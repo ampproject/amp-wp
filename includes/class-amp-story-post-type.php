@@ -769,20 +769,12 @@ class AMP_Story_Post_Type {
 
 		wp_enqueue_style(
 			self::AMP_STORIES_EDITOR_STYLE_HANDLE,
-			amp_get_asset_url( 'css/amp-stories-editor.css' ),
-			[ 'wp-edit-blocks' ],
-			AMP__VERSION
-		);
-
-		wp_enqueue_style(
-			self::AMP_STORIES_EDITOR_STYLE_HANDLE . '-compiled',
 			amp_get_asset_url( 'css/amp-stories-editor-compiled.css' ),
 			[ 'wp-edit-blocks', 'amp-stories' ],
 			AMP__VERSION
 		);
 
 		wp_styles()->add_data( self::AMP_STORIES_EDITOR_STYLE_HANDLE, 'rtl', 'replace' );
-		wp_styles()->add_data( self::AMP_STORIES_EDITOR_STYLE_HANDLE . '-compiled', 'rtl', 'replace' );
 
 		self::enqueue_general_styles();
 	}

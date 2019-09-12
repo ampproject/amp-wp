@@ -136,7 +136,7 @@ class EnhancedResizableBox extends Component {
 					lastHeight = height;
 					lastDeltaW = null;
 					lastDeltaH = null;
-					blockElement = element.closest( '.wp-block' );
+					blockElement = element.closest( '.wp-block' ).parentNode;
 					blockElementTop = blockElement.style.top;
 					blockElementLeft = blockElement.style.left;
 					if ( isImage ) {

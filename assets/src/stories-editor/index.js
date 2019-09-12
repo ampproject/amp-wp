@@ -25,6 +25,7 @@ import {
 /**
  * Internal dependencies
  */
+import './style.css'; // This way the general editor styles are loaded before all the component styles.
 import {
 	withCroppedFeaturedImage,
 	withEnforcedFileType,
@@ -61,9 +62,7 @@ import {
 	getMinimumStoryPosterDimensions,
 	maybeAddMissingAnchor,
 } from './helpers';
-
 import { ALLOWED_BLOCKS } from './constants';
-
 import store from './store';
 
 const {
@@ -275,8 +274,8 @@ store.subscribe( () => {
 			updateBlockAttributes( id, {
 				ampAnimationAfter: parentBlock ? parentBlock.attributes.anchor : undefined,
 				ampAnimationType: animationType,
-				ampAnimationDuration: duration,
-				ampAnimationDelay: delay,
+				ampAnimationDuration: duration ? `${ duration }ms` : undefined,
+				ampAnimationDelay: delay ? `${ delay }ms` : undefined,
 			} );
 		}
 	}

@@ -1,12 +1,35 @@
 /**
  * WordPress dependencies
  */
-import { createNewPost, saveDraft } from '@wordpress/e2e-test-utils';
+import { createNewPost, saveDraft, getAllBlocks, selectBlockByClientId } from '@wordpress/e2e-test-utils';
 
 /**
  * Internal dependencies
  */
 import { activateExperience, clickButton, deactivateExperience, insertBlock, selectBlockByClassName, openPreviewPage } from '../../utils';
+
+const animationTypeSelector = '.components-select-control__input';
+const animationDelaySelector = 'input[aria-label="Delay (ms)"]';
+const animationOrderSelector = '#amp-stories-animation-order-picker';
+const unSelectedAnimationSelector = '.components-animate__appear button[aria-checked="false"]';
+const authorBlockClassName = 'wp-block-amp-amp-story-post-author';
+
+/**
+ * Set after which other block the animation should begin.
+ *
+ * @param buttonText
+ */
+// eslint-disable-next-line require-await
+const setAnimationToBeginAfter = async ( buttonText ) => {
+	await page.click( animationOrderSelector );
+
+	const button = await page.waitForXPath( `//div[contains(@class, "components-preview-picker__dropdown-content")]//button[contains(@class,"components-button")][contains(.,"${ buttonText }")]` );
+	await page.evaluate( ( btn ) => {
+		btn.click();
+	}, button );
+
+	await page.click( animationOrderSelector );
+};
 
 describe( 'Story Animations', () => {
 	beforeAll( async () => {
@@ -21,14 +44,7 @@ describe( 'Story Animations', () => {
 		await createNewPost( { postType: 'amp_story' } );
 	} );
 
-	const animationTypeSelector = '.components-select-control__input';
-	const unSelectedAnimationSelector = '.components-animate__appear button[aria-checked="false"]';
-	const authorBlockClassName = 'wp-block-amp-amp-story-post-author';
-
 	it( 'should save correct animation values', async () => {
-		// Add Author block with animation.
-
-		const animationDelaySelector = 'input[aria-label="Delay (ms)"]';
 		await insertBlock( 'Author' );
 		await page.waitForSelector( animationTypeSelector );
 		await page.select( animationTypeSelector, 'fly-in-bottom' );
@@ -52,7 +68,6 @@ describe( 'Story Animations', () => {
 	} );
 
 	it( 'should save correct animation after values', async () => {
-		// Add Author block with animation.
 		await insertBlock( 'Author' );
 		await page.waitForSelector( animationTypeSelector );
 		await page.select( animationTypeSelector, 'fly-in-bottom' );
@@ -86,7 +101,6 @@ describe( 'Story Animations', () => {
 	} );
 
 	it( 'should not allow creating a cycle in animation after', async () => {
-		// Add Author block with animation.
 		await insertBlock( 'Author' );
 		await page.select( animationTypeSelector, 'fly-in-bottom' );
 
@@ -116,7 +130,6 @@ describe( 'Story Animations', () => {
 	} );
 
 	it( 'should save ID to the same element as animation', async () => {
-		// Add Author block with animation.
 		await insertBlock( 'Author' );
 		await page.select( animationTypeSelector, 'pulse' );
 
@@ -148,5 +161,55 @@ describe( 'Story Animations', () => {
 		const idHandle = await elementHandle.getProperty( 'value' );
 		const idValue = await idHandle.jsonValue();
 		expect( idValue ).not.toBeUndefined();
+	} );
+
+	it( 'should not display playback button if block is not animated', async () => {
+		await insertBlock( 'Author' );
+		await expect( page ).not.toMatch( 'Play Animation' );
+	} );
+
+	it( 'should play a single animation in the editor', async () => {
+		await insertBlock( 'Author' );
+		await page.waitForSelector( animationTypeSelector );
+		await page.select( animationTypeSelector, 'twirl-in' );
+
+		await clickButton( 'Play Animation' );
+
+		await expect( page ).toMatchElement( '.amp-page-child-block.story-animation-twirl-in' );
+	} );
+
+	it( 'should not display playback button if no blocks are animated on the current page', async () => {
+		await insertBlock( 'Author' );
+		await insertBlock( 'Author' );
+
+		// Select page block.
+		await selectBlockByClientId(
+			( await getAllBlocks() )[ 0 ].clientId
+		);
+
+		await expect( page ).not.toMatch( 'Play 0 Animations' );
+		await expect( page ).not.toMatch( 'Play 1 Animation' );
+	} );
+
+	it( 'should play all animations on the current page in the editor', async () => {
+		await insertBlock( 'Author' );
+		await page.waitForSelector( animationTypeSelector );
+		await page.select( animationTypeSelector, 'twirl-in' );
+
+		await insertBlock( 'Author' );
+		await page.waitForSelector( animationTypeSelector );
+		await page.select( animationTypeSelector, 'drop' );
+
+		await setAnimationToBeginAfter( 'admin' );
+
+		// Select page block.
+		await selectBlockByClientId(
+			( await getAllBlocks() )[ 0 ].clientId
+		);
+
+		await clickButton( 'Play 2 Animations' );
+
+		await expect( page ).toMatchElement( '.amp-page-child-block.story-animation-twirl-in' );
+		await expect( page ).toMatchElement( '.amp-page-child-block.story-animation-init-drop' );
 	} );
 } );
