@@ -305,10 +305,10 @@ store.subscribe( () => {
 const plugins = require.context( './plugins', true, /.*\.js$/ );
 
 plugins.keys().forEach( ( modulePath ) => {
-	const { name, render, isActive = true } = plugins( modulePath );
+	const { name, render, icon, isActive = true } = plugins( modulePath );
 
 	if ( isActive ) {
-		registerPlugin( name, { render } );
+		registerPlugin( name, { render, icon } );
 	}
 } );
 

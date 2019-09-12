@@ -96,6 +96,8 @@ const EnhancedMetaFields = compose(
 
 export const name = 'amp-story-settings-panel';
 
+export const icon = 'book';
+
 export const render = () => {
 	return (
 		<PluginDocumentSettingPanel
