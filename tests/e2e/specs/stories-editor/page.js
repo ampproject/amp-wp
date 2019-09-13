@@ -6,7 +6,6 @@ import {
 	saveDraft,
 	selectBlockByClientId,
 	getAllBlocks,
-	visitAdminPage,
 } from '@wordpress/e2e-test-utils';
 
 /**
@@ -20,37 +19,59 @@ import {
 	uploadMedia,
 	openPreviewPage,
 	insertBlock,
-	resetStorySettings,
+	setStorySettings,
 } from '../../utils';
 
 const LARGE_IMAGE = 'large-image-36521.jpg';
 const CORRECT_VIDEO = 'clothes-hanged-to-dry-1295231.mp4';
 const SELECT_BUTTON = '.media-modal button.media-button-select';
 
+const DOCUMENT_PANEL = 'button.edit-post-sidebar__panel-tab[data-label="Document"]';
+const SETTINGS_PANEL = '.amp-story-settings-panel';
+const SETTINGS_ADVANCE_AFTER = '.amp-story-settings-advance-after select';
+const SETTINGS_ADVANCE_AFTER_DURATION = '.amp-story-settings-advance-after-duration .components-range-control__number';
+
+/**
+ * Helper to retrieve a current value from form fields.
+ *
+ * @param {string} inputSelector Selector that matches an element with a value attribute.
+ */
+async function getInputValue( inputSelector ) {
+	const value = await page.evaluate( ( selector ) => {
+		return document.querySelector( selector ).value;
+	}, inputSelector );
+
+	return value;
+}
+
+/**
+ * Helper to clear form fields' value.
+ *
+ * @param {string} inputSelector Selector that matches an element with a value attribute.
+ */
+async function clearInputValue( inputSelector ) {
+	await page.evaluate( ( selector ) => {
+		document.querySelector( selector ).value = '';
+	}, inputSelector );
+}
+
+/**
+ * Expands the Story settings panel.
+ */
+async function expandSettingsPanel() {
+	await page.click( DOCUMENT_PANEL );
+	await page.waitForSelector( SETTINGS_PANEL );
+	await page.click( SETTINGS_PANEL );
+}
+
 describe( 'Story Page', () => {
 	beforeAll( async () => {
 		await activateExperience( 'stories' );
-
-		// Set story options to custom values.
-		const advanceAfterSelector = '#stories_settings_auto_advance_after';
-		const advanceAfterDurationSelector = '#stories_settings_auto_advance_after_duration';
-
-		await visitAdminPage( 'admin.php', 'page=amp-options' );
-
-		await page.evaluate( ( durationSel ) => {
-			document.querySelector( durationSel ).value = '';
-		}, advanceAfterDurationSelector );
-
-		await page.select( advanceAfterSelector, 'time' );
-
-		const advanceAfterDurationElement = await page.$( advanceAfterDurationSelector );
-
-		await advanceAfterDurationElement.type( '2' );
-		await advanceAfterDurationElement.press( 'Enter' );
+		await setStorySettings( 'time', '2' );
 	} );
 
 	afterAll( async () => {
-		await resetStorySettings();
+		await setStorySettings( '', '0' );
 		await deactivateExperience( 'stories' );
 	} );
 
@@ -96,10 +117,7 @@ describe( 'Story Page', () => {
 		await page.waitForSelector( opacitySelector );
 
 		// Set opacity to 15.
-		await page.evaluate( () => {
-			document.querySelector( '.components-range-control__number[aria-label="Opacity"]' ).value = '';
-		} );
-
+		await clearInputValue( opacitySelector );
 		await page.type( opacitySelector, '15' );
 
 		await clickButtonByLabel( 'Color: Vivid red' );
@@ -147,10 +165,7 @@ describe( 'Story Page', () => {
 		const secondsSelector = 'input[aria-label="Time in seconds"]';
 		await page.waitForSelector( secondsSelector );
 
-		await page.evaluate( ( selector ) => {
-			document.querySelector( selector ).value = '';
-		}, secondsSelector );
-
+		await clearInputValue( secondsSelector );
 		await page.type( secondsSelector, '5' );
 
 		await saveDraft();
@@ -161,9 +176,7 @@ describe( 'Story Page', () => {
 		);
 		await page.waitForSelector( secondsSelector );
 
-		expect( await page.evaluate( ( selector ) => {
-			return document.querySelector( selector ).value;
-		}, secondsSelector ) ).toBe( '5' );
+		expect( await getInputValue( secondsSelector ) ).toBe( '5' );
 
 		const editorPage = page;
 		const previewPage = await openPreviewPage( editorPage, 'amp-story' );
@@ -197,9 +210,7 @@ describe( 'Story Page', () => {
 		const secondsSelector = 'input[aria-label="Time in seconds"]';
 		await page.waitForSelector( secondsSelector );
 
-		expect( await page.evaluate( ( selector ) => {
-			return document.querySelector( selector ).value;
-		}, secondsSelector ) ).toBe( '4' );
+		expect( await getInputValue( secondsSelector ) ).toBe( '4' );
 	} );
 
 	it( 'should allow changing the alt attribute for the background image', async () => {
@@ -250,56 +261,30 @@ describe( 'Story Page', () => {
 	} );
 
 	it( 'should pass global story settings to a new story', async () => {
-		const documentPanelSelector = 'button.edit-post-sidebar__panel-tab[data-label="Document"]';
-		const storySettingsPanelSelector = '.amp-story-settings-panel';
-		const storySettingsAdvanceAfterSelector = '.components-panel__body.amp-story-settings-panel .components-select-control__input:nth-of-type(1)';
-		const storySettingsAdvanceAfterDurationSelector = '.components-panel__body.amp-story-settings-panel [aria-label="Time in seconds"]';
+		await expandSettingsPanel();
+		await page.waitForSelector( SETTINGS_ADVANCE_AFTER );
 
-		await page.click( documentPanelSelector );
-		await page.waitForSelector( storySettingsPanelSelector );
-
-		await page.click( storySettingsPanelSelector );
-		await page.waitForSelector( storySettingsAdvanceAfterSelector );
-
-		expect( await page.evaluate( ( selector ) => {
-			return document.querySelector( selector ).value;
-		}, storySettingsAdvanceAfterSelector ) ).toBe( 'time' );
-
-		expect( await page.evaluate( ( selector ) => {
-			return document.querySelector( selector ).value;
-		}, storySettingsAdvanceAfterDurationSelector ) ).toBe( '2' );
+		expect( await getInputValue( SETTINGS_ADVANCE_AFTER ) ).toBe( 'time' );
+		expect( await getInputValue( SETTINGS_ADVANCE_AFTER_DURATION ) ).toBe( '2' );
 	} );
 
 	it( 'should save the story settings correctly', async () => {
-		const documentPanelSelector = 'button.edit-post-sidebar__panel-tab[data-label="Document"]';
-		const storySettingsPanelSelector = '.amp-story-settings-panel';
-		const storySettingsAdvanceAfterSelector = '.amp-story-settings-panel .components-select-control__input:nth-of-type(1)';
+		await expandSettingsPanel();
+		await page.waitForSelector( SETTINGS_ADVANCE_AFTER );
 
-		await page.click( documentPanelSelector );
-		await page.waitForSelector( storySettingsPanelSelector );
-
-		await page.click( storySettingsPanelSelector );
-		await page.waitForSelector( storySettingsAdvanceAfterSelector );
-
-		await page.select( storySettingsAdvanceAfterSelector, 'auto' );
+		await page.select( SETTINGS_ADVANCE_AFTER, 'auto' );
 
 		await saveDraft();
 		await page.reload();
 
-		await page.click( documentPanelSelector );
-		await page.waitForSelector( storySettingsPanelSelector );
+		await expandSettingsPanel();
+		await page.waitForSelector( SETTINGS_ADVANCE_AFTER );
 
-		await page.click( storySettingsPanelSelector );
-		await page.waitForSelector( storySettingsAdvanceAfterSelector );
-
-		expect( await page.evaluate( ( selector ) => {
-			return document.querySelector( selector ).value;
-		}, storySettingsAdvanceAfterSelector ) ).toBe( 'auto' );
+		expect( await getInputValue( SETTINGS_ADVANCE_AFTER ) ).toBe( 'auto' );
 	} );
 
 	it( 'should apply story settings to newly created pages', async () => {
-		await page.click( '.block-editor-inserter .editor-inserter__amp-inserter' );
-		await page.waitForXPath( `//div[contains(@class, 'amp-story-page-number') and contains(text(), 'Page 2')]` );
+		await insertBlock( 'Page' );
 
 		const pageAdvancementSelector = '.components-select-control__input';
 		await page.waitForSelector( pageAdvancementSelector );
@@ -307,18 +292,12 @@ describe( 'Story Page', () => {
 		const secondsSelector = 'input[aria-label="Time in seconds"]';
 		await page.waitForSelector( secondsSelector );
 
-		expect( await page.evaluate( ( selector ) => {
-			return document.querySelector( selector ).value;
-		}, pageAdvancementSelector ) ).toBe( 'time' );
-
-		expect( await page.evaluate( ( selector ) => {
-			return document.querySelector( selector ).value;
-		}, secondsSelector ) ).toBe( '2' );
+		expect( await getInputValue( pageAdvancementSelector ) ).toBe( 'time' );
+		expect( await getInputValue( secondsSelector ) ).toBe( '2' );
 	} );
 
 	it( 'should not affect story settings when individual page settings are changed', async () => {
-		await page.click( '.block-editor-inserter .editor-inserter__amp-inserter' );
-		await page.waitForXPath( `//div[contains(@class, 'amp-story-page-number') and contains(text(), 'Page 2')]` );
+		await insertBlock( 'Page' );
 
 		const pageAdvancementSelector = '.components-select-control__input';
 		await page.waitForSelector( pageAdvancementSelector );
@@ -326,24 +305,60 @@ describe( 'Story Page', () => {
 		const secondsSelector = 'input[aria-label="Time in seconds"]';
 		await page.waitForSelector( secondsSelector );
 
-		await page.evaluate( ( selector ) => {
-			document.querySelector( selector ).value = '';
-		}, secondsSelector );
-
+		await clearInputValue( secondsSelector );
 		await page.type( secondsSelector, '5' );
 
-		const documentPanelSelector = 'button.edit-post-sidebar__panel-tab[data-label="Document"]';
-		const storySettingsPanelSelector = '.amp-story-settings-panel';
-		const storySettingsAdvanceAfterDurationXPathSelector = `//div[contains(@class, 'components-panel__body') and contains(@class, 'amp-story-settings-panel')]//input[contains(@class, 'components-range-control__number')][1]`;
+		await expandSettingsPanel();
 
-		await page.click( documentPanelSelector );
-		await page.waitForSelector( storySettingsPanelSelector );
+		expect( await getInputValue( SETTINGS_ADVANCE_AFTER_DURATION ) ).toBe( '2' );
+	} );
 
-		await page.click( storySettingsPanelSelector );
-		const durationSettingHandle = await page.waitForXPath( storySettingsAdvanceAfterDurationXPathSelector );
+	it( 'should not affect existing stories when story defaults are changed', async () => {
+		await saveDraft();
+		await page.reload();
 
-		expect( await page.evaluate( ( node ) => {
-			return node.value;
-		}, durationSettingHandle ) ).toBe( '2' );
+		await expandSettingsPanel();
+		await page.waitForSelector( SETTINGS_ADVANCE_AFTER );
+
+		const originalStoryAdvancement = await getInputValue( SETTINGS_ADVANCE_AFTER );
+		const originalStoryAdvancementDuration = await getInputValue( SETTINGS_ADVANCE_AFTER_DURATION );
+
+		expect( originalStoryAdvancement ).toBe( 'time' );
+		expect( originalStoryAdvancementDuration ).toBe( '2' );
+
+		// Save the first post admin URL for later.
+		const originalPostAdminUrl = page.url();
+
+		await setStorySettings( 'time', '10' );
+
+		// Create a second post with new defaults.
+		await createNewPost( { postType: 'amp_story' } );
+		await selectBlockByClientId(
+			( await getAllBlocks() )[ 0 ].clientId
+		);
+
+		await saveDraft();
+		await page.reload();
+
+		await expandSettingsPanel();
+		await page.waitForSelector( SETTINGS_ADVANCE_AFTER );
+
+		const newStoryAdvancement = await getInputValue( SETTINGS_ADVANCE_AFTER );
+		const newStoryAdvancementDuration = await getInputValue( SETTINGS_ADVANCE_AFTER_DURATION );
+
+		expect( newStoryAdvancement ).toBe( 'time' );
+		expect( newStoryAdvancementDuration ).toBe( '10' );
+
+		// Return back to the original post with the original settings.
+		await page.goto( originalPostAdminUrl );
+
+		const compareOriginalStoryAdvancement = await getInputValue( SETTINGS_ADVANCE_AFTER );
+		const compareOriginalStoryAdvancementDuration = await getInputValue( SETTINGS_ADVANCE_AFTER_DURATION );
+
+		expect( originalStoryAdvancement ).toStrictEqual( compareOriginalStoryAdvancement );
+		expect( originalStoryAdvancementDuration ).toStrictEqual( compareOriginalStoryAdvancementDuration );
+
+		// Change back to defaults
+		await setStorySettings( 'time', '2' );
 	} );
 } );

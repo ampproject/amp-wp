@@ -46,12 +46,16 @@ const MetaFields = ( props ) => {
 				value={ autoAdvanceAfter }
 				options={ autoAdvanceAfterOptions }
 				onChange={ ( value ) => updateMeta( { amp_story_auto_advance_after: value } ) }
+				className="amp-story-settings-advance-after"
 			/>
 			{ 'time' === autoAdvanceAfter && (
 				<RangeControl
 					label={ __( 'Time in seconds', 'amp' ) }
 					value={ autoAdvanceAfterDuration ? parseInt( autoAdvanceAfterDuration ) : 0 }
 					onChange={ ( value ) => updateMeta( { amp_story_auto_advance_after_duration: value } ) }
+					min={ 0 }
+					max={ 100 }
+					className="amp-story-settings-advance-after-duration"
 				/>
 			) }
 		</>

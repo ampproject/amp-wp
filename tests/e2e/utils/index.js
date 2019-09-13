@@ -19,4 +19,4 @@ export { uploadMedia } from './upload-media';
 export { getBlocksOnPage } from './get-blocks-on-page';
 export { goToPreviousPage } from './go-to-previous-page';
 export { wpDataSelect } from './wp-data-select';
-export { resetStorySettings } from './reset-story-settings';
+export { setStorySettings } from './set-story-settings';
