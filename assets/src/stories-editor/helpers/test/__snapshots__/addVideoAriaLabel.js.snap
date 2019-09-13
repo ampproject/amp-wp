@@ -1,0 +1,42 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`addVideoAriaLabel adds an aria label to video content with a caption 1`] = `
+<figure>
+  <amp-video
+    aria-label="Aria label 2"
+  >
+    Fallback content
+  </amp-video>
+  <figcaption>
+    My video caption
+  </figcaption>
+</figure>
+`;
+
+exports[`addVideoAriaLabel adds an aria label to video content without a caption 1`] = `
+<figure>
+  <amp-video
+    aria-label="Aria label 1"
+  >
+    Fallback content
+  </amp-video>
+</figure>
+`;
+
+exports[`addVideoAriaLabel ignores arbitrary content 1`] = `
+<div>
+  Ignore me
+</div>
+`;
+
+exports[`addVideoAriaLabel ignores video content even with an aria label attribute if content does not have the right format 1`] = `
+<div>
+  Ignore me 3
+</div>
+`;
+
+exports[`addVideoAriaLabel ignores video content without an aria label attribute 1`] = `
+<div>
+  Ignore me 2
+</div>
+`;
