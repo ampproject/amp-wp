@@ -9,27 +9,35 @@ import { registerStore } from '@wordpress/data';
 import reducer from './reducer';
 import * as actions from './actions';
 import * as selectors from './selectors';
+import applyMiddlewares from './middlewares';
 
 /**
  * Module Constants
  */
 const MODULE_KEY = 'amp/story';
 
-export default registerStore(
+const store = registerStore(
 	MODULE_KEY,
 	{
 		reducer,
 		selectors,
 		actions,
 		initialState: {
+			animations: {
+				animationOrder: {},
+			},
 			editorSettings: {
 				...window.ampStoriesEditorSettings,
 			},
-			animations: {},
 			blocks: {
 				order: [],
 				isReordering: false,
 			},
+			copiedMarkup: '',
 		},
 	}
 );
+
+applyMiddlewares( store );
+
+export default store;
