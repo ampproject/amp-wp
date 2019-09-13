@@ -27,7 +27,6 @@ import {
  */
 import './style.css'; // This way the general editor styles are loaded before all the component styles.
 import { withEnforcedFileType } from '../common/components';
-
 import {
 	withAmpStorySettings,
 	withPageNumber,
