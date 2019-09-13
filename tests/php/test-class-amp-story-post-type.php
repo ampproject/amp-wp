@@ -799,7 +799,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test the definitions return value
+	 * Test that default settings are added as post meta to new posts.
 	 *
 	 * @covers AMP_Story_Post_Type::add_story_settings_meta_to_new_story
 	 */
@@ -814,5 +814,23 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 
 		$this->assertEquals( 'time', $advance_after );
 		$this->assertEquals( 10, $advance_after_duration );
+	}
+
+	/**
+	 * Test that default settings are NOT added as post meta to existing posts that are just being updated.
+	 *
+	 * @covers AMP_Story_Post_Type::add_story_settings_meta_to_new_story
+	 */
+	public function test_not_add_story_settings_meta_to_updated_story() {
+		$new_story = self::factory()->post->create_and_get(
+			[ 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ]
+		);
+		AMP_Story_Post_Type::add_story_settings_meta_to_new_story( $new_story->ID, $new_story, true );
+
+		$advance_after          = get_post_meta( $new_story->ID, AMP_Story_Post_Type::STORY_SETTINGS_META_PREFIX . 'auto_advance_after', true );
+		$advance_after_duration = get_post_meta( $new_story->ID, AMP_Story_Post_Type::STORY_SETTINGS_META_PREFIX . 'auto_advance_after_duration', true );
+
+		$this->assertEquals( '', $advance_after );
+		$this->assertEquals( '', $advance_after_duration );
 	}
 }
