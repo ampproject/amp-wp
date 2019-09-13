@@ -2898,15 +2898,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$max_bytes      = $group_config['cdata_spec']['max_bytes'] - strlen( $group_config['source_map_comment'] );
 
 		$previously_seen_stylesheet_index = [];
-		$indices_by_stylesheet_element_id = [];
 		foreach ( $this->pending_stylesheets as $pending_stylesheet_index => &$pending_stylesheet ) {
 			if ( $group !== $pending_stylesheet['group'] ) {
 				continue;
-			}
-
-			// Keep track of the element IDs for the stylesheets.
-			if ( $pending_stylesheet['node'] instanceof DOMElement && $pending_stylesheet['node']->hasAttribute( 'id' ) ) {
-				$indices_by_stylesheet_element_id[ $pending_stylesheet['node']->getAttribute( 'id' ) ] = $pending_stylesheet_index;
 			}
 
 			$stylesheet_parts = [];
