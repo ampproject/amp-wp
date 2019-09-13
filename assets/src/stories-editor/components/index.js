@@ -26,6 +26,7 @@ export { default as withMetaBlockSave } from './with-meta-block-save';
 export { default as withAmpStorySettings } from './higher-order/with-amp-story-settings';
 export { default as withAttributes } from './higher-order/with-attributes';
 export { default as withBlockName } from './higher-order/with-block-name';
+export { default as withCroppedFeaturedImage } from './with-cropped-featured-image';
 export { default as withHasSelectedInnerBlock } from './higher-order/with-has-selected-inner-block';
 export { default as withPageNumber } from './higher-order/with-page-number';
 export { default as withRightClickHandler } from './higher-order/with-right-click-handler';

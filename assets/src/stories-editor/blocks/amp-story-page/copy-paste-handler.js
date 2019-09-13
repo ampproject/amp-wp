@@ -138,9 +138,12 @@ export default withDispatch( ( dispatch, ownProps, { select } ) => {
 		// Reuse code in onCode.
 		onCopy();
 		// Remove selected Blocks.
-		for ( const clientId of selectedBlockClientIds ) {
-			removeBlock( clientId );
-		}
+		// But wait 1 render cycle to do it to allow the browser to correctly pick up the cut content.
+		setTimeout( () => {
+			for ( const clientId of selectedBlockClientIds ) {
+				removeBlock( clientId );
+			}
+		} );
 	};
 
 	return {

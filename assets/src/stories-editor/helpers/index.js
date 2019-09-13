@@ -11,7 +11,7 @@ import { ReactElement } from 'react';
  * WordPress dependencies
  */
 import '@wordpress/core-data';
-import { render } from '@wordpress/element';
+import { render, cloneElement } from '@wordpress/element';
 import { count } from '@wordpress/wordcount';
 import { __, _x, sprintf } from '@wordpress/i18n';
 import { select, dispatch } from '@wordpress/data';
@@ -326,6 +326,11 @@ export const addAMPAttributes = ( settings, name ) => {
 		addedAttributes.ampShowCaption = {
 			type: 'boolean',
 			default: false,
+		};
+
+		addedAttributes.ampAriaLabel = {
+			type: 'string',
+			default: '',
 		};
 
 		// Required defaults for AMP validity.
@@ -1761,6 +1766,64 @@ export const processMedia = ( media ) => {
 		mediaAlt,
 		poster,
 	};
+};
+
+/**
+ * Helper to add an `aria-label` to video elements when saved.
+ *
+ * This helper is designed as a filter for `blocks.getSaveElement`.
+ *
+ * @param {ReactElement}  element     Previously generated React element
+ * @param {Object}        type        Block type definition.
+ * @param {string}        type.name   Name of block type
+ * @param {Object}        attributes  Block attributes.
+ *
+ * @return {ReactElement}  New React element
+ */
+export const addVideoAriaLabel = ( element, { name }, attributes ) => {
+	// this filter only applies to core video objects where an aria label has been set
+	if ( name !== 'core/video' || ! attributes.ampAriaLabel ) {
+		return element;
+	}
+
+	/* `element` will be a react structure like:
+
+	<figure>
+		<amp-video>
+			Fallback content
+		</amp-video>
+		[<figcaption>Caption</figcaption>]
+	</figure>
+
+	`<figcaption>` is not necessarily present.
+
+	We need to hook into this element and add an `aria-label` on the `<amp-video>` element.
+	*/
+
+	const isFigure = element.type === 'figure';
+	const hasAtLeastOneChild = element.props && element.props.children.length >= 1;
+	const isFirstChildAmpVideo = element.props && element.props.children[ 0 ] && element.props.children[ 0 ].type === 'amp-video';
+	if ( ! isFigure || ! hasAtLeastOneChild || ! isFirstChildAmpVideo ) {
+		return element;
+	}
+
+	const figure = element;
+	const [ video, ...rest ] = figure.props.children;
+
+	const newVideo = cloneElement(
+		video,
+		{ 'aria-label': attributes.ampAriaLabel },
+		video.props.children,
+	);
+
+	const newFigure = cloneElement(
+		figure,
+		{},
+		newVideo,
+		...rest
+	);
+
+	return newFigure;
 };
 
 /**
