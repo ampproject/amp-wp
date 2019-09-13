@@ -1748,7 +1748,7 @@ export const addVideoAriaLabel = ( element, { name }, attributes ) => {
 	<figure>
 		<amp-video>
 			Fallback content
-		<amp-video>
+		</amp-video>
 		[<figcaption>Caption</figcaption>]
 	</figure>
 
@@ -1756,6 +1756,13 @@ export const addVideoAriaLabel = ( element, { name }, attributes ) => {
 
 	We need to hook into this element and add an `aria-label` on the `<amp-video>` element.
 	*/
+
+	const isFigure = element.type === 'figure';
+	const hasAtLeastOneChild = element.props && element.props.children.length >= 1;
+	const isFirstChildAmpVideo = element.props && element.props.children[ 0 ] && element.props.children[ 0 ].type === 'amp-video';
+	if ( ! isFigure || ! hasAtLeastOneChild || ! isFirstChildAmpVideo ) {
+		return element;
+	}
 
 	const figure = element;
 	const [ video, ...rest ] = figure.props.children;
