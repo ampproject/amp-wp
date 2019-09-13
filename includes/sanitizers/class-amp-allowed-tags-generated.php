@@ -13,7 +13,7 @@
  */
 class AMP_Allowed_Tags_Generated {
 
-	private static $spec_file_revision = 935;
+	private static $spec_file_revision = 950;
 	private static $minimum_validator_revision_required = 375;
 
 	private static $descendant_tag_lists = array(
@@ -1861,6 +1861,7 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'type' => array(
 						'value' => array(
+							'carousel',
 							'slides',
 						),
 					),
@@ -1880,64 +1881,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-carousel',
 					),
-					'spec_name' => 'AMP-CAROUSEL [type=slides]',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-carousel',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'arrows' => array(
-						'value' => array(
-							'',
-						),
-					),
-					'autoplay' => array(
-						'value_regex' => '(|[0-9]+)',
-					),
-					'controls' => array(),
-					'data-amp-bind-slide' => array(),
-					'delay' => array(
-						'value_regex' => '[0-9]+',
-					),
-					'dots' => array(
-						'value' => array(
-							'',
-						),
-					),
-					'loop' => array(
-						'value' => array(
-							'',
-						),
-					),
-					'media' => array(),
-					'noloading' => array(
-						'value' => array(
-							'',
-						),
-					),
-					'slide' => array(
-						'value_regex' => '[0-9]+',
-					),
-					'type' => array(
-						'dispatch_key' => 2,
-						'mandatory' => true,
-						'value' => array(
-							'carousel',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'amp_layout' => array(
-						'supported_layouts' => array(
-							2,
-							3,
-							1,
-						),
-					),
-					'requires_extension' => array(
-						'amp-carousel',
-					),
-					'spec_name' => 'AMP-CAROUSEL [type=carousel]',
+					'spec_name' => 'AMP-CAROUSEL',
 					'spec_url' => 'https://amp.dev/documentation/components/amp-carousel',
 				),
 			),
@@ -1980,6 +1924,7 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'type' => array(
 						'value' => array(
+							'carousel',
 							'slides',
 						),
 					),
@@ -2010,78 +1955,7 @@ class AMP_Allowed_Tags_Generated {
 						'amp-carousel',
 						'amp-lightbox-gallery',
 					),
-					'spec_name' => 'AMP-CAROUSEL [lightbox] [type=slides]',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-carousel',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'arrows' => array(
-						'value' => array(
-							'',
-						),
-					),
-					'autoplay' => array(
-						'value_regex' => '(|[0-9]+)',
-					),
-					'controls' => array(),
-					'data-amp-bind-slide' => array(),
-					'delay' => array(
-						'value_regex' => '[0-9]+',
-					),
-					'dots' => array(
-						'value' => array(
-							'',
-						),
-					),
-					'lightbox' => array(
-						'mandatory' => true,
-					),
-					'loop' => array(
-						'value' => array(
-							'',
-						),
-					),
-					'media' => array(),
-					'noloading' => array(
-						'value' => array(
-							'',
-						),
-					),
-					'slide' => array(
-						'value_regex' => '[0-9]+',
-					),
-					'type' => array(
-						'dispatch_key' => 2,
-						'mandatory' => true,
-						'value' => array(
-							'carousel',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'amp_layout' => array(
-						'supported_layouts' => array(
-							2,
-							3,
-							1,
-						),
-					),
-					'reference_points' => array(
-						'AMP-CAROUSEL lightbox [child]' => array(
-							'mandatory' => false,
-							'unique' => false,
-						),
-						'AMP-CAROUSEL lightbox [lightbox-exclude]' => array(
-							'mandatory' => false,
-							'unique' => false,
-						),
-					),
-					'requires_extension' => array(
-						'amp-carousel',
-						'amp-lightbox-gallery',
-					),
-					'spec_name' => 'AMP-CAROUSEL [lightbox] [type=carousel]',
+					'spec_name' => 'AMP-CAROUSEL lightbox',
 					'spec_url' => 'https://amp.dev/documentation/components/amp-carousel',
 				),
 			),
@@ -8673,6 +8547,7 @@ class AMP_Allowed_Tags_Generated {
 							'allow_relative' => true,
 							'protocol' => array(
 								'data',
+								'http',
 								'https',
 							),
 						),
@@ -9765,6 +9640,7 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'integrity' => array(),
 					'media' => array(),
+					'nonce' => array(),
 					'rel' => array(
 						'dispatch_key' => 2,
 						'mandatory' => true,
@@ -15330,6 +15206,31 @@ class AMP_Allowed_Tags_Generated {
 					'mandatory_parent' => 'head',
 					'spec_name' => 'style amp-custom',
 					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets',
+					'unique' => true,
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'amp-custom-length-check' => array(
+						'dispatch_key' => 1,
+						'mandatory' => true,
+						'value' => array(
+							'',
+						),
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => array(
+							'text/css',
+						),
+					),
+				),
+				'cdata' => array(
+					'max_bytes' => -1,
+				),
+				'tag_spec' => array(
+					'mandatory_parent' => 'head',
+					'spec_name' => 'style amp-custom-length-check',
 					'unique' => true,
 				),
 			),
