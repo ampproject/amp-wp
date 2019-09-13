@@ -25,7 +25,9 @@ import {
 /**
  * Internal dependencies
  */
+import './style.css'; // This way the general editor styles are loaded before all the component styles.
 import { withEnforcedFileType } from '../common/components';
+
 import {
 	withAmpStorySettings,
 	withPageNumber,
@@ -37,6 +39,7 @@ import {
 	withStoryBlockDropZone,
 	withCallToActionValidation,
 	withCroppedFeaturedImage,
+	withRightClickHandler,
 } from './components';
 import {
 	maybeEnqueueFontStyle,
@@ -59,9 +62,7 @@ import {
 	getMinimumStoryPosterDimensions,
 	maybeAddMissingAnchor,
 } from './helpers';
-
 import { ALLOWED_BLOCKS } from './constants';
-
 import store from './store';
 
 const {
@@ -273,8 +274,8 @@ store.subscribe( () => {
 			updateBlockAttributes( id, {
 				ampAnimationAfter: parentBlock ? parentBlock.attributes.anchor : undefined,
 				ampAnimationType: animationType,
-				ampAnimationDuration: duration,
-				ampAnimationDelay: delay,
+				ampAnimationDuration: duration ? `${ duration }ms` : undefined,
+				ampAnimationDelay: delay ? `${ delay }ms` : undefined,
 			} );
 		}
 	}
@@ -315,6 +316,7 @@ addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/filterBlockTransfor
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/deprecateCoreBlocks', deprecateCoreBlocks );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addStorySettings', withAmpStorySettings );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addPageNumber', withPageNumber );
+addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/rightClickHandler', withRightClickHandler );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addEditFeaturedImage', withEditFeaturedImage );
 addFilter( 'editor.BlockEdit', 'ampEditorBlocks/addVideoBlockPreview', withCustomVideoBlockEdit, 9 );
 addFilter( 'editor.PostFeaturedImage', 'ampStoryEditorBlocks/addFeaturedImageNotice', withStoryFeaturedImageNotice );

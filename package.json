@@ -22,7 +22,9 @@
     "classnames": "2.2.6",
     "dom-scroll-into-view": "2.0.1",
     "memize": "1.0.5",
-    "prop-types": "15.7.2"
+    "prop-types": "15.7.2",
+    "redux-multi": "0.1.12",
+    "refx": "3.1.1"
   },
   "devDependencies": {
     "@babel/cli": "7.6.0",
@@ -30,6 +32,7 @@
     "@babel/plugin-proposal-class-properties": "7.5.5",
     "@babel/plugin-proposal-object-rest-spread": "7.5.5",
     "@babel/plugin-transform-react-jsx": "7.3.0",
+    "@wordpress/api-fetch": "3.5.0",
     "@wordpress/babel-preset-default": "4.5.0",
     "@wordpress/blob": "2.5.0",
     "@wordpress/block-editor": "3.1.0",
@@ -47,6 +50,7 @@
     "@wordpress/element": "2.7.0",
     "@wordpress/eslint-plugin": "3.0.0",
     "@wordpress/hooks": "2.6.0",
+    "@wordpress/html-entities": "2.5.0",
     "@wordpress/i18n": "3.6.0",
     "@wordpress/keycodes": "2.6.0",
     "@wordpress/plugins": "2.6.0",
