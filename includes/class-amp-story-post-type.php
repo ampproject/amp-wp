@@ -1835,7 +1835,7 @@ class AMP_Story_Post_Type {
 						'type'    => 'string',
 						'default' => '',
 					],
-					'text'            => [
+					'openText'        => [
 						'type'    => 'string',
 						'default' => __( 'Swipe up', 'amp' ),
 					],
@@ -1894,7 +1894,7 @@ class AMP_Story_Post_Type {
 
 		ob_start();
 		?>
-		<amp-story-page-attachment layout="nodisplay" theme="light" data-cta-text="<?php echo esc_attr( $attributes['text'] ); ?>" data-title="<?php echo esc_attr( $attributes['title'] ); ?>">
+		<amp-story-page-attachment layout="nodisplay" theme="light" data-cta-text="<?php echo esc_attr( $attributes['openText'] ); ?>" data-title="<?php echo esc_attr( $attributes['title'] ); ?>">
 			<div class="<?php echo esc_attr( $attributes['attachmentClass'] ); ?>" style="<?php echo esc_attr( $style ); ?>">
 				<h2><?php the_title(); ?></h2>
 				<div class="amp-page-attachment-inner-content">
