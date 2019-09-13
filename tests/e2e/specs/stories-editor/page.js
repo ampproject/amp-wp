@@ -245,7 +245,7 @@ describe( 'Story Page', () => {
 		await page.waitForSelector( '.editor-amp-story-page-background' );
 		await page.click( '.editor-amp-story-page-background' );
 		await uploadMedia( CORRECT_VIDEO );
-		await expect( page ).toClick( SELECT_BUTTON );
+		await page.click( SELECT_BUTTON );
 
 		// Write assistive text.
 		const label = await page.waitForXPath( `//label[contains(text(), 'Assistive Text')]` );
@@ -257,7 +257,7 @@ describe( 'Story Page', () => {
 		// Open preview.
 		const editorPage = page;
 		const previewPage = await openPreviewPage( editorPage, 'amp-story' );
-		await previewPage.waitForXPath( '//amp-video[contains(@aria-label, "Hello World")]' );
+		expect( await previewPage.$x( '//amp-video[contains(@aria-label, "Hello World")]' ) ).toHaveLength( 1 );
 	} );
 
 	it( 'should pass global story settings to a new story', async () => {
