@@ -1835,7 +1835,7 @@ class AMP_Story_Post_Type {
 						'type'    => 'string',
 						'default' => '',
 					],
-					'openText'            => [
+					'openText'        => [
 						'type'    => 'string',
 						'default' => __( 'Swipe up', 'amp' ),
 					],
