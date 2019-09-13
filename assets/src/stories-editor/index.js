@@ -26,10 +26,7 @@ import {
  * Internal dependencies
  */
 import './style.css'; // This way the general editor styles are loaded before all the component styles.
-import {
-	withCroppedFeaturedImage,
-	withEnforcedFileType,
-} from '../common/components';
+import { withEnforcedFileType } from '../common/components';
 import {
 	withAmpStorySettings,
 	withPageNumber,
@@ -40,6 +37,7 @@ import {
 	withActivePageState,
 	withStoryBlockDropZone,
 	withCallToActionValidation,
+	withCroppedFeaturedImage,
 	withRightClickHandler,
 } from './components';
 import {
