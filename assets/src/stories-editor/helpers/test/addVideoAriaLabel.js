@@ -1,10 +1,6 @@
 /**
  * Internal dependencies
  */
-
-/**
- * Internal dependencies
- */
 import { addVideoAriaLabel } from '../';
 
 const getFigure = ( caption ) => (
