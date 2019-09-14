@@ -77,6 +77,7 @@ export const BLOCKS_WITH_COLOR_SETTINGS = [
 	'amp/amp-story-post-date',
 	'amp/amp-story-post-title',
 	'amp/amp-story-cta',
+	'amp/amp-story-page-attachment',
 ];
 
 export const BLOCKS_WITH_RESIZING = [
@@ -97,6 +98,7 @@ export const BLOCKS_WITH_RESIZING = [
 export const ALLOWED_CHILD_BLOCKS = [
 	...ALLOWED_MOVABLE_BLOCKS,
 	'amp/amp-story-cta',
+	'amp/amp-story-page-attachment',
 ];
 
 export const ALLOWED_BLOCKS = [
@@ -104,11 +106,14 @@ export const ALLOWED_BLOCKS = [
 	...ALLOWED_CHILD_BLOCKS,
 ];
 
+export const DISABLE_DUPLICATE_BLOCKS = [
+	'amp/amp-story-cta',
+	'amp/amp-story-page-attachment',
+];
+
 export const IMAGE_BACKGROUND_TYPE = 'image';
 export const VIDEO_BACKGROUND_TYPE = 'video';
 
-export const ALLOWED_VIDEO_TYPES = [ 'video/mp4' ];
-export const ALLOWED_BACKGROUND_MEDIA_TYPES = [ IMAGE_BACKGROUND_TYPE, ...ALLOWED_VIDEO_TYPES ];
 export const POSTER_ALLOWED_MEDIA_TYPES = [ IMAGE_BACKGROUND_TYPE ];
 
 export const MEDIA_INNER_BLOCKS = [ 'core/video', 'core/audio' ];
@@ -116,17 +121,17 @@ export const MAX_IMAGE_SIZE_SLUG = 'amp_story_page';
 
 export const ANIMATION_DURATION_DEFAULTS = {
 	drop: 1600,
-	'fade-in': 500,
-	'fly-in-bottom': 500,
-	'fly-in-left': 500,
-	'fly-in-right': 500,
-	'fly-in-top': 500,
-	pulse: 500,
-	'rotate-in-left': 700,
-	'rotate-in-right': 700,
+	'fade-in': 400,
+	'fly-in-bottom': 400,
+	'fly-in-left': 400,
+	'fly-in-right': 400,
+	'fly-in-top': 400,
+	pulse: 400,
+	'rotate-in-left': 600,
+	'rotate-in-right': 600,
 	'twirl-in': 1000,
-	'whoosh-in-left': 500,
-	'whoosh-in-right': 500,
+	'whoosh-in-left': 400,
+	'whoosh-in-right': 400,
 	'pan-left': 1000,
 	'pan-right': 1000,
 	'pan-down': 1000,

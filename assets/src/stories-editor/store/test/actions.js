@@ -11,6 +11,10 @@ import {
 	movePageToPosition,
 	saveOrder,
 	resetOrder,
+	setCopiedMarkup,
+	clearCopiedMarkup,
+	playAnimation,
+	stopAnimation,
 } from '../actions';
 
 describe( 'actions', () => {
@@ -78,6 +82,56 @@ describe( 'actions', () => {
 		} );
 	} );
 
+	describe( 'playAnimation', () => {
+		it( 'should return the PLAY_ANIMATION action for a given page', () => {
+			const page = 'foo';
+
+			const result = playAnimation( page );
+			expect( result ).toStrictEqual( {
+				type: 'PLAY_ANIMATION',
+				page,
+				item: undefined,
+			} );
+		} );
+
+		it( 'should return the PLAY_ANIMATION action for a given page and item', () => {
+			const page = 'foo';
+			const item = 'bar';
+
+			const result = playAnimation( page, item );
+			expect( result ).toStrictEqual( {
+				type: 'PLAY_ANIMATION',
+				page,
+				item,
+			} );
+		} );
+	} );
+
+	describe( 'stopAnimation', () => {
+		it( 'should return the STOP_ANIMATION action for a given page', () => {
+			const page = 'foo';
+
+			const result = stopAnimation( page );
+			expect( result ).toStrictEqual( {
+				type: 'STOP_ANIMATION',
+				item: undefined,
+				page,
+			} );
+		} );
+
+		it( 'should return the STOP_ANIMATION action for a given page and item', () => {
+			const page = 'foo';
+			const item = 'bar';
+
+			const result = stopAnimation( page, item );
+			expect( result ).toStrictEqual( {
+				type: 'STOP_ANIMATION',
+				page,
+				item,
+			} );
+		} );
+	} );
+
 	describe( 'setCurrentPage', () => {
 		it( 'should return the SET_CURRENT_PAGE action', () => {
 			const page = 'foo';
@@ -129,6 +183,27 @@ describe( 'actions', () => {
 			expect( result ).toStrictEqual( {
 				type: 'RESET_ORDER',
 				order: undefined,
+			} );
+		} );
+	} );
+
+	describe( 'setCopiedMarkup', () => {
+		it( 'should return the SET_COPIED_MARKUP action', () => {
+			const result = setCopiedMarkup( 'Hello' );
+
+			expect( result ).toStrictEqual( {
+				type: 'SET_COPIED_MARKUP',
+				markup: 'Hello',
+			} );
+		} );
+	} );
+
+	describe( 'clearCopiedMarkup', () => {
+		it( 'should return the CLEAR_COPIED_MARKUP action', () => {
+			const result = clearCopiedMarkup();
+
+			expect( result ).toStrictEqual( {
+				type: 'CLEAR_COPIED_MARKUP',
 			} );
 		} );
 	} );

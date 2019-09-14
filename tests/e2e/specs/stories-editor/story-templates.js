@@ -12,7 +12,10 @@ import {
 	clickOnMoreMenuItem,
 	deactivateExperience,
 	openTemplateInserter,
+	removeAllBlocks,
 	searchForBlock as searchForStoryBlock,
+	getBlocksOnPage,
+	wpDataSelect,
 } from '../../utils';
 
 /**
@@ -28,12 +31,7 @@ async function addReusableBlock() {
 		await clickOnMoreMenuItem( 'Top Toolbar' );
 	}
 
-	// Remove all blocks from the post so that we're working with a clean slate.
-	await page.evaluate( () => {
-		const blocks = wp.data.select( 'core/block-editor' ).getBlocks();
-		const clientIds = blocks.map( ( block ) => block.clientId );
-		wp.data.dispatch( 'core/block-editor' ).removeBlocks( clientIds );
-	} );
+	await removeAllBlocks();
 
 	// Insert a paragraph block
 	await insertBlock( 'Paragraph' );
@@ -140,7 +138,9 @@ describe( 'Story Templates', () => {
 			await expect( page ).toMatchElement( '.block-editor-inserter__no-results' );
 		} );
 
-		it( 'should load story templates in the stories editor', async () => {
+		// Disable reason: see https://github.com/ampproject/amp-wp/issues/3211
+		// eslint-disable-next-line jest/no-disabled-tests
+		it.skip( 'should load story templates in the stories editor', async () => {
 			await createNewPost( { postType: 'amp_story' } );
 
 			await openTemplateInserter();
@@ -157,7 +157,9 @@ describe( 'Story Templates', () => {
 			await expect( page ).toMatchElement( '.block-editor-inserter__no-results' );
 		} );
 
-		it( 'should insert the correct blocks and as skeletons when clicking on a template', async () => {
+		// Disable reason: see https://github.com/ampproject/amp-wp/issues/3211
+		// eslint-disable-next-line jest/no-disabled-tests
+		it.skip( 'should insert the correct blocks and as skeletons when clicking on a template', async () => {
 			await createNewPost( { postType: 'amp_story' } );
 
 			await openTemplateInserter();
@@ -191,7 +193,9 @@ describe( 'Story Templates', () => {
 			expect( defaultStyledQuote ).toStrictEqual( 0 );
 		} );
 
-		it( 'should contain expected content in the template preview', async () => {
+		// Disable reason: see https://github.com/ampproject/amp-wp/issues/3211
+		// eslint-disable-next-line jest/no-disabled-tests
+		it.skip( 'should contain expected content in the template preview', async () => {
 			await createNewPost( { postType: 'amp_story' } );
 
 			await openTemplateInserter();
@@ -228,6 +232,20 @@ describe( 'Story Templates', () => {
 			expect( templateContents[ 8 ] ).toContain( 'One of the biggest things missing from the show is the fact that before his death, Robb Start legitimizes Jon Snow as a Stark and makes him his heir.' );
 			// Fandom Intro
 			expect( templateContents[ 9 ] ).toContain( 'got-logo.png' );
+		} );
+
+		// @see https://github.com/ampproject/amp-wp/issues/3211
+		it( 'should directly insert a new blank page', async () => {
+			await createNewPost( { postType: 'amp_story' } );
+
+			const blockOrder = await wpDataSelect( 'core/block-editor', 'getBlockOrder' );
+			await page.click( '.block-editor-inserter .editor-inserter__amp-inserter' );
+			await expect( page ).toMatchElement( '.amp-story-editor-carousel-navigation button:not(disabled)[aria-label="Previous Page"]' );
+			await expect( page ).toMatchElement( '.amp-story-editor-carousel-navigation button[disabled][aria-label="Next Page"]' );
+
+			const newBlockOrder = await wpDataSelect( 'core/block-editor', 'getBlockOrder' );
+			expect( newBlockOrder ).toHaveLength( blockOrder.length + 1 );
+			expect( await getBlocksOnPage() ).toHaveLength( 0 );
 		} );
 	} );
 } );

@@ -23,22 +23,16 @@ import {
 	STORY_PAGE_INNER_HEIGHT,
 } from '../../constants';
 
-const { Image } = window;
+const { Image, navigator } = window;
 
 const cloneWrapperClass = 'components-draggable__clone';
 
-const isChromeUA = ( ) => /Chrome/i.test( window.navigator.userAgent );
+const isChromeUA = ( ) => /Chrome/i.test( navigator.userAgent );
 const documentHasIframes = ( ) => [ ...document.getElementById( 'editor' ).querySelectorAll( 'iframe' ) ].length > 0;
 
 class Draggable extends Component {
 	constructor( ...args ) {
 		super( ...args );
-
-		this.onDragStart = this.onDragStart.bind( this );
-		this.onDragOver = this.onDragOver.bind( this );
-		this.onDrop = this.onDrop.bind( this );
-		this.onDragEnd = this.onDragEnd.bind( this );
-		this.resetDragState = this.resetDragState.bind( this );
 
 		this.isChromeAndHasIframes = false;
 	}
@@ -66,7 +60,7 @@ class Draggable extends Component {
 	 *
 	 * @param {Object} event The non-custom DragEvent.
 	 */
-	onDragEnd( event ) {
+	onDragEnd = ( event ) => {
 		const { onDragEnd = noop } = this.props;
 		if ( event ) {
 			event.preventDefault();
@@ -81,7 +75,7 @@ class Draggable extends Component {
 	 *
 	 * @param  {Object} event The non-custom DragEvent.
 	 */
-	onDragOver( event ) {
+	onDragOver = ( event ) => {
 		const top = parseInt( this.cloneWrapper.style.top ) + event.clientY - this.cursorTop;
 
 		// Don't allow the CTA button to go over its top limit.
@@ -99,7 +93,7 @@ class Draggable extends Component {
 		this.cursorTop = event.clientY;
 	}
 
-	onDrop( ) {
+	onDrop = () => {
 		// As per https://html.spec.whatwg.org/multipage/dnd.html#dndevents
 		// the target node for the dragend is the source node that started the drag operation,
 		// while drop event's target is the current target element.
@@ -112,12 +106,20 @@ class Draggable extends Component {
 	 *
 	 * @param {Object} event Custom DragEvent.
 	 */
-	onDragStart( event ) {
+	onDragStart = ( event ) => {
 		const { blockName, elementId, transferData, onDragStart = noop } = this.props;
-		const element = document.getElementById( elementId );
 		const isCTABlock = 'amp/amp-story-cta' === blockName;
+		// In the CTA block only the inner element (the button) is draggable, not the whole block.
+		const element = isCTABlock ? document.getElementById( elementId ) : document.getElementById( elementId ).parentNode;
+
+		if ( ! element ) {
+			event.preventDefault();
+			return;
+		}
+
 		const parentPage = element.closest( 'div[data-type="amp/amp-story-page"]' );
-		if ( ! element || ! parentPage ) {
+
+		if ( ! parentPage ) {
 			event.preventDefault();
 			return;
 		}
@@ -189,7 +191,7 @@ class Draggable extends Component {
 	 * Cleans up drag state when drag has completed, or component unmounts
 	 * while dragging.
 	 */
-	resetDragState() {
+	resetDragState = () => {
 		// Remove drag clone
 		document.removeEventListener( 'dragover', this.onDragOver );
 		if ( this.cloneWrapper && this.cloneWrapper.parentNode ) {

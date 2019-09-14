@@ -28,7 +28,6 @@ import { __ } from '@wordpress/i18n';
 import { StoryBlockMover, FontFamilyPicker, ResizableBox, AnimationControls, RotatableBox } from '../';
 import {
 	ALLOWED_CHILD_BLOCKS,
-	ALLOWED_MOVABLE_BLOCKS,
 	BLOCKS_WITH_TEXT_SETTINGS,
 	BLOCKS_WITH_COLOR_SETTINGS,
 	MIN_BLOCK_WIDTH,
@@ -37,7 +36,7 @@ import {
 	BLOCK_ROTATION_SNAPS,
 	BLOCK_ROTATION_SNAP_GAP,
 } from '../../constants';
-import { getBlockOrderDescription, maybeEnqueueFontStyle, getCallToActionBlock } from '../../helpers';
+import { getBlockOrderDescription, maybeEnqueueFontStyle, getCallToActionBlock, isMovableBlock } from '../../helpers';
 import bringForwardIcon from '../../../../images/stories-editor/bring-forward.svg';
 import sendBackwardIcon from '../../../../images/stories-editor/send-backwards.svg';
 import bringFrontIcon from '../../../../images/stories-editor/bring-front.svg';
@@ -167,6 +166,7 @@ export default createHigherOrderComponent(
 		return enhance( ( props ) => { // eslint-disable-line complexity
 			const {
 				clientId,
+				rootClientId,
 				name,
 				attributes,
 				isLast,
@@ -206,11 +206,11 @@ export default createHigherOrderComponent(
 			const isImageBlock = 'core/image' === name;
 			const isVideoBlock = 'core/video' === name;
 			const isTextBlock = 'amp/amp-story-text' === name;
+			const excludeOpacity = 'amp/amp-story-page-attachment' === name;
 
 			const needsTextSettings = BLOCKS_WITH_TEXT_SETTINGS.includes( name );
 			const needsColorSettings = BLOCKS_WITH_COLOR_SETTINGS.includes( name );
 			const needsResizing = BLOCKS_WITH_RESIZING.includes( name );
-			const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
 
 			const {
 				ampFontFamily,
@@ -241,11 +241,14 @@ export default createHigherOrderComponent(
 				minHeight = MIN_BLOCK_HEIGHTS[ name ] || MIN_BLOCK_HEIGHTS.default;
 			}
 
+			const animationDuration = parseInt( String( ampAnimationDuration ).replace( 'ms', '' ) );
+			const animationDelay = parseInt( String( ampAnimationDelay ).replace( 'ms', '' ) );
+
 			const captionAttribute = isVideoBlock ? 'ampShowCaption' : 'ampShowImageCaption';
 			return (
 				<>
-					{ ( ! isMovableBlock ) && ( <BlockEdit { ...props } /> ) }
-					{ isMovableBlock && ! isEmptyImageBlock && needsResizing && (
+					{ ( ! isMovableBlock( name ) ) && ( <BlockEdit { ...props } /> ) }
+					{ isMovableBlock( name ) && ! isEmptyImageBlock && needsResizing && (
 						<ResizableBox
 							width={ width }
 							height={ height }
@@ -289,7 +292,7 @@ export default createHigherOrderComponent(
 										blockName={ name }
 										blockElementId={ `block-${ props.clientId }` }
 										isDraggable={ ! props.isPartOfMultiSelection }
-										isMovable={ isMovableBlock }
+										isMovable={ isMovableBlock( name ) }
 									>
 										<BlockEdit { ...props } />
 									</StoryBlockMover>
@@ -297,7 +300,7 @@ export default createHigherOrderComponent(
 							</RotatableBox>
 						</ResizableBox>
 					) }
-					{ isMovableBlock && ( ! needsResizing || isEmptyImageBlock ) && (
+					{ isMovableBlock( name ) && ( ! needsResizing || isEmptyImageBlock ) && (
 						<RotatableBox
 							blockElementId={ `block-${ clientId }` }
 							initialAngle={ rotationAngle }
@@ -321,13 +324,13 @@ export default createHigherOrderComponent(
 								blockName={ name }
 								blockElementId={ `block-${ props.clientId }` }
 								isDraggable={ ! props.isPartOfMultiSelection }
-								isMovable={ isMovableBlock }
+								isMovable={ isMovableBlock( name ) }
 							>
 								<BlockEdit { ...props } />
 							</StoryBlockMover>
 						</RotatableBox>
 					) }
-					{ ! ( isLast && isFirst ) && isMovableBlock && (
+					{ ! ( isLast && isFirst ) && isMovableBlock( name ) && (
 						<InspectorControls>
 							<PanelBody
 								className="amp-story-order-controls"
@@ -432,9 +435,13 @@ export default createHigherOrderComponent(
 								<FontFamilyPicker
 									fonts={ ampStoriesFonts }
 									value={ ampFontFamily }
-									onChange={ ( value ) => {
-										maybeEnqueueFontStyle( value );
-										setAttributes( { ampFontFamily: value } );
+									onChange={ ( font ) => {
+										if ( ! font ) {
+											setAttributes( { ampFontFamily: '' } );
+											return;
+										}
+										maybeEnqueueFontStyle( font.name );
+										setAttributes( { ampFontFamily: font.name } );
 									} }
 								/>
 								<ToggleControl
@@ -493,27 +500,31 @@ export default createHigherOrderComponent(
 										fontSize: fontSize.size,
 									} }
 								/>
-								<RangeControl
-									label={ __( 'Opacity', 'amp' ) }
-									value={ opacity }
-									onChange={ ( value ) => setAttributes( { opacity: value } ) }
-									min={ 5 }
-									max={ 100 }
-									step={ 5 }
-								/>
+								{ ! excludeOpacity && (
+									<RangeControl
+										label={ __( 'Opacity', 'amp' ) }
+										value={ opacity }
+										onChange={ ( value ) => setAttributes( { opacity: value } ) }
+										min={ 5 }
+										max={ 100 }
+										step={ 5 }
+									/>
+								) }
 							</PanelColorSettings>
 						</InspectorControls>
 					) }
-					{ isMovableBlock && (
+					{ isMovableBlock( name ) && (
 						<InspectorControls>
 							<PanelBody
 								title={ __( 'Animation', 'amp' ) }
 							>
 								<AnimationControls
+									clientId={ clientId }
+									page={ rootClientId }
 									animatedBlocks={ getAnimatedBlocks }
 									animationType={ ampAnimationType }
-									animationDuration={ ampAnimationDuration ? parseInt( ampAnimationDuration ) : '' }
-									animationDelay={ ampAnimationDelay ? parseInt( ampAnimationDelay ) : '' }
+									animationDuration={ animationDuration }
+									animationDelay={ animationDelay }
 									animationAfter={ animationAfter }
 									onAnimationTypeChange={ onAnimationTypeChange }
 									onAnimationDurationChange={ onAnimationDurationChange }

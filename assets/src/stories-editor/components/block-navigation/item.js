@@ -51,8 +51,6 @@ class BlockNavigationItem extends Component {
 		this.state = {
 			isDragging: false,
 		};
-
-		this.onDrop = this.onDrop.bind( this );
 	}
 
 	getInsertIndex( position ) {
@@ -66,7 +64,7 @@ class BlockNavigationItem extends Component {
 		return undefined;
 	}
 
-	onDrop( event, position ) {
+	onDrop = ( event, position ) => {
 		const { block: { clientId }, moveBlockToPosition, getBlockIndex } = this.props;
 		const { srcClientId, srcIndex, type } = parseDropEvent( event );
 
@@ -84,12 +82,11 @@ class BlockNavigationItem extends Component {
 	}
 
 	render() {
-		const { block, getBlockIndex, isSelected, onClick } = this.props;
-		const isCallToActionBlock = 'amp/amp-story-cta' === block.name;
+		const { block, getBlockIndex, isSelected, onClick, unMovableBlock } = this.props;
 		const { clientId } = block;
 		const blockElementId = `block-navigation-item-${ clientId }`;
 
-		if ( isCallToActionBlock ) {
+		if ( unMovableBlock ) {
 			return (
 				<div className="editor-block-navigation__item block-editor-block-navigation__item">
 					<Button
@@ -174,6 +171,7 @@ BlockNavigationItem.propTypes = {
 	} ),
 	isSelected: PropTypes.bool,
 	onClick: PropTypes.func.isRequired,
+	unMovableBlock: PropTypes.object,
 };
 
 const applyWithSelect = withSelect( ( select, { block: { clientId } } ) => {

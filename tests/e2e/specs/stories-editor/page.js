@@ -16,6 +16,10 @@ import {
 	insertBlock,
 } from '../../utils';
 
+const LARGE_IMAGE = 'large-image-36521.jpg';
+const CORRECT_VIDEO = 'clothes-hanged-to-dry-1295231.mp4';
+const SELECT_BUTTON = '.media-modal button.media-button-select';
+
 describe( 'Story Page', () => {
 	beforeAll( async () => {
 		await activateExperience( 'stories' );
@@ -44,7 +48,7 @@ describe( 'Story Page', () => {
 		const nodes = await page.$x(
 			`//div[contains(@class, "amp-page-active")]//div[contains(@style,"${ style }")]`
 		);
-		expect( nodes.length ).not.toStrictEqual( 0 );
+		expect( nodes ).not.toHaveLength( 0 );
 	} );
 
 	it( 'should allow adding gradient', async () => {
@@ -59,7 +63,7 @@ describe( 'Story Page', () => {
 		const nodes = await page.$x(
 			`//div[contains(@class, "amp-page-active")]//div[contains(@style,"${ style }")]`
 		);
-		expect( nodes.length ).not.toStrictEqual( 0 );
+		expect( nodes ).not.toHaveLength( 0 );
 	} );
 
 	it( 'should allow adding opacity', async () => {
@@ -82,7 +86,7 @@ describe( 'Story Page', () => {
 		const nodes = await page.$x(
 			`//div[contains(@class, "amp-page-active")]//div[contains(@style,"${ style }")]`
 		);
-		expect( nodes.length ).not.toStrictEqual( 0 );
+		expect( nodes ).not.toHaveLength( 0 );
 	} );
 
 	it( 'should be possible to add Background Image', async () => {
@@ -166,5 +170,52 @@ describe( 'Story Page', () => {
 		expect( await page.evaluate( ( selector ) => {
 			return document.querySelector( selector ).value;
 		}, secondsSelector ) ).toBe( '2' );
+	} );
+
+	it( 'should allow changing the alt attribute for the background image', async () => {
+		// Add background image.
+		await page.waitForSelector( '.editor-amp-story-page-background' );
+		await page.click( '.editor-amp-story-page-background' );
+		await uploadMedia( LARGE_IMAGE );
+		await expect( page ).toClick( SELECT_BUTTON );
+
+		// Write assistive text.
+		const label = await page.waitForXPath( `//label[contains(text(), 'Assistive Text')]` );
+		await page.evaluate( ( lbl ) => {
+			lbl.click();
+		}, label );
+		await page.keyboard.type( 'Hello World' );
+
+		// Open preview.
+		const editorPage = page;
+		const previewPage = await openPreviewPage( editorPage, 'amp-story' );
+		await previewPage.waitForSelector( 'amp-img[alt*="Hello World"]' );
+	} );
+
+	/**
+	 * This test is disabled because it does not work on Chromium.
+	 *
+	 * @see https://github.com/ampproject/amp-wp/pull/2874
+	 * @see https://github.com/ampproject/amp-wp/pull/3214
+	 */
+	// eslint-disable-next-line jest/no-disabled-tests
+	it.skip( 'should allow changing the ARIA label for the background video', async () => {
+		// Add background video.
+		await page.waitForSelector( '.editor-amp-story-page-background' );
+		await page.click( '.editor-amp-story-page-background' );
+		await uploadMedia( CORRECT_VIDEO );
+		await page.click( SELECT_BUTTON );
+
+		// Write assistive text.
+		const label = await page.waitForXPath( `//label[contains(text(), 'Assistive Text')]` );
+		await page.evaluate( ( lbl ) => {
+			lbl.click();
+		}, label );
+		await page.keyboard.type( 'Hello World' );
+
+		// Open preview.
+		const editorPage = page;
+		const previewPage = await openPreviewPage( editorPage, 'amp-story' );
+		expect( await previewPage.$x( '//amp-video[contains(@aria-label, "Hello World")]' ) ).toHaveLength( 1 );
 	} );
 } );

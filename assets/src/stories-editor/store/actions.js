@@ -1,7 +1,7 @@
 /**
  * Returns an action object in signalling that a given item is now animated.
  *
- * @param {string}  page        ID of the page the item is in.
+ * @param {string}  page        ID of the page the item is on.
  * @param {string}  item        ID of the animated item.
  * @param {?string} predecessor Optional. ID of the item's predecessor in the animation order.
  *
@@ -19,7 +19,7 @@ export function addAnimation( page, item, predecessor ) {
 /**
  * Returns an action object in signalling that an item's animation type has changed.
  *
- * @param {string} page          ID of the page the item is in.
+ * @param {string} page          ID of the page the item is on.
  * @param {string} item          ID of the animated item.
  * @param {string} animationType Animation type value.
  *
@@ -37,7 +37,7 @@ export function changeAnimationType( page, item, animationType ) {
 /**
  * Returns an action object in signalling that an item's animation duration has changed.
  *
- * @param {string} page     ID of the page the item is in.
+ * @param {string} page     ID of the page the item is on.
  * @param {string} item     ID of the animated item.
  * @param {number} duration Animation delay value
  *
@@ -55,7 +55,7 @@ export function changeAnimationDuration( page, item, duration ) {
 /**
  * Returns an action object in signalling that an item's animation delay has changed.
  *
- * @param {string} page  ID of the page the item is in.
+ * @param {string} page  ID of the page the item is on.
  * @param {string} item  ID of the animated item.
  * @param {number} delay Animation delay value
  *
@@ -67,6 +67,54 @@ export function changeAnimationDelay( page, item, delay ) {
 		page,
 		item,
 		delay,
+	};
+}
+
+/**
+ * Returns an action object in signalling that animation has been started.
+ *
+ * @param {string} page ID of the page the item is on.
+ * @param {string} [item] Optional. ID of the animated item. If not passed, all items on the given page are animated.
+ *
+ * @return {Object} Action object.
+ */
+export function playAnimation( page, item ) {
+	return {
+		type: 'PLAY_ANIMATION',
+		page,
+		item,
+	};
+}
+
+/**
+ * Returns an action object in signalling that an animation has finished.
+ *
+ * @param {string} page ID of the page the item is on.
+ * @param {string} item ID of the animated item.
+ *
+ * @return {Object} Action object.
+ */
+export function finishAnimation( page, item ) {
+	return {
+		type: 'FINISH_ANIMATION',
+		page,
+		item,
+	};
+}
+
+/**
+ * Returns an action object in signalling that an animation has been stopped.
+ *
+ * @param {string} page ID of the page the item is on.
+ * @param {string} [item] Optional. ID of the animated item. If not passed, all items on the given page are stopped.
+ *
+ * @return {Object} Action object.
+ */
+export function stopAnimation( page, item ) {
+	return {
+		type: 'STOP_ANIMATION',
+		page,
+		item,
 	};
 }
 
@@ -138,5 +186,29 @@ export function resetOrder( order ) {
 	return {
 		type: 'RESET_ORDER',
 		order,
+	};
+}
+
+/**
+ * Returns an action object for setting copied block markup.
+ *
+ * @param {string} markup Markup copied to clipboard.
+ * @return {Object} Action object.
+ */
+export function setCopiedMarkup( markup ) {
+	return {
+		type: 'SET_COPIED_MARKUP',
+		markup,
+	};
+}
+
+/**
+ * Returns an action object signalling that copied markup needs to be cleared.
+ *
+ * @return {Object} Action object.
+ */
+export function clearCopiedMarkup() {
+	return {
+		type: 'CLEAR_COPIED_MARKUP',
 	};
 }

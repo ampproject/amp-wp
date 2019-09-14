@@ -25,13 +25,7 @@ const TOTAL_PAGE_MARGIN = 50;
 const PAGE_BORDER = 1;
 
 class EditorCarousel extends Component {
-	constructor( ...args ) {
-		super( ...args );
-
-		this.translateWrapper.bind( this );
-	}
-
-	translateWrapper() {
+	translateWrapper = () => {
 		const wrapper = document.querySelector( '#amp-story-controls + .block-editor-block-list__layout' );
 
 		if ( ! wrapper ) {

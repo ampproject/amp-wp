@@ -18,8 +18,9 @@
   },
   "require-dev": {
     "dealerdirect/phpcodesniffer-composer-installer": "0.5.0",
-    "phpcompatibility/php-compatibility": "9.3.0",
+    "phpcompatibility/php-compatibility": "9.3.1",
     "roave/security-advisories": "dev-master",
+    "mikey179/vfsstream": "^1.6",
     "wp-cli/wp-cli": "^2.3",
     "wp-coding-standards/wpcs": "2.1.1",
     "xwp/wp-dev-lib": "1.2.2"
@@ -39,7 +40,7 @@
   "extra": {
     "patches": {
       "sabberworm/php-css-parser": {
-        "PHP-CSS-Parser: Fix parsing CSS selectors which contain commas <https://github.com/sabberworm/PHP-CSS-Parser/pull/138>": "patches/php-css-parser-mods.diff"
+        "PHP-CSS-Parser: Fix parsing CSS selectors which contain commas <https://github.com/sabberworm/PHP-CSS-Parser/pull/138>": "https://github.com/sabberworm/PHP-CSS-Parser/commit/fa139f65c5b098ae652c970b25e6eb03fc495eb4.diff"
       }
     }
   }

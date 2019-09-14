@@ -461,7 +461,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				],
 				[],
 			],
-			'dynamic_classes_preserved_conditionally' => [
+			'dynamic_classes_and_attributes_preserved_conditionally' => [
 				'
 					<html amp><head>
 					<style> .amp-viewer { color: blue; } </style>
@@ -472,8 +472,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					<style> .amp-form-submit-success { color: green; } </style>
 					<style> .amp-access-laterpay-container { color: purple} </style>
 					<style> .amp-image-lightbox-caption { color: brown} </style>
-					<style> .amp-live-list-item-new { color: lime} </style>
-					<style> .amp-sidebar-toolbar-target-hidden { color: lavender} </style>
+					<style> .amp-live-list-item-new { color: lime} #my-live-list [data-tombstone] { display: block; }</style>
+					<style> .amp-sidebar-toolbar-target-hidden { color: lavender} #sidebar1[open] { outline: solid 1px red; }</style>
 					<style> .amp-sticky-ad-close-button { color: aliceblue} </style>
 					<style> .amp-docked-video-shadow { color: azure} </style>
 					<style> .amp-geo-pending { color: saddlebrown; } </style>
@@ -481,6 +481,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					<style> .amp-geo-group-foo { color: peru; } </style>
 					<style> .amp-iso-country-us { color: oldlace; } </style>
 					<style> .amp-video-eq { display: none; } </style>
+					<style> #accord section[expanded] { outline: solid 1px blue; } </style>
 					<style> .non-existent { color: black; } </style>
 					</head>
 					<body>
@@ -495,6 +496,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 						<amp-sticky-ad layout="nodisplay"><amp-ad width="320" height="50" type="doubleclick" data-slot="/35096353/amptesting/formats/sticky"></amp-ad></amp-sticky-ad>
 						<amp-video dock width="720" height="305" layout="responsive" src="https://yourhost.com/videos/myvideo.mp4" poster="https://yourhost.com/posters/poster.png" artwork="https://yourhost.com/artworks/artwork.png" title="Awesome video" artist="Awesome artist" album="Amazing album"></amp-video>
 						<amp-geo layout="nodisplay"><script type="application/json">{"ISOCountryGroups": {"foo":["us"]}}</script></amp-geo>
+						<amp-accordion id="accord" disable-session-states><section><h2>Section 1</h2><p>Content in section 1.</p></section><section><h2>Section 2</h2><div>Content in section 2.</div></section></amp-accordion>
 					</body>
 					</html>
 				',
@@ -507,8 +509,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'.amp-form-submit-success{color:green}',
 					'.amp-access-laterpay-container{color:purple}',
 					'.amp-image-lightbox-caption{color:brown}',
-					'.amp-live-list-item-new{color:lime}',
-					'.amp-sidebar-toolbar-target-hidden{color:lavender}',
+					'.amp-live-list-item-new{color:lime}#my-live-list [data-tombstone]{display:block}',
+					'.amp-sidebar-toolbar-target-hidden{color:lavender}#sidebar1[open]{outline:solid 1px red}',
 					'.amp-sticky-ad-close-button{color:aliceblue}',
 					'.amp-docked-video-shadow{color:azure}',
 					'.amp-geo-pending{color:saddlebrown}',
@@ -516,8 +518,14 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'.amp-geo-group-foo{color:peru}',
 					'.amp-iso-country-us{color:oldlace}',
 					'.amp-video-eq{display:none}',
+					'#accord section[expanded]{outline:solid 1px blue}',
 					'', // Because no non-existent.
 				],
+				[],
+			],
+			'test_with_dev_mode' => [
+				'<html amp data-ampdevmode=""><body data-ampdevmode="" style="background:red !important"><link rel="stylesheet" href="https://example.com/foo.css" data-ampdevmode=""><style data-ampdevmode="">body{color:red !important}</style></body></html>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+				[],
 				[],
 			],
 		];
@@ -589,7 +597,9 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			$this->assertContains( $expected_stylesheet, $sanitized_html );
 		}
 
-		$this->assertContains( "\n\n/*# sourceURL=amp-custom.css */", $sanitized_html );
+		if ( $actual_stylesheets ) {
+			$this->assertContains( "\n\n/*# sourceURL=amp-custom.css */", $sanitized_html );
+		}
 	}
 
 	/**
@@ -2277,7 +2287,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					add_action( 'wp_enqueue_scripts', 'twentyten_scripts_styles' );
 					AMP_Theme_Support::add_hooks();
 					wp_add_inline_style( 'admin-bar', '.admin-bar-inline-style{ color:red }' );
-					wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 
 					add_action(
 						'wp_footer',
@@ -2309,11 +2318,10 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					$this->assertContains( '.is-style-outline .wp-block-button__link', $amphtml_source, 'Expected block-library/style.css' );
 					$this->assertContains( '[class^="wp-block-"]:not(.wp-block-gallery) figcaption', $amphtml_source, 'Expected twentyten/blocks.css' );
 					$this->assertContains( 'amp-img.amp-wp-enforced-sizes', $amphtml_source, 'Expected amp-default.css' );
-					$this->assertNotContains( 'ab-empty-item', $amphtml_source, 'Expected admin-bar.css to not be present.' );
+					$this->assertContains( 'ab-empty-item', $amphtml_source, 'Expected admin-bar.css to still be present.' );
 					$this->assertNotContains( 'earlyprintstyle', $amphtml_source, 'Expected early print style to not be present.' );
-					$this->assertNotContains( 'admin-bar-inline-style', $amphtml_source, 'Expected admin-bar.css inline style to not be present.' );
-					$this->assertNotContains( 'admin-bar', $amphtml_dom->getElementsByTagName( 'body' )->item( 0 )->getAttribute( 'class' ) );
-					$this->assertEmpty( $amphtml_dom->getElementById( 'wpadminbar' ) );
+					$this->assertContains( 'admin-bar', $amphtml_dom->getElementsByTagName( 'body' )->item( 0 )->getAttribute( 'class' ) );
+					$this->assertInstanceOf( 'DOMElement', $amphtml_dom->getElementById( 'wpadminbar' ) );
 				},
 			],
 			// @todo Add other scenarios in the future.
