@@ -67,8 +67,6 @@ class AMP_Autoloader {
 		'AMP_Options_Menu_Page'              => 'includes/options/views/class-amp-options-menu-page',
 		'AMP_Rule_Spec'                      => 'includes/sanitizers/class-amp-rule-spec',
 		'AMP_Allowed_Tags_Generated'         => 'includes/sanitizers/class-amp-allowed-tags-generated',
-		'AMP_Context'                        => 'includes/sanitizers/class-amp-context',
-		'AMP_Contextual_Node'                => 'includes/sanitizers/class-amp-contextual-node',
 		'AMP_Audio_Sanitizer'                => 'includes/sanitizers/class-amp-audio-sanitizer',
 		'AMP_Base_Sanitizer'                 => 'includes/sanitizers/class-amp-base-sanitizer',
 		'AMP_Blacklist_Sanitizer'            => 'includes/sanitizers/class-amp-blacklist-sanitizer',

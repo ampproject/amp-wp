@@ -20,8 +20,18 @@ class AMP_Form_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function setUp() {
 		parent::setUp();
+		add_theme_support( 'amp' );
 		$this->go_to( '/current-page/' );
 	}
+
+	/**
+	 * Tear down.
+	 */
+	public function tearDown() {
+		remove_theme_support( 'amp' );
+		parent::tearDown();
+	}
+
 
 	/**
 	 * Data strings for testing converter.

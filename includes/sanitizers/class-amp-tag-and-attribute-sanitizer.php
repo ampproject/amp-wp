@@ -26,11 +26,6 @@
 class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
-	 * Contextual node tag used for keeping track of when we are within a template tag.
-	 */
-	const CONTEXT_NODE_TAG_IS_WITHIN_TEMPLATE = '_AMP_IS_WITHIN_TEMPLATE_';
-
-	/**
 	 * Allowed tags.
 	 *
 	 * @since 0.5
@@ -73,15 +68,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	protected $visited_unique_tag_specs = [];
 
 	/**
-	 * Stack.
-	 *
-	 * @since 0.5
-	 *
-	 * @var DOMElement[]
-	 */
-	private $stack = [];
-
-	/**
 	 * Default args.
 	 *
 	 * @since 0.5
@@ -105,16 +91,16 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	protected $should_not_replace_nodes = [];
 
 	/**
-	 * Contextual information to keep track of.
+	 * Keep track of the elements that are currently open.
 	 *
-	 * The context is adapted when it encounters contextual nodes that perform operations on it.
+	 * This is used to determine whether a node exists inside of a given element tree, speeding up has_ancestor checks
+	 * as well as disabling attribute validation inside of templates.
 	 *
-	 * This mechanism is used to overcome the fact that the linearization we are doing when building the stack we process
-	 * loses important hierarchical information (unless we want to endlessly traverse parent nodes).
-	 *
-	 * @var AMP_Context
+	 * @see \AMP_Tag_And_Attribute_Sanitizer::has_ancestor()
+	 * @since 1.3
+	 * @var array
 	 */
-	protected $context;
+	protected $open_elements = [];
 
 	/**
 	 * AMP_Tag_And_Attribute_Sanitizer constructor.
@@ -130,8 +116,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			'amp_globally_allowed_attributes' => AMP_Allowed_Tags_Generated::get_allowed_attributes(),
 			'amp_layout_allowed_attributes'   => AMP_Allowed_Tags_Generated::get_layout_attributes(),
 		];
-
-		$this->context = new AMP_Context();
 
 		parent::__construct( $dom, $args );
 
@@ -253,7 +237,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param array $attr_spec_list Attribute spec list.
 	 * @return array Modified attribute spec list.
 	 */
-	private function process_alternate_names( $attr_spec_list ) {
+	private function process_alternate_names( array $attr_spec_list ) {
 		foreach ( $attr_spec_list as $attr_name => &$attr_spec ) {
 			// Save all alternative names in lookup to improve performance.
 			if ( isset( $attr_spec[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
@@ -271,131 +255,37 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.5
 	 */
 	public function sanitize() {
+		$this->sanitize_element( $this->root_element );
+	}
 
-		// Add root of content to the stack.
-		$this->stack[] = $this->root_element;
+	/**
+	 * Sanitize element.
+	 *
+	 * @param DOMElement $element Element.
+	 */
+	private function sanitize_element( DOMElement $element ) {
+		if ( ! isset( $this->open_elements[ $element->nodeName ] ) ) {
+			$this->open_elements[ $element->nodeName ] = 0;
+		}
 
-		/**
-		 * This loop traverses through the DOM tree iteratively.
-		 */
-		while ( ! empty( $this->stack ) ) {
-			// Make sure we're targeting the first node of the remaining stack.
-			reset( $this->stack );
-			$node       = current( $this->stack );
-			$node_index = key( $this->stack );
+		$this->open_elements[ $element->nodeName ]++;
 
-			// Process this node.
-			$this->process_node( $node );
+		// First the element.
+		$this->process_node( $element );
 
-			// No need to check for children on contextual nodes.
-			if ( $node instanceof AMP_Contextual_Node ) {
-				array_shift( $this->stack );
-				continue;
-			}
-
-			// No need to proceed further if the node has no children.
-			if ( ! $node->parentNode ) {
-				array_shift( $this->stack );
-				continue;
-			}
-
-			/*
-			 * Push child nodes onto the stack, if any exist.
-			 * if node was removed, then it's parentNode value is null.
-			 */
-			if ( $node->parentNode ) {
-
-				$child_nodes = $this->has_child_nodes( $node );
-
-				// If we need contextual nodes to track state for the current element,
-				// we add them as wrapping nodes around all children.
-				$contextual_nodes = $this->needs_contextual_nodes( $node );
-
-				if ( ! empty( $contextual_nodes ) ) {
-					array_unshift( $child_nodes, array_shift( $contextual_nodes ) );
-					array_push( $child_nodes, array_shift( $contextual_nodes ) );
+		// Then if the element was not removed, proceed with sanitizing its children.
+		if ( $element->parentNode ) {
+			$this_child = $element->firstChild;
+			while ( $this_child ) {
+				$next_child = $this_child->nextSibling;
+				if ( $this_child instanceof DOMElement ) {
+					$this->sanitize_element( $this_child );
 				}
-
-				// Replace the parent node by its child nodes.
-				array_splice( $this->stack, $node_index, 1, $child_nodes );
+				$this_child = $next_child;
 			}
 		}
-	}
 
-	/**
-	 * Check whether a given node requires keeping track of context.
-	 *
-	 * If this is the case, it will return a pair of start and end nodes to
-	 * keep track of said context. This is done because we linearize the stack
-	 * and lack hierarchical information when processing the nodes. So we turn
-	 * one parent node into a pair of starting and ending contextual nodes.
-	 *
-	 * @param DOMNode $node Node to examine.
-	 * @return DOMNode[]|false Pair of contextual nodes, or false if none to be
-	 *                         used.
-	 */
-	protected function needs_contextual_nodes( DOMNode $node ) {
-		switch ( $node->nodeName ) {
-			case 'template':
-				return $this->get_template_contextual_nodes( $node );
-		}
-
-		return false;
-	}
-
-	/**
-	 * Retrieve an array of direct child nodes from a given node.
-	 *
-	 * @param DOMNode $node Node to retrieve the direct children from.
-	 * @return DOMNode[] Array of child nodes.
-	 */
-	protected function has_child_nodes( DOMNode $node ) {
-		$children = [];
-		$child    = $node->firstChild;
-
-		while ( $child ) {
-			$children[] = $child;
-			$child      = $child->nextSibling;
-		}
-
-		return $children;
-	}
-
-	/**
-	 * Build and return the contextual nodes needed for template tags.
-	 *
-	 * @param DOMNode $node Template tag to examine.
-	 * @return DOMNode[]|false Pair of contextual nodes, or false if none to be
-	 *                         used.
-	 */
-	protected function get_template_contextual_nodes( DOMNode $node ) {
-		// A template tag is only valid if it has a type attribute.
-		if ( ! $node->hasAttributes() ) {
-			return false;
-		}
-		$type = $node->attributes->getNamedItem( 'type' );
-		if ( null === $type ) {
-			return false;
-		}
-
-		// The type attribute of a template tag defines what templating engine to use.
-		switch ( $type->nodeValue ) {
-			case 'amp-mustache':
-				$start_node = new AMP_Contextual_Node(
-					AMP_Context::WITHIN_TEMPLATE_TAG,
-					AMP_Contextual_Node::OPERATION_ENTER,
-					[ 'pattern' => '/^.*{{.*}}.*$/' ]
-				);
-				$end_node   = new AMP_Contextual_Node(
-					AMP_Context::WITHIN_TEMPLATE_TAG,
-					AMP_Contextual_Node::OPERATION_LEAVE
-				);
-
-				return compact( 'start_node', 'end_node' );
-		}
-
-		// No matching engine found to act upon.
-		return false;
+		$this->open_elements[ $element->nodeName ]--;
 	}
 
 	/**
@@ -407,7 +297,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param array      $rule_spec Rule spec.
 	 * @return array Augmented rule spec.
 	 */
-	private function get_rule_spec_list_to_validate( $node, $rule_spec ) {
+	private function get_rule_spec_list_to_validate( DOMElement $node, array $rule_spec ) {
 
 		// Expand extension_spec into a set of attr_spec_list.
 		if ( isset( $rule_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec'] ) ) {
@@ -482,33 +372,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * Attributes which are not valid are removed. Elements which are not allowed are also removed,
 	 * including elements which miss mandatory attributes.
 	 *
-	 * @param DOMNode $node Node.
+	 * @param DOMElement $node Node.
 	 */
-	private function process_node( $node ) {
-
-		// Process contextual nodes first.
-		if ( $node instanceof AMP_Contextual_Node ) {
-			switch ( $node->get_operation() ) {
-				case AMP_Contextual_Node::OPERATION_ENTER:
-					$this->context->enter( $node->get_context(), $node->get_state() );
-					break;
-
-				case AMP_Contextual_Node::OPERATION_LEAVE:
-					$this->context->leave( $node->get_context() );
-					break;
-
-				case AMP_Contextual_Node::OPERATION_TOGGLE:
-					$this->context->toggle( $node->get_context(), $node->get_state() );
-					break;
-			}
-
-			return;
-		}
-
-		// Don't process text or comment nodes.
-		if ( XML_TEXT_NODE === $node->nodeType || XML_COMMENT_NODE === $node->nodeType || XML_CDATA_SECTION_NODE === $node->nodeType ) {
-			return;
-		}
+	private function process_node( DOMElement $node ) {
 
 		// Remove nodes with tags that have not been whitelisted.
 		if ( ! $this->is_amp_allowed_tag( $node ) ) {
@@ -519,12 +385,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			// Return early since this node no longer exists.
 			return;
 		}
-
-		/**
-		 * Node is now an element.
-		 *
-		 * @var DOMElement $node
-		 */
 
 		/*
 		 * Compile a list of rule_specs to validate for this node
@@ -737,7 +597,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param DOMElement $node      The DOMElement of the node to check.
 	 * @return boolean $is_missing boolean Whether a required attribute is missing.
 	 */
-	public function is_missing_mandatory_attribute( $attr_spec, $node ) {
+	public function is_missing_mandatory_attribute( array $attr_spec, DOMElement $node ) {
 		if ( ! is_array( $attr_spec ) ) {
 			return false;
 		}
@@ -774,7 +634,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param array      $cdata_spec CDATA.
 	 * @return true|WP_Error True when valid or error when invalid.
 	 */
-	private function validate_cdata_for_node( $element, $cdata_spec ) {
+	private function validate_cdata_for_node( DOMElement $element, array $cdata_spec ) {
 		if ( isset( $cdata_spec['max_bytes'] ) && strlen( $element->textContent ) > $cdata_spec['max_bytes'] ) {
 			return new WP_Error( 'excessive_bytes' );
 		}
@@ -801,11 +661,11 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 0.5
 	 *
-	 * @param DOMNode $node The node to validate.
-	 * @param array   $tag_spec The specification.
+	 * @param DOMElement $node     The node to validate.
+	 * @param array      $tag_spec The specification.
 	 * @return boolean $valid Whether the node's placement is valid.
 	 */
-	private function validate_tag_spec_for_node( $node, $tag_spec ) {
+	private function validate_tag_spec_for_node( DOMElement $node, array $tag_spec ) {
 
 		if ( ! empty( $tag_spec[ AMP_Rule_Spec::MANDATORY_PARENT ] ) && ! $this->has_parent( $node, $tag_spec[ AMP_Rule_Spec::MANDATORY_PARENT ] ) ) {
 			return false;
@@ -845,12 +705,12 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @note This can be a very expensive function. Use it sparingly.
 	 *
-	 * @param DOMNode $node           Node.
-	 * @param array[] $attr_spec_list Attribute Spec list.
+	 * @param DOMElement $node           Node.
+	 * @param array[]    $attr_spec_list Attribute Spec list.
 	 *
 	 * @return float Number of times the attribute spec list matched. If there was a mismatch, then 0 is returned. 0.5 is returned if there is an implicit match.
 	 */
-	private function validate_attr_spec_list_for_node( $node, $attr_spec_list ) {
+	private function validate_attr_spec_list_for_node( DOMElement $node, array $attr_spec_list ) {
 		/*
 		 * If node has no attributes there is no point in continuing, but if none of attributes
 		 * in the spec list are mandatory, then we give this a score.
@@ -862,14 +722,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 			return 0.5;
-		}
-
-		if ( ! $node instanceof DOMElement ) {
-			/*
-			 * A DOMNode is not valid for checks so might
-			 * as well bail here is not an DOMElement.
-			 */
-			return 0;
 		}
 
 		foreach ( $node->attributes as $attr_name => $attr_node ) {
@@ -1070,20 +922,11 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Remove attributes from $node that are not listed in $allowed_attrs.
 	 *
-	 * @param DOMNode $node           Node.
-	 * @param array[] $attr_spec_list Attribute spec list.
+	 * @param DOMElement $node           Node.
+	 * @param array[]    $attr_spec_list Attribute spec list.
 	 * @return DOMAttr[] Attributes to remove.
 	 */
-	private function get_disallowed_attributes_in_node( $node, $attr_spec_list ) {
-
-		if ( ! $node instanceof DOMElement ) {
-			/**
-			 * If $node is only a DOMNode and not a DOMElement we can't
-			 * remove an attribute from it anyway.  So bail out now.
-			 */
-			return [];
-		}
-
+	private function get_disallowed_attributes_in_node( DOMElement $node, array $attr_spec_list ) {
 		/*
 		 * We can't remove attributes inside the 'foreach' loop without
 		 * breaking the iteration. So we keep track of the attributes to
@@ -1104,42 +947,12 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * Allowed values are found $this->globally_allowed_attributes and in parameter $attr_spec_list
 	 *
-	 * @param DOMNode   $node                       Node.
-	 * @param array[][] $attr_spec_list             Attribute spec list.
-	 * @param DOMAttr[] $attributes_pending_removal Attributes pending removal.
-	 * @return DOMAttr[]|false Attributes to remove, or false if the element itself should be removed.
-	 */
-	private function sanitize_disallowed_attribute_values_in_node( $node, $attr_spec_list, $attributes_pending_removal ) {
-
-		if ( ! $node instanceof DOMElement ) {
-			/*
-			 * If $node is only a DOMNode and not a DOMElement we can't
-			 * remove an attribute from it anyway.  So bail out now.
-			 */
-			return $attributes_pending_removal;
-		}
-
-		return $this->delegated_sanitize_disallowed_attribute_values_in_node(
-			$node,
-			array_merge(
-				$this->globally_allowed_attributes,
-				$attr_spec_list
-			),
-			$attributes_pending_removal
-		);
-	}
-
-	/**
-	 * Remove attributes values from $node that have been disallowed by AMP.
-	 *
-	 * @see $this->sanitize_disallowed_attribute_values_in_node() which delegates to this method
-	 *
 	 * @param DOMElement $node                       Node.
 	 * @param array[][]  $attr_spec_list             Attribute spec list.
 	 * @param DOMAttr[]  $attributes_pending_removal Attributes pending removal.
 	 * @return DOMAttr[]|false Attributes to remove, or false if the element itself should be removed.
 	 */
-	private function delegated_sanitize_disallowed_attribute_values_in_node( $node, $attr_spec_list, $attributes_pending_removal ) {
+	private function sanitize_disallowed_attribute_values_in_node( DOMElement $node, array $attr_spec_list, array $attributes_pending_removal ) {
 		$attrs_to_remove = [];
 
 		foreach ( $attr_spec_list as $attr_name => $attr_val ) {
@@ -1158,11 +971,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 			// Check the context to see if we are currently within a template tag.
 			// If this is the case and the attribute value contains a template placeholder, we skip sanitization.
-			if ( false !== $this->context->is( AMP_Context::WITHIN_TEMPLATE_TAG ) ) {
-				$state = $this->context->get_state( AMP_Context::WITHIN_TEMPLATE_TAG );
-				if ( ! empty( $state['pattern'] ) && preg_match( $state['pattern'], $attr_node->nodeValue ) ) {
-					continue;
-				}
+			if ( ! empty( $this->open_elements['template'] ) && preg_match( '/^.*{{.*}}/', $attr_node->nodeValue ) ) {
+				continue;
 			}
 
 			$should_remove_node = false;
@@ -1245,7 +1055,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *      - AMP_Rule_Spec::FAIL - $attr_name is mandatory, but doesn't exist
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name is not mandatory
 	 */
-	private function check_attr_spec_rule_mandatory( $node, $attr_name, $attr_spec_rule ) {
+	private function check_attr_spec_rule_mandatory( DOMElement $node, $attr_name, array $attr_spec_rule ) {
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::MANDATORY ] ) && $attr_spec_rule[ AMP_Rule_Spec::MANDATORY ] ) {
 			if ( $node->hasAttribute( $attr_name ) ) {
 				return AMP_Rule_Spec::PASS;
@@ -1279,7 +1089,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
 	 *                                        is no rule for this attribute.
 	 */
-	private function check_attr_spec_rule_value( $node, $attr_name, $attr_spec_rule ) {
+	private function check_attr_spec_rule_value( DOMElement $node, $attr_name, array $attr_spec_rule ) {
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE ] ) ) {
 			if ( $node->hasAttribute( $attr_name ) ) {
 				if ( $this->check_matching_attribute_value( $attr_name, $node->getAttribute( $attr_name ), $attr_spec_rule[ AMP_Rule_Spec::VALUE ] ) ) {
@@ -1354,7 +1164,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
 	 *                                        is no rule for this attribute.
 	 */
-	private function check_attr_spec_rule_value_casei( $node, $attr_name, $attr_spec_rule ) {
+	private function check_attr_spec_rule_value_casei( DOMElement $node, $attr_name, $attr_spec_rule ) {
 		if ( ! isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_CASEI ] ) ) {
 			return AMP_Rule_Spec::NOT_APPLICABLE;
 		}
@@ -1399,7 +1209,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
 	 *                                        is no rule for this attribute.
 	 */
-	private function check_attr_spec_rule_value_regex( $node, $attr_name, $attr_spec_rule ) {
+	private function check_attr_spec_rule_value_regex( DOMElement $node, $attr_name, $attr_spec_rule ) {
 		// Check 'value_regex' - case sensitive regex match.
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_REGEX ] ) && $node->hasAttribute( $attr_name ) ) {
 			$rule_value = $attr_spec_rule[ AMP_Rule_Spec::VALUE_REGEX ];
@@ -1433,10 +1243,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
 	 *                                        is no rule for this attribute.
 	 */
-	private function check_attr_spec_rule_value_regex_casei( $node, $attr_name, $attr_spec_rule ) {
-		/**
-		 * Check 'value_regex_casei' - case insensitive regex match
-		 */
+	private function check_attr_spec_rule_value_regex_casei( DOMElement $node, $attr_name, array $attr_spec_rule ) {
+		// Check 'value_regex_casei' - case insensitive regex match
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_REGEX_CASEI ] ) && $node->hasAttribute( $attr_name ) ) {
 			$rule_value = $attr_spec_rule[ AMP_Rule_Spec::VALUE_REGEX_CASEI ];
 			$rule_value = str_replace( '/', '\\/', $rule_value );
@@ -1466,7 +1274,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
 	 *                                        is no rule for this attribute.
 	 */
-	private function check_attr_spec_rule_valid_url( $node, $attr_name, $attr_spec_rule ) {
+	private function check_attr_spec_rule_valid_url( DOMElement $node, $attr_name, array $attr_spec_rule ) {
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ] ) && $node->hasAttribute( $attr_name ) ) {
 			foreach ( $this->extract_attribute_urls( $node->getAttributeNode( $attr_name ) ) as $url ) {
 				$url = urldecode( $url );
@@ -1528,7 +1336,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
 	 *                                        is no rule for this attribute.
 	 */
-	private function check_attr_spec_rule_allowed_protocol( $node, $attr_name, $attr_spec_rule ) {
+	private function check_attr_spec_rule_allowed_protocol( DOMElement $node, $attr_name, array $attr_spec_rule ) {
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOWED_PROTOCOL ] ) ) {
 			if ( $node->hasAttribute( $attr_name ) ) {
 				foreach ( $this->extract_attribute_urls( $node->getAttributeNode( $attr_name ) ) as $url ) {
@@ -1564,7 +1372,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string|null $spec_attr_name Non-alternative attribute name for the spec.
 	 * @return string[] List of URLs.
 	 */
-	private function extract_attribute_urls( $attribute_node, $spec_attr_name = null ) {
+	private function extract_attribute_urls( DOMAttr $attribute_node, $spec_attr_name = null ) {
 		/*
 		 * Handle the srcset special case where the attribute value can contain multiple parts, each in the format `URL [WIDTH] [PIXEL_DENSITY]`.
 		 * So we split the srcset attribute value by commas and then return the first token of each item, omitting width descriptor and pixel density descriptor.
@@ -1599,7 +1407,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
 	 *                                        is no rule for this attribute.
 	 */
-	private function check_attr_spec_rule_disallowed_relative( $node, $attr_name, $attr_spec_rule ) {
+	private function check_attr_spec_rule_disallowed_relative( DOMElement $node, $attr_name, array $attr_spec_rule ) {
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_RELATIVE ] ) && ! $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_RELATIVE ] ) {
 			if ( $node->hasAttribute( $attr_name ) ) {
 				foreach ( $this->extract_attribute_urls( $node->getAttributeNode( $attr_name ) ) as $url ) {
@@ -1649,7 +1457,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
 	 *                                        is no rule for this attribute.
 	 */
-	private function check_attr_spec_rule_disallowed_empty( $node, $attr_name, $attr_spec_rule ) {
+	private function check_attr_spec_rule_disallowed_empty( DOMElement $node, $attr_name, array $attr_spec_rule ) {
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] ) && ! $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] && $node->hasAttribute( $attr_name ) ) {
 			$attr_value = $node->getAttribute( $attr_name );
 			if ( empty( $attr_value ) ) {
@@ -1673,7 +1481,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
 	 *                                        is no rule for this attribute.
 	 */
-	private function check_attr_spec_rule_disallowed_domain( $node, $attr_name, $attr_spec_rule ) {
+	private function check_attr_spec_rule_disallowed_domain( DOMElement $node, $attr_name, array $attr_spec_rule ) {
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::DISALLOWED_DOMAIN ] ) && $node->hasAttribute( $attr_name ) ) {
 			$attr_value = $node->getAttribute( $attr_name );
 			$url_domain = wp_parse_url( $attr_value, PHP_URL_HOST );
@@ -1706,7 +1514,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
 	 *                                        is no rule for this attribute.
 	 */
-	private function check_attr_spec_rule_blacklisted_value_regex( $node, $attr_name, $attr_spec_rule ) {
+	private function check_attr_spec_rule_blacklisted_value_regex( DOMElement $node, $attr_name, array $attr_spec_rule ) {
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::BLACKLISTED_VALUE_REGEX ] ) ) {
 			$pattern = '/' . $attr_spec_rule[ AMP_Rule_Spec::BLACKLISTED_VALUE_REGEX ] . '/u';
 			if ( $node->hasAttribute( $attr_name ) ) {
@@ -1748,7 +1556,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
 	 *                                        is no rule for this attribute.
 	 */
-	private function check_attr_spec_rule_value_properties( $node, $attr_name, $attr_spec_rule ) {
+	private function check_attr_spec_rule_value_properties( DOMElement $node, $attr_name, array $attr_spec_rule ) {
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_PROPERTIES ] ) && $node->hasAttribute( $attr_name ) ) {
 			$properties = [];
 			foreach ( explode( ',', $node->getAttribute( $attr_name ) ) as $pair ) {
@@ -1803,7 +1611,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param array[]|string[] $attr_spec_list Attribute spec list.
 	 * @return bool Return true if attribute name is valid for this attr_spec_list, false otherwise.
 	 */
-	private function is_amp_allowed_attribute( $attr_node, $attr_spec_list ) {
+	private function is_amp_allowed_attribute( DOMAttr $attr_node, array $attr_spec_list ) {
 		$attr_name = $attr_node->nodeName;
 		if (
 			isset( $attr_spec_list[ $attr_name ] )
@@ -1853,22 +1661,11 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 0.5
 	 *
-	 * @param DOMNode $node Node.
+	 * @param DOMElement $node Node.
 	 * @return bool Return true if the specified node's name is an AMP allowed tag, false otherwise.
 	 */
-	private function is_amp_allowed_tag( $node ) {
-		if ( ! $node instanceof DOMElement ) {
-			return false;
-		}
-		/**
-		 * Return true if node is an allowed tags or is a text or comment node.
-		 */
-		return (
-			( XML_TEXT_NODE === $node->nodeType ) ||
-			isset( $this->allowed_tags[ $node->nodeName ] ) ||
-			( XML_COMMENT_NODE === $node->nodeType ) ||
-			( XML_CDATA_SECTION_NODE === $node->nodeType )
-		);
+	private function is_amp_allowed_tag( DOMElement $node ) {
+		return isset( $this->allowed_tags[ $node->nodeName ] );
 	}
 
 	/**
@@ -1878,14 +1675,11 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @todo It would be more robust if the the actual tag spec were looked up and then matched against the parent, but this is currently overkill.
 	 *
-	 * @param DOMNode $node             Node.
-	 * @param string  $parent_spec_name Parent spec name, for example 'body' or 'form [method=post]'.
+	 * @param DOMElement $node             Node.
+	 * @param string     $parent_spec_name Parent spec name, for example 'body' or 'form [method=post]'.
 	 * @return bool Return true if given node has direct parent with the given name, false otherwise.
 	 */
-	private function has_parent( $node, $parent_spec_name ) {
-		if ( ! $node ) {
-			return false;
-		}
+	private function has_parent( DOMElement $node, $parent_spec_name ) {
 		$parsed_spec_name = $this->parse_tag_and_attributes_from_spec_name( $parent_spec_name );
 
 		if ( ! $node->parentNode || $node->parentNode->nodeName !== $parsed_spec_name['tag_name'] ) {
@@ -1907,12 +1701,12 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 0.5
 	 *
-	 * @param DOMNode $node              Node.
-	 * @param string  $ancestor_tag_name Ancestor tag name.
+	 * @param DOMElement $node              Node.
+	 * @param string     $ancestor_tag_spec_name Ancestor tag spec name. This looks somewhat like a CSS selector, e.g. 'form div [submitting][template]'.
 	 * @return bool Return true if given node has any ancestor with the give name, false otherwise.
 	 */
-	private function has_ancestor( $node, $ancestor_tag_name ) {
-		if ( $this->get_ancestor_with_matching_spec_name( $node, $ancestor_tag_name ) ) {
+	private function has_ancestor( DOMElement $node, $ancestor_tag_spec_name ) {
+		if ( $this->get_ancestor_with_matching_spec_name( $node, $ancestor_tag_spec_name ) ) {
 			return true;
 		}
 		return false;
@@ -1967,10 +1761,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Loop through node's descendants and remove the ones that are not whitelisted.
 	 *
-	 * @param DOMNode $node Node.
-	 * @param array   $allowed_descendants List of allowed descendant tags.
+	 * @param DOMElement $node                Node.
+	 * @param array      $allowed_descendants List of allowed descendant tags.
 	 */
-	private function remove_disallowed_descendants( $node, $allowed_descendants ) {
+	private function remove_disallowed_descendants( DOMElement $node, $allowed_descendants ) {
 		if ( ! $node->hasChildNodes() ) {
 			return;
 		}
@@ -1995,9 +1789,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Check whether the node validates the constraints for children.
 	 *
-	 * @param DOMNode $node Node.
-	 * @param array   $child_tags {
-	 *     List of allowed child tags.
+	 * @param DOMElement $node Node.
+	 * @param array      $child_tags {
+	 *     List of allowed child tag.
 	 *
 	 *     @type array $first_child_tag_name_oneof   List of tag names that are allowed as the first element child.
 	 *     @type array $child_tag_name_oneof         List of tag names that are allowed as children.
@@ -2006,7 +1800,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * }
 	 * @return bool Whether the element satisfies the requirements, or else it should be removed.
 	 */
-	private function check_valid_children( $node, $child_tags ) {
+	private function check_valid_children( DOMElement $node, array $child_tags ) {
 		$child_elements = [];
 		for ( $i = 0; $i < $node->childNodes->length; $i++ ) {
 			$child = $node->childNodes->item( $i );
@@ -2048,12 +1842,18 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.5
 	 * @todo It would be more robust if the the actual tag spec were looked up and then matched for each ancestor, but this is currently overkill.
 	 *
-	 * @param DOMNode $node               Node.
-	 * @param string  $ancestor_spec_name Ancestor spec name, e.g. 'body' or 'form [method=post]'.
+	 * @param DOMElement $node               Node.
+	 * @param string     $ancestor_spec_name Ancestor spec name, e.g. 'body' or 'form [method=post]'.
 	 * @return DOMNode|null Returns an ancestor node for the name specified, or null if not found.
 	 */
-	private function get_ancestor_with_matching_spec_name( $node, $ancestor_spec_name ) {
+	private function get_ancestor_with_matching_spec_name( DOMElement $node, $ancestor_spec_name ) {
 		$parsed_spec_name = $this->parse_tag_and_attributes_from_spec_name( $ancestor_spec_name );
+
+		// Do quick check to see if the the ancestor element is even open.
+		// Note first isset check is for the sake of \AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test::test_get_ancestor_with_matching_spec_name().
+		if ( isset( $this->open_element['html'] ) && empty( $this->open_elements[ $parsed_spec_name['tag_name'] ] ) ) {
+			return null;
+		}
 
 		while ( $node && $node->parentNode ) {
 			$node = $node->parentNode;
@@ -2086,9 +1886,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 1.0 Fix silently removing unrecognized elements.
 	 * @see https://github.com/ampproject/amp-wp/issues/1100
 	 *
-	 * @param DOMNode $node Node.
+	 * @param DOMElement $node Node.
 	 */
-	private function replace_node_with_children( $node ) {
+	private function replace_node_with_children( DOMElement $node ) {
 
 		// If node has no children or no parent, just remove the node.
 		if ( ! $node->hasChildNodes() || ! $node->parentNode ) {
@@ -2108,8 +1908,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		$child = $node->firstChild;
 		while ( $child ) {
 			$fragment->appendChild( $child );
-			$this->stack[] = $child;
-			$child         = $node->firstChild;
+			$child = $node->firstChild;
 		}
 
 		// Prevent double-reporting nodes that are rejected for sanitization.
@@ -2134,9 +1933,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 0.5
 	 *
-	 * @param DOMNode $node Node.
+	 * @param DOMElement $node Node.
 	 */
-	private function remove_node( $node ) {
+	private function remove_node( DOMElement $node ) {
 		/**
 		 * Parent.
 		 *
