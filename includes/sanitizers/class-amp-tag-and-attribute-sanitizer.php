@@ -255,37 +255,63 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.5
 	 */
 	public function sanitize() {
-		$this->sanitize_element( $this->root_element );
+		$result = $this->sanitize_element( $this->root_element );
+		if ( is_array( $result ) ) {
+			$this->script_components = $result;
+		}
 	}
 
 	/**
 	 * Sanitize element.
 	 *
+	 * Walk the DOM tree with depth first search (DFS) with post order traversal (LRN).
+	 *
 	 * @param DOMElement $element Element.
+	 * @return string[]|null Required component scripts from sanitizing an element tree, or null if the element was removed.
 	 */
 	private function sanitize_element( DOMElement $element ) {
 		if ( ! isset( $this->open_elements[ $element->nodeName ] ) ) {
 			$this->open_elements[ $element->nodeName ] = 0;
 		}
-
 		$this->open_elements[ $element->nodeName ]++;
 
-		// First the element.
-		$this->process_node( $element );
+		$script_components = [];
 
-		// Then if the element was not removed, proceed with sanitizing its children.
-		if ( $element->parentNode ) {
-			$this_child = $element->firstChild;
-			while ( $this_child ) {
-				$next_child = $this_child->nextSibling;
-				if ( $this_child instanceof DOMElement ) {
-					$this->sanitize_element( $this_child );
+		// First recurse into children to sanitize descendants.
+		$this_child = $element->firstChild;
+		while ( $this_child && $element->parentNode ) {
+			$next_child = $this_child->nextSibling;
+			if ( $this_child instanceof DOMElement ) {
+				$result = $this->sanitize_element( $this_child );
+				if ( is_array( $result ) ) {
+					$script_components = array_merge(
+						$script_components,
+						$result
+					);
 				}
-				$this_child = $next_child;
+			}
+			$this_child = $next_child;
+		}
+
+		// If the element is still in the tree, process it.
+		// The element can currently be removed from the tree when processing children via AMP_Tag_And_Attribute_Sanitizer::remove_node().
+		$was_removed = false;
+		if ( $element->parentNode ) {
+			$result = $this->process_node( $element );
+			if ( is_array( $result ) ) {
+				$script_components = array_merge( $script_components, $result );
+			} else {
+				$was_removed = true;
 			}
 		}
 
 		$this->open_elements[ $element->nodeName ]--;
+
+		if ( $was_removed ) {
+			return null;
+		}
+
+		return $script_components;
 	}
 
 	/**
@@ -373,6 +399,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * including elements which miss mandatory attributes.
 	 *
 	 * @param DOMElement $node Node.
+	 * @return string[]|null Required scripts, or null if the element was removed.
 	 */
 	private function process_node( DOMElement $node ) {
 
@@ -383,7 +410,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			$this->replace_node_with_children( $node );
 
 			// Return early since this node no longer exists.
-			return;
+			return null;
 		}
 
 		/*
@@ -404,7 +431,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		// If no valid rule_specs exist, then remove this node and return.
 		if ( empty( $rule_spec_list_to_validate ) ) {
 			$this->remove_node( $node );
-			return;
+			return null;
 		}
 
 		// The remaining validations all have to do with attributes.
@@ -445,7 +472,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			// If no attribute spec lists match, then the element must be removed.
 			if ( empty( $attr_spec_scores ) ) {
 				$this->remove_node( $node );
-				return;
+				return null;
 			}
 
 			// Get the key(s) to the highest score(s).
@@ -484,7 +511,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		if ( ! empty( $attr_spec_list ) && $this->is_missing_mandatory_attribute( $attr_spec_list, $node ) ) {
 			$this->remove_node( $node );
-			return;
+			return null;
 		}
 
 		// Remove element if it has illegal CDATA.
@@ -492,7 +519,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			$validity = $this->validate_cdata_for_node( $node, $cdata );
 			if ( is_wp_error( $validity ) ) {
 				$this->remove_node( $node );
-				return;
+				return null;
 			}
 		}
 
@@ -524,7 +551,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			}
 			$this->visited_unique_tag_specs[ $node->nodeName ][ $tag_spec_key ] = true;
 			if ( $removed ) {
-				return;
+				return null;
 			}
 		}
 
@@ -537,7 +564,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		// If $disallowed_attributes is false then the entire element should be removed.
 		if ( false === $disallowed_attributes ) {
 			$this->remove_node( $node );
-			return;
+			return null;
 		}
 
 		// Remove all invalid attributes.
@@ -557,37 +584,41 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		// Add required AMP component scripts if the element is still in the document.
-		if ( $node->parentNode ) {
-			if ( ! empty( $tag_spec['also_requires_tag_warning'] ) ) {
-				$this->script_components[] = strtok( $tag_spec['also_requires_tag_warning'][0], ' ' );
-			}
-			if ( ! empty( $tag_spec['requires_extension'] ) ) {
-				$this->script_components = array_merge( $this->script_components, $tag_spec['requires_extension'] );
-			}
+		// Add required AMP component scripts.
+		$script_components = [];
+		if ( ! empty( $tag_spec['also_requires_tag_warning'] ) ) {
+			$script_components[] = strtok( $tag_spec['also_requires_tag_warning'][0], ' ' );
+		}
+		if ( ! empty( $tag_spec['requires_extension'] ) ) {
+			$script_components = array_merge( $script_components, $tag_spec['requires_extension'] );
+		}
 
-			// Add required AMP components for attributes.
-			foreach ( $node->attributes as $attribute ) {
-				if ( isset( $merged_attr_spec_list[ $attribute->nodeName ]['requires_extension'] ) ) {
-					$this->script_components = array_merge( $this->script_components, $merged_attr_spec_list[ $attribute->nodeName ]['requires_extension'] );
-				}
+		// Add required AMP components for attributes.
+		foreach ( $node->attributes as $attribute ) {
+			if ( isset( $merged_attr_spec_list[ $attribute->nodeName ]['requires_extension'] ) ) {
+				$script_components = array_merge(
+					$script_components,
+					$merged_attr_spec_list[ $attribute->nodeName ]['requires_extension']
+				);
 			}
+		}
 
-			// Manually add components for attributes; this is hard-coded because attributes do not have requires_extension like tags do. See <https://github.com/ampproject/amp-wp/issues/1808>.
-			if ( $node->hasAttribute( 'lightbox' ) ) {
-				$this->script_components[] = 'amp-lightbox-gallery';
-			}
+		// Manually add components for attributes; this is hard-coded because attributes do not have requires_extension like tags do. See <https://github.com/ampproject/amp-wp/issues/1808>.
+		if ( $node->hasAttribute( 'lightbox' ) ) {
+			$script_components[] = 'amp-lightbox-gallery';
+		}
 
-			// Check if element needs amp-bind component.
-			if ( $node instanceof DOMElement && ! in_array( 'amp-bind', $this->script_components, true ) ) {
-				foreach ( $node->attributes as $name => $value ) {
-					if ( AMP_DOM_Utils::AMP_BIND_DATA_ATTR_PREFIX === substr( $name, 0, 14 ) ) {
-						$this->script_components[] = 'amp-bind';
-						break;
-					}
+		// Check if element needs amp-bind component.
+		if ( $node instanceof DOMElement && ! in_array( 'amp-bind', $this->script_components, true ) ) {
+			foreach ( $node->attributes as $name => $value ) {
+				if ( AMP_DOM_Utils::AMP_BIND_DATA_ATTR_PREFIX === substr( $name, 0, 14 ) ) {
+					$script_components[] = 'amp-bind';
+					break;
 				}
 			}
 		}
+
+		return $script_components;
 	}
 
 	/**
@@ -1244,7 +1275,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *                                        is no rule for this attribute.
 	 */
 	private function check_attr_spec_rule_value_regex_casei( DOMElement $node, $attr_name, array $attr_spec_rule ) {
-		// Check 'value_regex_casei' - case insensitive regex match
+		// Check 'value_regex_casei' - case insensitive regex match.
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_REGEX_CASEI ] ) && $node->hasAttribute( $attr_name ) ) {
 			$rule_value = $attr_spec_rule[ AMP_Rule_Spec::VALUE_REGEX_CASEI ];
 			$rule_value = str_replace( '/', '\\/', $rule_value );

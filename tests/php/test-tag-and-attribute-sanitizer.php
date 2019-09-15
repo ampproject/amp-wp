@@ -2019,14 +2019,14 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<divs><foo>Invalid <span>nested elements</span></foo></divs>',
 				[
 					[
-						'node_name'       => 'divs',
-						'parent_name'     => 'body',
+						'node_name'       => 'foo',
+						'parent_name'     => 'divs',
 						'code'            => 'invalid_element',
 						'node_attributes' => [],
 						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
 					],
 					[
-						'node_name'       => 'foo',
+						'node_name'       => 'divs',
 						'parent_name'     => 'body',
 						'code'            => 'invalid_element',
 						'node_attributes' => [],
@@ -2058,12 +2058,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 					$this->assertInstanceOf( 'DOMElement', $context['node'] );
 					$this->assertEquals( $tag, $context['node']->tagName );
 					$this->assertEquals( $tag, $context['node']->nodeName );
-
 					return true;
 				},
 			]
 		);
 		$sanitizer->sanitize();
+
+		$this->assertEmpty( $expected_errors, 'There should be no expected validation errors remaining.' );
 	}
 
 	/**
