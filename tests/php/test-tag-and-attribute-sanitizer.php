@@ -589,6 +589,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-mustache', 'amp-timeago' ],
 			],
 
+			'attribute_requirements_overriden_by_placeholders_within_template_newlines' => [
+				"<template type=\"amp-mustache\"><amp-timeago datetime=\"first-line\n{{iso}}\"></amp-timeago></template>",
+				null,
+				[ 'amp-mustache', 'amp-timeago' ],
+			],
+
 			'attribute_requirements_not_overriden_by_placeholders_outside_of_template' => [
 				'<amp-timeago datetime="{{iso}}"></amp-timeago>',
 				'',
