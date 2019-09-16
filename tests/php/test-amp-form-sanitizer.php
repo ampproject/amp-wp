@@ -32,7 +32,6 @@ class AMP_Form_Sanitizer_Test extends WP_UnitTestCase {
 		parent::tearDown();
 	}
 
-
 	/**
 	 * Data strings for testing converter.
 	 *

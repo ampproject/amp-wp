@@ -278,6 +278,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		$script_components = [];
 
 		// First recurse into children to sanitize descendants.
+		// The check for $element->parentNode at each iteration is to make sure an invalid child didn't bubble up removal
+		// ancestor nodes in AMP_Tag_And_Attribute_Sanitizer::remove_node().
 		$this_child = $element->firstChild;
 		while ( $this_child && $element->parentNode ) {
 			$next_child = $this_child->nextSibling;
