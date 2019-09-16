@@ -12,6 +12,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { Component } from '@wordpress/element';
+import { withSafeTimeout, compose } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -356,4 +357,9 @@ Draggable.propTypes = {
 	parentBlockOffsetLeft: PropTypes.number.isRequired,
 };
 
-export default withSnapTargets( Draggable );
+const enhance = compose(
+	withSnapTargets,
+	withSafeTimeout,
+);
+
+export default enhance( Draggable );
