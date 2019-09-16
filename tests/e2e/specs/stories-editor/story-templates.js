@@ -65,7 +65,6 @@ describe( 'Story Templates', () => {
 	describe( 'Stories experience disabled', () => {
 		it( 'should hide story templates from the reusable blocks management screen', async () => {
 			await visitAdminPage( 'edit.php', 'post_type=wp_block' );
-			await page.waitForSelector( '.no-items' );
 			await expect( page ).toMatchElement( '.no-items' );
 		} );
 
@@ -120,7 +119,6 @@ describe( 'Story Templates', () => {
 
 		it( 'should hide story templates from the reusable blocks management screen', async () => {
 			await visitAdminPage( 'edit.php', 'post_type=wp_block' );
-			await page.waitForSelector( '.no-items' );
 			await expect( page ).toMatchElement( '.no-items' );
 		} );
 
