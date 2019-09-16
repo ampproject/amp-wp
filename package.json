@@ -106,7 +106,7 @@
     "terser-webpack-plugin": "2.0.1",
     "travis-size-report": "1.1.0",
     "uuid": "3.3.3",
-    "webpack": "4.39.3",
+    "webpack": "4.40.2",
     "webpack-cli": "3.3.8",
     "webpackbar": "4.0.0"
   },
