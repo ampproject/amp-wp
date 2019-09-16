@@ -2536,6 +2536,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$excluded_size          = 0;
 			$excluded_original_size = 0;
 			$included_sources       = [];
+			$excluded_sources       = [];
 			foreach ( $this->pending_stylesheets as $j => $pending_stylesheet ) {
 				if ( 'custom' !== $pending_stylesheet['group'] || ! ( $pending_stylesheet['node'] instanceof DOMElement ) || ! empty( $pending_stylesheet['duplicate'] ) ) {
 					continue;

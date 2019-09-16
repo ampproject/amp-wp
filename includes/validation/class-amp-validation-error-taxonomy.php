@@ -690,7 +690,6 @@ class AMP_Validation_Error_Taxonomy {
 			}
 
 			if ( ! empty( $validation_error['sources'] ) ) {
-				$hook = null;
 				foreach ( $validation_error['sources'] as $source ) {
 					if ( isset( $source['hook'] ) ) {
 						$invalid_sources['hook'] = $source['hook'];

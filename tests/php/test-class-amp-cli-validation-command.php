@@ -342,11 +342,15 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 		$second_author     = $users[1];
 		$second_author_url = get_author_posts_url( $second_author->ID, $second_author->user_nicename );
 
+		$actual_urls = $this->call_private_method( $this->validation, 'get_author_page_urls', [ 0, 1 ] );
+
 		// Passing 0 as the offset argument should get the first author.
-		$this->assertEquals( [ $first_author_url ], $actual_urls = $this->call_private_method( $this->validation, 'get_author_page_urls', [ 0, 1 ] ) );
+		$this->assertEquals( [ $first_author_url ], $actual_urls );
+
+		$actual_urls = $this->call_private_method( $this->validation, 'get_author_page_urls', [ 1, 1 ] );
 
 		// Passing 1 as the offset argument should get the second author.
-		$this->assertEquals( [ $second_author_url ], $actual_urls = $this->call_private_method( $this->validation, 'get_author_page_urls', [ 1, 1 ] ) );
+		$this->assertEquals( [ $second_author_url ], $actual_urls );
 
 		// If $include_conditionals is set and does not have is_author, this should not return a URL.
 		$this->validation->include_conditionals = [ 'is_category' ];
