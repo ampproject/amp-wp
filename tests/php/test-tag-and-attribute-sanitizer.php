@@ -1660,6 +1660,14 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-user-location' ],
 			],
 
+			'deeply_nested_elements_250'                   => [
+				// If a DOM tree is too deep, libxml itself will issue an error: Excessive depth in document: 256 use XML_PARSE_HUGE option.
+				// So this tests just up before that limit to also ensure that the recursive \AMP_Tag_And_Attribute_Sanitizer::sanitize_element()
+				// method does not cause a different error at the PHP level when a recursion call stack reaches that same level.
+				str_repeat( '<div>', 250 ) . 'hello world!' . str_repeat( '</div>', 250 ),
+				null,
+				[],
+			],
 		];
 	}
 
