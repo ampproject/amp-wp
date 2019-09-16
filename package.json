@@ -53,7 +53,7 @@
     "@wordpress/html-entities": "2.5.0",
     "@wordpress/i18n": "3.6.0",
     "@wordpress/keycodes": "2.6.0",
-    "@wordpress/plugins": "2.6.0",
+    "@wordpress/plugins": "2.7.0",
     "@wordpress/postcss-themes": "2.2.0",
     "@wordpress/rich-text": "3.6.0",
     "@wordpress/scripts": "4.1.0",
