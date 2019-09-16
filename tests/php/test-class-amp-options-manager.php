@@ -123,6 +123,10 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				'version'                  => AMP__VERSION,
 				'story_templates_version'  => false,
 				'story_export_base_url'    => '',
+				'story_settings'           => [
+					'auto_advance_after'          => '',
+					'auto_advance_after_duration' => 0,
+				],
 			],
 			AMP_Options_Manager::get_options()
 		);

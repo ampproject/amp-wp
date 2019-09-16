@@ -46,6 +46,10 @@ class AMP_Options_Manager {
 		'version'                  => AMP__VERSION,
 		'story_templates_version'  => false,
 		'story_export_base_url'    => '',
+		'story_settings'           => [
+			'auto_advance_after'          => '',
+			'auto_advance_after_duration' => 0,
+		],
 	];
 
 	/**
@@ -340,6 +344,15 @@ class AMP_Options_Manager {
 
 		// Handle the base URL for exported stories.
 		$options['story_export_base_url'] = isset( $new_options['story_export_base_url'] ) ? esc_url_raw( $new_options['story_export_base_url'], [ 'https' ] ) : '';
+
+		// AMP stories settings definitions.
+		$definitions = AMP_Story_Post_Type::get_stories_settings_definitions();
+
+		// Handle the AMP stories settings sanitization.
+		foreach ( $definitions as $option_name => $definition ) {
+			$value = $new_options[ AMP_Story_Post_Type::STORY_SETTINGS_OPTION ][ $option_name ];
+			$options[ AMP_Story_Post_Type::STORY_SETTINGS_OPTION ][ $option_name ] = call_user_func( $definition['meta_args']['sanitize_callback'], $value );
+		}
 
 		return $options;
 	}

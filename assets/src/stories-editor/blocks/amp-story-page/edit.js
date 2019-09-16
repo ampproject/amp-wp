@@ -25,6 +25,7 @@ import {
 	getCallToActionBlock,
 	getPageAttachmentBlock,
 	getUniqueId,
+	metaToAttributeNames,
 } from '../../helpers';
 
 import CopyPasteHandler from './copy-paste-handler';
@@ -51,6 +52,14 @@ class PageEdit extends Component {
 
 		if ( ! props.attributes.anchor ) {
 			this.props.setAttributes( { anchor: getUniqueId() } );
+		}
+
+		if ( props.storySettingsAttributes ) {
+			Object.entries( props.storySettingsAttributes ).forEach( ( [ key, value ] ) => {
+				if ( ! props.attributes.hasOwnProperty( key ) ) {
+					this.props.setAttributes( { [ key ]: value } );
+				}
+			} );
 		}
 
 		this.state = {
@@ -105,6 +114,7 @@ class PageEdit extends Component {
 	render() {
 		const {
 			attributes,
+			autoAdvanceAfterOptions,
 			clientId,
 			isSelected,
 			media,
@@ -171,6 +181,7 @@ class PageEdit extends Component {
 					<PageSettings
 						autoAdvanceAfter={ autoAdvanceAfter }
 						autoAdvanceAfterDuration={ autoAdvanceAfterDuration }
+						autoAdvanceAfterOptions={ autoAdvanceAfterOptions }
 						clientId={ clientId }
 						setAttributes={ setAttributes }
 					/>
@@ -225,6 +236,11 @@ PageEdit.propTypes = {
 	videoFeaturedImage: PropTypes.shape( {
 		source_url: PropTypes.string,
 	} ),
+	storySettingsAttributes: PropTypes.shape( {
+		autoAdvanceAfter: PropTypes.string,
+		autoAdvanceAfterDuration: PropTypes.number,
+	} ),
+	autoAdvanceAfterOptions: PropTypes.array,
 	allowedBackgroundMediaTypes: PropTypes.arrayOf( PropTypes.string ).isRequired,
 };
 
@@ -269,13 +285,19 @@ export default compose(
 			];
 		}
 
-		const { allowedVideoMimeTypes } = getSettings();
+		const { getEditedPostAttribute } = select( 'core/editor' );
+		const postMeta = getEditedPostAttribute( 'meta' ) || {};
+		const storySettingsAttributes = metaToAttributeNames( postMeta );
+		const { allowedVideoMimeTypes, storySettings } = getSettings();
+		const { autoAdvanceAfterOptions } = storySettings || {};
 
 		return {
 			media,
 			videoFeaturedImage,
 			allowedBlocks,
 			getBlockOrder,
+			storySettingsAttributes,
+			autoAdvanceAfterOptions,
 			allowedBackgroundMediaTypes: [ IMAGE_BACKGROUND_TYPE, ...allowedVideoMimeTypes ],
 		};
 	} ),
