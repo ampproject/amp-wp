@@ -51,14 +51,18 @@ async function addReusableBlock() {
 async function removeAllReusableBlocks() {
 	await visitAdminPage( 'edit.php', 'post_type=wp_block' );
 
-	// Delete all reusable blocks to restore clean state.
-	const selector = '#cb-select-all-1';
-	const actionsSelector = '#bulk-action-selector-top';
+	const hasReusableBlocks = ( await page.$x( '//*[@id="doaction"]' ) ).length > 0;
 
-	await page.click( selector );
-	await page.select( actionsSelector, 'trash' );
-	await page.click( '#doaction' );
-	await page.waitForNavigation();
+	if ( ! hasReusableBlocks ) {
+		return;
+	}
+
+	await page.click( '#cb-select-all-1' );
+	await page.select( '#bulk-action-selector-top', 'trash' );
+	await Promise.all( [
+		page.click( '#doaction' ),
+		page.waitForNavigation(),
+	] );
 }
 
 describe( 'Story Templates', () => {
