@@ -173,40 +173,4 @@ describe( 'reducers', () => {
 			} );
 		} );
 	} );
-
-	describe( 'snap()', () => {
-		it( 'should show snap lines', () => {
-			const state = snap( undefined, {
-				type: 'SHOW_SNAP_LINES',
-			} );
-
-			expect( state.showSnapLines ).toBe( true );
-		} );
-
-		it( 'should hide snap lines', () => {
-			const state = snap( undefined, {
-				type: 'HIDE_SNAP_LINES',
-			} );
-
-			expect( state.showSnapLines ).toBe( false );
-		} );
-
-		it( 'should add snap lines', () => {
-			const state = snap( undefined, {
-				type: 'SET_SNAP_LINES',
-				snapLines: [ [ [ 0, 0 ], [ 100, 100 ] ] ],
-			} );
-
-			expect( state.snapLines ).toHaveLength( 1 );
-		} );
-
-		it( 'should clear snap lines', () => {
-			const original = { snapLines: [ 1, 2, 3 ] };
-			const state = snap( original, {
-				type: 'CLEAR_SNAP_LINES',
-			} );
-
-			expect( state.snapLines ).toHaveLength( 0 );
-		} );
-	} );
 } );

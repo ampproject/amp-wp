@@ -11,10 +11,6 @@ import {
 	movePageToPosition,
 	saveOrder,
 	resetOrder,
-	showSnapLines,
-	hideSnapLines,
-	setSnapLines,
-	clearSnapLines,
 } from '../actions';
 
 describe( 'actions', () => {
@@ -133,47 +129,6 @@ describe( 'actions', () => {
 			expect( result ).toStrictEqual( {
 				type: 'RESET_ORDER',
 				order: undefined,
-			} );
-		} );
-	} );
-
-	describe( 'setSnapLines', () => {
-		it( 'should return the SET_SNAP_LINES action', () => {
-			const result = setSnapLines( 1, 2, 3 );
-
-			expect( result ).toStrictEqual( {
-				type: 'SET_SNAP_LINES',
-				snapLines: [ 1, 2, 3 ],
-			} );
-		} );
-	} );
-
-	describe( 'clearSnapLines', () => {
-		it( 'should return the CLEAR_SNAP_LINES action', () => {
-			const result = clearSnapLines();
-
-			expect( result ).toStrictEqual( {
-				type: 'CLEAR_SNAP_LINES',
-			} );
-		} );
-	} );
-
-	describe( 'showSnapLines', () => {
-		it( 'should return the SHOW_SNAP_LINES action', () => {
-			const result = showSnapLines();
-
-			expect( result ).toStrictEqual( {
-				type: 'SHOW_SNAP_LINES',
-			} );
-		} );
-	} );
-
-	describe( 'hideSnapLines', () => {
-		it( 'should return the HIDE_SNAP_LINES action', () => {
-			const result = hideSnapLines();
-
-			expect( result ).toStrictEqual( {
-				type: 'HIDE_SNAP_LINES',
 			} );
 		} );
 	} );

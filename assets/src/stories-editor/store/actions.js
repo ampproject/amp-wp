@@ -140,28 +140,3 @@ export function resetOrder( order ) {
 		order,
 	};
 }
-
-export function setSnapLines( ...snapLines ) {
-	return {
-		type: 'SET_SNAP_LINES',
-		snapLines,
-	};
-}
-
-export function clearSnapLines() {
-	return {
-		type: 'CLEAR_SNAP_LINES',
-	};
-}
-
-export function showSnapLines() {
-	return {
-		type: 'SHOW_SNAP_LINES',
-	};
-}
-
-export function hideSnapLines() {
-	return {
-		type: 'HIDE_SNAP_LINES',
-	};
-}

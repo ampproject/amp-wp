@@ -109,22 +109,3 @@ export function isReordering( state ) {
 export function getSettings( state ) {
 	return state.editorSettings || window.ampStoriesEditorSettings || {};
 }
-
-/**
- * Shared reference to an empty array for cases where it is important to avoid
- * returning a new array reference on every invocation, as in a connected or
- * other pure component which performs `shouldComponentUpdate` check on props.
- * This should be used as a last resort, since the normalized data should be
- * maintained by the reducer result in state.
- *
- * @type {Array}
- */
-const EMPTY_ARRAY = [];
-
-export function snapLinesVisible( state ) {
-	return state.snap.showSnapLines;
-}
-
-export function getSnapLines( state ) {
-	return state.snap.snapLines && state.snap.snapLines.length > 0 ? state.snap.snapLines : EMPTY_ARRAY;
-}

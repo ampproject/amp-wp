@@ -1,24 +1,17 @@
 /**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+
+/**
  * WordPress dependencies
  */
-import { withSelect } from '@wordpress/data';
-import { SVG } from '@wordpress/components';
 import { createHigherOrderComponent } from '@wordpress/compose';
 
 /**
  * Internal dependencies
  */
-import { STORY_PAGE_INNER_HEIGHT, STORY_PAGE_INNER_WIDTH } from '../../constants';
-
-const applyWithSelect = withSelect( ( select, { clientId } ) => {
-	const {	getCurrentPage, snapLinesVisible, getSnapLines } = select( 'amp/story' );
-
-	return {
-		snapLinesVisible: snapLinesVisible(),
-		snapLines: getSnapLines(),
-		isActivePage: getCurrentPage() === clientId,
-	};
-} );
+import Snapping from '../contexts/Snapping';
 
 /**
  * Higher-order component that adds snap lines to page blocks
@@ -27,43 +20,23 @@ const applyWithSelect = withSelect( ( select, { clientId } ) => {
  */
 export default createHigherOrderComponent(
 	( BlockEdit ) => {
-		return applyWithSelect( ( props ) => {
-			const { snapLinesVisible, snapLines, isActivePage } = props;
+		const Inner = ( props ) => {
+			const { name } = props;
 
-			if ( ! isActivePage ) {
-				return <BlockEdit { ...props } />;
-			}
-
-			if ( ! snapLinesVisible || ! snapLines.length ) {
+			if ( name !== 'amp/amp-story-page' ) {
 				return <BlockEdit { ...props } />;
 			}
 
 			return (
-				<>
+				<Snapping>
 					<BlockEdit { ...props } />
-					<SVG
-						viewBox={ `0 0 ${ STORY_PAGE_INNER_WIDTH } ${ STORY_PAGE_INNER_HEIGHT }` }
-						style={ {
-							position: 'absolute',
-							top: 0,
-							pointerEvents: 'none',
-						} }
-					>
-						{ snapLines.map( ( [ start, end ], index ) => (
-							<line
-								key={ index }
-								x1={ start[ 0 ] }
-								y1={ start[ 1 ] }
-								x2={ end[ 0 ] }
-								y2={ end[ 1 ] }
-								stroke="red"
-								pointerEvents="none"
-							/>
-						) ) }
-					</SVG>
-				</>
+				</Snapping>
 			);
-		} );
+		};
+
+		Inner.propTypes = { name: PropTypes.string.isRequired };
+
+		return Inner;
 	},
 	'withSnapLines'
 );

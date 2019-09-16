@@ -2,7 +2,6 @@
  * WordPress dependencies
  */
 import { combineReducers } from '@wordpress/data';
-import isShallowEqual from '@wordpress/is-shallow-equal';
 
 /**
  * Internal dependencies
@@ -160,62 +159,8 @@ export function blocks( state = {}, action ) {
 	}
 }
 
-/**
- * Reducer handling block snapping.
- *
- * @param {Object} state  Current state.
- * @param {Object} action Dispatched action.
- *
- * @return {Object} Updated state.
- */
-export function snap( state = {}, action ) {
-	switch ( action.type ) {
-		case 'SHOW_SNAP_LINES':
-			return {
-				...state,
-				showSnapLines: true,
-			};
-
-		case 'HIDE_SNAP_LINES':
-			return {
-				...state,
-				showSnapLines: false,
-			};
-
-		case 'SET_SNAP_LINES':
-			const { snapLines: existingSnapLines = [] } = state;
-			const { snapLines = [] } = action;
-
-			if ( snapLines.length === existingSnapLines.length ) {
-				const hasSnapLine = ( item ) => existingSnapLines.find( ( snapLine ) => isShallowEqual( item[ 0 ], snapLine[ 0 ] ) && isShallowEqual( item[ 1 ], snapLine[ 1 ] ) );
-				if ( snapLines.every( hasSnapLine ) ) {
-					return state;
-				}
-			}
-
-			return {
-				...state,
-				snapLines: [ ...snapLines ],
-			};
-
-		case 'CLEAR_SNAP_LINES':
-			if ( ! state.snapLines.length ) {
-				return state;
-			}
-
-			return {
-				...state,
-				snapLines: [],
-			};
-
-		default:
-			return state;
-	}
-}
-
 export default combineReducers( {
 	animations,
 	currentPage,
 	blocks,
-	snap,
 } );

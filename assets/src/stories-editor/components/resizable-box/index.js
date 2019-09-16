@@ -339,10 +339,7 @@ class EnhancedResizableBox extends Component {
 					}
 
 					if ( newSnapLines.length ) {
-						const hasSnapLine = ( item ) => snapLines.find( ( snapLine ) => isShallowEqual( item[ 0 ], snapLine[ 0 ] ) && isShallowEqual( item[ 1 ], snapLine[ 1 ] ) );
-						if ( ! newSnapLines.every( hasSnapLine ) ) {
-							setSnapLines( ...newSnapLines );
-						}
+						setSnapLines( newSnapLines );
 					} else if ( snapLines.length ) {
 						clearSnapLines();
 					}

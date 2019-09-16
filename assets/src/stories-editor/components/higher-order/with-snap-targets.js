@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { withDispatch, withSelect } from '@wordpress/data';
+import { withSelect } from '@wordpress/data';
 import { compose, createHigherOrderComponent } from '@wordpress/compose';
 import isShallowEqual from '@wordpress/is-shallow-equal';
 
@@ -10,6 +10,7 @@ import isShallowEqual from '@wordpress/is-shallow-equal';
  */
 import { STORY_PAGE_INNER_HEIGHT, STORY_PAGE_INNER_WIDTH } from '../../constants';
 import { getBlockInnerElement } from '../../helpers';
+import { withSnapContext } from '../contexts/Snapping';
 
 /**
  * Higher-order component that returns snap targets for the current block.
@@ -28,14 +29,13 @@ const applyWithSelect = withSelect( ( select, { clientId } ) => {
 		getBlock,
 		getBlockOrder,
 	} = select( 'core/block-editor' );
-	const { getCurrentPage, getSnapLines } = select( 'amp/story' );
+	const { getCurrentPage } = select( 'amp/story' );
 
 	const parentBlock = getBlockRootClientId( clientId );
 
 	const defaultData = {
 		horizontalSnaps: [],
 		verticalSnaps: [],
-		snapLines: [],
 		parentBlockOffsetTop: 0,
 		parentBlockOffsetLeft: 0,
 	};
@@ -129,37 +129,20 @@ const applyWithSelect = withSelect( ( select, { clientId } ) => {
 
 				const { top, bottom } = blockElement.getBoundingClientRect();
 
-				snaps[ top - parentBlockOffsetTop ] = getVerticalLine( top - parentBlockOffsetTop );
-				snaps[ bottom - parentBlockOffsetTop ] = getVerticalLine( bottom - parentBlockOffsetTop );
+				snaps[ top - parentBlockOffsetTop ] = getHorizontalLine( top - parentBlockOffsetTop );
+				snaps[ bottom - parentBlockOffsetTop ] = getHorizontalLine( bottom - parentBlockOffsetTop );
 			}
 
 			return snaps;
 		},
-		snapLines: getSnapLines(),
 		parentBlockOffsetTop,
 		parentBlockOffsetLeft,
 	};
 } );
 
-const applyWithDispatch = withDispatch( ( dispatch ) => {
-	const {
-		showSnapLines,
-		hideSnapLines,
-		setSnapLines,
-		clearSnapLines,
-	} = dispatch( 'amp/story' );
-
-	return {
-		showSnapLines,
-		hideSnapLines,
-		setSnapLines,
-		clearSnapLines,
-	};
-} );
-
 const enhance = compose(
 	applyWithSelect,
-	applyWithDispatch,
+	withSnapContext,
 );
 
 /**
