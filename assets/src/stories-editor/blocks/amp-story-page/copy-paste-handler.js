@@ -37,7 +37,6 @@ function CopyPasteHandler( { children, onCopy, onCut, clientId, isSelected } ) {
 	);
 
 	const { insertBlocks } = useDispatch( 'core/block-editor' );
-	const { clearCopiedMarkup } = useDispatch( 'amp/story' );
 
 	const onPaste = ( event ) => {
 		// Ignore if the Page is not the selected page.
