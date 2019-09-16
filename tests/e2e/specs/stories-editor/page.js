@@ -313,7 +313,8 @@ describe( 'Story Page', () => {
 		expect( await getInputValue( SETTINGS_ADVANCE_AFTER_DURATION ) ).toBe( '2' );
 	} );
 
-	it( 'should not affect existing stories when story defaults are changed', async () => {
+	// eslint-disable-next-line jest/no-disabled-tests
+	it.skip( 'should not affect existing stories when story defaults are changed', async () => {
 		await saveDraft();
 		await page.reload();
 
