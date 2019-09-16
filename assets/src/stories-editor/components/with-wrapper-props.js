@@ -23,7 +23,7 @@ const enhance = compose(
  */
 const withWrapperProps = ( BlockListBlock ) => {
 	return enhance( ( props ) => {
-		const { blockName, hasSelectedInnerBlock, attributes } = props;
+		const { clientId, blockName, hasSelectedInnerBlock, attributes } = props;
 
 		// If it's not an allowed block then lets return original;
 		if ( -1 === ALLOWED_BLOCKS.indexOf( blockName ) ) {
@@ -58,26 +58,37 @@ const withWrapperProps = ( BlockListBlock ) => {
 		};
 
 		if ( ALLOWED_CHILD_BLOCKS.includes( blockName ) ) {
-			let style = {
+			const innerStyle = {
+				transform: `scale(var(--preview-scale)) translateX(var(--preview-translateX)) translateY(var(--preview-translateY)) rotate(${ attributes.rotationAngle || 0 }deg)`,
+			};
+
+			if ( 'amp/amp-story-cta' === blockName ) {
+				innerStyle.transform = `scale(var(--preview-scale))`;
+			}
+
+			wrapperProps = {
+				...wrapperProps,
+				style: {
+					...wrapperProps.style,
+					...innerStyle,
+				},
+			};
+
+			const outerStyle = {
 				top: `${ attributes.positionTop }%`,
 				left: `${ attributes.positionLeft }%`,
 			};
-			style.transform = `scale(var(--preview-scale)) translateX(var(--preview-translateX)) translateY(var(--preview-translateY)) rotate(${ attributes.rotationAngle || 0 }deg)`;
 
-			if ( 'amp/amp-story-cta' === blockName ) {
-				style.transform = `scale(var(--preview-scale))`;
-			}
-
-			if ( props.wrapperProps && props.wrapperProps.style ) {
-				style = {
-					...style,
-					...props.wrapperProps.style,
-				};
-			}
-			wrapperProps = {
-				...wrapperProps,
-				style,
-			};
+			return (
+				<div
+					className="amp-page-child-block"
+					data-block={ clientId }
+					data-type={ blockName }
+					style={ outerStyle }
+				>
+					<BlockListBlock { ...props } wrapperProps={ wrapperProps } enableAnimation={ false } />
+				</div>
+			);
 		}
 
 		return <BlockListBlock { ...props } wrapperProps={ wrapperProps } enableAnimation={ false } />;

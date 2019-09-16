@@ -122,17 +122,19 @@ function observeConsoleLogging() {
 	} );
 }
 
-/*
- Before every test suite run, delete all content created by the test. This ensures
- other posts/comments/etc. aren't dirtying tests and tests don't depend on
- each other's side-effects.
-*/
+/**
+ * Before every test suite run, delete all content created by the test. This ensures
+ * other posts/comments/etc. aren't dirtying tests and tests don't depend on
+ * each other's side-effects.
+ */
 // eslint-disable-next-line jest/require-top-level-describe
 beforeAll( async () => {
 	capturePageEventsForTearDown();
 	enablePageDialogAccept();
 	observeConsoleLogging();
 	await setBrowserViewport( 'large' );
+	await page.setDefaultNavigationTimeout( 5000 );
+	await page.setDefaultTimeout( 3000 );
 } );
 
 // eslint-disable-next-line jest/require-top-level-describe

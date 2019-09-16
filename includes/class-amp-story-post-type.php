@@ -18,6 +18,16 @@ class AMP_Story_Post_Type {
 	const POST_TYPE_SLUG = 'amp_story';
 
 	/**
+	 * The option name where story settings are stored.
+	 */
+	const STORY_SETTINGS_OPTION = 'story_settings';
+
+	/**
+	 * The meta prefix applied to story settings options saved as individual post meta.
+	 */
+	const STORY_SETTINGS_META_PREFIX = 'amp_story_';
+
+	/**
 	 * Minimum required version of Gutenberg required.
 	 *
 	 * @var string
@@ -157,6 +167,7 @@ class AMP_Story_Post_Type {
 					'thumbnail', // Used for poster images.
 					'amp',
 					'revisions', // Without this, the REST API will return 404 for an autosave request.
+					'custom-fields', // Used for global stories settings.
 				],
 				'rewrite'      => [
 					'slug' => self::REWRITE_SLUG,
@@ -233,6 +244,17 @@ class AMP_Story_Post_Type {
 		add_action( 'amp_story_head', 'wp_site_icon', 99 );
 		add_action( 'amp_story_head', 'wp_oembed_add_discovery_links' );
 
+		// Disable admin bar from even trying to be output, since wp_head and wp_footer hooks are not on the template.
+		add_filter(
+			'show_admin_bar',
+			static function( $show ) {
+				if ( is_singular( self::POST_TYPE_SLUG ) ) {
+					$show = false;
+				}
+				return $show;
+			}
+		);
+
 		// Remove unnecessary settings.
 		add_filter( 'block_editor_settings', [ __CLASS__, 'filter_block_editor_settings' ], 10, 2 );
 
@@ -271,6 +293,7 @@ class AMP_Story_Post_Type {
 		add_filter( 'classic_editor_enabled_editors_for_post_type', [ __CLASS__, 'filter_enabled_editors_for_story_post_type' ], PHP_INT_MAX, 2 );
 
 		self::register_block_latest_stories();
+		self::register_block_page_attachment();
 
 		register_block_type(
 			'amp/amp-story-post-author',
@@ -337,6 +360,31 @@ class AMP_Story_Post_Type {
 		);
 
 		add_action( 'wp_head', [ __CLASS__, 'print_feed_link' ] );
+
+		// Register story settings meta.
+		$stories_settings_definitions = self::get_stories_settings_definitions();
+
+		foreach ( $stories_settings_definitions as $option_key => $definition ) {
+			$meta_args = isset( $definition['meta_args'] )
+				? (array) $definition['meta_args']
+				: [];
+
+			$meta_args_defaults = [
+				'type'           => 'string',
+				'object_subtype' => self::POST_TYPE_SLUG,
+				'description'    => '',
+				'single'         => true,
+				'show_in_rest'   => true,
+			];
+
+			register_meta(
+				'post',
+				self::STORY_SETTINGS_META_PREFIX . $option_key,
+				wp_parse_args( $meta_args, $meta_args_defaults )
+			);
+		}
+
+		add_action( 'wp_insert_post', [ __CLASS__, 'add_story_settings_meta_to_new_story' ], 10, 3 );
 
 		AMP_Story_Media::init();
 	}
@@ -758,20 +806,12 @@ class AMP_Story_Post_Type {
 
 		wp_enqueue_style(
 			self::AMP_STORIES_EDITOR_STYLE_HANDLE,
-			amp_get_asset_url( 'css/amp-stories-editor.css' ),
-			[ 'wp-edit-blocks' ],
-			AMP__VERSION
-		);
-
-		wp_enqueue_style(
-			self::AMP_STORIES_EDITOR_STYLE_HANDLE . '-compiled',
 			amp_get_asset_url( 'css/amp-stories-editor-compiled.css' ),
 			[ 'wp-edit-blocks', 'amp-stories' ],
 			AMP__VERSION
 		);
 
 		wp_styles()->add_data( self::AMP_STORIES_EDITOR_STYLE_HANDLE, 'rtl', 'replace' );
-		wp_styles()->add_data( self::AMP_STORIES_EDITOR_STYLE_HANDLE . '-compiled', 'rtl', 'replace' );
 
 		self::enqueue_general_styles();
 	}
@@ -956,11 +996,36 @@ class AMP_Story_Post_Type {
 		// Only add currently supported mime types.
 		$allowed_video_mime_types = array_values( array_intersect( $allowed_video_mime_types, wp_get_mime_types() ) );
 
+		// Convert auto advancement.
+		$meta_definitions         = self::get_stories_settings_definitions();
+		$auto_advancement_options = $meta_definitions['auto_advance_after']['data']['options'];
+
+		/**
+		 * Filters the list of allowed post types for use in page attachments.
+		 *
+		 * @since 1.3
+		 *
+		 * @param array Allowed post types.
+		 */
+		$page_attachment_post_types = apply_filters( 'amp_story_allowed_page_attachment_post_types', [ 'page', 'post' ] );
+		$post_types                 = [];
+		foreach ( $page_attachment_post_types as $post_type ) {
+			$post_type_object = get_post_type_object( $post_type );
+
+			if ( $post_type_object ) {
+				$post_types[ $post_type ] = ! empty( $post_type_object->rest_base ) ? $post_type_object->rest_base : $post_type_object->name;
+			}
+		}
+
 		wp_localize_script(
 			self::AMP_STORIES_SCRIPT_HANDLE,
 			'ampStoriesEditorSettings',
 			[
-				'allowedVideoMimeTypes' => $allowed_video_mime_types,
+				'allowedVideoMimeTypes'          => $allowed_video_mime_types,
+				'allowedPageAttachmentPostTypes' => $post_types,
+				'storySettings'                  => [
+					'autoAdvanceAfterOptions' => $auto_advancement_options,
+				],
 			]
 		);
 
@@ -1799,6 +1864,101 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
+	 * Registers the Page Attachment block.
+	 */
+	public static function register_block_page_attachment() {
+		register_block_type(
+			'amp/amp-story-page-attachment',
+			[
+				'attributes'      => [
+					'postId'          => [
+						'type' => 'number',
+					],
+					'title'           => [
+						'type'    => 'string',
+						'default' => '',
+					],
+					'openText'        => [
+						'type'    => 'string',
+						'default' => __( 'Swipe up', 'amp' ),
+					],
+					'theme'           => [
+						'type'    => 'string',
+						'default' => 'light',
+					],
+					'wrapperStyle'    => [
+						'type'    => 'object',
+						'default' => [],
+					],
+					'attachmentClass' => [
+						'type'    => 'string',
+						'default' => 'amp-page-attachment-content',
+					],
+				],
+				'render_callback' => [ __CLASS__, 'render_block_page_attachment' ],
+			]
+		);
+	}
+
+	/**
+	 * Renders the dynamic block Page Attachment.
+	 *
+	 * @param array $attributes The block attributes.
+	 * @return string $markup The rendered block markup.
+	 */
+	public static function render_block_page_attachment( $attributes ) {
+		global $post;
+
+		if ( empty( $attributes['postId'] ) ) {
+			return null;
+		}
+
+		$content_post = get_post( absint( $attributes['postId'] ) );
+
+		if ( empty( $content_post ) ) {
+			return null;
+		}
+
+		$original_post = $post;
+		$post          = $content_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		// Remove filter for not adding grid layer to blocks within the attachment content.
+		remove_filter( 'render_block', [ __CLASS__, 'render_block_with_grid_layer' ], 10 );
+
+		setup_postdata( $content_post );
+
+		$style = '';
+		if ( isset( $attributes['wrapperStyle']['backgroundColor'] ) ) {
+			$style .= 'background-color:' . $attributes['wrapperStyle']['backgroundColor'] . ';';
+		}
+		if ( isset( $attributes['wrapperStyle']['color'] ) ) {
+			$style .= 'color:' . $attributes['wrapperStyle']['color'] . ';';
+		}
+
+		ob_start();
+		?>
+		<amp-story-page-attachment layout="nodisplay" theme="light" data-cta-text="<?php echo esc_attr( $attributes['openText'] ); ?>" data-title="<?php echo esc_attr( $attributes['title'] ); ?>">
+			<div class="<?php echo esc_attr( $attributes['attachmentClass'] ); ?>" style="<?php echo esc_attr( $style ); ?>">
+				<h2><?php the_title(); ?></h2>
+				<div class="amp-page-attachment-inner-content">
+					<?php the_content(); ?>
+				</div>
+			</div>
+		</amp-story-page-attachment>
+		<?php
+		wp_reset_postdata();
+
+		// Add filter back.
+		add_filter( 'render_block', [ __CLASS__, 'render_block_with_grid_layer' ], 10, 2 );
+
+		$output = ob_get_clean();
+
+		$post = $original_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		return $output;
+	}
+
+	/**
 	 * Add RSS feed link for stories.
 	 *
 	 * @since 1.2
@@ -2080,5 +2240,101 @@ class AMP_Story_Post_Type {
 		fpassthru( $fo );
 		unlink( $file );
 		die();
+	}
+
+	/**
+	 * Returns the definitions for the stories settings.
+	 *
+	 * @since 1.3
+	 *
+	 * @return array
+	 *
+	 * - meta_args array Arguments passed to `register_meta`; sanitize_callback is required.
+	 * - data      array Any additional data.
+	 */
+	public static function get_stories_settings_definitions() {
+		return [
+			'auto_advance_after'          => [
+				'meta_args' => [
+					'type'              => 'string',
+					'sanitize_callback' => function( $value ) {
+						$valid_values = [ '', 'auto', 'time', 'media' ];
+
+						if ( ! in_array( $value, $valid_values, true ) ) {
+							return '';
+						}
+						return $value;
+					},
+				],
+				'data'      => [
+					'options' => [
+						[
+							'value'       => '',
+							'label'       => __( 'Manual', 'amp' ),
+							'description' => '',
+						],
+						[
+							'value'       => 'auto',
+							'label'       => __( 'Automatic', 'amp' ),
+							'description' => __( 'Based on the duration of all animated blocks on the page', 'amp' ),
+						],
+						[
+							'value'       => 'time',
+							'label'       => __( 'After a certain time', 'amp' ),
+							'description' => '',
+						],
+						[
+							'value'       => 'media',
+							'label'       => __( 'After media has played', 'amp' ),
+							'description' => __( 'Based on the first media block encountered on the page', 'amp' ),
+						],
+					],
+				],
+			],
+			'auto_advance_after_duration' => [
+				'meta_args' => [
+					'type'              => 'integer',
+					'sanitize_callback' => function( $value ) {
+						$value = intval( $value );
+
+						return filter_var(
+							$value,
+							FILTER_VALIDATE_INT,
+							[
+								'default'   => 0,
+								'min_range' => 1,
+								'max_range' => 100,
+							]
+						);
+					},
+				],
+				'data'      => [],
+			],
+		];
+	}
+
+	/**
+	 * Adds stories global settings as post meta to all new Stories.
+	 *
+	 * @param int      $post_id New Story post ID.
+	 * @param \WP_Post $post    Story post object.
+	 * @param bool     $update  Whether this is an update or a new post being created.
+	 *
+	 * @return void
+	 */
+	public static function add_story_settings_meta_to_new_story( $post_id, $post, $update ) {
+		$is_story = ( self::POST_TYPE_SLUG === $post->post_type );
+
+		if ( $update || ! $is_story ) {
+			return;
+		}
+
+		$meta_definitions = self::get_stories_settings_definitions();
+		$story_settings   = AMP_Options_Manager::get_option( self::STORY_SETTINGS_OPTION );
+
+		foreach ( $story_settings as $option_key => $value ) {
+			$sanitized_value = call_user_func( $meta_definitions[ $option_key ]['meta_args']['sanitize_callback'], $value );
+			add_post_meta( $post_id, self::STORY_SETTINGS_META_PREFIX . $option_key, $sanitized_value, true );
+		}
 	}
 }

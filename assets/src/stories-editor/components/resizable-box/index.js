@@ -9,7 +9,6 @@ import PropTypes from 'prop-types';
  */
 import { Component } from '@wordpress/element';
 import { ResizableBox } from '@wordpress/components';
-import isShallowEqual from '@wordpress/is-shallow-equal';
 
 /**
  * Internal dependencies
@@ -157,7 +156,7 @@ class EnhancedResizableBox extends Component {
 					lastHeight = height;
 					lastDeltaW = null;
 					lastDeltaH = null;
-					blockElement = element.closest( '.wp-block' );
+					blockElement = element.closest( '.wp-block' ).parentNode;
 					blockElementTop = blockElement.style.top;
 					blockElementLeft = blockElement.style.left;
 					if ( isImage ) {

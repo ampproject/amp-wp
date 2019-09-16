@@ -702,6 +702,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 				],
 				'',
 			],
+			'nested_invalid_elements' => [
+				[
+					'source' => '<div><bad-details><summary><p>Example Summary</p></summary><p>Example expanded text</p></bad-details></div>',
+					'tag_name' => 'bad-details',
+				],
+				'<div><summary><p>Example Summary</p></summary><p>Example expanded text</p></div>',
+			],
 			'children_multiple_empty_parents' => [
 				[
 					'source' => '<div><p><bad-tag>Good Data</bad-tag></p></div>',
@@ -792,14 +799,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 	 */
 	public function get_ancestor_with_matching_spec_name_data() {
 		return [
-			'empty' => [
-				[
-					'source' => '',
-					'node_tag_name' => 'p',
-					'ancestor_tag_name' => 'article',
-				],
-				null,
-			],
 			'ancestor_is_immediate_parent' => [
 				[
 					'source' => '<article><p>Good Data</p><article>',
@@ -860,6 +859,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 		$this->assertEquals( $ancestor_node, $got, sprintf( "using source: %s\n%s", $data['source'], wp_json_encode( $data ) ) );
 	}
 
+	/**
+	 * Get test data for test_get_ancestor_with_matching_spec_name.
+	 *
+	 * @return array Test data.
+	 */
 	public function get_validate_attr_spec_list_for_node_data() {
 		return [
 			'no_attributes' => [

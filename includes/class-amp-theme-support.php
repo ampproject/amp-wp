@@ -87,6 +87,15 @@ class AMP_Theme_Support {
 	const PAIRED_FLAG = 'paired';
 
 	/**
+	 * The directory name in a theme where Reader Mode templates can be.
+	 *
+	 * For example, this could be at your-theme-name/amp.
+	 *
+	 * @var string
+	 */
+	const READER_MODE_TEMPLATE_DIRECTORY = 'amp';
+
+	/**
 	 * Sanitizer classes.
 	 *
 	 * @var array
@@ -362,6 +371,26 @@ class AMP_Theme_Support {
 			return [];
 		}
 		return $support[0];
+	}
+
+	/**
+	 * Gets whether the parent or child theme supports Reader Mode.
+	 *
+	 * True if the theme does not call add_theme_support( 'amp' ) at all,
+	 * and it has an amp/ directory for templates.
+	 *
+	 * @return bool Whether the theme supports Reader Mode.
+	 */
+	public static function supports_reader_mode() {
+		return (
+			! self::get_support_mode_added_via_theme()
+			&&
+			(
+				is_dir( trailingslashit( get_template_directory() ) . self::READER_MODE_TEMPLATE_DIRECTORY )
+				||
+				is_dir( trailingslashit( get_stylesheet_directory() ) . self::READER_MODE_TEMPLATE_DIRECTORY )
+			)
+		);
 	}
 
 	/**
@@ -1346,27 +1375,10 @@ class AMP_Theme_Support {
 	 * @since 1.0
 	 */
 	public static function init_admin_bar() {
+		add_filter( 'style_loader_tag', [ __CLASS__, 'filter_admin_bar_style_loader_tag' ], 10, 2 );
+		add_filter( 'script_loader_tag', [ __CLASS__, 'filter_admin_bar_script_loader_tag' ], 10, 2 );
 
-		// Replace admin-bar.css in core with forked version which makes use of :focus-within among other change for AMP-compat.
-		wp_styles()->registered['admin-bar']->src = amp_get_asset_url( 'css/admin-bar.css' );
-		wp_styles()->registered['admin-bar']->ver = AMP__VERSION;
-
-		// Remove any possible '.min' to avoid RTL failing to generate the href for admin-bar-rtl.css, which does not currently have a minified version in the AMP plugin.
-		wp_styles()->registered['admin-bar']->extra['suffix'] = '';
-
-		// Remove script which is almost entirely made obsolete by :focus-inside in the forked admin-bar.css.
-		wp_dequeue_script( 'admin-bar' );
-
-		// Remove customize support script since not valid AMP.
-		add_action(
-			'admin_bar_menu',
-			static function() {
-				remove_action( 'wp_before_admin_bar_render', 'wp_customize_support_script' );
-			},
-			41
-		);
-
-		// Convert admin bar bump callback into an inline style for admin-bar. See \WP_Admin_Bar::initialize().
+		// Inject the data-ampdevmode attribute into the admin bar bump style. See \WP_Admin_Bar::initialize().
 		if ( current_theme_supports( 'admin-bar' ) ) {
 			$admin_bar_args  = get_theme_support( 'admin-bar' );
 			$header_callback = $admin_bar_args[0]['callback'];
@@ -1383,6 +1395,13 @@ class AMP_Theme_Support {
 		}
 
 		// Emulate customize support script in PHP, to assume Customizer.
+		add_action(
+			'admin_bar_menu',
+			static function() {
+				remove_action( 'wp_before_admin_bar_render', 'wp_customize_support_script' );
+			},
+			41
+		);
 		add_filter(
 			'body_class',
 			static function( $body_classes ) {
@@ -1395,6 +1414,86 @@ class AMP_Theme_Support {
 				);
 			}
 		);
+	}
+
+	/**
+	 * Recursively determine if a given dependency depends on another.
+	 *
+	 * @since 1.3
+	 *
+	 * @param WP_Dependencies $dependencies      Dependencies.
+	 * @param string          $current_handle    Current handle.
+	 * @param string          $dependency_handle Dependency handle.
+	 * @return bool Whether the current handle is a dependency of the dependency handle.
+	 */
+	protected static function has_dependency( WP_Dependencies $dependencies, $current_handle, $dependency_handle ) {
+		if ( $current_handle === $dependency_handle ) {
+			return true;
+		}
+		if ( ! isset( $dependencies->registered[ $current_handle ] ) ) {
+			return false;
+		}
+		foreach ( $dependencies->registered[ $current_handle ]->deps as $handle ) {
+			if ( self::has_dependency( $dependencies, $handle, $dependency_handle ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Add data-ampdevmode attribute to any enqueued style that depends on the admin-bar.
+	 *
+	 * @since 1.3
+	 *
+	 * @param string $tag    The link tag for the enqueued style.
+	 * @param string $handle The style's registered handle.
+	 * @return string Tag.
+	 */
+	public static function filter_admin_bar_style_loader_tag( $tag, $handle ) {
+		if ( 'dashicons' === $handle ) {
+			// Conditionally include Dashicons in dev mode only if was included because it is a dependency of admin-bar.
+			$needs_dev_mode = true;
+			foreach ( wp_styles()->queue as $queued_handle ) {
+				if (
+					// If a theme or plugin directly enqueued dashicons, then it is not added via admin-bar dependency and it is not part of dev mode.
+					'dashicons' === $queued_handle
+					||
+					// If a stylesheet has dashicons as a dependency without also having admin-bar as a dependency, then no dev mode.
+					(
+						self::has_dependency( wp_styles(), $queued_handle, 'dashicons' )
+						&&
+						! self::has_dependency( wp_styles(), $queued_handle, 'admin-bar' )
+					)
+				) {
+					$needs_dev_mode = false;
+					break;
+				}
+			}
+		} else {
+			$needs_dev_mode = self::has_dependency( wp_styles(), $handle, 'admin-bar' );
+		}
+
+		if ( $needs_dev_mode ) {
+			$tag = preg_replace( '/(?<=<link)(?=\s|>)/i', ' ' . AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, $tag );
+		}
+		return $tag;
+	}
+
+	/**
+	 * Add data-ampdevmode attribute to any enqueued script that depends on the admin-bar.
+	 *
+	 * @since 1.3
+	 *
+	 * @param string $tag    The `<script>` tag for the enqueued script.
+	 * @param string $handle The script's registered handle.
+	 * @return string Tag.
+	 */
+	public static function filter_admin_bar_script_loader_tag( $tag, $handle ) {
+		if ( self::has_dependency( wp_scripts(), $handle, 'admin-bar' ) ) {
+			$tag = preg_replace( '/(?<=<script)(?=\s|>)/i', ' ' . AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, $tag );
+		}
+		return $tag;
 	}
 
 	/**
@@ -1910,11 +2009,12 @@ class AMP_Theme_Support {
 			$enable_response_caching                           = ! $disable_response_caching;
 		}
 
+		// @todo Both allow_dirty_styles and allow_dirty_scripts should eventually use AMP dev mode instead.
 		$args = array_merge(
 			[
 				'content_max_width'    => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
 				'use_document_element' => true,
-				'allow_dirty_styles'   => self::is_customize_preview_iframe(), // Dirty styles only needed when editing (e.g. for edit shortcodes).
+				'allow_dirty_styles'   => self::is_customize_preview_iframe(), // Dirty styles only needed when editing (e.g. for edit shortcuts).
 				'allow_dirty_scripts'  => is_customize_preview(), // Scripts are always needed to inject changeset UUID.
 				'user_can_validate'    => AMP_Validation_Manager::has_cap(),
 			],
@@ -2071,8 +2171,9 @@ class AMP_Theme_Support {
 			);
 		}
 
-		$dom  = AMP_DOM_Utils::get_dom( $response );
-		$head = $dom->getElementsByTagName( 'head' )->item( 0 );
+		$dom   = AMP_DOM_Utils::get_dom( $response );
+		$xpath = new DOMXPath( $dom );
+		$head  = $dom->getElementsByTagName( 'head' )->item( 0 );
 
 		// Move anything after </html>, such as Query Monitor output added at shutdown, to be moved before </body>.
 		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
@@ -2090,9 +2191,10 @@ class AMP_Theme_Support {
 			}
 		}
 
+		AMP_HTTP::send_server_timing( 'amp_dom_parse', -$dom_parse_start, 'AMP DOM Parse' );
+
 		// Make sure scripts from the body get moved to the head.
 		if ( isset( $head ) ) {
-			$xpath = new DOMXPath( $dom );
 			foreach ( $xpath->query( '//body//script[ @custom-element or @custom-template ]' ) as $script ) {
 				$head->appendChild( $script->parentNode->removeChild( $script ) );
 			}
@@ -2102,8 +2204,6 @@ class AMP_Theme_Support {
 		if ( ! $dom->documentElement->hasAttribute( 'amp' ) && ! $dom->documentElement->hasAttribute( '⚡️' ) ) {
 			$dom->documentElement->setAttribute( 'amp', '' );
 		}
-
-		AMP_HTTP::send_server_timing( 'amp_dom_parse', -$dom_parse_start, 'AMP DOM Parse' );
 
 		$assets = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
 

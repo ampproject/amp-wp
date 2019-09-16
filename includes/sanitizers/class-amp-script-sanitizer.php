@@ -35,8 +35,11 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			// Skip noscript elements inside of amp-img or other AMP components for fallbacks. See \AMP_Img_Sanitizer::adjust_and_replace_node().
-			if ( 'amp-' === substr( $noscript->parentNode->nodeName, 0, 4 ) ) {
+			/*
+			 * Skip noscript elements inside of amp-img or other AMP components for fallbacks.
+			 * See \AMP_Img_Sanitizer::adjust_and_replace_node(). Also skip if the element has dev mode.
+			 */
+			if ( 'amp-' === substr( $noscript->parentNode->nodeName, 0, 4 ) || $this->has_dev_mode_exemption( $noscript ) ) {
 				continue;
 			}
 

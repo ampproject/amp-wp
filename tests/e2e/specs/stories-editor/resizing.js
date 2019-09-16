@@ -29,7 +29,7 @@ async function rotateSelectedBlock() {
 // eslint-disable-next-line require-await
 async function getSelectedBlockPosition() {
 	return page.evaluate( () => {
-		const el = document.querySelector( '.wp-block.is-selected' );
+		const el = document.querySelector( '.wp-block.is-selected' ).parentNode;
 		return {
 			positionLeft: el.style.left,
 			positionTop: el.style.top,
@@ -122,12 +122,12 @@ describe( 'Resizing', () => {
 			const { width } = await getSelectedBlockDimensions();
 			expect( width ).toStrictEqual( textBlockMinWidth );
 
-			const positionLeft = await page.evaluate( () => document.querySelector( '.wp-block.is-selected' ).style.left );
+			const positionLeft = await page.evaluate( () => document.querySelector( '.wp-block.is-selected' ).parentNode.style.left );
 			expect( positionLeft ).toContain( '%' );
 
 			// Drag the resizer more.
 			await dragAndResize( resizableHandleLeft, { x: 300, y: 0 } );
-			const positionLeftAfter = await page.evaluate( () => document.querySelector( '.wp-block.is-selected' ).style.left );
+			const positionLeftAfter = await page.evaluate( () => document.querySelector( '.wp-block.is-selected' ).parentNode.style.left );
 			// Verify that that the positionLeft has not changed.
 			expect( positionLeftAfter ).toStrictEqual( positionLeft );
 		} );
@@ -412,7 +412,7 @@ describe( 'Resizing', () => {
 		} );
 	} );
 
-	describe( 'Author block', () => {
+	describe( 'Rotated Author block', () => {
 		beforeEach( async () => {
 			await createNewPost( { postType: 'amp_story' } );
 			await insertBlock( 'Author' );
