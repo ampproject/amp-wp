@@ -1549,15 +1549,29 @@ class AMP_Theme_Support {
 			$head->appendChild( $script );
 		}
 
-		// Ensure rel=canonical link.
-		$links         = [];
+		// Gather all links.
+		$links         = [
+			'preconnect' => [
+				// Include preconnect link for AMP CDN for browsers that don't support preload.
+				AMP_DOM_Utils::create_node(
+					$dom,
+					'link',
+					[
+						'rel'  => 'preconnect',
+						'href' => 'https://cdn.ampproject.org',
+					]
+				),
+			],
+		];
 		$link_elements = $head->getElementsByTagName( 'link' );
-		$rel_canonical = null;
 		foreach ( $link_elements as $link ) {
 			if ( $link->hasAttribute( 'rel' ) ) {
 				$links[ $link->getAttribute( 'rel' ) ][] = $link;
 			}
 		}
+
+		// Ensure rel=canonical link.
+		$rel_canonical = null;
 		if ( empty( $links['canonical'] ) ) {
 			$rel_canonical = AMP_DOM_Utils::create_node(
 				$dom,
