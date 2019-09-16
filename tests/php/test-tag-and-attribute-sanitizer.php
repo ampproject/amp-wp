@@ -239,6 +239,18 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-playbuzz' ],
 			],
 
+			'invalid_element_stripped'                     => [
+				'<nonexistent><p>Foo text</p><nonexistent>',
+				'<p>Foo text</p>',
+				[],
+			],
+
+			'nested_invalid_elements_stripped'             => [
+				'<bad-details><bad-summary><p>Example Summary</p></bad-summary><p>Example expanded text</p></bad-details>',
+				'<p>Example Summary</p><p>Example expanded text</p>',
+				[],
+			],
+
 			// AMP-NEXT-PAGE > [separator].
 			'reference-point-amp-next-page-separator'      => [
 				'<amp-next-page src="https://example.com/config.json"><div separator><h1>Keep reading</h1></div></amp-next-page>',
@@ -1903,6 +1915,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 		return [
 			'amp_image'                => [
 				'<amp-image src="/none.jpg" width="100" height="100" alt="None"></amp-image>',
+				'',
 				[
 					[
 						'node_name'       => 'amp-image',
@@ -1921,6 +1934,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'invalid_parent_element'   => [
 				'<baz class="baz-invalid"><p>Invalid baz parent element.</p></baz>',
+				'<p>Invalid baz parent element.</p>',
 				[
 					[
 						'node_name'       => 'baz',
@@ -1934,6 +1948,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'invalid_a_tag'            => [
 				'<amp-story-grid-layer class="a-invalid"><a>Invalid a tag.</a></amp-story-grid-layer>',
+				'',
 				[
 					[
 						'node_name'       => 'amp-story-grid-layer',
@@ -1947,6 +1962,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'invalid_foo_tag'          => [
 				'<foo class="foo-invalid">Invalid foo tag.</foo>',
+				'Invalid foo tag.',
 				[
 					[
 						'node_name'       => 'foo',
@@ -1960,6 +1976,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'invalid_barbaz_tag'       => [
 				'<bazbar><span>Is an invalid "bazbar" tag.</span></bazbar>',
+				'<span>Is an invalid "bazbar" tag.</span>',
 				[
 					[
 						'node_name'       => 'bazbar',
@@ -1977,6 +1994,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						<p>Nesting valid and invalid elements.</p>
 						<invalid_p id="invalid">Is an invalid "invalid" tag</invalid_p>
 						<bazfoo>Is an invalid "foo" tag <p>This should pass.</p></bazfoo>
+					</div>
+				',
+				'
+					<div class="parent">
+						<p>Nesting valid and invalid elements.</p>
+						Is an invalid "invalid" tagIs an invalid "foo" tag <p>This should pass.</p>
 					</div>
 				',
 				[
@@ -2004,6 +2027,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						<lili>world</lili>
 					</ul>
 				',
+				'<ul><li>hello</li> world</ul>',
 				[
 					[
 						'node_name'       => 'lili',
@@ -2017,6 +2041,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'invalid_nested_elements'  => [
 				'<divs><foo>Invalid <span>nested elements</span></foo></divs>',
+				'Invalid <span>nested elements</span>',
 				[
 					[
 						'node_name'       => 'foo',
@@ -2043,11 +2068,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 	 * @dataProvider get_data_for_replace_node_with_children_validation_errors
 	 * @covers \AMP_Tag_And_Attribute_Sanitizer::replace_node_with_children()
 	 *
-	 * @param string  $content         DOM content.
-	 * @param array[] $expected_errors Expected errors.
+	 * @param string  $source_content   Source DOM content.
+	 * @param string  $expected_content Expected content after sanitization.
+	 * @param array[] $expected_errors  Expected errors.
 	 */
-	public function test_replace_node_with_children_validation_errors( $content, $expected_errors ) {
-		$dom       = AMP_DOM_Utils::get_dom_from_content( $content );
+	public function test_replace_node_with_children_validation_errors( $source_content, $expected_content, $expected_errors ) {
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $source_content );
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer(
 			$dom,
 			[
@@ -2065,6 +2091,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer->sanitize();
 
 		$this->assertEmpty( $expected_errors, 'There should be no expected validation errors remaining.' );
+		$this->assertEqualMarkup( $expected_content, AMP_DOM_Utils::get_content_from_dom( $dom ) );
 	}
 
 	/**

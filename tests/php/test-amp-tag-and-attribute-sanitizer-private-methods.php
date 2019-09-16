@@ -702,6 +702,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 				],
 				'',
 			],
+			'nested_invalid_elements' => [
+				[
+					'source' => '<div><bad-details><summary><p>Example Summary</p></summary><p>Example expanded text</p></bad-details></div>',
+					'tag_name' => 'bad-details',
+				],
+				'<div><summary><p>Example Summary</p></summary><p>Example expanded text</p></div>',
+			],
 			'children_multiple_empty_parents' => [
 				[
 					'source' => '<div><p><bad-tag>Good Data</bad-tag></p></div>',
