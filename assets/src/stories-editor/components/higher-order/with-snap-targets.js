@@ -10,7 +10,7 @@ import isShallowEqual from '@wordpress/is-shallow-equal';
  */
 import { STORY_PAGE_INNER_HEIGHT, STORY_PAGE_INNER_WIDTH } from '../../constants';
 import { getBlockInnerElement } from '../../helpers';
-import { withSnapContext } from '../contexts/Snapping';
+import { withSnapContext } from '../contexts/snapping';
 
 /**
  * Higher-order component that returns snap targets for the current block.

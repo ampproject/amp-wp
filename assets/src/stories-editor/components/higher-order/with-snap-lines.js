@@ -11,7 +11,7 @@ import { createHigherOrderComponent } from '@wordpress/compose';
 /**
  * Internal dependencies
  */
-import Snapping from '../contexts/Snapping';
+import Snapping from '../contexts/snapping';
 
 /**
  * Higher-order component that adds snap lines to page blocks
