@@ -97,7 +97,7 @@ const AnimationControls = ( {
 };
 
 AnimationControls.propTypes = {
-	isImageBlock: PropTypes.bool.isRequired,
+	isImageBlock: PropTypes.bool,
 	animatedBlocks: PropTypes.func.isRequired,
 	onAnimationTypeChange: PropTypes.func.isRequired,
 	onAnimationDurationChange: PropTypes.func.isRequired,
