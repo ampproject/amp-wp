@@ -37,7 +37,7 @@ const Snapping = ( { children } ) => {
 	return (
 		<SnapContext.Provider value={ context }>
 			{ children }
-			{ hasSnapLines && snapLines.length && (
+			{ Boolean( hasSnapLines && snapLines.length ) && (
 				<SVG
 					viewBox={ `0 0 ${ STORY_PAGE_INNER_WIDTH } ${ STORY_PAGE_INNER_HEIGHT }` }
 					style={ {
