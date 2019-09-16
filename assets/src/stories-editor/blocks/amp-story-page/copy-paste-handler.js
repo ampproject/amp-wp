@@ -99,15 +99,18 @@ export default withDispatch( ( dispatch, ownProps, { select } ) => {
 		getSelectedBlockClientIds,
 		hasMultiSelection,
 	} = select( 'core/block-editor' );
-	const { removeBlock } = dispatch( 'core/block-editor' );
 	const { clearCopiedMarkup, setCopiedMarkup } = dispatch( 'amp/story' );
 
 	/**
-	 * Copy handler for ensuring that the store's copiedMarkup is in sync with what's actually in clipBoard.
+	 * Creates cut/copy handler for ensuring that the store's copiedMarkup is in sync with what's actually in clipBoard.
 	 * If it's not a block that's being copied, let's clear the copiedMarkup.
 	 * Otherwise, let's set the copied markup.
+	 * If it's a cut handler, finally remove the currently selected block.
+	 *
+	 * @param {boolean} isCut  Set to true if this is a cut handler, false if copy handler
+	 * @return {Function} Returns an event handler for the desired action
 	 */
-	const onCopy = () => {
+	const createCutCopyHandler = ( isCut ) => () => {
 		const selectedBlockClientIds = getSelectedBlockClientIds();
 
 		if ( selectedBlockClientIds.length === 0 ) {
@@ -122,29 +125,19 @@ export default withDispatch( ( dispatch, ownProps, { select } ) => {
 		}
 		const serialized = serialize( getBlocksByClientId( selectedBlockClientIds ) );
 		setCopiedMarkup( serialized );
-	};
 
-	/**
-	 * Cut handler for ensuring that the store's cutMarkup is in sync with what's actually in clipBoard.
-	 * If it's not a block that's being cut, let's clear the cutMarkup.
-	 * Otherwise, let's set the cut markup.
-	 */
-	const onCut = () => {
-		const selectedBlockClientIds = getSelectedBlockClientIds();
-
-		if ( selectedBlockClientIds.length === 0 ) {
-			return;
-		}
-		// Reuse code in onCode.
-		onCopy();
-		// Remove selected Blocks.
-		// But wait 1 render cycle to do it to allow the browser to correctly pick up the cut content.
-		setTimeout( () => {
-			for ( const clientId of selectedBlockClientIds ) {
+		if ( isCut ) {
+			// TODO: Remove selected Blocks.
+			// The code below works most of the time, but sometimes (unable to tell when and why) another element on page is selected when the block is removed, and then the browser copies this other element in stead of the previously selected element (that has now been removed).
+			/* for ( const clientId of selectedBlockClientIds ) {
 				removeBlock( clientId );
-			}
-		} );
+			} */
+			// wrapping the call in setTimeout fixes the case where another element is selected on cut, but throws an error in the cases, where the above code works fine.
+		}
 	};
+
+	const onCopy = createCutCopyHandler( false );
+	const onCut = createCutCopyHandler( true );
 
 	return {
 		onCopy,
