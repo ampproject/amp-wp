@@ -13,7 +13,7 @@ import { withDispatch, useSelect, useDispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { copyTextToClipBoard, ensureAllowedBlocksOnPaste } from '../../helpers';
+import { copyTextToClipBoard, ensureAllowedBlocksOnPaste, isStoryBlock } from '../../helpers';
 
 function CopyPasteHandler( { children, onCopy, onCut, clientId, isSelected } ) {
 	const {
@@ -126,13 +126,13 @@ export default withDispatch( ( dispatch, ownProps, { select } ) => {
 			return;
 		}
 
-		const copyBlocks = getBlocksByClientId( selectedBlockClientIds );
-		for ( const copyBlock of copyBlocks ) {
-			if ( copyBlock && copyBlock.name && 'amp/amp-story-page' === copyBlock.name ) {
+		for ( const selectedBlockClientId of selectedBlockClientIds ) {
+			if ( isStoryBlock( selectedBlockClientId ) ) {
 				return;
 			}
 		}
 
+		const copyBlocks = getBlocksByClientId( selectedBlockClientIds );
 		const serialized = serialize( copyBlocks );
 		setCopiedMarkup( serialized ).then( () => {
 			copyTextToClipBoard( serialized );

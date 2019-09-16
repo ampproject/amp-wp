@@ -28,6 +28,7 @@ import useOutsideClickChecker from './outside-click-checker';
 import {
 	copyTextToClipBoard,
 	ensureAllowedBlocksOnPaste,
+	isStoryBlock,
 } from '../../helpers';
 import { ALLOWED_MOVABLE_BLOCKS, DISABLE_DUPLICATE_BLOCKS } from '../../constants';
 
@@ -60,7 +61,7 @@ const RightClickMenu = ( props ) => {
 	const blockClientIds = castArray( clientIds );
 	const firstBlockClientId = blockClientIds[ 0 ];
 	const block = getBlock( firstBlockClientId );
-	const isPageBlock = block ? 'amp/amp-story-page' === block.name : false;
+	const isPageBlock = isStoryBlock( firstBlockClientId );
 
 	const onClose = () => {
 		setIsOpen( false );

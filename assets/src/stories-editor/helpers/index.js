@@ -2118,3 +2118,14 @@ export const startAnimation = ( block, animationType, animationDuration, animati
 
 	blockElement.addEventListener( 'animationend', callback, { once: true } );
 };
+
+/**
+ * Check if block is page block.
+ *
+ * @param {string} clientId Block client ID.
+ * @return {boolean} Boolean if block is / is not a page block.
+ */
+export const isStoryBlock = ( clientId ) => {
+	const block = getBlock( clientId );
+	return block && 'amp/amp-story-page' === block.name;
+};
