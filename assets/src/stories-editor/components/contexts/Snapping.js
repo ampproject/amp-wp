@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import React from 'react';
 import PropTypes from 'prop-types';
 
 /**
@@ -9,17 +8,18 @@ import PropTypes from 'prop-types';
  */
 import { SVG } from '@wordpress/components';
 import { createHigherOrderComponent } from '@wordpress/compose';
+import { createContext, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { STORY_PAGE_INNER_HEIGHT, STORY_PAGE_INNER_WIDTH } from '../../constants';
 
-const SnapContext = React.createContext();
+const SnapContext = createContext();
 
 const Snapping = ( { children } ) => {
-	const [ snapLines, setSnapLines ] = React.useState( [] );
-	const [ hasSnapLines, setHasSnapLines ] = React.useState( false );
+	const [ snapLines, setSnapLines ] = useState( [] );
+	const [ hasSnapLines, setHasSnapLines ] = useState( false );
 
 	const showSnapLines = () => setHasSnapLines( true );
 	const hideSnapLines = () => setHasSnapLines( false );
