@@ -697,7 +697,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 			'delete' => 'Delete',
 		];
 		$actions        = AMP_Validated_URL_Post_Type::filter_bulk_actions( $initial_action );
-		$this->assertFalse( isset( $action['edit'] ) );
+		$this->assertArrayNotHasKey( $actions['edit'] );
 		$this->assertEquals( 'Recheck', $actions[ AMP_Validated_URL_Post_Type::BULK_VALIDATE_ACTION ] );
 		$this->assertArrayNotHasKey( 'trash', $actions );
 		$this->assertEquals( 'Forget', $actions['delete'] );

@@ -1432,6 +1432,7 @@ class AMP_Validated_URL_Post_Type {
 
 		$post = null;
 		$url  = null;
+		$args = [];
 
 		try {
 			if ( isset( $_GET['post'] ) ) {

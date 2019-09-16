@@ -281,12 +281,15 @@ class AMP_Post_Meta_Box {
 		$status_and_errors = self::get_status_and_errors( $post );
 		$status            = $status_and_errors['status'];
 		$errors            = $status_and_errors['errors'];
-		$error_messages    = $this->get_error_messages( $status, $errors );
+
+		// phpcs:disable VariableAnalysis.CodeAnalysis.VariableAnalysis
+		$error_messages = $this->get_error_messages( $status, $errors );
 
 		$labels = [
 			'enabled'  => __( 'Enabled', 'amp' ),
 			'disabled' => __( 'Disabled', 'amp' ),
 		];
+		// phpcs:enable VariableAnalysis.CodeAnalysis.VariableAnalysis
 
 		// The preceding variables are used inside the following amp-status.php template.
 		include AMP__DIR__ . '/includes/templates/amp-enabled-classic-editor-toggle.php';

@@ -1007,6 +1007,9 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertNotContains( '<!--amp-source-stack ', $output );
 		$this->assertNotContains( '<!--/amp-source-stack ', $output );
 
+		$handle_inner_action = null;
+		$handle_outer_action = null;
+
 		// Ensure that nested actions output the expected stack, and that has_action() works as expected in spite of the function wrapping.
 		$handle_outer_action = static function() use ( $that, &$handle_outer_action, &$handle_inner_action ) {
 			$that->assertEquals( 10, has_action( 'outer_action', $handle_outer_action ) );
@@ -1202,7 +1205,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertInstanceOf( '\\AMP_Validation_Callback_Wrapper', $wrapped_callback );
 		$this->assertEquals( '', $output );
 		$this->assertEquals( $this->get_string(), $result );
-		unset( $post );
+		unset( $GLOBALS['post'] );
 	}
 
 	/**
@@ -1532,6 +1535,8 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 * @return string Sanitized markup.
 	 */
 	protected function process_markup( $markup ) {
+		global $content_width;
+
 		AMP_Theme_Support::register_content_embed_handlers();
 
 		/** This filter is documented in wp-includes/post-template.php */
