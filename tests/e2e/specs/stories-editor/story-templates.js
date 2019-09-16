@@ -81,6 +81,7 @@ describe( 'Story Templates', () => {
 
 		describe( 'With non-template Reusable block', () => {
 			beforeAll( async () => {
+				await removeAllReusableBlocks();
 				await addReusableBlock();
 			} );
 
@@ -114,6 +115,7 @@ describe( 'Story Templates', () => {
 	describe( 'Stories experience enabled', () => {
 		beforeAll( async () => {
 			await activateExperience( 'stories' );
+			await removeAllReusableBlocks();
 		} );
 
 		afterAll( async () => {
