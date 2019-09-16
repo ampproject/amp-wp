@@ -49,26 +49,18 @@ function CopyPasteHandler( { children, onCopy, onCut, clientId, isSelected } ) {
 		let plainText = '';
 		let html = '';
 
-		if ( getCopiedMarkupState().length ) {
-			plainText = getCopiedMarkupState();
-			html = getCopiedMarkupState();
-			clearCopiedMarkup();
-		} else {
-			// IE11 only supports `Text` as an argument for `getData` and will
-			// otherwise throw an invalid argument error, so we try the standard
-			// arguments first, then fallback to `Text` if they fail.
+		// IE11 only supports `Text` as an argument for `getData` and will
+		// otherwise throw an invalid argument error, so we try the standard
+		// arguments first, then fallback to `Text` if they fail.
+		try {
+			plainText = clipboardData.getData( 'text/plain' );
+			html = clipboardData.getData( 'text/html' );
+		} catch ( error1 ) {
 			try {
-				plainText = clipboardData.getData( 'text/plain' );
-				html = clipboardData.getData( 'text/html' );
-			} catch ( error1 ) {
-				try {
-					html = clipboardData.getData( 'Text' );
-				} catch ( error2 ) {
-					// Some browsers like UC Browser paste plain text by default and
-					// don't support clipboardData at all, so allow default
-					// behaviour.
-					return;
-				}
+				html = clipboardData.getData( 'Text' );
+			} catch ( error2 ) {
+				plainText = getCopiedMarkupState();
+				html = getCopiedMarkupState();
 			}
 		}
 
@@ -134,6 +126,7 @@ export default withDispatch( ( dispatch, ownProps, { select } ) => {
 			clearCopiedMarkup();
 			return;
 		}
+
 		const copyBlocks = getBlocksByClientId( selectedBlockClientIds );
 		for ( const copyBlock of copyBlocks ) {
 			if ( copyBlock && copyBlock.name && 'amp/amp-story-page' === copyBlock.name ) {
@@ -142,13 +135,15 @@ export default withDispatch( ( dispatch, ownProps, { select } ) => {
 		}
 
 		const serialized = serialize( copyBlocks );
-		setCopiedMarkup( serialized );
-		copyTextToClipBoard( serialized );
-		if ( isCut ) {
-			for ( const clientId of selectedBlockClientIds ) {
-				removeBlock( clientId );
+		setCopiedMarkup( serialized ).then( () => {
+			copyTextToClipBoard( serialized );
+
+			if ( isCut ) {
+				for ( const clientId of selectedBlockClientIds ) {
+					removeBlock( clientId );
+				}
 			}
-		}
+		} );
 	};
 
 	const onCopy = createCutCopyHandler( false );
