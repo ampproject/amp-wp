@@ -31,15 +31,7 @@ import { getTotalAnimationDuration } from '../../helpers';
  *
  * @return {ReactElement} Component.
  */
-const PageSettings = ( { autoAdvanceAfter, autoAdvanceAfterDuration, setAttributes, clientId } ) => {
-	let autoAdvanceAfterHelp;
-
-	if ( 'media' === autoAdvanceAfter ) {
-		autoAdvanceAfterHelp = __( 'Based on the first media block encountered on the page', 'amp' );
-	} else if ( 'auto' === autoAdvanceAfter ) {
-		autoAdvanceAfterHelp = __( 'Based on the duration of all animated blocks on the page', 'amp' );
-	}
-
+const PageSettings = ( { autoAdvanceAfter, autoAdvanceAfterDuration, autoAdvanceAfterOptions, setAttributes, clientId } ) => {
 	const totalAnimationDuration = useSelect( ( select ) => {
 		const { getBlockRootClientId } = select( 'core/block-editor' );
 		const { getAnimatedBlocks } = select( 'amp/story' );
@@ -49,22 +41,20 @@ const PageSettings = ( { autoAdvanceAfter, autoAdvanceAfterDuration, setAttribut
 		return Math.ceil( totalAnimationDurationInMs / 1000 );
 	} );
 
-	const autoAdvanceAfterOptions = [
-		{ value: '', label: __( 'Manual', 'amp' ) },
-		{ value: 'auto', label: __( 'Automatic', 'amp' ) },
-		{ value: 'time', label: __( 'After a certain time', 'amp' ) },
-		{ value: 'media', label: __( 'After media has played', 'amp' ) },
-	];
+	const currentOption = autoAdvanceAfterOptions.find( ( i ) => i.value === autoAdvanceAfter ) || {};
+
 	return (
 		<PanelBody title={ __( 'Page Settings', 'amp' ) }>
 			<SelectControl
 				label={ __( 'Advance to next page', 'amp' ) }
-				help={ autoAdvanceAfterHelp }
+				help={ currentOption.description || '' }
 				value={ autoAdvanceAfter }
 				options={ autoAdvanceAfterOptions }
 				onChange={ ( value ) => {
 					setAttributes( { autoAdvanceAfter: value } );
-					setAttributes( { autoAdvanceAfterDuration: totalAnimationDuration } );
+					if ( 'auto' === value ) {
+						setAttributes( { autoAdvanceAfterDuration: totalAnimationDuration } );
+					}
 				} }
 			/>
 			{ 'time' === autoAdvanceAfter && (
@@ -85,6 +75,7 @@ PageSettings.propTypes = {
 	clientId: PropTypes.string.isRequired,
 	autoAdvanceAfter: PropTypes.string,
 	autoAdvanceAfterDuration: PropTypes.number,
+	autoAdvanceAfterOptions: PropTypes.array,
 	setAttributes: PropTypes.func.isRequired,
 };
 

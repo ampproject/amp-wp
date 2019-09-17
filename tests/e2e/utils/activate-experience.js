@@ -19,6 +19,8 @@ export async function activateExperience( experience ) {
 	}
 
 	await page.click( selector );
-	await page.click( '#submit' );
-	await page.waitForNavigation();
+	await Promise.all( [
+		page.click( '#submit' ),
+		page.waitForNavigation(),
+	] );
 }

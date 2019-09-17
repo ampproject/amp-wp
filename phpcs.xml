@@ -86,6 +86,15 @@
 		<exclude-pattern>amp.php</exclude-pattern>
 	</rule>
 
+	<rule ref="VariableAnalysis.CodeAnalysis.VariableAnalysis">
+		<exclude-pattern>templates/*</exclude-pattern>
+		<exclude-pattern>includes/templates/*</exclude-pattern>
+		<exclude-pattern>back-compat/*</exclude-pattern>
+		<properties>
+			<property name="allowUnusedParametersBeforeUsed" value="true"/>
+		</properties>
+	</rule>
+
 	<arg value="s"/>
 	<arg name="extensions" value="php"/>
 	<file>.</file>
