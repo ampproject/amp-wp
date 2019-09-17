@@ -59,12 +59,12 @@ after_script:
 
 jobs:
   fast_finish: true
-  # These need to be exact matches
+  # These need to be exact matches, including whitespace!
   allow_failures:
     # PHP unit tests (7.3, WordPress trunk)
-    - env: WP_VERSION=trunk  DEV_LIB_ONLY=phpunit INSTALL_PWA_PLUGIN=1
+    - env: WP_VERSION=trunk  DEV_LIB_ONLY=phpunit                               INSTALL_PWA_PLUGIN=1
     # PHP and JavaScript unit tests (7.3, WordPress trunk, with code coverage)
-    - env: WP_VERSION=latest DEV_LIB_ONLY=phpunit INSTALL_PWA_PLUGIN=1 RUN_PHPUNIT_COVERAGE=1
+    - env: WP_VERSION=latest DEV_LIB_ONLY=phpunit                               INSTALL_PWA_PLUGIN=1 RUN_PHPUNIT_COVERAGE=1
   include:
     - stage: lint
       name: Lint (PHP, JavaScript, and configuration files)
