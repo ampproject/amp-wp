@@ -51,10 +51,9 @@ class AMP_Pinterest_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @param array  $matches URL pattern matches.
 	 * @param array  $attr    Matched attributes.
 	 * @param string $url     Matched URL.
-	 * @param string $rawattr Raw attributes string.
 	 * @return string HTML markup for rendered embed.
 	 */
-	public function oembed( $matches, $attr, $url, $rawattr ) {
+	public function oembed( $matches, $attr, $url ) {
 		return $this->render( [ 'url' => $url ] );
 	}
 

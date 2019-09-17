@@ -92,6 +92,8 @@ const handleExport = ( { postId, createErrorNotice, createSuccessNotice, removeN
 
 export const name = 'amp-story-export';
 
+export const icon = 'media-archive';
+
 /**
  * Renders the actual export menu item.
  *
@@ -106,7 +108,6 @@ export const name = 'amp-story-export';
 const renderPlugin = ( { postId, createErrorNotice, createSuccessNotice, removeNotice } ) => {
 	return (
 		<PluginMoreMenuItem
-			icon={ 'media-archive' }
 			onClick={ () => {
 				handleExport( { postId, createErrorNotice, createSuccessNotice, removeNotice } );
 			} }

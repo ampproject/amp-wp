@@ -1769,6 +1769,20 @@ export const processMedia = ( media ) => {
 };
 
 /**
+ * Helper to convert snake_case meta keys to key names used in the amp-story-page attributes.
+ *
+ * @param {Object} meta Meta object to be converted to an object with attributes key names.
+ *
+ * @return {Object} Processed object.
+ */
+export const metaToAttributeNames = ( meta ) => {
+	return {
+		autoAdvanceAfter: meta.amp_story_auto_advance_after,
+		autoAdvanceAfterDuration: meta.amp_story_auto_advance_after_duration,
+	};
+};
+
+/**
  * Helper to add an `aria-label` to video elements when saved.
  *
  * This helper is designed as a filter for `blocks.getSaveElement`.
