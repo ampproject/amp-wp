@@ -751,7 +751,6 @@ class AMP_Validation_Manager {
 	 */
 	public static function add_validation_error( array $error, array $data = [] ) {
 		$node    = null;
-		$matches = null;
 		$sources = null;
 
 		if ( isset( $data['node'] ) && $data['node'] instanceof DOMNode ) {
