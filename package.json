@@ -39,7 +39,7 @@
     "@wordpress/blocks": "6.6.0",
     "@wordpress/browserslist-config": "2.6.0",
     "@wordpress/components": "8.2.0",
-    "@wordpress/compose": "3.6.0",
+    "@wordpress/compose": "3.7.0",
     "@wordpress/core-data": "2.6.0",
     "@wordpress/data": "4.9.0",
     "@wordpress/date": "3.5.0",
