@@ -418,16 +418,19 @@ function amp_register_default_scripts( $wp_scripts ) {
 	$handles = [ 'wp-i18n', 'wp-dom-ready', 'wp-server-side-render' ];
 	foreach ( $handles as $handle ) {
 		if ( ! isset( $wp_scripts->registered[ $handle ] ) ) {
-			$script_deps_path    = AMP__DIR__ . '/assets/js/' . $handle . '.deps.json';
-			$script_dependencies = file_exists( $script_deps_path )
-				? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+			$asset_file = AMP__DIR__ . '/assets/js/' . $handle . '.asset.php';
+			$asset      = file_exists( $asset_file )
+				? require $asset_file
 				: [];
+
+			$dependencies = isset( $asset['dependencies'] ) ? $asset['dependencies'] : [];
+			$version      = isset( $asset['version'] ) ? $asset['version'] : [];
 
 			$wp_scripts->add(
 				$handle,
 				amp_get_asset_url( sprintf( 'js/%s.js', $handle ) ),
-				$script_dependencies,
-				AMP__VERSION
+				$dependencies,
+				$version
 			);
 		}
 	}

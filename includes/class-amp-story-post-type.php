@@ -946,20 +946,29 @@ class AMP_Story_Post_Type {
 	 * Enqueue scripts for the block editor.
 	 */
 	public static function enqueue_block_editor_scripts() {
-		if ( self::POST_TYPE_SLUG !== get_current_screen()->post_type ) {
+		$screen = get_current_screen();
+
+		if ( ! $screen instanceof \WP_Screen ) {
 			return;
 		}
 
-		$script_deps_path    = AMP__DIR__ . '/assets/js/' . self::AMP_STORIES_SCRIPT_HANDLE . '.deps.json';
-		$script_dependencies = file_exists( $script_deps_path )
-			? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		if ( self::POST_TYPE_SLUG !== $screen->post_type ) {
+			return;
+		}
+
+		$asset_file = AMP__DIR__ . '/assets/js/' . self::AMP_STORIES_SCRIPT_HANDLE . '.asset.php';
+		$asset      = file_exists( $asset_file )
+			? require $asset_file
 			: [];
+
+		$dependencies = isset( $asset['dependencies'] ) ? $asset['dependencies'] : [];
+		$version      = isset( $asset['version'] ) ? $asset['version'] : [];
 
 		wp_enqueue_script(
 			self::AMP_STORIES_SCRIPT_HANDLE,
 			amp_get_asset_url( 'js/' . self::AMP_STORIES_SCRIPT_HANDLE . '.js' ),
-			$script_dependencies,
-			AMP__VERSION,
+			$dependencies,
+			$version,
 			false
 		);
 

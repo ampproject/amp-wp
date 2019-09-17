@@ -151,17 +151,20 @@ class AMP_Post_Meta_Box {
 
 		wp_styles()->add_data( self::ASSETS_HANDLE, 'rtl', 'replace' );
 
-		$script_deps_path    = AMP__DIR__ . '/assets/js/' . self::ASSETS_HANDLE . '.deps.json';
-		$script_dependencies = file_exists( $script_deps_path )
-			? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$asset_file = AMP__DIR__ . '/assets/js/' . self::ASSETS_HANDLE . '.asset.php';
+		$asset      = file_exists( $asset_file )
+			? require $asset_file
 			: [];
+
+		$dependencies = isset( $asset['dependencies'] ) ? $asset['dependencies'] : [];
+		$version      = isset( $asset['version'] ) ? $asset['version'] : [];
 
 		// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.NotInFooter
 		wp_enqueue_script(
 			self::ASSETS_HANDLE,
 			amp_get_asset_url( 'js/' . self::ASSETS_HANDLE . '.js' ),
-			$script_dependencies,
-			AMP__VERSION,
+			$dependencies,
+			$version,
 			false
 		);
 
@@ -212,16 +215,19 @@ class AMP_Post_Meta_Box {
 
 		wp_styles()->add_data( self::BLOCK_ASSET_HANDLE, 'rtl', 'replace' );
 
-		$script_deps_path    = AMP__DIR__ . '/assets/js/' . self::BLOCK_ASSET_HANDLE . '.deps.json';
-		$script_dependencies = file_exists( $script_deps_path )
-			? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$asset_file = AMP__DIR__ . '/assets/js/' . self::BLOCK_ASSET_HANDLE . '.asset.php';
+		$asset      = file_exists( $asset_file )
+			? require $asset_file
 			: [];
+
+		$dependencies = isset( $asset['dependencies'] ) ? $asset['dependencies'] : [];
+		$version      = isset( $asset['version'] ) ? $asset['version'] : [];
 
 		wp_enqueue_script(
 			self::BLOCK_ASSET_HANDLE,
 			amp_get_asset_url( 'js/' . self::BLOCK_ASSET_HANDLE . '.js' ),
-			$script_dependencies,
-			AMP__VERSION,
+			$dependencies,
+			$version,
 			true
 		);
 

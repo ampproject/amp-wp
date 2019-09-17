@@ -884,16 +884,19 @@ class AMP_Validation_Error_Taxonomy {
 
 					wp_styles()->add_data( 'amp-validation-tooltips', 'rtl', 'replace' );
 
-					$script_deps_path    = AMP__DIR__ . '/assets/js/amp-validation-tooltips.deps.json';
-					$script_dependencies = file_exists( $script_deps_path )
-						? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+					$asset_file = AMP__DIR__ . '/assets/js/amp-validation-tooltips.asset.php';
+					$asset      = file_exists( $asset_file )
+						? require $asset_file
 						: [];
+
+					$dependencies = isset( $asset['dependencies'] ) ? $asset['dependencies'] : [];
+					$version      = isset( $asset['version'] ) ? $asset['version'] : [];
 
 					wp_register_script(
 						'amp-validation-tooltips',
 						amp_get_asset_url( 'js/amp-validation-tooltips.js' ),
-						array_merge( $script_dependencies, [ 'wp-pointer' ] ),
-						AMP__VERSION,
+						array_merge( $dependencies, [ 'wp-pointer' ] ),
+						$version,
 						true
 					);
 
@@ -925,16 +928,19 @@ class AMP_Validation_Error_Taxonomy {
 
 					wp_styles()->add_data( 'amp-validation-single-error-url', 'rtl', 'replace' );
 
-					$script_deps_path    = AMP__DIR__ . '/assets/js/amp-validation-single-error-url-details.deps.json';
-					$script_dependencies = file_exists( $script_deps_path )
-						? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+					$asset_file = AMP__DIR__ . '/assets/js/amp-validation-single-error-url-details.asset.php';
+					$asset      = file_exists( $asset_file )
+						? require $asset_file
 						: [];
+
+					$dependencies = isset( $asset['dependencies'] ) ? $asset['dependencies'] : [];
+					$version      = isset( $asset['version'] ) ? $asset['version'] : [];
 
 					wp_enqueue_script(
 						'amp-validation-single-error-url-details',
 						amp_get_asset_url( 'js/amp-validation-single-error-url-details.js' ),
-						$script_dependencies,
-						AMP__VERSION,
+						$dependencies,
+						$version,
 						true
 					);
 				}
