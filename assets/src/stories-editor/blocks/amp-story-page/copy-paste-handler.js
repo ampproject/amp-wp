@@ -13,7 +13,7 @@ import { withDispatch, useSelect, useDispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { copyTextToClipBoard, ensureAllowedBlocksOnPaste, isStoryBlock } from '../../helpers';
+import { copyTextToClipBoard, ensureAllowedBlocksOnPaste, isPageBlock } from '../../helpers';
 
 function CopyPasteHandler( { children, onCopy, clientId, isSelected } ) {
 	const {
@@ -128,7 +128,7 @@ export default withDispatch( ( dispatch, ownProps, { select } ) => {
 
 		// Don't allow story blocks to be copyied.
 		for ( const selectedBlockClientId of selectedBlockClientIds ) {
-			if ( isStoryBlock( selectedBlockClientId ) ) {
+			if ( isPageBlock( selectedBlockClientId ) ) {
 				clearCopiedMarkup();
 				return;
 			}

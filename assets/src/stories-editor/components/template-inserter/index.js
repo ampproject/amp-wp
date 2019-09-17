@@ -22,7 +22,7 @@ import TemplatePreview from './template-preview';
 import pageIcon from '../../../../images/stories-editor/add-page-inserter.svg';
 import addTemplateIcon from '../../../../images/stories-editor/add-template.svg';
 import './edit.css';
-import { createSkeletonTemplate, maybeEnqueueFontStyle, isStoryBlock } from '../../helpers';
+import { createSkeletonTemplate, maybeEnqueueFontStyle, isPageBlock } from '../../helpers';
 
 class TemplateInserter extends Component {
 	constructor( ...args ) {
@@ -170,7 +170,7 @@ export default compose(
 		const reusableBlocks = getReusableBlocks();
 
 		return {
-			storyTemplates: reusableBlocks.filter( ( { clientId } ) => isStoryBlock( clientId ) ),
+			storyTemplates: reusableBlocks.filter( ( { clientId } ) => isPageBlock( clientId ) ),
 			getBlock,
 			allBlocks: getBlocks(),
 		};

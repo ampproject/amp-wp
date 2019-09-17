@@ -28,7 +28,7 @@ import useOutsideClickChecker from './outside-click-checker';
 import {
 	copyTextToClipBoard,
 	ensureAllowedBlocksOnPaste,
-	isStoryBlock,
+	isPageBlock,
 } from '../../helpers';
 import { ALLOWED_MOVABLE_BLOCKS, DISABLE_DUPLICATE_BLOCKS } from '../../constants';
 
@@ -61,7 +61,6 @@ const RightClickMenu = ( props ) => {
 	const blockClientIds = castArray( clientIds );
 	const firstBlockClientId = blockClientIds[ 0 ];
 	const block = getBlock( firstBlockClientId );
-	const isPageBlock = isStoryBlock( firstBlockClientId );
 
 	const onClose = () => {
 		setIsOpen( false );
@@ -78,7 +77,7 @@ const RightClickMenu = ( props ) => {
 	let blockActions = [];
 
 	// Don't allow any actions other than pasting with Page.
-	if ( ! isPageBlock ) {
+	if ( ! isPageBlock( firstBlockClientId ) ) {
 		blockActions = [
 			{
 				name: __( 'Copy Block', 'amp' ),
@@ -118,7 +117,7 @@ const RightClickMenu = ( props ) => {
 	}
 
 	// If it's Page block and clipboard is empty, don't display anything.
-	if ( ! getCopiedMarkup().length && isPageBlock ) {
+	if ( ! getCopiedMarkup().length && isPageBlock( firstBlockClientId ) ) {
 		return '';
 	}
 
