@@ -107,7 +107,8 @@ class Draggable extends Component {
 
 		const snappingEnabled = ! event.getModifierState( 'Alt' );
 
-		const dimensions = this.cloneWrapper.getBoundingClientRect();
+		// Get the correct dimensions in case the block is rotated, as rotation is only applied to the clone's inner element(s).
+		const dimensions = this.cloneWrapper.querySelector( '.wp-block' ).getBoundingClientRect();
 
 		// We calculate with the block's actual dimensions relative to the page it's on.
 		let {
