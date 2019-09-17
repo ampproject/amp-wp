@@ -57,7 +57,7 @@
     "@wordpress/postcss-themes": "2.2.0",
     "@wordpress/rich-text": "3.6.0",
     "@wordpress/scripts": "4.1.0",
-    "@wordpress/server-side-render": "1.1.0",
+    "@wordpress/server-side-render": "1.3.0",
     "@wordpress/url": "2.7.0",
     "@wordpress/wordcount": "2.6.0",
     "accessible-autocomplete": "1.6.2",
