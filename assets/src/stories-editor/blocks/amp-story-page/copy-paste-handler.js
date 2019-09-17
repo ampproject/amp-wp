@@ -58,6 +58,7 @@ function CopyPasteHandler( { children, onCopy, clientId, isSelected } ) {
 			try {
 				html = clipboardData.getData( 'Text' );
 			} catch ( error2 ) {
+				// If everything gones wrong, fallback to state based clipboard.
 				plainText = getCopiedMarkupState();
 				html = getCopiedMarkupState();
 			}
@@ -125,22 +126,27 @@ export default withDispatch( ( dispatch, ownProps, { select } ) => {
 			return;
 		}
 
+		// Don't allow story blocks to be copyied.
 		for ( const selectedBlockClientId of selectedBlockClientIds ) {
 			if ( isStoryBlock( selectedBlockClientId ) ) {
+				clearCopiedMarkup();
 				return;
 			}
 		}
 
 		const copyBlocks = getBlocksByClientId( selectedBlockClientIds );
 		const serialized = serialize( copyBlocks );
+		// Workout what type of event, from event object passed to this function.
 		const isCut = ( event.type === 'cut' );
 
+		// Make sure that setCopiedMarkup finishes before doing anything else.
 		setCopiedMarkup( serialized ).then( () => {
 			copyTextToClipBoard( serialized );
 
 			if ( isCut ) {
 				const pageClientId = getCurrentPage();
 				for ( const clientId of selectedBlockClientIds ) {
+					// On removing block, change focus to the page, to make sure that editor doesn't get confused.
 					selectBlock( pageClientId );
 					removeBlock( clientId );
 				}
