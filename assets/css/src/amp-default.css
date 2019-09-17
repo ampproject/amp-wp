@@ -66,5 +66,10 @@ amp-carousel .amp-wp-gallery-caption {
 	text-align: center;
 	position: absolute;
 	bottom: 0;
-	width: 100%;
+	left: 0;
+	right: 0;
+	padding: 0.5rem;
+	max-height: 30%;
+	color: #fff;
+	background: linear-gradient(0deg, rgba(0, 0, 0, 0.7) 0, rgba(0, 0, 0, 0.3) 70%, transparent);
 }
