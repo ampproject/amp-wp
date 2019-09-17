@@ -69,7 +69,7 @@
     "babel-plugin-transform-react-remove-prop-types": "0.4.24",
     "browserslist": "4.7.0",
     "core-js": "3.2.1",
-    "cross-env": "5.2.1",
+    "cross-env": "6.0.0",
     "css-loader": "3.2.0",
     "cssnano": "4.1.10",
     "dotenv": "8.1.0",
