@@ -61,3 +61,10 @@ body amp-audio:not([controls]) {
 .amp-wp-default-form-message[submit-success] > p:empty {
 	display: none;
 }
+
+amp-carousel .amp-wp-gallery-caption {
+	text-align: center;
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+}

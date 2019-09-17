@@ -140,8 +140,27 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 					'layout' => 'responsive',
 				]
 			);
+
 			foreach ( $images as $image ) {
-				$amp_carousel->appendChild( $image );
+				$div                   = AMP_DOM_Utils::create_node(
+					$this->dom,
+					'div',
+					[ 'class' => 'slide' ]
+				);
+				$possible_caption_text = isset( $image->nextSibling ) && 'figcaption' === $image->nextSibling->nodeName ? $image->nextSibling->textContent : null;
+				$div->appendChild( $image );
+
+				if ( $possible_caption_text ) {
+					$caption              = AMP_DOM_Utils::create_node(
+						$this->dom,
+						'div',
+						[ 'class' => 'amp-wp-gallery-caption' ]
+					);
+					$caption->textContent = $possible_caption_text;
+					$div->appendChild( $caption );
+				}
+
+				$amp_carousel->appendChild( $div );
 			}
 
 			$node->parentNode->replaceChild( $amp_carousel, $node );

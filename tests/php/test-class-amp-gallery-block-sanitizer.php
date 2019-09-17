@@ -39,7 +39,12 @@ class AMP_Gallery_Block_Sanitizer_Test extends WP_UnitTestCase {
 
 			'data_amp_with_carousel'              => [
 				'<ul class="wp-block-gallery" data-amp-carousel="true"><li class="blocks-gallery-item"><figure><a href="http://example.com"><amp-img src="http://example.com/img.png" width="600" height="400"></amp-img></a></figure></li></ul>',
-				'<amp-carousel width="600" height="400" type="slides" layout="responsive"><a href="http://example.com"><amp-img src="http://example.com/img.png" width="600" height="400"></amp-img></a></amp-carousel>',
+				'<amp-carousel width="600" height="400" type="slides" layout="responsive"><div class="slide"><a href="http://example.com"><amp-img src="http://example.com/img.png" width="600" height="400"></amp-img></a></div></amp-carousel>',
+			],
+
+			'data_amp_with_carousel_and_caption'  => [
+				'<ul class="wp-block-gallery" data-amp-carousel="true"><li class="blocks-gallery-item"><figure><amp-img src="http://example.com/img.png" width="600" height="400"></amp-img><figcaption>This is a caption</figcaption></figure></li></ul>',
+				'<amp-carousel width="600" height="400" type="slides" layout="responsive"><div class="slide"><amp-img src="http://example.com/img.png" width="600" height="400"></amp-img><div class="amp-wp-gallery-caption">This is a caption</div></div></amp-carousel>',
 			],
 
 			'data_amp_with_lightbox'              => [
@@ -49,7 +54,7 @@ class AMP_Gallery_Block_Sanitizer_Test extends WP_UnitTestCase {
 
 			'data_amp_with_lightbox_and_carousel' => [
 				'<ul class="wp-block-gallery" data-amp-lightbox="true" data-amp-carousel="true"><li class="blocks-gallery-item"><figure><a href="http://example.com"><amp-img src="http://example.com/img.png" width="1234" height="567"></amp-img></a></figure></li></ul>',
-				'<amp-carousel width="1234" height="567" type="slides" layout="responsive"><amp-img src="http://example.com/img.png" width="1234" height="567" data-amp-lightbox="" on="tap:amp-image-lightbox" role="button" tabindex="0"></amp-img></amp-carousel><amp-image-lightbox id="amp-image-lightbox" layout="nodisplay" data-close-button-aria-label="Close"></amp-image-lightbox>',
+				'<amp-carousel width="1234" height="567" type="slides" layout="responsive"><div class="slide"><amp-img src="http://example.com/img.png" width="1234" height="567" data-amp-lightbox="" on="tap:amp-image-lightbox" role="button" tabindex="0"></amp-img></div></amp-carousel><amp-image-lightbox id="amp-image-lightbox" layout="nodisplay" data-close-button-aria-label="Close"></amp-image-lightbox>',
 			],
 		];
 	}
@@ -91,14 +96,19 @@ class AMP_Gallery_Block_Sanitizer_Test extends WP_UnitTestCase {
 				'<ul data-amp-carousel="true"><li class="blocks-gallery-item"><figure><a href="http://example.com"><amp-img src="http://example.com/img.png" width="600" height="400"></amp-img></a></figure></li></ul>',
 			],
 
+			'data_amp_with_carousel_and_caption'  => [
+				'<ul class="wp-block-gallery" data-amp-carousel="true"><li class="blocks-gallery-item"><figure><a href="http://example.com"><amp-img src="http://example.com/img.png" width="600" height="400"></amp-img></a><figcaption>Here is a caption</figcaption></figure></li></ul>',
+				'<amp-carousel width="600" height="400" type="slides" layout="responsive"><div class="slide"><a href="http://example.com"><amp-img src="http://example.com/img.png" width="600" height="400"></amp-img></a><div class="amp-wp-gallery-caption">Here is a caption</div></div></amp-carousel>',
+			],
+
 			'data_amp_with_lightbox'              => [
 				'<ul class="wp-block-gallery" data-amp-lightbox="true"><li class="blocks-gallery-item"><figure><a href="http://example.com"><amp-img src="http://example.com/img.png" width="600" height="400"></amp-img></a></figure></li></ul>',
-				'<amp-carousel width="600" height="400" type="slides" layout="responsive"><amp-img src="http://example.com/img.png" width="600" height="400" data-amp-lightbox="" on="tap:amp-image-lightbox" role="button" tabindex="0"></amp-img></amp-carousel><amp-image-lightbox id="amp-image-lightbox" layout="nodisplay" data-close-button-aria-label="Close"></amp-image-lightbox>',
+				'<amp-carousel width="600" height="400" type="slides" layout="responsive"><div class="slide"><amp-img src="http://example.com/img.png" width="600" height="400" data-amp-lightbox="" on="tap:amp-image-lightbox" role="button" tabindex="0"></amp-img></div></amp-carousel><amp-image-lightbox id="amp-image-lightbox" layout="nodisplay" data-close-button-aria-label="Close"></amp-image-lightbox>',
 			],
 
 			'data_amp_with_lightbox_and_carousel' => [
 				'<ul class="wp-block-gallery" data-amp-lightbox="true" data-amp-carousel="true"><li class="blocks-gallery-item"><figure><a href="http://example.com"><amp-img src="http://example.com/img.png" width="600" height="400"></amp-img></a></figure></li></ul>',
-				'<amp-carousel width="600" height="400" type="slides" layout="responsive"><amp-img src="http://example.com/img.png" width="600" height="400" data-amp-lightbox="" on="tap:amp-image-lightbox" role="button" tabindex="0"></amp-img></amp-carousel><amp-image-lightbox id="amp-image-lightbox" layout="nodisplay" data-close-button-aria-label="Close"></amp-image-lightbox>',
+				'<amp-carousel width="600" height="400" type="slides" layout="responsive"><div class="slide"><amp-img src="http://example.com/img.png" width="600" height="400" data-amp-lightbox="" on="tap:amp-image-lightbox" role="button" tabindex="0"></amp-img></div></amp-carousel><amp-image-lightbox id="amp-image-lightbox" layout="nodisplay" data-close-button-aria-label="Close"></amp-image-lightbox>',
 			],
 		];
 	}
