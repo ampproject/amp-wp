@@ -58,7 +58,7 @@ function CopyPasteHandler( { children, onCopy, clientId, isSelected } ) {
 			try {
 				html = clipboardData.getData( 'Text' );
 			} catch ( error2 ) {
-				// If everything gones wrong, fallback to state based clipboard.
+				// If everything goes wrong, fall back to state based clipboard.
 				plainText = getCopiedMarkupState();
 				html = getCopiedMarkupState();
 			}
