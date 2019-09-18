@@ -146,7 +146,7 @@ export default withDispatch( ( dispatch, ownProps, { select } ) => {
 			if ( isCut ) {
 				const pageClientId = getCurrentPage();
 				for ( const clientId of selectedBlockClientIds ) {
-					// On removing block, change focus to the page, to make sure that editor doesn't get confused.
+					// On removing block, change focus to the page, to make sure that editor doesn't get confused and tries to select an already removed block.
 					selectBlock( pageClientId );
 					removeBlock( clientId );
 				}
