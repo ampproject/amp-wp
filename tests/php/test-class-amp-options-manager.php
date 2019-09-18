@@ -269,6 +269,95 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		}
 	}
 
+
+	public function get_test_get_options_defaults_data() {
+		return [
+			'reader'                               => [
+				null,
+				AMP_Theme_Support::READER_MODE_SLUG,
+			],
+			'transitional_without_template_dir'    => [
+				[
+					'paired' => true,
+				],
+				AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
+			],
+			'transitional_implied_by_template_dir' => [
+				[
+					'template_dir' => 'amp',
+				],
+				AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
+			],
+			'standard_paired_false'                => [
+				[
+					'paired' => false,
+				],
+				AMP_Theme_Support::STANDARD_MODE_SLUG,
+			],
+			'standard_paired_false'                => [
+				[
+					'paired' => false,
+				],
+				AMP_Theme_Support::STANDARD_MODE_SLUG,
+			],
+			'standard_no_args'                     => [
+				[],
+				AMP_Theme_Support::STANDARD_MODE_SLUG,
+			],
+			'standard_via_native'                  => [
+				null,
+				AMP_Theme_Support::STANDARD_MODE_SLUG,
+				[
+					'theme_support' => 'native',
+				],
+			],
+			'standard_via_native'                  => [
+				null,
+				AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
+				[
+					'theme_support' => 'paired',
+				],
+			],
+			'standard_upon_upgrade'                => [
+				[
+					'paired' => false,
+				],
+				AMP_Theme_Support::STANDARD_MODE_SLUG,
+				[
+					'theme_support' => 'disabled',
+				],
+			],
+			'transitional_upon_upgrade'            => [
+				[
+					'paired' => true,
+				],
+				AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
+				[
+					'theme_support' => 'disabled',
+				],
+			],
+		];
+	}
+
+	/**
+	 * Test get_options defaults.
+	 *
+	 * @dataProvider get_test_get_options_defaults_data
+	 * @covers AMP_Options_Manager::get_options()
+	 * @covers AMP_Options_Manager::get_option()
+	 *
+	 * @param array|null $args           Theme support args.
+	 * @param string     $expected_mode  Expected mode.
+	 * @param array      $initial_option Initial option in DB.
+	 */
+	public function test_get_options_theme_support_defaults( $args, $expected_mode, $initial_option = [] ) {
+		update_option( AMP_Options_Manager::OPTION_NAME, $initial_option );
+		if ( isset( $args ) ) {
+			add_theme_support( 'amp', $args );
+		}
+		$this->assertEquals( $expected_mode, AMP_Options_Manager::get_option( 'theme_support' ) );
+	}
+
 	/**
 	 * Test check_supported_post_type_update_errors.
 	 *

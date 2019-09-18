@@ -318,7 +318,8 @@ class AMP_Theme_Support {
 				);
 			}
 
-			$is_paired = ! empty( $args[ self::PAIRED_FLAG ] );
+			// See amp_is_canonical().
+			$is_paired = isset( $args[ self::PAIRED_FLAG ] ) ? $args[ self::PAIRED_FLAG ] : ! empty( $args['template_dir'] );
 
 			self::$support_added_via_theme  = $is_paired ? self::TRANSITIONAL_MODE_SLUG : self::STANDARD_MODE_SLUG;
 			self::$support_added_via_option = $theme_support_option;

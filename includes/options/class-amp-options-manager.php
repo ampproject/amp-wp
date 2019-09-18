@@ -126,9 +126,8 @@ class AMP_Options_Manager {
 
 		$defaults['enable_response_caching'] = wp_using_ext_object_cache();
 
-		$args = AMP_Theme_Support::get_theme_support_args();
-		if ( false !== $args ) {
-			$defaults['theme_support'] = empty( $args[ AMP_Theme_Support::PAIRED_FLAG ] ) ? AMP_Theme_Support::STANDARD_MODE_SLUG : AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
+		if ( current_theme_supports( 'amp' ) ) {
+			$defaults['theme_support'] = amp_is_canonical() ? AMP_Theme_Support::STANDARD_MODE_SLUG : AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
 		}
 
 		$options = array_merge( $defaults, $options );
