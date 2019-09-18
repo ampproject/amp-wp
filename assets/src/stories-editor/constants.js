@@ -3,30 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 
-/**
- * Internal dependencies
- */
-import Arimo from '../../images/stories-editor/font-names/arimo.svg';
-import Lato from '../../images/stories-editor/font-names/lato.svg';
-import Lora from '../../images/stories-editor/font-names/lora.svg';
-import Merriweather from '../../images/stories-editor/font-names/merriweather.svg';
-import Montserrat from '../../images/stories-editor/font-names/montserrat.svg';
-import NotoSans from '../../images/stories-editor/font-names/noto-sans.svg';
-import OpenSans from '../../images/stories-editor/font-names/open-sans.svg';
-import OpenSansCondensed from '../../images/stories-editor/font-names/open-sans-condensed.svg';
-import Oswald from '../../images/stories-editor/font-names/oswald.svg';
-import PlayfairDisplay from '../../images/stories-editor/font-names/playfair-display.svg';
-import PtSans from '../../images/stories-editor/font-names/pt-sans.svg';
-import PtSansNarrow from '../../images/stories-editor/font-names/pt-sans-narrow.svg';
-import PtSerif from '../../images/stories-editor/font-names/pt-serif.svg';
-import Raleway from '../../images/stories-editor/font-names/raleway.svg';
-import Roboto from '../../images/stories-editor/font-names/roboto.svg';
-import RobotoCondensed from '../../images/stories-editor/font-names/roboto-condensed.svg';
-import RobotoSlab from '../../images/stories-editor/font-names/roboto-slab.svg';
-import Slabo27 from '../../images/stories-editor/font-names/slabo-27.svg';
-import SourceSansPro from '../../images/stories-editor/font-names/source-sans-pro.svg';
-import Ubuntu from '../../images/stories-editor/font-names/ubuntu.svg';
-
 export const STORY_PAGE_INNER_WIDTH = 328;
 export const STORY_PAGE_INNER_HEIGHT = 553;
 
@@ -218,29 +194,6 @@ export const AMP_ANIMATION_TYPE_OPTIONS = [
 		label: __( 'Zoom Out', 'amp' ),
 	},
 ];
-
-export const AMP_STORY_FONT_IMAGES = {
-	Arimo,
-	Lato,
-	Lora,
-	Merriweather,
-	Montserrat,
-	'Noto Sans': NotoSans,
-	'Open Sans': OpenSans,
-	'Open Sans Condensed': OpenSansCondensed,
-	Oswald,
-	'Playfair Display': PlayfairDisplay,
-	'PT Sans': PtSans,
-	'PT Sans Narrow': PtSansNarrow,
-	'PT Serif': PtSerif,
-	Raleway,
-	Roboto,
-	'Roboto Condensed': RobotoCondensed,
-	'Roboto Slab': RobotoSlab,
-	'Slabo 27px': Slabo27,
-	'Source Sans Pro': SourceSansPro,
-	Ubuntu,
-};
 
 export const REVERSE_WIDTH_CALCULATIONS = [
 	'left',
