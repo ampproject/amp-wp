@@ -284,12 +284,15 @@ abstract class AMP_Base_Sanitizer {
 				&& 0 === (int) $styles['left']
 				&& 0 === (int) $styles['bottom']
 				&& 0 === (int) $styles['right']
+				&& ( ! isset( $attributes['width'] ) || '100%' === $attributes['width'] )
+				&& ( ! isset( $attributes['height'] ) || '100%' === $attributes['height'] )
 			) {
 				unset( $attributes['style'], $styles['position'], $styles['top'], $styles['left'], $styles['bottom'], $styles['right'] );
 				if ( ! empty( $styles ) ) {
 					$attributes['style'] = $this->reassemble_style_string( $styles );
 				}
 				$attributes['layout'] = 'fill';
+				unset( $attributes['height'], $attributes['width'] );
 				return $attributes;
 			}
 
