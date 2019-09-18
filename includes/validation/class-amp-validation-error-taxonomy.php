@@ -884,18 +884,15 @@ class AMP_Validation_Error_Taxonomy {
 
 					wp_styles()->add_data( 'amp-validation-tooltips', 'rtl', 'replace' );
 
-					$asset_file = AMP__DIR__ . '/assets/js/amp-validation-tooltips.asset.php';
-					$asset      = file_exists( $asset_file )
-						? require $asset_file
-						: [];
-
-					$dependencies = isset( $asset['dependencies'] ) ? $asset['dependencies'] : [];
-					$version      = isset( $asset['version'] ) ? $asset['version'] : [];
+					$asset_file   = AMP__DIR__ . '/assets/js/amp-validation-tooltips.asset.php';
+					$asset        = require $asset_file;
+					$dependencies = $asset['dependencies'];
+					$version      = $asset['version'];
 
 					wp_register_script(
 						'amp-validation-tooltips',
 						amp_get_asset_url( 'js/amp-validation-tooltips.js' ),
-						array_merge( $dependencies, [ 'wp-pointer' ] ),
+						$dependencies,
 						$version,
 						true
 					);
@@ -928,13 +925,10 @@ class AMP_Validation_Error_Taxonomy {
 
 					wp_styles()->add_data( 'amp-validation-single-error-url', 'rtl', 'replace' );
 
-					$asset_file = AMP__DIR__ . '/assets/js/amp-validation-single-error-url-details.asset.php';
-					$asset      = file_exists( $asset_file )
-						? require $asset_file
-						: [];
-
-					$dependencies = isset( $asset['dependencies'] ) ? $asset['dependencies'] : [];
-					$version      = isset( $asset['version'] ) ? $asset['version'] : [];
+					$asset_file   = AMP__DIR__ . '/assets/js/amp-validation-single-error-url-details.asset.php';
+					$asset        = require $asset_file;
+					$dependencies = $asset['dependencies'];
+					$version      = $asset['version'];
 
 					wp_enqueue_script(
 						'amp-validation-single-error-url-details',

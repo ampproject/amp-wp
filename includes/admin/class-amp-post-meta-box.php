@@ -151,13 +151,10 @@ class AMP_Post_Meta_Box {
 
 		wp_styles()->add_data( self::ASSETS_HANDLE, 'rtl', 'replace' );
 
-		$asset_file = AMP__DIR__ . '/assets/js/' . self::ASSETS_HANDLE . '.asset.php';
-		$asset      = file_exists( $asset_file )
-			? require $asset_file
-			: [];
-
-		$dependencies = isset( $asset['dependencies'] ) ? $asset['dependencies'] : [];
-		$version      = isset( $asset['version'] ) ? $asset['version'] : [];
+		$asset_file   = AMP__DIR__ . '/assets/js/' . self::ASSETS_HANDLE . '.asset.php';
+		$asset        = require $asset_file;
+		$dependencies = $asset['dependencies'];
+		$version      = $asset['version'];
 
 		// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.NotInFooter
 		wp_enqueue_script(
@@ -215,13 +212,10 @@ class AMP_Post_Meta_Box {
 
 		wp_styles()->add_data( self::BLOCK_ASSET_HANDLE, 'rtl', 'replace' );
 
-		$asset_file = AMP__DIR__ . '/assets/js/' . self::BLOCK_ASSET_HANDLE . '.asset.php';
-		$asset      = file_exists( $asset_file )
-			? require $asset_file
-			: [];
-
-		$dependencies = isset( $asset['dependencies'] ) ? $asset['dependencies'] : [];
-		$version      = isset( $asset['version'] ) ? $asset['version'] : [];
+		$asset_file   = AMP__DIR__ . '/assets/js/' . self::BLOCK_ASSET_HANDLE . '.asset.php';
+		$asset        = require $asset_file;
+		$dependencies = $asset['dependencies'];
+		$version      = $asset['version'];
 
 		wp_enqueue_script(
 			self::BLOCK_ASSET_HANDLE,

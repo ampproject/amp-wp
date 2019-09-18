@@ -956,13 +956,10 @@ class AMP_Story_Post_Type {
 			return;
 		}
 
-		$asset_file = AMP__DIR__ . '/assets/js/' . self::AMP_STORIES_SCRIPT_HANDLE . '.asset.php';
-		$asset      = file_exists( $asset_file )
-			? require $asset_file
-			: [];
-
-		$dependencies = isset( $asset['dependencies'] ) ? $asset['dependencies'] : [];
-		$version      = isset( $asset['version'] ) ? $asset['version'] : [];
+		$asset_file   = AMP__DIR__ . '/assets/js/' . self::AMP_STORIES_SCRIPT_HANDLE . '.asset.php';
+		$asset        = require $asset_file;
+		$dependencies = $asset['dependencies'];
+		$version      = $asset['version'];
 
 		wp_enqueue_script(
 			self::AMP_STORIES_SCRIPT_HANDLE,

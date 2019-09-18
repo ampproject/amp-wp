@@ -1964,13 +1964,10 @@ class AMP_Validation_Manager {
 
 		$slug = 'amp-block-validation';
 
-		$asset_file = AMP__DIR__ . '/assets/js/' . $slug . '.asset.php';
-		$asset      = file_exists( $asset_file )
-			? require $asset_file
-			: [];
-
-		$dependencies = isset( $asset['dependencies'] ) ? $asset['dependencies'] : [];
-		$version      = isset( $asset['version'] ) ? $asset['version'] : [];
+		$asset_file   = AMP__DIR__ . '/assets/js/' . $slug . '.asset.php';
+		$asset        = require $asset_file;
+		$dependencies = $asset['dependencies'];
+		$version      = $asset['version'];
 
 		wp_enqueue_script(
 			$slug,

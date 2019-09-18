@@ -258,13 +258,10 @@ class AMP_Validated_URL_Post_Type {
 		}
 
 		if ( 'edit-' . self::POST_TYPE_SLUG === $screen->id && self::POST_TYPE_SLUG === $screen->post_type ) {
-			$asset_file = AMP__DIR__ . '/assets/js/amp-validated-urls-index.asset.php';
-			$asset      = file_exists( $asset_file )
-				? require $asset_file
-				: [];
-
-			$dependencies = isset( $asset['dependencies'] ) ? $asset['dependencies'] : [];
-			$version      = isset( $asset['version'] ) ? $asset['version'] : [];
+			$asset_file   = AMP__DIR__ . '/assets/js/amp-validated-urls-index.asset.php';
+			$asset        = require $asset_file;
+			$dependencies = $asset['dependencies'];
+			$version      = $asset['version'];
 
 			wp_enqueue_script(
 				'amp-validated-urls-index',
@@ -300,18 +297,15 @@ class AMP_Validated_URL_Post_Type {
 
 		wp_styles()->add_data( 'amp-validation-tooltips', 'rtl', 'replace' );
 
-		$asset_file = AMP__DIR__ . '/assets/js/amp-validation-tooltips.asset.php';
-		$asset      = file_exists( $asset_file )
-			? require $asset_file
-			: [];
-
-		$dependencies = isset( $asset['dependencies'] ) ? $asset['dependencies'] : [];
-		$version      = isset( $asset['version'] ) ? $asset['version'] : [];
+		$asset_file   = AMP__DIR__ . '/assets/js/amp-validation-tooltips.asset.php';
+		$asset        = require $asset_file;
+		$dependencies = $asset['dependencies'];
+		$version      = $asset['version'];
 
 		wp_register_script(
 			'amp-validation-tooltips',
 			amp_get_asset_url( 'js/amp-validation-tooltips.js' ),
-			array_merge( $dependencies, [ 'wp-pointer' ] ),
+			$dependencies,
 			$version,
 			true
 		);
@@ -1665,13 +1659,10 @@ class AMP_Validated_URL_Post_Type {
 		// Eliminate autosave since it is only relevant for the content editor.
 		wp_dequeue_script( 'autosave' );
 
-		$asset_file = AMP__DIR__ . '/assets/js/' . self::EDIT_POST_SCRIPT_HANDLE . '.asset.php';
-		$asset      = file_exists( $asset_file )
-			? require $asset_file
-			: [];
-
-		$dependencies = isset( $asset['dependencies'] ) ? $asset['dependencies'] : [];
-		$version      = isset( $asset['version'] ) ? $asset['version'] : [];
+		$asset_file   = AMP__DIR__ . '/assets/js/' . self::EDIT_POST_SCRIPT_HANDLE . '.asset.php';
+		$asset        = require $asset_file;
+		$dependencies = $asset['dependencies'];
+		$version      = $asset['version'];
 
 		wp_enqueue_script(
 			self::EDIT_POST_SCRIPT_HANDLE,

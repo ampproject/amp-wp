@@ -418,13 +418,10 @@ function amp_register_default_scripts( $wp_scripts ) {
 	$handles = [ 'wp-i18n', 'wp-dom-ready', 'wp-server-side-render' ];
 	foreach ( $handles as $handle ) {
 		if ( ! isset( $wp_scripts->registered[ $handle ] ) ) {
-			$asset_file = AMP__DIR__ . '/assets/js/' . $handle . '.asset.php';
-			$asset      = file_exists( $asset_file )
-				? require $asset_file
-				: [];
-
-			$dependencies = isset( $asset['dependencies'] ) ? $asset['dependencies'] : [];
-			$version      = isset( $asset['version'] ) ? $asset['version'] : [];
+			$asset_file   = AMP__DIR__ . '/assets/js/' . $handle . '.asset.php';
+			$asset        = require $asset_file;
+			$dependencies = $asset['dependencies'];
+			$version      = $asset['version'];
 
 			$wp_scripts->add(
 				$handle,
