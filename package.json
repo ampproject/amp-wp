@@ -52,6 +52,7 @@
     "@wordpress/hooks": "2.6.0",
     "@wordpress/html-entities": "2.5.0",
     "@wordpress/i18n": "3.6.0",
+    "@wordpress/jest-puppeteer-axe": "1.3.0",
     "@wordpress/keycodes": "2.6.0",
     "@wordpress/plugins": "2.7.0",
     "@wordpress/postcss-themes": "2.2.0",
