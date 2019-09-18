@@ -791,7 +791,9 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	 * Test the definitions return value
 	 *
 	 * @dataProvider get_default_settings_definitions
-	 * @covers AMP_Story_Post_Type::get_stories_settings_meta_definitions
+	 * @covers AMP_Story_Post_Type::get_stories_settings_definitions()
+	 *
+	 * @param array $default_definitions Default definitions.
 	 */
 	public function test_get_stories_settings_meta_definitions( $default_definitions ) {
 		$definitions = AMP_Story_Post_Type::get_stories_settings_definitions();
