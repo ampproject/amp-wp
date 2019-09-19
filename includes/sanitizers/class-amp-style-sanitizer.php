@@ -1368,8 +1368,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * }
 	 */
 	private function process_stylesheet( $stylesheet, $options = [] ) {
-		$parsed      = null;
-		$cache_key   = null;
+		$parsed    = null;
+		$cache_key = null;
 
 		$cache_impacting_options = array_merge(
 			wp_array_slice_assoc(
