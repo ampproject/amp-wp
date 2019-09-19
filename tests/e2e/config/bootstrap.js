@@ -137,6 +137,7 @@ async function runAxeTestsForBlockEditor() {
 		// See: https://github.com/WordPress/gutenberg/pull/15018.
 		disabledRules: [
 			'color-contrast',
+			'duplicate-id',
 			'region',
 		],
 		exclude: [
