@@ -46,13 +46,13 @@ const Snapping = ( { children } ) => {
 						pointerEvents: 'none',
 					} }
 				>
-					{ snapLines.map( ( [ start, end ], index ) => (
+					{ snapLines.map( ( [ [ x1, y1 ], [ x2, y2 ] ], index ) => (
 						<line
 							key={ index }
-							x1={ start[ 0 ] }
-							y1={ start[ 1 ] }
-							x2={ end[ 0 ] }
-							y2={ end[ 1 ] }
+							x1={ x1 }
+							y1={ y1 }
+							x2={ x2 }
+							y2={ y2 }
 							stroke="red"
 							pointerEvents="none"
 						/>
@@ -73,24 +73,9 @@ export const withSnapContext = createHigherOrderComponent(
 	( WrappedComponent ) => ( props ) => (
 		<SnapContext.Consumer>
 			{
-				( {
-					snapLines,
-					setSnapLines,
-					showSnapLines,
-					hideSnapLines,
-					clearSnapLines,
-				} ) => {
-					const fullProps = {
-						...props,
-						snapLines,
-						setSnapLines,
-						showSnapLines,
-						hideSnapLines,
-						clearSnapLines,
-					};
-
-					return <WrappedComponent { ...fullProps } />;
-				}
+				( snappingProps ) => (
+					<WrappedComponent { ...props } { ...snappingProps } />
+				)
 			}
 		</SnapContext.Consumer>
 	),
