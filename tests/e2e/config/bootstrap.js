@@ -136,15 +136,7 @@ async function runAxeTestsForBlockEditor() {
 		// Temporary disabled rules to enable initial integration.
 		// See: https://github.com/WordPress/gutenberg/pull/15018.
 		disabledRules: [
-			'aria-allowed-role',
-			'aria-valid-attr-value',
-			'button-name',
 			'color-contrast',
-			'dlitem',
-			'duplicate-id',
-			'label',
-			'link-name',
-			'listitem',
 			'region',
 		],
 		exclude: [
