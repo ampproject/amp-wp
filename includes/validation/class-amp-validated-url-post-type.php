@@ -253,17 +253,21 @@ class AMP_Validated_URL_Post_Type {
 	public static function enqueue_post_list_screen_scripts() {
 		$screen = get_current_screen();
 
+		if ( ! $screen instanceof \WP_Screen ) {
+			return;
+		}
+
 		if ( 'edit-' . self::POST_TYPE_SLUG === $screen->id && self::POST_TYPE_SLUG === $screen->post_type ) {
-			$script_deps_path    = AMP__DIR__ . '/assets/js/amp-validated-urls-index.deps.json';
-			$script_dependencies = file_exists( $script_deps_path )
-				? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-				: [];
+			$asset_file   = AMP__DIR__ . '/assets/js/amp-validated-urls-index.asset.php';
+			$asset        = require $asset_file;
+			$dependencies = $asset['dependencies'];
+			$version      = $asset['version'];
 
 			wp_enqueue_script(
 				'amp-validated-urls-index',
 				amp_get_asset_url( 'js/amp-validated-urls-index.js' ),
-				$script_dependencies,
-				AMP__VERSION,
+				$dependencies,
+				$version,
 				true
 			);
 		}
@@ -293,16 +297,16 @@ class AMP_Validated_URL_Post_Type {
 
 		wp_styles()->add_data( 'amp-validation-tooltips', 'rtl', 'replace' );
 
-		$script_deps_path    = AMP__DIR__ . '/assets/js/amp-validation-tooltips.deps.json';
-		$script_dependencies = file_exists( $script_deps_path )
-			? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-			: [];
+		$asset_file   = AMP__DIR__ . '/assets/js/amp-validation-tooltips.asset.php';
+		$asset        = require $asset_file;
+		$dependencies = $asset['dependencies'];
+		$version      = $asset['version'];
 
 		wp_register_script(
 			'amp-validation-tooltips',
 			amp_get_asset_url( 'js/amp-validation-tooltips.js' ),
-			array_merge( $script_dependencies, [ 'wp-pointer' ] ),
-			AMP__VERSION,
+			$dependencies,
+			$version,
 			true
 		);
 
@@ -1655,16 +1659,16 @@ class AMP_Validated_URL_Post_Type {
 		// Eliminate autosave since it is only relevant for the content editor.
 		wp_dequeue_script( 'autosave' );
 
-		$script_deps_path    = AMP__DIR__ . '/assets/js/' . self::EDIT_POST_SCRIPT_HANDLE . '.deps.json';
-		$script_dependencies = file_exists( $script_deps_path )
-			? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-			: [];
+		$asset_file   = AMP__DIR__ . '/assets/js/' . self::EDIT_POST_SCRIPT_HANDLE . '.asset.php';
+		$asset        = require $asset_file;
+		$dependencies = $asset['dependencies'];
+		$version      = $asset['version'];
 
 		wp_enqueue_script(
 			self::EDIT_POST_SCRIPT_HANDLE,
 			amp_get_asset_url( 'js/' . self::EDIT_POST_SCRIPT_HANDLE . '.js' ),
-			$script_dependencies,
-			AMP__VERSION,
+			$dependencies,
+			$version,
 			true
 		);
 
