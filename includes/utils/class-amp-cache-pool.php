@@ -24,14 +24,14 @@ final class AMP_Cache_Pool {
 	 *
 	 * @var array
 	 */
-	private $pool_map = [];
+	private static $pool_maps = [];
 
 	/**
 	 * Index into the pool map.
 	 *
 	 * @var int
 	 */
-	private $pool_index = -1;
+	private static $pool_indexes = [];
 
 	/**
 	 * Cache group to use.
@@ -64,7 +64,7 @@ final class AMP_Cache_Pool {
 		$this->group = $group;
 		$this->size  = $size;
 
-		$this->is_object_cache_available = false; // wp_using_ext_object_cache();
+		$this->is_object_cache_available = wp_using_ext_object_cache();
 
 		if ( ! $this->is_object_cache_available ) {
 			$this->read_pool_meta();
@@ -105,7 +105,7 @@ final class AMP_Cache_Pool {
 	 * @return mixed Value for the requested key.
 	 */
 	private function get_rotated_transient( $key ) {
-		$pool_index = array_search( $key, $this->pool_map, true );
+		$pool_index = array_search( $key, self::$pool_maps[ $this->group ], true );
 
 		if ( false === $pool_index ) {
 			return false;
@@ -121,22 +121,22 @@ final class AMP_Cache_Pool {
 	 * @param mixed  $value Value to store under the given key.
 	 */
 	private function set_rotated_transient( $key, $value ) {
-		$pool_index = array_search( $key, $this->pool_map, true );
+		$pool_index = array_search( $key, self::$pool_maps[ $this->group ], true );
 
 		// We already have the provided key and the value seems unchanged.
-		if ( false !== $pool_index && $value === $this->pool_map[ $pool_index ] ) {
+		if ( false !== $pool_index && $value === self::$pool_maps[ $this->group ][ $pool_index ] ) {
 			return;
 		}
 
 		// As we didn't find the key, we create a new pool slot to store it.
-		if ( false === $pool_index || -1 === $this->pool_index ) {
+		if ( false === $pool_index || -1 === self::$pool_indexes[ $this->group ] ) {
 			$this->advance_pool_index();
-			$this->pool_map[ $this->pool_index ] = $key;
+			self::$pool_maps[ $this->group ][ self::$pool_indexes[ $this->group ] ] = $key;
 		}
 
 		// The expiration is to ensure transients don't stick around forever
 		// since no LRU flushing like with external object cache.
-		set_transient( "{$this->group}-pool-slot-{$this->pool_index}", $value, MONTH_IN_SECONDS );
+		set_transient( "{$this->group}-pool-slot-" . self::$pool_indexes[ $this->group ], $value, MONTH_IN_SECONDS );
 
 		$this->persist_pool_meta();
 	}
@@ -145,26 +145,26 @@ final class AMP_Cache_Pool {
 	 * Read the pool meta information that was persisted.
 	 */
 	private function read_pool_meta() {
-		$this->pool_map   = get_transient( "{$this->group}-pool-map" ) ?: [];
-		$this->pool_index = get_transient( "{$this->group}-pool-index" ) ?: -1;
+		self::$pool_maps[ $this->group ]    = get_transient( "{$this->group}-pool-map" ) ?: [];
+		self::$pool_indexes[ $this->group ] = get_transient( "{$this->group}-pool-index" ) ?: -1;
 	}
 
 	/**
 	 * Persist the pool meta information.
 	 */
 	private function persist_pool_meta() {
-		set_transient( "{$this->group}-pool-map", $this->pool_map );
-		set_transient( "{$this->group}-pool-index", $this->pool_index );
+		set_transient( "{$this->group}-pool-map", self::$pool_maps[ $this->group ] );
+		set_transient( "{$this->group}-pool-index", self::$pool_indexes[ $this->group ] );
 	}
 
 	/**
 	 * Advance the index into the pool cache.
 	 */
 	private function advance_pool_index() {
-		$this->pool_index++;
+		self::$pool_indexes[ $this->group ]++;
 
-		if ( $this->pool_index >= $this->size ) {
-			$this->pool_index = 0;
+		if ( self::$pool_indexes[ $this->group ] >= $this->size ) {
+			self::$pool_indexes[ $this->group ] = 0;
 		}
 	}
 }
