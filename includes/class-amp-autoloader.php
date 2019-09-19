@@ -94,6 +94,7 @@ class AMP_Autoloader {
 		'AMP_Content_Sanitizer'              => 'includes/templates/class-amp-content-sanitizer',
 		'AMP_Post_Template'                  => 'includes/templates/class-amp-post-template',
 		'AMP_DOM_Utils'                      => 'includes/utils/class-amp-dom-utils',
+		'AMP_Cache_Pool'                     => 'includes/utils/class-amp-cache-pool',
 		'AMP_HTML_Utils'                     => 'includes/utils/class-amp-html-utils',
 		'AMP_Image_Dimension_Extractor'      => 'includes/utils/class-amp-image-dimension-extractor',
 		'AMP_Validation_Manager'             => 'includes/validation/class-amp-validation-manager',

@@ -77,6 +77,18 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	const SELECTOR_EXTRACTED_ATTRIBUTES = 3;
 
 	/**
+	 * Cache group to use for caching stylesheets.
+	 *
+	 * This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
+	 *
+	 * @var string
+	 * @private
+	 * @since 1.4
+	 * @see \AMP_Style_Sanitizer::prepare_stylesheet()
+	 */
+	const CACHE_GROUP = 'amp-parsed-stylesheet-v19';
+
+	/**
 	 * Array of flags used to control sanitization.
 	 *
 	 * @var array {
@@ -305,6 +317,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	];
 
 	/**
+	 * Cache pool implementation to use if no object cache is available.
+	 *
+	 * @var AMP_Cache_Pool;
+	 */
+	private $cache_pool;
+
+	/**
 	 * Get error codes that can be raised during parsing of CSS.
 	 *
 	 * This is used to determine which validation errors should be taken into account
@@ -399,6 +418,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$this->base_url    = untrailingslashit( $guessurl );
 		$this->content_url = WP_CONTENT_URL;
 		$this->xpath       = new DOMXPath( $dom );
+		$this->cache_pool  = new AMP_Cache_Pool( self::CACHE_GROUP );
 	}
 
 	/**
@@ -1350,7 +1370,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private function process_stylesheet( $stylesheet, $options = [] ) {
 		$parsed      = null;
 		$cache_key   = null;
-		$cache_group = 'amp-parsed-stylesheet-v19'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
 
 		$cache_impacting_options = array_merge(
 			wp_array_slice_assoc(
@@ -1367,12 +1386,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		);
 
 		$cache_key = md5( $stylesheet . wp_json_encode( $cache_impacting_options ) );
-
-		if ( wp_using_ext_object_cache() ) {
-			$parsed = wp_cache_get( $cache_key, $cache_group );
-		} else {
-			$parsed = get_transient( $cache_group . '-' . $cache_key );
-		}
+		$parsed    = $this->cache_pool->get( $cache_key );
 
 		/*
 		 * Make sure that the parsed stylesheet was cached with current sanitizations.
@@ -1390,18 +1404,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		if ( ! $parsed || ! isset( $parsed['stylesheet'] ) || ! is_array( $parsed['stylesheet'] ) ) {
 			$parsed = $this->prepare_stylesheet( $stylesheet, $options );
-
-			/*
-			 * When an object cache is not available, we cache with an expiration to prevent the options table from
-			 * getting filled infinitely. On the other hand, if an external object cache is available then we don't
-			 * set an expiration because it should implement LRU cache expulsion policy.
-			 */
-			if ( wp_using_ext_object_cache() ) {
-				wp_cache_set( $cache_key, $parsed, $cache_group );
-			} else {
-				// The expiration is to ensure transient doesn't stick around forever since no LRU flushing like with external object cache.
-				set_transient( $cache_group . '-' . $cache_key, $parsed, MONTH_IN_SECONDS );
-			}
+			$this->cache_pool->set( $cache_key, $parsed );
 		}
 
 		return $parsed;
