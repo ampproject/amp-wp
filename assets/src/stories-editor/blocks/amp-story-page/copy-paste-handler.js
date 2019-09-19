@@ -13,12 +13,13 @@ import { withDispatch, useSelect, useDispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { ensureAllowedBlocksOnPaste } from '../../helpers';
+import { copyTextToClipBoard, ensureAllowedBlocksOnPaste, isPageBlock } from '../../helpers';
 
-function CopyPasteHandler( { children, onCopy, onCut, clientId, isSelected } ) {
+function CopyPasteHandler( { children, onCopy, clientId, isSelected } ) {
 	const {
 		isFirstPage,
 		canUserUseUnfilteredHTML,
+		getCopiedMarkupState,
 	} = useSelect(
 		( select ) => {
 			const {
@@ -26,9 +27,11 @@ function CopyPasteHandler( { children, onCopy, onCut, clientId, isSelected } ) {
 				getSettings,
 			} = select( 'core/block-editor' );
 			const { __experimentalCanUserUseUnfilteredHTML } = getSettings();
+			const { getCopiedMarkup } = select( 'amp/story' );
 			return {
 				isFirstPage: getBlockOrder().indexOf( clientId ) === 0,
 				canUserUseUnfilteredHTML: __experimentalCanUserUseUnfilteredHTML,
+				getCopiedMarkupState: getCopiedMarkup,
 			};
 		}, [ clientId ]
 	);
@@ -55,10 +58,9 @@ function CopyPasteHandler( { children, onCopy, onCut, clientId, isSelected } ) {
 			try {
 				html = clipboardData.getData( 'Text' );
 			} catch ( error2 ) {
-				// Some browsers like UC Browser paste plain text by default and
-				// don't support clipboardData at all, so allow default
-				// behaviour.
-				return;
+				// If everything goes wrong, fall back to state based clipboard.
+				plainText = getCopiedMarkupState();
+				html = getCopiedMarkupState();
 			}
 		}
 
@@ -79,7 +81,7 @@ function CopyPasteHandler( { children, onCopy, onCut, clientId, isSelected } ) {
 	};
 
 	return (
-		<div onCopy={ onCopy } onPaste={ onPaste } onCut={ onCut }>
+		<div onCopy={ onCopy } onPaste={ onPaste } onCut={ onCopy }>
 			{ children }
 		</div>
 	);
@@ -90,7 +92,6 @@ CopyPasteHandler.propTypes = {
 	clientId: PropTypes.string.isRequired,
 	isSelected: PropTypes.bool.isRequired,
 	onCopy: PropTypes.func.isRequired,
-	onCut: PropTypes.func.isRequired,
 };
 
 export default withDispatch( ( dispatch, ownProps, { select } ) => {
@@ -99,15 +100,19 @@ export default withDispatch( ( dispatch, ownProps, { select } ) => {
 		getSelectedBlockClientIds,
 		hasMultiSelection,
 	} = select( 'core/block-editor' );
-	const { removeBlock } = dispatch( 'core/block-editor' );
+	const { getCurrentPage } = select( 'amp/story' );
 	const { clearCopiedMarkup, setCopiedMarkup } = dispatch( 'amp/story' );
+	const { removeBlock, selectBlock } = dispatch( 'core/block-editor' );
 
 	/**
-	 * Copy handler for ensuring that the store's copiedMarkup is in sync with what's actually in clipBoard.
+	 * Creates cut/copy handler for ensuring that the store's copiedMarkup is in sync with what's actually in clipBoard.
 	 * If it's not a block that's being copied, let's clear the copiedMarkup.
 	 * Otherwise, let's set the copied markup.
+	 * If it's a cut handler, finally remove the currently selected block.
+	 *
+	 * @param  {Event} event Event object.
 	 */
-	const onCopy = () => {
+	const onCopy = ( event ) => {
 		const selectedBlockClientIds = getSelectedBlockClientIds();
 
 		if ( selectedBlockClientIds.length === 0 ) {
@@ -120,31 +125,36 @@ export default withDispatch( ( dispatch, ownProps, { select } ) => {
 			clearCopiedMarkup();
 			return;
 		}
-		const serialized = serialize( getBlocksByClientId( selectedBlockClientIds ) );
-		setCopiedMarkup( serialized );
-	};
 
-	/**
-	 * Cut handler for ensuring that the store's cutMarkup is in sync with what's actually in clipBoard.
-	 * If it's not a block that's being cut, let's clear the cutMarkup.
-	 * Otherwise, let's set the cut markup.
-	 */
-	const onCut = () => {
-		const selectedBlockClientIds = getSelectedBlockClientIds();
+		// Don't allow story blocks to be copyied.
+		for ( const selectedBlockClientId of selectedBlockClientIds ) {
+			if ( isPageBlock( selectedBlockClientId ) ) {
+				clearCopiedMarkup();
+				return;
+			}
+		}
 
-		if ( selectedBlockClientIds.length === 0 ) {
-			return;
-		}
-		// Reuse code in onCode.
-		onCopy();
-		// Remove selected Blocks.
-		for ( const clientId of selectedBlockClientIds ) {
-			removeBlock( clientId );
-		}
+		const copyBlocks = getBlocksByClientId( selectedBlockClientIds );
+		const serialized = serialize( copyBlocks );
+		// Workout what type of event, from event object passed to this function.
+		const isCut = ( event.type === 'cut' );
+
+		// Make sure that setCopiedMarkup finishes before doing anything else.
+		setCopiedMarkup( serialized ).then( () => {
+			copyTextToClipBoard( serialized );
+
+			if ( isCut ) {
+				const pageClientId = getCurrentPage();
+				for ( const clientId of selectedBlockClientIds ) {
+					// On removing block, change focus to the page, to make sure that editor doesn't get confused and tries to select an already removed block.
+					selectBlock( pageClientId );
+					removeBlock( clientId );
+				}
+			}
+		} );
 	};
 
 	return {
 		onCopy,
-		onCut,
 	};
 } )( CopyPasteHandler );

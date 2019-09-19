@@ -1,12 +1,27 @@
 <?php
+/**
+ * Tests for gallery embed.
+ *
+ * @package AMP
+ */
 
+/**
+ * Class AMP_Gallery_Embed_Test
+ */
 class AMP_Gallery_Embed_Test extends WP_UnitTestCase {
 
 	/**
+	 * Replacements.
+	 *
 	 * @var array Associative array of string replacements to process.
 	 */
 	private $replacements = [];
 
+	/**
+	 * Get conversion data.
+	 *
+	 * @return array[]
+	 */
 	public function get_conversion_data() {
 		return [
 			'shortcode_with_invalid_id'               => [
@@ -101,7 +116,11 @@ class AMP_Gallery_Embed_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test conversion.
+	 *
 	 * @dataProvider get_conversion_data
+	 * @param string $source   Source.
+	 * @param string $expected Expected.
 	 */
 	public function test__conversion( $source, $expected ) {
 		$source_files = [
@@ -116,7 +135,6 @@ class AMP_Gallery_Embed_Test extends WP_UnitTestCase {
 		// collisions. So we write the tests in a way that they don't rely on
 		// this, and str-replace the dynamic portions into the expected and
 		// actual output after the fact.
-
 		$ids   = [];
 		$files = [];
 
@@ -182,6 +200,9 @@ class AMP_Gallery_Embed_Test extends WP_UnitTestCase {
 		// We start by turning multiple whitespaces into one space, as the default WP gallery code
 		// creates a mess with lots of spaces.
 		$content = trim( preg_replace( '/\s+/', ' ', $content ) );
+
+		// Normalize attribute quote style for 5.3-alpha.
+		$content = str_replace( '<style type=\'text/css\'>', '<style type="text/css">', $content );
 
 		// Then we go through all previously defined replacements.
 		return str_replace(

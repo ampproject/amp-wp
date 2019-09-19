@@ -11,7 +11,7 @@ import { ReactElement } from 'react';
  * WordPress dependencies
  */
 import '@wordpress/core-data';
-import { render } from '@wordpress/element';
+import { render, cloneElement } from '@wordpress/element';
 import { count } from '@wordpress/wordcount';
 import { __, _x, sprintf } from '@wordpress/i18n';
 import { select, dispatch } from '@wordpress/data';
@@ -326,6 +326,11 @@ export const addAMPAttributes = ( settings, name ) => {
 		addedAttributes.ampShowCaption = {
 			type: 'boolean',
 			default: false,
+		};
+
+		addedAttributes.ampAriaLabel = {
+			type: 'string',
+			default: '',
 		};
 
 		// Required defaults for AMP validity.
@@ -1764,6 +1769,81 @@ export const processMedia = ( media ) => {
 };
 
 /**
+ * Helper to convert snake_case meta keys to key names used in the amp-story-page attributes.
+ *
+ * @param {Object} meta Meta object to be converted to an object with attributes key names.
+ *
+ * @return {Object} Processed object.
+ */
+export const metaToAttributeNames = ( meta ) => {
+	return {
+		autoAdvanceAfter: meta.amp_story_auto_advance_after,
+		autoAdvanceAfterDuration: meta.amp_story_auto_advance_after_duration,
+	};
+};
+
+/**
+ * Helper to add an `aria-label` to video elements when saved.
+ *
+ * This helper is designed as a filter for `blocks.getSaveElement`.
+ *
+ * @param {ReactElement}  element     Previously generated React element
+ * @param {Object}        type        Block type definition.
+ * @param {string}        type.name   Name of block type
+ * @param {Object}        attributes  Block attributes.
+ *
+ * @return {ReactElement}  New React element
+ */
+export const addVideoAriaLabel = ( element, { name }, attributes ) => {
+	// this filter only applies to core video objects (which always has children) where an aria label has been set
+	if ( name !== 'core/video' || ! element.props.children || ! attributes.ampAriaLabel ) {
+		return element;
+	}
+
+	/* `element` will be a react structure like:
+
+	<figure>
+		<amp-video|video>
+			Fallback content
+		</amp-video|video>
+		[<figcaption>Caption</figcaption>]
+	</figure>
+
+	The video element can be either an `<amp-video>`` or a regular `<video>`.
+
+	`<figcaption>` is not necessarily present.
+
+	We need to hook into this element and add an `aria-label` on the `<amp-video|video>` element.
+	*/
+
+	const isFigure = element.type === 'figure';
+	const childNodes = Array.isArray( element.props.children ) ? element.props.children : [ element.props.children ];
+	const videoTypes = [ 'amp-video', 'video' ];
+	const isFirstChildVideoType = videoTypes.includes( childNodes[ 0 ].type );
+	if ( ! isFigure || ! isFirstChildVideoType ) {
+		return element;
+	}
+
+	const figure = element;
+	const [ video, ...rest ] = childNodes;
+
+	const newVideo = cloneElement(
+		video,
+		{ 'aria-label': attributes.ampAriaLabel },
+		video.props.children,
+	);
+
+	const newFigure = cloneElement(
+		figure,
+		{},
+		newVideo,
+		...rest
+	);
+
+	return newFigure;
+};
+
+/**
  * Copy text to clipboard by using temporary input field.
  *
  * @param {string} text Text to copy.
@@ -2051,4 +2131,15 @@ export const startAnimation = ( block, animationType, animationDuration, animati
 	blockElement.classList.add( `story-animation-${ animationType }` );
 
 	blockElement.addEventListener( 'animationend', callback, { once: true } );
+};
+
+/**
+ * Check if block is page block.
+ *
+ * @param {string} clientId Block client ID.
+ * @return {boolean} Boolean if block is / is not a page block.
+ */
+export const isPageBlock = ( clientId ) => {
+	const block = getBlock( clientId );
+	return block && 'amp/amp-story-page' === block.name;
 };

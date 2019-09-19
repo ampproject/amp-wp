@@ -135,7 +135,7 @@ abstract class AMP_Base_Sanitizer {
 	 *
 	 * @param array $args Args.
 	 */
-	public static function add_buffering_hooks( $args = [] ) {}
+	public static function add_buffering_hooks( $args = [] ) {} // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 
 	/**
 	 * Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
@@ -154,7 +154,7 @@ abstract class AMP_Base_Sanitizer {
 	 *
 	 * @param AMP_Base_Sanitizer[] $sanitizers Sanitizers.
 	 */
-	public function init( $sanitizers ) {}
+	public function init( $sanitizers ) {} // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 
 	/**
 	 * Sanitize the HTML contained in the DOMDocument received by the constructor
@@ -284,12 +284,15 @@ abstract class AMP_Base_Sanitizer {
 				&& 0 === (int) $styles['left']
 				&& 0 === (int) $styles['bottom']
 				&& 0 === (int) $styles['right']
+				&& ( ! isset( $attributes['width'] ) || '100%' === $attributes['width'] )
+				&& ( ! isset( $attributes['height'] ) || '100%' === $attributes['height'] )
 			) {
 				unset( $attributes['style'], $styles['position'], $styles['top'], $styles['left'], $styles['bottom'], $styles['right'] );
 				if ( ! empty( $styles ) ) {
 					$attributes['style'] = $this->reassemble_style_string( $styles );
 				}
 				$attributes['layout'] = 'fill';
+				unset( $attributes['height'], $attributes['width'] );
 				return $attributes;
 			}
 
@@ -510,8 +513,7 @@ abstract class AMP_Base_Sanitizer {
 	 * @return array Error.
 	 */
 	public function prepare_validation_error( array $error = [], array $data = [] ) {
-		$node    = null;
-		$matches = null;
+		$node = null;
 
 		if ( isset( $data['node'] ) && $data['node'] instanceof DOMNode ) {
 			$node = $data['node'];

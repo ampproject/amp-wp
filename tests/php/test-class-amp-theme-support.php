@@ -234,7 +234,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	/**
 	 * Test supports_reader_mode.
 	 *
-	 * @covers \AMP_Theme_Support::supports_reader_mode.
+	 * @covers \AMP_Theme_Support::supports_reader_mode()
 	 */
 	public function test_supports_reader_mode() {
 		$themes_directory = 'themes';

@@ -133,6 +133,8 @@ beforeAll( async () => {
 	enablePageDialogAccept();
 	observeConsoleLogging();
 	await setBrowserViewport( 'large' );
+	await page.setDefaultNavigationTimeout( 5000 );
+	await page.setDefaultTimeout( 3000 );
 } );
 
 // eslint-disable-next-line jest/require-top-level-describe

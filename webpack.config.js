@@ -48,8 +48,6 @@ const ampStories = {
 	output: {
 		path: path.resolve( process.cwd(), 'assets', 'js' ),
 		filename: '[name].js',
-		library: 'AMP',
-		libraryTarget: 'this',
 	},
 	module: {
 		...defaultConfig.module,

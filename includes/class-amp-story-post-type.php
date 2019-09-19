@@ -18,6 +18,16 @@ class AMP_Story_Post_Type {
 	const POST_TYPE_SLUG = 'amp_story';
 
 	/**
+	 * The option name where story settings are stored.
+	 */
+	const STORY_SETTINGS_OPTION = 'story_settings';
+
+	/**
+	 * The meta prefix applied to story settings options saved as individual post meta.
+	 */
+	const STORY_SETTINGS_META_PREFIX = 'amp_story_';
+
+	/**
 	 * Minimum required version of Gutenberg required.
 	 *
 	 * @var string
@@ -157,6 +167,7 @@ class AMP_Story_Post_Type {
 					'thumbnail', // Used for poster images.
 					'amp',
 					'revisions', // Without this, the REST API will return 404 for an autosave request.
+					'custom-fields', // Used for global stories settings.
 				],
 				'rewrite'      => [
 					'slug' => self::REWRITE_SLUG,
@@ -349,6 +360,31 @@ class AMP_Story_Post_Type {
 		);
 
 		add_action( 'wp_head', [ __CLASS__, 'print_feed_link' ] );
+
+		// Register story settings meta.
+		$stories_settings_definitions = self::get_stories_settings_definitions();
+
+		foreach ( $stories_settings_definitions as $option_key => $definition ) {
+			$meta_args = isset( $definition['meta_args'] )
+				? (array) $definition['meta_args']
+				: [];
+
+			$meta_args_defaults = [
+				'type'           => 'string',
+				'object_subtype' => self::POST_TYPE_SLUG,
+				'description'    => '',
+				'single'         => true,
+				'show_in_rest'   => true,
+			];
+
+			register_meta(
+				'post',
+				self::STORY_SETTINGS_META_PREFIX . $option_key,
+				wp_parse_args( $meta_args, $meta_args_defaults )
+			);
+		}
+
+		add_action( 'wp_insert_post', [ __CLASS__, 'add_story_settings_meta_to_new_story' ], 10, 3 );
 
 		AMP_Story_Media::init();
 	}
@@ -910,20 +946,26 @@ class AMP_Story_Post_Type {
 	 * Enqueue scripts for the block editor.
 	 */
 	public static function enqueue_block_editor_scripts() {
-		if ( self::POST_TYPE_SLUG !== get_current_screen()->post_type ) {
+		$screen = get_current_screen();
+
+		if ( ! $screen instanceof \WP_Screen ) {
 			return;
 		}
 
-		$script_deps_path    = AMP__DIR__ . '/assets/js/' . self::AMP_STORIES_SCRIPT_HANDLE . '.deps.json';
-		$script_dependencies = file_exists( $script_deps_path )
-			? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-			: [];
+		if ( self::POST_TYPE_SLUG !== $screen->post_type ) {
+			return;
+		}
+
+		$asset_file   = AMP__DIR__ . '/assets/js/' . self::AMP_STORIES_SCRIPT_HANDLE . '.asset.php';
+		$asset        = require $asset_file;
+		$dependencies = $asset['dependencies'];
+		$version      = $asset['version'];
 
 		wp_enqueue_script(
 			self::AMP_STORIES_SCRIPT_HANDLE,
 			amp_get_asset_url( 'js/' . self::AMP_STORIES_SCRIPT_HANDLE . '.js' ),
-			$script_dependencies,
-			AMP__VERSION,
+			$dependencies,
+			$version,
 			false
 		);
 
@@ -960,6 +1002,10 @@ class AMP_Story_Post_Type {
 		// Only add currently supported mime types.
 		$allowed_video_mime_types = array_values( array_intersect( $allowed_video_mime_types, wp_get_mime_types() ) );
 
+		// Convert auto advancement.
+		$meta_definitions         = self::get_stories_settings_definitions();
+		$auto_advancement_options = $meta_definitions['auto_advance_after']['data']['options'];
+
 		/**
 		 * Filters the list of allowed post types for use in page attachments.
 		 *
@@ -983,6 +1029,9 @@ class AMP_Story_Post_Type {
 			[
 				'allowedVideoMimeTypes'          => $allowed_video_mime_types,
 				'allowedPageAttachmentPostTypes' => $post_types,
+				'storySettings'                  => [
+					'autoAdvanceAfterOptions' => $auto_advancement_options,
+				],
 			]
 		);
 
@@ -1835,7 +1884,7 @@ class AMP_Story_Post_Type {
 						'type'    => 'string',
 						'default' => '',
 					],
-					'text'            => [
+					'openText'        => [
 						'type'    => 'string',
 						'default' => __( 'Swipe up', 'amp' ),
 					],
@@ -1894,7 +1943,7 @@ class AMP_Story_Post_Type {
 
 		ob_start();
 		?>
-		<amp-story-page-attachment layout="nodisplay" theme="light" data-cta-text="<?php echo esc_attr( $attributes['text'] ); ?>" data-title="<?php echo esc_attr( $attributes['title'] ); ?>">
+		<amp-story-page-attachment layout="nodisplay" theme="light" data-cta-text="<?php echo esc_attr( $attributes['openText'] ); ?>" data-title="<?php echo esc_attr( $attributes['title'] ); ?>">
 			<div class="<?php echo esc_attr( $attributes['attachmentClass'] ); ?>" style="<?php echo esc_attr( $style ); ?>">
 				<h2><?php the_title(); ?></h2>
 				<div class="amp-page-attachment-inner-content">
@@ -2197,5 +2246,101 @@ class AMP_Story_Post_Type {
 		fpassthru( $fo );
 		unlink( $file );
 		die();
+	}
+
+	/**
+	 * Returns the definitions for the stories settings.
+	 *
+	 * @since 1.3
+	 *
+	 * @return array
+	 *
+	 * - meta_args array Arguments passed to `register_meta`; sanitize_callback is required.
+	 * - data      array Any additional data.
+	 */
+	public static function get_stories_settings_definitions() {
+		return [
+			'auto_advance_after'          => [
+				'meta_args' => [
+					'type'              => 'string',
+					'sanitize_callback' => function( $value ) {
+						$valid_values = [ '', 'auto', 'time', 'media' ];
+
+						if ( ! in_array( $value, $valid_values, true ) ) {
+							return '';
+						}
+						return $value;
+					},
+				],
+				'data'      => [
+					'options' => [
+						[
+							'value'       => '',
+							'label'       => __( 'Manual', 'amp' ),
+							'description' => '',
+						],
+						[
+							'value'       => 'auto',
+							'label'       => __( 'Automatic', 'amp' ),
+							'description' => __( 'Based on the duration of all animated blocks on the page', 'amp' ),
+						],
+						[
+							'value'       => 'time',
+							'label'       => __( 'After a certain time', 'amp' ),
+							'description' => '',
+						],
+						[
+							'value'       => 'media',
+							'label'       => __( 'After media has played', 'amp' ),
+							'description' => __( 'Based on the first media block encountered on the page', 'amp' ),
+						],
+					],
+				],
+			],
+			'auto_advance_after_duration' => [
+				'meta_args' => [
+					'type'              => 'integer',
+					'sanitize_callback' => function( $value ) {
+						$value = intval( $value );
+
+						return filter_var(
+							$value,
+							FILTER_VALIDATE_INT,
+							[
+								'default'   => 0,
+								'min_range' => 1,
+								'max_range' => 100,
+							]
+						);
+					},
+				],
+				'data'      => [],
+			],
+		];
+	}
+
+	/**
+	 * Adds stories global settings as post meta to all new Stories.
+	 *
+	 * @param int      $post_id New Story post ID.
+	 * @param \WP_Post $post    Story post object.
+	 * @param bool     $update  Whether this is an update or a new post being created.
+	 *
+	 * @return void
+	 */
+	public static function add_story_settings_meta_to_new_story( $post_id, $post, $update ) {
+		$is_story = ( self::POST_TYPE_SLUG === $post->post_type );
+
+		if ( $update || ! $is_story ) {
+			return;
+		}
+
+		$meta_definitions = self::get_stories_settings_definitions();
+		$story_settings   = AMP_Options_Manager::get_option( self::STORY_SETTINGS_OPTION );
+
+		foreach ( $story_settings as $option_key => $value ) {
+			$sanitized_value = call_user_func( $meta_definitions[ $option_key ]['meta_args']['sanitize_callback'], $value );
+			add_post_meta( $post_id, self::STORY_SETTINGS_META_PREFIX . $option_key, $sanitized_value, true );
+		}
 	}
 }

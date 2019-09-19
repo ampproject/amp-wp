@@ -10,6 +10,8 @@
  */
 class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 
+	private $original_options;
+
 	/**
 	 * Set up.
 	 */
@@ -30,6 +32,18 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 
 		global $wp_styles;
 		$wp_styles = null;
+
+		$this->original_options = AMP_Options_Manager::get_options();
+
+		// Set stories settings for testing.
+		AMP_Options_Manager::update_option(
+			AMP_Story_Post_Type::STORY_SETTINGS_OPTION,
+			[
+				'auto_advance_after'          => 'time',
+				'auto_advance_after_duration' => '10',
+			]
+		);
+
 		AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::STORIES_EXPERIENCE ] );
 	}
 
@@ -40,6 +54,11 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	 */
 	public function tearDown() {
 		global $wp_rewrite;
+
+		// Restore original options
+		foreach ( $this->original_options as $option => $value ) {
+			AMP_Options_Manager::update_option( $option, $value );
+		}
 
 		AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::WEBSITE_EXPERIENCE ] );
 		unregister_post_type( AMP_Story_Post_Type::POST_TYPE_SLUG );
@@ -53,9 +72,10 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	/**
 	 * Test requires opt_in.
 	 *
+	 * @dataProvider get_default_settings_definitions
 	 * @covers \AMP_Story_Post_Type::register()
 	 */
-	public function test_requires_opt_in() {
+	public function test_requires_opt_in( $definitions ) {
 		unregister_post_type( AMP_Story_Post_Type::POST_TYPE_SLUG );
 
 		AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::WEBSITE_EXPERIENCE ] );
@@ -65,6 +85,11 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::STORIES_EXPERIENCE ] );
 		AMP_Story_Post_Type::register();
 		$this->assertTrue( post_type_exists( AMP_Story_Post_Type::POST_TYPE_SLUG ) );
+
+		foreach ( $definitions as $option_key => $definition ) {
+			$is_meta_registered = registered_meta_key_exists( 'post', AMP_Story_Post_Type::STORY_SETTINGS_META_PREFIX . $option_key, AMP_Story_Post_Type::POST_TYPE_SLUG );
+			$this->assertTrue( $is_meta_registered );
+		}
 	}
 
 	/**
@@ -695,5 +720,119 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 				[ 'sans-serif' ],
 			],
 		];
+	}
+
+	public function get_default_settings_definitions() {
+		return [
+			[
+				[
+					'auto_advance_after'          => [
+						'meta_args' => [
+							'type'              => 'string',
+							'sanitize_callback' => function( $value ) {
+								$valid_values = [ '', 'auto', 'time', 'media' ];
+
+								if ( ! in_array( $value, $valid_values, true ) ) {
+									return '';
+								}
+								return $value;
+							},
+						],
+						'data'      => [
+							'options' => [
+								[
+									'value'       => '',
+									'label'       => __( 'Manual', 'amp' ),
+									'description' => '',
+								],
+								[
+									'value'       => 'auto',
+									'label'       => __( 'Automatic', 'amp' ),
+									'description' => __( 'Based on the duration of all animated blocks on the page', 'amp' ),
+								],
+								[
+									'value'       => 'time',
+									'label'       => __( 'After a certain time', 'amp' ),
+									'description' => '',
+								],
+								[
+									'value'       => 'media',
+									'label'       => __( 'After media has played', 'amp' ),
+									'description' => __( 'Based on the first media block encountered on the page', 'amp' ),
+								],
+							],
+						],
+					],
+					'auto_advance_after_duration' => [
+						'meta_args' => [
+							'type'              => 'integer',
+							'sanitize_callback' => function( $value ) {
+								$value = intval( $value );
+
+								return filter_var(
+									$value,
+									FILTER_VALIDATE_INT,
+									[
+										'default'   => 0,
+										'min_range' => 1,
+										'max_range' => 100,
+									]
+								);
+							},
+						],
+						'data'      => [],
+					],
+				],
+			],
+		];
+	}
+
+	/**
+	 * Test the definitions return value
+	 *
+	 * @dataProvider get_default_settings_definitions
+	 * @covers AMP_Story_Post_Type::get_stories_settings_definitions()
+	 *
+	 * @param array $default_definitions Default definitions.
+	 */
+	public function test_get_stories_settings_meta_definitions( $default_definitions ) {
+		$definitions = AMP_Story_Post_Type::get_stories_settings_definitions();
+		$this->assertEquals( $default_definitions, $definitions );
+	}
+
+	/**
+	 * Test that default settings are added as post meta to new posts.
+	 *
+	 * @covers AMP_Story_Post_Type::add_story_settings_meta_to_new_story
+	 */
+	public function test_add_story_settings_meta_to_new_story() {
+		$new_story = self::factory()->post->create_and_get(
+			[ 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ]
+		);
+		AMP_Story_Post_Type::add_story_settings_meta_to_new_story( $new_story->ID, $new_story, false );
+
+		$advance_after          = get_post_meta( $new_story->ID, AMP_Story_Post_Type::STORY_SETTINGS_META_PREFIX . 'auto_advance_after', true );
+		$advance_after_duration = get_post_meta( $new_story->ID, AMP_Story_Post_Type::STORY_SETTINGS_META_PREFIX . 'auto_advance_after_duration', true );
+
+		$this->assertEquals( 'time', $advance_after );
+		$this->assertEquals( 10, $advance_after_duration );
+	}
+
+	/**
+	 * Test that default settings are NOT added as post meta to existing posts that are just being updated.
+	 *
+	 * @covers AMP_Story_Post_Type::add_story_settings_meta_to_new_story
+	 */
+	public function test_not_add_story_settings_meta_to_updated_story() {
+		$new_story = self::factory()->post->create_and_get(
+			[ 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ]
+		);
+		AMP_Story_Post_Type::add_story_settings_meta_to_new_story( $new_story->ID, $new_story, true );
+
+		$advance_after          = get_post_meta( $new_story->ID, AMP_Story_Post_Type::STORY_SETTINGS_META_PREFIX . 'auto_advance_after', true );
+		$advance_after_duration = get_post_meta( $new_story->ID, AMP_Story_Post_Type::STORY_SETTINGS_META_PREFIX . 'auto_advance_after_duration', true );
+
+		$this->assertEquals( '', $advance_after );
+		$this->assertEquals( '', $advance_after_duration );
 	}
 }

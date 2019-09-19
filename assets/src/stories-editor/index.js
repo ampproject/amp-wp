@@ -26,10 +26,7 @@ import {
  * Internal dependencies
  */
 import './style.css'; // This way the general editor styles are loaded before all the component styles.
-import {
-	withCroppedFeaturedImage,
-	withEnforcedFileType,
-} from '../common/components';
+import { withEnforcedFileType } from '../common/components';
 import {
 	withAmpStorySettings,
 	withPageNumber,
@@ -40,6 +37,7 @@ import {
 	withActivePageState,
 	withStoryBlockDropZone,
 	withCallToActionValidation,
+	withCroppedFeaturedImage,
 	withRightClickHandler,
 } from './components';
 import {
@@ -62,6 +60,7 @@ import {
 	wrapBlocksInGridLayer,
 	getMinimumStoryPosterDimensions,
 	maybeAddMissingAnchor,
+	addVideoAriaLabel,
 } from './helpers';
 import { ALLOWED_BLOCKS } from './constants';
 import store from './store';
@@ -304,10 +303,10 @@ store.subscribe( () => {
 const plugins = require.context( './plugins', true, /.*\.js$/ );
 
 plugins.keys().forEach( ( modulePath ) => {
-	const { name, render, isActive = true } = plugins( modulePath );
+	const { name, render, icon, isActive = true } = plugins( modulePath );
 
 	if ( isActive ) {
-		registerPlugin( name, { render } );
+		registerPlugin( name, { render, icon } );
 	}
 } );
 
@@ -327,6 +326,7 @@ addFilter( 'editor.MediaUpload', 'ampStoryEditorBlocks/addEnforcedFileType', ( I
 addFilter( 'editor.MediaUpload', 'ampStoryEditorBlocks/addCroppedFeaturedImage', ( InitialMediaUpload ) => withCroppedFeaturedImage( InitialMediaUpload, getMinimumStoryPosterDimensions() ) );
 addFilter( 'blocks.getSaveContent.extraProps', 'ampStoryEditorBlocks/addExtraAttributes', addAMPExtraProps );
 addFilter( 'blocks.getSaveElement', 'ampStoryEditorBlocks/wrapBlocksInGridLayer', wrapBlocksInGridLayer );
+addFilter( 'blocks.getSaveElement', 'ampStoryEditorBlocks/addVideoAriaLabel', addVideoAriaLabel );
 addFilter( 'editor.BlockDropZone', 'ampStoryEditorBlocks/withStoryBlockDropZone', withStoryBlockDropZone );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/withCallToActionValidation', withCallToActionValidation );
 addFilter( 'blocks.getBlockAttributes', 'ampStoryEditorBlocks/filterBlockAttributes', filterBlockAttributes );

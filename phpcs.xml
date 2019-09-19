@@ -86,6 +86,15 @@
 		<exclude-pattern>amp.php</exclude-pattern>
 	</rule>
 
+	<rule ref="VariableAnalysis.CodeAnalysis.VariableAnalysis">
+		<exclude-pattern>templates/*</exclude-pattern>
+		<exclude-pattern>includes/templates/*</exclude-pattern>
+		<exclude-pattern>back-compat/*</exclude-pattern>
+		<properties>
+			<property name="allowUnusedParametersBeforeUsed" value="true"/>
+		</properties>
+	</rule>
+
 	<arg value="s"/>
 	<arg name="extensions" value="php"/>
 	<file>.</file>
@@ -100,4 +109,5 @@
 	<exclude-pattern>*/vendor/*</exclude-pattern>
 	<exclude-pattern type="relative">^build/*</exclude-pattern>
 	<exclude-pattern>includes/sanitizers/class-amp-allowed-tags-generated.php</exclude-pattern>
+	<exclude-pattern>assets/js/*.asset.php</exclude-pattern>
 </ruleset>
