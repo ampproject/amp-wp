@@ -31,7 +31,7 @@ final class AMP_Cache_Pool {
 	 *
 	 * @var int
 	 */
-	private $pool_index;
+	private $pool_index = -1;
 
 	/**
 	 * Cache group to use.
@@ -107,7 +107,7 @@ final class AMP_Cache_Pool {
 	private function get_rotated_transient( $key ) {
 		$pool_index = array_search( $key, $this->pool_map, true );
 
-		if ( ! $pool_index ) {
+		if ( false === $pool_index ) {
 			return false;
 		}
 
@@ -129,7 +129,7 @@ final class AMP_Cache_Pool {
 		}
 
 		// As we didn't find the key, we create a new pool slot to store it.
-		if ( false === $pool_index ) {
+		if ( false === $pool_index || -1 === $this->pool_index ) {
 			$this->advance_pool_index();
 			$this->pool_map[ $this->pool_index ] = $key;
 		}
@@ -146,7 +146,7 @@ final class AMP_Cache_Pool {
 	 */
 	private function read_pool_meta() {
 		$this->pool_map   = get_transient( "{$this->group}-pool-map" ) ?: [];
-		$this->pool_index = get_transient( "{$this->group}-pool-index" ) ?: 0;
+		$this->pool_index = get_transient( "{$this->group}-pool-index" ) ?: -1;
 	}
 
 	/**
