@@ -13,6 +13,13 @@
 final class AMP_Cache_Pool {
 
 	/**
+	 * Default size of the cache pool.
+	 *
+	 * @var int
+	 */
+	const DEFAULT_POOL_SIZE = 1000;
+
+	/**
 	 * Pool map of cached entries.
 	 *
 	 * @var array
@@ -34,6 +41,13 @@ final class AMP_Cache_Pool {
 	private $group;
 
 	/**
+	 * Size of the cache pool.
+	 *
+	 * @var int
+	 */
+	private $size;
+
+	/**
 	 * Whether an object cache is available.
 	 *
 	 * @var bool
@@ -44,9 +58,12 @@ final class AMP_Cache_Pool {
 	 * Instantiate an AMP_Cache_Pool object.
 	 *
 	 * @param string $group Optional. Group to use. Defaults to an empty string.
+	 * @param int    $size  Optional. Size of the cache pool.
 	 */
-	public function __construct( $group = '' ) {
-		$this->group                     = $group;
+	public function __construct( $group = '', $size = self::DEFAULT_POOL_SIZE ) {
+		$this->group = $group;
+		$this->size  = $size;
+
 		$this->is_object_cache_available = false; // wp_using_ext_object_cache();
 
 		if ( ! $this->is_object_cache_available ) {
@@ -104,33 +121,24 @@ final class AMP_Cache_Pool {
 	 * @param mixed  $value Value to store under the given key.
 	 */
 	private function set_rotated_transient( $key, $value ) {
-		if ( $this->has_key_value( $key, $value ) ) {
+		$pool_index = array_search( $key, $this->pool_map, true );
+
+		// We already have the provided key and the value seems unchanged.
+		if ( false !== $pool_index && $value === $this->pool_map[ $pool_index ] ) {
 			return;
 		}
 
-		$this->pool_index ++;
-
-		$this->pool_map[ $this->pool_index ] = $key;
+		// As we didn't find the key, we create a new pool slot to store it.
+		if ( false === $pool_index ) {
+			$this->advance_pool_index();
+			$this->pool_map[ $this->pool_index ] = $key;
+		}
 
 		// The expiration is to ensure transients don't stick around forever
 		// since no LRU flushing like with external object cache.
 		set_transient( "{$this->group}-pool-slot-{$this->pool_index}", $value, MONTH_IN_SECONDS );
 
 		$this->persist_pool_meta();
-	}
-
-	private function has_key_value( $key, $value ) {
-		$pool_index = array_search( $key, $this->pool_map, true );
-
-		if ( ! $pool_index ) {
-			return false;
-		}
-
-		if ( $this->pool_map[ $pool_index ] !== $value ) {
-			return false;
-		}
-
-		return true;
 	}
 
 	/**
@@ -147,5 +155,16 @@ final class AMP_Cache_Pool {
 	private function persist_pool_meta() {
 		set_transient( "{$this->group}-pool-map", $this->pool_map );
 		set_transient( "{$this->group}-pool-index", $this->pool_index );
+	}
+
+	/**
+	 * Advance the index into the pool cache.
+	 */
+	private function advance_pool_index() {
+		$this->pool_index++;
+
+		if ( $this->pool_index >= $this->size ) {
+			$this->pool_index = 0;
+		}
 	}
 }
