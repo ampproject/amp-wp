@@ -15,7 +15,6 @@ import {
 	dispatch,
 } from '@wordpress/data';
 import { cloneBlock } from '@wordpress/blocks';
-import { useRef } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -68,7 +67,7 @@ const BlockDraggable = ( { children, clientId, blockName, rootClientId, blockEle
 		selectBlock( newPageId );
 	};
 
-	const currentHoverElement = useRef( null );
+	const currentHoverElement = { current: null }
 
 	const onNeighborHover = ( offset ) => {
 		// Unhighlight old highlighted page.
