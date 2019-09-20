@@ -512,7 +512,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			 * See <https://www.ampproject.org/docs/reference/components/amp-live-list#styling>.
 			 */
 			if ( 'amp-active' === $class_name || 'amp-hidden' === $class_name ) {
-				if ( ! $this->has_used_tag_names( [ 'amp-live-list' ] ) && ! $this->has_used_tag_names( [ 'amp-user-notification' ] ) ) {
+				if ( ! $this->has_used_tag_names( [ 'amp-live-list', 'amp-user-notification' ] ) ) {
 					return false;
 				}
 				continue;
