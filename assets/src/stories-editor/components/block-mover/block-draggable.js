@@ -34,18 +34,26 @@ const BlockDraggable = ( { children, clientId, blockName, rootClientId, blockEle
 	const { setCurrentPage } = dispatch( 'amp/story' );
 	const { selectBlock, removeBlock, insertBlock, updateBlockAttributes } = dispatch( 'core/block-editor' );
 
-	const onNeighborDrop = ( offset, finalPosition ) => {
+	const getNeighborPageId = ( offset ) => {
 		const pages = getBlockOrder();
 		const currentPageIndex = pages.findIndex( ( i ) => i === rootClientId );
 		const newPageIndex = currentPageIndex + offset;
 
-		// Do we even have a neighbor in that direction?
-		if ( newPageIndex < 0 || newPageIndex >= pages.length ) {
-			return false;
+		// Do we even have a neighbor in that direction? (offset=0 is not a neighbor)
+		if ( offset === 0 || newPageIndex < 0 || newPageIndex >= pages.length ) {
+			return null;
+		}
+
+		return pages[ newPageIndex ];
+	};
+
+	const onNeighborDrop = ( offset, finalPosition ) => {
+		const newPageId = getNeighborPageId( offset );
+		if ( ! newPageId ) {
+			return;
 		}
 
 		// Remove block and add cloned block to new page.
-		const newPageId = pages[ newPageIndex ];
 		removeBlock( clientId );
 		const clonedBlock = cloneBlock( block );
 		const newAttributes = {
@@ -58,27 +66,18 @@ const BlockDraggable = ( { children, clientId, blockName, rootClientId, blockEle
 		// Switch to new page.
 		setCurrentPage( newPageId );
 		selectBlock( newPageId );
-		return true;
 	};
 
 	const currentHoverElement = useRef( null );
 
 	const onNeighborHover = ( offset ) => {
-		const pages = getBlockOrder();
-		const currentPageIndex = pages.findIndex( ( i ) => i === rootClientId );
-		const newPageIndex = currentPageIndex + offset;
-
+		// Unhighlight old highlighted page.
 		if ( currentHoverElement.current ) {
 			currentHoverElement.current.classList.remove( 'amp-page-draggable-hover' );
 		}
 
-		// Do we even have a neighbor in that direction (offset=0 is not a neighbor)?
-		if ( offset === 0 || newPageIndex < 0 || newPageIndex >= pages.length ) {
-			return;
-		}
-
-		// Highlight neighboring block
-		const newPageId = pages[ newPageIndex ];
+		// Highlight neighboring page.
+		const newPageId = getNeighborPageId( offset );
 		currentHoverElement.current = document.getElementById( `block-${ newPageId }` );
 		currentHoverElement.current.classList.add( 'amp-page-draggable-hover' );
 	};
