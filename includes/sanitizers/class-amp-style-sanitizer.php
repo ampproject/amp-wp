@@ -418,7 +418,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$this->base_url    = untrailingslashit( $guessurl );
 		$this->content_url = WP_CONTENT_URL;
 		$this->xpath       = new DOMXPath( $dom );
-		$this->cache_pool  = new AMP_Cache_Pool( self::CACHE_GROUP );
+		$this->cache_pool  = new AMP_Cache_Pool( self::CACHE_GROUP, isset( $this->args['cache_pool_size'] ) ? $this->args['cache_pool_size'] : AMP_Cache_Pool::DEFAULT_POOL_SIZE );
 	}
 
 	/**
