@@ -10,19 +10,77 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { withSelect } from '@wordpress/data';
+import {
+	withSelect,
+	dispatch,
+} from '@wordpress/data';
+import { cloneBlock } from '@wordpress/blocks';
+import { useRef } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import Draggable from './draggable';
+import { getPercentageFromPixels } from '../../helpers';
 
-const BlockDraggable = ( { children, clientId, blockName, rootClientId, blockElementId, index, onDragStart, onDragEnd } ) => {
+const BlockDraggable = ( { children, clientId, blockName, rootClientId, blockElementId, block, index, getBlockOrder, onDragStart, onDragEnd } ) => {
 	const transferData = {
 		type: 'block',
 		srcIndex: index,
 		srcRootClientId: rootClientId,
 		srcClientId: clientId,
+	};
+
+	const { setCurrentPage } = dispatch( 'amp/story' );
+	const { selectBlock, removeBlock, insertBlock, updateBlockAttributes } = dispatch( 'core/block-editor' );
+
+	const onNeighborDrop = ( offset, finalPosition ) => {
+		const pages = getBlockOrder();
+		const currentPageIndex = pages.findIndex( ( i ) => i === rootClientId );
+		const newPageIndex = currentPageIndex + offset;
+
+		// Do we even have a neighbor in that direction?
+		if ( newPageIndex < 0 || newPageIndex >= pages.length ) {
+			return false;
+		}
+
+		// Remove block and add cloned block to new page.
+		const newPageId = pages[ newPageIndex ];
+		removeBlock( clientId );
+		const clonedBlock = cloneBlock( block );
+		const newAttributes = {
+			positionTop: getPercentageFromPixels( 'y', finalPosition.top ),
+			positionLeft: getPercentageFromPixels( 'x', finalPosition.left ),
+		};
+		insertBlock( clonedBlock, null, newPageId );
+		updateBlockAttributes( clonedBlock.clientId, newAttributes );
+
+		// Switch to new page.
+		setCurrentPage( newPageId );
+		selectBlock( newPageId );
+		return true;
+	};
+
+	const currentHoverElement = useRef( null );
+
+	const onNeighborHover = ( offset ) => {
+		const pages = getBlockOrder();
+		const currentPageIndex = pages.findIndex( ( i ) => i === rootClientId );
+		const newPageIndex = currentPageIndex + offset;
+
+		if ( currentHoverElement.current ) {
+			currentHoverElement.current.classList.remove( 'amp-page-draggable-hover' );
+		}
+
+		// Do we even have a neighbor in that direction (offset=0 is not a neighbor)?
+		if ( offset === 0 || newPageIndex < 0 || newPageIndex >= pages.length ) {
+			return;
+		}
+
+		// Highlight neighboring block
+		const newPageId = pages[ newPageIndex ];
+		currentHoverElement.current = document.getElementById( `block-${ newPageId }` );
+		currentHoverElement.current.classList.add( 'amp-page-draggable-hover' );
 	};
 
 	return (
@@ -32,6 +90,8 @@ const BlockDraggable = ( { children, clientId, blockName, rootClientId, blockEle
 			transferData={ transferData }
 			onDragStart={ onDragStart }
 			onDragEnd={ onDragEnd }
+			onNeighborDrop={ onNeighborDrop }
+			onNeighborHover={ onNeighborHover }
 		>
 			{
 				( { onDraggableStart, onDraggableEnd } ) => {
@@ -54,13 +114,17 @@ BlockDraggable.propTypes = {
 	children: PropTypes.any.isRequired,
 	onDragStart: PropTypes.func,
 	onDragEnd: PropTypes.func,
+	block: PropTypes.object,
+	getBlockOrder: PropTypes.func,
 };
 
 export default withSelect( ( select, { clientId } ) => {
-	const { getBlockIndex, getBlockRootClientId } = select( 'core/block-editor' );
+	const { getBlockIndex, getBlockRootClientId, getBlockOrder, getBlock } = select( 'core/block-editor' );
 	const rootClientId = getBlockRootClientId( clientId );
 	return {
 		index: getBlockIndex( clientId, rootClientId ),
 		rootClientId,
+		block: getBlock( clientId ),
+		getBlockOrder,
 	};
 } )( BlockDraggable );

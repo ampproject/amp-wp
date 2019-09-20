@@ -17,11 +17,14 @@ import { withSafeTimeout } from '@wordpress/compose';
 /**
  * Internal dependencies
  */
-import { getPixelsFromPercentage } from '../../helpers';
+import { getPixelsFromPercentage, getRelativeElementPosition } from '../../helpers';
 import {
 	STORY_PAGE_INNER_WIDTH,
 	STORY_PAGE_INNER_HEIGHT,
 } from '../../constants';
+
+const PAGE_BORDER = 50;
+const PAGE_AND_BORDER = STORY_PAGE_INNER_WIDTH + PAGE_BORDER;
 
 const { Image, navigator } = window;
 
@@ -61,13 +64,24 @@ class Draggable extends Component {
 	 * @param {Object} event The non-custom DragEvent.
 	 */
 	onDragEnd = ( event ) => {
-		const { onDragEnd = noop } = this.props;
+		const { onDragEnd = noop, setTimeout, onNeighborDrop } = this.props;
 		if ( event ) {
 			event.preventDefault();
 		}
 
+		// Attempt drop on neighbor if offset
+		const currentElementLeft = parseInt( this.cloneWrapper.style.left );
+		if ( this.pageOffset !== 0 ) {
+			const newLeft = currentElementLeft - ( this.pageOffset * PAGE_AND_BORDER );
+			const newPosition = {
+				top: parseInt( this.cloneWrapper.style.top ),
+				left: newLeft,
+			};
+			onNeighborDrop( this.pageOffset, newPosition );
+		}
+
 		this.resetDragState();
-		this.props.setTimeout( onDragEnd );
+		setTimeout( onDragEnd );
 	}
 
 	/**
@@ -76,6 +90,7 @@ class Draggable extends Component {
 	 * @param  {Object} event The non-custom DragEvent.
 	 */
 	onDragOver = ( event ) => {
+		const { onNeighborHover } = this.props;
 		const top = parseInt( this.cloneWrapper.style.top ) + event.clientY - this.cursorTop;
 
 		// Don't allow the CTA button to go over its top limit.
@@ -91,6 +106,21 @@ class Draggable extends Component {
 		// Update cursor coordinates.
 		this.cursorLeft = event.clientX;
 		this.cursorTop = event.clientY;
+
+		// Check if mouse (*not* element, but actual cursor) is over neighboring page to either side.
+		const currentElementLeft = parseInt( this.cloneWrapper.style.left );
+		const cursorLeftRelativeToPage = currentElementLeft + this.cursorLeftInsideElement;
+		const isOffRight = cursorLeftRelativeToPage > PAGE_AND_BORDER;
+		const isOffLeft = cursorLeftRelativeToPage < -PAGE_BORDER;
+		this.pageOffset = 0;
+		if ( isOffLeft || isOffRight ) {
+			// Check how far off we are to that side - on large screens you can drag elements 2+ pages over to either side.
+			this.pageOffset = ( isOffLeft ?
+				-Math.ceil( ( PAGE_BORDER - cursorLeftRelativeToPage ) / PAGE_AND_BORDER ) :
+				Math.ceil( ( cursorLeftRelativeToPage - PAGE_AND_BORDER ) / PAGE_AND_BORDER )
+			);
+		}
+		onNeighborHover( this.pageOffset );
 	}
 
 	onDrop = () => {
@@ -152,8 +182,15 @@ class Draggable extends Component {
 		const baseHeight = isCTABlock ? STORY_PAGE_INNER_HEIGHT / 5 : STORY_PAGE_INNER_HEIGHT;
 
 		// Position clone over the original element.
-		this.cloneWrapper.style.top = `${ getPixelsFromPercentage( 'y', parseInt( clone.style.top ), baseHeight ) }px`;
-		this.cloneWrapper.style.left = `${ getPixelsFromPercentage( 'x', parseInt( clone.style.left ), STORY_PAGE_INNER_WIDTH ) }px`;
+		const top = getPixelsFromPercentage( 'y', parseInt( clone.style.top ), baseHeight );
+		const left = getPixelsFromPercentage( 'x', parseInt( clone.style.left ), STORY_PAGE_INNER_WIDTH );
+		this.cloneWrapper.style.top = `${ top }px`;
+		this.cloneWrapper.style.left = `${ left }px`;
+
+		// Get starting position information
+		const absolutePositionOfPage = getRelativeElementPosition( elementWrapper, document.documentElement );
+		const absoluteElementLeft = absolutePositionOfPage.left + left;
+		this.cursorLeftInsideElement = event.clientX - absoluteElementLeft;
 
 		clone.id = `clone-${ elementId }`;
 		clone.style.top = 0;
@@ -224,6 +261,8 @@ Draggable.propTypes = {
 	transferData: PropTypes.object,
 	onDragStart: PropTypes.func,
 	onDragEnd: PropTypes.func,
+	onNeighborDrop: PropTypes.func,
+	onNeighborHover: PropTypes.func,
 	setTimeout: PropTypes.func.isRequired,
 	children: PropTypes.any.isRequired,
 };

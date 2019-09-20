@@ -76,6 +76,10 @@
 	opacity: .5;
 }
 
+.editor-block-list__layout [data-type="amp/amp-story-page"].amp-page-draggable-hover {
+	opacity: 1;
+}
+
 .editor-block-list__layout [data-type="amp/amp-story-page"].amp-page-inactive > div {
 	pointer-events: none;
 }
