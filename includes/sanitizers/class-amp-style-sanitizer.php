@@ -501,6 +501,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		foreach ( $class_names as $class_name ) {
+			// Bail early with a common case scenario.
+			if ( isset( $this->used_class_names[ $class_name ] ) ) {
+				continue;
+			}
+
 			// Check exact matches first, as they are faster.
 			switch ( $class_name ) {
 				/*
