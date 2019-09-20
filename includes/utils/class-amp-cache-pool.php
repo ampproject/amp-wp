@@ -20,7 +20,7 @@ final class AMP_Cache_Pool {
 	const DEFAULT_POOL_SIZE = 1000;
 
 	/**
-	 * Pool map of cached entries.
+	 * Pool map of cached entry keys.
 	 *
 	 * @var array
 	 */
