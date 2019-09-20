@@ -501,35 +501,36 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		foreach ( $class_names as $class_name ) {
-			// Only do element-specific checks on an AMP components.
+			// Check exact matches first, as they are faster.
+			switch ( $class_name ) {
+				/*
+				 * Common class names used for amp-user-notification and amp-live-list.
+				 * See <https://www.ampproject.org/docs/reference/components/amp-user-notification#styling>.
+				 * See <https://www.ampproject.org/docs/reference/components/amp-live-list#styling>.
+				 */
+				case 'amp-active':
+				case 'amp-hidden':
+					if ( ! $this->has_used_tag_names( [ 'amp-live-list', 'amp-user-notification' ] ) ) {
+						return false;
+					}
+					continue 2;
+				// Class names for amp-image-lightbox, see <https://www.ampproject.org/docs/reference/components/amp-image-lightbox#styling>.
+				case 'amp-image-lightbox-caption':
+					if ( ! $this->has_used_tag_names( [ 'amp-image-lightbox' ] ) ) {
+						return false;
+					}
+					continue 2;
+				// Class names for amp-form, see <https://www.ampproject.org/docs/reference/components/amp-form#classes-and-css-hooks>.
+				case 'user-valid':
+				case 'user-invalid':
+					if ( ! $this->has_used_tag_names( [ 'form' ] ) ) {
+						return false;
+					}
+					continue 2;
+			}
+
+			// Only do AMP element-specific checks on an AMP components with the corresponding prefix.
 			if ( 'amp-' === substr( $class_name, 0, 4 ) ) {
-				// Check exact matches first, as they are faster.
-				switch ( $class_name ) {
-					/*
-					 * Common class names used for amp-user-notification and amp-live-list.
-					 * See <https://www.ampproject.org/docs/reference/components/amp-user-notification#styling>.
-					 * See <https://www.ampproject.org/docs/reference/components/amp-live-list#styling>.
-					 */
-					case 'amp-active':
-					case 'amp-hidden':
-						if ( ! $this->has_used_tag_names( [ 'amp-live-list', 'amp-user-notification' ] ) ) {
-							return false;
-						}
-						continue 2;
-					// Class names for amp-image-lightbox, see <https://www.ampproject.org/docs/reference/components/amp-image-lightbox#styling>.
-					case 'amp-image-lightbox-caption':
-						if ( ! $this->has_used_tag_names( [ 'amp-image-lightbox' ] ) ) {
-							return false;
-						}
-						continue 2;
-					// Class names for amp-form, see <https://www.ampproject.org/docs/reference/components/amp-form#classes-and-css-hooks>.
-					case 'user-valid':
-					case 'user-invalid':
-						if ( ! $this->has_used_tag_names( [ 'form' ] ) ) {
-							return false;
-						}
-						continue 2;
-				}
 
 				// Class names for amp-geo, see <https://www.ampproject.org/docs/reference/components/amp-geo#generated-css-classes>.
 				if ( 'amp-geo-' === substr( $class_name, 0, 8 ) ) {
