@@ -414,3 +414,31 @@ amp-carousel > amp-img > img {
 	position: absolute;
 	<?php echo is_rtl() ? 'left' : 'right'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>: 16px;
 }
+
+/* Dark Theme */
+
+:root {
+	color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+	body,
+	.amp-wp-article {
+		background: #202020;
+		color: #fff;
+	}
+
+	.amp-wp-tax-category,
+	.amp-wp-tax-tag,
+	.amp-wp-meta,
+	span.amp-site-title,
+	.amp-wp-title {
+		color: #fff;
+	}
+
+	a,
+	a:visited,
+	.amp-wp-comments-link a {
+		color: #93B3DB;
+	}
+}
