@@ -441,4 +441,9 @@ amp-carousel > amp-img > img {
 	.amp-wp-comments-link a {
 		color: #93B3DB;
 	}
+	blockquote {
+		color: #ccc;
+		border-left: 2px solid #444;
+	}
 }
+
