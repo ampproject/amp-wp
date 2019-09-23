@@ -136,6 +136,7 @@ async function runAxeTestsForBlockEditor() {
 		// Temporary disabled rules to enable initial integration.
 		// See: https://github.com/WordPress/gutenberg/pull/15018.
 		disabledRules: [
+			'aria-hidden-focus',
 			'button-name',
 			'color-contrast',
 			'duplicate-id',
@@ -146,6 +147,9 @@ async function runAxeTestsForBlockEditor() {
 			'.edit-post-layout__metaboxes',
 			// Ignores elements created by TinyMCE.
 			'.mce-container',
+			// Ignore attachent close button.
+			'.amp-story-page-attachment-close-button',
+			'.editor-default-block-appender__content',
 		],
 	} );
 }
