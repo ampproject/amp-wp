@@ -136,6 +136,7 @@ async function runAxeTestsForBlockEditor() {
 		// Temporary disabled rules to enable initial integration.
 		// See: https://github.com/WordPress/gutenberg/pull/15018.
 		disabledRules: [
+			'aria-allowed-role',
 			'aria-hidden-focus',
 			'button-name',
 			'color-contrast',
@@ -149,7 +150,6 @@ async function runAxeTestsForBlockEditor() {
 			'.mce-container',
 			// Ignore attachent close button.
 			'.amp-story-page-attachment-close-button',
-			'.editor-default-block-appender__content',
 		],
 	} );
 }
