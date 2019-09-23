@@ -125,7 +125,7 @@ class Draggable extends Component {
 		if ( isOffLeft || isOffRight ) {
 			// Check how far off we are to that side - on large screens you can drag elements 2+ pages over to either side.
 			this.pageOffset = ( isOffLeft ?
-				-Math.ceil( ( PAGE_BORDER - cursorLeftRelativeToPage ) / PAGE_AND_BORDER ) :
+				-Math.ceil( ( -PAGE_BORDER - cursorLeftRelativeToPage ) / PAGE_AND_BORDER ) :
 				Math.ceil( ( cursorLeftRelativeToPage - PAGE_AND_BORDER ) / PAGE_AND_BORDER )
 			);
 		}
