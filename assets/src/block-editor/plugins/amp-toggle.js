@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import { errorMessages } from 'amp-block-editor-data';
+import { errorMessages, isStandardMode } from 'amp-block-editor-data';
 import PropTypes from 'prop-types';
 
 /**
@@ -62,7 +62,7 @@ function AMPToggle( { isEnabled, onChange } ) {
 				}
 			</PluginPostStatusInfo>
 			{
-				isEnabled && (
+				isEnabled && ! isStandardMode && (
 					<PluginPostStatusInfo>
 						<AMPPreview />
 					</PluginPostStatusInfo>

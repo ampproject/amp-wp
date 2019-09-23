@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { get } from 'lodash';
-import { errorMessages } from 'amp-block-editor-data';
+import { ampSlug, errorMessages } from 'amp-block-editor-data';
 import PropTypes from 'prop-types';
 
 /**
@@ -261,13 +261,15 @@ export default compose( [
 			getPostType,
 		} = select( 'core' );
 
+		const queryArgs = {};
+		queryArgs[ ampSlug ] = 1;
 		const initialPreviewLink = getEditedPostPreviewLink();
-		const previewLink = initialPreviewLink ? addQueryArgs( initialPreviewLink, { amp: 1 } ) : undefined;
+		const previewLink = initialPreviewLink ? addQueryArgs( initialPreviewLink, queryArgs ) : undefined;
 		const postType = getPostType( getEditedPostAttribute( 'type' ) );
 
 		return {
 			postId: getCurrentPostId(),
-			currentPostLink: getCurrentPostAttribute( 'link' ),
+			currentPostLink: addQueryArgs( getCurrentPostAttribute( 'link' ), queryArgs ),
 			previewLink: forcePreviewLink !== undefined ? forcePreviewLink : previewLink,
 			isSaveable: isEditedPostSaveable(),
 			isAutosaveable: forceIsAutosaveable || isEditedPostAutosaveable(),
