@@ -30,7 +30,6 @@ const Snapping = ( { children } ) => {
 		hideSnapLines,
 		setSnapLines,
 		snapLines,
-		hasSnapLines,
 		clearSnapLines,
 	};
 
