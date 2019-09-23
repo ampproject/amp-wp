@@ -90,9 +90,6 @@ describe( 'Block Position Controls', () => {
 			// The 'Block Position' controls should be present.
 			expect( page ).toMatch( 'Block Position' );
 
-			await page.waitForSelector( '.amp-story-controls-send-front[aria-disabled="true"]' );
-			await page.waitForSelector( '.amp-story-controls-send-forward[aria-disabled="true"]' );
-
 			// Since the selected block is already at the front, the 'Front' and 'Forward' buttons should be disabled.
 			expect( page ).toMatchElement( '.amp-story-controls-bring-front[aria-disabled="true"]' );
 			expect( page ).toMatchElement( '.amp-story-controls-bring-forward[aria-disabled="true"]' );
@@ -105,12 +102,9 @@ describe( 'Block Position Controls', () => {
 			// The 'Block Position' controls should again be present.
 			expect( page ).toMatch( 'Block Position' );
 
-			await page.waitForSelector( '.amp-story-controls-send-back[aria-disabled="true"]' );
-			await page.waitForSelector( '.amp-story-controls-send-backward[aria-disabled="true"]' );
-
 			// Since the selected block is already at the back, the 'Back' and 'Backward' buttons should be disabled.
 			expect( page ).toMatchElement( '.amp-story-controls-send-back[aria-disabled="true"]' );
-			expect( page ).toMatchElement( '.amp-story-controls-send-backward[aria-disabled="true"]' );
+			expect( page ).toMatchElement( '.amp-story-controls-send-backwards[aria-disabled="true"]' );
 		} );
 	} );
 } );
