@@ -8,9 +8,8 @@ import PropTypes from 'prop-types';
  */
 import { __ } from '@wordpress/i18n';
 import { IconButton } from '@wordpress/components';
-import { Component } from '@wordpress/element';
-import { withDispatch, withSelect } from '@wordpress/data';
-import { compose } from '@wordpress/compose';
+import { useEffect } from '@wordpress/element';
+import { useSelect, useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -24,74 +23,87 @@ import './edit.css';
 const TOTAL_PAGE_MARGIN = 50;
 const PAGE_BORDER = 1;
 
-class EditorCarousel extends Component {
-	translateWrapper = () => {
+const EditorCarousel = () => {
+	const { pages, currentPage, currentIndex, previousPage, nextPage, isReordering } = useSelect( ( select ) => {
+		const {
+			getBlockOrder,
+			getBlocksByClientId,
+			getAdjacentBlockClientId,
+		} = select( 'core/block-editor' );
+		const { getCurrentPage, isReordering: _isReordering } = select( 'amp/story' );
+
+		const _currentPage = getCurrentPage();
+		const _pages = getBlocksByClientId( getBlockOrder() );
+
+		const index = pages.findIndex( ( { clientId } ) => clientId === currentPage );
+
+		return {
+			pages: _pages,
+			currentPage: _currentPage,
+			currentIndex: Math.max( 0, index ), // Prevent -1 from being used for calculation.
+			previousPage: getCurrentPage() ? getAdjacentBlockClientId( _currentPage, -1 ) : null,
+			nextPage: getCurrentPage() ? getAdjacentBlockClientId( _currentPage, 1 ) : null,
+			isReordering: _isReordering(),
+		};
+	}, [] );
+
+	useEffect( () => {
 		const wrapper = document.querySelector( '#amp-story-controls + .block-editor-block-list__layout' );
 
 		if ( ! wrapper ) {
 			return;
 		}
 
-		const { currentIndex } = this.props;
-
-		if ( this.props.isReordering ) {
+		if ( isReordering ) {
 			wrapper.style.display = 'none';
 		} else {
 			wrapper.style.display = '';
 			wrapper.style.transform = `translateX(calc(50% - ${ PAGE_BORDER }px - ${ ( STORY_PAGE_INNER_WIDTH + TOTAL_PAGE_MARGIN ) / 2 }px - ${ ( currentIndex ) * TOTAL_PAGE_MARGIN }px - ${ currentIndex * STORY_PAGE_INNER_WIDTH }px))`;
 		}
+	}, [ currentIndex, isReordering ] );
+
+	const { setCurrentPage } = useDispatch( 'amp/story' );
+	const { selectBlock } = useDispatch( 'core/block-editor' );
+
+	const goToPage = ( page ) => {
+		setCurrentPage( page );
+		selectBlock( page );
+	};
+
+	if ( isReordering ) {
+		return <Reorderer />;
 	}
 
-	componentDidMount() {
-		this.translateWrapper();
-	}
-
-	componentDidUpdate() {
-		this.translateWrapper();
-	}
-
-	render() {
-		const { pages, currentPage, previousPage, nextPage, onChangePage, isReordering } = this.props;
-
-		const goToPage = ( page ) => {
-			onChangePage( page );
-		};
-
-		if ( isReordering ) {
-			return <Reorderer />;
-		}
-
-		return (
-			<>
-				<div className="amp-story-editor-carousel-navigation">
-					<IconButton
-						icon="arrow-left-alt2"
-						label={ __( 'Previous Page', 'amp' ) }
-						onClick={ ( e ) => {
-							e.preventDefault();
-							goToPage( previousPage );
-						} }
-						disabled={ null === previousPage }
-					/>
-					<Indicator
-						pages={ pages }
-						currentPage={ currentPage }
-						onClick={ goToPage }
-					/>
-					<IconButton
-						icon="arrow-right-alt2"
-						label={ __( 'Next Page', 'amp' ) }
-						onClick={ ( e ) => {
-							e.preventDefault();
-							goToPage( nextPage );
-						} }
-						disabled={ null === nextPage }
-					/>
-				</div>
-			</>
-		);
-	}
-}
+	return (
+		<>
+			<div className="amp-story-editor-carousel-navigation">
+				<IconButton
+					icon="arrow-left-alt2"
+					label={ __( 'Previous Page', 'amp' ) }
+					onClick={ ( e ) => {
+						e.preventDefault();
+						goToPage( previousPage );
+					} }
+					disabled={ null === previousPage }
+				/>
+				<Indicator
+					pages={ pages }
+					currentPage={ currentPage }
+					onClick={ goToPage }
+				/>
+				<IconButton
+					icon="arrow-right-alt2"
+					label={ __( 'Next Page', 'amp' ) }
+					onClick={ ( e ) => {
+						e.preventDefault();
+						goToPage( nextPage );
+					} }
+					disabled={ null === nextPage }
+				/>
+			</div>
+		</>
+	);
+};
 
 EditorCarousel.propTypes = {
 	pages: PropTypes.arrayOf( PropTypes.shape( {
@@ -105,38 +117,4 @@ EditorCarousel.propTypes = {
 	isReordering: PropTypes.bool,
 };
 
-export default compose(
-	withSelect( ( select ) => {
-		const {
-			getBlockOrder,
-			getBlocksByClientId,
-			getAdjacentBlockClientId,
-		} = select( 'core/block-editor' );
-		const { getCurrentPage, isReordering } = select( 'amp/story' );
-
-		const currentPage = getCurrentPage();
-		const pages = getBlocksByClientId( getBlockOrder() );
-
-		const currentIndex = pages.findIndex( ( { clientId } ) => clientId === currentPage );
-
-		return {
-			pages,
-			currentPage,
-			currentIndex: Math.max( 0, currentIndex ), // Prevent -1 from being used for calculation.
-			previousPage: getCurrentPage() ? getAdjacentBlockClientId( currentPage, -1 ) : null,
-			nextPage: getCurrentPage() ? getAdjacentBlockClientId( currentPage, 1 ) : null,
-			isReordering: isReordering(),
-		};
-	} ),
-	withDispatch( ( dispatch ) => {
-		const { setCurrentPage } = dispatch( 'amp/story' );
-		const { selectBlock } = dispatch( 'core/block-editor' );
-
-		return {
-			onChangePage: ( pageClientId ) => {
-				setCurrentPage( pageClientId );
-				selectBlock( pageClientId );
-			},
-		};
-	} )
-)( EditorCarousel );
+export default EditorCarousel;
