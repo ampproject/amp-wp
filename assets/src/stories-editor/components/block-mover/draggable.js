@@ -71,6 +71,7 @@ class Draggable extends Component {
 
 		// Attempt drop on neighbor if offset
 		if ( this.pageOffset !== 0 ) {
+			// All this is about calculating the position of the (correct) element on the new page.
 			const currentElementTop = parseInt( this.cloneWrapper.style.top );
 			const currentElementLeft = parseInt( this.cloneWrapper.style.left );
 			const newLeft = currentElementLeft - ( this.pageOffset * PAGE_AND_BORDER );
@@ -84,6 +85,7 @@ class Draggable extends Component {
 				[ xAttribute ]: x,
 				[ yAttribute ]: y,
 			};
+
 			onNeighborDrop( this.pageOffset, newAttributes );
 		}
 

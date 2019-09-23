@@ -86,8 +86,7 @@ BlockDraggable.propTypes = {
 	onDragEnd: PropTypes.func,
 	onNeighborHover: PropTypes.func,
 	onNeighborDrop: PropTypes.func,
-	block: PropTypes.object,
-	getBlockOrder: PropTypes.func,
+	getNeighborPageId: PropTypes.func,
 };
 
 export default compose(
