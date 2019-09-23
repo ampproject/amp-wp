@@ -156,6 +156,22 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		$this->assertEquals( AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE, $block_script->handle );
 		$this->assertEquals( amp_get_asset_url( 'js/' . AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE . '.js' ), $block_script->src );
 
+		$this->assertContains( 'ampBlockEditor', $block_script->extra['data'] );
+		$expected_localized_values = [
+			'ampSlug',
+			'possibleStatuses',
+			'defaultStatus',
+			'errorMessages',
+			'isWebsiteEnabled',
+			'isStoriesEnabled',
+			'hasThemeSupport',
+			'isStandardMode',
+		];
+
+		foreach ( $expected_localized_values as $localized_value ) {
+			$this->assertContains( $localized_value, $block_script->extra['data'] );
+		}
+
 		/*
 		 * Test Stories integration.
 		 * The current screen is the AMP Story editor, so the data for the Latest Stories block should not be present, as it's not needed there.
