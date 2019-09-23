@@ -19,6 +19,7 @@ import { compose, withInstanceId } from '@wordpress/compose';
  * Internal dependencies
  */
 import { isAMPEnabled } from '../helpers';
+import { AMPPreview } from '../components';
 
 /**
  * Adds an 'Enable AMP' toggle to the block editor 'Status & Visibility' section.
@@ -60,6 +61,13 @@ function AMPToggle( { isEnabled, onChange } ) {
 					)
 				}
 			</PluginPostStatusInfo>
+			{
+				isEnabled && (
+					<PluginPostStatusInfo>
+						<AMPPreview />
+					</PluginPostStatusInfo>
+				)
+			}
 		</>
 	);
 }

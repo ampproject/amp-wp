@@ -247,11 +247,7 @@ AMPPreview.propTypes = {
 	savePost: PropTypes.bool.isRequired,
 };
 
-export const name = 'amp-preview';
-
-export const icon = 'hidden';
-
-export const render = compose( [
+export default compose( [
 	withSelect( ( select, { forcePreviewLink, forceIsAutosaveable } ) => {
 		const {
 			getCurrentPostId,
