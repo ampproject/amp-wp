@@ -63,6 +63,7 @@ function FontFamilyPicker( {
 						inputValue: inputValueTemplate,
 					}
 				}
+				ariaLabel={ __( 'Font Family', 'amp' ) }
 				minLength={ 2 }
 				onConfirm={ onChange }
 				showAllValues={ false }
