@@ -67,18 +67,30 @@ const BlockDraggable = ( { children, clientId, blockName, rootClientId, blockEle
 		selectBlock( newPageId );
 	};
 
-	const currentHoverElement = { current: null }
+	// This holds the currently highlighted element
+	const currentHoverElement = { pageId: null, current: null };
 
 	const onNeighborHover = ( offset ) => {
+		// Get neighboring page.
+		const newPageId = getNeighborPageId( offset );
+		const hasHighlightChanged = newPageId !== currentHoverElement.pageId;
+
+		if ( ! hasHighlightChanged ) {
+			return;
+		}
+
+		currentHoverElement.pageId = newPageId;
+
 		// Unhighlight old highlighted page.
 		if ( currentHoverElement.current ) {
 			currentHoverElement.current.classList.remove( 'amp-page-draggable-hover' );
 		}
 
-		// Highlight neighboring page.
-		const newPageId = getNeighborPageId( offset );
-		currentHoverElement.current = document.getElementById( `block-${ newPageId }` );
-		currentHoverElement.current.classList.add( 'amp-page-draggable-hover' );
+		// Highlight neigboring page.
+		if ( newPageId ) {
+			currentHoverElement.current = document.getElementById( `block-${ newPageId }` );
+			currentHoverElement.current.classList.add( 'amp-page-draggable-hover' );
+		}
 	};
 
 	return (
