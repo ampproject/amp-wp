@@ -100,7 +100,7 @@ class Autocomplete extends OriginalAutocomplete {
 				) }
 
 				<input
-					aria-activedescendant={ optionFocused ? `${ id }__option--${ focused }` : false }
+					aria-activedescendant={ optionFocused ? `${ id }__option--${ focused }` : '' }
 					aria-owns={ `${ id }__listbox` }
 					autoComplete="off"
 					className={ `${ inputClassName }${ inputModifierFocused }${ inputModifierType }` }
