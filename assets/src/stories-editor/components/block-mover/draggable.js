@@ -17,7 +17,7 @@ import { withSafeTimeout } from '@wordpress/compose';
 /**
  * Internal dependencies
  */
-import { getPixelsFromPercentage, getRelativeElementPosition } from '../../helpers';
+import { getPixelsFromPercentage, getPercentageFromPixels, getRelativeElementPosition } from '../../helpers';
 import {
 	STORY_PAGE_INNER_WIDTH,
 	STORY_PAGE_INNER_HEIGHT,
@@ -64,20 +64,27 @@ class Draggable extends Component {
 	 * @param {Object} event The non-custom DragEvent.
 	 */
 	onDragEnd = ( event ) => {
-		const { onDragEnd = noop, setTimeout, onNeighborDrop } = this.props;
+		const { onNeighborDrop, blockName, setTimeout, onDragEnd = noop } = this.props;
 		if ( event ) {
 			event.preventDefault();
 		}
 
 		// Attempt drop on neighbor if offset
-		const currentElementLeft = parseInt( this.cloneWrapper.style.left );
 		if ( this.pageOffset !== 0 ) {
+			const currentElementTop = parseInt( this.cloneWrapper.style.top );
+			const currentElementLeft = parseInt( this.cloneWrapper.style.left );
 			const newLeft = currentElementLeft - ( this.pageOffset * PAGE_AND_BORDER );
-			const newPosition = {
-				top: parseInt( this.cloneWrapper.style.top ),
-				left: newLeft,
+			const isCTABlock = 'amp/amp-story-cta' === blockName;
+			const baseHeight = isCTABlock ? STORY_PAGE_INNER_HEIGHT / 5 : STORY_PAGE_INNER_HEIGHT;
+			const x = getPercentageFromPixels( 'x', newLeft, STORY_PAGE_INNER_WIDTH );
+			const y = getPercentageFromPixels( 'y', currentElementTop, baseHeight );
+			const xAttribute = isCTABlock ? 'btnPositionLeft' : 'positionLeft';
+			const yAttribute = isCTABlock ? 'btnPositionTop' : 'positionTop';
+			const newAttributes = {
+				[ xAttribute ]: x,
+				[ yAttribute ]: y,
 			};
-			onNeighborDrop( this.pageOffset, newPosition );
+			onNeighborDrop( this.pageOffset, newAttributes );
 		}
 
 		this.resetDragState();

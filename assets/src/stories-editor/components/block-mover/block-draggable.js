@@ -18,7 +18,6 @@ import { cloneBlock } from '@wordpress/blocks';
  * Internal dependencies
  */
 import Draggable from './draggable';
-import { getPercentageFromPixels } from '../../helpers';
 
 const BlockDraggable = ( { children, clientId, blockName, rootClientId, blockElementId, index, onDragStart, onDragEnd, onNeighborDrop, getNeighborPageId } ) => {
 	const transferData = {
@@ -102,7 +101,7 @@ export default compose(
 			getBlockOrder,
 		};
 	} ),
-	withDispatch( ( dispatch, { getBlockOrder, rootClientId, clientId, block } ) => {
+	withDispatch( ( dispatch, { getBlockOrder, rootClientId, clientId, block, blockName } ) => {
 		const { setCurrentPage } = dispatch( 'amp/story' );
 		const { selectBlock, removeBlock, insertBlock, updateBlockAttributes } = dispatch( 'core/block-editor' );
 
@@ -111,15 +110,19 @@ export default compose(
 			const currentPageIndex = pages.findIndex( ( i ) => i === rootClientId );
 			const newPageIndex = currentPageIndex + offset;
 
+			const isCTABlock = 'amp/amp-story-cta' === blockName;
+			const lowestPageNumberAllowed = isCTABlock ? 1 : 0;
+			const highestPageNumberAllowed = pages.length - 1;
+
 			// Do we even have a neighbor in that direction? (offset=0 is not a neighbor)
-			if ( offset === 0 || newPageIndex < 0 || newPageIndex >= pages.length ) {
+			if ( offset === 0 || newPageIndex < lowestPageNumberAllowed || newPageIndex > highestPageNumberAllowed ) {
 				return null;
 			}
 
 			return pages[ newPageIndex ];
 		};
 
-		const onNeighborDrop = ( offset, finalPosition ) => {
+		const onNeighborDrop = ( offset, newAttributes ) => {
 			const newPageId = getNeighborPageId( offset );
 			if ( ! newPageId ) {
 				return;
@@ -128,10 +131,6 @@ export default compose(
 			// Remove block and add cloned block to new page.
 			removeBlock( clientId );
 			const clonedBlock = cloneBlock( block );
-			const newAttributes = {
-				positionTop: getPercentageFromPixels( 'y', finalPosition.top ),
-				positionLeft: getPercentageFromPixels( 'x', finalPosition.left ),
-			};
 			insertBlock( clonedBlock, null, newPageId );
 			updateBlockAttributes( clonedBlock.clientId, newAttributes );
 
