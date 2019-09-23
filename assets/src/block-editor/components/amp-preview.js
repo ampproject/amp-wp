@@ -236,15 +236,15 @@ class AMPPreview extends Component {
 }
 
 AMPPreview.propTypes = {
-	autosave: PropTypes.bool.isRequired,
-	currentPostLink: PropTypes.func.isRequired,
-	postId: PropTypes.bool.isRequired,
-	previewLink: PropTypes.func.isRequired,
-	isAutosaveable: PropTypes.func.isRequired,
-	isDraft: PropTypes.func.isRequired,
-	isSaveable: PropTypes.func.isRequired,
-	isViewable: PropTypes.func.isRequired,
-	savePost: PropTypes.bool.isRequired,
+	autosave: PropTypes.func.isRequired,
+	currentPostLink: PropTypes.string.isRequired,
+	postId: PropTypes.number.isRequired,
+	previewLink: PropTypes.string,
+	isAutosaveable: PropTypes.bool.isRequired,
+	isDraft: PropTypes.bool.isRequired,
+	isSaveable: PropTypes.bool.isRequired,
+	isViewable: PropTypes.bool.isRequired,
+	savePost: PropTypes.func.isRequired,
 };
 
 export default compose( [
