@@ -7,7 +7,7 @@ amp.zip
 /assets/css/*
 !/assets/css/src/
 assets/js/*.js
-assets/js/*.deps.json
+assets/js/*.asset.php
 !assets/js/amp-service-worker-runtime-precaching.js
 assets/js/*.map
 built

@@ -213,9 +213,15 @@ class EnhancedResizableBox extends Component {
 							}
 						}
 
+						// Whenever reducing the size of a text element,
+						// set height to `auto` to get proper scroll height.
+						if ( isText ) {
+							textElement.style.height = 'auto';
+						}
+
 						const scrollWidth = textElement.scrollWidth;
 						const scrollHeight = textElement.scrollHeight;
-						if ( appliedWidth <= scrollWidth || appliedHeight <= scrollHeight ) {
+						if ( appliedWidth < scrollWidth || appliedHeight < scrollHeight ) {
 							appliedWidth = lastWidth;
 							appliedHeight = lastHeight;
 						}
@@ -227,6 +233,11 @@ class EnhancedResizableBox extends Component {
 							} else if ( isText && ! ampFitText ) {
 								textElement.style.width = '100%';
 							}
+						}
+
+						// Reset text element height.
+						if ( isText ) {
+							textElement.style.height = '';
 						}
 					}
 
