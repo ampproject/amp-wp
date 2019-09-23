@@ -2196,7 +2196,7 @@ class AMP_Theme_Support {
 
 		// Make sure scripts from the body get moved to the head.
 		if ( isset( $head ) ) {
-			foreach ( $xpath->query( '//body//script[ @custom-element or @custom-template ]' ) as $script ) {
+			foreach ( $xpath->query( '//body//script[ @custom-element or @custom-template or @src = "https://cdn.ampproject.org/v0.js" ]' ) as $script ) {
 				$head->appendChild( $script->parentNode->removeChild( $script ) );
 			}
 		}

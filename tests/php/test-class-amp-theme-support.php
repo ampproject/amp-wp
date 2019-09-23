@@ -1352,6 +1352,42 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test moving AMP scripts from body to head.
+	 *
+	 * @covers AMP_Theme_Support::prepare_response()
+	 * @covers AMP_Theme_Support::ensure_required_markup()
+	 */
+	public function test_scripts_get_moved_to_head() {
+		ob_start();
+		?>
+		<html>
+			<head></head>
+			<body>
+				<amp-list width="auto" height="100" layout="fixed-height" src="/static/inline-examples/data/amp-list-urls.json">
+					<template type="amp-mustache">
+						<div class="url-entry">
+							<a href="{{url}}">{{title}}</a>
+						</div>
+					</template>
+				</amp-list>
+				<?php wp_print_scripts( [ 'amp-runtime', 'amp-mustache', 'amp-list' ] ); ?>
+			</body>
+		</html>
+		<?php
+		$html = ob_get_clean();
+		$html = AMP_Theme_Support::prepare_response( $html );
+
+		$dom   = AMP_DOM_Utils::get_dom( $html );
+		$xpath = new DOMXPath( $dom );
+
+		$scripts = $xpath->query( '//script[ not( @type ) or @type = "text/javascript" ]' );
+		$this->assertSame( 3, $scripts->length );
+		foreach ( $scripts as $script ) {
+			$this->assertSame( 'head', $script->parentNode->nodeName );
+		}
+	}
+
+	/**
 	 * Test dequeue_customize_preview_scripts.
 	 *
 	 * @covers AMP_Theme_Support::dequeue_customize_preview_scripts()
