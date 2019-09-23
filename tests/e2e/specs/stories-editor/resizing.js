@@ -149,7 +149,7 @@ describe( 'Resizing', () => {
 			await dragAndResize( handle, { x: -100, y: 100 } );
 
 			const { positionLeft, positionTop } = await getSelectedBlockPosition();
-			expect( positionLeft ).toStrictEqual( '5%' );
+			expect( positionLeft ).toStrictEqual( '4.88%' );
 			expect( positionTop ).toStrictEqual( '9.95%' );
 		} );
 
@@ -162,8 +162,8 @@ describe( 'Resizing', () => {
 			await dragAndResize( handle, { x: -100, y: 0 } );
 
 			const { positionLeft, positionTop } = await getSelectedBlockPosition();
-			expect( positionLeft ).toStrictEqual( '5%' );
-			expect( positionTop ).toStrictEqual( '10%' );
+			expect( positionLeft ).toStrictEqual( '4.88%' );
+			expect( positionTop ).toStrictEqual( '9.95%' );
 		} );
 
 		it( 'should not change the top and left position when resizing: bottomRight', async () => {
@@ -175,8 +175,8 @@ describe( 'Resizing', () => {
 			await dragAndResize( handle, { x: 100, y: 100 } );
 
 			const { positionLeft, positionTop } = await getSelectedBlockPosition();
-			expect( positionLeft ).toStrictEqual( '5%' );
-			expect( positionTop ).toStrictEqual( '10%' );
+			expect( positionLeft ).toStrictEqual( '4.88%' );
+			expect( positionTop ).toStrictEqual( '9.95%' );
 		} );
 
 		it( 'should not change the top and left position when resizing: bottom', async () => {
@@ -188,8 +188,8 @@ describe( 'Resizing', () => {
 			await dragAndResize( handle, { x: 0, y: -100 } );
 
 			const { positionLeft, positionTop } = await getSelectedBlockPosition();
-			expect( positionLeft ).toStrictEqual( '5%' );
-			expect( positionTop ).toStrictEqual( '10%' );
+			expect( positionLeft ).toStrictEqual( '4.88%' );
+			expect( positionTop ).toStrictEqual( '9.95%' );
 		} );
 
 		it( 'should change the left position correctly when resizing: bottomLeft', async () => {
@@ -202,7 +202,7 @@ describe( 'Resizing', () => {
 
 			const { positionLeft, positionTop } = await getSelectedBlockPosition();
 			expect( positionLeft ).toStrictEqual( '-25.61%' );
-			expect( positionTop ).toStrictEqual( '10%' );
+			expect( positionTop ).toStrictEqual( '9.95%' );
 		} );
 
 		it( 'should keep text content height when resizing when max font size', async () => {
