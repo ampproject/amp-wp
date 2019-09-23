@@ -21,49 +21,88 @@ class AMP_Story_Sanitizer extends AMP_Base_Sanitizer {
 	public static $tag = 'amp-story-page';
 
 	/**
+	 * AMP Story tag spec.
+	 *
+	 * @var array
+	 */
+	private $amp_story_tag_spec;
+
+	/**
+	 * AMP Story Page tag spec.
+	 *
+	 * @var array
+	 */
+	private $amp_story_page_tag_spec;
+
+	/**
 	 * Sanitize the AMP elements contained by <amp-story-page> element where necessary.
 	 *
 	 * @since 0.2
 	 */
 	public function sanitize() {
-		$nodes     = $this->dom->getElementsByTagName( self::$tag );
-		$num_nodes = $nodes->length;
+		$this->amp_story_tag_spec      = AMP_Allowed_Tags_Generated::get_allowed_tag( 'amp-story' )[0];
+		$this->amp_story_page_tag_spec = AMP_Allowed_Tags_Generated::get_allowed_tag( 'amp-story-page' )[0];
 
-		if ( 0 === $num_nodes ) {
-			return;
-		}
-
-		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
-			$node = $nodes->item( $i );
-
-			if ( ! $node ) {
-				continue;
-			}
-
-			$cta_layers     = $node->getElementsByTagName( 'amp-story-cta-layer' );
-			$num_cta_layers = $cta_layers->length;
-
-			/**
-			 * Sanitizes usage of Call-to-Action layers.
-			 *
-			 * Does not use the remove_invalid_child() method
-			 * since the withCallToActionValidation HOC in the editor
-			 * already warns the user about improper usage.
-			 */
-			for ( $j = $num_cta_layers - 1; $j >= 0; $j-- ) {
-				$cta_layer_node = $cta_layers->item( $j );
-
-				// The first page in a story must not have a CTA layer.
-				if ( 0 === $i ) {
-					$cta_layer_node->parentNode->removeChild( $cta_layer_node );
-					continue;
-				}
-
-				if ( $j > 0 ) {
-					// There can only be one CTA layer.
-					$cta_layer_node->parentNode->removeChild( $cta_layer_node );
-				}
-			}
+		$amp_story_element = $this->dom->getElementsByTagName( 'amp-story' )->item( 0 );
+		if ( $amp_story_element instanceof DOMElement ) {
+			$this->sanitize_story_element( $amp_story_element );
 		}
 	}
+
+	/**
+	 * Sanitize the children of an amp-story element.
+	 *
+	 * @param DOMElement $element An amp-story element.
+	 */
+	private function sanitize_story_element( DOMElement $element ) {
+		$page_number = 0;
+
+		$node = $element->firstChild;
+		while ( $node ) {
+			$next_node = $node->nextSibling;
+			if ( $node instanceof DOMElement ) {
+				if ( 'amp-story-page' === $node->nodeName ) {
+					$page_number++;
+					$this->sanitize_story_page_element( $node, $page_number );
+				} elseif ( ! in_array( $node->nodeName, $this->amp_story_tag_spec['tag_spec']['child_tags']['child_tag_name_oneof'], true ) ) {
+					$this->remove_invalid_child( $node );
+				}
+			}
+			$node = $next_node;
+		}
+	}
+
+	/**
+	 * Sanitize the children of an amp-story-page element.
+	 *
+	 * @param DOMElement $element     An amp-story-page element.
+	 * @param int        $page_number Page number.
+	 */
+	private function sanitize_story_page_element( DOMElement $element, $page_number ) {
+		$cta_layer_count = 0;
+
+		$node = $element->firstChild;
+		while ( $node ) {
+			$next_node = $node->nextSibling;
+			if ( $node instanceof DOMElement ) {
+				if ( 'amp-story-cta-layer' === $node->nodeName ) {
+					/*
+					 * Remove all erroneous Call-to-Action layers.
+					 *
+					 * Does not use the remove_invalid_child() method
+					 * since the withCallToActionValidation HOC in the editor
+					 * already warns the user about improper usage.
+					 */
+					$cta_layer_count ++;
+					if ( 1 === $page_number || $cta_layer_count > 1 ) {
+						$element->removeChild( $node );
+					}
+				} elseif ( ! in_array( $node->nodeName, $this->amp_story_page_tag_spec['tag_spec']['child_tags']['child_tag_name_oneof'], true ) ) {
+					$this->remove_invalid_child( $node );
+				}
+			}
+			$node = $next_node;
+		}
+	}
+
 }
