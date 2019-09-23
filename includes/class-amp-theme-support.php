@@ -2115,7 +2115,7 @@ class AMP_Theme_Support {
 				AMP_HTTP::send_server_timing( 'amp_processor_cache_hit', -$prepare_response_start );
 
 				// Redirect to non-AMP version.
-				if ( ! amp_is_canonical() && $blocking_error_count > 0 ) {
+				if ( ! amp_is_canonical() && ! is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) && $blocking_error_count > 0 ) {
 					if ( AMP_Validation_Manager::has_cap() ) {
 						$non_amp_url = add_query_arg( AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR, $blocking_error_count, $non_amp_url );
 					}
@@ -2247,7 +2247,7 @@ class AMP_Theme_Support {
 			 * already surfaced inside of WordPress. This is intended to not serve dirty AMP, but rather a
 			 * non-AMP document (intentionally not valid AMP) that contains the AMP runtime and AMP components.
 			 */
-			if ( amp_is_canonical() ) {
+			if ( amp_is_canonical() || is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
 				$dom->documentElement->removeAttribute( 'amp' );
 				$dom->documentElement->removeAttribute( '⚡️' );
 
