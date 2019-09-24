@@ -127,14 +127,16 @@ function observeConsoleLogging() {
  *
  * @return {?Promise} Promise resolving once Axe texts are finished.
  */
-async function runAxeTestsForBlockEditor() {
+async function runAxeTestsForStoriesEditor() {
 	if ( ! await page.$( '.block-editor' ) ) {
 		return;
 	}
 
 	await expect( page ).toPassAxeTests( {
-		// Temporary disabled rules to enable initial integration.
-		// See: https://github.com/WordPress/gutenberg/pull/15018.
+		/**
+		 * Rules are disabled, as there are still accessiblity issues within gutenberg.
+		 * See: https://github.com/WordPress/gutenberg/pull/15018 & https://github.com/WordPress/gutenberg/issues/15452
+		 */
 		disabledRules: [
 			'aria-allowed-role',
 			'aria-hidden-focus',
@@ -172,7 +174,7 @@ beforeAll( async () => {
 // eslint-disable-next-line jest/require-top-level-describe
 afterEach( async () => {
 	await clearLocalStorage();
-	await runAxeTestsForBlockEditor();
+	await runAxeTestsForStoriesEditor();
 	await setBrowserViewport( 'large' );
 } );
 
