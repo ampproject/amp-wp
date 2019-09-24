@@ -47,7 +47,7 @@ class Autocomplete extends OriginalAutocomplete {
 			tStatusQueryTooShort,
 			tStatusSelectedOption,
 			tStatusResults,
-			ariaLabel,
+			ariaLabelBy,
 		} = this.props;
 		const { focused, hovered, menuOpen, options, query, selected } = this.state;
 		const autoselect = this.hasAutoselect();
@@ -133,7 +133,7 @@ class Autocomplete extends OriginalAutocomplete {
 					className={ `${ menuClassName } ${ menuModifierDisplayMenu } ${ menuModifierVisibility }` }
 					onMouseLeave={ ( event ) => this.handleListMouseLeave( event ) }
 					id={ `${ id }__listbox` }
-					aria-label={ ariaLabel }
+					aria-labelledby={ ariaLabelBy }
 					role="listbox"
 				>
 					{ options.map( ( option, index ) => {
