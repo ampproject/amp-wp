@@ -1358,7 +1358,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 			$validation_error_term = self::factory()->term->create(
 				[
 					'taxonomy'    => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
-					'description' => wp_json_encode( [ 'code' => 'test' ], compact( 'i' ) ),
+					'description' => wp_json_encode( array_merge( [ 'code' => 'test' ], compact( 'i' ) ) ),
 				]
 			);
 			if ( $i < 9 ) {

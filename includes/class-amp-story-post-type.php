@@ -813,6 +813,16 @@ class AMP_Story_Post_Type {
 
 		wp_styles()->add_data( self::AMP_STORIES_EDITOR_STYLE_HANDLE, 'rtl', 'replace' );
 
+		// Include all fonts in the editor since new fonts can be selected at runtime.
+		// In a frontend context, the fonts are added only as needed via \AMP_Story_Post_Type::render_block_with_google_fonts().
+		$fonts = self::get_fonts();
+		foreach ( $fonts as $font ) {
+			wp_add_inline_style(
+				self::AMP_STORIES_EDITOR_STYLE_HANDLE,
+				self::get_inline_font_style_rule( $font )
+			);
+		}
+
 		self::enqueue_general_styles();
 	}
 
@@ -829,14 +839,6 @@ class AMP_Story_Post_Type {
 		);
 
 		wp_styles()->add_data( self::AMP_STORIES_STYLE_HANDLE, 'rtl', 'replace' );
-
-		$fonts = self::get_fonts();
-		foreach ( $fonts as $font ) {
-			wp_add_inline_style(
-				self::AMP_STORIES_STYLE_HANDLE,
-				self::get_inline_font_style_rule( $font )
-			);
-		}
 	}
 
 	/**
@@ -1385,6 +1387,8 @@ class AMP_Story_Post_Type {
 
 	/**
 	 * Include any required Google Font styles when rendering a block in AMP Stories.
+	 *
+	 * @see AMP_Story_Post_Type::enqueue_block_editor_styles() Where fonts are added in the story editor.
 	 *
 	 * @param string $block_content The block content about to be appended.
 	 * @param array  $block         The full block, including name and attributes.
