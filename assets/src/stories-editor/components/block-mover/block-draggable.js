@@ -129,8 +129,9 @@ export default compose(
 				}
 
 				// CTA's aren't allowed on pages, that already have a CTA
-				const ctaBlockOnTargetPage = getCallToActionBlock( targetPageId );
-				if ( ctaBlockOnTargetPage !== null ) {
+				const CTABlockOnTargetPage = getCallToActionBlock( targetPageId );
+				const hasCTABlockOnTargetPage = Boolean( CTABlockOnTargetPage );
+				if ( hasCTABlockOnTargetPage ) {
 					return false;
 				}
 			}
