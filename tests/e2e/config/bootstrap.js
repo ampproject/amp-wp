@@ -134,7 +134,8 @@ async function runAxeTestsForStoriesEditor() {
 
 	await expect( page ).toPassAxeTests( {
 		/**
-		 * Rules are disabled, as there are still accessiblity issues within gutenberg.
+		 * Rules are disabled, as there are still accessibility issues within gutenberg.
+		 *
 		 * See: https://github.com/WordPress/gutenberg/pull/15018 & https://github.com/WordPress/gutenberg/issues/15452
 		 */
 		disabledRules: [
