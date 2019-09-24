@@ -163,7 +163,6 @@ async function runAxeTestsForStoriesEditor() {
  * @return {?Promise} Promise resolving once Axe texts are finished.
  */
 async function runAxeTestsForBlockEditor() {
-
 	if ( ! await page.$( '.block-editor' ) ) {
 		return;
 	}
