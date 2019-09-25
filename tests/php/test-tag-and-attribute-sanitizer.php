@@ -1660,13 +1660,15 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-user-location' ],
 			],
 
-			'deeply_nested_elements_250'                   => [
+			'deeply_nested_elements_200'                   => [
 				// If a DOM tree is too deep, libxml itself will issue an error: Excessive depth in document: 256 use XML_PARSE_HUGE option.
-				// So this tests just up before that limit to also ensure that the recursive \AMP_Tag_And_Attribute_Sanitizer::sanitize_element()
+				// Also, if XDebug is enabled, then max_nesting_level error is reached if call stack is >256. A nesting level of 200 is safe,
+				// so this tests up to that level of nesting to also ensure that the recursive \AMP_Tag_And_Attribute_Sanitizer::sanitize_element()
 				// method does not cause a different error at the PHP level when a recursion call stack reaches that same level.
-				str_repeat( '<div>', 250 ) . 'hello world!' . str_repeat( '</div>', 250 ),
-				null,
+				str_repeat( '<div>', 200 ) . '<bad>hello world!</bad>' . str_repeat( '</div>', 200 ),
+				str_repeat( '<div>', 200 ) . 'hello world!' . str_repeat( '</div>', 200 ),
 				[],
+				[ 'invalid_element' ],
 			],
 		];
 	}
