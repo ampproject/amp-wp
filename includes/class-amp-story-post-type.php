@@ -1407,9 +1407,10 @@ class AMP_Story_Post_Type {
 			return $block_content;
 		}
 
+		// Output system fonts.
 		if ( ! isset( $font['handle'], $font['src'] ) ) {
-			// @todo Prevent adding duplicates!
-			return '<style>' . self::get_inline_font_style_rule( $font ) . '</style>' . $block_content;
+			$style = sprintf( '<style data-font-family="%s">%s</style>', esc_attr( $font['name'] ), self::get_inline_font_style_rule( $font ) );
+			return $style . $block_content;
 		}
 
 		if ( wp_style_is( $font['handle'] ) ) {
