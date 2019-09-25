@@ -569,6 +569,35 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test getting fonts.
+	 *
+	 * @covers AMP_Story_Post_Type::get_font
+	 * @covers AMP_Story_Post_Type::get_fonts
+	 */
+	public function test_get_fonts() {
+		$fonts = AMP_Story_Post_Type::get_fonts();
+		$this->assertInternalType( 'array', $fonts );
+
+		$arial_font = current(
+			array_filter(
+				$fonts,
+				function ( $font ) {
+					return 'Arial' === $font['name'];
+				}
+			)
+		);
+
+		$this->assertEquals(
+			[
+				'name'      => 'Arial',
+				'fallbacks' => [ 'Helvetica Neue', 'Helvetica', 'sans-serif' ],
+				'slug'      => 'arial',
+			],
+			$arial_font
+		);
+	}
+
+	/**
 	 * Test process google fonts.
 	 *
 	 * @covers AMP_Story_Post_Type::get_google_fonts
@@ -616,8 +645,8 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	 * @covers AMP_Story_Post_Type::get_google_fonts
 	 * @dataProvider get_gfont_data
 	 *
-	 * @param string $font Font name
-	 * @param string $gfont gfont entry
+	 * @param string $font Font name.
+	 * @param string $gfont gfont entry.
 	 * @param string $fallbacks Font fallbacks.
 	 */
 	public function test_google_fonts_entries( $font, $gfont, $fallbacks ) {
@@ -640,19 +669,19 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	 * @covers AMP_Story_Post_Type::get_font_fallback
 	 * @dataProvider get_font_fallback_data
 	 *
-	 * @param string $expected
-	 * @param string $category
+	 * @param string $expected Expected.
+	 * @param string $category Category.
 	 */
-	public function test_fallback_font( $expected, $category ) {
+	public function test_get_font_fallback( $expected, $category ) {
 		$this->assertEquals( $expected, AMP_Story_Post_Type::get_font_fallback( $category ) );
 	}
 
 	/**
 	 * Helper to find key in array.
 	 *
-	 * @param $data
-	 * @param $key
-	 * @param $value
+	 * @param array  $data  Data.
+	 * @param string $key   Key.
+	 * @param mixed  $value Value.
 	 *
 	 * @return false|int|string
 	 */
@@ -722,6 +751,64 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		];
 	}
 
+	/**
+	 * Get data for testing render_block_with_fonts.
+	 *
+	 * @return array Data.
+	 */
+	public function get_render_block_with_fonts_test_data() {
+		return [
+			[
+				'Arial',
+				null,
+			],
+			[
+				'Aref Ruqaa',
+				'aref-ruqaa-font',
+			],
+		];
+	}
+
+	/**
+	 * Test render_block_with_google_fonts.
+	 *
+	 * @param string $font_name      Font Name.
+	 * @param string $enqueued_style Enqueued style.
+	 *
+	 * @dataProvider get_render_block_with_fonts_test_data
+	 * @covers AMP_Story_Post_Type::render_block_with_google_fonts
+	 */
+	public function test_render_block_with_google_fonts( $font_name, $enqueued_style ) {
+		$block_name = 'amp/amp-story-text';
+
+		$system_block_attrs = [ 'ampFontFamily' => $font_name ];
+		$system_text_block  = sprintf(
+			'<!-- wp:%1$s %2$s --><h1 data-font-family="%3$s">Text</h1><!-- /wp:%1$s -->',
+			$block_name,
+			wp_json_encode( $system_block_attrs ),
+			$font_name
+		);
+		$filtered_block     = AMP_Story_Post_Type::render_block_with_google_fonts(
+			$system_text_block,
+			[
+				'name'  => $block_name,
+				'attrs' => $system_block_attrs,
+			]
+		);
+		$this->assertStringStartsWith(
+			sprintf( '<style data-font-family="%1$s">[data-font-family="%1$s"]', $font_name ),
+			$filtered_block
+		);
+		if ( $enqueued_style ) {
+			$this->assertTrue( wp_style_is( $enqueued_style, 'enqueued' ) );
+		}
+	}
+
+	/**
+	 * Get default settings definitions.
+	 *
+	 * @return array
+	 */
 	public function get_default_settings_definitions() {
 		return [
 			[
