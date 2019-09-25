@@ -104,7 +104,7 @@ const Indicator = ( { pages, currentPage, onClick } ) => {
 						elementId={ blockElementId }
 						transferData={ transferData }
 						onDragStart={ () => {
-							setIsDragging( true );
+							setIsDragging( page.clientId );
 							initializePageOrder( getBlockOrder() );
 						} }
 						onDragEnd={ () => {
@@ -152,7 +152,7 @@ const Indicator = ( { pages, currentPage, onClick } ) => {
 											) }
 										</div>
 										<DropZone
-											className={ isDragging ? 'is-dragging-indicator' : undefined }
+											className={ isDragging === page.clientId ? 'is-dragging-indicator' : undefined }
 											onDrop={ onDrop }
 										/>
 									</li>

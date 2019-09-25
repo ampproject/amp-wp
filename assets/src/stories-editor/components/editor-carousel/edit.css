@@ -84,6 +84,8 @@
 .amp-story-editor-carousel-item .components-drop-zone {
 	left: -10px;
 	width: calc(100% + 20px);
+	height: 18px;
+	top: -5px;
 	border: none;
 	border-radius: 0;
 }
@@ -103,6 +105,7 @@
 }
 
 .amp-story-editor-carousel-item .components-drop-zone .components-drop-zone__content-text,
-.amp-story-editor-carousel-item .components-drop-zone .components-drop-zone__content-icon {
+.amp-story-editor-carousel-item .components-drop-zone .components-drop-zone__content-icon,
+.amp-story-editor-carousel-item .components-drop-zone.is-dragging-indicator {
 	display: none;
 }
