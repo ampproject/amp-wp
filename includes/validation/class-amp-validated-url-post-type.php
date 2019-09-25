@@ -750,7 +750,7 @@ class AMP_Validated_URL_Post_Type {
 								'term_group' => $sanitization['status'],
 							]
 						);
-					} elseif ( AMP_Validation_Manager::is_sanitization_auto_accepted() || $is_story ) {
+					} elseif ( AMP_Validation_Manager::is_sanitization_auto_accepted( $data ) || $is_story ) {
 						$term_data['term_group'] = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS;
 						wp_update_term(
 							$term_id,
