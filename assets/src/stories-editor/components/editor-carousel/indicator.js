@@ -59,7 +59,7 @@ const Indicator = ( { pages, currentPage, onClick } ) => {
 
 	const [ isDragging, setIsDragging ] = useState( false );
 	const { movePageToPosition, initializePageOrder } = useDispatch( 'amp/story' );
-	const { getBlockOrder } = useSelect( ( select ) => {
+	const { getBlockOrder, getBlockIndex } = useSelect( ( select ) => {
 		return select( 'core/block-editor' );
 	} );
 
@@ -68,17 +68,16 @@ const Indicator = ( { pages, currentPage, onClick } ) => {
 			{ pages.map( ( page, index ) => {
 				const className = page.clientId === currentPage ? 'amp-story-editor-carousel-item amp-story-editor-carousel-item--active' : 'amp-story-editor-carousel-item';
 				const blockElementId = `amp-story-editor-carousel-item-${ page.clientId }`;
-
 				const transferData = {
 					type: 'indicator',
-					//srcIndex: getBlockIndex( page.clientId ),
-					srcIndex: index,
+					srcIndex: getBlockIndex( page.clientId ),
 					srcClientId: page.clientId,
 				};
 
 				const getInsertIndex = ( position ) => {
+					const dstIndex = getBlockIndex( page.clientId );
 					if ( page.clientId !== undefined ) {
-						return position.x === 'left' ? index : index + 1;
+						return position.x === 'left' ? dstIndex : dstIndex + 1;
 					}
 
 					return undefined;
@@ -125,19 +124,32 @@ const Indicator = ( { pages, currentPage, onClick } ) => {
 											className="amp-story-editor-carousel-item-wrapper"
 											id={ `amp-story-editor-carousel-item-${ page.clientId }` }
 										>
-											<Tooltip text={ toolTip( index + 1 ) }>
+											{ page.clientId !== currentPage && (
+												<Tooltip text={ toolTip( index + 1 ) }>
+													<Button
+														onClick={ ( e ) => {
+															e.preventDefault();
+															onClick( page.clientId );
+														} }
+													>
+														<span className="screen-reader-text">
+															{ label( index + 1 ) }
+														</span>
+													</Button>
+												</Tooltip>
+											) }
+											{ page.clientId === currentPage && (
 												<Button
 													onClick={ ( e ) => {
 														e.preventDefault();
 														onClick( page.clientId );
 													} }
-													disabled={ page.clientId === currentPage }
 												>
 													<span className="screen-reader-text">
 														{ label( index + 1 ) }
 													</span>
 												</Button>
-											</Tooltip>
+											) }
 										</div>
 										<DropZone
 											className={ isDragging ? 'is-dragging-indicator' : undefined }
