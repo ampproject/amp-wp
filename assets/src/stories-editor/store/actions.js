@@ -135,6 +135,20 @@ export function setCurrentPage( page ) {
 }
 
 /**
+ * Returns an action object in signalling that page order should be initiated.
+ *
+ * @param {string[]} order The current block order.
+ *
+ * @return {Object} Action object.
+ */
+export function initializePageOrder( order ) {
+	return {
+		type: 'INITIALIZE_ORDER',
+		order,
+	};
+}
+
+/**
  * Returns an action object in signalling that reorder mode should be initiated.
  *
  * @param {string[]} order The current block order.

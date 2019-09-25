@@ -282,6 +282,12 @@ export function blocks( state = {}, action ) {
 				isReordering: false,
 			};
 
+		case 'INITIALIZE_ORDER':
+			return {
+				...state,
+				order,
+			};
+
 		default:
 			return state;
 	}

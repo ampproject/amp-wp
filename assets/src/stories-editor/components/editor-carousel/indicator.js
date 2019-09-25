@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { __, sprintf } from '@wordpress/i18n';
 import { Button, Draggable, DropZone, Tooltip } from '@wordpress/components';
 import { useState } from '@wordpress/element';
-import { useDispatch } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 
 /**
  * Parses drag & drop events to ensure the event contains valid transfer data.
@@ -58,7 +58,10 @@ const Indicator = ( { pages, currentPage, onClick } ) => {
 	const toolTip = ( pageNumber ) => sprintf( __( 'Go to page %s', 'amp' ), pageNumber );
 
 	const [ isDragging, setIsDragging ] = useState( false );
-	const { moveBlockToPosition } = useDispatch( 'core/block-editor' );
+	const { movePageToPosition, initializePageOrder } = useDispatch( 'amp/story' );
+	const { getBlockOrder } = useSelect( ( select ) => {
+		return select( 'core/block-editor' );
+	} );
 
 	return (
 		<ul className="amp-story-editor-carousel-item-list">
@@ -93,8 +96,7 @@ const Indicator = ( { pages, currentPage, onClick } ) => {
 
 					const positionIndex = getInsertIndex( position );
 					const insertIndex = srcIndex < index ? positionIndex - 1 : positionIndex;
-					// @todo get actual index
-					moveBlockToPosition( srcClientId, insertIndex );
+					movePageToPosition( srcClientId, insertIndex );
 				};
 
 				return (
@@ -104,6 +106,7 @@ const Indicator = ( { pages, currentPage, onClick } ) => {
 						transferData={ transferData }
 						onDragStart={ () => {
 							setIsDragging( true );
+							initializePageOrder( getBlockOrder() );
 						} }
 						onDragEnd={ () => {
 							setIsDragging( false );

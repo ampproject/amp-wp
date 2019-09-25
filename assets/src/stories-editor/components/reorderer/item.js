@@ -88,7 +88,7 @@ class ReordererItem extends Component {
 		const positionIndex = this.getInsertIndex( position );
 		const insertIndex = srcIndex < index ? positionIndex - 1 : positionIndex;
 		movePageToPosition( srcClientId, insertIndex );
-	}
+	};
 
 	render() {
 		const { page, index } = this.props;
