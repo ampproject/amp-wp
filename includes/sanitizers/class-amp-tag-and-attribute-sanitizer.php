@@ -668,12 +668,14 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return true|WP_Error True when valid or error when invalid.
 	 */
 	private function validate_cdata_for_node( DOMElement $element, $cdata_spec ) {
-		if ( isset( $cdata_spec['max_bytes'] ) && strlen( $element->textContent ) > $cdata_spec['max_bytes'] ) {
+		if (
+			isset( $cdata_spec['max_bytes'] ) && strlen( $element->textContent ) > $cdata_spec['max_bytes']
+			&&
 			// Skip the <style amp-custom> tag, as we want to display it even with an excessive size if it passed the style sanitizer.
 			// This would mean that AMP was disabled to not break the styling.
-			if ( 'style' !== $element->nodeName || ! $element->hasAttributes() || 'amp-custom' !== $element->attributes->item( 0 )->nodeName ) {
-				return new WP_Error( 'excessive_bytes' );
-			}
+			! ( 'style' === $element->nodeName && $element->hasAttributes() && 'amp-custom' === $element->attributes->item( 0 )->nodeName )
+		) {
+			return new WP_Error( 'excessive_bytes' );
 		}
 		if ( isset( $cdata_spec['blacklisted_cdata_regex'] ) ) {
 			if ( preg_match( '@' . $cdata_spec['blacklisted_cdata_regex']['regex'] . '@u', $element->textContent ) ) {
