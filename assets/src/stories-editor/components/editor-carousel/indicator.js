@@ -7,7 +7,35 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { Button, Tooltip } from '@wordpress/components';
+import { Button, Draggable, DropZone, Tooltip } from '@wordpress/components';
+import { useState } from '@wordpress/element';
+import { useDispatch } from '@wordpress/data';
+
+/**
+ * Parses drag & drop events to ensure the event contains valid transfer data.
+ *
+ * @param {Object} event
+ * @return {Object} Parsed event data.
+ */
+const parseDropEvent = ( event ) => {
+	let result = {
+		srcClientId: null,
+		srcIndex: null,
+		type: null,
+	};
+
+	if ( ! event.dataTransfer ) {
+		return result;
+	}
+
+	try {
+		result = Object.assign( result, JSON.parse( event.dataTransfer.getData( 'text' ) ) );
+	} catch ( err ) {
+		return result;
+	}
+
+	return result;
+};
 
 /**
  * Carousel indicator component.
@@ -29,27 +57,94 @@ const Indicator = ( { pages, currentPage, onClick } ) => {
 	/* translators: %s: Page number */
 	const toolTip = ( pageNumber ) => sprintf( __( 'Go to page %s', 'amp' ), pageNumber );
 
+	const [ isDragging, setIsDragging ] = useState( false );
+	const { moveBlockToPosition } = useDispatch( 'core/block-editor' );
+
 	return (
 		<ul className="amp-story-editor-carousel-item-list">
 			{ pages.map( ( page, index ) => {
 				const className = page.clientId === currentPage ? 'amp-story-editor-carousel-item amp-story-editor-carousel-item--active' : 'amp-story-editor-carousel-item';
+				const blockElementId = `amp-story-editor-carousel-item-${ page.clientId }`;
+
+				const transferData = {
+					type: 'indicator',
+					//srcIndex: getBlockIndex( page.clientId ),
+					srcIndex: index,
+					srcClientId: page.clientId,
+				};
+
+				const getInsertIndex = ( position ) => {
+					if ( page.clientId !== undefined ) {
+						return position.x === 'left' ? index : index + 1;
+					}
+
+					return undefined;
+				};
+
+				const onDrop = ( event, position ) => {
+					const { srcClientId, srcIndex, type } = parseDropEvent( event );
+
+					const isIndicatorDropType = ( dropType ) => dropType === 'indicator';
+					const isSameBlock = ( src, dst ) => src === dst;
+
+					if ( ! isIndicatorDropType( type ) || isSameBlock( srcClientId, page.clientId ) ) {
+						return;
+					}
+
+					const positionIndex = getInsertIndex( position );
+					const insertIndex = srcIndex < index ? positionIndex - 1 : positionIndex;
+					// @todo get actual index
+					moveBlockToPosition( srcClientId, insertIndex );
+				};
 
 				return (
-					<li key={ page.clientId } className={ className }>
-						<Tooltip text={ toolTip( index + 1 ) }>
-							<Button
-								onClick={ ( e ) => {
-									e.preventDefault();
-									onClick( page.clientId );
-								} }
-								disabled={ page.clientId === currentPage }
-							>
-								<span className="screen-reader-text">
-									{ label( index + 1 ) }
-								</span>
-							</Button>
-						</Tooltip>
-					</li>
+					<Draggable
+						key={ page.clientId }
+						elementId={ blockElementId }
+						transferData={ transferData }
+						onDragStart={ () => {
+							setIsDragging( true );
+						} }
+						onDragEnd={ () => {
+							setIsDragging( false );
+						} }
+					>
+						{
+							( { onDraggableStart, onDraggableEnd } ) => (
+								<>
+									<li
+										className={ className }
+									>
+										<div
+											onDragStart={ onDraggableStart }
+											onDragEnd={ onDraggableEnd }
+											draggable
+											className="amp-story-editor-carousel-item-wrapper"
+											id={ `amp-story-editor-carousel-item-${ page.clientId }` }
+										>
+											<Tooltip text={ toolTip( index + 1 ) }>
+												<Button
+													onClick={ ( e ) => {
+														e.preventDefault();
+														onClick( page.clientId );
+													} }
+													disabled={ page.clientId === currentPage }
+												>
+													<span className="screen-reader-text">
+														{ label( index + 1 ) }
+													</span>
+												</Button>
+											</Tooltip>
+										</div>
+										<DropZone
+											className={ isDragging ? 'is-dragging-indicator' : undefined }
+											onDrop={ onDrop }
+										/>
+									</li>
+								</>
+							)
+						}
+					</Draggable>
 				);
 			} ) }
 		</ul>
