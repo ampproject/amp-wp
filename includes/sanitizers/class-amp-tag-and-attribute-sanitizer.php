@@ -673,7 +673,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			&&
 			// Skip the <style amp-custom> tag, as we want to display it even with an excessive size if it passed the style sanitizer.
 			// This would mean that AMP was disabled to not break the styling.
-			! ( 'style' === $element->nodeName && $element->hasAttributes() && 'amp-custom' === $element->attributes->item( 0 )->nodeName )
+			! ( 'style' === $element->nodeName && $element->hasAttribute( 'amp-custom' ) )
 		) {
 			return new WP_Error( 'excessive_bytes' );
 		}
