@@ -1402,29 +1402,23 @@ class AMP_Story_Post_Type {
 		}
 
 		$font = self::get_font( $block['attrs'][ $font_family_attribute ] );
-
 		if ( ! $font ) {
 			return $block_content;
 		}
 
-		// Output system fonts.
-		if ( ! isset( $font['handle'], $font['src'] ) ) {
-			$style = sprintf( '<style data-font-family="%s">%s</style>', esc_attr( $font['name'] ), self::get_inline_font_style_rule( $font ) );
-			return $style . $block_content;
-		}
-
-		if ( wp_style_is( $font['handle'] ) ) {
-			return $block_content;
-		}
-
-		wp_enqueue_style( $font['handle'], $font['src'], [], null, 'all' ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
-
-		wp_add_inline_style(
-			$font['handle'],
+		// Create style rule for the custom font. The style sanitizer will de-duplicate.
+		$style = sprintf(
+			'<style data-font-family="%s">%s</style>',
+			esc_attr( $font['name'] ),
 			self::get_inline_font_style_rule( $font )
 		);
 
-		return $block_content;
+		// Make sure that the Google Font is enqueued.
+		if ( isset( $font['src'], $font['handle'] ) && ! wp_style_is( $font['handle'] ) ) {
+			wp_enqueue_style( $font['handle'], $font['src'], [], null, 'all' ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+		}
+
+		return $style . $block_content;
 	}
 
 	/**
