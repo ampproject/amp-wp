@@ -40,13 +40,14 @@ class TextBlockEdit extends Component {
 	}
 
 	componentDidUpdate( prevProps, prevState ) {
-		const { attributes, fontSize, isSelected } = this.props;
+		const { attributes, fontSize, isSelected, setAttributes } = this.props;
 		const {
 			height,
 			width,
 			content,
 			ampFitText,
 			ampFontFamily,
+			isPasted,
 		} = attributes;
 
 		// If the block was unselected, make sure that it's not editing anymore.
@@ -73,6 +74,12 @@ class TextBlockEdit extends Component {
 			prevProps.attributes.ampFontFamily !== ampFontFamily ||
 			prevProps.attributes.content !== content
 		);
+
+		// If block has been pasted, then regenerate height and width.
+		if ( isPasted ) {
+			setAttributes( { isPasted: false } );
+			maybeUpdateBlockDimensions( this.props );
+		}
 
 		if ( checkBlockDimensions ) {
 			maybeUpdateBlockDimensions( this.props );
@@ -252,6 +259,7 @@ TextBlockEdit.propTypes = {
 		opacity: PropTypes.number,
 		className: PropTypes.string,
 		ampFontFamily: PropTypes.string,
+		isPasted: PropTypes.bool,
 	} ).isRequired,
 	isSelected: PropTypes.bool.isRequired,
 	clientId: PropTypes.string.isRequired,
