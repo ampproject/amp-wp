@@ -297,15 +297,11 @@ class AMP_Validation_Manager {
 	 */
 	public static function is_sanitization_auto_accepted( $error = null ) {
 		if ( ! amp_is_canonical() ) {
-			return false;
+			// @todo Eliminate auto_accept_sanitization altogether.
+			return AMP_Options_Manager::get_option( 'auto_accept_sanitization' );
 		}
 
-		if ( $error && 'excessive_css' === $error['code'] ) {
-			return false;
-		}
-
-		// @todo Eliminate auto_accept_sanitization altogether.
-		return AMP_Options_Manager::get_option( 'auto_accept_sanitization' );
+		return ! ( $error && 'excessive_css' === $error['code'] );
 	}
 
 	/**
