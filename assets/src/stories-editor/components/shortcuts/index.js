@@ -12,6 +12,11 @@ import { withDispatch, withSelect } from '@wordpress/data';
 import { IconButton } from '@wordpress/components';
 import { compose, ifCondition } from '@wordpress/compose';
 
+/**
+ * Internal dependencies
+ */
+import { isBlockAllowedOnPage } from '../../helpers';
+
 const Shortcuts = ( { insertBlock, canInsertBlockType, showInserter } ) => {
 	const blocks = [
 		'amp/amp-story-text',
@@ -48,16 +53,13 @@ Shortcuts.propTypes = {
 
 const applyWithSelect = withSelect( ( select ) => {
 	const { getCurrentPage } = select( 'amp/story' );
-	const { canInsertBlockType, getBlockListSettings } = select( 'core/block-editor' );
 	const { isReordering } = select( 'amp/story' );
+
+	const currentPage = getCurrentPage();
 
 	return {
 		isReordering: isReordering(),
-		canInsertBlockType: ( name ) => {
-			// canInsertBlockType() alone is not enough, see https://github.com/WordPress/gutenberg/issues/14515
-			const blockSettings = getBlockListSettings( getCurrentPage() );
-			return canInsertBlockType( name, getCurrentPage() ) && blockSettings && blockSettings.allowedBlocks.includes( name );
-		},
+		canInsertBlockType: ( name ) => isBlockAllowedOnPage( name, currentPage ),
 		// As used in <HeaderToolbar> component
 		showInserter: select( 'core/edit-post' ).getEditorMode() === 'visual' && select( 'core/editor' ).getEditorSettings().richEditingEnabled,
 	};

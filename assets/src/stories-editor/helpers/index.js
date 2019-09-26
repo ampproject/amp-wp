@@ -69,6 +69,8 @@ const {
 	getBlock,
 	getClientIdsWithDescendants,
 	getSettings,
+	canInsertBlockType,
+	getBlockListSettings,
 } = select( 'core/block-editor' );
 
 const { getAnimatedBlocks } = select( 'amp/story' );
@@ -1868,33 +1870,23 @@ export const copyTextToClipBoard = ( text ) => {
  * Ensure that only allowed blocks are pasted.
  *
  * @param {[]}      blocks Array of blocks.
- * @param {string}  clientId Page ID.
- * @param {boolean} isFirstPage If is first page.
+ * @param {string}  pageId Page ID.
  * @return {[]} Filtered blocks.
  */
-export const ensureAllowedBlocksOnPaste = ( blocks, clientId, isFirstPage ) => {
-	const allowedBlocks = [];
-	blocks.forEach( ( block ) => {
-		switch ( block.name ) {
-			// Skip copying Page.
-			case 'amp/amp-story-page':
-				return;
-			case 'amp/amp-story-page-attachment':
-			case 'amp/amp-story-cta':
-				const currentBlock = getPageBlockByName( clientId, block.name );
-				if ( currentBlock || ( isFirstPage && block.name === 'amp/amp-story-cta' ) ) {
-					return;
-				}
-				allowedBlocks.push( block );
-				break;
-			default:
-				if ( ALLOWED_CHILD_BLOCKS.includes( block.name ) ) {
-					allowedBlocks.push( block );
-				}
-				break;
-		}
-	} );
-	return allowedBlocks;
+export const ensureAllowedBlocksOnPaste = ( blocks, pageId ) =>
+	blocks.filter( ( block ) => isBlockAllowedOnPage( block.name, pageId ) );
+
+/**
+ * Is the given block allowed on the given page?
+ *
+ * @param {Object}  name The name of the block to test.
+ * @param {string}  pageId Page ID.
+ * @return {boolean} Returns true if the element is allowed on the page, false otherwise.
+ */
+export const isBlockAllowedOnPage = ( name, pageId ) => {
+	// canInsertBlockType() alone is not enough, see https://github.com/WordPress/gutenberg/issues/14515
+	const blockSettings = getBlockListSettings( pageId );
+	return canInsertBlockType( name, pageId ) && blockSettings && blockSettings.allowedBlocks.includes( name );
 };
 
 /**

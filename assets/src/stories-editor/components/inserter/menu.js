@@ -52,6 +52,7 @@ import { addQueryArgs } from '@wordpress/url';
 import BlockPreview from '../block-preview';
 import BlockTypesList from '../block-types-list';
 import { ALLOWED_TOP_LEVEL_BLOCKS } from '../../constants';
+import { isBlockAllowedOnPage } from '../../helpers';
 
 const MAX_SUGGESTED_ITEMS = 9;
 
@@ -377,8 +378,6 @@ export default compose(
 			getBlockName,
 			getBlockRootClientId,
 			getBlockSelectionEnd,
-			canInsertBlockType,
-			getBlockListSettings,
 		} = select( 'core/block-editor' );
 		const {
 			getChildBlockNames,
@@ -409,9 +408,7 @@ export default compose(
 				return true;
 			}
 
-			// canInsertBlockType() alone is not enough, see https://github.com/WordPress/gutenberg/issues/14515
-			const destinationBlockListSettings = getBlockListSettings( destinationRootClientId );
-			return canInsertBlockType( name, getCurrentPage() ) && destinationBlockListSettings && destinationBlockListSettings.allowedBlocks.includes( name );
+			return isBlockAllowedOnPage( name, getCurrentPage() );
 		} );
 
 		return {

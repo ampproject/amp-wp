@@ -12,10 +12,11 @@ import { withDispatch, withSelect } from '@wordpress/data';
 import { DropdownMenu } from '@wordpress/components';
 import { compose, ifCondition } from '@wordpress/compose';
 import { __, sprintf } from '@wordpress/i18n';
+
 /**
  * Internal dependencies
  */
-import { processMedia } from '../../helpers';
+import { processMedia, isBlockAllowedOnPage } from '../../helpers';
 
 const POPOVER_PROPS = {
 	position: 'bottom right',
@@ -110,7 +111,7 @@ const mediaPicker = ( dialogTitle, mediaType, updateBlock ) => {
 
 const applyWithSelect = withSelect( ( select ) => {
 	const { getCurrentPage } = select( 'amp/story' );
-	const { canInsertBlockType, getBlockListSettings, getBlock } = select( 'core/block-editor' );
+	const { getBlock } = select( 'core/block-editor' );
 	const { isReordering } = select( 'amp/story' );
 
 	const currentPage = getCurrentPage();
@@ -119,11 +120,7 @@ const applyWithSelect = withSelect( ( select ) => {
 
 	return {
 		isReordering: isReordering(),
-		canInsertBlockType: ( name ) => {
-			// canInsertBlockType() alone is not enough, see https://github.com/WordPress/gutenberg/issues/14515
-			const blockSettings = getBlockListSettings( currentPage );
-			return canInsertBlockType( name, currentPage ) && blockSettings && blockSettings.allowedBlocks.includes( name );
-		},
+		canInsertBlockType: ( name ) => isBlockAllowedOnPage( name, currentPage ),
 		// As used in <HeaderToolbar> component
 		showInserter: select( 'core/edit-post' ).getEditorMode() === 'visual' && select( 'core/editor' ).getEditorSettings().richEditingEnabled,
 		mediaType,
