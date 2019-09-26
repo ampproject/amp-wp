@@ -1890,7 +1890,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 		);
 
 		$data['dont_strip_excessive_css_in_amp_custom_document'] = [
-			$dont_strip_excessive_css_in_amp_custom_document
+			$dont_strip_excessive_css_in_amp_custom_document,
 		];
 
 		// Also include the body tests.

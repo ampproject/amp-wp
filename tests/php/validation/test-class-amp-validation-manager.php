@@ -229,8 +229,17 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::is_sanitization_auto_accepted()
 	 */
 	public function test_is_sanitization_auto_accepted() {
-		$some_error = [ 'node_name' => 'href', 'parent_name' => 'a', 'type' => 'html_attribute_error', 'code' => 'invalid_attribute' ];
-		$excessive_css_error = [ 'node_name' => 'style', 'type' => 'css', 'code' => 'excessive_css' ];
+		$some_error = [
+			'node_name'   => 'href',
+			'parent_name' => 'a',
+			'type'        => 'html_attribute_error',
+			'code'        => 'invalid_attribute',
+		];
+		$excessive_css_error = [
+			'node_name' => 'style',
+			'type'      => 'css',
+			'code'      => 'excessive_css',
+		];
 
 		remove_theme_support( AMP_Theme_Support::SLUG );
 		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
