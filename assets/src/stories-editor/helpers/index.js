@@ -189,6 +189,15 @@ export const getDefaultMinimumBlockHeight = ( name ) => {
 };
 
 /**
+ * Is this block a CTA block
+ *
+ * @param {string} name  Block name.
+ *
+ * @return {boolean} True if CTA block, false otherwise.
+ */
+export const isCTABlock = ( name ) => name === 'amp/amp-story-cta';
+
+/**
  * Adds AMP attributes to every allowed AMP Story block.
  *
  * @param {Object} settings Settings.
@@ -212,7 +221,6 @@ export const addAMPAttributes = ( settings, name ) => {
 
 	const isImageBlock = 'core/image' === name;
 	const isVideoBlock = 'core/video' === name;
-	const isCTABlock = 'amp/amp-story-cta' === name;
 
 	const needsTextSettings = BLOCKS_WITH_TEXT_SETTINGS.includes( name );
 
@@ -262,7 +270,7 @@ export const addAMPAttributes = ( settings, name ) => {
 		};
 	}
 
-	if ( isCTABlock ) {
+	if ( isCTABlock( name ) ) {
 		addedAttributes.anchor = {
 			type: 'string',
 			source: 'attribute',
@@ -1194,13 +1202,12 @@ const getBlockInnerTextElement = ( block ) => {
 export const getBlockInnerElement = ( block ) => {
 	const { name, clientId } = block;
 	const isPage = 'amp/amp-story-page' === name;
-	const isCTABlock = 'amp/amp-story-cta' === name;
 
 	if ( isPage ) {
 		return document.querySelector( `[data-block="${ clientId }"]` );
 	}
 
-	if ( isCTABlock ) {
+	if ( isCTABlock( name ) ) {
 		// Not the block itself is movable, only the button within.
 		return document.querySelector( `amp-story-cta-button-${ clientId }` );
 	}

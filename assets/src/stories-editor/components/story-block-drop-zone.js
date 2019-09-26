@@ -20,7 +20,7 @@ import { withDispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { getPercentageFromPixels } from '../helpers';
+import { getPercentageFromPixels, isCTABlock } from '../helpers';
 import {
 	STORY_PAGE_INNER_HEIGHT,
 } from '../constants';
@@ -36,14 +36,14 @@ class BlockDropZone extends Component {
 	 */
 	onDrop = ( event ) => {
 		const { srcBlockName, updateBlockAttributes, srcClientId } = this.props;
-		const isCTABlock = 'amp/amp-story-cta' === srcBlockName;
+		const blockIsCTA = isCTABlock( srcBlockName );
 
 		let elementId,
 			cloneElementId,
 			wrapperEl;
 
 		// In case of the CTA block we are not moving the block itself but just the `a` within.
-		if ( isCTABlock ) {
+		if ( blockIsCTA ) {
 			elementId = `amp-story-cta-button-${ srcClientId }`;
 			cloneElementId = `clone-amp-story-cta-button-${ srcClientId }`;
 			const btnWrapperSelector = `#block-${ srcClientId } .editor-block-list__block-edit`;
@@ -65,7 +65,7 @@ class BlockDropZone extends Component {
 		}
 
 		// CTA block can't be rotated.
-		if ( ! isCTABlock ) {
+		if ( ! blockIsCTA ) {
 			// We have to remove the rotation for getting accurate position.
 			clone.parentNode.style.visibility = 'hidden';
 			clone.parentNode.style.transform = 'none';
@@ -76,12 +76,12 @@ class BlockDropZone extends Component {
 
 		// We will set the new position based on where the clone was moved to, with reference being the wrapper element.
 		// Lets take the % based on the wrapper for top and left.
-		const leftPosKey = isCTABlock ? 'btnPositionLeft' : 'positionLeft';
-		const topPosKey = isCTABlock ? 'btnPositionTop' : 'positionTop';
+		const leftPosKey = blockIsCTA ? 'btnPositionLeft' : 'positionLeft';
+		const topPosKey = blockIsCTA ? 'btnPositionTop' : 'positionTop';
 
 		// Let's get the base value to measure the top percentage from.
 		let baseHeight = STORY_PAGE_INNER_HEIGHT;
-		if ( isCTABlock ) {
+		if ( blockIsCTA ) {
 			baseHeight = STORY_PAGE_INNER_HEIGHT / 5;
 		}
 		updateBlockAttributes( srcClientId, {

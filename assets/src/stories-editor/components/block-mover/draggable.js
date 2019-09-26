@@ -17,7 +17,12 @@ import { withSafeTimeout } from '@wordpress/compose';
 /**
  * Internal dependencies
  */
-import { getPixelsFromPercentage, getPercentageFromPixels, getRelativeElementPosition } from '../../helpers';
+import {
+	getPixelsFromPercentage,
+	getPercentageFromPixels,
+	getRelativeElementPosition,
+	isCTABlock,
+} from '../../helpers';
 import {
 	STORY_PAGE_INNER_WIDTH,
 	STORY_PAGE_INNER_HEIGHT,
@@ -75,12 +80,12 @@ class Draggable extends Component {
 			const currentElementTop = parseInt( this.cloneWrapper.style.top );
 			const currentElementLeft = parseInt( this.cloneWrapper.style.left );
 			const newLeft = currentElementLeft - ( this.pageOffset * PAGE_AND_BORDER );
-			const isCTABlock = 'amp/amp-story-cta' === blockName;
-			const baseHeight = isCTABlock ? STORY_PAGE_INNER_HEIGHT / 5 : STORY_PAGE_INNER_HEIGHT;
+			const blockIsCTA = isCTABlock( blockName );
+			const baseHeight = blockIsCTA ? STORY_PAGE_INNER_HEIGHT / 5 : STORY_PAGE_INNER_HEIGHT;
 			const x = getPercentageFromPixels( 'x', newLeft, STORY_PAGE_INNER_WIDTH );
 			const y = getPercentageFromPixels( 'y', currentElementTop, baseHeight );
-			const xAttribute = isCTABlock ? 'btnPositionLeft' : 'positionLeft';
-			const yAttribute = isCTABlock ? 'btnPositionTop' : 'positionTop';
+			const xAttribute = blockIsCTA ? 'btnPositionLeft' : 'positionLeft';
+			const yAttribute = blockIsCTA ? 'btnPositionTop' : 'positionTop';
 			const newAttributes = {
 				[ xAttribute ]: x,
 				[ yAttribute ]: y,
@@ -99,11 +104,11 @@ class Draggable extends Component {
 	 * @param  {Object} event The non-custom DragEvent.
 	 */
 	onDragOver = ( event ) => {
-		const { onNeighborHover } = this.props;
+		const { onNeighborHover, blockName } = this.props;
 		const top = parseInt( this.cloneWrapper.style.top ) + event.clientY - this.cursorTop;
 
 		// Don't allow the CTA button to go over its top limit.
-		if ( 'amp/amp-story-cta' === this.props.blockName ) {
+		if ( isCTABlock( blockName ) ) {
 			this.cloneWrapper.style.top = top >= 0 ? `${ top }px` : '0px';
 		} else {
 			this.cloneWrapper.style.top = `${ top }px`;
@@ -147,9 +152,9 @@ class Draggable extends Component {
 	 */
 	onDragStart = ( event ) => {
 		const { blockName, elementId, transferData, onDragStart = noop } = this.props;
-		const isCTABlock = 'amp/amp-story-cta' === blockName;
+		const blockIsCTA = isCTABlock( blockName );
 		// In the CTA block only the inner element (the button) is draggable, not the whole block.
-		const element = isCTABlock ? document.getElementById( elementId ) : document.getElementById( elementId ).parentNode;
+		const element = blockIsCTA ? document.getElementById( elementId ) : document.getElementById( elementId ).parentNode;
 
 		if ( ! element ) {
 			event.preventDefault();

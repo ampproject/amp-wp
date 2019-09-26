@@ -8,6 +8,7 @@ import { compose } from '@wordpress/compose';
  */
 import { ALLOWED_BLOCKS, ALLOWED_CHILD_BLOCKS } from '../constants';
 import { withAttributes, withBlockName, withHasSelectedInnerBlock } from './';
+import { isCTABlock } from '../helpers';
 
 const wrapperWithSelect = compose(
 	withAttributes,
@@ -62,7 +63,7 @@ const withWrapperProps = ( BlockListBlock ) => {
 				transform: `scale(var(--preview-scale)) translateX(var(--preview-translateX)) translateY(var(--preview-translateY)) rotate(${ attributes.rotationAngle || 0 }deg)`,
 			};
 
-			if ( 'amp/amp-story-cta' === blockName ) {
+			if ( isCTABlock( blockName ) ) {
 				innerStyle.transform = `scale(var(--preview-scale))`;
 			}
 
