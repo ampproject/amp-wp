@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { get } from 'lodash';
-import { ampSlug, errorMessages } from 'amp-block-editor-data';
+import { ampSlug, errorMessages, isStandardMode } from 'amp-block-editor-data';
 import PropTypes from 'prop-types';
 
 /**
@@ -12,7 +12,6 @@ import { Component, renderToString } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { withSelect, withDispatch } from '@wordpress/data';
-import { PluginPostStatusInfo } from '@wordpress/edit-post';
 import { DotTip } from '@wordpress/nux';
 import { ifCondition, compose } from '@wordpress/compose';
 import { addQueryArgs } from '@wordpress/url';
@@ -21,6 +20,7 @@ import { addQueryArgs } from '@wordpress/url';
  * Internal dependencies
  */
 import ampIcon from './amp-black-icon';
+import { isAMPEnabled } from '../helpers';
 
 /**
  * Writes the message and graphic in the new preview window that was opened.
@@ -200,7 +200,7 @@ class AMPPreview extends Component {
 	 * Renders the component.
 	 */
 	render() {
-		const { previewLink, currentPostLink, isSaveable } = this.props;
+		const { previewLink, currentPostLink, isEnabled, isSaveable } = this.props;
 
 		// Link to the `?preview=true` URL if we have it, since this lets us see
 		// changes that were autosaved since the post was last published. Otherwise,
@@ -208,28 +208,26 @@ class AMPPreview extends Component {
 		const href = previewLink || currentPostLink;
 
 		return (
-			! errorMessages.length && (
-				<PluginPostStatusInfo>
-					<Button
-						isLarge
-						className="editor-post-preview"
-						href={ href }
-						target={ this.getWindowTarget() }
-						disabled={ ! isSaveable }
-						onClick={ this.openPreviewWindow }
-					>
-						{ __( 'AMP Preview', 'amp' ) }
-						<span className="screen-reader-text">
-							{
-								/* translators: accessibility text */
-								__( '(opens in a new tab)', 'amp' )
-							}
-						</span>
-						<DotTip tipId="core/editor.preview">
-							{ __( 'Click “Preview” to load a preview of this page in AMP, so you can make sure you’re happy with your blocks.', 'amp' ) }
-						</DotTip>
-					</Button>
-				</PluginPostStatusInfo>
+			isEnabled && ! errorMessages.length && ! isStandardMode && (
+				<Button
+					isLarge
+					className="editor-post-preview"
+					href={ href }
+					target={ this.getWindowTarget() }
+					disabled={ ! isSaveable }
+					onClick={ this.openPreviewWindow }
+				>
+					{ __( 'AMP Preview', 'amp' ) }
+					<span className="screen-reader-text">
+						{
+							/* translators: accessibility text */
+							__( '(opens in a new tab)', 'amp' )
+						}
+					</span>
+					<DotTip tipId="core/editor.preview">
+						{ __( 'Click “Preview” to load a preview of this page in AMP, so you can make sure you’re happy with your blocks.', 'amp' ) }
+					</DotTip>
+				</Button>
 			)
 		);
 	}
@@ -242,6 +240,7 @@ AMPPreview.propTypes = {
 	previewLink: PropTypes.string,
 	isAutosaveable: PropTypes.bool.isRequired,
 	isDraft: PropTypes.bool.isRequired,
+	isEnabled: PropTypes.bool.isRequired,
 	isSaveable: PropTypes.bool.isRequired,
 	isViewable: PropTypes.bool.isRequired,
 	savePost: PropTypes.func.isRequired,
@@ -275,6 +274,7 @@ export default compose( [
 			isAutosaveable: forceIsAutosaveable || isEditedPostAutosaveable(),
 			isViewable: get( postType, [ 'viewable' ], false ),
 			isDraft: [ 'draft', 'auto-draft' ].indexOf( getEditedPostAttribute( 'status' ) ) !== -1,
+			isEnabled: isAMPEnabled(),
 		};
 	} ),
 	withDispatch( ( dispatch ) => ( {

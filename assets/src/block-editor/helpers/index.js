@@ -8,7 +8,7 @@ import { ReactElement } from 'react';
  * WordPress dependencies
  */
 import { __, _x } from '@wordpress/i18n';
-import { cloneElement, RawHTML } from '@wordpress/element';
+import { cloneElement, RawHTML, render } from '@wordpress/element';
 import { TextControl, SelectControl, ToggleControl, Notice, PanelBody, FontSizePicker } from '@wordpress/components';
 import { InspectorControls } from '@wordpress/block-editor';
 import { select } from '@wordpress/data';
@@ -18,6 +18,7 @@ import { select } from '@wordpress/data';
  */
 import { TEXT_BLOCKS, MEDIA_BLOCKS, DEFAULT_HEIGHT, DEFAULT_WIDTH } from '../constants';
 import { MIN_FONT_SIZE, MAX_FONT_SIZE } from '../../common/constants';
+import { AMPPreview } from '../components';
 
 const ampLayoutOptions = [
 	{
@@ -938,4 +939,22 @@ export const isAMPEnabled = () => {
 	}
 
 	return 'enabled' === getDefaultStatus();
+};
+
+/**
+ * Replaces the button to preview the post with one that also previews AMP.
+ */
+export const replacePreviewButton = () => {
+	const postPreviewButton = document.querySelector( '.editor-post-preview' );
+	if ( ! postPreviewButton ) {
+		return;
+	}
+
+	const buttonWrapper = document.createElement( 'div' );
+	postPreviewButton.parentElement.insertBefore( buttonWrapper, postPreviewButton.nextSibling );
+
+	render(
+		<AMPPreview />,
+		buttonWrapper
+	);
 };

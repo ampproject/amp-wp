@@ -5,13 +5,14 @@ import { addFilter } from '@wordpress/hooks';
 import { registerPlugin } from '@wordpress/plugins';
 import { registerBlockType } from '@wordpress/blocks';
 import { select } from '@wordpress/data';
+import domReady from '@wordpress/dom-ready';
 
 /**
  * Internal dependencies
  */
 import { withFeaturedImageNotice } from '../common/components';
 import { withMediaLibraryNotice } from './components';
-import { addAMPAttributes, addAMPExtraProps, filterBlocksEdit, filterBlocksSave } from './helpers';
+import { addAMPAttributes, addAMPExtraProps, filterBlocksEdit, filterBlocksSave, replacePreviewButton } from './helpers';
 import { getMinimumFeaturedImageDimensions } from '../common/helpers';
 import './store';
 
@@ -77,3 +78,12 @@ blocks.keys().forEach( ( modulePath ) => {
 		registerBlockType( name, settings );
 	}
 } );
+
+/**
+ * Replace the preview button with one that also previews AMP.
+ */
+if ( isWebsiteEnabled() ) {
+	domReady( () => {
+		replacePreviewButton();
+	} );
+}
