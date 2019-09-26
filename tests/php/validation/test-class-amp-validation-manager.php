@@ -251,7 +251,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( 'auto_accept_sanitization', true );
 		$this->assertTrue( AMP_Validation_Manager::is_sanitization_auto_accepted() );
 		$this->assertTrue( AMP_Validation_Manager::is_sanitization_auto_accepted( $some_error ) );
-		$this->assertFalse( AMP_Validation_Manager::is_sanitization_auto_accepted( $excessive_css_error ) );
+		$this->assertTrue( AMP_Validation_Manager::is_sanitization_auto_accepted( $excessive_css_error ) );
 
 		add_theme_support( AMP_Theme_Support::SLUG );
 		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
@@ -269,7 +269,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( 'auto_accept_sanitization', true );
 		$this->assertTrue( AMP_Validation_Manager::is_sanitization_auto_accepted() );
 		$this->assertTrue( AMP_Validation_Manager::is_sanitization_auto_accepted( $some_error ) );
-		$this->assertFalse( AMP_Validation_Manager::is_sanitization_auto_accepted( $excessive_css_error ) );
+		$this->assertTrue( AMP_Validation_Manager::is_sanitization_auto_accepted( $excessive_css_error ) );
 	}
 
 	/**
