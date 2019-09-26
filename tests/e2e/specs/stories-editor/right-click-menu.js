@@ -21,9 +21,7 @@ async function openRightClickMenu( el ) {
 	} );
 }
 
-// @todo Fix unstable test case.
-// eslint-disable-next-line jest/no-disabled-tests
-describe.skip( 'Right Click Menu', () => {
+describe( 'Right Click Menu', () => {
 	beforeAll( async () => {
 		await activateExperience( 'stories' );
 	} );
