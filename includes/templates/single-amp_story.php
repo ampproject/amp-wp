@@ -65,6 +65,7 @@ the_post();
 			amp_print_story_auto_ads();
 			the_content();
 			amp_print_analytics( '' );
+			amp_print_story_bookend();
 			?>
 		</amp-story>
 

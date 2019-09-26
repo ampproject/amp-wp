@@ -1304,6 +1304,53 @@ function amp_print_story_auto_ads() {
 	echo AMP_HTML_Utils::build_tag( 'amp-story-auto-ads', [], $script_element ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 }
 
+
+/**
+ * Prints AMP Stories bookend.
+ *
+ * @since 1.2
+ */
+function amp_print_story_bookend() {
+	$bookend = [
+		'bookendVersion' => 'v1.0',
+		'shareProviders' => [
+			'facebook',
+			'twitter',
+			'email',
+		],
+		// @todo: Add some components by default.
+		'components'     => [],
+	];
+
+	/**
+	 * Filters AMP story bookend data.
+	 *
+	 * @param array   $bookend Bookend data.
+	 * @param WP_Post $post    The current story's post object.
+	 */
+	$bookend = apply_filters( 'amp_story_bookend_data', $bookend, get_post() );
+
+	if ( empty( $bookend ) ) {
+		return;
+	}
+
+	$script_element = AMP_HTML_Utils::build_tag(
+		'script',
+		[
+			'type' => 'application/json',
+		],
+		wp_json_encode( $bookend )
+	);
+
+	echo AMP_HTML_Utils::build_tag( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		'amp-story-bookend',
+		[
+			'layout' => 'nodisplay',
+		],
+		$script_element
+	);
+}
+
 /*
  * The function below is copied from the ramsey/array_column package.
  *
