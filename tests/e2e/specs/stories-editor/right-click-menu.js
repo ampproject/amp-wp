@@ -99,6 +99,7 @@ describe( 'Right Click Menu', () => {
 
 		await clickButton( 'Paste' );
 
+		await page.waitForSelector( BLOCK_SELECTOR );
 		expect( page ).toMatchElement( BLOCK_SELECTOR );
 	} );
 
