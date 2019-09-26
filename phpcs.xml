@@ -78,7 +78,7 @@
 
 	<!-- Include sniffs for PHP cross-version compatibility. -->
 	<config name="testVersion" value="5.4-"/>
-	<rule ref="PHPCompatibility">
+	<rule ref="PHPCompatibilityWP">
 		<exclude-pattern>bin/*</exclude-pattern>
 	</rule>
 
