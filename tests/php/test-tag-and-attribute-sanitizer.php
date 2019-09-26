@@ -1820,7 +1820,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				<html amp data-ampdevmode>
 					<head>
 						<meta charset="utf-8">
-						<style amp-custom data-ampdevmode>%s</style>
+						<style data-ampdevmode>%s</style>
 					</head>
 					<body>
 						<amp-state id="something">
