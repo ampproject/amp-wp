@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useRef } from '@wordpress/element';
 import { withSpokenMessages, Button } from '@wordpress/components';
 import { ESCAPE, LEFT, RIGHT, ENTER } from '@wordpress/keycodes';
 import { __, sprintf } from '@wordpress/i18n';
@@ -22,10 +22,10 @@ const RotatableBox = ( { angle, initialAngle, blockElementId, className, speak, 
 	const [ isRotating, setIsRotating ] = useState( false );
 	const [ currentAngle, setAngle ] = useState( angle );
 
-	let elementRef = null;
+	const elementRef = useRef( null );
 
 	useEffect( () => {
-		elementRef = document.getElementById( blockElementId );
+		elementRef.current = document.getElementById( blockElementId );
 
 		document.addEventListener( 'mousemove', onMouseMove );
 		document.addEventListener( 'mouseup', onMouseUp );
@@ -48,8 +48,8 @@ const RotatableBox = ( { angle, initialAngle, blockElementId, className, speak, 
 		const { keyCode } = e;
 
 		if ( ESCAPE === keyCode ) {
-			elementRef.classList.remove( 'is-rotating' );
-			elementRef.style.transform = `rotate(${ initialAngle }deg)`;
+			elementRef.current.classList.remove( 'is-rotating' );
+			elementRef.current.style.transform = `rotate(${ initialAngle }deg)`;
 
 			setIsRotating( false );
 			setAngle( initialAngle );
@@ -65,7 +65,7 @@ const RotatableBox = ( { angle, initialAngle, blockElementId, className, speak, 
 				newAngle += 360;
 			}
 
-			elementRef.style.transform = `rotate(${ newAngle }deg)`;
+			elementRef.current.style.transform = `rotate(${ newAngle }deg)`;
 
 			/* translators: %s: degrees */
 			speak( sprintf( __( 'Rotating block by %s degrees', 'amp' ), newAngle ) );
@@ -98,7 +98,7 @@ const RotatableBox = ( { angle, initialAngle, blockElementId, className, speak, 
 
 		e.preventDefault();
 
-		elementRef.classList.add( 'is-rotating' );
+		elementRef.current.classList.add( 'is-rotating' );
 
 		setIsRotating( true );
 
@@ -114,9 +114,9 @@ const RotatableBox = ( { angle, initialAngle, blockElementId, className, speak, 
 
 		e.preventDefault();
 
-		elementRef.classList.add( 'is-rotating' );
+		elementRef.current.classList.add( 'is-rotating' );
 
-		const { top, left, width, height } = elementRef.getBoundingClientRect();
+		const { top, left, width, height } = elementRef.current.getBoundingClientRect();
 
 		const centerX = left + ( width / 2 );
 		const centerY = top + ( height / 2 );
@@ -133,7 +133,7 @@ const RotatableBox = ( { angle, initialAngle, blockElementId, className, speak, 
 			return;
 		}
 
-		elementRef.style.transform = `rotate(${ newAngle }deg)`;
+		elementRef.current.style.transform = `rotate(${ newAngle }deg)`;
 
 		setAngle( newAngle );
 
@@ -149,8 +149,8 @@ const RotatableBox = ( { angle, initialAngle, blockElementId, className, speak, 
 
 		e.preventDefault();
 
-		elementRef.classList.remove( 'is-rotating' );
-		elementRef.style.transform = `rotate(${ currentAngle }deg)`;
+		elementRef.current.classList.remove( 'is-rotating' );
+		elementRef.current.style.transform = `rotate(${ currentAngle }deg)`;
 
 		setIsRotating( false );
 
