@@ -39,6 +39,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 		parent::__construct( $args );
 
 		if ( isset( $this->args['content_max_width'] ) ) {
+			// Set default width/height; these will be overridden by whatever YouTube specifies.
 			$max_width            = $this->args['content_max_width'];
 			$this->args['width']  = $max_width;
 			$this->args['height'] = round( $max_width * self::RATIO );
@@ -49,8 +50,8 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Register embed.
 	 */
 	public function register_embed() {
-		wp_embed_register_handler( 'amp-youtube', self::URL_PATTERN, [ $this, 'oembed' ], -1 );
-		add_shortcode( 'youtube', [ $this, 'shortcode' ] );
+		add_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ], 10, 2 );
+		add_shortcode( 'youtube', [ $this, 'shortcode' ] ); // @todo Deprecated. See <https://github.com/ampproject/amp-wp/issues/3309>.
 		add_filter( 'wp_video_shortcode_override', [ $this, 'video_override' ], 10, 2 );
 	}
 
@@ -58,12 +59,69 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Unregister embed.
 	 */
 	public function unregister_embed() {
-		wp_embed_unregister_handler( 'amp-youtube', -1 );
-		remove_shortcode( 'youtube' );
+		remove_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ], 10 );
+		remove_shortcode( 'youtube' ); // @todo Deprecated. See <https://github.com/ampproject/amp-wp/issues/3309>.
 	}
 
 	/**
+	 * Filter oEmbed HTML for SoundCloud to convert to AMP.
+	 *
+	 * @param string $cache Cache for oEmbed.
+	 * @param string $url   Embed URL.
+	 * @return string Embed.
+	 */
+	public function filter_embed_oembed_html( $cache, $url ) {
+		$host = wp_parse_url( $url, PHP_URL_HOST );
+		if ( ! in_array( $host, [ 'youtu.be', 'youtube.com', 'www.youtube.com' ], true ) ) {
+			return $cache;
+		}
+
+		$id = $this->get_video_id_from_url( $url );
+		if ( ! $id ) {
+			return $cache;
+		}
+
+		$props = $this->parse_props( $cache, $url );
+
+		$props['video_id'] = $id;
+		return $this->render( $props, $url );
+	}
+
+	/**
+	 * Parse AMP component from iframe.
+	 *
+	 * @param string      $html HTML.
+	 * @param string|null $url  Embed URL, for fallback purposes.
+	 * @return array Props for rendering the component.
+	 */
+	private function parse_props( $html, $url ) {
+		$props = [];
+
+		if ( preg_match( '#<iframe[^>]*?title="(?P<title>[^"]+)"#s', $html, $matches ) ) {
+			// @todo Is a fallback a suitable alternative for a11y for the title attribute?
+			$props['fallback'] = sprintf(
+				'<a fallback href="%s">%s</a>',
+				esc_url( $url ),
+				esc_html( $matches['title'] )
+			);
+		}
+
+		if ( preg_match( '#<iframe[^>]*?height="(?P<height>\d+)"#s', $html, $matches ) ) {
+			$props['height'] = (int) $matches['height'];
+		}
+
+		if ( preg_match( '#<iframe[^>]*?width="(?P<width>\d+)"#s', $html, $matches ) ) {
+			$props['width'] = (int) $matches['width'];
+		}
+
+		return $props;
+	}
+
+
+	/**
 	 * Gets AMP-compliant markup for the YouTube shortcode.
+	 *
+	 * @deprecated This should be moved to Jetpack. See <https://github.com/ampproject/amp-wp/issues/3309>.
 	 *
 	 * @param array $attr The YouTube attributes.
 	 * @return string YouTube shortcode markup.
@@ -83,18 +141,14 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		$video_id = $this->get_video_id_from_url( $url );
 
-		return $this->render(
-			[
-				'url'      => $url,
-				'video_id' => $video_id,
-			]
-		);
+		return $this->render( compact( 'video_id' ), $url );
 	}
 
 	/**
 	 * Render oEmbed.
 	 *
 	 * @see \WP_Embed::shortcode()
+	 * @deprecated This is no longer being used.
 	 *
 	 * @param array  $matches URL pattern matches.
 	 * @param array  $attr    Shortcode attribues.
@@ -102,20 +156,26 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return string Rendered oEmbed.
 	 */
 	public function oembed( $matches, $attr, $url ) {
+		_deprecated_function( __METHOD__, '1.3.1' );
 		return $this->shortcode( [ $url ] );
 	}
 
 	/**
-	 * Render.
+	 * Render embed.
 	 *
-	 * @param array $args Args.
+	 * @param array  $args Args.
+	 * @param string $url  URL.
 	 * @return string Rendered.
 	 */
-	public function render( $args ) {
+	public function render( $args, $url ) {
 		$args = wp_parse_args(
 			$args,
 			[
 				'video_id' => false,
+				'layout'   => 'responsive',
+				'width'    => $this->args['width'],
+				'height'   => $this->args['height'],
+				'fallback' => '',
 			]
 		);
 
@@ -123,10 +183,10 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 			return AMP_HTML_Utils::build_tag(
 				'a',
 				[
-					'href'  => esc_url( $args['url'] ),
+					'href'  => esc_url( $url ),
 					'class' => 'amp-wp-embed-fallback',
 				],
-				esc_html( $args['url'] )
+				esc_html( $url )
 			);
 		}
 
@@ -134,17 +194,18 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		return AMP_HTML_Utils::build_tag(
 			'amp-youtube',
-			[
-				'data-videoid' => $args['video_id'],
-				'layout'       => 'responsive',
-				'width'        => $this->args['width'],
-				'height'       => $this->args['height'],
-			]
+			array_merge(
+				[ 'data-videoid' => $args['video_id'] ],
+				wp_array_slice_assoc( $args, [ 'width', 'height', 'layout' ] )
+			),
+			$args['fallback']
 		);
 	}
 
 	/**
 	 * Determine the video ID from the URL.
+	 *
+	 * @todo Needs to be totally refactored.
 	 *
 	 * @param string $url URL.
 	 * @return integer Video ID.
@@ -162,7 +223,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 		} else {
 			/* phpcs:ignore Squiz.PHP.CommentedOutCode.Found
 			The query looks like ?v={id} or ?list={id} */
-			parse_str( $parsed_url['query'], $query_args );
+			parse_str( $parsed_url['query'], $query_args ); // @todo Bug! See <https://github.com/ampproject/amp-wp/issues/3348>.
 
 			if ( isset( $query_args['v'] ) ) {
 				$video_id = $this->sanitize_v_arg( $query_args['v'] );

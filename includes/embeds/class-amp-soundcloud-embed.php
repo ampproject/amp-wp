@@ -157,7 +157,6 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @param array  $args Args.
 	 * @param string $url  Embed URL for fallback purposes. Optional.
 	 * @return string Rendered embed.
-	 * @global WP_Embed $wp_embed
 	 */
 	public function render( $args, $url ) {
 		$args = wp_parse_args(
