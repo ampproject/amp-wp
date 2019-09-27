@@ -83,16 +83,16 @@ const BlockDraggable = ( { children, clientId, blockName, rootClientId, blockEle
 
 BlockDraggable.propTypes = {
 	index: PropTypes.number.isRequired,
-	rootClientId: PropTypes.string,
-	clientId: PropTypes.string,
-	blockElementId: PropTypes.string,
+	rootClientId: PropTypes.string.isRequired,
+	clientId: PropTypes.string.isRequired,
+	blockElementId: PropTypes.string.isRequired,
 	blockName: PropTypes.string,
 	children: PropTypes.any.isRequired,
 	onDragStart: PropTypes.func,
 	onDragEnd: PropTypes.func,
-	onNeighborHover: PropTypes.func,
-	onNeighborDrop: PropTypes.func,
-	getNeighborPageId: PropTypes.func,
+	onNeighborHover: PropTypes.func.isRequired,
+	onNeighborDrop: PropTypes.func.isRequired,
+	getNeighborPageId: PropTypes.func.isRequired,
 };
 
 export default compose(

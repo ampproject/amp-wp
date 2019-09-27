@@ -271,12 +271,12 @@ class Draggable extends Component {
 
 Draggable.propTypes = {
 	blockName: PropTypes.string,
-	elementId: PropTypes.string,
+	elementId: PropTypes.string.isRequired,
 	transferData: PropTypes.object,
 	onDragStart: PropTypes.func,
 	onDragEnd: PropTypes.func,
-	onNeighborDrop: PropTypes.func,
-	onNeighborHover: PropTypes.func,
+	onNeighborDrop: PropTypes.func.isRequired,
+	onNeighborHover: PropTypes.func.isRequired,
 	setTimeout: PropTypes.func.isRequired,
 	children: PropTypes.any.isRequired,
 };
