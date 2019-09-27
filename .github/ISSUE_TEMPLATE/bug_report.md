@@ -8,9 +8,13 @@ about: Create a report to help us improve
 
 <!-- Please describe clearly and concisely what the bug is. -->
 
+## Expected Behaviour
+
+<!-- Please describe clearly and concisely what the expected behaviour should be. -->
+
 ## Steps to reproduce
 
-<!-- Please provide detailed steps on how to reproduce the bug. -->
+<!-- Please provide detailed steps on how to reproduce the bug. Provide a URL where the issue can be seen on the frontend when possible, otherwise go to “View source” in the browser and copy all to paste in a [Gist](https://gist.github.com/) and share it. -->
 1. Go to '...'
 2. Click on '....'
 3. Scroll down to '....'
@@ -18,18 +22,21 @@ about: Create a report to help us improve
 
 ## Screenshots
 
-<!-- If applicable, please add screenshots to help explain your problem. -->
+<!-- If applicable, please add screenshots to help explain your problem. Bonus points for videos! -->
 
-## Additional Context
+## Additional context
 
 <!-- Please complete the following information. -->
- - PHP Version: 
+ - WordPress version:
+ - Gutenberg plugin version (of applicable):
+ - AMP plugin template mode:
+ - PHP version:
  - OS: [e.g. iOS]
  - Browser [e.g. chrome, safari]
- - Plugin Version [e.g. 22]
+ - Plugin version [e.g. 22]
  - Device: [e.g. iPhone6]
 
-<!-- Please add any additional information about the bug. -->
+<!-- Please add any additional information about the bug. Ideal dumping your [Site Health](https://wordpress.org/support/wordpress-version/version-5-2/#site-health-check) information here as well. -->
 
 ---------------
 
@@ -39,10 +46,18 @@ _Do not alter or remove anything below. The following sections will be managed b
 
 * <!-- One or more bullet points for acceptance criteria. -->
 
-## Implementation Brief
+## Implementation brief
 
-* <!-- One or more bullet points for how to technically resolve the issue. -->
+* <!-- One or more bullet points for how to technically resolve the issue. For significant Implementation Design, it is ok use a Google document **accessible by anyone**. -->
+
+## QA testing instructions
+
+* <!-- One or more bullet points to describe how to test the implementation in QA. -->
 
 ## Changelog entry
 
 * <!-- One sentence summarizing the PR, to be used in the changelog. -->
+
+## Demo
+
+* <!-- A video or screenshots demoing the implementation. -->
