@@ -18,12 +18,12 @@ export const BlockDragArea = ( { children, blockName, className, onDragStart, on
 			onDragEnd={ onDragEnd }
 		>
 			{
-				( { onDraggableStart, onDraggableEnd, isDragging } ) => (
+				( { onDraggableStart, onDraggableEnd } ) => (
 					<div
 						className={ className }
+						aria-hidden="true"
 						onDragStart={ onDraggableStart }
 						onDragEnd={ onDraggableEnd }
-						aria-grabbed={ isDragging }
 						draggable
 					>
 						{ children }

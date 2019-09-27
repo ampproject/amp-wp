@@ -39,10 +39,6 @@ const isChromeUA = ( ) => /Chrome/i.test( navigator.userAgent );
 const documentHasIframes = ( ) => [ ...document.getElementById( 'editor' ).querySelectorAll( 'iframe' ) ].length > 0;
 
 class Draggable extends Component {
-	state = {
-		isDragging: false,
-	}
-
 	constructor( ...args ) {
 		super( ...args );
 
@@ -97,8 +93,6 @@ class Draggable extends Component {
 
 			onNeighborDrop( this.pageOffset, newAttributes );
 		}
-
-		this.setState( { isDragging: false } );
 
 		this.resetDragState();
 		setTimeout( onDragEnd );
@@ -241,8 +235,6 @@ class Draggable extends Component {
 			document.addEventListener( 'drop', this.onDrop );
 		}
 
-		this.setState( { isDragging: true } );
-
 		this.props.setTimeout( onDragStart );
 	}
 
@@ -269,12 +261,10 @@ class Draggable extends Component {
 
 	render() {
 		const { children } = this.props;
-		const { isDragging } = this.state;
 
 		return children( {
 			onDraggableStart: this.onDragStart,
 			onDraggableEnd: this.onDragEnd,
-			isDragging,
 		} );
 	}
 }
