@@ -90,7 +90,6 @@ BlockDraggable.propTypes = {
 	children: PropTypes.any.isRequired,
 	onDragStart: PropTypes.func,
 	onDragEnd: PropTypes.func,
-	onNeighborHover: PropTypes.func.isRequired,
 	onNeighborDrop: PropTypes.func.isRequired,
 	getNeighborPageId: PropTypes.func.isRequired,
 };
