@@ -39,7 +39,7 @@ describe( 'isBlockAllowedOnPage', () => {
 		expect( result ).toBe( false );
 	} );
 
-	it( 'should return false if element is no block list exist for page', () => {
+	it( 'should return false if no block list exist for page', () => {
 		mockCanInsertBlockType.mockImplementationOnce( () => true );
 		mockGetBlockListSettings.mockImplementationOnce( () => null );
 
@@ -48,7 +48,7 @@ describe( 'isBlockAllowedOnPage', () => {
 		expect( result ).toBe( false );
 	} );
 
-	it( 'should return false if element is block list does not contain element', () => {
+	it( 'should return false if block list does not contain element', () => {
 		mockCanInsertBlockType.mockImplementationOnce( () => true );
 		mockGetBlockListSettings.mockImplementationOnce( () => ( { allowedBlocks: [] } ) );
 
