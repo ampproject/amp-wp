@@ -15,6 +15,7 @@ import {
 	clearCopiedMarkup,
 	playAnimation,
 	stopAnimation,
+	initializePageOrder,
 } from '../actions';
 
 describe( 'actions', () => {
@@ -150,6 +151,16 @@ describe( 'actions', () => {
 			expect( result ).toStrictEqual( {
 				type: 'START_REORDERING',
 				order: undefined,
+			} );
+		} );
+	} );
+
+	describe( 'initializePageOrder', () => {
+		it( 'should return the INITIALIZE_ORDER action', () => {
+			const result = initializePageOrder( [] );
+			expect( result ).toStrictEqual( {
+				type: 'INITIALIZE_ORDER',
+				order: [],
 			} );
 		} );
 	} );

@@ -185,6 +185,17 @@ describe( 'reducers', () => {
 	} );
 
 	describe( 'blocks()', () => {
+		it( 'should initialize page order', () => {
+			const state = blocks( undefined, {
+				type: 'INITIALIZE_ORDER',
+				order: [ 'page-1', 'page-2' ],
+			} );
+
+			expect( state ).toStrictEqual( {
+				order: [ 'page-1', 'page-2' ],
+			} );
+		} );
+
 		it( 'should start reordering', () => {
 			const state = blocks( undefined, {
 				type: 'START_REORDERING',
