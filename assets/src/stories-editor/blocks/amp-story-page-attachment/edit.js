@@ -35,12 +35,6 @@ const PageAttachmentEdit = ( {
 
 	const [ isOpen, setIsOpen ] = useState( false );
 
-	const toggleAttachment = ( open ) => {
-		if ( open !== isOpen ) {
-			setIsOpen( open );
-		}
-	};
-
 	const colors = useSelect( ( select ) => {
 		const { getSettings } = select( 'core/block-editor' );
 		const settings = getSettings();
@@ -75,19 +69,21 @@ const PageAttachmentEdit = ( {
 
 	return (
 		<>
-			{ isOpen &&
-			<AttachmentContent
-				setAttributes={ setAttributes }
-				attributes={ attributes }
-				toggleAttachment={ toggleAttachment }
-			/>
-			}
-			{ ! isOpen &&
-			<AttachmentOpener
-				setAttributes={ setAttributes }
-				toggleAttachment={ toggleAttachment }
-				openText={ openText }
-			/>
+			{ isOpen ?
+				(
+					<AttachmentContent
+						setAttributes={ setAttributes }
+						attributes={ attributes }
+						toggleAttachment={ setIsOpen }
+					/>
+				) :
+				(
+					<AttachmentOpener
+						setAttributes={ setAttributes }
+						toggleAttachment={ setIsOpen }
+						openText={ openText }
+					/>
+				)
 			}
 		</>
 	);
