@@ -26,10 +26,10 @@ import {
 import {
 	STORY_PAGE_INNER_WIDTH,
 	STORY_PAGE_INNER_HEIGHT,
+	STORY_PAGE_MARGIN,
 } from '../../constants';
 
-const PAGE_BORDER = 50;
-const PAGE_AND_BORDER = STORY_PAGE_INNER_WIDTH + PAGE_BORDER;
+const PAGE_AND_MARGIN = STORY_PAGE_INNER_WIDTH + STORY_PAGE_MARGIN;
 
 const { Image, navigator } = window;
 
@@ -79,7 +79,7 @@ class Draggable extends Component {
 			// All this is about calculating the position of the (correct) element on the new page.
 			const currentElementTop = parseInt( this.cloneWrapper.style.top );
 			const currentElementLeft = parseInt( this.cloneWrapper.style.left );
-			const newLeft = currentElementLeft - ( this.pageOffset * PAGE_AND_BORDER );
+			const newLeft = currentElementLeft - ( this.pageOffset * PAGE_AND_MARGIN );
 			const blockIsCTA = isCTABlock( blockName );
 			const baseHeight = blockIsCTA ? STORY_PAGE_INNER_HEIGHT / 5 : STORY_PAGE_INNER_HEIGHT;
 			const x = getPercentageFromPixels( 'x', newLeft, STORY_PAGE_INNER_WIDTH );
@@ -124,14 +124,14 @@ class Draggable extends Component {
 		// Check if mouse (*not* element, but actual cursor) is over neighboring page to either side.
 		const currentElementLeft = parseInt( this.cloneWrapper.style.left );
 		const cursorLeftRelativeToPage = currentElementLeft + this.cursorLeftInsideElement;
-		const isOffRight = cursorLeftRelativeToPage > PAGE_AND_BORDER;
-		const isOffLeft = cursorLeftRelativeToPage < -PAGE_BORDER;
+		const isOffRight = cursorLeftRelativeToPage > PAGE_AND_MARGIN;
+		const isOffLeft = cursorLeftRelativeToPage < -STORY_PAGE_MARGIN;
 		this.pageOffset = 0;
 		if ( isOffLeft || isOffRight ) {
 			// Check how far off we are to that side - on large screens you can drag elements 2+ pages over to either side.
 			this.pageOffset = ( isOffLeft ?
-				-Math.ceil( ( -PAGE_BORDER - cursorLeftRelativeToPage ) / PAGE_AND_BORDER ) :
-				Math.ceil( ( cursorLeftRelativeToPage - PAGE_AND_BORDER ) / PAGE_AND_BORDER )
+				-Math.ceil( ( -PAGE_AND_MARGIN - cursorLeftRelativeToPage ) / PAGE_AND_MARGIN ) :
+				Math.ceil( ( cursorLeftRelativeToPage - PAGE_AND_MARGIN ) / PAGE_AND_MARGIN )
 			);
 		}
 		onNeighborHover( this.pageOffset );
