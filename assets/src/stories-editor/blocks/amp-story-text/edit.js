@@ -75,14 +75,13 @@ class TextBlockEdit extends Component {
 			prevProps.attributes.content !== content
 		);
 
-		// If block has been pasted, then regenerate height and width.
-		if ( isPasted ) {
-			setAttributes( { isPasted: false } );
+		// If block has been changed or content pasted, then regenerate height and width.
+		if ( checkBlockDimensions || isPasted ) {
 			maybeUpdateBlockDimensions( this.props );
 		}
 
-		if ( checkBlockDimensions ) {
-			maybeUpdateBlockDimensions( this.props );
+		if ( isPasted ) {
+			setAttributes( { isPasted: false } );
 		}
 
 		// If the state changed to editing, focus on the text.
