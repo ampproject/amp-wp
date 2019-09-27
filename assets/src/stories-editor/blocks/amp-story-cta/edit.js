@@ -45,6 +45,18 @@ const CallToActionEdit = ( {
 	const [ isEditing, setIsEditing ] = useState( false );
 	const [ hasOverlay, setHasOverlay ] = useState( true );
 
+	const toggleIsEditing = ( enable ) => {
+		if ( enable !== isEditing ) {
+			setIsEditing( ! isEditing );
+		}
+	};
+
+	const toggleOverlay = ( add ) => {
+		if ( add !== hasOverlay ) {
+			setHasOverlay( ! hasOverlay );
+		}
+	};
+
 	useEffect( () => {
 		if ( ! anchor ) {
 			setAttributes( { anchor: getUniqueId() } );
@@ -71,18 +83,6 @@ const CallToActionEdit = ( {
 
 		return settings.colors;
 	} );
-
-	const toggleIsEditing = ( enable ) => {
-		if ( enable !== isEditing ) {
-			setIsEditing( ! isEditing );
-		}
-	};
-
-	const toggleOverlay = ( add ) => {
-		if ( add !== hasOverlay ) {
-			setHasOverlay( ! hasOverlay );
-		}
-	};
 
 	const appliedBackgroundColor = getBackgroundColorWithOpacity( colors, backgroundColor, customBackgroundColor, opacity );
 
