@@ -53,18 +53,6 @@ const TextBlockEdit = ( props ) => {
 	const [ isEditing, setIsEditing ] = useState( false );
 	const [ hasOverlay, setHasOverlay ] = useState( true );
 
-	const toggleIsEditing = ( enable ) => {
-		if ( enable !== isEditing ) {
-			setIsEditing( ! isEditing );
-		}
-	};
-
-	const toggleOverlay = ( add ) => {
-		if ( add !== hasOverlay ) {
-			setHasOverlay( ! hasOverlay );
-		}
-	};
-
 	useEffect( () => {
 		if ( isEditing ) {
 			setInputSelectionToEnd( '.is-selected .wp-block-amp-amp-story-text' );
@@ -86,8 +74,8 @@ const TextBlockEdit = ( props ) => {
 	useEffect( () => {
 		// If the block was unselected, make sure that it's not editing anymore.
 		if ( ! isSelected ) {
-			toggleIsEditing( false );
-			toggleOverlay( true );
+			setIsEditing( false );
+			setHasOverlay( true );
 		}
 	}, [ isSelected ] );
 
@@ -190,8 +178,8 @@ const TextBlockEdit = ( props ) => {
 					isDraggable={ ! isPartOfMultiSelection }
 					isSelected={ isSelected }
 					hasOverlay={ hasOverlay }
-					toggleIsEditing={ toggleIsEditing }
-					toggleOverlay={ toggleOverlay }
+					toggleIsEditing={ setIsEditing }
+					toggleOverlay={ setHasOverlay }
 					text={ content }
 					textStyle={ textStyle }
 					textWrapperClass={ classnames( className + ' block-editor-rich-text__editable editor-rich-text__editable', textClassNames ) }
