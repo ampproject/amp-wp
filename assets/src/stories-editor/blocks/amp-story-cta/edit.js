@@ -43,7 +43,7 @@ const CallToActionEdit = ( {
 	} = attributes;
 
 	const [ isEditing, setIsEditing ] = useState( false );
-	const [ hasOverlay, setHasOverlay ] = useState( false );
+	const [ hasOverlay, setHasOverlay ] = useState( true );
 
 	useEffect( () => {
 		if ( ! anchor ) {
