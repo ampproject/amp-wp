@@ -63,6 +63,7 @@ function FontFamilyPicker( {
 						inputValue: inputValueTemplate,
 					}
 				}
+				ariaLabelBy={ `${ id }__help` }
 				minLength={ 2 }
 				onConfirm={ onChange }
 				showAllValues={ false }

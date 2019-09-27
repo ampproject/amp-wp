@@ -16,12 +16,15 @@ import { __, sprintf } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { processMedia } from '../../helpers';
+import {
+	IMAGE_BACKGROUND_TYPE,
+} from '../../constants';
 
 const POPOVER_PROPS = {
 	position: 'bottom right',
 };
 
-const MediaInserter = ( { insertBlock, updateBlock, canInsertBlockType, showInserter, mediaType } ) => {
+const MediaInserter = ( { insertBlock, updateBlock, canInsertBlockType, showInserter, mediaType, allowedVideoMimeTypes } ) => {
 	const blocks = [
 		'core/video',
 		'core/image',
@@ -34,13 +37,13 @@ const MediaInserter = ( { insertBlock, updateBlock, canInsertBlockType, showInse
 		{
 			title: imageTitle,
 			icon: <BlockIcon icon={ 'format-image' } />,
-			onClick: () => mediaPicker( __( 'Select or Upload Media', 'amp' ), 'image', updateBlock ),
+			onClick: () => mediaPicker( __( 'Select or Upload Media', 'amp' ), IMAGE_BACKGROUND_TYPE, updateBlock ),
 			disabled: ! showInserter,
 		},
 		{
 			title: videoTitle,
 			icon: <BlockIcon icon={ 'media-video' } />,
-			onClick: () => mediaPicker( __( 'Select or Upload Media', 'amp' ), 'video', updateBlock ),
+			onClick: () => mediaPicker( __( 'Select or Upload Media', 'amp' ), allowedVideoMimeTypes, updateBlock ),
 			disabled: ! showInserter,
 		},
 	];
@@ -82,6 +85,7 @@ MediaInserter.propTypes = {
 	canInsertBlockType: PropTypes.func.isRequired,
 	showInserter: PropTypes.bool.isRequired,
 	mediaType: PropTypes.string.isRequired,
+	allowedVideoMimeTypes: PropTypes.arrayOf( PropTypes.string ).isRequired,
 };
 
 const mediaPicker = ( dialogTitle, mediaType, updateBlock ) => {
@@ -111,11 +115,12 @@ const mediaPicker = ( dialogTitle, mediaType, updateBlock ) => {
 const applyWithSelect = withSelect( ( select ) => {
 	const { getCurrentPage } = select( 'amp/story' );
 	const { canInsertBlockType, getBlockListSettings, getBlock } = select( 'core/block-editor' );
-	const { isReordering } = select( 'amp/story' );
+	const { isReordering, getSettings } = select( 'amp/story' );
 
 	const currentPage = getCurrentPage();
 	const block = getBlock( currentPage );
 	const mediaType = block && block.attributes.mediaType ? block.attributes.mediaType : '';
+	const { allowedVideoMimeTypes } = getSettings();
 
 	return {
 		isReordering: isReordering(),
@@ -127,6 +132,7 @@ const applyWithSelect = withSelect( ( select ) => {
 		// As used in <HeaderToolbar> component
 		showInserter: select( 'core/edit-post' ).getEditorMode() === 'visual' && select( 'core/editor' ).getEditorSettings().richEditingEnabled,
 		mediaType,
+		allowedVideoMimeTypes,
 	};
 } );
 
