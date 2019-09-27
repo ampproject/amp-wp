@@ -358,8 +358,6 @@ class AMP_Post_Template {
 			return;
 		}
 
-		$featured_image = get_post( $featured_id );
-
 		$dom    = AMP_DOM_Utils::get_dom_from_content( $featured_html );
 		$assets = AMP_Content_Sanitizer::sanitize_document(
 			$dom,
@@ -369,13 +367,18 @@ class AMP_Post_Template {
 			]
 		);
 
+		$featured_image = get_post( $featured_id );
+		if ( ! $featured_image ) {
+			return;
+		}
+		
 		$sanitized_html = AMP_DOM_Utils::get_content_from_dom( $dom );
 
 		$this->add_data_by_key(
 			'featured_image',
 			[
 				'amp_html' => $sanitized_html,
-				'caption'  => $featured_image->post_excerpt,
+				'caption'  => get_the_excerpt( $featured_image ),
 			]
 		);
 
