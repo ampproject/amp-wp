@@ -10,7 +10,7 @@ import {
 	InnerBlocks,
 	InspectorControls,
 } from '@wordpress/block-editor';
-import { createRef, useEffect } from '@wordpress/element';
+import { useEffect, useRef } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 
 /**
@@ -134,7 +134,7 @@ const PageEdit = ( {
 		}
 	}, [ storySettingsAttributes ] );
 
-	const videoPlayer = createRef();
+	const videoPlayer = useRef();
 
 	useEffect( () => {
 		if ( videoPlayer.current ) {
