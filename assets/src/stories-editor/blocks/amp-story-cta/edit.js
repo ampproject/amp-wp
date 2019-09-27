@@ -45,18 +45,6 @@ const CallToActionEdit = ( {
 	const [ isEditing, setIsEditing ] = useState( false );
 	const [ hasOverlay, setHasOverlay ] = useState( true );
 
-	const toggleIsEditing = ( enable ) => {
-		if ( enable !== isEditing ) {
-			setIsEditing( ! isEditing );
-		}
-	};
-
-	const toggleOverlay = ( add ) => {
-		if ( add !== hasOverlay ) {
-			setHasOverlay( ! hasOverlay );
-		}
-	};
-
 	useEffect( () => {
 		if ( ! anchor ) {
 			setAttributes( { anchor: getUniqueId() } );
@@ -66,8 +54,8 @@ const CallToActionEdit = ( {
 	useEffect( () => {
 		// If the block was unselected, make sure that it's not editing anymore.
 		if ( ! isSelected ) {
-			toggleIsEditing( false );
-			toggleOverlay( true );
+			setIsEditing( false );
+			setHasOverlay( true );
 		}
 	}, [ isSelected ] );
 
@@ -121,8 +109,8 @@ const CallToActionEdit = ( {
 						isEditing={ isEditing }
 						isSelected={ isSelected }
 						hasOverlay={ hasOverlay }
-						toggleIsEditing={ toggleIsEditing }
-						toggleOverlay={ toggleOverlay }
+						toggleIsEditing={ setIsEditing }
+						toggleOverlay={ setHasOverlay }
 						text={ text }
 						textStyle={ textStyle }
 						textWrapperClass={ textWrapperClass }
