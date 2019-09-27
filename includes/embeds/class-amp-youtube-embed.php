@@ -98,7 +98,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 		$props = [];
 
 		if ( preg_match( '#<iframe[^>]*?title="(?P<title>[^"]+)"#s', $html, $matches ) ) {
-			// @todo Is a fallback a suitable alternative for a11y for the title attribute?
+			$props['title']    = $matches['title'];
 			$props['fallback'] = sprintf(
 				'<a fallback href="%s">%s</a>',
 				esc_url( $url ),
@@ -196,7 +196,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 			'amp-youtube',
 			array_merge(
 				[ 'data-videoid' => $args['video_id'] ],
-				wp_array_slice_assoc( $args, [ 'width', 'height', 'layout' ] )
+				wp_array_slice_assoc( $args, [ 'layout', 'width', 'height', 'title' ] )
 			),
 			$args['fallback']
 		);
