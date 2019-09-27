@@ -111,7 +111,7 @@ const TextBlockEdit = ( props ) => {
 		) ) );
 	};
 
-	const userFontSize = fontSize && fontSize.size ? fontSize.size + 'px' : undefined;
+	const userFontSize = fontSize && fontSize.size ? `${ fontSize.size }px` : undefined;
 
 	const { colors } = select( 'core/block-editor' ).getSettings();
 	const appliedBackgroundColor = getBackgroundColorWithOpacity( colors, backgroundColor, customBackgroundColor, opacity );
