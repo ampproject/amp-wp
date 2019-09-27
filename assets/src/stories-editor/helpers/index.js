@@ -59,6 +59,7 @@ import {
 	addAMPAttributesDeprecations,
 } from '../deprecations/filters';
 import { default as MetaBlockDeprecated } from '../deprecations/story-meta-block';
+import isBlockAllowedOnPage from './isBlockAllowedOnPage';
 
 const { ampStoriesFonts } = window;
 
@@ -69,8 +70,6 @@ const {
 	getBlock,
 	getClientIdsWithDescendants,
 	getSettings,
-	canInsertBlockType,
-	getBlockListSettings,
 } = select( 'core/block-editor' );
 
 const { getAnimatedBlocks } = select( 'amp/story' );
@@ -84,6 +83,8 @@ const {
 
 const { saveMedia } = dispatch( 'core' );
 const { updateBlockAttributes } = dispatch( 'core/block-editor' );
+
+export { isBlockAllowedOnPage };
 
 export const isMovableBlock = ( name ) => ALLOWED_MOVABLE_BLOCKS.includes( name );
 
@@ -1882,19 +1883,6 @@ export const copyTextToClipBoard = ( text ) => {
  */
 export const ensureAllowedBlocksOnPaste = ( blocks, pageId ) =>
 	blocks.filter( ( block ) => isBlockAllowedOnPage( block.name, pageId ) );
-
-/**
- * Is the given block allowed on the given page?
- *
- * @param {Object}  name The name of the block to test.
- * @param {string}  pageId Page ID.
- * @return {boolean} Returns true if the element is allowed on the page, false otherwise.
- */
-export const isBlockAllowedOnPage = ( name, pageId ) => {
-	// canInsertBlockType() alone is not enough, see https://github.com/WordPress/gutenberg/issues/14515
-	const blockSettings = getBlockListSettings( pageId );
-	return canInsertBlockType( name, pageId ) && blockSettings && blockSettings.allowedBlocks.includes( name );
-};
 
 /**
  * Given a block client ID, returns the corresponding DOM node for the block,
