@@ -193,7 +193,7 @@ class Draggable extends Component {
 		this.cloneWrapper.style.transform = clone.style.transform;
 
 		// 20% of the full value in case of CTA block.
-		const baseHeight = isCTABlock ? STORY_PAGE_INNER_HEIGHT / 5 : STORY_PAGE_INNER_HEIGHT;
+		const baseHeight = blockIsCTA ? STORY_PAGE_INNER_HEIGHT / 5 : STORY_PAGE_INNER_HEIGHT;
 
 		// Position clone over the original element.
 		const top = getPixelsFromPercentage( 'y', parseInt( clone.style.top ), baseHeight );
