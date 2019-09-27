@@ -135,7 +135,7 @@ const TextBlockEdit = ( props ) => {
 	};
 	const textStyle = {
 		color: textColor.color,
-		fontSize: ampFitText ? autoFontSize + 'px' : userFontSize,
+		fontSize: ampFitText ? `${ autoFontSize }px` : userFontSize,
 		textAlign: align,
 		position: ampFitText && content.length ? 'static' : undefined,
 	};
