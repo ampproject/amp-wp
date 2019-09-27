@@ -38,6 +38,14 @@ const RotatableBox = ( { angle, initialAngle, blockElementId, className, speak, 
 		};
 	}, [ blockElementId ] );
 
+	useEffect( () => {
+		elementRef.current.style.transform = `rotate(${ currentAngle }deg)`;
+	}, [ currentAngle ] );
+
+	useEffect( () => {
+		elementRef.current.classList.toggle( 'is-rotating', isRotating );
+	}, [ isRotating ] );
+
 	const onKeyUp = ( e ) => {
 		if ( ! isRotating ) {
 			return;
@@ -48,9 +56,6 @@ const RotatableBox = ( { angle, initialAngle, blockElementId, className, speak, 
 		const { keyCode } = e;
 
 		if ( ESCAPE === keyCode ) {
-			elementRef.current.classList.remove( 'is-rotating' );
-			elementRef.current.style.transform = `rotate(${ initialAngle }deg)`;
-
 			setIsRotating( false );
 			setAngle( initialAngle );
 
@@ -64,8 +69,6 @@ const RotatableBox = ( { angle, initialAngle, blockElementId, className, speak, 
 			} else if ( newAngle <= -360 ) {
 				newAngle += 360;
 			}
-
-			elementRef.current.style.transform = `rotate(${ newAngle }deg)`;
 
 			/* translators: %s: degrees */
 			speak( sprintf( __( 'Rotating block by %s degrees', 'amp' ), newAngle ) );
@@ -98,8 +101,6 @@ const RotatableBox = ( { angle, initialAngle, blockElementId, className, speak, 
 
 		e.preventDefault();
 
-		elementRef.current.classList.add( 'is-rotating' );
-
 		setIsRotating( true );
 
 		if ( onRotateStart ) {
@@ -113,8 +114,6 @@ const RotatableBox = ( { angle, initialAngle, blockElementId, className, speak, 
 		}
 
 		e.preventDefault();
-
-		elementRef.current.classList.add( 'is-rotating' );
 
 		const { top, left, width, height } = elementRef.current.getBoundingClientRect();
 
@@ -133,8 +132,6 @@ const RotatableBox = ( { angle, initialAngle, blockElementId, className, speak, 
 			return;
 		}
 
-		elementRef.current.style.transform = `rotate(${ newAngle }deg)`;
-
 		setAngle( newAngle );
 
 		if ( onRotate ) {
@@ -148,9 +145,6 @@ const RotatableBox = ( { angle, initialAngle, blockElementId, className, speak, 
 		}
 
 		e.preventDefault();
-
-		elementRef.current.classList.remove( 'is-rotating' );
-		elementRef.current.style.transform = `rotate(${ currentAngle }deg)`;
 
 		setIsRotating( false );
 
