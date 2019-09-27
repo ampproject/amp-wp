@@ -46,6 +46,14 @@ class AMP_Story_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-story-page><amp-story-grid-layer><p>Lorem Ipsum Demet Delorit.</p></amp-story-grid-layer></amp-story-page><amp-story-page><amp-story-grid-layer></amp-story-grid-layer><amp-story-cta-layer><a href="">Foo</a></amp-story-cta-layer><amp-story-cta-layer><a href="">Foo</a></amp-story-cta-layer></amp-story-page>',
 				'<amp-story-page><amp-story-grid-layer><p>Lorem Ipsum Demet Delorit.</p></amp-story-grid-layer></amp-story-page><amp-story-page><amp-story-grid-layer></amp-story-grid-layer><amp-story-cta-layer><a href="">Foo</a></amp-story-cta-layer></amp-story-page>',
 			],
+			'story_with_invalid_root_elements' => [
+				'<p>Word count: 4</p><amp-story-page><amp-story-grid-layer><p>Lorem Ipsum Demet Delorit.</p></amp-story-grid-layer></amp-story-page><p>Related posts: <a href="https://example.com/"><strong>Example</strong></a></p>',
+				'<amp-story-page><amp-story-grid-layer><p>Lorem Ipsum Demet Delorit.</p></amp-story-grid-layer></amp-story-page>',
+			],
+			'story_with_invalid_layer_siblings' => [
+				'<amp-story-page><p>Before layer</p><amp-story-grid-layer><p>Lorem Ipsum Demet Delorit.</p></amp-story-grid-layer><p>After layer</p></amp-story-page</p>',
+				'<amp-story-page><amp-story-grid-layer><p>Lorem Ipsum Demet Delorit.</p></amp-story-grid-layer></amp-story-page>',
+			],
 		];
 	}
 
@@ -57,8 +65,13 @@ class AMP_Story_Sanitizer_Test extends WP_UnitTestCase {
 	 * @dataProvider get_data
 	 */
 	public function test_converter( $source, $expected = null ) {
+		$amp_story_element = '<amp-story standalone title="Test" publisher="Tester" publisher-logo-src="https://example.com/favicons/tester-228x228.png" poster-portrait-src="https://example.com/test.jpg">%s</amp-story>';
+
+		$source = sprintf( $amp_story_element, $source );
 		if ( is_null( $expected ) ) {
 			$expected = $source;
+		} else {
+			$expected = sprintf( $amp_story_element, $expected );
 		}
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
 

@@ -104,7 +104,7 @@ describe( 'Block Position Controls', () => {
 
 			// Since the selected block is already at the back, the 'Back' and 'Backward' buttons should be disabled.
 			expect( page ).toMatchElement( '.amp-story-controls-send-back[aria-disabled="true"]' );
-			expect( page ).toMatchElement( '.amp-story-controls-send-backward[aria-disabled="true"]' );
+			expect( page ).toMatchElement( '.amp-story-controls-send-backwards[aria-disabled="true"]' );
 		} );
 	} );
 } );
