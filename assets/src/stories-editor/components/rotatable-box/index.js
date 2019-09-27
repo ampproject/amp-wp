@@ -18,7 +18,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { findClosestSnap } from '../../helpers';
 import './edit.css';
 
-const RotatableBox = ( { angle, initialAngle, blockElementId, className, speak, onRotateStart, onRotate, onRotateStop, snap, snapGap } ) => {
+const RotatableBox = ( { angle, initialAngle, blockElementId, className, speak, onRotateStart, onRotate, onRotateStop, snap, snapGap, children } ) => {
 	const [ isRotating, setIsRotating ] = useState( false );
 	const [ currentAngle, setAngle ] = useState( angle );
 
