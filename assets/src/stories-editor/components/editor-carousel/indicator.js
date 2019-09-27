@@ -57,11 +57,9 @@ const Indicator = ( { pages, currentPage, onClick } ) => {
 	/* translators: %s: Page number */
 	const toolTip = ( pageNumber ) => sprintf( __( 'Go to page %s', 'amp' ), pageNumber );
 
-	const [ isDragging, setIsDragging ] = useState( false );
+	const [ draggedPage, setDraggedPage ] = useState( null );
 	const { movePageToPosition, initializePageOrder } = useDispatch( 'amp/story' );
-	const { getBlockOrder, getBlockIndex } = useSelect( ( select ) => {
-		return select( 'core/block-editor' );
-	} );
+	const { getBlockOrder, getBlockIndex } = useSelect( ( select ) => select( 'core/block-editor' ) );
 
 	return (
 		<ul className="amp-story-editor-carousel-item-list">
@@ -86,10 +84,10 @@ const Indicator = ( { pages, currentPage, onClick } ) => {
 				const onDrop = ( event, position ) => {
 					const { srcClientId, srcIndex, type } = parseDropEvent( event );
 
-					const isIndicatorDropType = ( dropType ) => dropType === 'indicator';
-					const isSameBlock = ( src, dst ) => src === dst;
+					const isIndicatorDropType = 'indicator' === type;
+					const isSameBlock = srcClientId === page.clientId;
 
-					if ( ! isIndicatorDropType( type ) || isSameBlock( srcClientId, page.clientId ) ) {
+					if ( ! isIndicatorDropType || isSameBlock ) {
 						return;
 					}
 
@@ -98,17 +96,32 @@ const Indicator = ( { pages, currentPage, onClick } ) => {
 					movePageToPosition( srcClientId, insertIndex );
 				};
 
+				const isPageDragged = page.clientId === draggedPage;
+				const isCurrentPage = page.clientId !== currentPage;
+				const indicatorButton = (
+					<Button
+						onClick={ ( e ) => {
+							e.preventDefault();
+							onClick( page.clientId );
+						} }
+					>
+						<span className="screen-reader-text">
+							{ label( index + 1 ) }
+						</span>
+					</Button>
+				);
+
 				return (
 					<Draggable
 						key={ page.clientId }
 						elementId={ blockElementId }
 						transferData={ transferData }
 						onDragStart={ () => {
-							setIsDragging( page.clientId );
+							setDraggedPage( page.clientId );
 							initializePageOrder( getBlockOrder() );
 						} }
 						onDragEnd={ () => {
-							setIsDragging( false );
+							setDraggedPage( null );
 						} }
 					>
 						{
@@ -122,37 +135,15 @@ const Indicator = ( { pages, currentPage, onClick } ) => {
 											onDragEnd={ onDraggableEnd }
 											draggable
 											className="amp-story-editor-carousel-item-wrapper"
-											id={ `amp-story-editor-carousel-item-${ page.clientId }` }
+											id={ blockElementId }
 										>
-											{ page.clientId !== currentPage && (
-												<Tooltip text={ toolTip( index + 1 ) }>
-													<Button
-														onClick={ ( e ) => {
-															e.preventDefault();
-															onClick( page.clientId );
-														} }
-													>
-														<span className="screen-reader-text">
-															{ label( index + 1 ) }
-														</span>
-													</Button>
-												</Tooltip>
-											) }
-											{ page.clientId === currentPage && (
-												<Button
-													onClick={ ( e ) => {
-														e.preventDefault();
-														onClick( page.clientId );
-													} }
-												>
-													<span className="screen-reader-text">
-														{ label( index + 1 ) }
-													</span>
-												</Button>
-											) }
+											{ isCurrentPage ?
+												indicatorButton :
+												<Tooltip text={ toolTip( index + 1 ) }>{ indicatorButton }</Tooltip>
+											}
 										</div>
 										<DropZone
-											className={ isDragging === page.clientId ? 'is-dragging-indicator' : undefined }
+											className={ isPageDragged ? 'is-dragging-indicator' : undefined }
 											onDrop={ onDrop }
 										/>
 									</li>
