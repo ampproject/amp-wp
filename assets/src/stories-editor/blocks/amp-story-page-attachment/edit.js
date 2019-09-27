@@ -7,8 +7,8 @@ import classnames from 'classnames';
 /**
  * WordPress dependencies
  */
-import { Component } from '@wordpress/element';
-import { select } from '@wordpress/data';
+import { useState, useEffect } from '@wordpress/element';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -21,56 +21,34 @@ import AttachmentContent from './attachment-content';
 /**
  * Edit component for the page attachment block rendered in the editor.
  */
-class PageAttachmentEdit extends Component {
-	constructor( props ) {
-		super( props );
-		this.state = {
-			isOpen: false,
-		};
+const PageAttachmentEdit = ( {
+	attributes,
+	setAttributes,
+	backgroundColor,
+	customBackgroundColor,
+	textColor,
+} ) => {
+	const {
+		opacity,
+		openText,
+	} = attributes;
 
-		this.toggleAttachment = this.toggleAttachment.bind( this );
-	}
+	const [ isOpen, setIsOpen ] = useState( false );
 
-	componentDidUpdate( prevProps ) {
-		const {
-			backgroundColor,
-			customBackgroundColor,
-			textColor,
-			setAttributes,
-		} = this.props;
-
-		if (
-			backgroundColor !== prevProps.backgroundColor ||
-			customBackgroundColor !== prevProps.customBackgroundColor ||
-			textColor !== prevProps.textColor
-		) {
-			const { style, attachmentClass } = this.getWrapperAttributes();
-			const newAttributes = { wrapperStyle: style };
-			if ( textColor !== prevProps.textColor ) {
-				newAttributes.attachmentClass = attachmentClass;
-			}
-			setAttributes( newAttributes );
+	const toggleAttachment = ( open ) => {
+		if ( open !== isOpen ) {
+			setIsOpen( open );
 		}
-	}
+	};
 
-	toggleAttachment( open ) {
-		if ( open !== this.state.isOpen ) {
-			this.setState( { isOpen: open } );
-		}
-	}
+	const colors = useSelect( ( select ) => {
+		const { getSettings } = select( 'core/block-editor' );
+		const settings = getSettings();
 
-	getWrapperAttributes() {
-		const {
-			attributes,
-			backgroundColor,
-			customBackgroundColor,
-			textColor,
-		} = this.props;
+		return settings.colors;
+	} );
 
-		const {
-			opacity,
-		} = attributes;
-		const { colors } = select( 'core/block-editor' ).getSettings();
+	const getWrapperAttributes = () => {
 		const appliedBackgroundColor = getBackgroundColorWithOpacity( colors, backgroundColor, customBackgroundColor, opacity );
 
 		const attachmentClass = classnames( 'amp-page-attachment-content', {
@@ -81,42 +59,39 @@ class PageAttachmentEdit extends Component {
 			color: textColor.color,
 			backgroundColor: appliedBackgroundColor,
 		};
+
 		return {
 			style: attachmentStyle,
 			attachmentClass,
 		};
-	}
+	};
 
-	render() {
-		const {
-			attributes,
-			setAttributes,
-		} = this.props;
+	useEffect( () => {
+		const { style, attachmentClass } = getWrapperAttributes();
+		const newAttributes = { wrapperStyle: style };
+		newAttributes.attachmentClass = attachmentClass;
+		setAttributes( newAttributes );
+	}, [ backgroundColor, customBackgroundColor, textColor ] );
 
-		const {
-			openText,
-		} = attributes;
-
-		return (
-			<>
-				{ this.state.isOpen &&
-					<AttachmentContent
-						setAttributes={ setAttributes }
-						attributes={ attributes }
-						toggleAttachment={ this.toggleAttachment }
-					/>
-				}
-				{ ! this.state.isOpen &&
-					<AttachmentOpener
-						setAttributes={ setAttributes }
-						toggleAttachment={ this.toggleAttachment }
-						openText={ openText }
-					/>
-				}
-			</>
-		);
-	}
-}
+	return (
+		<>
+			{ isOpen &&
+			<AttachmentContent
+				setAttributes={ setAttributes }
+				attributes={ attributes }
+				toggleAttachment={ toggleAttachment }
+			/>
+			}
+			{ ! isOpen &&
+			<AttachmentOpener
+				setAttributes={ setAttributes }
+				toggleAttachment={ toggleAttachment }
+				openText={ openText }
+			/>
+			}
+		</>
+	);
+};
 
 PageAttachmentEdit.propTypes = {
 	attributes: PropTypes.shape( {
