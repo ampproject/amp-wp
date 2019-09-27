@@ -136,8 +136,6 @@ ReordererItem.propTypes = {
 	page: PropTypes.shape( {
 		clientId: PropTypes.string.isRequired,
 	} ).isRequired,
-	index: PropTypes.number.isRequired,
-	movePageToPosition: PropTypes.func.isRequired,
 };
 
 export default ReordererItem;
