@@ -25,7 +25,7 @@ const RotatableBox = ( { angle, initialAngle, blockElementId, className, speak, 
 	let elementRef = null;
 
 	useEffect( () => {
-		elementRef = document.getElementById( this.props.blockElementId );
+		elementRef = document.getElementById( blockElementId );
 
 		document.addEventListener( 'mousemove', onMouseMove );
 		document.addEventListener( 'mouseup', onMouseUp );
@@ -175,7 +175,7 @@ const RotatableBox = ( { angle, initialAngle, blockElementId, className, speak, 
 					</span>
 				</Button>
 			</div>
-			{ this.props.children }
+			{ children }
 		</div>
 	);
 };

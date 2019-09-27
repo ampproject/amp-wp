@@ -35,7 +35,7 @@ const EditorCarousel = () => {
 		const _currentPage = getCurrentPage();
 		const _pages = getBlocksByClientId( getBlockOrder() );
 
-		const index = pages.findIndex( ( { clientId } ) => clientId === currentPage );
+		const index = _pages.findIndex( ( { clientId } ) => clientId === currentPage );
 
 		return {
 			pages: _pages,
