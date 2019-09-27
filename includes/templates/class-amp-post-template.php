@@ -371,7 +371,7 @@ class AMP_Post_Template {
 		if ( ! $featured_image ) {
 			return;
 		}
-		
+
 		$sanitized_html = AMP_DOM_Utils::get_content_from_dom( $dom );
 
 		$this->add_data_by_key(
