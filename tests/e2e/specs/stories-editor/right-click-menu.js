@@ -83,7 +83,7 @@ describe( 'Right Click Menu', () => {
 		await openRightClickMenu( pageBlock );
 
 		await clickButton( 'Paste' );
-
+		await page.waitForSelector( ACTIVE_PAGE_SELECTOR + ' ' + BLOCK_SELECTOR );
 		expect( page ).toMatchElement( ACTIVE_PAGE_SELECTOR + ' ' + BLOCK_SELECTOR );
 	} );
 
