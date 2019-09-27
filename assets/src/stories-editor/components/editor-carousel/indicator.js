@@ -105,6 +105,7 @@ const Indicator = ( { pages, currentPage, onClick } ) => {
 							onClick( page.clientId );
 						} }
 					>
+						{ draggedPage && <span className="is-dragging-indicator-label">{ index + 1 }</span> }
 						<span className="screen-reader-text">
 							{ label( index + 1 ) }
 						</span>

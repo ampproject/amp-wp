@@ -109,3 +109,9 @@
 .amp-story-editor-carousel-item .components-drop-zone.is-dragging-indicator {
 	display: none;
 }
+
+.is-dragging-indicator-label {
+	font-size: 11px;
+	display: block;
+	margin-top: 6px;
+}
