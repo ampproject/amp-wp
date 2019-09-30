@@ -43,7 +43,7 @@ const TemplateInserter = ( props ) => {
 
 	useEffect( () => {
 		fetchStoryTemplates();
-	}, [] );
+	}, [ fetchStoryTemplates ] );
 
 	useEffect( () => {
 		for ( const template of storyTemplates ) {
@@ -61,7 +61,7 @@ const TemplateInserter = ( props ) => {
 		}
 
 		cacheStoryTemplates( storyTemplates );
-	}, [ storyTemplates, allBlocks ] );
+	}, [ storyTemplates, allBlocks, getBlock ] );
 
 	const onToggle = ( isOpen ) => {
 		// Surface toggle callback to parent component

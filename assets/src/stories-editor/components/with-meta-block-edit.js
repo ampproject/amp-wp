@@ -86,21 +86,19 @@ const MetaBlockEdit = ( props ) => {
 			colors: getSettings().colors,
 			isLoading: loading,
 		};
-	} );
-
-	useEffect( () => maybeUpdateFontSize( props ), [ isLoading ] );
+	}, [ attribute ] );
 
 	useEffect( () => {
 		if ( ampFitText && ! isLoading ) {
 			maybeUpdateFontSize( props );
 		}
-	}, [ ampFitText, ampFontFamily, width, height, content, isLoading ] );
+	}, [ ampFitText, ampFontFamily, width, height, content, isLoading, props ] );
 
 	useEffect( () => {
 		if ( ! ampFitText ) {
 			maybeUpdateBlockDimensions( props );
 		}
-	}, [ ampFitText, fontSize, ampFontFamily, content ] );
+	}, [ ampFitText, fontSize, ampFontFamily, content, props ] );
 
 	const userFontSize = fontSize && fontSize.size && fontSize.size + 'px';
 
