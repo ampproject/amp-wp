@@ -53,8 +53,6 @@ const icon = <SVG viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><Path f
  * The main change is that in render(), the <video> is not wrapped in <Disabled>, so it can play.
  *
  * Also removes video settings that are not applicable / allowed in an AMP Stories context.
- *
- * @class
  */
 const CustomVideoBlockEdit = ( { instanceId, isSelected, className, attributes, setAttributes, mediaUpload, noticeUI, noticeOperations } ) => {
 	const {
