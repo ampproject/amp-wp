@@ -34,7 +34,7 @@ import {
 	RichText,
 } from '@wordpress/block-editor';
 import { compose, withInstanceId } from '@wordpress/compose';
-import { withSelect } from '@wordpress/data';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -56,7 +56,7 @@ const icon = <SVG viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><Path f
  *
  * @class
  */
-const CustomVideoBlockEdit = ( { instanceId, isSelected, className, attributes, setAttributes, mediaUpload, noticeUI, noticeOperations, allowedVideoMimeTypes, media, videoFeaturedImage } ) => {
+const CustomVideoBlockEdit = ( { instanceId, isSelected, className, attributes, setAttributes, mediaUpload, noticeUI, noticeOperations } ) => {
 	const {
 		caption,
 		loop,
@@ -76,6 +76,29 @@ const CustomVideoBlockEdit = ( { instanceId, isSelected, className, attributes, 
 	const switchToEditing = () => setIsEditing( true );
 
 	const videoPlayer = useRef( null );
+
+	const {
+		media,
+		videoFeaturedImage,
+		allowedVideoMimeTypes,
+	} = useSelect( ( select ) => {
+		const { getMedia } = select( 'core' );
+		const { getSettings } = select( 'amp/story' );
+
+		let featuredImage;
+
+		const mediaObj = id ? getMedia( id ) : undefined;
+
+		if ( mediaObj && mediaObj.featured_media && ! poster ) {
+			featuredImage = getMedia( mediaObj.featured_media );
+		}
+
+		return {
+			media: mediaObj,
+			videoFeaturedImage: featuredImage,
+			allowedVideoMimeTypes: getSettings().allowedVideoMimeTypes,
+		};
+	}, [ id, poster ] );
 
 	useEffect( () => {
 		if ( ! id && isBlobURL( src ) ) {
@@ -100,7 +123,7 @@ const CustomVideoBlockEdit = ( { instanceId, isSelected, className, attributes, 
 		if ( src && ! isBlobURL( src ) ) {
 			getContentLengthFromUrl( src ).then( setVideoSize );
 		}
-	}, [] );
+	}, [ allowedVideoMimeTypes, id, mediaUpload, noticeOperations, setAttributes, src ] );
 
 	useEffect( () => {
 		if ( videoPlayer.current ) {
@@ -143,7 +166,7 @@ const CustomVideoBlockEdit = ( { instanceId, isSelected, className, attributes, 
 				} )
 				.catch( () => setExtractingPoster( false ) );
 		}
-	}, [ media ] );
+	}, [ media, ampAriaLabel, id, isExtractingPoster, setAttributes, src, videoFeaturedImage ] );
 
 	/**
 	 * Callback to toggle an attribute's value.
@@ -382,37 +405,10 @@ CustomVideoBlockEdit.propTypes = {
 	mediaUpload: PropTypes.func,
 	noticeUI: PropTypes.oneOfType( [ PropTypes.func, PropTypes.bool ] ),
 	noticeOperations: PropTypes.object,
-	media: PropTypes.object,
 	setAttributes: PropTypes.func,
-	videoFeaturedImage: PropTypes.shape( {
-		source_url: PropTypes.string,
-	} ),
-	allowedVideoMimeTypes: PropTypes.arrayOf( PropTypes.string ).isRequired,
 };
 
 export default compose( [
-	withSelect( ( select, { attributes } ) => {
-		const { getMedia } = select( 'core' );
-		const { getSettings } = select( 'amp/story' );
-
-		let videoFeaturedImage;
-
-		const { id, poster } = attributes;
-
-		const media = id ? getMedia( id ) : undefined;
-
-		if ( media && media.featured_media && ! poster ) {
-			videoFeaturedImage = getMedia( media.featured_media );
-		}
-
-		const { allowedVideoMimeTypes } = getSettings();
-
-		return {
-			media,
-			videoFeaturedImage,
-			allowedVideoMimeTypes,
-		};
-	} ),
 	withNotices,
 	withInstanceId,
 ] )( CustomVideoBlockEdit );
