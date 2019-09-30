@@ -40,7 +40,7 @@
     "@wordpress/browserslist-config": "2.6.0",
     "@wordpress/components": "8.3.1",
     "@wordpress/compose": "3.7.1",
-    "@wordpress/core-data": "2.7.0",
+    "@wordpress/core-data": "2.7.1",
     "@wordpress/data": "4.9.1",
     "@wordpress/date": "3.5.0",
     "@wordpress/dom-ready": "2.5.0",
