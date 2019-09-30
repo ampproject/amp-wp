@@ -57,7 +57,7 @@ Status.propTypes = {
 	length: PropTypes.number.isRequired,
 	queryLength: PropTypes.number.isRequired,
 	minQueryLength: PropTypes.number.isRequired,
-	selectedOption: PropTypes.func,
+	selectedOption: PropTypes.string,
 	selectedOptionIndex: PropTypes.number,
 	tQueryTooShort: PropTypes.func.isRequired,
 	tNoResults: PropTypes.func.isRequired,

@@ -46,7 +46,7 @@ module.exports = function( grunt ) {
 		// Clean up the build.
 		clean: {
 			compiled: {
-				src: [ 'assets/js/*.js', '!assets/js/amp-service-worker-runtime-precaching.js', 'assets/js/*.deps.json' ],
+				src: [ 'assets/js/*.js', '!assets/js/amp-service-worker-runtime-precaching.js', 'assets/js/*.asset.php' ],
 			},
 			build: {
 				src: [ 'build' ],
@@ -149,8 +149,8 @@ module.exports = function( grunt ) {
 			} );
 
 			paths.push( 'composer.*' ); // Copy in order to be able to do run composer_install.
-			paths.push( 'assets/js/*.js' );
-			paths.push( 'assets/js/*.deps.json' );
+			paths.push( 'assets/js/*.js' ); // @todo Also include *.map files?
+			paths.push( 'assets/js/*.asset.php' );
 			paths.push( 'assets/css/*.css' );
 
 			grunt.config.set( 'copy', {

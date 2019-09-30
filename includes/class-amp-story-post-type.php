@@ -813,6 +813,16 @@ class AMP_Story_Post_Type {
 
 		wp_styles()->add_data( self::AMP_STORIES_EDITOR_STYLE_HANDLE, 'rtl', 'replace' );
 
+		// Include all fonts in the editor since new fonts can be selected at runtime.
+		// In a frontend context, the fonts are added only as needed via \AMP_Story_Post_Type::render_block_with_google_fonts().
+		$fonts = self::get_fonts();
+		foreach ( $fonts as $font ) {
+			wp_add_inline_style(
+				self::AMP_STORIES_EDITOR_STYLE_HANDLE,
+				self::get_inline_font_style_rule( $font )
+			);
+		}
+
 		self::enqueue_general_styles();
 	}
 
@@ -829,14 +839,6 @@ class AMP_Story_Post_Type {
 		);
 
 		wp_styles()->add_data( self::AMP_STORIES_STYLE_HANDLE, 'rtl', 'replace' );
-
-		$fonts = self::get_fonts();
-		foreach ( $fonts as $font ) {
-			wp_add_inline_style(
-				self::AMP_STORIES_STYLE_HANDLE,
-				self::get_inline_font_style_rule( $font )
-			);
-		}
 	}
 
 	/**
@@ -1386,6 +1388,8 @@ class AMP_Story_Post_Type {
 	/**
 	 * Include any required Google Font styles when rendering a block in AMP Stories.
 	 *
+	 * @see AMP_Story_Post_Type::enqueue_block_editor_styles() Where fonts are added in the story editor.
+	 *
 	 * @param string $block_content The block content about to be appended.
 	 * @param array  $block         The full block, including name and attributes.
 	 * @return string Block content.
@@ -1393,28 +1397,28 @@ class AMP_Story_Post_Type {
 	public static function render_block_with_google_fonts( $block_content, $block ) {
 		$font_family_attribute = 'ampFontFamily';
 
-		// Short-circuit if no font family present.
 		if ( empty( $block['attrs'][ $font_family_attribute ] ) ) {
 			return $block_content;
 		}
 
-		// Short-circuit if there is no Google Font or the font is already enqueued.
 		$font = self::get_font( $block['attrs'][ $font_family_attribute ] );
-		if ( ! isset( $font['handle'], $font['src'] ) || ! $font || wp_style_is( $font['handle'] ) ) {
+		if ( ! $font ) {
 			return $block_content;
 		}
 
-		if ( ! wp_style_is( $font['handle'], 'registered' ) ) {
-			wp_register_style( $font['handle'], $font['src'], [], null, 'all' ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
-		}
-
-		wp_enqueue_style( $font['handle'] );
-		wp_add_inline_style(
-			$font['handle'],
+		// Create style rule for the custom font. The style sanitizer will de-duplicate.
+		$style = sprintf(
+			'<style data-font-family="%s">%s</style>',
+			esc_attr( $font['name'] ),
 			self::get_inline_font_style_rule( $font )
 		);
 
-		return $block_content;
+		// Make sure that the Google Font is enqueued.
+		if ( isset( $font['src'], $font['handle'] ) && ! wp_style_is( $font['handle'] ) ) {
+			wp_enqueue_style( $font['handle'], $font['src'], [], null, 'all' ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+		}
+
+		return $style . $block_content;
 	}
 
 	/**
