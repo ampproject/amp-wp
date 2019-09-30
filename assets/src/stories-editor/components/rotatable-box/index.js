@@ -25,6 +25,10 @@ const RotatableBox = ( { angle, initialAngle, blockElementId, className, speak, 
 	const elementRef = useRef( null );
 
 	useEffect( () => {
+		elementRef.current = document.getElementById( blockElementId );
+	}, [ blockElementId ] );
+
+	useEffect( () => {
 		elementRef.current.style.transform = `rotate(${ currentAngle }deg)`;
 	}, [ currentAngle ] );
 
@@ -140,8 +144,6 @@ const RotatableBox = ( { angle, initialAngle, blockElementId, className, speak, 
 	}, [ currentAngle, isRotating, onRotateStop ] );
 
 	useEffect( () => {
-		elementRef.current = document.getElementById( blockElementId );
-
 		document.addEventListener( 'mousemove', onMouseMove );
 		document.addEventListener( 'mouseup', onMouseUp );
 		document.addEventListener( 'keyUp', onKeyUp );
@@ -151,7 +153,7 @@ const RotatableBox = ( { angle, initialAngle, blockElementId, className, speak, 
 			document.removeEventListener( 'mouseup', onMouseUp );
 			document.removeEventListener( 'keyUp', onKeyUp );
 		};
-	}, [ blockElementId, onMouseMove, onMouseUp, onKeyUp ] );
+	}, [ onMouseMove, onMouseUp, onKeyUp ] );
 
 	return (
 		<div
