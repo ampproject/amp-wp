@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import PropTypes from 'prop-types';
-
-/**
  * WordPress dependencies
  */
 import { getBlockType, createBlock } from '@wordpress/blocks';
@@ -69,12 +64,6 @@ const Shortcuts = () => {
 			);
 		} )
 	);
-};
-
-Shortcuts.propTypes = {
-	insertBlock: PropTypes.func.isRequired,
-	canInsertBlockType: PropTypes.func.isRequired,
-	showInserter: PropTypes.bool.isRequired,
 };
 
 export default compose(
