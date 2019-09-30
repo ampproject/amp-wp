@@ -69,7 +69,7 @@ const TextBlockEdit = ( props ) => {
 		if ( ! ampFitText ) {
 			maybeUpdateBlockDimensions( props );
 		}
-	}, [ ampFitText, fontSize , ampFontFamily, content ] );
+	}, [ ampFitText, fontSize, ampFontFamily, content ] );
 
 	useEffect( () => {
 		// If the block was unselected, make sure that it's not editing anymore.
