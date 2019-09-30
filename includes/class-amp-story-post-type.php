@@ -1238,8 +1238,9 @@ class AMP_Story_Post_Type {
 					$font['handle'] = sprintf( '%s-font', $font['slug'] );
 					$font['src']    = add_query_arg(
 						[
-							'family' => rawurlencode( $font['gfont'] ),
-							'subset' => rawurlencode( implode( ',', $subsets ) ),
+							'family'  => rawurlencode( $font['gfont'] ),
+							'subset'  => rawurlencode( implode( ',', $subsets ) ),
+							'display' => 'swap',
 						],
 						$fonts_url
 					);

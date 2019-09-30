@@ -48,6 +48,7 @@ const TextBlockEdit = ( props ) => {
 		width,
 		height,
 		opacity,
+		isPasted,
 	} = attributes;
 
 	const [ isEditing, setIsEditing ] = useState( false );
@@ -66,10 +67,14 @@ const TextBlockEdit = ( props ) => {
 	}, [ ampFitText, ampFontFamily, width, height, content, props ] );
 
 	useEffect( () => {
-		if ( ! ampFitText ) {
+		if ( ! ampFitText || isPasted ) {
 			maybeUpdateBlockDimensions( props );
 		}
-	}, [ ampFitText, fontSize, ampFontFamily, content, props ] );
+
+		if ( isPasted ) {
+			setAttributes( { isPasted: false } );
+		}
+	}, [ ampFitText, fontSize, ampFontFamily, content, isPasted, props, setAttributes ] );
 
 	useEffect( () => {
 		// If the block was unselected, make sure that it's not editing anymore.
@@ -209,6 +214,7 @@ TextBlockEdit.propTypes = {
 		opacity: PropTypes.number,
 		className: PropTypes.string,
 		ampFontFamily: PropTypes.string,
+		isPasted: PropTypes.bool,
 	} ).isRequired,
 	isSelected: PropTypes.bool.isRequired,
 	clientId: PropTypes.string.isRequired,
