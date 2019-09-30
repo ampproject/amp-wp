@@ -76,8 +76,8 @@ const PageEdit = ( {
 
 		let videoThumbnail;
 
-		if ( VIDEO_BACKGROUND_TYPE === mediaType && media && media.featured_media && ! poster ) {
-			videoThumbnail = getMedia( media.featured_media );
+		if ( VIDEO_BACKGROUND_TYPE === mediaType && mediaObject && mediaObject.featured_media && ! poster ) {
+			videoThumbnail = getMedia( mediaObject.featured_media );
 		}
 
 		const { getEditedPostAttribute } = select( 'core/editor' );
@@ -94,7 +94,7 @@ const PageEdit = ( {
 			autoAdvanceAfterOptions: storySettings.autoAdvanceAfterOptions,
 			allowedVideoMimeTypes: getSettings().allowedVideoMimeTypes,
 		};
-	} );
+	}, [ mediaId, mediaType, poster ] );
 
 	const allowedBackgroundMediaTypes = [ IMAGE_BACKGROUND_TYPE, ...allowedVideoMimeTypes ];
 
@@ -122,7 +122,7 @@ const PageEdit = ( {
 		if ( ! anchor ) {
 			setAttributes( { anchor: getUniqueId() } );
 		}
-	}, [ anchor ] );
+	}, [ anchor, setAttributes ] );
 
 	useEffect( () => {
 		if ( storySettingsAttributes ) {
@@ -132,7 +132,7 @@ const PageEdit = ( {
 				}
 			} );
 		}
-	}, [ storySettingsAttributes ] );
+	}, [ storySettingsAttributes, setAttributes, attributes ] );
 
 	const videoPlayer = useRef();
 
@@ -163,7 +163,7 @@ const PageEdit = ( {
 				moveBlockToPosition( blockToMove.clientId, clientId, clientId, childrenOrder.length - 1 );
 			}
 		}
-	}, [ childrenOrder ] );
+	}, [ childrenOrder, clientId, moveBlockToPosition ] );
 
 	const style = {
 		backgroundImage: IMAGE_BACKGROUND_TYPE === mediaType && mediaUrl ? `url(${ mediaUrl })` : undefined,

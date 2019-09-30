@@ -49,7 +49,7 @@ const CallToActionEdit = ( {
 		if ( ! anchor ) {
 			setAttributes( { anchor: getUniqueId() } );
 		}
-	}, [ anchor ] );
+	}, [ anchor, setAttributes ] );
 
 	useEffect( () => {
 		// If the block was unselected, make sure that it's not editing anymore.
