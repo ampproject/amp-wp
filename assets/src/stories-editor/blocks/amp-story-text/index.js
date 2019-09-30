@@ -40,6 +40,10 @@ const schema = {
 	align: {
 		type: 'string',
 	},
+	isPasted: {
+		type: 'boolean',
+		default: false,
+	},
 };
 
 export const settings = {
@@ -85,6 +89,7 @@ export const settings = {
 						blockAttributes.content = node.textContent;
 						blockAttributes.tagName = node.nodeName;
 						blockAttributes.ampFitText = false;
+						blockAttributes.isPasted = true;
 					}
 
 					return createBlock( name, blockAttributes );
