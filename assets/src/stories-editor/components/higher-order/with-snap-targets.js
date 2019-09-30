@@ -9,7 +9,7 @@ import isShallowEqual from '@wordpress/is-shallow-equal';
  * Internal dependencies
  */
 import { STORY_PAGE_INNER_HEIGHT, STORY_PAGE_INNER_WIDTH } from '../../constants';
-import { getBlockInnerElement } from '../../helpers';
+import { getBlockInnerElement, getRelativeElementPosition } from '../../helpers';
 import { withSnapContext } from '../contexts/snapping';
 
 /**
@@ -49,8 +49,6 @@ const applyWithSelect = withSelect( ( select, { clientId } ) => {
 	if ( ! parentBlockElement ) {
 		return defaultData;
 	}
-
-	const { left: parentBlockOffsetLeft, top: parentBlockOffsetTop } = parentBlockElement.getBoundingClientRect();
 
 	const siblings = getBlocksByClientId( getBlockOrder( parentBlock ) ).filter( ( { clientId: blockId } ) => blockId !== clientId );
 
@@ -99,10 +97,10 @@ const applyWithSelect = withSelect( ( select, { clientId } ) => {
 					continue;
 				}
 
-				const { left, right } = blockElement.getBoundingClientRect();
+				const { left, right } = getRelativeElementPosition( blockElement, parentBlockElement );
 
-				snaps[ left - parentBlockOffsetLeft ] = getVerticalLine( left - parentBlockOffsetLeft );
-				snaps[ right - parentBlockOffsetLeft ] = getVerticalLine( right - parentBlockOffsetLeft );
+				snaps[ left ] = getVerticalLine( left );
+				snaps[ right ] = getVerticalLine( right );
 			}
 
 			return snaps;
@@ -127,16 +125,15 @@ const applyWithSelect = withSelect( ( select, { clientId } ) => {
 					continue;
 				}
 
-				const { top, bottom } = blockElement.getBoundingClientRect();
+				const { top, bottom } = getRelativeElementPosition( blockElement, parentBlockElement );
 
-				snaps[ top - parentBlockOffsetTop ] = getHorizontalLine( top - parentBlockOffsetTop );
-				snaps[ bottom - parentBlockOffsetTop ] = getHorizontalLine( bottom - parentBlockOffsetTop );
+				snaps[ top ] = getHorizontalLine( top );
+				snaps[ bottom ] = getHorizontalLine( bottom );
 			}
 
 			return snaps;
 		},
-		parentBlockOffsetTop,
-		parentBlockOffsetLeft,
+		parentBlockElement,
 	};
 } );
 

@@ -17,7 +17,7 @@ import withSnapTargets from '../higher-order/with-snap-targets';
 import './edit.css';
 import {
 	getPercentageFromPixels,
-	findClosestSnap,
+	findClosestSnap, getRelativeElementPosition,
 } from '../../helpers';
 import {
 	getBlockPositioning,
@@ -87,8 +87,7 @@ class EnhancedResizableBox extends Component {
 			hideSnapLines,
 			setSnapLines,
 			clearSnapLines,
-			parentBlockOffsetTop,
-			parentBlockOffsetLeft,
+			parentBlockElement,
 			...childProps
 		} = otherProps;
 
@@ -247,20 +246,13 @@ class EnhancedResizableBox extends Component {
 						lastDeltaW = deltaW;
 					}
 
-					const dimensions = blockElement.getBoundingClientRect();
-
 					// We calculate with the block's actual dimensions relative to the page it's on.
-					let {
+					const {
 						top: actualTop,
 						right: actualRight,
 						bottom: actualBottom,
 						left: actualLeft,
-					} = dimensions;
-
-					actualTop -= parentBlockOffsetTop;
-					actualRight -= parentBlockOffsetLeft;
-					actualBottom -= parentBlockOffsetTop;
-					actualLeft -= parentBlockOffsetLeft;
+					} = getRelativeElementPosition( blockElement, parentBlockElement );
 
 					const horizontalCenter = actualLeft + ( ( actualRight - actualLeft ) / 2 );
 					const verticalCenter = actualTop + ( ( actualBottom - actualTop ) / 2 );
@@ -377,8 +369,7 @@ EnhancedResizableBox.propTypes = {
 	hideSnapLines: PropTypes.func.isRequired,
 	setSnapLines: PropTypes.func.isRequired,
 	clearSnapLines: PropTypes.func.isRequired,
-	parentBlockOffsetTop: PropTypes.number.isRequired,
-	parentBlockOffsetLeft: PropTypes.number.isRequired,
+	parentBlockElement: PropTypes.object.isRequired,
 };
 
 export default withSnapTargets( EnhancedResizableBox );

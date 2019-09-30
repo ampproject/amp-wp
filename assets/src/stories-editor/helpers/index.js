@@ -1966,12 +1966,14 @@ export const calculateTargetScalingFactor = ( width, height ) => {
  *
  * @return {{top: number, left: number}} Relative position of the block.
  */
-const getRelativeElementPosition = ( blockElement, parentElement ) => {
+export const getRelativeElementPosition = ( blockElement, parentElement ) => {
 	const { left: parentLeft, top: parentTop } = parentElement.getBoundingClientRect();
-	const { top, left } = blockElement.getBoundingClientRect();
+	const { top, right, bottom, left } = blockElement.getBoundingClientRect();
 
 	return {
 		top: top - parentTop,
+		right: right - parentLeft,
+		bottom: bottom - parentTop,
 		left: left - parentLeft,
 	};
 };

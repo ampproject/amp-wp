@@ -20,7 +20,7 @@ import { withSafeTimeout, compose } from '@wordpress/compose';
 import withSnapTargets from '../higher-order/with-snap-targets';
 import {
 	getPixelsFromPercentage,
-	findClosestSnap,
+	findClosestSnap, getRelativeElementPosition,
 } from '../../helpers';
 import {
 	STORY_PAGE_INNER_WIDTH,
@@ -94,8 +94,7 @@ class Draggable extends Component {
 			snapLines,
 			clearSnapLines,
 			setSnapLines,
-			parentBlockOffsetTop,
-			parentBlockOffsetLeft,
+			parentBlockElement,
 		} = this.props;
 
 		const top = parseInt( this.cloneWrapper.style.top ) + event.clientY - this.cursorTop;
@@ -106,20 +105,15 @@ class Draggable extends Component {
 		}
 
 		// Get the correct dimensions in case the block is rotated, as rotation is only applied to the clone's inner element(s).
-		const dimensions = this.cloneWrapper.querySelector( '.wp-block' ).getBoundingClientRect();
+		const blockElement = this.cloneWrapper.querySelector( '.wp-block' );
 
 		// We calculate with the block's actual dimensions relative to the page it's on.
-		let {
+		const {
 			top: actualTop,
 			right: actualRight,
 			bottom: actualBottom,
 			left: actualLeft,
-		} = dimensions;
-
-		actualTop -= parentBlockOffsetTop;
-		actualRight -= parentBlockOffsetLeft;
-		actualBottom -= parentBlockOffsetTop;
-		actualLeft -= parentBlockOffsetLeft;
+		} = getRelativeElementPosition( blockElement, parentBlockElement );
 
 		const horizontalCenter = actualLeft + ( ( actualRight - actualLeft ) / 2 );
 		const verticalCenter = actualTop + ( ( actualBottom - actualTop ) / 2 );
@@ -340,8 +334,7 @@ Draggable.propTypes = {
 	hideSnapLines: PropTypes.func.isRequired,
 	setSnapLines: PropTypes.func.isRequired,
 	clearSnapLines: PropTypes.func.isRequired,
-	parentBlockOffsetTop: PropTypes.number.isRequired,
-	parentBlockOffsetLeft: PropTypes.number.isRequired,
+	parentBlockElement: PropTypes.object.isRequired,
 };
 
 const enhance = compose(
