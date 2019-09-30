@@ -70,7 +70,7 @@ const CallToActionEdit = ( {
 		const settings = getSettings();
 
 		return settings.colors;
-	} );
+	}, [] );
 
 	const appliedBackgroundColor = getBackgroundColorWithOpacity( colors, backgroundColor, customBackgroundColor, opacity );
 
