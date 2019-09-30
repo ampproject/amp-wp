@@ -402,12 +402,13 @@ export const getContentLengthFromUrl = async ( url ) => {
 /**
  * Sets the featured image, on selecting it in the Media Library.
  *
- * @param {string} url             Image URL.
- * @param {number} id              Attachment ID.
- * @param {number} width           Image width.
- * @param {number} height          Image height.
- * @param {Function} onSelect      A function in the MediaUpload component called on selecting the image.
- * @param {Function} dispatchImage A function to dispatch the change in image to the store.
+ * @param {Object} args Arguments.
+ * @param {string} args.url Image URL.
+ * @param {number} args.id Attachment ID.
+ * @param {number} args.width Image width.
+ * @param {number} args.height Image height.
+ * @param {Function} args.onSelect A function in the MediaUpload component called on selecting the image.
+ * @param {Function} args.dispatchImage A function to dispatch the change in image to the store.
  */
 export const setImageFromURL = ( { url, id, width, height, onSelect, dispatchImage } ) => {
 	const data = {};
