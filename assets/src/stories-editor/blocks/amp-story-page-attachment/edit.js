@@ -42,7 +42,7 @@ const PageAttachmentEdit = ( {
 		return settings.colors;
 	} );
 
-	const getWrapperAttributes = () => {
+	useEffect( () => {
 		const appliedBackgroundColor = getBackgroundColorWithOpacity( colors, backgroundColor, customBackgroundColor, opacity );
 
 		const attachmentClass = classnames( 'amp-page-attachment-content', {
@@ -54,18 +54,10 @@ const PageAttachmentEdit = ( {
 			backgroundColor: appliedBackgroundColor,
 		};
 
-		return {
-			style: attachmentStyle,
-			attachmentClass,
-		};
-	};
-
-	useEffect( () => {
-		const { style, attachmentClass } = getWrapperAttributes();
-		const newAttributes = { wrapperStyle: style };
+		const newAttributes = { wrapperStyle: attachmentStyle };
 		newAttributes.attachmentClass = attachmentClass;
 		setAttributes( newAttributes );
-	}, [ backgroundColor, customBackgroundColor, textColor ] );
+	}, [ colors, backgroundColor, customBackgroundColor, opacity, textColor, setAttributes ] );
 
 	return (
 		<>
