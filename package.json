@@ -41,7 +41,7 @@
     "@wordpress/components": "8.3.1",
     "@wordpress/compose": "3.7.0",
     "@wordpress/core-data": "2.7.0",
-    "@wordpress/data": "4.9.0",
+    "@wordpress/data": "4.9.1",
     "@wordpress/date": "3.5.0",
     "@wordpress/dom-ready": "2.5.0",
     "@wordpress/e2e-test-utils": "2.4.1",
