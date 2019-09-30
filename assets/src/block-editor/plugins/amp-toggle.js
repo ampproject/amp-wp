@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import { errorMessages, isStandardMode } from 'amp-block-editor-data';
+import { errorMessages } from 'amp-block-editor-data';
 import PropTypes from 'prop-types';
 
 /**
@@ -19,7 +19,6 @@ import { compose, withInstanceId } from '@wordpress/compose';
  * Internal dependencies
  */
 import { isAMPEnabled } from '../helpers';
-import { AMPPreview } from '../components';
 
 /**
  * Adds an 'Enable AMP' toggle to the block editor 'Status & Visibility' section.
@@ -61,13 +60,6 @@ function AMPToggle( { isEnabled, onChange } ) {
 					)
 				}
 			</PluginPostStatusInfo>
-			{
-				isEnabled && ! isStandardMode && (
-					<PluginPostStatusInfo>
-						<AMPPreview />
-					</PluginPostStatusInfo>
-				)
-			}
 		</>
 	);
 }

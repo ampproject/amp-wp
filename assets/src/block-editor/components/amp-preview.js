@@ -8,8 +8,8 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { Component, renderToString } from '@wordpress/element';
-import { Button } from '@wordpress/components';
+import { Component, createRef, renderToString } from '@wordpress/element';
+import { Icon, IconButton } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { withSelect, withDispatch } from '@wordpress/data';
 import { DotTip } from '@wordpress/nux';
@@ -19,8 +19,10 @@ import { addQueryArgs } from '@wordpress/url';
 /**
  * Internal dependencies
  */
-import ampIcon from './amp-black-icon';
+import ampBlackIcon from '../../../images/amp-black-icon.svg';
+import ampFilledIcon from '../../../images/amp-icon.svg';
 import { isAMPEnabled } from '../helpers';
+import { POST_PREVIEW_CLASS } from '../constants';
 
 /**
  * Writes the message and graphic in the new preview window that was opened.
@@ -34,7 +36,10 @@ import { isAMPEnabled } from '../helpers';
 function writeInterstitialMessage( targetDocument ) {
 	let markup = renderToString(
 		<div className="editor-post-preview-button__interstitial-message">
-			{ ampIcon }
+			<Icon
+				icon={ ampBlackIcon }
+				viewBox="0 0 98 98"
+			/>
 			<p>{ __( 'Generating AMP preview…', 'amp' ) }</p>
 		</div>
 	);
@@ -73,8 +78,8 @@ function writeInterstitialMessage( targetDocument ) {
 				}
 			}
 			.editor-post-preview-button__interstitial-message svg {
-				width: 192px;
-				height: 192px;
+				width: 198px;
+				height: 198px;
 				stroke: #555d66;
 				stroke-width: 0.75;
 			}
@@ -100,7 +105,10 @@ function writeInterstitialMessage( targetDocument ) {
 }
 
 /**
- * Forked from the Core component <PostPreviewButton>.
+ * A 'Preview AMP' button, forked from the Core 'Preview' button: <PostPreviewButton>.
+ *
+ * Rendered into the DOM with renderPreviewButton() in helpers/index.js.
+ * This also moves the (non-AMP) 'Preview' button to before this, if it's not already there.
  *
  * @see https://github.com/WordPress/gutenberg/blob/95e769df1f82f6b0ef587d81af65dd2f48cd1c38/packages/editor/src/components/post-preview-button/index.js
  */
@@ -113,6 +121,8 @@ class AMPPreview extends Component {
 	constructor( ...args ) {
 		super( ...args );
 		this.openPreviewWindow = this.openPreviewWindow.bind( this );
+		this.moveButton = this.moveButton.bind( this );
+		this.buttonRef = createRef();
 	}
 
 	/**
@@ -128,6 +138,23 @@ class AMPPreview extends Component {
 		// unintentional forceful redirects.
 		if ( previewLink && ! prevProps.previewLink ) {
 			this.setPreviewWindowLink( previewLink );
+		}
+
+		this.moveButton();
+	}
+
+	/**
+	 * Moves the (non-AMP) 'Preview' button to before this 'Preview AMP' button, if it's not there already.
+	 */
+	moveButton() {
+		const buttonWrapper = get( this, [ 'buttonRef', 'current', 'parentNode' ], false );
+		if ( ! buttonWrapper ) {
+			return;
+		}
+
+		if ( ! buttonWrapper.previousSibling || ! buttonWrapper.previousSibling.classList.contains( POST_PREVIEW_CLASS ) ) {
+			const postPreviewButton = document.querySelector( `.${ POST_PREVIEW_CLASS }` );
+			buttonWrapper.parentNode.insertBefore( postPreviewButton, buttonWrapper );
 		}
 	}
 
@@ -206,18 +233,21 @@ class AMPPreview extends Component {
 		// changes that were autosaved since the post was last published. Otherwise,
 		// just link to the post's URL.
 		const href = previewLink || currentPostLink;
+		const buttonIcon = <Icon viewBox="0 0 62 62" icon={ ampFilledIcon } />;
 
 		return (
 			isEnabled && ! errorMessages.length && ! isStandardMode && (
-				<Button
+				<IconButton
+					icon={ buttonIcon }
 					isLarge
-					className="editor-post-preview"
+					className="amp-editor-post-preview"
 					href={ href }
+					label={ __( 'Preview AMP', 'amp' ) }
 					target={ this.getWindowTarget() }
 					disabled={ ! isSaveable }
 					onClick={ this.openPreviewWindow }
+					ref={ this.buttonRef }
 				>
-					{ __( 'AMP Preview', 'amp' ) }
 					<span className="screen-reader-text">
 						{
 							/* translators: accessibility text */
@@ -227,7 +257,7 @@ class AMPPreview extends Component {
 					<DotTip tipId="core/editor.preview">
 						{ __( 'Click “Preview” to load a preview of this page in AMP, so you can make sure you’re happy with your blocks.', 'amp' ) }
 					</DotTip>
-				</Button>
+				</IconButton>
 			)
 		);
 	}

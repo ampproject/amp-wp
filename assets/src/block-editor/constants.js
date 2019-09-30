@@ -13,3 +13,6 @@ export const MEDIA_BLOCKS = [
 
 export const DEFAULT_WIDTH = 608; // Max-width in the editor.
 export const DEFAULT_HEIGHT = 400;
+
+export const AMP_PREVIEW_BUTTON_WRAPPER_ID = 'amp-wrapper-post-preview';
+export const POST_PREVIEW_CLASS = 'editor-post-preview';
