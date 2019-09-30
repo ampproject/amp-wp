@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { IconButton } from '@wordpress/components';
-import { useEffect } from '@wordpress/element';
+import { useEffect, useLayoutEffect, useRef } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 
 /**
@@ -19,43 +19,49 @@ const TOTAL_PAGE_MARGIN = 50;
 const PAGE_BORDER = 1;
 
 const EditorCarousel = () => {
-	const { pages, currentPage, currentIndex, previousPage, nextPage, isReordering } = useSelect( ( select ) => {
+	const currentPage = useSelect( ( select ) => select( 'amp/story' ).getCurrentPage() );
+
+	const {
+		pages,
+		currentIndex,
+		previousPage,
+		nextPage,
+		isReordering,
+	} = useSelect( ( select ) => {
 		const {
 			getBlockOrder,
 			getBlocksByClientId,
 			getAdjacentBlockClientId,
 		} = select( 'core/block-editor' );
-		const { getCurrentPage, isReordering: _isReordering } = select( 'amp/story' );
+		const { isReordering: _isReordering } = select( 'amp/story' );
 
-		const _currentPage = getCurrentPage();
 		const _pages = getBlocksByClientId( getBlockOrder() );
 
 		const index = _pages.findIndex( ( { clientId } ) => clientId === currentPage );
 
 		return {
 			pages: _pages,
-			currentPage: _currentPage,
 			currentIndex: Math.max( 0, index ), // Prevent -1 from being used for calculation.
-			previousPage: getCurrentPage() ? getAdjacentBlockClientId( _currentPage, -1 ) : null,
-			nextPage: getCurrentPage() ? getAdjacentBlockClientId( _currentPage, 1 ) : null,
+			previousPage: currentPage ? getAdjacentBlockClientId( currentPage, -1 ) : null,
+			nextPage: currentPage ? getAdjacentBlockClientId( currentPage, 1 ) : null,
 			isReordering: _isReordering(),
 		};
+	}, [ currentPage ] );
+
+	const wrapper = useRef( null );
+
+	useEffect( () => {
+		wrapper.current = document.querySelector( '#amp-story-controls + .block-editor-block-list__layout' );
 	}, [] );
 
 	useEffect( () => {
-		const wrapper = document.querySelector( '#amp-story-controls + .block-editor-block-list__layout' );
-
-		if ( ! wrapper ) {
-			return;
-		}
-
 		if ( isReordering ) {
-			wrapper.style.display = 'none';
+			wrapper.current.style.display = 'none';
 		} else {
-			wrapper.style.display = '';
-			wrapper.style.transform = `translateX(calc(50% - ${ PAGE_BORDER }px - ${ ( STORY_PAGE_INNER_WIDTH + TOTAL_PAGE_MARGIN ) / 2 }px - ${ ( currentIndex ) * TOTAL_PAGE_MARGIN }px - ${ currentIndex * STORY_PAGE_INNER_WIDTH }px))`;
+			wrapper.current.style.display = '';
+			wrapper.current.style.transform = `translateX(calc(50% - ${ PAGE_BORDER }px - ${ ( STORY_PAGE_INNER_WIDTH + TOTAL_PAGE_MARGIN ) / 2 }px - ${ ( currentIndex ) * TOTAL_PAGE_MARGIN }px - ${ currentIndex * STORY_PAGE_INNER_WIDTH }px))`;
 		}
-	}, [ currentIndex, isReordering ] );
+	}, [ currentIndex, isReordering, wrapper ] );
 
 	const { setCurrentPage } = useDispatch( 'amp/story' );
 	const { selectBlock } = useDispatch( 'core/block-editor' );
