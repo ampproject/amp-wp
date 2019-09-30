@@ -238,7 +238,7 @@ class EnhancedResizableBox extends Component {
 						}
 					}
 
-					// Is it's not min width / height yet, assign lastDeltaH and lastDeltaW for position calculation.
+					// If it's not min width / height yet, assign lastDeltaH and lastDeltaW for position calculation.
 					if ( minHeight < appliedHeight ) {
 						lastDeltaH = deltaH;
 					}
@@ -246,13 +246,14 @@ class EnhancedResizableBox extends Component {
 						lastDeltaW = deltaW;
 					}
 
+					// Get the correct dimensions in case the block is rotated, as rotation is only applied to the clone's inner element(s).
 					// We calculate with the block's actual dimensions relative to the page it's on.
 					const {
 						top: actualTop,
 						right: actualRight,
 						bottom: actualBottom,
 						left: actualLeft,
-					} = getRelativeElementPosition( blockElement, parentBlockElement );
+					} = getRelativeElementPosition( blockElement.querySelector( '.wp-block' ), parentBlockElement );
 
 					const horizontalCenter = actualLeft + ( ( actualRight - actualLeft ) / 2 );
 					const verticalCenter = actualTop + ( ( actualBottom - actualTop ) / 2 );
