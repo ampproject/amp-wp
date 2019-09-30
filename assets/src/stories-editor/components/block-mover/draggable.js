@@ -105,8 +105,6 @@ class Draggable extends Component {
 			return;
 		}
 
-		const snappingEnabled = ! event.getModifierState( 'Alt' );
-
 		// Get the correct dimensions in case the block is rotated, as rotation is only applied to the clone's inner element(s).
 		const dimensions = this.cloneWrapper.querySelector( '.wp-block' ).getBoundingClientRect();
 
@@ -128,36 +126,24 @@ class Draggable extends Component {
 
 		const newSnapLines = [];
 
+		const snappingEnabled = ! event.getModifierState( 'Alt' );
+
 		if ( snappingEnabled ) {
-			const horizontalLeftSnap = findClosestSnap( actualLeft, this.horizontalSnapKeys, BLOCK_DRAGGING_SNAP_GAP );
-			const horizontalRightSnap = findClosestSnap( actualRight, this.horizontalSnapKeys, BLOCK_DRAGGING_SNAP_GAP );
-			const horizontalCenterSnap = findClosestSnap( horizontalCenter, this.horizontalSnapKeys, BLOCK_DRAGGING_SNAP_GAP );
-			const verticalTopSnap = findClosestSnap( actualTop, this.verticalSnapKeys, BLOCK_DRAGGING_SNAP_GAP );
-			const verticalBottomSnap = findClosestSnap( actualBottom, this.verticalSnapKeys, BLOCK_DRAGGING_SNAP_GAP );
-			const verticalCenterSnap = findClosestSnap( verticalCenter, this.verticalSnapKeys, BLOCK_DRAGGING_SNAP_GAP );
+			const findSnaps = ( snapKeys, ...values ) => {
+				return values
+					.map( ( value ) => findClosestSnap( value, snapKeys, BLOCK_DRAGGING_SNAP_GAP ) )
+					.filter( ( value ) => value !== null );
+			};
 
-			if ( horizontalLeftSnap !== null ) {
-				newSnapLines.push( ...this.horizontalSnaps[ horizontalLeftSnap ] );
+			const _horizontalSnaps = findSnaps( this.horizontalSnapKeys, actualLeft, actualRight, horizontalCenter );
+			const _verticalSnaps = findSnaps( this.verticalSnapKeys, actualTop, actualBottom, verticalCenter );
+
+			for ( const snap of _horizontalSnaps ) {
+				newSnapLines.push( ...this.horizontalSnaps[ snap ] );
 			}
 
-			if ( horizontalRightSnap !== null ) {
-				newSnapLines.push( ...this.horizontalSnaps[ horizontalRightSnap ] );
-			}
-
-			if ( horizontalCenterSnap !== null ) {
-				newSnapLines.push( ...this.horizontalSnaps[ horizontalCenterSnap ] );
-			}
-
-			if ( verticalTopSnap !== null ) {
-				newSnapLines.push( ...this.verticalSnaps[ verticalTopSnap ] );
-			}
-
-			if ( verticalBottomSnap !== null ) {
-				newSnapLines.push( ...this.verticalSnaps[ verticalBottomSnap ] );
-			}
-
-			if ( verticalCenterSnap !== null ) {
-				newSnapLines.push( ...this.verticalSnaps[ verticalCenterSnap ] );
+			for ( const snap of _verticalSnaps ) {
+				newSnapLines.push( ...this.verticalSnaps[ snap ] );
 			}
 		}
 

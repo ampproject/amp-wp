@@ -29,7 +29,7 @@ import {
 } from './helpers';
 import {
 	TEXT_BLOCK_PADDING,
-	BLOCK_DRAGGING_SNAP_GAP,
+	BLOCK_RESIZING_SNAP_GAP,
 } from '../../constants';
 
 let lastSeenX = 0,
@@ -185,8 +185,6 @@ class EnhancedResizableBox extends Component {
 					onResizeStart();
 				} }
 				onResize={ ( event, direction, element ) => { // eslint-disable-line complexity
-					const newSnapLines = [];
-
 					const { deltaW, deltaH } = getResizedWidthAndHeight( event, angle, lastSeenX, lastSeenY, direction );
 
 					// Handle case where media is inserted from URL.
@@ -267,38 +265,26 @@ class EnhancedResizableBox extends Component {
 					const horizontalCenter = actualLeft + ( ( actualRight - actualLeft ) / 2 );
 					const verticalCenter = actualTop + ( ( actualBottom - actualTop ) / 2 );
 
+					const newSnapLines = [];
+
 					const snappingEnabled = ! event.getModifierState( 'Alt' );
 
 					if ( snappingEnabled ) {
-						const horizontalLeftSnap = findClosestSnap( actualLeft, this.horizontalSnapKeys, BLOCK_DRAGGING_SNAP_GAP );
-						const horizontalRightSnap = findClosestSnap( actualRight, this.horizontalSnapKeys, BLOCK_DRAGGING_SNAP_GAP );
-						const horizontalCenterSnap = findClosestSnap( horizontalCenter, this.horizontalSnapKeys, BLOCK_DRAGGING_SNAP_GAP );
-						const verticalTopSnap = findClosestSnap( actualTop, this.verticalSnapKeys, BLOCK_DRAGGING_SNAP_GAP );
-						const verticalBottomSnap = findClosestSnap( actualBottom, this.verticalSnapKeys, BLOCK_DRAGGING_SNAP_GAP );
-						const verticalCenterSnap = findClosestSnap( verticalCenter, this.verticalSnapKeys, BLOCK_DRAGGING_SNAP_GAP );
+						const findSnaps = ( snapKeys, ...values ) => {
+							return values
+								.map( ( value ) => findClosestSnap( value, snapKeys, BLOCK_RESIZING_SNAP_GAP ) )
+								.filter( ( value ) => value !== null );
+						};
 
-						if ( horizontalLeftSnap !== null ) {
-							newSnapLines.push( ...this.horizontalSnaps[ horizontalLeftSnap ] );
+						const _horizontalSnaps = findSnaps( this.horizontalSnapKeys, actualLeft, actualRight, horizontalCenter );
+						const _verticalSnaps = findSnaps( this.verticalSnapKeys, actualTop, actualBottom, verticalCenter );
+
+						for ( const snap of _horizontalSnaps ) {
+							newSnapLines.push( ...this.horizontalSnaps[ snap ] );
 						}
 
-						if ( horizontalRightSnap !== null ) {
-							newSnapLines.push( ...this.horizontalSnaps[ horizontalRightSnap ] );
-						}
-
-						if ( horizontalCenterSnap !== null ) {
-							newSnapLines.push( ...this.horizontalSnaps[ horizontalCenterSnap ] );
-						}
-
-						if ( verticalTopSnap !== null ) {
-							newSnapLines.push( ...this.verticalSnaps[ verticalTopSnap ] );
-						}
-
-						if ( verticalBottomSnap !== null ) {
-							newSnapLines.push( ...this.verticalSnaps[ verticalBottomSnap ] );
-						}
-
-						if ( verticalCenterSnap !== null ) {
-							newSnapLines.push( ...this.verticalSnaps[ verticalCenterSnap ] );
+						for ( const snap of _verticalSnaps ) {
+							newSnapLines.push( ...this.verticalSnaps[ snap ] );
 						}
 					}
 
