@@ -153,39 +153,38 @@ const TextBlockEdit = ( props ) => {
 				'with-line-height': ampFitText,
 				'is-empty-draggable-text': ! isEditing && ! content.length,
 			} ) } style={ wrapperStyle } >
-				{ isEditing &&
-				<RichText
-					wrapperClassName={ textWrapperClassName }
-					tagName="p"
-					// Ensure line breaks are normalised to HTML.
-					value={ content }
-					onChange={ ( nextContent ) => setAttributes( { content: nextContent } ) }
-					// The 2 following lines are necessary for pasting to work.
-					onReplace={ onReplace }
-					onSplit={ () => {} }
-					style={ textStyle }
-					className={ classnames( className, textClassNames ) }
-					placeholder={ placeholder || __( 'Write text…', 'amp' ) }
-				/>
-				}
-				{ ! isEditing &&
-				<DraggableText
-					blockClass="wp-block-amp-story-text"
-					blockElementId={ `block-${ clientId }` }
-					clientId={ clientId }
-					name={ name }
-					isEditing={ isEditing }
-					isDraggable={ ! isPartOfMultiSelection }
-					isSelected={ isSelected }
-					hasOverlay={ hasOverlay }
-					toggleIsEditing={ setIsEditing }
-					toggleOverlay={ setHasOverlay }
-					text={ content }
-					textStyle={ textStyle }
-					textWrapperClass={ classnames( className + ' block-editor-rich-text__editable editor-rich-text__editable', textClassNames ) }
-					placeholder={ placeholder || __( 'Write text…', 'amp' ) }
-				/>
-				}
+				{ isEditing ? (
+					<RichText
+						wrapperClassName={ textWrapperClassName }
+						tagName="p"
+						// Ensure line breaks are normalised to HTML.
+						value={ content }
+						onChange={ ( nextContent ) => setAttributes( { content: nextContent } ) }
+						// The 2 following lines are necessary for pasting to work.
+						onReplace={ onReplace }
+						onSplit={ () => {} }
+						style={ textStyle }
+						className={ classnames( className, textClassNames ) }
+						placeholder={ placeholder || __( 'Write text…', 'amp' ) }
+					/>
+				) : (
+					<DraggableText
+						blockClass="wp-block-amp-story-text"
+						blockElementId={ `block-${ clientId }` }
+						clientId={ clientId }
+						name={ name }
+						isEditing={ isEditing }
+						isDraggable={ ! isPartOfMultiSelection }
+						isSelected={ isSelected }
+						hasOverlay={ hasOverlay }
+						toggleIsEditing={ setIsEditing }
+						toggleOverlay={ setHasOverlay }
+						text={ content }
+						textStyle={ textStyle }
+						textWrapperClass={ classnames( className + ' block-editor-rich-text__editable editor-rich-text__editable', textClassNames ) }
+						placeholder={ placeholder || __( 'Write text…', 'amp' ) }
+					/>
+				) }
 			</div>
 		</>
 	);

@@ -91,7 +91,7 @@ const CallToActionEdit = ( {
 		<>
 			<div className="amp-story-cta-button" id={ `amp-story-cta-button-${ clientId }` } style={ { top: `${ btnPositionTop }%`, left: `${ btnPositionLeft }%` } } >
 				<div className={ className } style={ { backgroundColor: appliedBackgroundColor } }>
-					{ isEditing && (
+					{ isEditing ? (
 						<RichText
 							placeholder={ placeholder }
 							value={ text }
@@ -99,24 +99,23 @@ const CallToActionEdit = ( {
 							className={ textWrapperClass }
 							style={ textStyle }
 						/>
+					) : (
+						<DraggableText
+							blockElementId={ `amp-story-cta-button-${ clientId }` }
+							clientId={ clientId }
+							name={ name }
+							isDraggable={ true }
+							isEditing={ isEditing }
+							isSelected={ isSelected }
+							hasOverlay={ hasOverlay }
+							toggleIsEditing={ setIsEditing }
+							toggleOverlay={ setHasOverlay }
+							text={ text }
+							textStyle={ textStyle }
+							textWrapperClass={ textWrapperClass }
+							placeholder={ placeholder }
+						/>
 					) }
-					{ ! isEditing &&
-					<DraggableText
-						blockElementId={ `amp-story-cta-button-${ clientId }` }
-						clientId={ clientId }
-						name={ name }
-						isDraggable={ true }
-						isEditing={ isEditing }
-						isSelected={ isSelected }
-						hasOverlay={ hasOverlay }
-						toggleIsEditing={ setIsEditing }
-						toggleOverlay={ setHasOverlay }
-						text={ text }
-						textStyle={ textStyle }
-						textWrapperClass={ textWrapperClass }
-						placeholder={ placeholder }
-					/>
-					}
 				</div>
 				{ isSelected && isEditing && (
 					<form
