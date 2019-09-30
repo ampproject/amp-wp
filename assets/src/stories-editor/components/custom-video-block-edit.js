@@ -237,7 +237,6 @@ const CustomVideoBlockEdit = ( { instanceId, isSelected, className, attributes, 
 		// sets the block's attribute and updates the edit component from the
 		// selected media, then switches off the editing UI
 		setAttributes( { src: mediaObj.url, id: mediaObj.id, poster: undefined } );
-		this.setState( { editing: false, duration: null, videoSize: null } );
 		setIsEditing( false );
 		setDuration( null );
 		setVideoSize( null );
