@@ -347,7 +347,11 @@ class AMP_Post_Template {
 			return;
 		}
 
-		$featured_id = get_post_thumbnail_id( $post_id );
+		$featured_id    = get_post_thumbnail_id( $post_id );
+		$featured_image = get_post( $featured_id );
+		if ( ! $featured_image ) {
+			return;
+		}
 
 		// If an image with the same ID as the featured image exists in the content, skip the featured image markup.
 		// Prevents duplicate images, which is especially problematic for photo blogs.
@@ -357,8 +361,6 @@ class AMP_Post_Template {
 			|| false !== strpos( $post_content, 'attachment_' . $featured_id ) ) {
 			return;
 		}
-
-		$featured_image = get_post( $featured_id );
 
 		$dom    = AMP_DOM_Utils::get_dom_from_content( $featured_html );
 		$assets = AMP_Content_Sanitizer::sanitize_document(
