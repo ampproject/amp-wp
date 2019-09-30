@@ -14,7 +14,7 @@ import {
 	BlockControls,
 	AlignmentToolbar,
 } from '@wordpress/block-editor';
-import { select } from '@wordpress/data';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -101,7 +101,13 @@ const TextBlockEdit = ( props ) => {
 
 	const userFontSize = fontSize && fontSize.size ? `${ fontSize.size }px` : undefined;
 
-	const { colors } = select( 'core/block-editor' ).getSettings();
+	const colors = useSelect( ( select ) => {
+		const { getSettings } = select( 'core/block-editor' );
+		const settings = getSettings();
+
+		return settings.colors;
+	}, [] );
+
 	const appliedBackgroundColor = getBackgroundColorWithOpacity( colors, backgroundColor, customBackgroundColor, opacity );
 
 	const wrapperStyle = { backgroundColor: appliedBackgroundColor };
