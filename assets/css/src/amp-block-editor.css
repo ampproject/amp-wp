@@ -49,4 +49,6 @@
 .wp-core-ui .editor-post-preview {
 	border-top-right-radius: 0;
 	border-bottom-right-radius: 0;
+	padding-left: 10px;
+	padding-right: 10px;
 }
