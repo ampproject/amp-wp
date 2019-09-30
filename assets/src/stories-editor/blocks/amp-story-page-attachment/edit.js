@@ -40,7 +40,7 @@ const PageAttachmentEdit = ( {
 		const settings = getSettings();
 
 		return settings.colors;
-	} );
+	}, [] );
 
 	useEffect( () => {
 		const appliedBackgroundColor = getBackgroundColorWithOpacity( colors, backgroundColor, customBackgroundColor, opacity );
