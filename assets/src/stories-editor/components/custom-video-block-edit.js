@@ -138,7 +138,7 @@ const CustomVideoBlockEdit = ( { instanceId, isSelected, className, attributes, 
 	}, [ src ] );
 
 	useEffect( () => {
-		if ( ! ampAriaLabel ) {
+		if ( ! ampAriaLabel && media ) {
 			/*
 			 * New video set from media library and we don't have an aria label already,
 			 * use alt text or title from media object.
@@ -149,7 +149,7 @@ const CustomVideoBlockEdit = ( { instanceId, isSelected, className, attributes, 
 
 		if ( videoFeaturedImage ) {
 			setAttributes( { poster: videoFeaturedImage.source_url } );
-		} else if ( ! media.featured_media && ! isExtractingPoster ) {
+		} else if ( media && ! media.featured_media && ! isExtractingPoster ) {
 			/*
 			 * The video has changed, and its media object has been loaded already.
 			 *
