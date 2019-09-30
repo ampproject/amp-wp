@@ -15,18 +15,12 @@ import { useState, useEffect } from '@wordpress/element';
  */
 import { BlockPreview } from '../';
 
-const TemplatePreview = ( { item } ) => {
+const TemplatePreview = ( { item, setTimeout } ) => {
 	const [ shouldLoad, setShouldLoad ] = useState( false );
 
-	useEffect( () => {
-		if ( ! shouldLoad ) {
-			// @todo Look into React Concurrent mode to replace this once it gets available.
-			// Set timeout to cause a small latency between loading the templates, otherwise they all try to load instantly and cause a lag.
-			this.props.setTimeout( () => {
-				setShouldLoad( true );
-			}, 100 );
-		}
-	}, [ shouldLoad ] );
+	// @todo Look into React Concurrent mode to replace this once it gets available.
+	// Set timeout to cause a small latency between loading the templates, otherwise they all try to load instantly and cause a lag.
+	useEffect( () => setTimeout( setShouldLoad, 100, true ), [ setTimeout ] );
 
 	if ( ! shouldLoad ) {
 		return <Spinner />;
