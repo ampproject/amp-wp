@@ -57,7 +57,7 @@ describe( 'isBlockAllowedOnPage', () => {
 		expect( result ).toBe( false );
 	} );
 
-	it( 'should return true only iff element is allowed by both type and block list', () => {
+	it( 'should return true iff element is allowed by both type and block list', () => {
 		mockCanInsertBlockType.mockImplementationOnce( () => true );
 		mockGetBlockListSettings.mockImplementationOnce( () => ( { allowedBlocks: [ BLOCK_NAME ] } ) );
 
