@@ -334,7 +334,7 @@ Draggable.propTypes = {
 	hideSnapLines: PropTypes.func.isRequired,
 	setSnapLines: PropTypes.func.isRequired,
 	clearSnapLines: PropTypes.func.isRequired,
-	parentBlockElement: PropTypes.object.isRequired,
+	parentBlockElement: PropTypes.object,
 };
 
 const enhance = compose(

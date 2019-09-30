@@ -36,8 +36,7 @@ const applyWithSelect = withSelect( ( select, { clientId } ) => {
 	const defaultData = {
 		horizontalSnaps: [],
 		verticalSnaps: [],
-		parentBlockOffsetTop: 0,
-		parentBlockOffsetLeft: 0,
+		parentBlockElement: null,
 	};
 
 	if ( getCurrentPage() !== parentBlock ) {
