@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { useState, useEffect, useRef } from '@wordpress/element';
+import { useState, useEffect, useRef, useCallback } from '@wordpress/element';
 import { withSpokenMessages, Button } from '@wordpress/components';
 import { ESCAPE, LEFT, RIGHT, ENTER } from '@wordpress/keycodes';
 import { __, sprintf } from '@wordpress/i18n';
@@ -25,20 +25,6 @@ const RotatableBox = ( { angle, initialAngle, blockElementId, className, speak, 
 	const elementRef = useRef( null );
 
 	useEffect( () => {
-		elementRef.current = document.getElementById( blockElementId );
-
-		document.addEventListener( 'mousemove', onMouseMove );
-		document.addEventListener( 'mouseup', onMouseUp );
-		document.addEventListener( 'keyUp', onKeyUp );
-
-		return () => {
-			document.removeEventListener( 'mousemove', onMouseMove );
-			document.removeEventListener( 'mouseup', onMouseUp );
-			document.removeEventListener( 'keyUp', onKeyUp );
-		};
-	}, [ blockElementId ] );
-
-	useEffect( () => {
 		elementRef.current.style.transform = `rotate(${ currentAngle }deg)`;
 	}, [ currentAngle ] );
 
@@ -46,7 +32,7 @@ const RotatableBox = ( { angle, initialAngle, blockElementId, className, speak, 
 		elementRef.current.classList.toggle( 'is-rotating', isRotating );
 	}, [ isRotating ] );
 
-	const onKeyUp = ( e ) => {
+	const onKeyUp = useCallback( ( e ) => {
 		if ( ! isRotating ) {
 			return;
 		}
@@ -86,7 +72,7 @@ const RotatableBox = ( { angle, initialAngle, blockElementId, className, speak, 
 				onRotateStop( e );
 			}
 		}
-	};
+	}, [ currentAngle, initialAngle, onRotate, onRotateStop, isRotating, speak ] );
 
 	const onMouseDown = ( e ) => {
 		if ( isRotating ) {
@@ -108,7 +94,7 @@ const RotatableBox = ( { angle, initialAngle, blockElementId, className, speak, 
 		}
 	};
 
-	const onMouseMove = ( e ) => {
+	const onMouseMove = useCallback( ( e ) => {
 		if ( ! isRotating ) {
 			return;
 		}
@@ -137,9 +123,9 @@ const RotatableBox = ( { angle, initialAngle, blockElementId, className, speak, 
 		if ( onRotate ) {
 			onRotate( e, newAngle );
 		}
-	};
+	}, [ currentAngle, isRotating, snap, snapGap, onRotate ] );
 
-	const onMouseUp = ( e ) => {
+	const onMouseUp = useCallback( ( e ) => {
 		if ( ! isRotating ) {
 			return;
 		}
@@ -151,7 +137,21 @@ const RotatableBox = ( { angle, initialAngle, blockElementId, className, speak, 
 		if ( onRotateStop ) {
 			onRotateStop( e, currentAngle );
 		}
-	};
+	}, [ currentAngle, isRotating, onRotateStop ] );
+
+	useEffect( () => {
+		elementRef.current = document.getElementById( blockElementId );
+
+		document.addEventListener( 'mousemove', onMouseMove );
+		document.addEventListener( 'mouseup', onMouseUp );
+		document.addEventListener( 'keyUp', onKeyUp );
+
+		return () => {
+			document.removeEventListener( 'mousemove', onMouseMove );
+			document.removeEventListener( 'mouseup', onMouseUp );
+			document.removeEventListener( 'keyUp', onKeyUp );
+		};
+	}, [ blockElementId, onMouseMove, onMouseUp, onKeyUp ] );
 
 	return (
 		<div
