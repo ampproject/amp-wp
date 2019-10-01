@@ -69,10 +69,13 @@ class Draggable extends Component {
 	 * @param {Object} event The non-custom DragEvent.
 	 */
 	onDragEnd = ( event ) => {
-		const { onNeighborDrop, blockName, setTimeout, onDragEnd = noop } = this.props;
+		const { onNeighborDrop, onNeighborHover, blockName, setTimeout, onDragEnd = noop } = this.props;
 		if ( event ) {
 			event.preventDefault();
 		}
+
+		// Make sure to reset hover
+		onNeighborHover( 0, true );
 
 		// Attempt drop on neighbor if offset
 		if ( this.pageOffset !== 0 ) {
@@ -90,7 +93,6 @@ class Draggable extends Component {
 				[ xAttribute ]: x,
 				[ yAttribute ]: y,
 			};
-
 			onNeighborDrop( this.pageOffset, newAttributes );
 		}
 

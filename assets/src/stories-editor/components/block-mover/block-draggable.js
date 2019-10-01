@@ -13,6 +13,7 @@ import PropTypes from 'prop-types';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
 import { cloneBlock } from '@wordpress/blocks';
+import { useRef } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -28,34 +29,45 @@ const BlockDraggable = ( { children, clientId, blockName, rootClientId, blockEle
 		srcClientId: clientId,
 	};
 
-	// This holds the currently highlighted element
-	const currentHoverElement = { pageId: null, current: null };
+	// This holds the currently highlighted element, if any
+	const hoverElement = useRef( { pageId: null, element: null, classes: [] } );
 
 	/**
 	 * Highlight neighboring page on hover. Neigboring page is given by offset.
 	 *
 	 * @param {number} offset  Integer specifying offset from current page - e.g. -2 on page 3 will return id of page 1. Page indices are zero-based.
+	 * @param {boolean} clear  Flag used to clear highlighting without making any new highlighting
 	 */
-	const onNeighborHover = ( offset ) => {
+	const onNeighborHover = ( offset, clear = false ) => {
 		// Get neighboring page.
-		const newPageId = getNeighborPageId( offset );
-		const hasHighlightChanged = newPageId !== currentHoverElement.pageId;
+		const newPageId = clear ? null : getNeighborPageId( offset );
+		const hasHighlightChanged = newPageId !== hoverElement.current.pageId;
 
 		if ( ! hasHighlightChanged ) {
 			return;
 		}
 
-		currentHoverElement.pageId = newPageId;
+		hoverElement.current.pageId = newPageId;
 
 		// Unhighlight old highlighted page.
-		if ( currentHoverElement.current ) {
-			currentHoverElement.current.classList.remove( 'amp-page-draggable-hover' );
+		if ( hoverElement.current.element ) {
+			hoverElement.current.element.classList.remove( ...hoverElement.current.classes );
 		}
 
 		// Highlight neigboring page.
 		if ( newPageId ) {
-			currentHoverElement.current = document.getElementById( `block-${ newPageId }` );
-			currentHoverElement.current.classList.add( 'amp-page-draggable-hover' );
+			const isLegal = offset === 0 || isBlockAllowedOnPage( blockName, newPageId );
+			const classes = [
+				'amp-page-draggable-hover',
+				`amp-page-draggable-hover-${ blockName.replace( /\W/g, '-' ) }`,
+				isLegal ? 'amp-page-draggable-hover-legal' : 'amp-page-draggable-hover-illegal',
+			];
+			hoverElement.current.element = document.getElementById( `block-${ newPageId }` );
+			hoverElement.current.element.classList.add( ...classes );
+			hoverElement.current.classes = classes;
+		} else {
+			hoverElement.current.element = null;
+			hoverElement.current.classes = [];
 		}
 	};
 
@@ -112,10 +124,10 @@ export default compose(
 		/**
 		 * Get id of neighbor page that is `offset` away from the current page.
 		 *
-		 * If no page exists in that direction, if offset is zero or if element is not allowed on that page, null will be returned.
+		 * If no page exists in that direction, null will be returned.
 		 *
 		 * @param {number} offset  Integer specifying offset from current page - e.g. -2 on page 3 will return id of page 1. Page indices are zero-based.
-		 * @return {string} Returns id of target page or null if element can't be dropped there for any reason.
+		 * @return {string} Returns id of target page or null if no page exists there.
 		 */
 		const getNeighborPageId = ( offset ) => {
 			const pages = getBlockOrder();
@@ -123,10 +135,9 @@ export default compose(
 			const newPageIndex = currentPageIndex + offset;
 			const isInsidePageCount = newPageIndex >= 0 && newPageIndex < pages.length;
 			const newPageId = pages[ newPageIndex ];
-			const isAllowedOnPage = isBlockAllowedOnPage( block.name, newPageId );
 
-			// Do we even have a legal neighbor in that direction? (offset=0 is not a neighbor)
-			if ( offset === 0 || ! isInsidePageCount || ! isAllowedOnPage ) {
+			// Do we even have a neighbor in that direction?
+			if ( ! isInsidePageCount ) {
 				return null;
 			}
 
@@ -143,7 +154,8 @@ export default compose(
 		 */
 		const onNeighborDrop = ( offset, newAttributes ) => {
 			const newPageId = getNeighborPageId( offset );
-			if ( ! newPageId ) {
+			const isAllowedOnPage = isBlockAllowedOnPage( block.name, newPageId );
+			if ( ! newPageId || ! isAllowedOnPage || ! offset === 0 ) {
 				return;
 			}
 
