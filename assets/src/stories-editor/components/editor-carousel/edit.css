@@ -112,11 +112,12 @@
 }
 
 .indicator-page-number {
-	font-size: 11px;
+	font-size: 13px;
 	display: block;
-	margin-top: 7px;
+	margin-top: 10px;
+	color: #555d66;
 }
 
 .amp-story-editor-carousel-item--active .indicator-page-number {
-	font-weight: bold;
+	font-weight: 600;
 }
