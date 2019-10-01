@@ -1,7 +1,26 @@
 /**
  * Internal dependencies
  */
-import { getTagName } from '../';
+import { getTagName } from '../maybeSetTagName';
+
+const mockGetBlocksByClientId = jest.fn( () => [] );
+const mockGetBlockOrder = jest.fn( () => [] );
+const mockGetBlock = jest.fn();
+const mockUpdateBlockAttributes = jest.fn();
+
+jest.mock( '@wordpress/data', () => {
+	return {
+		select: () => ( {
+			getBlocksByClientId: ( ...args ) => mockGetBlocksByClientId( ...args ),
+			getBlockOrder: ( ...args ) => mockGetBlockOrder( ...args ),
+			getBlock: ( ...args ) => mockGetBlock( ...args ),
+		} ),
+
+		dispatch: () => ( {
+			updateBlockAttributes: ( ...args ) => mockUpdateBlockAttributes( ...args ),
+		} ),
+	};
+} );
 
 describe( 'getTagName', () => {
 	it( 'should return type if explicitly set', () => {

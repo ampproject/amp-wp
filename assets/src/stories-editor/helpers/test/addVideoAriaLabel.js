@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { addVideoAriaLabel } from '../';
+import addVideoAriaLabel from '../addVideoAriaLabel';
 
 describe( 'addVideoAriaLabel', () => {
 	it( 'ignores arbitrary content', () => {
