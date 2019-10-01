@@ -7,7 +7,7 @@ import { UP, DOWN, RIGHT, LEFT, DELETE } from '@wordpress/keycodes';
 /**
  * Internal dependencies
  */
-import { ALLOWED_CHILD_BLOCKS } from '../../constants';
+import { ALLOWED_CHILD_BLOCKS, ALLOWED_MOVABLE_BLOCKS } from '../../constants';
 
 const applyWithDispatch = withDispatch( ( dispatch, props, { select } ) => {
 	const {	isReordering } = select( 'amp/story' );
@@ -17,13 +17,13 @@ const applyWithDispatch = withDispatch( ( dispatch, props, { select } ) => {
 	const onKeyPress = ( event ) => {
 		const { keyCode } = event;
 		const selectedBlock = getSelectedBlock();
-		if(!selectedBlock){
+		if ( ! selectedBlock ) {
 			return;
 		}
 
 		let top = 0;
 		let left = 0;
-		switch(keyCode){
+		switch ( keyCode ) {
 			case UP:
 				top = -1;
 				break;
@@ -43,10 +43,14 @@ const applyWithDispatch = withDispatch( ( dispatch, props, { select } ) => {
 				return;
 		}
 		event.preventDefault();
-		const newPositionTop = selectedBlock.attributes.positionTop + top;
-		const newPositionLeft = selectedBlock.attributes.positionLeft + left;
-		updateBlockAttributes( selectedBlock.clientId, { positionTop: newPositionTop, positionLeft: newPositionLeft } );
-
+		if ( ALLOWED_MOVABLE_BLOCKS.includes( selectedBlock.name ) ) {
+			const newPositionTop = selectedBlock.attributes.positionTop + top;
+			const newPositionLeft = selectedBlock.attributes.positionLeft + left;
+			updateBlockAttributes( selectedBlock.clientId, {
+				positionTop: newPositionTop,
+				positionLeft: newPositionLeft,
+			} );
+		}
 	};
 
 	return {
@@ -76,7 +80,7 @@ export default createHigherOrderComponent(
 				return <BlockEdit { ...props } />;
 			}
 			return (
-				<div className='KeyPress'  onKeyDown={ onKeyPress }>
+				<div onKeyDown={ onKeyPress }>
 					<BlockEdit { ...props } />
 				</div>
 			);
