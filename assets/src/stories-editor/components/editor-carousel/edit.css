@@ -81,6 +81,7 @@
 .amp-story-editor-carousel-item {
 	position: relative;
 }
+
 .amp-story-editor-carousel-item .components-drop-zone {
 	left: -10px;
 	width: calc(100% + 20px);
@@ -114,4 +115,8 @@
 	font-size: 11px;
 	display: block;
 	margin-top: 7px;
+}
+
+.amp-story-editor-carousel-item--active .indicator-page-number {
+	font-weight: bold;
 }
