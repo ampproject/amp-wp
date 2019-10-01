@@ -110,8 +110,8 @@
 	display: none;
 }
 
-.is-dragging-indicator-label {
+.indicator-page-number {
 	font-size: 11px;
 	display: block;
-	margin-top: 6px;
+	margin-top: 7px;
 }

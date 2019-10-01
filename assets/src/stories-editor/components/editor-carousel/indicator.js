@@ -37,8 +37,8 @@ const Indicator = ( { pages, currentPage, onClick } ) => {
 	const toolTip = ( pageNumber ) => sprintf( __( 'Go to page %s', 'amp' ), pageNumber );
 
 	const [ draggedPage, setDraggedPage ] = useState( null );
-	const { movePageToPosition, initializePageOrder } = useDispatch( 'amp/story' );
-	const { getBlockOrder, getBlockIndex } = useSelect( ( select ) => select( 'core/block-editor' ) );
+	const { moveBlockToPosition } = useDispatch( 'core/block-editor' );
+	const { getBlockIndex } = useSelect( ( select ) => select( 'core/block-editor' ) );
 
 	return (
 		<ul className="amp-story-editor-carousel-item-list">
@@ -72,7 +72,7 @@ const Indicator = ( { pages, currentPage, onClick } ) => {
 
 					const positionIndex = getInsertIndex( position );
 					const insertIndex = srcIndex < index ? positionIndex - 1 : positionIndex;
-					movePageToPosition( srcClientId, insertIndex );
+					moveBlockToPosition( srcClientId, '', '', insertIndex );
 				};
 
 				const isPageDragged = page.clientId === draggedPage;
@@ -84,7 +84,7 @@ const Indicator = ( { pages, currentPage, onClick } ) => {
 							onClick( page.clientId );
 						} }
 					>
-						{ draggedPage && <span className="is-dragging-indicator-label">{ index + 1 }</span> }
+						<span className="indicator-page-number">{ index + 1 }</span>
 						<span className="screen-reader-text">
 							{ label( index + 1 ) }
 						</span>
@@ -98,7 +98,6 @@ const Indicator = ( { pages, currentPage, onClick } ) => {
 						transferData={ transferData }
 						onDragStart={ () => {
 							setDraggedPage( page.clientId );
-							initializePageOrder( getBlockOrder() );
 						} }
 						onDragEnd={ () => {
 							setDraggedPage( null );
