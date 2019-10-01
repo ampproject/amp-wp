@@ -30,6 +30,7 @@ export { default as withCroppedFeaturedImage } from './with-cropped-featured-ima
 export { default as withHasSelectedInnerBlock } from './higher-order/with-has-selected-inner-block';
 export { default as withPageNumber } from './higher-order/with-page-number';
 export { default as withRightClickHandler } from './higher-order/with-right-click-handler';
+export { default as withKeyboardNavigation } from './higher-order/with-keyboard-navigation-handler';
 export { default as withStoryFeaturedImageNotice } from './higher-order/with-story-featured-image-notice';
 export { default as withEditFeaturedImage } from './with-edit-featured-image';
 export { default as withCustomVideoBlockEdit } from './with-custom-video-block-edit';
