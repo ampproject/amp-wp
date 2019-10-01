@@ -2,6 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import classnames from 'classnames';
 
 /**
  * WordPress dependencies
@@ -44,7 +45,9 @@ const Indicator = ( { pages, currentPage, onClick } ) => {
 		<ul className="amp-story-editor-carousel-item-list">
 			{ pages.map( ( page, index ) => {
 				const { clientId } = page;
-				const className = clientId === currentPage ? 'amp-story-editor-carousel-item amp-story-editor-carousel-item--active' : 'amp-story-editor-carousel-item';
+				const className = classnames( 'amp-story-editor-carousel-item', {
+					'amp-story-editor-carousel-item--active': clientId === currentPage,
+				} );
 				const blockElementId = `amp-story-editor-carousel-item-${ clientId }`;
 				const transferData = {
 					type: 'indicator',
@@ -123,7 +126,7 @@ const Indicator = ( { pages, currentPage, onClick } ) => {
 											}
 										</div>
 										<DropZone
-											className={ isPageDragged ? 'is-dragging-indicator' : undefined }
+											className={ classnames( '', { 'is-dragging-indicator': isPageDragged } ) }
 											onDrop={ onDrop }
 										/>
 									</li>
