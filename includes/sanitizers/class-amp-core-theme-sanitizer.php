@@ -52,6 +52,18 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	protected static $theme_features = [
 		// Twenty Nineteen.
+		'twentytwenty'  => [
+			// @todo Cover Modals (stripped with twentytwenty-js)
+			// @todo Smooth Scroll (stripped with twentytwenty-js)
+			// @todo Modal Menu (stripped with twentytwenty-js)
+			// @todo Primary Menu (stripped with twentytwenty-js)
+			// @todo Toggles (stripped with twentytwenty-js) - probably unneeded once the rest is done
+			'dequeue_scripts'                    => [
+				'twentytwenty-js',
+			],
+		],
+
+		// Twenty Nineteen.
 		'twentynineteen'  => [
 			'dequeue_scripts'                    => [
 				'twentynineteen-skip-link-focus-fix', // This is part of AMP. See <https://github.com/ampproject/amphtml/issues/18671>.
