@@ -43,17 +43,18 @@ const Indicator = ( { pages, currentPage, onClick } ) => {
 	return (
 		<ul className="amp-story-editor-carousel-item-list">
 			{ pages.map( ( page, index ) => {
-				const className = page.clientId === currentPage ? 'amp-story-editor-carousel-item amp-story-editor-carousel-item--active' : 'amp-story-editor-carousel-item';
-				const blockElementId = `amp-story-editor-carousel-item-${ page.clientId }`;
+				const { clientId } = page;
+				const className = clientId === currentPage ? 'amp-story-editor-carousel-item amp-story-editor-carousel-item--active' : 'amp-story-editor-carousel-item';
+				const blockElementId = `amp-story-editor-carousel-item-${ clientId }`;
 				const transferData = {
 					type: 'indicator',
-					srcIndex: getBlockIndex( page.clientId ),
-					srcClientId: page.clientId,
+					srcIndex: getBlockIndex( clientId ),
+					srcClientId: clientId,
 				};
 
 				const getInsertIndex = ( position ) => {
-					const dstIndex = getBlockIndex( page.clientId );
-					if ( page.clientId !== undefined ) {
+					const dstIndex = getBlockIndex( clientId );
+					if ( clientId !== undefined ) {
 						return position.x === 'left' ? dstIndex : dstIndex + 1;
 					}
 
@@ -64,7 +65,7 @@ const Indicator = ( { pages, currentPage, onClick } ) => {
 					const { srcClientId, srcIndex, type } = parseDropEvent( event );
 
 					const isIndicatorDropType = 'indicator' === type;
-					const isSameBlock = srcClientId === page.clientId;
+					const isSameBlock = srcClientId === clientId;
 
 					if ( ! isIndicatorDropType || isSameBlock ) {
 						return;
@@ -75,13 +76,13 @@ const Indicator = ( { pages, currentPage, onClick } ) => {
 					moveBlockToPosition( srcClientId, '', '', insertIndex );
 				};
 
-				const isPageDragged = page.clientId === draggedPage;
-				const isCurrentPage = page.clientId !== currentPage;
+				const isPageDragged = clientId === draggedPage;
+				const isCurrentPage = clientId !== currentPage;
 				const indicatorButton = (
 					<Button
 						onClick={ ( e ) => {
 							e.preventDefault();
-							onClick( page.clientId );
+							onClick( clientId );
 						} }
 					>
 						<span className="indicator-page-number">{ index + 1 }</span>
@@ -93,11 +94,11 @@ const Indicator = ( { pages, currentPage, onClick } ) => {
 
 				return (
 					<Draggable
-						key={ page.clientId }
+						key={ clientId }
 						elementId={ blockElementId }
 						transferData={ transferData }
 						onDragStart={ () => {
-							setDraggedPage( page.clientId );
+							setDraggedPage( clientId );
 						} }
 						onDragEnd={ () => {
 							setDraggedPage( null );
