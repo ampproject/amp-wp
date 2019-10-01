@@ -1284,12 +1284,12 @@ export const maybeUpdateBlockDimensions = ( block ) => {
 			const element = getBlockInnerTextElement( block );
 
 			if ( element && content.length ) {
-				if ( element.offsetHeight > height ) {
-					updateBlockAttributes( clientId, { height: element.offsetHeight } );
+				if ( element.scrollHeight > height ) {
+					updateBlockAttributes( clientId, { height: element.scrollHeight } );
 				}
 
-				if ( element.offsetWidth > width ) {
-					updateBlockAttributes( clientId, { width: element.offsetWidth } );
+				if ( element.scrollWidth > width ) {
+					updateBlockAttributes( clientId, { width: element.scrollWidth } );
 				}
 			}
 

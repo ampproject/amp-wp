@@ -2503,7 +2503,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			foreach ( $pending_stylesheet['stylesheet'] as $j => $part ) {
 				if ( is_string( $part ) && 0 === strpos( $part, '@import' ) ) {
 					$stylesheet_groups[ $pending_stylesheet['group'] ]['import_front_matter'] .= $part;
-					unset( $this->pending_stylesheets['stylesheet'][ $j ][ $i ] );
+					unset( $this->pending_stylesheets[ $i ]['stylesheet'][ $j ] );
 				}
 			}
 
