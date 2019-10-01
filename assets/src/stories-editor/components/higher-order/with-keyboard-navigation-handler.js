@@ -15,9 +15,15 @@ const applyWithDispatch = withDispatch( ( dispatch, props, { select } ) => {
 	const { updateBlockAttributes, removeBlock } = dispatch( 'core/block-editor' );
 
 	const onKeyPress = ( event ) => {
-		const { keyCode } = event;
+		const { keyCode, target } = event;
+		const { classList } = target;
 		const selectedBlock = getSelectedBlock();
+
 		if ( ! selectedBlock ) {
+			return;
+		}
+
+		if ( classList.contains( 'editor-rich-text__editable' ) && classList.contains( 'is-selected' ) ) {
 			return;
 		}
 
@@ -69,7 +75,6 @@ export default createHigherOrderComponent(
 		return applyWithDispatch( ( props ) => {
 			const { name, onKeyPress, isReordering } = props;
 			const isPageBlock = 'amp/amp-story-page' === name;
-
 			// Add for page block and inner blocks.
 			if ( ! isPageBlock && ! ALLOWED_CHILD_BLOCKS.includes( name ) ) {
 				return <BlockEdit { ...props } />;
@@ -79,6 +84,7 @@ export default createHigherOrderComponent(
 			if ( isReordering() ) {
 				return <BlockEdit { ...props } />;
 			}
+
 			return (
 				<div onKeyDown={ onKeyPress }>
 					<BlockEdit { ...props } />
