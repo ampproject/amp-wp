@@ -58,6 +58,9 @@ const Indicator = ( { pages, currentPage, onClick } ) => {
 				const getInsertIndex = ( position ) => {
 					const dstIndex = getBlockIndex( clientId );
 					if ( clientId !== undefined ) {
+						// Considering the horizontal layout of the indicators.
+						// If the dropzone is on the left from the destination page
+						// Then the destination index is correct, otherwise it should be one higher.
 						return position.x === 'left' ? dstIndex : dstIndex + 1;
 					}
 
@@ -74,8 +77,11 @@ const Indicator = ( { pages, currentPage, onClick } ) => {
 						return;
 					}
 
-					const positionIndex = getInsertIndex( position );
-					const insertIndex = srcIndex < index ? positionIndex - 1 : positionIndex;
+					let insertIndex = getInsertIndex( position );
+					// If we move the page forward, we should also account for the "vacant" place of the page itself.
+					if ( insertIndex > srcIndex ) {
+						insertIndex--;
+					}
 					moveBlockToPosition( srcClientId, '', '', insertIndex );
 				};
 
