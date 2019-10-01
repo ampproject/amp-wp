@@ -134,6 +134,17 @@ class AMP_Options_Menu {
 			]
 		);
 
+		add_settings_field(
+			'stories_settings',
+			__( 'Stories Settings', 'amp' ),
+			[ $this, 'render_stories_settings' ],
+			AMP_Options_Manager::OPTION_NAME,
+			'general',
+			[
+				'class' => 'amp-stories-settings-field',
+			]
+		);
+
 		add_action(
 			'admin_print_styles',
 			function() {
@@ -144,7 +155,8 @@ class AMP_Options_Menu {
 					body:not(.amp-experience-website) .amp-validation-field {
 						display: none;
 					}
-					body:not(.amp-experience-stories) .amp-stories-export-field {
+					body:not(.amp-experience-stories) .amp-stories-export-field,
+					body:not(.amp-experience-stories) .amp-stories-settings-field {
 						display: none;
 					}
 				</style>
@@ -304,7 +316,8 @@ class AMP_Options_Menu {
 		/* translators: %s: URL to the ecosystem page. */
 		$ecosystem_description = sprintf( __( 'For a list of themes and plugins that are known to be AMP compatible, please see the <a href="%s">ecosystem page</a>.', 'amp' ), esc_url( 'https://amp-wp.org/ecosystem/' ) );
 
-		$builtin_support = in_array( get_template(), AMP_Core_Theme_Sanitizer::get_supported_themes(), true );
+		$builtin_support     = in_array( get_template(), AMP_Core_Theme_Sanitizer::get_supported_themes(), true );
+		$reader_mode_support = __( 'Your theme indicates it works best in <strong>Reader mode.</strong>', 'amp' );
 		?>
 
 		<fieldset>
@@ -318,9 +331,13 @@ class AMP_Options_Menu {
 						<p><?php esc_html_e( 'Your active theme is known to work well in standard or transitional mode.', 'amp' ); ?></p>
 					</div>
 				<?php endif; ?>
+			<?php elseif ( AMP_Theme_Support::supports_reader_mode() ) : ?>
+				<div class="notice notice-success notice-alt inline">
+					<p><?php echo wp_kses( $reader_mode_support, [ 'strong' => [] ] ); ?></p>
+				</div>
 			<?php endif; ?>
 
-			<?php if ( ! AMP_Theme_Support::get_support_mode_added_via_theme() ) : ?>
+			<?php if ( ! AMP_Theme_Support::get_support_mode_added_via_theme() && ! AMP_Theme_Support::supports_reader_mode() && ! $builtin_support ) : ?>
 				<p>
 					<?php echo wp_kses_post( $ecosystem_description ); ?>
 				</p>
@@ -667,6 +684,84 @@ class AMP_Options_Menu {
 			</p>
 			<p class="description"><?php esc_html_e( 'AMP requires most asset URLs to be absolute as opposed to relative. In order to export stories with the desired absolute URLs, you can provide the required URL base here. This base URL will be used for the uploaded files, as well as, links to other stories. If left empty, the default URLs will be used. Meaning, uploaded images and videos will be referenced from the WordPress install. Remember that the provided URL should be HTTPS.', 'amp' ); ?></p>
 		</fieldset>
+		<?php
+	}
+
+	/**
+	 * Render the stories settings section.
+	 *
+	 * @since 1.3
+	 */
+	public function render_stories_settings() {
+		?>
+		<p><?php esc_html_e( 'These settings are applied to new stories only.', 'amp' ); ?></p>
+		<?php
+		$this->render_stories_settings_page_advance();
+	}
+
+	/**
+	 * Render the page advancement settings section.
+	 *
+	 * @since 1.3
+	 */
+	private function render_stories_settings_page_advance() {
+		$definitions                = AMP_Story_Post_Type::get_stories_settings_definitions();
+		$auto_advance_after_options = $definitions['auto_advance_after']['data']['options'];
+
+		$story_settings            = AMP_Options_Manager::get_option( 'story_settings' );
+		$story_settings_field_name = sprintf( '%s[%s]', AMP_Options_Manager::OPTION_NAME, AMP_Story_Post_Type::STORY_SETTINGS_OPTION );
+		?>
+		<fieldset>
+			<p>
+				<label for="stories_settings_auto_advance_after">
+					<strong><?php echo esc_html__( 'Advance to next page', 'amp' ); ?></strong>
+				</label>
+				<br />
+				<select id="stories_settings_auto_advance_after" name="<?php echo esc_attr( $story_settings_field_name . '[auto_advance_after]' ); ?>">
+				<?php foreach ( $auto_advance_after_options as $option ) : ?>
+					<option
+						value="<?php echo esc_attr( $option['value'] ); ?>"
+						data-description="<?php echo esc_attr( $option['description'] ); ?>"
+						<?php selected( $story_settings['auto_advance_after'], $option['value'] ); ?>
+					>
+						<?php echo esc_html( $option['label'] ); ?>
+					</option>
+				<?php endforeach; ?>
+				</select>
+			</p>
+			<p class="hidden">
+				<label for="stories_settings_auto_advance_after_duration">
+					<strong><?php echo esc_html__( 'Time in seconds', 'amp' ); ?></strong>
+				</label>
+				<br />
+				<input
+					type="number"
+					class="small-text"
+					id="stories_settings_auto_advance_after_duration"
+					min="0"
+					max="100"
+					name="<?php echo esc_attr( $story_settings_field_name . '[auto_advance_after_duration]' ); ?>"
+					value="<?php echo (int) $story_settings['auto_advance_after_duration']; ?>"
+				>
+			</p>
+			<p class="description"></p>
+		</fieldset>
+		<script>
+			(function( $ ) {
+				const $autoAdvanceAfter = $('#stories_settings_auto_advance_after');
+				const $description = $autoAdvanceAfter.closest('fieldset').find('.description');
+				const $durationSection = $('#stories_settings_auto_advance_after_duration').closest('p');
+
+				$autoAdvanceAfter
+					.on('change', function() {
+						const $selectedOption = $('option:selected', this);
+
+						$description.text( $selectedOption.data('description') );
+						$durationSection.toggleClass( 'hidden', 'time' !== $selectedOption.prop('value') );
+					})
+					.trigger('change');
+			})( jQuery );
+		</script>
 		<?php
 	}
 

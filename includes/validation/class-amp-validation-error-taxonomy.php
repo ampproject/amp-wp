@@ -690,7 +690,6 @@ class AMP_Validation_Error_Taxonomy {
 			}
 
 			if ( ! empty( $validation_error['sources'] ) ) {
-				$hook = null;
 				foreach ( $validation_error['sources'] as $source ) {
 					if ( isset( $source['hook'] ) ) {
 						$invalid_sources['hook'] = $source['hook'];
@@ -2219,6 +2218,8 @@ class AMP_Validation_Error_Taxonomy {
 				$redirect_to
 			);
 		}
+
+		delete_transient( AMP_Validated_URL_Post_Type::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT );
 
 		return $redirect_to;
 	}

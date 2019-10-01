@@ -122,21 +122,107 @@ function observeConsoleLogging() {
 	} );
 }
 
-// Before every test suite run, delete all content created by the test. This ensures
-// other posts/comments/etc. aren't dirtying tests and tests don't depend on
-// each other's side-effects.
+/**
+ * Runs Axe tests when the story editor is found on the current page.
+ *
+ * @return {?Promise} Promise resolving once Axe texts are finished.
+ */
+async function runAxeTestsForStoriesEditor() {
+	if ( ! await page.$( '#amp-story-editor' ) ) {
+		return;
+	}
+
+	await expect( page ).toPassAxeTests( {
+		/**
+		 * Rules are disabled, as there are still accessibility issues within gutenberg.
+		 *
+		 * See: https://github.com/WordPress/gutenberg/pull/15018 & https://github.com/WordPress/gutenberg/issues/15452
+		 */
+		disabledRules: [
+			'aria-allowed-role',
+			'aria-hidden-focus',
+			'button-name',
+			'color-contrast',
+			'duplicate-id',
+			'region',
+		],
+		exclude: [
+			// Ignores elements created by metaboxes.
+			'.edit-post-layout__metaboxes',
+			// Ignores elements created by TinyMCE.
+			'.mce-container',
+			// Ignore attachment close button.
+			'.amp-story-page-attachment-close-button',
+		],
+	} );
+}
+
+/**
+ * Runs Axe tests when the block editor is found on the current page.
+ *
+ * @return {?Promise} Promise resolving once Axe texts are finished.
+ */
+async function runAxeTestsForBlockEditor() {
+	if ( ! await page.$( '.block-editor' ) ) {
+		return;
+	}
+
+	// If amp story editor is found, don't run tests.
+	if ( await page.$( '#amp-story-editor' ) ) {
+		return;
+	}
+
+	await expect( page ).toPassAxeTests( {
+		/**
+		 * Rules are disabled, as there are still accessibility issues within gutenberg.
+		 *
+		 * See: https://github.com/WordPress/gutenberg/pull/15018 & https://github.com/WordPress/gutenberg/issues/15452
+		 */
+		disabledRules: [
+			'aria-allowed-role',
+			'aria-valid-attr-value',
+			'button-name',
+			'color-contrast',
+			'dlitem',
+			'duplicate-id',
+			'label',
+			'link-name',
+			'listitem',
+			'region',
+		],
+		exclude: [
+			// Ignores elements created by metaboxes.
+			'.edit-post-layout__metaboxes',
+			// Ignores elements created by TinyMCE.
+			'.mce-container',
+		],
+	} );
+}
+
+/**
+ * Before every test suite run, delete all content created by the test. This ensures
+ * other posts/comments/etc. aren't dirtying tests and tests don't depend on
+ * each other's side-effects.
+ */
+// eslint-disable-next-line jest/require-top-level-describe
 beforeAll( async () => {
 	capturePageEventsForTearDown();
 	enablePageDialogAccept();
 	observeConsoleLogging();
 	await setBrowserViewport( 'large' );
+	await page.setDefaultNavigationTimeout( 5000 );
+	await page.setDefaultTimeout( 3000 );
 } );
 
+// eslint-disable-next-line jest/require-top-level-describe
 afterEach( async () => {
 	await clearLocalStorage();
+	await runAxeTestsForStoriesEditor();
+	await runAxeTestsForBlockEditor();
 	await setBrowserViewport( 'large' );
 } );
 
+// eslint-disable-next-line jest/require-top-level-describe
 afterAll( () => {
 	removePageEvents();
 } );

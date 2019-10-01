@@ -22,7 +22,6 @@ cache:
     - $HOME/.npm
     - $HOME/.nvm/.cache
     - $HOME/phpunit-bin
-    - $HOME/deployment-targets
 
 branches:
   only:
@@ -59,8 +58,12 @@ after_script:
 
 jobs:
   fast_finish: true
+  # These need to be exact matches, including whitespace!
   allow_failures:
-    - env: ALLOW_FAILURES=1
+    # PHP unit tests (7.3, WordPress trunk)
+    - env: WP_VERSION=trunk  DEV_LIB_ONLY=phpunit                               INSTALL_PWA_PLUGIN=1
+    # PHP and JavaScript unit tests (7.3, WordPress trunk, with code coverage)
+    - env: WP_VERSION=latest DEV_LIB_ONLY=phpunit                               INSTALL_PWA_PLUGIN=1 RUN_PHPUNIT_COVERAGE=1
   include:
     - stage: lint
       name: Lint (PHP, JavaScript, and configuration files)
@@ -97,7 +100,6 @@ jobs:
         - npm run build:js
         - npm run build:css
         - npm run env:start
-        - npm run env:reset-site
         - npm run test:e2e:ci
         - npm run env:stop
 
@@ -135,12 +137,12 @@ jobs:
 
     - name: PHP unit tests (7.3, WordPress trunk)
       php: "7.3"
-      env: WP_VERSION=trunk  DEV_LIB_ONLY=phpunit                               INSTALL_PWA_PLUGIN=1                        ALLOW_FAILURES=1
+      env: WP_VERSION=trunk  DEV_LIB_ONLY=phpunit                               INSTALL_PWA_PLUGIN=1
 
     - name: PHP and JavaScript unit tests (7.3, WordPress trunk, with code coverage)
       if: branch = develop AND type = push
       php: "7.3"
-      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit                               INSTALL_PWA_PLUGIN=1 RUN_PHPUNIT_COVERAGE=1 ALLOW_FAILURES=1
+      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit                               INSTALL_PWA_PLUGIN=1 RUN_PHPUNIT_COVERAGE=1
       before_script:
         - echo "Running unit tests with code coverage..."
       script:
@@ -150,21 +152,3 @@ jobs:
         - bash <(curl -s https://codecov.io/bash) -cF php -f /tmp/wordpress/src/wp-content/plugins/amp/build/logs/clover.xml
         - npm run test:js -- --collectCoverage
         - bash <(curl -s https://codecov.io/bash) -cF javascript -f build/logs/lcov.info
-
-    - stage: deploy
-      if: type = push AND fork = false AND ( branch =~ ^[a-z][a-z0-9-]{0,10}$ OR branch =~ ^[0-9]+\.[0-9]+$ ) AND NOT branch IN ( live, test, dev, settings, team, support, debug, multidev, files, tags, billing )
-      php: "7.1"
-      env: WP_VERSION=latest DEV_LIB_ONLY=composer,grunt
-      script:
-        - |
-          eval "$(ssh-agent -s)"
-          pantheon_branch=$( echo $TRAVIS_BRANCH | sed 's/^\([0-9]\)/v\1/' | sed 's/[^a-z0-9-]/-/' )
-          echo "Initializing deployment to Pantheon branch: $pantheon_branch"
-          openssl aes-256-cbc -K $encrypted_7eb11f40d4e9_key -iv $encrypted_7eb11f40d4e9_iv -in bin/keys/id_rsa_ampconfdemo.enc -out bin/keys/id_rsa_ampconfdemo -d
-          chmod 600 bin/keys/id_rsa_ampconfdemo
-          ./bin/deploy-travis-pantheon.sh \
-            ampconfdemo \
-            db7f3307-9808-4753-aaa4-acb387c94472 \
-            $(pwd)/bin/keys/id_rsa_ampconfdemo \
-            $pantheon_branch
-      after_script: skip

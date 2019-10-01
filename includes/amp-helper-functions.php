@@ -361,8 +361,23 @@ function amp_get_asset_url( $file ) {
  * @return string Boilerplate code.
  */
 function amp_get_boilerplate_code() {
-	return '<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style>'
-		. '<noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>';
+	$stylesheets = amp_get_boilerplate_stylesheets();
+	return sprintf( '<style amp-boilerplate>%s</style><noscript><style amp-boilerplate>%s</style></noscript>', $stylesheets[0], $stylesheets[1] );
+}
+
+/**
+ * Get AMP boilerplate stylesheets.
+ *
+ * @since 1.3
+ * @link https://www.ampproject.org/docs/reference/spec#boilerplate
+ *
+ * @return string[] Stylesheets, where first is contained in style[amp-boilerplate] and the second in noscript>style[amp-boilerplate].
+ */
+function amp_get_boilerplate_stylesheets() {
+	return [
+		'body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}',
+		'body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}',
+	];
 }
 
 /**
@@ -457,6 +472,15 @@ function amp_register_default_scripts( $wp_scripts ) {
 			array_pop( $versions );
 			$extensions[ $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec']['name'] ] = array_pop( $versions );
 		}
+	}
+
+	if ( isset( $extensions['amp-carousel'] ) ) {
+		/*
+		 * The 0.2 version of amp-carousel depends on the amp-base-carousel component, but this is still experimental.
+		 * Also, the validator spec does not currently specify what base dependencies a given component has.
+		 * @todo Revisit once amp-base-carousel is no longer experimental. Add support for obtaining a list of extensions that depend on other extensions to include in the script dependencies when registering below.
+		 */
+		$extensions['amp-carousel'] = '0.1';
 	}
 
 	foreach ( $extensions as $extension => $version ) {
@@ -673,7 +697,21 @@ function amp_print_analytics( $analytics ) {
 	if ( '' === $analytics ) {
 		$analytics = [];
 	}
+
 	$analytics_entries = amp_get_analytics( $analytics );
+
+	/**
+	 * Triggers before analytics entries are printed as amp-analytics tags.
+	 *
+	 * This is useful for printing additional `amp-analytics` tags to the page without having to refactor any existing
+	 * markup generation logic to use the data structure mutated by the `amp_analytics_entries` filter. For such cases,
+	 * this action should be used for printing `amp-analytics` tags as opposed to using the `wp_footer` and
+	 * `amp_post_template_footer` actions; this will ensure analytics will also be included on AMP Stories.
+	 *
+	 * @since 1.3
+	 * @param array $analytics_entries Analytics entries, already potentially modified by the amp_analytics_entries filter.
+	 */
+	do_action( 'amp_print_analytics', $analytics_entries );
 
 	if ( empty( $analytics_entries ) ) {
 		return;
@@ -778,6 +816,42 @@ function amp_get_content_embed_handlers( $post = null ) {
 }
 
 /**
+ * Determine whether AMP dev mode is enabled.
+ *
+ * When enabled, the <html> element will get the data-ampdevmode attribute and the plugin will add the same attribute
+ * to elements associated with the admin bar and other elements that are provided by the `amp_dev_mode_element_xpaths`
+ * filter.
+ *
+ * @since 1.3
+ *
+ * @return bool Whether AMP dev mode is enabled.
+ */
+function amp_is_dev_mode() {
+
+	/**
+	 * Filters whether AMP mode is enabled.
+	 *
+	 * When enabled, the data-ampdevmode attribute will be added to the document element and it will allow the
+	 * attributes to be added to the admin bar. It will also add the attribute to all elements which match the
+	 * queries for the expressions returned by the 'amp_dev_mode_element_xpaths' filter.
+	 *
+	 * @since 1.3
+	 * @param bool Whether AMP dev mode is enabled.
+	 */
+	return apply_filters(
+		'amp_dev_mode_enabled',
+		(
+			// For the few sites that forcibly show the admin bar even when the user is logged out, only enable dev
+			// mode if the user is actually logged in. This prevents the dev mode from being served to crawlers
+			// when they index the AMP version.
+			( is_admin_bar_showing() && is_user_logged_in() )
+			||
+			is_customize_preview()
+		)
+	);
+}
+
+/**
  * Get content sanitizers.
  *
  * @since 0.7
@@ -859,6 +933,33 @@ function amp_get_content_sanitizers( $post = null ) {
 	 * @param WP_Post $post     Post. Deprecated.
 	 */
 	$sanitizers = apply_filters( 'amp_content_sanitizers', $sanitizers, $post );
+
+	if ( amp_is_dev_mode() ) {
+		/**
+		 * Filters the XPath queries for elements that should be enabled for dev mode.
+		 *
+		 * By supplying XPath queries to this filter, the data-ampdevmode attribute will automatically be added to the
+		 * root HTML element as well as to any elements that match the expressions. The attribute is added to the
+		 * elements prior to running any of the sanitizers.
+		 *
+		 * @since 1.3
+		 * @param string[] XPath element queries. Context is the root element.
+		 */
+		$dev_mode_xpaths = (array) apply_filters( 'amp_dev_mode_element_xpaths', [] );
+		if ( is_admin_bar_showing() ) {
+			$dev_mode_xpaths[] = '//*[ @id = "wpadminbar" ]';
+			$dev_mode_xpaths[] = '//*[ @id = "wpadminbar" ]//*';
+			$dev_mode_xpaths[] = '//style[ @id = "admin-bar-inline-css" ]';
+		}
+		$sanitizers = array_merge(
+			[
+				'AMP_Dev_Mode_Sanitizer' => [
+					'element_xpaths' => $dev_mode_xpaths,
+				],
+			],
+			$sanitizers
+		);
+	}
 
 	// Force style sanitizer and whitelist sanitizer to be at end.
 	foreach ( [ 'AMP_Style_Sanitizer', 'AMP_Tag_And_Attribute_Sanitizer' ] as $class_name ) {
@@ -1201,4 +1302,121 @@ function amp_print_story_auto_ads() {
 	);
 
 	echo AMP_HTML_Utils::build_tag( 'amp-story-auto-ads', [], $script_element ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+}
+
+/*
+ * The function below is copied from the ramsey/array_column package.
+ *
+ * Changes were made to code style to pass PHPCS requirements, but logic is unchanged.
+ *
+ * This can be removed once the required PHP version moves to PHP 5.5+.
+ *
+ * @link https://github.com/ramsey/array_column
+ *
+ * @copyright Copyright (c) Ben Ramsey (http://benramsey.com)
+ * @license   http://opensource.org/licenses/MIT MIT
+ */
+if ( ! function_exists( 'array_column' ) ) {
+	/**
+	 * Returns the values from a single column of the input array, identified by
+	 * the $columnKey.
+	 *
+	 * Optionally, you may provide an $indexKey to index the values in the returned
+	 * array by the values from the $indexKey column in the input array.
+	 *
+	 * @param array $input      A multi-dimensional array (record set) from which to pull
+	 *                          a column of values.
+	 * @param mixed $column_key The column of values to return. This value may be the
+	 *                          integer key of the column you wish to retrieve, or it
+	 *                          may be the string key name for an associative array.
+	 * @param mixed $index_key  (Optional.) The column to use as the index/keys for
+	 *                          the returned array. This value may be the integer key
+	 *                          of the column, or it may be the string key name.
+	 * @return array|bool
+	 */
+	function array_column( $input = null, $column_key = null, $index_key = null ) {
+		// Using func_get_args() in order to check for proper number of
+		// parameters and trigger errors exactly as the built-in array_column()
+		// does in PHP 5.5.
+		$argc   = func_num_args();
+		$params = func_get_args();
+
+		if ( $argc < 2 ) {
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error,WordPress.Security.EscapeOutput.OutputNotEscaped
+			trigger_error( "array_column() expects at least 2 parameters, {$argc} given", E_USER_WARNING );
+			return null;
+		}
+
+		if ( ! is_array( $params[0] ) ) {
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error,WordPress.Security.EscapeOutput.OutputNotEscaped
+			trigger_error( 'array_column() expects parameter 1 to be array, ' . gettype( $params[0] ) . ' given', E_USER_WARNING );
+			return null;
+		}
+
+		if ( ! is_int( $params[1] )
+			&& ! is_float( $params[1] )
+			&& ! is_string( $params[1] )
+			&& null !== $params[1]
+			&& ! ( is_object( $params[1] ) && method_exists( $params[1], '__toString' ) )
+		) {
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+			trigger_error( 'array_column(): The column key should be either a string or an integer', E_USER_WARNING );
+			return false;
+		}
+
+		if ( isset( $params[2] )
+			&& ! is_int( $params[2] )
+			&& ! is_float( $params[2] )
+			&& ! is_string( $params[2] )
+			&& ! ( is_object( $params[2] ) && method_exists( $params[2], '__toString' ) )
+		) {
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+			trigger_error( 'array_column(): The index key should be either a string or an integer', E_USER_WARNING );
+			return false;
+		}
+
+		$params_input      = $params[0];
+		$params_column_key = ( null !== $params[1] ) ? (string) $params[1] : null;
+
+		$params_index_key = null;
+		if ( isset( $params[2] ) ) {
+			if ( is_float( $params[2] ) || is_int( $params[2] ) ) {
+				$params_index_key = (int) $params[2];
+			} else {
+				$params_index_key = (string) $params[2];
+			}
+		}
+
+		$result_array = [];
+
+		foreach ( $params_input as $row ) {
+			$key       = null;
+			$value     = null;
+			$key_set   = false;
+			$value_set = false;
+
+			if ( null !== $params_index_key && array_key_exists( $params_index_key, $row ) ) {
+				$key_set = true;
+				$key     = (string) $row[ $params_index_key ];
+			}
+
+			if ( null === $params_column_key ) {
+				$value_set = true;
+				$value     = $row;
+			} elseif ( is_array( $row ) && array_key_exists( $params_column_key, $row ) ) {
+				$value_set = true;
+				$value     = $row[ $params_column_key ];
+			}
+
+			if ( $value_set ) {
+				if ( $key_set ) {
+					$result_array[ $key ] = $value;
+				} else {
+					$result_array[] = $value;
+				}
+			}
+		}
+
+		return $result_array;
+	}
 }

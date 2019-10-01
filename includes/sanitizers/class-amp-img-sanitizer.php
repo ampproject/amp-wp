@@ -97,7 +97,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
 			$node = $nodes->item( $i );
-			if ( ! $node instanceof DOMElement ) {
+			if ( ! $node instanceof DOMElement || $this->has_dev_mode_exemption( $node ) ) {
 				continue;
 			}
 
@@ -148,21 +148,6 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 
 		$this->determine_dimensions( $need_dimensions );
 		$this->adjust_and_replace_nodes_in_array_map( $need_dimensions );
-
-		/*
-		 * Opt-in to amp-img-auto-sizes experiment.
-		 * This is needed because the sizes attribute is removed from all img elements converted to amp-img
-		 * in order to prevent the undesirable setting of the width. This $meta tag can be removed once the
-		 * experiment ends (and the feature has been fully launched).
-		 * See <https://github.com/ampproject/amphtml/issues/21371> and <https://github.com/ampproject/amp-wp/pull/2036>.
-		 */
-		$head = $this->dom->getElementsByTagName( 'head' )->item( 0 );
-		if ( $head ) {
-			$meta = $this->dom->createElement( 'meta' );
-			$meta->setAttribute( 'name', 'amp-experiments-opt-in' );
-			$meta->setAttribute( 'content', 'amp-img-auto-sizes' );
-			$head->insertBefore( $meta, $head->firstChild );
-		}
 	}
 
 	/**
@@ -201,6 +186,12 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 
 				case 'data-amp-noloading':
 					$out['noloading'] = $value;
+					break;
+
+				// Skip directly copying new web platform attributes from img to amp-img which are largely handled by AMP already.
+				case 'importance': // Not supported by AMP.
+				case 'loading': // Lazy-loading handled by amp-img natively.
+				case 'intrinsicsize': // Responsive images handled by amp-img directly.
 					break;
 
 				default:
@@ -379,6 +370,18 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		$parent_node = $node->parentNode;
 		if ( ! ( $parent_node instanceof DOMElement ) || 'figure' !== $parent_node->tagName ) {
 			return $attributes;
+		}
+
+		// Account for blocks that include alignment.
+		// In that case, the structure changes from figure.wp-block-image > img
+		// to div.wp-block-image > figure > img and the amp-lightbox attribute
+		// can be found on the wrapping div instead of the figure element.
+		$grand_parent = $parent_node->parentNode;
+		if ( $grand_parent instanceof DOMElement ) {
+			$classes = preg_split( '/\s+/', $grand_parent->getAttribute( 'class' ) );
+			if ( in_array( 'wp-block-image', $classes, true ) ) {
+				$parent_node = $grand_parent;
+			}
 		}
 
 		$parent_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $parent_node );

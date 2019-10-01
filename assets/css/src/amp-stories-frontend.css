@@ -139,3 +139,12 @@ amp-story-grid-layer .wp-block-quote {
 	/* --story-page-vw is accessible in the FE, this equals 16px in the editor */
 	font-size: calc(4.88 * var(--story-page-vw));
 }
+
+amp-story-page-attachment .amp-page-attachment-content {
+	padding: 10px;
+	height: 100%;
+}
+
+amp-story-page-attachment .amp-page-attachment-content .wp-block-quote {
+	background: none;
+}

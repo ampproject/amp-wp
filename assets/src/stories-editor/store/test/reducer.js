@@ -10,7 +10,9 @@ import {
 	animations,
 	currentPage,
 	blocks,
+	copiedMarkup,
 } from '../reducer';
+import { ANIMATION_STATUS } from '../constants';
 
 describe( 'reducers', () => {
 	describe( 'animations()', () => {
@@ -26,7 +28,7 @@ describe( 'reducers', () => {
 				predecessor,
 			} );
 
-			expect( state ).toStrictEqual( {
+			expect( state.animationOrder ).toStrictEqual( {
 				[ page ]: [
 					{ id: item, parent: undefined },
 				],
@@ -44,7 +46,7 @@ describe( 'reducers', () => {
 				predecessor: item,
 			} );
 
-			expect( state ).toStrictEqual( {
+			expect( state.animationOrder ).toStrictEqual( {
 				[ page ]: [
 					{ id: item, parent: undefined },
 				],
@@ -69,6 +71,13 @@ describe( 'reducers', () => {
 				predecessor: item,
 			} );
 
+			expect( originalState.animationOrder ).toStrictEqual( {
+				[ page ]: [
+					{ id: item, parent: undefined },
+					{ id: item2, parent: item },
+				],
+			} );
+
 			const state = animations( originalState, {
 				type: 'ADD_ANIMATION',
 				page,
@@ -76,7 +85,7 @@ describe( 'reducers', () => {
 				predecessor: item2,
 			} );
 
-			expect( state ).toStrictEqual( {
+			expect( state.animationOrder ).toStrictEqual( {
 				[ page ]: [
 					{ id: item, parent: undefined },
 					{ id: item2, parent: item },
@@ -95,6 +104,71 @@ describe( 'reducers', () => {
 		it.todo( 'should update an entry when animation duration changes' );
 
 		it.todo( 'should update an entry when animation delay changes' );
+
+		it( 'should play and stop animation', () => {
+			const page = 'foo';
+			const item = 'bar';
+			const item2 = 'baz';
+
+			const originalState = {
+				animationOrder: {
+					[ page ]: [
+						{ id: item, parent: undefined },
+						{ id: item2, parent: item },
+					],
+				},
+			};
+
+			let state = animations( originalState, {
+				type: 'PLAY_ANIMATION',
+				page,
+			} );
+
+			expect( state.animationOrder ).toStrictEqual( {
+				[ page ]: [
+					{ id: item, parent: undefined, status: ANIMATION_STATUS.playing },
+					{ id: item2, parent: item, status: ANIMATION_STATUS.prepared },
+				],
+			} );
+
+			state = animations( state, {
+				type: 'STOP_ANIMATION',
+				page,
+			} );
+
+			expect( state.animationOrder ).toStrictEqual( {
+				[ page ]: [
+					{ id: item, parent: undefined, status: ANIMATION_STATUS.stopped },
+					{ id: item2, parent: item, status: ANIMATION_STATUS.stopped },
+				],
+			} );
+
+			state = animations( state, {
+				type: 'PLAY_ANIMATION',
+				page,
+				item: item2,
+			} );
+
+			expect( state.animationOrder ).toStrictEqual( {
+				[ page ]: [
+					{ id: item, parent: undefined, status: ANIMATION_STATUS.stopped },
+					{ id: item2, parent: item, status: ANIMATION_STATUS.playing },
+				],
+			} );
+
+			state = animations( state, {
+				type: 'STOP_ANIMATION',
+				page,
+				item: item2,
+			} );
+
+			expect( state.animationOrder ).toStrictEqual( {
+				[ page ]: [
+					{ id: item, parent: undefined, status: ANIMATION_STATUS.stopped },
+					{ id: item2, parent: item, status: ANIMATION_STATUS.stopped },
+				],
+			} );
+		} );
 	} );
 
 	describe( 'currentPage()', () => {
@@ -169,6 +243,48 @@ describe( 'reducers', () => {
 			expect( state ).toStrictEqual( {
 				order: [ 'page-1', 'page-2' ],
 				isReordering: false,
+			} );
+		} );
+	} );
+
+	describe( 'copiedMarkup()', () => {
+		it( 'should set copied markup', () => {
+			const markup = '<! -- Hello -->';
+			const state = copiedMarkup( undefined, {
+				type: 'SET_COPIED_MARKUP',
+				markup,
+			} );
+
+			expect( state ).toStrictEqual( markup );
+		} );
+
+		it( 'should not set non-string values', () => {
+			const markups = [
+				false,
+				999,
+				[],
+			];
+			markups.forEach( ( markup ) => {
+				const state = copiedMarkup( undefined, {
+					type: 'SET_COPIED_MARKUP',
+					markup,
+				} );
+				expect( state ).toStrictEqual( {} );
+			} );
+		} );
+
+		it( 'should clear markup', () => {
+			const originals = [
+				999,
+				false,
+				'Hello',
+			];
+
+			originals.forEach( ( original ) => {
+				const state = copiedMarkup( original, {
+					type: 'CLEAR_COPIED_MARKUP',
+				} );
+				expect( state ).toStrictEqual( '' );
 			} );
 		} );
 	} );

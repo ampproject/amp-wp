@@ -92,20 +92,22 @@ const handleExport = ( { postId, createErrorNotice, createSuccessNotice, removeN
 
 export const name = 'amp-story-export';
 
+export const icon = 'media-archive';
+
 /**
  * Renders the actual export menu item.
  *
- * @param {number} postId
- * @param {function} createErrorNotice
- * @param {function} createSuccessNotice
- * @param {function} removeNotice
+ * @param {Object} props Component props.
+ * @param {number} props.postId Post ID.
+ * @param {Function} props.createErrorNotice Callback to create an error notice.
+ * @param {Function} props.createSuccessNotice Callback to create a success notice.
+ * @param {Function} props.removeNotice Callback to remove a notice.
  *
  * @return {Object} The rendered export menu item.
  */
 const renderPlugin = ( { postId, createErrorNotice, createSuccessNotice, removeNotice } ) => {
 	return (
 		<PluginMoreMenuItem
-			icon={ 'media-archive' }
 			onClick={ () => {
 				handleExport( { postId, createErrorNotice, createSuccessNotice, removeNotice } );
 			} }

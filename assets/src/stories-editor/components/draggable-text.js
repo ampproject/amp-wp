@@ -3,6 +3,7 @@
  */
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
+import { ReactElement } from 'react';
 
 /**
  * WordPress dependencies
@@ -21,7 +22,7 @@ import { StoryBlockMover } from './index';
  *
  * @param {Object} props Component props.
  *
- * @return {WPElement} Rendered element.
+ * @return {ReactElement} Rendered element.
  */
 const DraggableText = ( props ) => {
 	const {
@@ -113,7 +114,7 @@ DraggableText.propTypes = {
 	isSelected: PropTypes.bool.isRequired,
 	toggleIsEditing: PropTypes.func.isRequired,
 	toggleOverlay: PropTypes.func.isRequired,
-	text: PropTypes.string.isRequired,
+	text: PropTypes.string,
 	textStyle: PropTypes.shape( {
 		color: PropTypes.string,
 		fontSize: PropTypes.string,

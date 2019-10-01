@@ -18,11 +18,21 @@ class AMP_Story_Post_Type {
 	const POST_TYPE_SLUG = 'amp_story';
 
 	/**
+	 * The option name where story settings are stored.
+	 */
+	const STORY_SETTINGS_OPTION = 'story_settings';
+
+	/**
+	 * The meta prefix applied to story settings options saved as individual post meta.
+	 */
+	const STORY_SETTINGS_META_PREFIX = 'amp_story_';
+
+	/**
 	 * Minimum required version of Gutenberg required.
 	 *
 	 * @var string
 	 */
-	const REQUIRED_GUTENBERG_VERSION = '5.8';
+	const REQUIRED_GUTENBERG_VERSION = '5.9';
 
 	/**
 	 * The slug of the story card CSS file.
@@ -157,6 +167,7 @@ class AMP_Story_Post_Type {
 					'thumbnail', // Used for poster images.
 					'amp',
 					'revisions', // Without this, the REST API will return 404 for an autosave request.
+					'custom-fields', // Used for global stories settings.
 				],
 				'rewrite'      => [
 					'slug' => self::REWRITE_SLUG,
@@ -197,6 +208,53 @@ class AMP_Story_Post_Type {
 
 		add_action( 'wp_enqueue_scripts', [ __CLASS__, 'add_custom_stories_styles' ] );
 
+		add_action(
+			'amp_story_head',
+			function() {
+				// Theme support for title-tag is implied for stories. See _wp_render_title_tag().
+				echo '<title>' . esc_html( wp_get_document_title() ) . '</title>' . "\n";
+			},
+			1
+		);
+		add_action( 'amp_story_head', 'wp_enqueue_scripts', 1 );
+		add_action(
+			'amp_story_head',
+			function() {
+				/*
+				 * Same as wp_print_styles() but importantly omitting the wp_print_styles action, which themes/plugins
+				 * can use to output arbitrary styling. Styling is constrained in story template via the
+				 * \AMP_Story_Post_Type::filter_frontend_print_styles_array() method.
+				 */
+				wp_styles()->do_items();
+			},
+			8
+		);
+		add_action( 'amp_story_head', 'amp_add_generator_metadata' );
+		add_action( 'amp_story_head', 'rest_output_link_wp_head', 10, 0 );
+		add_action( 'amp_story_head', 'wp_resource_hints', 2 );
+		add_action( 'amp_story_head', 'feed_links', 2 );
+		add_action( 'amp_story_head', 'feed_links_extra', 3 );
+		add_action( 'amp_story_head', 'rsd_link' );
+		add_action( 'amp_story_head', 'wlwmanifest_link' );
+		add_action( 'amp_story_head', 'adjacent_posts_rel_link_wp_head', 10, 0 );
+		add_action( 'amp_story_head', 'noindex', 1 );
+		add_action( 'amp_story_head', 'wp_generator' );
+		add_action( 'amp_story_head', 'rel_canonical' );
+		add_action( 'amp_story_head', 'wp_shortlink_wp_head', 10, 0 );
+		add_action( 'amp_story_head', 'wp_site_icon', 99 );
+		add_action( 'amp_story_head', 'wp_oembed_add_discovery_links' );
+
+		// Disable admin bar from even trying to be output, since wp_head and wp_footer hooks are not on the template.
+		add_filter(
+			'show_admin_bar',
+			static function( $show ) {
+				if ( is_singular( self::POST_TYPE_SLUG ) ) {
+					$show = false;
+				}
+				return $show;
+			}
+		);
+
 		// Remove unnecessary settings.
 		add_filter( 'block_editor_settings', [ __CLASS__, 'filter_block_editor_settings' ], 10, 2 );
 
@@ -235,6 +293,7 @@ class AMP_Story_Post_Type {
 		add_filter( 'classic_editor_enabled_editors_for_post_type', [ __CLASS__, 'filter_enabled_editors_for_story_post_type' ], PHP_INT_MAX, 2 );
 
 		self::register_block_latest_stories();
+		self::register_block_page_attachment();
 
 		register_block_type(
 			'amp/amp-story-post-author',
@@ -301,6 +360,31 @@ class AMP_Story_Post_Type {
 		);
 
 		add_action( 'wp_head', [ __CLASS__, 'print_feed_link' ] );
+
+		// Register story settings meta.
+		$stories_settings_definitions = self::get_stories_settings_definitions();
+
+		foreach ( $stories_settings_definitions as $option_key => $definition ) {
+			$meta_args = isset( $definition['meta_args'] )
+				? (array) $definition['meta_args']
+				: [];
+
+			$meta_args_defaults = [
+				'type'           => 'string',
+				'object_subtype' => self::POST_TYPE_SLUG,
+				'description'    => '',
+				'single'         => true,
+				'show_in_rest'   => true,
+			];
+
+			register_meta(
+				'post',
+				self::STORY_SETTINGS_META_PREFIX . $option_key,
+				wp_parse_args( $meta_args, $meta_args_defaults )
+			);
+		}
+
+		add_action( 'wp_insert_post', [ __CLASS__, 'add_story_settings_meta_to_new_story' ], 10, 3 );
 
 		AMP_Story_Media::init();
 	}
@@ -722,20 +806,22 @@ class AMP_Story_Post_Type {
 
 		wp_enqueue_style(
 			self::AMP_STORIES_EDITOR_STYLE_HANDLE,
-			amp_get_asset_url( 'css/amp-stories-editor.css' ),
-			[ 'wp-edit-blocks' ],
-			AMP__VERSION
-		);
-
-		wp_enqueue_style(
-			self::AMP_STORIES_EDITOR_STYLE_HANDLE . '-compiled',
 			amp_get_asset_url( 'css/amp-stories-editor-compiled.css' ),
 			[ 'wp-edit-blocks', 'amp-stories' ],
 			AMP__VERSION
 		);
 
 		wp_styles()->add_data( self::AMP_STORIES_EDITOR_STYLE_HANDLE, 'rtl', 'replace' );
-		wp_styles()->add_data( self::AMP_STORIES_EDITOR_STYLE_HANDLE . '-compiled', 'rtl', 'replace' );
+
+		// Include all fonts in the editor since new fonts can be selected at runtime.
+		// In a frontend context, the fonts are added only as needed via \AMP_Story_Post_Type::render_block_with_google_fonts().
+		$fonts = self::get_fonts();
+		foreach ( $fonts as $font ) {
+			wp_add_inline_style(
+				self::AMP_STORIES_EDITOR_STYLE_HANDLE,
+				self::get_inline_font_style_rule( $font )
+			);
+		}
 
 		self::enqueue_general_styles();
 	}
@@ -753,14 +839,6 @@ class AMP_Story_Post_Type {
 		);
 
 		wp_styles()->add_data( self::AMP_STORIES_STYLE_HANDLE, 'rtl', 'replace' );
-
-		$fonts = self::get_fonts();
-		foreach ( $fonts as $font ) {
-			wp_add_inline_style(
-				self::AMP_STORIES_STYLE_HANDLE,
-				self::get_inline_font_style_rule( $font )
-			);
-		}
 	}
 
 	/**
@@ -900,6 +978,59 @@ class AMP_Story_Post_Type {
 			);
 		}
 
+		/**
+		 * Filter list of allowed video mime types.
+		 *
+		 * This can be used to add additionally supported formats, for example by plugins
+		 * that do video transcoding.
+		 *
+		 * @since 1.3
+		 *
+		 * @param array Allowed video mime types.
+		 */
+		$allowed_video_mime_types = apply_filters( 'amp_story_allowed_video_types', [ 'video/mp4' ] );
+
+		// If `$allowed_video_mime_types` doesn't have valid data or is empty add default supported type.
+		if ( ! is_array( $allowed_video_mime_types ) || empty( $allowed_video_mime_types ) ) {
+			$allowed_video_mime_types = [ 'video/mp4' ];
+		}
+
+		// Only add currently supported mime types.
+		$allowed_video_mime_types = array_values( array_intersect( $allowed_video_mime_types, wp_get_mime_types() ) );
+
+		// Convert auto advancement.
+		$meta_definitions         = self::get_stories_settings_definitions();
+		$auto_advancement_options = $meta_definitions['auto_advance_after']['data']['options'];
+
+		/**
+		 * Filters the list of allowed post types for use in page attachments.
+		 *
+		 * @since 1.3
+		 *
+		 * @param array Allowed post types.
+		 */
+		$page_attachment_post_types = apply_filters( 'amp_story_allowed_page_attachment_post_types', [ 'page', 'post' ] );
+		$post_types                 = [];
+		foreach ( $page_attachment_post_types as $post_type ) {
+			$post_type_object = get_post_type_object( $post_type );
+
+			if ( $post_type_object ) {
+				$post_types[ $post_type ] = ! empty( $post_type_object->rest_base ) ? $post_type_object->rest_base : $post_type_object->name;
+			}
+		}
+
+		wp_localize_script(
+			self::AMP_STORIES_SCRIPT_HANDLE,
+			'ampStoriesEditorSettings',
+			[
+				'allowedVideoMimeTypes'          => $allowed_video_mime_types,
+				'allowedPageAttachmentPostTypes' => $post_types,
+				'storySettings'                  => [
+					'autoAdvanceAfterOptions' => $auto_advancement_options,
+				],
+			]
+		);
+
 		wp_localize_script(
 			self::AMP_STORIES_SCRIPT_HANDLE,
 			'ampStoriesFonts',
@@ -982,10 +1113,12 @@ class AMP_Story_Post_Type {
 	 */
 	public static function get_fonts() {
 		static $fonts = null;
+
 		if ( isset( $fonts ) ) {
 			return $fonts;
 		}
 
+		// Default system fonts.
 		$fonts = [
 			[
 				'name'      => 'Arial',
@@ -998,11 +1131,6 @@ class AMP_Story_Post_Type {
 			[
 				'name'      => 'Arial Narrow',
 				'fallbacks' => [ 'Arial', 'sans-serif' ],
-			],
-			[
-				'name'      => 'Arimo',
-				'gfont'     => 'Arimo:400,700',
-				'fallbacks' => [ 'sans-serif' ],
 			],
 			[
 				'name'      => 'Baskerville',
@@ -1037,16 +1165,6 @@ class AMP_Story_Post_Type {
 				'fallbacks' => [ 'Gill Sans MT', 'Calibri', 'sans-serif' ],
 			],
 			[
-				'name'      => 'Lato',
-				'gfont'     => 'Lato:400,700',
-				'fallbacks' => [ 'sans-serif' ],
-			],
-			[
-				'name'      => 'Lora',
-				'gfont'     => 'Lora:400,700',
-				'fallbacks' => [ 'serif' ],
-			],
-			[
 				'name'      => 'Lucida Bright',
 				'fallbacks' => [ 'Georgia', 'serif' ],
 			],
@@ -1055,92 +1173,12 @@ class AMP_Story_Post_Type {
 				'fallbacks' => [ 'Lucida Console', 'monaco', 'Bitstream Vera Sans Mono', 'monospace' ],
 			],
 			[
-				'name'      => 'Merriweather',
-				'gfont'     => 'Merriweather:400,700',
-				'fallbacks' => [ 'serif' ],
-			],
-			[
-				'name'      => 'Montserrat',
-				'gfont'     => 'Montserrat:400,700',
-				'fallbacks' => [ 'sans-serif' ],
-			],
-			[
-				'name'      => 'Noto Sans',
-				'gfont'     => 'Noto Sans:400,700',
-				'fallbacks' => [ 'sans-serif' ],
-			],
-			[
-				'name'      => 'Open Sans',
-				'gfont'     => 'Open Sans:400,700',
-				'fallbacks' => [ 'sans-serif' ],
-			],
-			[
-				'name'      => 'Open Sans Condensed',
-				'gfont'     => 'Open Sans Condensed:400,700',
-				'fallbacks' => [ 'sans-serif' ],
-			],
-			[
-				'name'      => 'Oswald',
-				'gfont'     => 'Oswald:400,700',
-				'fallbacks' => [ 'sans-serif' ],
-			],
-			[
 				'name'      => 'Palatino',
 				'fallbacks' => [ 'Palatino Linotype', 'Palatino LT STD', 'Book Antiqua', 'Georgia', 'serif' ],
 			],
 			[
 				'name'      => 'Papyrus',
 				'fallbacks' => [ 'fantasy' ],
-			],
-			[
-				'name'      => 'Playfair Display',
-				'gfont'     => 'Playfair Display:400,700',
-				'fallbacks' => [ 'serif' ],
-			],
-			[
-				'name'      => 'PT Sans',
-				'gfont'     => 'PT Sans:400,700',
-				'fallbacks' => [ 'sans-serif' ],
-			],
-			[
-				'name'      => 'PT Sans Narrow',
-				'gfont'     => 'PT Sans Narrow:400,700',
-				'fallbacks' => [ 'sans-serif' ],
-			],
-			[
-				'name'      => 'PT Serif',
-				'gfont'     => 'PT Serif:400,700',
-				'fallbacks' => [ 'serif' ],
-			],
-			[
-				'name'      => 'Raleway',
-				'gfont'     => 'Raleway:400,700',
-				'fallbacks' => [ 'sans-serif' ],
-			],
-			[
-				'name'      => 'Roboto',
-				'gfont'     => 'Roboto:400,700',
-				'fallbacks' => [ 'sans-serif' ],
-			],
-			[
-				'name'      => 'Roboto Condensed',
-				'gfont'     => 'Roboto Condensed:400,700',
-				'fallbacks' => [ 'sans-serif' ],
-			],
-			[
-				'name'      => 'Roboto Slab',
-				'gfont'     => 'Roboto Slab:400,700',
-				'fallbacks' => [ 'serif' ],
-			],
-			[
-				'name'      => 'Slabo 27px',
-				'gfont'     => 'Slabo 27px:400,700',
-				'fallbacks' => [ 'serif' ],
-			],
-			[
-				'name'      => 'Source Sans Pro',
-				'gfont'     => 'Source Sans Pro:400,700',
-				'fallbacks' => [ 'sans-serif' ],
 			],
 			[
 				'name'      => 'Tahoma',
@@ -1155,15 +1193,15 @@ class AMP_Story_Post_Type {
 				'fallbacks' => [ 'Lucida Grande', 'Lucida Sans Unicode', 'Lucida Sans', 'Tahoma', 'sans-serif' ],
 			],
 			[
-				'name'      => 'Ubuntu',
-				'gfont'     => 'Ubuntu:400,700',
-				'fallbacks' => [ 'sans-serif' ],
-			],
-			[
 				'name'      => 'Verdana',
 				'fallbacks' => [ 'Geneva', 'sans-serif' ],
 			],
 		];
+		$file  = __DIR__ . '/data/fonts.json';
+		$fonts = array_merge( $fonts, self::get_google_fonts( $file ) );
+
+		$columns = wp_list_pluck( $fonts, 'name' );
+		array_multisort( $columns, SORT_ASC, $fonts );
 
 		$fonts_url = 'https://fonts.googleapis.com/css';
 		$subsets   = [ 'latin', 'latin-ext' ];
@@ -1190,7 +1228,7 @@ class AMP_Story_Post_Type {
 			static function ( $font ) use ( $fonts_url, $subsets ) {
 				$font['slug'] = sanitize_title( $font['name'] );
 
-				if ( isset( $font['gfont'] ) ) {
+				if ( ! empty( $font['gfont'] ) ) {
 					$font['handle'] = sprintf( '%s-font', $font['slug'] );
 					$font['src']    = add_query_arg(
 						[
@@ -1207,6 +1245,87 @@ class AMP_Story_Post_Type {
 		);
 
 		return $fonts;
+	}
+
+	/**
+	 * Get list of Google Fonts from a given JSON file.
+	 *
+	 * @param string $file  Path to file containing Google Fonts definitions.
+	 *
+	 * @return array $fonts Fonts list.
+	 */
+	public static function get_google_fonts( $file ) {
+		if ( ! is_readable( $file ) ) {
+			return [];
+		}
+		$file_content = file_get_contents( $file );  // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$google_fonts = json_decode( $file_content, true );
+
+		if ( empty( $google_fonts ) ) {
+			return [];
+		}
+
+		$fonts = [];
+
+		foreach ( $google_fonts as $font ) {
+			$variants = array_intersect(
+				$font['variants'],
+				[
+					'regular',
+					'italic',
+					'700',
+					'700italic',
+				]
+			);
+
+			$variants = array_map(
+				static function ( $variant ) {
+					$variant = str_replace(
+						[ '0italic', 'regular', 'italic' ],
+						[ '0i', '400', '400i' ],
+						$variant
+					);
+
+					return $variant;
+				},
+				$variants
+			);
+
+			$gfont = '';
+
+			if ( $variants ) {
+				$gfont = $font['family'] . ':' . implode( ',', $variants );
+			}
+
+			$fonts[] = [
+				'name'      => $font['family'],
+				'fallbacks' => (array) self::get_font_fallback( $font['category'] ),
+				'gfont'     => $gfont,
+			];
+		}
+
+		return $fonts;
+	}
+
+	/**
+	 * Helper method to lookup fallback font.
+	 *
+	 * @param string $category Google font category.
+	 *
+	 * @return string $fallback Fallback font.
+	 */
+	public static function get_font_fallback( $category ) {
+		switch ( $category ) {
+			case 'sans-serif':
+				return 'sans-serif';
+			case 'handwriting':
+			case 'display':
+				return 'cursive';
+			case 'monospace':
+				return 'monospace';
+			default:
+				return 'serif';
+		}
 	}
 
 	/**
@@ -1263,6 +1382,8 @@ class AMP_Story_Post_Type {
 	/**
 	 * Include any required Google Font styles when rendering a block in AMP Stories.
 	 *
+	 * @see AMP_Story_Post_Type::enqueue_block_editor_styles() Where fonts are added in the story editor.
+	 *
 	 * @param string $block_content The block content about to be appended.
 	 * @param array  $block         The full block, including name and attributes.
 	 * @return string Block content.
@@ -1270,28 +1391,28 @@ class AMP_Story_Post_Type {
 	public static function render_block_with_google_fonts( $block_content, $block ) {
 		$font_family_attribute = 'ampFontFamily';
 
-		// Short-circuit if no font family present.
 		if ( empty( $block['attrs'][ $font_family_attribute ] ) ) {
 			return $block_content;
 		}
 
-		// Short-circuit if there is no Google Font or the font is already enqueued.
 		$font = self::get_font( $block['attrs'][ $font_family_attribute ] );
-		if ( ! isset( $font['handle'], $font['src'] ) || ! $font || wp_style_is( $font['handle'] ) ) {
+		if ( ! $font ) {
 			return $block_content;
 		}
 
-		if ( ! wp_style_is( $font['handle'], 'registered' ) ) {
-			wp_register_style( $font['handle'], $font['src'], [], null, 'all' ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
-		}
-
-		wp_enqueue_style( $font['handle'] );
-		wp_add_inline_style(
-			$font['handle'],
+		// Create style rule for the custom font. The style sanitizer will de-duplicate.
+		$style = sprintf(
+			'<style data-font-family="%s">%s</style>',
+			esc_attr( $font['name'] ),
 			self::get_inline_font_style_rule( $font )
 		);
 
-		return $block_content;
+		// Make sure that the Google Font is enqueued.
+		if ( isset( $font['src'], $font['handle'] ) && ! wp_style_is( $font['handle'] ) ) {
+			wp_enqueue_style( $font['handle'], $font['src'], [], null, 'all' ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+		}
+
+		return $style . $block_content;
 	}
 
 	/**
@@ -1747,6 +1868,101 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
+	 * Registers the Page Attachment block.
+	 */
+	public static function register_block_page_attachment() {
+		register_block_type(
+			'amp/amp-story-page-attachment',
+			[
+				'attributes'      => [
+					'postId'          => [
+						'type' => 'number',
+					],
+					'title'           => [
+						'type'    => 'string',
+						'default' => '',
+					],
+					'openText'        => [
+						'type'    => 'string',
+						'default' => __( 'Swipe up', 'amp' ),
+					],
+					'theme'           => [
+						'type'    => 'string',
+						'default' => 'light',
+					],
+					'wrapperStyle'    => [
+						'type'    => 'object',
+						'default' => [],
+					],
+					'attachmentClass' => [
+						'type'    => 'string',
+						'default' => 'amp-page-attachment-content',
+					],
+				],
+				'render_callback' => [ __CLASS__, 'render_block_page_attachment' ],
+			]
+		);
+	}
+
+	/**
+	 * Renders the dynamic block Page Attachment.
+	 *
+	 * @param array $attributes The block attributes.
+	 * @return string $markup The rendered block markup.
+	 */
+	public static function render_block_page_attachment( $attributes ) {
+		global $post;
+
+		if ( empty( $attributes['postId'] ) ) {
+			return null;
+		}
+
+		$content_post = get_post( absint( $attributes['postId'] ) );
+
+		if ( empty( $content_post ) ) {
+			return null;
+		}
+
+		$original_post = $post;
+		$post          = $content_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		// Remove filter for not adding grid layer to blocks within the attachment content.
+		remove_filter( 'render_block', [ __CLASS__, 'render_block_with_grid_layer' ], 10 );
+
+		setup_postdata( $content_post );
+
+		$style = '';
+		if ( isset( $attributes['wrapperStyle']['backgroundColor'] ) ) {
+			$style .= 'background-color:' . $attributes['wrapperStyle']['backgroundColor'] . ';';
+		}
+		if ( isset( $attributes['wrapperStyle']['color'] ) ) {
+			$style .= 'color:' . $attributes['wrapperStyle']['color'] . ';';
+		}
+
+		ob_start();
+		?>
+		<amp-story-page-attachment layout="nodisplay" theme="light" data-cta-text="<?php echo esc_attr( $attributes['openText'] ); ?>" data-title="<?php echo esc_attr( $attributes['title'] ); ?>">
+			<div class="<?php echo esc_attr( $attributes['attachmentClass'] ); ?>" style="<?php echo esc_attr( $style ); ?>">
+				<h2><?php the_title(); ?></h2>
+				<div class="amp-page-attachment-inner-content">
+					<?php the_content(); ?>
+				</div>
+			</div>
+		</amp-story-page-attachment>
+		<?php
+		wp_reset_postdata();
+
+		// Add filter back.
+		add_filter( 'render_block', [ __CLASS__, 'render_block_with_grid_layer' ], 10, 2 );
+
+		$output = ob_get_clean();
+
+		$post = $original_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		return $output;
+	}
+
+	/**
 	 * Add RSS feed link for stories.
 	 *
 	 * @since 1.2
@@ -2028,5 +2244,101 @@ class AMP_Story_Post_Type {
 		fpassthru( $fo );
 		unlink( $file );
 		die();
+	}
+
+	/**
+	 * Returns the definitions for the stories settings.
+	 *
+	 * @since 1.3
+	 *
+	 * @return array
+	 *
+	 * - meta_args array Arguments passed to `register_meta`; sanitize_callback is required.
+	 * - data      array Any additional data.
+	 */
+	public static function get_stories_settings_definitions() {
+		return [
+			'auto_advance_after'          => [
+				'meta_args' => [
+					'type'              => 'string',
+					'sanitize_callback' => function( $value ) {
+						$valid_values = [ '', 'auto', 'time', 'media' ];
+
+						if ( ! in_array( $value, $valid_values, true ) ) {
+							return '';
+						}
+						return $value;
+					},
+				],
+				'data'      => [
+					'options' => [
+						[
+							'value'       => '',
+							'label'       => __( 'Manual', 'amp' ),
+							'description' => '',
+						],
+						[
+							'value'       => 'auto',
+							'label'       => __( 'Automatic', 'amp' ),
+							'description' => __( 'Based on the duration of all animated blocks on the page', 'amp' ),
+						],
+						[
+							'value'       => 'time',
+							'label'       => __( 'After a certain time', 'amp' ),
+							'description' => '',
+						],
+						[
+							'value'       => 'media',
+							'label'       => __( 'After media has played', 'amp' ),
+							'description' => __( 'Based on the first media block encountered on the page', 'amp' ),
+						],
+					],
+				],
+			],
+			'auto_advance_after_duration' => [
+				'meta_args' => [
+					'type'              => 'integer',
+					'sanitize_callback' => function( $value ) {
+						$value = intval( $value );
+
+						return filter_var(
+							$value,
+							FILTER_VALIDATE_INT,
+							[
+								'default'   => 0,
+								'min_range' => 1,
+								'max_range' => 100,
+							]
+						);
+					},
+				],
+				'data'      => [],
+			],
+		];
+	}
+
+	/**
+	 * Adds stories global settings as post meta to all new Stories.
+	 *
+	 * @param int      $post_id New Story post ID.
+	 * @param \WP_Post $post    Story post object.
+	 * @param bool     $update  Whether this is an update or a new post being created.
+	 *
+	 * @return void
+	 */
+	public static function add_story_settings_meta_to_new_story( $post_id, $post, $update ) {
+		$is_story = ( self::POST_TYPE_SLUG === $post->post_type );
+
+		if ( $update || ! $is_story ) {
+			return;
+		}
+
+		$meta_definitions = self::get_stories_settings_definitions();
+		$story_settings   = AMP_Options_Manager::get_option( self::STORY_SETTINGS_OPTION );
+
+		foreach ( $story_settings as $option_key => $value ) {
+			$sanitized_value = call_user_func( $meta_definitions[ $option_key ]['meta_args']['sanitize_callback'], $value );
+			add_post_meta( $post_id, self::STORY_SETTINGS_META_PREFIX . $option_key, $sanitized_value, true );
+		}
 	}
 }

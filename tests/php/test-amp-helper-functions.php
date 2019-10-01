@@ -22,9 +22,10 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 */
 	public function tearDown() {
 		remove_theme_support( AMP_Theme_Support::SLUG );
-		global $wp_scripts, $pagenow;
-		$wp_scripts = null;
-		$pagenow    = 'index.php'; // Since clean_up_global_scope() doesn't.
+		global $wp_scripts, $pagenow, $show_admin_bar;
+		$wp_scripts     = null;
+		$show_admin_bar = null;
+		$pagenow        = 'index.php'; // Since clean_up_global_scope() doesn't.
 
 		if ( class_exists( 'WP_Block_Type_Registry' ) ) {
 			foreach ( WP_Block_Type_Registry::get_instance()->get_all_registered() as $block ) {
@@ -268,15 +269,15 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	public function get_amphtml_urls() {
 		$post_id = self::factory()->post->create();
 		return [
-			'home' => [
+			'is_home' => [
 				home_url( '/' ),
 				add_query_arg( amp_get_slug(), '', home_url( '/' ) ),
 			],
-			'404'  => [
+			'is_404'  => [
 				home_url( '/no-existe/' ),
 				add_query_arg( amp_get_slug(), '', home_url( '/no-existe/' ) ),
 			],
-			'post' => [
+			'is_post' => [
 				get_permalink( $post_id ),
 				amp_get_permalink( $post_id ),
 			],
@@ -291,8 +292,45 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * @param string $canonical_url Canonical URL.
 	 * @param string $amphtml_url   The amphtml URL.
 	 */
-	public function test_amp_add_amphtml_link( $canonical_url, $amphtml_url ) {
+	public function test_amp_add_amphtml_link_reader_mode( $canonical_url, $amphtml_url ) {
+		$this->assertFalse( current_theme_supports( AMP_Theme_Support::SLUG ) );
+		$this->assertFalse( amp_is_canonical() );
+		$get_amp_html_link = static function() {
+			return get_echo( 'amp_add_amphtml_link' );
+		};
+
+		$assert_amphtml_link_present = function() use ( $amphtml_url, $get_amp_html_link ) {
+			$this->assertEquals(
+				sprintf( '<link rel="amphtml" href="%s">', esc_url( $amphtml_url ) ),
+				$get_amp_html_link()
+			);
+		};
+
+		$this->go_to( $canonical_url );
+		$assert_amphtml_link_present();
+
+		// Make sure adding the filter hides the amphtml link.
+		add_filter( 'amp_frontend_show_canonical', '__return_false' );
+		$this->assertEmpty( $get_amp_html_link() );
+		remove_filter( 'amp_frontend_show_canonical', '__return_false' );
+		$assert_amphtml_link_present();
+	}
+
+	/**
+	 * Adding link when theme support in transitional mode.
+	 *
+	 * @dataProvider get_amphtml_urls
+	 * @covers ::amp_add_amphtml_link()
+	 * @param string $canonical_url Canonical URL.
+	 * @param string $amphtml_url   The amphtml URL.
+	 */
+	public function test_amp_add_amphtml_link_transitional_mode( $canonical_url, $amphtml_url ) {
+		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
+		AMP_Theme_Support::read_theme_support();
+		AMP_Theme_Support::init();
+		$this->assertTrue( current_theme_supports( AMP_Theme_Support::SLUG ) );
+		$this->assertFalse( amp_is_canonical() );
 
 		$get_amp_html_link = static function() {
 			return get_echo( 'amp_add_amphtml_link' );
@@ -315,15 +353,6 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$assert_amphtml_link_present();
 
 		// Make sure that the link is not provided when there are validation errors associated with the URL.
-		add_theme_support(
-			AMP_Theme_Support::SLUG,
-			[
-				'template_dir' => './',
-			]
-		);
-		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::STANDARD_MODE_SLUG );
-		AMP_Theme_Support::read_theme_support();
-		AMP_Theme_Support::init();
 		$invalid_url_post_id = AMP_Validated_URL_Post_Type::store_validation_errors(
 			[
 				[ 'code' => 'foo' ],
@@ -331,10 +360,12 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			$canonical_url
 		);
 		$this->assertNotInstanceOf( 'WP_Error', $invalid_url_post_id );
+		$this->assertContains( '<!--', $get_amp_html_link() );
+		$this->assertTrue( AMP_Theme_Support::is_paired_available() );
 
 		// Allow the URL when the errors are forcibly sanitized.
-		$this->assertContains( '<!--', $get_amp_html_link() );
 		add_filter( 'amp_validation_error_sanitized', '__return_true' );
+		$this->assertTrue( AMP_Theme_Support::is_paired_available() );
 		$assert_amphtml_link_present();
 	}
 
@@ -481,6 +512,39 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test amp_get_asset_url.
+	 *
+	 * @covers ::amp_get_asset_url()
+	 */
+	public function test_amp_get_asset_url() {
+		$this->assertStringEndsWith( '/assets/foo.jpg', amp_get_asset_url( 'foo.jpg' ) );
+	}
+
+	/**
+	 * Test amp_get_boilerplate_code.
+	 *
+	 * @covers ::amp_get_boilerplate_code()
+	 */
+	public function test_amp_get_boilerplate_code() {
+		$boilerplate_code = amp_get_boilerplate_code();
+		$this->assertStringStartsWith( '<style amp-boilerplate>', $boilerplate_code );
+		$this->assertContains( '<noscript><style amp-boilerplate>', $boilerplate_code );
+	}
+
+	/**
+	 * Test amp_get_boilerplate_stylesheets.
+	 *
+	 * @covers ::amp_get_boilerplate_stylesheets()
+	 */
+	public function test_amp_get_boilerplate_stylesheets() {
+		$stylesheets = amp_get_boilerplate_stylesheets();
+		$this->assertInternalType( 'array', $stylesheets );
+		$this->assertCount( 2, $stylesheets );
+		$this->assertContains( 'body{-webkit-animation:-amp-start', $stylesheets[0] );
+		$this->assertContains( 'body{-webkit-animation:none', $stylesheets[1] );
+	}
+
+	/**
 	 * Test amp_add_generator_metadata.
 	 *
 	 * @covers ::amp_add_generator_metadata()
@@ -596,6 +660,33 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test amp_is_dev_mode().
+	 *
+	 * @covers ::amp_is_dev_mode()
+	 */
+	public function test_amp_is_dev_mode() {
+		$this->assertFalse( amp_is_dev_mode() );
+		add_filter( 'amp_dev_mode_enabled', '__return_true' );
+		$this->assertTrue( amp_is_dev_mode() );
+		remove_filter( 'amp_dev_mode_enabled', '__return_true' );
+		$this->assertFalse( amp_is_dev_mode() );
+
+		// Test authenticated user with admin bar showing.
+		add_filter( 'show_admin_bar', '__return_true' );
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$this->assertTrue( is_admin_bar_showing() );
+		$this->assertTrue( is_user_logged_in() );
+		$this->assertTrue( amp_is_dev_mode() );
+
+		// Test unauthenticated user with admin bar forced.
+		add_filter( 'show_admin_bar', '__return_true' );
+		wp_set_current_user( 0 );
+		$this->assertFalse( is_user_logged_in() );
+		$this->assertTrue( is_admin_bar_showing() );
+		$this->assertFalse( amp_is_dev_mode() );
+	}
+
+	/**
 	 * Test deprecated $post param for amp_get_content_embed_handlers().
 	 *
 	 * @covers ::amp_get_content_embed_handlers()
@@ -642,10 +733,62 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 				return $classes;
 			}
 		);
-		$orderd_sanitizers = array_keys( amp_get_content_sanitizers() );
-		$this->assertEquals( 'Even_After_Whitelist_Sanitizer', $orderd_sanitizers[ count( $orderd_sanitizers ) - 3 ] );
-		$this->assertEquals( 'AMP_Style_Sanitizer', $orderd_sanitizers[ count( $orderd_sanitizers ) - 2 ] );
-		$this->assertEquals( 'AMP_Tag_And_Attribute_Sanitizer', $orderd_sanitizers[ count( $orderd_sanitizers ) - 1 ] );
+		$ordered_sanitizers = array_keys( amp_get_content_sanitizers() );
+		$this->assertEquals( 'Even_After_Whitelist_Sanitizer', $ordered_sanitizers[ count( $ordered_sanitizers ) - 3 ] );
+		$this->assertEquals( 'AMP_Style_Sanitizer', $ordered_sanitizers[ count( $ordered_sanitizers ) - 2 ] );
+		$this->assertEquals( 'AMP_Tag_And_Attribute_Sanitizer', $ordered_sanitizers[ count( $ordered_sanitizers ) - 1 ] );
+	}
+
+	/**
+	 * Test amp_get_content_sanitizers().
+	 *
+	 * @covers ::amp_get_content_sanitizers()
+	 */
+	public function test_amp_get_content_sanitizers_with_dev_mode() {
+		$element_xpaths = [ '//script[ @id = "hello-world" ]' ];
+		add_filter(
+			'amp_dev_mode_element_xpaths',
+			function ( $xpaths ) use ( $element_xpaths ) {
+				return array_merge( $xpaths, $element_xpaths );
+			}
+		);
+
+		// Check that AMP_Dev_Mode_Sanitizer is not registered if not in dev mode.
+		$sanitizers = amp_get_content_sanitizers();
+		$this->assertFalse( amp_is_dev_mode() );
+		$this->assertArrayNotHasKey( 'AMP_Dev_Mode_Sanitizer', $sanitizers );
+
+		// Check that AMP_Dev_Mode_Sanitizer is registered once in dev mode, but not with admin bar showing yet.
+		add_filter( 'amp_dev_mode_enabled', '__return_true' );
+		$sanitizers = amp_get_content_sanitizers();
+		$this->assertFalse( is_admin_bar_showing() );
+		$this->assertTrue( amp_is_dev_mode() );
+		$this->assertArrayHasKey( 'AMP_Dev_Mode_Sanitizer', $sanitizers );
+		$this->assertEquals( 'AMP_Dev_Mode_Sanitizer', current( array_keys( $sanitizers ) ) );
+		$this->assertEquals(
+			compact( 'element_xpaths' ),
+			$sanitizers['AMP_Dev_Mode_Sanitizer']
+		);
+		remove_filter( 'amp_dev_mode_enabled', '__return_true' );
+
+		// Check that AMP_Dev_Mode_Sanitizer is registered once in dev mode, and now also with admin bar showing.
+		add_filter( 'amp_dev_mode_enabled', '__return_true' );
+		add_filter( 'show_admin_bar', '__return_true' );
+		$sanitizers = amp_get_content_sanitizers();
+		$this->assertTrue( is_admin_bar_showing() );
+		$this->assertTrue( amp_is_dev_mode() );
+		$this->assertArrayHasKey( 'AMP_Dev_Mode_Sanitizer', $sanitizers );
+		$this->assertEqualSets(
+			array_merge(
+				$element_xpaths,
+				[
+					'//*[ @id = "wpadminbar" ]',
+					'//*[ @id = "wpadminbar" ]//*',
+					'//style[ @id = "admin-bar-inline-css" ]',
+				]
+			),
+			$sanitizers['AMP_Dev_Mode_Sanitizer']['element_xpaths']
+		);
 	}
 
 	/**

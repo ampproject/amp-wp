@@ -19,6 +19,7 @@ import {
 	Path,
 	ResponsiveWrapper,
 	SVG,
+	TextControl,
 	ToggleControl,
 	Toolbar,
 	withNotices,
@@ -41,7 +42,7 @@ import { withSelect } from '@wordpress/data';
 import { uploadVideoFrame, getPosterImageFromFileObj } from '../helpers';
 import { getContentLengthFromUrl, isVideoSizeExcessive } from '../../common/helpers';
 import { MEGABYTE_IN_BYTES, VIDEO_ALLOWED_MEGABYTES_PER_SECOND } from '../../common/constants';
-import { POSTER_ALLOWED_MEDIA_TYPES, ALLOWED_VIDEO_TYPES } from '../constants';
+import { POSTER_ALLOWED_MEDIA_TYPES } from '../constants';
 
 const icon = <SVG viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><Path fill="none" d="M0 0h24v24H0V0z" /><Path d="M4 6.47L5.76 10H20v8H4V6.47M22 4h-4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4z" /></SVG>;
 
@@ -65,10 +66,6 @@ class CustomVideoBlockEdit extends Component {
 		};
 
 		this.videoPlayer = createRef();
-		this.toggleAttribute = this.toggleAttribute.bind( this );
-		this.onSelectURL = this.onSelectURL.bind( this );
-		this.onUploadError = this.onUploadError.bind( this );
-		this.onLoadedMetadata = this.onLoadedMetadata.bind( this );
 	}
 
 	componentDidMount() {
@@ -77,6 +74,7 @@ class CustomVideoBlockEdit extends Component {
 			mediaUpload,
 			noticeOperations,
 			setAttributes,
+			allowedVideoMimeTypes,
 		} = this.props;
 		const { id, src = '' } = attributes;
 
@@ -93,7 +91,7 @@ class CustomVideoBlockEdit extends Component {
 						this.setState( { editing: true } );
 						noticeOperations.createErrorNotice( message );
 					},
-					allowedTypes: ALLOWED_VIDEO_TYPES,
+					allowedTypes: allowedVideoMimeTypes,
 				} );
 			}
 		}
@@ -124,6 +122,15 @@ class CustomVideoBlockEdit extends Component {
 			return;
 		}
 
+		if ( media && media !== prevProps.media && ! attributes.ampAriaLabel ) {
+			/*
+			 * New video set from media library and we don't have an aria label already,
+			 * use alt text or title from media object.
+			 */
+			const ampAriaLabel = media.alt_text || ( media.title && media.title.raw ) || '';
+			setAttributes( { ampAriaLabel } );
+		}
+
 		if ( videoFeaturedImage ) {
 			setAttributes( { poster: videoFeaturedImage.source_url } );
 		} else if ( media && media !== prevProps.media && ! media.featured_media && ! this.state.extractingPoster ) {
@@ -145,13 +152,24 @@ class CustomVideoBlockEdit extends Component {
 		}
 	}
 
-	toggleAttribute( attribute ) {
+	/**
+	 * Callback to toggle an attribute's value.
+	 *
+	 * @param {string} attribute Attribute name.
+	 * @return {Function} Function that updates the block's attributes.
+	 */
+	toggleAttribute = ( attribute ) => {
 		return ( newValue ) => {
 			this.props.setAttributes( { [ attribute ]: newValue } );
 		};
-	}
+	};
 
-	onSelectURL( newSrc ) {
+	/**
+	 * URL selection callback.
+	 *
+	 * @param {string} newSrc New src value.
+	 */
+	onSelectURL = ( newSrc ) => {
 		const { attributes, setAttributes } = this.props;
 		const { src } = attributes;
 
@@ -175,19 +193,29 @@ class CustomVideoBlockEdit extends Component {
 		}
 
 		this.setState( { editing: false, duration: null, videoSize: null } );
-	}
+	};
 
-	onUploadError( message ) {
+	/**
+	 * Upload error callback.
+	 *
+	 * @param {string} message Error message.
+	 */
+	onUploadError = ( message ) => {
 		const { noticeOperations } = this.props;
 		noticeOperations.removeAllNotices();
 		noticeOperations.createErrorNotice( message );
-	}
+	};
 
-	onLoadedMetadata( event ) {
+	/**
+	 * Metadata loaded callback.
+	 *
+	 * @param {Event} event Event object.
+	 */
+	onLoadedMetadata = ( event ) => {
 		const duration = Math.round( event.currentTarget.duration );
 
 		this.setState( { duration } );
-	}
+	};
 
 	render() {
 		const {
@@ -197,6 +225,7 @@ class CustomVideoBlockEdit extends Component {
 			noticeUI,
 			attributes,
 			setAttributes,
+			allowedVideoMimeTypes,
 		} = this.props;
 		const {
 			caption,
@@ -205,6 +234,7 @@ class CustomVideoBlockEdit extends Component {
 			src,
 			width,
 			height,
+			ampAriaLabel,
 		} = attributes;
 
 		const { editing } = this.state;
@@ -233,8 +263,8 @@ class CustomVideoBlockEdit extends Component {
 					className={ className }
 					onSelect={ onSelectVideo }
 					onSelectURL={ this.onSelectURL }
-					accept="video/mp4"
-					allowedTypes={ ALLOWED_VIDEO_TYPES }
+					accept={ allowedVideoMimeTypes.join( ',' ) }
+					allowedTypes={ allowedVideoMimeTypes }
 					value={ this.props.attributes }
 					notices={ noticeUI }
 					onError={ this.onUploadError }
@@ -265,6 +295,12 @@ class CustomVideoBlockEdit extends Component {
 							label={ __( 'Loop', 'amp' ) }
 							onChange={ this.toggleAttribute( 'loop' ) }
 							checked={ loop }
+						/>
+						<TextControl
+							label={ __( 'Assistive Text', 'amp' ) }
+							help={ __( 'Used to inform visually impaired users about the video content.', 'amp' ) }
+							value={ ampAriaLabel }
+							onChange={ ( label ) => setAttributes( { ampAriaLabel: label } ) }
 						/>
 						{ ( ! this.state.extractingPoster || poster ) && (
 							<MediaUploadCheck>
@@ -342,6 +378,7 @@ class CustomVideoBlockEdit extends Component {
 					<video
 						autoPlay
 						muted
+						aria-label={ ampAriaLabel }
 						loop={ loop }
 						controls={ ! loop }
 						poster={ poster }
@@ -369,6 +406,7 @@ CustomVideoBlockEdit.propTypes = {
 		caption: PropTypes.string,
 		controls: PropTypes.bool,
 		loop: PropTypes.bool,
+		ampAriaLabel: PropTypes.string,
 		id: PropTypes.number,
 		poster: PropTypes.string,
 		src: PropTypes.string,
@@ -386,11 +424,13 @@ CustomVideoBlockEdit.propTypes = {
 	videoFeaturedImage: PropTypes.shape( {
 		source_url: PropTypes.string,
 	} ),
+	allowedVideoMimeTypes: PropTypes.arrayOf( PropTypes.string ).isRequired,
 };
 
 export default compose( [
 	withSelect( ( select, { attributes } ) => {
 		const { getMedia } = select( 'core' );
+		const { getSettings } = select( 'amp/story' );
 
 		let videoFeaturedImage;
 
@@ -402,9 +442,12 @@ export default compose( [
 			videoFeaturedImage = getMedia( media.featured_media );
 		}
 
+		const { allowedVideoMimeTypes } = getSettings();
+
 		return {
 			media,
 			videoFeaturedImage,
+			allowedVideoMimeTypes,
 		};
 	} ),
 	withNotices,
