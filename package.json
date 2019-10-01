@@ -57,7 +57,7 @@
     "@wordpress/plugins": "2.7.1",
     "@wordpress/postcss-themes": "2.2.0",
     "@wordpress/rich-text": "3.7.0",
-    "@wordpress/scripts": "5.0.0",
+    "@wordpress/scripts": "5.0.1",
     "@wordpress/server-side-render": "1.1.0",
     "@wordpress/url": "2.8.0",
     "@wordpress/wordcount": "2.6.0",
