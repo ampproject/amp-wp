@@ -175,7 +175,7 @@ class EnhancedResizableBox extends Component {
 								textElement.style.width = appliedWidth + 'px';
 								textElement.style.height = appliedHeight + 'px';
 							} else if ( isText && ! ampFitText ) {
-								textElement.style.width = 'initial';
+								textElement.style.width = appliedWidth + 'px';
 							}
 						}
 
