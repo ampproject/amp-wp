@@ -4,6 +4,7 @@
 import { withSelect } from '@wordpress/data';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { render } from '@wordpress/element';
+import { F10 } from '@wordpress/keycodes';
 /**
  * Internal dependencies
  */
@@ -20,7 +21,10 @@ const applyWithSelect = withSelect( ( select, props ) => {
 
 	const { name } = props;
 
-	const onContextMenu = ( event ) => {
+	const handleEvent = ( event ) => {
+		const isKeydown = event.type === 'keydown';
+		const isContextmenu = event.type === 'contextmenu';
+
 		const selectedBlockClientIds = getSelectedBlockClientIds();
 
 		if ( selectedBlockClientIds.length === 0 ) {
@@ -36,6 +40,16 @@ const applyWithSelect = withSelect( ( select, props ) => {
 		// Let's ignore multi-selection for now.
 		if ( hasMultiSelection() || selectedText.length ) {
 			return;
+		}
+
+		// Ignore if it's a keydown event and the correct combo hasn't been pressed.
+		if ( isKeydown ) {
+			const isShift = event.getModifierState( 'Shift' );
+			const isF10 = event.keyCode === F10;
+			const isRightCombo = isShift && isF10;
+			if ( ! isRightCombo ) {
+				return;
+			}
 		}
 
 		const editLayout = document.querySelector( '.edit-post-layout' );
@@ -55,8 +69,22 @@ const applyWithSelect = withSelect( ( select, props ) => {
 		if ( toolBar ) {
 			toolBarHeight = toolBar.clientHeight;
 		}
-		const relativePositionX = event.clientX - wrapperDimensions.left;
-		const relativePositionY = event.clientY - wrapperDimensions.top - toolBarHeight;
+
+		let eventX = 0;
+		let eventY = 0;
+
+		if ( isContextmenu ) {
+			eventX = event.clientX;
+			eventY = event.clientY;
+		} else if ( isKeydown ) {
+			// Place menu in the upper left corner of the element - but a little inside it.
+			const elementPosition = event.target.getBoundingClientRect();
+			eventX = elementPosition.left + 20;
+			eventY = elementPosition.top + 20;
+		}
+
+		const relativePositionX = eventX - wrapperDimensions.left;
+		const relativePositionY = eventY - wrapperDimensions.top - toolBarHeight;
 		const clientId = getCurrentPage();
 
 		let insidePercentageY = 0;
@@ -64,11 +92,11 @@ const applyWithSelect = withSelect( ( select, props ) => {
 
 		const page = getBlockDOMNode( clientId );
 		if ( page ) {
-			const pagePostions = page.getBoundingClientRect();
-			const insideY = event.clientY - pagePostions.top;
-			const insideX = event.clientX - pagePostions.left;
-			insidePercentageY = getPercentageFromPixels( 'y', insideY );
+			const pagePosition = page.getBoundingClientRect();
+			const insideX = eventX - pagePosition.left;
+			const insideY = eventY - pagePosition.top;
 			insidePercentageX = getPercentageFromPixels( 'x', insideX );
+			insidePercentageY = getPercentageFromPixels( 'y', insideY );
 		}
 
 		render(
@@ -80,7 +108,7 @@ const applyWithSelect = withSelect( ( select, props ) => {
 	};
 
 	return {
-		onContextMenu,
+		handleEvent,
 		isReordering: isReordering(),
 	};
 } );
@@ -93,7 +121,7 @@ const applyWithSelect = withSelect( ( select, props ) => {
 export default createHigherOrderComponent(
 	( BlockEdit ) => {
 		return applyWithSelect( ( props ) => {
-			const { name, onContextMenu, isReordering } = props;
+			const { name, handleEvent, isReordering } = props;
 			const isPageBlock = 'amp/amp-story-page' === name;
 
 			// Add for page block and inner blocks.
@@ -107,7 +135,7 @@ export default createHigherOrderComponent(
 			}
 
 			return (
-				<div onContextMenu={ onContextMenu }>
+				<div tabIndex="0" role="button" onContextMenu={ handleEvent } onKeyDown={ handleEvent }>
 					<BlockEdit { ...props } />
 				</div>
 			);
