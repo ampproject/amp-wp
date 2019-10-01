@@ -80,7 +80,7 @@ const Indicator = ( { pages, currentPage, onClick } ) => {
 				};
 
 				const isPageDragged = clientId === draggedPage;
-				const isCurrentPage = clientId !== currentPage;
+				const isCurrentPage = clientId === currentPage;
 				const indicatorButton = (
 					<Button
 						onClick={ ( e ) => {
