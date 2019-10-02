@@ -20,7 +20,8 @@ import { withSafeTimeout, compose } from '@wordpress/compose';
 import withSnapTargets from '../higher-order/with-snap-targets';
 import {
 	getPixelsFromPercentage,
-	findClosestSnap, getRelativeElementPosition,
+	findClosestSnap,
+	getRelativeElementPosition,
 } from '../../helpers';
 import {
 	STORY_PAGE_INNER_WIDTH,
@@ -91,6 +92,7 @@ class Draggable extends Component {
 	 */
 	onDragOver = ( event ) => { // eslint-disable-line complexity
 		const {
+			blockName,
 			snapLines,
 			clearSnapLines,
 			setSnapLines,
@@ -104,8 +106,11 @@ class Draggable extends Component {
 			return;
 		}
 
+		const isCTABlock = 'amp/amp-story-cta' === blockName;
+
 		// Get the correct dimensions in case the block is rotated, as rotation is only applied to the clone's inner element(s).
-		const blockElement = this.cloneWrapper.querySelector( '.wp-block' );
+		// For CTA blocks, not the whole block is draggable, but only the button within.
+		const blockElement = isCTABlock ? this.cloneWrapper.querySelector( '.amp-story-cta-button' ) : this.cloneWrapper.querySelector( '.wp-block' );
 
 		// We calculate with the block's actual dimensions relative to the page it's on.
 		const {
