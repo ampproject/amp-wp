@@ -262,7 +262,6 @@ class EnhancedResizableBox extends Component {
 					const originalPos = getResizedBlockPosition( direction, blockElementLeft, blockElementTop, lastDeltaW, lastDeltaH );
 					const updatedPos = getUpdatedBlockPosition( direction, originalPos, diff );
 
-
 					blockElement.style.left = getPercentageFromPixels( 'x', updatedPos.left ) + '%';
 					blockElement.style.top = getPercentageFromPixels( 'y', updatedPos.top ) + '%';
 
