@@ -312,7 +312,6 @@ class Draggable extends Component {
 }
 
 Draggable.propTypes = {
-	clientId: PropTypes.string.isRequired,
 	blockName: PropTypes.string,
 	elementId: PropTypes.string,
 	transferData: PropTypes.shape( {
@@ -323,7 +322,6 @@ Draggable.propTypes = {
 	} ),
 	onDragStart: PropTypes.func,
 	onDragEnd: PropTypes.func,
-	clearTimeout: PropTypes.func.isRequired,
 	setTimeout: PropTypes.func.isRequired,
 	children: PropTypes.node.isRequired,
 	horizontalSnaps: PropTypes.oneOfType( [
