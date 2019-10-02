@@ -24,10 +24,10 @@ _Do not alter or remove anything below. The following sections will be managed b
 
 * <!-- One or more bullet points to describe how to test the implementation in QA. -->
 
-## Changelog entry
-
-* <!-- One sentence summarizing the PR, to be used in the changelog. -->
-
 ## Demo
 
 * <!-- A video or screenshots demoing the implementation. -->
+
+## Changelog entry
+
+* <!-- One sentence summarizing the PR, to be used in the changelog. -->
