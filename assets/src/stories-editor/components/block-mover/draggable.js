@@ -323,7 +323,7 @@ Draggable.propTypes = {
 	onDragStart: PropTypes.func,
 	onDragEnd: PropTypes.func,
 	setTimeout: PropTypes.func.isRequired,
-	children: PropTypes.node.isRequired,
+	children: PropTypes.func.isRequired,
 	horizontalSnaps: PropTypes.oneOfType( [
 		PropTypes.arrayOf( PropTypes.number ),
 		PropTypes.func,
