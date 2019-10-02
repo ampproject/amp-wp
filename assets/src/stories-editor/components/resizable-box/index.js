@@ -241,6 +241,34 @@ class EnhancedResizableBox extends Component {
 						lastDeltaW = deltaW;
 					}
 
+					const radianAngle = getRadianFromDeg( angle );
+
+					// Compare position between the initial and after resizing.
+					let initialPosition, resizedPosition;
+
+					// If it's a text block, we shouldn't consider the added padding for measuring.
+					if ( isText ) {
+						initialPosition = getBlockPositioning( width - ( TEXT_BLOCK_PADDING * 2 ), height - ( TEXT_BLOCK_PADDING * 2 ), radianAngle, direction );
+						resizedPosition = getBlockPositioning( appliedWidth - ( TEXT_BLOCK_PADDING * 2 ), appliedHeight - ( TEXT_BLOCK_PADDING * 2 ), radianAngle, direction );
+					} else {
+						initialPosition = getBlockPositioning( width, height, radianAngle, direction );
+						resizedPosition = getBlockPositioning( appliedWidth, appliedHeight, radianAngle, direction );
+					}
+					const diff = {
+						left: resizedPosition.left - initialPosition.left,
+						top: resizedPosition.top - initialPosition.top,
+					};
+
+					const originalPos = getResizedBlockPosition( direction, blockElementLeft, blockElementTop, lastDeltaW, lastDeltaH );
+					const updatedPos = getUpdatedBlockPosition( direction, originalPos, diff );
+
+
+					blockElement.style.left = getPercentageFromPixels( 'x', updatedPos.left ) + '%';
+					blockElement.style.top = getPercentageFromPixels( 'y', updatedPos.top ) + '%';
+
+					element.style.width = appliedWidth + 'px';
+					element.style.height = appliedHeight + 'px';
+
 					// Get the correct dimensions in case the block is rotated, as rotation is only applied to the clone's inner element(s).
 					// We calculate with the block's actual dimensions relative to the page it's on.
 					const {
@@ -275,35 +303,6 @@ class EnhancedResizableBox extends Component {
 							newSnapLines.push( ...this.verticalSnaps[ snap ] );
 						}
 					}
-
-					const radianAngle = getRadianFromDeg( angle );
-
-					// Compare position between the initial and after resizing.
-					let initialPosition, resizedPosition;
-
-					// If it's a text block, we shouldn't consider the added padding for measuring.
-					if ( isText ) {
-						initialPosition = getBlockPositioning( width - ( TEXT_BLOCK_PADDING * 2 ), height - ( TEXT_BLOCK_PADDING * 2 ), radianAngle, direction );
-						resizedPosition = getBlockPositioning( appliedWidth - ( TEXT_BLOCK_PADDING * 2 ), appliedHeight - ( TEXT_BLOCK_PADDING * 2 ), radianAngle, direction );
-					} else {
-						initialPosition = getBlockPositioning( width, height, radianAngle, direction );
-						resizedPosition = getBlockPositioning( appliedWidth, appliedHeight, radianAngle, direction );
-					}
-					const diff = {
-						left: resizedPosition.left - initialPosition.left,
-						top: resizedPosition.top - initialPosition.top,
-					};
-
-					const originalPos = getResizedBlockPosition( direction, blockElementLeft, blockElementTop, lastDeltaW, lastDeltaH );
-					const updatedPos = getUpdatedBlockPosition( direction, originalPos, diff );
-
-					// @todo: Do actual snapping.
-
-					blockElement.style.left = getPercentageFromPixels( 'x', updatedPos.left ) + '%';
-					blockElement.style.top = getPercentageFromPixels( 'y', updatedPos.top ) + '%';
-
-					element.style.width = appliedWidth + 'px';
-					element.style.height = appliedHeight + 'px';
 
 					lastWidth = appliedWidth;
 					lastHeight = appliedHeight;
