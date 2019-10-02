@@ -56,3 +56,4 @@ export { default as setInputSelectionToEnd } from './setInputSelectionToEnd';
 export { default as getBlockDOMNode } from './getBlockDOMNode';
 export { default as isMovableBlock } from './isMovableBlock';
 export { default as metaToAttributeNames } from './metaToAttributeNames';
+export { default as parseDropEvent } from './parseDropEvent';

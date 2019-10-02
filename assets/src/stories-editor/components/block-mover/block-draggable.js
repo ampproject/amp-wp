@@ -51,7 +51,7 @@ BlockDraggable.propTypes = {
 	clientId: PropTypes.string,
 	blockElementId: PropTypes.string,
 	blockName: PropTypes.string,
-	children: PropTypes.any.isRequired,
+	children: PropTypes.node.isRequired,
 	onDragStart: PropTypes.func,
 	onDragEnd: PropTypes.func,
 };

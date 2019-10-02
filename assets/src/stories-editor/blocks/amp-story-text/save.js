@@ -45,7 +45,11 @@ const TextBlockSave = ( { attributes } ) => {
 		<ContentTag
 			style={ styles }
 			className={ className }>
-			<amp-fit-text layout="flex-item" className="amp-text-content"><RawHTML>{ content }</RawHTML></amp-fit-text>
+			<amp-fit-text layout="flex-item" className="amp-text-content">
+				<RawHTML>
+					{ content }
+				</RawHTML>
+			</amp-fit-text>
 		</ContentTag>
 	);
 };

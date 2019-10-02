@@ -17,7 +17,11 @@ const BlockPreviewLabel = ( { content, icon, displayIcon = true, alignIcon = 'le
 		<>
 			{ displayIcon && 'left' === alignIcon && <BlockIcon icon={ icon } /> }
 			{ content.length > 20 ? `${ content.substr( 0, 20 ) }…` : content }
-			{ accessibilityText && <span className="screen-reader-text">{ accessibilityText }</span> }
+			{ accessibilityText && (
+				<span className="screen-reader-text">
+					{ accessibilityText }
+				</span>
+			) }
 			{ displayIcon && 'right' === alignIcon && <BlockIcon icon={ icon } /> }
 		</>
 	);

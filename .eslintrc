@@ -40,6 +40,15 @@
     "require-await": "error",
     "rest-spread-spacing": [ "error", "never" ],
     "react/prop-types": "error",
+    "react/jsx-closing-tag-location": "error",
+    "react/jsx-fragments": "error",
+    "react/jsx-first-prop-new-line": "error",
+    "react/jsx-max-props-per-line": [ "error", { "when":  "multiline" } ],
+    "react/jsx-no-literals": "error",
+    "react/no-unused-prop-types": "error",
+    "react/jsx-no-useless-fragment": "error",
+    "react/jsx-one-expression-per-line": "error",
+    "react/self-closing-comp": "error",
     "import/no-unresolved": [ "error", {
       "ignore": [ "jquery", "amp-block-editor-data" ]
     } ],

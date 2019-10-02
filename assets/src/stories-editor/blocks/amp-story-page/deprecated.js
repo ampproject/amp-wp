@@ -110,7 +110,7 @@ const SaveV120 = ( { attributes } ) => {
 					</amp-story-grid-layer>
 				)
 			}
-			<amp-story-grid-layer template="fill" style={ overlayStyle }></amp-story-grid-layer>
+			<amp-story-grid-layer template="fill" style={ overlayStyle } />
 			<InnerBlocks.Content />
 		</amp-story-page>
 	);
