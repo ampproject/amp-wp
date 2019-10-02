@@ -86,7 +86,7 @@ export default createHigherOrderComponent(
 			}
 
 			return (
-				<div onKeyDown={ onKeyPress }>
+				<div role="button" tabIndex="-1" onKeyDown={ onKeyPress }>
 					<BlockEdit { ...props } />
 				</div>
 			);
