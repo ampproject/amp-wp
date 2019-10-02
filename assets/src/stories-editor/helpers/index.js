@@ -61,6 +61,8 @@ import {
 import { default as MetaBlockDeprecated } from '../deprecations/story-meta-block';
 import isBlockAllowedOnPage from './isBlockAllowedOnPage';
 
+export { default as useMoveBlockToPage} from './useMoveBlockToPage';
+
 const { ampStoriesFonts } = window;
 
 const {

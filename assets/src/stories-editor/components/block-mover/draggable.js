@@ -69,13 +69,13 @@ class Draggable extends Component {
 	 * @param {Object} event The non-custom DragEvent.
 	 */
 	onDragEnd = ( event ) => {
-		const { onNeighborDrop, onNeighborHover, blockName, setTimeout, onDragEnd = noop } = this.props;
+		const { clearHighlight, dropElementByOffset, blockName, setTimeout, onDragEnd = noop } = this.props;
 		if ( event ) {
 			event.preventDefault();
 		}
 
-		// Make sure to reset hover
-		onNeighborHover( 0, true );
+		// Make sure to clear highlight.
+		clearHighlight();
 
 		// Attempt drop on neighbor if offset
 		if ( this.pageOffset !== 0 ) {
@@ -83,17 +83,23 @@ class Draggable extends Component {
 			const currentElementTop = parseInt( this.cloneWrapper.style.top );
 			const currentElementLeft = parseInt( this.cloneWrapper.style.left );
 			const newLeft = currentElementLeft - ( this.pageOffset * PAGE_AND_MARGIN );
-			const blockIsCTA = isCTABlock( blockName );
-			const baseHeight = blockIsCTA ? STORY_PAGE_INNER_HEIGHT / 5 : STORY_PAGE_INNER_HEIGHT;
-			const x = getPercentageFromPixels( 'x', newLeft, STORY_PAGE_INNER_WIDTH );
-			const y = getPercentageFromPixels( 'y', currentElementTop, baseHeight );
-			const xAttribute = blockIsCTA ? 'btnPositionLeft' : 'positionLeft';
-			const yAttribute = blockIsCTA ? 'btnPositionTop' : 'positionTop';
+
+			let baseHeight, xAttribute, yAttribute;
+			if ( isCTABlock( blockName ) ) {
+				baseHeight = STORY_PAGE_INNER_HEIGHT / 5;
+				xAttribute = 'btnPositionLeft';
+				yAttribute = 'btnPositionTop';
+			} else {
+				baseHeight = STORY_PAGE_INNER_HEIGHT;
+				xAttribute = 'positionLeft';
+				yAttribute = 'positionTop';
+			}
+
 			const newAttributes = {
-				[ xAttribute ]: x,
-				[ yAttribute ]: y,
+				[ xAttribute ]: getPercentageFromPixels( 'x', newLeft, STORY_PAGE_INNER_WIDTH ),
+				[ yAttribute ]: getPercentageFromPixels( 'y', currentElementTop, baseHeight ),
 			};
-			onNeighborDrop( this.pageOffset, newAttributes );
+			dropElementByOffset( this.pageOffset, newAttributes );
 		}
 
 		this.resetDragState();
@@ -106,7 +112,7 @@ class Draggable extends Component {
 	 * @param  {Object} event The non-custom DragEvent.
 	 */
 	onDragOver = ( event ) => {
-		const { onNeighborHover, blockName } = this.props;
+		const { setHighlightByOffset, blockName } = this.props;
 		const top = parseInt( this.cloneWrapper.style.top ) + event.clientY - this.cursorTop;
 
 		// Don't allow the CTA button to go over its top limit.
@@ -136,7 +142,7 @@ class Draggable extends Component {
 				Math.ceil( ( cursorLeftRelativeToPage - PAGE_AND_MARGIN ) / PAGE_AND_MARGIN )
 			);
 		}
-		onNeighborHover( this.pageOffset );
+		setHighlightByOffset( this.pageOffset );
 	}
 
 	onDrop = () => {
@@ -277,8 +283,9 @@ Draggable.propTypes = {
 	transferData: PropTypes.object,
 	onDragStart: PropTypes.func,
 	onDragEnd: PropTypes.func,
-	onNeighborDrop: PropTypes.func.isRequired,
-	onNeighborHover: PropTypes.func.isRequired,
+	clearHighlight: PropTypes.func.isRequired,
+	setHighlightByOffset: PropTypes.func.isRequired,
+	dropElementByOffset: PropTypes.func.isRequired,
 	setTimeout: PropTypes.func.isRequired,
 	children: PropTypes.any.isRequired,
 };
