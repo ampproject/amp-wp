@@ -88,50 +88,48 @@ const CallToActionEdit = ( {
 	};
 
 	return (
-		<>
-			<div className="amp-story-cta-button" id={ `amp-story-cta-button-${ clientId }` } style={ { top: `${ btnPositionTop }%`, left: `${ btnPositionLeft }%` } } >
-				<div className={ className } style={ { backgroundColor: appliedBackgroundColor } }>
-					{ isEditing ? (
-						<RichText
-							placeholder={ placeholder }
-							value={ text }
-							onChange={ ( value ) => setAttributes( { text: value } ) }
-							className={ textWrapperClass }
-							style={ textStyle }
-						/>
-					) : (
-						<DraggableText
-							blockElementId={ `amp-story-cta-button-${ clientId }` }
-							clientId={ clientId }
-							name={ name }
-							isDraggable={ true }
-							isEditing={ isEditing }
-							isSelected={ isSelected }
-							hasOverlay={ hasOverlay }
-							toggleIsEditing={ setIsEditing }
-							toggleOverlay={ setHasOverlay }
-							text={ text }
-							textStyle={ textStyle }
-							textWrapperClass={ textWrapperClass }
-							placeholder={ placeholder }
-						/>
-					) }
-				</div>
-				{ isSelected && isEditing && (
-					<form
-						className="amp-block-story-cta__inline-link"
-						onSubmit={ ( event ) => event.preventDefault() }>
-						<Dashicon icon="admin-links" />
-						<URLInput
-							value={ url }
-							onChange={ ( value ) => setAttributes( { url: value } ) }
-							autoFocus={ false /* eslint-disable-line jsx-a11y/no-autofocus */ }
-						/>
-						<IconButton icon="editor-break" label={ __( 'Apply', 'amp' ) } type="submit" />
-					</form>
+		<div className="amp-story-cta-button" id={ `amp-story-cta-button-${ clientId }` } style={ { top: `${ btnPositionTop }%`, left: `${ btnPositionLeft }%` } } >
+			<div className={ className } style={ { backgroundColor: appliedBackgroundColor } }>
+				{ isEditing ? (
+					<RichText
+						placeholder={ placeholder }
+						value={ text }
+						onChange={ ( value ) => setAttributes( { text: value } ) }
+						className={ textWrapperClass }
+						style={ textStyle }
+					/>
+				) : (
+					<DraggableText
+						blockElementId={ `amp-story-cta-button-${ clientId }` }
+						clientId={ clientId }
+						name={ name }
+						isDraggable={ true }
+						isEditing={ isEditing }
+						isSelected={ isSelected }
+						hasOverlay={ hasOverlay }
+						toggleIsEditing={ setIsEditing }
+						toggleOverlay={ setHasOverlay }
+						text={ text }
+						textStyle={ textStyle }
+						textWrapperClass={ textWrapperClass }
+						placeholder={ placeholder }
+					/>
 				) }
 			</div>
-		</>
+			{ isSelected && isEditing && (
+				<form
+					className="amp-block-story-cta__inline-link"
+					onSubmit={ ( event ) => event.preventDefault() }>
+					<Dashicon icon="admin-links" />
+					<URLInput
+						value={ url }
+						onChange={ ( value ) => setAttributes( { url: value } ) }
+						autoFocus={ false /* eslint-disable-line jsx-a11y/no-autofocus */ }
+					/>
+					<IconButton icon="editor-break" label={ __( 'Apply', 'amp' ) } type="submit" />
+				</form>
+			) }
+		</div>
 	);
 };
 

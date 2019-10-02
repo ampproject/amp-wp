@@ -59,26 +59,21 @@ const PageAttachmentEdit = ( {
 		setAttributes( newAttributes );
 	}, [ colors, backgroundColor, customBackgroundColor, opacity, textColor, setAttributes ] );
 
-	return (
-		<>
-			{ isOpen ?
-				(
-					<AttachmentContent
-						setAttributes={ setAttributes }
-						attributes={ attributes }
-						toggleAttachment={ setIsOpen }
-					/>
-				) :
-				(
-					<AttachmentOpener
-						setAttributes={ setAttributes }
-						toggleAttachment={ setIsOpen }
-						openText={ openText }
-					/>
-				)
-			}
-		</>
-	);
+	return isOpen ?
+		(
+			<AttachmentContent
+				setAttributes={ setAttributes }
+				attributes={ attributes }
+				toggleAttachment={ setIsOpen }
+			/>
+		) :
+		(
+			<AttachmentOpener
+				setAttributes={ setAttributes }
+				toggleAttachment={ setIsOpen }
+				openText={ openText }
+			/>
+		);
 };
 
 PageAttachmentEdit.propTypes = {

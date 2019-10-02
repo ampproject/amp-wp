@@ -149,7 +149,7 @@ const BlockNavigationItem = ( { block, isSelected, onClick, unMovableBlock } ) =
 								className={ isDragging ? 'is-dragging-block' : undefined }
 								onDrop={ onDrop }
 							/>
-							<div className="block-navigation__placeholder"></div>
+							<div className="block-navigation__placeholder" />
 							<Button
 								className={ classnames(
 									'components-button editor-block-navigation__item-button block-editor-block-navigation__item-button',

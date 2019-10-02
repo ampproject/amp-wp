@@ -11,7 +11,7 @@ const BlockSave = ( { attributes } ) => {
 		layout: 'container',
 	};
 	return (
-		<amp-mathml { ...mathmlProps }></amp-mathml>
+		<amp-mathml { ...mathmlProps } />
 	);
 };
 

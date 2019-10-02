@@ -103,7 +103,9 @@ function BlockNavigation() {
 			role="presentation"
 			className="block-editor-block-navigation__container"
 		>
-			<p className="block-editor-block-navigation__label">{ __( 'Elements', 'amp' ) }</p>
+			<p className="block-editor-block-navigation__label">
+				{ __( 'Elements', 'amp' ) }
+			</p>
 			{ hasBlocks && (
 				<BlockNavigationList
 					blocks={ blocks }

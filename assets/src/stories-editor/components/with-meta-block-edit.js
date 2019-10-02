@@ -151,8 +151,6 @@ MetaBlockEdit.propTypes = {
 	className: PropTypes.string,
 	tagName: PropTypes.string,
 	attribute: PropTypes.string,
-	isSelected: PropTypes.bool,
-	isEditable: PropTypes.bool,
 	fontSize: PropTypes.shape( {
 		name: PropTypes.string,
 		shortName: PropTypes.string,
