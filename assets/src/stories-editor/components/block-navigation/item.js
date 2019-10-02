@@ -17,32 +17,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { BlockPreviewLabel } from '../';
-
-/**
- * Parses drag & drop events to ensure the event contains valid transfer data.
- *
- * @param {Object} event
- * @return {Object} Parsed event data.
- */
-const parseDropEvent = ( event ) => {
-	let result = {
-		srcClientId: null,
-		srcIndex: null,
-		type: null,
-	};
-
-	if ( ! event.dataTransfer ) {
-		return result;
-	}
-
-	try {
-		result = Object.assign( result, JSON.parse( event.dataTransfer.getData( 'text' ) ) );
-	} catch ( err ) {
-		return result;
-	}
-
-	return result;
-};
+import { parseDropEvent } from '../../helpers';
 
 class BlockNavigationItem extends Component {
 	constructor( ...args ) {
@@ -82,12 +57,11 @@ class BlockNavigationItem extends Component {
 	}
 
 	render() {
-		const { block, getBlockIndex, isSelected, onClick } = this.props;
-		const isCallToActionBlock = 'amp/amp-story-cta' === block.name;
+		const { block, getBlockIndex, isSelected, onClick, unMovableBlock } = this.props;
 		const { clientId } = block;
 		const blockElementId = `block-navigation-item-${ clientId }`;
 
-		if ( isCallToActionBlock ) {
+		if ( unMovableBlock ) {
 			return (
 				<div className="editor-block-navigation__item block-editor-block-navigation__item">
 					<Button
@@ -135,7 +109,7 @@ class BlockNavigationItem extends Component {
 									className={ this.state.isDragging ? 'is-dragging-block' : undefined }
 									onDrop={ this.onDrop }
 								/>
-								<div className="block-navigation__placeholder"></div>
+								<div className="block-navigation__placeholder" />
 								<Button
 									className={ classnames(
 										'components-button editor-block-navigation__item-button block-editor-block-navigation__item-button',
@@ -172,6 +146,7 @@ BlockNavigationItem.propTypes = {
 	} ),
 	isSelected: PropTypes.bool,
 	onClick: PropTypes.func.isRequired,
+	unMovableBlock: PropTypes.object,
 };
 
 const applyWithSelect = withSelect( ( select, { block: { clientId } } ) => {

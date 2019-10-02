@@ -23,11 +23,11 @@ import {
 	STORY_PAGE_INNER_HEIGHT,
 } from '../../constants';
 
-const { Image } = window;
+const { Image, navigator } = window;
 
 const cloneWrapperClass = 'components-draggable__clone';
 
-const isChromeUA = ( ) => /Chrome/i.test( window.navigator.userAgent );
+const isChromeUA = ( ) => /Chrome/i.test( navigator.userAgent );
 const documentHasIframes = ( ) => [ ...document.getElementById( 'editor' ).querySelectorAll( 'iframe' ) ].length > 0;
 
 class Draggable extends Component {
@@ -108,10 +108,18 @@ class Draggable extends Component {
 	 */
 	onDragStart = ( event ) => {
 		const { blockName, elementId, transferData, onDragStart = noop } = this.props;
-		const element = document.getElementById( elementId );
 		const isCTABlock = 'amp/amp-story-cta' === blockName;
+		// In the CTA block only the inner element (the button) is draggable, not the whole block.
+		const element = isCTABlock ? document.getElementById( elementId ) : document.getElementById( elementId ).parentNode;
+
+		if ( ! element ) {
+			event.preventDefault();
+			return;
+		}
+
 		const parentPage = element.closest( 'div[data-type="amp/amp-story-page"]' );
-		if ( ! element || ! parentPage ) {
+
+		if ( ! parentPage ) {
 			event.preventDefault();
 			return;
 		}
@@ -213,11 +221,16 @@ class Draggable extends Component {
 Draggable.propTypes = {
 	blockName: PropTypes.string,
 	elementId: PropTypes.string,
-	transferData: PropTypes.object,
+	transferData: PropTypes.shape( {
+		type: PropTypes.string,
+		srcIndex: PropTypes.number,
+		srcRootClientId: PropTypes.string,
+		srcClientId: PropTypes.string,
+	} ),
 	onDragStart: PropTypes.func,
 	onDragEnd: PropTypes.func,
 	setTimeout: PropTypes.func.isRequired,
-	children: PropTypes.any.isRequired,
+	children: PropTypes.node.isRequired,
 };
 
 export default withSafeTimeout( Draggable );

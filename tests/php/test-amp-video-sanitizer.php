@@ -182,6 +182,14 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 				'<div id="player"><noscript><video width="300" height="300" src="https://example.com/video.mp4"></video></noscript></div>',
 				'<div id="player"><!--noscript--><amp-video width="300" height="300" src="https://example.com/video.mp4" layout="responsive"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a><noscript><video width="300" height="300" src="https://example.com/video.mp4"></video></noscript></amp-video><!--/noscript--></div>',
 			],
+
+			'test_with_dev_mode' => [
+				'<video data-ampdevmode="" width="300" height="300" src="https://example.com/video.mp4"></video>',
+				null, // No change.
+				[
+					'add_dev_mode' => true,
+				],
+			],
 		];
 	}
 
@@ -200,6 +208,9 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 		}
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		if ( ! empty( $args['add_dev_mode'] ) ) {
+			$dom->documentElement->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
+		}
 
 		$sanitizer = new AMP_Video_Sanitizer( $dom, $args );
 		$sanitizer->sanitize();

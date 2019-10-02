@@ -46,6 +46,10 @@ class AMP_Options_Manager {
 		'version'                  => AMP__VERSION,
 		'story_templates_version'  => false,
 		'story_export_base_url'    => '',
+		'story_settings'           => [
+			'auto_advance_after'          => '',
+			'auto_advance_after_duration' => 0,
+		],
 	];
 
 	/**
@@ -66,6 +70,7 @@ class AMP_Options_Manager {
 		add_action( 'admin_notices', [ __CLASS__, 'persistent_object_caching_notice' ] );
 		add_action( 'admin_notices', [ __CLASS__, 'render_cache_miss_notice' ] );
 		add_action( 'admin_notices', [ __CLASS__, 'render_php_css_parser_conflict_notice' ] );
+		add_action( 'admin_notices', [ __CLASS__, 'insecure_connection_notice' ] );
 	}
 
 	/**
@@ -121,9 +126,8 @@ class AMP_Options_Manager {
 
 		$defaults['enable_response_caching'] = wp_using_ext_object_cache();
 
-		$args = AMP_Theme_Support::get_theme_support_args();
-		if ( false !== $args ) {
-			$defaults['theme_support'] = empty( $args[ AMP_Theme_Support::PAIRED_FLAG ] ) ? AMP_Theme_Support::STANDARD_MODE_SLUG : AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
+		if ( current_theme_supports( 'amp' ) ) {
+			$defaults['theme_support'] = amp_is_canonical() ? AMP_Theme_Support::STANDARD_MODE_SLUG : AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
 		}
 
 		$options = array_merge( $defaults, $options );
@@ -339,6 +343,15 @@ class AMP_Options_Manager {
 
 		// Handle the base URL for exported stories.
 		$options['story_export_base_url'] = isset( $new_options['story_export_base_url'] ) ? esc_url_raw( $new_options['story_export_base_url'], [ 'https' ] ) : '';
+
+		// AMP stories settings definitions.
+		$definitions = AMP_Story_Post_Type::get_stories_settings_definitions();
+
+		// Handle the AMP stories settings sanitization.
+		foreach ( $definitions as $option_name => $definition ) {
+			$value = $new_options[ AMP_Story_Post_Type::STORY_SETTINGS_OPTION ][ $option_name ];
+			$options[ AMP_Story_Post_Type::STORY_SETTINGS_OPTION ][ $option_name ] = call_user_func( $definition['meta_args']['sanitize_callback'], $value );
+		}
 
 		return $options;
 	}
@@ -621,6 +634,42 @@ class AMP_Options_Manager {
 			&&
 			AMP_Theme_Support::exceeded_cache_miss_threshold()
 		);
+	}
+
+
+	/**
+	 * Outputs an admin notice if the site is not served over HTTPS.
+	 *
+	 * @since 1.3
+	 *
+	 * @return void
+	 */
+	public static function insecure_connection_notice() {
+		// is_ssl() only tells us whether the admin backend uses HTTPS here, so we add a few more sanity checks.
+		$uses_ssl = (
+			is_ssl()
+			&&
+			( strpos( get_bloginfo( 'wpurl' ), 'https' ) === 0 )
+			&&
+			( strpos( get_bloginfo( 'url' ), 'https' ) === 0 )
+		);
+
+		if ( ! $uses_ssl && 'toplevel_page_' . self::OPTION_NAME === get_current_screen()->id ) {
+			printf(
+				'<div class="notice notice-warning"><p>%s</p></div>',
+				wp_kses(
+					sprintf(
+						/* translators: %s: "Why should I use HTTPS" support URL */
+						__( 'Your site is not being fully served over a secure connection (using HTTPS).<br>As some AMP functionality requires a secure connection, you might experience degraded performance or broken components.<br><a href="%s">More details</a>', 'amp' ),
+						esc_url( __( 'https://wordpress.org/support/article/why-should-i-use-https/', 'amp' ) )
+					),
+					[
+						'br' => [],
+						'a'  => [ 'href' => true ],
+					]
+				)
+			);
+		}
 	}
 
 	/**

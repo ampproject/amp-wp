@@ -239,6 +239,18 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-playbuzz' ],
 			],
 
+			'invalid_element_stripped'                     => [
+				'<nonexistent><p>Foo text</p><nonexistent>',
+				'<p>Foo text</p>',
+				[],
+			],
+
+			'nested_invalid_elements_stripped'             => [
+				'<bad-details><bad-summary><p>Example Summary</p></bad-summary><p>Example expanded text</p></bad-details>',
+				'<p>Example Summary</p><p>Example expanded text</p>',
+				[],
+			],
+
 			// AMP-NEXT-PAGE > [separator].
 			'reference-point-amp-next-page-separator'      => [
 				'<amp-next-page src="https://example.com/config.json"><div separator><h1>Keep reading</h1></div></amp-next-page>',
@@ -569,6 +581,35 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<template type="bad-type">Template Data</template>',
 				'',
 				[], // No scripts because removed.
+			],
+
+			'attribute_requirements_overriden_by_placeholders_within_template' => [
+				'<template type="amp-mustache"><amp-timeago datetime="{{iso}}"></amp-timeago></template>',
+				null,
+				[ 'amp-mustache', 'amp-timeago' ],
+			],
+
+			'attribute_requirements_overriden_by_placeholders_within_template_newlines' => [
+				"<template type=\"amp-mustache\"><amp-timeago datetime=\"first-line\n{{iso}}\"></amp-timeago></template>",
+				null,
+				[ 'amp-mustache', 'amp-timeago' ],
+			],
+
+			'attribute_requirements_not_overriden_by_placeholders_outside_of_template' => [
+				'<amp-timeago datetime="{{iso}}"></amp-timeago>',
+				'',
+			],
+
+			'attribute_requirements_overriden_in_indirect_template_parents' => [
+				'<template type="amp-mustache"><div><span><amp-timeago datetime="{{iso}}"></amp-timeago></span></div></template>',
+				null,
+				[ 'amp-mustache', 'amp-timeago' ],
+			],
+
+			'attribute_requirements_not_overriden_in_sibling_template_tags' => [
+				'<template type="amp-mustache"></template><amp-timeago datetime="{{iso}}"></amp-timeago>',
+				'<template type="amp-mustache"></template>',
+				[ 'amp-mustache' ],
 			],
 
 			'attribute_amp_accordion_value'                => call_user_func(
@@ -1619,6 +1660,16 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-user-location' ],
 			],
 
+			'deeply_nested_elements_200'                   => [
+				// If a DOM tree is too deep, libxml itself will issue an error: Excessive depth in document: 256 use XML_PARSE_HUGE option.
+				// Also, if XDebug is enabled, then max_nesting_level error is reached if call stack is >256. A nesting level of 200 is safe,
+				// so this tests up to that level of nesting to also ensure that the recursive \AMP_Tag_And_Attribute_Sanitizer::sanitize_element()
+				// method does not cause a different error at the PHP level when a recursion call stack reaches that same level.
+				str_repeat( '<div>', 200 ) . '<bad>hello world!</bad>' . str_repeat( '</div>', 200 ),
+				str_repeat( '<div>', 200 ) . 'hello world!' . str_repeat( '</div>', 200 ),
+				[],
+				[ 'invalid_element' ],
+			],
 		];
 	}
 
@@ -1642,9 +1693,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 		$node->setAttribute( 'data-gistid', 'foo-value' );
 		$this->assertFalse( $sanitizer->is_missing_mandatory_attribute( $spec, $node ) );
-
-		$spec_non_array = new stdClass();
-		$this->assertFalse( $sanitizer->is_missing_mandatory_attribute( $spec_non_array, $node ) );
 	}
 
 	/**
@@ -1875,121 +1923,191 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests replace_node_with_children validation errors.
+	 * Get data for replace_node_with_children_validation_errors test.
+	 *
+	 * @return array[] Test data.
 	 */
-	public function test_replace_node_with_children_validation_errors() {
-		$that            = $this;
-		$error_index     = 0;
-		$content         = [];
-		$expected_errors = [];
+	public function get_data_for_replace_node_with_children_validation_errors() {
+		return [
+			'amp_image'                => [
+				'<amp-image src="/none.jpg" width="100" height="100" alt="None"></amp-image>',
+				'',
+				[
+					[
+						'node_name'       => 'amp-image',
+						'parent_name'     => 'body',
+						'code'            => 'invalid_element',
+						'node_attributes' => [
+							'src'    => '/none.jpg',
+							'width'  => '100',
+							'height' => '100',
+							'alt'    => 'None',
+						],
+						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+					],
+				],
+			],
 
-		$content[]         = '<amp-image src="/none.jpg" width="100" height="100" alt="None"></amp-image>';
-		$expected_errors[] = [
-			'node_name'       => 'amp-image',
-			'parent_name'     => 'body',
-			'code'            => 'invalid_element',
-			'node_attributes' => [
-				'src'    => '/none.jpg',
-				'width'  => '100',
-				'height' => '100',
-				'alt'    => 'None',
+			'invalid_parent_element'   => [
+				'<baz class="baz-invalid"><p>Invalid baz parent element.</p></baz>',
+				'<p>Invalid baz parent element.</p>',
+				[
+					[
+						'node_name'       => 'baz',
+						'parent_name'     => 'body',
+						'code'            => 'invalid_element',
+						'node_attributes' => [ 'class' => 'baz-invalid' ],
+						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+					],
+				],
+			],
+
+			'invalid_a_tag'            => [
+				'<amp-story-grid-layer class="a-invalid"><a>Invalid a tag.</a></amp-story-grid-layer>',
+				'',
+				[
+					[
+						'node_name'       => 'amp-story-grid-layer',
+						'parent_name'     => 'body',
+						'code'            => 'invalid_element',
+						'node_attributes' => [ 'class' => 'a-invalid' ],
+						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+					],
+				],
+			],
+
+			'invalid_foo_tag'          => [
+				'<foo class="foo-invalid">Invalid foo tag.</foo>',
+				'Invalid foo tag.',
+				[
+					[
+						'node_name'       => 'foo',
+						'parent_name'     => 'body',
+						'code'            => 'invalid_element',
+						'node_attributes' => [ 'class' => 'foo-invalid' ],
+						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+					],
+				],
+			],
+
+			'invalid_barbaz_tag'       => [
+				'<bazbar><span>Is an invalid "bazbar" tag.</span></bazbar>',
+				'<span>Is an invalid "bazbar" tag.</span>',
+				[
+					[
+						'node_name'       => 'bazbar',
+						'parent_name'     => 'body',
+						'code'            => 'invalid_element',
+						'node_attributes' => [],
+						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+					],
+				],
+			],
+
+			'nested_valid_and_invalud' => [
+				'
+					<div class="parent">
+						<p>Nesting valid and invalid elements.</p>
+						<invalid_p id="invalid">Is an invalid "invalid" tag</invalid_p>
+						<bazfoo>Is an invalid "foo" tag <p>This should pass.</p></bazfoo>
+					</div>
+				',
+				'
+					<div class="parent">
+						<p>Nesting valid and invalid elements.</p>
+						Is an invalid "invalid" tagIs an invalid "foo" tag <p>This should pass.</p>
+					</div>
+				',
+				[
+					[
+						'node_name'       => 'invalid_p',
+						'parent_name'     => 'div',
+						'code'            => 'invalid_element',
+						'node_attributes' => [ 'id' => 'invalid' ],
+						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+					],
+					[
+						'node_name'       => 'bazfoo',
+						'parent_name'     => 'div',
+						'code'            => 'invalid_element',
+						'node_attributes' => [],
+						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+					],
+				],
+			],
+
+			'bad_lili'                 => [
+				'
+					<ul>
+						<li>hello</li>
+						<lili>world</lili>
+					</ul>
+				',
+				'<ul><li>hello</li> world</ul>',
+				[
+					[
+						'node_name'       => 'lili',
+						'parent_name'     => 'ul',
+						'code'            => 'invalid_element',
+						'node_attributes' => [],
+						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+					],
+				],
+			],
+
+			'invalid_nested_elements'  => [
+				'<divs><foo>Invalid <span>nested elements</span></foo></divs>',
+				'Invalid <span>nested elements</span>',
+				[
+					[
+						'node_name'       => 'foo',
+						'parent_name'     => 'divs',
+						'code'            => 'invalid_element',
+						'node_attributes' => [],
+						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+					],
+					[
+						'node_name'       => 'divs',
+						'parent_name'     => 'body',
+						'code'            => 'invalid_element',
+						'node_attributes' => [],
+						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+					],
+				],
 			],
 		];
-		$content[]         = '<baz class="baz-invalid"><p>Invalid baz parent element.</p></baz>';
-		$expected_errors[] = [
-			'node_name'       => 'baz',
-			'parent_name'     => 'body',
-			'code'            => 'invalid_element',
-			'node_attributes' => [ 'class' => 'baz-invalid' ],
-		];
-		$content[]         = '<amp-story-grid-layer class="a-invalid"><a>Invalid a tag.</a></amp-story-grid-layer>';
-		$expected_errors[] = [
-			'node_name'       => 'amp-story-grid-layer',
-			'parent_name'     => 'body',
-			'code'            => 'invalid_element',
-			'node_attributes' => [ 'class' => 'a-invalid' ],
-		];
-		$content[]         = '<foo class="foo-invalid">Invalid foo tag.</foo>';
-		$expected_errors[] = [
-			'node_name'       => 'foo',
-			'parent_name'     => 'body',
-			'code'            => 'invalid_element',
-			'node_attributes' => [ 'class' => 'foo-invalid' ],
-		];
-		$content[]         = '<divs><foo>Invalid <span>nested elements</span></foo></divs>';
-		$expected_errors[] = [
-			'node_name'       => 'divs',
-			'parent_name'     => 'body',
-			'code'            => 'invalid_element',
-			'node_attributes' => [],
-		];
-		$expected_errors[] = [
-			'node_name'       => 'foo',
-			'parent_name'     => 'body',
-			'code'            => 'invalid_element',
-			'node_attributes' => [],
-		];
-		$content[]         = '<bazbar><span>Is an invalid "bar" tag.</span></bazbar>';
-		$expected_errors[] = [
-			'node_name'       => 'bazbar',
-			'parent_name'     => 'body',
-			'code'            => 'invalid_element',
-			'node_attributes' => [],
-		];
-		$content[]         = <<<EOB
-<div class="parent">
-	<p>Nesting valid and invalid elements.</p>
-	<invalid_p id="invalid">Is an invalid "invalid" tag</invalid_p>
-	<bazfoo>Is an invalid "foo" tag <p>This should pass.</p></bazfoo>
-</div>
-EOB;
-		$expected_errors[] = [
-			'node_name'       => 'invalid_p',
-			'parent_name'     => 'div',
-			'code'            => 'invalid_element',
-			'node_attributes' => [ 'id' => 'invalid' ],
-		];
-		$expected_errors[] = [
-			'node_name'       => 'bazfoo',
-			'parent_name'     => 'div',
-			'code'            => 'invalid_element',
-			'node_attributes' => [],
-		];
-		$content[]         = <<<EOB
-<ul>
-	<li>hello</li>
-	<lili>world</lili>
-</ul>
-EOB;
-		$expected_errors[] = [
-			'node_name'       => 'lili',
-			'parent_name'     => 'ul',
-			'code'            => 'invalid_element',
-			'node_attributes' => [],
-		];
+	}
 
-		// Test validation error for nested invalid tags.
-		foreach ( $content as $dom_content ) {
-			$dom       = AMP_DOM_Utils::get_dom_from_content( $dom_content );
-			$sanitizer = new AMP_Tag_And_Attribute_Sanitizer(
-				$dom,
-				[
-					'validation_error_callback' => static function( $error, $context ) use ( $that, $expected_errors, &$error_index ) {
-						$expected         = $expected_errors[ $error_index ];
-						$expected['type'] = AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE;
-						$tag              = $expected['node_name'];
-						$that->assertEquals( $expected, $error );
-						$that->assertInstanceOf( 'DOMElement', $context['node'] );
-						$that->assertEquals( $tag, $context['node']->tagName );
-						$that->assertEquals( $tag, $context['node']->nodeName );
-						$error_index++;
+	/**
+	 * Tests replace_node_with_children validation errors.
+	 *
+	 * @dataProvider get_data_for_replace_node_with_children_validation_errors
+	 * @covers \AMP_Tag_And_Attribute_Sanitizer::replace_node_with_children()
+	 *
+	 * @param string  $source_content   Source DOM content.
+	 * @param string  $expected_content Expected content after sanitization.
+	 * @param array[] $expected_errors  Expected errors.
+	 */
+	public function test_replace_node_with_children_validation_errors( $source_content, $expected_content, $expected_errors ) {
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $source_content );
+		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer(
+			$dom,
+			[
+				'validation_error_callback' => function( $error, $context ) use ( &$expected_errors ) {
+					$expected = array_shift( $expected_errors );
+					$tag      = $expected['node_name'];
+					$this->assertEquals( $expected, $error );
+					$this->assertInstanceOf( 'DOMElement', $context['node'] );
+					$this->assertEquals( $tag, $context['node']->tagName );
+					$this->assertEquals( $tag, $context['node']->nodeName );
+					return true;
+				},
+			]
+		);
+		$sanitizer->sanitize();
 
-						return true;
-					},
-				]
-			);
-			$sanitizer->sanitize();
-		}
+		$this->assertEmpty( $expected_errors, 'There should be no expected validation errors remaining.' );
+		$this->assertEqualMarkup( $expected_content, AMP_DOM_Utils::get_content_from_dom( $dom ) );
 	}
 
 	/**

@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { IconButton } from '@wordpress/components';
+import { DropZoneProvider, IconButton } from '@wordpress/components';
 import { Component } from '@wordpress/element';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
@@ -62,7 +62,7 @@ class EditorCarousel extends Component {
 		}
 
 		return (
-			<>
+			<DropZoneProvider>
 				<div className="amp-story-editor-carousel-navigation">
 					<IconButton
 						icon="arrow-left-alt2"
@@ -88,7 +88,7 @@ class EditorCarousel extends Component {
 						disabled={ null === nextPage }
 					/>
 				</div>
-			</>
+			</DropZoneProvider>
 		);
 	}
 }

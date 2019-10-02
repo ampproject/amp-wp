@@ -8,6 +8,7 @@ module.exports = {
 	],
 	setupFilesAfterEnv: [
 		'<rootDir>/config/bootstrap.js',
+		'@wordpress/jest-puppeteer-axe',
 		'expect-puppeteer',
 	],
 	testPathIgnorePatterns: [

@@ -62,13 +62,13 @@ BlockTypesList.propTypes = {
 			foreground: PropTypes.string,
 			shadowColor: PropTypes.string,
 		} ),
-		hasChildBlocksWithInserterSupport: PropTypes.bool.isRequired,
+		hasChildBlocksWithInserterSupport: PropTypes.bool,
 		title: PropTypes.string.isRequired,
 		isDisabled: PropTypes.bool.isRequired,
 	} ) ),
 	onSelect: PropTypes.func.isRequired,
 	onHover: PropTypes.func,
-	children: PropTypes.any,
+	children: PropTypes.node,
 };
 
 export default BlockTypesList;

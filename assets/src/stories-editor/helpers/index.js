@@ -11,7 +11,7 @@ import { ReactElement } from 'react';
  * WordPress dependencies
  */
 import '@wordpress/core-data';
-import { render } from '@wordpress/element';
+import { render, cloneElement } from '@wordpress/element';
 import { count } from '@wordpress/wordcount';
 import { __, _x, sprintf } from '@wordpress/i18n';
 import { select, dispatch } from '@wordpress/data';
@@ -45,6 +45,7 @@ import {
 	MAX_IMAGE_SIZE_SLUG,
 	VIDEO_BACKGROUND_TYPE,
 	IMAGE_BACKGROUND_TYPE,
+	ANIMATION_DURATION_DEFAULTS,
 } from '../constants';
 import {
 	MAX_FONT_SIZE,
@@ -81,6 +82,8 @@ const {
 
 const { saveMedia } = dispatch( 'core' );
 const { updateBlockAttributes } = dispatch( 'core/block-editor' );
+
+export const isMovableBlock = ( name ) => ALLOWED_MOVABLE_BLOCKS.includes( name );
 
 /**
  * Adds a <link> element to the <head> for a given font in case there is none yet.
@@ -209,7 +212,6 @@ export const addAMPAttributes = ( settings, name ) => {
 	const isVideoBlock = 'core/video' === name;
 	const isCTABlock = 'amp/amp-story-cta' === name;
 
-	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
 	const needsTextSettings = BLOCKS_WITH_TEXT_SETTINGS.includes( name );
 
 	// Image block already has width and height.
@@ -267,7 +269,7 @@ export const addAMPAttributes = ( settings, name ) => {
 		};
 	}
 
-	if ( isMovableBlock ) {
+	if ( isMovableBlock( name ) ) {
 		addedAttributes.anchor = {
 			type: 'string',
 		};
@@ -326,6 +328,11 @@ export const addAMPAttributes = ( settings, name ) => {
 			default: false,
 		};
 
+		addedAttributes.ampAriaLabel = {
+			type: 'string',
+			default: '',
+		};
+
 		// Required defaults for AMP validity.
 		addedAttributes.autoplay = {
 			...settings.attributes.autoplay,
@@ -372,9 +379,7 @@ export const addAMPAttributes = ( settings, name ) => {
 };
 
 export const deprecateCoreBlocks = ( settings, name ) => {
-	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
-
-	if ( ! isMovableBlock ) {
+	if ( ! isMovableBlock( name ) ) {
 		return settings;
 	}
 
@@ -406,9 +411,7 @@ export const deprecateCoreBlocks = ( settings, name ) => {
  * @return {Object} Settings.
  */
 export const filterBlockTransforms = ( settings, name ) => {
-	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
-
-	if ( ! isMovableBlock ) {
+	if ( ! isMovableBlock( name ) ) {
 		return settings;
 	}
 
@@ -540,7 +543,7 @@ export const filterBlockAttributes = ( blockAttributes, blockType, innerHTML ) =
  * @return {ReactElement} The wrapped element.
  */
 export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
-	if ( ! element || ! ALLOWED_MOVABLE_BLOCKS.includes( blockType.name ) ) {
+	if ( ! element || ! isMovableBlock( blockType.name ) ) {
 		return element;
 	}
 
@@ -1180,6 +1183,30 @@ const getBlockInnerTextElement = ( block ) => {
 };
 
 /**
+ * Returns a movable block's inner element.
+ *
+ * @param {Object} block Block object.
+ *
+ * @return {?Element} The inner element.
+ */
+export const getBlockInnerElement = ( block ) => {
+	const { name, clientId } = block;
+	const isPage = 'amp/amp-story-page' === name;
+	const isCTABlock = 'amp/amp-story-cta' === name;
+
+	if ( isPage ) {
+		return document.querySelector( `[data-block="${ clientId }"]` );
+	}
+
+	if ( isCTABlock ) {
+		// Not the block itself is movable, only the button within.
+		return document.querySelector( `amp-story-cta-button-${ clientId }` );
+	}
+
+	return document.querySelector( `#block-${ clientId }` );
+};
+
+/**
  * Updates a block's font size in case it uses amp-fit-text and the content has changed.
  *
  * @param {Object}  block                         Block object.
@@ -1257,12 +1284,12 @@ export const maybeUpdateBlockDimensions = ( block ) => {
 			const element = getBlockInnerTextElement( block );
 
 			if ( element && content.length ) {
-				if ( element.offsetHeight > height ) {
-					updateBlockAttributes( clientId, { height: element.offsetHeight } );
+				if ( element.scrollHeight > height ) {
+					updateBlockAttributes( clientId, { height: element.scrollHeight } );
 				}
 
-				if ( element.offsetWidth > width ) {
-					updateBlockAttributes( clientId, { width: element.offsetWidth } );
+				if ( element.scrollWidth > width ) {
+					updateBlockAttributes( clientId, { width: element.scrollWidth } );
 				}
 			}
 
@@ -1492,14 +1519,35 @@ export const getBlockOrderDescription = ( type, currentPosition, newPosition, is
 };
 
 /**
+ * Get block by Page ID and block name.
+ *
+ * @param {string} pageClientId Root ID.
+ * @param {string} blockName Block name.
+ * @return {Object} Found block.
+ */
+const getPageBlockByName = ( pageClientId, blockName ) => {
+	const innerBlocks = getBlocksByClientId( getBlockOrder( pageClientId ) );
+	return innerBlocks.find( ( { name } ) => name === blockName );
+};
+
+/**
  * Get CTA block.
  *
  * @param {Array} pageClientId Root ID.
  * @return {Object} CTA block.
  */
 export const getCallToActionBlock = ( pageClientId ) => {
-	const innerBlocks = getBlocksByClientId( getBlockOrder( pageClientId ) );
-	return innerBlocks.find( ( { name } ) => name === 'amp/amp-story-cta' );
+	return getPageBlockByName( pageClientId, 'amp/amp-story-cta' );
+};
+
+/**
+ * Get Page Attachment block.
+ *
+ * @param {Array} pageClientId Root ID.
+ * @return {Object} Page Attachment block.
+ */
+export const getPageAttachmentBlock = ( pageClientId ) => {
+	return getPageBlockByName( pageClientId, 'amp/amp-story-page-attachment' );
 };
 
 /**
@@ -1718,4 +1766,406 @@ export const processMedia = ( media ) => {
 		mediaAlt,
 		poster,
 	};
+};
+
+/**
+ * Helper to convert snake_case meta keys to key names used in the amp-story-page attributes.
+ *
+ * @param {Object} meta Meta object to be converted to an object with attributes key names.
+ *
+ * @return {Object} Processed object.
+ */
+export const metaToAttributeNames = ( meta ) => {
+	return {
+		autoAdvanceAfter: meta.amp_story_auto_advance_after,
+		autoAdvanceAfterDuration: meta.amp_story_auto_advance_after_duration,
+	};
+};
+
+/**
+ * Helper to add an `aria-label` to video elements when saved.
+ *
+ * This helper is designed as a filter for `blocks.getSaveElement`.
+ *
+ * @param {ReactElement}  element     Previously generated React element
+ * @param {Object}        type        Block type definition.
+ * @param {string}        type.name   Name of block type
+ * @param {Object}        attributes  Block attributes.
+ *
+ * @return {ReactElement}  New React element
+ */
+export const addVideoAriaLabel = ( element, { name }, attributes ) => {
+	// this filter only applies to core video objects (which always has children) where an aria label has been set
+	if ( name !== 'core/video' || ! element.props.children || ! attributes.ampAriaLabel ) {
+		return element;
+	}
+
+	/* `element` will be a react structure like:
+
+	<figure>
+		<amp-video|video>
+			Fallback content
+		</amp-video|video>
+		[<figcaption>Caption</figcaption>]
+	</figure>
+
+	The video element can be either an `<amp-video>`` or a regular `<video>`.
+
+	`<figcaption>` is not necessarily present.
+
+	We need to hook into this element and add an `aria-label` on the `<amp-video|video>` element.
+	*/
+
+	const isFigure = element.type === 'figure';
+	const childNodes = Array.isArray( element.props.children ) ? element.props.children : [ element.props.children ];
+	const videoTypes = [ 'amp-video', 'video' ];
+	const isFirstChildVideoType = videoTypes.includes( childNodes[ 0 ].type );
+	if ( ! isFigure || ! isFirstChildVideoType ) {
+		return element;
+	}
+
+	const figure = element;
+	const [ video, ...rest ] = childNodes;
+
+	const newVideo = cloneElement(
+		video,
+		{ 'aria-label': attributes.ampAriaLabel },
+		video.props.children,
+	);
+
+	const newFigure = cloneElement(
+		figure,
+		{},
+		newVideo,
+		...rest
+	);
+
+	return newFigure;
+};
+
+/**
+ * Copy text to clipboard by using temporary input field.
+ *
+ * @param {string} text Text to copy.
+ */
+export const copyTextToClipBoard = ( text ) => {
+	// Create temporary input element for being able to copy.
+	const tmpInput = document.createElement( 'textarea' );
+	tmpInput.setAttribute( 'readonly', '' );
+	tmpInput.style = {
+		position: 'absolute',
+		left: '-9999px',
+	};
+	tmpInput.value = text;
+	document.body.appendChild( tmpInput );
+	tmpInput.select();
+	document.execCommand( 'copy' );
+	// Remove the temporary element.
+	document.body.removeChild( tmpInput );
+};
+
+/**
+ * Ensure that only allowed blocks are pasted.
+ *
+ * @param {[]}      blocks Array of blocks.
+ * @param {string}  clientId Page ID.
+ * @param {boolean} isFirstPage If is first page.
+ * @return {[]} Filtered blocks.
+ */
+export const ensureAllowedBlocksOnPaste = ( blocks, clientId, isFirstPage ) => {
+	const allowedBlocks = [];
+	blocks.forEach( ( block ) => {
+		switch ( block.name ) {
+			// Skip copying Page.
+			case 'amp/amp-story-page':
+				return;
+			case 'amp/amp-story-page-attachment':
+			case 'amp/amp-story-cta':
+				const currentBlock = getPageBlockByName( clientId, block.name );
+				if ( currentBlock || ( isFirstPage && block.name === 'amp/amp-story-cta' ) ) {
+					return;
+				}
+				allowedBlocks.push( block );
+				break;
+			default:
+				if ( ALLOWED_CHILD_BLOCKS.includes( block.name ) ) {
+					allowedBlocks.push( block );
+				}
+				break;
+		}
+	} );
+	return allowedBlocks;
+};
+
+/**
+ * Given a block client ID, returns the corresponding DOM node for the block,
+ * if exists. As much as possible, this helper should be avoided, and used only
+ * in cases where isolated behaviors need remote access to a block node.
+ *
+ * @param {string} clientId Block client ID.
+ * @param {Element} scope an optional DOM Element to which the selector should be scoped
+ *
+ * @return {Element} Block DOM node.
+ */
+export const getBlockDOMNode = ( clientId, scope = document ) => {
+	return scope.querySelector( `[data-block="${ clientId }"]` );
+};
+
+/**
+ * Returns a movable block's wrapper element.
+ *
+ * @param {Object} block Block object.
+ *
+ * @return {null|Element} The inner element.
+ */
+export const getBlockWrapperElement = ( block ) => {
+	if ( ! block ) {
+		return null;
+	}
+
+	const { name, clientId } = block;
+
+	if ( ! isMovableBlock( name ) ) {
+		return null;
+	}
+
+	return document.querySelector( `.amp-page-child-block[data-block="${ clientId }"]` );
+};
+
+/**
+ * Calculate target scaling factor so that it is at least 25% larger than the
+ * page.
+ *
+ * A copy of the same method in the AMP framework.
+ *
+ * @see https://github.com/ampproject/amphtml/blob/13b3b6d92ee0565c54ec34732e88f01847aa8a91/extensions/amp-story/1.0/animation-presets-utils.js#L91-L111
+ *
+ * @param {number} width Target width.
+ * @param {number} height Target height.
+ *
+ * @return {number} Target scaling factor.
+ */
+export const calculateTargetScalingFactor = ( width, height ) => {
+	const targetFitsWithinPage = width <= STORY_PAGE_INNER_WIDTH || height <= STORY_PAGE_INNER_HEIGHT;
+
+	if ( targetFitsWithinPage ) {
+		const scalingFactor = 1.25;
+
+		const widthFactor = STORY_PAGE_INNER_WIDTH > width ? STORY_PAGE_INNER_WIDTH / width : 1;
+		const heightFactor = STORY_PAGE_INNER_HEIGHT > height ? STORY_PAGE_INNER_HEIGHT / height : 1;
+
+		return Math.max( widthFactor, heightFactor ) * scalingFactor;
+	}
+
+	return 1;
+};
+
+/**
+ * Returns the block's actual position in relation to the page it's on.
+ *
+ * @param {Element} blockElement Block element.
+ * @param {Element} parentElement The block parent element.
+ *
+ * @return {{top: number, left: number}} Relative position of the block.
+ */
+const getRelativeElementPosition = ( blockElement, parentElement ) => {
+	const { left: parentLeft, top: parentTop } = parentElement.getBoundingClientRect();
+	const { top, left } = blockElement.getBoundingClientRect();
+
+	return {
+		top: top - parentTop,
+		left: left - parentLeft,
+	};
+};
+
+/**
+ * Calculates the offsets and scaling factors for animation playback.
+ *
+ * @param {Object} block Block object.
+ * @param {string} animationType Animation type.
+ * @return {{offsetX: number, offsetY: number, scalingFactor: number}} Animation transform parameters.
+ */
+const getAnimationTransformParams = ( block, animationType ) => {
+	const blockElement = getBlockWrapperElement( block );
+	const innerElement = getBlockInnerElement( block );
+	const parentBlock = getBlockRootClientId( block.clientId );
+	const parentBlockElement = document.querySelector( `[data-block="${ parentBlock }"]` );
+
+	const width = innerElement.offsetWidth;
+	const height = innerElement.offsetHeight;
+	const { top, left } = getRelativeElementPosition( blockElement, parentBlockElement );
+
+	let offsetX;
+	let offsetY;
+	let scalingFactor;
+
+	switch ( animationType ) {
+		case 'fly-in-left':
+		case 'rotate-in-left':
+		case 'whoosh-in-left':
+			offsetX = -( left + width );
+			break;
+		case 'fly-in-right':
+		case 'rotate-in-right':
+		case 'whoosh-in-right':
+			offsetX = STORY_PAGE_INNER_WIDTH + left + width;
+			break;
+		case 'fly-in-top':
+			offsetY = -( top + height );
+			break;
+		case 'fly-in-bottom':
+			offsetY = STORY_PAGE_INNER_HEIGHT + top + height;
+			break;
+		case 'drop':
+			offsetY = Math.max( 160, ( top + height ) );
+			break;
+		case 'pan-left':
+		case 'pan-right':
+			scalingFactor = calculateTargetScalingFactor( width, height );
+			offsetX = STORY_PAGE_INNER_WIDTH - ( width * scalingFactor );
+			offsetY = ( STORY_PAGE_INNER_HEIGHT - ( height * scalingFactor ) ) / 2;
+			break;
+		case 'pan-down':
+		case 'pan-up':
+			scalingFactor = calculateTargetScalingFactor( width, height );
+			offsetX = -( width * scalingFactor ) / 2;
+			offsetY = STORY_PAGE_INNER_HEIGHT - ( height * scalingFactor );
+			break;
+		default:
+			offsetX = 0;
+	}
+
+	return {
+		offsetX,
+		offsetY,
+		scalingFactor,
+	};
+};
+
+/**
+ * Sets the needed CSS custom properties and class name for animation playback.
+ *
+ * This way the initial animation state can be displayed without having to actually
+ * start the animation.
+ *
+ * @param {Object} block Block object.
+ * @param {string} animationType Animation type.
+ */
+export const setAnimationTransformProperties = ( block, animationType ) => {
+	const blockElement = getBlockWrapperElement( block );
+
+	if ( ! blockElement || ! animationType ) {
+		return;
+	}
+
+	resetAnimationProperties( block, animationType );
+
+	const { offsetX, offsetY, scalingFactor } = getAnimationTransformParams( block, animationType );
+
+	if ( offsetX ) {
+		blockElement.style.setProperty( '--animation-offset-x', `${ offsetX }px` );
+	}
+
+	if ( offsetY ) {
+		blockElement.style.setProperty( '--animation-offset-y', `${ offsetY }px` );
+	}
+
+	if ( scalingFactor ) {
+		blockElement.style.setProperty( '--animation-scale-start', scalingFactor );
+		blockElement.style.setProperty( '--animation-scale-end', scalingFactor );
+	}
+
+	blockElement.classList.add( `story-animation-init-${ animationType }` );
+};
+
+/**
+ * Removes all inline styles and class name previously set for animation playback.
+ *
+ * @param {Object} block Block object.
+ * @param {string} animationType Animation type.
+ */
+export const resetAnimationProperties = ( block, animationType ) => {
+	const blockElement = getBlockWrapperElement( block );
+
+	if ( ! blockElement || ! animationType ) {
+		return;
+	}
+
+	blockElement.classList.remove( `story-animation-init-${ animationType }` );
+	blockElement.classList.remove( `story-animation-${ animationType }` );
+	blockElement.style.removeProperty( '--animation-offset-x' );
+	blockElement.style.removeProperty( '--animation-offset-y' );
+	blockElement.style.removeProperty( '--animation-scale-start' );
+	blockElement.style.removeProperty( '--animation-scale-end' );
+	blockElement.style.removeProperty( '--animation-duration' );
+	blockElement.style.removeProperty( '--animation-delay' );
+};
+
+/**
+ * Plays the block's animation in the editor.
+ *
+ * Assumes that setAnimationTransformProperties() has been called before.
+ *
+ * @param {Object} block Block object.
+ * @param {string} animationType Animation type.
+ * @param {number} animationDuration Animation duration.
+ * @param {number} animationDelay Animation delay.
+ * @param {Function} callback Callback for when animation has stopped.
+ */
+export const startAnimation = ( block, animationType, animationDuration, animationDelay, callback = () => {} ) => {
+	const blockElement = getBlockWrapperElement( block );
+
+	if ( ! blockElement || ! animationType ) {
+		callback();
+
+		return;
+	}
+
+	const DEFAULT_ANIMATION_DURATION = ANIMATION_DURATION_DEFAULTS[ animationType ] || 0;
+
+	blockElement.classList.remove( `story-animation-init-${ animationType }` );
+
+	blockElement.style.setProperty( '--animation-duration', `${ animationDuration || DEFAULT_ANIMATION_DURATION }ms` );
+	blockElement.style.setProperty( '--animation-delay', `${ animationDelay || 0 }ms` );
+
+	blockElement.classList.add( `story-animation-${ animationType }` );
+
+	blockElement.addEventListener( 'animationend', callback, { once: true } );
+};
+
+/**
+ * Check if block is page block.
+ *
+ * @param {string} clientId Block client ID.
+ * @return {boolean} Boolean if block is / is not a page block.
+ */
+export const isPageBlock = ( clientId ) => {
+	const block = getBlock( clientId );
+	return block && 'amp/amp-story-page' === block.name;
+};
+
+/**
+ * Parses drag & drop events to ensure the event contains valid transfer data.
+ *
+ * @param {Object} event
+ * @return {Object} Parsed event data.
+ */
+export const parseDropEvent = ( event ) => {
+	let result = {
+		srcClientId: null,
+		srcIndex: null,
+		type: null,
+	};
+
+	if ( ! event.dataTransfer ) {
+		return result;
+	}
+
+	try {
+		result = Object.assign( result, JSON.parse( event.dataTransfer.getData( 'text' ) ) );
+	} catch ( err ) {
+		return result;
+	}
+
+	return result;
 };

@@ -19,6 +19,7 @@ import {
 	Path,
 	ResponsiveWrapper,
 	SVG,
+	TextControl,
 	ToggleControl,
 	Toolbar,
 	withNotices,
@@ -43,7 +44,12 @@ import { getContentLengthFromUrl, isVideoSizeExcessive } from '../../common/help
 import { MEGABYTE_IN_BYTES, VIDEO_ALLOWED_MEGABYTES_PER_SECOND } from '../../common/constants';
 import { POSTER_ALLOWED_MEDIA_TYPES } from '../constants';
 
-const icon = <SVG viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><Path fill="none" d="M0 0h24v24H0V0z" /><Path d="M4 6.47L5.76 10H20v8H4V6.47M22 4h-4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4z" /></SVG>;
+const icon = (
+	<SVG viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+		<Path fill="none" d="M0 0h24v24H0V0z" />
+		<Path d="M4 6.47L5.76 10H20v8H4V6.47M22 4h-4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4z" />
+	</SVG>
+);
 
 /**
  * Mainly forked from the Core Video block edit component, but allows the <video> to play instead of being disabled.
@@ -119,6 +125,15 @@ class CustomVideoBlockEdit extends Component {
 
 		if ( poster ) {
 			return;
+		}
+
+		if ( media && media !== prevProps.media && ! attributes.ampAriaLabel ) {
+			/*
+			 * New video set from media library and we don't have an aria label already,
+			 * use alt text or title from media object.
+			 */
+			const ampAriaLabel = media.alt_text || ( media.title && media.title.raw ) || '';
+			setAttributes( { ampAriaLabel } );
 		}
 
 		if ( videoFeaturedImage ) {
@@ -224,6 +239,7 @@ class CustomVideoBlockEdit extends Component {
 			src,
 			width,
 			height,
+			ampAriaLabel,
 		} = attributes;
 
 		const { editing } = this.state;
@@ -284,6 +300,12 @@ class CustomVideoBlockEdit extends Component {
 							label={ __( 'Loop', 'amp' ) }
 							onChange={ this.toggleAttribute( 'loop' ) }
 							checked={ loop }
+						/>
+						<TextControl
+							label={ __( 'Assistive Text', 'amp' ) }
+							help={ __( 'Used to inform visually impaired users about the video content.', 'amp' ) }
+							value={ ampAriaLabel }
+							onChange={ ( label ) => setAttributes( { ampAriaLabel: label } ) }
 						/>
 						{ ( ! this.state.extractingPoster || poster ) && (
 							<MediaUploadCheck>
@@ -361,6 +383,7 @@ class CustomVideoBlockEdit extends Component {
 					<video
 						autoPlay
 						muted
+						aria-label={ ampAriaLabel }
 						loop={ loop }
 						controls={ ! loop }
 						poster={ poster }
@@ -388,6 +411,7 @@ CustomVideoBlockEdit.propTypes = {
 		caption: PropTypes.string,
 		controls: PropTypes.bool,
 		loop: PropTypes.bool,
+		ampAriaLabel: PropTypes.string,
 		id: PropTypes.number,
 		poster: PropTypes.string,
 		src: PropTypes.string,

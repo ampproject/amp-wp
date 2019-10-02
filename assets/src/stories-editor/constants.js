@@ -3,30 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 
-/**
- * Internal dependencies
- */
-import Arimo from '../../images/stories-editor/font-names/arimo.svg';
-import Lato from '../../images/stories-editor/font-names/lato.svg';
-import Lora from '../../images/stories-editor/font-names/lora.svg';
-import Merriweather from '../../images/stories-editor/font-names/merriweather.svg';
-import Montserrat from '../../images/stories-editor/font-names/montserrat.svg';
-import NotoSans from '../../images/stories-editor/font-names/noto-sans.svg';
-import OpenSans from '../../images/stories-editor/font-names/open-sans.svg';
-import OpenSansCondensed from '../../images/stories-editor/font-names/open-sans-condensed.svg';
-import Oswald from '../../images/stories-editor/font-names/oswald.svg';
-import PlayfairDisplay from '../../images/stories-editor/font-names/playfair-display.svg';
-import PtSans from '../../images/stories-editor/font-names/pt-sans.svg';
-import PtSansNarrow from '../../images/stories-editor/font-names/pt-sans-narrow.svg';
-import PtSerif from '../../images/stories-editor/font-names/pt-serif.svg';
-import Raleway from '../../images/stories-editor/font-names/raleway.svg';
-import Roboto from '../../images/stories-editor/font-names/roboto.svg';
-import RobotoCondensed from '../../images/stories-editor/font-names/roboto-condensed.svg';
-import RobotoSlab from '../../images/stories-editor/font-names/roboto-slab.svg';
-import Slabo27 from '../../images/stories-editor/font-names/slabo-27.svg';
-import SourceSansPro from '../../images/stories-editor/font-names/source-sans-pro.svg';
-import Ubuntu from '../../images/stories-editor/font-names/ubuntu.svg';
-
 export const STORY_PAGE_INNER_WIDTH = 328;
 export const STORY_PAGE_INNER_HEIGHT = 553;
 
@@ -77,6 +53,7 @@ export const BLOCKS_WITH_COLOR_SETTINGS = [
 	'amp/amp-story-post-date',
 	'amp/amp-story-post-title',
 	'amp/amp-story-cta',
+	'amp/amp-story-page-attachment',
 ];
 
 export const BLOCKS_WITH_RESIZING = [
@@ -97,11 +74,17 @@ export const BLOCKS_WITH_RESIZING = [
 export const ALLOWED_CHILD_BLOCKS = [
 	...ALLOWED_MOVABLE_BLOCKS,
 	'amp/amp-story-cta',
+	'amp/amp-story-page-attachment',
 ];
 
 export const ALLOWED_BLOCKS = [
 	...ALLOWED_TOP_LEVEL_BLOCKS,
 	...ALLOWED_CHILD_BLOCKS,
+];
+
+export const DISABLE_DUPLICATE_BLOCKS = [
+	'amp/amp-story-cta',
+	'amp/amp-story-page-attachment',
 ];
 
 export const IMAGE_BACKGROUND_TYPE = 'image';
@@ -114,17 +97,17 @@ export const MAX_IMAGE_SIZE_SLUG = 'amp_story_page';
 
 export const ANIMATION_DURATION_DEFAULTS = {
 	drop: 1600,
-	'fade-in': 500,
-	'fly-in-bottom': 500,
-	'fly-in-left': 500,
-	'fly-in-right': 500,
-	'fly-in-top': 500,
-	pulse: 500,
-	'rotate-in-left': 700,
-	'rotate-in-right': 700,
+	'fade-in': 400,
+	'fly-in-bottom': 400,
+	'fly-in-left': 400,
+	'fly-in-right': 400,
+	'fly-in-top': 400,
+	pulse: 400,
+	'rotate-in-left': 600,
+	'rotate-in-right': 600,
 	'twirl-in': 1000,
-	'whoosh-in-left': 500,
-	'whoosh-in-right': 500,
+	'whoosh-in-left': 400,
+	'whoosh-in-right': 400,
 	'pan-left': 1000,
 	'pan-right': 1000,
 	'pan-down': 1000,
@@ -211,29 +194,6 @@ export const AMP_ANIMATION_TYPE_OPTIONS = [
 		label: __( 'Zoom Out', 'amp' ),
 	},
 ];
-
-export const AMP_STORY_FONT_IMAGES = {
-	Arimo,
-	Lato,
-	Lora,
-	Merriweather,
-	Montserrat,
-	'Noto Sans': NotoSans,
-	'Open Sans': OpenSans,
-	'Open Sans Condensed': OpenSansCondensed,
-	Oswald,
-	'Playfair Display': PlayfairDisplay,
-	'PT Sans': PtSans,
-	'PT Sans Narrow': PtSansNarrow,
-	'PT Serif': PtSerif,
-	Raleway,
-	Roboto,
-	'Roboto Condensed': RobotoCondensed,
-	'Roboto Slab': RobotoSlab,
-	'Slabo 27px': Slabo27,
-	'Source Sans Pro': SourceSansPro,
-	Ubuntu,
-};
 
 export const REVERSE_WIDTH_CALCULATIONS = [
 	'left',

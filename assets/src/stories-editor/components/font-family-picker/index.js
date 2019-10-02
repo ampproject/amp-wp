@@ -13,10 +13,8 @@ import { withInstanceId } from '@wordpress/compose';
 /**
  * Internal dependencies
  */
+import { Autocomplete } from '../';
 import { maybeEnqueueFontStyle } from '../../helpers';
-import Autocomplete from './autocomplete';
-import 'accessible-autocomplete/src/autocomplete.css';
-import './edit.css';
 
 /**
  * Font Family Picker component.
@@ -65,6 +63,7 @@ function FontFamilyPicker( {
 						inputValue: inputValueTemplate,
 					}
 				}
+				ariaLabelBy={ `${ id }__help` }
 				minLength={ 2 }
 				onConfirm={ onChange }
 				showAllValues={ false }

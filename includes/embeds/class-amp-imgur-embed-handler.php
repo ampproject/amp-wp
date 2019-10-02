@@ -47,10 +47,9 @@ class AMP_Imgur_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @param array  $matches Matches.
 	 * @param array  $attr Attributes.
 	 * @param string $url URL.
-	 * @param array  $rawattr Raw attributes.
 	 * @return string Embed.
 	 */
-	public function oembed( $matches, $attr, $url, $rawattr ) {
+	public function oembed( $matches, $attr, $url ) {
 		return $this->render( [ 'url' => $url ] );
 	}
 

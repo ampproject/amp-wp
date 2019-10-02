@@ -1,93 +1,72 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
 import PropTypes from 'prop-types';
-import { has } from 'lodash';
 
 /**
  * WordPress dependencies
  */
-import { __, _x, sprintf } from '@wordpress/i18n';
 import {
 	InnerBlocks,
-	PanelColorSettings,
 	InspectorControls,
-	MediaUpload,
-	MediaUploadCheck,
 	BlockIcon,
 } from '@wordpress/block-editor';
 import { getBlockType } from '@wordpress/blocks';
 import { Component, createRef } from '@wordpress/element';
 import {
-	PanelBody,
-	Button,
-	BaseControl,
-	FocalPointPicker,
-	Notice,
-	SelectControl,
-	RangeControl,
-	ResponsiveWrapper,
-	Placeholder,
-	IconButton,
-} from '@wordpress/components';
-import {
 	withSelect,
 	withDispatch,
-	dispatch,
 } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
+import { Placeholder, IconButton, Button } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
 import {
-	getTotalAnimationDuration,
 	addBackgroundColorToOverlay,
 	getCallToActionBlock,
+	getPageAttachmentBlock,
 	getUniqueId,
-	uploadVideoFrame,
-	getPosterImageFromFileObj,
-	processMedia,
+	metaToAttributeNames,
 } from '../../helpers';
 import {
-	getVideoBytesPerSecond,
-	isVideoSizeExcessive,
-} from '../../../common/helpers';
-import blockIcon from '../../../../images/stories-editor/amp-story-page-icon.svg';
-
-import {
-	ALLOWED_CHILD_BLOCKS,
 	ALLOWED_MOVABLE_BLOCKS,
 	IMAGE_BACKGROUND_TYPE,
 	VIDEO_BACKGROUND_TYPE,
-	POSTER_ALLOWED_MEDIA_TYPES,
-	MAX_IMAGE_SIZE_SLUG,
 } from '../../constants';
-import {
-	MEGABYTE_IN_BYTES,
-	VIDEO_ALLOWED_MEGABYTES_PER_SECOND,
-} from '../../../common/constants';
 import './edit.css';
+import blockIcon from '../../../../images/stories-editor/amp-story-page-icon.svg';
+import BackgroundColorSettings from './background-color-settings';
+import PageSettings from './page-settings';
+import BackgroundMediaSettings from './background-media-settings';
+import AnimationSettings from './animation-settings';
+import CopyPasteHandler from './copy-paste-handler';
 
 class PageEdit extends Component {
 	shouldComponentUpdate() {
-		this.ensureCTABeingLast();
+		this.ensureCorrectBlockOrder();
 		return true;
 	}
 
 	constructor( props ) {
 		super( props );
 
-		const { isFirstPage, hasInnerBlocks, media, attributes } = props;
-		const { anchor, backgroundColors } = attributes;
-		const colors = JSON.parse( backgroundColors );
-
-		if ( ! anchor ) {
+		if ( ! props.attributes.anchor ) {
 			this.props.setAttributes( { anchor: getUniqueId() } );
 		}
 
-		const showPlaceholder = isFirstPage && ! hasInnerBlocks && ! media && ! colors.length;
+		if ( props.storySettingsAttributes ) {
+			Object.entries( props.storySettingsAttributes ).forEach( ( [ key, value ] ) => {
+				if ( ! props.attributes.hasOwnProperty( key ) ) {
+					this.props.setAttributes( { [ key ]: value } );
+				}
+			} );
+		}
+
+		const backgroundColors = JSON.parse( props.attributes.backgroundColors );
+		const showPlaceholder = props.showPlaceholder && ! backgroundColors.length;
 
 		this.state = {
 			extractingPoster: false,
@@ -97,27 +76,9 @@ class PageEdit extends Component {
 		this.videoPlayer = createRef();
 	}
 
-	/**
-	 * Media selection callback.
-	 *
-	 * @param {Object} media            Media object.
-	 * @param {string} media.icon       Media icon.
-	 * @param {string} media.url        Media URL.
-	 * @param {string} media.media_type Media type.
-	 * @param {string} media.type       Media type if it was an existing attachment.
-	 * @param {number} media.id         Attachment ID.
-	 * @param {Object} media.image      Media image object.
-	 * @param {string} media.image.src  Media image URL
-	 */
-	onSelectMedia = ( media ) => {
-		const { setAttributes } = this.props;
-		const processed = processMedia( media );
-		setAttributes( processed );
-	}
-
 	componentDidUpdate( prevProps ) {
-		const { attributes, setAttributes, videoFeaturedImage, media } = this.props;
-		const { mediaType, mediaUrl, mediaId, poster } = attributes;
+		const { attributes } = this.props;
+		const { mediaType, mediaUrl } = attributes;
 
 		if ( VIDEO_BACKGROUND_TYPE !== mediaType ) {
 			return;
@@ -126,81 +87,9 @@ class PageEdit extends Component {
 		if ( prevProps.attributes.mediaUrl !== mediaUrl && this.videoPlayer.current ) {
 			this.videoPlayer.current.load();
 		}
-
-		if ( poster ) {
-			return;
-		}
-
-		if ( videoFeaturedImage ) {
-			setAttributes( { poster: videoFeaturedImage.source_url } );
-		} else if ( media && media !== prevProps.media && ! media.featured_media && ! this.state.extractingPoster ) {
-			/*
-			 * The video has changed, and its media object has been loaded already.
-			 *
-			 * Since it's clear that the video does not have a featured (poster) image,
-			 * one can be generated now.
-			 */
-			this.setState( { extractingPoster: true } );
-
-			uploadVideoFrame( { id: mediaId, src: mediaUrl } )
-				.then( ( fileObj ) => {
-					setAttributes( { poster: getPosterImageFromFileObj( fileObj ) } );
-					this.setState( { extractingPoster: false } );
-				} )
-				.catch( () => this.setState( { extractingPoster: false } ) );
-		}
 	}
 
-	removeBackgroundColor( index ) {
-		const { attributes, setAttributes } = this.props;
-		const backgroundColors = JSON.parse( attributes.backgroundColors );
-		backgroundColors.splice( index, 1 );
-		setAttributes( { backgroundColors: JSON.stringify( backgroundColors ) } );
-	}
-
-	setBackgroundColors( value, index ) {
-		const { attributes, setAttributes } = this.props;
-		const backgroundColors = JSON.parse( attributes.backgroundColors );
-		backgroundColors[ index ] = {
-			color: value,
-		};
-		setAttributes( { backgroundColors: JSON.stringify( backgroundColors ) } );
-	}
-
-	getOverlayColorSettings() {
-		const { attributes } = this.props;
-		const backgroundColors = JSON.parse( attributes.backgroundColors );
-
-		if ( ! backgroundColors.length ) {
-			return [
-				{
-					value: undefined,
-					onChange: ( value ) => {
-						this.setBackgroundColors( value, 0 );
-					},
-					label: __( 'Color', 'amp' ),
-				},
-			];
-		}
-
-		const backgroundColorSettings = [];
-		const useNumberedLabels = backgroundColors.length > 1;
-
-		backgroundColors.forEach( ( color, index ) => {
-			backgroundColorSettings[ index ] = {
-				value: color ? color.color : undefined,
-				onChange: ( value ) => {
-					this.setBackgroundColors( value, index );
-				},
-				/* translators: %s: color number */
-				label: useNumberedLabels ? sprintf( __( 'Color %s', 'amp' ), index + 1 ) : __( 'Color', 'amp' ),
-			};
-		} );
-
-		return backgroundColorSettings;
-	}
-
-	ensureCTABeingLast() {
+	ensureCorrectBlockOrder() {
 		const {
 			getBlockOrder,
 			moveBlockToPosition,
@@ -211,29 +100,49 @@ class PageEdit extends Component {
 			return;
 		}
 		const ctaBlock = getCallToActionBlock( clientId );
+		const attachmentBlock = getPageAttachmentBlock( clientId );
+
+		let blockToMove = null;
+
 		if ( ctaBlock ) {
-			// If the CTA is not the last block, move it there.
-			if ( order[ order.length - 1 ] !== ctaBlock.clientId ) {
-				moveBlockToPosition( ctaBlock.clientId, clientId, clientId, order.length - 1 );
+			blockToMove = ctaBlock;
+		} else if ( attachmentBlock ) {
+			blockToMove = attachmentBlock;
+		}
+
+		if ( blockToMove ) {
+			// If the either CTA or Attachment is not the last block, move it there.
+			if ( order[ order.length - 1 ] !== blockToMove.clientId ) {
+				moveBlockToPosition( blockToMove.clientId, clientId, clientId, order.length - 1 );
 			}
 		}
 	}
 
-	render() { // eslint-disable-line complexity
-		const { attributes, media, setAttributes, totalAnimationDuration, allowedBlocks, isFirstPage, hasInnerBlocks, allowedBackgroundMediaTypes } = this.props;
+	render() {
+		const {
+			attributes,
+			autoAdvanceAfterOptions,
+			clientId,
+			isSelected,
+			media,
+			setAttributes,
+			allowedBlocks,
+			allowedBackgroundMediaTypes,
+			videoFeaturedImage,
+			showPlaceholder,
+		} = this.props;
 
 		const {
 			mediaId,
 			mediaType,
 			mediaUrl,
+			mediaAlt,
 			focalPoint = { x: 0.5, y: 0.5 },
 			overlayOpacity,
 			poster,
 			autoAdvanceAfter,
 			autoAdvanceAfterDuration,
 		} = attributes;
-
-		const instructions = <p>{ __( 'To edit the background image or video, you need permission to upload media.', 'amp' ) }</p>;
 
 		const style = {
 			backgroundImage: IMAGE_BACKGROUND_TYPE === mediaType && mediaUrl ? `url(${ mediaUrl })` : undefined,
@@ -244,21 +153,6 @@ class PageEdit extends Component {
 
 		if ( VIDEO_BACKGROUND_TYPE === mediaType && poster ) {
 			style.backgroundImage = `url(${ poster })`;
-		}
-
-		const autoAdvanceAfterOptions = [
-			{ value: '', label: __( 'Manual', 'amp' ) },
-			{ value: 'auto', label: __( 'Automatic', 'amp' ) },
-			{ value: 'time', label: __( 'After a certain time', 'amp' ) },
-			{ value: 'media', label: __( 'After media has played', 'amp' ) },
-		];
-
-		let autoAdvanceAfterHelp;
-
-		if ( 'media' === autoAdvanceAfter ) {
-			autoAdvanceAfterHelp = __( 'Based on the first media block encountered on the page', 'amp' );
-		} else if ( 'auto' === autoAdvanceAfter ) {
-			autoAdvanceAfterHelp = __( 'Based on the duration of all animated blocks on the page', 'amp' );
 		}
 
 		let overlayStyle = {
@@ -272,11 +166,7 @@ class PageEdit extends Component {
 		overlayStyle = addBackgroundColorToOverlay( overlayStyle, backgroundColors );
 		overlayStyle.opacity = overlayOpacity / 100;
 
-		const colorSettings = this.getOverlayColorSettings();
-		const isExcessiveVideoSize = VIDEO_BACKGROUND_TYPE === mediaType && isVideoSizeExcessive( getVideoBytesPerSecond( media ) );
-		const videoBytesPerSecond = VIDEO_BACKGROUND_TYPE === mediaType ? getVideoBytesPerSecond( media ) : null;
-
-		const showPlaceholder = this.state.showPlaceholder && isFirstPage && ! hasInnerBlocks && ! media && ! backgroundColors.length;
+		const shouldShowPlaceholder = this.state.showPlaceholder && showPlaceholder && ! backgroundColors.length;
 		const placeholderInstructions = __( 'Choose a background, or start writing some content.', 'amp' );
 
 		const textBlock = getBlockType( 'amp/amp-story-text' );
@@ -284,237 +174,103 @@ class PageEdit extends Component {
 		return (
 			<>
 				<InspectorControls>
-					<PanelColorSettings
-						title={ __( 'Background Color', 'amp' ) }
-						colorSettings={ colorSettings }
-					>
-						<p>
-							{ backgroundColors.length < 2 &&
-							<Button
-								onClick={ () => this.setBackgroundColors( null, 1 ) }
-								isSmall>
-								{ __( 'Add Gradient', 'amp' ) }
-							</Button>
-							}
-							{ backgroundColors.length > 1 &&
-							<Button
-								onClick={ () => this.removeBackgroundColor( backgroundColors.length - 1 ) }
-								isLink
-								isDestructive>
-								{ __( 'Remove Gradient', 'amp' ) }
-							</Button>
-							}
-						</p>
-						<RangeControl
-							label={ __( 'Opacity', 'amp' ) }
-							value={ overlayOpacity }
-							onChange={ ( value ) => setAttributes( { overlayOpacity: value } ) }
-							min={ 0 }
-							max={ 100 }
-							step={ 5 }
-							required
-						/>
-					</PanelColorSettings>
-					<PanelBody title={ __( 'Background Media', 'amp' ) }>
-						<>
-							{
-								isExcessiveVideoSize &&
-								<Notice status="warning" isDismissible={ false } >
-									{
-										sprintf(
-											/* translators: %d: the number of recommended megabytes per second */
-											__( 'A video size of less than %d MB per second is recommended.', 'amp' ),
-											VIDEO_ALLOWED_MEGABYTES_PER_SECOND
-										)
-									}
-									{
-										videoBytesPerSecond && ' ' + sprintf(
-											/* translators: %d: the number of actual megabytes per second */
-											__( 'The selected video is %d MB per second.', 'amp' ),
-											Math.round( videoBytesPerSecond / MEGABYTE_IN_BYTES )
-										)
-									}
-								</Notice>
-							}
-							<BaseControl>
-								<MediaUploadCheck fallback={ instructions }>
-									<MediaUpload
-										onSelect={ this.onSelectMedia }
-										allowedTypes={ allowedBackgroundMediaTypes }
-										value={ mediaId }
-										render={ ( { open } ) => (
-											<Button isDefault isLarge onClick={ open } className="editor-amp-story-page-background">
-												{ mediaUrl ? __( 'Change Media', 'amp' ) : __( 'Select Media', 'amp' ) }
-											</Button>
-										) }
-										id="story-background-media"
-									/>
-									{ mediaUrl && (
-										<Button onClick={ () => setAttributes( { mediaUrl: undefined, mediaId: undefined, mediaType: undefined } ) } isLink isDestructive>
-											{ _x( 'Remove', 'background media', 'amp' ) }
-										</Button>
-									) }
-								</MediaUploadCheck>
-							</BaseControl>
-							{ VIDEO_BACKGROUND_TYPE === mediaType && ( ! this.state.extractingPoster || poster ) && (
-								<MediaUploadCheck>
-									<BaseControl
-										id="editor-amp-story-page-poster"
-										label={ __( 'Poster Image', 'amp' ) }
-										help={ sprintf(
-											/* translators: 1: 720p. 2: 720w. 3: 1280h */
-											__( 'The recommended dimensions for a poster image are: %1$s (%2$s x %3$s)', 'amp' ),
-											'720p',
-											'720w',
-											'1080h',
-										) }
-									>
-										{
-											! poster &&
-											<Notice status="error" isDismissible={ false } >
-												{ __( 'A poster image must be set.', 'amp' ) }
-											</Notice>
-										}
-										<MediaUpload
-											title={ __( 'Select Poster Image', 'amp' ) }
-											onSelect={ ( image ) => {
-												const imageUrl = has( image, [ 'sizes', MAX_IMAGE_SIZE_SLUG, 'url' ] ) ? image.sizes[ MAX_IMAGE_SIZE_SLUG ].url : image.url;
-												setAttributes( { poster: imageUrl } );
-											} }
-											allowedTypes={ POSTER_ALLOWED_MEDIA_TYPES }
-											modalClass="editor-amp-story-background-video-poster__media-modal"
-											render={ ( { open } ) => (
-												<Button
-													id="editor-amp-story-page-poster"
-													className={ classnames(
-														'editor-amp-story-page-background',
-														{
-															'editor-post-featured-image__toggle': ! poster,
-															'editor-post-featured-image__preview': poster,
-														}
-													) }
-													onClick={ open }
-													aria-label={ ! poster ? null : __( 'Replace Poster Image', 'amp' ) }
-												>
-													{ poster && (
-														<ResponsiveWrapper
-															naturalWidth={ 960 }
-															naturalHeight={ 1280 }
-														>
-															<img src={ poster } alt="" />
-														</ResponsiveWrapper>
-													) }
-													{ ! poster &&
-														__( 'Set Poster Image', 'amp' )
-													}
-												</Button>
-											) }
-										/>
-									</BaseControl>
-								</MediaUploadCheck>
-							) }
-							{ IMAGE_BACKGROUND_TYPE === mediaType && mediaUrl && FocalPointPicker && (
-								<FocalPointPicker
-									label={ __( 'Focal Point Picker', 'amp' ) }
-									url={ mediaUrl }
-									value={ focalPoint }
-									onChange={ ( value ) => setAttributes( { focalPoint: value } ) }
-								/>
-							) }
-						</>
-					</PanelBody>
-					<PanelBody title={ __( 'Page Settings', 'amp' ) }>
-						<SelectControl
-							label={ __( 'Advance to next page', 'amp' ) }
-							help={ autoAdvanceAfterHelp }
-							value={ autoAdvanceAfter }
-							options={ autoAdvanceAfterOptions }
-							onChange={ ( value ) => {
-								setAttributes( { autoAdvanceAfter: value } );
-								setAttributes( { autoAdvanceAfterDuration: totalAnimationDuration } );
-							} }
-						/>
-						{ 'time' === autoAdvanceAfter && (
-							<RangeControl
-								label={ __( 'Time in seconds', 'amp' ) }
-								value={ autoAdvanceAfterDuration ? parseInt( autoAdvanceAfterDuration ) : 0 }
-								onChange={ ( value ) => setAttributes( { autoAdvanceAfterDuration: value } ) }
-								min={ Math.max( totalAnimationDuration, 1 ) }
-								initialPosition={ totalAnimationDuration }
-								help={ totalAnimationDuration > 1 ? __( 'A minimum time is enforced because there are animated blocks on this page.', 'amp' ) : undefined }
-							/>
-						) }
-					</PanelBody>
+					<BackgroundColorSettings
+						backgroundColors={ JSON.parse( attributes.backgroundColors ) }
+						setAttributes={ setAttributes }
+						overlayOpacity={ overlayOpacity }
+					/>
+					<BackgroundMediaSettings
+						allowedBackgroundMediaTypes={ allowedBackgroundMediaTypes }
+						media={ media }
+						mediaId={ mediaId }
+						mediaType={ mediaType }
+						mediaAlt={ mediaAlt }
+						mediaUrl={ mediaUrl }
+						poster={ poster }
+						focalPoint={ focalPoint }
+						videoFeaturedImage={ videoFeaturedImage }
+						setAttributes={ setAttributes }
+					/>
+					<PageSettings
+						autoAdvanceAfter={ autoAdvanceAfter }
+						autoAdvanceAfterDuration={ autoAdvanceAfterDuration }
+						autoAdvanceAfterOptions={ autoAdvanceAfterOptions }
+						clientId={ clientId }
+						setAttributes={ setAttributes }
+					/>
+					<AnimationSettings clientId={ clientId } />
 				</InspectorControls>
-				{ showPlaceholder && (
-					<div style={ style }>
-						<Placeholder
-							icon={ blockIcon( { width: 24, height: 24 } ) }
-							label={ __( 'Get Started', 'amp' ) }
-							instructions={ placeholderInstructions }
-							className="editor-amp-story-page-placeholder"
+				<CopyPasteHandler clientId={ clientId } isSelected={ isSelected }>
+					{ shouldShowPlaceholder ? (
+						<div style={ style }>
+							<Placeholder
+								icon={ blockIcon( { width: 24, height: 24 } ) }
+								label={ __( 'Get Started', 'amp' ) }
+								instructions={ placeholderInstructions }
+								className="editor-amp-story-page-placeholder"
+							>
+								{
+									/*
+									* Disable reason: The `list` ARIA role is redundant but
+									* Safari+VoiceOver won't announce the list otherwise.
+									*/
+									/* eslint-disable jsx-a11y/no-redundant-roles */
+								}
+								<ul className="editor-amp-story-page-placeholder-options" role="list">
+									<li key="background-image" >
+										<IconButton
+											isLarge
+											icon="format-image"
+											className="editor-amp-story-page-placeholder-option"
+											label={ __( 'Insert Background Image', 'amp' ) }
+										/>
+									</li>
+									<li key="background-video" >
+										<IconButton
+											isLarge
+											icon="media-video"
+											className="editor-amp-story-page-placeholder-option"
+											label={ __( 'Insert Background Video', 'amp' ) }
+										/>
+									</li>
+									<li key="text-block" >
+										<IconButton
+											isLarge
+											icon={ <BlockIcon icon={ textBlock.icon } /> }
+											className="editor-amp-story-page-placeholder-option"
+											label={ __( 'Insert Text', 'amp' ) }
+										/>
+									</li>
+								</ul>
+								{ /* eslint-enable jsx-a11y/no-redundant-roles */ }
+								<div className="editor-amp-story-page-placeholder-skip">
+									<Button
+										isLink
+										onClick={ () => this.setState( { showPlaceholder: false } ) }
+									>
+										{ __( 'Skip', 'amp' ) }
+									</Button>
+								</div>
+							</Placeholder>
+						</div>
+					) : (
+						<div
+							style={ style }
 						>
-							{
-								/*
-								* Disable reason: The `list` ARIA role is redundant but
-								* Safari+VoiceOver won't announce the list otherwise.
-								*/
-								/* eslint-disable jsx-a11y/no-redundant-roles */
-							}
-							<ul className="editor-amp-story-page-placeholder-options" role="list">
-								<li key="background-image" >
-									<IconButton
-										isLarge
-										icon="format-image"
-										className="editor-amp-story-page-placeholder-option"
-										label={ __( 'Insert Background Image', 'amp' ) }
-									/>
-								</li>
-								<li key="background-video" >
-									<IconButton
-										isLarge
-										icon="media-video"
-										className="editor-amp-story-page-placeholder-option"
-										label={ __( 'Insert Background Video', 'amp' ) }
-									/>
-								</li>
-								<li key="text-block" >
-									<IconButton
-										isLarge
-										icon={ <BlockIcon icon={ textBlock.icon } /> }
-										className="editor-amp-story-page-placeholder-option"
-										label={ __( 'Insert Text', 'amp' ) }
-									/>
-								</li>
-							</ul>
-							{ /* eslint-enable jsx-a11y/no-redundant-roles */ }
-							<div className="editor-amp-story-page-placeholder-skip">
-								<Button
-									isLink
-									onClick={ () => this.setState( { showPlaceholder: false } ) }
-								>
-									{ __( 'Skip', 'amp' ) }
-								</Button>
-							</div>
-						</Placeholder>
-					</div>
-				) }
-				{ ! showPlaceholder && (
-					<div style={ style }>
-						{ /* todo: show poster image as background-image instead */ }
-						{ VIDEO_BACKGROUND_TYPE === mediaType && media && (
-							<div className="editor-amp-story-page-video-wrap">
-								<video autoPlay muted loop className="editor-amp-story-page-video" poster={ poster } ref={ this.videoPlayer }>
-									<source src={ mediaUrl } type={ media.mime_type } />
-								</video>
-							</div>
-						) }
-						{ backgroundColors.length > 0 && (
-							<div style={ overlayStyle } />
-						) }
-						<InnerBlocks allowedBlocks={ allowedBlocks } />
-					</div>
-				) }
+							{ VIDEO_BACKGROUND_TYPE === mediaType && media && (
+								<div className="editor-amp-story-page-video-wrap">
+									<video autoPlay muted loop className="editor-amp-story-page-video" poster={ poster } ref={ this.videoPlayer }>
+										<source src={ mediaUrl } type={ media.mime_type } />
+									</video>
+								</div>
+							) }
+							{ backgroundColors.length > 0 && (
+								<div style={ overlayStyle } />
+							) }
+							<InnerBlocks allowedBlocks={ allowedBlocks } />
+						</div>
+					) }
+				</CopyPasteHandler>
 			</>
 		);
 	}
@@ -536,23 +292,28 @@ PageEdit.propTypes = {
 		poster: PropTypes.string,
 		autoAdvanceAfter: PropTypes.string,
 		autoAdvanceAfterDuration: PropTypes.number,
+		mediaAlt: PropTypes.string,
 	} ).isRequired,
+	isSelected: PropTypes.bool.isRequired,
 	setAttributes: PropTypes.func.isRequired,
 	media: PropTypes.object,
 	allowedBlocks: PropTypes.arrayOf( PropTypes.string ).isRequired,
-	totalAnimationDuration: PropTypes.number.isRequired,
 	getBlockOrder: PropTypes.func.isRequired,
 	moveBlockToPosition: PropTypes.func.isRequired,
 	videoFeaturedImage: PropTypes.shape( {
 		source_url: PropTypes.string,
 	} ),
-	isFirstPage: PropTypes.bool.isRequired,
-	hasInnerBlocks: PropTypes.bool.isRequired,
+	storySettingsAttributes: PropTypes.shape( {
+		autoAdvanceAfter: PropTypes.string,
+		autoAdvanceAfterDuration: PropTypes.number,
+	} ),
+	autoAdvanceAfterOptions: PropTypes.array,
 	allowedBackgroundMediaTypes: PropTypes.arrayOf( PropTypes.string ).isRequired,
+	showPlaceholder: PropTypes.bool.isRequired,
 };
 
 export default compose(
-	withDispatch( () => {
+	withDispatch( ( dispatch ) => {
 		const { moveBlockToPosition } = dispatch( 'core/block-editor' );
 		return {
 			moveBlockToPosition,
@@ -560,11 +321,12 @@ export default compose(
 	} ),
 	withSelect( ( select, { clientId, attributes } ) => {
 		const { getMedia } = select( 'core' );
-		const { getBlockOrder, getBlockRootClientId, getBlock } = select( 'core/block-editor' );
-		const { getAnimatedBlocks, getSettings } = select( 'amp/story' );
+		const { getBlockOrder, getBlock } = select( 'core/block-editor' );
+		const { getSettings } = select( 'amp/story' );
 
 		const isFirstPage = getBlockOrder().indexOf( clientId ) === 0;
-		const isCallToActionAllowed = ! isFirstPage && ! getCallToActionBlock( clientId );
+		const isCallToActionAllowed = ! isFirstPage && ! getCallToActionBlock( clientId ) && ! getPageAttachmentBlock( clientId );
+		const isPageAttachmentAllowed = ! getCallToActionBlock( clientId ) && ! getPageAttachmentBlock( clientId );
 
 		const { mediaType, mediaId, poster } = attributes;
 
@@ -576,22 +338,39 @@ export default compose(
 			videoFeaturedImage = getMedia( media.featured_media );
 		}
 
-		const animatedBlocks = getAnimatedBlocks();
-		const animatedBlocksPerPage = ( animatedBlocks[ clientId ] || [] ).filter( ( { id } ) => clientId === getBlockRootClientId( id ) );
-		const totalAnimationDuration = getTotalAnimationDuration( animatedBlocksPerPage );
-		const totalAnimationDurationInSeconds = Math.ceil( totalAnimationDuration / 1000 );
+		let allowedBlocks = ALLOWED_MOVABLE_BLOCKS;
+
+		if ( isCallToActionAllowed ) {
+			allowedBlocks = [
+				...allowedBlocks,
+				'amp/amp-story-cta',
+			];
+		}
+		if ( isPageAttachmentAllowed ) {
+			allowedBlocks = [
+				...allowedBlocks,
+				'amp/amp-story-page-attachment',
+			];
+		}
 
 		const block = getBlock( clientId );
-		const { allowedVideoMimeTypes } = getSettings();
+		const { getEditedPostAttribute } = select( 'core/editor' );
+		const postMeta = getEditedPostAttribute( 'meta' ) || {};
+		const storySettingsAttributes = metaToAttributeNames( postMeta );
+		const { allowedVideoMimeTypes, storySettings } = getSettings();
+		const { autoAdvanceAfterOptions } = storySettings || {};
+
+		const hasInnerBlocks = Boolean( block && block.innerBlocks.length );
+		const showPlaceholder = isFirstPage && ! hasInnerBlocks && ! media;
 
 		return {
 			media,
 			videoFeaturedImage,
-			allowedBlocks: isCallToActionAllowed ? ALLOWED_CHILD_BLOCKS : ALLOWED_MOVABLE_BLOCKS,
-			totalAnimationDuration: totalAnimationDurationInSeconds,
+			allowedBlocks,
 			getBlockOrder,
-			isFirstPage,
-			hasInnerBlocks: Boolean( block && block.innerBlocks.length ),
+			storySettingsAttributes,
+			autoAdvanceAfterOptions,
+			showPlaceholder,
 			allowedBackgroundMediaTypes: [ IMAGE_BACKGROUND_TYPE, ...allowedVideoMimeTypes ],
 		};
 	} ),

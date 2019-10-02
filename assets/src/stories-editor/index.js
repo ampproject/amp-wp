@@ -25,10 +25,8 @@ import {
 /**
  * Internal dependencies
  */
-import {
-	withCroppedFeaturedImage,
-	withEnforcedFileType,
-} from '../common/components';
+import './style.css'; // This way the general editor styles are loaded before all the component styles.
+import { withEnforcedFileType } from '../common/components';
 import {
 	withAmpStorySettings,
 	withPageNumber,
@@ -39,6 +37,8 @@ import {
 	withActivePageState,
 	withStoryBlockDropZone,
 	withCallToActionValidation,
+	withCroppedFeaturedImage,
+	withRightClickHandler,
 } from './components';
 import {
 	maybeEnqueueFontStyle,
@@ -60,10 +60,9 @@ import {
 	wrapBlocksInGridLayer,
 	getMinimumStoryPosterDimensions,
 	maybeAddMissingAnchor,
+	addVideoAriaLabel,
 } from './helpers';
-
 import { ALLOWED_BLOCKS } from './constants';
-
 import store from './store';
 
 const {
@@ -275,8 +274,8 @@ store.subscribe( () => {
 			updateBlockAttributes( id, {
 				ampAnimationAfter: parentBlock ? parentBlock.attributes.anchor : undefined,
 				ampAnimationType: animationType,
-				ampAnimationDuration: duration,
-				ampAnimationDelay: delay,
+				ampAnimationDuration: duration ? `${ duration }ms` : undefined,
+				ampAnimationDelay: delay ? `${ delay }ms` : undefined,
 			} );
 		}
 	}
@@ -304,10 +303,10 @@ store.subscribe( () => {
 const plugins = require.context( './plugins', true, /.*\.js$/ );
 
 plugins.keys().forEach( ( modulePath ) => {
-	const { name, render, isActive = true } = plugins( modulePath );
+	const { name, render, icon, isActive = true } = plugins( modulePath );
 
 	if ( isActive ) {
-		registerPlugin( name, { render } );
+		registerPlugin( name, { render, icon } );
 	}
 } );
 
@@ -317,6 +316,7 @@ addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/filterBlockTransfor
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/deprecateCoreBlocks', deprecateCoreBlocks );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addStorySettings', withAmpStorySettings );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addPageNumber', withPageNumber );
+addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/rightClickHandler', withRightClickHandler );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addEditFeaturedImage', withEditFeaturedImage );
 addFilter( 'editor.BlockEdit', 'ampEditorBlocks/addVideoBlockPreview', withCustomVideoBlockEdit, 9 );
 addFilter( 'editor.PostFeaturedImage', 'ampStoryEditorBlocks/addFeaturedImageNotice', withStoryFeaturedImageNotice );
@@ -326,6 +326,7 @@ addFilter( 'editor.MediaUpload', 'ampStoryEditorBlocks/addEnforcedFileType', ( I
 addFilter( 'editor.MediaUpload', 'ampStoryEditorBlocks/addCroppedFeaturedImage', ( InitialMediaUpload ) => withCroppedFeaturedImage( InitialMediaUpload, getMinimumStoryPosterDimensions() ) );
 addFilter( 'blocks.getSaveContent.extraProps', 'ampStoryEditorBlocks/addExtraAttributes', addAMPExtraProps );
 addFilter( 'blocks.getSaveElement', 'ampStoryEditorBlocks/wrapBlocksInGridLayer', wrapBlocksInGridLayer );
+addFilter( 'blocks.getSaveElement', 'ampStoryEditorBlocks/addVideoAriaLabel', addVideoAriaLabel );
 addFilter( 'editor.BlockDropZone', 'ampStoryEditorBlocks/withStoryBlockDropZone', withStoryBlockDropZone );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/withCallToActionValidation', withCallToActionValidation );
 addFilter( 'blocks.getBlockAttributes', 'ampStoryEditorBlocks/filterBlockAttributes', filterBlockAttributes );

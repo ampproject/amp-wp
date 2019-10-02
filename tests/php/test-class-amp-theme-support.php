@@ -6,6 +6,8 @@
  * @since 0.7
  */
 
+use org\bovigo\vfs;
+
 /**
  * Tests for Theme Support.
  *
@@ -46,9 +48,13 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @global WP_Scripts $wp_scripts
 	 */
 	public function tearDown() {
-		global $wp_scripts;
-		$wp_scripts = null;
+		global $wp_scripts, $wp_styles, $wp_admin_bar;
+		$wp_scripts   = null;
+		$wp_styles    = null;
+		$wp_admin_bar = null;
+
 		parent::tearDown();
+		unset( $GLOBALS['show_admin_bar'] );
 		AMP_Validation_Manager::reset_validation_results();
 		remove_theme_support( AMP_Theme_Support::SLUG );
 		remove_theme_support( 'custom-header' );
@@ -61,6 +67,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			$GLOBALS['wp_customize']->stop_previewing_theme();
 		}
 		AMP_HTTP::$headers_sent = [];
+		remove_all_filters( 'theme_root' );
+		remove_all_filters( 'template' );
 	}
 
 	/**
@@ -221,6 +229,50 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertSame( AMP_Theme_Support::STANDARD_MODE_SLUG, AMP_Theme_Support::get_support_mode_added_via_option() );
 		$this->assertNull( AMP_Theme_Support::get_support_mode_added_via_theme() );
 		$this->assertTrue( get_theme_support( AMP_Theme_Support::SLUG ) );
+	}
+
+	/**
+	 * Test supports_reader_mode.
+	 *
+	 * @covers \AMP_Theme_Support::supports_reader_mode()
+	 */
+	public function test_supports_reader_mode() {
+		$themes_directory = 'themes';
+		$mock_theme       = 'example-theme';
+		$mock_directory   = vfs\vfsStream::setup( $themes_directory, null, [ $mock_theme => [] ] );
+
+		// Add filters so that get_template_directory() the theme in the mock filesystem.
+		add_filter(
+			'theme_root',
+			function() use ( $mock_directory ) {
+				return $mock_directory->url();
+			}
+		);
+
+		add_filter(
+			'template',
+			function() use ( $mock_theme ) {
+				return $mock_theme;
+			}
+		);
+
+		add_theme_support( 'amp' );
+		AMP_Theme_Support::read_theme_support();
+
+		// The mode is Standard, and there is no /amp directory, so this should be false.
+		$this->assertFalse( AMP_Theme_Support::supports_reader_mode() );
+
+		remove_theme_support( 'amp' );
+		AMP_Theme_Support::read_theme_support();
+
+		// The mode is Reader, but there is no /amp directory in the theme.
+		$this->assertFalse( AMP_Theme_Support::supports_reader_mode() );
+
+		// Add an /amp directory to the theme.
+		$mock_directory->getChild( $mock_theme )->addChild( vfs\vfsStream::newDirectory( 'amp' ) );
+
+		// This should be true, as there is now an /amp directory in the theme.
+		$this->assertTrue( AMP_Theme_Support::supports_reader_mode() );
 	}
 
 	/**
@@ -1152,19 +1204,109 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * Test init_admin_bar.
 	 *
 	 * @covers \AMP_Theme_Support::init_admin_bar()
+	 * @covers \AMP_Theme_Support::filter_admin_bar_style_loader_tag()
+	 * @covers \AMP_Theme_Support::filter_admin_bar_script_loader_tag()
 	 */
 	public function test_init_admin_bar() {
-		global $wp_styles, $wp_scripts;
-		$wp_styles  = null;
-		$wp_scripts = null;
-		$this->assertNotEquals( AMP__VERSION, wp_styles()->registered['admin-bar']->ver );
+		require_once ABSPATH . WPINC . '/class-wp-admin-bar.php';
+
+		add_action(
+			'admin_bar_init',
+			function() {
+				wp_enqueue_style( 'example-admin-bar', 'https://example.com/example-admin-bar.css', [ 'admin-bar' ], '0.1' );
+				wp_enqueue_script( 'example-admin-bar', 'https://example.com/example-admin-bar.js', [ 'admin-bar' ], '0.1', false );
+			}
+		);
+
+		$callback = function() {
+			?>
+			<style type="text/css" media="screen">
+				html { margin-top: 64px !important; }
+				@media screen and ( max-width: 782px ) {
+					html { margin-top: 92px !important; }
+				}
+			</style>
+			<?php
+		};
+		add_theme_support( 'admin-bar', compact( 'callback' ) );
+
+		global $wp_admin_bar;
+		$wp_admin_bar = new WP_Admin_Bar();
+		$wp_admin_bar->initialize();
+		$this->assertEquals( 10, has_action( 'wp_head', $callback ) );
 
 		AMP_Theme_Support::init_admin_bar();
-		$this->assertEquals( AMP__VERSION, wp_styles()->registered['admin-bar']->ver );
-		$this->assertFalse( wp_scripts()->query( 'admin-bar', 'enqueued' ) );
+		$this->assertEquals( 10, has_filter( 'style_loader_tag', [ 'AMP_Theme_Support', 'filter_admin_bar_style_loader_tag' ] ) );
+		$this->assertEquals( 10, has_filter( 'script_loader_tag', [ 'AMP_Theme_Support', 'filter_admin_bar_script_loader_tag' ] ) );
+		$this->assertFalse( has_action( 'wp_head', $callback ) );
+		ob_start();
+		wp_print_styles();
+		wp_print_scripts();
+		$output = ob_get_clean();
+		$this->assertContains( '<style id=\'admin-bar-inline-css\' type=\'text/css\'>', $output ); // Note: data-ampdevmode attribute will be added by AMP_Dev_Mode_Sanitizer.
+		$this->assertNotContains( '<link rel=\'stylesheet\' id=\'dashicons-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$this->assertContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'dashicons-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$this->assertContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'admin-bar-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$this->assertContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'example-admin-bar-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$this->assertContains( 'html { margin-top: 64px !important; }', $output );
+		$this->assertRegExp( '/' . implode( '', [ '<script ', 'data-ampdevmode [^>]+admin-bar\.js' ] ) . '/', $output );
+		$this->assertRegExp( '/' . implode( '', [ '<script ', 'data-ampdevmode [^>]+example-admin-bar\.js' ] ) . '/', $output );
+
 		$body_classes = get_body_class();
 		$this->assertContains( 'customize-support', $body_classes );
 		$this->assertNotContains( 'no-customize-support', $body_classes );
+	}
+
+	/**
+	 * Test init_admin_bar to ensure dashicons are not added to dev mode when directly enqueued.
+	 *
+	 * @covers \AMP_Theme_Support::init_admin_bar()
+	 * @covers \AMP_Theme_Support::filter_admin_bar_style_loader_tag()
+	 */
+	public function test_init_admin_bar_for_directly_enqueued_dashicons() {
+		require_once ABSPATH . WPINC . '/class-wp-admin-bar.php';
+
+		global $wp_admin_bar;
+		$wp_admin_bar = new WP_Admin_Bar();
+		$wp_admin_bar->initialize();
+		AMP_Theme_Support::init_admin_bar();
+
+		// Enqueued directly.
+		wp_enqueue_style( 'dashicons' );
+
+		ob_start();
+		wp_print_styles();
+		$output = ob_get_clean();
+
+		$this->assertContains( '<link rel=\'stylesheet\' id=\'dashicons-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$this->assertNotContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'dashicons-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$this->assertContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'admin-bar-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+	}
+
+	/**
+	 * Test init_admin_bar to ensure dashicons are not added to dev mode when indirectly enqueued.
+	 *
+	 * @covers \AMP_Theme_Support::init_admin_bar()
+	 * @covers \AMP_Theme_Support::filter_admin_bar_style_loader_tag()
+	 */
+	public function test_init_admin_bar_for_indirectly_enqueued_dashicons() {
+		require_once ABSPATH . WPINC . '/class-wp-admin-bar.php';
+
+		global $wp_admin_bar;
+		$wp_admin_bar = new WP_Admin_Bar();
+		$wp_admin_bar->initialize();
+		AMP_Theme_Support::init_admin_bar();
+
+		// Enqueued indirectly.
+		wp_enqueue_style( 'my-font-pack', 'https://example.com/fonts', [ 'dashicons' ], '0.1' );
+
+		ob_start();
+		wp_print_styles();
+		$output = ob_get_clean();
+
+		$this->assertContains( '<link rel=\'stylesheet\' id=\'dashicons-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$this->assertNotContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'dashicons-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$this->assertContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'admin-bar-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 	}
 
 	/**
@@ -1207,6 +1349,42 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$dom->loadHTML( sprintf( $page, $script ) );
 		AMP_Theme_Support::ensure_required_markup( $dom );
 		$this->assertEquals( $expected, substr_count( $dom->saveHTML(), 'schema.org' ) );
+	}
+
+	/**
+	 * Test moving AMP scripts from body to head.
+	 *
+	 * @covers AMP_Theme_Support::prepare_response()
+	 * @covers AMP_Theme_Support::ensure_required_markup()
+	 */
+	public function test_scripts_get_moved_to_head() {
+		ob_start();
+		?>
+		<html>
+			<head></head>
+			<body>
+				<amp-list width="auto" height="100" layout="fixed-height" src="/static/inline-examples/data/amp-list-urls.json">
+					<template type="amp-mustache">
+						<div class="url-entry">
+							<a href="{{url}}">{{title}}</a>
+						</div>
+					</template>
+				</amp-list>
+				<?php wp_print_scripts( [ 'amp-runtime', 'amp-mustache', 'amp-list' ] ); ?>
+			</body>
+		</html>
+		<?php
+		$html = ob_get_clean();
+		$html = AMP_Theme_Support::prepare_response( $html );
+
+		$dom   = AMP_DOM_Utils::get_dom( $html );
+		$xpath = new DOMXPath( $dom );
+
+		$scripts = $xpath->query( '//script[ not( @type ) or @type = "text/javascript" ]' );
+		$this->assertSame( 3, $scripts->length );
+		foreach ( $scripts as $script ) {
+			$this->assertSame( 'head', $script->parentNode->nodeName );
+		}
 	}
 
 	/**

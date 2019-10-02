@@ -22,8 +22,12 @@ import { __ } from '@wordpress/i18n';
 const MediaPlaceholder = ( { name, url } ) => {
 	return (
 		<Placeholder label={ name }>
-			<p className="components-placeholder__error">{ url }</p>
-			<p className="components-placeholder__error">{ __( 'Previews for this are unavailable in the editor, sorry!', 'amp' ) }</p>
+			<p className="components-placeholder__error">
+				{ url }
+			</p>
+			<p className="components-placeholder__error">
+				{ __( 'Previews for this are unavailable in the editor, sorry!', 'amp' ) }
+			</p>
 		</Placeholder>
 	);
 };

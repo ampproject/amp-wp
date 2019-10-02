@@ -40,13 +40,14 @@ class TextBlockEdit extends Component {
 	}
 
 	componentDidUpdate( prevProps, prevState ) {
-		const { attributes, fontSize, isSelected } = this.props;
+		const { attributes, fontSize, isSelected, setAttributes } = this.props;
 		const {
 			height,
 			width,
 			content,
 			ampFitText,
 			ampFontFamily,
+			isPasted,
 		} = attributes;
 
 		// If the block was unselected, make sure that it's not editing anymore.
@@ -74,8 +75,13 @@ class TextBlockEdit extends Component {
 			prevProps.attributes.content !== content
 		);
 
-		if ( checkBlockDimensions ) {
+		// If block has been changed or content pasted, then regenerate height and width.
+		if ( checkBlockDimensions || isPasted ) {
 			maybeUpdateBlockDimensions( this.props );
+		}
+
+		if ( isPasted ) {
+			setAttributes( { isPasted: false } );
 		}
 
 		// If the state changed to editing, focus on the text.
@@ -196,10 +202,12 @@ class TextBlockEdit extends Component {
 						onChange={ ( value ) => setAttributes( { align: value } ) }
 					/>
 				</BlockControls>
-				<div className={ classnames( wrapperClass, {
-					'with-line-height': ampFitText,
-					'is-empty-draggable-text': ! isEditing && ! content.length,
-				} ) } style={ wrapperStyle } >
+				<div
+					className={ classnames( wrapperClass, {
+						'with-line-height': ampFitText,
+						'is-empty-draggable-text': ! isEditing && ! content.length,
+					} ) }
+					style={ wrapperStyle } >
 					{ isEditing &&
 						<RichText
 							wrapperClassName={ textWrapperClassName }
@@ -252,6 +260,7 @@ TextBlockEdit.propTypes = {
 		opacity: PropTypes.number,
 		className: PropTypes.string,
 		ampFontFamily: PropTypes.string,
+		isPasted: PropTypes.bool,
 	} ).isRequired,
 	isSelected: PropTypes.bool.isRequired,
 	clientId: PropTypes.string.isRequired,

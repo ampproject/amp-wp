@@ -14,11 +14,11 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
+import { isMovableBlock } from '../../helpers';
 import BlockNavigationItem from './item';
-import { ALLOWED_MOVABLE_BLOCKS } from '../../constants';
 import './edit.css';
 
-function BlockNavigationList( { blocks,	selectedBlockClientId, selectBlock, callToActionBlock } ) {
+function BlockNavigationList( { blocks, selectedBlockClientId, selectBlock, unMovableBlock } ) {
 	return (
 		/*
 		 * Disable reason: The `list` ARIA role is redundant but
@@ -45,14 +45,14 @@ function BlockNavigationList( { blocks,	selectedBlockClientId, selectBlock, call
 					</ul>
 				</DropZoneProvider>
 			) }
-			{ /* Add CTA block separately to exclude it from DropZone. */ }
-			{ callToActionBlock && (
+			{ /* Add CTA/Attachment block separately to exclude it from DropZone. */ }
+			{ unMovableBlock && (
 				<ul className="editor-block-navigation__list block-editor-block-navigation__list editor-block-navigation__list__static" role="list">
-					<li key={ callToActionBlock.clientId }>
+					<li key={ unMovableBlock.clientId }>
 						<BlockNavigationItem
-							block={ callToActionBlock }
-							isSelected={ callToActionBlock.clientId === selectedBlockClientId }
-							onClick={ () => selectBlock( callToActionBlock.clientId ) }
+							block={ unMovableBlock }
+							isSelected={ unMovableBlock.clientId === selectedBlockClientId }
+							onClick={ () => selectBlock( unMovableBlock.clientId ) }
 						/>
 					</li>
 				</ul>
@@ -68,26 +68,28 @@ BlockNavigationList.propTypes = {
 	} ) ).isRequired,
 	selectedBlockClientId: PropTypes.string,
 	selectBlock: PropTypes.func.isRequired,
-	callToActionBlock: PropTypes.shape( {
+	unMovableBlock: PropTypes.shape( {
 		clientId: PropTypes.string.isRequired,
 	} ),
 };
 
-function BlockNavigation( { callToActionBlock, blocks, selectBlock, selectedBlockClientId } ) {
-	const hasBlocks = blocks.length > 0 || callToActionBlock;
+function BlockNavigation( { unMovableBlock, blocks, selectBlock, selectedBlockClientId } ) {
+	const hasBlocks = blocks.length > 0 || unMovableBlock;
 
 	return (
 		<NavigableMenu
 			role="presentation"
 			className="block-editor-block-navigation__container"
 		>
-			<p className="block-editor-block-navigation__label">{ __( 'Elements', 'amp' ) }</p>
+			<p className="block-editor-block-navigation__label">
+				{ __( 'Elements', 'amp' ) }
+			</p>
 			{ hasBlocks && (
 				<BlockNavigationList
 					blocks={ blocks }
 					selectedBlockClientId={ selectedBlockClientId }
 					selectBlock={ selectBlock }
-					callToActionBlock={ callToActionBlock }
+					unMovableBlock={ unMovableBlock }
 				/>
 			) }
 			{ ! hasBlocks && (
@@ -100,7 +102,7 @@ function BlockNavigation( { callToActionBlock, blocks, selectBlock, selectedBloc
 }
 
 BlockNavigation.propTypes = {
-	callToActionBlock: PropTypes.shape( {
+	unMovableBlock: PropTypes.shape( {
 		clientId: PropTypes.string.isRequired,
 	} ),
 	blocks: PropTypes.arrayOf( PropTypes.shape( {
@@ -108,7 +110,6 @@ BlockNavigation.propTypes = {
 	} ) ).isRequired,
 	selectedBlockClientId: PropTypes.string,
 	selectBlock: PropTypes.func.isRequired,
-	isReordering: PropTypes.bool.isRequired,
 };
 
 export default compose(
@@ -117,12 +118,12 @@ export default compose(
 		const { getBlockOrder, getBlocksByClientId, getSelectedBlockClientId } = select( 'core/block-editor' );
 
 		let blocks = getCurrentPage() ? getBlocksByClientId( getBlockOrder( getCurrentPage() ) ) : [];
-		// Let's get the CTA block to handle it separately.
-		const callToActionBlock = blocks.find( ( { name } ) => name === 'amp/amp-story-cta' );
-		blocks = blocks.filter( ( { name } ) => ALLOWED_MOVABLE_BLOCKS.includes( name ) ).reverse();
+		// Let's get the CTA/Attachment block to handle it separately.
+		const unMovableBlock = blocks.find( ( { name } ) => ! isMovableBlock( name ) );
+		blocks = blocks.filter( ( { name } ) => isMovableBlock( name ) ).reverse();
 		return {
 			blocks,
-			callToActionBlock,
+			unMovableBlock,
 			selectedBlockClientId: getSelectedBlockClientId(),
 			isReordering: isReordering(),
 		};

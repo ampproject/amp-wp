@@ -77,13 +77,22 @@
 	</rule>
 
 	<!-- Include sniffs for PHP cross-version compatibility. -->
-	<config name="testVersion" value="5.4-99.0"/>
-	<rule ref="PHPCompatibility">
+	<config name="testVersion" value="5.4-"/>
+	<rule ref="PHPCompatibilityWP">
 		<exclude-pattern>bin/*</exclude-pattern>
 	</rule>
 
 	<rule ref="Generic.Arrays.DisallowLongArraySyntax.Found">
 		<exclude-pattern>amp.php</exclude-pattern>
+	</rule>
+
+	<rule ref="VariableAnalysis.CodeAnalysis.VariableAnalysis">
+		<exclude-pattern>templates/*</exclude-pattern>
+		<exclude-pattern>includes/templates/*</exclude-pattern>
+		<exclude-pattern>back-compat/*</exclude-pattern>
+		<properties>
+			<property name="allowUnusedParametersBeforeUsed" value="true"/>
+		</properties>
 	</rule>
 
 	<arg value="s"/>
@@ -100,4 +109,5 @@
 	<exclude-pattern>*/vendor/*</exclude-pattern>
 	<exclude-pattern type="relative">^build/*</exclude-pattern>
 	<exclude-pattern>includes/sanitizers/class-amp-allowed-tags-generated.php</exclude-pattern>
+	<exclude-pattern>assets/js/*.asset.php</exclude-pattern>
 </ruleset>

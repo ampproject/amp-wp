@@ -26,7 +26,7 @@ const BlockSave = ( { attributes } ) => {
 		o2Props[ 'data-bid' ] = dataBid;
 	}
 	return (
-		<amp-o2-player { ...o2Props }></amp-o2-player>
+		<amp-o2-player { ...o2Props } />
 	);
 };
 

@@ -1,4 +1,9 @@
 /**
+ * Internal dependencies
+ */
+import { ANIMATION_STATUS } from './constants';
+
+/**
  * Returns a list of all pages and their animated child blocks.
  *
  * @param {Object} state Editor state.
@@ -6,7 +11,73 @@
  * @return {Array} Animation order.
  */
 export function getAnimatedBlocks( state ) {
-	return state.animations || {};
+	return state.animations && state.animations.animationOrder ? state.animations.animationOrder : {};
+}
+
+/**
+ * Returns a list of animated blocks for a given page.
+ *
+ * @param {Object} state Editor state.
+ * @param {string} page Page ID.
+ *
+ * @return {Array} Animation entries.
+ */
+export function getAnimatedBlocksPerPage( state, page ) {
+	return getAnimatedBlocks( state ) && getAnimatedBlocks( state )[ page ] ?
+		state.animations.animationOrder[ page ] :
+		[];
+}
+
+/**
+ * Returns a the animation entry for a given item.
+ *
+ * @param {Object} state Editor state.
+ * @param {string} page Page ID.
+ * @param {string} item Item ID.
+ *
+ * @return {Array} Animation entry.
+ */
+export function getAnimationEntry( state, page, item ) {
+	return getAnimatedBlocksPerPage( state, page ).find( ( { id } ) => id === item );
+}
+
+/**
+ * Returns a list of animated blocks that start directly after a given block.
+ *
+ * @param {Object} state Editor state.
+ * @param {string} page Page ID.
+ * @param {string} predecessor Predecessor ID.
+ *
+ * @return {Array} Animation successors.
+ */
+export function getAnimationSuccessors( state, page, predecessor ) {
+	return getAnimatedBlocksPerPage( state, page ).filter( ( { parent } ) => parent === predecessor );
+}
+
+/**
+ * Returns whether an animation is currently playing or not.
+ *
+ * @param {Object} state Editor state.
+ * @param {string} [page] Optional. Page ID. If not passed, checks whether any animation is playing anywhere.
+ * @param {string} [item] Optional. Item ID. If not passed, checks whether any animation is playing on the given page.
+ *
+ * @return {boolean} Whether an animation is currently playing.
+ */
+export function isPlayingAnimation( state, page, item ) {
+	if ( page && item ) {
+		const entry = getAnimationEntry( state, page, item );
+		return entry && entry.status ? entry.status !== ANIMATION_STATUS.stopped : false;
+	} else if ( page ) {
+		return Boolean( getAnimatedBlocksPerPage( state, page ).find( ( { status } ) => status && status !== ANIMATION_STATUS.stopped ) );
+	}
+
+	for ( const p of Object.keys( getAnimatedBlocks( state ) ) ) {
+		if ( isPlayingAnimation( state, p ) ) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 /**
@@ -22,11 +93,13 @@ export function getAnimatedBlocks( state ) {
  * @return {boolean} True if the animation predecessor is valid, false otherwise.
  */
 export function isValidAnimationPredecessor( state, page, item, predecessor ) {
-	if ( undefined === predecessor || ! state.animations ) {
+	state.animations = state.animations || {};
+	state.animations.animationOrder = state.animations.animationOrder || {};
+	if ( undefined === predecessor ) {
 		return true;
 	}
 
-	const pageAnimationOrder = state.animations[ page ] || [];
+	const pageAnimationOrder = state.animations.animationOrder[ page ] || [];
 
 	const findEntry = ( entryId ) => pageAnimationOrder.find( ( { id } ) => id === entryId );
 
@@ -97,6 +170,16 @@ export function getBlockIndex( state, page ) {
  */
 export function isReordering( state ) {
 	return state.blocks.isReordering || false;
+}
+
+/**
+ * Returns copied markup for pasting workaround.
+ *
+ * @param {Object} state Editor state.
+ * @return {string} Markup.
+ */
+export function getCopiedMarkup( state ) {
+	return state.copiedMarkup || '';
 }
 
 /**

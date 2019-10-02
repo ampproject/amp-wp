@@ -501,115 +501,136 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		foreach ( $class_names as $class_name ) {
-			// Class names for amp-dynamic-css-classes, see <https://www.ampproject.org/docs/reference/components/amp-dynamic-css-classes>.
-			if ( 'amp-referrer-' === substr( $class_name, 0, 13 ) ) {
+			// Bail early with a common case scenario.
+			if ( isset( $this->used_class_names[ $class_name ] ) ) {
 				continue;
 			}
 
-			/*
-			 * Common class names used for amp-user-notification and amp-live-list.
-			 * See <https://www.ampproject.org/docs/reference/components/amp-user-notification#styling>.
-			 * See <https://www.ampproject.org/docs/reference/components/amp-live-list#styling>.
-			 */
-			if ( 'amp-active' === $class_name || 'amp-hidden' === $class_name ) {
-				if ( ! $this->has_used_tag_names( [ 'amp-live-list' ] ) && ! $this->has_used_tag_names( [ 'amp-user-notification' ] ) ) {
-					return false;
-				}
-				continue;
-			}
-
-			// Class names for amp-carousel, see <https://www.ampproject.org/docs/reference/components/amp-carousel#styling>.
-			if ( 'amp-carousel-' === substr( $class_name, 0, 13 ) ) {
-				if ( ! $this->has_used_tag_names( [ 'amp-carousel' ] ) ) {
-					return false;
-				}
-				continue;
-			}
-
-			// Class names for amp-date-picker, see <https://www.ampproject.org/docs/reference/components/amp-date-picker>.
-			if ( 'amp-date-picker-' === substr( $class_name, 0, 16 ) ) {
-				if ( ! $this->has_used_tag_names( [ 'amp-date-picker' ] ) ) {
-					return false;
-				}
-				continue;
-			}
-
-			// Class names for amp-form, see <https://www.ampproject.org/docs/reference/components/amp-form#classes-and-css-hooks>.
-			if ( 'amp-form-' === substr( $class_name, 0, 9 ) || 'user-valid' === $class_name || 'user-invalid' === $class_name ) {
-				if ( ! $this->has_used_tag_names( [ 'form' ] ) ) {
-					return false;
-				}
-				continue;
-			}
-
-			// Class names for extensions which use the video-manager, and thus video-autoplay.css.
-			if ( 'amp-video-' === substr( $class_name, 0, 10 ) ) {
-				foreach ( $this->video_autoplay_elements as $video_autoplay_element ) {
-					if ( $this->has_used_tag_names( [ $video_autoplay_element ] ) ) {
-						continue 2;
+			// Check exact matches first, as they are faster.
+			switch ( $class_name ) {
+				/*
+				 * Common class names used for amp-user-notification and amp-live-list.
+				 * See <https://www.ampproject.org/docs/reference/components/amp-user-notification#styling>.
+				 * See <https://www.ampproject.org/docs/reference/components/amp-live-list#styling>.
+				 */
+				case 'amp-active':
+				case 'amp-hidden':
+					if ( ! $this->has_used_tag_names( [ 'amp-live-list', 'amp-user-notification' ] ) ) {
+						return false;
 					}
-				}
-				return false;
+					continue 2;
+				// Class names for amp-image-lightbox, see <https://www.ampproject.org/docs/reference/components/amp-image-lightbox#styling>.
+				case 'amp-image-lightbox-caption':
+					if ( ! $this->has_used_tag_names( [ 'amp-image-lightbox' ] ) ) {
+						return false;
+					}
+					continue 2;
+				// Class names for amp-form, see <https://www.ampproject.org/docs/reference/components/amp-form#classes-and-css-hooks>.
+				case 'user-valid':
+				case 'user-invalid':
+					if ( ! $this->has_used_tag_names( [ 'form' ] ) ) {
+						return false;
+					}
+					continue 2;
 			}
 
-			/*
-			 * Class names for amp-access and amp-access-laterpay.
-			 * See <https://www.ampproject.org/docs/reference/components/amp-access>.
-			 * See <https://www.ampproject.org/docs/reference/components/amp-access-laterpay#styling>
-			 */
-			if ( 'amp-access-' === substr( $class_name, 0, 11 ) ) {
-				if ( ! $this->has_used_attributes( [ 'amp-access' ] ) ) {
-					return false;
-				}
-				continue;
-			}
+			// Only do AMP element-specific checks on an AMP components with the corresponding prefix.
+			if ( 'amp-' === substr( $class_name, 0, 4 ) ) {
 
-			// Class names for amp-geo, see <https://www.ampproject.org/docs/reference/components/amp-geo#generated-css-classes>.
-			if ( 'amp-geo-' === substr( $class_name, 0, 8 ) || 'amp-iso-country-' === substr( $class_name, 0, 16 ) ) {
-				if ( ! $this->has_used_tag_names( [ 'amp-geo' ] ) ) {
-					return false;
+				// Class names for amp-geo, see <https://www.ampproject.org/docs/reference/components/amp-geo#generated-css-classes>.
+				if ( 'amp-geo-' === substr( $class_name, 0, 8 ) ) {
+					if ( ! $this->has_used_tag_names( [ 'amp-geo' ] ) ) {
+						return false;
+					}
+					continue;
 				}
-				continue;
-			}
 
-			// Class names for amp-image-lightbox, see <https://www.ampproject.org/docs/reference/components/amp-image-lightbox#styling>.
-			if ( 'amp-image-lightbox-caption' === $class_name ) {
-				if ( ! $this->has_used_tag_names( [ 'amp-image-lightbox' ] ) ) {
-					return false;
+				// Class names for amp-form, see <https://www.ampproject.org/docs/reference/components/amp-form#classes-and-css-hooks>.
+				if ( 'amp-form-' === substr( $class_name, 0, 9 ) ) {
+					if ( ! $this->has_used_tag_names( [ 'form' ] ) ) {
+						return false;
+					}
+					continue;
 				}
-				continue;
-			}
 
-			// Class names for amp-live-list, see <https://www.ampproject.org/docs/reference/components/amp-live-list#styling>.
-			if ( 'amp-live-list-' === substr( $class_name, 0, 14 ) ) {
-				if ( ! $this->has_used_tag_names( [ 'amp-live-list' ] ) ) {
+				// Class names for extensions which use the video-manager, and thus video-autoplay.css.
+				if ( 'amp-video-' === substr( $class_name, 0, 10 ) ) {
+					foreach ( $this->video_autoplay_elements as $video_autoplay_element ) {
+						if ( $this->has_used_tag_names( [ $video_autoplay_element ] ) ) {
+							continue 2;
+						}
+					}
 					return false;
 				}
-				continue;
-			}
 
-			// Class names for amp-sidebar, see <https://www.ampproject.org/docs/reference/components/amp-sidebar#styling-toolbar>.
-			if ( 'amp-sidebar-' === substr( $class_name, 0, 12 ) ) {
-				if ( ! $this->has_used_tag_names( [ 'amp-sidebar' ] ) ) {
-					return false;
+				switch ( substr( $class_name, 0, 11 ) ) {
+					/*
+					 * Class names for amp-access and amp-access-laterpay.
+					 * See <https://www.ampproject.org/docs/reference/components/amp-access>.
+					 * See <https://www.ampproject.org/docs/reference/components/amp-access-laterpay#styling>
+					 */
+					case 'amp-access-':
+						if ( ! $this->has_used_attributes( [ 'amp-access' ] ) ) {
+							return false;
+						}
+						continue 2;
+					// Class names for amp-video-docking, see <https://github.com/ampproject/amphtml/blob/master/extensions/amp-video-docking/amp-video-docking.md#styling>.
+					case 'amp-docked-':
+						if ( ! $this->has_used_attributes( [ 'dock' ] ) ) {
+							return false;
+						}
+						continue 2;
 				}
-				continue;
-			}
 
-			// Class names for amp-sticky-ad, see <https://www.ampproject.org/docs/reference/components/amp-sticky-ad#styling>.
-			if ( 'amp-sticky-ad-' === substr( $class_name, 0, 14 ) ) {
-				if ( ! $this->has_used_tag_names( [ 'amp-sticky-ad' ] ) ) {
-					return false;
+				// Class names for amp-sidebar, see <https://www.ampproject.org/docs/reference/components/amp-sidebar#styling-toolbar>.
+				if ( 'amp-sidebar-' === substr( $class_name, 0, 12 ) ) {
+					if ( ! $this->has_used_tag_names( [ 'amp-sidebar' ] ) ) {
+						return false;
+					}
+					continue;
 				}
-				continue;
-			}
 
-			// Class names for amp-video-docking, see <https://github.com/ampproject/amphtml/blob/master/extensions/amp-video-docking/amp-video-docking.md#styling>.
-			if ( 'amp-docked-' === substr( $class_name, 0, 11 ) ) {
-				if ( ! $this->has_used_attributes( [ 'dock' ] ) ) {
-					return false;
+				switch ( substr( $class_name, 0, 13 ) ) {
+					// Class names for amp-dynamic-css-classes, see <https://www.ampproject.org/docs/reference/components/amp-dynamic-css-classes>.
+					case 'amp-referrer-':
+						continue 2;
+					// Class names for amp-carousel, see <https://www.ampproject.org/docs/reference/components/amp-carousel#styling>.
+					case 'amp-carousel-':
+						if ( ! $this->has_used_tag_names( [ 'amp-carousel' ] ) ) {
+							return false;
+						}
+						continue 2;
 				}
-				continue;
+
+				switch ( substr( $class_name, 0, 14 ) ) {
+					// Class names for amp-sticky-ad, see <https://www.ampproject.org/docs/reference/components/amp-sticky-ad#styling>.
+					case 'amp-sticky-ad-':
+						if ( ! $this->has_used_tag_names( [ 'amp-sticky-ad' ] ) ) {
+							return false;
+						}
+						continue 2;
+					// Class names for amp-live-list, see <https://www.ampproject.org/docs/reference/components/amp-live-list#styling>.
+					case 'amp-live-list-':
+						if ( ! $this->has_used_tag_names( [ 'amp-live-list' ] ) ) {
+							return false;
+						}
+						continue 2;
+				}
+
+				switch ( substr( $class_name, 0, 16 ) ) {
+					// Class names for amp-date-picker, see <https://www.ampproject.org/docs/reference/components/amp-date-picker>.
+					case 'amp-date-picker-':
+						if ( ! $this->has_used_tag_names( [ 'amp-date-picker' ] ) ) {
+							return false;
+						}
+						continue 2;
+					// Class names for amp-geo, see <https://www.ampproject.org/docs/reference/components/amp-geo#generated-css-classes>.
+					case 'amp-iso-country-':
+						if ( ! $this->has_used_tag_names( [ 'amp-geo' ] ) ) {
+							return false;
+						}
+						continue 2;
+				}
 			}
 
 			if ( ! isset( $this->used_class_names[ $class_name ] ) ) {
@@ -743,7 +764,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	public function sanitize() {
 		$elements = [];
 
-		// Do nothing if inline styles are allowed.
+		// Do nothing if inline styles are allowed. Note, a better alternative to this is AMP dev mode.
 		if ( ! empty( $this->args['allow_dirty_styles'] ) ) {
 			return;
 		}
@@ -762,10 +783,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		 */
 		$xpath = $this->xpath;
 
+		$dev_mode_predicate = '';
+		if ( $this->is_document_in_dev_mode() ) {
+			$dev_mode_predicate = sprintf( ' and not ( @%s )', AMP_Rule_Spec::DEV_MODE_ATTRIBUTE );
+		}
+
 		$lower_case = 'translate( %s, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz" )'; // In XPath 2.0 this is lower-case().
 		$predicates = [
-			sprintf( '( self::style and not( @amp-boilerplate ) and ( not( @type ) or %s = "text/css" ) )', sprintf( $lower_case, '@type' ) ),
-			sprintf( '( self::link and @href and %s = "stylesheet" )', sprintf( $lower_case, '@rel' ) ),
+			sprintf( '( self::style and not( @amp-boilerplate ) and ( not( @type ) or %s = "text/css" ) %s )', sprintf( $lower_case, '@type' ), $dev_mode_predicate ),
+			sprintf( '( self::link and @href and %s = "stylesheet" %s )', sprintf( $lower_case, '@rel' ), $dev_mode_predicate ),
 		];
 
 		foreach ( $xpath->query( '//*[ ' . implode( ' or ', $predicates ) . ' ]' ) as $element ) {
@@ -814,7 +840,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		$elements = [];
-		foreach ( $xpath->query( '//*[ @style ]' ) as $element ) {
+		foreach ( $xpath->query( "//*[ @style $dev_mode_predicate ]" ) as $element ) {
 			$elements[] = $element;
 		}
 		foreach ( $elements as $element ) {
@@ -1354,7 +1380,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			),
 			wp_array_slice_assoc(
 				$this->args,
-				[ 'should_locate_sources', 'parsed_cache_variant' ]
+				[ 'should_locate_sources', 'parsed_cache_variant', 'dynamic_element_selectors' ]
 			),
 			[
 				'language' => get_bloginfo( 'language' ), // Used to tree-shake html[lang] selectors.
@@ -2477,7 +2503,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			foreach ( $pending_stylesheet['stylesheet'] as $j => $part ) {
 				if ( is_string( $part ) && 0 === strpos( $part, '@import' ) ) {
 					$stylesheet_groups[ $pending_stylesheet['group'] ]['import_front_matter'] .= $part;
-					unset( $this->pending_stylesheets['stylesheet'][ $j ][ $i ] );
+					unset( $this->pending_stylesheets[ $i ]['stylesheet'][ $j ] );
 				}
 			}
 
@@ -2531,6 +2557,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$excluded_size          = 0;
 			$excluded_original_size = 0;
 			$included_sources       = [];
+			$excluded_sources       = [];
 			foreach ( $this->pending_stylesheets as $j => $pending_stylesheet ) {
 				if ( 'custom' !== $pending_stylesheet['group'] || ! ( $pending_stylesheet['node'] instanceof DOMElement ) || ! empty( $pending_stylesheet['duplicate'] ) ) {
 					continue;
@@ -2709,7 +2736,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$admin_bar_id = 'wpadminbar';
 		$admin_bar    = $this->dom->getElementById( $admin_bar_id );
-		if ( ! $admin_bar ) {
+		if ( ! $admin_bar || ! $admin_bar->parentNode ) {
 			return;
 		}
 
@@ -2893,15 +2920,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$max_bytes      = $group_config['cdata_spec']['max_bytes'] - strlen( $group_config['source_map_comment'] );
 
 		$previously_seen_stylesheet_index = [];
-		$indices_by_stylesheet_element_id = [];
 		foreach ( $this->pending_stylesheets as $pending_stylesheet_index => &$pending_stylesheet ) {
 			if ( $group !== $pending_stylesheet['group'] ) {
 				continue;
-			}
-
-			// Keep track of the element IDs for the stylesheets.
-			if ( $pending_stylesheet['node'] instanceof DOMElement && $pending_stylesheet['node']->hasAttribute( 'id' ) ) {
-				$indices_by_stylesheet_element_id[ $pending_stylesheet['node']->getAttribute( 'id' ) ] = $pending_stylesheet_index;
 			}
 
 			$stylesheet_parts = [];
@@ -3072,44 +3093,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		$included_count -= $this->exclude_all_admin_bar_css_if_excessive( $indices_by_stylesheet_element_id );
-
 		return $included_count;
-	}
-
-	/**
-	 * If the admin-bar CSS was excluded, make sure the admin-bar inline CSS is also excluded, and vice-versa.
-	 *
-	 * @param int[] $indices_by_stylesheet_element_id Lookup of stylesheet indices by stylesheet element ID.
-	 * @return int Number of excluded styles.
-	 */
-	private function exclude_all_admin_bar_css_if_excessive( $indices_by_stylesheet_element_id ) {
-		$excluded_count = 0;
-
-		$admin_bar_style_element_ids         = [ 'admin-bar-css', 'admin-bar-inline-css' ];
-		$should_exclude_admin_bar_inline_css = false;
-		foreach ( $admin_bar_style_element_ids as $admin_bar_style_element_id ) {
-			if ( ! isset( $indices_by_stylesheet_element_id[ $admin_bar_style_element_id ] ) ) {
-				continue;
-			}
-			if ( false === $this->pending_stylesheets[ $indices_by_stylesheet_element_id[ $admin_bar_style_element_id ] ]['included'] ) {
-				$should_exclude_admin_bar_inline_css = true;
-				break;
-			}
-		}
-		if ( $should_exclude_admin_bar_inline_css ) {
-			foreach ( $admin_bar_style_element_ids as $admin_bar_style_element_id ) {
-				$needs_exclusion = (
-					isset( $indices_by_stylesheet_element_id[ $admin_bar_style_element_id ] )
-					&&
-					true === $this->pending_stylesheets[ $indices_by_stylesheet_element_id[ $admin_bar_style_element_id ] ]['included']
-				);
-				if ( $needs_exclusion ) {
-					$this->pending_stylesheets[ $indices_by_stylesheet_element_id[ $admin_bar_style_element_id ] ]['included'] = false;
-					$excluded_count++;
-				}
-			}
-		}
-		return $excluded_count;
 	}
 }

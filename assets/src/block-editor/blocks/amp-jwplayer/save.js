@@ -21,7 +21,7 @@ const BlockSave = ( { attributes } ) => {
 		jwProps[ 'data-media-id' ] = dataMediaId;
 	}
 	return (
-		<amp-jwplayer { ...jwProps }></amp-jwplayer>
+		<amp-jwplayer { ...jwProps } />
 	);
 };
 

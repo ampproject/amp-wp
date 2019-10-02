@@ -33,6 +33,29 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Call a private method as if it was public.
+	 *
+	 * This is currently being used to test the internals of the validation
+	 * command.
+	 *
+	 * The command should be refactored to rely on abstractions, instead of
+	 * having so much of its own logic. This would then make testing the
+	 * internals unnecessary.
+	 * See: https://github.com/ampproject/amp-wp/issues/3077
+	 *
+	 * @param object $object      Object instance to call the method on.
+	 * @param string $method_name Name of the method to call.
+	 * @param array  $args        Optional. Array of arguments to pass to the method.
+	 * @return mixed Return value of the method call.
+	 * @throws ReflectionException If the object could not be reflected upon.
+	 */
+	private function call_private_method( $object, $method_name, $args = [] ) {
+		$method = ( new ReflectionClass( $object ) )->getMethod( $method_name );
+		$method->setAccessible( true );
+		return $method->invokeArgs( $object, $args );
+	}
+
+	/**
 	 * Test count_urls_to_validate.
 	 *
 	 * @covers AMP_CLI_Validation_Command::count_urls_to_validate()
@@ -40,7 +63,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 	public function test_count_urls_to_validate() {
 		// The number of original URLs present before adding these test URLs.
 		$number_original_urls = $this->get_inital_url_count();
-		$this->assertEquals( $number_original_urls, $this->validation->count_urls_to_validate() );
+		$this->assertEquals( $number_original_urls, $this->call_private_method( $this->validation, 'count_urls_to_validate' ) );
 		$this->validation->limit_type_validate_count = 100;
 
 		$category         = $this->factory()->term->create( [ 'taxonomy' => 'category' ] );
@@ -59,7 +82,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 		 * And ensure that the tested method finds a URL for all of them.
 		 */
 		$expected_url_count = $number_new_posts + $number_original_urls + 1;
-		$this->assertEquals( $expected_url_count, $this->validation->count_urls_to_validate() );
+		$this->assertEquals( $expected_url_count, $this->call_private_method( $this->validation, 'count_urls_to_validate' ) );
 
 		$number_of_new_terms        = 20;
 		$expected_url_count        += $number_of_new_terms;
@@ -80,7 +103,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 			$taxonomy
 		);
 
-		$this->assertEquals( $expected_url_count, $this->validation->count_urls_to_validate() );
+		$this->assertEquals( $expected_url_count, $this->call_private_method( $this->validation, 'count_urls_to_validate' ) );
 	}
 
 	/**
@@ -96,7 +119,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 		}
 
 		// This should count all of the newly-created posts as supporting AMP.
-		$this->assertEquals( $ids, $this->validation->get_posts_that_support_amp( $ids ) );
+		$this->assertEquals( $ids, $this->call_private_method( $this->validation, 'get_posts_that_support_amp', [ $ids ] ) );
 
 		// Simulate 'Enable AMP' being unchecked in the post editor, in which case get_url_count() should not count it.
 		$first_id = $ids[0];
@@ -105,7 +128,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 			AMP_Post_Meta_Box::STATUS_POST_META_KEY,
 			AMP_Post_Meta_Box::DISABLED_STATUS
 		);
-		$this->assertEquals( [], $this->validation->get_posts_that_support_amp( [ $first_id ] ) );
+		$this->assertEquals( [], $this->call_private_method( $this->validation, 'get_posts_that_support_amp', [ [ $first_id ] ] ) );
 
 		update_post_meta(
 			$first_id,
@@ -115,12 +138,12 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 
 		// When the second $force_count_all_urls argument is true, all of the newly-created posts should be part of the URL count.
 		$this->validation->force_crawl_urls = true;
-		$this->assertEquals( $ids, $this->validation->get_posts_that_support_amp( $ids ) );
+		$this->assertEquals( $ids, $this->call_private_method( $this->validation, 'get_posts_that_support_amp', [ $ids ] ) );
 		$this->validation->force_crawl_urls = false;
 
 		// In AMP-first, the IDs should include all of the newly-created posts.
 		add_theme_support( AMP_Theme_Support::SLUG );
-		$this->assertEquals( $ids, $this->validation->get_posts_that_support_amp( $ids ) );
+		$this->assertEquals( $ids, $this->call_private_method( $this->validation, 'get_posts_that_support_amp', [ $ids ] ) );
 
 		// In Transitional Mode, the IDs should also include all of the newly-created posts.
 		add_theme_support(
@@ -129,21 +152,21 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 				AMP_Theme_Support::PAIRED_FLAG => true,
 			]
 		);
-		$this->assertEquals( $ids, $this->validation->get_posts_that_support_amp( $ids ) );
+		$this->assertEquals( $ids, $this->call_private_method( $this->validation, 'get_posts_that_support_amp', [ $ids ] ) );
 
 		/*
 		 * If the WP-CLI command has an include argument, and is_singular isn't in it, no posts will have AMP enabled.
 		 * For example, wp amp validate-site --include=is_tag,is_category
 		 */
 		$this->validation->include_conditionals = [ 'is_tag', 'is_category' ];
-		$this->assertEquals( [], $this->validation->get_posts_that_support_amp( $ids ) );
+		$this->assertEquals( [], $this->call_private_method( $this->validation, 'get_posts_that_support_amp', [ $ids ] ) );
 
 		/*
 		 * If is_singular is in the WP-CLI argument, it should allow return these posts as being AMP-enabled.
 		 * For example, wp amp validate-site include=is_singular,is_category
 		 */
 		$this->validation->include_conditionals = [ 'is_singular', 'is_category' ];
-		$this->assertEmpty( array_diff( $ids, $this->validation->get_posts_that_support_amp( $ids ) ) );
+		$this->assertEmpty( array_diff( $ids, $this->call_private_method( $this->validation, 'get_posts_that_support_amp', [ $ids ] ) ) );
 		$this->validation->include_conditionals = [];
 	}
 
@@ -160,27 +183,27 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 
 		// When these templates are not unchecked in the 'AMP Settings' UI, these should be supported.
 		foreach ( $taxonomies_to_test as $taxonomy ) {
-			$this->assertTrue( $this->validation->does_taxonomy_support_amp( $taxonomy ) );
+			$this->assertTrue( $this->call_private_method( $this->validation, 'does_taxonomy_support_amp', [ $taxonomy ] ) );
 		}
 
 		// When the user has not checked the boxes for 'Categories' and 'Tags,' this should be false.
 		AMP_Options_Manager::update_option( 'supported_templates', [ 'is_author' ] );
 		AMP_Options_Manager::update_option( 'all_templates_supported', false );
 		foreach ( $taxonomies_to_test as $taxonomy ) {
-			$this->assertFalse( $this->validation->does_taxonomy_support_amp( $taxonomy ) );
+			$this->assertFalse( $this->call_private_method( $this->validation, 'does_taxonomy_support_amp', [ $taxonomy ] ) );
 		}
 
 		// When $force_crawl_urls is true, all taxonomies should be supported.
 		$this->validation->force_crawl_urls = true;
 		foreach ( $taxonomies_to_test as $taxonomy ) {
-			$this->assertTrue( $this->validation->does_taxonomy_support_amp( $taxonomy ) );
+			$this->assertTrue( $this->call_private_method( $this->validation, 'does_taxonomy_support_amp', [ $taxonomy ] ) );
 		}
 		$this->validation->force_crawl_urls = false;
 
 		// When the user has checked the 'all_templates_supported' box, this should always be true.
 		AMP_Options_Manager::update_option( 'all_templates_supported', true );
 		foreach ( $taxonomies_to_test as $taxonomy ) {
-			$this->assertTrue( $this->validation->does_taxonomy_support_amp( $taxonomy ) );
+			$this->assertTrue( $this->call_private_method( $this->validation, 'does_taxonomy_support_amp', [ $taxonomy ] ) );
 		}
 		AMP_Options_Manager::update_option( 'all_templates_supported', false );
 
@@ -189,10 +212,10 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 		 * these should be supported taxonomies.
 		 */
 		$this->validation->include_conditionals = [ 'is_category', 'is_tag' ];
-		$this->assertTrue( $this->validation->does_taxonomy_support_amp( 'category' ) );
-		$this->assertTrue( $this->validation->does_taxonomy_support_amp( 'tag' ) );
-		$this->assertFalse( $this->validation->does_taxonomy_support_amp( 'author' ) );
-		$this->assertFalse( $this->validation->does_taxonomy_support_amp( 'search' ) );
+		$this->assertTrue( $this->call_private_method( $this->validation, 'does_taxonomy_support_amp', [ 'category' ] ) );
+		$this->assertTrue( $this->call_private_method( $this->validation, 'does_taxonomy_support_amp', [ 'tag' ] ) );
+		$this->assertFalse( $this->call_private_method( $this->validation, 'does_taxonomy_support_amp', [ 'author' ] ) );
+		$this->assertFalse( $this->call_private_method( $this->validation, 'does_taxonomy_support_amp', [ 'search' ] ) );
 		$this->validation->include_conditionals = [];
 	}
 
@@ -207,12 +230,12 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 
 		AMP_Options_Manager::update_option( 'supported_templates', [ $author_conditional ] );
 		AMP_Options_Manager::update_option( 'all_templates_supported', false );
-		$this->assertTrue( $this->validation->is_template_supported( $author_conditional ) );
-		$this->assertFalse( $this->validation->is_template_supported( $search_conditional ) );
+		$this->assertTrue( $this->call_private_method( $this->validation, 'is_template_supported', [ $author_conditional ] ) );
+		$this->assertFalse( $this->call_private_method( $this->validation, 'is_template_supported', [ $search_conditional ] ) );
 
 		AMP_Options_Manager::update_option( 'supported_templates', [ $search_conditional ] );
-		$this->assertTrue( $this->validation->is_template_supported( $search_conditional ) );
-		$this->assertFalse( $this->validation->is_template_supported( $author_conditional ) );
+		$this->assertTrue( $this->call_private_method( $this->validation, 'is_template_supported', [ $search_conditional ] ) );
+		$this->assertFalse( $this->call_private_method( $this->validation, 'is_template_supported', [ $author_conditional ] ) );
 	}
 
 	/**
@@ -245,12 +268,12 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 				);
 			}
 
-			$actual_posts = $this->validation->get_posts_by_type( $post_type );
+			$actual_posts = $this->call_private_method( $this->validation, 'get_posts_by_type', [ $post_type ] );
 			$this->assertEquals( $expected_posts, array_values( $actual_posts ) );
 
 			// Test with the $offset and $number arguments.
 			$offset       = 0;
-			$actual_posts = $this->validation->get_posts_by_type( $post_type, $offset, $number_posts_each_post_type );
+			$actual_posts = $this->call_private_method( $this->validation, 'get_posts_by_type', [ $post_type, $offset, $number_posts_each_post_type ] );
 			$this->assertEquals( array_slice( $expected_posts, $offset, $number_posts_each_post_type ), $actual_posts );
 		}
 	}
@@ -292,7 +315,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 				array_map( 'get_term_link', $terms_for_current_taxonomy )
 			);
 			$number_of_links = 100;
-			$actual_links    = $this->validation->get_taxonomy_links( $taxonomy, 0, $number_of_links );
+			$actual_links    = $this->call_private_method( $this->validation, 'get_taxonomy_links', [ $taxonomy, 0, $number_of_links ] );
 
 			// The get_terms() call in get_taxonomy_links() returns an array with a first index of 1, so correct for that with array_values().
 			$this->assertEquals( $expected_links, array_values( $actual_links ) );
@@ -300,7 +323,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 
 			$number_of_links           = 5;
 			$offset                    = 10;
-			$actual_links_using_offset = $this->validation->get_taxonomy_links( $taxonomy, $offset, $number_of_links );
+			$actual_links_using_offset = $this->call_private_method( $this->validation, 'get_taxonomy_links', [ $taxonomy, $offset, $number_of_links ] );
 			$this->assertEquals( array_slice( $expected_links, $offset, $number_of_links ), array_values( $actual_links_using_offset ) );
 			$this->assertEquals( $number_of_links, count( $actual_links_using_offset ) );
 		}
@@ -319,21 +342,25 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 		$second_author     = $users[1];
 		$second_author_url = get_author_posts_url( $second_author->ID, $second_author->user_nicename );
 
+		$actual_urls = $this->call_private_method( $this->validation, 'get_author_page_urls', [ 0, 1 ] );
+
 		// Passing 0 as the offset argument should get the first author.
-		$this->assertEquals( [ $first_author_url ], $actual_urls = $this->validation->get_author_page_urls( 0, 1 ) );
+		$this->assertEquals( [ $first_author_url ], $actual_urls );
+
+		$actual_urls = $this->call_private_method( $this->validation, 'get_author_page_urls', [ 1, 1 ] );
 
 		// Passing 1 as the offset argument should get the second author.
-		$this->assertEquals( [ $second_author_url ], $actual_urls = $this->validation->get_author_page_urls( 1, 1 ) );
+		$this->assertEquals( [ $second_author_url ], $actual_urls );
 
 		// If $include_conditionals is set and does not have is_author, this should not return a URL.
 		$this->validation->include_conditionals = [ 'is_category' ];
-		$this->assertEquals( [], $this->validation->get_author_page_urls() );
+		$this->assertEquals( [], $this->call_private_method( $this->validation, 'get_author_page_urls' ) );
 
 		// If $include_conditionals is set and has is_author, this should return URLs.
 		$this->validation->include_conditionals = [ 'is_author' ];
 		$this->assertEquals(
 			[ $first_author_url, $second_author_url ],
-			$this->validation->get_author_page_urls()
+			$this->call_private_method( $this->validation, 'get_author_page_urls' )
 		);
 		$this->validation->include_conditionals = [];
 	}
@@ -345,15 +372,15 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 	 */
 	public function test_get_search_page() {
 		// Normally, this should return a string, unless the user has opted out of the search template.
-		$this->assertTrue( is_string( $this->validation->get_search_page() ) );
+		$this->assertTrue( is_string( $this->call_private_method( $this->validation, 'get_search_page' ) ) );
 
 		// If $include_conditionals is set and does not have is_search, this should not return a URL.
 		$this->validation->include_conditionals = [ 'is_author' ];
-		$this->assertEquals( null, $this->validation->get_search_page() );
+		$this->assertEquals( null, $this->call_private_method( $this->validation, 'get_search_page' ) );
 
 		// If $include_conditionals has is_search, this should return a URL.
 		$this->validation->include_conditionals = [ 'is_search' ];
-		$this->assertTrue( is_string( $this->validation->get_search_page() ) );
+		$this->assertTrue( is_string( $this->call_private_method( $this->validation, 'get_search_page' ) ) );
 		$this->validation->include_conditionals = [];
 	}
 
@@ -366,15 +393,15 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 		$year = date( 'Y' );
 
 		// Normally, this should return the date page, unless the user has opted out of that template.
-		$this->assertContains( $year, $this->validation->get_date_page() );
+		$this->assertContains( $year, $this->call_private_method( $this->validation, 'get_date_page' ) );
 
 		// If $include_conditionals is set and does not have is_date, this should not return a URL.
 		$this->validation->include_conditionals = [ 'is_search' ];
-		$this->assertEquals( null, $this->validation->get_date_page() );
+		$this->assertEquals( null, $this->call_private_method( $this->validation, 'get_date_page' ) );
 
 		// If $include_conditionals has is_date, this should return a URL.
 		$this->validation->include_conditionals = [ 'is_date' ];
-		$parsed_page_url                        = wp_parse_url( $this->validation->get_date_page() );
+		$parsed_page_url                        = wp_parse_url( $this->call_private_method( $this->validation, 'get_date_page' ) );
 		$this->assertContains( $year, $parsed_page_url['query'] );
 		$this->validation->include_conditionals = [];
 	}
@@ -396,7 +423,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 			$posts[]           = $post_id;
 			$post_permalinks[] = get_permalink( $post_id );
 		}
-		$this->validation->crawl_site();
+		$this->call_private_method( $this->validation, 'crawl_site' );
 
 		// All of the posts created above should be present in $validated_urls.
 		$this->assertEmpty( array_diff( $post_permalinks, self::get_validated_urls() ) );
@@ -407,7 +434,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 
 		// Terms need to be associated with a post in order to be returned in get_terms().
 		wp_set_post_terms( $posts[0], $terms, 'category' );
-		$this->validation->crawl_site();
+		$this->call_private_method( $this->validation, 'crawl_site' );
 		$expected_validated_urls = array_map( 'get_term_link', $terms );
 		$actual_validated_urls   = self::get_validated_urls();
 
@@ -423,7 +450,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 	 */
 	public function test_validate_and_store_url() {
 		$single_post_permalink = get_permalink( $this->factory()->post->create() );
-		$this->validation->validate_and_store_url( $single_post_permalink, 'post' );
+		$this->call_private_method( $this->validation, 'validate_and_store_url', [ $single_post_permalink, 'post' ] );
 		$this->assertTrue( in_array( $single_post_permalink, self::get_validated_urls(), true ) );
 
 		$number_of_posts = 30;
@@ -432,7 +459,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 		for ( $i = 0; $i < $number_of_posts; $i++ ) {
 			$permalink         = get_permalink( $this->factory()->post->create() );
 			$post_permalinks[] = $permalink;
-			$this->validation->validate_and_store_url( $permalink, 'post' );
+			$this->call_private_method( $this->validation, 'validate_and_store_url', [ $permalink, 'post' ] );
 		}
 
 		// All of the posts created should be present in the validated URLs.
@@ -457,9 +484,9 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 		);
 
 		$total_count += count( $term_query->terms );
-		$total_count += count( $this->validation->get_author_page_urls() );
-		$total_count += is_string( $this->validation->get_search_page() ) ? 1 : 0;
-		$total_count += is_string( $this->validation->get_date_page() ) ? 1 : 0;
+		$total_count += count( $this->call_private_method( $this->validation, 'get_author_page_urls' ) );
+		$total_count += is_string( $this->call_private_method( $this->validation, 'get_search_page' ) ) ? 1 : 0;
+		$total_count += is_string( $this->call_private_method( $this->validation, 'get_date_page' ) ) ? 1 : 0;
 
 		return $total_count;
 	}

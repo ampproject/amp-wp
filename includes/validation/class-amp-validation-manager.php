@@ -227,15 +227,6 @@ class AMP_Validation_Manager {
 		}
 
 		if ( self::$should_locate_sources ) {
-			/*
-			 * Always suppress the admin bar from being shown when performing a validation request. This ensures that
-			 * user-initiated validation requests perform the same as validation requests initiated by the WP-CLI
-			 * command `wp amp validate-site`, which does so as an unauthenticated user. Unauthenticated users should
-			 * not be shown the admin bar, and normal site visitors who read AMP content (such as via an AMP Cache) are
-			 * not authenticated, so it doesn't make sense to include the admin bar when doing validation.
-			 */
-			add_filter( 'show_admin_bar', '__return_false', PHP_INT_MAX );
-
 			self::add_validation_error_sourcing();
 		}
 	}
@@ -760,7 +751,6 @@ class AMP_Validation_Manager {
 	 */
 	public static function add_validation_error( array $error, array $data = [] ) {
 		$node    = null;
-		$matches = null;
 		$sources = null;
 
 		if ( isset( $data['node'] ) && $data['node'] instanceof DOMNode ) {
@@ -1974,16 +1964,16 @@ class AMP_Validation_Manager {
 
 		$slug = 'amp-block-validation';
 
-		$script_deps_path    = AMP__DIR__ . '/assets/js/' . $slug . '.deps.json';
-		$script_dependencies = file_exists( $script_deps_path )
-			? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-			: [];
+		$asset_file   = AMP__DIR__ . '/assets/js/' . $slug . '.asset.php';
+		$asset        = require $asset_file;
+		$dependencies = $asset['dependencies'];
+		$version      = $asset['version'];
 
 		wp_enqueue_script(
 			$slug,
 			amp_get_asset_url( "js/{$slug}.js" ),
-			$script_dependencies,
-			AMP__VERSION,
+			$dependencies,
+			$version,
 			true
 		);
 
