@@ -134,7 +134,7 @@ class BlockNavigationItem extends Component {
 									className={ this.state.isDragging ? 'is-dragging-block' : undefined }
 									onDrop={ this.onDrop }
 								/>
-								<div className="block-navigation__placeholder"></div>
+								<div className="block-navigation__placeholder" />
 								<Button
 									className={ classnames(
 										'components-button editor-block-navigation__item-button block-editor-block-navigation__item-button',

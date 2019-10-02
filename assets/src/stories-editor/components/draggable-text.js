@@ -71,33 +71,38 @@ const DraggableText = ( props ) => {
 					}
 				} }
 			>
-				{ hasOverlay && ( <div
-					role="textbox"
-					tabIndex="-1"
-					className="amp-overlay"
-					onClick={ ( e ) => {
-						toggleOverlay( false );
-						e.stopPropagation();
-					} }
-					onKeyDown={ ( event ) => {
-						event.stopPropagation();
-						if ( ENTER === event.keyCode && isSelected ) {
+				{ hasOverlay && (
+					<div
+						role="textbox"
+						tabIndex="-1"
+						className="amp-overlay"
+						onClick={ ( e ) => {
 							toggleOverlay( false );
-							toggleIsEditing( true );
-						}
-					} }
-				></div>
+							e.stopPropagation();
+						} }
+						onKeyDown={ ( event ) => {
+							event.stopPropagation();
+							if ( ENTER === event.keyCode && isSelected ) {
+								toggleOverlay( false );
+								toggleIsEditing( true );
+							}
+						} }
+					/>
 				) }
 				<div
 					role="textbox"
 					className={ textWrapperClass }
-					style={ textStyle }>
-					{ text && text.length ?
-						<RawHTML>{ text }</RawHTML> : (
-							<span className="amp-text-placeholder">
-								{ placeholder }
-							</span>
-						) }
+					style={ textStyle }
+				>
+					{ text && text.length ? (
+						<RawHTML>
+							{ text }
+						</RawHTML>
+					) : (
+						<span className="amp-text-placeholder">
+							{ placeholder }
+						</span>
+					) }
 				</div>
 			</div>
 		</StoryBlockMover>

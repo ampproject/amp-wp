@@ -6,7 +6,9 @@ import { addVideoAriaLabel } from '../';
 describe( 'addVideoAriaLabel', () => {
 	it( 'ignores arbitrary content', () => {
 		const result = addVideoAriaLabel(
-			<div>Ignore me</div>,
+			<div>
+				{ 'Ignore me' }
+			</div>,
 			{ name: 'anythin' },
 			{},
 		);
@@ -16,7 +18,9 @@ describe( 'addVideoAriaLabel', () => {
 
 	it( 'ignores video content without an aria label attribute', () => {
 		const result = addVideoAriaLabel(
-			<div>Ignore me 2</div>,
+			<div>
+				{ 'Ignore me 2' }
+			</div>,
 			{ name: 'core/video' },
 			{ ampAriaLabel: '' },
 		);
@@ -26,7 +30,9 @@ describe( 'addVideoAriaLabel', () => {
 
 	it( 'ignores video content if content is not a figure object', () => {
 		const result = addVideoAriaLabel(
-			<div>Ignore me 3</div>,
+			<div>
+				{ 'Ignore me 3' }
+			</div>,
 			{ name: 'core/video' },
 			{ ampAriaLabel: 'Ignored label' },
 		);
@@ -37,9 +43,11 @@ describe( 'addVideoAriaLabel', () => {
 	it( 'ignores video content if content has incorrect node order', () => {
 		const result = addVideoAriaLabel(
 			<figure>
-				<figcaption>Caption above content</figcaption>
+				<figcaption>
+					{ 'Caption above content' }
+				</figcaption>
 				<video>
-					Fallback content
+					{ 'Fallback content' }
 				</video>
 			</figure>,
 			{ name: 'core/video' },
@@ -53,7 +61,7 @@ describe( 'addVideoAriaLabel', () => {
 		const result = addVideoAriaLabel(
 			<figure>
 				<video>
-					Fallback content
+					{ 'Fallback content' }
 				</video>
 			</figure>,
 			{ name: 'core/video' },
@@ -67,7 +75,7 @@ describe( 'addVideoAriaLabel', () => {
 		const result = addVideoAriaLabel(
 			<figure>
 				<amp-video>
-					Fallback content
+					{ 'Fallback content' }
 				</amp-video>
 			</figure>,
 			{ name: 'core/video' },
@@ -81,9 +89,11 @@ describe( 'addVideoAriaLabel', () => {
 		const result = addVideoAriaLabel(
 			<figure>
 				<video>
-					Fallback content
+					{ 'Fallback content' }
 				</video>
-				<figcaption>Caption below content</figcaption>
+				<figcaption>
+					{ 'Caption below content' }
+				</figcaption>
 			</figure>,
 			{ name: 'core/video' },
 			{ ampAriaLabel: 'Aria label 2' },

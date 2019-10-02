@@ -285,7 +285,7 @@ EnhancedResizableBox.propTypes = {
 	minHeight: PropTypes.number,
 	onResizeStart: PropTypes.func.isRequired,
 	onResizeStop: PropTypes.func.isRequired,
-	children: PropTypes.any.isRequired,
+	children: PropTypes.node.isRequired,
 	width: PropTypes.number,
 	height: PropTypes.number,
 };

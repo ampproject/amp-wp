@@ -66,7 +66,11 @@ const BackgroundMediaSettings = ( {
 	videoFeaturedImage,
 	setAttributes,
 } ) => {
-	const instructions = <p>{ __( 'To edit the background image or video, you need permission to upload media.', 'amp' ) }</p>;
+	const instructions = (
+		<p>
+			{ __( 'To edit the background image or video, you need permission to upload media.', 'amp' ) }
+		</p>
+	);
 
 	const isExcessiveVideoSize = VIDEO_BACKGROUND_TYPE === mediaType && isVideoSizeExcessive( getVideoBytesPerSecond( media ) );
 	const videoBytesPerSecond = VIDEO_BACKGROUND_TYPE === mediaType ? getVideoBytesPerSecond( media ) : null;

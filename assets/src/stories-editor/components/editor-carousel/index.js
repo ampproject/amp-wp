@@ -62,33 +62,31 @@ class EditorCarousel extends Component {
 		}
 
 		return (
-			<>
-				<div className="amp-story-editor-carousel-navigation">
-					<IconButton
-						icon="arrow-left-alt2"
-						label={ __( 'Previous Page', 'amp' ) }
-						onClick={ ( e ) => {
-							e.preventDefault();
-							goToPage( previousPage );
-						} }
-						disabled={ null === previousPage }
-					/>
-					<Indicator
-						pages={ pages }
-						currentPage={ currentPage }
-						onClick={ goToPage }
-					/>
-					<IconButton
-						icon="arrow-right-alt2"
-						label={ __( 'Next Page', 'amp' ) }
-						onClick={ ( e ) => {
-							e.preventDefault();
-							goToPage( nextPage );
-						} }
-						disabled={ null === nextPage }
-					/>
-				</div>
-			</>
+			<div className="amp-story-editor-carousel-navigation">
+				<IconButton
+					icon="arrow-left-alt2"
+					label={ __( 'Previous Page', 'amp' ) }
+					onClick={ ( e ) => {
+						e.preventDefault();
+						goToPage( previousPage );
+					} }
+					disabled={ null === previousPage }
+				/>
+				<Indicator
+					pages={ pages }
+					currentPage={ currentPage }
+					onClick={ goToPage }
+				/>
+				<IconButton
+					icon="arrow-right-alt2"
+					label={ __( 'Next Page', 'amp' ) }
+					onClick={ ( e ) => {
+						e.preventDefault();
+						goToPage( nextPage );
+					} }
+					disabled={ null === nextPage }
+				/>
+			</div>
 		);
 	}
 }

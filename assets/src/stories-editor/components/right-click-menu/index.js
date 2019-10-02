@@ -166,7 +166,7 @@ const RightClickMenu = ( props ) => {
 };
 
 RightClickMenu.propTypes = {
-	clientIds: PropTypes.array.isRequired,
+	clientIds: PropTypes.arrayOf( PropTypes.string ).isRequired,
 	clientX: PropTypes.number.isRequired,
 	clientY: PropTypes.number.isRequired,
 	insidePercentageX: PropTypes.number,

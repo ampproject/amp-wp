@@ -345,7 +345,9 @@ export class InserterMenu extends Component {
 						</PanelBody>
 					) }
 					{ isEmpty( suggestedItems ) && isEmpty( reusableItems ) && isEmpty( itemsPerCategory ) && (
-						<p className="editor-inserter__no-results block-editor-inserter__no-results">{ __( 'No blocks found.', 'amp' ) }</p>
+						<p className="editor-inserter__no-results block-editor-inserter__no-results">
+							{ __( 'No blocks found.', 'amp' ) }
+						</p>
 					) }
 				</div>
 
