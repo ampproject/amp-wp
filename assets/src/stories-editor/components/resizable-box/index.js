@@ -200,18 +200,13 @@ class EnhancedResizableBox extends Component {
 					if ( textElement && isReducing ) {
 						// If we have a rotated block, let's assign the width and height for measuring.
 						// Without assigning the new measure, the calculation would be incorrect due to angle.
-						// Text block is handled differently since the text block's content shouldn't have full width while measuring.
 						if ( angle ) {
-							if ( ! isText ) {
-								textElement.style.width = appliedWidth + 'px';
-								textElement.style.height = appliedHeight + 'px';
-							} else if ( isText && ! ampFitText ) {
-								textElement.style.width = 'initial';
-							}
+							textElement.style.width = appliedWidth + 'px';
+							textElement.style.height = appliedHeight + 'px';
 						}
 
-						// Whenever reducing the size of a text element,
-						// set height to `auto` to get proper scroll height.
+						// Whenever reducing the size of a text element, set height to `auto`
+						// (overwriting the above for angled text boxes) to get proper scroll height.
 						if ( isText ) {
 							textElement.style.height = 'auto';
 						}
@@ -353,7 +348,7 @@ EnhancedResizableBox.propTypes = {
 	minHeight: PropTypes.number,
 	onResizeStart: PropTypes.func.isRequired,
 	onResizeStop: PropTypes.func.isRequired,
-	children: PropTypes.any.isRequired,
+	children: PropTypes.node.isRequired,
 	width: PropTypes.number,
 	height: PropTypes.number,
 	horizontalSnaps: PropTypes.oneOfType( [

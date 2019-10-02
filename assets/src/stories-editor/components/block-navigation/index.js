@@ -81,7 +81,9 @@ function BlockNavigation( { unMovableBlock, blocks, selectBlock, selectedBlockCl
 			role="presentation"
 			className="block-editor-block-navigation__container"
 		>
-			<p className="block-editor-block-navigation__label">{ __( 'Elements', 'amp' ) }</p>
+			<p className="block-editor-block-navigation__label">
+				{ __( 'Elements', 'amp' ) }
+			</p>
 			{ hasBlocks && (
 				<BlockNavigationList
 					blocks={ blocks }
@@ -108,7 +110,6 @@ BlockNavigation.propTypes = {
 	} ) ).isRequired,
 	selectedBlockClientId: PropTypes.string,
 	selectBlock: PropTypes.func.isRequired,
-	isReordering: PropTypes.bool.isRequired,
 };
 
 export default compose(

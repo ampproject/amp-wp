@@ -80,7 +80,9 @@ const BlockEdit = ( props ) => {
 			{
 				! url && (
 					<Placeholder label={ __( 'Springboard Player', 'amp' ) }>
-						<p>{ __( 'Add required data to use the block.', 'amp' ) }</p>
+						<p>
+							{ __( 'Add required data to use the block.', 'amp' ) }
+						</p>
 					</Placeholder>
 				)
 			}
