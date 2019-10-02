@@ -883,6 +883,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array( 'amp-date-picker', 'amp-bind', 'amp-mustache' ),
 			),
 
+			'amp-delight-player' => array(
+				'<amp-delight-player data-content-id="-987521" layout="responsive" width="400" height="300"></amp-delight-player>',
+				null, // No change.
+				array( 'amp-delight-player' ),
+			),
+
 			'amp-img-layout-allowed' => array(
 				implode( '', array(
 					'<amp-img src="/img1.png" width="50" height="50" layout="fill"></amp-img>',
@@ -958,7 +964,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'amp-pan-zoom' => array(
-				'<amp-layout layout="responsive" width="4" height="3"><amp-pan-zoom layout="fill" disable-double-tap><svg> ... </svg></amp-pan-zoom></amp-layout>',
+				'<amp-layout layout="responsive" width="4" height="3"><amp-pan-zoom layout="fill" disable-double-tap><svg focusable="false"> ... </svg></amp-pan-zoom></amp-layout>',
 				null,
 				array( 'amp-pan-zoom' ),
 			),
@@ -981,10 +987,16 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array( 'amp-lightbox', 'amp-bind' ),
 			),
 
-			'amp-fom-messages' => array(
-				'<form action-xhr="https://example.com/" method="post"><fieldset><input type="text" name="firstName"></fieldset><div verify-error=""><template type="amp-mustache">There is a mistake in the form!{{#verifyErrors}}{{message}}{{/verifyErrors}}</template></div><div submitting=""><template type="amp-mustache">Form submitting... Thank you for waiting {{name}}.</template></div><div submit-success=""><template type="amp-mustache">Success! Thanks {{name}} for subscribing! Please make sure to check your email {{email}}to confirm! After that we\'ll start sending you weekly articles on {{#interests}}<b>{{name}}</b> {{/interests}}.</template></div><div submit-error><template type="amp-mustache">Oops! {{name}}, {{message}}.</template></div></form>',
+			'amp-form-messages' => array(
+				'<form action-xhr="https://example.com/" method="post"><fieldset><input type="text" name="do-not-verify" no-verify><input type="text" name="firstName"></fieldset><div verify-error=""><template type="amp-mustache">There is a mistake in the form!{{#verifyErrors}}{{message}}{{/verifyErrors}}</template></div><div submitting=""><template type="amp-mustache">Form submitting... Thank you for waiting {{name}}.</template></div><div submit-success=""><template type="amp-mustache">Success! Thanks {{name}} for subscribing! Please make sure to check your email {{email}}to confirm! After that we\'ll start sending you weekly articles on {{#interests}}<b>{{name}}</b> {{/interests}}.</template></div><div submit-error><template type="amp-mustache">Oops! {{name}}, {{message}}.</template></div></form>',
 				null,
 				array( 'amp-form', 'amp-mustache' ),
+			),
+
+			'amp-input-mask' => array(
+				'<form method="post" class="p2" action-xhr="/components/amp-inputmask/postal" target="_top"><label>Postal code: <input name="code" mask="L0L_0L0" placeholder="A1A 1A1"></label><input type="submit"><div submit-success><template type="amp-mustache"><p>You submitted: {{code}}</p></template></div></form>',
+				null,
+				array( 'amp-form', 'amp-inputmask', 'amp-mustache' ),
 			),
 
 			'amp-viqeo-player' => array(
@@ -1093,7 +1105,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<html amp><head><meta><title>Mojibake?</title></head><body></body></html>', // Note the charset attribute is removed because it violates the attribute spec, but the entire element is not removed because charset is not mandatory.
 			),
 			'bad_meta_viewport'                       => array(
-				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
+				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="maximum-scale=1.0"></head><body></body></html>',
 				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
 			),
 			'edge_meta_ua_compatible'                 => array(
@@ -1101,7 +1113,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				null, // No change.
 			),
 			'meta_viewport_extras'                    => array(
-				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,height=device-height,initial-scale=2,maximum-scale=3,minimum-scale=1.0,shrink-to-fit=yes,user-scalable=yes,viewport-fit=cover"></head><body></body></html>',
+				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,height=device-height,initial-scale=2,maximum-scale=3,minimum-scale=0.5,shrink-to-fit=yes,user-scalable=yes,viewport-fit=cover"></head><body></body></html>',
 				null, // No change.
 			),
 			'meta_og_property'                        => array(

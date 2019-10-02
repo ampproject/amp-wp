@@ -1601,7 +1601,14 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function is_amp_allowed_attribute( $attr_node, $attr_spec_list ) {
 		$attr_name = $attr_node->nodeName;
-		if ( isset( $attr_spec_list[ $attr_name ] ) || 'data-' === substr( $attr_name, 0, 5 ) ) {
+		if (
+			isset( $attr_spec_list[ $attr_name ] )
+			||
+			'data-' === substr( $attr_name, 0, 5 )
+			||
+			// Allow the 'amp' or '⚡' attribute in <html>, like <html ⚡>.
+			( 'html' === $attr_node->parentNode->nodeName && in_array( $attr_node->nodeName, array( 'amp', '⚡' ), true ) )
+		) {
 			return true;
 		}
 
@@ -1794,7 +1801,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 0.3.3
 	 * @since 1.0 Fix silently removing unrecognized elements.
-	 * @see https://github.com/Automattic/amp-wp/issues/1100
+	 * @see https://github.com/ampproject/amp-wp/issues/1100
 	 *
 	 * @param DOMNode $node Node.
 	 */

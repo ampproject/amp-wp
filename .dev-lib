@@ -1,8 +1,10 @@
-PATH_EXCLUDES_PATTERN=includes/lib/
+PATH_EXCLUDES_PATTERN=third_party/
 DEFAULT_BASE_BRANCH=develop
 ASSETS_DIR=wp-assets
 PROJECT_SLUG=amp
 SKIP_ECHO_PATHS_SCOPE=1
+README_MD_TITLE="AMP Plugin for WordPress"
+DEV_LIB_SKIP="$DEV_LIB_SKIP,jshint"
 
 function after_wp_install {
     echo "Installing plugins..."

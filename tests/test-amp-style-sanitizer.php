@@ -138,9 +138,9 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'<style>@charset "utf-8"; @namespace svg url(http://www.w3.org/2000/svg); @page { margin: 1cm; } @viewport { width: device-width; } @counter-style thumbs { system: cyclic; symbols: "\1F44D"; suffix: " "; } body { color: black; }</style>',
 				'',
 				array(
-					'body{color:black}',
+					'@page{margin:1cm}body{color:black}',
 				),
-				array( 'illegal_css_at_rule', 'illegal_css_at_rule', 'illegal_css_at_rule', 'illegal_css_at_rule', 'illegal_css_at_rule' ),
+				array( 'illegal_css_at_rule', 'illegal_css_at_rule', 'illegal_css_at_rule' ),
 			),
 
 			'allowed_at_rules_retained' => array(
@@ -365,6 +365,13 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				),
 				array(),
 			),
+			'charset_ruleset_removed_without_warning'  => array(
+				'<html amp><body><style>@charset "utf-8"; body { color:limegreen; }</style></body></html>',
+				array(
+					'body{color:limegreen}',
+				),
+				array(),
+			),
 		);
 	}
 
@@ -494,6 +501,11 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'<div>test</div>',
 				'span {color:red;} @keyframes foo { from: { opacity:0; } 50% {opacity:0.5} 75%,80% { opacity:0.6 } to { opacity:1 }  }',
 				'@keyframes foo{from:{opacity:0}50%{opacity:.5}75%,80%{opacity:.6}to{opacity:1}}',
+			),
+			'type_class_names' => array(
+				'<audio src="https://example.org/foo.mp3" width="100" height="100" class="audio iframe video img form">',
+				'.video{color:blue;} audio.audio{color:purple;} .iframe{color:black;} .img{color:purple;} .form:not(form){color:green;}',
+				'.video{color:blue}amp-audio.audio{color:purple}.iframe{color:black}.img{color:purple}.form:not(amp-form){color:green}',
 			),
 		);
 	}
@@ -831,6 +843,31 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$html .= '<style>.b[data-value="' . str_repeat( 'c', $custom_max_size ) . '"] { color:green }</style>';
 		$html .= '<style>#nonexists { color:black; } #exists { color:white; }</style>';
 		$html .= '<style>div { color:black; } span { color:white; } </style>';
+		$html .= '<style>@font-face {font-family: "Open Sans";src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2");}</style>';
+		$html .= '<style>@media only screen and (min-width: 1280px) { .not-exists-selector { margin: 0 auto; } } .b { background: lightblue; }</style>';
+		$html .= '
+			<style>
+			@media screen and (max-width: 1000px) {
+				@supports (display: grid) {
+					.b::before {
+						content: "@media screen and (max-width: 1000px) {";
+					}
+					.b::after {
+						content: "}";
+					}
+				}
+			}
+			@media print { @media print { @media print { #nonexists { color:red; } @media presentation {} #verynotexists { color:blue; } } } }
+			@media print { @media print { @media print { #nonexists { color:red; } @media presentation {} .b { color:blue; } @media print {} } } }
+			@media screen and (min-width: 750px) and (max-width: 999px) {
+				.b::before {
+					content: "@media screen and (max-width: 1000px) {}";
+					content: \'@media screen and (max-width: 1000px) {}\';
+				}
+			}
+			@media screen {}
+			</style>
+		';
 		$html .= '</head><body><span class="b">...</span><span id="exists"></span></body></html>';
 		$dom   = AMP_DOM_Utils::get_dom( $html );
 
@@ -848,6 +885,9 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'.b{color:blue}',
 				'#exists{color:white}',
 				'span{color:white}',
+				'@font-face{font-family:"Open Sans";src:url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2")}',
+				'.b{background:lightblue}',
+				'@media screen and (max-width: 1000px){@supports (display: grid){.b::before{content:"@media screen and (max-width: 1000px) {"}.b::after{content:"}"}}}@media print{@media print{@media print{.b{color:blue}}}}@media screen and (min-width: 750px) and (max-width: 999px){.b::before{content:"@media screen and (max-width: 1000px) {}";content:"@media screen and (max-width: 1000px) {}"}}',
 			),
 			array_values( $sanitizer->get_stylesheets() )
 		);
@@ -969,8 +1009,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'style_amp_keyframes_last_child'   => array(
-				'<b>before</b> <style amp-keyframes>@keyframes anim1 {}</style> between <style amp-keyframes>@keyframes anim2 {}</style> as <b>after</b>',
-				'<b>before</b>  between  as <b>after</b><style amp-keyframes="">@keyframes anim1{}@keyframes anim2{}</style>',
+				'<b>before</b> <style amp-keyframes>@keyframes anim1 { from { opacity:1; } to { opacity:0.5; } }</style> between <style amp-keyframes>@keyframes anim2 { from { opacity:0.25; } to { opacity:0.75; } }</style> as <b>after</b>',
+				'<b>before</b>  between  as <b>after</b><style amp-keyframes="">@keyframes anim1{from{opacity:1}to{opacity:.5}}@keyframes anim2{from{opacity:.25}to{opacity:.75}}</style>',
 				array(),
 			),
 
@@ -1348,6 +1388,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * @covers \AMP_DOM_Utils::get_content_from_dom_node()
 	 */
 	public function test_unicode_stylesheet() {
+		wp();
 		add_theme_support( AMP_Theme_Support::SLUG );
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();

@@ -1,9 +1,6 @@
 # Tell Travis CI we're using PHP
 language: php
 
-# Opt to use Travis container-based environment.
-sudo: false
-
 # Newer versions like trusty don't have PHP 5.2 or 5.3
 # https://blog.travis-ci.com/2017-07-11-trusty-as-default-linux-is-coming
 dist: precise
@@ -25,6 +22,7 @@ install:
   - nvm install 8.11.4 && nvm use 8.11.4
   - export DEV_LIB_PATH=dev-lib
   - source $DEV_LIB_PATH/travis.install.sh
+  - npx grunt shell:webpack_production
 
 script:
   - source $DEV_LIB_PATH/travis.script.sh
@@ -40,7 +38,7 @@ jobs:
     - php: "5.3"
       env: WP_VERSION=latest DEV_LIB_SKIP=composer,phpcs
     - php: "5.4"
-      env: WP_VERSION=4.8    DEV_LIB_SKIP=composer,phpcs
+      env: WP_VERSION=4.9    DEV_LIB_SKIP=composer,phpcs
     - php: "5.5"
       env: WP_VERSION=latest DEV_LIB_SKIP=phpcs
     - php: "5.6"
@@ -57,13 +55,6 @@ jobs:
       env: WP_VERSION=latest DEV_LIB_ONLY=composer,grunt
       script:
         - |
-          if ! command -v wp >/dev/null 2>&1; then
-            mkdir -p /tmp/wp-cli
-            wget -O /tmp/wp-cli/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
-            chmod +x /tmp/wp-cli/wp
-            export PATH="/tmp/wp-cli:$PATH"
-            wp cli update --yes --nightly # Temporary until WP-CLI 2.1 or 2.0.1
-          fi
           eval "$(ssh-agent -s)"
           pantheon_branch=$( echo $TRAVIS_BRANCH | sed 's/^\([0-9]\)/v\1/' | sed 's/[^a-z0-9-]/-/' )
           echo "Initializing deployment to Pantheon branch: $pantheon_branch"

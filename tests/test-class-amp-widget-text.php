@@ -53,6 +53,7 @@ class Test_AMP_Widget_Text extends WP_UnitTestCase {
 	 * @covers AMP_Widget_Text::inject_video_max_width_style()
 	 */
 	public function test_inject_video_max_width_style() {
+		wp();
 		$this->assertTrue( is_amp_endpoint() );
 		$video            = '<video src="http://example.com" height="100" width="200"></video>';
 		$video_only_width = '<video src="http://example.com/this-video" width="500">';

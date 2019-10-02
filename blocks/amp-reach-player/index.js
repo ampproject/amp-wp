@@ -33,27 +33,23 @@ export default registerBlockType(
 
 		attributes: {
 			dataEmbedId: {
-				type: 'string',
 				source: 'attribute',
 				selector: 'amp-reach-player',
 				attribute: 'data-embed-id'
 			},
 			ampLayout: {
-				type: 'string',
 				default: 'fixed-height',
 				source: 'attribute',
 				selector: 'amp-reach-player',
 				attribute: 'layout'
 			},
 			width: {
-				type: 'number',
 				default: 600,
 				source: 'attribute',
 				selector: 'amp-reach-player',
 				attribute: 'width'
 			},
 			height: {
-				type: 'number',
 				default: 400,
 				source: 'attribute',
 				selector: 'amp-reach-player',

@@ -1,8 +1,3 @@
-/**
- * WordPress dependencies
- */
-import domReady from '@wordpress/dom-ready';
-
 // WIP Pointer function
 function sourcesPointer() {
 	jQuery( document ).on( 'click', '.tooltip-button', function() {
@@ -17,6 +12,5 @@ function sourcesPointer() {
 	} );
 }
 
-domReady( () => {
-	sourcesPointer();
-} );
+// Run at DOM ready.
+jQuery( sourcesPointer );

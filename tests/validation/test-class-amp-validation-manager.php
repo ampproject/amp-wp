@@ -545,7 +545,8 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::print_edit_form_validation_status()
 	 */
 	public function test_print_edit_form_validation_status() {
-		add_theme_support( AMP_Theme_Support::SLUG );
+		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
+		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
 
 		AMP_Validated_URL_Post_Type::register();
 		AMP_Validation_Error_Taxonomy::register();
@@ -557,29 +558,52 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 
 		$this->assertNotContains( 'notice notice-warning', $output );
 
-		AMP_Validated_URL_Post_Type::store_validation_errors(
+		$validation_errors = array(
 			array(
-				array(
-					'code'            => AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE,
-					'node_name'       => $this->disallowed_tag_name,
-					'parent_name'     => 'div',
-					'node_attributes' => array(),
-					'sources'         => array(
-						array(
-							'type' => 'plugin',
-							'name' => $this->plugin_name,
-						),
+				'code'            => AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE,
+				'node_name'       => $this->disallowed_tag_name,
+				'parent_name'     => 'div',
+				'node_attributes' => array(),
+				'sources'         => array(
+					array(
+						'type' => 'plugin',
+						'name' => $this->plugin_name,
 					),
 				),
 			),
-			get_permalink( $post->ID )
 		);
+
+		AMP_Validated_URL_Post_Type::store_validation_errors( $validation_errors, get_permalink( $post->ID ) );
 		ob_start();
 		AMP_Validation_Manager::print_edit_form_validation_status( $post );
 		$output = ob_get_clean();
 
+		// In 'Paired' mode with 'auto_accept_sanitization' set to false.
+		$expected_notice_non_accepted_errors = 'There is content which fails AMP validation. Non-accepted validation errors prevent AMP from being served, and the user will be redirected to the non-AMP version.';
 		$this->assertContains( 'notice notice-warning', $output );
 		$this->assertContains( '<code>script</code>', $output );
+		$this->assertContains( $expected_notice_non_accepted_errors, $output );
+
+		// In 'Native' mode, if there are unaccepted validation errors, there should be a notice because this will block serving an AMP document.
+		add_theme_support( AMP_Theme_Support::SLUG );
+		ob_start();
+		AMP_Validation_Manager::print_edit_form_validation_status( $post );
+		$output = ob_get_clean();
+		$this->assertContains( 'There is content which fails AMP validation. Though your site is configured to automatically accept sanitization errors, there are rejected error(s). This could be because auto-acceptance of errors was disabled earlier. You should review the issues to confirm whether or not sanitization should be accepted or rejected.', $output );
+
+		/*
+		 * When there are 'Rejected' or 'New Rejected' errors, there should be a message that explains that this will serve a non-AMP URL.
+		 * This simulates 'auto_accept_sanitization' being true, but it having been false when the validation errors were stored,
+		 * as there are errors with 'New Rejected' status.
+		 */
+		AMP_Options_Manager::update_option( 'auto_accept_sanitization', true );
+		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
+		AMP_Validated_URL_Post_Type::store_validation_errors( $validation_errors, get_permalink( $post->ID ) );
+		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
+		ob_start();
+		AMP_Validation_Manager::print_edit_form_validation_status( $post );
+		$output = ob_get_clean();
+		$this->assertContains( $expected_notice_non_accepted_errors, $output );
 	}
 
 	/**
@@ -668,11 +692,11 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 				),
 			),
 			'latest_posts' => array(
-				'<!-- wp:latest-posts {"postsToShow":1} /-->',
+				'<!-- wp:latest-posts {"postsToShow":1,"categories":""} /-->',
 				sprintf(
-					'<!--amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_content_index":0,"block_attrs":{"postsToShow":1},"type":"%1$s","name":"%2$s","function":"render_block_core_latest_posts"}--><ul class="wp-block-latest-posts"><li><a href="{{url}}">{{title}}</a></li></ul><!--/amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_attrs":{"postsToShow":1},"type":"%1$s","name":"%2$s","function":"render_block_core_latest_posts"}-->',
-					function_exists( 'gutenberg_wpautop' ) ? 'plugin' : 'core',
-					function_exists( 'gutenberg_wpautop' ) ? 'gutenberg' : 'wp-includes'
+					'<!--amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_content_index":0,"block_attrs":{"postsToShow":1,"categories":""},"type":"%1$s","name":"%2$s","function":"render_block_core_latest_posts"}--><ul class="wp-block-latest-posts"><li><a href="{{url}}">{{title}}</a></li></ul><!--/amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_attrs":{"postsToShow":1,"categories":""},"type":"%1$s","name":"%2$s","function":"render_block_core_latest_posts"}-->',
+					function_exists( 'the_gutenberg_project' ) ? 'plugin' : 'core',
+					function_exists( 'the_gutenberg_project' ) ? 'gutenberg' : 'wp-includes'
 				),
 				array(
 					'element' => 'ul',
@@ -931,10 +955,10 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 
 		$filtered_content = apply_filters( 'the_content', 'before[test]after' );
 
-		if ( ! function_exists( 'gutenberg_wpautop' ) && has_filter( 'the_content', 'do_blocks' ) ) {
+		if ( ! function_exists( 'the_gutenberg_project' ) && has_filter( 'the_content', 'do_blocks' ) ) {
 			$source_json = '{"hook":"the_content","filter":true,"sources":[{"type":"core","name":"wp-includes","function":"WP_Embed::run_shortcode"},{"type":"core","name":"wp-includes","function":"WP_Embed::autoembed"},{"type":"plugin","name":"amp","function":"AMP_Validation_Manager::add_block_source_comments"},{"type":"core","name":"wp-includes","function":"do_blocks"},{"type":"core","name":"wp-includes","function":"wptexturize"},{"type":"core","name":"wp-includes","function":"wpautop"},{"type":"core","name":"wp-includes","function":"shortcode_unautop"},{"type":"core","name":"wp-includes","function":"prepend_attachment"},{"type":"core","name":"wp-includes","function":"wp_make_content_images_responsive"},{"type":"core","name":"wp-includes","function":"capital_P_dangit"},{"type":"core","name":"wp-includes","function":"do_shortcode"},{"type":"core","name":"wp-includes","function":"convert_smilies"}]}';
 		} elseif ( has_filter( 'the_content', 'do_blocks' ) ) {
-			$source_json = '{"hook":"the_content","filter":true,"sources":[{"type":"plugin","name":"gutenberg","function":"gutenberg_wpautop"},{"type":"plugin","name":"amp","function":"AMP_Validation_Manager::add_block_source_comments"},{"type":"plugin","name":"gutenberg","function":"do_blocks"},{"type":"core","name":"wp-includes","function":"WP_Embed::run_shortcode"},{"type":"core","name":"wp-includes","function":"WP_Embed::autoembed"},{"type":"core","name":"wp-includes","function":"wptexturize"},{"type":"core","name":"wp-includes","function":"shortcode_unautop"},{"type":"core","name":"wp-includes","function":"prepend_attachment"},{"type":"core","name":"wp-includes","function":"wp_make_content_images_responsive"},{"type":"core","name":"wp-includes","function":"capital_P_dangit"},{"type":"core","name":"wp-includes","function":"do_shortcode"},{"type":"core","name":"wp-includes","function":"convert_smilies"}]}';
+			$source_json = '{"hook":"the_content","filter":true,"sources":[{"type":"plugin","name":"amp","function":"AMP_Validation_Manager::add_block_source_comments"},{"type":"plugin","name":"gutenberg","function":"do_blocks"},{"type":"core","name":"wp-includes","function":"WP_Embed::run_shortcode"},{"type":"core","name":"wp-includes","function":"WP_Embed::autoembed"},{"type":"core","name":"wp-includes","function":"wptexturize"},{"type":"core","name":"wp-includes","function":"wpautop"},{"type":"core","name":"wp-includes","function":"shortcode_unautop"},{"type":"core","name":"wp-includes","function":"prepend_attachment"},{"type":"core","name":"wp-includes","function":"wp_make_content_images_responsive"},{"type":"core","name":"wp-includes","function":"capital_P_dangit"},{"type":"core","name":"wp-includes","function":"do_shortcode"},{"type":"core","name":"wp-includes","function":"convert_smilies"}]}';
 		} else {
 			$source_json = '{"hook":"the_content","filter":true,"sources":[{"type":"core","name":"wp-includes","function":"WP_Embed::run_shortcode"},{"type":"core","name":"wp-includes","function":"WP_Embed::autoembed"},{"type":"core","name":"wp-includes","function":"wptexturize"},{"type":"core","name":"wp-includes","function":"wpautop"},{"type":"core","name":"wp-includes","function":"shortcode_unautop"},{"type":"core","name":"wp-includes","function":"prepend_attachment"},{"type":"core","name":"wp-includes","function":"wp_make_content_images_responsive"},{"type":"core","name":"wp-includes","function":"capital_P_dangit"},{"type":"core","name":"wp-includes","function":"do_shortcode"},{"type":"core","name":"wp-includes","function":"convert_smilies"}]}';
 		}
@@ -1282,8 +1306,8 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::enqueue_block_validation()
 	 */
 	public function test_enqueue_block_validation() {
-		if ( ! function_exists( 'gutenberg_get_jed_locale_data' ) ) {
-			$this->markTestSkipped( 'Gutenberg not available.' );
+		if ( ! function_exists( 'register_block_type' ) ) {
+			$this->markTestSkipped( 'The block editor is not available.' );
 		}
 
 		global $post;
@@ -1292,15 +1316,19 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$this->set_capability();
 		AMP_Validation_Manager::enqueue_block_validation();
 
-		$script        = wp_scripts()->registered[ $slug ];
-		$inline_script = $script->extra['after'][1];
+		$script                = wp_scripts()->registered[ $slug ];
+		$inline_script         = $script->extra['after'][1];
+		$expected_dependencies = array( 'underscore', AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE );
+		if ( function_exists( 'wp_set_script_translations' ) ) {
+			$expected_dependencies[] = 'wp-i18n';
+		}
+
 		$this->assertContains( 'js/amp-block-validation.js', $script->src );
-		$this->assertEqualSets( array( 'underscore', AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE ), $script->deps );
+		$this->assertEqualSets( $expected_dependencies, $script->deps );
 		$this->assertEquals( AMP__VERSION, $script->ver );
 		$this->assertTrue( in_array( $slug, wp_scripts()->queue, true ) );
 		$this->assertContains( 'ampBlockValidation.boot', $inline_script );
 		$this->assertContains( AMP_Validation_Manager::VALIDITY_REST_FIELD_NAME, $inline_script );
-		$this->assertContains( '"domain":"amp"', $inline_script );
 	}
 
 	/**

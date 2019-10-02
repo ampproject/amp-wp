@@ -25,6 +25,17 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 	public static $tag = 'form';
 
 	/**
+	 * Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
+	 *
+	 * @return array Mapping.
+	 */
+	public function get_selector_conversion_mapping() {
+		return array(
+			'form' => array( 'amp-form' ),
+		);
+	}
+
+	/**
 	 * Sanitize the <form> elements from the HTML contained in this instance's DOMDocument.
 	 *
 	 * @link https://www.ampproject.org/docs/reference/components/amp-form

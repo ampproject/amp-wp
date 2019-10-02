@@ -283,8 +283,15 @@ function is_amp_endpoint() {
 		return true;
 	}
 
-	$availability = AMP_Theme_Support::get_template_availability();
-	return amp_is_canonical() ? $availability['supported'] : ( $has_amp_query_var && $availability['supported'] );
+	if ( ! did_action( 'wp' ) ) {
+		_doing_it_wrong( __FUNCTION__, sprintf( esc_html__( "is_amp_endpoint() was called before the 'wp' action which means it will not have access to the queried object to determine if it is an AMP response, thus neither the amp_skip_post filter nor the AMP enabled publish metabox toggle will not be considered.", 'amp' ) ), '1.0.2' );
+		$supported = true;
+	} else {
+		$availability = AMP_Theme_Support::get_template_availability();
+		$supported    = $availability['supported'];
+	}
+
+	return amp_is_canonical() ? $supported : ( $has_amp_query_var && $supported );
 }
 
 /**
@@ -333,6 +340,16 @@ function amp_add_generator_metadata() {
  * @param WP_Scripts $wp_scripts Scripts.
  */
 function amp_register_default_scripts( $wp_scripts ) {
+	/*
+	 * Polyfill dependencies that are registered in Gutenberg and WordPress 5.0.
+	 * Note that Gutenberg will override these at wp_enqueue_scripts if it is active.
+	 */
+	$handles = array( 'wp-i18n', 'wp-dom-ready' );
+	foreach ( $handles as $handle ) {
+		if ( ! isset( $wp_scripts->registered[ $handle ] ) ) {
+			$wp_scripts->add( $handle, amp_get_asset_url( sprintf( 'js/%s-compiled.js', $handle ) ) );
+		}
+	}
 
 	// AMP Runtime.
 	$handle = 'amp-runtime';
@@ -878,8 +895,8 @@ function amp_get_schemaorg_metadata() {
 				'@type'            => is_page() ? 'WebPage' : 'BlogPosting',
 				'mainEntityOfPage' => get_permalink(),
 				'headline'         => get_the_title(),
-				'datePublished'    => date( 'c', get_the_date( 'U', $post->ID ) ),
-				'dateModified'     => date( 'c', get_the_date( 'U', $post->ID ) ),
+				'datePublished'    => mysql2date( 'c', $post->post_date_gmt, false ),
+				'dateModified'     => mysql2date( 'c', $post->post_modified_gmt, false ),
 			)
 		);
 

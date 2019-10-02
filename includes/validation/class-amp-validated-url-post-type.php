@@ -276,7 +276,7 @@ class AMP_Validated_URL_Post_Type {
 		wp_enqueue_script(
 			'amp-validation-detail-toggle',
 			amp_get_asset_url( 'js/amp-validation-detail-toggle-compiled.js' ),
-			array( 'amp-validation-tooltips' ),
+			array( 'wp-dom-ready', 'amp-validation-tooltips' ),
 			AMP__VERSION,
 			true
 		);
@@ -862,7 +862,7 @@ class AMP_Validated_URL_Post_Type {
 				) )
 			),
 			'sources_with_invalid_output' => __( 'Sources', 'amp' ),
-			'error_type'                  => __( 'Error Type', 'amp' ),
+			'error_type'                  => __( 'Type', 'amp' ),
 		);
 	}
 
@@ -982,7 +982,7 @@ class AMP_Validated_URL_Post_Type {
 				$output[] = '</details>';
 			}
 		}
-		if ( isset( $sources['theme'] ) ) {
+		if ( isset( $sources['theme'] ) && empty( $sources['embed'] ) ) {
 			$output[] = '<div class="source">';
 			$output[] = '<span class="dashicons dashicons-admin-appearance"></span>';
 			$themes   = array_unique( $sources['theme'] );
@@ -1519,7 +1519,7 @@ class AMP_Validated_URL_Post_Type {
 		 */
 		if ( $updated_count > 0 ) {
 			$validation_results = self::recheck_post( $post->ID );
-			// @todo For WP_Error case, see <https://github.com/Automattic/amp-wp/issues/1166>.
+			// @todo For WP_Error case, see <https://github.com/ampproject/amp-wp/issues/1166>.
 			if ( ! is_wp_error( $validation_results ) ) {
 				$args[ self::REMAINING_ERRORS ] = count( array_filter(
 					$validation_results,
@@ -1599,7 +1599,15 @@ class AMP_Validated_URL_Post_Type {
 	public static function add_meta_boxes() {
 		remove_meta_box( 'submitdiv', self::POST_TYPE_SLUG, 'side' );
 		remove_meta_box( 'slugdiv', self::POST_TYPE_SLUG, 'normal' );
-		add_meta_box( self::STATUS_META_BOX, __( 'Status', 'amp' ), array( __CLASS__, 'print_status_meta_box' ), self::POST_TYPE_SLUG, 'side' );
+		add_meta_box(
+			self::STATUS_META_BOX,
+			__( 'Status', 'amp' ),
+			array( __CLASS__, 'print_status_meta_box' ),
+			self::POST_TYPE_SLUG,
+			'side',
+			'default',
+			array( '__back_compat_meta_box' => true )
+		);
 	}
 
 	/**
@@ -1881,13 +1889,13 @@ class AMP_Validated_URL_Post_Type {
 	/**
 	 * Strip host name from AMP validated URL being printed.
 	 *
-	 * @param string  $title Title.
-	 * @param WP_Post $post  Post.
+	 * @param string $title Title.
+	 * @param int    $id Post ID.
 	 *
 	 * @return string Title.
 	 */
-	public static function filter_the_title_in_post_list_table( $title, $post ) {
-		if ( function_exists( 'get_current_screen' ) && get_current_screen() && get_current_screen()->base === 'edit' && get_current_screen()->post_type === self::POST_TYPE_SLUG && self::POST_TYPE_SLUG === get_post_type( $post ) ) {
+	public static function filter_the_title_in_post_list_table( $title, $id = null ) {
+		if ( function_exists( 'get_current_screen' ) && get_current_screen() && get_current_screen()->base === 'edit' && get_current_screen()->post_type === self::POST_TYPE_SLUG && self::POST_TYPE_SLUG === get_post_type( $id ) ) {
 			$title = preg_replace( '#^(\w+:)?//[^/]+#', '', $title );
 		}
 		return $title;

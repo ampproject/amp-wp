@@ -33,59 +33,50 @@ export default registerBlockType(
 
 		attributes: {
 			dataSiteId: {
-				type: 'string',
 				source: 'attribute',
 				selector: 'amp-springboard-player',
 				attribute: 'data-site-id'
 			},
 			dataContentId: {
-				type: 'string',
 				source: 'attribute',
 				selector: 'amp-springboard-player',
 				attribute: 'data-content-id'
 			},
 			dataPlayerId: {
-				type: 'string',
 				source: 'attribute',
 				selector: 'amp-springboard-player',
 				attribute: 'data-player-id'
 			},
 			dataDomain: {
-				type: 'string',
 				source: 'attribute',
 				selector: 'amp-springboard-player',
 				attribute: 'data-domain'
 			},
 			dataMode: {
-				type: 'string',
 				default: 'video',
 				source: 'attribute',
 				selector: 'amp-springboard-player',
 				attribute: 'data-mode'
 			},
 			dataItems: {
-				type: 'number',
 				default: 1,
 				source: 'attribute',
 				selector: 'amp-springboard-player',
 				attribute: 'data-items'
 			},
 			ampLayout: {
-				type: 'string',
 				default: 'responsive',
 				source: 'attribute',
 				selector: 'amp-springboard-player',
 				attribute: 'layout'
 			},
 			width: {
-				type: 'number',
 				default: 600,
 				source: 'attribute',
 				selector: 'amp-springboard-player',
 				attribute: 'width'
 			},
 			height: {
-				type: 'number',
 				default: 400,
 				source: 'attribute',
 				selector: 'amp-springboard-player',

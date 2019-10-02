@@ -1,15 +1,16 @@
 {
  "name": "amp-wp",
  "title": "AMP for WordPress",
- "homepage": "https://github.com/Automattic/amp-wp",
+ "homepage": "https://github.com/ampproject/amp-wp",
  "repository": {
   "type": "git",
-  "url": "https://github.com/Automattic/amp-wp.git"
+  "url": "https://github.com/ampproject/amp-wp.git"
  },
  "license": "GPL-2.0+",
  "private": true,
  "devDependencies": {
-  "@wordpress/i18n": "^1.1.0",
+  "@wordpress/dom-ready": "2.0.2",
+  "@wordpress/i18n": "1.2.3",
   "babel-core": "^6.25.0",
   "babel-loader": "^7.1.1",
   "babel-plugin-transform-object-rest-spread": "^6.26.0",
@@ -23,7 +24,6 @@
   "grunt": "^1.0.2",
   "grunt-contrib-clean": "^1.1.0",
   "grunt-contrib-copy": "^1.0.0",
-  "grunt-contrib-jshint": "^1.1.0",
   "grunt-shell": "^2.1.0",
   "grunt-wp-deploy": "^1.2.1",
   "timeago.js": "3.0.2",
@@ -31,12 +31,8 @@
  },
  "main": "blocks/index.js",
  "scripts": {
-  "pot-to-php": "pot-to-php languages/amp-js.pot languages/amp-translations.php amp",
   "build": "grunt build && grunt create-build-zip",
   "deploy": "grunt deploy",
   "dev": "cross-env BABEL_ENV=default webpack --watch"
- },
- "dependencies": {
-  "@wordpress/dom-ready": "^2.0.0"
  }
 }

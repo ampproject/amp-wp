@@ -1,7 +1,7 @@
 {
-    "name": "automattic/amp-wp",
+    "name": "ampproject/amp-wp",
     "description": "WordPress plugin for adding AMP support.",
-    "homepage": "https://github.com/Automattic/amp-wp",
+    "homepage": "https://github.com/ampproject/amp-wp",
     "type": "wordpress-plugin",
     "license": "GPL-2.0",
     "repositories": [
@@ -12,7 +12,7 @@
     ],
     "require": {
         "php": "^5.3.6 || ^7.0",
-        "sabberworm/php-css-parser": "dev-master"
+        "sabberworm/php-css-parser": "^8"
     },
     "require-dev": {
         "wp-coding-standards/wpcs": "^0.14.0",

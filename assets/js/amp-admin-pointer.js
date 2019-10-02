@@ -27,16 +27,6 @@ var ampAdminPointer = ( function( $ ) { // eslint-disable-line no-unused-vars
 							pointer: data.pointer.pointer_id,
 							action: 'dismiss-wp-pointer'
 						} );
-					},
-
-					/**
-					 * Adds styling to the pointer, to ensure it appears alongside the AMP menu.
-					 *
-					 * @param {Object} event The pointer event.
-					 * @param {Object} t Pointer element and state.
-					 */
-					show: function( event, t ) {
-						t.pointer.css( 'position', 'fixed' );
 					}
 				}
 			);

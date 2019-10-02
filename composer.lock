@@ -1,23 +1,23 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "33d4c9d9bf48285e6557d79a6b4b7601",
+    "content-hash": "b8432d8f248557e2589567614d402586",
     "packages": [
         {
             "name": "sabberworm/php-css-parser",
-            "version": "dev-master",
+            "version": "8.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/xwp/PHP-CSS-Parser.git",
-                "reference": "bd0c481ba28ccd54bbbb1846a69ead237cd26cd8"
+                "reference": "22311fa3d67217c5fcd0b839670be39a768eda7b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/xwp/PHP-CSS-Parser/zipball/bd0c481ba28ccd54bbbb1846a69ead237cd26cd8",
-                "reference": "bd0c481ba28ccd54bbbb1846a69ead237cd26cd8",
+                "url": "https://api.github.com/repos/xwp/PHP-CSS-Parser/zipball/22311fa3d67217c5fcd0b839670be39a768eda7b",
+                "reference": "22311fa3d67217c5fcd0b839670be39a768eda7b",
                 "shasum": ""
             },
             "require": {
@@ -50,7 +50,7 @@
             "support": {
                 "source": "https://github.com/xwp/PHP-CSS-Parser/tree/master"
             },
-            "time": "2018-09-06 16:11:27"
+            "time": "2018-11-25T04:50:29+00:00"
         }
     ],
     "packages-dev": [
@@ -124,16 +124,16 @@
         },
         {
             "name": "squizlabs/php_codesniffer",
-            "version": "3.3.1",
+            "version": "3.3.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/squizlabs/PHP_CodeSniffer.git",
-                "reference": "628a481780561150481a9ec74709092b9759b3ec"
+                "reference": "6ad28354c04b364c3c71a34e4a18b629cc3b231e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/squizlabs/PHP_CodeSniffer/zipball/628a481780561150481a9ec74709092b9759b3ec",
-                "reference": "628a481780561150481a9ec74709092b9759b3ec",
+                "url": "https://api.github.com/repos/squizlabs/PHP_CodeSniffer/zipball/6ad28354c04b364c3c71a34e4a18b629cc3b231e",
+                "reference": "6ad28354c04b364c3c71a34e4a18b629cc3b231e",
                 "shasum": ""
             },
             "require": {
@@ -171,7 +171,7 @@
                 "phpcs",
                 "standards"
             ],
-            "time": "2018-07-26T23:47:18+00:00"
+            "time": "2018-09-23T23:08:17+00:00"
         },
         {
             "name": "wimg/php-compatibility",
@@ -224,6 +224,7 @@
                 "phpcs",
                 "standards"
             ],
+            "abandoned": "phpcompatibility/php-compatibility",
             "time": "2018-07-17T13:42:26+00:00"
         },
         {
@@ -269,9 +270,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "sabberworm/php-css-parser": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

@@ -23,8 +23,8 @@ class AMP_Block_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'more_than_one_child'  => array(
-				'<figure class="wp-block-embed"><amp-facebook></amp-facebook><amp-facebook></amp-facebook></figure>',
-				'<figure class="wp-block-embed"><amp-facebook></amp-facebook><amp-facebook></amp-facebook></figure>',
+				'<figure class="wp-block-embed wp-embed-aspect-16-9 wp-has-aspect-ratio"><amp-facebook></amp-facebook><amp-facebook></amp-facebook></figure>',
+				'<figure class="wp-block-embed  wp-has-aspect-ratio"><amp-facebook></amp-facebook><amp-facebook></amp-facebook></figure>',
 			),
 
 			'no_wp_block_embed'    => array(

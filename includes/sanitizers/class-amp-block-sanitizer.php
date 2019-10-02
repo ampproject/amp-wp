@@ -35,17 +35,21 @@ class AMP_Block_Sanitizer extends AMP_Base_Sanitizer {
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
 			$node = $nodes->item( $i );
 
+			// We are only looking for <figure> elements which have wp-block-embed as class.
+			$class = (string) $node->getAttribute( 'class' );
+			if ( false === strpos( $class, 'wp-block-embed' ) ) {
+				continue;
+			}
+
+			// Remove classes like wp-embed-aspect-16-9 since responsive layout is handled by AMP's layout system.
+			$node->setAttribute( 'class', preg_replace( '/(?<=^|\s)wp-embed-aspect-\d+-\d+(?=\s|$)/', '', $class ) );
+
 			// We're looking for <figure> elements that have one child node only.
 			if ( 1 !== count( $node->childNodes ) ) {
 				continue;
 			}
 
 			$attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
-
-			// We are only looking for <figure> elements which have wp-block-embed as class.
-			if ( ! isset( $attributes['class'] ) || false === strpos( $attributes['class'], 'wp-block-embed' ) ) {
-				continue;
-			}
 
 			// We are looking for <figure> elements with layout attribute only.
 			if (

@@ -176,7 +176,6 @@ class AMP_Post_Meta_Box {
 
 	/**
 	 * Enqueues block assets.
-	 * The name of gutenberg_get_jed_locale_data() may change, as the Gutenberg Core merge approaches.
 	 *
 	 * @since 1.0
 	 */
@@ -203,7 +202,11 @@ class AMP_Post_Meta_Box {
 			'errorMessages' => $error_messages,
 		);
 
-		if ( function_exists( 'gutenberg_get_jed_locale_data' ) ) {
+		if ( function_exists( 'wp_set_script_translations' ) ) {
+			wp_set_script_translations( self::BLOCK_ASSET_HANDLE, 'amp' );
+		} elseif ( function_exists( 'wp_get_jed_locale_data' ) ) {
+			$script_data['i18n'] = wp_get_jed_locale_data( 'amp' );
+		} elseif ( function_exists( 'gutenberg_get_jed_locale_data' ) ) {
 			$script_data['i18n'] = gutenberg_get_jed_locale_data( 'amp' );
 		}
 

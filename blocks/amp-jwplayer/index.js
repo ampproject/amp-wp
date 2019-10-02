@@ -32,39 +32,33 @@ export default registerBlockType(
 
 		attributes: {
 			dataPlayerId: {
-				type: 'string',
 				source: 'attribute',
 				selector: 'amp-jwplayer',
 				attribute: 'data-player-id'
 			},
 			dataMediaId: {
-				type: 'string',
 				source: 'attribute',
 				selector: 'amp-jwplayer',
 				attribute: 'data-media-id'
 			},
 			dataPlaylistId: {
-				type: 'string',
 				source: 'attribute',
 				selector: 'amp-jwplayer',
 				attribute: 'data-playlist-id'
 			},
 			ampLayout: {
-				type: 'string',
 				default: 'responsive',
 				source: 'attribute',
 				selector: 'amp-jwplayer',
 				attribute: 'layout'
 			},
 			width: {
-				type: 'number',
 				default: 600,
 				source: 'attribute',
 				selector: 'amp-jwplayer',
 				attribute: 'width'
 			},
 			height: {
-				type: 'number',
 				default: 400,
 				source: 'attribute',
 				selector: 'amp-jwplayer',

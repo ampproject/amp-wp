@@ -36,5 +36,5 @@ git push origin "$built_tag"
 rm -rf built
 
 echo "Pushed tag $built_tag."
-echo "See https://github.com/Automattic/amp-wp/releases/tag/$built_tag"
-echo "For https://github.com/Automattic/amp-wp/releases/tag/$tag"
+echo "See https://github.com/ampproject/amp-wp/releases/tag/$built_tag"
+echo "For https://github.com/ampproject/amp-wp/releases/tag/$tag"

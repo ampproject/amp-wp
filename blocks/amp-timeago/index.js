@@ -45,32 +45,27 @@ export default registerBlockType(
 				type: 'string'
 			},
 			cutoff: {
-				type: 'number',
 				source: 'attribute',
 				selector: 'amp-timeago',
 				attribute: 'cutoff'
 			},
 			dateTime: {
-				type: 'string',
 				source: 'attribute',
 				selector: 'amp-timeago',
 				attribute: 'datetime'
 			},
 			ampLayout: {
-				type: 'string',
 				default: 'fixed-height',
 				source: 'attribute',
 				selector: 'amp-timeago',
 				attribute: 'layout'
 			},
 			width: {
-				type: 'number',
 				source: 'attribute',
 				selector: 'amp-timeago',
 				attribute: 'width'
 			},
 			height: {
-				type: 'number',
 				default: 20,
 				source: 'attribute',
 				selector: 'amp-timeago',
@@ -90,7 +85,7 @@ export default registerBlockType(
 			const { align, cutoff } = attributes;
 			let timeAgo;
 			if ( attributes.dateTime ) {
-				if ( attributes.cutoff && attributes.cutoff < Math.abs( moment( attributes.dateTime ).diff( moment(), 'seconds' ) ) ) {
+				if ( attributes.cutoff && parseInt( attributes.cutoff ) < Math.abs( moment( attributes.dateTime ).diff( moment(), 'seconds' ) ) ) {
 					timeAgo = moment( attributes.dateTime ).format( 'dddd D MMMM HH:mm' );
 				} else {
 					timeAgo = timeago().format( attributes.dateTime );

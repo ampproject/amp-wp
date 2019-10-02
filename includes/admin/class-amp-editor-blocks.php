@@ -53,7 +53,7 @@ class AMP_Editor_Blocks {
 			 * sites because the AMP Gutenberg blocks are only made available in that mode; they are not
 			 * presented in the Gutenberg inserter in paired mode. In general, using AMP components in
 			 * non-AMP documents is still not officially supported, so it's occurrence is being minimized
-			 * as much as possible. For more, see <https://github.com/Automattic/amp-wp/issues/1192>.
+			 * as much as possible. For more, see <https://github.com/ampproject/amp-wp/issues/1192>.
 			 */
 			if ( amp_is_canonical() ) {
 				add_filter( 'the_content', array( $this, 'tally_content_requiring_amp_scripts' ) );
@@ -135,9 +135,13 @@ class AMP_Editor_Blocks {
 			wp_enqueue_script(
 				'amp-editor-blocks-build',
 				amp_get_asset_url( 'js/amp-blocks-compiled.js' ),
-				array( 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components' ),
+				array( 'wp-editor', 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components' ),
 				AMP__VERSION
 			);
+
+			if ( function_exists( 'wp_set_script_translations' ) ) {
+				wp_set_script_translations( 'amp-editor-blocks-build', 'amp' );
+			}
 		}
 
 		wp_enqueue_script(
@@ -155,11 +159,16 @@ class AMP_Editor_Blocks {
 			) ) )
 		);
 
-		wp_add_inline_script(
-			'wp-i18n',
-			'wp.i18n.setLocaleData( ' . wp_json_encode( gutenberg_get_jed_locale_data( 'amp' ) ) . ', "amp" );',
-			'after'
-		);
+		if ( function_exists( 'wp_set_script_translations' ) ) {
+			wp_set_script_translations( 'amp-editor-blocks', 'amp' );
+		} elseif ( function_exists( 'wp_get_jed_locale_data' ) || function_exists( 'gutenberg_get_jed_locale_data' ) ) {
+			$locale_data = function_exists( 'wp_get_jed_locale_data' ) ? wp_get_jed_locale_data( 'amp' ) : gutenberg_get_jed_locale_data( 'amp' );
+			wp_add_inline_script(
+				'wp-i18n',
+				'wp.i18n.setLocaleData( ' . wp_json_encode( $locale_data ) . ', "amp" );',
+				'after'
+			);
+		}
 	}
 
 	/**

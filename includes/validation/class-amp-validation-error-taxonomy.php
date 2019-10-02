@@ -830,9 +830,12 @@ class AMP_Validation_Error_Taxonomy {
 
 		// Hide empty term addition form.
 		add_action( 'admin_enqueue_scripts', function() {
-			global $pagenow;
+			$current_screen = get_current_screen();
+			if ( ! $current_screen ) {
+				return;
+			}
 
-			if ( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG === get_current_screen()->taxonomy ) {
+			if ( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG === $current_screen->taxonomy ) {
 				wp_add_inline_style( 'common', '
 					#col-left { display: none; }
 					#col-right { float:none; width: auto; }
@@ -852,7 +855,7 @@ class AMP_Validation_Error_Taxonomy {
 				wp_enqueue_script(
 					'amp-validation-detail-toggle',
 					amp_get_asset_url( 'js/amp-validation-detail-toggle-compiled.js' ),
-					array( 'amp-validation-tooltips' ),
+					array( 'wp-dom-ready', 'amp-validation-tooltips' ),
 					AMP__VERSION,
 					true
 				);
@@ -867,7 +870,7 @@ class AMP_Validation_Error_Taxonomy {
 				);
 			}
 
-			if ( 'post.php' === $pagenow ) {
+			if ( 'post' === $current_screen->base && AMP_Validated_URL_Post_Type::POST_TYPE_SLUG === $current_screen->post_type ) {
 				wp_enqueue_style(
 					'amp-validation-single-error-url',
 					amp_get_asset_url( 'css/amp-validation-single-error-url.css' ),
@@ -878,7 +881,7 @@ class AMP_Validation_Error_Taxonomy {
 				wp_enqueue_script(
 					'amp-validation-single-error-url-details',
 					amp_get_asset_url( 'js/amp-validation-single-error-url-details-compiled.js' ),
-					array(),
+					array( 'wp-dom-ready' ),
 					AMP__VERSION,
 					true
 				);
@@ -1601,7 +1604,7 @@ class AMP_Validation_Error_Taxonomy {
 	public static function get_reader_friendly_error_type_text( $error_type ) {
 		switch ( $error_type ) {
 			case 'js_error':
-				return esc_html__( 'JavaScript', 'amp' );
+				return esc_html__( 'JS', 'amp' );
 
 			case 'html_element_error':
 				return esc_html__( 'HTML (Element)', 'amp' );
