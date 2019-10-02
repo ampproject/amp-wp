@@ -4,7 +4,7 @@
 import { withSelect } from '@wordpress/data';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { render } from '@wordpress/element';
-import { F10 } from '@wordpress/keycodes';
+import { KeyboardShortcuts } from '@wordpress/components';
 /**
  * Internal dependencies
  */
@@ -22,8 +22,7 @@ const applyWithSelect = withSelect( ( select, props ) => {
 	const { name } = props;
 
 	const handleEvent = ( event ) => {
-		const isKeydown = event.type === 'keydown';
-		const isContextmenu = event.type === 'contextmenu';
+		const isRightClick = event.type === 'contextmenu';
 
 		const selectedBlockClientIds = getSelectedBlockClientIds();
 
@@ -40,16 +39,6 @@ const applyWithSelect = withSelect( ( select, props ) => {
 		// Let's ignore multi-selection for now.
 		if ( hasMultiSelection() || selectedText.length ) {
 			return;
-		}
-
-		// Ignore if it's a keydown event and the correct combo hasn't been pressed.
-		if ( isKeydown ) {
-			const isShift = event.getModifierState( 'Shift' );
-			const isF10 = event.keyCode === F10;
-			const isRightCombo = isShift && isF10;
-			if ( ! isRightCombo ) {
-				return;
-			}
 		}
 
 		const editLayout = document.querySelector( '.edit-post-layout' );
@@ -73,11 +62,12 @@ const applyWithSelect = withSelect( ( select, props ) => {
 		let eventX = 0;
 		let eventY = 0;
 
-		if ( isContextmenu ) {
+		if ( isRightClick ) {
+			// Use coordinates of actual click to place context menu.
 			eventX = event.clientX;
 			eventY = event.clientY;
-		} else if ( isKeydown ) {
-			// Place menu in the upper left corner of the element - but a little inside it.
+		} else {
+			// Place menu in the upper left corner of the element - but slightly inside.
 			const elementPosition = event.target.getBoundingClientRect();
 			eventX = elementPosition.left + 20;
 			eventY = elementPosition.top + 20;
@@ -135,9 +125,11 @@ export default createHigherOrderComponent(
 			}
 
 			return (
-				<div tabIndex="0" role="button" onContextMenu={ handleEvent } onKeyDown={ handleEvent }>
-					<BlockEdit { ...props } />
-				</div>
+				<KeyboardShortcuts shortcuts={ { 'shift+f10': handleEvent } }>
+					<div onContextMenu={ handleEvent }>
+						<BlockEdit { ...props } />
+					</div>
+				</KeyboardShortcuts>
 			);
 		} );
 	},
