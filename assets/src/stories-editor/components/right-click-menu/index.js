@@ -37,6 +37,10 @@ const POPOVER_PROPS = {
 	position: 'bottom left',
 };
 
+const isBlockAllowedOnPage = ( name, pageId ) => {
+	return true;
+};
+
 const RightClickMenu = ( props ) => {
 	const {
 		clientIds,
@@ -51,6 +55,10 @@ const RightClickMenu = ( props ) => {
 		removeBlock,
 		duplicateBlock,
 		pasteBlock,
+		moveBackBlock,
+		moveForwardBlock,
+		getBlockOrder,
+		getCurrentPage,
 	} = props;
 	const [ isOpen, setIsOpen ] = useState( true );
 
@@ -104,6 +112,39 @@ const RightClickMenu = ( props ) => {
 					className: 'right-click-duplicate',
 				},
 			);
+		}
+
+		const pageList = getBlockOrder();
+		const pageNumber = pageList.length;
+		if ( block && pageNumber > 1 ) {
+			const currentPage = getCurrentPage();
+			const currentPagePosition = pageList.indexOf( currentPage );
+			if ( currentPagePosition > 0 ) {
+				const prevPage = currentPagePosition[ currentPagePosition - 1 ];
+				if ( isBlockAllowedOnPage( block.name, prevPage ) ) {
+					blockActions.push(
+						{
+							name: __( 'Send block to previous page', 'amp' ),
+							blockAction: moveBackBlock,
+							icon: 'arrow-left-alt',
+							className: 'right-click-previous-page',
+						},
+					);
+				}
+			}
+			if ( currentPagePosition < ( pageNumber - 1 ) ) {
+				const nextPage = currentPagePosition[ currentPagePosition + 1 ];
+				if ( isBlockAllowedOnPage( block.name, nextPage ) ) {
+					blockActions.push(
+						{
+							name: __( 'Send block to next page', 'amp' ),
+							blockAction: moveForwardBlock,
+							icon: 'arrow-right-alt',
+							className: 'right-click-next-page',
+						},
+					);
+				}
+			}
 		}
 
 		blockActions.push(
@@ -178,6 +219,10 @@ RightClickMenu.propTypes = {
 	removeBlock: PropTypes.func.isRequired,
 	duplicateBlock: PropTypes.func.isRequired,
 	pasteBlock: PropTypes.func.isRequired,
+	getBlockOrder: PropTypes.func.isRequired,
+	getCurrentPage: PropTypes.func.isRequired,
+	moveBackBlock: PropTypes.func.isRequired,
+	moveForwardBlock: PropTypes.func.isRequired,
 };
 
 const applyWithSelect = withSelect( ( select ) => {
@@ -188,7 +233,10 @@ const applyWithSelect = withSelect( ( select ) => {
 		getSettings,
 	} = select( 'core/block-editor' );
 
-	const { getCopiedMarkup } = select( 'amp/story' );
+	const {
+		getCopiedMarkup,
+		getCurrentPage,
+	} = select( 'amp/story' );
 
 	return {
 		getBlock,
@@ -196,6 +244,7 @@ const applyWithSelect = withSelect( ( select ) => {
 		getBlockRootClientId,
 		getSettings,
 		getCopiedMarkup,
+		getCurrentPage,
 	};
 } );
 
@@ -206,15 +255,17 @@ const applyWithDispatch = withDispatch( ( dispatch, props ) => {
 		getBlockRootClientId,
 		getCopiedMarkup,
 		getSettings,
+		getCurrentPage,
 	} = props;
 	const {
 		removeBlock,
 		insertBlock,
 		insertBlocks,
 		updateBlockAttributes,
+		selectBlock,
 	} = dispatch( 'core/block-editor' );
 
-	const { setCopiedMarkup } = dispatch( 'amp/story' );
+	const { setCopiedMarkup, setCurrentPage } = dispatch( 'amp/story' );
 
 	const { __experimentalCanUserUseUnfilteredHTML: canUserUseUnfilteredHTML } = getSettings();
 
@@ -263,6 +314,39 @@ const applyWithDispatch = withDispatch( ( dispatch, props ) => {
 		} ).catch( () => {} );
 	};
 
+	const getNeighborPageId = ( offset ) => {
+		const pages = getBlockOrder();
+		const rootClientId = getCurrentPage();
+		const currentPageIndex = pages.findIndex( ( i ) => i === rootClientId );
+		const newPageIndex = currentPageIndex + offset;
+		const isInsidePageCount = newPageIndex >= 0 && newPageIndex < pages.length;
+		const newPageId = pages[ newPageIndex ];
+
+		// Do we even have a neighbor in that direction?
+		if ( ! isInsidePageCount ) {
+			return null;
+		}
+
+		return newPageId;
+	};
+
+	const moveBlock = ( clientId, offset ) => {
+		const newPageId = getNeighborPageId( offset );
+		const block = getBlock( clientId );
+		const isAllowedOnPage = isBlockAllowedOnPage( block.name, newPageId );
+		if ( ! newPageId || ! isAllowedOnPage || ! offset === 0 ) {
+			return;
+		}
+		// Remove block and add cloned block to new page.
+		removeBlock( clientId );
+		const clonedBlock = cloneBlock( block );
+		insertBlock( clonedBlock, null, newPageId );
+
+		// Switch to new page.
+		setCurrentPage( newPageId );
+		selectBlock( newPageId );
+	};
+
 	return {
 		removeBlock,
 		duplicateBlock( clientId ) {
@@ -299,6 +383,12 @@ const applyWithDispatch = withDispatch( ( dispatch, props ) => {
 				const text = getCopiedMarkup();
 				processTextToPaste( text, clientId, insidePercentageY, insidePercentageX );
 			}
+		},
+		moveBackBlock( clientId ) {
+			moveBlock( clientId, -1 );
+		},
+		moveForwardBlock( clientId ) {
+			moveBlock( clientId, 1 );
 		},
 	};
 } );
