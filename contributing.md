@@ -20,7 +20,7 @@ Project maintainers are regularly monitoring issues and aim to fix open bugs qui
 
 ## Product and code contributions
 
-We'd love to have your help contributing code and features to the AMP Plugin! Head to the [Project Management guidelines](https://github.com/ampproject/amp-wp/blob/develop/contributing/projet-management.md) as well as [Engineering guidelines](https://github.com/ampproject/amp-wp/blob/develop/contributing/engineering.md) for details on the process you can use to contribute.
+We'd love to have your help contributing code and features to the AMP Plugin! Head to the [Project Management guidelines](https://github.com/ampproject/amp-wp/blob/develop/contributing/project-management.md) as well as [Engineering guidelines](https://github.com/ampproject/amp-wp/blob/develop/contributing/engineering.md) for details on the process you can use to contribute.
 
 ## Contributor license agreement
 
