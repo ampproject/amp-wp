@@ -39,7 +39,9 @@ const MetaFields = ( props ) => {
 
 	return (
 		<>
-			<p>{ __( 'These settings are applied to new pages.', 'amp' ) }</p>
+			<p>
+				{ __( 'These settings are applied to new pages.', 'amp' ) }
+			</p>
 			<SelectControl
 				label={ __( 'Advance to next page', 'amp' ) }
 				help={ currentOption.description || '' }

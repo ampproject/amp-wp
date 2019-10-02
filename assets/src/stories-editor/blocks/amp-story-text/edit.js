@@ -202,10 +202,12 @@ class TextBlockEdit extends Component {
 						onChange={ ( value ) => setAttributes( { align: value } ) }
 					/>
 				</BlockControls>
-				<div className={ classnames( wrapperClass, {
-					'with-line-height': ampFitText,
-					'is-empty-draggable-text': ! isEditing && ! content.length,
-				} ) } style={ wrapperStyle } >
+				<div
+					className={ classnames( wrapperClass, {
+						'with-line-height': ampFitText,
+						'is-empty-draggable-text': ! isEditing && ! content.length,
+					} ) }
+					style={ wrapperStyle } >
 					{ isEditing &&
 						<RichText
 							wrapperClassName={ textWrapperClassName }
