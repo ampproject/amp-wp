@@ -17,7 +17,8 @@ import withSnapTargets from '../higher-order/with-snap-targets';
 import './edit.css';
 import {
 	getPercentageFromPixels,
-	findClosestSnap, getRelativeElementPosition,
+	findClosestSnap,
+	getRelativeElementPosition,
 } from '../../helpers';
 import {
 	getBlockPositioning,
