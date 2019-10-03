@@ -4,14 +4,14 @@
 import PropTypes from 'prop-types';
 
 /**
- * Internal dependencies
- */
-import { migrateV120 } from '../shared';
-
-/**
  * WordPress dependencies
  */
 import { RichText } from '@wordpress/block-editor';
+
+/**
+ * Internal dependencies
+ */
+import { migrateV120 } from '../shared';
 
 const blockAttributes = {
 	content: {

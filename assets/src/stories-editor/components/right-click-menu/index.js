@@ -24,13 +24,13 @@ import { compose } from '@wordpress/compose';
  * Internal dependencies
  */
 import './edit.css';
-import useOutsideClickChecker from './outside-click-checker';
 import {
 	copyTextToClipBoard,
 	ensureAllowedBlocksOnPaste,
 	isPageBlock,
 } from '../../helpers';
 import { ALLOWED_MOVABLE_BLOCKS, DISABLE_DUPLICATE_BLOCKS } from '../../constants';
+import useOutsideClickChecker from './outside-click-checker';
 
 const POPOVER_PROPS = {
 	className: 'amp-story-right-click-menu__popover block-editor-block-settings-menu__popover editor-block-settings-menu__popover',

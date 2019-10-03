@@ -2,13 +2,13 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { dispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import { FeaturedImageToolbarSelect, getSelectMediaFrame } from '../../common/components/select-media-frame';
 import { setImageFromURL } from '../../common/helpers';
-import { dispatch } from '@wordpress/data';
 
 const { wp } = window;
 
