@@ -269,7 +269,7 @@ describe( 'Resizing', () => {
 			await selectBlockByClassName( 'wp-block-amp-story-text' );
 			// Click the toggle to disable automatic fitting
 			const fitToggle = await page.waitForSelector( '.components-toggle-control input' );
-			fitToggle.click();
+			await fitToggle.click();
 		} );
 
 		it( 'should not resize smaller than the set minimum width: bottom', async () => {
