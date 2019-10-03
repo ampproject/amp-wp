@@ -66,7 +66,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				],
 			],
 			'add_smooth_scrolling' => [
-				'//a[ contains( @class, "to-the-top" ) ]',
+				// @todo Only replaces twentytwenty.smoothscroll.scrollToAnchor, but not twentytwenty.smoothscroll.scrollToElement
+				// @todo Still does a full page reload after scrolling in Transitional mode. See https://github.com/ampproject/amp-wp/issues/3435
+				'//a[ starts-with( @href, "#" ) and not( @href = "#" )and not( @href = "#0" ) and not( contains( @class, "do-not-scroll" ) ) and not( contains( @class, "skip-link" ) ) ]',
 			],
 		],
 
