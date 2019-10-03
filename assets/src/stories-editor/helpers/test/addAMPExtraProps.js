@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { addAMPExtraProps } from '../';
+import addAMPExtraProps from '../addAMPExtraProps';
 
 describe( 'addAMPExtraProps', () => {
 	it( 'does not modify non-child blocks', () => {
