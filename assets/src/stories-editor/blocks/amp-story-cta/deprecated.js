@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import PropTypes from 'prop-types';
 import { omit } from 'lodash';
 
 /**
@@ -12,7 +13,6 @@ import { RichText } from '@wordpress/block-editor';
  * Internal dependencies
  */
 import { getClassNameFromBlockAttributes, getStylesFromBlockAttributes } from '../../helpers';
-import PropTypes from 'prop-types';
 
 const blockAttributes = {
 	url: {

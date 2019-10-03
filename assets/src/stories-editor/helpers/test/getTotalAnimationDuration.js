@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { getTotalAnimationDuration } from '../';
+import getTotalAnimationDuration from '../getTotalAnimationDuration';
 
 describe( 'getTotalAnimationDuration', () => {
 	it( 'should return 0 if there are no animated blocks', () => {

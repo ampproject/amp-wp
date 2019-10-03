@@ -17,9 +17,13 @@ import withSnapTargets from '../higher-order/with-snap-targets';
 import './edit.css';
 import {
 	getPercentageFromPixels,
-	findClosestSnap,
 	getRelativeElementPosition,
+	findClosestSnap,
 } from '../../helpers';
+import {
+	TEXT_BLOCK_PADDING,
+	BLOCK_RESIZING_SNAP_GAP,
+} from '../../constants';
 import {
 	getBlockPositioning,
 	getResizedBlockPosition,
@@ -28,10 +32,6 @@ import {
 	getRadianFromDeg,
 	getBlockTextElement,
 } from './helpers';
-import {
-	TEXT_BLOCK_PADDING,
-	BLOCK_RESIZING_SNAP_GAP,
-} from '../../constants';
 
 let lastSeenX = 0,
 	lastSeenY = 0,
