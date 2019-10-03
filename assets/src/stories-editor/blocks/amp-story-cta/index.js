@@ -7,10 +7,10 @@ import { createBlock, getBlockAttributes } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
+import blockIcon from '../../../../images/stories-editor/call-to-action.svg';
 import edit from './edit';
 import save from './save';
 import deprecated from './deprecated';
-import blockIcon from '../../../../images/stories-editor/call-to-action.svg';
 
 const schema = {
 	url: {

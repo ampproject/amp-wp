@@ -28,13 +28,12 @@ import {
 	metaToAttributeNames,
 } from '../../helpers';
 
-import CopyPasteHandler from './copy-paste-handler';
-
 import {
 	ALLOWED_MOVABLE_BLOCKS,
 	IMAGE_BACKGROUND_TYPE,
 	VIDEO_BACKGROUND_TYPE,
 } from '../../constants';
+import CopyPasteHandler from './copy-paste-handler';
 import './edit.css';
 import BackgroundColorSettings from './background-color-settings';
 import PageSettings from './page-settings';
