@@ -3,7 +3,8 @@
  */
 import { withDispatch } from '@wordpress/data';
 import { createHigherOrderComponent } from '@wordpress/compose';
-import { UP, DOWN, RIGHT, LEFT, DELETE } from '@wordpress/keycodes';
+import { UP, DOWN, RIGHT, LEFT } from '@wordpress/keycodes';
+import { KeyboardShortcuts } from '@wordpress/components';
 /**
  * Internal dependencies
  */
@@ -13,17 +14,17 @@ const applyWithDispatch = withDispatch( ( dispatch, props, { select } ) => {
 	const {	isReordering } = select( 'amp/story' );
 	const { getSelectedBlock } = select( 'core/block-editor' );
 	const { updateBlockAttributes, removeBlock } = dispatch( 'core/block-editor' );
+	const selectedBlock = getSelectedBlock();
 
-	const onKeyPress = ( event ) => {
+	const onMoveBlock = ( event ) => {
 		const { keyCode, target } = event;
 		const { classList } = target;
-		const selectedBlock = getSelectedBlock();
 
 		if ( ! selectedBlock ) {
 			return;
 		}
 
-		if ( classList.contains( 'editor-rich-text__editable' ) && classList.contains( 'is-selected' ) ) {
+		if ( classList.contains( 'editor-rich-text__editable' ) && ( classList.contains( 'is-selected' ) || classList.contains( 'is-typing' ) ) ) {
 			return;
 		}
 
@@ -42,11 +43,8 @@ const applyWithDispatch = withDispatch( ( dispatch, props, { select } ) => {
 			case LEFT:
 				left = -1;
 				break;
-			case DELETE:
-				removeBlock( selectedBlock.clientId );
-				return;
 			default:
-				return;
+				break;
 		}
 		event.preventDefault();
 		if ( ALLOWED_MOVABLE_BLOCKS.includes( selectedBlock.name ) ) {
@@ -59,9 +57,23 @@ const applyWithDispatch = withDispatch( ( dispatch, props, { select } ) => {
 		}
 	};
 
+	const deleteSelectedBlocks = ( event ) => {
+		const { target } = event;
+		const { classList } = target;
+		if ( ! selectedBlock ) {
+			return;
+		}
+		if ( classList.contains( 'editor-rich-text__editable' ) && ( classList.contains( 'is-selected' ) || classList.contains( 'is-typing' ) ) ) {
+			return;
+		}
+		event.preventDefault();
+		removeBlock( selectedBlock.clientId );
+	};
+
 	return {
 		isReordering,
-		onKeyPress,
+		onMoveBlock,
+		deleteSelectedBlocks,
 	};
 } );
 
@@ -73,7 +85,7 @@ const applyWithDispatch = withDispatch( ( dispatch, props, { select } ) => {
 export default createHigherOrderComponent(
 	( BlockEdit ) => {
 		return applyWithDispatch( ( props ) => {
-			const { name, onKeyPress, isReordering } = props;
+			const { name, onMoveBlock, isReordering, deleteSelectedBlocks } = props;
 			const isPageBlock = 'amp/amp-story-page' === name;
 			// Add for page block and inner blocks.
 			if ( ! isPageBlock && ! ALLOWED_CHILD_BLOCKS.includes( name ) ) {
@@ -85,10 +97,19 @@ export default createHigherOrderComponent(
 				return <BlockEdit { ...props } />;
 			}
 
+			const shortcuts = {
+				up: onMoveBlock,
+				right: onMoveBlock,
+				down: onMoveBlock,
+				left: onMoveBlock,
+				backspace: deleteSelectedBlocks,
+				del: deleteSelectedBlocks,
+			};
+
 			return (
-				<div role="button" tabIndex="-1" onKeyDown={ onKeyPress }>
+				<KeyboardShortcuts shortcuts={ shortcuts } event='keyup' >
 					<BlockEdit { ...props } />
-				</div>
+				</KeyboardShortcuts>
 			);
 		} );
 	},
