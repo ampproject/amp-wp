@@ -165,7 +165,7 @@ describe( 'Context Menu', () => {
 	describe( 'using Keyboard', () => {
 		it( 'should open the context menu when pressing Shift+F10', async () => {
 			await page.$( BLOCK_SELECTOR );
-			await pressKeyWithModifier( 'ctrl', 'F10' );
+			await pressKeyWithModifier( 'shift', 'F10' );
 
 			expect( page ).toMatchElement( POPOVER_SELECTOR );
 			expect( page ).toMatchElement( POPOVER_SELECTOR + ' .right-click-copy' );
