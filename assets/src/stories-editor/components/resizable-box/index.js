@@ -146,6 +146,10 @@ class EnhancedResizableBox extends Component {
 					if ( ampFitText && isText ) {
 						textBlockWrapper = blockElement.querySelector( '.with-line-height' );
 					} else {
+						// If the textBlockWrapper was set previously, make sure it's line height is reset, too.
+						if ( textBlockWrapper ) {
+							textBlockWrapper.style.lineHeight = 'initial';
+						}
 						textBlockWrapper = null;
 					}
 
@@ -161,6 +165,7 @@ class EnhancedResizableBox extends Component {
 						width = blockElement.clientWidth;
 						height = blockElement.clientHeight;
 					}
+
 					// If the new width/height is below the minimum limit, set the minimum limit as the width/height instead.
 					let appliedWidth = minWidth <= width + deltaW ? width + deltaW : minWidth;
 					let appliedHeight = minHeight <= height + deltaH ? height + deltaH : minHeight;
@@ -222,8 +227,6 @@ class EnhancedResizableBox extends Component {
 							// If the resizing is to left or top then we have to compensate
 							if ( REVERSE_WIDTH_CALCULATIONS.includes( direction ) ) {
 								const leftInPx = getPixelsFromPercentage( 'x', parseFloat( blockElementLeft ) );
-								//console.log( 'left', 'IN PX START', leftInPx );
-								//console.log( 'lastDeltaW', lastDeltaW );
 								blockElement.style.left = getPercentageFromPixels( 'x', leftInPx - lastDeltaW ) + '%';
 							}
 							if ( REVERSE_HEIGHT_CALCULATIONS.includes( direction ) ) {
