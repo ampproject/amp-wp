@@ -70,14 +70,13 @@ class Draggable extends Component {
 	 * @param {Object} event The non-custom DragEvent.
 	 */
 	onDragEnd = ( event ) => {
-		const { onDragEnd = noop, snapLines, hideSnapLines, clearSnapLines } = this.props;
+		const { onDragEnd = noop, snapLines, clearSnapLines } = this.props;
 		if ( event ) {
 			event.preventDefault();
 		}
 
 		this.resetDragState();
 
-		hideSnapLines();
 		if ( snapLines.length ) {
 			clearSnapLines();
 		}
@@ -203,7 +202,6 @@ class Draggable extends Component {
 			transferData,
 			onDragStart = noop,
 			snapLines,
-			showSnapLines,
 			clearSnapLines,
 		} = this.props;
 		const isCTABlock = 'amp/amp-story-cta' === blockName;
@@ -284,7 +282,6 @@ class Draggable extends Component {
 			document.addEventListener( 'drop', this.onDrop );
 		}
 
-		showSnapLines();
 		if ( snapLines.length ) {
 			clearSnapLines();
 		}
@@ -339,8 +336,6 @@ Draggable.propTypes = {
 	horizontalSnaps: PropTypes.func.isRequired,
 	verticalSnaps: PropTypes.func.isRequired,
 	snapLines: PropTypes.array.isRequired,
-	showSnapLines: PropTypes.func.isRequired,
-	hideSnapLines: PropTypes.func.isRequired,
 	setSnapLines: PropTypes.func.isRequired,
 	clearSnapLines: PropTypes.func.isRequired,
 	parentBlockElement: PropTypes.object,

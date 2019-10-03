@@ -23,8 +23,6 @@ const setup = () => {
 	const snapProps = wrapper.find( Dummy ).props();
 	const callbacks = [
 		'setSnapLines',
-		'showSnapLines',
-		'hideSnapLines',
 		'clearSnapLines',
 	];
 
@@ -62,20 +60,9 @@ describe( 'Snapping', () => {
 		expect( displayedSnapLines ).toHaveLength( 0 );
 	} );
 
-	it( 'should not display any snap lines when set but not shown', () => {
+	it( 'should display snap lines when set', () => {
 		const { setSnapLines, getDisplayedSnapLines } = setup();
 
-		setSnapLines( [ VERTICAL_SNAP_LINE, HORIZONTAL_SNAP_LINE ] );
-
-		const displayedSnapLines = getDisplayedSnapLines();
-
-		expect( displayedSnapLines ).toHaveLength( 0 );
-	} );
-
-	it( 'should display snap lines when shown and set', () => {
-		const { setSnapLines, showSnapLines, getDisplayedSnapLines } = setup();
-
-		showSnapLines();
 		setSnapLines( [ VERTICAL_SNAP_LINE, HORIZONTAL_SNAP_LINE ] );
 
 		const displayedSnapLines = getDisplayedSnapLines();
@@ -83,10 +70,9 @@ describe( 'Snapping', () => {
 		expect( displayedSnapLines ).toHaveLength( 2 );
 	} );
 
-	it( 'should render a single snap line correctly when shown and set', () => {
-		const { setSnapLines, showSnapLines, getDisplayedSnapLines } = setup();
+	it( 'should render a single snap line correctly when set', () => {
+		const { setSnapLines, getDisplayedSnapLines } = setup();
 
-		showSnapLines();
 		setSnapLines( [ HORIZONTAL_SNAP_LINE ] );
 
 		const displayedSnapLines = getDisplayedSnapLines();
@@ -94,10 +80,9 @@ describe( 'Snapping', () => {
 		expect( displayedSnapLines ).toMatchSnapshot();
 	} );
 
-	it( 'should display only new snap lines when shown, set and set again', () => {
-		const { setSnapLines, showSnapLines, getDisplayedSnapLines } = setup();
+	it( 'should display only new snap lines when set and set again', () => {
+		const { setSnapLines, getDisplayedSnapLines } = setup();
 
-		showSnapLines();
 		setSnapLines( [ VERTICAL_SNAP_LINE, HORIZONTAL_SNAP_LINE ] );
 		setSnapLines( [ VERTICAL_SNAP_LINE ] );
 
@@ -106,51 +91,14 @@ describe( 'Snapping', () => {
 		expect( displayedSnapLines ).toHaveLength( 1 );
 	} );
 
-	it( 'should not display any snap lines when set, shown and then hidden', () => {
+	it( 'should not display any snap lines when set and cleared', () => {
 		const {
 			setSnapLines,
-			showSnapLines,
-			hideSnapLines,
-			getDisplayedSnapLines,
-		} = setup();
-
-		setSnapLines( [ VERTICAL_SNAP_LINE, HORIZONTAL_SNAP_LINE ] );
-		showSnapLines();
-		hideSnapLines();
-
-		const displayedSnapLines = getDisplayedSnapLines();
-
-		expect( displayedSnapLines ).toHaveLength( 0 );
-	} );
-
-	it( 'should display snap lines when set, shown, hidden and then shown', () => {
-		const {
-			setSnapLines,
-			showSnapLines,
-			hideSnapLines,
-			getDisplayedSnapLines,
-		} = setup();
-
-		setSnapLines( [ VERTICAL_SNAP_LINE, HORIZONTAL_SNAP_LINE ] );
-		showSnapLines();
-		hideSnapLines();
-		showSnapLines();
-
-		const displayedSnapLines = getDisplayedSnapLines();
-
-		expect( displayedSnapLines ).toHaveLength( 2 );
-	} );
-
-	it( 'should not display any snap lines when set, shown and cleared', () => {
-		const {
-			setSnapLines,
-			showSnapLines,
 			clearSnapLines,
 			getDisplayedSnapLines,
 		} = setup();
 
 		setSnapLines( [ VERTICAL_SNAP_LINE, HORIZONTAL_SNAP_LINE ] );
-		showSnapLines();
 		clearSnapLines();
 
 		const displayedSnapLines = getDisplayedSnapLines();

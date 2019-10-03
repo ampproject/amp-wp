@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Snapping should render a single snap line correctly when shown and set 1`] = `
+exports[`Snapping should render a single snap line correctly when set 1`] = `
 <line
   key="0"
   pointerEvents="none"
