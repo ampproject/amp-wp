@@ -357,14 +357,8 @@ EnhancedResizableBox.propTypes = {
 	children: PropTypes.node.isRequired,
 	width: PropTypes.number,
 	height: PropTypes.number,
-	horizontalSnaps: PropTypes.oneOfType( [
-		PropTypes.arrayOf( PropTypes.number ),
-		PropTypes.func,
-	] ).isRequired,
-	verticalSnaps: PropTypes.oneOfType( [
-		PropTypes.arrayOf( PropTypes.number ),
-		PropTypes.func,
-	] ).isRequired,
+	horizontalSnaps: PropTypes.func.isRequired,
+	verticalSnaps: PropTypes.func.isRequired,
 	snapGap: PropTypes.number.isRequired,
 	snapLines: PropTypes.array.isRequired,
 	showSnapLines: PropTypes.func.isRequired,

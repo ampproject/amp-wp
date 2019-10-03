@@ -34,8 +34,8 @@ const applyWithSelect = withSelect( ( select, { clientId } ) => {
 	const parentBlock = getBlockRootClientId( clientId );
 
 	const defaultData = {
-		horizontalSnaps: [],
-		verticalSnaps: [],
+		horizontalSnaps: () => [],
+		verticalSnaps: () => [],
 		parentBlockElement: null,
 	};
 

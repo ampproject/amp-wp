@@ -336,14 +336,8 @@ Draggable.propTypes = {
 	onDragEnd: PropTypes.func,
 	setTimeout: PropTypes.func.isRequired,
 	children: PropTypes.func.isRequired,
-	horizontalSnaps: PropTypes.oneOfType( [
-		PropTypes.arrayOf( PropTypes.number ),
-		PropTypes.func,
-	] ).isRequired,
-	verticalSnaps: PropTypes.oneOfType( [
-		PropTypes.arrayOf( PropTypes.number ),
-		PropTypes.func,
-	] ).isRequired,
+	horizontalSnaps: PropTypes.func.isRequired,
+	verticalSnaps: PropTypes.func.isRequired,
 	snapLines: PropTypes.array.isRequired,
 	showSnapLines: PropTypes.func.isRequired,
 	hideSnapLines: PropTypes.func.isRequired,
