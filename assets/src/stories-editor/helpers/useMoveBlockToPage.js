@@ -30,13 +30,13 @@ const useMoveBlockToPage = ( blockId ) => {
 	const getPageByOffset = ( offset ) => {
 		const newPageIndex = currentPageIndex + offset;
 		const isInsidePageCount = newPageIndex >= 0 && newPageIndex < pages.length;
-		const newPageId = pages[ newPageIndex ];
 
 		// Do we even have a neighbor in that direction?
 		if ( ! isInsidePageCount ) {
 			return null;
 		}
 
+		const newPageId = pages[ newPageIndex ];
 		return newPageId;
 	};
 
@@ -48,12 +48,14 @@ const useMoveBlockToPage = ( blockId ) => {
 	 * @param {string} pageId  Id of page to move element to
 	 * @param {Object} attributes  Object with attributes to update on element on new page.
 	 */
-	const moveBlockToPage = ( pageId, attributes ) => {
+	const moveBlockToPage = ( pageId, attributes = null ) => {
 		// Remove block and add cloned block to new page.
 		removeBlock( blockId );
 		const clonedBlock = cloneBlock( block );
 		insertBlock( clonedBlock, null, pageId );
-		updateBlockAttributes( clonedBlock.clientId, attributes );
+		if ( attributes !== null ) {
+			updateBlockAttributes( clonedBlock.clientId, attributes );
+		}
 
 		// Switch to new page.
 		setCurrentPage( pageId );
