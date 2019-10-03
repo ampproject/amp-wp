@@ -16,8 +16,8 @@ import { useRef } from '@wordpress/element';
 /**
  * Internal dependencies
  */
+import { useIsBlockAllowedOnPage, useMoveBlockToPage } from '../../helpers';
 import Draggable from './draggable';
-import { isBlockAllowedOnPage, useMoveBlockToPage } from '../../helpers';
 
 const BlockDraggable = ( { children, clientId, blockName, blockElementId, onDragStart, onDragEnd } ) => {
 	const { rootClientId } = useSelect( ( select ) => select( 'core/block-editor' ).getBlockRootClientId( clientId ) );
@@ -31,6 +31,8 @@ const BlockDraggable = ( { children, clientId, blockName, blockElementId, onDrag
 	};
 
 	const { moveBlockToPage, getPageByOffset } = useMoveBlockToPage( clientId );
+
+	const isBlockAllowedOnPage = useIsBlockAllowedOnPage();
 
 	// This holds the currently highlighted element, if any
 	const hoverElement = useRef( { pageId: null, element: null, classes: [] } );

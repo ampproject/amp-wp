@@ -61,3 +61,4 @@ export { default as getRelativeElementPosition } from './getRelativeElementPosit
 export { default as isCTABlock } from './isCTABlock';
 export { default as useMoveBlockToPage } from './useMoveBlockToPage';
 export { default as isBlockAllowedOnPage } from './isBlockAllowedOnPage';
+export { default as useIsBlockAllowedOnPage } from './useIsBlockAllowedOnPage';

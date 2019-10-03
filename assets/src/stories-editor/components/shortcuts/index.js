@@ -15,17 +15,19 @@ import { compose, ifCondition } from '@wordpress/compose';
 /**
  * Internal dependencies
  */
-import { isBlockAllowedOnPage } from '../../helpers';
+import { useIsBlockAllowedOnPage } from '../../helpers';
 
-const Shortcuts = ( { insertBlock, canInsertBlockType, showInserter } ) => {
+const Shortcuts = ( { insertBlock, currentPage, showInserter } ) => {
 	const blocks = [
 		'amp/amp-story-text',
 		'amp/amp-story-cta',
 	];
 
+	const isBlockAllowedOnPage = useIsBlockAllowedOnPage();
+
 	return (
 		blocks.map( ( block ) => {
-			if ( ! canInsertBlockType( block ) ) {
+			if ( ! isBlockAllowedOnPage( block, currentPage ) ) {
 				return null;
 			}
 
@@ -59,7 +61,7 @@ const applyWithSelect = withSelect( ( select ) => {
 
 	return {
 		isReordering: isReordering(),
-		canInsertBlockType: ( name ) => isBlockAllowedOnPage( name, currentPage ),
+		currentPage,
 		// As used in <HeaderToolbar> component
 		showInserter: select( 'core/edit-post' ).getEditorMode() === 'visual' && select( 'core/editor' ).getEditorSettings().richEditingEnabled,
 	};

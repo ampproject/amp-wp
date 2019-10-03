@@ -12,6 +12,8 @@ const {
 /**
  * Is the given block allowed on the given page?
  *
+ * @deprecated Please use the hook version `useIsBlockAllowedOnPage` if at all possible.
+ *
  * @param {Object}  name The name of the block to test.
  * @param {string}  pageId Page ID.
  * @return {boolean} Returns true if the element is allowed on the page, false otherwise.
