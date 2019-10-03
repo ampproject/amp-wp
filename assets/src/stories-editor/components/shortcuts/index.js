@@ -49,7 +49,7 @@ const Shortcuts = ( { insertBlock, currentPage, showInserter } ) => {
 
 Shortcuts.propTypes = {
 	insertBlock: PropTypes.func.isRequired,
-	canInsertBlockType: PropTypes.func.isRequired,
+	currentPage: PropTypes.string.isRequired,
 	showInserter: PropTypes.bool.isRequired,
 };
 
