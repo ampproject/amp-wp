@@ -10,17 +10,15 @@ import { KeyboardShortcuts } from '@wordpress/components';
  * Internal dependencies
  */
 import { ALLOWED_CHILD_BLOCKS } from '../../constants';
-import { getBlockDOMNode, getPercentageFromPixels } from '../../helpers';
-import { RightClickMenu } from '../';
+import { getBlockDOMNode, getPercentageFromPixels, isPageBlock } from '../../helpers';
+import { ContextMenu } from '../';
 
-const applyWithSelect = withSelect( ( select, props ) => {
+const applyWithSelect = withSelect( ( select ) => {
 	const {	isReordering, getCopiedMarkup, getCurrentPage } = select( 'amp/story' );
 	const {
 		getSelectedBlockClientIds,
 		hasMultiSelection,
 	} = select( 'core/block-editor' );
-
-	const { name } = props;
 
 	const handleEvent = ( event ) => {
 		const isRightClick = event.type === 'contextmenu';
@@ -30,8 +28,9 @@ const applyWithSelect = withSelect( ( select, props ) => {
 		if ( selectedBlockClientIds.length === 0 ) {
 			return;
 		}
-		// If nothing is in the saved markup, use the default behavior.
-		if ( 'amp/amp-story-page' === name && ! getCopiedMarkup().length ) {
+
+		// If selection is page and nothing is in the saved markup, use the default behavior.
+		if ( isPageBlock( selectedBlockClientIds[ 0 ] ) && ! getCopiedMarkup().length ) {
 			return;
 		}
 
@@ -91,7 +90,7 @@ const applyWithSelect = withSelect( ( select, props ) => {
 		}
 
 		render(
-			<RightClickMenu clientIds={ selectedBlockClientIds } clientX={ relativePositionX } clientY={ relativePositionY } insidePercentageX={ insidePercentageX } insidePercentageY={ insidePercentageY } />,
+			<ContextMenu clientIds={ selectedBlockClientIds } clientX={ relativePositionX } clientY={ relativePositionY } insidePercentageX={ insidePercentageX } insidePercentageY={ insidePercentageY } />,
 			document.getElementById( 'amp-story-right-click-menu' )
 		);
 
@@ -105,7 +104,7 @@ const applyWithSelect = withSelect( ( select, props ) => {
 } );
 
 /**
- * Higher-order component that adds right click handler to each inner block.
+ * Higher-order component that adds right context menu handler to each inner block.
  *
  * @return {Function} Higher-order component.
  */
@@ -113,10 +112,10 @@ export default createHigherOrderComponent(
 	( BlockEdit ) => {
 		return applyWithSelect( ( props ) => {
 			const { name, handleEvent, isReordering } = props;
-			const isPageBlock = 'amp/amp-story-page' === name;
+			const isPage = 'amp/amp-story-page' === name;
 
 			// Add for page block and inner blocks.
-			if ( ! isPageBlock && ! ALLOWED_CHILD_BLOCKS.includes( name ) ) {
+			if ( ! isPage && ! ALLOWED_CHILD_BLOCKS.includes( name ) ) {
 				return <BlockEdit { ...props } />;
 			}
 
@@ -134,5 +133,5 @@ export default createHigherOrderComponent(
 			);
 		} );
 	},
-	'withRightClickHandler'
+	'withContextMenu'
 );

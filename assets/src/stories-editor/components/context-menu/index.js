@@ -37,7 +37,7 @@ const POPOVER_PROPS = {
 	position: 'bottom left',
 };
 
-const RightClickMenu = ( props ) => {
+const ContextMenu = ( props ) => {
 	const {
 		clientIds,
 		clientX,
@@ -165,7 +165,7 @@ const RightClickMenu = ( props ) => {
 	);
 };
 
-RightClickMenu.propTypes = {
+ContextMenu.propTypes = {
 	clientIds: PropTypes.arrayOf( PropTypes.string ).isRequired,
 	clientX: PropTypes.number.isRequired,
 	clientY: PropTypes.number.isRequired,
@@ -306,4 +306,4 @@ const applyWithDispatch = withDispatch( ( dispatch, props ) => {
 export default compose(
 	applyWithSelect,
 	applyWithDispatch,
-)( RightClickMenu );
+)( ContextMenu );
