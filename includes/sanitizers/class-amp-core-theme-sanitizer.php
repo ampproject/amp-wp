@@ -51,7 +51,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	protected static $theme_features = [
-		// Twenty Nineteen.
+		// Twenty Twenty.
 		'twentytwenty'    => [
 			// @todo Cover Modals (stripped with twentytwenty-js)
 			// @todo Smooth Scroll (stripped with twentytwenty-js)
@@ -63,7 +63,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			],
 			'remove_actions'  => [
 				'wp_head' => [
-					'twentytwenty_no_js_class', // AMP is essentially no-js, with any interactively added explicitly via amp-bind.
+					'twentytwenty_no_js_class', // AMP is essentially no-js, with any interactivity added explicitly via amp-bind.
 				],
 			],
 		],
@@ -96,7 +96,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			],
 			'remove_actions'                      => [
 				'wp_head' => [
-					'twentyseventeen_javascript_detection', // AMP is essentially no-js, with any interactively added explicitly via amp-bind.
+					'twentyseventeen_javascript_detection', // AMP is essentially no-js, with any interactivity added explicitly via amp-bind.
 				],
 			],
 			'force_fixed_background_support'      => [],
@@ -127,7 +127,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			],
 			'remove_actions'      => [
 				'wp_head' => [
-					'twentysixteen_javascript_detection', // AMP is essentially no-js, with any interactively added explicitly via amp-bind.
+					'twentysixteen_javascript_detection', // AMP is essentially no-js, with any interactivity added explicitly via amp-bind.
 				],
 			],
 			'add_nav_menu_styles' => [
@@ -146,7 +146,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			],
 			'remove_actions'      => [
 				'wp_head' => [
-					'twentyfifteen_javascript_detection', // AMP is essentially no-js, with any interactively added explicitly via amp-bind.
+					'twentyfifteen_javascript_detection', // AMP is essentially no-js, with any interactivity added explicitly via amp-bind.
 				],
 			],
 			'add_nav_menu_styles' => [
