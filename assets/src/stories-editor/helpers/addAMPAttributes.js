@@ -3,8 +3,8 @@
  */
 import { ALLOWED_CHILD_BLOCKS, BLOCKS_WITH_RESIZING, BLOCKS_WITH_TEXT_SETTINGS } from '../constants';
 import { addAMPAttributesDeprecations } from '../deprecations/filters';
-import { isMovableBlock } from './';
 import getDefaultMinimumBlockHeight from './getDefaultMinimumBlockHeight';
+import { isMovableBlock } from './';
 
 /**
  * Adds AMP attributes to every allowed AMP Story block.
