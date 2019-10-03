@@ -2,8 +2,8 @@
  * Internal dependencies
  */
 import { mediaLibraryHasTwoNotices } from '../';
-import { Mock, AlternateMock } from './fixtures/mockClasses';
 import { FILE_TYPE_ERROR_VIEW, FILE_SIZE_ERROR_VIEW } from '../../constants';
+import { Mock, AlternateMock } from './fixtures/mockClasses';
 
 describe( 'mediaLibraryHasTwoNotices', () => {
 	it( 'should return false when none of the notices appear', () => {
