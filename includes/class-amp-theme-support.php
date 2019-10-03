@@ -1392,6 +1392,12 @@ class AMP_Theme_Support {
 			$header_callback();
 			$style = ob_get_clean();
 			$data  = trim( preg_replace( '#<style[^>]*>(.*)</style>#is', '$1', $style ) ); // See wp_add_inline_style().
+
+			// Override AMP's position:relative on the body for the sake of the AMP viewer, which is not relevant an an Admin Bar context.
+			if ( amp_is_dev_mode() ) {
+				$data .= 'html:not(#_) > body { position:unset !important; }';
+			}
+
 			wp_add_inline_style( 'admin-bar', $data );
 		}
 
