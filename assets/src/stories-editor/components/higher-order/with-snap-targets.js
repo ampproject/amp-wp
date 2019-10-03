@@ -3,13 +3,16 @@
  */
 import { withSelect } from '@wordpress/data';
 import { compose, createHigherOrderComponent } from '@wordpress/compose';
-import isShallowEqual from '@wordpress/is-shallow-equal';
 
 /**
  * Internal dependencies
  */
-import { STORY_PAGE_INNER_HEIGHT, STORY_PAGE_INNER_WIDTH } from '../../constants';
-import { getBlockInnerElement, getRelativeElementPosition } from '../../helpers';
+import {
+	getBlockInnerElement,
+	getRelativeElementPosition,
+	getHorizontalSnaps,
+	getVerticalSnaps,
+} from '../../helpers';
 import { withSnapContext } from '../contexts/snapping';
 
 /**
@@ -49,119 +52,18 @@ const applyWithSelect = withSelect( ( select, { clientId } ) => {
 		return defaultData;
 	}
 
-	const siblings = getBlocksByClientId( getBlockOrder( parentBlock ) )
+	const siblingPositions = getBlocksByClientId( getBlockOrder( parentBlock ) )
 		.filter( ( { clientId: blockId } ) => blockId !== clientId )
 		.map( getBlockInnerElement )
-		.filter( Boolean );
+		.filter( Boolean )
+		.map( ( el ) => getRelativeElementPosition( el, parentBlockElement ) );
 
-	const getVerticalLine = ( offsetX, start = 0, end = STORY_PAGE_INNER_HEIGHT ) => [ [ offsetX, start ], [ offsetX, end ] ];
-	const getHorizontalLine = ( offsetY, start = 0, end = STORY_PAGE_INNER_WIDTH ) => [ [ start, offsetY ], [ end, offsetY ] ];
-
-	/**
-	 * Returns the setter used for the proxied snap target objects.
-	 *
-	 * The setter is a small helper that:
-	 *
-	 * - Prevents duplicates
-	 * - Keeps snap targets within lower and upper bounds.
-	 * - Combines snap lines if there are multiple for a given target
-	 *
-	 * @param {number} lowerBound Lower limit for snap targets, i.e. the page dimensions.
-	 * @param {number}  upperBound Upper limit for snap targets, i.e. the page dimensions.
-	 * @return {Function} Proxy setter.
-	 */
-	const getSetter = ( lowerBound, upperBound ) => {
-		return ( obj, prop, value ) => {
-			prop = Math.round( prop );
-
-			if ( prop < lowerBound || prop > upperBound ) {
-				return true;
-			}
-
-			const hasSnapLine = ( item ) => obj[ prop ].find( ( snapLine ) => isShallowEqual( item[ 0 ], snapLine[ 0 ] ) && isShallowEqual( item[ 1 ], snapLine[ 1 ] ) );
-
-			if ( obj.hasOwnProperty( prop ) && ! hasSnapLine( value ) ) {
-				obj[ prop ].push( value );
-			} else {
-				obj[ prop ] = [ value ];
-			}
-
-			obj[ prop ] = obj[ prop ].sort();
-
-			return true;
-		};
-	};
+	const horizontalSnaps = getHorizontalSnaps( siblingPositions );
+	const verticalSnaps = getVerticalSnaps( siblingPositions );
 
 	return {
-		/**
-		 * Horizontal snap function.
-		 *
-		 * @param {number} targetTop The top position of the currently dragged/resized block.
-		 * @param {number} targetBottom The bottom position of the currently dragged/resized block.
-		 * @return {Object.<number,Array.<Array.<number, number>>>} Dictionary with horizontal snap targets.
-		 */
-		horizontalSnaps: ( targetTop, targetBottom ) => {
-			const snaps = new Proxy( {
-				// Left page border.
-				0: [ getVerticalLine( 0 ) ],
-				// Center of the page.
-				[ STORY_PAGE_INNER_WIDTH / 2 ]: [ getVerticalLine( STORY_PAGE_INNER_WIDTH / 2 ) ],
-				// Right page border.
-				[ STORY_PAGE_INNER_WIDTH ]: [ getVerticalLine( STORY_PAGE_INNER_WIDTH ) ],
-			},
-			{
-				set: getSetter( 0, STORY_PAGE_INNER_WIDTH ),
-			} );
-
-			for ( const blockElement of siblings ) {
-				const { top, right, bottom, left } = getRelativeElementPosition( blockElement, parentBlockElement );
-				const center = ( top + bottom ) / 2;
-
-				const start = Math.min( targetTop, top );
-				const end = Math.max( targetBottom, bottom );
-
-				snaps[ left ] = getVerticalLine( left, start, end );
-				snaps[ right ] = getVerticalLine( right, start, end );
-				snaps[ center ] = getVerticalLine( center, start, end );
-			}
-
-			return snaps;
-		},
-
-		/**
-		 * Vertical snap function.
-		 *
-		 * @param {number} targetLeft The left position of the currently dragged/resized block.
-		 * @param {number} targetRight The right position of the currently dragged/resized block.
-		 * @return {Object.<number,Array.<Array.<number, number>>>} Dictionary with vertical snap targets.
-		 */
-		verticalSnaps: ( targetLeft, targetRight ) => {
-			const snaps = new Proxy( {
-				// Top page border.
-				0: [ getHorizontalLine( 0 ) ],
-				// Center of the page.
-				[ STORY_PAGE_INNER_HEIGHT / 2 ]: [ getHorizontalLine( STORY_PAGE_INNER_HEIGHT / 2 ) ],
-				// Bottom page border.
-				[ STORY_PAGE_INNER_HEIGHT ]: [ getHorizontalLine( STORY_PAGE_INNER_HEIGHT ) ],
-			},
-			{
-				set: getSetter( 0, STORY_PAGE_INNER_HEIGHT ),
-			} );
-
-			for ( const blockElement of siblings ) {
-				const { top, right, bottom, left } = getRelativeElementPosition( blockElement, parentBlockElement );
-				const center = ( top + bottom ) / 2;
-
-				const start = Math.min( targetLeft, left );
-				const end = Math.max( targetRight, right );
-
-				snaps[ top ] = getHorizontalLine( top, start, end );
-				snaps[ bottom ] = getHorizontalLine( bottom, start, end );
-				snaps[ center ] = getHorizontalLine( center, start, end );
-			}
-
-			return snaps;
-		},
+		horizontalSnaps,
+		verticalSnaps,
 		parentBlockElement,
 	};
 } );

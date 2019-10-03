@@ -59,3 +59,5 @@ export { default as metaToAttributeNames } from './metaToAttributeNames';
 export { default as parseDropEvent } from './parseDropEvent';
 export { default as getBlockInnerElement } from './getBlockInnerElement';
 export { default as getRelativeElementPosition } from './getRelativeElementPosition';
+export { default as getHorizontalSnaps } from './getHorizontalSnaps';
+export { default as getVerticalSnaps } from './getVerticalSnaps';
