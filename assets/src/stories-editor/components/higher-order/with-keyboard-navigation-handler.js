@@ -24,7 +24,7 @@ const applyWithDispatch = withDispatch( ( dispatch, props, { select } ) => {
 			return;
 		}
 
-		if ( classList.contains( 'editor-rich-text__editable' ) && ( classList.contains( 'is-selected' ) || classList.contains( 'is-typing' ) ) ) {
+		if ( classList.contains( 'editor-rich-text__editable' ) && classList.contains( 'is-selected' ) ) {
 			return;
 		}
 
@@ -46,8 +46,9 @@ const applyWithDispatch = withDispatch( ( dispatch, props, { select } ) => {
 			default:
 				break;
 		}
-		event.preventDefault();
-		if ( ALLOWED_MOVABLE_BLOCKS.includes( selectedBlock.name ) ) {
+
+		if ( ALLOWED_MOVABLE_BLOCKS.includes( selectedBlock.name ) && ( left || top ) ) {
+			event.preventDefault();
 			const newPositionTop = selectedBlock.attributes.positionTop + top;
 			const newPositionLeft = selectedBlock.attributes.positionLeft + left;
 			updateBlockAttributes( selectedBlock.clientId, {
@@ -63,7 +64,7 @@ const applyWithDispatch = withDispatch( ( dispatch, props, { select } ) => {
 		if ( ! selectedBlock ) {
 			return;
 		}
-		if ( classList.contains( 'editor-rich-text__editable' ) && ( classList.contains( 'is-selected' ) || classList.contains( 'is-typing' ) ) ) {
+		if ( classList.contains( 'editor-rich-text__editable' ) && classList.contains( 'is-selected' ) ) {
 			return;
 		}
 		event.preventDefault();
@@ -107,7 +108,7 @@ export default createHigherOrderComponent(
 			};
 
 			return (
-				<KeyboardShortcuts shortcuts={ shortcuts } event='keyup' >
+				<KeyboardShortcuts shortcuts={ shortcuts } event="keyup">
 					<BlockEdit { ...props } />
 				</KeyboardShortcuts>
 			);
