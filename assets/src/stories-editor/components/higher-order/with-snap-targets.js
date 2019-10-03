@@ -56,26 +56,39 @@ const applyWithSelect = withSelect( ( select, { clientId } ) => {
 	const getVerticalLine = ( offsetX, start = 0, end = STORY_PAGE_INNER_HEIGHT ) => [ [ offsetX, start ], [ offsetX, end ] ];
 	const getHorizontalLine = ( offsetY, start = 0, end = STORY_PAGE_INNER_WIDTH ) => [ [ start, offsetY ], [ end, offsetY ] ];
 
-	// Setter used for the proxied snap target objects.
-	// Prevents duplicates and sets upper and lower boundaries.
-	const proxySet = ( obj, prop, value ) => {
-		prop = Math.round( prop );
+	/**
+	 * Returns the setter used for the proxied snap target objects.
+	 *
+	 * The setter is a small helper that:
+	 *
+	 * - Prevents duplicates
+	 * - Keeps snap targets within lower and upper bounds.
+	 * - Combines snap lines if there are multiple for a given target
+	 *
+	 * @param {number} lowerBound Lower limit for snap targets, i.e. the page dimensions.
+	 * @param {number}  upperBound Upper limit for snap targets, i.e. the page dimensions.
+	 * @return {Function} Proxy setter.
+	 */
+	const getSetter = ( lowerBound, upperBound ) => {
+		return ( obj, prop, value ) => {
+			prop = Math.round( prop );
 
-		if ( prop < 0 || prop > STORY_PAGE_INNER_WIDTH ) {
+			if ( prop < lowerBound || prop > upperBound ) {
+				return true;
+			}
+
+			const hasSnapLine = ( item ) => obj[ prop ].find( ( snapLine ) => isShallowEqual( item[ 0 ], snapLine[ 0 ] ) && isShallowEqual( item[ 1 ], snapLine[ 1 ] ) );
+
+			if ( obj.hasOwnProperty( prop ) && ! hasSnapLine( value ) ) {
+				obj[ prop ].push( value );
+			} else {
+				obj[ prop ] = [ value ];
+			}
+
+			obj[ prop ] = obj[ prop ].sort();
+
 			return true;
-		}
-
-		const hasSnapLine = ( item ) => obj[ prop ].find( ( snapLine ) => isShallowEqual( item[ 0 ], snapLine[ 0 ] ) && isShallowEqual( item[ 1 ], snapLine[ 1 ] ) );
-
-		if ( obj.hasOwnProperty( prop ) && ! hasSnapLine( value ) ) {
-			obj[ prop ].push( value );
-		} else {
-			obj[ prop ] = [ value ];
-		}
-
-		obj[ prop ] = obj[ prop ].sort();
-
-		return true;
+		};
 	};
 
 	return {
@@ -96,7 +109,7 @@ const applyWithSelect = withSelect( ( select, { clientId } ) => {
 				[ STORY_PAGE_INNER_WIDTH ]: [ getVerticalLine( STORY_PAGE_INNER_WIDTH ) ],
 			},
 			{
-				set: proxySet,
+				set: getSetter( 0, STORY_PAGE_INNER_WIDTH ),
 			} );
 
 			for ( const block of siblings ) {
@@ -132,7 +145,7 @@ const applyWithSelect = withSelect( ( select, { clientId } ) => {
 				[ STORY_PAGE_INNER_HEIGHT ]: [ getHorizontalLine( STORY_PAGE_INNER_HEIGHT ) ],
 			},
 			{
-				set: proxySet,
+				set: getSetter( 0, STORY_PAGE_INNER_HEIGHT ),
 			} );
 
 			for ( const block of siblings ) {
