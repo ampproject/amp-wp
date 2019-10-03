@@ -1200,7 +1200,7 @@ export const getBlockInnerElement = ( block ) => {
 
 	if ( isCTABlock ) {
 		// Not the block itself is movable, only the button within.
-		return document.querySelector( `amp-story-cta-button-${ clientId }` );
+		return document.querySelector( `#amp-story-cta-button-${ clientId }` );
 	}
 
 	return document.querySelector( `#block-${ clientId }` );
