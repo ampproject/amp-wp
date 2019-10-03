@@ -52,19 +52,21 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	protected static $theme_features = [
 		// Twenty Twenty.
-		'twentytwenty'    => [
+		'twentytwenty' => [
 			// @todo Cover Modals (stripped with twentytwenty-js)
-			// @todo Smooth Scroll (stripped with twentytwenty-js)
 			// @todo Modal Menu (stripped with twentytwenty-js)
 			// @todo Primary Menu (stripped with twentytwenty-js)
 			// @todo Toggles (stripped with twentytwenty-js) - probably unneeded once the rest is done
-			'dequeue_scripts' => [
+			'dequeue_scripts'      => [
 				'twentytwenty-js',
 			],
-			'remove_actions'  => [
+			'remove_actions'       => [
 				'wp_head' => [
 					'twentytwenty_no_js_class', // AMP is essentially no-js, with any interactivity added explicitly via amp-bind.
 				],
+			],
+			'add_smooth_scrolling' => [
+				'//a[ contains( @class, "to-the-top" ) ]',
 			],
 		],
 
