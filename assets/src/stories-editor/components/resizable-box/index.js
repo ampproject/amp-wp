@@ -162,10 +162,13 @@ class EnhancedResizableBox extends Component {
 						width = blockElement.clientWidth;
 						height = blockElement.clientHeight;
 					}
+					// If the new width/height is below the minimum limit, set the minimum limit as the width/height instead.
 					let appliedWidth = minWidth <= width + deltaW ? width + deltaW : minWidth;
 					let appliedHeight = minHeight <= height + deltaH ? height + deltaH : minHeight;
 					const isReducing = 0 > deltaW || 0 > deltaH;
 
+					// Track if resizing has reached its minimum limits.
+					let reachedLimits = false;
 					if ( textElement && isReducing ) {
 						// If we have a rotated block, let's assign the width and height for measuring.
 						// Without assigning the new measure, the calculation would be incorrect due to angle.
@@ -180,9 +183,13 @@ class EnhancedResizableBox extends Component {
 							textElement.style.height = 'auto';
 						}
 
+						// If the applied measures get too small for text, use the previous measures instead.
 						const scrollWidth = textElement.scrollWidth;
 						const scrollHeight = textElement.scrollHeight;
+						// If the text goes over either of the edges, stop resizing from both sides
+						// since the text is filling in the room from both sides at the same time.
 						if ( appliedWidth < scrollWidth || appliedHeight < scrollHeight ) {
+							reachedLimits = true;
 							appliedWidth = lastWidth;
 							appliedHeight = lastHeight;
 						}
@@ -210,39 +217,44 @@ class EnhancedResizableBox extends Component {
 						lastDeltaW = deltaW;
 					}
 
-					if ( ! angle ) {
-						// If the resizing is to left or top then we have to compensate
-						if ( REVERSE_WIDTH_CALCULATIONS.includes( direction ) ) {
-							const leftInPx = getPixelsFromPercentage( 'x', parseFloat( blockElementLeft ) );
-							blockElement.style.left = getPercentageFromPixels( 'x', leftInPx - lastDeltaW ) + '%';
-						}
-						if ( REVERSE_HEIGHT_CALCULATIONS.includes( direction ) ) {
-							const topInPx = getPixelsFromPercentage( 'y', parseFloat( blockElementTop ) );
-							blockElement.style.top = getPercentageFromPixels( 'y', topInPx - lastDeltaH ) + '%';
-						}
-					} else {
-						const radianAngle = getRadianFromDeg( angle );
-
-						// Compare position between the initial and after resizing.
-						let initialPosition, resizedPosition;
-						// If it's a text block, we shouldn't consider the added padding for measuring.
-						if ( isText ) {
-							initialPosition = getBlockPositioning( width - ( TEXT_BLOCK_PADDING * 2 ), height - ( TEXT_BLOCK_PADDING * 2 ), radianAngle, direction );
-							resizedPosition = getBlockPositioning( appliedWidth - ( TEXT_BLOCK_PADDING * 2 ), appliedHeight - ( TEXT_BLOCK_PADDING * 2 ), radianAngle, direction );
+					// If limits were not reached yet, do the calculations for positioning.
+					if ( ! reachedLimits ) {
+						if ( ! angle ) {
+							// If the resizing is to left or top then we have to compensate
+							if ( REVERSE_WIDTH_CALCULATIONS.includes( direction ) ) {
+								const leftInPx = getPixelsFromPercentage( 'x', parseFloat( blockElementLeft ) );
+								//console.log( 'left', 'IN PX START', leftInPx );
+								//console.log( 'lastDeltaW', lastDeltaW );
+								blockElement.style.left = getPercentageFromPixels( 'x', leftInPx - lastDeltaW ) + '%';
+							}
+							if ( REVERSE_HEIGHT_CALCULATIONS.includes( direction ) ) {
+								const topInPx = getPixelsFromPercentage( 'y', parseFloat( blockElementTop ) );
+								blockElement.style.top = getPercentageFromPixels( 'y', topInPx - lastDeltaH ) + '%';
+							}
 						} else {
-							initialPosition = getBlockPositioning( width, height, radianAngle, direction );
-							resizedPosition = getBlockPositioning( appliedWidth, appliedHeight, radianAngle, direction );
+							const radianAngle = getRadianFromDeg( angle );
+
+							// Compare position between the initial and after resizing.
+							let initialPosition, resizedPosition;
+							// If it's a text block, we shouldn't consider the added padding for measuring.
+							if ( isText ) {
+								initialPosition = getBlockPositioning( width - ( TEXT_BLOCK_PADDING * 2 ), height - ( TEXT_BLOCK_PADDING * 2 ), radianAngle, direction );
+								resizedPosition = getBlockPositioning( appliedWidth - ( TEXT_BLOCK_PADDING * 2 ), appliedHeight - ( TEXT_BLOCK_PADDING * 2 ), radianAngle, direction );
+							} else {
+								initialPosition = getBlockPositioning( width, height, radianAngle, direction );
+								resizedPosition = getBlockPositioning( appliedWidth, appliedHeight, radianAngle, direction );
+							}
+							const diff = {
+								left: resizedPosition.left - initialPosition.left,
+								top: resizedPosition.top - initialPosition.top,
+							};
+
+							const originalPos = getResizedBlockPosition( direction, blockElementLeft, blockElementTop, lastDeltaW, lastDeltaH );
+							const updatedPos = getUpdatedBlockPosition( direction, originalPos, diff );
+
+							blockElement.style.left = getPercentageFromPixels( 'x', updatedPos.left ) + '%';
+							blockElement.style.top = getPercentageFromPixels( 'y', updatedPos.top ) + '%';
 						}
-						const diff = {
-							left: resizedPosition.left - initialPosition.left,
-							top: resizedPosition.top - initialPosition.top,
-						};
-
-						const originalPos = getResizedBlockPosition( direction, blockElementLeft, blockElementTop, lastDeltaW, lastDeltaH );
-						const updatedPos = getUpdatedBlockPosition( direction, originalPos, diff );
-
-						blockElement.style.left = getPercentageFromPixels( 'x', updatedPos.left ) + '%';
-						blockElement.style.top = getPercentageFromPixels( 'y', updatedPos.top ) + '%';
 					}
 
 					element.style.width = appliedWidth + 'px';
