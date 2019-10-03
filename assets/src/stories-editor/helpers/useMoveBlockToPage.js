@@ -11,9 +11,9 @@ import { cloneBlock } from '@wordpress/blocks';
  * @return {Object} Returns two functions: `getPageByOffset` and `moveBlockToPage`.
  */
 const useMoveBlockToPage = ( blockId ) => {
-	const pages = useSelect( ( select ) => select( 'core/block-editor' ).getBlockOrder() );
-	const block = useSelect( ( select ) => select( 'core/block-editor' ).getBlock( blockId ) );
-	const currentPageId = useSelect( ( select ) => select( 'amp/story' ).getCurrentPage() );
+	const pages = useSelect( ( select ) => select( 'core/block-editor' ).getBlockOrder(), [] );
+	const block = useSelect( ( select ) => select( 'core/block-editor' ).getBlock( blockId ), [ blockId ] );
+	const currentPageId = useSelect( ( select ) => select( 'amp/story' ).getCurrentPage(), [] );
 	const currentPageIndex = pages.findIndex( ( i ) => i === currentPageId );
 
 	const { setCurrentPage } = useDispatch( 'amp/story' );
