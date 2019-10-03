@@ -10,9 +10,9 @@ import { select } from '@wordpress/data';
  * Internal dependencies
  */
 import { withFeaturedImageNotice } from '../common/components';
+import { getMinimumFeaturedImageDimensions } from '../common/helpers';
 import { withMediaLibraryNotice } from './components';
 import { addAMPAttributes, addAMPExtraProps, filterBlocksEdit, filterBlocksSave } from './helpers';
-import { getMinimumFeaturedImageDimensions } from '../common/helpers';
 import './store';
 
 const {

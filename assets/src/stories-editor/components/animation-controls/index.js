@@ -15,9 +15,9 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import AnimationOrderPicker from './animation-order-picker';
 import { ANIMATION_DURATION_DEFAULTS, AMP_ANIMATION_TYPE_OPTIONS } from '../../constants';
 import stopIcon from '../../../../images/stories-editor/stop.svg';
+import AnimationOrderPicker from './animation-order-picker';
 
 /**
  * Animation controls for AMP Story layout blocks'.

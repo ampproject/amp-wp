@@ -17,11 +17,11 @@ import { ENTER, SPACE } from '@wordpress/keycodes';
 /**
  * Internal dependencies
  */
-import TemplatePreview from './template-preview';
 import pageIcon from '../../../../images/stories-editor/add-page-inserter.svg';
 import addTemplateIcon from '../../../../images/stories-editor/add-template.svg';
 import './edit.css';
 import { createSkeletonTemplate, maybeEnqueueFontStyle, isPageBlock } from '../../helpers';
+import TemplatePreview from './template-preview';
 
 const TemplateInserter = ( props ) => {
 	const { storyTemplates, allBlocks, getBlock } = props;

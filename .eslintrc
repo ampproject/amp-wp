@@ -53,6 +53,7 @@
     "import/no-unresolved": [ "error", {
       "ignore": [ "jquery", "amp-block-editor-data" ]
     } ],
+    "import/order": [ "error", {"groups": ["builtin", [ "external", "unknown" ], "internal", "parent", "sibling", "index"]} ],
     "jsdoc/check-indentation": "error",
     "@wordpress/dependency-group": "error",
     "@wordpress/react-no-unsafe-timeout": "error"
