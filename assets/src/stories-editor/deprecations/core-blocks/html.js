@@ -4,14 +4,14 @@
 import PropTypes from 'prop-types';
 
 /**
- * Internal dependencies
- */
-import { migrateV120 } from '../shared';
-
-/**
  * WordPress dependencies
  */
 import { RawHTML } from '@wordpress/element';
+
+/**
+ * Internal dependencies
+ */
+import { migrateV120 } from '../shared';
 
 const blockAttributes = {
 	content: {
@@ -21,7 +21,11 @@ const blockAttributes = {
 };
 
 const saveV120 = ( { attributes } ) => {
-	return <RawHTML>{ attributes.content }</RawHTML>;
+	return (
+		<RawHTML>
+			{ attributes.content }
+		</RawHTML>
+	);
 };
 
 saveV120.propTypes = {

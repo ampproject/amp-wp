@@ -70,7 +70,9 @@ const BlockEdit = ( props ) => {
 					controls={ [ 'left', 'center', 'right' ] }
 				/>
 			</BlockControls>
-			<time dateTime={ dateTime }>{ timeAgo }</time>
+			<time dateTime={ dateTime }>
+				{ timeAgo }
+			</time>
 		</>
 	);
 };

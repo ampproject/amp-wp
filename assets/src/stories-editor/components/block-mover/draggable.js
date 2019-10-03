@@ -279,15 +279,20 @@ class Draggable extends Component {
 
 Draggable.propTypes = {
 	blockName: PropTypes.string,
-	elementId: PropTypes.string.isRequired,
-	transferData: PropTypes.object,
+	elementId: PropTypes.string,
+	transferData: PropTypes.shape( {
+		type: PropTypes.string,
+		srcIndex: PropTypes.number,
+		srcRootClientId: PropTypes.string,
+		srcClientId: PropTypes.string,
+	} ),
 	onDragStart: PropTypes.func,
 	onDragEnd: PropTypes.func,
 	clearHighlight: PropTypes.func.isRequired,
 	setHighlightByOffset: PropTypes.func.isRequired,
 	dropElementByOffset: PropTypes.func.isRequired,
 	setTimeout: PropTypes.func.isRequired,
-	children: PropTypes.any.isRequired,
+	children: PropTypes.func.isRequired,
 };
 
 export default withSafeTimeout( Draggable );

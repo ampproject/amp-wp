@@ -121,7 +121,6 @@ Inserter.propTypes = {
 	rootClientId: PropTypes.string,
 	clientId: PropTypes.string,
 	isAppender: PropTypes.bool,
-	showInserter: PropTypes.bool,
 };
 
 const applyWithSelect = withSelect( ( select ) => {

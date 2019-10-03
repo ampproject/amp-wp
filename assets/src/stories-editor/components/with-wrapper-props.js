@@ -7,8 +7,8 @@ import { compose } from '@wordpress/compose';
  * Internal dependencies
  */
 import { ALLOWED_BLOCKS, ALLOWED_CHILD_BLOCKS } from '../constants';
-import { withAttributes, withBlockName, withHasSelectedInnerBlock } from './';
 import { isCTABlock } from '../helpers';
+import { withAttributes, withBlockName, withHasSelectedInnerBlock } from './';
 
 const wrapperWithSelect = compose(
 	withAttributes,

@@ -21,9 +21,7 @@ async function openRightClickMenu( el ) {
 	} );
 }
 
-// @todo Fix unstable test case.
-// eslint-disable-next-line jest/no-disabled-tests
-describe.skip( 'Right Click Menu', () => {
+describe( 'Right Click Menu', () => {
 	beforeAll( async () => {
 		await activateExperience( 'stories' );
 	} );
@@ -85,7 +83,7 @@ describe.skip( 'Right Click Menu', () => {
 		await openRightClickMenu( pageBlock );
 
 		await clickButton( 'Paste' );
-
+		await page.waitForSelector( ACTIVE_PAGE_SELECTOR + ' ' + BLOCK_SELECTOR );
 		expect( page ).toMatchElement( ACTIVE_PAGE_SELECTOR + ' ' + BLOCK_SELECTOR );
 	} );
 
@@ -101,6 +99,7 @@ describe.skip( 'Right Click Menu', () => {
 
 		await clickButton( 'Paste' );
 
+		await page.waitForSelector( BLOCK_SELECTOR );
 		expect( page ).toMatchElement( BLOCK_SELECTOR );
 	} );
 
