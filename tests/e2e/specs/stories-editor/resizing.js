@@ -272,10 +272,7 @@ describe( 'Resizing', () => {
 			fitToggle.click();
 		} );
 
-		// TODO: unskip when this actually works. Currently non-fit text blocks can't be resized smaller, only larger.
-		// reported in #3199
-		// eslint-disable-next-line jest/no-disabled-tests
-		it.skip( 'should not resize smaller than the set minimum width and height', async () => {
+		it( 'should not resize smaller than the set minimum width and height', async () => {
 			let dimensions;
 			const resizableHandleBottom = await page.$( '.wp-block.is-selected .components-resizable-box__handle-bottom' );
 			await dragAndResize( resizableHandleBottom, { x: 0, y: -250 } );
