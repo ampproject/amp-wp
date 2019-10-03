@@ -51,7 +51,8 @@ const applyWithSelect = withSelect( ( select, { clientId } ) => {
 
 	const siblings = getBlocksByClientId( getBlockOrder( parentBlock ) )
 		.filter( ( { clientId: blockId } ) => blockId !== clientId )
-		.filter( getBlockInnerElement );
+		.map( getBlockInnerElement )
+		.filter( Boolean );
 
 	const getVerticalLine = ( offsetX, start = 0, end = STORY_PAGE_INNER_HEIGHT ) => [ [ offsetX, start ], [ offsetX, end ] ];
 	const getHorizontalLine = ( offsetY, start = 0, end = STORY_PAGE_INNER_WIDTH ) => [ [ start, offsetY ], [ end, offsetY ] ];
@@ -112,8 +113,7 @@ const applyWithSelect = withSelect( ( select, { clientId } ) => {
 				set: getSetter( 0, STORY_PAGE_INNER_WIDTH ),
 			} );
 
-			for ( const block of siblings ) {
-				const blockElement = getBlockInnerElement( block );
+			for ( const blockElement of siblings ) {
 				const { top, right, bottom, left } = getRelativeElementPosition( blockElement, parentBlockElement );
 				const center = left + ( ( right - left ) / 2 );
 
@@ -148,8 +148,7 @@ const applyWithSelect = withSelect( ( select, { clientId } ) => {
 				set: getSetter( 0, STORY_PAGE_INNER_HEIGHT ),
 			} );
 
-			for ( const block of siblings ) {
-				const blockElement = getBlockInnerElement( block );
+			for ( const blockElement of siblings ) {
 				const { top, right, bottom, left } = getRelativeElementPosition( blockElement, parentBlockElement );
 				const center = top + ( ( bottom - top ) / 2 );
 
