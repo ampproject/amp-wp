@@ -97,6 +97,8 @@ class Draggable extends Component {
 			clearSnapLines,
 			setSnapLines,
 			parentBlockElement,
+			horizontalSnaps,
+			verticalSnaps,
 		} = this.props;
 
 		const top = parseInt( this.cloneWrapper.style.top ) + event.clientY - this.cursorTop;
@@ -128,21 +130,33 @@ class Draggable extends Component {
 		const snappingEnabled = ! event.getModifierState( 'Alt' );
 
 		if ( snappingEnabled ) {
-			const findSnaps = ( snapKeys, ...values ) => {
+			// Go through all snap targets and find the one that is closest.
+			const findSnap = ( snapKeys, ...values ) => {
 				return values
-					.map( ( value ) => findClosestSnap( value, snapKeys, BLOCK_DRAGGING_SNAP_GAP ) )
-					.filter( ( value ) => value !== null );
+					.map( ( value ) => {
+						const snap = findClosestSnap( value, snapKeys, BLOCK_DRAGGING_SNAP_GAP );
+						return [ value, snap ];
+					} )
+					.filter( ( arr ) => arr[ 1 ] !== null )
+					.sort( ( a, b ) => a[ 1 ] - b[ 1 ] )
+					.map( ( arr ) => arr[ 1 ] )
+					.shift();
 			};
 
-			const _horizontalSnaps = findSnaps( this.horizontalSnapKeys, actualLeft, actualRight, horizontalCenter );
-			const _verticalSnaps = findSnaps( this.verticalSnapKeys, actualTop, actualBottom, verticalCenter );
+			const _horizontalSnaps = horizontalSnaps( actualTop, actualBottom );
+			const _horizontalSnapKeys = Object.keys( _horizontalSnaps );
+			const _verticalSnaps = verticalSnaps( actualLeft, actualRight );
+			const _verticalSnapKeys = Object.keys( _verticalSnaps );
 
-			for ( const snap of _horizontalSnaps ) {
-				newSnapLines.push( ...this.horizontalSnaps[ snap ] );
+			const horizontalSnap = findSnap( _horizontalSnapKeys, actualLeft, actualRight, horizontalCenter );
+			const verticalSnap = findSnap( _verticalSnapKeys, actualTop, actualBottom, verticalCenter );
+
+			if ( horizontalSnap !== undefined ) {
+				newSnapLines.push( ..._horizontalSnaps[ horizontalSnap ] );
 			}
 
-			for ( const snap of _verticalSnaps ) {
-				newSnapLines.push( ...this.verticalSnaps[ snap ] );
+			if ( verticalSnap !== undefined ) {
+				newSnapLines.push( ..._verticalSnaps[ verticalSnap ] );
 			}
 		}
 
@@ -191,8 +205,6 @@ class Draggable extends Component {
 			snapLines,
 			showSnapLines,
 			clearSnapLines,
-			horizontalSnaps,
-			verticalSnaps,
 		} = this.props;
 		const isCTABlock = 'amp/amp-story-cta' === blockName;
 		// In the CTA block only the inner element (the button) is draggable, not the whole block.
@@ -276,11 +288,6 @@ class Draggable extends Component {
 		if ( snapLines.length ) {
 			clearSnapLines();
 		}
-
-		this.horizontalSnaps = horizontalSnaps();
-		this.horizontalSnapKeys = Object.keys( this.horizontalSnaps );
-		this.verticalSnaps = verticalSnaps();
-		this.verticalSnapKeys = Object.keys( this.verticalSnaps );
 
 		this.props.setTimeout( onDragStart );
 	}

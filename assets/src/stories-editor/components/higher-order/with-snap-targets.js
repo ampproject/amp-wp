@@ -49,12 +49,15 @@ const applyWithSelect = withSelect( ( select, { clientId } ) => {
 		return defaultData;
 	}
 
-	const siblings = getBlocksByClientId( getBlockOrder( parentBlock ) ).filter( ( { clientId: blockId } ) => blockId !== clientId );
+	const siblings = getBlocksByClientId( getBlockOrder( parentBlock ) )
+		.filter( ( { clientId: blockId } ) => blockId !== clientId )
+		.filter( getBlockInnerElement );
 
-	const getVerticalLine = ( offsetX ) => [ [ offsetX, 0 ], [ offsetX, STORY_PAGE_INNER_HEIGHT ] ];
-	const getHorizontalLine = ( offsetY ) => [ [ 0, offsetY ], [ STORY_PAGE_INNER_WIDTH, offsetY ] ];
+	const getVerticalLine = ( offsetX, start = 0, end = STORY_PAGE_INNER_HEIGHT ) => [ [ offsetX, start ], [ offsetX, end ] ];
+	const getHorizontalLine = ( offsetY, start = 0, end = STORY_PAGE_INNER_WIDTH ) => [ [ start, offsetY ], [ end, offsetY ] ];
 
-	// Setter used for the proxied objects.
+	// Setter used for the proxied snap target objects.
+	// Prevents duplicates and sets upper and lower boundaries.
 	const proxySet = ( obj, prop, value ) => {
 		prop = Math.round( prop );
 
@@ -76,7 +79,14 @@ const applyWithSelect = withSelect( ( select, { clientId } ) => {
 	};
 
 	return {
-		horizontalSnaps: () => {
+		/**
+		 * Horizontal snap function.
+		 *
+		 * @param {number} targetTop The top position of the currently dragged/resized block.
+		 * @param {number} targetBottom The bottom position of the currently dragged/resized block.
+		 * @return {Object.<number,Array.<Array.<number, number>>>} Dictionary with horizontal snap targets.
+		 */
+		horizontalSnaps: ( targetTop, targetBottom ) => {
 			const snaps = new Proxy( {
 				// Left page border.
 				0: [ getVerticalLine( 0 ) ],
@@ -91,20 +101,28 @@ const applyWithSelect = withSelect( ( select, { clientId } ) => {
 
 			for ( const block of siblings ) {
 				const blockElement = getBlockInnerElement( block );
+				const { top, right, bottom, left } = getRelativeElementPosition( blockElement, parentBlockElement );
+				const center = left + ( ( right - left ) / 2 );
 
-				if ( ! blockElement ) {
-					continue;
-				}
+				const start = targetTop < top ? targetTop : top;
+				const end = targetBottom > bottom ? targetBottom : bottom;
 
-				const { left, right } = getRelativeElementPosition( blockElement, parentBlockElement );
-
-				snaps[ left ] = getVerticalLine( left );
-				snaps[ right ] = getVerticalLine( right );
+				snaps[ left ] = getVerticalLine( left, start, end );
+				snaps[ right ] = getVerticalLine( right, start, end );
+				snaps[ center ] = getVerticalLine( center, start, end );
 			}
 
 			return snaps;
 		},
-		verticalSnaps: () => {
+
+		/**
+		 * Vertical snap function.
+		 *
+		 * @param {number} targetLeft The left position of the currently dragged/resized block.
+		 * @param {number} targetRight The right position of the currently dragged/resized block.
+		 * @return {Object.<number,Array.<Array.<number, number>>>} Dictionary with vertical snap targets.
+		 */
+		verticalSnaps: ( targetLeft, targetRight ) => {
 			const snaps = new Proxy( {
 				// Top page border.
 				0: [ getHorizontalLine( 0 ) ],
@@ -119,15 +137,15 @@ const applyWithSelect = withSelect( ( select, { clientId } ) => {
 
 			for ( const block of siblings ) {
 				const blockElement = getBlockInnerElement( block );
+				const { top, right, bottom, left } = getRelativeElementPosition( blockElement, parentBlockElement );
+				const center = top + ( ( bottom - top ) / 2 );
 
-				if ( ! blockElement ) {
-					continue;
-				}
+				const start = targetLeft < left ? targetLeft : left;
+				const end = targetRight > right ? targetRight : right;
 
-				const { top, bottom } = getRelativeElementPosition( blockElement, parentBlockElement );
-
-				snaps[ top ] = getHorizontalLine( top );
-				snaps[ bottom ] = getHorizontalLine( bottom );
+				snaps[ top ] = getHorizontalLine( top, start, end );
+				snaps[ bottom ] = getHorizontalLine( bottom, start, end );
+				snaps[ center ] = getHorizontalLine( center, start, end );
 			}
 
 			return snaps;
