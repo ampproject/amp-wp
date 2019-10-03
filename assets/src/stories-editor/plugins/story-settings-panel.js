@@ -4,11 +4,6 @@
 import PropTypes from 'prop-types';
 
 /**
- * Internal dependencies
- */
-import { metaToAttributeNames } from '../helpers';
-
-/**
  * WordPress dependencies
  */
 import { PluginDocumentSettingPanel } from '@wordpress/edit-post';
@@ -22,6 +17,11 @@ import {
 	SelectControl,
 	RangeControl,
 } from '@wordpress/components';
+
+/**
+ * Internal dependencies
+ */
+import { metaToAttributeNames } from '../helpers';
 
 const MetaFields = ( props ) => {
 	const {
@@ -39,7 +39,9 @@ const MetaFields = ( props ) => {
 
 	return (
 		<>
-			<p>{ __( 'These settings are applied to new pages.', 'amp' ) }</p>
+			<p>
+				{ __( 'These settings are applied to new pages.', 'amp' ) }
+			</p>
 			<SelectControl
 				label={ __( 'Advance to next page', 'amp' ) }
 				help={ currentOption.description || '' }

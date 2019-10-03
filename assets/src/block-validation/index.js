@@ -14,8 +14,8 @@ import { select, subscribe } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { updateValidationErrors, maybeResetValidationErrors } from './helpers';
 import { isAMPEnabled } from '../block-editor/helpers';
+import { updateValidationErrors, maybeResetValidationErrors } from './helpers';
 import { withValidationErrorNotice } from './components';
 import './store';
 import '../block-editor/store';

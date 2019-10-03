@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { getBlockOrderDescription } from '../';
+import getBlockOrderDescription from '../getBlockOrderDescription';
 
 describe( 'block order controls', () => {
 	const dirUp = -1,

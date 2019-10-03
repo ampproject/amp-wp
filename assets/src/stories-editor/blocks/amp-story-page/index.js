@@ -7,10 +7,10 @@ import { createBlock, getBlockAttributes } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
+import blockIcon from '../../../../images/stories-editor/amp-story-page-icon.svg';
 import deprecated from './deprecated';
 import edit from './edit';
 import save from './save';
-import blockIcon from '../../../../images/stories-editor/amp-story-page-icon.svg';
 
 export const name = 'amp/amp-story-page';
 

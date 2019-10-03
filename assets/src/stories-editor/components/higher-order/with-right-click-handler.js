@@ -5,6 +5,7 @@ import { withSelect } from '@wordpress/data';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { render } from '@wordpress/element';
 import { KeyboardShortcuts } from '@wordpress/components';
+
 /**
  * Internal dependencies
  */

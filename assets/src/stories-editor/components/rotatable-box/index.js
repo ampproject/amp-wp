@@ -197,7 +197,7 @@ RotatableBox.propTypes = {
 	onRotateStart: PropTypes.func,
 	onRotate: PropTypes.func,
 	onRotateStop: PropTypes.func,
-	children: PropTypes.any.isRequired,
+	children: PropTypes.node.isRequired,
 	snap: PropTypes.oneOfType( [ PropTypes.arrayOf( PropTypes.number ), PropTypes.func ] ),
 	snapGap: PropTypes.number,
 };
