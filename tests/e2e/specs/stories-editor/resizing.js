@@ -272,26 +272,31 @@ describe( 'Resizing', () => {
 			fitToggle.click();
 		} );
 
-		it( 'should not resize smaller than the set minimum width and height', async () => {
-			let dimensions;
+		it( 'should not resize smaller than the set minimum width: bottom', async () => {
 			const resizableHandleBottom = await page.$( '.wp-block.is-selected .components-resizable-box__handle-bottom' );
 			await dragAndResize( resizableHandleBottom, { x: 0, y: -250 } );
-			dimensions = await getSelectedBlockDimensions();
+			const dimensions = await getSelectedBlockDimensions();
 			expect( dimensions.height ).toStrictEqual( textBlockMinHeight );
+		} );
 
+		it( 'should not resize smaller than the set minimum height: top', async () => {
 			const resizableHandleTop = await page.$( '.wp-block.is-selected .components-resizable-box__handle-top' );
 			await dragAndResize( resizableHandleTop, { x: 0, y: 250 } );
-			dimensions = await getSelectedBlockDimensions();
+			const dimensions = await getSelectedBlockDimensions();
 			expect( dimensions.height ).toStrictEqual( textBlockMinHeight );
+		} );
 
+		it( 'should not resize smaller than the set minimum width: left', async () => {
 			const resizableHandleLeft = await page.$( '.wp-block.is-selected .components-resizable-box__handle-left' );
 			await dragAndResize( resizableHandleLeft, { x: 300, y: 0 } );
-			dimensions = await getSelectedBlockDimensions();
+			const dimensions = await getSelectedBlockDimensions();
 			expect( dimensions.width ).toStrictEqual( textBlockMinWidth );
+		} );
 
+		it( 'should not resize smaller than the set minimum width: right', async () => {
 			const resizableHandleRight = await page.$( '.wp-block.is-selected .components-resizable-box__handle-right' );
 			await dragAndResize( resizableHandleRight, { x: -300, y: 0 } );
-			dimensions = await getSelectedBlockDimensions();
+			const dimensions = await getSelectedBlockDimensions();
 			expect( dimensions.width ).toStrictEqual( textBlockMinWidth );
 		} );
 	} );
