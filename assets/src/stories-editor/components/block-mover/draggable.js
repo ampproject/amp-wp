@@ -26,6 +26,7 @@ import {
 import {
 	STORY_PAGE_INNER_WIDTH,
 	STORY_PAGE_INNER_HEIGHT,
+	STORY_PAGE_INNER_HEIGHT_FOR_CTA,
 	STORY_PAGE_MARGIN,
 } from '../../constants';
 
@@ -86,7 +87,7 @@ class Draggable extends Component {
 
 			let baseHeight, xAttribute, yAttribute;
 			if ( isCTABlock( blockName ) ) {
-				baseHeight = STORY_PAGE_INNER_HEIGHT / 5;
+				baseHeight = STORY_PAGE_INNER_HEIGHT_FOR_CTA;
 				xAttribute = 'btnPositionLeft';
 				yAttribute = 'btnPositionTop';
 			} else {
@@ -201,7 +202,7 @@ class Draggable extends Component {
 		this.cloneWrapper.style.transform = clone.style.transform;
 
 		// 20% of the full value in case of CTA block.
-		const baseHeight = blockIsCTA ? STORY_PAGE_INNER_HEIGHT / 5 : STORY_PAGE_INNER_HEIGHT;
+		const baseHeight = blockIsCTA ? STORY_PAGE_INNER_HEIGHT_FOR_CTA : STORY_PAGE_INNER_HEIGHT;
 
 		// Position clone over the original element.
 		const top = getPixelsFromPercentage( 'y', parseInt( clone.style.top ), baseHeight );

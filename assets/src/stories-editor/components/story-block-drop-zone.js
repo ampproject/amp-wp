@@ -23,6 +23,7 @@ import { withDispatch } from '@wordpress/data';
 import { getPercentageFromPixels, isCTABlock } from '../helpers';
 import {
 	STORY_PAGE_INNER_HEIGHT,
+	STORY_PAGE_INNER_HEIGHT_FOR_CTA,
 } from '../constants';
 
 const wrapperElSelector = 'div[data-amp-selected="parent"] .editor-inner-blocks';
@@ -82,7 +83,7 @@ class BlockDropZone extends Component {
 		// Let's get the base value to measure the top percentage from.
 		let baseHeight = STORY_PAGE_INNER_HEIGHT;
 		if ( blockIsCTA ) {
-			baseHeight = STORY_PAGE_INNER_HEIGHT / 5;
+			baseHeight = STORY_PAGE_INNER_HEIGHT_FOR_CTA;
 		}
 		updateBlockAttributes( srcClientId, {
 			[ leftPosKey ]: getPercentageFromPixels( 'x', clonePosition.left - wrapperPosition.left ),
