@@ -31,13 +31,14 @@ import {
 	getUniqueId,
 	metaToAttributeNames,
 } from '../../helpers';
+
 import {
 	ALLOWED_MOVABLE_BLOCKS,
 	IMAGE_BACKGROUND_TYPE,
 	VIDEO_BACKGROUND_TYPE,
 } from '../../constants';
-import './edit.css';
 import blockIcon from '../../../../images/stories-editor/amp-story-page-icon.svg';
+import './edit.css';
 import BackgroundColorSettings from './background-color-settings';
 import PageSettings from './page-settings';
 import BackgroundMediaSettings from './background-media-settings';

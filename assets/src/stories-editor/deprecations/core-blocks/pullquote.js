@@ -6,11 +6,6 @@ import classnames from 'classnames';
 import { includes, get } from 'lodash';
 
 /**
- * Internal dependencies
- */
-import { migrateV120 } from '../shared';
-
-/**
  * WordPress dependencies
  */
 import {
@@ -21,6 +16,11 @@ import {
 import {
 	select,
 } from '@wordpress/data';
+
+/**
+ * Internal dependencies
+ */
+import { migrateV120 } from '../shared';
 
 const blockAttributes = {
 	value: {

@@ -19,6 +19,11 @@ import {
 	getPixelsFromPercentage,
 } from '../../helpers';
 import {
+	TEXT_BLOCK_PADDING,
+	REVERSE_WIDTH_CALCULATIONS,
+	REVERSE_HEIGHT_CALCULATIONS,
+} from '../../constants';
+import {
 	getBlockPositioning,
 	getResizedBlockPosition,
 	getUpdatedBlockPosition,
@@ -26,12 +31,6 @@ import {
 	getRadianFromDeg,
 	getBlockTextElement,
 } from './helpers';
-
-import {
-	TEXT_BLOCK_PADDING,
-	REVERSE_WIDTH_CALCULATIONS,
-	REVERSE_HEIGHT_CALCULATIONS,
-} from '../../constants';
 
 let lastSeenX = 0,
 	lastSeenY = 0,

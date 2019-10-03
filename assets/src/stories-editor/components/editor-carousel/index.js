@@ -15,9 +15,9 @@ import { compose } from '@wordpress/compose';
 /**
  * Internal dependencies
  */
-import Indicator from './indicator';
 import { Reorderer } from '../';
 import { STORY_PAGE_INNER_WIDTH } from '../../constants';
+import Indicator from './indicator';
 import './edit.css';
 
 // This is the sum of left (20px) and right (30px) margin.

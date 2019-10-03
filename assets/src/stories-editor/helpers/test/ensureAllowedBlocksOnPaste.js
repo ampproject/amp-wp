@@ -1,7 +1,19 @@
 /**
  * Internal dependencies
  */
-import { ensureAllowedBlocksOnPaste } from '../';
+import ensureAllowedBlocksOnPaste from '../ensureAllowedBlocksOnPaste';
+
+const mockGetBlocksByClientId = jest.fn( () => [] );
+const mockGetBlockOrder = jest.fn( () => [] );
+
+jest.mock( '@wordpress/data', () => {
+	return {
+		select: () => ( {
+			getBlocksByClientId: ( ...args ) => mockGetBlocksByClientId( ...args ),
+			getBlockOrder: ( ...args ) => mockGetBlockOrder( ...args ),
+		} ),
+	};
+} );
 
 describe( 'pasting blocks', () => {
 	describe( 'ensureAllowedBlocksOnPaste', () => {

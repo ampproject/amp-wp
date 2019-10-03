@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { addBackgroundColorToOverlay } from '../';
+import addBackgroundColorToOverlay from '../addBackgroundColorToOverlay';
 
 describe( 'addBackgroundColorToOverlay', () => {
 	it.todo( 'add tests' );
