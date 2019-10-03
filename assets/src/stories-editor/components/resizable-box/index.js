@@ -168,7 +168,7 @@ class EnhancedResizableBox extends Component {
 					const isReducing = 0 > deltaW || 0 > deltaH;
 
 					// Track if resizing has reached its minimum limits.
-					let reachedLimits = false;
+					let reachedMinLimit = false;
 					if ( textElement && isReducing ) {
 						// If we have a rotated block, let's assign the width and height for measuring.
 						// Without assigning the new measure, the calculation would be incorrect due to angle.
@@ -189,7 +189,7 @@ class EnhancedResizableBox extends Component {
 						// If the text goes over either of the edges, stop resizing from both sides
 						// since the text is filling in the room from both sides at the same time.
 						if ( appliedWidth < scrollWidth || appliedHeight < scrollHeight ) {
-							reachedLimits = true;
+							reachedMinLimit = true;
 							appliedWidth = lastWidth;
 							appliedHeight = lastHeight;
 						}
@@ -218,7 +218,7 @@ class EnhancedResizableBox extends Component {
 					}
 
 					// If limits were not reached yet, do the calculations for positioning.
-					if ( ! reachedLimits ) {
+					if ( ! reachedMinLimit ) {
 						if ( ! angle ) {
 							// If the resizing is to left or top then we have to compensate
 							if ( REVERSE_WIDTH_CALCULATIONS.includes( direction ) ) {
