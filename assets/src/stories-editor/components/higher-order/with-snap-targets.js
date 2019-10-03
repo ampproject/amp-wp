@@ -115,10 +115,10 @@ const applyWithSelect = withSelect( ( select, { clientId } ) => {
 
 			for ( const blockElement of siblings ) {
 				const { top, right, bottom, left } = getRelativeElementPosition( blockElement, parentBlockElement );
-				const center = left + ( ( right - left ) / 2 );
+				const center = ( top + bottom ) / 2;
 
-				const start = targetTop < top ? targetTop : top;
-				const end = targetBottom > bottom ? targetBottom : bottom;
+				const start = Math.min( targetTop, top );
+				const end = Math.max( targetBottom, bottom );
 
 				snaps[ left ] = getVerticalLine( left, start, end );
 				snaps[ right ] = getVerticalLine( right, start, end );
@@ -150,10 +150,10 @@ const applyWithSelect = withSelect( ( select, { clientId } ) => {
 
 			for ( const blockElement of siblings ) {
 				const { top, right, bottom, left } = getRelativeElementPosition( blockElement, parentBlockElement );
-				const center = top + ( ( bottom - top ) / 2 );
+				const center = ( top + bottom ) / 2;
 
-				const start = targetLeft < left ? targetLeft : left;
-				const end = targetRight > right ? targetRight : right;
+				const start = Math.min( targetLeft, left );
+				const end = Math.max( targetRight, right );
 
 				snaps[ top ] = getHorizontalLine( top, start, end );
 				snaps[ bottom ] = getHorizontalLine( bottom, start, end );

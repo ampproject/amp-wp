@@ -122,8 +122,8 @@ class Draggable extends Component {
 			left: actualLeft,
 		} = getRelativeElementPosition( blockElement, parentBlockElement );
 
-		const horizontalCenter = actualLeft + ( ( actualRight - actualLeft ) / 2 );
-		const verticalCenter = actualTop + ( ( actualBottom - actualTop ) / 2 );
+		const horizontalCenter = ( actualRight + actualLeft ) / 2;
+		const verticalCenter = ( actualTop + actualBottom ) / 2;
 
 		const newSnapLines = [];
 
