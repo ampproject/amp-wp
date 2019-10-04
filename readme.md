@@ -2,7 +2,7 @@
 # AMP Plugin for WordPress
 
 ![Banner](wp-assets/banner-1544x500.png)
-Enable AMP on your WordPress site, the WordPress way.
+Official AMP plugin WordPress. Enable AMP on your WordPress site, the WordPress way.
 
 **Contributors:** [google](https://profiles.wordpress.org/google), [xwp](https://profiles.wordpress.org/xwp), [automattic](https://profiles.wordpress.org/automattic), [westonruter](https://profiles.wordpress.org/westonruter), [swissspidy](https://profiles.wordpress.org/swissspidy), [miinasikk](https://profiles.wordpress.org/miinasikk), [ryankienstra](https://profiles.wordpress.org/ryankienstra), [albertomedina](https://profiles.wordpress.org/albertomedina), [tweetythierry](https://profiles.wordpress.org/tweetythierry)  
 **Tags:** [amp](https://wordpress.org/plugins/tags/amp), [framework](https://wordpress.org/plugins/tags/framework), [components](https://wordpress.org/plugins/tags/components), [performance](https://wordpress.org/plugins/tags/performance), [mobile](https://wordpress.org/plugins/tags/mobile), [stories](https://wordpress.org/plugins/tags/stories)  
@@ -16,7 +16,7 @@ Enable AMP on your WordPress site, the WordPress way.
 
 ## Description ##
 
-The [AMP Project](http://amp.dev) is an open-source initiative aiming to make the web better for all. AMP enables web experiences that are consistently fast, beautiful and high-performing across distribution platforms. The official AMP plugin for WordPress supports fully integrated AMP publishing for WordPress sites, with robust capabilities and granular publisher controls.
+The [AMP Project](http://amp.dev) is an open-source initiative aiming to make the web better for all. AMP enables web experiences that are consistently fast, beautiful and high-performing across distribution platforms. AMP used to stand for “Accelerated Mobile Pages” but no longer as it is for improving beb experiences regardless of the device type. The official AMP plugin for WordPress supports fully integrated AMP publishing for WordPress sites, with robust capabilities and granular publisher controls.
 
 Features and capabilities provided by the plugin include:
 
