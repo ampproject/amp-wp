@@ -3,33 +3,33 @@
  */
 import { getBlockType, createBlock } from '@wordpress/blocks';
 import { BlockIcon } from '@wordpress/block-editor';
-import { withSelect, useSelect, useDispatch } from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
 import { IconButton } from '@wordpress/components';
-import { compose, ifCondition } from '@wordpress/compose';
 import { useCallback } from '@wordpress/element';
+
+/**
+ * Internal dependencies
+ */
+import { useIsBlockAllowedOnPage } from '../../helpers';
 
 const Shortcuts = () => {
 	const {
 		currentPage,
 		index,
-		canInsertBlockType,
 		showInserter,
 	} = useSelect( ( select ) => {
 		const { getCurrentPage } = select( 'amp/story' );
-		const { canInsertBlockType: canInsert, getBlockListSettings, getBlockOrder } = select( 'core/block-editor' );
+		const { getBlockOrder } = select( 'core/block-editor' );
 
 		return {
 			currentPage: getCurrentPage(),
 			index: getBlockOrder( getCurrentPage() ).length,
-			canInsertBlockType: ( name ) => {
-				// canInsertBlockType() alone is not enough, see https://github.com/WordPress/gutenberg/issues/14515
-				const blockSettings = getBlockListSettings( getCurrentPage() );
-				return canInsert( name, getCurrentPage() ) && blockSettings && blockSettings.allowedBlocks.includes( name );
-			},
 			// As used in <HeaderToolbar> component
 			showInserter: select( 'core/edit-post' ).getEditorMode() === 'visual' && select( 'core/editor' ).getEditorSettings().richEditingEnabled,
 		};
 	}, [] );
+
+	const isBlockAllowedOnPage = useIsBlockAllowedOnPage();
 
 	const { insertBlock } = useDispatch( 'core/block-editor' );
 
@@ -39,6 +39,12 @@ const Shortcuts = () => {
 		insertBlock( insertedBlock, index, currentPage );
 	}, [ currentPage, index, insertBlock ] );
 
+	const isReordering = useSelect( ( select ) => select( 'amp/story' ).isReordering(), [] );
+
+	if ( isReordering ) {
+		return null;
+	}
+
 	const blocks = [
 		'amp/amp-story-text',
 		'amp/amp-story-cta',
@@ -46,7 +52,7 @@ const Shortcuts = () => {
 
 	return (
 		blocks.map( ( block ) => {
-			if ( ! canInsertBlockType( block ) ) {
+			if ( ! isBlockAllowedOnPage( block, currentPage ) ) {
 				return null;
 			}
 
@@ -66,13 +72,4 @@ const Shortcuts = () => {
 	);
 };
 
-export default compose(
-	withSelect( ( select ) => {
-		const { isReordering } = select( 'amp/story' );
-
-		return {
-			isReordering: isReordering(),
-		};
-	} ),
-	ifCondition( ( { isReordering } ) => ! isReordering ),
-)( Shortcuts );
+export default Shortcuts;
