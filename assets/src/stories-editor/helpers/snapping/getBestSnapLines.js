@@ -7,7 +7,7 @@ import findBestMatch from './findBestMatch';
 /**
  * Get the best match(es) from a list of snap lines based on actual position.
  *
- * @param {import('./types').SnapLines} snapLines Function to create lines based off maximum value.
+ * @param {import('./types').SnapLines} snapLines Object with lists of snap lines indexes by coordinate.
  * @param {number} start Value of near edge of current object
  * @param {number} end Value of far edge of current object
  * @param {number} gap Maximum gap from edge to snap line for line to be considered.
