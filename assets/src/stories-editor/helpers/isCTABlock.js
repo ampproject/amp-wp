@@ -4,8 +4,8 @@
  * @param {string} blockName Block name.
  * @return {boolean} Boolean if block is / is not a CTA block.
  */
-export const isPCTABlock = ( blockName ) => {
+const isCTABlock = ( blockName ) => {
 	return 'amp/amp-story-cta' === blockName;
 };
 
-export default isPCTABlock;
+export default isCTABlock;
