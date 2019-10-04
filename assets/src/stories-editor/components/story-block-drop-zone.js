@@ -14,8 +14,7 @@ import PropTypes from 'prop-types';
 import {
 	DropZone,
 } from '@wordpress/components';
-import { Component } from '@wordpress/element';
-import { withDispatch } from '@wordpress/data';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -27,17 +26,18 @@ import {
 
 const wrapperElSelector = 'div[data-amp-selected="parent"] .editor-inner-blocks';
 
-class BlockDropZone extends Component {
+const BlockDropZone = ( { srcBlockName, srcClientId } ) => {
+	const isCTABlock = 'amp/amp-story-cta' === srcBlockName;
+
+	const { updateBlockAttributes } = useDispatch( 'core/block-editor' );
+
 	/**
 	 * Handles the drop event for blocks within a page.
 	 * Separate handling for CTA block.
 	 *
 	 * @param {Object} event Drop event.
 	 */
-	onDrop = ( event ) => {
-		const { srcBlockName, updateBlockAttributes, srcClientId } = this.props;
-		const isCTABlock = 'amp/amp-story-cta' === srcBlockName;
-
+	const onDrop = ( event ) => {
 		let elementId,
 			cloneElementId,
 			wrapperEl;
@@ -88,30 +88,19 @@ class BlockDropZone extends Component {
 			[ leftPosKey ]: getPercentageFromPixels( 'x', clonePosition.left - wrapperPosition.left ),
 			[ topPosKey ]: getPercentageFromPixels( 'y', clonePosition.top - wrapperPosition.top, baseHeight ),
 		} );
-	}
+	};
 
-	render() {
-		return (
-			<DropZone
-				className="editor-block-drop-zone"
-				onDrop={ this.onDrop }
-			/>
-		);
-	}
-}
+	return (
+		<DropZone
+			className="editor-block-drop-zone"
+			onDrop={ onDrop }
+		/>
+	);
+};
 
 BlockDropZone.propTypes = {
-	updateBlockAttributes: PropTypes.func,
 	srcClientId: PropTypes.string,
 	srcBlockName: PropTypes.string,
 };
 
-export default withDispatch( ( dispatch ) => {
-	const { updateBlockAttributes } = dispatch( 'core/block-editor' );
-
-	return {
-		updateBlockAttributes( ...args ) {
-			updateBlockAttributes( ...args );
-		},
-	};
-} )( BlockDropZone );
+export default BlockDropZone;

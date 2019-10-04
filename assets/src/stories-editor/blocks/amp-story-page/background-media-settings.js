@@ -121,7 +121,7 @@ const BackgroundMediaSettings = ( {
 				} )
 				.catch( () => setExtractingPoster( false ) );
 		}
-	}, [ media, mediaType, videoFeaturedImage ] );
+	}, [ media, mediaId, mediaType, mediaUrl, poster, videoFeaturedImage, isExtractingPoster, setAttributes ] );
 
 	return (
 		<PanelBody title={ __( 'Background Media', 'amp' ) }>

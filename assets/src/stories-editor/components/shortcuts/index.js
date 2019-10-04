@@ -1,18 +1,44 @@
 /**
- * External dependencies
- */
-import PropTypes from 'prop-types';
-
-/**
  * WordPress dependencies
  */
 import { getBlockType, createBlock } from '@wordpress/blocks';
 import { BlockIcon } from '@wordpress/block-editor';
-import { withDispatch, withSelect } from '@wordpress/data';
+import { withSelect, useSelect, useDispatch } from '@wordpress/data';
 import { IconButton } from '@wordpress/components';
 import { compose, ifCondition } from '@wordpress/compose';
+import { useCallback } from '@wordpress/element';
 
-const Shortcuts = ( { insertBlock, canInsertBlockType, showInserter } ) => {
+const Shortcuts = () => {
+	const {
+		currentPage,
+		index,
+		canInsertBlockType,
+		showInserter,
+	} = useSelect( ( select ) => {
+		const { getCurrentPage } = select( 'amp/story' );
+		const { canInsertBlockType: canInsert, getBlockListSettings, getBlockOrder } = select( 'core/block-editor' );
+
+		return {
+			currentPage: getCurrentPage(),
+			index: getBlockOrder( getCurrentPage() ).length,
+			canInsertBlockType: ( name ) => {
+				// canInsertBlockType() alone is not enough, see https://github.com/WordPress/gutenberg/issues/14515
+				const blockSettings = getBlockListSettings( getCurrentPage() );
+				return canInsert( name, getCurrentPage() ) && blockSettings && blockSettings.allowedBlocks.includes( name );
+			},
+			// As used in <HeaderToolbar> component
+			showInserter: select( 'core/edit-post' ).getEditorMode() === 'visual' && select( 'core/editor' ).getEditorSettings().richEditingEnabled,
+		};
+	}, [] );
+
+	const { insertBlock } = useDispatch( 'core/block-editor' );
+
+	const onClick = useCallback( ( name ) => {
+		const insertedBlock = createBlock( name, {} );
+
+		insertBlock( insertedBlock, index, currentPage );
+	}, [ currentPage, index, insertBlock ] );
+
 	const blocks = [
 		'amp/amp-story-text',
 		'amp/amp-story-cta',
@@ -30,7 +56,7 @@ const Shortcuts = ( { insertBlock, canInsertBlockType, showInserter } ) => {
 				<IconButton
 					key={ block }
 					icon={ <BlockIcon icon={ blockType.icon } /> }
-					onClick={ () => insertBlock( block ) }
+					onClick={ () => onClick( block ) }
 					label={ blockType.title }
 					labelPosition="bottom"
 					disabled={ ! showInserter }
@@ -40,48 +66,13 @@ const Shortcuts = ( { insertBlock, canInsertBlockType, showInserter } ) => {
 	);
 };
 
-Shortcuts.propTypes = {
-	insertBlock: PropTypes.func.isRequired,
-	canInsertBlockType: PropTypes.func.isRequired,
-	showInserter: PropTypes.bool.isRequired,
-};
-
-const applyWithSelect = withSelect( ( select ) => {
-	const { getCurrentPage } = select( 'amp/story' );
-	const { canInsertBlockType, getBlockListSettings } = select( 'core/block-editor' );
-	const { isReordering } = select( 'amp/story' );
-
-	return {
-		isReordering: isReordering(),
-		canInsertBlockType: ( name ) => {
-			// canInsertBlockType() alone is not enough, see https://github.com/WordPress/gutenberg/issues/14515
-			const blockSettings = getBlockListSettings( getCurrentPage() );
-			return canInsertBlockType( name, getCurrentPage() ) && blockSettings && blockSettings.allowedBlocks.includes( name );
-		},
-		// As used in <HeaderToolbar> component
-		showInserter: select( 'core/edit-post' ).getEditorMode() === 'visual' && select( 'core/editor' ).getEditorSettings().richEditingEnabled,
-	};
-} );
-
-const applyWithDispatch = withDispatch( ( dispatch, props, { select } ) => {
-	const { getCurrentPage } = select( 'amp/story' );
-	const { getBlockOrder } = select( 'core/block-editor' );
-	const { insertBlock } = dispatch( 'core/block-editor' );
-
-	return {
-		insertBlock: ( name ) => {
-			const currentPage = getCurrentPage();
-			const index = getBlockOrder( currentPage ).length;
-
-			const insertedBlock = createBlock( name, {} );
-
-			insertBlock( insertedBlock, index, currentPage );
-		},
-	};
-} );
-
 export default compose(
-	applyWithSelect,
-	applyWithDispatch,
+	withSelect( ( select ) => {
+		const { isReordering } = select( 'amp/story' );
+
+		return {
+			isReordering: isReordering(),
+		};
+	} ),
 	ifCondition( ( { isReordering } ) => ! isReordering ),
 )( Shortcuts );
