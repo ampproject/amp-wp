@@ -52,7 +52,6 @@ import { addQueryArgs } from '@wordpress/url';
 import BlockPreview from '../block-preview';
 import BlockTypesList from '../block-types-list';
 import { ALLOWED_TOP_LEVEL_BLOCKS } from '../../constants';
-import { isBlockAllowedOnPage } from '../../helpers';
 
 const MAX_SUGGESTED_ITEMS = 9;
 
@@ -380,6 +379,8 @@ export default compose(
 			getBlockName,
 			getBlockRootClientId,
 			getBlockSelectionEnd,
+			canInsertBlockType,
+			getBlockListSettings,
 		} = select( 'core/block-editor' );
 		const {
 			getChildBlockNames,
@@ -397,6 +398,22 @@ export default compose(
 			destinationRootClientId = getCurrentPage();
 		}
 		const destinationRootBlockName = getBlockName( destinationRootClientId );
+
+		/**
+		 * Is the given block allowed on the given page?
+		 *
+		 * @todo Use `useIsBlockAllowedOnPage` once this component is refactored to use hooks.
+		 *
+		 * @param {Object}  name The name of the block to test.
+		 * @param {string}  pageId Page ID.
+		 * @return {boolean} Returns true if the element is allowed on the page, false otherwise.
+		 */
+		const isBlockAllowedOnPage = ( name, pageId ) => {
+			// canInsertBlockType() alone is not enough, see https://github.com/WordPress/gutenberg/issues/14515
+			const blockSettings = getBlockListSettings( pageId );
+			const isAllowed = canInsertBlockType( name, pageId ) && blockSettings && blockSettings.allowedBlocks.includes( name );
+			return Boolean( isAllowed );
+		};
 
 		/*
 		 * Filters inserter items to only show blocks that can be inserted given the context.
