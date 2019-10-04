@@ -18,8 +18,7 @@ import { ReactElement } from 'react';
  */
 import { __ } from '@wordpress/i18n';
 import { Dropdown, IconButton } from '@wordpress/components';
-import { compose, ifCondition } from '@wordpress/compose';
-import { withSelect, useSelect } from '@wordpress/data';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -55,6 +54,12 @@ const Inserter = ( props ) => {
 
 		return ! showInserter;
 	} );
+
+	const isReordering = useSelect( ( select ) => select( 'amp/story' ).isReordering(), [] );
+
+	if ( isReordering ) {
+		return null;
+	}
 
 	const onToggle = ( isOpen ) => {
 		// Surface toggle callback to parent component
@@ -122,17 +127,4 @@ Inserter.propTypes = {
 	isAppender: PropTypes.bool,
 };
 
-const applyWithSelect = withSelect( ( select ) => {
-	const { isReordering } = select( 'amp/story' );
-
-	return {
-		isReordering: isReordering(),
-	};
-} );
-
-export default compose(
-	applyWithSelect,
-	ifCondition(
-		( { isReordering } ) => ! isReordering
-	),
-)( Inserter );
+export default Inserter;

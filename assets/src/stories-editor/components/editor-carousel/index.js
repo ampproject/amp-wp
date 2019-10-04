@@ -10,12 +10,10 @@ import { useSelect, useDispatch } from '@wordpress/data';
  * Internal dependencies
  */
 import { Reorderer } from '../';
-import { STORY_PAGE_INNER_WIDTH } from '../../constants';
+import { STORY_PAGE_INNER_WIDTH, STORY_PAGE_MARGIN } from '../../constants';
 import Indicator from './indicator';
 import './edit.css';
 
-// This is the sum of left (20px) and right (30px) margin.
-const TOTAL_PAGE_MARGIN = 50;
 const PAGE_BORDER = 1;
 
 const EditorCarousel = () => {
@@ -59,7 +57,7 @@ const EditorCarousel = () => {
 			wrapper.current.style.display = 'none';
 		} else {
 			wrapper.current.style.display = '';
-			wrapper.current.style.transform = `translateX(calc(50% - ${ PAGE_BORDER }px - ${ ( STORY_PAGE_INNER_WIDTH + TOTAL_PAGE_MARGIN ) / 2 }px - ${ ( currentIndex ) * TOTAL_PAGE_MARGIN }px - ${ currentIndex * STORY_PAGE_INNER_WIDTH }px))`;
+			wrapper.current.style.transform = `translateX(calc(50% - ${ PAGE_BORDER }px - ${ ( STORY_PAGE_INNER_WIDTH + STORY_PAGE_MARGIN ) / 2 }px - ${ ( currentIndex ) * STORY_PAGE_MARGIN }px - ${ currentIndex * STORY_PAGE_INNER_WIDTH }px))`;
 		}
 	}, [ currentIndex, isReordering, wrapper ] );
 

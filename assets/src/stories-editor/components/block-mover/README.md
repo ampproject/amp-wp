@@ -9,8 +9,6 @@ In addition the component also uses default `IgnoreNestedEvents` component which
 ## Unchanged files.
 
 The following files of the component are 100% or almost unchanged:
-- block-draggable.js:
-  - This file is mainly copied from core, the only difference is switching to using internal Draggable
 - ignore-nested-events.js (unchanged)
 
 ## Modified files
@@ -18,6 +16,9 @@ draggable.js: This file has been modified to display the clone in relation to th
 - Creating the clone has been updated to take the initial position based on the wrapper element;
 - The clone styling has been changed to ignore the % values and to match the size of the original element;
 - Resizing the dragged clone has been removed.
+
+block-draggable.js: This file has been extended to allow drag between pages
+- Assumes that blocks are only draggable inside pages, not inside other types of elements
 
 block-drag-area.js: This was renamed from from drag-handle.js
 - Now wraps draggable element(s) as children, whereas it used to appear alongside them.

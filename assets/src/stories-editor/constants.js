@@ -5,6 +5,8 @@ import { __ } from '@wordpress/i18n';
 
 export const STORY_PAGE_INNER_WIDTH = 328;
 export const STORY_PAGE_INNER_HEIGHT = 553;
+export const STORY_PAGE_INNER_HEIGHT_FOR_CTA = Math.floor( STORY_PAGE_INNER_HEIGHT / 5 );
+export const STORY_PAGE_MARGIN = 50;
 
 export const MIN_BLOCK_WIDTH = 40;
 export const MIN_BLOCK_HEIGHTS = {
