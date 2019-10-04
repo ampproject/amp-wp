@@ -3,10 +3,9 @@
  */
 import { getBlockType, createBlock } from '@wordpress/blocks';
 import { BlockIcon } from '@wordpress/block-editor';
-import { withSelect, useSelect, useDispatch } from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
 import { useCallback } from '@wordpress/element';
 import { DropdownMenu } from '@wordpress/components';
-import { compose, ifCondition } from '@wordpress/compose';
 import { __, sprintf } from '@wordpress/i18n';
 
 /**
@@ -65,6 +64,12 @@ const MediaInserter = () => {
 		updateBlockAttributes( currentPage, processed );
 		selectBlock( currentPage );
 	}, [ currentPage, selectBlock, updateBlockAttributes ] );
+
+	const isReordering = useSelect( ( select ) => select( 'amp/story' ).isReordering(), [] );
+
+	if ( isReordering ) {
+		return null;
+	}
 
 	const blocks = [
 		'core/video',
@@ -144,15 +149,4 @@ const mediaPicker = ( dialogTitle, mediaType, updateBlock ) => {
 	fileFrame.open();
 };
 
-const applyWithSelect = withSelect( ( select ) => {
-	const { isReordering } = select( 'amp/story' );
-
-	return {
-		isReordering: isReordering(),
-	};
-} );
-
-export default compose(
-	applyWithSelect,
-	ifCondition( ( { isReordering } ) => ! isReordering ),
-)( MediaInserter );
+export default MediaInserter;

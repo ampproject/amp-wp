@@ -3,9 +3,8 @@
  */
 import { getBlockType, createBlock } from '@wordpress/blocks';
 import { BlockIcon } from '@wordpress/block-editor';
-import { withSelect, useSelect, useDispatch } from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
 import { IconButton } from '@wordpress/components';
-import { compose, ifCondition } from '@wordpress/compose';
 import { useCallback } from '@wordpress/element';
 
 /**
@@ -40,6 +39,12 @@ const Shortcuts = () => {
 		insertBlock( insertedBlock, index, currentPage );
 	}, [ currentPage, index, insertBlock ] );
 
+	const isReordering = useSelect( ( select ) => select( 'amp/story' ).isReordering(), [] );
+
+	if ( isReordering ) {
+		return null;
+	}
+
 	const blocks = [
 		'amp/amp-story-text',
 		'amp/amp-story-cta',
@@ -67,13 +72,4 @@ const Shortcuts = () => {
 	);
 };
 
-export default compose(
-	withSelect( ( select ) => {
-		const { isReordering } = select( 'amp/story' );
-
-		return {
-			isReordering: isReordering(),
-		};
-	} ),
-	ifCondition( ( { isReordering } ) => ! isReordering ),
-)( Shortcuts );
+export default Shortcuts;
