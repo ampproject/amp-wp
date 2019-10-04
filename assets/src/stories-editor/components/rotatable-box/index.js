@@ -15,7 +15,7 @@ import { __, sprintf } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { findClosestSnap } from '../../helpers';
+import { findClosestSnap } from '../../helpers/snapping';
 import './edit.css';
 
 const RotatableBox = ( { angle, initialAngle, blockElementId, className, speak, onRotateStart, onRotate, onRotateStop, snap, snapGap, children } ) => {

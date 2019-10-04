@@ -20,11 +20,11 @@ import { withSafeTimeout, compose } from '@wordpress/compose';
 import withSnapTargets from '../higher-order/with-snap-targets';
 import {
 	getPixelsFromPercentage,
-	findClosestSnap,
 	getPercentageFromPixels,
 	getRelativeElementPosition,
 	isCTABlock,
 } from '../../helpers';
+import { findClosestSnap } from '../../helpers/snapping';
 import {
 	STORY_PAGE_INNER_WIDTH,
 	STORY_PAGE_INNER_HEIGHT,

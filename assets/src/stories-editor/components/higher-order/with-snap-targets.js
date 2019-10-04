@@ -7,12 +7,8 @@ import { compose, createHigherOrderComponent } from '@wordpress/compose';
 /**
  * Internal dependencies
  */
-import {
-	getBlockInnerElement,
-	getRelativeElementPosition,
-	getHorizontalSnaps,
-	getVerticalSnaps,
-} from '../../helpers';
+import { getBlockInnerElement, getRelativeElementPosition } from '../../helpers';
+import { getHorizontalSnaps, getVerticalSnaps } from '../../helpers/snapping';
 import { withSnapContext } from '../contexts/snapping';
 
 /**

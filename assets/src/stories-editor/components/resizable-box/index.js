@@ -15,15 +15,9 @@ import { ResizableBox } from '@wordpress/components';
  */
 import withSnapTargets from '../higher-order/with-snap-targets';
 import './edit.css';
-import {
-	getPercentageFromPixels,
-	getRelativeElementPosition,
-	findClosestSnap,
-} from '../../helpers';
-import {
-	TEXT_BLOCK_PADDING,
-	BLOCK_RESIZING_SNAP_GAP,
-} from '../../constants';
+import { getPercentageFromPixels, getRelativeElementPosition } from '../../helpers';
+import { findClosestSnap } from '../../helpers/snapping';
+import { TEXT_BLOCK_PADDING, BLOCK_RESIZING_SNAP_GAP } from '../../constants';
 import {
 	getBlockPositioning,
 	getResizedBlockPosition,

@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { STORY_PAGE_INNER_HEIGHT, STORY_PAGE_INNER_WIDTH } from '../constants';
+import { STORY_PAGE_INNER_HEIGHT, STORY_PAGE_INNER_WIDTH } from '../../constants';
 import getSnapCalculatorByDimension from './getSnapCalculatorByDimension';
 
 const getHorizontalLine = (
