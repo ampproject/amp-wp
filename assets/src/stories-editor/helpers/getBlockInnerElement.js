@@ -2,6 +2,7 @@
  * Internal dependencies
  */
 import getBlockDOMNode from './getBlockDOMNode';
+import isCTABlock from './isCTABlock';
 
 /**
  * Returns a movable block's inner element.
@@ -13,13 +14,12 @@ import getBlockDOMNode from './getBlockDOMNode';
 const getBlockInnerElement = ( block ) => {
 	const { name, clientId } = block;
 	const isPage = 'amp/amp-story-page' === name;
-	const isCTABlock = 'amp/amp-story-cta' === name;
 
 	if ( isPage ) {
 		return getBlockDOMNode( clientId );
 	}
 
-	if ( isCTABlock ) {
+	if ( isCTABlock( name ) ) {
 		// Not the block itself is movable, only the button within.
 		return document.querySelector( `amp-story-cta-button-${ clientId }` );
 	}

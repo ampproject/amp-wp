@@ -5,6 +5,7 @@ import { ALLOWED_CHILD_BLOCKS, BLOCKS_WITH_RESIZING, BLOCKS_WITH_TEXT_SETTINGS }
 import { addAMPAttributesDeprecations } from '../deprecations/filters';
 import getDefaultMinimumBlockHeight from './getDefaultMinimumBlockHeight';
 import isMovableBlock from './isMovableBlock';
+import isCTABlock from './isCTABlock';
 
 /**
  * Adds AMP attributes to every allowed AMP Story block.
@@ -30,7 +31,6 @@ const addAMPAttributes = ( settings, name ) => {
 
 	const isImageBlock = 'core/image' === name;
 	const isVideoBlock = 'core/video' === name;
-	const isCTABlock = 'amp/amp-story-cta' === name;
 
 	const needsTextSettings = BLOCKS_WITH_TEXT_SETTINGS.includes( name );
 
@@ -80,7 +80,7 @@ const addAMPAttributes = ( settings, name ) => {
 		};
 	}
 
-	if ( isCTABlock ) {
+	if ( isCTABlock( name ) ) {
 		addedAttributes.anchor = {
 			type: 'string',
 			source: 'attribute',
