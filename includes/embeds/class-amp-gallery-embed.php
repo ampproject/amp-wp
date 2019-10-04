@@ -171,14 +171,20 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 					return $attr;
 				};
 
+				$set_link_attribute = static function ( $attributes ) {
+					$attributes['link'] = 'none';
+					return $attributes;
+				};
+
 				remove_filter( 'post_gallery', [ $this, 'maybe_override_gallery' ], 10 );
 				add_filter( 'wp_get_attachment_image_attributes', $add_lightbox_attribute );
+				add_filter( 'shortcode_atts_gallery', $set_link_attribute, PHP_INT_MAX );
 
-				$attributes['link'] = 'none';
-				$html               = gallery_shortcode( $attributes );
+				$html = gallery_shortcode( $attributes );
 
 				remove_filter( 'wp_get_attachment_image_attributes', $add_lightbox_attribute );
 				add_filter( 'post_gallery', [ $this, 'maybe_override_gallery' ], 10, 2 );
+				remove_filter( 'shortcode_atts_gallery', $set_link_attribute, PHP_INT_MAX );
 			}
 
 			return $html;
