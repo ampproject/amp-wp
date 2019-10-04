@@ -374,10 +374,11 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		// New rejected => Ack rejected, as the query var should force this to be rejected.
 		$_GET[ AMP_Validation_Error_Taxonomy::REJECT_ALL_VALIDATION_ERRORS_QUERY_VAR ] = '';
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		AMP_Validation_Error_Taxonomy::accept_validation_errors( [ self::MOCK_ACCEPTABLE_ERROR => true ] );
 		$this->assertfalse( AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $error_foo ) );
 		$this->assertEquals(
 			[
-				'forced'      => 'with_query_var',
+				'forced'      => 'with_filter',
 				'status'      => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS,
 				'term_status' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS,
 			],

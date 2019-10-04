@@ -472,11 +472,6 @@ class AMP_Validation_Error_Taxonomy {
 			$forced = 'with_preview';
 		}
 
-		if ( isset( $_GET[ self::REJECT_ALL_VALIDATION_ERRORS_QUERY_VAR ] ) && AMP_Validation_Manager::has_cap() ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$status = self::VALIDATION_ERROR_ACK_REJECTED_STATUS;
-			$forced = 'with_query_var';
-		}
-
 		/**
 		 * Filters whether the validation error should be sanitized.
 		 *
@@ -522,6 +517,10 @@ class AMP_Validation_Error_Taxonomy {
 			static function( $sanitized, $error ) use ( $acceptable_errors ) {
 				if ( true === $acceptable_errors ) {
 					return true;
+				}
+
+				if ( isset( $_GET[ self::REJECT_ALL_VALIDATION_ERRORS_QUERY_VAR ] ) && AMP_Validation_Manager::has_cap() ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+					return false;
 				}
 
 				if ( isset( $acceptable_errors[ $error['code'] ] ) ) {
