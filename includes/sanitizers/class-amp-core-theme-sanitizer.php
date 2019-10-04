@@ -57,18 +57,26 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			// @todo Modal Menu (stripped with twentytwenty-js)
 			// @todo Primary Menu (stripped with twentytwenty-js)
 			// @todo Toggles (stripped with twentytwenty-js) - probably unneeded once the rest is done
-			'dequeue_scripts'      => [
+			'dequeue_scripts'        => [
 				'twentytwenty-js',
 			],
-			'remove_actions'       => [
+			'remove_actions'         => [
 				'wp_head' => [
 					'twentytwenty_no_js_class', // AMP is essentially no-js, with any interactivity added explicitly via amp-bind.
 				],
 			],
-			'add_smooth_scrolling' => [
+			'add_smooth_scrolling'   => [
 				// @todo Only replaces twentytwenty.smoothscroll.scrollToAnchor, but not twentytwenty.smoothscroll.scrollToElement
 				'//a[ starts-with( @href, "#" ) and not( @href = "#" )and not( @href = "#0" ) and not( contains( @class, "do-not-scroll" ) ) and not( contains( @class, "skip-link" ) ) ]',
 			],
+			'wrap_modal_in_lightbox' => [
+				// @todo Works alright apart from the fact that the scrollbar disappears, causing a repaint and the admin bar jumping around.
+				'modal_id'             => 'mobile-menu',
+				'modal_content_xpath'  => '//div[ contains( @class, "menu-modal" ) ]',
+				'open_button_xpath'    => '//header[@id = "site-header"]//button[ contains( @class, "mobile-nav-toggle" ) ]',
+				'close_button_xpath'   => '//div[ contains( @class, "menu-modal" ) ]//button[ contains ( @class, "close-nav-toggle" ) ]',
+				'strip_wrapper_levels' => 1,
+			]
 		],
 
 		// Twenty Nineteen.
@@ -1541,5 +1549,78 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$search_toggle_link->setAttribute( AMP_DOM_Utils::AMP_BIND_DATA_ATTR_PREFIX . 'aria-expanded', "$hidden_state_id ? 'false' : 'true'" );
 		$search_toggle_div->setAttribute( AMP_DOM_Utils::AMP_BIND_DATA_ATTR_PREFIX . 'class', "$hidden_state_id ? 'search-toggle' : 'search-toggle active'" );
 		$search_container->setAttribute( AMP_DOM_Utils::AMP_BIND_DATA_ATTR_PREFIX . 'class', "$hidden_state_id ? 'search-box-wrapper hide' : 'search-box-wrapper'" );
+	}
+
+	/**
+	 * Wrap a modal node tree in an <amp-lightbox> element.
+	 *
+	 * @param array $args Associative array of arguments {
+	 *     @type string $modal_id            ID to use for the modal and its associated buttons.
+	 *     @type string $modal_content_xpath XPath to query the contents of the modal.
+	 *     @type string $open_button_xpath   XPath to query the button that opens the modal.
+	 *     @type string $close_button_xpath  XPath to query the button that closes the modal. This one should be contained within the modal.
+	 *     @type string $animate_in          Optional. What animation to use for showing the modal. Valid options are: 'fade-in', 'fly-in-bottom', 'fly-in-top'. Defaults to 'fade-in'.
+	 *     @type bool   $scrollable          Optional. Whether the inner content of the modal should be scrollable. Defaults to true.
+	 * }
+	 */
+	public function wrap_modal_in_lightbox( $args = [] ) {
+		if ( ! isset( $args['modal_id'], $args['modal_content_xpath'], $args['open_button_xpath'], $args['close_button_xpath'] ) ) {
+			return;
+		}
+
+		$modal_id           = $args['modal_id'];
+		$modal_content_node = $this->xpath->query( $args['modal_content_xpath'] )->item( 0 );
+		$open_button_node   = $this->xpath->query( $args['open_button_xpath'] )->item( 0 );
+		$close_button_node  = $this->xpath->query( $args['close_button_xpath'] )->item( 0 );
+
+		if ( ! $modal_id || ! $modal_content_node || ! $open_button_node || ! $close_button_node ) {
+			return;
+		}
+
+		// Create an <amp-lightbox> element that will contain the modal.
+
+		$amp_lightbox = $this->dom->createElement( 'amp-lightbox' );
+		$amp_lightbox->setAttribute( 'id', $modal_id );
+		$amp_lightbox->setAttribute( 'layout', 'nodisplay' );
+		$amp_lightbox->setAttribute( 'animate-in', isset( $args['animate_in'] ) ? $args['animate_in'] : 'fade-in' );
+		$amp_lightbox->setAttribute( 'scrollable', isset( $args['scrollable'] ) ? $args['scrollable'] : true );
+
+		$parent_node = $modal_content_node->parentNode;
+		$parent_node->replaceChild( $amp_lightbox, $modal_content_node );
+
+		$strip_wrapper_levels = isset( $args['strip_wrapper_levels'] ) ? $args['strip_wrapper_levels'] : 0;
+
+		while ( $strip_wrapper_levels > 0 ) {
+			$children = [];
+			foreach ( $modal_content_node->childNodes as $child_node ) {
+				if ( $child_node instanceof DOMElement && ! $child_node instanceof DOMComment ) {
+					$children[] = $child_node;
+				}
+			}
+
+			if ( count( $children ) > 1 ) {
+				break;
+			}
+
+			$modal_content_node = $modal_content_node->removeChild( $children[0] );
+
+			$strip_wrapper_levels--;
+		}
+
+		$amp_lightbox->appendChild( $modal_content_node );
+
+		// Adapt the open button.
+
+		$open_button_node->setAttribute( 'on', "tap:{$modal_id}" );
+
+		// @todo: Do we need to remove cruft here?
+		// <button class="toggle nav-toggle mobile-nav-toggle" data-toggle-target=".menu-modal" data-toggle-screen-lock="true" data-toggle-body-class="showing-menu-modal" aria-expanded="false" data-set-focus=".close-nav-toggle" on="tap:mobile-menu"></button>
+
+		// Adapt the close button.
+
+		$close_button_node->setAttribute( 'on', "tap:{$modal_id}.close" );
+
+		// @todo: Do we need to remove cruft here?
+		// <button class="toggle close-nav-toggle fill-children-current-color" data-toggle-target=".menu-modal" data-toggle-screen-lock="true" data-toggle-body-class="showing-menu-modal" aria-expanded="false" data-set-focus=".menu-modal" on="tap:mobile-menu.close"></button>
 	}
 }
