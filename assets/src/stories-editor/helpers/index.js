@@ -57,3 +57,7 @@ export { default as getBlockDOMNode } from './getBlockDOMNode';
 export { default as isMovableBlock } from './isMovableBlock';
 export { default as metaToAttributeNames } from './metaToAttributeNames';
 export { default as parseDropEvent } from './parseDropEvent';
+export { default as getRelativeElementPosition } from './getRelativeElementPosition';
+export { default as isCTABlock } from './isCTABlock';
+export { default as useMoveBlockToPage } from './useMoveBlockToPage';
+export { default as useIsBlockAllowedOnPage } from './useIsBlockAllowedOnPage';

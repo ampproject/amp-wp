@@ -6,9 +6,8 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { withSelect, useSelect, useDispatch } from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
 import { DropZoneProvider, NavigableMenu } from '@wordpress/components';
-import { compose, ifCondition } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -96,6 +95,12 @@ function BlockNavigation() {
 		};
 	}, [] );
 
+	const isReordering = useSelect( ( select ) => select( 'amp/story' ).isReordering(), [] );
+
+	if ( isReordering ) {
+		return null;
+	}
+
 	const hasBlocks = blocks.length > 0 || unMovableBlock;
 
 	return (
@@ -122,13 +127,5 @@ function BlockNavigation() {
 	);
 }
 
-export default compose(
-	withSelect( ( select ) => {
-		const { isReordering } = select( 'amp/story' );
+export default BlockNavigation;
 
-		return {
-			isReordering: isReordering(),
-		};
-	} ),
-	ifCondition( ( { isReordering } ) => ! isReordering ),
-)( BlockNavigation );
