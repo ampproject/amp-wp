@@ -254,7 +254,7 @@ export default createHigherOrderComponent(
 							width={ width }
 							height={ height }
 							angle={ rotationAngle }
-							hasTextContent={ isTextBlock && content.length }
+							hasTextContent={ Boolean( isTextBlock && content.length ) }
 							minHeight={ minHeight }
 							minWidth={ MIN_BLOCK_WIDTH }
 							onResizeStop={ ( value ) => {
