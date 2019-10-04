@@ -185,7 +185,7 @@ class AMP_Validation_Manager {
 			$args
 		);
 
-		self::$should_locate_sources = $args['should_locate_sources'];
+		self::$should_locate_sources = $args['should_locate_sources'] && ! AMP_Theme_Support::prevent_redirect_to_non_amp();
 
 		AMP_Validated_URL_Post_Type::register();
 		AMP_Validation_Error_Taxonomy::register();

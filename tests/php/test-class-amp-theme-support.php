@@ -58,7 +58,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		AMP_Validation_Manager::reset_validation_results();
 		remove_theme_support( AMP_Theme_Support::SLUG );
 		remove_theme_support( 'custom-header' );
-		$_REQUEST                = []; // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
+		$_REQUEST                = [];
+		$_GET                    = [];
 		$_SERVER['QUERY_STRING'] = '';
 		unset( $_SERVER['REQUEST_URI'] );
 		unset( $_SERVER['REQUEST_METHOD'] );
@@ -1444,6 +1445,13 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertEquals( $initial_ob_level + 1, ob_get_level() );
 		ob_end_flush();
 		$this->assertEquals( $initial_ob_level, ob_get_level() );
+
+		// When this query var is present, this method should exit early, and shouldn't buffer the output.
+		$_GET[ AMP_Theme_Support::DISABLE_POST_PROCESSING_QUERY_VAR ] = '';
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$initial_ob_level = ob_get_level();
+		AMP_Theme_Support::start_output_buffering();
+		$this->assertEquals( $initial_ob_level, ob_get_level() );
 	}
 
 	/**
@@ -1730,7 +1738,14 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$last_server_timing_header = array_pop( $server_timing_headers );
 		$this->assertStringStartsWith( 'amp_processor_cache_hit;', $last_server_timing_header['value'] );
 		$this->assertCount( count( $server_timing_headers ), $initial_server_timing_headers );
+		$this->reset_post_processor_cache_effectiveness();
 
+		// Test that the response is not cached if a certain query var is present.
+		$_GET[ AMP_Theme_Support::DISABLE_RESPONSE_CACHE_QUERY_VAR ] = '';
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$call_prepare_response();
+		$server_timing_headers = $this->get_server_timing_headers();
+		$this->assertCount( count( $server_timing_headers ), $this->get_server_timing_headers() );
 		// phpcs:enable WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 	}
 
@@ -2088,6 +2103,24 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertEquals( home_url( '/?amp_validation_errors=1' ), $redirects[0] );
 		$this->assertEquals( 2, AMP_Theme_Support_Sanitizer_Counter::$count, 'Expected sanitizer to not now be invoked since previous validation results now cached.' );
 
+	}
+
+	/**
+	 * Test prevent_redirect_to_non_amp
+	 *
+	 * @covers AMP_Theme_Support::prevent_redirect_to_non_amp()
+	 */
+	public function test_prevent_redirect_to_non_amp() {
+		// The query var isn't present, and the user doesn't have the right permission.
+		$this->assertFalse( AMP_Theme_Support::prevent_redirect_to_non_amp() );
+
+		// The query var is present, but the user doesn't have the right permission.
+		$_GET[ AMP_Theme_Support::PREVENT_REDIRECT_TO_NON_AMP_QUERY_VAR ] = '';
+		$this->assertFalse( AMP_Theme_Support::prevent_redirect_to_non_amp() );
+
+		// Now that the user has the right permission, this should be true.
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$this->assertTrue( AMP_Theme_Support::prevent_redirect_to_non_amp() );
 	}
 
 	/**

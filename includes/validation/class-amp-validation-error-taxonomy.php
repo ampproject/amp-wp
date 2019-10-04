@@ -111,6 +111,13 @@ class AMP_Validation_Error_Taxonomy {
 	const VALIDATION_ERRORS_CLEARED_QUERY_VAR = 'amp_validation_errors_cleared';
 
 	/**
+	 * Query var to reject all validation errors.
+	 *
+	 * @var string
+	 */
+	const REJECT_ALL_VALIDATION_ERRORS_QUERY_VAR = 'reject_all_errors';
+
+	/**
 	 * The <option> value to not filter at all, like for 'All Statuses'.
 	 *
 	 * This is also used in WP_List_Table, like for the 'Bulk Actions' option.
@@ -463,6 +470,11 @@ class AMP_Validation_Error_Taxonomy {
 		if ( isset( AMP_Validation_Manager::$validation_error_status_overrides[ $term_data['slug'] ] ) ) {
 			$status = AMP_Validation_Manager::$validation_error_status_overrides[ $term_data['slug'] ];
 			$forced = 'with_preview';
+		}
+
+		if ( isset( $_GET[ self::REJECT_ALL_VALIDATION_ERRORS_QUERY_VAR ] ) && AMP_Validation_Manager::has_cap() ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$status = self::VALIDATION_ERROR_ACK_REJECTED_STATUS;
+			$forced = 'with_query_var';
 		}
 
 		/**

@@ -31,6 +31,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 	 */
 	public function tearDown() {
 		$_REQUEST = [];
+		$_GET     = [];
 		remove_theme_support( AMP_Theme_Support::SLUG );
 		AMP_Theme_Support::read_theme_support();
 		remove_filter( 'amp_validation_error_sanitized', '__return_true' );
@@ -368,6 +369,19 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 				'term_status' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
 			],
 			AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $error_bar )
+		);
+
+		// New rejected => Ack rejected, as the query var should force this to be rejected.
+		$_GET[ AMP_Validation_Error_Taxonomy::REJECT_ALL_VALIDATION_ERRORS_QUERY_VAR ] = '';
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$this->assertfalse( AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $error_foo ) );
+		$this->assertEquals(
+			[
+				'forced'      => 'with_query_var',
+				'status'      => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS,
+				'term_status' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS,
+			],
+			AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $error_foo )
 		);
 	}
 
