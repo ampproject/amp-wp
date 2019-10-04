@@ -9,7 +9,7 @@ import memize from 'memize';
  * @see https://github.com/bokuweb/re-resizable
  *
  * @param {number} number Given number.
- * @param {Array|Function<number>} snap List of snap targets or function that provides them.
+ * @param {Array.<number> | Function.<number>} snap List of snap targets or function that provides them.
  * @param {number} snapGap Minimum gap required in order to move to the next snapping target
  * @return {?number} Snap target if found.
  */

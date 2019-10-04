@@ -16,7 +16,7 @@ import { ResizableBox } from '@wordpress/components';
 import withSnapTargets from '../higher-order/with-snap-targets';
 import './edit.css';
 import { getPercentageFromPixels, getRelativeElementPosition } from '../../helpers';
-import { findClosestSnap } from '../../helpers/snapping';
+import { getBestSnapLines } from '../../helpers/snapping';
 import { TEXT_BLOCK_PADDING, BLOCK_RESIZING_SNAP_GAP } from '../../constants';
 import {
 	getBlockPositioning,
@@ -263,42 +263,17 @@ class EnhancedResizableBox extends Component {
 						left: actualLeft,
 					} = getRelativeElementPosition( blockElement.querySelector( '.wp-block' ), parentBlockElement );
 
-					const horizontalCenter = actualLeft + ( ( actualRight - actualLeft ) / 2 );
-					const verticalCenter = actualTop + ( ( actualBottom - actualTop ) / 2 );
-
-					const newSnapLines = [];
-
 					const snappingEnabled = ! event.getModifierState( 'Alt' );
 
 					if ( snappingEnabled ) {
-						// Go through all snap targets and find the one that is closest.
-						const findSnap = ( snapKeys, ...values ) => {
-							return values
-								.map( ( value ) => {
-									const snap = findClosestSnap( value, snapKeys, BLOCK_RESIZING_SNAP_GAP );
-									return [ value, snap ];
-								} )
-								.filter( ( arr ) => arr[ 1 ] !== null )
-								.sort( ( a, b ) => a[ 1 ] - b[ 1 ] )
-								.map( ( arr ) => arr[ 1 ] )
-								.shift();
-						};
-
-						const _horizontalSnaps = horizontalSnaps( actualTop, actualBottom );
-						const _horizontalSnapKeys = Object.keys( _horizontalSnaps );
-						const _verticalSnaps = verticalSnaps( actualLeft, actualRight );
-						const _verticalSnapKeys = Object.keys( _verticalSnaps );
-
-						const horizontalSnap = findSnap( _horizontalSnapKeys, actualLeft, actualRight, horizontalCenter );
-						const verticalSnap = findSnap( _verticalSnapKeys, actualTop, actualBottom, verticalCenter );
-
-						if ( horizontalSnap !== undefined ) {
-							newSnapLines.push( ..._horizontalSnaps[ horizontalSnap ] );
-						}
-
-						if ( verticalSnap !== undefined ) {
-							newSnapLines.push( ..._verticalSnaps[ verticalSnap ] );
-						}
+						const horizontalSnapsForPosition = horizontalSnaps( actualTop, actualBottom );
+						const verticalSnapsForPosition = verticalSnaps( actualLeft, actualRight );
+						setSnapLines( [
+							...getBestSnapLines( horizontalSnapsForPosition, actualLeft, actualRight, BLOCK_RESIZING_SNAP_GAP ),
+							...getBestSnapLines( verticalSnapsForPosition, actualTop, actualBottom, BLOCK_RESIZING_SNAP_GAP ),
+						] );
+					} else {
+						clearSnapLines();
 					}
 
 					lastWidth = appliedWidth;
@@ -316,12 +291,6 @@ class EnhancedResizableBox extends Component {
 					if ( imageWrapper && isImage ) {
 						imageWrapper.style.width = appliedWidth + 'px';
 						imageWrapper.style.height = appliedHeight + 'px';
-					}
-
-					if ( newSnapLines.length ) {
-						setSnapLines( newSnapLines );
-					} else if ( snapLines.length ) {
-						clearSnapLines();
 					}
 				} }
 			>

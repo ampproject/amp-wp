@@ -51,27 +51,11 @@ const getSetter = ( lowerBound, upperBound ) => ( obj, prop, value ) => {
 };
 
 /**
- * Straight line between two coordinates.
- *
- * @typedef {Array.<Array.<number, number>, Array.<number, number>>} Line
- */
-
-/**
- * Function that draws a line from A to B.
- *
- * @typedef {LineCreator} LineCreator
- * @param {number} offset Offset on the axis.
- * @param {number} [start] Starting point.
- * @param {number} [end] End point.
- * @return Line
- */
-
-/**
  * Create snap list via proxy that contains initial snap lines for edges and center of page.
  *
- * @param {LineCreator} getLine Function to create lines based off maximum value.
+ * @param {import('./types').LineCreator} getLine Function to create lines based off maximum value.
  * @param {number} maxValue Maximum value of page in this direction.
- * @return {Function} Function mapping an actual object's position to all possible snap targets.
+ * @return {import('./types').SnapLines} An initial list of snap lines ready to be extended.
  */
 const createSnapList = ( getLine, maxValue ) => new Proxy(
 	// Create initial list of snap lines.

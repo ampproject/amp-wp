@@ -24,7 +24,7 @@ import {
 	getRelativeElementPosition,
 	isCTABlock,
 } from '../../helpers';
-import { findClosestSnap } from '../../helpers/snapping';
+import { getBestSnapLines } from '../../helpers/snapping';
 import {
 	STORY_PAGE_INNER_WIDTH,
 	STORY_PAGE_INNER_HEIGHT,
@@ -76,7 +76,7 @@ class Draggable extends Component {
 	 * @param {Object} event The non-custom DragEvent.
 	 */
 	onDragEnd = ( event ) => {
-		const { clearHighlight, dropElementByOffset, blockName, setTimeout, snapLines, clearSnapLines, onDragEnd = noop } = this.props;
+		const { clearHighlight, dropElementByOffset, blockName, setTimeout, clearSnapLines, onDragEnd = noop } = this.props;
 		if ( event ) {
 			event.preventDefault();
 		}
@@ -111,9 +111,7 @@ class Draggable extends Component {
 
 		this.resetDragState();
 
-		if ( snapLines.length ) {
-			clearSnapLines();
-		}
+		clearSnapLines();
 
 		setTimeout( onDragEnd );
 	}
@@ -126,9 +124,8 @@ class Draggable extends Component {
 	onDragOver = ( event ) => { // eslint-disable-line complexity
 		const {
 			blockName,
-			snapLines,
-			clearSnapLines,
 			setSnapLines,
+			clearSnapLines,
 			parentBlockElement,
 			horizontalSnaps,
 			verticalSnaps,
@@ -154,47 +151,16 @@ class Draggable extends Component {
 			left: actualLeft,
 		} = getRelativeElementPosition( blockElement, parentBlockElement );
 
-		const horizontalCenter = ( actualRight + actualLeft ) / 2;
-		const verticalCenter = ( actualTop + actualBottom ) / 2;
-
-		const newSnapLines = [];
-
 		const snappingEnabled = ! event.getModifierState( 'Alt' );
 
 		if ( snappingEnabled ) {
-			// Go through all snap targets and find the one that is closest.
-			const findSnap = ( snapKeys, ...values ) => {
-				return values
-					.map( ( value ) => {
-						const snap = findClosestSnap( value, snapKeys, BLOCK_DRAGGING_SNAP_GAP );
-						return [ value, snap ];
-					} )
-					.filter( ( arr ) => arr[ 1 ] !== null )
-					.sort( ( a, b ) => a[ 1 ] - b[ 1 ] )
-					.map( ( arr ) => arr[ 1 ] )
-					.shift();
-			};
-
-			const _horizontalSnaps = horizontalSnaps( actualTop, actualBottom );
-			const _horizontalSnapKeys = Object.keys( _horizontalSnaps );
-			const _verticalSnaps = verticalSnaps( actualLeft, actualRight );
-			const _verticalSnapKeys = Object.keys( _verticalSnaps );
-
-			const horizontalSnap = findSnap( _horizontalSnapKeys, actualLeft, actualRight, horizontalCenter );
-			const verticalSnap = findSnap( _verticalSnapKeys, actualTop, actualBottom, verticalCenter );
-
-			if ( horizontalSnap !== undefined ) {
-				newSnapLines.push( ..._horizontalSnaps[ horizontalSnap ] );
-			}
-
-			if ( verticalSnap !== undefined ) {
-				newSnapLines.push( ..._verticalSnaps[ verticalSnap ] );
-			}
-		}
-
-		if ( newSnapLines.length ) {
-			setSnapLines( newSnapLines );
-		} else if ( snapLines.length ) {
+			const horizontalSnapsForPosition = horizontalSnaps( actualTop, actualBottom );
+			const verticalSnapsForPosition = verticalSnaps( actualLeft, actualRight );
+			setSnapLines( [
+				...getBestSnapLines( horizontalSnapsForPosition, actualLeft, actualRight, BLOCK_DRAGGING_SNAP_GAP ),
+				...getBestSnapLines( verticalSnapsForPosition, actualTop, actualBottom, BLOCK_DRAGGING_SNAP_GAP ),
+			] );
+		} else {
 			clearSnapLines();
 		}
 
@@ -250,7 +216,6 @@ class Draggable extends Component {
 			elementId,
 			transferData,
 			onDragStart = noop,
-			snapLines,
 			clearSnapLines,
 		} = this.props;
 		const blockIsCTA = isCTABlock( blockName );
@@ -338,9 +303,7 @@ class Draggable extends Component {
 			document.addEventListener( 'drop', this.onDrop );
 		}
 
-		if ( snapLines.length ) {
-			clearSnapLines();
-		}
+		clearSnapLines();
 
 		this.props.setTimeout( onDragStart );
 	}
