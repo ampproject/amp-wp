@@ -32,7 +32,7 @@ const getSetter = ( lowerBound, upperBound ) => ( obj, prop, value ) => {
 			);
 
 	if ( obj.hasOwnProperty( prop ) ) {
-		if ( ! hasSnapLine( value ) ) {
+		if ( hasSnapLine( value ) ) {
 			// We already have a completely identical snap line.
 			return true;
 		}
