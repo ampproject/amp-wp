@@ -1,8 +1,8 @@
 /**
  * Internal dependencies
  */
-import getPageBlockByName from './getPageBlockByName';
 import { ALLOWED_CHILD_BLOCKS } from '../constants';
+import getPageBlockByName from './getPageBlockByName';
 
 /**
  * Ensure that only allowed blocks are pasted.

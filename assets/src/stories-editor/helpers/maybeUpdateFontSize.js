@@ -6,9 +6,9 @@ import { dispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
+import { MAX_FONT_SIZE, MIN_FONT_SIZE } from '../../common/constants';
 import calculateFontSize from './calculateFontSize';
 import getBlockInnerTextElement from './getBlockInnerTextElement';
-import { MAX_FONT_SIZE, MIN_FONT_SIZE } from '../../common/constants';
 
 const { updateBlockAttributes } = dispatch( 'core/block-editor' );
 
