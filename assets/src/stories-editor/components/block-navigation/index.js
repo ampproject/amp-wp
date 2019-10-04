@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { withSelect, withDispatch } from '@wordpress/data';
+import { withSelect, useSelect, useDispatch } from '@wordpress/data';
 import { DropZoneProvider, NavigableMenu } from '@wordpress/components';
 import { compose, ifCondition } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
@@ -18,7 +18,9 @@ import { isMovableBlock } from '../../helpers';
 import BlockNavigationItem from './item';
 import './edit.css';
 
-function BlockNavigationList( { blocks, selectedBlockClientId, selectBlock, unMovableBlock } ) {
+function BlockNavigationList( { blocks, selectedBlockClientId, unMovableBlock } ) {
+	const { selectBlock } = useDispatch( 'core/block-editor' );
+
 	return (
 		/*
 		 * Disable reason: The `list` ARIA role is redundant but
@@ -67,13 +69,33 @@ BlockNavigationList.propTypes = {
 		clientId: PropTypes.string.isRequired,
 	} ) ).isRequired,
 	selectedBlockClientId: PropTypes.string,
-	selectBlock: PropTypes.func.isRequired,
 	unMovableBlock: PropTypes.shape( {
 		clientId: PropTypes.string.isRequired,
 	} ),
 };
 
-function BlockNavigation( { unMovableBlock, blocks, selectBlock, selectedBlockClientId } ) {
+function BlockNavigation() {
+	const {
+		blocks,
+		unMovableBlock,
+		selectedBlockClientId,
+	} = useSelect( ( select ) => {
+		const { getCurrentPage } = select( 'amp/story' );
+		const { getBlockOrder, getBlocksByClientId, getSelectedBlockClientId } = select( 'core/block-editor' );
+
+		const allBlocks = getCurrentPage() ? getBlocksByClientId( getBlockOrder( getCurrentPage() ) ) : [];
+		const movableBlocks = allBlocks.filter( ( { name } ) => isMovableBlock( name ) ).reverse();
+
+		// Let's get the CTA/Attachment block to handle it separately.
+		const _unMovableBlock = allBlocks.find( ( { name } ) => ! isMovableBlock( name ) );
+
+		return {
+			blocks: movableBlocks,
+			unMovableBlock: _unMovableBlock,
+			selectedBlockClientId: getSelectedBlockClientId(),
+		};
+	}, [] );
+
 	const hasBlocks = blocks.length > 0 || unMovableBlock;
 
 	return (
@@ -88,7 +110,6 @@ function BlockNavigation( { unMovableBlock, blocks, selectBlock, selectedBlockCl
 				<BlockNavigationList
 					blocks={ blocks }
 					selectedBlockClientId={ selectedBlockClientId }
-					selectBlock={ selectBlock }
 					unMovableBlock={ unMovableBlock }
 				/>
 			) }
@@ -101,39 +122,12 @@ function BlockNavigation( { unMovableBlock, blocks, selectBlock, selectedBlockCl
 	);
 }
 
-BlockNavigation.propTypes = {
-	unMovableBlock: PropTypes.shape( {
-		clientId: PropTypes.string.isRequired,
-	} ),
-	blocks: PropTypes.arrayOf( PropTypes.shape( {
-		clientId: PropTypes.string.isRequired,
-	} ) ).isRequired,
-	selectedBlockClientId: PropTypes.string,
-	selectBlock: PropTypes.func.isRequired,
-};
-
 export default compose(
 	withSelect( ( select ) => {
-		const { getCurrentPage, isReordering } = select( 'amp/story' );
-		const { getBlockOrder, getBlocksByClientId, getSelectedBlockClientId } = select( 'core/block-editor' );
+		const { isReordering } = select( 'amp/story' );
 
-		let blocks = getCurrentPage() ? getBlocksByClientId( getBlockOrder( getCurrentPage() ) ) : [];
-		// Let's get the CTA/Attachment block to handle it separately.
-		const unMovableBlock = blocks.find( ( { name } ) => ! isMovableBlock( name ) );
-		blocks = blocks.filter( ( { name } ) => isMovableBlock( name ) ).reverse();
 		return {
-			blocks,
-			unMovableBlock,
-			selectedBlockClientId: getSelectedBlockClientId(),
 			isReordering: isReordering(),
-		};
-	} ),
-	withDispatch( ( dispatch, { onSelect = () => undefined } ) => {
-		return {
-			selectBlock( clientId ) {
-				dispatch( 'core/block-editor' ).selectBlock( clientId );
-				onSelect( clientId );
-			},
 		};
 	} ),
 	ifCondition( ( { isReordering } ) => ! isReordering ),
