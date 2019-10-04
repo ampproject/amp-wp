@@ -1447,7 +1447,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertEquals( $initial_ob_level, ob_get_level() );
 
 		// When this query var is present, this method should exit early, and shouldn't buffer the output.
-		$_GET[ AMP_Theme_Support::DISABLE_POST_PROCESSING_QUERY_VAR ] = '';
+		$_GET[ AMP_Theme_Support::AMP_FLAGS_QUERY_VAR ][ AMP_Theme_Support::DISABLE_POST_PROCESSING_QUERY_VAR ] = '';
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		$initial_ob_level = ob_get_level();
 		AMP_Theme_Support::start_output_buffering();
@@ -1741,7 +1741,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->reset_post_processor_cache_effectiveness();
 
 		// Test that the response is not cached if a certain query var is present.
-		$_GET[ AMP_Theme_Support::DISABLE_RESPONSE_CACHE_QUERY_VAR ] = '';
+		$_GET[ AMP_Theme_Support::AMP_FLAGS_QUERY_VAR ][ AMP_Theme_Support::DISABLE_RESPONSE_CACHE_QUERY_VAR ] = '';
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		$call_prepare_response();
 		$server_timing_headers = $this->get_server_timing_headers();
@@ -2115,7 +2115,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertFalse( AMP_Theme_Support::prevent_redirect_to_non_amp() );
 
 		// The query var is present, but the user doesn't have the right permission.
-		$_GET[ AMP_Theme_Support::PREVENT_REDIRECT_TO_NON_AMP_QUERY_VAR ] = '';
+		$_GET[ AMP_Theme_Support::AMP_FLAGS_QUERY_VAR ][ AMP_Theme_Support::PREVENT_REDIRECT_TO_NON_AMP_QUERY_VAR ] = '';
 		$this->assertFalse( AMP_Theme_Support::prevent_redirect_to_non_amp() );
 
 		// Now that the user has the right permission, this should be true.

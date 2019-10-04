@@ -96,6 +96,13 @@ class AMP_Theme_Support {
 	const READER_MODE_TEMPLATE_DIRECTORY = 'amp';
 
 	/**
+	 * A top-level query var for AMP flags.
+	 *
+	 * @var string
+	 */
+	const AMP_FLAGS_QUERY_VAR = 'amp_flags';
+
+	/**
 	 * A query var to disable post processing.
 	 *
 	 * @var string
@@ -1893,7 +1900,7 @@ class AMP_Theme_Support {
 			newrelic_disable_autorum();
 		}
 
-		if ( isset( $_GET[ self::DISABLE_POST_PROCESSING_QUERY_VAR ] ) && AMP_Validation_Manager::has_cap() ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET[ self::AMP_FLAGS_QUERY_VAR ][ self::DISABLE_POST_PROCESSING_QUERY_VAR ] ) && AMP_Validation_Manager::has_cap() ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			return;
 		}
 
@@ -2026,7 +2033,7 @@ class AMP_Theme_Support {
 		 * @param bool $enable_response_caching Whether response caching is enabled.
 		 */
 		$enable_response_caching    = apply_filters( 'amp_response_caching_enabled', ! ( defined( 'WP_DEBUG' ) && WP_DEBUG ) || ! empty( $args['enable_response_caching'] ) );
-		$is_disabled_with_query_var = isset( $_GET[ self::DISABLE_RESPONSE_CACHE_QUERY_VAR ] ) && AMP_Validation_Manager::has_cap(); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$is_disabled_with_query_var = isset( $_GET[ self::AMP_FLAGS_QUERY_VAR ][ self::DISABLE_RESPONSE_CACHE_QUERY_VAR ] ) && AMP_Validation_Manager::has_cap(); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		$enable_response_caching = (
 			$enable_response_caching
@@ -2316,13 +2323,7 @@ class AMP_Theme_Support {
 				}
 
 				// Remove debugging query args.
-				$non_amp_url = remove_query_arg(
-					[
-						self::DISABLE_RESPONSE_CACHE_QUERY_VAR,
-						AMP_Validation_Error_Taxonomy::REJECT_ALL_VALIDATION_ERRORS_QUERY_VAR,
-					],
-					$non_amp_url
-				);
+				$non_amp_url = remove_query_arg( self::AMP_FLAGS_QUERY_VAR, $non_amp_url );
 
 				/*
 				 * Temporary redirect because AMP page may return with blocking validation errors when auto-accepting sanitization
@@ -2369,7 +2370,7 @@ class AMP_Theme_Support {
 	 * @return bool Whether the prevent a redirect.
 	 */
 	public static function prevent_redirect_to_non_amp() {
-		return isset( $_GET[ self::PREVENT_REDIRECT_TO_NON_AMP_QUERY_VAR ] ) && AMP_Validation_Manager::has_cap(); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return isset( $_GET[ self::AMP_FLAGS_QUERY_VAR ][ self::PREVENT_REDIRECT_TO_NON_AMP_QUERY_VAR ] ) && AMP_Validation_Manager::has_cap(); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 
 	/**

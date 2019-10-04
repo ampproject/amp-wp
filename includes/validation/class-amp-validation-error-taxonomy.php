@@ -281,6 +281,16 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		self::accept_validation_errors( AMP_Core_Theme_Sanitizer::get_acceptable_errors( get_template() ) );
+
+		if ( isset( $_GET[ AMP_Theme_Support::AMP_FLAGS_QUERY_VAR ][ self::REJECT_ALL_VALIDATION_ERRORS_QUERY_VAR ] ) && AMP_Validation_Manager::has_cap() ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			add_filter(
+				'amp_validation_error_sanitized',
+				static function( $sanitized ) {
+					unset( $sanitized );
+					return false;
+				}
+			);
+		}
 	}
 
 	/**
@@ -517,10 +527,6 @@ class AMP_Validation_Error_Taxonomy {
 			static function( $sanitized, $error ) use ( $acceptable_errors ) {
 				if ( true === $acceptable_errors ) {
 					return true;
-				}
-
-				if ( isset( $_GET[ self::REJECT_ALL_VALIDATION_ERRORS_QUERY_VAR ] ) && AMP_Validation_Manager::has_cap() ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-					return false;
 				}
 
 				if ( isset( $acceptable_errors[ $error['code'] ] ) ) {
