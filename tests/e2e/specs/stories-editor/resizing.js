@@ -337,7 +337,7 @@ describe( 'Resizing', () => {
 
 			// Rotate the block and try again.
 			await rotateSelectedBlock();
-			await dragAndResize( resizableHandleTop, { x: 300, y: 0 } );
+			await dragAndResize( resizableHandleTop, { x: 0, y: 250 } );
 			const { positionTop: positionTopRotated } = await getSelectedBlockPosition();
 			expect( positionTopRotated ).toStrictEqual( positionTopBefore );
 		} );
