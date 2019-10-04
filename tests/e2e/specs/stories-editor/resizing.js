@@ -314,7 +314,7 @@ describe( 'Resizing', () => {
 			const { positionLeft } = await getSelectedBlockPosition();
 			expect( positionLeft ).toStrictEqual( positionLeftBefore );
 
-			// Rotate the block and try again.
+			// Rotate the block and try again. This will rotate the block -75 degrees.
 			await rotateSelectedBlock();
 			await dragAndResize( resizableHandleLeft, { x: 300, y: 0 } );
 			const { positionLeft: positionLeftRotated } = await getSelectedBlockPosition();
@@ -335,7 +335,7 @@ describe( 'Resizing', () => {
 			const { positionTop } = await getSelectedBlockPosition();
 			expect( positionTop ).toStrictEqual( positionTopBefore );
 
-			// Rotate the block and try again.
+			// Rotate the block and try again. This will rotate the block -75 degrees.
 			await rotateSelectedBlock();
 			await dragAndResize( resizableHandleTop, { x: 0, y: 250 } );
 			const { positionTop: positionTopRotated } = await getSelectedBlockPosition();
