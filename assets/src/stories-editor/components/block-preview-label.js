@@ -101,7 +101,6 @@ const BlockPreviewLabel = ( { block, label, displayIcon = true, alignIcon = 'lef
 };
 
 BlockPreviewLabel.propTypes = {
-	content: PropTypes.string.isRequired,
 	block: PropTypes.object,
 	label: PropTypes.string,
 	displayIcon: PropTypes.bool,
