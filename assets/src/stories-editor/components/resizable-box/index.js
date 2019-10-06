@@ -53,6 +53,7 @@ class EnhancedResizableBox extends Component {
 			angle,
 			blockName,
 			ampFitText,
+			hasTextContent,
 			minWidth,
 			minHeight,
 			onResizeStart,
@@ -158,6 +159,10 @@ class EnhancedResizableBox extends Component {
 					if ( ampFitText && isText ) {
 						textBlockWrapper = blockElement.querySelector( '.with-line-height' );
 					} else {
+						// If the textBlockWrapper was set previously, make sure it's line height is reset, too.
+						if ( textBlockWrapper ) {
+							textBlockWrapper.style.lineHeight = 'initial';
+						}
 						textBlockWrapper = null;
 					}
 
@@ -178,12 +183,16 @@ class EnhancedResizableBox extends Component {
 						height = blockElement.clientHeight;
 					}
 
+					// If the new width/height is below the minimum limit, set the minimum limit as the width/height instead.
 					let appliedWidth = minWidth <= width + deltaW ? width + deltaW : minWidth;
 					let appliedHeight = minHeight <= height + deltaH ? height + deltaH : minHeight;
 
 					const isReducing = 0 > deltaW || 0 > deltaH;
 
-					if ( textElement && isReducing ) {
+					// Track if resizing has reached its minimum limits to fit the text inside.
+					let reachedMinLimit = false;
+					// The following calculation is needed only when content has been added to the Text block.
+					if ( textElement && isReducing && hasTextContent ) {
 						// If we have a rotated block, let's assign the width and height for measuring.
 						// Without assigning the new measure, the calculation would be incorrect due to angle.
 						if ( angle ) {
@@ -197,9 +206,13 @@ class EnhancedResizableBox extends Component {
 							textElement.style.height = 'auto';
 						}
 
+						// If the applied measures get too small for text, use the previous measures instead.
 						const scrollWidth = textElement.scrollWidth;
 						const scrollHeight = textElement.scrollHeight;
+						// If the text goes over either of the edges, stop resizing from both sides
+						// since the text is filling in the room from both sides at the same time.
 						if ( appliedWidth < scrollWidth || appliedHeight < scrollHeight ) {
+							reachedMinLimit = true;
 							appliedWidth = lastWidth;
 							appliedHeight = lastHeight;
 						}
@@ -227,29 +240,33 @@ class EnhancedResizableBox extends Component {
 						lastDeltaW = deltaW;
 					}
 
-					const radianAngle = getRadianFromDeg( angle );
+					// If limits were not reached yet, do the calculations for positioning.
+					if ( ! reachedMinLimit ) {
+						const radianAngle = getRadianFromDeg( angle );
 
-					// Compare position between the initial and after resizing.
-					let initialPosition, resizedPosition;
+						// Compare position between the initial and after resizing.
+						let initialPosition, resizedPosition;
 
-					// If it's a text block, we shouldn't consider the added padding for measuring.
-					if ( isText ) {
-						initialPosition = getBlockPositioning( width - ( TEXT_BLOCK_PADDING * 2 ), height - ( TEXT_BLOCK_PADDING * 2 ), radianAngle, direction );
-						resizedPosition = getBlockPositioning( appliedWidth - ( TEXT_BLOCK_PADDING * 2 ), appliedHeight - ( TEXT_BLOCK_PADDING * 2 ), radianAngle, direction );
-					} else {
-						initialPosition = getBlockPositioning( width, height, radianAngle, direction );
-						resizedPosition = getBlockPositioning( appliedWidth, appliedHeight, radianAngle, direction );
+						// If it's a text block, we shouldn't consider the added padding for measuring.
+						if ( isText ) {
+							initialPosition = getBlockPositioning( width - ( TEXT_BLOCK_PADDING * 2 ), height - ( TEXT_BLOCK_PADDING * 2 ), radianAngle, direction );
+							resizedPosition = getBlockPositioning( appliedWidth - ( TEXT_BLOCK_PADDING * 2 ), appliedHeight - ( TEXT_BLOCK_PADDING * 2 ), radianAngle, direction );
+						} else {
+							initialPosition = getBlockPositioning( width, height, radianAngle, direction );
+							resizedPosition = getBlockPositioning( appliedWidth, appliedHeight, radianAngle, direction );
+						}
+
+						const diff = {
+							left: resizedPosition.left - initialPosition.left,
+							top: resizedPosition.top - initialPosition.top,
+						};
+
+						const originalPos = getResizedBlockPosition( direction, blockElementLeft, blockElementTop, lastDeltaW, lastDeltaH );
+						const updatedPos = getUpdatedBlockPosition( direction, originalPos, diff );
+
+						blockElement.style.left = getPercentageFromPixels( 'x', updatedPos.left ) + '%';
+						blockElement.style.top = getPercentageFromPixels( 'y', updatedPos.top ) + '%';
 					}
-					const diff = {
-						left: resizedPosition.left - initialPosition.left,
-						top: resizedPosition.top - initialPosition.top,
-					};
-
-					const originalPos = getResizedBlockPosition( direction, blockElementLeft, blockElementTop, lastDeltaW, lastDeltaH );
-					const updatedPos = getUpdatedBlockPosition( direction, originalPos, diff );
-
-					blockElement.style.left = getPercentageFromPixels( 'x', updatedPos.left ) + '%';
-					blockElement.style.top = getPercentageFromPixels( 'y', updatedPos.top ) + '%';
 
 					element.style.width = appliedWidth + 'px';
 					element.style.height = appliedHeight + 'px';
@@ -309,6 +326,7 @@ EnhancedResizableBox.propTypes = {
 	angle: PropTypes.number,
 	blockName: PropTypes.string,
 	clientId: PropTypes.string,
+	hasTextContent: PropTypes.number,
 	minWidth: PropTypes.number,
 	minHeight: PropTypes.number,
 	onResizeStart: PropTypes.func.isRequired,

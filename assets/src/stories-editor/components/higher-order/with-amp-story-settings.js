@@ -216,6 +216,7 @@ export default createHigherOrderComponent(
 			const {
 				ampFontFamily,
 				ampFitText,
+				content,
 				height,
 				width,
 				opacity,
@@ -254,6 +255,7 @@ export default createHigherOrderComponent(
 							width={ width }
 							height={ height }
 							angle={ rotationAngle }
+							hasTextContent={ Boolean( isTextBlock && content.length ) }
 							minHeight={ minHeight }
 							minWidth={ MIN_BLOCK_WIDTH }
 							onResizeStop={ ( value ) => {
