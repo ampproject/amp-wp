@@ -13,12 +13,19 @@ import { __experimentalGetSettings as getDateSettings, dateI18n } from '@wordpre
 import { __ } from '@wordpress/i18n';
 
 const BlockPreviewLabel = ( { block, label, displayIcon = true, alignIcon = 'left', accessibilityText = false } ) => {
-	const { attributes, name } = block;
-
 	const {
 		content,
 		icon,
 	} = useSelect( ( select ) => {
+		if ( ! block ) {
+			return {
+				content: label,
+				icon: null,
+			};
+		}
+
+		const { attributes, name } = block;
+
 		const { getEditedPostAttribute } = select( 'core/editor' );
 		const { getAuthors, getMedia } = select( 'core' );
 
@@ -84,7 +91,7 @@ const BlockPreviewLabel = ( { block, label, displayIcon = true, alignIcon = 'lef
 			content: label,
 			icon: blockType.icon,
 		};
-	}, [ name, attributes ] );
+	}, [ block ] );
 
 	return (
 		<>
