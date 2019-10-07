@@ -319,4 +319,4 @@ RightClickMenu.propTypes = {
 	insidePercentageY: PropTypes.number,
 };
 
-export default ( RightClickMenu );
+export default RightClickMenu;

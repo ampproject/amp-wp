@@ -154,7 +154,6 @@ describe( 'Right Click Menu', () => {
 		await openRightClickMenu( ctaBlock );
 		const duplicateSelector = 'right-click-previous-page';
 		expect( page ).not.toMatchElement( duplicateSelector );
-
 	} );
 
 	it( 'should not allow pasting disallowed blocks', async () => {
