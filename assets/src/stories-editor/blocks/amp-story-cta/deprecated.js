@@ -15,7 +15,7 @@ import { RichText } from '@wordpress/block-editor';
 import {
 	getClassNameFromBlockAttributes,
 	getStylesFromBlockAttributes,
-	getUniqueId
+	getUniqueId,
 } from '../../helpers';
 
 const blockAttributes = {
@@ -92,12 +92,12 @@ CallToActionSaveV121.propTypes = {
 };
 
 /**
- * Deprecated save function for plugin version 1.3.1
+ * Deprecated save function which was used last for plugin version 1.3.0
  *
  * @param {Object} attributes Attributes.
  * @return {*} CTA save.
  */
-const CallToActionSaveV131 = ( { attributes } ) => {
+const CallToActionSaveV130 = ( { attributes } ) => {
 	const {
 		anchor,
 		btnPositionLeft,
@@ -125,7 +125,7 @@ const CallToActionSaveV131 = ( { attributes } ) => {
 	);
 };
 
-CallToActionSaveV131.propTypes = {
+CallToActionSaveV130.propTypes = {
 	attributes: PropTypes.shape( {
 		anchor: PropTypes.string,
 		url: PropTypes.string,
@@ -164,7 +164,7 @@ const deprecated = [
 			...blockAttributes,
 		},
 
-		save: CallToActionSaveV131,
+		save: CallToActionSaveV130,
 	},
 ];
 

@@ -54,6 +54,8 @@ CallToActionSave.propTypes = {
 		text: PropTypes.string,
 		btnPositionLeft: PropTypes.number,
 		btnPositionTop: PropTypes.number,
+		btnWidth: PropTypes.number,
+		btnHeight: PropTypes.number,
 		backgroundColor: PropTypes.shape( {
 			color: PropTypes.string,
 			name: PropTypes.string,
