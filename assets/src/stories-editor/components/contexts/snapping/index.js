@@ -13,7 +13,8 @@ import { createContext, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { STORY_PAGE_INNER_HEIGHT, STORY_PAGE_INNER_WIDTH } from '../../constants';
+import { STORY_PAGE_INNER_HEIGHT, STORY_PAGE_INNER_WIDTH } from '../../../constants';
+import './edit.css';
 
 const SnapContext = createContext();
 
@@ -34,11 +35,7 @@ const Snapping = ( { children } ) => {
 			{ Boolean( snapLines.length ) && (
 				<SVG
 					viewBox={ `0 0 ${ STORY_PAGE_INNER_WIDTH } ${ STORY_PAGE_INNER_HEIGHT }` }
-					style={ {
-						position: 'absolute',
-						top: 0,
-						pointerEvents: 'none',
-					} }
+					className="amp-story-page-snap-lines"
 				>
 					{ snapLines.map( ( [ [ x1, y1 ], [ x2, y2 ] ], index ) => (
 						<line
@@ -47,8 +44,6 @@ const Snapping = ( { children } ) => {
 							y1={ y1 }
 							x2={ x2 }
 							y2={ y2 }
-							stroke="red"
-							pointerEvents="none"
 						/>
 					) ) }
 				</SVG>
