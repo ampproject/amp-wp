@@ -134,6 +134,10 @@ div[data-type="amp/amp-story-cta"] .amp-overlay {
 	width: auto;
 }
 
+.amp-block-story-cta__inline-link .block-editor-url-input input[type="text"] {
+	border: 1px solid #ddd;
+}
+
 .amp-block-story-cta__inline-link .block-editor-url-input__suggestions {
 	width: calc(300px + 2px);
 	z-index: 10;
