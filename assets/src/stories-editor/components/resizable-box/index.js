@@ -32,7 +32,8 @@ import {
 	getBlockTextElement,
 } from './helpers';
 
-let lastSeenX = 0,
+let ampFitTextElement = null,
+	lastSeenX = 0,
 	lastSeenY = 0,
 	lastWidth,
 	lastHeight,
@@ -142,7 +143,8 @@ class EnhancedResizableBox extends Component {
 					if ( isImage ) {
 						imageWrapper = blockElement.querySelector( 'figure .components-resizable-box__container' );
 					}
-					textElement = ! ampFitText ? getBlockTextElement( blockName, blockElement ) : null;
+					textElement = getBlockTextElement( blockName, blockElement );
+					ampFitTextElement = ampFitText ? blockElement.querySelector( '.is-amp-fit-text' ) : null;
 
 					if ( ampFitText && isText ) {
 						textBlockWrapper = blockElement.querySelector( '.with-line-height' );
@@ -190,14 +192,26 @@ class EnhancedResizableBox extends Component {
 						}
 
 						// If the applied measures get too small for text, use the previous measures instead.
-						const scrollWidth = textElement.scrollWidth;
-						const scrollHeight = textElement.scrollHeight;
-						// If the text goes over either of the edges, stop resizing from both sides
-						// since the text is filling in the room from both sides at the same time.
+						let scrollWidth = textElement.scrollWidth;
+						let scrollHeight = textElement.scrollHeight;
+
 						if ( appliedWidth < scrollWidth || appliedHeight < scrollHeight ) {
-							reachedMinLimit = true;
-							appliedWidth = lastWidth;
-							appliedHeight = lastHeight;
+							// If we have amp-fit-text on, then reduce the font size to prevent the block
+							// shifting due to font size not fitting.
+							if ( ampFitTextElement ) {
+								while ( appliedWidth < scrollWidth || appliedHeight < scrollHeight ) {
+									const fontSize = parseInt( ampFitTextElement.style.fontSize );
+									ampFitTextElement.style.fontSize = ( fontSize - 1 ) + 'px';
+									scrollWidth = textElement.scrollWidth;
+									scrollHeight = textElement.scrollHeight;
+								}
+							} else {
+								// If the text goes over either of the edges, stop resizing from both sides
+								// since the text is filling in the room from both sides at the same time.
+								reachedMinLimit = true;
+								appliedWidth = lastWidth;
+								appliedHeight = lastHeight;
+							}
 						}
 						// If we have rotated block, let's restore the correct measures.
 						if ( angle ) {
