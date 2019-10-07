@@ -435,6 +435,9 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'
 					<html amp><head>
 					<style> .amp-viewer { color: blue; } </style>
+					<style> .amp-mode-touch { color: blanchedalmond; } </style>
+					<style> .amp-mode-mouse { color: bisque; } </style>
+					<style> .amp-mode-keyboard-active { color: burlywood; } </style>
 					<style> .amp-referrer-www-google-com { color: red; } </style>
 					<style> .amp-active { color: green } </style>
 					<style> .amp-carousel-slide { outline: solid 1px red; } </style>
@@ -456,6 +459,9 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				',
 				[
 					'.amp-viewer{color:blue}',
+					'.amp-mode-touch{color:blanchedalmond}',
+					'.amp-mode-mouse{color:bisque}',
+					'.amp-mode-keyboard-active{color:burlywood}',
 					'.amp-referrer-www-google-com{color:red}',
 					'', // Because there is no <form>, <amp-carousel>, and no non-existent.
 				],
