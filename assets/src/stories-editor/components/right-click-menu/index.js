@@ -69,7 +69,7 @@ const RightClickMenu = ( props ) => {
 
 	const { setCopiedMarkup } = useDispatch( 'amp/story' );
 
-	const { __experimentalCanUserUseUnfilteredHTML: canUserUseUnfilteredHTML } = getSettings();
+	const { __experimentalCanUserUseUnfilteredHTML: canUserUseUnfilteredHTML, isRTL } = getSettings();
 
 	const isBlockAllowedOnPage = useIsBlockAllowedOnPage();
 
@@ -229,7 +229,7 @@ const RightClickMenu = ( props ) => {
 								name: __( 'Send block to previous page', 'amp' ),
 								blockAction: moveBlockToPage,
 								params: [ prevPage ],
-								icon: 'arrow-left-alt',
+								icon: isRTL ? 'arrow-right-alt' : 'arrow-left-alt',
 								className: 'right-click-previous-page',
 							},
 						);
@@ -243,7 +243,7 @@ const RightClickMenu = ( props ) => {
 								name: __( 'Send block to next page', 'amp' ),
 								blockAction: moveBlockToPage,
 								params: [ nextPage ],
-								icon: 'arrow-right-alt',
+								icon: isRTL ? 'arrow-left-alt' : 'arrow-right-alt',
 								className: 'right-click-next-page',
 							},
 						);
