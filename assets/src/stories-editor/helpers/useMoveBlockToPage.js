@@ -59,7 +59,7 @@ const useMoveBlockToPage = ( blockId ) => {
 
 		// Switch to new page.
 		setCurrentPage( pageId );
-		selectBlock( pageId );
+		selectBlock( clonedBlock.clientId );
 	};
 
 	return {

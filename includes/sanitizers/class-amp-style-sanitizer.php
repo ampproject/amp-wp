@@ -449,6 +449,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			 * Note that amp-referrer-* class names are handled in has_used_class_name() below.
 			 */
 			'amp-viewer',
+
+			// Classes added based on input mode. See <https://github.com/ampproject/amphtml/blob/master/spec/amp-css-classes.md#input-mode-classes>.
+			'amp-mode-touch',
+			'amp-mode-mouse',
+			'amp-mode-keyboard-active',
 		];
 
 		$classes = ' ';

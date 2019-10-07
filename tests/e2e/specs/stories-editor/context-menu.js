@@ -129,6 +129,54 @@ describe( 'Context Menu', () => {
 			expect( page ).not.toMatchElement( BLOCK_SELECTOR );
 		} );
 
+		it( 'should allow move to next page', async () => {
+			const firstPageClientId = ( await getAllBlocks() )[ 0 ].clientId;
+			await insertBlock( 'Page' );
+			await insertBlock( 'Page' );
+			await goToPreviousPage();
+			await goToPreviousPage();
+
+			await selectBlockByClientId( firstPageClientId );
+			await page.$( `#block-${ firstPageClientId }` );
+			// Wait for transition time 300ms.
+			await page.waitFor( 300 );
+
+			await page.$( ACTIVE_PAGE_SELECTOR );
+			let block = await page.$( BLOCK_SELECTOR );
+			await makeRightClick( block );
+
+			await page.waitForSelector( POPOVER_SELECTOR );
+
+			expect( page ).not.toMatchElement( POPOVER_SELECTOR + ' .right-click-previous-page' );
+			expect( page ).toMatchElement( POPOVER_SELECTOR + ' .right-click-next-page' );
+
+			await clickButton( 'Send block to next page' );
+			await page.waitForSelector( ACTIVE_PAGE_SELECTOR + ' ' + BLOCK_SELECTOR );
+			expect( page ).toMatchElement( ACTIVE_PAGE_SELECTOR + ' ' + BLOCK_SELECTOR );
+
+			block = await page.$( BLOCK_SELECTOR );
+			await makeRightClick( block );
+
+			await page.waitForSelector( POPOVER_SELECTOR );
+			expect( page ).toMatchElement( POPOVER_SELECTOR + ' .right-click-previous-page' );
+			expect( page ).toMatchElement( POPOVER_SELECTOR + ' .right-click-next-page' );
+
+			await clickButton( 'Send block to previous page' );
+			await page.waitForSelector( ACTIVE_PAGE_SELECTOR + ' ' + BLOCK_SELECTOR );
+			expect( page ).toMatchElement( ACTIVE_PAGE_SELECTOR + ' ' + BLOCK_SELECTOR );
+		} );
+
+		it( 'should not allow move disallowed blocks', async () => {
+			await insertBlock( 'Page' );
+			await insertBlock( 'Call to Action' );
+
+			const callToActionSelector = '.wp-block-amp-amp-story-cta';
+			const ctaBlock = await page.waitForSelector( callToActionSelector );
+			await makeRightClick( ctaBlock );
+			const duplicateSelector = 'right-click-previous-page';
+			expect( page ).not.toMatchElement( duplicateSelector );
+		} );
+
 		it( 'should not allow pasting disallowed blocks', async () => {
 			const firstPageClientId = ( await getAllBlocks() )[ 0 ].clientId;
 			await insertBlock( 'Page' );

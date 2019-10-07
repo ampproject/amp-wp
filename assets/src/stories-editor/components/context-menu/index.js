@@ -17,8 +17,7 @@ import {
 	NavigableMenu,
 	Popover,
 } from '@wordpress/components';
-import { withDispatch, withSelect } from '@wordpress/data';
-import { compose } from '@wordpress/compose';
+import { useDispatch, useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -28,6 +27,8 @@ import {
 	copyTextToClipBoard,
 	ensureAllowedBlocksOnPaste,
 	isPageBlock,
+	useIsBlockAllowedOnPage,
+	useMoveBlockToPage,
 } from '../../helpers';
 import { ALLOWED_MOVABLE_BLOCKS, DISABLE_DUPLICATE_BLOCKS } from '../../constants';
 import useOutsideClickChecker from './outside-click-checker';
@@ -44,15 +45,118 @@ const ContextMenu = ( props ) => {
 		clientY,
 		insidePercentageX,
 		insidePercentageY,
-		copyBlock,
-		cutBlock,
-		getBlock,
-		getCopiedMarkup,
-		removeBlock,
-		duplicateBlock,
-		pasteBlock,
 	} = props;
 	const [ isOpen, setIsOpen ] = useState( true );
+
+	const {
+		getBlock,
+		getBlockOrder,
+		getBlockRootClientId,
+		getSettings,
+	} = useSelect( ( select ) => select( 'core/block-editor' ), [] );
+
+	const {
+		getCopiedMarkup,
+		getCurrentPage,
+	} = useSelect( ( select ) => select( 'amp/story' ), [] );
+
+	const {
+		removeBlock,
+		insertBlock,
+		insertBlocks,
+		updateBlockAttributes,
+	} = useDispatch( 'core/block-editor' );
+
+	const { setCopiedMarkup } = useDispatch( 'amp/story' );
+
+	const { __experimentalCanUserUseUnfilteredHTML: canUserUseUnfilteredHTML, isRTL } = getSettings();
+
+	const isBlockAllowedOnPage = useIsBlockAllowedOnPage();
+
+	const copyBlock = ( clientId ) => {
+		const block = getBlock( clientId );
+		const serialized = serialize( block );
+
+		// Set the copied block to component state for being able to Paste.
+		setCopiedMarkup( serialized );
+		copyTextToClipBoard( serialized );
+	};
+
+	const getPageClientId = ( clientId ) => {
+		let pageClientId;
+		if ( isPageBlock( clientId ) ) {
+			const clickedBlock = getBlock( clientId );
+			pageClientId = clickedBlock.clientId;
+		} else {
+			pageClientId = getBlockRootClientId( clientId );
+		}
+		return pageClientId;
+	};
+
+	const processTextToPaste = ( text, clientId ) => {
+		const mode = 'BLOCKS';
+		const content = pasteHandler( {
+			HTML: '',
+			plainText: text,
+			mode,
+			tagName: null,
+			canUserUseUnfilteredHTML,
+		} );
+
+		const pageClientId = getPageClientId( clientId );
+
+		if ( ! pageClientId || ! content.length ) {
+			return;
+		}
+
+		const isFirstPage = getBlockOrder().indexOf( pageClientId ) === 0;
+		insertBlocks( ensureAllowedBlocksOnPaste( content, pageClientId, isFirstPage ), null, pageClientId ).then( ( { blocks } ) => {
+			for ( const block of blocks ) {
+				if ( ALLOWED_MOVABLE_BLOCKS.includes( block.name ) ) {
+					updateBlockAttributes( block.clientId, {
+						positionTop: insidePercentageY,
+						positionLeft: insidePercentageX,
+					} );
+				}
+			}
+		} ).catch( () => {} );
+	};
+
+	const cutBlock = ( clientId ) => {
+		// First copy block and then remove it.
+		copyBlock( clientId );
+		removeBlock( clientId );
+	};
+
+	const pasteBlock = ( clientId ) => {
+		const { navigator } = window;
+
+		if ( navigator.clipboard && navigator.clipboard.readText ) {
+			// We have to ask permissions for being able to read from clipboard.
+			navigator.clipboard.readText().
+				then( ( clipBoardText ) => {
+				// If got permission, paste from clipboard.
+					processTextToPaste( clipBoardText, clientId, insidePercentageY, insidePercentageX );
+				} ).catch( () => {
+				// If forbidden, use the markup from state instead.
+					const text = getCopiedMarkup();
+					processTextToPaste( text, clientId, insidePercentageY, insidePercentageX );
+				} );
+		} else {
+			const text = getCopiedMarkup();
+			processTextToPaste( text, clientId, insidePercentageY, insidePercentageX );
+		}
+	};
+	const duplicateBlock = ( clientId ) => {
+		const block = getBlock( clientId );
+		if ( DISABLE_DUPLICATE_BLOCKS.includes( block.name ) ) {
+			return;
+		}
+
+		const rootClientId = getBlockRootClientId( clientId );
+		const clonedBlock = cloneBlock( block );
+		insertBlock( clonedBlock, null, rootClientId );
+	};
 
 	useEffect( () => {
 		setIsOpen( true );
@@ -67,6 +171,8 @@ const ContextMenu = ( props ) => {
 	};
 
 	const containerRef = useRef( null );
+	const { moveBlockToPage, getPageByOffset } = useMoveBlockToPage( firstBlockClientId );
+
 	useOutsideClickChecker( containerRef, onClose );
 
 	const position = {
@@ -82,34 +188,75 @@ const ContextMenu = ( props ) => {
 			{
 				name: __( 'Copy Block', 'amp' ),
 				blockAction: copyBlock,
+				params: [ firstBlockClientId ],
 				icon: 'admin-page',
 				className: 'right-click-copy',
 			},
 			{
 				name: __( 'Cut Block', 'amp' ),
 				blockAction: cutBlock,
+				params: [ firstBlockClientId ],
 				icon: 'clipboard',
 				className: 'right-click-cut',
 			},
 
 		];
 
-		// Disable Duplicate Block option for cta and attachment blocks.
-		if ( block && ! DISABLE_DUPLICATE_BLOCKS.includes( block.name ) ) {
-			blockActions.push(
-				{
-					name: __( 'Duplicate Block', 'amp' ),
-					blockAction: duplicateBlock,
-					icon: 'admin-page',
-					className: 'right-click-duplicate',
-				},
-			);
+		if ( block ) {
+			// Disable Duplicate Block option for cta and attachment blocks.
+			if ( ! DISABLE_DUPLICATE_BLOCKS.includes( block.name ) ) {
+				blockActions.push(
+					{
+						name: __( 'Duplicate Block', 'amp' ),
+						blockAction: duplicateBlock,
+						params: [ firstBlockClientId ],
+						icon: 'admin-page',
+						className: 'right-click-duplicate',
+					},
+				);
+			}
+
+			const pageList = getBlockOrder();
+			const numPages = pageList.length;
+			if ( numPages > 1 ) {
+				const currentPage = getCurrentPage();
+				const currentPagePosition = pageList.indexOf( currentPage );
+				if ( currentPagePosition > 0 ) {
+					const prevPage = getPageByOffset( -1 );
+					if ( isBlockAllowedOnPage( block.name, prevPage ) ) {
+						blockActions.push(
+							{
+								name: __( 'Send block to previous page', 'amp' ),
+								blockAction: moveBlockToPage,
+								params: [ prevPage ],
+								icon: isRTL ? 'arrow-right-alt' : 'arrow-left-alt',
+								className: 'right-click-previous-page',
+							},
+						);
+					}
+				}
+				if ( currentPagePosition < ( numPages - 1 ) ) {
+					const nextPage = getPageByOffset( 1 );
+					if ( isBlockAllowedOnPage( block.name, nextPage ) ) {
+						blockActions.push(
+							{
+								name: __( 'Send block to next page', 'amp' ),
+								blockAction: moveBlockToPage,
+								params: [ nextPage ],
+								icon: isRTL ? 'arrow-left-alt' : 'arrow-right-alt',
+								className: 'right-click-next-page',
+							},
+						);
+					}
+				}
+			}
 		}
 
 		blockActions.push(
 			{
 				name: __( 'Remove Block', 'amp' ),
 				blockAction: removeBlock,
+				params: [ firstBlockClientId ],
 				icon: 'trash',
 				className: 'right-click-remove',
 			},
@@ -126,6 +273,7 @@ const ContextMenu = ( props ) => {
 			{
 				name: __( 'Paste', 'amp' ),
 				blockAction: pasteBlock,
+				params: [ firstBlockClientId, insidePercentageY, insidePercentageX ],
 				icon: 'pressthis',
 				className: 'right-click-paste',
 			}
@@ -150,7 +298,7 @@ const ContextMenu = ( props ) => {
 									className={ classnames( action.className, 'editor-block-settings-menu__control block-editor-block-settings-menu__control' ) }
 									onClick={ () => {
 										onClose();
-										action.blockAction( firstBlockClientId, insidePercentageY, insidePercentageX );
+										action.blockAction( ...action.params );
 									} }
 									icon={ action.icon }
 								>
@@ -171,139 +319,6 @@ ContextMenu.propTypes = {
 	clientY: PropTypes.number.isRequired,
 	insidePercentageX: PropTypes.number,
 	insidePercentageY: PropTypes.number,
-	copyBlock: PropTypes.func.isRequired,
-	cutBlock: PropTypes.func.isRequired,
-	getBlock: PropTypes.func.isRequired,
-	getCopiedMarkup: PropTypes.func.isRequired,
-	removeBlock: PropTypes.func.isRequired,
-	duplicateBlock: PropTypes.func.isRequired,
-	pasteBlock: PropTypes.func.isRequired,
 };
 
-const applyWithSelect = withSelect( ( select ) => {
-	const {
-		getBlock,
-		getBlockOrder,
-		getBlockRootClientId,
-		getSettings,
-	} = select( 'core/block-editor' );
-
-	const { getCopiedMarkup } = select( 'amp/story' );
-
-	return {
-		getBlock,
-		getBlockOrder,
-		getBlockRootClientId,
-		getSettings,
-		getCopiedMarkup,
-	};
-} );
-
-const applyWithDispatch = withDispatch( ( dispatch, props ) => {
-	const {
-		getBlock,
-		getBlockOrder,
-		getBlockRootClientId,
-		getCopiedMarkup,
-		getSettings,
-	} = props;
-	const {
-		removeBlock,
-		insertBlock,
-		insertBlocks,
-		updateBlockAttributes,
-	} = dispatch( 'core/block-editor' );
-
-	const { setCopiedMarkup } = dispatch( 'amp/story' );
-
-	const { __experimentalCanUserUseUnfilteredHTML: canUserUseUnfilteredHTML } = getSettings();
-
-	const copyBlock = ( clientId ) => {
-		const block = getBlock( clientId );
-		const serialized = serialize( block );
-
-		// Set the copied block to component state for being able to Paste.
-		setCopiedMarkup( serialized );
-		copyTextToClipBoard( serialized );
-	};
-
-	const processTextToPaste = ( text, clientId, insidePercentageY, insidePercentageX ) => {
-		const mode = 'BLOCKS';
-		const content = pasteHandler( {
-			HTML: '',
-			plainText: text,
-			mode,
-			tagName: null,
-			canUserUseUnfilteredHTML,
-		} );
-
-		const clickedBlock = getBlock( clientId );
-		// Get the page client ID to paste to.
-		let pageClientId;
-		if ( 'amp/amp-story-page' === clickedBlock.name ) {
-			pageClientId = clickedBlock.clientId;
-		} else {
-			pageClientId = getBlockRootClientId( clientId );
-		}
-
-		if ( ! pageClientId || ! content.length ) {
-			return;
-		}
-
-		const isFirstPage = getBlockOrder().indexOf( pageClientId ) === 0;
-		insertBlocks( ensureAllowedBlocksOnPaste( content, pageClientId, isFirstPage ), null, pageClientId ).then( ( { blocks } ) => {
-			for ( const block of blocks ) {
-				if ( ALLOWED_MOVABLE_BLOCKS.includes( block.name ) ) {
-					updateBlockAttributes( block.clientId, {
-						positionTop: insidePercentageY,
-						positionLeft: insidePercentageX,
-					} );
-				}
-			}
-		} ).catch( () => {} );
-	};
-
-	return {
-		removeBlock,
-		duplicateBlock( clientId ) {
-			const block = getBlock( clientId );
-			if ( DISABLE_DUPLICATE_BLOCKS.includes( block.name ) ) {
-				return;
-			}
-
-			const rootClientId = getBlockRootClientId( clientId );
-			const clonedBlock = cloneBlock( block );
-			insertBlock( clonedBlock, null, rootClientId );
-		},
-		copyBlock,
-		cutBlock( clientId ) {
-			// First copy block and then remove it.
-			copyBlock( clientId );
-			removeBlock( clientId );
-		},
-		pasteBlock( clientId, insidePercentageY, insidePercentageX ) {
-			const { navigator } = window;
-
-			if ( navigator.clipboard && navigator.clipboard.readText ) {
-				// We have to ask permissions for being able to read from clipboard.
-				navigator.clipboard.readText().
-					then( ( clipBoardText ) => {
-						// If got permission, paste from clipboard.
-						processTextToPaste( clipBoardText, clientId, insidePercentageY, insidePercentageX );
-					} ).catch( () => {
-						// If forbidden, use the markup from state instead.
-						const text = getCopiedMarkup();
-						processTextToPaste( text, clientId, insidePercentageY, insidePercentageX );
-					} );
-			} else {
-				const text = getCopiedMarkup();
-				processTextToPaste( text, clientId, insidePercentageY, insidePercentageX );
-			}
-		},
-	};
-} );
-
-export default compose(
-	applyWithSelect,
-	applyWithDispatch,
-)( ContextMenu );
+export default ContextMenu;
