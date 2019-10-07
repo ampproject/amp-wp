@@ -202,50 +202,52 @@ const RightClickMenu = ( props ) => {
 
 		];
 
-		// Disable Duplicate Block option for cta and attachment blocks.
-		if ( block && ! DISABLE_DUPLICATE_BLOCKS.includes( block.name ) ) {
-			blockActions.push(
-				{
-					name: __( 'Duplicate Block', 'amp' ),
-					blockAction: duplicateBlock,
-					params: [ firstBlockClientId ],
-					icon: 'admin-page',
-					className: 'right-click-duplicate',
-				},
-			);
-		}
-
-		const pageList = getBlockOrder();
-		const numPages = pageList.length;
-		if ( block && numPages > 1 ) {
-			const currentPage = getCurrentPage();
-			const currentPagePosition = pageList.indexOf( currentPage );
-			if ( currentPagePosition > 0 ) {
-				const prevPage = getPageByOffset( -1 );
-				if ( isBlockAllowedOnPage( block.name, prevPage ) ) {
-					blockActions.push(
-						{
-							name: __( 'Send block to previous page', 'amp' ),
-							blockAction: moveBlockToPage,
-							params: [ prevPage ],
-							icon: 'arrow-left-alt',
-							className: 'right-click-previous-page',
-						},
-					);
-				}
+		if ( block ) {
+			// Disable Duplicate Block option for cta and attachment blocks.
+			if ( ! DISABLE_DUPLICATE_BLOCKS.includes( block.name ) ) {
+				blockActions.push(
+					{
+						name: __( 'Duplicate Block', 'amp' ),
+						blockAction: duplicateBlock,
+						params: [ firstBlockClientId ],
+						icon: 'admin-page',
+						className: 'right-click-duplicate',
+					},
+				);
 			}
-			if ( currentPagePosition < ( numPages - 1 ) ) {
-				const nextPage = getPageByOffset( 1 );
-				if ( isBlockAllowedOnPage( block.name, nextPage ) ) {
-					blockActions.push(
-						{
-							name: __( 'Send block to next page', 'amp' ),
-							blockAction: moveBlockToPage,
-							params: [ nextPage ],
-							icon: 'arrow-right-alt',
-							className: 'right-click-next-page',
-						},
-					);
+
+			const pageList = getBlockOrder();
+			const numPages = pageList.length;
+			if ( numPages > 1 ) {
+				const currentPage = getCurrentPage();
+				const currentPagePosition = pageList.indexOf( currentPage );
+				if ( currentPagePosition > 0 ) {
+					const prevPage = getPageByOffset( -1 );
+					if ( isBlockAllowedOnPage( block.name, prevPage ) ) {
+						blockActions.push(
+							{
+								name: __( 'Send block to previous page', 'amp' ),
+								blockAction: moveBlockToPage,
+								params: [ prevPage ],
+								icon: 'arrow-left-alt',
+								className: 'right-click-previous-page',
+							},
+						);
+					}
+				}
+				if ( currentPagePosition < ( numPages - 1 ) ) {
+					const nextPage = getPageByOffset( 1 );
+					if ( isBlockAllowedOnPage( block.name, nextPage ) ) {
+						blockActions.push(
+							{
+								name: __( 'Send block to next page', 'amp' ),
+								blockAction: moveBlockToPage,
+								params: [ nextPage ],
+								icon: 'arrow-right-alt',
+								className: 'right-click-next-page',
+							},
+						);
+					}
 				}
 			}
 		}
