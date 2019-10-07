@@ -57,26 +57,28 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			// @todo Modal Menu (stripped with twentytwenty-js)
 			// @todo Primary Menu (stripped with twentytwenty-js)
 			// @todo Toggles (stripped with twentytwenty-js) - probably unneeded once the rest is done
-			'dequeue_scripts'        => [
+			'dequeue_scripts'                    => [
 				'twentytwenty-js',
 			],
-			'remove_actions'         => [
+			'remove_actions'                     => [
 				'wp_head' => [
 					'twentytwenty_no_js_class', // AMP is essentially no-js, with any interactivity added explicitly via amp-bind.
 				],
 			],
-			'add_smooth_scrolling'   => [
+			'add_smooth_scrolling'               => [
 				// @todo Only replaces twentytwenty.smoothscroll.scrollToAnchor, but not twentytwenty.smoothscroll.scrollToElement
 				'//a[ starts-with( @href, "#" ) and not( @href = "#" )and not( @href = "#0" ) and not( contains( @class, "do-not-scroll" ) ) and not( contains( @class, "skip-link" ) ) ]',
 			],
-			'wrap_modal_in_lightbox' => [
+			'wrap_modal_in_lightbox'             => [
 				// @todo Works alright apart from the fact that the scrollbar disappears, causing a repaint and the admin bar jumping around.
+				// @todo Styling needs to be adapted to get rid of the "display: none" styles when ".active".
 				'modal_id'             => 'mobile-menu',
 				'modal_content_xpath'  => '//div[ contains( @class, "menu-modal" ) ]',
 				'open_button_xpath'    => '//header[@id = "site-header"]//button[ contains( @class, "mobile-nav-toggle" ) ]',
 				'close_button_xpath'   => '//div[ contains( @class, "menu-modal" ) ]//button[ contains ( @class, "close-nav-toggle" ) ]',
 				'strip_wrapper_levels' => 1,
-			]
+			],
+			'add_twentytwenty_toggles' => [],
 		],
 
 		// Twenty Nineteen.
@@ -1602,6 +1604,15 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				break;
 			}
 
+			// Add class(es) of removed wrapper to lightbox to avoid breaking CSS selectors.
+			if ( $modal_content_node->hasAttribute( 'class' ) ) {
+				$classes = $modal_content_node->getAttribute( 'class' );
+				if ( $amp_lightbox->hasAttribute( 'class' ) ) {
+					$classes .= ' ' . $amp_lightbox->getAttribute( 'class' );
+				}
+				$amp_lightbox->setAttribute( 'class', $classes );
+			}
+
 			$modal_content_node = $modal_content_node->removeChild( $children[0] );
 
 			$strip_wrapper_levels--;
@@ -1610,17 +1621,184 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$amp_lightbox->appendChild( $modal_content_node );
 
 		// Adapt the open button.
-
 		$open_button_node->setAttribute( 'on', "tap:{$modal_id}" );
-
 		// @todo: Do we need to remove cruft here?
 		// <button class="toggle nav-toggle mobile-nav-toggle" data-toggle-target=".menu-modal" data-toggle-screen-lock="true" data-toggle-body-class="showing-menu-modal" aria-expanded="false" data-set-focus=".close-nav-toggle" on="tap:mobile-menu"></button>
 
 		// Adapt the close button.
-
 		$close_button_node->setAttribute( 'on', "tap:{$modal_id}.close" );
-
 		// @todo: Do we need to remove cruft here?
 		// <button class="toggle close-nav-toggle fill-children-current-color" data-toggle-target=".menu-modal" data-toggle-screen-lock="true" data-toggle-body-class="showing-menu-modal" aria-expanded="false" data-set-focus=".menu-modal" on="tap:mobile-menu.close"></button>
+	}
+
+	/**
+	 * Add generic toggle interactivity compat for the Twentytwenty theme.
+	 *
+	 * Toggles implemented in JS will be transformed into <amp-bind> equivalents,
+	 * with <amp-state> components storing the CSS classes to set.
+	 */
+	public function add_twentytwenty_toggles() {
+		$toggles = $this->xpath->query( '//*[ @data-toggle-target ]' );
+
+		if ( false === $toggles || 0 === $toggles->count() ) {
+			return;
+		}
+
+		$state = [];
+
+		foreach ( $toggles as $toggle ) {
+			// Bail early if the toggle already has previously defined interactivity.
+			if ( $toggle->hasAttribute( 'on' ) ) {
+				continue;
+			}
+
+			$toggle_target = $toggle->getAttribute( 'data-toggle-target' );
+			$id            = $this->get_toggle_id( $toggle_target, $state );
+
+			if ( 'next' === $toggle_target ) {
+				$target_node = $toggle->nextSibling;
+			} else if ( ! array_key_exists( $id, $state ) ) {
+				$target_xpath = $this->xpath_from_css_selector( $toggle_target );
+				if ( null === $target_xpath ) {
+					continue;
+				}
+
+				$target_nodes = $this->xpath->query( $target_xpath, $toggle );
+				if ( false === $target_nodes || 0 === count( $target_nodes ) ) {
+					continue;
+				}
+				$target_node = $target_nodes->item( 0 );
+
+			}
+
+			if ( ! $target_node ) {
+				continue;
+			}
+
+			$toggle_class = $toggle->hasAttribute( 'data-class-to-toggle' ) ? $toggle->getAttribute( 'data-class-to-toggle' ) : 'active';
+
+			$off_class = $target_node->hasAttribute( 'class' ) ? $target_node->getAttribute( 'class' ) : '';
+			$on_class  = empty( $off_class ) ? $toggle_class : "{$off_class} {$toggle_class}";
+
+			// If we got back an existing ID, then the toggle target was already targeted by a previous toggle,
+			//so we don't need to adapt the target, only the toggle (multiple toggles can target the same target node).
+			if ( ! array_key_exists( $id, $state ) ) {
+				$state[ $id ] = [
+					'on'           => $on_class,
+					'off'          => $off_class,
+					'css_selector' => $toggle_target,
+				];
+
+				// We can't use the regular "[class]" notation because of the PHP dom extension.
+				$target_node->setAttribute( 'data-amp-bind-class', "{$id} ? {$id}_classes['on'] : {$id}_classes['off']" );
+			}
+
+			$toggle->setAttribute( 'on', "tap:AMP.setState({{$id}: !{$id}})" );
+		}
+
+		// Add <amp-state> snippets to the document that contain the classes to use.
+		foreach ( $state as $id => $state_data ) {
+			$amp_state    = $this->dom->createElement( 'amp-state' );
+			$amp_state->setAttribute( 'id', "{$id}_classes" );
+			unset( $state_data['css_selector'] );
+			$script = $this->dom->createElement( 'script' );
+			$script->setAttribute( 'type', 'application/json' );
+			$script->appendChild( $this->dom->createTextNode( wp_json_encode( $state_data ) ) );
+			$amp_state->appendChild( $script );
+			$this->body->appendChild( $amp_state );
+		}
+
+	}
+
+	/**
+	 * Get the next toggle ID, or return a previous one for a same selector.
+	 *
+	 * @param string $css_selector Selector to get the toggle ID for.
+	 * @param array  $state        Associative array of existing state to check.
+	 * @return string Toggle ID to use.
+	 */
+	protected function get_toggle_id( $css_selector, $state ) {
+		static $index = 1;
+
+		if ( 'next' !== $css_selector ) {
+			foreach ( $state as $id => $state_data ) {
+				if ( $state_data['css_selector'] === $css_selector ) {
+					return $id;
+				}
+			}
+		}
+
+		$id = "_amp_toggle_{$index}";
+		$index ++;
+
+		return $id;
+	}
+
+	/**
+	 * Provides a "best guess" as to what XPath would mirror a given CSS
+	 * selector.
+	 *
+	 * This is a very simplistic conversion and will only work for very basic
+	 * CSS selectors. Therefore, it provides a filter for themes & plugins to
+	 * hook into to provide custom replacements.
+	 *
+	 * @param string $css_selector CSS selector to convert.
+	 * @return string|null XPath that closely mirrors the provided CSS
+	 *                     selector, or null if an error occurred.
+	 */
+	protected function xpath_from_css_selector( $css_selector ) {
+		// Start with basic clean-up.
+		$css_selector = trim( $css_selector );
+		$css_selector = preg_replace( '/\s+/', ' ', $css_selector );
+
+		/**
+		 * Provide a manual conversion from CSS selector to XPath query.
+		 *
+		 * @param string CSS selector that needs to be converted to XPath.
+		 * @return string XPath to use. Return the unchanged CSS selector if no conversion provided.
+		 */
+		$xpath = apply_filters( 'amp_xpath_from_css_selector', $css_selector );
+
+		// Bail early if the filter provided a conversion.
+		if ( ! empty( $xpath ) && $xpath !== $css_selector ) {
+			return $xpath;
+		}
+
+		$xpath             = '';
+		$direct_descendant = false;
+		$token             = strtok( $css_selector, ' ' );
+
+		while ( false !== $token ) {
+			$matches = [];
+
+			// Direct descendant.
+			if ( preg_match( '/^>$/', $token, $matches ) ) {
+				$direct_descendant = true;
+				$token             = strtok( ' ' );
+				continue;
+			}
+
+			// Single class.
+			if ( preg_match( '/^\.(?<class>[a-zA-Z0-9-_]*)$/', $token, $matches ) ) {
+				$descendant        = $direct_descendant ? '/' : '//';
+				$xpath             .= "{$descendant}*[ contains( concat( ' ', @class, ' ' ), ' {$matches['class']} ' ) ]";
+				$direct_descendant = false;
+				$token             = strtok( ' ' );
+				continue;
+			}
+
+			// Element.
+			if ( preg_match( '/^(?<element>[^.][a-zA-Z0-9-_]*)$/', $token, $matches ) ) {
+				$descendant        = $direct_descendant ? '/' : '//';
+				$xpath             .= "{$descendant}{$matches['element']}";
+				$direct_descendant = false;
+				$token             = strtok( ' ' );
+				continue;
+			}
+
+			$token = strtok( ' ' );
+		}
+
+		return $xpath;
 	}
 }
