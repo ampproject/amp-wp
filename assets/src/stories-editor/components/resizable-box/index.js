@@ -292,7 +292,7 @@ EnhancedResizableBox.propTypes = {
 	ampFitText: PropTypes.bool,
 	angle: PropTypes.number,
 	blockName: PropTypes.string,
-	hasTextContent: PropTypes.number,
+	hasTextContent: PropTypes.bool,
 	minWidth: PropTypes.number,
 	minHeight: PropTypes.number,
 	onResizeStart: PropTypes.func.isRequired,
