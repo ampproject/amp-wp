@@ -25,7 +25,12 @@ export default createHigherOrderComponent( ( BlockEdit ) => {
 			isInvalid,
 			originalBlockClientId,
 		} = useSelect( ( select ) => {
-			const { getBlockRootClientId, getBlock, getBlockOrder, getBlocksByClientId } = select( 'core/block-editor' );
+			const {
+				getBlockRootClientId,
+				getBlock,
+				getBlockOrder,
+				getBlocksByClientId,
+			} = select( 'core/block-editor' );
 
 			if ( ! isCTABlock( props.name ) ) {
 				return {};
