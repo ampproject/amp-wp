@@ -269,33 +269,77 @@ describe( 'Resizing', () => {
 			await selectBlockByClassName( 'wp-block-amp-story-text' );
 			// Click the toggle to disable automatic fitting
 			const fitToggle = await page.waitForSelector( '.components-toggle-control input' );
-			fitToggle.click();
+			await fitToggle.click();
 		} );
 
-		// TODO: unskip when this actually works. Currently non-fit text blocks can't be resized smaller, only larger.
-		// reported in #3199
-		// eslint-disable-next-line jest/no-disabled-tests
-		it.skip( 'should not resize smaller than the set minimum width and height', async () => {
-			let dimensions;
+		it( 'should not resize smaller than the set minimum width: bottom', async () => {
 			const resizableHandleBottom = await page.$( '.wp-block.is-selected .components-resizable-box__handle-bottom' );
 			await dragAndResize( resizableHandleBottom, { x: 0, y: -250 } );
-			dimensions = await getSelectedBlockDimensions();
+			const dimensions = await getSelectedBlockDimensions();
 			expect( dimensions.height ).toStrictEqual( textBlockMinHeight );
+		} );
 
+		it( 'should not resize smaller than the set minimum height: top', async () => {
 			const resizableHandleTop = await page.$( '.wp-block.is-selected .components-resizable-box__handle-top' );
 			await dragAndResize( resizableHandleTop, { x: 0, y: 250 } );
-			dimensions = await getSelectedBlockDimensions();
+			const dimensions = await getSelectedBlockDimensions();
 			expect( dimensions.height ).toStrictEqual( textBlockMinHeight );
+		} );
 
+		it( 'should not resize smaller than the set minimum width: left', async () => {
 			const resizableHandleLeft = await page.$( '.wp-block.is-selected .components-resizable-box__handle-left' );
 			await dragAndResize( resizableHandleLeft, { x: 300, y: 0 } );
-			dimensions = await getSelectedBlockDimensions();
+			const dimensions = await getSelectedBlockDimensions();
 			expect( dimensions.width ).toStrictEqual( textBlockMinWidth );
+		} );
 
+		it( 'should not resize smaller than the set minimum width: right', async () => {
 			const resizableHandleRight = await page.$( '.wp-block.is-selected .components-resizable-box__handle-right' );
 			await dragAndResize( resizableHandleRight, { x: -300, y: 0 } );
-			dimensions = await getSelectedBlockDimensions();
+			const dimensions = await getSelectedBlockDimensions();
 			expect( dimensions.width ).toStrictEqual( textBlockMinWidth );
+		} );
+
+		it( 'should not move the position of the block when the width is not changing: left', async () => {
+			// Ensure first that the block is already minimum width.
+			const resizableHandleLeft = await page.$( '.wp-block.is-selected .components-resizable-box__handle-left' );
+			await dragAndResize( resizableHandleLeft, { x: 300, y: 0 } );
+			const dimensions = await getSelectedBlockDimensions();
+			expect( dimensions.width ).toStrictEqual( textBlockMinWidth );
+
+			// Get the initial position.
+			const { positionLeft: positionLeftBefore } = await getSelectedBlockPosition();
+			// Try resizing again.
+			await dragAndResize( resizableHandleLeft, { x: 300, y: 0 } );
+			const { positionLeft } = await getSelectedBlockPosition();
+			expect( positionLeft ).toStrictEqual( positionLeftBefore );
+
+			// Rotate the block and try again. This will rotate the block -75 degrees.
+			await rotateSelectedBlock();
+			await dragAndResize( resizableHandleLeft, { x: 300, y: 0 } );
+			const { positionLeft: positionLeftRotated } = await getSelectedBlockPosition();
+			expect( positionLeftRotated ).toStrictEqual( positionLeftBefore );
+		} );
+
+		it( 'should not move the position of the block when the height is not changing: top', async () => {
+			// Ensure first that the block is already minimum height.
+			const resizableHandleTop = await page.$( '.wp-block.is-selected .components-resizable-box__handle-top' );
+			await dragAndResize( resizableHandleTop, { x: 0, y: 250 } );
+			const dimensions = await getSelectedBlockDimensions();
+			expect( dimensions.height ).toStrictEqual( textBlockMinHeight );
+
+			// Get the initial position.
+			const { positionTop: positionTopBefore } = await getSelectedBlockPosition();
+			// Try resizing again.
+			await dragAndResize( resizableHandleTop, { x: 0, y: 250 } );
+			const { positionTop } = await getSelectedBlockPosition();
+			expect( positionTop ).toStrictEqual( positionTopBefore );
+
+			// Rotate the block and try again. This will rotate the block -75 degrees.
+			await rotateSelectedBlock();
+			await dragAndResize( resizableHandleTop, { x: 0, y: 250 } );
+			const { positionTop: positionTopRotated } = await getSelectedBlockPosition();
+			expect( positionTopRotated ).toStrictEqual( positionTopBefore );
 		} );
 	} );
 

@@ -88,9 +88,9 @@ function CopyPasteHandler( { children, onCopy, clientId, isSelected } ) {
 }
 
 CopyPasteHandler.propTypes = {
-	children: PropTypes.object.isRequired,
+	children: PropTypes.node.isRequired,
 	clientId: PropTypes.string.isRequired,
-	isSelected: PropTypes.bool.isRequired,
+	isSelected: PropTypes.bool,
 	onCopy: PropTypes.func.isRequired,
 };
 

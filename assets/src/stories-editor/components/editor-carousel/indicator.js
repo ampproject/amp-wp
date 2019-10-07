@@ -94,7 +94,9 @@ const Indicator = ( { pages, currentPage, onClick } ) => {
 							onClick( clientId );
 						} }
 					>
-						<span className="indicator-page-number">{ index + 1 }</span>
+						<span className="indicator-page-number">
+							{ index + 1 }
+						</span>
 						<span className="screen-reader-text">
 							{ label( index + 1 ) }
 						</span>
@@ -115,28 +117,28 @@ const Indicator = ( { pages, currentPage, onClick } ) => {
 					>
 						{
 							( { onDraggableStart, onDraggableEnd } ) => (
-								<>
-									<li
-										className={ className }
+								<li
+									className={ className }
+								>
+									<div
+										onDragStart={ onDraggableStart }
+										onDragEnd={ onDraggableEnd }
+										draggable
+										className="amp-story-editor-carousel-item-wrapper"
+										id={ blockElementId }
 									>
-										<div
-											onDragStart={ onDraggableStart }
-											onDragEnd={ onDraggableEnd }
-											draggable
-											className="amp-story-editor-carousel-item-wrapper"
-											id={ blockElementId }
-										>
-											{ isCurrentPage ?
-												indicatorButton :
-												<Tooltip text={ toolTip( index + 1 ) }>{ indicatorButton }</Tooltip>
-											}
-										</div>
-										<DropZone
-											className={ classnames( '', { 'is-dragging-indicator': isPageDragged } ) }
-											onDrop={ onDrop }
-										/>
-									</li>
-								</>
+										{ isCurrentPage ?
+											indicatorButton :
+											<Tooltip text={ toolTip( index + 1 ) }>
+												{ indicatorButton }
+											</Tooltip>
+										}
+									</div>
+									<DropZone
+										className={ classnames( '', { 'is-dragging-indicator': isPageDragged } ) }
+										onDrop={ onDrop }
+									/>
+								</li>
 							)
 						}
 					</Draggable>

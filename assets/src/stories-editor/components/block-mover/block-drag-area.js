@@ -34,13 +34,11 @@ export const BlockDragArea = ( { children, blockName, className, onDragStart, on
 };
 
 BlockDragArea.propTypes = {
-	icon: PropTypes.object,
-	isVisible: PropTypes.bool,
 	className: PropTypes.string,
 	onDragStart: PropTypes.func,
 	onDragEnd: PropTypes.func,
 	blockElementId: PropTypes.string,
 	blockName: PropTypes.string,
 	clientId: PropTypes.string,
-	children: PropTypes.any.isRequired,
+	children: PropTypes.node.isRequired,
 };

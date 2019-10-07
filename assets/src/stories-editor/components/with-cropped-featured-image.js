@@ -44,7 +44,7 @@ export default ( InitialMediaUpload, minImageDimensions, alternateMinImageDimens
 	/**
 	 * Mostly copied from customize-controls.js, with slight changes.
 	 *
-	 * @link https://github.com/WordPress/wordpress-develop/blob/c80325658f85d24ff82295dd2d55bfdf789f4163/src/js/_enqueues/wp/customize/controls.js#L4695
+	 * @see https://github.com/WordPress/wordpress-develop/blob/c80325658f85d24ff82295dd2d55bfdf789f4163/src/js/_enqueues/wp/customize/controls.js#L4695
 	 * @see wp.media.HeaderControl
 	 */
 	return class FeaturedImageMediaUpload extends InitialMediaUpload {

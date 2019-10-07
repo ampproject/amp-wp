@@ -97,7 +97,9 @@ class Autocomplete extends OriginalAutocomplete {
 					tResults={ tStatusResults }
 				/>
 				{ hintValue && (
-					<span><input className={ hintClassName } readOnly tabIndex="-1" value={ hintValue } /></span>
+					<span>
+						<input className={ hintClassName } readOnly tabIndex="-1" value={ hintValue } />
+					</span>
 				) }
 
 				<input

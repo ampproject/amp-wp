@@ -62,9 +62,6 @@ module.exports = function( grunt ) {
 			readme: {
 				command: './vendor/xwp/wp-dev-lib/scripts/generate-markdown-readme', // Generate the readme.md.
 			},
-			phpunit: {
-				command: 'phpunit',
-			},
 			verify_matching_versions: {
 				command: 'php bin/verify-version-consistency.php',
 			},
@@ -237,7 +234,6 @@ module.exports = function( grunt ) {
 	] );
 
 	grunt.registerTask( 'deploy', [
-		'shell:phpunit',
 		'shell:verify_matching_versions',
 		'wp_deploy',
 	] );

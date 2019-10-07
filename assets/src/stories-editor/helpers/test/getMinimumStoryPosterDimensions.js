@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { getMinimumStoryPosterDimensions } from '../';
+import getMinimumStoryPosterDimensions from '../getMinimumStoryPosterDimensions';
 
 describe( 'getMinimumStoryPosterDimensions', () => {
 	it( 'should return size with correct aspect ration', () => {

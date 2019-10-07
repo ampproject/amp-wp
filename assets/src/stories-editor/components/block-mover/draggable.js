@@ -17,11 +17,20 @@ import { withSafeTimeout } from '@wordpress/compose';
 /**
  * Internal dependencies
  */
-import { getPixelsFromPercentage } from '../../helpers';
+import {
+	getPixelsFromPercentage,
+	getPercentageFromPixels,
+	getRelativeElementPosition,
+	isCTABlock,
+} from '../../helpers';
 import {
 	STORY_PAGE_INNER_WIDTH,
 	STORY_PAGE_INNER_HEIGHT,
+	STORY_PAGE_INNER_HEIGHT_FOR_CTA,
+	STORY_PAGE_MARGIN,
 } from '../../constants';
+
+const PAGE_AND_MARGIN = STORY_PAGE_INNER_WIDTH + STORY_PAGE_MARGIN;
 
 const { Image, navigator } = window;
 
@@ -61,13 +70,41 @@ class Draggable extends Component {
 	 * @param {Object} event The non-custom DragEvent.
 	 */
 	onDragEnd = ( event ) => {
-		const { onDragEnd = noop } = this.props;
+		const { clearHighlight, dropElementByOffset, blockName, setTimeout, onDragEnd = noop } = this.props;
 		if ( event ) {
 			event.preventDefault();
 		}
 
+		// Make sure to clear highlight.
+		clearHighlight();
+
+		// Attempt drop on neighbor if offset
+		if ( this.pageOffset !== 0 ) {
+			// All this is about calculating the position of the (correct) element on the new page.
+			const currentElementTop = parseInt( this.cloneWrapper.style.top );
+			const currentElementLeft = parseInt( this.cloneWrapper.style.left );
+			const newLeft = currentElementLeft - ( this.pageOffset * PAGE_AND_MARGIN );
+
+			let baseHeight, xAttribute, yAttribute;
+			if ( isCTABlock( blockName ) ) {
+				baseHeight = STORY_PAGE_INNER_HEIGHT_FOR_CTA;
+				xAttribute = 'btnPositionLeft';
+				yAttribute = 'btnPositionTop';
+			} else {
+				baseHeight = STORY_PAGE_INNER_HEIGHT;
+				xAttribute = 'positionLeft';
+				yAttribute = 'positionTop';
+			}
+
+			const newAttributes = {
+				[ xAttribute ]: getPercentageFromPixels( 'x', newLeft, STORY_PAGE_INNER_WIDTH ),
+				[ yAttribute ]: getPercentageFromPixels( 'y', currentElementTop, baseHeight ),
+			};
+			dropElementByOffset( this.pageOffset, newAttributes );
+		}
+
 		this.resetDragState();
-		this.props.setTimeout( onDragEnd );
+		setTimeout( onDragEnd );
 	}
 
 	/**
@@ -76,10 +113,11 @@ class Draggable extends Component {
 	 * @param  {Object} event The non-custom DragEvent.
 	 */
 	onDragOver = ( event ) => {
+		const { setHighlightByOffset, blockName } = this.props;
 		const top = parseInt( this.cloneWrapper.style.top ) + event.clientY - this.cursorTop;
 
 		// Don't allow the CTA button to go over its top limit.
-		if ( 'amp/amp-story-cta' === this.props.blockName ) {
+		if ( isCTABlock( blockName ) ) {
 			this.cloneWrapper.style.top = top >= 0 ? `${ top }px` : '0px';
 		} else {
 			this.cloneWrapper.style.top = `${ top }px`;
@@ -91,6 +129,21 @@ class Draggable extends Component {
 		// Update cursor coordinates.
 		this.cursorLeft = event.clientX;
 		this.cursorTop = event.clientY;
+
+		// Check if mouse (*not* element, but actual cursor) is over neighboring page to either side.
+		const currentElementLeft = parseInt( this.cloneWrapper.style.left );
+		const cursorLeftRelativeToPage = currentElementLeft + this.cursorLeftInsideElement;
+		const isOffRight = cursorLeftRelativeToPage > PAGE_AND_MARGIN;
+		const isOffLeft = cursorLeftRelativeToPage < -STORY_PAGE_MARGIN;
+		this.pageOffset = 0;
+		if ( isOffLeft || isOffRight ) {
+			// Check how far off we are to that side - on large screens you can drag elements 2+ pages over to either side.
+			this.pageOffset = ( isOffLeft ?
+				-Math.ceil( ( -STORY_PAGE_MARGIN - cursorLeftRelativeToPage ) / PAGE_AND_MARGIN ) :
+				Math.ceil( ( cursorLeftRelativeToPage - PAGE_AND_MARGIN ) / PAGE_AND_MARGIN )
+			);
+		}
+		setHighlightByOffset( this.pageOffset );
 	}
 
 	onDrop = () => {
@@ -108,9 +161,9 @@ class Draggable extends Component {
 	 */
 	onDragStart = ( event ) => {
 		const { blockName, elementId, transferData, onDragStart = noop } = this.props;
-		const isCTABlock = 'amp/amp-story-cta' === blockName;
+		const blockIsCTA = isCTABlock( blockName );
 		// In the CTA block only the inner element (the button) is draggable, not the whole block.
-		const element = isCTABlock ? document.getElementById( elementId ) : document.getElementById( elementId ).parentNode;
+		const element = blockIsCTA ? document.getElementById( elementId ) : document.getElementById( elementId ).parentNode;
 
 		if ( ! element ) {
 			event.preventDefault();
@@ -149,11 +202,18 @@ class Draggable extends Component {
 		this.cloneWrapper.style.transform = clone.style.transform;
 
 		// 20% of the full value in case of CTA block.
-		const baseHeight = isCTABlock ? STORY_PAGE_INNER_HEIGHT / 5 : STORY_PAGE_INNER_HEIGHT;
+		const baseHeight = blockIsCTA ? STORY_PAGE_INNER_HEIGHT_FOR_CTA : STORY_PAGE_INNER_HEIGHT;
 
 		// Position clone over the original element.
-		this.cloneWrapper.style.top = `${ getPixelsFromPercentage( 'y', parseInt( clone.style.top ), baseHeight ) }px`;
-		this.cloneWrapper.style.left = `${ getPixelsFromPercentage( 'x', parseInt( clone.style.left ), STORY_PAGE_INNER_WIDTH ) }px`;
+		const top = getPixelsFromPercentage( 'y', parseInt( clone.style.top ), baseHeight );
+		const left = getPixelsFromPercentage( 'x', parseInt( clone.style.left ), STORY_PAGE_INNER_WIDTH );
+		this.cloneWrapper.style.top = `${ top }px`;
+		this.cloneWrapper.style.left = `${ left }px`;
+
+		// Get starting position information
+		const absolutePositionOfPage = getRelativeElementPosition( elementWrapper, document.documentElement );
+		const absoluteElementLeft = absolutePositionOfPage.left + left;
+		this.cursorLeftInsideElement = event.clientX - absoluteElementLeft;
 
 		clone.id = `clone-${ elementId }`;
 		clone.style.top = 0;
@@ -221,11 +281,19 @@ class Draggable extends Component {
 Draggable.propTypes = {
 	blockName: PropTypes.string,
 	elementId: PropTypes.string,
-	transferData: PropTypes.object,
+	transferData: PropTypes.shape( {
+		type: PropTypes.string,
+		srcIndex: PropTypes.number,
+		srcRootClientId: PropTypes.string,
+		srcClientId: PropTypes.string,
+	} ),
 	onDragStart: PropTypes.func,
 	onDragEnd: PropTypes.func,
+	clearHighlight: PropTypes.func.isRequired,
+	setHighlightByOffset: PropTypes.func.isRequired,
+	dropElementByOffset: PropTypes.func.isRequired,
 	setTimeout: PropTypes.func.isRequired,
-	children: PropTypes.any.isRequired,
+	children: PropTypes.func.isRequired,
 };
 
 export default withSafeTimeout( Draggable );

@@ -1,20 +1,9 @@
 /**
- * Component that adds additional controls in the top of the editor
- * to add new pages and start/stop reordering pages.
- */
-
-/**
- * External dependencies
- */
-import PropTypes from 'prop-types';
-
-/**
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
 import { IconButton, Button } from '@wordpress/components';
-import { withDispatch, withSelect } from '@wordpress/data';
-import { compose } from '@wordpress/compose';
+import { useSelect, useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -23,13 +12,30 @@ import { PageInserter } from '../';
 import reorderIcon from '../../../../images/stories-editor/reorder.svg';
 import './edit.css';
 
-function StoryControls( { isReordering, startReordering, saveOrder, resetOrder } ) {
+/**
+ * Component that adds additional controls in the top of the editor
+ * to add new pages and start/stop reordering pages.
+ */
+function StoryControls() {
+	const {
+		isReordering,
+		blockOrder,
+	} = useSelect( ( select ) => {
+		return {
+			isReordering: select( 'amp/story' ).isReordering(),
+			blockOrder: select( 'core/block-editor' ).getBlockOrder(),
+		};
+	}, [] );
+
+	const { clearSelectedBlock } = useDispatch( 'core/block-editor' );
+	const { startReordering, saveOrder, resetOrder } = useDispatch( 'amp/story' );
+
 	if ( isReordering ) {
 		return (
 			<>
 				<IconButton
 					className="amp-story-controls-reorder-cancel"
-					onClick={ resetOrder }
+					onClick={ () => resetOrder( blockOrder ) }
 					icon="no-alt"
 				>
 					{ __( 'Cancel', 'amp' ) }
@@ -53,40 +59,13 @@ function StoryControls( { isReordering, startReordering, saveOrder, resetOrder }
 				className="amp-story-controls-reorder"
 				icon={ reorderIcon( { width: 24, height: 19 } ) }
 				label={ __( 'Reorder Pages', 'amp' ) }
-				onClick={ startReordering }
+				onClick={ () => {
+					clearSelectedBlock();
+					startReordering( blockOrder );
+				} }
 			/>
 		</>
 	);
 }
 
-StoryControls.propTypes = {
-	isReordering: PropTypes.bool.isRequired,
-	startReordering: PropTypes.func.isRequired,
-	saveOrder: PropTypes.func.isRequired,
-	resetOrder: PropTypes.func.isRequired,
-};
-
-export default compose(
-	withSelect( ( select ) => {
-		const { isReordering } = select( 'amp/story' );
-		const { getBlockOrder } = select( 'core/block-editor' );
-
-		return {
-			isReordering: isReordering(),
-			blockOrder: getBlockOrder(),
-		};
-	} ),
-	withDispatch( ( dispatch, { blockOrder } ) => {
-		const { clearSelectedBlock } = dispatch( 'core/block-editor' );
-		const { startReordering, saveOrder, resetOrder } = dispatch( 'amp/story' );
-
-		return {
-			startReordering: () => {
-				clearSelectedBlock();
-				startReordering( blockOrder );
-			},
-			saveOrder,
-			resetOrder: () => resetOrder( blockOrder ),
-		};
-	} )
-)( StoryControls );
+export default StoryControls;
