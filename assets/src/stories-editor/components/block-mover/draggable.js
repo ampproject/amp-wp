@@ -357,7 +357,6 @@ Draggable.propTypes = {
 	children: PropTypes.func.isRequired,
 	horizontalSnaps: PropTypes.func.isRequired,
 	verticalSnaps: PropTypes.func.isRequired,
-	snapLines: PropTypes.array.isRequired,
 	setSnapLines: PropTypes.func.isRequired,
 	clearSnapLines: PropTypes.func.isRequired,
 	parentBlockElement: PropTypes.object,
