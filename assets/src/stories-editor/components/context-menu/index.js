@@ -38,7 +38,7 @@ const POPOVER_PROPS = {
 	position: 'bottom left',
 };
 
-const RightClickMenu = ( props ) => {
+const ContextMenu = ( props ) => {
 	const {
 		clientIds,
 		clientX,
@@ -313,7 +313,7 @@ const RightClickMenu = ( props ) => {
 	);
 };
 
-RightClickMenu.propTypes = {
+ContextMenu.propTypes = {
 	clientIds: PropTypes.arrayOf( PropTypes.string ).isRequired,
 	clientX: PropTypes.number.isRequired,
 	clientY: PropTypes.number.isRequired,
@@ -321,4 +321,4 @@ RightClickMenu.propTypes = {
 	insidePercentageY: PropTypes.number,
 };
 
-export default RightClickMenu;
+export default ContextMenu;
