@@ -78,7 +78,6 @@ class EnhancedResizableBox extends Component {
 			snapGap,
 			horizontalSnaps,
 			verticalSnaps,
-			snapLines,
 			setSnapLines,
 			clearSnapLines,
 			parentBlockElement,
@@ -130,9 +129,7 @@ class EnhancedResizableBox extends Component {
 
 					this.setState( { isResizing: false } );
 
-					if ( snapLines.length ) {
-						clearSnapLines();
-					}
+					clearSnapLines();
 
 					onResizeStop( {
 						width: parseInt( appliedWidth ),
@@ -168,9 +165,7 @@ class EnhancedResizableBox extends Component {
 
 					this.setState( { isResizing: true } );
 
-					if ( snapLines.length ) {
-						clearSnapLines();
-					}
+					clearSnapLines();
 
 					onResizeStart();
 				} }
@@ -337,7 +332,6 @@ EnhancedResizableBox.propTypes = {
 	horizontalSnaps: PropTypes.func.isRequired,
 	verticalSnaps: PropTypes.func.isRequired,
 	snapGap: PropTypes.number.isRequired,
-	snapLines: PropTypes.array.isRequired,
 	setSnapLines: PropTypes.func.isRequired,
 	clearSnapLines: PropTypes.func.isRequired,
 	parentBlockElement: PropTypes.object,
