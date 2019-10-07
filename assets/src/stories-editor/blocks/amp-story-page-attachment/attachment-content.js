@@ -11,7 +11,7 @@ import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { RichText } from '@wordpress/block-editor';
 import { Button, Spinner } from '@wordpress/components';
-import { RawHTML, useEffect, useRef, useState } from '@wordpress/element';
+import { RawHTML, useEffect, useRef, useState, useCallback } from '@wordpress/element';
 import { ENTER, SPACE } from '@wordpress/keycodes';
 import { useSelect } from '@wordpress/data';
 
@@ -41,7 +41,8 @@ const AttachmentContent = ( props ) => {
 	const [ failedToFetch, setFailedToFetch ] = useState( false );
 	const [ searchValue, setSearchValue ] = useState( '' );
 	const [ isFetching, setIsFetching ] = useState( false );
-	let fetchRequest, isStillMounted;
+	const fetchRequest = useRef( null );
+	const isStillMounted = useRef( true );
 
 	const {
 		attributes,
@@ -61,19 +62,19 @@ const AttachmentContent = ( props ) => {
 		const { getSettings } = select( 'amp/story' );
 		const { allowedPageAttachmentPostTypes } = getSettings();
 		return allowedPageAttachmentPostTypes;
-	} );
+	}, [] );
 
-	const fetchSelectedPost = () => {
+	const fetchSelectedPost = useCallback( () => {
 		const restBase = allowedPostTypes[ postType ] || `${ postType }s`;
 
-		isStillMounted = true;
+		isStillMounted.current = true;
 		if ( postId ) {
 			setIsFetching( true );
-			const currentFetchRequest = fetchRequest = apiFetch( {
+			const currentFetchRequest = fetchRequest.current = apiFetch( {
 				path: `/wp/v2/${ restBase }/${ postId }`,
 			} ).then(
 				( post ) => {
-					if ( isStillMounted && fetchRequest === currentFetchRequest ) {
+					if ( isStillMounted.current && fetchRequest.current === currentFetchRequest ) {
 						setSelectedPost( post );
 						setFailedToFetch( false );
 						setIsFetching( false );
@@ -81,7 +82,7 @@ const AttachmentContent = ( props ) => {
 				}
 			).catch(
 				() => {
-					if ( isStillMounted && fetchRequest === currentFetchRequest ) {
+					if ( isStillMounted.current && fetchRequest.current === currentFetchRequest ) {
 						setSelectedPost( null );
 						setFailedToFetch( true );
 						setIsFetching( false );
@@ -89,17 +90,17 @@ const AttachmentContent = ( props ) => {
 				}
 			);
 		}
-	};
+	}, [ postId, postType, allowedPostTypes ] );
 
 	useEffect( () => {
 		return () => {
-			isStillMounted = false;
+			isStillMounted.current = false;
 		};
 	}, [] );
 
 	useEffect( () => {
 		fetchSelectedPost();
-	}, [ postId ] );
+	}, [ fetchSelectedPost ] );
 
 	const removePost = () => {
 		setFailedToFetch( false );

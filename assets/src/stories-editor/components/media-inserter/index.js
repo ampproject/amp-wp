@@ -1,30 +1,76 @@
 /**
- * External dependencies
- */
-import PropTypes from 'prop-types';
-
-/**
  * WordPress dependencies
  */
 import { getBlockType, createBlock } from '@wordpress/blocks';
 import { BlockIcon } from '@wordpress/block-editor';
-import { withDispatch, withSelect } from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
+import { useCallback } from '@wordpress/element';
 import { DropdownMenu } from '@wordpress/components';
-import { compose, ifCondition } from '@wordpress/compose';
 import { __, sprintf } from '@wordpress/i18n';
+
 /**
  * Internal dependencies
  */
-import { processMedia } from '../../helpers';
-import {
-	IMAGE_BACKGROUND_TYPE,
-} from '../../constants';
+import { processMedia, useIsBlockAllowedOnPage } from '../../helpers';
+import { IMAGE_BACKGROUND_TYPE } from '../../constants';
 
 const POPOVER_PROPS = {
 	position: 'bottom right',
 };
 
-const MediaInserter = ( { insertBlock, updateBlock, canInsertBlockType, showInserter, mediaType, allowedVideoMimeTypes } ) => {
+const MediaInserter = () => {
+	const {
+		currentPage,
+		blockOrder,
+		showInserter,
+		mediaType,
+		allowedVideoMimeTypes,
+	} = useSelect( ( select ) => {
+		const { getCurrentPage } = select( 'amp/story' );
+		const { getBlock, getBlockOrder } = select( 'core/block-editor' );
+		const { getSettings } = select( 'amp/story' );
+
+		const _currentPage = getCurrentPage();
+		const block = getBlock( _currentPage );
+
+		return {
+			currentPage: _currentPage,
+			blockOrder: getBlockOrder( _currentPage ),
+			// As used in <HeaderToolbar> component
+			showInserter: select( 'core/edit-post' ).getEditorMode() === 'visual' && select( 'core/editor' ).getEditorSettings().richEditingEnabled,
+			mediaType: block && block.attributes.mediaType ? block.attributes.mediaType : '',
+			allowedVideoMimeTypes: getSettings().allowedVideoMimeTypes,
+		};
+	}, [] );
+
+	const isBlockAllowedOnPage = useIsBlockAllowedOnPage();
+
+	const { insertBlock, updateBlockAttributes, selectBlock } = useDispatch( 'core/block-editor' );
+
+	const insertBlockOnPage = useCallback( ( name ) => {
+		const index = blockOrder.length;
+
+		const insertedBlock = createBlock( name, {} );
+
+		insertBlock( insertedBlock, index, currentPage );
+	}, [ blockOrder, currentPage, insertBlock ] );
+
+	const updateBlock = useCallback( ( media ) => {
+		if ( ! currentPage ) {
+			return;
+		}
+
+		const processed = processMedia( media );
+		updateBlockAttributes( currentPage, processed );
+		selectBlock( currentPage );
+	}, [ currentPage, selectBlock, updateBlockAttributes ] );
+
+	const isReordering = useSelect( ( select ) => select( 'amp/story' ).isReordering(), [] );
+
+	if ( isReordering ) {
+		return null;
+	}
+
 	const blocks = [
 		'core/video',
 		'core/image',
@@ -49,14 +95,14 @@ const MediaInserter = ( { insertBlock, updateBlock, canInsertBlockType, showInse
 	];
 
 	for ( const block of blocks ) {
-		if ( ! canInsertBlockType( block ) ) {
+		if ( ! isBlockAllowedOnPage( block, currentPage ) ) {
 			continue;
 		}
 
 		const blockType = getBlockType( block );
 		const item = {
 			title: sprintf( __( 'Insert %s', 'amp' ), blockType.title ),
-			onClick: () => insertBlock( block ),
+			onClick: () => insertBlockOnPage( block ),
 			disabled: ! showInserter,
 			icon: <BlockIcon icon={ blockType.icon } />,
 		};
@@ -77,15 +123,6 @@ const MediaInserter = ( { insertBlock, updateBlock, canInsertBlockType, showInse
 			}
 		/>
 	);
-};
-
-MediaInserter.propTypes = {
-	insertBlock: PropTypes.func.isRequired,
-	updateBlock: PropTypes.func.isRequired,
-	canInsertBlockType: PropTypes.func.isRequired,
-	showInserter: PropTypes.bool.isRequired,
-	mediaType: PropTypes.string.isRequired,
-	allowedVideoMimeTypes: PropTypes.arrayOf( PropTypes.string ).isRequired,
 };
 
 const mediaPicker = ( dialogTitle, mediaType, updateBlock ) => {
@@ -112,61 +149,4 @@ const mediaPicker = ( dialogTitle, mediaType, updateBlock ) => {
 	fileFrame.open();
 };
 
-const applyWithSelect = withSelect( ( select ) => {
-	const { getCurrentPage } = select( 'amp/story' );
-	const { canInsertBlockType, getBlockListSettings, getBlock } = select( 'core/block-editor' );
-	const { isReordering, getSettings } = select( 'amp/story' );
-
-	const currentPage = getCurrentPage();
-	const block = getBlock( currentPage );
-	const mediaType = block && block.attributes.mediaType ? block.attributes.mediaType : '';
-	const { allowedVideoMimeTypes } = getSettings();
-
-	return {
-		isReordering: isReordering(),
-		canInsertBlockType: ( name ) => {
-			// canInsertBlockType() alone is not enough, see https://github.com/WordPress/gutenberg/issues/14515
-			const blockSettings = getBlockListSettings( currentPage );
-			return canInsertBlockType( name, currentPage ) && blockSettings && blockSettings.allowedBlocks.includes( name );
-		},
-		// As used in <HeaderToolbar> component
-		showInserter: select( 'core/edit-post' ).getEditorMode() === 'visual' && select( 'core/editor' ).getEditorSettings().richEditingEnabled,
-		mediaType,
-		allowedVideoMimeTypes,
-	};
-} );
-
-const applyWithDispatch = withDispatch( ( dispatch, props, { select } ) => {
-	const { getCurrentPage } = select( 'amp/story' );
-	const { getBlockOrder } = select( 'core/block-editor' );
-	const { insertBlock } = dispatch( 'core/block-editor' );
-
-	return {
-		insertBlock: ( name ) => {
-			const currentPage = getCurrentPage();
-			const index = getBlockOrder( currentPage ).length;
-
-			const insertedBlock = createBlock( name, {} );
-
-			insertBlock( insertedBlock, index, currentPage );
-		},
-		updateBlock: ( media ) => {
-			const clientId = getCurrentPage();
-			const { updateBlockAttributes, selectBlock } = dispatch( 'core/block-editor' );
-
-			if ( ! clientId ) {
-				return;
-			}
-
-			const processed = processMedia( media );
-			updateBlockAttributes( clientId, processed );
-			selectBlock( clientId );
-		},
-	};
-} );
-
-export default compose(
-	applyWithSelect,
-	applyWithDispatch,
-	ifCondition( ( { isReordering } ) => ! isReordering ),
-)( MediaInserter );
+export default MediaInserter;
