@@ -67,10 +67,10 @@ const applyWithSelect = withSelect( ( select ) => {
 			eventX = event.clientX;
 			eventY = event.clientY;
 		} else {
-			// Place menu in the upper left corner of the element - but slightly inside.
+			// Place menu the center of the target element.
 			const elementPosition = event.target.getBoundingClientRect();
-			eventX = elementPosition.left + 20;
-			eventY = elementPosition.top + 20;
+			eventX = elementPosition.left + ( elementPosition.width / 2 );
+			eventY = elementPosition.top + ( elementPosition.height / 2 );
 		}
 
 		const relativePositionX = eventX - wrapperDimensions.left;
