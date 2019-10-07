@@ -1621,12 +1621,12 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$amp_lightbox->appendChild( $modal_content_node );
 
 		// Adapt the open button.
-		$open_button_node->setAttribute( 'on', "tap:{$modal_id}" );
+		$this->add_amp_action( $open_button_node, 'tap', $modal_id );
 		// @todo: Do we need to remove cruft here?
 		// <button class="toggle nav-toggle mobile-nav-toggle" data-toggle-target=".menu-modal" data-toggle-screen-lock="true" data-toggle-body-class="showing-menu-modal" aria-expanded="false" data-set-focus=".close-nav-toggle" on="tap:mobile-menu"></button>
 
 		// Adapt the close button.
-		$close_button_node->setAttribute( 'on', "tap:{$modal_id}.close" );
+		$this->add_amp_action( $close_button_node, 'tap', "{$modal_id}.close" );
 		// @todo: Do we need to remove cruft here?
 		// <button class="toggle close-nav-toggle fill-children-current-color" data-toggle-target=".menu-modal" data-toggle-screen-lock="true" data-toggle-body-class="showing-menu-modal" aria-expanded="false" data-set-focus=".menu-modal" on="tap:mobile-menu.close"></button>
 	}
@@ -1647,11 +1647,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$state = [];
 
 		foreach ( $toggles as $toggle ) {
-			// Bail early if the toggle already has previously defined interactivity.
-			if ( $toggle->hasAttribute( 'on' ) ) {
-				continue;
-			}
-
 			$toggle_target = $toggle->getAttribute( 'data-toggle-target' );
 			$id            = $this->get_toggle_id( $toggle_target, $state );
 
@@ -1693,7 +1688,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				$target_node->setAttribute( 'data-amp-bind-class', "{$id} ? {$id}_classes['on'] : {$id}_classes['off']" );
 			}
 
-			$toggle->setAttribute( 'on', "tap:AMP.setState({{$id}: !{$id}})" );
+			$this->add_amp_action( $toggle, 'tap', "AMP.setState({{$id}: !{$id}})" );
 		}
 
 		// Add <amp-state> snippets to the document that contain the classes to use.
@@ -1800,5 +1795,50 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		return $xpath;
+	}
+
+	/**
+	 * Register an AMP action to an event on a given element.
+	 *
+	 * If the element already contains one or more events or actions, the method
+	 * will assemble them in a smart way.
+	 *
+	 * @param DOMElement $element Element to add an action to.
+	 * @param string     $event   Event to trigger the action on.
+	 * @param string     $action  Action to add.
+	 */
+	protected function add_amp_action( DOMElement $element, $event, $action ) {
+		if ( ! $element->hasAttribute( 'on' ) ) {
+			$element->setAttribute( 'on', "{$event}:{$action}" );
+			return;
+		}
+
+		$events = explode( ';', $element->getAttribute( 'on' ) );
+
+		$found = false;
+		foreach ( $events as $index => $event_action_string ) {
+			if ( $found ) {
+				continue;
+			}
+
+			list( $existing_event, $existing_actions ) = explode( ':', $event_action_string );
+
+			if ( $existing_event !== $event ) {
+				continue;
+			}
+
+			$existing_actions_array = explode( ',', $existing_actions );
+			$existing_actions_array[] = $action;
+			$actions = implode( ',', $existing_actions_array );
+
+			$events[ $index ] = "{$event}:{$actions}";
+			$found = true;
+		}
+
+		if ( ! $found ) {
+			$events[] = "{$event}:${action}";
+		}
+
+		$element->setAttribute( 'on', implode( ';', $events ) );
 	}
 }
