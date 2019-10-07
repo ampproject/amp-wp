@@ -13,16 +13,11 @@ import { ResizableBox } from '@wordpress/components';
 /**
  * Internal dependencies
  */
+import withSnapTargets from '../higher-order/with-snap-targets';
 import './edit.css';
-import {
-	getPercentageFromPixels,
-	getPixelsFromPercentage,
-} from '../../helpers';
-import {
-	TEXT_BLOCK_PADDING,
-	REVERSE_WIDTH_CALCULATIONS,
-	REVERSE_HEIGHT_CALCULATIONS,
-} from '../../constants';
+import { getPercentageFromPixels, getRelativeElementPosition } from '../../helpers';
+import { getBestSnapLines } from '../../helpers/snapping';
+import { TEXT_BLOCK_PADDING, BLOCK_RESIZING_SNAP_GAP } from '../../constants';
 import {
 	getBlockPositioning,
 	getResizedBlockPosition,
@@ -77,9 +72,21 @@ class EnhancedResizableBox extends Component {
 		const isImage = 'core/image' === blockName;
 		const isText = 'amp/amp-story-text' === blockName;
 
+		// Ensure that these props are not passed down.
+		const {
+			clientId,
+			snapGap,
+			horizontalSnaps,
+			verticalSnaps,
+			setSnapLines,
+			clearSnapLines,
+			parentBlockElement,
+			...childProps
+		} = otherProps;
+
 		return (
 			<ResizableBox
-				{ ...otherProps }
+				{ ...childProps }
 				className={ classnames(
 					'amp-story-resize-container',
 					{
@@ -122,6 +129,8 @@ class EnhancedResizableBox extends Component {
 
 					this.setState( { isResizing: false } );
 
+					clearSnapLines();
+
 					onResizeStop( {
 						width: parseInt( appliedWidth ),
 						height: parseInt( appliedHeight ),
@@ -156,6 +165,8 @@ class EnhancedResizableBox extends Component {
 
 					this.setState( { isResizing: true } );
 
+					clearSnapLines();
+
 					onResizeStart();
 				} }
 				onResize={ ( event, direction, element ) => { // eslint-disable-line complexity
@@ -170,6 +181,7 @@ class EnhancedResizableBox extends Component {
 					// If the new width/height is below the minimum limit, set the minimum limit as the width/height instead.
 					let appliedWidth = minWidth <= width + deltaW ? width + deltaW : minWidth;
 					let appliedHeight = minHeight <= height + deltaH ? height + deltaH : minHeight;
+
 					const isReducing = 0 > deltaW || 0 > deltaH;
 
 					// Track if resizing has reached its minimum limits to fit the text inside.
@@ -215,7 +227,7 @@ class EnhancedResizableBox extends Component {
 						}
 					}
 
-					// Is it's not min width / height yet, assign lastDeltaH and lastDeltaW for position calculation.
+					// If it's not min width / height yet, assign lastDeltaH and lastDeltaW for position calculation.
 					if ( minHeight < appliedHeight ) {
 						lastDeltaH = deltaH;
 					}
@@ -225,44 +237,56 @@ class EnhancedResizableBox extends Component {
 
 					// If limits were not reached yet, do the calculations for positioning.
 					if ( ! reachedMinLimit ) {
-						if ( ! angle ) {
-							// If the resizing is to left or top then we have to compensate
-							if ( REVERSE_WIDTH_CALCULATIONS.includes( direction ) ) {
-								const leftInPx = getPixelsFromPercentage( 'x', parseFloat( blockElementLeft ) );
-								blockElement.style.left = getPercentageFromPixels( 'x', leftInPx - lastDeltaW ) + '%';
-							}
-							if ( REVERSE_HEIGHT_CALCULATIONS.includes( direction ) ) {
-								const topInPx = getPixelsFromPercentage( 'y', parseFloat( blockElementTop ) );
-								blockElement.style.top = getPercentageFromPixels( 'y', topInPx - lastDeltaH ) + '%';
-							}
+						const radianAngle = getRadianFromDeg( angle );
+
+						// Compare position between the initial and after resizing.
+						let initialPosition, resizedPosition;
+
+						// If it's a text block, we shouldn't consider the added padding for measuring.
+						if ( isText ) {
+							initialPosition = getBlockPositioning( width - ( TEXT_BLOCK_PADDING * 2 ), height - ( TEXT_BLOCK_PADDING * 2 ), radianAngle, direction );
+							resizedPosition = getBlockPositioning( appliedWidth - ( TEXT_BLOCK_PADDING * 2 ), appliedHeight - ( TEXT_BLOCK_PADDING * 2 ), radianAngle, direction );
 						} else {
-							const radianAngle = getRadianFromDeg( angle );
-
-							// Compare position between the initial and after resizing.
-							let initialPosition, resizedPosition;
-							// If it's a text block, we shouldn't consider the added padding for measuring.
-							if ( isText ) {
-								initialPosition = getBlockPositioning( width - ( TEXT_BLOCK_PADDING * 2 ), height - ( TEXT_BLOCK_PADDING * 2 ), radianAngle, direction );
-								resizedPosition = getBlockPositioning( appliedWidth - ( TEXT_BLOCK_PADDING * 2 ), appliedHeight - ( TEXT_BLOCK_PADDING * 2 ), radianAngle, direction );
-							} else {
-								initialPosition = getBlockPositioning( width, height, radianAngle, direction );
-								resizedPosition = getBlockPositioning( appliedWidth, appliedHeight, radianAngle, direction );
-							}
-							const diff = {
-								left: resizedPosition.left - initialPosition.left,
-								top: resizedPosition.top - initialPosition.top,
-							};
-
-							const originalPos = getResizedBlockPosition( direction, blockElementLeft, blockElementTop, lastDeltaW, lastDeltaH );
-							const updatedPos = getUpdatedBlockPosition( direction, originalPos, diff );
-
-							blockElement.style.left = getPercentageFromPixels( 'x', updatedPos.left ) + '%';
-							blockElement.style.top = getPercentageFromPixels( 'y', updatedPos.top ) + '%';
+							initialPosition = getBlockPositioning( width, height, radianAngle, direction );
+							resizedPosition = getBlockPositioning( appliedWidth, appliedHeight, radianAngle, direction );
 						}
+
+						const diff = {
+							left: resizedPosition.left - initialPosition.left,
+							top: resizedPosition.top - initialPosition.top,
+						};
+
+						const originalPos = getResizedBlockPosition( direction, blockElementLeft, blockElementTop, lastDeltaW, lastDeltaH );
+						const updatedPos = getUpdatedBlockPosition( direction, originalPos, diff );
+
+						blockElement.style.left = getPercentageFromPixels( 'x', updatedPos.left ) + '%';
+						blockElement.style.top = getPercentageFromPixels( 'y', updatedPos.top ) + '%';
 					}
 
 					element.style.width = appliedWidth + 'px';
 					element.style.height = appliedHeight + 'px';
+
+					// Get the correct dimensions in case the block is rotated, as rotation is only applied to the clone's inner element(s).
+					// We calculate with the block's actual dimensions relative to the page it's on.
+					const {
+						top: actualTop,
+						right: actualRight,
+						bottom: actualBottom,
+						left: actualLeft,
+					} = getRelativeElementPosition( blockElement.querySelector( '.wp-block' ), parentBlockElement );
+
+					const snappingEnabled = ! event.getModifierState( 'Alt' );
+
+					if ( snappingEnabled ) {
+						const horizontalSnapsForPosition = horizontalSnaps( actualTop, actualBottom );
+						const verticalSnapsForPosition = verticalSnaps( actualLeft, actualRight );
+						setSnapLines( [
+							...getBestSnapLines( horizontalSnapsForPosition, actualLeft, actualRight, BLOCK_RESIZING_SNAP_GAP ),
+							...getBestSnapLines( verticalSnapsForPosition, actualTop, actualBottom, BLOCK_RESIZING_SNAP_GAP ),
+						] );
+					} else {
+						clearSnapLines();
+					}
 
 					lastWidth = appliedWidth;
 					lastHeight = appliedHeight;
@@ -288,11 +312,16 @@ class EnhancedResizableBox extends Component {
 	}
 }
 
+EnhancedResizableBox.defaultProps = {
+	snapGap: 0,
+};
+
 EnhancedResizableBox.propTypes = {
 	ampFitText: PropTypes.bool,
 	angle: PropTypes.number,
 	blockName: PropTypes.string,
 	hasTextContent: PropTypes.bool,
+	clientId: PropTypes.string,
 	minWidth: PropTypes.number,
 	minHeight: PropTypes.number,
 	onResizeStart: PropTypes.func.isRequired,
@@ -300,6 +329,12 @@ EnhancedResizableBox.propTypes = {
 	children: PropTypes.node.isRequired,
 	width: PropTypes.number,
 	height: PropTypes.number,
+	horizontalSnaps: PropTypes.func.isRequired,
+	verticalSnaps: PropTypes.func.isRequired,
+	snapGap: PropTypes.number.isRequired,
+	setSnapLines: PropTypes.func.isRequired,
+	clearSnapLines: PropTypes.func.isRequired,
+	parentBlockElement: PropTypes.object,
 };
 
-export default EnhancedResizableBox;
+export default withSnapTargets( EnhancedResizableBox );

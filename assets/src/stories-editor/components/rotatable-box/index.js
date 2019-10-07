@@ -15,7 +15,7 @@ import { __, sprintf } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { findClosestSnap } from '../../helpers';
+import { findClosestSnap } from '../../helpers/snapping';
 import './edit.css';
 
 const RotatableBox = ( { angle, initialAngle, blockElementId, className, speak, onRotateStart, onRotate, onRotateStop, snap, snapGap, children } ) => {
@@ -116,7 +116,15 @@ const RotatableBox = ( { angle, initialAngle, blockElementId, className, speak, 
 		const rad2deg = ( 180 / Math.PI );
 		let newAngle = Math.ceil( -( rad2deg * Math.atan2( x, y ) ) );
 
-		newAngle = findClosestSnap( newAngle, snap, snapGap );
+		const snappingEnabled = ! e.getModifierState( 'Alt' );
+
+		if ( snappingEnabled ) {
+			const angleSnap = findClosestSnap( newAngle, snap, snapGap );
+
+			if ( angleSnap !== null ) {
+				newAngle = angleSnap;
+			}
+		}
 
 		if ( currentAngle === newAngle ) {
 			return;

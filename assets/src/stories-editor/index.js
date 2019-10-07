@@ -37,6 +37,7 @@ import {
 	withActivePageState,
 	withStoryBlockDropZone,
 	withCallToActionValidation,
+	withSnapLines,
 	withCroppedFeaturedImage,
 	withContextMenu,
 } from './components';
@@ -319,6 +320,7 @@ addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addPageNumber', withPageNum
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/contextMenuHandler', withContextMenu );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addEditFeaturedImage', withEditFeaturedImage );
 addFilter( 'editor.BlockEdit', 'ampEditorBlocks/addVideoBlockPreview', withCustomVideoBlockEdit, 9 );
+addFilter( 'editor.BlockEdit', 'ampEditorBlocks/withSnapLines', withSnapLines );
 addFilter( 'editor.PostFeaturedImage', 'ampStoryEditorBlocks/addFeaturedImageNotice', withStoryFeaturedImageNotice );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/withActivePageState', withActivePageState );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', withWrapperProps );

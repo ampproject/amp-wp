@@ -36,6 +36,8 @@ export { default as withCustomVideoBlockEdit } from './with-custom-video-block-e
 export { default as CustomVideoBlockEdit } from './custom-video-block-edit';
 export { default as withIsReordering } from './higher-order/with-is-reordering';
 export { default as withSelectedBlock } from './higher-order/with-selected-block';
+export { default as withSnapLines } from './higher-order/with-snap-lines';
+export { default as withSnapTargets } from './higher-order/with-snap-targets';
 export { default as withWrapperProps } from './with-wrapper-props';
 export { default as withActivePageState } from './with-active-page-state';
 export { default as withStoryBlockDropZone } from './with-story-block-drop-zone';

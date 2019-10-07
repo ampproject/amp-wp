@@ -6,7 +6,7 @@ import { createBlock, getBlockAttributes } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import { isMovableBlock } from './';
+import isMovableBlock from './isMovableBlock';
 
 /**
  * Filters block transformations.
