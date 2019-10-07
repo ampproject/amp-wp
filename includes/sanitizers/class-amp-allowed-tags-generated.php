@@ -15408,31 +15408,6 @@ class AMP_Allowed_Tags_Generated {
 			),
 			array(
 				'attr_spec_list' => array(
-					'amp-custom-length-check' => array(
-						'dispatch_key' => 1,
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/css',
-						),
-					),
-				),
-				'cdata' => array(
-					'max_bytes' => -1,
-				),
-				'tag_spec' => array(
-					'mandatory_parent' => 'head',
-					'spec_name' => 'style amp-custom-length-check',
-					'unique' => true,
-				),
-			),
-			array(
-				'attr_spec_list' => array(
 					'amp-boilerplate' => array(
 						'dispatch_key' => 3,
 						'mandatory' => true,
