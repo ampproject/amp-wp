@@ -216,8 +216,8 @@ const RightClickMenu = ( props ) => {
 		}
 
 		const pageList = getBlockOrder();
-		const pageNumber = pageList.length;
-		if ( block && pageNumber > 1 ) {
+		const numPages = pageList.length;
+		if ( block && numPages > 1 ) {
 			const currentPage = getCurrentPage();
 			const currentPagePosition = pageList.indexOf( currentPage );
 			if ( currentPagePosition > 0 ) {
@@ -234,7 +234,7 @@ const RightClickMenu = ( props ) => {
 					);
 				}
 			}
-			if ( currentPagePosition < ( pageNumber - 1 ) ) {
+			if ( currentPagePosition < ( numPages - 1 ) ) {
 				const nextPage = getPageByOffset( 1 );
 				if ( isBlockAllowedOnPage( block.name, nextPage ) ) {
 					blockActions.push(
