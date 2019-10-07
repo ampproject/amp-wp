@@ -41,6 +41,12 @@ const schema = {
 		type: 'number',
 		default: 30,
 	},
+	btnWidth: {
+		type: 'number',
+	},
+	btnHeight: {
+		type: 'number',
+	},
 };
 
 export const name = 'amp/amp-story-cta';

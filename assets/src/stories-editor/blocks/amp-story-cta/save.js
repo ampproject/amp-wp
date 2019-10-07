@@ -18,6 +18,8 @@ const CallToActionSave = ( { attributes } ) => {
 		anchor,
 		btnPositionLeft,
 		btnPositionTop,
+		btnWidth,
+		btnHeight,
 		text,
 		url,
 	} = attributes;
@@ -27,16 +29,20 @@ const CallToActionSave = ( { attributes } ) => {
 
 	styles.top = btnPositionTop ? `${ btnPositionTop }%` : undefined;
 	styles.left = btnPositionLeft ? `${ btnPositionLeft }%` : undefined;
+	styles.width = btnWidth ? `${ btnWidth }%` : undefined;
+	styles.height = btnHeight ? `${ btnHeight }%` : undefined;
 
 	return (
 		<amp-story-cta-layer id={ anchor ? anchor : getUniqueId() }>
-			<RichText.Content
-				tagName="a"
-				className={ className }
-				href={ url }
-				style={ styles }
-				value={ text }
-			/>
+			<div className="amp-cta-button-wrapper">
+				<RichText.Content
+					tagName="a"
+					className={ className }
+					href={ url }
+					style={ styles }
+					value={ text }
+				/>
+			</div>
 		</amp-story-cta-layer>
 	);
 };
