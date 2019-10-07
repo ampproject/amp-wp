@@ -69,3 +69,8 @@ div[data-type="amp/amp-story-page"] .block-editor-inner-blocks .block-editor-blo
 .wp-block[data-type="amp/amp-story-text"] .block-mover {
 	height: 100%;
 }
+
+/* For the resizing time, let's ignore the font size to avoid the block "sliding" */
+.is-resizing .wp-block-amp-story-text-wrapper.with-line-height {
+	overflow: hidden;
+}
