@@ -368,12 +368,17 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function maybe_add_lightbox_attributes( $attributes, $node ) {
 		$parent_node = $node->parentNode;
-		if ( ! ( $parent_node instanceof DOMElement ) || 'figure' !== $parent_node->tagName ) {
+		if ( ! ( $parent_node instanceof DOMElement ) ) {
 			return $attributes;
 		}
 
-		// Account for blocks that include alignment.
-		// In that case, the structure changes from figure.wp-block-image > img
+		$is_node_wrapped_in_anchor = 'a' === $parent_node->tagName && $parent_node->parentNode instanceof DOMElement && 'figure' === $parent_node->parentNode->tagName;
+		if ( 'figure' !== $parent_node->tagName && ! $is_node_wrapped_in_anchor ) {
+			return $attributes;
+		}
+
+		// Account for blocks that include alignment or images that are wrapped in <a>.
+		// With alignment, the structure changes from figure.wp-block-image > img
 		// to div.wp-block-image > figure > img and the amp-lightbox attribute
 		// can be found on the wrapping div instead of the figure element.
 		$grand_parent = $parent_node->parentNode;
@@ -393,13 +398,18 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			$attributes['tabindex']          = 0;
 
 			$this->maybe_add_amp_image_lightbox_node();
+
+			if ( $is_node_wrapped_in_anchor ) {
+				// Remove the <a> that the image is wrapped in, as it can prevent the lightbox from working.
+				$node->parentNode->parentNode->replaceChild( $node, $node->parentNode );
+			}
 		}
 
 		return $attributes;
 	}
 
 	/**
-	 * Determines is a URL is considered a GIF URL
+	 * Determines if a URL is considered a GIF URL
 	 *
 	 * @since 0.2
 	 *
