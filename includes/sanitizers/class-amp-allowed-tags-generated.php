@@ -14970,6 +14970,32 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'extension_spec' => array(
+						'name' => 'amp-wordpress-embed',
+						'version' => array(
+							'0.1',
+							'latest',
+						),
+					),
+					'spec_url' => 'https://amp.dev/documentation/components/amp-wordpress-embed',
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => array(
+							'',
+						),
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => array(
+							'text/javascript',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
 						'name' => 'amp-yotpo',
 						'version' => array(
 							'0.1',
