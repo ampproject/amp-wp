@@ -57,28 +57,21 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			// @todo Modal Menu (stripped with twentytwenty-js)
 			// @todo Primary Menu (stripped with twentytwenty-js)
 			// @todo Toggles (stripped with twentytwenty-js) - probably unneeded once the rest is done
-			'dequeue_scripts'                    => [
+			'dequeue_scripts'          => [
 				'twentytwenty-js',
 			],
-			'remove_actions'                     => [
+			'remove_actions'           => [
 				'wp_head' => [
 					'twentytwenty_no_js_class', // AMP is essentially no-js, with any interactivity added explicitly via amp-bind.
 				],
 			],
-			'add_smooth_scrolling'               => [
+			'add_smooth_scrolling'     => [
 				// @todo Only replaces twentytwenty.smoothscroll.scrollToAnchor, but not twentytwenty.smoothscroll.scrollToElement
 				'//a[ starts-with( @href, "#" ) and not( @href = "#" )and not( @href = "#0" ) and not( contains( @class, "do-not-scroll" ) ) and not( contains( @class, "skip-link" ) ) ]',
 			],
-			'wrap_modal_in_lightbox'             => [
-				// @todo Works alright apart from the fact that the scrollbar disappears, causing a repaint and the admin bar jumping around.
-				// @todo Styling needs to be adapted to get rid of the "display: none" styles when ".active".
-				'modal_id'             => 'mobile-menu',
-				'modal_content_xpath'  => '//div[ contains( @class, "menu-modal" ) ]',
-				'open_button_xpath'    => '//header[@id = "site-header"]//button[ contains( @class, "mobile-nav-toggle" ) ]',
-				'close_button_xpath'   => '//div[ contains( @class, "menu-modal" ) ]//button[ contains ( @class, "close-nav-toggle" ) ]',
-				'strip_wrapper_levels' => 1,
-			],
+			'add_twentytwenty_modals'  => [],
 			'add_twentytwenty_toggles' => [],
+			'add_nav_menu_styles'      => [],
 		],
 
 		// Twenty Nineteen.
@@ -990,7 +983,13 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					}
 				<?php endif; ?>
 
-				<?php if ( 'twentyseventeen' === get_template() ) : ?>
+				<?php if ( 'twentytwenty' === get_template() ) : ?>
+					.cover-modal,
+					.active {
+						display: inherit;
+					}
+				}
+				<?php elseif ( 'twentyseventeen' === get_template() ) : ?>
 					/* Show the button*/
 					.no-js .menu-toggle {
 						display: block;
@@ -1557,12 +1556,12 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * Wrap a modal node tree in an <amp-lightbox> element.
 	 *
 	 * @param array $args Associative array of arguments {
-	 *     @type string $modal_id            ID to use for the modal and its associated buttons.
-	 *     @type string $modal_content_xpath XPath to query the contents of the modal.
-	 *     @type string $open_button_xpath   XPath to query the button that opens the modal.
-	 *     @type string $close_button_xpath  XPath to query the button that closes the modal. This one should be contained within the modal.
-	 *     @type string $animate_in          Optional. What animation to use for showing the modal. Valid options are: 'fade-in', 'fly-in-bottom', 'fly-in-top'. Defaults to 'fade-in'.
-	 *     @type bool   $scrollable          Optional. Whether the inner content of the modal should be scrollable. Defaults to true.
+	 *     @type string   $modal_id            ID to use for the modal and its associated buttons.
+	 *     @type string   $modal_content_xpath XPath to query the contents of the modal.
+	 *     @type string[] $open_button_xpath   Array of XPaths to query the buttons that open the modal.
+	 *     @type string[] $close_button_xpath  Array of XPaths to query the buttons that close the modal. These should be contained within the modal.
+	 *     @type string   $animate_in          Optional. What animation to use for showing the modal. Valid options are: 'fade-in', 'fly-in-bottom', 'fly-in-top'. Defaults to 'fade-in'.
+	 *     @type bool     $scrollable          Optional. Whether the inner content of the modal should be scrollable. Defaults to true.
 	 * }
 	 */
 	public function wrap_modal_in_lightbox( $args = [] ) {
@@ -1572,11 +1571,24 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 		$modal_id           = $args['modal_id'];
 		$modal_content_node = $this->xpath->query( $args['modal_content_xpath'] )->item( 0 );
-		$open_button_node   = $this->xpath->query( $args['open_button_xpath'] )->item( 0 );
-		$close_button_node  = $this->xpath->query( $args['close_button_xpath'] )->item( 0 );
 
-		if ( ! $modal_id || ! $modal_content_node || ! $open_button_node || ! $close_button_node ) {
+		if ( ! is_string( $modal_id ) || ! $modal_content_node instanceof DOMElement ) {
 			return;
+		}
+
+		$buttons = [
+			$modal_id           => isset( $args['open_button_xpath'] ) ? $args['open_button_xpath'] : [],
+			"{$modal_id}.close" => isset( $args['close_button_xpath'] ) ? $args['close_button_xpath'] : [],
+		];
+
+		foreach ( $buttons as $action => $button_xpaths ) {
+			foreach ( $button_xpaths as $button_xpath ) {
+				foreach ( $this->xpath->query( $button_xpath ) as $node ) {
+					if ( $node instanceof DOMElement ) {
+						$this->add_amp_action( $node, 'tap', $action );
+					}
+				}
+			}
 		}
 
 		// Create an <amp-lightbox> element that will contain the modal.
@@ -1619,16 +1631,71 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		$amp_lightbox->appendChild( $modal_content_node );
+	}
 
-		// Adapt the open button.
-		$this->add_amp_action( $open_button_node, 'tap', $modal_id );
-		// @todo: Do we need to remove cruft here?
-		// <button class="toggle nav-toggle mobile-nav-toggle" data-toggle-target=".menu-modal" data-toggle-screen-lock="true" data-toggle-body-class="showing-menu-modal" aria-expanded="false" data-set-focus=".close-nav-toggle" on="tap:mobile-menu"></button>
+	/**
+	 * Add generic modal interactivity compat for the Twentytwenty theme.
+	 *
+	 * Modals implemented in JS will be transformed into <amp-lightbox> equivalents,
+	 * with the tap actions being attached to their associated toggles.
+	 */
+	public function add_twentytwenty_modals() {
+		$modals = $this->xpath->query( "//*[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' cover-modal ' ) ]" );
 
-		// Adapt the close button.
-		$this->add_amp_action( $close_button_node, 'tap', "{$modal_id}.close" );
-		// @todo: Do we need to remove cruft here?
-		// <button class="toggle close-nav-toggle fill-children-current-color" data-toggle-target=".menu-modal" data-toggle-screen-lock="true" data-toggle-body-class="showing-menu-modal" aria-expanded="false" data-set-focus=".menu-modal" on="tap:mobile-menu.close"></button>
+		if ( false === $modals || 0 === $modals->count() ) {
+			return;
+		}
+
+		$index = 1;
+		foreach ( $modals as $modal ) {
+
+			if ( ! $modal instanceof DOMElement ) {
+				return;
+			}
+
+			if ( ! $modal->hasAttribute( 'data-modal-target-string' ) ) {
+				return;
+			}
+
+			$modal_target = $modal->getAttribute( 'data-modal-target-string' );
+			$toggles = $this->xpath->query( "//*[ @data-toggle-target = '{$modal_target}' ]" );
+
+			$open_button_xpaths  = [];
+			$close_button_xpaths = [];
+			foreach ( $toggles as $toggle ) {
+				if ( ! $toggle instanceof DOMElement ) {
+					continue;
+				}
+
+				$within_modal = false;
+				$parent = $toggle->parentNode;
+				while ( $parent ) {
+					if ( $parent === $modal ) {
+						$within_modal = true;
+						break;
+					}
+					$parent = $parent->parentNode;
+				}
+
+				if ( $within_modal ) {
+					$close_button_xpaths[] = $toggle->getNodePath();
+				} else {
+					$open_button_xpaths[] = $toggle->getNodePath();
+				}
+			}
+
+			$this->wrap_modal_in_lightbox(
+				[
+					'modal_id'             => "amp-modal-{$index}",
+					'modal_content_xpath'  => $modal->getNodePath(),
+					'open_button_xpath'    => $open_button_xpaths,
+					'close_button_xpath'   => $close_button_xpaths,
+					'strip_wrapper_levels' => 1,
+				]
+			);
+
+			$index ++;
+		}
 	}
 
 	/**
@@ -1647,6 +1714,10 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$state = [];
 
 		foreach ( $toggles as $toggle ) {
+			if ( ! $toggle instanceof DOMElement ) {
+				return;
+			}
+
 			$toggle_target = $toggle->getAttribute( 'data-toggle-target' );
 			$id            = $this->get_toggle_id( $toggle_target, $state );
 
@@ -1776,7 +1847,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			// Single class.
 			if ( preg_match( '/^\.(?<class>[a-zA-Z0-9-_]*)$/', $token, $matches ) ) {
 				$descendant        = $direct_descendant ? '/' : '//';
-				$xpath             .= "{$descendant}*[ contains( concat( ' ', @class, ' ' ), ' {$matches['class']} ' ) ]";
+				$xpath             .= "{$descendant}*[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' {$matches['class']} ' ) ]";
 				$direct_descendant = false;
 				$token             = strtok( ' ' );
 				continue;
