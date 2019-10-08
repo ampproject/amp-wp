@@ -6395,6 +6395,31 @@ class AMP_Allowed_Tags_Generated {
 				),
 			),
 		),
+		'amp-wordpress-embed' => array(
+			array(
+				'attr_spec_list' => array(
+					'data-url' => array(
+						'mandatory' => true,
+						'value_url' => array(
+							'allow_relative' => false,
+							'protocol' => array(
+								'https',
+							),
+						),
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							3,
+						),
+					),
+					'requires_extension' => array(
+						'amp-wordpress-embed',
+					),
+				),
+			),
+		),
 		'amp-yotpo' => array(
 			array(
 				'attr_spec_list' => array(
