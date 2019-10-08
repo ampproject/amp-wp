@@ -10,7 +10,7 @@ import { ALLOWED_BLOCKS, ALLOWED_CHILD_BLOCKS } from '../constants';
 import { isCTABlock } from '../helpers';
 import { withAttributes, withBlockName, withHasSelectedInnerBlock } from './';
 
-const wrapperWithSelect = compose(
+const enhance = compose(
 	withAttributes,
 	withBlockName,
 	withHasSelectedInnerBlock,
@@ -23,7 +23,7 @@ const wrapperWithSelect = compose(
  * @return {Function} Enhanced component.
  */
 const withWrapperProps = ( BlockListBlock ) => {
-	return wrapperWithSelect( ( props ) => {
+	return enhance( ( props ) => {
 		const { clientId, blockName, hasSelectedInnerBlock, attributes } = props;
 
 		// If it's not an allowed block then lets return original;

@@ -143,7 +143,7 @@ describe( 'useMoveBlockToPage', () => {
 			expect( mockCloneBlock ).toHaveBeenCalledWith( BLOCK_1 );
 			expect( mockInsertBlock ).toHaveBeenCalledWith( BLOCK_2, null, PAGE_1 );
 			expect( mockSetCurrentPage ).toHaveBeenCalledWith( PAGE_1 );
-			expect( mockSelectBlock ).toHaveBeenCalledWith( PAGE_1 );
+			expect( mockSelectBlock ).toHaveBeenCalledWith( BLOCK_2.clientId );
 		} );
 
 		it( 'should invoke extra function correctly when invoked with attributes', () => {

@@ -213,3 +213,6 @@ export const TEXT_BLOCK_PADDING = 7;
 
 export const BLOCK_ROTATION_SNAPS = [ -180, -165, -150, -135, -120, -105, -90, -75, -60, -45, -30, -15, 0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180 ];
 export const BLOCK_ROTATION_SNAP_GAP = 10;
+
+export const BLOCK_RESIZING_SNAP_GAP = 8;
+export const BLOCK_DRAGGING_SNAP_GAP = 8;

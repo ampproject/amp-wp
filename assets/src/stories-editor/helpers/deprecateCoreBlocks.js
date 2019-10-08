@@ -2,7 +2,7 @@
  * Internal dependencies
  */
 import { coreDeprecations } from '../deprecations/core-blocks';
-import { isMovableBlock } from './';
+import isMovableBlock from './isMovableBlock';
 
 const deprecateCoreBlocks = ( settings, name ) => {
 	if ( ! isMovableBlock( name ) ) {
