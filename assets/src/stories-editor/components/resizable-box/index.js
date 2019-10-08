@@ -190,10 +190,6 @@ class EnhancedResizableBox extends Component {
 
 					const isReducing = 0 > deltaW || 0 > deltaH;
 
-					if ( ampFitTextElement && textElement ) {
-						adjustFontSizeWhileResizing( textElement, ampFitTextElement, appliedWidth, appliedHeight );
-					}
-
 					// Track if resizing has reached its minimum limits to fit the text inside.
 					let reachedMinLimit = false;
 					// The following calculation is needed only when content has been added to the Text block.
@@ -244,6 +240,11 @@ class EnhancedResizableBox extends Component {
 					}
 					if ( minWidth < appliedWidth ) {
 						lastDeltaW = deltaW;
+					}
+
+					if ( ampFitTextElement && textElement ) {
+						const blockLimitsReached = appliedWidth === minWidth || appliedHeight === minHeight;
+						adjustFontSizeWhileResizing( textElement, ampFitTextElement, appliedWidth, appliedHeight, isText, blockLimitsReached );
 					}
 
 					// If limits were not reached yet, do the calculations for positioning.
