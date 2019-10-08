@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { isMovableBlock } from './';
+import isMovableBlock from './isMovableBlock';
 
 /**
  * Returns a movable block's wrapper element.

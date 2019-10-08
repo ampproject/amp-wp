@@ -8,10 +8,12 @@
  */
 const getRelativeElementPosition = ( blockElement, parentElement ) => {
 	const { left: parentLeft, top: parentTop } = parentElement.getBoundingClientRect();
-	const { top, left } = blockElement.getBoundingClientRect();
+	const { top, right, bottom, left } = blockElement.getBoundingClientRect();
 
 	return {
 		top: top - parentTop,
+		right: right - parentLeft,
+		bottom: bottom - parentTop,
 		left: left - parentLeft,
 	};
 };

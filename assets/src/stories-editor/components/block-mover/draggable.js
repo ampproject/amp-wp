@@ -1,5 +1,5 @@
 /**
- * This file is based on the core's <Draggable> Component.
+ * This file is based on core's <Draggable> Component.
  **/
 
 /**
@@ -12,20 +12,23 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { Component } from '@wordpress/element';
-import { withSafeTimeout } from '@wordpress/compose';
+import { withSafeTimeout, compose } from '@wordpress/compose';
 
 /**
  * Internal dependencies
  */
+import withSnapTargets from '../higher-order/with-snap-targets';
 import {
 	getPixelsFromPercentage,
 	getPercentageFromPixels,
 	getRelativeElementPosition,
 	isCTABlock,
 } from '../../helpers';
+import { getBestSnapLines } from '../../helpers/snapping';
 import {
 	STORY_PAGE_INNER_WIDTH,
 	STORY_PAGE_INNER_HEIGHT,
+	BLOCK_DRAGGING_SNAP_GAP,
 	STORY_PAGE_INNER_HEIGHT_FOR_CTA,
 	STORY_PAGE_MARGIN,
 } from '../../constants';
@@ -38,6 +41,9 @@ const cloneWrapperClass = 'components-draggable__clone';
 
 const isChromeUA = ( ) => /Chrome/i.test( navigator.userAgent );
 const documentHasIframes = ( ) => [ ...document.getElementById( 'editor' ).querySelectorAll( 'iframe' ) ].length > 0;
+
+let lastX;
+let lastY;
 
 class Draggable extends Component {
 	constructor( ...args ) {
@@ -70,7 +76,7 @@ class Draggable extends Component {
 	 * @param {Object} event The non-custom DragEvent.
 	 */
 	onDragEnd = ( event ) => {
-		const { clearHighlight, dropElementByOffset, blockName, setTimeout, onDragEnd = noop } = this.props;
+		const { clearHighlight, dropElementByOffset, blockName, setTimeout, clearSnapLines, onDragEnd = noop } = this.props;
 		if ( event ) {
 			event.preventDefault();
 		}
@@ -104,6 +110,9 @@ class Draggable extends Component {
 		}
 
 		this.resetDragState();
+
+		clearSnapLines();
+
 		setTimeout( onDragEnd );
 	}
 
@@ -112,9 +121,48 @@ class Draggable extends Component {
 	 *
 	 * @param  {Object} event The non-custom DragEvent.
 	 */
-	onDragOver = ( event ) => {
-		const { setHighlightByOffset, blockName } = this.props;
+	onDragOver = ( event ) => { // eslint-disable-line complexity
+		const {
+			blockName,
+			setSnapLines,
+			clearSnapLines,
+			parentBlockElement,
+			horizontalSnaps,
+			verticalSnaps,
+			setHighlightByOffset,
+		} = this.props;
+
 		const top = parseInt( this.cloneWrapper.style.top ) + event.clientY - this.cursorTop;
+		const left = parseInt( this.cloneWrapper.style.left ) + event.clientX - this.cursorLeft;
+
+		if ( top === lastY && left === lastX ) {
+			return;
+		}
+
+		// Get the correct dimensions in case the block is rotated, as rotation is only applied to the clone's inner element(s).
+		// For CTA blocks, not the whole block is draggable, but only the button within.
+		const blockElement = isCTABlock( blockName ) ? this.cloneWrapper.querySelector( '.amp-story-cta-button' ) : this.cloneWrapper.querySelector( '.wp-block' );
+
+		// We calculate with the block's actual dimensions relative to the page it's on.
+		const {
+			top: actualTop,
+			right: actualRight,
+			bottom: actualBottom,
+			left: actualLeft,
+		} = getRelativeElementPosition( blockElement, parentBlockElement );
+
+		const snappingEnabled = ! event.getModifierState( 'Alt' );
+
+		if ( snappingEnabled ) {
+			const horizontalSnapsForPosition = horizontalSnaps( actualTop, actualBottom );
+			const verticalSnapsForPosition = verticalSnaps( actualLeft, actualRight );
+			setSnapLines( [
+				...getBestSnapLines( horizontalSnapsForPosition, actualLeft, actualRight, BLOCK_DRAGGING_SNAP_GAP ),
+				...getBestSnapLines( verticalSnapsForPosition, actualTop, actualBottom, BLOCK_DRAGGING_SNAP_GAP ),
+			] );
+		} else {
+			clearSnapLines();
+		}
 
 		// Don't allow the CTA button to go over its top limit.
 		if ( isCTABlock( blockName ) ) {
@@ -123,12 +171,14 @@ class Draggable extends Component {
 			this.cloneWrapper.style.top = `${ top }px`;
 		}
 
-		this.cloneWrapper.style.left =
-			`${ parseInt( this.cloneWrapper.style.left ) + event.clientX - this.cursorLeft }px`;
+		this.cloneWrapper.style.left = `${ left }px`;
 
 		// Update cursor coordinates.
 		this.cursorLeft = event.clientX;
 		this.cursorTop = event.clientY;
+
+		lastY = top;
+		lastX = left;
 
 		// Check if mouse (*not* element, but actual cursor) is over neighboring page to either side.
 		const currentElementLeft = parseInt( this.cloneWrapper.style.left );
@@ -143,6 +193,7 @@ class Draggable extends Component {
 				Math.ceil( ( cursorLeftRelativeToPage - PAGE_AND_MARGIN ) / PAGE_AND_MARGIN )
 			);
 		}
+
 		setHighlightByOffset( this.pageOffset );
 	}
 
@@ -160,7 +211,13 @@ class Draggable extends Component {
 	 * @param {Object} event Custom DragEvent.
 	 */
 	onDragStart = ( event ) => {
-		const { blockName, elementId, transferData, onDragStart = noop } = this.props;
+		const {
+			blockName,
+			elementId,
+			transferData,
+			onDragStart = noop,
+			clearSnapLines,
+		} = this.props;
 		const blockIsCTA = isCTABlock( blockName );
 		// In the CTA block only the inner element (the button) is draggable, not the whole block.
 		const element = blockIsCTA ? document.getElementById( elementId ) : document.getElementById( elementId ).parentNode;
@@ -199,6 +256,7 @@ class Draggable extends Component {
 		this.cloneWrapper.style.height = `${ element.clientHeight }px`;
 
 		const clone = element.cloneNode( true );
+
 		this.cloneWrapper.style.transform = clone.style.transform;
 
 		// 20% of the full value in case of CTA block.
@@ -229,6 +287,7 @@ class Draggable extends Component {
 		// Mark the current cursor coordinates.
 		this.cursorLeft = event.clientX;
 		this.cursorTop = event.clientY;
+
 		// Update cursor to 'grabbing', document wide.
 		document.body.classList.add( 'is-dragging-components-draggable' );
 		document.addEventListener( 'dragover', this.onDragOver );
@@ -243,6 +302,8 @@ class Draggable extends Component {
 			this.isChromeAndHasIframes = true;
 			document.addEventListener( 'drop', this.onDrop );
 		}
+
+		clearSnapLines();
 
 		this.props.setTimeout( onDragStart );
 	}
@@ -294,6 +355,16 @@ Draggable.propTypes = {
 	dropElementByOffset: PropTypes.func.isRequired,
 	setTimeout: PropTypes.func.isRequired,
 	children: PropTypes.func.isRequired,
+	horizontalSnaps: PropTypes.func.isRequired,
+	verticalSnaps: PropTypes.func.isRequired,
+	setSnapLines: PropTypes.func.isRequired,
+	clearSnapLines: PropTypes.func.isRequired,
+	parentBlockElement: PropTypes.object,
 };
 
-export default withSafeTimeout( Draggable );
+const enhance = compose(
+	withSnapTargets,
+	withSafeTimeout,
+);
+
+export default enhance( Draggable );

@@ -292,10 +292,16 @@ class AMP_Validation_Manager {
 	/**
 	 * Return whether sanitization is forcibly accepted, whether because in AMP-first mode or via user option.
 	 *
+	 * @param array $error Optional. Validation error. Will query the general status if no error provided.
 	 * @return bool Whether sanitization is forcibly accepted.
 	 */
-	public static function is_sanitization_auto_accepted() {
-		return amp_is_canonical() || AMP_Options_Manager::get_option( 'auto_accept_sanitization' );
+	public static function is_sanitization_auto_accepted( $error = null ) {
+		if ( ! amp_is_canonical() ) {
+			// @todo Eliminate auto_accept_sanitization altogether.
+			return AMP_Options_Manager::get_option( 'auto_accept_sanitization' );
+		}
+
+		return ! ( $error && 'excessive_css' === $error['code'] );
 	}
 
 	/**

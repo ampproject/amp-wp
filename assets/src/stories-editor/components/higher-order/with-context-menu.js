@@ -4,31 +4,33 @@
 import { withSelect } from '@wordpress/data';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { render } from '@wordpress/element';
+import { KeyboardShortcuts } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import { ALLOWED_CHILD_BLOCKS } from '../../constants';
-import { getBlockDOMNode, getPercentageFromPixels } from '../../helpers';
-import { RightClickMenu } from '../';
+import { getBlockDOMNode, getPercentageFromPixels, isPageBlock } from '../../helpers';
+import { ContextMenu } from '../';
 
-const applyWithSelect = withSelect( ( select, props ) => {
+const applyWithSelect = withSelect( ( select ) => {
 	const {	isReordering, getCopiedMarkup, getCurrentPage } = select( 'amp/story' );
 	const {
 		getSelectedBlockClientIds,
 		hasMultiSelection,
 	} = select( 'core/block-editor' );
 
-	const { name } = props;
+	const handleEvent = ( event ) => {
+		const isRightClick = event.type === 'contextmenu';
 
-	const onContextMenu = ( event ) => {
 		const selectedBlockClientIds = getSelectedBlockClientIds();
 
 		if ( selectedBlockClientIds.length === 0 ) {
 			return;
 		}
-		// If nothing is in the saved markup, use the default behavior.
-		if ( 'amp/amp-story-page' === name && ! getCopiedMarkup().length ) {
+
+		// If selection is page and nothing is in the saved markup, use the default behavior.
+		if ( isPageBlock( selectedBlockClientIds[ 0 ] ) && ! getCopiedMarkup().length ) {
 			return;
 		}
 
@@ -56,8 +58,23 @@ const applyWithSelect = withSelect( ( select, props ) => {
 		if ( toolBar ) {
 			toolBarHeight = toolBar.clientHeight;
 		}
-		const relativePositionX = event.clientX - wrapperDimensions.left;
-		const relativePositionY = event.clientY - wrapperDimensions.top - toolBarHeight;
+
+		let eventX = 0;
+		let eventY = 0;
+
+		if ( isRightClick ) {
+			// Use coordinates of actual click to place context menu.
+			eventX = event.clientX;
+			eventY = event.clientY;
+		} else {
+			// Place menu the center of the target element.
+			const elementPosition = event.target.getBoundingClientRect();
+			eventX = elementPosition.left + ( elementPosition.width / 2 );
+			eventY = elementPosition.top + ( elementPosition.height / 2 );
+		}
+
+		const relativePositionX = eventX - wrapperDimensions.left;
+		const relativePositionY = eventY - wrapperDimensions.top - toolBarHeight;
 		const clientId = getCurrentPage();
 
 		let insidePercentageY = 0;
@@ -65,15 +82,15 @@ const applyWithSelect = withSelect( ( select, props ) => {
 
 		const page = getBlockDOMNode( clientId );
 		if ( page ) {
-			const pagePostions = page.getBoundingClientRect();
-			const insideY = event.clientY - pagePostions.top;
-			const insideX = event.clientX - pagePostions.left;
-			insidePercentageY = getPercentageFromPixels( 'y', insideY );
+			const pagePosition = page.getBoundingClientRect();
+			const insideX = eventX - pagePosition.left;
+			const insideY = eventY - pagePosition.top;
 			insidePercentageX = getPercentageFromPixels( 'x', insideX );
+			insidePercentageY = getPercentageFromPixels( 'y', insideY );
 		}
 
 		render(
-			<RightClickMenu clientIds={ selectedBlockClientIds } clientX={ relativePositionX } clientY={ relativePositionY } insidePercentageX={ insidePercentageX } insidePercentageY={ insidePercentageY } />,
+			<ContextMenu clientIds={ selectedBlockClientIds } clientX={ relativePositionX } clientY={ relativePositionY } insidePercentageX={ insidePercentageX } insidePercentageY={ insidePercentageY } />,
 			document.getElementById( 'amp-story-right-click-menu' )
 		);
 
@@ -81,24 +98,24 @@ const applyWithSelect = withSelect( ( select, props ) => {
 	};
 
 	return {
-		onContextMenu,
+		handleEvent,
 		isReordering: isReordering(),
 	};
 } );
 
 /**
- * Higher-order component that adds right click handler to each inner block.
+ * Higher-order component that adds right context menu handler to each inner block.
  *
  * @return {Function} Higher-order component.
  */
 export default createHigherOrderComponent(
 	( BlockEdit ) => {
 		return applyWithSelect( ( props ) => {
-			const { name, onContextMenu, isReordering } = props;
-			const isPageBlock = 'amp/amp-story-page' === name;
+			const { name, handleEvent, isReordering } = props;
+			const isPage = 'amp/amp-story-page' === name;
 
 			// Add for page block and inner blocks.
-			if ( ! isPageBlock && ! ALLOWED_CHILD_BLOCKS.includes( name ) ) {
+			if ( ! isPage && ! ALLOWED_CHILD_BLOCKS.includes( name ) ) {
 				return <BlockEdit { ...props } />;
 			}
 
@@ -108,11 +125,13 @@ export default createHigherOrderComponent(
 			}
 
 			return (
-				<div onContextMenu={ onContextMenu }>
-					<BlockEdit { ...props } />
-				</div>
+				<KeyboardShortcuts shortcuts={ { 'shift+f10': handleEvent } }>
+					<div onContextMenu={ handleEvent }>
+						<BlockEdit { ...props } />
+					</div>
+				</KeyboardShortcuts>
 			);
 		} );
 	},
-	'withRightClickHandler'
+	'withContextMenu'
 );

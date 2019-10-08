@@ -34,3 +34,12 @@
 .wp-block[data-type="core/quote"] .editor-rich-text__editable:hover {
 	cursor: default;
 }
+
+.components-draggable__clone .components-resizable-box__handle,
+.components-draggable__clone .rotatable-box-wrap::before,
+.components-draggable__clone .rotatable-box-wrap__handle {
+	display: none;
+	opacity: 0;
+	visibility: hidden;
+	content: none;
+}

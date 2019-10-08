@@ -35,6 +35,7 @@ import {
 	BLOCKS_WITH_RESIZING,
 	BLOCK_ROTATION_SNAPS,
 	BLOCK_ROTATION_SNAP_GAP,
+	BLOCK_RESIZING_SNAP_GAP,
 } from '../../constants';
 import { getBlockOrderDescription, maybeEnqueueFontStyle, getCallToActionBlock, isMovableBlock } from '../../helpers';
 import bringForwardIcon from '../../../../images/stories-editor/bring-forward.svg';
@@ -215,6 +216,7 @@ export default createHigherOrderComponent(
 			const {
 				ampFontFamily,
 				ampFitText,
+				content,
 				height,
 				width,
 				opacity,
@@ -253,6 +255,7 @@ export default createHigherOrderComponent(
 							width={ width }
 							height={ height }
 							angle={ rotationAngle }
+							hasTextContent={ Boolean( isTextBlock && content.length ) }
 							minHeight={ minHeight }
 							minWidth={ MIN_BLOCK_WIDTH }
 							onResizeStop={ ( value ) => {
@@ -260,10 +263,12 @@ export default createHigherOrderComponent(
 								stopBlockActions();
 							} }
 							blockName={ name }
+							clientId={ clientId }
 							ampFitText={ ampFitText }
 							onResizeStart={ () => {
 								startBlockActions();
 							} }
+							snapGap={ BLOCK_RESIZING_SNAP_GAP }
 						>
 							<RotatableBox
 								blockElementId={ `block-${ clientId }` }

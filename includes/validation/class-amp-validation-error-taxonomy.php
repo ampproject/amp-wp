@@ -470,7 +470,7 @@ class AMP_Validation_Error_Taxonomy {
 		if ( ! empty( $term ) && in_array( $term->term_group, $statuses, true ) ) {
 			$term_status = $term->term_group;
 		} else {
-			$term_status = AMP_Validation_Manager::is_sanitization_auto_accepted() ? self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS : self::VALIDATION_ERROR_NEW_REJECTED_STATUS;
+			$term_status = AMP_Validation_Manager::is_sanitization_auto_accepted( $error ) ? self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS : self::VALIDATION_ERROR_NEW_REJECTED_STATUS;
 		}
 
 		$forced = false;
