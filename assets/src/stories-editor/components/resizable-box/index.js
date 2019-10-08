@@ -193,7 +193,7 @@ class EnhancedResizableBox extends Component {
 					// Track if resizing has reached its minimum limits to fit the text inside.
 					let reachedMinLimit = false;
 					// The following calculation is needed only when content has been added to the Text block.
-					if ( textElement && isReducing && hasTextContent ) {
+					if ( ! ampFitText && textElement && isReducing && hasTextContent ) {
 						// If we have a rotated block, let's assign the width and height for measuring.
 						// Without assigning the new measure, the calculation would be incorrect due to angle.
 						if ( angle ) {
