@@ -571,7 +571,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	public function force_svg_support() {
 		$class = $this->dom->documentElement->getAttribute( 'class' );
 
-		if ( strpos( $class, 'no-svg' ) !== false ) {
+		if ( false !== strpos( $class, 'no-svg' ) ) {
 			$this->dom->documentElement->setAttribute(
 				'class',
 				preg_replace(
