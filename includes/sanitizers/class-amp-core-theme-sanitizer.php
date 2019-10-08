@@ -52,7 +52,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	protected static $theme_features = [
 		// Twenty Twenty.
-		'twentytwenty' => [
+		'twentytwenty'    => [
 			// @todo Cover Modals (stripped with twentytwenty-js)
 			// @todo Modal Menu (stripped with twentytwenty-js)
 			// @todo Primary Menu (stripped with twentytwenty-js)
@@ -1553,7 +1553,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Wrap a modal node tree in an <amp-lightbox> element.
 	 *
-	 * @param array $args Associative array of arguments {
+	 * @param array $args {
+	 *     Associative array of arguments.
+	 *
 	 *     @type string   $modal_id            ID to use for the modal and its associated buttons.
 	 *     @type string   $modal_content_xpath XPath to query the contents of the modal.
 	 *     @type string[] $open_button_xpath   Array of XPaths to query the buttons that open the modal.
@@ -1656,7 +1658,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			$modal_target = $modal->getAttribute( 'data-modal-target-string' );
-			$toggles = $this->xpath->query( "//*[ @data-toggle-target = '{$modal_target}' ]" );
+			$toggles      = $this->xpath->query( "//*[ @data-toggle-target = '{$modal_target}' ]" );
 
 			$open_button_xpaths  = [];
 			$close_button_xpaths = [];
@@ -1666,7 +1668,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				}
 
 				$within_modal = false;
-				$parent = $toggle->parentNode;
+				$parent       = $toggle->parentNode;
 				while ( $parent ) {
 					if ( $parent === $modal ) {
 						$within_modal = true;
@@ -1721,7 +1723,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 			if ( 'next' === $toggle_target ) {
 				$target_node = $toggle->nextSibling;
-			} else if ( ! array_key_exists( $id, $state ) ) {
+			} elseif ( ! array_key_exists( $id, $state ) ) {
 				$target_xpath = $this->xpath_from_css_selector( $toggle_target );
 				if ( null === $target_xpath ) {
 					continue;
@@ -1745,7 +1747,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			$on_class  = empty( $off_class ) ? $toggle_class : "{$off_class} {$toggle_class}";
 
 			// If we got back an existing ID, then the toggle target was already targeted by a previous toggle,
-			//so we don't need to adapt the target, only the toggle (multiple toggles can target the same target node).
+			// so we don't need to adapt the target, only the toggle (multiple toggles can target the same target node).
 			if ( ! array_key_exists( $id, $state ) ) {
 				$state[ $id ] = [
 					'on'           => $on_class,
@@ -1762,7 +1764,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Add <amp-state> snippets to the document that contain the classes to use.
 		foreach ( $state as $id => $state_data ) {
-			$amp_state    = $this->dom->createElement( 'amp-state' );
+			$amp_state = $this->dom->createElement( 'amp-state' );
 			$amp_state->setAttribute( 'id', "{$id}_classes" );
 			unset( $state_data['css_selector'] );
 			$script = $this->dom->createElement( 'script' );
@@ -1845,7 +1847,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			// Single class.
 			if ( preg_match( '/^\.(?<class>[a-zA-Z0-9-_]*)$/', $token, $matches ) ) {
 				$descendant        = $direct_descendant ? '/' : '//';
-				$xpath             .= "{$descendant}*[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' {$matches['class']} ' ) ]";
+				$xpath            .= "{$descendant}*[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' {$matches['class']} ' ) ]";
 				$direct_descendant = false;
 				$token             = strtok( ' ' );
 				continue;
@@ -1854,7 +1856,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			// Element.
 			if ( preg_match( '/^(?<element>[^.][a-zA-Z0-9-_]*)$/', $token, $matches ) ) {
 				$descendant        = $direct_descendant ? '/' : '//';
-				$xpath             .= "{$descendant}{$matches['element']}";
+				$xpath            .= "{$descendant}{$matches['element']}";
 				$direct_descendant = false;
 				$token             = strtok( ' ' );
 				continue;
@@ -1896,12 +1898,12 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			$existing_actions_array = explode( ',', $existing_actions );
+			$existing_actions_array   = explode( ',', $existing_actions );
 			$existing_actions_array[] = $action;
-			$actions = implode( ',', $existing_actions_array );
+			$actions                  = implode( ',', $existing_actions_array );
 
 			$events[ $index ] = "{$event}:{$actions}";
-			$found = true;
+			$found            = true;
 		}
 
 		if ( ! $found ) {
