@@ -15,11 +15,15 @@ class AMP_WordPress_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Default height.
 	 *
-	 * @todo What is the default?
+	 * Note that 200px is the minimum that WordPress allows for a post embed. This minimum height is enforced by
+	 * WordPress in the wp.receiveEmbedMessage() function, and the <amp-wordpress-embed> also enforces that same
+	 * minimum height. It is important for the minimum height to be initially used because if the actual post embed
+	 * window is _less_ than the initial, then no overflow button will be presented to resize the iframe to be
+	 * _smaller_. So this ensures that the iframe will only ever overflow to grow in height.
 	 *
 	 * @var int
 	 */
-	protected $DEFAULT_HEIGHT = 400;
+	protected $DEFAULT_HEIGHT = 200;
 
 	/**
 	 * Register embed.
@@ -46,10 +50,24 @@ class AMP_WordPress_Embed_Handler extends AMP_Base_Embed_Handler {
 		/*
 		 * Example WordPress embed HTML that would be present in $cache.
 		 *
-		 * <blockquote class="wp-embedded-content" data-secret="gTfBfCdvMg">
-		 *  <a href="https://wordpressdev.lndo.site/2019/02/01/hello-world-2/">Hello world!!</a>
+		 * <blockquote class="wp-embedded-content" data-secret="xUuZHketRt">
+		 *     <a href="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/">New Embeds Feature in WordPress 4.4</a>
 		 * </blockquote>
-		 * <iframe title="&#8220;Hello world!!&#8221; &#8212; WordPressDevs" class="wp-embedded-content" sandbox="allow-scripts" security="restricted" style="position: absolute; clip: rect(1px, 1px, 1px, 1px);" src="https://wordpressdev.lndo.site/2019/02/01/hello-world-2/embed/#?secret=gTfBfCdvMg" data-secret="gTfBfCdvMg" width="600" height="338" frameborder="0" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+		 * <iframe
+		 *      title="&#8220;New Embeds Feature in WordPress 4.4&#8221; &#8212; Make WordPress Core"
+		 *      class="wp-embedded-content"
+		 *      sandbox="allow-scripts"
+		 *      security="restricted"
+		 *      style="position: absolute; clip: rect(1px, 1px, 1px, 1px);"
+		 *      src="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/embed/#?secret=xUuZHketRt"
+		 *      data-secret="xUuZHketRt"
+		 *      width="600"
+		 *      height="338"
+		 *      frameborder="0"
+		 *      marginwidth="0"
+		 *      marginheight="0"
+		 *      scrolling="no">
+		 * </iframe>
 		 */
 		if ( ! preg_match( '#<blockquote class="wp-embedded-content" data-secret="\w+">(.+?)</blockquote>#s', $cache, $matches ) ) {
 			return $cache;
@@ -60,9 +78,6 @@ class AMP_WordPress_Embed_Handler extends AMP_Base_Embed_Handler {
 			'height' => $this->args['height'],
 			'title'  => '',
 		];
-		if ( preg_match( '#<iframe[^>]*?height="(?P<height>\d+)"#s', $cache, $matches ) ) {
-			$attributes['height'] = (int) $matches['height'];
-		}
 		if ( preg_match( '#<iframe[^>]*?title="(?P<title>[^"]+?)"#s', $cache, $matches ) ) {
 			$attributes['title'] = $matches['title'];
 		}
