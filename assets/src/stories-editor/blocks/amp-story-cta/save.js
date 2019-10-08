@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { RichText } from '@wordpress/block-editor';
+import { RawHTML } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -31,17 +31,23 @@ const CallToActionSave = ( { attributes } ) => {
 	styles.left = btnPositionLeft ? `${ btnPositionLeft }%` : undefined;
 	styles.width = btnWidth ? `${ btnWidth }%` : undefined;
 	styles.height = btnHeight ? `${ btnHeight }%` : undefined;
+	styles.display = 'flex';
 
+	// Uses RawHTML to mimic RichText.Content behavior.
 	return (
 		<amp-story-cta-layer id={ anchor ? anchor : getUniqueId() }>
 			<div className="amp-cta-button-wrapper">
-				<RichText.Content
-					tagName="a"
+				<a
 					className={ className }
 					href={ url }
 					style={ styles }
-					value={ text }
-				/>
+				>
+					<amp-fit-text layout="flex-item" className="amp-cta-content">
+						<RawHTML>
+							{ text }
+						</RawHTML>
+					</amp-fit-text>
+				</a>
 			</div>
 		</amp-story-cta-layer>
 	);

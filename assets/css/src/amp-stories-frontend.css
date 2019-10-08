@@ -23,7 +23,7 @@ amp-story-grid-layer {
 
 .amp-block-story-cta__link {
 	position: absolute;
-	font-size: 3.3vh;
+	overflow-wrap: normal;
 }
 
 .amp-block-story-cta__link amp-img {
