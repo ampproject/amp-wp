@@ -94,7 +94,7 @@ div[data-type="amp/amp-story-cta"] .amp-overlay {
 .wp-block-amp-amp-story-cta .amp-block-story-cta__link {
 	max-width: 100%;
 	overflow: hidden;
-	white-space: nowrap;
+	white-space: nowrap !important;
 	text-overflow: ellipsis;
 }
 
