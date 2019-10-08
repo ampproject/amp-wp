@@ -15,7 +15,11 @@ import { ResizableBox } from '@wordpress/components';
  */
 import withSnapTargets from '../higher-order/with-snap-targets';
 import './edit.css';
-import { getPercentageFromPixels, getRelativeElementPosition } from '../../helpers';
+import {
+	adjustFontSizeWhileResizing,
+	getPercentageFromPixels,
+	getRelativeElementPosition,
+} from '../../helpers';
 import { getBestSnapLines } from '../../helpers/snapping';
 import { TEXT_BLOCK_PADDING, BLOCK_RESIZING_SNAP_GAP } from '../../constants';
 import {
@@ -186,6 +190,10 @@ class EnhancedResizableBox extends Component {
 
 					const isReducing = 0 > deltaW || 0 > deltaH;
 
+					if ( ampFitTextElement && textElement ) {
+						adjustFontSizeWhileResizing( textElement, ampFitTextElement, appliedWidth, appliedHeight );
+					}
+
 					// Track if resizing has reached its minimum limits to fit the text inside.
 					let reachedMinLimit = false;
 					// The following calculation is needed only when content has been added to the Text block.
@@ -204,26 +212,15 @@ class EnhancedResizableBox extends Component {
 						}
 
 						// If the applied measures get too small for text, use the previous measures instead.
-						let scrollWidth = textElement.scrollWidth;
-						let scrollHeight = textElement.scrollHeight;
+						const scrollWidth = textElement.scrollWidth;
+						const scrollHeight = textElement.scrollHeight;
 
 						if ( appliedWidth < scrollWidth || appliedHeight < scrollHeight ) {
-							// If we have amp-fit-text on, then reduce the font size to prevent the block
-							// shifting due to font size not fitting.
-							if ( ampFitTextElement ) {
-								while ( appliedWidth < scrollWidth || appliedHeight < scrollHeight ) {
-									const fontSize = parseInt( ampFitTextElement.style.fontSize );
-									ampFitTextElement.style.fontSize = ( fontSize - 1 ) + 'px';
-									scrollWidth = textElement.scrollWidth;
-									scrollHeight = textElement.scrollHeight;
-								}
-							} else {
-								// If the text goes over either of the edges, stop resizing from both sides
-								// since the text is filling in the room from both sides at the same time.
-								reachedMinLimit = true;
-								appliedWidth = lastWidth;
-								appliedHeight = lastHeight;
-							}
+							// If the text goes over either of the edges, stop resizing from both sides
+							// since the text is filling in the room from both sides at the same time.
+							reachedMinLimit = true;
+							appliedWidth = lastWidth;
+							appliedHeight = lastHeight;
 						}
 						// If we have rotated block, let's restore the correct measures.
 						if ( angle ) {
