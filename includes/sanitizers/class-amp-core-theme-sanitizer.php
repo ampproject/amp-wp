@@ -82,7 +82,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					'twentyseventeen_javascript_detection', // AMP is essentially no-js, with any interactively added explicitly via amp-bind.
 				],
 			],
-			'force_svg_support'                   => [],
 			'force_fixed_background_support'      => [],
 			'add_twentyseventeen_masthead_styles' => [],
 			'add_twentyseventeen_image_styles'    => [],
@@ -570,14 +569,18 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @link https://caniuse.com/#feat=svg
 	 */
 	public function force_svg_support() {
-		$this->dom->documentElement->setAttribute(
-			'class',
-			preg_replace(
-				'/(^|\s)no-svg(\s|$)/',
-				' svg ',
-				$this->dom->documentElement->getAttribute( 'class' )
-			)
-		);
+		$class = $this->dom->documentElement->getAttribute( 'class' );
+
+		if ( strpos( $class, 'no-svg' ) ) {
+			$this->dom->documentElement->setAttribute(
+				'class',
+				preg_replace(
+					'/(^|\s)no-svg(\s|$)/',
+					' svg ',
+					$this->dom->documentElement->getAttribute( 'class' )
+				)
+			);
+		}
 	}
 
 	/**
