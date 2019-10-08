@@ -1660,6 +1660,18 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-user-location' ],
 			],
 
+			'amp-megaphone'                                => [
+				'<amp-megaphone height="166" layout="fixed-height" data-episode="OSC7749686951" data-light></amp-megaphone>',
+				null,
+				[ 'amp-megaphone' ],
+			],
+
+			'amp-minute-media-player'                      => [
+				'<amp-minute-media-player dock data-content-type="semantic" data-minimum-date-factor="10" data-scanned-element-type="tag" data-scanned-element="post-body" data-scoped-keywords="football" layout="responsive" width="160" height="96"></amp-minute-media-player>',
+				null,
+				[ 'amp-minute-media-player', 'amp-video-docking' ],
+			],
+
 			'deeply_nested_elements_200'                   => [
 				// If a DOM tree is too deep, libxml itself will issue an error: Excessive depth in document: 256 use XML_PARSE_HUGE option.
 				// Also, if XDebug is enabled, then max_nesting_level error is reached if call stack is >256. A nesting level of 200 is safe,
