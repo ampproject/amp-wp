@@ -68,11 +68,12 @@ class AMP_WordPress_Embed_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		return sprintf(
-			'<amp-wordpress-embed layout="fixed-height" height="%d" title="%s" data-url="%s">%s</amp-wordpress-embed>',
+			'<amp-wordpress-embed layout="fixed-height" height="%d" title="%s" data-url="%s">%s<button overflow>%s</button></amp-wordpress-embed>',
 			esc_attr( $attributes['height'] ),
 			esc_attr( $attributes['title'] ),
 			esc_url( $url ),
-			$fallback
+			$fallback,
+			esc_html__( 'Expand', 'amp' )
 		);
 	}
 }
