@@ -1832,7 +1832,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				<html amp data-ampdevmode>
 					<head>
 						<meta charset="utf-8">
-						<style amp-custom data-ampdevmode>%s</style>
+						<style data-ampdevmode>%s</style>
 					</head>
 					<body>
 						<amp-state id="something">
@@ -1874,6 +1874,35 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'invalid_element',
 				'invalid_element',
 			],
+		];
+
+		$max_size = null;
+		foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( 'style' ) as $spec_rule ) {
+			if ( isset( $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) && 'style amp-custom' === $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) {
+				$max_size = $spec_rule[ AMP_Rule_Spec::CDATA ]['max_bytes'];
+				break;
+			}
+		}
+		if ( ! $max_size ) {
+			throw new Exception( 'Could not find amp-custom max_bytes' );
+		}
+
+		$dont_strip_excessive_css_in_amp_custom_document = sprintf(
+			'
+				<html amp>
+					<head>
+						<meta charset="utf-8">
+						<style amp-custom>%s</style>
+					</head>
+					<body>
+					</body>
+				</html>
+				',
+			'body::after { content:"' . str_repeat( 'a', $max_size ) . '";"}'
+		);
+
+		$data['dont_strip_excessive_css_in_amp_custom_document'] = [
+			$dont_strip_excessive_css_in_amp_custom_document,
 		];
 
 		// Also include the body tests.
