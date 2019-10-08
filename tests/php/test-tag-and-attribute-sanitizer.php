@@ -1660,6 +1660,18 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-user-location' ],
 			],
 
+			'amp-megaphone'                                => [
+				'<amp-megaphone height="166" layout="fixed-height" data-episode="OSC7749686951" data-light></amp-megaphone>',
+				null,
+				[ 'amp-megaphone' ],
+			],
+
+			'amp-minute-media-player'                      => [
+				'<amp-minute-media-player dock data-content-type="semantic" data-minimum-date-factor="10" data-scanned-element-type="tag" data-scanned-element="post-body" data-scoped-keywords="football" layout="responsive" width="160" height="96"></amp-minute-media-player>',
+				null,
+				[ 'amp-minute-media-player', 'amp-video-docking' ],
+			],
+
 			'deeply_nested_elements_200'                   => [
 				// If a DOM tree is too deep, libxml itself will issue an error: Excessive depth in document: 256 use XML_PARSE_HUGE option.
 				// Also, if XDebug is enabled, then max_nesting_level error is reached if call stack is >256. A nesting level of 200 is safe,
@@ -1820,7 +1832,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				<html amp data-ampdevmode>
 					<head>
 						<meta charset="utf-8">
-						<style amp-custom data-ampdevmode>%s</style>
+						<style data-ampdevmode>%s</style>
 					</head>
 					<body>
 						<amp-state id="something">
@@ -1862,6 +1874,35 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'invalid_element',
 				'invalid_element',
 			],
+		];
+
+		$max_size = null;
+		foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( 'style' ) as $spec_rule ) {
+			if ( isset( $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) && 'style amp-custom' === $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) {
+				$max_size = $spec_rule[ AMP_Rule_Spec::CDATA ]['max_bytes'];
+				break;
+			}
+		}
+		if ( ! $max_size ) {
+			throw new Exception( 'Could not find amp-custom max_bytes' );
+		}
+
+		$dont_strip_excessive_css_in_amp_custom_document = sprintf(
+			'
+				<html amp>
+					<head>
+						<meta charset="utf-8">
+						<style amp-custom>%s</style>
+					</head>
+					<body>
+					</body>
+				</html>
+				',
+			'body::after { content:"' . str_repeat( 'a', $max_size ) . '";"}'
+		);
+
+		$data['dont_strip_excessive_css_in_amp_custom_document'] = [
+			$dont_strip_excessive_css_in_amp_custom_document,
 		];
 
 		// Also include the body tests.

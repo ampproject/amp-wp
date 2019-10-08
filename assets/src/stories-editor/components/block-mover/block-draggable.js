@@ -111,6 +111,7 @@ const BlockDraggable = ( { children, clientId, blockName, blockElementId, onDrag
 			transferData={ transferData }
 			onDragStart={ onDragStart }
 			onDragEnd={ onDragEnd }
+			clientId={ clientId }
 			clearHighlight={ clearHighlight }
 			setHighlightByOffset={ setHighlightByOffset }
 			dropElementByOffset={ dropElementByOffset }

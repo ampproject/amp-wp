@@ -4,16 +4,14 @@
 import memize from 'memize';
 
 /**
- * Given a rotation angle, finds the closest angle to snap to.
- *
- * Inspired by the implementation in re-resizable.
+ * Given a number, finds the closest snap target.
  *
  * @see https://github.com/bokuweb/re-resizable
  *
- * @param {number} number
- * @param {Array|Function<number>} snap List of snap targets or function that provider
+ * @param {number} number Given number.
+ * @param {Array.<number> | Function.<number>} snap List of snap targets or function that provides them.
  * @param {number} snapGap Minimum gap required in order to move to the next snapping target
- * @return {number} New angle.
+ * @return {?number} Snap target if found.
  */
 const findClosestSnap = memize( ( number, snap, snapGap ) => {
 	const snapArray = typeof snap === 'function' ? snap( number ) : snap;
@@ -24,7 +22,7 @@ const findClosestSnap = memize( ( number, snap, snapGap ) => {
 	);
 	const gap = Math.abs( snapArray[ closestGapIndex ] - number );
 
-	return snapGap === 0 || gap < snapGap ? snapArray[ closestGapIndex ] : number;
+	return snapGap === 0 || gap < snapGap ? snapArray[ closestGapIndex ] : null;
 } );
 
 export default findClosestSnap;

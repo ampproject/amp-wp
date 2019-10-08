@@ -346,14 +346,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			);
 		}
 
-		$can_include_noscript = (
-			$this->args['add_noscript_fallback']
-			&&
-			( $node->hasAttribute( 'src' ) && ! preg_match( '/^http:/', $node->getAttribute( 'src' ) ) )
-			&&
-			( ! $node->hasAttribute( 'srcset' ) || ! preg_match( '/http:/', $node->getAttribute( 'srcset' ) ) )
-		);
-		if ( $can_include_noscript ) {
+		if ( $this->args['add_noscript_fallback'] ) {
 			// Preserve original node in noscript for no-JS environments.
 			$this->append_old_node_noscript( $img_node, $node, $this->dom );
 		}
