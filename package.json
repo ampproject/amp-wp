@@ -28,7 +28,7 @@
   },
   "devDependencies": {
     "@babel/cli": "7.6.2",
-    "@babel/core": "7.6.2",
+    "@babel/core": "7.6.3",
     "@babel/plugin-proposal-class-properties": "7.5.5",
     "@babel/plugin-proposal-object-rest-spread": "7.6.2",
     "@babel/plugin-transform-react-jsx": "7.3.0",
