@@ -110,6 +110,7 @@ div[data-type="amp/amp-story-cta"] .amp-overlay {
 	text-decoration: none;
 	white-space: normal;
 	overflow-wrap: break-word;
+	line-height: 1.15;
 }
 
 .amp-block-story-cta__inline-link {
