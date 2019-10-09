@@ -18,6 +18,15 @@
   "bugs": {
     "url": "https://github.com/ampproject/amp-wp/issues"
   },
+  "sideEffects": [
+    "./assets/src/block-editor/index.js",
+    "./assets/src/block-editor/store/index.js",
+    "./assets/src/block-validation/index.js",
+    "./assets/src/block-validation/store/index.js",
+    "./assets/src/stories-editor/index.js",
+    "./assets/src/stories-editor/helpers/index.js",
+    "./assets/src/stories-editor/store/index.js"
+  ],
   "dependencies": {
     "classnames": "2.2.6",
     "dom-scroll-into-view": "2.0.1",
