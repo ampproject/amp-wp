@@ -1,3 +1,6 @@
+.wp-block[data-type="amp/amp-story-post-date"] {
+	line-height: 0;
+}
 .wp-block[data-type="amp/amp-story-post-date"] .wp-block-amp-amp-story-post-date {
 	margin: 0;
 	padding: 7px !important;
