@@ -8,7 +8,6 @@ import '@wordpress/core-data';
  */
 import '../store';
 
-export { default as adjustFontSizeWhileResizing } from './adjustFontSizeWhileResizing';
 export { default as maybeEnqueueFontStyle } from './maybeEnqueueFontStyle';
 export { default as setBlockParent } from './setBlockParent';
 export { default as getDefaultMinimumBlockHeight } from './getDefaultMinimumBlockHeight';

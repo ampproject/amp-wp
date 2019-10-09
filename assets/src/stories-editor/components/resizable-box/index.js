@@ -15,11 +15,7 @@ import { ResizableBox } from '@wordpress/components';
  */
 import withSnapTargets from '../higher-order/with-snap-targets';
 import './edit.css';
-import {
-	adjustFontSizeWhileResizing,
-	getPercentageFromPixels,
-	getRelativeElementPosition,
-} from '../../helpers';
+import { getPercentageFromPixels, getRelativeElementPosition } from '../../helpers';
 import { getBestSnapLines } from '../../helpers/snapping';
 import { TEXT_BLOCK_PADDING, BLOCK_RESIZING_SNAP_GAP } from '../../constants';
 import {
@@ -31,8 +27,7 @@ import {
 	getBlockTextElement,
 } from './helpers';
 
-let ampFitTextElement = null,
-	lastSeenX = 0,
+let lastSeenX = 0,
 	lastSeenY = 0,
 	lastWidth,
 	lastHeight,
@@ -156,8 +151,7 @@ class EnhancedResizableBox extends Component {
 					if ( isImage ) {
 						imageWrapper = blockElement.querySelector( 'figure .components-resizable-box__container' );
 					}
-					textElement = getBlockTextElement( blockName, blockElement );
-					ampFitTextElement = ampFitText ? blockElement.querySelector( '.is-amp-fit-text' ) : null;
+					textElement = ! ampFitText ? getBlockTextElement( blockName, blockElement ) : null;
 
 					if ( ampFitText && isText ) {
 						textBlockWrapper = blockElement.querySelector( '.with-line-height' );
@@ -193,7 +187,7 @@ class EnhancedResizableBox extends Component {
 					// Track if resizing has reached its minimum limits to fit the text inside.
 					let reachedMinLimit = false;
 					// The following calculation is needed only when content has been added to the Text block.
-					if ( ! ampFitText && textElement && isReducing && hasTextContent ) {
+					if ( textElement && isReducing && hasTextContent ) {
 						// If we have a rotated block, let's assign the width and height for measuring.
 						// Without assigning the new measure, the calculation would be incorrect due to angle.
 						if ( angle ) {
@@ -210,10 +204,9 @@ class EnhancedResizableBox extends Component {
 						// If the applied measures get too small for text, use the previous measures instead.
 						const scrollWidth = textElement.scrollWidth;
 						const scrollHeight = textElement.scrollHeight;
-
+						// If the text goes over either of the edges, stop resizing from both sides
+						// since the text is filling in the room from both sides at the same time.
 						if ( appliedWidth < scrollWidth || appliedHeight < scrollHeight ) {
-							// If the text goes over either of the edges, stop resizing from both sides
-							// since the text is filling in the room from both sides at the same time.
 							reachedMinLimit = true;
 							appliedWidth = lastWidth;
 							appliedHeight = lastHeight;
@@ -240,11 +233,6 @@ class EnhancedResizableBox extends Component {
 					}
 					if ( minWidth < appliedWidth ) {
 						lastDeltaW = deltaW;
-					}
-
-					if ( ampFitTextElement ) {
-						const blockLimitsReached = appliedWidth === minWidth || appliedHeight === minHeight;
-						adjustFontSizeWhileResizing( textElement, ampFitTextElement, appliedWidth, appliedHeight, isText, blockLimitsReached );
 					}
 
 					// If limits were not reached yet, do the calculations for positioning.

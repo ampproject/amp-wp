@@ -28,3 +28,7 @@
 .wp-block[data-type="amp/amp-story-post-author"] .block-mover div {
 	height: 100%;
 }
+
+.wp-block[data-type="amp/amp-story-post-author"] .is-resizing .block-mover {
+	overflow: hidden;
+}

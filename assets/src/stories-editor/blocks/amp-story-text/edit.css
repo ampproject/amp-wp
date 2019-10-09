@@ -55,8 +55,7 @@ div[data-type="amp/amp-story-page"] .block-editor-inner-blocks .block-editor-blo
 	line-height: 1.15;
 }
 
-.wp-block[data-type="amp/amp-story-text"] .wp-block-amp-story-text .is-amp-fit-text.is-measuring,
-.wp-block[data-type="amp/amp-story-text"] .is-resizing .wp-block-amp-story-text {
+.wp-block[data-type="amp/amp-story-text"] .wp-block-amp-story-text .is-amp-fit-text.is-measuring {
 	height: initial !important;
 	width: initial !important;
 	position: absolute !important;
@@ -69,4 +68,8 @@ div[data-type="amp/amp-story-page"] .block-editor-inner-blocks .block-editor-blo
 .wp-block[data-type="amp/amp-story-text"] .amp-story-editor__rotate-container,
 .wp-block[data-type="amp/amp-story-text"] .block-mover {
 	height: 100%;
+}
+
+.is-resizing .wp-block-amp-story-text-wrapper {
+	overflow: hidden;
 }
