@@ -376,6 +376,10 @@ class AMP_Validated_URL_Post_Type {
 		if ( false === $new_validation_error_urls ) {
 			$new_validation_error_urls = static::get_validation_error_urls_count();
 			set_transient( static::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT, $new_validation_error_urls, DAY_IN_SECONDS );
+		} else {
+			// Handle case where integer stored in transient gets returned as string when persistent object cache is not
+			// used. This is due to wp_options.option_value being a string.
+			$new_validation_error_urls = (int) $new_validation_error_urls;
 		}
 
 		if ( 0 === $new_validation_error_urls ) {
