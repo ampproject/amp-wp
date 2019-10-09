@@ -8,7 +8,7 @@ import { MAX_FONT_SIZE, MIN_FONT_SIZE } from '../../common/constants';
  *
  * Reduces the font size when reducing the size and increases when increasing.
  * This is not intended to assign the ideal match as amp-fit-text does
- * after resizing stops, however, should come quite close.
+ * after resizing stops.
  *
  * @param {Element}  textElement         Containing text element.
  * @param {Element}  ampFitTextElement   Element that contains the text.
@@ -23,22 +23,21 @@ const adjustFontSizeWhileResizing = ( textElement, ampFitTextElement, appliedWid
 	const scrollHeight = textElement.scrollHeight;
 
 	// For other than text blocks, let's set the height for being able to measure correctly.
-	if ( ! isText ) {
-		ampFitTextElement.style.height = 'initial';
-	} else {
+	if ( isText ) {
 		textElement.style.height = 'auto';
 	}
 
 	let fontSize = parseInt( ampFitTextElement.style.fontSize );
 
 	const contentExceedsLimits = ( contentWidth, contentHeight ) => {
-		const buffer = 3;
+		const buffer = 0;
 		return Math.round( appliedWidth ) < contentWidth - buffer || Math.round( appliedHeight ) < contentHeight - buffer;
 	};
 
 	const contentLimitReached = ( contentWidth, contentHeight ) => {
-		// Let's leave some buffer to make sure we're not crossing the limits.
-		const buffer = 5;
+		// Let's leave some buffer to make sure we're not crossing the limits fot Text block.
+		// To ensure vertically aligner meta blocks increasing the font, assign small negative buffer.
+		const buffer = isText ? 1 : -1;
 		return Math.round( appliedWidth ) <= ( contentWidth + buffer ) || Math.round( appliedHeight ) <= ( contentHeight + buffer );
 	};
 
@@ -52,8 +51,6 @@ const adjustFontSizeWhileResizing = ( textElement, ampFitTextElement, appliedWid
 
 	// Reset the height.
 	if ( ! isText ) {
-		ampFitTextElement.style.height = '';
-	} else {
 		textElement.style.height = '';
 	}
 };
