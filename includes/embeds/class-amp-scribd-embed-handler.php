@@ -37,57 +37,42 @@ class AMP_Scribd_Embed_Handler extends AMP_Base_Embed_Handler {
 			return $cache;
 		}
 
-		$embed = $this->remove_script( $cache );
-		$embed = $this->inject_sandbox_permissions( $embed );
-
-		return $embed;
+		return $this->sanitize_iframe( $cache );
 	}
 
 	/**
-	 * Remove the 'script' element from the provided HTML if there is any.
+	 * Retrieves iframe element from HTML string and amends or appends the correct sandbox permissions.
 	 *
 	 * @param string $html HTML string.
-	 * @return string
+	 * @return string iframe with correct sandbox permissions.
 	 */
-	private function remove_script( $html ) {
-		$html_without_script = preg_replace( '#<script(?:\s.*?)?>.+?</script>#s', '', $html );
+	private function sanitize_iframe( $html ) {
+		return preg_replace_callback(
+			'#^.*<iframe(?P<iframe_attributes>[^>]+?)></iframe>.*$#s',
+			function ( $matches ) {
+				$attrs = $matches['iframe_attributes'];
 
-		if ( null !== $html_without_script ) {
-			return $html_without_script;
-		}
+				// Amend the required keywords to the iframe's sandbox.
+				$sandbox  = 'allow-popups allow-scripts';
+				$replaced = 0;
+				$attrs    = preg_replace(
+					'#(?<=\ssandbox=["\'])#',
+					"{$sandbox} ", // whitespace is necessary to separate prior permissions.
+					$attrs,
+					1,
+					$replaced
+				);
 
-		return $html;
-	}
-
-	/**
-	 * Injects the 'allow-popups' & 'allow-scripts' permissions into the sandbox attribute so that
-	 * the 'Fullscreen' button works as intended.
-	 *
-	 * @param string $html HTML string.
-	 * @return string
-	 */
-	private function inject_sandbox_permissions( $html ) {
-		if ( preg_match( '#<iframe.+?sandbox="(?P<sandbox_attr>.+?)"#s', $html, $matches ) ) {
-			$permissions = [
-				'allow-popups',
-				'allow-scripts',
-			];
-
-			foreach ( $permissions as $permission ) {
-				if ( false === strpos( $matches['sandbox_attr'], $permission ) ) {
-					$matches['sandbox_attr'] .= " ${permission}";
+				// If no sandbox attribute was found, then add the attribute.
+				if ( 0 === $replaced ) {
+					$attrs .= sprintf( ' sandbox="%s"', $sandbox );
 				}
-			}
 
-			return preg_replace(
-				'#(<iframe.+?sandbox=")(.+?)(".+</iframe>)#s',
-				"$1${matches['sandbox_attr']}$3",
-				$html,
-				1
-			);
-		} else {
-			return str_replace( '<iframe ', '<iframe sandbox="allow-scripts allow-popups" ', $html );
-		}
+				// The iframe sanitizer will convert this into an amp-iframe.
+				return "<iframe{$attrs}></iframe>";
+			},
+			$html
+		);
 	}
 
 }

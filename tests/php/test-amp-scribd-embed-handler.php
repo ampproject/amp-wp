@@ -98,12 +98,12 @@ class AMP_Scribd_Embed_Handler_Test extends WP_UnitTestCase {
 			],
 			'document_embed'                   => [
 				$this->scribd_doc_url . PHP_EOL,
-				'<p><iframe sandbox="allow-scripts allow-popups" title="Synthesis of Knowledge: Effects of Fire and Thinning Treatments on Understory Vegetation in Dry U.S. Forests" class="scribd_iframe_embed" src="https://www.scribd.com/embeds/110799637/content" data-aspect-ratio="1.2941176470588236" scrolling="no" id="110799637" width="100%" height="500" frameborder="0"></iframe></p>' . PHP_EOL,
+				'<p><iframe title="Synthesis of Knowledge: Effects of Fire and Thinning Treatments on Understory Vegetation in Dry U.S. Forests" class="scribd_iframe_embed" src="https://www.scribd.com/embeds/110799637/content" data-aspect-ratio="1.2941176470588236" scrolling="no" id="110799637" width="100%" height="500" frameborder="0" sandbox="allow-popups allow-scripts"></iframe></p>' . PHP_EOL,
 			],
 
 			'document_embed_with_sandbox_attr' => [
 				$this->scribd_doc_with_sandbox_attr_url . PHP_EOL,
-				'<p><iframe title="Hypothetical Book" class="scribd_iframe_embed" sandbox="allow-forms allow-scripts allow-popups" src="https://www.scribd.com/embeds/NaN/content" data-aspect-ratio="1.2941176470588236" scrolling="no" id="NaN" width="100%" height="500" frameborder="0"></iframe></p>' . PHP_EOL,
+				'<p><iframe title="Hypothetical Book" class="scribd_iframe_embed" sandbox="allow-popups allow-scripts allow-forms allow-scripts" src="https://www.scribd.com/embeds/NaN/content" data-aspect-ratio="1.2941176470588236" scrolling="no" id="NaN" width="100%" height="500" frameborder="0"></iframe></p>' . PHP_EOL,
 			],
 		];
 
@@ -111,12 +111,12 @@ class AMP_Scribd_Embed_Handler_Test extends WP_UnitTestCase {
 		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.2', '<' ) ) {
 			$data['document_embed'] = [
 				$this->scribd_doc_url . PHP_EOL,
-				'<p><iframe sandbox="allow-scripts allow-popups" class="scribd_iframe_embed" src="https://www.scribd.com/embeds/110799637/content" data-aspect-ratio="1.2941176470588236" scrolling="no" id="110799637" width="100%" height="500" frameborder="0"></iframe></p>' . PHP_EOL,
+				'<p><iframe class="scribd_iframe_embed" src="https://www.scribd.com/embeds/110799637/content" data-aspect-ratio="1.2941176470588236" scrolling="no" id="110799637" width="100%" height="500" frameborder="0" sandbox="allow-popups allow-scripts"></iframe></p>' . PHP_EOL,
 			];
 
 			$data['document_embed_with_sandbox_attr'] = [
 				$this->scribd_doc_with_sandbox_attr_url . PHP_EOL,
-				'<p><iframe class="scribd_iframe_embed" sandbox="allow-forms allow-scripts allow-popups" src="https://www.scribd.com/embeds/NaN/content" data-aspect-ratio="1.2941176470588236" scrolling="no" id="NaN" width="100%" height="500" frameborder="0"></iframe></p>' . PHP_EOL,
+				'<p><iframe class="scribd_iframe_embed" sandbox="allow-popups allow-scripts allow-forms allow-scripts" src="https://www.scribd.com/embeds/NaN/content" data-aspect-ratio="1.2941176470588236" scrolling="no" id="NaN" width="100%" height="500" frameborder="0"></iframe></p>' . PHP_EOL,
 			];
 		}
 
