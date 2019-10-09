@@ -1713,6 +1713,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public function add_twentytwenty_toggles() {
 		$toggles = $this->xpath->query( '//*[ @data-toggle-target ]' );
+		$body_id = $this->get_body_id();
 
 		if ( false === $toggles || 0 === $toggles->count() ) {
 			return;
@@ -1767,6 +1768,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			$this->add_amp_action( $toggle, 'tap', "AMP.setState({{$id}: !{$id}})" );
+
+			if ( $toggle->hasAttribute( 'data-toggle-body-class' ) ) {
+				$body_class = $toggle->getAttribute( 'data-toggle-body-class' );
+				$this->add_amp_action( $toggle, 'tap', "{$body_id}.toggleClass(class='{$body_class}')" );
+			}
 		}
 
 		// Add <amp-state> snippets to the document that contain the classes to use.
@@ -1899,7 +1905,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			list( $existing_event, $existing_actions ) = explode( ':', $event_action_string );
+			list( $existing_event, $existing_actions ) = explode( ':', $event_action_string, 2 );
 
 			if ( $existing_event !== $event ) {
 				continue;
