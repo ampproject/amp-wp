@@ -1576,9 +1576,16 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
+		$body_id = $this->get_body_id();
+
+		$open_xpaths  = isset( $args['open_button_xpath'] ) ? $args['open_button_xpath'] : [];
+		$close_xpaths = isset( $args['close_button_xpath'] ) ? $args['close_button_xpath'] : [];
+
 		$buttons = [
-			$modal_id           => isset( $args['open_button_xpath'] ) ? $args['open_button_xpath'] : [],
-			"{$modal_id}.close" => isset( $args['close_button_xpath'] ) ? $args['close_button_xpath'] : [],
+			"{$modal_id}.open"                                        => $open_xpaths,
+			"{$body_id}.toggleClass(class=showing-modal,force=true)"  => $open_xpaths,
+			"{$modal_id}.close"                                       => $close_xpaths,
+			"{$body_id}.toggleClass(class=showing-modal,force=false)" => $close_xpaths,
 		];
 
 		foreach ( $buttons as $action => $button_xpaths ) {
@@ -1911,5 +1918,25 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		$element->setAttribute( 'on', implode( ';', $events ) );
+	}
+
+	/**
+	 * Get the ID of the <body> element.
+	 *
+	 * If the <body> element does not have an ID yet, a new one is created.
+	 *
+	 * @return string ID of the body element.
+	 */
+	protected function get_body_id() {
+		$body = $this->get_body_node();
+
+		if ( $body->hasAttribute( 'id' ) ) {
+			return $body->getAttribute( 'id' );
+		}
+
+		$id = '_amp_body';
+		$body->setAttribute( 'id', $id );
+
+		return $id;
 	}
 }
