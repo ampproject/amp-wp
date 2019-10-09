@@ -242,7 +242,7 @@ class EnhancedResizableBox extends Component {
 						lastDeltaW = deltaW;
 					}
 
-					if ( ampFitTextElement && textElement ) {
+					if ( ampFitTextElement ) {
 						const blockLimitsReached = appliedWidth === minWidth || appliedHeight === minHeight;
 						adjustFontSizeWhileResizing( textElement, ampFitTextElement, appliedWidth, appliedHeight, isText, blockLimitsReached );
 					}

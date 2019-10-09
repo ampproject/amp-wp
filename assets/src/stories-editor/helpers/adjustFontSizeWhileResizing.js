@@ -19,8 +19,8 @@ import { MAX_FONT_SIZE, MIN_FONT_SIZE } from '../../common/constants';
  *
  */
 const adjustFontSizeWhileResizing = ( textElement, ampFitTextElement, appliedWidth, appliedHeight, isText, blockLimitsReached ) => {
-	let scrollWidth = textElement.scrollWidth;
-	let scrollHeight = textElement.scrollHeight;
+	const scrollWidth = textElement.scrollWidth;
+	const scrollHeight = textElement.scrollHeight;
 
 	// For other than text blocks, let's set the height for being able to measure correctly.
 	if ( ! isText ) {
@@ -33,28 +33,21 @@ const adjustFontSizeWhileResizing = ( textElement, ampFitTextElement, appliedWid
 
 	const contentExceedsLimits = ( contentWidth, contentHeight ) => {
 		const buffer = 3;
-		return Math.round( appliedWidth ) < contentWidth || Math.round( appliedHeight ) < contentHeight - buffer;
+		return Math.round( appliedWidth ) < contentWidth - buffer || Math.round( appliedHeight ) < contentHeight - buffer;
 	};
 
 	const contentLimitReached = ( contentWidth, contentHeight ) => {
+		// Let's leave some buffer to make sure we're not crossing the limits.
 		const buffer = 5;
-		return Math.round( appliedWidth ) <= contentWidth || Math.round( appliedHeight ) <= ( contentHeight - buffer );
+		return Math.round( appliedWidth ) <= ( contentWidth + buffer ) || Math.round( appliedHeight ) <= ( contentHeight + buffer );
 	};
 
-	if ( contentExceedsLimits( scrollWidth, scrollHeight ) ) {
-		while ( contentExceedsLimits( scrollWidth, scrollHeight ) && fontSize > MIN_FONT_SIZE ) {
-			fontSize--;
-			ampFitTextElement.style.fontSize = fontSize + 'px';
-			scrollWidth = ampFitTextElement.scrollWidth;
-			scrollHeight = ampFitTextElement.scrollHeight;
-		}
-	} else if ( ! blockLimitsReached ) {
-		while ( ! contentLimitReached( scrollWidth, scrollHeight ) && fontSize < MAX_FONT_SIZE ) {
-			fontSize++;
-			ampFitTextElement.style.fontSize = fontSize + 'px';
-			scrollWidth = ampFitTextElement.scrollWidth;
-			scrollHeight = ampFitTextElement.scrollHeight;
-		}
+	if ( contentExceedsLimits( scrollWidth, scrollHeight ) && fontSize > MIN_FONT_SIZE ) {
+		fontSize--;
+		ampFitTextElement.style.fontSize = fontSize + 'px';
+	} else if ( ! blockLimitsReached && ! contentLimitReached( scrollWidth, scrollHeight ) && fontSize < MAX_FONT_SIZE ) {
+		fontSize++;
+		ampFitTextElement.style.fontSize = fontSize + 'px';
 	}
 
 	// Reset the height.
