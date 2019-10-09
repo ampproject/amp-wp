@@ -72,7 +72,7 @@ class AMP_WordPress_Embed_Handler extends AMP_Base_Embed_Handler {
 		if ( ! preg_match( '#<blockquote class="wp-embedded-content" data-secret="\w+">(.+?)</blockquote>#s', $cache, $matches ) ) {
 			return $cache;
 		}
-		$fallback = sprintf( '<blockquote fallback>%s</blockquote>', $matches[1] );
+		$placeholder = sprintf( '<blockquote class="wp-embedded-content" placeholder>%s</blockquote>', $matches[1] );
 
 		$attributes = [
 			'height' => $this->args['height'],
@@ -87,7 +87,7 @@ class AMP_WordPress_Embed_Handler extends AMP_Base_Embed_Handler {
 			esc_attr( $attributes['height'] ),
 			esc_attr( $attributes['title'] ),
 			esc_url( $url ),
-			$fallback,
+			$placeholder,
 			esc_html__( 'Expand', 'amp' )
 		);
 	}
