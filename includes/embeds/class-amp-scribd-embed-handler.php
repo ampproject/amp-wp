@@ -1,6 +1,6 @@
 <?php
 /**
- * Class AMP_SoundCloud_Embed_Handler
+ * Class AMP_Scribd_Embed_Handler
  *
  * @package AMP
  * @since 1.3.1
@@ -22,7 +22,7 @@ class AMP_Scribd_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Unregisters embed.
 	 */
 	public function unregister_embed() {
-		remove_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ], 10 );
+		remove_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ] );
 	}
 
 	/**
@@ -50,7 +50,7 @@ class AMP_Scribd_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return string
 	 */
 	private function remove_script( $html ) {
-		$html_without_script = preg_replace( '#<script[^>].+?</script>#s', '', $html );
+		$html_without_script = preg_replace( '#<script.+?</script>#s', '', $html );
 
 		if ( null !== $html_without_script ) {
 			return $html_without_script;
@@ -68,8 +68,7 @@ class AMP_Scribd_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	private function inject_sandbox_attribute( $html ) {
 		if ( false === strpos( $html, 'sandbox="allow-scripts allow-popups"' ) ) {
-			preg_match( '#<iframe(?P<attributes>.+?)>#s', $html, $matches );
-			return "<iframe sandbox='allow-scripts allow-popups' ${matches['attributes']}></iframe>";
+			return str_replace( '<iframe ', '<iframe sandbox="allow-scripts allow-popups" ', $html );
 		}
 
 		return $html;
