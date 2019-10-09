@@ -22,7 +22,7 @@ const schema = {
 	text: {
 		type: 'string',
 		source: 'html',
-		selector: 'a, .amp-cta-content',
+		selector: '.amp-cta-content',
 	},
 	// The rest of the color attributes are added by addAMPAttributes()
 	customTextColor: {
