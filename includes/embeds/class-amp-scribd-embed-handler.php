@@ -26,19 +26,19 @@ class AMP_Scribd_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
-	 * Filter oEmbed HTML for Scribd to to be AMP compatible.
+	 * Filter oEmbed HTML for Scribd to be AMP compatible.
 	 *
 	 * @param string $cache Cache for oEmbed.
 	 * @param string $url   Embed URL.
 	 * @return string Embed.
 	 */
 	public function filter_embed_oembed_html( $cache, $url ) {
-		if ( false === strpos( wp_parse_url( $url, PHP_URL_HOST ), 'scribd.com' ) ) {
+		if ( ! in_array( wp_parse_url( $url, PHP_URL_HOST ), [ 'scribd.com', 'www.scribd.com' ], true ) ) {
 			return $cache;
 		}
 
 		$embed = $this->remove_script( $cache );
-		$embed = $this->inject_sandbox_attribute( $embed );
+		$embed = $this->inject_sandbox_permissions( $embed );
 
 		return $embed;
 	}
@@ -50,7 +50,7 @@ class AMP_Scribd_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return string
 	 */
 	private function remove_script( $html ) {
-		$html_without_script = preg_replace( '#<script.+?</script>#s', '', $html );
+		$html_without_script = preg_replace( '#<script(?:\s.*?)?>.+?</script>#s', '', $html );
 
 		if ( null !== $html_without_script ) {
 			return $html_without_script;
@@ -60,18 +60,34 @@ class AMP_Scribd_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
-	 * Add the sandbox attribute with 'allow-popups' & 'allow-scripts' permissions set so that the
-	 * full screen button works.
+	 * Injects the 'allow-popups' & 'allow-scripts' permissions into the sandbox attribute so that
+	 * the 'Fullscreen' button works as intended.
 	 *
 	 * @param string $html HTML string.
 	 * @return string
 	 */
-	private function inject_sandbox_attribute( $html ) {
-		if ( false === strpos( $html, 'sandbox="allow-scripts allow-popups"' ) ) {
+	private function inject_sandbox_permissions( $html ) {
+		if ( preg_match( '#<iframe.+?sandbox="(?P<sandbox_attr>.+?)"#s', $html, $matches ) ) {
+			$permissions = [
+				'allow-popups',
+				'allow-scripts',
+			];
+
+			foreach ( $permissions as $permission ) {
+				if ( false === strpos( $matches['sandbox_attr'], $permission ) ) {
+					$matches['sandbox_attr'] .= " ${permission}";
+				}
+			}
+
+			return preg_replace(
+				'#(<iframe.+?sandbox=")(.+?)(".+</iframe>)#s',
+				"$1${matches['sandbox_attr']}$3",
+				$html,
+				1
+			);
+		} else {
 			return str_replace( '<iframe ', '<iframe sandbox="allow-scripts allow-popups" ', $html );
 		}
-
-		return $html;
 	}
 
 }
