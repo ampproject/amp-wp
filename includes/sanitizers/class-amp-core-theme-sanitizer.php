@@ -1576,7 +1576,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		$body_id = $this->get_body_id();
+		$body_id = $this->get_element_id( $this->get_body_node(), 'body' );
 
 		$open_xpaths  = isset( $args['open_button_xpath'] ) ? $args['open_button_xpath'] : [];
 		$close_xpaths = isset( $args['close_button_xpath'] ) ? $args['close_button_xpath'] : [];
@@ -1653,7 +1653,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		$index = 1;
 		foreach ( $modals as $modal ) {
 
 			if ( ! $modal instanceof DOMElement ) {
@@ -1693,15 +1692,13 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 			$this->wrap_modal_in_lightbox(
 				[
-					'modal_id'             => "amp-modal-{$index}",
+					'modal_id'             => $this->get_element_id( $modal ),
 					'modal_content_xpath'  => $modal->getNodePath(),
 					'open_button_xpath'    => $open_button_xpaths,
 					'close_button_xpath'   => $close_button_xpaths,
 					'strip_wrapper_levels' => 1,
 				]
 			);
-
-			$index ++;
 		}
 	}
 
@@ -1713,13 +1710,13 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public function add_twentytwenty_toggles() {
 		$toggles = $this->xpath->query( '//*[ @data-toggle-target ]' );
-		$body_id = $this->get_body_id();
+		$body_id = $this->get_element_id( $this->get_body_node(), 'body' );
 
 		if ( false === $toggles || 0 === $toggles->count() ) {
 			return;
 		}
 
-		$state = [];
+		$targets = [];
 
 		foreach ( $toggles as $toggle ) {
 			if ( ! $toggle instanceof DOMElement ) {
@@ -1727,11 +1724,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			$toggle_target = $toggle->getAttribute( 'data-toggle-target' );
-			$id            = $this->get_toggle_id( $toggle_target, $state );
+			$toggle_id     = $this->get_element_id( $toggle );
 
 			if ( 'next' === $toggle_target ) {
 				$target_node = $toggle->nextSibling;
-			} elseif ( ! array_key_exists( $id, $state ) ) {
+			} else {
 				$target_xpath = $this->xpath_from_css_selector( $toggle_target );
 				if ( null === $target_xpath ) {
 					continue;
@@ -1742,73 +1739,71 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					continue;
 				}
 				$target_node = $target_nodes->item( 0 );
-
 			}
 
 			if ( ! $target_node ) {
 				continue;
 			}
 
+			// Get the class to toggle, if specified.
 			$toggle_class = $toggle->hasAttribute( 'data-class-to-toggle' ) ? $toggle->getAttribute( 'data-class-to-toggle' ) : 'active';
 
-			$off_class = $target_node->hasAttribute( 'class' ) ? $target_node->getAttribute( 'class' ) : '';
-			$on_class  = empty( $off_class ) ? $toggle_class : "{$off_class} {$toggle_class}";
+			$is_sub_menu = $this->has_class( $target_node, 'sub-menu' );
+			$new_target_node = $is_sub_menu ? $this->get_closest_submenu( $toggle ) : $target_node;
+			$new_target_id = $this->get_element_id( $new_target_node );
 
-			// If we got back an existing ID, then the toggle target was already targeted by a previous toggle,
-			// so we don't need to adapt the target, only the toggle (multiple toggles can target the same target node).
-			if ( ! array_key_exists( $id, $state ) ) {
-				$state[ $id ] = [
-					'on'           => $on_class,
-					'off'          => $off_class,
-					'css_selector' => $toggle_target,
-				];
+			// Toggle the target of the clicked toggle.
+			$this->add_amp_action( $toggle, 'tap', "{$new_target_id}.toggleClass(class='{$toggle_class}')" );
 
-				// We can't use the regular "[class]" notation because of the PHP dom extension.
-				$target_node->setAttribute( 'data-amp-bind-class', "{$id} ? {$id}_classes['on'] : {$id}_classes['off']" );
+			// If the toggle target is 'next' ir a sub-menu, only give the clicked toggle the active class.
+			if ( 'next' === $toggle_target || $this->has_class( $target_node, 'sub-menu' ) ) {
+				$this->add_amp_action( $toggle, 'tap', "{$toggle_id}.toggleClass(class='active')" );
+			} else {
+				// If not, toggle all toggles with this toggle target.
+				$target_toggles = $this->xpath->query( "//*[ @data-toggle-target = '{$toggle_target}' ]" );
+				foreach ( $target_toggles as $target_toggle ) {
+					$target_toggle_id = $this->get_element_id( $target_toggle );
+					$this->add_amp_action( $toggle, 'tap', "{$target_toggle_id}.toggleClass(class='active')" );
+				}
 			}
 
-			$this->add_amp_action( $toggle, 'tap', "AMP.setState({{$id}: !{$id}})" );
-
+			// Toggle body class.
 			if ( $toggle->hasAttribute( 'data-toggle-body-class' ) ) {
 				$body_class = $toggle->getAttribute( 'data-toggle-body-class' );
 				$this->add_amp_action( $toggle, 'tap', "{$body_id}.toggleClass(class='{$body_class}')" );
 			}
-		}
 
-		// Add <amp-state> snippets to the document that contain the classes to use.
-		foreach ( $state as $id => $state_data ) {
-			$amp_state = $this->dom->createElement( 'amp-state' );
-			$amp_state->setAttribute( 'id', "{$id}_classes" );
-			unset( $state_data['css_selector'] );
-			$script = $this->dom->createElement( 'script' );
-			$script->setAttribute( 'type', 'application/json' );
-			$script->appendChild( $this->dom->createTextNode( wp_json_encode( $state_data ) ) );
-			$amp_state->appendChild( $script );
-			$this->body->appendChild( $amp_state );
+			// @todo Check whether to set focus.
 		}
-
 	}
 
 	/**
-	 * Get the next toggle ID, or return a previous one for a same selector.
+	 * Get the ID for an element.
 	 *
-	 * @param string $css_selector Selector to get the toggle ID for.
-	 * @param array  $state        Associative array of existing state to check.
-	 * @return string Toggle ID to use.
+	 * If the element does not have an ID, create one first.
+	 *
+	 * @param DOMElement $element Element to get the ID for.
+	 * @param string     $prefix  Optional. Defaults to '_amp_wp_id_'.
+	 * @return string ID to use.
 	 */
-	protected function get_toggle_id( $css_selector, $state ) {
-		static $index = 1;
+	protected function get_element_id( $element, $prefix = 'amp-wp-id' ) {
+		static $index_counter = [];
 
-		if ( 'next' !== $css_selector ) {
-			foreach ( $state as $id => $state_data ) {
-				if ( $state_data['css_selector'] === $css_selector ) {
-					return $id;
-				}
-			}
+		if ( $element->hasAttribute( 'id' ) ) {
+			return $element->getAttribute( 'id' );
 		}
 
-		$id = "_amp_toggle_{$index}";
-		$index ++;
+		if ( ! array_key_exists( $prefix, $index_counter ) ) {
+			$index_counter[ $prefix ] = 2;
+			$element->setAttribute( 'id', $prefix );
+
+			return $prefix;
+		}
+
+		$id = "{$prefix}-{$index_counter[ $prefix ]}";
+		$index_counter[ $prefix ] ++;
+
+		$element->setAttribute( 'id', $id );
 
 		return $id;
 	}
@@ -1927,22 +1922,45 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Get the ID of the <body> element.
+	 * Check whether a given element has a specific class.
 	 *
-	 * If the <body> element does not have an ID yet, a new one is created.
-	 *
-	 * @return string ID of the body element.
+	 * @param DOMElement $element Element to check the classes of.
+	 * @param string     $class Class to check for.
+	 * @return bool Whether the element has the requested class.
 	 */
-	protected function get_body_id() {
-		$body = $this->get_body_node();
-
-		if ( $body->hasAttribute( 'id' ) ) {
-			return $body->getAttribute( 'id' );
+	protected function has_class( DOMElement $element, $class ) {
+		if ( ! $element->hasAttribute( 'class ' ) ) {
+			return false;
 		}
 
-		$id = '_amp_body';
-		$body->setAttribute( 'id', $id );
+		$classes = $element->getAttribute( 'class' );
 
-		return $id;
+		return (bool) preg_match( "/\b{$class}\b/", $classes );
+	}
+
+	/**
+	 * Get the closest sub-menu within a menu item.
+	 *
+	 * @param DOMElement $element Element to get the closest sub-menu of.
+	 * @return DOMElement Requested sub-menu element, or the starting element
+	 *                    if none found.
+	 */
+	protected function get_closest_submenu( DOMElement $element ) {
+		$menu_item = $element;
+
+		while ( ! $this->has_class( $menu_item, 'menu-item' ) ) {
+			$menu_item = $menu_item->parentNode;
+			if ( ! $menu_item ) {
+				return $element;
+			}
+		}
+
+		$sub_menu = $this->xpath->query( "//*[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' sub-menu ' ) ]", $menu_item )->item( 0 );
+
+		if ( ! $sub_menu instanceof DOMElement ) {
+			return $element;
+		}
+
+		return $sub_menu;
 	}
 }
