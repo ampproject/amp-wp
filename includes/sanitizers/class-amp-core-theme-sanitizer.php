@@ -1823,19 +1823,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$css_selector = trim( $css_selector );
 		$css_selector = preg_replace( '/\s+/', ' ', $css_selector );
 
-		/**
-		 * Provide a manual conversion from CSS selector to XPath query.
-		 *
-		 * @param string CSS selector that needs to be converted to XPath.
-		 * @return string XPath to use. Return the unchanged CSS selector if no conversion provided.
-		 */
-		$xpath = apply_filters( 'amp_xpath_from_css_selector', $css_selector );
-
-		// Bail early if the filter provided a conversion.
-		if ( ! empty( $xpath ) && $xpath !== $css_selector ) {
-			return $xpath;
-		}
-
 		$xpath             = '';
 		$direct_descendant = false;
 		$token             = strtok( $css_selector, ' ' );
