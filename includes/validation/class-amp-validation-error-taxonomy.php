@@ -118,6 +118,13 @@ class AMP_Validation_Error_Taxonomy {
 	const REJECT_ALL_VALIDATION_ERRORS_QUERY_VAR = 'reject_all_errors';
 
 	/**
+	 * Query var to accept 'excessive_css' validation errors.
+	 *
+	 * @var string
+	 */
+	const ACCEPT_EXCESSIVE_CSS_ERROR_QUERY_VAR = 'accept_excessive_css';
+
+	/**
 	 * The <option> value to not filter at all, like for 'All Statuses'.
 	 *
 	 * This is also used in WP_List_Table, like for the 'Bulk Actions' option.
@@ -281,16 +288,7 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		self::accept_validation_errors( AMP_Core_Theme_Sanitizer::get_acceptable_errors( get_template() ) );
-
-		if ( isset( $_GET[ AMP_Theme_Support::AMP_FLAGS_QUERY_VAR ][ self::REJECT_ALL_VALIDATION_ERRORS_QUERY_VAR ] ) && AMP_Validation_Manager::has_cap() ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			add_filter(
-				'amp_validation_error_sanitized',
-				static function( $sanitized ) {
-					unset( $sanitized );
-					return false;
-				}
-			);
-		}
+		add_filter( 'amp_validation_error_sanitized', [ __CLASS__, 'conditionally_change_sanitization' ], 10, 2 );
 	}
 
 	/**
@@ -2324,5 +2322,38 @@ class AMP_Validation_Error_Taxonomy {
 			$text  = __( 'New Accepted', 'amp' );
 		}
 		return sprintf( '<span class="status-text %s">%s</span>', esc_attr( $class ), esc_html( $text ) );
+	}
+
+	/**
+	 * Possibly changes the sanitization of an error, based on the presence of query vars and the proper permission.
+	 *
+	 * This enables rejecting all validation errors, given the proper permissions and a query var.
+	 * Likewise, it enables accepting only 'excessive_css' errors.
+	 *
+	 * @param bool|null $sanitized A boolean to change the sanitization of the error, or null to not change it.
+	 * @param array     $error The error to examine.
+	 * @return bool|null The filtered sanitization, false meaning that it will be rejected, and null meaning to not change the sanitization.
+	 */
+	public static function conditionally_change_sanitization( $sanitized, $error ) {
+		if ( ! AMP_Validation_Manager::has_cap() ) {
+			return $sanitized;
+		}
+
+		if ( isset( $_GET[ AMP_Theme_Support::AMP_FLAGS_QUERY_VAR ][ self::REJECT_ALL_VALIDATION_ERRORS_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return false;
+		}
+
+		if (
+			isset(
+				$_GET[ AMP_Theme_Support::AMP_FLAGS_QUERY_VAR ][ self::ACCEPT_EXCESSIVE_CSS_ERROR_QUERY_VAR ], // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				$error['code']
+			)
+			&&
+			'excessive_css' === $error['code']
+		) {
+			return true;
+		}
+
+		return $sanitized;
 	}
 }

@@ -375,7 +375,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		$_GET[ AMP_Theme_Support::AMP_FLAGS_QUERY_VAR ][ AMP_Validation_Error_Taxonomy::REJECT_ALL_VALIDATION_ERRORS_QUERY_VAR ] = '';
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		AMP_Validation_Error_Taxonomy::register();
-		$this->assertfalse( AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $error_foo ) );
+		$this->assertFalse( AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $error_foo ) );
 		$this->assertEquals(
 			[
 				'forced'      => 'with_filter',
@@ -383,6 +383,32 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 				'term_status' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS,
 			],
 			AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $error_foo )
+		);
+		$_GET = [];
+
+		// The query var should force the excessive_css error to be accepted.
+		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
+		$excessive_css_error = array_merge(
+			$this->get_mock_error(),
+			[
+				'example' => 1,
+				'code'    => 'excessive_css',
+			]
+		);
+		AMP_Validated_URL_Post_Type::store_validation_errors(
+			[ $excessive_css_error ],
+			home_url( '/example' )
+		);
+		$_GET[ AMP_Theme_Support::AMP_FLAGS_QUERY_VAR ][ AMP_Validation_Error_Taxonomy::ACCEPT_EXCESSIVE_CSS_ERROR_QUERY_VAR ] = '';
+		AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( $error_bar );
+		$this->assertTrue( AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $excessive_css_error ) );
+		$this->assertEquals(
+			[
+				'forced'      => 'with_filter',
+				'status'      => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+				'term_status' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
+			],
+			AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $excessive_css_error )
 		);
 	}
 
@@ -1352,6 +1378,35 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		$_REQUEST[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_CLEAR_EMPTY_ACTION . '_nonce' ] = wp_create_nonce( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_CLEAR_EMPTY_ACTION );
 		AMP_Validation_Error_Taxonomy::handle_clear_empty_terms_request();
 		$this->assertEquals( 0, AMP_Validation_Error_Taxonomy::get_validation_error_count() );
+	}
+
+	/**
+	 * Test conditionally_change_sanitization.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::conditionally_change_sanitization()
+	 */
+	public function test_conditionally_change_sanitization() {
+		$initial_sanitization = null;
+
+		// The user doesn't have the correct permissions, so this should not change the sanitization.
+		$this->assertEquals( $initial_sanitization, AMP_Validation_Error_Taxonomy::conditionally_change_sanitization( $initial_sanitization, [] ) );
+
+		// The user now has the correct permissions, but the query vars aren't present, so this should not change the sanitization.
+		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$this->assertEquals( $initial_sanitization, AMP_Validation_Error_Taxonomy::conditionally_change_sanitization( $initial_sanitization, [] ) );
+
+		// With the query var present to reject all errors, this should return false.
+		$_GET[ AMP_Theme_Support::AMP_FLAGS_QUERY_VAR ][ AMP_Validation_Error_Taxonomy::REJECT_ALL_VALIDATION_ERRORS_QUERY_VAR ] = '';
+		$this->assertEquals( false, AMP_Validation_Error_Taxonomy::conditionally_change_sanitization( $initial_sanitization, [] ) );
+		$_GET = [];
+
+		// Though the query var to reject excessive_css errors is present, the error's code is wrong, so this shouldn't change the sanitization.
+		$_GET[ AMP_Theme_Support::AMP_FLAGS_QUERY_VAR ][ AMP_Validation_Error_Taxonomy::ACCEPT_EXCESSIVE_CSS_ERROR_QUERY_VAR ] = '';
+		$error = [ 'code' => 'invalid_attribute' ];
+		$this->assertEquals( $initial_sanitization, AMP_Validation_Error_Taxonomy::conditionally_change_sanitization( $initial_sanitization, $error ) );
+
+		// Now that the error code is 'excessive_css', this should return true for the sanitization.
+		$this->assertEquals( true, AMP_Validation_Error_Taxonomy::conditionally_change_sanitization( $initial_sanitization, [ 'code' => 'excessive_css' ] ) );
 	}
 
 	/**
