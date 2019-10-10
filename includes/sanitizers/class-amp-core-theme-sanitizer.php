@@ -1582,9 +1582,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$close_xpaths = isset( $args['close_button_xpath'] ) ? $args['close_button_xpath'] : [];
 
 		$buttons = [
-			"{$modal_id}.open"                                        => $open_xpaths,
-			"{$body_id}.toggleClass(class=showing-modal,force=true)"  => $open_xpaths,
-			"{$modal_id}.close"                                       => $close_xpaths,
+			"{$modal_id}.open"  => $open_xpaths,
+			"{$body_id}.toggleClass(class=showing-modal,force=true)" => $open_xpaths,
+			"{$modal_id}.close" => $close_xpaths,
 			"{$body_id}.toggleClass(class=showing-modal,force=false)" => $close_xpaths,
 		];
 
@@ -1716,8 +1716,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		$targets = [];
-
 		foreach ( $toggles as $toggle ) {
 			if ( ! $toggle instanceof DOMElement ) {
 				return;
@@ -1748,9 +1746,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			// Get the class to toggle, if specified.
 			$toggle_class = $toggle->hasAttribute( 'data-class-to-toggle' ) ? $toggle->getAttribute( 'data-class-to-toggle' ) : 'active';
 
-			$is_sub_menu = $this->has_class( $target_node, 'sub-menu' );
+			$is_sub_menu     = $this->has_class( $target_node, 'sub-menu' );
 			$new_target_node = $is_sub_menu ? $this->get_closest_submenu( $toggle ) : $target_node;
-			$new_target_id = $this->get_element_id( $new_target_node );
+			$new_target_id   = $this->get_element_id( $new_target_node );
 
 			// Toggle the target of the clicked toggle.
 			$this->add_amp_action( $toggle, 'tap', "{$new_target_id}.toggleClass(class='{$toggle_class}')" );
