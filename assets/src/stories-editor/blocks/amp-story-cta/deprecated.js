@@ -12,7 +12,11 @@ import { RichText } from '@wordpress/block-editor';
 /**
  * Internal dependencies
  */
-import { getClassNameFromBlockAttributes, getStylesFromBlockAttributes } from '../../helpers';
+import {
+	getClassNameFromBlockAttributes,
+	getStylesFromBlockAttributes,
+	getUniqueId,
+} from '../../helpers';
 
 const blockAttributes = {
 	url: {
@@ -33,6 +37,20 @@ const blockAttributes = {
 	customBackgroundColor: {
 		type: 'string',
 		default: '#32373c',
+	},
+	btnPositionTop: {
+		type: 'number',
+		default: 0,
+	},
+	btnPositionLeft: {
+		type: 'number',
+		default: 30,
+	},
+	btnWidth: {
+		type: 'number',
+	},
+	btnHeight: {
+		type: 'number',
 	},
 };
 
@@ -73,6 +91,50 @@ CallToActionSaveV121.propTypes = {
 	} ).isRequired,
 };
 
+/**
+ * Deprecated save function which was used last for plugin version 1.3.0
+ *
+ * @param {Object} attributes Attributes.
+ * @return {*} CTA save.
+ */
+const CallToActionSaveV130 = ( { attributes } ) => {
+	const {
+		anchor,
+		btnPositionLeft,
+		btnPositionTop,
+		text,
+		url,
+	} = attributes;
+
+	const className = getClassNameFromBlockAttributes( { ...attributes, className: 'amp-block-story-cta__link' } );
+	const styles = getStylesFromBlockAttributes( attributes );
+
+	styles.top = btnPositionTop ? `${ btnPositionTop }%` : undefined;
+	styles.left = btnPositionLeft ? `${ btnPositionLeft }%` : undefined;
+
+	return (
+		<amp-story-cta-layer id={ anchor ? anchor : getUniqueId() }>
+			<RichText.Content
+				tagName="a"
+				className={ className }
+				href={ url }
+				style={ styles }
+				value={ text }
+			/>
+		</amp-story-cta-layer>
+	);
+};
+
+CallToActionSaveV130.propTypes = {
+	attributes: PropTypes.shape( {
+		anchor: PropTypes.string,
+		url: PropTypes.string,
+		text: PropTypes.string,
+		btnPositionLeft: PropTypes.number,
+		btnPositionTop: PropTypes.number,
+	} ).isRequired,
+};
+
 const deprecated = [
 	{
 		attributes: {
@@ -96,6 +158,13 @@ const deprecated = [
 				btnPositionLeft: 30,
 			};
 		},
+	},
+	{
+		attributes: {
+			...blockAttributes,
+		},
+
+		save: CallToActionSaveV130,
 	},
 ];
 
