@@ -59,7 +59,7 @@ const icon = (
  *
  * Also removes video settings that are not applicable / allowed in an AMP Stories context.
  */
-const CustomVideoBlockEdit = ( { instanceId, isSelected, className, attributes, setAttributes, mediaUpload, noticeUI, noticeOperations } ) => {
+const CustomVideoBlockEdit = ( { instanceId, isSelected, className, attributes, setAttributes, noticeUI, noticeOperations } ) => {
 	const {
 		caption,
 		loop,
@@ -102,6 +102,14 @@ const CustomVideoBlockEdit = ( { instanceId, isSelected, className, attributes, 
 			allowedVideoMimeTypes: getSettings().allowedVideoMimeTypes,
 		};
 	}, [ id, poster ] );
+
+	const { mediaUpload } = useSelect( ( select ) => {
+		const { getSettings } = select( 'core/block-editor' );
+		const { __experimentalMediaUpload } = getSettings();
+		return {
+			mediaUpload: __experimentalMediaUpload,
+		};
+	}, [] );
 
 	useEffect( () => {
 		if ( ! id && isBlobURL( src ) ) {
@@ -404,7 +412,6 @@ CustomVideoBlockEdit.propTypes = {
 	className: PropTypes.string,
 	instanceId: PropTypes.number,
 	isSelected: PropTypes.bool,
-	mediaUpload: PropTypes.func,
 	noticeUI: PropTypes.oneOfType( [ PropTypes.func, PropTypes.bool ] ),
 	noticeOperations: PropTypes.object,
 	setAttributes: PropTypes.func,
