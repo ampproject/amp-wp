@@ -16,8 +16,14 @@ amp-story-grid-layer {
 	align-content: unset;
 }
 
+.amp-cta-button-wrapper {
+	max-width: 600px;
+	margin: 0 auto;
+}
+
 .amp-block-story-cta__link {
 	position: absolute;
+	overflow-wrap: normal;
 }
 
 .amp-block-story-cta__link amp-img {
