@@ -1771,7 +1771,26 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				$this->add_amp_action( $toggle, 'tap', "{$body_id}.toggleClass(class='{$body_class}')" );
 			}
 
-			// @todo Check whether to set focus.
+			// @todo Toggle aria-expanded on the target.
+			// @todo Toggle aria-expanded on the toggle.
+
+			if ( $toggle->hasAttribute( 'data-set-focus' ) ) {
+				$focus_selector = $toggle->getAttribute( 'data-set-focus' );
+
+				if ( ! empty( $focus_selector ) ) {
+					$focus_xpath   = $this->xpath_from_css_selector( $focus_selector );
+					$focus_element = $this->xpath->query( $focus_xpath )->item( 0 );
+
+					// Instead of manually setting or unsetting the focus here, we're going
+					// with the autofocus attribute instead (AMP does not have a "blur" action).
+					// According to the HTML 5 spec, only one element should have "autofocus",
+					// however it seems like AMP has turned this into a common mechanism for
+					// focusing on inputs after a lightbox (i.e. modal) opens.
+					if ( $focus_element instanceof DOMElement ) {
+						$focus_element->setAttribute( 'autofocus', true );
+					}
+				}
+			}
 		}
 	}
 
