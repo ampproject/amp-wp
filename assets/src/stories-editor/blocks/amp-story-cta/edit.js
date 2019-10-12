@@ -17,9 +17,10 @@ import { useSelect } from '@wordpress/data';
  * Internal dependencies
  */
 import './edit.css';
-import { getUniqueId, setInputSelectionToEnd } from '../../helpers';
+import { getUniqueId, getPercentageFromPixels, setInputSelectionToEnd } from '../../helpers';
 import { getBackgroundColorWithOpacity } from '../../../common/helpers';
 import { DraggableText } from '../../components';
+import { STORY_PAGE_INNER_HEIGHT_FOR_CTA } from '../../constants';
 
 const CallToActionEdit = ( {
 	attributes,
@@ -94,7 +95,17 @@ const CallToActionEdit = ( {
 					<RichText
 						placeholder={ placeholder }
 						value={ text }
-						onChange={ ( value ) => setAttributes( { text: value } ) }
+						onChange={ ( value ) => {
+							setAttributes( { text: value } );
+							// Also update width and height based on the room that the CTA button takes.
+							const element = document.querySelector( `#amp-story-cta-button-${ clientId } .amp-block-story-cta__link` );
+							const btnWidth = getPercentageFromPixels( 'x', element.clientWidth );
+							const btnHeight = getPercentageFromPixels( 'y', element.clientHeight, STORY_PAGE_INNER_HEIGHT_FOR_CTA );
+							setAttributes( {
+								btnWidth,
+								btnHeight,
+							} );
+						} }
 						className={ textWrapperClass }
 						style={ textStyle }
 					/>

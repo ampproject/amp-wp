@@ -92,6 +92,7 @@ const BlockDropZone = ( { srcBlockName, srcClientId } ) => {
 	return (
 		<DropZone
 			className="editor-block-drop-zone"
+			key={ srcClientId }
 			onDrop={ onDrop }
 		/>
 	);

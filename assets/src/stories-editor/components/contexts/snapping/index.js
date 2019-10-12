@@ -25,7 +25,6 @@ const Snapping = ( { children } ) => {
 
 	const context = {
 		setSnapLines,
-		snapLines,
 		clearSnapLines,
 	};
 

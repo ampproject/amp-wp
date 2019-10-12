@@ -810,6 +810,7 @@ function amp_get_content_embed_handlers( $post = null ) {
 			'AMP_Gfycat_Embed_Handler'      => [],
 			'AMP_Hulu_Embed_Handler'        => [],
 			'AMP_Imgur_Embed_Handler'       => [],
+			'AMP_Scribd_Embed_Handler'      => [],
 		],
 		$post
 	);
@@ -885,8 +886,11 @@ function amp_get_content_sanitizers( $post = null ) {
 
 	$sanitizers = [
 		'AMP_Core_Theme_Sanitizer'        => [
-			'template'   => get_template(),
-			'stylesheet' => get_stylesheet(),
+			'template'       => get_template(),
+			'stylesheet'     => get_stylesheet(),
+			'theme_features' => [
+				'force_svg_support' => [], // Always replace 'no-svg' class with 'svg' if it exists.
+			],
 		],
 		'AMP_Img_Sanitizer'               => [
 			'align_wide_support' => current_theme_supports( 'align-wide' ),
