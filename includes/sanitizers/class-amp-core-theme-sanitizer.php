@@ -1787,7 +1787,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					// According to the HTML 5 spec, only one element should have "autofocus",
 					// however it seems like AMP has turned this into a common mechanism for
 					// focusing on inputs after a lightbox (i.e. modal) opens.
-					if ( $focus_element instanceof DOMElement ) {
+					if ( $focus_element instanceof DOMElement && in_array( $focus_element->tagName, [ 'input', 'select', 'textarea' ], true ) ) {
 						$focus_element->setAttribute( 'autofocus', true );
 					}
 				}
