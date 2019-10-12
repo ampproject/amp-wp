@@ -57,21 +57,22 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			// @todo Modal Menu (stripped with twentytwenty-js)
 			// @todo Primary Menu (stripped with twentytwenty-js)
 			// @todo Toggles (stripped with twentytwenty-js) - probably unneeded once the rest is done
-			'dequeue_scripts'          => [
+			'dequeue_scripts'                  => [
 				'twentytwenty-js',
 			],
-			'remove_actions'           => [
+			'remove_actions'                   => [
 				'wp_head' => [
 					'twentytwenty_no_js_class', // AMP is essentially no-js, with any interactivity added explicitly via amp-bind.
 				],
 			],
-			'add_smooth_scrolling'     => [
+			'add_smooth_scrolling'             => [
 				// @todo Only replaces twentytwenty.smoothscroll.scrollToAnchor, but not twentytwenty.smoothscroll.scrollToElement
 				'//a[ starts-with( @href, "#" ) and not( @href = "#" )and not( @href = "#0" ) and not( contains( @class, "do-not-scroll" ) ) and not( contains( @class, "skip-link" ) ) ]',
 			],
-			'add_twentytwenty_modals'  => [],
-			'add_twentytwenty_toggles' => [],
-			'add_nav_menu_styles'      => [],
+			'add_twentytwenty_modals'          => [],
+			'add_twentytwenty_toggles'         => [],
+			'add_nav_menu_styles'              => [],
+			'add_twentytwenty_masthead_styles' => [],
 		],
 
 		// Twenty Nineteen.
@@ -662,6 +663,28 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	protected static function get_twentyseventeen_navigation_outer_height() {
 		return 72;
+	}
+
+	/**
+	 * Add required styles for featured image header in Twenty Twenty.
+	 */
+	public static function add_twentytwenty_masthead_styles() {
+		add_action(
+			'wp_enqueue_scripts',
+			static function() {
+				ob_start();
+				?>
+				<style>
+				.featured-media amp-img {
+					position: static;
+				}
+				</style>
+				<?php
+				$styles = str_replace( [ '<style>', '</style>' ], '', ob_get_clean() );
+				wp_add_inline_style( get_template() . '-style', $styles );
+			},
+			11
+		);
 	}
 
 	/**
