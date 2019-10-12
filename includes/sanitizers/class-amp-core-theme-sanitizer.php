@@ -1771,6 +1771,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				$this->add_amp_action( $toggle, 'tap', "{$body_id}.toggleClass(class='{$body_class}')" );
 			}
 
+			// Leaving these for now as the theme looks broken in non-AMP already.
 			// @todo Toggle aria-expanded on the target.
 			// @todo Toggle aria-expanded on the toggle.
 
