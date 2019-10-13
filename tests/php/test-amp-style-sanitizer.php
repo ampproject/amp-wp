@@ -31,6 +31,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		global $wp_styles, $wp_scripts;
 		$wp_styles  = null;
 		$wp_scripts = null;
+		$_GET       = [];
 	}
 
 	/**
@@ -1213,9 +1214,11 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		}
 		$this->assertNotNull( $custom_max_size );
 
+		$long_style_rule = '.b[data-value="' . str_repeat( 'c', $custom_max_size ) . '"]{color:green}';
+
 		$html  = '<html amp><head><meta charset="utf-8">';
 		$html .= '<style>.' . str_repeat( 'a', $custom_max_size - 50 ) . '{ color:red } .b{ color:blue; }</style>';
-		$html .= '<style>.b[data-value="' . str_repeat( 'c', $custom_max_size ) . '"] { color:green }</style>';
+		$html .= '<style>' . $long_style_rule . '</style>';
 		$html .= '<style>#nonexists { color:black; } #exists { color:white; }</style>';
 		$html .= '<style>div { color:black; } span { color:white; } </style>';
 		$html .= '<style>@font-face {font-family: "Open Sans";src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2");}</style>';
@@ -1274,6 +1277,28 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			[ 'excessive_css' ],
 			$error_codes
 		);
+
+		// This should not perform tree shaking if a certain query var is present.
+		$_GET[ AMP_Theme_Support::AMP_FLAGS_QUERY_VAR ][ AMP_Style_Sanitizer::SKIP_TREE_SHAKING_QUERY_VAR ] = '';
+		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$dom         = AMP_DOM_Utils::get_dom( $html );
+		$error_codes = [];
+		$sanitizer   = new AMP_Style_Sanitizer(
+			$dom,
+			[
+				'use_document_element'      => true,
+				'validation_error_callback' => static function( $error ) use ( &$error_codes ) {
+					$error_codes[] = $error['code'];
+				},
+			]
+		);
+		$sanitizer->sanitize();
+
+		// The long <style> should not be removed, as this should not perform tree-shaking.
+		$this->assertTrue( in_array( $long_style_rule, $sanitizer->get_stylesheets(), true ) );
+
+		// There should be no 'excessive_css' error.
+		$this->assertEmpty( $error_codes );
 	}
 
 	/**
@@ -2385,5 +2410,23 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$whitelist_sanitizer->sanitize();
 
 		$assert( $original_dom, $html, $amphtml_dom, $amphtml_dom->saveHTML(), $sanitizer->get_stylesheets() );
+	}
+
+	/**
+	 * Test skip_tree_shaking.
+	 *
+	 * @covers \AMP_Style_Sanitizer::skip_tree_shaking()
+	 */
+	public function test_skip_tree_shaking() {
+		// The query var isn't present and the permission isn't correct, so this should return false.
+		$this->assertFalse( AMP_Style_Sanitizer::skip_tree_shaking() );
+
+		// The query var is present, but the user doesn't have the right permission, so this should still return false.
+		$_GET[ AMP_Theme_Support::AMP_FLAGS_QUERY_VAR ][ AMP_Style_Sanitizer::SKIP_TREE_SHAKING_QUERY_VAR ] = '';
+		$this->assertFalse( AMP_Style_Sanitizer::skip_tree_shaking() );
+
+		// Now that the user has the right permission, this should return true.
+		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$this->assertTrue( AMP_Style_Sanitizer::skip_tree_shaking() );
 	}
 }

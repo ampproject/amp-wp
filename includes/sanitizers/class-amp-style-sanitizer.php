@@ -77,6 +77,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	const SELECTOR_EXTRACTED_ATTRIBUTES = 3;
 
 	/**
+	 * A query var to skip tree shaking.
+	 *
+	 * @var string
+	 */
+	const SKIP_TREE_SHAKING_QUERY_VAR = 'skip_tree_shaking';
+
+	/**
 	 * Array of flags used to control sanitization.
 	 *
 	 * @var array {
@@ -2609,7 +2616,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					esc_html__( 'The %s element is populated with:', 'amp' ),
 					'style[amp-custom]'
 				) . "\n" . implode( "\n", $included_sources ) . "\n";
-				if ( self::has_required_php_css_parser() ) {
+				if ( self::has_required_php_css_parser() && ! self::skip_tree_shaking() ) {
 					$comment .= sprintf(
 						/* translators: 1: number of included bytes. 2: percentage of total CSS actually included after tree shaking. 3: total included size. */
 						esc_html__( 'Total included size: %1$s bytes (%2$d%% of %3$s total after tree shaking)', 'amp' ),
@@ -2979,7 +2986,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 							$this->has_used_attributes( $parsed_selector[ self::SELECTOR_EXTRACTED_ATTRIBUTES ] )
 						)
 					);
-					if ( $should_include ) {
+					if ( $should_include || self::skip_tree_shaking() ) {
 						$selectors[] = $selector;
 					}
 				}
@@ -3076,7 +3083,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			// Report validation error if size is now too big.
-			if ( $current_concatenated_size + $this->pending_stylesheets[ $i ]['size'] > $max_bytes ) {
+			if ( $current_concatenated_size + $this->pending_stylesheets[ $i ]['size'] > $max_bytes && ! self::skip_tree_shaking() ) {
 				$validation_error = [
 					'code' => 'excessive_css',
 					'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
@@ -3099,5 +3106,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		return $included_count;
+	}
+
+	/**
+	 * Gets whether to skip tree shaking, based on a query var and a permission.
+	 *
+	 * @return bool Whether to skip tree shaking.
+	 */
+	public static function skip_tree_shaking() {
+		return isset( $_GET[ AMP_Theme_Support::AMP_FLAGS_QUERY_VAR ][ self::SKIP_TREE_SHAKING_QUERY_VAR ] ) && AMP_Validation_Manager::has_cap(); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 }
