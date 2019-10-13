@@ -526,7 +526,7 @@ class AMP_Theme_Support {
 	 */
 	public static function redirect_non_amp_url( $status = 302, $exit = true ) {
 		$current_url = amp_get_current_url();
-		$non_amp_url = amp_remove_endpoint( $current_url );
+		$non_amp_url = remove_query_arg( self::AMP_FLAGS_QUERY_VAR, amp_remove_endpoint( $current_url ) );
 		if ( $non_amp_url === $current_url ) {
 			return false;
 		}
