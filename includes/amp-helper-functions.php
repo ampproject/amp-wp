@@ -302,6 +302,11 @@ function is_amp_endpoint() {
 		return true;
 	}
 
+	// If a certain query var is present and the user has the right permission, AMP should be disabled.
+	if ( isset( $_GET[ AMP_Theme_Support::AMP_FLAGS_QUERY_VAR ]['disable_amp'] ) && AMP_Validation_Manager::has_cap() ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return false;
+	}
+
 	$has_amp_query_var = (
 		isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		||
