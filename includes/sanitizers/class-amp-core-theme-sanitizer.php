@@ -53,10 +53,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	protected static $theme_features = [
 		// Twenty Twenty.
 		'twentytwenty'    => [
-			// @todo Cover Modals (stripped with twentytwenty-js)
-			// @todo Modal Menu (stripped with twentytwenty-js)
-			// @todo Primary Menu (stripped with twentytwenty-js)
-			// @todo Toggles (stripped with twentytwenty-js) - probably unneeded once the rest is done
 			'dequeue_scripts'                         => [
 				'twentytwenty-js',
 			],
@@ -1800,7 +1796,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			// Leaving these for now as the theme looks broken in non-AMP already.
-			// @todo Toggle aria-expanded on the target.
 			// @todo Toggle aria-expanded on the toggle.
 
 			if ( $toggle->hasAttribute( 'data-set-focus' ) ) {
