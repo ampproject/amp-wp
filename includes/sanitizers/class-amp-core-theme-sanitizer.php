@@ -1784,6 +1784,10 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				// If not, toggle all toggles with this toggle target.
 				$target_toggles = $this->xpath->query( "//*[ @data-toggle-target = '{$toggle_target}' ]" );
 				foreach ( $target_toggles as $target_toggle ) {
+					if ( $this->has_class( $target_toggle, 'close-nav-toggle' ) ) {
+						// Skip adding the 'active' class on the "Close" button in the primary nav menu.
+						continue;
+					}
 					$target_toggle_id = $this->get_element_id( $target_toggle );
 					$this->add_amp_action( $toggle, 'tap', "{$target_toggle_id}.toggleClass(class='active')" );
 				}
@@ -1958,7 +1962,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return bool Whether the element has the requested class.
 	 */
 	protected function has_class( DOMElement $element, $class ) {
-		if ( ! $element->hasAttribute( 'class ' ) ) {
+		if ( ! $element->hasAttribute( 'class' ) ) {
 			return false;
 		}
 
