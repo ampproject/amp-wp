@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { IconButton } from '@wordpress/components';
+import { DropZoneProvider, IconButton } from '@wordpress/components';
 import { useEffect, useRef } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 
@@ -74,31 +74,33 @@ const EditorCarousel = () => {
 	}
 
 	return (
-		<div className="amp-story-editor-carousel-navigation">
-			<IconButton
-				icon="arrow-left-alt2"
-				label={ __( 'Previous Page', 'amp' ) }
-				onClick={ ( e ) => {
-					e.preventDefault();
-					goToPage( previousPage );
-				} }
-				disabled={ null === previousPage }
-			/>
-			<Indicator
-				pages={ pages }
-				currentPage={ currentPage }
-				onClick={ goToPage }
-			/>
-			<IconButton
-				icon="arrow-right-alt2"
-				label={ __( 'Next Page', 'amp' ) }
-				onClick={ ( e ) => {
-					e.preventDefault();
-					goToPage( nextPage );
-				} }
-				disabled={ null === nextPage }
-			/>
-		</div>
+		<DropZoneProvider>
+			<div className="amp-story-editor-carousel-navigation">
+				<IconButton
+					icon="arrow-left-alt2"
+					label={ __( 'Previous Page', 'amp' ) }
+					onClick={ ( e ) => {
+						e.preventDefault();
+						goToPage( previousPage );
+					} }
+					disabled={ null === previousPage }
+				/>
+				<Indicator
+					pages={ pages }
+					currentPage={ currentPage }
+					onClick={ goToPage }
+				/>
+				<IconButton
+					icon="arrow-right-alt2"
+					label={ __( 'Next Page', 'amp' ) }
+					onClick={ ( e ) => {
+						e.preventDefault();
+						goToPage( nextPage );
+					} }
+					disabled={ null === nextPage }
+				/>
+			</div>
+		</DropZoneProvider>
 	);
 };
 
