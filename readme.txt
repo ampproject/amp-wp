@@ -8,7 +8,7 @@ License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires PHP: 5.4
 
-Official AMP plugin, supported by the AMP team. Formerly “Accelerated Mobile Pages”, AMP enables great experiences across mobile, desktop & stories.
+Official AMP plugin, supported by the AMP team. Formerly "Accelerated Mobile Pages", AMP enables great experiences across mobile, desktop & stories.
 
 == Description ==
 
