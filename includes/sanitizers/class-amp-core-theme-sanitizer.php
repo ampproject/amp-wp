@@ -57,22 +57,23 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			// @todo Modal Menu (stripped with twentytwenty-js)
 			// @todo Primary Menu (stripped with twentytwenty-js)
 			// @todo Toggles (stripped with twentytwenty-js) - probably unneeded once the rest is done
-			'dequeue_scripts'                  => [
+			'dequeue_scripts'                         => [
 				'twentytwenty-js',
 			],
-			'remove_actions'                   => [
+			'remove_actions'                          => [
 				'wp_head' => [
 					'twentytwenty_no_js_class', // AMP is essentially no-js, with any interactivity added explicitly via amp-bind.
 				],
 			],
-			'add_smooth_scrolling'             => [
+			'add_smooth_scrolling'                    => [
 				// @todo Only replaces twentytwenty.smoothscroll.scrollToAnchor, but not twentytwenty.smoothscroll.scrollToElement
 				'//a[ starts-with( @href, "#" ) and not( @href = "#" )and not( @href = "#0" ) and not( contains( @class, "do-not-scroll" ) ) and not( contains( @class, "skip-link" ) ) ]',
 			],
-			'add_twentytwenty_modals'          => [],
-			'add_twentytwenty_toggles'         => [],
-			'add_nav_menu_styles'              => [],
-			'add_twentytwenty_masthead_styles' => [],
+			'add_twentytwenty_modals'                 => [],
+			'add_twentytwenty_toggles'                => [],
+			'add_nav_menu_styles'                     => [],
+			'add_twentytwenty_masthead_styles'        => [],
+			'add_twentytwenty_current_page_awareness' => [],
 		],
 
 		// Twenty Nineteen.
@@ -1990,5 +1991,25 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		return $sub_menu;
+	}
+
+	/**
+	 * Automatically open the submenus related to the current page in the menu modal.
+	 */
+	public function add_twentytwenty_current_page_awareness() {
+		$page_ancestors = $this->xpath->query( "//li[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' current_page_ancestor ' ) ]" );
+		foreach ( $page_ancestors as $page_ancestor ) {
+			$toggle   = $this->xpath->query( "./div/button[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' sub-menu-toggle ' ) ]", $page_ancestor )->item( 0 );
+			$children = $this->xpath->query( "./ul[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' children ' ) ]", $page_ancestor )->item( 0 );
+			foreach ( [ $toggle, $children ] as $element ) {
+				if ( ! $element instanceof DOMElement ) {
+					continue;
+				}
+
+				$classes   = $element->hasAttribute( 'class' ) ? explode( ' ', $element->getAttribute( 'class' ) ) : [];
+				$classes[] = 'active';
+				$element->setAttribute( 'class', implode( ' ', array_unique( $classes ) ) );
+			}
+		}
 	}
 }
