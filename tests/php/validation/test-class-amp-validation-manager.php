@@ -311,6 +311,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertContains( 'action=amp_validate', $node->href );
 		$this->assertNull( $admin_bar->get_node( 'amp-view' ) );
 		$this->assertInternalType( 'object', $admin_bar->get_node( 'amp-validity' ) );
+		$this->assertInternalType( 'object', $admin_bar->get_node( 'amp-debug' ) );
 
 		// Admin bar item available in paired mode.
 		add_theme_support( AMP_Theme_Support::SLUG, [ AMP_Theme_Support::PAIRED_FLAG => true ] );
@@ -320,6 +321,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertInternalType( 'object', $node );
 		$this->assertStringEndsWith( '?amp', $node->href );
 		$this->assertInternalType( 'object', $admin_bar->get_node( 'amp-view' ) );
+		$this->assertNull( $admin_bar->get_node( 'amp-debug' ) );
 		$this->assertInternalType( 'object', $admin_bar->get_node( 'amp-validity' ) );
 
 		// Admin bar item available in paired mode with validation errors.
@@ -332,6 +334,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertContains( 'action=amp_validate', $node->href );
 		$this->assertNull( $admin_bar->get_node( 'amp-view' ) );
 		$this->assertInternalType( 'object', $admin_bar->get_node( 'amp-validity' ) );
+		$this->assertInternalType( 'object', $admin_bar->get_node( 'amp-debug' ) );
 	}
 
 	/**

@@ -173,6 +173,7 @@ const admin = {
 	...sharedConfig,
 	entry: {
 		'amp-validation-tooltips': './assets/src/admin/amp-validation-tooltips.js',
+		'amp-admin-bar-debugging': './assets/src/admin/amp-admin-bar-debugging.js',
 	},
 	plugins: [
 		...defaultConfig.plugins,

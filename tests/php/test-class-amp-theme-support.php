@@ -70,6 +70,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		AMP_HTTP::$headers_sent = [];
 		remove_all_filters( 'theme_root' );
 		remove_all_filters( 'template' );
+		remove_all_filters( 'show_admin_bar' );
 	}
 
 	/**
@@ -990,6 +991,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertEquals( 100, has_action( 'comment_form', [ self::TESTED_CLASS, 'amend_comment_form' ] ) );
 		$this->assertFalse( has_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' ) );
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'get_header_image_tag', [ self::TESTED_CLASS, 'amend_header_image_with_video_header' ] ) );
+		$this->assertEquals( 10, has_filter( 'wp_enqueue_scripts', [ self::TESTED_CLASS, 'enqueue_admin_bar_debugging' ] ) );
 	}
 
 	/**
@@ -2197,6 +2199,49 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			$mock_image . '<amp-youtube media="(min-width: 900px)" width="0" height="0" layout="responsive" autoplay loop id="wp-custom-header-video" data-videoid="a8NScvBhVnc" data-param-rel="0" data-param-showinfo="0" data-param-controls="0" data-param-iv_load_policy="3" data-param-modestbranding="1" data-param-playsinline="1" data-param-disablekb="1" data-param-fs="0"></amp-youtube><style>#wp-custom-header-video .amp-video-eq { display:none; }</style>',
 			AMP_Theme_Support::amend_header_image_with_video_header( $mock_image )
 		);
+	}
+
+	/**
+	 * Test enqueue_admin_bar_debugging.
+	 *
+	 * @covers AMP_Theme_Support::enqueue_admin_bar_debugging()
+	 */
+	public function test_enqueue_admin_bar_debugging() {
+		$admin_bar_debugging_handle = 'amp-admin-bar-debugging';
+		$wp_element_handle          = 'wp-element';
+		$initial_script             = '<script type="text/javascript"></script>';
+		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'subscriber' ] ) );
+
+		// The admin bar isn't showing, so this script should not be enqueued.
+		AMP_Theme_Support::enqueue_admin_bar_debugging();
+		$this->assertFalse( wp_script_is( $admin_bar_debugging_handle, 'enqueued' ) );
+
+		// Similarly, the tested method should not filter 'script_loader_tag', and this should return the same $initial_script it's passed.
+		$this->assertEquals( $initial_script, apply_filters( 'script_loader_tag', $initial_script, $wp_element_handle, '' ) );
+
+		// The admin bar is showing, but this is in /wp-admin, so this should still not be enqueued.
+		add_filter( 'show_admin_bar', '__return_true' );
+		set_current_screen( 'edit.php' );
+		AMP_Theme_Support::enqueue_admin_bar_debugging();
+		$this->assertFalse( wp_script_is( $admin_bar_debugging_handle, 'enqueued' ) );
+
+		// This is on the front-end, but the user doesn't have the right permission, so this should not be enqueued.
+		set_current_screen( 'front' );
+		AMP_Theme_Support::enqueue_admin_bar_debugging();
+		$this->assertFalse( wp_script_is( $admin_bar_debugging_handle, 'enqueued' ) );
+
+		// Now that the user has the right permission, this should be enqueued.
+		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
+		AMP_Theme_Support::enqueue_admin_bar_debugging();
+		$this->assertTrue( wp_script_is( $admin_bar_debugging_handle, 'enqueued' ) );
+
+		// This should also filter 'script_loader_tag', and add the dev mode attribute to the script.
+		$this->assertContains( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, apply_filters( 'script_loader_tag', $initial_script, $wp_element_handle, '' ) );
+
+		// The dev mode attribute should not be added to a script that isn't a dependency.
+		$handle_non_dependency = 'handle-not-a-dependency';
+		wp_register_script( $handle_non_dependency, 'https://exampl.com/script.js', [], '123', true );
+		$this->assertNotContains( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, apply_filters( 'script_loader_tag', $initial_script, $handle_non_dependency, '' ) );
 	}
 }
 

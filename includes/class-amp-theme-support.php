@@ -1110,6 +1110,7 @@ class AMP_Theme_Support {
 				wp_dequeue_script( 'comment-reply' ); // Handled largely by AMP_Comments_Sanitizer and *reply* methods in this class.
 			}
 		);
+		add_action( 'wp_enqueue_scripts', [ __CLASS__, 'enqueue_admin_bar_debugging' ] );
 
 		// @todo Add character conversion.
 	}
@@ -2574,5 +2575,42 @@ class AMP_Theme_Support {
 		}
 
 		return $image_markup . $video_markup;
+	}
+
+	/**
+	 * Enqueues the admin bar debugging script, which adds toggles to the 'AMP' submenu, like to disable tree shaking.
+	 */
+	public static function enqueue_admin_bar_debugging() {
+		if ( is_admin() || ! is_admin_bar_showing() || ! AMP_Validation_Manager::has_cap() ) {
+			return;
+		}
+
+		$slug         = 'amp-admin-bar-debugging';
+		$asset_file   = AMP__DIR__ . '/assets/js/' . $slug . '.asset.php';
+		$asset        = require $asset_file;
+		$dependencies = $asset['dependencies'];
+		$version      = $asset['version'];
+
+		wp_enqueue_script(
+			$slug,
+			amp_get_asset_url( "js/{$slug}.js" ),
+			$dependencies,
+			$version,
+			true
+		);
+
+		// Add the dev mode attribute to this script and its dependencies, so they don't cause validation errors.
+		add_filter(
+			'script_loader_tag',
+			static function( $tag, $handle ) use ( $slug ) {
+				if ( AMP_Theme_Support::has_dependency( wp_scripts(), $slug, $handle ) ) {
+					return preg_replace( '/(?<=<script)(?=\s|>)/i', ' ' . AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, $tag );
+				}
+
+				return $tag;
+			},
+			10,
+			2
+		);
 	}
 }

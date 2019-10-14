@@ -443,6 +443,13 @@ class AMP_Validation_Manager {
 			'href'   => esc_url( is_amp_endpoint() ? $non_amp_url : $amp_url ),
 		];
 
+		// Construct admin bar item for debugging options.
+		$debug_item = [
+			'parent' => 'amp',
+			'id'     => 'amp-debug',
+			'title'  => esc_html__( 'Debugging options', 'amp' ),
+		];
+
 		// Add admin bar item to switch between AMP and non-AMP if parent node is also an AMP link.
 		$is_single_version_available = (
 			amp_is_canonical()
@@ -459,12 +466,14 @@ class AMP_Validation_Manager {
 		 */
 		if ( $is_single_version_available ) {
 			$wp_admin_bar->add_node( $validate_item );
+			$wp_admin_bar->add_node( $debug_item );
 		} elseif ( ! is_amp_endpoint() ) {
 			$wp_admin_bar->add_node( $link_item );
 			$wp_admin_bar->add_node( $validate_item );
 		} else {
 			$wp_admin_bar->add_node( $validate_item );
 			$wp_admin_bar->add_node( $link_item );
+			$wp_admin_bar->add_node( $debug_item );
 		}
 
 		// Scrub the query var from the URL.
