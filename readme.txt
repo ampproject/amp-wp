@@ -8,11 +8,11 @@ License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires PHP: 5.4
 
-Official AMP plugin, supported and maintained by AMP. Formerly “Accelerated Mobile Pages”, now for mobile and desktop. Use for website and stories!
+Official AMP plugin, supported by the AMP team. Formerly “Accelerated Mobile Pages”, AMP enables great experiences across mobile, desktop & stories.
 
 == Description ==
 
-The [AMP Project](http://amp.dev) is an open-source initiative aiming to make the web better for all. AMP enables web experiences that are consistently fast, beautiful and high-performing across distribution platforms. AMP used to stand for “Accelerated Mobile Pages” but no longer as it is for improving web experiences regardless of the device type, whether mobile or desktop. The official AMP plugin for WordPress supports fully integrated AMP publishing for WordPress sites, with robust capabilities and granular publisher controls.
+The [AMP Project](http://amp.dev) is an open-source initiative aiming to make the web better for all. AMP enables web experiences that are consistently fast, beautiful and high-performing across distribution platforms. AMP formerly stood for “Accelerated Mobile Pages”, but now works completely across desktop and mobile. The official AMP plugin for WordPress supports fully integrated AMP publishing for WordPress sites, with robust capabilities and granular publisher controls.
 
 Features and capabilities provided by the plugin include:
 
