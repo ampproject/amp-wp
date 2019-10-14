@@ -2216,9 +2216,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		AMP_Theme_Support::enqueue_admin_bar_debugging();
 		$this->assertFalse( wp_script_is( $admin_bar_debugging_handle, 'enqueued' ) );
 
-		// Similarly, the tested method should not filter 'script_loader_tag', and this should return the same $initial_script it's passed.
-		$this->assertEquals( $initial_script, apply_filters( 'script_loader_tag', $initial_script, $wp_element_handle, '' ) );
-
 		// The admin bar is showing, but this is in /wp-admin, so this should still not be enqueued.
 		add_filter( 'show_admin_bar', '__return_true' );
 		set_current_screen( 'edit.php' );
