@@ -71,7 +71,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		remove_all_filters( 'theme_root' );
 		remove_all_filters( 'template' );
 		remove_all_filters( 'show_admin_bar' );
-		remove_all_filters( 'script_loader_tag' );
 	}
 
 	/**
@@ -2209,10 +2208,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 */
 	public function test_enqueue_admin_bar_debugging() {
 		$admin_bar_debugging_handle = 'amp-admin-bar-debugging';
-		$wp_element_handle          = 'wp-element';
 		$initial_script             = '<script type="text/javascript"></script>';
+		$wp_element_handle          = 'wp-element';
+
+		wp_register_script( $wp_element_handle, 'https://example.com/wp-element.js', [], '123', true );
 		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'subscriber' ] ) );
-		remove_all_filters( 'script_loader_tag' );
 
 		// The admin bar isn't showing, so this script should not be enqueued.
 		AMP_Theme_Support::enqueue_admin_bar_debugging();
@@ -2238,11 +2238,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertTrue( wp_script_is( $admin_bar_debugging_handle, 'enqueued' ) );
 
 		// This should also filter 'script_loader_tag', and add the dev mode attribute to the script.
-		$this->assertContains( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, apply_filters( 'script_loader_tag', $initial_script, $wp_element_handle, '' ) );
+		$this->assertContains( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, apply_filters( 'script_loader_tag', $initial_script, $admin_bar_debugging_handle, '' ) );
 
 		// The dev mode attribute should not be added to a script that isn't a dependency.
 		$handle_non_dependency = 'handle-not-a-dependency';
-		wp_register_script( $handle_non_dependency, 'https://exampl.com/script.js', [], '123', true );
+		wp_register_script( $handle_non_dependency, 'https://example.com/script.js', [], '123', true );
 		$this->assertNotContains( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, apply_filters( 'script_loader_tag', $initial_script, $handle_non_dependency, '' ) );
 	}
 }
