@@ -184,6 +184,7 @@ const ContextMenu = ( props ) => {
 
 	let blockActions = [];
 	const pageList = getBlockOrder();
+	const numPages = pageList.length;
 	const isPage = isPageBlock( firstBlockClientId );
 
 	// Don't allow any actions other than pasting with Page.
@@ -222,7 +223,6 @@ const ContextMenu = ( props ) => {
 		}
 
 		if ( ! isPage ) {
-			const numPages = pageList.length;
 			if ( numPages > 1 ) {
 				const currentPage = getCurrentPage();
 				const currentPagePosition = pageList.indexOf( currentPage );
@@ -268,14 +268,14 @@ const ContextMenu = ( props ) => {
 				className: 'right-click-remove',
 			},
 		);
-	} else if ( pageList.length > 1 ) {
+	} else if ( numPages > 1 ) {
 		blockActions.push(
 			{
 				name: __( 'Remove Page', 'amp' ),
 				blockAction: removeBlock,
 				params: [ firstBlockClientId ],
 				icon: 'trash',
-				className: 'right-click-remove',
+				className: 'right-click-remove-page',
 			},
 		);
 	}
