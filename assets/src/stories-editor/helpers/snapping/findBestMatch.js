@@ -2,7 +2,7 @@
  * Get the best match for a list of values each creating a match
  *
  * @param {Array.<Object>} targets List of values and matchers to find a best match between.
- * @return {number} The single best matching value or undefined.
+ * @return {Object} The single best matching object with value and distance (and any extra props from target object)
  */
 const findBestMatch = ( ...targets ) => targets
 	.map( ( { value, matcher, ...rest } ) => {
