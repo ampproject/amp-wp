@@ -36,7 +36,7 @@
     "@wordpress/babel-preset-default": "4.6.1",
     "@wordpress/blob": "2.5.1",
     "@wordpress/block-editor": "3.2.1",
-    "@wordpress/blocks": "6.7.1",
+    "@wordpress/blocks": "6.7.2",
     "@wordpress/browserslist-config": "2.6.0",
     "@wordpress/components": "8.3.1",
     "@wordpress/compose": "3.7.1",
