@@ -2,7 +2,10 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { ToggleControl } from '@wordpress/components';
+import { Component } from '@wordpress/element';
 
+/* @todo: import the query vars for each of these */
 const debugOptions = {
 	'disable-post': __( 'Disable post processing', 'amp' ),
 	'disable-cache': __( 'Disable response cache', 'amp' ),
@@ -18,19 +21,48 @@ const debugOptions = {
  *
  * @return {Function} The component.
  */
-const DebugOptions = () => {
-	const listItems = [];
-	for ( const [ debugId, title ] of Object.entries( debugOptions ) ) {
-		listItems.push( (
-			<li id={ `wp-admin-bar-amp-${ debugId }` } data-ampdevmode>
-				<div className="ab-item">
-					{ title }
-				</div>
-			</li>
-		) );
+class DebugOptions extends Component {
+	/**
+	 * Constructs the class.
+	 *
+	 * @param {*} args The constructor arguments.
+	 */
+	constructor( ...args ) {
+		super( ...args );
+
+		this.state = {};
+		for ( const [ debugId ] of Object.entries( debugOptions ) ) {
+			this.state[ debugId ] = false;
+		}
 	}
 
-	return listItems;
-};
+	/**
+	 * Renders the component.
+	 *
+	 * @return {Function} The rendered component.
+	 */
+	render() {
+		const listItems = [];
+		for ( const [ debugId, title ] of Object.entries( debugOptions ) ) {
+			listItems.push( (
+				<li id={ `wp-admin-bar-amp-${ debugId }` } data-ampdevmode>
+					<div className="ab-item">
+						<ToggleControl
+							label={ title }
+							checked={ this.state[ debugId ] }
+							onChange={ () => {
+								const newState = {};
+								newState[ debugId ] = ! this.state[ debugId ];
+								this.setState( newState );
+							} }
+						/>
+					</div>
+				</li>
+			) );
+		}
+
+		return listItems;
+	}
+}
 
 export default DebugOptions;
