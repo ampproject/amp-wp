@@ -62,7 +62,7 @@
     "@wordpress/scripts": "5.0.1",
     "@wordpress/server-side-render": "1.1.0",
     "@wordpress/url": "2.8.0",
-    "@wordpress/wordcount": "2.6.1",
+    "@wordpress/wordcount": "2.6.2",
     "accessible-autocomplete": "1.6.2",
     "autoprefixer": "9.6.5",
     "babel-eslint": "10.0.3",
