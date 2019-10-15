@@ -1674,10 +1674,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		foreach ( $modals as $modal ) {
-
-			if ( ! $modal instanceof DOMElement ) {
-				return;
-			}
+			/**
+			 * Modal element to transform.
+			 *
+			 * @var DOMElement $modal
+			 */
 
 			if ( ! $modal->hasAttribute( 'data-modal-target-string' ) ) {
 				return;
@@ -1689,9 +1690,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			$open_button_xpaths  = [];
 			$close_button_xpaths = [];
 			foreach ( $toggles as $toggle ) {
-				if ( ! $toggle instanceof DOMElement ) {
-					continue;
-				}
+				/**
+				 * Toggle element to transform.
+				 *
+				 * @var $toggle DOMElement
+				 */
 
 				$within_modal = false;
 				$parent       = $toggle->parentNode;
@@ -1737,9 +1740,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		foreach ( $toggles as $toggle ) {
-			if ( ! $toggle instanceof DOMElement ) {
-				return;
-			}
+			/**
+			 * Toggle element to transform.
+			 *
+			 * @var $toggle DOMElement
+			 */
 
 			$toggle_target = $toggle->getAttribute( 'data-toggle-target' );
 			$toggle_id     = $this->get_element_id( $toggle );
