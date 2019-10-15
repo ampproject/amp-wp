@@ -34,7 +34,7 @@
     "@babel/plugin-transform-react-jsx": "7.3.0",
     "@wordpress/api-fetch": "3.6.1",
     "@wordpress/babel-preset-default": "4.6.1",
-    "@wordpress/blob": "2.5.0",
+    "@wordpress/blob": "2.5.1",
     "@wordpress/block-editor": "3.2.1",
     "@wordpress/blocks": "6.7.1",
     "@wordpress/browserslist-config": "2.6.0",
