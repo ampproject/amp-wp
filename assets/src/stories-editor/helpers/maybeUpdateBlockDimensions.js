@@ -34,49 +34,16 @@ const maybeUpdateBlockDimensions = ( block ) => {
 		return;
 	}
 
+	let newHeight,
+		newWidth;
+
 	switch ( name ) {
 		case 'amp/amp-story-text':
 			const element = getBlockInnerTextElement( block );
 
 			if ( element && content.length ) {
-				const newHeight = element.scrollHeight > height ? element.scrollHeight : null;
-				const newWidth = element.scrollWidth > width ? element.scrollWidth : null;
-
-				if ( rotationAngle && ( newWidth || newHeight ) ) {
-					const deltaW = newWidth ? newWidth - width : 0;
-					const deltaH = newHeight ? newHeight - height : 0;
-					const { left: newLeft, top: newTop } = getPositionAfterResizing( {
-						direction: 'bottomRight',
-						angle: rotationAngle,
-						isText: true,
-						width,
-						height,
-						appliedWidth: width + deltaW,
-						appliedHeight: height + deltaH,
-						blockElementLeft: positionLeft,
-						blockElementTop: positionTop,
-						deltaW,
-						deltaH,
-					} );
-					const newAtts = {
-						positionLeft: Number( getPercentageFromPixels( 'x', newLeft ).toFixed( 2 ) ),
-						positionTop: Number( getPercentageFromPixels( 'y', newTop ).toFixed( 2 ) ),
-					};
-					if ( newHeight ) {
-						newAtts.height = newHeight;
-					}
-					if ( newWidth ) {
-						newAtts.width = newWidth;
-					}
-					updateBlockAttributes( clientId, newAtts );
-				}
-				/*if ( element.scrollHeight > height ) {
-					updateBlockAttributes( clientId, { height: element.scrollHeight } );
-				}
-
-				if ( element.scrollWidth > width ) {
-					updateBlockAttributes( clientId, { width: element.scrollWidth } );
-				}*/
+				newHeight = element.scrollHeight > height ? element.scrollHeight : null;
+				newWidth = element.scrollWidth > width ? element.scrollWidth : null;
 			}
 
 			break;
@@ -89,13 +56,8 @@ const maybeUpdateBlockDimensions = ( block ) => {
 			if ( metaBlockElement ) {
 				metaBlockElement.classList.toggle( 'is-measuring' );
 
-				if ( metaBlockElement.offsetHeight > height ) {
-					updateBlockAttributes( clientId, { height: metaBlockElement.offsetHeight } );
-				}
-
-				if ( metaBlockElement.offsetWidth > width ) {
-					updateBlockAttributes( clientId, { width: metaBlockElement.offsetWidth } );
-				}
+				newHeight = metaBlockElement.offsetHeight > height ? metaBlockElement.offsetHeight : null;
+				newWidth = metaBlockElement.offsetWidth > width ? metaBlockElement.offsetWidth : null;
 
 				metaBlockElement.classList.toggle( 'is-measuring' );
 			}
@@ -104,6 +66,35 @@ const maybeUpdateBlockDimensions = ( block ) => {
 
 		default:
 			break;
+	}
+
+	if ( rotationAngle && ( newWidth || newHeight ) ) {
+		const deltaW = newWidth ? newWidth - width : 0;
+		const deltaH = newHeight ? newHeight - height : 0;
+		const { left: newLeft, top: newTop } = getPositionAfterResizing( {
+			direction: 'bottomRight',
+			angle: rotationAngle,
+			isText: 'amp/amp-story-text' === name,
+			width,
+			height,
+			appliedWidth: width + deltaW,
+			appliedHeight: height + deltaH,
+			blockElementLeft: positionLeft,
+			blockElementTop: positionTop,
+			deltaW,
+			deltaH,
+		} );
+		const newAtts = {
+			positionLeft: Number( getPercentageFromPixels( 'x', newLeft ).toFixed( 2 ) ),
+			positionTop: Number( getPercentageFromPixels( 'y', newTop ).toFixed( 2 ) ),
+		};
+		if ( newHeight ) {
+			newAtts.height = newHeight;
+		}
+		if ( newWidth ) {
+			newAtts.width = newWidth;
+		}
+		updateBlockAttributes( clientId, newAtts );
 	}
 };
 
