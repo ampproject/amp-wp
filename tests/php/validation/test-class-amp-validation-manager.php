@@ -321,8 +321,8 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertInternalType( 'object', $node );
 		$this->assertStringEndsWith( '?amp', $node->href );
 		$this->assertInternalType( 'object', $admin_bar->get_node( 'amp-view' ) );
-		$this->assertNull( $admin_bar->get_node( 'amp-debug' ) );
 		$this->assertInternalType( 'object', $admin_bar->get_node( 'amp-validity' ) );
+		$this->assertInternalType( 'object', $admin_bar->get_node( 'amp-debug' ) );
 
 		// Admin bar item available in paired mode with validation errors.
 		$_GET[ AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR ] = 3;

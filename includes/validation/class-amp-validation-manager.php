@@ -470,6 +470,7 @@ class AMP_Validation_Manager {
 		} elseif ( ! is_amp_endpoint() ) {
 			$wp_admin_bar->add_node( $link_item );
 			$wp_admin_bar->add_node( $validate_item );
+			$wp_admin_bar->add_node( $debug_item );
 		} else {
 			$wp_admin_bar->add_node( $validate_item );
 			$wp_admin_bar->add_node( $link_item );

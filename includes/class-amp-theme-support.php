@@ -214,6 +214,7 @@ class AMP_Theme_Support {
 			require_once AMP__DIR__ . '/includes/amp-post-template-functions.php';
 
 			add_action( 'widgets_init', [ __CLASS__, 'register_widgets' ] );
+			add_action( 'wp_enqueue_scripts', [ __CLASS__, 'enqueue_admin_bar_debugging' ] );
 
 			/*
 			 * Note that wp action is use instead of template_redirect because some themes/plugins output
@@ -1110,7 +1111,6 @@ class AMP_Theme_Support {
 				wp_dequeue_script( 'comment-reply' ); // Handled largely by AMP_Comments_Sanitizer and *reply* methods in this class.
 			}
 		);
-		add_action( 'wp_enqueue_scripts', [ __CLASS__, 'enqueue_admin_bar_debugging' ] );
 
 		// @todo Add character conversion.
 	}
