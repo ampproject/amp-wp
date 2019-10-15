@@ -209,9 +209,9 @@ export const getPositionAfterResizing = ( attributes ) => {
 		appliedHeight,
 		blockElementLeft,
 		blockElementTop,
-		deltaW,
-		deltaH,
 	} = attributes;
+	const deltaW = appliedWidth - width;
+	const deltaH = appliedHeight - height;
 	const radianAngle = getRadianFromDeg( angle );
 
 	// Compare position between the initial and after resizing.

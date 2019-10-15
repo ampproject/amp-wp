@@ -31,8 +31,6 @@ let lastSeenX = 0,
 	blockElement = null,
 	blockElementTop,
 	blockElementLeft,
-	lastDeltaW,
-	lastDeltaH,
 	imageWrapper,
 	textBlockWrapper,
 	textElement;
@@ -140,8 +138,6 @@ class EnhancedResizableBox extends Component {
 					lastSeenY = event.clientY;
 					lastWidth = width;
 					lastHeight = height;
-					lastDeltaW = null;
-					lastDeltaH = null;
 					blockElement = element.closest( '.wp-block' ).parentNode;
 					blockElementTop = blockElement.style.top;
 					blockElementLeft = blockElement.style.left;
@@ -224,14 +220,6 @@ class EnhancedResizableBox extends Component {
 						}
 					}
 
-					// If it's not min width / height yet, assign lastDeltaH and lastDeltaW for position calculation.
-					if ( minHeight < appliedHeight ) {
-						lastDeltaH = deltaH;
-					}
-					if ( minWidth < appliedWidth ) {
-						lastDeltaW = deltaW;
-					}
-
 					// If limits were not reached yet, do the calculations for positioning.
 					if ( ! reachedMinLimit ) {
 						const updatedPos = getPositionAfterResizing( {
@@ -244,8 +232,6 @@ class EnhancedResizableBox extends Component {
 							appliedHeight,
 							blockElementLeft,
 							blockElementTop,
-							deltaW: lastDeltaW,
-							deltaH: lastDeltaH,
 						} );
 						blockElement.style.left = getPercentageFromPixels( 'x', updatedPos.left ) + '%';
 						blockElement.style.top = getPercentageFromPixels( 'y', updatedPos.top ) + '%';

@@ -81,8 +81,6 @@ const maybeUpdateBlockDimensions = ( block ) => {
 			appliedHeight: height + deltaH,
 			blockElementLeft: positionLeft,
 			blockElementTop: positionTop,
-			deltaW,
-			deltaH,
 		} );
 		const newAtts = {
 			positionLeft: Number( getPercentageFromPixels( 'x', newLeft ).toFixed( 2 ) ),
