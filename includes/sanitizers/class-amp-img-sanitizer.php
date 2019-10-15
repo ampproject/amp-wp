@@ -395,8 +395,11 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			$attributes['data-amp-lightbox'] = '';
 			$attributes['lightbox']          = '';
 
+			/*
+			 * Remove the <a> if the image is wrapped in one, as it can prevent the lightbox from working.
+			 * If this feature is added, this can probably be removed: https://github.com/ampproject/amphtml/issues/25021
+			 */
 			if ( $is_node_wrapped_in_anchor ) {
-				// Remove the <a> that the image is wrapped in, as it can prevent the lightbox from working.
 				$node->parentNode->parentNode->replaceChild( $node, $node->parentNode );
 			}
 		}
