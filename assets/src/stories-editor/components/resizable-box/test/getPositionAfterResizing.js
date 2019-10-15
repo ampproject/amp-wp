@@ -16,7 +16,7 @@ describe( 'getPositionAfterResizing', () => {
 			blockElementLeft: 5,
 			blockElementTop: 10,
 		};
-		expect( getPositionAfterResizing( { attributes } ) ).toStrictEqual( { left: 6.318621296669647, top: -69.58141571295789 } );
+		expect( getPositionAfterResizing( attributes ) ).toStrictEqual( { left: -19.49038105676658, top: 34.509618943233406 } );
 	} );
 
 	it( 'should return correct left and top position for a non-text block', () => {
@@ -31,6 +31,6 @@ describe( 'getPositionAfterResizing', () => {
 			blockElementLeft: 5,
 			blockElementTop: 10,
 		};
-		expect( getPositionAfterResizing( { attributes } ) ).toStrictEqual( { left: -5.490381056766566, top: -9.509618943233406 } );
+		expect( getPositionAfterResizing( attributes ) ).toStrictEqual( { left: 21.490381056766566, top: 45.490381056766594 } );
 	} );
 } );
