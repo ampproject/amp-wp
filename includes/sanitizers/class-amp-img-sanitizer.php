@@ -393,11 +393,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 
 		if ( isset( $parent_attributes['data-amp-lightbox'] ) && true === filter_var( $parent_attributes['data-amp-lightbox'], FILTER_VALIDATE_BOOLEAN ) ) {
 			$attributes['data-amp-lightbox'] = '';
-			$attributes['on']                = 'tap:' . self::AMP_IMAGE_LIGHTBOX_ID;
-			$attributes['role']              = 'button';
-			$attributes['tabindex']          = 0;
-
-			$this->maybe_add_amp_image_lightbox_node();
+			$attributes['lightbox']          = '';
 
 			if ( $is_node_wrapped_in_anchor ) {
 				// Remove the <a> that the image is wrapped in, as it can prevent the lightbox from working.

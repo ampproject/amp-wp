@@ -216,7 +216,7 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 
 			'image_with_custom_lightbox_attrs'         => [
 				'<figure data-amp-lightbox="true"><img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" /></figure>',
-				'<figure data-amp-lightbox="true"><amp-img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="" on="tap:amp-image-lightbox" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/100x100" width="100" height="100" role="button" tabindex="0"></noscript></amp-img></figure><amp-image-lightbox id="amp-image-lightbox" layout="nodisplay" data-close-button-aria-label="Close"></amp-image-lightbox>',
+				'<figure data-amp-lightbox="true"><amp-img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="" lightbox="" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/100x100" width="100" height="100" role="button" tabindex="0"></noscript></amp-img></figure>',
 			],
 
 			'wide_image'                               => [
@@ -336,17 +336,17 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 
 			'image_block_with_lightbox'                => [
 				'<figure class="wp-block-image" data-amp-lightbox="true"><img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" /></figure>',
-				'<figure class="wp-block-image" data-amp-lightbox="true"><amp-img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="" on="tap:amp-image-lightbox" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/100x100" width="100" height="100" role="button" tabindex="0"></noscript></amp-img></figure><amp-image-lightbox id="amp-image-lightbox" layout="nodisplay" data-close-button-aria-label="Close"></amp-image-lightbox>',
+				'<figure class="wp-block-image" data-amp-lightbox="true"><amp-img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="" lightbox="" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/100x100" width="100" height="100" role="button" tabindex="0"></noscript></amp-img></figure>',
 			],
 
 			'image_block_wrapped_in_a_with_lightbox'   => [
 				'<figure class="wp-block-image" data-amp-lightbox="true"><a href="https://example.com/image.jpg"><img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" /></a></figure>',
-				'<figure class="wp-block-image" data-amp-lightbox="true"><amp-img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="" on="tap:amp-image-lightbox" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/100x100" width="100" height="100" role="button" tabindex="0"></noscript></amp-img></figure><amp-image-lightbox id="amp-image-lightbox" layout="nodisplay" data-close-button-aria-label="Close"></amp-image-lightbox>',
+				'<figure class="wp-block-image" data-amp-lightbox="true"><amp-img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="" lightbox="" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/100x100" width="100" height="100" role="button" tabindex="0"></noscript></amp-img></figure>',
 			],
 
 			'aligned_image_block_with_lightbox'        => [
 				'<div data-amp-lightbox="true" class="wp-block-image"><figure class="alignleft is-resized"><img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" /></figure></div>',
-				'<div data-amp-lightbox="true" class="wp-block-image"><figure class="alignleft is-resized"><amp-img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="" on="tap:amp-image-lightbox" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/100x100" width="100" height="100" role="button" tabindex="0"></noscript></amp-img></figure></div><amp-image-lightbox id="amp-image-lightbox" layout="nodisplay" data-close-button-aria-label="Close"></amp-image-lightbox>',
+				'<div data-amp-lightbox="true" class="wp-block-image"><figure class="alignleft is-resized"><amp-img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="" lightbox="" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/100x100" width="100" height="100" role="button" tabindex="0"></noscript></amp-img></figure></div>',
 			],
 
 			'test_with_dev_mode'                       => [
