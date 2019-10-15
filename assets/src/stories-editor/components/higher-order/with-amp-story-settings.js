@@ -247,6 +247,11 @@ export default createHigherOrderComponent(
 			const animationDelay = parseInt( String( ampAnimationDelay ).replace( 'ms', '' ) );
 
 			const captionAttribute = isVideoBlock ? 'ampShowCaption' : 'ampShowImageCaption';
+			// A block has text content (in terms of resizable at least) if it's a "real" text block with content or
+			// any of the meta text blocks
+			const isMetaTextBlock = name.indexOf( 'amp/amp-story-post-' ) === 0;
+			const hasTextContent = ( isTextBlock && content.length > 0 ) || isMetaTextBlock;
+
 			return (
 				<>
 					{ ( ! isMovableBlock( name ) ) && ( <BlockEdit { ...props } /> ) }
@@ -255,7 +260,7 @@ export default createHigherOrderComponent(
 							width={ width }
 							height={ height }
 							angle={ rotationAngle }
-							hasTextContent={ Boolean( isTextBlock && content.length ) }
+							hasTextContent={ hasTextContent }
 							minHeight={ minHeight }
 							minWidth={ MIN_BLOCK_WIDTH }
 							onResizeStop={ ( value ) => {
