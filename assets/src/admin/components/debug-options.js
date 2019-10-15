@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { ToggleControl } from '@wordpress/components';
+import { Button, ToggleControl } from '@wordpress/components';
 import { Component } from '@wordpress/element';
 
 /* @todo: import the query vars for each of these */
@@ -31,8 +31,8 @@ class DebugOptions extends Component {
 		super( ...args );
 
 		this.state = {};
-		for ( const [ debugId ] of Object.entries( debugOptions ) ) {
-			this.state[ debugId ] = false;
+		for ( const [ debugOptionId ] of Object.entries( debugOptions ) ) {
+			this.state[ debugOptionId ] = false;
 		}
 	}
 
@@ -43,16 +43,16 @@ class DebugOptions extends Component {
 	 */
 	render() {
 		const listItems = [];
-		for ( const [ debugId, title ] of Object.entries( debugOptions ) ) {
+		for ( const [ debugOptionId, title ] of Object.entries( debugOptions ) ) {
 			listItems.push( (
-				<li id={ `wp-admin-bar-amp-${ debugId }` } data-ampdevmode>
+				<li id={ `wp-admin-bar-amp-${ debugOptionId }` } data-ampdevmode>
 					<div className="ab-item">
 						<ToggleControl
 							label={ title }
-							checked={ this.state[ debugId ] }
+							checked={ this.state[ debugOptionId ] }
 							onChange={ () => {
 								const newState = {};
-								newState[ debugId ] = ! this.state[ debugId ];
+								newState[ debugOptionId ] = ! this.state[ debugOptionId ];
 								this.setState( newState );
 							} }
 						/>
@@ -61,7 +61,18 @@ class DebugOptions extends Component {
 			) );
 		}
 
-		return listItems;
+		return (
+			<>
+				{ listItems }
+				<li id="wp-admin-bar-amp-reload" data-ampdevmode>
+					<div className="ab-item">
+						<Button>
+							{ __( 'Reload and apply', 'amp' ) }
+						</Button>
+					</div>
+				</li>
+			</>
+		);
 	}
 }
 

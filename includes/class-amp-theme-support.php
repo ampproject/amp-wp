@@ -2599,6 +2599,22 @@ class AMP_Theme_Support {
 			true
 		);
 
+		wp_localize_script(
+			$slug,
+			'ampWpAdminDebugging',
+			[
+				'queryVars' => [
+					self::DISABLE_POST_PROCESSING_QUERY_VAR => __( '', 'amp' ),
+				]
+				'allowedVideoMimeTypes'          => $allowed_video_mime_types,
+				'allowedPageAttachmentPostTypes' => $post_types,
+				'storySettings'                  => [
+				'autoAdvanceAfterOptions' => $auto_advancement_options,
+				],
+			]
+		);
+
+
 		// Add the dev mode attribute to this script and its dependencies, so they don't cause validation errors.
 		add_filter(
 			'script_loader_tag',
