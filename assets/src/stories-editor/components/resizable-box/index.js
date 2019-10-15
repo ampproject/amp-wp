@@ -17,14 +17,11 @@ import withSnapTargets from '../higher-order/with-snap-targets';
 import './edit.css';
 import { getPercentageFromPixels, getRelativeElementPosition } from '../../helpers';
 import { getBestSnapLines } from '../../helpers/snapping';
-import { TEXT_BLOCK_PADDING, BLOCK_RESIZING_SNAP_GAP } from '../../constants';
+import { BLOCK_RESIZING_SNAP_GAP } from '../../constants';
 import {
-	getBlockPositioning,
-	getResizedBlockPosition,
-	getUpdatedBlockPosition,
 	getResizedWidthAndHeight,
-	getRadianFromDeg,
 	getBlockTextElement,
+	getPositionAfterResizing,
 } from './helpers';
 
 let lastSeenX = 0,
@@ -237,28 +234,19 @@ class EnhancedResizableBox extends Component {
 
 					// If limits were not reached yet, do the calculations for positioning.
 					if ( ! reachedMinLimit ) {
-						const radianAngle = getRadianFromDeg( angle );
-
-						// Compare position between the initial and after resizing.
-						let initialPosition, resizedPosition;
-
-						// If it's a text block, we shouldn't consider the added padding for measuring.
-						if ( isText ) {
-							initialPosition = getBlockPositioning( width - ( TEXT_BLOCK_PADDING * 2 ), height - ( TEXT_BLOCK_PADDING * 2 ), radianAngle, direction );
-							resizedPosition = getBlockPositioning( appliedWidth - ( TEXT_BLOCK_PADDING * 2 ), appliedHeight - ( TEXT_BLOCK_PADDING * 2 ), radianAngle, direction );
-						} else {
-							initialPosition = getBlockPositioning( width, height, radianAngle, direction );
-							resizedPosition = getBlockPositioning( appliedWidth, appliedHeight, radianAngle, direction );
-						}
-
-						const diff = {
-							left: resizedPosition.left - initialPosition.left,
-							top: resizedPosition.top - initialPosition.top,
-						};
-
-						const originalPos = getResizedBlockPosition( direction, blockElementLeft, blockElementTop, lastDeltaW, lastDeltaH );
-						const updatedPos = getUpdatedBlockPosition( direction, originalPos, diff );
-
+						const updatedPos = getPositionAfterResizing( {
+							direction,
+							angle,
+							isText,
+							width,
+							height,
+							appliedWidth,
+							appliedHeight,
+							blockElementLeft,
+							blockElementTop,
+							deltaW: lastDeltaW,
+							deltaH: lastDeltaH,
+						} );
 						blockElement.style.left = getPercentageFromPixels( 'x', updatedPos.left ) + '%';
 						blockElement.style.top = getPercentageFromPixels( 'y', updatedPos.top ) + '%';
 					}

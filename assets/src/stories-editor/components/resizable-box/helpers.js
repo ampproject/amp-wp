@@ -5,6 +5,7 @@ import {
 	BLOCKS_WITH_TEXT_SETTINGS,
 	REVERSE_WIDTH_CALCULATIONS,
 	REVERSE_HEIGHT_CALCULATIONS,
+	TEXT_BLOCK_PADDING,
 } from '../../constants';
 import { getPixelsFromPercentage } from '../../helpers';
 
@@ -189,4 +190,47 @@ export const getBlockPositioning = ( width, height, radian, direction ) => {
 		left: rotatedX - x,
 		top: rotatedY - y,
 	};
+};
+
+/**
+ * Get block's adjusted left and top position after it has been resized.
+ *
+ * @param {Object}   attributes Attributes.
+ * @return {Object}  Top and left positions adjusted based on the rotation angle.
+ */
+export const getPositionAfterResizing = ( attributes ) => {
+	const {
+		direction,
+		angle,
+		isText,
+		width,
+		height,
+		appliedWidth,
+		appliedHeight,
+		blockElementLeft,
+		blockElementTop,
+		deltaW,
+		deltaH,
+	} = attributes;
+	const radianAngle = getRadianFromDeg( angle );
+
+	// Compare position between the initial and after resizing.
+	let initialPosition, resizedPosition;
+
+	// If it's a text block, we shouldn't consider the added padding for measuring.
+	if ( isText ) {
+		initialPosition = getBlockPositioning( width - ( TEXT_BLOCK_PADDING * 2 ), height - ( TEXT_BLOCK_PADDING * 2 ), radianAngle, direction );
+		resizedPosition = getBlockPositioning( appliedWidth - ( TEXT_BLOCK_PADDING * 2 ), appliedHeight - ( TEXT_BLOCK_PADDING * 2 ), radianAngle, direction );
+	} else {
+		initialPosition = getBlockPositioning( width, height, radianAngle, direction );
+		resizedPosition = getBlockPositioning( appliedWidth, appliedHeight, radianAngle, direction );
+	}
+
+	const diff = {
+		left: resizedPosition.left - initialPosition.left,
+		top: resizedPosition.top - initialPosition.top,
+	};
+
+	const originalPos = getResizedBlockPosition( direction, blockElementLeft, blockElementTop, deltaW, deltaH );
+	return getUpdatedBlockPosition( direction, originalPos, diff );
 };

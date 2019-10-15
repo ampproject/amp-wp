@@ -7,6 +7,10 @@ import { dispatch } from '@wordpress/data';
  * Internal dependencies
  */
 import getBlockInnerTextElement from './getBlockInnerTextElement';
+import {
+	getPositionAfterResizing,
+} from './../components/resizable-box/helpers';
+import { getPercentageFromPixels } from './';
 
 const { updateBlockAttributes } = dispatch( 'core/block-editor' );
 
@@ -24,7 +28,7 @@ const { updateBlockAttributes } = dispatch( 'core/block-editor' );
  */
 const maybeUpdateBlockDimensions = ( block ) => {
 	const { name, clientId, attributes } = block;
-	const { width, height, ampFitText, content } = attributes;
+	const { width, height, ampFitText, content, rotationAngle, positionLeft, positionTop } = attributes;
 
 	if ( ampFitText ) {
 		return;
@@ -35,13 +39,44 @@ const maybeUpdateBlockDimensions = ( block ) => {
 			const element = getBlockInnerTextElement( block );
 
 			if ( element && content.length ) {
-				if ( element.scrollHeight > height ) {
+				const newHeight = element.scrollHeight > height ? element.scrollHeight : null;
+				const newWidth = element.scrollWidth > width ? element.scrollWidth : null;
+
+				if ( rotationAngle && ( newWidth || newHeight ) ) {
+					const deltaW = newWidth ? newWidth - width : 0;
+					const deltaH = newHeight ? newHeight - height : 0;
+					const { left: newLeft, top: newTop } = getPositionAfterResizing( {
+						direction: 'bottomRight',
+						angle: rotationAngle,
+						isText: true,
+						width,
+						height,
+						appliedWidth: width + deltaW,
+						appliedHeight: height + deltaH,
+						blockElementLeft: positionLeft,
+						blockElementTop: positionTop,
+						deltaW,
+						deltaH,
+					} );
+					const newAtts = {
+						positionLeft: Number( getPercentageFromPixels( 'x', newLeft ).toFixed( 2 ) ),
+						positionTop: Number( getPercentageFromPixels( 'y', newTop ).toFixed( 2 ) ),
+					};
+					if ( newHeight ) {
+						newAtts.height = newHeight;
+					}
+					if ( newWidth ) {
+						newAtts.width = newWidth;
+					}
+					updateBlockAttributes( clientId, newAtts );
+				}
+				/*if ( element.scrollHeight > height ) {
 					updateBlockAttributes( clientId, { height: element.scrollHeight } );
 				}
 
 				if ( element.scrollWidth > width ) {
 					updateBlockAttributes( clientId, { width: element.scrollWidth } );
-				}
+				}*/
 			}
 
 			break;
