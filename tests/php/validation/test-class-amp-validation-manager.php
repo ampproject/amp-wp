@@ -1056,11 +1056,11 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 			implode(
 				'',
 				[
-					'<!--amp-source-stack {"type":"plugin","name":"amp","function":"{closure}","hook":"outer_action"}-->',
-					'<!--amp-source-stack {"type":"plugin","name":"amp","function":"{closure}","hook":"inner_action"}-->',
+					'<!--amp-source-stack {"type":"plugin","name":"amp","function":"{closure}","hook":"outer_action","priority":10}-->',
+					'<!--amp-source-stack {"type":"plugin","name":"amp","function":"{closure}","hook":"inner_action","priority":10}-->',
 					'<b>Hello</b>',
-					'<!--/amp-source-stack {"type":"plugin","name":"amp","function":"{closure}","hook":"inner_action"}-->',
-					'<!--/amp-source-stack {"type":"plugin","name":"amp","function":"{closure}","hook":"outer_action"}-->',
+					'<!--/amp-source-stack {"type":"plugin","name":"amp","function":"{closure}","hook":"inner_action","priority":10}-->',
+					'<!--/amp-source-stack {"type":"plugin","name":"amp","function":"{closure}","hook":"outer_action","priority":10}-->',
 				]
 			),
 			$output

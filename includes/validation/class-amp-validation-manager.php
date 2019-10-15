@@ -1255,9 +1255,10 @@ class AMP_Validation_Manager {
 					continue;
 				}
 
-				$source['hook']    = $hook;
-				$original_function = $callback['function'];
-				$wrapped_callback  = self::wrapped_callback(
+				$source['hook']     = $hook;
+				$source['priority'] = $priority;
+				$original_function  = $callback['function'];
+				$wrapped_callback   = self::wrapped_callback(
 					array_merge(
 						$callback,
 						compact( 'priority', 'source' )
