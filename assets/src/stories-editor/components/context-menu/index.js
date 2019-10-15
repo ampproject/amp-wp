@@ -155,7 +155,9 @@ const ContextMenu = ( props ) => {
 
 		const rootClientId = getBlockRootClientId( clientId );
 		const clonedBlock = cloneBlock( block );
-		insertBlock( clonedBlock, null, rootClientId );
+		const selectBlock = ( clonedBlock.name === 'amp/amp-story-page' ) ? '' : rootClientId;
+
+		insertBlock( clonedBlock, null, selectBlock );
 	};
 
 	useEffect( () => {
@@ -181,9 +183,11 @@ const ContextMenu = ( props ) => {
 	};
 
 	let blockActions = [];
+	const pageList = getBlockOrder();
+	const isPage = isPageBlock( firstBlockClientId );
 
 	// Don't allow any actions other than pasting with Page.
-	if ( ! isPageBlock( firstBlockClientId ) ) {
+	if ( ! isPage ) {
 		blockActions = [
 			{
 				name: __( 'Copy Block', 'amp' ),
@@ -201,22 +205,23 @@ const ContextMenu = ( props ) => {
 			},
 
 		];
+	}
+	if ( block ) {
+		// Disable Duplicate Block option for cta and attachment blocks.
+		if ( ! DISABLE_DUPLICATE_BLOCKS.includes( block.name ) ) {
+			const dupTitle = ( ! isPage ) ? __( 'Duplicate Block', 'amp' ) : __( 'Duplicate Page', 'amp' );
+			blockActions.push(
+				{
+					name: dupTitle,
+					blockAction: duplicateBlock,
+					params: [ firstBlockClientId ],
+					icon: 'admin-page',
+					className: 'right-click-duplicate',
+				},
+			);
+		}
 
-		if ( block ) {
-			// Disable Duplicate Block option for cta and attachment blocks.
-			if ( ! DISABLE_DUPLICATE_BLOCKS.includes( block.name ) ) {
-				blockActions.push(
-					{
-						name: __( 'Duplicate Block', 'amp' ),
-						blockAction: duplicateBlock,
-						params: [ firstBlockClientId ],
-						icon: 'admin-page',
-						className: 'right-click-duplicate',
-					},
-				);
-			}
-
-			const pageList = getBlockOrder();
+		if ( ! isPage ) {
 			const numPages = pageList.length;
 			if ( numPages > 1 ) {
 				const currentPage = getCurrentPage();
@@ -251,7 +256,9 @@ const ContextMenu = ( props ) => {
 				}
 			}
 		}
+	}
 
+	if ( ! isPage ) {
 		blockActions.push(
 			{
 				name: __( 'Remove Block', 'amp' ),
@@ -261,11 +268,16 @@ const ContextMenu = ( props ) => {
 				className: 'right-click-remove',
 			},
 		);
-	}
-
-	// If it's Page block and clipboard is empty, don't display anything.
-	if ( ! getCopiedMarkup().length && isPageBlock( firstBlockClientId ) ) {
-		return '';
+	} else if ( pageList.length > 1 ) {
+		blockActions.push(
+			{
+				name: __( 'Remove Page', 'amp' ),
+				blockAction: removeBlock,
+				params: [ firstBlockClientId ],
+				icon: 'trash',
+				className: 'right-click-remove',
+			},
+		);
 	}
 
 	if ( getCopiedMarkup().length ) {
