@@ -27,6 +27,7 @@ const RemovePageSetting = ( { clientId } ) => {
 		removeBlock( clientId );
 	};
 
+	// Shouldn't allow users to remove the first and only page.
 	if ( pages.length < 2 ) {
 		return null;
 	}
