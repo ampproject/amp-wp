@@ -1239,6 +1239,11 @@ class AMP_Validation_Manager {
 					continue;
 				}
 
+				/**
+				 * Reflection.
+				 *
+				 * @var ReflectionFunctionAbstract $reflection
+				 */
 				$reflection = $source['reflection'];
 				unset( $source['reflection'] ); // Omit from stored source.
 
@@ -1446,22 +1451,31 @@ class AMP_Validation_Manager {
 
 		if ( $file ) {
 			$file         = wp_normalize_path( $file );
-			$slug_pattern = '([^/]+)';
-			if ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( WP_PLUGIN_DIR ) ), ':' ) . $slug_pattern . ':s', $file, $matches ) ) {
+			$slug_pattern = '(?<slug>[^/]+)';
+			if ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( WP_PLUGIN_DIR ) ), ':' ) . $slug_pattern . '/(?P<file>.*$):s', $file, $matches ) ) {
 				$source['type'] = 'plugin';
-				$source['name'] = $matches[1];
-			} elseif ( preg_match( ':' . preg_quote( trailingslashit( self::$template_directory ), ':' ) . $slug_pattern . ':s', $file ) ) {
+				$source['name'] = $matches['slug'];
+				$source['file'] = $matches['file'];
+			} elseif ( preg_match( ':' . preg_quote( trailingslashit( self::$template_directory ), ':' ) . '(?P<file>.*$):s', $file, $matches ) ) {
 				$source['type'] = 'theme';
 				$source['name'] = self::$template_slug;
-			} elseif ( preg_match( ':' . preg_quote( trailingslashit( self::$stylesheet_directory ), ':' ) . $slug_pattern . ':s', $file ) ) {
+				$source['file'] = $matches['file'];
+			} elseif ( preg_match( ':' . preg_quote( trailingslashit( self::$stylesheet_directory ), ':' ) . '/(?P<file>.*$):s', $file, $matches ) ) {
 				$source['type'] = 'theme';
 				$source['name'] = self::$stylesheet_slug;
-			} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( WPMU_PLUGIN_DIR ) ), ':' ) . $slug_pattern . ':s', $file, $matches ) ) {
+				$source['file'] = $matches['file'];
+			} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( WPMU_PLUGIN_DIR ) ), ':' ) . $slug_pattern . '/(?P<file>.*$):s', $file, $matches ) ) {
 				$source['type'] = 'mu-plugin';
-				$source['name'] = $matches[1];
-			} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( ABSPATH ) ), ':' ) . '(wp-admin|wp-includes)/:s', $file, $matches ) ) {
+				$source['name'] = $matches['slug'];
+				$source['file'] = $matches['file'];
+			} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( ABSPATH ) ), ':' ) . '(?P<slug>wp-admin|wp-includes)/(?P<file>.*$):s', $file, $matches ) ) {
 				$source['type'] = 'core';
-				$source['name'] = $matches[1];
+				$source['name'] = $matches['slug'];
+				$source['file'] = $matches['file'];
+			}
+
+			if ( isset( $source['file'] ) ) {
+				$source['line'] = $reflection->getStartLine();
 			}
 		}
 
