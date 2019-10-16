@@ -256,7 +256,7 @@ const ContextMenu = ( props ) => {
 		}
 	}
 
-	// If not page the show Remove block text other wise if multiple pages, show option to remove page.
+	// If not page, show "Remove block" option, otherwise if multiple pages, show "Remove page" option.
 	if ( ! isPage ) {
 		blockActions.push(
 			{
