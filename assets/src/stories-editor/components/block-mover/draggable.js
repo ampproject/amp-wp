@@ -127,8 +127,8 @@ class Draggable extends Component {
 			setSnapLines,
 			clearSnapLines,
 			parentBlockElement,
-			horizontalSnaps,
-			verticalSnaps,
+			horizontalTargets,
+			verticalTargets,
 			setHighlightByOffset,
 		} = this.props;
 
@@ -154,11 +154,11 @@ class Draggable extends Component {
 		const snappingEnabled = ! event.getModifierState( 'Alt' );
 
 		if ( snappingEnabled ) {
-			const horizontalSnapsForPosition = horizontalSnaps( actualTop, actualBottom );
-			const verticalSnapsForPosition = verticalSnaps( actualLeft, actualRight );
+			const [ horizontalEdgeSnaps, horizontalCenterSnaps ] = horizontalTargets( actualTop, actualBottom );
+			const [ verticalEdgeSnaps, verticalCenterSnaps ] = verticalTargets( actualLeft, actualRight );
 			setSnapLines( [
-				...getBestSnapLines( horizontalSnapsForPosition, actualLeft, actualRight, BLOCK_DRAGGING_SNAP_GAP ),
-				...getBestSnapLines( verticalSnapsForPosition, actualTop, actualBottom, BLOCK_DRAGGING_SNAP_GAP ),
+				...getBestSnapLines( horizontalEdgeSnaps, horizontalCenterSnaps, actualLeft, actualRight, BLOCK_DRAGGING_SNAP_GAP ),
+				...getBestSnapLines( verticalEdgeSnaps, verticalCenterSnaps, actualTop, actualBottom, BLOCK_DRAGGING_SNAP_GAP ),
 			] );
 		} else {
 			clearSnapLines();
@@ -355,8 +355,8 @@ Draggable.propTypes = {
 	dropElementByOffset: PropTypes.func.isRequired,
 	setTimeout: PropTypes.func.isRequired,
 	children: PropTypes.func.isRequired,
-	horizontalSnaps: PropTypes.func.isRequired,
-	verticalSnaps: PropTypes.func.isRequired,
+	horizontalTargets: PropTypes.func.isRequired,
+	verticalTargets: PropTypes.func.isRequired,
 	setSnapLines: PropTypes.func.isRequired,
 	clearSnapLines: PropTypes.func.isRequired,
 	parentBlockElement: PropTypes.object,

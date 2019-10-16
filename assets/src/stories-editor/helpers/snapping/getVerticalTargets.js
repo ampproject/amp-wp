@@ -10,11 +10,11 @@ const getHorizontalLine = (
 	end = STORY_PAGE_INNER_WIDTH,
 ) => [ [ start, offsetY ], [ end, offsetY ] ];
 
-const getVerticalSnaps = getSnapCalculatorByDimension(
+const getVerticalTargets = getSnapCalculatorByDimension(
 	getHorizontalLine,
 	STORY_PAGE_INNER_HEIGHT,
 	[ 'top', 'bottom' ],
 	[ 'left', 'right' ],
 );
 
-export default getVerticalSnaps;
+export default getVerticalTargets;

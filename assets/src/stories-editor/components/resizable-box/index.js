@@ -76,8 +76,8 @@ class EnhancedResizableBox extends Component {
 		const {
 			clientId,
 			snapGap,
-			horizontalSnaps,
-			verticalSnaps,
+			horizontalTargets,
+			verticalTargets,
 			setSnapLines,
 			clearSnapLines,
 			parentBlockElement,
@@ -278,11 +278,11 @@ class EnhancedResizableBox extends Component {
 					const snappingEnabled = ! event.getModifierState( 'Alt' );
 
 					if ( snappingEnabled ) {
-						const horizontalSnapsForPosition = horizontalSnaps( actualTop, actualBottom );
-						const verticalSnapsForPosition = verticalSnaps( actualLeft, actualRight );
+						const [ horizontalEdgeSnaps, horizontalCenterSnaps ] = horizontalTargets( actualTop, actualBottom );
+						const [ verticalEdgeSnaps, verticalCenterSnaps ] = verticalTargets( actualLeft, actualRight );
 						setSnapLines( [
-							...getBestSnapLines( horizontalSnapsForPosition, actualLeft, actualRight, BLOCK_RESIZING_SNAP_GAP ),
-							...getBestSnapLines( verticalSnapsForPosition, actualTop, actualBottom, BLOCK_RESIZING_SNAP_GAP ),
+							...getBestSnapLines( horizontalEdgeSnaps, horizontalCenterSnaps, actualLeft, actualRight, BLOCK_RESIZING_SNAP_GAP ),
+							...getBestSnapLines( verticalEdgeSnaps, verticalCenterSnaps, actualTop, actualBottom, BLOCK_RESIZING_SNAP_GAP ),
 						] );
 					} else {
 						clearSnapLines();
@@ -329,8 +329,8 @@ EnhancedResizableBox.propTypes = {
 	children: PropTypes.node.isRequired,
 	width: PropTypes.number,
 	height: PropTypes.number,
-	horizontalSnaps: PropTypes.func.isRequired,
-	verticalSnaps: PropTypes.func.isRequired,
+	horizontalTargets: PropTypes.func.isRequired,
+	verticalTargets: PropTypes.func.isRequired,
 	snapGap: PropTypes.number.isRequired,
 	setSnapLines: PropTypes.func.isRequired,
 	clearSnapLines: PropTypes.func.isRequired,
