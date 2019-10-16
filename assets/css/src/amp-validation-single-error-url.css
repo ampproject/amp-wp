@@ -63,19 +63,9 @@ table.striped > tbody > tr.even {
 	cursor: pointer;
 }
 
-.details ul.detailed {
-	padding: 0 32px;
-	margin-top: 0;
-}
-
-.details div.detailed {
+.details dl.detailed {
 	padding-left: 30px;
 	margin-top: 10px;
-	font-family: Consolas, Monaco, monospace;
-}
-
-.details .detailed details {
-	padding-bottom: 16px;
 }
 
 .details .detailed summary code {

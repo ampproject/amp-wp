@@ -1753,11 +1753,11 @@ class AMP_Validation_Error_Taxonomy {
 						'<button type="button" aria-label="%s" class="single-url-detail-toggle">',
 						esc_attr__( 'Toggle error details', 'amp' )
 					);
-					$content .= sprintf( '<code>%s</code>', esc_html( $validation_error['code'] ) );
+					$content .= self::get_error_title_from_code( $validation_error['code'] );
 				} else {
 					$content .= '<p>';
 					$content .= sprintf(
-						'<a href="%s" class="error-code">%s</a>',
+						'<a href="%s">%s</a>',
 						admin_url(
 							add_query_arg(
 								[
@@ -1767,7 +1767,7 @@ class AMP_Validation_Error_Taxonomy {
 								'edit.php'
 							)
 						),
-						esc_html( $validation_error['code'] )
+						esc_html( self::get_error_title_from_code( $validation_error['code'] ) )
 					);
 				}
 
@@ -2006,70 +2006,121 @@ class AMP_Validation_Error_Taxonomy {
 
 		ob_start();
 		?>
-		<ul class="detailed">
-			<?php if ( self::INVALID_ELEMENT_CODE === $validation_error['code'] && isset( $validation_error['node_attributes'] ) ) : ?>
-				<li>
-					<details open>
-						<summary><code><?php esc_html_e( 'Invalid markup:', 'amp' ); ?></code></summary>
-						<div class="detailed">
-							<mark>
+
+		<dl class="detailed">
+			<?php if ( isset( $validation_error['type'], $validation_error['code'] ) ) : ?>
+				<dt><?php esc_html_e( 'Information', 'amp' ); ?></dt>
+				<dd class="detailed">
+					<p>
+						<?php if ( self::JS_ERROR_TYPE === $validation_error['type'] ) : ?>
+								<?php
+								echo wp_kses_post(
+									__( 'Arbitrary JavaScript is not allowed in AMP. You cannot use JS <code>&lt;script&gt;</code> tags unless they are for loading <a href="https://amp.dev/documentation/components/">AMP components</a> (which the AMP plugin will add for you automatically). In order for a page to be served as AMP, the invalid JS code must be removed from the page, which is what happens when you <strong>accept</strong> sanitization. Learn more about <a href="https://amp.dev/about/how-amp-works/">how AMP works</a>. As an alternative to using custom JS, please consider using a pre-built AMP functionality, including <a href="https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events/">actions and events</a> (as opposed to JS event handler attributes like <code>onclick</code>) and the <a href="https://amp.dev/documentation/components/amp-bind/">amp-bind</a> component; you may also add custom JS if encapsulated in the <a href="https://amp.dev/documentation/components/amp-script/">amp-script</a>.', 'amp' )
+								)
+								?>
+						<?php elseif ( self::CSS_ERROR_TYPE === $validation_error['type'] ) : ?>
 							<?php
-							echo '&lt;' . esc_html( $validation_error['node_name'] );
-							if ( count( $validation_error['node_attributes'] ) > 0 ) {
-								echo ' &hellip; ';
-							}
-							echo '&gt;';
+							echo wp_kses_post(
+								__( 'AMP allows you to <a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/">style your pages using CSS</a> in much the same way as regular HTML pages, however there are some <a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/">restrictions</a>. Nevertheless, the AMP plugin automatically inlines external stylesheets, transforms <code>!important</code> qualifiers, and uses tree shaking to remove the majority of CSS rules that do not apply to the current page. Nevertheless, AMP does have a 50KB limit and tree shaking cannot always reduce the amount of CSS under this limit; when this happens an excessive CSS error will result.', 'amp' )
+							)
 							?>
-							</mark>
-						<div>
-					</details>
-				</li>
-			<?php elseif ( self::INVALID_ATTRIBUTE_CODE === $validation_error['code'] && isset( $validation_error['element_attributes'] ) ) : ?>
-				<li>
-					<details open>
-						<summary><code><?php esc_html_e( 'Invalid markup:', 'amp' ); ?></code></summary>
-							<div class="detailed">
+						<?php else : ?>
 							<?php
-							echo '&lt;' . esc_html( $validation_error['parent_name'] );
-							if ( count( $validation_error['element_attributes'] ) > 1 ) {
-								echo ' &hellip;';
-							}
-							echo '<mark>';
-							printf( ' %s="%s"', esc_html( $validation_error['node_name'] ), esc_html( $validation_error['element_attributes'][ $validation_error['node_name'] ] ) );
-							echo '</mark>';
-							if ( count( $validation_error['element_attributes'] ) > 1 ) {
-								echo ' &hellip;';
-							}
-							echo '&gt;';
+							echo wp_kses_post(
+								__( 'AMP has specific set of allowed elements and attributes that are allowed in valid AMP pages. Learn about the <a href="https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/">AMP HTML specification</a>. If an element or attribute is not allowed in AMP, it must be removed for the page to <a href="https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/how_amp_pages_are_cached/">cached and be eligible for prerendering</a>.', 'amp' )
+							)
 							?>
-					</details>
-				</li>
+						<?php endif; ?>
+					</p>
+					<p>
+						<?php echo wp_kses_post( __( 'The invalid code is removed when you <strong>accept</strong> sanitization for this error. Note that you need to check what impact the removal of the code has on the page to see if sanitization is truly acceptable. If you <strong>reject</strong> sanitization of this error, then the page will not be served as AMP.', 'amp' ) ); ?>
+					</p>
+				</dd>
 			<?php endif; ?>
+
+			<?php if ( self::INVALID_ELEMENT_CODE === $validation_error['code'] && isset( $validation_error['node_attributes'] ) ) : ?>
+				<dt><?php esc_html_e( 'Invalid markup', 'amp' ); ?></dt>
+				<dd class="detailed">
+					<code>
+						<mark>
+						<?php
+						echo '&lt;' . esc_html( $validation_error['node_name'] );
+						if ( count( $validation_error['node_attributes'] ) > 0 ) {
+							echo ' &hellip; ';
+						}
+						echo '&gt;';
+						?>
+						</mark>
+					</code>
+				</dd>
+			<?php elseif ( self::INVALID_ATTRIBUTE_CODE === $validation_error['code'] && isset( $validation_error['element_attributes'] ) ) : ?>
+				<dt><?php esc_html_e( 'Invalid markup', 'amp' ); ?></dt>
+				<dd class="detailed">
+					<code>
+						<?php
+						echo '&lt;' . esc_html( $validation_error['parent_name'] );
+						if ( count( $validation_error['element_attributes'] ) > 1 ) {
+							echo ' &hellip;';
+						}
+						echo '<mark>';
+						printf( ' %s="%s"', esc_html( $validation_error['node_name'] ), esc_html( $validation_error['element_attributes'][ $validation_error['node_name'] ] ) );
+						echo '</mark>';
+						if ( count( $validation_error['element_attributes'] ) > 1 ) {
+							echo ' &hellip;';
+						}
+						echo '&gt;';
+						?>
+					</code>
+				</dd>
+			<?php endif; ?>
+
 			<?php foreach ( $validation_error as $key => $value ) : ?>
-				<li>
-					<details <?php echo esc_attr( 'sources' === $key ? '' : 'open' ); ?>>
-						<summary><code><?php echo esc_html( $key ); ?></code></summary>
-						<div class="detailed">
-							<?php if ( is_string( $value ) ) : ?>
-								<?php echo esc_html( $value ); ?>
-							<?php elseif ( 'sources' === $key ) : ?>
-								<pre><?php echo esc_html( wp_json_encode( $value, 128 /* JSON_PRETTY_PRINT */ | 64 /* JSON_UNESCAPED_SLASHES */ ) ); ?></pre>
-							<?php elseif ( is_array( $value ) ) : ?>
-								<?php foreach ( $value as $value_key => $attr ) : ?>
-									<?php
-									printf( '<strong>%s</strong>', esc_html( $value_key ) );
-									if ( ! empty( $attr ) ) :
-										printf( ': %s', esc_html( $attr ) );
-									endif;
-									?>
-									<br />
-								<?php endforeach; ?>
-							<?php endif; ?>
-						</div>
-					</details>
-				</li>
+				<?php
+				$is_element_attributes = 'node_attributes' === $key || 'element_attributes' === $key;
+				if ( $is_element_attributes && empty( $value ) ) {
+					continue;
+				}
+				if ( in_array( $key, [ 'code', 'type' ], true ) ) {
+					continue; // Handled above.
+				}
+				?>
+				<dt><?php echo esc_html( self::get_source_key_label( $key, $validation_error ) ); ?></dt>
+				<dd class="detailed">
+					<?php if ( in_array( $key, [ 'node_name', 'parent_name' ], true ) ) : ?>
+						<code><?php echo esc_html( $value ); ?></code>
+					<?php elseif ( 'sources' === $key ) : ?>
+						<pre><?php echo esc_html( wp_json_encode( $value, 128 /* JSON_PRETTY_PRINT */ | 64 /* JSON_UNESCAPED_SLASHES */ ) ); ?></pre>
+					<?php elseif ( $is_element_attributes ) : ?>
+						<table class="element-attributes">
+							<?php foreach ( $value as $attr_name => $attr_value ) : ?>
+								<tr>
+								<?php
+								printf( '<th><code>%s</code></th>', esc_html( $attr_name ) );
+								echo '<td>';
+								if ( ! empty( $attr_value ) ) {
+									printf( '<code>%s</code>', esc_html( $attr_value ) );
+								}
+								echo '</td>';
+								?>
+								</tr>
+							<?php endforeach; ?>
+						</table>
+					<?php elseif ( is_array( $value ) ) : ?>
+						<?php foreach ( $value as $value_key => $attr ) : ?>
+							<?php
+							printf( '<strong>%s</strong>', esc_html( $value_key ) );
+							if ( ! empty( $attr ) ) :
+								printf( ': %s', esc_html( $attr ) );
+							endif;
+							?>
+							<br />
+						<?php endforeach; ?>
+					<?php elseif ( is_string( $value ) ) : ?>
+						<?php echo esc_html( $value ); ?>
+					<?php endif; ?>
+				</dd>
 			<?php endforeach; ?>
-		</ul>
+		</dl>
 
 		<?php
 
@@ -2261,27 +2312,65 @@ class AMP_Validation_Error_Taxonomy {
 	 * @return string
 	 */
 	public static function get_error_title_from_code( $error_code ) {
-		$error_title = 'Error';
-		if ( self::INVALID_ELEMENT_CODE === $error_code ) {
-			$error_title = __( 'Invalid element', 'amp' );
-		} elseif ( self::INVALID_ATTRIBUTE_CODE === $error_code ) {
-			$error_title = __( 'Invalid attribute', 'amp' );
-		} elseif ( 'file_path_not_allowed' === $error_code ) {
-			$error_title = __( 'File path not allowed', 'amp' );
-		} elseif ( 'excessive_css' === $error_code ) {
-			$error_title = __( 'Excessive CSS', 'amp' );
-		} elseif ( 'illegal_css_at_rule' === $error_code ) {
-			$error_title = sprintf(
-				/* translators: %s: @ */
-				__( 'Illegal CSS %s rule', 'amp' ),
-				'@'
-			);
-		} elseif ( 'disallowed_file_extension' === $error_code ) {
-			$error_title = __( 'Disallowed file extension', 'amp' );
-		} elseif ( 'removed_unused_css_rules' === $error_code ) {
-			$error_title = __( 'Remove unused CSS rules', 'amp' );
+		switch ( $error_code ) {
+			case self::INVALID_ELEMENT_CODE:
+				return __( 'Invalid element', 'amp' );
+			case self::INVALID_ATTRIBUTE_CODE:
+				return __( 'Invalid attribute', 'amp' );
+			case 'file_path_not_allowed':
+				return __( 'File path not allowed', 'amp' );
+			case 'excessive_css':
+				return __( 'Excessive CSS', 'amp' );
+			case 'illegal_css_at_rule':
+				return sprintf(
+					/* translators: %s: @ */
+					__( 'Illegal CSS %s rule', 'amp' ),
+					'@'
+				);
+			case 'disallowed_file_extension':
+				return __( 'Disallowed file extension', 'amp' );
+			case 'removed_unused_css_rules':
+				return __( 'Remove unused CSS rules', 'amp' ); // @todo This is obsolete.
+			default:
+				return __( 'Unknown Error', 'amp' );
 		}
-		return $error_title;
+	}
+
+	/**
+	 * Get label for object key in validation error source.
+	 *
+	 * @param string $key              Key.
+	 * @param array  $validation_error Validation error.
+	 * @return string Label for key.
+	 */
+	public static function get_source_key_label( $key, $validation_error ) {
+		switch ( $key ) {
+			case 'code':
+				return __( 'Code', 'amp' );
+			case 'at_rule':
+				return __( 'At-rule', 'amp' );
+			case 'node_attributes':
+			case 'element_attributes':
+				return __( 'Element attributes', 'amp' );
+			case 'node_name':
+				if ( self::INVALID_ATTRIBUTE_CODE === $validation_error['code'] ) {
+					return __( 'Attribute name', 'amp' );
+				} elseif ( self::INVALID_ELEMENT_CODE === $validation_error['code'] ) {
+						return __( 'Element name', 'amp' );
+				} else {
+					return __( 'Node name', 'amp' );
+				}
+			case 'parent_name':
+				return __( 'Parent element', 'amp' );
+			case 'text':
+				return __( 'Inner text', 'amp' );
+			case 'type':
+				return __( 'Type', 'amp' );
+			case 'sources':
+				return __( 'Sources', 'amp' );
+			default:
+				return $key;
+		}
 	}
 
 	/**

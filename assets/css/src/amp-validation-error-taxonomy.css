@@ -78,7 +78,34 @@ details.single-error-detail[open] .single-error-detail-summary::after {
 
 .notice .detailed details .detailed {
 	padding-left: 32px;
-	font-family: Consolas, Monaco, monospace;
+}
+
+dl.detailed dt {
+	font-weight: bold;
+	margin-bottom: 0.5em;
+}
+dl.detailed dd + dt {
+	margin-top: 1em;
+}
+
+dl.detailed .element-attributes th {
+	font-weight: bold;
+	text-align: right;
+}
+dl.detailed .element-attributes th:after {
+	content: ":";
+}
+dl.detailed .element-attributes th,
+dl.detailed .element-attributes td {
+	padding: 2px;
+}
+
+dl.detailed a {
+	text-decoration: underline;
+}
+
+dl.detailed {
+	padding-bottom: 16px;
 }
 
 .details-attributes__title code,
