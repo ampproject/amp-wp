@@ -1,5 +1,5 @@
 /**
- * Plugin for add remove page button to more settings.
+ * Plugin that adds a remove page button to the "More" settings menu.
  */
 
 /**
