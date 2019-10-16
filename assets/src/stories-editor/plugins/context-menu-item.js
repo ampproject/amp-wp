@@ -6,6 +6,7 @@
  * External dependencies
  */
 import { ReactElement } from 'react';
+
 /**
  * WordPress dependencies
  */
