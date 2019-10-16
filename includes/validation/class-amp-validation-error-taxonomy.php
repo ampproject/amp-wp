@@ -2325,8 +2325,6 @@ class AMP_Validation_Error_Taxonomy {
 				return __( 'Illegal CSS at-rule', 'amp' );
 			case 'disallowed_file_extension':
 				return __( 'Disallowed file extension', 'amp' );
-			case 'removed_unused_css_rules':
-				return __( 'Remove unused CSS rules', 'amp' ); // @todo This is obsolete.
 			default:
 				return __( 'Unknown Error', 'amp' );
 		}

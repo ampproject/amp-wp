@@ -198,8 +198,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	public static function get_acceptable_errors( $template ) {
 		if ( isset( self::$theme_features[ $template ] ) ) {
 			return [
-				'removed_unused_css_rules' => true,
-				'illegal_css_at_rule'      => [
+				'illegal_css_at_rule' => [
 					[
 						'at_rule' => 'viewport',
 					],

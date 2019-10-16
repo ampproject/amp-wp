@@ -1622,11 +1622,7 @@ class AMP_Validated_URL_Post_Type {
 			'amp_taxonomy_terms_updated' => $updated_count,
 		];
 
-		/*
-		 * Re-check the post after the validation status change. This is particularly important for validation errors like
-		 * 'removed_unused_css_rules' since whether it is accepted will determine whether other validation errors are triggered
-		 * such as in this case 'excessive_css'.
-		 */
+		// Re-check the post after the validation status change.
 		if ( $updated_count > 0 ) {
 			$validation_results = self::recheck_post( $post->ID );
 			// @todo For WP_Error case, see <https://github.com/ampproject/amp-wp/issues/1166>.
