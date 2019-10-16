@@ -19,7 +19,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
  * @param {Object} props Component props.
  * @param {string} props.clientId Client ID.
  */
-const RemovePageSetting = ( { clientId } ) => {
+const RemoveButton = ( { clientId } ) => {
 	const { removeBlock } = useDispatch( 'core/block-editor' );
 	const pages = useSelect( ( select ) => select( 'core/block-editor' ).getBlockOrder(), [] );
 
@@ -41,8 +41,8 @@ const RemovePageSetting = ( { clientId } ) => {
 	);
 };
 
-RemovePageSetting.propTypes = {
+RemoveButton.propTypes = {
 	clientId: PropTypes.string.isRequired,
 };
 
-export default RemovePageSetting;
+export default RemoveButton;

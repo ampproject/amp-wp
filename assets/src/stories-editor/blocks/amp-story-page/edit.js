@@ -35,7 +35,7 @@ import BackgroundColorSettings from './background-color-settings';
 import PageSettings from './page-settings';
 import BackgroundMediaSettings from './background-media-settings';
 import AnimationSettings from './animation-settings';
-import RemovePageSetting from './remove-button-setting';
+import RemoveButton from './remove-button';
 
 const PageEdit = ( {
 	attributes,
@@ -190,7 +190,7 @@ const PageEdit = ( {
 	return (
 		<>
 			<InspectorControls>
-				<RemovePageSetting clientId={ clientId } />
+				<RemoveButton clientId={ clientId } />
 				<BackgroundColorSettings
 					backgroundColors={ bgColors }
 					setAttributes={ setAttributes }
