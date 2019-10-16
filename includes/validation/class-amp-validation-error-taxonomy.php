@@ -1774,7 +1774,7 @@ class AMP_Validation_Error_Taxonomy {
 				if ( self::INVALID_ELEMENT_CODE === $validation_error['code'] ) {
 					$content .= sprintf( ': <code>&lt;%s&gt;</code>', esc_html( $validation_error['node_name'] ) );
 				} elseif ( self::INVALID_ATTRIBUTE_CODE === $validation_error['code'] ) {
-					$content .= sprintf( ': <code>[%s]</code>', esc_html( $validation_error['node_name'] ) );
+					$content .= sprintf( ': <code>%s</code>', esc_html( $validation_error['node_name'] ) );
 				} elseif ( 'illegal_css_at_rule' === $validation_error['code'] ) {
 					$content .= sprintf( ': <code>@%s</code>', esc_html( $validation_error['at_rule'] ) );
 				}
@@ -2322,11 +2322,7 @@ class AMP_Validation_Error_Taxonomy {
 			case 'excessive_css':
 				return __( 'Excessive CSS', 'amp' );
 			case 'illegal_css_at_rule':
-				return sprintf(
-					/* translators: %s: @ */
-					__( 'Illegal CSS %s rule', 'amp' ),
-					'@'
-				);
+				return __( 'Illegal CSS at-rule', 'amp' );
 			case 'disallowed_file_extension':
 				return __( 'Disallowed file extension', 'amp' );
 			case 'removed_unused_css_rules':
