@@ -912,20 +912,25 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::wrap_widget_callbacks()
 	 */
 	public function test_wrap_widget_callbacks() {
-		$this->markTestIncomplete( 'Need to deal with file and line.' );
-
 		global $wp_registered_widgets, $_wp_sidebars_widgets;
 
-		$widget_id = 'search-2';
-		$this->assertArrayHasKey( $widget_id, $wp_registered_widgets );
-		$this->assertInternalType( 'array', $wp_registered_widgets[ $widget_id ]['callback'] );
-		$this->assertInstanceOf( 'WP_Widget_Search', $wp_registered_widgets[ $widget_id ]['callback'][0] );
-		$this->assertSame( 'display_callback', $wp_registered_widgets[ $widget_id ]['callback'][1] );
+		$search_widget_id = 'search-2';
+		$this->assertArrayHasKey( $search_widget_id, $wp_registered_widgets );
+		$this->assertInternalType( 'array', $wp_registered_widgets[ $search_widget_id ]['callback'] );
+		$this->assertInstanceOf( 'WP_Widget_Search', $wp_registered_widgets[ $search_widget_id ]['callback'][0] );
+		$this->assertSame( 'display_callback', $wp_registered_widgets[ $search_widget_id ]['callback'][1] );
+		$archives_widget_id = 'archives-2';
+		$this->assertArrayHasKey( $archives_widget_id, $wp_registered_widgets );
+		$this->assertInternalType( 'array', $wp_registered_widgets[ $archives_widget_id ]['callback'] );
+		$wp_registered_widgets[ $archives_widget_id ]['callback'][0] = new AMP_Widget_Archives();
 
 		AMP_Validation_Manager::wrap_widget_callbacks();
-		$this->assertInstanceOf( 'AMP_Validation_Callback_Wrapper', $wp_registered_widgets[ $widget_id ]['callback'] );
-		$this->assertInstanceOf( 'WP_Widget', $wp_registered_widgets[ $widget_id ]['callback'][0] );
-		$this->assertSame( 'display_callback', $wp_registered_widgets[ $widget_id ]['callback'][1] );
+		$this->assertInstanceOf( 'AMP_Validation_Callback_Wrapper', $wp_registered_widgets[ $search_widget_id ]['callback'] );
+		$this->assertInstanceOf( 'AMP_Validation_Callback_Wrapper', $wp_registered_widgets[ $archives_widget_id ]['callback'] );
+		$this->assertInstanceOf( 'WP_Widget', $wp_registered_widgets[ $search_widget_id ]['callback'][0] );
+		$this->assertInstanceOf( 'WP_Widget', $wp_registered_widgets[ $archives_widget_id ]['callback'][0] );
+		$this->assertSame( 'display_callback', $wp_registered_widgets[ $search_widget_id ]['callback'][1] );
+		$this->assertSame( 'display_callback', $wp_registered_widgets[ $archives_widget_id ]['callback'][1] );
 
 		$sidebar_id = 'amp-sidebar';
 		register_sidebar(
@@ -934,18 +939,42 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 				'after_widget' => '</li>',
 			]
 		);
-		$_wp_sidebars_widgets[ $sidebar_id ] = [ $widget_id ];
 
+		// Test core search widget.
+		$_wp_sidebars_widgets[ $sidebar_id ] = [ $search_widget_id ];
 		AMP_Theme_Support::start_output_buffering();
 		dynamic_sidebar( $sidebar_id );
-		$output = ob_get_clean();
-
+		$output     = ob_get_clean();
+		$reflection = new ReflectionMethod( 'WP_Widget_Search', 'widget' );
 		$this->assertStringStartsWith(
-			'<!--amp-source-stack {"type":"core","name":"wp-includes","function":"WP_Widget_Search::display_callback","widget_id":"search-2"}--><li id="search-2"',
+			sprintf(
+				'<!--amp-source-stack {"type":"core","name":"wp-includes","file":%1$s,"line":%2$d,"function":%3$s,"widget_id":%4$s}--><li id=%4$s',
+				wp_json_encode( preg_replace( ':^.*wp-includes/:', '', $reflection->getFileName() ) ),
+				$reflection->getStartLine(),
+				wp_json_encode( $reflection->getDeclaringClass()->getName() . '::' . $reflection->getName() ),
+				wp_json_encode( $search_widget_id )
+			),
 			$output
 		);
-		$this->assertStringEndsWith(
-			'</li><!--/amp-source-stack {"type":"core","name":"wp-includes","function":"WP_Widget_Search::display_callback","widget_id":"search-2"}-->',
+		$this->assertRegExp(
+			'#</li><!--/amp-source-stack {.*$#s',
+			$output
+		);
+
+		// Test plugin-extended archives widget.
+		$_wp_sidebars_widgets[ $sidebar_id ] = [ $archives_widget_id ];
+		AMP_Theme_Support::start_output_buffering();
+		dynamic_sidebar( $sidebar_id );
+		$output     = ob_get_clean();
+		$reflection = new ReflectionMethod( 'AMP_Widget_Archives', 'widget' );
+		$this->assertStringStartsWith(
+			sprintf(
+				'<!--amp-source-stack {"type":"plugin","name":"amp","file":%1$s,"line":%2$d,"function":%3$s,"widget_id":%4$s}--><li id=%4$s',
+				wp_json_encode( preg_replace( ':^.*(?=includes/):', '', $reflection->getFileName() ) ),
+				$reflection->getStartLine(),
+				wp_json_encode( $reflection->getDeclaringClass()->getName() . '::' . $reflection->getName() ),
+				wp_json_encode( $archives_widget_id )
+			),
 			$output
 		);
 	}
