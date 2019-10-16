@@ -1127,33 +1127,241 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::add_validation_error_sourcing()
 	 * @covers AMP_Validation_Manager::decorate_shortcode_source()
 	 * @covers AMP_Validation_Manager::decorate_filter_source()
+	 * @throws Exception If assertion fails.
 	 */
 	public function test_decorate_shortcode_and_filter_source() {
-		$this->markTestIncomplete( 'Need to figure out what to do with the file and line information.' );
-
 		AMP_Validation_Manager::add_validation_error_sourcing();
+		$shortcode_fallback = static function() {
+			return '<b>test</b>';
+		};
 		add_shortcode(
 			'test',
-			static function() {
-				return '<b>test</b>';
-			}
+			$shortcode_fallback
 		);
 
 		$filtered_content = apply_filters( 'the_content', 'before[test]after' );
 
 		if ( version_compare( get_bloginfo( 'version' ), '5.0', '>=' ) && has_filter( 'the_content', 'do_blocks' ) ) {
-			$source_json = '{"hook":"the_content","filter":true,"sources":[{"type":"core","name":"wp-includes","function":"WP_Embed::run_shortcode"},{"type":"core","name":"wp-includes","function":"WP_Embed::autoembed"},{"type":"plugin","name":"amp","function":"AMP_Validation_Manager::add_block_source_comments"},{"type":"core","name":"wp-includes","function":"do_blocks"},{"type":"core","name":"wp-includes","function":"wptexturize"},{"type":"core","name":"wp-includes","function":"wpautop"},{"type":"core","name":"wp-includes","function":"shortcode_unautop"},{"type":"core","name":"wp-includes","function":"prepend_attachment"},{"type":"core","name":"wp-includes","function":"wp_make_content_images_responsive"},{"type":"core","name":"wp-includes","function":"capital_P_dangit"},{"type":"core","name":"wp-includes","function":"do_shortcode"},{"type":"core","name":"wp-includes","function":"convert_smilies"}]}';
+			$sources = [
+				[
+					'type'     => 'core',
+					'name'     => 'wp-includes',
+					'function' => 'WP_Embed::run_shortcode',
+				],
+				[
+					'type'     => 'core',
+					'name'     => 'wp-includes',
+					'function' => 'WP_Embed::autoembed',
+				],
+				[
+					'type'     => 'plugin',
+					'name'     => 'amp',
+					'function' => 'AMP_Validation_Manager::add_block_source_comments',
+				],
+				[
+					'type'     => 'core',
+					'name'     => 'wp-includes',
+					'function' => 'do_blocks',
+				],
+				[
+					'type'     => 'core',
+					'name'     => 'wp-includes',
+					'function' => 'wptexturize',
+				],
+				[
+					'type'     => 'core',
+					'name'     => 'wp-includes',
+					'function' => 'wpautop',
+				],
+				[
+					'type'     => 'core',
+					'name'     => 'wp-includes',
+					'function' => 'shortcode_unautop',
+				],
+				[
+					'type'     => 'core',
+					'name'     => 'wp-includes',
+					'function' => 'prepend_attachment',
+				],
+				[
+					'type'     => 'core',
+					'name'     => 'wp-includes',
+					'function' => 'wp_make_content_images_responsive',
+				],
+				[
+					'type'     => 'core',
+					'name'     => 'wp-includes',
+					'function' => 'capital_P_dangit',
+				],
+				[
+					'type'     => 'core',
+					'name'     => 'wp-includes',
+					'function' => 'do_shortcode',
+				],
+				[
+					'type'     => 'core',
+					'name'     => 'wp-includes',
+					'function' => 'convert_smilies',
+				],
+			];
 		} elseif ( has_filter( 'the_content', 'do_blocks' ) ) {
-			$source_json = '{"hook":"the_content","filter":true,"sources":[{"type":"plugin","name":"amp","function":"AMP_Validation_Manager::add_block_source_comments"},{"type":"plugin","name":"gutenberg","function":"do_blocks"},{"type":"core","name":"wp-includes","function":"WP_Embed::run_shortcode"},{"type":"core","name":"wp-includes","function":"WP_Embed::autoembed"},{"type":"core","name":"wp-includes","function":"wptexturize"},{"type":"core","name":"wp-includes","function":"wpautop"},{"type":"core","name":"wp-includes","function":"shortcode_unautop"},{"type":"core","name":"wp-includes","function":"prepend_attachment"},{"type":"core","name":"wp-includes","function":"wp_make_content_images_responsive"},{"type":"core","name":"wp-includes","function":"capital_P_dangit"},{"type":"core","name":"wp-includes","function":"do_shortcode"},{"type":"core","name":"wp-includes","function":"convert_smilies"}]}';
+			$sources = [
+				[
+					'type'     => 'plugin',
+					'name'     => 'amp',
+					'function' => 'AMP_Validation_Manager::add_block_source_comments',
+				],
+				[
+					'type'     => 'plugin',
+					'name'     => 'gutenberg',
+					'function' => 'do_blocks',
+				],
+				[
+					'type'     => 'core',
+					'name'     => 'wp-includes',
+					'function' => 'WP_Embed::run_shortcode',
+				],
+				[
+					'type'     => 'core',
+					'name'     => 'wp-includes',
+					'function' => 'WP_Embed::autoembed',
+				],
+				[
+					'type'     => 'core',
+					'name'     => 'wp-includes',
+					'function' => 'wptexturize',
+				],
+				[
+					'type'     => 'core',
+					'name'     => 'wp-includes',
+					'function' => 'wpautop',
+				],
+				[
+					'type'     => 'core',
+					'name'     => 'wp-includes',
+					'function' => 'shortcode_unautop',
+				],
+				[
+					'type'     => 'core',
+					'name'     => 'wp-includes',
+					'function' => 'prepend_attachment',
+				],
+				[
+					'type'     => 'core',
+					'name'     => 'wp-includes',
+					'function' => 'wp_make_content_images_responsive',
+				],
+				[
+					'type'     => 'core',
+					'name'     => 'wp-includes',
+					'function' => 'capital_P_dangit',
+				],
+				[
+					'type'     => 'core',
+					'name'     => 'wp-includes',
+					'function' => 'do_shortcode',
+				],
+				[
+					'type'     => 'core',
+					'name'     => 'wp-includes',
+					'function' => 'convert_smilies',
+				],
+			];
 		} else {
-			$source_json = '{"hook":"the_content","filter":true,"sources":[{"type":"core","name":"wp-includes","function":"WP_Embed::run_shortcode"},{"type":"core","name":"wp-includes","function":"WP_Embed::autoembed"},{"type":"core","name":"wp-includes","function":"wptexturize"},{"type":"core","name":"wp-includes","function":"wpautop"},{"type":"core","name":"wp-includes","function":"shortcode_unautop"},{"type":"core","name":"wp-includes","function":"prepend_attachment"},{"type":"core","name":"wp-includes","function":"wp_make_content_images_responsive"},{"type":"core","name":"wp-includes","function":"capital_P_dangit"},{"type":"core","name":"wp-includes","function":"do_shortcode"},{"type":"core","name":"wp-includes","function":"convert_smilies"}]}';
+			$sources = [
+				[
+					'type'     => 'core',
+					'name'     => 'wp-includes',
+					'function' => 'WP_Embed::run_shortcode',
+				],
+				[
+					'type'     => 'core',
+					'name'     => 'wp-includes',
+					'function' => 'WP_Embed::autoembed',
+				],
+				[
+					'type'     => 'core',
+					'name'     => 'wp-includes',
+					'function' => 'wptexturize',
+				],
+				[
+					'type'     => 'core',
+					'name'     => 'wp-includes',
+					'function' => 'wpautop',
+				],
+				[
+					'type'     => 'core',
+					'name'     => 'wp-includes',
+					'function' => 'shortcode_unautop',
+				],
+				[
+					'type'     => 'core',
+					'name'     => 'wp-includes',
+					'function' => 'prepend_attachment',
+				],
+				[
+					'type'     => 'core',
+					'name'     => 'wp-includes',
+					'function' => 'wp_make_content_images_responsive',
+				],
+				[
+					'type'     => 'core',
+					'name'     => 'wp-includes',
+					'function' => 'capital_P_dangit',
+				],
+				[
+					'type'     => 'core',
+					'name'     => 'wp-includes',
+					'function' => 'do_shortcode',
+				],
+				[
+					'type'     => 'core',
+					'name'     => 'wp-includes',
+					'function' => 'convert_smilies',
+				],
+			];
 		}
+
+		foreach ( $sources as &$source ) {
+			$function = $source['function'];
+			unset( $source['function'] );
+			if ( strpos( $function, '::' ) ) {
+				$method     = explode( '::', $function, 2 );
+				$reflection = new ReflectionMethod( $method[0], $method[1] );
+			} else {
+				$reflection = new ReflectionFunction( $function );
+			}
+
+			if ( 'core' === $source['type'] ) {
+				$source['file'] = preg_replace( ':.*/' . preg_quote( $source['name'], ':' ) . '/:', '', $reflection->getFileName() );
+			} elseif ( 'plugin' === $source['type'] ) {
+				$source['file'] = preg_replace( ':.*/' . preg_quote( basename( WP_PLUGIN_DIR ), ':' ) . '/[^/]+?/:', '', $reflection->getFileName() );
+			} else {
+				throw new Exception( 'Unexpected type: ' . $source['type'] );
+			}
+			$source['line']     = $reflection->getStartLine();
+			$source['function'] = $function;
+		}
+
+		$source_json = wp_json_encode(
+			[
+				'hook'    => 'the_content',
+				'filter'  => true,
+				'sources' => $sources,
+			]
+		);
+
+		$shortcode_fallback_reflection = new ReflectionFunction( $shortcode_fallback );
 
 		$expected_content = implode(
 			'',
 			[
 				"<!--amp-source-stack $source_json-->",
-				'<p>before<!--amp-source-stack {"type":"plugin","name":"amp","function":"{closure}","shortcode":"test"}--><b>test</b><!--/amp-source-stack {"type":"plugin","name":"amp","function":"{closure}","shortcode":"test"}-->after</p>' . "\n",
+				sprintf(
+					'<p>before<!--amp-source-stack {"type":"plugin","name":"amp","file":%1$s,"line":%2$s,"function":"{closure}","shortcode":"test"}--><b>test</b><!--/amp-source-stack {"type":"plugin","name":"amp","file":%1$s,"line":%2$s,"function":"{closure}","shortcode":"test"}-->after</p>' . "\n",
+					wp_json_encode( substr( $shortcode_fallback_reflection->getFileName(), strlen( AMP__DIR__ ) + 1 ) ),
+					$shortcode_fallback_reflection->getStartLine()
+				),
 				"<!--/amp-source-stack $source_json-->",
 			]
 		);
