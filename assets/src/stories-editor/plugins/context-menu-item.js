@@ -12,11 +12,7 @@ import { ReactElement } from 'react';
 import { PluginBlockSettingsMenuItem } from '@wordpress/edit-post';
 import { __ } from '@wordpress/i18n';
 import { useSelect, useDispatch } from '@wordpress/data';
-
-/**
- * Internal dependencies
- */
-import { isPageBlock } from '../helpers';
+import { useCallback } from '@wordpress/element';
 
 export const name = 'amp-story-page-remove';
 
@@ -31,12 +27,10 @@ const RemovePageSetting = () => {
 	const { removeBlock } = useDispatch( 'core/block-editor' );
 	const currentPageId = useSelect( ( select ) => select( 'amp/story' ).getCurrentPage(), [] );
 
-	const removePage = () => {
-		if ( ! isPageBlock( currentPageId ) ) {
-			return;
-		}
-		removeBlock( currentPageId );
-	};
+	const removePage = useCallback(
+		() => removeBlock( currentPageId ),
+		[ currentPageId, removeBlock ],
+	);
 
 	return (
 		<PluginBlockSettingsMenuItem
@@ -48,9 +42,4 @@ const RemovePageSetting = () => {
 	);
 };
 
-export const render = () => {
-	return (
-		<RemovePageSetting />
-	);
-};
-
+export const render = () => <RemovePageSetting />;
