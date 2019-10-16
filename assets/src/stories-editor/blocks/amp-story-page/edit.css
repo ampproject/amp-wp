@@ -302,5 +302,5 @@ div[data-type="amp/amp-story-page"] .wp-block-image {
 
 .edit-post-settings-sidebar__panel-block .components-panel__body.editor-amp-story-remove-page {
 	border: none;
-	margin-top: 0px;
+	margin-top: 0;
 }
