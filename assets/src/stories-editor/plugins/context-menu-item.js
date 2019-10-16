@@ -27,11 +27,17 @@ export const icon = 'trash';
 const RemovePageSetting = () => {
 	const { removeBlock } = useDispatch( 'core/block-editor' );
 	const currentPageId = useSelect( ( select ) => select( 'amp/story' ).getCurrentPage(), [] );
+	const pages = useSelect( ( select ) => select( 'core/block-editor' ).getBlockOrder(), [] );
 
 	const removePage = useCallback(
 		() => removeBlock( currentPageId ),
 		[ currentPageId, removeBlock ],
 	);
+
+	// Shouldn't allow users to remove the first and only page.
+	if ( pages.length < 2 ) {
+		return null;
+	}
 
 	return (
 		<PluginBlockSettingsMenuItem
