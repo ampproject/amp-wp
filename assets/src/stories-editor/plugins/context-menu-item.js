@@ -36,7 +36,7 @@ const RemovePageSetting = () => {
 	return (
 		<PluginBlockSettingsMenuItem
 			icon="trash"
-			label={ __( 'Remove page', 'amp' ) }
+			label={ __( 'Remove Page', 'amp' ) }
 			role="menuitem"
 			onClick={ removePage }
 		/>
