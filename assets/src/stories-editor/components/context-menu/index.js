@@ -153,11 +153,19 @@ const ContextMenu = ( props ) => {
 			return;
 		}
 
+		let parentBlock = rootClientId;
+		let index = null;
+
+		if ( block.name === 'amp/amp-story-page' ) {
+			parentBlock = '';
+			const currentPageIndex = pageList.indexOf( clientId );
+			index = currentPageIndex + 1;
+		}
+
 		const rootClientId = getBlockRootClientId( clientId );
 		const clonedBlock = cloneBlock( block );
-		const parentBlock = ( clonedBlock.name === 'amp/amp-story-page' ) ? '' : rootClientId;
 
-		insertBlock( clonedBlock, null, parentBlock );
+		insertBlock( clonedBlock, index, parentBlock );
 	};
 
 	useEffect( () => {
