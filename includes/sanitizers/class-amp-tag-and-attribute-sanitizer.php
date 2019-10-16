@@ -291,6 +291,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 						$result
 					);
 				}
+			} elseif ( $this_child instanceof DOMProcessingInstruction ) {
+				$this->remove_invalid_child( $this_child, [ 'code' => 'invalid_processing_instruction' ] );
 			}
 			$this_child = $next_child;
 		}
