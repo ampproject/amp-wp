@@ -185,6 +185,7 @@ const ContextMenu = ( props ) => {
 	let blockActions = [];
 	const pageList = getBlockOrder();
 	const numPages = pageList.length;
+	const hasMultiplePages = ( numPages > 1 );
 	const isPage = isPageBlock( firstBlockClientId );
 
 	// Don't allow any copying  or cutting of Page blocks.
@@ -223,7 +224,7 @@ const ContextMenu = ( props ) => {
 	}
 
 	// If more than one page, add options to move blocks between pages.
-	if ( block && ! isPage && numPages > 1 ) {
+	if ( block && ! isPage && hasMultiplePages ) {
 		const currentPage = getCurrentPage();
 		const currentPagePosition = pageList.indexOf( currentPage );
 		if ( currentPagePosition > 0 ) {
@@ -267,7 +268,7 @@ const ContextMenu = ( props ) => {
 				className: 'right-click-remove',
 			},
 		);
-	} else if ( numPages > 1 ) {
+	} else if ( hasMultiplePages ) {
 		blockActions.push(
 			{
 				name: __( 'Remove Page', 'amp' ),
