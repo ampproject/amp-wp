@@ -12,6 +12,7 @@ import {
 	Button,
 } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
+import { useCallback } from '@wordpress/element';
 
 /**.
  * Add a simple remove page link to sidebar.
@@ -23,9 +24,10 @@ const RemoveButton = ( { clientId } ) => {
 	const { removeBlock } = useDispatch( 'core/block-editor' );
 	const pages = useSelect( ( select ) => select( 'core/block-editor' ).getBlockOrder(), [] );
 
-	const removePage = () => {
-		removeBlock( clientId );
-	};
+	const removePage = useCallback(
+		() => removeBlock( clientId ),
+		[ clientId, removeBlock ],
+	);
 
 	// Shouldn't allow users to remove the first and only page.
 	if ( pages.length < 2 ) {
