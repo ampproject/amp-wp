@@ -155,9 +155,9 @@ const ContextMenu = ( props ) => {
 
 		const rootClientId = getBlockRootClientId( clientId );
 		const clonedBlock = cloneBlock( block );
-		const selectBlock = ( clonedBlock.name === 'amp/amp-story-page' ) ? '' : rootClientId;
+		const parentBlock = ( clonedBlock.name === 'amp/amp-story-page' ) ? '' : rootClientId;
 
-		insertBlock( clonedBlock, null, selectBlock );
+		insertBlock( clonedBlock, null, parentBlock );
 	};
 
 	useEffect( () => {
@@ -187,7 +187,7 @@ const ContextMenu = ( props ) => {
 	const numPages = pageList.length;
 	const isPage = isPageBlock( firstBlockClientId );
 
-	// Don't allow any actions other than pasting with Page.
+	// Don't allow any copying  or cutting of Page blocks.
 	if ( ! isPage ) {
 		blockActions = [
 			{
@@ -207,57 +207,56 @@ const ContextMenu = ( props ) => {
 
 		];
 	}
-	if ( block ) {
-		// Disable Duplicate Block option for cta and attachment blocks.
-		if ( ! DISABLE_DUPLICATE_BLOCKS.includes( block.name ) ) {
-			const dupTitle = ( ! isPage ) ? __( 'Duplicate Block', 'amp' ) : __( 'Duplicate Page', 'amp' );
-			blockActions.push(
-				{
-					name: dupTitle,
-					blockAction: duplicateBlock,
-					params: [ firstBlockClientId ],
-					icon: 'admin-page',
-					className: 'right-click-duplicate',
-				},
-			);
-		}
 
-		if ( ! isPage ) {
-			if ( numPages > 1 ) {
-				const currentPage = getCurrentPage();
-				const currentPagePosition = pageList.indexOf( currentPage );
-				if ( currentPagePosition > 0 ) {
-					const prevPage = getPageByOffset( -1 );
-					if ( isBlockAllowedOnPage( block.name, prevPage ) ) {
-						blockActions.push(
-							{
-								name: __( 'Send block to previous page', 'amp' ),
-								blockAction: moveBlockToPage,
-								params: [ prevPage ],
-								icon: isRTL ? 'arrow-right-alt' : 'arrow-left-alt',
-								className: 'right-click-previous-page',
-							},
-						);
-					}
-				}
-				if ( currentPagePosition < ( numPages - 1 ) ) {
-					const nextPage = getPageByOffset( 1 );
-					if ( isBlockAllowedOnPage( block.name, nextPage ) ) {
-						blockActions.push(
-							{
-								name: __( 'Send block to next page', 'amp' ),
-								blockAction: moveBlockToPage,
-								params: [ nextPage ],
-								icon: isRTL ? 'arrow-left-alt' : 'arrow-right-alt',
-								className: 'right-click-next-page',
-							},
-						);
-					}
-				}
+	// Disable Duplicate Block option for cta and attachment blocks.
+	if ( block && ! DISABLE_DUPLICATE_BLOCKS.includes( block.name ) ) {
+		const dupTitle = ( ! isPage ) ? __( 'Duplicate Block', 'amp' ) : __( 'Duplicate Page', 'amp' );
+		blockActions.push(
+			{
+				name: dupTitle,
+				blockAction: duplicateBlock,
+				params: [ firstBlockClientId ],
+				icon: 'admin-page',
+				className: 'right-click-duplicate',
+			},
+		);
+	}
+
+	// If more than one page, add options to move blocks between pages.
+	if ( block && ! isPage && numPages > 1 ) {
+		const currentPage = getCurrentPage();
+		const currentPagePosition = pageList.indexOf( currentPage );
+		if ( currentPagePosition > 0 ) {
+			const prevPage = getPageByOffset( -1 );
+			if ( isBlockAllowedOnPage( block.name, prevPage ) ) {
+				blockActions.push(
+					{
+						name: __( 'Send block to previous page', 'amp' ),
+						blockAction: moveBlockToPage,
+						params: [ prevPage ],
+						icon: isRTL ? 'arrow-right-alt' : 'arrow-left-alt',
+						className: 'right-click-previous-page',
+					},
+				);
+			}
+		}
+		if ( currentPagePosition < ( numPages - 1 ) ) {
+			const nextPage = getPageByOffset( 1 );
+			if ( isBlockAllowedOnPage( block.name, nextPage ) ) {
+				blockActions.push(
+					{
+						name: __( 'Send block to next page', 'amp' ),
+						blockAction: moveBlockToPage,
+						params: [ nextPage ],
+						icon: isRTL ? 'arrow-left-alt' : 'arrow-right-alt',
+						className: 'right-click-next-page',
+					},
+				);
 			}
 		}
 	}
 
+	// If not page the show Remove block text other wise if multiple pages, show option to remove page.
 	if ( ! isPage ) {
 		blockActions.push(
 			{
@@ -280,6 +279,7 @@ const ContextMenu = ( props ) => {
 		);
 	}
 
+	// If value set in clipboard, show paste option.
 	if ( getCopiedMarkup().length ) {
 		blockActions.push(
 			{
