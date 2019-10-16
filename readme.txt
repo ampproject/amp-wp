@@ -1,6 +1,6 @@
 === AMP ===
 Contributors: google, xwp, automattic, westonruter, swissspidy, miinasikk, ryankienstra, albertomedina, tweetythierry
-Tags: amp, framework, components, blocks, performance, optimization, ux, mobile, stories, accelerated mobile pages, seo, official
+Tags: amp, stories, mobile, optimization, accelerated mobile pages, framework, components, blocks, performance, ux, seo, official
 Requires at least: 4.9
 Tested up to: 5.2
 Stable tag: 1.3.0
