@@ -969,10 +969,10 @@ class AMP_Validation_Error_Taxonomy {
 		add_action(
 			'admin_enqueue_scripts',
 			function ( $hook_suffix ) {
-				if ( ! isset( $_GET['line'] ) ) {
+				if ( ! isset( $_GET['line'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 					return;
 				}
-				$line = (int) $_GET['line'];
+				$line = (int) $_GET['line']; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 				if ( 'plugin-editor.php' === $hook_suffix || 'theme-editor.php' === $hook_suffix ) {
 					wp_add_inline_script(
