@@ -156,7 +156,7 @@ const ContextMenu = ( props ) => {
 		let parentBlock = rootClientId;
 		let index = null;
 
-		if ( block.name === 'amp/amp-story-page' ) {
+		if ( isPageBlock( clientId ) ) {
 			parentBlock = '';
 			const currentPageIndex = pageList.indexOf( clientId );
 			index = currentPageIndex + 1;
