@@ -597,4 +597,42 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$actual = AMP_DOM_Utils::has_class( $element, $class );
 		$this->assertEquals( $expected, $actual );
 	}
+
+	public function get_get_element_id_data() {
+		$dom = new DOMDocument();
+
+		$same_element = AMP_DOM_Utils::create_node( $dom, 'div', [] );
+
+		return [
+			// Element with existing ID
+			[ AMP_DOM_Utils::create_node( $dom, 'div', [ 'id' => 'my-id' ] ), 'some-prefix', 'my-id' ],
+			// Element without ID
+			[ AMP_DOM_Utils::create_node( $dom, 'div', [] ), 'some-prefix', 'some-prefix' ],
+			// Another element without ID with same prefix
+			[ AMP_DOM_Utils::create_node( $dom, 'div', [] ), 'some-prefix', 'some-prefix-2' ],
+			// Another element without ID with different prefix
+			[ AMP_DOM_Utils::create_node( $dom, 'div', [] ), 'other-prefix', 'other-prefix' ],
+			// Another element without ID with different prefix again
+			[ AMP_DOM_Utils::create_node( $dom, 'div', [] ), 'other-prefix', 'other-prefix-2' ],
+			// Another element without ID with first prefix again
+			[ AMP_DOM_Utils::create_node( $dom, 'div', [] ), 'some-prefix', 'some-prefix-3' ],
+			// Element with existing prefix again
+			[ AMP_DOM_Utils::create_node( $dom, 'div', [ 'id' => 'another-id' ] ), 'some-prefix', 'another-id' ],
+			// Same element first time
+			[ $same_element, 'some-prefix', 'some-prefix-4' ],
+			// Same element second time
+			[ $same_element, 'some-prefix', 'some-prefix-4' ],
+		];
+	}
+
+	/**
+	 * Test get_element_id().
+	 *
+	 * @dataProvider get_get_element_id_data
+	 * @covers \AMP_DOM_Utils::get_element_id()
+	 */
+	public function test_get_element_id( DOMElement $element, $prefix, $expected ) {
+		$actual = AMP_DOM_Utils::get_element_id( $element, $prefix );
+		$this->assertEquals( $expected, $actual );
+	}
 }

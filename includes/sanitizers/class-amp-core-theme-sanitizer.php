@@ -1596,7 +1596,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		$body_id = $this->get_element_id( $this->get_body_node(), 'body' );
+		$body_id = AMP_DOM_Utils::get_element_id( $this->get_body_node(), 'body' );
 
 		$open_xpaths  = isset( $args['open_button_xpath'] ) ? $args['open_button_xpath'] : [];
 		$close_xpaths = isset( $args['close_button_xpath'] ) ? $args['close_button_xpath'] : [];
@@ -1715,7 +1715,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 			$this->wrap_modal_in_lightbox(
 				[
-					'modal_id'             => $this->get_element_id( $modal ),
+					'modal_id'             => AMP_DOM_Utils::get_element_id( $modal ),
 					'modal_content_xpath'  => $modal->getNodePath(),
 					'open_button_xpath'    => $open_button_xpaths,
 					'close_button_xpath'   => $close_button_xpaths,
@@ -1733,7 +1733,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public function add_twentytwenty_toggles() {
 		$toggles = $this->xpath->query( '//*[ @data-toggle-target ]' );
-		$body_id = $this->get_element_id( $this->get_body_node(), 'body' );
+		$body_id = AMP_DOM_Utils::get_element_id( $this->get_body_node(), 'body' );
 
 		if ( false === $toggles || 0 === $toggles->count() ) {
 			return;
@@ -1747,7 +1747,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			 */
 
 			$toggle_target = $toggle->getAttribute( 'data-toggle-target' );
-			$toggle_id     = $this->get_element_id( $toggle );
+			$toggle_id     = AMP_DOM_Utils::get_element_id( $toggle );
 
 			if ( 'next' === $toggle_target ) {
 				$target_node = $toggle->nextSibling;
@@ -1773,7 +1773,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 			$is_sub_menu     = AMP_DOM_Utils::has_class( $target_node, 'sub-menu' );
 			$new_target_node = $is_sub_menu ? $this->get_closest_submenu( $toggle ) : $target_node;
-			$new_target_id   = $this->get_element_id( $new_target_node );
+			$new_target_id   = AMP_DOM_Utils::get_element_id( $new_target_node );
 
 			// Toggle the target of the clicked toggle.
 			$this->add_amp_action( $toggle, 'tap', "{$new_target_id}.toggleClass(class='{$toggle_class}')" );
@@ -1789,7 +1789,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						// Skip adding the 'active' class on the "Close" button in the primary nav menu.
 						continue;
 					}
-					$target_toggle_id = $this->get_element_id( $target_toggle );
+					$target_toggle_id = AMP_DOM_Utils::get_element_id( $target_toggle );
 					$this->add_amp_action( $toggle, 'tap', "{$target_toggle_id}.toggleClass(class='active')" );
 				}
 			}
@@ -1821,37 +1821,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Get the ID for an element.
-	 *
-	 * If the element does not have an ID, create one first.
-	 *
-	 * @param DOMElement $element Element to get the ID for.
-	 * @param string     $prefix  Optional. Defaults to '_amp_wp_id_'.
-	 * @return string ID to use.
-	 */
-	protected function get_element_id( $element, $prefix = 'amp-wp-id' ) {
-		static $index_counter = [];
-
-		if ( $element->hasAttribute( 'id' ) ) {
-			return $element->getAttribute( 'id' );
-		}
-
-		if ( ! array_key_exists( $prefix, $index_counter ) ) {
-			$index_counter[ $prefix ] = 2;
-			$element->setAttribute( 'id', $prefix );
-
-			return $prefix;
-		}
-
-		$id = "{$prefix}-{$index_counter[ $prefix ]}";
-		$index_counter[ $prefix ] ++;
-
-		$element->setAttribute( 'id', $id );
-
-		return $id;
 	}
 
 	/**
