@@ -157,9 +157,9 @@ class AMP_Options_Manager {
 			$options['theme_support'] = $defaults['theme_support'];
 		}
 
-		// Remove 'auto_accept_sanitization' option as of 1.4.
-		if ( isset( $options['auto_accept_sanitization'] ) ) {
-			unset( $options['auto_accept_sanitization'] );
+		// Remove 'accept_sanitization_by_default' option as of 1.4.
+		if ( isset( $options['accept_sanitization_by_default'] ) ) {
+			unset( $options['accept_sanitization_by_default'] );
 		}
 
 		return $options;

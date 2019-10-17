@@ -154,7 +154,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 	 * @covers \AMP_Validated_URL_Post_Type::store_validation_errors()
 	 */
 	public function test_get_invalid_url_validation_errors() {
-		$this->auto_accept_sanitization( false );
+		$this->accept_sanitization_by_default( false );
 		add_theme_support( AMP_Theme_Support::SLUG, [ AMP_Theme_Support::PAIRED_FLAG => true ] );
 		AMP_Validation_Manager::init();
 		$post = self::factory()->post->create();
@@ -711,7 +711,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 	 * @covers \AMP_Validated_URL_Post_Type::handle_bulk_action()
 	 */
 	public function test_handle_bulk_action() {
-		$this->auto_accept_sanitization( false );
+		$this->accept_sanitization_by_default( false );
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		add_theme_support( AMP_Theme_Support::SLUG, [ AMP_Theme_Support::PAIRED_FLAG => true ] );
 		AMP_Validation_Manager::init();
@@ -836,7 +836,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 	 * @covers \AMP_Validated_URL_Post_Type::handle_validate_request()
 	 */
 	public function test_handle_validate_request() {
-		$this->auto_accept_sanitization( false );
+		$this->accept_sanitization_by_default( false );
 		add_theme_support( AMP_Theme_Support::SLUG, [ AMP_Theme_Support::PAIRED_FLAG => true ] );
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		AMP_Validation_Manager::init();

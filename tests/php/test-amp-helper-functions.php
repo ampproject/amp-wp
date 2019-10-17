@@ -328,7 +328,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 */
 	public function test_amp_add_amphtml_link_transitional_mode( $canonical_url, $amphtml_url ) {
 		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
-		$this->auto_accept_sanitization( false );
+		$this->accept_sanitization_by_default( false );
 		AMP_Theme_Support::read_theme_support();
 		AMP_Theme_Support::init();
 		$this->assertTrue( current_theme_supports( AMP_Theme_Support::SLUG ) );
