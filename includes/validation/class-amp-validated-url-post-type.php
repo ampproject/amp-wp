@@ -1288,40 +1288,6 @@ class AMP_Validated_URL_Post_Type {
 			);
 		}
 
-		if ( 'post' !== get_current_screen()->base ) {
-			// Display admin notice according to the AMP mode.
-			if ( amp_is_canonical() ) {
-				$template_mode = AMP_Theme_Support::STANDARD_MODE_SLUG;
-			} elseif ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-				$template_mode = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
-			} else {
-				$template_mode = 'reader';
-			}
-			$auto_sanitization = AMP_Options_Manager::get_option( 'auto_accept_sanitization' );
-
-			if ( AMP_Theme_Support::STANDARD_MODE_SLUG === $template_mode ) {
-				$message = __( 'The site is using standard AMP mode, the validation errors found are already automatically handled.', 'amp' );
-			} elseif ( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === $template_mode && $auto_sanitization ) {
-				$message = __( 'The site is using transitional AMP mode with auto-sanitization turned on, the validation errors found are already automatically handled.', 'amp' );
-			} elseif ( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === $template_mode ) {
-				$message = sprintf(
-					/* translators: %s is a link to the AMP settings screen */
-					__( 'The site is using transitional AMP mode without auto-sanitization, the validation errors found require action and influence which pages are shown in AMP. For automatically handling the errors turn on auto-sanitization from <a href="%s">Validation Handling settings</a>.', 'amp' ),
-					esc_url( admin_url( 'admin.php?page=' . AMP_Options_Manager::OPTION_NAME ) )
-				);
-			} else {
-				$message = __( 'The site is using AMP reader mode, your theme templates are not used and the errors below are irrelevant.', 'amp' );
-			}
-
-			$class = 'info';
-			printf(
-				/* translators: 1. Notice classname; 2. Message text; 3. Screenreader text; */
-				'<div class="notice notice-%s"><p>%s</p></div>',
-				esc_attr( $class ),
-				wp_kses_post( $message )
-			);
-		}
-
 		/**
 		 * Adds notices to the single error page.
 		 * 1. Notice with detailed error information in an expanding box.
