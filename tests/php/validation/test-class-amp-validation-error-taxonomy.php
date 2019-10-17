@@ -12,6 +12,8 @@
  */
 class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 
+	use AMP_Test_HandleValidation;
+
 	/**
 	 * The tested class.
 	 *
@@ -234,7 +236,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 	public function test_is_validation_error_sanitized_and_get_validation_error_sanitization() {
 
 		// New accepted.
-		AMP_Options_Manager::update_option( 'auto_accept_sanitization', true );
+		$this->auto_accept_sanitization( true );
 		$error_foo = array_merge(
 			$this->get_mock_error(),
 			[ 'foo' => 1 ]
@@ -254,7 +256,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		);
 
 		// New rejected.
-		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
+		$this->auto_accept_sanitization( false );
 		$error_bar = array_merge(
 			$this->get_mock_error(),
 			[ 'bar' => 1 ]
@@ -1095,7 +1097,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::filter_manage_custom_columns()
 	 */
 	public function test_filter_manage_custom_columns() {
-		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
+		$this->auto_accept_sanitization( false );
 		AMP_Validation_Error_Taxonomy::register();
 		$validation_error = $this->get_mock_error();
 		$initial_content  = 'example initial content';

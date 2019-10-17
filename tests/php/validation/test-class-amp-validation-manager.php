@@ -15,6 +15,8 @@
  */
 class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 
+	use AMP_Test_HandleValidation;
+
 	/**
 	 * The name of the tested class.
 	 *
@@ -145,7 +147,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 
 		// Make sure should_locate_sources arg is recognized.
 		remove_all_filters( 'amp_validation_error_sanitized' );
-		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
+		$this->auto_accept_sanitization( false );
 		AMP_Validation_Manager::init(
 			[
 				'should_locate_sources' => true,
@@ -242,31 +244,31 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		];
 
 		remove_theme_support( AMP_Theme_Support::SLUG );
-		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
+		$this->auto_accept_sanitization( false );
 		$this->assertFalse( AMP_Validation_Manager::is_sanitization_auto_accepted() );
 		$this->assertFalse( AMP_Validation_Manager::is_sanitization_auto_accepted( $some_error ) );
 		$this->assertFalse( AMP_Validation_Manager::is_sanitization_auto_accepted( $excessive_css_error ) );
 
 		remove_theme_support( AMP_Theme_Support::SLUG );
-		AMP_Options_Manager::update_option( 'auto_accept_sanitization', true );
+		$this->auto_accept_sanitization( true );
 		$this->assertTrue( AMP_Validation_Manager::is_sanitization_auto_accepted() );
 		$this->assertTrue( AMP_Validation_Manager::is_sanitization_auto_accepted( $some_error ) );
 		$this->assertTrue( AMP_Validation_Manager::is_sanitization_auto_accepted( $excessive_css_error ) );
 
 		add_theme_support( AMP_Theme_Support::SLUG );
-		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
+		$this->auto_accept_sanitization( false );
 		$this->assertTrue( AMP_Validation_Manager::is_sanitization_auto_accepted() );
 		$this->assertTrue( AMP_Validation_Manager::is_sanitization_auto_accepted( $some_error ) );
 		$this->assertFalse( AMP_Validation_Manager::is_sanitization_auto_accepted( $excessive_css_error ) );
 
 		add_theme_support( AMP_Theme_Support::SLUG, [ AMP_Theme_Support::PAIRED_FLAG => true ] );
-		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
+		$this->auto_accept_sanitization( false );
 		$this->assertFalse( AMP_Validation_Manager::is_sanitization_auto_accepted() );
 		$this->assertFalse( AMP_Validation_Manager::is_sanitization_auto_accepted( $some_error ) );
 		$this->assertFalse( AMP_Validation_Manager::is_sanitization_auto_accepted( $excessive_css_error ) );
 
 		add_theme_support( AMP_Theme_Support::SLUG, [ AMP_Theme_Support::PAIRED_FLAG => true ] );
-		AMP_Options_Manager::update_option( 'auto_accept_sanitization', true );
+		$this->auto_accept_sanitization( true );
 		$this->assertTrue( AMP_Validation_Manager::is_sanitization_auto_accepted() );
 		$this->assertTrue( AMP_Validation_Manager::is_sanitization_auto_accepted( $some_error ) );
 		$this->assertTrue( AMP_Validation_Manager::is_sanitization_auto_accepted( $excessive_css_error ) );
@@ -278,7 +280,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::add_admin_bar_menu_items()
 	 */
 	public function test_add_admin_bar_menu_items() {
-		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
+		$this->auto_accept_sanitization( false );
 
 		// No admin bar item when user lacks capability.
 		$this->go_to( home_url( '/' ) );
@@ -481,7 +483,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 */
 	public function test_get_amp_validity_rest_field() {
 		add_theme_support( AMP_Theme_Support::SLUG, [ AMP_Theme_Support::PAIRED_FLAG => true ] );
-		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
+		$this->auto_accept_sanitization( false );
 		AMP_Validated_URL_Post_Type::register();
 		AMP_Validation_Error_Taxonomy::register();
 
@@ -666,7 +668,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 */
 	public function test_print_edit_form_validation_status() {
 		add_theme_support( AMP_Theme_Support::SLUG, [ AMP_Theme_Support::PAIRED_FLAG => true ] );
-		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
+		$this->auto_accept_sanitization( false );
 
 		AMP_Validated_URL_Post_Type::register();
 		AMP_Validation_Error_Taxonomy::register();
@@ -710,10 +712,10 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		 * This simulates 'auto_accept_sanitization' being true, but it having been false when the validation errors were stored,
 		 * as there are errors with 'New Rejected' status.
 		 */
-		AMP_Options_Manager::update_option( 'auto_accept_sanitization', true );
+		$this->auto_accept_sanitization( true );
 		add_theme_support( AMP_Theme_Support::SLUG, [ AMP_Theme_Support::PAIRED_FLAG => true ] );
 		AMP_Validated_URL_Post_Type::store_validation_errors( $validation_errors, get_permalink( $post->ID ) );
-		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
+		$this->auto_accept_sanitization( false );
 		$output = get_echo( [ 'AMP_Validation_Manager', 'print_edit_form_validation_status' ], [ $post ] );
 		$this->assertContains( $expected_notice_non_accepted_errors, $output );
 	}
