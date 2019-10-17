@@ -84,6 +84,7 @@ dl.detailed dt {
 	font-weight: bold;
 	margin-bottom: 0.5em;
 }
+
 dl.detailed dd + dt {
 	margin-top: 1em;
 }
@@ -92,9 +93,11 @@ dl.detailed .element-attributes th {
 	font-weight: bold;
 	text-align: right;
 }
-dl.detailed .element-attributes th:after {
+
+dl.detailed .element-attributes th::after {
 	content: ":";
 }
+
 dl.detailed .element-attributes th,
 dl.detailed .element-attributes td {
 	padding: 2px;
@@ -349,6 +352,7 @@ body.taxonomy-amp_validation_error .wp-list-table .new th.check-column input {
 	margin: 0;
 	padding: 6px 0;
 }
+
 .validation-error-sources > li:first-child {
 	border-top: 0;
 }
