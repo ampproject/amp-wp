@@ -1447,10 +1447,10 @@ class AMP_Validation_Manager {
 		// Identify the type, name, and relative file path.
 		$file         = wp_normalize_path( $reflection->getFileName() );
 		$slug_pattern = '(?<slug>[^/]+)';
-		if ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( WP_PLUGIN_DIR ) ), ':' ) . $slug_pattern . '/(?P<file>.*$):s', $file, $matches ) ) {
+		if ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( WP_PLUGIN_DIR ) ), ':' ) . $slug_pattern . '(/(?P<file>.*$))?:s', $file, $matches ) ) {
 			$source['type'] = 'plugin';
 			$source['name'] = $matches['slug'];
-			$source['file'] = $matches['file'];
+			$source['file'] = isset( $matches['file'] ) ? $matches['file'] : $matches['slug'];
 		} elseif ( ! empty( self::$template_directory ) && preg_match( ':' . preg_quote( trailingslashit( self::$template_directory ), ':' ) . '(?P<file>.*$):s', $file, $matches ) ) {
 			$source['type'] = 'theme';
 			$source['name'] = self::$template_slug;
@@ -1459,10 +1459,10 @@ class AMP_Validation_Manager {
 			$source['type'] = 'theme';
 			$source['name'] = self::$stylesheet_slug;
 			$source['file'] = $matches['file'];
-		} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( WPMU_PLUGIN_DIR ) ), ':' ) . $slug_pattern . '/(?P<file>.*$):s', $file, $matches ) ) {
+		} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( WPMU_PLUGIN_DIR ) ), ':' ) . $slug_pattern . '(/(?P<file>.*$))?:s', $file, $matches ) ) {
 			$source['type'] = 'mu-plugin';
 			$source['name'] = $matches['slug'];
-			$source['file'] = $matches['file'];
+			$source['file'] = isset( $matches['file'] ) ? $matches['file'] : $matches['slug'];
 		} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( ABSPATH ) ), ':' ) . '(?P<slug>wp-admin|wp-includes)/(?P<file>.*$):s', $file, $matches ) ) {
 			$source['type'] = 'core';
 			$source['name'] = $matches['slug'];
