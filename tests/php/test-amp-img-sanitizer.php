@@ -339,9 +339,9 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 				'<figure class="wp-block-image" data-amp-lightbox="true"><amp-img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="" lightbox="" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/100x100" width="100" height="100" role="button" tabindex="0"></noscript></amp-img></figure>',
 			],
 
-			'image_block_wrapped_in_a_with_lightbox'   => [
-				'<figure class="wp-block-image" data-amp-lightbox="true"><a href="https://example.com/image.jpg"><img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" /></a></figure>',
-				'<figure class="wp-block-image" data-amp-lightbox="true"><amp-img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="" lightbox="" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/100x100" width="100" height="100" role="button" tabindex="0"></noscript></amp-img></figure>',
+			'image_block_link_attach_page_lightbox'    => [
+				'<figure class="wp-block-image" data-amp-lightbox="true"><a href="https://example.com/example-image"><img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" /></a></figure>',
+				'<figure class="wp-block-image" data-amp-lightbox="true"><a href="https://example.com/example-image"><amp-img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/100x100" width="100" height="100" role="button" tabindex="0"></noscript></amp-img></a></figure>',
 			],
 
 			'aligned_image_block_with_lightbox'        => [
@@ -442,5 +442,32 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 			$whitelist_sanitizer->get_scripts()
 		);
 		$this->assertEquals( $expected, $scripts );
+	}
+
+	/**
+	 * Test an Image block wrapped in an <a>, that links to the media file, with 'lightbox' selected.
+	 *
+	 * This should have the <a> stripped, as it interferes with the lightbox.
+	 */
+	public function test_image_block_link_to_media_file_with_lightbox() {
+		$attachment_id = $this->factory()->attachment->create_object(
+			'example-image.jpeg',
+			$this->factory()->post->create(),
+			[
+				'post_mime_type' => 'image/jpeg',
+				'post_type'      => 'attachment',
+			]
+		);
+		$source        = sprintf( '<figure class="wp-block-image" data-amp-lightbox="true"><a href="%s"><img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" /></a></figure>', wp_get_attachment_image_url( $attachment_id ) );
+		$expected      = '<figure class="wp-block-image" data-amp-lightbox="true"><amp-img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="" lightbox="" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/100x100" width="100" height="100" role="button" tabindex="0"></noscript></amp-img></figure>';
+
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
+		$sanitizer = new AMP_Img_Sanitizer( $dom );
+		$sanitizer->sanitize();
+
+		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$sanitizer->sanitize();
+		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+		$this->assertEquals( $expected, $content );
 	}
 }

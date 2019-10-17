@@ -372,8 +372,18 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			return $attributes;
 		}
 
-		$is_node_wrapped_in_anchor = 'a' === $parent_node->tagName && $parent_node->parentNode instanceof DOMElement && 'figure' === $parent_node->parentNode->tagName;
-		if ( 'figure' !== $parent_node->tagName && ! $is_node_wrapped_in_anchor ) {
+		// This should be true for links to the actual media file, but not for links to the attachment page.
+		$is_node_wrapped_in_media_file_link = (
+			'a' === $parent_node->tagName
+			&&
+			$parent_node->parentNode instanceof DOMElement
+			&&
+			'figure' === $parent_node->parentNode->tagName
+			&&
+			attachment_url_to_postid( $parent_node->getAttribute( 'href' ) )
+		);
+
+		if ( 'figure' !== $parent_node->tagName && ! $is_node_wrapped_in_media_file_link ) {
 			return $attributes;
 		}
 
@@ -396,10 +406,11 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			$attributes['lightbox']          = '';
 
 			/*
-			 * Remove the <a> if the image is wrapped in one, as it can prevent the lightbox from working.
+			 * Removes the <a> if the image is wrapped in one, as it can prevent the lightbox from working.
+			 * But this only removes the <a> if it links to the media file, not the attachment page.
 			 * If this feature is added, this can probably be removed: https://github.com/ampproject/amphtml/issues/25021
 			 */
-			if ( $is_node_wrapped_in_anchor ) {
+			if ( $is_node_wrapped_in_media_file_link ) {
 				$node->parentNode->parentNode->replaceChild( $node, $node->parentNode );
 			}
 		}
