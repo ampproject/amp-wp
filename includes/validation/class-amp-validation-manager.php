@@ -290,24 +290,44 @@ class AMP_Validation_Manager {
 	}
 
 	/**
-	 * Return whether sanitization is forcibly accepted, whether because in AMP-first mode or via user option.
+	 * Return whether sanitization is initially accepted for newly encountered validation errors.
+	 *
+	 * To auto-reject all validation errors, a filter can be used like so:
+	 *
+	 *     add_filter( 'amp_is_sanitization_auto_accepted', '__return_false' );
+	 *
+	 * Whether or not a validation error is then actually sanitized is the ultimately determined by the
+	 * `amp_validation_error_sanitized` filter.
+	 *
+	 * @since 1.0
+	 * @see AMP_Validation_Error_Taxonomy::is_validation_error_sanitized()
+	 * @see AMP_Validation_Error_Taxonomy::get_validation_error_sanitization()
 	 *
 	 * @param array $error Optional. Validation error. Will query the general status if no error provided.
 	 * @return bool Whether sanitization is forcibly accepted.
 	 */
 	public static function is_sanitization_auto_accepted( $error = null ) {
-		if ( ! amp_is_canonical() ) {
-			/**
-			 * Filters whether auto-sanitization is to be enabled or not.
-			 *
-			 * @since 1.3.1
-			 *
-			 * @param array $error Validation error.
-			 */
-			return apply_filters( 'amp_is_sanitization_auto_accepted', $error );
+
+		if ( $error && amp_is_canonical() ) {
+			// Excessive CSS on AMP-first sites must not be removed by default since removing CSS can severely break a site.
+			$auto_accepted = 'excessive_css' !== $error['code'];
+		} else {
+			$auto_accepted = true;
 		}
 
-		return ! ( $error && 'excessive_css' === $error['code'] );
+		/**
+		 * Filters whether sanitization is accepted for a newly-encountered validation error .
+		 *
+		 * This only applies to validation errors that have not been encountered before. To override the sanitization
+		 * status of existing validation errors, use the `amp_validation_error_sanitized` filter.
+		 *
+		 * @since 1.4
+		 * @see \AMP_Validation_Error_Taxonomy::get_validation_error_sanitization()
+		 *
+		 * @param bool       $auto_accepted Auto accepted.
+		 * @param array|null $error         Validation error. May be null when asking if auto-accepting sanitization is generally enabled.
+		 */
+		return apply_filters( 'amp_validation_error_auto_sanitized', $auto_accepted, $error );
 	}
 
 	/**
@@ -898,7 +918,7 @@ class AMP_Validation_Manager {
 		esc_html_e( 'There is content which fails AMP validation.', 'amp' );
 		echo ' ';
 
-		// Auto-acceptance is from either the `amp_is_sanitization_auto_accepted` filter, or from being in AMP-first.
+		// Auto-acceptance is enabled by default but can be overridden by the the `amp_validation_error_auto_sanitized` filter.
 		if ( self::is_sanitization_auto_accepted() ) {
 			if ( ! $has_rejected_error ) {
 				esc_html_e( 'However, your site is configured to automatically accept sanitization of the offending markup. You should review the issues to confirm whether or not sanitization should be accepted or rejected.', 'amp' );
@@ -2002,7 +2022,7 @@ class AMP_Validation_Manager {
 		$enabled_status    = $status_and_errors['status'];
 
 		$data = [
-			'isSanitizationAutoAccepted' => self::is_sanitization_auto_accepted() || AMP_Story_Post_Type::POST_TYPE_SLUG === get_post_type(),
+			'isSanitizationAutoAccepted' => self::is_sanitization_auto_accepted(),
 			'possibleStatuses'           => [ AMP_Post_Meta_Box::ENABLED_STATUS, AMP_Post_Meta_Box::DISABLED_STATUS ],
 			'defaultStatus'              => $enabled_status,
 		];

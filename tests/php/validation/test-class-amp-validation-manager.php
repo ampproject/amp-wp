@@ -257,8 +257,8 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 
 		add_theme_support( AMP_Theme_Support::SLUG );
 		$this->auto_accept_sanitization( false );
-		$this->assertTrue( AMP_Validation_Manager::is_sanitization_auto_accepted() );
-		$this->assertTrue( AMP_Validation_Manager::is_sanitization_auto_accepted( $some_error ) );
+		$this->assertFalse( AMP_Validation_Manager::is_sanitization_auto_accepted() );
+		$this->assertFalse( AMP_Validation_Manager::is_sanitization_auto_accepted( $some_error ) );
 		$this->assertFalse( AMP_Validation_Manager::is_sanitization_auto_accepted( $excessive_css_error ) );
 
 		add_theme_support( AMP_Theme_Support::SLUG, [ AMP_Theme_Support::PAIRED_FLAG => true ] );
@@ -702,7 +702,8 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertContains( '<code>script</code>', $output );
 		$this->assertContains( $expected_notice_non_accepted_errors, $output );
 
-		// In 'Standard' mode, if there are unaccepted validation errors, there should be a notice because this will block serving an AMP document.
+		// When auto-accepting validation errors, if there are unaccepted validation errors, there should be a notice because this will block serving an AMP document.
+		$this->auto_accept_sanitization( true );
 		add_theme_support( AMP_Theme_Support::SLUG );
 		$output = get_echo( [ 'AMP_Validation_Manager', 'print_edit_form_validation_status' ], [ $post ] );
 		$this->assertContains( 'There is content which fails AMP validation. Though your site is configured to automatically accept sanitization errors, there are rejected error(s). This could be because auto-acceptance of errors was disabled earlier. You should review the issues to confirm whether or not sanitization should be accepted or rejected.', $output );

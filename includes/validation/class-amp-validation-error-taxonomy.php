@@ -415,8 +415,11 @@ class AMP_Validation_Error_Taxonomy {
 	/**
 	 * Determine whether a validation error should be sanitized.
 	 *
-	 * @param array $error Validation error.
+	 * @since 1.0
+	 * @see AMP_Validation_Error_Taxonomy::get_validation_error_sanitization()
+	 * @see AMP_Validation_Manager::is_sanitization_auto_accepted()
 	 *
+	 * @param array $error Validation error.
 	 * @return bool Whether error should be sanitized.
 	 */
 	public static function is_validation_error_sanitized( $error ) {
@@ -431,8 +434,10 @@ class AMP_Validation_Error_Taxonomy {
 	/**
 	 * Get the validation error sanitization.
 	 *
-	 * @param array $error Validation error.
+	 * @since 1.0
+	 * @see AMP_Validation_Manager::is_sanitization_auto_accepted()
 	 *
+	 * @param array $error Validation error.
 	 * @return array {
 	 *     Validation error sanitization.
 	 *
@@ -479,6 +484,7 @@ class AMP_Validation_Error_Taxonomy {
 		 * sanitization by.
 		 *
 		 * @since 1.0
+		 * @see AMP_Validation_Manager::is_sanitization_auto_accepted() Which controls whether an error is initially accepted or rejected for sanitization.
 		 *
 		 * @param null|bool $sanitized Whether sanitized; this is initially null, and changing it to bool causes the validation error to be forced.
 		 * @param array $error Validation error being sanitized.

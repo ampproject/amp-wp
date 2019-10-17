@@ -275,7 +275,8 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 			AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $error_bar )
 		);
 
-		// New accepted, since canonical.
+		// New accepted.
+		$this->auto_accept_sanitization( true );
 		add_theme_support(
 			AMP_Theme_Support::SLUG,
 			[

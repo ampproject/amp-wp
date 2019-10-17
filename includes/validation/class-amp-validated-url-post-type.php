@@ -693,14 +693,6 @@ class AMP_Validated_URL_Post_Type {
 			);
 		}
 
-		$is_story = (
-			isset( $args['queried_object']['type'], $args['queried_object']['id'] )
-			&&
-			'post' === $args['queried_object']['type']
-			&&
-			AMP_Story_Post_Type::POST_TYPE_SLUG === get_post_type( $args['queried_object']['id'] )
-		);
-
 		/*
 		 * The details for individual validation errors is stored in the amp_validation_error taxonomy terms.
 		 * The post content just contains the slugs for these terms and the sources for the given instance of
@@ -754,7 +746,7 @@ class AMP_Validated_URL_Post_Type {
 								'term_group' => $sanitization['status'],
 							]
 						);
-					} elseif ( AMP_Validation_Manager::is_sanitization_auto_accepted( $data ) || $is_story ) {
+					} elseif ( AMP_Validation_Manager::is_sanitization_auto_accepted( $data ) ) {
 						$term_data['term_group'] = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS;
 						wp_update_term(
 							$term_id,
