@@ -173,7 +173,7 @@ const ContextMenu = ( props ) => {
 	}, [ clientIds, clientX, clientY ] );
 
 	const blockClientIds = castArray( clientIds );
-	const firstBlockClientId = blockClientIds[ 0 ];
+	const firstBlockClientId = blockClientIds.shift();
 	const block = getBlock( firstBlockClientId );
 
 	const onClose = () => {
@@ -218,7 +218,7 @@ const ContextMenu = ( props ) => {
 	}
 
 	// Disable Duplicate Block option for cta and attachment blocks.
-	if ( block && ! DISABLE_DUPLICATE_BLOCKS.includes( block.name ) ) {
+	if ( ! DISABLE_DUPLICATE_BLOCKS.includes( block.name ) ) {
 		const dupTitle = ( ! isPage ) ? __( 'Duplicate Block', 'amp' ) : __( 'Duplicate Page', 'amp' );
 		blockActions.push(
 			{
@@ -232,7 +232,7 @@ const ContextMenu = ( props ) => {
 	}
 
 	// If more than one page, add options to move blocks between pages.
-	if ( block && ! isPage && hasMultiplePages ) {
+	if ( ! isPage && hasMultiplePages ) {
 		const currentPage = getCurrentPage();
 		const currentPagePosition = pageList.indexOf( currentPage );
 		if ( currentPagePosition > 0 ) {
