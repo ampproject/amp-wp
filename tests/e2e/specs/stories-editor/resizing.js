@@ -150,7 +150,7 @@ describe( 'Resizing', () => {
 
 			const { positionLeft, positionTop } = await getSelectedBlockPosition();
 			expect( positionLeft ).toStrictEqual( '4.88%' );
-			expect( positionTop ).toStrictEqual( '9.95%' );
+			expect( positionTop ).toStrictEqual( '15.37%' );
 		} );
 
 		it( 'should not change the top and left position when resizing: right', async () => {
@@ -374,7 +374,7 @@ describe( 'Resizing', () => {
 
 			const { positionLeft, positionTop } = await getSelectedBlockPosition();
 			expect( positionLeft ).toStrictEqual( '32.8%' );
-			expect( positionTop ).toStrictEqual( '-2.76%' );
+			expect( positionTop ).toStrictEqual( '2.66%' );
 		} );
 
 		it( 'should change the top and left position correctly when resizing a rotated block: top', async () => {
@@ -480,7 +480,7 @@ describe( 'Resizing', () => {
 
 			const { positionLeft, positionTop } = await getSelectedBlockPosition();
 			expect( positionLeft ).toStrictEqual( '31.32%' );
-			expect( positionTop ).toStrictEqual( '8.04%' );
+			expect( positionTop ).toStrictEqual( '11.65%' );
 		} );
 	} );
 } );
