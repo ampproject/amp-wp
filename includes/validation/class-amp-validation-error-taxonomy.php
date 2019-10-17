@@ -964,6 +964,36 @@ class AMP_Validation_Error_Taxonomy {
 				return $primary_column;
 			}
 		);
+
+		// Jump to the requested line when opening the file editor.
+		add_action(
+			'admin_enqueue_scripts',
+			function ( $hook_suffix ) {
+				if ( ! isset( $_GET['line'] ) ) {
+					return;
+				}
+				$line = (int) $_GET['line'];
+
+				if ( 'plugin-editor.php' === $hook_suffix || 'theme-editor.php' === $hook_suffix ) {
+					wp_add_inline_script(
+						'wp-theme-plugin-editor',
+						sprintf(
+							'
+								(
+									function( originalInitCodeEditor ) {
+										wp.themePluginEditor.initCodeEditor = function init() {
+											originalInitCodeEditor.apply( this, arguments );
+											this.instance.codemirror.doc.setCursor( %d - 1 );
+										};
+									}
+								)( wp.themePluginEditor.initCodeEditor );
+							',
+							wp_json_encode( $line )
+						)
+					);
+				}
+			}
+		);
 	}
 
 	/**
