@@ -635,4 +635,34 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$actual = AMP_DOM_Utils::get_element_id( $element, $prefix );
 		$this->assertEquals( $expected, $actual );
 	}
+
+	public function get_xpath_from_css_selector_data() {
+		return [
+			// Single element.
+			[ 'body', '//body' ],
+			// Simple ID.
+			[ '#some-id', "//*[ @id = 'some-id' ]" ],
+			// Simple class.
+			[ '.some-class', "//*[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' some-class ' ) ]" ],
+			// Class descendants.
+			[ '.some-class .other-class', "//*[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' some-class ' ) ]//*[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' other-class ' ) ]" ],
+			// Class direct descendants.
+			[ '.some-class > .other-class', "//*[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' some-class ' ) ]/*[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' other-class ' ) ]" ],
+			// ID direct descendant elements.
+			[ '#some-id > ul', "//*[ @id = 'some-id' ]/ul" ],
+			// ID direct descendant elements with messy whitespace.
+			[ "   \t  \n #some-id    \t  >   \n  ul  \t \n ", "//*[ @id = 'some-id' ]/ul" ],
+		];
+	}
+
+	/**
+	 * Test xpath_from_css_selector().
+	 *
+	 * @dataProvider get_xpath_from_css_selector_data
+	 * @covers \AMP_DOM_Utils::xpath_from_css_selector()
+	 */
+	public function test_xpath_from_css_selector( $css_selector, $expected ) {
+		$actual = AMP_DOM_Utils::xpath_from_css_selector( $css_selector );
+		$this->assertEquals( $expected, $actual );
+	}
 }

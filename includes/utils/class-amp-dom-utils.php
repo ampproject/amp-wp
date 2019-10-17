@@ -759,4 +759,68 @@ class AMP_DOM_Utils {
 
 		return $id;
 	}
+
+	/**
+	 * Provides a "best guess" as to what XPath would mirror a given CSS
+	 * selector.
+	 *
+	 * This is a very simplistic conversion and will only work for very basic
+	 * CSS selectors. Therefore, it provides a filter for themes & plugins to
+	 * hook into to provide custom replacements.
+	 *
+	 * @param string $css_selector CSS selector to convert.
+	 * @return string|null XPath that closely mirrors the provided CSS selector,
+	 *                     or null if an error occurred.
+	 */
+	public static function xpath_from_css_selector( $css_selector ) {
+		// Start with basic clean-up.
+		$css_selector = trim( $css_selector );
+		$css_selector = preg_replace( '/\s+/', ' ', $css_selector );
+
+		$xpath             = '';
+		$direct_descendant = false;
+		$token             = strtok( $css_selector, ' ' );
+
+		while ( false !== $token ) {
+			$matches = [];
+
+			// Direct descendant.
+			if ( preg_match( '/^>$/', $token, $matches ) ) {
+				$direct_descendant = true;
+				$token             = strtok( ' ' );
+				continue;
+			}
+
+			// Single ID.
+			if ( preg_match( '/^#(?<id>[a-zA-Z0-9-_]*)$/', $token, $matches ) ) {
+				$descendant        = $direct_descendant ? '/' : '//';
+				$xpath             .= "{$descendant}*[ @id = '{$matches['id']}' ]";
+				$direct_descendant = false;
+				$token             = strtok( ' ' );
+				continue;
+			}
+
+			// Single class.
+			if ( preg_match( '/^\.(?<class>[a-zA-Z0-9-_]*)$/', $token, $matches ) ) {
+				$descendant        = $direct_descendant ? '/' : '//';
+				$xpath             .= "{$descendant}*[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' {$matches['class']} ' ) ]";
+				$direct_descendant = false;
+				$token             = strtok( ' ' );
+				continue;
+			}
+
+			// Element.
+			if ( preg_match( '/^(?<element>[^.][a-zA-Z0-9-_]*)$/', $token, $matches ) ) {
+				$descendant        = $direct_descendant ? '/' : '//';
+				$xpath             .= "{$descendant}{$matches['element']}";
+				$direct_descendant = false;
+				$token             = strtok( ' ' );
+				continue;
+			}
+
+			$token = strtok( ' ' );
+		}
+
+		return $xpath;
+	}
 }
