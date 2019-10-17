@@ -2518,7 +2518,7 @@ class AMP_Validation_Error_Taxonomy {
 				if ( self::INVALID_ATTRIBUTE_CODE === $validation_error['code'] ) {
 					return __( 'Attribute name', 'amp' );
 				} elseif ( self::INVALID_ELEMENT_CODE === $validation_error['code'] ) {
-						return __( 'Element name', 'amp' );
+					return __( 'Element name', 'amp' );
 				} else {
 					return __( 'Node name', 'amp' );
 				}

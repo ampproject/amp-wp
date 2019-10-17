@@ -1239,6 +1239,11 @@ class AMP_Validation_Manager {
 					continue;
 				}
 
+				// Skip considering ourselves.
+				if ( 'AMP_Validation_Manager::add_block_source_comments' === $source['function'] ) {
+					continue;
+				}
+
 				/**
 				 * Reflection.
 				 *

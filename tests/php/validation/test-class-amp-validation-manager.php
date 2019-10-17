@@ -1154,11 +1154,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 					'function' => 'WP_Embed::autoembed',
 				],
 				[
-					'type'     => 'plugin',
-					'name'     => 'amp',
-					'function' => 'AMP_Validation_Manager::add_block_source_comments',
-				],
-				[
 					'type'     => 'core',
 					'name'     => 'wp-includes',
 					'function' => 'do_blocks',
@@ -1206,11 +1201,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 			];
 		} elseif ( has_filter( 'the_content', 'do_blocks' ) ) {
 			$sources = [
-				[
-					'type'     => 'plugin',
-					'name'     => 'amp',
-					'function' => 'AMP_Validation_Manager::add_block_source_comments',
-				],
 				[
 					'type'     => 'plugin',
 					'name'     => 'gutenberg',
