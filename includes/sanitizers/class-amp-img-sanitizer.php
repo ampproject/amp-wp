@@ -405,7 +405,6 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			/*
 			 * Removes the <a> if the image is wrapped in one, as it can prevent the lightbox from working.
 			 * But this only removes the <a> if it links to the media file, not the attachment page.
-			 * If this feature is added, this can probably be removed: https://github.com/ampproject/amphtml/issues/25021
 			 */
 			if ( $is_node_wrapped_in_media_file_link ) {
 				$node->parentNode->parentNode->replaceChild( $node, $node->parentNode );
