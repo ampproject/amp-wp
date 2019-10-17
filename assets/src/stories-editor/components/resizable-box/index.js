@@ -17,14 +17,11 @@ import withSnapTargets from '../higher-order/with-snap-targets';
 import './edit.css';
 import { getPercentageFromPixels, getRelativeElementPosition } from '../../helpers';
 import { getBestSnapLines } from '../../helpers/snapping';
-import { TEXT_BLOCK_PADDING, BLOCK_RESIZING_SNAP_GAP } from '../../constants';
+import { BLOCK_RESIZING_SNAP_GAP } from '../../constants';
 import {
-	getBlockPositioning,
-	getResizedBlockPosition,
-	getUpdatedBlockPosition,
 	getResizedWidthAndHeight,
-	getRadianFromDeg,
 	getBlockTextElement,
+	getPositionAfterResizing,
 } from './helpers';
 
 let lastSeenX = 0,
@@ -34,8 +31,6 @@ let lastSeenX = 0,
 	blockElement = null,
 	blockElementTop,
 	blockElementLeft,
-	lastDeltaW,
-	lastDeltaH,
 	imageWrapper,
 	textBlockWrapper,
 	textElement;
@@ -143,8 +138,6 @@ class EnhancedResizableBox extends Component {
 					lastSeenY = event.clientY;
 					lastWidth = width;
 					lastHeight = height;
-					lastDeltaW = null;
-					lastDeltaH = null;
 					blockElement = element.closest( '.wp-block' ).parentNode;
 					blockElementTop = blockElement.style.top;
 					blockElementLeft = blockElement.style.left;
@@ -179,8 +172,8 @@ class EnhancedResizableBox extends Component {
 					}
 
 					// If the new width/height is below the minimum limit, set the minimum limit as the width/height instead.
-					let appliedWidth = minWidth <= width + deltaW ? width + deltaW : minWidth;
-					let appliedHeight = minHeight <= height + deltaH ? height + deltaH : minHeight;
+					let appliedWidth = Math.max( minWidth, ( width + deltaW ) );
+					let appliedHeight = Math.max( minHeight, ( height + deltaH ) );
 
 					const isReducing = 0 > deltaW || 0 > deltaH;
 
@@ -227,38 +220,19 @@ class EnhancedResizableBox extends Component {
 						}
 					}
 
-					// If it's not min width / height yet, assign lastDeltaH and lastDeltaW for position calculation.
-					if ( minHeight < appliedHeight ) {
-						lastDeltaH = deltaH;
-					}
-					if ( minWidth < appliedWidth ) {
-						lastDeltaW = deltaW;
-					}
-
 					// If limits were not reached yet, do the calculations for positioning.
 					if ( ! reachedMinLimit ) {
-						const radianAngle = getRadianFromDeg( angle );
-
-						// Compare position between the initial and after resizing.
-						let initialPosition, resizedPosition;
-
-						// If it's a text block, we shouldn't consider the added padding for measuring.
-						if ( isText ) {
-							initialPosition = getBlockPositioning( width - ( TEXT_BLOCK_PADDING * 2 ), height - ( TEXT_BLOCK_PADDING * 2 ), radianAngle, direction );
-							resizedPosition = getBlockPositioning( appliedWidth - ( TEXT_BLOCK_PADDING * 2 ), appliedHeight - ( TEXT_BLOCK_PADDING * 2 ), radianAngle, direction );
-						} else {
-							initialPosition = getBlockPositioning( width, height, radianAngle, direction );
-							resizedPosition = getBlockPositioning( appliedWidth, appliedHeight, radianAngle, direction );
-						}
-
-						const diff = {
-							left: resizedPosition.left - initialPosition.left,
-							top: resizedPosition.top - initialPosition.top,
-						};
-
-						const originalPos = getResizedBlockPosition( direction, blockElementLeft, blockElementTop, lastDeltaW, lastDeltaH );
-						const updatedPos = getUpdatedBlockPosition( direction, originalPos, diff );
-
+						const updatedPos = getPositionAfterResizing( {
+							direction,
+							angle,
+							isText,
+							oldWidth: width,
+							oldHeight: height,
+							newWidth: appliedWidth,
+							newHeight: appliedHeight,
+							oldPositionLeft: blockElementLeft,
+							oldPositionTop: blockElementTop,
+						} );
 						blockElement.style.left = getPercentageFromPixels( 'x', updatedPos.left ) + '%';
 						blockElement.style.top = getPercentageFromPixels( 'y', updatedPos.top ) + '%';
 					}
