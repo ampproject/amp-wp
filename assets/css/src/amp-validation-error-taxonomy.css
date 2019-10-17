@@ -94,7 +94,7 @@ dl.detailed .element-attributes th {
 	text-align: right;
 }
 
-dl.detailed .element-attributes th::after {
+dl.detailed .element-attributes th.has-attr-value::after {
 	content: ":";
 }
 

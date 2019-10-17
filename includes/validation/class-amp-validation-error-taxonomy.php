@@ -2125,7 +2125,8 @@ class AMP_Validation_Error_Taxonomy {
 							<?php foreach ( $value as $attr_name => $attr_value ) : ?>
 								<tr>
 								<?php
-								printf( '<th><code>%s</code></th>', esc_html( $attr_name ) );
+								$attr_name_class = empty( $attr_value ) ? '' : 'has-attr-value';
+								printf( '<th class="%1$s"><code>%2$s</code></th>', esc_attr( $attr_name_class ), esc_html( $attr_name ) );
 								echo '<td>';
 								if ( ! empty( $attr_value ) ) {
 									printf( '<code>%s</code>', esc_html( $attr_value ) );
