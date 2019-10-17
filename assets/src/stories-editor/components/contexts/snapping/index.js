@@ -2,6 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import debounce from 'lodash/debounce';
 
 /**
  * WordPress dependencies
@@ -19,7 +20,8 @@ import './edit.css';
 const SnapContext = createContext();
 
 const Snapping = ( { children } ) => {
-	const [ snapLines, setSnapLines ] = useState( [] );
+	const [ snapLines, setRawSnapLines ] = useState( [] );
+	const setSnapLines = debounce( setRawSnapLines, 10 );
 
 	const clearSnapLines = () => setSnapLines( [] );
 

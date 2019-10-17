@@ -9,6 +9,9 @@ import { act } from 'react-dom/test-utils';
  */
 import { default as Snapping, withSnapContext } from '../snapping';
 
+// Mock debounce by just returning the original function
+jest.mock( 'lodash/debounce', () => ( f ) => f );
+
 const setup = () => {
 	const Dummy = () => null;
 	// Disable reason: I have no idea why eslint thinks this variable is unused?

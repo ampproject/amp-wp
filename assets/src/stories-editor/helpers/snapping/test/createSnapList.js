@@ -19,6 +19,17 @@ describe( 'createSnapList', () => {
 		expect( snapLines ).toMatchObject( expected );
 	} );
 
+	it( 'should return an initial list of snap lines without edges', () => {
+		const maxValue = 1000;
+		const snapLines = createSnapList( getLine, maxValue, false );
+
+		const expected = {
+			500: [ [ [ 500, 0 ], [ 500, 1000 ] ] ],
+		};
+
+		expect( snapLines ).toMatchObject( expected );
+	} );
+
 	it( 'should allow adding new snap targets', () => {
 		const maxValue = 1000;
 		const snapLines = createSnapList( getLine, maxValue );
