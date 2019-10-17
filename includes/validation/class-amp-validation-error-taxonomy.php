@@ -2045,7 +2045,19 @@ class AMP_Validation_Error_Taxonomy {
 						<?php if ( self::JS_ERROR_TYPE === $validation_error['type'] ) : ?>
 								<?php
 								echo wp_kses_post(
-									__( 'Arbitrary JavaScript is not allowed in AMP. You cannot use JS <code>&lt;script&gt;</code> tags unless they are for loading <a href="https://amp.dev/documentation/components/">AMP components</a> (which the AMP plugin will add for you automatically). In order for a page to be served as AMP, the invalid JS code must be removed from the page, which is what happens when you <strong>accept</strong> sanitization. Learn more about <a href="https://amp.dev/about/how-amp-works/">how AMP works</a>. As an alternative to using custom JS, please consider using a pre-built AMP functionality, including <a href="https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events/">actions and events</a> (as opposed to JS event handler attributes like <code>onclick</code>) and the <a href="https://amp.dev/documentation/components/amp-bind/">amp-bind</a> component; you may also add custom JS if encapsulated in the <a href="https://amp.dev/documentation/components/amp-script/">amp-script</a>.', 'amp' )
+									sprintf(
+										/* translators: 1: script,  2: Documentation URL, 3: Documentation URL, 4: Documentation URL, 5: onclick, 6: Documentation URL, 7: amp-bind, 8: Documentation URL, 9: amp-script */
+										__( 'Arbitrary JavaScript is not allowed in AMP. You cannot use JS %1$s tags unless they are for loading <a href="%2$s">AMP components</a> (which the AMP plugin will add for you automatically). In order for a page to be served as AMP, the invalid JS code must be removed from the page, which is what happens when you <strong>accept</strong> sanitization. Learn more about <a href="%3$s">how AMP works</a>. As an alternative to using custom JS, please consider using a pre-built AMP functionality, including <a href="%4$s">actions and events</a> (as opposed to JS event handler attributes like %5$s) and the <a href="%6$s">%7$s</a> component; you may also add custom JS if encapsulated in the <a href="%8$s">%9$s</a>.', 'amp' ),
+										'<code>&lt;script&gt;</code>',
+										'https://amp.dev/documentation/components/',
+										'https://amp.dev/about/how-amp-works/',
+										'https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events/',
+										'<code>onclick</code>',
+										'https://amp.dev/documentation/components/amp-bind/',
+										'amp-bind',
+										'https://amp.dev/documentation/components/amp-script/',
+										'amp-script'
+									)
 								)
 								?>
 						<?php elseif ( self::CSS_ERROR_TYPE === $validation_error['type'] ) : ?>
@@ -2057,7 +2069,12 @@ class AMP_Validation_Error_Taxonomy {
 						<?php else : ?>
 							<?php
 							echo wp_kses_post(
-								__( 'AMP has specific set of allowed elements and attributes that are allowed in valid AMP pages. Learn about the <a href="https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/">AMP HTML specification</a>. If an element or attribute is not allowed in AMP, it must be removed for the page to <a href="https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/how_amp_pages_are_cached/">cached and be eligible for prerendering</a>.', 'amp' )
+								sprintf(
+									/* translators: 1: Documentation URL, 2: Documentation URL. */
+									__( 'AMP has specific set of allowed elements and attributes that are allowed in valid AMP pages. Learn about the <a href="%1$s">AMP HTML specification</a>. If an element or attribute is not allowed in AMP, it must be removed for the page to <a href="%2$s">cached and be eligible for prerendering</a>.', 'amp' ),
+									'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/',
+									'https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/how_amp_pages_are_cached/'	
+								)
 							)
 							?>
 						<?php endif; ?>
@@ -2203,7 +2220,7 @@ class AMP_Validation_Error_Taxonomy {
 				$source_count = count( $sources );
 				echo esc_html(
 					sprintf(
-						/* translators: %s is the number */
+						/* translators: %s: number of sources. */
 						_n(
 							'%s source',
 							'%s sources',
