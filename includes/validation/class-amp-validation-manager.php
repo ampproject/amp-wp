@@ -898,13 +898,13 @@ class AMP_Validation_Manager {
 		esc_html_e( 'There is content which fails AMP validation.', 'amp' );
 		echo ' ';
 
-		// Auto-acceptance is from either checking 'Automatically accept sanitization...' or from being in AMP-first.
+		// Auto-acceptance is from either the `amp_is_sanitization_auto_accepted` filter, or from being in AMP-first.
 		if ( self::is_sanitization_auto_accepted() ) {
 			if ( ! $has_rejected_error ) {
 				esc_html_e( 'However, your site is configured to automatically accept sanitization of the offending markup. You should review the issues to confirm whether or not sanitization should be accepted or rejected.', 'amp' );
 			} else {
 				/*
-				 * Even if sanitizations are auto accepted, if there are non-accepted errors in non-Standard mode, it will redirect to a non-AMP page.
+				 * Even if sanitizations are auto-accepted, if there are non-accepted errors in non-Standard mode, it will redirect to a non-AMP page.
 				 * For example, the errors could have been stored as 'New Rejected' when auto-accept was false, and now auto-accept is true.
 				 * In that case, this will block serving AMP.
 				 * This could also apply if this is in 'Standard' mode and the user has rejected a validation error.
