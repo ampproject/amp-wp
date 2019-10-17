@@ -172,8 +172,8 @@ class EnhancedResizableBox extends Component {
 					}
 
 					// If the new width/height is below the minimum limit, set the minimum limit as the width/height instead.
-					let appliedWidth = minWidth <= width + deltaW ? width + deltaW : minWidth;
-					let appliedHeight = minHeight <= height + deltaH ? height + deltaH : minHeight;
+					let appliedWidth = Math.max( minWidth, ( width + deltaW ) );
+					let appliedHeight = Math.max( minHeight, ( height + deltaH ) );
 
 					const isReducing = 0 > deltaW || 0 > deltaH;
 
