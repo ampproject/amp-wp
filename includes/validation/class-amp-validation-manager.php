@@ -297,6 +297,13 @@ class AMP_Validation_Manager {
 	 */
 	public static function is_sanitization_auto_accepted( $error = null ) {
 		if ( ! amp_is_canonical() ) {
+			/**
+			 * Filters whether auto-sanitization is to be enabled or not.
+			 *
+			 * @since 1.3.1
+			 *
+			 * @param array $error Validation error.
+			 */
 			return apply_filters( 'amp_is_sanitization_auto_accepted', $error );
 		}
 
