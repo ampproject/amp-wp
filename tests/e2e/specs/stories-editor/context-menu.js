@@ -59,11 +59,12 @@ describe( 'Context Menu', () => {
 			expect( page ).toMatchElement( POPOVER_SELECTOR + ' .right-click-duplicate' );
 		} );
 
-		it( 'does not open the menu by clicking on a page', async () => {
+		it( 'open the menu by clicking on a page', async () => {
 			const pageBlock = await page.$( ACTIVE_PAGE_SELECTOR );
 			await makeRightClick( pageBlock );
 
-			expect( page ).not.toMatchElement( POPOVER_SELECTOR );
+			expect( page ).toMatchElement( POPOVER_SELECTOR );
+			expect( page ).toMatchElement( POPOVER_SELECTOR + ' .right-click-duplicate-page' );
 		} );
 
 		it( 'should open right click menu for pasting on a page if a block has been copied previously', async () => {
@@ -75,6 +76,7 @@ describe( 'Context Menu', () => {
 			await makeRightClick( pageBlock );
 
 			expect( page ).toMatchElement( POPOVER_SELECTOR + ' .right-click-paste' );
+			expect( page ).toMatchElement( POPOVER_SELECTOR + ' .right-click-duplicate-page' );
 		} );
 
 		it( 'should allow copying and pasting a block', async () => {
@@ -117,6 +119,18 @@ describe( 'Context Menu', () => {
 
 			const nodes = await page.$x(
 				'//div[contains(@class, "wp-block-amp-amp-story-post-author")]'
+			);
+			expect( nodes ).toHaveLength( 2 );
+		} );
+
+		it( 'should allow duplicating a page', async () => {
+			const pageBlock = await page.$( ACTIVE_PAGE_SELECTOR );
+			await makeRightClick( pageBlock );
+
+			await clickButton( 'Duplicate Page' );
+
+			const nodes = await page.$x(
+				'//div[contains(@class, "amp-page-block")]'
 			);
 			expect( nodes ).toHaveLength( 2 );
 		} );
@@ -220,6 +234,15 @@ describe( 'Context Menu', () => {
 			expect( page ).toMatchElement( POPOVER_SELECTOR + ' .right-click-cut' );
 			expect( page ).toMatchElement( POPOVER_SELECTOR + ' .right-click-remove' );
 			expect( page ).toMatchElement( POPOVER_SELECTOR + ' .right-click-duplicate' );
+		} );
+
+		it( 'should open the context menu when pressing Shift+F10 on a page', async () => {
+			await insertBlock( 'Page' );
+			await pressKeyWithModifier( 'shift', 'F10' );
+
+			expect( page ).toMatchElement( POPOVER_SELECTOR );
+			expect( page ).toMatchElement( POPOVER_SELECTOR + ' .right-click-duplicate-page' );
+			expect( page ).toMatchElement( POPOVER_SELECTOR + ' .right-click-remove-page' );
 		} );
 	} );
 } );
