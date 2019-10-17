@@ -226,12 +226,12 @@ class EnhancedResizableBox extends Component {
 							direction,
 							angle,
 							isText,
-							width,
-							height,
-							appliedWidth,
-							appliedHeight,
-							blockElementLeft,
-							blockElementTop,
+							oldWidth: width,
+							oldHeight: height,
+							newWidth: appliedWidth,
+							newHeight: appliedHeight,
+							oldPositionLeft: blockElementLeft,
+							oldPositionTop: blockElementTop,
 						} );
 						blockElement.style.left = getPercentageFromPixels( 'x', updatedPos.left ) + '%';
 						blockElement.style.top = getPercentageFromPixels( 'y', updatedPos.top ) + '%';

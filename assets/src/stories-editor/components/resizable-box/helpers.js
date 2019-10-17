@@ -195,23 +195,33 @@ export const getBlockPositioning = ( width, height, radian, direction ) => {
 /**
  * Get block's adjusted left and top position after it has been resized.
  *
- * @param {Object}   attributes Attributes.
- * @return {Object}  Top and left positions adjusted based on the rotation angle.
+ * @param {Object}  attributes                 Attributes.
+ * @param {string}  attributes.direction       Direction in which the resizing happened.
+ * @param {number}  attributes.angle           Rotation angle.
+ * @param {boolean} attributes.isText          If it's the Text block being resized.
+ * @param {number}  attributes.oldWidth        Original width before resizing.
+ * @param {number}  attributes.oldHeight       Original height before resizing.
+ * @param {number}  attributes.newWidth        New width after resizing.
+ * @param {number}  attributes.newHeight       New height after resizing.
+ * @param {number}  attributes.oldPositionLeft Original left position.
+ * @param {number}  attributes.oldPositionTop  Original top position.
+ *
+ * @return {Object} Top and left positions adjusted based on the rotation angle.
  */
 export const getPositionAfterResizing = ( attributes ) => {
 	const {
 		direction,
 		angle,
 		isText,
-		width,
-		height,
-		appliedWidth,
-		appliedHeight,
-		blockElementLeft,
-		blockElementTop,
+		oldWidth,
+		oldHeight,
+		newWidth,
+		newHeight,
+		oldPositionLeft,
+		oldPositionTop,
 	} = attributes;
-	const deltaW = appliedWidth - width;
-	const deltaH = appliedHeight - height;
+	const deltaW = newWidth - oldWidth;
+	const deltaH = newHeight - oldHeight;
 	const radianAngle = getRadianFromDeg( angle );
 
 	// Compare position between the initial and after resizing.
@@ -219,11 +229,11 @@ export const getPositionAfterResizing = ( attributes ) => {
 
 	// If it's a text block, we shouldn't consider the added padding for measuring.
 	if ( isText ) {
-		initialPosition = getBlockPositioning( width - ( TEXT_BLOCK_PADDING * 2 ), height - ( TEXT_BLOCK_PADDING * 2 ), radianAngle, direction );
-		resizedPosition = getBlockPositioning( appliedWidth - ( TEXT_BLOCK_PADDING * 2 ), appliedHeight - ( TEXT_BLOCK_PADDING * 2 ), radianAngle, direction );
+		initialPosition = getBlockPositioning( oldWidth - ( TEXT_BLOCK_PADDING * 2 ), oldHeight - ( TEXT_BLOCK_PADDING * 2 ), radianAngle, direction );
+		resizedPosition = getBlockPositioning( newWidth - ( TEXT_BLOCK_PADDING * 2 ), newHeight - ( TEXT_BLOCK_PADDING * 2 ), radianAngle, direction );
 	} else {
-		initialPosition = getBlockPositioning( width, height, radianAngle, direction );
-		resizedPosition = getBlockPositioning( appliedWidth, appliedHeight, radianAngle, direction );
+		initialPosition = getBlockPositioning( oldWidth, oldHeight, radianAngle, direction );
+		resizedPosition = getBlockPositioning( newWidth, newHeight, radianAngle, direction );
 	}
 
 	const diff = {
@@ -231,6 +241,6 @@ export const getPositionAfterResizing = ( attributes ) => {
 		top: resizedPosition.top - initialPosition.top,
 	};
 
-	const originalPos = getResizedBlockPosition( direction, blockElementLeft, blockElementTop, deltaW, deltaH );
+	const originalPos = getResizedBlockPosition( direction, oldPositionLeft, oldPositionTop, deltaW, deltaH );
 	return getUpdatedBlockPosition( direction, originalPos, diff );
 };

@@ -75,12 +75,12 @@ const maybeUpdateBlockDimensions = ( block ) => {
 			direction: 'bottomRight',
 			angle: rotationAngle,
 			isText: 'amp/amp-story-text' === name,
-			width,
-			height,
-			appliedWidth: width + deltaW,
-			appliedHeight: height + deltaH,
-			blockElementLeft: positionLeft,
-			blockElementTop: positionTop,
+			oldWidth: width,
+			oldHeight: height,
+			newWidth: width + deltaW,
+			newHeight: height + deltaH,
+			oldPositionLeft: positionLeft,
+			oldPositionTop: positionTop,
 		} );
 		const newAtts = {
 			positionLeft: Number( getPercentageFromPixels( 'x', newLeft ).toFixed( 2 ) ),

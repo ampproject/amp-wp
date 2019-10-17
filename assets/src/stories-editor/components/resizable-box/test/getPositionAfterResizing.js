@@ -9,12 +9,12 @@ describe( 'getPositionAfterResizing', () => {
 			direction: 'topLeft',
 			angle: '-30',
 			isText: true,
-			width: 250,
-			height: 30,
-			appliedWidth: 280,
-			appliedHeight: 60,
-			blockElementLeft: 5,
-			blockElementTop: 10,
+			oldWidth: 250,
+			oldHeight: 30,
+			newWidth: 280,
+			newHeight: 60,
+			oldPositionLeft: 5,
+			oldPositionTop: 10,
 		};
 		expect( getPositionAfterResizing( attributes ) ).toStrictEqual( { left: -19.49038105676658, top: 34.509618943233406 } );
 	} );
@@ -24,12 +24,12 @@ describe( 'getPositionAfterResizing', () => {
 			direction: 'bottomRight',
 			angle: '-30',
 			isText: false,
-			width: 250,
-			height: 30,
-			appliedWidth: 280,
-			appliedHeight: 60,
-			blockElementLeft: 5,
-			blockElementTop: 10,
+			oldWidth: 250,
+			oldHeight: 30,
+			newWidth: 280,
+			newHeight: 60,
+			oldPositionLeft: 5,
+			oldPositionTop: 10,
 		};
 		expect( getPositionAfterResizing( attributes ) ).toStrictEqual( { left: 21.490381056766566, top: 45.490381056766594 } );
 	} );
