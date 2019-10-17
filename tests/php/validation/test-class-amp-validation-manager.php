@@ -710,7 +710,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 
 		/*
 		 * When there are 'Rejected' or 'New Rejected' errors, there should be a message that explains that this will serve a non-AMP URL.
-		 * This simulates 'accept_sanitization_by_default' being true, but it having been false when the validation errors were stored,
+		 * This simulates sanitization being accepted by default, but it having been false when the validation errors were stored,
 		 * as there are errors with 'New Rejected' status.
 		 */
 		$this->accept_sanitization_by_default( true );
