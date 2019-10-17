@@ -368,7 +368,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function maybe_add_lightbox_attributes( $attributes, $node ) {
 		$parent_node = $node->parentNode;
-		if ( ! ( $parent_node instanceof DOMElement ) ) {
+		if ( ! ( $parent_node instanceof DOMElement ) || ! ( $parent_node->parentNode instanceof DOMElement ) ) {
 			return $attributes;
 		}
 
@@ -376,9 +376,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		$is_node_wrapped_in_media_file_link = (
 			'a' === $parent_node->tagName
 			&&
-			$parent_node->parentNode instanceof DOMElement
-			&&
-			'figure' === $parent_node->parentNode->tagName
+			( 'figure' === $parent_node->tagName || 'figure' === $parent_node->parentNode->tagName )
 			&&
 			attachment_url_to_postid( $parent_node->getAttribute( 'href' ) )
 		);
@@ -392,11 +390,10 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		// to div.wp-block-image > figure > img and the amp-lightbox attribute
 		// can be found on the wrapping div instead of the figure element.
 		$grand_parent = $parent_node->parentNode;
-		if ( $grand_parent instanceof DOMElement ) {
-			$classes = preg_split( '/\s+/', $grand_parent->getAttribute( 'class' ) );
-			if ( in_array( 'wp-block-image', $classes, true ) ) {
-				$parent_node = $grand_parent;
-			}
+		if ( $this->does_node_have_block_class( $grand_parent ) ) {
+			$parent_node = $grand_parent;
+		} elseif ( isset( $grand_parent->parentNode ) && $this->does_node_have_block_class( $grand_parent->parentNode ) ) {
+			$parent_node = $grand_parent->parentNode;
 		}
 
 		$parent_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $parent_node );
@@ -416,6 +413,23 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		return $attributes;
+	}
+
+	/**
+	 * Gets whether a node has the class 'wp-block-image', meaning it is a wrapper for an Image block.
+	 *
+	 * @param DOMElement $node A node to evaluate.
+	 * @return bool Whether the node has the class 'wp-block-image'.
+	 */
+	private function does_node_have_block_class( $node ) {
+		if ( $node instanceof DOMElement ) {
+			$classes = preg_split( '/\s+/', $node->getAttribute( 'class' ) );
+			if ( in_array( 'wp-block-image', $classes, true ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**

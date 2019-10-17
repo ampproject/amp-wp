@@ -450,16 +450,8 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 	 * This should have the <a> stripped, as it interferes with the lightbox.
 	 */
 	public function test_image_block_link_to_media_file_with_lightbox() {
-		$attachment_id = $this->factory()->attachment->create_object(
-			'example-image.jpeg',
-			$this->factory()->post->create(),
-			[
-				'post_mime_type' => 'image/jpeg',
-				'post_type'      => 'attachment',
-			]
-		);
-		$source        = sprintf( '<figure class="wp-block-image" data-amp-lightbox="true"><a href="%s"><img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" /></a></figure>', wp_get_attachment_image_url( $attachment_id ) );
-		$expected      = '<figure class="wp-block-image" data-amp-lightbox="true"><amp-img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="" lightbox="" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/100x100" width="100" height="100" role="button" tabindex="0"></noscript></amp-img></figure>';
+		$source   = sprintf( '<figure class="wp-block-image" data-amp-lightbox="true"><a href="%s"><img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" /></a></figure>', wp_get_attachment_image_url( $this->get_new_attachment_id() ) );
+		$expected = '<figure class="wp-block-image" data-amp-lightbox="true"><amp-img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="" lightbox="" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/100x100" width="100" height="100" role="button" tabindex="0"></noscript></amp-img></figure>';
 
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Img_Sanitizer( $dom );
@@ -469,5 +461,87 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer->sanitize();
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$this->assertEquals( $expected, $content );
+	}
+
+	/**
+	 * Test an Image block wrapped in an <a>, that has right-alignment, links to the media file, and has 'lightbox' selected.
+	 *
+	 * This should have the <a> stripped, as it interferes with the lightbox.
+	 */
+	public function test_image_block_link_to_media_file_and_alignment_with_lightbox() {
+		$source   = sprintf( '<div data-amp-lightbox="true" class="wp-block-image"><figure class="alignright size-large"><a href="%s"><img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" /></a></figure></div>', wp_get_attachment_image_url( $this->get_new_attachment_id() ) );
+		$expected = '<div data-amp-lightbox="true" class="wp-block-image"><figure class="alignright size-large"><amp-img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="" lightbox="" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/100x100" width="100" height="100" role="button" tabindex="0"></noscript></amp-img></figure></div>';
+
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
+		$sanitizer = new AMP_Img_Sanitizer( $dom );
+		$sanitizer->sanitize();
+
+		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$sanitizer->sanitize();
+		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+		$this->assertEquals( $expected, $content );
+	}
+
+	/**
+	 * Gets test data for test_does_node_have_block_class(), using a <figure> element.
+	 *
+	 * @see AMP_Img_Sanitizer_Test::test_does_node_have_block_class()
+	 * @return array Test data for function.
+	 */
+	public function get_data_for_node_block_class_test() {
+		return [
+			'has_no_class'           => [
+				'<figure></figure>',
+				false,
+			],
+			'has_wrong_class'        => [
+				'<figure class="completely-wrong-class"></figure>',
+				false,
+			],
+			'only_has_part_of_class' => [
+				'<figure class="wp-block"></figure>',
+				false,
+			],
+			'has_correct_class'      => [
+				'<figure class="wp-block-image"></figure>',
+				true,
+			],
+		];
+	}
+
+	/**
+	 * Test does_node_have_block_class.
+	 *
+	 * @dataProvider get_data_for_node_block_class_test
+	 * @covers \AMP_Img_Sanitizer::does_node_have_block_class()
+	 *
+	 * @param string $source The source markup to test.
+	 * @param string $expected The expected return of the tested function, using the source markup.
+	 * @throws ReflectionException If invoking the private method fails.
+	 */
+	public function test_does_node_have_block_class( $source, $expected ) {
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
+		$sanitizer = new AMP_Img_Sanitizer( $dom );
+		$figures   = $dom->getElementsByTagName( 'figure' );
+		$method    = new ReflectionMethod( $sanitizer, 'does_node_have_block_class' );
+
+		$method->setAccessible( true );
+		$this->assertEquals( $expected, $method->invoke( $figures[0] ) );
+	}
+
+	/**
+	 * Creates a new image attachment, and gets the ID.
+	 *
+	 * @return int|WP_Error The new attachment ID, or WP_Error.
+	 */
+	public function get_new_attachment_id() {
+		return $this->factory()->attachment->create_object(
+			'example-image.jpeg',
+			$this->factory()->post->create(),
+			[
+				'post_mime_type' => 'image/jpeg',
+				'post_type'      => 'attachment',
+			]
+		);
 	}
 }
