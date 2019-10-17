@@ -153,18 +153,19 @@ const ContextMenu = ( props ) => {
 			return;
 		}
 
-		let parentBlock = rootClientId;
-		let index = null;
+		let parentBlock;
+		let index;
 
 		if ( isPageBlock( clientId ) ) {
 			parentBlock = '';
 			const currentPageIndex = pageList.indexOf( clientId );
 			index = currentPageIndex + 1;
+		} else {
+			parentBlock = getBlockRootClientId( clientId );
+			index = null;
 		}
 
-		const rootClientId = getBlockRootClientId( clientId );
 		const clonedBlock = cloneBlock( block );
-
 		insertBlock( clonedBlock, index, parentBlock );
 	};
 
@@ -173,7 +174,7 @@ const ContextMenu = ( props ) => {
 	}, [ clientIds, clientX, clientY ] );
 
 	const blockClientIds = castArray( clientIds );
-	const firstBlockClientId = blockClientIds.shift();
+	const firstBlockClientId = blockClientIds[ 0 ];
 	const block = getBlock( firstBlockClientId );
 
 	const onClose = () => {
@@ -218,21 +219,32 @@ const ContextMenu = ( props ) => {
 	}
 
 	// Disable Duplicate Block option for cta and attachment blocks.
-	if ( ! DISABLE_DUPLICATE_BLOCKS.includes( block.name ) ) {
-		const dupTitle = ( ! isPage ) ? __( 'Duplicate Block', 'amp' ) : __( 'Duplicate Page', 'amp' );
-		blockActions.push(
-			{
-				name: dupTitle,
-				blockAction: duplicateBlock,
-				params: [ firstBlockClientId ],
-				icon: 'admin-page',
-				className: 'right-click-duplicate',
-			},
-		);
+	if ( block && ! DISABLE_DUPLICATE_BLOCKS.includes( block.name ) ) {
+		if ( ! isPage ) {
+			blockActions.push(
+				{
+					name: __( 'Duplicate Block', 'amp' ),
+					blockAction: duplicateBlock,
+					params: [ firstBlockClientId ],
+					icon: 'admin-page',
+					className: 'right-click-duplicate',
+				},
+			);
+		} else {
+			blockActions.push(
+				{
+					name: __( 'Duplicate Page', 'amp' ),
+					blockAction: duplicateBlock,
+					params: [ firstBlockClientId ],
+					icon: 'admin-page',
+					className: 'right-click-duplicate-page',
+				},
+			);
+		}
 	}
 
 	// If more than one page, add options to move blocks between pages.
-	if ( ! isPage && hasMultiplePages ) {
+	if ( block && ! isPage && hasMultiplePages ) {
 		const currentPage = getCurrentPage();
 		const currentPagePosition = pageList.indexOf( currentPage );
 		if ( currentPagePosition > 0 ) {
