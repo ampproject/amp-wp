@@ -42,6 +42,7 @@ const maybeUpdateBlockDimensions = ( block ) => {
 			const element = getBlockInnerTextElement( block );
 
 			if ( element && content.length ) {
+				// If the scroll height or width exceeds the actual width/height.
 				newHeight = element.scrollHeight > height ? element.scrollHeight : null;
 				newWidth = element.scrollWidth > width ? element.scrollWidth : null;
 			}
@@ -56,6 +57,7 @@ const maybeUpdateBlockDimensions = ( block ) => {
 			if ( metaBlockElement ) {
 				metaBlockElement.classList.toggle( 'is-measuring' );
 
+				// If the scroll height or width exceeds the actual width/height.
 				newHeight = metaBlockElement.offsetHeight > height ? metaBlockElement.offsetHeight : null;
 				newWidth = metaBlockElement.offsetWidth > width ? metaBlockElement.offsetWidth : null;
 
@@ -68,6 +70,8 @@ const maybeUpdateBlockDimensions = ( block ) => {
 			break;
 	}
 
+	// If the block is rotated and either new width or height has been assigned
+	// we need to reposition the block.
 	if ( rotationAngle && ( newWidth || newHeight ) ) {
 		const deltaW = newWidth ? newWidth - width : 0;
 		const deltaH = newHeight ? newHeight - height : 0;
