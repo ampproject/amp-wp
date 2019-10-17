@@ -39,7 +39,6 @@ class AMP_Options_Manager {
 		'theme_support'            => AMP_Theme_Support::READER_MODE_SLUG,
 		'supported_post_types'     => [ 'post' ],
 		'analytics'                => [],
-		'auto_accept_sanitization' => true,
 		'all_templates_supported'  => true,
 		'supported_templates'      => [ 'is_singular' ],
 		'enable_response_caching'  => true,
@@ -158,6 +157,11 @@ class AMP_Options_Manager {
 			$options['theme_support'] = $defaults['theme_support'];
 		}
 
+		// Remove 'auto_accept_sanitization' option from 1.3.1-alpha.
+		if ( isset( $options['auto_accept_sanitization'] ) ) {
+			unset( $options['auto_accept_sanitization'] );
+		}
+
 		return $options;
 	}
 
@@ -250,8 +254,6 @@ class AMP_Options_Manager {
 				add_action( 'update_option_' . self::OPTION_NAME, [ __CLASS__, 'handle_updated_theme_support_option' ] );
 			}
 		}
-
-		$options['auto_accept_sanitization'] = ! empty( $new_options['auto_accept_sanitization'] );
 
 		// Validate post type support.
 		if ( in_array( self::WEBSITE_EXPERIENCE, $options['experiences'], true ) || isset( $new_options['supported_post_types'] ) ) {
