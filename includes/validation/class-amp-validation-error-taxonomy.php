@@ -2089,7 +2089,7 @@ class AMP_Validation_Error_Taxonomy {
 					<?php if ( in_array( $key, [ 'node_name', 'parent_name' ], true ) ) : ?>
 						<code><?php echo esc_html( $value ); ?></code>
 					<?php elseif ( 'sources' === $key ) : ?>
-						<pre><?php echo esc_html( wp_json_encode( $value, 128 /* JSON_PRETTY_PRINT */ | 64 /* JSON_UNESCAPED_SLASHES */ ) ); ?></pre>
+						<?php self::render_sources( $value, $validation_error ); ?>
 					<?php elseif ( $is_element_attributes ) : ?>
 						<table class="element-attributes">
 							<?php foreach ( $value as $attr_name => $attr_value ) : ?>
@@ -2129,6 +2129,144 @@ class AMP_Validation_Error_Taxonomy {
 			self::get_details_summary_label( $validation_error ),
 			ob_get_clean()
 		);
+	}
+
+	/**
+	 * Find a plugin from a slug.
+	 *
+	 * A slug is a plugin directory name like 'amp' or if the plugin is just a single file, then the PHP file in
+	 * the plugins directory.
+	 *
+	 * @param string $plugin_slug Plugin slug.
+	 * @return array|null
+	 */
+	public static function get_plugin_from_slug( $plugin_slug ) {
+		$plugins = get_plugins();
+		if ( isset( $plugins[ $plugin_slug ] ) ) {
+			return [
+				'name' => $plugin_slug,
+				'data' => $plugins[ $plugin_slug ],
+			];
+		}
+		foreach ( $plugins as $plugin_file => $plugin_data ) {
+			if ( strtok( $plugin_file, '/' ) === $plugin_slug ) {
+				return [
+					'name' => $plugin_file,
+					'data' => $plugin_data,
+				];
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Render sources.
+	 *
+	 * @param array $sources Sources.
+	 */
+	private static function render_sources( $sources ) {
+		?>
+		<details>
+			<summary>
+				<?php
+				$source_count = count( $sources );
+				echo esc_html(
+					sprintf(
+						/* translators: %s is the number */
+						_n(
+							'%s source',
+							'%s sources',
+							$source_count,
+							'amp'
+						),
+						number_format_i18n( $source_count )
+					)
+				);
+				?>
+			</summary>
+			<ol class="validation-error-sources">
+				<?php foreach ( $sources as $source ) : ?>
+					<?php
+					$file_text = null;
+					$file_link = null;
+					if ( isset( $source['file'], $source['line'] ) ) {
+						$file      = $source['file'];
+						$line      = $source['line'];
+						$file_text = "$file:$line";
+						unset( $source['file'], $source['line'] );
+
+						if ( isset( $source['type'], $source['name'] ) ) {
+							if ( 'plugin' === $source['type'] && current_user_can( 'edit_plugins' ) ) {
+								$plugin = self::get_plugin_from_slug( $source['name'] );
+								if ( $plugin ) {
+									// Prepend the plugin directory name to the file name as the plugin editor requires.
+									if ( false !== strpos( $plugin['name'], '/' ) ) {
+										$file = strtok( $plugin['name'], '/' ) . '/' . $file;
+									}
+
+									$file_link = add_query_arg(
+										[
+											'plugin' => rawurlencode( $plugin['name'] ),
+											'file'   => rawurlencode( $file ),
+											'line'   => rawurlencode( $line ),
+										],
+										admin_url( 'plugin-editor.php' )
+									);
+								}
+							} elseif ( 'theme' === $source['type'] && current_user_can( 'edit_themes' ) ) {
+								$file_link = add_query_arg(
+									[
+										'file'  => rawurlencode( $file ),
+										'theme' => rawurlencode( $source['name'] ),
+										'line'  => rawurlencode( $line ),
+									],
+									admin_url( 'theme-editor.php' )
+								);
+							}
+						}
+					}
+					?>
+					<li>
+						<table>
+							<?php foreach ( $source as $key => $value ) : ?>
+								<tr>
+									<th>
+										<?php echo esc_html( $key ); ?>:
+									</th>
+									<td>
+										<?php if ( 'sources' === $key && is_array( $value ) ) : ?>
+											<?php self::render_sources( $value ); ?>
+										<?php elseif ( is_scalar( $value ) ) : ?>
+											<?php echo esc_html( (string) $value ); ?>
+										<?php else : ?>
+											<pre><?php echo esc_html( wp_json_encode( $source, 128 /* JSON_PRETTY_PRINT */ | 64 /* JSON_UNESCAPED_SLASHES */ ) ); ?></pre>
+										<?php endif; ?>
+									</td>
+								</tr>
+							<?php endforeach; ?>
+							<?php if ( $file_text ) : ?>
+								<tr>
+									<th>
+										file:
+									</th>
+									<td>
+										<?php if ( $file_link ) : ?>
+											<a href="<?php echo esc_url( $file_link ); ?>" target="_blank">
+										<?php endif; ?>
+										<?php echo esc_html( $file_text ); ?>
+										<?php if ( $file_link ) : ?>
+											</a>
+										<?php endif; ?>
+									</td>
+								</tr>
+							<?php endif; ?>
+						</table>
+
+					</li>
+				<?php endforeach; ?>
+			</ol>
+		</details>
+		<?php
 	}
 
 	/**

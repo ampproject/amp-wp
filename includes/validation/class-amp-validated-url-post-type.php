@@ -1037,7 +1037,7 @@ class AMP_Validated_URL_Post_Type {
 			return;
 		}
 
-		// Show nothing if there are no valudation errors.
+		// Show nothing if there are no validation errors.
 		if ( 0 === count( array_filter( $error_summary ) ) ) {
 			esc_html_e( '--', 'amp' );
 			return;
@@ -1051,7 +1051,6 @@ class AMP_Validated_URL_Post_Type {
 
 		$sources = $error_summary[ AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT ];
 		$output  = [];
-		$plugins = get_plugins();
 		foreach ( wp_array_slice_assoc( $sources, [ 'plugin', 'mu-plugin' ] ) as $type => $slugs ) {
 			$plugin_names = [];
 			$plugin_slugs = array_unique( $slugs );
@@ -1059,14 +1058,12 @@ class AMP_Validated_URL_Post_Type {
 				if ( 'mu-plugin' === $type ) {
 					$plugin_names[] = $plugin_slug;
 				} else {
-					$name = $plugin_slug;
-					foreach ( $plugins as $plugin_file => $plugin_data ) {
-						if ( strtok( $plugin_file, '/' ) === $plugin_slug ) {
-							$name = $plugin_data['Name'];
-							break;
-						}
+					$plugin_name = $plugin_slug;
+					$plugin      = AMP_Validation_Error_Taxonomy::get_plugin_from_slug( $plugin_slug );
+					if ( $plugin ) {
+						$plugin_name = $plugin['data']['Name'];
 					}
-					$plugin_names[] = $name;
+					$plugin_names[] = $plugin_name;
 				}
 			}
 			$count = count( $plugin_names );

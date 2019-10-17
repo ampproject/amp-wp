@@ -98,6 +98,7 @@ dl.detailed .element-attributes th:after {
 dl.detailed .element-attributes th,
 dl.detailed .element-attributes td {
 	padding: 2px;
+	vertical-align: top;
 }
 
 dl.detailed a {
@@ -249,6 +250,14 @@ body.post-type-amp_validated_url .wp-list-table .new td {
 	background-color: #fef7f1;
 }
 
+body.taxonomy-amp_validation_error .wp-list-table .new.odd th,
+body.taxonomy-amp_validation_error .wp-list-table .new.odd td,
+tr.expanded.new.odd + tr > td:first-of-type,
+body.post-type-amp_validated_url .wp-list-table .new.odd th,
+body.post-type-amp_validated_url .wp-list-table .new.odd td {
+	background-color: #f9eee5;
+}
+
 body.taxonomy-amp_validation_error .wp-list-table .new th.check-column,
 tr.expanded.new + tr > td:first-of-type,
 body.post-type-amp_validated_url .wp-list-table .new th.check-column {
@@ -322,4 +331,24 @@ body.taxonomy-amp_validation_error .wp-list-table .new th.check-column input {
 	color: #0073aa;
 	cursor: pointer;
 	text-decoration: underline;
+}
+
+.validation-error-sources th {
+	font-weight: bold;
+	text-align: right;
+}
+
+.validation-error-sources td,
+.validation-error-sources th {
+	vertical-align: top;
+	padding: 0 4px;
+}
+
+.validation-error-sources > li {
+	border-top: solid 1px #ddd;
+	margin: 0;
+	padding: 6px 0;
+}
+.validation-error-sources > li:first-child {
+	border-top: 0;
 }
