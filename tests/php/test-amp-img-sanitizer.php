@@ -526,7 +526,7 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 		$method    = new ReflectionMethod( $sanitizer, 'does_node_have_block_class' );
 
 		$method->setAccessible( true );
-		$this->assertEquals( $expected, $method->invoke( $figures[0] ) );
+		$this->assertEquals( $expected, $method->invoke( $sanitizer, $figures[0] ) );
 	}
 
 	/**
