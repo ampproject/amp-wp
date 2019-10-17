@@ -559,4 +559,42 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$this->assertNull( $dom->getElementsByTagName( 'head' )->item( 0 )->firstChild );
 		$this->assertEquals( 6, $dom->getElementsByTagName( 'body' )->item( 0 )->childNodes->length );
 	}
+
+	public function get_has_class_data() {
+		$dom = new DOMDocument();
+
+		return [
+			// Element without class attribute.
+			[ AMP_DOM_Utils::create_node( $dom, 'div', [] ), 'target-class', false ],
+			// Single class being checked.
+			[ AMP_DOM_Utils::create_node( $dom, 'div', [ 'class' => 'target-class' ] ), 'target-class', true ],
+			// Single class not being checked.
+			[ AMP_DOM_Utils::create_node( $dom, 'div', [ 'class' => 'some-class' ] ), 'target-class', false ],
+			// Multiple classes with match at the beginning.
+			[ AMP_DOM_Utils::create_node( $dom, 'div', [ 'class' => 'target-class some-class some-other-class something else' ] ), 'target-class', true ],
+			// Multiple classes with match in the middle.
+			[ AMP_DOM_Utils::create_node( $dom, 'div', [ 'class' => 'some-class some-other-class target-class something else' ] ), 'target-class', true ],
+			// Multiple classes with match at the end.
+			[ AMP_DOM_Utils::create_node( $dom, 'div', [ 'class' => 'some-class some-other-class something else target-class' ] ), 'target-class', true ],
+			// Multiple classes with match and random whitespace.
+			[ AMP_DOM_Utils::create_node( $dom, 'div', [ 'class' => '  some-class    some-other-class   target-class   something   else   target-class  ' ] ), 'target-class', true ],
+			// Multiple classes without match.
+			[ AMP_DOM_Utils::create_node( $dom, 'div', [ 'class' => 'some-class some-other-class something else' ] ), 'target-class', false ],
+			// Single class with UTF-8.
+			[ AMP_DOM_Utils::create_node( $dom, 'div', [ 'class' => 'some-class Iñtërnâtiônàlizætiøn some-other-class' ] ), 'Iñtërnâtiônàlizætiøn', true ],
+			// Target class in other attribute
+			[ AMP_DOM_Utils::create_node( $dom, 'div', [ 'some-attribute' => 'target-class' ] ), 'target-class', false ],
+		];
+	}
+
+	/**
+	 * Test has_class().
+	 *
+	 * @dataProvider get_has_class_data
+	 * @covers \AMP_DOM_Utils::has_class()
+	 */
+	public function test_has_class( DOMElement $element, $class, $expected ) {
+		$actual = AMP_DOM_Utils::has_class( $element, $class );
+		$this->assertEquals( $expected, $actual );
+	}
 }

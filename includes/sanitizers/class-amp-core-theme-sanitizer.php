@@ -1771,7 +1771,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			// Get the class to toggle, if specified.
 			$toggle_class = $toggle->hasAttribute( 'data-class-to-toggle' ) ? $toggle->getAttribute( 'data-class-to-toggle' ) : 'active';
 
-			$is_sub_menu     = $this->has_class( $target_node, 'sub-menu' );
+			$is_sub_menu     = AMP_DOM_Utils::has_class( $target_node, 'sub-menu' );
 			$new_target_node = $is_sub_menu ? $this->get_closest_submenu( $toggle ) : $target_node;
 			$new_target_id   = $this->get_element_id( $new_target_node );
 
@@ -1779,13 +1779,13 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			$this->add_amp_action( $toggle, 'tap', "{$new_target_id}.toggleClass(class='{$toggle_class}')" );
 
 			// If the toggle target is 'next' ir a sub-menu, only give the clicked toggle the active class.
-			if ( 'next' === $toggle_target || $this->has_class( $target_node, 'sub-menu' ) ) {
+			if ( 'next' === $toggle_target || AMP_DOM_Utils::has_class( $target_node, 'sub-menu' ) ) {
 				$this->add_amp_action( $toggle, 'tap', "{$toggle_id}.toggleClass(class='active')" );
 			} else {
 				// If not, toggle all toggles with this toggle target.
 				$target_toggles = $this->xpath->query( "//*[ @data-toggle-target = '{$toggle_target}' ]" );
 				foreach ( $target_toggles as $target_toggle ) {
-					if ( $this->has_class( $target_toggle, 'close-nav-toggle' ) ) {
+					if ( AMP_DOM_Utils::has_class( $target_toggle, 'close-nav-toggle' ) ) {
 						// Skip adding the 'active' class on the "Close" button in the primary nav menu.
 						continue;
 					}
@@ -1955,23 +1955,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Check whether a given element has a specific class.
-	 *
-	 * @param DOMElement $element Element to check the classes of.
-	 * @param string     $class Class to check for.
-	 * @return bool Whether the element has the requested class.
-	 */
-	protected function has_class( DOMElement $element, $class ) {
-		if ( ! $element->hasAttribute( 'class' ) ) {
-			return false;
-		}
-
-		$classes = $element->getAttribute( 'class' );
-
-		return (bool) preg_match( "/\b{$class}\b/", $classes );
-	}
-
-	/**
 	 * Get the closest sub-menu within a menu item.
 	 *
 	 * @param DOMElement $element Element to get the closest sub-menu of.
@@ -1981,7 +1964,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	protected function get_closest_submenu( DOMElement $element ) {
 		$menu_item = $element;
 
-		while ( ! $this->has_class( $menu_item, 'menu-item' ) ) {
+		while ( ! AMP_DOM_Utils::has_class( $menu_item, 'menu-item' ) ) {
 			$menu_item = $menu_item->parentNode;
 			if ( ! $menu_item ) {
 				return $element;

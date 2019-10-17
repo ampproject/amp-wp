@@ -711,4 +711,21 @@ class AMP_DOM_Utils {
 	private static function is_self_closing_tag( $tag ) {
 		return in_array( strtolower( $tag ), self::$self_closing_tags, true );
 	}
+
+	/**
+	 * Check whether a given element has a specific class.
+	 *
+	 * @param DOMElement $element Element to check the classes of.
+	 * @param string     $class   Class to check for.
+	 * @return bool Whether the element has the requested class.
+	 */
+	public static function has_class( DOMElement $element, $class ) {
+		if ( ! $element->hasAttribute( 'class' ) ) {
+			return false;
+		}
+
+		$classes = $element->getAttribute( 'class' );
+
+		return (bool) preg_match( "/\b{$class}\b/", $classes );
+	}
 }
