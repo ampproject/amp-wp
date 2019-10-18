@@ -136,7 +136,7 @@ const CustomVideoBlockEdit = ( { instanceId, isSelected, className, attributes, 
 		}
 		// Disable reason: src is constantly changing, but we want this hook to fire only once (like componentDidMount).
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ allowedVideoMimeTypes, id, mediaUpload, noticeOperations, setAttributes ] );
+	}, [] );
 
 	useEffect( () => {
 		if ( videoPlayer.current ) {
