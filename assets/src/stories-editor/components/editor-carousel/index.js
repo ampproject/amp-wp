@@ -25,8 +25,10 @@ const EditorCarousel = () => {
 		previousPage,
 		nextPage,
 		isReordering,
+		isRTL,
 	} = useSelect( ( select ) => {
 		const {
+			getSettings,
 			getBlockOrder,
 			getBlocksByClientId,
 			getAdjacentBlockClientId,
@@ -43,6 +45,7 @@ const EditorCarousel = () => {
 			previousPage: currentPage ? getAdjacentBlockClientId( currentPage, -1 ) : null,
 			nextPage: currentPage ? getAdjacentBlockClientId( currentPage, 1 ) : null,
 			isReordering: _isReordering(),
+			isRTL: getSettings().isRTL,
 		};
 	}, [ currentPage ] );
 
@@ -57,9 +60,14 @@ const EditorCarousel = () => {
 			wrapper.current.style.display = 'none';
 		} else {
 			wrapper.current.style.display = '';
-			wrapper.current.style.transform = `translateX(calc(50% - ${ PAGE_BORDER }px - ${ ( STORY_PAGE_INNER_WIDTH + STORY_PAGE_MARGIN ) / 2 }px - ${ ( currentIndex ) * STORY_PAGE_MARGIN }px - ${ currentIndex * STORY_PAGE_INNER_WIDTH }px))`;
+
+			if ( isRTL ) {
+				wrapper.current.style.transform = `translateX(calc(-50% - ${ PAGE_BORDER }px + ${ ( STORY_PAGE_INNER_WIDTH + STORY_PAGE_MARGIN ) / 2 }px + ${ ( currentIndex ) * STORY_PAGE_MARGIN }px + ${ currentIndex * STORY_PAGE_INNER_WIDTH }px))`;
+			} else {
+				wrapper.current.style.transform = `translateX(calc(50% - ${ PAGE_BORDER }px - ${ ( STORY_PAGE_INNER_WIDTH + STORY_PAGE_MARGIN ) / 2 }px - ${ ( currentIndex ) * STORY_PAGE_MARGIN }px - ${ currentIndex * STORY_PAGE_INNER_WIDTH }px))`;
+			}
 		}
-	}, [ currentIndex, isReordering, wrapper ] );
+	}, [ currentIndex, isReordering, wrapper, isRTL ] );
 
 	const { setCurrentPage } = useDispatch( 'amp/story' );
 	const { selectBlock } = useDispatch( 'core/block-editor' );
@@ -77,7 +85,7 @@ const EditorCarousel = () => {
 		<DropZoneProvider>
 			<div className="amp-story-editor-carousel-navigation">
 				<IconButton
-					icon="arrow-left-alt2"
+					icon={ isRTL ? 'arrow-right-alt2' : 'arrow-left-alt2' }
 					label={ __( 'Previous Page', 'amp' ) }
 					onClick={ ( e ) => {
 						e.preventDefault();
@@ -91,7 +99,7 @@ const EditorCarousel = () => {
 					onClick={ goToPage }
 				/>
 				<IconButton
-					icon="arrow-right-alt2"
+					icon={ isRTL ? 'arrow-left-alt2' : 'arrow-right-alt2' }
 					label={ __( 'Next Page', 'amp' ) }
 					onClick={ ( e ) => {
 						e.preventDefault();
