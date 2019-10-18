@@ -2410,6 +2410,12 @@ class AMP_Validation_Error_Taxonomy {
 					$is_filter = ! empty( $source['filter'] );
 					unset( $source['filter'] );
 
+					$dependency_type = null;
+					if ( isset( $source['dependency_type'] ) ) {
+						$dependency_type = $source['dependency_type'];
+						unset( $source['dependency_type'] );
+					}
+
 					$priority = null;
 					if ( isset( $source['priority'] ) ) {
 						$priority = $source['priority'];
@@ -2434,7 +2440,13 @@ class AMP_Validation_Error_Taxonomy {
 												esc_html_e( 'Post Type', 'amp' );
 												break;
 											case 'handle':
-												esc_html_e( 'Handle', 'amp' );
+												if ( 'script' === $dependency_type ) {
+													esc_html_e( 'Script Handle', 'amp' );
+												} elseif ( 'style' === $dependency_type ) {
+													esc_html_e( 'Style Handle', 'amp' );
+												} else {
+													esc_html_e( 'Handle', 'amp' );
+												}
 												break;
 											case 'block_content_index':
 												esc_html_e( 'Block Index', 'amp' );
@@ -2510,7 +2522,7 @@ class AMP_Validation_Error_Taxonomy {
 											?>
 										<?php elseif ( 'function' === $key ) : ?>
 											<code><?php echo esc_html( '{closure}' === $value ? $value : $value . '()' ); ?></code>
-										<?php elseif ( 'block_name' === $key || 'shortcode' === $key ) : ?>
+										<?php elseif ( 'block_name' === $key || 'shortcode' === $key || 'handle' === $key ) : ?>
 											<code><?php echo esc_html( $value ); ?></code>
 										<?php elseif ( 'post_type' === $key ) : ?>
 											<?php
