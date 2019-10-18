@@ -553,7 +553,7 @@ class AMP_Validation_Manager {
 				[
 					'parent' => $parent_node_id,
 					'id'     => $query_var,
-					'title'  => esc_html( self::get_debugging_option_title( $title, $query_var ) ),
+					'title'  => self::get_debugging_option_title( $title, $query_var ),
 					'href'   => add_query_arg( AMP_Theme_Support::AMP_FLAGS_QUERY_VAR, [ $query_var => '' ], $amp_url ),
 				]
 			);
@@ -565,18 +565,15 @@ class AMP_Validation_Manager {
 	 *
 	 * If the current URL has the debugging option query var present, the title starts with a 'check mark' emoji.
 	 * For example, if the URL has the 'Prevent redirect' query var present,
-	 * the title in the Admin Bar will be '✅ Prevent redirect'.
+	 * the title in the Admin Bar will be '☑ Prevent redirect'.
 	 *
 	 * @param string $title_text The title of the option, like 'Prevent redirect'.
 	 * @param string $query_var The query var of the option.
 	 * @return string The debugging option title, possible with a 'check mark' emoji at the beginning.
 	 */
 	public static function get_debugging_option_title( $title_text, $query_var ) {
-		if ( isset( $_GET[ AMP_Theme_Support::AMP_FLAGS_QUERY_VAR ][ $query_var ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			return '✅ ' . $title_text;
-		}
-
-		return $title_text;
+		$checkbox = isset( $_GET[ AMP_Theme_Support::AMP_FLAGS_QUERY_VAR ][ $query_var ] ) ? '☑' : '☐'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return sprintf( '<span class="amp-debug-option" style="font-family:Roboto,Oxygen-Sans,sans-serif;font-size:17px">%s</span> %s', $checkbox, esc_html( $title_text ) );
 	}
 
 	/**

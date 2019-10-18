@@ -388,16 +388,17 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$query_var  = 'example_query_var';
 
 		// The query var is not present, so this should return the same title it's passed.
-		$this->assertEquals( $title, AMP_Validation_Manager::get_debugging_option_title( $title, $query_var ) );
+		$expected_title_unchecked = '<span class="amp-debug-option" style="font-family:Roboto,Oxygen-Sans,sans-serif;font-size:17px">☐</span> ' . $title;
+		$this->assertEquals( $expected_title_unchecked, AMP_Validation_Manager::get_debugging_option_title( $title, $query_var ) );
 
 		// The query var is present, but not under the top-level 'amp_flags' query var, so this should again return the same title it's passed.
 		$_GET[ $query_var ] = '';
-		$this->assertEquals( $title, AMP_Validation_Manager::get_debugging_option_title( $title, $query_var ) );
+		$this->assertEquals( $expected_title_unchecked, AMP_Validation_Manager::get_debugging_option_title( $title, $query_var ) );
 		$_GET = [];
 
 		// The query var is now present, so this should have the emoji in the returned title.
 		$_GET[ AMP_Theme_Support::AMP_FLAGS_QUERY_VAR ][ $query_var ] = '';
-		$this->assertEquals( '✅ ' . $title, AMP_Validation_Manager::get_debugging_option_title( $title, $query_var ) );
+		$this->assertEquals( '<span class="amp-debug-option" style="font-family:Roboto,Oxygen-Sans,sans-serif;font-size:17px">☑</span> ' . $title, AMP_Validation_Manager::get_debugging_option_title( $title, $query_var ) );
 	}
 
 	/**
