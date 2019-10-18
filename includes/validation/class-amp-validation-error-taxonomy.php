@@ -2321,13 +2321,17 @@ class AMP_Validation_Error_Taxonomy {
 										file:
 									</th>
 									<td>
-										<?php if ( $edit_url ) : ?>
-											<a
-												href="<?php
-													echo esc_attr( $edit_url ); // Note that esc_attr() used instead of esc_url() to allow IDE protocols.
-												?>"
-												target="_blank">
-										<?php endif; ?>
+										<?php
+										if ( $edit_url ) {
+											printf(
+												'<a href="%s" %s>',
+												// Note that esc_attr() used instead of esc_url() to allow IDE protocols.
+												esc_attr( $edit_url ),
+												// Open link in new window unless the user has filtered the URL to open their system IDE.
+												in_array( wp_parse_url( $edit_url, PHP_URL_SCHEME ), [ 'http:', 'https:' ], true ) ? 'target="_blank"' : ''
+											);
+										}
+										?>
 										<?php echo esc_html( $file_text ); ?>
 										<?php if ( $edit_url ) : ?>
 											</a>
