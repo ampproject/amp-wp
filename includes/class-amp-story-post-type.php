@@ -1530,8 +1530,8 @@ class AMP_Story_Post_Type {
 		$height = isset( $atts['height'] ) ? $atts['height'] : self::get_blocks_default_height( $name );
 
 		// Set passed attributes or default values (0, 5) for top and left.
-		$style['top']    = empty( $atts['positionTop'] ) ? '0%' : $atts['positionTop'] . '%';
-		$style['left']   = empty( $atts['positionLeft'] ) ? '5%' : $atts['positionLeft'] . '%';
+		$style['top']    = ! isset( $atts['positionTop'] ) ? '0%' : $atts['positionTop'] . '%';
+		$style['left']   = ! isset( $atts['positionLeft'] ) ? '5%' : $atts['positionLeft'] . '%';
 		$style['width']  = self::get_percentage_from_pixels( 'x', $width ) . '%';
 		$style['height'] = self::get_percentage_from_pixels( 'y', $height ) . '%';
 
