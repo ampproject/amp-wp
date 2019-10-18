@@ -145,7 +145,7 @@ const CustomVideoBlockEdit = ( { instanceId, isSelected, className, attributes, 
 	}, [ poster ] );
 
 	useEffect( () => {
-		if ( ! isBlobURL( src ) ) {
+		if ( src && ! isBlobURL( src ) ) {
 			getContentLengthFromUrl( src ).then( setVideoSize );
 		}
 	}, [ src ] );
