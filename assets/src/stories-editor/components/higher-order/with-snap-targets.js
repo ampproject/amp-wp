@@ -8,7 +8,7 @@ import { compose, createHigherOrderComponent } from '@wordpress/compose';
  * Internal dependencies
  */
 import { getBlockInnerElement, getRelativeElementPosition } from '../../helpers';
-import { getHorizontalSnaps, getVerticalSnaps } from '../../helpers/snapping';
+import { getHorizontalTargets, getVerticalTargets } from '../../helpers/snapping';
 import { withSnapContext } from '../contexts/snapping';
 
 /**
@@ -33,8 +33,8 @@ const applyWithSelect = withSelect( ( select, { clientId } ) => {
 	const parentBlock = getBlockRootClientId( clientId );
 
 	const defaultData = {
-		horizontalSnaps: () => [],
-		verticalSnaps: () => [],
+		horizontalTargets: () => [],
+		verticalTargets: () => [],
 		parentBlockElement: null,
 	};
 
@@ -54,12 +54,12 @@ const applyWithSelect = withSelect( ( select, { clientId } ) => {
 		.filter( Boolean )
 		.map( ( el ) => getRelativeElementPosition( el, parentBlockElement ) );
 
-	const horizontalSnaps = getHorizontalSnaps( siblingPositions );
-	const verticalSnaps = getVerticalSnaps( siblingPositions );
+	const horizontalTargets = getHorizontalTargets( siblingPositions );
+	const verticalTargets = getVerticalTargets( siblingPositions );
 
 	return {
-		horizontalSnaps,
-		verticalSnaps,
+		horizontalTargets,
+		verticalTargets,
 		parentBlockElement,
 	};
 } );

@@ -153,9 +153,20 @@ const ContextMenu = ( props ) => {
 			return;
 		}
 
-		const rootClientId = getBlockRootClientId( clientId );
+		let parentBlock;
+		let index;
+
+		if ( isPageBlock( clientId ) ) {
+			parentBlock = '';
+			const currentPageIndex = pageList.indexOf( clientId );
+			index = currentPageIndex + 1;
+		} else {
+			parentBlock = getBlockRootClientId( clientId );
+			index = null;
+		}
+
 		const clonedBlock = cloneBlock( block );
-		insertBlock( clonedBlock, null, rootClientId );
+		insertBlock( clonedBlock, index, parentBlock );
 	};
 
 	useEffect( () => {
@@ -181,9 +192,13 @@ const ContextMenu = ( props ) => {
 	};
 
 	let blockActions = [];
+	const pageList = getBlockOrder();
+	const numPages = pageList.length;
+	const hasMultiplePages = ( numPages > 1 );
+	const isPage = isPageBlock( firstBlockClientId );
 
-	// Don't allow any actions other than pasting with Page.
-	if ( ! isPageBlock( firstBlockClientId ) ) {
+	// Don't allow any copying  or cutting of Page blocks.
+	if ( ! isPage ) {
 		blockActions = [
 			{
 				name: __( 'Copy Block', 'amp' ),
@@ -201,57 +216,69 @@ const ContextMenu = ( props ) => {
 			},
 
 		];
+	}
 
-		if ( block ) {
-			// Disable Duplicate Block option for cta and attachment blocks.
-			if ( ! DISABLE_DUPLICATE_BLOCKS.includes( block.name ) ) {
+	// Disable Duplicate Block option for cta and attachment blocks.
+	if ( block && ! DISABLE_DUPLICATE_BLOCKS.includes( block.name ) ) {
+		if ( ! isPage ) {
+			blockActions.push(
+				{
+					name: __( 'Duplicate Block', 'amp' ),
+					blockAction: duplicateBlock,
+					params: [ firstBlockClientId ],
+					icon: 'admin-page',
+					className: 'right-click-duplicate',
+				},
+			);
+		} else {
+			blockActions.push(
+				{
+					name: __( 'Duplicate Page', 'amp' ),
+					blockAction: duplicateBlock,
+					params: [ firstBlockClientId ],
+					icon: 'admin-page',
+					className: 'right-click-duplicate-page',
+				},
+			);
+		}
+	}
+
+	// If more than one page, add options to move blocks between pages.
+	if ( block && ! isPage && hasMultiplePages ) {
+		const currentPage = getCurrentPage();
+		const currentPagePosition = pageList.indexOf( currentPage );
+		if ( currentPagePosition > 0 ) {
+			const prevPage = getPageByOffset( -1 );
+			if ( isBlockAllowedOnPage( block.name, prevPage ) ) {
 				blockActions.push(
 					{
-						name: __( 'Duplicate Block', 'amp' ),
-						blockAction: duplicateBlock,
-						params: [ firstBlockClientId ],
-						icon: 'admin-page',
-						className: 'right-click-duplicate',
+						name: __( 'Send block to previous page', 'amp' ),
+						blockAction: moveBlockToPage,
+						params: [ prevPage ],
+						icon: isRTL ? 'arrow-right-alt' : 'arrow-left-alt',
+						className: 'right-click-previous-page',
 					},
 				);
 			}
-
-			const pageList = getBlockOrder();
-			const numPages = pageList.length;
-			if ( numPages > 1 ) {
-				const currentPage = getCurrentPage();
-				const currentPagePosition = pageList.indexOf( currentPage );
-				if ( currentPagePosition > 0 ) {
-					const prevPage = getPageByOffset( -1 );
-					if ( isBlockAllowedOnPage( block.name, prevPage ) ) {
-						blockActions.push(
-							{
-								name: __( 'Send block to previous page', 'amp' ),
-								blockAction: moveBlockToPage,
-								params: [ prevPage ],
-								icon: isRTL ? 'arrow-right-alt' : 'arrow-left-alt',
-								className: 'right-click-previous-page',
-							},
-						);
-					}
-				}
-				if ( currentPagePosition < ( numPages - 1 ) ) {
-					const nextPage = getPageByOffset( 1 );
-					if ( isBlockAllowedOnPage( block.name, nextPage ) ) {
-						blockActions.push(
-							{
-								name: __( 'Send block to next page', 'amp' ),
-								blockAction: moveBlockToPage,
-								params: [ nextPage ],
-								icon: isRTL ? 'arrow-left-alt' : 'arrow-right-alt',
-								className: 'right-click-next-page',
-							},
-						);
-					}
-				}
+		}
+		if ( currentPagePosition < ( numPages - 1 ) ) {
+			const nextPage = getPageByOffset( 1 );
+			if ( isBlockAllowedOnPage( block.name, nextPage ) ) {
+				blockActions.push(
+					{
+						name: __( 'Send block to next page', 'amp' ),
+						blockAction: moveBlockToPage,
+						params: [ nextPage ],
+						icon: isRTL ? 'arrow-left-alt' : 'arrow-right-alt',
+						className: 'right-click-next-page',
+					},
+				);
 			}
 		}
+	}
 
+	// If not page, show "Remove block" option, otherwise if multiple pages, show "Remove page" option.
+	if ( ! isPage ) {
 		blockActions.push(
 			{
 				name: __( 'Remove Block', 'amp' ),
@@ -261,13 +288,19 @@ const ContextMenu = ( props ) => {
 				className: 'right-click-remove',
 			},
 		);
+	} else if ( hasMultiplePages ) {
+		blockActions.push(
+			{
+				name: __( 'Remove Page', 'amp' ),
+				blockAction: removeBlock,
+				params: [ firstBlockClientId ],
+				icon: 'trash',
+				className: 'right-click-remove-page',
+			},
+		);
 	}
 
-	// If it's Page block and clipboard is empty, don't display anything.
-	if ( ! getCopiedMarkup().length && isPageBlock( firstBlockClientId ) ) {
-		return '';
-	}
-
+	// If value set in clipboard, show paste option.
 	if ( getCopiedMarkup().length ) {
 		blockActions.push(
 			{

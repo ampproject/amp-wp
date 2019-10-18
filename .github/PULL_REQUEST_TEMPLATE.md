@@ -1,7 +1,7 @@
 ## Summary
 
 <!-- Please reference the issue this PR addresses. -->
-Addresses issue #
+Fixes #
 
 ## Checklist
 

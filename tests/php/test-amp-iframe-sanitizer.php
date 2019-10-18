@@ -112,7 +112,7 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 					<amp-iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" sandbox="allow-scripts allow-same-origin" layout="intrinsic" class="amp-wp-enforced-sizes">
 						<noscript>
 							<iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0"></iframe>
-						</noscript>					
+						</noscript>
 					</amp-iframe>
 				',
 			],
@@ -368,6 +368,24 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 							<iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="1" class="iframe-class"></iframe>
 						</noscript>
 					</amp-iframe>
+				',
+				[
+					'add_noscript_fallback' => true,
+					'add_placeholder'       => true,
+				],
+			],
+
+			'iframe_with_full_width_alignment'               => [
+				'<figure class="alignfull"><iframe width="580" height="326" src="https://videopress.com/embed/yFCmLMGL?hd=0" frameborder="0" allowfullscreen="" data-origwidth="580" data-origheight="326"></iframe></figure>',
+				'
+					<figure class="alignfull">
+						<amp-iframe width="580" height="326" src="https://videopress.com/embed/yFCmLMGL?hd=0" frameborder="0" allowfullscreen="" data-origwidth="580" data-origheight="326" sandbox="allow-scripts allow-same-origin" layout="responsive" class="amp-wp-enforced-sizes">
+							<span placeholder="" class="amp-wp-iframe-placeholder"></span>
+							<noscript>
+								<iframe width="580" height="326" src="https://videopress.com/embed/yFCmLMGL?hd=0" frameborder="0"></iframe>
+							</noscript>
+						</amp-iframe>
+					</figure>
 				',
 				[
 					'add_noscript_fallback' => true,
