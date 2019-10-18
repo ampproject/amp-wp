@@ -852,6 +852,7 @@ class AMP_DOM_Utils {
 	 */
 	public static function add_amp_action( DOMElement $element, $event, $action ) {
 		if ( ! $element->hasAttribute( 'on' ) ) {
+			// There's no "on" attribute yet, so just add it and be done.
 			$element->setAttribute( 'on', "{$event}:{$action}" );
 			return;
 		}
@@ -860,6 +861,8 @@ class AMP_DOM_Utils {
 		$results = preg_match_all( self::AMP_EVENT_ACTIONS_REGEX_PATTERN, $element->getAttribute( 'on' ), $matches );
 
 		if ( ! $results || ! isset( $matches['event'] ) ) {
+			// Something went wrong with parsing the existing "on" attribute, so just assume it
+			// doesn't work properly and replace by our own.
 			$element->setAttribute( 'on', "{$event}:{$action}" );
 			return;
 		}
@@ -867,12 +870,14 @@ class AMP_DOM_Utils {
 		$found = false;
 		foreach ( $matches['event'] as $index => $existing_event ) {
 			if ( $event === $existing_event ) {
+				// The "on" attribute already has this action, so add the event to the existing one(s).
 				$matches['actions'][ $index ] .= ",{$action}";
 				$found                         = true;
 			}
 		}
 
 		if ( ! $found ) {
+			// The "on" attribute didn't contain this particular event, so we add it as a new one.
 			$matches['event'][]   = $event;
 			$matches['actions'][] = $action;
 		}
