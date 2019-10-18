@@ -1618,18 +1618,23 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$open_xpaths  = isset( $args['open_button_xpath'] ) ? $args['open_button_xpath'] : [];
 		$close_xpaths = isset( $args['close_button_xpath'] ) ? $args['close_button_xpath'] : [];
 
-		$buttons = [
+		$modal_actions = [
 			"{$modal_id}.open"  => $open_xpaths,
 			"{$body_id}.toggleClass(class=showing-modal,force=true)" => $open_xpaths,
 			"{$modal_id}.close" => $close_xpaths,
 			"{$body_id}.toggleClass(class=showing-modal,force=false)" => $close_xpaths,
 		];
 
-		foreach ( $buttons as $action => $button_xpaths ) {
-			foreach ( $button_xpaths as $button_xpath ) {
-				foreach ( $this->xpath->query( $button_xpath ) as $node ) {
-					if ( $node instanceof DOMElement ) {
-						AMP_DOM_Utils::add_amp_action( $node, 'tap', $action );
+		// As we have the toggle targets, we need to go backwards from their and find all
+		// nodes that are meant to toggle these targets.
+		// The triple loop below is generally a double loop (modals x toggles), however
+		// we need the third loop as we cannot guarantee that each xpath will only ever
+		// retrieve a single result.
+		foreach ( $modal_actions as $modal_action => $toggle_xpaths ) {
+			foreach ( $toggle_xpaths as $toggle_xpath ) {
+				foreach ( $this->xpath->query( $toggle_xpath ) as $toggle_node ) {
+					if ( $toggle_node instanceof DOMElement ) {
+						AMP_DOM_Utils::add_amp_action( $toggle_node, 'tap', $modal_action );
 					}
 				}
 			}
