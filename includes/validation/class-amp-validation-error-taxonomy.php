@@ -2071,7 +2071,13 @@ class AMP_Validation_Error_Taxonomy {
 						<?php elseif ( self::CSS_ERROR_TYPE === $validation_error['type'] ) : ?>
 							<?php
 							echo wp_kses_post(
-								__( 'AMP allows you to <a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/">style your pages using CSS</a> in much the same way as regular HTML pages, however there are some <a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/">restrictions</a>. Nevertheless, the AMP plugin automatically inlines external stylesheets, transforms <code>!important</code> qualifiers, and uses tree shaking to remove the majority of CSS rules that do not apply to the current page. Nevertheless, AMP does have a 50KB limit and tree shaking cannot always reduce the amount of CSS under this limit; when this happens an excessive CSS error will result.', 'amp' )
+								sprintf(
+									/* translators: 1: Documentation URL, 2: Documentation URL, 3: !important */
+									__( 'AMP allows you to <a href="%1$s">style your pages using CSS</a> in much the same way as regular HTML pages, however there are some <a href="%2$s">restrictions</a>. Nevertheless, the AMP plugin automatically inlines external stylesheets, transforms %3$s qualifiers, and uses tree shaking to remove the majority of CSS rules that do not apply to the current page. Nevertheless, AMP does have a 50KB limit and tree shaking cannot always reduce the amount of CSS under this limit; when this happens an excessive CSS error will result.', 'amp' ),
+									'https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/',
+									'https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/',
+									'<code>!important</code>'
+								)
 							)
 							?>
 						<?php else : ?>
