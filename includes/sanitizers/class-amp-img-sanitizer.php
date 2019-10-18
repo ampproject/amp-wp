@@ -372,13 +372,13 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			return $attributes;
 		}
 
-		// This should be true for links to the actual media file, but not for links to the attachment page.
+		$is_file_url                        = preg_match( '/\.\w+$/', wp_parse_url( $parent_node->getAttribute( 'href' ), PHP_URL_PATH ) );
 		$is_node_wrapped_in_media_file_link = (
 			'a' === $parent_node->tagName
 			&&
 			( 'figure' === $parent_node->tagName || 'figure' === $parent_node->parentNode->tagName )
 			&&
-			attachment_url_to_postid( $parent_node->getAttribute( 'href' ) )
+			$is_file_url // This should be a link to the media file, not the attachment page.
 		);
 
 		if ( 'figure' !== $parent_node->tagName && ! $is_node_wrapped_in_media_file_link ) {
