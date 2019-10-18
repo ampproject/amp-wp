@@ -461,30 +461,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$classes .= ' ' . $class_attribute->nodeValue;
 		}
 
-		// Find all [class] attributes and capture the contents of any single- or double-quoted strings,
-		// as well as <amp-state> content that might be used.
+		// Find all [class] attributes and capture the contents of any single- or double-quoted strings.
 		foreach ( $this->xpath->query( '//*/@' . AMP_DOM_Utils::AMP_BIND_DATA_ATTR_PREFIX . 'class' ) as $bound_class_attribute ) {
-			if ( preg_match_all( '/([a-zA-Z0-9_]+?)\[\s*([\'"])([^\2]*?)\2\s*\]/', $bound_class_attribute->nodeValue, $matches ) ) {
-				$amp_states = $matches[1];
-				$properties = $matches[3];
-
-				foreach ( $amp_states as $index => $amp_state ) {
-					$state_element = $this->xpath->query( "//amp-state[@id = '{$amp_state}' ]/script" )->item( 0 );
-
-					if ( ! $state_element ) {
-						continue;
-					}
-
-					$state_data = json_decode( $state_element->textContent, true );
-
-					if ( isset( $state_data[ $properties[ $index ] ] ) ) {
-						$classes .= ' ' . $state_data[ $properties[ $index ] ];
-					}
-				}
-
-				continue;
-			}
-
 			if ( preg_match_all( '/([\'"])([^\1]*?)\1/', $bound_class_attribute->nodeValue, $matches ) ) {
 				$classes .= ' ' . implode( ' ', $matches[2] );
 			}
