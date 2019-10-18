@@ -934,6 +934,19 @@ class AMP_Validated_URL_Post_Type {
 		return [
 			'cb'                          => '<input type="checkbox" />',
 			'error'                       => __( 'Error', 'amp' ),
+			'error_type'                  => __( 'Type', 'amp' ),
+			'details'                     => sprintf(
+				'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="%s"></div>',
+				esc_html__( 'Context', 'amp' ),
+				esc_attr(
+					sprintf(
+						'<h3>%s</h3><p>%s</p>',
+						esc_html__( 'Context', 'amp' ),
+						esc_html__( 'The parent element of where the error occurred.', 'amp' )
+					)
+				)
+			),
+			'sources_with_invalid_output' => __( 'Sources', 'amp' ),
 			'status'                      => sprintf(
 				'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="%s"></div>',
 				esc_html__( 'Status', 'amp' ),
@@ -945,19 +958,6 @@ class AMP_Validated_URL_Post_Type {
 					)
 				)
 			),
-			'details'                     => sprintf(
-				'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="%s"></div>',
-				esc_html__( 'Details', 'amp' ),
-				esc_attr(
-					sprintf(
-						'<h3>%s</h3><p>%s</p>',
-						esc_html__( 'Details', 'amp' ),
-						esc_html__( 'The parent element of where the error occurred.', 'amp' )
-					)
-				)
-			),
-			'sources_with_invalid_output' => __( 'Sources', 'amp' ),
-			'error_type'                  => __( 'Type', 'amp' ),
 		];
 	}
 

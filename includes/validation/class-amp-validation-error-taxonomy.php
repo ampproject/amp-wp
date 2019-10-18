@@ -831,11 +831,11 @@ class AMP_Validation_Error_Taxonomy {
 					),
 					'details'          => sprintf(
 						'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="%s"></div>',
-						esc_html__( 'Details', 'amp' ),
+						esc_html__( 'Context', 'amp' ),
 						esc_attr(
 							sprintf(
 								'<h3>%s</h3><p>%s</p>',
-								esc_html__( 'Details', 'amp' ),
+								esc_html__( 'Context', 'amp' ),
 								esc_html__( 'The parent element of where the error occurred.', 'amp' )
 							)
 						)

@@ -245,7 +245,7 @@ const handleSearching = () => {
 		const detailsQuery = document.querySelectorAll( 'tbody .column-details' );
 
 		/*
-		 * Iterate through the 'Details' column of each row.
+		 * Iterate through the 'Context' (formerly 'Details') column of each row.
 		 * If the search query is not present, hide the row.
 		 */
 		let numberErrorsDisplaying = 0;
