@@ -1007,6 +1007,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					.cover-modal {
 						display: inherit;
 					}
+
+					.wp-block-image img {
+						display: block;
+					}
+				}
 				<?php elseif ( 'twentyseventeen' === get_template() ) : ?>
 					/* Show the button*/
 					.no-js .menu-toggle {
