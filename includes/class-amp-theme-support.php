@@ -214,7 +214,6 @@ class AMP_Theme_Support {
 			require_once AMP__DIR__ . '/includes/amp-post-template-functions.php';
 
 			add_action( 'widgets_init', [ __CLASS__, 'register_widgets' ] );
-			add_action( 'wp_enqueue_scripts', [ __CLASS__, 'enqueue_admin_bar_debugging' ] );
 
 			/*
 			 * Note that wp action is use instead of template_redirect because some themes/plugins output
@@ -2575,58 +2574,5 @@ class AMP_Theme_Support {
 		}
 
 		return $image_markup . $video_markup;
-	}
-
-	/**
-	 * Enqueues the admin bar debugging script, which adds toggles to the 'AMP' submenu, like to disable tree shaking.
-	 */
-	public static function enqueue_admin_bar_debugging() {
-		if ( is_admin() || ! is_admin_bar_showing() || ! AMP_Validation_Manager::has_cap() ) {
-			return;
-		}
-
-		$slug         = 'amp-admin-bar-debugging';
-		$asset_file   = AMP__DIR__ . '/assets/js/' . $slug . '.asset.php';
-		$asset        = require $asset_file;
-		$dependencies = $asset['dependencies'];
-		$version      = $asset['version'];
-
-		wp_enqueue_script(
-			$slug,
-			amp_get_asset_url( "js/{$slug}.js" ),
-			$dependencies,
-			$version,
-			true
-		);
-
-		wp_localize_script(
-			$slug,
-			'ampWpAdminDebugging',
-			[
-				'queryVars' => [
-					self::DISABLE_POST_PROCESSING_QUERY_VAR => __( '', 'amp' ),
-				]
-				'allowedVideoMimeTypes'          => $allowed_video_mime_types,
-				'allowedPageAttachmentPostTypes' => $post_types,
-				'storySettings'                  => [
-				'autoAdvanceAfterOptions' => $auto_advancement_options,
-				],
-			]
-		);
-
-
-		// Add the dev mode attribute to this script and its dependencies, so they don't cause validation errors.
-		add_filter(
-			'script_loader_tag',
-			static function( $tag, $handle ) use ( $slug ) {
-				if ( AMP_Theme_Support::has_dependency( wp_scripts(), $slug, $handle ) ) {
-					return preg_replace( '/(?<=<script)(?=\s|>)/i', ' ' . AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, $tag );
-				}
-
-				return $tag;
-			},
-			10,
-			2
-		);
 	}
 }
