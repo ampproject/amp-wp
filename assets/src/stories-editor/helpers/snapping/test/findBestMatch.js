@@ -11,26 +11,68 @@ describe( 'findBestMatch', () => {
 	};
 
 	it( 'should return the best match', () => {
-		const values = [ 33, 22, 11 ];
+		const values = [
+			{ value: 11, matcher },
+			{ value: 22, matcher },
+			{ value: 33, matcher },
+		];
 
-		expect( findBestMatch( matcher, ...values ) ).toStrictEqual( 10 );
+		expect( findBestMatch( ...values ) ).toStrictEqual( {
+			value: 10,
+			distance: 1,
+		} );
+	} );
+
+	it( 'should return extra values if present', () => {
+		const values = [
+			{ value: 11, matcher, a: 1, b: 2 },
+			{ value: 22, matcher },
+			{ value: 33, matcher },
+		];
+
+		expect( findBestMatch( ...values ) ).toStrictEqual( {
+			value: 10,
+			distance: 1,
+			a: 1,
+			b: 2,
+		} );
 	} );
 
 	it( 'should return ignore non-matches', () => {
-		const values = [ 46, 22, 51 ];
+		const values = [
+			{ value: 46, matcher },
+			{ value: 22, matcher },
+			{ value: 51, matcher },
+		];
 
-		expect( findBestMatch( matcher, ...values ) ).toStrictEqual( 20 );
+		expect( findBestMatch( ...values ) ).toStrictEqual( {
+			value: 20,
+			distance: 2,
+		} );
 	} );
 
 	it( 'should return null if none match', () => {
-		const values = [ 46, 51 ];
+		const values = [
+			{ value: 46, matcher },
+			{ value: 51, matcher },
+		];
 
-		expect( findBestMatch( matcher, ...values ) ).toBeNull();
+		expect( findBestMatch( ...values ) ).toStrictEqual( {
+			value: null,
+			distance: expect.any( Number ),
+		} );
 	} );
 
 	it( 'should return the first match if several match equally well', () => {
-		const values = [ 33, 22, 12 ];
+		const values = [
+			{ value: 33, matcher },
+			{ value: 22, matcher },
+			{ value: 12, matcher },
+		];
 
-		expect( findBestMatch( matcher, ...values ) ).toStrictEqual( 20 );
+		expect( findBestMatch( ...values ) ).toStrictEqual( {
+			value: 20,
+			distance: 2,
+		} );
 	} );
 } );

@@ -28,6 +28,7 @@ import { __ } from '@wordpress/i18n';
 import { StoryBlockMover, FontFamilyPicker, ResizableBox, AnimationControls, RotatableBox } from '../';
 import {
 	ALLOWED_CHILD_BLOCKS,
+	BLOCKS_WITH_META_CONTENT,
 	BLOCKS_WITH_TEXT_SETTINGS,
 	BLOCKS_WITH_COLOR_SETTINGS,
 	MIN_BLOCK_WIDTH,
@@ -208,6 +209,7 @@ export default createHigherOrderComponent(
 			const isVideoBlock = 'core/video' === name;
 			const isTextBlock = 'amp/amp-story-text' === name;
 			const excludeOpacity = 'amp/amp-story-page-attachment' === name;
+			const isMetaTextBlock = BLOCKS_WITH_META_CONTENT.includes( name );
 
 			const needsTextSettings = BLOCKS_WITH_TEXT_SETTINGS.includes( name );
 			const needsColorSettings = BLOCKS_WITH_COLOR_SETTINGS.includes( name );
@@ -247,6 +249,10 @@ export default createHigherOrderComponent(
 			const animationDelay = parseInt( String( ampAnimationDelay ).replace( 'ms', '' ) );
 
 			const captionAttribute = isVideoBlock ? 'ampShowCaption' : 'ampShowImageCaption';
+			// A block has text content (in terms of resizable at least) if it's a "real" text block with content or
+			// any of the meta text blocks
+			const hasTextContent = ( isTextBlock && content.length > 0 ) || isMetaTextBlock;
+
 			return (
 				<>
 					{ ( ! isMovableBlock( name ) ) && ( <BlockEdit { ...props } /> ) }
@@ -255,7 +261,7 @@ export default createHigherOrderComponent(
 							width={ width }
 							height={ height }
 							angle={ rotationAngle }
-							hasTextContent={ Boolean( isTextBlock && content.length ) }
+							hasTextContent={ hasTextContent }
 							minHeight={ minHeight }
 							minWidth={ MIN_BLOCK_WIDTH }
 							onResizeStop={ ( value ) => {

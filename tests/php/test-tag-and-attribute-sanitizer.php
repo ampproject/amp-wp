@@ -1682,6 +1682,20 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[],
 				[ 'invalid_element' ],
 			],
+
+			'invalid_php_pi'                               => [
+				'<?php $schema = get_post_meta(get_the_ID(), \'schema\', true); if(!empty($schema)) { echo $schema; } ?>',
+				'',
+				[],
+				[ 'invalid_processing_instruction' ],
+			],
+
+			'invalid_xml_pi'                               => [
+				'<?xml version="1.0" encoding="utf-8"?>',
+				'',
+				[],
+				[ 'invalid_processing_instruction' ],
+			],
 		];
 	}
 

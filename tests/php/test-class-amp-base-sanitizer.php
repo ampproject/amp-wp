@@ -123,6 +123,17 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 				],
 			],
 
+			'fill_both_dimensions_and_absolute_position' => [
+				[
+					'width'  => '100%',
+					'height' => '100%',
+					'style'  => 'position:absolute',
+				],
+				[
+					'layout' => 'fill',
+				],
+			],
+
 			'fill_with_bottom_right_keeps_unrelated_styles' => [
 				[
 					'style' => 'position:absolute;background-color:white;top:0;left:0;right:0;bottom:0;color:red;',

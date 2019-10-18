@@ -28,7 +28,7 @@
  * Function returning an enhanced list of snap targets based on the current element's siblings' dimensions.
  *
  * @typedef {SnapTargetsEnhancer} SnapTargetsEnhancer
- * @param {Array<BlockPosition>} blockPositions List of relative block dimensions.
+ * @param {Array.<BlockPosition>} blockPositions List of relative block dimensions.
  * @return {SnapTargetsProvider}
  */
 

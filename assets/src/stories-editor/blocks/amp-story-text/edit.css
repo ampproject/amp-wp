@@ -38,11 +38,13 @@
 
 .editor-styles-wrapper #amp-story-editor .wp-block .wp-block[data-type="amp/amp-story-text"] {
 	width: initial;
+	line-height: 0;
 }
 
 .wp-block[data-type="amp/amp-story-text"] .block-editor-rich-text__editable,
 div[data-type="amp/amp-story-page"] .block-editor-inner-blocks .block-editor-block-list__block-edit {
 	display: inline-block;
+	line-height: 1.15;
 }
 
 .with-line-height .wp-block-amp-story-text {
@@ -68,4 +70,8 @@ div[data-type="amp/amp-story-page"] .block-editor-inner-blocks .block-editor-blo
 .wp-block[data-type="amp/amp-story-text"] .amp-story-editor__rotate-container,
 .wp-block[data-type="amp/amp-story-text"] .block-mover {
 	height: 100%;
+}
+
+.is-resizing .wp-block-amp-story-text-wrapper {
+	overflow: hidden;
 }

@@ -1,6 +1,6 @@
 === AMP ===
 Contributors: google, xwp, automattic, westonruter, swissspidy, miinasikk, ryankienstra, albertomedina, tweetythierry
-Tags: amp, framework, components, performance, mobile, stories
+Tags: amp, stories, mobile, optimization, accelerated mobile pages, framework, components, blocks, performance, ux, seo, official
 Requires at least: 4.9
 Tested up to: 5.2
 Stable tag: 1.3.0
@@ -8,11 +8,11 @@ License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires PHP: 5.4
 
-Enable AMP on your WordPress site, the WordPress way.
+Official AMP plugin, supported by the AMP team. Formerly Accelerated Mobile Pages, AMP enables great experiences across mobile, desktop, and stories.
 
 == Description ==
 
-The [AMP Project](http://amp.dev) is an open-source initiative aiming to make the web better for all. AMP enables web experiences that are consistently fast, beautiful and high-performing across distribution platforms. The official AMP plugin for WordPress supports fully integrated AMP publishing for WordPress sites, with robust capabilities and granular publisher controls.
+The [AMP Project](http://amp.dev) is an open-source initiative aiming to make the web better for all. AMP enables web experiences that are consistently fast, beautiful and high-performing across distribution platforms. AMP formerly stood for “Accelerated Mobile Pages”, but now works completely across desktop and mobile. The official AMP plugin for WordPress supports fully integrated AMP publishing for WordPress sites, with robust capabilities and granular publisher controls.
 
 Features and capabilities provided by the plugin include:
 
