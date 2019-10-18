@@ -122,6 +122,13 @@ amp-story-grid-layer .wp-block-quote {
 	text-align: center;
 }
 
+.wp-block-image .alignleft,
+.wp-block-image .alignright,
+.wp-block-image .aligncenter,
+.wp-block-image.is-resized {
+	display: block;
+}
+
 .amp-story-block-wrapper > :first-child {
 	width: 100%;
 	height: 100%;
