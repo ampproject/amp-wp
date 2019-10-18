@@ -1612,7 +1612,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			foreach ( $button_xpaths as $button_xpath ) {
 				foreach ( $this->xpath->query( $button_xpath ) as $node ) {
 					if ( $node instanceof DOMElement ) {
-						$this->add_amp_action( $node, 'tap', $action );
+						AMP_DOM_Utils::add_amp_action( $node, 'tap', $action );
 					}
 				}
 			}
@@ -1776,11 +1776,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			$new_target_id   = AMP_DOM_Utils::get_element_id( $new_target_node );
 
 			// Toggle the target of the clicked toggle.
-			$this->add_amp_action( $toggle, 'tap', "{$new_target_id}.toggleClass(class='{$toggle_class}')" );
+			AMP_DOM_Utils::add_amp_action( $toggle, 'tap', "{$new_target_id}.toggleClass(class='{$toggle_class}')" );
 
 			// If the toggle target is 'next' ir a sub-menu, only give the clicked toggle the active class.
 			if ( 'next' === $toggle_target || AMP_DOM_Utils::has_class( $target_node, 'sub-menu' ) ) {
-				$this->add_amp_action( $toggle, 'tap', "{$toggle_id}.toggleClass(class='active')" );
+				AMP_DOM_Utils::add_amp_action( $toggle, 'tap', "{$toggle_id}.toggleClass(class='active')" );
 			} else {
 				// If not, toggle all toggles with this toggle target.
 				$target_toggles = $this->xpath->query( "//*[ @data-toggle-target = '{$toggle_target}' ]" );
@@ -1790,14 +1790,14 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						continue;
 					}
 					$target_toggle_id = AMP_DOM_Utils::get_element_id( $target_toggle );
-					$this->add_amp_action( $toggle, 'tap', "{$target_toggle_id}.toggleClass(class='active')" );
+					AMP_DOM_Utils::add_amp_action( $toggle, 'tap', "{$target_toggle_id}.toggleClass(class='active')" );
 				}
 			}
 
 			// Toggle body class.
 			if ( $toggle->hasAttribute( 'data-toggle-body-class' ) ) {
 				$body_class = $toggle->getAttribute( 'data-toggle-body-class' );
-				$this->add_amp_action( $toggle, 'tap', "{$body_id}.toggleClass(class='{$body_class}')" );
+				AMP_DOM_Utils::add_amp_action( $toggle, 'tap', "{$body_id}.toggleClass(class='{$body_class}')" );
 			}
 
 			// Leaving these for now as the theme looks broken in non-AMP already.
@@ -1821,51 +1821,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Register an AMP action to an event on a given element.
-	 *
-	 * If the element already contains one or more events or actions, the method
-	 * will assemble them in a smart way.
-	 *
-	 * @param DOMElement $element Element to add an action to.
-	 * @param string     $event   Event to trigger the action on.
-	 * @param string     $action  Action to add.
-	 */
-	protected function add_amp_action( DOMElement $element, $event, $action ) {
-		if ( ! $element->hasAttribute( 'on' ) ) {
-			$element->setAttribute( 'on', "{$event}:{$action}" );
-			return;
-		}
-
-		$events = explode( ';', $element->getAttribute( 'on' ) );
-
-		$found = false;
-		foreach ( $events as $index => $event_action_string ) {
-			if ( $found ) {
-				continue;
-			}
-
-			list( $existing_event, $existing_actions ) = explode( ':', $event_action_string, 2 );
-
-			if ( $existing_event !== $event ) {
-				continue;
-			}
-
-			$existing_actions_array   = explode( ',', $existing_actions );
-			$existing_actions_array[] = $action;
-			$actions                  = implode( ',', $existing_actions_array );
-
-			$events[ $index ] = "{$event}:{$actions}";
-			$found            = true;
-		}
-
-		if ( ! $found ) {
-			$events[] = "{$event}:${action}";
-		}
-
-		$element->setAttribute( 'on', implode( ';', $events ) );
 	}
 
 	/**

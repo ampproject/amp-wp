@@ -21,6 +21,14 @@ class AMP_DOM_Utils {
 	const AMP_BIND_DATA_ATTR_PREFIX = 'data-amp-bind-';
 
 	/**
+	 * Regular expression pattern to match events and actions within an 'on' attribute.
+	 *
+	 * @since 1.4.0
+	 * @var string
+	 */
+	const AMP_EVENT_ACTIONS_REGEX_PATTERN = '/((?<event>[^:;]+):(?<actions>(?:[^;,\(]+(?:\([^\)]+\))?,?)+))+?/';
+
+	/**
 	 * HTML elements that are self-closing.
 	 *
 	 * Not all are valid AMP, but we include them for completeness.
@@ -715,6 +723,8 @@ class AMP_DOM_Utils {
 	/**
 	 * Check whether a given element has a specific class.
 	 *
+	 * @since 1.4.0
+	 *
 	 * @param DOMElement $element Element to check the classes of.
 	 * @param string     $class   Class to check for.
 	 * @return bool Whether the element has the requested class.
@@ -733,6 +743,8 @@ class AMP_DOM_Utils {
 	 * Get the ID for an element.
 	 *
 	 * If the element does not have an ID, create one first.
+	 *
+	 * @since 1.4.0
 	 *
 	 * @param DOMElement $element Element to get the ID for.
 	 * @param string     $prefix  Optional. Defaults to '_amp_wp_id_'.
@@ -768,6 +780,8 @@ class AMP_DOM_Utils {
 	 * CSS selectors. Therefore, it provides a filter for themes & plugins to
 	 * hook into to provide custom replacements.
 	 *
+	 * @since 1.4.0
+	 *
 	 * @param string $css_selector CSS selector to convert.
 	 * @return string|null XPath that closely mirrors the provided CSS selector,
 	 *                     or null if an error occurred.
@@ -794,7 +808,7 @@ class AMP_DOM_Utils {
 			// Single ID.
 			if ( preg_match( '/^#(?<id>[a-zA-Z0-9-_]*)$/', $token, $matches ) ) {
 				$descendant        = $direct_descendant ? '/' : '//';
-				$xpath             .= "{$descendant}*[ @id = '{$matches['id']}' ]";
+				$xpath            .= "{$descendant}*[ @id = '{$matches['id']}' ]";
 				$direct_descendant = false;
 				$token             = strtok( ' ' );
 				continue;
@@ -803,7 +817,7 @@ class AMP_DOM_Utils {
 			// Single class.
 			if ( preg_match( '/^\.(?<class>[a-zA-Z0-9-_]*)$/', $token, $matches ) ) {
 				$descendant        = $direct_descendant ? '/' : '//';
-				$xpath             .= "{$descendant}*[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' {$matches['class']} ' ) ]";
+				$xpath            .= "{$descendant}*[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' {$matches['class']} ' ) ]";
 				$direct_descendant = false;
 				$token             = strtok( ' ' );
 				continue;
@@ -812,7 +826,7 @@ class AMP_DOM_Utils {
 			// Element.
 			if ( preg_match( '/^(?<element>[^.][a-zA-Z0-9-_]*)$/', $token, $matches ) ) {
 				$descendant        = $direct_descendant ? '/' : '//';
-				$xpath             .= "{$descendant}{$matches['element']}";
+				$xpath            .= "{$descendant}{$matches['element']}";
 				$direct_descendant = false;
 				$token             = strtok( ' ' );
 				continue;
@@ -822,5 +836,52 @@ class AMP_DOM_Utils {
 		}
 
 		return $xpath;
+	}
+
+	/**
+	 * Register an AMP action to an event on a given element.
+	 *
+	 * If the element already contains one or more events or actions, the method
+	 * will assemble them in a smart way.
+	 *
+	 * @since 1.4.0
+	 *
+	 * @param DOMElement $element Element to add an action to.
+	 * @param string     $event   Event to trigger the action on.
+	 * @param string     $action  Action to add.
+	 */
+	public static function add_amp_action( DOMElement $element, $event, $action ) {
+		if ( ! $element->hasAttribute( 'on' ) ) {
+			$element->setAttribute( 'on', "{$event}:{$action}" );
+			return;
+		}
+
+		$matches = [];
+		$results = preg_match_all( self::AMP_EVENT_ACTIONS_REGEX_PATTERN, $element->getAttribute( 'on' ), $matches );
+
+		if ( ! $results || ! isset( $matches['event'] ) ) {
+			$element->setAttribute( 'on', "{$event}:{$action}" );
+			return;
+		}
+
+		$found = false;
+		foreach ( $matches['event'] as $index => $existing_event ) {
+			if ( $event === $existing_event ) {
+				$matches['actions'][ $index ] .= ",{$action}";
+				$found                         = true;
+			}
+		}
+
+		if ( ! $found ) {
+			$matches['event'][]   = $event;
+			$matches['actions'][] = $action;
+		}
+
+		$value_strings = [];
+		foreach ( $matches['event'] as $index => $event_name ) {
+			$value_strings[] = "{$event_name}:{$matches['actions'][ $index ]}";
+		}
+
+		$element->setAttribute( 'on', implode( ';', $value_strings ) );
 	}
 }

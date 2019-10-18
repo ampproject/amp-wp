@@ -665,4 +665,42 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$actual = AMP_DOM_Utils::xpath_from_css_selector( $css_selector );
 		$this->assertEquals( $expected, $actual );
 	}
+
+	public function get_add_amp_action_data() {
+		$dom    = new DOMDocument();
+		$button = AMP_DOM_Utils::create_node( $dom, 'button', [] );
+		$form   = AMP_DOM_Utils::create_node( $dom, 'form', [] );
+
+		return [
+			// Add a toggle class on tap to a button
+			[ $button, 'tap', "some-id.toggleClass(class='some-class')", "tap:some-id.toggleClass(class='some-class')" ],
+			// Add another toggle class on tap to a button
+			[ $button, 'tap', "some-other-id.toggleClass(class='some-class')", "tap:some-id.toggleClass(class='some-class'),some-other-id.toggleClass(class='some-class')" ],
+			// Add a third toggle class on tap to a button
+			[ $button, 'tap', "third-id.toggleClass(class='some-class')", "tap:some-id.toggleClass(class='some-class'),some-other-id.toggleClass(class='some-class'),third-id.toggleClass(class='some-class')" ],
+			// Add some other event to a button
+			[ $button, 'event', 'action', "tap:some-id.toggleClass(class='some-class'),some-other-id.toggleClass(class='some-class'),third-id.toggleClass(class='some-class');event:action" ],
+			// Add another action to the second event to a button
+			[ $button, 'event', 'other-action', "tap:some-id.toggleClass(class='some-class'),some-other-id.toggleClass(class='some-class'),third-id.toggleClass(class='some-class');event:action,other-action" ],
+			// Add fourth action to the tap event to a button
+			[ $button, 'tap', 'lightbox', "tap:some-id.toggleClass(class='some-class'),some-other-id.toggleClass(class='some-class'),third-id.toggleClass(class='some-class'),lightbox;event:action,other-action" ],
+			// Add a submit success action to a form
+			[ $form, 'submit-success', 'success-lightbox', 'submit-success:success-lightbox' ],
+			// Add a submit error action to a form
+			[ $form, 'submit-error', 'error-lightbox', 'submit-success:success-lightbox;submit-error:error-lightbox' ],
+			// Make sure separators within methods won't break
+			[ AMP_DOM_Utils::create_node( $dom, 'div', [ 'on' => "event:action(method='with problematic characters , : ;')" ] ), 'event', "second-action('with problematic characters , : ;')", "event:action(method='with problematic characters , : ;'),second-action('with problematic characters , : ;')" ],
+		];
+	}
+
+	/**
+	 * Test add_amp_action().
+	 *
+	 * @dataProvider get_add_amp_action_data
+	 * @covers \AMP_DOM_Utils::add_amp_action()
+	 */
+	public function test_add_amp_action( DOMElement $element, $event, $action, $expected ) {
+		AMP_DOM_Utils::add_amp_action( $element, $event, $action );
+		$this->assertEquals( $expected, $element->getAttribute( 'on' ) );
+	}
 }
