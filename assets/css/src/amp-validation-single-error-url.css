@@ -149,7 +149,12 @@ table.striped > tbody > tr.even {
 	border-right: 1px solid #a0a5aa;
 }
 
+.amp-validation-error-status-dropdown {
+	display: flex;
+}
+
 .amp-validation-error-status {
+	margin-left: 5px;
 	width: auto;
 	float: none;
 }
