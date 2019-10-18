@@ -390,7 +390,6 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		$_GET = [];
 
 		// The query var should force the excessive_css error to be accepted.
-		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
 		$excessive_css_error = array_merge(
 			$this->get_mock_error(),
 			[
@@ -409,7 +408,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 			[
 				'forced'      => 'with_filter',
 				'status'      => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
-				'term_status' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
+				'term_status' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
 			],
 			AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $excessive_css_error )
 		);
