@@ -2137,7 +2137,7 @@ class AMP_Validation_Error_Taxonomy {
 
 			<?php foreach ( $validation_error as $key => $value ) : ?>
 				<?php
-				$is_element_attributes = 'node_attributes' === $key || 'element_attributes' === $key;
+				$is_element_attributes = ( 'node_attributes' === $key || 'element_attributes' === $key );
 				if ( $is_element_attributes && empty( $value ) ) {
 					continue;
 				}
@@ -2318,8 +2318,9 @@ class AMP_Validation_Error_Taxonomy {
 					$file = $source['file'];
 
 					// Prepend the plugin directory name to the file name as the plugin editor requires.
-					if ( false !== strpos( $plugin['name'], '/' ) ) {
-						$file = strtok( $plugin['name'], '/' ) . '/' . $file;
+					$i = strpos( $plugin['name'], '/' );
+					if ( false !== $i ) {
+						$file = substr( $plugin['name'], 0, $i ) . '/' . $file;
 					}
 
 					$edit_url = add_query_arg(
@@ -2561,7 +2562,7 @@ class AMP_Validation_Error_Taxonomy {
 												// Note that esc_attr() used instead of esc_url() to allow IDE protocols.
 												esc_attr( $edit_url ),
 												// Open link in new window unless the user has filtered the URL to open their system IDE.
-												in_array( wp_parse_url( $edit_url, PHP_URL_SCHEME ), [ 'http:', 'https:' ], true ) ? 'target="_blank"' : ''
+												in_array( wp_parse_url( $edit_url, PHP_URL_SCHEME ), [ 'http', 'https' ], true ) ? 'target="_blank"' : ''
 											);
 										}
 										?>
