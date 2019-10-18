@@ -663,7 +663,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Add required styles for featured image header in Twenty Twenty.
+	 * Add required styles for featured image header and image blocks in Twenty Twenty.
 	 */
 	public static function add_twentytwenty_masthead_styles() {
 		add_action(
@@ -674,6 +674,10 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				<style>
 				.featured-media amp-img {
 					position: static;
+				}
+
+				.wp-block-image img {
+						display: block;
 				}
 				</style>
 				<?php
@@ -1008,9 +1012,17 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						display: inherit;
 					}
 
-					.wp-block-image img {
-						display: block;
+					.primary-menu li.menu-item-has-children:focus-within > ul {
+						right: 0;
+						opacity: 1;
+						transform: translateY(0);
+						transition: opacity .15s linear, transform .15s linear;
 					}
+
+					.primary-menu ul li.menu-item-has-children:focus-within > ul {
+						right: calc(100% + 2rem);
+					}
+
 				}
 				<?php elseif ( 'twentyseventeen' === get_template() ) : ?>
 					/* Show the button*/
