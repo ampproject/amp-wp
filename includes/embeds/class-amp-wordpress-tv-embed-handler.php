@@ -3,10 +3,13 @@
  * Class AMP_WordPress_TV_Embed_Handler
  *
  * @package AMP
+ * @since 1.4
  */
 
 /**
  * Class AMP_WordPress_TV_Embed_Handler
+ *
+ * @since 1.4
  */
 class AMP_WordPress_TV_Embed_Handler extends AMP_Base_Embed_Handler {
 
@@ -14,14 +17,14 @@ class AMP_WordPress_TV_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Register embed.
 	 */
 	public function register_embed() {
-		add_filter( 'render_block', [ $this, 'filter_rendered_block' ], 0, 2 );
+		add_filter( 'render_block', [ $this, 'filter_rendered_block' ], 10, 2 );
 	}
 
 	/**
 	 * Unregister embed.
 	 */
 	public function unregister_embed() {
-		remove_filter( 'render_block', [ $this, 'filter_rendered_block' ], 0 );
+		remove_filter( 'render_block', [ $this, 'filter_rendered_block' ], 10 );
 	}
 
 	/**
