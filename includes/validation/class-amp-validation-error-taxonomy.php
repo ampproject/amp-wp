@@ -2242,12 +2242,11 @@ class AMP_Validation_Error_Taxonomy {
 				<?php foreach ( $sources as $source ) : ?>
 					<?php
 					$file_text = null;
-					$file_link = null;
+					$edit_url  = null;
 					if ( isset( $source['file'], $source['line'] ) ) {
 						$file      = $source['file'];
 						$line      = $source['line'];
 						$file_text = "$file:$line";
-						unset( $source['file'], $source['line'] );
 
 						if ( isset( $source['type'], $source['name'] ) ) {
 							if ( 'plugin' === $source['type'] && current_user_can( 'edit_plugins' ) ) {
@@ -2258,7 +2257,7 @@ class AMP_Validation_Error_Taxonomy {
 										$file = strtok( $plugin['name'], '/' ) . '/' . $file;
 									}
 
-									$file_link = add_query_arg(
+									$edit_url = add_query_arg(
 										[
 											'plugin' => rawurlencode( $plugin['name'] ),
 											'file'   => rawurlencode( $file ),
@@ -2268,7 +2267,7 @@ class AMP_Validation_Error_Taxonomy {
 									);
 								}
 							} elseif ( 'theme' === $source['type'] && current_user_can( 'edit_themes' ) ) {
-								$file_link = add_query_arg(
+								$edit_url = add_query_arg(
 									[
 										'file'  => rawurlencode( $file ),
 										'theme' => rawurlencode( $source['name'] ),
@@ -2278,6 +2277,22 @@ class AMP_Validation_Error_Taxonomy {
 								);
 							}
 						}
+
+						/**
+						 * Filters the URL for opening the file to edit.
+						 *
+						 * Users of IDEs that support opening files in via web protocols can use this filter to override
+						 * the edit link to result in their editor opening rather than the theme/plugin editor.
+						 *
+						 * @since 1.4
+						 *
+						 * @param string|null $edit_url Edit URL for the file. Line number with colon will be appended to end. Null when user cannot access theme/plugin editor.
+						 * @param array       $source   Source information.
+						 */
+						$edit_url = apply_filters( 'amp_validation_error_source_file_edit_url', $edit_url, $source );
+
+						// Prevent duplicated info.
+						unset( $source['file'], $source['line'] );
 					}
 					?>
 					<li>
@@ -2304,11 +2319,15 @@ class AMP_Validation_Error_Taxonomy {
 										file:
 									</th>
 									<td>
-										<?php if ( $file_link ) : ?>
-											<a href="<?php echo esc_url( $file_link ); ?>" target="_blank">
+										<?php if ( $edit_url ) : ?>
+											<a
+												href="<?php
+													echo esc_attr( $edit_url ); // Note that esc_attr() used instead of esc_url() to allow IDE protocols.
+												?>"
+												target="_blank">
 										<?php endif; ?>
 										<?php echo esc_html( $file_text ); ?>
-										<?php if ( $file_link ) : ?>
+										<?php if ( $edit_url ) : ?>
 											</a>
 										<?php endif; ?>
 									</td>
