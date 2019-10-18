@@ -134,6 +134,8 @@ const CustomVideoBlockEdit = ( { instanceId, isSelected, className, attributes, 
 		if ( src && ! isBlobURL( src ) ) {
 			getContentLengthFromUrl( src ).then( setVideoSize );
 		}
+		// Disable reason: src is constantly changing, but we want this hook to fire only once (like componentDidMount).
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [ allowedVideoMimeTypes, id, mediaUpload, noticeOperations, setAttributes ] );
 
 	useEffect( () => {
