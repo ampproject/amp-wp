@@ -2341,6 +2341,39 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
+	 * Render source name.
+	 *
+	 * @since 1.4
+	 *
+	 * @param string $name Name.
+	 * @param string $type Type.
+	 */
+	private static function render_source_name( $name, $type ) {
+		$nicename = null;
+		switch ( $type ) {
+			case 'theme':
+				$theme = wp_get_theme( $name );
+				if ( ! $theme->errors() ) {
+					$nicename = $theme->get( 'Name' );
+				}
+				break;
+			case 'plugin':
+				$plugin = self::get_plugin_from_slug( $name );
+				if ( $plugin && ! empty( $plugin['data']['Name'] ) ) {
+					$nicename = $plugin['data']['Name'];
+				}
+				break;
+		}
+		echo ' ';
+
+		if ( $nicename ) {
+			printf( '%s (<code>%s</code>)', esc_html( $nicename ), esc_html( $name ) );
+		} else {
+			echo '<code>' . esc_html( $name ) . '</code>';
+		}
+	}
+
+	/**
 	 * Render sources.
 	 *
 	 * @param array $sources Sources.
@@ -2355,8 +2388,8 @@ class AMP_Validation_Error_Taxonomy {
 					sprintf(
 						/* translators: %s: number of sources. */
 						_n(
-							'%s source',
-							'%s sources',
+							'%s possible source',
+							'%s possible sources',
 							$source_count,
 							'amp'
 						),
@@ -2374,17 +2407,121 @@ class AMP_Validation_Error_Taxonomy {
 						$file_text = $source['file'] . ':' . $source['line'];
 						unset( $source['file'], $source['line'] );
 					}
+					$is_filter = ! empty( $source['filter'] );
+					unset( $source['filter'] );
+
+					$priority = null;
+					if ( isset( $source['priority'] ) ) {
+						$priority = $source['priority'];
+						unset( $source['priority'] );
+					}
+
 					?>
 					<li>
 						<table>
 							<?php foreach ( $source as $key => $value ) : ?>
 								<tr>
 									<th>
-										<?php echo esc_html( $key ); ?>:
+										<?php
+										switch ( $key ) {
+											case 'name':
+												esc_html_e( 'Name', 'amp' );
+												break;
+											case 'post_id':
+												esc_html_e( 'Post ID', 'amp' );
+												break;
+											case 'post_type':
+												esc_html_e( 'Post Type', 'amp' );
+												break;
+											case 'handle':
+												esc_html_e( 'Handle', 'amp' );
+												break;
+											case 'block_content_index':
+												esc_html_e( 'Block Index', 'amp' );
+												break;
+											case 'block_name':
+												esc_html_e( 'Block Name', 'amp' );
+												break;
+											case 'shortcode':
+												esc_html_e( 'Shortcode', 'amp' );
+												break;
+											case 'type':
+												esc_html_e( 'Type', 'amp' );
+												break;
+											case 'function':
+												esc_html_e( 'Function', 'amp' );
+												break;
+											case 'sources':
+												esc_html_e( 'Sources', 'amp' );
+												break;
+											case 'hook':
+												if ( $is_filter ) {
+													esc_html_e( 'Filter', 'amp' );
+												} else {
+													esc_html_e( 'Action', 'amp' );
+												}
+												break;
+											default:
+												echo esc_html( $key );
+										}
+										echo ':';
+										?>
 									</th>
 									<td>
 										<?php if ( 'sources' === $key && is_array( $value ) ) : ?>
 											<?php self::render_sources( $value ); ?>
+										<?php elseif ( 'type' === $key ) : ?>
+											<?php
+											switch ( $value ) {
+												case 'theme':
+													echo '<span class="dashicons dashicons-admin-appearance"></span> ';
+													esc_html_e( 'Theme', 'amp' );
+													break;
+												case 'plugin':
+													echo '<span class="dashicons dashicons-admin-plugins"></span> ';
+													esc_html_e( 'Plugin', 'amp' );
+													break;
+												case 'mu-plugin':
+													echo '<span class="dashicons dashicons-admin-plugins"></span> ';
+													esc_html_e( 'Must-Use Plugin', 'amp' );
+													break;
+												case 'core':
+													echo '<span class="dashicons dashicons-wordpress-alt"></span> ';
+													esc_html_e( 'Core', 'amp' );
+													break;
+												default:
+													echo esc_html( (string) $value );
+											}
+											?>
+										<?php elseif ( 'name' === $key && isset( $source['type'] ) ) : ?>
+											<?php self::render_source_name( $value, $source['type'] ); ?>
+										<?php elseif ( 'hook' === $key ) : ?>
+											<code><?php echo esc_html( (string) $value ); ?></code>
+											<?php
+											if ( null !== $priority ) {
+												echo esc_html(
+													sprintf(
+														/* translators: %d is the hook priority */
+														__( '(priority %d)', 'amp' ),
+														$priority
+													)
+												);
+											}
+											?>
+										<?php elseif ( 'function' === $key ) : ?>
+											<code><?php echo esc_html( '{closure}' === $value ? $value : $value . '()' ); ?></code>
+										<?php elseif ( 'block_name' === $key || 'shortcode' === $key ) : ?>
+											<code><?php echo esc_html( $value ); ?></code>
+										<?php elseif ( 'post_type' === $key ) : ?>
+											<?php
+											$post_type = get_post_type_object( $value );
+											if ( $post_type && isset( $post_type->labels->singular_name ) ) {
+												echo esc_html( $post_type->labels->singular_name );
+												printf( ' (<code>%s</code>)', esc_html( $value ) );
+											} else {
+												printf( '<code>%s</code>', esc_html( $value ) );
+											}
+											?>
 										<?php elseif ( is_scalar( $value ) ) : ?>
 											<?php echo esc_html( (string) $value ); ?>
 										<?php else : ?>
@@ -2396,7 +2533,7 @@ class AMP_Validation_Error_Taxonomy {
 							<?php if ( $file_text ) : ?>
 								<tr>
 									<th>
-										file:
+										<?php esc_html_e( 'Location', 'amp' ); ?>:
 									</th>
 									<td>
 										<?php
