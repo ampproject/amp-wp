@@ -299,3 +299,8 @@ div[data-type="amp/amp-story-page"] .wp-block-image {
 .editor-block-list__layout [data-type="amp/amp-story-page"] .block-editor-block-list__block.is-selected .block-editor-warning {
 	border: none;
 }
+
+.edit-post-settings-sidebar__panel-block .components-panel__body.editor-amp-story-remove-page {
+	border: none;
+	margin-top: 0;
+}

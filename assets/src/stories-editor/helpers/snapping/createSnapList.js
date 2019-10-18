@@ -53,19 +53,25 @@ const getSetter = ( lowerBound, upperBound ) => ( obj, prop, value ) => {
 /**
  * Create snap list via proxy that contains initial snap lines for edges and center of page.
  *
- * @param {import('./types').LineCreator} getLine Function to create lines based off maximum value.
- * @param {number} maxValue Maximum value of page in this direction.
+ * @param {import('./types').LineCreator} getLine       Function to create lines based off maximum value.
+ * @param {number}                        maxValue      Maximum value of page in this direction.
+ * @param {boolean}                       includeEdges  Include edges in initial list.
  * @return {import('./types').SnapLines} An initial list of snap lines ready to be extended.
  */
-const createSnapList = ( getLine, maxValue ) => new Proxy(
+const createSnapList = ( getLine, maxValue, includeEdges = true ) => new Proxy(
 	// Create initial list of snap lines.
 	{
-		// Start page border.
-		0: [ getLine( 0 ) ],
 		// Center of the page.
 		[ maxValue / 2 ]: [ getLine( maxValue / 2 ) ],
-		// End page border.
-		[ maxValue ]: [ getLine( maxValue ) ],
+		...( includeEdges ?
+			{
+				// Start page border.
+				0: [ getLine( 0 ) ],
+				// End page border.
+				[ maxValue ]: [ getLine( maxValue ) ],
+			} :
+			{}
+		),
 	},
 	{
 		set: getSetter( 0, maxValue ),

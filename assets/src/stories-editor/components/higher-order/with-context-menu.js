@@ -10,11 +10,11 @@ import { KeyboardShortcuts } from '@wordpress/components';
  * Internal dependencies
  */
 import { ALLOWED_CHILD_BLOCKS } from '../../constants';
-import { getBlockDOMNode, getPercentageFromPixels, isPageBlock } from '../../helpers';
+import { getBlockDOMNode, getPercentageFromPixels } from '../../helpers';
 import { ContextMenu } from '../';
 
 const applyWithSelect = withSelect( ( select ) => {
-	const {	isReordering, getCopiedMarkup, getCurrentPage } = select( 'amp/story' );
+	const {	isReordering, getCurrentPage } = select( 'amp/story' );
 	const {
 		getSelectedBlockClientIds,
 		hasMultiSelection,
@@ -26,11 +26,6 @@ const applyWithSelect = withSelect( ( select ) => {
 		const selectedBlockClientIds = getSelectedBlockClientIds();
 
 		if ( selectedBlockClientIds.length === 0 ) {
-			return;
-		}
-
-		// If selection is page and nothing is in the saved markup, use the default behavior.
-		if ( isPageBlock( selectedBlockClientIds[ 0 ] ) && ! getCopiedMarkup().length ) {
 			return;
 		}
 

@@ -7,7 +7,7 @@ import createSnapList from './createSnapList';
  * Higher-higher order function that in the end creates a list of snap targets.
  *
  * First it is invoked with the "direction" of the snaps to calculate, creating the two
- * functions below, `getHorizontalSnaps` and `getVerticalSnaps`.
+ * functions in separate helpers, `getHorizontalSnaps` and `getVerticalSnaps`.
  *
  * These functions in turn take a list of sibling element positions used to create the
  * snap calculator function.
@@ -20,7 +20,7 @@ import createSnapList from './createSnapList';
  * @param {number} maxValue Maximum value of page in this direction.
  * @param {Array.<string>} primary Coordinate property names in primary direction.
  * @param {Array.<string>} secondary Coordinate property names in secondary direction.
- * @return {import('./types').SnapTargetsEnhancer} Function mapping an actual object's position to all possible snap targets.
+ * @return {Array.<import('./types').SnapTargetsEnhancer>} Function mapping an actual object's position to all possible snap targets.
  */
 const getSnapCalculatorByDimension = (
 	getLine,
@@ -28,7 +28,8 @@ const getSnapCalculatorByDimension = (
 	[ startProp, endProp ],
 	[ minProp, maxProp ],
 ) => ( siblingPositions ) => ( targetMin, targetMax ) => {
-	const snaps = createSnapList( getLine, maxValue );
+	const edgeSnaps = createSnapList( getLine, maxValue );
+	const centerSnaps = createSnapList( getLine, maxValue, false );
 
 	for ( const coords of siblingPositions ) {
 		const start = coords[ startProp ];
@@ -38,12 +39,12 @@ const getSnapCalculatorByDimension = (
 		const min = Math.min( targetMin, coords[ minProp ] );
 		const max = Math.max( targetMax, coords[ maxProp ] );
 
-		snaps[ start ] = getLine( start, min, max );
-		snaps[ end ] = getLine( end, min, max );
-		snaps[ center ] = getLine( center, min, max );
+		edgeSnaps[ start ] = getLine( start, min, max );
+		edgeSnaps[ end ] = getLine( end, min, max );
+		centerSnaps[ center ] = getLine( center, min, max );
 	}
 
-	return snaps;
+	return [ edgeSnaps, centerSnaps ];
 };
 
 export default getSnapCalculatorByDimension;
