@@ -777,8 +777,7 @@ class AMP_DOM_Utils {
 	 * selector.
 	 *
 	 * This is a very simplistic conversion and will only work for very basic
-	 * CSS selectors. Therefore, it provides a filter for themes & plugins to
-	 * hook into to provide custom replacements.
+	 * CSS selectors.
 	 *
 	 * @since 1.4.0
 	 *
