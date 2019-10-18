@@ -1023,6 +1023,18 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						right: calc(100% + 2rem);
 					}
 
+					.admin-bar .menu-modal {
+						/* Use padding to shift down modal because amp-lightbox has top:0 !important. */
+						padding-top: 32px;
+					}
+
+					@media (max-width: 782px) {
+						.admin-bar .menu-modal {
+							/* Use padding to shift down modal because amp-lightbox has top:0 !important. */
+							padding-top: 46px;
+						}
+					}
+
 				}
 				<?php elseif ( 'twentyseventeen' === get_template() ) : ?>
 					/* Show the button*/
@@ -1641,7 +1653,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// Create an <amp-lightbox> element that will contain the modal.
-
 		$amp_lightbox = $this->dom->createElement( 'amp-lightbox' );
 		$amp_lightbox->setAttribute( 'id', $modal_id );
 		$amp_lightbox->setAttribute( 'layout', 'nodisplay' );
