@@ -134,7 +134,7 @@ const CustomVideoBlockEdit = ( { instanceId, isSelected, className, attributes, 
 		if ( src && ! isBlobURL( src ) ) {
 			getContentLengthFromUrl( src ).then( setVideoSize );
 		}
-	}, [ allowedVideoMimeTypes, id, mediaUpload, noticeOperations, setAttributes, src ] );
+	}, [ allowedVideoMimeTypes, id, mediaUpload, noticeOperations, setAttributes ] );
 
 	useEffect( () => {
 		if ( videoPlayer.current ) {
