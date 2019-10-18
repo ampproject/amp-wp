@@ -736,7 +736,7 @@ class AMP_DOM_Utils {
 
 		$classes = $element->getAttribute( 'class' );
 
-		return (bool) preg_match( "/\b{$class}\b/", $classes );
+		return in_array( $class, preg_split( '/\s/', $classes ), true );
 	}
 
 	/**
