@@ -1792,8 +1792,14 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			$new_target_node = $is_sub_menu ? $this->get_closest_submenu( $toggle ) : $target_node;
 			$new_target_id   = AMP_DOM_Utils::get_element_id( $new_target_node );
 
+			$state_string = str_replace( '-', '_', $new_target_id );
+
 			// Toggle the target of the clicked toggle.
 			AMP_DOM_Utils::add_amp_action( $toggle, 'tap', "{$new_target_id}.toggleClass(class='{$toggle_class}')" );
+			// Set the central state of the toggle's target.
+			AMP_DOM_Utils::add_amp_action( $toggle, 'tap', "AMP.setState({{$state_string}: !{$state_string}})" );
+			// Adapt the aria-expanded attribute according to the central state.
+			$toggle->setAttribute( 'data-amp-bind-aria-expanded', "{$state_string} ? 'true' : 'false'" );
 
 			// If the toggle target is 'next' ir a sub-menu, only give the clicked toggle the active class.
 			if ( 'next' === $toggle_target || AMP_DOM_Utils::has_class( $target_node, 'sub-menu' ) ) {
@@ -1816,9 +1822,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				$body_class = $toggle->getAttribute( 'data-toggle-body-class' );
 				AMP_DOM_Utils::add_amp_action( $toggle, 'tap', "{$body_id}.toggleClass(class='{$body_class}')" );
 			}
-
-			// Leaving these for now as the theme looks broken in non-AMP already.
-			// @todo Toggle aria-expanded on the toggle.
 
 			if ( $toggle->hasAttribute( 'data-set-focus' ) ) {
 				$focus_selector = $toggle->getAttribute( 'data-set-focus' );
