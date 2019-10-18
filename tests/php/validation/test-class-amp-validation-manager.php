@@ -369,7 +369,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 				[
 					'parent' => $parent_node_id,
 					'id'     => $query_var,
-					'title'  => 'Disable AMP',
+					'title'  => '<span class="amp-debug-option" style="font-family:Roboto,Oxygen-Sans,sans-serif;font-size:17px">☐</span> Disable AMP',
 					'href'   => add_query_arg( AMP_Theme_Support::AMP_FLAGS_QUERY_VAR, [ $query_var => '' ], $amp_url ),
 				],
 				$wp_admin_bar->nodes,
