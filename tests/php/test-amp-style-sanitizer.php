@@ -1735,11 +1735,11 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Get data URLs.
+	 * Get data for CSS rules with url() values.
 	 *
-	 * @returns array data: URL data.
+	 * @returns array Data.
 	 */
-	public function get_data_urls() {
+	public function get_style_rules_with_url_values() {
 		return [
 			'url_with_spaces'      => [
 				'html { background-image:url(url with spaces.png); }',
@@ -1749,19 +1749,27 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'html { background: url(data:image/png; base64, ivborw0kggoaaaansuheugaaacwaaaascamaaaapwqozaaaabgdbtueaalgpc/xhbqaaaafzukdcak7ohokaaaamuexurczmzpf399fx1+bm5mzy9amaaadisurbvdjlvzxbesmgces5/p8/t9furvcrmu73jwlzosgsiizurcjo/ad+eqjjb4hv8bft+idpqocx1wjosbfhh2xssxeiyn3uli/6mnree07uiwjev8ueowds88ly97kqytlijkktuybbruayvh5wohixmpi5we58ek028czwyuqdlkpg1bkb4nnm+veanfhqn1k4+gpt6ugqcvu2h2ovuif/gwufyy8owepdyzsa3avcqpvovvzzz2vtnn2wu8qzvjddeto90gsy9mvlqtgysy231mxry6i2ggqjrty0l8fxcxfcbbhwrsyyaaaaaelftksuqmcc); }',
 				'html{background:url("data:image/png;base64,ivborw0kggoaaaansuheugaaacwaaaascamaaaapwqozaaaabgdbtueaalgpc/xhbqaaaafzukdcak7ohokaaaamuexurczmzpf399fx1+bm5mzy9amaaadisurbvdjlvzxbesmgces5/p8/t9furvcrmu73jwlzosgsiizurcjo/ad+eqjjb4hv8bft+idpqocx1wjosbfhh2xssxeiyn3uli/6mnree07uiwjev8ueowds88ly97kqytlijkktuybbruayvh5wohixmpi5we58ek028czwyuqdlkpg1bkb4nnm+veanfhqn1k4+gpt6ugqcvu2h2ovuif/gwufyy8owepdyzsa3avcqpvovvzzz2vtnn2wu8qzvjddeto90gsy9mvlqtgysy231mxry6i2ggqjrty0l8fxcxfcbbhwrsyyaaaaaelftksuqmcc")}',
 			],
+			'svg_url_with_spaces1' => [
+				'html { mask-image: url(\'data:image/svg+xml;utf8,\\00003Csvg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"\\00003E\\00003Ccircle cx=\"50\" cy=\"50\" r=\"50\"/\\00003E\\00003C/svg\\00003E\' ); }',
+				'html{mask-image:url("data:image/svg+xml;utf8,<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><circle cx=\"50\" cy=\"50\" r=\"50\"/></svg>")}',
+			],
+			'svg_url_with_spaces2' => [
+				'html { mask-image: url( "data:image/svg+xml;utf8,\\00003Csvg viewBox=\'0 0 100 100\' xmlns=\'http://www.w3.org/2000/svg\'\\00003E\\00003Ccircle cx=\'50\' cy=\'50\' r=\'50\'/\\00003E\\00003C/svg\\00003E" ); }',
+				"html{mask-image:url(\"data:image/svg+xml;utf8,<svg viewBox=\'0 0 100 100\' xmlns=\'http://www.w3.org/2000/svg\'><circle cx=\'50\' cy=\'50\' r=\'50\'/></svg>\")}",
+			],
 		];
 	}
 
 	/**
 	 * Test handling of stylesheets with spaces in the background-image URLs.
 	 *
-	 * @dataProvider get_data_urls
-	 * @covers AMP_Style_Sanitizer::remove_spaces_from_data_urls()
+	 * @dataProvider get_style_rules_with_url_values
+	 * @covers AMP_Style_Sanitizer::remove_spaces_from_url_values()
 	 *
 	 * @param string      $source     Source URL string.
 	 * @param string|null $expected   Expected normalized URL string.
 	 */
-	public function test_remove_spaces_from_data_urls( $source, $expected ) {
+	public function test_remove_spaces_from_url_values( $source, $expected ) {
 		$html  = '<html><head><style>';
 		$html .= $source;
 		$html .= '</style></head</html>';
