@@ -82,7 +82,7 @@
     "eslint-plugin-import": "2.18.2",
     "eslint-plugin-jest": "22.19.0",
     "eslint-plugin-react": "7.16.0",
-    "eslint-utils": "1.4.2",
+    "eslint-utils": "1.4.3",
     "grunt": "1.0.4",
     "grunt-contrib-clean": "2.0.0",
     "grunt-contrib-copy": "1.0.0",
