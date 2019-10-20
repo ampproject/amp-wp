@@ -154,7 +154,9 @@ class AMPPreview extends Component {
 
 		if ( ! buttonWrapper.previousSibling || ! buttonWrapper.previousSibling.classList.contains( POST_PREVIEW_CLASS ) ) {
 			const postPreviewButton = document.querySelector( `.${ POST_PREVIEW_CLASS }` );
-			buttonWrapper.parentNode.insertBefore( postPreviewButton, buttonWrapper );
+			if ( get( postPreviewButton, 'nextSibling' ) ) {
+				buttonWrapper.parentNode.insertBefore( buttonWrapper, postPreviewButton.nextSibling );
+			}
 		}
 	}
 
