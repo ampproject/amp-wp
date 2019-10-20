@@ -1869,7 +1869,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private function remove_spaces_from_url_values( $css ) {
 		return preg_replace_callback(
 			// Match CSS url() values that don't have quoted string values.
-			'/\burl\(\s*+(?!["\'\s])(?P<url>[^}]*?\s*)\)/',
+			'/\burl\(\s*(?=\w)(?P<url>[^}]*?\s*)\)/',
 			static function( $matches ) {
 				return preg_replace( '/\s+/', '', $matches[0] );
 			},
