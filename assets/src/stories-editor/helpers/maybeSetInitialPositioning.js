@@ -11,7 +11,7 @@ import { dispatch, select } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { ALLOWED_CHILD_BLOCKS } from '../constants';
+import { ALLOWED_CHILD_BLOCKS, ALLOWED_MOVABLE_BLOCKS } from '../constants';
 
 const {	getBlock, getBlockRootClientId } = select( 'core/block-editor' );
 const { updateBlockAttributes } = dispatch( 'core/block-editor' );
@@ -45,6 +45,7 @@ const maybeSetInitialPositioning = ( clientId ) => {
 	// Only set the position if the block was unmodified before.
 	if ( isUnmodified ) {
 		const highestPositionTop = parentBlock.innerBlocks
+			.filter( ( childBlock ) => ALLOWED_MOVABLE_BLOCKS.includes( childBlock.name ) )
 			.map( ( childBlock ) => childBlock.attributes.positionTop )
 			.reduce( ( highestTop, positionTop ) => Math.max( highestTop, positionTop ), 0 );
 
