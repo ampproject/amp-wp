@@ -141,6 +141,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 				'wp-components',
 				'wp-compose',
 				'wp-data',
+				'wp-dom-ready',
 				'wp-edit-post',
 				'wp-element',
 				'wp-hooks',
