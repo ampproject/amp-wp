@@ -1022,13 +1022,13 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						right: calc(100% + 2rem);
 					}
 
-					.admin-bar .menu-modal {
+					.admin-bar .cover-modal {
 						/* Use padding to shift down modal because amp-lightbox has top:0 !important. */
 						padding-top: 32px;
 					}
 
 					@media (max-width: 782px) {
-						.admin-bar .menu-modal {
+						.admin-bar .cover-modal {
 							/* Use padding to shift down modal because amp-lightbox has top:0 !important. */
 							padding-top: 46px;
 						}
