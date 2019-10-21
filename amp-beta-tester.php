@@ -12,3 +12,23 @@
  *
  * @package AMP Beta Tester
  */
+
+namespace AMP_Beta_Tester;
+
+define( 'AMP__BETA_TESTER__DIR__', dirname( __FILE__ ) );
+
+// DEV_CODE. This block of code is removed during the build process.
+if ( file_exists( AMP__BETA_TESTER__DIR__ . '/amp.php' ) ) {
+	add_filter(
+		'site_transient_update_plugins',
+		function ( $updates ) {
+			if ( isset( $updates->response ) && is_array( $updates->response ) ) {
+				if ( array_key_exists( 'amp/amp-beta-tester.php', $updates->response ) ) {
+					unset( $updates->response['amp/amp-beta-tester.php'] );
+				}
+			}
+
+			return $updates;
+		}
+	);
+}
