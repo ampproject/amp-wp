@@ -1675,14 +1675,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				break;
 			}
 
-			// Add class(es) of removed wrapper to lightbox to avoid breaking CSS selectors.
-			if ( $modal_content_node->hasAttribute( 'class' ) ) {
-				$classes = $modal_content_node->getAttribute( 'class' );
-				if ( $amp_lightbox->hasAttribute( 'class' ) ) {
-					$classes .= ' ' . $amp_lightbox->getAttribute( 'class' );
-				}
-				$amp_lightbox->setAttribute( 'class', $classes );
-			}
+			// Add class(es) and action(s) of removed wrapper to lightbox to avoid breaking CSS selectors.
+			AMP_DOM_Utils::copy_attributes( [ 'class', 'on', 'data-toggle-target' ], $modal_content_node, $amp_lightbox );
 
 			$modal_content_node = $modal_content_node->removeChild( $children[0] );
 
@@ -1745,9 +1739,17 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 
+			$modal_id = AMP_DOM_Utils::get_element_id( $modal );
+
+			// Add the lightbox itself as a close button xpath as well.
+			// With twentytwenty compat, the lightbox fills the entire screen, and only an inner wrapper will contain
+			// the actionable elements in the modal. Therefore, the lightbox represents the "background".
+			$close_button_xpaths[] = "//*[ @id = '{$modal_id}' ]";
+			$modal->setAttribute( 'data-toggle-target', "#{$modal_id}" );
+
 			$this->wrap_modal_in_lightbox(
 				[
-					'modal_id'             => AMP_DOM_Utils::get_element_id( $modal ),
+					'modal_id'             => $modal_id,
 					'modal_content_xpath'  => $modal->getNodePath(),
 					'open_button_xpath'    => $open_button_xpaths,
 					'close_button_xpath'   => $close_button_xpaths,
