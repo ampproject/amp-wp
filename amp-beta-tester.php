@@ -49,6 +49,7 @@ function init() {
 	}
 
 	add_filter( 'pre_set_site_transient_update_plugins', __NAMESPACE__ . '\update_amp_manifest' );
+	add_action( 'after_plugin_row_' . AMP_PLUGIN_FILE, __NAMESPACE__ . '\replace_view_version_details_link', 10, 2 );
 }
 
 /**
@@ -128,4 +129,43 @@ function get_amp_github_releases() {
 		return null;
 	}
 	return json_decode( $raw_response['body'] );
+}
+
+/**
+ * Replace the 'View version details' link with the link to the release on GitHub.
+ *
+ * @param string $file Plugin file.
+ * @param array  $plugin_data Plugin data.
+ */
+function replace_view_version_details_link( $file, $plugin_data ) {
+	$plugin_version = $plugin_data['Version'];
+
+	if ( is_prerelease( $plugin_version ) ) {
+		ob_start();
+		?>
+		<script>
+			document.addEventListener('DOMContentLoaded', function() {
+				const link = document.querySelectorAll("[data-slug='amp'] a.thickbox.open-plugin-details-modal");
+
+				link.forEach( (link) => {
+					link.className = 'overridden'; // Override class so that onclick listeners are disabled.
+					link.target = '_blank';
+					link.href = '<?php echo $plugin_data['url']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>';
+				} );
+			}, false);
+		</script>
+		<?php
+
+		echo ob_get_clean(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	}
+}
+
+/**
+ * Determine if the supplied version code is a prerelease.
+ *
+ * @param string $plugin_version Plugin version code.
+ * @return false|int
+ */
+function is_prerelease( $plugin_version ) {
+	return preg_match( '/(beta|alpha)/', $plugin_version );
 }
