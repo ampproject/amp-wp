@@ -35,7 +35,7 @@
     "@wordpress/api-fetch": "3.6.2",
     "@wordpress/babel-preset-default": "4.6.2",
     "@wordpress/blob": "2.5.1",
-    "@wordpress/block-editor": "3.2.2",
+    "@wordpress/block-editor": "3.2.3",
     "@wordpress/blocks": "6.7.2",
     "@wordpress/browserslist-config": "2.6.0",
     "@wordpress/components": "8.3.2",
