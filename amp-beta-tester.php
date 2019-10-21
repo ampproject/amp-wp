@@ -16,6 +16,7 @@
 namespace AMP_Beta_Tester;
 
 define( 'AMP__BETA_TESTER__DIR__', dirname( __FILE__ ) );
+define( 'AMP_PLUGIN_FILE', 'amp/amp.php' );
 
 // DEV_CODE. This block of code is removed during the build process.
 if ( file_exists( AMP__BETA_TESTER__DIR__ . '/amp.php' ) ) {
@@ -46,6 +47,8 @@ function init() {
 		add_action( 'admin_notices', __NAMESPACE__ . '\show_amp_not_active_notice' );
 		return;
 	}
+
+	add_filter( 'pre_set_site_transient_update_plugins', __NAMESPACE__ . '\update_amp_manifest' );
 }
 
 /**
@@ -58,4 +61,71 @@ function show_amp_not_active_notice() {
 
 	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	echo "<div class='notice notice-error'><p><strong>{$error}</strong></p></div>";
+}
+
+/**
+ * Modifies the AMP plugin manifest to point to a new beta update if one exists.
+ *
+ * @param \stdClass $updates Object containing information on plugin updates.
+ * @return \stdClass
+ */
+function update_amp_manifest( $updates ) {
+	if ( ! isset( $updates->no_update ) ) {
+		return $updates;
+	}
+
+	$amp_zip_file = 'amp.zip';
+	$amp_manifest = isset( $updates->response[ AMP_PLUGIN_FILE ] )
+		? $updates->response[ AMP_PLUGIN_FILE ]
+		: $updates->no_update[ AMP_PLUGIN_FILE ];
+
+	$github_releases = get_amp_github_releases();
+
+	if ( is_array( $github_releases ) ) {
+		$amp_version = get_plugin_data( WP_PLUGIN_DIR . '/' . AMP_PLUGIN_FILE )['Version'];
+		$amp_updated = false;
+
+		foreach ( $github_releases as $release ) {
+			if ( $release->prerelease ) {
+				$release_version = $release->tag_name;
+
+				// If there is a new release, let's see if there is a zip available for download.
+				if ( version_compare( $release_version, $amp_version, '>' ) ) {
+					foreach ( $release->assets as $asset ) {
+						if ( $amp_zip_file === $asset->name ) {
+							$amp_manifest->new_version = $release_version;
+							$amp_manifest->package     = $asset->browser_download_url;
+							$amp_manifest->url         = $release->html_url;
+
+							// Set the AMP plugin to be updated.
+							$updates->response[ AMP_PLUGIN_FILE ] = $amp_manifest;
+							unset( $updates->no_update[ AMP_PLUGIN_FILE ] );
+
+							$amp_updated = true;
+							break;
+						}
+					}
+
+					if ( $amp_updated ) {
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	return $updates;
+}
+
+/**
+ * Fetch AMP releases from GitHub.
+ *
+ * @return array|null
+ */
+function get_amp_github_releases() {
+	$raw_response = wp_remote_get( 'https://api.github.com/repos/ampproject/amp-wp/releases' );
+	if ( is_wp_error( $raw_response ) ) {
+		return null;
+	}
+	return json_decode( $raw_response['body'] );
 }
