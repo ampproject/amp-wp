@@ -32,3 +32,30 @@ if ( file_exists( AMP__BETA_TESTER__DIR__ . '/amp.php' ) ) {
 		}
 	);
 }
+
+add_action( 'plugins_loaded', __NAMESPACE__ . '\init' );
+
+/**
+ * Hook into WP.
+ *
+ * @return void
+ */
+function init() {
+	// Abort init if AMP plugin is not active.
+	if ( ! defined( 'AMP__FILE__' ) ) {
+		add_action( 'admin_notices', __NAMESPACE__ . '\show_amp_not_active_notice' );
+		return;
+	}
+}
+
+/**
+ * Display an admin notice if the AMP plugin is not active.
+ *
+ * @return void
+ */
+function show_amp_not_active_notice() {
+	$error = esc_html__( 'AMP Beta Tester requires AMP to be active.', 'amp-beta-tester' );
+
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	echo "<div class='notice notice-error'><p><strong>{$error}</strong></p></div>";
+}
