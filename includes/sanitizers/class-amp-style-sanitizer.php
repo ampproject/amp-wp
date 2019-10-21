@@ -449,6 +449,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			 * Note that amp-referrer-* class names are handled in has_used_class_name() below.
 			 */
 			'amp-viewer',
+
+			// Classes added based on input mode. See <https://github.com/ampproject/amphtml/blob/master/spec/amp-css-classes.md#input-mode-classes>.
+			'amp-mode-touch',
+			'amp-mode-mouse',
+			'amp-mode-keyboard-active',
 		];
 
 		$classes = ' ';
@@ -1371,7 +1376,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private function process_stylesheet( $stylesheet, $options = [] ) {
 		$parsed      = null;
 		$cache_key   = null;
-		$cache_group = 'amp-parsed-stylesheet-v19'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
+		$cache_group = 'amp-parsed-stylesheet-v20'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
 
 		$cache_impacting_options = array_merge(
 			wp_array_slice_assoc(
@@ -1571,7 +1576,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$this->imported_font_urls = [];
 		try {
 			// Remove spaces from data URLs, which cause errors and PHP-CSS-Parser can't handle them.
-			$stylesheet_string = $this->remove_spaces_from_data_urls( $stylesheet_string );
+			$stylesheet_string = $this->remove_spaces_from_url_values( $stylesheet_string );
 
 			$parser_settings = Sabberworm\CSS\Settings::create();
 			$css_parser      = new Sabberworm\CSS\Parser( $stylesheet_string, $parser_settings );
@@ -1854,16 +1859,17 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Remove spaces from data URLs which PHP-CSS-Parser doesn't handle.
+	 * Remove spaces from CSS URL values which PHP-CSS-Parser doesn't handle.
 	 *
 	 * @since 1.0
 	 *
 	 * @param string $css CSS.
-	 * @return string CSS with spaces removed from data URLs.
+	 * @return string CSS with spaces removed from URLs.
 	 */
-	private function remove_spaces_from_data_urls( $css ) {
+	private function remove_spaces_from_url_values( $css ) {
 		return preg_replace_callback(
-			'/\burl\([^}]*?\)/',
+			// Match CSS url() values that don't have quoted string values.
+			'/\burl\(\s*(?=\w)(?P<url>[^}]*?\s*)\)/',
 			static function( $matches ) {
 				return preg_replace( '/\s+/', '', $matches[0] );
 			},

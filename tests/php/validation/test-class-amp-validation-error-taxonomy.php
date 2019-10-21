@@ -12,6 +12,8 @@
  */
 class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 
+	use AMP_Test_HandleValidation;
+
 	/**
 	 * The tested class.
 	 *
@@ -234,7 +236,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 	public function test_is_validation_error_sanitized_and_get_validation_error_sanitization() {
 
 		// New accepted.
-		AMP_Options_Manager::update_option( 'auto_accept_sanitization', true );
+		$this->accept_sanitization_by_default( true );
 		$error_foo = array_merge(
 			$this->get_mock_error(),
 			[ 'foo' => 1 ]
@@ -254,7 +256,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		);
 
 		// New rejected.
-		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
+		$this->accept_sanitization_by_default( false );
 		$error_bar = array_merge(
 			$this->get_mock_error(),
 			[ 'bar' => 1 ]
@@ -273,7 +275,8 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 			AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $error_bar )
 		);
 
-		// New accepted, since canonical.
+		// New accepted.
+		$this->accept_sanitization_by_default( true );
 		add_theme_support(
 			AMP_Theme_Support::SLUG,
 			[
@@ -1095,7 +1098,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::filter_manage_custom_columns()
 	 */
 	public function test_filter_manage_custom_columns() {
-		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
+		$this->accept_sanitization_by_default( false );
 		AMP_Validation_Error_Taxonomy::register();
 		$validation_error = $this->get_mock_error();
 		$initial_content  = 'example initial content';
@@ -1109,7 +1112,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		// Test the 'error' block in the switch.
 		$GLOBALS['pagenow'] = 'post.php';
 		$filtered_content   = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'error', $term_id );
-		$this->assertEquals( $initial_content . '<button type="button" aria-label="Toggle error details" class="single-url-detail-toggle"><code>illegal_css_at_rule</code>: <code>@-ms-viewport</code></button>', $filtered_content );
+		$this->assertStringStartsWith( $initial_content . '<button type="button" aria-label="Toggle error details"', $filtered_content );
 
 		// Test the 'status' block in the switch for the error taxonomy page.
 		$GLOBALS['pagenow'] = 'edit-tags.php';
@@ -1176,7 +1179,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		$validation_error['code'] = AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE;
 		$term                     = self::factory()->term->create_and_get( [ 'taxonomy' => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] );
 		$html                     = AMP_Validation_Error_Taxonomy::render_single_url_error_details( $validation_error, $term );
-		$this->assertContains( '<details open>', $html );
+		$this->assertContains( '<dl class="detailed">', $html );
 	}
 
 	/**

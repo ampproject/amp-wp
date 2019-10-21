@@ -17,7 +17,13 @@ const blockAttributes = {
 };
 
 const saveV120 = ( { attributes } ) => {
-	return <pre><code>{ attributes.content }</code></pre>;
+	return (
+		<pre>
+			<code>
+				{ attributes.content }
+			</code>
+		</pre>
+	);
 };
 
 saveV120.propTypes = {

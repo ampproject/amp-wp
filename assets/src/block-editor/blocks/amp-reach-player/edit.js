@@ -46,7 +46,9 @@ const BlockEdit = ( props ) => {
 			{
 				! url && (
 					<Placeholder label={ __( 'Reach Player', 'amp' ) }>
-						<p>{ __( 'Add Reach player embed ID to use the block.', 'amp' ) }</p>
+						<p>
+							{ __( 'Add Reach player embed ID to use the block.', 'amp' ) }
+						</p>
 					</Placeholder>
 				)
 			}

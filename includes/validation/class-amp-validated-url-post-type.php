@@ -376,6 +376,10 @@ class AMP_Validated_URL_Post_Type {
 		if ( false === $new_validation_error_urls ) {
 			$new_validation_error_urls = static::get_validation_error_urls_count();
 			set_transient( static::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT, $new_validation_error_urls, DAY_IN_SECONDS );
+		} else {
+			// Handle case where integer stored in transient gets returned as string when persistent object cache is not
+			// used. This is due to wp_options.option_value being a string.
+			$new_validation_error_urls = (int) $new_validation_error_urls;
 		}
 
 		if ( 0 === $new_validation_error_urls ) {
@@ -689,14 +693,6 @@ class AMP_Validated_URL_Post_Type {
 			);
 		}
 
-		$is_story = (
-			isset( $args['queried_object']['type'], $args['queried_object']['id'] )
-			&&
-			'post' === $args['queried_object']['type']
-			&&
-			AMP_Story_Post_Type::POST_TYPE_SLUG === get_post_type( $args['queried_object']['id'] )
-		);
-
 		/*
 		 * The details for individual validation errors is stored in the amp_validation_error taxonomy terms.
 		 * The post content just contains the slugs for these terms and the sources for the given instance of
@@ -750,7 +746,7 @@ class AMP_Validated_URL_Post_Type {
 								'term_group' => $sanitization['status'],
 							]
 						);
-					} elseif ( AMP_Validation_Manager::is_sanitization_auto_accepted() || $is_story ) {
+					} elseif ( AMP_Validation_Manager::is_sanitization_auto_accepted( $data ) ) {
 						$term_data['term_group'] = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS;
 						wp_update_term(
 							$term_id,
@@ -938,6 +934,19 @@ class AMP_Validated_URL_Post_Type {
 		return [
 			'cb'                          => '<input type="checkbox" />',
 			'error'                       => __( 'Error', 'amp' ),
+			'error_type'                  => __( 'Type', 'amp' ),
+			'details'                     => sprintf(
+				'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="%s"></div>',
+				esc_html__( 'Context', 'amp' ),
+				esc_attr(
+					sprintf(
+						'<h3>%s</h3><p>%s</p>',
+						esc_html__( 'Context', 'amp' ),
+						esc_html__( 'The parent element of where the error occurred.', 'amp' )
+					)
+				)
+			),
+			'sources_with_invalid_output' => __( 'Sources', 'amp' ),
 			'status'                      => sprintf(
 				'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="%s"></div>',
 				esc_html__( 'Status', 'amp' ),
@@ -949,19 +958,6 @@ class AMP_Validated_URL_Post_Type {
 					)
 				)
 			),
-			'details'                     => sprintf(
-				'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="%s"></div>',
-				esc_html__( 'Details', 'amp' ),
-				esc_attr(
-					sprintf(
-						'<h3>%s</h3><p>%s</p>',
-						esc_html__( 'Details', 'amp' ),
-						esc_html__( 'The parent element of where the error occurred.', 'amp' )
-					)
-				)
-			),
-			'sources_with_invalid_output' => __( 'Sources', 'amp' ),
-			'error_type'                  => __( 'Type', 'amp' ),
 		];
 	}
 
@@ -994,18 +990,18 @@ class AMP_Validated_URL_Post_Type {
 				if ( ! empty( $error_summary[ AMP_Validation_Error_Taxonomy::REMOVED_ELEMENTS ] ) ) {
 					foreach ( $error_summary[ AMP_Validation_Error_Taxonomy::REMOVED_ELEMENTS ] as $name => $count ) {
 						if ( 1 === (int) $count ) {
-							$items[] = sprintf( '<code>%s</code>', esc_html( $name ) );
+							$items[] = sprintf( '<code>&lt;%s&gt;</code>', esc_html( $name ) );
 						} else {
-							$items[] = sprintf( '<code>%s</code> (%d)', esc_html( $name ), $count );
+							$items[] = sprintf( '<code>&lt;%s&gt;</code> (%d)', esc_html( $name ), $count );
 						}
 					}
 				}
 				if ( ! empty( $error_summary[ AMP_Validation_Error_Taxonomy::REMOVED_ATTRIBUTES ] ) ) {
 					foreach ( $error_summary[ AMP_Validation_Error_Taxonomy::REMOVED_ATTRIBUTES ] as $name => $count ) {
 						if ( 1 === (int) $count ) {
-							$items[] = sprintf( '<code>[%s]</code>', esc_html( $name ) );
+							$items[] = sprintf( '<code>%s</code>', esc_html( $name ) );
 						} else {
-							$items[] = sprintf( '<code>[%s]</code> (%d)', esc_html( $name ), $count );
+							$items[] = sprintf( '<code>%s</code> (%d)', esc_html( $name ), $count );
 						}
 					}
 				}
@@ -1033,7 +1029,7 @@ class AMP_Validated_URL_Post_Type {
 			return;
 		}
 
-		// Show nothing if there are no valudation errors.
+		// Show nothing if there are no validation errors.
 		if ( 0 === count( array_filter( $error_summary ) ) ) {
 			esc_html_e( '--', 'amp' );
 			return;
@@ -1047,7 +1043,6 @@ class AMP_Validated_URL_Post_Type {
 
 		$sources = $error_summary[ AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT ];
 		$output  = [];
-		$plugins = get_plugins();
 		foreach ( wp_array_slice_assoc( $sources, [ 'plugin', 'mu-plugin' ] ) as $type => $slugs ) {
 			$plugin_names = [];
 			$plugin_slugs = array_unique( $slugs );
@@ -1055,14 +1050,12 @@ class AMP_Validated_URL_Post_Type {
 				if ( 'mu-plugin' === $type ) {
 					$plugin_names[] = $plugin_slug;
 				} else {
-					$name = $plugin_slug;
-					foreach ( $plugins as $plugin_file => $plugin_data ) {
-						if ( strtok( $plugin_file, '/' ) === $plugin_slug ) {
-							$name = $plugin_data['Name'];
-							break;
-						}
+					$plugin_name = $plugin_slug;
+					$plugin      = AMP_Validation_Error_Taxonomy::get_plugin_from_slug( $plugin_slug );
+					if ( $plugin ) {
+						$plugin_name = $plugin['data']['Name'];
 					}
-					$plugin_names[] = $name;
+					$plugin_names[] = $plugin_name;
 				}
 			}
 			$count = count( $plugin_names );
@@ -1281,40 +1274,6 @@ class AMP_Validated_URL_Post_Type {
 					)
 				),
 				esc_html__( 'Dismiss this notice.', 'amp' )
-			);
-		}
-
-		if ( 'post' !== get_current_screen()->base ) {
-			// Display admin notice according to the AMP mode.
-			if ( amp_is_canonical() ) {
-				$template_mode = AMP_Theme_Support::STANDARD_MODE_SLUG;
-			} elseif ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-				$template_mode = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
-			} else {
-				$template_mode = 'reader';
-			}
-			$auto_sanitization = AMP_Options_Manager::get_option( 'auto_accept_sanitization' );
-
-			if ( AMP_Theme_Support::STANDARD_MODE_SLUG === $template_mode ) {
-				$message = __( 'The site is using standard AMP mode, the validation errors found are already automatically handled.', 'amp' );
-			} elseif ( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === $template_mode && $auto_sanitization ) {
-				$message = __( 'The site is using transitional AMP mode with auto-sanitization turned on, the validation errors found are already automatically handled.', 'amp' );
-			} elseif ( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === $template_mode ) {
-				$message = sprintf(
-					/* translators: %s is a link to the AMP settings screen */
-					__( 'The site is using transitional AMP mode without auto-sanitization, the validation errors found require action and influence which pages are shown in AMP. For automatically handling the errors turn on auto-sanitization from <a href="%s">Validation Handling settings</a>.', 'amp' ),
-					esc_url( admin_url( 'admin.php?page=' . AMP_Options_Manager::OPTION_NAME ) )
-				);
-			} else {
-				$message = __( 'The site is using AMP reader mode, your theme templates are not used and the errors below are irrelevant.', 'amp' );
-			}
-
-			$class = 'info';
-			printf(
-				/* translators: 1. Notice classname; 2. Message text; 3. Screenreader text; */
-				'<div class="notice notice-%s"><p>%s</p></div>',
-				esc_attr( $class ),
-				wp_kses_post( $message )
 			);
 		}
 
@@ -1618,11 +1577,7 @@ class AMP_Validated_URL_Post_Type {
 			'amp_taxonomy_terms_updated' => $updated_count,
 		];
 
-		/*
-		 * Re-check the post after the validation status change. This is particularly important for validation errors like
-		 * 'removed_unused_css_rules' since whether it is accepted will determine whether other validation errors are triggered
-		 * such as in this case 'excessive_css'.
-		 */
+		// Re-check the post after the validation status change.
 		if ( $updated_count > 0 ) {
 			$validation_results = self::recheck_post( $post->ID );
 			// @todo For WP_Error case, see <https://github.com/ampproject/amp-wp/issues/1166>.

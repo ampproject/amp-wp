@@ -196,7 +196,11 @@ export const filterBlocksSave = ( element, blockType, attributes ) => { // eslin
 			// If lightbox is not set, we can return here.
 			if ( ! attributes.ampLightbox ) {
 				if ( attributes.text !== text ) {
-					return <RawHTML>{ text }</RawHTML>;
+					return (
+						<RawHTML>
+							{ text }
+						</RawHTML>
+					);
 				}
 
 				// Else lets return original.
@@ -214,7 +218,11 @@ export const filterBlocksSave = ( element, blockType, attributes ) => { // eslin
 		}
 
 		if ( attributes.text !== text ) {
-			return <RawHTML>{ text }</RawHTML>;
+			return (
+				<RawHTML>
+					{ text }
+				</RawHTML>
+			);
 		}
 	} else if ( 'core/paragraph' === blockType.name && ! attributes.ampFitText ) {
 		content = getAmpFitTextContent( attributes.content );
@@ -550,7 +558,6 @@ const AmpNoloadingToggle = ( props ) => {
 };
 
 AmpNoloadingToggle.propTypes = {
-	name: PropTypes.string,
 	attributes: PropTypes.shape( {
 		ampNoLoading: PropTypes.string,
 	} ),

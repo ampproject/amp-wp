@@ -34,25 +34,23 @@ const PrePublishPanel = ( { featuredMedia, dimensions, required } ) => {
 	}
 
 	return (
-		<>
-			<PluginPrePublishPanel
-				title={ __( 'Featured Image', 'amp' ) }
-				initialOpen="true"
+		<PluginPrePublishPanel
+			title={ __( 'Featured Image', 'amp' ) }
+			initialOpen="true"
+		>
+			<Notice
+				status={ required ? 'warning' : 'notice' }
+				isDismissible={ false }
 			>
-				<Notice
-					status={ required ? 'warning' : 'notice' }
-					isDismissible={ false }
-				>
-					{ errors.map( ( errorMessage, index ) => {
-						return (
-							<p key={ `error-${ index }` }>
-								{ errorMessage }
-							</p>
-						);
-					} ) }
-				</Notice>
-			</PluginPrePublishPanel>
-		</>
+				{ errors.map( ( errorMessage, index ) => {
+					return (
+						<p key={ `error-${ index }` }>
+							{ errorMessage }
+						</p>
+					);
+				} ) }
+			</Notice>
+		</PluginPrePublishPanel>
 	);
 };
 

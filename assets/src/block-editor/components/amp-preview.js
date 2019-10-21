@@ -13,7 +13,7 @@ import { Icon, IconButton } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { withSelect, withDispatch } from '@wordpress/data';
 import { DotTip } from '@wordpress/nux';
-import { ifCondition, compose } from '@wordpress/compose';
+import { compose } from '@wordpress/compose';
 import { addQueryArgs } from '@wordpress/url';
 
 /**
@@ -40,7 +40,9 @@ function writeInterstitialMessage( targetDocument ) {
 				icon={ ampBlackIcon }
 				viewBox="0 0 98 98"
 			/>
-			<p>{ __( 'Generating AMP preview…', 'amp' ) }</p>
+			<p>
+				{ __( 'Generating AMP preview…', 'amp' ) }
+			</p>
 		</div>
 	);
 
@@ -274,7 +276,6 @@ AMPPreview.propTypes = {
 	isDraft: PropTypes.bool.isRequired,
 	isEnabled: PropTypes.bool.isRequired,
 	isSaveable: PropTypes.bool.isRequired,
-	isViewable: PropTypes.bool.isRequired,
 	savePost: PropTypes.func.isRequired,
 };
 
@@ -288,15 +289,11 @@ export default compose( [
 			isEditedPostAutosaveable,
 			getEditedPostPreviewLink,
 		} = select( 'core/editor' );
-		const {
-			getPostType,
-		} = select( 'core' );
 
 		const queryArgs = {};
 		queryArgs[ ampSlug ] = 1;
 		const initialPreviewLink = getEditedPostPreviewLink();
 		const previewLink = initialPreviewLink ? addQueryArgs( initialPreviewLink, queryArgs ) : undefined;
-		const postType = getPostType( getEditedPostAttribute( 'type' ) );
 
 		return {
 			postId: getCurrentPostId(),
@@ -304,7 +301,6 @@ export default compose( [
 			previewLink: forcePreviewLink !== undefined ? forcePreviewLink : previewLink,
 			isSaveable: isEditedPostSaveable(),
 			isAutosaveable: forceIsAutosaveable || isEditedPostAutosaveable(),
-			isViewable: get( postType, [ 'viewable' ], false ),
 			isDraft: [ 'draft', 'auto-draft' ].indexOf( getEditedPostAttribute( 'status' ) ) !== -1,
 			isEnabled: isAMPEnabled(),
 		};
@@ -313,5 +309,4 @@ export default compose( [
 		autosave: dispatch( 'core/editor' ).autosave,
 		savePost: dispatch( 'core/editor' ).savePost,
 	} ) ),
-	ifCondition( ( { isViewable } ) => isViewable ),
 ] )( AMPPreview );

@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { setBlockParent } from '../';
+import setBlockParent from '../setBlockParent';
 
 describe( 'setBlockParent', () => {
 	it.todo( 'add tests' );

@@ -7,34 +7,37 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { Component } from '@wordpress/element';
+import { useState, useEffect, useRef, useCallback } from '@wordpress/element';
 import { withSpokenMessages, Button } from '@wordpress/components';
-import { compose, withGlobalEvents } from '@wordpress/compose';
 import { ESCAPE, LEFT, RIGHT, ENTER } from '@wordpress/keycodes';
 import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
-import { findClosestSnap } from '../../helpers';
+import { findClosestSnap } from '../../helpers/snapping';
 import './edit.css';
 
-class RotatableBox extends Component {
-	constructor( props ) {
-		super( props );
+const RotatableBox = ( { angle, initialAngle, blockElementId, className, speak, onRotateStart, onRotate, onRotateStop, snap, snapGap, children } ) => {
+	const [ isRotating, setIsRotating ] = useState( false );
+	const [ currentAngle, setAngle ] = useState( angle );
 
-		this.state = {
-			isRotating: false,
-			angle: props.angle,
-		};
-	}
+	const elementRef = useRef( null );
 
-	componentDidMount() {
-		this.elementRef = document.getElementById( this.props.blockElementId );
-	}
+	useEffect( () => {
+		elementRef.current = document.getElementById( blockElementId );
+	}, [ blockElementId ] );
 
-	onKeyUp = ( e ) => {
-		if ( ! this.state.isRotating ) {
+	useEffect( () => {
+		elementRef.current.style.transform = `rotate(${ currentAngle }deg)`;
+	}, [ currentAngle ] );
+
+	useEffect( () => {
+		elementRef.current.classList.toggle( 'is-rotating', isRotating );
+	}, [ isRotating ] );
+
+	const onKeyUp = useCallback( ( e ) => {
+		if ( ! isRotating ) {
 			return;
 		}
 
@@ -43,45 +46,40 @@ class RotatableBox extends Component {
 		const { keyCode } = e;
 
 		if ( ESCAPE === keyCode ) {
-			this.elementRef.classList.remove( 'is-rotating' );
-			this.elementRef.style.transform = `rotate(${ this.props.initialAngle }deg)`;
+			setIsRotating( false );
+			setAngle( initialAngle );
 
-			this.setState(
-				{
-					isRotating: false,
-					angle: this.props.initialAngle,
-				},
-				() => this.props.onRotateStop && this.props.onRotateStop( e, this.props.initialAngle )
-			);
+			if ( onRotateStop ) {
+				onRotateStop( e, initialAngle );
+			}
 		} else if ( LEFT === keyCode || RIGHT === keyCode ) {
-			let angle = LEFT === keyCode ? this.state.angle - 30 : this.state.angle + 30;
-			if ( angle > 360 ) {
-				angle -= 360;
-			} else if ( angle <= -360 ) {
-				angle += 360;
+			let newAngle = LEFT === keyCode ? currentAngle - 30 : currentAngle + 30;
+			if ( newAngle > 360 ) {
+				newAngle -= 360;
+			} else if ( newAngle <= -360 ) {
+				newAngle += 360;
 			}
 
-			this.elementRef.style.transform = `rotate(${ angle }deg)`;
-
 			/* translators: %s: degrees */
-			this.props.speak( sprintf( __( 'Rotating block by %s degrees', 'amp' ), angle ) );
+			speak( sprintf( __( 'Rotating block by %s degrees', 'amp' ), newAngle ) );
 
-			this.setState(
-				{
-					angle,
-				},
-				() => this.props.onRotate && this.props.onRotate( e, angle )
-			);
+			setAngle( newAngle );
+
+			if ( onRotate ) {
+				onRotate( e, newAngle );
+			}
 		} else if ( ENTER === keyCode ) {
 			/* translators: %s: degrees */
-			this.props.speak( sprintf( __( 'Saving block rotation of %s degrees', 'amp' ), this.state.angle ) );
+			speak( sprintf( __( 'Saving block rotation of %s degrees', 'amp' ), currentAngle ) );
 
-			this.onRotateStop( e );
+			if ( onRotateStop ) {
+				onRotateStop( e );
+			}
 		}
-	}
+	}, [ currentAngle, initialAngle, onRotate, onRotateStop, isRotating, speak ] );
 
-	onRotateStart = ( e ) => {
-		if ( this.state.isRotating ) {
+	const onMouseDown = ( e ) => {
+		if ( isRotating ) {
 			return;
 		}
 
@@ -93,26 +91,21 @@ class RotatableBox extends Component {
 
 		e.preventDefault();
 
-		this.elementRef.classList.add( 'is-rotating' );
+		setIsRotating( true );
 
-		this.setState(
-			{
-				isRotating: true,
-			},
-			() => this.props.onRotateStart && this.props.onRotateStart( e )
-		);
-	}
+		if ( onRotateStart ) {
+			onRotateStart( e );
+		}
+	};
 
-	onRotate = ( e ) => {
-		if ( ! this.state.isRotating ) {
+	const onMouseMove = useCallback( ( e ) => {
+		if ( ! isRotating ) {
 			return;
 		}
 
 		e.preventDefault();
 
-		this.elementRef.classList.add( 'is-rotating' );
-
-		const { top, left, width, height } = this.elementRef.getBoundingClientRect();
+		const { top, left, width, height } = elementRef.current.getBoundingClientRect();
 
 		const centerX = left + ( width / 2 );
 		const centerY = top + ( height / 2 );
@@ -121,66 +114,75 @@ class RotatableBox extends Component {
 		const y = e.clientY - centerY;
 
 		const rad2deg = ( 180 / Math.PI );
-		let angle = Math.ceil( -( rad2deg * Math.atan2( x, y ) ) );
+		let newAngle = Math.ceil( -( rad2deg * Math.atan2( x, y ) ) );
 
-		angle = findClosestSnap( angle, this.props.snap, this.props.snapGap );
+		const snappingEnabled = ! e.getModifierState( 'Alt' );
 
-		if ( this.state.angle === angle ) {
+		if ( snappingEnabled ) {
+			const angleSnap = findClosestSnap( newAngle, snap, snapGap );
+
+			if ( angleSnap !== null ) {
+				newAngle = angleSnap;
+			}
+		}
+
+		if ( currentAngle === newAngle ) {
 			return;
 		}
 
-		this.elementRef.style.transform = `rotate(${ angle }deg)`;
+		setAngle( newAngle );
 
-		this.setState(
-			{
-				angle,
-			},
-			() => this.props.onRotate && this.props.onRotate( e, angle )
-		);
-	}
+		if ( onRotate ) {
+			onRotate( e, newAngle );
+		}
+	}, [ currentAngle, isRotating, snap, snapGap, onRotate ] );
 
-	onRotateStop = ( e ) => {
-		if ( ! this.state.isRotating ) {
+	const onMouseUp = useCallback( ( e ) => {
+		if ( ! isRotating ) {
 			return;
 		}
 
 		e.preventDefault();
 
-		this.elementRef.classList.remove( 'is-rotating' );
-		this.elementRef.style.transform = `rotate(${ this.state.angle }deg)`;
+		setIsRotating( false );
 
-		this.setState(
-			{
-				isRotating: false,
-			},
-			() => this.props.onRotateStop && this.props.onRotateStop( e, this.state.angle )
-		);
-	}
+		if ( onRotateStop ) {
+			onRotateStop( e, currentAngle );
+		}
+	}, [ currentAngle, isRotating, onRotateStop ] );
 
-	render() {
-		const className = classnames( this.props.className, { 'is-rotating': this.state.isRotating } );
+	useEffect( () => {
+		document.addEventListener( 'mousemove', onMouseMove );
+		document.addEventListener( 'mouseup', onMouseUp );
+		document.addEventListener( 'keyUp', onKeyUp );
 
-		return (
-			<div
-				className={ className }
-			>
-				<div className="rotatable-box-wrap">
-					<Button
-						role="switch"
-						aria-checked={ this.state.isRotating }
-						onMouseDown={ this.onRotateStart }
-						className="rotatable-box-wrap__handle"
-					>
-						<span className="screen-reader-text">
-							{ __( 'Rotate Block', 'amp' ) }
-						</span>
-					</Button>
-				</div>
-				{ this.props.children }
+		return () => {
+			document.removeEventListener( 'mousemove', onMouseMove );
+			document.removeEventListener( 'mouseup', onMouseUp );
+			document.removeEventListener( 'keyUp', onKeyUp );
+		};
+	}, [ onMouseMove, onMouseUp, onKeyUp ] );
+
+	return (
+		<div
+			className={ classnames( className, { 'is-rotating': isRotating } ) }
+		>
+			<div className="rotatable-box-wrap">
+				<Button
+					role="switch"
+					aria-checked={ isRotating }
+					onMouseDown={ onMouseDown }
+					className="rotatable-box-wrap__handle"
+				>
+					<span className="screen-reader-text">
+						{ __( 'Rotate Block', 'amp' ) }
+					</span>
+				</Button>
 			</div>
-		);
-	}
-}
+			{ children }
+		</div>
+	);
+};
 
 RotatableBox.defaultProps = {
 	angle: 0,
@@ -197,16 +199,9 @@ RotatableBox.propTypes = {
 	onRotateStart: PropTypes.func,
 	onRotate: PropTypes.func,
 	onRotateStop: PropTypes.func,
-	children: PropTypes.any.isRequired,
+	children: PropTypes.node.isRequired,
 	snap: PropTypes.oneOfType( [ PropTypes.arrayOf( PropTypes.number ), PropTypes.func ] ),
 	snapGap: PropTypes.number,
 };
 
-export default compose(
-	withSpokenMessages,
-	withGlobalEvents( {
-		mousemove: 'onRotate',
-		mouseup: 'onRotateStop',
-		keyup: 'onKeyUp',
-	} ),
-)( RotatableBox );
+export default withSpokenMessages( RotatableBox );

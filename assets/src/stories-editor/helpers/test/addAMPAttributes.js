@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { addAMPAttributes } from '../';
+import addAMPAttributes from '../addAMPAttributes';
 
 describe( 'addAMPAttributes', () => {
 	it( 'does not affect the page block', () => {

@@ -7,10 +7,9 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { compose } from '@wordpress/compose';
 import { Button, Draggable, DropZone } from '@wordpress/components';
-import { Component } from '@wordpress/element';
-import { withDispatch, withSelect } from '@wordpress/data';
+import { useState } from '@wordpress/element';
+import { useSelect, useDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -44,28 +43,47 @@ const parseDropEvent = ( event ) => {
 	return result;
 };
 
-class BlockNavigationItem extends Component {
-	constructor( ...args ) {
-		super( ...args );
+const BlockNavigationItem = ( { block, isSelected, onClick, unMovableBlock } ) => {
+	const { clientId } = block;
 
-		this.state = {
-			isDragging: false,
-		};
-	}
+	const [ isDragging, setIsDragging ] = useState( false );
 
-	getInsertIndex( position ) {
-		const { block: { clientId }, getBlockIndex } = this.props;
+	const rootClientId = useSelect( ( select ) => {
+		const { getBlockRootClientId } = select( 'core/block-editor' );
+		return getBlockRootClientId( clientId );
+	}, [ clientId ] );
+	const blockOrder = useSelect( ( select ) => {
+		const { getBlockOrder } = select( 'core/block-editor' );
+		return getBlockOrder( rootClientId );
+	}, [ rootClientId ] );
+	const blocks = useSelect( ( select ) => {
+		const { getBlocksByClientId } = select( 'core/block-editor' );
+		return getBlocksByClientId( blockOrder ).map( ( { clientId: id } ) => id ).reverse();
+	}, [ blockOrder ] );
 
-		if ( clientId !== undefined ) {
+	const { moveBlockToPosition } = useDispatch( 'core/block-editor' );
+
+	const getBlockIndex = ( blockClientId ) => {
+		return blocks.indexOf( blockClientId );
+	};
+
+	const moveItem = ( item, index ) => {
+		// Since the BlockNavigation list is reversed, inserting at index 0 actually means inserting at the end, and vice-versa.
+		const reversedIndex = blockOrder.length - 1 - index;
+
+		moveBlockToPosition( item, rootClientId, rootClientId, reversedIndex );
+	};
+
+	const getInsertIndex = ( position ) => {
+		if ( clientId ) {
 			const index = getBlockIndex( clientId );
 			return position.y === 'top' ? index : index + 1;
 		}
 
 		return undefined;
-	}
+	};
 
-	onDrop = ( event, position ) => {
-		const { block: { clientId }, moveBlockToPosition, getBlockIndex } = this.props;
+	const onDrop = ( event, position ) => {
 		const { srcClientId, srcIndex, type } = parseDropEvent( event );
 
 		const isBlockDropType = ( dropType ) => dropType === 'block';
@@ -76,95 +94,89 @@ class BlockNavigationItem extends Component {
 		}
 
 		const dstIndex = getBlockIndex( clientId );
-		const positionIndex = this.getInsertIndex( position );
+		const positionIndex = getInsertIndex( position );
 		const insertIndex = srcIndex < dstIndex ? positionIndex - 1 : positionIndex;
-		moveBlockToPosition( srcClientId, insertIndex );
-	}
+		moveItem( srcClientId, insertIndex );
+	};
 
-	render() {
-		const { block, getBlockIndex, isSelected, onClick, unMovableBlock } = this.props;
-		const { clientId } = block;
-		const blockElementId = `block-navigation-item-${ clientId }`;
+	const blockElementId = `block-navigation-item-${ clientId }`;
 
-		if ( unMovableBlock ) {
-			return (
-				<div className="editor-block-navigation__item block-editor-block-navigation__item">
-					<Button
-						className={ classnames(
-							'components-button editor-block-navigation__item-button block-editor-block-navigation__item-button',
-							{
-								'is-selected': isSelected,
-							}
-						) }
-						onClick={ onClick }
-						id={ blockElementId }
-					>
-						<BlockPreviewLabel
-							block={ block }
-							accessibilityText={ isSelected && __( '(selected block)', 'amp' ) }
-						/>
-					</Button>
-				</div>
-			);
-		}
-
-		const transferData = {
-			type: 'block',
-			srcIndex: getBlockIndex( clientId ),
-			srcClientId: clientId,
-		};
-
+	if ( unMovableBlock ) {
 		return (
-			<div className={ classnames(
-				'editor-block-navigation__item block-editor-block-navigation__item',
-				{
-					'block-editor-block-navigation__item-is-dragging': this.state.isDragging,
-				}
-			) } >
-				<Draggable
-					elementId={ blockElementId }
-					transferData={ transferData }
-					onDragStart={ () => this.setState( { isDragging: true } ) }
-					onDragEnd={ () => this.setState( { isDragging: false } ) }
+			<div className="editor-block-navigation__item block-editor-block-navigation__item">
+				<Button
+					className={ classnames(
+						'components-button editor-block-navigation__item-button block-editor-block-navigation__item-button',
+						{
+							'is-selected': isSelected,
+						}
+					) }
+					onClick={ onClick }
+					id={ blockElementId }
 				>
-					{
-						( { onDraggableStart, onDraggableEnd } ) => (
-							<>
-								<DropZone
-									className={ this.state.isDragging ? 'is-dragging-block' : undefined }
-									onDrop={ this.onDrop }
-								/>
-								<div className="block-navigation__placeholder"></div>
-								<Button
-									className={ classnames(
-										'components-button editor-block-navigation__item-button block-editor-block-navigation__item-button',
-										{
-											'is-selected': isSelected,
-										}
-									) }
-									onClick={ onClick }
-									id={ blockElementId }
-									onDragStart={ onDraggableStart }
-									onDragEnd={ onDraggableEnd }
-									draggable
-								>
-									<BlockPreviewLabel
-										block={ block }
-										accessibilityText={ isSelected && __( '(selected block)', 'amp' ) }
-									/>
-								</Button>
-							</>
-						)
-					}
-				</Draggable>
+					<BlockPreviewLabel
+						block={ block }
+						accessibilityText={ isSelected && __( '(selected block)', 'amp' ) }
+					/>
+				</Button>
 			</div>
 		);
 	}
-}
+
+	const transferData = {
+		type: 'block',
+		srcIndex: getBlockIndex( clientId ),
+		srcClientId: clientId,
+	};
+
+	return (
+		<div className={ classnames(
+			'editor-block-navigation__item block-editor-block-navigation__item',
+			{
+				'block-editor-block-navigation__item-is-dragging': isDragging,
+			}
+		) } >
+			<Draggable
+				elementId={ blockElementId }
+				transferData={ transferData }
+				onDragStart={ () => setIsDragging( true ) }
+				onDragEnd={ () => setIsDragging( false ) }
+			>
+				{
+					( { onDraggableStart, onDraggableEnd } ) => (
+						<>
+							<DropZone
+								className={ isDragging ? 'is-dragging-block' : undefined }
+								onDrop={ onDrop }
+							/>
+							<div className="block-navigation__placeholder" />
+							<Button
+								className={ classnames(
+									'components-button editor-block-navigation__item-button block-editor-block-navigation__item-button',
+									{
+										'is-selected': isSelected,
+									}
+								) }
+								onClick={ onClick }
+								id={ blockElementId }
+								onDragStart={ onDraggableStart }
+								onDragEnd={ onDraggableEnd }
+								draggable
+							>
+								<BlockPreviewLabel
+									block={ block }
+									accessibilityText={ isSelected && __( '(selected block)', 'amp' ) }
+								/>
+							</Button>
+						</>
+					)
+				}
+			</Draggable>
+		</div>
+	);
+};
 
 BlockNavigationItem.propTypes = {
-	getBlockIndex: PropTypes.func.isRequired,
-	moveBlockToPosition: PropTypes.func.isRequired,
 	block: PropTypes.shape( {
 		name: PropTypes.string.isRequired,
 		clientId: PropTypes.string.isRequired,
@@ -174,39 +186,4 @@ BlockNavigationItem.propTypes = {
 	unMovableBlock: PropTypes.object,
 };
 
-const applyWithSelect = withSelect( ( select, { block: { clientId } } ) => {
-	const { getBlockOrder, getBlockRootClientId, getBlocksByClientId } = select( 'core/block-editor' );
-
-	const blockOrder = getBlockOrder( getBlockRootClientId( clientId ) );
-
-	// Need to reverse the list just like BlockNavigation does.
-	const blocks = getBlocksByClientId( blockOrder ).map( ( { clientId: id } ) => id ).reverse();
-
-	return {
-		getBlockIndex: ( blockClientId ) => {
-			return blocks.indexOf( blockClientId );
-		},
-	};
-} );
-
-const applyWithDispatch = withDispatch( ( dispatch, { block: { clientId } }, { select } ) => {
-	const { getBlockOrder, getBlockRootClientId } = select( 'core/block-editor' );
-	const { moveBlockToPosition } = dispatch( 'core/block-editor' );
-
-	const rootClientId = getBlockRootClientId( clientId );
-	const blockOrder = getBlockOrder( rootClientId );
-
-	return {
-		moveBlockToPosition: ( block, index ) => {
-			// Since the BlockNavigation list is reversed, inserting at index 0 actually means inserting at the end, and vice-versa.
-			const reversedIndex = blockOrder.length - 1 - index;
-
-			moveBlockToPosition( block, rootClientId, rootClientId, reversedIndex );
-		},
-	};
-} );
-
-export default compose(
-	applyWithSelect,
-	applyWithDispatch,
-)( BlockNavigationItem );
+export default BlockNavigationItem;

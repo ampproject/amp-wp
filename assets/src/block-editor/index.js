@@ -11,9 +11,9 @@ import domReady from '@wordpress/dom-ready';
  * Internal dependencies
  */
 import { withFeaturedImageNotice } from '../common/components';
+import { getMinimumFeaturedImageDimensions } from '../common/helpers';
 import { withMediaLibraryNotice } from './components';
 import { addAMPAttributes, addAMPExtraProps, filterBlocksEdit, filterBlocksSave, renderPreviewButton } from './helpers';
-import { getMinimumFeaturedImageDimensions } from '../common/helpers';
 import './store';
 
 const {

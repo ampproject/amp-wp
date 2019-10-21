@@ -11,39 +11,38 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import {
-	DropZone,
-} from '@wordpress/components';
-import { Component } from '@wordpress/element';
-import { withDispatch } from '@wordpress/data';
+import { DropZone } from '@wordpress/components';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
-import { getPercentageFromPixels } from '../helpers';
+import { getPercentageFromPixels, isCTABlock } from '../helpers';
 import {
 	STORY_PAGE_INNER_HEIGHT,
+	STORY_PAGE_INNER_HEIGHT_FOR_CTA,
 } from '../constants';
 
 const wrapperElSelector = 'div[data-amp-selected="parent"] .editor-inner-blocks';
 
-class BlockDropZone extends Component {
+const BlockDropZone = ( { srcBlockName, srcClientId } ) => {
+	const blockIsCTA = isCTABlock( srcBlockName );
+
+	const { updateBlockAttributes } = useDispatch( 'core/block-editor' );
+
 	/**
 	 * Handles the drop event for blocks within a page.
 	 * Separate handling for CTA block.
 	 *
 	 * @param {Object} event Drop event.
 	 */
-	onDrop = ( event ) => {
-		const { srcBlockName, updateBlockAttributes, srcClientId } = this.props;
-		const isCTABlock = 'amp/amp-story-cta' === srcBlockName;
-
+	const onDrop = ( event ) => {
 		let elementId,
 			cloneElementId,
 			wrapperEl;
 
 		// In case of the CTA block we are not moving the block itself but just the `a` within.
-		if ( isCTABlock ) {
+		if ( blockIsCTA ) {
 			elementId = `amp-story-cta-button-${ srcClientId }`;
 			cloneElementId = `clone-amp-story-cta-button-${ srcClientId }`;
 			const btnWrapperSelector = `#block-${ srcClientId } .editor-block-list__block-edit`;
@@ -65,7 +64,7 @@ class BlockDropZone extends Component {
 		}
 
 		// CTA block can't be rotated.
-		if ( ! isCTABlock ) {
+		if ( ! blockIsCTA ) {
 			// We have to remove the rotation for getting accurate position.
 			clone.parentNode.style.visibility = 'hidden';
 			clone.parentNode.style.transform = 'none';
@@ -76,42 +75,32 @@ class BlockDropZone extends Component {
 
 		// We will set the new position based on where the clone was moved to, with reference being the wrapper element.
 		// Lets take the % based on the wrapper for top and left.
-		const leftPosKey = isCTABlock ? 'btnPositionLeft' : 'positionLeft';
-		const topPosKey = isCTABlock ? 'btnPositionTop' : 'positionTop';
+		const leftPosKey = blockIsCTA ? 'btnPositionLeft' : 'positionLeft';
+		const topPosKey = blockIsCTA ? 'btnPositionTop' : 'positionTop';
 
 		// Let's get the base value to measure the top percentage from.
 		let baseHeight = STORY_PAGE_INNER_HEIGHT;
-		if ( isCTABlock ) {
-			baseHeight = STORY_PAGE_INNER_HEIGHT / 5;
+		if ( blockIsCTA ) {
+			baseHeight = STORY_PAGE_INNER_HEIGHT_FOR_CTA;
 		}
 		updateBlockAttributes( srcClientId, {
 			[ leftPosKey ]: getPercentageFromPixels( 'x', clonePosition.left - wrapperPosition.left ),
 			[ topPosKey ]: getPercentageFromPixels( 'y', clonePosition.top - wrapperPosition.top, baseHeight ),
 		} );
-	}
+	};
 
-	render() {
-		return (
-			<DropZone
-				className="editor-block-drop-zone"
-				onDrop={ this.onDrop }
-			/>
-		);
-	}
-}
+	return (
+		<DropZone
+			className="editor-block-drop-zone"
+			key={ srcClientId }
+			onDrop={ onDrop }
+		/>
+	);
+};
 
 BlockDropZone.propTypes = {
-	updateBlockAttributes: PropTypes.func,
 	srcClientId: PropTypes.string,
 	srcBlockName: PropTypes.string,
 };
 
-export default withDispatch( ( dispatch ) => {
-	const { updateBlockAttributes } = dispatch( 'core/block-editor' );
-
-	return {
-		updateBlockAttributes( ...args ) {
-			updateBlockAttributes( ...args );
-		},
-	};
-} )( BlockDropZone );
+export default BlockDropZone;

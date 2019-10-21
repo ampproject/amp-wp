@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { getPercentageFromPixels } from '../';
+import getPercentageFromPixels from '../getPercentageFromPixels';
 
 describe( 'getPercentageFromPixels', () => {
 	it( 'returns 0 for unknown axis', () => {

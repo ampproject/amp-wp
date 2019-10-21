@@ -37,8 +37,9 @@ import {
 	withActivePageState,
 	withStoryBlockDropZone,
 	withCallToActionValidation,
+	withSnapLines,
 	withCroppedFeaturedImage,
-	withRightClickHandler,
+	withContextMenu,
 } from './components';
 import {
 	maybeEnqueueFontStyle,
@@ -316,9 +317,10 @@ addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/filterBlockTransfor
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/deprecateCoreBlocks', deprecateCoreBlocks );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addStorySettings', withAmpStorySettings );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addPageNumber', withPageNumber );
-addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/rightClickHandler', withRightClickHandler );
+addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/contextMenuHandler', withContextMenu );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addEditFeaturedImage', withEditFeaturedImage );
 addFilter( 'editor.BlockEdit', 'ampEditorBlocks/addVideoBlockPreview', withCustomVideoBlockEdit, 9 );
+addFilter( 'editor.BlockEdit', 'ampEditorBlocks/withSnapLines', withSnapLines );
 addFilter( 'editor.PostFeaturedImage', 'ampStoryEditorBlocks/addFeaturedImageNotice', withStoryFeaturedImageNotice );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/withActivePageState', withActivePageState );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', withWrapperProps );

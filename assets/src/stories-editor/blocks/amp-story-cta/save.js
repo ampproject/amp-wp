@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { RichText } from '@wordpress/block-editor';
+import { RawHTML } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -18,6 +18,8 @@ const CallToActionSave = ( { attributes } ) => {
 		anchor,
 		btnPositionLeft,
 		btnPositionTop,
+		btnWidth,
+		btnHeight,
 		text,
 		url,
 	} = attributes;
@@ -27,16 +29,26 @@ const CallToActionSave = ( { attributes } ) => {
 
 	styles.top = btnPositionTop ? `${ btnPositionTop }%` : undefined;
 	styles.left = btnPositionLeft ? `${ btnPositionLeft }%` : undefined;
+	styles.width = btnWidth ? `${ btnWidth }%` : undefined;
+	styles.height = btnHeight ? `${ btnHeight }%` : undefined;
+	styles.display = 'flex';
 
+	// Uses RawHTML to mimic RichText.Content behavior.
 	return (
 		<amp-story-cta-layer id={ anchor ? anchor : getUniqueId() }>
-			<RichText.Content
-				tagName="a"
-				className={ className }
-				href={ url }
-				style={ styles }
-				value={ text }
-			/>
+			<div className="amp-cta-button-wrapper">
+				<a
+					className={ className }
+					href={ url }
+					style={ styles }
+				>
+					<amp-fit-text layout="flex-item" className="amp-cta-content">
+						<RawHTML>
+							{ text }
+						</RawHTML>
+					</amp-fit-text>
+				</a>
+			</div>
 		</amp-story-cta-layer>
 	);
 };
@@ -48,6 +60,8 @@ CallToActionSave.propTypes = {
 		text: PropTypes.string,
 		btnPositionLeft: PropTypes.number,
 		btnPositionTop: PropTypes.number,
+		btnWidth: PropTypes.number,
+		btnHeight: PropTypes.number,
 		backgroundColor: PropTypes.shape( {
 			color: PropTypes.string,
 			name: PropTypes.string,

@@ -5,14 +5,14 @@ import PropTypes from 'prop-types';
 import classnames from 'classnames';
 
 /**
- * Internal dependencies
- */
-import { migrateV120 } from '../shared';
-
-/**
  * WordPress dependencies
  */
 import { RichText, getColorClassName } from '@wordpress/block-editor';
+
+/**
+ * Internal dependencies
+ */
+import { migrateV120 } from '../shared';
 
 const blockAttributes = {
 	hasFixedLayout: {

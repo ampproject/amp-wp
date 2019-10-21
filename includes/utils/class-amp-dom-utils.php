@@ -21,6 +21,14 @@ class AMP_DOM_Utils {
 	const AMP_BIND_DATA_ATTR_PREFIX = 'data-amp-bind-';
 
 	/**
+	 * Regular expression pattern to match events and actions within an 'on' attribute.
+	 *
+	 * @since 1.4.0
+	 * @var string
+	 */
+	const AMP_EVENT_ACTIONS_REGEX_PATTERN = '/((?<event>[^:;]+):(?<actions>(?:[^;,\(]+(?:\([^\)]+\))?,?)+))+?/';
+
+	/**
 	 * HTML elements that are self-closing.
 	 *
 	 * Not all are valid AMP, but we include them for completeness.
@@ -710,5 +718,109 @@ class AMP_DOM_Utils {
 	 */
 	private static function is_self_closing_tag( $tag ) {
 		return in_array( strtolower( $tag ), self::$self_closing_tags, true );
+	}
+
+	/**
+	 * Check whether a given element has a specific class.
+	 *
+	 * @since 1.4.0
+	 *
+	 * @param DOMElement $element Element to check the classes of.
+	 * @param string     $class   Class to check for.
+	 * @return bool Whether the element has the requested class.
+	 */
+	public static function has_class( DOMElement $element, $class ) {
+		if ( ! $element->hasAttribute( 'class' ) ) {
+			return false;
+		}
+
+		$classes = $element->getAttribute( 'class' );
+
+		return in_array( $class, preg_split( '/\s/', $classes ), true );
+	}
+
+	/**
+	 * Get the ID for an element.
+	 *
+	 * If the element does not have an ID, create one first.
+	 *
+	 * @since 1.4.0
+	 *
+	 * @param DOMElement $element Element to get the ID for.
+	 * @param string     $prefix  Optional. Defaults to '_amp_wp_id_'.
+	 * @return string ID to use.
+	 */
+	public static function get_element_id( $element, $prefix = 'amp-wp-id' ) {
+		static $index_counter = [];
+
+		if ( $element->hasAttribute( 'id' ) ) {
+			return $element->getAttribute( 'id' );
+		}
+
+		if ( ! array_key_exists( $prefix, $index_counter ) ) {
+			$index_counter[ $prefix ] = 2;
+			$element->setAttribute( 'id', $prefix );
+
+			return $prefix;
+		}
+
+		$id = "{$prefix}-{$index_counter[ $prefix ]}";
+		$index_counter[ $prefix ] ++;
+
+		$element->setAttribute( 'id', $id );
+
+		return $id;
+	}
+
+	/**
+	 * Register an AMP action to an event on a given element.
+	 *
+	 * If the element already contains one or more events or actions, the method
+	 * will assemble them in a smart way.
+	 *
+	 * @since 1.4.0
+	 *
+	 * @param DOMElement $element Element to add an action to.
+	 * @param string     $event   Event to trigger the action on.
+	 * @param string     $action  Action to add.
+	 */
+	public static function add_amp_action( DOMElement $element, $event, $action ) {
+		if ( ! $element->hasAttribute( 'on' ) ) {
+			// There's no "on" attribute yet, so just add it and be done.
+			$element->setAttribute( 'on', "{$event}:{$action}" );
+			return;
+		}
+
+		$matches = [];
+		$results = preg_match_all( self::AMP_EVENT_ACTIONS_REGEX_PATTERN, $element->getAttribute( 'on' ), $matches );
+
+		if ( ! $results || ! isset( $matches['event'] ) ) {
+			// Something went wrong with parsing the existing "on" attribute, so just assume it
+			// doesn't work properly and replace by our own.
+			$element->setAttribute( 'on', "{$event}:{$action}" );
+			return;
+		}
+
+		$found = false;
+		foreach ( $matches['event'] as $index => $existing_event ) {
+			if ( $event === $existing_event ) {
+				// The "on" attribute already has this action, so add the event to the existing one(s).
+				$matches['actions'][ $index ] .= ",{$action}";
+				$found                         = true;
+			}
+		}
+
+		if ( ! $found ) {
+			// The "on" attribute didn't contain this particular event, so we add it as a new one.
+			$matches['event'][]   = $event;
+			$matches['actions'][] = $action;
+		}
+
+		$value_strings = [];
+		foreach ( $matches['event'] as $index => $event_name ) {
+			$value_strings[] = "{$event_name}:{$matches['actions'][ $index ]}";
+		}
+
+		$element->setAttribute( 'on', implode( ';', $value_strings ) );
 	}
 }

@@ -7,9 +7,10 @@ import { compose } from '@wordpress/compose';
  * Internal dependencies
  */
 import { ALLOWED_BLOCKS, ALLOWED_CHILD_BLOCKS } from '../constants';
+import { isCTABlock } from '../helpers';
 import { withAttributes, withBlockName, withHasSelectedInnerBlock } from './';
 
-const wrapperWithSelect = compose(
+const enhance = compose(
 	withAttributes,
 	withBlockName,
 	withHasSelectedInnerBlock,
@@ -22,7 +23,7 @@ const wrapperWithSelect = compose(
  * @return {Function} Enhanced component.
  */
 const withWrapperProps = ( BlockListBlock ) => {
-	return wrapperWithSelect( ( props ) => {
+	return enhance( ( props ) => {
 		const { clientId, blockName, hasSelectedInnerBlock, attributes } = props;
 
 		// If it's not an allowed block then lets return original;
@@ -62,7 +63,7 @@ const withWrapperProps = ( BlockListBlock ) => {
 				transform: `scale(var(--preview-scale)) translateX(var(--preview-translateX)) translateY(var(--preview-translateY)) rotate(${ attributes.rotationAngle || 0 }deg)`,
 			};
 
-			if ( 'amp/amp-story-cta' === blockName ) {
+			if ( isCTABlock( blockName ) ) {
 				innerStyle.transform = `scale(var(--preview-scale))`;
 			}
 
