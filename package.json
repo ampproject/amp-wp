@@ -46,7 +46,7 @@
     "@wordpress/dom": "2.5.2",
     "@wordpress/dom-ready": "2.5.1",
     "@wordpress/e2e-test-utils": "2.4.3",
-    "@wordpress/edit-post": "3.8.2",
+    "@wordpress/edit-post": "3.8.3",
     "@wordpress/editor": "9.7.3",
     "@wordpress/element": "2.8.2",
     "@wordpress/eslint-plugin": "3.1.0",
