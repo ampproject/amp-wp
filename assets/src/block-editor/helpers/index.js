@@ -16,7 +16,7 @@ import { select } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { TEXT_BLOCKS, MEDIA_BLOCKS, DEFAULT_HEIGHT, DEFAULT_WIDTH } from '../constants';
+import { AMP_PREVIEW_BUTTON_WRAPPER_ID, TEXT_BLOCKS, MEDIA_BLOCKS, DEFAULT_HEIGHT, DEFAULT_WIDTH, POST_PREVIEW_CLASS } from '../constants';
 import { MIN_FONT_SIZE, MAX_FONT_SIZE } from '../../common/constants';
 import { AMPPreview } from '../components';
 
@@ -942,19 +942,22 @@ export const isAMPEnabled = () => {
 };
 
 /**
- * Replaces the button to preview the post with one that also previews AMP.
+ * Renders the 'Preview AMP' button in the DOM right after the (non-AMP) 'Preview' button.
  */
-export const replacePreviewButton = () => {
-	const postPreviewButton = document.querySelector( '.editor-post-preview' );
-	if ( ! postPreviewButton ) {
+export const renderPreviewButton = () => {
+	const postPreviewButton = document.querySelector( `.${ POST_PREVIEW_CLASS }` );
+	if ( ! postPreviewButton || document.getElementById( AMP_PREVIEW_BUTTON_WRAPPER_ID ) ) {
 		return;
 	}
 
 	const buttonWrapper = document.createElement( 'div' );
-	postPreviewButton.parentElement.insertBefore( buttonWrapper, postPreviewButton.nextSibling );
+	buttonWrapper.id = AMP_PREVIEW_BUTTON_WRAPPER_ID;
 
 	render(
 		<AMPPreview />,
 		buttonWrapper
 	);
+
+	// Insert this after the (non-AMP) 'Preview' button.
+	postPreviewButton.parentNode.insertBefore( buttonWrapper, postPreviewButton.nextSibling );
 };

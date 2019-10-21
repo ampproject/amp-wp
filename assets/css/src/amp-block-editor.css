@@ -18,3 +18,37 @@
 	flex: 0 0 auto;
 	margin-right: 1rem;
 }
+
+/* AMP preview button wrapper */
+.wp-core-ui #amp-wrapper-post-preview {
+	border: 0;
+	margin-left: -4px;
+	padding: 0;
+	position: relative;
+}
+
+/* AMP preview button */
+.wp-core-ui .amp-editor-post-preview {
+	height: 33px;
+	padding-left: 6px;
+	padding-right: 6px;
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+}
+
+.wp-core-ui .amp-editor-post-preview svg {
+	width: 15px;
+	height: 15px;
+	margin: 0;
+}
+
+/*
+ * Remove right border radius on the (non-AMP) 'Preview' button, as it'll be next to the AMP button.
+ * @todo: only apply this if the 'Preview AMP' button displays.
+ */
+.wp-core-ui .editor-post-preview {
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+	padding-left: 10px;
+	padding-right: 10px;
+}

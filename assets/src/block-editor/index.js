@@ -12,7 +12,7 @@ import domReady from '@wordpress/dom-ready';
  */
 import { withFeaturedImageNotice } from '../common/components';
 import { withMediaLibraryNotice } from './components';
-import { addAMPAttributes, addAMPExtraProps, filterBlocksEdit, filterBlocksSave, replacePreviewButton } from './helpers';
+import { addAMPAttributes, addAMPExtraProps, filterBlocksEdit, filterBlocksSave, renderPreviewButton } from './helpers';
 import { getMinimumFeaturedImageDimensions } from '../common/helpers';
 import './store';
 
@@ -80,10 +80,10 @@ blocks.keys().forEach( ( modulePath ) => {
 } );
 
 /**
- * Replace the preview button with one that also previews AMP.
+ * Render the 'Preview AMP' button, and move it to after the (non-AMP) 'Preview' button.
  */
 if ( isWebsiteEnabled() ) {
 	domReady( () => {
-		replacePreviewButton();
+		renderPreviewButton();
 	} );
 }
