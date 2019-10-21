@@ -140,7 +140,7 @@ function get_amp_github_releases() {
 function replace_view_version_details_link( $file, $plugin_data ) {
 	$plugin_version = $plugin_data['Version'];
 
-	if ( is_prerelease( $plugin_version ) ) {
+	if ( is_pre_release( $plugin_version ) ) {
 		ob_start();
 		?>
 		<script>
@@ -164,8 +164,8 @@ function replace_view_version_details_link( $file, $plugin_data ) {
  * Determine if the supplied version code is a prerelease.
  *
  * @param string $plugin_version Plugin version code.
- * @return false|int
+ * @return bool
  */
-function is_prerelease( $plugin_version ) {
-	return preg_match( '/(beta|alpha)/', $plugin_version );
+function is_pre_release( $plugin_version ) {
+	return (bool) preg_match( '/^\d+\.\d+\.\d+-(beta|alpha)\d?$/', $plugin_version );
 }
