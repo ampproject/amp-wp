@@ -94,7 +94,7 @@ const PageEdit = ( {
 			autoAdvanceAfterOptions: storySettings.autoAdvanceAfterOptions,
 			allowedVideoMimeTypes: getSettings().allowedVideoMimeTypes,
 		};
-	}, [ mediaId, mediaType, poster ] );
+	}, [ clientId, mediaId, mediaType, poster ] );
 
 	const allowedBackgroundMediaTypes = [ IMAGE_BACKGROUND_TYPE, ...allowedVideoMimeTypes ];
 

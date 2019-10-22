@@ -39,7 +39,7 @@ const PageSettings = ( { autoAdvanceAfter, autoAdvanceAfterDuration, autoAdvance
 		const animatedBlocksPerPage = ( animatedBlocks[ clientId ] || [] ).filter( ( { id } ) => clientId === getBlockRootClientId( id ) );
 		const totalAnimationDurationInMs = getTotalAnimationDuration( animatedBlocksPerPage );
 		return Math.ceil( totalAnimationDurationInMs / 1000 );
-	} );
+	}, [ clientId ] );
 
 	const currentOption = autoAdvanceAfterOptions.find( ( i ) => i.value === autoAdvanceAfter ) || {};
 
