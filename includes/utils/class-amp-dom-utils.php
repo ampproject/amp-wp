@@ -29,6 +29,14 @@ class AMP_DOM_Utils {
 	const AMP_EVENT_ACTIONS_REGEX_PATTERN = '/((?<event>[^:;]+):(?<actions>(?:[^;,\(]+(?:\([^\)]+\))?,?)+))+?/';
 
 	/**
+	 * Regular expression pattern to match individual actions within an event.
+	 *
+	 * @since 1.4.0
+	 * @var string
+	 */
+	const AMP_ACTION_REGEX_PATTERN = '/(?<action>[^(),\s]+(?:\([^\)]+\))?)+/';
+
+	/**
 	 * HTML elements that are self-closing.
 	 *
 	 * Not all are valid AMP, but we include them for completeness.
@@ -785,42 +793,98 @@ class AMP_DOM_Utils {
 	 * @param string     $action  Action to add.
 	 */
 	public static function add_amp_action( DOMElement $element, $event, $action ) {
+		$event_action_string = "{$event}:{$action}";
+
 		if ( ! $element->hasAttribute( 'on' ) ) {
 			// There's no "on" attribute yet, so just add it and be done.
-			$element->setAttribute( 'on', "{$event}:{$action}" );
+			$element->setAttribute( 'on', $event_action_string );
 			return;
 		}
 
-		$matches = [];
-		$results = preg_match_all( self::AMP_EVENT_ACTIONS_REGEX_PATTERN, $element->getAttribute( 'on' ), $matches );
+		$element->setAttribute(
+			'on',
+			self::merge_amp_actions(
+				$element->getAttribute( 'on' ),
+				$event_action_string
+			)
+		);
+	}
 
-		if ( ! $results || ! isset( $matches['event'] ) ) {
-			// Something went wrong with parsing the existing "on" attribute, so just assume it
-			// doesn't work properly and replace by our own.
-			$element->setAttribute( 'on', "{$event}:{$action}" );
-			return;
-		}
+	/**
+	 * Merge two sets of AMP events & actions.
+	 *
+	 * @since 1.4.0
+	 *
+	 * @param string $first  First event/action string.
+	 * @param string $second First event/action string.
+	 * @return string Merged event/action string.
+	 */
+	public static function merge_amp_actions( $first, $second ) {
+		$events = [];
+		foreach ( [ $first, $second ] as $event_action_string ) {
+			$matches = [];
+			$results = preg_match_all( self::AMP_EVENT_ACTIONS_REGEX_PATTERN, $event_action_string, $matches );
 
-		$found = false;
-		foreach ( $matches['event'] as $index => $existing_event ) {
-			if ( $event === $existing_event ) {
-				// The "on" attribute already has this action, so add the event to the existing one(s).
-				$matches['actions'][ $index ] .= ",{$action}";
-				$found                         = true;
+			if ( ! $results || ! isset( $matches['event'] ) ) {
+				continue;
+			}
+
+			foreach ( $matches['event'] as $index => $event ) {
+				$events[ $event ][] = $matches['actions'][ $index ];
 			}
 		}
 
-		if ( ! $found ) {
-			// The "on" attribute didn't contain this particular event, so we add it as a new one.
-			$matches['event'][]   = $event;
-			$matches['actions'][] = $action;
-		}
-
 		$value_strings = [];
-		foreach ( $matches['event'] as $index => $event_name ) {
-			$value_strings[] = "{$event_name}:{$matches['actions'][ $index ]}";
+		foreach ( $events as $event => $action_strings_array ) {
+			$actions_array = [];
+			array_walk(
+				$action_strings_array,
+				static function ( $actions ) use ( &$actions_array ) {
+					$matches = [];
+					$results = preg_match_all( self::AMP_ACTION_REGEX_PATTERN, $actions, $matches );
+
+					if ( ! $results || ! isset( $matches['action'] ) ) {
+						$actions_array[] = $actions;
+						return;
+					}
+
+					$actions_array = array_merge( $actions_array, $matches['action'] );
+				}
+			);
+
+			$actions         = implode( ',', array_unique( array_filter( $actions_array ) ) );
+			$value_strings[] = "{$event}:{$actions}";
 		}
 
-		$element->setAttribute( 'on', implode( ';', $value_strings ) );
+		return implode( ';', $value_strings );
+	}
+
+	/**
+	 * Copy one or more attributes from one element to the other.
+	 *
+	 * @param array|string $attributes        Attribute name or array of attribute names to copy.
+	 * @param DOMElement   $from              DOM element to copy the attributes from.
+	 * @param DOMElement   $to                DOM element to copy the attributes to.
+	 * @param string       $default_separator Default separator to use for multiple values if the attribute is not known.
+	 */
+	public static function copy_attributes( $attributes, DOMElement $from, DOMElement $to, $default_separator = ',' ) {
+		foreach ( (array) $attributes as $attribute ) {
+			if ( $from->hasAttribute( $attribute ) ) {
+				$values = $from->getAttribute( $attribute );
+				if ( $to->hasAttribute( $attribute ) ) {
+					switch ( $attribute ) {
+						case 'on':
+							$values = self::merge_amp_actions( $to->getAttribute( $attribute ), $values );
+							break;
+						case 'class':
+							$values = $to->getAttribute( $attribute ) . ' ' . $values;
+							break;
+						default:
+							$values = $to->getAttribute( $attribute ) . $default_separator . $values;
+					}
+				}
+				$to->setAttribute( $attribute, $values );
+			}
+		}
 	}
 }
