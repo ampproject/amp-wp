@@ -817,7 +817,7 @@ class AMP_Validation_Error_Taxonomy {
 
 				return [
 					'cb'               => $old_columns['cb'],
-					'error'            => esc_html__( 'Error', 'amp' ),
+					'error_code'       => esc_html__( 'Error', 'amp' ),
 					'status'           => sprintf(
 						'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="%s"></div>',
 						esc_html__( 'Status', 'amp' ),
@@ -853,7 +853,7 @@ class AMP_Validation_Error_Taxonomy {
 			static function( $sortable_columns ) {
 				$sortable_columns['created_date_gmt'] = 'term_id';
 				$sortable_columns['error_type']       = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_TYPE_QUERY_VAR;
-				$sortable_columns['error']            = AMP_Validation_Error_Taxonomy::VALIDATION_DETAILS_ERROR_CODE_QUERY_VAR;
+				$sortable_columns['error_code']       = AMP_Validation_Error_Taxonomy::VALIDATION_DETAILS_ERROR_CODE_QUERY_VAR;
 				return $sortable_columns;
 			}
 		);
@@ -965,7 +965,7 @@ class AMP_Validation_Error_Taxonomy {
 			'list_table_primary_column',
 			static function( $primary_column ) {
 				if ( get_current_screen() && AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG === get_current_screen()->taxonomy ) {
-					$primary_column = 'error';
+					$primary_column = 'error_code';
 				}
 				return $primary_column;
 			}
@@ -1783,7 +1783,7 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		switch ( $column_name ) {
-			case 'error':
+			case 'error_code':
 				if ( 'post.php' === $pagenow ) {
 					$content .= sprintf(
 						'<button type="button" aria-label="%s" class="single-url-detail-toggle">',
@@ -2017,7 +2017,7 @@ class AMP_Validation_Error_Taxonomy {
 		return array_merge(
 			$sortable_columns,
 			[
-				'error'      => self::VALIDATION_DETAILS_ERROR_CODE_QUERY_VAR,
+				'error_code' => self::VALIDATION_DETAILS_ERROR_CODE_QUERY_VAR,
 				'error_type' => self::VALIDATION_ERROR_TYPE_QUERY_VAR,
 			]
 		);
