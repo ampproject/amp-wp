@@ -150,8 +150,7 @@ const PageEdit = ( {
 	// If there is more than one immovable block, leave only the last and remove the others.
 	useEffect( () => {
 		if ( immovableBlocks.length > 1 ) {
-			immovableBlocks.pop();
-			const blocksToRemove = immovableBlocks.slice( 0, -1 ).map( ( { clientId } ) => clientId );
+			const blocksToRemove = immovableBlocks.slice( 0, -1 ).map( ( { clientId: blockId } ) => blockId );
 			removeBlocks( blocksToRemove );
 			const removeMessage = sprintf(
 				_n(
