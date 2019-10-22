@@ -88,6 +88,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *      @type bool     $should_locate_sources      Whether to locate the sources when reporting validation errors.
 	 *      @type string   $parsed_cache_variant       Additional value by which to vary parsed cache.
 	 *      @type string   $include_manifest_comment   Whether to show the manifest HTML comment in the response before the style[amp-custom] element. Can be 'always', 'never', or 'when_excessive'.
+	 *      @type string[] $focus_within_classes       Class names in selectors that should be replaced with :focus-within pseudo classes.
 	 * }
 	 */
 	protected $args;
@@ -108,6 +109,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		'should_locate_sources'     => false,
 		'parsed_cache_variant'      => null,
 		'include_manifest_comment'  => 'always',
+		'focus_within_classes'      => [ 'focus' ],
 	];
 
 	/**
@@ -181,6 +183,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	private $used_class_names;
+
+	/**
+	 * Regular expression pattern to match focus_class_names in selectors.
+	 *
+	 * The computed pattern is cached to prevent re-constructing for each processed selector.
+	 *
+	 * @var string|null
+	 */
+	private $focus_class_name_selector_pattern;
 
 	/**
 	 * Attributes used in the document.
@@ -773,6 +784,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		if ( ! empty( $this->args['allow_dirty_styles'] ) ) {
 			return;
 		}
+
+		$this->focus_class_name_selector_pattern = (
+			! empty( $this->args['focus_within_classes'] ) ?
+				self::get_class_name_selector_pattern( $this->args['focus_within_classes'] ) :
+				null
+		);
 
 		$this->head = $this->dom->getElementsByTagName( 'head' )->item( 0 );
 		if ( ! $this->head ) {
@@ -1376,7 +1393,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private function process_stylesheet( $stylesheet, $options = [] ) {
 		$parsed      = null;
 		$cache_key   = null;
-		$cache_group = 'amp-parsed-stylesheet-v20'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
+		$cache_group = 'amp-parsed-stylesheet-v21'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
 
 		$cache_impacting_options = array_merge(
 			wp_array_slice_assoc(
@@ -2860,6 +2877,21 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$before_type_selector_pattern = '(?<=^|\(|\s|>|\+|~|,|})';
 			$after_type_selector_pattern  = '(?=$|[^a-zA-Z0-9_-])';
 
+			// Replace .focus selector with :focus-within.
+			if ( $this->focus_class_name_selector_pattern ) {
+				$count    = 0;
+				$selector = preg_replace(
+					$this->focus_class_name_selector_pattern,
+					':focus-within',
+					$selector,
+					-1,
+					$count
+				);
+				if ( $count > 0 ) {
+					$has_changed_selectors = true;
+				}
+			}
+
 			/*
 			 * Loop over each selector mappings. A single HTML tag can map to multiple AMP tags (e.g. img could be amp-img or amp-anim).
 			 * The $selector_mappings array contains ~6 items, so rest easy your O(n^3) eyes when seeing triple nested loops!
@@ -2910,6 +2942,30 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		if ( $has_changed_selectors ) {
 			$ruleset->setSelectors( $selectors );
 		}
+	}
+
+	/**
+	 * Given list of class names, create a regular expression pattern to match them in a selector.
+	 *
+	 * @since 1.4
+	 *
+	 * @param string[] $class_names Class names.
+	 * @return string Pattern,
+	 */
+	private static function get_class_name_selector_pattern( $class_names ) {
+		$pattern  = '/\.(';
+		$pattern .= implode(
+			'|',
+			array_map(
+				function ( $class_name ) {
+					return preg_quote( $class_name, '/' );
+				},
+				$class_names
+			)
+		);
+		$pattern .= ')(?=$|[^a-zA-Z0-9_-])';
+		$pattern .= '/';
+		return $pattern;
 	}
 
 	/**
