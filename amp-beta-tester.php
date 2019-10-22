@@ -27,12 +27,17 @@ if ( file_exists( AMP__BETA_TESTER__DIR__ . '/amp.php' ) ) {
 				if ( array_key_exists( 'amp/amp-beta-tester.php', $updates->response ) ) {
 					unset( $updates->response['amp/amp-beta-tester.php'] );
 				}
+
+				if ( array_key_exists( 'amp/amp.php', $updates->response ) ) {
+					unset( $updates->response['amp/amp.php'] );
+				}
 			}
 
 			return $updates;
 		}
 	);
 }
+
 register_activation_hook( __FILE__, __NAMESPACE__ . '\force_plugin_update_check' );
 add_action( 'plugins_loaded', __NAMESPACE__ . '\init' );
 
