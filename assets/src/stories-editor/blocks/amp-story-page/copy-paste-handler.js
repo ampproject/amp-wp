@@ -33,7 +33,7 @@ function CopyPasteHandler( { children, onCopy, clientId, isSelected } ) {
 				isFirstPage: getBlockOrder().indexOf( clientId ) === 0,
 				canUserUseUnfilteredHTML: __experimentalCanUserUseUnfilteredHTML,
 				getCopiedMarkupState: getCopiedMarkup,
-				blocksOnPage: getBlockOrder( clientId),
+				blocksOnPage: getBlockOrder( clientId ),
 			};
 		}, [ clientId ]
 	);
