@@ -29,6 +29,7 @@ class AMP_Beta_Tester_Test extends WP_UnitTestCase {
 	public function test_init() {
 		AMP_Beta_Tester\init();
 
+		$this->assertEquals( 10, has_filter( 'admin_bar_menu', 'AMP_Beta_Tester\show_unstable_reminder' ) );
 		$this->assertEquals( 10, has_filter( 'pre_set_site_transient_update_plugins', 'AMP_Beta_Tester\update_amp_manifest' ) );
 		$this->assertEquals( 10, has_action( 'after_plugin_row_amp/amp.php', 'AMP_Beta_Tester\replace_view_version_details_link' ) );
 	}
