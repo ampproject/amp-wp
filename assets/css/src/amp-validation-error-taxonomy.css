@@ -243,12 +243,14 @@ dl.detailed {
 	margin-left: 10px;
 }
 
-/*body.taxonomy-amp_validation_error .wp-list-table .new th,*/
-/*body.taxonomy-amp_validation_error .wp-list-table .new td,*/
 tr.expanded.new + tr > td:first-of-type,
-.wp-list-table .new td,
-.wp-list-table .new th {
+.wp-list-table > tbody > .new > td,
+.wp-list-table > tbody > .new > th {
 	background-color: #fef7f1;
+}
+
+tr.expanded + tr > td:first-of-type {
+	border-left: solid 4px transparent;
 }
 
 tr.expanded.new + tr > td:first-of-type,
@@ -256,18 +258,20 @@ tr.expanded.new + tr > td:first-of-type,
 	border-left: 4px solid #d54e21;
 }
 
-.wp-list-table th,
-.wp-list-table td {
+.wp-list-table > tbody > tr > th,
+.wp-list-table > tbody > tr > td {
 	box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.1);
 }
 
-.wp-list-table tr:last-child th,
-.wp-list-table tr:last-child td {
+.wp-list-table > tbody > tr:last-child > th,
+.wp-list-table > tbody > tr.expanded > th,
+.wp-list-table > tbody > tr:last-child > td,
+.wp-list-table > tbody > tr.expanded > td {
 	box-shadow: none;
 }
 
-.wp-list-table tr.unapproved + tr.approved th,
-.wp-list-table tr.unapproved + tr.approved td {
+.wp-list-table > tbody > tr.unapproved + tr.approved th,
+.wp-list-table > tbody > tr.unapproved + tr.approved td {
 	border-top: 1px solid rgba(0, 0, 0, 0.03);
 }
 
