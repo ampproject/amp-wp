@@ -50,6 +50,7 @@ function init() {
 
 	add_filter( 'pre_set_site_transient_update_plugins', __NAMESPACE__ . '\update_amp_manifest' );
 	add_action( 'after_plugin_row_' . AMP_PLUGIN_FILE, __NAMESPACE__ . '\replace_view_version_details_link', 10, 2 );
+	add_action( 'admin_bar_menu', __NAMESPACE__ . '\show_unstable_reminder' );
 }
 
 /**
@@ -168,4 +169,25 @@ function replace_view_version_details_link( $file, $plugin_data ) {
  */
 function is_pre_release( $plugin_version ) {
 	return (bool) preg_match( '/^\d+\.\d+\.\d+-(beta|alpha)\d?$/', $plugin_version );
+}
+
+/**
+ * Displays the version code in the admin bar to act as a reminder that an unstable version
+ * of AMP is being used.
+ */
+function show_unstable_reminder() {
+	global $wp_admin_bar;
+
+	if ( is_pre_release( AMP__VERSION ) ) {
+		$args = [
+			'id'     => 'amp-beta-tester-admin-bar',
+			'title'  => sprintf( 'AMP v%s', AMP__VERSION ),
+			'parent' => 'top-secondary',
+			'href'   => current_user_can( 'update_plugins' ) ? admin_url( 'admin.php?page=amp-options' ) : '',
+		];
+		$wp_admin_bar->add_node( $args );
+
+		// Highlight the menu if you are running the BETA Versions..
+		echo '<style>#wpadminbar #wp-admin-bar-amp-beta-tester-admin-bar { background: #0075C2; }</style>';
+	}
 }
