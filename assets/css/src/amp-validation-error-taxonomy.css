@@ -108,6 +108,14 @@ dl.detailed {
 	padding-bottom: 16px;
 }
 
+dl.detailed details > summary {
+	cursor: pointer;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
 .details-attributes__title,
 .notice .detailed summary code {
 	display: inline-block;
