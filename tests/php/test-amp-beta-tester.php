@@ -22,21 +22,6 @@ class AMP_Beta_Tester_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test show_amp_not_active_notice().
-	 *
-	 * @covers \AMP_Beta_Tester\show_amp_not_active_notice()
-	 */
-	public function test_show_amp_not_active_notice() {
-		$expected = "<div class='notice notice-error'><p><strong>AMP Beta Tester requires AMP to be active.</strong></p></div>";
-
-		ob_start();
-		AMP_Beta_Tester\show_amp_not_active_notice();
-		$actual = ob_get_clean();
-
-		$this->assertEquals( $actual, $expected );
-	}
-
-	/**
 	 * Test replace_view_version_details_link().
 	 *
 	 * @covers \AMP_Beta_Tester\replace_view_version_details_link()
@@ -54,9 +39,9 @@ class AMP_Beta_Tester_Test extends WP_UnitTestCase {
 		?>
 		<script>
 			document.addEventListener('DOMContentLoaded', function() {
-				const link = document.querySelectorAll("[data-slug='amp'] a.thickbox.open-plugin-details-modal");
+				const links = document.querySelectorAll("[data-slug='amp'] a.thickbox.open-plugin-details-modal");
 
-				link.forEach( (link) => {
+				links.forEach( (link) => {
 					link.className = 'overridden'; // Override class so that onclick listeners are disabled.
 					link.target = '_blank';
 					link.href = 'example.com';
