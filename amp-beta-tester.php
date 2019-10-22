@@ -33,8 +33,19 @@ if ( file_exists( AMP__BETA_TESTER__DIR__ . '/amp.php' ) ) {
 		}
 	);
 }
-
+register_activation_hook( __FILE__, __NAMESPACE__ . '\force_plugin_update_check' );
 add_action( 'plugins_loaded', __NAMESPACE__ . '\init' );
+
+/**
+ * Force a plugin update check. This will allows us to modify the plugin update cache so we
+ * can set a custom update.
+ */
+function force_plugin_update_check() {
+	if ( defined( 'DOING_CRON' ) ) {
+		return;
+	}
+	delete_site_transient( 'update_plugins' );
+}
 
 /**
  * Hook into WP.
