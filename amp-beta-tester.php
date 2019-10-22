@@ -65,18 +65,6 @@ function init() {
 }
 
 /**
- * Display an admin notice if the AMP plugin is not active.
- *
- * @return void
- */
-function show_amp_not_active_notice() {
-	$error = esc_html__( 'AMP Beta Tester requires AMP to be active.', 'amp' );
-
-	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-	echo "<div class='notice notice-error'><p><strong>{$error}</strong></p></div>";
-}
-
-/**
  * Modifies the AMP plugin manifest to point to a new beta update if one exists.
  *
  * @param \stdClass $updates Object containing information on plugin updates.
