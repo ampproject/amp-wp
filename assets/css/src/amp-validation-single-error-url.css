@@ -1,5 +1,5 @@
 /** Arrow icon on title in error column. */
-.column-error > .single-url-detail-toggle {
+.column-error_code > .single-url-detail-toggle {
 	position: relative;
 	width: 100%;
 	padding: 5px 36px 5px 0;
@@ -11,7 +11,7 @@
 	cursor: pointer;
 }
 
-.column-error > .single-url-detail-toggle::after {
+.column-error_code > .single-url-detail-toggle::after {
 	position: absolute;
 	top: 0;
 	right: 0;
@@ -44,18 +44,6 @@ table.striped > tbody > tr.even {
 /** Hide original details content. */
 .details-attributes > .detailed {
 	display: none;
-}
-
-/** Details post action. */
-.details button {
-	display: inline-block;
-	background: none;
-	border: none;
-	padding: 0;
-	text-align: left;
-	color: #0073aa;
-	cursor: pointer;
-	text-decoration: underline;
 }
 
 /** Details row styles. */
@@ -117,7 +105,7 @@ table.striped > tbody > tr.even {
 	width: 20%;
 }
 
-.wp-list-table th.column-error {
+.wp-list-table th.column-error_type {
 	width: 25%;
 }
 

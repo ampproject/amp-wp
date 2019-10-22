@@ -933,7 +933,7 @@ class AMP_Validated_URL_Post_Type {
 	public static function add_single_post_columns() {
 		return [
 			'cb'                          => '<input type="checkbox" />',
-			'error'                       => __( 'Error', 'amp' ),
+			'error_code'                  => __( 'Error', 'amp' ),
 			'error_type'                  => __( 'Type', 'amp' ),
 			'details'                     => sprintf(
 				'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="%s"></div>',

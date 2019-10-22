@@ -1627,7 +1627,7 @@ class AMP_Validation_Error_Taxonomy {
 
 			if ( 'post.php' === $pagenow ) {
 				$actions['details'] = sprintf(
-					'<button type="button" aria-label="%s" class="single-url-detail-toggle">%s</button>',
+					'<button type="button" aria-label="%s" class="single-url-detail-toggle button-link">%s</button>',
 					esc_attr__( 'Toggle error details', 'amp' ),
 					esc_html__( 'Details', 'amp' )
 				);
@@ -1793,7 +1793,7 @@ class AMP_Validation_Error_Taxonomy {
 				} else {
 					$content .= '<p>';
 					$content .= sprintf(
-						'<a href="%s">%s</a>',
+						'<a href="%s">%s',
 						admin_url(
 							add_query_arg(
 								[
@@ -1818,6 +1818,7 @@ class AMP_Validation_Error_Taxonomy {
 				if ( 'post.php' === $pagenow ) {
 					$content .= '</button>';
 				} else {
+					$content .= '</a>';
 					$content .= '</p>';
 				}
 

@@ -23,7 +23,7 @@ th.column-error_type {
 	width: 15%;
 }
 
-td.column-error .error-code {
+td.column-error_code .error-code {
 	font-family: Consolas, Monaco, monospace;
 }
 
@@ -43,6 +43,14 @@ details[open] .details-attributes__summary {
 	margin-bottom: 15px;
 }
 
+.details-attributes__summary {
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	cursor: pointer;
+}
+
 .column-details .details-attributes__summary::-webkit-details-marker,
 .column-details .notice details > summary::-webkit-details-marker {
 	display: none;
@@ -60,7 +68,8 @@ details[open] .details-attributes__summary {
 }
 
 tr.expanded .details-attributes__summary::after,
-details.single-error-detail[open] .single-error-detail-summary::after {
+details[open] > .details-attributes__summary::after,
+details[open] > .single-error-detail-summary::after {
 	transform: rotate(180deg);
 }
 
@@ -338,18 +347,6 @@ body.taxonomy-amp_validation_error .wp-list-table .new th.check-column input {
 
 .wp-heading-inline code {
 	font-size: 1rem;
-}
-
-/** Details post action. */
-.details button {
-	display: inline-block;
-	background: none;
-	border: none;
-	padding: 0;
-	text-align: left;
-	color: #0073aa;
-	cursor: pointer;
-	text-decoration: underline;
 }
 
 .validation-error-sources th {
