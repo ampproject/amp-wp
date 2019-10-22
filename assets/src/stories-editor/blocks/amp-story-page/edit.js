@@ -181,11 +181,9 @@ const PageEdit = ( {
 		}
 		const blockToMove = immovableBlocks[ 0 ];
 
-		if ( blockToMove ) {
-			// If the either CTA or Attachment is not the last block, move it there.
-			if ( childrenOrder[ childrenOrder.length - 1 ] !== blockToMove.clientId ) {
-				moveBlockToPosition( blockToMove.clientId, clientId, clientId, childrenOrder.length - 1 );
-			}
+		// If the either CTA or Attachment is not the last block, move it there.
+		if ( childrenOrder[ childrenOrder.length - 1 ] !== blockToMove.clientId ) {
+			moveBlockToPosition( blockToMove.clientId, clientId, clientId, childrenOrder.length - 1 );
 		}
 	}, [ childrenOrder, clientId, moveBlockToPosition, immovableBlocks ] );
 
