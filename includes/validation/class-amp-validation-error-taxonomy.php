@@ -2160,8 +2160,19 @@ class AMP_Validation_Error_Taxonomy {
 								printf( '<th class="%1$s"><code>%2$s</code></th>', esc_attr( $attr_name_class ), esc_html( $attr_name ) );
 								echo '<td>';
 								if ( ! empty( $attr_value ) ) {
-									printf( '<code>%s</code>', esc_html( $attr_value ) );
+									echo '<code>';
+									$is_url = in_array( $attr_name, [ 'href', 'src' ], true );
+									if ( $is_url ) {
+										// @todo There should be a link to the file editor as well, if available.
+										printf( '<a href="%s" target="_blank">', esc_url( $attr_value ) );
+									}
+									echo esc_html( $attr_value );
+									if ( $is_url ) {
+										echo '</a>';
+									}
+									echo '</code>';
 								}
+
 								echo '</td>';
 								?>
 								</tr>
