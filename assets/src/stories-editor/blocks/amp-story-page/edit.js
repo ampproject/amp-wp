@@ -150,7 +150,7 @@ const PageEdit = ( {
 	useEffect( () => {
 		if ( immovableBlocks.length > 1 ) {
 			immovableBlocks.pop();
-			const blocksToRemove = immovableBlocks.map( ( { clientId: blockId } ) => blockId );
+			const blocksToRemove = immovableBlocks.slice( 0, -1 ).map( ( { clientId } ) => clientId );
 			removeBlocks( blocksToRemove );
 			const removeMessage = sprintf(
 				_n(
