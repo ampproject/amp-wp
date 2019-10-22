@@ -155,14 +155,10 @@ dl.detailed {
 	flex-direction: column;
 	height: 14px;
 	padding: 0;
-	margin-top: 4px;
+	margin: 0;
 	background: none;
 	border: none;
 	cursor: pointer;
-}
-
-.error-details-toggle.is-open {
-	transform: rotate(180deg);
 }
 
 .column-details .error-details-toggle::before,
@@ -173,6 +169,11 @@ dl.detailed {
 	background-size: cover;
 	background-position: center;
 	content: "";
+}
+
+.error-details-toggle.is-open::before,
+.error-details-toggle.is-open::after {
+	transform: rotate(180deg);
 }
 
 /* Status text icons */
