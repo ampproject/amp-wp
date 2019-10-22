@@ -15,10 +15,6 @@
 		<testsuite name="default">
 			<directory prefix="test-" suffix=".php">./tests/</directory>
 		</testsuite>
-		<!-- Test suite for beta tester plugin -->
-		<testsuite name="beta-tester">
-			<file>./tests/php/test-amp-beta-tester.php</file>
-		</testsuite>
 	</testsuites>
 	<groups>
 		<exclude>
