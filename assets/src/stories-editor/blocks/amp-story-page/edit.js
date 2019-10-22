@@ -86,14 +86,15 @@ const PageEdit = ( {
 		const { getEditedPostAttribute } = select( 'core/editor' );
 		const postMeta = getEditedPostAttribute( 'meta' ) || {};
 		const { storySettings } = getSettings();
-		const innerBlocks = getBlocksByClientId( getBlockOrder( clientId ) );
+		const innerBlocksIds = getBlockOrder( clientId );
+		const innerBlocks = getBlocksByClientId( innerBlocksIds );
 
 		return {
 			media: mediaObject,
 			videoFeaturedImage: videoThumbnail,
 			immovableBlocks: innerBlocks.filter( ( { name } ) => ! ALLOWED_MOVABLE_BLOCKS.includes( name ) ),
 			pagesOrder: getBlockOrder(),
-			childrenOrder: getBlockOrder( clientId ),
+			childrenOrder: innerBlocksIds,
 			storySettingsAttributes: metaToAttributeNames( postMeta ),
 			autoAdvanceAfterOptions: storySettings.autoAdvanceAfterOptions,
 			allowedVideoMimeTypes: getSettings().allowedVideoMimeTypes,
