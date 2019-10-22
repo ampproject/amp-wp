@@ -304,26 +304,6 @@ body.taxonomy-amp_validation_error .wp-list-table .new th.check-column input {
 	color: #a00;
 }
 
-.notice.accept-reject-error {
-	display: flex;
-	margin-bottom: 0;
-}
-
-.notice.accept-reject-error > p {
-	display: inline-block;
-	font-size: 14px;
-	flex-grow: 10;
-	margin-right: 20px;
-}
-
-.notice.accept-reject-error > .button {
-	display: inline-block;
-	margin: 5px 5px 0 5px;
-	padding: 0 26px 2px;
-	flex-grow: 1;
-	text-align: center;
-}
-
 .notice.accept-reject-error > .button.accept {
 
 	/* @todo Add green colors */

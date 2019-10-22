@@ -1319,26 +1319,26 @@ class AMP_Validated_URL_Post_Type {
 			if ( ! $sanitization['forced'] ) {
 				echo '<div class="notice accept-reject-error">';
 
-				if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $sanitization['term_status'] || AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS === $sanitization['term_status'] ) {
+				if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS === $sanitization['term_status'] ) {
 					if ( amp_is_canonical() ) {
 						$info = __( 'Rejecting an error means that any URL on which it occurs will not be served as AMP.', 'amp' );
 					} else {
 						$info = __( 'Rejecting an error means that any URL on which it occurs will redirect to the non-AMP version.', 'amp' );
 					}
 					printf(
-						'<p>%s</p><a class="button button-primary reject" href="%s">%s</a>',
+						'<p>%s</p><p><a class="button button-primary reject" href="%s">%s</a></p>',
 						esc_html__( 'Reject this validation error for all instances.', 'amp' ) . ' ' . esc_html( $info ),
 						esc_url( $reject_all_url ),
 						esc_html__( 'Reject', 'amp' )
 					);
-				} elseif ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS === $sanitization['term_status'] || AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS === $sanitization['term_status'] ) {
+				} elseif ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS === $sanitization['term_status'] ) {
 					if ( amp_is_canonical() ) {
 						$info = __( 'Accepting all validation errors which occur on a URL will allow it to be served as AMP.', 'amp' );
 					} else {
 						$info = __( 'Accepting all validation errors which occur on a URL will allow it to be served as AMP.', 'amp' );
 					}
 					printf(
-						'<p>%s</p><a class="button button-primary accept" href="%s">%s</a>',
+						'<p>%s</p><p><a class="button button-primary accept" href="%s">%s</a></p>',
 						esc_html__( 'Accept this error for all instances.', 'amp' ) . ' ' . esc_html( $info ),
 						esc_url( $accept_all_url ),
 						esc_html__( 'Accept', 'amp' )
@@ -1350,12 +1350,12 @@ class AMP_Validated_URL_Post_Type {
 						$info = __( 'Rejecting an error means that any URL on which it occurs will redirect to the non-AMP version. If all errors occurring on a URL are accepted, then it will not redirect.', 'amp' );
 					}
 					printf(
-						'<p>%s</p><a class="button reject" href="%s">%s</a><a class="button button-primary accept" href="%s">%s</a>',
+						'<p>%s</p><p><a class="button button-primary accept" href="%s">%s</a> <a class="button button-primary reject" href="%s">%s</a></p>',
 						esc_html__( 'Accept or Reject this error for all instances.', 'amp' ) . ' ' . esc_html( $info ),
-						esc_url( $reject_all_url ),
-						esc_html__( 'Reject', 'amp' ),
 						esc_url( $accept_all_url ),
-						esc_html__( 'Accept', 'amp' )
+						esc_html__( 'Accept', 'amp' ),
+						esc_url( $reject_all_url ),
+						esc_html__( 'Reject', 'amp' )
 					);
 				}
 				echo '</div>';
