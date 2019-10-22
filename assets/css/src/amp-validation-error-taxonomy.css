@@ -329,23 +329,32 @@ body.taxonomy-amp_validation_error .wp-list-table .new th.check-column input {
 	font-size: 1rem;
 }
 
-.validation-error-sources th {
-	font-weight: bold;
-	text-align: right;
+.validation-error-sources {
+	border-collapse: collapse;
+}
+
+.validation-error-sources tbody:not(:first-child) {
+	border-top: solid 1px #ddd;
+	margin: 0;
 }
 
 .validation-error-sources td,
 .validation-error-sources th {
 	vertical-align: top;
-	padding: 0 4px;
+	padding: 2px 4px;
 }
 
-.validation-error-sources > li {
-	border-top: solid 1px #ddd;
-	margin: 0;
-	padding: 6px 0;
+.validation-error-sources tbody > tr:first-child > th,
+.validation-error-sources tbody > tr:first-child > td {
+	padding-top: 0.75em;
 }
 
-.validation-error-sources > li:first-child {
-	border-top: 0;
+.validation-error-sources tbody > tr:last-child > th,
+.validation-error-sources tbody > tr:last-child > td {
+	padding-bottom: 0.75em;
+}
+
+.validation-error-sources th {
+	font-weight: bold;
+	text-align: right;
 }

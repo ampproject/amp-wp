@@ -2417,178 +2417,184 @@ class AMP_Validation_Error_Taxonomy {
 				);
 				?>
 			</summary>
-			<ol class="validation-error-sources">
-				<?php foreach ( $sources as $source ) : ?>
+			<table class="validation-error-sources">
+				<?php foreach ( $sources as $i => $source ) : ?>
 					<?php
-					$file_text = null;
-					$edit_url  = self::get_file_editor_url( $source );
+					$source_table_rows = $source;
+
 					if ( isset( $source['file'], $source['line'] ) ) {
-						$file_text = $source['file'] . ':' . $source['line'];
-						unset( $source['file'], $source['line'] );
+						unset( $source_table_rows['file'], $source_table_rows['line'] );
+						$source_table_rows['location'] = [
+							'link_text' => $source['file'] . ':' . $source['line'],
+							'link_url'  => self::get_file_editor_url( $source ),
+						];
 					}
 					$is_filter = ! empty( $source['filter'] );
-					unset( $source['filter'] );
+					unset( $source_table_rows['filter'] );
 
 					$dependency_type = null;
 					if ( isset( $source['dependency_type'] ) ) {
 						$dependency_type = $source['dependency_type'];
-						unset( $source['dependency_type'] );
+						unset( $source_table_rows['dependency_type'] );
 					}
 
 					$priority = null;
 					if ( isset( $source['priority'] ) ) {
 						$priority = $source['priority'];
-						unset( $source['priority'] );
+						unset( $source_table_rows['priority'] );
 					}
 
+					$row_span = count( $source_table_rows );
 					?>
-					<li>
-						<table>
-							<?php foreach ( $source as $key => $value ) : ?>
-								<tr>
-									<th>
+					<tbody>
+						<?php foreach ( array_keys( $source_table_rows ) as $j => $key ) : ?>
+							<?php
+							$value = $source_table_rows[ $key ];
+							?>
+							<tr>
+								<?php if ( 0 === $j ) : ?>
+									<th rowspan="<?php echo esc_attr( $row_span ); ?>" scope="rowgroup">
+										#<?php echo esc_html( $i + 1 ); ?>
+									</th>
+								<?php endif; ?>
+								<th scope="row">
+									<?php
+									switch ( $key ) {
+										case 'name':
+											esc_html_e( 'Name', 'amp' );
+											break;
+										case 'post_id':
+											esc_html_e( 'Post ID', 'amp' );
+											break;
+										case 'post_type':
+											esc_html_e( 'Post Type', 'amp' );
+											break;
+										case 'handle':
+											if ( 'script' === $dependency_type ) {
+												esc_html_e( 'Script Handle', 'amp' );
+											} elseif ( 'style' === $dependency_type ) {
+												esc_html_e( 'Style Handle', 'amp' );
+											} else {
+												esc_html_e( 'Handle', 'amp' );
+											}
+											break;
+										case 'block_content_index':
+											esc_html_e( 'Block Index', 'amp' );
+											break;
+										case 'block_name':
+											esc_html_e( 'Block Name', 'amp' );
+											break;
+										case 'shortcode':
+											esc_html_e( 'Shortcode', 'amp' );
+											break;
+										case 'type':
+											esc_html_e( 'Type', 'amp' );
+											break;
+										case 'function':
+											esc_html_e( 'Function', 'amp' );
+											break;
+										case 'location':
+											esc_html_e( 'Location', 'amp' );
+											break;
+										case 'sources':
+											esc_html_e( 'Sources', 'amp' );
+											break;
+										case 'hook':
+											if ( $is_filter ) {
+												esc_html_e( 'Filter', 'amp' );
+											} else {
+												esc_html_e( 'Action', 'amp' );
+											}
+											break;
+										default:
+											echo esc_html( $key );
+									}
+									echo ':';
+									?>
+								</th>
+								<td>
+									<?php if ( 'sources' === $key && is_array( $value ) ) : ?>
+										<?php self::render_sources( $value ); ?>
+									<?php elseif ( 'type' === $key ) : ?>
 										<?php
-										switch ( $key ) {
-											case 'name':
-												esc_html_e( 'Name', 'amp' );
+										switch ( $value ) {
+											case 'theme':
+												echo '<span class="dashicons dashicons-admin-appearance"></span> ';
+												esc_html_e( 'Theme', 'amp' );
 												break;
-											case 'post_id':
-												esc_html_e( 'Post ID', 'amp' );
+											case 'plugin':
+												echo '<span class="dashicons dashicons-admin-plugins"></span> ';
+												esc_html_e( 'Plugin', 'amp' );
 												break;
-											case 'post_type':
-												esc_html_e( 'Post Type', 'amp' );
+											case 'mu-plugin':
+												echo '<span class="dashicons dashicons-admin-plugins"></span> ';
+												esc_html_e( 'Must-Use Plugin', 'amp' );
 												break;
-											case 'handle':
-												if ( 'script' === $dependency_type ) {
-													esc_html_e( 'Script Handle', 'amp' );
-												} elseif ( 'style' === $dependency_type ) {
-													esc_html_e( 'Style Handle', 'amp' );
-												} else {
-													esc_html_e( 'Handle', 'amp' );
-												}
-												break;
-											case 'block_content_index':
-												esc_html_e( 'Block Index', 'amp' );
-												break;
-											case 'block_name':
-												esc_html_e( 'Block Name', 'amp' );
-												break;
-											case 'shortcode':
-												esc_html_e( 'Shortcode', 'amp' );
-												break;
-											case 'type':
-												esc_html_e( 'Type', 'amp' );
-												break;
-											case 'function':
-												esc_html_e( 'Function', 'amp' );
-												break;
-											case 'sources':
-												esc_html_e( 'Sources', 'amp' );
-												break;
-											case 'hook':
-												if ( $is_filter ) {
-													esc_html_e( 'Filter', 'amp' );
-												} else {
-													esc_html_e( 'Action', 'amp' );
-												}
+											case 'core':
+												echo '<span class="dashicons dashicons-wordpress-alt"></span> ';
+												esc_html_e( 'Core', 'amp' );
 												break;
 											default:
-												echo esc_html( $key );
+												echo esc_html( (string) $value );
 										}
-										echo ':';
 										?>
-									</th>
-									<td>
-										<?php if ( 'sources' === $key && is_array( $value ) ) : ?>
-											<?php self::render_sources( $value ); ?>
-										<?php elseif ( 'type' === $key ) : ?>
-											<?php
-											switch ( $value ) {
-												case 'theme':
-													echo '<span class="dashicons dashicons-admin-appearance"></span> ';
-													esc_html_e( 'Theme', 'amp' );
-													break;
-												case 'plugin':
-													echo '<span class="dashicons dashicons-admin-plugins"></span> ';
-													esc_html_e( 'Plugin', 'amp' );
-													break;
-												case 'mu-plugin':
-													echo '<span class="dashicons dashicons-admin-plugins"></span> ';
-													esc_html_e( 'Must-Use Plugin', 'amp' );
-													break;
-												case 'core':
-													echo '<span class="dashicons dashicons-wordpress-alt"></span> ';
-													esc_html_e( 'Core', 'amp' );
-													break;
-												default:
-													echo esc_html( (string) $value );
-											}
-											?>
-										<?php elseif ( 'name' === $key && isset( $source['type'] ) ) : ?>
-											<?php self::render_source_name( $value, $source['type'] ); ?>
-										<?php elseif ( 'hook' === $key ) : ?>
-											<code><?php echo esc_html( (string) $value ); ?></code>
-											<?php
-											if ( null !== $priority ) {
-												echo esc_html(
-													sprintf(
-														/* translators: %d is the hook priority */
-														__( '(priority %d)', 'amp' ),
-														$priority
-													)
-												);
-											}
-											?>
-										<?php elseif ( 'function' === $key ) : ?>
-											<code><?php echo esc_html( '{closure}' === $value ? $value : $value . '()' ); ?></code>
-										<?php elseif ( 'block_name' === $key || 'shortcode' === $key || 'handle' === $key ) : ?>
-											<code><?php echo esc_html( $value ); ?></code>
-										<?php elseif ( 'post_type' === $key ) : ?>
-											<?php
-											$post_type = get_post_type_object( $value );
-											if ( $post_type && isset( $post_type->labels->singular_name ) ) {
-												echo esc_html( $post_type->labels->singular_name );
-												printf( ' (<code>%s</code>)', esc_html( $value ) );
-											} else {
-												printf( '<code>%s</code>', esc_html( $value ) );
-											}
-											?>
-										<?php elseif ( is_scalar( $value ) ) : ?>
-											<?php echo esc_html( (string) $value ); ?>
-										<?php else : ?>
-											<pre><?php echo esc_html( wp_json_encode( $source, 128 /* JSON_PRETTY_PRINT */ | 64 /* JSON_UNESCAPED_SLASHES */ ) ); ?></pre>
-										<?php endif; ?>
-									</td>
-								</tr>
-							<?php endforeach; ?>
-							<?php if ( $file_text ) : ?>
-								<tr>
-									<th>
-										<?php esc_html_e( 'Location', 'amp' ); ?>:
-									</th>
-									<td>
+									<?php elseif ( 'name' === $key && isset( $source['type'] ) ) : ?>
+										<?php self::render_source_name( $value, $source['type'] ); ?>
+									<?php elseif ( 'hook' === $key ) : ?>
+										<code><?php echo esc_html( (string) $value ); ?></code>
 										<?php
-										if ( $edit_url ) {
-											printf(
-												'<a href="%s" %s>',
-												// Note that esc_attr() used instead of esc_url() to allow IDE protocols.
-												esc_attr( $edit_url ),
-												// Open link in new window unless the user has filtered the URL to open their system IDE.
-												in_array( wp_parse_url( $edit_url, PHP_URL_SCHEME ), [ 'http', 'https' ], true ) ? 'target="_blank"' : ''
+										if ( null !== $priority ) {
+											echo esc_html(
+												sprintf(
+													/* translators: %d is the hook priority */
+													__( '(priority %d)', 'amp' ),
+													$priority
+												)
 											);
 										}
 										?>
-										<?php echo esc_html( $file_text ); ?>
-										<?php if ( $edit_url ) : ?>
+									<?php elseif ( 'location' === $key ) : ?>
+										<?php
+										if ( ! empty( $value['link_url'] ) ) {
+											printf(
+												'<a href="%s" %s>',
+												// Note that esc_attr() used instead of esc_url() to allow IDE protocols.
+												esc_attr( $value['link_url'] ),
+												// Open link in new window unless the user has filtered the URL to open their system IDE.
+												in_array( wp_parse_url( $value['link_url'], PHP_URL_SCHEME ), [ 'http', 'https' ], true ) ? 'target="_blank"' : ''
+											);
+										}
+										?>
+										<?php echo esc_html( $value['link_text'] ); ?>
+										<?php if ( ! empty( $value['link_url'] ) ) : ?>
 											</a>
 										<?php endif; ?>
-									</td>
-								</tr>
-							<?php endif; ?>
-						</table>
-					</li>
+									<?php elseif ( 'function' === $key ) : ?>
+										<code><?php echo esc_html( '{closure}' === $value ? $value : $value . '()' ); ?></code>
+									<?php elseif ( 'block_name' === $key || 'shortcode' === $key || 'handle' === $key ) : ?>
+										<code><?php echo esc_html( $value ); ?></code>
+									<?php elseif ( 'post_type' === $key ) : ?>
+										<?php
+										$post_type = get_post_type_object( $value );
+										if ( $post_type && isset( $post_type->labels->singular_name ) ) {
+											echo esc_html( $post_type->labels->singular_name );
+											printf( ' (<code>%s</code>)', esc_html( $value ) );
+										} else {
+											printf( '<code>%s</code>', esc_html( $value ) );
+										}
+										?>
+									<?php elseif ( is_scalar( $value ) ) : ?>
+										<?php echo esc_html( (string) $value ); ?>
+									<?php else : ?>
+										<pre><?php echo esc_html( wp_json_encode( $source, 128 /* JSON_PRETTY_PRINT */ | 64 /* JSON_UNESCAPED_SLASHES */ ) ); ?></pre>
+									<?php endif; ?>
+								</td>
+							</tr>
+						<?php endforeach; ?>
+					</tbody>
 				<?php endforeach; ?>
-			</ol>
+				</tbody>
+			</table>
 		</details>
 		<?php
 	}
