@@ -1,5 +1,5 @@
 <phpunit
-	bootstrap="tests/php/bootstrap.php"
+	bootstrap="vendor/xwp/wp-dev-lib/sample-config/phpunit-plugin-bootstrap.php"
 	backupGlobals="false"
 	colors="true"
 	convertErrorsToExceptions="true"
@@ -8,6 +8,7 @@
 	>
 	<php>
 		<const name="WP_TEST_ACTIVATED_PLUGINS" value="jetpack/jetpack.php,gutenberg/gutenberg.php,pwa/pwa.php" />
+		<env name="PLUGIN_FILE" value="amp.php" />
 	</php>
 	<testsuites>
 		<!-- Default test suite to run all tests -->
