@@ -57,19 +57,20 @@ const PageEdit = ( {
 		backgroundColors,
 	} = attributes;
 
-	const { moveBlockToPosition } = useDispatch( 'core/block-editor' );
+	const { moveBlockToPosition, removeBlocks } = useDispatch( 'core/block-editor' );
 
 	const {
 		media,
 		videoFeaturedImage,
 		pagesOrder,
 		childrenOrder,
+		getImmovableBlocks,
 		storySettingsAttributes,
 		autoAdvanceAfterOptions,
 		allowedVideoMimeTypes,
 	} = useSelect( ( select ) => {
 		const { getMedia } = select( 'core' );
-		const { getBlockOrder } = select( 'core/block-editor' );
+		const { getBlockOrder, getBlocksByClientId } = select( 'core/block-editor' );
 		const { getSettings } = select( 'amp/story' );
 
 		const mediaObject = mediaId ? getMedia( mediaId ) : undefined;
@@ -88,6 +89,10 @@ const PageEdit = ( {
 			media: mediaObject,
 			videoFeaturedImage: videoThumbnail,
 			getBlockOrder,
+			getImmovableBlocks: ( pageClientId ) => {
+				const innerBlocks = getBlocksByClientId( getBlockOrder( pageClientId ) );
+				return innerBlocks.filter( ( { name } ) => ! ALLOWED_MOVABLE_BLOCKS.includes( name ) );
+			},
 			pagesOrder: getBlockOrder(),
 			childrenOrder: getBlockOrder( clientId ),
 			storySettingsAttributes: metaToAttributeNames( postMeta ),
@@ -142,8 +147,21 @@ const PageEdit = ( {
 		}
 	}, [ mediaType, mediaUrl ] );
 
+	// If there is more than one immovable block, leave only the last and remove the others.
+	useEffect( () => {
+		const immovableBlocks = getImmovableBlocks( clientId );
+		if ( immovableBlocks.length > 1 ) {
+			immovableBlocks.pop();
+			const blocksToRemove = immovableBlocks.map( ( { clientId: blockId } ) => blockId );
+			removeBlocks( blocksToRemove );
+		}
+	}, [ childrenOrder, clientId, getImmovableBlocks, removeBlocks ] );
+
 	useEffect( () => {
 		if ( childrenOrder.length <= 1 ) {
+			return;
+		}
+		if ( getImmovableBlocks( clientId ).length > 1 ) {
 			return;
 		}
 		const ctaBlock = getCallToActionBlock( clientId );
@@ -163,7 +181,7 @@ const PageEdit = ( {
 				moveBlockToPosition( blockToMove.clientId, clientId, clientId, childrenOrder.length - 1 );
 			}
 		}
-	}, [ childrenOrder, clientId, moveBlockToPosition ] );
+	}, [ childrenOrder, clientId, moveBlockToPosition, getImmovableBlocks ] );
 
 	const style = {
 		backgroundImage: IMAGE_BACKGROUND_TYPE === mediaType && mediaUrl ? `url(${ mediaUrl })` : undefined,
