@@ -108,7 +108,7 @@ dl.detailed {
 	padding-bottom: 16px;
 }
 
-.details-attributes__title code,
+.details-attributes__title,
 .notice .detailed summary code {
 	display: inline-block;
 	min-width: 240px;
@@ -116,8 +116,9 @@ dl.detailed {
 	font-weight: 600;
 }
 
-.details-attributes__title code {
+.details-attributes__title {
 	margin-left: 0;
+	font-weight: bold;
 }
 
 .details-attributes__list {

@@ -1939,11 +1939,11 @@ class AMP_Validation_Error_Taxonomy {
 					$attributes         = [];
 					$attributes_heading = '';
 					if ( ! empty( $validation_error['node_attributes'] ) ) {
-						$attributes_heading = sprintf( '<div class="details-attributes__title"><code>%s</code></div>', esc_html__( 'Element attributes:', 'amp' ) );
+						$attributes_heading = sprintf( '<div class="details-attributes__title">%s:</div>', esc_html( self::get_source_key_label( 'node_attributes', $validation_error ) ) );
 						$attributes         = $validation_error['node_attributes'];
 					} elseif ( ! empty( $validation_error['element_attributes'] ) ) {
-						$attributes_heading = sprintf( '<div class="details-attributes__title"><code>%s</code></div>', esc_html__( 'Other attributes:', 'amp' ) );
 						$attributes         = $validation_error['element_attributes'];
+						$attributes_heading = sprintf( '<div class="details-attributes__title">%s:</div>', esc_html( self::get_source_key_label( 'element_attributes', $validation_error ) ) );
 					}
 
 					if ( empty( $attributes ) ) {
@@ -1960,7 +1960,7 @@ class AMP_Validation_Error_Taxonomy {
 						foreach ( $attributes as $attr => $value ) {
 							$content .= sprintf( '<li><span class="details-attributes__attr">%s</span>', esc_html( $attr ) );
 
-							if ( isset( $value ) ) {
+							if ( ! empty( $value ) ) {
 								$content .= sprintf( ': <span class="details-attributes__value">%s</span>', esc_html( $value ) );
 							}
 
