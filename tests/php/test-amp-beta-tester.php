@@ -1,13 +1,20 @@
 <?php
 
-require __DIR__ . '/../../amp-beta-tester.php';
-
 /**
  * Class AMP_Beta_Tester_Test
  *
  * @covers \AMP_Beta_Tester
  */
 class AMP_Beta_Tester_Test extends WP_UnitTestCase {
+
+	/**
+	 * Runs the routine before setting up all tests.
+	 */
+	public static function setupBeforeClass() {
+		require_once __DIR__ . '/../../amp-beta-tester.php';
+
+		parent::setUpBeforeClass();
+	}
 
 	/**
 	 * Test force_plugin_update_check().
@@ -129,5 +136,33 @@ class AMP_Beta_Tester_Test extends WP_UnitTestCase {
 
 		$actual = AMP_Beta_Tester\is_pre_release( '1.0.0-RC' );
 		$this->assertTrue( $actual );
+	}
+
+	/**
+	 * Test show_unstable_reminder().
+	 *
+	 * @covers \AMP_Beta_Tester\show_unstable_reminder()
+	 */
+	public function test_show_unstable_reminder() {
+		if ( ! \AMP_Beta_Tester\is_pre_release( AMP__VERSION ) ) {
+			$this->markTestSkipped( 'Unstable reminder is only shown on non-stable versions.' );
+		}
+
+		global $show_admin_bar, $wp_admin_bar;
+
+		$show_admin_bar = true;
+
+		_wp_admin_bar_init();
+
+		ob_start();
+		AMP_Beta_Tester\show_unstable_reminder();
+		$styles = ob_get_clean();
+
+		$this->assertEquals( $styles, '<style>#wpadminbar #wp-admin-bar-amp-beta-tester-admin-bar { background: #0075C2; }</style>' );
+
+		$node_amp_beta_tester = $wp_admin_bar->get_node( 'amp-beta-tester-admin-bar' );
+
+		$this->assertEquals( 'AMP v' . AMP__VERSION, $node_amp_beta_tester->title );
+		$this->assertEquals( admin_url( 'admin.php?page=amp-options' ), $node_amp_beta_tester->href );
 	}
 }

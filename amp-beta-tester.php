@@ -192,7 +192,7 @@ function show_unstable_reminder() {
 			'id'     => 'amp-beta-tester-admin-bar',
 			'title'  => sprintf( 'AMP v%s', AMP__VERSION ),
 			'parent' => 'top-secondary',
-			'href'   => current_user_can( 'update_plugins' ) ? admin_url( 'admin.php?page=amp-options' ) : '',
+			'href'   => admin_url( 'admin.php?page=amp-options' ),
 		];
 		$wp_admin_bar->add_node( $args );
 
