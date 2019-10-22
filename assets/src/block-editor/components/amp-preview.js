@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { get } from 'lodash';
-import { ampSlug, errorMessages, isStandardMode } from 'amp-block-editor-data';
 import PropTypes from 'prop-types';
 
 /**
@@ -28,7 +27,6 @@ import { POST_PREVIEW_CLASS } from '../constants';
  * Writes the message and graphic in the new preview window that was opened.
  *
  * Forked from the Core component <PostPreviewButton>.
- * The errorMessages are imported via wp_localize_script().
  *
  * @see https://github.com/WordPress/gutenberg/blob/95e769df1f82f6b0ef587d81af65dd2f48cd1c38/packages/editor/src/components/post-preview-button/index.js#L17
  * @param {Object} targetDocument The target document.
@@ -231,7 +229,7 @@ class AMPPreview extends Component {
 	 * Renders the component.
 	 */
 	render() {
-		const { previewLink, currentPostLink, isEnabled, isSaveable } = this.props;
+		const { previewLink, currentPostLink, errorMessages, isEnabled, isSaveable, isStandardMode } = this.props;
 
 		// Link to the `?preview=true` URL if we have it, since this lets us see
 		// changes that were autosaved since the post was last published. Otherwise,
@@ -277,6 +275,8 @@ AMPPreview.propTypes = {
 	isEnabled: PropTypes.bool.isRequired,
 	isSaveable: PropTypes.bool.isRequired,
 	savePost: PropTypes.func.isRequired,
+	errorMessages: PropTypes.array,
+	isStandardMode: PropTypes.bool,
 };
 
 export default compose( [
@@ -290,8 +290,14 @@ export default compose( [
 			getEditedPostPreviewLink,
 		} = select( 'core/editor' );
 
+		const {
+			getAmpSlug,
+			getErrorMessages,
+			isStandardMode,
+		} = select( 'amp/block-editor' );
+
 		const queryArgs = {};
-		queryArgs[ ampSlug ] = 1;
+		queryArgs[ getAmpSlug() ] = 1;
 		const initialPreviewLink = getEditedPostPreviewLink();
 		const previewLink = initialPreviewLink ? addQueryArgs( initialPreviewLink, queryArgs ) : undefined;
 
@@ -303,6 +309,8 @@ export default compose( [
 			isAutosaveable: forceIsAutosaveable || isEditedPostAutosaveable(),
 			isDraft: [ 'draft', 'auto-draft' ].indexOf( getEditedPostAttribute( 'status' ) ) !== -1,
 			isEnabled: isAMPEnabled(),
+			errorMessages: getErrorMessages(),
+			isStandardMode: isStandardMode(),
 		};
 	} ),
 	withDispatch( ( dispatch ) => ( {
