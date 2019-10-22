@@ -2407,8 +2407,8 @@ class AMP_Validation_Error_Taxonomy {
 					sprintf(
 						/* translators: %s: number of sources. */
 						_n(
-							'%s possible source',
-							'%s possible sources',
+							'Source stack (%s)',
+							'Source stack (%s)',
 							$source_count,
 							'amp'
 						),
