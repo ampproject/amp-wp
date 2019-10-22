@@ -8,8 +8,8 @@ import classnames from 'classnames';
 /**
  * WordPress dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
-import { cloneBlock, getBlockType, pasteHandler, serialize } from '@wordpress/blocks';
+import { __ } from '@wordpress/i18n';
+import { cloneBlock, pasteHandler, serialize } from '@wordpress/blocks';
 import { useEffect, useState, useRef } from '@wordpress/element';
 import {
 	MenuGroup,
@@ -24,7 +24,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
  */
 import './edit.css';
 import {
-	copyTextToClipBoard,
+	copyTextToClipBoard, displayPasteError,
 	isPageBlock,
 	useIsBlockAllowedOnPage,
 	useMoveBlockToPage,
@@ -121,21 +121,10 @@ const ContextMenu = ( props ) => {
 						}
 					} );
 				} ).catch( () => {
+					displayPasteError( pastedBlock.name, createErrorNotice );
 				} );
 			} else {
-				const blockType = getBlockType( pastedBlock.name );
-				const removeMessage = sprintf(
-					// translators: %s: Type of block (i.e. Text, Image etc)
-					__( 'Unable to paste %s block.', 'amp' ),
-					blockType.title
-				);
-				createErrorNotice(
-					removeMessage,
-					{
-						type: 'snackbar',
-						isDismissible: true,
-					}
-				);
+				displayPasteError( pastedBlock.name, createErrorNotice );
 			}
 		} );
 	};

@@ -6,15 +6,14 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { getBlockType, pasteHandler, serialize } from '@wordpress/blocks';
+import { pasteHandler, serialize } from '@wordpress/blocks';
 import { documentHasSelection } from '@wordpress/dom';
 import { withDispatch, useSelect, useDispatch } from '@wordpress/data';
-import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
-import { copyTextToClipBoard, isPageBlock, useIsBlockAllowedOnPage } from '../../helpers';
+import { copyTextToClipBoard, isPageBlock, useIsBlockAllowedOnPage, displayPasteError } from '../../helpers';
 
 function CopyPasteHandler( { children, onCopy, clientId, isSelected } ) {
 	const {
@@ -22,16 +21,14 @@ function CopyPasteHandler( { children, onCopy, clientId, isSelected } ) {
 		getCopiedMarkupState,
 	} = useSelect(
 		( select ) => {
-			const {
-				getSettings,
-			} = select( 'core/block-editor' );
+			const { getSettings } = select( 'core/block-editor' );
 			const { __experimentalCanUserUseUnfilteredHTML } = getSettings();
 			const { getCopiedMarkup } = select( 'amp/story' );
 			return {
 				canUserUseUnfilteredHTML: __experimentalCanUserUseUnfilteredHTML,
 				getCopiedMarkupState: getCopiedMarkup,
 			};
-		}, [ clientId ]
+		}, [ ]
 	);
 
 	const { insertBlock } = useDispatch( 'core/block-editor' );
@@ -83,19 +80,7 @@ function CopyPasteHandler( { children, onCopy, clientId, isSelected } ) {
 			if ( isBlockAllowedOnPage( pastedBlock.name, clientId ) ) {
 				insertBlock( pastedBlock, null, clientId );
 			} else {
-				const blockType = getBlockType( pastedBlock.name );
-				const removeMessage = sprintf(
-					// translators: %s: Type of block (i.e. Text, Image etc)
-					__( 'Unable to paste %s block.', 'amp' ),
-					blockType.title
-				);
-				createErrorNotice(
-					removeMessage,
-					{
-						type: 'snackbar',
-						isDismissible: true,
-					}
-				);
+				displayPasteError( pastedBlock.name, createErrorNotice );
 			}
 		} );
 	};
