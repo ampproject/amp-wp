@@ -78,39 +78,45 @@ function update_amp_manifest( $updates ) {
 		return $updates;
 	}
 
-	$amp_zip_file = 'amp.zip';
-	$amp_manifest = isset( $updates->response[ AMP_PLUGIN_FILE ] )
-		? $updates->response[ AMP_PLUGIN_FILE ]
-		: $updates->no_update[ AMP_PLUGIN_FILE ];
+	$amp_version = get_plugin_data( WP_PLUGIN_DIR . '/' . AMP_PLUGIN_FILE )['Version'];
+
+	if ( ! is_pre_release( $amp_version ) ) {
+		return $updates;
+	}
+
+	$manifest_type = isset( $updates->response[ AMP_PLUGIN_FILE ] ) ? 'response' : 'no_update';
+	$amp_manifest  = $updates->{$manifest_type}[ AMP_PLUGIN_FILE ];
 
 	$github_releases = get_amp_github_releases();
 
 	if ( is_array( $github_releases ) ) {
-		$amp_version = get_plugin_data( WP_PLUGIN_DIR . '/' . AMP_PLUGIN_FILE )['Version'];
-		$amp_updated = false;
+		$amp_to_be_updated = false;
 
 		foreach ( $github_releases as $release ) {
 			if ( $release->prerelease ) {
 				$release_version = $release->tag_name;
 
 				// If there is a new release, let's see if there is a zip available for download.
-				if ( version_compare( $release_version, $amp_version, '>' ) ) {
+				if ( version_compare( $release_version, $amp_version, '>=' ) ) {
 					foreach ( $release->assets as $asset ) {
-						if ( $amp_zip_file === $asset->name ) {
+						if ( 'amp.zip' === $asset->name ) {
 							$amp_manifest->new_version = $release_version;
 							$amp_manifest->package     = $asset->browser_download_url;
 							$amp_manifest->url         = $release->html_url;
 
 							// Set the AMP plugin to be updated.
-							$updates->response[ AMP_PLUGIN_FILE ] = $amp_manifest;
-							unset( $updates->no_update[ AMP_PLUGIN_FILE ] );
+							$updates->{$manifest_type}[ AMP_PLUGIN_FILE ] = $amp_manifest;
 
-							$amp_updated = true;
+							if ( 'response' === $manifest_type ) {
+								unset( $updates->no_update[ AMP_PLUGIN_FILE ] );
+							}
+
+							$amp_to_be_updated = true;
 							break;
 						}
 					}
 
-					if ( $amp_updated ) {
+					if ( $amp_to_be_updated ) {
 						break;
 					}
 				}
