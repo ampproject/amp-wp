@@ -16,7 +16,7 @@ import { select } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { AMP_PREVIEW_BUTTON_WRAPPER_ID, TEXT_BLOCKS, MEDIA_BLOCKS, DEFAULT_HEIGHT, DEFAULT_WIDTH, POST_PREVIEW_CLASS } from '../constants';
+import { TEXT_BLOCKS, MEDIA_BLOCKS, DEFAULT_HEIGHT, DEFAULT_WIDTH, POST_PREVIEW_CLASS } from '../constants';
 import { MIN_FONT_SIZE, MAX_FONT_SIZE } from '../../common/constants';
 import { AMPPreview } from '../components';
 
@@ -952,13 +952,14 @@ export const isAMPEnabled = () => {
  * Renders the 'Preview AMP' button in the DOM right after the (non-AMP) 'Preview' button.
  */
 export const renderPreviewButton = () => {
+	const ampPreviewButtonWrapperId = 'amp-wrapper-post-preview';
 	const postPreviewButton = document.querySelector( `.${ POST_PREVIEW_CLASS }` );
-	if ( ! postPreviewButton || document.getElementById( AMP_PREVIEW_BUTTON_WRAPPER_ID ) ) {
+	if ( ! postPreviewButton || document.getElementById( ampPreviewButtonWrapperId ) ) {
 		return;
 	}
 
 	const buttonWrapper = document.createElement( 'div' );
-	buttonWrapper.id = AMP_PREVIEW_BUTTON_WRAPPER_ID;
+	buttonWrapper.id = ampPreviewButtonWrapperId;
 
 	render(
 		<AMPPreview />,
