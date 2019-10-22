@@ -245,26 +245,32 @@ dl.detailed {
 	margin-left: 10px;
 }
 
-body.taxonomy-amp_validation_error .wp-list-table .new th,
-body.taxonomy-amp_validation_error .wp-list-table .new td,
+/*body.taxonomy-amp_validation_error .wp-list-table .new th,*/
+/*body.taxonomy-amp_validation_error .wp-list-table .new td,*/
 tr.expanded.new + tr > td:first-of-type,
-body.post-type-amp_validated_url .wp-list-table .new th,
-body.post-type-amp_validated_url .wp-list-table .new td {
+.wp-list-table .new td,
+.wp-list-table .new th {
 	background-color: #fef7f1;
 }
 
-body.taxonomy-amp_validation_error .wp-list-table .new.odd th,
-body.taxonomy-amp_validation_error .wp-list-table .new.odd td,
-tr.expanded.new.odd + tr > td:first-of-type,
-body.post-type-amp_validated_url .wp-list-table .new.odd th,
-body.post-type-amp_validated_url .wp-list-table .new.odd td {
-	background-color: #f9eee5;
+tr.expanded.new + tr > td:first-of-type,
+.wp-list-table .new th.check-column {
+	border-left: 4px solid #d54e21;
 }
 
-body.taxonomy-amp_validation_error .wp-list-table .new th.check-column,
-tr.expanded.new + tr > td:first-of-type,
-body.post-type-amp_validated_url .wp-list-table .new th.check-column {
-	border-left: 4px solid #d54e21;
+.wp-list-table th,
+.wp-list-table td {
+	box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+.wp-list-table tr:last-child th,
+.wp-list-table tr:last-child td {
+	box-shadow: none;
+}
+
+.wp-list-table tr.unapproved + tr.approved th,
+.wp-list-table tr.unapproved + tr.approved td {
+	border-top: 1px solid rgba(0, 0, 0, 0.03);
 }
 
 body.taxonomy-amp_validation_error .wp-list-table .new th.check-column input {
