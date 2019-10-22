@@ -16,8 +16,12 @@ import { ALLOWED_CHILD_BLOCKS, ALLOWED_MOVABLE_BLOCKS } from '../constants';
 const {	getBlock, getBlockRootClientId } = select( 'core/block-editor' );
 const { updateBlockAttributes } = dispatch( 'core/block-editor' );
 
+export const POSITION_TOP_LIMIT = 75;
+export const POSITION_TOP_GAP = 10;
+export const POSITION_TOP_DEFAULT = 0;
+
 /**
- * Set initial positioning if the selected block is an unmodified block.
+ * Set initial positioning if the selected block is an unmodified block and it has positioned siblings.
  *
  * @param {string} clientId Block ID.
  */
@@ -34,10 +38,6 @@ const maybeSetInitialPositioning = ( clientId ) => {
 		return;
 	}
 
-	const positionTopLimit = 75;
-	const positionTopHighest = 0;
-	const positionTopGap = 10;
-
 	// Check if it's a new block.
 	const newBlock = createBlock( block.name );
 	const isUnmodified = every( newBlock.attributes, ( value, key ) => value === block.attributes[ key ] );
@@ -49,10 +49,10 @@ const maybeSetInitialPositioning = ( clientId ) => {
 			.map( ( childBlock ) => childBlock.attributes.positionTop )
 			.reduce( ( highestTop, positionTop ) => Math.max( highestTop, positionTop ), 0 );
 
-		// If it's more than the limit, set the new one.
-		const newPositionTop = highestPositionTop > positionTopLimit ? positionTopHighest : highestPositionTop + positionTopGap;
+		// If it's more than the limit, set to default.
+		const positionTop = highestPositionTop > POSITION_TOP_LIMIT ? POSITION_TOP_DEFAULT : highestPositionTop + POSITION_TOP_GAP;
 
-		updateBlockAttributes( clientId, { positionTop: newPositionTop } );
+		updateBlockAttributes( clientId, { positionTop } );
 	}
 };
 
