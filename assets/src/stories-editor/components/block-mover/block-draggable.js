@@ -20,8 +20,8 @@ import { useIsBlockAllowedOnPage, useMoveBlockToPage } from '../../helpers';
 import Draggable from './draggable';
 
 const BlockDraggable = ( { children, clientId, blockName, blockElementId, onDragStart, onDragEnd } ) => {
-	const { rootClientId } = useSelect( ( select ) => select( 'core/block-editor' ).getBlockRootClientId( clientId ) );
-	const { index } = useSelect( ( select ) => select( 'core/block-editor' ).getBlockIndex( clientId, rootClientId ) );
+	const { rootClientId } = useSelect( ( select ) => select( 'core/block-editor' ).getBlockRootClientId( clientId ), [ clientId ] );
+	const { index } = useSelect( ( select ) => select( 'core/block-editor' ).getBlockIndex( clientId, rootClientId ), [ clientId, rootClientId ] );
 
 	const transferData = {
 		type: 'block',
