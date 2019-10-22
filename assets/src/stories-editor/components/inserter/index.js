@@ -53,7 +53,7 @@ const Inserter = ( props ) => {
 		const showInserter = select( 'core/edit-post' ).getEditorMode() === 'visual' && select( 'core/editor' ).getEditorSettings().richEditingEnabled;
 
 		return ! showInserter;
-	} );
+	}, [] );
 
 	const isReordering = useSelect( ( select ) => select( 'amp/story' ).isReordering(), [] );
 
