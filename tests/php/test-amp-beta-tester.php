@@ -10,6 +10,18 @@ require __DIR__ . '/../../amp-beta-tester.php';
 class AMP_Beta_Tester_Test extends WP_UnitTestCase {
 
 	/**
+	 * Test force_plugin_update_check().
+	 *
+	 * @covers \AMP_Beta_Tester\force_plugin_update_check()
+	 */
+	public function test_force_plugin_update_check() {
+		set_site_transient( 'update_plugins', new \stdClass() );
+		AMP_Beta_Tester\force_plugin_update_check();
+
+		$this->assertFalse( get_site_transient( 'update_plugins' ) );
+	}
+
+	/**
 	 * Test init().
 	 *
 	 * @covers \AMP_Beta_Tester\init()
