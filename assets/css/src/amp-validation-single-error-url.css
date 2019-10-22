@@ -75,7 +75,7 @@ table.striped > tbody > tr.even {
 #number-errors {
 	text-align: center;
 	background-color: #d3d3d3b8;
-	color: #1e8cbecc;
+	color: black;
 }
 
 #url-post-filter {
