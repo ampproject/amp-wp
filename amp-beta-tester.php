@@ -179,7 +179,7 @@ function replace_view_version_details_link( $file, $plugin_data ) {
  * @return bool
  */
 function is_pre_release( $plugin_version ) {
-	return (bool) preg_match( '/^\d+\.\d+\.\d+-(beta|alpha)\d?$/', $plugin_version );
+	return (bool) preg_match( '/^\d+\.\d+\.\d+-(beta|alpha|RC)\d?$/', $plugin_version );
 }
 
 /**

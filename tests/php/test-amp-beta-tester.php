@@ -99,5 +99,11 @@ class AMP_Beta_Tester_Test extends WP_UnitTestCase {
 
 		$actual = AMP_Beta_Tester\is_pre_release( '1.0.0-alpha' );
 		$this->assertTrue( $actual );
+
+		$actual = AMP_Beta_Tester\is_pre_release( '1.0.0-RC1' );
+		$this->assertTrue( $actual );
+
+		$actual = AMP_Beta_Tester\is_pre_release( '1.0.0-RC' );
+		$this->assertTrue( $actual );
 	}
 }
