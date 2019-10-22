@@ -181,7 +181,7 @@ dl.detailed details > summary {
 .column-details .error-details-toggle::before,
 .column-details .error-details-toggle::after {
 	width: 12px;
-	height: 12px;
+	height: 10px;
 	background-image: url("../images/down-triangle.svg");
 	background-size: cover;
 	background-position: center;
