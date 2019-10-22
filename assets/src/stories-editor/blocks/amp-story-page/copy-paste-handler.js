@@ -16,7 +16,6 @@ import { __, sprintf } from '@wordpress/i18n';
  */
 import { copyTextToClipBoard, isPageBlock, useIsBlockAllowedOnPage } from '../../helpers';
 
-
 function CopyPasteHandler( { children, onCopy, clientId, isSelected } ) {
 	const {
 		canUserUseUnfilteredHTML,
@@ -24,13 +23,11 @@ function CopyPasteHandler( { children, onCopy, clientId, isSelected } ) {
 	} = useSelect(
 		( select ) => {
 			const {
-				getBlockOrder,
 				getSettings,
 			} = select( 'core/block-editor' );
 			const { __experimentalCanUserUseUnfilteredHTML } = getSettings();
 			const { getCopiedMarkup } = select( 'amp/story' );
 			return {
-				isFirstPage: getBlockOrder().indexOf( clientId ) === 0,
 				canUserUseUnfilteredHTML: __experimentalCanUserUseUnfilteredHTML,
 				getCopiedMarkupState: getCopiedMarkup,
 			};
