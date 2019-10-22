@@ -185,7 +185,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private $used_class_names;
 
 	/**
-	 * Regular expression pattern to match focus_class_names in selectors.
+	 * Regular expression pattern to match focus class names in selectors.
 	 *
 	 * The computed pattern is cached to prevent re-constructing for each processed selector.
 	 *
@@ -2877,7 +2877,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$before_type_selector_pattern = '(?<=^|\(|\s|>|\+|~|,|})';
 			$after_type_selector_pattern  = '(?=$|[^a-zA-Z0-9_-])';
 
-			// Replace .focus selector with :focus-within.
+			// Replace focus selectors with :focus-within.
 			if ( $this->focus_class_name_selector_pattern ) {
 				$count    = 0;
 				$selector = preg_replace(
@@ -2945,12 +2945,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Given list of class names, create a regular expression pattern to match them in a selector.
+	 * Given a list of class names, create a regular expression pattern to match them in a selector.
 	 *
 	 * @since 1.4
 	 *
 	 * @param string[] $class_names Class names.
-	 * @return string Pattern,
+	 * @return string Regular expression pattern.
 	 */
 	private static function get_class_name_selector_pattern( $class_names ) {
 		$pattern  = '/\.(';
@@ -2960,7 +2960,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				function ( $class_name ) {
 					return preg_quote( $class_name, '/' );
 				},
-				$class_names
+				(array) $class_names
 			)
 		);
 		$pattern .= ')(?=$|[^a-zA-Z0-9_-])';
