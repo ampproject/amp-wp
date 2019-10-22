@@ -53,15 +53,13 @@ function force_plugin_update_check() {
  * @return void
  */
 function init() {
-	// Abort init if AMP plugin is not active.
-	if ( ! defined( 'AMP__FILE__' ) ) {
-		add_action( 'admin_notices', __NAMESPACE__ . '\show_amp_not_active_notice' );
-		return;
+	// Remind the user that an unstable AMP plugin is in use.
+	if ( defined( 'AMP__FILE__' ) ) {
+		add_action( 'admin_bar_menu', __NAMESPACE__ . '\show_unstable_reminder' );
 	}
 
 	add_filter( 'pre_set_site_transient_update_plugins', __NAMESPACE__ . '\update_amp_manifest' );
 	add_action( 'after_plugin_row_' . AMP_PLUGIN_FILE, __NAMESPACE__ . '\replace_view_version_details_link', 10, 2 );
-	add_action( 'admin_bar_menu', __NAMESPACE__ . '\show_unstable_reminder' );
 }
 
 /**
@@ -145,9 +143,9 @@ function replace_view_version_details_link( $file, $plugin_data ) {
 		?>
 		<script>
 			document.addEventListener('DOMContentLoaded', function() {
-				const link = document.querySelectorAll("[data-slug='amp'] a.thickbox.open-plugin-details-modal");
+				const links = document.querySelectorAll("[data-slug='amp'] a.thickbox.open-plugin-details-modal");
 
-				link.forEach( (link) => {
+				links.forEach( (link) => {
 					link.className = 'overridden'; // Override class so that onclick listeners are disabled.
 					link.target = '_blank';
 					link.href = '<?php echo $plugin_data['url']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>';
@@ -186,7 +184,7 @@ function show_unstable_reminder() {
 		];
 		$wp_admin_bar->add_node( $args );
 
-		// Highlight the menu if you are running the BETA Versions..
+		// Highlight the menu.
 		echo '<style>#wpadminbar #wp-admin-bar-amp-beta-tester-admin-bar { background: #0075C2; }</style>';
 	}
 }
