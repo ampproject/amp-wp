@@ -6,7 +6,7 @@
  * Author: AMP Project Contributors
  * Author URI: https://github.com/ampproject/amp-wp/graphs/contributors
  * Version: 0.1
- * Text Domain: amp-beta-tester
+ * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
  *
@@ -70,7 +70,7 @@ function init() {
  * @return void
  */
 function show_amp_not_active_notice() {
-	$error = esc_html__( 'AMP Beta Tester requires AMP to be active.', 'amp-beta-tester' );
+	$error = esc_html__( 'AMP Beta Tester requires AMP to be active.', 'amp' );
 
 	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	echo "<div class='notice notice-error'><p><strong>{$error}</strong></p></div>";
