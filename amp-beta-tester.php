@@ -150,7 +150,6 @@ function replace_view_version_details_link( $file, $plugin_data ) {
 	$plugin_version = $plugin_data['Version'];
 
 	if ( is_pre_release( $plugin_version ) ) {
-		ob_start();
 		?>
 		<script>
 			document.addEventListener('DOMContentLoaded', function() {
@@ -159,13 +158,15 @@ function replace_view_version_details_link( $file, $plugin_data ) {
 				links.forEach( (link) => {
 					link.className = 'overridden'; // Override class so that onclick listeners are disabled.
 					link.target = '_blank';
-					link.href = '<?php echo $plugin_data['url']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>';
+					<?php
+					if ( isset( $plugin_data['url'] ) ) {
+						echo "link.href = '{$plugin_data['url']}';"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					}
+					?>
 				} );
 			}, false);
 		</script>
 		<?php
-
-		echo ob_get_clean(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 }
 
