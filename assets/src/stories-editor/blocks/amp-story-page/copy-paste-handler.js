@@ -6,18 +6,19 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { pasteHandler, serialize } from '@wordpress/blocks';
+import { getBlockType, pasteHandler, serialize } from '@wordpress/blocks';
 import { documentHasSelection } from '@wordpress/dom';
 import { withDispatch, useSelect, useDispatch } from '@wordpress/data';
+import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
-import { copyTextToClipBoard, ensureAllowedBlocksOnPaste, isPageBlock } from '../../helpers';
+import { copyTextToClipBoard, isPageBlock, useIsBlockAllowedOnPage } from '../../helpers';
+
 
 function CopyPasteHandler( { children, onCopy, clientId, isSelected } ) {
 	const {
-		isFirstPage,
 		canUserUseUnfilteredHTML,
 		getCopiedMarkupState,
 	} = useSelect(
@@ -36,7 +37,9 @@ function CopyPasteHandler( { children, onCopy, clientId, isSelected } ) {
 		}, [ clientId ]
 	);
 
-	const { insertBlocks } = useDispatch( 'core/block-editor' );
+	const { insertBlock } = useDispatch( 'core/block-editor' );
+	const { createErrorNotice } = useDispatch( 'core/notices' );
+	const isBlockAllowedOnPage = useIsBlockAllowedOnPage();
 
 	const onPaste = ( event ) => {
 		// Ignore if the Page is not the selected page.
@@ -75,9 +78,29 @@ function CopyPasteHandler( { children, onCopy, clientId, isSelected } ) {
 			canUserUseUnfilteredHTML,
 		} );
 
-		if ( content.length > 0 ) {
-			insertBlocks( ensureAllowedBlocksOnPaste( content, clientId, isFirstPage ), null, clientId );
+		if ( ! clientId || ! content.length ) {
+			return;
 		}
+
+		content.forEach( ( pastedBlock ) => {
+			if ( isBlockAllowedOnPage( pastedBlock.name, clientId ) ) {
+				insertBlock( pastedBlock, null, clientId );
+			} else {
+				const blockType = getBlockType( pastedBlock.name );
+				const removeMessage = sprintf(
+					// translators: %s: Type of block (i.e. Text, Image etc)
+					__( 'Unable to paste %s block.', 'amp' ),
+					blockType.title
+				);
+				createErrorNotice(
+					removeMessage,
+					{
+						type: 'snackbar',
+						isDismissible: true,
+					}
+				);
+			}
+		} );
 	};
 
 	return (

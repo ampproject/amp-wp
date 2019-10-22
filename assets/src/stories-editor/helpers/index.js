@@ -46,7 +46,6 @@ export { default as processMedia } from './processMedia';
 export { default as addVideoAriaLabel } from './addVideoAriaLabel';
 export { default as getCallToActionBlock } from './getCallToActionBlock';
 export { default as getPageAttachmentBlock } from './getPageAttachmentBlock';
-export { default as ensureAllowedBlocksOnPaste } from './ensureAllowedBlocksOnPaste';
 export { default as isPageBlock } from './isPageBlock';
 export { default as copyTextToClipBoard } from './copyTextToClipBoard';
 export { default as getPosterImageFromFileObj } from './getPosterImageFromFileObj';

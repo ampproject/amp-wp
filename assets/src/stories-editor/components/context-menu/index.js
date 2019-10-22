@@ -8,8 +8,8 @@ import classnames from 'classnames';
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
-import { cloneBlock, pasteHandler, serialize } from '@wordpress/blocks';
+import { __, sprintf } from '@wordpress/i18n';
+import { cloneBlock, getBlockType, pasteHandler, serialize } from '@wordpress/blocks';
 import { useEffect, useState, useRef } from '@wordpress/element';
 import {
 	MenuGroup,
@@ -25,7 +25,6 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import './edit.css';
 import {
 	copyTextToClipBoard,
-	ensureAllowedBlocksOnPaste,
 	isPageBlock,
 	useIsBlockAllowedOnPage,
 	useMoveBlockToPage,
@@ -63,9 +62,10 @@ const ContextMenu = ( props ) => {
 	const {
 		removeBlock,
 		insertBlock,
-		insertBlocks,
 		updateBlockAttributes,
 	} = useDispatch( 'core/block-editor' );
+
+	const { createErrorNotice } = useDispatch( 'core/notices' );
 
 	const { setCopiedMarkup } = useDispatch( 'amp/story' );
 
@@ -109,17 +109,35 @@ const ContextMenu = ( props ) => {
 			return;
 		}
 
-		const isFirstPage = getBlockOrder().indexOf( pageClientId ) === 0;
-		insertBlocks( ensureAllowedBlocksOnPaste( content, pageClientId, isFirstPage ), null, pageClientId ).then( ( { blocks } ) => {
-			for ( const block of blocks ) {
-				if ( ALLOWED_MOVABLE_BLOCKS.includes( block.name ) ) {
-					updateBlockAttributes( block.clientId, {
-						positionTop: insidePercentageY,
-						positionLeft: insidePercentageX,
+		content.forEach( ( pastedBlock ) => {
+			if ( isBlockAllowedOnPage( pastedBlock.name, pageClientId ) ) {
+				insertBlock( pastedBlock, null, pageClientId ).then( ( { blocks } ) => {
+					blocks.forEach( ( block ) => {
+						if ( ALLOWED_MOVABLE_BLOCKS.includes( block.name ) ) {
+							updateBlockAttributes( block.clientId, {
+								positionTop: insidePercentageY,
+								positionLeft: insidePercentageX,
+							} );
+						}
 					} );
-				}
+				} ).catch( () => {
+				} );
+			} else {
+				const blockType = getBlockType( pastedBlock.name );
+				const removeMessage = sprintf(
+					// translators: %s: Type of block (i.e. Text, Image etc)
+					__( 'Unable to paste %s block.', 'amp' ),
+					blockType.title
+				);
+				createErrorNotice(
+					removeMessage,
+					{
+						type: 'snackbar',
+						isDismissible: true,
+					}
+				);
 			}
-		} ).catch( () => {} );
+		} );
 	};
 
 	const cutBlock = ( clientId ) => {
