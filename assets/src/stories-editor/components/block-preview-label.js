@@ -9,23 +9,22 @@ import PropTypes from 'prop-types';
 import { getBlockType } from '@wordpress/blocks';
 import { BlockIcon } from '@wordpress/block-editor';
 import { useSelect } from '@wordpress/data';
-import { useRef } from '@wordpress/element';
 import { __experimentalGetSettings as getDateSettings, dateI18n } from '@wordpress/date';
 import { __ } from '@wordpress/i18n';
 
 const BlockPreviewLabel = ( { block, label, displayIcon = true, alignIcon = 'left', accessibilityText = false } ) => {
-	const blockPreviewLabel = useRef( label );
-
 	const {
 		content,
 		icon,
 	} = useSelect( ( select ) => {
 		if ( ! block ) {
 			return {
-				content: blockPreviewLabel.current,
+				content: label,
 				icon: null,
 			};
 		}
+
+		let newLabel = label;
 
 		const { attributes, name } = block;
 
@@ -34,7 +33,7 @@ const BlockPreviewLabel = ( { block, label, displayIcon = true, alignIcon = 'lef
 
 		const blockType = getBlockType( name );
 
-		blockPreviewLabel.current = blockType.title;
+		newLabel = blockType.title;
 		let blockContent = '';
 
 		switch ( name ) {
@@ -43,7 +42,7 @@ const BlockPreviewLabel = ( { block, label, displayIcon = true, alignIcon = 'lef
 					blockContent = attributes.url.slice( attributes.url.lastIndexOf( '/' ) ).slice( 1, 30 );
 
 					if ( blockContent.length > 0 ) {
-						blockPreviewLabel.current = blockContent;
+						newLabel = blockContent;
 					}
 				}
 
@@ -51,7 +50,7 @@ const BlockPreviewLabel = ( { block, label, displayIcon = true, alignIcon = 'lef
 					const media = getMedia( attributes.id );
 
 					if ( media ) {
-						blockPreviewLabel.current = media.caption.raw || media.title.raw || blockPreviewLabel.current;
+						newLabel = media.caption.raw || media.title.raw || newLabel;
 					}
 				}
 
@@ -64,13 +63,13 @@ const BlockPreviewLabel = ( { block, label, displayIcon = true, alignIcon = 'lef
 						.slice( 0, 30 );
 				}
 
-				blockPreviewLabel.current = blockContent.length > 0 ? blockContent : blockType.title;
+				newLabel = blockContent.length > 0 ? blockContent : blockType.title;
 				break;
 
 			case 'amp/amp-story-post-author':
 				const author = getAuthors().find( ( { id } ) => id === getEditedPostAttribute( 'author' ) );
 
-				blockPreviewLabel.current = author ? author.name : __( 'Post Author', 'amp' );
+				newLabel = author ? author.name : __( 'Post Author', 'amp' );
 				break;
 
 			case 'amp/amp-story-post-date':
@@ -79,11 +78,11 @@ const BlockPreviewLabel = ( { block, label, displayIcon = true, alignIcon = 'lef
 				const dateFormat = dateSettings.formats.date;
 				const date = postDate || new Date();
 
-				blockPreviewLabel.current = dateI18n( dateFormat, date );
+				newLabel = dateI18n( dateFormat, date );
 				break;
 
 			case 'amp/amp-story-post-title':
-				blockPreviewLabel.current = getEditedPostAttribute( 'title' ) || blockType.title;
+				newLabel = getEditedPostAttribute( 'title' ) || blockType.title;
 				break;
 
 			default:
@@ -91,10 +90,10 @@ const BlockPreviewLabel = ( { block, label, displayIcon = true, alignIcon = 'lef
 		}
 
 		return {
-			content: blockPreviewLabel.current,
+			content: newLabel,
 			icon: blockType.icon,
 		};
-	}, [ block ] );
+	}, [ label, block ] );
 
 	return (
 		<>
