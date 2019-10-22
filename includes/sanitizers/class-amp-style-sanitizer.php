@@ -2953,19 +2953,16 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return string Regular expression pattern.
 	 */
 	private static function get_class_name_selector_pattern( $class_names ) {
-		$pattern  = '/\.(';
-		$pattern .= implode(
+		$class_pattern = implode(
 			'|',
 			array_map(
-				function ( $class_name ) {
+				static function ( $class_name ) {
 					return preg_quote( $class_name, '/' );
 				},
 				(array) $class_names
 			)
 		);
-		$pattern .= ')(?=$|[^a-zA-Z0-9_-])';
-		$pattern .= '/';
-		return $pattern;
+		return "/\.({$class_pattern})(?=$|[^a-zA-Z0-9_-])/";
 	}
 
 	/**
