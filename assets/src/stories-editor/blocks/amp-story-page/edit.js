@@ -176,19 +176,10 @@ const PageEdit = ( {
 			return;
 		}
 		// If there is an illegal number of immovable blocks (more than 1).
-		if ( immovableBlocks.length > 1 ) {
+		if ( 1 !== immovableBlocks.length ) {
 			return;
 		}
-		const ctaBlock = getCallToActionBlock( clientId );
-		const attachmentBlock = getPageAttachmentBlock( clientId );
-
-		let blockToMove = null;
-
-		if ( ctaBlock ) {
-			blockToMove = ctaBlock;
-		} else if ( attachmentBlock ) {
-			blockToMove = attachmentBlock;
-		}
+		const blockToMove = immovableBlocks[ 0 ];
 
 		if ( blockToMove ) {
 			// If the either CTA or Attachment is not the last block, move it there.
