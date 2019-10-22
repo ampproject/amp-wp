@@ -12,6 +12,7 @@ import {
 } from '@wordpress/block-editor';
 import { useEffect, useRef } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -58,6 +59,7 @@ const PageEdit = ( {
 	} = attributes;
 
 	const { moveBlockToPosition, removeBlocks } = useDispatch( 'core/block-editor' );
+	const { createErrorNotice } = useDispatch( 'core/notices' );
 
 	const {
 		media,
@@ -154,8 +156,15 @@ const PageEdit = ( {
 			immovableBlocks.pop();
 			const blocksToRemove = immovableBlocks.map( ( { clientId: blockId } ) => blockId );
 			removeBlocks( blocksToRemove );
+			createErrorNotice(
+				__( 'Block removed. Only one CTA/Attachment block allowed per Page.', 'amp' ),
+				{
+					type: 'snackbar',
+					isDismissible: true,
+				}
+			);
 		}
-	}, [ childrenOrder, clientId, getImmovableBlocks, removeBlocks ] );
+	}, [ childrenOrder, clientId, createErrorNotice, getImmovableBlocks, removeBlocks ] );
 
 	useEffect( () => {
 		if ( childrenOrder.length <= 1 ) {
