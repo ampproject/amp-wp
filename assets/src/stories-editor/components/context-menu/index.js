@@ -110,16 +110,19 @@ const ContextMenu = ( props ) => {
 		}
 
 		const isFirstPage = getBlockOrder().indexOf( pageClientId ) === 0;
-		insertBlocks( ensureAllowedBlocksOnPaste( content, pageClientId, isFirstPage ), null, pageClientId ).then( ( { blocks } ) => {
-			for ( const block of blocks ) {
-				if ( ALLOWED_MOVABLE_BLOCKS.includes( block.name ) ) {
-					updateBlockAttributes( block.clientId, {
-						positionTop: insidePercentageY,
-						positionLeft: insidePercentageX,
-					} );
+		const blocksOnPage = getBlockOrder( pageClientId );
+		insertBlocks( ensureAllowedBlocksOnPaste( content, pageClientId, isFirstPage ), blocksOnPage.length, pageClientId )
+			.then( ( { blocks } ) => {
+				for ( const block of blocks ) {
+					if ( ALLOWED_MOVABLE_BLOCKS.includes( block.name ) ) {
+						updateBlockAttributes( block.clientId, {
+							positionTop: insidePercentageY,
+							positionLeft: insidePercentageX,
+						} );
+					}
 				}
-			}
-		} ).catch( () => {} );
+			} )
+			.catch( () => {} );
 	};
 
 	const cutBlock = ( clientId ) => {
