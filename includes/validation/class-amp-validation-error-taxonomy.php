@@ -842,7 +842,7 @@ class AMP_Validation_Error_Taxonomy {
 					),
 					'error_type'       => esc_html__( 'Type', 'amp' ),
 					'created_date_gmt' => esc_html__( 'Last Seen', 'amp' ),
-					'posts'            => esc_html__( 'Found URLs', 'amp' ),
+					'posts'            => esc_html__( 'URLs', 'amp' ),
 				];
 			}
 		);
@@ -2150,7 +2150,7 @@ class AMP_Validation_Error_Taxonomy {
 					<?php if ( in_array( $key, [ 'node_name', 'parent_name' ], true ) ) : ?>
 						<code><?php echo esc_html( $value ); ?></code>
 					<?php elseif ( 'sources' === $key ) : ?>
-						<?php self::render_sources( $value, $validation_error ); ?>
+						<?php self::render_sources( $value ); ?>
 					<?php elseif ( $is_element_attributes ) : ?>
 						<table class="element-attributes">
 							<?php foreach ( $value as $attr_name => $attr_value ) : ?>

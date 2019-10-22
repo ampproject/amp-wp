@@ -31,10 +31,6 @@ th.column-status {
 	width: 15%;
 }
 
-.fixed th.column-posts {
-	width: 10%;
-}
-
 /* Details column */
 .column-details .details-attributes__summary {
 	display: flex;
