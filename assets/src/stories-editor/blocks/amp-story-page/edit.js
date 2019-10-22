@@ -66,7 +66,7 @@ const PageEdit = ( {
 		videoFeaturedImage,
 		pagesOrder,
 		childrenOrder,
-		getImmovableBlocks,
+		immovableBlocks,
 		storySettingsAttributes,
 		autoAdvanceAfterOptions,
 		allowedVideoMimeTypes,
@@ -86,22 +86,19 @@ const PageEdit = ( {
 		const { getEditedPostAttribute } = select( 'core/editor' );
 		const postMeta = getEditedPostAttribute( 'meta' ) || {};
 		const { storySettings } = getSettings();
+		const innerBlocks = getBlocksByClientId( getBlockOrder( clientId ) );
 
 		return {
 			media: mediaObject,
 			videoFeaturedImage: videoThumbnail,
-			getBlockOrder,
-			getImmovableBlocks: ( pageClientId ) => {
-				const innerBlocks = getBlocksByClientId( getBlockOrder( pageClientId ) );
-				return innerBlocks.filter( ( { name } ) => ! ALLOWED_MOVABLE_BLOCKS.includes( name ) );
-			},
+			immovableBlocks: innerBlocks.filter( ( { name } ) => ! ALLOWED_MOVABLE_BLOCKS.includes( name ) ),
 			pagesOrder: getBlockOrder(),
 			childrenOrder: getBlockOrder( clientId ),
 			storySettingsAttributes: metaToAttributeNames( postMeta ),
 			autoAdvanceAfterOptions: storySettings.autoAdvanceAfterOptions,
 			allowedVideoMimeTypes: getSettings().allowedVideoMimeTypes,
 		};
-	}, [ mediaId, mediaType, poster ] );
+	}, [ mediaId, mediaType, poster, clientId ] );
 
 	const allowedBackgroundMediaTypes = [ IMAGE_BACKGROUND_TYPE, ...allowedVideoMimeTypes ];
 
@@ -151,7 +148,6 @@ const PageEdit = ( {
 
 	// If there is more than one immovable block, leave only the last and remove the others.
 	useEffect( () => {
-		const immovableBlocks = getImmovableBlocks( clientId );
 		if ( immovableBlocks.length > 1 ) {
 			immovableBlocks.pop();
 			const blocksToRemove = immovableBlocks.map( ( { clientId: blockId } ) => blockId );
@@ -173,13 +169,14 @@ const PageEdit = ( {
 				}
 			);
 		}
-	}, [ childrenOrder, clientId, createErrorNotice, getImmovableBlocks, removeBlocks ] );
+	}, [ childrenOrder, clientId, createErrorNotice, immovableBlocks, removeBlocks ] );
 
 	useEffect( () => {
 		if ( childrenOrder.length <= 1 ) {
 			return;
 		}
-		if ( getImmovableBlocks( clientId ).length > 1 ) {
+		// If there is an illegal number of immovable blocks (more than 1).
+		if ( immovableBlocks.length > 1 ) {
 			return;
 		}
 		const ctaBlock = getCallToActionBlock( clientId );
@@ -199,7 +196,7 @@ const PageEdit = ( {
 				moveBlockToPosition( blockToMove.clientId, clientId, clientId, childrenOrder.length - 1 );
 			}
 		}
-	}, [ childrenOrder, clientId, moveBlockToPosition, getImmovableBlocks ] );
+	}, [ childrenOrder, clientId, moveBlockToPosition, immovableBlocks ] );
 
 	const style = {
 		backgroundImage: IMAGE_BACKGROUND_TYPE === mediaType && mediaUrl ? `url(${ mediaUrl })` : undefined,
