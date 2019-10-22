@@ -160,7 +160,7 @@ function replace_view_version_details_link( $file, $plugin_data ) {
 					link.target = '_blank';
 					<?php
 					if ( isset( $plugin_data['url'] ) ) {
-						echo "link.href = '{$plugin_data['url']}';"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						echo "link.href = '" . esc_js( $plugin_data['url'] ) . "';";
 					}
 					?>
 				} );
