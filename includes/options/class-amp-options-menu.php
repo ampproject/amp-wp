@@ -238,7 +238,7 @@ class AMP_Options_Menu {
 									/* translators: 1: WordPress version number. 2: Gutenberg plugin name */
 									esc_html__( 'To use stories, you must be running WordPress %1$s or higher, or have the latest version of the %2$s plugin activated.', 'amp' ),
 									'5.3',
-									$gutenberg
+									$gutenberg // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 								);
 								?>
 							</p>
