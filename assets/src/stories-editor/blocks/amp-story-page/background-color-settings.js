@@ -26,6 +26,10 @@ import {
  * @return {ReactElement} Component.
  */
 const BackgroundColorSettings = ( { backgroundColors, setAttributes, overlayOpacity } ) => {
+	const hasColors = backgroundColors
+		.map( ( color ) => Object.values( color ).filter( Boolean ).length )
+		.filter( Boolean ).length > 0;
+
 	const removeBackgroundColor = ( index ) => {
 		backgroundColors.splice( index, 1 );
 		setAttributes( { backgroundColors: JSON.stringify( backgroundColors ) } );
@@ -90,6 +94,7 @@ const BackgroundColorSettings = ( { backgroundColors, setAttributes, overlayOpac
 				</Button>
 				}
 			</p>
+			{ hasColors &&
 			<RangeControl
 				label={ __( 'Opacity', 'amp' ) }
 				value={ overlayOpacity }
@@ -99,6 +104,7 @@ const BackgroundColorSettings = ( { backgroundColors, setAttributes, overlayOpac
 				step={ 5 }
 				required
 			/>
+			}
 		</PanelColorSettings>
 	);
 };
