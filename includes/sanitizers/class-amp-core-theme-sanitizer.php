@@ -1751,7 +1751,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		$sub_menu = $this->xpath->query( "//*[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' sub-menu ' ) ]", $menu_item )->item( 0 );
+		$sub_menu = $this->xpath->query( ".//*[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' sub-menu ' ) ]", $menu_item )->item( 0 );
 
 		if ( ! $sub_menu instanceof DOMElement ) {
 			return $element;
