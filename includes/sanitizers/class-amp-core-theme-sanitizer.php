@@ -1011,6 +1011,10 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						display: inherit;
 					}
 
+					.menu-modal-inner {
+						height: 100%;
+					}
+
 					.admin-bar .cover-modal {
 						/* Use padding to shift down modal because amp-lightbox has top:0 !important. */
 						padding-top: 32px;
@@ -1505,8 +1509,10 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 		$modal_actions = [
 			"{$modal_id}.open"  => $open_xpaths,
+			"{$modal_id}.toggleClass(class=show-modal,force=true)" => $open_xpaths,
 			"{$body_id}.toggleClass(class=showing-modal,force=true)" => $open_xpaths,
 			"{$modal_id}.close" => $close_xpaths,
+			"{$modal_id}.toggleClass(class=show-modal,force=false)" => $close_xpaths,
 			"{$body_id}.toggleClass(class=showing-modal,force=false)" => $close_xpaths,
 		];
 
