@@ -1590,6 +1590,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			'<meta name="viewport" content="width=device-width">',
 			'<meta name="generator" content="AMP Plugin',
 			'<title>',
+			'<link rel="preconnect" href="https://cdn.ampproject.org">',
 			'<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">',
 			'<link rel="dns-prefetch" href="//cdn.ampproject.org">',
 			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0.js">',
