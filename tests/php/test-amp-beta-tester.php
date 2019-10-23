@@ -331,16 +331,12 @@ class AMP_Beta_Tester_Test extends WP_UnitTestCase {
 
 		_wp_admin_bar_init();
 
-		ob_start();
-		AMP_Beta_Tester\show_unstable_reminder();
-		$styles = ob_get_clean();
+		AMP_Beta_Tester\show_unstable_reminder( $wp_admin_bar );
 
-		$this->assertEquals( $styles, '<style>#wpadminbar #wp-admin-bar-amp-beta-tester-admin-bar { background: #0075C2; }</style>' );
+		$node = $wp_admin_bar->get_node( 'amp-version-code' );
 
-		$node_amp_beta_tester = $wp_admin_bar->get_node( 'amp-beta-tester-admin-bar' );
-
-		$this->assertEquals( 'AMP v' . AMP__VERSION, $node_amp_beta_tester->title );
-		$this->assertEquals( admin_url( 'admin.php?page=amp-options' ), $node_amp_beta_tester->href );
+		$this->assertEquals( sprintf( 'v%s', AMP__VERSION ), $node->title );
+		$this->assertEquals( admin_url( 'plugins.php?s=amp&plugin_status=active' ), $node->href );
 	}
 
 	/**

@@ -183,20 +183,17 @@ function is_pre_release( $plugin_version ) {
 /**
  * Displays the version code in the admin bar to act as a reminder that an unstable version
  * of AMP is being used.
+ *
+ * @param WP_Admin_Bar $wp_admin_bar Admin bar.
  */
-function show_unstable_reminder() {
-	global $wp_admin_bar;
-
+function show_unstable_reminder( $wp_admin_bar ) {
 	if ( is_pre_release( AMP__VERSION ) ) {
 		$args = [
-			'id'     => 'amp-beta-tester-admin-bar',
-			'title'  => sprintf( 'AMP v%s', AMP__VERSION ),
-			'parent' => 'top-secondary',
-			'href'   => admin_url( 'admin.php?page=amp-options' ),
+			'parent' => 'amp',
+			'id'     => 'amp-version-code',
+			'title'  => sprintf( 'v%s', AMP__VERSION ),
+			'href'   => admin_url( 'plugins.php?s=amp&plugin_status=active' ),
 		];
 		$wp_admin_bar->add_node( $args );
-
-		// Highlight the menu.
-		echo '<style>#wpadminbar #wp-admin-bar-amp-beta-tester-admin-bar { background: #0075C2; }</style>';
 	}
 }
