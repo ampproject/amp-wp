@@ -44,52 +44,28 @@ class AMP_Beta_Tester_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test replace_view_version_details_link().
+	 * Get plugin version details data.
 	 *
-	 * @covers \AMP_Beta_Tester\replace_view_version_details_link()
+	 * @return array plugin version details data.
 	 */
-	public function test_replace_view_version_details_link() {
-		// It should not output anything if its not a pre-release.
-		ob_start();
-		AMP_Beta_Tester\replace_view_version_details_link( null, [ 'Version' => '' ] );
-		$actual = ob_get_clean();
-
-		$this->assertEquals( '', $actual );
-
-		// It should output a script if its a pre-release.
-		ob_start();
-		?>
-		<script>
+	public function get_view_version_details_data() {
+		// Note: scripts below are formatted exactly to how they would be outputted.
+		return [
+			'no version code'                 => [
+				[ 'Version' => '' ],
+				'',
+			],
+			'not a pre-release'               => [
+				[ 'Version' => '1.0.0' ],
+				'',
+			],
+			'is a pre-release without an url' => [
+				[
+					'Version' => '1.0.0-beta1',
+				],
+				"		<script>
 			document.addEventListener('DOMContentLoaded', function() {
-				const links = document.querySelectorAll("[data-slug='amp'] a.thickbox.open-plugin-details-modal");
-
-				links.forEach( (link) => {
-					link.className = 'overridden'; // Override class so that onclick listeners are disabled.
-					link.target = '_blank';
-					link.href = 'example.com';				} );
-			}, false);
-		</script>
-		<?php
-		$expected = ob_get_clean();
-
-		ob_start();
-		AMP_Beta_Tester\replace_view_version_details_link(
-			null,
-			[
-				'Version' => '1.0.0-beta',
-				'url'     => 'example.com',
-			]
-		);
-		$actual = ob_get_clean();
-
-		$this->assertEquals( $expected, $actual );
-
-		// It should not output a script if its a pre-release and no URL provided.
-		ob_start();
-		?>
-		<script>
-			document.addEventListener('DOMContentLoaded', function() {
-				const links = document.querySelectorAll("[data-slug='amp'] a.thickbox.open-plugin-details-modal");
+				const links = document.querySelectorAll(\"[data-slug='amp'] a.thickbox.open-plugin-details-modal\");
 
 				links.forEach( (link) => {
 					link.className = 'overridden'; // Override class so that onclick listeners are disabled.
@@ -97,19 +73,43 @@ class AMP_Beta_Tester_Test extends WP_UnitTestCase {
 									} );
 			}, false);
 		</script>
-		<?php
-		$expected = ob_get_clean();
+		",
+			],
+			'is a pre-release with url'       => [
+				[
+					'Version' => '1.0.0-beta1',
+					'url'     => 'example.com',
+				],
+				"		<script>
+			document.addEventListener('DOMContentLoaded', function() {
+				const links = document.querySelectorAll(\"[data-slug='amp'] a.thickbox.open-plugin-details-modal\");
 
+				links.forEach( (link) => {
+					link.className = 'overridden'; // Override class so that onclick listeners are disabled.
+					link.target = '_blank';
+					link.href = 'example.com';				} );
+			}, false);
+		</script>
+		",
+			],
+		];
+	}
+
+	/**
+	 * Test replace_view_version_details_link().
+	 *
+	 * @dataProvider get_view_version_details_data
+	 * @covers \AMP_Beta_Tester\replace_view_version_details_link()
+	 *
+	 * @param array $source   Source.
+	 * @param string $expected Expected.
+	 */
+	public function test__view_version_details( $source, $expected ) {
 		ob_start();
-		AMP_Beta_Tester\replace_view_version_details_link(
-			null,
-			[
-				'Version' => '1.0.0-beta',
-			]
-		);
-		$actual = ob_get_clean();
+		AMP_Beta_Tester\replace_view_version_details_link( null, $source );
+		$script = ob_get_clean();
 
-		$this->assertEquals( $expected, $actual );
+		$this->assertEquals( $expected, $script );
 	}
 
 	/**
