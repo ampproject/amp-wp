@@ -24,10 +24,11 @@ import { useDispatch, useSelect } from '@wordpress/data';
  */
 import './edit.css';
 import {
-	copyTextToClipBoard, displayPasteError,
+	copyTextToClipBoard,
 	isPageBlock,
 	useIsBlockAllowedOnPage,
 	useMoveBlockToPage,
+	useDisplayPasteError,
 } from '../../helpers';
 import { ALLOWED_MOVABLE_BLOCKS, DISABLE_DUPLICATE_BLOCKS } from '../../constants';
 import useOutsideClickChecker from './outside-click-checker';
@@ -65,13 +66,12 @@ const ContextMenu = ( props ) => {
 		updateBlockAttributes,
 	} = useDispatch( 'core/block-editor' );
 
-	const { createErrorNotice } = useDispatch( 'core/notices' );
-
 	const { setCopiedMarkup } = useDispatch( 'amp/story' );
 
 	const { __experimentalCanUserUseUnfilteredHTML: canUserUseUnfilteredHTML, isRTL } = getSettings();
 
 	const isBlockAllowedOnPage = useIsBlockAllowedOnPage();
+	const displayPasteError = useDisplayPasteError();
 
 	const copyBlock = ( clientId ) => {
 		const block = getBlock( clientId );
@@ -124,10 +124,10 @@ const ContextMenu = ( props ) => {
 						} );
 					} )
 					.catch( () => {
-						displayPasteError( pastedBlock.name, createErrorNotice );
+						displayPasteError( pastedBlock.name );
 					} );
 			} else {
-				displayPasteError( pastedBlock.name, createErrorNotice );
+				displayPasteError( pastedBlock.name );
 			}
 		} );
 	};
