@@ -235,8 +235,9 @@ class AMP_Options_Menu {
 									$gutenberg = '<a href="' . esc_url( add_query_arg( 'tab', 'beta', admin_url( 'plugin-install.php' ) ) ) . '">' . $gutenberg . '</a>';
 								}
 								printf(
-									/* translators: %s: Gutenberg plugin name */
-									esc_html__( 'To use stories, you currently must have the latest version of the %s plugin installed and activated.', 'amp' ),
+									/* translators: 1: WordPress version number. 2: Gutenberg plugin name */
+									esc_html__( 'To use stories, you must be running WordPress %1$s or higher, or have the latest version of the %2$s plugin activated.', 'amp' ),
+									'5.3',
 									$gutenberg // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 								);
 								?>
