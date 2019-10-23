@@ -296,6 +296,10 @@ class AMP_Beta_Tester_Test extends WP_UnitTestCase {
 				'1.0.0-RC1',
 				true,
 			],
+			'built pre-release'                   => [
+				'1.4.0-beta1-20191023T111320Z-492bfcf2',
+				true,
+			],
 		];
 	}
 
