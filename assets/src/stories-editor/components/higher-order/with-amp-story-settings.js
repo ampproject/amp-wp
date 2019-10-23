@@ -510,7 +510,7 @@ export default createHigherOrderComponent(
 										fontSize: fontSize.size,
 									} }
 								/>
-								{ ! excludeOpacity && (
+								{ ( ! excludeOpacity && backgroundColor.color ) && (
 									<RangeControl
 										label={ __( 'Opacity', 'amp' ) }
 										value={ opacity }
