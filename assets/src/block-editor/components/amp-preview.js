@@ -35,8 +35,7 @@ function writeInterstitialMessage( targetDocument ) {
 	let markup = renderToString(
 		<div className="editor-post-preview-button__interstitial-message">
 			<Icon
-				icon={ ampBlackIcon }
-				viewBox="0 0 98 98"
+				icon={ ampBlackIcon( { viewBox: '0 0 98 98' } ) }
 			/>
 			<p>
 				{ __( 'Generating AMP preview…', 'amp' ) }
@@ -235,12 +234,11 @@ class AMPPreview extends Component {
 		// changes that were autosaved since the post was last published. Otherwise,
 		// just link to the post's URL.
 		const href = previewLink || currentPostLink;
-		const buttonIcon = <Icon viewBox="0 0 62 62" icon={ ampFilledIcon } />;
 
 		return (
 			isEnabled && ! errorMessages.length && ! isStandardMode && (
 				<IconButton
-					icon={ buttonIcon }
+					icon={ ampFilledIcon( { viewBox: '0 0 62 62' } ) }
 					isLarge
 					className="amp-editor-post-preview"
 					href={ href }
