@@ -28,7 +28,7 @@ import {
  */
 const BackgroundColorSettings = ( { backgroundColors, setAttributes, overlayOpacity, hasMedia } ) => {
 	const hasColors = backgroundColors
-		.map( ( color ) => Object.values( color ).filter( Boolean ).length )
+		.map( ( color ) => color && Object.values( color ).filter( Boolean ).length )
 		.filter( Boolean ).length > 0;
 
 	const removeBackgroundColor = ( index ) => {
