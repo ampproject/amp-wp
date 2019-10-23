@@ -136,31 +136,69 @@ class AMP_Beta_Tester_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Get pre-release data.
+	 *
+	 * @return array pre-release data.
+	 */
+	public function get_pre_release_data() {
+		return [
+			'null'                                => [
+				null,
+				false,
+			],
+			'empty string'                        => [
+				'',
+				false,
+			],
+			'major version only'                  => [
+				'1',
+				false,
+			],
+			'version without a patch number'      => [
+				'1.0',
+				false,
+			],
+			'stable version'                      => [
+				'1.0.0',
+				false,
+			],
+			'beta version without an identifier'  => [
+				'1.0.0-beta',
+				true,
+			],
+			'beta version with an identifier'     => [
+				'1.0.0-beta1',
+				true,
+			],
+			'alpha version without an identifier' => [
+				'1.0.0-alpha',
+				true,
+			],
+			'alpha version with an identifier'    => [
+				'1.0.0-alpha1',
+				true,
+			],
+			'RC version without an identifier'    => [
+				'1.0.0-RC',
+				true,
+			],
+			'RC version with an identifier'       => [
+				'1.0.0-RC1',
+				true,
+			],
+		];
+	}
+
+	/**
 	 * Test is_pre_release().
 	 *
+	 * @dataProvider get_pre_release_data
 	 * @covers \AMP_Beta_Tester\is_pre_release()
 	 */
-	public function test_is_pre_release() {
-		$actual = AMP_Beta_Tester\is_pre_release( '' );
-		$this->assertFalse( $actual );
+	public function test__pre_release( $source, $expected ) {
+		$is_pre_release = AMP_Beta_Tester\is_pre_release( $source );
 
-		$actual = AMP_Beta_Tester\is_pre_release( '1.0.0' );
-		$this->assertFalse( $actual );
-
-		$actual = AMP_Beta_Tester\is_pre_release( '1.0.0-beta' );
-		$this->assertTrue( $actual );
-
-		$actual = AMP_Beta_Tester\is_pre_release( '1.0.0-beta1' );
-		$this->assertTrue( $actual );
-
-		$actual = AMP_Beta_Tester\is_pre_release( '1.0.0-alpha' );
-		$this->assertTrue( $actual );
-
-		$actual = AMP_Beta_Tester\is_pre_release( '1.0.0-RC1' );
-		$this->assertTrue( $actual );
-
-		$actual = AMP_Beta_Tester\is_pre_release( '1.0.0-RC' );
-		$this->assertTrue( $actual );
+		$this->assertEquals( $expected, $is_pre_release );
 	}
 
 	/**
