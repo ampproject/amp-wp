@@ -488,7 +488,6 @@ export default createHigherOrderComponent(
 						<InspectorControls>
 							<PanelColorSettings
 								title={ __( 'Color Settings', 'amp' ) }
-								initialOpen={ false }
 								colorSettings={ [
 									{
 										value: backgroundColor.color,
