@@ -1011,17 +1011,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						display: inherit;
 					}
 
-					.primary-menu li.menu-item-has-children:focus-within > ul {
-						right: 0;
-						opacity: 1;
-						transform: translateY(0);
-						transition: opacity .15s linear, transform .15s linear;
-					}
-
-					.primary-menu ul li.menu-item-has-children:focus-within > ul {
-						right: calc(100% + 2rem);
-					}
-
 					.admin-bar .cover-modal {
 						/* Use padding to shift down modal because amp-lightbox has top:0 !important. */
 						padding-top: 32px;
@@ -1056,46 +1045,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						.no-js .main-navigation > div > ul {
 							display: block;
 						}
-						.main-navigation ul li.menu-item-has-children:focus-within:before,
-						.main-navigation ul li.menu-item-has-children:focus-within:after,
-						.main-navigation ul li.page_item_has_children:focus-within:before,
-						.main-navigation ul li.page_item_has_children:focus-within:after {
-							display: block;
-						}
-						.main-navigation ul ul li:focus-within > ul {
-							<?php if ( is_rtl() ) : ?>
-								left: auto;
-								right: 100%;
-							<?php else : ?>
-								left: 100%;
-								right: auto;
-							<?php endif; ?>
-						}
-						.main-navigation li li:focus-within {
-							background: #767676;
-						}
-						.main-navigation li li:focus-within > a,
-						.main-navigation li li a:focus-within,
-						.main-navigation li li.current_page_item a:focus-within,
-						.main-navigation li li.current-menu-item a:focus-within {
-							color: #fff;
-						}
-						.main-navigation ul li:focus-within > ul {
-							<?php if ( is_rtl() ) : ?>
-								left: auto;
-								right: 0.5em;
-							<?php else : ?>
-								left: 0.5em;
-								right: auto;
-							<?php endif; ?>
-						}
-
-						.main-navigation ul ul li.menu-item-has-children:focus-within:before,
-						.main-navigation ul ul li.menu-item-has-children:focus-within:after,
-						.main-navigation ul ul li.page_item_has_children:focus-within:before,
-						.main-navigation ul ul li.page_item_has_children:focus-within:after {
-							display: none;
-						}
 					}
 				<?php elseif ( 'twentysixteen' === get_template() ) : ?>
 					@media screen and (max-width: 56.875em) {
@@ -1114,27 +1063,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						.no-js .main-navigation ul ul {
 							display: block;
 						}
-						.main-navigation li:focus-within > a {
-							color: #007acc;
-						}
-						.main-navigation li:focus-within > ul {
-							<?php if ( is_rtl() ) : ?>
-								left: auto;
-								right: 0;
-							<?php else : ?>
-								left: 0;
-								right: auto;
-							<?php endif; ?>
-						}
-						.main-navigation ul ul li:focus-within > ul {
-							<?php if ( is_rtl() ) : ?>
-								left: 100%;
-								right: auto;
-							<?php else : ?>
-								left: auto;
-								right: 100%;
-							<?php endif; ?>
-						}
 					}
 				<?php elseif ( 'twentyfifteen' === get_template() ) : ?>
 					@media screen and (min-width: 59.6875em) {
@@ -1147,52 +1075,10 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						}
 					}
 
-				<?php elseif ( 'twentyfourteen' === get_template() ) : ?>
-					@media screen and (min-width: 783px) {
-						.primary-navigation li:focus-within > a {
-							background-color: #24890d;
-							color: #fff;
-						}
-
-						.primary-navigation ul ul li:focus-within > a {
-							background-color: #41a62a;
-						}
-
-						.primary-navigation ul li:focus-within > ul {
-							left: auto;
-						}
-
-						.primary-navigation ul ul li:focus-within > ul {
-							left: 100%;
-						}
-					}
-
-					@media screen and (min-width: 1008px) {
-						.secondary-navigation li:focus-within > a {
-							background-color: #24890d;
-							color: #fff;
-						}
-
-						.secondary-navigation ul ul li:focus-within > a {
-							background-color: #41a62a;
-						}
-
-						.secondary-navigation ul li:focus-within > ul {
-							left: 202px;
-						}
-					}
-
 				<?php elseif ( 'twentythirteen' === get_template() ) : ?>
 					@media (min-width: 644px) {
 						.dropdown-toggle {
 							display: none;
-						}
-						ul.nav-menu :focus-within > ul,
-						.nav-menu :focus-within > ul {
-							clip: inherit;
-							overflow: inherit;
-							height: inherit;
-							width: inherit;
 						}
 					}
 					@media (max-width: 643px) {
@@ -1275,18 +1161,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 							outline: 1px solid rgba(51, 51, 51, 0.3);
 						}
 					}
-
-				<?php elseif ( 'twentytwelve' === get_template() ) : ?>
-					@media screen and (min-width: 600px) {
-						.main-navigation .menu-item-has-children:focus-within > ul {
-							border-left: 0;
-							clip: inherit;
-							overflow: inherit;
-							height: inherit;
-							width: inherit;
-						}
-					}
-
 				<?php endif; ?>
 				</style>
 				<?php
@@ -1877,7 +1751,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		$sub_menu = $this->xpath->query( "//*[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' sub-menu ' ) ]", $menu_item )->item( 0 );
+		$sub_menu = $this->xpath->query( ".//*[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' sub-menu ' ) ]", $menu_item )->item( 0 );
 
 		if ( ! $sub_menu instanceof DOMElement ) {
 			return $element;
