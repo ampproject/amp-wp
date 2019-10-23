@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/../../amp-beta-tester.php';
+
 /**
  * Class AMP_Beta_Tester_Test
  *
@@ -7,16 +9,12 @@
  */
 class AMP_Beta_Tester_Test extends WP_UnitTestCase {
 
-	protected $github_api_response = '[{ "url": "https://api.github.com/repos/ampproject/amp-wp/releases/20819569", "assets_url": "https://api.github.com/repos/ampproject/amp-wp/releases/20819569/assets", "upload_url": "https://uploads.github.com/repos/ampproject/amp-wp/releases/20819569/assets{?name,label}", "html_url": "https://github.com/ampproject/amp-wp/releases/tag/1.4.0-beta1", "id": 20819569, "node_id": "MDc6UmVsZWFzZTIwODE5NTY5", "tag_name": "1.4.0-beta1", "target_commitish": "develop", "name": "1.4.0-beta1", "draft": false, "author": { "login": "westonruter", "id": 134745, "node_id": "MDQ6VXNlcjEzNDc0NQ==", "avatar_url": "https://avatars2.githubusercontent.com/u/134745?v=4", "gravatar_id": "", "url": "https://api.github.com/users/westonruter", "html_url": "https://github.com/westonruter", "followers_url": "https://api.github.com/users/westonruter/followers", "following_url": "https://api.github.com/users/westonruter/following{/other_user}", "gists_url": "https://api.github.com/users/westonruter/gists{/gist_id}", "starred_url": "https://api.github.com/users/westonruter/starred{/owner}{/repo}", "subscriptions_url": "https://api.github.com/users/westonruter/subscriptions", "organizations_url": "https://api.github.com/users/westonruter/orgs", "repos_url": "https://api.github.com/users/westonruter/repos", "events_url": "https://api.github.com/users/westonruter/events{/privacy}", "received_events_url": "https://api.github.com/users/westonruter/received_events", "type": "User", "site_admin": false }]';
-
 	/**
-	 * Runs the routine before setting up all tests.
+	 * Allows for a custom GitHub API response to be set.
+	 *
+	 * @var string
 	 */
-	public static function setupBeforeClass() {
-		require_once __DIR__ . '/../../amp-beta-tester.php';
-
-		parent::setUpBeforeClass();
-	}
+	public $custom_github_api_response = null;
 
 	/**
 	 * Test force_plugin_update_check().
@@ -41,6 +39,103 @@ class AMP_Beta_Tester_Test extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'admin_bar_menu', 'AMP_Beta_Tester\show_unstable_reminder' ) );
 		$this->assertEquals( 10, has_filter( 'pre_set_site_transient_update_plugins', 'AMP_Beta_Tester\update_amp_manifest' ) );
 		$this->assertEquals( 10, has_action( 'after_plugin_row_amp/amp.php', 'AMP_Beta_Tester\replace_view_version_details_link' ) );
+	}
+
+	/**
+	 * Get data for testing \AMP_Beta_Tester\update_amp_manifest.
+	 *
+	 * @return array Data.
+	 */
+	public function get_plugin_updates_data() {
+		return [
+			'transient does not have no_update property' => [
+				$this->generate_github_api_response(),
+				$this->generate_plugins_manifest(),
+				$this->generate_plugins_manifest(),
+			],
+
+			'transient has no_update property'           => [
+				$this->generate_github_api_response(),
+				$this->generate_plugins_manifest(
+					[
+						'no_update' => [],
+					]
+				),
+				$this->generate_plugins_manifest(
+					[
+						'no_update' => [],
+					]
+				),
+			],
+
+			'no pre-release update available'            => [
+				$this->generate_github_api_response( null, false ),
+				$this->generate_plugins_manifest(
+					[
+						'no_update' => [],
+					]
+				),
+				$this->generate_plugins_manifest(
+					[
+						'no_update' => [],
+					]
+				),
+			],
+
+			'has pre-release update without amp.zip'     => [
+				$this->generate_github_api_response( null, true, false ),
+				$this->generate_plugins_manifest(
+					[
+						'no_update' => [],
+					]
+				),
+				$this->generate_plugins_manifest(
+					[
+						'no_update' => [],
+					]
+				),
+			],
+
+			'has pre-release update with amp.zip'        => [
+				$this->generate_github_api_response( '999.999.999' ),
+				$this->generate_plugins_manifest(
+					[
+						'no_update' => [
+							AMP_PLUGIN_FILE => $this->generate_amp_manifest( AMP__VERSION, false ),
+						],
+					]
+				),
+				$this->generate_plugins_manifest(
+					[
+						'no_update' => [],
+						'response'  => [
+							AMP_PLUGIN_FILE => $this->generate_amp_manifest( '999.999.999', true ),
+						],
+					]
+				),
+			],
+		];
+	}
+
+	/**
+	 * Test \AMP_Beta_Tester\update_amp_manifest().
+	 *
+	 * @dataProvider get_plugin_updates_data
+	 * @covers \AMP_Beta_Tester\update_amp_manifest()
+	 *
+	 * @param stdClass $source   Source.
+	 * @param string   $expected Expected.
+	 */
+	public function test__update_amp_manifest( $github_response, $source, $expected ) {
+		$this->custom_github_api_response = $github_response;
+
+		add_filter( 'pre_http_request', [ $this, 'mock_github_api_http_request' ], 10, 3 );
+
+		$modified_manifest = AMP_Beta_Tester\update_amp_manifest( $source );
+
+		$this->assertEquals( $expected, $modified_manifest );
+
+		remove_filter( 'pre_http_request', [ $this, 'mock_github_api_http_request' ] );
 	}
 
 	/**
@@ -87,7 +182,7 @@ class AMP_Beta_Tester_Test extends WP_UnitTestCase {
 				links.forEach( (link) => {
 					link.className = 'overridden'; // Override class so that onclick listeners are disabled.
 					link.target = '_blank';
-					link.href = 'example.com';				} );
+					link.href = 'http://example.com';				} );
 			}, false);
 		</script>
 		",
@@ -125,7 +220,7 @@ class AMP_Beta_Tester_Test extends WP_UnitTestCase {
 			],
 			'successful http request' => [
 				'mock_github_api_http_request',
-				json_decode( $this->github_api_response ),
+				json_decode( $this->generate_github_api_response() ),
 			],
 		];
 	}
@@ -140,6 +235,8 @@ class AMP_Beta_Tester_Test extends WP_UnitTestCase {
 	 * @param string $expected Expected.
 	 */
 	public function test__get_amp_github_releases( $source, $expected ) {
+		$this->custom_github_api_response = null;
+
 		add_filter( 'pre_http_request', [ $this, $source ], 10, 3 );
 		$amp_releases = AMP_Beta_Tester\get_amp_github_releases();
 
@@ -271,8 +368,12 @@ class AMP_Beta_Tester_Test extends WP_UnitTestCase {
 			return $preempt;
 		}
 
+		$body = empty( $this->custom_github_api_response )
+			? $this->generate_github_api_response()
+			: $this->custom_github_api_response;
+
 		return [
-			'body'          => $this->github_api_response,
+			'body'          => $body,
 			'headers'       => [],
 			'response'      => [
 				'code'    => 200,
@@ -280,6 +381,148 @@ class AMP_Beta_Tester_Test extends WP_UnitTestCase {
 			],
 			'cookies'       => [],
 			'http_response' => null,
+		];
+	}
+
+	/**
+	 * Generate a custom GitHub API response.
+	 *
+	 * @param string $version         AMP version to use.
+	 * @param bool   $is_pre_released Whether to set release as pre-release or not.
+	 * @param bool   $with_zip        Whether to include an 'amp.zip' asset or not.
+	 * @return string
+	 */
+	private function generate_github_api_response( $version = '1.0.0-beta', $is_pre_released = true, $with_zip = true ) {
+		$response = [
+			'url'              => 'https://api.github.com/repos/ampproject/amp-wp/releases/20819569',
+			'assets_url'       => 'https://api.github.com/repos/ampproject/amp-wp/releases/20819569/assets',
+			'upload_url'       => 'https://uploads.github.com/repos/ampproject/amp-wp/releases/20819569/assets{?name,label}',
+			'html_url'         => "https://github.com/ampproject/amp-wp/releases/tag/${version}",
+			'id'               => 20819569,
+			'node_id'          => 'MDc6UmVsZWFzZTIwODE5NTY5',
+			'tag_name'         => "${version}",
+			'target_commitish' => 'develop',
+			'name'             => "${version}",
+			'draft'            => false,
+			'author'           => [
+				'login'               => 'westonruter',
+				'id'                  => 134745,
+				'node_id'             => 'MDQ6VXNlcjEzNDc0NQ==',
+				'avatar_url'          => 'https://avatars2.githubusercontent.com/u/134745?v=4',
+				'gravatar_id'         => '',
+				'url'                 => 'https://api.github.com/users/westonruter',
+				'html_url'            => 'https://github.com/westonruter',
+				'followers_url'       => 'https://api.github.com/users/westonruter/followers',
+				'following_url'       => 'https://api.github.com/users/westonruter/following{/other_user}',
+				'gists_url'           => 'https://api.github.com/users/westonruter/gists{/gist_id}',
+				'starred_url'         => 'https://api.github.com/users/westonruter/starred{/owner}{/repo}',
+				'subscriptions_url'   => 'https://api.github.com/users/westonruter/subscriptions',
+				'organizations_url'   => 'https://api.github.com/users/westonruter/orgs',
+				'repos_url'           => 'https://api.github.com/users/westonruter/repos',
+				'events_url'          => 'https://api.github.com/users/westonruter/events{/privacy}',
+				'received_events_url' => 'https://api.github.com/users/westonruter/received_events',
+				'type'                => 'User',
+				'site_admin'          => false,
+			],
+			'prerelease'       => $is_pre_released,
+			'created_at'       => '2019-10-18T23:27:54Z',
+			'published_at'     => '2019-10-18T23:37:22Z',
+			'tarball_url'      => "https://api.github.com/repos/ampproject/amp-wp/tarball/${version}",
+			'zipball_url'      => "https://api.github.com/repos/ampproject/amp-wp/zipball/${version}",
+			'body'             => '',
+		];
+
+		if ( $with_zip ) {
+			$response['assets'] = [
+				[
+					'url'                  => 'https://api.github.com/repos/ampproject/amp-wp/releases/assets/15579699',
+					'id'                   => 15579699,
+					'node_id'              => 'MDEyOlJlbGVhc2VBc3NldDE1NTc5Njk5',
+					'name'                 => 'amp.zip',
+					'label'                => null,
+					'uploader'             => [
+						'login'               => 'westonruter',
+						'id'                  => 134745,
+						'node_id'             => 'MDQ6VXNlcjEzNDc0NQ==',
+						'avatar_url'          => 'https://avatars2.githubusercontent.com/u/134745?v=4',
+						'gravatar_id'         => '',
+						'url'                 => 'https://api.github.com/users/westonruter',
+						'html_url'            => 'https://github.com/westonruter',
+						'followers_url'       => 'https://api.github.com/users/westonruter/followers',
+						'following_url'       => 'https://api.github.com/users/westonruter/following{/other_user}',
+						'gists_url'           => 'https://api.github.com/users/westonruter/gists{/gist_id}',
+						'starred_url'         => 'https://api.github.com/users/westonruter/starred{/owner}{/repo}',
+						'subscriptions_url'   => 'https://api.github.com/users/westonruter/subscriptions',
+						'organizations_url'   => 'https://api.github.com/users/westonruter/orgs',
+						'repos_url'           => 'https://api.github.com/users/westonruter/repos',
+						'events_url'          => 'https://api.github.com/users/westonruter/events{/privacy}',
+						'received_events_url' => 'https://api.github.com/users/westonruter/received_events',
+						'type'                => 'User',
+						'site_admin'          => false,
+					],
+					'content_type'         => 'application/zip',
+					'state'                => 'uploaded',
+					'size'                 => 1007810,
+					'download_count'       => 2,
+					'created_at'           => '2019-10-18T23:30:36Z',
+					'updated_at'           => '2019-10-18T23:30:43Z',
+					'browser_download_url' => "https://github.com/ampproject/amp-wp/releases/download/${version}/amp.zip",
+				],
+			];
+		}
+
+		// phpcs:ignore: WordPress.WP.AlternativeFunctions.json_encode_json_encode
+		return json_encode( [ $response ] );
+	}
+
+	/**
+	 * Generate a generic class imitating a WP plugin update transient with custom properties.
+	 *
+	 * @param array $properties Properties with their associated values.
+	 * @return stdClass
+	 */
+	private function generate_plugins_manifest( $properties = [] ) {
+		$plugin_manifest = new stdClass();
+
+		foreach ( $properties as $key => $value ) {
+			$plugin_manifest->{$key} = $value;
+		}
+
+		return $plugin_manifest;
+	}
+
+	/**
+	 * Generate a custom AMP plugin update manifest.
+	 *
+	 * @param string $plugin_version AMP plugin version to use.
+	 * @param bool   $from_github To use WP or GitHub's URL.
+	 * @return object
+	 */
+	private function generate_amp_manifest( $plugin_version, $from_github ) {
+		$url = $from_github
+			? "https://github.com/ampproject/amp-wp/releases/tag/${plugin_version}"
+			: 'https://wordpress.org/plugins/amp/';
+
+		$package = $from_github
+			? "https://github.com/ampproject/amp-wp/releases/download/${plugin_version}/amp.zip"
+			: "https://downloads.wordpress.org/plugin/amp.${plugin_version}.zip";
+
+		return (object) [
+			'id'          => 'w.org/plugins/amp',
+			'slug'        => 'amp',
+			'plugin'      => 'amp/amp.php',
+			'new_version' => $plugin_version,
+			'url'         => $url,
+			'package'     => $package,
+			'icons'       => [
+				'2x' => 'https://ps.w.org/amp/assets/icon-256x256.png?rev=1987390',
+				'1x' => 'https://ps.w.org/amp/assets/icon-128x128.png?rev=1987390',
+			],
+			'banners'     => [
+				'2x' => 'https://ps.w.org/amp/assets/banner-1544x500.png?rev=1987390',
+				'1x' => 'https://ps.w.org/amp/assets/banner-772x250.png?rev=1987390',
+			],
+			'banners_rtl' => [],
 		];
 	}
 }

@@ -80,43 +80,43 @@ function update_amp_manifest( $updates ) {
 
 	$amp_version = get_plugin_data( WP_PLUGIN_DIR . '/' . AMP_PLUGIN_FILE )['Version'];
 
-	if ( ! is_pre_release( $amp_version ) ) {
+	if ( isset( $updates->response[ AMP_PLUGIN_FILE ] ) ) {
+		$manifest_type = 'response';
+	} elseif ( isset( $updates->no_update[ AMP_PLUGIN_FILE ] ) ) {
+		$manifest_type = 'no_update';
+	} else {
 		return $updates;
 	}
 
-	$manifest_type = isset( $updates->response[ AMP_PLUGIN_FILE ] ) ? 'response' : 'no_update';
-	$amp_manifest  = $updates->{$manifest_type}[ AMP_PLUGIN_FILE ];
+	$amp_manifest = $updates->{$manifest_type}[ AMP_PLUGIN_FILE ];
 
 	$github_releases = get_amp_github_releases();
 
 	if ( is_array( $github_releases ) ) {
-		$amp_to_be_updated = false;
 
 		foreach ( $github_releases as $release ) {
-			if ( $release->prerelease ) {
+			if ( true === $release->prerelease ) {
 				$release_version = $release->tag_name;
 
 				// If there is a new release, let's see if there is a zip available for download.
-				if ( version_compare( $release_version, $amp_version, '>=' ) ) {
+				if ( version_compare( $release_version, $amp_version, '>' ) ) {
+					$has_zip = false;
+
 					foreach ( $release->assets as $asset ) {
 						if ( 'amp.zip' === $asset->name ) {
-							$amp_manifest->new_version = $release_version;
-							$amp_manifest->package     = $asset->browser_download_url;
-							$amp_manifest->url         = $release->html_url;
-
-							// Set the AMP plugin to be updated.
-							$updates->{$manifest_type}[ AMP_PLUGIN_FILE ] = $amp_manifest;
-
-							if ( 'response' === $manifest_type ) {
-								unset( $updates->no_update[ AMP_PLUGIN_FILE ] );
-							}
-
-							$amp_to_be_updated = true;
+							$amp_manifest->package = $asset->browser_download_url;
+							$has_zip               = true;
 							break;
 						}
 					}
 
-					if ( $amp_to_be_updated ) {
+					$amp_manifest->new_version = $release_version;
+					$amp_manifest->url         = $release->html_url;
+
+					unset( $updates->{$manifest_type}[ AMP_PLUGIN_FILE ] );
+
+					if ( $has_zip ) {
+						$updates->response[ AMP_PLUGIN_FILE ] = $amp_manifest;
 						break;
 					}
 				}
@@ -160,7 +160,7 @@ function replace_view_version_details_link( $file, $plugin_data ) {
 					link.target = '_blank';
 					<?php
 					if ( isset( $plugin_data['url'] ) ) {
-						echo "link.href = '" . esc_js( $plugin_data['url'] ) . "';";
+						echo "link.href = '" . esc_url( $plugin_data['url'] ) . "';";
 					}
 					?>
 				} );
