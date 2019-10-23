@@ -46,7 +46,7 @@ add_action( 'plugins_loaded', __NAMESPACE__ . '\init' );
  * can set a custom update.
  */
 function force_plugin_update_check() {
-	if ( defined( 'DOING_CRON' ) ) {
+	if ( wp_doing_cron() ) {
 		return;
 	}
 	delete_site_transient( 'update_plugins' );
