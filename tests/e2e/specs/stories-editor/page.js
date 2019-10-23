@@ -116,11 +116,11 @@ describe( 'Story Page', () => {
 		const opacitySelector = '.components-range-control__number[aria-label="Opacity"]';
 		await page.waitForSelector( opacitySelector );
 
+		await clickButtonByLabel( 'Color: Vivid red' );
+
 		// Set opacity to 15.
 		await clearInputValue( opacitySelector );
 		await page.type( opacitySelector, '15' );
-
-		await clickButtonByLabel( 'Color: Vivid red' );
 
 		await saveDraft();
 		await page.reload();
