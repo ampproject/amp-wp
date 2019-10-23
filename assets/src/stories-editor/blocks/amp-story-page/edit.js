@@ -218,6 +218,7 @@ const PageEdit = ( {
 					backgroundColors={ bgColors }
 					setAttributes={ setAttributes }
 					overlayOpacity={ overlayOpacity }
+					hasMedia={ Boolean( mediaUrl ) }
 				/>
 				<BackgroundMediaSettings
 					allowedBackgroundMediaTypes={ allowedBackgroundMediaTypes }

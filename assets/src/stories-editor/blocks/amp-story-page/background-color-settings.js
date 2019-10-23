@@ -23,9 +23,10 @@ import {
  * @param {Array} props.backgroundColors Current background colors.
  * @param {Function} props.setAttributes setAttributes callback.
  * @param {number} props.overlayOpacity Overlay opacity.
+ * @param {number} props.hasMedia Whether the page has a media item set.
  * @return {ReactElement} Component.
  */
-const BackgroundColorSettings = ( { backgroundColors, setAttributes, overlayOpacity } ) => {
+const BackgroundColorSettings = ( { backgroundColors, setAttributes, overlayOpacity, hasMedia } ) => {
 	const hasColors = backgroundColors
 		.map( ( color ) => Object.values( color ).filter( Boolean ).length )
 		.filter( Boolean ).length > 0;
@@ -39,7 +40,11 @@ const BackgroundColorSettings = ( { backgroundColors, setAttributes, overlayOpac
 		backgroundColors[ index ] = {
 			color: value,
 		};
-		setAttributes( { backgroundColors: JSON.stringify( backgroundColors ) } );
+
+		setAttributes( {
+			backgroundColors: JSON.stringify( backgroundColors ),
+			overlayOpacity: ! hasColors && overlayOpacity === 100 && hasMedia ? 50 : overlayOpacity,
+		} );
 	};
 
 	const getOverlayColorSettings = () => {
@@ -113,6 +118,7 @@ BackgroundColorSettings.propTypes = {
 	backgroundColors: PropTypes.array,
 	overlayOpacity: PropTypes.number,
 	setAttributes: PropTypes.func.isRequired,
+	hasMedia: PropTypes.bool.isRequired,
 };
 
 export default BackgroundColorSettings;
