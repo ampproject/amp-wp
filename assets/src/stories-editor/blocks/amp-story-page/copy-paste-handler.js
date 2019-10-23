@@ -20,6 +20,7 @@ function CopyPasteHandler( { children, onCopy, clientId, isSelected } ) {
 		isFirstPage,
 		canUserUseUnfilteredHTML,
 		getCopiedMarkupState,
+		blocksOnPage,
 	} = useSelect(
 		( select ) => {
 			const {
@@ -32,6 +33,7 @@ function CopyPasteHandler( { children, onCopy, clientId, isSelected } ) {
 				isFirstPage: getBlockOrder().indexOf( clientId ) === 0,
 				canUserUseUnfilteredHTML: __experimentalCanUserUseUnfilteredHTML,
 				getCopiedMarkupState: getCopiedMarkup,
+				blocksOnPage: getBlockOrder( clientId ),
 			};
 		}, [ clientId ]
 	);
@@ -76,7 +78,7 @@ function CopyPasteHandler( { children, onCopy, clientId, isSelected } ) {
 		} );
 
 		if ( content.length > 0 ) {
-			insertBlocks( ensureAllowedBlocksOnPaste( content, clientId, isFirstPage ), null, clientId );
+			insertBlocks( ensureAllowedBlocksOnPaste( content, clientId, isFirstPage ), blocksOnPage.length, clientId );
 		}
 	};
 
