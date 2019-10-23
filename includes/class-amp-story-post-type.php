@@ -32,7 +32,7 @@ class AMP_Story_Post_Type {
 	 *
 	 * @var string
 	 */
-	const REQUIRED_GUTENBERG_VERSION = '5.9';
+	const REQUIRED_GUTENBERG_VERSION = '6.6';
 
 	/**
 	 * The slug of the story card CSS file.
@@ -93,20 +93,19 @@ class AMP_Story_Post_Type {
 	/**
 	 * Check if the required version of block capabilities available.
 	 *
-	 * Note that Gutenberg requires WordPress 5.0, so this check also accounts for that.
+	 * Requires either Gutenberg 6.6+ or WordPress 5.3+ (which includes Gutenberg 6.6)
 	 *
 	 * @todo Eventually the Gutenberg requirement should be removed.
 	 *
 	 * @return bool Whether capabilities are available.
 	 */
 	public static function has_required_block_capabilities() {
-		if ( ! function_exists( 'register_block_type' ) || version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
-			return false;
-		}
 		return (
 			( defined( 'GUTENBERG_DEVELOPMENT_MODE' ) && GUTENBERG_DEVELOPMENT_MODE )
 			||
 			( defined( 'GUTENBERG_VERSION' ) && version_compare( GUTENBERG_VERSION, self::REQUIRED_GUTENBERG_VERSION, '>=' ) )
+			||
+			version_compare( get_bloginfo( 'version' ), '5.3-RC2', '>=' )
 		);
 	}
 
