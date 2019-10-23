@@ -879,6 +879,9 @@ class AMP_Story_Post_Type {
 			}
 		}
 
+		$editor_settings['codeEditingEnabled'] = false;
+		$editor_settings['richEditingEnabled'] = true;
+
 		return $editor_settings;
 	}
 
