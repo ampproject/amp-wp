@@ -113,26 +113,39 @@ class AMP_Beta_Tester_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Get data for test_get_amp_github_releases().
+	 *
+	 * @return array Data.
+	 */
+	public function get_amp_releases_data() {
+		return [
+			'failed http request'     => [
+				'mock_http_request_error',
+				null,
+			],
+			'successful http request' => [
+				'mock_github_api_http_request',
+				json_decode( $this->github_api_response ),
+			],
+		];
+	}
+
+	/**
 	 * Test get_amp_github_releases().
 	 *
-	 * @covers \AMP_Beta_Tester\get_amp_github_releases()
+	 * @dataProvider get_amp_releases_data
+	 * @covers       \AMP_Beta_Tester\get_amp_github_releases()
+	 *
+	 * @param string $source Method for filter hook callback.
+	 * @param string $expected Expected.
 	 */
-	public function test_get_amp_github_releases() {
-		// It returns `null` on a failed HTTP request.
-		add_filter( 'pre_http_request', [ $this, 'mock_http_request_error' ], 10, 3 );
+	public function test__get_amp_github_releases( $source, $expected ) {
+		add_filter( 'pre_http_request', [ $this, $source ], 10, 3 );
 		$amp_releases = AMP_Beta_Tester\get_amp_github_releases();
 
-		$this->assertEquals( null, $amp_releases );
+		$this->assertEquals( $expected, $amp_releases );
 
-		remove_filter( 'pre_http_request', [ $this, 'mock_http_request_error' ] );
-
-		// It returns a JSON array on a successful HTTP request.
-		add_filter( 'pre_http_request', [ $this, 'mock_github_api_http_request' ], 10, 3 );
-		$amp_releases = AMP_Beta_Tester\get_amp_github_releases();
-
-		$this->assertEquals( json_decode( $this->github_api_response ), $amp_releases );
-
-		remove_filter( 'pre_http_request', [ $this, 'mock_github_api_http_request' ] );
+		remove_filter( 'pre_http_request', [ $this, $source ] );
 	}
 
 	/**
