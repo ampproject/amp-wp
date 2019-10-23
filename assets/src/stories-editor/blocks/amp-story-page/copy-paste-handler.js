@@ -19,16 +19,19 @@ function CopyPasteHandler( { children, onCopy, clientId, isSelected } ) {
 	const {
 		canUserUseUnfilteredHTML,
 		getCopiedMarkupState,
+		blocksOnPage,
 	} = useSelect(
 		( select ) => {
-			const { getSettings } = select( 'core/block-editor' );
+			const { getSettings, getBlockOrder } = select( 'core/block-editor' );
 			const { __experimentalCanUserUseUnfilteredHTML } = getSettings();
 			const { getCopiedMarkup } = select( 'amp/story' );
 			return {
 				canUserUseUnfilteredHTML: __experimentalCanUserUseUnfilteredHTML,
 				getCopiedMarkupState: getCopiedMarkup,
+				blocksOnPage: getBlockOrder( clientId ),
 			};
-		}, [ ]
+		},
+		[ clientId ]
 	);
 
 	const { insertBlock } = useDispatch( 'core/block-editor' );
@@ -78,7 +81,7 @@ function CopyPasteHandler( { children, onCopy, clientId, isSelected } ) {
 
 		content.forEach( ( pastedBlock ) => {
 			if ( isBlockAllowedOnPage( pastedBlock.name, clientId ) ) {
-				insertBlock( pastedBlock, null, clientId );
+				insertBlock( pastedBlock, blocksOnPage.length, clientId );
 			} else {
 				displayPasteError( pastedBlock.name, createErrorNotice );
 			}

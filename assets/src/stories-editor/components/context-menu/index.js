@@ -109,20 +109,23 @@ const ContextMenu = ( props ) => {
 			return;
 		}
 
+		const blocksOnPage = getBlockOrder( pageClientId );
 		content.forEach( ( pastedBlock ) => {
 			if ( isBlockAllowedOnPage( pastedBlock.name, pageClientId ) ) {
-				insertBlock( pastedBlock, null, pageClientId ).then( ( { blocks } ) => {
-					blocks.forEach( ( block ) => {
-						if ( ALLOWED_MOVABLE_BLOCKS.includes( block.name ) ) {
-							updateBlockAttributes( block.clientId, {
-								positionTop: insidePercentageY,
-								positionLeft: insidePercentageX,
-							} );
-						}
+				insertBlock( pastedBlock, blocksOnPage.length, pageClientId )
+					.then( ( { blocks } ) => {
+						blocks.forEach( ( block ) => {
+							if ( ALLOWED_MOVABLE_BLOCKS.includes( block.name ) ) {
+								updateBlockAttributes( block.clientId, {
+									positionTop: insidePercentageY,
+									positionLeft: insidePercentageX,
+								} );
+							}
+						} );
+					} )
+					.catch( () => {
+						displayPasteError( pastedBlock.name, createErrorNotice );
 					} );
-				} ).catch( () => {
-					displayPasteError( pastedBlock.name, createErrorNotice );
-				} );
 			} else {
 				displayPasteError( pastedBlock.name, createErrorNotice );
 			}

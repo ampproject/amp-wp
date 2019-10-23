@@ -700,11 +700,18 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'.video{color:blue;} audio.audio{color:purple;} .iframe{color:black;} .img{color:purple;} .form:not(form){color:green;}',
 				'.video{color:blue}amp-audio.audio{color:purple}.iframe{color:black}.img{color:purple}.form:not(form){color:green}',
 			],
+			'focus_within_classes' => [
+				'<nav class="main-navigation focused"><ul><li><a href="https://example.com/">Example</a><ul><li><a href="https://example.org">Another example</a></li></ul></li></ul></nav>',
+				'.main-navigation ul ul li:hover > ul, .main-navigation ul ul li.focus > ul { left: 100%; right: auto; } nav.focused { outline:solid 1px red; }',
+				'.main-navigation ul ul li:hover > ul,.main-navigation ul ul li:focus-within > ul{left:100%;right:auto}nav.focused{outline:solid 1px red}',
+			],
 		];
 	}
 
 	/**
 	 * Test AMP selector conversion.
+	 *
+	 * @covers AMP_Style_Sanitizer::ampify_ruleset_selectors()
 	 *
 	 * @dataProvider get_amp_selector_data
 	 * @param string $markup Markup.

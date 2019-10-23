@@ -445,14 +445,14 @@ class AMP_Validation_Manager {
 			'href'   => esc_url( $validate_url ),
 		];
 		if ( $error_count <= 0 ) {
-			$validate_item['title'] = esc_html__( 'Re-validate', 'amp' );
+			$validate_item['title'] = esc_html__( 'Validate', 'amp' );
 		} else {
 			$validate_item['title'] = esc_html(
 				sprintf(
 					/* translators: %s is count of validation errors */
 					_n(
-						'Re-validate (%s validation error)',
-						'Re-validate (%s validation errors)',
+						'Review %s validation issue',
+						'Review %s validation issues',
 						$error_count,
 						'amp'
 					),
@@ -1681,8 +1681,8 @@ class AMP_Validation_Manager {
 						$link->textContent = sprintf(
 							/* translators: %s is count of validation errors */
 							_n(
-								'Re-validate (%s validation error)',
-								'Re-validate (%s validation errors)',
+								'Review %s validation issue',
+								'Review %s validation issues',
 								$error_count,
 								'amp'
 							),

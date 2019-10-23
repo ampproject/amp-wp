@@ -24,6 +24,8 @@ const BlockPreviewLabel = ( { block, label, displayIcon = true, alignIcon = 'lef
 			};
 		}
 
+		let newLabel = label;
+
 		const { attributes, name } = block;
 
 		const { getEditedPostAttribute } = select( 'core/editor' );
@@ -31,7 +33,7 @@ const BlockPreviewLabel = ( { block, label, displayIcon = true, alignIcon = 'lef
 
 		const blockType = getBlockType( name );
 
-		label = blockType.title;
+		newLabel = blockType.title;
 		let blockContent = '';
 
 		switch ( name ) {
@@ -40,7 +42,7 @@ const BlockPreviewLabel = ( { block, label, displayIcon = true, alignIcon = 'lef
 					blockContent = attributes.url.slice( attributes.url.lastIndexOf( '/' ) ).slice( 1, 30 );
 
 					if ( blockContent.length > 0 ) {
-						label = blockContent;
+						newLabel = blockContent;
 					}
 				}
 
@@ -48,7 +50,7 @@ const BlockPreviewLabel = ( { block, label, displayIcon = true, alignIcon = 'lef
 					const media = getMedia( attributes.id );
 
 					if ( media ) {
-						label = media.caption.raw || media.title.raw || label;
+						newLabel = media.caption.raw || media.title.raw || newLabel;
 					}
 				}
 
@@ -61,13 +63,13 @@ const BlockPreviewLabel = ( { block, label, displayIcon = true, alignIcon = 'lef
 						.slice( 0, 30 );
 				}
 
-				label = blockContent.length > 0 ? blockContent : blockType.title;
+				newLabel = blockContent.length > 0 ? blockContent : blockType.title;
 				break;
 
 			case 'amp/amp-story-post-author':
 				const author = getAuthors().find( ( { id } ) => id === getEditedPostAttribute( 'author' ) );
 
-				label = author ? author.name : __( 'Post Author', 'amp' );
+				newLabel = author ? author.name : __( 'Post Author', 'amp' );
 				break;
 
 			case 'amp/amp-story-post-date':
@@ -76,11 +78,11 @@ const BlockPreviewLabel = ( { block, label, displayIcon = true, alignIcon = 'lef
 				const dateFormat = dateSettings.formats.date;
 				const date = postDate || new Date();
 
-				label = dateI18n( dateFormat, date );
+				newLabel = dateI18n( dateFormat, date );
 				break;
 
 			case 'amp/amp-story-post-title':
-				label = getEditedPostAttribute( 'title' ) || blockType.title;
+				newLabel = getEditedPostAttribute( 'title' ) || blockType.title;
 				break;
 
 			default:
@@ -88,10 +90,10 @@ const BlockPreviewLabel = ( { block, label, displayIcon = true, alignIcon = 'lef
 		}
 
 		return {
-			content: label,
+			content: newLabel,
 			icon: blockType.icon,
 		};
-	}, [ block ] );
+	}, [ label, block ] );
 
 	return (
 		<>
