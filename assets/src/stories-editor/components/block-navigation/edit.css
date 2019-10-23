@@ -57,6 +57,8 @@
 #amp-story-block-navigation .block-editor-block-navigation__list {
 	list-style-type: none;
 	margin-bottom: 15px;
+	margin-left: 0;
+	padding-left: 0;
 }
 
 #amp-story-block-navigation .editor-block-navigation__list__static {
