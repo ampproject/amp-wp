@@ -55,7 +55,7 @@ const BackgroundColorSettings = ( { backgroundColors, setAttributes, overlayOpac
 					onChange: ( value ) => {
 						setBackgroundColors( value, 0 );
 					},
-					label: __( 'Color', 'amp' ),
+					label: __( 'Background Color', 'amp' ),
 				},
 			];
 		}
@@ -70,7 +70,7 @@ const BackgroundColorSettings = ( { backgroundColors, setAttributes, overlayOpac
 					setBackgroundColors( value, index );
 				},
 				/* translators: %s: color number */
-				label: useNumberedLabels ? sprintf( __( 'Color %s', 'amp' ), index + 1 ) : __( 'Color', 'amp' ),
+				label: useNumberedLabels ? sprintf( __( 'Color %s', 'amp' ), index + 1 ) : __( 'Background Color', 'amp' ),
 			};
 		} );
 
@@ -79,7 +79,7 @@ const BackgroundColorSettings = ( { backgroundColors, setAttributes, overlayOpac
 
 	return (
 		<PanelColorSettings
-			title={ __( 'Background Color', 'amp' ) }
+			title={ __( 'Color Settings', 'amp' ) }
 			colorSettings={ getOverlayColorSettings() }
 		>
 			<p>
