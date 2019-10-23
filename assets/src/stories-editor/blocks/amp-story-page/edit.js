@@ -153,9 +153,10 @@ const PageEdit = ( {
 			const blocksToRemove = immovableBlocks.slice( 0, -1 ).map( ( { clientId: blockId } ) => blockId );
 			removeBlocks( blocksToRemove );
 			const removeMessage = sprintf(
+				/* translators: %d: number of removed blocks. */
 				_n(
-					'%d block removed. Only one CTA/Attachment block allowed per Page.',
-					'%d blocks removed. Only one CTA/Attachment block allowed per Page.',
+					'%d block removed. Only one block of this type is allowed per page.',
+					'%d blocks removed. Only one block of this type is allowed per page.',
 					blocksToRemove.length,
 					'amp'
 				),
