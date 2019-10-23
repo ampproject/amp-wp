@@ -1509,10 +1509,12 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 		$modal_actions = [
 			"{$modal_id}.open"  => $open_xpaths,
+			// Although we add the 'show-modal' class here, we don't remove it again, as it will
+			// _first_ remove the correct positioning and only _then_ start the fade-out animation.
+			// See: https://youtu.be/aooq-liRtMs .
 			"{$modal_id}.toggleClass(class=show-modal,force=true)" => $open_xpaths,
 			"{$body_id}.toggleClass(class=showing-modal,force=true)" => $open_xpaths,
 			"{$modal_id}.close" => $close_xpaths,
-			"{$modal_id}.toggleClass(class=show-modal,force=false)" => $close_xpaths,
 			"{$body_id}.toggleClass(class=showing-modal,force=false)" => $close_xpaths,
 		];
 
