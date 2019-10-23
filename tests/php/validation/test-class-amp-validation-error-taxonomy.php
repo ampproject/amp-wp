@@ -583,7 +583,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 			array_keys(
 				[
 					'cb'               => $cb,
-					'error'            => 'Error',
+					'error_code'       => 'Error',
 					'status'           => 'Status<div class="tooltip dashicons dashicons-editor-help"><h3>Statuses tooltip title</h3><p>An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.</p></div>',
 					'details'          => 'Details<div class="tooltip dashicons dashicons-editor-help"><h3>Details tooltip title</h3><p>An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.</p></div>',
 					'error_type'       => 'Type',
@@ -1111,8 +1111,8 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 
 		// Test the 'error' block in the switch.
 		$GLOBALS['pagenow'] = 'post.php';
-		$filtered_content   = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'error', $term_id );
-		$this->assertEquals( $initial_content . '<button type="button" aria-label="Toggle error details" class="single-url-detail-toggle"><code>illegal_css_at_rule</code>: <code>@-ms-viewport</code></button>', $filtered_content );
+		$filtered_content   = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'error_code', $term_id );
+		$this->assertStringStartsWith( $initial_content . '<button type="button" aria-label="Toggle error details"', $filtered_content );
 
 		// Test the 'status' block in the switch for the error taxonomy page.
 		$GLOBALS['pagenow'] = 'edit-tags.php';
@@ -1151,7 +1151,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 			'links'       => 'count',
 		];
 		$columns_expected_to_be_added = [
-			'error'      => 'amp_validation_code',
+			'error_code' => 'amp_validation_code',
 			'error_type' => 'amp_validation_error_type',
 		];
 		$this->assertEquals(
@@ -1161,7 +1161,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 
 		// In the unlikely case that the initial columns has an 'error' value, this method should overwrite it.
 		$initial_columns_with_error = [
-			'error' => 'foobar',
+			'error_code' => 'foobar',
 		];
 		$this->assertEquals(
 			$columns_expected_to_be_added,
@@ -1179,7 +1179,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		$validation_error['code'] = AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE;
 		$term                     = self::factory()->term->create_and_get( [ 'taxonomy' => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] );
 		$html                     = AMP_Validation_Error_Taxonomy::render_single_url_error_details( $validation_error, $term );
-		$this->assertContains( '<details open>', $html );
+		$this->assertContains( '<dl class="detailed">', $html );
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /** Arrow icon on title in error column. */
-.column-error > .single-url-detail-toggle {
+.column-error_code > .single-url-detail-toggle {
 	position: relative;
 	width: 100%;
 	padding: 5px 36px 5px 0;
@@ -11,7 +11,7 @@
 	cursor: pointer;
 }
 
-.column-error > .single-url-detail-toggle::after {
+.column-error_code > .single-url-detail-toggle::after {
 	position: absolute;
 	top: 0;
 	right: 0;
@@ -46,36 +46,14 @@ table.striped > tbody > tr.even {
 	display: none;
 }
 
-/** Details post action. */
-.details button {
-	display: inline-block;
-	background: none;
-	border: none;
-	padding: 0;
-	text-align: left;
-	color: #0073aa;
-	cursor: pointer;
-	text-decoration: underline;
-}
-
 /** Details row styles. */
 .details details.details-attributes:hover {
 	cursor: pointer;
 }
 
-.details ul.detailed {
-	padding: 0 32px;
-	margin-top: 0;
-}
-
-.details div.detailed {
+.details dl.detailed {
 	padding-left: 30px;
 	margin-top: 10px;
-	font-family: Consolas, Monaco, monospace;
-}
-
-.details .detailed details {
-	padding-bottom: 16px;
 }
 
 .details .detailed summary code {
@@ -97,7 +75,7 @@ table.striped > tbody > tr.even {
 #number-errors {
 	text-align: center;
 	background-color: #d3d3d3b8;
-	color: #1e8cbecc;
+	color: #000;
 }
 
 #url-post-filter {
@@ -118,21 +96,25 @@ table.striped > tbody > tr.even {
 	margin-top: 0.5rem;
 }
 
-/* Give enough width to prevent the widest column status, 'New Accepted,' from forcing the <select> below the icon. */
-.wp-list-table th.column-status {
-	width: 150px;
+.wp-list-table th.column-error_code {
+	width: 30%;
 }
 
-.wp-list-table th.column-sources_with_invalid_output {
-	width: 20%;
-}
-
-.wp-list-table th.column-error {
-	width: 25%;
+.wp-list-table th.column-error_type {
+	width: 15%;
 }
 
 .wp-list-table th.column-details {
-	width: 20%;
+	width: 15%;
+}
+
+.wp-list-table th.column-sources_with_invalid_output {
+	width: 30%;
+}
+
+/* Give enough width to prevent the widest column status, 'New Accepted,' from forcing the <select> below the icon. */
+.wp-list-table th.column-status {
+	width: 150px;
 }
 
 /** Add space between list table and the filter and search box above it. */
@@ -159,7 +141,12 @@ table.striped > tbody > tr.even {
 	border-right: 1px solid #a0a5aa;
 }
 
+.amp-validation-error-status-dropdown {
+	display: flex;
+}
+
 .amp-validation-error-status {
+	margin-left: 5px;
 	width: auto;
 	float: none;
 }

@@ -17,7 +17,7 @@ import './edit.css';
 const PAGE_BORDER = 1;
 
 const EditorCarousel = () => {
-	const currentPage = useSelect( ( select ) => select( 'amp/story' ).getCurrentPage() );
+	const currentPage = useSelect( ( select ) => select( 'amp/story' ).getCurrentPage(), [] );
 
 	const {
 		pages,

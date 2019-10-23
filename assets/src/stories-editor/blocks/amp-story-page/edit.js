@@ -12,6 +12,7 @@ import {
 } from '@wordpress/block-editor';
 import { useEffect, useRef } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
+import { _n, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -57,19 +58,21 @@ const PageEdit = ( {
 		backgroundColors,
 	} = attributes;
 
-	const { moveBlockToPosition } = useDispatch( 'core/block-editor' );
+	const { moveBlockToPosition, removeBlocks } = useDispatch( 'core/block-editor' );
+	const { createErrorNotice } = useDispatch( 'core/notices' );
 
 	const {
 		media,
 		videoFeaturedImage,
 		pagesOrder,
 		childrenOrder,
+		immovableBlocks,
 		storySettingsAttributes,
 		autoAdvanceAfterOptions,
 		allowedVideoMimeTypes,
 	} = useSelect( ( select ) => {
 		const { getMedia } = select( 'core' );
-		const { getBlockOrder } = select( 'core/block-editor' );
+		const { getBlockOrder, getBlocksByClientId } = select( 'core/block-editor' );
 		const { getSettings } = select( 'amp/story' );
 
 		const mediaObject = mediaId ? getMedia( mediaId ) : undefined;
@@ -83,18 +86,20 @@ const PageEdit = ( {
 		const { getEditedPostAttribute } = select( 'core/editor' );
 		const postMeta = getEditedPostAttribute( 'meta' ) || {};
 		const { storySettings } = getSettings();
+		const innerBlocksIds = getBlockOrder( clientId );
+		const innerBlocks = getBlocksByClientId( innerBlocksIds );
 
 		return {
 			media: mediaObject,
 			videoFeaturedImage: videoThumbnail,
-			getBlockOrder,
+			immovableBlocks: innerBlocks.filter( ( { name } ) => ! ALLOWED_MOVABLE_BLOCKS.includes( name ) ),
 			pagesOrder: getBlockOrder(),
-			childrenOrder: getBlockOrder( clientId ),
+			childrenOrder: innerBlocksIds,
 			storySettingsAttributes: metaToAttributeNames( postMeta ),
 			autoAdvanceAfterOptions: storySettings.autoAdvanceAfterOptions,
 			allowedVideoMimeTypes: getSettings().allowedVideoMimeTypes,
 		};
-	}, [ mediaId, mediaType, poster ] );
+	}, [ clientId, mediaId, mediaType, poster ] );
 
 	const allowedBackgroundMediaTypes = [ IMAGE_BACKGROUND_TYPE, ...allowedVideoMimeTypes ];
 
@@ -142,28 +147,46 @@ const PageEdit = ( {
 		}
 	}, [ mediaType, mediaUrl ] );
 
+	// If there is more than one immovable block, leave only the last and remove the others.
+	useEffect( () => {
+		if ( immovableBlocks.length > 1 ) {
+			const blocksToRemove = immovableBlocks.slice( 0, -1 ).map( ( { clientId: blockId } ) => blockId );
+			removeBlocks( blocksToRemove );
+			const removeMessage = sprintf(
+				/* translators: %d: number of removed blocks. */
+				_n(
+					'%d block removed. Only one block of this type is allowed per page.',
+					'%d blocks removed. Only one block of this type is allowed per page.',
+					blocksToRemove.length,
+					'amp'
+				),
+				blocksToRemove.length
+			);
+			createErrorNotice(
+				removeMessage,
+				{
+					type: 'snackbar',
+					isDismissible: true,
+				}
+			);
+		}
+	}, [ childrenOrder, clientId, createErrorNotice, immovableBlocks, removeBlocks ] );
+
 	useEffect( () => {
 		if ( childrenOrder.length <= 1 ) {
 			return;
 		}
-		const ctaBlock = getCallToActionBlock( clientId );
-		const attachmentBlock = getPageAttachmentBlock( clientId );
-
-		let blockToMove = null;
-
-		if ( ctaBlock ) {
-			blockToMove = ctaBlock;
-		} else if ( attachmentBlock ) {
-			blockToMove = attachmentBlock;
+		// If there is an illegal number of immovable blocks (more than 1).
+		if ( 1 !== immovableBlocks.length ) {
+			return;
 		}
+		const blockToMove = immovableBlocks[ 0 ];
 
-		if ( blockToMove ) {
-			// If the either CTA or Attachment is not the last block, move it there.
-			if ( childrenOrder[ childrenOrder.length - 1 ] !== blockToMove.clientId ) {
-				moveBlockToPosition( blockToMove.clientId, clientId, clientId, childrenOrder.length - 1 );
-			}
+		// If the either CTA or Attachment is not the last block, move it there.
+		if ( childrenOrder[ childrenOrder.length - 1 ] !== blockToMove.clientId ) {
+			moveBlockToPosition( blockToMove.clientId, clientId, clientId, childrenOrder.length - 1 );
 		}
-	}, [ childrenOrder, clientId, moveBlockToPosition ] );
+	}, [ childrenOrder, clientId, moveBlockToPosition, immovableBlocks ] );
 
 	const style = {
 		backgroundImage: IMAGE_BACKGROUND_TYPE === mediaType && mediaUrl ? `url(${ mediaUrl })` : undefined,

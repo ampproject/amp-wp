@@ -445,14 +445,14 @@ class AMP_Validation_Manager {
 			'href'   => esc_url( $validate_url ),
 		];
 		if ( $error_count <= 0 ) {
-			$validate_item['title'] = esc_html__( 'Re-validate', 'amp' );
+			$validate_item['title'] = esc_html__( 'Validate', 'amp' );
 		} else {
 			$validate_item['title'] = esc_html(
 				sprintf(
 					/* translators: %s is count of validation errors */
 					_n(
-						'Re-validate (%s validation error)',
-						'Re-validate (%s validation errors)',
+						'Review %s validation issue',
+						'Review %s validation issues',
 						$error_count,
 						'amp'
 					),
@@ -1265,6 +1265,16 @@ class AMP_Validation_Manager {
 					continue;
 				}
 
+				// Skip considering ourselves.
+				if ( 'AMP_Validation_Manager::add_block_source_comments' === $source['function'] ) {
+					continue;
+				}
+
+				/**
+				 * Reflection.
+				 *
+				 * @var ReflectionFunctionAbstract $reflection
+				 */
 				$reflection = $source['reflection'];
 				unset( $source['reflection'] ); // Omit from stored source.
 
@@ -1281,9 +1291,10 @@ class AMP_Validation_Manager {
 					continue;
 				}
 
-				$source['hook']    = $hook;
-				$original_function = $callback['function'];
-				$wrapped_callback  = self::wrapped_callback(
+				$source['hook']     = $hook;
+				$source['priority'] = $priority;
+				$original_function  = $callback['function'];
+				$wrapped_callback   = self::wrapped_callback(
 					array_merge(
 						$callback,
 						compact( 'priority', 'source' )
@@ -1425,7 +1436,6 @@ class AMP_Validation_Manager {
 	public static function get_source( $callback ) {
 		$reflection = null;
 		$class_name = null; // Because ReflectionMethod::getDeclaringClass() can return a parent class.
-		$file       = null;
 		try {
 			if ( is_string( $callback ) && is_callable( $callback ) ) {
 				// The $callback is a function or static method.
@@ -1444,20 +1454,16 @@ class AMP_Validation_Manager {
 					$class_name = get_class( $callback[0] );
 				}
 
-				/*
-				 * Obtain file from ReflectionClass because if the method is not on base class then
-				 * file returned by ReflectionMethod will be for the base class not the subclass.
-				 */
-				$reflection = new ReflectionClass( $callback[0] );
-				$file       = $reflection->getFileName();
-
 				// This is needed later for AMP_Validation_Manager::has_parameters_passed_by_reference().
 				$reflection = new ReflectionMethod( $callback[0], $callback[1] );
+
+				// Handle the special case of the class being a widget, in which case the display_callback method should
+				// actually map to the underling widget method. It is the display_callback in the end that is wrapped.
+				if ( 'WP_Widget' === $reflection->getDeclaringClass()->getName() && 'display_callback' === $reflection->getName() ) {
+					$reflection = new ReflectionMethod( $callback[0], 'widget' );
+				}
 			} elseif ( is_object( $callback ) && ( 'Closure' === get_class( $callback ) ) ) {
 				$reflection = new ReflectionFunction( $callback );
-			}
-			if ( $reflection && ! $file ) {
-				$file = $reflection->getFileName();
 			}
 		} catch ( Exception $e ) {
 			return null;
@@ -1469,25 +1475,34 @@ class AMP_Validation_Manager {
 
 		$source = compact( 'reflection' );
 
-		if ( $file ) {
-			$file         = wp_normalize_path( $file );
-			$slug_pattern = '([^/]+)';
-			if ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( WP_PLUGIN_DIR ) ), ':' ) . $slug_pattern . ':s', $file, $matches ) ) {
-				$source['type'] = 'plugin';
-				$source['name'] = $matches[1];
-			} elseif ( preg_match( ':' . preg_quote( trailingslashit( self::$template_directory ), ':' ) . $slug_pattern . ':s', $file ) ) {
-				$source['type'] = 'theme';
-				$source['name'] = self::$template_slug;
-			} elseif ( preg_match( ':' . preg_quote( trailingslashit( self::$stylesheet_directory ), ':' ) . $slug_pattern . ':s', $file ) ) {
-				$source['type'] = 'theme';
-				$source['name'] = self::$stylesheet_slug;
-			} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( WPMU_PLUGIN_DIR ) ), ':' ) . $slug_pattern . ':s', $file, $matches ) ) {
-				$source['type'] = 'mu-plugin';
-				$source['name'] = $matches[1];
-			} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( ABSPATH ) ), ':' ) . '(wp-admin|wp-includes)/:s', $file, $matches ) ) {
-				$source['type'] = 'core';
-				$source['name'] = $matches[1];
-			}
+		// Identify the type, name, and relative file path.
+		$file         = wp_normalize_path( $reflection->getFileName() );
+		$slug_pattern = '(?<slug>[^/]+)';
+		if ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( WP_PLUGIN_DIR ) ), ':' ) . $slug_pattern . '(/(?P<file>.*$))?:s', $file, $matches ) ) {
+			$source['type'] = 'plugin';
+			$source['name'] = $matches['slug'];
+			$source['file'] = isset( $matches['file'] ) ? $matches['file'] : $matches['slug'];
+		} elseif ( ! empty( self::$template_directory ) && preg_match( ':' . preg_quote( trailingslashit( self::$template_directory ), ':' ) . '(?P<file>.*$):s', $file, $matches ) ) {
+			$source['type'] = 'theme';
+			$source['name'] = self::$template_slug;
+			$source['file'] = $matches['file'];
+		} elseif ( ! empty( self::$stylesheet_directory ) && preg_match( ':' . preg_quote( trailingslashit( self::$stylesheet_directory ), ':' ) . '/(?P<file>.*$):s', $file, $matches ) ) {
+			$source['type'] = 'theme';
+			$source['name'] = self::$stylesheet_slug;
+			$source['file'] = $matches['file'];
+		} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( WPMU_PLUGIN_DIR ) ), ':' ) . $slug_pattern . '(/(?P<file>.*$))?:s', $file, $matches ) ) {
+			$source['type'] = 'mu-plugin';
+			$source['name'] = $matches['slug'];
+			$source['file'] = isset( $matches['file'] ) ? $matches['file'] : $matches['slug'];
+		} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( ABSPATH ) ), ':' ) . '(?P<slug>wp-admin|wp-includes)/(?P<file>.*$):s', $file, $matches ) ) {
+			$source['type'] = 'core';
+			$source['name'] = $matches['slug'];
+			$source['file'] = $matches['file'];
+		}
+
+		// If a file was identified, then also supply the line number.
+		if ( isset( $source['file'] ) ) {
+			$source['line'] = $reflection->getStartLine();
 		}
 
 		if ( $class_name ) {
@@ -1666,8 +1681,8 @@ class AMP_Validation_Manager {
 						$link->textContent = sprintf(
 							/* translators: %s is count of validation errors */
 							_n(
-								'Re-validate (%s validation error)',
-								'Re-validate (%s validation errors)',
+								'Review %s validation issue',
+								'Review %s validation issues',
 								$error_count,
 								'amp'
 							),
