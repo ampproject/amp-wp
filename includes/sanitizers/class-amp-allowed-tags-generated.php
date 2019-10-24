@@ -12879,33 +12879,6 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'extension_spec' => array(
 						'deprecated_allow_duplicates' => true,
-						'name' => 'amp-fit-text',
-						'requires_usage' => 2,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'SCRIPT[custom-element=amp-fit-text] (AMP4EMAIL)',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'deprecated_allow_duplicates' => true,
 						'name' => 'amp-font',
 						'requires_usage' => 2,
 						'version' => array(
