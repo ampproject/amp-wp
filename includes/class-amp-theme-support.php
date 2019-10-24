@@ -96,34 +96,6 @@ class AMP_Theme_Support {
 	const READER_MODE_TEMPLATE_DIRECTORY = 'amp';
 
 	/**
-	 * A top-level query var for AMP flags.
-	 *
-	 * @var string
-	 */
-	const AMP_FLAGS_QUERY_VAR = 'amp_flags';
-
-	/**
-	 * A query var to disable post processing.
-	 *
-	 * @var string
-	 */
-	const DISABLE_POST_PROCESSING_QUERY_VAR = 'disable_post_processing';
-
-	/**
-	 * A query var to disable the response cache.
-	 *
-	 * @var string
-	 */
-	const DISABLE_RESPONSE_CACHE_QUERY_VAR = 'disable_response_cache';
-
-	/**
-	 * A query var to prevent a redirect to a non-AMP URL.
-	 *
-	 * @var string
-	 */
-	const PREVENT_REDIRECT_TO_NON_AMP_QUERY_VAR = 'prevent_redirect';
-
-	/**
 	 * Sanitizer classes.
 	 *
 	 * @var array
@@ -526,7 +498,7 @@ class AMP_Theme_Support {
 	 */
 	public static function redirect_non_amp_url( $status = 302, $exit = true ) {
 		$current_url = amp_get_current_url();
-		$non_amp_url = remove_query_arg( self::AMP_FLAGS_QUERY_VAR, amp_remove_endpoint( $current_url ) );
+		$non_amp_url = remove_query_arg( AMP_Debug::AMP_FLAGS_QUERY_VAR, amp_remove_endpoint( $current_url ) );
 		if ( $non_amp_url === $current_url ) {
 			return false;
 		}
@@ -1900,7 +1872,7 @@ class AMP_Theme_Support {
 			newrelic_disable_autorum();
 		}
 
-		if ( isset( $_GET[ self::AMP_FLAGS_QUERY_VAR ][ self::DISABLE_POST_PROCESSING_QUERY_VAR ] ) && AMP_Validation_Manager::has_cap() ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( AMP_Debug::has_flag( AMP_Debug::DISABLE_POST_PROCESSING_QUERY_VAR ) ) {
 			return;
 		}
 
@@ -2032,9 +2004,7 @@ class AMP_Theme_Support {
 		 *
 		 * @param bool $enable_response_caching Whether response caching is enabled.
 		 */
-		$enable_response_caching    = apply_filters( 'amp_response_caching_enabled', ! ( defined( 'WP_DEBUG' ) && WP_DEBUG ) || ! empty( $args['enable_response_caching'] ) );
-		$is_disabled_with_query_var = isset( $_GET[ self::AMP_FLAGS_QUERY_VAR ][ self::DISABLE_RESPONSE_CACHE_QUERY_VAR ] ) && AMP_Validation_Manager::has_cap(); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-
+		$enable_response_caching = apply_filters( 'amp_response_caching_enabled', ! ( defined( 'WP_DEBUG' ) && WP_DEBUG ) || ! empty( $args['enable_response_caching'] ) );
 		$enable_response_caching = (
 			$enable_response_caching
 			&&
@@ -2042,7 +2012,7 @@ class AMP_Theme_Support {
 			&&
 			! is_customize_preview()
 			&&
-			! $is_disabled_with_query_var
+			! AMP_Debug::has_flag( AMP_Debug::DISABLE_RESPONSE_CACHE_QUERY_VAR )
 		);
 
 		// When response caching is enabled, determine if it should be turned off for cache misses.
@@ -2164,7 +2134,7 @@ class AMP_Theme_Support {
 					&&
 					$blocking_error_count > 0
 					&&
-					! self::prevent_redirect_to_non_amp()
+					! AMP_Debug::has_flag( AMP_Debug::PREVENT_REDIRECT_TO_NON_AMP_QUERY_VAR )
 				) {
 					if ( AMP_Validation_Manager::has_cap() ) {
 						$non_amp_url = add_query_arg( AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR, $blocking_error_count, $non_amp_url );
@@ -2310,7 +2280,7 @@ class AMP_Theme_Support {
 					$script->appendChild( $dom->createTextNode( 'document.addEventListener( "DOMContentLoaded", function() { document.write = function( text ) { throw new Error( "[AMP-WP] Prevented document.write() call with: "  + text ); }; } );' ) );
 					$head->appendChild( $script );
 				}
-			} elseif ( ! self::is_customize_preview_iframe() && ! self::prevent_redirect_to_non_amp() ) {
+			} elseif ( ! self::is_customize_preview_iframe() && ! AMP_Debug::has_flag( AMP_Debug::PREVENT_REDIRECT_TO_NON_AMP_QUERY_VAR ) ) {
 				$response = esc_html__( 'Redirecting to non-AMP version.', 'amp' );
 
 				if ( $cache_response ) {
@@ -2323,7 +2293,7 @@ class AMP_Theme_Support {
 				}
 
 				// Remove debugging query args.
-				$non_amp_url = remove_query_arg( self::AMP_FLAGS_QUERY_VAR, $non_amp_url );
+				$non_amp_url = remove_query_arg( AMP_Debug::AMP_FLAGS_QUERY_VAR, $non_amp_url );
 
 				/*
 				 * Temporary redirect because AMP page may return with blocking validation errors when auto-accepting sanitization
@@ -2358,19 +2328,6 @@ class AMP_Theme_Support {
 		}
 
 		return $response;
-	}
-
-	/**
-	 * Whether to prevent a redirect to a non-AMP URL.
-	 *
-	 * Usually, if there are unaccepted validation errors,
-	 * the AMP URL will redirect to a non-AMP URL.
-	 * This overrides that behavior, for debugging purposes.
-	 *
-	 * @return bool Whether the prevent a redirect.
-	 */
-	public static function prevent_redirect_to_non_amp() {
-		return isset( $_GET[ self::AMP_FLAGS_QUERY_VAR ][ self::PREVENT_REDIRECT_TO_NON_AMP_QUERY_VAR ] ) && AMP_Validation_Manager::has_cap(); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 
 	/**

@@ -1279,7 +1279,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		);
 
 		// This should not perform tree shaking if a certain query var is present.
-		$_GET[ AMP_Theme_Support::AMP_FLAGS_QUERY_VAR ][ AMP_Style_Sanitizer::DISABLE_TREE_SHAKING_QUERY_VAR ] = '';
+		$_GET[ AMP_Debug::AMP_FLAGS_QUERY_VAR ][ AMP_Debug::DISABLE_TREE_SHAKING_QUERY_VAR ] = '1';
 		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
 		$dom         = AMP_DOM_Utils::get_dom( $html );
 		$error_codes = [];
@@ -2410,23 +2410,5 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$whitelist_sanitizer->sanitize();
 
 		$assert( $original_dom, $html, $amphtml_dom, $amphtml_dom->saveHTML(), $sanitizer->get_stylesheets() );
-	}
-
-	/**
-	 * Test disable_tree_shaking.
-	 *
-	 * @covers \AMP_Style_Sanitizer::disable_tree_shaking()
-	 */
-	public function test_disable_tree_shaking() {
-		// The query var isn't present and the permission isn't correct, so this should return false.
-		$this->assertFalse( AMP_Style_Sanitizer::disable_tree_shaking() );
-
-		// The query var is present, but the user doesn't have the right permission, so this should still return false.
-		$_GET[ AMP_Theme_Support::AMP_FLAGS_QUERY_VAR ][ AMP_Style_Sanitizer::DISABLE_TREE_SHAKING_QUERY_VAR ] = '';
-		$this->assertFalse( AMP_Style_Sanitizer::disable_tree_shaking() );
-
-		// Now that the user has the right permission, this should return true.
-		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
-		$this->assertTrue( AMP_Style_Sanitizer::disable_tree_shaking() );
 	}
 }

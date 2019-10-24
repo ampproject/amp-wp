@@ -375,7 +375,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		);
 
 		// New rejected => Ack rejected, as the query var should force this to be rejected.
-		$_GET[ AMP_Theme_Support::AMP_FLAGS_QUERY_VAR ][ AMP_Validation_Error_Taxonomy::REJECT_ALL_VALIDATION_ERRORS_QUERY_VAR ] = '';
+		$_GET[ AMP_Debug::AMP_FLAGS_QUERY_VAR ][ AMP_Debug::REJECT_ALL_VALIDATION_ERRORS_QUERY_VAR ] = '1';
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		AMP_Validation_Error_Taxonomy::register();
 		$this->assertFalse( AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $error_foo ) );
@@ -401,7 +401,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 			[ $excessive_css_error ],
 			home_url( '/example' )
 		);
-		$_GET[ AMP_Theme_Support::AMP_FLAGS_QUERY_VAR ][ AMP_Validation_Error_Taxonomy::ACCEPT_EXCESSIVE_CSS_ERROR_QUERY_VAR ] = '';
+		$_GET[ AMP_Debug::AMP_FLAGS_QUERY_VAR ][ AMP_Debug::ACCEPT_EXCESSIVE_CSS_ERROR_QUERY_VAR ] = 'true';
 		AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( $error_bar );
 		$this->assertTrue( AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $excessive_css_error ) );
 		$this->assertEquals(
@@ -1398,12 +1398,12 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		$this->assertEquals( $initial_sanitization, AMP_Validation_Error_Taxonomy::conditionally_change_sanitization( $initial_sanitization, [] ) );
 
 		// With the query var present to reject all errors, this should return false.
-		$_GET[ AMP_Theme_Support::AMP_FLAGS_QUERY_VAR ][ AMP_Validation_Error_Taxonomy::REJECT_ALL_VALIDATION_ERRORS_QUERY_VAR ] = '';
+		$_GET[ AMP_Debug::AMP_FLAGS_QUERY_VAR ][ AMP_Debug::REJECT_ALL_VALIDATION_ERRORS_QUERY_VAR ] = '1';
 		$this->assertEquals( false, AMP_Validation_Error_Taxonomy::conditionally_change_sanitization( $initial_sanitization, [] ) );
 		$_GET = [];
 
 		// Though the query var to reject excessive_css errors is present, the error's code is wrong, so this shouldn't change the sanitization.
-		$_GET[ AMP_Theme_Support::AMP_FLAGS_QUERY_VAR ][ AMP_Validation_Error_Taxonomy::ACCEPT_EXCESSIVE_CSS_ERROR_QUERY_VAR ] = '';
+		$_GET[ AMP_Debug::AMP_FLAGS_QUERY_VAR ][ AMP_Debug::ACCEPT_EXCESSIVE_CSS_ERROR_QUERY_VAR ] = '1';
 		$error = [ 'code' => 'invalid_attribute' ];
 		$this->assertEquals( $initial_sanitization, AMP_Validation_Error_Taxonomy::conditionally_change_sanitization( $initial_sanitization, $error ) );
 

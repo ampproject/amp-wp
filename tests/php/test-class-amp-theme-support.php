@@ -1448,7 +1448,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertEquals( $initial_ob_level, ob_get_level() );
 
 		// When this query var is present, this method should exit early, and shouldn't buffer the output.
-		$_GET[ AMP_Theme_Support::AMP_FLAGS_QUERY_VAR ][ AMP_Theme_Support::DISABLE_POST_PROCESSING_QUERY_VAR ] = '';
+		$_GET[ AMP_Debug::AMP_FLAGS_QUERY_VAR ][ AMP_Debug::DISABLE_POST_PROCESSING_QUERY_VAR ] = '1';
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		$initial_ob_level = ob_get_level();
 		AMP_Theme_Support::start_output_buffering();
@@ -1742,7 +1742,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->reset_post_processor_cache_effectiveness();
 
 		// Test that the response is not cached if a certain query var is present.
-		$_GET[ AMP_Theme_Support::AMP_FLAGS_QUERY_VAR ][ AMP_Theme_Support::DISABLE_RESPONSE_CACHE_QUERY_VAR ] = '';
+		$_GET[ AMP_Debug::AMP_FLAGS_QUERY_VAR ][ AMP_Debug::DISABLE_RESPONSE_CACHE_QUERY_VAR ] = '1';
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		$call_prepare_response();
 		$server_timing_headers = $this->get_server_timing_headers();
@@ -2104,24 +2104,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertEquals( home_url( '/?amp_validation_errors=1' ), $redirects[0] );
 		$this->assertEquals( 2, AMP_Theme_Support_Sanitizer_Counter::$count, 'Expected sanitizer to not now be invoked since previous validation results now cached.' );
 
-	}
-
-	/**
-	 * Test prevent_redirect_to_non_amp
-	 *
-	 * @covers AMP_Theme_Support::prevent_redirect_to_non_amp()
-	 */
-	public function test_prevent_redirect_to_non_amp() {
-		// The query var isn't present, and the user doesn't have the right permission.
-		$this->assertFalse( AMP_Theme_Support::prevent_redirect_to_non_amp() );
-
-		// The query var is present, but the user doesn't have the right permission.
-		$_GET[ AMP_Theme_Support::AMP_FLAGS_QUERY_VAR ][ AMP_Theme_Support::PREVENT_REDIRECT_TO_NON_AMP_QUERY_VAR ] = '';
-		$this->assertFalse( AMP_Theme_Support::prevent_redirect_to_non_amp() );
-
-		// Now that the user has the right permission, this should be true.
-		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
-		$this->assertTrue( AMP_Theme_Support::prevent_redirect_to_non_amp() );
 	}
 
 	/**

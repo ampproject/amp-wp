@@ -503,7 +503,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		add_theme_support( AMP_Theme_Support::SLUG );
 
 		// The query var is present, but the user doesn't have the right permission, so this should return true.
-		$_GET[ AMP_Theme_Support::AMP_FLAGS_QUERY_VAR ]['disable_amp'] = '';
+		$_GET[ AMP_Debug::AMP_FLAGS_QUERY_VAR ][ AMP_Debug::DISABLE_AMP_QUERY_VAR ] = '1';
 		$this->assertTrue( is_amp_endpoint() );
 
 		// Now that the user has the right permission, this should return false, meaning the query var forced AMP to be disabled.

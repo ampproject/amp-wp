@@ -185,7 +185,7 @@ class AMP_Validation_Manager {
 			$args
 		);
 
-		self::$should_locate_sources = $args['should_locate_sources'] && ! AMP_Theme_Support::prevent_redirect_to_non_amp();
+		self::$should_locate_sources = $args['should_locate_sources'] && ! AMP_Debug::has_flag( AMP_Debug::PREVENT_REDIRECT_TO_NON_AMP_QUERY_VAR );
 
 		AMP_Validated_URL_Post_Type::register();
 		AMP_Validation_Error_Taxonomy::register();
@@ -538,23 +538,13 @@ class AMP_Validation_Manager {
 			]
 		);
 
-		$debugging_query_vars = [
-			AMP_Theme_Support::DISABLE_POST_PROCESSING_QUERY_VAR => esc_html__( 'Disable post-processing', 'amp' ),
-			AMP_Theme_Support::DISABLE_RESPONSE_CACHE_QUERY_VAR => esc_html__( 'Disable response cache', 'amp' ),
-			AMP_Theme_Support::PREVENT_REDIRECT_TO_NON_AMP_QUERY_VAR => esc_html__( 'Prevent redirect', 'amp' ),
-			AMP_Validation_Error_Taxonomy::REJECT_ALL_VALIDATION_ERRORS_QUERY_VAR => esc_html__( 'Reject all errors', 'amp' ),
-			AMP_Validation_Error_Taxonomy::ACCEPT_EXCESSIVE_CSS_ERROR_QUERY_VAR => esc_html__( 'Accept excessive CSS', 'amp' ),
-			'disable_amp' => esc_html__( 'Disable AMP', 'amp' ),
-			AMP_Style_Sanitizer::DISABLE_TREE_SHAKING_QUERY_VAR => esc_html__( 'Disable tree shaking', 'amp' ),
-		];
-
-		foreach ( $debugging_query_vars as $query_var => $title ) {
+		foreach ( AMP_Debug::get_all_query_vars() as $query_var => $title ) {
 			$wp_admin_bar->add_node(
 				[
 					'parent' => $parent_node_id,
 					'id'     => $query_var,
 					'title'  => self::get_debugging_option_title( $title, $query_var ),
-					'href'   => add_query_arg( AMP_Theme_Support::AMP_FLAGS_QUERY_VAR, [ $query_var => '' ], $amp_url ),
+					'href'   => add_query_arg( AMP_Debug::AMP_FLAGS_QUERY_VAR, [ $query_var => 'true' ], $amp_url ),
 				]
 			);
 		}
@@ -572,7 +562,7 @@ class AMP_Validation_Manager {
 	 * @return string The debugging option title, possible with a 'check mark' emoji at the beginning.
 	 */
 	public static function get_debugging_option_title( $title_text, $query_var ) {
-		$checkbox = isset( $_GET[ AMP_Theme_Support::AMP_FLAGS_QUERY_VAR ][ $query_var ] ) ? '☑' : '☐'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$checkbox = AMP_Debug::has_flag( $query_var ) ? '☑' : '☐'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		return sprintf( '<span class="amp-debug-option" style="font-family:Roboto,Oxygen-Sans,sans-serif;font-size:17px">%s</span> %s', $checkbox, esc_html( $title_text ) );
 	}
 

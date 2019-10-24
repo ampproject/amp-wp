@@ -346,6 +346,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::add_debugging_option_nodes()
 	 */
 	public function test_add_debugging_option_nodes() {
+		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
 		$wp_admin_bar = new AMP_Test_WP_Admin_Bar();
 		$amp_url      = add_query_arg( 'amp', '', 'https://example.com' );
 		AMP_Validation_Manager::add_debugging_option_nodes( $wp_admin_bar, $amp_url );
@@ -363,14 +364,14 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 			)
 		);
 
-		$query_var = 'disable_amp';
+		$query_var = AMP_Debug::DISABLE_AMP_QUERY_VAR;
 		$this->assertTrue(
 			in_array(
 				[
 					'parent' => $parent_node_id,
 					'id'     => $query_var,
 					'title'  => '<span class="amp-debug-option" style="font-family:Roboto,Oxygen-Sans,sans-serif;font-size:17px">☐</span> Disable AMP',
-					'href'   => add_query_arg( AMP_Theme_Support::AMP_FLAGS_QUERY_VAR, [ $query_var => '' ], $amp_url ),
+					'href'   => add_query_arg( AMP_Debug::AMP_FLAGS_QUERY_VAR, [ $query_var => 'true' ], $amp_url ),
 				],
 				$wp_admin_bar->nodes,
 				true
@@ -384,20 +385,21 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::get_debugging_option_title()
 	 */
 	public function test_get_debugging_option_title() {
-		$title = 'Foo title';
-		$query_var  = 'example_query_var';
+		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$title     = 'Foo title';
+		$query_var = AMP_Debug::PREVENT_REDIRECT_TO_NON_AMP_QUERY_VAR;
 
 		// The query var is not present, so this should return the same title it's passed.
 		$expected_title_unchecked = '<span class="amp-debug-option" style="font-family:Roboto,Oxygen-Sans,sans-serif;font-size:17px">☐</span> ' . $title;
 		$this->assertEquals( $expected_title_unchecked, AMP_Validation_Manager::get_debugging_option_title( $title, $query_var ) );
 
 		// The query var is present, but not under the top-level 'amp_flags' query var, so this should again return the same title it's passed.
-		$_GET[ $query_var ] = '';
+		$_GET[ $query_var ] = '1';
 		$this->assertEquals( $expected_title_unchecked, AMP_Validation_Manager::get_debugging_option_title( $title, $query_var ) );
 		$_GET = [];
 
 		// The query var is now present, so this should have the emoji in the returned title.
-		$_GET[ AMP_Theme_Support::AMP_FLAGS_QUERY_VAR ][ $query_var ] = '';
+		$_GET[ AMP_Debug::AMP_FLAGS_QUERY_VAR ][ $query_var ] = '1';
 		$this->assertEquals( '<span class="amp-debug-option" style="font-family:Roboto,Oxygen-Sans,sans-serif;font-size:17px">☑</span> ' . $title, AMP_Validation_Manager::get_debugging_option_title( $title, $query_var ) );
 	}
 

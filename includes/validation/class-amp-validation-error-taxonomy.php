@@ -2341,19 +2341,14 @@ class AMP_Validation_Error_Taxonomy {
 	 * @return bool|null The filtered sanitization, false meaning that it will be rejected, and null meaning to not change the sanitization.
 	 */
 	public static function conditionally_change_sanitization( $sanitized, $error ) {
-		if ( ! AMP_Validation_Manager::has_cap() ) {
-			return $sanitized;
-		}
-
-		if ( isset( $_GET[ AMP_Theme_Support::AMP_FLAGS_QUERY_VAR ][ self::REJECT_ALL_VALIDATION_ERRORS_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( AMP_Debug::has_flag( AMP_Debug::REJECT_ALL_VALIDATION_ERRORS_QUERY_VAR ) ) {
 			return false;
 		}
 
 		if (
-			isset(
-				$_GET[ AMP_Theme_Support::AMP_FLAGS_QUERY_VAR ][ self::ACCEPT_EXCESSIVE_CSS_ERROR_QUERY_VAR ], // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				$error['code']
-			)
+			AMP_Debug::has_flag( AMP_Debug::ACCEPT_EXCESSIVE_CSS_ERROR_QUERY_VAR )
+			&&
+			isset( $error['code'] )
 			&&
 			'excessive_css' === $error['code']
 		) {
