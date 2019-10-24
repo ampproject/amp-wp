@@ -61,11 +61,11 @@ const EditorCarousel = () => {
 		} else {
 			wrapper.current.style.display = '';
 
-			if ( isRTL ) {
-				wrapper.current.style.transform = `translateX(calc(-50% - ${ PAGE_BORDER }px + ${ ( STORY_PAGE_INNER_WIDTH + STORY_PAGE_MARGIN ) / 2 }px + ${ ( currentIndex ) * STORY_PAGE_MARGIN }px + ${ currentIndex * STORY_PAGE_INNER_WIDTH }px))`;
-			} else {
-				wrapper.current.style.transform = `translateX(calc(50% - ${ PAGE_BORDER }px - ${ ( STORY_PAGE_INNER_WIDTH + STORY_PAGE_MARGIN ) / 2 }px - ${ ( currentIndex ) * STORY_PAGE_MARGIN }px - ${ currentIndex * STORY_PAGE_INNER_WIDTH }px))`;
-			}
+			// Offset is number of pages times margin+width + plus a half.
+			const offset = ( currentIndex + .5 ) * ( STORY_PAGE_MARGIN + STORY_PAGE_INNER_WIDTH );
+			// Offset (and base value) changes with reading direction.
+			const factor = isRTL ? -1 : 1;
+			wrapper.current.style.transform = `translateX(calc(${ factor * 50 }% - ${ PAGE_BORDER }px - ${ factor * offset }px))`;
 		}
 	}, [ currentIndex, isReordering, wrapper, isRTL ] );
 
