@@ -111,20 +111,6 @@ class AMP_Validation_Error_Taxonomy {
 	const VALIDATION_ERRORS_CLEARED_QUERY_VAR = 'amp_validation_errors_cleared';
 
 	/**
-	 * Query var to reject all validation errors.
-	 *
-	 * @var string
-	 */
-	const REJECT_ALL_VALIDATION_ERRORS_QUERY_VAR = 'reject_all_errors';
-
-	/**
-	 * Query var to accept 'excessive_css' validation errors.
-	 *
-	 * @var string
-	 */
-	const ACCEPT_EXCESSIVE_CSS_ERROR_QUERY_VAR = 'accept_excessive_css';
-
-	/**
 	 * The <option> value to not filter at all, like for 'All Statuses'.
 	 *
 	 * This is also used in WP_List_Table, like for the 'Bulk Actions' option.
