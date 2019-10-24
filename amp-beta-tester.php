@@ -68,6 +68,7 @@ function restore_update_plugins_transient() {
  * @return void
  */
 function init() {
+	add_filter( 'plugins_api_result', __NAMESPACE__ . '\update_amp_plugin_information', 10, 3 );
 	add_filter( 'pre_set_site_transient_update_plugins', __NAMESPACE__ . '\update_amp_manifest' );
 }
 
@@ -101,6 +102,39 @@ function update_amp_manifest( $updates ) {
 	}
 
 	return $updates;
+}
+
+/**
+ * Update the AMP plugin information data to reflect that of the GitHub release.
+ *
+ * @param false|object|array $value  The result object or array. Default false.
+ * @param string             $action The type of information being requested from the Plugin Installation API.
+ * @param object             $args   Plugin API arguments.
+ * @return false|object|array Updated $value, or passed-through $value on failure.
+ */
+function update_amp_plugin_information( $value, $action, $args ) {
+	if ( 'plugin_information' !== $action || 'amp' !== $args->slug ) {
+		return $value;
+	}
+
+	$amp_version = get_amp_version();
+
+	if ( ! is_pre_release( $amp_version ) ) {
+		return $value;
+	}
+
+	$amp_manifest = get_amp_update_manifest( $amp_version );
+
+	if ( ! $amp_manifest ) {
+		return $value;
+	}
+
+	$value->version = $amp_version;
+
+	$value->download_link            = $amp_manifest->package;
+	$value->versions[ $amp_version ] = $amp_manifest->package;
+
+	return $value;
 }
 
 /**
