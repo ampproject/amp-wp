@@ -8,6 +8,7 @@ module.exports = function( grunt ) {
 	const productionIncludedRootFiles = [
 		'LICENSE',
 		'amp.php',
+		'amp-beta-tester.php',
 		'assets',
 		'back-compat',
 		'includes',
@@ -156,23 +157,25 @@ module.exports = function( grunt ) {
 					dest: 'build',
 					expand: true,
 					options: {
-						noProcess: [ '*/**', 'LICENSE' ], // That is, only process amp.php and readme.txt.
+						noProcess: [ '*/**', 'LICENSE', 'composer.*' ], // That is, only process amp.php, amp-beta-tester.php and readme.txt.
 						process( content, srcpath ) {
 							let matches, version, versionRegex;
-							if ( /amp\.php$/.test( srcpath ) ) {
+							const plugin = srcpath.match( /(amp|amp-beta-tester)\.php$/ );
+
+							if ( plugin ) {
 								versionRegex = /(\*\s+Version:\s+)(\d+(\.\d+)+-\w+)/;
 
 								// If not a stable build (e.g. 0.7.0-beta), amend the version with the git commit and current timestamp.
 								matches = content.match( versionRegex );
 								if ( matches ) {
 									version = matches[ 2 ] + '-' + versionAppend;
-									console.log( 'Updating version in amp.php to ' + version ); // eslint-disable-line no-console
+									console.log( 'Updating version in ' + plugin[ 0 ] + '.php to ' + version ); // eslint-disable-line no-console
 									content = content.replace( versionRegex, '$1' + version );
 									content = content.replace( /(define\(\s*'AMP__VERSION',\s*')(.+?)(?=')/, '$1' + version );
 								}
 
 								// Remove dev mode code blocks.
-								content = content.replace( /\n\/\/\s*DEV_CODE.+?\n}\n/s, '' );
+								content = content.replace( /\n\/\/\s*DEV_CODE.+?\n}\n/gs, '' );
 							}
 							return content;
 						},
