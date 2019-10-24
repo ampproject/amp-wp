@@ -22,7 +22,6 @@ const MediaInserter = () => {
 	const {
 		currentPage,
 		blockOrder,
-		showInserter,
 		mediaType,
 		allowedVideoMimeTypes,
 	} = useSelect( ( select ) => {
@@ -37,7 +36,6 @@ const MediaInserter = () => {
 			currentPage: _currentPage,
 			blockOrder: getBlockOrder( _currentPage ),
 			// As used in <HeaderToolbar> component
-			showInserter: select( 'core/edit-post' ).getEditorMode() === 'visual' && select( 'core/editor' ).getEditorSettings().richEditingEnabled,
 			mediaType: block && block.attributes.mediaType ? block.attributes.mediaType : '',
 			allowedVideoMimeTypes: getSettings().allowedVideoMimeTypes,
 		};
@@ -84,13 +82,11 @@ const MediaInserter = () => {
 			title: imageTitle,
 			icon: <BlockIcon icon={ 'format-image' } />,
 			onClick: () => mediaPicker( __( 'Select or Upload Media', 'amp' ), IMAGE_BACKGROUND_TYPE, updateBlock ),
-			disabled: ! showInserter,
 		},
 		{
 			title: videoTitle,
 			icon: <BlockIcon icon={ 'media-video' } />,
 			onClick: () => mediaPicker( __( 'Select or Upload Media', 'amp' ), allowedVideoMimeTypes, updateBlock ),
-			disabled: ! showInserter,
 		},
 	];
 
@@ -103,7 +99,6 @@ const MediaInserter = () => {
 		const item = {
 			title: sprintf( __( 'Insert %s', 'amp' ), blockType.title ),
 			onClick: () => insertBlockOnPage( block ),
-			disabled: ! showInserter,
 			icon: <BlockIcon icon={ blockType.icon } />,
 		};
 
