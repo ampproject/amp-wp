@@ -1011,6 +1011,10 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						display: inherit;
 					}
 
+					.menu-modal-inner {
+						height: 100%;
+					}
+
 					.admin-bar .cover-modal {
 						/* Use padding to shift down modal because amp-lightbox has top:0 !important. */
 						padding-top: 32px;
@@ -1505,6 +1509,10 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 		$modal_actions = [
 			"{$modal_id}.open"  => $open_xpaths,
+			// Although we add the 'show-modal' class here, we don't remove it again, as it will
+			// _first_ remove the correct positioning and only _then_ start the fade-out animation.
+			// See: https://youtu.be/aooq-liRtMs .
+			"{$modal_id}.toggleClass(class=show-modal,force=true)" => $open_xpaths,
 			"{$body_id}.toggleClass(class=showing-modal,force=true)" => $open_xpaths,
 			"{$modal_id}.close" => $close_xpaths,
 			"{$body_id}.toggleClass(class=showing-modal,force=false)" => $close_xpaths,
@@ -1751,7 +1759,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		$sub_menu = $this->xpath->query( "//*[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' sub-menu ' ) ]", $menu_item )->item( 0 );
+		$sub_menu = $this->xpath->query( ".//*[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' sub-menu ' ) ]", $menu_item )->item( 0 );
 
 		if ( ! $sub_menu instanceof DOMElement ) {
 			return $element;
