@@ -302,7 +302,7 @@ function is_amp_endpoint() {
 		return true;
 	}
 
-	// If a debugging value is present, AMP should be disabled.
+	// If a certain debugging flag is present, AMP should be disabled.
 	if ( AMP_Debug::has_flag( AMP_Debug::DISABLE_AMP_QUERY_VAR ) ) {
 		return false;
 	}
