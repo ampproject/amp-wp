@@ -77,13 +77,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	const SELECTOR_EXTRACTED_ATTRIBUTES = 3;
 
 	/**
-	 * A query var to disable tree shaking.
-	 *
-	 * @var string
-	 */
-	const DISABLE_TREE_SHAKING_QUERY_VAR = 'disable_tree_shaking';
-
-	/**
 	 * Array of flags used to control sanitization.
 	 *
 	 * @var array {

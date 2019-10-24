@@ -1399,7 +1399,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 
 		// With the query var present to reject all errors, this should return false.
 		$_GET[ AMP_Debug::AMP_FLAGS_QUERY_VAR ][ AMP_Debug::REJECT_ALL_VALIDATION_ERRORS_QUERY_VAR ] = '1';
-		$this->assertEquals( false, AMP_Validation_Error_Taxonomy::conditionally_change_sanitization( $initial_sanitization, [] ) );
+		$this->assertFalse( AMP_Validation_Error_Taxonomy::conditionally_change_sanitization( $initial_sanitization, [] ) );
 		$_GET = [];
 
 		// Though the query var to reject excessive_css errors is present, the error's code is wrong, so this shouldn't change the sanitization.
@@ -1408,7 +1408,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		$this->assertEquals( $initial_sanitization, AMP_Validation_Error_Taxonomy::conditionally_change_sanitization( $initial_sanitization, $error ) );
 
 		// Now that the error code is 'excessive_css', this should return true for the sanitization.
-		$this->assertEquals( true, AMP_Validation_Error_Taxonomy::conditionally_change_sanitization( $initial_sanitization, [ 'code' => 'excessive_css' ] ) );
+		$this->assertTrue( AMP_Validation_Error_Taxonomy::conditionally_change_sanitization( $initial_sanitization, [ 'code' => 'excessive_css' ] ) );
 	}
 
 	/**

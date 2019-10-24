@@ -1297,7 +1297,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		// The long <style> should not be removed, as this should not perform tree-shaking.
 		$this->assertTrue( in_array( $long_style_rule, $sanitizer->get_stylesheets(), true ) );
 
-		// There should be no 'excessive_css' error.
+		// There should be no 'excessive_css' error, or any other error.
 		$this->assertEmpty( $error_codes );
 	}
 

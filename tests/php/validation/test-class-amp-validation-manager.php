@@ -357,7 +357,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 				[
 					'parent' => 'amp',
 					'id'     => $parent_node_id,
-					'title'  => esc_html__( 'Debugging options', 'amp' ),
+					'title'  => 'Debugging options',
 				],
 				$wp_admin_bar->nodes,
 				true

@@ -23,7 +23,7 @@ class Test_AMP_Debug extends WP_UnitTestCase {
 	/**
 	 * Gets the testing data.
 	 *
-	 * @return array[] The query vars, the expected return value from them, and the $_GET value.
+	 * @return array[] The arguments for the method, the expected return values from them, and the $_GET values.
 	 */
 	public function get_query() {
 		return [
@@ -33,16 +33,16 @@ class Test_AMP_Debug extends WP_UnitTestCase {
 				[],
 			],
 			'valid_flag_but_without_top_level_query_var'   => [
-				'non-existent-flag-name',
+				AMP_Debug::DISABLE_TREE_SHAKING_QUERY_VAR,
 				false,
-				[ AMP_Debug::DISABLE_POST_PROCESSING_QUERY_VAR => '' ],
+				[ AMP_Debug::DISABLE_TREE_SHAKING_QUERY_VAR => '' ],
 			],
 			'valid_flag_passed_but_not_in_get_suberglobal' => [
 				AMP_Debug::DISABLE_POST_PROCESSING_QUERY_VAR,
 				false,
 				[ AMP_Debug::AMP_FLAGS_QUERY_VAR => [] ],
 			],
-			'valid_flag_but_empty_value'                   => [
+			'valid_flag_but_empty_string_value'            => [
 				AMP_Debug::DISABLE_POST_PROCESSING_QUERY_VAR,
 				false,
 				[ AMP_Debug::AMP_FLAGS_QUERY_VAR => [ AMP_Debug::DISABLE_POST_PROCESSING_QUERY_VAR => '' ] ],
@@ -92,7 +92,7 @@ class Test_AMP_Debug extends WP_UnitTestCase {
 	/**
 	 * Test has_flag, when the user does not have the right capability.
 	 *
-	 * Though this uses the @dataProvider, the return should be false every time,
+	 * Though this uses a @dataProvider, the return should be false every time,
 	 * as the user does not have the right capability.
 	 *
 	 * @dataProvider get_query
@@ -124,7 +124,7 @@ class Test_AMP_Debug extends WP_UnitTestCase {
 	 * @covers \AMP_Debug::get_all_query_vars()
 	 */
 	public function test_get_all_query_vars() {
-		$this->assertNotEmpty( AMP_Debug::get_all_query_vars() );
-		$this->assertTrue( is_array( AMP_Debug::get_all_query_vars() ) );
+		$all_query_vars = AMP_Debug::get_all_query_vars();
+		$this->assertEquals( 'Disable post-processing', $all_query_vars[ AMP_Debug::DISABLE_POST_PROCESSING_QUERY_VAR ] );
 	}
 }

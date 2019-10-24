@@ -562,7 +562,7 @@ class AMP_Validation_Manager {
 	 * @return string The debugging option title, possible with a 'check mark' emoji at the beginning.
 	 */
 	public static function get_debugging_option_title( $title_text, $query_var ) {
-		$checkbox = AMP_Debug::has_flag( $query_var ) ? '☑' : '☐'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$checkbox = AMP_Debug::has_flag( $query_var ) ? '☑' : '☐';
 		return sprintf( '<span class="amp-debug-option" style="font-family:Roboto,Oxygen-Sans,sans-serif;font-size:17px">%s</span> %s', $checkbox, esc_html( $title_text ) );
 	}
 

@@ -15,6 +15,9 @@ final class AMP_Debug {
 	/**
 	 * A top-level query var for AMP flags.
 	 *
+	 * Debugging query vars should follow this.
+	 * For example, https://example.com/?amp&amp_flags[disable_post_processing]=1
+	 *
 	 * @var string
 	 */
 	const AMP_FLAGS_QUERY_VAR = 'amp_flags';
@@ -62,7 +65,7 @@ final class AMP_Debug {
 	const ACCEPT_EXCESSIVE_CSS_ERROR_QUERY_VAR = 'accept_excessive_css';
 
 	/**
-	 * Query var to accept 'excessive_css' validation errors.
+	 * Query var to disable AMP.
 	 *
 	 * @var string
 	 */
@@ -91,17 +94,17 @@ final class AMP_Debug {
 	/**
 	 * Gets all of the debugging query vars.
 	 *
-	 * @return array All of the debugging query vars.
+	 * @return array An associative array of query var name => title.
 	 */
 	public static function get_all_query_vars() {
 		return [
-			self::DISABLE_POST_PROCESSING_QUERY_VAR      => esc_html__( 'Disable post-processing', 'amp' ),
-			self::DISABLE_RESPONSE_CACHE_QUERY_VAR       => esc_html__( 'Disable response cache', 'amp' ),
-			self::PREVENT_REDIRECT_TO_NON_AMP_QUERY_VAR  => esc_html__( 'Prevent redirect', 'amp' ),
-			self::REJECT_ALL_VALIDATION_ERRORS_QUERY_VAR => esc_html__( 'Reject all errors', 'amp' ),
-			self::ACCEPT_EXCESSIVE_CSS_ERROR_QUERY_VAR   => esc_html__( 'Accept excessive CSS', 'amp' ),
-			self::DISABLE_AMP_QUERY_VAR                  => esc_html__( 'Disable AMP', 'amp' ),
-			self::DISABLE_TREE_SHAKING_QUERY_VAR         => esc_html__( 'Disable tree shaking', 'amp' ),
+			self::DISABLE_POST_PROCESSING_QUERY_VAR      => __( 'Disable post-processing', 'amp' ),
+			self::DISABLE_RESPONSE_CACHE_QUERY_VAR       => __( 'Disable response cache', 'amp' ),
+			self::PREVENT_REDIRECT_TO_NON_AMP_QUERY_VAR  => __( 'Prevent redirect', 'amp' ),
+			self::REJECT_ALL_VALIDATION_ERRORS_QUERY_VAR => __( 'Reject all errors', 'amp' ),
+			self::ACCEPT_EXCESSIVE_CSS_ERROR_QUERY_VAR   => __( 'Accept excessive CSS', 'amp' ),
+			self::DISABLE_AMP_QUERY_VAR                  => __( 'Disable AMP', 'amp' ),
+			self::DISABLE_TREE_SHAKING_QUERY_VAR         => __( 'Disable tree shaking', 'amp' ),
 		];
 	}
 }
