@@ -72,7 +72,11 @@ final class AMP_Debug {
 	const DISABLE_AMP_QUERY_VAR = 'disable_amp';
 
 	/**
-	 * Gets whether the flag is present as a query var.
+	 * Gets whether the flag is present as a query var, and has a value of '1' or 'true'.
+	 *
+	 * The flag should be after the top-level flag of 'amp_flags'.
+	 * For example, with the flag 'disable_amp':
+	 * https://example.com/?amp&amp_flags[disable_amp]=1
 	 *
 	 * @param string $flag The name of the flag (query var).
 	 * @return bool Whether the flag is present as a query var.
