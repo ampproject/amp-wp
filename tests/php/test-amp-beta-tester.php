@@ -101,7 +101,7 @@ class AMP_Beta_Tester_Test extends WP_UnitTestCase {
 				$this->generate_plugins_manifest(
 					[
 						'no_update' => [
-							AMP_PLUGIN_FILE => $this->generate_amp_manifest( AMP__VERSION, false ),
+							AMP__PLUGIN__BASENAME => $this->generate_amp_manifest( AMP__VERSION, false ),
 						],
 					]
 				),
@@ -109,7 +109,7 @@ class AMP_Beta_Tester_Test extends WP_UnitTestCase {
 					[
 						'no_update' => [],
 						'response'  => [
-							AMP_PLUGIN_FILE => $this->generate_amp_manifest( '999.999.999', true ),
+							AMP__PLUGIN__BASENAME => $this->generate_amp_manifest( '999.999.999', true ),
 						],
 					]
 				),

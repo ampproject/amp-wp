@@ -16,7 +16,8 @@
 namespace AMP_Beta_Tester;
 
 define( 'AMP__BETA_TESTER__DIR__', dirname( __FILE__ ) );
-define( 'AMP_PLUGIN_FILE', 'amp/amp.php' );
+define( 'AMP__BETA__TESTER__RELEASES__TRANSIENT', 'amp_releases' );
+define( 'AMP__PLUGIN__BASENAME', 'amp/amp.php' );
 
 // DEV_CODE. This block of code is removed during the build process.
 if ( file_exists( AMP__BETA_TESTER__DIR__ . '/amp.php' ) ) {
@@ -39,6 +40,7 @@ if ( file_exists( AMP__BETA_TESTER__DIR__ . '/amp.php' ) ) {
 }
 
 register_activation_hook( __FILE__, __NAMESPACE__ . '\force_plugin_update_check' );
+register_deactivation_hook( __FILE__, __NAMESPACE__ . '\restore_update_plugins_transient' );
 add_action( 'plugins_loaded', __NAMESPACE__ . '\init' );
 
 /**
@@ -53,22 +55,24 @@ function force_plugin_update_check() {
 }
 
 /**
+ * Restore `update_plugins` transient and remove any plugin data.
+ */
+function restore_update_plugins_transient() {
+	delete_site_transient( AMP__BETA__TESTER__RELEASES__TRANSIENT );
+	delete_site_transient( 'update_plugins' );
+}
+
+/**
  * Hook into WP.
  *
  * @return void
  */
 function init() {
-	// Remind the user that an unstable AMP plugin is in use.
-	if ( defined( 'AMP__FILE__' ) ) {
-		add_action( 'admin_bar_menu', __NAMESPACE__ . '\show_unstable_reminder' );
-	}
-
 	add_filter( 'pre_set_site_transient_update_plugins', __NAMESPACE__ . '\update_amp_manifest' );
-	add_action( 'after_plugin_row_' . AMP_PLUGIN_FILE, __NAMESPACE__ . '\replace_view_version_details_link', 10, 2 );
 }
 
 /**
- * Modifies the AMP plugin manifest to point to a new beta update if one exists.
+ * Modifies the AMP plugin manifest to point to the latest non-stable update, if it exists.
  *
  * @param \stdClass $updates Object containing information on plugin updates.
  * @return \stdClass
@@ -78,50 +82,22 @@ function update_amp_manifest( $updates ) {
 		return $updates;
 	}
 
-	$amp_version = get_plugin_data( WP_PLUGIN_DIR . '/' . AMP_PLUGIN_FILE )['Version'];
-
-	if ( isset( $updates->response[ AMP_PLUGIN_FILE ] ) ) {
-		$manifest_type = 'response';
-	} elseif ( isset( $updates->no_update[ AMP_PLUGIN_FILE ] ) ) {
-		$manifest_type = 'no_update';
-	} else {
+	if ( ! get_current_amp_update_manifest() ) {
 		return $updates;
 	}
 
-	$amp_manifest = $updates->{$manifest_type}[ AMP_PLUGIN_FILE ];
+	$latest_manifest = get_amp_update_manifest();
 
-	$github_releases = get_amp_github_releases();
+	if ( ! $latest_manifest ) {
+		$current_manifest = get_amp_update_manifest( get_amp_version() );
 
-	if ( is_array( $github_releases ) ) {
-
-		foreach ( $github_releases as $release ) {
-			if ( true === $release->prerelease ) {
-				$release_version = $release->tag_name;
-
-				// If there is a new release, let's see if there is a zip available for download.
-				if ( version_compare( $release_version, $amp_version, '>' ) ) {
-					$has_zip = false;
-
-					foreach ( $release->assets as $asset ) {
-						if ( 'amp.zip' === $asset->name ) {
-							$amp_manifest->package = $asset->browser_download_url;
-							$has_zip               = true;
-							break;
-						}
-					}
-
-					$amp_manifest->new_version = $release_version;
-					$amp_manifest->url         = $release->html_url;
-
-					unset( $updates->{$manifest_type}[ AMP_PLUGIN_FILE ] );
-
-					if ( $has_zip ) {
-						$updates->response[ AMP_PLUGIN_FILE ] = $amp_manifest;
-						break;
-					}
-				}
-			}
+		if ( $current_manifest ) {
+			unset( $updates->response[ AMP__PLUGIN__BASENAME ] );
+			$updates->no_update[ AMP__PLUGIN__BASENAME ] = $current_manifest;
 		}
+	} else {
+		unset( $updates->no_update[ AMP__PLUGIN__BASENAME ] );
+		$updates->response[ AMP__PLUGIN__BASENAME ] = $latest_manifest;
 	}
 
 	return $updates;
@@ -130,44 +106,125 @@ function update_amp_manifest( $updates ) {
 /**
  * Fetch AMP releases from GitHub.
  *
- * @return array|null
+ * @return array|false
  */
 function get_amp_github_releases() {
 	$raw_response = wp_remote_get( 'https://api.github.com/repos/ampproject/amp-wp/releases' );
 	if ( is_wp_error( $raw_response ) ) {
-		return null;
+		return false;
 	}
 	return json_decode( $raw_response['body'] );
 }
 
 /**
- * Replace the 'View version details' link with the link to the release on GitHub.
+ * Retrieves the download url for amp.zip, if it exists.
  *
- * @param string $file Plugin file.
- * @param array  $plugin_data Plugin data.
+ * @param object $release GitHub release JSON object.
+ * @return string|false Download URL if it exists, false if not.
  */
-function replace_view_version_details_link( $file, $plugin_data ) {
-	$plugin_version = $plugin_data['Version'];
-
-	if ( is_pre_release( $plugin_version ) ) {
-		?>
-		<script>
-			document.addEventListener('DOMContentLoaded', function() {
-				const links = document.querySelectorAll("[data-slug='amp'] a.thickbox.open-plugin-details-modal");
-
-				links.forEach( (link) => {
-					link.className = 'overridden'; // Override class so that onclick listeners are disabled.
-					link.target = '_blank';
-					<?php
-					if ( isset( $plugin_data['url'] ) ) {
-						echo "link.href = '" . esc_url( $plugin_data['url'] ) . "';";
-					}
-					?>
-				} );
-			}, false);
-		</script>
-		<?php
+function get_download_url_from_amp_release($release ) {
+	foreach ( $release->assets as $asset ) {
+		if ( 'amp.zip' === $asset->name ) {
+			return $asset->browser_download_url;
+		}
 	}
+
+	return false;
+}
+
+/**
+ * Retrieves the current AMP update manifest, and updates it to include the analogous information
+ * from its GitHub release.
+ *
+ * @param object $release GitHub release JSON object.
+ * @return array|false Updated manifest, or false if it fails to retrieve the current update manifest.
+ */
+function generate_amp_update_manifest($release ) {
+	$current_manifest = get_current_amp_update_manifest();
+
+	if ( ! $current_manifest ) {
+		return false;
+	}
+
+	$manifest = [];
+	$zip_url  = get_download_url_from_amp_release( $release );
+
+	if ( $zip_url ) {
+		$manifest['package'] = $zip_url;
+	}
+
+	$manifest['new_version'] = $release->tag_name;
+	$manifest['url']         = $release->html_url;
+
+	return array_merge( (array) $current_manifest, $manifest );
+}
+
+/**
+ * Get the AMP plugin update manifest for the specified version from GitHub.
+ *
+ * @param string $version Version to get manifest for. Defaults to getting the latest pre-release.
+ * @return object|false Latest release, or false on failure.
+ */
+function get_amp_update_manifest($version = 'pre-release' ) {
+	$amp_manifest = null;
+	$releases     = get_site_transient( AMP__BETA__TESTER__RELEASES__TRANSIENT );
+
+	if ( empty( $releases ) ) {
+		$releases = get_amp_github_releases();
+		set_site_transient( AMP__BETA__TESTER__RELEASES__TRANSIENT, $releases, DAY_IN_SECONDS );
+	}
+
+	if ( is_array( $releases ) ) {
+		$amp_version = get_amp_version();
+
+		foreach ( $releases as $release ) {
+			if (
+				'pre-release' === $version
+				&& true === $release->prerelease
+				&& version_compare( $release->tag_name, $amp_version, '>' )
+			) {
+				$amp_manifest = generate_amp_update_manifest( $release );
+				break;
+			}
+
+			if ( $version === $release->tag_name ) {
+				$amp_manifest = generate_amp_update_manifest( $release );
+				break;
+			}
+		}
+	} else {
+		// Something went wrong fetching the releases.
+		return false;
+	}
+
+	if ( empty( $amp_manifest ) ) {
+		return false;
+	}
+
+	return (object) $amp_manifest;
+}
+
+/**
+ * Get the current AMP plugin update manifest.
+ *
+ * @return array|false Update manifest for current AMP plugin. False if it can't be retrieved.
+ */
+function get_current_amp_update_manifest() {
+	$updates = get_site_transient( 'update_plugins' );
+
+	if ( ! isset( $updates->response, $updates->no_update ) ) {
+		return false;
+	}
+
+	if ( isset( $updates->response[ AMP__PLUGIN__BASENAME ] ) ) {
+		$manifest = $updates->response[ AMP__PLUGIN__BASENAME ];
+	} elseif ( isset( $updates->no_update[ AMP__PLUGIN__BASENAME ] ) ) {
+		$manifest = $updates->no_update[ AMP__PLUGIN__BASENAME ];
+	} else {
+		return false;
+	}
+
+	return $manifest;
 }
 
 /**
@@ -181,19 +238,21 @@ function is_pre_release( $plugin_version ) {
 }
 
 /**
- * Displays the version code in the admin bar to act as a reminder that an unstable version
- * of AMP is being used.
+ * Get the current AMP version.
  *
- * @param WP_Admin_Bar $wp_admin_bar Admin bar.
+ * @param bool $strip_build_info Whether to strip build information or not.
+ * @return string Current AMP version.
  */
-function show_unstable_reminder( $wp_admin_bar ) {
-	if ( is_pre_release( AMP__VERSION ) ) {
-		$args = [
-			'parent' => 'amp',
-			'id'     => 'amp-version-code',
-			'title'  => sprintf( 'v%s', AMP__VERSION ),
-			'href'   => admin_url( 'plugins.php?s=amp&plugin_status=active' ),
-		];
-		$wp_admin_bar->add_node( $args );
+function get_amp_version( $strip_build_info = true ) {
+	$amp_version = defined( 'AMP__VERSION' )
+		? AMP__VERSION
+		: get_plugin_data( WP_PLUGIN_DIR . '/' . AMP__PLUGIN__BASENAME )['Version'];
+
+	if ( $strip_build_info ) {
+		// Strip the timestamp and commit hash from the plugin version if it exists.
+		preg_match( '/[^-]*-[^-]*/', $amp_version, $amp_version );
+		$amp_version = $amp_version[0];
 	}
+
+	return $amp_version;
 }
