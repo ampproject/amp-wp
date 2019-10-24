@@ -72,24 +72,29 @@ final class AMP_Debug {
 	const DISABLE_AMP_QUERY_VAR = 'disable_amp';
 
 	/**
-	 * Gets whether the flag is present as a query var, and has a value of '1' or 'true'.
+	 * Gets whether the flag as a query var should be considered true.
 	 *
+	 * If the flag is present but '', this will be true, like &amp_flags[disable_amp].
+	 * It will also be true if it is '1' or 'true', but false for most other values.
 	 * The flag should be after the top-level flag of 'amp_flags'.
 	 * For example, with the flag 'disable_amp':
 	 * https://example.com/?amp&amp_flags[disable_amp]=1
 	 *
 	 * @param string $flag The name of the flag (query var).
-	 * @return bool Whether the flag is present as a query var.
+	 * @return bool Whether the flag as a query var should be considered true.
 	 */
 	public static function has_flag( $flag ) {
+		if ( ! isset( $_GET[ self::AMP_FLAGS_QUERY_VAR ][ $flag ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return false;
+		}
+
+		$flag_query_var = $_GET[ self::AMP_FLAGS_QUERY_VAR ][ $flag ]; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if (
-			isset( $_GET[ self::AMP_FLAGS_QUERY_VAR ][ $flag ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			&&
 			array_key_exists( $flag, self::get_all_query_vars() )
 			&&
 			AMP_Validation_Manager::has_cap()
 		) {
-			return filter_var( $_GET[ self::AMP_FLAGS_QUERY_VAR ][ $flag ], FILTER_VALIDATE_BOOLEAN ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return '' === $flag_query_var ? true : filter_var( $flag_query_var, FILTER_VALIDATE_BOOLEAN );
 		}
 
 		return false;

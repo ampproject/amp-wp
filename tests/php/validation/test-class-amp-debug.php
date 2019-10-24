@@ -42,11 +42,6 @@ class Test_AMP_Debug extends WP_UnitTestCase {
 				false,
 				[ AMP_Debug::AMP_FLAGS_QUERY_VAR => [] ],
 			],
-			'valid_flag_but_empty_string_value'            => [
-				AMP_Debug::DISABLE_POST_PROCESSING_QUERY_VAR,
-				false,
-				[ AMP_Debug::AMP_FLAGS_QUERY_VAR => [ AMP_Debug::DISABLE_POST_PROCESSING_QUERY_VAR => '' ] ],
-			],
 			'valid_flag_but_false_as_string'               => [
 				AMP_Debug::DISABLE_POST_PROCESSING_QUERY_VAR,
 				false,
@@ -61,6 +56,11 @@ class Test_AMP_Debug extends WP_UnitTestCase {
 				AMP_Debug::DISABLE_POST_PROCESSING_QUERY_VAR,
 				false,
 				[ AMP_Debug::AMP_FLAGS_QUERY_VAR => [ AMP_Debug::DISABLE_POST_PROCESSING_QUERY_VAR => '5555' ] ],
+			],
+			'valid_flag_but_empty_string_value'            => [
+				AMP_Debug::DISABLE_POST_PROCESSING_QUERY_VAR,
+				true,
+				[ AMP_Debug::AMP_FLAGS_QUERY_VAR => [ AMP_Debug::DISABLE_POST_PROCESSING_QUERY_VAR => '' ] ],
 			],
 			'valid_flag_with_1_as_string'                  => [
 				AMP_Debug::DISABLE_POST_PROCESSING_QUERY_VAR,
