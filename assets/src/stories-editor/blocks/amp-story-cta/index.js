@@ -7,10 +7,10 @@ import { createBlock, getBlockAttributes } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
+import blockIcon from '../../../../images/stories-editor/call-to-action.svg';
 import edit from './edit';
 import save from './save';
 import deprecated from './deprecated';
-import blockIcon from '../../../../images/stories-editor/call-to-action.svg';
 
 const schema = {
 	url: {
@@ -22,7 +22,7 @@ const schema = {
 	text: {
 		type: 'string',
 		source: 'html',
-		selector: 'a',
+		selector: '.amp-cta-content',
 	},
 	// The rest of the color attributes are added by addAMPAttributes()
 	customTextColor: {
@@ -39,7 +39,13 @@ const schema = {
 	},
 	btnPositionLeft: {
 		type: 'number',
-		default: 30,
+		default: 5,
+	},
+	btnWidth: {
+		type: 'number',
+	},
+	btnHeight: {
+		type: 'number',
 	},
 };
 

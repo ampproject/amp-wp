@@ -72,7 +72,11 @@ class AMP_Validation_Callback_Wrapper implements ArrayAccess {
 		// Keep track of which source enqueued the styles.
 		if ( isset( $wp_styles, $wp_styles->queue ) ) {
 			foreach ( array_diff( $wp_styles->queue, $before_styles_enqueued ) as $handle ) {
-				AMP_Validation_Manager::$enqueued_style_sources[ $handle ][] = array_merge( $this->callback['source'], compact( 'handle' ) );
+				AMP_Validation_Manager::$enqueued_style_sources[ $handle ][] = array_merge(
+					$this->callback['source'],
+					[ 'dependency_type' => 'style' ],
+					compact( 'handle' )
+				);
 			}
 		}
 
@@ -87,7 +91,11 @@ class AMP_Validation_Callback_Wrapper implements ArrayAccess {
 				}
 
 				foreach ( $handles as $handle ) {
-					AMP_Validation_Manager::$enqueued_script_sources[ $handle ][] = array_merge( $this->callback['source'], compact( 'handle' ) );
+					AMP_Validation_Manager::$enqueued_script_sources[ $handle ][] = array_merge(
+						$this->callback['source'],
+						[ 'dependency_type' => 'script' ],
+						compact( 'handle' )
+					);
 				}
 			}
 		}

@@ -117,6 +117,19 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			$this->did_convert_elements = true;
 			if ( empty( $normalized_attributes['layout'] ) && ! empty( $normalized_attributes['width'] ) && ! empty( $normalized_attributes['height'] ) ) {
 				$normalized_attributes['layout'] = 'intrinsic';
+
+				// Set layout to responsive if the iframe is aligned to full width.
+				$figure_node = null;
+				if ( $node->parentNode instanceof DOMElement && 'figure' === $node->parentNode->tagName ) {
+					$figure_node = $node->parentNode;
+				}
+				if ( $node->parentNode->parentNode instanceof DOMElement && 'figure' === $node->parentNode->parentNode->tagName ) {
+					$figure_node = $node->parentNode->parentNode;
+				}
+				if ( $figure_node && $figure_node->hasAttribute( 'class' ) && in_array( 'alignfull', explode( ' ', $figure_node->getAttribute( 'class' ) ), true ) ) {
+					$normalized_attributes['layout'] = 'responsive';
+				}
+
 				$this->add_or_append_attribute( $normalized_attributes, 'class', 'amp-wp-enforced-sizes' );
 			}
 

@@ -36,6 +36,7 @@ const withActivePageState = ( BlockListBlock ) => {
 				'amp-page-active': isTopLevelBlock && isActivePage,
 				'amp-page-inactive': isTopLevelBlock && ! isActivePage,
 				'amp-page-is-animating': isPlayingAnimation,
+				'amp-page-block': true,
 			},
 			isLocked: ! isActivePage,
 		};

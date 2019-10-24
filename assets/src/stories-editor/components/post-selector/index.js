@@ -335,7 +335,7 @@ PostSelector.propTypes = {
 	instanceId: PropTypes.number.isRequired,
 	labelText: PropTypes.string,
 	setTimeout: PropTypes.func,
-	searchablePostTypes: PropTypes.array,
+	searchablePostTypes: PropTypes.arrayOf( PropTypes.string ),
 	onChange: PropTypes.func.isRequired,
 	onSelect: PropTypes.func.isRequired,
 	placeholder: PropTypes.string,

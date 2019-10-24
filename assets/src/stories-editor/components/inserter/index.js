@@ -18,9 +18,7 @@ import { ReactElement } from 'react';
  */
 import { __ } from '@wordpress/i18n';
 import { Dropdown, IconButton } from '@wordpress/components';
-import { Component } from '@wordpress/element';
-import { compose, ifCondition } from '@wordpress/compose';
-import { withSelect } from '@wordpress/data';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -47,15 +45,21 @@ defaultRenderToggle.propTypes = {
 	isOpen: PropTypes.bool,
 };
 
-class Inserter extends Component {
-	onToggle = ( isOpen ) => {
-		const { onToggle } = this.props;
+const Inserter = ( props ) => {
+	const { position, rootClientId, clientId, isAppender } = props;
 
-		// Surface toggle callback to parent component
-		if ( onToggle ) {
-			onToggle( isOpen );
-		}
+	const isReordering = useSelect( ( select ) => select( 'amp/story' ).isReordering(), [] );
+
+	if ( isReordering ) {
+		return null;
 	}
+
+	const onToggle = ( isOpen ) => {
+		// Surface toggle callback to parent component
+		if ( props.onToggle ) {
+			props.onToggle( isOpen );
+		}
+	};
 
 	/**
 	 * Render callback to display Dropdown toggle element.
@@ -66,14 +70,10 @@ class Inserter extends Component {
 	 *
 	 * @return {ReactElement} Dropdown toggle element.
 	 */
-	renderToggle = ( { onToggle, isOpen } ) => {
-		const {
-			disabled,
-			renderToggle = defaultRenderToggle,
-		} = this.props;
-
-		return renderToggle( { onToggle, isOpen, disabled } );
-	}
+	const renderToggle = ( { onToggle: toggle, isOpen } ) => {
+		const render = props.renderToggle || defaultRenderToggle;
+		return render( { onToggle: toggle, isOpen } );
+	};
 
 	/**
 	 * Render callback to display Dropdown content element.
@@ -82,63 +82,42 @@ class Inserter extends Component {
 	 *
 	 * @return {ReactElement} Dropdown content element.
 	 */
-	renderContent = ( { onClose } ) => {
-		const { rootClientId, clientId, isAppender } = this.props;
-
+	const renderContent = ( { onClose: onSelect } ) => {
 		return (
 			<InserterMenu
-				onSelect={ onClose }
+				onSelect={ onSelect }
 				rootClientId={ rootClientId }
 				clientId={ clientId }
 				isAppender={ isAppender }
 			/>
 		);
-	}
+	};
 
-	render() {
-		const { position } = this.props;
+	renderContent.propTypes = {
+		onClose: PropTypes.func,
+	};
 
-		return (
-			<Dropdown
-				className="editor-inserter block-editor-inserter"
-				contentClassName="editor-inserter__popover block-editor-inserter__popover"
-				position={ position }
-				onToggle={ this.onToggle }
-				expandOnMobile
-				headerTitle={ __( 'Add element', 'amp' ) }
-				renderToggle={ this.renderToggle }
-				renderContent={ this.renderContent }
-			/>
-		);
-	}
-}
+	return (
+		<Dropdown
+			className="editor-inserter block-editor-inserter"
+			contentClassName="editor-inserter__popover block-editor-inserter__popover"
+			position={ position }
+			onToggle={ onToggle }
+			expandOnMobile
+			headerTitle={ __( 'Add element', 'amp' ) }
+			renderToggle={ renderToggle }
+			renderContent={ renderContent }
+		/>
+	);
+};
 
 Inserter.propTypes = {
 	onToggle: PropTypes.func,
-	disabled: PropTypes.bool,
 	renderToggle: PropTypes.func,
 	position: PropTypes.string,
 	rootClientId: PropTypes.string,
 	clientId: PropTypes.string,
 	isAppender: PropTypes.bool,
-	showInserter: PropTypes.bool,
 };
 
-const applyWithSelect = withSelect( ( select ) => {
-	const { isReordering } = select( 'amp/story' );
-
-	// As used in <HeaderToolbar> component
-	const showInserter = select( 'core/edit-post' ).getEditorMode() === 'visual' && select( 'core/editor' ).getEditorSettings().richEditingEnabled;
-
-	return {
-		isReordering: isReordering(),
-		disabled: ! showInserter,
-	};
-} );
-
-export default compose(
-	applyWithSelect,
-	ifCondition(
-		( { isReordering } ) => ! isReordering
-	),
-)( Inserter );
+export default Inserter;

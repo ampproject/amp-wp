@@ -35,18 +35,17 @@ class AMP_Options_Manager {
 	 * @var array
 	 */
 	protected static $defaults = [
-		'experiences'              => [ self::WEBSITE_EXPERIENCE ],
-		'theme_support'            => AMP_Theme_Support::READER_MODE_SLUG,
-		'supported_post_types'     => [ 'post' ],
-		'analytics'                => [],
-		'auto_accept_sanitization' => true,
-		'all_templates_supported'  => true,
-		'supported_templates'      => [ 'is_singular' ],
-		'enable_response_caching'  => true,
-		'version'                  => AMP__VERSION,
-		'story_templates_version'  => false,
-		'story_export_base_url'    => '',
-		'story_settings'           => [
+		'experiences'             => [ self::WEBSITE_EXPERIENCE ],
+		'theme_support'           => AMP_Theme_Support::READER_MODE_SLUG,
+		'supported_post_types'    => [ 'post' ],
+		'analytics'               => [],
+		'all_templates_supported' => true,
+		'supported_templates'     => [ 'is_singular' ],
+		'enable_response_caching' => true,
+		'version'                 => AMP__VERSION,
+		'story_templates_version' => false,
+		'story_export_base_url'   => '',
+		'story_settings'          => [
 			'auto_advance_after'          => '',
 			'auto_advance_after_duration' => 0,
 		],
@@ -158,6 +157,11 @@ class AMP_Options_Manager {
 			$options['theme_support'] = $defaults['theme_support'];
 		}
 
+		// Remove 'auto_accept_sanitization' option as of 1.4.
+		if ( isset( $options['auto_accept_sanitization'] ) ) {
+			unset( $options['auto_accept_sanitization'] );
+		}
+
 		return $options;
 	}
 
@@ -250,8 +254,6 @@ class AMP_Options_Manager {
 				add_action( 'update_option_' . self::OPTION_NAME, [ __CLASS__, 'handle_updated_theme_support_option' ] );
 			}
 		}
-
-		$options['auto_accept_sanitization'] = ! empty( $new_options['auto_accept_sanitization'] );
 
 		// Validate post type support.
 		if ( in_array( self::WEBSITE_EXPERIENCE, $options['experiences'], true ) || isset( $new_options['supported_post_types'] ) ) {

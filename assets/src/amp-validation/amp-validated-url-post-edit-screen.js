@@ -245,7 +245,7 @@ const handleSearching = () => {
 		const detailsQuery = document.querySelectorAll( 'tbody .column-details' );
 
 		/*
-		 * Iterate through the 'Details' column of each row.
+		 * Iterate through the 'Context' (formerly 'Details') column of each row.
 		 * If the search query is not present, hide the row.
 		 */
 		let numberErrorsDisplaying = 0;
@@ -286,26 +286,32 @@ const updateSelectIcon = ( select ) => {
 };
 
 /**
+ * Set the row status class.
+ *
+ * @param {HTMLSelectElement} select Select element.
+ */
+const setRowStatusClass = ( select ) => {
+	const acceptedValue = 3;
+	const rejectedValue = 2;
+	const status = parseInt( select.options[ select.selectedIndex ].value );
+	const row = select.closest( 'tr' );
+
+	row.classList.toggle( 'new', isNaN( status ) );
+	row.classList.toggle( 'accepted', acceptedValue === status );
+	row.classList.toggle( 'rejected', rejectedValue === status );
+};
+
+/**
  * Handles a change in the error status, like from 'New' to 'Accepted'.
  *
  * Gets the data-status-icon value from the newly-selected <option>.
  * And sets this as the src of the status icon <img>.
  */
 const handleStatusChange = () => {
-	const setRowStatusClass = ( { row, select } ) => {
-		const acceptedValue = 3;
-		const rejectedValue = 2;
-		const status = parseInt( select.options[ select.selectedIndex ].value );
-
-		row.classList.toggle( 'new', isNaN( status ) );
-		row.classList.toggle( 'accepted', acceptedValue === status );
-		row.classList.toggle( 'rejected', rejectedValue === status );
-	};
-
-	const onChange = ( { event, row, select } ) => {
+	const onChange = ( { event, select } ) => {
 		if ( event.target.matches( 'select' ) ) {
 			updateSelectIcon( event.target );
-			setRowStatusClass( { row, select } );
+			setRowStatusClass( select );
 		}
 	};
 
@@ -313,7 +319,7 @@ const handleStatusChange = () => {
 		const select = row.querySelector( '.amp-validation-error-status' );
 
 		if ( select ) {
-			setRowStatusClass( { row, select } );
+			setRowStatusClass( /** @type {HTMLSelectElement} */ select );
 			select.addEventListener( 'change', ( event ) => {
 				onChange( { event, row, select } );
 			} );
@@ -370,6 +376,7 @@ const handleBulkActions = () => {
 			if ( select.closest( 'tr' ).querySelector( '.check-column input[type=checkbox]' ).checked ) {
 				select.value = '3';
 				updateSelectIcon( select );
+				setRowStatusClass( select );
 				addBeforeUnloadPrompt();
 			}
 		} );
@@ -381,6 +388,7 @@ const handleBulkActions = () => {
 			if ( select.closest( 'tr' ).querySelector( '.check-column input[type=checkbox]' ).checked ) {
 				select.value = '2';
 				updateSelectIcon( select );
+				setRowStatusClass( select );
 				addBeforeUnloadPrompt();
 			}
 		} );

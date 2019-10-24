@@ -18,7 +18,7 @@ const BlockSave = ( { attributes } ) => {
 		ooyalaProps.width = width;
 	}
 	return (
-		<amp-ooyala-player { ...ooyalaProps }></amp-ooyala-player>
+		<amp-ooyala-player { ...ooyalaProps } />
 	);
 };
 

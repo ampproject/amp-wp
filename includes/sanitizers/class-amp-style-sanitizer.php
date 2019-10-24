@@ -88,6 +88,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *      @type bool     $should_locate_sources      Whether to locate the sources when reporting validation errors.
 	 *      @type string   $parsed_cache_variant       Additional value by which to vary parsed cache.
 	 *      @type string   $include_manifest_comment   Whether to show the manifest HTML comment in the response before the style[amp-custom] element. Can be 'always', 'never', or 'when_excessive'.
+	 *      @type string[] $focus_within_classes       Class names in selectors that should be replaced with :focus-within pseudo classes.
 	 * }
 	 */
 	protected $args;
@@ -108,6 +109,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		'should_locate_sources'     => false,
 		'parsed_cache_variant'      => null,
 		'include_manifest_comment'  => 'always',
+		'focus_within_classes'      => [ 'focus' ],
 	];
 
 	/**
@@ -181,6 +183,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	private $used_class_names;
+
+	/**
+	 * Regular expression pattern to match focus class names in selectors.
+	 *
+	 * The computed pattern is cached to prevent re-constructing for each processed selector.
+	 *
+	 * @var string|null
+	 */
+	private $focus_class_name_selector_pattern;
 
 	/**
 	 * Attributes used in the document.
@@ -449,6 +460,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			 * Note that amp-referrer-* class names are handled in has_used_class_name() below.
 			 */
 			'amp-viewer',
+
+			// Classes added based on input mode. See <https://github.com/ampproject/amphtml/blob/master/spec/amp-css-classes.md#input-mode-classes>.
+			'amp-mode-touch',
+			'amp-mode-mouse',
+			'amp-mode-keyboard-active',
 		];
 
 		$classes = ' ';
@@ -501,115 +517,136 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		foreach ( $class_names as $class_name ) {
-			// Class names for amp-dynamic-css-classes, see <https://www.ampproject.org/docs/reference/components/amp-dynamic-css-classes>.
-			if ( 'amp-referrer-' === substr( $class_name, 0, 13 ) ) {
+			// Bail early with a common case scenario.
+			if ( isset( $this->used_class_names[ $class_name ] ) ) {
 				continue;
 			}
 
-			/*
-			 * Common class names used for amp-user-notification and amp-live-list.
-			 * See <https://www.ampproject.org/docs/reference/components/amp-user-notification#styling>.
-			 * See <https://www.ampproject.org/docs/reference/components/amp-live-list#styling>.
-			 */
-			if ( 'amp-active' === $class_name || 'amp-hidden' === $class_name ) {
-				if ( ! $this->has_used_tag_names( [ 'amp-live-list' ] ) && ! $this->has_used_tag_names( [ 'amp-user-notification' ] ) ) {
-					return false;
-				}
-				continue;
-			}
-
-			// Class names for amp-carousel, see <https://www.ampproject.org/docs/reference/components/amp-carousel#styling>.
-			if ( 'amp-carousel-' === substr( $class_name, 0, 13 ) ) {
-				if ( ! $this->has_used_tag_names( [ 'amp-carousel' ] ) ) {
-					return false;
-				}
-				continue;
-			}
-
-			// Class names for amp-date-picker, see <https://www.ampproject.org/docs/reference/components/amp-date-picker>.
-			if ( 'amp-date-picker-' === substr( $class_name, 0, 16 ) ) {
-				if ( ! $this->has_used_tag_names( [ 'amp-date-picker' ] ) ) {
-					return false;
-				}
-				continue;
-			}
-
-			// Class names for amp-form, see <https://www.ampproject.org/docs/reference/components/amp-form#classes-and-css-hooks>.
-			if ( 'amp-form-' === substr( $class_name, 0, 9 ) || 'user-valid' === $class_name || 'user-invalid' === $class_name ) {
-				if ( ! $this->has_used_tag_names( [ 'form' ] ) ) {
-					return false;
-				}
-				continue;
-			}
-
-			// Class names for extensions which use the video-manager, and thus video-autoplay.css.
-			if ( 'amp-video-' === substr( $class_name, 0, 10 ) ) {
-				foreach ( $this->video_autoplay_elements as $video_autoplay_element ) {
-					if ( $this->has_used_tag_names( [ $video_autoplay_element ] ) ) {
-						continue 2;
+			// Check exact matches first, as they are faster.
+			switch ( $class_name ) {
+				/*
+				 * Common class names used for amp-user-notification and amp-live-list.
+				 * See <https://www.ampproject.org/docs/reference/components/amp-user-notification#styling>.
+				 * See <https://www.ampproject.org/docs/reference/components/amp-live-list#styling>.
+				 */
+				case 'amp-active':
+				case 'amp-hidden':
+					if ( ! $this->has_used_tag_names( [ 'amp-live-list', 'amp-user-notification' ] ) ) {
+						return false;
 					}
-				}
-				return false;
+					continue 2;
+				// Class names for amp-image-lightbox, see <https://www.ampproject.org/docs/reference/components/amp-image-lightbox#styling>.
+				case 'amp-image-lightbox-caption':
+					if ( ! $this->has_used_tag_names( [ 'amp-image-lightbox' ] ) ) {
+						return false;
+					}
+					continue 2;
+				// Class names for amp-form, see <https://www.ampproject.org/docs/reference/components/amp-form#classes-and-css-hooks>.
+				case 'user-valid':
+				case 'user-invalid':
+					if ( ! $this->has_used_tag_names( [ 'form' ] ) ) {
+						return false;
+					}
+					continue 2;
 			}
 
-			/*
-			 * Class names for amp-access and amp-access-laterpay.
-			 * See <https://www.ampproject.org/docs/reference/components/amp-access>.
-			 * See <https://www.ampproject.org/docs/reference/components/amp-access-laterpay#styling>
-			 */
-			if ( 'amp-access-' === substr( $class_name, 0, 11 ) ) {
-				if ( ! $this->has_used_attributes( [ 'amp-access' ] ) ) {
-					return false;
-				}
-				continue;
-			}
+			// Only do AMP element-specific checks on an AMP components with the corresponding prefix.
+			if ( 'amp-' === substr( $class_name, 0, 4 ) ) {
 
-			// Class names for amp-geo, see <https://www.ampproject.org/docs/reference/components/amp-geo#generated-css-classes>.
-			if ( 'amp-geo-' === substr( $class_name, 0, 8 ) || 'amp-iso-country-' === substr( $class_name, 0, 16 ) ) {
-				if ( ! $this->has_used_tag_names( [ 'amp-geo' ] ) ) {
-					return false;
+				// Class names for amp-geo, see <https://www.ampproject.org/docs/reference/components/amp-geo#generated-css-classes>.
+				if ( 'amp-geo-' === substr( $class_name, 0, 8 ) ) {
+					if ( ! $this->has_used_tag_names( [ 'amp-geo' ] ) ) {
+						return false;
+					}
+					continue;
 				}
-				continue;
-			}
 
-			// Class names for amp-image-lightbox, see <https://www.ampproject.org/docs/reference/components/amp-image-lightbox#styling>.
-			if ( 'amp-image-lightbox-caption' === $class_name ) {
-				if ( ! $this->has_used_tag_names( [ 'amp-image-lightbox' ] ) ) {
-					return false;
+				// Class names for amp-form, see <https://www.ampproject.org/docs/reference/components/amp-form#classes-and-css-hooks>.
+				if ( 'amp-form-' === substr( $class_name, 0, 9 ) ) {
+					if ( ! $this->has_used_tag_names( [ 'form' ] ) ) {
+						return false;
+					}
+					continue;
 				}
-				continue;
-			}
 
-			// Class names for amp-live-list, see <https://www.ampproject.org/docs/reference/components/amp-live-list#styling>.
-			if ( 'amp-live-list-' === substr( $class_name, 0, 14 ) ) {
-				if ( ! $this->has_used_tag_names( [ 'amp-live-list' ] ) ) {
+				// Class names for extensions which use the video-manager, and thus video-autoplay.css.
+				if ( 'amp-video-' === substr( $class_name, 0, 10 ) ) {
+					foreach ( $this->video_autoplay_elements as $video_autoplay_element ) {
+						if ( $this->has_used_tag_names( [ $video_autoplay_element ] ) ) {
+							continue 2;
+						}
+					}
 					return false;
 				}
-				continue;
-			}
 
-			// Class names for amp-sidebar, see <https://www.ampproject.org/docs/reference/components/amp-sidebar#styling-toolbar>.
-			if ( 'amp-sidebar-' === substr( $class_name, 0, 12 ) ) {
-				if ( ! $this->has_used_tag_names( [ 'amp-sidebar' ] ) ) {
-					return false;
+				switch ( substr( $class_name, 0, 11 ) ) {
+					/*
+					 * Class names for amp-access and amp-access-laterpay.
+					 * See <https://www.ampproject.org/docs/reference/components/amp-access>.
+					 * See <https://www.ampproject.org/docs/reference/components/amp-access-laterpay#styling>
+					 */
+					case 'amp-access-':
+						if ( ! $this->has_used_attributes( [ 'amp-access' ] ) ) {
+							return false;
+						}
+						continue 2;
+					// Class names for amp-video-docking, see <https://github.com/ampproject/amphtml/blob/master/extensions/amp-video-docking/amp-video-docking.md#styling>.
+					case 'amp-docked-':
+						if ( ! $this->has_used_attributes( [ 'dock' ] ) ) {
+							return false;
+						}
+						continue 2;
 				}
-				continue;
-			}
 
-			// Class names for amp-sticky-ad, see <https://www.ampproject.org/docs/reference/components/amp-sticky-ad#styling>.
-			if ( 'amp-sticky-ad-' === substr( $class_name, 0, 14 ) ) {
-				if ( ! $this->has_used_tag_names( [ 'amp-sticky-ad' ] ) ) {
-					return false;
+				// Class names for amp-sidebar, see <https://www.ampproject.org/docs/reference/components/amp-sidebar#styling-toolbar>.
+				if ( 'amp-sidebar-' === substr( $class_name, 0, 12 ) ) {
+					if ( ! $this->has_used_tag_names( [ 'amp-sidebar' ] ) ) {
+						return false;
+					}
+					continue;
 				}
-				continue;
-			}
 
-			// Class names for amp-video-docking, see <https://github.com/ampproject/amphtml/blob/master/extensions/amp-video-docking/amp-video-docking.md#styling>.
-			if ( 'amp-docked-' === substr( $class_name, 0, 11 ) ) {
-				if ( ! $this->has_used_attributes( [ 'dock' ] ) ) {
-					return false;
+				switch ( substr( $class_name, 0, 13 ) ) {
+					// Class names for amp-dynamic-css-classes, see <https://www.ampproject.org/docs/reference/components/amp-dynamic-css-classes>.
+					case 'amp-referrer-':
+						continue 2;
+					// Class names for amp-carousel, see <https://www.ampproject.org/docs/reference/components/amp-carousel#styling>.
+					case 'amp-carousel-':
+						if ( ! $this->has_used_tag_names( [ 'amp-carousel' ] ) ) {
+							return false;
+						}
+						continue 2;
 				}
-				continue;
+
+				switch ( substr( $class_name, 0, 14 ) ) {
+					// Class names for amp-sticky-ad, see <https://www.ampproject.org/docs/reference/components/amp-sticky-ad#styling>.
+					case 'amp-sticky-ad-':
+						if ( ! $this->has_used_tag_names( [ 'amp-sticky-ad' ] ) ) {
+							return false;
+						}
+						continue 2;
+					// Class names for amp-live-list, see <https://www.ampproject.org/docs/reference/components/amp-live-list#styling>.
+					case 'amp-live-list-':
+						if ( ! $this->has_used_tag_names( [ 'amp-live-list' ] ) ) {
+							return false;
+						}
+						continue 2;
+				}
+
+				switch ( substr( $class_name, 0, 16 ) ) {
+					// Class names for amp-date-picker, see <https://www.ampproject.org/docs/reference/components/amp-date-picker>.
+					case 'amp-date-picker-':
+						if ( ! $this->has_used_tag_names( [ 'amp-date-picker' ] ) ) {
+							return false;
+						}
+						continue 2;
+					// Class names for amp-geo, see <https://www.ampproject.org/docs/reference/components/amp-geo#generated-css-classes>.
+					case 'amp-iso-country-':
+						if ( ! $this->has_used_tag_names( [ 'amp-geo' ] ) ) {
+							return false;
+						}
+						continue 2;
+				}
 			}
 
 			if ( ! isset( $this->used_class_names[ $class_name ] ) ) {
@@ -747,6 +784,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		if ( ! empty( $this->args['allow_dirty_styles'] ) ) {
 			return;
 		}
+
+		$this->focus_class_name_selector_pattern = (
+			! empty( $this->args['focus_within_classes'] ) ?
+				self::get_class_name_selector_pattern( $this->args['focus_within_classes'] ) :
+				null
+		);
 
 		$this->head = $this->dom->getElementsByTagName( 'head' )->item( 0 );
 		if ( ! $this->head ) {
@@ -1350,7 +1393,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private function process_stylesheet( $stylesheet, $options = [] ) {
 		$parsed      = null;
 		$cache_key   = null;
-		$cache_group = 'amp-parsed-stylesheet-v19'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
+		$cache_group = 'amp-parsed-stylesheet-v21'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
 
 		$cache_impacting_options = array_merge(
 			wp_array_slice_assoc(
@@ -1550,7 +1593,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$this->imported_font_urls = [];
 		try {
 			// Remove spaces from data URLs, which cause errors and PHP-CSS-Parser can't handle them.
-			$stylesheet_string = $this->remove_spaces_from_data_urls( $stylesheet_string );
+			$stylesheet_string = $this->remove_spaces_from_url_values( $stylesheet_string );
 
 			$parser_settings = Sabberworm\CSS\Settings::create();
 			$css_parser      = new Sabberworm\CSS\Parser( $stylesheet_string, $parser_settings );
@@ -1833,16 +1876,17 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Remove spaces from data URLs which PHP-CSS-Parser doesn't handle.
+	 * Remove spaces from CSS URL values which PHP-CSS-Parser doesn't handle.
 	 *
 	 * @since 1.0
 	 *
 	 * @param string $css CSS.
-	 * @return string CSS with spaces removed from data URLs.
+	 * @return string CSS with spaces removed from URLs.
 	 */
-	private function remove_spaces_from_data_urls( $css ) {
+	private function remove_spaces_from_url_values( $css ) {
 		return preg_replace_callback(
-			'/\burl\([^}]*?\)/',
+			// Match CSS url() values that don't have quoted string values.
+			'/\burl\(\s*(?=\w)(?P<url>[^}]*?\s*)\)/',
 			static function( $matches ) {
 				return preg_replace( '/\s+/', '', $matches[0] );
 			},
@@ -2482,7 +2526,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			foreach ( $pending_stylesheet['stylesheet'] as $j => $part ) {
 				if ( is_string( $part ) && 0 === strpos( $part, '@import' ) ) {
 					$stylesheet_groups[ $pending_stylesheet['group'] ]['import_front_matter'] .= $part;
-					unset( $this->pending_stylesheets['stylesheet'][ $j ][ $i ] );
+					unset( $this->pending_stylesheets[ $i ]['stylesheet'][ $j ] );
 				}
 			}
 
@@ -2833,6 +2877,21 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$before_type_selector_pattern = '(?<=^|\(|\s|>|\+|~|,|})';
 			$after_type_selector_pattern  = '(?=$|[^a-zA-Z0-9_-])';
 
+			// Replace focus selectors with :focus-within.
+			if ( $this->focus_class_name_selector_pattern ) {
+				$count    = 0;
+				$selector = preg_replace(
+					$this->focus_class_name_selector_pattern,
+					':focus-within',
+					$selector,
+					-1,
+					$count
+				);
+				if ( $count > 0 ) {
+					$has_changed_selectors = true;
+				}
+			}
+
 			/*
 			 * Loop over each selector mappings. A single HTML tag can map to multiple AMP tags (e.g. img could be amp-img or amp-anim).
 			 * The $selector_mappings array contains ~6 items, so rest easy your O(n^3) eyes when seeing triple nested loops!
@@ -2883,6 +2942,27 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		if ( $has_changed_selectors ) {
 			$ruleset->setSelectors( $selectors );
 		}
+	}
+
+	/**
+	 * Given a list of class names, create a regular expression pattern to match them in a selector.
+	 *
+	 * @since 1.4
+	 *
+	 * @param string[] $class_names Class names.
+	 * @return string Regular expression pattern.
+	 */
+	private static function get_class_name_selector_pattern( $class_names ) {
+		$class_pattern = implode(
+			'|',
+			array_map(
+				static function ( $class_name ) {
+					return preg_quote( $class_name, '/' );
+				},
+				(array) $class_names
+			)
+		);
+		return "/\.({$class_pattern})(?=$|[^a-zA-Z0-9_-])/";
 	}
 
 	/**

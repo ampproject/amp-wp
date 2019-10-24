@@ -13,30 +13,30 @@ import { withDispatch, useSelect, useDispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { copyTextToClipBoard, ensureAllowedBlocksOnPaste, isPageBlock } from '../../helpers';
+import { copyTextToClipBoard, isPageBlock, useIsBlockAllowedOnPage, useDisplayPasteError } from '../../helpers';
 
 function CopyPasteHandler( { children, onCopy, clientId, isSelected } ) {
 	const {
-		isFirstPage,
 		canUserUseUnfilteredHTML,
 		getCopiedMarkupState,
+		blocksOnPage,
 	} = useSelect(
 		( select ) => {
-			const {
-				getBlockOrder,
-				getSettings,
-			} = select( 'core/block-editor' );
+			const { getSettings, getBlockOrder } = select( 'core/block-editor' );
 			const { __experimentalCanUserUseUnfilteredHTML } = getSettings();
 			const { getCopiedMarkup } = select( 'amp/story' );
 			return {
-				isFirstPage: getBlockOrder().indexOf( clientId ) === 0,
 				canUserUseUnfilteredHTML: __experimentalCanUserUseUnfilteredHTML,
 				getCopiedMarkupState: getCopiedMarkup,
+				blocksOnPage: getBlockOrder( clientId ),
 			};
-		}, [ clientId ]
+		},
+		[ clientId ]
 	);
 
-	const { insertBlocks } = useDispatch( 'core/block-editor' );
+	const { insertBlock } = useDispatch( 'core/block-editor' );
+	const isBlockAllowedOnPage = useIsBlockAllowedOnPage();
+	const displayPasteError = useDisplayPasteError();
 
 	const onPaste = ( event ) => {
 		// Ignore if the Page is not the selected page.
@@ -75,9 +75,17 @@ function CopyPasteHandler( { children, onCopy, clientId, isSelected } ) {
 			canUserUseUnfilteredHTML,
 		} );
 
-		if ( content.length > 0 ) {
-			insertBlocks( ensureAllowedBlocksOnPaste( content, clientId, isFirstPage ), null, clientId );
+		if ( ! clientId || ! content.length ) {
+			return;
 		}
+
+		content.forEach( ( pastedBlock ) => {
+			if ( isBlockAllowedOnPage( pastedBlock.name, clientId ) ) {
+				insertBlock( pastedBlock, blocksOnPage.length, clientId );
+			} else {
+				displayPasteError( pastedBlock.name );
+			}
+		} );
 	};
 
 	return (
@@ -88,9 +96,9 @@ function CopyPasteHandler( { children, onCopy, clientId, isSelected } ) {
 }
 
 CopyPasteHandler.propTypes = {
-	children: PropTypes.object.isRequired,
+	children: PropTypes.node.isRequired,
 	clientId: PropTypes.string.isRequired,
-	isSelected: PropTypes.bool.isRequired,
+	isSelected: PropTypes.bool,
 	onCopy: PropTypes.func.isRequired,
 };
 

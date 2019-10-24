@@ -5,6 +5,11 @@
  */
 export async function selectBlockByClassName( className ) {
 	// We have to select the page first and then the block inside.
-	await page.click( '.amp-page-active' );
-	await page.click( `.${ className }` );
+	const pageSelector = '.amp-page-active';
+	await page.waitForSelector( pageSelector );
+	await page.click( pageSelector );
+
+	const blockSelector = `.${ className }`;
+	await page.waitForSelector( blockSelector );
+	await page.click( blockSelector );
 }

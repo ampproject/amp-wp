@@ -2,8 +2,8 @@
  * Internal dependencies
  */
 import { enforceFileSize } from '../';
-import { Mock, AlternateMock, MockSelectionError } from './fixtures/mockClasses';
 import { FILE_SIZE_ERROR_VIEW } from '../../constants';
+import { Mock, AlternateMock, MockSelectionError } from './fixtures/mockClasses';
 
 describe( 'enforceFileSize', () => {
 	it( 'should have a new error when the video file size is too big', () => {

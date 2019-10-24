@@ -1392,6 +1392,12 @@ class AMP_Theme_Support {
 			$header_callback();
 			$style = ob_get_clean();
 			$data  = trim( preg_replace( '#<style[^>]*>(.*)</style>#is', '$1', $style ) ); // See wp_add_inline_style().
+
+			// Override AMP's position:relative on the body for the sake of the AMP viewer, which is not relevant an an Admin Bar context.
+			if ( amp_is_dev_mode() ) {
+				$data .= 'html:not(#_) > body { position:unset !important; }';
+			}
+
 			wp_add_inline_style( 'admin-bar', $data );
 		}
 
@@ -1543,15 +1549,29 @@ class AMP_Theme_Support {
 			$head->appendChild( $script );
 		}
 
-		// Ensure rel=canonical link.
-		$links         = [];
+		// Gather all links.
+		$links         = [
+			'preconnect' => [
+				// Include preconnect link for AMP CDN for browsers that don't support preload.
+				AMP_DOM_Utils::create_node(
+					$dom,
+					'link',
+					[
+						'rel'  => 'preconnect',
+						'href' => 'https://cdn.ampproject.org',
+					]
+				),
+			],
+		];
 		$link_elements = $head->getElementsByTagName( 'link' );
-		$rel_canonical = null;
 		foreach ( $link_elements as $link ) {
 			if ( $link->hasAttribute( 'rel' ) ) {
 				$links[ $link->getAttribute( 'rel' ) ][] = $link;
 			}
 		}
+
+		// Ensure rel=canonical link.
+		$rel_canonical = null;
 		if ( empty( $links['canonical'] ) ) {
 			$rel_canonical = AMP_DOM_Utils::create_node(
 				$dom,
@@ -2115,7 +2135,7 @@ class AMP_Theme_Support {
 				AMP_HTTP::send_server_timing( 'amp_processor_cache_hit', -$prepare_response_start );
 
 				// Redirect to non-AMP version.
-				if ( ! amp_is_canonical() && $blocking_error_count > 0 ) {
+				if ( ! amp_is_canonical() && ! is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) && $blocking_error_count > 0 ) {
 					if ( AMP_Validation_Manager::has_cap() ) {
 						$non_amp_url = add_query_arg( AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR, $blocking_error_count, $non_amp_url );
 					}
@@ -2196,7 +2216,7 @@ class AMP_Theme_Support {
 
 		// Make sure scripts from the body get moved to the head.
 		if ( isset( $head ) ) {
-			foreach ( $xpath->query( '//body//script[ @custom-element or @custom-template ]' ) as $script ) {
+			foreach ( $xpath->query( '//body//script[ @custom-element or @custom-template or @src = "https://cdn.ampproject.org/v0.js" ]' ) as $script ) {
 				$head->appendChild( $script->parentNode->removeChild( $script ) );
 			}
 		}
@@ -2247,7 +2267,7 @@ class AMP_Theme_Support {
 			 * already surfaced inside of WordPress. This is intended to not serve dirty AMP, but rather a
 			 * non-AMP document (intentionally not valid AMP) that contains the AMP runtime and AMP components.
 			 */
-			if ( amp_is_canonical() ) {
+			if ( amp_is_canonical() || is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
 				$dom->documentElement->removeAttribute( 'amp' );
 				$dom->documentElement->removeAttribute( '⚡️' );
 

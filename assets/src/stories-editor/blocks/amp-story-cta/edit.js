@@ -8,164 +8,146 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Component } from '@wordpress/element';
-import {
-	Dashicon,
-	IconButton,
-} from '@wordpress/components';
-import {
-	URLInput,
-	RichText,
-} from '@wordpress/block-editor';
+import { useState, useEffect } from '@wordpress/element';
+import { Dashicon, IconButton } from '@wordpress/components';
+import { URLInput, RichText } from '@wordpress/block-editor';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import './edit.css';
-import { select } from '@wordpress/data';
-import { getUniqueId, setInputSelectionToEnd } from '../../helpers';
+import { getUniqueId, getPercentageFromPixels, setInputSelectionToEnd } from '../../helpers';
 import { getBackgroundColorWithOpacity } from '../../../common/helpers';
 import { DraggableText } from '../../components';
+import { STORY_PAGE_INNER_HEIGHT_FOR_CTA } from '../../constants';
 
-class CallToActionEdit extends Component {
-	constructor( props ) {
-		super( props );
+// Total padding of top + bottom (vertical) / left + right (horizontal).
+const CTA_BUTTON_PADDING_VERTICAL = 14;
+const CTA_BUTTON_PADDING_HORIZONTAL = 48;
 
-		if ( ! props.attributes.anchor ) {
-			this.props.setAttributes( { anchor: getUniqueId() } );
+const CallToActionEdit = ( {
+	attributes,
+	backgroundColor,
+	className,
+	clientId,
+	fontSize,
+	isSelected,
+	name,
+	setAttributes,
+	textColor,
+} ) => {
+	const {
+		anchor,
+		text,
+		url,
+		customBackgroundColor,
+		opacity,
+		btnPositionTop,
+		btnPositionLeft,
+	} = attributes;
+
+	const [ isEditing, setIsEditing ] = useState( false );
+	const [ hasOverlay, setHasOverlay ] = useState( true );
+
+	useEffect( () => {
+		if ( ! anchor ) {
+			setAttributes( { anchor: getUniqueId() } );
 		}
+	}, [ anchor, setAttributes ] );
 
-		this.state = {
-			isEditing: false,
-			hasOverlay: true,
-		};
-
-		this.nodeRef = null;
-	}
-
-	bindRef = ( node ) => {
-		if ( ! node ) {
-			return;
-		}
-		this.nodeRef = node;
-	}
-
-	toggleIsEditing = ( enable ) => {
-		if ( enable !== this.state.isEditing ) {
-			this.setState( {
-				isEditing: ! this.state.isEditing,
-			} );
-		}
-	}
-
-	toggleOverlay = ( add ) => {
-		if ( add !== this.state.hasOverlay ) {
-			this.setState( {
-				hasOverlay: ! this.state.hasOverlay,
-			} );
-		}
-	}
-
-	componentDidUpdate( prevProps, prevState ) {
-		const { isSelected } = this.props;
+	useEffect( () => {
 		// If the block was unselected, make sure that it's not editing anymore.
-		if ( ! isSelected && prevProps.isSelected ) {
-			this.toggleIsEditing( false );
-			this.toggleOverlay( true );
+		if ( ! isSelected ) {
+			setIsEditing( false );
+			setHasOverlay( true );
 		}
-		if ( this.state.isEditing && ! prevState.isEditing ) {
+	}, [ isSelected ] );
+
+	useEffect( () => {
+		if ( isEditing ) {
 			setInputSelectionToEnd( '.is-selected .amp-block-story-cta__link' );
 		}
-	}
+	}, [ isEditing ] );
 
-	render() {
-		const {
-			attributes,
-			backgroundColor,
-			className,
-			clientId,
-			fontSize,
-			isSelected,
-			name,
-			setAttributes,
-			textColor,
-		} = this.props;
+	const colors = useSelect( ( select ) => {
+		const { getSettings } = select( 'core/block-editor' );
+		const settings = getSettings();
 
-		const {
-			text,
-			url,
-			customBackgroundColor,
-			opacity,
-			btnPositionTop,
-			btnPositionLeft,
-		} = attributes;
+		return settings.colors;
+	}, [] );
 
-		const { isEditing, hasOverlay } = this.state;
+	const appliedBackgroundColor = getBackgroundColorWithOpacity( colors, backgroundColor, customBackgroundColor, opacity );
 
-		const { colors } = select( 'core/block-editor' ).getSettings();
-		const appliedBackgroundColor = getBackgroundColorWithOpacity( colors, backgroundColor, customBackgroundColor, opacity );
+	const placeholder = __( 'Add text…', 'amp' );
+	const textWrapperClass = classnames(
+		'amp-block-story-cta__link', {
+			'has-background': backgroundColor.color,
+			'has-text-color': textColor.color,
+			[ textColor.class ]: textColor.class,
+		}
+	);
+	const textStyle = {
+		color: textColor.color,
+		fontSize: fontSize.size ? fontSize.size + 'px' : undefined,
+	};
 
-		const placeholder = __( 'Add text…', 'amp' );
-		const textWrapperClass = classnames(
-			'amp-block-story-cta__link', {
-				'has-background': backgroundColor.color,
-				'has-text-color': textColor.color,
-				[ textColor.class ]: textColor.class,
-			}
-		);
-		const textStyle = {
-			color: textColor.color,
-			fontSize: fontSize.size ? fontSize.size + 'px' : undefined,
-		};
-		return (
-			<>
-				<div className="amp-story-cta-button" id={ `amp-story-cta-button-${ clientId }` } style={ { top: `${ btnPositionTop }%`, left: `${ btnPositionLeft }%` } } >
-					<div className={ className } ref={ this.bindRef } style={ { backgroundColor: appliedBackgroundColor } }>
-						{ isEditing && (
-							<RichText
-								placeholder={ placeholder }
-								value={ text }
-								onChange={ ( value ) => setAttributes( { text: value } ) }
-								className={ textWrapperClass }
-								style={ textStyle }
-							/>
-						) }
-						{ ! isEditing &&
-							<DraggableText
-								blockElementId={ `amp-story-cta-button-${ clientId }` }
-								clientId={ clientId }
-								name={ name }
-								isDraggable={ true }
-								isEditing={ isEditing }
-								isSelected={ isSelected }
-								hasOverlay={ hasOverlay }
-								toggleIsEditing={ this.toggleIsEditing }
-								toggleOverlay={ this.toggleOverlay }
-								text={ text }
-								textStyle={ textStyle }
-								textWrapperClass={ textWrapperClass }
-								placeholder={ placeholder }
-							/>
-						}
-					</div>
-					{ isSelected && isEditing && (
-						<form
-							className="amp-block-story-cta__inline-link"
-							onSubmit={ ( event ) => event.preventDefault() }>
-							<Dashicon icon="admin-links" />
-							<URLInput
-								value={ url }
-								onChange={ ( value ) => setAttributes( { url: value } ) }
-								autoFocus={ false /* eslint-disable-line jsx-a11y/no-autofocus */ }
-							/>
-							<IconButton icon="editor-break" label={ __( 'Apply', 'amp' ) } type="submit" />
-						</form>
-					) }
-				</div>
-			</>
-		);
-	}
-}
+	return (
+		<div className="amp-story-cta-button" id={ `amp-story-cta-button-${ clientId }` } style={ { top: `${ btnPositionTop }%`, left: `${ btnPositionLeft }%` } } >
+			<div className={ className } style={ { backgroundColor: appliedBackgroundColor } }>
+				{ isEditing ? (
+					<RichText
+						placeholder={ placeholder }
+						value={ text }
+						onChange={ ( value ) => {
+							setAttributes( { text: value } );
+							// Also update width and height based on the room that the CTA button takes.
+							const element = document.querySelector( `#amp-story-cta-button-${ clientId } .wp-block-amp-amp-story-cta` );
+							// Deduct the padding since this will be added extra otherwise.
+							const btnWidth = getPercentageFromPixels( 'x', element.clientWidth - CTA_BUTTON_PADDING_HORIZONTAL );
+							const btnHeight = getPercentageFromPixels( 'y', element.clientHeight - CTA_BUTTON_PADDING_VERTICAL, STORY_PAGE_INNER_HEIGHT_FOR_CTA );
+							setAttributes( {
+								btnWidth,
+								btnHeight,
+							} );
+						} }
+						className={ textWrapperClass }
+						style={ textStyle }
+					/>
+				) : (
+					<DraggableText
+						blockElementId={ `amp-story-cta-button-${ clientId }` }
+						clientId={ clientId }
+						name={ name }
+						isDraggable={ true }
+						isEditing={ isEditing }
+						isSelected={ isSelected }
+						hasOverlay={ hasOverlay }
+						toggleIsEditing={ setIsEditing }
+						toggleOverlay={ setHasOverlay }
+						text={ text }
+						textStyle={ textStyle }
+						textWrapperClass={ textWrapperClass }
+						placeholder={ placeholder }
+					/>
+				) }
+			</div>
+			{ isSelected && isEditing && (
+				<form
+					className="amp-block-story-cta__inline-link"
+					onSubmit={ ( event ) => event.preventDefault() }>
+					<Dashicon icon="admin-links" />
+					<URLInput
+						value={ url }
+						onChange={ ( value ) => setAttributes( { url: value } ) }
+						autoFocus={ false /* eslint-disable-line jsx-a11y/no-autofocus */ }
+					/>
+					<IconButton icon="editor-break" label={ __( 'Apply', 'amp' ) } type="submit" />
+				</form>
+			) }
+		</div>
+	);
+};
 
 CallToActionEdit.propTypes = {
 	attributes: PropTypes.shape( {

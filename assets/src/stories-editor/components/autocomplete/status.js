@@ -31,33 +31,35 @@ const Status = ( {
 		content = tResults( length, contentSelectedOption );
 	}
 
-	return <div
-		aria-atomic="true"
-		aria-live="polite"
-		role="status"
-		style={ {
-			border: '0',
-			clip: 'rect(0 0 0 0)',
-			height: '1px',
-			marginBottom: '-1px',
-			marginRight: '-1px',
-			overflow: 'hidden',
-			padding: '0',
-			position: 'absolute',
-			whiteSpace: 'nowrap',
-			width: '1px',
-		} }
-	>
-		{ content }
-		{ queryTooShort && ','.repeat( queryLength ) }
-	</div>;
+	return (
+		<div
+			aria-atomic="true"
+			aria-live="polite"
+			role="status"
+			style={ {
+				border: '0',
+				clip: 'rect(0 0 0 0)',
+				height: '1px',
+				marginBottom: '-1px',
+				marginRight: '-1px',
+				overflow: 'hidden',
+				padding: '0',
+				position: 'absolute',
+				whiteSpace: 'nowrap',
+				width: '1px',
+			} }
+		>
+			{ content }
+			{ queryTooShort && ','.repeat( queryLength ) }
+		</div>
+	);
 };
 
 Status.propTypes = {
 	length: PropTypes.number.isRequired,
 	queryLength: PropTypes.number.isRequired,
 	minQueryLength: PropTypes.number.isRequired,
-	selectedOption: PropTypes.func,
+	selectedOption: PropTypes.string,
 	selectedOptionIndex: PropTypes.number,
 	tQueryTooShort: PropTypes.func.isRequired,
 	tNoResults: PropTypes.func.isRequired,

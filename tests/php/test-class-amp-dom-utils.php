@@ -559,4 +559,340 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$this->assertNull( $dom->getElementsByTagName( 'head' )->item( 0 )->firstChild );
 		$this->assertEquals( 6, $dom->getElementsByTagName( 'body' )->item( 0 )->childNodes->length );
 	}
+
+	public function get_has_class_data() {
+		$dom = new DOMDocument();
+
+		return [
+			// Element without class attribute.
+			[ AMP_DOM_Utils::create_node( $dom, 'div', [] ), 'target-class', false ],
+			// Single class being checked.
+			[ AMP_DOM_Utils::create_node( $dom, 'div', [ 'class' => 'target-class' ] ), 'target-class', true ],
+			// Single class not being checked.
+			[ AMP_DOM_Utils::create_node( $dom, 'div', [ 'class' => 'some-class' ] ), 'target-class', false ],
+			// Multiple classes with match at the beginning.
+			[ AMP_DOM_Utils::create_node( $dom, 'div', [ 'class' => 'target-class some-class some-other-class something else' ] ), 'target-class', true ],
+			// Multiple classes with match in the middle.
+			[ AMP_DOM_Utils::create_node( $dom, 'div', [ 'class' => 'some-class some-other-class target-class something else' ] ), 'target-class', true ],
+			// Multiple classes with match at the end.
+			[ AMP_DOM_Utils::create_node( $dom, 'div', [ 'class' => 'some-class some-other-class something else target-class' ] ), 'target-class', true ],
+			// Multiple classes with match and random whitespace.
+			[ AMP_DOM_Utils::create_node( $dom, 'div', [ 'class' => '  some-class    some-other-class   target-class   something   else   target-class  ' ] ), 'target-class', true ],
+			// Multiple classes without match.
+			[ AMP_DOM_Utils::create_node( $dom, 'div', [ 'class' => 'some-class some-other-class something else' ] ), 'target-class', false ],
+			// Single class with UTF-8.
+			[ AMP_DOM_Utils::create_node( $dom, 'div', [ 'class' => 'some-class Iñtërnâtiônàlizætiøn some-other-class' ] ), 'Iñtërnâtiônàlizætiøn', true ],
+			// Target class in other attribute
+			[ AMP_DOM_Utils::create_node( $dom, 'div', [ 'some-attribute' => 'target-class' ] ), 'target-class', false ],
+		];
+	}
+
+	/**
+	 * Test has_class().
+	 *
+	 * @dataProvider get_has_class_data
+	 * @covers \AMP_DOM_Utils::has_class()
+	 */
+	public function test_has_class( DOMElement $element, $class, $expected ) {
+		$actual = AMP_DOM_Utils::has_class( $element, $class );
+		$this->assertEquals( $expected, $actual );
+	}
+
+	public function get_get_element_id_data() {
+		$dom = new DOMDocument();
+
+		$same_element = AMP_DOM_Utils::create_node( $dom, 'div', [] );
+
+		return [
+			// Element with existing ID
+			[ AMP_DOM_Utils::create_node( $dom, 'div', [ 'id' => 'my-id' ] ), 'some-prefix', 'my-id' ],
+			// Element without ID
+			[ AMP_DOM_Utils::create_node( $dom, 'div', [] ), 'some-prefix', 'some-prefix' ],
+			// Another element without ID with same prefix
+			[ AMP_DOM_Utils::create_node( $dom, 'div', [] ), 'some-prefix', 'some-prefix-2' ],
+			// Another element without ID with different prefix
+			[ AMP_DOM_Utils::create_node( $dom, 'div', [] ), 'other-prefix', 'other-prefix' ],
+			// Another element without ID with different prefix again
+			[ AMP_DOM_Utils::create_node( $dom, 'div', [] ), 'other-prefix', 'other-prefix-2' ],
+			// Another element without ID with first prefix again
+			[ AMP_DOM_Utils::create_node( $dom, 'div', [] ), 'some-prefix', 'some-prefix-3' ],
+			// Element with existing prefix again
+			[ AMP_DOM_Utils::create_node( $dom, 'div', [ 'id' => 'another-id' ] ), 'some-prefix', 'another-id' ],
+			// Same element first time
+			[ $same_element, 'some-prefix', 'some-prefix-4' ],
+			// Same element second time
+			[ $same_element, 'some-prefix', 'some-prefix-4' ],
+		];
+	}
+
+	/**
+	 * Test get_element_id().
+	 *
+	 * @dataProvider get_get_element_id_data
+	 * @covers \AMP_DOM_Utils::get_element_id()
+	 */
+	public function test_get_element_id( DOMElement $element, $prefix, $expected ) {
+		$actual = AMP_DOM_Utils::get_element_id( $element, $prefix );
+		$this->assertEquals( $expected, $actual );
+	}
+
+	public function get_add_amp_action_data() {
+		$dom    = new DOMDocument();
+		$button = AMP_DOM_Utils::create_node( $dom, 'button', [] );
+		$form   = AMP_DOM_Utils::create_node( $dom, 'form', [] );
+
+		return [
+			// Add a toggle class on tap to a button
+			[ $button, 'tap', "some-id.toggleClass(class='some-class')", "tap:some-id.toggleClass(class='some-class')" ],
+			// Add another toggle class on tap to a button
+			[ $button, 'tap', "some-other-id.toggleClass(class='some-class')", "tap:some-id.toggleClass(class='some-class'),some-other-id.toggleClass(class='some-class')" ],
+			// Add a third toggle class on tap to a button
+			[ $button, 'tap', "third-id.toggleClass(class='some-class')", "tap:some-id.toggleClass(class='some-class'),some-other-id.toggleClass(class='some-class'),third-id.toggleClass(class='some-class')" ],
+			// Add some other event to a button
+			[ $button, 'event', 'action', "tap:some-id.toggleClass(class='some-class'),some-other-id.toggleClass(class='some-class'),third-id.toggleClass(class='some-class');event:action" ],
+			// Add another action to the second event to a button
+			[ $button, 'event', 'other-action', "tap:some-id.toggleClass(class='some-class'),some-other-id.toggleClass(class='some-class'),third-id.toggleClass(class='some-class');event:action,other-action" ],
+			// Add fourth action to the tap event to a button
+			[ $button, 'tap', 'lightbox', "tap:some-id.toggleClass(class='some-class'),some-other-id.toggleClass(class='some-class'),third-id.toggleClass(class='some-class'),lightbox;event:action,other-action" ],
+			// Add a submit success action to a form
+			[ $form, 'submit-success', 'success-lightbox', 'submit-success:success-lightbox' ],
+			// Add a submit error action to a form
+			[ $form, 'submit-error', 'error-lightbox', 'submit-success:success-lightbox;submit-error:error-lightbox' ],
+			// Make sure separators within methods won't break
+			[ AMP_DOM_Utils::create_node( $dom, 'div', [ 'on' => "event:action(method='with problematic characters , : ;')" ] ), 'event', "second-action('with problematic characters , : ;')", "event:action(method='with problematic characters , : ;'),second-action('with problematic characters , : ;')" ],
+		];
+	}
+
+	/**
+	 * Test add_amp_action().
+	 *
+	 * @dataProvider get_add_amp_action_data
+	 * @covers \AMP_DOM_Utils::add_amp_action()
+	 */
+	public function test_add_amp_action( DOMElement $element, $event, $action, $expected ) {
+		AMP_DOM_Utils::add_amp_action( $element, $event, $action );
+		$this->assertEquals( $expected, $element->getAttribute( 'on' ) );
+	}
+
+
+	public function get_merge_amp_actions_data() {
+		return [
+			// Both empty.
+			[ '', '', '' ],
+			// First empty.
+			[ '', "tap:some-id.toggleClass(class='some-class')", "tap:some-id.toggleClass(class='some-class')" ],
+			// Second empty.
+			[ "tap:some-id.toggleClass(class='some-class')", '', "tap:some-id.toggleClass(class='some-class')" ],
+			// Same event.
+			[ "tap:first-id.toggleClass(class='some-class')", "tap:second-id.toggleClass(class='some-class')", "tap:first-id.toggleClass(class='some-class'),second-id.toggleClass(class='some-class')" ],
+			// Same event twice.
+			[ "tap:first-id.toggleClass(class='some-class'),second-id.toggleClass(class='some-class')", "tap:third-id.toggleClass(class='some-class'),fourth.toggleClass(class='some-class')", "tap:first-id.toggleClass(class='some-class'),second-id.toggleClass(class='some-class'),third-id.toggleClass(class='some-class'),fourth.toggleClass(class='some-class')" ],
+			// Different events.
+			[ 'submit-success:success-lightbox', 'submit-error:error-lightbox', 'submit-success:success-lightbox;submit-error:error-lightbox' ],
+			// Two different events twice.
+			[ 'submit-success:success-lightbox;submit-error:error-lightbox', 'submit-success:success-modal;submit-error:error-modal', 'submit-success:success-lightbox,success-modal;submit-error:error-lightbox,error-modal' ],
+			// Make sure separators within methods won't break
+			[ "event:action(method='with problematic characters , : ;'),second-action('with problematic characters , : ;')", "another-event:another-action(method='with problematic characters , : ;'),second-action('with problematic characters , : ;')", "event:action(method='with problematic characters , : ;'),second-action('with problematic characters , : ;');another-event:another-action(method='with problematic characters , : ;'),second-action('with problematic characters , : ;')" ],
+			// Duplicates should be stripped.
+			[ 'event:action,other-action,action;other-event:action,other-action,action', 'event:action;other-event:action;event:action', 'event:action,other-action;other-event:action,other-action' ],
+		];
+	}
+
+	/**
+	 * Test merge_amp_actions().
+	 *
+	 * @dataProvider get_merge_amp_actions_data
+	 * @covers \AMP_DOM_Utils::merge_amp_actions()
+	 */
+	public function test_merge_amp_actions( $first, $second, $expected ) {
+		$actual = AMP_DOM_Utils::merge_amp_actions( $first, $second );
+		$this->assertEquals( $expected, $actual );
+	}
+
+	public function get_copy_attributes_data() {
+		$dom = new DOMDocument();
+
+		return [
+			// No attributes from full to empty.
+			[
+				'',
+				AMP_DOM_Utils::create_node(
+					$dom,
+					'div',
+					[
+						'class'          => 'class-c class-d',
+						'on'             => 'other-event:other-action',
+						'some-attribute' => 'value-b',
+					]
+				),
+				AMP_DOM_Utils::create_node( $dom, 'div', [] ),
+				[],
+			],
+			// No attributes from empty to full.
+			[
+				'',
+				AMP_DOM_Utils::create_node( $dom, 'div', [] ),
+				AMP_DOM_Utils::create_node(
+					$dom,
+					'div',
+					[
+						'class'          => 'class-a class-b',
+						'on'             => 'event:action',
+						'some-attribute' => 'value-a',
+					]
+				),
+				[
+					'class'          => 'class-a class-b',
+					'on'             => 'event:action',
+					'some-attribute' => 'value-a',
+				],
+			],
+			// No attributes from full to full.
+			[
+				'',
+				AMP_DOM_Utils::create_node(
+					$dom,
+					'div',
+					[
+						'class'          => 'class-c class-d',
+						'on'             => 'other-event:other-action',
+						'some-attribute' => 'value-b',
+					]
+				),
+				AMP_DOM_Utils::create_node(
+					$dom,
+					'div',
+					[
+						'class'          => 'class-a class-b',
+						'on'             => 'event:action',
+						'some-attribute' => 'value-a',
+					]
+				),
+				[
+					'class'          => 'class-a class-b',
+					'on'             => 'event:action',
+					'some-attribute' => 'value-a',
+				],
+			],
+			// Class attribute from full to full.
+			[
+				'class',
+				AMP_DOM_Utils::create_node(
+					$dom,
+					'div',
+					[
+						'class'          => 'class-c class-d',
+						'on'             => 'other-event:other-action',
+						'some-attribute' => 'value-b',
+					]
+				),
+				AMP_DOM_Utils::create_node(
+					$dom,
+					'div',
+					[
+						'class'          => 'class-a class-b',
+						'on'             => 'event:action',
+						'some-attribute' => 'value-a',
+					]
+				),
+				[
+					'class'          => 'class-a class-b class-c class-d',
+					'on'             => 'event:action',
+					'some-attribute' => 'value-a',
+				],
+			],
+			// On attribute from full to full.
+			[
+				'on',
+				AMP_DOM_Utils::create_node(
+					$dom,
+					'div',
+					[
+						'class'          => 'class-c class-d',
+						'on'             => 'other-event:other-action',
+						'some-attribute' => 'value-b',
+					]
+				),
+				AMP_DOM_Utils::create_node(
+					$dom,
+					'div',
+					[
+						'class'          => 'class-a class-b',
+						'on'             => 'event:action',
+						'some-attribute' => 'value-a',
+					]
+				),
+				[
+					'class'          => 'class-a class-b',
+					'on'             => 'event:action;other-event:other-action',
+					'some-attribute' => 'value-a',
+				],
+			],
+			// Other attribute from full to full.
+			[
+				'some-attribute',
+				AMP_DOM_Utils::create_node(
+					$dom,
+					'div',
+					[
+						'class'          => 'class-c class-d',
+						'on'             => 'other-event:other-action',
+						'some-attribute' => 'value-b',
+					]
+				),
+				AMP_DOM_Utils::create_node(
+					$dom,
+					'div',
+					[
+						'class'          => 'class-a class-b',
+						'on'             => 'event:action',
+						'some-attribute' => 'value-a',
+					]
+				),
+				[
+					'class'          => 'class-a class-b',
+					'on'             => 'event:action',
+					'some-attribute' => 'value-a,value-b',
+				],
+			],
+			// Two attributes from full to full.
+			[
+				[ 'class', 'on' ],
+				AMP_DOM_Utils::create_node(
+					$dom,
+					'div',
+					[
+						'class'          => 'class-c class-d',
+						'on'             => 'other-event:other-action',
+						'some-attribute' => 'value-b',
+					]
+				),
+				AMP_DOM_Utils::create_node(
+					$dom,
+					'div',
+					[
+						'class'          => 'class-a class-b',
+						'on'             => 'event:action',
+						'some-attribute' => 'value-a',
+					]
+				),
+				[
+					'class'          => 'class-a class-b class-c class-d',
+					'on'             => 'event:action;other-event:other-action',
+					'some-attribute' => 'value-a',
+				],
+			],
+		];
+	}
+
+	/**
+	 * Test copy_attributes().
+	 *
+	 * @dataProvider get_copy_attributes_data
+	 * @covers \AMP_DOM_Utils::copy_attributes()
+	 */
+	public function test_copy_attributes( $attributes, DOMElement $from, DOMElement $to, $expected ) {
+		AMP_DOM_Utils::copy_attributes( $attributes, $from, $to );
+		$this->assertEquals( $expected, AMP_DOM_Utils::get_node_attributes_as_assoc_array( $to ) );
+	}
 }
