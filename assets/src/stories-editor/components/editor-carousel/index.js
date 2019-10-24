@@ -62,10 +62,10 @@ const EditorCarousel = () => {
 			wrapper.current.style.display = '';
 
 			// Offset is number of pages times margin+width + plus a half.
-			const offset = ( currentIndex + .5 ) * ( STORY_PAGE_MARGIN + STORY_PAGE_INNER_WIDTH );
+			const offset = ( currentIndex + 0.5 ) * ( STORY_PAGE_MARGIN + STORY_PAGE_INNER_WIDTH );
 			// Offset (and base value) changes with reading direction.
 			const factor = isRTL ? -1 : 1;
-			wrapper.current.style.transform = `translateX(calc(${ factor * 50 }% - ${ PAGE_BORDER }px - ${ factor * offset }px))`;
+			wrapper.current.style.transform = `translateX(calc(${ factor * 50 }% - ${ PAGE_BORDER }px - ${ factor * offset }px))`;
 		}
 	}, [ currentIndex, isReordering, wrapper, isRTL ] );
 
