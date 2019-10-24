@@ -52,6 +52,11 @@ class Test_AMP_Debug extends WP_UnitTestCase {
 				false,
 				[ AMP_Debug::AMP_FLAGS_QUERY_VAR => [ AMP_Debug::DISABLE_POST_PROCESSING_QUERY_VAR => 'false' ] ],
 			],
+			'valid_flag_with_random_string'                => [
+				AMP_Debug::DISABLE_POST_PROCESSING_QUERY_VAR,
+				false,
+				[ AMP_Debug::AMP_FLAGS_QUERY_VAR => [ AMP_Debug::DISABLE_POST_PROCESSING_QUERY_VAR => 'random-string' ] ],
+			],
 			'valid_flag_with_1_as_string'                  => [
 				AMP_Debug::DISABLE_POST_PROCESSING_QUERY_VAR,
 				true,
