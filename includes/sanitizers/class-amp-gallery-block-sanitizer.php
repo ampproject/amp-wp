@@ -161,13 +161,15 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 				$possible_caption_text = $this->possibly_get_caption_text( $image );
 				$div->appendChild( $image );
 				if ( $possible_caption_text ) {
-					$caption_wrapper           = AMP_DOM_Utils::create_node(
+					$caption_wrapper = AMP_DOM_Utils::create_node(
 						$this->dom,
 						'div',
 						[ 'class' => 'amp-wp-gallery-caption' ]
 					);
-					$caption_span              = AMP_DOM_Utils::create_node( $this->dom, 'span', [] );
-					$caption_span->textContent = $possible_caption_text;
+					$caption_span    = AMP_DOM_Utils::create_node( $this->dom, 'span', [] );
+					$text_node       = $this->dom->createTextNode( $possible_caption_text );
+
+					$caption_span->appendChild( $text_node );
 					$caption_wrapper->appendChild( $caption_span );
 					$div->appendChild( $caption_wrapper );
 				}
