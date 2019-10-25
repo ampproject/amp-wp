@@ -142,7 +142,7 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 			);
 
 			foreach ( $images as $image ) {
-				$div = AMP_DOM_Utils::create_node(
+				$slide = AMP_DOM_Utils::create_node(
 					$this->dom,
 					'div',
 					[ 'class' => 'slide' ]
@@ -159,7 +159,9 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 				}
 
 				$possible_caption_text = $this->possibly_get_caption_text( $image );
-				$div->appendChild( $image );
+				$slide->appendChild( $image );
+
+				// Wrap the caption in a <div> and <span>, and append it to the slide.
 				if ( $possible_caption_text ) {
 					$caption_wrapper = AMP_DOM_Utils::create_node(
 						$this->dom,
@@ -171,10 +173,10 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 
 					$caption_span->appendChild( $text_node );
 					$caption_wrapper->appendChild( $caption_span );
-					$div->appendChild( $caption_wrapper );
+					$slide->appendChild( $caption_wrapper );
 				}
 
-				$amp_carousel->appendChild( $div );
+				$amp_carousel->appendChild( $slide );
 			}
 
 			$node->parentNode->replaceChild( $amp_carousel, $node );
