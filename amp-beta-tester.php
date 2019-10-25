@@ -70,6 +70,7 @@ function restore_update_plugins_transient() {
 function init() {
 	add_filter( 'plugins_api_result', __NAMESPACE__ . '\update_amp_plugin_information', 10, 3 );
 	add_filter( 'pre_set_site_transient_update_plugins', __NAMESPACE__ . '\update_amp_manifest' );
+	add_filter( 'upgrader_post_install', __NAMESPACE__ . '\move_plugin_to_correct_folder', 10, 4 );
 }
 
 /**
@@ -138,6 +139,30 @@ function update_amp_plugin_information( $value, $action, $args ) {
 }
 
 /**
+ * Renames the folder created by WordPress to 'amp'. This is important as WordPress uses it as an
+ * identifier for future updates.
+ *
+ * @param bool  $response   Installation response.
+ * @param array $hook_extra Extra arguments passed to hooked filters.
+ * @param array $result     Installation result data.
+ *
+ * @return WP_Error|bool
+ */
+function move_plugin_to_correct_folder( $response, $hook_extra, $result ) {
+	global $wp_filesystem;
+
+	if ( ! isset( $hook_extra['plugin'] ) || AMP__PLUGIN__BASENAME !== $hook_extra['plugin'] ) {
+		return $response;
+	}
+
+	if ( $wp_filesystem->move( $result['destination'], WP_PLUGIN_DIR . DIRECTORY_SEPARATOR . 'amp', true ) ) {
+		return $response;
+	} else {
+		return new WP_Error();
+	}
+}
+
+/**
  * Fetch AMP releases from GitHub.
  *
  * @return array|false
@@ -156,7 +181,7 @@ function get_amp_github_releases() {
  * @param object $release GitHub release JSON object.
  * @return string|false Download URL if it exists, false if not.
  */
-function get_download_url_from_amp_release($release ) {
+function get_download_url_from_amp_release( $release ) {
 	foreach ( $release->assets as $asset ) {
 		if ( 'amp.zip' === $asset->name ) {
 			return $asset->browser_download_url;
@@ -173,7 +198,7 @@ function get_download_url_from_amp_release($release ) {
  * @param object $release GitHub release JSON object.
  * @return array|false Updated manifest, or false if it fails to retrieve the current update manifest.
  */
-function generate_amp_update_manifest($release ) {
+function generate_amp_update_manifest( $release ) {
 	$current_manifest = get_current_amp_update_manifest();
 
 	if ( ! $current_manifest ) {
@@ -199,7 +224,7 @@ function generate_amp_update_manifest($release ) {
  * @param string $version Version to get manifest for. Defaults to getting the latest pre-release.
  * @return object|false Latest release, or false on failure.
  */
-function get_amp_update_manifest($version = 'pre-release' ) {
+function get_amp_update_manifest( $version = 'pre-release' ) {
 	$amp_manifest = null;
 	$releases     = get_site_transient( AMP__BETA__TESTER__RELEASES__TRANSIENT );
 
