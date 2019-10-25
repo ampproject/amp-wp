@@ -783,8 +783,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		register_post_type(
 			$custom_post_type,
 			[
-				'has_archive'        => true,
-				'publicly_queryable' => true,
+				'has_archive' => true,
+				'public'      => true,
 			]
 		);
 		self::factory()->post->create(
