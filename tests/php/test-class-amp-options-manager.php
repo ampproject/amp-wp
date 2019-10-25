@@ -112,18 +112,17 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		delete_option( AMP_Options_Manager::OPTION_NAME );
 		$this->assertEquals(
 			[
-				'experiences'              => [ AMP_Options_Manager::WEBSITE_EXPERIENCE ],
-				'theme_support'            => AMP_Theme_Support::READER_MODE_SLUG,
-				'supported_post_types'     => [ 'post' ],
-				'analytics'                => [],
-				'auto_accept_sanitization' => true,
-				'all_templates_supported'  => true,
-				'supported_templates'      => [ 'is_singular' ],
-				'enable_response_caching'  => true,
-				'version'                  => AMP__VERSION,
-				'story_templates_version'  => false,
-				'story_export_base_url'    => '',
-				'story_settings'           => [
+				'experiences'             => [ AMP_Options_Manager::WEBSITE_EXPERIENCE ],
+				'theme_support'           => AMP_Theme_Support::READER_MODE_SLUG,
+				'supported_post_types'    => [ 'post' ],
+				'analytics'               => [],
+				'all_templates_supported' => true,
+				'supported_templates'     => [ 'is_singular' ],
+				'enable_response_caching' => true,
+				'version'                 => AMP__VERSION,
+				'story_templates_version' => false,
+				'story_export_base_url'   => '',
+				'story_settings'          => [
 					'auto_advance_after'          => '',
 					'auto_advance_after_duration' => 0,
 				],

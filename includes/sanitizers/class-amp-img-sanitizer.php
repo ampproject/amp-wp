@@ -346,14 +346,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			);
 		}
 
-		$can_include_noscript = (
-			$this->args['add_noscript_fallback']
-			&&
-			( $node->hasAttribute( 'src' ) && ! preg_match( '/^http:/', $node->getAttribute( 'src' ) ) )
-			&&
-			( ! $node->hasAttribute( 'srcset' ) || ! preg_match( '/http:/', $node->getAttribute( 'srcset' ) ) )
-		);
-		if ( $can_include_noscript ) {
+		if ( $this->args['add_noscript_fallback'] ) {
 			// Preserve original node in noscript for no-JS environments.
 			$this->append_old_node_noscript( $img_node, $node, $this->dom );
 		}
@@ -368,38 +361,71 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function maybe_add_lightbox_attributes( $attributes, $node ) {
 		$parent_node = $node->parentNode;
-		if ( ! ( $parent_node instanceof DOMElement ) || 'figure' !== $parent_node->tagName ) {
+		if ( ! ( $parent_node instanceof DOMElement ) || ! ( $parent_node->parentNode instanceof DOMElement ) ) {
 			return $attributes;
 		}
 
-		// Account for blocks that include alignment.
-		// In that case, the structure changes from figure.wp-block-image > img
+		$is_file_url                        = preg_match( '/\.\w+$/', wp_parse_url( $parent_node->getAttribute( 'href' ), PHP_URL_PATH ) );
+		$is_node_wrapped_in_media_file_link = (
+			'a' === $parent_node->tagName
+			&&
+			( 'figure' === $parent_node->tagName || 'figure' === $parent_node->parentNode->tagName )
+			&&
+			$is_file_url // This should be a link to the media file, not the attachment page.
+		);
+
+		if ( 'figure' !== $parent_node->tagName && ! $is_node_wrapped_in_media_file_link ) {
+			return $attributes;
+		}
+
+		// Account for blocks that include alignment or images that are wrapped in <a>.
+		// With alignment, the structure changes from figure.wp-block-image > img
 		// to div.wp-block-image > figure > img and the amp-lightbox attribute
 		// can be found on the wrapping div instead of the figure element.
 		$grand_parent = $parent_node->parentNode;
-		if ( $grand_parent instanceof DOMElement ) {
-			$classes = preg_split( '/\s+/', $grand_parent->getAttribute( 'class' ) );
-			if ( in_array( 'wp-block-image', $classes, true ) ) {
-				$parent_node = $grand_parent;
-			}
+		if ( $this->does_node_have_block_class( $grand_parent ) ) {
+			$parent_node = $grand_parent;
+		} elseif ( isset( $grand_parent->parentNode ) && $this->does_node_have_block_class( $grand_parent->parentNode ) ) {
+			$parent_node = $grand_parent->parentNode;
 		}
 
 		$parent_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $parent_node );
 
 		if ( isset( $parent_attributes['data-amp-lightbox'] ) && true === filter_var( $parent_attributes['data-amp-lightbox'], FILTER_VALIDATE_BOOLEAN ) ) {
 			$attributes['data-amp-lightbox'] = '';
-			$attributes['on']                = 'tap:' . self::AMP_IMAGE_LIGHTBOX_ID;
-			$attributes['role']              = 'button';
-			$attributes['tabindex']          = 0;
+			$attributes['lightbox']          = '';
 
-			$this->maybe_add_amp_image_lightbox_node();
+			/*
+			 * Removes the <a> if the image is wrapped in one, as it can prevent the lightbox from working.
+			 * But this only removes the <a> if it links to the media file, not the attachment page.
+			 */
+			if ( $is_node_wrapped_in_media_file_link ) {
+				$node->parentNode->parentNode->replaceChild( $node, $node->parentNode );
+			}
 		}
 
 		return $attributes;
 	}
 
 	/**
-	 * Determines is a URL is considered a GIF URL
+	 * Gets whether a node has the class 'wp-block-image', meaning it is a wrapper for an Image block.
+	 *
+	 * @param DOMElement $node A node to evaluate.
+	 * @return bool Whether the node has the class 'wp-block-image'.
+	 */
+	private function does_node_have_block_class( $node ) {
+		if ( $node instanceof DOMElement ) {
+			$classes = preg_split( '/\s+/', $node->getAttribute( 'class' ) );
+			if ( in_array( 'wp-block-image', $classes, true ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Determines if a URL is considered a GIF URL
 	 *
 	 * @since 0.2
 	 *

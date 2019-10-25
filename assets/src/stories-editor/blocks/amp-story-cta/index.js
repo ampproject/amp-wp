@@ -22,7 +22,7 @@ const schema = {
 	text: {
 		type: 'string',
 		source: 'html',
-		selector: 'a',
+		selector: '.amp-cta-content',
 	},
 	// The rest of the color attributes are added by addAMPAttributes()
 	customTextColor: {
@@ -39,7 +39,13 @@ const schema = {
 	},
 	btnPositionLeft: {
 		type: 'number',
-		default: 30,
+		default: 5,
+	},
+	btnWidth: {
+		type: 'number',
+	},
+	btnHeight: {
+		type: 'number',
 	},
 };
 

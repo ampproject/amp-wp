@@ -13,7 +13,10 @@ const { getBlock } = select( 'core/block-editor' );
  */
 export const isPageBlock = ( clientId ) => {
 	const block = getBlock( clientId );
-	return block && 'amp/amp-story-page' === block.name;
+	if ( ! block ) {
+		return false;
+	}
+	return 'amp/amp-story-page' === block.name;
 };
 
 export default isPageBlock;

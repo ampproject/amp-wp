@@ -790,26 +790,28 @@ function amp_get_content_embed_handlers( $post = null ) {
 	return apply_filters(
 		'amp_content_embed_handlers',
 		[
-			'AMP_Core_Block_Handler'        => [],
-			'AMP_Twitter_Embed_Handler'     => [],
-			'AMP_YouTube_Embed_Handler'     => [],
-			'AMP_Crowdsignal_Embed_Handler' => [],
-			'AMP_DailyMotion_Embed_Handler' => [],
-			'AMP_Vimeo_Embed_Handler'       => [],
-			'AMP_SoundCloud_Embed_Handler'  => [],
-			'AMP_Instagram_Embed_Handler'   => [],
-			'AMP_Issuu_Embed_Handler'       => [],
-			'AMP_Meetup_Embed_Handler'      => [],
-			'AMP_Vine_Embed_Handler'        => [],
-			'AMP_Facebook_Embed_Handler'    => [],
-			'AMP_Pinterest_Embed_Handler'   => [],
-			'AMP_Playlist_Embed_Handler'    => [],
-			'AMP_Reddit_Embed_Handler'      => [],
-			'AMP_Tumblr_Embed_Handler'      => [],
-			'AMP_Gallery_Embed_Handler'     => [],
-			'AMP_Gfycat_Embed_Handler'      => [],
-			'AMP_Hulu_Embed_Handler'        => [],
-			'AMP_Imgur_Embed_Handler'       => [],
+			'AMP_Core_Block_Handler'         => [],
+			'AMP_Twitter_Embed_Handler'      => [],
+			'AMP_YouTube_Embed_Handler'      => [],
+			'AMP_Crowdsignal_Embed_Handler'  => [],
+			'AMP_DailyMotion_Embed_Handler'  => [],
+			'AMP_Vimeo_Embed_Handler'        => [],
+			'AMP_SoundCloud_Embed_Handler'   => [],
+			'AMP_Instagram_Embed_Handler'    => [],
+			'AMP_Issuu_Embed_Handler'        => [],
+			'AMP_Meetup_Embed_Handler'       => [],
+			'AMP_Vine_Embed_Handler'         => [],
+			'AMP_Facebook_Embed_Handler'     => [],
+			'AMP_Pinterest_Embed_Handler'    => [],
+			'AMP_Playlist_Embed_Handler'     => [],
+			'AMP_Reddit_Embed_Handler'       => [],
+			'AMP_Tumblr_Embed_Handler'       => [],
+			'AMP_Gallery_Embed_Handler'      => [],
+			'AMP_Gfycat_Embed_Handler'       => [],
+			'AMP_Hulu_Embed_Handler'         => [],
+			'AMP_Imgur_Embed_Handler'        => [],
+			'AMP_Scribd_Embed_Handler'       => [],
+			'AMP_WordPress_TV_Embed_Handler' => [],
 		],
 		$post
 	);
@@ -885,8 +887,11 @@ function amp_get_content_sanitizers( $post = null ) {
 
 	$sanitizers = [
 		'AMP_Core_Theme_Sanitizer'        => [
-			'template'   => get_template(),
-			'stylesheet' => get_stylesheet(),
+			'template'       => get_template(),
+			'stylesheet'     => get_stylesheet(),
+			'theme_features' => [
+				'force_svg_support' => [], // Always replace 'no-svg' class with 'svg' if it exists.
+			],
 		],
 		'AMP_Img_Sanitizer'               => [
 			'align_wide_support' => current_theme_supports( 'align-wide' ),

@@ -2,18 +2,18 @@ module.exports = {
 	plugins: [
 		require( '@wordpress/postcss-themes' )( {
 			defaults: {
-				primary: '#0085ba',
+				primary: '#007cba',
 				secondary: '#11a0d2',
 				toggle: '#11a0d2',
-				button: '#0085ba',
+				button: '#007cba',
 				outlines: '#007cba',
 			},
 			themes: {
 				'admin-color-light': {
-					primary: '#0085ba',
+					primary: '#007cba',
 					secondary: '#c75726',
 					toggle: '#11a0d2',
-					button: '#0085ba',
+					button: '#007cba',
 					outlines: '#007cba',
 				},
 				'admin-color-blue': {

@@ -102,17 +102,6 @@ class AMP_Options_Menu {
 		);
 
 		add_settings_field(
-			'validation',
-			__( 'Validation Handling', 'amp' ),
-			[ $this, 'render_validation_handling' ],
-			AMP_Options_Manager::OPTION_NAME,
-			'general',
-			[
-				'class' => 'amp-validation-field',
-			]
-		);
-
-		add_settings_field(
 			'supported_templates',
 			__( 'Supported Templates', 'amp' ),
 			[ $this, 'render_supported_templates' ],
@@ -151,8 +140,7 @@ class AMP_Options_Menu {
 				?>
 				<style>
 					body:not(.amp-experience-website) .amp-website-mode,
-					body:not(.amp-experience-website) .amp-template-support-field,
-					body:not(.amp-experience-website) .amp-validation-field {
+					body:not(.amp-experience-website) .amp-template-support-field {
 						display: none;
 					}
 					body:not(.amp-experience-stories) .amp-stories-export-field,
@@ -247,8 +235,9 @@ class AMP_Options_Menu {
 									$gutenberg = '<a href="' . esc_url( add_query_arg( 'tab', 'beta', admin_url( 'plugin-install.php' ) ) ) . '">' . $gutenberg . '</a>';
 								}
 								printf(
-									/* translators: %s: Gutenberg plugin name */
-									esc_html__( 'To use stories, you currently must have the latest version of the %s plugin installed and activated.', 'amp' ),
+									/* translators: 1: WordPress version number. 2: Gutenberg plugin name */
+									esc_html__( 'To use stories, you must be running WordPress %1$s or higher, or have the latest version of the %2$s plugin activated.', 'amp' ),
+									'5.3',
 									$gutenberg // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 								);
 								?>
@@ -411,95 +400,6 @@ class AMP_Options_Menu {
 					<?php echo wp_kses_post( $ecosystem_description ); ?>
 				</p>
 			<?php endif; ?>
-		</fieldset>
-		<?php
-	}
-
-	/**
-	 * Post types support section renderer.
-	 *
-	 * @todo If dirty AMP is ever allowed (that is, post-processed documents which can be served with non-sanitized valdation errors), then automatically forcing sanitization in standard mode should be able to be turned off.
-	 *
-	 * @since 1.0
-	 */
-	public function render_validation_handling() {
-		?>
-		<fieldset>
-			<?php
-			$auto_sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization(
-				[
-					'code' => 'non_existent',
-				]
-			);
-
-			$forced_sanitization = 'with_filter' === $auto_sanitization['forced'];
-			?>
-
-			<?php if ( $forced_sanitization ) : ?>
-				<div class="notice notice-info notice-alt inline">
-					<p><?php esc_html_e( 'Your install is configured via a theme or plugin to automatically sanitize any AMP validation error that is encountered.', 'amp' ); ?></p>
-				</div>
-				<input type="hidden" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[auto_accept_sanitization]' ); ?>" value="<?php echo AMP_Options_Manager::get_option( 'auto_accept_sanitization' ) ? 'on' : ''; ?>">
-			<?php else : ?>
-				<div class="amp-auto-accept-sanitize-canonical notice notice-info notice-alt inline">
-					<p><?php esc_html_e( 'All new validation errors are automatically accepted when in standard mode.', 'amp' ); ?></p>
-				</div>
-				<div class="amp-auto-accept-sanitize">
-					<p>
-						<label for="auto_accept_sanitization">
-							<input id="auto_accept_sanitization" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[auto_accept_sanitization]' ); ?>" <?php checked( AMP_Options_Manager::get_option( 'auto_accept_sanitization' ) ); ?>>
-							<?php esc_html_e( 'Automatically accept sanitization for any newly encountered AMP validation errors.', 'amp' ); ?>
-						</label>
-					</p>
-					<p class="description">
-						<?php esc_html_e( 'This will ensure your responses are always valid AMP but some important content may get stripped out (e.g. scripts).', 'amp' ); ?>
-						<?php
-						echo wp_kses_post(
-							sprintf(
-								/* translators: %s is URL to validation errors screen */
-								__( 'Existing validation errors which you have already rejected will not be modified (you may want to consider <a href="%s">bulk-accepting them</a>).', 'amp' ),
-								esc_url(
-									add_query_arg(
-										[
-											'taxonomy'  => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
-											'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-										],
-										admin_url( 'edit-tags.php' )
-									)
-								)
-							)
-						)
-						?>
-					</p>
-				</div>
-			<?php endif; ?>
-
-			<script>
-			(function( $, standardModeSlug, readerModeSlug ) {
-				const getThemeSupportMode = () => {
-					const checkedInput = $( 'input[type=radio][name="amp-options[theme_support]"]:checked' );
-					if ( 0 === checkedInput.length ) {
-						return standardModeSlug;
-					}
-					return checkedInput.val();
-				};
-
-				const updateHiddenClasses = function() {
-					const themeSupportMode = getThemeSupportMode();
-					$( '.amp-auto-accept-sanitize' ).toggleClass( 'hidden', standardModeSlug === themeSupportMode );
-					$( '.amp-validation-field' ).toggleClass( 'hidden', readerModeSlug === themeSupportMode );
-					$( '.amp-auto-accept-sanitize-canonical' ).toggleClass( 'hidden', standardModeSlug !== themeSupportMode );
-				};
-
-				$( 'input[type=radio][name="amp-options[theme_support]"]' ).change( updateHiddenClasses );
-
-				updateHiddenClasses();
-			})(
-				jQuery,
-				<?php echo wp_json_encode( AMP_Theme_Support::STANDARD_MODE_SLUG ); ?>,
-				<?php echo wp_json_encode( AMP_Theme_Support::READER_MODE_SLUG ); ?>
-			);
-			</script>
 		</fieldset>
 		<?php
 	}

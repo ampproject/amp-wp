@@ -32,7 +32,7 @@ class AMP_Story_Post_Type {
 	 *
 	 * @var string
 	 */
-	const REQUIRED_GUTENBERG_VERSION = '5.9';
+	const REQUIRED_GUTENBERG_VERSION = '6.6';
 
 	/**
 	 * The slug of the story card CSS file.
@@ -93,20 +93,19 @@ class AMP_Story_Post_Type {
 	/**
 	 * Check if the required version of block capabilities available.
 	 *
-	 * Note that Gutenberg requires WordPress 5.0, so this check also accounts for that.
+	 * Requires either Gutenberg 6.6+ or WordPress 5.3+ (which includes Gutenberg 6.6)
 	 *
 	 * @todo Eventually the Gutenberg requirement should be removed.
 	 *
 	 * @return bool Whether capabilities are available.
 	 */
 	public static function has_required_block_capabilities() {
-		if ( ! function_exists( 'register_block_type' ) || version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
-			return false;
-		}
 		return (
 			( defined( 'GUTENBERG_DEVELOPMENT_MODE' ) && GUTENBERG_DEVELOPMENT_MODE )
 			||
 			( defined( 'GUTENBERG_VERSION' ) && version_compare( GUTENBERG_VERSION, self::REQUIRED_GUTENBERG_VERSION, '>=' ) )
+			||
+			version_compare( get_bloginfo( 'version' ), '5.3-RC2', '>=' )
 		);
 	}
 
@@ -879,6 +878,9 @@ class AMP_Story_Post_Type {
 			}
 		}
 
+		$editor_settings['codeEditingEnabled'] = false;
+		$editor_settings['richEditingEnabled'] = true;
+
 		return $editor_settings;
 	}
 
@@ -1530,8 +1532,8 @@ class AMP_Story_Post_Type {
 		$height = isset( $atts['height'] ) ? $atts['height'] : self::get_blocks_default_height( $name );
 
 		// Set passed attributes or default values (0, 5) for top and left.
-		$style['top']    = empty( $atts['positionTop'] ) ? '0%' : $atts['positionTop'] . '%';
-		$style['left']   = empty( $atts['positionLeft'] ) ? '5%' : $atts['positionLeft'] . '%';
+		$style['top']    = ! isset( $atts['positionTop'] ) ? '0%' : $atts['positionTop'] . '%';
+		$style['left']   = ! isset( $atts['positionLeft'] ) ? '5%' : $atts['positionLeft'] . '%';
 		$style['width']  = self::get_percentage_from_pixels( 'x', $width ) . '%';
 		$style['height'] = self::get_percentage_from_pixels( 'y', $height ) . '%';
 

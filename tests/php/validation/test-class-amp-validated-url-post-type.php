@@ -14,6 +14,8 @@
  */
 class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 
+	use AMP_Test_HandleValidation;
+
 	const TESTED_CLASS = 'AMP_Validated_URL_Post_Type';
 
 	/**
@@ -152,7 +154,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 	 * @covers \AMP_Validated_URL_Post_Type::store_validation_errors()
 	 */
 	public function test_get_invalid_url_validation_errors() {
-		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
+		$this->accept_sanitization_by_default( false );
 		add_theme_support( AMP_Theme_Support::SLUG, [ AMP_Theme_Support::PAIRED_FLAG => true ] );
 		AMP_Validation_Manager::init();
 		$post = self::factory()->post->create();
@@ -554,9 +556,9 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$this->assertEquals(
 			[
 				'cb'                          => '<input type="checkbox" />',
-				'error'                       => 'Error',
+				'error_code'                  => 'Error',
 				'status'                      => 'Status<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="&lt;h3&gt;Status&lt;/h3&gt;&lt;p&gt;An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.&lt;/p&gt;"></div>',
-				'details'                     => 'Details<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="&lt;h3&gt;Details&lt;/h3&gt;&lt;p&gt;The parent element of where the error occurred.&lt;/p&gt;"></div>',
+				'details'                     => 'Context<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="&lt;h3&gt;Context&lt;/h3&gt;&lt;p&gt;The parent element of where the error occurred.&lt;/p&gt;"></div>',
 				'sources_with_invalid_output' => 'Sources',
 				'error_type'                  => 'Type',
 			],
@@ -709,7 +711,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 	 * @covers \AMP_Validated_URL_Post_Type::handle_bulk_action()
 	 */
 	public function test_handle_bulk_action() {
-		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
+		$this->accept_sanitization_by_default( false );
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		add_theme_support( AMP_Theme_Support::SLUG, [ AMP_Theme_Support::PAIRED_FLAG => true ] );
 		AMP_Validation_Manager::init();
@@ -834,7 +836,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 	 * @covers \AMP_Validated_URL_Post_Type::handle_validate_request()
 	 */
 	public function test_handle_validate_request() {
-		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
+		$this->accept_sanitization_by_default( false );
 		add_theme_support( AMP_Theme_Support::SLUG, [ AMP_Theme_Support::PAIRED_FLAG => true ] );
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		AMP_Validation_Manager::init();

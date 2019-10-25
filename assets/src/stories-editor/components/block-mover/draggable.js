@@ -1,5 +1,5 @@
 /**
- * This file is based on the core's <Draggable> Component.
+ * This file is based on core's <Draggable> Component.
  **/
 
 /**
@@ -12,16 +12,29 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { Component } from '@wordpress/element';
-import { withSafeTimeout } from '@wordpress/compose';
+import { withSelect } from '@wordpress/data';
+import { withSafeTimeout, compose } from '@wordpress/compose';
 
 /**
  * Internal dependencies
  */
-import { getPixelsFromPercentage } from '../../helpers';
+import withSnapTargets from '../higher-order/with-snap-targets';
+import {
+	getPixelsFromPercentage,
+	getPercentageFromPixels,
+	getRelativeElementPosition,
+	isCTABlock,
+} from '../../helpers';
+import { getBestSnapLines } from '../../helpers/snapping';
 import {
 	STORY_PAGE_INNER_WIDTH,
 	STORY_PAGE_INNER_HEIGHT,
+	BLOCK_DRAGGING_SNAP_GAP,
+	STORY_PAGE_INNER_HEIGHT_FOR_CTA,
+	STORY_PAGE_MARGIN,
 } from '../../constants';
+
+const PAGE_AND_MARGIN = STORY_PAGE_INNER_WIDTH + STORY_PAGE_MARGIN;
 
 const { Image, navigator } = window;
 
@@ -29,6 +42,9 @@ const cloneWrapperClass = 'components-draggable__clone';
 
 const isChromeUA = ( ) => /Chrome/i.test( navigator.userAgent );
 const documentHasIframes = ( ) => [ ...document.getElementById( 'editor' ).querySelectorAll( 'iframe' ) ].length > 0;
+
+let lastX;
+let lastY;
 
 class Draggable extends Component {
 	constructor( ...args ) {
@@ -61,13 +77,44 @@ class Draggable extends Component {
 	 * @param {Object} event The non-custom DragEvent.
 	 */
 	onDragEnd = ( event ) => {
-		const { onDragEnd = noop } = this.props;
+		const { clearHighlight, dropElementByOffset, blockName, setTimeout, clearSnapLines, onDragEnd = noop } = this.props;
 		if ( event ) {
 			event.preventDefault();
 		}
 
+		// Make sure to clear highlight.
+		clearHighlight();
+
+		// Attempt drop on neighbor if offset
+		if ( this.pageOffset !== 0 ) {
+			// All this is about calculating the position of the (correct) element on the new page.
+			const currentElementTop = parseInt( this.cloneWrapper.style.top );
+			const currentElementLeft = parseInt( this.cloneWrapper.style.left );
+			const newLeft = currentElementLeft - ( this.pageOffset * PAGE_AND_MARGIN );
+
+			let baseHeight, xAttribute, yAttribute;
+			if ( isCTABlock( blockName ) ) {
+				baseHeight = STORY_PAGE_INNER_HEIGHT_FOR_CTA;
+				xAttribute = 'btnPositionLeft';
+				yAttribute = 'btnPositionTop';
+			} else {
+				baseHeight = STORY_PAGE_INNER_HEIGHT;
+				xAttribute = 'positionLeft';
+				yAttribute = 'positionTop';
+			}
+
+			const newAttributes = {
+				[ xAttribute ]: getPercentageFromPixels( 'x', newLeft, STORY_PAGE_INNER_WIDTH ),
+				[ yAttribute ]: getPercentageFromPixels( 'y', currentElementTop, baseHeight ),
+			};
+			dropElementByOffset( this.pageOffset, newAttributes );
+		}
+
 		this.resetDragState();
-		this.props.setTimeout( onDragEnd );
+
+		clearSnapLines();
+
+		setTimeout( onDragEnd );
 	}
 
 	/**
@@ -75,22 +122,85 @@ class Draggable extends Component {
 	 *
 	 * @param  {Object} event The non-custom DragEvent.
 	 */
-	onDragOver = ( event ) => {
+	onDragOver = ( event ) => { // eslint-disable-line complexity
+		const {
+			blockName,
+			setSnapLines,
+			clearSnapLines,
+			parentBlockElement,
+			horizontalTargets,
+			verticalTargets,
+			setHighlightByOffset,
+			isRTL,
+		} = this.props;
+
 		const top = parseInt( this.cloneWrapper.style.top ) + event.clientY - this.cursorTop;
+		const left = parseInt( this.cloneWrapper.style.left ) + event.clientX - this.cursorLeft;
+
+		if ( top === lastY && left === lastX ) {
+			return;
+		}
+
+		// Get the correct dimensions in case the block is rotated, as rotation is only applied to the clone's inner element(s).
+		// For CTA blocks, not the whole block is draggable, but only the button within.
+		const blockElement = isCTABlock( blockName ) ? this.cloneWrapper.querySelector( '.amp-story-cta-button' ) : this.cloneWrapper.querySelector( '.wp-block' );
+
+		// We calculate with the block's actual dimensions relative to the page it's on.
+		const {
+			top: actualTop,
+			right: actualRight,
+			bottom: actualBottom,
+			left: actualLeft,
+		} = getRelativeElementPosition( blockElement, parentBlockElement );
+
+		const snappingEnabled = ! event.getModifierState( 'Alt' );
+
+		if ( snappingEnabled ) {
+			const [ horizontalEdgeSnaps, horizontalCenterSnaps ] = horizontalTargets( actualTop, actualBottom );
+			const [ verticalEdgeSnaps, verticalCenterSnaps ] = verticalTargets( actualLeft, actualRight );
+			setSnapLines( [
+				...getBestSnapLines( horizontalEdgeSnaps, horizontalCenterSnaps, actualLeft, actualRight, BLOCK_DRAGGING_SNAP_GAP ),
+				...getBestSnapLines( verticalEdgeSnaps, verticalCenterSnaps, actualTop, actualBottom, BLOCK_DRAGGING_SNAP_GAP ),
+			] );
+		} else {
+			clearSnapLines();
+		}
 
 		// Don't allow the CTA button to go over its top limit.
-		if ( 'amp/amp-story-cta' === this.props.blockName ) {
+		if ( isCTABlock( blockName ) ) {
 			this.cloneWrapper.style.top = top >= 0 ? `${ top }px` : '0px';
 		} else {
 			this.cloneWrapper.style.top = `${ top }px`;
 		}
 
-		this.cloneWrapper.style.left =
-			`${ parseInt( this.cloneWrapper.style.left ) + event.clientX - this.cursorLeft }px`;
+		this.cloneWrapper.style.left = `${ left }px`;
 
 		// Update cursor coordinates.
 		this.cursorLeft = event.clientX;
 		this.cursorTop = event.clientY;
+
+		lastY = top;
+		lastX = left;
+
+		// Check if mouse (*not* element, but actual cursor) is over neighboring page to either side.
+		const currentElementLeft = parseInt( this.cloneWrapper.style.left );
+		const cursorLeftRelativeToPage = currentElementLeft + this.cursorLeftInsideElement;
+		const isOffRight = cursorLeftRelativeToPage > PAGE_AND_MARGIN;
+		const isOffLeft = cursorLeftRelativeToPage < -STORY_PAGE_MARGIN;
+		this.pageOffset = 0;
+		if ( isOffLeft || isOffRight ) {
+			// Check how far off we are to that side - on large screens you can drag elements 2+ pages over to either side.
+			this.pageOffset = ( isOffLeft ?
+				-Math.ceil( ( -STORY_PAGE_MARGIN - cursorLeftRelativeToPage ) / PAGE_AND_MARGIN ) :
+				Math.ceil( ( cursorLeftRelativeToPage - PAGE_AND_MARGIN ) / PAGE_AND_MARGIN )
+			);
+
+			if ( isRTL ) {
+				this.pageOffset *= -1;
+			}
+		}
+
+		setHighlightByOffset( this.pageOffset );
 	}
 
 	onDrop = () => {
@@ -107,10 +217,16 @@ class Draggable extends Component {
 	 * @param {Object} event Custom DragEvent.
 	 */
 	onDragStart = ( event ) => {
-		const { blockName, elementId, transferData, onDragStart = noop } = this.props;
-		const isCTABlock = 'amp/amp-story-cta' === blockName;
+		const {
+			blockName,
+			elementId,
+			transferData,
+			onDragStart = noop,
+			clearSnapLines,
+		} = this.props;
+		const blockIsCTA = isCTABlock( blockName );
 		// In the CTA block only the inner element (the button) is draggable, not the whole block.
-		const element = isCTABlock ? document.getElementById( elementId ) : document.getElementById( elementId ).parentNode;
+		const element = blockIsCTA ? document.getElementById( elementId ) : document.getElementById( elementId ).parentNode;
 
 		if ( ! element ) {
 			event.preventDefault();
@@ -146,14 +262,22 @@ class Draggable extends Component {
 		this.cloneWrapper.style.height = `${ element.clientHeight }px`;
 
 		const clone = element.cloneNode( true );
+
 		this.cloneWrapper.style.transform = clone.style.transform;
 
 		// 20% of the full value in case of CTA block.
-		const baseHeight = isCTABlock ? STORY_PAGE_INNER_HEIGHT / 5 : STORY_PAGE_INNER_HEIGHT;
+		const baseHeight = blockIsCTA ? STORY_PAGE_INNER_HEIGHT_FOR_CTA : STORY_PAGE_INNER_HEIGHT;
 
 		// Position clone over the original element.
-		this.cloneWrapper.style.top = `${ getPixelsFromPercentage( 'y', parseInt( clone.style.top ), baseHeight ) }px`;
-		this.cloneWrapper.style.left = `${ getPixelsFromPercentage( 'x', parseInt( clone.style.left ), STORY_PAGE_INNER_WIDTH ) }px`;
+		const top = getPixelsFromPercentage( 'y', parseInt( clone.style.top ), baseHeight );
+		const left = getPixelsFromPercentage( 'x', parseInt( clone.style.left ), STORY_PAGE_INNER_WIDTH );
+		this.cloneWrapper.style.top = `${ top }px`;
+		this.cloneWrapper.style.left = `${ left }px`;
+
+		// Get starting position information
+		const absolutePositionOfPage = getRelativeElementPosition( elementWrapper, document.documentElement );
+		const absoluteElementLeft = absolutePositionOfPage.left + left;
+		this.cursorLeftInsideElement = event.clientX - absoluteElementLeft;
 
 		clone.id = `clone-${ elementId }`;
 		clone.style.top = 0;
@@ -169,6 +293,7 @@ class Draggable extends Component {
 		// Mark the current cursor coordinates.
 		this.cursorLeft = event.clientX;
 		this.cursorTop = event.clientY;
+
 		// Update cursor to 'grabbing', document wide.
 		document.body.classList.add( 'is-dragging-components-draggable' );
 		document.addEventListener( 'dragover', this.onDragOver );
@@ -183,6 +308,8 @@ class Draggable extends Component {
 			this.isChromeAndHasIframes = true;
 			document.addEventListener( 'drop', this.onDrop );
 		}
+
+		clearSnapLines();
 
 		this.props.setTimeout( onDragStart );
 	}
@@ -229,8 +356,27 @@ Draggable.propTypes = {
 	} ),
 	onDragStart: PropTypes.func,
 	onDragEnd: PropTypes.func,
+	clearHighlight: PropTypes.func.isRequired,
+	setHighlightByOffset: PropTypes.func.isRequired,
+	dropElementByOffset: PropTypes.func.isRequired,
 	setTimeout: PropTypes.func.isRequired,
-	children: PropTypes.node.isRequired,
+	children: PropTypes.func.isRequired,
+	horizontalTargets: PropTypes.func.isRequired,
+	verticalTargets: PropTypes.func.isRequired,
+	setSnapLines: PropTypes.func.isRequired,
+	clearSnapLines: PropTypes.func.isRequired,
+	parentBlockElement: PropTypes.object,
+	isRTL: PropTypes.bool.isRequired,
 };
 
-export default withSafeTimeout( Draggable );
+const enhance = compose(
+	withSnapTargets,
+	withSafeTimeout,
+	withSelect( ( select ) => {
+		return {
+			isRTL: select( 'core/block-editor' ).getSettings().isRTL,
+		};
+	} ),
+);
+
+export default enhance( Draggable );

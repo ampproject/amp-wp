@@ -7,7 +7,7 @@ import { ReactElement } from 'react';
  * Internal dependencies
  */
 import { wrapBlockInGridLayerDeprecations } from '../deprecations/filters';
-import { isMovableBlock } from './';
+import isMovableBlock from './isMovableBlock';
 
 /**
  * Wraps all movable blocks in a grid layer and assigns custom attributes as needed.

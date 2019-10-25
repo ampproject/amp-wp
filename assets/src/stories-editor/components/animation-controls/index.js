@@ -8,8 +8,8 @@ import { ReactElement } from 'react';
  * WordPress dependencies
  */
 import { RangeControl, SelectControl, IconButton } from '@wordpress/components';
-import { compose } from '@wordpress/compose';
-import { withDispatch, withSelect } from '@wordpress/data';
+import { useCallback } from '@wordpress/element';
+import { useSelect, useDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -25,6 +25,8 @@ import AnimationOrderPicker from './animation-order-picker';
  * @return {ReactElement} Controls.
  */
 const AnimationControls = ( {
+	clientId,
+	page,
 	animatedBlocks,
 	onAnimationTypeChange,
 	onAnimationDurationChange,
@@ -34,11 +36,32 @@ const AnimationControls = ( {
 	animationDuration,
 	animationDelay,
 	animationAfter,
-	onAnimationStart,
-	onAnimationStop,
-	isPlayingAnimation,
-	isImageBlock,
 } ) => {
+	const {
+		isImageBlock,
+		isPlayingAnimation,
+	} = useSelect( ( select ) => {
+		const { getBlock } = select( 'core/block-editor' );
+
+		const block = getBlock( clientId );
+
+		return {
+			isImageBlock: block && 'core/image' === block.name,
+			isPlayingAnimation: select( 'amp/story' ).isPlayingAnimation( page, clientId ),
+		};
+	}, [ clientId, page ] );
+
+	const { playAnimation, stopAnimation } = useDispatch( 'amp/story' );
+
+	const onAnimationStart = useCallback(
+		() => playAnimation( page, clientId ),
+		[ page, clientId, playAnimation ]
+	);
+	const onAnimationStop = useCallback(
+		() => stopAnimation( page, clientId ),
+		[ page, clientId, stopAnimation ]
+	);
+
 	const DEFAULT_ANIMATION_DURATION = ANIMATION_DURATION_DEFAULTS[ animationType ] || 0;
 
 	// "pan" animations are only really meant for images.
@@ -97,7 +120,8 @@ const AnimationControls = ( {
 };
 
 AnimationControls.propTypes = {
-	isImageBlock: PropTypes.bool,
+	clientId: PropTypes.string.isRequired,
+	page: PropTypes.string.isRequired,
 	animatedBlocks: PropTypes.func.isRequired,
 	onAnimationTypeChange: PropTypes.func.isRequired,
 	onAnimationDurationChange: PropTypes.func.isRequired,
@@ -107,36 +131,6 @@ AnimationControls.propTypes = {
 	animationDuration: PropTypes.number,
 	animationDelay: PropTypes.number,
 	animationAfter: PropTypes.string,
-	onAnimationStart: PropTypes.func.isRequired,
-	onAnimationStop: PropTypes.func.isRequired,
-	isPlayingAnimation: PropTypes.bool.isRequired,
 };
 
-const applyWithSelect = withSelect( ( select, { clientId, page } ) => {
-	const { getBlock } = select( 'core/block-editor' );
-	const { isPlayingAnimation } = select( 'amp/story' );
-
-	const block = getBlock( clientId );
-	const isImageBlock = block && 'core/image' === block.name;
-
-	return {
-		isImageBlock,
-		isPlayingAnimation: isPlayingAnimation( page, clientId ),
-	};
-} );
-
-const withAnimationPlayback = withDispatch( ( dispatch, { clientId, page } ) => {
-	const { playAnimation, stopAnimation } = dispatch( 'amp/story' );
-
-	return {
-		onAnimationStart: () => playAnimation( page, clientId ),
-		onAnimationStop: () => stopAnimation( page, clientId ),
-	};
-} );
-
-const enhance = compose(
-	applyWithSelect,
-	withAnimationPlayback,
-);
-
-export default enhance( AnimationControls );
+export default AnimationControls;

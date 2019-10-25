@@ -2,12 +2,12 @@
 # AMP Plugin for WordPress
 
 ![Banner](wp-assets/banner-1544x500.png)
-Enable AMP on your WordPress site, the WordPress way.
+Official AMP plugin, supported by the AMP team. Formerly Accelerated Mobile Pages, AMP enables great experiences across mobile, desktop, and stories.
 
 **Contributors:** [google](https://profiles.wordpress.org/google), [xwp](https://profiles.wordpress.org/xwp), [automattic](https://profiles.wordpress.org/automattic), [westonruter](https://profiles.wordpress.org/westonruter), [swissspidy](https://profiles.wordpress.org/swissspidy), [miinasikk](https://profiles.wordpress.org/miinasikk), [ryankienstra](https://profiles.wordpress.org/ryankienstra), [albertomedina](https://profiles.wordpress.org/albertomedina), [tweetythierry](https://profiles.wordpress.org/tweetythierry)  
-**Tags:** [amp](https://wordpress.org/plugins/tags/amp), [framework](https://wordpress.org/plugins/tags/framework), [components](https://wordpress.org/plugins/tags/components), [performance](https://wordpress.org/plugins/tags/performance), [mobile](https://wordpress.org/plugins/tags/mobile), [stories](https://wordpress.org/plugins/tags/stories)  
+**Tags:** [amp](https://wordpress.org/plugins/tags/amp), [stories](https://wordpress.org/plugins/tags/stories), [mobile](https://wordpress.org/plugins/tags/mobile), [optimization](https://wordpress.org/plugins/tags/optimization), [accelerated mobile pages](https://wordpress.org/plugins/tags/accelerated-mobile-pages), [framework](https://wordpress.org/plugins/tags/framework), [components](https://wordpress.org/plugins/tags/components), [blocks](https://wordpress.org/plugins/tags/blocks), [performance](https://wordpress.org/plugins/tags/performance), [ux](https://wordpress.org/plugins/tags/ux), [seo](https://wordpress.org/plugins/tags/seo), [official](https://wordpress.org/plugins/tags/official)  
 **Requires at least:** 4.9  
-**Tested up to:** 5.2  
+**Tested up to:** 5.3  
 **Stable tag:** 1.3.0  
 **License:** [GPLv2 or later](http://www.gnu.org/licenses/gpl-2.0.html)  
 **Requires PHP:** 5.4  
@@ -16,7 +16,7 @@ Enable AMP on your WordPress site, the WordPress way.
 
 ## Description ##
 
-The [AMP Project](http://amp.dev) is an open-source initiative aiming to make the web better for all. AMP enables web experiences that are consistently fast, beautiful and high-performing across distribution platforms. The official AMP plugin for WordPress supports fully integrated AMP publishing for WordPress sites, with robust capabilities and granular publisher controls.
+The [AMP Project](http://amp.dev) is an open-source initiative aiming to make the web better for all. AMP enables web experiences that are consistently fast, beautiful and high-performing across distribution platforms. AMP formerly stood for “Accelerated Mobile Pages”, but now works completely across desktop and mobile. The official AMP plugin for WordPress supports fully integrated AMP publishing for WordPress sites, with robust capabilities and granular publisher controls.
 
 Features and capabilities provided by the plugin include:
 
