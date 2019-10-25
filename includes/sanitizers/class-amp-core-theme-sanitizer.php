@@ -1539,6 +1539,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$amp_lightbox->setAttribute( 'layout', 'nodisplay' );
 		$amp_lightbox->setAttribute( 'animate-in', isset( $args['animate_in'] ) ? $args['animate_in'] : 'fade-in' );
 		$amp_lightbox->setAttribute( 'scrollable', isset( $args['scrollable'] ) ? $args['scrollable'] : true );
+		$amp_lightbox->setAttribute( 'role', $this->guess_modal_role( $modal_content_node ) );
 
 		$parent_node = $modal_content_node->parentNode;
 		$parent_node->replaceChild( $amp_lightbox, $modal_content_node );
@@ -1850,5 +1851,29 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		return $xpath;
+	}
+
+	/**
+	 * Try to guess the role of a modal based on its classes.
+	 *
+	 * @param DOMElement $modal Modal to guess the role for.
+	 * @return string Role that was guessed.
+	 */
+	protected function guess_modal_role( DOMElement $modal ) {
+		// No classes to base our guess on, so keep it generic.
+		if ( ! $modal->hasAttribute( 'class' ) ) {
+			return 'dialog';
+		}
+
+		$classes = $modal->getAttribute( 'class' );
+
+		foreach ( [ 'navigation', 'menu', 'search', 'alert', 'figure', 'form', 'img', 'toolbar', 'tooltip' ] as $role ) {
+			if ( false !== strpos( $classes, $role ) ) {
+				return $role;
+			}
+		}
+
+		// None of the roles we are looking for match any of the classes.
+		return 'dialog';
 	}
 }
