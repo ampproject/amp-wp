@@ -1540,6 +1540,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$amp_lightbox->setAttribute( 'animate-in', isset( $args['animate_in'] ) ? $args['animate_in'] : 'fade-in' );
 		$amp_lightbox->setAttribute( 'scrollable', isset( $args['scrollable'] ) ? $args['scrollable'] : true );
 		$amp_lightbox->setAttribute( 'role', $this->guess_modal_role( $modal_content_node ) );
+		// Setting tabindex to -1 (not reachable) as keyboard focus is handled through toggles.
+		$amp_lightbox->setAttribute( 'tabindex', -1 );
 
 		$parent_node = $modal_content_node->parentNode;
 		$parent_node->replaceChild( $amp_lightbox, $modal_content_node );
