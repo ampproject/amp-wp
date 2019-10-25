@@ -814,6 +814,43 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test get_template_availability with broken parent relationship.
+	 *
+	 * @covers AMP_Theme_Support::get_template_availability()
+	 */
+	public function test_get_template_availability_with_missing_parent() {
+		AMP_Options_Manager::update_option( 'supported_templates', [ 'missing_parent' ] );
+		add_theme_support( AMP_Theme_Support::SLUG );
+		add_filter(
+			'amp_supportable_templates',
+			static function ( $templates ) {
+				$templates['missing_parent'] = [
+					'label'    => 'Missing parent',
+					'parent'   => 'is_unknown',
+					'callback' => static function( WP_Query $query ) {
+						return false !== $query->get( 'missing_parent', false );
+					},
+				];
+				return $templates;
+			}
+		);
+		add_filter(
+			'query_vars',
+			static function ( $vars ) {
+				$vars[] = 'missing_parent';
+				return $vars;
+			}
+		);
+
+		// Test missing_parent.
+		$this->go_to( '/?missing_parent=1' );
+		$this->setExpectedIncorrectUsage( 'AMP_Theme_Support::get_template_availability' );
+		$availability = AMP_Theme_Support::get_template_availability();
+		$this->assertTrue( $availability['supported'] );
+		$this->assertEquals( 'missing_parent', $availability['template'] );
+	}
+
+	/**
 	 * Test get_supportable_templates.
 	 *
 	 * @covers AMP_Theme_Support::get_supportable_templates()
