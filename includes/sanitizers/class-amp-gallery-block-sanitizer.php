@@ -73,23 +73,40 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.2
 	 */
 	public function sanitize() {
-		$nodes     = $this->dom->getElementsByTagName( self::$tag );
-		$num_nodes = $nodes->length;
-		if ( 0 === $num_nodes ) {
-			return;
+		$xpath = new DOMXPath( $this->dom );
+		$expr  = sprintf(
+			'//ul[ %s ]',
+			implode(
+				' or ',
+				[
+					'( parent::figure[ contains( @class, "wp-block-gallery" ) and @data-amp-carousel = "true" ] )',
+					'( contains( @class, "wp-block-gallery" ) and @data-amp-carousel = "true" )',
+				]
+			)
+		);
+		$query = $xpath->query( $expr );
+
+		$nodes = [];
+		foreach ( $query as $node ) {
+			$nodes[] = $node;
 		}
 
-		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
-			$node = $nodes->item( $i );
-
-			// We're looking for <ul> elements that have at least one child and the proper class.
-			if ( 0 === count( $node->childNodes ) || false === strpos( $node->getAttribute( 'class' ), self::$class ) ) {
-				continue;
-			}
+		foreach ( $nodes as $node ) {
+			/**
+			 * Element
+			 *
+			 * @var DOMElement $node
+			 */
 
 			$attributes      = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
 			$is_amp_lightbox = isset( $attributes['data-amp-lightbox'] ) && true === filter_var( $attributes['data-amp-lightbox'], FILTER_VALIDATE_BOOLEAN );
-			$is_amp_carousel = ! empty( $this->args['carousel_required'] ) || ( isset( $attributes['data-amp-carousel'] ) && true === filter_var( $attributes['data-amp-carousel'], FILTER_VALIDATE_BOOLEAN ) );
+			$is_amp_carousel = (
+				! empty( $this->args['carousel_required'] )
+				||
+				filter_var( $node->getAttribute( 'data-amp-carousel' ), FILTER_VALIDATE_BOOLEAN )
+				||
+				filter_var( $node->parentNode->getAttribute( 'data-amp-carousel' ), FILTER_VALIDATE_BOOLEAN )
+			);
 
 			// We are only looking for <ul> elements which have amp-carousel / amp-lightbox true.
 			if ( ! $is_amp_carousel && ! $is_amp_lightbox ) {
