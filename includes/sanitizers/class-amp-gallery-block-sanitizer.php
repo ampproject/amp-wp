@@ -142,22 +142,34 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 			);
 
 			foreach ( $images as $image ) {
-				$div                   = AMP_DOM_Utils::create_node(
+				$div = AMP_DOM_Utils::create_node(
 					$this->dom,
 					'div',
 					[ 'class' => 'slide' ]
 				);
-				$possible_caption_text = isset( $image->nextSibling ) && 'figcaption' === $image->nextSibling->nodeName ? $image->nextSibling->textContent : null;
-				$div->appendChild( $image );
 
+				// Ensure the image fills the entire <amp-carousel>, so the possible caption looks right.
+				if ( 'amp-img' === $image->tagName ) {
+					$image->setAttribute( 'layout', 'fill' );
+					$image->setAttribute( 'object-fit', 'cover' );
+				} elseif ( isset( $image->firstChild->tagName ) && 'amp-img' === $image->firstChild->tagName ) {
+					// If the <amp-img> is wrapped in an <a>.
+					$image->firstChild->setAttribute( 'layout', 'fill' );
+					$image->firstChild->setAttribute( 'object-fit', 'cover' );
+				}
+
+				$possible_caption_text = $this->possibly_get_caption_text( $image );
+				$div->appendChild( $image );
 				if ( $possible_caption_text ) {
-					$caption              = AMP_DOM_Utils::create_node(
+					$caption_wrapper           = AMP_DOM_Utils::create_node(
 						$this->dom,
 						'div',
 						[ 'class' => 'amp-wp-gallery-caption' ]
 					);
-					$caption->textContent = $possible_caption_text;
-					$div->appendChild( $caption );
+					$caption_span              = AMP_DOM_Utils::create_node( $this->dom, 'span', [] );
+					$caption_span->textContent = $possible_caption_text;
+					$caption_wrapper->appendChild( $caption_span );
+					$div->appendChild( $caption_wrapper );
 				}
 
 				$amp_carousel->appendChild( $div );
@@ -237,5 +249,25 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 				$image_node->setAttribute( $att, $value );
 			}
 		}
+	}
+
+	/**
+	 * Gets the caption of an image, if it exists.
+	 *
+	 * @param DOMElement $element The element for which to search for a caption.
+	 * @return string|null The caption for the image, or null.
+	 */
+	public function possibly_get_caption_text( $element ) {
+		$caption_tag = 'figcaption';
+		if ( isset( $element->nextSibling->nodeName ) && $caption_tag === $element->nextSibling->nodeName ) {
+			return $element->nextSibling->textContent;
+		}
+
+		// If 'Link To' is selected, the image will be wrapped in an <a>, so search for the sibling of the <a>.
+		if ( isset( $element->parentNode->nextSibling->nodeName ) && $caption_tag === $element->parentNode->nextSibling->nodeName ) {
+			return $element->parentNode->nextSibling->textContent;
+		}
+
+		return null;
 	}
 }

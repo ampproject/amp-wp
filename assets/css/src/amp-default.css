@@ -64,7 +64,12 @@ body amp-audio:not([controls]) {
 
 amp-carousel .amp-wp-gallery-caption {
 	text-align: center;
-	position: absolute;
 	bottom: 0;
-	width: 100%;
+	left: 0;
+	right: 0;
+	background-color: rgba(0, 0, 0, 0.5);
+	color: #fff;
+	padding: 1rem;
+	position: absolute;
+
 }
