@@ -79,8 +79,8 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 			implode(
 				' or ',
 				[
-					'( parent::figure[ contains( @class, "wp-block-gallery" ) and @data-amp-carousel = "true" ] )',
-					'( contains( @class, "wp-block-gallery" ) and @data-amp-carousel = "true" )',
+					'( parent::figure[ contains( @class, "wp-block-gallery" )] )',
+					'( contains( @class, "wp-block-gallery" ) )',
 				]
 			)
 		);
@@ -98,7 +98,10 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 			 * @var DOMElement $node
 			 */
 
-			$attributes      = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
+			// In WordPress 5.3, the Gallery block's <ul> is wrapped in a <figure class="wp-block-gallery">, so look for that node also.
+			$gallery_node = isset( $node->parentNode ) && AMP_DOM_Utils::has_class( $node->parentNode, self::$class ) ? $node->parentNode : $node;
+			$attributes   = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $gallery_node );
+
 			$is_amp_lightbox = isset( $attributes['data-amp-lightbox'] ) && true === filter_var( $attributes['data-amp-lightbox'], FILTER_VALIDATE_BOOLEAN );
 			$is_amp_carousel = (
 				! empty( $this->args['carousel_required'] )
@@ -196,7 +199,7 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 				$amp_carousel->appendChild( $slide );
 			}
 
-			$node->parentNode->replaceChild( $amp_carousel, $node );
+			$gallery_node->parentNode->replaceChild( $amp_carousel, $gallery_node );
 		}
 		$this->did_convert_elements = true;
 	}
