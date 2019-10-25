@@ -73,7 +73,7 @@ amp-carousel .amp-wp-gallery-caption {
 	padding: 1rem;
 }
 
-.wp-block-gallery[data-amp-carousel='true'] {
+.wp-block-gallery[data-amp-carousel="true"] {
 	display: block;
 	flex-wrap: unset;
 }
