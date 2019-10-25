@@ -715,7 +715,27 @@ class AMP_Theme_Support {
 			if ( ! $has_children ) {
 				$supportable_template = $supportable_templates[ $id ];
 				while ( ! empty( $supportable_template['parent'] ) ) {
-					$parent               = $supportable_template['parent'];
+					$parent = $supportable_template['parent'];
+
+					/*
+					 * If the parent is not amongst the supportable templates, then something is off in terms of hierarchy.
+					 * Either the matching is off-track, or the template is badly configured.
+					 */
+					if ( ! array_key_exists( $parent, $supportable_templates ) ) {
+						_doing_it_wrong(
+							__METHOD__,
+							esc_html(
+								sprintf(
+									/* translators: %s: amp_supportable_templates */
+									__( 'An expected parent was not found. Did you filter %s to not honor the template hierarchy?', 'amp' ),
+									'amp_supportable_templates'
+								)
+							),
+							'1.4'
+						);
+						break;
+					}
+
 					$supportable_template = $supportable_templates[ $parent ];
 
 					// Let the child supported status override the parent's supported status.
