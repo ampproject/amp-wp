@@ -27,9 +27,7 @@ import {
  * @return {ReactElement} Component.
  */
 const BackgroundColorSettings = ( { backgroundColors, setAttributes, overlayOpacity, hasMedia } ) => {
-	const hasColors = backgroundColors
-		.map( ( color ) => color && Object.values( color ).filter( Boolean ).length )
-		.filter( Boolean ).length > 0;
+	const hasColors = backgroundColors.some( ( color ) => color && Object.values( color ).some( Boolean ) );
 
 	const removeBackgroundColor = ( index ) => {
 		backgroundColors.splice( index, 1 );
