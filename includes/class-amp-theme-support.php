@@ -922,8 +922,8 @@ class AMP_Theme_Support {
 		}
 
 		$taxonomy_args = [
-			'_builtin'           => false,
-			'publicly_queryable' => true,
+			'_builtin' => false,
+			'public'   => true,
 		];
 		foreach ( get_taxonomies( $taxonomy_args, 'objects' ) as $taxonomy ) {
 			$templates[ sprintf( 'is_tax[%s]', $taxonomy->name ) ] = [
@@ -936,8 +936,8 @@ class AMP_Theme_Support {
 		}
 
 		$post_type_args = [
-			'has_archive'        => true,
-			'publicly_queryable' => true,
+			'has_archive' => true,
+			'public'      => true,
 		];
 		foreach ( get_post_types( $post_type_args, 'objects' ) as $post_type ) {
 			$templates[ sprintf( 'is_post_type_archive[%s]', $post_type->name ) ] = [
