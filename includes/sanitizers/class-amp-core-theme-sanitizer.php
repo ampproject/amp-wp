@@ -51,6 +51,27 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	protected static $theme_features = [
+		// Twenty Twenty.
+		'twentytwenty'    => [
+			'dequeue_scripts'                         => [
+				'twentytwenty-js',
+			],
+			'remove_actions'                          => [
+				'wp_head' => [
+					'twentytwenty_no_js_class', // AMP is essentially no-js, with any interactivity added explicitly via amp-bind.
+				],
+			],
+			'add_smooth_scrolling'                    => [
+				// @todo Only replaces twentytwenty.smoothscroll.scrollToAnchor, but not twentytwenty.smoothscroll.scrollToElement
+				'//a[ starts-with( @href, "#" ) and not( @href = "#" )and not( @href = "#0" ) and not( contains( @class, "do-not-scroll" ) ) and not( contains( @class, "skip-link" ) ) ]',
+			],
+			'add_twentytwenty_modals'                 => [],
+			'add_twentytwenty_toggles'                => [],
+			'add_nav_menu_styles'                     => [],
+			'add_twentytwenty_masthead_styles'        => [],
+			'add_twentytwenty_current_page_awareness' => [],
+		],
+
 		// Twenty Nineteen.
 		'twentynineteen'  => [
 			'dequeue_scripts'                    => [
@@ -79,7 +100,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			],
 			'remove_actions'                      => [
 				'wp_head' => [
-					'twentyseventeen_javascript_detection', // AMP is essentially no-js, with any interactively added explicitly via amp-bind.
+					'twentyseventeen_javascript_detection', // AMP is essentially no-js, with any interactivity added explicitly via amp-bind.
 				],
 			],
 			'force_fixed_background_support'      => [],
@@ -110,7 +131,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			],
 			'remove_actions'      => [
 				'wp_head' => [
-					'twentysixteen_javascript_detection', // AMP is essentially no-js, with any interactively added explicitly via amp-bind.
+					'twentysixteen_javascript_detection', // AMP is essentially no-js, with any interactivity added explicitly via amp-bind.
 				],
 			],
 			'add_nav_menu_styles' => [
@@ -129,7 +150,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			],
 			'remove_actions'      => [
 				'wp_head' => [
-					'twentyfifteen_javascript_detection', // AMP is essentially no-js, with any interactively added explicitly via amp-bind.
+					'twentyfifteen_javascript_detection', // AMP is essentially no-js, with any interactivity added explicitly via amp-bind.
 				],
 			],
 			'add_nav_menu_styles' => [
@@ -198,8 +219,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	public static function get_acceptable_errors( $template ) {
 		if ( isset( self::$theme_features[ $template ] ) ) {
 			return [
-				'removed_unused_css_rules' => true,
-				'illegal_css_at_rule'      => [
+				'illegal_css_at_rule' => [
 					[
 						'at_rule' => 'viewport',
 					],
@@ -642,6 +662,32 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Add required styles for featured image header and image blocks in Twenty Twenty.
+	 */
+	public static function add_twentytwenty_masthead_styles() {
+		add_action(
+			'wp_enqueue_scripts',
+			static function() {
+				ob_start();
+				?>
+				<style>
+				.featured-media amp-img {
+					position: static;
+				}
+
+				.wp-block-image img {
+					display: block;
+				}
+				</style>
+				<?php
+				$styles = str_replace( [ '<style>', '</style>' ], '', ob_get_clean() );
+				wp_add_inline_style( get_template() . '-style', $styles );
+			},
+			11
+		);
+	}
+
+	/**
 	 * Add required styles for featured image header in Twenty Nineteen.
 	 *
 	 * The following is necessary because the styles in the theme apply to the featured img,
@@ -960,7 +1006,29 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					}
 				<?php endif; ?>
 
-				<?php if ( 'twentyseventeen' === get_template() ) : ?>
+				<?php if ( 'twentytwenty' === get_template() ) : ?>
+					.cover-modal {
+						display: inherit;
+					}
+
+					.menu-modal-inner {
+						height: 100%;
+					}
+
+					.admin-bar .cover-modal {
+						/* Use padding to shift down modal because amp-lightbox has top:0 !important. */
+						padding-top: 32px;
+					}
+
+					@media (max-width: 782px) {
+						.admin-bar .cover-modal {
+							/* Use padding to shift down modal because amp-lightbox has top:0 !important. */
+							padding-top: 46px;
+						}
+					}
+
+				}
+				<?php elseif ( 'twentyseventeen' === get_template() ) : ?>
 					/* Show the button*/
 					.no-js .menu-toggle {
 						display: block;
@@ -981,46 +1049,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						.no-js .main-navigation > div > ul {
 							display: block;
 						}
-						.main-navigation ul li.menu-item-has-children:focus-within:before,
-						.main-navigation ul li.menu-item-has-children:focus-within:after,
-						.main-navigation ul li.page_item_has_children:focus-within:before,
-						.main-navigation ul li.page_item_has_children:focus-within:after {
-							display: block;
-						}
-						.main-navigation ul ul li:focus-within > ul {
-							<?php if ( is_rtl() ) : ?>
-								left: auto;
-								right: 100%;
-							<?php else : ?>
-								left: 100%;
-								right: auto;
-							<?php endif; ?>
-						}
-						.main-navigation li li:focus-within {
-							background: #767676;
-						}
-						.main-navigation li li:focus-within > a,
-						.main-navigation li li a:focus-within,
-						.main-navigation li li.current_page_item a:focus-within,
-						.main-navigation li li.current-menu-item a:focus-within {
-							color: #fff;
-						}
-						.main-navigation ul li:focus-within > ul {
-							<?php if ( is_rtl() ) : ?>
-								left: auto;
-								right: 0.5em;
-							<?php else : ?>
-								left: 0.5em;
-								right: auto;
-							<?php endif; ?>
-						}
-
-						.main-navigation ul ul li.menu-item-has-children:focus-within:before,
-						.main-navigation ul ul li.menu-item-has-children:focus-within:after,
-						.main-navigation ul ul li.page_item_has_children:focus-within:before,
-						.main-navigation ul ul li.page_item_has_children:focus-within:after {
-							display: none;
-						}
 					}
 				<?php elseif ( 'twentysixteen' === get_template() ) : ?>
 					@media screen and (max-width: 56.875em) {
@@ -1039,27 +1067,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						.no-js .main-navigation ul ul {
 							display: block;
 						}
-						.main-navigation li:focus-within > a {
-							color: #007acc;
-						}
-						.main-navigation li:focus-within > ul {
-							<?php if ( is_rtl() ) : ?>
-								left: auto;
-								right: 0;
-							<?php else : ?>
-								left: 0;
-								right: auto;
-							<?php endif; ?>
-						}
-						.main-navigation ul ul li:focus-within > ul {
-							<?php if ( is_rtl() ) : ?>
-								left: 100%;
-								right: auto;
-							<?php else : ?>
-								left: auto;
-								right: 100%;
-							<?php endif; ?>
-						}
 					}
 				<?php elseif ( 'twentyfifteen' === get_template() ) : ?>
 					@media screen and (min-width: 59.6875em) {
@@ -1072,52 +1079,10 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						}
 					}
 
-				<?php elseif ( 'twentyfourteen' === get_template() ) : ?>
-					@media screen and (min-width: 783px) {
-						.primary-navigation li:focus-within > a {
-							background-color: #24890d;
-							color: #fff;
-						}
-
-						.primary-navigation ul ul li:focus-within > a {
-							background-color: #41a62a;
-						}
-
-						.primary-navigation ul li:focus-within > ul {
-							left: auto;
-						}
-
-						.primary-navigation ul ul li:focus-within > ul {
-							left: 100%;
-						}
-					}
-
-					@media screen and (min-width: 1008px) {
-						.secondary-navigation li:focus-within > a {
-							background-color: #24890d;
-							color: #fff;
-						}
-
-						.secondary-navigation ul ul li:focus-within > a {
-							background-color: #41a62a;
-						}
-
-						.secondary-navigation ul li:focus-within > ul {
-							left: 202px;
-						}
-					}
-
 				<?php elseif ( 'twentythirteen' === get_template() ) : ?>
 					@media (min-width: 644px) {
 						.dropdown-toggle {
 							display: none;
-						}
-						ul.nav-menu :focus-within > ul,
-						.nav-menu :focus-within > ul {
-							clip: inherit;
-							overflow: inherit;
-							height: inherit;
-							width: inherit;
 						}
 					}
 					@media (max-width: 643px) {
@@ -1200,18 +1165,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 							outline: 1px solid rgba(51, 51, 51, 0.3);
 						}
 					}
-
-				<?php elseif ( 'twentytwelve' === get_template() ) : ?>
-					@media screen and (min-width: 600px) {
-						.main-navigation .menu-item-has-children:focus-within > ul {
-							border-left: 0;
-							clip: inherit;
-							overflow: inherit;
-							height: inherit;
-							width: inherit;
-						}
-					}
-
 				<?php endif; ?>
 				</style>
 				<?php
@@ -1521,5 +1474,404 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$search_toggle_link->setAttribute( AMP_DOM_Utils::AMP_BIND_DATA_ATTR_PREFIX . 'aria-expanded', "$hidden_state_id ? 'false' : 'true'" );
 		$search_toggle_div->setAttribute( AMP_DOM_Utils::AMP_BIND_DATA_ATTR_PREFIX . 'class', "$hidden_state_id ? 'search-toggle' : 'search-toggle active'" );
 		$search_container->setAttribute( AMP_DOM_Utils::AMP_BIND_DATA_ATTR_PREFIX . 'class', "$hidden_state_id ? 'search-box-wrapper hide' : 'search-box-wrapper'" );
+	}
+
+	/**
+	 * Wrap a modal node tree in an <amp-lightbox> element.
+	 *
+	 * @param array $args {
+	 *     Associative array of arguments.
+	 *
+	 *     @type string   $modal_id            ID to use for the modal and its associated buttons.
+	 *     @type string   $modal_content_xpath XPath to query the contents of the modal.
+	 *     @type string[] $open_button_xpath   Array of XPaths to query the buttons that open the modal.
+	 *     @type string[] $close_button_xpath  Array of XPaths to query the buttons that close the modal. These should be contained within the modal.
+	 *     @type string   $animate_in          Optional. What animation to use for showing the modal. Valid options are: 'fade-in', 'fly-in-bottom', 'fly-in-top'. Defaults to 'fade-in'.
+	 *     @type bool     $scrollable          Optional. Whether the inner content of the modal should be scrollable. Defaults to true.
+	 * }
+	 */
+	public function wrap_modal_in_lightbox( $args = [] ) {
+		if ( ! isset( $args['modal_id'], $args['modal_content_xpath'], $args['open_button_xpath'], $args['close_button_xpath'] ) ) {
+			return;
+		}
+
+		$modal_id           = $args['modal_id'];
+		$modal_content_node = $this->xpath->query( $args['modal_content_xpath'] )->item( 0 );
+
+		if ( ! is_string( $modal_id ) || ! $modal_content_node instanceof DOMElement ) {
+			return;
+		}
+
+		$body_id = AMP_DOM_Utils::get_element_id( $this->get_body_node(), 'body' );
+
+		$open_xpaths  = isset( $args['open_button_xpath'] ) ? $args['open_button_xpath'] : [];
+		$close_xpaths = isset( $args['close_button_xpath'] ) ? $args['close_button_xpath'] : [];
+
+		$modal_actions = [
+			"{$modal_id}.open"  => $open_xpaths,
+			// Although we add the 'show-modal' class here, we don't remove it again, as it will
+			// _first_ remove the correct positioning and only _then_ start the fade-out animation.
+			// See: https://youtu.be/aooq-liRtMs .
+			"{$modal_id}.toggleClass(class=show-modal,force=true)" => $open_xpaths,
+			"{$body_id}.toggleClass(class=showing-modal,force=true)" => $open_xpaths,
+			"{$modal_id}.close" => $close_xpaths,
+			"{$body_id}.toggleClass(class=showing-modal,force=false)" => $close_xpaths,
+		];
+
+		// As we have the toggle targets, we need to go backwards from their and find all
+		// nodes that are meant to toggle these targets.
+		// The triple loop below is generally a double loop (modals x toggles), however
+		// we need the third loop as we cannot guarantee that each xpath will only ever
+		// retrieve a single result.
+		foreach ( $modal_actions as $modal_action => $toggle_xpaths ) {
+			foreach ( $toggle_xpaths as $toggle_xpath ) {
+				foreach ( $this->xpath->query( $toggle_xpath ) as $toggle_node ) {
+					if ( $toggle_node instanceof DOMElement ) {
+						AMP_DOM_Utils::add_amp_action( $toggle_node, 'tap', $modal_action );
+					}
+				}
+			}
+		}
+
+		// Create an <amp-lightbox> element that will contain the modal.
+		$amp_lightbox = $this->dom->createElement( 'amp-lightbox' );
+		$amp_lightbox->setAttribute( 'id', $modal_id );
+		$amp_lightbox->setAttribute( 'layout', 'nodisplay' );
+		$amp_lightbox->setAttribute( 'animate-in', isset( $args['animate_in'] ) ? $args['animate_in'] : 'fade-in' );
+		$amp_lightbox->setAttribute( 'scrollable', isset( $args['scrollable'] ) ? $args['scrollable'] : true );
+		$amp_lightbox->setAttribute( 'role', $this->guess_modal_role( $modal_content_node ) );
+		// Setting tabindex to -1 (not reachable) as keyboard focus is handled through toggles.
+		$amp_lightbox->setAttribute( 'tabindex', -1 );
+
+		$parent_node = $modal_content_node->parentNode;
+		$parent_node->replaceChild( $amp_lightbox, $modal_content_node );
+
+		$strip_wrapper_levels = isset( $args['strip_wrapper_levels'] ) ? $args['strip_wrapper_levels'] : 0;
+
+		while ( $strip_wrapper_levels > 0 ) {
+			$children = [];
+			foreach ( $modal_content_node->childNodes as $child_node ) {
+				if ( $child_node instanceof DOMElement && ! $child_node instanceof DOMComment ) {
+					$children[] = $child_node;
+				}
+			}
+
+			if ( count( $children ) > 1 ) {
+				break;
+			}
+
+			// Add class(es) and action(s) of removed wrapper to lightbox to avoid breaking CSS selectors.
+			AMP_DOM_Utils::copy_attributes( [ 'class', 'on', 'data-toggle-target' ], $modal_content_node, $amp_lightbox );
+
+			$modal_content_node = $modal_content_node->removeChild( $children[0] );
+
+			$strip_wrapper_levels--;
+		}
+
+		$amp_lightbox->appendChild( $modal_content_node );
+	}
+
+	/**
+	 * Add generic modal interactivity compat for the Twentytwenty theme.
+	 *
+	 * Modals implemented in JS will be transformed into <amp-lightbox> equivalents,
+	 * with the tap actions being attached to their associated toggles.
+	 */
+	public function add_twentytwenty_modals() {
+		$modals = $this->xpath->query( "//*[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' cover-modal ' ) ]" );
+
+		if ( false === $modals || 0 === $modals->count() ) {
+			return;
+		}
+
+		foreach ( $modals as $modal ) {
+			/**
+			 * Modal element to transform.
+			 *
+			 * @var DOMElement $modal
+			 */
+
+			if ( ! $modal->hasAttribute( 'data-modal-target-string' ) ) {
+				return;
+			}
+
+			$modal_target = $modal->getAttribute( 'data-modal-target-string' );
+			$toggles      = $this->xpath->query( "//*[ @data-toggle-target = '{$modal_target}' ]" );
+
+			$open_button_xpaths  = [];
+			$close_button_xpaths = [];
+			foreach ( $toggles as $toggle ) {
+				/**
+				 * Toggle element to transform.
+				 *
+				 * @var $toggle DOMElement
+				 */
+
+				$within_modal = false;
+				$parent       = $toggle->parentNode;
+				while ( $parent ) {
+					if ( $parent === $modal ) {
+						$within_modal = true;
+						break;
+					}
+					$parent = $parent->parentNode;
+				}
+
+				if ( $within_modal ) {
+					$close_button_xpaths[] = $toggle->getNodePath();
+				} else {
+					$open_button_xpaths[] = $toggle->getNodePath();
+				}
+			}
+
+			$modal_id = AMP_DOM_Utils::get_element_id( $modal );
+
+			// Add the lightbox itself as a close button xpath as well.
+			// With twentytwenty compat, the lightbox fills the entire screen, and only an inner wrapper will contain
+			// the actionable elements in the modal. Therefore, the lightbox represents the "background".
+			$close_button_xpaths[] = "//*[ @id = '{$modal_id}' ]";
+			$modal->setAttribute( 'data-toggle-target', "#{$modal_id}" );
+
+			$this->wrap_modal_in_lightbox(
+				[
+					'modal_id'             => $modal_id,
+					'modal_content_xpath'  => $modal->getNodePath(),
+					'open_button_xpath'    => $open_button_xpaths,
+					'close_button_xpath'   => $close_button_xpaths,
+					'strip_wrapper_levels' => 1,
+				]
+			);
+		}
+	}
+
+	/**
+	 * Add generic toggle interactivity compat for the Twentytwenty theme.
+	 *
+	 * Toggles implemented in JS will be transformed into <amp-bind> equivalents,
+	 * with <amp-state> components storing the CSS classes to set.
+	 */
+	public function add_twentytwenty_toggles() {
+		$toggles = $this->xpath->query( '//*[ @data-toggle-target ]' );
+		$body_id = AMP_DOM_Utils::get_element_id( $this->get_body_node(), 'body' );
+
+		if ( false === $toggles || 0 === $toggles->count() ) {
+			return;
+		}
+
+		foreach ( $toggles as $toggle ) {
+			/**
+			 * Toggle element to transform.
+			 *
+			 * @var $toggle DOMElement
+			 */
+
+			$toggle_target = $toggle->getAttribute( 'data-toggle-target' );
+			$toggle_id     = AMP_DOM_Utils::get_element_id( $toggle );
+
+			if ( 'next' === $toggle_target ) {
+				$target_node = $toggle->nextSibling;
+			} else {
+				$target_xpath = $this->xpath_from_css_selector( $toggle_target );
+				if ( null === $target_xpath ) {
+					continue;
+				}
+
+				$target_nodes = $this->xpath->query( $target_xpath, $toggle );
+				if ( false === $target_nodes || 0 === count( $target_nodes ) ) {
+					continue;
+				}
+				$target_node = $target_nodes->item( 0 );
+			}
+
+			if ( ! $target_node ) {
+				continue;
+			}
+
+			// Get the class to toggle, if specified.
+			$toggle_class = $toggle->hasAttribute( 'data-class-to-toggle' ) ? $toggle->getAttribute( 'data-class-to-toggle' ) : 'active';
+
+			$is_sub_menu     = AMP_DOM_Utils::has_class( $target_node, 'sub-menu' );
+			$new_target_node = $is_sub_menu ? $this->get_closest_submenu( $toggle ) : $target_node;
+			$new_target_id   = AMP_DOM_Utils::get_element_id( $new_target_node );
+
+			$state_string = str_replace( '-', '_', $new_target_id );
+
+			// Toggle the target of the clicked toggle.
+			AMP_DOM_Utils::add_amp_action( $toggle, 'tap', "{$new_target_id}.toggleClass(class='{$toggle_class}')" );
+			// Set the central state of the toggle's target.
+			AMP_DOM_Utils::add_amp_action( $toggle, 'tap', "AMP.setState({{$state_string}: !{$state_string}})" );
+			// Adapt the aria-expanded attribute according to the central state.
+			$toggle->setAttribute( 'data-amp-bind-aria-expanded', "{$state_string} ? 'true' : 'false'" );
+
+			// If the toggle target is 'next' ir a sub-menu, only give the clicked toggle the active class.
+			if ( 'next' === $toggle_target || AMP_DOM_Utils::has_class( $target_node, 'sub-menu' ) ) {
+				AMP_DOM_Utils::add_amp_action( $toggle, 'tap', "{$toggle_id}.toggleClass(class='active')" );
+			} else {
+				// If not, toggle all toggles with this toggle target.
+				$target_toggles = $this->xpath->query( "//*[ @data-toggle-target = '{$toggle_target}' ]" );
+				foreach ( $target_toggles as $target_toggle ) {
+					if ( AMP_DOM_Utils::has_class( $target_toggle, 'close-nav-toggle' ) ) {
+						// Skip adding the 'active' class on the "Close" button in the primary nav menu.
+						continue;
+					}
+					$target_toggle_id = AMP_DOM_Utils::get_element_id( $target_toggle );
+					AMP_DOM_Utils::add_amp_action( $toggle, 'tap', "{$target_toggle_id}.toggleClass(class='active')" );
+				}
+			}
+
+			// Toggle body class.
+			if ( $toggle->hasAttribute( 'data-toggle-body-class' ) ) {
+				$body_class = $toggle->getAttribute( 'data-toggle-body-class' );
+				AMP_DOM_Utils::add_amp_action( $toggle, 'tap', "{$body_id}.toggleClass(class='{$body_class}')" );
+			}
+
+			if ( $toggle->hasAttribute( 'data-set-focus' ) ) {
+				$focus_selector = $toggle->getAttribute( 'data-set-focus' );
+
+				if ( ! empty( $focus_selector ) ) {
+					$focus_xpath   = $this->xpath_from_css_selector( $focus_selector );
+					$focus_element = $this->xpath->query( $focus_xpath )->item( 0 );
+
+					if ( $focus_element instanceof DOMElement ) {
+						$focus_element_id = AMP_DOM_Utils::get_element_id( $focus_element );
+						AMP_DOM_Utils::add_amp_action( $toggle, 'tap', "{$focus_element_id}.focus" );
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Get the closest sub-menu within a menu item.
+	 *
+	 * @param DOMElement $element Element to get the closest sub-menu of.
+	 * @return DOMElement Requested sub-menu element, or the starting element
+	 *                    if none found.
+	 */
+	protected function get_closest_submenu( DOMElement $element ) {
+		$menu_item = $element;
+
+		while ( ! AMP_DOM_Utils::has_class( $menu_item, 'menu-item' ) ) {
+			$menu_item = $menu_item->parentNode;
+			if ( ! $menu_item ) {
+				return $element;
+			}
+		}
+
+		$sub_menu = $this->xpath->query( ".//*[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' sub-menu ' ) ]", $menu_item )->item( 0 );
+
+		if ( ! $sub_menu instanceof DOMElement ) {
+			return $element;
+		}
+
+		return $sub_menu;
+	}
+
+	/**
+	 * Automatically open the submenus related to the current page in the menu modal.
+	 */
+	public function add_twentytwenty_current_page_awareness() {
+		$page_ancestors = $this->xpath->query( "//li[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' current_page_ancestor ' ) ]" );
+		foreach ( $page_ancestors as $page_ancestor ) {
+			$toggle   = $this->xpath->query( "./div/button[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' sub-menu-toggle ' ) ]", $page_ancestor )->item( 0 );
+			$children = $this->xpath->query( "./ul[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' children ' ) ]", $page_ancestor )->item( 0 );
+			foreach ( [ $toggle, $children ] as $element ) {
+				if ( ! $element instanceof DOMElement ) {
+					continue;
+				}
+
+				$classes   = $element->hasAttribute( 'class' ) ? explode( ' ', $element->getAttribute( 'class' ) ) : [];
+				$classes[] = 'active';
+				$element->setAttribute( 'class', implode( ' ', array_unique( $classes ) ) );
+			}
+		}
+	}
+
+	/**
+	 * Provides a "best guess" as to what XPath would mirror a given CSS
+	 * selector.
+	 *
+	 * This is a very simplistic conversion and will only work for very basic
+	 * CSS selectors.
+	 *
+	 * @param string $css_selector CSS selector to convert.
+	 * @return string|null XPath that closely mirrors the provided CSS selector,
+	 *                             or null if an error occurred.
+	 * @since 1.4.0
+	 */
+	protected function xpath_from_css_selector( $css_selector ) {
+		// Start with basic clean-up.
+		$css_selector = trim( $css_selector );
+		$css_selector = preg_replace( '/\s+/', ' ', $css_selector );
+
+		$xpath             = '';
+		$direct_descendant = false;
+		$token             = strtok( $css_selector, ' ' );
+
+		while ( false !== $token ) {
+			$matches = [];
+
+			// Direct descendant.
+			if ( preg_match( '/^>$/', $token, $matches ) ) {
+				$direct_descendant = true;
+				$token             = strtok( ' ' );
+				continue;
+			}
+
+			// Single ID.
+			if ( preg_match( '/^#(?<id>[a-zA-Z0-9-_]*)$/', $token, $matches ) ) {
+				$descendant        = $direct_descendant ? '/' : '//';
+				$xpath            .= "{$descendant}*[ @id = '{$matches['id']}' ]";
+				$direct_descendant = false;
+				$token             = strtok( ' ' );
+				continue;
+			}
+
+			// Single class.
+			if ( preg_match( '/^\.(?<class>[a-zA-Z0-9-_]*)$/', $token, $matches ) ) {
+				$descendant        = $direct_descendant ? '/' : '//';
+				$xpath            .= "{$descendant}*[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' {$matches['class']} ' ) ]";
+				$direct_descendant = false;
+				$token             = strtok( ' ' );
+				continue;
+			}
+
+			// Element.
+			if ( preg_match( '/^(?<element>[^.][a-zA-Z0-9-_]*)$/', $token, $matches ) ) {
+				$descendant        = $direct_descendant ? '/' : '//';
+				$xpath            .= "{$descendant}{$matches['element']}";
+				$direct_descendant = false;
+				$token             = strtok( ' ' );
+				continue;
+			}
+
+			$token = strtok( ' ' );
+		}
+
+		return $xpath;
+	}
+
+	/**
+	 * Try to guess the role of a modal based on its classes.
+	 *
+	 * @param DOMElement $modal Modal to guess the role for.
+	 * @return string Role that was guessed.
+	 */
+	protected function guess_modal_role( DOMElement $modal ) {
+		// No classes to base our guess on, so keep it generic.
+		if ( ! $modal->hasAttribute( 'class' ) ) {
+			return 'dialog';
+		}
+
+		$classes = $modal->getAttribute( 'class' );
+
+		foreach ( [ 'navigation', 'menu', 'search', 'alert', 'figure', 'form', 'img', 'toolbar', 'tooltip' ] as $role ) {
+			if ( false !== strpos( $classes, $role ) ) {
+				return $role;
+			}
+		}
+
+		// None of the roles we are looking for match any of the classes.
+		return 'dialog';
 	}
 }

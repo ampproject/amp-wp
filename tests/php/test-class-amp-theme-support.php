@@ -785,8 +785,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		register_post_type(
 			$custom_post_type,
 			[
-				'has_archive'        => true,
-				'publicly_queryable' => true,
+				'has_archive' => true,
+				'public'      => true,
 			]
 		);
 		self::factory()->post->create(
@@ -813,6 +813,43 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertTrue( $availability['supported'] );
 		$this->assertEmpty( $availability['errors'] );
 		$this->assertEquals( 'is_search', $availability['template'] );
+	}
+
+	/**
+	 * Test get_template_availability with broken parent relationship.
+	 *
+	 * @covers AMP_Theme_Support::get_template_availability()
+	 */
+	public function test_get_template_availability_with_missing_parent() {
+		AMP_Options_Manager::update_option( 'supported_templates', [ 'missing_parent' ] );
+		add_theme_support( AMP_Theme_Support::SLUG );
+		add_filter(
+			'amp_supportable_templates',
+			static function ( $templates ) {
+				$templates['missing_parent'] = [
+					'label'    => 'Missing parent',
+					'parent'   => 'is_unknown',
+					'callback' => static function( WP_Query $query ) {
+						return false !== $query->get( 'missing_parent', false );
+					},
+				];
+				return $templates;
+			}
+		);
+		add_filter(
+			'query_vars',
+			static function ( $vars ) {
+				$vars[] = 'missing_parent';
+				return $vars;
+			}
+		);
+
+		// Test missing_parent.
+		$this->go_to( '/?missing_parent=1' );
+		$this->setExpectedIncorrectUsage( 'AMP_Theme_Support::get_template_availability' );
+		$availability = AMP_Theme_Support::get_template_availability();
+		$this->assertTrue( $availability['supported'] );
+		$this->assertEquals( 'missing_parent', $availability['template'] );
 	}
 
 	/**
@@ -1599,6 +1636,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			'<meta name="viewport" content="width=device-width">',
 			'<meta name="generator" content="AMP Plugin',
 			'<title>',
+			'<link rel="preconnect" href="https://cdn.ampproject.org">',
 			'<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">',
 			'<link rel="dns-prefetch" href="//cdn.ampproject.org">',
 			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0.js">',

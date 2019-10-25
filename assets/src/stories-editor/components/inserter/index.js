@@ -48,13 +48,6 @@ defaultRenderToggle.propTypes = {
 const Inserter = ( props ) => {
 	const { position, rootClientId, clientId, isAppender } = props;
 
-	const disabled = useSelect( ( select ) => {
-		// As used in <HeaderToolbar> component
-		const showInserter = select( 'core/edit-post' ).getEditorMode() === 'visual' && select( 'core/editor' ).getEditorSettings().richEditingEnabled;
-
-		return ! showInserter;
-	} );
-
 	const isReordering = useSelect( ( select ) => select( 'amp/story' ).isReordering(), [] );
 
 	if ( isReordering ) {
@@ -79,7 +72,7 @@ const Inserter = ( props ) => {
 	 */
 	const renderToggle = ( { onToggle: toggle, isOpen } ) => {
 		const render = props.renderToggle || defaultRenderToggle;
-		return render( { onToggle: toggle, isOpen, disabled } );
+		return render( { onToggle: toggle, isOpen } );
 	};
 
 	/**

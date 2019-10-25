@@ -300,7 +300,7 @@ div[data-type="amp/amp-story-page"] .wp-block-image {
 	border: none;
 }
 
-.edit-post-settings-sidebar__panel-block .components-panel__body.editor-amp-story-remove-page {
+.components-panel__body.editor-amp-story-remove-page {
 	border: none;
-	margin-top: 0;
+	padding-top: 0;
 }

@@ -19,6 +19,8 @@ amp-story-grid-layer {
 .amp-cta-button-wrapper {
 	max-width: 600px;
 	margin: 0 auto;
+	position: relative;
+	height: 100%;
 }
 
 .amp-block-story-cta__link {
@@ -120,6 +122,13 @@ amp-story-grid-layer .wp-block-quote {
 	color: #555d66;
 	font-size: 13px;
 	text-align: center;
+}
+
+.wp-block-image .alignleft,
+.wp-block-image .alignright,
+.wp-block-image .aligncenter,
+.wp-block-image.is-resized {
+	display: block;
 }
 
 .amp-story-block-wrapper > :first-child {

@@ -60,7 +60,7 @@ describe( 'AMP Settings Screen', () => {
 
 		expect( await page.$eval( '#stories_experience', ( el ) => el.matches( ':disabled' ) ) ).toBe( true );
 
-		await expect( page ).toMatchElement( '.notice-info p', { text: 'To use stories, you currently must have the latest version' } );
+		await expect( page ).toMatchElement( '.notice-info p', { text: 'To use stories, you must be running WordPress' } );
 
 		await activatePlugin( 'gutenberg' );
 	} );

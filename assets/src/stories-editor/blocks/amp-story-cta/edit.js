@@ -22,6 +22,10 @@ import { getBackgroundColorWithOpacity } from '../../../common/helpers';
 import { DraggableText } from '../../components';
 import { STORY_PAGE_INNER_HEIGHT_FOR_CTA } from '../../constants';
 
+// Total padding of top + bottom (vertical) / left + right (horizontal).
+const CTA_BUTTON_PADDING_VERTICAL = 14;
+const CTA_BUTTON_PADDING_HORIZONTAL = 48;
+
 const CallToActionEdit = ( {
 	attributes,
 	backgroundColor,
@@ -98,9 +102,10 @@ const CallToActionEdit = ( {
 						onChange={ ( value ) => {
 							setAttributes( { text: value } );
 							// Also update width and height based on the room that the CTA button takes.
-							const element = document.querySelector( `#amp-story-cta-button-${ clientId } .amp-block-story-cta__link` );
-							const btnWidth = getPercentageFromPixels( 'x', element.clientWidth );
-							const btnHeight = getPercentageFromPixels( 'y', element.clientHeight, STORY_PAGE_INNER_HEIGHT_FOR_CTA );
+							const element = document.querySelector( `#amp-story-cta-button-${ clientId } .wp-block-amp-amp-story-cta` );
+							// Deduct the padding since this will be added extra otherwise.
+							const btnWidth = getPercentageFromPixels( 'x', element.clientWidth - CTA_BUTTON_PADDING_HORIZONTAL );
+							const btnHeight = getPercentageFromPixels( 'y', element.clientHeight - CTA_BUTTON_PADDING_VERTICAL, STORY_PAGE_INNER_HEIGHT_FOR_CTA );
 							setAttributes( {
 								btnWidth,
 								btnHeight,

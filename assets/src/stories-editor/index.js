@@ -32,7 +32,6 @@ import {
 	withPageNumber,
 	withEditFeaturedImage,
 	withCustomVideoBlockEdit,
-	withStoryFeaturedImageNotice,
 	withWrapperProps,
 	withActivePageState,
 	withStoryBlockDropZone,
@@ -82,7 +81,7 @@ const {
 	updateBlockAttributes,
 } = dispatch( 'core/block-editor' );
 
-const { getEditorMode, isFeatureActive } = select( 'core/edit-post' );
+const { isFeatureActive } = select( 'core/edit-post' );
 const { toggleFeature } = dispatch( 'core/edit-post' );
 
 const {
@@ -157,11 +156,9 @@ domReady( () => {
 let blockOrder = getBlockOrder();
 let allBlocksWithChildren = getClientIdsWithDescendants();
 
-let editorMode = getEditorMode();
-
 let selectedBlock;
 
-subscribe( async () => {
+subscribe( () => {
 	maybeInitializeAnimations();
 
 	const defaultBlockName = getDefaultBlockName();
@@ -216,18 +213,6 @@ subscribe( async () => {
 	}
 
 	allBlocksWithChildren = getClientIdsWithDescendants();
-
-	// Re-add controls when switching back from code to visual editor.
-	const newEditorMode = getEditorMode();
-	if ( 'visual' === newEditorMode && newEditorMode !== editorMode ) {
-		while ( ! document.querySelector( '.editor-block-list__layout' ) ) {
-			await new Promise( ( r ) => setTimeout( r, 200 ) ); // eslint-disable-line no-await-in-loop
-		}
-
-		renderStoryComponents();
-	}
-
-	editorMode = newEditorMode;
 } );
 
 store.subscribe( () => {
@@ -321,7 +306,6 @@ addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/contextMenuHandler', withCo
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addEditFeaturedImage', withEditFeaturedImage );
 addFilter( 'editor.BlockEdit', 'ampEditorBlocks/addVideoBlockPreview', withCustomVideoBlockEdit, 9 );
 addFilter( 'editor.BlockEdit', 'ampEditorBlocks/withSnapLines', withSnapLines );
-addFilter( 'editor.PostFeaturedImage', 'ampStoryEditorBlocks/addFeaturedImageNotice', withStoryFeaturedImageNotice );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/withActivePageState', withActivePageState );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', withWrapperProps );
 addFilter( 'editor.MediaUpload', 'ampStoryEditorBlocks/addEnforcedFileType', ( InitialMediaUpload ) => withEnforcedFileType( InitialMediaUpload ) );

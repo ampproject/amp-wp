@@ -25,7 +25,7 @@ const StorySettings = () => {
 			meta: getEditedPostAttribute( 'meta' ),
 			autoAdvanceAfterOptions: storySettings.autoAdvanceAfterOptions || {},
 		};
-	} );
+	}, [] );
 
 	const { editPost } = useDispatch( 'core/editor' );
 

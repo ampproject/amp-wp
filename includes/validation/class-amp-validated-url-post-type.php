@@ -933,7 +933,20 @@ class AMP_Validated_URL_Post_Type {
 	public static function add_single_post_columns() {
 		return [
 			'cb'                          => '<input type="checkbox" />',
-			'error'                       => __( 'Error', 'amp' ),
+			'error_code'                  => __( 'Error', 'amp' ),
+			'error_type'                  => __( 'Type', 'amp' ),
+			'details'                     => sprintf(
+				'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="%s"></div>',
+				esc_html__( 'Context', 'amp' ),
+				esc_attr(
+					sprintf(
+						'<h3>%s</h3><p>%s</p>',
+						esc_html__( 'Context', 'amp' ),
+						esc_html__( 'The parent element of where the error occurred.', 'amp' )
+					)
+				)
+			),
+			'sources_with_invalid_output' => __( 'Sources', 'amp' ),
 			'status'                      => sprintf(
 				'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="%s"></div>',
 				esc_html__( 'Status', 'amp' ),
@@ -945,19 +958,6 @@ class AMP_Validated_URL_Post_Type {
 					)
 				)
 			),
-			'details'                     => sprintf(
-				'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="%s"></div>',
-				esc_html__( 'Details', 'amp' ),
-				esc_attr(
-					sprintf(
-						'<h3>%s</h3><p>%s</p>',
-						esc_html__( 'Details', 'amp' ),
-						esc_html__( 'The parent element of where the error occurred.', 'amp' )
-					)
-				)
-			),
-			'sources_with_invalid_output' => __( 'Sources', 'amp' ),
-			'error_type'                  => __( 'Type', 'amp' ),
 		];
 	}
 
@@ -990,18 +990,18 @@ class AMP_Validated_URL_Post_Type {
 				if ( ! empty( $error_summary[ AMP_Validation_Error_Taxonomy::REMOVED_ELEMENTS ] ) ) {
 					foreach ( $error_summary[ AMP_Validation_Error_Taxonomy::REMOVED_ELEMENTS ] as $name => $count ) {
 						if ( 1 === (int) $count ) {
-							$items[] = sprintf( '<code>%s</code>', esc_html( $name ) );
+							$items[] = sprintf( '<code>&lt;%s&gt;</code>', esc_html( $name ) );
 						} else {
-							$items[] = sprintf( '<code>%s</code> (%d)', esc_html( $name ), $count );
+							$items[] = sprintf( '<code>&lt;%s&gt;</code> (%d)', esc_html( $name ), $count );
 						}
 					}
 				}
 				if ( ! empty( $error_summary[ AMP_Validation_Error_Taxonomy::REMOVED_ATTRIBUTES ] ) ) {
 					foreach ( $error_summary[ AMP_Validation_Error_Taxonomy::REMOVED_ATTRIBUTES ] as $name => $count ) {
 						if ( 1 === (int) $count ) {
-							$items[] = sprintf( '<code>[%s]</code>', esc_html( $name ) );
+							$items[] = sprintf( '<code>%s</code>', esc_html( $name ) );
 						} else {
-							$items[] = sprintf( '<code>[%s]</code> (%d)', esc_html( $name ), $count );
+							$items[] = sprintf( '<code>%s</code> (%d)', esc_html( $name ), $count );
 						}
 					}
 				}
@@ -1029,7 +1029,7 @@ class AMP_Validated_URL_Post_Type {
 			return;
 		}
 
-		// Show nothing if there are no valudation errors.
+		// Show nothing if there are no validation errors.
 		if ( 0 === count( array_filter( $error_summary ) ) ) {
 			esc_html_e( '--', 'amp' );
 			return;
@@ -1043,7 +1043,6 @@ class AMP_Validated_URL_Post_Type {
 
 		$sources = $error_summary[ AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT ];
 		$output  = [];
-		$plugins = get_plugins();
 		foreach ( wp_array_slice_assoc( $sources, [ 'plugin', 'mu-plugin' ] ) as $type => $slugs ) {
 			$plugin_names = [];
 			$plugin_slugs = array_unique( $slugs );
@@ -1051,14 +1050,12 @@ class AMP_Validated_URL_Post_Type {
 				if ( 'mu-plugin' === $type ) {
 					$plugin_names[] = $plugin_slug;
 				} else {
-					$name = $plugin_slug;
-					foreach ( $plugins as $plugin_file => $plugin_data ) {
-						if ( strtok( $plugin_file, '/' ) === $plugin_slug ) {
-							$name = $plugin_data['Name'];
-							break;
-						}
+					$plugin_name = $plugin_slug;
+					$plugin      = AMP_Validation_Error_Taxonomy::get_plugin_from_slug( $plugin_slug );
+					if ( $plugin ) {
+						$plugin_name = $plugin['data']['Name'];
 					}
-					$plugin_names[] = $name;
+					$plugin_names[] = $plugin_name;
 				}
 			}
 			$count = count( $plugin_names );
@@ -1322,26 +1319,26 @@ class AMP_Validated_URL_Post_Type {
 			if ( ! $sanitization['forced'] ) {
 				echo '<div class="notice accept-reject-error">';
 
-				if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $sanitization['term_status'] || AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS === $sanitization['term_status'] ) {
+				if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS === $sanitization['term_status'] ) {
 					if ( amp_is_canonical() ) {
 						$info = __( 'Rejecting an error means that any URL on which it occurs will not be served as AMP.', 'amp' );
 					} else {
 						$info = __( 'Rejecting an error means that any URL on which it occurs will redirect to the non-AMP version.', 'amp' );
 					}
 					printf(
-						'<p>%s</p><a class="button button-primary reject" href="%s">%s</a>',
+						'<p>%s</p><p><a class="button button-primary reject" href="%s">%s</a></p>',
 						esc_html__( 'Reject this validation error for all instances.', 'amp' ) . ' ' . esc_html( $info ),
 						esc_url( $reject_all_url ),
 						esc_html__( 'Reject', 'amp' )
 					);
-				} elseif ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS === $sanitization['term_status'] || AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS === $sanitization['term_status'] ) {
+				} elseif ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS === $sanitization['term_status'] ) {
 					if ( amp_is_canonical() ) {
 						$info = __( 'Accepting all validation errors which occur on a URL will allow it to be served as AMP.', 'amp' );
 					} else {
 						$info = __( 'Accepting all validation errors which occur on a URL will allow it to be served as AMP.', 'amp' );
 					}
 					printf(
-						'<p>%s</p><a class="button button-primary accept" href="%s">%s</a>',
+						'<p>%s</p><p><a class="button button-primary accept" href="%s">%s</a></p>',
 						esc_html__( 'Accept this error for all instances.', 'amp' ) . ' ' . esc_html( $info ),
 						esc_url( $accept_all_url ),
 						esc_html__( 'Accept', 'amp' )
@@ -1353,12 +1350,12 @@ class AMP_Validated_URL_Post_Type {
 						$info = __( 'Rejecting an error means that any URL on which it occurs will redirect to the non-AMP version. If all errors occurring on a URL are accepted, then it will not redirect.', 'amp' );
 					}
 					printf(
-						'<p>%s</p><a class="button reject" href="%s">%s</a><a class="button button-primary accept" href="%s">%s</a>',
+						'<p>%s</p><p><a class="button button-primary accept" href="%s">%s</a> <a class="button button-primary reject" href="%s">%s</a></p>',
 						esc_html__( 'Accept or Reject this error for all instances.', 'amp' ) . ' ' . esc_html( $info ),
-						esc_url( $reject_all_url ),
-						esc_html__( 'Reject', 'amp' ),
 						esc_url( $accept_all_url ),
-						esc_html__( 'Accept', 'amp' )
+						esc_html__( 'Accept', 'amp' ),
+						esc_url( $reject_all_url ),
+						esc_html__( 'Reject', 'amp' )
 					);
 				}
 				echo '</div>';
@@ -1580,11 +1577,7 @@ class AMP_Validated_URL_Post_Type {
 			'amp_taxonomy_terms_updated' => $updated_count,
 		];
 
-		/*
-		 * Re-check the post after the validation status change. This is particularly important for validation errors like
-		 * 'removed_unused_css_rules' since whether it is accepted will determine whether other validation errors are triggered
-		 * such as in this case 'excessive_css'.
-		 */
+		// Re-check the post after the validation status change.
 		if ( $updated_count > 0 ) {
 			$validation_results = self::recheck_post( $post->ID );
 			// @todo For WP_Error case, see <https://github.com/ampproject/amp-wp/issues/1166>.

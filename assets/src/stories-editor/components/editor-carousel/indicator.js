@@ -39,7 +39,7 @@ const Indicator = ( { pages, currentPage, onClick } ) => {
 
 	const [ draggedPage, setDraggedPage ] = useState( null );
 	const { moveBlockToPosition } = useDispatch( 'core/block-editor' );
-	const { getBlockIndex } = useSelect( ( select ) => select( 'core/block-editor' ) );
+	const { getBlockIndex } = useSelect( ( select ) => select( 'core/block-editor' ), [] );
 
 	return (
 		<ul className="amp-story-editor-carousel-item-list">
