@@ -1777,10 +1777,12 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$script1 = 'document.body.textContent += "First!";';
 		$script2 = 'document.body.textContent += "Second!";';
 		$script3 = 'document.body.textContent += "Third!";';
+		$script4 = 'document.body.textContent += "Fourth! (And forbidden because no amp-script-src meta in head.)";';
 
 		$script1_hash = amp_generate_script_hash( $script1 );
 		$script2_hash = amp_generate_script_hash( $script2 );
 		$script3_hash = amp_generate_script_hash( $script3 );
+		$script4_hash = amp_generate_script_hash( $script4 );
 
 		ob_start();
 		?>
@@ -1794,11 +1796,12 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 				<meta name="amp-script-src" content="<?php echo esc_attr( $script3_hash ); ?>">
 			</head>
 			<body>
-				<meta name="amp-script-src" content="<?php echo esc_attr( amp_generate_script_hash( 'This should not be considered!' ) ); ?>">
+				<meta name="amp-script-src" content="<?php echo esc_attr( $script4_hash ); ?>">
 
 				<amp-script script="s1" layout="fixed-height" height="30"></amp-script><script type="text/plain" target="amp-script" id="s1"><?php echo $script1; // phpcs:ignore ?></script>
 				<amp-script script="s2" layout="fixed-height" height="30"></amp-script><script type="text/plain" target="amp-script" id="s2"><?php echo $script2; // phpcs:ignore ?></script>
 				<amp-script script="s3" layout="fixed-height" height="30"></amp-script><script type="text/plain" target="amp-script" id="s3"><?php echo $script3; // phpcs:ignore ?></script>
+				<amp-script script="s4" layout="fixed-height" height="30"></amp-script><script type="text/plain" target="amp-script" id="s4"><?php echo $script4; // phpcs:ignore ?></script>
 			</body>
 		</html>
 		<?php
