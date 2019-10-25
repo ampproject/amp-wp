@@ -73,18 +73,19 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.2
 	 */
 	public function sanitize() {
-		$xpath = new DOMXPath( $this->dom );
-		$expr  = sprintf(
+		$xpath       = new DOMXPath( $this->dom );
+		$class_query = 'contains( concat( " ", normalize-space( @class ), " " ), " wp-block-gallery " )';
+		$expr        = sprintf(
 			'//ul[ %s ]',
 			implode(
 				' or ',
 				[
-					'( parent::figure[ contains( @class, "wp-block-gallery" )] )',
-					'( contains( @class, "wp-block-gallery" ) )',
+					sprintf( '( parent::figure[ %s ] )', $class_query ),
+					$class_query
 				]
 			)
 		);
-		$query = $xpath->query( $expr );
+		$query       = $xpath->query( $expr );
 
 		$nodes = [];
 		foreach ( $query as $node ) {
