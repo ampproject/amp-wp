@@ -1595,18 +1595,23 @@ class AMP_Theme_Support {
 		 *
 		 * {@link https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/optimize_amp/ Optimize the AMP Runtime loading}
 		 */
-		$meta_charset  = null;
-		$meta_viewport = null;
-		$meta_elements = [];
+		$meta_charset         = null;
+		$meta_viewport        = null;
+		$meta_amp_script_srcs = [];
+		$meta_elements        = [];
 		foreach ( $head->getElementsByTagName( 'meta' ) as $meta ) {
 			if ( $meta->hasAttribute( 'charset' ) ) { // There will not be a meta[http-equiv] because the sanitizer removed it.
 				$meta_charset = $meta;
 			} elseif ( 'viewport' === $meta->getAttribute( 'name' ) ) {
 				$meta_viewport = $meta;
+			} elseif ( 'amp-script-src' === $meta->getAttribute( 'name' ) ) {
+				$meta_amp_script_srcs[] = $meta;
 			} else {
 				$meta_elements[] = $meta;
 			}
 		}
+
+		// Handle meta charset.
 		if ( ! $meta_charset ) {
 			// Warning: This probably means the character encoding needs to be converted.
 			$meta_charset = AMP_DOM_Utils::create_node(
@@ -1621,6 +1626,7 @@ class AMP_Theme_Support {
 		}
 		$head->insertBefore( $meta_charset, $head->firstChild );
 
+		// Handle meta viewport.
 		if ( ! $meta_viewport ) {
 			$meta_viewport = AMP_DOM_Utils::create_node(
 				$dom,
@@ -1635,6 +1641,21 @@ class AMP_Theme_Support {
 		}
 		$head->insertBefore( $meta_viewport, $meta_charset->nextSibling );
 
+		// Merge meta amp-script-src elements.
+		$first_meta_amp_script_src = array_shift( $meta_amp_script_srcs );
+		foreach ( $meta_amp_script_srcs as $meta_amp_script_src ) {
+			$first_meta_amp_script_src->setAttribute(
+				'content',
+				$first_meta_amp_script_src->getAttribute( 'content' ) . ' ' . $meta_amp_script_src->getAttribute( 'content' )
+			);
+			$meta_amp_script_src->parentNode->removeChild( $meta_amp_script_src );
+		}
+		if ( $first_meta_amp_script_src ) {
+			$meta_elements[] = $first_meta_amp_script_src;
+		}
+		unset( $meta_amp_script_srcs, $first_meta_amp_script_src );
+
+		// Insert all the the meta elements next in the head.
 		$previous_node = $meta_viewport;
 		foreach ( $meta_elements as $meta_element ) {
 			$meta_element->parentNode->removeChild( $meta_element );
@@ -1642,6 +1663,7 @@ class AMP_Theme_Support {
 			$previous_node = $meta_element;
 		}
 
+		// Handle the title.
 		$title = $head->getElementsByTagName( 'title' )->item( 0 );
 		if ( $title ) {
 			$title->parentNode->removeChild( $title ); // So we can move it.

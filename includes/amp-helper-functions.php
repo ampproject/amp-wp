@@ -1309,6 +1309,29 @@ function amp_print_story_auto_ads() {
 	echo AMP_HTML_Utils::build_tag( 'amp-story-auto-ads', [], $script_element ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 }
 
+/**
+ * Generate hash for inline amp-script.
+ *
+ * @since 1.4.0
+ *
+ * @link https://amp.dev/documentation/components/amp-script/#security-features
+ * @link https://github.com/ampproject/amphtml/blob/e8707858895c2af25903af25d396e144e64690ba/extensions/amp-script/0.1/amp-script.js#L401-L425
+ * @param string $script Script.
+ * @return string|null Script hash or null if the sha384 algorithm is not supported.
+ */
+function amp_generate_script_hash( $script ) {
+	$sha384 = hash( 'sha384', $script, true );
+	if ( false === $sha384 ) {
+		return null;
+	}
+	$hash = str_replace(
+		[ '+', '/', '=' ],
+		[ '-', '_', '.' ],
+		base64_encode( $sha384 ) // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+	);
+	return 'sha384-' . $hash;
+}
+
 /*
  * The function below is copied from the ramsey/array_column package.
  *
