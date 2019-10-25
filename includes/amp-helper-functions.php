@@ -678,7 +678,7 @@ function amp_get_analytics( $analytics = [] ) {
 	foreach ( $analytics_entries as $entry_id => $entry ) {
 		$analytics[ $entry_id ] = [
 			'type'        => $entry['type'],
-			'attributes'  => [],
+			'attributes'  => isset( $entry['attributes'] ) ? $entry['attributes'] : [],
 			'config_data' => json_decode( $entry['config'] ),
 		];
 	}
