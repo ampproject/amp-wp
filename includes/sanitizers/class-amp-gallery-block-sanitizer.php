@@ -81,7 +81,7 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 				' or ',
 				[
 					sprintf( '( parent::figure[ %s ] )', $class_query ),
-					$class_query
+					$class_query,
 				]
 			)
 		);
