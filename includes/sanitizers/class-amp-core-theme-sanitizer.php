@@ -1732,13 +1732,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					$focus_xpath   = $this->xpath_from_css_selector( $focus_selector );
 					$focus_element = $this->xpath->query( $focus_xpath )->item( 0 );
 
-					// Instead of manually setting or unsetting the focus here, we're going
-					// with the autofocus attribute instead (AMP does not have a "blur" action).
-					// According to the HTML 5 spec, only one element should have "autofocus",
-					// however it seems like AMP has turned this into a common mechanism for
-					// focusing on inputs after a lightbox (i.e. modal) opens.
-					if ( $focus_element instanceof DOMElement && in_array( $focus_element->tagName, [ 'input', 'select', 'textarea' ], true ) ) {
-						$focus_element->setAttribute( 'autofocus', true );
+					if ( $focus_element instanceof DOMElement ) {
+						$focus_element_id = AMP_DOM_Utils::get_element_id( $focus_element );
+						AMP_DOM_Utils::add_amp_action( $toggle, 'tap', "{$focus_element_id}.focus" );
 					}
 				}
 			}
