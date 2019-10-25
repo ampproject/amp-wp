@@ -72,3 +72,8 @@ amp-carousel .amp-wp-gallery-caption {
 	color: #fff;
 	padding: 1rem;
 }
+
+.wp-block-gallery[data-amp-carousel='true'] {
+	display: block;
+	flex-wrap: unset;
+}
