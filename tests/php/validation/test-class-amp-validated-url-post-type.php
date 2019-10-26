@@ -678,7 +678,20 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		// If a hook is the only source, it should appear in the column.
 		$error_summary['sources_with_invalid_output'] = [ 'hook' => $hook_name ];
 		$sources_column                               = get_echo( [ 'AMP_Validated_URL_Post_Type', 'render_sources_column' ], [ $error_summary, $post_id ] );
-		$this->assertEquals( '<strong class="source"><span class="dashicons dashicons-wordpress-alt"></span>' . $hook_name . '</strong>', $sources_column );
+		$this->assertEquals( '<strong class="source"><span class="dashicons dashicons-wordpress-alt"></span>Hook: ' . $hook_name . '</strong>', $sources_column );
+
+		// Content gets a translated name.
+		$error_summary['sources_with_invalid_output'] = [ 'hook' => 'the_content' ];
+		$sources_column                               = get_echo( [ 'AMP_Validated_URL_Post_Type', 'render_sources_column' ], [ $error_summary, $post_id ] );
+		$this->assertEquals( '<strong class="source"><span class="dashicons dashicons-edit"></span>Content</strong>', $sources_column );
+
+		// Blocks are listed separately, overriding Content.
+		$error_summary['sources_with_invalid_output'] = [
+			'hook'   => 'the_content',
+			'blocks' => [ 'core/html' ],
+		];
+		$sources_column                               = get_echo( [ 'AMP_Validated_URL_Post_Type', 'render_sources_column' ], [ $error_summary, $post_id ] );
+		$this->assertEquals( '<strong class="source"><span class="dashicons dashicons-edit"></span>Custom HTML</strong>', $sources_column );
 
 		// If there's no source in 'sources_with_invalid_output', this should output the theme name.
 		update_post_meta( $post_id, '_amp_validated_environment', [ 'theme' => $theme_name ] );

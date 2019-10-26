@@ -1105,11 +1105,46 @@ class AMP_Validated_URL_Post_Type {
 		}
 
 		if ( empty( $output ) && ! empty( $sources['embed'] ) ) {
-			$output[] = sprintf( '<strong class="source"><span class="dashicons dashicons-wordpress-alt"></span>%s</strong>', esc_html( 'Embed' ) );
+			$output[] = sprintf( '<strong class="source"><span class="dashicons dashicons-wordpress-alt"></span>%s</strong>', esc_html__( 'Embed', 'amp' ) );
+		}
+
+		if ( empty( $output ) && ! empty( $sources['blocks'] ) ) {
+			foreach ( array_unique( $sources['blocks'] ) as $block ) {
+				$block_title = AMP_Validation_Error_Taxonomy::get_block_title( $block );
+
+				if ( $block_title ) {
+					$output[] = sprintf(
+						'<strong class="source"><span class="dashicons dashicons-edit"></span>%s</strong>',
+						esc_html( $block_title )
+					);
+				} else {
+					$output[] = sprintf(
+						'<strong class="source"><span class="dashicons dashicons-edit"></span><code>%s</code></strong>',
+						esc_html( $block )
+					);
+				}
+			}
 		}
 
 		if ( empty( $output ) && ! empty( $sources['hook'] ) ) {
-			$output[] = sprintf( '<strong class="source"><span class="dashicons dashicons-wordpress-alt"></span>%s</strong>', esc_html( $sources['hook'] ) );
+			switch ( $sources['hook'] ) {
+				case 'the_content':
+					$dashicon    = 'edit';
+					$source_name = __( 'Content', 'amp' );
+					break;
+				case 'the_excerpt':
+					$dashicon    = 'edit';
+					$source_name = __( 'Excerpt', 'amp' );
+					break;
+				default:
+					$dashicon    = 'wordpress-alt';
+					$source_name = sprintf(
+						/* translators: %s is the hook name */
+						__( 'Hook: %s', 'amp' ),
+						$sources['hook']
+					);
+			}
+			$output[] = sprintf( '<strong class="source"><span class="dashicons dashicons-%s"></span>%s</strong>', esc_attr( $dashicon ), esc_html( $source_name ) );
 		}
 
 		if ( empty( $sources ) && $active_theme ) {

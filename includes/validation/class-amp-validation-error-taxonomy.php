@@ -705,6 +705,9 @@ class AMP_Validation_Error_Taxonomy {
 					} elseif ( isset( $source['embed'] ) ) {
 						$invalid_sources['embed'] = true;
 					}
+					if ( isset( $source['block_name'] ) ) {
+						$invalid_sources['blocks'][] = $source['block_name'];
+					}
 				}
 
 				// Remove core if there is a plugin or theme.
@@ -2571,8 +2574,17 @@ class AMP_Validation_Error_Taxonomy {
 										<?php endif; ?>
 									<?php elseif ( 'function' === $key ) : ?>
 										<code><?php echo esc_html( '{closure}' === $value ? $value : $value . '()' ); ?></code>
-									<?php elseif ( 'block_name' === $key || 'shortcode' === $key || 'handle' === $key ) : ?>
+									<?php elseif ( 'shortcode' === $key || 'handle' === $key ) : ?>
 										<code><?php echo esc_html( $value ); ?></code>
+									<?php elseif ( 'block_name' ) : ?>
+										<?php
+										$block_title = self::get_block_title( $value );
+										if ( $block_title ) {
+											printf( '%s (<code>%s</code>)', esc_html( $block_title ), esc_html( $value ) );
+										} else {
+											printf( '<code>%s</code>', esc_html( $value ) );
+										}
+										?>
 									<?php elseif ( 'post_type' === $key ) : ?>
 										<?php
 										$post_type = get_post_type_object( $value );
@@ -2597,6 +2609,23 @@ class AMP_Validation_Error_Taxonomy {
 			</table>
 		</details>
 		<?php
+	}
+
+	/**
+	 * Get block name for a given block slug.
+	 *
+	 * @since 1.4
+	 *
+	 * @todo Blocks should eventually be registered server-side with titles.
+	 * @param string $block_name Block slug.
+	 * @return string Block title.
+	 */
+	public static function get_block_title( $block_name ) {
+		$block_title = null;
+		if ( 'core/html' === $block_name ) {
+			$block_title = __( 'Custom HTML', 'amp' );
+		}
+		return $block_title;
 	}
 
 	/**
