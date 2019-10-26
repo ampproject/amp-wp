@@ -12,7 +12,7 @@ import domReady from '@wordpress/dom-ready';
  */
 import { withFeaturedImageNotice } from '../common/components';
 import { getMinimumFeaturedImageDimensions } from '../common/helpers';
-import { withMediaLibraryNotice } from './components';
+import { withMediaLibraryNotice, AMPPreview } from './components';
 import { addAMPAttributes, addAMPExtraProps, filterBlocksEdit, filterBlocksSave, renderPreviewButton } from './helpers';
 import './store';
 
@@ -84,6 +84,6 @@ blocks.keys().forEach( ( modulePath ) => {
  */
 if ( isWebsiteEnabled() ) {
 	domReady( () => {
-		renderPreviewButton();
+		renderPreviewButton( AMPPreview );
 	} );
 }

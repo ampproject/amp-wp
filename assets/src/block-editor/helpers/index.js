@@ -18,7 +18,6 @@ import { select } from '@wordpress/data';
  */
 import { TEXT_BLOCKS, MEDIA_BLOCKS, DEFAULT_HEIGHT, DEFAULT_WIDTH, POST_PREVIEW_CLASS } from '../constants';
 import { MIN_FONT_SIZE, MAX_FONT_SIZE } from '../../common/constants';
-import { AMPPreview } from '../components';
 
 const ampLayoutOptions = [
 	{
@@ -950,8 +949,10 @@ export const isAMPEnabled = () => {
 
 /**
  * Renders the 'Preview AMP' button in the DOM right after the (non-AMP) 'Preview' button.
+ *
+ * @param {Object} PreviewComponent The 'Preview AMP' component to render into the DOM.
  */
-export const renderPreviewButton = () => {
+export const renderPreviewButton = ( PreviewComponent ) => {
 	const ampPreviewButtonWrapperId = 'amp-wrapper-post-preview';
 	const postPreviewButton = document.querySelector( `.${ POST_PREVIEW_CLASS }` );
 	if ( ! postPreviewButton || document.getElementById( ampPreviewButtonWrapperId ) ) {
@@ -962,7 +963,7 @@ export const renderPreviewButton = () => {
 	buttonWrapper.id = ampPreviewButtonWrapperId;
 
 	render(
-		<AMPPreview />,
+		<PreviewComponent />,
 		buttonWrapper
 	);
 
