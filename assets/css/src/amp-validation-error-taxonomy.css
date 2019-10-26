@@ -217,16 +217,6 @@ dl.detailed details > summary {
 	background-image: url("../images/baseline-error.svg");
 }
 
-.status-text.new.new-accepted::before,
-.status-text.new.accepted::before {
-	background-image: url("../images/baseline-error-green.svg");
-}
-
-.status-text.new.new-rejected::before,
-.status-text.new.rejected::before {
-	background-image: url("../images/baseline-error-red.svg");
-}
-
 .status-text.accepted::before {
 	background-image: url("../images/baseline-check-circle-green.svg");
 }

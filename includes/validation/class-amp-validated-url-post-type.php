@@ -500,36 +500,20 @@ class AMP_Validated_URL_Post_Type {
 		$counts            = self::count_invalid_url_validation_errors( $validation_errors );
 
 		$result = [];
-		if ( $counts['new_rejected'] ) {
+		if ( $counts['kept'] ) {
 			$result[] = sprintf(
 				/* translators: 1: status. 2: count. */
-				'<span class="status-text new new-rejected">%1$s: %2$s</span>',
-				esc_html__( 'New Rejected', 'amp' ),
-				number_format_i18n( $counts['new_rejected'] )
+				'<span class="status-text new rejected">%1$s: %2$s</span>',
+				esc_html__( 'Kept', 'amp' ),
+				number_format_i18n( $counts['kept'] )
 			);
 		}
-		if ( $counts['new_accepted'] ) {
+		if ( $counts['removed'] ) {
 			$result[] = sprintf(
 				/* translators: 1: status. 2: count. */
-				'<span class="status-text new new-accepted">%1$s: %2$s</span>',
-				esc_html__( 'New Accepted', 'amp' ),
-				number_format_i18n( $counts['new_accepted'] )
-			);
-		}
-		if ( $counts['ack_accepted'] ) {
-			$result[] = sprintf(
-				/* translators: 1. Title, 2. %s is count */
-				'<span class="status-text accepted">%1$s: %2$s</span>',
-				esc_html__( 'Accepted', 'amp' ),
-				number_format_i18n( $counts['ack_accepted'] )
-			);
-		}
-		if ( $counts['ack_rejected'] ) {
-			$result[] = sprintf(
-				/* translators: %s is count */
-				'<span class="status-text rejected">%1$s: %2$s</span>',
-				esc_html__( 'Rejected', 'amp' ),
-				number_format_i18n( $counts['ack_rejected'] )
+				'<span class="status-text new accepted">%1$s: %2$s</span>',
+				esc_html__( 'Removed', 'amp' ),
+				number_format_i18n( $counts['removed'] )
 			);
 		}
 
@@ -1354,43 +1338,28 @@ class AMP_Validated_URL_Post_Type {
 			if ( ! $sanitization['forced'] ) {
 				echo '<div class="notice accept-reject-error">';
 
-				if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS === $sanitization['term_status'] ) {
+				$is_removed = (bool) ( $sanitization['term_status'] & AMP_Validation_Error_Taxonomy::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
+
+				// @todo Does there need to be a Mark as Read link here too now?
+				if ( $is_removed ) {
 					if ( amp_is_canonical() ) {
-						$info = __( 'Rejecting an error means that any URL on which it occurs will not be served as AMP.', 'amp' );
+						$info = __( 'Keeping invalid markup means that any URL on which it occurs will not be served as AMP.', 'amp' );
 					} else {
-						$info = __( 'Rejecting an error means that any URL on which it occurs will redirect to the non-AMP version.', 'amp' );
+						$info = __( 'Keeping invalid markup means that any URL on which it occurs will redirect to the non-AMP version.', 'amp' );
 					}
 					printf(
 						'<p>%s</p><p><a class="button button-primary reject" href="%s">%s</a></p>',
-						esc_html__( 'Reject this validation error for all instances.', 'amp' ) . ' ' . esc_html( $info ),
+						esc_html__( 'Keep the invalid markup for all instances.', 'amp' ) . ' ' . esc_html( $info ),
 						esc_url( $reject_all_url ),
-						esc_html__( 'Reject', 'amp' )
-					);
-				} elseif ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS === $sanitization['term_status'] ) {
-					if ( amp_is_canonical() ) {
-						$info = __( 'Accepting all validation errors which occur on a URL will allow it to be served as AMP.', 'amp' );
-					} else {
-						$info = __( 'Accepting all validation errors which occur on a URL will allow it to be served as AMP.', 'amp' );
-					}
-					printf(
-						'<p>%s</p><p><a class="button button-primary accept" href="%s">%s</a></p>',
-						esc_html__( 'Accept this error for all instances.', 'amp' ) . ' ' . esc_html( $info ),
-						esc_url( $accept_all_url ),
-						esc_html__( 'Accept', 'amp' )
+						esc_html__( 'Keep', 'amp' )
 					);
 				} else {
-					if ( amp_is_canonical() ) {
-						$info = __( 'Rejecting an error means that any URL on which it occurs will not be served as AMP. If all errors occurring on a URL are accepted, then it will be served as AMP.', 'amp' );
-					} else {
-						$info = __( 'Rejecting an error means that any URL on which it occurs will redirect to the non-AMP version. If all errors occurring on a URL are accepted, then it will not redirect.', 'amp' );
-					}
+					$info = __( 'Removing all invalid markup which occur on a URL will allow it to be served as AMP.', 'amp' );
 					printf(
-						'<p>%s</p><p><a class="button button-primary accept" href="%s">%s</a> <a class="button button-primary reject" href="%s">%s</a></p>',
-						esc_html__( 'Accept or Reject this error for all instances.', 'amp' ) . ' ' . esc_html( $info ),
+						'<p>%s</p><p><a class="button button-primary accept" href="%s">%s</a></p>',
+						esc_html__( 'Remove the invalid markup for all instances.', 'amp' ) . ' ' . esc_html( $info ),
 						esc_url( $accept_all_url ),
-						esc_html__( 'Accept', 'amp' ),
-						esc_url( $reject_all_url ),
-						esc_html__( 'Reject', 'amp' )
+						esc_html__( 'Remove', 'amp' )
 					);
 				}
 				echo '</div>';
@@ -1908,8 +1877,8 @@ class AMP_Validated_URL_Post_Type {
 		</form>
 
 		<div id="accept-reject-buttons" class="hidden">
-			<button type="button" class="button action accept"><?php esc_html_e( 'Accept', 'amp' ); ?></button>
-			<button type="button" class="button action reject"><?php esc_html_e( 'Reject', 'amp' ); ?></button>
+			<button type="button" class="button action accept"><?php esc_html_e( 'Remove', 'amp' ); ?></button>
+			<button type="button" class="button action reject"><?php esc_html_e( 'Keep', 'amp' ); ?></button>
 			<div id="vertical-divider"></div>
 		</div>
 		<div id="url-post-filter" class="alignleft actions">
@@ -2302,10 +2271,9 @@ class AMP_Validated_URL_Post_Type {
 			return;
 		}
 
-		$validation_errors           = self::get_invalid_url_validation_errors( $post );
-		$counts                      = self::count_invalid_url_validation_errors( $validation_errors );
-		$are_there_unaccepted_errors = ( $counts['new_rejected'] || $counts['ack_rejected'] );
-		return ! $are_there_unaccepted_errors;
+		$validation_errors = self::get_invalid_url_validation_errors( $post );
+		$counts            = self::count_invalid_url_validation_errors( $validation_errors );
+		return ! $counts['kept'];
 	}
 
 	/**
@@ -2317,23 +2285,17 @@ class AMP_Validated_URL_Post_Type {
 	 */
 	protected static function count_invalid_url_validation_errors( $validation_errors ) {
 		$counts = array_fill_keys(
-			[ 'new_accepted', 'ack_accepted', 'new_rejected', 'ack_rejected' ],
+			[ 'unseen', 'removed', 'kept' ],
 			0
 		);
 		foreach ( $validation_errors as $error ) {
-			switch ( $error['term']->term_group ) {
-				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS:
-					$counts['new_rejected']++;
-					break;
-				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS:
-					$counts['new_accepted']++;
-					break;
-				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS:
-					$counts['ack_accepted']++;
-					break;
-				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS:
-					$counts['ack_rejected']++;
-					break;
+			if ( $error['term']->term_group & ~AMP_Validation_Error_Taxonomy::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK ) {
+				$counts['unseen']++;
+			}
+			if ( $error['term']->term_group & AMP_Validation_Error_Taxonomy::ACCEPTED_VALIDATION_ERROR_BIT_MASK ) {
+				$counts['removed']++;
+			} else {
+				$counts['kept']++;
 			}
 		}
 		return $counts;

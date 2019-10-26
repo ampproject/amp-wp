@@ -24,6 +24,7 @@ domReady( () => {
 	handleShowAll();
 	handleFiltering();
 	handleSearching();
+	setRowSeenState();
 	handleStatusChange();
 	handleBulkActions();
 	changeHeading();
@@ -286,19 +287,33 @@ const updateSelectIcon = ( select ) => {
 };
 
 /**
+ * Set the initial 'new' (aka 'unseen') class names on the rows based on the presence of a hidden input value.
+ *
+ * The reason for this is that the term list table does not allow for adding classes when printing the initial table.
+ * The status is updated hereafter based on clicking the "Mark as seen" or "Mark as unseen" row action links.
+ */
+const setRowSeenState = () => {
+	document.querySelectorAll( 'tr[id^="tag-"]' ).forEach( ( row ) => {
+		const input = row.querySelector( '.amp-validation-error-seen' );
+		if ( input ) {
+			row.classList.toggle( 'new', ! parseInt( input.value ) );
+		}
+	} );
+};
+
+/**
  * Set the row status class.
  *
  * @param {HTMLSelectElement} select Select element.
  */
 const setRowStatusClass = ( select ) => {
-	const acceptedValue = 3;
-	const rejectedValue = 2;
+	const removedValue = 1;
+	const keptValue = 0;
 	const status = parseInt( select.options[ select.selectedIndex ].value );
 	const row = select.closest( 'tr' );
 
-	row.classList.toggle( 'new', isNaN( status ) );
-	row.classList.toggle( 'accepted', acceptedValue === status );
-	row.classList.toggle( 'rejected', rejectedValue === status );
+	row.classList.toggle( 'accepted', removedValue === status );
+	row.classList.toggle( 'rejected', keptValue === status );
 };
 
 /**
@@ -370,11 +385,11 @@ const handleBulkActions = () => {
 		element.addEventListener( 'change', onChange );
 	} );
 
-	// Handle click on accept button.
+	// Handle click on "Mark as removed" button.
 	acceptButton.addEventListener( 'click', () => {
 		Array.prototype.forEach.call( document.querySelectorAll( 'select.amp-validation-error-status' ), ( select ) => {
 			if ( select.closest( 'tr' ).querySelector( '.check-column input[type=checkbox]' ).checked ) {
-				select.value = '3';
+				select.value = '1';
 				updateSelectIcon( select );
 				setRowStatusClass( select );
 				addBeforeUnloadPrompt();
@@ -382,11 +397,11 @@ const handleBulkActions = () => {
 		} );
 	} );
 
-	// Handle click on reject button.
+	// Handle click on "Mark as kept" button.
 	rejectButton.addEventListener( 'click', () => {
 		Array.prototype.forEach.call( document.querySelectorAll( 'select.amp-validation-error-status' ), ( select ) => {
 			if ( select.closest( 'tr' ).querySelector( '.check-column input[type=checkbox]' ).checked ) {
-				select.value = '2';
+				select.value = '0';
 				updateSelectIcon( select );
 				setRowStatusClass( select );
 				addBeforeUnloadPrompt();

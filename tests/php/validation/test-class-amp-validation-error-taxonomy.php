@@ -1005,8 +1005,8 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		$reject_action      = $filtered_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION ];
 		$this->assertContains( strval( $term_this_taxonomy->term_id ), $accept_action );
 		$this->assertContains( strval( $term_this_taxonomy->term_id ), $reject_action );
-		$this->assertContains( 'Accept', $accept_action );
-		$this->assertContains( 'Reject', $reject_action );
+		$this->assertContains( 'Remove', $accept_action );
+		$this->assertContains( 'Keep', $reject_action );
 	}
 
 	/**
@@ -1117,7 +1117,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		// Test the 'status' block in the switch for the error taxonomy page.
 		$GLOBALS['pagenow'] = 'edit-tags.php';
 		$filtered_content   = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'status', $term_id );
-		$this->assertContains( $initial_content . '<span class="status-text new rejected">New Rejected</span>', $filtered_content );
+		$this->assertContains( $initial_content . '<span class="status-text rejected">Kept</span>', $filtered_content );
 
 		// Test the 'status' block switch for the single error page.
 		$GLOBALS['pagenow'] = 'post.php';

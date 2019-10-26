@@ -161,6 +161,20 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$this->assertEmpty( AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( get_permalink( $post ) ) );
 
 		add_filter(
+			'amp_validation_error_default_sanitized',
+			static function( $sanitized, $error ) {
+				if ( 'new accepted' === $error['code'] ) {
+					$sanitized = true;
+				} elseif ( 'new rejected' === $error['code'] ) {
+					$sanitized = false;
+				}
+				return $sanitized;
+			},
+			10,
+			2
+		);
+
+		add_filter(
 			'amp_validation_error_sanitized',
 			static function( $sanitized, $error ) {
 				if ( 'accepted' === $error['code'] ) {
@@ -178,14 +192,15 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 			[
 				[ 'code' => 'accepted' ],
 				[ 'code' => 'rejected' ],
-				[ 'code' => 'new' ],
+				[ 'code' => 'new accepted' ],
+				[ 'code' => 'new rejected' ],
 			],
 			get_permalink( $post )
 		);
 		$this->assertNotInstanceOf( 'WP_Error', $invalid_url_post_id );
 
 		$errors = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( get_permalink( $post ) );
-		$this->assertCount( 3, $errors );
+		$this->assertCount( 4, $errors );
 
 		$error = array_shift( $errors );
 		$this->assertEquals( 'accepted', $error['data']['code'] );
@@ -194,7 +209,10 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$this->assertEquals( 'rejected', $error['data']['code'] );
 		$this->assertEquals( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS, $error['term_status'] );
 		$error = array_shift( $errors );
-		$this->assertEquals( 'new', $error['data']['code'] );
+		$this->assertEquals( 'new accepted', $error['data']['code'] );
+		$this->assertEquals( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS, $error['term_status'] );
+		$error = array_shift( $errors );
+		$this->assertEquals( 'new rejected', $error['data']['code'] );
 		$this->assertEquals( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS, $error['term_status'] );
 
 		$errors = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( get_permalink( $post ), [ 'ignore_accepted' => true ] );
@@ -203,13 +221,12 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$this->assertEquals( 'rejected', $error['data']['code'] );
 		$this->assertEquals( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS, $error['term_status'] );
 		$error = array_shift( $errors );
-		$this->assertEquals( 'new', $error['data']['code'] );
+		$this->assertEquals( 'new rejected', $error['data']['code'] );
 		$this->assertEquals( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS, $error['term_status'] );
 
 		$summary = get_echo( [ 'AMP_Validated_URL_Post_Type', 'display_invalid_url_validation_error_counts_summary' ], [ $invalid_url_post_id ] );
-		$this->assertContains( 'New Rejected: 1', $summary );
-		$this->assertContains( 'Accepted: 1', $summary );
-		$this->assertContains( 'Rejected: 1', $summary );
+		$this->assertContains( 'Kept: 2', $summary );
+		$this->assertContains( 'Removed: 2', $summary );
 	}
 
 	/**

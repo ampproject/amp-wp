@@ -1660,7 +1660,7 @@ class AMP_Validation_Error_Taxonomy {
 						add_query_arg( array_merge( [ 'action' => self::VALIDATION_ERROR_REJECT_ACTION ], compact( 'term_id' ) ) ),
 						self::VALIDATION_ERROR_REJECT_ACTION
 					),
-					esc_html__( 'Reject', 'amp' )
+					esc_html__( 'Keep', 'amp' )
 				);
 			}
 			if ( 'edit-tags.php' === $pagenow && self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $sanitization['term_status'] ) {
@@ -1670,7 +1670,7 @@ class AMP_Validation_Error_Taxonomy {
 						add_query_arg( array_merge( [ 'action' => self::VALIDATION_ERROR_ACCEPT_ACTION ], compact( 'term_id' ) ) ),
 						self::VALIDATION_ERROR_ACCEPT_ACTION
 					),
-					esc_html__( 'Accept', 'amp' )
+					esc_html__( 'Remove', 'amp' )
 				);
 			}
 		}
@@ -1832,51 +1832,33 @@ class AMP_Validation_Error_Taxonomy {
 				break;
 			case 'status':
 				if ( 'post.php' === $pagenow ) {
-					$select_name = sprintf( '%s[%s]', AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR, $term->slug );
+					// @todo The status query var now is exclusively for changing the ACCEPTED bit.
+					$status_select_name = sprintf( '%s[%s]', AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR, $term->slug );
 
-					switch ( $term->term_group ) {
-						case self::VALIDATION_ERROR_NEW_REJECTED_STATUS:
-							$img_src = 'baseline-error-red';
-							break;
-						case self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS:
-							$img_src = 'baseline-error-green';
-							break;
-						case self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS:
-							$img_src = 'baseline-check-circle-green';
-							break;
-						case self::VALIDATION_ERROR_ACK_REJECTED_STATUS:
-							$img_src = 'error-rejected';
-							break;
+					if ( $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK ) {
+						$img_src = 'baseline-check-circle-green';
+					} else {
+						$img_src = 'error-rejected';
 					}
 
-					if ( ! isset( $img_src ) ) {
-						break;
-					}
+					// Output whether the validation error has been seen via hidden field since we can't set the 'new' class on the <tr> directly.
+					// This will get read via amp-validated-url-post-edit-screen.js.
+					$is_seen = (bool) ( $term->term_group & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK );
+					printf( '<input class="amp-validation-error-seen" type="hidden" value="%d">', (int) $is_seen );
 
 					ob_start();
 					?>
 					<div class="amp-validation-error-status-dropdown">
 						<img src="<?php echo esc_url( amp_get_asset_url( 'images/' . $img_src . '.svg' ) ); ?>">
-						<label for="<?php echo esc_attr( $select_name ); ?>" class="screen-reader-text">
+						<label for="<?php echo esc_attr( $status_select_name ); ?>" class="screen-reader-text">
 							<?php esc_html_e( 'Markup Status', 'amp' ); ?>
 						</label>
-						<select class="amp-validation-error-status" id="<?php echo esc_attr( $select_name ); ?>" name="<?php echo esc_attr( $select_name ); ?>">
-							<?php if ( self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $term->term_group || self::VALIDATION_ERROR_NEW_REJECTED_STATUS === $term->term_group ) : ?>
-								<?php if ( self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $term->term_group ) : ?>
-									<option disabled selected value="" data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/baseline-error-green.svg' ) ); ?>">
-										<?php esc_html_e( 'New Accepted', 'amp' ); ?>
-									</option>
-								<?php else : ?>
-									<option disabled selected value="" data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/baseline-error-red.svg' ) ); ?>">
-										<?php esc_html_e( 'New Rejected', 'amp' ); ?>
-									</option>
-								<?php endif; ?>
-							<?php endif; ?>
-							<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS ); ?>" <?php selected( self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS, $term->term_group ); ?> data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/baseline-check-circle-green.svg' ) ); ?>">
-								<?php esc_html_e( 'Accepted', 'amp' ); ?>
+						<select class="amp-validation-error-status" id="<?php echo esc_attr( $status_select_name ); ?>" name="<?php echo esc_attr( $status_select_name ); ?>">
+							<option value="1" <?php selected( $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK ); ?> data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/baseline-check-circle-green.svg' ) ); ?>">
+								<?php esc_html_e( 'Removed', 'amp' ); ?>
 							</option>
-							<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACK_REJECTED_STATUS ); ?>" <?php selected( self::VALIDATION_ERROR_ACK_REJECTED_STATUS, $term->term_group ); ?> data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/error-rejected.svg' ) ); ?>">
-								<?php esc_html_e( 'Rejected', 'amp' ); ?>
+							<option value="0" <?php selected( ! ( $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK ) ); ?> data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/error-rejected.svg' ) ); ?>">
+								<?php esc_html_e( 'Kept', 'amp' ); ?>
 							</option>
 						</select>
 						</div>
@@ -2873,18 +2855,12 @@ class AMP_Validation_Error_Taxonomy {
 	 * @return string Status text.
 	 */
 	public static function get_status_text_with_icon( $sanitization ) {
-		if ( self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS === $sanitization['term_status'] ) {
-			$class = 'ack accepted';
-			$text  = __( 'Accepted', 'amp' );
-		} elseif ( self::VALIDATION_ERROR_ACK_REJECTED_STATUS === $sanitization['term_status'] ) {
-			$class = 'ack rejected';
-			$text  = __( 'Rejected', 'amp' );
-		} elseif ( self::VALIDATION_ERROR_NEW_REJECTED_STATUS === $sanitization['term_status'] ) {
-			$class = 'new rejected';
-			$text  = __( 'New Rejected', 'amp' );
+		if ( $sanitization['term_status'] & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK ) {
+			$class = 'accepted';
+			$text  = __( 'Removed', 'amp' );
 		} else {
-			$class = 'new accepted';
-			$text  = __( 'New Accepted', 'amp' );
+			$class = 'rejected';
+			$text  = __( 'Kept', 'amp' );
 		}
 		return sprintf( '<span class="status-text %s">%s</span>', esc_attr( $class ), esc_html( $text ) );
 	}
