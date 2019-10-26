@@ -505,6 +505,7 @@ def GetTagRules(tag_spec):
 		return None
 
 	# Ignore amp-custom-length-check because the AMP plugin will indicate how close they are to the limit.
+	# TODO: Remove the AMP4EMAIL check once this change is released: <https://github.com/ampproject/amphtml/pull/25246>.
 	if tag_spec.HasField('spec_name') and ( str(tag_spec.spec_name) == 'style amp-custom-length-check' or 'AMP4EMAIL' in str(tag_spec.spec_name) ):
 		return None
 

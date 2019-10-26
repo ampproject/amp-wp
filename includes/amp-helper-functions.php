@@ -1312,10 +1312,16 @@ function amp_print_story_auto_ads() {
 /**
  * Generate hash for inline amp-script.
  *
- * @since 1.4.0
+ * The sha384 hash used by amp-script is represented not as hexadecimal but as base64url, which is defined in RFC 4648
+ * under section 5, "Base 64 Encoding with URL and Filename Safe Alphabet". It is sometimes referred to as "web safe".
  *
+ * @since 1.4.0
  * @link https://amp.dev/documentation/components/amp-script/#security-features
  * @link https://github.com/ampproject/amphtml/blob/e8707858895c2af25903af25d396e144e64690ba/extensions/amp-script/0.1/amp-script.js#L401-L425
+ * @link https://github.com/ampproject/amphtml/blob/27b46b9c8c0fb3711a00376668d808f413d798ed/src/service/crypto-impl.js#L67-L124
+ * @link https://github.com/ampproject/amphtml/blob/c4a663d0ba13d0488c6fe73c55dc8c971ac6ec0d/src/utils/base64.js#L52-L61
+ * @link https://tools.ietf.org/html/rfc4648#section-5
+ *
  * @param string $script Script.
  * @return string|null Script hash or null if the sha384 algorithm is not supported.
  */
