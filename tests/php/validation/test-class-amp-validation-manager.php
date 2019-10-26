@@ -1747,9 +1747,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 			'wp-element',
 			'wp-hooks',
 			'wp-i18n',
-			'wp-nux',
 			'wp-polyfill',
-			'wp-url',
 		];
 
 		$this->assertContains( 'js/amp-block-validation.js', $script->src );
