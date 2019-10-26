@@ -2786,15 +2786,15 @@ class AMP_Validation_Error_Taxonomy {
 			case self::INVALID_ATTRIBUTE_CODE:
 				return __( 'Invalid attribute', 'amp' );
 			case 'file_path_not_allowed':
-				return __( 'File path not allowed', 'amp' );
+				return __( 'Stylesheet file path not allowed', 'amp' );
 			case 'excessive_css':
 				return __( 'Excessive CSS', 'amp' );
 			case 'illegal_css_at_rule':
 				return __( 'Illegal CSS at-rule', 'amp' );
 			case 'disallowed_file_extension':
-				return __( 'Disallowed file extension', 'amp' );
+				return __( 'Disallowed CSS file extension', 'amp' );
 			default:
-				return __( 'Unknown Error', 'amp' );
+				return __( 'Unknown error', 'amp' );
 		}
 	}
 
