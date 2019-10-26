@@ -4,6 +4,11 @@
 import domReady from '@wordpress/dom-ready';
 import { __, _n, sprintf } from '@wordpress/i18n';
 
+/**
+ * Internal dependencies
+ */
+import setValidationErrorRowsSeenClass from './set-validation-error-rows-seen-class';
+
 const { ampValidation } = window;
 
 /**
@@ -24,7 +29,7 @@ domReady( () => {
 	handleShowAll();
 	handleFiltering();
 	handleSearching();
-	setRowSeenState();
+	setValidationErrorRowsSeenClass();
 	handleStatusChange();
 	handleBulkActions();
 	changeHeading();
@@ -287,46 +292,15 @@ const updateSelectIcon = ( select ) => {
 };
 
 /**
- * Set the initial 'new' (aka 'unseen') class names on the rows based on the presence of a hidden input value.
- *
- * The reason for this is that the term list table does not allow for adding classes when printing the initial table.
- * The status is updated hereafter based on clicking the "Mark as seen" or "Mark as unseen" row action links.
- */
-const setRowSeenState = () => {
-	document.querySelectorAll( 'tr[id^="tag-"]' ).forEach( ( row ) => {
-		const input = row.querySelector( '.amp-validation-error-seen' );
-		if ( input ) {
-			row.classList.toggle( 'new', ! parseInt( input.value ) );
-		}
-	} );
-};
-
-/**
- * Set the row status class.
- *
- * @param {HTMLSelectElement} select Select element.
- */
-const setRowStatusClass = ( select ) => {
-	const removedValue = 1;
-	const keptValue = 0;
-	const status = parseInt( select.options[ select.selectedIndex ].value );
-	const row = select.closest( 'tr' );
-
-	row.classList.toggle( 'accepted', removedValue === status );
-	row.classList.toggle( 'rejected', keptValue === status );
-};
-
-/**
- * Handles a change in the error status, like from 'New' to 'Accepted'.
+ * Handles a change in the error status, like from 'Removed' to 'Kept'.
  *
  * Gets the data-status-icon value from the newly-selected <option>.
  * And sets this as the src of the status icon <img>.
  */
 const handleStatusChange = () => {
-	const onChange = ( { event, select } ) => {
+	const onChange = ( { event } ) => {
 		if ( event.target.matches( 'select' ) ) {
 			updateSelectIcon( event.target );
-			setRowStatusClass( select );
 		}
 	};
 
@@ -334,7 +308,6 @@ const handleStatusChange = () => {
 		const select = row.querySelector( '.amp-validation-error-status' );
 
 		if ( select ) {
-			setRowStatusClass( /** @type {HTMLSelectElement} */ select );
 			select.addEventListener( 'change', ( event ) => {
 				onChange( { event, row, select } );
 			} );
@@ -385,25 +358,23 @@ const handleBulkActions = () => {
 		element.addEventListener( 'change', onChange );
 	} );
 
-	// Handle click on "Mark as removed" button.
+	// Handle click on bulk "Remove" button.
 	acceptButton.addEventListener( 'click', () => {
 		Array.prototype.forEach.call( document.querySelectorAll( 'select.amp-validation-error-status' ), ( select ) => {
 			if ( select.closest( 'tr' ).querySelector( '.check-column input[type=checkbox]' ).checked ) {
 				select.value = '1';
 				updateSelectIcon( select );
-				setRowStatusClass( select );
 				addBeforeUnloadPrompt();
 			}
 		} );
 	} );
 
-	// Handle click on "Mark as kept" button.
+	// Handle click on bilk "Keep" button.
 	rejectButton.addEventListener( 'click', () => {
 		Array.prototype.forEach.call( document.querySelectorAll( 'select.amp-validation-error-status' ), ( select ) => {
 			if ( select.closest( 'tr' ).querySelector( '.check-column input[type=checkbox]' ).checked ) {
 				select.value = '0';
 				updateSelectIcon( select );
-				setRowStatusClass( select );
 				addBeforeUnloadPrompt();
 			}
 		} );

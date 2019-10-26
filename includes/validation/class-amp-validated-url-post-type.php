@@ -503,7 +503,7 @@ class AMP_Validated_URL_Post_Type {
 		if ( $counts['kept'] ) {
 			$result[] = sprintf(
 				/* translators: 1: status. 2: count. */
-				'<span class="status-text new rejected">%1$s: %2$s</span>',
+				'<span class="status-text rejected">%1$s: %2$s</span>',
 				esc_html__( 'Kept', 'amp' ),
 				number_format_i18n( $counts['kept'] )
 			);
@@ -511,11 +511,14 @@ class AMP_Validated_URL_Post_Type {
 		if ( $counts['removed'] ) {
 			$result[] = sprintf(
 				/* translators: 1: status. 2: count. */
-				'<span class="status-text new accepted">%1$s: %2$s</span>',
+				'<span class="status-text accepted">%1$s: %2$s</span>',
 				esc_html__( 'Removed', 'amp' ),
 				number_format_i18n( $counts['removed'] )
 			);
 		}
+
+		$is_seen = 0 === $counts['unseen'];
+		printf( '<input class="amp-validation-error-seen" type="hidden" value="%d">', (int) $is_seen );
 
 		if ( $args['display_enabled_status'] ) {
 			$is_amp_enabled = self::is_amp_enabled_on_post( $post );
@@ -2289,7 +2292,7 @@ class AMP_Validated_URL_Post_Type {
 			0
 		);
 		foreach ( $validation_errors as $error ) {
-			if ( $error['term']->term_group & ~AMP_Validation_Error_Taxonomy::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK ) {
+			if ( ! ( $error['term']->term_group & AMP_Validation_Error_Taxonomy::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK ) ) {
 				$counts['unseen']++;
 			}
 			if ( $error['term']->term_group & AMP_Validation_Error_Taxonomy::ACCEPTED_VALIDATION_ERROR_BIT_MASK ) {

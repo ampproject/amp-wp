@@ -1831,6 +1831,13 @@ class AMP_Validation_Error_Taxonomy {
 
 				break;
 			case 'status':
+				// Output whether the validation error has been seen via hidden field since we can't set the 'new' class on the <tr> directly.
+				// This will get read via amp-validated-url-post-edit-screen.js.
+				$is_seen = (bool) ( $term->term_group & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK );
+				printf( '<input class="amp-validation-error-seen" type="hidden" value="%d">', (int) $is_seen );
+
+				$is_removed = (bool) ( $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
+
 				if ( 'post.php' === $pagenow ) {
 					// @todo The status query var now is exclusively for changing the ACCEPTED bit.
 					$status_select_name = sprintf( '%s[%s]', AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR, $term->slug );
@@ -1841,11 +1848,6 @@ class AMP_Validation_Error_Taxonomy {
 						$img_src = 'error-rejected';
 					}
 
-					// Output whether the validation error has been seen via hidden field since we can't set the 'new' class on the <tr> directly.
-					// This will get read via amp-validated-url-post-edit-screen.js.
-					$is_seen = (bool) ( $term->term_group & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK );
-					printf( '<input class="amp-validation-error-seen" type="hidden" value="%d">', (int) $is_seen );
-
 					ob_start();
 					?>
 					<div class="amp-validation-error-status-dropdown">
@@ -1854,10 +1856,10 @@ class AMP_Validation_Error_Taxonomy {
 							<?php esc_html_e( 'Markup Status', 'amp' ); ?>
 						</label>
 						<select class="amp-validation-error-status" id="<?php echo esc_attr( $status_select_name ); ?>" name="<?php echo esc_attr( $status_select_name ); ?>">
-							<option value="1" <?php selected( $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK ); ?> data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/baseline-check-circle-green.svg' ) ); ?>">
+							<option value="1" <?php selected( $is_removed ); ?> data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/baseline-check-circle-green.svg' ) ); ?>">
 								<?php esc_html_e( 'Removed', 'amp' ); ?>
 							</option>
-							<option value="0" <?php selected( ! ( $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK ) ); ?> data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/error-rejected.svg' ) ); ?>">
+							<option value="0" <?php selected( ! $is_removed ); ?> data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/error-rejected.svg' ) ); ?>">
 								<?php esc_html_e( 'Kept', 'amp' ); ?>
 							</option>
 						</select>
@@ -1867,6 +1869,7 @@ class AMP_Validation_Error_Taxonomy {
 				} else {
 					$sanitization = self::get_validation_error_sanitization( $validation_error );
 					$content     .= self::get_status_text_with_icon( $sanitization );
+					printf( '<input class="amp-validation-error-status" type="hidden" value="%d">', (int) $is_removed );
 				}
 				break;
 			case 'created_date_gmt':
