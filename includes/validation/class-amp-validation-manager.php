@@ -469,6 +469,17 @@ class AMP_Validation_Manager {
 			'href'   => esc_url( is_amp_endpoint() ? $non_amp_url : $amp_url ),
 		];
 
+		// Construct admin bar item to link to AMP version or non-AMP version.
+		$paired_browsing_item = [
+			'parent' => 'amp',
+			'id'     => 'amp-paired-browsing',
+			'title'  => esc_html( __( 'Start paired browsing', 'amp' ) ),
+			'href'   => remove_query_arg( amp_get_slug(), add_query_arg( 'amp-paired-browsing', '1' ) ),
+			'meta'   => [
+				'target' => 'amp-paired-browsing',
+			],
+		];
+
 		// Add admin bar item to switch between AMP and non-AMP if parent node is also an AMP link.
 		$is_single_version_available = (
 			amp_is_canonical()
@@ -491,6 +502,10 @@ class AMP_Validation_Manager {
 		} else {
 			$wp_admin_bar->add_node( $validate_item );
 			$wp_admin_bar->add_node( $link_item );
+		}
+
+		if ( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Theme_Support::get_support_mode() || AMP_Theme_Support::is_paired_available() ) {
+			$wp_admin_bar->add_node( $paired_browsing_item );
 		}
 
 		// Scrub the query var from the URL.
