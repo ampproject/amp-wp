@@ -1533,6 +1533,13 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
+		// Make sure lightboxes are marked as inactive and not expanded when they are closed via the Escape key.
+		$state_string = str_replace( '-', '_', $modal_id );
+		AMP_DOM_Utils::add_amp_action( $modal_content_node, 'lightboxOpen', "{$modal_id}.toggleClass(class=active,force=true)" );
+		AMP_DOM_Utils::add_amp_action( $modal_content_node, 'lightboxOpen', "AMP.setState({{$state_string}:true})" );
+		AMP_DOM_Utils::add_amp_action( $modal_content_node, 'lightboxClose', "{$modal_id}.toggleClass(class=active,force=false)" );
+		AMP_DOM_Utils::add_amp_action( $modal_content_node, 'lightboxClose', "AMP.setState({{$state_string}:false})" );
+
 		// Create an <amp-lightbox> element that will contain the modal.
 		$amp_lightbox = $this->dom->createElement( 'amp-lightbox' );
 		$amp_lightbox->setAttribute( 'id', $modal_id );
