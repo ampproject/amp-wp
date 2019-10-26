@@ -918,7 +918,7 @@ function amp_get_content_sanitizers( $post = null ) {
 			'include_manifest_comment' => ( defined( 'WP_DEBUG' ) && WP_DEBUG ) ? 'always' : 'when_excessive',
 		],
 		'AMP_Link_Sanitizer'              => [
-			'add_query_vars'    => ! amp_is_canonical(),
+			'add_query_vars'    => AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Theme_Support::get_support_mode(),
 			'has_theme_support' => current_theme_supports( 'amp' ),
 		],
 		'AMP_Tag_And_Attribute_Sanitizer' => [], // Note: This whitelist sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
