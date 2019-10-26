@@ -820,12 +820,12 @@ class AMP_Validation_Error_Taxonomy {
 					'error_code'       => esc_html__( 'Error', 'amp' ),
 					'status'           => sprintf(
 						'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="%s"></div>',
-						esc_html__( 'Status', 'amp' ),
+						esc_html__( 'Markup Status', 'amp' ),
 						esc_attr(
 							sprintf(
 								'<h3>%s</h3><p>%s</p>',
-								esc_html__( 'Status', 'amp' ),
-								esc_html__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
+								esc_html__( 'Markup Status', 'amp' ),
+								__( 'When invalid markup is removed it will not block a URL from being served as AMP; the validation error will be sanitized, where the offending markup is stripped from the response to ensure AMP validity. If invalid AMP markup is kept, then URLs is occurs on will not be served as AMP pages.', 'amp' )
 							)
 						)
 					),
@@ -1855,7 +1855,7 @@ class AMP_Validation_Error_Taxonomy {
 					<div class="amp-validation-error-status-dropdown">
 						<img src="<?php echo esc_url( amp_get_asset_url( 'images/' . $img_src . '.svg' ) ); ?>">
 						<label for="<?php echo esc_attr( $select_name ); ?>" class="screen-reader-text">
-							<?php esc_html_e( 'Status:', 'amp' ); ?>
+							<?php esc_html_e( 'Markup Status', 'amp' ); ?>
 						</label>
 						<select class="amp-validation-error-status" id="<?php echo esc_attr( $select_name ); ?>" name="<?php echo esc_attr( $select_name ); ?>">
 							<?php if ( self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $term->term_group || self::VALIDATION_ERROR_NEW_REJECTED_STATUS === $term->term_group ) : ?>
