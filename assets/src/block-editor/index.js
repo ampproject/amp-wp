@@ -79,9 +79,7 @@ blocks.keys().forEach( ( modulePath ) => {
 	}
 } );
 
-/**
- * Render the 'Preview AMP' button, and move it to after the (non-AMP) 'Preview' button.
- */
+// Render the 'Preview AMP' button, and move it to after the (non-AMP) 'Preview' button.
 if ( isWebsiteEnabled() ) {
 	domReady( () => {
 		renderPreviewButton( AMPPreview );
