@@ -1641,17 +1641,21 @@ class AMP_Theme_Support {
 		}
 		$head->insertBefore( $meta_viewport, $meta_charset->nextSibling );
 
-		// Merge meta amp-script-src elements.
+		// Handle meta amp-script-src elements.
 		$first_meta_amp_script_src = array_shift( $meta_amp_script_srcs );
-		foreach ( $meta_amp_script_srcs as $meta_amp_script_src ) {
-			$first_meta_amp_script_src->setAttribute(
-				'content',
-				$first_meta_amp_script_src->getAttribute( 'content' ) . ' ' . $meta_amp_script_src->getAttribute( 'content' )
-			);
-			$meta_amp_script_src->parentNode->removeChild( $meta_amp_script_src );
-		}
 		if ( $first_meta_amp_script_src ) {
 			$meta_elements[] = $first_meta_amp_script_src;
+
+			// Merge (and remove) any subsequent meta amp-script-src elements.
+			if ( ! empty( $meta_amp_script_srcs ) ) {
+				$content_values = [ $first_meta_amp_script_src->getAttribute( 'content' ) ];
+				foreach ( $meta_amp_script_srcs as $meta_amp_script_src ) {
+					$meta_amp_script_src->parentNode->removeChild( $meta_amp_script_src );
+					$content_values[] = $meta_amp_script_src->getAttribute( 'content' );
+				}
+				$first_meta_amp_script_src->setAttribute( 'content', implode( ' ', $content_values ) );
+				unset( $meta_amp_script_src, $content_values );
+			}
 		}
 		unset( $meta_amp_script_srcs, $first_meta_amp_script_src );
 
