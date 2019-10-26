@@ -28,7 +28,7 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	protected $DEFAULT_ARGS = [ // phpcs:ignore WordPress.NamingConventions.ValidVariableName.PropertyNotSnakeCase
 		'add_amphtml_rel'   => true,
-		'add_query_vars'    => true, // Set to false when in native mode. Overridden in \AMP_To_AMP\filter_content_sanitizers().
+		'add_query_vars'    => false, // Only set to true when in Transitional mode.
 		'has_theme_support' => false, // Set to true when theme has 'amp' support. Overridden in \AMP_To_AMP\filter_content_sanitizers().
 		'add_a2a_meta'      => self::DEFAULT_A2A_META_CONTENT, // Only relevant when theme support is present.
 	];
