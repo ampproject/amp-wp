@@ -119,8 +119,8 @@ class AMPPreview extends Component {
 	 */
 	constructor( ...args ) {
 		super( ...args );
-		this.openPreviewWindow = this.openPreviewWindow.bind( this );
 		this.moveButton = this.moveButton.bind( this );
+		this.openPreviewWindow = this.openPreviewWindow.bind( this );
 		this.buttonRef = createRef();
 	}
 
