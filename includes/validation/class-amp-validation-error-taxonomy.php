@@ -1653,9 +1653,8 @@ class AMP_Validation_Error_Taxonomy {
 			// Only add the 'Remove' and 'Keep' links to the index page, not the individual URL page.
 			if ( 'edit-tags.php' === $pagenow ) {
 				$sanitization = self::get_validation_error_sanitization( json_decode( $term->description, true ) );
-				$is_removed   = (bool) ( $sanitization['status'] & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
 
-				if ( ! $is_removed ) {
+				if ( self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $sanitization['status'] ) {
 					$actions[ self::VALIDATION_ERROR_ACCEPT_ACTION ] = sprintf(
 						'<a href="%s">%s</a>',
 						wp_nonce_url(
@@ -1664,7 +1663,8 @@ class AMP_Validation_Error_Taxonomy {
 						),
 						esc_html__( 'Remove', 'amp' )
 					);
-				} else {
+				}
+				if ( self::VALIDATION_ERROR_ACK_REJECTED_STATUS !== $sanitization['status'] ) {
 					$actions[ self::VALIDATION_ERROR_REJECT_ACTION ] = sprintf(
 						'<a href="%s">%s</a>',
 						wp_nonce_url(

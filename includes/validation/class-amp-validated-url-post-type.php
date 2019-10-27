@@ -1352,30 +1352,37 @@ class AMP_Validated_URL_Post_Type {
 			if ( ! $sanitization['forced'] ) {
 				echo '<div class="notice accept-reject-error">';
 
-				$is_removed = (bool) ( $sanitization['term_status'] & AMP_Validation_Error_Taxonomy::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
+				$info    = '';
+				$buttons = '';
 
-				// @todo Does there need to be a Mark as Read link here too now?
-				if ( $is_removed ) {
-					if ( amp_is_canonical() ) {
-						$info = __( 'Keeping invalid markup means that any URL on which it occurs will not be served as AMP.', 'amp' );
-					} else {
-						$info = __( 'Keeping invalid markup means that any URL on which it occurs will redirect to the non-AMP version.', 'amp' );
-					}
-					printf(
-						'<p>%s</p><p><a class="button button-primary reject" href="%s">%s</a></p>',
-						esc_html__( 'Keep the invalid markup for all instances.', 'amp' ) . ' ' . esc_html( $info ),
-						esc_url( $reject_all_url ),
-						esc_html__( 'Keep', 'amp' )
-					);
-				} else {
-					$info = __( 'Removing all invalid markup which occur on a URL will allow it to be served as AMP.', 'amp' );
-					printf(
-						'<p>%s</p><p><a class="button button-primary accept" href="%s">%s</a></p>',
-						esc_html__( 'Remove the invalid markup for all instances.', 'amp' ) . ' ' . esc_html( $info ),
+				if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $sanitization['term_status'] ) {
+					$info    .= __( 'Removing all invalid markup which occur on a URL will allow it to be served as AMP.', 'amp' );
+					$buttons .= sprintf(
+						' <a class="button button-primary accept" href="%s">%s</a> ',
 						esc_url( $accept_all_url ),
 						esc_html__( 'Remove', 'amp' )
 					);
 				}
+				if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS !== $sanitization['term_status'] ) {
+					if ( amp_is_canonical() ) {
+						$info .= __( 'Keeping invalid markup means that any URL on which it occurs will not be served as AMP.', 'amp' );
+					} else {
+						$info .= __( 'Keeping invalid markup means that any URL on which it occurs will redirect to the non-AMP version.', 'amp' );
+					}
+					$buttons .= sprintf(
+						' <a class="button button-primary reject" href="%s">%s</a> ',
+						esc_url( $reject_all_url ),
+						esc_html__( 'Keep', 'amp' )
+					);
+				}
+
+				if ( $info ) {
+					printf( '<p>%s</p>', esc_html( $info ) );
+				}
+				if ( $buttons ) {
+					printf( '<p>%s</p>', wp_kses_post( $buttons ) );
+				}
+
 				echo '</div>';
 			}
 

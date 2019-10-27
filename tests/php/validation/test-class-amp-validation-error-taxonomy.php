@@ -1002,9 +1002,11 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		);
 		$filtered_actions   = AMP_Validation_Error_Taxonomy::filter_tag_row_actions( $initial_actions, $term_this_taxonomy );
 		$reject_action      = $filtered_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION ];
-		$this->assertArrayNotHasKey( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION, $filtered_actions );
+		$accept_action      = $filtered_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION ];
 		$this->assertContains( strval( $term_this_taxonomy->term_id ), $reject_action );
+		$this->assertContains( strval( $term_this_taxonomy->term_id ), $accept_action );
 		$this->assertContains( 'Keep', $reject_action );
+		$this->assertContains( 'Remove', $accept_action );
 	}
 
 	/**
