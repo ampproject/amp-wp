@@ -483,19 +483,8 @@ class AMP_Validated_URL_Post_Type {
 	 * Display summary of the validation error counts for a given post.
 	 *
 	 * @param int|WP_Post $post Post of amp_validated_url type.
-	 * @param array       $args {
-	 *     Arguments.
-	 *
-	 *     @type bool $display_enabled_status Whether to display the status of whether AMP is enabled on the URL.
-	 * }
 	 */
-	public static function display_invalid_url_validation_error_counts_summary( $post, $args = [] ) {
-		$args              = array_merge(
-			[
-				'display_enabled_status' => false, // @todo Remove this arg since it is always called with true.
-			],
-			$args
-		);
+	public static function display_invalid_url_validation_error_counts_summary( $post ) {
 		$validation_errors = self::get_invalid_url_validation_errors( $post );
 		$counts            = self::count_invalid_url_validation_errors( $validation_errors );
 
@@ -528,26 +517,25 @@ class AMP_Validated_URL_Post_Type {
 
 		printf( '<input class="amp-validation-error-new" type="hidden" value="%d">', (int) ( $counts['new'] > 0 ) );
 
-		if ( $args['display_enabled_status'] ) {
-			$is_amp_enabled = self::is_amp_enabled_on_post( $post );
-			$class          = $is_amp_enabled ? 'sanitized' : 'new';
-			?>
-			<span id="amp-enabled-icon" class="status-text <?php echo esc_attr( $class ); ?>">
-				<?php
-				if ( $is_amp_enabled ) {
-					// @todo Blue icon.
-					esc_html_e( 'AMP Enabled', 'amp' );
-				} elseif ( amp_is_canonical() ) {
-					// @todo Orange icon, because standard mode.
-					esc_html_e( 'AMP Disabled', 'amp' );
-				} else {
-					// @todo Gray icon, because transitional mode.
-					esc_html_e( 'AMP Disabled', 'amp' );
-				}
-				?>
-			</span>
+		$is_amp_enabled = self::is_amp_enabled_on_post( $post );
+		$class          = $is_amp_enabled ? 'sanitized' : 'new';
+		?>
+		<span id="amp-enabled-icon" class="status-text <?php echo esc_attr( $class ); ?>">
 			<?php
-		}
+			if ( $is_amp_enabled ) {
+				// @todo Blue icon.
+				esc_html_e( 'AMP Enabled', 'amp' );
+			} elseif ( amp_is_canonical() ) {
+				// @todo Orange icon, because standard mode.
+				esc_html_e( 'AMP Disabled', 'amp' );
+			} else {
+				// @todo Gray icon, because transitional mode.
+				esc_html_e( 'AMP Disabled', 'amp' );
+			}
+			?>
+		</span>
+		<?php
+
 		echo implode( '', $result ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
@@ -983,7 +971,7 @@ class AMP_Validated_URL_Post_Type {
 				if ( ! empty( $staleness ) ) {
 					echo '<p><strong><em>' . esc_html__( 'Stale results', 'amp' ) . '</em></strong></p>';
 				}
-				self::display_invalid_url_validation_error_counts_summary( $post_id, [ 'display_enabled_status' => true ] );
+				self::display_invalid_url_validation_error_counts_summary( $post_id );
 				break;
 			case AMP_Validation_Error_Taxonomy::FOUND_ELEMENTS_AND_ATTRIBUTES:
 				$items = [];
@@ -1779,7 +1767,7 @@ class AMP_Validated_URL_Post_Type {
 							echo '</p></div>';
 						}
 						?>
-						<?php self::display_invalid_url_validation_error_counts_summary( $post, [ 'display_enabled_status' => true ] ); ?>
+						<?php self::display_invalid_url_validation_error_counts_summary( $post ); ?>
 					</div>
 
 					<div class="misc-pub-section">
