@@ -125,7 +125,7 @@ class AMPPreview extends Component {
 	}
 
 	/**
-	 * Called after the component updated.
+	 * Called after the component is updated.
 	 *
 	 * @param {Object} prevProps The previous props.
 	 */

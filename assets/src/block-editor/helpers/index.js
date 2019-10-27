@@ -948,14 +948,16 @@ export const isAMPEnabled = () => {
 };
 
 /**
- * Renders the 'Preview AMP' button in the DOM right after the (non-AMP) 'Preview' button.
+ * Renders the 'Preview AMP' button in the DOM right after the non-AMP 'Preview' button.
  *
  * @param {Object} PreviewComponent The 'Preview AMP' component to render into the DOM.
  */
 export const renderPreviewButton = ( PreviewComponent ) => {
-	const ampPreviewButtonWrapperId = 'amp-wrapper-post-preview';
 	const postPreviewButton = document.querySelector( `.${ POST_PREVIEW_CLASS }` );
-	if ( ! postPreviewButton || document.getElementById( ampPreviewButtonWrapperId ) ) {
+	const ampPreviewButtonWrapperId = 'amp-wrapper-post-preview';
+
+	// Exit if the non-AMP 'Preview' button doesn't exist, or if the AMP preview button already exists.
+	if ( ! postPreviewButton || ! postPreviewButton.nextSibling || document.getElementById( ampPreviewButtonWrapperId ) ) {
 		return;
 	}
 
@@ -967,6 +969,6 @@ export const renderPreviewButton = ( PreviewComponent ) => {
 		buttonWrapper
 	);
 
-	// Insert this after the (non-AMP) 'Preview' button.
+	// Insert the new AMP preview button after the non-AMP 'Preview' button.
 	postPreviewButton.parentNode.insertBefore( buttonWrapper, postPreviewButton.nextSibling );
 };
