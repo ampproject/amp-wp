@@ -5,6 +5,7 @@
 #amp-story-right-click-menu .amp-story-right-click-menu__popover {
 	position: absolute;
 	top: 0 !important;
+
 	/*!rtl:ignore*/
 	left: 0 !important;
 }
