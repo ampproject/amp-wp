@@ -41,3 +41,11 @@
 	height: 15px;
 	margin: 0;
 }
+
+/*
+ * This is the height of the non-AMP preview button in WordPress 5.3,
+ * though the height before was 33px, so force this to 34px so it's the same as the 'Preview AMP' button.
+ */
+.wp-core-ui .edit-post-header .editor-post-preview {
+	height: 34px;
+}
