@@ -80,7 +80,7 @@
     "eslint": "6.5.1",
     "eslint-plugin-eslint-comments": "3.1.2",
     "eslint-plugin-import": "2.18.2",
-    "eslint-plugin-jest": "22.20.0",
+    "eslint-plugin-jest": "22.21.0",
     "eslint-plugin-react": "7.16.0",
     "eslint-utils": "1.4.3",
     "grunt": "1.0.4",
