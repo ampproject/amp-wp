@@ -515,6 +515,8 @@ class AMP_Validated_URL_Post_Type {
 			);
 		}
 
+		echo implode( '', $result ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+
 		printf( '<input class="amp-validation-error-new" type="hidden" value="%d">', (int) ( $counts['new'] > 0 ) );
 
 		$is_amp_enabled = self::is_amp_enabled_on_post( $post );
@@ -535,8 +537,6 @@ class AMP_Validated_URL_Post_Type {
 			?>
 		</span>
 		<?php
-
-		echo implode( '', $result ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	/**
