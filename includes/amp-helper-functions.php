@@ -885,6 +885,17 @@ function amp_get_content_sanitizers( $post = null ) {
 		$current_origin .= ':' . $parsed_home_url['port'];
 	}
 
+	/**
+	 * Filters whether AMP-to-AMP linking should be enabled.
+	 *
+	 * @since 1.4.1
+	 * @param bool $amp_to_amp_linking_enabled Whether AMP-to-AMP linking should be enabled.
+	 */
+	$amp_to_amp_linking_enabled = (bool) apply_filters(
+		'amp_to_amp_linking_enabled',
+		AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Theme_Support::get_support_mode()
+	);
+
 	$sanitizers = [
 		'AMP_Core_Theme_Sanitizer'        => [
 			'template'       => get_template(),
@@ -918,7 +929,7 @@ function amp_get_content_sanitizers( $post = null ) {
 			'include_manifest_comment' => ( defined( 'WP_DEBUG' ) && WP_DEBUG ) ? 'always' : 'when_excessive',
 		],
 		'AMP_Link_Sanitizer'              => [
-			'add_query_vars'    => AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Theme_Support::get_support_mode(),
+			'add_query_vars'    => $amp_to_amp_linking_enabled,
 			'has_theme_support' => current_theme_supports( 'amp' ),
 		],
 		'AMP_Tag_And_Attribute_Sanitizer' => [], // Note: This whitelist sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
