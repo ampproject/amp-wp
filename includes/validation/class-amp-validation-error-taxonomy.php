@@ -1858,10 +1858,10 @@ class AMP_Validation_Error_Taxonomy {
 							<?php esc_html_e( 'Markup Status', 'amp' ); ?>
 						</label>
 						<select class="amp-validation-error-status" id="<?php echo esc_attr( $status_select_name ); ?>" name="<?php echo esc_attr( $status_select_name ); ?>">
-							<option value="1" <?php selected( $is_removed ); ?> data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/baseline-check-circle-green.svg' ) ); ?>">
+							<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS ); ?>" <?php selected( $is_removed ); ?> data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/baseline-check-circle-green.svg' ) ); ?>">
 								<?php esc_html_e( 'Removed', 'amp' ); ?>
 							</option>
-							<option value="0" <?php selected( ! $is_removed ); ?> data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/error-rejected.svg' ) ); ?>">
+							<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACK_REJECTED_STATUS ); ?>" <?php selected( ! $is_removed ); ?> data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/error-rejected.svg' ) ); ?>">
 								<?php esc_html_e( 'Kept', 'amp' ); ?>
 							</option>
 						</select>
@@ -2727,6 +2727,7 @@ class AMP_Validation_Error_Taxonomy {
 	 * @return string Redirect.
 	 */
 	public static function handle_validation_error_update( $redirect_to, $action, $term_ids ) {
+		// @todo Add a new action for mark and unmark as new.
 		if ( ! in_array( $action, [ self::VALIDATION_ERROR_ACCEPT_ACTION, self::VALIDATION_ERROR_REJECT_ACTION ], true ) ) {
 			return $redirect_to;
 		}
@@ -2743,11 +2744,14 @@ class AMP_Validation_Error_Taxonomy {
 				continue;
 			}
 			$term_group = $term->term_group;
+
+			// The action of marking an error as removed/kept (aka accepted/rejected) also results in it being marked as not-new.
 			if ( self::VALIDATION_ERROR_ACCEPT_ACTION === $action ) {
-				$term_group = $term_group | self::ACCEPTED_VALIDATION_ERROR_BIT_MASK;
+				$term_group = self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS;
 			} elseif ( self::VALIDATION_ERROR_REJECT_ACTION === $action ) {
-				$term_group = $term_group & ~self::ACCEPTED_VALIDATION_ERROR_BIT_MASK;
+				$term_group = self::VALIDATION_ERROR_ACK_REJECTED_STATUS;
 			}
+
 			if ( $term_group !== $term->term_group ) {
 				wp_update_term( $term_id, self::TAXONOMY_SLUG, compact( 'term_group' ) );
 				$updated_count++;

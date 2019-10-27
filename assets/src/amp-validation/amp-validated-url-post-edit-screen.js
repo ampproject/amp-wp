@@ -362,7 +362,7 @@ const handleBulkActions = () => {
 	acceptButton.addEventListener( 'click', () => {
 		Array.prototype.forEach.call( document.querySelectorAll( 'select.amp-validation-error-status' ), ( select ) => {
 			if ( select.closest( 'tr' ).querySelector( '.check-column input[type=checkbox]' ).checked ) {
-				select.value = '1';
+				select.value = '3'; // See AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS.
 				updateSelectIcon( select );
 				addBeforeUnloadPrompt();
 			}
@@ -373,7 +373,7 @@ const handleBulkActions = () => {
 	rejectButton.addEventListener( 'click', () => {
 		Array.prototype.forEach.call( document.querySelectorAll( 'select.amp-validation-error-status' ), ( select ) => {
 			if ( select.closest( 'tr' ).querySelector( '.check-column input[type=checkbox]' ).checked ) {
-				select.value = '0';
+				select.value = '2'; // See AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS.
 				updateSelectIcon( select );
 				addBeforeUnloadPrompt();
 			}
