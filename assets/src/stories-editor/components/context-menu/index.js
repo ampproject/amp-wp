@@ -201,6 +201,10 @@ const ContextMenu = ( props ) => {
 		left: clientX,
 	};
 
+	if ( isRTL ) {
+		POPOVER_PROPS.position = 'bottom right';
+	}
+
 	let blockActions = [];
 	const pageList = getBlockOrder();
 	const numPages = pageList.length;
