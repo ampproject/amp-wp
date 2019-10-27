@@ -17,7 +17,6 @@ describe( 'renderPreviewButton', () => {
 	} );
 
 	it( 'should render the preview component into the DOM now that the preview button exists', () => {
-		renderPreviewButton();
 		const previewButton = document.createElement( 'div' );
 		previewButton.setAttribute( 'class', POST_PREVIEW_CLASS );
 		const previewButtonSibling = document.createElement( 'div' );

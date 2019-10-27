@@ -254,8 +254,8 @@ class AMPPreview extends Component {
 							__( '(opens in a new tab)', 'amp' )
 						}
 					</span>
-					<DotTip tipId="core/editor.preview">
-						{ __( 'Click “Preview” to load a preview of this page in AMP, so you can make sure you’re happy with your blocks.', 'amp' ) }
+					<DotTip tipId="amp/editor.preview">
+						{ __( 'Click “Preview” to load a preview of this page in AMP, so you can make sure you are happy with your blocks.', 'amp' ) }
 					</DotTip>
 				</IconButton>
 			)
