@@ -2727,34 +2727,47 @@ class AMP_Validation_Error_Taxonomy {
 	 * @return string Redirect.
 	 */
 	public static function handle_validation_error_update( $redirect_to, $action, $term_ids ) {
-		$term_group = null;
-		if ( self::VALIDATION_ERROR_ACCEPT_ACTION === $action ) {
-			$term_group = self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS;
-		} elseif ( self::VALIDATION_ERROR_REJECT_ACTION === $action ) {
-			$term_group = self::VALIDATION_ERROR_ACK_REJECTED_STATUS;
+		if ( ! in_array( $action, [ self::VALIDATION_ERROR_ACCEPT_ACTION, self::VALIDATION_ERROR_REJECT_ACTION ], true ) ) {
+			return $redirect_to;
 		}
 
-		if ( $term_group ) {
-			$has_pre_term_description_filter = has_filter( 'pre_term_description', 'wp_filter_kses' );
-			if ( false !== $has_pre_term_description_filter ) {
-				remove_filter( 'pre_term_description', 'wp_filter_kses', $has_pre_term_description_filter );
+		$has_pre_term_description_filter = has_filter( 'pre_term_description', 'wp_filter_kses' );
+		if ( false !== $has_pre_term_description_filter ) {
+			remove_filter( 'pre_term_description', 'wp_filter_kses', $has_pre_term_description_filter );
+		}
+
+		$updated_count = 0;
+		foreach ( $term_ids as $term_id ) {
+			$term = get_term( $term_id );
+			if ( ! $term ) {
+				continue;
 			}
-			foreach ( $term_ids as $term_id ) {
+			$term_group = $term->term_group;
+			if ( self::VALIDATION_ERROR_ACCEPT_ACTION === $action ) {
+				$term_group = $term_group | self::ACCEPTED_VALIDATION_ERROR_BIT_MASK;
+			} elseif ( self::VALIDATION_ERROR_REJECT_ACTION === $action ) {
+				$term_group = $term_group & ~self::ACCEPTED_VALIDATION_ERROR_BIT_MASK;
+			}
+			if ( $term_group !== $term->term_group ) {
 				wp_update_term( $term_id, self::TAXONOMY_SLUG, compact( 'term_group' ) );
+				$updated_count++;
 			}
-			if ( false !== $has_pre_term_description_filter ) {
-				add_filter( 'pre_term_description', 'wp_filter_kses', $has_pre_term_description_filter );
-			}
-			$redirect_to = add_query_arg(
-				[
-					'amp_actioned'       => $action,
-					'amp_actioned_count' => count( $term_ids ),
-				],
-				$redirect_to
-			);
+		}
+		if ( false !== $has_pre_term_description_filter ) {
+			add_filter( 'pre_term_description', 'wp_filter_kses', $has_pre_term_description_filter );
 		}
 
-		delete_transient( AMP_Validated_URL_Post_Type::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT );
+		$redirect_to = add_query_arg(
+			[
+				'amp_actioned'       => $action,
+				'amp_actioned_count' => count( $term_ids ),
+			],
+			$redirect_to
+		);
+
+		if ( $updated_count ) {
+			delete_transient( AMP_Validated_URL_Post_Type::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT );
+		}
 
 		return $redirect_to;
 	}

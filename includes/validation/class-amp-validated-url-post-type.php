@@ -494,7 +494,7 @@ class AMP_Validated_URL_Post_Type {
 				// @todo Question mark icon.
 				/* translators: 1: status. 2: count. */
 				'<span class="status-text">%1$s: %2$s</span>',
-				esc_html__( 'New invalid markup', 'amp' ), // @todo Replace "Unseen" with "New".
+				esc_html__( 'New invalid markup', 'amp' ),
 				number_format_i18n( $counts['new'] )
 			);
 		}

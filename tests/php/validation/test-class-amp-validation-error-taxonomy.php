@@ -1277,7 +1277,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		// The action argument isn't either an accepted or rejected status, so the redirect shouldn't change.
 		$this->assertEquals( $initial_redirect_to, AMP_Validation_Error_Taxonomy::handle_validation_error_update( $initial_redirect_to, 'unexpected-action', [] ) );
 
-		$action = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION;
+		$action = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION;
 		$this->assertEquals(
 			add_query_arg(
 				[
