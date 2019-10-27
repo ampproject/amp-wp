@@ -956,8 +956,8 @@ export const renderPreviewButton = ( PreviewComponent ) => {
 	const postPreviewButton = document.querySelector( `.${ POST_PREVIEW_CLASS }` );
 	const ampPreviewButtonWrapperId = 'amp-wrapper-post-preview';
 
-	// Exit if the non-AMP 'Preview' button doesn't exist, or if the AMP preview button already exists.
-	if ( ! postPreviewButton || ! postPreviewButton.nextSibling || document.getElementById( ampPreviewButtonWrapperId ) ) {
+	// Exit if the non-AMP 'Preview' button doesn't exist.
+	if ( ! postPreviewButton || ! postPreviewButton.nextSibling ) {
 		return;
 	}
 
