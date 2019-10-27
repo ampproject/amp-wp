@@ -500,7 +500,7 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
-	 * Automatically (forcibly) accept validation errors that arise.
+	 * Automatically (forcibly) accept validation errors that arise (that is, remove the invalid markup causing the validation errors).
 	 *
 	 * @since 1.0
 	 * @see AMP_Core_Theme_Sanitizer::get_acceptable_errors()
@@ -807,8 +807,8 @@ class AMP_Validation_Error_Taxonomy {
 			'bulk_actions-edit-' . self::TAXONOMY_SLUG,
 			static function( $bulk_actions ) {
 				unset( $bulk_actions['delete'] );
-				$bulk_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION ] = __( 'Accept', 'amp' );
-				$bulk_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION ] = __( 'Reject', 'amp' );
+				$bulk_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION ] = __( 'Remove', 'amp' );
+				$bulk_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION ] = __( 'Keep', 'amp' );
 				return $bulk_actions;
 			}
 		);
@@ -1260,7 +1260,7 @@ class AMP_Validation_Error_Taxonomy {
 	 * Renders the error status filter <select> element.
 	 *
 	 * There is a difference how the errors are counted, depending on which screen this is on.
-	 * For example: Accepted Errors (10).
+	 * For example: Removed Markup (10).
 	 * This status filter <select> element is rendered on the validation error post page (Errors by URL),
 	 * and the validation error taxonomy page (Error Index).
 	 * On the taxonomy page, this simply needs to count the number of terms with a given type.
@@ -1332,16 +1332,16 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		?>
-		<label for="<?php echo esc_attr( self::VALIDATION_ERROR_STATUS_QUERY_VAR ); ?>" class="screen-reader-text"><?php esc_html_e( 'Filter by error status', 'amp' ); ?></label>
+		<label for="<?php echo esc_attr( self::VALIDATION_ERROR_STATUS_QUERY_VAR ); ?>" class="screen-reader-text"><?php esc_html_e( 'Filter by markup status', 'amp' ); ?></label>
 		<select name="<?php echo esc_attr( self::VALIDATION_ERROR_STATUS_QUERY_VAR ); ?>" id="<?php echo esc_attr( self::VALIDATION_ERROR_STATUS_QUERY_VAR ); ?>">
-			<option value="<?php echo esc_attr( self::NO_FILTER_VALUE ); ?>"><?php esc_html_e( 'All Statuses', 'amp' ); ?></option>
+			<option value="<?php echo esc_attr( self::NO_FILTER_VALUE ); ?>"><?php esc_html_e( 'All statuses', 'amp' ); ?></option>
 			<?php
 			if ( 'edit' === $screen_base ) {
 				$new_term_text = sprintf(
 					/* translators: %s: the new term count. */
 					_nx(
-						'With New Error <span class="count">(%s)</span>',
-						'With New Errors <span class="count">(%s)</span>',
+						'With new error <span class="count">(%s)</span>',
+						'With new errors <span class="count">(%s)</span>', // @todo Should this really have variations for singular/plural? Should count be part of translated string?
 						$new_term_count,
 						'terms',
 						'amp'
@@ -1352,8 +1352,8 @@ class AMP_Validation_Error_Taxonomy {
 				$new_term_text = sprintf(
 					/* translators: %s: the new term count. */
 					_nx(
-						'New Error <span class="count">(%s)</span>',
-						'New Errors <span class="count">(%s)</span>',
+						'New error <span class="count">(%s)</span>',
+						'New errors <span class="count">(%s)</span>', // @todo Should this really have variations for singular/plural? Should count be part of translated string?
 						$new_term_count,
 						'terms',
 						'amp'
@@ -1366,11 +1366,11 @@ class AMP_Validation_Error_Taxonomy {
 			<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $error_status_filter_value, $value ); ?>><?php echo wp_kses_post( $new_term_text ); ?></option>
 			<?php
 			if ( 'edit' === $screen_base ) {
-				$accepted_term_text = sprintf(
+				$removed_term_text = sprintf(
 					/* translators: %s: the accepted term count. */
 					_nx(
-						'With Accepted Error <span class="count">(%s)</span>',
-						'With Accepted Errors <span class="count">(%s)</span>',
+						'With removed markup <span class="count">(%s)</span>',
+						'With removed markup <span class="count">(%s)</span>', // @todo Should this really have variations for singular/plural? Should count be part of translated string?
 						$ack_accepted_term_count,
 						'terms',
 						'amp'
@@ -1378,11 +1378,11 @@ class AMP_Validation_Error_Taxonomy {
 					number_format_i18n( $ack_accepted_term_count )
 				);
 			} else {
-				$accepted_term_text = sprintf(
+				$removed_term_text = sprintf(
 					/* translators: %s: the accepted term count. */
 					_nx(
-						'Accepted Error <span class="count">(%s)</span>',
-						'Accepted Errors <span class="count">(%s)</span>',
+						'Removed markup <span class="count">(%s)</span>',
+						'Removed markup <span class="count">(%s)</span>', // @todo Should this really have variations for singular/plural? Should count be part of translated string?
 						$ack_accepted_term_count,
 						'terms',
 						'amp'
@@ -1392,14 +1392,14 @@ class AMP_Validation_Error_Taxonomy {
 			}
 			$value = self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS;
 			?>
-			<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $error_status_filter_value, $value ); ?>><?php echo wp_kses_post( $accepted_term_text ); ?></option>
+			<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $error_status_filter_value, $value ); ?>><?php echo wp_kses_post( $removed_term_text ); ?></option>
 			<?php
 			if ( 'edit' === $screen_base ) {
-				$rejected_term_text = sprintf(
+				$kept_term_text = sprintf(
 					/* translators: %s: the rejected term count. */
 					_nx(
-						'With Rejected Error <span class="count">(%s)</span>',
-						'With Rejected Errors <span class="count">(%s)</span>',
+						'With kept markup <span class="count">(%s)</span>',
+						'With kept markup <span class="count">(%s)</span>', // @todo Should this really have variations for singular/plural? Should count be part of translated string?
 						$ack_rejected_term_count,
 						'terms',
 						'amp'
@@ -1407,11 +1407,11 @@ class AMP_Validation_Error_Taxonomy {
 					number_format_i18n( $ack_rejected_term_count )
 				);
 			} else {
-				$rejected_term_text = sprintf(
+				$kept_term_text = sprintf(
 					/* translators: %s: the rejected term count. */
 					_nx(
-						'Rejected Error <span class="count">(%s)</span>',
-						'Rejected Errors <span class="count">(%s)</span>',
+						'Kept markup <span class="count">(%s)</span>',
+						'Kept markup <span class="count">(%s)</span>', // @todo Should this really have variations for singular/plural? Should count be part of translated string?
 						$ack_rejected_term_count,
 						'terms',
 						'amp'
@@ -1421,7 +1421,7 @@ class AMP_Validation_Error_Taxonomy {
 			}
 			$value = self::VALIDATION_ERROR_ACK_REJECTED_STATUS;
 			?>
-			<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $error_status_filter_value, $value ); ?>><?php echo wp_kses_post( $rejected_term_text ); ?></option>
+			<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $error_status_filter_value, $value ); ?>><?php echo wp_kses_post( $kept_term_text ); ?></option>
 		</select>
 		<?php
 	}
@@ -1453,34 +1453,34 @@ class AMP_Validation_Error_Taxonomy {
 		<label for="<?php echo esc_attr( self::VALIDATION_ERROR_TYPE_QUERY_VAR ); ?>" class="screen-reader-text"><?php esc_html_e( 'Filter by error type', 'amp' ); ?></label>
 		<select name="<?php echo esc_attr( self::VALIDATION_ERROR_TYPE_QUERY_VAR ); ?>" id="<?php echo esc_attr( self::VALIDATION_ERROR_TYPE_QUERY_VAR ); ?>">
 			<option value="<?php echo esc_attr( self::NO_FILTER_VALUE ); ?>">
-				<?php esc_html_e( 'All Error Types', 'amp' ); ?>
+				<?php esc_html_e( 'All types of invalid markup', 'amp' ); ?>
 			</option>
 			<option value="<?php echo esc_attr( self::HTML_ELEMENT_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::HTML_ELEMENT_ERROR_TYPE ); ?>>
 				<?php if ( 'edit' === $screen_base ) : ?>
-					<?php esc_html_e( 'With HTML (Element) Errors', 'amp' ); ?>
+					<?php esc_html_e( 'With invalid HTML elements', 'amp' ); ?>
 				<?php else : ?>
-					<?php esc_html_e( 'HTML (Element) Errors', 'amp' ); ?>
+					<?php esc_html_e( 'Invalid HTML elements', 'amp' ); ?>
 				<?php endif; ?>
 			</option>
 			<option value="<?php echo esc_attr( self::HTML_ATTRIBUTE_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::HTML_ATTRIBUTE_ERROR_TYPE ); ?>>
 				<?php if ( 'edit' === $screen_base ) : ?>
-					<?php esc_html_e( 'With HTML (Attribute) Errors', 'amp' ); ?>
+					<?php esc_html_e( 'With invalid HTML attributes', 'amp' ); ?>
 				<?php else : ?>
-					<?php esc_html_e( 'HTML (Attribute) Errors', 'amp' ); ?>
+					<?php esc_html_e( 'Invalid HTML attributes', 'amp' ); ?>
 				<?php endif; ?>
 			</option>
 			<option value="<?php echo esc_attr( self::JS_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::JS_ERROR_TYPE ); ?>>
 				<?php if ( 'edit' === $screen_base ) : ?>
-					<?php esc_html_e( 'With JS Errors', 'amp' ); ?>
+					<?php esc_html_e( 'With invalid JS', 'amp' ); ?>
 				<?php else : ?>
-					<?php esc_html_e( 'JS Errors', 'amp' ); ?>
+					<?php esc_html_e( 'Invalid JS', 'amp' ); ?>
 				<?php endif; ?>
 			</option>
 			<option value="<?php echo esc_attr( self::CSS_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::CSS_ERROR_TYPE ); ?>>
 				<?php if ( 'edit' === $screen_base ) : ?>
-					<?php esc_html_e( 'With CSS Errors', 'amp' ); ?>
+					<?php esc_html_e( 'With invalid CSS', 'amp' ); ?>
 				<?php else : ?>
-					<?php esc_html_e( 'CSS Errors', 'amp' ); ?>
+					<?php esc_html_e( 'Invalid CSS', 'amp' ); ?>
 				<?php endif; ?>
 			</option>
 		</select>
@@ -1559,8 +1559,8 @@ class AMP_Validation_Error_Taxonomy {
 				$message = sprintf(
 					/* translators: %s is number of errors accepted */
 					_n(
-						'Accepted %s error. It will no longer block related URLs from being served as AMP.',
-						'Accepted %s errors. They will no longer block related URLs from being served as AMP.',
+						'Removed %s instance of invalid markup. It will no longer block related URLs from being served as AMP.',
+						'Removed %s instances of invalid markup. They will no longer block related URLs from being served as AMP.',
 						number_format_i18n( $count ),
 						'amp'
 					),
@@ -1570,8 +1570,8 @@ class AMP_Validation_Error_Taxonomy {
 				$message = sprintf(
 					/* translators: %s is number of errors rejected */
 					_n(
-						'Rejected %s error. It will continue to block related URLs from being served as AMP.',
-						'Rejected %s errors. They will continue to block related URLs from being served as AMP.',
+						'Kept %s instance of invalid markup. It will continue to block related URLs from being served as AMP.',
+						'Kept %s instances of invalid markup. They will continue to block related URLs from being served as AMP.',
 						number_format_i18n( $count ),
 						'amp'
 					),
@@ -1593,8 +1593,8 @@ class AMP_Validation_Error_Taxonomy {
 					sprintf(
 						/* translators: %s is the number of validation errors cleared */
 						_n(
-							'Cleared %s validation error that no longer occurs on the site.',
-							'Cleared %s validation errors that no longer occur on the site.',
+							'Cleared %s validation error for invalid markup that no longer occurs on the site.',
+							'Cleared %s validation errors for invalid markup that no longer occur on the site.',
 							$cleared_count,
 							'amp'
 						),
@@ -1650,28 +1650,30 @@ class AMP_Validation_Error_Taxonomy {
 				);
 			}
 
-			// @todo We should consider reversing the order.
-			// Only add the 'Reject' and 'Accept' links to the index page, not the individual URL page.
-			$sanitization = self::get_validation_error_sanitization( json_decode( $term->description, true ) );
-			if ( 'edit-tags.php' === $pagenow && self::VALIDATION_ERROR_ACK_REJECTED_STATUS !== $sanitization['term_status'] ) {
-				$actions[ self::VALIDATION_ERROR_REJECT_ACTION ] = sprintf(
-					'<a href="%s">%s</a>',
-					wp_nonce_url(
-						add_query_arg( array_merge( [ 'action' => self::VALIDATION_ERROR_REJECT_ACTION ], compact( 'term_id' ) ) ),
-						self::VALIDATION_ERROR_REJECT_ACTION
-					),
-					esc_html__( 'Keep', 'amp' )
-				);
-			}
-			if ( 'edit-tags.php' === $pagenow && self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $sanitization['term_status'] ) {
-				$actions[ self::VALIDATION_ERROR_ACCEPT_ACTION ] = sprintf(
-					'<a href="%s">%s</a>',
-					wp_nonce_url(
-						add_query_arg( array_merge( [ 'action' => self::VALIDATION_ERROR_ACCEPT_ACTION ], compact( 'term_id' ) ) ),
-						self::VALIDATION_ERROR_ACCEPT_ACTION
-					),
-					esc_html__( 'Remove', 'amp' )
-				);
+			// Only add the 'Remove' and 'Keep' links to the index page, not the individual URL page.
+			if ( 'edit-tags.php' === $pagenow ) {
+				$sanitization = self::get_validation_error_sanitization( json_decode( $term->description, true ) );
+				$is_removed   = (bool) ( $sanitization['status'] & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
+
+				if ( ! $is_removed ) {
+					$actions[ self::VALIDATION_ERROR_ACCEPT_ACTION ] = sprintf(
+						'<a href="%s">%s</a>',
+						wp_nonce_url(
+							add_query_arg( array_merge( [ 'action' => self::VALIDATION_ERROR_ACCEPT_ACTION ], compact( 'term_id' ) ) ),
+							self::VALIDATION_ERROR_ACCEPT_ACTION
+						),
+						esc_html__( 'Remove', 'amp' )
+					);
+				} else {
+					$actions[ self::VALIDATION_ERROR_REJECT_ACTION ] = sprintf(
+						'<a href="%s">%s</a>',
+						wp_nonce_url(
+							add_query_arg( array_merge( [ 'action' => self::VALIDATION_ERROR_REJECT_ACTION ], compact( 'term_id' ) ) ),
+							self::VALIDATION_ERROR_REJECT_ACTION
+						),
+						esc_html__( 'Keep', 'amp' )
+					);
+				}
 			}
 		}
 		return $actions;
@@ -1736,10 +1738,10 @@ class AMP_Validation_Error_Taxonomy {
 				return esc_html__( 'JS', 'amp' );
 
 			case 'html_element_error':
-				return esc_html__( 'HTML (Element)', 'amp' );
+				return esc_html__( 'HTML element', 'amp' );
 
 			case 'html_attribute_error':
-				return esc_html__( 'HTML (Attribute)', 'amp' );
+				return esc_html__( 'HTML attribute', 'amp' );
 
 			case 'css_error':
 				return esc_html__( 'CSS', 'amp' );
@@ -1833,8 +1835,8 @@ class AMP_Validation_Error_Taxonomy {
 			case 'status':
 				// Output whether the validation error has been seen via hidden field since we can't set the 'new' class on the <tr> directly.
 				// This will get read via amp-validated-url-post-edit-screen.js.
-				$is_seen = (bool) ( $term->term_group & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK );
-				printf( '<input class="amp-validation-error-seen" type="hidden" value="%d">', (int) $is_seen );
+				$is_new   = ! ( $term->term_group & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK );
+				$content .= sprintf( '<input class="amp-validation-error-new" type="hidden" value="%d">', (int) $is_new );
 
 				$is_removed = (bool) ( $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
 
@@ -1869,7 +1871,7 @@ class AMP_Validation_Error_Taxonomy {
 				} else {
 					$sanitization = self::get_validation_error_sanitization( $validation_error );
 					$content     .= self::get_status_text_with_icon( $sanitization );
-					printf( '<input class="amp-validation-error-status" type="hidden" value="%d">', (int) $is_removed );
+					$content     .= sprintf( '<input class="amp-validation-error-status" type="hidden" value="%d">', (int) $is_removed );
 				}
 				break;
 			case 'created_date_gmt':
@@ -2044,7 +2046,7 @@ class AMP_Validation_Error_Taxonomy {
 								echo wp_kses_post(
 									sprintf(
 										/* translators: 1: script,  2: Documentation URL, 3: Documentation URL, 4: Documentation URL, 5: onclick, 6: Documentation URL, 7: amp-bind, 8: Documentation URL, 9: amp-script */
-										__( 'Arbitrary JavaScript is not allowed in AMP. You cannot use JS %1$s tags unless they are for loading <a href="%2$s">AMP components</a> (which the AMP plugin will add for you automatically). In order for a page to be served as AMP, the invalid JS code must be removed from the page, which is what happens when you <strong>accept</strong> sanitization. Learn more about <a href="%3$s">how AMP works</a>. As an alternative to using custom JS, please consider using a pre-built AMP functionality, including <a href="%4$s">actions and events</a> (as opposed to JS event handler attributes like %5$s) and the <a href="%6$s">%7$s</a> component; you may also add custom JS if encapsulated in the <a href="%8$s">%9$s</a>.', 'amp' ),
+										__( 'Arbitrary JavaScript is not allowed in AMP. You cannot use JS %1$s tags unless they are for loading <a href="%2$s">AMP components</a> (which the AMP plugin will add for you automatically). In order for a page to be served as AMP, the invalid JS code must be removed from the page. Learn more about <a href="%3$s">how AMP works</a>. As an alternative to using custom JS, please consider using a pre-built AMP functionality, including <a href="%4$s">actions and events</a> (as opposed to JS event handler attributes like %5$s) and the <a href="%6$s">%7$s</a> component; you may also add custom JS if encapsulated in the <a href="%8$s">%9$s</a>.', 'amp' ),
 										'<code>&lt;script&gt;</code>',
 										'https://amp.dev/documentation/components/',
 										'https://amp.dev/about/how-amp-works/',
@@ -2083,7 +2085,7 @@ class AMP_Validation_Error_Taxonomy {
 						<?php endif; ?>
 					</p>
 					<p>
-						<?php echo wp_kses_post( __( 'The invalid code is removed when you <strong>accept</strong> sanitization for this error. Note that you need to check what impact the removal of the code has on the page to see if sanitization is truly acceptable. If you <strong>reject</strong> sanitization of this error, then the page will not be served as AMP.', 'amp' ) ); ?>
+						<?php echo wp_kses_post( __( 'If you <strong>remove</strong> the invalid markup then it will not block this page from being served as AMP. Note that you need to check what impact the removal of the invalid markup has on the page to see if the result is acceptable. If you <strong>keep</strong> the invalid markup, then the page will not be served as AMP.', 'amp' ) ); ?>
 					</p>
 				</dd>
 			<?php endif; ?>
@@ -2674,7 +2676,7 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
-	 * On the single URL page, handles the bulk actions of 'Accept' and 'Reject'
+	 * On the single URL page, handles the bulk actions of 'Remove' (formerly 'Accept') and 'Keep' (formerly 'Reject').
 	 *
 	 * On /wp-admin/post.php, this handles these bulk actions.
 	 * This page is more like an edit-tags.php page, in that it has a WP_Terms_List_Table of amp_validation_error terms.
@@ -2700,7 +2702,7 @@ class AMP_Validation_Error_Taxonomy {
 			self::handle_validation_error_update( null, $action, $term_ids );
 			$redirect_query_args['amp_actioned_count'] = count( $term_ids );
 		} elseif ( $single_term_id ) {
-			// If this is an inline action, like 'Reject' or 'Accept'.
+			// If this is an inline action, like 'Keep' or 'Remove'.
 			self::handle_validation_error_update( null, $action, [ $single_term_id ] );
 			$redirect_query_args['amp_actioned_count'] = 1;
 		}

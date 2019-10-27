@@ -7,9 +7,9 @@
  */
 export default function() {
 	document.querySelectorAll( 'tr[id]' ).forEach( ( row ) => {
-		const input = row.querySelector( '.amp-validation-error-seen' );
+		const input = row.querySelector( '.amp-validation-error-new' );
 		if ( input ) {
-			row.classList.toggle( 'new', ! parseInt( input.value ) );
+			row.classList.toggle( 'new', Boolean( parseInt( input.value ) ) );
 		}
 	} );
 }

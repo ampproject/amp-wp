@@ -225,8 +225,8 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$this->assertEquals( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS, $error['term_status'] );
 
 		$summary = get_echo( [ 'AMP_Validated_URL_Post_Type', 'display_invalid_url_validation_error_counts_summary' ], [ $invalid_url_post_id ] );
-		$this->assertContains( 'Kept: 2', $summary );
-		$this->assertContains( 'Removed: 2', $summary );
+		$this->assertContains( 'Invalid markup kept: 2', $summary );
+		$this->assertContains( 'Invalid markup removed: 2', $summary );
 	}
 
 	/**
@@ -839,19 +839,19 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$_GET[ AMP_Validated_URL_Post_Type::REMAINING_ERRORS ] = '1';
 		$_GET[ AMP_Validated_URL_Post_Type::URLS_TESTED ]      = '1';
 		$output = get_echo( [ 'AMP_Validated_URL_Post_Type', 'print_admin_notice' ] );
-		$this->assertContains( 'The rechecked URL still has unaccepted validation errors', $output );
+		$this->assertContains( 'The rechecked URL still has remaining invalid markup kept.', $output );
 
 		$_GET[ AMP_Validated_URL_Post_Type::URLS_TESTED ] = '2';
 		$output = get_echo( [ 'AMP_Validated_URL_Post_Type', 'print_admin_notice' ] );
-		$this->assertContains( 'The rechecked URLs still have unaccepted validation errors', $output );
+		$this->assertContains( 'The rechecked URLs still have remaining invalid markup kept.', $output );
 
 		$_GET[ AMP_Validated_URL_Post_Type::REMAINING_ERRORS ] = '0';
 		$output = get_echo( [ 'AMP_Validated_URL_Post_Type', 'print_admin_notice' ] );
-		$this->assertContains( 'The rechecked URLs are free of unaccepted validation errors', $output );
+		$this->assertContains( 'The rechecked URLs are free of non-removed invalid markup.', $output );
 
 		$_GET[ AMP_Validated_URL_Post_Type::URLS_TESTED ] = '1';
 		$output = get_echo( [ 'AMP_Validated_URL_Post_Type', 'print_admin_notice' ] );
-		$this->assertContains( 'The rechecked URL is free of unaccepted validation errors', $output );
+		$this->assertContains( 'The rechecked URL is free of non-removed invalid markup.', $output );
 
 		$_GET['amp_validate_error'] = [ 'http_request_failed' ];
 		$output                     = get_echo( [ 'AMP_Validated_URL_Post_Type', 'print_admin_notice' ] );
@@ -1435,15 +1435,15 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		// This is now on the invalid URL post type edit.php screen, so it should output a <select> element.
 		$output = get_echo( [ 'AMP_Validated_URL_Post_Type', 'render_post_filters' ], [ $correct_post_type, $correct_which_second_argument ] );
 		$this->assertContains(
-			sprintf( 'With New Errors <span class="count">(%d)</span>', $number_of_new_errors ),
+			sprintf( 'With new errors <span class="count">(%d)</span>', $number_of_new_errors ),
 			$output
 		);
 		$this->assertContains(
-			sprintf( 'With Rejected Errors <span class="count">(%d)</span>', $number_of_rejected ),
+			sprintf( 'With kept markup <span class="count">(%d)</span>', $number_of_rejected ),
 			$output
 		);
 		$this->assertContains(
-			sprintf( 'With Accepted Errors <span class="count">(%d)</span>', $number_of_accepted ),
+			sprintf( 'With removed markup <span class="count">(%d)</span>', $number_of_accepted ),
 			$output
 		);
 	}
