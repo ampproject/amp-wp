@@ -19,6 +19,8 @@ amp-story-grid-layer {
 .amp-cta-button-wrapper {
 	max-width: 600px;
 	margin: 0 auto;
+	position: relative;
+	height: 100%;
 }
 
 .amp-block-story-cta__link {

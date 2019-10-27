@@ -1011,15 +1011,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						display: inherit;
 					}
 
-					.primary-menu li.menu-item-has-children:focus-within > ul {
-						right: 0;
-						opacity: 1;
-						transform: translateY(0);
-						transition: opacity .15s linear, transform .15s linear;
-					}
-
-					.primary-menu ul li.menu-item-has-children:focus-within > ul {
-						right: calc(100% + 2rem);
+					.menu-modal-inner {
+						height: 100%;
 					}
 
 					.admin-bar .cover-modal {
@@ -1056,46 +1049,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						.no-js .main-navigation > div > ul {
 							display: block;
 						}
-						.main-navigation ul li.menu-item-has-children:focus-within:before,
-						.main-navigation ul li.menu-item-has-children:focus-within:after,
-						.main-navigation ul li.page_item_has_children:focus-within:before,
-						.main-navigation ul li.page_item_has_children:focus-within:after {
-							display: block;
-						}
-						.main-navigation ul ul li:focus-within > ul {
-							<?php if ( is_rtl() ) : ?>
-								left: auto;
-								right: 100%;
-							<?php else : ?>
-								left: 100%;
-								right: auto;
-							<?php endif; ?>
-						}
-						.main-navigation li li:focus-within {
-							background: #767676;
-						}
-						.main-navigation li li:focus-within > a,
-						.main-navigation li li a:focus-within,
-						.main-navigation li li.current_page_item a:focus-within,
-						.main-navigation li li.current-menu-item a:focus-within {
-							color: #fff;
-						}
-						.main-navigation ul li:focus-within > ul {
-							<?php if ( is_rtl() ) : ?>
-								left: auto;
-								right: 0.5em;
-							<?php else : ?>
-								left: 0.5em;
-								right: auto;
-							<?php endif; ?>
-						}
-
-						.main-navigation ul ul li.menu-item-has-children:focus-within:before,
-						.main-navigation ul ul li.menu-item-has-children:focus-within:after,
-						.main-navigation ul ul li.page_item_has_children:focus-within:before,
-						.main-navigation ul ul li.page_item_has_children:focus-within:after {
-							display: none;
-						}
 					}
 				<?php elseif ( 'twentysixteen' === get_template() ) : ?>
 					@media screen and (max-width: 56.875em) {
@@ -1114,27 +1067,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						.no-js .main-navigation ul ul {
 							display: block;
 						}
-						.main-navigation li:focus-within > a {
-							color: #007acc;
-						}
-						.main-navigation li:focus-within > ul {
-							<?php if ( is_rtl() ) : ?>
-								left: auto;
-								right: 0;
-							<?php else : ?>
-								left: 0;
-								right: auto;
-							<?php endif; ?>
-						}
-						.main-navigation ul ul li:focus-within > ul {
-							<?php if ( is_rtl() ) : ?>
-								left: 100%;
-								right: auto;
-							<?php else : ?>
-								left: auto;
-								right: 100%;
-							<?php endif; ?>
-						}
 					}
 				<?php elseif ( 'twentyfifteen' === get_template() ) : ?>
 					@media screen and (min-width: 59.6875em) {
@@ -1147,52 +1079,10 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						}
 					}
 
-				<?php elseif ( 'twentyfourteen' === get_template() ) : ?>
-					@media screen and (min-width: 783px) {
-						.primary-navigation li:focus-within > a {
-							background-color: #24890d;
-							color: #fff;
-						}
-
-						.primary-navigation ul ul li:focus-within > a {
-							background-color: #41a62a;
-						}
-
-						.primary-navigation ul li:focus-within > ul {
-							left: auto;
-						}
-
-						.primary-navigation ul ul li:focus-within > ul {
-							left: 100%;
-						}
-					}
-
-					@media screen and (min-width: 1008px) {
-						.secondary-navigation li:focus-within > a {
-							background-color: #24890d;
-							color: #fff;
-						}
-
-						.secondary-navigation ul ul li:focus-within > a {
-							background-color: #41a62a;
-						}
-
-						.secondary-navigation ul li:focus-within > ul {
-							left: 202px;
-						}
-					}
-
 				<?php elseif ( 'twentythirteen' === get_template() ) : ?>
 					@media (min-width: 644px) {
 						.dropdown-toggle {
 							display: none;
-						}
-						ul.nav-menu :focus-within > ul,
-						.nav-menu :focus-within > ul {
-							clip: inherit;
-							overflow: inherit;
-							height: inherit;
-							width: inherit;
 						}
 					}
 					@media (max-width: 643px) {
@@ -1275,18 +1165,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 							outline: 1px solid rgba(51, 51, 51, 0.3);
 						}
 					}
-
-				<?php elseif ( 'twentytwelve' === get_template() ) : ?>
-					@media screen and (min-width: 600px) {
-						.main-navigation .menu-item-has-children:focus-within > ul {
-							border-left: 0;
-							clip: inherit;
-							overflow: inherit;
-							height: inherit;
-							width: inherit;
-						}
-					}
-
 				<?php endif; ?>
 				</style>
 				<?php
@@ -1631,6 +1509,10 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 		$modal_actions = [
 			"{$modal_id}.open"  => $open_xpaths,
+			// Although we add the 'show-modal' class here, we don't remove it again, as it will
+			// _first_ remove the correct positioning and only _then_ start the fade-out animation.
+			// See: https://youtu.be/aooq-liRtMs .
+			"{$modal_id}.toggleClass(class=show-modal,force=true)" => $open_xpaths,
 			"{$body_id}.toggleClass(class=showing-modal,force=true)" => $open_xpaths,
 			"{$modal_id}.close" => $close_xpaths,
 			"{$body_id}.toggleClass(class=showing-modal,force=false)" => $close_xpaths,
@@ -1651,12 +1533,22 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
+		// Make sure lightboxes are marked as inactive and not expanded when they are closed via the Escape key.
+		$state_string = str_replace( '-', '_', $modal_id );
+		AMP_DOM_Utils::add_amp_action( $modal_content_node, 'lightboxOpen', "{$modal_id}.toggleClass(class=active,force=true)" );
+		AMP_DOM_Utils::add_amp_action( $modal_content_node, 'lightboxOpen', "AMP.setState({{$state_string}:true})" );
+		AMP_DOM_Utils::add_amp_action( $modal_content_node, 'lightboxClose', "{$modal_id}.toggleClass(class=active,force=false)" );
+		AMP_DOM_Utils::add_amp_action( $modal_content_node, 'lightboxClose', "AMP.setState({{$state_string}:false})" );
+
 		// Create an <amp-lightbox> element that will contain the modal.
 		$amp_lightbox = $this->dom->createElement( 'amp-lightbox' );
 		$amp_lightbox->setAttribute( 'id', $modal_id );
 		$amp_lightbox->setAttribute( 'layout', 'nodisplay' );
 		$amp_lightbox->setAttribute( 'animate-in', isset( $args['animate_in'] ) ? $args['animate_in'] : 'fade-in' );
 		$amp_lightbox->setAttribute( 'scrollable', isset( $args['scrollable'] ) ? $args['scrollable'] : true );
+		$amp_lightbox->setAttribute( 'role', $this->guess_modal_role( $modal_content_node ) );
+		// Setting tabindex to -1 (not reachable) as keyboard focus is handled through toggles.
+		$amp_lightbox->setAttribute( 'tabindex', -1 );
 
 		$parent_node = $modal_content_node->parentNode;
 		$parent_node->replaceChild( $amp_lightbox, $modal_content_node );
@@ -1675,14 +1567,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				break;
 			}
 
-			// Add class(es) of removed wrapper to lightbox to avoid breaking CSS selectors.
-			if ( $modal_content_node->hasAttribute( 'class' ) ) {
-				$classes = $modal_content_node->getAttribute( 'class' );
-				if ( $amp_lightbox->hasAttribute( 'class' ) ) {
-					$classes .= ' ' . $amp_lightbox->getAttribute( 'class' );
-				}
-				$amp_lightbox->setAttribute( 'class', $classes );
-			}
+			// Add class(es) and action(s) of removed wrapper to lightbox to avoid breaking CSS selectors.
+			AMP_DOM_Utils::copy_attributes( [ 'class', 'on', 'data-toggle-target' ], $modal_content_node, $amp_lightbox );
 
 			$modal_content_node = $modal_content_node->removeChild( $children[0] );
 
@@ -1745,9 +1631,17 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 
+			$modal_id = AMP_DOM_Utils::get_element_id( $modal );
+
+			// Add the lightbox itself as a close button xpath as well.
+			// With twentytwenty compat, the lightbox fills the entire screen, and only an inner wrapper will contain
+			// the actionable elements in the modal. Therefore, the lightbox represents the "background".
+			$close_button_xpaths[] = "//*[ @id = '{$modal_id}' ]";
+			$modal->setAttribute( 'data-toggle-target', "#{$modal_id}" );
+
 			$this->wrap_modal_in_lightbox(
 				[
-					'modal_id'             => AMP_DOM_Utils::get_element_id( $modal ),
+					'modal_id'             => $modal_id,
 					'modal_content_xpath'  => $modal->getNodePath(),
 					'open_button_xpath'    => $open_button_xpaths,
 					'close_button_xpath'   => $close_button_xpaths,
@@ -1845,13 +1739,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					$focus_xpath   = $this->xpath_from_css_selector( $focus_selector );
 					$focus_element = $this->xpath->query( $focus_xpath )->item( 0 );
 
-					// Instead of manually setting or unsetting the focus here, we're going
-					// with the autofocus attribute instead (AMP does not have a "blur" action).
-					// According to the HTML 5 spec, only one element should have "autofocus",
-					// however it seems like AMP has turned this into a common mechanism for
-					// focusing on inputs after a lightbox (i.e. modal) opens.
-					if ( $focus_element instanceof DOMElement && in_array( $focus_element->tagName, [ 'input', 'select', 'textarea' ], true ) ) {
-						$focus_element->setAttribute( 'autofocus', true );
+					if ( $focus_element instanceof DOMElement ) {
+						$focus_element_id = AMP_DOM_Utils::get_element_id( $focus_element );
+						AMP_DOM_Utils::add_amp_action( $toggle, 'tap', "{$focus_element_id}.focus" );
 					}
 				}
 			}
@@ -1875,7 +1765,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		$sub_menu = $this->xpath->query( "//*[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' sub-menu ' ) ]", $menu_item )->item( 0 );
+		$sub_menu = $this->xpath->query( ".//*[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' sub-menu ' ) ]", $menu_item )->item( 0 );
 
 		if ( ! $sub_menu instanceof DOMElement ) {
 			return $element;
@@ -1966,5 +1856,29 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		return $xpath;
+	}
+
+	/**
+	 * Try to guess the role of a modal based on its classes.
+	 *
+	 * @param DOMElement $modal Modal to guess the role for.
+	 * @return string Role that was guessed.
+	 */
+	protected function guess_modal_role( DOMElement $modal ) {
+		// No classes to base our guess on, so keep it generic.
+		if ( ! $modal->hasAttribute( 'class' ) ) {
+			return 'dialog';
+		}
+
+		$classes = $modal->getAttribute( 'class' );
+
+		foreach ( [ 'navigation', 'menu', 'search', 'alert', 'figure', 'form', 'img', 'toolbar', 'tooltip' ] as $role ) {
+			if ( false !== strpos( $classes, $role ) ) {
+				return $role;
+			}
+		}
+
+		// None of the roles we are looking for match any of the classes.
+		return 'dialog';
 	}
 }

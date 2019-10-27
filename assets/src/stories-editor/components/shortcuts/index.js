@@ -16,7 +16,6 @@ const Shortcuts = () => {
 	const {
 		currentPage,
 		index,
-		showInserter,
 	} = useSelect( ( select ) => {
 		const { getCurrentPage } = select( 'amp/story' );
 		const { getBlockOrder } = select( 'core/block-editor' );
@@ -24,8 +23,6 @@ const Shortcuts = () => {
 		return {
 			currentPage: getCurrentPage(),
 			index: getBlockOrder( getCurrentPage() ).length,
-			// As used in <HeaderToolbar> component
-			showInserter: select( 'core/edit-post' ).getEditorMode() === 'visual' && select( 'core/editor' ).getEditorSettings().richEditingEnabled,
 		};
 	}, [] );
 
@@ -65,7 +62,6 @@ const Shortcuts = () => {
 					onClick={ () => onClick( block ) }
 					label={ blockType.title }
 					labelPosition="bottom"
-					disabled={ ! showInserter }
 				/>
 			);
 		} )

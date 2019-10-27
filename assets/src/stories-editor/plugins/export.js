@@ -35,7 +35,7 @@ const StoryExport = () => {
 			hasPublishAction: get( getCurrentPost(), [ '_links', 'wp:action-publish' ], false ),
 			postId: getCurrentPostId(),
 		};
-	} );
+	}, [] );
 
 	if ( ! hasPublishAction ) {
 		return null;

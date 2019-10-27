@@ -23,9 +23,12 @@ import {
  * @param {Array} props.backgroundColors Current background colors.
  * @param {Function} props.setAttributes setAttributes callback.
  * @param {number} props.overlayOpacity Overlay opacity.
+ * @param {number} props.hasMedia Whether the page has a media item set.
  * @return {ReactElement} Component.
  */
-const BackgroundColorSettings = ( { backgroundColors, setAttributes, overlayOpacity } ) => {
+const BackgroundColorSettings = ( { backgroundColors, setAttributes, overlayOpacity, hasMedia } ) => {
+	const hasColors = backgroundColors.some( ( color ) => color && Object.values( color ).some( Boolean ) );
+
 	const removeBackgroundColor = ( index ) => {
 		backgroundColors.splice( index, 1 );
 		setAttributes( { backgroundColors: JSON.stringify( backgroundColors ) } );
@@ -35,7 +38,11 @@ const BackgroundColorSettings = ( { backgroundColors, setAttributes, overlayOpac
 		backgroundColors[ index ] = {
 			color: value,
 		};
-		setAttributes( { backgroundColors: JSON.stringify( backgroundColors ) } );
+
+		setAttributes( {
+			backgroundColors: JSON.stringify( backgroundColors ),
+			overlayOpacity: ! hasColors && overlayOpacity === 100 && hasMedia ? 50 : overlayOpacity,
+		} );
 	};
 
 	const getOverlayColorSettings = () => {
@@ -46,7 +53,7 @@ const BackgroundColorSettings = ( { backgroundColors, setAttributes, overlayOpac
 					onChange: ( value ) => {
 						setBackgroundColors( value, 0 );
 					},
-					label: __( 'Color', 'amp' ),
+					label: __( 'Background Color', 'amp' ),
 				},
 			];
 		}
@@ -61,7 +68,7 @@ const BackgroundColorSettings = ( { backgroundColors, setAttributes, overlayOpac
 					setBackgroundColors( value, index );
 				},
 				/* translators: %s: color number */
-				label: useNumberedLabels ? sprintf( __( 'Color %s', 'amp' ), index + 1 ) : __( 'Color', 'amp' ),
+				label: useNumberedLabels ? sprintf( __( 'Color %s', 'amp' ), index + 1 ) : __( 'Background Color', 'amp' ),
 			};
 		} );
 
@@ -70,7 +77,7 @@ const BackgroundColorSettings = ( { backgroundColors, setAttributes, overlayOpac
 
 	return (
 		<PanelColorSettings
-			title={ __( 'Background Color', 'amp' ) }
+			title={ __( 'Color Settings', 'amp' ) }
 			colorSettings={ getOverlayColorSettings() }
 		>
 			<p>
@@ -90,6 +97,7 @@ const BackgroundColorSettings = ( { backgroundColors, setAttributes, overlayOpac
 				</Button>
 				}
 			</p>
+			{ hasColors &&
 			<RangeControl
 				label={ __( 'Opacity', 'amp' ) }
 				value={ overlayOpacity }
@@ -99,6 +107,7 @@ const BackgroundColorSettings = ( { backgroundColors, setAttributes, overlayOpac
 				step={ 5 }
 				required
 			/>
+			}
 		</PanelColorSettings>
 	);
 };
@@ -107,6 +116,7 @@ BackgroundColorSettings.propTypes = {
 	backgroundColors: PropTypes.array,
 	overlayOpacity: PropTypes.number,
 	setAttributes: PropTypes.func.isRequired,
+	hasMedia: PropTypes.bool.isRequired,
 };
 
 export default BackgroundColorSettings;

@@ -125,6 +125,7 @@ div[data-type="amp/amp-story-cta"] .amp-overlay {
 	position: absolute;
 	z-index: 10;
 	margin-top: -0.5em;
+	top: 100%;
 }
 
 .is-dragging-components-draggable .amp-block-story-cta__inline-link {

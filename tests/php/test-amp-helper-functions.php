@@ -1200,6 +1200,17 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test amp_generate_script_hash().
+	 *
+	 * @covers \amp_generate_script_hash()
+	 */
+	public function test_amp_generate_script_hash() {
+		$this->assertSame( 'sha384-nYSGte6layPrGqn7c1Om8wNCgSq5PU-56H0R6j1kTb7R3aLbWeM3ra0YF5xKFuI0', amp_generate_script_hash( 'document.body.textContent += \'Hello world!\';' ) );
+		$this->assertSame( 'sha384-Qdwpb9Wpgg4BE21ukx8rwjbJGEdW2xjanFfsRNtmYQH69a_QeI0it1V8N23ZdsRX', amp_generate_script_hash( 'document.body.textContent = \'¡Hola mundo!\';' ) );
+		$this->assertSame( 'sha384-_MAJ0_NC2k8jrjehfi-5LdQasBICZXvp4gOwOx0D3mIStvDCGvZDzcTfXLgMrLL1', amp_generate_script_hash( 'document.body.textContent = \'<Hi! & 👋>\';' ) );
+	}
+
+	/**
 	 * Get a mock publisher logo URL, to test that the filter works as expected.
 	 *
 	 * @param string $site_icon The publisher logo in the schema.org data.

@@ -25,10 +25,10 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import './edit.css';
 import {
 	copyTextToClipBoard,
-	ensureAllowedBlocksOnPaste,
 	isPageBlock,
 	useIsBlockAllowedOnPage,
 	useMoveBlockToPage,
+	useDisplayPasteError,
 } from '../../helpers';
 import { ALLOWED_MOVABLE_BLOCKS, DISABLE_DUPLICATE_BLOCKS } from '../../constants';
 import useOutsideClickChecker from './outside-click-checker';
@@ -63,7 +63,6 @@ const ContextMenu = ( props ) => {
 	const {
 		removeBlock,
 		insertBlock,
-		insertBlocks,
 		updateBlockAttributes,
 	} = useDispatch( 'core/block-editor' );
 
@@ -72,6 +71,7 @@ const ContextMenu = ( props ) => {
 	const { __experimentalCanUserUseUnfilteredHTML: canUserUseUnfilteredHTML, isRTL } = getSettings();
 
 	const isBlockAllowedOnPage = useIsBlockAllowedOnPage();
+	const displayPasteError = useDisplayPasteError();
 
 	const copyBlock = ( clientId ) => {
 		const block = getBlock( clientId );
@@ -109,17 +109,27 @@ const ContextMenu = ( props ) => {
 			return;
 		}
 
-		const isFirstPage = getBlockOrder().indexOf( pageClientId ) === 0;
-		insertBlocks( ensureAllowedBlocksOnPaste( content, pageClientId, isFirstPage ), null, pageClientId ).then( ( { blocks } ) => {
-			for ( const block of blocks ) {
-				if ( ALLOWED_MOVABLE_BLOCKS.includes( block.name ) ) {
-					updateBlockAttributes( block.clientId, {
-						positionTop: insidePercentageY,
-						positionLeft: insidePercentageX,
+		const blocksOnPage = getBlockOrder( pageClientId );
+		content.forEach( ( pastedBlock ) => {
+			if ( isBlockAllowedOnPage( pastedBlock.name, pageClientId ) ) {
+				insertBlock( pastedBlock, blocksOnPage.length, pageClientId )
+					.then( ( { blocks } ) => {
+						blocks.forEach( ( block ) => {
+							if ( ALLOWED_MOVABLE_BLOCKS.includes( block.name ) ) {
+								updateBlockAttributes( block.clientId, {
+									positionTop: insidePercentageY,
+									positionLeft: insidePercentageX,
+								} );
+							}
+						} );
+					} )
+					.catch( () => {
+						displayPasteError( pastedBlock.name );
 					} );
-				}
+			} else {
+				displayPasteError( pastedBlock.name );
 			}
-		} ).catch( () => {} );
+		} );
 	};
 
 	const cutBlock = ( clientId ) => {

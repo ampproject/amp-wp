@@ -12,6 +12,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { Component } from '@wordpress/element';
+import { withSelect } from '@wordpress/data';
 import { withSafeTimeout, compose } from '@wordpress/compose';
 
 /**
@@ -130,6 +131,7 @@ class Draggable extends Component {
 			horizontalTargets,
 			verticalTargets,
 			setHighlightByOffset,
+			isRTL,
 		} = this.props;
 
 		const top = parseInt( this.cloneWrapper.style.top ) + event.clientY - this.cursorTop;
@@ -192,6 +194,10 @@ class Draggable extends Component {
 				-Math.ceil( ( -STORY_PAGE_MARGIN - cursorLeftRelativeToPage ) / PAGE_AND_MARGIN ) :
 				Math.ceil( ( cursorLeftRelativeToPage - PAGE_AND_MARGIN ) / PAGE_AND_MARGIN )
 			);
+
+			if ( isRTL ) {
+				this.pageOffset *= -1;
+			}
 		}
 
 		setHighlightByOffset( this.pageOffset );
@@ -360,11 +366,17 @@ Draggable.propTypes = {
 	setSnapLines: PropTypes.func.isRequired,
 	clearSnapLines: PropTypes.func.isRequired,
 	parentBlockElement: PropTypes.object,
+	isRTL: PropTypes.bool.isRequired,
 };
 
 const enhance = compose(
 	withSnapTargets,
 	withSafeTimeout,
+	withSelect( ( select ) => {
+		return {
+			isRTL: select( 'core/block-editor' ).getSettings().isRTL,
+		};
+	} ),
 );
 
 export default enhance( Draggable );

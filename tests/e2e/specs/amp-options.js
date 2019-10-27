@@ -12,7 +12,7 @@ describe( 'AMP Settings Screen', () => {
 	it( 'should display a welcome notice', async () => {
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 
-		await expect( page ).toMatchElement( '.amp-welcome-notice h1', { text: 'Welcome to AMP for WordPress' } );
+		await expect( page ).toMatchElement( '.amp-welcome-notice h2', { text: 'Welcome to AMP for WordPress' } );
 	} );
 
 	it( 'should display a warning about missing object cache', async () => {
@@ -60,7 +60,7 @@ describe( 'AMP Settings Screen', () => {
 
 		expect( await page.$eval( '#stories_experience', ( el ) => el.matches( ':disabled' ) ) ).toBe( true );
 
-		await expect( page ).toMatchElement( '.notice-info p', { text: 'To use stories, you currently must have the latest version' } );
+		await expect( page ).toMatchElement( '.notice-info p', { text: 'To use stories, you must be running WordPress' } );
 
 		await activatePlugin( 'gutenberg' );
 	} );
