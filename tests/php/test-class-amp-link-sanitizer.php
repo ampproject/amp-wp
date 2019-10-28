@@ -191,4 +191,22 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 			$this->assertStringEndsWith( 'amphtml', $link->getAttribute( 'rel' ) );
 		}
 	}
+
+	public function get_test_amp_to_amp_linking_enabled() {
+		return [
+			[ '__return_true', true ],
+			[ '__return_false', false ],
+		];
+	}
+
+	/**
+	 * @dataProvider get_test_amp_to_amp_linking_enabled
+	 */
+	public function test_amp_to_amp_linking_enabled_true( $filter, $expected ) {
+		add_filter( 'amp_to_amp_linking_enabled', $filter );
+		$sanitizers = amp_get_content_sanitizers();
+		$this->assertArrayHasKey( 'AMP_Link_Sanitizer', $sanitizers );
+		$this->assertArrayHasKey( 'add_query_vars', $sanitizers['AMP_Link_Sanitizer'] );
+		$this->assertEquals( $expected, $sanitizers['AMP_Link_Sanitizer']['add_query_vars'] );
+	}
 }
