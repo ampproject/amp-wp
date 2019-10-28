@@ -1806,6 +1806,56 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test combining amp-script-src meta tags.
+	 *
+	 * @covers \amp_generate_script_hash()
+	 */
+	public function test_prepare_response_for_amp_script() {
+		$script1 = 'document.body.textContent += "First!";';
+		$script2 = 'document.body.textContent += "Second!";';
+		$script3 = 'document.body.textContent += "Third!";';
+		$script4 = 'document.body.textContent += "Fourth! (And forbidden because no amp-script-src meta in head.)";';
+
+		$script1_hash = amp_generate_script_hash( $script1 );
+		$script2_hash = amp_generate_script_hash( $script2 );
+		$script3_hash = amp_generate_script_hash( $script3 );
+		$script4_hash = amp_generate_script_hash( $script4 );
+
+		ob_start();
+		?>
+		<html>
+			<head>
+				<meta name="amp-script-src" content="<?php echo esc_attr( $script1_hash ); ?>">
+				<meta name="amp-script-src" content="<?php echo esc_attr( $script2_hash ); ?>">
+				<style>
+					body { background: black; color:white }
+				</style>
+				<meta name="amp-script-src" content="<?php echo esc_attr( $script3_hash ); ?>">
+			</head>
+			<body>
+				<meta name="amp-script-src" content="<?php echo esc_attr( $script4_hash ); ?>">
+
+				<amp-script script="s1" layout="fixed-height" height="30"></amp-script><script type="text/plain" target="amp-script" id="s1"><?php echo $script1; // phpcs:ignore ?></script>
+				<amp-script script="s2" layout="fixed-height" height="30"></amp-script><script type="text/plain" target="amp-script" id="s2"><?php echo $script2; // phpcs:ignore ?></script>
+				<amp-script script="s3" layout="fixed-height" height="30"></amp-script><script type="text/plain" target="amp-script" id="s3"><?php echo $script3; // phpcs:ignore ?></script>
+				<amp-script script="s4" layout="fixed-height" height="30"></amp-script><script type="text/plain" target="amp-script" id="s4"><?php echo $script4; // phpcs:ignore ?></script>
+			</body>
+		</html>
+		<?php
+		$output = ob_get_clean();
+
+		$processed = AMP_Theme_Support::prepare_response( $output );
+		$dom       = AMP_DOM_Utils::get_dom( $processed );
+		$xpath     = new DOMXPath( $dom );
+
+		$meta_elements = $xpath->query( '/html/head/meta[ @name = "amp-script-src" ]' );
+		$this->assertSame( 1, $meta_elements->length );
+
+		$meta = $meta_elements->item( 0 );
+		$this->assertSame( "$script1_hash $script2_hash $script3_hash", $meta->getAttribute( 'content' ) );
+	}
+
+	/**
 	 * Test post-processor cache effectiveness in AMP_Theme_Support::prepare_response().
 	 */
 	public function test_post_processor_cache_effectiveness() {
