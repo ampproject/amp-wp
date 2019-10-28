@@ -99,7 +99,7 @@ class Draggable extends Component {
 			const currentElementTop = parseInt( this.cloneWrapper.style.top );
 			const currentElementLeft = parseInt( this.cloneWrapper.style.left );
 			const factor = isRTL ? 1 : -1;
-			const newLeft = currentElementLeft + factor * ( this.pageOffset * PAGE_AND_MARGIN );
+			const newLeft = currentElementLeft + ( factor * ( this.pageOffset * PAGE_AND_MARGIN ) );
 
 			let baseHeight, xAttribute, yAttribute;
 			if ( isCTABlock( blockName ) ) {
