@@ -167,7 +167,6 @@ function amp_add_amphtml_link() {
 	/**
 	 * Filters whether to show the amphtml link on the frontend.
 	 *
-	 * @todo This filter's name is incorrect. It's not about adding a canonical link but adding the amphtml link.
 	 * @since 0.2
 	 */
 	if ( false === apply_filters( 'amp_frontend_show_canonical', true ) ) {
