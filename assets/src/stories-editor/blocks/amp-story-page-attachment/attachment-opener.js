@@ -42,13 +42,14 @@ const AttachmentOpener = ( { setAttributes, toggleAttachment, openText } ) => {
 				<span className="amp-story-page-open-attachment-bar amp-story-page-open-attachment-bar-left" />
 				<span className="amp-story-page-open-attachment-bar amp-story-page-open-attachment-bar-right" />
 			</span>
-			<RichText
-				value={ openText }
-				tagName="div"
-				className="amp-story-page-attachment__text"
-				onChange={ ( value ) => setAttributes( { openText: value } ) }
-				placeholder={ __( 'Swipe Up', 'amp' ) }
-			/>
+			<div className="amp-story-page-attachment__text">
+				<RichText
+					value={ openText }
+					tagName="div"
+					onChange={ ( value ) => setAttributes( { openText: value } ) }
+					placeholder={ __( 'Swipe Up', 'amp' ) }
+				/>
+			</div>
 		</div>
 	);
 };

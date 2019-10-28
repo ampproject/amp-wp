@@ -136,14 +136,15 @@ const AttachmentContent = ( props ) => {
 						} }
 						ref={ closeButtonRef }
 					/>
-					<RichText
-						value={ title }
-						tagName="div"
-						className="amp-story-page-attachment-title"
-						onChange={ ( value ) => setAttributes( { title: value } ) }
-						placeholder={ __( 'Write Title', 'amp' ) }
-						onClick={ ( event ) => event.stopPropagation() }
-					/>
+					<div className="amp-story-page-attachment-title">
+						<RichText
+							value={ title }
+							tagName="div"
+							onChange={ ( value ) => setAttributes( { title: value } ) }
+							placeholder={ __( 'Write Title', 'amp' ) }
+							onClick={ ( event ) => event.stopPropagation() }
+						/>
+					</div>
 					{ postId && (
 						<Button
 							className="remove-attachment-post"

@@ -81,7 +81,7 @@ describe( 'Stories Editor Screen', () => {
 
 	it( 'should allow changing the CTA Text', async () => {
 		await insertBlock( 'Page Attachment' );
-		const callToActionInputSelector = '.amp-story-page-attachment__text.block-editor-rich-text__editable';
+		const callToActionInputSelector = '.amp-story-page-attachment__text .block-editor-rich-text__editable';
 		await page.waitForSelector( callToActionInputSelector );
 		await page.type( callToActionInputSelector, 'Hello, ' );
 
@@ -98,7 +98,7 @@ describe( 'Stories Editor Screen', () => {
 		await insertBlock( 'Page Attachment' );
 		await openPageAttachment();
 
-		const titleInputSelector = '.amp-story-page-attachment-title.block-editor-rich-text__editable';
+		const titleInputSelector = '.amp-story-page-attachment-title .block-editor-rich-text__editable';
 		await page.waitForSelector( titleInputSelector );
 		const title = 'Attachment Title';
 		await page.type( titleInputSelector, title );
