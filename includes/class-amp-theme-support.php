@@ -2522,12 +2522,13 @@ class AMP_Theme_Support {
 	 * non-AMP page and its AMP version to review any discrepancies.
 	 */
 	public static function serve_paired_browsing_experience() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( ! isset( $_GET[ self::PAIRED_BROWSING_QUERY_VAR ] ) ) {
 			return;
 		}
 
 		if ( ! is_admin_bar_showing() ) {
-			wp_die( esc_html__( 'The admin bar must be showing to use paired browsing mode.' ) );
+			wp_die( esc_html__( 'The admin bar must be showing to use paired browsing mode.', 'amp' ) );
 		}
 
 		$url     = remove_query_arg( self::PAIRED_BROWSING_QUERY_VAR );
@@ -2538,7 +2539,7 @@ class AMP_Theme_Support {
 		<html>
 		<head>
 			<meta charset="<?php bloginfo( 'charset' ); ?>">
-			<title><?php esc_html_e( 'Loading...', 'amp-to-amp' ); ?></title>
+			<title><?php esc_html_e( 'Loading...', 'amp' ); ?></title>
 			<style>
 				html,body {
 					margin: 0;
@@ -2573,10 +2574,10 @@ class AMP_Theme_Support {
 		<iframe src="<?php echo esc_url( $url ); ?>" id="non-amp" sandbox="allow-forms allow-scripts allow-same-origin allow-popups"></iframe>
 		<iframe src="<?php echo esc_url( $amp_url ); ?>" id="amp" sandbox="allow-forms allow-scripts allow-same-origin allow-popups"></iframe>
 		<script>
-            const ampSlug = <?php echo wp_json_encode( amp_get_slug() ); ?>;
-            const ampPairedBrowsingQueryVar = <?php echo wp_json_encode( self::PAIRED_BROWSING_QUERY_VAR ); ?>;
+			const ampSlug = <?php echo wp_json_encode( amp_get_slug() ); ?>;
+			const ampPairedBrowsingQueryVar = <?php echo wp_json_encode( self::PAIRED_BROWSING_QUERY_VAR ); ?>;
 		</script>
-		<script src="<?php echo esc_url( amp_get_asset_url( '/js/amp-paired-browsing-app.js' ) ); ?>"></script>
+		<script src="<?php echo esc_url( amp_get_asset_url( '/js/amp-paired-browsing-app.js' ) ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript ?>"></script>
 		</body>
 		</html>
 		<?php
