@@ -11,6 +11,8 @@
  * Adapts links for AMP-to-AMP navigation in Transitional mode.
  *
  * Adapted from https://gist.github.com/westonruter/f9ee9ea717d52471bae092879e3d52b0
+ *
+ * @since 1.4.1
  */
 class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 
@@ -133,7 +135,6 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 				if ( $this->args['add_query_vars'] ) {
 					$href = add_query_arg( amp_get_slug(), '', $href );
 					$element->setAttribute( 'href', $href );
-					$element->setAttribute( 'data-href', $href );
 				}
 			}
 		}
