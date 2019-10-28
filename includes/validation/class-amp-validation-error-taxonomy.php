@@ -1662,7 +1662,7 @@ class AMP_Validation_Error_Taxonomy {
 							self::VALIDATION_ERROR_ACCEPT_ACTION
 						),
 						esc_html(
-							self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $sanitization['term_status'] ? __( 'Confirm remove', 'amp' ) : __( 'Remove', 'amp' )
+							self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $sanitization['term_status'] ? __( 'Confirm removed', 'amp' ) : __( 'Remove', 'amp' )
 						)
 					);
 				}
@@ -1674,7 +1674,7 @@ class AMP_Validation_Error_Taxonomy {
 							self::VALIDATION_ERROR_REJECT_ACTION
 						),
 						esc_html(
-							self::VALIDATION_ERROR_NEW_REJECTED_STATUS === $sanitization['term_status'] ? __( 'Confirm keep', 'amp' ) : __( 'Keep', 'amp' )
+							self::VALIDATION_ERROR_NEW_REJECTED_STATUS === $sanitization['term_status'] ? __( 'Confirm kept', 'amp' ) : __( 'Keep', 'amp' )
 						)
 					);
 				}
