@@ -1489,32 +1489,15 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test for get_single_url_page_heading()
+	 * Test for get_validated_url_title()
 	 *
-	 * @covers \AMP_Validated_URL_Post_Type::get_single_url_page_heading()
+	 * @covers \AMP_Validated_URL_Post_Type::get_validated_url_title()
 	 */
-	public function test_get_single_url_page_heading() {
-		global $post;
+	public function test_get_validated_url_title() {
 		$meta_key               = '_amp_queried_object';
 		$test_post              = self::factory()->post->create_and_get();
 		$amp_validated_url_post = self::factory()->post->create_and_get( [ 'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ] );
 
-		// If $pagenow is not post.php, this should not filter the labels.
-		$GLOBALS['pagenow'] = 'edit.php';
-		$this->assertEmpty( AMP_Validated_URL_Post_Type::get_single_url_page_heading() );
-
-		// If $pagenow is correct, but $_GET['post'] and $_GET['action'] are not set, so this should not filter the labels.
-		$GLOBALS['pagenow'] = 'post.php';
-		$this->assertEmpty( AMP_Validated_URL_Post_Type::get_single_url_page_heading() );
-
-		// Though $_GET['post'] and $_GET['action'] are now set, but the post type is 'post', so this should not filter the labels.
-		$post           = $test_post;
-		$_GET['post']   = $test_post->ID;
-		$_GET['action'] = 'edit';
-		$this->assertEmpty( AMP_Validated_URL_Post_Type::get_single_url_page_heading() );
-
-		$_GET['post'] = $amp_validated_url_post->ID;
-		$post         = $amp_validated_url_post;
 		update_post_meta(
 			$amp_validated_url_post->ID,
 			$meta_key,
@@ -1524,8 +1507,8 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 			]
 		);
 		$this->assertEquals(
-			sprintf( 'Errors for: %s', $test_post->post_title ),
-			AMP_Validated_URL_Post_Type::get_single_url_page_heading()
+			$test_post->post_title,
+			AMP_Validated_URL_Post_Type::get_validated_url_title( $amp_validated_url_post )
 		);
 
 		// If the URL with validation error(s) is a term, this should return the term name.
@@ -1539,8 +1522,8 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 			]
 		);
 		$this->assertEquals(
-			sprintf( 'Errors for: %s', $term->name ),
-			AMP_Validated_URL_Post_Type::get_single_url_page_heading()
+			$term->name,
+			AMP_Validated_URL_Post_Type::get_validated_url_title( $amp_validated_url_post )
 		);
 
 		// If the URL with validation error(s) is for a user (author), this should return the author's name.
@@ -1554,8 +1537,8 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 			]
 		);
 		$this->assertEquals(
-			sprintf( 'Errors for: %s', $user->display_name ),
-			AMP_Validated_URL_Post_Type::get_single_url_page_heading()
+			$user->display_name,
+			AMP_Validated_URL_Post_Type::get_validated_url_title( $amp_validated_url_post )
 		);
 	}
 

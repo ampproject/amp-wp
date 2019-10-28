@@ -1686,8 +1686,7 @@ class AMP_Validated_URL_Post_Type {
 		if ( $current_screen && 'post' === $current_screen->base && self::POST_TYPE_SLUG === $current_screen->post_type ) {
 			$post = get_post();
 			$data = [
-				'page_heading' => self::get_single_url_page_heading(),
-				'amp_enabled'  => self::is_amp_enabled_on_post( $post ),
+				'amp_enabled' => self::is_amp_enabled_on_post( $post ),
 			];
 
 			wp_localize_script(
@@ -1986,16 +1985,19 @@ class AMP_Validated_URL_Post_Type {
 			return;
 		}
 
+		// @todo Consider displaying self::get_validated_url_title() here as well.
+		$entity_title = self::get_validated_url_title();
 		?>
+		<?php if ( $entity_title ) : ?>
+			<h2><em><?php echo esc_html( $entity_title ); ?></em></h2>
+		<?php endif; ?>
 		<h2 class="amp-validated-url">
 			<a href="<?php echo esc_url( $url ); ?>">
 				<?php
 				printf(
-					/* translators: %s is a link dashicon, %s is the front-end URL, %s is an external dashicon %s  */
-					'%s url: %s %s',
+					'%s %s',
 					'<span class="dashicons dashicons-admin-links"></span>',
-					esc_html( $url ),
-					'<span class="dashicons dashicons-external"></span>'
+					esc_html( $url )
 				);
 				?>
 			</a>
@@ -2164,15 +2166,26 @@ class AMP_Validated_URL_Post_Type {
 			! isset( $_GET['post'], $_GET['action'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			||
 			self::POST_TYPE_SLUG !== get_post_type( $_GET['post'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		) {
+		);
+	}
+
+	/**
+	 * Gets the title for validated URL, corresponding with the title for the queried object.
+	 *
+	 * @param int|WP_Post $post Post for the validated URL.
+	 * @return string|null Title, or null if none is available.
+	 */
+	public static function get_validated_url_title( $post = null ) {
+		$name = null;
+		$post = get_post( $post );
+		if ( ! $post ) {
 			return null;
 		}
 
 		// Mainly uses the same conditionals as print_status_meta_box().
-		$post           = get_post();
 		$queried_object = get_post_meta( $post->ID, '_amp_queried_object', true );
-		$name           = __( 'Single URL', 'amp' ); // Default.
 		if ( isset( $queried_object['type'], $queried_object['id'] ) ) {
+			$name = null;
 			if ( 'post' === $queried_object['type'] && get_post( $queried_object['id'] ) ) {
 				$name = html_entity_decode( get_the_title( $queried_object['id'] ), ENT_QUOTES );
 			} elseif ( 'term' === $queried_object['type'] && get_term( $queried_object['id'] ) ) {
@@ -2182,8 +2195,7 @@ class AMP_Validated_URL_Post_Type {
 			}
 		}
 
-		/* translators: %s is the name of the page with the the validation error(s) */
-		return esc_html( sprintf( __( 'Errors for: %s', 'amp' ), $name ) );
+		return $name;
 	}
 
 	/**
