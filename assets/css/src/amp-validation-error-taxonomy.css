@@ -201,38 +201,38 @@ dl.detailed details > summary {
 }
 
 .status-text::before {
-	margin-right: 10px;
-	background-size: 20px 20px;
-	height: 20px;
-	width: 20px;
+	margin-right: 6px;
+	background-size: 16px 16px;
+	height: 16px;
+	width: 16px;
 	content: "";
-	min-width: 20px;
+	min-width: 16px;
 }
 
-.status-text.sanitized::before {
+.wp-heading-inline .status-text::before {
+	margin-right: 10px;
+	background-size: 1em 1em;
+	height: 1em;
+	width: 1em;
+	content: "";
+	min-width: 1em;
+	vertical-align: middle;
+}
+
+.status-text.amp-enabled::before {
 	background-image: url("../images/amp-logo-icon.svg");
 }
 
-.status-text.new::before {
-	background-image: url("../images/baseline-error.svg");
-}
-
-.status-text.new.new-accepted::before,
-.status-text.new.accepted::before {
-	background-image: url("../images/baseline-error-green.svg");
-}
-
-.status-text.new.new-rejected::before,
-.status-text.new.rejected::before {
-	background-image: url("../images/baseline-error-red.svg");
+.status-text.amp-disabled::before {
+	background-image: url("../images/amp-logo-gray.svg");
 }
 
 .status-text.accepted::before {
-	background-image: url("../images/baseline-check-circle-green.svg");
+	background-image: url("../images/amp-logo-green.svg");
 }
 
 .status-text.rejected::before {
-	background-image: url("../images/error-rejected.svg");
+	background-image: url("../images/amp-logo-red.svg");
 }
 
 .single-error-detail {
@@ -304,14 +304,14 @@ body.taxonomy-amp_validation_error .wp-list-table .new th.check-column input {
 	color: #a00;
 }
 
-.notice.accept-reject-error > .button.accept {
-
-	/* @todo Add green colors */
+.notice.accept-reject-error .button.accept {
+	background: #006505;
+	border-color: #006505;
 }
 
-.notice.accept-reject-error > .button.reject {
-
-	/* @todo Add red colors */
+.notice.accept-reject-error .button.reject {
+	background: #a00;
+	border-color: #a00;
 }
 
 .notice.error-details {
@@ -319,10 +319,14 @@ body.taxonomy-amp_validation_error .wp-list-table .new th.check-column input {
 }
 
 .wp-heading-inline .status-text {
-	display: inline-flex;
+	display: inline-block;
 	margin-left: 10px;
 	vertical-align: middle;
 	padding-bottom: 0;
+}
+
+.wp-heading-inline .status-text::before {
+	display: inline-block;
 }
 
 .wp-heading-inline code {
