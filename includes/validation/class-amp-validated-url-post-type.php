@@ -488,54 +488,72 @@ class AMP_Validated_URL_Post_Type {
 		$validation_errors = self::get_invalid_url_validation_errors( $post );
 		$counts            = self::count_invalid_url_validation_errors( $validation_errors );
 
+		$removed_count = ( $counts['new_accepted'] + $counts['ack_accepted'] );
+		$kept_count    = ( $counts['new_rejected'] + $counts['ack_rejected'] );
+
 		$result = [];
-		if ( $counts['new'] ) {
+
+		if ( $kept_count ) {
+			$title = '';
+			if ( $counts['new_rejected'] > 0 && $counts['ack_rejected'] > 0 ) {
+				$title = sprintf(
+					/* translators: %s is the count of new validation errors */
+					_n(
+						'%s validation error with kept markup is new',
+						'%s validation errors with kept markup are new',
+						$counts['new_rejected'],
+						'amp'
+					),
+					$counts['new_rejected']
+				);
+			}
 			$result[] = sprintf(
-				// @todo Question mark icon.
-				/* translators: 1: status. 2: count. */
-				'<span class="status-text">%1$s: %2$s</span>',
-				esc_html__( 'New invalid markup', 'amp' ),
-				number_format_i18n( $counts['new'] )
-			);
-		}
-		if ( $counts['kept'] ) {
-			$result[] = sprintf(
-				/* translators: 1: status. 2: count. */
-				'<span class="status-text rejected">%1$s: %2$s</span>',
+				'<span class="status-text rejected %s" title="%s">%s: %s</span>',
+				esc_attr( $counts['new_rejected'] > 0 ? 'has-new' : '' ),
+				esc_attr( $title ),
 				esc_html__( 'Invalid markup kept', 'amp' ),
-				number_format_i18n( $counts['kept'] )
+				number_format_i18n( $kept_count )
 			);
 		}
-		if ( $counts['removed'] ) {
+		if ( $removed_count ) {
+			$title = '';
+			if ( $counts['new_accepted'] > 0 && $counts['ack_accepted'] > 0 ) {
+				$title = sprintf(
+					/* translators: %s is the count of new validation errors */
+					_n(
+						'%s validation error with removed markup is new',
+						'%s validation errors with removed markup are new',
+						$counts['new_rejected'],
+						'amp'
+					),
+					$counts['new_accepted']
+				);
+			}
 			$result[] = sprintf(
-				/* translators: 1: status. 2: count. */
-				'<span class="status-text accepted">%1$s: %2$s</span>',
+				'<span class="status-text accepted %s" title="%s">%s: %s</span>',
+				esc_attr( $counts['new_accepted'] > 0 ? 'has-new' : '' ),
+				esc_attr( $title ),
 				esc_html__( 'Invalid markup removed', 'amp' ),
-				number_format_i18n( $counts['removed'] )
+				number_format_i18n( $removed_count )
 			);
 		}
 
 		echo implode( '', $result ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
-		printf( '<input class="amp-validation-error-new" type="hidden" value="%d">', (int) ( $counts['new'] > 0 ) );
+		printf( '<input class="amp-validation-error-new" type="hidden" value="%d">', (int) ( $counts['new_accepted'] + $counts['new_rejected'] > 0 ) );
 
 		$is_amp_enabled = self::is_amp_enabled_on_post( $post );
-		$class          = $is_amp_enabled ? 'sanitized' : 'new';
+		$class          = $is_amp_enabled ? 'amp-enabled' : 'amp-disabled';
 		?>
-		<span id="amp-enabled-icon" class="status-text <?php echo esc_attr( $class ); ?>">
+		<strong id="amp-enabled-icon" class="status-text <?php echo esc_attr( $class ); ?>">
 			<?php
 			if ( $is_amp_enabled ) {
-				// @todo Blue icon.
-				esc_html_e( 'AMP Enabled', 'amp' );
-			} elseif ( amp_is_canonical() ) {
-				// @todo Orange icon, because standard mode.
-				esc_html_e( 'AMP Disabled', 'amp' );
+				esc_html_e( 'AMP enabled', 'amp' );
 			} else {
-				// @todo Gray icon, because transitional mode.
-				esc_html_e( 'AMP Disabled', 'amp' );
+				esc_html_e( 'AMP disabled', 'amp' );
 			}
 			?>
-		</span>
+		</strong>
 		<?php
 	}
 
@@ -2294,7 +2312,7 @@ class AMP_Validated_URL_Post_Type {
 
 		$validation_errors = self::get_invalid_url_validation_errors( $post );
 		$counts            = self::count_invalid_url_validation_errors( $validation_errors );
-		return ! $counts['kept'];
+		return 0 === ( $counts['new_rejected'] + $counts['ack_rejected'] );
 	}
 
 	/**
@@ -2306,17 +2324,23 @@ class AMP_Validated_URL_Post_Type {
 	 */
 	protected static function count_invalid_url_validation_errors( $validation_errors ) {
 		$counts = array_fill_keys(
-			[ 'new', 'removed', 'kept' ],
+			[ 'new_accepted', 'ack_accepted', 'new_rejected', 'ack_rejected' ],
 			0
 		);
 		foreach ( $validation_errors as $error ) {
-			if ( ! ( $error['term']->term_group & AMP_Validation_Error_Taxonomy::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK ) ) {
-				$counts['new']++;
-			}
-			if ( $error['term']->term_group & AMP_Validation_Error_Taxonomy::ACCEPTED_VALIDATION_ERROR_BIT_MASK ) {
-				$counts['removed']++;
-			} else {
-				$counts['kept']++;
+			switch ( $error['term']->term_group ) {
+				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS:
+					$counts['new_rejected']++;
+					break;
+				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS:
+					$counts['new_accepted']++;
+					break;
+				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS:
+					$counts['ack_accepted']++;
+					break;
+				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS:
+					$counts['ack_rejected']++;
+					break;
 			}
 		}
 		return $counts;

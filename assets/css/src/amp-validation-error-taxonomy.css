@@ -209,20 +209,20 @@ dl.detailed details > summary {
 	min-width: 20px;
 }
 
-.status-text.sanitized::before {
+.status-text.amp-enabled::before {
 	background-image: url("../images/amp-logo-icon.svg");
 }
 
-.status-text.new::before {
-	background-image: url("../images/baseline-error.svg");
+.status-text.amp-disabled::before {
+	background-image: url("../images/amp-logo-gray.svg");
 }
 
 .status-text.accepted::before {
-	background-image: url("../images/baseline-check-circle-green.svg");
+	background-image: url("../images/amp-logo-green.svg");
 }
 
 .status-text.rejected::before {
-	background-image: url("../images/error-rejected.svg");
+	background-image: url("../images/amp-logo-red.svg");
 }
 
 .single-error-detail {

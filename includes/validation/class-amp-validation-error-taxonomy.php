@@ -1845,9 +1845,9 @@ class AMP_Validation_Error_Taxonomy {
 					$status_select_name = sprintf( '%s[%s]', AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR, $term->slug );
 
 					if ( $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK ) {
-						$img_src = 'baseline-check-circle-green';
+						$img_src = 'amp-logo-green';
 					} else {
-						$img_src = 'error-rejected';
+						$img_src = 'amp-logo-red';
 					}
 
 					ob_start();
@@ -1858,10 +1858,10 @@ class AMP_Validation_Error_Taxonomy {
 							<?php esc_html_e( 'Markup Status', 'amp' ); ?>
 						</label>
 						<select class="amp-validation-error-status" id="<?php echo esc_attr( $status_select_name ); ?>" name="<?php echo esc_attr( $status_select_name ); ?>">
-							<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS ); ?>" <?php selected( $is_removed ); ?> data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/baseline-check-circle-green.svg' ) ); ?>">
+							<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS ); ?>" <?php selected( $is_removed ); ?> data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/amp-logo-green.svg' ) ); ?>">
 								<?php esc_html_e( 'Removed', 'amp' ); ?>
 							</option>
-							<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACK_REJECTED_STATUS ); ?>" <?php selected( ! $is_removed ); ?> data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/error-rejected.svg' ) ); ?>">
+							<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACK_REJECTED_STATUS ); ?>" <?php selected( ! $is_removed ); ?> data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/amp-logo-red.svg' ) ); ?>">
 								<?php esc_html_e( 'Kept', 'amp' ); ?>
 							</option>
 						</select>
