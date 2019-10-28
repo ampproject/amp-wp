@@ -50,12 +50,12 @@ class PairedBrowsingApp {
 	checkConnectedIframes() {
 		this.ampIframe.classList.toggle(
 			'disconnected',
-			! ( this.nonAmpIframe.contentWindow && this.nonAmpIframe.contentWindow.ampPairedBrowsingClient )
+			! ( this.nonAmpIframe.contentWindow && this.nonAmpIframe.contentWindow.ampPairedBrowsingClient ),
 		);
 
 		this.nonAmpIframe.classList.toggle(
 			'disconnected',
-			! ( this.ampIframe.contentWindow && this.ampIframe.contentWindow.ampPairedBrowsingClient )
+			! ( this.ampIframe.contentWindow && this.ampIframe.contentWindow.ampPairedBrowsingClient ),
 		);
 	}
 
@@ -160,7 +160,7 @@ class PairedBrowsingApp {
 					oppositeWindow.scrollTo( win.scrollX, win.scrollY );
 				}
 			},
-			{ passive: true }
+			{ passive: true },
 		);
 
 		// Make sure the opposite iframe is set to match.
@@ -181,7 +181,7 @@ class PairedBrowsingApp {
 		history.replaceState(
 			{},
 			'',
-			this.addPairedBrowsingQueryVar( this.removeAmpQueryVars( win.location ) )
+			this.addPairedBrowsingQueryVar( this.removeAmpQueryVars( win.location ) ),
 		);
 	}
 }
