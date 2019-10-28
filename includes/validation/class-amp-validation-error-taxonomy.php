@@ -1845,7 +1845,6 @@ class AMP_Validation_Error_Taxonomy {
 				$is_removed = (bool) ( $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
 
 				if ( 'post.php' === $pagenow ) {
-					// @todo The status query var now is exclusively for changing the ACCEPTED bit.
 					$status_select_name = sprintf( '%s[%s]', AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR, $term->slug );
 
 					if ( $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK ) {

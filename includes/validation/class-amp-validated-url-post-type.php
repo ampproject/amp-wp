@@ -1311,25 +1311,27 @@ class AMP_Validated_URL_Post_Type {
 			);
 		}
 
-		$count = isset( $_GET['amp_taxonomy_terms_updated'] ) ? (int) $_GET['amp_taxonomy_terms_updated'] : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$class = 'updated';
-		printf(
-			'<div class="notice is-dismissible %s"><p>%s</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">%s</span></button></div>',
-			esc_attr( $class ),
-			esc_html(
-				sprintf(
-					/* translators: %s is count of validation errors updated */
-					_n(
-						'Updated %s validation error.',
-						'Updated %s validation errors.',
-						$count,
-						'amp'
-					),
-					number_format_i18n( $count )
-				)
-			),
-			esc_html__( 'Dismiss this notice.', 'amp' )
-		);
+		if ( isset( $_GET['amp_taxonomy_terms_updated'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$count = (int) $_GET['amp_taxonomy_terms_updated']; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$class = 'updated';
+			printf(
+				'<div class="notice is-dismissible %s"><p>%s</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">%s</span></button></div>',
+				esc_attr( $class ),
+				esc_html(
+					sprintf(
+						/* translators: %s is count of validation errors updated */
+						_n(
+							'Updated %s validation error.',
+							'Updated %s validation errors.',
+							$count,
+							'amp'
+						),
+						number_format_i18n( $count )
+					)
+				),
+				esc_html__( 'Dismiss this notice.', 'amp' )
+			);
+		}
 
 		/**
 		 * Adds notices to the single error page.
@@ -1983,7 +1985,7 @@ class AMP_Validated_URL_Post_Type {
 			return;
 		}
 
-		// @todo Consider displaying self::get_validated_url_title() here as well.
+		// @todo For URLs without a queried object, this should eventually be augmented to indicate the query type (e.g. Homepage, Search Results, Date Archive, etc)
 		$entity_title = self::get_validated_url_title();
 		?>
 		<?php if ( $entity_title ) : ?>
@@ -1991,13 +1993,8 @@ class AMP_Validated_URL_Post_Type {
 		<?php endif; ?>
 		<h2 class="amp-validated-url">
 			<a href="<?php echo esc_url( $url ); ?>">
-				<?php
-				printf(
-					'%s %s',
-					'<span class="dashicons dashicons-admin-links"></span>',
-					esc_html( $url )
-				);
-				?>
+				<span class="dashicons dashicons-admin-links"></span>
+				<?php echo esc_html( $url ); ?>
 			</a>
 		</h2>
 		<?php
