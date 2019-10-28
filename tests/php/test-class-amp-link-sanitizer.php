@@ -100,7 +100,9 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 			],
 		];
 
-		$html = '';
+		$admin_bar_link_href = home_url( '/?do_something' );
+
+		$html = sprintf( '<div id="wpadminbar"><a id="admin-bar-link" href="%s"></a></div>', esc_url( $admin_bar_link_href ) );
 		foreach ( $links as $id => $link_data ) {
 			$html .= sprintf( '<a id="%s" href="%s"', esc_attr( $id ), esc_attr( $link_data['href'] ) );
 			if ( isset( $link_data['rel'] ) ) {
@@ -108,21 +110,21 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 			}
 			$html .= '>Link</a>';
 		}
+		$html .= sprintf( '<form id="internal-search" action="%s" method="get"><input name="s" type="search"></form>', esc_url( home_url( '/' ) ) );
+		$html .= sprintf( '<form id="internal-post" action="%s" method="post"><input name="content" type="text"></form>', esc_url( home_url( '/' ) ) );
+		$html .= '<form id="external-search" action="https://search.example.com/" method="get"><input name="s" type="search"></form>';
 
-		$post = self::factory()->post->create_and_get(
-			[
-				'post_name'    => 'some-post',
-				'post_status'  => 'publish',
-				'post_type'    => 'post',
-				'post_content' => $html,
-			]
-		);
-
-		$dom = AMP_DOM_Utils::get_dom_from_content( $post->post_content );
+		$dom = AMP_DOM_Utils::get_dom_from_content( $html );
 
 		$sanitizer = new AMP_Link_Sanitizer( $dom, compact( 'paired' ) );
 		$sanitizer->sanitize();
 
+		// Confirm admin bar is unchanged.
+		$admin_bar_link = $dom->getElementById( 'admin-bar-link' );
+		$this->assertFalse( $admin_bar_link->hasAttribute( 'rel' ) );
+		$this->assertEquals( $admin_bar_link_href, $admin_bar_link->getAttribute( 'href' ) );
+
+		// Check content links.
 		foreach ( $links as $id => $link_data ) {
 			$element = $dom->getElementById( $id );
 			$this->assertInstanceOf( 'DOMElement', $element, "ID: $id" );
@@ -138,6 +140,12 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 				$this->assertNotContains( '?' . amp_get_slug(), $element->getAttribute( 'href' ) );
 			}
 		}
+
+		// Confirm changes to form.
+		$xpath = new DOMXPath( $dom );
+		$this->assertEquals( 1, $xpath->query( '//form[ @id = "internal-search" ]//input[ @name = "amp" ]' )->length );
+		$this->assertEquals( 0, $xpath->query( '//form[ @id = "internal-post" ]//input[ @name = "amp" ]' )->length );
+		$this->assertEquals( 0, $xpath->query( '//form[ @id = "external-search" ]//input[ @name = "amp" ]' )->length );
 	}
 
 	/**

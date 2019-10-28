@@ -8,11 +8,17 @@
 /**
  * Class AMP_Link_Sanitizer
  *
- * Adapts links for AMP-to-AMP navigation in Transitional mode.
+ * Adapts links for AMP-to-AMP navigation:
+ *  - In paired AMP (Transitional and Reader modes), internal links get '?amp' added to them.
+ *  - Internal links on AMP pages get rel=amphtml added to them.
+ *  - Forms with internal actions get a hidden 'amp' input added to them.
+ *  - AMP pages get meta[amp-to-amp-navigation] added to them.
+ *  - Any elements in the admin bar are excluded.
  *
  * Adapted from https://gist.github.com/westonruter/f9ee9ea717d52471bae092879e3d52b0
  *
- * @since 1.4.1
+ * @link https://github.com/ampproject/amphtml/issues/12496
+ * @since 1.4.0
  */
 class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 
