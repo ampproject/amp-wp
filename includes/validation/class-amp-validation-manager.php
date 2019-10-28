@@ -504,7 +504,7 @@ class AMP_Validation_Manager {
 			$wp_admin_bar->add_node( $link_item );
 		}
 
-		if ( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Theme_Support::get_support_mode() || AMP_Theme_Support::is_paired_available() ) {
+		if ( AMP_Theme_Support::is_paired_available() ) {
 			$wp_admin_bar->add_node( $paired_browsing_item );
 		}
 
