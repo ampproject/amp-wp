@@ -1661,7 +1661,9 @@ class AMP_Validation_Error_Taxonomy {
 							add_query_arg( array_merge( [ 'action' => self::VALIDATION_ERROR_ACCEPT_ACTION ], compact( 'term_id' ) ) ),
 							self::VALIDATION_ERROR_ACCEPT_ACTION
 						),
-						esc_html__( 'Remove', 'amp' )
+						esc_html(
+							self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $sanitization['term_status'] ? __( 'Confirm remove', 'amp' ) : __( 'Remove', 'amp' )
+						)
 					);
 				}
 				if ( self::VALIDATION_ERROR_ACK_REJECTED_STATUS !== $sanitization['status'] ) {
@@ -1671,7 +1673,9 @@ class AMP_Validation_Error_Taxonomy {
 							add_query_arg( array_merge( [ 'action' => self::VALIDATION_ERROR_REJECT_ACTION ], compact( 'term_id' ) ) ),
 							self::VALIDATION_ERROR_REJECT_ACTION
 						),
-						esc_html__( 'Keep', 'amp' )
+						esc_html(
+							self::VALIDATION_ERROR_NEW_REJECTED_STATUS === $sanitization['term_status'] ? __( 'Confirm keep', 'amp' ) : __( 'Keep', 'amp' )
+						)
 					);
 				}
 			}

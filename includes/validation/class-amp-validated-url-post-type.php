@@ -1378,7 +1378,9 @@ class AMP_Validated_URL_Post_Type {
 					$buttons .= sprintf(
 						' <a class="button button-primary accept" href="%s">%s</a> ',
 						esc_url( $accept_all_url ),
-						esc_html__( 'Remove', 'amp' )
+						esc_html(
+							AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $sanitization['term_status'] ? __( 'Confirm remove', 'amp' ) : __( 'Remove', 'amp' )
+						)
 					);
 				}
 				if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS !== $sanitization['term_status'] ) {
@@ -1390,7 +1392,9 @@ class AMP_Validated_URL_Post_Type {
 					$buttons .= sprintf(
 						' <a class="button button-primary reject" href="%s">%s</a> ',
 						esc_url( $reject_all_url ),
-						esc_html__( 'Keep', 'amp' )
+						esc_html(
+							AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS === $sanitization['term_status'] ? __( 'Confirm keep', 'amp' ) : __( 'Keep', 'amp' )
+						)
 					);
 				}
 

@@ -1006,7 +1006,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		$this->assertContains( strval( $term_this_taxonomy->term_id ), $reject_action );
 		$this->assertContains( strval( $term_this_taxonomy->term_id ), $accept_action );
 		$this->assertContains( 'Keep', $reject_action );
-		$this->assertContains( 'Remove', $accept_action );
+		$this->assertContains( 'Confirm remove', $accept_action );
 	}
 
 	/**
