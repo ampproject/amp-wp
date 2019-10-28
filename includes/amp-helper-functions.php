@@ -885,16 +885,19 @@ function amp_get_content_sanitizers( $post = null ) {
 		$current_origin .= ':' . $parsed_home_url['port'];
 	}
 
-	/**
-	 * Filters whether AMP-to-AMP linking should be enabled.
-	 *
-	 * @since 1.4.0
-	 * @param bool $amp_to_amp_linking_enabled Whether AMP-to-AMP linking should be enabled.
-	 */
-	$amp_to_amp_linking_enabled = (bool) apply_filters(
-		'amp_to_amp_linking_enabled',
-		AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Theme_Support::get_support_mode()
-	);
+	$amp_to_amp_linking_enabled = false;
+	if ( AMP_Options_Manager::is_website_experience_enabled() ) {
+		/**
+		 * Filters whether AMP-to-AMP linking should be enabled.
+		 *
+		 * @since 1.4.0
+		 * @param bool $amp_to_amp_linking_enabled Whether AMP-to-AMP linking should be enabled.
+		 */
+		$amp_to_amp_linking_enabled = (bool) apply_filters(
+			'amp_to_amp_linking_enabled',
+			AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Theme_Support::get_support_mode()
+		);
+	}
 
 	$sanitizers = [
 		'AMP_Core_Theme_Sanitizer'        => [
