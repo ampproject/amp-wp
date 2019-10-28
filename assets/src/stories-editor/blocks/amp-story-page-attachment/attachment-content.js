@@ -139,7 +139,7 @@ const AttachmentContent = ( props ) => {
 					<RichText
 						value={ title }
 						tagName="div"
-						wrapperClassName="amp-story-page-attachment-title"
+						className="amp-story-page-attachment-title"
 						onChange={ ( value ) => setAttributes( { title: value } ) }
 						placeholder={ __( 'Write Title', 'amp' ) }
 						onClick={ ( event ) => event.stopPropagation() }
