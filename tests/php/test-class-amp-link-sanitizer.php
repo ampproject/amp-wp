@@ -10,23 +10,27 @@
  */
 class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 
+	/**
+	 * Data for test_amp_to_amp_navigation.
+	 *
+	 * @return array
+	 */
 	public function get_amp_to_amp_navigation_data() {
 		return [
-			[
-				[ 'add_query_vars' => true ],
-				[ true, true, false, false, false, false, false ],
-			],
-			[
-				[ 'add_query_vars' => false ],
-				[ false, false, false, false, false, false, false ],
-			],
+			[ true ],
+			[ false ],
 		];
 	}
 
 	/**
+	 * Test adding links.
+	 *
 	 * @dataProvider get_amp_to_amp_navigation_data
+	 * @covers AMP_Link_Sanitizer::process_links()
+	 *
+	 * @param bool $paired Paired.
 	 */
-	public function test_amp_to_amp_navigation( $args_array, $expected_array ) {
+	public function test_amp_to_amp_navigation( $paired ) {
 		// Enable pretty permalinks to keep the AMP slug as the only query var.
 		global $wp_rewrite;
 		update_option( 'permalink_structure', '/%postname%/' );
@@ -42,156 +46,144 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 			]
 		);
 
+		$links = [
+			'home-link'         => [
+				'href'         => home_url( '/' ),
+				'expected_amp' => true,
+				'expected_rel' => 'amphtml',
+			],
+			'internal-link'     => [
+				'href'         => get_permalink( $post_to_link_to ),
+				'expected_amp' => true,
+				'expected_rel' => 'amphtml',
+			],
+			'ugc-link'          => [
+				'rel'          => 'ugc',
+				'href'         => home_url( '/some/user/generated/data/' ),
+				'expected_amp' => true,
+				'expected_rel' => 'ugc amphtml',
+			],
+			'page-anchor'       => [
+				'href'         => '#top',
+				'expected_amp' => false,
+				'expected_rel' => null,
+			],
+			'other-page-anchor' => [
+				'href'         => get_permalink( $post_to_link_to ) . '#top',
+				'expected_amp' => true,
+				'expected_rel' => 'amphtml',
+			],
+			'external-link'     => [
+				'href'         => 'https://external.example.com/',
+				'expected_amp' => false,
+				'expected_rel' => null,
+			],
+			'php-file-link'     => [
+				'href'         => site_url( '/wp-login.php' ),
+				'expected_amp' => false,
+				'expected_rel' => null,
+			],
+			'feed-link'         => [
+				'href'         => get_feed_link(),
+				'expected_amp' => false,
+				'expected_rel' => null,
+			],
+			'admin-link'        => [
+				'href'         => admin_url( 'options-general.php?page=some-plugin' ),
+				'expected_amp' => false,
+				'expected_rel' => null,
+			],
+			'image-link'        => [
+				'href'         => content_url( '/some-image.jpg' ),
+				'expected_amp' => false,
+				'expected_rel' => null,
+			],
+		];
+
+		$html = '';
+		foreach ( $links as $id => $link_data ) {
+			$html .= sprintf( '<a id="%s" href="%s"', esc_attr( $id ), esc_attr( $link_data['href'] ) );
+			if ( isset( $link_data['rel'] ) ) {
+				$html .= sprintf( ' rel="%s"', esc_attr( $link_data['rel'] ) );
+			}
+			$html .= '>Link</a>';
+		}
+
 		$post = self::factory()->post->create_and_get(
 			[
 				'post_name'    => 'some-post',
 				'post_status'  => 'publish',
 				'post_type'    => 'post',
-				'post_content' => sprintf(
-					'
-						<a id="home-link" href="%s">Home Link</a>
-						<a id="internal-link" href="%s">Internal Link</a>
-						<a id="external-link" href="%s">External Link</a>
-						<a id="php-file-link" href="%s">PHP File Link</a>
-						<a id="feed-link" href="%s">Feed Link</a>
-						<a id="admin-link" href="%s">Admin Link</a>
-						<a id="image-link" href="%s">Image Link</a>
-					',
-					home_url(),
-					get_permalink( $post_to_link_to ),
-					'https://example.com',
-					site_url( '/wp-login.php' ),
-					get_feed_link(),
-					admin_url( 'options-general.php?page=some-plugin' ),
-					content_url( '/some-image.jpg' )
-				),
+				'post_content' => $html,
 			]
 		);
 
-		$amp_slug = amp_get_slug();
-		$dom      = AMP_DOM_Utils::get_dom_from_content( $post->post_content );
-		$xpath    = new DOMXPath( $dom );
+		$dom = AMP_DOM_Utils::get_dom_from_content( $post->post_content );
 
-		$sanitizer = new AMP_Link_Sanitizer( $dom, $args_array );
+		$sanitizer = new AMP_Link_Sanitizer( $dom, compact( 'paired' ) );
 		$sanitizer->sanitize();
 
-		foreach ( [ 'home-link', 'internal-link', 'external-link', 'php-file-link', 'feed-link', 'admin-link', 'image-link' ] as $id ) {
-			$link      = $xpath->query( "//*[ @id = '{$id}' ]" )->item( 0 );
-			$url       = $link->getAttribute( 'href' );
-			$expected  = array_shift( $expected_array );
-			$assertion = $expected ? 'assertStringEndsWith' : 'assertStringEndsNotWith';
-			$this->$assertion( "?{$amp_slug}", $url );
+		foreach ( $links as $id => $link_data ) {
+			$element = $dom->getElementById( $id );
+			$this->assertInstanceOf( 'DOMElement', $element, "ID: $id" );
+			if ( empty( $link_data['expected_rel'] ) ) {
+				$this->assertFalse( $element->hasAttribute( 'rel' ) );
+			} else {
+				$this->assertEquals( $link_data['expected_rel'], $element->getAttribute( 'rel' ) );
+			}
+
+			if ( $paired && $link_data['expected_amp'] ) {
+				$this->assertContains( '?' . amp_get_slug(), $element->getAttribute( 'href' ) );
+			} elseif ( ! $paired || ! $link_data['expected_amp'] ) {
+				$this->assertNotContains( '?' . amp_get_slug(), $element->getAttribute( 'href' ) );
+			}
 		}
 	}
 
-	public function get_amp_to_amp_meta_tag_data() {
+	/**
+	 * Get data for test_amp_to_amp_meta_tag.
+	 *
+	 * @return array
+	 */
+	public function get_test_amp_to_amp_meta_tag_data() {
 		return [
-			[
-				[
-					'has_theme_support' => false,
-					'add_a2a_meta'      => AMP_Link_Sanitizer::DEFAULT_A2A_META_CONTENT,
-				],
-				false,
+			'default' => [
+				[],
+				AMP_Link_Sanitizer::DEFAULT_META_CONTENT,
 			],
-			[
+			'custom'  => [
 				[
-					'has_theme_support' => true,
-					'add_a2a_meta'      => AMP_Link_Sanitizer::DEFAULT_A2A_META_CONTENT,
+					'meta_content' => 'AMP-Redirect-To',
 				],
-				true,
-			],
-			[
-				[
-					'has_theme_support' => false,
-					'add_a2a_meta'      => false,
-				],
-				false,
-			],
-			[
-				[
-					'has_theme_support' => true,
-					'add_a2a_meta'      => false,
-				],
-				false,
+				'AMP-Redirect-To',
 			],
 		];
 	}
 
 	/**
-	 * @dataProvider get_amp_to_amp_meta_tag_data
+	 * Test adding amp-to-amp-navigation meta tag.
+	 *
+	 * @dataProvider get_test_amp_to_amp_meta_tag_data
+	 * @param array  $sanitizer_args Sanitizer args.
+	 * @param string $expected_meta Expected meta content.
 	 */
-	public function test_amp_to_amp_meta_tag( $args_array, $expected ) {
+	public function test_amp_to_amp_meta_tag( $sanitizer_args, $expected_meta ) {
 		$dom   = AMP_DOM_Utils::get_dom_from_content( '<div>Hello</div>' );
 		$xpath = new DOMXPath( $dom );
 
-		$sanitizer = new AMP_Link_Sanitizer( $dom, $args_array );
+		$sanitizer = new AMP_Link_Sanitizer( $dom, $sanitizer_args );
 		$sanitizer->sanitize();
 
 		$meta_tag = $xpath->query( "//meta[ @name = 'amp-to-amp-navigation' ]" )->item( 0 );
-		$this->assertEquals( $expected, $meta_tag instanceof DOMElement );
-	}
-
-	public function get_amp_to_amp_rel_attribute_data() {
-		return [
-			[
-				[
-					'add_amphtml_rel' => true,
-					'add_query_vars'  => true,
-				],
-				true,
-				true,
-			],
-			[
-				[
-					'add_amphtml_rel' => false,
-					'add_query_vars'  => true,
-				],
-				true,
-				false,
-			],
-			[
-				[
-					'add_amphtml_rel' => true,
-					'add_query_vars'  => false,
-				],
-				false,
-				true,
-			],
-			[
-				[
-					'add_amphtml_rel' => false,
-					'add_query_vars'  => false,
-				],
-				false,
-				false,
-			],
-		];
+		$this->assertInstanceOf( 'DOMElement', $meta_tag );
+		$this->assertEquals( $expected_meta, $meta_tag->getAttribute( 'content' ) );
 	}
 
 	/**
-	 * @dataProvider get_amp_to_amp_rel_attribute_data
+	 * Get data for test_amp_to_amp_linking_enabled.
+	 *
+	 * @return array
 	 */
-	public function test_amp_to_amp_rel_attribute( $args_array, $expected_slug, $expected_rel ) {
-		$content = sprintf( '<a id="home-link" href="%s">Home Link</a>', home_url() );
-
-		$amp_slug = amp_get_slug();
-		$dom      = AMP_DOM_Utils::get_dom_from_content( $content );
-		$xpath    = new DOMXPath( $dom );
-
-		$sanitizer = new AMP_Link_Sanitizer( $dom, $args_array );
-		$sanitizer->sanitize();
-
-		$link      = $xpath->query( "//*[ @id = 'home-link' ]" )->item( 0 );
-		$url       = $link->getAttribute( 'href' );
-		$assertion = $expected_slug ? 'assertStringEndsWith' : 'assertStringEndsNotWith';
-		$this->$assertion( "?{$amp_slug}", $url );
-
-		$this->assertEquals( $expected_rel, $link->hasAttribute( 'rel' ) );
-		if ( $expected_rel ) {
-			$this->assertStringEndsWith( 'amphtml', $link->getAttribute( 'rel' ) );
-		}
-	}
-
 	public function get_test_amp_to_amp_linking_enabled() {
 		return [
 			[ '__return_true', true ],
@@ -200,13 +192,21 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test the 'amp_to_amp_linking_enabled filter.
+	 *
 	 * @dataProvider get_test_amp_to_amp_linking_enabled
+	 * @covers ::amp_get_content_sanitizers()
+	 *
+	 * @param callable $filter   Filter.
+	 * @param bool     $expected Whether to expect the sanitizer to be present.
 	 */
-	public function test_amp_to_amp_linking_enabled_true( $filter, $expected ) {
+	public function test_amp_to_amp_linking_enabled( $filter, $expected ) {
 		add_filter( 'amp_to_amp_linking_enabled', $filter );
 		$sanitizers = amp_get_content_sanitizers();
-		$this->assertArrayHasKey( 'AMP_Link_Sanitizer', $sanitizers );
-		$this->assertArrayHasKey( 'add_query_vars', $sanitizers['AMP_Link_Sanitizer'] );
-		$this->assertEquals( $expected, $sanitizers['AMP_Link_Sanitizer']['add_query_vars'] );
+		if ( $expected ) {
+			$this->assertArrayHasKey( 'AMP_Link_Sanitizer', $sanitizers );
+		} else {
+			$this->assertArrayNotHasKey( 'AMP_Link_Sanitizer', $sanitizers );
+		}
 	}
 }

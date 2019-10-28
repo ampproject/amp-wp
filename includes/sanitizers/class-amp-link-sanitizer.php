@@ -21,7 +21,7 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @var string
 	 */
-	const DEFAULT_A2A_META_CONTENT = 'AMP-Redirect-To; AMP.navigateTo';
+	const DEFAULT_META_CONTENT = 'AMP-Redirect-To; AMP.navigateTo';
 
 	/**
 	 * Placeholder for default args, to be set in child classes.
@@ -29,10 +29,8 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	protected $DEFAULT_ARGS = [ // phpcs:ignore WordPress.NamingConventions.ValidVariableName.PropertyNotSnakeCase
-		'add_amphtml_rel'   => true,
-		'add_query_vars'    => false, // Only set to true when in Transitional mode.
-		'has_theme_support' => false, // Set to true when theme has 'amp' support. Overridden in \AMP_To_AMP\filter_content_sanitizers().
-		'add_a2a_meta'      => self::DEFAULT_A2A_META_CONTENT, // Only relevant when theme support is present.
+		'paired'       => false, // Only set to true when in a paired mode (will be false when amp_is_canonical()). Controls whether query var is added.
+		'meta_content' => self::DEFAULT_META_CONTENT,
 	];
 
 	/**
@@ -63,6 +61,10 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param array       $args Args.
 	 */
 	public function __construct( DOMDocument $dom, array $args = [] ) {
+		if ( ! isset( $args['meta_content'] ) ) {
+			$args['meta_content'] = self::DEFAULT_META_CONTENT;
+		}
+
 		parent::__construct( $dom, $args );
 
 		$this->home_host    = wp_parse_url( home_url(), PHP_URL_HOST );
@@ -74,8 +76,8 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 	 * Sanitize.
 	 */
 	public function sanitize() {
-		if ( $this->args['has_theme_support'] && $this->args['add_a2a_meta'] ) {
-			$this->add_a2a_meta( $this->args['add_a2a_meta'] );
+		if ( ! empty( $this->args['meta_content'] ) ) {
+			$this->add_a2a_meta( $this->args['meta_content'] );
 		}
 
 		$this->process_links();
@@ -87,7 +89,7 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string $content The content for the meta tag, for example 'AMP-Redirect-To; AMP.navigateTo'.
 	 * @return DOMElement|null The added meta element if successful.
 	 */
-	public function add_a2a_meta( $content = self::DEFAULT_A2A_META_CONTENT ) {
+	public function add_a2a_meta( $content = self::DEFAULT_META_CONTENT ) {
 		$head = $this->dom->documentElement->getElementsByTagName( 'head' )->item( 0 );
 		if ( ! $head || ! $content ) {
 			return null;
@@ -100,7 +102,7 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Process links by adding rel=amphtml and AMP query var.
+	 * Process links by adding adding AMP query var to links in paired mode and adding rel=amphtml.
 	 */
 	public function process_links() {
 		/**
@@ -126,13 +128,13 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 			$href = $element->getAttribute( 'href' );
 
 			if ( $this->is_frontend_url( $href ) && '#' !== substr( $href, 0, 1 ) ) {
-				if ( $this->args['add_amphtml_rel'] ) {
-					$rel  = $element->hasAttribute( 'rel' ) ? $element->getAttribute( 'rel' ) . ' ' : '';
-					$rel .= 'amphtml';
-					$element->setAttribute( 'rel', $rel );
-				}
+				// Always add the amphtml link relation when linking enabled.
+				$rel  = $element->hasAttribute( 'rel' ) ? $element->getAttribute( 'rel' ) . ' ' : '';
+				$rel .= 'amphtml';
+				$element->setAttribute( 'rel', $rel );
 
-				if ( $this->args['add_query_vars'] ) {
+				// Only add the AMP query var when requested (in Transitional or Reader mode).
+				if ( ! empty( $this->args['paired'] ) ) {
 					$href = add_query_arg( amp_get_slug(), '', $href );
 					$element->setAttribute( 'href', $href );
 				}

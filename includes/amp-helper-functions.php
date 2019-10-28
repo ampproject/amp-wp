@@ -888,7 +888,7 @@ function amp_get_content_sanitizers( $post = null ) {
 	/**
 	 * Filters whether AMP-to-AMP linking should be enabled.
 	 *
-	 * @since 1.4.1
+	 * @since 1.4.0
 	 * @param bool $amp_to_amp_linking_enabled Whether AMP-to-AMP linking should be enabled.
 	 */
 	$amp_to_amp_linking_enabled = (bool) apply_filters(
@@ -928,10 +928,6 @@ function amp_get_content_sanitizers( $post = null ) {
 		'AMP_Style_Sanitizer'             => [
 			'include_manifest_comment' => ( defined( 'WP_DEBUG' ) && WP_DEBUG ) ? 'always' : 'when_excessive',
 		],
-		'AMP_Link_Sanitizer'              => [
-			'add_query_vars'    => $amp_to_amp_linking_enabled,
-			'has_theme_support' => current_theme_supports( 'amp' ),
-		],
 		'AMP_Tag_And_Attribute_Sanitizer' => [], // Note: This whitelist sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
 	];
 
@@ -941,6 +937,12 @@ function amp_get_content_sanitizers( $post = null ) {
 
 	if ( ! empty( $theme_support_args['nav_menu_dropdown'] ) ) {
 		$sanitizers['AMP_Nav_Menu_Dropdown_Sanitizer'] = $theme_support_args['nav_menu_dropdown'];
+	}
+
+	if ( $amp_to_amp_linking_enabled ) {
+		$sanitizers['AMP_Link_Sanitizer'] = [
+			'paired' => ! amp_is_canonical(),
+		];
 	}
 
 	/**
