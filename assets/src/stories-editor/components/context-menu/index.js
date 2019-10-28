@@ -35,7 +35,6 @@ import useOutsideClickChecker from './outside-click-checker';
 
 const POPOVER_PROPS = {
 	className: 'amp-story-right-click-menu__popover block-editor-block-settings-menu__popover editor-block-settings-menu__popover',
-	position: 'bottom left',
 };
 
 const ContextMenu = ( props ) => {
@@ -201,9 +200,7 @@ const ContextMenu = ( props ) => {
 		left: clientX,
 	};
 
-	if ( isRTL ) {
-		POPOVER_PROPS.position = 'bottom right';
-	}
+	const POPOVER_POSITION = ( isRTL ) ? 'bottom right' : 'bottom left';
 
 	let blockActions = [];
 	const pageList = getBlockOrder();
@@ -332,7 +329,7 @@ const ContextMenu = ( props ) => {
 			{ isOpen && (
 				<Popover
 					className={ POPOVER_PROPS.className }
-					position={ POPOVER_PROPS.position }
+					position={ POPOVER_POSITION }
 					onClose={ onClose }
 					focusOnMount="firstElement"
 				>
