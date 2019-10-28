@@ -68,8 +68,7 @@ table.striped > tbody > tr.even {
 }
 
 .column-status img {
-	width: 1.5rem;
-	margin-top: 0.2rem;
+	width: 1.2rem;
 }
 
 #number-errors {
