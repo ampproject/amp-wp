@@ -294,14 +294,14 @@ body.taxonomy-amp_validation_error .wp-list-table .new th.check-column input {
 	color: #a00;
 }
 
-.notice.accept-reject-error > .button.accept {
-
-	/* @todo Add green colors */
+.notice.accept-reject-error .button.accept {
+	background: #006505;
+	border-color: #006505;
 }
 
-.notice.accept-reject-error > .button.reject {
-
-	/* @todo Add red colors */
+.notice.accept-reject-error .button.reject {
+	background: #a00;
+	border-color: #a00;
 }
 
 .notice.error-details {
