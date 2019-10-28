@@ -40,7 +40,7 @@ describe( 'Stories Editor Screen', () => {
 
 	it( 'should display media inserter icon', async () => {
 		const nodes = await page.$x(
-			'//div[@id="amp-story-media-inserter"]//button[@aria-label="Insert Media"]'
+			'//div[@id="amp-story-media-inserter"]//button[@aria-label="Insert Media"]',
 		);
 		expect( nodes ).toHaveLength( 1 );
 	} );
@@ -85,7 +85,7 @@ describe( 'Stories Editor Screen', () => {
 		await openMediaInserter();
 
 		const nodes = await page.$x(
-			`//button[contains(text(), 'Update Background Image')]`
+			`//button[contains(text(), 'Update Background Image')]`,
 		);
 		expect( nodes ).toHaveLength( 1 );
 	} );
@@ -146,7 +146,7 @@ describe( 'Stories Editor Screen', () => {
 
 	it( 'should dropdown title should change after sidebar upload', async () => {
 		await selectBlockByClientId(
-			( await getAllBlocks() )[ 0 ].clientId
+			( await getAllBlocks() )[ 0 ].clientId,
 		);
 		// Click the media selection button.
 		await page.waitForSelector( '.editor-amp-story-page-background' );
@@ -161,7 +161,7 @@ describe( 'Stories Editor Screen', () => {
 		// Click the media selection button.
 		await openMediaInserter();
 		const nodes = await page.$x(
-			`//button[contains(text(), 'Update Background Image')]`
+			`//button[contains(text(), 'Update Background Image')]`,
 		);
 		expect( nodes ).toHaveLength( 1 );
 	} );

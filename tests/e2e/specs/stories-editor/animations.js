@@ -183,7 +183,7 @@ describe( 'Story Animations', () => {
 
 		// Select page block.
 		await selectBlockByClientId(
-			( await getAllBlocks() )[ 0 ].clientId
+			( await getAllBlocks() )[ 0 ].clientId,
 		);
 
 		await expect( page ).not.toMatch( 'Play 0 Animations' );
@@ -203,7 +203,7 @@ describe( 'Story Animations', () => {
 
 		// Select page block.
 		await selectBlockByClientId(
-			( await getAllBlocks() )[ 0 ].clientId
+			( await getAllBlocks() )[ 0 ].clientId,
 		);
 
 		await clickButton( 'Play 2 Animations' );

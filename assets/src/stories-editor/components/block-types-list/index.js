@@ -46,7 +46,7 @@ function BlockTypesList( { items, onSelect, onHover = () => {}, children } ) {
 					onBlur={ () => onHover( null ) }
 					isDisabled={ item.isDisabled }
 					title={ item.title }
-				/>
+				/>,
 			) }
 			{ children }
 		</ul>

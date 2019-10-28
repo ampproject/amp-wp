@@ -31,7 +31,7 @@ function CopyPasteHandler( { children, onCopy, clientId, isSelected } ) {
 				blocksOnPage: getBlockOrder( clientId ),
 			};
 		},
-		[ clientId ]
+		[ clientId ],
 	);
 
 	const { insertBlock } = useDispatch( 'core/block-editor' );

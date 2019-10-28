@@ -28,7 +28,7 @@ const getBlockOrderDescription = ( type, currentPosition, newPosition, isFirst, 
 			__( 'Move %1$s block from position %2$d down to position %3$d', 'amp' ),
 			type,
 			currentPosition,
-			newPosition
+			newPosition,
 		);
 	}
 
@@ -45,7 +45,7 @@ const getBlockOrderDescription = ( type, currentPosition, newPosition, isFirst, 
 			__( 'Move %1$s block from position %2$d up to position %3$d', 'amp' ),
 			type,
 			currentPosition,
-			newPosition
+			newPosition,
 		);
 	}
 
