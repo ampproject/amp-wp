@@ -537,24 +537,16 @@ class AMP_Validated_URL_Post_Type {
 				number_format_i18n( $removed_count )
 			);
 		}
+		if ( 0 === $removed_count && 0 === $kept_count ) {
+			$result[] = sprintf(
+				'<span class="status-text accepted">%s</span>',
+				esc_html__( 'All markup valid', 'amp' )
+			);
+		}
 
 		echo implode( '', $result ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
 		printf( '<input class="amp-validation-error-new" type="hidden" value="%d">', (int) ( $counts['new_accepted'] + $counts['new_rejected'] > 0 ) );
-
-		$is_amp_enabled = self::is_amp_enabled_on_post( $post );
-		$class          = $is_amp_enabled ? 'amp-enabled' : 'amp-disabled';
-		?>
-		<strong id="amp-enabled-icon" class="status-text <?php echo esc_attr( $class ); ?>">
-			<?php
-			if ( $is_amp_enabled ) {
-				esc_html_e( 'AMP enabled', 'amp' );
-			} else {
-				esc_html_e( 'AMP disabled', 'amp' );
-			}
-			?>
-		</strong>
-		<?php
 	}
 
 	/**
@@ -897,7 +889,7 @@ class AMP_Validated_URL_Post_Type {
 			[
 				AMP_Validation_Error_Taxonomy::ERROR_STATUS => sprintf(
 					'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="%s"></div>',
-					esc_html__( 'Status', 'amp' ),
+					esc_html__( 'Markup Status', 'amp' ),
 					esc_attr(
 						sprintf(
 							'<h3>%s</h3><p>%s</p>',
@@ -1801,6 +1793,26 @@ class AMP_Validated_URL_Post_Type {
 						}
 						?>
 						<?php self::display_invalid_url_validation_error_counts_summary( $post ); ?>
+
+						<?php
+						$is_amp_enabled = self::is_amp_enabled_on_post( $post );
+						$counts         = self::count_invalid_url_validation_errors( self::get_invalid_url_validation_errors( $post ) );
+						$class          = $is_amp_enabled ? 'amp-enabled' : 'amp-disabled';
+						?>
+						<strong id="amp-enabled-icon" class="status-text <?php echo esc_attr( $class ); ?>">
+							<?php
+							if ( $is_amp_enabled ) {
+								esc_html_e( 'AMP enabled', 'amp' );
+							} else {
+								esc_html_e( 'AMP disabled', 'amp' );
+							}
+							?>
+						</strong>
+						<?php if ( $is_amp_enabled && count( array_filter( $counts ) ) > 0 ) : ?>
+							<?php esc_html_e( 'AMP is enabled because no invalid markup is kept.', 'amp' ); ?>
+						<?php elseif ( ! $is_amp_enabled ) : ?>
+							<?php esc_html_e( 'AMP is disabled because there is invalid markup kept. To unblock AMP from being served, either mark the invalid markup as removed or fix the code that adds the invalid markup.', 'amp' ); ?>
+						<?php endif; ?>
 					</div>
 
 					<div class="misc-pub-section">
