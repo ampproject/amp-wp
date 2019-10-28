@@ -161,6 +161,20 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$this->assertEmpty( AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( get_permalink( $post ) ) );
 
 		add_filter(
+			'amp_validation_error_default_sanitized',
+			static function( $sanitized, $error ) {
+				if ( 'new accepted' === $error['code'] ) {
+					$sanitized = true;
+				} elseif ( 'new rejected' === $error['code'] ) {
+					$sanitized = false;
+				}
+				return $sanitized;
+			},
+			10,
+			2
+		);
+
+		add_filter(
 			'amp_validation_error_sanitized',
 			static function( $sanitized, $error ) {
 				if ( 'accepted' === $error['code'] ) {
@@ -178,14 +192,15 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 			[
 				[ 'code' => 'accepted' ],
 				[ 'code' => 'rejected' ],
-				[ 'code' => 'new' ],
+				[ 'code' => 'new accepted' ],
+				[ 'code' => 'new rejected' ],
 			],
 			get_permalink( $post )
 		);
 		$this->assertNotInstanceOf( 'WP_Error', $invalid_url_post_id );
 
 		$errors = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( get_permalink( $post ) );
-		$this->assertCount( 3, $errors );
+		$this->assertCount( 4, $errors );
 
 		$error = array_shift( $errors );
 		$this->assertEquals( 'accepted', $error['data']['code'] );
@@ -194,7 +209,10 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$this->assertEquals( 'rejected', $error['data']['code'] );
 		$this->assertEquals( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS, $error['term_status'] );
 		$error = array_shift( $errors );
-		$this->assertEquals( 'new', $error['data']['code'] );
+		$this->assertEquals( 'new accepted', $error['data']['code'] );
+		$this->assertEquals( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS, $error['term_status'] );
+		$error = array_shift( $errors );
+		$this->assertEquals( 'new rejected', $error['data']['code'] );
 		$this->assertEquals( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS, $error['term_status'] );
 
 		$errors = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( get_permalink( $post ), [ 'ignore_accepted' => true ] );
@@ -203,13 +221,12 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$this->assertEquals( 'rejected', $error['data']['code'] );
 		$this->assertEquals( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS, $error['term_status'] );
 		$error = array_shift( $errors );
-		$this->assertEquals( 'new', $error['data']['code'] );
+		$this->assertEquals( 'new rejected', $error['data']['code'] );
 		$this->assertEquals( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS, $error['term_status'] );
 
 		$summary = get_echo( [ 'AMP_Validated_URL_Post_Type', 'display_invalid_url_validation_error_counts_summary' ], [ $invalid_url_post_id ] );
-		$this->assertContains( 'New Rejected: 1', $summary );
-		$this->assertContains( 'Accepted: 1', $summary );
-		$this->assertContains( 'Rejected: 1', $summary );
+		$this->assertContains( 'Invalid markup kept: 2', $summary );
+		$this->assertContains( 'Invalid markup removed: 2', $summary );
 	}
 
 	/**
@@ -557,7 +574,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 			[
 				'cb'                          => '<input type="checkbox" />',
 				'error_code'                  => 'Error',
-				'status'                      => 'Status<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="&lt;h3&gt;Status&lt;/h3&gt;&lt;p&gt;An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.&lt;/p&gt;"></div>',
+				'status'                      => 'Markup Status<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="&lt;h3&gt;Markup Status&lt;/h3&gt;&lt;p&gt;When invalid markup is removed it will not block a URL from being served as AMP; the validation error will be sanitized, where the offending markup is stripped from the response to ensure AMP validity. If invalid AMP markup is kept, then URLs is occurs on will not be served as AMP pages.&lt;/p&gt;"></div>',
 				'details'                     => 'Context<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="&lt;h3&gt;Context&lt;/h3&gt;&lt;p&gt;The parent element of where the error occurred.&lt;/p&gt;"></div>',
 				'sources_with_invalid_output' => 'Sources',
 				'error_type'                  => 'Type',
@@ -678,7 +695,20 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		// If a hook is the only source, it should appear in the column.
 		$error_summary['sources_with_invalid_output'] = [ 'hook' => $hook_name ];
 		$sources_column                               = get_echo( [ 'AMP_Validated_URL_Post_Type', 'render_sources_column' ], [ $error_summary, $post_id ] );
-		$this->assertEquals( '<strong class="source"><span class="dashicons dashicons-wordpress-alt"></span>' . $hook_name . '</strong>', $sources_column );
+		$this->assertEquals( '<strong class="source"><span class="dashicons dashicons-wordpress-alt"></span>Hook: ' . $hook_name . '</strong>', $sources_column );
+
+		// Content gets a translated name.
+		$error_summary['sources_with_invalid_output'] = [ 'hook' => 'the_content' ];
+		$sources_column                               = get_echo( [ 'AMP_Validated_URL_Post_Type', 'render_sources_column' ], [ $error_summary, $post_id ] );
+		$this->assertEquals( '<strong class="source"><span class="dashicons dashicons-edit"></span>Content</strong>', $sources_column );
+
+		// Blocks are listed separately, overriding Content.
+		$error_summary['sources_with_invalid_output'] = [
+			'hook'   => 'the_content',
+			'blocks' => [ 'core/html' ],
+		];
+		$sources_column                               = get_echo( [ 'AMP_Validated_URL_Post_Type', 'render_sources_column' ], [ $error_summary, $post_id ] );
+		$this->assertEquals( '<strong class="source"><span class="dashicons dashicons-edit"></span>Custom HTML</strong>', $sources_column );
 
 		// If there's no source in 'sources_with_invalid_output', this should output the theme name.
 		update_post_meta( $post_id, '_amp_validated_environment', [ 'theme' => $theme_name ] );
@@ -809,19 +839,19 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$_GET[ AMP_Validated_URL_Post_Type::REMAINING_ERRORS ] = '1';
 		$_GET[ AMP_Validated_URL_Post_Type::URLS_TESTED ]      = '1';
 		$output = get_echo( [ 'AMP_Validated_URL_Post_Type', 'print_admin_notice' ] );
-		$this->assertContains( 'The rechecked URL still has unaccepted validation errors', $output );
+		$this->assertContains( 'The rechecked URL still has remaining invalid markup kept.', $output );
 
 		$_GET[ AMP_Validated_URL_Post_Type::URLS_TESTED ] = '2';
 		$output = get_echo( [ 'AMP_Validated_URL_Post_Type', 'print_admin_notice' ] );
-		$this->assertContains( 'The rechecked URLs still have unaccepted validation errors', $output );
+		$this->assertContains( 'The rechecked URLs still have remaining invalid markup kept.', $output );
 
 		$_GET[ AMP_Validated_URL_Post_Type::REMAINING_ERRORS ] = '0';
 		$output = get_echo( [ 'AMP_Validated_URL_Post_Type', 'print_admin_notice' ] );
-		$this->assertContains( 'The rechecked URLs are free of unaccepted validation errors', $output );
+		$this->assertContains( 'The rechecked URLs are free of non-removed invalid markup.', $output );
 
 		$_GET[ AMP_Validated_URL_Post_Type::URLS_TESTED ] = '1';
 		$output = get_echo( [ 'AMP_Validated_URL_Post_Type', 'print_admin_notice' ] );
-		$this->assertContains( 'The rechecked URL is free of unaccepted validation errors', $output );
+		$this->assertContains( 'The rechecked URL is free of non-removed invalid markup.', $output );
 
 		$_GET['amp_validate_error'] = [ 'http_request_failed' ];
 		$output                     = get_echo( [ 'AMP_Validated_URL_Post_Type', 'print_admin_notice' ] );
@@ -1405,15 +1435,15 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		// This is now on the invalid URL post type edit.php screen, so it should output a <select> element.
 		$output = get_echo( [ 'AMP_Validated_URL_Post_Type', 'render_post_filters' ], [ $correct_post_type, $correct_which_second_argument ] );
 		$this->assertContains(
-			sprintf( 'With New Errors <span class="count">(%d)</span>', $number_of_new_errors ),
+			sprintf( 'With new errors <span class="count">(%d)</span>', $number_of_new_errors ),
 			$output
 		);
 		$this->assertContains(
-			sprintf( 'With Rejected Errors <span class="count">(%d)</span>', $number_of_rejected ),
+			sprintf( 'With kept markup <span class="count">(%d)</span>', $number_of_rejected ),
 			$output
 		);
 		$this->assertContains(
-			sprintf( 'With Accepted Errors <span class="count">(%d)</span>', $number_of_accepted ),
+			sprintf( 'With removed markup <span class="count">(%d)</span>', $number_of_accepted ),
 			$output
 		);
 	}
@@ -1459,32 +1489,15 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test for get_single_url_page_heading()
+	 * Test for get_validated_url_title()
 	 *
-	 * @covers \AMP_Validated_URL_Post_Type::get_single_url_page_heading()
+	 * @covers \AMP_Validated_URL_Post_Type::get_validated_url_title()
 	 */
-	public function test_get_single_url_page_heading() {
-		global $post;
+	public function test_get_validated_url_title() {
 		$meta_key               = '_amp_queried_object';
 		$test_post              = self::factory()->post->create_and_get();
 		$amp_validated_url_post = self::factory()->post->create_and_get( [ 'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ] );
 
-		// If $pagenow is not post.php, this should not filter the labels.
-		$GLOBALS['pagenow'] = 'edit.php';
-		$this->assertEmpty( AMP_Validated_URL_Post_Type::get_single_url_page_heading() );
-
-		// If $pagenow is correct, but $_GET['post'] and $_GET['action'] are not set, so this should not filter the labels.
-		$GLOBALS['pagenow'] = 'post.php';
-		$this->assertEmpty( AMP_Validated_URL_Post_Type::get_single_url_page_heading() );
-
-		// Though $_GET['post'] and $_GET['action'] are now set, but the post type is 'post', so this should not filter the labels.
-		$post           = $test_post;
-		$_GET['post']   = $test_post->ID;
-		$_GET['action'] = 'edit';
-		$this->assertEmpty( AMP_Validated_URL_Post_Type::get_single_url_page_heading() );
-
-		$_GET['post'] = $amp_validated_url_post->ID;
-		$post         = $amp_validated_url_post;
 		update_post_meta(
 			$amp_validated_url_post->ID,
 			$meta_key,
@@ -1494,8 +1507,8 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 			]
 		);
 		$this->assertEquals(
-			sprintf( 'Errors for: %s', $test_post->post_title ),
-			AMP_Validated_URL_Post_Type::get_single_url_page_heading()
+			$test_post->post_title,
+			AMP_Validated_URL_Post_Type::get_validated_url_title( $amp_validated_url_post )
 		);
 
 		// If the URL with validation error(s) is a term, this should return the term name.
@@ -1509,8 +1522,8 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 			]
 		);
 		$this->assertEquals(
-			sprintf( 'Errors for: %s', $term->name ),
-			AMP_Validated_URL_Post_Type::get_single_url_page_heading()
+			$term->name,
+			AMP_Validated_URL_Post_Type::get_validated_url_title( $amp_validated_url_post )
 		);
 
 		// If the URL with validation error(s) is for a user (author), this should return the author's name.
@@ -1524,8 +1537,8 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 			]
 		);
 		$this->assertEquals(
-			sprintf( 'Errors for: %s', $user->display_name ),
-			AMP_Validated_URL_Post_Type::get_single_url_page_heading()
+			$user->display_name,
+			AMP_Validated_URL_Post_Type::get_validated_url_title( $amp_validated_url_post )
 		);
 	}
 
