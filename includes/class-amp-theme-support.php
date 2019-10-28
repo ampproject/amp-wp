@@ -2517,6 +2517,10 @@ class AMP_Theme_Support {
 		);
 	}
 
+	/**
+	 * Output an HTML page that acts as an interface to facilitate a side-by-side comparison of a
+	 * non-AMP page and its AMP version to review any discrepancies.
+	 */
 	public static function serve_paired_browsing_experience() {
 		if ( ! isset( $_GET[ self::PAIRED_BROWSING_QUERY_VAR ] ) ) {
 			return;
