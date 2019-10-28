@@ -200,7 +200,7 @@ const ContextMenu = ( props ) => {
 		left: clientX,
 	};
 
-	const POPOVER_POSITION = ( isRTL ) ? 'bottom right' : 'bottom left';
+	const popoverPosition = ( isRTL ) ? 'bottom right' : 'bottom left';
 
 	let blockActions = [];
 	const pageList = getBlockOrder();
@@ -329,7 +329,7 @@ const ContextMenu = ( props ) => {
 			{ isOpen && (
 				<Popover
 					className={ POPOVER_PROPS.className }
-					position={ POPOVER_POSITION }
+					position={ popoverPosition }
 					onClose={ onClose }
 					focusOnMount="firstElement"
 				>
