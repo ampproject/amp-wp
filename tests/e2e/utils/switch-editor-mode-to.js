@@ -13,7 +13,7 @@ export async function switchEditorModeTo( mode ) {
 		document.querySelector( sel ).click();
 	}, selector );
 	const [ button ] = await page.$x(
-		`//button[contains(text(), '${ mode } Editor')]`
+		`//button[contains(text(), '${ mode } Editor')]`,
 	);
 
 	await page.evaluate( ( btn ) => {

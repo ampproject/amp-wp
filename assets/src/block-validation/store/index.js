@@ -26,5 +26,5 @@ export default registerStore(
 			errors: [],
 			reviewLink: undefined,
 		},
-	}
+	},
 );

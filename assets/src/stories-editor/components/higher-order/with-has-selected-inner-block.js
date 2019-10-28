@@ -17,7 +17,7 @@ export default createHigherOrderComponent(
 			return {
 				hasSelectedInnerBlock: hasSelectedInnerBlock( props.clientId, true ),
 			};
-		}
+		},
 	),
-	'withHasSelectedInnerBlock'
+	'withHasSelectedInnerBlock',
 );

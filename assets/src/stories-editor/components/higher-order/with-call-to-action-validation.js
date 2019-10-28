@@ -72,7 +72,7 @@ export default createHigherOrderComponent( ( BlockEdit ) => {
 			actions.unshift(
 				<Button key="find-original" isLarge onClick={ selectFirst }>
 					{ __( 'Find original', 'amp' ) }
-				</Button>
+				</Button>,
 			);
 		}
 

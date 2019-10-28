@@ -28,7 +28,7 @@ const getSetter = ( lowerBound, upperBound ) => ( obj, prop, value ) => {
 		obj[ prop ]
 			.find( ( snapLine ) =>
 				isShallowEqual( item[ 0 ], snapLine[ 0 ] ) &&
-				isShallowEqual( item[ 1 ], snapLine[ 1 ] )
+				isShallowEqual( item[ 1 ], snapLine[ 1 ] ),
 			);
 
 	if ( obj.hasOwnProperty( prop ) ) {

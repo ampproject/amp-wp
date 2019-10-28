@@ -14,6 +14,6 @@ export function wpDataSelect( store, selector, ...parameters ) {
 		},
 		store,
 		selector,
-		parameters
+		parameters,
 	);
 }

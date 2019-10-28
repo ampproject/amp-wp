@@ -128,7 +128,7 @@ export const FeaturedImageToolbarSelect = wp.media.view.Toolbar.Select.extend( {
 					minHeight,
 					width: attachment.get( 'width' ),
 					height: attachment.get( 'height' ),
-				} )
+				} ),
 			);
 		}
 

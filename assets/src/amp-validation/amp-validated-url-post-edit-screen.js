@@ -123,7 +123,7 @@ const updateShowingErrorsRow = ( numberErrorsDisplaying, totalErrors ) => {
 				'Showing %1$s of %2$s validation error',
 				'Showing %1$s of %2$s validation errors',
 				totalErrors,
-				'amp'
+				'amp',
 			),
 			numberErrorsDisplaying,
 			totalErrors,

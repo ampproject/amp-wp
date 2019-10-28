@@ -168,9 +168,9 @@ export const maybeDisplayNotice = () => {
 			'There is %s issue from AMP validation which needs review.',
 			'There are %s issues from AMP validation which need review.',
 			validationErrorCount,
-			'amp'
+			'amp',
 		),
-		validationErrorCount
+		validationErrorCount,
 	);
 
 	const blockValidationErrors = validationErrors.filter( ( { clientId } ) => clientId );
@@ -184,9 +184,9 @@ export const maybeDisplayNotice = () => {
 					'%s issue is directly due to content here.',
 					'%s issues are directly due to content here.',
 					blockValidationErrorCount,
-					'amp'
+					'amp',
 				),
-				blockValidationErrorCount
+				blockValidationErrorCount,
 			);
 		} else if ( validationErrors.length === 1 ) {
 			noticeMessage += ' ' + __( 'The issue is not directly due to content here.', 'amp' );
@@ -220,7 +220,7 @@ export const maybeDisplayNotice = () => {
 					'Your site is configured to automatically accept sanitization errors, but this error could be from when auto-acceptance was not selected, or from manually rejecting an error.',
 					'Your site is configured to automatically accept sanitization errors, but these errors could be from when auto-acceptance was not selected, or from manually rejecting an error.',
 					validationErrors.length,
-					'amp'
+					'amp',
 				);
 			}
 		} else {

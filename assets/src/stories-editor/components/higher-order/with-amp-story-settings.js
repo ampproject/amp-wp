@@ -569,5 +569,5 @@ export default createHigherOrderComponent(
 			);
 		} );
 	},
-	'withAmpStorySettings'
+	'withAmpStorySettings',
 );
