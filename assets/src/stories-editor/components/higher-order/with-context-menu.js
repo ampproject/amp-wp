@@ -86,7 +86,7 @@ const applyWithSelect = withSelect( ( select ) => {
 
 		render(
 			<ContextMenu clientIds={ selectedBlockClientIds } clientX={ relativePositionX } clientY={ relativePositionY } insidePercentageX={ insidePercentageX } insidePercentageY={ insidePercentageY } />,
-			document.getElementById( 'amp-story-right-click-menu' )
+			document.getElementById( 'amp-story-right-click-menu' ),
 		);
 
 		event.preventDefault();
@@ -128,5 +128,5 @@ export default createHigherOrderComponent(
 			);
 		} );
 	},
-	'withContextMenu'
+	'withContextMenu',
 );

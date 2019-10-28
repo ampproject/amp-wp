@@ -79,7 +79,7 @@ const AttachmentContent = ( props ) => {
 						setFailedToFetch( false );
 						setIsFetching( false );
 					}
-				}
+				},
 			).catch(
 				() => {
 					if ( isStillMounted.current && fetchRequest.current === currentFetchRequest ) {
@@ -87,7 +87,7 @@ const AttachmentContent = ( props ) => {
 						setFailedToFetch( true );
 						setIsFetching( false );
 					}
-				}
+				},
 			);
 		}
 	}, [ postId, postType, allowedPostTypes ] );

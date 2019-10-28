@@ -37,7 +37,7 @@ describe( 'Font picker in Text Block', () => {
 		await page.keyboard.type( 'Arimo' );
 
 		const nodes = await page.$x(
-			'//ul[contains(@class,"autocomplete__menu")]//li'
+			'//ul[contains(@class,"autocomplete__menu")]//li',
 		);
 		expect( nodes ).toHaveLength( 1 );
 		await expect( page ).toMatchElement( '#arimo-font' );
@@ -47,7 +47,7 @@ describe( 'Font picker in Text Block', () => {
 		await page.keyboard.type( 'pt sans' );
 
 		const nodes = await page.$x(
-			'//ul[contains(@class,"autocomplete__menu")]//li'
+			'//ul[contains(@class,"autocomplete__menu")]//li',
 		);
 		expect( nodes ).toHaveLength( 3 );
 		await expect( page ).toMatchElement( '#pt-sans-font' );

@@ -34,7 +34,7 @@ describe( 'Media File Size Warnings', () => {
 
 			// Select the default page block.
 			await selectBlockByClientId(
-				( await getAllBlocks() )[ 0 ].clientId
+				( await getAllBlocks() )[ 0 ].clientId,
 			);
 
 			// Click the media selection button.
@@ -55,7 +55,7 @@ describe( 'Media File Size Warnings', () => {
 
 			// Select the default page block.
 			await selectBlockByClientId(
-				( await getAllBlocks() )[ 0 ].clientId
+				( await getAllBlocks() )[ 0 ].clientId,
 			);
 
 			// Click the media selection button.

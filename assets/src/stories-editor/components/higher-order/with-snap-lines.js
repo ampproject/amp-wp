@@ -38,5 +38,5 @@ export default createHigherOrderComponent(
 
 		return Inner;
 	},
-	'withSnapLines'
+	'withSnapLines',
 );

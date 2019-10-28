@@ -63,7 +63,7 @@ const addVideoAriaLabel = ( element, { name }, attributes ) => {
 		figure,
 		{},
 		newVideo,
-		...rest
+		...rest,
 	);
 };
 

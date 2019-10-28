@@ -319,7 +319,7 @@ const ContextMenu = ( props ) => {
 				params: [ firstBlockClientId, insidePercentageY, insidePercentageX ],
 				icon: 'pressthis',
 				className: 'right-click-paste',
-			}
+			},
 		);
 	}
 

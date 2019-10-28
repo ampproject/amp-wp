@@ -12,7 +12,7 @@ const dropBlockZoneWithSelect = compose(
 	withBlockName,
 	withHasSelectedInnerBlock,
 	withSelectedBlock,
-	withIsReordering
+	withIsReordering,
 );
 
 /**

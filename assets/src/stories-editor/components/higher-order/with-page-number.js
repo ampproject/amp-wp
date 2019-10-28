@@ -64,5 +64,5 @@ export default createHigherOrderComponent(
 			);
 		} );
 	},
-	'withPageNumber'
+	'withPageNumber',
 );
