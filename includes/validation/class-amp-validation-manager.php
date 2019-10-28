@@ -474,7 +474,7 @@ class AMP_Validation_Manager {
 			'parent' => 'amp',
 			'id'     => 'amp-paired-browsing',
 			'title'  => esc_html( __( 'Start paired browsing', 'amp' ) ),
-			'href'   => remove_query_arg( amp_get_slug(), add_query_arg( 'amp-paired-browsing', '1' ) ),
+			'href'   => remove_query_arg( amp_get_slug(), add_query_arg( AMP_Theme_Support::PAIRED_BROWSING_QUERY_VAR, '1' ) ),
 			'meta'   => [
 				'target' => 'amp-paired-browsing',
 			],

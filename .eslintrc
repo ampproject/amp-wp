@@ -1,4 +1,8 @@
 {
+  "globals": {
+    "history": true,
+    "parent": true
+  },
   "root": true,
   "extends": [
     "plugin:@wordpress/eslint-plugin/recommended",
@@ -33,7 +37,7 @@
     "no-unused-vars": [
       "error",
       {
-        "ignoreRestSiblings": true,
+        "ignoreRestSiblings": true
       }
     ],
     "no-useless-call": "error",
@@ -84,7 +88,7 @@
         ],
         "jest/no-hooks": "off",
         "jest/prefer-expect-assertions": "off",
-        "jest/prefer-inline-snapshots": "off",
+        "jest/prefer-inline-snapshots": "off"
       }
     },
     {
@@ -102,7 +106,7 @@
         ],
         "jest/no-hooks": "off",
         "jest/prefer-expect-assertions": "off",
-        "jest/prefer-inline-snapshots": "off",
+        "jest/prefer-inline-snapshots": "off"
       }
     }
   ]

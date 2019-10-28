@@ -173,6 +173,8 @@ const admin = {
 	...sharedConfig,
 	entry: {
 		'amp-validation-tooltips': './assets/src/admin/amp-validation-tooltips.js',
+		'amp-paired-browsing-app': './assets/src/admin/paired-browsing/app.js',
+		'amp-paired-browsing-client': './assets/src/admin/paired-browsing/client.js',
 	},
 	plugins: [
 		...defaultConfig.plugins,
