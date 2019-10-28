@@ -32,7 +32,6 @@ domReady( () => {
 	setValidationErrorRowsSeenClass();
 	handleStatusChange();
 	handleBulkActions();
-	changeHeading();
 	watchForUnsavedChanges();
 	showAMPIconIfEnabled();
 } );
@@ -379,16 +378,6 @@ const handleBulkActions = () => {
 			}
 		} );
 	} );
-};
-
-/**
- * Changes the page heading and document title, as this doesn't look to be possible with a PHP filter.
- */
-const changeHeading = () => {
-	const heading = document.querySelector( 'h1.wp-heading-inline' );
-	if ( heading && ampValidation.page_heading ) {
-		heading.innerText = ampValidation.page_heading;
-	}
 };
 
 /**

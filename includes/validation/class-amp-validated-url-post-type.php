@@ -2133,31 +2133,32 @@ class AMP_Validated_URL_Post_Type {
 	/**
 	 * Filters the document title on the single URL page at /wp-admin/post.php.
 	 *
-	 * @param string $title Document title.
+	 * @global string $title
 	 *
+	 * @param string $admin_title Document title.
 	 * @return string Filtered document title.
 	 */
-	public static function filter_admin_title( $title ) {
-		$page_title = self::get_single_url_page_heading();
+	public static function filter_admin_title( $admin_title ) {
+		global $title;
+		if ( self::is_validated_url_admin_screen() ) {
 
-		if ( $page_title ) {
+			// This is not ideal to set this in a filter, but it's the only apparent way to set the variable for admin-header.php.
+			$title = __( 'AMP Validated URL', 'amp' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
 			/* translators: Admin screen title. %s: Admin screen name */
-			return sprintf( __( '%s &#8212; WordPress', 'default' ), $page_title );
+			$admin_title = sprintf( __( '%s &#8212; WordPress', 'default' ), $title );
 		}
-
-		return $title;
+		return $admin_title;
 	}
 
 	/**
-	 * Gets the heading for the single URL page at /wp-admin/post.php.
-	 * This will be in the format of 'Errors for: <page title>'.
+	 * Determines whether the current screen is for a validated URL.
 	 *
-	 * @return string|null The page heading, or null.
+	 * @return bool Is screen.
 	 */
-	public static function get_single_url_page_heading() {
+	private static function is_validated_url_admin_screen() {
 		global $pagenow;
-
-		if (
+		return ! (
 			'post.php' !== $pagenow
 			||
 			! isset( $_GET['post'], $_GET['action'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
