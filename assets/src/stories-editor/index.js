@@ -32,7 +32,6 @@ import {
 	withPageNumber,
 	withEditFeaturedImage,
 	withCustomVideoBlockEdit,
-	withStoryFeaturedImageNotice,
 	withWrapperProps,
 	withActivePageState,
 	withStoryBlockDropZone,
@@ -307,7 +306,6 @@ addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/contextMenuHandler', withCo
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addEditFeaturedImage', withEditFeaturedImage );
 addFilter( 'editor.BlockEdit', 'ampEditorBlocks/addVideoBlockPreview', withCustomVideoBlockEdit, 9 );
 addFilter( 'editor.BlockEdit', 'ampEditorBlocks/withSnapLines', withSnapLines );
-addFilter( 'editor.PostFeaturedImage', 'ampStoryEditorBlocks/addFeaturedImageNotice', withStoryFeaturedImageNotice );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/withActivePageState', withActivePageState );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', withWrapperProps );
 addFilter( 'editor.MediaUpload', 'ampStoryEditorBlocks/addEnforcedFileType', ( InitialMediaUpload ) => withEnforcedFileType( InitialMediaUpload ) );

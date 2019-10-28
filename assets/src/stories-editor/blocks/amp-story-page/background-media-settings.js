@@ -133,14 +133,14 @@ const BackgroundMediaSettings = ( {
 							sprintf(
 								/* translators: %d: the number of recommended megabytes per second */
 								__( 'A video size of less than %d MB per second is recommended.', 'amp' ),
-								VIDEO_ALLOWED_MEGABYTES_PER_SECOND
+								VIDEO_ALLOWED_MEGABYTES_PER_SECOND,
 							)
 						}
 						{
 							videoBytesPerSecond && ' ' + sprintf(
 								/* translators: %d: the number of actual megabytes per second */
 								__( 'The selected video is %d MB per second.', 'amp' ),
-								Math.round( videoBytesPerSecond / MEGABYTE_IN_BYTES )
+								Math.round( videoBytesPerSecond / MEGABYTE_IN_BYTES ),
 							)
 						}
 					</Notice>
@@ -200,7 +200,7 @@ const BackgroundMediaSettings = ( {
 											{
 												'editor-post-featured-image__toggle': ! poster,
 												'editor-post-featured-image__preview': poster,
-											}
+											},
 										) }
 										onClick={ open }
 										aria-label={ ! poster ? null : __( 'Replace Poster Image', 'amp' ) }

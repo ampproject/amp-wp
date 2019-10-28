@@ -12,6 +12,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { Component } from '@wordpress/element';
+import { withSelect } from '@wordpress/data';
 import { withSafeTimeout, compose } from '@wordpress/compose';
 
 /**
@@ -76,7 +77,15 @@ class Draggable extends Component {
 	 * @param {Object} event The non-custom DragEvent.
 	 */
 	onDragEnd = ( event ) => {
-		const { clearHighlight, dropElementByOffset, blockName, setTimeout, clearSnapLines, onDragEnd = noop } = this.props;
+		const {
+			clearHighlight,
+			dropElementByOffset,
+			blockName,
+			setTimeout,
+			clearSnapLines,
+			isRTL,
+			onDragEnd = noop,
+		} = this.props;
 		if ( event ) {
 			event.preventDefault();
 		}
@@ -89,7 +98,8 @@ class Draggable extends Component {
 			// All this is about calculating the position of the (correct) element on the new page.
 			const currentElementTop = parseInt( this.cloneWrapper.style.top );
 			const currentElementLeft = parseInt( this.cloneWrapper.style.left );
-			const newLeft = currentElementLeft - ( this.pageOffset * PAGE_AND_MARGIN );
+			const factor = isRTL ? 1 : -1;
+			const newLeft = currentElementLeft + ( factor * ( this.pageOffset * PAGE_AND_MARGIN ) );
 
 			let baseHeight, xAttribute, yAttribute;
 			if ( isCTABlock( blockName ) ) {
@@ -130,6 +140,7 @@ class Draggable extends Component {
 			horizontalTargets,
 			verticalTargets,
 			setHighlightByOffset,
+			isRTL,
 		} = this.props;
 
 		const top = parseInt( this.cloneWrapper.style.top ) + event.clientY - this.cursorTop;
@@ -192,6 +203,10 @@ class Draggable extends Component {
 				-Math.ceil( ( -STORY_PAGE_MARGIN - cursorLeftRelativeToPage ) / PAGE_AND_MARGIN ) :
 				Math.ceil( ( cursorLeftRelativeToPage - PAGE_AND_MARGIN ) / PAGE_AND_MARGIN )
 			);
+
+			if ( isRTL ) {
+				this.pageOffset *= -1;
+			}
 		}
 
 		setHighlightByOffset( this.pageOffset );
@@ -360,11 +375,17 @@ Draggable.propTypes = {
 	setSnapLines: PropTypes.func.isRequired,
 	clearSnapLines: PropTypes.func.isRequired,
 	parentBlockElement: PropTypes.object,
+	isRTL: PropTypes.bool.isRequired,
 };
 
 const enhance = compose(
 	withSnapTargets,
 	withSafeTimeout,
+	withSelect( ( select ) => {
+		return {
+			isRTL: select( 'core/block-editor' ).getSettings().isRTL,
+		};
+	} ),
 );
 
 export default enhance( Draggable );

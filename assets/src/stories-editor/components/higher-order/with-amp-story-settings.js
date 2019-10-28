@@ -488,7 +488,6 @@ export default createHigherOrderComponent(
 						<InspectorControls>
 							<PanelColorSettings
 								title={ __( 'Color Settings', 'amp' ) }
-								initialOpen={ false }
 								colorSettings={ [
 									{
 										value: backgroundColor.color,
@@ -511,7 +510,7 @@ export default createHigherOrderComponent(
 										fontSize: fontSize.size,
 									} }
 								/>
-								{ ! excludeOpacity && (
+								{ ( ! excludeOpacity && backgroundColor.color ) && (
 									<RangeControl
 										label={ __( 'Opacity', 'amp' ) }
 										value={ opacity }
@@ -570,5 +569,5 @@ export default createHigherOrderComponent(
 			);
 		} );
 	},
-	'withAmpStorySettings'
+	'withAmpStorySettings',
 );

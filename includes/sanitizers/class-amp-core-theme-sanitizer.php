@@ -1533,12 +1533,22 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
+		// Make sure lightboxes are marked as inactive and not expanded when they are closed via the Escape key.
+		$state_string = str_replace( '-', '_', $modal_id );
+		AMP_DOM_Utils::add_amp_action( $modal_content_node, 'lightboxOpen', "{$modal_id}.toggleClass(class=active,force=true)" );
+		AMP_DOM_Utils::add_amp_action( $modal_content_node, 'lightboxOpen', "AMP.setState({{$state_string}:true})" );
+		AMP_DOM_Utils::add_amp_action( $modal_content_node, 'lightboxClose', "{$modal_id}.toggleClass(class=active,force=false)" );
+		AMP_DOM_Utils::add_amp_action( $modal_content_node, 'lightboxClose', "AMP.setState({{$state_string}:false})" );
+
 		// Create an <amp-lightbox> element that will contain the modal.
 		$amp_lightbox = $this->dom->createElement( 'amp-lightbox' );
 		$amp_lightbox->setAttribute( 'id', $modal_id );
 		$amp_lightbox->setAttribute( 'layout', 'nodisplay' );
 		$amp_lightbox->setAttribute( 'animate-in', isset( $args['animate_in'] ) ? $args['animate_in'] : 'fade-in' );
 		$amp_lightbox->setAttribute( 'scrollable', isset( $args['scrollable'] ) ? $args['scrollable'] : true );
+		$amp_lightbox->setAttribute( 'role', $this->guess_modal_role( $modal_content_node ) );
+		// Setting tabindex to -1 (not reachable) as keyboard focus is handled through toggles.
+		$amp_lightbox->setAttribute( 'tabindex', -1 );
 
 		$parent_node = $modal_content_node->parentNode;
 		$parent_node->replaceChild( $amp_lightbox, $modal_content_node );
@@ -1729,13 +1739,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					$focus_xpath   = $this->xpath_from_css_selector( $focus_selector );
 					$focus_element = $this->xpath->query( $focus_xpath )->item( 0 );
 
-					// Instead of manually setting or unsetting the focus here, we're going
-					// with the autofocus attribute instead (AMP does not have a "blur" action).
-					// According to the HTML 5 spec, only one element should have "autofocus",
-					// however it seems like AMP has turned this into a common mechanism for
-					// focusing on inputs after a lightbox (i.e. modal) opens.
-					if ( $focus_element instanceof DOMElement && in_array( $focus_element->tagName, [ 'input', 'select', 'textarea' ], true ) ) {
-						$focus_element->setAttribute( 'autofocus', true );
+					if ( $focus_element instanceof DOMElement ) {
+						$focus_element_id = AMP_DOM_Utils::get_element_id( $focus_element );
+						AMP_DOM_Utils::add_amp_action( $toggle, 'tap', "{$focus_element_id}.focus" );
 					}
 				}
 			}
@@ -1850,5 +1856,29 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		return $xpath;
+	}
+
+	/**
+	 * Try to guess the role of a modal based on its classes.
+	 *
+	 * @param DOMElement $modal Modal to guess the role for.
+	 * @return string Role that was guessed.
+	 */
+	protected function guess_modal_role( DOMElement $modal ) {
+		// No classes to base our guess on, so keep it generic.
+		if ( ! $modal->hasAttribute( 'class' ) ) {
+			return 'dialog';
+		}
+
+		$classes = $modal->getAttribute( 'class' );
+
+		foreach ( [ 'navigation', 'menu', 'search', 'alert', 'figure', 'form', 'img', 'toolbar', 'tooltip' ] as $role ) {
+			if ( false !== strpos( $classes, $role ) ) {
+				return $role;
+			}
+		}
+
+		// None of the roles we are looking for match any of the classes.
+		return 'dialog';
 	}
 }

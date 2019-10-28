@@ -90,7 +90,7 @@ function FontFamilyPicker( {
 							// translators: %d: The total number of results.
 							_n( '%d font is available. %s', '%d fonts are available. %s', length, 'amp' ),
 							length,
-							contentSelectedOption
+							contentSelectedOption,
 						)
 					);
 				} }

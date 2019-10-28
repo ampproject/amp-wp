@@ -35,7 +35,6 @@ import useOutsideClickChecker from './outside-click-checker';
 
 const POPOVER_PROPS = {
 	className: 'amp-story-right-click-menu__popover block-editor-block-settings-menu__popover editor-block-settings-menu__popover',
-	position: 'bottom left',
 };
 
 const ContextMenu = ( props ) => {
@@ -201,6 +200,8 @@ const ContextMenu = ( props ) => {
 		left: clientX,
 	};
 
+	const popoverPosition = ( isRTL ) ? 'bottom right' : 'bottom left';
+
 	let blockActions = [];
 	const pageList = getBlockOrder();
 	const numPages = pageList.length;
@@ -319,7 +320,7 @@ const ContextMenu = ( props ) => {
 				params: [ firstBlockClientId, insidePercentageY, insidePercentageX ],
 				icon: 'pressthis',
 				className: 'right-click-paste',
-			}
+			},
 		);
 	}
 
@@ -328,7 +329,7 @@ const ContextMenu = ( props ) => {
 			{ isOpen && (
 				<Popover
 					className={ POPOVER_PROPS.className }
-					position={ POPOVER_PROPS.position }
+					position={ popoverPosition }
 					onClose={ onClose }
 					focusOnMount="firstElement"
 				>

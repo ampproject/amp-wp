@@ -158,16 +158,16 @@ const PageEdit = ( {
 					'%d block removed. Only one block of this type is allowed per page.',
 					'%d blocks removed. Only one block of this type is allowed per page.',
 					blocksToRemove.length,
-					'amp'
+					'amp',
 				),
-				blocksToRemove.length
+				blocksToRemove.length,
 			);
 			createErrorNotice(
 				removeMessage,
 				{
 					type: 'snackbar',
 					isDismissible: true,
-				}
+				},
 			);
 		}
 	}, [ childrenOrder, clientId, createErrorNotice, immovableBlocks, removeBlocks ] );
@@ -218,6 +218,7 @@ const PageEdit = ( {
 					backgroundColors={ bgColors }
 					setAttributes={ setAttributes }
 					overlayOpacity={ overlayOpacity }
+					hasMedia={ Boolean( mediaUrl ) }
 				/>
 				<BackgroundMediaSettings
 					allowedBackgroundMediaTypes={ allowedBackgroundMediaTypes }

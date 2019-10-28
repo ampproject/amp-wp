@@ -12,7 +12,7 @@ describe( 'AMP Settings Screen', () => {
 	it( 'should display a welcome notice', async () => {
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 
-		await expect( page ).toMatchElement( '.amp-welcome-notice h1', { text: 'Welcome to AMP for WordPress' } );
+		await expect( page ).toMatchElement( '.amp-welcome-notice h2', { text: 'Welcome to AMP for WordPress' } );
 	} );
 
 	it( 'should display a warning about missing object cache', async () => {

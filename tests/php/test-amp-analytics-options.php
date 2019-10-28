@@ -240,12 +240,16 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		add_filter(
 			'amp_analytics_entries',
 			static function( $analytics ) use ( $key ) {
-				$analytics[ $key ]['type'] = 'test';
+				$analytics[ $key ]['type']                                = 'test';
+				$analytics[ $key ]['attributes']['data-include']          = '_till_responded';
+				$analytics[ $key ]['attributes']['data-block-on-consent'] = 'credentials';
 				return $analytics;
 			}
 		);
 		$analytics = amp_get_analytics();
 		$this->assertEquals( 'test', $analytics[ $key ]['type'] );
+		$this->assertEquals( '_till_responded', $analytics[ $key ]['attributes']['data-include'] );
+		$this->assertEquals( 'credentials', $analytics[ $key ]['attributes']['data-block-on-consent'] );
 	}
 
 	/**
@@ -261,13 +265,18 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 
 		$analytics = amp_get_analytics();
 
+		$key = key( $analytics );
+
 		$trigger_count = 0;
+
+		$entries_test = function ( $entries ) use ( $analytics, &$trigger_count ) {
+			$this->assertEquals( $analytics, $entries );
+			$trigger_count++;
+		};
+
 		add_action(
 			'amp_print_analytics',
-			function ( $entries ) use ( $analytics, &$trigger_count ) {
-				$this->assertEquals( $analytics, $entries );
-				$trigger_count++;
-			}
+			$entries_test
 		);
 
 		$output = get_echo( 'amp_print_analytics', [ $analytics ] );
@@ -276,6 +285,25 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 
 		$this->assertStringStartsWith( '<amp-analytics', $output );
 		$this->assertContains( 'type="googleanalytics"><script type="application/json">{"requests":{"event":', $output );
+
+		remove_action(
+			'amp_print_analytics',
+			$entries_test
+		);
+
+		add_filter(
+			'amp_analytics_entries',
+			static function( $analytics ) use ( $key ) {
+				$analytics[ $key ]['attributes']['data-include'] = '_till_responded';
+				return $analytics;
+			}
+		);
+
+		$analytics = amp_get_analytics();
+
+		$output = get_echo( 'amp_print_analytics', [ $analytics ] );
+
+		$this->assertContains( 'data-include="_till_responded"', $output );
 	}
 
 	/**

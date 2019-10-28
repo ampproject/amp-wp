@@ -152,7 +152,7 @@ const saveV120 = ( { attributes } ) => {
 								value={ content }
 								key={ cellIndex }
 								scope={ tag === 'th' ? scope : undefined }
-							/>
+							/>,
 						) }
 					</tr>
 				) ) }

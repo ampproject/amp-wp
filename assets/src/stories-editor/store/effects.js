@@ -49,7 +49,7 @@ export default {
 				animationType,
 				duration ? parseInt( duration ) : 0,
 				delay ? parseInt( delay ) : 0,
-				() => dispatch( finishAnimation( page, id ) )
+				() => dispatch( finishAnimation( page, id ) ),
 			);
 		} );
 	},

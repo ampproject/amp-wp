@@ -18,7 +18,10 @@ const applyWithSelect = withSelect( ( select ) => {
 	const {
 		getSelectedBlockClientIds,
 		hasMultiSelection,
+		getSettings,
 	} = select( 'core/block-editor' );
+
+	const { isRTL } = getSettings();
 
 	const handleEvent = ( event ) => {
 		const isRightClick = event.type === 'contextmenu';
@@ -68,7 +71,8 @@ const applyWithSelect = withSelect( ( select ) => {
 			eventY = elementPosition.top + ( elementPosition.height / 2 );
 		}
 
-		const relativePositionX = eventX - wrapperDimensions.left;
+		const relativeSub = ( isRTL ) ? wrapperDimensions.right : wrapperDimensions.left;
+		const relativePositionX = eventX - relativeSub;
 		const relativePositionY = eventY - wrapperDimensions.top - toolBarHeight;
 		const clientId = getCurrentPage();
 
@@ -86,7 +90,7 @@ const applyWithSelect = withSelect( ( select ) => {
 
 		render(
 			<ContextMenu clientIds={ selectedBlockClientIds } clientX={ relativePositionX } clientY={ relativePositionY } insidePercentageX={ insidePercentageX } insidePercentageY={ insidePercentageY } />,
-			document.getElementById( 'amp-story-right-click-menu' )
+			document.getElementById( 'amp-story-right-click-menu' ),
 		);
 
 		event.preventDefault();
@@ -128,5 +132,5 @@ export default createHigherOrderComponent(
 			);
 		} );
 	},
-	'withContextMenu'
+	'withContextMenu',
 );

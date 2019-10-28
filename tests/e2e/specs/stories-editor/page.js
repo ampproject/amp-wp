@@ -79,7 +79,7 @@ describe( 'Story Page', () => {
 		await createNewPost( { postType: 'amp_story' } );
 		// Select the default page block.
 		await selectBlockByClientId(
-			( await getAllBlocks() )[ 0 ].clientId
+			( await getAllBlocks() )[ 0 ].clientId,
 		);
 	} );
 
@@ -92,7 +92,7 @@ describe( 'Story Page', () => {
 		const style = 'background-color: rgb(207, 46, 46); opacity: 1;';
 
 		const nodes = await page.$x(
-			`//div[contains(@class, "amp-page-active")]//div[contains(@style,"${ style }")]`
+			`//div[contains(@class, "amp-page-active")]//div[contains(@style,"${ style }")]`,
 		);
 		expect( nodes ).not.toHaveLength( 0 );
 	} );
@@ -107,12 +107,14 @@ describe( 'Story Page', () => {
 		const style = 'background-image: linear-gradient(rgb(207, 46, 46), transparent)';
 
 		const nodes = await page.$x(
-			`//div[contains(@class, "amp-page-active")]//div[contains(@style,"${ style }")]`
+			`//div[contains(@class, "amp-page-active")]//div[contains(@style,"${ style }")]`,
 		);
 		expect( nodes ).not.toHaveLength( 0 );
 	} );
 
 	it( 'should allow adding opacity', async () => {
+		await clickButtonByLabel( 'Color: Vivid red' );
+
 		const opacitySelector = '.components-range-control__number[aria-label="Opacity"]';
 		await page.waitForSelector( opacitySelector );
 
@@ -120,14 +122,12 @@ describe( 'Story Page', () => {
 		await clearInputValue( opacitySelector );
 		await page.type( opacitySelector, '15' );
 
-		await clickButtonByLabel( 'Color: Vivid red' );
-
 		await saveDraft();
 		await page.reload();
 
 		const style = 'opacity: 0.15;';
 		const nodes = await page.$x(
-			`//div[contains(@class, "amp-page-active")]//div[contains(@style,"${ style }")]`
+			`//div[contains(@class, "amp-page-active")]//div[contains(@style,"${ style }")]`,
 		);
 		expect( nodes ).not.toHaveLength( 0 );
 	} );
@@ -172,7 +172,7 @@ describe( 'Story Page', () => {
 		await page.reload();
 
 		await selectBlockByClientId(
-			( await getAllBlocks() )[ 0 ].clientId
+			( await getAllBlocks() )[ 0 ].clientId,
 		);
 		await page.waitForSelector( secondsSelector );
 
@@ -200,7 +200,7 @@ describe( 'Story Page', () => {
 		await page.type( animationDelaySelector, '3500' );
 
 		await selectBlockByClientId(
-			( await getAllBlocks() )[ 0 ].clientId
+			( await getAllBlocks() )[ 0 ].clientId,
 		);
 
 		const pageAdvancementSelector = '.components-select-control__input';
@@ -334,7 +334,7 @@ describe( 'Story Page', () => {
 		// Create a second post with new defaults.
 		await createNewPost( { postType: 'amp_story' } );
 		await selectBlockByClientId(
-			( await getAllBlocks() )[ 0 ].clientId
+			( await getAllBlocks() )[ 0 ].clientId,
 		);
 
 		await saveDraft();
