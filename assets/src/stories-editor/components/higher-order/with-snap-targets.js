@@ -76,5 +76,5 @@ const enhance = compose(
  */
 export default createHigherOrderComponent(
 	enhance,
-	'withSnapTargets'
+	'withSnapTargets',
 );

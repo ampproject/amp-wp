@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useRef, useCallback } from '@wordpress/element';
 import { Dashicon, IconButton } from '@wordpress/components';
 import { URLInput, RichText } from '@wordpress/block-editor';
 import { useSelect } from '@wordpress/data';
@@ -45,7 +45,31 @@ const CallToActionEdit = ( {
 		opacity,
 		btnPositionTop,
 		btnPositionLeft,
+		btnWidth,
+		btnHeight,
 	} = attributes;
+
+	const elementRef = useRef( null );
+
+	useEffect( () => {
+		elementRef.current = document.querySelector( `#amp-story-cta-button-${ clientId } .wp-block-amp-amp-story-cta` );
+	}, [ clientId ] );
+
+	// Updates width and height based on the room that the CTA button takes.
+	const updateWidthAndHeight = useCallback( () => {
+		if ( ! elementRef.current ) {
+			return;
+		}
+
+		// Deduct the padding since this will be added extra otherwise.
+		const width = getPercentageFromPixels( 'x', elementRef.current.clientWidth - CTA_BUTTON_PADDING_HORIZONTAL );
+		const height = getPercentageFromPixels( 'y', elementRef.current.clientHeight - CTA_BUTTON_PADDING_VERTICAL, STORY_PAGE_INNER_HEIGHT_FOR_CTA );
+
+		setAttributes( {
+			btnWidth: width,
+			btnHeight: height,
+		} );
+	}, [ setAttributes ] );
 
 	const [ isEditing, setIsEditing ] = useState( false );
 	const [ hasOverlay, setHasOverlay ] = useState( true );
@@ -70,6 +94,13 @@ const CallToActionEdit = ( {
 		}
 	}, [ isEditing ] );
 
+	useEffect( () => {
+		// If the text is set but width and height not, set width and height, too.
+		if ( text && text.length && ! btnWidth && ! btnHeight ) {
+			updateWidthAndHeight();
+		}
+	}, [ btnWidth, btnHeight, text, updateWidthAndHeight ] );
+
 	const colors = useSelect( ( select ) => {
 		const { getSettings } = select( 'core/block-editor' );
 		const settings = getSettings();
@@ -85,11 +116,17 @@ const CallToActionEdit = ( {
 			'has-background': backgroundColor.color,
 			'has-text-color': textColor.color,
 			[ textColor.class ]: textColor.class,
-		}
+		},
 	);
 	const textStyle = {
 		color: textColor.color,
 		fontSize: fontSize.size ? fontSize.size + 'px' : undefined,
+	};
+
+	const onChange = ( value ) => {
+		setAttributes( { text: value } );
+
+		updateWidthAndHeight();
 	};
 
 	return (
@@ -99,18 +136,7 @@ const CallToActionEdit = ( {
 					<RichText
 						placeholder={ placeholder }
 						value={ text }
-						onChange={ ( value ) => {
-							setAttributes( { text: value } );
-							// Also update width and height based on the room that the CTA button takes.
-							const element = document.querySelector( `#amp-story-cta-button-${ clientId } .wp-block-amp-amp-story-cta` );
-							// Deduct the padding since this will be added extra otherwise.
-							const btnWidth = getPercentageFromPixels( 'x', element.clientWidth - CTA_BUTTON_PADDING_HORIZONTAL );
-							const btnHeight = getPercentageFromPixels( 'y', element.clientHeight - CTA_BUTTON_PADDING_VERTICAL, STORY_PAGE_INNER_HEIGHT_FOR_CTA );
-							setAttributes( {
-								btnWidth,
-								btnHeight,
-							} );
-						} }
+						onChange={ onChange }
 						className={ textWrapperClass }
 						style={ textStyle }
 					/>
@@ -158,6 +184,8 @@ CallToActionEdit.propTypes = {
 		opacity: PropTypes.number,
 		btnPositionLeft: PropTypes.number,
 		btnPositionTop: PropTypes.number,
+		btnWidth: PropTypes.number,
+		btnHeight: PropTypes.number,
 	} ).isRequired,
 	setAttributes: PropTypes.func.isRequired,
 	isSelected: PropTypes.bool,

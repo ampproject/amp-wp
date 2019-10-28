@@ -17,7 +17,7 @@ export default createHigherOrderComponent(
 			return {
 				blockName: getBlockName( props.clientId ),
 			};
-		}
+		},
 	),
-	'withBlockName'
+	'withBlockName',
 );

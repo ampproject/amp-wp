@@ -19,7 +19,7 @@ describe( 'block order controls', () => {
 				false,
 				dirUp,
 			) ).toBe(
-				`Block ${ type } is at the beginning of the content and can’t be moved up`
+				`Block ${ type } is at the beginning of the content and can’t be moved up`,
 			);
 		} );
 

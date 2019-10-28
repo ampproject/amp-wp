@@ -45,11 +45,11 @@ const AnimationSettings = ( { clientId } ) => {
 
 	const onAnimationStart = useCallback(
 		() => playAnimation( clientId ),
-		[ clientId, playAnimation ]
+		[ clientId, playAnimation ],
 	);
 	const onAnimationStop = useCallback(
 		() => stopAnimation( clientId ),
-		[ clientId, stopAnimation ]
+		[ clientId, stopAnimation ],
 	);
 
 	if ( ! animatedBlocks.length ) {
@@ -60,7 +60,7 @@ const AnimationSettings = ( { clientId } ) => {
 		__( 'Stop All Animations', 'amp' ) :
 		sprintf(
 			_n( 'Play %s Animation', 'Play %s Animations', animatedBlocks.length, 'amp' ),
-			animatedBlocks.length
+			animatedBlocks.length,
 		);
 
 	return (

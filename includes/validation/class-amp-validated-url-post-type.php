@@ -424,7 +424,7 @@ class AMP_Validated_URL_Post_Type {
 	 * @param array              $args {
 	 *     Args.
 	 *
-	 *     @type bool $ignore_accepted Exclude validation errors that are accepted. Default false.
+	 *     @type bool $ignore_accepted Exclude validation errors that are accepted (invalid markup removed). Default false.
 	 * }
 	 * @return array List of errors, with keys for term, data, status, and (sanitization) forced.
 	 */
@@ -483,72 +483,70 @@ class AMP_Validated_URL_Post_Type {
 	 * Display summary of the validation error counts for a given post.
 	 *
 	 * @param int|WP_Post $post Post of amp_validated_url type.
-	 * @param array       $args {
-	 *     Arguments.
-	 *
-	 *     @type bool $display_enabled_status Whether to display the status of whether AMP is enabled on the URL.
-	 * }
 	 */
-	public static function display_invalid_url_validation_error_counts_summary( $post, $args = [] ) {
-		$args              = array_merge(
-			[
-				'display_enabled_status' => false,
-			],
-			$args
-		);
+	public static function display_invalid_url_validation_error_counts_summary( $post ) {
 		$validation_errors = self::get_invalid_url_validation_errors( $post );
 		$counts            = self::count_invalid_url_validation_errors( $validation_errors );
 
+		$removed_count = ( $counts['new_accepted'] + $counts['ack_accepted'] );
+		$kept_count    = ( $counts['new_rejected'] + $counts['ack_rejected'] );
+
 		$result = [];
-		if ( $counts['new_rejected'] ) {
+
+		if ( $kept_count ) {
+			$title = '';
+			if ( $counts['new_rejected'] > 0 && $counts['ack_rejected'] > 0 ) {
+				$title = sprintf(
+					/* translators: %s is the count of new validation errors */
+					_n(
+						'%s validation error with kept markup is new',
+						'%s validation errors with kept markup are new',
+						$counts['new_rejected'],
+						'amp'
+					),
+					$counts['new_rejected']
+				);
+			}
 			$result[] = sprintf(
-				/* translators: 1: status. 2: count. */
-				'<span class="status-text new new-rejected">%1$s: %2$s</span>',
-				esc_html__( 'New Rejected', 'amp' ),
-				number_format_i18n( $counts['new_rejected'] )
+				'<span class="status-text rejected %s" title="%s">%s: %s</span>',
+				esc_attr( $counts['new_rejected'] > 0 ? 'has-new' : '' ),
+				esc_attr( $title ),
+				esc_html__( 'Invalid markup kept', 'amp' ),
+				number_format_i18n( $kept_count )
 			);
 		}
-		if ( $counts['new_accepted'] ) {
+		if ( $removed_count ) {
+			$title = '';
+			if ( $counts['new_accepted'] > 0 && $counts['ack_accepted'] > 0 ) {
+				$title = sprintf(
+					/* translators: %s is the count of new validation errors */
+					_n(
+						'%s validation error with removed markup is new',
+						'%s validation errors with removed markup are new',
+						$counts['new_rejected'],
+						'amp'
+					),
+					$counts['new_accepted']
+				);
+			}
 			$result[] = sprintf(
-				/* translators: 1: status. 2: count. */
-				'<span class="status-text new new-accepted">%1$s: %2$s</span>',
-				esc_html__( 'New Accepted', 'amp' ),
-				number_format_i18n( $counts['new_accepted'] )
+				'<span class="status-text accepted %s" title="%s">%s: %s</span>',
+				esc_attr( $counts['new_accepted'] > 0 ? 'has-new' : '' ),
+				esc_attr( $title ),
+				esc_html__( 'Invalid markup removed', 'amp' ),
+				number_format_i18n( $removed_count )
 			);
 		}
-		if ( $counts['ack_accepted'] ) {
+		if ( 0 === $removed_count && 0 === $kept_count ) {
 			$result[] = sprintf(
-				/* translators: 1. Title, 2. %s is count */
-				'<span class="status-text accepted">%1$s: %2$s</span>',
-				esc_html__( 'Accepted', 'amp' ),
-				number_format_i18n( $counts['ack_accepted'] )
-			);
-		}
-		if ( $counts['ack_rejected'] ) {
-			$result[] = sprintf(
-				/* translators: %s is count */
-				'<span class="status-text rejected">%1$s: %2$s</span>',
-				esc_html__( 'Rejected', 'amp' ),
-				number_format_i18n( $counts['ack_rejected'] )
+				'<span class="status-text accepted">%s</span>',
+				esc_html__( 'All markup valid', 'amp' )
 			);
 		}
 
-		if ( $args['display_enabled_status'] ) {
-			$is_amp_enabled = self::is_amp_enabled_on_post( $post );
-			$class          = $is_amp_enabled ? 'sanitized' : 'new';
-			?>
-			<span id="amp-enabled-icon" class="status-text <?php echo esc_attr( $class ); ?>">
-				<?php
-				if ( $is_amp_enabled ) {
-					esc_html_e( 'AMP: Enabled', 'amp' );
-				} else {
-					esc_html_e( 'AMP: Disabled', 'amp' );
-				}
-				?>
-			</span>
-			<?php
-		}
 		echo implode( '', $result ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+
+		printf( '<input class="amp-validation-error-new" type="hidden" value="%d">', (int) ( $counts['new_accepted'] + $counts['new_rejected'] > 0 ) );
 	}
 
 	/**
@@ -891,16 +889,16 @@ class AMP_Validated_URL_Post_Type {
 			[
 				AMP_Validation_Error_Taxonomy::ERROR_STATUS => sprintf(
 					'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="%s"></div>',
-					esc_html__( 'Status', 'amp' ),
+					esc_html__( 'Markup Status', 'amp' ),
 					esc_attr(
 						sprintf(
 							'<h3>%s</h3><p>%s</p>',
-							__( 'Status', 'amp' ),
-							__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
+							__( 'Markup Status', 'amp' ),
+							__( 'When invalid markup is removed it will not block a URL from being served as AMP; the validation error will be sanitized, where the offending markup is stripped from the response to ensure AMP validity. If invalid AMP markup is kept, then URLs is occurs on will not be served as AMP pages.', 'amp' )
 						)
 					)
 				),
-				AMP_Validation_Error_Taxonomy::FOUND_ELEMENTS_AND_ATTRIBUTES => esc_html__( 'Invalid', 'amp' ),
+				AMP_Validation_Error_Taxonomy::FOUND_ELEMENTS_AND_ATTRIBUTES => esc_html__( 'Invalid Markup', 'amp' ),
 				AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT => esc_html__( 'Sources', 'amp' ),
 			]
 		);
@@ -949,12 +947,12 @@ class AMP_Validated_URL_Post_Type {
 			'sources_with_invalid_output' => __( 'Sources', 'amp' ),
 			'status'                      => sprintf(
 				'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="%s"></div>',
-				esc_html__( 'Status', 'amp' ),
+				esc_html__( 'Markup Status', 'amp' ),
 				esc_attr(
 					sprintf(
 						'<h3>%s</h3><p>%s</p>',
-						esc_html__( 'Status', 'amp' ),
-						esc_html__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
+						esc_html__( 'Markup Status', 'amp' ),
+						__( 'When invalid markup is removed it will not block a URL from being served as AMP; the validation error will be sanitized, where the offending markup is stripped from the response to ensure AMP validity. If invalid AMP markup is kept, then URLs is occurs on will not be served as AMP pages.', 'amp' )
 					)
 				)
 			),
@@ -981,7 +979,7 @@ class AMP_Validated_URL_Post_Type {
 			case 'error_status':
 				$staleness = self::get_post_staleness( $post_id );
 				if ( ! empty( $staleness ) ) {
-					echo '<strong><em>' . esc_html__( 'Stale results', 'amp' ) . '</em></strong><br>';
+					echo '<p><strong><em>' . esc_html__( 'Stale results', 'amp' ) . '</em></strong></p>';
 				}
 				self::display_invalid_url_validation_error_counts_summary( $post_id );
 				break;
@@ -1050,6 +1048,11 @@ class AMP_Validated_URL_Post_Type {
 				if ( 'mu-plugin' === $type ) {
 					$plugin_names[] = $plugin_slug;
 				} else {
+					// Skip including Gutenberg in the summary if there is another plugin, since Gutenberg is like core.
+					if ( 'gutenberg' === $plugin_slug && count( $slugs ) > 1 ) {
+						continue;
+					}
+
 					$plugin_name = $plugin_slug;
 					$plugin      = AMP_Validation_Error_Taxonomy::get_plugin_from_slug( $plugin_slug );
 					if ( $plugin ) {
@@ -1105,11 +1108,46 @@ class AMP_Validated_URL_Post_Type {
 		}
 
 		if ( empty( $output ) && ! empty( $sources['embed'] ) ) {
-			$output[] = sprintf( '<strong class="source"><span class="dashicons dashicons-wordpress-alt"></span>%s</strong>', esc_html( 'Embed' ) );
+			$output[] = sprintf( '<strong class="source"><span class="dashicons dashicons-wordpress-alt"></span>%s</strong>', esc_html__( 'Embed', 'amp' ) );
+		}
+
+		if ( empty( $output ) && ! empty( $sources['blocks'] ) ) {
+			foreach ( array_unique( $sources['blocks'] ) as $block ) {
+				$block_title = AMP_Validation_Error_Taxonomy::get_block_title( $block );
+
+				if ( $block_title ) {
+					$output[] = sprintf(
+						'<strong class="source"><span class="dashicons dashicons-edit"></span>%s</strong>',
+						esc_html( $block_title )
+					);
+				} else {
+					$output[] = sprintf(
+						'<strong class="source"><span class="dashicons dashicons-edit"></span><code>%s</code></strong>',
+						esc_html( $block )
+					);
+				}
+			}
 		}
 
 		if ( empty( $output ) && ! empty( $sources['hook'] ) ) {
-			$output[] = sprintf( '<strong class="source"><span class="dashicons dashicons-wordpress-alt"></span>%s</strong>', esc_html( $sources['hook'] ) );
+			switch ( $sources['hook'] ) {
+				case 'the_content':
+					$dashicon    = 'edit';
+					$source_name = __( 'Content', 'amp' );
+					break;
+				case 'the_excerpt':
+					$dashicon    = 'edit';
+					$source_name = __( 'Excerpt', 'amp' );
+					break;
+				default:
+					$dashicon    = 'wordpress-alt';
+					$source_name = sprintf(
+						/* translators: %s is the hook name */
+						__( 'Hook: %s', 'amp' ),
+						$sources['hook']
+					);
+			}
+			$output[] = sprintf( '<strong class="source"><span class="dashicons dashicons-%s"></span>%s</strong>', esc_attr( $dashicon ), esc_html( $source_name ) );
 		}
 
 		if ( empty( $sources ) && $active_theme ) {
@@ -1240,10 +1278,20 @@ class AMP_Validated_URL_Post_Type {
 			$count_urls_tested = isset( $_GET[ self::URLS_TESTED ] ) ? (int) $_GET[ self::URLS_TESTED ] : 1; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$errors_remain     = ! empty( $_GET[ self::REMAINING_ERRORS ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( $errors_remain ) {
-				$message = _n( 'The rechecked URL still has unaccepted validation errors.', 'The rechecked URLs still have unaccepted validation errors.', $count_urls_tested, 'amp' );
+				$message = _n(
+					'The rechecked URL still has remaining invalid markup kept.',
+					'The rechecked URLs still have remaining invalid markup kept.',
+					$count_urls_tested,
+					'amp'
+				);
 				$class   = 'notice-warning';
 			} else {
-				$message = _n( 'The rechecked URL is free of unaccepted validation errors.', 'The rechecked URLs are free of unaccepted validation errors.', $count_urls_tested, 'amp' );
+				$message = _n(
+					'The rechecked URL is free of non-removed invalid markup.',
+					'The rechecked URLs are free of non-removed invalid markup.',
+					$count_urls_tested,
+					'amp'
+				);
 				$class   = 'updated';
 			}
 
@@ -1255,8 +1303,8 @@ class AMP_Validated_URL_Post_Type {
 			);
 		}
 
-		$count = isset( $_GET['amp_taxonomy_terms_updated'] ) ? (int) $_GET['amp_taxonomy_terms_updated'] : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( $count > 0 ) {
+		if ( isset( $_GET['amp_taxonomy_terms_updated'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$count = (int) $_GET['amp_taxonomy_terms_updated']; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$class = 'updated';
 			printf(
 				'<div class="notice is-dismissible %s"><p>%s</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">%s</span></button></div>',
@@ -1280,7 +1328,7 @@ class AMP_Validated_URL_Post_Type {
 		/**
 		 * Adds notices to the single error page.
 		 * 1. Notice with detailed error information in an expanding box.
-		 * 2. Notice with accept and reject buttons.
+		 * 2. Notice with remove (accept) and keep (reject) buttons.
 		 */
 		if ( ! empty( $_GET[ AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] ) && isset( $_GET['post_type'] ) && self::POST_TYPE_SLUG === $_GET['post_type'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$error_id = sanitize_key( wp_unslash( $_GET[ AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -1319,45 +1367,41 @@ class AMP_Validated_URL_Post_Type {
 			if ( ! $sanitization['forced'] ) {
 				echo '<div class="notice accept-reject-error">';
 
-				if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS === $sanitization['term_status'] ) {
-					if ( amp_is_canonical() ) {
-						$info = __( 'Rejecting an error means that any URL on which it occurs will not be served as AMP.', 'amp' );
-					} else {
-						$info = __( 'Rejecting an error means that any URL on which it occurs will redirect to the non-AMP version.', 'amp' );
-					}
-					printf(
-						'<p>%s</p><p><a class="button button-primary reject" href="%s">%s</a></p>',
-						esc_html__( 'Reject this validation error for all instances.', 'amp' ) . ' ' . esc_html( $info ),
-						esc_url( $reject_all_url ),
-						esc_html__( 'Reject', 'amp' )
-					);
-				} elseif ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS === $sanitization['term_status'] ) {
-					if ( amp_is_canonical() ) {
-						$info = __( 'Accepting all validation errors which occur on a URL will allow it to be served as AMP.', 'amp' );
-					} else {
-						$info = __( 'Accepting all validation errors which occur on a URL will allow it to be served as AMP.', 'amp' );
-					}
-					printf(
-						'<p>%s</p><p><a class="button button-primary accept" href="%s">%s</a></p>',
-						esc_html__( 'Accept this error for all instances.', 'amp' ) . ' ' . esc_html( $info ),
+				$info    = '';
+				$buttons = '';
+
+				if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $sanitization['term_status'] ) {
+					$info    .= __( 'Removing all invalid markup which occur on a URL will allow it to be served as AMP.', 'amp' );
+					$buttons .= sprintf(
+						' <a class="button button-primary accept" href="%s">%s</a> ',
 						esc_url( $accept_all_url ),
-						esc_html__( 'Accept', 'amp' )
-					);
-				} else {
-					if ( amp_is_canonical() ) {
-						$info = __( 'Rejecting an error means that any URL on which it occurs will not be served as AMP. If all errors occurring on a URL are accepted, then it will be served as AMP.', 'amp' );
-					} else {
-						$info = __( 'Rejecting an error means that any URL on which it occurs will redirect to the non-AMP version. If all errors occurring on a URL are accepted, then it will not redirect.', 'amp' );
-					}
-					printf(
-						'<p>%s</p><p><a class="button button-primary accept" href="%s">%s</a> <a class="button button-primary reject" href="%s">%s</a></p>',
-						esc_html__( 'Accept or Reject this error for all instances.', 'amp' ) . ' ' . esc_html( $info ),
-						esc_url( $accept_all_url ),
-						esc_html__( 'Accept', 'amp' ),
-						esc_url( $reject_all_url ),
-						esc_html__( 'Reject', 'amp' )
+						esc_html(
+							AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $sanitization['term_status'] ? __( 'Confirm removed', 'amp' ) : __( 'Remove', 'amp' )
+						)
 					);
 				}
+				if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS !== $sanitization['term_status'] ) {
+					if ( amp_is_canonical() ) {
+						$info .= __( 'Keeping invalid markup means that any URL on which it occurs will not be served as AMP.', 'amp' );
+					} else {
+						$info .= __( 'Keeping invalid markup means that any URL on which it occurs will redirect to the non-AMP version.', 'amp' );
+					}
+					$buttons .= sprintf(
+						' <a class="button button-primary reject" href="%s">%s</a> ',
+						esc_url( $reject_all_url ),
+						esc_html(
+							AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS === $sanitization['term_status'] ? __( 'Confirm kept', 'amp' ) : __( 'Keep', 'amp' )
+						)
+					);
+				}
+
+				if ( $info ) {
+					printf( '<p>%s</p>', esc_html( $info ) );
+				}
+				if ( $buttons ) {
+					printf( '<p>%s</p>', wp_kses_post( $buttons ) );
+				}
+
 				echo '</div>';
 			}
 
@@ -1634,8 +1678,7 @@ class AMP_Validated_URL_Post_Type {
 		if ( $current_screen && 'post' === $current_screen->base && self::POST_TYPE_SLUG === $current_screen->post_type ) {
 			$post = get_post();
 			$data = [
-				'page_heading' => self::get_single_url_page_heading(),
-				'amp_enabled'  => self::is_amp_enabled_on_post( $post ),
+				'amp_enabled' => self::is_amp_enabled_on_post( $post ),
 			];
 
 			wp_localize_script(
@@ -1749,7 +1792,27 @@ class AMP_Validated_URL_Post_Type {
 							echo '</p></div>';
 						}
 						?>
-						<?php self::display_invalid_url_validation_error_counts_summary( $post, [ 'display_enabled_status' => true ] ); ?>
+						<?php self::display_invalid_url_validation_error_counts_summary( $post ); ?>
+
+						<?php
+						$is_amp_enabled = self::is_amp_enabled_on_post( $post );
+						$counts         = self::count_invalid_url_validation_errors( self::get_invalid_url_validation_errors( $post ) );
+						$class          = $is_amp_enabled ? 'amp-enabled' : 'amp-disabled';
+						?>
+						<strong id="amp-enabled-icon" class="status-text <?php echo esc_attr( $class ); ?>">
+							<?php
+							if ( $is_amp_enabled ) {
+								esc_html_e( 'AMP enabled', 'amp' );
+							} else {
+								esc_html_e( 'AMP disabled', 'amp' );
+							}
+							?>
+						</strong>
+						<?php if ( $is_amp_enabled && count( array_filter( $counts ) ) > 0 ) : ?>
+							<?php esc_html_e( 'AMP is enabled because no invalid markup is kept.', 'amp' ); ?>
+						<?php elseif ( ! $is_amp_enabled ) : ?>
+							<?php esc_html_e( 'AMP is disabled because there is invalid markup kept. To unblock AMP from being served, either mark the invalid markup as removed or fix the code that adds the invalid markup.', 'amp' ); ?>
+						<?php endif; ?>
 					</div>
 
 					<div class="misc-pub-section">
@@ -1873,8 +1936,8 @@ class AMP_Validated_URL_Post_Type {
 		</form>
 
 		<div id="accept-reject-buttons" class="hidden">
-			<button type="button" class="button action accept"><?php esc_html_e( 'Accept', 'amp' ); ?></button>
-			<button type="button" class="button action reject"><?php esc_html_e( 'Reject', 'amp' ); ?></button>
+			<button type="button" class="button action accept"><?php esc_html_e( 'Remove', 'amp' ); ?></button>
+			<button type="button" class="button action reject"><?php esc_html_e( 'Keep', 'amp' ); ?></button>
 			<div id="vertical-divider"></div>
 		</div>
 		<div id="url-post-filter" class="alignleft actions">
@@ -1934,18 +1997,16 @@ class AMP_Validated_URL_Post_Type {
 			return;
 		}
 
+		// @todo For URLs without a queried object, this should eventually be augmented to indicate the query type (e.g. Homepage, Search Results, Date Archive, etc)
+		$entity_title = self::get_validated_url_title();
 		?>
+		<?php if ( $entity_title ) : ?>
+			<h2><em><?php echo esc_html( $entity_title ); ?></em></h2>
+		<?php endif; ?>
 		<h2 class="amp-validated-url">
 			<a href="<?php echo esc_url( $url ); ?>">
-				<?php
-				printf(
-					/* translators: %s is a link dashicon, %s is the front-end URL, %s is an external dashicon %s  */
-					'%s url: %s %s',
-					'<span class="dashicons dashicons-admin-links"></span>',
-					esc_html( $url ),
-					'<span class="dashicons dashicons-external"></span>'
-				);
-				?>
+				<span class="dashicons dashicons-admin-links"></span>
+				<?php echo esc_html( $url ); ?>
 			</a>
 		</h2>
 		<?php
@@ -2081,45 +2142,57 @@ class AMP_Validated_URL_Post_Type {
 	/**
 	 * Filters the document title on the single URL page at /wp-admin/post.php.
 	 *
-	 * @param string $title Document title.
+	 * @global string $title
 	 *
+	 * @param string $admin_title Document title.
 	 * @return string Filtered document title.
 	 */
-	public static function filter_admin_title( $title ) {
-		$page_title = self::get_single_url_page_heading();
+	public static function filter_admin_title( $admin_title ) {
+		global $title;
+		if ( self::is_validated_url_admin_screen() ) {
 
-		if ( $page_title ) {
+			// This is not ideal to set this in a filter, but it's the only apparent way to set the variable for admin-header.php.
+			$title = __( 'AMP Validated URL', 'amp' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
 			/* translators: Admin screen title. %s: Admin screen name */
-			return sprintf( __( '%s &#8212; WordPress', 'default' ), $page_title );
+			$admin_title = sprintf( __( '%s &#8212; WordPress', 'default' ), $title );
 		}
-
-		return $title;
+		return $admin_title;
 	}
 
 	/**
-	 * Gets the heading for the single URL page at /wp-admin/post.php.
-	 * This will be in the format of 'Errors for: <page title>'.
+	 * Determines whether the current screen is for a validated URL.
 	 *
-	 * @return string|null The page heading, or null.
+	 * @return bool Is screen.
 	 */
-	public static function get_single_url_page_heading() {
+	private static function is_validated_url_admin_screen() {
 		global $pagenow;
-
-		if (
+		return ! (
 			'post.php' !== $pagenow
 			||
 			! isset( $_GET['post'], $_GET['action'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			||
 			self::POST_TYPE_SLUG !== get_post_type( $_GET['post'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		) {
+		);
+	}
+
+	/**
+	 * Gets the title for validated URL, corresponding with the title for the queried object.
+	 *
+	 * @param int|WP_Post $post Post for the validated URL.
+	 * @return string|null Title, or null if none is available.
+	 */
+	public static function get_validated_url_title( $post = null ) {
+		$name = null;
+		$post = get_post( $post );
+		if ( ! $post ) {
 			return null;
 		}
 
 		// Mainly uses the same conditionals as print_status_meta_box().
-		$post           = get_post();
 		$queried_object = get_post_meta( $post->ID, '_amp_queried_object', true );
-		$name           = __( 'Single URL', 'amp' ); // Default.
 		if ( isset( $queried_object['type'], $queried_object['id'] ) ) {
+			$name = null;
 			if ( 'post' === $queried_object['type'] && get_post( $queried_object['id'] ) ) {
 				$name = html_entity_decode( get_the_title( $queried_object['id'] ), ENT_QUOTES );
 			} elseif ( 'term' === $queried_object['type'] && get_term( $queried_object['id'] ) ) {
@@ -2129,8 +2202,7 @@ class AMP_Validated_URL_Post_Type {
 			}
 		}
 
-		/* translators: %s is the name of the page with the the validation error(s) */
-		return esc_html( sprintf( __( 'Errors for: %s', 'amp' ), $name ) );
+		return $name;
 	}
 
 	/**
@@ -2267,10 +2339,9 @@ class AMP_Validated_URL_Post_Type {
 			return;
 		}
 
-		$validation_errors           = self::get_invalid_url_validation_errors( $post );
-		$counts                      = self::count_invalid_url_validation_errors( $validation_errors );
-		$are_there_unaccepted_errors = ( $counts['new_rejected'] || $counts['ack_rejected'] );
-		return ! $are_there_unaccepted_errors;
+		$validation_errors = self::get_invalid_url_validation_errors( $post );
+		$counts            = self::count_invalid_url_validation_errors( $validation_errors );
+		return 0 === ( $counts['new_rejected'] + $counts['ack_rejected'] );
 	}
 
 	/**

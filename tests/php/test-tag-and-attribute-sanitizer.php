@@ -1345,7 +1345,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'amp-orientation-observer'                     => [
-				'<amp-orientation-observer on="beta:clockAnim1.seekTo(percent=event.percent)" layout="nodisplay"></amp-orientation-observer>',
+				'<amp-orientation-observer on="beta:clockAnim1.seekTo(percent=event.percent)" alpha-range="0 180" beta-range="0 180" gamma-range="0 90" smoothing="5" layout="nodisplay"></amp-orientation-observer>',
 				null,
 				[ 'amp-orientation-observer' ],
 			],
@@ -1574,9 +1574,20 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'amp-script-4'                                 => [
 				'
-					<amp-script layout="container" src="https://example.com/examples/amp-script/empty.js">
+					<amp-script layout="container" src="https://example.com/examples/amp-script/empty.js" max-age="3600">
 						<div class="root">should be empty</div>
 					</amp-script>
+				',
+				null,
+				[ 'amp-script' ],
+			],
+
+			'amp-script-5'                                 => [
+				'
+					<amp-script script="myScript" layout="container"></amp-script>
+					<script type="text/plain" target="amp-script" id="myScript">
+					document.body.textContent += \'Hello world!\';
+					</script>
 				',
 				null,
 				[ 'amp-script' ],

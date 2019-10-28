@@ -783,8 +783,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		register_post_type(
 			$custom_post_type,
 			[
-				'has_archive'        => true,
-				'publicly_queryable' => true,
+				'has_archive' => true,
+				'public'      => true,
 			]
 		);
 		self::factory()->post->create(
@@ -811,6 +811,43 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertTrue( $availability['supported'] );
 		$this->assertEmpty( $availability['errors'] );
 		$this->assertEquals( 'is_search', $availability['template'] );
+	}
+
+	/**
+	 * Test get_template_availability with broken parent relationship.
+	 *
+	 * @covers AMP_Theme_Support::get_template_availability()
+	 */
+	public function test_get_template_availability_with_missing_parent() {
+		AMP_Options_Manager::update_option( 'supported_templates', [ 'missing_parent' ] );
+		add_theme_support( AMP_Theme_Support::SLUG );
+		add_filter(
+			'amp_supportable_templates',
+			static function ( $templates ) {
+				$templates['missing_parent'] = [
+					'label'    => 'Missing parent',
+					'parent'   => 'is_unknown',
+					'callback' => static function( WP_Query $query ) {
+						return false !== $query->get( 'missing_parent', false );
+					},
+				];
+				return $templates;
+			}
+		);
+		add_filter(
+			'query_vars',
+			static function ( $vars ) {
+				$vars[] = 'missing_parent';
+				return $vars;
+			}
+		);
+
+		// Test missing_parent.
+		$this->go_to( '/?missing_parent=1' );
+		$this->setExpectedIncorrectUsage( 'AMP_Theme_Support::get_template_availability' );
+		$availability = AMP_Theme_Support::get_template_availability();
+		$this->assertTrue( $availability['supported'] );
+		$this->assertEquals( 'missing_parent', $availability['template'] );
 	}
 
 	/**
@@ -1766,6 +1803,56 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		unset( AMP_HTTP::$purged_amp_query_vars[ AMP_HTTP::ACTION_XHR_CONVERTED_QUERY_VAR ] );
 		unset( $_SERVER['REQUEST_METHOD'] );
+	}
+
+	/**
+	 * Test combining amp-script-src meta tags.
+	 *
+	 * @covers \amp_generate_script_hash()
+	 */
+	public function test_prepare_response_for_amp_script() {
+		$script1 = 'document.body.textContent += "First!";';
+		$script2 = 'document.body.textContent += "Second!";';
+		$script3 = 'document.body.textContent += "Third!";';
+		$script4 = 'document.body.textContent += "Fourth! (And forbidden because no amp-script-src meta in head.)";';
+
+		$script1_hash = amp_generate_script_hash( $script1 );
+		$script2_hash = amp_generate_script_hash( $script2 );
+		$script3_hash = amp_generate_script_hash( $script3 );
+		$script4_hash = amp_generate_script_hash( $script4 );
+
+		ob_start();
+		?>
+		<html>
+			<head>
+				<meta name="amp-script-src" content="<?php echo esc_attr( $script1_hash ); ?>">
+				<meta name="amp-script-src" content="<?php echo esc_attr( $script2_hash ); ?>">
+				<style>
+					body { background: black; color:white }
+				</style>
+				<meta name="amp-script-src" content="<?php echo esc_attr( $script3_hash ); ?>">
+			</head>
+			<body>
+				<meta name="amp-script-src" content="<?php echo esc_attr( $script4_hash ); ?>">
+
+				<amp-script script="s1" layout="fixed-height" height="30"></amp-script><script type="text/plain" target="amp-script" id="s1"><?php echo $script1; // phpcs:ignore ?></script>
+				<amp-script script="s2" layout="fixed-height" height="30"></amp-script><script type="text/plain" target="amp-script" id="s2"><?php echo $script2; // phpcs:ignore ?></script>
+				<amp-script script="s3" layout="fixed-height" height="30"></amp-script><script type="text/plain" target="amp-script" id="s3"><?php echo $script3; // phpcs:ignore ?></script>
+				<amp-script script="s4" layout="fixed-height" height="30"></amp-script><script type="text/plain" target="amp-script" id="s4"><?php echo $script4; // phpcs:ignore ?></script>
+			</body>
+		</html>
+		<?php
+		$output = ob_get_clean();
+
+		$processed = AMP_Theme_Support::prepare_response( $output );
+		$dom       = AMP_DOM_Utils::get_dom( $processed );
+		$xpath     = new DOMXPath( $dom );
+
+		$meta_elements = $xpath->query( '/html/head/meta[ @name = "amp-script-src" ]' );
+		$this->assertSame( 1, $meta_elements->length );
+
+		$meta = $meta_elements->item( 0 );
+		$this->assertSame( "$script1_hash $script2_hash $script3_hash", $meta->getAttribute( 'content' ) );
 	}
 
 	/**

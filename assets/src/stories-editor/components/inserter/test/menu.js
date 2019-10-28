@@ -113,7 +113,7 @@ const DEFAULT_PROPS = {
 
 const getWrapperForProps = ( propOverrides ) => {
 	return TestUtils.renderIntoDocument(
-		<InserterMenu { ...DEFAULT_PROPS } { ...propOverrides } />
+		<InserterMenu { ...DEFAULT_PROPS } { ...propOverrides } />,
 	);
 };
 
@@ -127,7 +127,7 @@ const initializeMenuDefaultStateAndReturnElement = ( propOverrides ) => {
 const initializeAllClosedMenuStateAndReturnElement = ( propOverrides ) => {
 	const element = initializeMenuDefaultStateAndReturnElement( propOverrides );
 	const activeTabs = element.querySelectorAll(
-		'.components-panel__body.is-opened button.components-panel__body-toggle'
+		'.components-panel__body.is-opened button.components-panel__body-toggle',
 	);
 	activeTabs.forEach( ( tab ) => {
 		TestUtils.Simulate.click( tab );
@@ -137,14 +137,14 @@ const initializeAllClosedMenuStateAndReturnElement = ( propOverrides ) => {
 
 const assertNoResultsMessageToBePresent = ( element ) => {
 	const noResultsMessage = element.querySelector(
-		'.block-editor-inserter__no-results'
+		'.block-editor-inserter__no-results',
 	);
 	expect( noResultsMessage.textContent ).toStrictEqual( 'No blocks found.' );
 };
 
 const assertNoResultsMessageNotToBePresent = ( element ) => {
 	const noResultsMessage = element.querySelector(
-		'.block-editor-inserter__no-results'
+		'.block-editor-inserter__no-results',
 	);
 	expect( noResultsMessage ).toBeNull( );
 };
@@ -174,17 +174,17 @@ describe( 'InserterMenu', () => {
 	it( 'should show the suggested tab by default', () => {
 		const element = initializeMenuDefaultStateAndReturnElement();
 		const activeCategory = element.querySelector(
-			'.components-panel__body.is-opened > .components-panel__body-title'
+			'.components-panel__body.is-opened > .components-panel__body-title',
 		);
 		expect( activeCategory.textContent ).toBe( 'Most Used' );
 	} );
 
 	it( 'should show nothing if there are no items', () => {
 		const element = initializeMenuDefaultStateAndReturnElement(
-			{ items: [] }
+			{ items: [] },
 		);
 		const visibleBlocks = element.querySelector(
-			'.block-editor-block-types-list__item'
+			'.block-editor-block-types-list__item',
 		);
 
 		expect( visibleBlocks ).toBeNull( );
@@ -195,7 +195,7 @@ describe( 'InserterMenu', () => {
 	it( 'should show only high utility items in the suggested tab', () => {
 		const element = initializeMenuDefaultStateAndReturnElement();
 		const visibleBlocks = element.querySelectorAll(
-			'.block-editor-block-types-list__item-title'
+			'.block-editor-block-types-list__item-title',
 		);
 		expect( visibleBlocks ).toHaveLength( 3 );
 		expect( visibleBlocks[ 0 ].textContent ).toStrictEqual( 'Text' );
@@ -205,10 +205,10 @@ describe( 'InserterMenu', () => {
 
 	it( 'should limit the number of items shown in the suggested tab', () => {
 		const element = initializeMenuDefaultStateAndReturnElement(
-			{ maxSuggestedItems: 2 }
+			{ maxSuggestedItems: 2 },
 		);
 		const visibleBlocks = element.querySelectorAll(
-			'.block-editor-block-types-list__list-item'
+			'.block-editor-block-types-list__list-item',
 		);
 		expect( visibleBlocks ).toHaveLength( 2 );
 	} );
@@ -222,7 +222,7 @@ describe( 'InserterMenu', () => {
 		assertOpenedPanels( element, 1 );
 
 		const visibleBlocks = element.querySelectorAll(
-			'.block-editor-block-types-list__item-title'
+			'.block-editor-block-types-list__item-title',
 		);
 
 		expect( visibleBlocks ).toHaveLength( 2 );
@@ -241,7 +241,7 @@ describe( 'InserterMenu', () => {
 		assertOpenedPanels( element, 1 );
 
 		const visibleBlocks = element.querySelectorAll(
-			'.block-editor-block-types-list__item-title'
+			'.block-editor-block-types-list__item-title',
 		);
 
 		expect( visibleBlocks ).toHaveLength( 1 );
@@ -259,7 +259,7 @@ describe( 'InserterMenu', () => {
 		assertOpenedPanels( element, 1 );
 
 		const visibleBlocks = element.querySelectorAll(
-			'.block-editor-block-types-list__item-title'
+			'.block-editor-block-types-list__item-title',
 		);
 
 		expect( visibleBlocks ).toHaveLength( 3 );
@@ -277,7 +277,7 @@ describe( 'InserterMenu', () => {
 		TestUtils.Simulate.click( layoutTab );
 
 		const disabledBlocks = element.querySelectorAll(
-			'.block-editor-block-types-list__item[disabled]'
+			'.block-editor-block-types-list__item[disabled]',
 		);
 
 		expect( disabledBlocks ).toHaveLength( 1 );
@@ -291,7 +291,7 @@ describe( 'InserterMenu', () => {
 		assertOpenedPanels( element, 2 );
 
 		const matchingCategories = element.querySelectorAll(
-			'.components-panel__body-toggle'
+			'.components-panel__body-toggle',
 		);
 
 		expect( matchingCategories ).toHaveLength( 2 );
@@ -299,7 +299,7 @@ describe( 'InserterMenu', () => {
 		expect( matchingCategories[ 1 ].textContent ).toBe( 'Embeds' );
 
 		const visibleBlocks = element.querySelectorAll(
-			'.block-editor-block-types-list__item-title'
+			'.block-editor-block-types-list__item-title',
 		);
 
 		expect( visibleBlocks ).toHaveLength( 3 );
@@ -317,7 +317,7 @@ describe( 'InserterMenu', () => {
 		assertOpenedPanels( element, 2 );
 
 		const matchingCategories = element.querySelectorAll(
-			'.components-panel__body-toggle'
+			'.components-panel__body-toggle',
 		);
 
 		expect( matchingCategories ).toHaveLength( 2 );
@@ -325,7 +325,7 @@ describe( 'InserterMenu', () => {
 		expect( matchingCategories[ 1 ].textContent ).toBe( 'Embeds' );
 
 		const visibleBlocks = element.querySelectorAll(
-			'.block-editor-block-types-list__item-title'
+			'.block-editor-block-types-list__item-title',
 		);
 
 		expect( visibleBlocks ).toHaveLength( 3 );
@@ -340,25 +340,25 @@ describe( 'InserterMenu', () => {
 describe( 'searchItems', () => {
 	it( 'should search items using the title ignoring case', () => {
 		expect( searchItems( items, 'TEXT' ) ).toStrictEqual(
-			[ textItem, advancedTextItem, textEmbedItem ]
+			[ textItem, advancedTextItem, textEmbedItem ],
 		);
 	} );
 
 	it( 'should search items using the keywords', () => {
 		expect( searchItems( items, 'GOOGL' ) ).toStrictEqual(
-			[ youtubeItem ]
+			[ youtubeItem ],
 		);
 	} );
 
 	it( 'should search items using the categories', () => {
 		expect( searchItems( items, 'LAYOUT' ) ).toStrictEqual(
-			[ moreItem ]
+			[ moreItem ],
 		);
 	} );
 
 	it( 'should ignore a leading slash on a search term', () => {
 		expect( searchItems( items, '/GOOGL' ) ).toStrictEqual(
-			[ youtubeItem ]
+			[ youtubeItem ],
 		);
 	} );
 } );
@@ -366,19 +366,19 @@ describe( 'searchItems', () => {
 describe( 'normalizeTerm', () => {
 	it( 'should remove diacritics', () => {
 		expect( normalizeTerm( 'média' ) ).toStrictEqual(
-			'media'
+			'media',
 		);
 	} );
 
 	it( 'should trim whitespace', () => {
 		expect( normalizeTerm( '  média  ' ) ).toStrictEqual(
-			'media'
+			'media',
 		);
 	} );
 
 	it( 'should convert to lowercase', () => {
 		expect( normalizeTerm( '  Média  ' ) ).toStrictEqual(
-			'media'
+			'media',
 		);
 	} );
 } );

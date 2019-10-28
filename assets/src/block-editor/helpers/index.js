@@ -231,7 +231,7 @@ export const filterBlocksSave = ( element, blockType, attributes ) => { // eslin
 				{
 					key: 'new',
 					value: content,
-				}
+				},
 			);
 		}
 	} else if ( TEXT_BLOCKS.includes( blockType.name ) && attributes.ampFitText ) {
@@ -267,7 +267,7 @@ export const filterBlocksSave = ( element, blockType, attributes ) => { // eslin
 				{
 					key: 'new',
 					value: ampFitTextContent,
-				}
+				},
 			);
 		}
 
