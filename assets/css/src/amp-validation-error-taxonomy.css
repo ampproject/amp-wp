@@ -309,10 +309,14 @@ body.taxonomy-amp_validation_error .wp-list-table .new th.check-column input {
 }
 
 .wp-heading-inline .status-text {
-	display: inline-flex;
+	display: inline-block;
 	margin-left: 10px;
 	vertical-align: middle;
 	padding-bottom: 0;
+}
+
+.wp-heading-inline .status-text::before {
+	display: inline-block;
 }
 
 .wp-heading-inline code {

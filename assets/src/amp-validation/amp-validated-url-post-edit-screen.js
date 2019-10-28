@@ -387,7 +387,7 @@ const showAMPIconIfEnabled = () => {
 	const heading = document.querySelector( 'h1.wp-heading-inline' );
 	if ( heading && true === Boolean( ampValidation.amp_enabled ) ) {
 		const ampIcon = document.createElement( 'span' );
-		ampIcon.classList.add( 'status-text', 'sanitized' );
+		ampIcon.classList.add( 'status-text', 'amp-enabled' );
 		heading.appendChild( ampIcon );
 	}
 };
