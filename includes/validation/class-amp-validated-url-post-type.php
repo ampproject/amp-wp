@@ -1056,6 +1056,11 @@ class AMP_Validated_URL_Post_Type {
 				if ( 'mu-plugin' === $type ) {
 					$plugin_names[] = $plugin_slug;
 				} else {
+					// Skip including Gutenberg in the summary if there is another plugin, since Gutenberg is like core.
+					if ( 'gutenberg' === $plugin_slug && count( $slugs ) > 1 ) {
+						continue;
+					}
+
 					$plugin_name = $plugin_slug;
 					$plugin      = AMP_Validation_Error_Taxonomy::get_plugin_from_slug( $plugin_slug );
 					if ( $plugin ) {
