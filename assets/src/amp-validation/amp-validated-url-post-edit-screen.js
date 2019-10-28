@@ -368,7 +368,7 @@ const handleBulkActions = () => {
 		} );
 	} );
 
-	// Handle click on bilk "Keep" button.
+	// Handle click on bulk "Keep" button.
 	rejectButton.addEventListener( 'click', () => {
 		Array.prototype.forEach.call( document.querySelectorAll( 'select.amp-validation-error-status' ), ( select ) => {
 			if ( select.closest( 'tr' ).querySelector( '.check-column input[type=checkbox]' ).checked ) {

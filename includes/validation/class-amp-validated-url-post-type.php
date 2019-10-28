@@ -1312,26 +1312,24 @@ class AMP_Validated_URL_Post_Type {
 		}
 
 		$count = isset( $_GET['amp_taxonomy_terms_updated'] ) ? (int) $_GET['amp_taxonomy_terms_updated'] : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( $count > 0 ) {
-			$class = 'updated';
-			printf(
-				'<div class="notice is-dismissible %s"><p>%s</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">%s</span></button></div>',
-				esc_attr( $class ),
-				esc_html(
-					sprintf(
-						/* translators: %s is count of validation errors updated */
-						_n(
-							'Updated %s validation error.',
-							'Updated %s validation errors.',
-							$count,
-							'amp'
-						),
-						number_format_i18n( $count )
-					)
-				),
-				esc_html__( 'Dismiss this notice.', 'amp' )
-			);
-		}
+		$class = 'updated';
+		printf(
+			'<div class="notice is-dismissible %s"><p>%s</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">%s</span></button></div>',
+			esc_attr( $class ),
+			esc_html(
+				sprintf(
+					/* translators: %s is count of validation errors updated */
+					_n(
+						'Updated %s validation error.',
+						'Updated %s validation errors.',
+						$count,
+						'amp'
+					),
+					number_format_i18n( $count )
+				)
+			),
+			esc_html__( 'Dismiss this notice.', 'amp' )
+		);
 
 		/**
 		 * Adds notices to the single error page.
