@@ -85,7 +85,7 @@ const CallToActionEdit = ( {
 			'has-background': backgroundColor.color,
 			'has-text-color': textColor.color,
 			[ textColor.class ]: textColor.class,
-		}
+		},
 	);
 	const textStyle = {
 		color: textColor.color,

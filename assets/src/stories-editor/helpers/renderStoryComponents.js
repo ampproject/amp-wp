@@ -42,7 +42,7 @@ const renderStoryComponents = () => {
 
 			render(
 				<StoryControls />,
-				storyControls
+				storyControls,
 			);
 		}
 
@@ -52,7 +52,7 @@ const renderStoryComponents = () => {
 
 		render(
 			<BlockNavigation />,
-			blockNavigation
+			blockNavigation,
 		);
 
 		if ( ! document.getElementById( 'amp-story-editor-carousel' ) ) {
@@ -63,7 +63,7 @@ const renderStoryComponents = () => {
 
 			render(
 				<EditorCarousel />,
-				editorCarousel
+				editorCarousel,
 			);
 		}
 	}
@@ -77,7 +77,7 @@ const renderStoryComponents = () => {
 
 			render(
 				<Shortcuts />,
-				shortcuts
+				shortcuts,
 			);
 		}
 
@@ -89,7 +89,7 @@ const renderStoryComponents = () => {
 
 			render(
 				<MediaInserter />,
-				mediaInserter
+				mediaInserter,
 			);
 		}
 
@@ -101,7 +101,7 @@ const renderStoryComponents = () => {
 
 		render(
 			<Inserter position="bottom right" />,
-			customInserter
+			customInserter,
 		);
 	}
 

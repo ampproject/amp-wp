@@ -13,6 +13,6 @@ describe( 'isVideoSizeExcessive', () => {
 	] )( 'should return excessive video size status',
 		( bytesPerSecond, expected ) => {
 			expect( isVideoSizeExcessive( bytesPerSecond ) ).toBe( expected );
-		}
+		},
 	);
 } );

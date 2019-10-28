@@ -18,14 +18,14 @@ const useDisplayPasteError = () => {
 		const removeMessage = sprintf(
 			// translators: %s: Type of block (i.e. Text, Image etc)
 			__( 'Unable to paste %s block.', 'amp' ),
-			blockType.title
+			blockType.title,
 		);
 		createErrorNotice(
 			removeMessage,
 			{
 				type: 'snackbar',
 				isDismissible: true,
-			}
+			},
 		);
 	};
 };

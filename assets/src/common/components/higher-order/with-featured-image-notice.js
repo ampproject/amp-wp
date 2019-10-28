@@ -57,5 +57,5 @@ export default createHigherOrderComponent(
 
 		return withFeaturedImageNotice;
 	},
-	'withFeaturedImageNotice'
+	'withFeaturedImageNotice',
 );

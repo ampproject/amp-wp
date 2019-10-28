@@ -98,7 +98,7 @@ describe( 'Story Templates', () => {
 				// Check that it is untitled
 				const title = await page.$eval(
 					titleSelector,
-					( element ) => element.innerText
+					( element ) => element.innerText,
 				);
 				expect( title ).toBe( 'Untitled Reusable Block' );
 			} );
@@ -171,7 +171,7 @@ describe( 'Story Templates', () => {
 			await openTemplateInserter();
 
 			const nodes = await page.$x(
-				'//*[contains(@class,"block-editor-block-preview")]'
+				'//*[contains(@class,"block-editor-block-preview")]',
 			);
 
 			// Wait until the templates are loaded and blocks accessible.

@@ -3,7 +3,7 @@
 {
 	self.addEventListener( 'install', ( event ) => {
 		event.waitUntil(
-			caches.open( wp.serviceWorker.core.cacheNames.runtime ).then( ( cache ) => cache.addAll( URLS ) )
+			caches.open( wp.serviceWorker.core.cacheNames.runtime ).then( ( cache ) => cache.addAll( URLS ) ),
 		);
 	} );
 }

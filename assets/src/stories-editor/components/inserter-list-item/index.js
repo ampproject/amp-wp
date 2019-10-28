@@ -43,7 +43,7 @@ function InserterListItem( {
 						{
 							'editor-block-types-list__item-has-children block-editor-block-types-list__item-has-children':
 								hasChildBlocksWithInserterSupport,
-						}
+						},
 					)
 				}
 				onClick={ ( event ) => {
