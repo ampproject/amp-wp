@@ -2056,58 +2056,56 @@ class AMP_Validation_Error_Taxonomy {
 		?>
 
 		<dl class="detailed">
-			<?php if ( isset( $validation_error['type'], $validation_error['code'] ) ) : ?>
-				<dt><?php esc_html_e( 'Information', 'amp' ); ?></dt>
-				<dd class="detailed">
-					<p>
-						<?php if ( self::JS_ERROR_TYPE === $validation_error['type'] ) : ?>
-								<?php
-								echo wp_kses_post(
-									sprintf(
-										/* translators: 1: script,  2: Documentation URL, 3: Documentation URL, 4: Documentation URL, 5: onclick, 6: Documentation URL, 7: amp-bind, 8: Documentation URL, 9: amp-script */
-										__( 'Arbitrary JavaScript is not allowed in AMP. You cannot use JS %1$s tags unless they are for loading <a href="%2$s">AMP components</a> (which the AMP plugin will add for you automatically). In order for a page to be served as AMP, the invalid JS code must be removed from the page. Learn more about <a href="%3$s">how AMP works</a>. As an alternative to using custom JS, please consider using a pre-built AMP functionality, including <a href="%4$s">actions and events</a> (as opposed to JS event handler attributes like %5$s) and the <a href="%6$s">%7$s</a> component; you may also add custom JS if encapsulated in the <a href="%8$s">%9$s</a>.', 'amp' ),
-										'<code>&lt;script&gt;</code>',
-										'https://amp.dev/documentation/components/',
-										'https://amp.dev/about/how-amp-works/',
-										'https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events/',
-										'<code>onclick</code>',
-										'https://amp.dev/documentation/components/amp-bind/',
-										'amp-bind',
-										'https://amp.dev/documentation/components/amp-script/',
-										'amp-script'
-									)
-								)
-								?>
-						<?php elseif ( self::CSS_ERROR_TYPE === $validation_error['type'] ) : ?>
-							<?php
-							echo wp_kses_post(
-								sprintf(
-									/* translators: 1: Documentation URL, 2: Documentation URL, 3: !important */
-									__( 'AMP allows you to <a href="%1$s">style your pages using CSS</a> in much the same way as regular HTML pages, however there are some <a href="%2$s">restrictions</a>. Nevertheless, the AMP plugin automatically inlines external stylesheets, transforms %3$s qualifiers, and uses tree shaking to remove the majority of CSS rules that do not apply to the current page. Nevertheless, AMP does have a 50KB limit and tree shaking cannot always reduce the amount of CSS under this limit; when this happens an excessive CSS error will result.', 'amp' ),
-									'https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/',
-									'https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/',
-									'<code>!important</code>'
-								)
+			<dt><?php esc_html_e( 'Information', 'amp' ); ?></dt>
+			<dd class="detailed">
+				<p>
+					<?php if ( isset( $validation_error['type'] ) && self::JS_ERROR_TYPE === $validation_error['type'] ) : ?>
+						<?php
+						echo wp_kses_post(
+							sprintf(
+								/* translators: 1: script,  2: Documentation URL, 3: Documentation URL, 4: Documentation URL, 5: onclick, 6: Documentation URL, 7: amp-bind, 8: Documentation URL, 9: amp-script */
+								__( 'Arbitrary JavaScript is not allowed in AMP. You cannot use JS %1$s tags unless they are for loading <a href="%2$s">AMP components</a> (which the AMP plugin will add for you automatically). In order for a page to be served as AMP, the invalid JS code must be removed from the page. Learn more about <a href="%3$s">how AMP works</a>. As an alternative to using custom JS, please consider using a pre-built AMP functionality, including <a href="%4$s">actions and events</a> (as opposed to JS event handler attributes like %5$s) and the <a href="%6$s">%7$s</a> component; you may also add custom JS if encapsulated in the <a href="%8$s">%9$s</a>.', 'amp' ),
+								'<code>&lt;script&gt;</code>',
+								'https://amp.dev/documentation/components/',
+								'https://amp.dev/about/how-amp-works/',
+								'https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events/',
+								'<code>onclick</code>',
+								'https://amp.dev/documentation/components/amp-bind/',
+								'amp-bind',
+								'https://amp.dev/documentation/components/amp-script/',
+								'amp-script'
 							)
-							?>
-						<?php else : ?>
-							<?php
-							echo wp_kses_post(
-								sprintf(
-									/* translators: 1: Documentation URL, 2: Documentation URL. */
-									__( 'AMP has specific set of allowed elements and attributes that are allowed in valid AMP pages. Learn about the <a href="%1$s">AMP HTML specification</a>. If an element or attribute is not allowed in AMP, it must be removed for the page to <a href="%2$s">cached and be eligible for prerendering</a>.', 'amp' ),
-									'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/',
-									'https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/how_amp_pages_are_cached/'
-								)
+						)
+						?>
+					<?php elseif ( isset( $validation_error['type'] ) && self::CSS_ERROR_TYPE === $validation_error['type'] ) : ?>
+						<?php
+						echo wp_kses_post(
+							sprintf(
+								/* translators: 1: Documentation URL, 2: Documentation URL, 3: !important */
+								__( 'AMP allows you to <a href="%1$s">style your pages using CSS</a> in much the same way as regular HTML pages, however there are some <a href="%2$s">restrictions</a>. Nevertheless, the AMP plugin automatically inlines external stylesheets, transforms %3$s qualifiers, and uses tree shaking to remove the majority of CSS rules that do not apply to the current page. Nevertheless, AMP does have a 50KB limit and tree shaking cannot always reduce the amount of CSS under this limit; when this happens an excessive CSS error will result.', 'amp' ),
+								'https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/',
+								'https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/',
+								'<code>!important</code>'
 							)
-							?>
-						<?php endif; ?>
-					</p>
-					<p>
-						<?php echo wp_kses_post( __( 'If you <strong>remove</strong> the invalid markup then it will not block this page from being served as AMP. Note that you need to check what impact the removal of the invalid markup has on the page to see if the result is acceptable. If you <strong>keep</strong> the invalid markup, then the page will not be served as AMP.', 'amp' ) ); ?>
-					</p>
-				</dd>
-			<?php endif; ?>
+						)
+						?>
+					<?php else : ?>
+						<?php
+						echo wp_kses_post(
+							sprintf(
+								/* translators: 1: Documentation URL, 2: Documentation URL. */
+								__( 'AMP has specific set of allowed elements and attributes that are allowed in valid AMP pages. Learn about the <a href="%1$s">AMP HTML specification</a>. If an element or attribute is not allowed in AMP, it must be removed for the page to <a href="%2$s">cached and be eligible for prerendering</a>.', 'amp' ),
+								'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/',
+								'https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/how_amp_pages_are_cached/'
+							)
+						)
+						?>
+					<?php endif; ?>
+				</p>
+				<p>
+					<?php echo wp_kses_post( __( 'If you <strong>remove</strong> the invalid markup then it will not block this page from being served as AMP. Note that you need to check what impact the removal of the invalid markup has on the page to see if the result is acceptable. If you <strong>keep</strong> the invalid markup, then the page will not be served as AMP.', 'amp' ) ); ?>
+				</p>
+			</dd>
 
 			<?php if ( self::INVALID_ELEMENT_CODE === $validation_error['code'] && isset( $validation_error['node_attributes'] ) ) : ?>
 				<dt><?php esc_html_e( 'Invalid markup', 'amp' ); ?></dt>
