@@ -52,8 +52,8 @@ class AMP_Carousel {
 	 */
 	public function create_and_get( $images_and_captions ) {
 		$images = [];
-		foreach ( $images_and_captions as [ $image, $caption ] ) {
-			$images[] = $image;
+		foreach ( $images_and_captions as $image_and_caption ) {
+			$images[] = $image_and_caption[0];
 		}
 
 		list( $width, $height ) = $this->get_carousel_dimensions( $images );
@@ -68,8 +68,10 @@ class AMP_Carousel {
 			]
 		);
 
-		foreach ( $images_and_captions as [ $image, $caption ] ) {
-			$slide = AMP_DOM_Utils::create_node(
+		foreach ( $images_and_captions as $image_and_caption ) {
+			$image   = $image_and_caption[0];
+			$caption = isset( $image_and_caption[1] ) ? $image_and_caption[1] : null;
+			$slide   = AMP_DOM_Utils::create_node(
 				$this->dom,
 				'div',
 				[ 'class' => 'slide' ]
