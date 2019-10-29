@@ -129,6 +129,7 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 				'width'  => $width,
 				'height' => $height,
 				'alt'    => trim( wp_strip_all_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) ), // Logic from wp_get_attachment_image().
+				'id'     => $attachment_id,
 			];
 		}
 
@@ -211,6 +212,7 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return string Rendered.
 	 */
 	public function render( $args ) {
+		$dom                        = new DOMDocument();
 		$this->did_convert_elements = true;
 
 		$args = wp_parse_args(
@@ -223,10 +225,6 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 		if ( empty( $args['images'] ) ) {
 			return '';
 		}
-
-		$max_aspect_ratio = 0;
-		$carousel_width   = 0;
-		$carousel_height  = 0;
 
 		$images = [];
 		foreach ( $args['images'] as $props ) {
@@ -241,47 +239,40 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 				$image_atts['srcset'] = $props['srcset'];
 			}
 
-			$this_aspect_ratio = $props['width'] / $props['height'];
-			if ( $this_aspect_ratio > $max_aspect_ratio ) {
-				$max_aspect_ratio = $this_aspect_ratio;
-				$carousel_width   = $props['width'];
-				$carousel_height  = $props['height'];
-			}
-
 			if ( ! empty( $args['lightbox'] ) ) {
 				$image_atts['lightbox'] = '';
 				$image_atts['on']       = 'tap:' . AMP_Img_Sanitizer::AMP_IMAGE_LIGHTBOX_ID;
 				$image_atts['role']     = 'button';
 				$image_atts['tabindex'] = 0;
 			}
-			$image = AMP_HTML_Utils::build_tag(
+			$image = AMP_DOM_Utils::create_node(
+				$dom,
 				'amp-img',
 				$image_atts
 			);
 
 			if ( ! empty( $props['href'] ) ) {
-				$image = AMP_HTML_Utils::build_tag(
+				$previous_image = $image;
+				$image          = AMP_DOM_Utils::create_node(
+					$dom,
 					'a',
 					[
 						'href' => $props['href'],
-					],
-					$image
+					]
 				);
+				$image->appendChild( $previous_image );
 			}
 
-			$images[] = $image;
+			$images[] = [ $image, wp_get_attachment_caption( $props['id'] ) ];
 		}
 
-		return AMP_HTML_Utils::build_tag(
-			'amp-carousel',
-			[
-				'width'  => $carousel_width,
-				'height' => $carousel_height,
-				'type'   => 'slides',
-				'layout' => 'responsive',
-			],
-			implode( PHP_EOL, $images )
-		);
+		$amp_carousel  = new AMP_Carousel( $dom );
+		$carousel_node = $amp_carousel->create_and_get( $images );
+
+		// Prevent an error in get_content_from_dom_node when it calls $node->parentNode->insertBefore().
+		$dom->appendChild( $carousel_node );
+
+		return AMP_DOM_Utils::get_content_from_dom_node( $dom, $carousel_node );
 	}
 
 	/**

@@ -13,24 +13,6 @@
 class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
-	 * Value used for width of amp-carousel.
-	 *
-	 * @since 1.0
-	 *
-	 * @const int
-	 */
-	const FALLBACK_WIDTH = 600;
-
-	/**
-	 * Value used for height of amp-carousel.
-	 *
-	 * @since 1.0
-	 *
-	 * @const int
-	 */
-	const FALLBACK_HEIGHT = 480;
-
-	/**
 	 * Tag.
 	 *
 	 * @since 1.0
@@ -93,12 +75,6 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		foreach ( $nodes as $node ) {
-			/**
-			 * Element
-			 *
-			 * @var DOMElement $node
-			 */
-
 			// In WordPress 5.3, the Gallery block's <ul> is wrapped in a <figure class="wp-block-gallery">, so look for that node also.
 			$gallery_node = isset( $node->parentNode ) && AMP_DOM_Utils::has_class( $node->parentNode, self::$class ) ? $node->parentNode : $node;
 			$attributes   = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $gallery_node );
@@ -149,105 +125,17 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			list( $width, $height ) = $this->get_carousel_dimensions( $node );
-
-			$amp_carousel = AMP_DOM_Utils::create_node(
-				$this->dom,
-				'amp-carousel',
-				[
-					'width'  => $width,
-					'height' => $height,
-					'type'   => 'slides',
-					'layout' => 'responsive',
-				]
-			);
-
+			$images_and_captions = [];
 			foreach ( $images as $image ) {
-				$slide = AMP_DOM_Utils::create_node(
-					$this->dom,
-					'div',
-					[ 'class' => 'slide' ]
-				);
-
-				// Ensure the image fills the entire <amp-carousel>, so the possible caption looks right.
-				if ( 'amp-img' === $image->tagName ) {
-					$image->setAttribute( 'layout', 'fill' );
-					$image->setAttribute( 'object-fit', 'cover' );
-				} elseif ( isset( $image->firstChild->tagName ) && 'amp-img' === $image->firstChild->tagName ) {
-					// If the <amp-img> is wrapped in an <a>.
-					$image->firstChild->setAttribute( 'layout', 'fill' );
-					$image->firstChild->setAttribute( 'object-fit', 'cover' );
-				}
-
-				$possible_caption_text = $this->possibly_get_caption_text( $image );
-				$slide->appendChild( $image );
-
-				// Wrap the caption in a <div> and <span>, and append it to the slide.
-				if ( $possible_caption_text ) {
-					$caption_wrapper = AMP_DOM_Utils::create_node(
-						$this->dom,
-						'div',
-						[ 'class' => 'amp-wp-gallery-caption' ]
-					);
-					$caption_span    = AMP_DOM_Utils::create_node( $this->dom, 'span', [] );
-					$text_node       = $this->dom->createTextNode( $possible_caption_text );
-
-					$caption_span->appendChild( $text_node );
-					$caption_wrapper->appendChild( $caption_span );
-					$slide->appendChild( $caption_wrapper );
-				}
-
-				$amp_carousel->appendChild( $slide );
+				$images_and_captions[] = [ $image, $this->possibly_get_caption_text( $image ) ];
 			}
 
-			$gallery_node->parentNode->replaceChild( $amp_carousel, $gallery_node );
+			$amp_carousel      = new AMP_Carousel( $this->dom );
+			$amp_carousel_node = $amp_carousel->create_and_get( $images_and_captions );
+
+			$gallery_node->parentNode->replaceChild( $amp_carousel_node, $gallery_node );
 		}
 		$this->did_convert_elements = true;
-	}
-
-	/**
-	 * Get carousel height by containing images.
-	 *
-	 * @param DOMElement $element The UL element.
-	 * @return array {
-	 *     Dimensions.
-	 *
-	 *     @type int $width  Width.
-	 *     @type int $height Height.
-	 * }
-	 */
-	protected function get_carousel_dimensions( $element ) {
-		/**
-		 * Elements.
-		 *
-		 * @var DOMElement $image
-		 */
-		$images     = $element->getElementsByTagName( 'amp-img' );
-		$num_images = $images->length;
-
-		$max_aspect_ratio = 0;
-		$carousel_width   = 0;
-		$carousel_height  = 0;
-
-		if ( 0 === $num_images ) {
-			return [ self::FALLBACK_WIDTH, self::FALLBACK_HEIGHT ];
-		}
-		foreach ( $images as $image ) {
-			if ( ! is_numeric( $image->getAttribute( 'width' ) ) || ! is_numeric( $image->getAttribute( 'height' ) ) ) {
-				continue;
-			}
-			$width  = (float) $image->getAttribute( 'width' );
-			$height = (float) $image->getAttribute( 'height' );
-
-			$this_aspect_ratio = $width / $height;
-			if ( $this_aspect_ratio > $max_aspect_ratio ) {
-				$max_aspect_ratio = $this_aspect_ratio;
-				$carousel_width   = $width;
-				$carousel_height  = $height;
-			}
-		}
-
-		return [ $carousel_width, $carousel_height ];
 	}
 
 	/**
