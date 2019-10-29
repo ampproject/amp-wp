@@ -116,14 +116,17 @@ class AMP_Carousel {
 	}
 
 	/**
-	 * Gets the carousel height by the containing images.
+	 * Gets the carousel's width and height, based on its images.
 	 *
-	 * @param array[] $images The images and captions to get the dimensions from.
+	 * This will return the width and height of the image with the widest aspect ratio,
+	 * not necessarily the image with the biggest absolute width.
+	 *
+	 * @param array $images The images to get the dimensions from.
 	 * @return array {
-	 *     Dimensions.
+	 *     The carousel dimensions.
 	 *
-	 *     @type int $width  Width.
-	 *     @type int $height Height.
+	 *     @type int $width  The width of the carousel, at index 0.
+	 *     @type int $height The height of the carousel, at index 1.
 	 * }
 	 */
 	public function get_dimensions( $images ) {
@@ -131,7 +134,7 @@ class AMP_Carousel {
 		$carousel_width   = 0;
 		$carousel_height  = 0;
 
-		if ( 0 === count( $images ) ) {
+		if ( ! $images || 0 === count( $images ) ) {
 			return [ self::FALLBACK_WIDTH, self::FALLBACK_HEIGHT ];
 		}
 

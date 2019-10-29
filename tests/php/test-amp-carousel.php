@@ -96,8 +96,12 @@ class Test_AMP_Carousel extends WP_UnitTestCase {
 		);
 
 		return [
-			'no_image_passed_as_argument'                  => [
+			'empty_array_passed_as_argument'               => [
 				[],
+				[ AMP_Carousel::FALLBACK_WIDTH, AMP_Carousel::FALLBACK_HEIGHT ],
+			],
+			'null_passed_as_argument'                      => [
+				null,
 				[ AMP_Carousel::FALLBACK_WIDTH, AMP_Carousel::FALLBACK_HEIGHT ],
 			],
 			'single_small_image_passed_as_argument'        => [
