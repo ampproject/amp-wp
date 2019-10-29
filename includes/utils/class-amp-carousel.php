@@ -47,7 +47,7 @@ class AMP_Carousel {
 	/**
 	 * Creates and gets an <amp-carousel> with the given images and captions.
 	 *
-	 * @param array[] {
+	 * @param array[] $images_and_captions {
 	 *     The images and their respective captions, if any.
 	 *
 	 *     @type DOMElement  $image A representation of an image, in index 0.
