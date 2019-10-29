@@ -60,7 +60,7 @@ export default createHigherOrderComponent(
 										'There is %s issue from AMP validation.',
 										'There are %s issues from AMP validation.',
 										errorCount,
-										'amp'
+										'amp',
 									),
 									errorCount,
 								) }
@@ -81,5 +81,5 @@ export default createHigherOrderComponent(
 			);
 		} );
 	},
-	'withValidationErrorNotice'
+	'withValidationErrorNotice',
 );

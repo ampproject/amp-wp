@@ -25,7 +25,7 @@ export default createHigherOrderComponent(
 			return {
 				attributes,
 			};
-		}
+		},
 	),
-	'withAttributes'
+	'withAttributes',
 );

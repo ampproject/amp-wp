@@ -55,11 +55,11 @@ const AnimationControls = ( {
 
 	const onAnimationStart = useCallback(
 		() => playAnimation( page, clientId ),
-		[ page, clientId, playAnimation ]
+		[ page, clientId, playAnimation ],
 	);
 	const onAnimationStop = useCallback(
 		() => stopAnimation( page, clientId ),
-		[ page, clientId, stopAnimation ]
+		[ page, clientId, stopAnimation ],
 	);
 
 	const DEFAULT_ANIMATION_DURATION = ANIMATION_DURATION_DEFAULTS[ animationType ] || 0;

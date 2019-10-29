@@ -21,5 +21,5 @@ export default registerStore(
 		initialState: {
 			...window.ampBlockEditor,
 		},
-	}
+	},
 );

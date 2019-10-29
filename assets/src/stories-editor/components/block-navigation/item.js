@@ -109,7 +109,7 @@ const BlockNavigationItem = ( { block, isSelected, onClick, unMovableBlock } ) =
 						'components-button editor-block-navigation__item-button block-editor-block-navigation__item-button',
 						{
 							'is-selected': isSelected,
-						}
+						},
 					) }
 					onClick={ onClick }
 					id={ blockElementId }
@@ -134,7 +134,7 @@ const BlockNavigationItem = ( { block, isSelected, onClick, unMovableBlock } ) =
 			'editor-block-navigation__item block-editor-block-navigation__item',
 			{
 				'block-editor-block-navigation__item-is-dragging': isDragging,
-			}
+			},
 		) } >
 			<Draggable
 				elementId={ blockElementId }
@@ -155,7 +155,7 @@ const BlockNavigationItem = ( { block, isSelected, onClick, unMovableBlock } ) =
 									'components-button editor-block-navigation__item-button block-editor-block-navigation__item-button',
 									{
 										'is-selected': isSelected,
-									}
+									},
 								) }
 								onClick={ onClick }
 								id={ blockElementId }

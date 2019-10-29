@@ -23,6 +23,6 @@ describe( 'calculateTargetScalingFactor', () => {
 	] )( 'should scale the target accordingly',
 		( width, height, expected ) => {
 			expect( calculateTargetScalingFactor( width, height ) ).toBe( expected );
-		}
+		},
 	);
 } );

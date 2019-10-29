@@ -38,7 +38,7 @@ const setup = () => {
 				wrapper.update();
 			},
 		} ),
-		{}
+		{},
 	);
 
 	const getDisplayedSnapLines = () => wrapper.find( 'line' );

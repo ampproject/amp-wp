@@ -35,7 +35,7 @@ const store = registerStore(
 			},
 			copiedMarkup: '',
 		},
-	}
+	},
 );
 
 applyMiddlewares( store );
