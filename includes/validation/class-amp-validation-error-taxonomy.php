@@ -679,6 +679,7 @@ class AMP_Validation_Error_Taxonomy {
 		$results            = [];
 		$removed_elements   = [];
 		$removed_attributes = [];
+		$removed_pis        = [];
 		$invalid_sources    = [];
 		foreach ( $validation_errors as $validation_error ) {
 			$code = isset( $validation_error['code'] ) ? $validation_error['code'] : null;
@@ -693,6 +694,11 @@ class AMP_Validation_Error_Taxonomy {
 					$removed_attributes[ $validation_error['node_name'] ] = 0;
 				}
 				++$removed_attributes[ $validation_error['node_name'] ];
+			} elseif ( 'invalid_processing_instruction' === $code ) {
+				if ( ! isset( $removed_pis[ $validation_error['node_name'] ] ) ) {
+					$removed_pis[ $validation_error['node_name'] ] = 0;
+				}
+				++$removed_pis[ $validation_error['node_name'] ];
 			}
 
 			if ( ! empty( $validation_error['sources'] ) ) {
@@ -723,7 +729,8 @@ class AMP_Validation_Error_Taxonomy {
 			],
 			compact(
 				'removed_elements',
-				'removed_attributes'
+				'removed_attributes',
+				'removed_pis'
 			),
 			$results
 		);
@@ -1762,7 +1769,11 @@ class AMP_Validation_Error_Taxonomy {
 	 * @return string The label.
 	 */
 	public static function get_details_summary_label( $validation_error ) {
-		if ( self::INVALID_ATTRIBUTE_CODE === $validation_error['code'] || self::INVALID_ELEMENT_CODE === $validation_error['code'] ) {
+		if (
+			self::INVALID_ATTRIBUTE_CODE === $validation_error['code'] ||
+			self::INVALID_ELEMENT_CODE === $validation_error['code'] ||
+			'invalid_processing_instruction' === $validation_error['code']
+		) {
 			$summary_label = sprintf( '<%s>', $validation_error['parent_name'] );
 		} elseif ( isset( $validation_error['node_name'] ) ) {
 			$summary_label = sprintf( '<%s>', $validation_error['node_name'] );
@@ -1822,6 +1833,8 @@ class AMP_Validation_Error_Taxonomy {
 					$content .= sprintf( ': <code>%s</code>', esc_html( $validation_error['node_name'] ) );
 				} elseif ( 'illegal_css_at_rule' === $validation_error['code'] ) {
 					$content .= sprintf( ': <code>@%s</code>', esc_html( $validation_error['at_rule'] ) );
+				} elseif ( 'invalid_processing_instruction' === $validation_error['code'] ) {
+					$content .= sprintf( ': <code>&lt;%s%s…%s&gt;</code>', '?', esc_html( $validation_error['node_name'] ), '?' );
 				}
 
 				if ( 'post.php' === $pagenow ) {
@@ -1995,6 +2008,8 @@ class AMP_Validation_Error_Taxonomy {
 					} else {
 						$content .= $text;
 					}
+				} else {
+					$content .= esc_html__( 'Misc', 'amp' );
 				}
 				break;
 		}
@@ -2821,6 +2836,8 @@ class AMP_Validation_Error_Taxonomy {
 				return __( 'Invalid element', 'amp' );
 			case self::INVALID_ATTRIBUTE_CODE:
 				return __( 'Invalid attribute', 'amp' );
+			case 'invalid_processing_instruction':
+				return __( 'Invalid processing instruction', 'amp' );
 			case 'file_path_not_allowed':
 				return __( 'Stylesheet file path not allowed', 'amp' );
 			case 'excessive_css':
@@ -2861,7 +2878,7 @@ class AMP_Validation_Error_Taxonomy {
 			case 'parent_name':
 				return __( 'Parent element', 'amp' );
 			case 'text':
-				return __( 'Inner text', 'amp' );
+				return __( 'Text content', 'amp' );
 			case 'type':
 				return __( 'Type', 'amp' );
 			case 'sources':

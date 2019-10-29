@@ -537,6 +537,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 				'plugin' => [ 'foo' ],
 				'theme'  => [ 'bar' ],
 			],
+			'removed_pis' => [],
 		];
 		$this->assertEquals( $expected_results, $results );
 	}
