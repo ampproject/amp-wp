@@ -1006,9 +1006,9 @@ class AMP_Validated_URL_Post_Type {
 				if ( ! empty( $error_summary['removed_pis'] ) ) {
 					foreach ( $error_summary['removed_pis'] as $name => $count ) {
 						if ( 1 === (int) $count ) {
-							$items[] = sprintf( '<code>&lt;?%s…?&gt;</code>', esc_html( $name ) );
+							$items[] = sprintf( '<code>&lt;?%s&hellip;?&gt;</code>', esc_html( $name ) );
 						} else {
-							$items[] = sprintf( '<code>&lt;?%s…?&gt;</code> (%d)', esc_html( $name ), $count );
+							$items[] = sprintf( '<code>&lt;?%s&hellip;?&gt;</code> (%d)', esc_html( $name ), $count );
 						}
 					}
 				}

@@ -1835,7 +1835,7 @@ class AMP_Validation_Error_Taxonomy {
 				} elseif ( 'illegal_css_at_rule' === $validation_error['code'] ) {
 					$content .= sprintf( ': <code>@%s</code>', esc_html( $validation_error['at_rule'] ) );
 				} elseif ( 'invalid_processing_instruction' === $validation_error['code'] ) {
-					$content .= sprintf( ': <code>&lt;%s%s…%s&gt;</code>', '?', esc_html( $validation_error['node_name'] ), '?' );
+					$content .= sprintf( ': <code>&lt;%s%s&hellip;%s&gt;</code>', '?', esc_html( $validation_error['node_name'] ), '?' );
 				}
 
 				if ( 'post.php' === $pagenow ) {
