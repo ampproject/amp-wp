@@ -2509,7 +2509,7 @@ class AMP_Theme_Support {
 	 */
 	public static function enqueue_paired_browsing_client() {
 		wp_enqueue_script(
-			'amp-paired-browsing',
+			'amp-paired-browsing-client',
 			amp_get_asset_url( '/js/amp-paired-browsing-client.js' ),
 			[ 'admin-bar' ],
 			AMP__VERSION,
@@ -2533,6 +2533,24 @@ class AMP_Theme_Support {
 		if ( ! is_admin_bar_showing() ) {
 			wp_die( esc_html__( 'The admin bar must be showing to use paired browsing mode.', 'amp' ) );
 		}
+
+		wp_enqueue_style(
+			'amp-paired-browsing-app',
+			amp_get_asset_url( '/css/amp-paired-browsing-app-compiled.css' ),
+			[ 'dashicons' ],
+			AMP__VERSION
+		);
+
+		wp_enqueue_script(
+			'amp-paired-browsing-app',
+			amp_get_asset_url( '/js/amp-paired-browsing-app.js' ),
+			[],
+			AMP__VERSION,
+			true
+		);
+
+		wp_dequeue_style( 'admin-bar' );
+		wp_dequeue_script( 'amp-paired-browsing-client' );
 
 		return AMP__DIR__ . '/templates/amp-paired-browsing.php';
 	}

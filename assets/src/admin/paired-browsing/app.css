@@ -24,6 +24,7 @@ body {
 #header ul {
 	display: flex;
 	margin: 0;
+	padding: 0 40px;
 	list-style: none;
 	align-items: center;
 	height: 100%;
@@ -34,6 +35,7 @@ body {
 }
 
 #header img {
+	display: block;
 	height: 24px;
 }
 

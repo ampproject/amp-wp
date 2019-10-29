@@ -19,7 +19,7 @@ $amp_url = add_query_arg( amp_get_slug(), '1', $url );
 	<head>
 		<meta charset="<?php bloginfo( 'charset' ); ?>">
 		<title><?php esc_html_e( 'Loading...', 'amp' ); ?></title>
-		<link rel="stylesheet" href="<?php echo esc_url( amp_get_asset_url( 'css/amp-paired-browsing-app-compiled.css' ) ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet ?>">
+		<?php print_admin_styles(); ?>
 	</head>
 	<body>
 		<section>
@@ -49,6 +49,6 @@ $amp_url = add_query_arg( amp_get_slug(), '1', $url );
 			window.ampSlug = <?php echo wp_json_encode( amp_get_slug() ); ?>;
 			window.ampPairedBrowsingQueryVar = <?php echo wp_json_encode( AMP_Theme_Support::PAIRED_BROWSING_QUERY_VAR ); ?>;
 		</script>
-		<script src="<?php echo esc_url( amp_get_asset_url( '/js/amp-paired-browsing-app.js' ) ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript ?>"></script>
+		<?php print_footer_scripts(); ?>
 	</body>
 </html>
