@@ -885,6 +885,20 @@ function amp_get_content_sanitizers( $post = null ) {
 		$current_origin .= ':' . $parsed_home_url['port'];
 	}
 
+	$amp_to_amp_linking_enabled = false;
+	if ( AMP_Options_Manager::is_website_experience_enabled() ) {
+		/**
+		 * Filters whether AMP-to-AMP linking should be enabled.
+		 *
+		 * @since 1.4.0
+		 * @param bool $amp_to_amp_linking_enabled Whether AMP-to-AMP linking should be enabled.
+		 */
+		$amp_to_amp_linking_enabled = (bool) apply_filters(
+			'amp_to_amp_linking_enabled',
+			AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Theme_Support::get_support_mode()
+		);
+	}
+
 	$sanitizers = [
 		'AMP_Core_Theme_Sanitizer'        => [
 			'template'       => get_template(),
@@ -926,6 +940,12 @@ function amp_get_content_sanitizers( $post = null ) {
 
 	if ( ! empty( $theme_support_args['nav_menu_dropdown'] ) ) {
 		$sanitizers['AMP_Nav_Menu_Dropdown_Sanitizer'] = $theme_support_args['nav_menu_dropdown'];
+	}
+
+	if ( $amp_to_amp_linking_enabled ) {
+		$sanitizers['AMP_Link_Sanitizer'] = [
+			'paired' => ! amp_is_canonical(),
+		];
 	}
 
 	/**

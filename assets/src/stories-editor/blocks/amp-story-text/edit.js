@@ -167,19 +167,20 @@ const TextBlockEdit = ( props ) => {
 				} ) }
 				style={ wrapperStyle } >
 				{ isEditing ? (
-					<RichText
-						wrapperClassName={ textWrapperClassName }
-						tagName="p"
-						// Ensure line breaks are normalised to HTML.
-						value={ content }
-						onChange={ ( nextContent ) => setAttributes( { content: nextContent } ) }
-						// The 2 following lines are necessary for pasting to work.
-						onReplace={ onReplace }
-						onSplit={ () => {} }
-						style={ textStyle }
-						className={ classnames( className, textClassNames ) }
-						placeholder={ placeholder || __( 'Write text…', 'amp' ) }
-					/>
+					<div className={ textWrapperClassName }>
+						<RichText
+							tagName="p"
+							// Ensure line breaks are normalised to HTML.
+							value={ content }
+							onChange={ ( nextContent ) => setAttributes( { content: nextContent } ) }
+							// The 2 following lines are necessary for pasting to work.
+							onReplace={ onReplace }
+							onSplit={ () => {} }
+							style={ textStyle }
+							className={ classnames( className, textClassNames ) }
+							placeholder={ placeholder || __( 'Write text…', 'amp' ) }
+						/>
+					</div>
 				) : (
 					<DraggableText
 						blockClass="wp-block-amp-story-text"
