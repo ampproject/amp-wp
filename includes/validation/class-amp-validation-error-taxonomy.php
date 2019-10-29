@@ -1772,7 +1772,8 @@ class AMP_Validation_Error_Taxonomy {
 		if (
 			self::INVALID_ATTRIBUTE_CODE === $validation_error['code'] ||
 			self::INVALID_ELEMENT_CODE === $validation_error['code'] ||
-			'invalid_processing_instruction' === $validation_error['code']
+			'invalid_processing_instruction' === $validation_error['code'] ||
+			'duplicate_element' === $validation_error['code']
 		) {
 			$summary_label = sprintf( '<%s>', $validation_error['parent_name'] );
 		} elseif ( isset( $validation_error['node_name'] ) ) {
@@ -1827,7 +1828,7 @@ class AMP_Validation_Error_Taxonomy {
 					);
 				}
 
-				if ( self::INVALID_ELEMENT_CODE === $validation_error['code'] ) {
+				if ( self::INVALID_ELEMENT_CODE === $validation_error['code'] || 'duplicate_element' === $validation_error['code'] ) {
 					$content .= sprintf( ': <code>&lt;%s&gt;</code>', esc_html( $validation_error['node_name'] ) );
 				} elseif ( self::INVALID_ATTRIBUTE_CODE === $validation_error['code'] ) {
 					$content .= sprintf( ': <code>%s</code>', esc_html( $validation_error['node_name'] ) );
@@ -2846,8 +2847,11 @@ class AMP_Validation_Error_Taxonomy {
 				return __( 'Illegal CSS at-rule', 'amp' );
 			case 'disallowed_file_extension':
 				return __( 'Disallowed CSS file extension', 'amp' );
+			case 'duplicate_element':
+				return __( 'Duplicate element', 'amp' );
 			default:
-				return __( 'Unknown error', 'amp' );
+				/* translators: %s error code */
+				return sprintf( __( 'Unknown error (%s)', 'amp' ), $error_code );
 		}
 	}
 
