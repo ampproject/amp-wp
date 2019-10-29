@@ -15,7 +15,7 @@ $amp_url = add_query_arg( amp_get_slug(), '1', $url );
 ?>
 
 <!DOCTYPE html>
-<html <?php echo language_attributes(); ?>>
+<html <?php language_attributes(); // // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 	<head>
 		<meta charset="<?php bloginfo( 'charset' ); ?>">
 		<title><?php esc_html_e( 'Loading...', 'amp' ); ?></title>
