@@ -195,6 +195,7 @@ const addAMPAttributes = ( settings, name ) => {
 			...settings.supports,
 			anchor: false,
 			align: false,
+			alignWide: false,
 		},
 	};
 };
