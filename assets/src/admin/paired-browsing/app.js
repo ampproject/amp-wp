@@ -1,4 +1,4 @@
-/* global ampSlug, ampPairedBrowsingQueryVar */
+const { ampSlug, ampPairedBrowsingQueryVar, alert, history } = window;
 
 class PairedBrowsingApp {
 	/**

@@ -1,9 +1,4 @@
 {
-  "globals": {
-    "alert": true,
-    "history": true,
-    "parent": true
-  },
   "root": true,
   "extends": [
     "plugin:@wordpress/eslint-plugin/recommended",

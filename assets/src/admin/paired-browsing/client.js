@@ -1,3 +1,5 @@
+const { parent } = window;
+
 if ( parent.pairedBrowsingApp ) {
 	window.ampPairedBrowsingClient = true;
 	const app = parent.pairedBrowsingApp;
