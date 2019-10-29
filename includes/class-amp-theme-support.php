@@ -404,7 +404,7 @@ class AMP_Theme_Support {
 	public static function finish_init() {
 		if ( self::is_paired_available() ) {
 			add_action( 'admin_bar_init', [ __CLASS__, 'enqueue_paired_browsing_client' ] );
-			add_action( 'template_redirect', [ __CLASS__, 'serve_paired_browsing_experience' ] );
+			add_filter( 'template_include', [ __CLASS__, 'serve_paired_browsing_experience' ] );
 		}
 
 		if ( ! is_amp_endpoint() ) {
@@ -2518,70 +2518,23 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Output an HTML page that acts as an interface to facilitate a side-by-side comparison of a
+	 * Includes a custom template that acts as an interface to facilitate a side-by-side comparison of a
 	 * non-AMP page and its AMP version to review any discrepancies.
+	 *
+	 * @param string $template Path of the template to include.
+	 * @return string Custom template if in paired browsing mode, else the supplied template.
 	 */
-	public static function serve_paired_browsing_experience() {
+	public static function serve_paired_browsing_experience( $template ) {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( ! isset( $_GET[ self::PAIRED_BROWSING_QUERY_VAR ] ) ) {
-			return;
+			return $template;
 		}
 
 		if ( ! is_admin_bar_showing() ) {
 			wp_die( esc_html__( 'The admin bar must be showing to use paired browsing mode.', 'amp' ) );
 		}
 
-		$url     = remove_query_arg( self::PAIRED_BROWSING_QUERY_VAR );
-		$amp_url = add_query_arg( amp_get_slug(), '1', $url );
-
-		?>
-		<!DOCTYPE html>
-		<html>
-		<head>
-			<meta charset="<?php bloginfo( 'charset' ); ?>">
-			<title><?php esc_html_e( 'Loading...', 'amp' ); ?></title>
-			<style>
-				html,body {
-					margin: 0;
-					padding: 0;
-				}
-				iframe {
-					border: 0;
-					position: absolute;
-					width: calc( 50% - 1px );
-					height: 100%;
-					top: 0;
-					bottom: 0;
-				}
-				iframe.disconnected {
-					opacity: 0.5;
-				}
-				#non-amp {
-					left: 0;
-					right: auto;
-					border-right: solid 1px #DDD;
-					background-color: red;
-				}
-				#amp {
-					border-left: solid 1px #DDD;
-					left: auto;
-					right: 0;
-					background-color: green;
-				}
-			</style>
-		</head>
-		<body>
-		<iframe src="<?php echo esc_url( $url ); ?>" id="non-amp" sandbox="allow-forms allow-scripts allow-same-origin allow-popups"></iframe>
-		<iframe src="<?php echo esc_url( $amp_url ); ?>" id="amp" sandbox="allow-forms allow-scripts allow-same-origin allow-popups"></iframe>
-		<script>
-			const ampSlug = <?php echo wp_json_encode( amp_get_slug() ); ?>;
-			const ampPairedBrowsingQueryVar = <?php echo wp_json_encode( self::PAIRED_BROWSING_QUERY_VAR ); ?>;
-		</script>
-		<script src="<?php echo esc_url( amp_get_asset_url( '/js/amp-paired-browsing-app.js' ) ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript ?>"></script>
-		</body>
-		</html>
-		<?php
-		exit;
+		return AMP__DIR__ . '/templates/amp-paired-browsing.php';
 	}
 
 	/**

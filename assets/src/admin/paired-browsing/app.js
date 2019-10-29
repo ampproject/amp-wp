@@ -1,3 +1,8 @@
+/**
+ * Internal dependencies
+ */
+import './app.css';
+
 const { ampSlug, ampPairedBrowsingQueryVar, alert, history } = window;
 
 class PairedBrowsingApp {
@@ -5,8 +10,8 @@ class PairedBrowsingApp {
 	 * Set the iframes on init.
 	 */
 	constructor() {
-		this.nonAmpIframe = document.getElementById( 'non-amp' );
-		this.ampIframe = document.getElementById( 'amp' );
+		this.nonAmpIframe = document.getElementById( 'non-amp' ).firstElementChild;
+		this.ampIframe = document.getElementById( 'amp' ).firstElementChild;
 
 		// If both iframes have loaded successfully, then let's check every second to see if any
 		// iframe has disconnected.
@@ -145,7 +150,7 @@ class PairedBrowsingApp {
 		} else {
 			// Force the non-AMP iframe to always have a non-AMP URL.
 			if ( this.documentIsAmp( win.document ) ) {
-				win.location.replace( this.removeAmpQueryVar( win.location ) );
+				win.location.replace( this.removeAmpQueryVars( win.location ) );
 				return;
 			}
 

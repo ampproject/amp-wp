@@ -176,8 +176,25 @@ const admin = {
 		'amp-paired-browsing-app': './assets/src/admin/paired-browsing/app.js',
 		'amp-paired-browsing-client': './assets/src/admin/paired-browsing/client.js',
 	},
+	module: {
+		...defaultConfig.module,
+		rules: [
+			...defaultConfig.module.rules,
+			{
+				test: /\.css$/,
+				use: [
+					MiniCssExtractPlugin.loader,
+					'css-loader',
+					'postcss-loader',
+				],
+			},
+		],
+	},
 	plugins: [
 		...defaultConfig.plugins,
+		new MiniCssExtractPlugin( {
+			filename: '../css/[name]-compiled.css',
+		} ),
 		new WebpackBar( {
 			name: 'Admin',
 			color: '#67b255',
