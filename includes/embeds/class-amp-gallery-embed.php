@@ -134,21 +134,9 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		$args = [
-			'images' => $urls,
+			'images'   => $urls,
+			'lightbox' => ! empty( $atts['lightbox'] ),
 		];
-		if ( ! empty( $atts['lightbox'] ) ) {
-			$args['lightbox'] = true;
-			$lightbox_tag     = AMP_HTML_Utils::build_tag(
-				'amp-image-lightbox',
-				[
-					'id'                           => AMP_Base_Sanitizer::AMP_IMAGE_LIGHTBOX_ID,
-					'layout'                       => 'nodisplay',
-					'data-close-button-aria-label' => __( 'Close', 'amp' ),
-				]
-			);
-			/* We need to add lightbox tag, too. @todo Could there be a better alternative for this? */
-			return $this->render( $args ) . $lightbox_tag;
-		}
 
 		return $this->render( $args );
 	}
@@ -241,9 +229,6 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 
 			if ( ! empty( $args['lightbox'] ) ) {
 				$image_atts['lightbox'] = '';
-				$image_atts['on']       = 'tap:' . AMP_Img_Sanitizer::AMP_IMAGE_LIGHTBOX_ID;
-				$image_atts['role']     = 'button';
-				$image_atts['tabindex'] = 0;
 			}
 			$image = AMP_DOM_Utils::create_node(
 				$dom,
