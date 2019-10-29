@@ -33,7 +33,7 @@ class AMP_Carousel {
 	 *
 	 * @var DOMDocument
 	 */
-	public $dom;
+	protected $dom;
 
 	/**
 	 * Instantiates the class.
@@ -47,7 +47,12 @@ class AMP_Carousel {
 	/**
 	 * Creates and gets an <amp-carousel> with the given images and captions.
 	 *
-	 * @param array[] $images_and_captions An array of arrays, with the image and its caption (if any).
+	 * @param array[] {
+	 *     The images and their respective captions, if any.
+	 *
+	 *     @type DOMElement  $image A representation of an image, in index 0.
+	 *     @type string|null $caption The caption for that image, if any, in index 1.
+	 * }
 	 * @return DOMElement A representation of the <amp-carousel>.
 	 */
 	public function create_and_get( $images_and_captions ) {
