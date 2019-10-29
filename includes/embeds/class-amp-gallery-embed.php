@@ -263,7 +263,8 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 				$image->appendChild( $previous_image );
 			}
 
-			$images_and_captions[] = [ $image, wp_get_attachment_caption( $props['id'] ) ];
+			$caption               = isset( $props['id'] ) ? wp_get_attachment_caption( $props['id'] ) : null;
+			$images_and_captions[] = [ $image, $caption ];
 		}
 
 		$amp_carousel  = new AMP_Carousel( $dom );

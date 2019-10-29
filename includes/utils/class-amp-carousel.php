@@ -56,7 +56,7 @@ class AMP_Carousel {
 			$images[] = $image_and_caption[0];
 		}
 
-		list( $width, $height ) = $this->get_carousel_dimensions( $images );
+		list( $width, $height ) = $this->get_dimensions( $images );
 		$amp_carousel           = AMP_DOM_Utils::create_node(
 			$this->dom,
 			'amp-carousel',
@@ -121,7 +121,7 @@ class AMP_Carousel {
 	 *     @type int $height Height.
 	 * }
 	 */
-	public function get_carousel_dimensions( $images ) {
+	public function get_dimensions( $images ) {
 		$max_aspect_ratio = 0;
 		$carousel_width   = 0;
 		$carousel_height  = 0;

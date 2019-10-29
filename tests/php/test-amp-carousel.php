@@ -67,7 +67,7 @@ class Test_AMP_Carousel extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Gets the testing data for test_get_carousel_dimensions.
+	 * Gets the testing data for test_get_dimensions.
 	 *
 	 * @return array[] An associate array including the $images argument and the expected return value.
 	 */
@@ -120,19 +120,19 @@ class Test_AMP_Carousel extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test get_carousel_dimensions.
+	 * Test get_dimensions.
 	 *
 	 * @dataProvider get_data_carousel_dimensions
-	 * @covers \AMP_Carousel::get_carousel_dimensions()
+	 * @covers \AMP_Carousel::get_dimensions()
 	 *
 	 * @param DOMElement[] $images The images to get the dimensions from.
 	 * @param array $expected The expected return value of the tested function.
 	 */
-	public function test_get_carousel_dimensions( $images, $expected ) {
+	public function test_get_dimensions( $images, $expected ) {
 		$amp_carousel = new AMP_Carousel( new DOMDocument() );
 		$this->assertEquals(
 			$expected,
-			$amp_carousel->get_carousel_dimensions( $images )
+			$amp_carousel->get_dimensions( $images )
 		);
 	}
 }
