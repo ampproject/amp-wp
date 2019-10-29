@@ -48,7 +48,10 @@ const applyWithSelect = withSelect( ( select ) => {
 
 		// Make sure that user did not right click topbar.
 		const toolBar = document.querySelector( '.edit-post-header' );
-		if ( toolBar.compareDocumentPosition( event.target ) === 20 ) {
+		// Disable reason: This is a valid use a bitwise here. Node is an interface from which various types of DOM API objects inherit and is present in the browser context.
+		// eslint-disable-next-line no-bitwise,no-undef
+		const isEventInsideToolbar = Boolean( toolBar.compareDocumentPosition( event.target ) & Node.DOCUMENT_POSITION_CONTAINED_BY );
+		if ( isEventInsideToolbar ) {
 			return;
 		}
 
