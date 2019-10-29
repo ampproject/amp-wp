@@ -1637,7 +1637,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			// With twentytwenty compat, the lightbox fills the entire screen, and only an inner wrapper will contain
 			// the actionable elements in the modal. Therefore, the lightbox represents the "background".
 			$close_button_xpaths[] = "//*[ @id = '{$modal_id}' ]";
-			$modal->setAttribute( 'data-toggle-target', "#{$modal_id}" );
+
+			// Then, add the inner element of the lightbox as an open button xpath.
+			// This is done to prevent the above close action from closing the modal when an inner element is clicked.
+			// Workaround found here: https://stackoverflow.com/a/45971501 .
+			$open_button_xpaths[] = "//*[ @id = '{$modal_id}' ]//*[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' modal-inner ' ) ]";
 
 			$this->wrap_modal_in_lightbox(
 				[
