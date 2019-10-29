@@ -31,7 +31,6 @@ const applyWithSelect = withSelect( ( select ) => {
 		if ( selectedBlockClientIds.length === 0 ) {
 			return;
 		}
-
 		// Let's ignore if some text has been selected.
 		const selectedText = window.getSelection().toString();
 		// Let's ignore multi-selection for now.
@@ -47,9 +46,14 @@ const applyWithSelect = withSelect( ( select ) => {
 			editLayout.appendChild( menuWrapper );
 		}
 
+		// Make sure that user did not right click topbar.
+		const toolBar = document.querySelector( '.edit-post-header' );
+		if ( toolBar.compareDocumentPosition( event.target ) === 20 ) {
+			return;
+		}
+
 		// Calculate the position to display the right click menu.
 		const wrapperDimensions = editLayout.getBoundingClientRect();
-		const toolBar = document.querySelector( '.edit-post-header' );
 
 		// If Toolbar is available then consider that as well.
 		let toolBarHeight = 0;
