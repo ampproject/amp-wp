@@ -1003,6 +1003,15 @@ class AMP_Validated_URL_Post_Type {
 						}
 					}
 				}
+				if ( ! empty( $error_summary['removed_pis'] ) ) {
+					foreach ( $error_summary['removed_pis'] as $name => $count ) {
+						if ( 1 === (int) $count ) {
+							$items[] = sprintf( '<code>&lt;?%s&hellip;?&gt;</code>', esc_html( $name ) );
+						} else {
+							$items[] = sprintf( '<code>&lt;?%s&hellip;?&gt;</code> (%d)', esc_html( $name ), $count );
+						}
+					}
+				}
 				if ( ! empty( $items ) ) {
 					$imploded_items = implode( ',</div><div>', $items );
 					echo sprintf( '<div>%s</div>', $imploded_items ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
