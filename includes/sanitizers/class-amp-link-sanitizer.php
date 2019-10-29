@@ -1,12 +1,12 @@
 <?php
 /**
- * Class AMP_Comments_Sanitizer.
+ * Class AMP_Links_Sanitizer.
  *
  * @package AMP
  */
 
 /**
- * Class AMP_Link_Sanitizer
+ * Class AMP_Link_Sanitizer.
  *
  * Adapts links for AMP-to-AMP navigation:
  *  - In paired AMP (Transitional and Reader modes), internal links get '?amp' added to them.
@@ -23,14 +23,14 @@
 class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
-	 * Default A2A meta tag content.
+	 * Default meta tag content.
 	 *
 	 * @var string
 	 */
 	const DEFAULT_META_CONTENT = 'AMP-Redirect-To; AMP.navigateTo';
 
 	/**
-	 * Placeholder for default args, to be set in child classes.
+	 * Placeholder for default arguments, to be set in child classes.
 	 *
 	 * @var array
 	 */
@@ -83,7 +83,7 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public function sanitize() {
 		if ( ! empty( $this->args['meta_content'] ) ) {
-			$this->add_a2a_meta( $this->args['meta_content'] );
+			$this->add_meta_tag( $this->args['meta_content'] );
 		}
 
 		$this->process_links();
@@ -95,7 +95,7 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string $content The content for the meta tag, for example 'AMP-Redirect-To; AMP.navigateTo'.
 	 * @return DOMElement|null The added meta element if successful.
 	 */
-	public function add_a2a_meta( $content = self::DEFAULT_META_CONTENT ) {
+	public function add_meta_tag( $content = self::DEFAULT_META_CONTENT ) {
 		$head = $this->dom->documentElement->getElementsByTagName( 'head' )->item( 0 );
 		if ( ! $head || ! $content ) {
 			return null;
