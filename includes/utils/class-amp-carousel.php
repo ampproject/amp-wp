@@ -17,14 +17,14 @@ class AMP_Carousel {
 	/**
 	 * Value used for width of amp-carousel.
 	 *
-	 * @const int
+	 * @var int
 	 */
 	const FALLBACK_WIDTH = 600;
 
 	/**
 	 * Value used for height of amp-carousel.
 	 *
-	 * @const int
+	 * @var int
 	 */
 	const FALLBACK_HEIGHT = 480;
 

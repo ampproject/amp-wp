@@ -226,7 +226,7 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 			return '';
 		}
 
-		$images = [];
+		$images_and_captions = [];
 		foreach ( $args['images'] as $props ) {
 			$image_atts = [
 				'src'    => $props['url'],
@@ -263,13 +263,13 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 				$image->appendChild( $previous_image );
 			}
 
-			$images[] = [ $image, wp_get_attachment_caption( $props['id'] ) ];
+			$images_and_captions[] = [ $image, wp_get_attachment_caption( $props['id'] ) ];
 		}
 
 		$amp_carousel  = new AMP_Carousel( $dom );
-		$carousel_node = $amp_carousel->create_and_get( $images );
+		$carousel_node = $amp_carousel->create_and_get( $images_and_captions );
 
-		// Prevent an error in get_content_from_dom_node when it calls $node->parentNode->insertBefore().
+		// Prevent an error in get_content_from_dom_node() when it calls $node->parentNode->insertBefore().
 		$dom->appendChild( $carousel_node );
 
 		return AMP_DOM_Utils::get_content_from_dom_node( $dom, $carousel_node );
