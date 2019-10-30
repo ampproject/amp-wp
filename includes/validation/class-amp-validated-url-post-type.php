@@ -1693,6 +1693,7 @@ class AMP_Validated_URL_Post_Type {
 			true
 		);
 
+		// @todo This is likely dead code.
 		$current_screen = get_current_screen();
 		if ( $current_screen && 'post' === $current_screen->base && self::POST_TYPE_SLUG === $current_screen->post_type ) {
 			$post = get_post();
