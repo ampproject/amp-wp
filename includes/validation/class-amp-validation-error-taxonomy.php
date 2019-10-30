@@ -2171,7 +2171,12 @@ class AMP_Validation_Error_Taxonomy {
 									echo '<code>';
 									$is_url = in_array( $attr_name, [ 'href', 'src' ], true );
 									if ( $is_url ) {
-										// @todo There should be a link to the file editor as well, if available.
+										// Remove non-helpful normalized version.
+										$url_query = wp_parse_url( $attr_value, PHP_URL_QUERY );
+										if ( $url_query && false !== strpos( 'ver=__normalized__', $url_query ) ) {
+											$attr_value = remove_query_arg( 'ver', $attr_value );
+										}
+
 										printf( '<a href="%s" target="_blank">', esc_url( $attr_value ) );
 									}
 									echo esc_html( $attr_value );
