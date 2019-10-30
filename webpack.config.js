@@ -195,6 +195,9 @@ const admin = {
 		new MiniCssExtractPlugin( {
 			filename: '../css/[name]-compiled.css',
 		} ),
+		new RtlCssPlugin( {
+			filename: '../css/[name]-compiled-rtl.css',
+		} ),
 		new WebpackBar( {
 			name: 'Admin',
 			color: '#67b255',

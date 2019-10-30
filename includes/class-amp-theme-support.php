@@ -2508,13 +2508,31 @@ class AMP_Theme_Support {
 	 * @return void
 	 */
 	public static function enqueue_paired_browsing_client() {
+		$asset_file   = AMP__DIR__ . '/assets/js/amp-paired-browsing-client.asset.php';
+		$asset        = require $asset_file;
+		$dependencies = array_merge( [ 'admin-bar' ], $asset['dependencies'] );
+		$version      = $asset['version'];
+
 		wp_enqueue_script(
 			'amp-paired-browsing-client',
 			amp_get_asset_url( '/js/amp-paired-browsing-client.js' ),
-			[ 'admin-bar' ],
-			AMP__VERSION,
+			$dependencies,
+			$version,
 			true
 		);
+
+		add_filter( 'script_loader_tag', [ __CLASS__, 'filter_paired_browsing_client_script_loader_tags' ], 10, 2 );
+	}
+
+	public static function filter_paired_browsing_client_script_loader_tags( $tag, $handle ) {
+		$asset_file = AMP__DIR__ . '/assets/js/amp-paired-browsing-client.asset.php';
+		$asset      = require $asset_file;
+
+		if ( in_array( $handle, $asset['dependencies'], true ) ) {
+			$tag = preg_replace( '/(?<=<script)(?=\s|>)/i', ' ' . AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, $tag );
+		}
+
+		return $tag;
 	}
 
 	/**
@@ -2537,15 +2555,22 @@ class AMP_Theme_Support {
 		wp_enqueue_style(
 			'amp-paired-browsing-app',
 			amp_get_asset_url( '/css/amp-paired-browsing-app-compiled.css' ),
-			[ 'dashicons' ],
+			[],
 			AMP__VERSION
 		);
+
+		wp_styles()->add_data( 'amp-paired-browsing-app', 'rtl', 'replace' );
+
+		$asset_file   = AMP__DIR__ . '/assets/js/amp-paired-browsing-app.asset.php';
+		$asset        = require $asset_file;
+		$dependencies = $asset['dependencies'];
+		$version      = $asset['version'];
 
 		wp_enqueue_script(
 			'amp-paired-browsing-app',
 			amp_get_asset_url( '/js/amp-paired-browsing-app.js' ),
-			[],
-			AMP__VERSION,
+			$dependencies,
+			$version,
 			true
 		);
 
