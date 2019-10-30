@@ -2524,6 +2524,15 @@ class AMP_Theme_Support {
 		add_filter( 'script_loader_tag', [ __CLASS__, 'filter_paired_browsing_client_script_loader_tags' ], 10, 2 );
 	}
 
+	/**
+	 * Add data-ampdevmode attribute to any enqueued script that the paired browsing interface uses.
+	 *
+	 * @since 1.3
+	 *
+	 * @param string $tag    The link tag for the enqueued script.
+	 * @param string $handle The script's registered handle.
+	 * @return string Tag.
+	 */
 	public static function filter_paired_browsing_client_script_loader_tags( $tag, $handle ) {
 		$asset_file = AMP__DIR__ . '/assets/js/amp-paired-browsing-client.asset.php';
 		$asset      = require $asset_file;
