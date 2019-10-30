@@ -29,7 +29,7 @@ $amp_url = add_query_arg( amp_get_slug(), '1', $url );
 						<img src="<?php echo esc_url( amp_get_asset_url( 'images/amp-white-icon.svg' ) ); ?>" alt="">
 					</li>
 					<li>
-						<span>Paired Browsing</span>
+						<span><?php esc_html_e( 'Paired Browsing', 'amp' ); ?></span>
 					</li>
 				</ul>
 			</nav>
