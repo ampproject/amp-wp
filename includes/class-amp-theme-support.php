@@ -404,6 +404,7 @@ class AMP_Theme_Support {
 	public static function finish_init() {
 		if ( self::is_paired_available() ) {
 			add_action( 'admin_bar_init', [ __CLASS__, 'enqueue_paired_browsing_client' ] );
+			add_action( 'template_redirect', [ __CLASS__, 'sanitize_url_for_paired_browsing' ] );
 			add_filter( 'template_include', [ __CLASS__, 'serve_paired_browsing_experience' ] );
 		}
 
@@ -2542,6 +2543,21 @@ class AMP_Theme_Support {
 		}
 
 		return $tag;
+	}
+
+	/**
+	 * Remove any unnecessary query vars that could hamper for the paired browsing experience.
+	 */
+	public static function sanitize_url_for_paired_browsing() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET[ self::PAIRED_BROWSING_QUERY_VAR ] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			if ( isset( $_GET[ AMP_Validated_URL_Post_Type::VALIDATE_ACTION ] ) ) {
+				$url = remove_query_arg( AMP_Validated_URL_Post_Type::VALIDATE_ACTION );
+				wp_safe_redirect( $url );
+				exit;
+			}
+		}
 	}
 
 	/**
