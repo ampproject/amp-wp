@@ -2549,14 +2549,18 @@ class AMP_Theme_Support {
 	 * Remove any unnecessary query vars that could hamper for the paired browsing experience.
 	 */
 	public static function sanitize_url_for_paired_browsing() {
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( isset( $_GET[ self::PAIRED_BROWSING_QUERY_VAR ] ) ) {
-			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			if ( isset( $_GET[ AMP_Validated_URL_Post_Type::VALIDATE_ACTION ] ) ) {
-				$url = remove_query_arg( AMP_Validated_URL_Post_Type::VALIDATE_ACTION );
-				wp_safe_redirect( $url );
-				exit;
-			}
+		if (
+			// phpcs:disable WordPress.Security.NonceVerification.Recommended
+			isset( $_GET[ self::PAIRED_BROWSING_QUERY_VAR ] ) &&
+			(
+				isset( $_GET[ amp_get_slug() ] ) ||
+				isset( $_GET[ AMP_Validated_URL_Post_Type::VALIDATE_ACTION ] )
+			)
+			// phpcs:enable
+		) {
+			$url = remove_query_arg( [ amp_get_slug(), AMP_Validated_URL_Post_Type::VALIDATE_ACTION ] );
+			wp_safe_redirect( $url );
+			exit;
 		}
 	}
 

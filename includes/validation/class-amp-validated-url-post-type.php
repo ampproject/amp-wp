@@ -1832,6 +1832,21 @@ class AMP_Validated_URL_Post_Type {
 						<?php elseif ( ! $is_amp_enabled ) : ?>
 							<?php esc_html_e( 'AMP is disabled because there is invalid markup kept. To unblock AMP from being served, either mark the invalid markup as removed or fix the code that adds the invalid markup.', 'amp' ); ?>
 						<?php endif; ?>
+
+						<?php
+						if ( $is_amp_enabled && AMP_Theme_Support::is_paired_available() ) {
+							?>
+							<div id="paired-browsing-action">
+								<a class="button button-secondary"
+									target="amp-paired-browsing"
+									href="<?php echo esc_url( add_query_arg( AMP_Theme_Support::PAIRED_BROWSING_QUERY_VAR, '1', self::get_url_from_post( $post ) ) ); ?>"
+								>
+									<?php esc_html_e( 'Start paired browsing', 'amp' ); ?>
+								</a>
+							</div>
+							<?php
+						}
+						?>
 					</div>
 
 					<div class="misc-pub-section">
