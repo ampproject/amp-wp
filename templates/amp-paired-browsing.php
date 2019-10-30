@@ -31,6 +31,9 @@ $amp_url = add_query_arg( amp_get_slug(), '1', $url );
 					<li>
 						<span><?php esc_html_e( 'Paired Browsing', 'amp' ); ?></span>
 					</li>
+					<li>
+						<span id="exit-link" class="dashicons-before dashicons-migrate"><?php esc_html_e( 'Exit', 'amp' ); ?></span>
+					</li>
 				</ul>
 			</nav>
 		</section>

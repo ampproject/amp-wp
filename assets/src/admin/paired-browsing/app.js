@@ -18,10 +18,16 @@ class PairedBrowsingApp {
 		this.nonAmpIframe = document.getElementById( 'non-amp' ).firstElementChild;
 		this.ampIframe = document.getElementById( 'amp' ).firstElementChild;
 
-		// If both iframes have loaded successfully, then let's check every second to see if any
-		// iframe has disconnected.
 		Promise.all( this.getIframeLoadedPromises() ).then( () => {
+			// Check every second to see if any iframe has disconnected.
 			setInterval( () => this.checkConnectedIframes(), 1000 );
+
+			const exitLink = document.getElementById( 'exit-link' );
+
+			exitLink.addEventListener( 'click', () => {
+				// Let's head back to the non-AMP page upon exiting.
+				window.location.replace( this.nonAmpIframe.contentWindow.location.href );
+			} );
 		} );
 	}
 
