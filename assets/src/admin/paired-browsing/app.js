@@ -1,4 +1,9 @@
 /**
+ * WordPress dependencies
+ */
+import { removeQueryArgs, addQueryArgs, hasQueryArg } from '@wordpress/url';
+
+/**
  * Internal dependencies
  */
 import './app.css';
@@ -67,44 +72,47 @@ class PairedBrowsingApp {
 	/**
 	 * Removes AMP related query variables from the supplied URL.
 	 *
-	 * @param {Location} url URL string.
+	 * @param {string} url URL string.
 	 * @return {string} Modified URL without any AMP related query variables.
 	 */
 	removeAmpQueryVars( url ) {
-		const modifiedUrl = new URL( url );
-		modifiedUrl.searchParams.delete( ampSlug );
-		modifiedUrl.searchParams.delete( 'amp_validation_errors' );
-		return modifiedUrl.href;
+		return removeQueryArgs( url, ampSlug, 'amp_validation_errors' );
 	}
 
 	/**
 	 * Adds the AMP query variable to the supplied URL.
 	 *
-	 * @param {Location} url Location object.
+	 * @param {string} url URL string.
 	 * @return {string} Modified URL with the AMP query variable.
 	 */
 	addAmpQueryVar( url ) {
-		const modifiedUrl = new URL( url );
-		modifiedUrl.searchParams.set( ampSlug, '' );
-		return modifiedUrl.href;
+		return addQueryArgs(
+			url,
+			{
+				ampSlug: '',
+			},
+		);
 	}
 
 	/**
 	 * Adds the AMP paired browsing query variable to the supplied URL.
 	 *
-	 * @param {Location} url Location object.
+	 * @param {string} url URL string.
 	 * @return {string} Modified URL with the AMP paired browsing query variable.
 	 */
 	addPairedBrowsingQueryVar( url ) {
-		const modifiedUrl = new URL( url );
-		modifiedUrl.searchParams.set( ampPairedBrowsingQueryVar, '1' );
-		return modifiedUrl.href;
+		return addQueryArgs(
+			url,
+			{
+				[ ampPairedBrowsingQueryVar ]: '1',
+			},
+		);
 	}
 
 	/**
 	 * Removes the URL hash from the supplied URL.
 	 *
-	 * @param {Location} url Location object.
+	 * @param {string} url URL string.
 	 * @return {string} Modified URL without the hash.
 	 */
 	removeUrlHash( url ) {
@@ -116,12 +124,11 @@ class PairedBrowsingApp {
 	/**
 	 * Checks if a URL has the 'amp_validation_errors' query variable.
 	 *
-	 * @param {Location} url Location object.
+	 * @param {string} url URL string.
 	 * @return {boolean} True if such query var exists, false if not.
 	 */
 	urlHasValidationErrorQueryVar( url ) {
-		const parsedUrl = new URL( url );
-		return parsedUrl.searchParams.get( 'amp_validation_errors' ) !== null;
+		return hasQueryArg( url, 'amp_validation_errors' );
 	}
 
 	/**
@@ -134,14 +141,14 @@ class PairedBrowsingApp {
 
 		if ( win === this.ampIframe.contentWindow ) {
 			if ( ! this.documentIsAmp( win.document ) ) {
-				if ( this.urlHasValidationErrorQueryVar( win.location ) ) {
+				if ( this.urlHasValidationErrorQueryVar( win.location.href ) ) {
 					// eslint-disable-next-line no-alert
 					alert( 'The AMP version of this page could not be rendered due to validation errors.' );
 
 					this.ampIframe.classList.toggle( 'disconnected', true );
 				} else if ( win.document.querySelector( 'head > link[rel=amphtml]' ) ) {
 					// Force the AMP iframe to always have an AMP URL, if an AMP version is available.
-					win.location.replace( this.addAmpQueryVar( win.location ) );
+					win.location.replace( this.addAmpQueryVar( win.location.href ) );
 					return;
 				}
 			}
@@ -150,7 +157,7 @@ class PairedBrowsingApp {
 		} else {
 			// Force the non-AMP iframe to always have a non-AMP URL.
 			if ( this.documentIsAmp( win.document ) ) {
-				win.location.replace( this.removeAmpQueryVars( win.location ) );
+				win.location.replace( this.removeAmpQueryVars( win.location.href ) );
 				return;
 			}
 
@@ -173,11 +180,11 @@ class PairedBrowsingApp {
 			oppositeWindow &&
 			oppositeWindow.location &&
 			(
-				this.removeAmpQueryVars( this.removeUrlHash( oppositeWindow.location ) ) !==
-				this.removeAmpQueryVars( this.removeUrlHash( win.location ) )
+				this.removeAmpQueryVars( this.removeUrlHash( oppositeWindow.location.href ) ) !==
+				this.removeAmpQueryVars( this.removeUrlHash( win.location.href ) )
 			)
 		) {
-			oppositeWindow.location.replace( this.removeAmpQueryVars( win.location ) );
+			oppositeWindow.location.replace( this.removeAmpQueryVars( win.location.href ) );
 			return;
 		}
 
@@ -186,7 +193,7 @@ class PairedBrowsingApp {
 		history.replaceState(
 			{},
 			'',
-			this.addPairedBrowsingQueryVar( this.removeAmpQueryVars( win.location ) ),
+			this.addPairedBrowsingQueryVar( this.removeAmpQueryVars( win.location.href ) ),
 		);
 	}
 }

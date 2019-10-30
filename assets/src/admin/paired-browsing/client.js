@@ -1,3 +1,8 @@
+/**
+ * WordPress dependencies
+ */
+import domReady from '@wordpress/dom-ready';
+
 const { parent } = window;
 
 if ( parent.pairedBrowsingApp ) {
@@ -6,7 +11,7 @@ if ( parent.pairedBrowsingApp ) {
 
 	app.registerClientWindow( window );
 
-	document.addEventListener( 'DOMContentLoaded', () => {
+	domReady( () => {
 		if ( app.documentIsAmp( document ) ) {
 			// Hide the paired browsing menu item.
 			const pairedBrowsingMenuItem = document.getElementById( 'wp-admin-bar-amp-paired-browsing' );
