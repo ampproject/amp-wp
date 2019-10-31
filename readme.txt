@@ -43,15 +43,17 @@ If you are a developer, we encourage you to [follow along](https://github.com/am
 1. Create great web experiences via AMP-powered websites or visually rich, engaging stories.
 2. Story editor enables creation of pages in a horizontal, page-based interface, with background media, with blocks that can be dragged, rotated, and animated.
 3. In the website experience, theme support enables you to reuse the active theme's templates and stylesheets; all WordPress features (menus, widgets, comments) are available in AMP.
-4. All core themes are supported, but many themes can be served as AMP with minimal changes, Otherwise, behavior is often as if JavaScript is turned off in the browser since scripts are removed.
-5. Reader mode templates are still available, but they are differ from the active theme, any validation errors are silently sanitized.
-6. Switch from Reader mode to Transitional or Standard mode in AMP settings screen. You may need to disable the admin bar in AMP if your theme has a larger amount of CSS.
-7. Make the entire site available in AMP or pick specific post types and templates; you can also opt-out on per-post basis.
-8. Plugin checks for AMP validity and will indicate when either: no issues are found, new issues need moderation, or issues block AMP from being served.
-9. The editor will surface validation issues during content authoring. The specific blocks with validation errors are indicated.
-10. Validated URLs include the list of validation errors encountered, giving control over whether sanitization for a validation error is accepted or rejected.
-11. Styles added by themes and plugins are automatically concatenated, minified, and tree-shaken to try to keep the total under 50KB of inline CSS.
-12. A WP-CLI command is provided to check the URLs on a site for AMP validity. Results are available in the admin for inspection.
+4. All core themes are supported, and many themes can be served as AMP with minimal changes, Otherwise, behavior is often as if JavaScript is turned off in the browser since scripts are removed.
+5. Reader mode templates are still available, but they are differ from the active theme.
+6. Switch from Reader mode to Transitional or Standard mode in AMP settings screen.
+7. Standard mode: Using AMP as the framework for your site, not having to maintain an AMP and non-AMP version. Mobile and desktop users get same experience.
+8. Transitional mode: A path to making your site fully AMP-compatible, with tools to assist with debugging validation issues along the way.
+9. Make the entire site available in AMP or pick specific post types and templates; you can also opt-out on per-post basis.
+10. Plugin checks for AMP validity and will indicate when: no issues are found, new issues need review, or issues block AMP from being served.
+11. The editor will surface validation issues during content authoring. The specific blocks with validation errors are indicated.
+12. Each Validated URL shows the list of validation errors encountered, giving control over whether invalid markup is removed or kept.
+13. Styles added by themes and plugins are automatically concatenated, minified, and tree-shaken to try to keep the total under 50KB of inline CSS.
+14. A WP-CLI command is provided to check the URLs on a site for AMP validity. Results are available in the admin for inspection.
 
 == Changelog ==
 

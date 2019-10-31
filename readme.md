@@ -56,41 +56,49 @@ If you are a developer, we encourage you to [follow along](https://github.com/am
 
 ![In the website experience, theme support enables you to reuse the active theme's templates and stylesheets; all WordPress features (menus, widgets, comments) are available in AMP.](wp-assets/screenshot-3.png)
 
-### All core themes are supported, but many themes can be served as AMP with minimal changes, Otherwise, behavior is often as if JavaScript is turned off in the browser since scripts are removed.
+### All core themes are supported, and many themes can be served as AMP with minimal changes, Otherwise, behavior is often as if JavaScript is turned off in the browser since scripts are removed.
 
-![All core themes are supported, but many themes can be served as AMP with minimal changes, Otherwise, behavior is often as if JavaScript is turned off in the browser since scripts are removed.](wp-assets/screenshot-4.png)
+![All core themes are supported, and many themes can be served as AMP with minimal changes, Otherwise, behavior is often as if JavaScript is turned off in the browser since scripts are removed.](wp-assets/screenshot-4.png)
 
-### Reader mode templates are still available, but they are differ from the active theme, any validation errors are silently sanitized.
+### Reader mode templates are still available, but they are differ from the active theme.
 
-![Reader mode templates are still available, but they are differ from the active theme, any validation errors are silently sanitized.](wp-assets/screenshot-5.png)
+![Reader mode templates are still available, but they are differ from the active theme.](wp-assets/screenshot-5.png)
 
-### Switch from Reader mode to Transitional or Standard mode in AMP settings screen. You may need to disable the admin bar in AMP if your theme has a larger amount of CSS.
+### Switch from Reader mode to Transitional or Standard mode in AMP settings screen.
 
-![Switch from Reader mode to Transitional or Standard mode in AMP settings screen. You may need to disable the admin bar in AMP if your theme has a larger amount of CSS.](wp-assets/screenshot-6.png)
+![Switch from Reader mode to Transitional or Standard mode in AMP settings screen.](wp-assets/screenshot-6.png)
+
+### Standard mode: Using AMP as the framework for your site, not having to maintain an AMP and non-AMP version. Mobile and desktop users get same experience.
+
+![Standard mode: Using AMP as the framework for your site, not having to maintain an AMP and non-AMP version. Mobile and desktop users get same experience.](wp-assets/screenshot-7.png)
+
+### Transitional mode: A path to making your site fully AMP-compatible, with tools to assist with debugging validation issues along the way.
+
+![Transitional mode: A path to making your site fully AMP-compatible, with tools to assist with debugging validation issues along the way.](wp-assets/screenshot-8.png)
 
 ### Make the entire site available in AMP or pick specific post types and templates; you can also opt-out on per-post basis.
 
-![Make the entire site available in AMP or pick specific post types and templates; you can also opt-out on per-post basis.](wp-assets/screenshot-7.png)
+![Make the entire site available in AMP or pick specific post types and templates; you can also opt-out on per-post basis.](wp-assets/screenshot-9.png)
 
-### Plugin checks for AMP validity and will indicate when either: no issues are found, new issues need moderation, or issues block AMP from being served.
+### Plugin checks for AMP validity and will indicate when: no issues are found, new issues need review, or issues block AMP from being served.
 
-![Plugin checks for AMP validity and will indicate when either: no issues are found, new issues need moderation, or issues block AMP from being served.](wp-assets/screenshot-8.png)
+![Plugin checks for AMP validity and will indicate when: no issues are found, new issues need review, or issues block AMP from being served.](wp-assets/screenshot-10.png)
 
 ### The editor will surface validation issues during content authoring. The specific blocks with validation errors are indicated.
 
-![The editor will surface validation issues during content authoring. The specific blocks with validation errors are indicated.](wp-assets/screenshot-9.png)
+![The editor will surface validation issues during content authoring. The specific blocks with validation errors are indicated.](wp-assets/screenshot-11.png)
 
-### Validated URLs include the list of validation errors encountered, giving control over whether sanitization for a validation error is accepted or rejected.
+### Each Validated URL shows the list of validation errors encountered, giving control over whether invalid markup is removed or kept.
 
-![Validated URLs include the list of validation errors encountered, giving control over whether sanitization for a validation error is accepted or rejected.](wp-assets/screenshot-10.png)
+![Each Validated URL shows the list of validation errors encountered, giving control over whether invalid markup is removed or kept.](wp-assets/screenshot-12.png)
 
 ### Styles added by themes and plugins are automatically concatenated, minified, and tree-shaken to try to keep the total under 50KB of inline CSS.
 
-![Styles added by themes and plugins are automatically concatenated, minified, and tree-shaken to try to keep the total under 50KB of inline CSS.](wp-assets/screenshot-11.png)
+![Styles added by themes and plugins are automatically concatenated, minified, and tree-shaken to try to keep the total under 50KB of inline CSS.](wp-assets/screenshot-13.png)
 
 ### A WP-CLI command is provided to check the URLs on a site for AMP validity. Results are available in the admin for inspection.
 
-![A WP-CLI command is provided to check the URLs on a site for AMP validity. Results are available in the admin for inspection.](wp-assets/screenshot-12.png)
+![A WP-CLI command is provided to check the URLs on a site for AMP validity. Results are available in the admin for inspection.](wp-assets/screenshot-14.png)
 
 ## Changelog ##
 
