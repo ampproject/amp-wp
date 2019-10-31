@@ -1,23 +1,23 @@
 === AMP ===
 Contributors: google, xwp, automattic, westonruter, swissspidy, miinasikk, ryankienstra, albertomedina, tweetythierry
-Tags: amp, framework, components, performance, mobile, stories
+Tags: amp, stories, mobile, optimization, accelerated mobile pages, framework, components, blocks, performance, ux, seo, official
 Requires at least: 4.9
-Tested up to: 5.2
-Stable tag: 1.3.0
+Tested up to: 5.3
+Stable tag: 1.4.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires PHP: 5.4
 
-Enable AMP on your WordPress site, the WordPress way.
+Official AMP plugin, supported by the AMP team. Formerly Accelerated Mobile Pages, AMP enables great experiences across mobile, desktop, and stories.
 
 == Description ==
 
-The [AMP Project](http://amp.dev) is an open-source initiative aiming to make the web better for all. AMP enables web experiences that are consistently fast, beautiful and high-performing across distribution platforms. The official AMP plugin for WordPress supports fully integrated AMP publishing for WordPress sites, with robust capabilities and granular publisher controls.
+The [AMP Project](http://amp.dev) is an open-source initiative aiming to make the web better for all. AMP enables web experiences that are consistently fast, beautiful and high-performing across distribution platforms. AMP formerly stood for “Accelerated Mobile Pages”, but now works completely across desktop and mobile. The official AMP plugin for WordPress supports fully integrated AMP publishing for WordPress sites, with robust capabilities and granular publisher controls.
 
 Features and capabilities provided by the plugin include:
 
 - **AMP-first Experiences**: enabling [full-site AMP experiences](https://amp.dev/about/websites) without sacrificing the flexibility of the platform or the fidelity of content.
-- **Core Theme Support**: enabling AMP compatibility for all core themes, from Twenty Ten all the way through Twenty Nineteen.
+- **Core Theme Support**: enabling AMP compatibility for all core themes, from Twenty Ten all the way through Twenty Twenty.
 - **Compatibility Tool**: when automatic conversion of markup to AMP is not possible, debug AMP validation errors with detailed information including the invalid markup and the specific components responsible on site (e.g theme, plugin, embed); validation errors are shown contextually with their respective blocks in the editor.
 - **CSS Tree Shaking**: automatically remove the majority of unused CSS to bring the total under AMP's 50KB limit; when the total after tree shaking is still over this limit, prioritization is used so that the all-important theme stylesheet important is retained, leaving less important ones to be excluded (e.g. print styles).
 - ✨ **AMP Stories** (beta): the AMP plugin enables the creation, editing, and publishing of [AMP Stories](https://amp.dev/about/stories) in WordPress; leverage the magic of storytelling the WordPress way!
@@ -43,15 +43,17 @@ If you are a developer, we encourage you to [follow along](https://github.com/am
 1. Create great web experiences via AMP-powered websites or visually rich, engaging stories.
 2. Story editor enables creation of pages in a horizontal, page-based interface, with background media, with blocks that can be dragged, rotated, and animated.
 3. In the website experience, theme support enables you to reuse the active theme's templates and stylesheets; all WordPress features (menus, widgets, comments) are available in AMP.
-4. All core themes are supported, but many themes can be served as AMP with minimal changes, Otherwise, behavior is often as if JavaScript is turned off in the browser since scripts are removed.
-5. Reader mode templates are still available, but they are differ from the active theme, any validation errors are silently sanitized.
-6. Switch from Reader mode to Transitional or Standard mode in AMP settings screen. You may need to disable the admin bar in AMP if your theme has a larger amount of CSS.
-7. Make the entire site available in AMP or pick specific post types and templates; you can also opt-out on per-post basis.
-8. Plugin checks for AMP validity and will indicate when either: no issues are found, new issues need moderation, or issues block AMP from being served.
-9. The editor will surface validation issues during content authoring. The specific blocks with validation errors are indicated.
-10. Validated URLs include the list of validation errors encountered, giving control over whether sanitization for a validation error is accepted or rejected.
-11. Styles added by themes and plugins are automatically concatenated, minified, and tree-shaken to try to keep the total under 50KB of inline CSS.
-12. A WP-CLI command is provided to check the URLs on a site for AMP validity. Results are available in the admin for inspection.
+4. All core themes are supported, and many themes can be served as AMP with minimal changes, Otherwise, behavior is often as if JavaScript is turned off in the browser since scripts are removed.
+5. Reader mode templates are still available, but they are differ from the active theme.
+6. Switch from Reader mode to Transitional or Standard mode in AMP settings screen.
+7. Standard mode: Using AMP as the framework for your site, not having to maintain an AMP and non-AMP version. Mobile and desktop users get same experience.
+8. Transitional mode: A path to making your site fully AMP-compatible, with tools to assist with debugging validation issues along the way.
+9. Make the entire site available in AMP or pick specific post types and templates; you can also opt-out on per-post basis.
+10. Plugin checks for AMP validity and will indicate when: no issues are found, new issues need review, or issues block AMP from being served.
+11. The editor will surface validation issues during content authoring. The specific blocks with validation errors are indicated.
+12. Each Validated URL shows the list of validation errors encountered, giving control over whether invalid markup is removed or kept.
+13. Styles added by themes and plugins are automatically concatenated, minified, and tree-shaken to try to keep the total under 50KB of inline CSS.
+14. A WP-CLI command is provided to check the URLs on a site for AMP validity. Results are available in the admin for inspection.
 
 == Changelog ==
 

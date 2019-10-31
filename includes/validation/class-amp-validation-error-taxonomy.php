@@ -415,8 +415,11 @@ class AMP_Validation_Error_Taxonomy {
 	/**
 	 * Determine whether a validation error should be sanitized.
 	 *
-	 * @param array $error Validation error.
+	 * @since 1.0
+	 * @see AMP_Validation_Error_Taxonomy::get_validation_error_sanitization()
+	 * @see AMP_Validation_Manager::is_sanitization_auto_accepted()
 	 *
+	 * @param array $error Validation error.
 	 * @return bool Whether error should be sanitized.
 	 */
 	public static function is_validation_error_sanitized( $error ) {
@@ -431,8 +434,10 @@ class AMP_Validation_Error_Taxonomy {
 	/**
 	 * Get the validation error sanitization.
 	 *
-	 * @param array $error Validation error.
+	 * @since 1.0
+	 * @see AMP_Validation_Manager::is_sanitization_auto_accepted()
 	 *
+	 * @param array $error Validation error.
 	 * @return array {
 	 *     Validation error sanitization.
 	 *
@@ -453,7 +458,7 @@ class AMP_Validation_Error_Taxonomy {
 		if ( ! empty( $term ) && in_array( $term->term_group, $statuses, true ) ) {
 			$term_status = $term->term_group;
 		} else {
-			$term_status = AMP_Validation_Manager::is_sanitization_auto_accepted() ? self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS : self::VALIDATION_ERROR_NEW_REJECTED_STATUS;
+			$term_status = AMP_Validation_Manager::is_sanitization_auto_accepted( $error ) ? self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS : self::VALIDATION_ERROR_NEW_REJECTED_STATUS;
 		}
 
 		$forced = false;
@@ -479,6 +484,7 @@ class AMP_Validation_Error_Taxonomy {
 		 * sanitization by.
 		 *
 		 * @since 1.0
+		 * @see AMP_Validation_Manager::is_sanitization_auto_accepted() Which controls whether an error is initially accepted or rejected for sanitization.
 		 *
 		 * @param null|bool $sanitized Whether sanitized; this is initially null, and changing it to bool causes the validation error to be forced.
 		 * @param array $error Validation error being sanitized.
@@ -494,7 +500,7 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
-	 * Automatically (forcibly) accept validation errors that arise.
+	 * Automatically (forcibly) accept validation errors that arise (that is, remove the invalid markup causing the validation errors).
 	 *
 	 * @since 1.0
 	 * @see AMP_Core_Theme_Sanitizer::get_acceptable_errors()
@@ -673,6 +679,7 @@ class AMP_Validation_Error_Taxonomy {
 		$results            = [];
 		$removed_elements   = [];
 		$removed_attributes = [];
+		$removed_pis        = [];
 		$invalid_sources    = [];
 		foreach ( $validation_errors as $validation_error ) {
 			$code = isset( $validation_error['code'] ) ? $validation_error['code'] : null;
@@ -687,6 +694,11 @@ class AMP_Validation_Error_Taxonomy {
 					$removed_attributes[ $validation_error['node_name'] ] = 0;
 				}
 				++$removed_attributes[ $validation_error['node_name'] ];
+			} elseif ( 'invalid_processing_instruction' === $code ) {
+				if ( ! isset( $removed_pis[ $validation_error['node_name'] ] ) ) {
+					$removed_pis[ $validation_error['node_name'] ] = 0;
+				}
+				++$removed_pis[ $validation_error['node_name'] ];
 			}
 
 			if ( ! empty( $validation_error['sources'] ) ) {
@@ -698,6 +710,9 @@ class AMP_Validation_Error_Taxonomy {
 						$invalid_sources[ $source['type'] ][] = $source['name'];
 					} elseif ( isset( $source['embed'] ) ) {
 						$invalid_sources['embed'] = true;
+					}
+					if ( isset( $source['block_name'] ) ) {
+						$invalid_sources['blocks'][] = $source['block_name'];
 					}
 				}
 
@@ -714,7 +729,8 @@ class AMP_Validation_Error_Taxonomy {
 			],
 			compact(
 				'removed_elements',
-				'removed_attributes'
+				'removed_attributes',
+				'removed_pis'
 			),
 			$results
 		);
@@ -798,8 +814,8 @@ class AMP_Validation_Error_Taxonomy {
 			'bulk_actions-edit-' . self::TAXONOMY_SLUG,
 			static function( $bulk_actions ) {
 				unset( $bulk_actions['delete'] );
-				$bulk_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION ] = __( 'Accept', 'amp' );
-				$bulk_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION ] = __( 'Reject', 'amp' );
+				$bulk_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION ] = __( 'Remove', 'amp' );
+				$bulk_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION ] = __( 'Keep', 'amp' );
 				return $bulk_actions;
 			}
 		);
@@ -811,32 +827,32 @@ class AMP_Validation_Error_Taxonomy {
 
 				return [
 					'cb'               => $old_columns['cb'],
-					'error'            => esc_html__( 'Error', 'amp' ),
+					'error_code'       => esc_html__( 'Error', 'amp' ),
 					'status'           => sprintf(
 						'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="%s"></div>',
-						esc_html__( 'Status', 'amp' ),
+						esc_html__( 'Markup Status', 'amp' ),
 						esc_attr(
 							sprintf(
 								'<h3>%s</h3><p>%s</p>',
-								esc_html__( 'Status', 'amp' ),
-								esc_html__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
+								esc_html__( 'Markup Status', 'amp' ),
+								__( 'When invalid markup is removed it will not block a URL from being served as AMP; the validation error will be sanitized, where the offending markup is stripped from the response to ensure AMP validity. If invalid AMP markup is kept, then URLs is occurs on will not be served as AMP pages.', 'amp' )
 							)
 						)
 					),
 					'details'          => sprintf(
 						'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="%s"></div>',
-						esc_html__( 'Details', 'amp' ),
+						esc_html__( 'Context', 'amp' ),
 						esc_attr(
 							sprintf(
 								'<h3>%s</h3><p>%s</p>',
-								esc_html__( 'Details', 'amp' ),
+								esc_html__( 'Context', 'amp' ),
 								esc_html__( 'The parent element of where the error occurred.', 'amp' )
 							)
 						)
 					),
 					'error_type'       => esc_html__( 'Type', 'amp' ),
 					'created_date_gmt' => esc_html__( 'Last Seen', 'amp' ),
-					'posts'            => esc_html__( 'Found URLs', 'amp' ),
+					'posts'            => esc_html__( 'URLs', 'amp' ),
 				];
 			}
 		);
@@ -847,7 +863,7 @@ class AMP_Validation_Error_Taxonomy {
 			static function( $sortable_columns ) {
 				$sortable_columns['created_date_gmt'] = 'term_id';
 				$sortable_columns['error_type']       = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_TYPE_QUERY_VAR;
-				$sortable_columns['error']            = AMP_Validation_Error_Taxonomy::VALIDATION_DETAILS_ERROR_CODE_QUERY_VAR;
+				$sortable_columns['error_code']       = AMP_Validation_Error_Taxonomy::VALIDATION_DETAILS_ERROR_CODE_QUERY_VAR;
 				return $sortable_columns;
 			}
 		);
@@ -884,16 +900,16 @@ class AMP_Validation_Error_Taxonomy {
 
 					wp_styles()->add_data( 'amp-validation-tooltips', 'rtl', 'replace' );
 
-					$script_deps_path    = AMP__DIR__ . '/assets/js/amp-validation-tooltips.deps.json';
-					$script_dependencies = file_exists( $script_deps_path )
-						? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-						: [];
+					$asset_file   = AMP__DIR__ . '/assets/js/amp-validation-tooltips.asset.php';
+					$asset        = require $asset_file;
+					$dependencies = $asset['dependencies'];
+					$version      = $asset['version'];
 
 					wp_register_script(
 						'amp-validation-tooltips',
 						amp_get_asset_url( 'js/amp-validation-tooltips.js' ),
-						array_merge( $script_dependencies, [ 'wp-pointer' ] ),
-						AMP__VERSION,
+						$dependencies,
+						$version,
 						true
 					);
 
@@ -925,16 +941,16 @@ class AMP_Validation_Error_Taxonomy {
 
 					wp_styles()->add_data( 'amp-validation-single-error-url', 'rtl', 'replace' );
 
-					$script_deps_path    = AMP__DIR__ . '/assets/js/amp-validation-single-error-url-details.deps.json';
-					$script_dependencies = file_exists( $script_deps_path )
-						? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-						: [];
+					$asset_file   = AMP__DIR__ . '/assets/js/amp-validation-single-error-url-details.asset.php';
+					$asset        = require $asset_file;
+					$dependencies = $asset['dependencies'];
+					$version      = $asset['version'];
 
 					wp_enqueue_script(
 						'amp-validation-single-error-url-details',
 						amp_get_asset_url( 'js/amp-validation-single-error-url-details.js' ),
-						$script_dependencies,
-						AMP__VERSION,
+						$dependencies,
+						$version,
 						true
 					);
 				}
@@ -959,9 +975,39 @@ class AMP_Validation_Error_Taxonomy {
 			'list_table_primary_column',
 			static function( $primary_column ) {
 				if ( get_current_screen() && AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG === get_current_screen()->taxonomy ) {
-					$primary_column = 'error';
+					$primary_column = 'error_code';
 				}
 				return $primary_column;
+			}
+		);
+
+		// Jump to the requested line when opening the file editor.
+		add_action(
+			'admin_enqueue_scripts',
+			function ( $hook_suffix ) {
+				if ( ! isset( $_GET['line'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+					return;
+				}
+				$line = (int) $_GET['line']; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+				if ( 'plugin-editor.php' === $hook_suffix || 'theme-editor.php' === $hook_suffix ) {
+					wp_add_inline_script(
+						'wp-theme-plugin-editor',
+						sprintf(
+							'
+								(
+									function( originalInitCodeEditor ) {
+										wp.themePluginEditor.initCodeEditor = function init() {
+											originalInitCodeEditor.apply( this, arguments );
+											this.instance.codemirror.doc.setCursor( %d - 1 );
+										};
+									}
+								)( wp.themePluginEditor.initCodeEditor );
+							',
+							wp_json_encode( $line )
+						)
+					);
+				}
 			}
 		);
 	}
@@ -1221,7 +1267,7 @@ class AMP_Validation_Error_Taxonomy {
 	 * Renders the error status filter <select> element.
 	 *
 	 * There is a difference how the errors are counted, depending on which screen this is on.
-	 * For example: Accepted Errors (10).
+	 * For example: Removed Markup (10).
 	 * This status filter <select> element is rendered on the validation error post page (Errors by URL),
 	 * and the validation error taxonomy page (Error Index).
 	 * On the taxonomy page, this simply needs to count the number of terms with a given type.
@@ -1293,16 +1339,16 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		?>
-		<label for="<?php echo esc_attr( self::VALIDATION_ERROR_STATUS_QUERY_VAR ); ?>" class="screen-reader-text"><?php esc_html_e( 'Filter by error status', 'amp' ); ?></label>
+		<label for="<?php echo esc_attr( self::VALIDATION_ERROR_STATUS_QUERY_VAR ); ?>" class="screen-reader-text"><?php esc_html_e( 'Filter by markup status', 'amp' ); ?></label>
 		<select name="<?php echo esc_attr( self::VALIDATION_ERROR_STATUS_QUERY_VAR ); ?>" id="<?php echo esc_attr( self::VALIDATION_ERROR_STATUS_QUERY_VAR ); ?>">
-			<option value="<?php echo esc_attr( self::NO_FILTER_VALUE ); ?>"><?php esc_html_e( 'All Statuses', 'amp' ); ?></option>
+			<option value="<?php echo esc_attr( self::NO_FILTER_VALUE ); ?>"><?php esc_html_e( 'All statuses', 'amp' ); ?></option>
 			<?php
 			if ( 'edit' === $screen_base ) {
 				$new_term_text = sprintf(
 					/* translators: %s: the new term count. */
 					_nx(
-						'With New Error <span class="count">(%s)</span>',
-						'With New Errors <span class="count">(%s)</span>',
+						'With new error <span class="count">(%s)</span>',
+						'With new errors <span class="count">(%s)</span>', // @todo Should this really have variations for singular/plural? Should count be part of translated string?
 						$new_term_count,
 						'terms',
 						'amp'
@@ -1313,8 +1359,8 @@ class AMP_Validation_Error_Taxonomy {
 				$new_term_text = sprintf(
 					/* translators: %s: the new term count. */
 					_nx(
-						'New Error <span class="count">(%s)</span>',
-						'New Errors <span class="count">(%s)</span>',
+						'New error <span class="count">(%s)</span>',
+						'New errors <span class="count">(%s)</span>', // @todo Should this really have variations for singular/plural? Should count be part of translated string?
 						$new_term_count,
 						'terms',
 						'amp'
@@ -1327,11 +1373,11 @@ class AMP_Validation_Error_Taxonomy {
 			<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $error_status_filter_value, $value ); ?>><?php echo wp_kses_post( $new_term_text ); ?></option>
 			<?php
 			if ( 'edit' === $screen_base ) {
-				$accepted_term_text = sprintf(
+				$removed_term_text = sprintf(
 					/* translators: %s: the accepted term count. */
 					_nx(
-						'With Accepted Error <span class="count">(%s)</span>',
-						'With Accepted Errors <span class="count">(%s)</span>',
+						'With removed markup <span class="count">(%s)</span>',
+						'With removed markup <span class="count">(%s)</span>', // @todo Should this really have variations for singular/plural? Should count be part of translated string?
 						$ack_accepted_term_count,
 						'terms',
 						'amp'
@@ -1339,11 +1385,11 @@ class AMP_Validation_Error_Taxonomy {
 					number_format_i18n( $ack_accepted_term_count )
 				);
 			} else {
-				$accepted_term_text = sprintf(
+				$removed_term_text = sprintf(
 					/* translators: %s: the accepted term count. */
 					_nx(
-						'Accepted Error <span class="count">(%s)</span>',
-						'Accepted Errors <span class="count">(%s)</span>',
+						'Removed markup <span class="count">(%s)</span>',
+						'Removed markup <span class="count">(%s)</span>', // @todo Should this really have variations for singular/plural? Should count be part of translated string?
 						$ack_accepted_term_count,
 						'terms',
 						'amp'
@@ -1353,14 +1399,14 @@ class AMP_Validation_Error_Taxonomy {
 			}
 			$value = self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS;
 			?>
-			<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $error_status_filter_value, $value ); ?>><?php echo wp_kses_post( $accepted_term_text ); ?></option>
+			<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $error_status_filter_value, $value ); ?>><?php echo wp_kses_post( $removed_term_text ); ?></option>
 			<?php
 			if ( 'edit' === $screen_base ) {
-				$rejected_term_text = sprintf(
+				$kept_term_text = sprintf(
 					/* translators: %s: the rejected term count. */
 					_nx(
-						'With Rejected Error <span class="count">(%s)</span>',
-						'With Rejected Errors <span class="count">(%s)</span>',
+						'With kept markup <span class="count">(%s)</span>',
+						'With kept markup <span class="count">(%s)</span>', // @todo Should this really have variations for singular/plural? Should count be part of translated string?
 						$ack_rejected_term_count,
 						'terms',
 						'amp'
@@ -1368,11 +1414,11 @@ class AMP_Validation_Error_Taxonomy {
 					number_format_i18n( $ack_rejected_term_count )
 				);
 			} else {
-				$rejected_term_text = sprintf(
+				$kept_term_text = sprintf(
 					/* translators: %s: the rejected term count. */
 					_nx(
-						'Rejected Error <span class="count">(%s)</span>',
-						'Rejected Errors <span class="count">(%s)</span>',
+						'Kept markup <span class="count">(%s)</span>',
+						'Kept markup <span class="count">(%s)</span>', // @todo Should this really have variations for singular/plural? Should count be part of translated string?
 						$ack_rejected_term_count,
 						'terms',
 						'amp'
@@ -1382,7 +1428,7 @@ class AMP_Validation_Error_Taxonomy {
 			}
 			$value = self::VALIDATION_ERROR_ACK_REJECTED_STATUS;
 			?>
-			<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $error_status_filter_value, $value ); ?>><?php echo wp_kses_post( $rejected_term_text ); ?></option>
+			<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $error_status_filter_value, $value ); ?>><?php echo wp_kses_post( $kept_term_text ); ?></option>
 		</select>
 		<?php
 	}
@@ -1414,34 +1460,34 @@ class AMP_Validation_Error_Taxonomy {
 		<label for="<?php echo esc_attr( self::VALIDATION_ERROR_TYPE_QUERY_VAR ); ?>" class="screen-reader-text"><?php esc_html_e( 'Filter by error type', 'amp' ); ?></label>
 		<select name="<?php echo esc_attr( self::VALIDATION_ERROR_TYPE_QUERY_VAR ); ?>" id="<?php echo esc_attr( self::VALIDATION_ERROR_TYPE_QUERY_VAR ); ?>">
 			<option value="<?php echo esc_attr( self::NO_FILTER_VALUE ); ?>">
-				<?php esc_html_e( 'All Error Types', 'amp' ); ?>
+				<?php esc_html_e( 'All types of invalid markup', 'amp' ); ?>
 			</option>
 			<option value="<?php echo esc_attr( self::HTML_ELEMENT_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::HTML_ELEMENT_ERROR_TYPE ); ?>>
 				<?php if ( 'edit' === $screen_base ) : ?>
-					<?php esc_html_e( 'With HTML (Element) Errors', 'amp' ); ?>
+					<?php esc_html_e( 'With invalid HTML elements', 'amp' ); ?>
 				<?php else : ?>
-					<?php esc_html_e( 'HTML (Element) Errors', 'amp' ); ?>
+					<?php esc_html_e( 'Invalid HTML elements', 'amp' ); ?>
 				<?php endif; ?>
 			</option>
 			<option value="<?php echo esc_attr( self::HTML_ATTRIBUTE_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::HTML_ATTRIBUTE_ERROR_TYPE ); ?>>
 				<?php if ( 'edit' === $screen_base ) : ?>
-					<?php esc_html_e( 'With HTML (Attribute) Errors', 'amp' ); ?>
+					<?php esc_html_e( 'With invalid HTML attributes', 'amp' ); ?>
 				<?php else : ?>
-					<?php esc_html_e( 'HTML (Attribute) Errors', 'amp' ); ?>
+					<?php esc_html_e( 'Invalid HTML attributes', 'amp' ); ?>
 				<?php endif; ?>
 			</option>
 			<option value="<?php echo esc_attr( self::JS_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::JS_ERROR_TYPE ); ?>>
 				<?php if ( 'edit' === $screen_base ) : ?>
-					<?php esc_html_e( 'With JS Errors', 'amp' ); ?>
+					<?php esc_html_e( 'With invalid JS', 'amp' ); ?>
 				<?php else : ?>
-					<?php esc_html_e( 'JS Errors', 'amp' ); ?>
+					<?php esc_html_e( 'Invalid JS', 'amp' ); ?>
 				<?php endif; ?>
 			</option>
 			<option value="<?php echo esc_attr( self::CSS_ERROR_TYPE ); ?>" <?php selected( $error_type_filter_value, self::CSS_ERROR_TYPE ); ?>>
 				<?php if ( 'edit' === $screen_base ) : ?>
-					<?php esc_html_e( 'With CSS Errors', 'amp' ); ?>
+					<?php esc_html_e( 'With invalid CSS', 'amp' ); ?>
 				<?php else : ?>
-					<?php esc_html_e( 'CSS Errors', 'amp' ); ?>
+					<?php esc_html_e( 'Invalid CSS', 'amp' ); ?>
 				<?php endif; ?>
 			</option>
 		</select>
@@ -1520,8 +1566,8 @@ class AMP_Validation_Error_Taxonomy {
 				$message = sprintf(
 					/* translators: %s is number of errors accepted */
 					_n(
-						'Accepted %s error. It will no longer block related URLs from being served as AMP.',
-						'Accepted %s errors. They will no longer block related URLs from being served as AMP.',
+						'Removed %s instance of invalid markup. It will no longer block related URLs from being served as AMP.',
+						'Removed %s instances of invalid markup. They will no longer block related URLs from being served as AMP.',
 						number_format_i18n( $count ),
 						'amp'
 					),
@@ -1531,8 +1577,8 @@ class AMP_Validation_Error_Taxonomy {
 				$message = sprintf(
 					/* translators: %s is number of errors rejected */
 					_n(
-						'Rejected %s error. It will continue to block related URLs from being served as AMP.',
-						'Rejected %s errors. They will continue to block related URLs from being served as AMP.',
+						'Kept %s instance of invalid markup. It will continue to block related URLs from being served as AMP.',
+						'Kept %s instances of invalid markup. They will continue to block related URLs from being served as AMP.',
 						number_format_i18n( $count ),
 						'amp'
 					),
@@ -1554,8 +1600,8 @@ class AMP_Validation_Error_Taxonomy {
 					sprintf(
 						/* translators: %s is the number of validation errors cleared */
 						_n(
-							'Cleared %s validation error that no longer occurs on the site.',
-							'Cleared %s validation errors that no longer occur on the site.',
+							'Cleared %s validation error for invalid markup that no longer occurs on the site.',
+							'Cleared %s validation errors for invalid markup that no longer occur on the site.',
 							$cleared_count,
 							'amp'
 						),
@@ -1591,7 +1637,7 @@ class AMP_Validation_Error_Taxonomy {
 
 			if ( 'post.php' === $pagenow ) {
 				$actions['details'] = sprintf(
-					'<button type="button" aria-label="%s" class="single-url-detail-toggle">%s</button>',
+					'<button type="button" aria-label="%s" class="single-url-detail-toggle button-link">%s</button>',
 					esc_attr__( 'Toggle error details', 'amp' ),
 					esc_html__( 'Details', 'amp' )
 				);
@@ -1611,28 +1657,34 @@ class AMP_Validation_Error_Taxonomy {
 				);
 			}
 
-			// @todo We should consider reversing the order.
-			// Only add the 'Reject' and 'Accept' links to the index page, not the individual URL page.
-			$sanitization = self::get_validation_error_sanitization( json_decode( $term->description, true ) );
-			if ( 'edit-tags.php' === $pagenow && self::VALIDATION_ERROR_ACK_REJECTED_STATUS !== $sanitization['term_status'] ) {
-				$actions[ self::VALIDATION_ERROR_REJECT_ACTION ] = sprintf(
-					'<a href="%s">%s</a>',
-					wp_nonce_url(
-						add_query_arg( array_merge( [ 'action' => self::VALIDATION_ERROR_REJECT_ACTION ], compact( 'term_id' ) ) ),
-						self::VALIDATION_ERROR_REJECT_ACTION
-					),
-					esc_html__( 'Reject', 'amp' )
-				);
-			}
-			if ( 'edit-tags.php' === $pagenow && self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $sanitization['term_status'] ) {
-				$actions[ self::VALIDATION_ERROR_ACCEPT_ACTION ] = sprintf(
-					'<a href="%s">%s</a>',
-					wp_nonce_url(
-						add_query_arg( array_merge( [ 'action' => self::VALIDATION_ERROR_ACCEPT_ACTION ], compact( 'term_id' ) ) ),
-						self::VALIDATION_ERROR_ACCEPT_ACTION
-					),
-					esc_html__( 'Accept', 'amp' )
-				);
+			// Only add the 'Remove' and 'Keep' links to the index page, not the individual URL page.
+			if ( 'edit-tags.php' === $pagenow ) {
+				$sanitization = self::get_validation_error_sanitization( json_decode( $term->description, true ) );
+
+				if ( self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $sanitization['status'] ) {
+					$actions[ self::VALIDATION_ERROR_ACCEPT_ACTION ] = sprintf(
+						'<a href="%s">%s</a>',
+						wp_nonce_url(
+							add_query_arg( array_merge( [ 'action' => self::VALIDATION_ERROR_ACCEPT_ACTION ], compact( 'term_id' ) ) ),
+							self::VALIDATION_ERROR_ACCEPT_ACTION
+						),
+						esc_html(
+							self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $sanitization['term_status'] ? __( 'Confirm removed', 'amp' ) : __( 'Remove', 'amp' )
+						)
+					);
+				}
+				if ( self::VALIDATION_ERROR_ACK_REJECTED_STATUS !== $sanitization['status'] ) {
+					$actions[ self::VALIDATION_ERROR_REJECT_ACTION ] = sprintf(
+						'<a href="%s">%s</a>',
+						wp_nonce_url(
+							add_query_arg( array_merge( [ 'action' => self::VALIDATION_ERROR_REJECT_ACTION ], compact( 'term_id' ) ) ),
+							self::VALIDATION_ERROR_REJECT_ACTION
+						),
+						esc_html(
+							self::VALIDATION_ERROR_NEW_REJECTED_STATUS === $sanitization['term_status'] ? __( 'Confirm kept', 'amp' ) : __( 'Keep', 'amp' )
+						)
+					);
+				}
 			}
 		}
 		return $actions;
@@ -1697,10 +1749,10 @@ class AMP_Validation_Error_Taxonomy {
 				return esc_html__( 'JS', 'amp' );
 
 			case 'html_element_error':
-				return esc_html__( 'HTML (Element)', 'amp' );
+				return esc_html__( 'HTML element', 'amp' );
 
 			case 'html_attribute_error':
-				return esc_html__( 'HTML (Attribute)', 'amp' );
+				return esc_html__( 'HTML attribute', 'amp' );
 
 			case 'css_error':
 				return esc_html__( 'CSS', 'amp' );
@@ -1717,7 +1769,12 @@ class AMP_Validation_Error_Taxonomy {
 	 * @return string The label.
 	 */
 	public static function get_details_summary_label( $validation_error ) {
-		if ( self::INVALID_ATTRIBUTE_CODE === $validation_error['code'] || self::INVALID_ELEMENT_CODE === $validation_error['code'] ) {
+		if (
+			self::INVALID_ATTRIBUTE_CODE === $validation_error['code'] ||
+			self::INVALID_ELEMENT_CODE === $validation_error['code'] ||
+			'invalid_processing_instruction' === $validation_error['code'] ||
+			'duplicate_element' === $validation_error['code']
+		) {
 			$summary_label = sprintf( '<%s>', $validation_error['parent_name'] );
 		} elseif ( isset( $validation_error['node_name'] ) ) {
 			$summary_label = sprintf( '<%s>', $validation_error['node_name'] );
@@ -1747,17 +1804,17 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		switch ( $column_name ) {
-			case 'error':
+			case 'error_code':
 				if ( 'post.php' === $pagenow ) {
 					$content .= sprintf(
 						'<button type="button" aria-label="%s" class="single-url-detail-toggle">',
 						esc_attr__( 'Toggle error details', 'amp' )
 					);
-					$content .= sprintf( '<code>%s</code>', esc_html( $validation_error['code'] ) );
+					$content .= self::get_error_title_from_code( $validation_error['code'] );
 				} else {
 					$content .= '<p>';
 					$content .= sprintf(
-						'<a href="%s" class="error-code">%s</a>',
+						'<a href="%s">%s',
 						admin_url(
 							add_query_arg(
 								[
@@ -1767,21 +1824,24 @@ class AMP_Validation_Error_Taxonomy {
 								'edit.php'
 							)
 						),
-						esc_html( $validation_error['code'] )
+						esc_html( self::get_error_title_from_code( $validation_error['code'] ) )
 					);
 				}
 
-				if ( self::INVALID_ELEMENT_CODE === $validation_error['code'] ) {
+				if ( self::INVALID_ELEMENT_CODE === $validation_error['code'] || 'duplicate_element' === $validation_error['code'] ) {
 					$content .= sprintf( ': <code>&lt;%s&gt;</code>', esc_html( $validation_error['node_name'] ) );
 				} elseif ( self::INVALID_ATTRIBUTE_CODE === $validation_error['code'] ) {
-					$content .= sprintf( ': <code>[%s]</code>', esc_html( $validation_error['node_name'] ) );
+					$content .= sprintf( ': <code>%s</code>', esc_html( $validation_error['node_name'] ) );
 				} elseif ( 'illegal_css_at_rule' === $validation_error['code'] ) {
 					$content .= sprintf( ': <code>@%s</code>', esc_html( $validation_error['at_rule'] ) );
+				} elseif ( 'invalid_processing_instruction' === $validation_error['code'] ) {
+					$content .= sprintf( ': <code>&lt;%s%s&hellip;%s&gt;</code>', '?', esc_html( $validation_error['node_name'] ), '?' );
 				}
 
 				if ( 'post.php' === $pagenow ) {
 					$content .= '</button>';
 				} else {
+					$content .= '</a>';
 					$content .= '</p>';
 				}
 
@@ -1791,58 +1851,44 @@ class AMP_Validation_Error_Taxonomy {
 
 				break;
 			case 'status':
+				// Output whether the validation error has been seen via hidden field since we can't set the 'new' class on the <tr> directly.
+				// This will get read via amp-validated-url-post-edit-screen.js.
+				$is_new   = ! ( $term->term_group & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK );
+				$content .= sprintf( '<input class="amp-validation-error-new" type="hidden" value="%d">', (int) $is_new );
+
+				$is_removed = (bool) ( $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
+
 				if ( 'post.php' === $pagenow ) {
-					$select_name = sprintf( '%s[%s]', AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR, $term->slug );
+					$status_select_name = sprintf( '%s[%s]', AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR, $term->slug );
 
-					switch ( $term->term_group ) {
-						case self::VALIDATION_ERROR_NEW_REJECTED_STATUS:
-							$img_src = 'baseline-error-red';
-							break;
-						case self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS:
-							$img_src = 'baseline-error-green';
-							break;
-						case self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS:
-							$img_src = 'baseline-check-circle-green';
-							break;
-						case self::VALIDATION_ERROR_ACK_REJECTED_STATUS:
-							$img_src = 'error-rejected';
-							break;
-					}
-
-					if ( ! isset( $img_src ) ) {
-						break;
+					if ( $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK ) {
+						$img_src = 'amp-logo-green';
+					} else {
+						$img_src = 'amp-logo-red';
 					}
 
 					ob_start();
 					?>
-					<img src="<?php echo esc_url( amp_get_asset_url( 'images/' . $img_src . '.svg' ) ); ?>">
-					<label for="<?php echo esc_attr( $select_name ); ?>" class="screen-reader-text">
-						<?php esc_html_e( 'Status:', 'amp' ); ?>
-					</label>
-					<select class="amp-validation-error-status" id="<?php echo esc_attr( $select_name ); ?>" name="<?php echo esc_attr( $select_name ); ?>">
-						<?php if ( self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $term->term_group || self::VALIDATION_ERROR_NEW_REJECTED_STATUS === $term->term_group ) : ?>
-
-								<?php if ( self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $term->term_group ) : ?>
-								<option disabled selected value="" data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/baseline-error-green.svg' ) ); ?>">
-									<?php esc_html_e( 'New Accepted', 'amp' ); ?>
-								<?php else : ?>
-								<option disabled selected value="" data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/baseline-error-red.svg' ) ); ?>">
-									<?php esc_html_e( 'New Rejected', 'amp' ); ?>
-								<?php endif; ?>
+					<div class="amp-validation-error-status-dropdown">
+						<img src="<?php echo esc_url( amp_get_asset_url( 'images/' . $img_src . '.svg' ) ); ?>">
+						<label for="<?php echo esc_attr( $status_select_name ); ?>" class="screen-reader-text">
+							<?php esc_html_e( 'Markup Status', 'amp' ); ?>
+						</label>
+						<select class="amp-validation-error-status" id="<?php echo esc_attr( $status_select_name ); ?>" name="<?php echo esc_attr( $status_select_name ); ?>">
+							<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS ); ?>" <?php selected( $is_removed ); ?> data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/amp-logo-green.svg' ) ); ?>">
+								<?php esc_html_e( 'Removed', 'amp' ); ?>
 							</option>
-						<?php endif; ?>
-						<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS ); ?>" <?php selected( self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS, $term->term_group ); ?> data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/baseline-check-circle-green.svg' ) ); ?>">
-							<?php esc_html_e( 'Accepted', 'amp' ); ?>
-						</option>
-						<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACK_REJECTED_STATUS ); ?>" <?php selected( self::VALIDATION_ERROR_ACK_REJECTED_STATUS, $term->term_group ); ?> data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/error-rejected.svg' ) ); ?>">
-							<?php esc_html_e( 'Rejected', 'amp' ); ?>
-						</option>
-					</select>
+							<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACK_REJECTED_STATUS ); ?>" <?php selected( ! $is_removed ); ?> data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/amp-logo-red.svg' ) ); ?>">
+								<?php esc_html_e( 'Kept', 'amp' ); ?>
+							</option>
+						</select>
+						</div>
 					<?php
 					$content .= ob_get_clean();
 				} else {
 					$sanitization = self::get_validation_error_sanitization( $validation_error );
 					$content     .= self::get_status_text_with_icon( $sanitization );
+					$content     .= sprintf( '<input class="amp-validation-error-status" type="hidden" value="%d">', (int) $is_removed );
 				}
 				break;
 			case 'created_date_gmt':
@@ -1901,11 +1947,11 @@ class AMP_Validation_Error_Taxonomy {
 					$attributes         = [];
 					$attributes_heading = '';
 					if ( ! empty( $validation_error['node_attributes'] ) ) {
-						$attributes_heading = sprintf( '<div class="details-attributes__title"><code>%s</code></div>', esc_html__( 'Element attributes:', 'amp' ) );
+						$attributes_heading = sprintf( '<div class="details-attributes__title">%s:</div>', esc_html( self::get_source_key_label( 'node_attributes', $validation_error ) ) );
 						$attributes         = $validation_error['node_attributes'];
 					} elseif ( ! empty( $validation_error['element_attributes'] ) ) {
-						$attributes_heading = sprintf( '<div class="details-attributes__title"><code>%s</code></div>', esc_html__( 'Other attributes:', 'amp' ) );
 						$attributes         = $validation_error['element_attributes'];
+						$attributes_heading = sprintf( '<div class="details-attributes__title">%s:</div>', esc_html( self::get_source_key_label( 'element_attributes', $validation_error ) ) );
 					}
 
 					if ( empty( $attributes ) ) {
@@ -1922,7 +1968,7 @@ class AMP_Validation_Error_Taxonomy {
 						foreach ( $attributes as $attr => $value ) {
 							$content .= sprintf( '<li><span class="details-attributes__attr">%s</span>', esc_html( $attr ) );
 
-							if ( isset( $value ) ) {
+							if ( ! empty( $value ) ) {
 								$content .= sprintf( ': <span class="details-attributes__value">%s</span>', esc_html( $value ) );
 							}
 
@@ -1963,6 +2009,8 @@ class AMP_Validation_Error_Taxonomy {
 					} else {
 						$content .= $text;
 					}
+				} else {
+					$content .= esc_html__( 'Misc', 'amp' );
 				}
 				break;
 		}
@@ -1979,7 +2027,7 @@ class AMP_Validation_Error_Taxonomy {
 		return array_merge(
 			$sortable_columns,
 			[
-				'error'      => self::VALIDATION_DETAILS_ERROR_CODE_QUERY_VAR,
+				'error_code' => self::VALIDATION_DETAILS_ERROR_CODE_QUERY_VAR,
 				'error_type' => self::VALIDATION_ERROR_TYPE_QUERY_VAR,
 			]
 		);
@@ -2006,70 +2054,159 @@ class AMP_Validation_Error_Taxonomy {
 
 		ob_start();
 		?>
-		<ul class="detailed">
+
+		<dl class="detailed">
+			<dt><?php esc_html_e( 'Information', 'amp' ); ?></dt>
+			<dd class="detailed">
+				<p>
+					<?php if ( isset( $validation_error['type'] ) && self::JS_ERROR_TYPE === $validation_error['type'] ) : ?>
+						<?php
+						echo wp_kses_post(
+							sprintf(
+								/* translators: 1: script,  2: Documentation URL, 3: Documentation URL, 4: Documentation URL, 5: onclick, 6: Documentation URL, 7: amp-bind, 8: Documentation URL, 9: amp-script */
+								__( 'Arbitrary JavaScript is not allowed in AMP. You cannot use JS %1$s tags unless they are for loading <a href="%2$s">AMP components</a> (which the AMP plugin will add for you automatically). In order for a page to be served as AMP, the invalid JS code must be removed from the page. Learn more about <a href="%3$s">how AMP works</a>. As an alternative to using custom JS, please consider using a pre-built AMP functionality, including <a href="%4$s">actions and events</a> (as opposed to JS event handler attributes like %5$s) and the <a href="%6$s">%7$s</a> component; you may also add custom JS if encapsulated in the <a href="%8$s">%9$s</a>.', 'amp' ),
+								'<code>&lt;script&gt;</code>',
+								'https://amp.dev/documentation/components/',
+								'https://amp.dev/about/how-amp-works/',
+								'https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events/',
+								'<code>onclick</code>',
+								'https://amp.dev/documentation/components/amp-bind/',
+								'amp-bind',
+								'https://amp.dev/documentation/components/amp-script/',
+								'amp-script'
+							)
+						)
+						?>
+					<?php elseif ( isset( $validation_error['type'] ) && self::CSS_ERROR_TYPE === $validation_error['type'] ) : ?>
+						<?php
+						echo wp_kses_post(
+							sprintf(
+								/* translators: 1: Documentation URL, 2: Documentation URL, 3: !important */
+								__( 'AMP allows you to <a href="%1$s">style your pages using CSS</a> in much the same way as regular HTML pages, however there are some <a href="%2$s">restrictions</a>. Nevertheless, the AMP plugin automatically inlines external stylesheets, transforms %3$s qualifiers, and uses tree shaking to remove the majority of CSS rules that do not apply to the current page. Nevertheless, AMP does have a 50KB limit and tree shaking cannot always reduce the amount of CSS under this limit; when this happens an excessive CSS error will result.', 'amp' ),
+								'https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/',
+								'https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/',
+								'<code>!important</code>'
+							)
+						)
+						?>
+					<?php else : ?>
+						<?php
+						echo wp_kses_post(
+							sprintf(
+								/* translators: 1: Documentation URL, 2: Documentation URL. */
+								__( 'AMP has specific set of allowed elements and attributes that are allowed in valid AMP pages. Learn about the <a href="%1$s">AMP HTML specification</a>. If an element or attribute is not allowed in AMP, it must be removed for the page to <a href="%2$s">cached and be eligible for prerendering</a>.', 'amp' ),
+								'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/',
+								'https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/how_amp_pages_are_cached/'
+							)
+						)
+						?>
+					<?php endif; ?>
+				</p>
+				<p>
+					<?php echo wp_kses_post( __( 'If you <strong>remove</strong> the invalid markup then it will not block this page from being served as AMP. Note that you need to check what impact the removal of the invalid markup has on the page to see if the result is acceptable. If you <strong>keep</strong> the invalid markup, then the page will not be served as AMP.', 'amp' ) ); ?>
+				</p>
+			</dd>
+
 			<?php if ( self::INVALID_ELEMENT_CODE === $validation_error['code'] && isset( $validation_error['node_attributes'] ) ) : ?>
-				<li>
-					<details open>
-						<summary><code><?php esc_html_e( 'Invalid markup:', 'amp' ); ?></code></summary>
-						<div class="detailed">
-							<mark>
-							<?php
-							echo '&lt;' . esc_html( $validation_error['node_name'] );
-							if ( count( $validation_error['node_attributes'] ) > 0 ) {
-								echo ' &hellip; ';
-							}
-							echo '&gt;';
-							?>
-							</mark>
-						<div>
-					</details>
-				</li>
+				<dt><?php esc_html_e( 'Invalid markup', 'amp' ); ?></dt>
+				<dd class="detailed">
+					<code>
+						<mark>
+						<?php
+						echo '&lt;' . esc_html( $validation_error['node_name'] );
+						if ( count( $validation_error['node_attributes'] ) > 0 ) {
+							echo ' &hellip; ';
+						}
+						echo '&gt;';
+						?>
+						</mark>
+					</code>
+				</dd>
 			<?php elseif ( self::INVALID_ATTRIBUTE_CODE === $validation_error['code'] && isset( $validation_error['element_attributes'] ) ) : ?>
-				<li>
-					<details open>
-						<summary><code><?php esc_html_e( 'Invalid markup:', 'amp' ); ?></code></summary>
-							<div class="detailed">
-							<?php
-							echo '&lt;' . esc_html( $validation_error['parent_name'] );
-							if ( count( $validation_error['element_attributes'] ) > 1 ) {
-								echo ' &hellip;';
-							}
-							echo '<mark>';
-							printf( ' %s="%s"', esc_html( $validation_error['node_name'] ), esc_html( $validation_error['element_attributes'][ $validation_error['node_name'] ] ) );
-							echo '</mark>';
-							if ( count( $validation_error['element_attributes'] ) > 1 ) {
-								echo ' &hellip;';
-							}
-							echo '&gt;';
-							?>
-					</details>
-				</li>
+				<dt><?php esc_html_e( 'Invalid markup', 'amp' ); ?></dt>
+				<dd class="detailed">
+					<code>
+						<?php
+						echo '&lt;' . esc_html( $validation_error['parent_name'] );
+						if ( count( $validation_error['element_attributes'] ) > 1 ) {
+							echo ' &hellip;';
+						}
+						echo '<mark>';
+						printf( ' %s="%s"', esc_html( $validation_error['node_name'] ), esc_html( $validation_error['element_attributes'][ $validation_error['node_name'] ] ) );
+						echo '</mark>';
+						if ( count( $validation_error['element_attributes'] ) > 1 ) {
+							echo ' &hellip;';
+						}
+						echo '&gt;';
+						?>
+					</code>
+				</dd>
 			<?php endif; ?>
+
 			<?php foreach ( $validation_error as $key => $value ) : ?>
-				<li>
-					<details <?php echo esc_attr( 'sources' === $key ? '' : 'open' ); ?>>
-						<summary><code><?php echo esc_html( $key ); ?></code></summary>
-						<div class="detailed">
-							<?php if ( is_string( $value ) ) : ?>
-								<?php echo esc_html( $value ); ?>
-							<?php elseif ( 'sources' === $key ) : ?>
-								<pre><?php echo esc_html( wp_json_encode( $value, 128 /* JSON_PRETTY_PRINT */ | 64 /* JSON_UNESCAPED_SLASHES */ ) ); ?></pre>
-							<?php elseif ( is_array( $value ) ) : ?>
-								<?php foreach ( $value as $value_key => $attr ) : ?>
-									<?php
-									printf( '<strong>%s</strong>', esc_html( $value_key ) );
-									if ( ! empty( $attr ) ) :
-										printf( ': %s', esc_html( $attr ) );
-									endif;
-									?>
-									<br />
-								<?php endforeach; ?>
-							<?php endif; ?>
-						</div>
-					</details>
-				</li>
+				<?php
+				$is_element_attributes = ( 'node_attributes' === $key || 'element_attributes' === $key );
+				if ( $is_element_attributes && empty( $value ) ) {
+					continue;
+				}
+				if ( in_array( $key, [ 'code', 'type' ], true ) ) {
+					continue; // Handled above.
+				}
+				?>
+				<dt><?php echo esc_html( self::get_source_key_label( $key, $validation_error ) ); ?></dt>
+				<dd class="detailed">
+					<?php if ( in_array( $key, [ 'node_name', 'parent_name' ], true ) ) : ?>
+						<code><?php echo esc_html( $value ); ?></code>
+					<?php elseif ( 'sources' === $key ) : ?>
+						<?php self::render_sources( $value ); ?>
+					<?php elseif ( $is_element_attributes ) : ?>
+						<table class="element-attributes">
+							<?php foreach ( $value as $attr_name => $attr_value ) : ?>
+								<tr>
+								<?php
+								$attr_name_class = empty( $attr_value ) ? '' : 'has-attr-value';
+								printf( '<th class="%1$s"><code>%2$s</code></th>', esc_attr( $attr_name_class ), esc_html( $attr_name ) );
+								echo '<td>';
+								if ( ! empty( $attr_value ) ) {
+									echo '<code>';
+									$is_url = in_array( $attr_name, [ 'href', 'src' ], true );
+									if ( $is_url ) {
+										// Remove non-helpful normalized version.
+										$url_query = wp_parse_url( $attr_value, PHP_URL_QUERY );
+										if ( $url_query && false !== strpos( 'ver=__normalized__', $url_query ) ) {
+											$attr_value = remove_query_arg( 'ver', $attr_value );
+										}
+
+										printf( '<a href="%s" target="_blank">', esc_url( $attr_value ) );
+									}
+									echo esc_html( $attr_value );
+									if ( $is_url ) {
+										echo '</a>';
+									}
+									echo '</code>';
+								}
+
+								echo '</td>';
+								?>
+								</tr>
+							<?php endforeach; ?>
+						</table>
+					<?php elseif ( is_array( $value ) ) : ?>
+						<?php foreach ( $value as $value_key => $attr ) : ?>
+							<?php
+							printf( '<strong>%s</strong>', esc_html( $value_key ) );
+							if ( ! empty( $attr ) ) :
+								printf( ': %s', esc_html( $attr ) );
+							endif;
+							?>
+							<br />
+						<?php endforeach; ?>
+					<?php elseif ( is_string( $value ) ) : ?>
+						<?php echo esc_html( $value ); ?>
+					<?php endif; ?>
+				</dd>
 			<?php endforeach; ?>
-		</ul>
+		</dl>
 
 		<?php
 
@@ -2078,6 +2215,426 @@ class AMP_Validation_Error_Taxonomy {
 			self::get_details_summary_label( $validation_error ),
 			ob_get_clean()
 		);
+	}
+
+	/**
+	 * Find a plugin from a slug.
+	 *
+	 * A slug is a plugin directory name like 'amp' or if the plugin is just a single file, then the PHP file in
+	 * the plugins directory.
+	 *
+	 * @param string $plugin_slug Plugin slug.
+	 * @return array|null
+	 */
+	public static function get_plugin_from_slug( $plugin_slug ) {
+		$plugins = get_plugins();
+		if ( isset( $plugins[ $plugin_slug ] ) ) {
+			return [
+				'name' => $plugin_slug,
+				'data' => $plugins[ $plugin_slug ],
+			];
+		}
+		foreach ( $plugins as $plugin_file => $plugin_data ) {
+			if ( strtok( $plugin_file, '/' ) === $plugin_slug ) {
+				return [
+					'name' => $plugin_file,
+					'data' => $plugin_data,
+				];
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Get the URL for opening the file for a AMP validation error in an external editor.
+	 *
+	 * @since 1.4
+	 *
+	 * @param array $source Source for AMP validation error.
+	 * @return string|null File editor URL or null if not available.
+	 */
+	private static function get_file_editor_url( $source ) {
+		if ( ! isset( $source['file'], $source['line'], $source['type'], $source['name'] ) ) {
+			return null;
+		}
+
+		$edit_url = null;
+
+		/**
+		 * Filters the template for the URL for linking to an external editor to open a file for editing.
+		 *
+		 * Users of IDEs that support opening files in via web protocols can use this filter to override
+		 * the edit link to result in their editor opening rather than the theme/plugin editor.
+		 *
+		 * The initial filtered value is null, requiring extension plugins to supply the URL template
+		 * string themselves. If no template string is provided, links to the theme/plugin editors will
+		 * be provided if available. For example, for an extension plugin to cause file edit links to
+		 * open in PhpStorm, the following filter can be used:
+		 *
+		 *     add_filter( 'amp_validation_error_source_file_editor_url_template', function () {
+		 *         return 'phpstorm://open?file={{file}}&line={{line}}';
+		 *     } );
+		 *
+		 * For a template to be considered, the string '{{file}}' must be present in the filtered value.
+		 *
+		 * @since 1.4
+		 *
+		 * @param string|null $editor_url_template Editor URL template.
+		 */
+		$editor_url_template = apply_filters( 'amp_validation_error_source_file_editor_url_template', null );
+
+		// Supply the file path to the editor template.
+		if ( null !== $editor_url_template && false !== strpos( $editor_url_template, '{{file}}' ) ) {
+			$file_path = null;
+			if ( 'core' === $source['type'] ) {
+				if ( 'wp-includes' === $source['name'] ) {
+					$file_path = ABSPATH . WPINC . '/' . $source['file'];
+				} elseif ( 'wp-admin' === $source['name'] ) {
+					$file_path = ABSPATH . 'wp-admin/' . $source['file'];
+				}
+			} elseif ( 'plugin' === $source['type'] ) {
+				$file_path = WP_PLUGIN_DIR . '/' . $source['name'];
+				if ( $source['name'] !== $source['file'] ) {
+					$file_path .= '/' . $source['file'];
+				}
+			} elseif ( 'mu-plugin' === $source['type'] ) {
+				$file_path = WPMU_PLUGIN_DIR . '/' . $source['name'];
+			} elseif ( 'theme' === $source['type'] ) {
+				$theme = wp_get_theme( $source['name'] );
+				if ( $theme instanceof WP_Theme && ! $theme->errors() ) {
+					$file_path = $theme->get_stylesheet_directory() . '/' . $source['file'];
+				}
+			}
+
+			if ( $file_path && file_exists( $file_path ) ) {
+				/**
+				 * Filters the file path to be opened in an external editor for a given AMP validation error source.
+				 *
+				 * This is useful to map the file path from inside of a Docker container or VM to the host machine.
+				 *
+				 * @since 1.4
+				 *
+				 * @param string|null $editor_url_template Editor URL template.
+				 * @param array       $source              Source information.
+				 */
+				$file_path = apply_filters( 'amp_validation_error_source_file_path', $file_path, $source );
+				if ( $file_path ) {
+					$edit_url = str_replace(
+						[
+							'{{file}}',
+							'{{line}}',
+						],
+						[
+							rawurlencode( $file_path ),
+							rawurlencode( $source['line'] ),
+						],
+						$editor_url_template
+					);
+				}
+			}
+		}
+
+		// Fall back to using the theme/plugin editors if no external editor is offered.
+		if ( ! $edit_url ) {
+			if ( 'plugin' === $source['type'] && current_user_can( 'edit_plugins' ) ) {
+				$plugin = self::get_plugin_from_slug( $source['name'] );
+				if ( $plugin ) {
+					$file = $source['file'];
+
+					// Prepend the plugin directory name to the file name as the plugin editor requires.
+					$i = strpos( $plugin['name'], '/' );
+					if ( false !== $i ) {
+						$file = substr( $plugin['name'], 0, $i ) . '/' . $file;
+					}
+
+					$edit_url = add_query_arg(
+						[
+							'plugin' => rawurlencode( $plugin['name'] ),
+							'file'   => rawurlencode( $file ),
+							'line'   => rawurlencode( $source['line'] ),
+						],
+						admin_url( 'plugin-editor.php' )
+					);
+				}
+			} elseif ( 'theme' === $source['type'] && current_user_can( 'edit_themes' ) ) {
+				$edit_url = add_query_arg(
+					[
+						'file'  => rawurlencode( $source['file'] ),
+						'theme' => rawurlencode( $source['name'] ),
+						'line'  => rawurlencode( $source['line'] ),
+					],
+					admin_url( 'theme-editor.php' )
+				);
+			}
+		}
+
+		return $edit_url;
+	}
+
+	/**
+	 * Render source name.
+	 *
+	 * @since 1.4
+	 *
+	 * @param string $name Name.
+	 * @param string $type Type.
+	 */
+	private static function render_source_name( $name, $type ) {
+		$nicename = null;
+		switch ( $type ) {
+			case 'theme':
+				$theme = wp_get_theme( $name );
+				if ( ! $theme->errors() ) {
+					$nicename = $theme->get( 'Name' );
+				}
+				break;
+			case 'plugin':
+				$plugin = self::get_plugin_from_slug( $name );
+				if ( $plugin && ! empty( $plugin['data']['Name'] ) ) {
+					$nicename = $plugin['data']['Name'];
+				}
+				break;
+		}
+		echo ' ';
+
+		if ( $nicename ) {
+			printf( '%s (<code>%s</code>)', esc_html( $nicename ), esc_html( $name ) );
+		} else {
+			echo '<code>' . esc_html( $name ) . '</code>';
+		}
+	}
+
+	/**
+	 * Render sources.
+	 *
+	 * @param array $sources Sources.
+	 */
+	private static function render_sources( $sources ) {
+		?>
+		<details>
+			<summary>
+				<?php
+				$source_count = count( $sources );
+				echo esc_html(
+					sprintf(
+						/* translators: %s: number of sources. */
+						_n(
+							'Source stack (%s)',
+							'Source stack (%s)',
+							$source_count,
+							'amp'
+						),
+						number_format_i18n( $source_count )
+					)
+				);
+				?>
+			</summary>
+			<table class="validation-error-sources">
+				<?php foreach ( $sources as $i => $source ) : ?>
+					<?php
+					$source_table_rows = $source;
+
+					if ( isset( $source['file'], $source['line'] ) ) {
+						unset( $source_table_rows['file'], $source_table_rows['line'] );
+						$source_table_rows['location'] = [
+							'link_text' => $source['file'] . ':' . $source['line'],
+							'link_url'  => self::get_file_editor_url( $source ),
+						];
+					}
+					$is_filter = ! empty( $source['filter'] );
+					unset( $source_table_rows['filter'] );
+
+					$dependency_type = null;
+					if ( isset( $source['dependency_type'] ) ) {
+						$dependency_type = $source['dependency_type'];
+						unset( $source_table_rows['dependency_type'] );
+					}
+
+					$priority = null;
+					if ( isset( $source['priority'] ) ) {
+						$priority = $source['priority'];
+						unset( $source_table_rows['priority'] );
+					}
+
+					$row_span = count( $source_table_rows );
+					?>
+					<tbody>
+						<?php foreach ( array_keys( $source_table_rows ) as $j => $key ) : ?>
+							<?php
+							$value = $source_table_rows[ $key ];
+							?>
+							<tr>
+								<?php if ( 0 === $j ) : ?>
+									<th rowspan="<?php echo esc_attr( $row_span ); ?>" scope="rowgroup">
+										#<?php echo esc_html( $i + 1 ); ?>
+									</th>
+								<?php endif; ?>
+								<th scope="row">
+									<?php
+									switch ( $key ) {
+										case 'name':
+											esc_html_e( 'Name', 'amp' );
+											break;
+										case 'post_id':
+											esc_html_e( 'Post ID', 'amp' );
+											break;
+										case 'post_type':
+											esc_html_e( 'Post Type', 'amp' );
+											break;
+										case 'handle':
+											if ( 'script' === $dependency_type ) {
+												esc_html_e( 'Script Handle', 'amp' );
+											} elseif ( 'style' === $dependency_type ) {
+												esc_html_e( 'Style Handle', 'amp' );
+											} else {
+												esc_html_e( 'Handle', 'amp' );
+											}
+											break;
+										case 'block_content_index':
+											esc_html_e( 'Block Index', 'amp' );
+											break;
+										case 'block_name':
+											esc_html_e( 'Block Name', 'amp' );
+											break;
+										case 'shortcode':
+											esc_html_e( 'Shortcode', 'amp' );
+											break;
+										case 'type':
+											esc_html_e( 'Type', 'amp' );
+											break;
+										case 'function':
+											esc_html_e( 'Function', 'amp' );
+											break;
+										case 'location':
+											esc_html_e( 'Location', 'amp' );
+											break;
+										case 'sources':
+											esc_html_e( 'Sources', 'amp' );
+											break;
+										case 'hook':
+											if ( $is_filter ) {
+												esc_html_e( 'Filter', 'amp' );
+											} else {
+												esc_html_e( 'Action', 'amp' );
+											}
+											break;
+										default:
+											echo esc_html( $key );
+									}
+									echo ':';
+									?>
+								</th>
+								<td>
+									<?php if ( 'sources' === $key && is_array( $value ) ) : ?>
+										<?php self::render_sources( $value ); ?>
+									<?php elseif ( 'type' === $key ) : ?>
+										<?php
+										switch ( $value ) {
+											case 'theme':
+												echo '<span class="dashicons dashicons-admin-appearance"></span> ';
+												esc_html_e( 'Theme', 'amp' );
+												break;
+											case 'plugin':
+												echo '<span class="dashicons dashicons-admin-plugins"></span> ';
+												esc_html_e( 'Plugin', 'amp' );
+												break;
+											case 'mu-plugin':
+												echo '<span class="dashicons dashicons-admin-plugins"></span> ';
+												esc_html_e( 'Must-Use Plugin', 'amp' );
+												break;
+											case 'core':
+												echo '<span class="dashicons dashicons-wordpress-alt"></span> ';
+												esc_html_e( 'Core', 'amp' );
+												break;
+											default:
+												echo esc_html( (string) $value );
+										}
+										?>
+									<?php elseif ( 'name' === $key && isset( $source['type'] ) ) : ?>
+										<?php self::render_source_name( $value, $source['type'] ); ?>
+									<?php elseif ( 'hook' === $key ) : ?>
+										<code><?php echo esc_html( (string) $value ); ?></code>
+										<?php
+										if ( null !== $priority ) {
+											echo esc_html(
+												sprintf(
+													/* translators: %d is the hook priority */
+													__( '(priority %d)', 'amp' ),
+													$priority
+												)
+											);
+										}
+										?>
+									<?php elseif ( 'location' === $key ) : ?>
+										<?php
+										if ( ! empty( $value['link_url'] ) ) {
+											printf(
+												'<a href="%s" %s>',
+												// Note that esc_attr() used instead of esc_url() to allow IDE protocols.
+												esc_attr( $value['link_url'] ),
+												// Open link in new window unless the user has filtered the URL to open their system IDE.
+												in_array( wp_parse_url( $value['link_url'], PHP_URL_SCHEME ), [ 'http', 'https' ], true ) ? 'target="_blank"' : ''
+											);
+										}
+										?>
+										<?php echo esc_html( $value['link_text'] ); ?>
+										<?php if ( ! empty( $value['link_url'] ) ) : ?>
+											</a>
+										<?php endif; ?>
+									<?php elseif ( 'function' === $key ) : ?>
+										<code><?php echo esc_html( '{closure}' === $value ? $value : $value . '()' ); ?></code>
+									<?php elseif ( 'shortcode' === $key || 'handle' === $key ) : ?>
+										<code><?php echo esc_html( $value ); ?></code>
+									<?php elseif ( 'block_name' ) : ?>
+										<?php
+										$block_title = self::get_block_title( $value );
+										if ( $block_title ) {
+											printf( '%s (<code>%s</code>)', esc_html( $block_title ), esc_html( $value ) );
+										} else {
+											printf( '<code>%s</code>', esc_html( $value ) );
+										}
+										?>
+									<?php elseif ( 'post_type' === $key ) : ?>
+										<?php
+										$post_type = get_post_type_object( $value );
+										if ( $post_type && isset( $post_type->labels->singular_name ) ) {
+											echo esc_html( $post_type->labels->singular_name );
+											printf( ' (<code>%s</code>)', esc_html( $value ) );
+										} else {
+											printf( '<code>%s</code>', esc_html( $value ) );
+										}
+										?>
+									<?php elseif ( is_scalar( $value ) ) : ?>
+										<?php echo esc_html( (string) $value ); ?>
+									<?php else : ?>
+										<pre><?php echo esc_html( wp_json_encode( $source, 128 /* JSON_PRETTY_PRINT */ | 64 /* JSON_UNESCAPED_SLASHES */ ) ); ?></pre>
+									<?php endif; ?>
+								</td>
+							</tr>
+						<?php endforeach; ?>
+					</tbody>
+				<?php endforeach; ?>
+				</tbody>
+			</table>
+		</details>
+		<?php
+	}
+
+	/**
+	 * Get block name for a given block slug.
+	 *
+	 * @since 1.4
+	 *
+	 * @todo Blocks should eventually be registered server-side with titles.
+	 * @param string $block_name Block slug.
+	 * @return string Block title.
+	 */
+	public static function get_block_title( $block_name ) {
+		$block_title = null;
+		if ( 'core/html' === $block_name ) {
+			$block_title = __( 'Custom HTML', 'amp' );
+		}
+		return $block_title;
 	}
 
 	/**
@@ -2141,7 +2698,7 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
-	 * On the single URL page, handles the bulk actions of 'Accept' and 'Reject'
+	 * On the single URL page, handles the bulk actions of 'Remove' (formerly 'Accept') and 'Keep' (formerly 'Reject').
 	 *
 	 * On /wp-admin/post.php, this handles these bulk actions.
 	 * This page is more like an edit-tags.php page, in that it has a WP_Terms_List_Table of amp_validation_error terms.
@@ -2167,7 +2724,7 @@ class AMP_Validation_Error_Taxonomy {
 			self::handle_validation_error_update( null, $action, $term_ids );
 			$redirect_query_args['amp_actioned_count'] = count( $term_ids );
 		} elseif ( $single_term_id ) {
-			// If this is an inline action, like 'Reject' or 'Accept'.
+			// If this is an inline action, like 'Keep' or 'Remove'.
 			self::handle_validation_error_update( null, $action, [ $single_term_id ] );
 			$redirect_query_args['amp_actioned_count'] = 1;
 		}
@@ -2192,34 +2749,51 @@ class AMP_Validation_Error_Taxonomy {
 	 * @return string Redirect.
 	 */
 	public static function handle_validation_error_update( $redirect_to, $action, $term_ids ) {
-		$term_group = null;
-		if ( self::VALIDATION_ERROR_ACCEPT_ACTION === $action ) {
-			$term_group = self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS;
-		} elseif ( self::VALIDATION_ERROR_REJECT_ACTION === $action ) {
-			$term_group = self::VALIDATION_ERROR_ACK_REJECTED_STATUS;
+		// @todo Add a new action for mark and unmark as new.
+		if ( ! in_array( $action, [ self::VALIDATION_ERROR_ACCEPT_ACTION, self::VALIDATION_ERROR_REJECT_ACTION ], true ) ) {
+			return $redirect_to;
 		}
 
-		if ( $term_group ) {
-			$has_pre_term_description_filter = has_filter( 'pre_term_description', 'wp_filter_kses' );
-			if ( false !== $has_pre_term_description_filter ) {
-				remove_filter( 'pre_term_description', 'wp_filter_kses', $has_pre_term_description_filter );
+		$has_pre_term_description_filter = has_filter( 'pre_term_description', 'wp_filter_kses' );
+		if ( false !== $has_pre_term_description_filter ) {
+			remove_filter( 'pre_term_description', 'wp_filter_kses', $has_pre_term_description_filter );
+		}
+
+		$updated_count = 0;
+		foreach ( $term_ids as $term_id ) {
+			$term = get_term( $term_id );
+			if ( ! $term ) {
+				continue;
 			}
-			foreach ( $term_ids as $term_id ) {
+			$term_group = $term->term_group;
+
+			// The action of marking an error as removed/kept (aka accepted/rejected) also results in it being marked as not-new.
+			if ( self::VALIDATION_ERROR_ACCEPT_ACTION === $action ) {
+				$term_group = self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS;
+			} elseif ( self::VALIDATION_ERROR_REJECT_ACTION === $action ) {
+				$term_group = self::VALIDATION_ERROR_ACK_REJECTED_STATUS;
+			}
+
+			if ( $term_group !== $term->term_group ) {
 				wp_update_term( $term_id, self::TAXONOMY_SLUG, compact( 'term_group' ) );
+				$updated_count++;
 			}
-			if ( false !== $has_pre_term_description_filter ) {
-				add_filter( 'pre_term_description', 'wp_filter_kses', $has_pre_term_description_filter );
-			}
-			$redirect_to = add_query_arg(
-				[
-					'amp_actioned'       => $action,
-					'amp_actioned_count' => count( $term_ids ),
-				],
-				$redirect_to
-			);
+		}
+		if ( false !== $has_pre_term_description_filter ) {
+			add_filter( 'pre_term_description', 'wp_filter_kses', $has_pre_term_description_filter );
 		}
 
-		delete_transient( AMP_Validated_URL_Post_Type::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT );
+		$redirect_to = add_query_arg(
+			[
+				'amp_actioned'       => $action,
+				'amp_actioned_count' => count( $term_ids ),
+			],
+			$redirect_to
+		);
+
+		if ( $updated_count ) {
+			delete_transient( AMP_Validated_URL_Post_Type::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT );
+		}
 
 		return $redirect_to;
 	}
@@ -2261,27 +2835,64 @@ class AMP_Validation_Error_Taxonomy {
 	 * @return string
 	 */
 	public static function get_error_title_from_code( $error_code ) {
-		$error_title = 'Error';
-		if ( self::INVALID_ELEMENT_CODE === $error_code ) {
-			$error_title = __( 'Invalid element', 'amp' );
-		} elseif ( self::INVALID_ATTRIBUTE_CODE === $error_code ) {
-			$error_title = __( 'Invalid attribute', 'amp' );
-		} elseif ( 'file_path_not_allowed' === $error_code ) {
-			$error_title = __( 'File path not allowed', 'amp' );
-		} elseif ( 'excessive_css' === $error_code ) {
-			$error_title = __( 'Excessive CSS', 'amp' );
-		} elseif ( 'illegal_css_at_rule' === $error_code ) {
-			$error_title = sprintf(
-				/* translators: %s: @ */
-				__( 'Illegal CSS %s rule', 'amp' ),
-				'@'
-			);
-		} elseif ( 'disallowed_file_extension' === $error_code ) {
-			$error_title = __( 'Disallowed file extension', 'amp' );
-		} elseif ( 'removed_unused_css_rules' === $error_code ) {
-			$error_title = __( 'Remove unused CSS rules', 'amp' );
+		switch ( $error_code ) {
+			case self::INVALID_ELEMENT_CODE:
+				return __( 'Invalid element', 'amp' );
+			case self::INVALID_ATTRIBUTE_CODE:
+				return __( 'Invalid attribute', 'amp' );
+			case 'invalid_processing_instruction':
+				return __( 'Invalid processing instruction', 'amp' );
+			case 'file_path_not_allowed':
+				return __( 'Stylesheet file path not allowed', 'amp' );
+			case 'excessive_css':
+				return __( 'Excessive CSS', 'amp' );
+			case 'illegal_css_at_rule':
+				return __( 'Illegal CSS at-rule', 'amp' );
+			case 'disallowed_file_extension':
+				return __( 'Disallowed CSS file extension', 'amp' );
+			case 'duplicate_element':
+				return __( 'Duplicate element', 'amp' );
+			default:
+				/* translators: %s error code */
+				return sprintf( __( 'Unknown error (%s)', 'amp' ), $error_code );
 		}
-		return $error_title;
+	}
+
+	/**
+	 * Get label for object key in validation error source.
+	 *
+	 * @param string $key              Key.
+	 * @param array  $validation_error Validation error.
+	 * @return string Label for key.
+	 */
+	public static function get_source_key_label( $key, $validation_error ) {
+		switch ( $key ) {
+			case 'code':
+				return __( 'Code', 'amp' );
+			case 'at_rule':
+				return __( 'At-rule', 'amp' );
+			case 'node_attributes':
+			case 'element_attributes':
+				return __( 'Element attributes', 'amp' );
+			case 'node_name':
+				if ( self::INVALID_ATTRIBUTE_CODE === $validation_error['code'] ) {
+					return __( 'Attribute name', 'amp' );
+				} elseif ( self::INVALID_ELEMENT_CODE === $validation_error['code'] ) {
+					return __( 'Element name', 'amp' );
+				} else {
+					return __( 'Node name', 'amp' );
+				}
+			case 'parent_name':
+				return __( 'Parent element', 'amp' );
+			case 'text':
+				return __( 'Text content', 'amp' );
+			case 'type':
+				return __( 'Type', 'amp' );
+			case 'sources':
+				return __( 'Sources', 'amp' );
+			default:
+				return $key;
+		}
 	}
 
 	/**
@@ -2293,18 +2904,12 @@ class AMP_Validation_Error_Taxonomy {
 	 * @return string Status text.
 	 */
 	public static function get_status_text_with_icon( $sanitization ) {
-		if ( self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS === $sanitization['term_status'] ) {
-			$class = 'ack accepted';
-			$text  = __( 'Accepted', 'amp' );
-		} elseif ( self::VALIDATION_ERROR_ACK_REJECTED_STATUS === $sanitization['term_status'] ) {
-			$class = 'ack rejected';
-			$text  = __( 'Rejected', 'amp' );
-		} elseif ( self::VALIDATION_ERROR_NEW_REJECTED_STATUS === $sanitization['term_status'] ) {
-			$class = 'new rejected';
-			$text  = __( 'New Rejected', 'amp' );
+		if ( $sanitization['term_status'] & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK ) {
+			$class = 'accepted';
+			$text  = __( 'Removed', 'amp' );
 		} else {
-			$class = 'new accepted';
-			$text  = __( 'New Accepted', 'amp' );
+			$class = 'rejected';
+			$text  = __( 'Kept', 'amp' );
 		}
 		return sprintf( '<span class="status-text %s">%s</span>', esc_attr( $class ), esc_html( $text ) );
 	}

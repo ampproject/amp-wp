@@ -2,13 +2,13 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { dispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import { FeaturedImageToolbarSelect, getSelectMediaFrame } from '../../common/components/select-media-frame';
 import { setImageFromURL } from '../../common/helpers';
-import { dispatch } from '@wordpress/data';
 
 const { wp } = window;
 
@@ -27,7 +27,7 @@ export default ( InitialMediaUpload, minImageDimensions ) => {
 	/**
 	 * Mostly copied from customize-controls.js, with slight changes.
 	 *
-	 * @link https://github.com/WordPress/wordpress-develop/blob/c80325658f85d24ff82295dd2d55bfdf789f4163/src/js/_enqueues/wp/customize/controls.js#L4695
+	 * @see https://github.com/WordPress/wordpress-develop/blob/c80325658f85d24ff82295dd2d55bfdf789f4163/src/js/_enqueues/wp/customize/controls.js#L4695
 	 * @see wp.media.HeaderControl
 	 */
 	return class FeaturedImageMediaUpload extends InitialMediaUpload {

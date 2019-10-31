@@ -46,7 +46,7 @@ function BlockTypesList( { items, onSelect, onHover = () => {}, children } ) {
 					onBlur={ () => onHover( null ) }
 					isDisabled={ item.isDisabled }
 					title={ item.title }
-				/>
+				/>,
 			) }
 			{ children }
 		</ul>
@@ -68,7 +68,7 @@ BlockTypesList.propTypes = {
 	} ) ),
 	onSelect: PropTypes.func.isRequired,
 	onHover: PropTypes.func,
-	children: PropTypes.any,
+	children: PropTypes.node,
 };
 
 export default BlockTypesList;

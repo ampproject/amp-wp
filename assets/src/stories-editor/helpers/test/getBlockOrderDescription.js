@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { getBlockOrderDescription } from '../';
+import getBlockOrderDescription from '../getBlockOrderDescription';
 
 describe( 'block order controls', () => {
 	const dirUp = -1,
@@ -19,7 +19,7 @@ describe( 'block order controls', () => {
 				false,
 				dirUp,
 			) ).toBe(
-				`Block ${ type } is at the beginning of the content and can’t be moved up`
+				`Block ${ type } is at the beginning of the content and can’t be moved up`,
 			);
 		} );
 

@@ -4,7 +4,10 @@
 import domReady from '@wordpress/dom-ready';
 import { __, _n, sprintf } from '@wordpress/i18n';
 
-const { ampValidation } = window;
+/**
+ * Internal dependencies
+ */
+import setValidationErrorRowsSeenClass from './set-validation-error-rows-seen-class';
 
 /**
  * The id for the 'Showing x of y errors' notice.
@@ -24,11 +27,10 @@ domReady( () => {
 	handleShowAll();
 	handleFiltering();
 	handleSearching();
+	setValidationErrorRowsSeenClass();
 	handleStatusChange();
 	handleBulkActions();
-	changeHeading();
 	watchForUnsavedChanges();
-	showAMPIconIfEnabled();
 } );
 
 let beforeUnloadPromptAdded = false;
@@ -118,7 +120,7 @@ const updateShowingErrorsRow = ( numberErrorsDisplaying, totalErrors ) => {
 				'Showing %1$s of %2$s validation error',
 				'Showing %1$s of %2$s validation errors',
 				totalErrors,
-				'amp'
+				'amp',
 			),
 			numberErrorsDisplaying,
 			totalErrors,
@@ -245,7 +247,7 @@ const handleSearching = () => {
 		const detailsQuery = document.querySelectorAll( 'tbody .column-details' );
 
 		/*
-		 * Iterate through the 'Details' column of each row.
+		 * Iterate through the 'Context' (formerly 'Details') column of each row.
 		 * If the search query is not present, hide the row.
 		 */
 		let numberErrorsDisplaying = 0;
@@ -286,26 +288,15 @@ const updateSelectIcon = ( select ) => {
 };
 
 /**
- * Handles a change in the error status, like from 'New' to 'Accepted'.
+ * Handles a change in the error status, like from 'Removed' to 'Kept'.
  *
  * Gets the data-status-icon value from the newly-selected <option>.
  * And sets this as the src of the status icon <img>.
  */
 const handleStatusChange = () => {
-	const setRowStatusClass = ( { row, select } ) => {
-		const acceptedValue = 3;
-		const rejectedValue = 2;
-		const status = parseInt( select.options[ select.selectedIndex ].value );
-
-		row.classList.toggle( 'new', isNaN( status ) );
-		row.classList.toggle( 'accepted', acceptedValue === status );
-		row.classList.toggle( 'rejected', rejectedValue === status );
-	};
-
-	const onChange = ( { event, row, select } ) => {
+	const onChange = ( { event } ) => {
 		if ( event.target.matches( 'select' ) ) {
 			updateSelectIcon( event.target );
-			setRowStatusClass( { row, select } );
 		}
 	};
 
@@ -313,7 +304,6 @@ const handleStatusChange = () => {
 		const select = row.querySelector( '.amp-validation-error-status' );
 
 		if ( select ) {
-			setRowStatusClass( { row, select } );
 			select.addEventListener( 'change', ( event ) => {
 				onChange( { event, row, select } );
 			} );
@@ -364,47 +354,25 @@ const handleBulkActions = () => {
 		element.addEventListener( 'change', onChange );
 	} );
 
-	// Handle click on accept button.
+	// Handle click on bulk "Remove" button.
 	acceptButton.addEventListener( 'click', () => {
 		Array.prototype.forEach.call( document.querySelectorAll( 'select.amp-validation-error-status' ), ( select ) => {
 			if ( select.closest( 'tr' ).querySelector( '.check-column input[type=checkbox]' ).checked ) {
-				select.value = '3';
+				select.value = '3'; // See AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS.
 				updateSelectIcon( select );
 				addBeforeUnloadPrompt();
 			}
 		} );
 	} );
 
-	// Handle click on reject button.
+	// Handle click on bulk "Keep" button.
 	rejectButton.addEventListener( 'click', () => {
 		Array.prototype.forEach.call( document.querySelectorAll( 'select.amp-validation-error-status' ), ( select ) => {
 			if ( select.closest( 'tr' ).querySelector( '.check-column input[type=checkbox]' ).checked ) {
-				select.value = '2';
+				select.value = '2'; // See AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS.
 				updateSelectIcon( select );
 				addBeforeUnloadPrompt();
 			}
 		} );
 	} );
-};
-
-/**
- * Changes the page heading and document title, as this doesn't look to be possible with a PHP filter.
- */
-const changeHeading = () => {
-	const heading = document.querySelector( 'h1.wp-heading-inline' );
-	if ( heading && ampValidation.page_heading ) {
-		heading.innerText = ampValidation.page_heading;
-	}
-};
-
-/**
- * Adds the AMP icon to the page heading if AMP is enabled on this URL.
- */
-const showAMPIconIfEnabled = () => {
-	const heading = document.querySelector( 'h1.wp-heading-inline' );
-	if ( heading && true === Boolean( ampValidation.amp_enabled ) ) {
-		const ampIcon = document.createElement( 'span' );
-		ampIcon.classList.add( 'status-text', 'sanitized' );
-		heading.appendChild( ampIcon );
-	}
 };

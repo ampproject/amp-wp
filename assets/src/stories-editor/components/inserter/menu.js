@@ -190,7 +190,7 @@ export class InserterMenu extends Component {
 		}
 		if ( filteredItems.length > 0 ) {
 			openPanels = openPanels.concat(
-				Object.keys( itemsPerCategory )
+				Object.keys( itemsPerCategory ),
 			);
 		}
 		return openPanels;
@@ -216,7 +216,7 @@ export class InserterMenu extends Component {
 		const itemsPerCategory = flow(
 			( itemList ) => filter( itemList, ( item ) => item.category !== 'reusable' ),
 			( itemList ) => sortBy( itemList, getCategoryIndex ),
-			( itemList ) => groupBy( itemList, 'category' )
+			( itemList ) => groupBy( itemList, 'category' ),
 		)( filteredItems );
 
 		this.setState( {
@@ -230,7 +230,7 @@ export class InserterMenu extends Component {
 				filterValue,
 				itemsPerCategory,
 				filteredItems,
-				reusableItems
+				reusableItems,
 			),
 		} );
 
@@ -240,7 +240,7 @@ export class InserterMenu extends Component {
 
 		const resultsFoundMessage = sprintf(
 			_n( '%d result found.', '%d results found.', resultCount, 'amp' ),
-			resultCount
+			resultCount,
 		);
 
 		debouncedSpeak( resultsFoundMessage );
@@ -345,7 +345,9 @@ export class InserterMenu extends Component {
 						</PanelBody>
 					) }
 					{ isEmpty( suggestedItems ) && isEmpty( reusableItems ) && isEmpty( itemsPerCategory ) && (
-						<p className="editor-inserter__no-results block-editor-inserter__no-results">{ __( 'No blocks found.', 'amp' ) }</p>
+						<p className="editor-inserter__no-results block-editor-inserter__no-results">
+							{ __( 'No blocks found.', 'amp' ) }
+						</p>
 					) }
 				</div>
 
@@ -397,6 +399,22 @@ export default compose(
 		}
 		const destinationRootBlockName = getBlockName( destinationRootClientId );
 
+		/**
+		 * Is the given block allowed on the given page?
+		 *
+		 * @todo Use `useIsBlockAllowedOnPage` once this component is refactored to use hooks.
+		 *
+		 * @param {Object}  name The name of the block to test.
+		 * @param {string}  pageId Page ID.
+		 * @return {boolean} Returns true if the element is allowed on the page, false otherwise.
+		 */
+		const isBlockAllowedOnPage = ( name, pageId ) => {
+			// canInsertBlockType() alone is not enough, see https://github.com/WordPress/gutenberg/issues/14515
+			const blockSettings = getBlockListSettings( pageId );
+			const isAllowed = canInsertBlockType( name, pageId ) && blockSettings && blockSettings.allowedBlocks.includes( name );
+			return Boolean( isAllowed );
+		};
+
 		/*
 		 * Filters inserter items to only show blocks that can be inserted given the context.
 		 *
@@ -409,9 +427,7 @@ export default compose(
 				return true;
 			}
 
-			// canInsertBlockType() alone is not enough, see https://github.com/WordPress/gutenberg/issues/14515
-			const destinationBlockListSettings = getBlockListSettings( destinationRootClientId );
-			return canInsertBlockType( name, getCurrentPage() ) && destinationBlockListSettings && destinationBlockListSettings.allowedBlocks.includes( name );
+			return isBlockAllowedOnPage( name, getCurrentPage() );
 		} );
 
 		return {
@@ -496,5 +512,5 @@ export default compose(
 	} ),
 	withSpokenMessages,
 	withInstanceId,
-	withSafeTimeout
+	withSafeTimeout,
 )( InserterMenu );

@@ -9,7 +9,7 @@
 	font-size: 13px;
 	width: 300px;
 	padding: 12px;
-	border-color: #007cba;
+	border-color: theme(primary);
 	outline: 2px solid transparent;
 	border-radius: 0;
 	margin-left: 0;

@@ -35,18 +35,17 @@ class AMP_Options_Manager {
 	 * @var array
 	 */
 	protected static $defaults = [
-		'experiences'              => [ self::WEBSITE_EXPERIENCE ],
-		'theme_support'            => AMP_Theme_Support::READER_MODE_SLUG,
-		'supported_post_types'     => [ 'post' ],
-		'analytics'                => [],
-		'auto_accept_sanitization' => true,
-		'all_templates_supported'  => true,
-		'supported_templates'      => [ 'is_singular' ],
-		'enable_response_caching'  => true,
-		'version'                  => AMP__VERSION,
-		'story_templates_version'  => false,
-		'story_export_base_url'    => '',
-		'story_settings'           => [
+		'experiences'             => [ self::WEBSITE_EXPERIENCE ],
+		'theme_support'           => AMP_Theme_Support::READER_MODE_SLUG,
+		'supported_post_types'    => [ 'post' ],
+		'analytics'               => [],
+		'all_templates_supported' => true,
+		'supported_templates'     => [ 'is_singular' ],
+		'enable_response_caching' => true,
+		'version'                 => AMP__VERSION,
+		'story_templates_version' => false,
+		'story_export_base_url'   => '',
+		'story_settings'          => [
 			'auto_advance_after'          => '',
 			'auto_advance_after_duration' => 0,
 		],
@@ -158,6 +157,11 @@ class AMP_Options_Manager {
 			$options['theme_support'] = $defaults['theme_support'];
 		}
 
+		// Remove 'auto_accept_sanitization' option as of 1.4.
+		if ( isset( $options['auto_accept_sanitization'] ) ) {
+			unset( $options['auto_accept_sanitization'] );
+		}
+
 		return $options;
 	}
 
@@ -250,8 +254,6 @@ class AMP_Options_Manager {
 				add_action( 'update_option_' . self::OPTION_NAME, [ __CLASS__, 'handle_updated_theme_support_option' ] );
 			}
 		}
-
-		$options['auto_accept_sanitization'] = ! empty( $new_options['auto_accept_sanitization'] );
 
 		// Validate post type support.
 		if ( in_array( self::WEBSITE_EXPERIENCE, $options['experiences'], true ) || isset( $new_options['supported_post_types'] ) ) {
@@ -491,7 +493,7 @@ class AMP_Options_Manager {
 			<div class="amp-welcome-icon-holder">
 				<img width="200" height="200" class="amp-welcome-icon" src="<?php echo esc_url( amp_get_asset_url( 'images/amp-welcome-icon.svg' ) ); ?>" alt="<?php esc_attr_e( 'Illustration of WordPress running AMP plugin.', 'amp' ); ?>" />
 			</div>
-			<h1><?php esc_html_e( 'Welcome to AMP for WordPress', 'amp' ); ?></h1>
+			<h2><?php esc_html_e( 'Welcome to AMP for WordPress', 'amp' ); ?></h2>
 			<h3><?php esc_html_e( 'Bring the speed and features of the open source AMP project to your site, complete with the tools to support content authoring and website development.', 'amp' ); ?></h3>
 			<h3><?php esc_html_e( 'From granular controls that help you create AMP content, to Core Gutenberg support, to a sanitizer that only shows visitors error-free pages, to a full error workflow for developers, this release enables rich, performant experiences for your WordPress site.', 'amp' ); ?></h3>
 			<a href="https://amp-wp.org/getting-started/" target="_blank" class="button button-primary"><?php esc_html_e( 'Learn More', 'amp' ); ?></a>

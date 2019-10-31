@@ -31,36 +31,37 @@ import { isAMPEnabled } from '../helpers';
  */
 function AMPToggle( { isEnabled, onChange } ) {
 	return (
-		<>
-			<PluginPostStatusInfo>
-				{ ! errorMessages.length && <label htmlFor="amp-enabled">{ __( 'Enable AMP', 'amp' ) }</label> }
-				{
-					! errorMessages.length &&
-					(
-						<FormToggle
-							checked={ isEnabled }
-							onChange={ () => onChange( ! isEnabled ) }
-							id="amp-enabled"
-						/>
-					)
-				}
-				{
-					Boolean( errorMessages.length ) &&
+		<PluginPostStatusInfo>
+			{ ! errorMessages.length && (
+				<>
+					<label htmlFor="amp-enabled">
+						{ __( 'Enable AMP', 'amp' ) }
+					</label>
+					<FormToggle
+						checked={ isEnabled }
+						onChange={ () => onChange( ! isEnabled ) }
+						id="amp-enabled"
+					/>
+				</>
+			) }
+			{
+				Boolean( errorMessages.length ) &&
 					(
 						<Notice
 							status="warning"
 							isDismissible={ false }
 						>
 							{
-								errorMessages.map(
-									( message, index ) => <RawHTML key={ index }>{ message }</RawHTML>
-								)
+								errorMessages.map( ( message, index ) => (
+									<RawHTML key={ index }>
+										{ message }
+									</RawHTML>
+								) )
 							}
 						</Notice>
 					)
-				}
-			</PluginPostStatusInfo>
-		</>
+			}
+		</PluginPostStatusInfo>
 	);
 }
 

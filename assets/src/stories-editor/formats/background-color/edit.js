@@ -14,9 +14,9 @@ import { getActiveFormat, applyFormat, removeFormat } from '@wordpress/rich-text
 /**
  * Internal dependencies
  */
+import markerIcon from '../../../../images/stories-editor/marker.svg';
 import { name } from './';
 import './edit.css';
-import markerIcon from '../../../../images/stories-editor/marker.svg';
 
 const FormatEdit = ( { isActive, value, onChange } ) => {
 	let activeColor;

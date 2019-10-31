@@ -10,6 +10,8 @@
  */
 class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 
+	use AMP_Test_HandleValidation;
+
 	/**
 	 * The mock Site Icon value to use in a filter.
 	 *
@@ -326,7 +328,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 */
 	public function test_amp_add_amphtml_link_transitional_mode( $canonical_url, $amphtml_url ) {
 		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
-		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
+		$this->accept_sanitization_by_default( false );
 		AMP_Theme_Support::read_theme_support();
 		AMP_Theme_Support::init();
 		$this->assertTrue( current_theme_supports( AMP_Theme_Support::SLUG ) );
@@ -1195,6 +1197,17 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$item = $admin_bar->get_node( 'amp' );
 		$this->assertInternalType( 'object', $item );
 		$this->assertEquals( esc_url( amp_get_permalink( $post_id ) ), $item->href );
+	}
+
+	/**
+	 * Test amp_generate_script_hash().
+	 *
+	 * @covers \amp_generate_script_hash()
+	 */
+	public function test_amp_generate_script_hash() {
+		$this->assertSame( 'sha384-nYSGte6layPrGqn7c1Om8wNCgSq5PU-56H0R6j1kTb7R3aLbWeM3ra0YF5xKFuI0', amp_generate_script_hash( 'document.body.textContent += \'Hello world!\';' ) );
+		$this->assertSame( 'sha384-Qdwpb9Wpgg4BE21ukx8rwjbJGEdW2xjanFfsRNtmYQH69a_QeI0it1V8N23ZdsRX', amp_generate_script_hash( 'document.body.textContent = \'¡Hola mundo!\';' ) );
+		$this->assertSame( 'sha384-_MAJ0_NC2k8jrjehfi-5LdQasBICZXvp4gOwOx0D3mIStvDCGvZDzcTfXLgMrLL1', amp_generate_script_hash( 'document.body.textContent = \'<Hi! & 👋>\';' ) );
 	}
 
 	/**

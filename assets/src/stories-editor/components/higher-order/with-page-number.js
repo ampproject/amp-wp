@@ -3,13 +3,12 @@
  */
 import { withSelect } from '@wordpress/data';
 import { __, sprintf } from '@wordpress/i18n';
-import { compose, createHigherOrderComponent } from '@wordpress/compose';
+import { createHigherOrderComponent } from '@wordpress/compose';
 
 /**
  * Internal dependencies
  */
 import { ALLOWED_TOP_LEVEL_BLOCKS } from '../../constants';
-import { withBlockName } from '../index';
 
 const applyWithSelect = withSelect( ( select, props ) => {
 	const {
@@ -32,11 +31,6 @@ const applyWithSelect = withSelect( ( select, props ) => {
 	};
 } );
 
-const wrapperWithSelect = compose(
-	applyWithSelect,
-	withBlockName,
-);
-
 /**
  * Higher-order component that adds a page number label to page blocks
  *
@@ -44,11 +38,11 @@ const wrapperWithSelect = compose(
  */
 export default createHigherOrderComponent(
 	( BlockEdit ) => {
-		return wrapperWithSelect( ( props ) => {
-			const { blockName, pageNumber, isReordering } = props;
+		return applyWithSelect( ( props ) => {
+			const { name, pageNumber, isReordering } = props;
 
 			// Not a valid top level block.
-			if ( ! ALLOWED_TOP_LEVEL_BLOCKS.includes( blockName ) || ! pageNumber ) {
+			if ( ! ALLOWED_TOP_LEVEL_BLOCKS.includes( name ) || ! pageNumber ) {
 				return <BlockEdit { ...props } />;
 			}
 
@@ -70,5 +64,5 @@ export default createHigherOrderComponent(
 			);
 		} );
 	},
-	'withPageNumber'
+	'withPageNumber',
 );

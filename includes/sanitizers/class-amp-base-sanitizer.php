@@ -311,6 +311,18 @@ abstract class AMP_Base_Sanitizer {
 				$attributes['layout'] = 'fill';
 				return $attributes;
 			}
+
+			// Apply fill layout if width & height are 100%.
+			if ( isset( $styles['position'], $attributes['width'], $attributes['height'] )
+				&& 'absolute' === $styles['position']
+				&& '100%' === $attributes['width']
+				&& '100%' === $attributes['height']
+			) {
+				unset( $attributes['style'], $attributes['width'], $attributes['height'] );
+				$attributes['layout'] = 'fill';
+				unset( $attributes['height'], $attributes['width'] );
+				return $attributes;
+			}
 		}
 
 		if ( empty( $attributes['height'] ) ) {
@@ -567,6 +579,8 @@ abstract class AMP_Base_Sanitizer {
 					}
 				}
 			}
+		} elseif ( $node instanceof DOMProcessingInstruction ) {
+			$error['text'] = trim( $node->data, '?' );
 		}
 
 		return $error;

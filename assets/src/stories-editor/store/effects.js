@@ -6,6 +6,7 @@ import { select } from '@wordpress/data';
 /**
  * Internal dependencies
  */
+import { startAnimation, resetAnimationProperties, setAnimationTransformProperties } from '../helpers';
 import {
 	getAnimationEntry,
 	getAnimatedBlocksPerPage,
@@ -17,7 +18,6 @@ import {
 	stopAnimation,
 	finishAnimation,
 } from './actions';
-import { startAnimation, resetAnimationProperties, setAnimationTransformProperties } from '../helpers';
 import { ANIMATION_STATUS } from './constants';
 
 export default {
@@ -49,7 +49,7 @@ export default {
 				animationType,
 				duration ? parseInt( duration ) : 0,
 				delay ? parseInt( delay ) : 0,
-				() => dispatch( finishAnimation( page, id ) )
+				() => dispatch( finishAnimation( page, id ) ),
 			);
 		} );
 	},

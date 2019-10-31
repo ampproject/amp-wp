@@ -66,7 +66,11 @@ const BackgroundMediaSettings = ( {
 	videoFeaturedImage,
 	setAttributes,
 } ) => {
-	const instructions = <p>{ __( 'To edit the background image or video, you need permission to upload media.', 'amp' ) }</p>;
+	const instructions = (
+		<p>
+			{ __( 'To edit the background image or video, you need permission to upload media.', 'amp' ) }
+		</p>
+	);
 
 	const isExcessiveVideoSize = VIDEO_BACKGROUND_TYPE === mediaType && isVideoSizeExcessive( getVideoBytesPerSecond( media ) );
 	const videoBytesPerSecond = VIDEO_BACKGROUND_TYPE === mediaType ? getVideoBytesPerSecond( media ) : null;
@@ -117,7 +121,7 @@ const BackgroundMediaSettings = ( {
 				} )
 				.catch( () => setExtractingPoster( false ) );
 		}
-	}, [ media, mediaType, videoFeaturedImage ] );
+	}, [ media, mediaId, mediaType, mediaUrl, poster, videoFeaturedImage, isExtractingPoster, setAttributes ] );
 
 	return (
 		<PanelBody title={ __( 'Background Media', 'amp' ) }>
@@ -129,14 +133,14 @@ const BackgroundMediaSettings = ( {
 							sprintf(
 								/* translators: %d: the number of recommended megabytes per second */
 								__( 'A video size of less than %d MB per second is recommended.', 'amp' ),
-								VIDEO_ALLOWED_MEGABYTES_PER_SECOND
+								VIDEO_ALLOWED_MEGABYTES_PER_SECOND,
 							)
 						}
 						{
 							videoBytesPerSecond && ' ' + sprintf(
 								/* translators: %d: the number of actual megabytes per second */
 								__( 'The selected video is %d MB per second.', 'amp' ),
-								Math.round( videoBytesPerSecond / MEGABYTE_IN_BYTES )
+								Math.round( videoBytesPerSecond / MEGABYTE_IN_BYTES ),
 							)
 						}
 					</Notice>
@@ -196,7 +200,7 @@ const BackgroundMediaSettings = ( {
 											{
 												'editor-post-featured-image__toggle': ! poster,
 												'editor-post-featured-image__preview': poster,
-											}
+											},
 										) }
 										onClick={ open }
 										aria-label={ ! poster ? null : __( 'Replace Poster Image', 'amp' ) }

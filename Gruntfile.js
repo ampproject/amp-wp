@@ -46,7 +46,7 @@ module.exports = function( grunt ) {
 		// Clean up the build.
 		clean: {
 			compiled: {
-				src: [ 'assets/js/*.js', '!assets/js/amp-service-worker-runtime-precaching.js', 'assets/js/*.deps.json' ],
+				src: [ 'assets/js/*.js', '!assets/js/amp-service-worker-runtime-precaching.js', 'assets/js/*.asset.php' ],
 			},
 			build: {
 				src: [ 'build' ],
@@ -61,9 +61,6 @@ module.exports = function( grunt ) {
 			},
 			readme: {
 				command: './vendor/xwp/wp-dev-lib/scripts/generate-markdown-readme', // Generate the readme.md.
-			},
-			phpunit: {
-				command: 'phpunit',
 			},
 			verify_matching_versions: {
 				command: 'php bin/verify-version-consistency.php',
@@ -125,7 +122,7 @@ module.exports = function( grunt ) {
 			{
 				cmd: 'git',
 				args: [ 'ls-files' ],
-			}
+			},
 		);
 
 		function finalize() {
@@ -149,8 +146,8 @@ module.exports = function( grunt ) {
 			} );
 
 			paths.push( 'composer.*' ); // Copy in order to be able to do run composer_install.
-			paths.push( 'assets/js/*.js' );
-			paths.push( 'assets/js/*.deps.json' );
+			paths.push( 'assets/js/*.js' ); // @todo Also include *.map files?
+			paths.push( 'assets/js/*.asset.php' );
 			paths.push( 'assets/css/*.css' );
 
 			grunt.config.set( 'copy', {
@@ -202,7 +199,7 @@ module.exports = function( grunt ) {
 						}
 						stdout.push( res.stdout );
 						doNext();
-					}
+					},
 				);
 			}
 		}
@@ -237,7 +234,6 @@ module.exports = function( grunt ) {
 	] );
 
 	grunt.registerTask( 'deploy', [
-		'shell:phpunit',
 		'shell:verify_matching_versions',
 		'wp_deploy',
 	] );

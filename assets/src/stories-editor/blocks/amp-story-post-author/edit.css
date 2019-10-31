@@ -1,3 +1,7 @@
+.wp-block[data-type="amp/amp-story-post-author"] {
+	line-height: 0;
+}
+
 .wp-block[data-type="amp/amp-story-post-author"] .wp-block-amp-amp-story-post-author {
 	margin: 0;
 	padding: 7px !important;
@@ -27,4 +31,8 @@
 .wp-block[data-type="amp/amp-story-post-author"] .block-mover,
 .wp-block[data-type="amp/amp-story-post-author"] .block-mover div {
 	height: 100%;
+}
+
+.wp-block[data-type="amp/amp-story-post-author"] .is-resizing .block-mover {
+	overflow: hidden;
 }

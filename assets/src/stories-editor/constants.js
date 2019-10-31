@@ -5,6 +5,8 @@ import { __ } from '@wordpress/i18n';
 
 export const STORY_PAGE_INNER_WIDTH = 328;
 export const STORY_PAGE_INNER_HEIGHT = 553;
+export const STORY_PAGE_INNER_HEIGHT_FOR_CTA = Math.floor( STORY_PAGE_INNER_HEIGHT / 5 );
+export const STORY_PAGE_MARGIN = 50;
 
 export const MIN_BLOCK_WIDTH = 40;
 export const MIN_BLOCK_HEIGHTS = {
@@ -38,6 +40,12 @@ export const ALLOWED_MOVABLE_BLOCKS = [
 	'core/html',
 	'core/block', // Reusable blocks.
 	'core/template', // Reusable blocks.
+];
+
+export const BLOCKS_WITH_META_CONTENT = [
+	'amp/amp-story-post-author',
+	'amp/amp-story-post-date',
+	'amp/amp-story-post-title',
 ];
 
 export const BLOCKS_WITH_TEXT_SETTINGS = [
@@ -211,3 +219,6 @@ export const TEXT_BLOCK_PADDING = 7;
 
 export const BLOCK_ROTATION_SNAPS = [ -180, -165, -150, -135, -120, -105, -90, -75, -60, -45, -30, -15, 0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180 ];
 export const BLOCK_ROTATION_SNAP_GAP = 10;
+
+export const BLOCK_RESIZING_SNAP_GAP = 8;
+export const BLOCK_DRAGGING_SNAP_GAP = 8;

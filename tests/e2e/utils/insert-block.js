@@ -14,12 +14,12 @@ export async function insertBlock( searchTerm, panelName = null ) {
 	await searchForBlock( searchTerm );
 	if ( panelName ) {
 		const panelButton = ( await page.$x(
-			`//button[contains(text(), '${ panelName }')]`
+			`//button[contains(text(), '${ panelName }')]`,
 		) )[ 0 ];
 		await panelButton.click();
 	}
 	const insertButton = ( await page.$x(
-		`//button//span[contains(text(), '${ searchTerm }')]`
+		`//button//span[contains(text(), '${ searchTerm }')]`,
 	) )[ 0 ];
 	await insertButton.click();
 }

@@ -103,13 +103,13 @@ class PostSelector extends Component {
 						this.props.debouncedSpeak( sprintf( _n(
 							'%d result found, use up and down arrow keys to navigate.',
 							'%d results found, use up and down arrow keys to navigate.',
-							suggestions.length, 'amp'
+							suggestions.length, 'amp',
 						), suggestions.length ), 'assertive' );
 					} else {
 						this.props.debouncedSpeak( __( 'No results.', 'amp' ), 'assertive' );
 					}
 				}
-			}
+			},
 		).catch(
 			() => {
 				if ( this.isStillMounted && this.suggestionsRequest === suggestionsRequest ) {
@@ -117,7 +117,7 @@ class PostSelector extends Component {
 						loading: false,
 					} );
 				}
-			}
+			},
 		);
 	}
 
@@ -295,7 +295,7 @@ class PostSelector extends Component {
 						className={ classnames(
 							'editor-post-input__suggestions',
 							'block-editor-post-input__suggestions',
-							`${ className }__suggestions`
+							`${ className }__suggestions`,
 						) }
 						id={ suggestionsListboxId }
 						ref={ this.autocompleteRef }
@@ -335,7 +335,7 @@ PostSelector.propTypes = {
 	instanceId: PropTypes.number.isRequired,
 	labelText: PropTypes.string,
 	setTimeout: PropTypes.func,
-	searchablePostTypes: PropTypes.array,
+	searchablePostTypes: PropTypes.arrayOf( PropTypes.string ),
 	onChange: PropTypes.func.isRequired,
 	onSelect: PropTypes.func.isRequired,
 	placeholder: PropTypes.string,

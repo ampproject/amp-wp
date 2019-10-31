@@ -37,7 +37,9 @@ const BlockSave = ( { attributes } ) => {
 		}
 	}
 	return (
-		<amp-timeago { ...timeagoProps }>{ moment( attributes.dateTime ).format( 'dddd D MMMM HH:mm' ) }</amp-timeago>
+		<amp-timeago { ...timeagoProps }>
+			{ moment( attributes.dateTime ).format( 'dddd D MMMM HH:mm' ) }
+		</amp-timeago>
 	);
 };
 

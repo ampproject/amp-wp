@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { maybeEnqueueFontStyle } from '../';
+import maybeEnqueueFontStyle from '../maybeEnqueueFontStyle';
 
 describe( 'maybeEnqueueFontStyle', () => {
 	it( 'should ignore invalid font name', () => {

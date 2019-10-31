@@ -34,12 +34,21 @@ trait AMP_Noscript_Fallback {
 	 */
 	protected function initialize_noscript_allowed_attributes( $tag ) {
 		$this->noscript_fallback_allowed_attributes = array_fill_keys(
-			array_merge(
-				array_keys( current( AMP_Allowed_Tags_Generated::get_allowed_tag( $tag ) )['attr_spec_list'] ),
-				array_keys( AMP_Allowed_Tags_Generated::get_allowed_attributes() )
-			),
+			array_keys( AMP_Allowed_Tags_Generated::get_allowed_attributes() ),
 			true
 		);
+
+		foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( $tag ) as $tag_spec ) { // Normally 1 iteration.
+			foreach ( $tag_spec['attr_spec_list'] as $attr_name => $attr_spec ) {
+				$this->noscript_fallback_allowed_attributes[ $attr_name ] = true;
+				if ( isset( $attr_spec['alternative_names'] ) ) {
+					$this->noscript_fallback_allowed_attributes = array_merge(
+						$this->noscript_fallback_allowed_attributes,
+						array_fill_keys( $attr_spec['alternative_names'], true )
+					);
+				}
+			}
+		}
 	}
 
 	/**

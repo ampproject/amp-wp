@@ -16,31 +16,31 @@ import { __, sprintf } from '@wordpress/i18n';
  * @param {?string} props.code Error code.
  * @param {?string} props.node_name Node name.
  * @param {?string} props.parent_name Parent node name.
- * @param {?string} props.message Error message.
+ * @param {?string|ReactElement} props.message Error message.
  *
  * @return {ReactElement} Validation error message.
  */
 const ValidationErrorMessage = ( { message, code, node_name: nodeName, parent_name: parentName } ) => {
 	if ( message ) {
-		return (
-			<>
-				{ message }
-			</>
-		);
+		return message;
 	}
 
 	if ( 'invalid_element' === code && nodeName ) {
 		return (
 			<>
 				{ __( 'Invalid element: ', 'amp' ) }
-				<code>{ nodeName }</code>
+				<code>
+					{ nodeName }
+				</code>
 			</>
 		);
 	} else if ( 'invalid_attribute' === code && nodeName ) {
 		return (
 			<>
 				{ __( 'Invalid attribute: ', 'amp' ) }
-				<code>{ parentName ? sprintf( '%s[%s]', parentName, nodeName ) : nodeName }</code>
+				<code>
+					{ parentName ? sprintf( '%s[%s]', parentName, nodeName ) : nodeName }
+				</code>
 			</>
 		);
 	}
@@ -48,7 +48,9 @@ const ValidationErrorMessage = ( { message, code, node_name: nodeName, parent_na
 	return (
 		<>
 			{ __( 'Error code: ', 'amp' ) }
-			<code>{ code || __( 'unknown', 'amp' ) }</code>
+			<code>
+				{ code || __( 'unknown', 'amp' ) }
+			</code>
 		</>
 	);
 };

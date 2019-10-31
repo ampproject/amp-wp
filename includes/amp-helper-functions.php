@@ -418,16 +418,16 @@ function amp_register_default_scripts( $wp_scripts ) {
 	$handles = [ 'wp-i18n', 'wp-dom-ready', 'wp-server-side-render' ];
 	foreach ( $handles as $handle ) {
 		if ( ! isset( $wp_scripts->registered[ $handle ] ) ) {
-			$script_deps_path    = AMP__DIR__ . '/assets/js/' . $handle . '.deps.json';
-			$script_dependencies = file_exists( $script_deps_path )
-				? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-				: [];
+			$asset_file   = AMP__DIR__ . '/assets/js/' . $handle . '.asset.php';
+			$asset        = require $asset_file;
+			$dependencies = $asset['dependencies'];
+			$version      = $asset['version'];
 
 			$wp_scripts->add(
 				$handle,
 				amp_get_asset_url( sprintf( 'js/%s.js', $handle ) ),
-				$script_dependencies,
-				AMP__VERSION
+				$dependencies,
+				$version
 			);
 		}
 	}
@@ -678,7 +678,7 @@ function amp_get_analytics( $analytics = [] ) {
 	foreach ( $analytics_entries as $entry_id => $entry ) {
 		$analytics[ $entry_id ] = [
 			'type'        => $entry['type'],
-			'attributes'  => [],
+			'attributes'  => isset( $entry['attributes'] ) ? $entry['attributes'] : [],
 			'config_data' => json_decode( $entry['config'] ),
 		];
 	}
@@ -790,26 +790,28 @@ function amp_get_content_embed_handlers( $post = null ) {
 	return apply_filters(
 		'amp_content_embed_handlers',
 		[
-			'AMP_Core_Block_Handler'        => [],
-			'AMP_Twitter_Embed_Handler'     => [],
-			'AMP_YouTube_Embed_Handler'     => [],
-			'AMP_Crowdsignal_Embed_Handler' => [],
-			'AMP_DailyMotion_Embed_Handler' => [],
-			'AMP_Vimeo_Embed_Handler'       => [],
-			'AMP_SoundCloud_Embed_Handler'  => [],
-			'AMP_Instagram_Embed_Handler'   => [],
-			'AMP_Issuu_Embed_Handler'       => [],
-			'AMP_Meetup_Embed_Handler'      => [],
-			'AMP_Vine_Embed_Handler'        => [],
-			'AMP_Facebook_Embed_Handler'    => [],
-			'AMP_Pinterest_Embed_Handler'   => [],
-			'AMP_Playlist_Embed_Handler'    => [],
-			'AMP_Reddit_Embed_Handler'      => [],
-			'AMP_Tumblr_Embed_Handler'      => [],
-			'AMP_Gallery_Embed_Handler'     => [],
-			'AMP_Gfycat_Embed_Handler'      => [],
-			'AMP_Hulu_Embed_Handler'        => [],
-			'AMP_Imgur_Embed_Handler'       => [],
+			'AMP_Core_Block_Handler'         => [],
+			'AMP_Twitter_Embed_Handler'      => [],
+			'AMP_YouTube_Embed_Handler'      => [],
+			'AMP_Crowdsignal_Embed_Handler'  => [],
+			'AMP_DailyMotion_Embed_Handler'  => [],
+			'AMP_Vimeo_Embed_Handler'        => [],
+			'AMP_SoundCloud_Embed_Handler'   => [],
+			'AMP_Instagram_Embed_Handler'    => [],
+			'AMP_Issuu_Embed_Handler'        => [],
+			'AMP_Meetup_Embed_Handler'       => [],
+			'AMP_Vine_Embed_Handler'         => [],
+			'AMP_Facebook_Embed_Handler'     => [],
+			'AMP_Pinterest_Embed_Handler'    => [],
+			'AMP_Playlist_Embed_Handler'     => [],
+			'AMP_Reddit_Embed_Handler'       => [],
+			'AMP_Tumblr_Embed_Handler'       => [],
+			'AMP_Gallery_Embed_Handler'      => [],
+			'AMP_Gfycat_Embed_Handler'       => [],
+			'AMP_Hulu_Embed_Handler'         => [],
+			'AMP_Imgur_Embed_Handler'        => [],
+			'AMP_Scribd_Embed_Handler'       => [],
+			'AMP_WordPress_TV_Embed_Handler' => [],
 		],
 		$post
 	);
@@ -883,10 +885,27 @@ function amp_get_content_sanitizers( $post = null ) {
 		$current_origin .= ':' . $parsed_home_url['port'];
 	}
 
+	$amp_to_amp_linking_enabled = false;
+	if ( AMP_Options_Manager::is_website_experience_enabled() ) {
+		/**
+		 * Filters whether AMP-to-AMP linking should be enabled.
+		 *
+		 * @since 1.4.0
+		 * @param bool $amp_to_amp_linking_enabled Whether AMP-to-AMP linking should be enabled.
+		 */
+		$amp_to_amp_linking_enabled = (bool) apply_filters(
+			'amp_to_amp_linking_enabled',
+			AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Theme_Support::get_support_mode()
+		);
+	}
+
 	$sanitizers = [
 		'AMP_Core_Theme_Sanitizer'        => [
-			'template'   => get_template(),
-			'stylesheet' => get_stylesheet(),
+			'template'       => get_template(),
+			'stylesheet'     => get_stylesheet(),
+			'theme_features' => [
+				'force_svg_support' => [], // Always replace 'no-svg' class with 'svg' if it exists.
+			],
 		],
 		'AMP_Img_Sanitizer'               => [
 			'align_wide_support' => current_theme_supports( 'align-wide' ),
@@ -921,6 +940,12 @@ function amp_get_content_sanitizers( $post = null ) {
 
 	if ( ! empty( $theme_support_args['nav_menu_dropdown'] ) ) {
 		$sanitizers['AMP_Nav_Menu_Dropdown_Sanitizer'] = $theme_support_args['nav_menu_dropdown'];
+	}
+
+	if ( $amp_to_amp_linking_enabled ) {
+		$sanitizers['AMP_Link_Sanitizer'] = [
+			'paired' => ! amp_is_canonical(),
+		];
 	}
 
 	/**
@@ -1302,6 +1327,35 @@ function amp_print_story_auto_ads() {
 	);
 
 	echo AMP_HTML_Utils::build_tag( 'amp-story-auto-ads', [], $script_element ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+}
+
+/**
+ * Generate hash for inline amp-script.
+ *
+ * The sha384 hash used by amp-script is represented not as hexadecimal but as base64url, which is defined in RFC 4648
+ * under section 5, "Base 64 Encoding with URL and Filename Safe Alphabet". It is sometimes referred to as "web safe".
+ *
+ * @since 1.4.0
+ * @link https://amp.dev/documentation/components/amp-script/#security-features
+ * @link https://github.com/ampproject/amphtml/blob/e8707858895c2af25903af25d396e144e64690ba/extensions/amp-script/0.1/amp-script.js#L401-L425
+ * @link https://github.com/ampproject/amphtml/blob/27b46b9c8c0fb3711a00376668d808f413d798ed/src/service/crypto-impl.js#L67-L124
+ * @link https://github.com/ampproject/amphtml/blob/c4a663d0ba13d0488c6fe73c55dc8c971ac6ec0d/src/utils/base64.js#L52-L61
+ * @link https://tools.ietf.org/html/rfc4648#section-5
+ *
+ * @param string $script Script.
+ * @return string|null Script hash or null if the sha384 algorithm is not supported.
+ */
+function amp_generate_script_hash( $script ) {
+	$sha384 = hash( 'sha384', $script, true );
+	if ( false === $sha384 ) {
+		return null;
+	}
+	$hash = str_replace(
+		[ '+', '/', '=' ],
+		[ '-', '_', '.' ],
+		base64_encode( $sha384 ) // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+	);
+	return 'sha384-' . $hash;
 }
 
 /*

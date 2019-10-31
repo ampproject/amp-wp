@@ -715,7 +715,27 @@ class AMP_Theme_Support {
 			if ( ! $has_children ) {
 				$supportable_template = $supportable_templates[ $id ];
 				while ( ! empty( $supportable_template['parent'] ) ) {
-					$parent               = $supportable_template['parent'];
+					$parent = $supportable_template['parent'];
+
+					/*
+					 * If the parent is not amongst the supportable templates, then something is off in terms of hierarchy.
+					 * Either the matching is off-track, or the template is badly configured.
+					 */
+					if ( ! array_key_exists( $parent, $supportable_templates ) ) {
+						_doing_it_wrong(
+							__METHOD__,
+							esc_html(
+								sprintf(
+									/* translators: %s: amp_supportable_templates */
+									__( 'An expected parent was not found. Did you filter %s to not honor the template hierarchy?', 'amp' ),
+									'amp_supportable_templates'
+								)
+							),
+							'1.4'
+						);
+						break;
+					}
+
 					$supportable_template = $supportable_templates[ $parent ];
 
 					// Let the child supported status override the parent's supported status.
@@ -922,8 +942,8 @@ class AMP_Theme_Support {
 		}
 
 		$taxonomy_args = [
-			'_builtin'           => false,
-			'publicly_queryable' => true,
+			'_builtin' => false,
+			'public'   => true,
 		];
 		foreach ( get_taxonomies( $taxonomy_args, 'objects' ) as $taxonomy ) {
 			$templates[ sprintf( 'is_tax[%s]', $taxonomy->name ) ] = [
@@ -936,8 +956,8 @@ class AMP_Theme_Support {
 		}
 
 		$post_type_args = [
-			'has_archive'        => true,
-			'publicly_queryable' => true,
+			'has_archive' => true,
+			'public'      => true,
 		];
 		foreach ( get_post_types( $post_type_args, 'objects' ) as $post_type ) {
 			$templates[ sprintf( 'is_post_type_archive[%s]', $post_type->name ) ] = [
@@ -1392,6 +1412,12 @@ class AMP_Theme_Support {
 			$header_callback();
 			$style = ob_get_clean();
 			$data  = trim( preg_replace( '#<style[^>]*>(.*)</style>#is', '$1', $style ) ); // See wp_add_inline_style().
+
+			// Override AMP's position:relative on the body for the sake of the AMP viewer, which is not relevant an an Admin Bar context.
+			if ( amp_is_dev_mode() ) {
+				$data .= 'html:not(#_) > body { position:unset !important; }';
+			}
+
 			wp_add_inline_style( 'admin-bar', $data );
 		}
 
@@ -1543,15 +1569,29 @@ class AMP_Theme_Support {
 			$head->appendChild( $script );
 		}
 
-		// Ensure rel=canonical link.
-		$links         = [];
+		// Gather all links.
+		$links         = [
+			'preconnect' => [
+				// Include preconnect link for AMP CDN for browsers that don't support preload.
+				AMP_DOM_Utils::create_node(
+					$dom,
+					'link',
+					[
+						'rel'  => 'preconnect',
+						'href' => 'https://cdn.ampproject.org',
+					]
+				),
+			],
+		];
 		$link_elements = $head->getElementsByTagName( 'link' );
-		$rel_canonical = null;
 		foreach ( $link_elements as $link ) {
 			if ( $link->hasAttribute( 'rel' ) ) {
 				$links[ $link->getAttribute( 'rel' ) ][] = $link;
 			}
 		}
+
+		// Ensure rel=canonical link.
+		$rel_canonical = null;
 		if ( empty( $links['canonical'] ) ) {
 			$rel_canonical = AMP_DOM_Utils::create_node(
 				$dom,
@@ -1575,18 +1615,23 @@ class AMP_Theme_Support {
 		 *
 		 * {@link https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/optimize_amp/ Optimize the AMP Runtime loading}
 		 */
-		$meta_charset  = null;
-		$meta_viewport = null;
-		$meta_elements = [];
+		$meta_charset         = null;
+		$meta_viewport        = null;
+		$meta_amp_script_srcs = [];
+		$meta_elements        = [];
 		foreach ( $head->getElementsByTagName( 'meta' ) as $meta ) {
 			if ( $meta->hasAttribute( 'charset' ) ) { // There will not be a meta[http-equiv] because the sanitizer removed it.
 				$meta_charset = $meta;
 			} elseif ( 'viewport' === $meta->getAttribute( 'name' ) ) {
 				$meta_viewport = $meta;
+			} elseif ( 'amp-script-src' === $meta->getAttribute( 'name' ) ) {
+				$meta_amp_script_srcs[] = $meta;
 			} else {
 				$meta_elements[] = $meta;
 			}
 		}
+
+		// Handle meta charset.
 		if ( ! $meta_charset ) {
 			// Warning: This probably means the character encoding needs to be converted.
 			$meta_charset = AMP_DOM_Utils::create_node(
@@ -1601,6 +1646,7 @@ class AMP_Theme_Support {
 		}
 		$head->insertBefore( $meta_charset, $head->firstChild );
 
+		// Handle meta viewport.
 		if ( ! $meta_viewport ) {
 			$meta_viewport = AMP_DOM_Utils::create_node(
 				$dom,
@@ -1615,6 +1661,25 @@ class AMP_Theme_Support {
 		}
 		$head->insertBefore( $meta_viewport, $meta_charset->nextSibling );
 
+		// Handle meta amp-script-src elements.
+		$first_meta_amp_script_src = array_shift( $meta_amp_script_srcs );
+		if ( $first_meta_amp_script_src ) {
+			$meta_elements[] = $first_meta_amp_script_src;
+
+			// Merge (and remove) any subsequent meta amp-script-src elements.
+			if ( ! empty( $meta_amp_script_srcs ) ) {
+				$content_values = [ $first_meta_amp_script_src->getAttribute( 'content' ) ];
+				foreach ( $meta_amp_script_srcs as $meta_amp_script_src ) {
+					$meta_amp_script_src->parentNode->removeChild( $meta_amp_script_src );
+					$content_values[] = $meta_amp_script_src->getAttribute( 'content' );
+				}
+				$first_meta_amp_script_src->setAttribute( 'content', implode( ' ', $content_values ) );
+				unset( $meta_amp_script_src, $content_values );
+			}
+		}
+		unset( $meta_amp_script_srcs, $first_meta_amp_script_src );
+
+		// Insert all the the meta elements next in the head.
 		$previous_node = $meta_viewport;
 		foreach ( $meta_elements as $meta_element ) {
 			$meta_element->parentNode->removeChild( $meta_element );
@@ -1622,6 +1687,7 @@ class AMP_Theme_Support {
 			$previous_node = $meta_element;
 		}
 
+		// Handle the title.
 		$title = $head->getElementsByTagName( 'title' )->item( 0 );
 		if ( $title ) {
 			$title->parentNode->removeChild( $title ); // So we can move it.

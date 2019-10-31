@@ -113,7 +113,7 @@ export const validateFeaturedImage = ( media, dimensions, required ) => {
 	if ( ! [ 'image/png', 'image/gif', 'image/jpeg' ].includes( media.mime_type ) ) {
 		errors.push(
 			/* translators: 1: .jpg, 2: .png. 3: .gif */
-			sprintf( __( 'The featured image must be in %1$s, %2$s, or %3$s format.', 'amp' ), '.jpg', '.png', '.gif' )
+			sprintf( __( 'The featured image must be in %1$s, %2$s, or %3$s format.', 'amp' ), '.jpg', '.png', '.gif' ),
 		);
 	}
 
@@ -122,7 +122,7 @@ export const validateFeaturedImage = ( media, dimensions, required ) => {
 
 		errors.push(
 			/* translators: 1: minimum width, 2: minimum height. */
-			sprintf( __( 'The featured image should have a size of at least %1$s by %2$s pixels.', 'amp' ), Math.ceil( width ), Math.ceil( height ) )
+			sprintf( __( 'The featured image should have a size of at least %1$s by %2$s pixels.', 'amp' ), Math.ceil( width ), Math.ceil( height ) ),
 		);
 	}
 
@@ -228,7 +228,7 @@ export const getNoticeTemplate = ( message ) => {
 			evaluate: /<#([\s\S]+?)#>/g,
 			interpolate: /\{\{\{([\s\S]+?)\}\}\}/g,
 			escape: /\{\{([^\}]+?)\}\}(?!\})/g,
-		}
+		},
 	);
 
 	return ( data ) => {
@@ -282,7 +282,7 @@ export const enforceFileType = function( attachment, SelectionError ) {
 	if ( allowedTypes && attachment.get( 'type' ) && ! isFileTypeAllowed( attachment, allowedTypes ) ) {
 		this.secondary.set(
 			FILE_TYPE_ERROR_VIEW,
-			new SelectionError( { mimeType: attachment.get( 'mime' ) } )
+			new SelectionError( { mimeType: attachment.get( 'mime' ) } ),
 		);
 		if ( selectButton && selectButton.model ) {
 			selectButton.model.set( 'disabled', true ); // Disable the button to select the file.
@@ -317,7 +317,7 @@ export const enforceFileSize = function( attachment, SelectionError ) {
 			new SelectionError( {
 				actualVideoMegabytesPerSecond: Math.round( getVideoBytesPerSecond( attachment ) / MEGABYTE_IN_BYTES ),
 				maxVideoMegabytesPerSecond: VIDEO_ALLOWED_MEGABYTES_PER_SECOND,
-			} )
+			} ),
 		);
 	} else {
 		this.secondary.unset( FILE_SIZE_ERROR_VIEW );
@@ -380,7 +380,7 @@ export const getSecondsFromTime = ( time ) => {
 			const multiple = Math.pow( minuteInSeconds, distanceFromRight ); // This should be 1 for seconds, 60 for minutes, 360 for hours...
 			return totalSeconds + ( multiple * parsedTimeSection );
 		},
-		0
+		0,
 	);
 };
 
@@ -402,12 +402,13 @@ export const getContentLengthFromUrl = async ( url ) => {
 /**
  * Sets the featured image, on selecting it in the Media Library.
  *
- * @param {string} url             Image URL.
- * @param {number} id              Attachment ID.
- * @param {number} width           Image width.
- * @param {number} height          Image height.
- * @param {Function} onSelect      A function in the MediaUpload component called on selecting the image.
- * @param {Function} dispatchImage A function to dispatch the change in image to the store.
+ * @param {Object} args Arguments.
+ * @param {string} args.url Image URL.
+ * @param {number} args.id Attachment ID.
+ * @param {number} args.width Image width.
+ * @param {number} args.height Image height.
+ * @param {Function} args.onSelect A function in the MediaUpload component called on selecting the image.
+ * @param {Function} args.dispatchImage A function to dispatch the change in image to the store.
  */
 export const setImageFromURL = ( { url, id, width, height, onSelect, dispatchImage } ) => {
 	const data = {};

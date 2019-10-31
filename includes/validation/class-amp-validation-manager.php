@@ -290,12 +290,44 @@ class AMP_Validation_Manager {
 	}
 
 	/**
-	 * Return whether sanitization is forcibly accepted, whether because in AMP-first mode or via user option.
+	 * Return whether sanitization is initially accepted (by default) for newly encountered validation errors.
 	 *
+	 * To reject all new validation errors by default, a filter can be used like so:
+	 *
+	 *     add_filter( 'amp_validation_error_default_sanitized', '__return_false' );
+	 *
+	 * Whether or not a validation error is then actually sanitized is the ultimately determined by the
+	 * `amp_validation_error_sanitized` filter.
+	 *
+	 * @since 1.0
+	 * @see AMP_Validation_Error_Taxonomy::is_validation_error_sanitized()
+	 * @see AMP_Validation_Error_Taxonomy::get_validation_error_sanitization()
+	 *
+	 * @param array $error Optional. Validation error. Will query the general status if no error provided.
 	 * @return bool Whether sanitization is forcibly accepted.
 	 */
-	public static function is_sanitization_auto_accepted() {
-		return amp_is_canonical() || AMP_Options_Manager::get_option( 'auto_accept_sanitization' );
+	public static function is_sanitization_auto_accepted( $error = null ) {
+
+		if ( $error && amp_is_canonical() ) {
+			// Excessive CSS on AMP-first sites must not be removed by default since removing CSS can severely break a site.
+			$accepted = 'excessive_css' !== $error['code'];
+		} else {
+			$accepted = true;
+		}
+
+		/**
+		 * Filters whether sanitization is accepted for a newly-encountered validation error .
+		 *
+		 * This only applies to validation errors that have not been encountered before. To override the sanitization
+		 * status of existing validation errors, use the `amp_validation_error_sanitized` filter.
+		 *
+		 * @since 1.4
+		 * @see AMP_Validation_Error_Taxonomy::get_validation_error_sanitization()
+		 *
+		 * @param bool       $accepted Default accepted.
+		 * @param array|null $error    Validation error. May be null when asking if accepting sanitization is enabled by default.
+		 */
+		return apply_filters( 'amp_validation_error_default_sanitized', $accepted, $error );
 	}
 
 	/**
@@ -413,14 +445,14 @@ class AMP_Validation_Manager {
 			'href'   => esc_url( $validate_url ),
 		];
 		if ( $error_count <= 0 ) {
-			$validate_item['title'] = esc_html__( 'Re-validate', 'amp' );
+			$validate_item['title'] = esc_html__( 'Validate', 'amp' );
 		} else {
 			$validate_item['title'] = esc_html(
 				sprintf(
 					/* translators: %s is count of validation errors */
 					_n(
-						'Re-validate (%s validation error)',
-						'Re-validate (%s validation errors)',
+						'Review %s validation issue',
+						'Review %s validation issues',
 						$error_count,
 						'amp'
 					),
@@ -886,21 +918,17 @@ class AMP_Validation_Manager {
 		esc_html_e( 'There is content which fails AMP validation.', 'amp' );
 		echo ' ';
 
-		// Auto-acceptance is from either checking 'Automatically accept sanitization...' or from being in AMP-first.
-		if ( self::is_sanitization_auto_accepted() ) {
-			if ( ! $has_rejected_error ) {
-				esc_html_e( 'However, your site is configured to automatically accept sanitization of the offending markup. You should review the issues to confirm whether or not sanitization should be accepted or rejected.', 'amp' );
-			} else {
-				/*
-				 * Even if the 'auto_accept_sanitization' option is true, if there are non-accepted errors in non-Standard mode, it will redirect to a non-AMP page.
-				 * For example, the errors could have been stored as 'New Rejected' when auto-accept was false, and now auto-accept is true.
-				 * In that case, this will block serving AMP.
-				 * This could also apply if this is in 'Standard' mode and the user has rejected a validation error.
-				 */
-				esc_html_e( 'Though your site is configured to automatically accept sanitization errors, there are rejected error(s). This could be because auto-acceptance of errors was disabled earlier. You should review the issues to confirm whether or not sanitization should be accepted or rejected.', 'amp' );
-			}
+		// Auto-acceptance is enabled by default but can be overridden by the the `amp_validation_error_default_sanitized` filter.
+		if ( ! $has_rejected_error ) {
+			esc_html_e( 'Nevertheless, the invalid markup has been automatically removed.', 'amp' );
 		} else {
-			esc_html_e( 'Non-accepted validation errors prevent AMP from being served, and the user will be redirected to the non-AMP version.', 'amp' );
+			/*
+			 * Even if invalid markup is removed by default, if there are non-accepted errors in non-Standard mode, it will redirect to a non-AMP page.
+			 * For example, the errors could have been stored as 'New Kept' when auto-accept was false, and now auto-accept is true.
+			 * In that case, this will block serving AMP.
+			 * This could also apply if this is in 'Standard' mode and the user has rejected a validation error.
+			 */
+			esc_html_e( 'You will have to remove the invalid markup (or allow the plugin to remove it) to serve AMP.', 'amp' );
 		}
 
 		echo sprintf(
@@ -1233,6 +1261,16 @@ class AMP_Validation_Manager {
 					continue;
 				}
 
+				// Skip considering ourselves.
+				if ( 'AMP_Validation_Manager::add_block_source_comments' === $source['function'] ) {
+					continue;
+				}
+
+				/**
+				 * Reflection.
+				 *
+				 * @var ReflectionFunctionAbstract $reflection
+				 */
 				$reflection = $source['reflection'];
 				unset( $source['reflection'] ); // Omit from stored source.
 
@@ -1249,9 +1287,10 @@ class AMP_Validation_Manager {
 					continue;
 				}
 
-				$source['hook']    = $hook;
-				$original_function = $callback['function'];
-				$wrapped_callback  = self::wrapped_callback(
+				$source['hook']     = $hook;
+				$source['priority'] = $priority;
+				$original_function  = $callback['function'];
+				$wrapped_callback   = self::wrapped_callback(
 					array_merge(
 						$callback,
 						compact( 'priority', 'source' )
@@ -1393,7 +1432,6 @@ class AMP_Validation_Manager {
 	public static function get_source( $callback ) {
 		$reflection = null;
 		$class_name = null; // Because ReflectionMethod::getDeclaringClass() can return a parent class.
-		$file       = null;
 		try {
 			if ( is_string( $callback ) && is_callable( $callback ) ) {
 				// The $callback is a function or static method.
@@ -1412,20 +1450,16 @@ class AMP_Validation_Manager {
 					$class_name = get_class( $callback[0] );
 				}
 
-				/*
-				 * Obtain file from ReflectionClass because if the method is not on base class then
-				 * file returned by ReflectionMethod will be for the base class not the subclass.
-				 */
-				$reflection = new ReflectionClass( $callback[0] );
-				$file       = $reflection->getFileName();
-
 				// This is needed later for AMP_Validation_Manager::has_parameters_passed_by_reference().
 				$reflection = new ReflectionMethod( $callback[0], $callback[1] );
+
+				// Handle the special case of the class being a widget, in which case the display_callback method should
+				// actually map to the underling widget method. It is the display_callback in the end that is wrapped.
+				if ( 'WP_Widget' === $reflection->getDeclaringClass()->getName() && 'display_callback' === $reflection->getName() ) {
+					$reflection = new ReflectionMethod( $callback[0], 'widget' );
+				}
 			} elseif ( is_object( $callback ) && ( 'Closure' === get_class( $callback ) ) ) {
 				$reflection = new ReflectionFunction( $callback );
-			}
-			if ( $reflection && ! $file ) {
-				$file = $reflection->getFileName();
 			}
 		} catch ( Exception $e ) {
 			return null;
@@ -1437,25 +1471,34 @@ class AMP_Validation_Manager {
 
 		$source = compact( 'reflection' );
 
-		if ( $file ) {
-			$file         = wp_normalize_path( $file );
-			$slug_pattern = '([^/]+)';
-			if ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( WP_PLUGIN_DIR ) ), ':' ) . $slug_pattern . ':s', $file, $matches ) ) {
-				$source['type'] = 'plugin';
-				$source['name'] = $matches[1];
-			} elseif ( preg_match( ':' . preg_quote( trailingslashit( self::$template_directory ), ':' ) . $slug_pattern . ':s', $file ) ) {
-				$source['type'] = 'theme';
-				$source['name'] = self::$template_slug;
-			} elseif ( preg_match( ':' . preg_quote( trailingslashit( self::$stylesheet_directory ), ':' ) . $slug_pattern . ':s', $file ) ) {
-				$source['type'] = 'theme';
-				$source['name'] = self::$stylesheet_slug;
-			} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( WPMU_PLUGIN_DIR ) ), ':' ) . $slug_pattern . ':s', $file, $matches ) ) {
-				$source['type'] = 'mu-plugin';
-				$source['name'] = $matches[1];
-			} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( ABSPATH ) ), ':' ) . '(wp-admin|wp-includes)/:s', $file, $matches ) ) {
-				$source['type'] = 'core';
-				$source['name'] = $matches[1];
-			}
+		// Identify the type, name, and relative file path.
+		$file         = wp_normalize_path( $reflection->getFileName() );
+		$slug_pattern = '(?<slug>[^/]+)';
+		if ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( WP_PLUGIN_DIR ) ), ':' ) . $slug_pattern . '(/(?P<file>.*$))?:s', $file, $matches ) ) {
+			$source['type'] = 'plugin';
+			$source['name'] = $matches['slug'];
+			$source['file'] = isset( $matches['file'] ) ? $matches['file'] : $matches['slug'];
+		} elseif ( ! empty( self::$template_directory ) && preg_match( ':' . preg_quote( trailingslashit( self::$template_directory ), ':' ) . '(?P<file>.*$):s', $file, $matches ) ) {
+			$source['type'] = 'theme';
+			$source['name'] = self::$template_slug;
+			$source['file'] = $matches['file'];
+		} elseif ( ! empty( self::$stylesheet_directory ) && preg_match( ':' . preg_quote( trailingslashit( self::$stylesheet_directory ), ':' ) . '/(?P<file>.*$):s', $file, $matches ) ) {
+			$source['type'] = 'theme';
+			$source['name'] = self::$stylesheet_slug;
+			$source['file'] = $matches['file'];
+		} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( WPMU_PLUGIN_DIR ) ), ':' ) . $slug_pattern . '(/(?P<file>.*$))?:s', $file, $matches ) ) {
+			$source['type'] = 'mu-plugin';
+			$source['name'] = $matches['slug'];
+			$source['file'] = isset( $matches['file'] ) ? $matches['file'] : $matches['slug'];
+		} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( ABSPATH ) ), ':' ) . '(?P<slug>wp-admin|wp-includes)/(?P<file>.*$):s', $file, $matches ) ) {
+			$source['type'] = 'core';
+			$source['name'] = $matches['slug'];
+			$source['file'] = $matches['file'];
+		}
+
+		// If a file was identified, then also supply the line number.
+		if ( isset( $source['file'] ) ) {
+			$source['line'] = $reflection->getStartLine();
 		}
 
 		if ( $class_name ) {
@@ -1634,8 +1677,8 @@ class AMP_Validation_Manager {
 						$link->textContent = sprintf(
 							/* translators: %s is count of validation errors */
 							_n(
-								'Re-validate (%s validation error)',
-								'Re-validate (%s validation errors)',
+								'Review %s validation issue',
+								'Review %s validation issues',
 								$error_count,
 								'amp'
 							),
@@ -1964,16 +2007,16 @@ class AMP_Validation_Manager {
 
 		$slug = 'amp-block-validation';
 
-		$script_deps_path    = AMP__DIR__ . '/assets/js/' . $slug . '.deps.json';
-		$script_dependencies = file_exists( $script_deps_path )
-			? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-			: [];
+		$asset_file   = AMP__DIR__ . '/assets/js/' . $slug . '.asset.php';
+		$asset        = require $asset_file;
+		$dependencies = $asset['dependencies'];
+		$version      = $asset['version'];
 
 		wp_enqueue_script(
 			$slug,
 			amp_get_asset_url( "js/{$slug}.js" ),
-			$script_dependencies,
-			AMP__VERSION,
+			$dependencies,
+			$version,
 			true
 		);
 
@@ -1990,7 +2033,7 @@ class AMP_Validation_Manager {
 		$enabled_status    = $status_and_errors['status'];
 
 		$data = [
-			'isSanitizationAutoAccepted' => self::is_sanitization_auto_accepted() || AMP_Story_Post_Type::POST_TYPE_SLUG === get_post_type(),
+			'isSanitizationAutoAccepted' => self::is_sanitization_auto_accepted(),
 			'possibleStatuses'           => [ AMP_Post_Meta_Box::ENABLED_STATUS, AMP_Post_Meta_Box::DISABLED_STATUS ],
 			'defaultStatus'              => $enabled_status,
 		];

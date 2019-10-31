@@ -94,7 +94,7 @@ div[data-type="amp/amp-story-cta"] .amp-overlay {
 .wp-block-amp-amp-story-cta .amp-block-story-cta__link {
 	max-width: 100%;
 	overflow: hidden;
-	white-space: nowrap;
+	white-space: nowrap !important;
 	text-overflow: ellipsis;
 }
 
@@ -110,6 +110,7 @@ div[data-type="amp/amp-story-cta"] .amp-overlay {
 	text-decoration: none;
 	white-space: normal;
 	overflow-wrap: break-word;
+	line-height: 1.15;
 }
 
 .amp-block-story-cta__inline-link {
@@ -124,6 +125,7 @@ div[data-type="amp/amp-story-cta"] .amp-overlay {
 	position: absolute;
 	z-index: 10;
 	margin-top: -0.5em;
+	top: 100%;
 }
 
 .is-dragging-components-draggable .amp-block-story-cta__inline-link {
@@ -132,6 +134,10 @@ div[data-type="amp/amp-story-cta"] .amp-overlay {
 
 .amp-block-story-cta__inline-link .block-editor-url-input {
 	width: auto;
+}
+
+.amp-block-story-cta__inline-link .block-editor-url-input input[type="text"] {
+	border: 1px solid #ddd;
 }
 
 .amp-block-story-cta__inline-link .block-editor-url-input__suggestions {

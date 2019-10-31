@@ -19,6 +19,8 @@
 }
 
 .amp-story-resize-container .components-resizable-box__handle-right {
+
+	/*!rtl:ignore*/
 	right: -14px !important;
 }
 
@@ -27,6 +29,8 @@
 }
 
 .amp-story-resize-container .components-resizable-box__handle-left {
+
+	/*!rtl:ignore*/
 	left: -14px !important;
 }
 

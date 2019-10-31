@@ -287,6 +287,14 @@ export function blocks( state = {}, action ) {
 	}
 }
 
+/**
+ * Reducer handling copy/paste.
+ *
+ * @param {Object} state  Current state.
+ * @param {Object} action Dispatched action.
+ *
+ * @return {Object} Updated state.
+ */
 export function copiedMarkup( state = {}, action ) {
 	switch ( action.type ) {
 		case 'SET_COPIED_MARKUP':

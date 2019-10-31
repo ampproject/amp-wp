@@ -8,6 +8,11 @@ import { Warning } from '@wordpress/block-editor';
 import { createHigherOrderComponent, compose } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
 
+/**
+ * Internal dependencies
+ */
+import { isCTABlock } from '../../helpers';
+
 const enhance = compose(
 	/**
 	 * For blocks which are only allowed once per page,  provides the
@@ -19,7 +24,7 @@ const enhance = compose(
 	withSelect( ( select, props ) => {
 		const { getBlockRootClientId, getBlock, getBlockOrder, getBlocksByClientId } = select( 'core/block-editor' );
 
-		if ( 'amp/amp-story-cta' !== props.name ) {
+		if ( ! isCTABlock( props.name ) ) {
 			return {};
 		}
 
@@ -51,7 +56,7 @@ export default createHigherOrderComponent( ( BlockEdit ) => {
 		selectFirst,
 		...props
 	} ) => {
-		if ( ! isInvalid || 'amp/amp-story-cta' !== props.name ) {
+		if ( ! isInvalid || ! isCTABlock( props.name ) ) {
 			return <BlockEdit { ...props } />;
 		}
 
@@ -67,13 +72,15 @@ export default createHigherOrderComponent( ( BlockEdit ) => {
 			actions.unshift(
 				<Button key="find-original" isLarge onClick={ selectFirst }>
 					{ __( 'Find original', 'amp' ) }
-				</Button>
+				</Button>,
 			);
 		}
 
 		return (
 			<Warning actions={ actions }>
-				<strong>{ blockType.title }: </strong>
+				<strong>
+					{ `${ blockType.title }: ` }
+				</strong>
 				{ originalBlockClientId ?
 					__( 'This block can only be used once per page.', 'amp' ) :
 					__( 'This block can not be used on the first page.', 'amp' )

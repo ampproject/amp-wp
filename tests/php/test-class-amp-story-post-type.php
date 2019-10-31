@@ -218,8 +218,8 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		];
 		$this->assertEquals( null, AMP_Story_Post_Type::override_story_embed_callback( null, $wrong_block ) );
 
-		// The conditional is now satisfied, so this should return the overriden callback.
-		$story_posts    = $this->create_story_posts_with_featured_images( [ 400, 400 ] );
+		// The conditional is now satisfied, so this should return the overridden callback.
+		$story_posts    = $this->create_story_posts_with_featured_images( [ [ 400, 400 ] ] );
 		$amp_story_post = reset( $story_posts );
 		$correct_url    = get_post_permalink( $amp_story_post );
 		$correct_block  = [

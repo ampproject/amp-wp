@@ -59,7 +59,9 @@ class AMP_Autoloader {
 		'AMP_Twitter_Embed_Handler'          => 'includes/embeds/class-amp-twitter-embed',
 		'AMP_Vimeo_Embed_Handler'            => 'includes/embeds/class-amp-vimeo-embed',
 		'AMP_Vine_Embed_Handler'             => 'includes/embeds/class-amp-vine-embed',
+		'AMP_WordPress_TV_Embed_Handler'     => 'includes/embeds/class-amp-wordpress-tv-embed-handler',
 		'AMP_YouTube_Embed_Handler'          => 'includes/embeds/class-amp-youtube-embed',
+		'AMP_Scribd_Embed_Handler'           => 'includes/embeds/class-amp-scribd-embed-handler',
 		'AMP_Analytics_Options_Submenu'      => 'includes/options/class-amp-analytics-options-submenu',
 		'AMP_Options_Menu'                   => 'includes/options/class-amp-options-menu',
 		'AMP_Options_Manager'                => 'includes/options/class-amp-options-manager',
@@ -75,6 +77,7 @@ class AMP_Autoloader {
 		'AMP_Gallery_Block_Sanitizer'        => 'includes/sanitizers/class-amp-gallery-block-sanitizer',
 		'AMP_Iframe_Sanitizer'               => 'includes/sanitizers/class-amp-iframe-sanitizer',
 		'AMP_Img_Sanitizer'                  => 'includes/sanitizers/class-amp-img-sanitizer',
+		'AMP_Link_Sanitizer'                 => 'includes/sanitizers/class-amp-link-sanitizer',
 		'AMP_Nav_Menu_Toggle_Sanitizer'      => 'includes/sanitizers/class-amp-nav-menu-toggle-sanitizer',
 		'AMP_Nav_Menu_Dropdown_Sanitizer'    => 'includes/sanitizers/class-amp-nav-menu-dropdown-sanitizer',
 		'AMP_Comments_Sanitizer'             => 'includes/sanitizers/class-amp-comments-sanitizer',
@@ -113,6 +116,7 @@ class AMP_Autoloader {
 		'AMP_Story_Export_Sanitizer'         => 'includes/sanitizers/class-amp-story-export-sanitizer',
 		'AMP_Test_Stub_Sanitizer'            => 'tests/php/stubs',
 		'AMP_Test_World_Sanitizer'           => 'tests/php/stubs',
+		'AMP_Test_HandleValidation'          => 'tests/php/validation/trait-handle-validation',
 	];
 
 	/**

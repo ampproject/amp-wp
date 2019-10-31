@@ -12,7 +12,7 @@ export default createHigherOrderComponent(
 			return {
 				selectedBlock: getSelectedBlock(),
 			};
-		}
+		},
 	),
-	'withSelectedBlock'
+	'withSelectedBlock',
 );

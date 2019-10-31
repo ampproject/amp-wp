@@ -76,6 +76,45 @@
 	opacity: .5;
 }
 
+.editor-block-list__layout [data-type="amp/amp-story-page"].amp-page-draggable-hover {
+	opacity: 1;
+}
+
+.editor-block-list__layout [data-type="amp/amp-story-page"].amp-page-draggable-hover-droppable::before,
+.editor-block-list__layout [data-type="amp/amp-story-page"].amp-page-draggable-hover-amp-amp-story-cta.amp-page-draggable-hover-droppable::before {
+	display: block;
+	content: "";
+	position: absolute;
+	top: -4px;
+	bottom: -4px;
+	left: -4px;
+	right: -4px;
+	border: 4px solid theme(primary);
+	z-index: 10;
+}
+
+.editor-block-list__layout [data-type="amp/amp-story-page"].amp-page-draggable-hover-amp-amp-story-cta.amp-page-draggable-hover-droppable::before {
+	top: calc(80% - 2px);
+}
+
+.editor-block-list__layout [data-type="amp/amp-story-page"].amp-page-draggable-hover-undroppable::after,
+.editor-block-list__layout [data-type="amp/amp-story-page"].amp-page-draggable-hover-amp-amp-story-cta.amp-page-draggable-hover-droppable::after {
+	display: block;
+	content: "";
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background-color: #fff;
+	opacity: .8;
+	z-index: 10;
+}
+
+.editor-block-list__layout [data-type="amp/amp-story-page"].amp-page-draggable-hover-amp-amp-story-cta.amp-page-draggable-hover-droppable::after {
+	bottom: calc(20% + 2px);
+}
+
 .editor-block-list__layout [data-type="amp/amp-story-page"].amp-page-inactive > div {
 	pointer-events: none;
 }
@@ -179,10 +218,7 @@ div[data-type="amp/amp-story-page"] .wp-block-image {
  * Hackily hide the alignment options from the image block since they are irrelevant for an image block in a story.
  * In the future the underlying alignment buttons should be removed entirely. See <https://github.com/ampproject/amp-wp/issues/2115>.
  */
-.edit-post-layout[data-block-name="core/image"] .edit-post-header-toolbar__block-toolbar .block-editor-block-toolbar > .components-toolbar:nth-child(2),
-.edit-post-layout[data-block-name="core/pullquote"] .edit-post-header-toolbar__block-toolbar  .block-editor-block-toolbar > .components-toolbar:nth-child(2),
-.edit-post-layout[data-block-name="core/embed"] .edit-post-header-toolbar__block-toolbar .block-editor-block-toolbar > .components-toolbar:nth-child(2),
-.edit-post-layout[data-block-name="core/video"] .edit-post-header-toolbar__block-toolbar .block-editor-block-toolbar > .components-toolbar:nth-child(2) {
+.edit-post-layout[data-block-name="core/image"]  .edit-post-header-toolbar__block-toolbar .block-editor-block-toolbar .components-dropdown-menu.components-toolbar {
 	display: none;
 }
 
@@ -259,4 +295,9 @@ div[data-type="amp/amp-story-page"] .wp-block-image {
 
 .editor-block-list__layout [data-type="amp/amp-story-page"] .block-editor-block-list__block.is-selected .block-editor-warning {
 	border: none;
+}
+
+.components-panel__body.editor-amp-story-remove-page {
+	border: none;
+	padding-top: 0;
 }
