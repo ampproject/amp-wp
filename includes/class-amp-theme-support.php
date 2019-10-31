@@ -403,7 +403,7 @@ class AMP_Theme_Support {
 	 */
 	public static function finish_init() {
 		if ( self::is_paired_available() ) {
-			add_action( 'admin_bar_init', [ __CLASS__, 'enqueue_paired_browsing_client' ] );
+			self::setup_paired_browsing_client();
 			add_action( 'template_redirect', [ __CLASS__, 'sanitize_url_for_paired_browsing' ] );
 			add_filter( 'template_include', [ __CLASS__, 'serve_paired_browsing_experience' ] );
 		}
@@ -2504,14 +2504,19 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Enqueue AMP paired browsing client script.
+	 * Setup pages to have the paired browsing client script so that the app can interact with it.
 	 *
 	 * @return void
 	 */
-	public static function enqueue_paired_browsing_client() {
+	public static function setup_paired_browsing_client() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET[ self::PAIRED_BROWSING_QUERY_VAR ] ) ) {
+			return;
+		}
+
 		$asset_file   = AMP__DIR__ . '/assets/js/amp-paired-browsing-client.asset.php';
 		$asset        = require $asset_file;
-		$dependencies = array_merge( [ 'admin-bar' ], $asset['dependencies'] );
+		$dependencies = $asset['dependencies'];
 		$version      = $asset['version'];
 
 		wp_enqueue_script(
@@ -2522,6 +2527,16 @@ class AMP_Theme_Support {
 			true
 		);
 
+		// Force dev mode to be enabled. This ensures that the enqueued script and its dependencies
+		// will be present when the admin bar is not showing.
+		add_filter(
+			'amp_dev_mode_enabled',
+			static function () {
+				return true;
+			}
+		);
+
+		// Whitelist enqueued scripts so that they are not removed.
 		add_filter( 'script_loader_tag', [ __CLASS__, 'filter_paired_browsing_client_script_loader_tags' ], 10, 2 );
 	}
 
@@ -2537,8 +2552,9 @@ class AMP_Theme_Support {
 	public static function filter_paired_browsing_client_script_loader_tags( $tag, $handle ) {
 		$asset_file = AMP__DIR__ . '/assets/js/amp-paired-browsing-client.asset.php';
 		$asset      = require $asset_file;
+		$handles    = array_merge( [ 'amp-paired-browsing-client' ], $asset['dependencies'] );
 
-		if ( in_array( $handle, $asset['dependencies'], true ) ) {
+		if ( in_array( $handle, $handles, true ) ) {
 			$tag = preg_replace( '/(?<=<script)(?=\s|>)/i', ' ' . AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, $tag );
 		}
 
@@ -2575,10 +2591,6 @@ class AMP_Theme_Support {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( ! isset( $_GET[ self::PAIRED_BROWSING_QUERY_VAR ] ) ) {
 			return $template;
-		}
-
-		if ( ! is_admin_bar_showing() ) {
-			wp_die( esc_html__( 'The admin bar must be showing to use paired browsing mode.', 'amp' ) );
 		}
 
 		wp_enqueue_style(
