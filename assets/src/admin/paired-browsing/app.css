@@ -36,7 +36,10 @@ body {
 
 #header li:last-child {
 	margin-left: auto;
-	cursor: pointer;
+}
+
+#exit-link {
+	text-decoration: none;
 }
 
 #header img {

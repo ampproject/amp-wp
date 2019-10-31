@@ -12,6 +12,8 @@ const { app, alert, history } = window;
 const { ampSlug, ampPairedBrowsingQueryVar } = app;
 
 class PairedBrowsingApp {
+	exitLink;
+
 	/**
 	 * Set the iframes on init.
 	 */
@@ -23,12 +25,7 @@ class PairedBrowsingApp {
 			// Check every second to see if any iframe has disconnected.
 			setInterval( () => this.checkConnectedIframes(), 1000 );
 
-			const exitLink = document.getElementById( 'exit-link' );
-
-			exitLink.addEventListener( 'click', () => {
-				// Let's head back to the non-AMP page upon exiting.
-				window.location.replace( this.nonAmpIframe.contentWindow.location.href );
-			} );
+			this.exitLink = document.getElementById( 'exit-link' );
 		} );
 	}
 
@@ -96,7 +93,7 @@ class PairedBrowsingApp {
 		return addQueryArgs(
 			url,
 			{
-				ampSlug: '',
+				[ ampSlug ]: '',
 			},
 		);
 	}
@@ -166,6 +163,11 @@ class PairedBrowsingApp {
 			if ( this.documentIsAmp( win.document ) ) {
 				win.location.replace( this.removeAmpQueryVars( win.location.href ) );
 				return;
+			}
+
+			if ( this.exitLink !== undefined ) {
+				// Update the link used for exiting paired browsing.
+				this.exitLink.href = this.nonAmpIframe.contentWindow.location.href;
 			}
 
 			oppositeWindow = this.ampIframe.contentWindow;
