@@ -8,7 +8,8 @@ import { removeQueryArgs, addQueryArgs, hasQueryArg } from '@wordpress/url';
  */
 import './app.css';
 
-const { ampSlug, ampPairedBrowsingQueryVar, alert, history } = window;
+const { app, alert, history } = window;
+const { ampSlug, ampPairedBrowsingQueryVar } = app;
 
 class PairedBrowsingApp {
 	/**

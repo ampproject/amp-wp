@@ -2615,8 +2615,14 @@ class AMP_Theme_Support {
 			true
 		);
 
-		wp_dequeue_style( 'admin-bar' );
-		wp_dequeue_script( 'amp-paired-browsing-client' );
+		wp_localize_script(
+			'amp-paired-browsing-app',
+			'app',
+			[
+				'ampSlug'                   => amp_get_slug(),
+				'ampPairedBrowsingQueryVar' => self::PAIRED_BROWSING_QUERY_VAR,
+			]
+		);
 
 		return AMP__DIR__ . '/templates/amp-paired-browsing.php';
 	}

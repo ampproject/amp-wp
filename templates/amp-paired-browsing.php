@@ -48,10 +48,6 @@ $amp_url = add_query_arg( amp_get_slug(), '1', $url );
 			</div>
 		</div>
 
-		<script>
-			window.ampSlug = <?php echo wp_json_encode( amp_get_slug() ); ?>;
-			window.ampPairedBrowsingQueryVar = <?php echo wp_json_encode( AMP_Theme_Support::PAIRED_BROWSING_QUERY_VAR ); ?>;
-		</script>
 		<?php print_footer_scripts(); ?>
 	</body>
 </html>
