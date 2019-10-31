@@ -476,6 +476,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 			// If no attribute spec lists match, then the element must be removed.
 			if ( empty( $attr_spec_scores ) ) {
+				// @todo How can we tell the reason for removal if none of the tag specs matched? Ignore attribute values?
 				$this->remove_node( $node );
 				return null;
 			}
@@ -514,6 +515,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
+		// @todo Need to pass the $tag_spec['spec_name'] into the validation errors for each.
+		// @todo Will the is_missing_mandatory_attribute check here even be needed because it will be checked
 		if ( ! empty( $attr_spec_list ) && $this->is_missing_mandatory_attribute( $attr_spec_list, $node ) ) {
 			$this->remove_node( $node );
 			return null;
@@ -756,9 +759,38 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Checks to see if a spec is potentially valid.
 	 *
-	 * Checks the given node based on the attributes present in the node.
+	 * Checks the given node based on the attributes present in the node. This does not check every possible constraint
+	 * imposed by the validator spec. It only performs the checks that are used to narrow down which set of attribute
+	 * specs is most aligned with the given node. As of AMPHTML v1910161528000, the frequency of attribute spec
+	 * constraints looks as follows:
 	 *
-	 * @note This can be a very expensive function. Use it sparingly.
+	 *  433: value
+	 *  400: mandatory
+	 *  222: value_casei
+	 *  147: blacklisted_value_regex
+	 *  115: value_regex
+	 *  101: value_url
+	 *   77: dispatch_key
+	 *   17: value_regex_casei
+	 *   15: requires_extension
+	 *   12: alternative_names
+	 *    2: value_properties
+	 *
+	 * The constraints that should be the most likely to differentiate one tag spec from another are:
+	 *
+	 * - value
+	 * - mandatory
+	 * - value_casei
+	 *
+	 * For example, there are two <amp-carousel> tag specs, one that has a mandatory lightbox attribute and another that
+	 * lacks the lightbox attribute altogether. If an <amp-carousel> has the lightbox attribute, then we can rule out
+	 * the tag spec without the lightbox attribute via the mandatory constraint.
+	 *
+	 * Additionally, there are multiple <amp-date-picker> tag specs, each which vary by the value of the 'type' attribute.
+	 * By validating the type 'value' and 'value_casei' constraints here, we can narrow down the tag specs that should
+	 * then be used to later validate and sanitize the element (in the sanitize_disallowed_attribute_values_in_node method).
+	 *
+	 * @see AMP_Tag_And_Attribute_Sanitizer::sanitize_disallowed_attribute_values_in_node()
 	 *
 	 * @param DOMElement $node           Node.
 	 * @param array[]    $attr_spec_list Attribute Spec list.
@@ -776,7 +808,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					return 0;
 				}
 			}
-			return 0.5;
+			return 1;
 		}
 
 		foreach ( $node->attributes as $attr_name => $attr_node ) {
@@ -807,16 +839,22 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 			// If attr spec rule is empty, then it allows anything.
 			if ( empty( $attr_spec_rule ) && $node->hasAttribute( $attr_name ) ) {
-				$score++;
+				$score += 2;
 				continue;
+			}
+
+			// Merely having the attribute counts for something, though it may get sanitized out later.
+			if ( $node->hasAttribute( $attr_name ) ) {
+				$score += 2;
 			}
 
 			// If a mandatory attribute is required, and attribute exists, pass.
 			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::MANDATORY ] ) ) {
-				$mandatory_count++;
+				$mandatory_count ++;
+
 				$result = $this->check_attr_spec_rule_mandatory( $node, $attr_name, $attr_spec_rule );
 				if ( AMP_Rule_Spec::PASS === $result ) {
-					$score++;
+					$score += 2;
 				} elseif ( AMP_Rule_Spec::FAIL === $result ) {
 					return 0;
 				}
@@ -829,21 +867,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE ] ) ) {
 				$result = $this->check_attr_spec_rule_value( $node, $attr_name, $attr_spec_rule );
 				if ( AMP_Rule_Spec::PASS === $result ) {
-					$score++;
-				} elseif ( AMP_Rule_Spec::FAIL === $result ) {
-					return 0;
-				}
-			}
-
-			/*
-			 * Check 'value_regex' - case sensitive regex match
-			 * Given attribute's value must be a case insensitive match to regex pattern
-			 * specified by the value of rule to pass.
-			 */
-			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_REGEX ] ) ) {
-				$result = $this->check_attr_spec_rule_value_regex( $node, $attr_name, $attr_spec_rule );
-				if ( AMP_Rule_Spec::PASS === $result ) {
-					$score++;
+					$score += 2;
 				} elseif ( AMP_Rule_Spec::FAIL === $result ) {
 					return 0;
 				}
@@ -857,118 +881,16 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_CASEI ] ) ) {
 				$result = $this->check_attr_spec_rule_value_casei( $node, $attr_name, $attr_spec_rule );
 				if ( AMP_Rule_Spec::PASS === $result ) {
-					$score++;
-				} elseif ( AMP_Rule_Spec::FAIL === $result ) {
-					return 0;
-				}
-			}
-
-			/*
-			 * Check 'value_regex_casei' - case insensitive regex match
-			 * Given attribute's value must be a case insensitive match to the regex
-			 * pattern specified by the value of the rule to pass.
-			 */
-			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_REGEX_CASEI ] ) ) {
-				$result = $this->check_attr_spec_rule_value_regex_casei( $node, $attr_name, $attr_spec_rule );
-				if ( AMP_Rule_Spec::PASS === $result ) {
-					$score++;
-				} elseif ( AMP_Rule_Spec::FAIL === $result ) {
-					return 0;
-				}
-			}
-
-			/*
-			 * If given attribute's value is a URL with a protocol, the protocol must
-			 * be in the array specified by the rule's value to pass.
-			 */
-			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOWED_PROTOCOL ] ) ) {
-				$result = $this->check_attr_spec_rule_allowed_protocol( $node, $attr_name, $attr_spec_rule );
-				if ( AMP_Rule_Spec::PASS === $result ) {
-					$score++;
-				} elseif ( AMP_Rule_Spec::FAIL === $result ) {
-					return 0;
-				}
-			}
-
-			/*
-			 * If given attribute's value is a URL with a host, the host must
-			 * be valid
-			 */
-			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ] ) ) {
-				$result = $this->check_attr_spec_rule_valid_url( $node, $attr_name, $attr_spec_rule );
-				if ( AMP_Rule_Spec::PASS === $result ) {
-					$score++;
-				} elseif ( AMP_Rule_Spec::FAIL === $result ) {
-					return 0;
-				}
-			}
-
-			/*
-			 * If the given attribute's value is *not* a relative path, and the rule's
-			 * value is `false`, then pass.
-			 */
-			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_RELATIVE ] ) ) {
-				$result = $this->check_attr_spec_rule_disallowed_relative( $node, $attr_name, $attr_spec_rule );
-				if ( AMP_Rule_Spec::PASS === $result ) {
-					$score++;
-				} elseif ( AMP_Rule_Spec::FAIL === $result ) {
-					return 0;
-				}
-			}
-
-			/*
-			 * If the given attribute's value exists, is non-empty and the rule's value
-			 * is false, then pass.
-			 */
-			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] ) ) {
-				$result = $this->check_attr_spec_rule_disallowed_empty( $node, $attr_name, $attr_spec_rule );
-				if ( AMP_Rule_Spec::PASS === $result ) {
-					$score++;
-				} elseif ( AMP_Rule_Spec::FAIL === $result ) {
-					return 0;
-				}
-			}
-
-			/*
-			 * If the given attribute's value is a URL and does not match any of the list
-			 * of domains in the value of the rule, then pass.
-			 */
-			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::DISALLOWED_DOMAIN ] ) ) {
-				$result = $this->check_attr_spec_rule_disallowed_domain( $node, $attr_name, $attr_spec_rule );
-				if ( AMP_Rule_Spec::PASS === $result ) {
-					$score++;
-				} elseif ( AMP_Rule_Spec::FAIL === $result ) {
-					return 0;
-				}
-			}
-
-			/*
-			 * If the attribute's value exists and does not match the regex specified
-			 * by the rule's value, then pass.
-			 */
-			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::BLACKLISTED_VALUE_REGEX ] ) ) {
-				$result = $this->check_attr_spec_rule_blacklisted_value_regex( $node, $attr_name, $attr_spec_rule );
-				if ( AMP_Rule_Spec::PASS === $result ) {
-					$score++;
-				} elseif ( AMP_Rule_Spec::FAIL === $result ) {
-					return 0;
-				}
-			}
-
-			// If the attribute's value exists and it matches the value properties spec.
-			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_PROPERTIES ] ) && $node->hasAttribute( $attr_name ) ) {
-				$result = $this->check_attr_spec_rule_value_properties( $node, $attr_name, $attr_spec_rule );
-				if ( AMP_Rule_Spec::PASS === $result ) {
-					$score++;
+					$score += 2;
 				} elseif ( AMP_Rule_Spec::FAIL === $result ) {
 					return 0;
 				}
 			}
 		}
 
-		// Give the spec a score if it doesn't have any mandatory attributes.
+		// Give the spec a score if it doesn't have any mandatory attributes, since they could all be removed during sanitization.
 		if ( 0 === $mandatory_count && 0 === $score ) {
-			$score = 0.5;
+			$score = 1;
 		}
 
 		return $score;
@@ -1002,6 +924,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * Allowed values are found $this->globally_allowed_attributes and in parameter $attr_spec_list
 	 *
+	 * @see \AMP_Tag_And_Attribute_Sanitizer::validate_attr_spec_list_for_node()
+	 *
 	 * @param DOMElement $node                       Node.
 	 * @param array[][]  $attr_spec_list             Attribute spec list.
 	 * @param DOMAttr[]  $attributes_pending_removal Attributes pending removal.
@@ -1033,6 +957,19 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			$should_remove_node = false;
 			$attr_spec_rule     = $attr_spec_list[ $attr_name ];
 
+			/*
+			 * Note that the following checks may have been previously done in validate_attr_spec_list_for_node():
+			 *
+			 * - check_attr_spec_rule_mandatory
+			 * - check_attr_spec_rule_value
+			 * - check_attr_spec_rule_value_casei
+			 *
+			 * They have already been checked because the tag spec should only be considered a candidate for a given
+			 * node if if passes those checks, that is, if the shape of the node matches the spec close enough.
+			 *
+			 * However, if there was only one spec for a given tag, then then validate_attr_spec_list_for_node() would
+			 * not have been called. and thus these checks need to be performed here as well.
+			 */
 			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_value( $node, $attr_name, $attr_spec_rule ) ) {
 				$should_remove_node = true;
@@ -1063,7 +1000,12 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::BLACKLISTED_VALUE_REGEX ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_blacklisted_value_regex( $node, $attr_name, $attr_spec_rule ) ) {
 				$should_remove_node = true;
+			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_PROPERTIES ] ) &&
+				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_value_properties( $node, $attr_name, $attr_spec_rule ) ) {
+				$should_remove_node = true;
 			}
+
+			// @todo Mandatory check is done where??
 
 			if ( $should_remove_node ) {
 				$is_mandatory =
@@ -1072,7 +1014,13 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 						: false;
 
 				if ( $is_mandatory ) {
-					$this->remove_node( $node );
+					$this->remove_invalid_child(
+						$node,
+						[
+							'code'      => 'invalid_mandatory_attribute',
+							'attr_name' => $attr_name,
+						]
+					);
 					return false;
 				}
 

@@ -872,7 +872,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'node_tag_name' => 'div',
 					'attr_spec_list' => [],
 				],
-				0.5, // Because there are no mandatory attributes.
+				1, // Because there are no mandatory attributes.
 			],
 			'attributes_no_spec' => [
 				[
@@ -880,7 +880,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'node_tag_name' => 'div',
 					'attr_spec_list' => [],
 				],
-				0.5, // Because there are no mandatory attributes.
+				1, // Because there are no mandatory attributes.
 			],
 			'attributes_alternative_names' => [
 				[
@@ -896,7 +896,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						],
 					],
 				],
-				0.5, // Because there are no mandatory attributes.
+				2, // Because there are no mandatory attributes.
 			],
 			'attributes_mandatory' => [
 				[
@@ -908,7 +908,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						],
 					],
 				],
-				1,
+				4,
 			],
 			'attributes_mandatory_alternative_name' => [
 				[
@@ -925,7 +925,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						],
 					],
 				],
-				1,
+				2,
 			],
 			'attributes_value' => [
 				[
@@ -937,7 +937,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						],
 					],
 				],
-				1,
+				4,
 			],
 			'attributes_value_regex' => [
 				[
@@ -949,7 +949,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						],
 					],
 				],
-				1,
+				2,
 			],
 			'attributes_value_casei' => [
 				[
@@ -961,7 +961,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						],
 					],
 				],
-				1,
+				4,
 			],
 			'attributes_value_regex_casei' => [
 				[
@@ -973,7 +973,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						],
 					],
 				],
-				1,
+				2,
 			],
 			'attributes_allow_relative_false_pass' => [
 				[
@@ -1001,7 +1001,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						],
 					],
 				],
-				0,
+				2, // Still passes because relative URL is not checked until sanitization.
 			],
 			'attributes_allow_empty_false_pass' => [
 				[
@@ -1029,7 +1029,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						],
 					],
 				],
-				0,
+				2, // Allow empty is not not used until sanitization.
 			],
 			'attributes_blacklisted_regex' => [
 				[
@@ -1046,7 +1046,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						],
 					],
 				],
-				0,
+				2,
 			],
 		];
 	}
