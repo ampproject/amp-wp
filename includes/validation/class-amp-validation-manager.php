@@ -919,20 +919,16 @@ class AMP_Validation_Manager {
 		echo ' ';
 
 		// Auto-acceptance is enabled by default but can be overridden by the the `amp_validation_error_default_sanitized` filter.
-		if ( self::is_sanitization_auto_accepted() ) {
-			if ( ! $has_rejected_error ) {
-				esc_html_e( 'However, your site is configured to automatically accept sanitization of the offending markup. You should review the issues to confirm whether or not sanitization should be accepted or rejected.', 'amp' );
-			} else {
-				/*
-				 * Even if sanitizations are accepted by default, if there are non-accepted errors in non-Standard mode, it will redirect to a non-AMP page.
-				 * For example, the errors could have been stored as 'New Rejected' when auto-accept was false, and now auto-accept is true.
-				 * In that case, this will block serving AMP.
-				 * This could also apply if this is in 'Standard' mode and the user has rejected a validation error.
-				 */
-				esc_html_e( 'Though your site is configured to automatically accept sanitization errors, there are rejected error(s). This could be because auto-acceptance of errors was disabled earlier. You should review the issues to confirm whether or not sanitization should be accepted or rejected.', 'amp' );
-			}
+		if ( ! $has_rejected_error ) {
+			esc_html_e( 'Nevertheless, the invalid markup has been automatically removed.', 'amp' );
 		} else {
-			esc_html_e( 'Non-accepted validation errors prevent AMP from being served, and the user will be redirected to the non-AMP version.', 'amp' );
+			/*
+			 * Even if invalid markup is removed by default, if there are non-accepted errors in non-Standard mode, it will redirect to a non-AMP page.
+			 * For example, the errors could have been stored as 'New Kept' when auto-accept was false, and now auto-accept is true.
+			 * In that case, this will block serving AMP.
+			 * This could also apply if this is in 'Standard' mode and the user has rejected a validation error.
+			 */
+			esc_html_e( 'You will have to remove the invalid markup (or allow the plugin to remove it) to serve AMP.', 'amp' );
 		}
 
 		echo sprintf(

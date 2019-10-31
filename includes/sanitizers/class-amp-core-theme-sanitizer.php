@@ -57,8 +57,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				'twentytwenty-js',
 			],
 			'remove_actions'                          => [
-				'wp_head' => [
+				'wp_head'                 => [
 					'twentytwenty_no_js_class', // AMP is essentially no-js, with any interactivity added explicitly via amp-bind.
+				],
+				'wp_print_footer_scripts' => [
+					'twentytwenty_skip_link_focus_fix', // See <https://github.com/WordPress/twentynineteen/pull/47>.
 				],
 			],
 			'add_smooth_scrolling'                    => [
@@ -1546,9 +1549,13 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$amp_lightbox->setAttribute( 'layout', 'nodisplay' );
 		$amp_lightbox->setAttribute( 'animate-in', isset( $args['animate_in'] ) ? $args['animate_in'] : 'fade-in' );
 		$amp_lightbox->setAttribute( 'scrollable', isset( $args['scrollable'] ) ? $args['scrollable'] : true );
-		$amp_lightbox->setAttribute( 'role', $this->guess_modal_role( $modal_content_node ) );
-		// Setting tabindex to -1 (not reachable) as keyboard focus is handled through toggles.
-		$amp_lightbox->setAttribute( 'tabindex', -1 );
+
+		$amp_lightbox_inner_content = $this->xpath->query( ".//*[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' modal-inner ' ) ]", $modal_content_node )->item( 0 );
+		foreach ( [ $amp_lightbox, $amp_lightbox_inner_content ] as $event_element ) {
+			$event_element->setAttribute( 'role', $this->guess_modal_role( $modal_content_node ) );
+			// Setting tabindex to -1 (not reachable) as keyboard focus is handled through toggles.
+			$event_element->setAttribute( 'tabindex', -1 );
+		}
 
 		$parent_node = $modal_content_node->parentNode;
 		$parent_node->replaceChild( $amp_lightbox, $modal_content_node );
@@ -1637,7 +1644,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			// With twentytwenty compat, the lightbox fills the entire screen, and only an inner wrapper will contain
 			// the actionable elements in the modal. Therefore, the lightbox represents the "background".
 			$close_button_xpaths[] = "//*[ @id = '{$modal_id}' ]";
-			$modal->setAttribute( 'data-toggle-target', "#{$modal_id}" );
+
+			// Then, add the inner element of the lightbox as an open button xpath.
+			// This is done to prevent the above close action from closing the modal when an inner element is clicked.
+			// Workaround found here: https://stackoverflow.com/a/45971501 .
+			$open_button_xpaths[] = "//*[ @id = '{$modal_id}' ]//*[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' modal-inner ' ) ]";
 
 			$this->wrap_modal_in_lightbox(
 				[

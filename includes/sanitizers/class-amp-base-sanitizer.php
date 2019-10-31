@@ -579,6 +579,8 @@ abstract class AMP_Base_Sanitizer {
 					}
 				}
 			}
+		} elseif ( $node instanceof DOMProcessingInstruction ) {
+			$error['text'] = trim( $node->data, '?' );
 		}
 
 		return $error;
