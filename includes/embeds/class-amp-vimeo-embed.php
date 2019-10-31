@@ -50,7 +50,9 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function register_embed() {
 		wp_embed_register_handler( 'amp-vimeo', self::URL_PATTERN, [ $this, 'oembed' ], -1 );
-		add_shortcode( 'vimeo', [ $this, 'shortcode' ] );
+		if ( ! $this->is_amp_shortcode_available_in_jetpack() ) {
+			add_shortcode( 'vimeo', [ $this, 'shortcode' ] );
+		}
 		add_filter( 'wp_video_shortcode_override', [ $this, 'video_override' ], 10, 2 );
 	}
 
@@ -59,7 +61,21 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function unregister_embed() {
 		wp_embed_unregister_handler( 'amp-vimeo', -1 );
-		remove_shortcode( 'vimeo' );
+		if ( ! $this->is_amp_shortcode_available_in_jetpack() ) {
+			remove_shortcode( 'vimeo' );
+		}
+	}
+
+	/**
+	 * Gets whether the Vimeo shortcode AMP implementation is available in Jetpack.
+	 *
+	 * This logic is being migrated to Jetpack, so check whether it's available there
+	 * before running the shortcode logic here.
+	 *
+	 * @return bool Whether the AMP version of the [vimeo] shortcode is available in Jetpack.
+	 */
+	public function is_amp_shortcode_available_in_jetpack() {
+		return false !== has_filter( 'video_embed_html', [ 'Jetpack_AMP_Support', 'filter_vimeo_shortcode' ] );
 	}
 
 	/**

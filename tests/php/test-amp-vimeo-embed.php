@@ -13,6 +13,15 @@
 class AMP_Vimeo_Embed_Test extends WP_UnitTestCase {
 
 	/**
+	 * Tears down the environment after each test.
+	 *
+	 * @inheritDoc
+	 */
+	public function tearDown() {
+		remove_all_filters( 'video_embed_html' );
+	}
+
+	/**
 	 * Get conversion data.
 	 *
 	 * @return array
@@ -108,5 +117,24 @@ class AMP_Vimeo_Embed_Test extends WP_UnitTestCase {
 		);
 
 		$this->assertEquals( $expected, $scripts );
+	}
+
+	/**
+	 * Test is_amp_shortcode_available_in_jetpack.
+	 *
+	 * @covers AMP_Vimeo_Embed_Handler::is_amp_shortcode_available_in_jetpack()
+	 */
+	public function test_is_amp_shortcode_available_in_jetpack() {
+		$embed = new AMP_Vimeo_Embed_Handler();
+		$embed->is_amp_shortcode_available_in_jetpack();
+		remove_all_filters( 'video_embed_html' );
+
+		// With the filter not added, this filter should return false.
+		$this->assertFalse( $embed->is_amp_shortcode_available_in_jetpack() );
+
+		add_filter( 'video_embed_html', [ 'Jetpack_AMP_Support', 'filter_vimeo_shortcode' ] );
+
+		// With the filter added, this filter should return false.
+		$this->assertTrue( $embed->is_amp_shortcode_available_in_jetpack() );
 	}
 }
