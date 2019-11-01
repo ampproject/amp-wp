@@ -77,4 +77,18 @@ abstract class AMP_Base_Embed_Handler {
 	public function get_scripts() {
 		return [];
 	}
+
+	/**
+	 * Gets whether a certain Jetpack shortcode's AMP implementation is available in Jetpack.
+	 *
+	 * This logic is being migrated to Jetpack, so check whether it's available there
+	 * before running the shortcode logic here.
+	 *
+	 * @param string $shortcode_tag The tag (name) of the shortcode.
+	 * @return bool Whether the AMP version of the passed shortcode is available in Jetpack.
+	 */
+	public function is_amp_shortcode_available_in_jetpack( $shortcode_tag ) {
+		$upper_tag = ucfirst( $shortcode_tag );
+		return false !== has_filter( 'do_shortcode_tag', [ "Jetpack_AMP_{$upper_tag}_Shortcode", 'filter_shortcode' ] );
+	}
 }
