@@ -29,6 +29,13 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	const URL_PATTERN_TIMELINE = '#https?:\/\/twitter\.com(?:\/\#\!\/|\/)(?P<username>[a-zA-Z0-9_]{1,20})(?:$|\/(?P<type>likes|lists)(\/(?P<id>[a-zA-Z0-9_-]+))?)#i';
 
 	/**
+	 * The tag (name) of the shortcode.
+	 *
+	 * @var string
+	 */
+	const SHORTCODE_TAG = 'vimeo';
+
+	/**
 	 * Tag.
 	 *
 	 * @var string embed HTML blockquote tag to identify and replace with AMP version.
@@ -46,7 +53,9 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Registers embed.
 	 */
 	public function register_embed() {
-		add_shortcode( 'tweet', [ $this, 'shortcode' ] ); // Note: This is a Jetpack shortcode.
+		if ( ! $this->is_amp_shortcode_available_in_jetpack( self::SHORTCODE_TAG ) ) {
+			add_shortcode( self::SHORTCODE_TAG, [ $this, 'shortcode' ] );
+		}
 		wp_embed_register_handler( 'amp-twitter', self::URL_PATTERN, [ $this, 'oembed' ], -1 );
 		wp_embed_register_handler( 'amp-twitter-timeline', self::URL_PATTERN_TIMELINE, [ $this, 'oembed_timeline' ], -1 );
 	}
@@ -55,7 +64,9 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Unregisters embed.
 	 */
 	public function unregister_embed() {
-		remove_shortcode( 'tweet' ); // Note: This is a Jetpack shortcode.
+		if ( ! $this->is_amp_shortcode_available_in_jetpack( self::SHORTCODE_TAG ) ) {
+			remove_shortcode( self::SHORTCODE_TAG );
+		}
 		wp_embed_unregister_handler( 'amp-twitter', -1 );
 		wp_embed_unregister_handler( 'amp-twitter-timeline', -1 );
 	}
