@@ -75,7 +75,7 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return bool Whether the AMP version of the [vimeo] shortcode is available in Jetpack.
 	 */
 	public function is_amp_shortcode_available_in_jetpack() {
-		return false !== has_filter( 'video_embed_html', [ 'Jetpack_AMP_Shortcode', 'filter_vimeo_shortcode' ] );
+		return false !== has_filter( 'do_shortcode_tag', [ 'Jetpack_AMP_Vimeo_Shortcode', 'filter_shortcode' ] );
 	}
 
 	/**
