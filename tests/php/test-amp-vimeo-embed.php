@@ -118,23 +118,4 @@ class AMP_Vimeo_Embed_Test extends WP_UnitTestCase {
 
 		$this->assertEquals( $expected, $scripts );
 	}
-
-	/**
-	 * Test is_amp_shortcode_available_in_jetpack.
-	 *
-	 * @covers AMP_Base_Embed_Handler::is_amp_shortcode_available_in_jetpack()
-	 */
-	public function test_is_amp_shortcode_available_in_jetpack() {
-		remove_all_filters( 'do_shortcode_tag' );
-		$embed = new AMP_Vimeo_Embed_Handler();
-
-		// With the filter not added, this filter should return false.
-		$this->assertFalse( $embed->is_amp_shortcode_available_in_jetpack( 'vimeo' ) );
-
-		add_filter( 'do_shortcode_tag', [ 'Jetpack_AMP_Vimeo_Shortcode', 'filter_shortcode' ] );
-
-		// With the filter added, this filter should return false.
-		$this->assertTrue( $embed->is_amp_shortcode_available_in_jetpack( 'vimeo' ) );
-		$this->assertFalse( $embed->is_amp_shortcode_available_in_jetpack( 'wrongshortcode' ) );
-	}
 }

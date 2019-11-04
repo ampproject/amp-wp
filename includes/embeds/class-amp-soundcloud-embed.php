@@ -30,7 +30,7 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Register embed.
 	 */
 	public function register_embed() {
-		if ( ! $this->is_amp_shortcode_available_in_jetpack( self::SHORTCODE_TAG ) ) {
+		if ( ! class_exists( 'Jetpack_AMP_Soundcloud_Shortcode' ) ) {
 			add_shortcode( self::SHORTCODE_TAG, [ $this, 'shortcode' ] );
 		}
 		add_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ], 10, 2 );
@@ -40,7 +40,7 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Unregister embed.
 	 */
 	public function unregister_embed() {
-		if ( ! $this->is_amp_shortcode_available_in_jetpack( self::SHORTCODE_TAG ) ) {
+		if ( ! class_exists( 'Jetpack_AMP_Soundcloud_Shortcode' ) ) {
 			remove_shortcode( self::SHORTCODE_TAG );
 		}
 		remove_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ], 10 );
@@ -121,7 +121,7 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Render shortcode.
 	 *
-	 * @todo Move this to Jetpack.
+	 * @deprecated 1.4.1 in favor of Jetpack_AMP_Soundcloud_Shortcode::filter_shortcode().
 	 *
 	 * @param array  $attr    Shortcode attributes.
 	 * @param string $content Shortcode content.
