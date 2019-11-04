@@ -13,15 +13,6 @@
 class AMP_Vimeo_Embed_Test extends WP_UnitTestCase {
 
 	/**
-	 * Tears down the environment after each test.
-	 *
-	 * @inheritDoc
-	 */
-	public function tearDown() {
-		remove_all_filters( 'do_shortcode_tag' );
-	}
-
-	/**
 	 * Get conversion data.
 	 *
 	 * @return array

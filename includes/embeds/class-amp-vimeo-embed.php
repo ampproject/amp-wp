@@ -86,7 +86,7 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Gets AMP-compliant markup for the Vimeo shortcode.
 	 *
-	 * @deprecated 1.4.1 in favor of Jetpack_AMP_Vimeo_Shortcode::filter_shortcode().
+	 * @deprecated 1.4.1 Moved to Jetpack_AMP_Vimeo_Shortcode::filter_shortcode().
 	 *
 	 * @param array $attr The Vimeo attributes.
 	 * @return string Vimeo shortcode markup.

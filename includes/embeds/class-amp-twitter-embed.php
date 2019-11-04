@@ -76,7 +76,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	 *
 	 * Note that this shortcode is is defined in Jetpack.
 	 *
-	 * @deprecated 1.4.1 in favor of Jetpack_AMP_Tweet_Shortcode::filter_shortcode().
+	 * @deprecated 1.4.1 Moved to Jetpack_AMP_Tweet_Shortcode::filter_shortcode().
 	 *
 	 * @param array $attr The Twitter attributes.
 	 * @return string Twitter shortcode markup.

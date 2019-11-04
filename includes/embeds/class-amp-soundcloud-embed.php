@@ -121,7 +121,7 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Render shortcode.
 	 *
-	 * @deprecated 1.4.1 in favor of Jetpack_AMP_Soundcloud_Shortcode::filter_shortcode().
+	 * @deprecated 1.4.1 Moved to Jetpack_AMP_Soundcloud_Shortcode::filter_shortcode().
 	 *
 	 * @param array  $attr    Shortcode attributes.
 	 * @param string $content Shortcode content.
