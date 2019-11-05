@@ -592,11 +592,11 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 			/*
 			 * Only run cleanup after the fact to prevent a scenario where invalid markup is kept and so the attribute
-			 * is actually not removed. This prevents a "DOMException: Not Found Error" from happening in when calling
+			 * is actually not removed. This prevents a "DOMException: Not Found Error" from happening when calling
 			 * remove_invalid_attribute() since clean_up_after_attribute_removal() can end up removing invalid link
 			 * attributes (like 'target') when there is an invalid 'href' attribute, but if the 'target' attribute is
-			 * itself invalid, then if clean_up_after_attribute_removal is called inside of remove_invalid_attribute
-			 * then it can cause a subsequent invocation of remove_invalid_attribute to try to remove an invalid
+			 * itself invalid, then if clean_up_after_attribute_removal() is called inside of remove_invalid_attribute()
+			 * it can cause a subsequent invocation of remove_invalid_attribute() to try to remove an invalid
 			 * attribute that has already been removed from the DOM.
 			 */
 			foreach ( $removed_attributes as $removed_attribute ) {

@@ -590,7 +590,7 @@ abstract class AMP_Base_Sanitizer {
 	 *
 	 * @since 1.3
 	 *
-	 * @param DOMElement $element   The node for which he attribute was removed.
+	 * @param DOMElement $element   The node for which the attribute was removed.
 	 * @param DOMAttr    $attribute The attribute that was removed.
 	 */
 	protected function clean_up_after_attribute_removal( $element, $attribute ) {
