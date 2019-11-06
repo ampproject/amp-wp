@@ -11,6 +11,10 @@ body {
 	flex-direction: column;
 }
 
+body * {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
 #header {
 	height: 32px;
 	background-color: #0075c2;
@@ -18,7 +22,6 @@ body {
 
 #header * {
 	color: #fff;
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 }
 
 #header ul {
@@ -47,9 +50,33 @@ body {
 	width: 24px;
 }
 
+#amp::before {
+	content: "AMP";
+}
+
+#non-amp::before {
+	content: "non-AMP";
+}
+
+#non-amp,
+#amp {
+	flex: 1 0 auto;
+	align-self: stretch;
+}
+
 .container {
 	display: flex;
 	height: 100%;
+}
+
+.container > div::before {
+	opacity: 0.8;
+	font-size: 5em;
+	font-weight: 800;
+	position: absolute;
+	top: 50%;
+	width: 50%;
+	text-align: center;
 }
 
 iframe {
@@ -60,10 +87,4 @@ iframe {
 
 iframe.disconnected {
 	opacity: 0.5;
-}
-
-#non-amp,
-#amp {
-	flex: 1 0 auto;
-	align-self: stretch;
 }
