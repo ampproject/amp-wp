@@ -31,7 +31,6 @@ const applyWithSelect = withSelect( ( select ) => {
 		if ( selectedBlockClientIds.length === 0 ) {
 			return;
 		}
-
 		// Let's ignore if some text has been selected.
 		const selectedText = window.getSelection().toString();
 		// Let's ignore multi-selection for now.
@@ -47,9 +46,17 @@ const applyWithSelect = withSelect( ( select ) => {
 			editLayout.appendChild( menuWrapper );
 		}
 
+		// Make sure that user did not right click topbar.
+		const toolBar = document.querySelector( '.edit-post-header' );
+		// Disable reason: This is a valid use a bitwise here. Node is an interface from which various types of DOM API objects inherit and is present in the browser context.
+		// eslint-disable-next-line no-bitwise,no-undef
+		const isEventInsideToolbar = Boolean( toolBar.compareDocumentPosition( event.target ) & Node.DOCUMENT_POSITION_CONTAINED_BY );
+		if ( isEventInsideToolbar ) {
+			return;
+		}
+
 		// Calculate the position to display the right click menu.
 		const wrapperDimensions = editLayout.getBoundingClientRect();
-		const toolBar = document.querySelector( '.edit-post-header' );
 
 		// If Toolbar is available then consider that as well.
 		let toolBarHeight = 0;
