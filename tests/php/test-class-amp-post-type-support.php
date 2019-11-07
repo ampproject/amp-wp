@@ -124,10 +124,10 @@ class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
 	 * @covers AMP_Post_Type_Support::show_password_form()
 	 */
 	public function test_show_password_form() {
-		$post = self::factory()->post->create_and_get();
+		$GLOBALS['post'] = self::factory()->post->create_and_get();
 
 		add_filter( 'post_password_required', '__return_true' );
-		AMP_Post_Type_Support::get_support_errors( $post );
-		$this->assertEquals( get_the_password_form( $post ), get_the_content( null, false, $post ) );
+		AMP_Post_Type_Support::get_support_errors( $GLOBALS['post'] );
+		$this->assertEquals( get_the_password_form( $GLOBALS['post'] ), get_the_content( null, false, $GLOBALS['post'] ) );
 	}
 }
