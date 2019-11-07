@@ -1909,21 +1909,22 @@ class AMP_Validation_Manager {
 	 * @return string Error message.
 	 */
 	public static function get_validate_url_error_message( $error_code ) {
+		$check_error_log = __( 'Please check your server\'s PHP error logs; to do this you may need to enable WP_DEBUG_LOG.', 'amp' );
 		switch ( $error_code ) {
 			case 'http_request_failed':
-				return __( 'Failed to fetch URL(s) to validate. This may be due to a request timeout.', 'amp' );
+				return __( 'Failed to fetch URL(s) to validate. This may be due to a request timeout.', 'amp' ) . ' ' . $check_error_log;
 			case 'white_screen_of_death':
-				return __( 'Unable to validate URL. Encountered a white screen of death likely due to a fatal error. Please check your server\'s PHP error logs.', 'amp' );
+				return __( 'Unable to validate URL. Encountered a white screen of death likely due to a fatal error.', 'amp' ) . ' ' . $check_error_log;
 			case '404':
 				return __( 'The fetched URL was not found. It may have been deleted. If so, you can trash this.', 'amp' );
 			case '500':
-				return __( 'An internal server error occurred when fetching the URL for validation.', 'amp' );
+				return __( 'An internal server error occurred when fetching the URL for validation.', 'amp' ) . ' ' . $check_error_log;
 			case 'response_comment_absent':
 				return sprintf(
 					/* translators: %s: AMP_VALIDATION */
-					__( 'URL validation failed to due to the absence of the expected JSON-containing %s comment after the body.', 'amp' ),
+					__( 'URL validation failed to due to the absence of the expected JSON-containing %s comment after the body. This is often due to a PHP fatal error occurring.', 'amp' ),
 					'AMP_VALIDATION'
-				);
+				) . ' ' . $check_error_log;
 			case 'malformed_json_validation_errors':
 				return sprintf(
 					/* translators: %s: AMP_VALIDATION */
