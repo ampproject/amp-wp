@@ -57,8 +57,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				'twentytwenty-js',
 			],
 			'remove_actions'                          => [
-				'wp_head' => [
+				'wp_head'                 => [
 					'twentytwenty_no_js_class', // AMP is essentially no-js, with any interactivity added explicitly via amp-bind.
+				],
+				'wp_print_footer_scripts' => [
+					'twentytwenty_skip_link_focus_fix', // See <https://github.com/WordPress/twentynineteen/pull/47>.
 				],
 			],
 			'add_smooth_scrolling'                    => [

@@ -124,6 +124,16 @@ class AMP_Validated_URL_Post_Type {
 			]
 		);
 
+		// Ensure cached count of URLs with new validation errors is flushed whenever a URL is updated, trashed, or deleted.
+		$handle_delete = function ( $post_id ) {
+			if ( static::POST_TYPE_SLUG === get_post_type( $post_id ) ) {
+				delete_transient( static::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT );
+			}
+		};
+		add_action( 'save_post_' . self::POST_TYPE_SLUG, $handle_delete );
+		add_action( 'trash_post', $handle_delete );
+		add_action( 'delete_post', $handle_delete );
+
 		// Hide the add new post link.
 		$post_type->cap->create_posts = 'do_not_allow';
 
@@ -1683,6 +1693,7 @@ class AMP_Validated_URL_Post_Type {
 			true
 		);
 
+		// @todo This is likely dead code.
 		$current_screen = get_current_screen();
 		if ( $current_screen && 'post' === $current_screen->base && self::POST_TYPE_SLUG === $current_screen->post_type ) {
 			$post = get_post();
