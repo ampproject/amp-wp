@@ -88,8 +88,9 @@ class AMP_Post_Type_Support {
 			$errors[] = 'post-type-support';
 		}
 
-		if ( post_password_required( $post ) ) {
-			$errors[] = 'password-protected';
+		// Show password form instead of the post content.
+		if ( ! current_theme_supports( 'amp' ) && post_password_required( $post ) ) {
+			add_filter( 'the_content', [ __CLASS__, 'show_password_form' ] );
 		}
 
 		/**
@@ -152,5 +153,16 @@ class AMP_Post_Type_Support {
 			}
 		}
 		return $errors;
+	}
+
+	/**
+	 * Show the password form if the post password is required.
+	 *
+	 * @return string
+	 */
+	public static function show_password_form() {
+		$post = get_post();
+
+		return get_the_password_form( $post );
 	}
 }
