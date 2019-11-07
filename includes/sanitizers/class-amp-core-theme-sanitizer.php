@@ -1030,6 +1030,19 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						}
 					}
 
+					/* Allow submenus to be opened via its icon on the desktop horizontal menu if
+					its a touch interface */
+					body.amp-mode-touch .primary-menu > li.menu-item-has-children > a {
+						padding-right: 0;
+						margin-right: 2rem;
+					}
+
+					body.amp-mode-touch .primary-menu ul li.menu-item-has-children > a {
+						margin-right: 4.5rem;
+						padding-right: 0;
+						width: unset;
+					}
+
 				}
 				<?php elseif ( 'twentyseventeen' === get_template() ) : ?>
 					/* Show the button*/
