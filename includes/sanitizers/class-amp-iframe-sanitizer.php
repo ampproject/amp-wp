@@ -217,6 +217,11 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 					}
 					break;
 
+				case 'mozallowfullscreen':
+				case 'webkitallowfullscreen':
+					// Omit these since amp-iframe will add them if needed if the `allowfullscreen` attribute is present.
+					break;
+
 				default:
 					$out[ $name ] = $value;
 					break;
