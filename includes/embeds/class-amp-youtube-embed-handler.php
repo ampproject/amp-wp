@@ -183,7 +183,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 			return AMP_HTML_Utils::build_tag(
 				'a',
 				[
-					'href'  => esc_url( $url ),
+					'href'  => esc_url_raw( $url ),
 					'class' => 'amp-wp-embed-fallback',
 				],
 				esc_html( $url )
