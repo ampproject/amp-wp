@@ -400,9 +400,11 @@ class AMP_Options_Manager {
 				add_settings_error(
 					self::OPTION_NAME,
 					$code,
-					sprintf(
-						$error,
-						isset( $post_type->label ) ? $post_type->label : $post_type->name
+					esc_html(
+						sprintf(
+							$error,
+							isset( $post_type->label ) ? $post_type->label : $post_type->name
+						)
 					)
 				);
 			}
