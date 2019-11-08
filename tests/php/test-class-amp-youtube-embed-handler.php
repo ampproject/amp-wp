@@ -13,6 +13,16 @@
  */
 class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
 
+	protected $youtube_video_id = 'kfVsfOSbJY0';
+
+	/**
+	 * Response for YouTube oEmbed request.
+	 *
+	 * @see Test_AMP_YouTube_Embed_Handler::$youtube_video_id
+	 * @var string
+	 */
+	protected $youtube_oembed_response = '{"height":270,"type":"video","author_name":"rebecca","thumbnail_url":"https:\/\/i.ytimg.com\/vi\/kfVsfOSbJY0\/hqdefault.jpg","provider_url":"https:\/\/www.youtube.com\/","title":"Rebecca Black - Friday","version":"1.0","width":480,"thumbnail_height":360,"html":"\u003ciframe width=\"480\" height=\"270\" src=\"https:\/\/www.youtube.com\/embed\/kfVsfOSbJY0?feature=oembed\" frameborder=\"0\" allow=\"accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen\u003e\u003c\/iframe\u003e","thumbnail_width":480,"provider_name":"YouTube","author_url":"https:\/\/www.youtube.com\/user\/rebecca"}';
+
 	/**
 	 * An instance of this embed handler.
 	 *
@@ -26,6 +36,54 @@ class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 		$this->handler = new AMP_YouTube_Embed_Handler();
+
+		add_filter( 'pre_http_request', [ $this, 'mock_http_request' ], 10, 3 );
+	}
+
+	/**
+	 * After a test method runs, reset any state in WordPress the test method might have changed.
+	 */
+	public function tearDown() {
+		remove_filter( 'pre_http_request', [ $this, 'mock_http_request' ] );
+		parent::tearDown();
+	}
+
+	/**
+	 * Mock HTTP request.
+	 *
+	 * @param mixed  $preempt Whether to preempt an HTTP request's return value. Default false.
+	 * @param mixed  $r       HTTP request arguments.
+	 * @param string $url     The request URL.
+	 * @return array Response data.
+	 */
+	public function mock_http_request( $preempt, $r, $url ) {
+		$host = wp_parse_url( $url, PHP_URL_HOST );
+
+		if ( ! in_array( $host, [ 'youtu.be', 'youtube.com', 'www.youtube.com' ], true ) ) {
+			return $preempt;
+		}
+
+		/**
+		 * The URL http://www.youtube.com/watch?v=kfVsfOSbJY0?hl=en&fs=1&w=425&h=349 is invalid as
+		 * it has multiple query vars. Checking if `?v=kfVsfOSbJY0?hl=en` is in the URL should be a
+		 * sufficient check when that URL is being mocked.
+		 */
+		if ( false !== strpos( $url, '%3Fv%3DkfVsfOSbJY0%3Fhl%3Den' ) ) {
+			return $preempt;
+		}
+
+		unset( $r );
+
+		return [
+			'body'          => $this->youtube_oembed_response,
+			'headers'       => [],
+			'response'      => [
+				'code'    => 200,
+				'message' => 'ok',
+			],
+			'cookies'       => [],
+			'http_response' => null,
+		];
 	}
 
 	/**
@@ -75,17 +133,17 @@ class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
 
 			'url_simple'                       => [
 				'https://www.youtube.com/watch?v=kfVsfOSbJY0' . PHP_EOL,
-				'<p><amp-youtube data-videoid="kfVsfOSbJY0" layout="responsive" width="500" height="281" title="Rebecca Black - Friday"><a fallback href="https://www.youtube.com/watch?v=kfVsfOSbJY0">Rebecca Black &#8211; Friday</a></amp-youtube></p>' . PHP_EOL,
+				'<p><amp-youtube data-videoid="kfVsfOSbJY0" layout="responsive" width="480" height="270" title="Rebecca Black - Friday"><a fallback href="https://www.youtube.com/watch?v=kfVsfOSbJY0">Rebecca Black &#8211; Friday</a></amp-youtube></p>' . PHP_EOL,
 			],
 
 			'url_short'                        => [
 				'https://youtu.be/kfVsfOSbJY0' . PHP_EOL,
-				'<p><amp-youtube data-videoid="kfVsfOSbJY0" layout="responsive" width="500" height="281" title="Rebecca Black - Friday"><a fallback href="https://youtu.be/kfVsfOSbJY0">Rebecca Black &#8211; Friday</a></amp-youtube></p>' . PHP_EOL,
+				'<p><amp-youtube data-videoid="kfVsfOSbJY0" layout="responsive" width="480" height="270" title="Rebecca Black - Friday"><a fallback href="https://youtu.be/kfVsfOSbJY0">Rebecca Black &#8211; Friday</a></amp-youtube></p>' . PHP_EOL,
 			],
 
 			'url_with_querystring'             => [
 				'http://www.youtube.com/watch?v=kfVsfOSbJY0&hl=en&fs=1&w=425&h=349' . PHP_EOL,
-				'<p><amp-youtube data-videoid="kfVsfOSbJY0" layout="responsive" width="500" height="281" title="Rebecca Black - Friday"><a fallback href="http://www.youtube.com/watch?v=kfVsfOSbJY0&#038;hl=en&#038;fs=1&#038;w=425&#038;h=349">Rebecca Black &#8211; Friday</a></amp-youtube></p>' . PHP_EOL,
+				'<p><amp-youtube data-videoid="kfVsfOSbJY0" layout="responsive" width="480" height="270" title="Rebecca Black - Friday"><a fallback href="http://www.youtube.com/watch?v=kfVsfOSbJY0&#038;hl=en&#038;fs=1&#038;w=425&#038;h=349">Rebecca Black &#8211; Friday</a></amp-youtube></p>' . PHP_EOL,
 			],
 
 			// Several reports of invalid URLs that have multiple `?` in the URL.
@@ -101,7 +159,7 @@ class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
 
 			'embed_url'                        => [
 				'https://www.youtube.com/embed/kfVsfOSbJY0' . PHP_EOL,
-				'<p><amp-youtube data-videoid="kfVsfOSbJY0" layout="responsive" width="500" height="281" title="Rebecca Black - Friday"><a fallback href="https://youtube.com/watch?v=kfVsfOSbJY0">Rebecca Black &#8211; Friday</a></amp-youtube></p>' . PHP_EOL,
+				'<p><amp-youtube data-videoid="kfVsfOSbJY0" layout="responsive" width="480" height="270" title="Rebecca Black - Friday"><a fallback href="https://youtube.com/watch?v=kfVsfOSbJY0">Rebecca Black &#8211; Friday</a></amp-youtube></p>' . PHP_EOL,
 			],
 		];
 	}
