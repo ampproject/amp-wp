@@ -190,7 +190,7 @@ export class InserterMenu extends Component {
 		}
 		if ( filteredItems.length > 0 ) {
 			openPanels = openPanels.concat(
-				Object.keys( itemsPerCategory )
+				Object.keys( itemsPerCategory ),
 			);
 		}
 		return openPanels;
@@ -216,7 +216,7 @@ export class InserterMenu extends Component {
 		const itemsPerCategory = flow(
 			( itemList ) => filter( itemList, ( item ) => item.category !== 'reusable' ),
 			( itemList ) => sortBy( itemList, getCategoryIndex ),
-			( itemList ) => groupBy( itemList, 'category' )
+			( itemList ) => groupBy( itemList, 'category' ),
 		)( filteredItems );
 
 		this.setState( {
@@ -230,7 +230,7 @@ export class InserterMenu extends Component {
 				filterValue,
 				itemsPerCategory,
 				filteredItems,
-				reusableItems
+				reusableItems,
 			),
 		} );
 
@@ -240,7 +240,7 @@ export class InserterMenu extends Component {
 
 		const resultsFoundMessage = sprintf(
 			_n( '%d result found.', '%d results found.', resultCount, 'amp' ),
-			resultCount
+			resultCount,
 		);
 
 		debouncedSpeak( resultsFoundMessage );
@@ -512,5 +512,5 @@ export default compose(
 	} ),
 	withSpokenMessages,
 	withInstanceId,
-	withSafeTimeout
+	withSafeTimeout,
 )( InserterMenu );

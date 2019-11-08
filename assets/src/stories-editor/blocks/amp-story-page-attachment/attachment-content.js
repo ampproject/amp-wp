@@ -79,7 +79,7 @@ const AttachmentContent = ( props ) => {
 						setFailedToFetch( false );
 						setIsFetching( false );
 					}
-				}
+				},
 			).catch(
 				() => {
 					if ( isStillMounted.current && fetchRequest.current === currentFetchRequest ) {
@@ -87,7 +87,7 @@ const AttachmentContent = ( props ) => {
 						setFailedToFetch( true );
 						setIsFetching( false );
 					}
-				}
+				},
 			);
 		}
 	}, [ postId, postType, allowedPostTypes ] );
@@ -136,14 +136,15 @@ const AttachmentContent = ( props ) => {
 						} }
 						ref={ closeButtonRef }
 					/>
-					<RichText
-						value={ title }
-						tagName="div"
-						wrapperClassName="amp-story-page-attachment-title"
-						onChange={ ( value ) => setAttributes( { title: value } ) }
-						placeholder={ __( 'Write Title', 'amp' ) }
-						onClick={ ( event ) => event.stopPropagation() }
-					/>
+					<div className="amp-story-page-attachment-title">
+						<RichText
+							value={ title }
+							tagName="div"
+							onChange={ ( value ) => setAttributes( { title: value } ) }
+							placeholder={ __( 'Write Title', 'amp' ) }
+							onClick={ ( event ) => event.stopPropagation() }
+						/>
+					</div>
 					{ postId && (
 						<Button
 							className="remove-attachment-post"

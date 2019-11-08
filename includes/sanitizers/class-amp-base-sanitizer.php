@@ -487,7 +487,6 @@ abstract class AMP_Base_Sanitizer {
 		$should_remove = $this->should_sanitize_validation_error( $validation_error, compact( 'node' ) );
 		if ( $should_remove ) {
 			$element->removeAttributeNode( $node );
-			$this->clean_up_after_attribute_removal( $element, $node, $validation_error );
 		}
 		return $should_remove;
 	}
@@ -579,6 +578,8 @@ abstract class AMP_Base_Sanitizer {
 					}
 				}
 			}
+		} elseif ( $node instanceof DOMProcessingInstruction ) {
+			$error['text'] = trim( $node->data, '?' );
 		}
 
 		return $error;
@@ -589,12 +590,10 @@ abstract class AMP_Base_Sanitizer {
 	 *
 	 * @since 1.3
 	 *
-	 * @param DOMElement $element          The node for which he attribute was
-	 *                                     removed.
-	 * @param DOMAttr    $attribute        The attribute that was removed.
-	 * @param array      $validation_error Validation error details.
+	 * @param DOMElement $element   The node for which the attribute was removed.
+	 * @param DOMAttr    $attribute The attribute that was removed.
 	 */
-	protected function clean_up_after_attribute_removal( $element, $attribute, $validation_error ) {
+	protected function clean_up_after_attribute_removal( $element, $attribute ) {
 		static $attributes_tied_to_href = [ 'target', 'download', 'rel', 'rev', 'hreflang', 'type' ];
 
 		if ( 'href' === $attribute->nodeName ) {

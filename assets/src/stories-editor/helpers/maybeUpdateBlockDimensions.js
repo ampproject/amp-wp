@@ -25,10 +25,11 @@ const { updateBlockAttributes } = dispatch( 'core/block-editor' );
  * @param {string}  block.attributes.content      Block inner content.
  * @param {boolean} block.attributes.ampFitText   Whether amp-fit-text should be used or not.
  * @param {number}  block.attributes.autoFontSize Automatically determined font size for amp-fit-text blocks.
+ * @param {number}  block.attributes.isPasted     Block has been pasted from clipboard.
  */
-const maybeUpdateBlockDimensions = ( block ) => {
+const maybeUpdateBlockDimensions = ( block ) => { // eslint-disable-line complexity
 	const { name, clientId, attributes } = block;
-	const { width, height, ampFitText, content, rotationAngle, positionLeft, positionTop } = attributes;
+	const { width, height, ampFitText, content, rotationAngle, positionLeft, positionTop, isPasted } = attributes;
 
 	if ( ampFitText ) {
 		return;
@@ -70,9 +71,9 @@ const maybeUpdateBlockDimensions = ( block ) => {
 			break;
 	}
 
-	// If the block is rotated and either new width or height has been assigned
+	// If the block is rotated or text has been pasted and either new width or height has been assigned
 	// we need to reposition the block.
-	if ( rotationAngle && ( newWidth || newHeight ) ) {
+	if ( ( rotationAngle || isPasted ) && ( newWidth || newHeight ) ) {
 		const deltaW = newWidth ? newWidth - width : 0;
 		const deltaH = newHeight ? newHeight - height : 0;
 		const { left: newLeft, top: newTop } = getPositionAfterResizing( {

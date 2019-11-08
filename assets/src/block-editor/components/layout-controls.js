@@ -39,7 +39,7 @@ const LayoutControls = ( { attributes, setAttributes, ampLayoutOptions } ) => {
 						sprintf(
 							/* translators: %s is the layout name */
 							__( 'Width is required for %s layout', 'amp' ),
-							ampLayout
+							ampLayout,
 						)
 					}
 				</Notice>
@@ -56,7 +56,7 @@ const LayoutControls = ( { attributes, setAttributes, ampLayoutOptions } ) => {
 						sprintf(
 							/* translators: %s is the layout name */
 							__( 'Height is required for %s layout', 'amp' ),
-							ampLayout
+							ampLayout,
 						)
 					}
 				</Notice>

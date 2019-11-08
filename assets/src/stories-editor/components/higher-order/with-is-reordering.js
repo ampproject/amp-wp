@@ -17,7 +17,7 @@ export default createHigherOrderComponent(
 			return {
 				isReordering: isReordering(),
 			};
-		}
+		},
 	),
-	'withIsReordering'
+	'withIsReordering',
 );

@@ -233,7 +233,7 @@ final class AMP_CLI_Validation_Command {
 
 		WP_CLI::success(
 			sprintf(
-				'%3$d crawled URLs have unaccepted issue(s) out of %2$d total with AMP validation issue(s); %1$d URLs were crawled.',
+				'%3$d crawled URLs have invalid markup kept out of %2$d total with AMP validation issue(s); %1$d URLs were crawled.',
 				$this->number_crawled,
 				$this->total_errors,
 				$this->unaccepted_errors

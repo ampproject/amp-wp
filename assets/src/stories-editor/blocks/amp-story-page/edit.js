@@ -12,7 +12,7 @@ import {
 } from '@wordpress/block-editor';
 import { useEffect, useRef } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
-import { _n, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -152,22 +152,12 @@ const PageEdit = ( {
 		if ( immovableBlocks.length > 1 ) {
 			const blocksToRemove = immovableBlocks.slice( 0, -1 ).map( ( { clientId: blockId } ) => blockId );
 			removeBlocks( blocksToRemove );
-			const removeMessage = sprintf(
-				/* translators: %d: number of removed blocks. */
-				_n(
-					'%d block removed. Only one block of this type is allowed per page.',
-					'%d blocks removed. Only one block of this type is allowed per page.',
-					blocksToRemove.length,
-					'amp'
-				),
-				blocksToRemove.length
-			);
 			createErrorNotice(
-				removeMessage,
+				__( 'Action canceled. Only one block of this type is allowed per page.', 'amp' ),
 				{
 					type: 'snackbar',
 					isDismissible: true,
-				}
+				},
 			);
 		}
 	}, [ childrenOrder, clientId, createErrorNotice, immovableBlocks, removeBlocks ] );

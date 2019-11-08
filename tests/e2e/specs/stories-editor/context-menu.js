@@ -118,7 +118,7 @@ describe( 'Context Menu', () => {
 			await clickButton( 'Duplicate Block' );
 
 			const nodes = await page.$x(
-				'//div[contains(@class, "wp-block-amp-amp-story-post-author")]'
+				'//div[contains(@class, "wp-block-amp-amp-story-post-author")]',
 			);
 			expect( nodes ).toHaveLength( 2 );
 		} );
@@ -130,7 +130,7 @@ describe( 'Context Menu', () => {
 			await clickButton( 'Duplicate Page' );
 
 			const nodes = await page.$x(
-				'//div[contains(@class, "amp-page-block")]'
+				'//div[contains(@class, "amp-page-block")]',
 			);
 			expect( nodes ).toHaveLength( 2 );
 		} );

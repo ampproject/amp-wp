@@ -77,7 +77,15 @@ class Draggable extends Component {
 	 * @param {Object} event The non-custom DragEvent.
 	 */
 	onDragEnd = ( event ) => {
-		const { clearHighlight, dropElementByOffset, blockName, setTimeout, clearSnapLines, onDragEnd = noop } = this.props;
+		const {
+			clearHighlight,
+			dropElementByOffset,
+			blockName,
+			setTimeout,
+			clearSnapLines,
+			isRTL,
+			onDragEnd = noop,
+		} = this.props;
 		if ( event ) {
 			event.preventDefault();
 		}
@@ -90,7 +98,8 @@ class Draggable extends Component {
 			// All this is about calculating the position of the (correct) element on the new page.
 			const currentElementTop = parseInt( this.cloneWrapper.style.top );
 			const currentElementLeft = parseInt( this.cloneWrapper.style.left );
-			const newLeft = currentElementLeft - ( this.pageOffset * PAGE_AND_MARGIN );
+			const factor = isRTL ? 1 : -1;
+			const newLeft = currentElementLeft + ( factor * ( this.pageOffset * PAGE_AND_MARGIN ) );
 
 			let baseHeight, xAttribute, yAttribute;
 			if ( isCTABlock( blockName ) ) {

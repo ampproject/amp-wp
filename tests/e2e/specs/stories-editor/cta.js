@@ -33,7 +33,7 @@ describe( 'Stories Editor Screen', () => {
 		await visitAdminPage( 'post-new.php', 'post_type=amp_story' );
 
 		const nodes = await page.$x(
-			'//div[@id="amp-story-shortcuts"]//button[@aria-label="Call to Action"]'
+			'//div[@id="amp-story-shortcuts"]//button[@aria-label="Call to Action"]',
 		);
 		expect( nodes ).toHaveLength( 0 );
 	} );
@@ -43,7 +43,7 @@ describe( 'Stories Editor Screen', () => {
 
 		await insertBlock( 'Page' );
 		const nodes = await page.$x(
-			'//div[@id="amp-story-shortcuts"]//button[@aria-label="Call to Action"]'
+			'//div[@id="amp-story-shortcuts"]//button[@aria-label="Call to Action"]',
 		);
 		expect( nodes ).toHaveLength( 1 );
 	} );

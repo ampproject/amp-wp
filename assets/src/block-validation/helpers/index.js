@@ -78,7 +78,7 @@ export const updateValidationErrors = () => {
 	 */
 	const validationErrors = ampValidity.results.filter( ( result ) => {
 		return result.term_status !== VALIDATION_ERROR_ACK_ACCEPTED_STATUS; // If not accepted by the user.
-	} ).map( ( { error } ) => error );
+	} ).map( ( { error, status } ) => ( { ...error, status } ) ); // Merge status into error since needed in maybeDisplayNotice.
 
 	if ( isEqual( validationErrors, previousValidationErrors ) ) {
 		return;
@@ -153,7 +153,7 @@ export const updateValidationErrors = () => {
  * @return {void}
  */
 export const maybeDisplayNotice = () => {
-	const { getValidationErrors, isSanitizationAutoAccepted, getReviewLink } = select( 'amp/block-validation' );
+	const { getValidationErrors, getReviewLink } = select( 'amp/block-validation' );
 	const { createWarningNotice } = dispatch( 'core/notices' );
 	const { getCurrentPost } = select( 'core/editor' );
 
@@ -168,9 +168,9 @@ export const maybeDisplayNotice = () => {
 			'There is %s issue from AMP validation which needs review.',
 			'There are %s issues from AMP validation which need review.',
 			validationErrorCount,
-			'amp'
+			'amp',
 		),
-		validationErrorCount
+		validationErrorCount,
 	);
 
 	const blockValidationErrors = validationErrors.filter( ( { clientId } ) => clientId );
@@ -184,9 +184,9 @@ export const maybeDisplayNotice = () => {
 					'%s issue is directly due to content here.',
 					'%s issues are directly due to content here.',
 					blockValidationErrorCount,
-					'amp'
+					'amp',
 				),
-				blockValidationErrorCount
+				blockValidationErrorCount,
 			);
 		} else if ( validationErrors.length === 1 ) {
 			noticeMessage += ' ' + __( 'The issue is not directly due to content here.', 'amp' );
@@ -196,35 +196,30 @@ export const maybeDisplayNotice = () => {
 
 		noticeMessage += ' ';
 
-		if ( isSanitizationAutoAccepted() ) {
-			const rejectedBlockValidationErrors = blockValidationErrors.filter( ( error ) => {
-				return (
-					VALIDATION_ERROR_NEW_REJECTED_STATUS === error.status ||
-					VALIDATION_ERROR_ACK_REJECTED_STATUS === error.status
-				);
-			} );
+		const rejectedBlockValidationErrors = blockValidationErrors.filter( ( error ) => {
+			return (
+				VALIDATION_ERROR_NEW_REJECTED_STATUS === error.status ||
+				VALIDATION_ERROR_ACK_REJECTED_STATUS === error.status
+			);
+		} );
 
-			const rejectedValidationErrors = validationErrors.filter( ( error ) => {
-				return (
-					VALIDATION_ERROR_NEW_REJECTED_STATUS === error.status ||
-					VALIDATION_ERROR_ACK_REJECTED_STATUS === error.status
-				);
-			} );
+		const rejectedValidationErrors = validationErrors.filter( ( error ) => {
+			return (
+				VALIDATION_ERROR_NEW_REJECTED_STATUS === error.status ||
+				VALIDATION_ERROR_ACK_REJECTED_STATUS === error.status
+			);
+		} );
 
-			const totalRejectedErrorsCount = rejectedBlockValidationErrors.length + rejectedValidationErrors.length;
-
-			if ( totalRejectedErrorsCount === 0 ) {
-				noticeMessage += __( 'However, your site is configured to automatically accept sanitization of the offending markup.', 'amp' );
-			} else {
-				noticeMessage += _n(
-					'Your site is configured to automatically accept sanitization errors, but this error could be from when auto-acceptance was not selected, or from manually rejecting an error.',
-					'Your site is configured to automatically accept sanitization errors, but these errors could be from when auto-acceptance was not selected, or from manually rejecting an error.',
-					validationErrors.length,
-					'amp'
-				);
-			}
+		const totalRejectedErrorsCount = rejectedBlockValidationErrors.length + rejectedValidationErrors.length;
+		if ( totalRejectedErrorsCount === 0 ) {
+			noticeMessage += __( 'Nevertheless, the invalid markup has been automatically removed.', 'amp' );
 		} else {
-			noticeMessage += __( 'Non-accepted validation errors prevent AMP from being served, and the user will be redirected to the non-AMP version.', 'amp' );
+			noticeMessage += _n(
+				'You will have to remove the invalid markup (or allow the plugin to remove it) to serve AMP.',
+				'You will have to remove the invalid markup (or allow the plugin to remove it) to serve AMP.',
+				validationErrors.length,
+				'amp',
+			);
 		}
 	}
 
