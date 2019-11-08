@@ -40,7 +40,7 @@ function writeInterstitialMessage( targetDocument ) {
 			<p>
 				{ __( 'Generating AMP preview…', 'amp' ) }
 			</p>
-		</div>
+		</div>,
 	);
 
 	markup += `

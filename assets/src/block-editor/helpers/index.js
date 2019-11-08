@@ -966,7 +966,7 @@ export const renderPreviewButton = ( PreviewComponent ) => {
 
 	render(
 		<PreviewComponent />,
-		buttonWrapper
+		buttonWrapper,
 	);
 
 	// Insert the new AMP preview button after the non-AMP 'Preview' button.
