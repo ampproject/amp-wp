@@ -178,7 +178,7 @@ class AMPPreview extends Component {
 	 */
 	getWindowTarget() {
 		const { postId } = this.props;
-		return `wp-preview-${ postId }`;
+		return `amp-preview-${ postId }`;
 	}
 
 	/**
