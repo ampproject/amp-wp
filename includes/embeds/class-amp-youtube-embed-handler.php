@@ -156,7 +156,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return string Rendered oEmbed.
 	 */
 	public function oembed( $matches, $attr, $url ) {
-		_deprecated_function( __METHOD__, '1.3.1' );
+		_deprecated_function( __METHOD__, '1.5.0' );
 		return $this->shortcode( [ $url ] );
 	}
 
