@@ -785,7 +785,6 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 				$element_xpaths,
 				[
 					'//*[ @id = "wpadminbar" ]',
-					'//*[ @id = "wpadminbar" ]//*',
 					'//style[ @id = "admin-bar-inline-css" ]',
 				]
 			),
