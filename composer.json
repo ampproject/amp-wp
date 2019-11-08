@@ -18,7 +18,7 @@
   },
   "require-dev": {
     "dealerdirect/phpcodesniffer-composer-installer": "0.5.0",
-    "mikey179/vfsstream": "1.6.7",
+    "mikey179/vfsstream": "1.6.8",
     "phpcompatibility/phpcompatibility-wp": "2.1.0",
     "roave/security-advisories": "dev-master",
     "sirbrillig/phpcs-variable-analysis": "2.6.2",

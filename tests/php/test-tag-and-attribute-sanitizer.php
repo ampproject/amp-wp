@@ -1707,6 +1707,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[],
 				[ 'invalid_processing_instruction' ],
 			],
+
+			'malformed_attribute_syntax_curly_quotes'      => [
+				'<a href=“%E2%80%9Chttps://example.com/path/to/post/%E2%80%9D“ target=“_blank“ rel=“noopener“>Whatever</a>',
+				'<a>Whatever</a>',
+				[],
+				[ 'invalid_attribute', 'invalid_attribute' ],
+			],
 		];
 	}
 

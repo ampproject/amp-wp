@@ -9,8 +9,6 @@ import { __, _n, sprintf } from '@wordpress/i18n';
  */
 import setValidationErrorRowsSeenClass from './set-validation-error-rows-seen-class';
 
-const { ampValidation } = window;
-
 /**
  * The id for the 'Showing x of y errors' notice.
  *
@@ -33,7 +31,6 @@ domReady( () => {
 	handleStatusChange();
 	handleBulkActions();
 	watchForUnsavedChanges();
-	showAMPIconIfEnabled();
 } );
 
 let beforeUnloadPromptAdded = false;
@@ -378,16 +375,4 @@ const handleBulkActions = () => {
 			}
 		} );
 	} );
-};
-
-/**
- * Adds the AMP icon to the page heading if AMP is enabled on this URL.
- */
-const showAMPIconIfEnabled = () => {
-	const heading = document.querySelector( 'h1.wp-heading-inline' );
-	if ( heading && true === Boolean( ampValidation.amp_enabled ) ) {
-		const ampIcon = document.createElement( 'span' );
-		ampIcon.classList.add( 'status-text', 'amp-enabled' );
-		heading.appendChild( ampIcon );
-	}
 };
