@@ -64,7 +64,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
-	 * Filter oEmbed HTML for SoundCloud to convert to AMP.
+	 * Filter oEmbed HTML for YouTube to convert to AMP.
 	 *
 	 * @param string $cache Cache for oEmbed.
 	 * @param string $url   Embed URL.

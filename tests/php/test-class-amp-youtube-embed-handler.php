@@ -66,4 +66,85 @@ class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
 		remove_all_filters( 'wp_video_shortcode_override' );
 	}
 
+	public function get_conversion_data() {
+		return [
+			'no_embed'                         => [
+				'<p>Hello world.</p>',
+				'<p>Hello world.</p>' . PHP_EOL,
+			],
+
+			'url_simple'                       => [
+				'https://www.youtube.com/watch?v=kfVsfOSbJY0' . PHP_EOL,
+				'<p><amp-youtube data-videoid="kfVsfOSbJY0" layout="responsive" width="500" height="281" title="Rebecca Black - Friday"><a fallback href="https://www.youtube.com/watch?v=kfVsfOSbJY0">Rebecca Black &#8211; Friday</a></amp-youtube></p>' . PHP_EOL,
+			],
+
+			'url_short'                        => [
+				'https://youtu.be/kfVsfOSbJY0' . PHP_EOL,
+				'<p><amp-youtube data-videoid="kfVsfOSbJY0" layout="responsive" width="500" height="281" title="Rebecca Black - Friday"><a fallback href="https://youtu.be/kfVsfOSbJY0">Rebecca Black &#8211; Friday</a></amp-youtube></p>' . PHP_EOL,
+			],
+
+			'url_with_querystring'             => [
+				'http://www.youtube.com/watch?v=kfVsfOSbJY0&hl=en&fs=1&w=425&h=349' . PHP_EOL,
+				'<p><amp-youtube data-videoid="kfVsfOSbJY0" layout="responsive" width="500" height="281" title="Rebecca Black - Friday"><a fallback href="http://www.youtube.com/watch?v=kfVsfOSbJY0&#038;hl=en&#038;fs=1&#038;w=425&#038;h=349">Rebecca Black &#8211; Friday</a></amp-youtube></p>' . PHP_EOL,
+			],
+
+			// Several reports of invalid URLs that have multiple `?` in the URL.
+			'url_with_querystring_and_extra_?' => [
+				'http://www.youtube.com/watch?v=kfVsfOSbJY0?hl=en&fs=1&w=425&h=349' . PHP_EOL,
+				'<p>http://www.youtube.com/watch?v=kfVsfOSbJY0?hl=en&#038;fs=1&#038;w=425&#038;h=349</p>' . PHP_EOL,
+			],
+
+			'shortcode_unnamed_attr_as_url'    => [
+				'[youtube http://www.youtube.com/watch?v=kfVsfOSbJY0]' . PHP_EOL,
+				'<amp-youtube data-videoid="kfVsfOSbJY0" layout="responsive" width="600" height="338"></amp-youtube>' . PHP_EOL,
+			],
+
+			'embed_url'                        => [
+				'https://www.youtube.com/embed/kfVsfOSbJY0' . PHP_EOL,
+				'<p><amp-youtube data-videoid="kfVsfOSbJY0" layout="responsive" width="500" height="281" title="Rebecca Black - Friday"><a fallback href="https://youtube.com/watch?v=kfVsfOSbJY0">Rebecca Black &#8211; Friday</a></amp-youtube></p>' . PHP_EOL,
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider get_conversion_data
+	 */
+	public function test__conversion( $source, $expected ) {
+		$this->handler->register_embed();
+		$filtered_content = apply_filters( 'the_content', $source );
+
+		$this->assertEquals( $expected, $filtered_content );
+	}
+
+	public function get_scripts_data() {
+		return [
+			'not_converted' => [
+				'<p>Hello World.</p>',
+				[],
+			],
+			'converted'     => [
+				'https://www.youtube.com/watch?v=kfVsfOSbJY0' . PHP_EOL,
+				[ 'amp-youtube' => true ],
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider get_scripts_data
+	 */
+	public function test__get_scripts( $source, $expected ) {
+		$this->handler->register_embed();
+		$source = apply_filters( 'the_content', $source );
+
+		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( AMP_DOM_Utils::get_dom_from_content( $source ) );
+		$whitelist_sanitizer->sanitize();
+
+		$scripts = array_merge(
+			$this->handler->get_scripts(),
+			$whitelist_sanitizer->get_scripts()
+		);
+
+		$this->assertEquals( $expected, $scripts );
+	}
+
 }
