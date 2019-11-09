@@ -22,8 +22,8 @@ class PairedBrowsingApp {
 		this.ampIframe = document.getElementById( 'amp' ).firstElementChild;
 
 		Promise.all( this.getIframeLoadedPromises() ).then( () => {
-			// Check every second to see if any iframe has disconnected.
-			setInterval( () => this.checkConnectedIframes(), 1000 );
+			// Check to see if any of the iframes have been disconnected, at the specified interval.
+			setInterval( () => this.checkConnectedIframes(), 250 );
 
 			this.exitLink = document.getElementById( 'exit-link' );
 		} );
