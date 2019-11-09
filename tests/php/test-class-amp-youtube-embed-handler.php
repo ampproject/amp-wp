@@ -171,16 +171,15 @@ class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
 	/**
 	 * @dataProvider get_conversion_data
 	 */
-	// TODO:
-	public function test__conversion( $source, $expected, $fallback = null ) {
+	public function test__conversion( $source, $expected, $fallback_for_expected = null ) {
 		$this->handler->register_embed();
 		$filtered_content = apply_filters( 'the_content', $source );
 
 		if (
 			version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.2', '<' )
-			&& null !== $fallback
+			&& null !== $fallback_for_expected
 		) {
-			$this->assertEquals( $fallback, $filtered_content );
+			$this->assertEquals( $fallback_for_expected, $filtered_content );
 		} else {
 			$this->assertEquals( $expected, $filtered_content );
 		}
