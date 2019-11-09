@@ -223,7 +223,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 		} else {
 			/* phpcs:ignore Squiz.PHP.CommentedOutCode.Found
 			The query looks like ?v={id} or ?list={id} */
-			parse_str( $parsed_url['query'], $query_args ); // @todo Bug! See <https://github.com/ampproject/amp-wp/issues/3348>.
+			parse_str( $parsed_url['query'], $query_args );
 
 			if ( isset( $query_args['v'] ) ) {
 				$video_id = $this->sanitize_v_arg( $query_args['v'] );
