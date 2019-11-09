@@ -2562,7 +2562,7 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Remove any unnecessary query vars that could hamper for the paired browsing experience.
+	 * Remove any unnecessary query vars that could hamper the paired browsing experience.
 	 */
 	public static function sanitize_url_for_paired_browsing() {
 		if (
