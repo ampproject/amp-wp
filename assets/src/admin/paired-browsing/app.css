@@ -50,14 +50,6 @@ body * {
 	width: 24px;
 }
 
-#amp::before {
-	content: "AMP";
-}
-
-#non-amp::before {
-	content: "non-AMP";
-}
-
 #non-amp,
 #amp {
 	flex: 1 0 auto;
@@ -67,17 +59,6 @@ body * {
 .container {
 	display: flex;
 	height: 100%;
-}
-
-.container > div::before {
-	opacity: 0.8;
-	font-size: 5em;
-	font-weight: 800;
-	position: absolute;
-	top: 50%;
-	width: 50%;
-	text-align: center;
-	pointer-events: none;
 }
 
 iframe {
