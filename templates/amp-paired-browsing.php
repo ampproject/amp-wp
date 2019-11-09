@@ -15,10 +15,10 @@ $amp_url = add_query_arg( amp_get_slug(), '1', $url );
 ?>
 
 <!DOCTYPE html>
-<html <?php language_attributes(); // // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+<html <?php language_attributes(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 	<head>
 		<meta charset="<?php bloginfo( 'charset' ); ?>">
-		<title><?php esc_html_e( 'Loading...', 'amp' ); ?></title>
+		<title><?php esc_html_e( 'Loading&#8230;', 'amp' ); ?></title>
 		<?php print_admin_styles(); ?>
 	</head>
 	<body>

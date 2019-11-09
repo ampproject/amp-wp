@@ -322,7 +322,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertInternalType( 'object', $node );
 		$this->assertInternalType( 'object', $admin_bar->get_node( 'amp-paired-browsing' ) );
 
-		/**
+		/*
 		 * Admin bar item available in transitional mode.
 		 * Transitional mode is available once template_dir is supplied.
 		 */
