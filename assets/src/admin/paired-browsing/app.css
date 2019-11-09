@@ -45,6 +45,14 @@ body * {
 	text-decoration: none;
 }
 
+#exit-link::before {
+	text-decoration: none;
+}
+
+#exit-link:hover {
+	text-decoration: underline;
+}
+
 #header img {
 	display: block;
 	width: 24px;
