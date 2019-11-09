@@ -193,7 +193,12 @@ class PairedBrowsingApp {
 				this.removeAmpQueryVars( this.removeUrlHash( win.location.href ) )
 			)
 		) {
-			oppositeWindow.location.replace( this.removeAmpQueryVars( win.location.href ) );
+			const url = oppositeWindow === this.ampIframe.contentWindow ?
+				this.addAmpQueryVar( win.location.href ) :
+				this.removeAmpQueryVars( win.location.href );
+
+			oppositeWindow.location.replace( url );
+
 			return;
 		}
 
