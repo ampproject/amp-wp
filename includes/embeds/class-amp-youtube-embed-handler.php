@@ -81,7 +81,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 			return $cache;
 		}
 
-		$props = $this->parse_props( $cache, $url );
+		$props = $this->parse_props( $cache, $url, $id );
 
 		$props['video_id'] = $id;
 		return $this->render( $props, $url );
@@ -90,21 +90,35 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Parse AMP component from iframe.
 	 *
-	 * @param string      $html HTML.
-	 * @param string|null $url  Embed URL, for fallback purposes.
+	 * @param string $html     HTML.
+	 * @param string $url      Embed URL, for fallback purposes.
+	 * @param string $video_id YouTube video ID.
 	 * @return array Props for rendering the component.
 	 */
-	private function parse_props( $html, $url ) {
+	private function parse_props( $html, $url, $video_id ) {
 		$props = [];
 
 		if ( preg_match( '#<iframe[^>]*?title="(?P<title>[^"]+)"#s', $html, $matches ) ) {
-			$props['title']    = $matches['title'];
-			$props['fallback'] = sprintf(
-				'<a fallback href="%s">%s</a>',
-				esc_url( $url ),
-				esc_html( $matches['title'] )
-			);
+			$props['title'] = $matches['title'];
 		}
+
+		$img = AMP_HTML_Utils::build_tag(
+			'img',
+			[
+				'src'             => esc_url_raw( sprintf( 'https://i.ytimg.com/vi/%s/hqdefault.jpg', $video_id ) ),
+				'alt'             => isset( $props['title'] ) ? $props['title'] : '',
+				'data-amp-layout' => 'fill',
+			]
+		);
+
+		$props['placeholder'] = AMP_HTML_Utils::build_tag(
+			'a',
+			[
+				'placeholder' => '',
+				'href'        => esc_url_raw( $url ),
+			],
+			$img
+		);
 
 		if ( preg_match( '#<iframe[^>]*?height="(?P<height>\d+)"#s', $html, $matches ) ) {
 			$props['height'] = (int) $matches['height'];
@@ -171,11 +185,11 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 		$args = wp_parse_args(
 			$args,
 			[
-				'video_id' => false,
-				'layout'   => 'responsive',
-				'width'    => $this->args['width'],
-				'height'   => $this->args['height'],
-				'fallback' => '',
+				'video_id'    => false,
+				'layout'      => 'responsive',
+				'width'       => $this->args['width'],
+				'height'      => $this->args['height'],
+				'placeholder' => '',
 			]
 		);
 
@@ -198,7 +212,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 				[ 'data-videoid' => $args['video_id'] ],
 				wp_array_slice_assoc( $args, [ 'layout', 'width', 'height', 'title' ] )
 			),
-			$args['fallback']
+			$args['placeholder']
 		);
 	}
 
