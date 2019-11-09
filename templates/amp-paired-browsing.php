@@ -45,11 +45,11 @@ $amp_url = add_query_arg( amp_get_slug(), '1', $url );
 
 		<div class="container">
 			<div id="non-amp">
-				<iframe src="<?php echo esc_url( $url ); ?>" sandbox="allow-forms allow-scripts allow-same-origin allow-popups"></iframe>
+				<iframe src="<?php echo esc_url( $url ); ?>" sandbox="allow-forms allow-scripts allow-same-origin allow-popups" title="<?php esc_attr__( 'non-AMP version', 'amp' ); ?>"></iframe>
 			</div>
 
 			<div id="amp">
-				<iframe src="<?php echo esc_url( $amp_url ); ?>" sandbox="allow-forms allow-scripts allow-same-origin allow-popups"></iframe>
+				<iframe src="<?php echo esc_url( $amp_url ); ?>" sandbox="allow-forms allow-scripts allow-same-origin allow-popups" title="<?php esc_attr__( 'AMP version', 'amp' ); ?>"></iframe>
 			</div>
 		</div>
 
