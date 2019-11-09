@@ -11,7 +11,7 @@
  * Much of this class is borrowed from Jetpack embeds.
  */
 class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
-	const SHORT_URL_HOST = 'youtu.be';
+
 	// Only handling single videos. Playlists are handled elsewhere.
 	const URL_PATTERN = '#https?://(?:www\.)?(?:youtube.com/(?:v/|e/|embed/|watch[/\#?])|youtu\.be/).*#i';
 	const RATIO       = 0.5625;
@@ -219,41 +219,15 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Determine the video ID from the URL.
 	 *
-	 * @todo Needs to be totally refactored.
-	 *
 	 * @param string $url URL.
 	 * @return integer Video ID.
 	 */
 	private function get_video_id_from_url( $url ) {
-		$video_id   = false;
-		$parsed_url = wp_parse_url( $url );
-
-		if ( self::SHORT_URL_HOST === substr( $parsed_url['host'], -strlen( self::SHORT_URL_HOST ) ) ) {
-			/* youtu.be/{id} */
-			$parts = explode( '/', $parsed_url['path'] );
-			if ( ! empty( $parts ) ) {
-				$video_id = $parts[1];
-			}
-		} else {
-			/* phpcs:ignore Squiz.PHP.CommentedOutCode.Found
-			The query looks like ?v={id} or ?list={id} */
-			parse_str( $parsed_url['query'], $query_args );
-
-			if ( isset( $query_args['v'] ) ) {
-				$video_id = $this->sanitize_v_arg( $query_args['v'] );
-			}
+		if ( preg_match( '/(?:watch\?v=|embed\/|youtu.be\/)(?P<id>\w*)/', $url, $match ) ) {
+			return $match['id'];
 		}
 
-		if ( empty( $video_id ) ) {
-			/* The path looks like /(v|e|embed)/{id} */
-			$parts = explode( '/', $parsed_url['path'] );
-
-			if ( in_array( $parts[1], [ 'v', 'e', 'embed' ], true ) ) {
-				$video_id = $parts[2];
-			}
-		}
-
-		return $video_id;
+		return false;
 	}
 
 	/**
