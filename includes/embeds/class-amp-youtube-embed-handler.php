@@ -96,36 +96,39 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return array Props for rendering the component.
 	 */
 	private function parse_props( $html, $url, $video_id ) {
-		$props = [];
+		$props         = [];
+		$props_pattern = '/<iframe(?=[^>]*?title="(?<title>[^"]+)")?(?=[^>]*?width="(?<width>[^"]+)")?(?=[^>]*?height="(?<height>[^"]+)")?/';
 
-		if ( preg_match( '#<iframe[^>]*?title="(?P<title>[^"]+)"#s', $html, $matches ) ) {
-			$props['title'] = $matches['title'];
-		}
+		if ( preg_match( $props_pattern, $html, $matches ) ) {
+			if ( isset( $matches['title'] ) ) {
+				$props['title'] = $matches['title'];
+			}
 
-		$img = AMP_HTML_Utils::build_tag(
-			'img',
-			[
-				'src'             => esc_url_raw( sprintf( 'https://i.ytimg.com/vi/%s/hqdefault.jpg', $video_id ) ),
-				'alt'             => isset( $props['title'] ) ? $props['title'] : '',
-				'data-amp-layout' => 'fill',
-			]
-		);
+			if ( isset( $matches['height'] ) ) {
+				$props['height'] = (int) $matches['height'];
+			}
 
-		$props['placeholder'] = AMP_HTML_Utils::build_tag(
-			'a',
-			[
-				'placeholder' => '',
-				'href'        => esc_url_raw( $url ),
-			],
-			$img
-		);
+			if ( isset( $matches['width'] ) ) {
+				$props['width'] = (int) $matches['width'];
+			}
 
-		if ( preg_match( '#<iframe[^>]*?height="(?P<height>\d+)"#s', $html, $matches ) ) {
-			$props['height'] = (int) $matches['height'];
-		}
+			$img = AMP_HTML_Utils::build_tag(
+				'img',
+				[
+					'src'             => esc_url_raw( sprintf( 'https://i.ytimg.com/vi/%s/hqdefault.jpg', $video_id ) ),
+					'alt'             => isset( $props['title'] ) ? $props['title'] : '',
+					'data-amp-layout' => 'fill',
+				]
+			);
 
-		if ( preg_match( '#<iframe[^>]*?width="(?P<width>\d+)"#s', $html, $matches ) ) {
-			$props['width'] = (int) $matches['width'];
+			$props['placeholder'] = AMP_HTML_Utils::build_tag(
+				'a',
+				[
+					'placeholder' => '',
+					'href'        => esc_url_raw( $url ),
+				],
+				$img
+			);
 		}
 
 		return $props;
