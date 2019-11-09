@@ -555,7 +555,7 @@ class AMP_Options_Manager {
 				wp_kses(
 					sprintf(
 						/* translators: %s: Persistent object cache support URL */
-						__( 'The AMP plugin performs at its best when persistent object cache is enabled. <a href="%s">More details</a>', 'amp' ), // phpcs:ignore WordPress.Security.EscapeOutput
+						__( 'The AMP plugin performs at its best when persistent object cache is enabled. <a href="%s">More details</a>', 'amp' ),
 						esc_url( __( 'https://codex.wordpress.org/Class_Reference/WP_Object_Cache#Persistent_Caching', 'amp' ) )
 					),
 					[ 'a' => [ 'href' => true ] ]
@@ -583,7 +583,7 @@ class AMP_Options_Manager {
 			wp_kses(
 				sprintf(
 					/* translators: %s: post-processor cache support URL */
-					__( 'The AMP plugin&lsquo;s post-processor cache was disabled due to the detection of highly-variable content. <a href="%s">More details</a>', 'amp' ), // phpcs:ignore WordPress.Security.EscapeOutput
+					__( 'The AMP plugin&lsquo;s post-processor cache was disabled due to the detection of highly-variable content. <a href="%s">More details</a>', 'amp' ),
 					esc_url( __( 'https://github.com/ampproject/amp-wp/wiki/Post-Processor-Cache', 'amp' ) )
 				),
 				[ 'a' => [ 'href' => true ] ]
@@ -618,7 +618,7 @@ class AMP_Options_Manager {
 				wp_kses(
 					sprintf(
 						/* translators: %s: path to the conflicting library */
-						__( 'A conflicting version of PHP-CSS-Parser appears to be installed by another plugin or theme (located in %s). Because of this, CSS processing will be limited, and tree shaking will not be available.', 'amp' ), // phpcs:ignore WordPress.Security.EscapeOutput
+						__( 'A conflicting version of PHP-CSS-Parser appears to be installed by another plugin or theme (located in %s). Because of this, CSS processing will be limited, and tree shaking will not be available.', 'amp' ),
 						'<code>' . esc_html( $source_dir ) . '</code>'
 					),
 					[ 'code' => [] ]
