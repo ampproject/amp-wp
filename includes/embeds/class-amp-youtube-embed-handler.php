@@ -223,7 +223,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Determine the video ID from the URL.
 	 *
 	 * @param string $url URL.
-	 * @return integer Video ID.
+	 * @return integer|false Video ID, or false if none could be retrieved.
 	 */
 	private function get_video_id_from_url( $url ) {
 		if ( preg_match( '/(?:watch\?v=|embed\/|youtu.be\/)(?P<id>\w*)/', $url, $match ) ) {
