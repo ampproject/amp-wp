@@ -106,14 +106,14 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 			return null;
 		}
 
-		$img = AMP_HTML_Utils::build_tag(
-			'img',
-			[
-				'src'             => esc_url_raw( sprintf( 'https://i.ytimg.com/vi/%s/hqdefault.jpg', $video_id ) ),
-				'alt'             => isset( $props['title'] ) ? $props['title'] : '',
-				'data-amp-layout' => 'fill',
-			]
-		);
+		$img_attributes = [
+			'src'             => esc_url_raw( sprintf( 'https://i.ytimg.com/vi/%s/hqdefault.jpg', $video_id ) ),
+			'data-amp-layout' => 'fill',
+		];
+		if ( ! empty( $props['title'] ) ) {
+			$img_attributes['alt'] = $props['title'];
+		}
+		$img = AMP_HTML_Utils::build_tag( 'img', $img_attributes );
 
 		$props['placeholder'] = AMP_HTML_Utils::build_tag(
 			'a',
@@ -202,14 +202,15 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		$this->did_convert_elements = true;
 
-		return AMP_HTML_Utils::build_tag(
-			'amp-youtube',
-			array_merge(
-				[ 'data-videoid' => $args['video_id'] ],
-				wp_array_slice_assoc( $args, [ 'layout', 'width', 'height', 'title' ] )
-			),
-			$args['placeholder']
+		$attributes = array_merge(
+			[ 'data-videoid' => $args['video_id'] ],
+			wp_array_slice_assoc( $args, [ 'layout', 'width', 'height' ] )
 		);
+		if ( ! empty( $args['title'] ) ) {
+			$attributes['title'] = $args['title'];
+		}
+
+		return AMP_HTML_Utils::build_tag( 'amp-youtube', $attributes, $args['placeholder'] );
 	}
 
 	/**
