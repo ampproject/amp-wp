@@ -107,8 +107,9 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		$img_attributes = [
-			'src'             => esc_url_raw( sprintf( 'https://i.ytimg.com/vi/%s/hqdefault.jpg', $video_id ) ),
-			'data-amp-layout' => 'fill',
+			'src'        => esc_url_raw( sprintf( 'https://i.ytimg.com/vi/%s/hqdefault.jpg', $video_id ) ),
+			'layout'     => 'fill',
+			'object-fit' => 'cover',
 		];
 		if ( ! empty( $props['title'] ) ) {
 			$img_attributes['alt'] = $props['title'];
