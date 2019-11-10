@@ -77,4 +77,29 @@ abstract class AMP_Base_Embed_Handler {
 	public function get_scripts() {
 		return [];
 	}
+
+	/**
+	 * Get regex pattern for matching HTML attributes from a given tag name.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @param string   $tag_name        Tag name.
+	 * @param string[] $attribute_names Attribute names.
+	 * @return string Regular expression pattern.
+	 */
+	protected function get_html_attribute_pattern( $tag_name, $attribute_names ) {
+		return sprintf(
+			'/<%s%s/',
+			$tag_name,
+			implode(
+				'',
+				array_map(
+					function ( $attr_name ) {
+						return sprintf( '(?=[^>]*?%1$s="(?P<%1$s>[^"]+)")?', $attr_name );
+					},
+					$attribute_names
+				)
+			)
+		);
+	}
 }

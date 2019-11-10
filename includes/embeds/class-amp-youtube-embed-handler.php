@@ -82,6 +82,9 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		$props = $this->parse_props( $cache, $url, $id );
+		if ( empty( $props ) ) {
+			return $cache;
+		}
 
 		$props['video_id'] = $id;
 		return $this->render( $props, $url );
@@ -93,43 +96,33 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @param string $html     HTML.
 	 * @param string $url      Embed URL, for fallback purposes.
 	 * @param string $video_id YouTube video ID.
-	 * @return array Props for rendering the component.
+	 * @return array|null Props for rendering the component, or null if unable to parse.
 	 */
 	private function parse_props( $html, $url, $video_id ) {
+		$attr_names    = [ 'title', 'height', 'width' ];
 		$props         = [];
-		$props_pattern = '/<iframe(?=[^>]*?title="(?<title>[^"]+)")?(?=[^>]*?width="(?<width>[^"]+)")?(?=[^>]*?height="(?<height>[^"]+)")?/';
-
-		if ( preg_match( $props_pattern, $html, $matches ) ) {
-			if ( isset( $matches['title'] ) ) {
-				$props['title'] = $matches['title'];
-			}
-
-			if ( isset( $matches['height'] ) ) {
-				$props['height'] = (int) $matches['height'];
-			}
-
-			if ( isset( $matches['width'] ) ) {
-				$props['width'] = (int) $matches['width'];
-			}
-
-			$img = AMP_HTML_Utils::build_tag(
-				'img',
-				[
-					'src'             => esc_url_raw( sprintf( 'https://i.ytimg.com/vi/%s/hqdefault.jpg', $video_id ) ),
-					'alt'             => isset( $props['title'] ) ? $props['title'] : '',
-					'data-amp-layout' => 'fill',
-				]
-			);
-
-			$props['placeholder'] = AMP_HTML_Utils::build_tag(
-				'a',
-				[
-					'placeholder' => '',
-					'href'        => esc_url_raw( $url ),
-				],
-				$img
-			);
+		$props_pattern = $this->get_html_attribute_pattern( 'iframe', $attr_names );
+		if ( ! preg_match( $props_pattern, $html, $props ) ) {
+			return null;
 		}
+
+		$img = AMP_HTML_Utils::build_tag(
+			'img',
+			[
+				'src'             => esc_url_raw( sprintf( 'https://i.ytimg.com/vi/%s/hqdefault.jpg', $video_id ) ),
+				'alt'             => isset( $props['title'] ) ? $props['title'] : '',
+				'data-amp-layout' => 'fill',
+			]
+		);
+
+		$props['placeholder'] = AMP_HTML_Utils::build_tag(
+			'a',
+			[
+				'placeholder' => '',
+				'href'        => esc_url_raw( $url ),
+			],
+			$img
+		);
 
 		return $props;
 	}

@@ -78,39 +78,39 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @param string|null $url  Embed URL, for fallback purposes.
 	 * @return string AMP component or empty if unable to determine SoundCloud ID.
 	 */
-	private function parse_amp_component_from_iframe( $html, $url ) {
-		$embed = '';
-
-		if ( preg_match( '#<iframe[^>]*?src="(?P<src>[^"]+)"#s', $html, $matches ) ) {
-			$src   = html_entity_decode( $matches['src'], ENT_QUOTES );
-			$query = [];
-			parse_str( wp_parse_url( $src, PHP_URL_QUERY ), $query );
-			if ( ! empty( $query['url'] ) ) {
-				$props = $this->extract_params_from_iframe_src( $query['url'] );
-				if ( isset( $query['visual'] ) ) {
-					$props['visual'] = $query['visual'];
-				}
-
-				if ( $url && preg_match( '#<iframe[^>]*?title="(?P<title>[^"]+)"#s', $html, $matches ) ) {
-					$props['fallback'] = sprintf(
-						'<a fallback href="%s">%s</a>',
-						esc_url( $url ),
-						esc_html( $matches['title'] )
-					);
-				}
-
-				if ( preg_match( '#<iframe[^>]*?height="(?P<height>\d+)"#s', $html, $matches ) ) {
-					$props['height'] = (int) $matches['height'];
-				}
-
-				if ( preg_match( '#<iframe[^>]*?width="(?P<width>\d+)"#s', $html, $matches ) ) {
-					$props['width'] = (int) $matches['width'];
-				}
-
-				$embed = $this->render( $props, $url );
-			}
+	private function parse_amp_component_from_iframe( $html, $url = null ) {
+		$attr_names    = [ 'src', 'title', 'width', 'height' ];
+		$props         = [];
+		$props_pattern = $this->get_html_attribute_pattern( 'iframe', $attr_names );
+		if ( ! preg_match( $props_pattern, $html, $props ) || empty( $props['src'] ) ) {
+			return $html;
 		}
-		return $embed;
+
+		$src   = html_entity_decode( $props['src'], ENT_QUOTES );
+		$query = [];
+		parse_str( wp_parse_url( $src, PHP_URL_QUERY ), $query );
+
+		if ( empty( $query['url'] ) ) {
+			return $html;
+		}
+
+		$props = array_merge(
+			$props,
+			$this->extract_params_from_iframe_src( $query['url'] )
+		);
+		if ( isset( $query['visual'] ) ) {
+			$props['visual'] = $query['visual'];
+		}
+
+		if ( $url && ! empty( $props['title'] ) ) {
+			$props['fallback'] = sprintf(
+				'<a fallback href="%s">%s</a>',
+				esc_url( $url ),
+				esc_html( $props['title'] )
+			);
+		}
+
+		return $this->render( $props, $url );
 	}
 
 	/**
