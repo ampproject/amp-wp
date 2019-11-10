@@ -90,12 +90,12 @@ abstract class AMP_Base_Embed_Handler {
 	protected function get_html_attribute_pattern( $tag_name, $attribute_names ) {
 		return sprintf(
 			'/<%s%s/',
-			$tag_name,
+			preg_quote( $tag_name, '/' ),
 			implode(
 				'',
 				array_map(
 					function ( $attr_name ) {
-						return sprintf( '(?=[^>]*?%1$s="(?P<%1$s>[^"]+)")?', $attr_name );
+						return sprintf( '(?=[^>]*?%1$s="(?P<%1$s>[^"]+)")?', preg_quote( $attr_name, '/' ) );
 					},
 					$attribute_names
 				)
