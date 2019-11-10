@@ -348,6 +348,11 @@ describe( 'Resizing', () => {
 			await createNewPost( { postType: 'amp_story' } );
 			// Select the Text block inserted by default.
 			await selectBlockByClassName( 'wp-block-amp-story-text' );
+			/*
+			 * Some block handles are not visible upon block rotation. Scrolling the page up to the
+			 * Story controls should provide enough space to solve this.
+			 */
+			await page.$eval( '#amp-story-controls', ( el ) => el.scrollIntoView() );
 			await rotateSelectedBlock();
 		} );
 
