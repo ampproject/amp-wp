@@ -1727,7 +1727,7 @@ class AMP_Theme_Support {
 			$script->parentNode->removeChild( $script ); // So we can move it.
 		}
 
-		// Create scripts for any components discovered from output buffering.
+		// Create scripts for any components discovered from output buffering that are missing.
 		foreach ( array_diff( $script_handles, array_keys( $amp_scripts ) ) as $missing_script_handle ) {
 			if ( ! wp_script_is( $missing_script_handle, 'registered' ) ) {
 				continue;
@@ -1743,6 +1743,30 @@ class AMP_Theme_Support {
 			}
 
 			$amp_scripts[ $missing_script_handle ] = AMP_DOM_Utils::create_node( $dom, 'script', $attrs );
+		}
+
+		// Remove scripts that had already been added but couldn't be detected from output buffering.
+		foreach ( array_diff( array_keys( $amp_scripts ), $script_handles ) as $superfluous_script_handle ) {
+			$src = $amp_scripts[ $superfluous_script_handle ]->getAttribute( 'src' );
+
+			// Skip scripts unrelated to AMP.
+			if ( ! $src || 0 !== strpos( $src, 'https://cdn.ampproject.org/' ) ) {
+				continue;
+			}
+
+			// Skip AMP runtime script.
+			if ( 'https://cdn.ampproject.org/v0.js' === $src ) {
+				continue;
+			}
+
+			$custom_element = $amp_scripts[ $superfluous_script_handle ]->getAttribute( 'custom-element' );
+
+			// Skip dynamic CSS classes script, it has no associated element.
+			if ( 'amp-dynamic-css-classes' === $custom_element ) {
+				continue;
+			}
+
+			unset( $amp_scripts[ $superfluous_script_handle ] );
 		}
 
 		/* phpcs:ignore Squiz.PHP.CommentedOutCode.Found
