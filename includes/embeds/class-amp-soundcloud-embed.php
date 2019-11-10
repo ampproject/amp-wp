@@ -79,10 +79,8 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return string AMP component or empty if unable to determine SoundCloud ID.
 	 */
 	private function parse_amp_component_from_iframe( $html, $url = null ) {
-		$attr_names    = [ 'src', 'title', 'width', 'height' ];
-		$props         = [];
-		$props_pattern = $this->get_html_attribute_pattern( 'iframe', $attr_names );
-		if ( ! preg_match( $props_pattern, $html, $props ) || empty( $props['src'] ) ) {
+		$props = $this->match_element_attributes( $html, 'iframe', [ 'src', 'title', 'width', 'height' ] );
+		if ( ! isset( $props ) || empty( $props['src'] ) ) {
 			return $html;
 		}
 

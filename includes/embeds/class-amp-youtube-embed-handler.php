@@ -99,10 +99,8 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return array|null Props for rendering the component, or null if unable to parse.
 	 */
 	private function parse_props( $html, $url, $video_id ) {
-		$attr_names    = [ 'title', 'height', 'width' ];
-		$props         = [];
-		$props_pattern = $this->get_html_attribute_pattern( 'iframe', $attr_names );
-		if ( ! preg_match( $props_pattern, $html, $props ) ) {
+		$props = $this->match_element_attributes( $html, 'iframe', [ 'title', 'height', 'width' ] );
+		if ( ! isset( $props ) ) {
 			return null;
 		}
 

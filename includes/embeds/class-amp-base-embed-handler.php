@@ -83,12 +83,13 @@ abstract class AMP_Base_Embed_Handler {
 	 *
 	 * @since 1.5.0
 	 *
+	 * @param string   $html            HTML source haystack.
 	 * @param string   $tag_name        Tag name.
 	 * @param string[] $attribute_names Attribute names.
-	 * @return string Regular expression pattern.
+	 * @return string[]|null Matched attributes, or null if the element was not matched at all.
 	 */
-	protected function get_html_attribute_pattern( $tag_name, $attribute_names ) {
-		return sprintf(
+	protected function match_element_attributes( $html, $tag_name, $attribute_names ) {
+		$pattern = sprintf(
 			'/<%s%s/',
 			preg_quote( $tag_name, '/' ),
 			implode(
@@ -101,5 +102,9 @@ abstract class AMP_Base_Embed_Handler {
 				)
 			)
 		);
+		if ( ! preg_match( $pattern, $html, $matches ) ) {
+			return null;
+		}
+		return wp_array_slice_assoc( $matches, $attribute_names );
 	}
 }
