@@ -210,7 +210,7 @@ beforeAll( async () => {
 	enablePageDialogAccept();
 	observeConsoleLogging();
 	await setBrowserViewport( 'large' );
-	await page.setDefaultNavigationTimeout( 5000 );
+	await page.setDefaultNavigationTimeout( 10000 );
 	await page.setDefaultTimeout( 3000 );
 } );
 
