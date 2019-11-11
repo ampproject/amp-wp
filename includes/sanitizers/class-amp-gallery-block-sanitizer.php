@@ -163,7 +163,7 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 	 * Gets the caption of an image, if it exists.
 	 *
 	 * @param DOMElement $element The element for which to search for a caption.
-	 * @return string The caption for the image, or null.
+	 * @return string The caption for the image, or ''.
 	 */
 	public function possibly_get_caption_text( $element ) {
 		$caption_tag = 'figcaption';
