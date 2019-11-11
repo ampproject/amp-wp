@@ -50,7 +50,9 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function register_embed() {
 		wp_embed_register_handler( 'amp-youtube', self::URL_PATTERN, [ $this, 'oembed' ], -1 );
-		add_shortcode( 'youtube', [ $this, 'shortcode' ] );
+		if ( ! function_exists( 'jetpack_amp_youtube_shortcode' ) ) {
+			add_shortcode( 'youtube', [ $this, 'shortcode' ] );
+		}
 		add_filter( 'wp_video_shortcode_override', [ $this, 'video_override' ], 10, 2 );
 	}
 
@@ -59,11 +61,15 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function unregister_embed() {
 		wp_embed_unregister_handler( 'amp-youtube', -1 );
-		remove_shortcode( 'youtube' );
+		if ( ! function_exists( 'jetpack_amp_youtube_shortcode' ) ) {
+			remove_shortcode( 'youtube' );
+		}
 	}
 
 	/**
 	 * Gets AMP-compliant markup for the YouTube shortcode.
+	 *
+	 * @deprecated 1.5 Moved to Jetpack in jetpack_amp_youtube_shortcode().
 	 *
 	 * @param array $attr The YouTube attributes.
 	 * @return string YouTube shortcode markup.
