@@ -1473,7 +1473,7 @@ class AMP_Validation_Manager {
 			$source['type'] = 'theme';
 			$source['name'] = self::$template_slug;
 			$source['file'] = $matches['file'];
-		} elseif ( ! empty( self::$stylesheet_directory ) && preg_match( ':' . preg_quote( trailingslashit( self::$stylesheet_directory ), ':' ) . '/(?P<file>.*$):s', $file, $matches ) ) {
+		} elseif ( ! empty( self::$stylesheet_directory ) && preg_match( ':' . preg_quote( trailingslashit( self::$stylesheet_directory ), ':' ) . '(?P<file>.*$):s', $file, $matches ) ) {
 			$source['type'] = 'theme';
 			$source['name'] = self::$stylesheet_slug;
 			$source['file'] = $matches['file'];
