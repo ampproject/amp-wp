@@ -2256,7 +2256,7 @@ class AMP_Validated_URL_Post_Type {
 			if ( $url ) {
 				$actions['view'] = sprintf(
 					'<a href="%s">%s</a>',
-					esc_url( add_query_arg( AMP_Validation_Manager::VALIDATE_QUERY_VAR, '', $url ) ),
+					esc_url( $url ),
 					esc_html__( 'View', 'amp' )
 				);
 			}

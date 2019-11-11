@@ -28,7 +28,6 @@
 		<exclude-pattern>includes/embeds/class-amp-twitter-embed.php</exclude-pattern>
 		<exclude-pattern>includes/embeds/class-amp-vimeo-embed.php</exclude-pattern>
 		<exclude-pattern>includes/embeds/class-amp-vine-embed.php</exclude-pattern>
-		<exclude-pattern>includes/embeds/class-amp-youtube-embed.php</exclude-pattern>
 	</rule>
 	<rule ref="WordPress.Arrays.MultipleStatementAlignment.LongIndexSpaceBeforeDoubleArrow">
 		<exclude-pattern>tests/test-tag-and-attribute-sanitizer.php</exclude-pattern>
