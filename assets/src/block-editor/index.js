@@ -5,14 +5,15 @@ import { addFilter } from '@wordpress/hooks';
 import { registerPlugin } from '@wordpress/plugins';
 import { registerBlockType } from '@wordpress/blocks';
 import { select } from '@wordpress/data';
+import domReady from '@wordpress/dom-ready';
 
 /**
  * Internal dependencies
  */
 import { withFeaturedImageNotice } from '../common/components';
 import { getMinimumFeaturedImageDimensions } from '../common/helpers';
-import { withMediaLibraryNotice } from './components';
-import { addAMPAttributes, addAMPExtraProps, filterBlocksEdit, filterBlocksSave } from './helpers';
+import { withMediaLibraryNotice, AMPPreview } from './components';
+import { addAMPAttributes, addAMPExtraProps, filterBlocksEdit, filterBlocksSave, renderPreviewButton } from './helpers';
 import './store';
 
 const {
@@ -77,3 +78,10 @@ blocks.keys().forEach( ( modulePath ) => {
 		registerBlockType( name, settings );
 	}
 } );
+
+// Render the 'Preview AMP' button, and move it to after the (non-AMP) 'Preview' button.
+if ( isWebsiteEnabled() ) {
+	domReady( () => {
+		renderPreviewButton( AMPPreview );
+	} );
+}

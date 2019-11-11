@@ -88,10 +88,6 @@ class AMP_Post_Type_Support {
 			$errors[] = 'post-type-support';
 		}
 
-		if ( post_password_required( $post ) ) {
-			$errors[] = 'password-protected';
-		}
-
 		/**
 		 * Filters whether to skip the post from AMP.
 		 *

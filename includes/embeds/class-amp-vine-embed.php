@@ -75,7 +75,7 @@ class AMP_Vine_Embed_Handler extends AMP_Base_Embed_Handler {
 			return AMP_HTML_Utils::build_tag(
 				'a',
 				[
-					'href'  => esc_url( $args['url'] ),
+					'href'  => esc_url_raw( $args['url'] ),
 					'class' => 'amp-wp-embed-fallback',
 				],
 				esc_html( $args['url'] )
