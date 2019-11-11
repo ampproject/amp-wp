@@ -72,7 +72,7 @@ final class AMP_Captioned_Image extends AMP_Image implements Has_Caption {
 	 * Constructs the class.
 	 *
 	 * @param DOMElement $image_node The image node.
-	 * @param string     $caption The caption text.
+	 * @param string     $caption    The caption text.
 	 */
 	public function __construct( DOMElement $image_node, $caption ) {
 		parent::__construct( $image_node );
@@ -106,8 +106,8 @@ final class AMP_Image_List implements IteratorAggregate, Countable {
 	/**
 	 * Adds an image to the list.
 	 *
-	 * @param DOMElement $image_node The image
-	 * @param string     $caption
+	 * @param DOMElement $image_node The image to add.
+	 * @param string     $caption    The caption to add.
 	 * @return self
 	 */
 	public function add( DOMElement $image_node, $caption = '' ) {
@@ -115,7 +115,7 @@ final class AMP_Image_List implements IteratorAggregate, Countable {
 		return $this;
 	}
 
-	/*
+	/**
 	 * Gets an iterator with the elements.
 	 *
 	 * This together with the IteratorAggregate turns the object into a "Traversable",
@@ -127,7 +127,7 @@ final class AMP_Image_List implements IteratorAggregate, Countable {
 		return new ArrayIterator( $this->elements );
 	}
 
-	/*
+	/**
 	 * Gets the count of the images.
 	 *
 	 * @return int The number of images.
