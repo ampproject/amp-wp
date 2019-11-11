@@ -1295,7 +1295,7 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 		'href'  => esc_url( $href ),
 	];
 
-	$wp_admin_bar->add_menu( $parent );
+	$wp_admin_bar->add_node( $parent );
 }
 
 /**

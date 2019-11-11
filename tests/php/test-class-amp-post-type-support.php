@@ -104,12 +104,6 @@ class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
 		add_post_type_support( 'book', AMP_Post_Type_Support::SLUG );
 		$this->assertEmpty( AMP_Post_Type_Support::get_support_errors( $book_id ) );
 
-		// Password-protected.
-		add_filter( 'post_password_required', '__return_true' );
-		$this->assertEquals( [ 'password-protected' ], AMP_Post_Type_Support::get_support_errors( $book_id ) );
-		remove_filter( 'post_password_required', '__return_true' );
-		$this->assertEmpty( AMP_Post_Type_Support::get_support_errors( $book_id ) );
-
 		// Skip-post.
 		add_filter( 'amp_skip_post', '__return_true' );
 		$this->assertEquals( [ 'skip-post' ], AMP_Post_Type_Support::get_support_errors( $book_id ) );

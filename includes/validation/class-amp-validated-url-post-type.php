@@ -1693,6 +1693,7 @@ class AMP_Validated_URL_Post_Type {
 			true
 		);
 
+		// @todo This is likely dead code.
 		$current_screen = get_current_screen();
 		if ( $current_screen && 'post' === $current_screen->base && self::POST_TYPE_SLUG === $current_screen->post_type ) {
 			$post = get_post();
@@ -2255,7 +2256,7 @@ class AMP_Validated_URL_Post_Type {
 			if ( $url ) {
 				$actions['view'] = sprintf(
 					'<a href="%s">%s</a>',
-					esc_url( add_query_arg( AMP_Validation_Manager::VALIDATE_QUERY_VAR, '', $url ) ),
+					esc_url( $url ),
 					esc_html__( 'View', 'amp' )
 				);
 			}

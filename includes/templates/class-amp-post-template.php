@@ -322,7 +322,7 @@ class AMP_Post_Template {
 	 */
 	private function build_post_content() {
 		$amp_content = new AMP_Content(
-			$this->post->post_content,
+			post_password_required( $this->post ) ? get_the_password_form( $this->post ) : $this->post->post_content,
 			amp_get_content_embed_handlers( $this->post ),
 			amp_get_content_sanitizers( $this->post ),
 			[
