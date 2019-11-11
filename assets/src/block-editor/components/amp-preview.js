@@ -28,8 +28,8 @@ import { POST_PREVIEW_CLASS } from '../constants';
  *
  * Forked from the Core component <PostPreviewButton>.
  *
- * @see https://github.com/WordPress/gutenberg/blob/95e769df1f82f6b0ef587d81af65dd2f48cd1c38/packages/editor/src/components/post-preview-button/index.js#L17
- * @param {Object} targetDocument The target document.
+ * @see https://github.com/WordPress/gutenberg/blob/95e769df1f82f6b0ef587d81af65dd2f48cd1c38/packages/editor/src/components/post-preview-button/index.js#L17-L93
+ * @param {Document} targetDocument The target document.
  */
 function writeInterstitialMessage( targetDocument ) {
 	let markup = renderToString(
@@ -109,7 +109,7 @@ function writeInterstitialMessage( targetDocument ) {
  * Rendered into the DOM with renderPreviewButton() in helpers/index.js.
  * This also moves the (non-AMP) 'Preview' button to before this, if it's not already there.
  *
- * @see https://github.com/WordPress/gutenberg/blob/95e769df1f82f6b0ef587d81af65dd2f48cd1c38/packages/editor/src/components/post-preview-button/index.js
+ * @see https://github.com/WordPress/gutenberg/blob/95e769df1f82f6b0ef587d81af65dd2f48cd1c38/packages/editor/src/components/post-preview-button/index.js#L95-L200
  */
 class AMPPreview extends Component {
 	/**
@@ -184,7 +184,7 @@ class AMPPreview extends Component {
 	/**
 	 * Opens the preview window.
 	 *
-	 * @param {Object} event The DOM event.
+	 * @param {Event} event The DOM event.
 	 */
 	openPreviewWindow( event ) {
 		// Our Preview button has its 'href' and 'target' set correctly for a11y
