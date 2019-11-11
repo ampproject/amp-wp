@@ -10,7 +10,7 @@
  *
  * Gets the markup for an <amp-carousel>.
  *
- * @since 1.4.1
+ * @since 1.5.0
  */
 class AMP_Carousel {
 
