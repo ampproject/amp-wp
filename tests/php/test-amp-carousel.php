@@ -95,6 +95,15 @@ class Test_AMP_Carousel extends WP_UnitTestCase {
 			]
 		);
 
+		$image_with_0_height = AMP_DOM_Utils::create_node(
+			$dom,
+			'amp-img',
+			[
+				'width'  => 1000,
+				'height' => 0,
+			]
+		);
+
 		return [
 			'empty_image_list_as_argument'                 => [
 				( new AMP_Image_List() ),
@@ -106,6 +115,10 @@ class Test_AMP_Carousel extends WP_UnitTestCase {
 			],
 			'single_large_image_passed_as_argument'        => [
 				( new AMP_Image_List() )->add( $wide_image, '' ),
+				[ $wide_image_width, $wide_image_height ],
+			],
+			'image_with_0_height_should_not_affect_ratio'  => [
+				( new AMP_Image_List() )->add( $image_with_0_height, '' )->add( $wide_image, '' ),
 				[ $wide_image_width, $wide_image_height ],
 			],
 			'two_images_passed_as_arguments'               => [

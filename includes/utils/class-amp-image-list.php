@@ -1,4 +1,6 @@
-<?php
+<?php // phpcs:ignore WordPress.Files.FileName.InvalidClassFileName
+
+// phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound
 /**
  * Image collection classes.
  *

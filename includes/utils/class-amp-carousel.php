@@ -138,8 +138,13 @@ class AMP_Carousel {
 			if ( ! is_numeric( $image_node->getAttribute( 'width' ) ) || ! is_numeric( $image_node->getAttribute( 'height' ) ) ) {
 				continue;
 			}
+
 			$width  = (float) $image_node->getAttribute( 'width' );
 			$height = (float) $image_node->getAttribute( 'height' );
+
+			if ( empty( $width ) || empty( $height ) ) {
+				continue;
+			}
 
 			$this_aspect_ratio = $width / $height;
 			if ( $this_aspect_ratio > $max_aspect_ratio ) {
