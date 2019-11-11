@@ -670,7 +670,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		// If there is no embed source, but there is a theme, this should output the theme icon.
 		unset( $error_summary['sources_with_invalid_output']['embed'] );
 		$sources_column      = get_echo( [ 'AMP_Validated_URL_Post_Type', 'render_sources_column' ], [ $error_summary, $post_id ] );
-		$expected_theme_icon = '<div class="source"><span class="dashicons dashicons-admin-appearance"></span><strong>' . $theme_name . '</strong></div>';
+		$expected_theme_icon = '<strong class="source"><span class="dashicons dashicons-admin-appearance"></span>' . $theme_name . '</strong>';
 		$this->assertEquals( $expected_theme_icon, $sources_column );
 
 		// If there is a plugin and theme source, this should output icons for both of them.

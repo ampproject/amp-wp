@@ -1097,19 +1097,15 @@ class AMP_Validated_URL_Post_Type {
 			}
 		}
 		if ( isset( $sources['theme'] ) && empty( $sources['embed'] ) ) {
-			$output[] = '<div class="source">';
-			$output[] = '<span class="dashicons dashicons-admin-appearance"></span>';
-			$themes   = array_unique( $sources['theme'] );
-			foreach ( $themes as $theme_slug ) {
+			foreach ( array_unique( $sources['theme'] ) as $theme_slug ) {
 				$theme_obj = wp_get_theme( $theme_slug );
 				if ( ! $theme_obj->errors() ) {
 					$theme_name = $theme_obj->get( 'Name' );
 				} else {
 					$theme_name = $theme_slug;
 				}
-				$output[] = sprintf( '<strong>%s</strong>', esc_html( $theme_name ) );
+				$output[] = sprintf( '<strong class="source"><span class="dashicons dashicons-admin-appearance"></span>%s</strong>', esc_html( $theme_name ) );
 			}
-			$output[] = '</div>';
 		}
 		if ( isset( $sources['core'] ) ) {
 			$core_sources = array_unique( $sources['core'] );
