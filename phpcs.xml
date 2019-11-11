@@ -3,6 +3,7 @@
 
 	<rule ref="WordPress-Core">
 		<exclude name="Generic.Arrays.DisallowShortArraySyntax" />
+		<exclude name="WordPress.PHP.DisallowShortTernary" />
 	</rule>
 
 	<rule ref="WordPress-Docs">
