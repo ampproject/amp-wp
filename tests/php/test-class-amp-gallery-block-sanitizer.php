@@ -176,12 +176,12 @@ class AMP_Gallery_Block_Sanitizer_Test extends WP_UnitTestCase {
 		return [
 			'no_amp_img_or_anchor'       => [
 				'<div><img src="https://example.com/image.jpg"></div>',
-				null,
+				'',
 				'img',
 			],
 			'amp_img_with_empty_caption' => [
 				'<amp-img src="https://example.com/image.jpg"></amp-img><figcaption></figcaption>',
-				null,
+				'',
 				'amp-img',
 			],
 			'amp_img_with_caption'       => [
@@ -191,7 +191,7 @@ class AMP_Gallery_Block_Sanitizer_Test extends WP_UnitTestCase {
 			],
 			'amp_img_wrapped_in_anchor_with_caption_in_div' => [
 				'<a href="https://example.com"><amp-img src="https://example.com/image.jpg"></amp-img></a><div>This is a caption</div>',
-				null,
+				'',
 				'a',
 			],
 			'amp_img_wrapped_in_anchor_with_caption_in_figcaption' => [

@@ -47,20 +47,10 @@ class AMP_Carousel {
 	/**
 	 * Creates and gets an <amp-carousel> with the given images and captions.
 	 *
-	 * @param array[] $images_and_captions {
-	 *     The images and their respective captions, if any.
-	 *
-	 *     @type DOMElement  $image A representation of an image, in index 0.
-	 *     @type string|null $caption The caption for that image, if any, in index 1.
-	 * }
-	 * @return DOMElement A representation of the <amp-carousel>.
+	 * @param AMP_Image_List $images The images from which to create a carousel.
+	 * @return DOMElement An <amp-carousel> with the images.
 	 */
-	public function create_and_get( $images_and_captions ) {
-		$images = [];
-		foreach ( $images_and_captions as $image_and_caption ) {
-			$images[] = $image_and_caption[0];
-		}
-
+	public function create_and_get( AMP_Image_List $images ) {
 		list( $width, $height ) = $this->get_dimensions( $images );
 		$amp_carousel           = AMP_DOM_Utils::create_node(
 			$this->dom,
@@ -73,26 +63,26 @@ class AMP_Carousel {
 			]
 		);
 
-		foreach ( $images_and_captions as $image_and_caption ) {
-			$image   = $image_and_caption[0];
-			$caption = isset( $image_and_caption[1] ) ? $image_and_caption[1] : null;
-			$slide   = AMP_DOM_Utils::create_node(
+		foreach ( $images as $image ) {
+			$image_node = $image->get_image_node();
+			$caption    = $image instanceof Has_Caption ? $image->get_caption() : null;
+			$slide      = AMP_DOM_Utils::create_node(
 				$this->dom,
 				'div',
 				[ 'class' => 'slide' ]
 			);
 
 			// Ensure the image fills the entire <amp-carousel>, so the possible caption looks right.
-			if ( 'amp-img' === $image->tagName ) {
-				$image->setAttribute( 'layout', 'fill' );
-				$image->setAttribute( 'object-fit', 'cover' );
-			} elseif ( isset( $image->firstChild->tagName ) && 'amp-img' === $image->firstChild->tagName ) {
+			if ( 'amp-img' === $image_node->tagName ) {
+				$image_node->setAttribute( 'layout', 'fill' );
+				$image_node->setAttribute( 'object-fit', 'cover' );
+			} elseif ( isset( $image_node->firstChild->tagName ) && 'amp-img' === $image_node->firstChild->tagName ) {
 				// If the <amp-img> is wrapped in an <a>.
-				$image->firstChild->setAttribute( 'layout', 'fill' );
-				$image->firstChild->setAttribute( 'object-fit', 'cover' );
+				$image_node->firstChild->setAttribute( 'layout', 'fill' );
+				$image_node->firstChild->setAttribute( 'object-fit', 'cover' );
 			}
 
-			$slide->appendChild( $image );
+			$slide->appendChild( $image_node );
 
 			// If there's a caption, wrap it in a <div> and <span>, and append it to the slide.
 			if ( $caption ) {
@@ -121,7 +111,7 @@ class AMP_Carousel {
 	 * This will return the width and height of the image with the widest aspect ratio,
 	 * not necessarily the image with the biggest absolute width.
 	 *
-	 * @param array $images The images to get the dimensions from.
+	 * @param AMP_Image_List $images The images to get the dimensions from.
 	 * @return array {
 	 *     The carousel dimensions.
 	 *
@@ -129,26 +119,27 @@ class AMP_Carousel {
 	 *     @type int $height The height of the carousel, at index 1.
 	 * }
 	 */
-	public function get_dimensions( $images ) {
+	public function get_dimensions( AMP_Image_List $images ) {
+		if ( 0 === count( $images ) ) {
+			return [ self::FALLBACK_WIDTH, self::FALLBACK_HEIGHT ];
+		}
+
 		$max_aspect_ratio = 0;
 		$carousel_width   = 0;
 		$carousel_height  = 0;
 
-		if ( ! $images || 0 === count( $images ) ) {
-			return [ self::FALLBACK_WIDTH, self::FALLBACK_HEIGHT ];
-		}
-
 		foreach ( $images as $image ) {
+			$image_node = $image->get_image_node();
 			// Account for an <amp-img> that's wrapped in an <a>.
-			if ( 'amp-img' !== $image->tagName && isset( $image->firstChild->tagName ) && 'amp-img' === $image->firstChild->tagName ) {
-				$image = $image->firstChild;
+			if ( 'amp-img' !== $image_node->tagName && isset( $image_node->firstChild->tagName ) && 'amp-img' === $image_node->firstChild->tagName ) {
+				$image_node = $image_node->firstChild;
 			}
 
-			if ( ! is_numeric( $image->getAttribute( 'width' ) ) || ! is_numeric( $image->getAttribute( 'height' ) ) ) {
+			if ( ! is_numeric( $image_node->getAttribute( 'width' ) ) || ! is_numeric( $image_node->getAttribute( 'height' ) ) ) {
 				continue;
 			}
-			$width  = (float) $image->getAttribute( 'width' );
-			$height = (float) $image->getAttribute( 'height' );
+			$width  = (float) $image_node->getAttribute( 'width' );
+			$height = (float) $image_node->getAttribute( 'height' );
 
 			$this_aspect_ratio = $width / $height;
 			if ( $this_aspect_ratio > $max_aspect_ratio ) {

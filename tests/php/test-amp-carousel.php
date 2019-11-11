@@ -31,12 +31,12 @@ class Test_AMP_Carousel extends WP_UnitTestCase {
 
 		return [
 			'image_without_caption' => [
-				[ [ $image, null ] ],
+				( new AMP_Image_List() )->add( $image, null ),
 				$dom,
 				'<amp-carousel width="' . $width . '" height="' . $height . '" type="slides" layout="responsive"><div class="slide"><amp-img src="' . $src . '" width="' . $width . '" height="' . $height . '" layout="fill" object-fit="cover"></amp-img></div></amp-carousel>',
 			],
 			'image_with_caption'    => [
-				[ [ $image, $caption ] ],
+				( new AMP_Image_List() )->add( $image, $caption ),
 				$dom,
 				'<amp-carousel width="' . $width . '" height="' . $height . '" type="slides" layout="responsive"><div class="slide"><amp-img src="' . $src . '" width="' . $width . '" height="' . $height . '" layout="fill" object-fit="cover"></amp-img><div class="amp-wp-gallery-caption"><span>' . $caption . '</span></div></div></amp-carousel>',
 			],
@@ -96,28 +96,24 @@ class Test_AMP_Carousel extends WP_UnitTestCase {
 		);
 
 		return [
-			'empty_array_passed_as_argument'               => [
-				[],
-				[ AMP_Carousel::FALLBACK_WIDTH, AMP_Carousel::FALLBACK_HEIGHT ],
-			],
-			'null_passed_as_argument'                      => [
-				null,
+			'empty_image_list_as_argument'                 => [
+				( new AMP_Image_List() ),
 				[ AMP_Carousel::FALLBACK_WIDTH, AMP_Carousel::FALLBACK_HEIGHT ],
 			],
 			'single_small_image_passed_as_argument'        => [
-				[ $narrow_image ],
+				( new AMP_Image_List() )->add( $narrow_image, '' ),
 				[ $narrow_image_width, $narrow_image_height ],
 			],
 			'single_large_image_passed_as_argument'        => [
-				[ $wide_image ],
+				( new AMP_Image_List() )->add( $wide_image, '' ),
 				[ $wide_image_width, $wide_image_height ],
 			],
 			'two_images_passed_as_arguments'               => [
-				[ $narrow_image, $wide_image ],
+				( new AMP_Image_List() )->add( $narrow_image, '' )->add( $wide_image, '' ),
 				[ $wide_image_width, $wide_image_height ],
 			],
 			'two_images_passed_as_arguments_order_changed' => [
-				[ $wide_image, $narrow_image ],
+				( new AMP_Image_List() )->add( $wide_image, '' )->add( $narrow_image, '' ),
 				[ $wide_image_width, $wide_image_height ],
 			],
 		];

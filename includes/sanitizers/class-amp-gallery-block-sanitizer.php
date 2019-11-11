@@ -104,34 +104,29 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			$images = [];
+			$images = new AMP_Image_List();
 
 			// If it's not AMP lightbox, look for links first.
 			if ( ! $is_amp_lightbox ) {
 				foreach ( $node->getElementsByTagName( 'a' ) as $element ) {
-					$images[] = $element;
+					$images->add( $element, $this->possibly_get_caption_text( $element ) );
 				}
 			}
 
 			// If not linking to anything then look for <amp-img>.
-			if ( empty( $images ) ) {
+			if ( 0 === count( $images ) ) {
 				foreach ( $node->getElementsByTagName( 'amp-img' ) as $element ) {
-					$images[] = $element;
+					$images->add( $element, $this->possibly_get_caption_text( $element ) );
 				}
 			}
 
 			// Skip if no images found.
-			if ( empty( $images ) ) {
+			if ( 0 === count( $images ) ) {
 				continue;
 			}
 
-			$images_and_captions = [];
-			foreach ( $images as $image ) {
-				$images_and_captions[] = [ $image, $this->possibly_get_caption_text( $image ) ];
-			}
-
 			$amp_carousel      = new AMP_Carousel( $this->dom );
-			$amp_carousel_node = $amp_carousel->create_and_get( $images_and_captions );
+			$amp_carousel_node = $amp_carousel->create_and_get( $images );
 
 			$gallery_node->parentNode->replaceChild( $amp_carousel_node, $gallery_node );
 		}
@@ -168,7 +163,7 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 	 * Gets the caption of an image, if it exists.
 	 *
 	 * @param DOMElement $element The element for which to search for a caption.
-	 * @return string|null The caption for the image, or null.
+	 * @return string The caption for the image, or null.
 	 */
 	public function possibly_get_caption_text( $element ) {
 		$caption_tag = 'figcaption';
@@ -181,6 +176,6 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 			return $element->parentNode->nextSibling->textContent;
 		}
 
-		return null;
+		return '';
 	}
 }
