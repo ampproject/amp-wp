@@ -6,6 +6,11 @@
 	margin: 0;
 	padding: 7px !important;
 	height: 100%;
+	user-select: none;
+}
+
+.wp-block[data-type="amp/amp-story-post-title"] .wp-block-amp-amp-story-post-title.is-editing {
+	user-select: auto;
 }
 
 .wp-block[data-type="amp/amp-story-post-title"] .wp-block-amp-amp-story-post-title.is-amp-fit-text {
