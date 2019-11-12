@@ -44,6 +44,7 @@ const ampStories = {
 	...sharedConfig,
 	entry: {
 		'amp-stories-editor': './assets/src/stories-editor/index.js',
+		'amp-edit-story': './assets/src/edit-story/index.js',
 	},
 	output: {
 		path: path.resolve( process.cwd(), 'assets', 'js' ),

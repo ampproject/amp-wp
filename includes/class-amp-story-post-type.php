@@ -53,7 +53,7 @@ class AMP_Story_Post_Type {
 	 *
 	 * @var string
 	 */
-	const AMP_STORIES_SCRIPT_HANDLE = 'amp-stories-editor';
+	const AMP_STORIES_SCRIPT_HANDLE = 'amp-edit-story';
 
 	/**
 	 * AMP Stories style handle.
@@ -384,6 +384,23 @@ class AMP_Story_Post_Type {
 		}
 
 		add_action( 'wp_insert_post', [ __CLASS__, 'add_story_settings_meta_to_new_story' ], 10, 3 );
+
+		add_filter(
+			'replace_editor',
+			function ( $replace, $post ) {
+				if ( 'amp_story' === get_post_type( $post ) ) {
+					$replace = true;
+					// In lieu of an action being available to actually load the replacement editor, include it here
+					// after the current_screen action has occurred because the replace_editor filter fires twice.
+					if ( did_action( 'current_screen' ) ) {
+						include_once __DIR__ . '/edit-story.php';
+					}
+				}
+				return $replace;
+			},
+			10,
+			2
+		);
 
 		AMP_Story_Media::init();
 	}
