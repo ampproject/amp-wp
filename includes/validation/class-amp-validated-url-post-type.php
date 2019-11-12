@@ -1396,6 +1396,7 @@ class AMP_Validated_URL_Post_Type {
 					);
 				}
 				if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS !== $sanitization['term_status'] ) {
+					$info .= ' ';
 					if ( amp_is_canonical() ) {
 						$info .= __( 'Keeping invalid markup means that any URL on which it occurs will not be served as AMP.', 'amp' );
 					} else {
