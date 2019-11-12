@@ -2894,7 +2894,7 @@ class AMP_Validation_Error_Taxonomy {
 			case 'stylesheet_file_missing':
 				return __( 'Missing stylesheet file', 'amp' );
 			case 'illegal_css_important':
-				return __( 'Illegal CSS !important', 'amp' );
+				return __( 'Illegal CSS !important property', 'amp' );
 			default:
 				/* translators: %s error code */
 				return sprintf( __( 'Unknown error (%s)', 'amp' ), $error_code );
