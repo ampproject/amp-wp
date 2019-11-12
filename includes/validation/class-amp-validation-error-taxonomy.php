@@ -2618,7 +2618,7 @@ class AMP_Validation_Error_Taxonomy {
 										<code><?php echo esc_html( '{closure}' === $value ? $value : $value . '()' ); ?></code>
 									<?php elseif ( 'shortcode' === $key || 'handle' === $key ) : ?>
 										<code><?php echo esc_html( $value ); ?></code>
-									<?php elseif ( 'block_name' ) : ?>
+									<?php elseif ( 'block_name' === $key ) : ?>
 										<?php
 										$block_title = self::get_block_title( $value );
 										if ( $block_title ) {
