@@ -1810,7 +1810,7 @@ class AMP_Validation_Error_Taxonomy {
 						'<button type="button" aria-label="%s" class="single-url-detail-toggle">',
 						esc_attr__( 'Toggle error details', 'amp' )
 					);
-					$content .= self::get_error_title_from_code( $validation_error['code'] );
+					$content .= self::get_error_title_from_code( $validation_error );
 				} else {
 					$content .= '<p>';
 					$content .= sprintf(
@@ -1824,11 +1824,14 @@ class AMP_Validation_Error_Taxonomy {
 								'edit.php'
 							)
 						),
-						esc_html( self::get_error_title_from_code( $validation_error['code'] ) )
+						esc_html( self::get_error_title_from_code( $validation_error ) )
 					);
 				}
 
-				if ( self::INVALID_ELEMENT_CODE === $validation_error['code'] || 'duplicate_element' === $validation_error['code'] ) {
+				$is_js_script = self::is_validation_error_for_js_script_element( $validation_error );
+				if ( self::INVALID_ELEMENT_CODE === $validation_error['code'] && $is_js_script && isset( $validation_error['node_attributes']['src'] ) ) {
+					$content .= sprintf( ': <code>%s</code>', esc_html( basename( wp_parse_url( $validation_error['node_attributes']['src'], PHP_URL_PATH ) ) ) );
+				} elseif ( ( self::INVALID_ELEMENT_CODE === $validation_error['code'] || 'duplicate_element' === $validation_error['code'] ) && ! $is_js_script ) {
 					$content .= sprintf( ': <code>&lt;%s&gt;</code>', esc_html( $validation_error['node_name'] ) );
 				} elseif ( self::INVALID_ATTRIBUTE_CODE === $validation_error['code'] ) {
 					$content .= sprintf( ': <code>%s</code>', esc_html( $validation_error['node_name'] ) );
@@ -2862,16 +2865,41 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
+	 * Determine whether a validation error is for a JS script element.
+	 *
+	 * @param array $validation_error Validation error.
+	 * @return bool Is for scrip JS element.
+	 */
+	private static function is_validation_error_for_js_script_element( $validation_error ) {
+		return (
+			isset( $validation_error['node_name'] )
+			&&
+			'script' === $validation_error['node_name']
+			&&
+			(
+				isset( $validation_error['node_attributes']['src'] )
+				||
+				empty( $validation_error['node_attributes']['type'] )
+				||
+				false !== strpos( $validation_error['node_attributes']['type'], 'javascript' )
+			)
+		);
+	}
+
+	/**
 	 * Get Error Title from Code
 	 *
-	 * @param string $error_code Error code.
-	 *
-	 * @return string
+	 * @param array $validation_error Validation error.
+	 * @return string Title.
 	 */
-	public static function get_error_title_from_code( $error_code ) {
-		switch ( $error_code ) {
+	public static function get_error_title_from_code( $validation_error ) {
+		switch ( $validation_error['code'] ) {
 			case self::INVALID_ELEMENT_CODE:
-				return __( 'Invalid element', 'amp' );
+				if ( self::is_validation_error_for_js_script_element( $validation_error ) ) {
+					return __( 'Invalid script', 'amp' );
+				} else {
+					return __( 'Invalid element', 'amp' );
+				}
 			case self::INVALID_ATTRIBUTE_CODE:
 				return __( 'Invalid attribute', 'amp' );
 			case 'invalid_processing_instruction':
@@ -2898,7 +2926,7 @@ class AMP_Validation_Error_Taxonomy {
 				return __( 'Illegal CSS !important property', 'amp' );
 			default:
 				/* translators: %s error code */
-				return sprintf( __( 'Unknown error (%s)', 'amp' ), $error_code );
+				return sprintf( __( 'Unknown error (%s)', 'amp' ), $validation_error['code'] );
 		}
 	}
 

@@ -1354,12 +1354,13 @@ class AMP_Validated_URL_Post_Type {
 			}
 
 			// @todo Update this to use the method which will be developed in PR #1429 AMP_Validation_Error_Taxonomy::get_term_error() .
-			$description      = json_decode( $error->description, true );
-			$sanitization     = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $description );
-			$status_text      = AMP_Validation_Error_Taxonomy::get_status_text_with_icon( $sanitization );
-			$error_code       = isset( $description['code'] ) ? $description['code'] : 'error';
-			$error_title      = AMP_Validation_Error_Taxonomy::get_error_title_from_code( $error_code );
 			$validation_error = json_decode( $error->description, true );
+			if ( ! is_array( $validation_error ) ) {
+				$validation_error = [];
+			}
+			$sanitization     = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $validation_error );
+			$status_text      = AMP_Validation_Error_Taxonomy::get_status_text_with_icon( $sanitization );
+			$error_title      = AMP_Validation_Error_Taxonomy::get_error_title_from_code( $validation_error );
 			$accept_all_url   = wp_nonce_url(
 				add_query_arg(
 					[
