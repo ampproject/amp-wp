@@ -2375,8 +2375,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$ruleset->removeRule( $property->getRule() );
 				} else {
 					$error     = [
-						'code' => 'illegal_css_important',
-						'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+						'code'           => 'illegal_css_important',
+						'type'           => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+						'property_name'  => $property->getRule(),
+						'property_value' => $property->getValue(),
 					];
 					$sanitized = $this->should_sanitize_validation_error( $error );
 					if ( $sanitized ) {
