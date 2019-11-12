@@ -1836,6 +1836,8 @@ class AMP_Validation_Error_Taxonomy {
 					$content .= sprintf( ': <code>@%s</code>', esc_html( $validation_error['at_rule'] ) );
 				} elseif ( 'invalid_processing_instruction' === $validation_error['code'] ) {
 					$content .= sprintf( ': <code>&lt;%s%s&hellip;%s&gt;</code>', '?', esc_html( $validation_error['node_name'] ), '?' );
+				} elseif ( isset( $validation_error['property_name'] ) ) {
+					$content .= sprintf( ': <code>%s</code>', esc_html( $validation_error['property_name'] ) );
 				}
 
 				if ( 'post.php' === $pagenow ) {
@@ -2149,7 +2151,7 @@ class AMP_Validation_Error_Taxonomy {
 				if ( $is_element_attributes && empty( $value ) ) {
 					continue;
 				}
-				if ( in_array( $key, [ 'code', 'type' ], true ) ) {
+				if ( in_array( $key, [ 'code', 'type', 'property_value' ], true ) ) {
 					continue; // Handled above.
 				}
 				?>
@@ -2157,6 +2159,17 @@ class AMP_Validation_Error_Taxonomy {
 				<dd class="detailed">
 					<?php if ( in_array( $key, [ 'node_name', 'parent_name' ], true ) ) : ?>
 						<code><?php echo esc_html( $value ); ?></code>
+					<?php elseif ( in_array( $key, [ 'node_name', 'parent_name' ], true ) ) : ?>
+						<pre><code><?php echo esc_html( $value ); ?></code></pre>
+					<?php elseif ( 'property_name' === $key ) : ?>
+						<?php
+						$property_value = isset( $validation_error['property_value'] ) ? $validation_error['property_value'] : '?';
+						printf(
+							'<code>%s: %s</code>',
+							esc_html( $value ),
+							esc_html( $property_value )
+						);
+						?>
 					<?php elseif ( 'text' === $key ) : ?>
 						<details>
 							<summary>
@@ -2904,6 +2917,8 @@ class AMP_Validation_Error_Taxonomy {
 				}
 			case 'parent_name':
 				return __( 'Parent element', 'amp' );
+			case 'property_name':
+				return __( 'CSS property', 'amp' );
 			case 'text':
 				return __( 'Text content', 'amp' );
 			case 'type':
