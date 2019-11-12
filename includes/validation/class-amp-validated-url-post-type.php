@@ -1358,10 +1358,10 @@ class AMP_Validated_URL_Post_Type {
 			if ( ! is_array( $validation_error ) ) {
 				$validation_error = [];
 			}
-			$sanitization     = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $validation_error );
-			$status_text      = AMP_Validation_Error_Taxonomy::get_status_text_with_icon( $sanitization );
-			$error_title      = AMP_Validation_Error_Taxonomy::get_error_title_from_code( $validation_error );
-			$accept_all_url   = wp_nonce_url(
+			$sanitization   = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $validation_error );
+			$status_text    = AMP_Validation_Error_Taxonomy::get_status_text_with_icon( $sanitization );
+			$error_title    = AMP_Validation_Error_Taxonomy::get_error_title_from_code( $validation_error );
+			$accept_all_url = wp_nonce_url(
 				add_query_arg(
 					[
 						'action'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION,
@@ -1370,7 +1370,7 @@ class AMP_Validated_URL_Post_Type {
 				),
 				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION
 			);
-			$reject_all_url   = wp_nonce_url(
+			$reject_all_url = wp_nonce_url(
 				add_query_arg(
 					[
 						'action'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION,
@@ -1433,7 +1433,7 @@ class AMP_Validated_URL_Post_Type {
 			$heading = sprintf(
 				'%s: <code>%s</code>%s',
 				esc_html( $error_title ),
-				esc_html( $description['node_name'] ),
+				esc_html( $validation_error['node_name'] ),
 				wp_kses_post( $status_text )
 			);
 			?>
