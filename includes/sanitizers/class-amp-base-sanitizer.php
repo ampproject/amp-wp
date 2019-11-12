@@ -551,8 +551,8 @@ abstract class AMP_Base_Sanitizer {
 				}
 			}
 
-			// Capture script contents.
-			if ( 'script' === $node->nodeName && ! $node->hasAttribute( 'src' ) ) {
+			// Capture element contents.
+			if ( ( 'script' === $node->nodeName && ! $node->hasAttribute( 'src' ) ) || 'style' === $node->nodeName ) {
 				$error['text'] = $node->textContent;
 			}
 
