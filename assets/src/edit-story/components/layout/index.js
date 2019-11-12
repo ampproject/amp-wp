@@ -17,7 +17,7 @@ import {
  */
 import Header, { Buttons } from '../header';
 import Sidebar from '../sidebar';
-import Explorer, { ExplorerProvider, ExplorerTabs } from '../explorer';
+import Library, { LibraryProvider, LibraryTabs } from '../library';
 import Canvas, { AddPage, Meta, Carrousel } from '../canvas';
 import darkTheme, { GlobalStyle } from '../../theme';
 
@@ -32,10 +32,10 @@ const Editor = styled.div`
 
   display: grid;
   grid:
-    "tabs      header  header  header  buttons  buttons" 56px
-    "explorer  empty1  meta    empty2  empty4   sidebar" 1fr
-    "explorer  empty1  canvas  add     empty4   sidebar" 775px
-    "explorer  empty1  pages   empty3  empty4   sidebar" 1fr
+    "tabs  head  head  head  btns  btns" 56px
+    "lib   .     meta  .     .     side" 1fr
+    "lib   .     page  add   .     side" 775px
+    "lib   .     carr  .     .     side" 1fr
     / 355px 1fr 434px 1fr 46px 309px;
 `;
 
@@ -47,25 +47,25 @@ function Layout() {
 	return (
 		<SlotFillProvider>
 			<ThemeProvider theme={ darkTheme }>
-				<ExplorerProvider>
+				<LibraryProvider>
 					<GlobalStyle />
 					<Editor>
-						<Area area="header">
+						<Area area="head">
 							<Header />
 						</Area>
-						<Area area="explorer">
-							<Explorer />
+						<Area area="lib">
+							<Library />
 						</Area>
 						<Area area="tabs">
-							<ExplorerTabs />
+							<LibraryTabs />
 						</Area>
-						<Area area="canvas">
+						<Area area="page">
 							<Canvas />
 						</Area>
-						<Area area="buttons">
+						<Area area="btns">
 							<Buttons />
 						</Area>
-						<Area area="sidebar">
+						<Area area="side">
 							<Sidebar />
 						</Area>
 						<Area area="add">
@@ -74,12 +74,12 @@ function Layout() {
 						<Area area="meta">
 							<Meta />
 						</Area>
-						<Area area="pages">
+						<Area area="carr">
 							<Carrousel />
 						</Area>
 					</Editor>
 					<Popover.Slot />
-				</ExplorerProvider>
+				</LibraryProvider>
 			</ThemeProvider>
 		</SlotFillProvider>
 	);
