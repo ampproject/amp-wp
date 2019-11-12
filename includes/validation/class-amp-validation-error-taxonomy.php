@@ -2159,8 +2159,6 @@ class AMP_Validation_Error_Taxonomy {
 				<dd class="detailed">
 					<?php if ( in_array( $key, [ 'node_name', 'parent_name' ], true ) ) : ?>
 						<code><?php echo esc_html( $value ); ?></code>
-					<?php elseif ( in_array( $key, [ 'node_name', 'parent_name' ], true ) ) : ?>
-						<pre><code><?php echo esc_html( $value ); ?></code></pre>
 					<?php elseif ( 'property_name' === $key ) : ?>
 						<?php
 						if ( isset( $validation_error['property_value'] ) && is_scalar( $validation_error['property_value'] ) ) {
