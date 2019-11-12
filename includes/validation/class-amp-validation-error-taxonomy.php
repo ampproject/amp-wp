@@ -2157,6 +2157,26 @@ class AMP_Validation_Error_Taxonomy {
 				<dd class="detailed">
 					<?php if ( in_array( $key, [ 'node_name', 'parent_name' ], true ) ) : ?>
 						<code><?php echo esc_html( $value ); ?></code>
+					<?php elseif ( 'text' === $key ) : ?>
+						<details>
+							<summary>
+								<?php
+								echo esc_html(
+									sprintf(
+										/* translators: %s is the byte count */
+										_n(
+											'%s byte',
+											'%s bytes',
+											strlen( $value ),
+											'amp'
+										),
+										number_format_i18n( strlen( $value ) )
+									)
+								);
+								?>
+							</summary>
+							<p><code><?php echo esc_html( $value ); ?></code></p>
+						</details>
 					<?php elseif ( 'sources' === $key ) : ?>
 						<?php self::render_sources( $value ); ?>
 					<?php elseif ( $is_element_attributes ) : ?>
