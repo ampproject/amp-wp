@@ -101,7 +101,6 @@ function amp_add_customizer_link() {
 	$menu_slug = add_query_arg(
 		[
 			'autofocus[panel]' => AMP_Template_Customizer::PANEL_ID,
-			'url'              => rawurlencode( amp_admin_get_preview_permalink() ),
 			'return'           => rawurlencode( admin_url() ),
 		],
 		'customize.php'
