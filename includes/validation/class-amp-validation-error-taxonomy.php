@@ -2188,7 +2188,7 @@ class AMP_Validation_Error_Taxonomy {
 								);
 								?>
 							</summary>
-							<p><code><?php echo esc_html( $value ); ?></code></p>
+							<pre><?php echo esc_html( $value ); ?></pre>
 						</details>
 					<?php elseif ( 'sources' === $key ) : ?>
 						<?php self::render_sources( $value ); ?>
