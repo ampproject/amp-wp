@@ -1431,9 +1431,8 @@ class AMP_Validated_URL_Post_Type {
 			<?php
 
 			$heading = sprintf(
-				'%s: <code>%s</code>%s',
-				esc_html( $error_title ),
-				esc_html( $validation_error['node_name'] ),
+				'%s %s',
+				wp_kses_post( $error_title ),
 				wp_kses_post( $status_text )
 			);
 			?>

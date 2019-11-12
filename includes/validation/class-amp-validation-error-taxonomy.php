@@ -1810,7 +1810,7 @@ class AMP_Validation_Error_Taxonomy {
 						'<button type="button" aria-label="%s" class="single-url-detail-toggle">',
 						esc_attr__( 'Toggle error details', 'amp' )
 					);
-					$content .= self::get_error_title_from_code( $validation_error );
+					$content .= wp_kses_post( self::get_error_title_from_code( $validation_error ) );
 				} else {
 					$content .= '<p>';
 					$content .= sprintf(
@@ -1824,23 +1824,8 @@ class AMP_Validation_Error_Taxonomy {
 								'edit.php'
 							)
 						),
-						esc_html( self::get_error_title_from_code( $validation_error ) )
+						wp_kses_post( self::get_error_title_from_code( $validation_error ) )
 					);
-				}
-
-				$is_js_script = self::is_validation_error_for_js_script_element( $validation_error );
-				if ( self::INVALID_ELEMENT_CODE === $validation_error['code'] && $is_js_script && isset( $validation_error['node_attributes']['src'] ) ) {
-					$content .= sprintf( ': <code>%s</code>', esc_html( basename( wp_parse_url( $validation_error['node_attributes']['src'], PHP_URL_PATH ) ) ) );
-				} elseif ( ( self::INVALID_ELEMENT_CODE === $validation_error['code'] || 'duplicate_element' === $validation_error['code'] ) && ! $is_js_script ) {
-					$content .= sprintf( ': <code>&lt;%s&gt;</code>', esc_html( $validation_error['node_name'] ) );
-				} elseif ( self::INVALID_ATTRIBUTE_CODE === $validation_error['code'] ) {
-					$content .= sprintf( ': <code>%s</code>', esc_html( $validation_error['node_name'] ) );
-				} elseif ( 'illegal_css_at_rule' === $validation_error['code'] ) {
-					$content .= sprintf( ': <code>@%s</code>', esc_html( $validation_error['at_rule'] ) );
-				} elseif ( 'invalid_processing_instruction' === $validation_error['code'] ) {
-					$content .= sprintf( ': <code>&lt;%s%s&hellip;%s&gt;</code>', '?', esc_html( $validation_error['node_name'] ), '?' );
-				} elseif ( isset( $validation_error['property_name'] ) ) {
-					$content .= sprintf( ': <code>%s</code>', esc_html( $validation_error['property_name'] ) );
 				}
 
 				if ( 'post.php' === $pagenow ) {
@@ -2890,40 +2875,75 @@ class AMP_Validation_Error_Taxonomy {
 	 * Get Error Title from Code
 	 *
 	 * @param array $validation_error Validation error.
-	 * @return string Title.
+	 * @return string Title with some formatting markup.
 	 */
 	public static function get_error_title_from_code( $validation_error ) {
 		switch ( $validation_error['code'] ) {
 			case self::INVALID_ELEMENT_CODE:
 				if ( self::is_validation_error_for_js_script_element( $validation_error ) ) {
-					return __( 'Invalid script', 'amp' );
+					$title = esc_html__( 'Invalid script', 'amp' );
+
+					if ( isset( $validation_error['node_attributes']['src'] ) ) {
+						$title .= sprintf(
+							': <code>%s</code>',
+							esc_html( basename( wp_parse_url( $validation_error['node_attributes']['src'], PHP_URL_PATH ) ) )
+						);
+					}
 				} else {
-					return __( 'Invalid element', 'amp' );
+					$title  = esc_html__( 'Invalid element', 'amp' );
+					$title .= sprintf( ': <code>&lt;%s&gt;</code>', esc_html( $validation_error['node_name'] ) );
 				}
+				return $title;
 			case self::INVALID_ATTRIBUTE_CODE:
-				return __( 'Invalid attribute', 'amp' );
+				return sprintf(
+					'%s: <code>%s</code>',
+					esc_html__( 'Invalid attribute', 'amp' ),
+					esc_html( $validation_error['node_name'] )
+				);
 			case 'invalid_processing_instruction':
-				return __( 'Invalid processing instruction', 'amp' );
+				return sprintf(
+					'%s: <code>&lt;%s%s&hellip;%s&gt;</code>',
+					esc_html__( 'Invalid processing instruction', 'amp' ),
+					'?',
+					esc_html( $validation_error['node_name'] ),
+					'?'
+				);
 			case 'file_path_not_allowed':
-				return __( 'Stylesheet file path not allowed', 'amp' );
+				return esc_html__( 'Stylesheet file path not allowed', 'amp' );
 			case 'excessive_css':
-				return __( 'Excessive CSS', 'amp' );
+				return esc_html__( 'Excessive CSS', 'amp' );
 			case 'illegal_css_at_rule':
-				return __( 'Illegal CSS at-rule', 'amp' );
+				return sprintf(
+					'%s: <code>@%s</code>',
+					esc_html__( 'Illegal CSS at-rule', 'amp' ),
+					esc_html( $validation_error['at_rule'] )
+				);
 			case 'disallowed_file_extension':
-				return __( 'Disallowed CSS file extension', 'amp' );
+				return esc_html__( 'Disallowed CSS file extension', 'amp' );
 			case 'duplicate_element':
-				return __( 'Duplicate element', 'amp' );
-			case 'illegal_css_property':
-				return __( 'Illegal CSS property', 'amp' );
+				return sprintf(
+					'%s: <code>&lt;%s&gt;</code>',
+					esc_html__( 'Duplicate element', 'amp' ),
+					esc_html( $validation_error['node_name'] )
+				);
 			case 'unrecognized_css':
-				return __( 'Unrecognized CSS', 'amp' );
+				return esc_html__( 'Unrecognized CSS', 'amp' );
 			case 'css_parse_error':
-				return __( 'CSS parse error', 'amp' );
+				return esc_html__( 'CSS parse error', 'amp' );
 			case 'stylesheet_file_missing':
-				return __( 'Missing stylesheet file', 'amp' );
+				return esc_html__( 'Missing stylesheet file', 'amp' );
+			case 'illegal_css_property':
+				$title = esc_html__( 'Illegal CSS property', 'amp' );
+				if ( isset( $validation_error['property_name'] ) ) {
+					$title .= sprintf( ': <code>%s</code>', esc_html( $validation_error['property_name'] ) );
+				}
+				return $title;
 			case 'illegal_css_important':
-				return __( 'Illegal CSS !important property', 'amp' );
+				$title = esc_html__( 'Illegal CSS !important property', 'amp' );
+				if ( isset( $validation_error['property_name'] ) ) {
+					$title .= sprintf( ': <code>%s</code>', esc_html( $validation_error['property_name'] ) );
+				}
+				return $title;
 			default:
 				/* translators: %s error code */
 				return sprintf( __( 'Unknown error (%s)', 'amp' ), $validation_error['code'] );
