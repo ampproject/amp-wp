@@ -758,7 +758,7 @@ class AMP_Validation_Error_Taxonomy {
 		);
 		add_filter( 'terms_clauses', [ __CLASS__, 'filter_terms_clauses_for_description_search' ], 10, 3 );
 		add_action( 'admin_notices', [ __CLASS__, 'add_admin_notices' ] );
-		add_filter( 'tag_row_actions', [ __CLASS__, 'filter_tag_row_actions' ], 10, 2 );
+		add_filter( self::TAXONOMY_SLUG . '_row_actions', [ __CLASS__, 'filter_tag_row_actions' ], 10, 2 );
 		if ( get_taxonomy( self::TAXONOMY_SLUG )->show_in_menu ) {
 			add_action( 'admin_menu', [ __CLASS__, 'add_admin_menu_validation_error_item' ] );
 		}
@@ -1622,69 +1622,67 @@ class AMP_Validation_Error_Taxonomy {
 	public static function filter_tag_row_actions( $actions, WP_Term $tag ) {
 		global $pagenow;
 
-		if ( self::TAXONOMY_SLUG === $tag->taxonomy ) {
-			$term_id = $tag->term_id;
-			$term    = get_term( $tag->term_id ); // We don't want filter=display given by $tag.
+		$term_id = $tag->term_id;
+		$term    = get_term( $tag->term_id ); // We don't want filter=display given by $tag.
 
-			/*
-			 * Hide deletion link since a validation error should only be removed once
-			 * it no longer has an occurrence on the site. When a validated URL is re-checked
-			 * and it no longer has this validation error, then the count will be decremented.
-			 * When a validation error term no longer has a count, then it is hidden from the
-			 * list table. A cron job could periodically delete terms that have no counts.
-			 */
-			unset( $actions['delete'] );
+		/*
+		 * Hide deletion link since a validation error should only be removed once
+		 * it no longer has an occurrence on the site. When a validated URL is re-checked
+		 * and it no longer has this validation error, then the count will be decremented.
+		 * When a validation error term no longer has a count, then it is hidden from the
+		 * list table. A cron job could periodically delete terms that have no counts.
+		 */
+		unset( $actions['delete'] );
 
-			if ( 'post.php' === $pagenow ) {
-				$actions['details'] = sprintf(
-					'<button type="button" aria-label="%s" class="single-url-detail-toggle button-link">%s</button>',
-					esc_attr__( 'Toggle error details', 'amp' ),
-					esc_html__( 'Details', 'amp' )
-				);
-			} else {
-				$actions['details'] = sprintf(
+		if ( 'post.php' === $pagenow ) {
+			$actions['details'] = sprintf(
+				'<button type="button" aria-label="%s" class="single-url-detail-toggle button-link">%s</button>',
+				esc_attr__( 'Toggle error details', 'amp' ),
+				esc_html__( 'Details', 'amp' )
+			);
+		} else {
+			$actions['details'] = sprintf(
+				'<a href="%s">%s</a>',
+				admin_url(
+					add_query_arg(
+						[
+							self::TAXONOMY_SLUG => $term->name,
+							'post_type'         => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+						],
+						'edit.php'
+					)
+				),
+				esc_html__( 'Details', 'amp' )
+			);
+		}
+
+		// Only add the 'Remove' and 'Keep' links to the index page, not the individual URL page.
+		if ( 'edit-tags.php' === $pagenow ) {
+			$sanitization = self::get_validation_error_sanitization( json_decode( $term->description, true ) );
+
+			if ( self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $sanitization['status'] ) {
+				$actions[ self::VALIDATION_ERROR_ACCEPT_ACTION ] = sprintf(
 					'<a href="%s">%s</a>',
-					admin_url(
-						add_query_arg(
-							[
-								self::TAXONOMY_SLUG => $term->name,
-								'post_type'         => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-							],
-							'edit.php'
-						)
+					wp_nonce_url(
+						add_query_arg( array_merge( [ 'action' => self::VALIDATION_ERROR_ACCEPT_ACTION ], compact( 'term_id' ) ) ),
+						self::VALIDATION_ERROR_ACCEPT_ACTION
 					),
-					esc_html__( 'Details', 'amp' )
+					esc_html(
+						self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $sanitization['term_status'] ? __( 'Confirm removed', 'amp' ) : __( 'Remove', 'amp' )
+					)
 				);
 			}
-
-			// Only add the 'Remove' and 'Keep' links to the index page, not the individual URL page.
-			if ( 'edit-tags.php' === $pagenow ) {
-				$sanitization = self::get_validation_error_sanitization( json_decode( $term->description, true ) );
-
-				if ( self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $sanitization['status'] ) {
-					$actions[ self::VALIDATION_ERROR_ACCEPT_ACTION ] = sprintf(
-						'<a href="%s">%s</a>',
-						wp_nonce_url(
-							add_query_arg( array_merge( [ 'action' => self::VALIDATION_ERROR_ACCEPT_ACTION ], compact( 'term_id' ) ) ),
-							self::VALIDATION_ERROR_ACCEPT_ACTION
-						),
-						esc_html(
-							self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $sanitization['term_status'] ? __( 'Confirm removed', 'amp' ) : __( 'Remove', 'amp' )
-						)
-					);
-				}
-				if ( self::VALIDATION_ERROR_ACK_REJECTED_STATUS !== $sanitization['status'] ) {
-					$actions[ self::VALIDATION_ERROR_REJECT_ACTION ] = sprintf(
-						'<a href="%s">%s</a>',
-						wp_nonce_url(
-							add_query_arg( array_merge( [ 'action' => self::VALIDATION_ERROR_REJECT_ACTION ], compact( 'term_id' ) ) ),
-							self::VALIDATION_ERROR_REJECT_ACTION
-						),
-						esc_html(
-							self::VALIDATION_ERROR_NEW_REJECTED_STATUS === $sanitization['term_status'] ? __( 'Confirm kept', 'amp' ) : __( 'Keep', 'amp' )
-						)
-					);
-				}
+			if ( self::VALIDATION_ERROR_ACK_REJECTED_STATUS !== $sanitization['status'] ) {
+				$actions[ self::VALIDATION_ERROR_REJECT_ACTION ] = sprintf(
+					'<a href="%s">%s</a>',
+					wp_nonce_url(
+						add_query_arg( array_merge( [ 'action' => self::VALIDATION_ERROR_REJECT_ACTION ], compact( 'term_id' ) ) ),
+						self::VALIDATION_ERROR_REJECT_ACTION
+					),
+					esc_html(
+						self::VALIDATION_ERROR_NEW_REJECTED_STATUS === $sanitization['term_status'] ? __( 'Confirm kept', 'amp' ) : __( 'Keep', 'amp' )
+					)
+				);
 			}
 		}
 		return $actions;
