@@ -1836,6 +1836,8 @@ class AMP_Validation_Error_Taxonomy {
 					$content .= sprintf( ': <code>@%s</code>', esc_html( $validation_error['at_rule'] ) );
 				} elseif ( 'invalid_processing_instruction' === $validation_error['code'] ) {
 					$content .= sprintf( ': <code>&lt;%s%s&hellip;%s&gt;</code>', '?', esc_html( $validation_error['node_name'] ), '?' );
+				} elseif ( isset( $validation_error['property_name'] ) ) {
+					$content .= sprintf( ': <code>%s</code>', esc_html( $validation_error['property_name'] ) );
 				}
 
 				if ( 'post.php' === $pagenow ) {
@@ -2149,7 +2151,7 @@ class AMP_Validation_Error_Taxonomy {
 				if ( $is_element_attributes && empty( $value ) ) {
 					continue;
 				}
-				if ( in_array( $key, [ 'code', 'type' ], true ) ) {
+				if ( in_array( $key, [ 'code', 'type', 'property_value' ], true ) ) {
 					continue; // Handled above.
 				}
 				?>
@@ -2157,6 +2159,18 @@ class AMP_Validation_Error_Taxonomy {
 				<dd class="detailed">
 					<?php if ( in_array( $key, [ 'node_name', 'parent_name' ], true ) ) : ?>
 						<code><?php echo esc_html( $value ); ?></code>
+					<?php elseif ( 'property_name' === $key ) : ?>
+						<?php
+						if ( isset( $validation_error['property_value'] ) && is_scalar( $validation_error['property_value'] ) ) {
+							printf(
+								'<code>%s: %s</code>',
+								esc_html( $value ),
+								esc_html( $validation_error['property_value'] )
+							);
+						} else {
+							printf( '<code>%s</code>', esc_html( $value ) );
+						}
+						?>
 					<?php elseif ( 'text' === $key ) : ?>
 						<details>
 							<summary>
@@ -2175,7 +2189,7 @@ class AMP_Validation_Error_Taxonomy {
 								);
 								?>
 							</summary>
-							<p><code><?php echo esc_html( $value ); ?></code></p>
+							<pre><?php echo esc_html( $value ); ?></pre>
 						</details>
 					<?php elseif ( 'sources' === $key ) : ?>
 						<?php self::render_sources( $value ); ?>
@@ -2605,7 +2619,7 @@ class AMP_Validation_Error_Taxonomy {
 										<code><?php echo esc_html( '{closure}' === $value ? $value : $value . '()' ); ?></code>
 									<?php elseif ( 'shortcode' === $key || 'handle' === $key ) : ?>
 										<code><?php echo esc_html( $value ); ?></code>
-									<?php elseif ( 'block_name' ) : ?>
+									<?php elseif ( 'block_name' === $key ) : ?>
 										<?php
 										$block_title = self::get_block_title( $value );
 										if ( $block_title ) {
@@ -2872,6 +2886,16 @@ class AMP_Validation_Error_Taxonomy {
 				return __( 'Disallowed CSS file extension', 'amp' );
 			case 'duplicate_element':
 				return __( 'Duplicate element', 'amp' );
+			case 'illegal_css_property':
+				return __( 'Illegal CSS property', 'amp' );
+			case 'unrecognized_css':
+				return __( 'Unrecognized CSS', 'amp' );
+			case 'css_parse_error':
+				return __( 'CSS parse error', 'amp' );
+			case 'stylesheet_file_missing':
+				return __( 'Missing stylesheet file', 'amp' );
+			case 'illegal_css_important':
+				return __( 'Illegal CSS !important property', 'amp' );
 			default:
 				/* translators: %s error code */
 				return sprintf( __( 'Unknown error (%s)', 'amp' ), $error_code );
@@ -2904,6 +2928,8 @@ class AMP_Validation_Error_Taxonomy {
 				}
 			case 'parent_name':
 				return __( 'Parent element', 'amp' );
+			case 'property_name':
+				return __( 'CSS property', 'amp' );
 			case 'text':
 				return __( 'Text content', 'amp' );
 			case 'type':
