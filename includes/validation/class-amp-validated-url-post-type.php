@@ -1430,11 +1430,7 @@ class AMP_Validated_URL_Post_Type {
 			</div>
 			<?php
 
-			$heading = sprintf(
-				'%s %s',
-				wp_kses_post( $error_title ),
-				wp_kses_post( $status_text )
-			);
+			$heading = wp_kses_post( $error_title ) . ' ' . wp_kses_post( $status_text );
 			?>
 			<script type="text/javascript">
 				jQuery( function( $ ) {
