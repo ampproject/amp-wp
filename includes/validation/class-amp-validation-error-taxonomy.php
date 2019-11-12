@@ -2885,6 +2885,16 @@ class AMP_Validation_Error_Taxonomy {
 				return __( 'Disallowed CSS file extension', 'amp' );
 			case 'duplicate_element':
 				return __( 'Duplicate element', 'amp' );
+			case 'illegal_css_property':
+				return __( 'Illegal CSS property', 'amp' );
+			case 'unrecognized_css':
+				return __( 'Unrecognized CSS', 'amp' );
+			case 'css_parse_error':
+				return __( 'CSS parse error', 'amp' );
+			case 'stylesheet_file_missing':
+				return __( 'Missing stylesheet file', 'amp' );
+			case 'illegal_css_important':
+				return __( 'Illegal CSS !important', 'amp' );
 			default:
 				/* translators: %s error code */
 				return sprintf( __( 'Unknown error (%s)', 'amp' ), $error_code );
