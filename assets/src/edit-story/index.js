@@ -7,21 +7,35 @@ import { registerCoreBlocks } from '@wordpress/block-library';
 /**
  * Internal dependencies
  */
-import Layout from './components/layout';
+import App from './components/app';
 
 /**
  * Initializes the block editor in the story edit screen.
  *
- * @param {string} id  ID of the root element to render the screen in.
+ * @param {Node} element           DOM element to render the screen in
+ * @param {Object} config          Configuration for the editor
  */
-export function initialize( id ) {
+export function initialize( element, config ) {
 	registerCoreBlocks();
 	render(
-		<Layout />,
-		document.getElementById( id ),
+		<App
+			config={ config }
+		/>,
+		element,
 	);
 }
 
 if ( window && document.getElementById( 'edit-story' ) ) {
-	initialize( 'edit-story' );
+	const element = document.getElementById( 'edit-story' );
+	const elementConfig = element.getAttribute( 'data-config' ) ? JSON.parse( element.getAttribute( 'data-config' ) ) : {};
+	const settings = window.ampStoriesEditorSettings || {};
+	const fonts = window.ampStoriesFonts || {};
+	const exportSettings = window.ampStoriesExport || {};
+	const config = {
+		...elementConfig,
+		settings,
+		fonts,
+		exportSettings,
+	};
+	initialize( element, config );
 }

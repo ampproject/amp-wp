@@ -3,6 +3,11 @@
  */
 import styled from 'styled-components';
 
+/**
+ * Internal dependencies
+ */
+import useStory from '../../story';
+
 const List = styled.nav`
 	display: flex;
 	flex-direction: row;
@@ -25,12 +30,12 @@ const Page = styled.a`
 `;
 
 function Canvas() {
+	const { state: { pages, currentPageId }, actions: { setCurrentPageById } } = useStory();
 	return (
 		<List>
-			<Page isActive />
-			<Page />
-			<Page />
-			<Page />
+			{ pages.map( ( { clientId } ) => (
+				<Page key={ clientId } onClick={ () => setCurrentPageById( clientId ) } isActive={ clientId === currentPageId } />
+			) ) }
 		</List>
 	);
 }

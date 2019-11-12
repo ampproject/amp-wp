@@ -68,7 +68,7 @@ const Slider = styled.span`
 `;
 
 function Switch( { label, checked, onChange } ) {
-	const [ on, setOn ] = useState( null );
+	const [ on, setOn ] = useState( checked );
 	const handleChange = ( evt ) => {
 		setOn( evt.target.checked );
 		if ( onChange ) {

@@ -6,6 +6,7 @@ import styled from 'styled-components';
 /**
  * Internal dependencies
  */
+import useStory from '../../story';
 import Switch from '../../switch';
 import Delete from './delete.svg';
 import Duplicate from './duplicate.svg';
@@ -47,10 +48,11 @@ const Icon = styled.a`
 `;
 
 function Canvas() {
+	const { state: { currentPageNumber } } = useStory();
 	return (
 		<Box>
 			<PageCount>
-				{ 'Page 1' }
+				{ `Page ${ currentPageNumber }` }
 			</PageCount>
 			<Options>
 				<Switch label="Helper" />

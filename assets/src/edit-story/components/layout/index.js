@@ -2,24 +2,15 @@
 /**
  * External dependencies
  */
-import styled, { ThemeProvider } from 'styled-components';
-
-/**
- * WordPress dependencies
- */
-import {
-	Popover,
-	SlotFillProvider,
-} from '@wordpress/components';
+import styled from 'styled-components';
 
 /**
  * Internal dependencies
  */
 import Header, { Buttons } from '../header';
 import Sidebar from '../sidebar';
-import Library, { LibraryProvider, LibraryTabs } from '../library';
+import Library, { LibraryTabs } from '../library';
 import Canvas, { AddPage, Meta, Carrousel } from '../canvas';
-import darkTheme, { GlobalStyle } from '../../theme';
 
 const Editor = styled.div`
 	background-color: ${ ( { theme } ) => theme.colors.bg.v1 };
@@ -45,43 +36,35 @@ const Area = styled.div`
 
 function Layout() {
 	return (
-		<SlotFillProvider>
-			<ThemeProvider theme={ darkTheme }>
-				<LibraryProvider>
-					<GlobalStyle />
-					<Editor>
-						<Area area="head">
-							<Header />
-						</Area>
-						<Area area="lib">
-							<Library />
-						</Area>
-						<Area area="tabs">
-							<LibraryTabs />
-						</Area>
-						<Area area="page">
-							<Canvas />
-						</Area>
-						<Area area="btns">
-							<Buttons />
-						</Area>
-						<Area area="side">
-							<Sidebar />
-						</Area>
-						<Area area="add">
-							<AddPage />
-						</Area>
-						<Area area="meta">
-							<Meta />
-						</Area>
-						<Area area="carr">
-							<Carrousel />
-						</Area>
-					</Editor>
-					<Popover.Slot />
-				</LibraryProvider>
-			</ThemeProvider>
-		</SlotFillProvider>
+		<Editor>
+			<Area area="head">
+				<Header />
+			</Area>
+			<Area area="lib">
+				<Library />
+			</Area>
+			<Area area="tabs">
+				<LibraryTabs />
+			</Area>
+			<Area area="page">
+				<Canvas />
+			</Area>
+			<Area area="btns">
+				<Buttons />
+			</Area>
+			<Area area="side">
+				<Sidebar />
+			</Area>
+			<Area area="add">
+				<AddPage />
+			</Area>
+			<Area area="meta">
+				<Meta />
+			</Area>
+			<Area area="carr">
+				<Carrousel />
+			</Area>
+		</Editor>
 	);
 }
 

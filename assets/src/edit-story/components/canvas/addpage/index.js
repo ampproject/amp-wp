@@ -4,8 +4,14 @@
 import styled from 'styled-components';
 
 /**
+ * WordPress dependencies
+ */
+import { useCallback} from '@wordpress/element';
+
+/**
  * Internal dependencies
  */
+import useStory from '../../story';
 import Icon from './plus.svg';
 
 const Wrapper = styled.div`
@@ -17,7 +23,7 @@ const Wrapper = styled.div`
 `;
 
 const Circle = styled.a`
-	margin: 0 60px;
+	margin: 0 0 0 60px;
 	color: inherit;
 	height: 60px;
 	width: 60px;
@@ -36,9 +42,14 @@ const Circle = styled.a`
 `;
 
 function AddPage() {
+	const { actions: { addBlankPage, setCurrentPageById } } = useStory();
+	const handleClick = useCallback( () => {
+		const page = addBlankPage();
+		setCurrentPageById( page.clientId );
+	}, [ addBlankPage, setCurrentPageById ] );
 	return (
 		<Wrapper>
-			<Circle>
+			<Circle onClick={ handleClick }>
 				<Icon />
 			</Circle>
 		</Wrapper>
