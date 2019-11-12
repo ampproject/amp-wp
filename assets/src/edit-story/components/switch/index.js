@@ -2,11 +2,12 @@
  * External dependencies
  */
 import styled from 'styled-components';
+import PropTypes from 'prop-types';
 
 /**
  * WordPress dependencies
  */
-import { useState } from '@wordpress/element';
+import { useState, useEffect } from '@wordpress/element';
 
 const Group = styled.label`
 	display: flex;
@@ -47,7 +48,7 @@ const Slider = styled.span`
 		content: '';
 		display: block;
 		position: absolute;
-		left: 1px;
+		left: 2px;
 		top: 2px;
 		width: 6px;
 		height: 6px;
@@ -66,17 +67,34 @@ const Slider = styled.span`
 	}
 `;
 
-function Switch( { label } ) {
-	const [ on, setOn ] = useState( false );
+function Switch( { label, checked, onChange } ) {
+	const [ on, setOn ] = useState( null );
+	const handleChange = ( evt ) => {
+		setOn( evt.target.checked );
+		if ( onChange ) {
+			onChange( evt.target.checked );
+		}
+	};
+	useEffect( () => setOn( checked ), [ checked ] );
 	return (
 		<Group>
 			<Label>
 				{ label }
 			</Label>
-			<Checkbox checked={ on } onChange={ ( evt ) => setOn( evt.target.checked ) } />
+			<Checkbox checked={ on } onChange={ handleChange } />
 			<Slider />
 		</Group>
 	);
 }
+
+Switch.propTypes = {
+	label: PropTypes.string.isRequired,
+	checked: PropTypes.bool,
+	onChange: PropTypes.func,
+};
+
+Switch.defaultProps = {
+	checked: false,
+};
 
 export default Switch;

@@ -6,7 +6,7 @@ import styled from 'styled-components';
 /**
  * Internal dependencies
  */
-import Slider from '../../slider';
+import Switch from '../../switch';
 import Delete from './delete.svg';
 import Duplicate from './duplicate.svg';
 
@@ -53,7 +53,7 @@ function Canvas() {
 				{ 'Page 1' }
 			</PageCount>
 			<Options>
-				<Slider label="Helper" />
+				<Switch label="Helper" />
 				<Divider />
 				<Icon>
 					<Delete />

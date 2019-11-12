@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+
+/**
  * WordPress dependencies
  */
 import { useState } from '@wordpress/element';
@@ -33,5 +38,12 @@ function ExplorerProvider( { children } ) {
 		</Context.Provider>
 	);
 }
+
+ExplorerProvider.propTypes = {
+	children: PropTypes.oneOfType( [
+		PropTypes.arrayOf( PropTypes.node ),
+		PropTypes.node,
+	] ).isRequired,
+};
 
 export default ExplorerProvider;
