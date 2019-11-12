@@ -2163,12 +2163,15 @@ class AMP_Validation_Error_Taxonomy {
 						<pre><code><?php echo esc_html( $value ); ?></code></pre>
 					<?php elseif ( 'property_name' === $key ) : ?>
 						<?php
-						$property_value = isset( $validation_error['property_value'] ) ? $validation_error['property_value'] : '?';
-						printf(
-							'<code>%s: %s</code>',
-							esc_html( $value ),
-							esc_html( $property_value )
-						);
+						if ( isset( $validation_error['property_value'] ) && is_scalar( $validation_error['property_value'] ) ) {
+							printf(
+								'<code>%s: %s</code>',
+								esc_html( $value ),
+								esc_html( $validation_error['property_value'] )
+							);
+						} else {
+							printf( '<code>%s</code>', esc_html( $value ) );
+						}
 						?>
 					<?php elseif ( 'text' === $key ) : ?>
 						<details>
