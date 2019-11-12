@@ -20,7 +20,7 @@ const Background = styled.aside`
 	color: ${ ( { theme } ) => theme.colors.fg.v1 };
 `;
 
-function Explorer() {
+function Library() {
 	const { tab } = useContext( Context );
 	return (
 		<Background>
@@ -30,4 +30,4 @@ function Explorer() {
 	);
 }
 
-export default Explorer;
+export default Library;

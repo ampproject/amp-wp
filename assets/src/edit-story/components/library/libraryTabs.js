@@ -9,7 +9,7 @@ import { useContext } from '@wordpress/element';
 import Context from './context';
 import { Tabs, Media, Text, Shapes, Links } from './tabs';
 
-function ExplorerTabs() {
+function LibraryTabs() {
 	const { tab, setTab, tabs: { MEDIA, TEXT, SHAPES, LINKS } } = useContext( Context );
 	const tabs = [
 		[ MEDIA, Media ],
@@ -26,4 +26,4 @@ function ExplorerTabs() {
 	);
 }
 
-export default ExplorerTabs;
+export default LibraryTabs;

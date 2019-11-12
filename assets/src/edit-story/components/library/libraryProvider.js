@@ -18,7 +18,7 @@ const TEXT = 'text';
 const SHAPES = 'shapes';
 const LINKS = 'links';
 
-function ExplorerProvider( { children } ) {
+function LibraryProvider( { children } ) {
 	const [ tab, setTab ] = useState( MEDIA );
 
 	const state = {
@@ -39,11 +39,11 @@ function ExplorerProvider( { children } ) {
 	);
 }
 
-ExplorerProvider.propTypes = {
+LibraryProvider.propTypes = {
 	children: PropTypes.oneOfType( [
 		PropTypes.arrayOf( PropTypes.node ),
 		PropTypes.node,
 	] ).isRequired,
 };
 
-export default ExplorerProvider;
+export default LibraryProvider;
