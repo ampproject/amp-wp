@@ -230,6 +230,7 @@ class AMP_Post_Meta_Box {
 		$error_messages    = $this->get_error_messages( $status_and_errors['status'], $status_and_errors['errors'] );
 
 		$data = [
+			'ampSlug'          => amp_get_slug(),
 			'possibleStatuses' => [ self::ENABLED_STATUS, self::DISABLED_STATUS ],
 			'defaultStatus'    => $enabled_status,
 			'errorMessages'    => $error_messages,
