@@ -566,7 +566,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'user_has_cap', [ self::TESTED_CLASS, 'filter_user_has_cap_for_hiding_term_list_table_checkbox' ] ) );
 		$this->assertEquals( 10, has_filter( 'terms_clauses', [ self::TESTED_CLASS, 'filter_terms_clauses_for_description_search' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_notices', [ self::TESTED_CLASS, 'add_admin_notices' ] ) );
-		$this->assertEquals( 10, has_filter( 'tag_row_actions', [ self::TESTED_CLASS, 'filter_tag_row_actions' ] ) );
+		$this->assertEquals( 10, has_filter( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_row_actions', [ self::TESTED_CLASS, 'filter_tag_row_actions' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_menu', [ self::TESTED_CLASS, 'add_admin_menu_validation_error_item' ] ) );
 		$this->assertEquals( 10, has_filter( 'parse_term_query', [ self::TESTED_CLASS, 'parse_post_php_term_query' ] ) );
 		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_custom_column', [ self::TESTED_CLASS, 'filter_manage_custom_columns' ] ) );
@@ -989,10 +989,6 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		$initial_actions = [
 			'delete' => '<a href="#">Delete</a>',
 		];
-
-		// When the term isn't for the invalid post type taxonomy, the actions shouldn't be altered.
-		$term_other_taxonomy = self::factory()->term->create_and_get();
-		$this->assertEquals( $initial_actions, AMP_Validation_Error_Taxonomy::filter_tag_row_actions( $initial_actions, $term_other_taxonomy ) );
 
 		// The term is for this taxonomy, so this should filter the actions.
 		$term_this_taxonomy = self::factory()->term->create_and_get(

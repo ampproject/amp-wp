@@ -758,7 +758,7 @@ class AMP_Validation_Error_Taxonomy {
 		);
 		add_filter( 'terms_clauses', [ __CLASS__, 'filter_terms_clauses_for_description_search' ], 10, 3 );
 		add_action( 'admin_notices', [ __CLASS__, 'add_admin_notices' ] );
-		add_filter( 'tag_row_actions', [ __CLASS__, 'filter_tag_row_actions' ], 10, 2 );
+		add_filter( self::TAXONOMY_SLUG . '_row_actions', [ __CLASS__, 'filter_tag_row_actions' ], 10, 2 );
 		if ( get_taxonomy( self::TAXONOMY_SLUG )->show_in_menu ) {
 			add_action( 'admin_menu', [ __CLASS__, 'add_admin_menu_validation_error_item' ] );
 		}
@@ -1622,69 +1622,67 @@ class AMP_Validation_Error_Taxonomy {
 	public static function filter_tag_row_actions( $actions, WP_Term $tag ) {
 		global $pagenow;
 
-		if ( self::TAXONOMY_SLUG === $tag->taxonomy ) {
-			$term_id = $tag->term_id;
-			$term    = get_term( $tag->term_id ); // We don't want filter=display given by $tag.
+		$term_id = $tag->term_id;
+		$term    = get_term( $tag->term_id ); // We don't want filter=display given by $tag.
 
-			/*
-			 * Hide deletion link since a validation error should only be removed once
-			 * it no longer has an occurrence on the site. When a validated URL is re-checked
-			 * and it no longer has this validation error, then the count will be decremented.
-			 * When a validation error term no longer has a count, then it is hidden from the
-			 * list table. A cron job could periodically delete terms that have no counts.
-			 */
-			unset( $actions['delete'] );
+		/*
+		 * Hide deletion link since a validation error should only be removed once
+		 * it no longer has an occurrence on the site. When a validated URL is re-checked
+		 * and it no longer has this validation error, then the count will be decremented.
+		 * When a validation error term no longer has a count, then it is hidden from the
+		 * list table. A cron job could periodically delete terms that have no counts.
+		 */
+		unset( $actions['delete'] );
 
-			if ( 'post.php' === $pagenow ) {
-				$actions['details'] = sprintf(
-					'<button type="button" aria-label="%s" class="single-url-detail-toggle button-link">%s</button>',
-					esc_attr__( 'Toggle error details', 'amp' ),
-					esc_html__( 'Details', 'amp' )
-				);
-			} else {
-				$actions['details'] = sprintf(
+		if ( 'post.php' === $pagenow ) {
+			$actions['details'] = sprintf(
+				'<button type="button" aria-label="%s" class="single-url-detail-toggle button-link">%s</button>',
+				esc_attr__( 'Toggle error details', 'amp' ),
+				esc_html__( 'Details', 'amp' )
+			);
+		} else {
+			$actions['details'] = sprintf(
+				'<a href="%s">%s</a>',
+				admin_url(
+					add_query_arg(
+						[
+							self::TAXONOMY_SLUG => $term->name,
+							'post_type'         => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+						],
+						'edit.php'
+					)
+				),
+				esc_html__( 'Details', 'amp' )
+			);
+		}
+
+		// Only add the 'Remove' and 'Keep' links to the index page, not the individual URL page.
+		if ( 'edit-tags.php' === $pagenow ) {
+			$sanitization = self::get_validation_error_sanitization( json_decode( $term->description, true ) );
+
+			if ( self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $sanitization['status'] ) {
+				$actions[ self::VALIDATION_ERROR_ACCEPT_ACTION ] = sprintf(
 					'<a href="%s">%s</a>',
-					admin_url(
-						add_query_arg(
-							[
-								self::TAXONOMY_SLUG => $term->name,
-								'post_type'         => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-							],
-							'edit.php'
-						)
+					wp_nonce_url(
+						add_query_arg( array_merge( [ 'action' => self::VALIDATION_ERROR_ACCEPT_ACTION ], compact( 'term_id' ) ) ),
+						self::VALIDATION_ERROR_ACCEPT_ACTION
 					),
-					esc_html__( 'Details', 'amp' )
+					esc_html(
+						self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $sanitization['term_status'] ? __( 'Confirm removed', 'amp' ) : __( 'Remove', 'amp' )
+					)
 				);
 			}
-
-			// Only add the 'Remove' and 'Keep' links to the index page, not the individual URL page.
-			if ( 'edit-tags.php' === $pagenow ) {
-				$sanitization = self::get_validation_error_sanitization( json_decode( $term->description, true ) );
-
-				if ( self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $sanitization['status'] ) {
-					$actions[ self::VALIDATION_ERROR_ACCEPT_ACTION ] = sprintf(
-						'<a href="%s">%s</a>',
-						wp_nonce_url(
-							add_query_arg( array_merge( [ 'action' => self::VALIDATION_ERROR_ACCEPT_ACTION ], compact( 'term_id' ) ) ),
-							self::VALIDATION_ERROR_ACCEPT_ACTION
-						),
-						esc_html(
-							self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $sanitization['term_status'] ? __( 'Confirm removed', 'amp' ) : __( 'Remove', 'amp' )
-						)
-					);
-				}
-				if ( self::VALIDATION_ERROR_ACK_REJECTED_STATUS !== $sanitization['status'] ) {
-					$actions[ self::VALIDATION_ERROR_REJECT_ACTION ] = sprintf(
-						'<a href="%s">%s</a>',
-						wp_nonce_url(
-							add_query_arg( array_merge( [ 'action' => self::VALIDATION_ERROR_REJECT_ACTION ], compact( 'term_id' ) ) ),
-							self::VALIDATION_ERROR_REJECT_ACTION
-						),
-						esc_html(
-							self::VALIDATION_ERROR_NEW_REJECTED_STATUS === $sanitization['term_status'] ? __( 'Confirm kept', 'amp' ) : __( 'Keep', 'amp' )
-						)
-					);
-				}
+			if ( self::VALIDATION_ERROR_ACK_REJECTED_STATUS !== $sanitization['status'] ) {
+				$actions[ self::VALIDATION_ERROR_REJECT_ACTION ] = sprintf(
+					'<a href="%s">%s</a>',
+					wp_nonce_url(
+						add_query_arg( array_merge( [ 'action' => self::VALIDATION_ERROR_REJECT_ACTION ], compact( 'term_id' ) ) ),
+						self::VALIDATION_ERROR_REJECT_ACTION
+					),
+					esc_html(
+						self::VALIDATION_ERROR_NEW_REJECTED_STATUS === $sanitization['term_status'] ? __( 'Confirm kept', 'amp' ) : __( 'Keep', 'amp' )
+					)
+				);
 			}
 		}
 		return $actions;
@@ -1810,7 +1808,7 @@ class AMP_Validation_Error_Taxonomy {
 						'<button type="button" aria-label="%s" class="single-url-detail-toggle">',
 						esc_attr__( 'Toggle error details', 'amp' )
 					);
-					$content .= self::get_error_title_from_code( $validation_error['code'] );
+					$content .= wp_kses_post( self::get_error_title_from_code( $validation_error ) );
 				} else {
 					$content .= '<p>';
 					$content .= sprintf(
@@ -1824,20 +1822,8 @@ class AMP_Validation_Error_Taxonomy {
 								'edit.php'
 							)
 						),
-						esc_html( self::get_error_title_from_code( $validation_error['code'] ) )
+						wp_kses_post( self::get_error_title_from_code( $validation_error ) )
 					);
-				}
-
-				if ( self::INVALID_ELEMENT_CODE === $validation_error['code'] || 'duplicate_element' === $validation_error['code'] ) {
-					$content .= sprintf( ': <code>&lt;%s&gt;</code>', esc_html( $validation_error['node_name'] ) );
-				} elseif ( self::INVALID_ATTRIBUTE_CODE === $validation_error['code'] ) {
-					$content .= sprintf( ': <code>%s</code>', esc_html( $validation_error['node_name'] ) );
-				} elseif ( 'illegal_css_at_rule' === $validation_error['code'] ) {
-					$content .= sprintf( ': <code>@%s</code>', esc_html( $validation_error['at_rule'] ) );
-				} elseif ( 'invalid_processing_instruction' === $validation_error['code'] ) {
-					$content .= sprintf( ': <code>&lt;%s%s&hellip;%s&gt;</code>', '?', esc_html( $validation_error['node_name'] ), '?' );
-				} elseif ( isset( $validation_error['property_name'] ) ) {
-					$content .= sprintf( ': <code>%s</code>', esc_html( $validation_error['property_name'] ) );
 				}
 
 				if ( 'post.php' === $pagenow ) {
@@ -2862,43 +2848,103 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
+	 * Determine whether a validation error is for a JS script element.
+	 *
+	 * @param array $validation_error Validation error.
+	 * @return bool Is for scrip JS element.
+	 */
+	private static function is_validation_error_for_js_script_element( $validation_error ) {
+		return (
+			isset( $validation_error['node_name'] )
+			&&
+			'script' === $validation_error['node_name']
+			&&
+			(
+				isset( $validation_error['node_attributes']['src'] )
+				||
+				empty( $validation_error['node_attributes']['type'] )
+				||
+				false !== strpos( $validation_error['node_attributes']['type'], 'javascript' )
+			)
+		);
+	}
+
+	/**
 	 * Get Error Title from Code
 	 *
-	 * @param string $error_code Error code.
-	 *
-	 * @return string
+	 * @param array $validation_error Validation error.
+	 * @return string Title with some formatting markup.
 	 */
-	public static function get_error_title_from_code( $error_code ) {
-		switch ( $error_code ) {
+	public static function get_error_title_from_code( $validation_error ) {
+		switch ( $validation_error['code'] ) {
 			case self::INVALID_ELEMENT_CODE:
-				return __( 'Invalid element', 'amp' );
+				if ( self::is_validation_error_for_js_script_element( $validation_error ) ) {
+					$title = esc_html__( 'Invalid script', 'amp' );
+
+					if ( isset( $validation_error['node_attributes']['src'] ) ) {
+						$title .= sprintf(
+							': <code>%s</code>',
+							esc_html( basename( wp_parse_url( $validation_error['node_attributes']['src'], PHP_URL_PATH ) ) )
+						);
+					}
+				} else {
+					$title  = esc_html__( 'Invalid element', 'amp' );
+					$title .= sprintf( ': <code>&lt;%s&gt;</code>', esc_html( $validation_error['node_name'] ) );
+				}
+				return $title;
 			case self::INVALID_ATTRIBUTE_CODE:
-				return __( 'Invalid attribute', 'amp' );
+				return sprintf(
+					'%s: <code>%s</code>',
+					esc_html__( 'Invalid attribute', 'amp' ),
+					esc_html( $validation_error['node_name'] )
+				);
 			case 'invalid_processing_instruction':
-				return __( 'Invalid processing instruction', 'amp' );
+				return sprintf(
+					'%s: <code>&lt;%s%s&hellip;%s&gt;</code>',
+					esc_html__( 'Invalid processing instruction', 'amp' ),
+					'?',
+					esc_html( $validation_error['node_name'] ),
+					'?'
+				);
 			case 'file_path_not_allowed':
-				return __( 'Stylesheet file path not allowed', 'amp' );
+				return esc_html__( 'Stylesheet file path not allowed', 'amp' );
 			case 'excessive_css':
-				return __( 'Excessive CSS', 'amp' );
+				return esc_html__( 'Excessive CSS', 'amp' );
 			case 'illegal_css_at_rule':
-				return __( 'Illegal CSS at-rule', 'amp' );
+				return sprintf(
+					'%s: <code>@%s</code>',
+					esc_html__( 'Illegal CSS at-rule', 'amp' ),
+					esc_html( $validation_error['at_rule'] )
+				);
 			case 'disallowed_file_extension':
-				return __( 'Disallowed CSS file extension', 'amp' );
+				return esc_html__( 'Disallowed CSS file extension', 'amp' );
 			case 'duplicate_element':
-				return __( 'Duplicate element', 'amp' );
-			case 'illegal_css_property':
-				return __( 'Illegal CSS property', 'amp' );
+				return sprintf(
+					'%s: <code>&lt;%s&gt;</code>',
+					esc_html__( 'Duplicate element', 'amp' ),
+					esc_html( $validation_error['node_name'] )
+				);
 			case 'unrecognized_css':
-				return __( 'Unrecognized CSS', 'amp' );
+				return esc_html__( 'Unrecognized CSS', 'amp' );
 			case 'css_parse_error':
-				return __( 'CSS parse error', 'amp' );
+				return esc_html__( 'CSS parse error', 'amp' );
 			case 'stylesheet_file_missing':
-				return __( 'Missing stylesheet file', 'amp' );
+				return esc_html__( 'Missing stylesheet file', 'amp' );
+			case 'illegal_css_property':
+				$title = esc_html__( 'Illegal CSS property', 'amp' );
+				if ( isset( $validation_error['property_name'] ) ) {
+					$title .= sprintf( ': <code>%s</code>', esc_html( $validation_error['property_name'] ) );
+				}
+				return $title;
 			case 'illegal_css_important':
-				return __( 'Illegal CSS !important property', 'amp' );
+				$title = esc_html__( 'Illegal CSS !important property', 'amp' );
+				if ( isset( $validation_error['property_name'] ) ) {
+					$title .= sprintf( ': <code>%s</code>', esc_html( $validation_error['property_name'] ) );
+				}
+				return $title;
 			default:
 				/* translators: %s error code */
-				return sprintf( __( 'Unknown error (%s)', 'amp' ), $error_code );
+				return sprintf( __( 'Unknown error (%s)', 'amp' ), $validation_error['code'] );
 		}
 	}
 
