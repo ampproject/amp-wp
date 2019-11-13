@@ -513,7 +513,12 @@ def GetTagRules(tag_spec):
 		return None
 
 	if tag_spec.HasField('extension_spec'):
-		extension_spec = {}
+		# See https://github.com/ampproject/amphtml/blob/e37f50d/validator/validator.proto#L430-L454
+		ERROR = 1
+		NONE = 3
+		extension_spec = {
+			'requires_usage': 1 # (ERROR=1)
+		}
 		for field in tag_spec.extension_spec.ListFields():
 			if isinstance(field[1], (list, google.protobuf.internal.containers.RepeatedScalarFieldContainer, google.protobuf.pyext._message.RepeatedScalarContainer)):
 				extension_spec[ field[0].name ] = []
@@ -521,6 +526,10 @@ def GetTagRules(tag_spec):
 					extension_spec[ field[0].name ].append( val )
 			else:
 				extension_spec[ field[0].name ] = field[1]
+
+		# Normalize ERROR and GRANDFATHERED as true, since we control which scripts are added (or removed) from the output.
+		extension_spec['requires_usage'] = ( extension_spec['requires_usage'] != 3 ) # NONE=3
+
 		tag_rules['extension_spec'] = extension_spec
 
 	if tag_spec.HasField('mandatory'):
