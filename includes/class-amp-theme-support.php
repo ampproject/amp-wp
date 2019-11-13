@@ -1746,27 +1746,14 @@ class AMP_Theme_Support {
 		}
 
 		// Remove scripts that had already been added but couldn't be detected from output buffering.
-		foreach ( array_diff( array_keys( $amp_scripts ), $script_handles ) as $superfluous_script_handle ) {
-			$src = $amp_scripts[ $superfluous_script_handle ]->getAttribute( 'src' );
-
-			// Skip scripts unrelated to AMP.
-			if ( ! $src || 0 !== strpos( $src, 'https://cdn.ampproject.org/' ) ) {
-				continue;
+		$superfluous_script_handles = array_diff(
+			array_keys( $amp_scripts ),
+			array_merge( $script_handles, [ 'amp-runtime' ] )
+		);
+		foreach ( $superfluous_script_handles as $superfluous_script_handle ) {
+			if ( true === wp_scripts()->get_data( $superfluous_script_handle, 'amp_requires_usage' ) ) {
+				unset( $amp_scripts[ $superfluous_script_handle ] );
 			}
-
-			// Skip AMP runtime script.
-			if ( 'https://cdn.ampproject.org/v0.js' === $src ) {
-				continue;
-			}
-
-			$custom_element = $amp_scripts[ $superfluous_script_handle ]->getAttribute( 'custom-element' );
-
-			// Skip dynamic CSS classes script, it has no associated element.
-			if ( 'amp-dynamic-css-classes' === $custom_element ) {
-				continue;
-			}
-
-			unset( $amp_scripts[ $superfluous_script_handle ] );
 		}
 
 		/* phpcs:ignore Squiz.PHP.CommentedOutCode.Found

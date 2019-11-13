@@ -464,38 +464,43 @@ function amp_register_default_scripts( $wp_scripts ) {
 		]
 	);
 
-	// Get all AMP components as defined in the spec.
-	$extensions = [];
+	// Register all AMP components as defined in the spec.
 	foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( 'script' ) as $script_spec ) {
-		if ( isset( $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec']['name'], $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec']['version'] ) ) {
-			$versions = $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec']['version'];
-			array_pop( $versions );
-			$extensions[ $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec']['name'] ] = array_pop( $versions );
+		if ( ! isset( $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec'] ) ) {
+			continue;
 		}
+		$extension_spec = $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec'];
+		$versions       = array_filter(
+			$extension_spec['version'],
+			function ( $version ) {
+				// @todo Why are we including the latest version in the generated spec in the first place? We can just include the highest number version.
+				return 'latest' !== $version;
+			}
+		);
+
+		$src = sprintf(
+			'https://cdn.ampproject.org/v0/%s-%s.js',
+			$extension_spec['name'],
+			array_pop( $versions )
+		);
+
+		$wp_scripts->add(
+			$extension_spec['name'],
+			$src,
+			[ 'amp-runtime' ],
+			null
+		);
+
+		$wp_scripts->add_data( $extension_spec['name'], 'amp_requires_usage', ! empty( $extension_spec['requires_usage'] ) );
 	}
 
-	if ( isset( $extensions['amp-carousel'] ) ) {
+	if ( $wp_scripts->query( 'amp-carousel', 'registered' ) ) {
 		/*
 		 * The 0.2 version of amp-carousel depends on the amp-base-carousel component, but this is still experimental.
 		 * Also, the validator spec does not currently specify what base dependencies a given component has.
 		 * @todo Revisit once amp-base-carousel is no longer experimental. Add support for obtaining a list of extensions that depend on other extensions to include in the script dependencies when registering below.
 		 */
-		$extensions['amp-carousel'] = '0.1';
-	}
-
-	foreach ( $extensions as $extension => $version ) {
-		$src = sprintf(
-			'https://cdn.ampproject.org/v0/%s-%s.js',
-			$extension,
-			$version
-		);
-
-		$wp_scripts->add(
-			$extension,
-			$src,
-			[ 'amp-runtime' ],
-			null
-		);
+		$wp_scripts->registered['amp-carousel']->src = 'https://cdn.ampproject.org/v0/amp-carousel-0.1.js';
 	}
 }
 

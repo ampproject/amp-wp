@@ -530,6 +530,11 @@ def GetTagRules(tag_spec):
 		# Normalize ERROR and GRANDFATHERED as true, since we control which scripts are added (or removed) from the output.
 		extension_spec['requires_usage'] = ( extension_spec['requires_usage'] != 3 ) # NONE=3
 
+		if 'version' not in extension_spec:
+			raise Exception( 'Missing required version field' )
+		if 'name' not in extension_spec:
+			raise Exception( 'Missing required name field' )
+
 		tag_rules['extension_spec'] = extension_spec
 
 	if tag_spec.HasField('mandatory'):
