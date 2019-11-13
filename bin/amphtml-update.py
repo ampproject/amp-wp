@@ -463,11 +463,20 @@ def GetTagRules(tag_spec):
 			also_requires_tag_list.append(UnicodeEscape(also_requires_tag))
 		tag_rules['also_requires_tag'] = also_requires_tag_list
 
+	requires_extension_list = set()
 	if hasattr(tag_spec, 'requires_extension') and len( tag_spec.requires_extension ) != 0:
-		requires_extension_list = []
 		for requires_extension in tag_spec.requires_extension:
-			requires_extension_list.append(requires_extension)
-		tag_rules['requires_extension'] = requires_extension_list
+			requires_extension_list.add(requires_extension)
+
+	if hasattr(tag_spec, 'also_requires_tag_warning') and len( tag_spec.also_requires_tag_warning ) != 0:
+		for also_requires_tag_warning in tag_spec.also_requires_tag_warning:
+			matches = re.search( r'(amp-\S+) extension .js script', also_requires_tag_warning )
+			if not matches:
+				raise Exception( 'Unexpected also_requires_tag_warning format: ' + also_requires_tag_warning )
+			requires_extension_list.add(matches.group(1))
+
+	if len( requires_extension_list ) > 0:
+		tag_rules['requires_extension'] = list( requires_extension_list )
 
 	if hasattr(tag_spec, 'reference_points') and len( tag_spec.reference_points ) != 0:
 		tag_reference_points = {}
@@ -478,12 +487,6 @@ def GetTagRules(tag_spec):
 			}
 		if len( tag_reference_points ) > 0:
 			tag_rules['reference_points'] = tag_reference_points
-
-	if hasattr(tag_spec, 'also_requires_tag_warning') and len( tag_spec.also_requires_tag_warning ) != 0:
-		also_requires_tag_warning_list = []
-		for also_requires_tag_warning in tag_spec.also_requires_tag_warning:
-			also_requires_tag_warning_list.append(also_requires_tag_warning)
-		tag_rules['also_requires_tag_warning'] = also_requires_tag_warning_list
 
 	if tag_spec.disallowed_ancestor:
 		disallowed_ancestor_list = []

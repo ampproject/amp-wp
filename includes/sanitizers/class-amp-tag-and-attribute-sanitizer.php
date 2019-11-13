@@ -606,9 +606,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Add required AMP component scripts.
 		$script_components = [];
-		if ( ! empty( $tag_spec['also_requires_tag_warning'] ) ) {
-			$script_components[] = strtok( $tag_spec['also_requires_tag_warning'][0], ' ' );
-		}
 		if ( ! empty( $tag_spec['requires_extension'] ) ) {
 			$script_components = array_merge( $script_components, $tag_spec['requires_extension'] );
 		}

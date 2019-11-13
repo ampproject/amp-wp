@@ -719,9 +719,6 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'tag_spec' => array(
-					'also_requires_tag_warning' => array(
-						'amp-ad extension .js script',
-					),
 					'amp_layout' => array(
 						'supported_layouts' => array(
 							6,
@@ -769,9 +766,6 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'tag_spec' => array(
-					'also_requires_tag_warning' => array(
-						'amp-ad extension .js script',
-					),
 					'amp_layout' => array(
 						'supported_layouts' => array(
 							6,
@@ -826,9 +820,6 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'tag_spec' => array(
-					'also_requires_tag_warning' => array(
-						'amp-ad extension .js script',
-					),
 					'amp_layout' => array(
 						'supported_layouts' => array(
 							6,
@@ -886,9 +877,6 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'tag_spec' => array(
-					'also_requires_tag_warning' => array(
-						'amp-ad extension .js script',
-					),
 					'amp_layout' => array(
 						'supported_layouts' => array(
 							6,
@@ -1548,8 +1536,8 @@ class AMP_Allowed_Tags_Generated {
 						),
 					),
 					'requires_extension' => array(
-						'amp-base-carousel',
 						'amp-lightbox-gallery',
+						'amp-base-carousel',
 					),
 					'spec_name' => 'AMP-BASE-CAROUSEL [lightbox]',
 					'spec_url' => 'https://amp.dev/documentation/components/amp-base-carousel',
@@ -2699,9 +2687,6 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'tag_spec' => array(
-					'also_requires_tag_warning' => array(
-						'amp-ad extension .js script',
-					),
 					'amp_layout' => array(
 						'supported_layouts' => array(
 							6,
@@ -2755,9 +2740,6 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'tag_spec' => array(
-					'also_requires_tag_warning' => array(
-						'amp-ad extension .js script',
-					),
 					'amp_layout' => array(
 						'supported_layouts' => array(
 							6,
@@ -5761,9 +5743,6 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'tag_spec' => array(
-					'also_requires_tag_warning' => array(
-						'amp-video extension .js script',
-					),
 					'amp_layout' => array(
 						'supported_layouts' => array(
 							6,
@@ -5776,6 +5755,9 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'disallowed_ancestor' => array(
 						'amp-story',
+					),
+					'requires_extension' => array(
+						'amp-video',
 					),
 					'spec_url' => 'https://amp.dev/documentation/components/amp-video',
 				),
@@ -5874,9 +5856,6 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'tag_spec' => array(
-					'also_requires_tag_warning' => array(
-						'amp-video extension .js script',
-					),
 					'amp_layout' => array(
 						'supported_layouts' => array(
 							6,
@@ -5888,6 +5867,9 @@ class AMP_Allowed_Tags_Generated {
 						),
 					),
 					'mandatory_ancestor' => 'amp-story-page-attachment',
+					'requires_extension' => array(
+						'amp-video',
+					),
 					'spec_name' => 'amp-story >> amp-story-page-attachment >> amp-video',
 					'spec_url' => 'https://amp.dev/documentation/components/amp-video',
 				),
@@ -8948,8 +8930,8 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_parent' => 'amp-autocomplete',
 					'requires_extension' => array(
-						'amp-autocomplete',
 						'amp-form',
+						'amp-autocomplete',
 					),
 					'spec_name' => 'amp-autocomplete > input',
 				),
