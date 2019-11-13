@@ -1,0 +1,160 @@
+[
+    {
+        "name": "fasterimage/fasterimage",
+        "version": "v1.5.0",
+        "version_normalized": "1.5.0.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/willwashburn/fasterimage.git",
+            "reference": "42d125a15dc124520aff2157bbed9a4b2d4f310a"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/willwashburn/fasterimage/zipball/42d125a15dc124520aff2157bbed9a4b2d4f310a",
+            "reference": "42d125a15dc124520aff2157bbed9a4b2d4f310a",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=5.4.0",
+            "willwashburn/stream": ">=1.0"
+        },
+        "require-dev": {
+            "php-coveralls/php-coveralls": "^2.1",
+            "php-mock/php-mock-phpunit": "^2.3",
+            "phpunit/phpunit": "~6.0"
+        },
+        "time": "2019-05-25T14:33:33+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "classmap": [
+                "src"
+            ]
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Will Washburn",
+                "email": "will@tailwindapp.com"
+            },
+            {
+                "name": "Weston Ruter"
+            }
+        ],
+        "description": "FasterImage finds the size or type of a set of images given their uris by fetching as little as needed, in parallel. Originally ported by Tom Moor.",
+        "homepage": "https://github.com/willwashburn/fasterimage",
+        "keywords": [
+            "fast image",
+            "faster image",
+            "fasterimage",
+            "fastimage",
+            "getimagesize",
+            "image size",
+            "parallel"
+        ]
+    },
+    {
+        "name": "sabberworm/php-css-parser",
+        "version": "8.3.0",
+        "version_normalized": "8.3.0.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/sabberworm/PHP-CSS-Parser.git",
+            "reference": "91bcc3e3fdb7386c9a2e0e0aa09ca75cc43f121f"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/sabberworm/PHP-CSS-Parser/zipball/91bcc3e3fdb7386c9a2e0e0aa09ca75cc43f121f",
+            "reference": "91bcc3e3fdb7386c9a2e0e0aa09ca75cc43f121f",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=5.3.2"
+        },
+        "require-dev": {
+            "codacy/coverage": "^1.4",
+            "phpunit/phpunit": "~4.8"
+        },
+        "time": "2019-02-22T07:42:52+00:00",
+        "type": "library",
+        "extra": {
+            "patches_applied": {
+                "PHP-CSS-Parser: Fix parsing CSS selectors which contain commas <https://github.com/sabberworm/PHP-CSS-Parser/pull/138>": "https://github.com/sabberworm/PHP-CSS-Parser/commit/fa139f65c5b098ae652c970b25e6eb03fc495eb4.diff"
+            }
+        },
+        "installation-source": "dist",
+        "autoload": {
+            "psr-0": {
+                "Sabberworm\\CSS": "lib/"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Raphael Schweikert"
+            }
+        ],
+        "description": "Parser for CSS Files written in PHP",
+        "homepage": "http://www.sabberworm.com/blog/2010/6/10/php-css-parser",
+        "keywords": [
+            "css",
+            "parser",
+            "stylesheet"
+        ]
+    },
+    {
+        "name": "willwashburn/stream",
+        "version": "v1.0.0",
+        "version_normalized": "1.0.0.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/willwashburn/stream.git",
+            "reference": "345b3062493e3899d987dbdd1fec1c13ee28c903"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/willwashburn/stream/zipball/345b3062493e3899d987dbdd1fec1c13ee28c903",
+            "reference": "345b3062493e3899d987dbdd1fec1c13ee28c903",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=5.4.0"
+        },
+        "require-dev": {
+            "mockery/mockery": "~0.9",
+            "phpunit/phpunit": "~4.0"
+        },
+        "time": "2016-03-15T10:54:35+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "WillWashburn\\": "src/"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Will Washburn",
+                "email": "will.washburn@gmail.com"
+            }
+        ],
+        "description": "model a sequence of data elements made available over time ",
+        "homepage": "https://github.com/willwashburn/stream",
+        "keywords": [
+            "peek",
+            "read",
+            "stream",
+            "streamable"
+        ]
+    }
+]
