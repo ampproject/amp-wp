@@ -8,6 +8,12 @@
 /**
  * Class AMP_CSS_Length
  *
+ * Adapted from the <code>amp.validator.CssLength</code> class found in validator.js of the
+ * <a href="https://github.com/ampproject/amphtml">ampproject/amphtml</a> project.
+ *
+ * @version 1911070201440
+ * @link https://github.com/ampproject/amphtml/blob/1911070201440/validator/engine/validator.js#L3351
+ *
  * @since 1.5
  */
 class AMP_CSS_Length {

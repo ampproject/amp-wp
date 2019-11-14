@@ -1204,6 +1204,12 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * Validates the layout for the given tag. This involves checking the
 	 * layout, width, height, sizes attributes with AMP specific logic.
 	 *
+	 * @version 1911070201440
+	 * @link https://github.com/ampproject/amphtml/blob/1911070201440/validator/engine/validator.js#L3937
+	 *
+	 * Adapted from the <code>validateLayout</code> method found in validator.js of the
+	 * <a href="https://github.com/ampproject/amphtml">ampproject/amphtml</a> project.
+	 *
 	 * @param array[][]  $tag_spec Tag spec list.
 	 * @param DOMElement $node     Tag to validate.
 	 * @return bool True if layout is valid, false if validation fails.
@@ -1300,6 +1306,12 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * amp-pixel, have natural dimensions (browser or implementation-specific
 	 * defaults for width / height).
 	 *
+	 * Adapted from the <code>CalculateWidth</code> method found in validator.js of the
+	 * <a href="https://github.com/ampproject/amphtml">ampproject/amphtml</a> project.
+	 *
+	 * @version 1911070201440
+	 * @link https://github.com/ampproject/amphtml/blob/1911070201440/validator/engine/validator.js#L3451
+	 *
 	 * @param array          $amp_layout_spec AMP layout specifications for tag.
 	 * @param string         $input_layout    Layout for tag.
 	 * @param AMP_CSS_Length $input_width     Parsed width.
@@ -1323,6 +1335,12 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
 	 * Calculates the effective height from input layout and input height.
+	 *
+	 * Adapted from the <code>CalculateHeight</code> method found in validator.js of the
+	 * <a href="https://github.com/ampproject/amphtml">ampproject/amphtml</a> project.
+	 *
+	 * @version 1911070201440
+	 * @link https://github.com/ampproject/amphtml/blob/1911070201440/validator/engine/validator.js#L3493
 	 *
 	 * @param array          $amp_layout_spec AMP layout specifications for tag.
 	 * @param string         $input_layout    Layout for tag.
@@ -1351,6 +1369,12 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * calculation above. It happens last because web designers often make
 	 * fixed-sized mocks first and then the layout determines how things
 	 * will change for different viewports / devices / etc.
+	 *
+	 * Adapted from the <code>CalculateLayout</code> method found in validator.js of the
+	 * <a href="https://github.com/ampproject/amphtml">ampproject/amphtml</a> project.
+	 *
+	 * @version 1911070201440
+	 * @link https://github.com/ampproject/amphtml/blob/1911070201440/validator/engine/validator.js#L3516
 	 *
 	 * @param string         $layout_attr  Layout attribute.
 	 * @param AMP_CSS_Length $width        Parsed width.
