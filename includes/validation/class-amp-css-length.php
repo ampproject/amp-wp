@@ -81,10 +81,10 @@ class AMP_CSS_Length {
 			$this->is_valid = $allow_fluid;
 		}
 
-		$pattern = '/^(?P<numeral>\d+(?:\.\d+)?)(?P<unit>px|em|rem|vh|vw|vmin|vmax)?$/';
+		$pattern = '/^(?<numeral>\d+(?:\.\d+)?)(?<unit>px|em|rem|vh|vw|vmin|vmax)?$/';
 		if ( preg_match( $pattern, $attr_value, $match ) ) {
 			$this->is_valid = true;
-			$this->numeral  = isset( $match['numeral'] ) ? floatval( $match['numeral'] ) : $this->numeral;
+			$this->numeral  = isset( $match['numeral'] ) ? (float) $match['numeral'] : $this->numeral;
 			$this->unit     = isset( $match['unit'] ) ? $match['unit'] : $this->unit;
 		}
 	}
