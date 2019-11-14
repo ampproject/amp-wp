@@ -12,6 +12,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { Outline, Primary } from '../button';
+import useHistory from '../history';
 
 const Head = styled.header`
 	background-color: ${ ( { theme } ) => theme.colors.bg.v3 };
@@ -49,9 +50,30 @@ function Header() {
 		</Head>
 	);
 }
+
+function Undo() {
+	const { state: { canUndo }, actions: { undo } } = useHistory();
+	return (
+		<Outline onClick={ undo } isDisabled={ ! canUndo }>
+			{ __( 'Undo' ) }
+		</Outline>
+	);
+}
+
+function Redo() {
+	const { state: { canRedo }, actions: { redo } } = useHistory();
+	return (
+		<Outline onClick={ redo } isDisabled={ ! canRedo }>
+			{ __( 'Redo' ) }
+		</Outline>
+	);
+}
+
 function Buttons() {
 	return (
 		<ButtonList>
+			<Undo />
+			<Redo />
 			<Outline>
 				{ __( 'Preview' ) }
 			</Outline>

@@ -24,7 +24,7 @@ function APIProvider( { children } ) {
 	);
 
 	const state = {
-		methods: {
+		actions: {
 			getStoryById,
 		},
 	};

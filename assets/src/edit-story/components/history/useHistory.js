@@ -9,9 +9,8 @@ import { useContext } from '@wordpress/element';
  */
 import Context from './context';
 
-function useAPI() {
-	const { actions } = useContext( Context );
-	return actions;
+function useHistory() {
+	return useContext( Context );
 }
 
-export default useAPI;
+export default useHistory;

@@ -4,7 +4,12 @@
 import { useEffect } from '@wordpress/element';
 
 // If page id is changed, load current page and set page number.
-function useCurrentPage( currentPageId, pages, setCurrentPage, setCurrentPageNumber ) {
+function useCurrentPage( {
+	currentPageId,
+	pages,
+	setCurrentPage,
+	setCurrentPageNumber,
+} ) {
 	useEffect( () => {
 		if ( currentPageId && pages.length ) {
 			const page = pages.find( ( { clientId } ) => clientId === currentPageId );
@@ -15,4 +20,3 @@ function useCurrentPage( currentPageId, pages, setCurrentPage, setCurrentPageNum
 }
 
 export default useCurrentPage;
-

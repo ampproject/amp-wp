@@ -6,7 +6,7 @@ import styled from 'styled-components';
 /**
  * WordPress dependencies
  */
-import { useCallback} from '@wordpress/element';
+import { useCallback } from '@wordpress/element';
 
 /**
  * Internal dependencies

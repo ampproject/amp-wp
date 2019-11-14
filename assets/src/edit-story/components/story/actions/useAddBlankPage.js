@@ -4,8 +4,12 @@
 import { useCallback } from '@wordpress/element';
 import { createBlock } from '@wordpress/blocks';
 
-// When ID is set, load story from API.
-function useAddBlankPage( pages, setPages ) {// If page id is changed, load current page and set page number.
+// If page id is changed, load current page and set page number.
+function useAddBlankPage( {
+	pages,
+	setPages,
+	clearSelection,
+} ) {
 	const addBlankPage = useCallback( () => {
 		const newPage = createBlock( 'amp/amp-story-page' );
 		const newPages = [
@@ -13,8 +17,9 @@ function useAddBlankPage( pages, setPages ) {// If page id is changed, load curr
 			newPage,
 		];
 		setPages( newPages );
+		clearSelection();
 		return newPage;
-	}, [ pages, setPages ] );
+	}, [ pages, setPages, clearSelection ] );
 	return addBlankPage;
 }
 

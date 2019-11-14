@@ -21,7 +21,9 @@ const PageEdit = ( {
 	return (
 		<>
 			<InspectorControls>
-				<h1>Editing { mediaUrl }</h1>
+				<h1>
+					{ `Editing ${ mediaUrl }` }
+				</h1>
 			</InspectorControls>
 			<div>
 				<InnerBlocks allowedBlocks={ [] } />
