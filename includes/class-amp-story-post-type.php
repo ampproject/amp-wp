@@ -1721,7 +1721,7 @@ class AMP_Story_Post_Type {
 						/* translators: 1: the post author. 2: the amount of time ago. */
 						esc_html__( '%1$s &#8226; %2$s ago', 'amp' ),
 						esc_html( $author_display_name ),
-						esc_html( human_time_diff( get_post_time( 'U', false, $post ), current_time( 'timestamp' ) ) )
+						esc_html( human_time_diff( get_post_time( 'U', false, $post ), time() ) )
 					);
 					?>
 				</span>

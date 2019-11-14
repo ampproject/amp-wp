@@ -1,7 +1,11 @@
 <?xml version="1.0"?>
 <ruleset name="WordPress Coding Standards for AMP">
 
-	<rule ref="WordPress-Core" />
+	<rule ref="WordPress-Core">
+		<exclude name="Generic.Arrays.DisallowShortArraySyntax" />
+		<exclude name="WordPress.PHP.DisallowShortTernary" />
+	</rule>
+
 	<rule ref="WordPress-Docs">
 		<exclude-pattern>tests/*</exclude-pattern>
 	</rule>
