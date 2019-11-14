@@ -1291,7 +1291,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return false;
 		}
 
-		// RESPONSIVE only allows heights attribute.
+		// Heights attribute is only allowed for RESPONSIVE layout.
 		if ( ( isset( $heights_attr ) && '' !== $heights_attr ) && AMP_Rule_Spec::LAYOUT_RESPONSIVE !== $layout ) {
 			return false;
 		}
