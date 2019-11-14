@@ -400,6 +400,16 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 					'add_dev_mode' => true,
 				],
 			],
+
+			'iframe_with_mozallowfullscreen_and_webkitallowfullscreen_attrs' => [
+				'<iframe title="Why Backbone" id="talk_frame_48643" src="//speakerdeck.com/player/4648d440a3230130452522b217532879" width="640" height="480" style="border:0; padding:0; margin:0; background:transparent;" frameborder="0" allowtransparency="true" allowfullscreen="allowfullscreen" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>',
+				'
+					<amp-iframe title="Why Backbone" id="talk_frame_48643" src="https://speakerdeck.com/player/4648d440a3230130452522b217532879" width="640" height="480" style="border:0; padding:0; margin:0; background:transparent;" frameborder="0" allowtransparency="" allowfullscreen="" sandbox="allow-scripts allow-same-origin" layout="intrinsic" class="amp-wp-enforced-sizes">
+						<noscript>
+							<iframe title="Why Backbone" id="talk_frame_48643" src="https://speakerdeck.com/player/4648d440a3230130452522b217532879" width="640" height="480" style="border:0; padding:0; margin:0; background:transparent;" frameborder="0"></iframe>
+						</noscript>
+					</amp-iframe>',
+			],
 		];
 	}
 
