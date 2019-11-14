@@ -2055,6 +2055,26 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-img src="/img1.png" width="50" height="50%" layout="responsive"></amp-img>',
 				'',
 			],
+
+			'0_width_attribute'                            => [
+				'<amp-img src="/img1.png" width="0" height="50" layout="responsive"></amp-img>',
+				'<amp-img src="/img1.png" width="0" height="50" layout="responsive"></amp-img>',
+			],
+
+			'empty_width_attribute'                        => [
+				'<amp-img src="/img1.png" width="" height="50" layout="responsive"></amp-img>',
+				'',
+			],
+
+			'no_width_attribute'                           => [
+				'<amp-img src="/img1.png" height="50" layout="responsive"></amp-img>',
+				'',
+			],
+
+			'multiple_width_attributes'                    => [
+				'<amp-img src="/img1.png" width="50" width="40" width="30" height="50" layout="responsive"></amp-img>',
+				'<amp-img src="/img1.png" width="50" height="50" layout="responsive"></amp-img>',
+			],
 		];
 	}
 
