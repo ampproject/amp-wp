@@ -1439,7 +1439,9 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		ob_start();
 		?>
 		<html>
-			<head></head>
+			<head>
+				<?php wp_print_scripts( [ 'amp-runtime', 'amp-mustache', 'amp-list', 'amp-runtime', 'amp-mustache', 'amp-list' ] ); ?>
+			</head>
 			<body>
 				<amp-list width="auto" height="100" layout="fixed-height" src="/static/inline-examples/data/amp-list-urls.json">
 					<template type="amp-mustache">
