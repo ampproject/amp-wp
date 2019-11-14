@@ -1436,35 +1436,47 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
 
+		// phpcs:disable WordPress.WP.EnqueuedResources.NonEnqueuedScript
 		ob_start();
 		?>
 		<html>
 			<head>
-				<?php wp_print_scripts( [ 'amp-runtime', 'amp-mustache', 'amp-list', 'amp-runtime', 'amp-mustache', 'amp-list' ] ); ?>
+				<script async src="https://cdn.ampproject.org/v0.js"></script>
+				<script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+				<script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+				<script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
 			</head>
 			<body>
-				<amp-list width="auto" height="100" layout="fixed-height" src="/static/inline-examples/data/amp-list-urls.json">
-					<template type="amp-mustache">
-						<div class="url-entry">
-							<a href="{{url}}">{{title}}</a>
-						</div>
-					</template>
-				</amp-list>
-				<?php wp_print_scripts( [ 'amp-runtime', 'amp-mustache', 'amp-list', 'amp-runtime', 'amp-mustache', 'amp-list' ] ); ?>
+				<?php wp_print_scripts( [ 'amp-video', 'amp-runtime' ] ); ?>
 			</body>
 		</html>
 		<?php
+		// phpcs:enable WordPress.WP.EnqueuedResources.NonEnqueuedScript
 		$html = ob_get_clean();
 		$html = AMP_Theme_Support::prepare_response( $html );
 
 		$dom   = AMP_DOM_Utils::get_dom( $html );
 		$xpath = new DOMXPath( $dom );
 
-		$scripts = $xpath->query( '//script[ not( @type ) or @type = "text/javascript" ]' );
-		$this->assertSame( 3, $scripts->length );
-		$this->assertEquals( 'https://cdn.ampproject.org/v0.js', $scripts->item( 0 )->getAttribute( 'src' ) );
-		$this->assertEquals( 'amp-mustache', $scripts->item( 1 )->getAttribute( 'custom-template' ) );
-		$this->assertEquals( 'amp-list', $scripts->item( 2 )->getAttribute( 'custom-element' ) );
+		$script_srcs = [];
+		/**
+		 * Script.
+		 *
+		 * @var DOMElement $script
+		 */
+		$scripts = $xpath->query( '//script[ @src ]' );
+		foreach ( $scripts as $script ) {
+			$script_srcs[] = $script->getAttribute( 'src' );
+		}
+
+		$this->assertCount( 2, $script_srcs );
+		$this->assertEquals(
+			$script_srcs,
+			[
+				'https://cdn.ampproject.org/v0.js',
+				'https://cdn.ampproject.org/v0/amp-video-0.1.js',
+			]
+		);
 	}
 
 	/**
