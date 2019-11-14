@@ -1425,6 +1425,47 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test removing duplicate scripts.
+	 *
+	 * @covers AMP_Theme_Support::prepare_response()
+	 * @covers AMP_Theme_Support::ensure_required_markup()
+	 */
+	public function test_duplicate_scripts_are_removed() {
+		wp();
+		add_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Theme_Support::init();
+		AMP_Theme_Support::finish_init();
+
+		ob_start();
+		?>
+		<html>
+			<head></head>
+			<body>
+				<amp-list width="auto" height="100" layout="fixed-height" src="/static/inline-examples/data/amp-list-urls.json">
+					<template type="amp-mustache">
+						<div class="url-entry">
+							<a href="{{url}}">{{title}}</a>
+						</div>
+					</template>
+				</amp-list>
+				<?php wp_print_scripts( [ 'amp-runtime', 'amp-mustache', 'amp-list', 'amp-runtime', 'amp-mustache', 'amp-list' ] ); ?>
+			</body>
+		</html>
+		<?php
+		$html = ob_get_clean();
+		$html = AMP_Theme_Support::prepare_response( $html );
+
+		$dom   = AMP_DOM_Utils::get_dom( $html );
+		$xpath = new DOMXPath( $dom );
+
+		$scripts = $xpath->query( '//script[ not( @type ) or @type = "text/javascript" ]' );
+		$this->assertSame( 3, $scripts->length );
+		$this->assertEquals( 'https://cdn.ampproject.org/v0.js', $scripts->item( 0 )->getAttribute( 'src' ) );
+		$this->assertEquals( 'amp-mustache', $scripts->item( 1 )->getAttribute( 'custom-template' ) );
+		$this->assertEquals( 'amp-list', $scripts->item( 2 )->getAttribute( 'custom-element' ) );
+	}
+
+	/**
 	 * Test dequeue_customize_preview_scripts.
 	 *
 	 * @covers AMP_Theme_Support::dequeue_customize_preview_scripts()
