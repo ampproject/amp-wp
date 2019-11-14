@@ -65,7 +65,7 @@ class AMP_CSS_Length {
 	 * @param bool   $allow_fluid Whether or not to allow the 'fluid' value as a value.
 	 */
 	public function __construct( $attr_value, $allow_auto, $allow_fluid ) {
-		if ( empty( $attr_value ) ) {
+		if ( ! isset( $attr_value ) || '' === $attr_value ) {
 			$this->is_valid = true;
 			return;
 		}

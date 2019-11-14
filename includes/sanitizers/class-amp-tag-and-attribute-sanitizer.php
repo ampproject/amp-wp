@@ -1286,7 +1286,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			// RESPONSIVE only allows heights attribute.
-			if ( ! empty( $heights_attr ) && AMP_Rule_Spec::LAYOUT_RESPONSIVE !== $layout ) {
+			if ( ( isset( $heights_attr ) && '' !== $heights_attr ) && AMP_Rule_Spec::LAYOUT_RESPONSIVE !== $layout ) {
 				return false;
 			}
 		}
@@ -1308,7 +1308,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function calculate_width( $amp_layout_spec, $input_layout, $input_width ) {
 		if (
-			( ! empty( $input_layout ) || AMP_Rule_Spec::LAYOUT_FIXED === $input_layout ) &&
+			(
+				( isset( $input_layout ) && '' !== $input_layout ) ||
+				AMP_Rule_Spec::LAYOUT_FIXED === $input_layout
+			) &&
 			! $input_width->is_set() &&
 			isset( $amp_layout_spec['defines_default_width'] )
 		) {
@@ -1330,7 +1333,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	private function calculate_height( $amp_layout_spec, $input_layout, $input_height ) {
 		if (
 			(
-				! empty( $input_layout ) ||
+				( ( isset( $input_layout ) && '' !== $input_layout ) ) ||
 				AMP_Rule_Spec::LAYOUT_FIXED === $input_layout ||
 				AMP_Rule_Spec::LAYOUT_FIXED_HEIGHT === $input_layout
 			) &&
@@ -1357,7 +1360,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return string Layout type.
 	 */
 	private function calculate_layout( $layout_attr, $width, $height, $sizes_attr, $heights_attr ) {
-		if ( ! empty( $layout_attr ) ) {
+		if ( isset( $layout_attr ) && '' !== $layout_attr ) {
 			return $layout_attr;
 		} elseif ( ! $width->is_set() && ! $height->is_set() ) {
 			return AMP_Rule_Spec::LAYOUT_CONTAINER;
@@ -1369,7 +1372,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return AMP_Rule_Spec::LAYOUT_FIXED_HEIGHT;
 		} elseif (
 			$height->is_set() && $width->is_set() &&
-			( ! empty( $sizes_attr ) || ! empty( $heights_attr ) )
+			(
+				( isset( $sizes_attr ) && '' !== $sizes_attr ) ||
+				( isset( $heights_attr ) && '' !== $heights_attr )
+			)
 		) {
 			return AMP_Rule_Spec::LAYOUT_RESPONSIVE;
 		} else {
