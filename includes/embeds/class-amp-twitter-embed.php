@@ -53,9 +53,6 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Registers embed.
 	 */
 	public function register_embed() {
-		if ( ! class_exists( 'Jetpack_AMP_Tweet_Shortcode' ) ) {
-			add_shortcode( self::SHORTCODE_TAG, [ $this, 'shortcode' ] );
-		}
 		wp_embed_register_handler( 'amp-twitter', self::URL_PATTERN, [ $this, 'oembed' ], -1 );
 		wp_embed_register_handler( 'amp-twitter-timeline', self::URL_PATTERN_TIMELINE, [ $this, 'oembed_timeline' ], -1 );
 	}
@@ -64,9 +61,6 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Unregisters embed.
 	 */
 	public function unregister_embed() {
-		if ( ! class_exists( 'Jetpack_AMP_Tweet_Shortcode' ) ) {
-			remove_shortcode( self::SHORTCODE_TAG );
-		}
 		wp_embed_unregister_handler( 'amp-twitter', -1 );
 		wp_embed_unregister_handler( 'amp-twitter-timeline', -1 );
 	}
@@ -74,9 +68,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Gets AMP-compliant markup for the Twitter shortcode.
 	 *
-	 * Note that this shortcode is is defined in Jetpack.
-	 *
-	 * @deprecated 1.4.1 Moved to Jetpack_AMP_Tweet_Shortcode::filter_shortcode().
+	 * @deprecated 1.5.0 Moved to jetpack in Jetpack_Tweet::jetpack_tweet_shortcode().
 	 *
 	 * @param array $attr The Twitter attributes.
 	 * @return string Twitter shortcode markup.
