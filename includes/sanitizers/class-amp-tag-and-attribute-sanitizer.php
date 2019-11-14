@@ -647,7 +647,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// Identify attribute values that don't conform to the attr_spec.
-		$disallowed_attributes = $this->sanitize_disallowed_attribute_values_in_node( $node, $merged_attr_spec_list );
+		$disallowed_attributes = $this->sanitize_disallowed_attribute_values_in_node( $node, $tag_spec, $merged_attr_spec_list );
 
 		// Remove all invalid attributes.
 		if ( ! empty( $disallowed_attributes ) ) {
@@ -1058,11 +1058,30 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @see https://github.com/ampproject/amphtml/blob/b692bf32880910cd52273cb41935098b86fb6725/validator/engine/validator.js#L3210-L3289
 	 *
 	 * @param DOMElement $node           Node.
+	 * @param array[][]  $tag_spec       Tag spec list.
 	 * @param array[]    $attr_spec_list Attribute spec list.
 	 * @return array Tuples containing attribute to remove and error code.
 	 */
-	private function sanitize_disallowed_attribute_values_in_node( DOMElement $node, $attr_spec_list ) {
+	private function sanitize_disallowed_attribute_values_in_node( DOMElement $node, $tag_spec, $attr_spec_list ) {
 		$attrs_to_remove = [];
+
+		if (
+			! $node->hasAttribute( 'layout' ) &&
+			( $node->hasAttribute( 'width' ) || $node->hasAttribute( 'height' ) ) &&
+			isset( $tag_spec['amp_layout'] ) &&
+			! $this->has_valid_dimensions( $node )
+		) {
+			// If the dimensions are invalid, the node should be removed.
+			$this->remove_node( $node );
+			return false;
+		} elseif (
+			$node->hasAttribute( 'layout' ) &&
+			! $this->is_valid_layout( $tag_spec, $node )
+		) {
+			// If the layout is invalid, the node should be removed.
+			$this->remove_node( $node );
+			return false;
+		}
 
 		foreach ( $attr_spec_list as $attr_name => $attr_val ) {
 			if ( isset( $attr_spec_list[ $attr_name ][ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
@@ -1149,6 +1168,213 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		return $attrs_to_remove;
+	}
+
+	/**
+	 * Ensure the width and height for the element are valid.
+	 *
+	 * @param DOMElement $node Node.
+	 * @return bool True if both width and height are valid, false if either is not valid.
+	 */
+	private function has_valid_dimensions( $node ) {
+		$input_width = new AMP_CSS_Length(
+			$node->getAttribute( 'width' ),
+			true,
+			true
+		);
+
+		if ( ! $input_width->is_valid() ) {
+			return false;
+		}
+
+		$input_height = new AMP_CSS_Length(
+			$node->getAttribute( 'height' ),
+			true,
+			true
+		);
+
+		if ( ! $input_height->is_valid() ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Validates the layout for the given tag. This involves checking the
+	 * layout, width, height, sizes attributes with AMP specific logic.
+	 *
+	 * @param array[][]  $tag_spec Tag spec list.
+	 * @param DOMElement $node     Tag to validate.
+	 * @return bool True if layout is valid, false if validation fails.
+	 */
+	private function is_valid_layout( $tag_spec, $node ) {
+		$layout_attr = $node->getAttribute( 'layout' );
+
+		$input_width = new AMP_CSS_Length(
+			$node->getAttribute( 'width' ),
+			true,
+			AMP_Rule_Spec::LAYOUT_FLUID === $layout_attr
+		);
+
+		if ( ! $input_width->is_valid() ) {
+			return false;
+		}
+
+		$input_height = new AMP_CSS_Length(
+			$node->getAttribute( 'height' ),
+			true,
+			AMP_Rule_Spec::LAYOUT_FLUID === $layout_attr
+		);
+
+		if ( ! $input_height->is_valid() ) {
+			return false;
+		}
+
+		if ( isset( $tag_spec['amp_layout'] ) ) {
+			$sizes_attr   = $node->getAttribute( 'sizes' );
+			$heights_attr = $node->getAttribute( 'heights' );
+
+			// Now calculate the effective layout attributes.
+			$width  = $this->calculate_width( $tag_spec['amp_layout'], $layout_attr, $input_width );
+			$height = $this->calculate_height( $tag_spec['amp_layout'], $layout_attr, $input_height );
+			$layout = $this->calculate_layout( $layout_attr, $width, $height, $sizes_attr, $heights_attr );
+
+			// Only FLEX_ITEM allows for height to be set to auto.
+			if ( $height->is_auto() && AMP_Rule_Spec::LAYOUT_FLEX_ITEM !== $layout ) {
+				return false;
+			}
+
+			// FIXED, FIXED_HEIGHT, INTRINSIC, RESPONSIVE must have height set.
+			if (
+				(
+					AMP_Rule_Spec::LAYOUT_FIXED === $layout ||
+					AMP_Rule_Spec::LAYOUT_FIXED_HEIGHT === $layout ||
+					AMP_Rule_Spec::LAYOUT_INTRINSIC === $layout ||
+					AMP_Rule_Spec::LAYOUT_RESPONSIVE === $layout
+				) &&
+				! $height->is_set()
+			) {
+				return false;
+			}
+
+			// For FIXED_HEIGHT if width is set it must be auto.
+			if ( AMP_Rule_Spec::LAYOUT_FIXED_HEIGHT === $layout && $width->is_set() && ! $width->is_auto() ) {
+				$node->setAttribute( 'width', 'auto' );
+			}
+
+			// FIXED, INTRINSIC, RESPONSIVE must have width set and not be auto.
+			if (
+				AMP_Rule_Spec::LAYOUT_FIXED === $layout ||
+				AMP_Rule_Spec::LAYOUT_INTRINSIC === $layout ||
+				AMP_Rule_Spec::LAYOUT_RESPONSIVE === $layout
+			) {
+				if ( ! $width->is_set() || $width->is_auto() ) {
+					return false;
+				}
+			}
+
+			// INTRINSIC, RESPONSIVE must have same units for height and width.
+			if (
+				(
+					AMP_Rule_Spec::LAYOUT_INTRINSIC === $layout ||
+					AMP_Rule_Spec::LAYOUT_RESPONSIVE === $layout
+				) &&
+				$width->get_unit() !== $height->get_unit()
+			) {
+				return false;
+			}
+
+			// RESPONSIVE only allows heights attribute.
+			if ( ! empty( $heights_attr ) && AMP_Rule_Spec::LAYOUT_RESPONSIVE !== $layout ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Calculates the effective width from the input layout and input width.
+	 * This involves considering that some elements, such as amp-audio and
+	 * amp-pixel, have natural dimensions (browser or implementation-specific
+	 * defaults for width / height).
+	 *
+	 * @param array          $amp_layout_spec AMP layout specifications for tag.
+	 * @param string         $input_layout    Layout for tag.
+	 * @param AMP_CSS_Length $input_width     Parsed width.
+	 *
+	 * @return AMP_CSS_Length
+	 */
+	private function calculate_width( $amp_layout_spec, $input_layout, $input_width ) {
+		if (
+			( ! empty( $input_layout ) || AMP_Rule_Spec::LAYOUT_FIXED === $input_layout ) &&
+			! $input_width->is_set() &&
+			isset( $amp_layout_spec['defines_default_width'] )
+		) {
+			return new AMP_CSS_Length( '1px', false, false );
+		}
+
+		return $input_width;
+	}
+
+	/**
+	 * Calculates the effective height from input layout and input height.
+	 *
+	 * @param array          $amp_layout_spec AMP layout specifications for tag.
+	 * @param string         $input_layout    Layout for tag.
+	 * @param AMP_CSS_Length $input_height    Parsed height.
+	 *
+	 * @return AMP_CSS_Length
+	 */
+	private function calculate_height( $amp_layout_spec, $input_layout, $input_height ) {
+		if (
+			(
+				! empty( $input_layout ) ||
+				AMP_Rule_Spec::LAYOUT_FIXED === $input_layout ||
+				AMP_Rule_Spec::LAYOUT_FIXED_HEIGHT === $input_layout
+			) &&
+			! $input_height->is_set() &&
+			isset( $amp_layout_spec['defines_default_width'] )
+		) {
+			return new AMP_CSS_Length( '1px', false, false );
+		}
+
+		return $input_height;
+	}
+
+	/**
+	 * Calculates the layout; this depends on the width / height
+	 * calculation above. It happens last because web designers often make
+	 * fixed-sized mocks first and then the layout determines how things
+	 * will change for different viewports / devices / etc.
+	 *
+	 * @param string         $layout_attr  Layout attribute.
+	 * @param AMP_CSS_Length $width        Parsed width.
+	 * @param AMP_CSS_Length $height       Parsed height.
+	 * @param string         $sizes_attr   Sizes attribute.
+	 * @param string         $heights_attr Heights attribute.
+	 * @return string Layout type.
+	 */
+	private function calculate_layout( $layout_attr, $width, $height, $sizes_attr, $heights_attr ) {
+		if ( ! empty( $layout_attr ) ) {
+			return $layout_attr;
+		} elseif ( ! $width->is_set() && ! $height->is_set() ) {
+			return AMP_Rule_Spec::LAYOUT_CONTAINER;
+		} elseif (
+			( $height->is_set() && $height->is_fluid() ) || ( $width->is_set() && $width->is_fluid() )
+		) {
+			return AMP_Rule_Spec::LAYOUT_FLUID;
+		} elseif ( $height->is_set() && ( ! $width->is_set() || $width->is_auto() ) ) {
+			return AMP_Rule_Spec::LAYOUT_FIXED_HEIGHT;
+		} elseif (
+			$height->is_set() && $width->is_set() &&
+			( ! empty( $sizes_attr ) || ! empty( $heights_attr ) )
+		) {
+			return AMP_Rule_Spec::LAYOUT_RESPONSIVE;
+		} else {
+			return AMP_Rule_Spec::LAYOUT_FIXED;
+		}
 	}
 
 	/**

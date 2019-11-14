@@ -184,13 +184,6 @@ class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
 				'<amp-facebook-comments layout="responsive" width="600" height="400" data-href="https://developers.facebook.com/docs/plugins/comments#configurator" data-numposts="5"></amp-facebook-comments>',
 			],
 
-			'comments_full_width'   => [
-				'
-					<div class="fb-comments" data-href="https://developers.facebook.com/docs/plugins/comments#configurator" data-width="100%" data-numposts="5"></div>
-				',
-				'<amp-facebook-comments layout="fixed-height" width="auto" height="400" data-href="https://developers.facebook.com/docs/plugins/comments#configurator" data-numposts="5"></amp-facebook-comments>',
-			],
-
 			'comment_embed'         => [
 				'
 					<div class="fb-comment-embed" data-href="https://www.facebook.com/zuck/posts/10102735452532991?comment_id=1070233703036185" data-width="500"></div>

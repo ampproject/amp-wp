@@ -54,6 +54,19 @@ abstract class AMP_Rule_Spec {
 	const VALUE_URL               = 'value_url';
 
 	/**
+	 * AMP layout types
+	 */
+	const LAYOUT_NODISPLAY    = 'nodisplay';
+	const LAYOUT_FIXED        = 'fixed';
+	const LAYOUT_FIXED_HEIGHT = 'fixed-height';
+	const LAYOUT_RESPONSIVE   = 'responsive';
+	const LAYOUT_CONTAINER    = 'container';
+	const LAYOUT_FILL         = 'fill';
+	const LAYOUT_FLEX_ITEM    = 'flex-item';
+	const LAYOUT_FLUID        = 'fluid';
+	const LAYOUT_INTRINSIC    = 'intrinsic';
+
+	/**
 	 * Attribute name for AMP dev mode.
 	 *
 	 * @since 1.2.2

@@ -1430,7 +1430,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 					[
 						'<amp-img src="/img1.png" width="50" height="50" layout="fill"></amp-img>',
 						'<amp-img src="/img1.png" width="50" height="50" layout="fixed"></amp-img>',
-						'<amp-img src="/img1.png" width="50" height="50" layout="fixed-height"></amp-img>',
+						'<amp-img src="/img1.png" width="auto" height="50" layout="fixed-height"></amp-img>',
 						'<amp-img src="/img1.png" width="50" height="50" layout="flex-item"></amp-img>',
 						'<amp-img src="/img1.png" width="50" height="50" layout="intrinsic"></amp-img>',
 						'<amp-img src="/img1.png" width="50" height="50" layout="nodisplay"></amp-img>',
@@ -2034,6 +2034,26 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-social-share type="foo" data-param-text="Check out this article: TITLE - CANONICAL_URL"></amp-social-share>',
 				[ 'amp-social-share' ],
 				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_RELATIVE_URL ],
+			],
+
+			'illegal_width_attribute'                      => [
+				'<amp-img src="/img1.png" width="50%" height="50"></amp-img>',
+				'',
+			],
+
+			'illegal_height_attribute'                     => [
+				'<amp-img src="/img1.png" width="50" height="50%"></amp-img>',
+				'',
+			],
+
+			'illegal_width_attribute_with_layout'          => [
+				'<amp-img src="/img1.png" width="50" height="50%" layout="responsive"></amp-img>',
+				'',
+			],
+
+			'illegal_height_attribute_with_layout'         => [
+				'<amp-img src="/img1.png" width="50" height="50%" layout="responsive"></amp-img>',
+				'',
 			],
 		];
 	}
