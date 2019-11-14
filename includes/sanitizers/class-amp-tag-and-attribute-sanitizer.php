@@ -1076,6 +1076,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return false;
 		} elseif (
 			$node->hasAttribute( 'layout' ) &&
+			isset( $tag_spec['amp_layout'] ) &&
 			! $this->is_valid_layout( $tag_spec, $node )
 		) {
 			// If the layout is invalid, the node should be removed.
@@ -1237,64 +1238,62 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return false;
 		}
 
-		if ( isset( $tag_spec['amp_layout'] ) ) {
-			$sizes_attr   = $node->getAttribute( 'sizes' );
-			$heights_attr = $node->getAttribute( 'heights' );
+		$sizes_attr   = $node->getAttribute( 'sizes' );
+		$heights_attr = $node->getAttribute( 'heights' );
 
-			// Now calculate the effective layout attributes.
-			$width  = $this->calculate_width( $tag_spec['amp_layout'], $layout_attr, $input_width );
-			$height = $this->calculate_height( $tag_spec['amp_layout'], $layout_attr, $input_height );
-			$layout = $this->calculate_layout( $layout_attr, $width, $height, $sizes_attr, $heights_attr );
+		// Now calculate the effective layout attributes.
+		$width  = $this->calculate_width( $tag_spec['amp_layout'], $layout_attr, $input_width );
+		$height = $this->calculate_height( $tag_spec['amp_layout'], $layout_attr, $input_height );
+		$layout = $this->calculate_layout( $layout_attr, $width, $height, $sizes_attr, $heights_attr );
 
-			// Only FLEX_ITEM allows for height to be set to auto.
-			if ( $height->is_auto() && AMP_Rule_Spec::LAYOUT_FLEX_ITEM !== $layout ) {
-				return false;
-			}
+		// Only FLEX_ITEM allows for height to be set to auto.
+		if ( $height->is_auto() && AMP_Rule_Spec::LAYOUT_FLEX_ITEM !== $layout ) {
+			return false;
+		}
 
-			// FIXED, FIXED_HEIGHT, INTRINSIC, RESPONSIVE must have height set.
-			if (
-				(
-					AMP_Rule_Spec::LAYOUT_FIXED === $layout ||
-					AMP_Rule_Spec::LAYOUT_FIXED_HEIGHT === $layout ||
-					AMP_Rule_Spec::LAYOUT_INTRINSIC === $layout ||
-					AMP_Rule_Spec::LAYOUT_RESPONSIVE === $layout
-				) &&
-				! $height->is_set()
-			) {
-				return false;
-			}
-
-			// For FIXED_HEIGHT if width is set it must be auto.
-			if ( AMP_Rule_Spec::LAYOUT_FIXED_HEIGHT === $layout && $width->is_set() && ! $width->is_auto() ) {
-				$node->setAttribute( 'width', 'auto' );
-			}
-
-			// FIXED, INTRINSIC, RESPONSIVE must have width set and not be auto.
-			if (
+		// FIXED, FIXED_HEIGHT, INTRINSIC, RESPONSIVE must have height set.
+		if (
+			(
 				AMP_Rule_Spec::LAYOUT_FIXED === $layout ||
+				AMP_Rule_Spec::LAYOUT_FIXED_HEIGHT === $layout ||
 				AMP_Rule_Spec::LAYOUT_INTRINSIC === $layout ||
 				AMP_Rule_Spec::LAYOUT_RESPONSIVE === $layout
-			) {
-				if ( ! $width->is_set() || $width->is_auto() ) {
-					return false;
-				}
-			}
+			) &&
+			! $height->is_set()
+		) {
+			return false;
+		}
 
-			// INTRINSIC, RESPONSIVE must have same units for height and width.
-			if (
-				(
-					AMP_Rule_Spec::LAYOUT_INTRINSIC === $layout ||
-					AMP_Rule_Spec::LAYOUT_RESPONSIVE === $layout
-				) &&
-				$width->get_unit() !== $height->get_unit()
-			) {
+		// For FIXED_HEIGHT if width is set it must be auto.
+		if ( AMP_Rule_Spec::LAYOUT_FIXED_HEIGHT === $layout && $width->is_set() && ! $width->is_auto() ) {
+			$node->setAttribute( 'width', 'auto' );
+		}
+
+		// FIXED, INTRINSIC, RESPONSIVE must have width set and not be auto.
+		if (
+			AMP_Rule_Spec::LAYOUT_FIXED === $layout ||
+			AMP_Rule_Spec::LAYOUT_INTRINSIC === $layout ||
+			AMP_Rule_Spec::LAYOUT_RESPONSIVE === $layout
+		) {
+			if ( ! $width->is_set() || $width->is_auto() ) {
 				return false;
 			}
+		}
 
-			// RESPONSIVE only allows heights attribute.
-			if ( ( isset( $heights_attr ) && '' !== $heights_attr ) && AMP_Rule_Spec::LAYOUT_RESPONSIVE !== $layout ) {
-				return false;
-			}
+		// INTRINSIC, RESPONSIVE must have same units for height and width.
+		if (
+			(
+				AMP_Rule_Spec::LAYOUT_INTRINSIC === $layout ||
+				AMP_Rule_Spec::LAYOUT_RESPONSIVE === $layout
+			) &&
+			$width->get_unit() !== $height->get_unit()
+		) {
+			return false;
+		}
+
+		// RESPONSIVE only allows heights attribute.
+		if ( ( isset( $heights_attr ) && '' !== $heights_attr ) && AMP_Rule_Spec::LAYOUT_RESPONSIVE !== $layout ) {
+			return false;
 		}
 
 		return true;
