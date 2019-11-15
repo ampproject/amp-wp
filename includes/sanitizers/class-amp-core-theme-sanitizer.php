@@ -1594,7 +1594,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	public function add_twentytwenty_modals() {
 		$modals = $this->xpath->query( "//*[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' cover-modal ' ) ]" );
 
-		if ( false === $modals || 0 === $modals->count() ) {
+		if ( false === $modals || 0 === $modals->length ) {
 			return;
 		}
 
@@ -1672,7 +1672,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$toggles = $this->xpath->query( '//*[ @data-toggle-target ]' );
 		$body_id = AMP_DOM_Utils::get_element_id( $this->get_body_node(), 'body' );
 
-		if ( false === $toggles || 0 === $toggles->count() ) {
+		if ( false === $toggles || 0 === $toggles->length ) {
 			return;
 		}
 
