@@ -6,6 +6,7 @@
  */
 
 use AMP\Image_List;
+use AMP\Carousel;
 
 /**
  * Class AMP_Gallery_Embed_Handler
@@ -254,7 +255,7 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 			$images->add( $image, $caption );
 		}
 
-		$amp_carousel  = new AMP_Carousel( $dom );
+		$amp_carousel  = new Carousel( $dom );
 		$carousel_node = $amp_carousel->create_and_get( $images );
 
 		// Prevent an error in get_content_from_dom_node() when it calls $node->parentNode->insertBefore().

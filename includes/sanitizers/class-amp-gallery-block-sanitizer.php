@@ -6,6 +6,7 @@
  */
 
 use AMP\Image_List;
+use AMP\Carousel;
 
 /**
  * Class AMP_Gallery_Block_Sanitizer
@@ -127,7 +128,7 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			$amp_carousel      = new AMP_Carousel( $this->dom );
+			$amp_carousel      = new Carousel( $this->dom );
 			$amp_carousel_node = $amp_carousel->create_and_get( $images );
 
 			$gallery_node->parentNode->replaceChild( $amp_carousel_node, $gallery_node );

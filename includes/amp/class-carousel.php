@@ -1,18 +1,22 @@
 <?php
 /**
- * Class AMP_Carousel.
+ * Class Carousel.
  *
  * @package AMP
  */
 
+namespace AMP;
+
+use AMP_DOM_Utils;
+
 /**
- * Class AMP_Carousel
+ * Class Carousel
  *
  * Gets the markup for an <amp-carousel>.
  *
  * @since 1.5.0
  */
-class AMP_Carousel {
+class Carousel {
 
 	/**
 	 * Value used for width of amp-carousel.
@@ -31,14 +35,14 @@ class AMP_Carousel {
 	/**
 	 * An object representation of the DOM.
 	 *
-	 * @var DOMDocument
+	 * @var \DOMDocument
 	 */
 	protected $dom;
 
 	/**
 	 * Instantiates the class.
 	 *
-	 * @param DOMDocument $dom The dom to use to create a carousel.
+	 * @param \DOMDocument $dom The dom to use to create a carousel.
 	 */
 	public function __construct( $dom ) {
 		$this->dom = $dom;
@@ -47,10 +51,10 @@ class AMP_Carousel {
 	/**
 	 * Creates and gets an <amp-carousel> with the given images and captions.
 	 *
-	 * @param AMP\Image_List $images The images from which to create a carousel.
-	 * @return DOMElement An <amp-carousel> with the images.
+	 * @param Image_List $images The images from which to create a carousel.
+	 * @return \DOMElement An <amp-carousel> with the images.
 	 */
-	public function create_and_get( AMP\Image_List $images ) {
+	public function create_and_get( Image_List $images ) {
 		list( $width, $height ) = $this->get_dimensions( $images );
 		$amp_carousel           = AMP_DOM_Utils::create_node(
 			$this->dom,
@@ -65,7 +69,7 @@ class AMP_Carousel {
 
 		foreach ( $images as $image ) {
 			$image_node = $image->get_image_node();
-			$caption    = $image instanceof AMP\Has_Caption ? $image->get_caption() : null;
+			$caption    = $image instanceof Has_Caption ? $image->get_caption() : null;
 			$slide      = AMP_DOM_Utils::create_node(
 				$this->dom,
 				'div',
@@ -111,7 +115,7 @@ class AMP_Carousel {
 	 * This will return the width and height of the image with the widest aspect ratio,
 	 * not necessarily the image with the biggest absolute width.
 	 *
-	 * @param AMP\Image_List $images The images to get the dimensions from.
+	 * @param Image_List $images The images to get the dimensions from.
 	 * @return array {
 	 *     The carousel dimensions.
 	 *
@@ -119,7 +123,7 @@ class AMP_Carousel {
 	 *     @type int $height The height of the carousel, at index 1.
 	 * }
 	 */
-	public function get_dimensions( AMP\Image_List $images ) {
+	public function get_dimensions( Image_List $images ) {
 		if ( 0 === count( $images ) ) {
 			return [ self::FALLBACK_WIDTH, self::FALLBACK_HEIGHT ];
 		}
