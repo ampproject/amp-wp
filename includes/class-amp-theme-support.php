@@ -1616,12 +1616,7 @@ class AMP_Theme_Support {
 
 		$xpath = new DOMXPath( $dom );
 
-		// Make sure the HEAD element is in the doc.
 		$head = $dom->getElementsByTagName( 'head' )->item( 0 );
-		if ( ! $head ) {
-			$head = $dom->createElement( 'head' );
-			$dom->documentElement->insertBefore( $head, $dom->documentElement->firstChild );
-		}
 
 		// Ensure there is a schema.org script in the document.
 		// @todo Consider applying the amp_schemaorg_metadata filter on the contents when a script is already present.
@@ -1679,14 +1674,11 @@ class AMP_Theme_Support {
 		 *
 		 * {@link https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/optimize_amp/ Optimize the AMP Runtime loading}
 		 */
-		$meta_charset         = null;
 		$meta_viewport        = null;
 		$meta_amp_script_srcs = [];
 		$meta_elements        = [];
 		foreach ( $head->getElementsByTagName( 'meta' ) as $meta ) {
-			if ( $meta->hasAttribute( 'charset' ) ) { // There will not be a meta[http-equiv] because the sanitizer removed it.
-				$meta_charset = $meta;
-			} elseif ( 'viewport' === $meta->getAttribute( 'name' ) ) {
+			if ( 'viewport' === $meta->getAttribute( 'name' ) ) {
 				$meta_viewport = $meta;
 			} elseif ( 'amp-script-src' === $meta->getAttribute( 'name' ) ) {
 				$meta_amp_script_srcs[] = $meta;
@@ -1694,36 +1686,6 @@ class AMP_Theme_Support {
 				$meta_elements[] = $meta;
 			}
 		}
-
-		// Handle meta charset.
-		if ( ! $meta_charset ) {
-			// Warning: This probably means the character encoding needs to be converted.
-			$meta_charset = AMP_DOM_Utils::create_node(
-				$dom,
-				'meta',
-				[
-					'charset' => 'utf-8',
-				]
-			);
-		} else {
-			$head->removeChild( $meta_charset ); // So we can move it.
-		}
-		$head->insertBefore( $meta_charset, $head->firstChild );
-
-		// Handle meta viewport.
-		if ( ! $meta_viewport ) {
-			$meta_viewport = AMP_DOM_Utils::create_node(
-				$dom,
-				'meta',
-				[
-					'name'    => 'viewport',
-					'content' => 'width=device-width',
-				]
-			);
-		} else {
-			$head->removeChild( $meta_viewport ); // So we can move it.
-		}
-		$head->insertBefore( $meta_viewport, $meta_charset->nextSibling );
 
 		// Handle meta amp-script-src elements.
 		$first_meta_amp_script_src = array_shift( $meta_amp_script_srcs );

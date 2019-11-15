@@ -31,6 +31,20 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	];
 
 	/**
+	 * Reference to the shared XPath object to query the DOM.
+	 *
+	 * @var DOMXPath
+	 */
+	protected $xpath;
+
+	/**
+	 * The document's <head> element.
+	 *
+	 * @var DOMElement
+	 */
+	protected $head;
+
+	/**
 	 * Charset to use for AMP markup.
 	 *
 	 * @var string
@@ -38,19 +52,47 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	const AMP_CHARSET = 'utf-8';
 
 	/**
+	 * Viewport settings to use for AMP markup.
+	 *
+	 * @var string
+	 */
+	const AMP_VIEWPORT = 'width=device-width';
+
+	/**
 	 * Sanitize.
 	 */
 	public function sanitize() {
+		$this->xpath = new DOMXPath( $this->dom );
+		$this->head  = $this->ensure_head_is_present();
+
 		foreach ( $this->dom->getElementsByTagName( static::$tag ) as $element ) {
 			$this->sanitize_element( $element );
 		}
 
-		$charset = $this->ensure_charset_is_present();
+		$charset_element = $this->ensure_charset_is_present_and_first_in_head();
 
-		if ( static::AMP_CHARSET !== strtolower( $charset ) ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement
+		if ( ! $this->is_correct_charset( $charset_element ) ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement
 			// @TODO Re-encode the content into UTF-8.
 			// ... sure?
 		}
+
+		$this->ensure_viewport_is_present_and_after_charset( $charset_element );
+	}
+
+	/**
+	 * Ensure that the <head> element is present in the document.
+	 *
+	 * @return DOMElement The document's <head> element.
+	 */
+	protected function ensure_head_is_present() {
+		$head = $this->dom->getElementsByTagName( 'head' )->item( 0 );
+
+		if ( ! $head ) {
+			$head = $this->dom->createElement( 'head' );
+			$head = $this->dom->documentElement->insertBefore( $head, $this->dom->documentElement->firstChild );
+		}
+
+		return $head;
 	}
 
 	/**
@@ -64,13 +106,13 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 			$charset = $element->getAttribute( 'charset' );
 			if ( $charset ) {
 				// If we have a charset attribute included, use that as a separate tag.
-				$element->parentNode->appendChild( $this->create_charset_node( $charset ) );
+				$element->parentNode->appendChild( $this->create_charset_element( $charset ) );
 			} else {
 				// If not, check whether the charset is included with the content type, and use that.
 				$content = $element->getAttribute( 'content' );
 				$matches = [];
 				if ( preg_match( '/;\s*charset=(?<charset>[^;]+)/', $content, $matches ) && ! empty( $matches['charset'] ) ) {
-					$element->parentNode->appendChild( $this->create_charset_node( $matches['charset'] ) );
+					$element->parentNode->appendChild( $this->create_charset_element( $matches['charset'] ) );
 				}
 			}
 			// In case we haven't found a charset by now, a default utf-8 one will be added in a later step.
@@ -81,30 +123,45 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Always ensure that we have an HTML 5 charset meta tag.
+	 * Always ensure that we have an HTML 5 charset meta tag, and force it to be the first in <head>.
 	 *
 	 * The charset defaults to utf-8, which is also what AMP requires.
 	 *
-	 * @return string The charset that was detected or added.
+	 * @return DOMElement The charset element that was detected or added.
 	 */
-	protected function ensure_charset_is_present() {
-		$xpath = new DOMXPath( $this->dom );
-
-		// Bail early if we already have a meta charset.
-		$charset_element = $xpath->query( '//meta[ @charset ]' )->item( 0 );
+	protected function ensure_charset_is_present_and_first_in_head() {
+		// Retrieve the charset element or create a new one.
+		$charset_element = $this->xpath->query( '//meta[ @charset ]' )->item( 0 );
 		if ( $charset_element ) {
-			return $charset_element->getAttribute( 'charset' );
+			$charset_element->parentNode->removeChild( $charset_element ); // So that we can move it.
+		} else {
+			$charset_element = $this->create_charset_element( static::AMP_CHARSET );
 		}
 
-		$parent = $xpath->query( '//html/head' )->item( 0 );
-		if ( ! $parent ) {
-			// We did not detect the actual head node to attach the meta tag to, so we just
-			// add it to the document and assume the other sanitizers will figure it out.
-			$parent = $this->dom->childNodes->item( 0 );
+		// (Re)insert the charset as first element of the head.
+		$charset_element = $this->head->insertBefore( $charset_element, $this->head->firstChild );
+
+		return $charset_element;
+	}
+
+	/**
+	 * Always ensure we have a viewport tag and force it to be the second in <head> (after charset).
+	 *
+	 * The viewport defaults to 'width=device-width', which is the bare minimum that AMP requires.
+	 *
+	 * @param DOMElement $charset_element The charset meta tag element to append the viewport to.
+	 */
+	protected function ensure_viewport_is_present_and_after_charset( DOMElement $charset_element ) {
+		// Retrieve the viewport element or create a new one.
+		$viewport_element = $this->xpath->query( '//meta[ @name = "viewport" ]' )->item( 0 );
+		if ( $viewport_element ) {
+			$viewport_element->parentNode->removeChild( $viewport_element ); // So that we can move it.
+		} else {
+			$viewport_element = $this->create_viewport_element( static::AMP_VIEWPORT );
 		}
 
-		// No charset found, so add the default one.
-		$parent->appendChild( $this->create_charset_node( static::AMP_CHARSET ) );
+		// (Re)insert the viewport as first element of the head.
+		$this->head->insertBefore( $viewport_element, $charset_element->nextSibling );
 	}
 
 	/**
@@ -113,9 +170,40 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string $charset Character set to use.
 	 * @return DOMElement New meta tag with requested charset.
 	 */
-	protected function create_charset_node( $charset ) {
-		$charset_node = $this->dom->createElement( 'meta' );
-		$charset_node->setAttribute( 'charset', strtolower( $charset ) );
-		return $charset_node;
+	protected function create_charset_element( $charset ) {
+		return AMP_DOM_Utils::create_node(
+			$this->dom,
+			'meta',
+			[
+				'charset' => strtolower( $charset ),
+			]
+		);
+	}
+
+	/**
+	 * Create a new meta tag for the viewport setting.
+	 *
+	 * @param string $viewport Viewport setting to use.
+	 * @return DOMElement New meta tag with requested viewport setting.
+	 */
+	protected function create_viewport_element( $viewport ) {
+		return AMP_DOM_Utils::create_node(
+			$this->dom,
+			'meta',
+			[
+				'name'    => 'viewport',
+				'content' => $viewport,
+			]
+		);
+	}
+
+	/**
+	 * Check whether the charset is the correct one according to AMP requirements.
+	 *
+	 * @param DOMElement $charset_element Charset meta tag element.
+	 * @return bool Whether the charset is the correct one.
+	 */
+	protected function is_correct_charset( DOMElement $charset_element ) {
+		return static::AMP_CHARSET === strtolower( $charset_element->getAttribute( 'charset' ) );
 	}
 }
