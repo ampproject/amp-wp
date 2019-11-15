@@ -2536,12 +2536,13 @@ class AMP_Theme_Support {
 			}
 		);
 
-		// Whitelist enqueued scripts so that they are not removed.
-		add_filter( 'script_loader_tag', [ __CLASS__, 'filter_paired_browsing_client_script_loader_tags' ], 10, 2 );
+		// Whitelist enqueued script so that it is not removed.
+		add_filter( 'script_loader_tag', [ __CLASS__, 'filter_paired_browsing_client_script_loader_tag' ], 10, 2 );
 	}
 
 	/**
-	 * Add data-ampdevmode attribute to any enqueued script that the paired browsing interface uses.
+	 * Add the `data-ampdevmode` attribute to any enqueued script that the paired browsing interface
+	 * depends on.
 	 *
 	 * @since 1.3
 	 *
@@ -2549,12 +2550,8 @@ class AMP_Theme_Support {
 	 * @param string $handle The script's registered handle.
 	 * @return string Tag.
 	 */
-	public static function filter_paired_browsing_client_script_loader_tags( $tag, $handle ) {
-		$asset_file = AMP__DIR__ . '/assets/js/amp-paired-browsing-client.asset.php';
-		$asset      = require $asset_file;
-		$handles    = array_merge( [ 'amp-paired-browsing-client' ], $asset['dependencies'] );
-
-		if ( in_array( $handle, $handles, true ) ) {
+	public static function filter_paired_browsing_client_script_loader_tag( $tag, $handle ) {
+		if ( self::has_dependency( wp_scripts(), 'amp-paired-browsing-client', $handle ) ) {
 			$tag = preg_replace( '/(?<=<script)(?=\s|>)/i', ' ' . AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, $tag );
 		}
 
