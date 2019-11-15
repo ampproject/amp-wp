@@ -20,19 +20,19 @@ class Test_AMP_Meta_Sanitizer extends WP_UnitTestCase {
 			// Turn HTML 4 charset into HTML 5 charset.
 			[
 				'<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body></body></html>',
-				'<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body></body></html>'
+				'<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body></body></html>',
 			],
 			[
 				'<!DOCTYPE html><html><head><meta http-equiv="content-type" content="text/html"></head><body></body></html>',
-				'<!DOCTYPE html><html><head><meta charset="utf-8"></head><body></body></html>'
+				'<!DOCTYPE html><html><head><meta charset="utf-8"></head><body></body></html>',
 			],
 			[
 				'<!DOCTYPE html><html><head><meta http-equiv="content-type" content="text/html; charset=UTF-8"></head><body></body></html>',
-				'<!DOCTYPE html><html><head><meta charset="utf-8"></head><body></body></html>'
+				'<!DOCTYPE html><html><head><meta charset="utf-8"></head><body></body></html>',
 			],
 			[
 				'<!DOCTYPE html><html><head><meta http-equiv="content-type" content="text/html; charset=UTF-8" charset="UTF-8"></head><body></body></html>',
-				'<!DOCTYPE html><html><head><meta charset="utf-8"></head><body></body></html>'
+				'<!DOCTYPE html><html><head><meta charset="utf-8"></head><body></body></html>',
 			],
 		];
 	}
