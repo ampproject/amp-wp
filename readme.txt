@@ -3,7 +3,7 @@ Contributors: google, xwp, automattic, westonruter, swissspidy, miinasikk, ryank
 Tags: amp, stories, mobile, optimization, accelerated mobile pages, framework, components, blocks, performance, ux, seo, official
 Requires at least: 4.9
 Tested up to: 5.3
-Stable tag: 1.4.0
+Stable tag: 1.4.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires PHP: 5.4
@@ -51,9 +51,10 @@ If you are a developer, we encourage you to [follow along](https://github.com/am
 9. Make the entire site available in AMP or pick specific post types and templates; you can also opt-out on per-post basis.
 10. Plugin checks for AMP validity and will indicate when: no issues are found, new issues need review, or issues block AMP from being served.
 11. The editor will surface validation issues during content authoring. The specific blocks with validation errors are indicated.
-12. Each Validated URL shows the list of validation errors encountered, giving control over whether invalid markup is removed or kept.
-13. Styles added by themes and plugins are automatically concatenated, minified, and tree-shaken to try to keep the total under 50KB of inline CSS.
-14. A WP-CLI command is provided to check the URLs on a site for AMP validity. Results are available in the admin for inspection.
+12. Each Validated URL shows the list of validation errors encountered, giving control over whether invalid markup is removed or kept. Keeping invalid markup disables AMP.
+13. Each validation error provides a stack trace to identify which code is responsible for the invalid markup, whether a theme, plugin, embed, content block, and so on.
+14. Styles added by themes and plugins are automatically concatenated, minified, and tree-shaken to try to keep the total under 50KB of inline CSS.
+15. A WP-CLI command is provided to check the URLs on a site for AMP validity. Results are available in the admin for inspection.
 
 == Changelog ==
 

@@ -1097,19 +1097,15 @@ class AMP_Validated_URL_Post_Type {
 			}
 		}
 		if ( isset( $sources['theme'] ) && empty( $sources['embed'] ) ) {
-			$output[] = '<div class="source">';
-			$output[] = '<span class="dashicons dashicons-admin-appearance"></span>';
-			$themes   = array_unique( $sources['theme'] );
-			foreach ( $themes as $theme_slug ) {
+			foreach ( array_unique( $sources['theme'] ) as $theme_slug ) {
 				$theme_obj = wp_get_theme( $theme_slug );
 				if ( ! $theme_obj->errors() ) {
 					$theme_name = $theme_obj->get( 'Name' );
 				} else {
 					$theme_name = $theme_slug;
 				}
-				$output[] = sprintf( '<strong>%s</strong>', esc_html( $theme_name ) );
+				$output[] = sprintf( '<strong class="source"><span class="dashicons dashicons-admin-appearance"></span>%s</strong>', esc_html( $theme_name ) );
 			}
-			$output[] = '</div>';
 		}
 		if ( isset( $sources['core'] ) ) {
 			$core_sources = array_unique( $sources['core'] );
@@ -1358,13 +1354,14 @@ class AMP_Validated_URL_Post_Type {
 			}
 
 			// @todo Update this to use the method which will be developed in PR #1429 AMP_Validation_Error_Taxonomy::get_term_error() .
-			$description      = json_decode( $error->description, true );
-			$sanitization     = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $description );
-			$status_text      = AMP_Validation_Error_Taxonomy::get_status_text_with_icon( $sanitization );
-			$error_code       = isset( $description['code'] ) ? $description['code'] : 'error';
-			$error_title      = AMP_Validation_Error_Taxonomy::get_error_title_from_code( $error_code );
 			$validation_error = json_decode( $error->description, true );
-			$accept_all_url   = wp_nonce_url(
+			if ( ! is_array( $validation_error ) ) {
+				$validation_error = [];
+			}
+			$sanitization   = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $validation_error );
+			$status_text    = AMP_Validation_Error_Taxonomy::get_status_text_with_icon( $sanitization );
+			$error_title    = AMP_Validation_Error_Taxonomy::get_error_title_from_code( $validation_error );
+			$accept_all_url = wp_nonce_url(
 				add_query_arg(
 					[
 						'action'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION,
@@ -1373,7 +1370,7 @@ class AMP_Validated_URL_Post_Type {
 				),
 				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION
 			);
-			$reject_all_url   = wp_nonce_url(
+			$reject_all_url = wp_nonce_url(
 				add_query_arg(
 					[
 						'action'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION,
@@ -1400,6 +1397,7 @@ class AMP_Validated_URL_Post_Type {
 					);
 				}
 				if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS !== $sanitization['term_status'] ) {
+					$info .= ' ';
 					if ( amp_is_canonical() ) {
 						$info .= __( 'Keeping invalid markup means that any URL on which it occurs will not be served as AMP.', 'amp' );
 					} else {
@@ -1432,12 +1430,7 @@ class AMP_Validated_URL_Post_Type {
 			</div>
 			<?php
 
-			$heading = sprintf(
-				'%s: <code>%s</code>%s',
-				esc_html( $error_title ),
-				esc_html( $description['node_name'] ),
-				wp_kses_post( $status_text )
-			);
+			$heading = wp_kses_post( $error_title ) . ' ' . wp_kses_post( $status_text );
 			?>
 			<script type="text/javascript">
 				jQuery( function( $ ) {

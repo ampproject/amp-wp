@@ -61,7 +61,8 @@ describe( 'Featured Image Automatically Set', () => {
 			await expect( page ).not.toMatch( FEATURED_IMAGE_NOTICE_TEXT );
 
 			// The featured image on the page should be set as the image that was uploaded to the Image block.
-			expect( await getFeaturedImageFromDocument() ).toContain( uploadedImage );
+			const expectedImage = uploadedImage.replace( '.jpg', '-150x150.jpg' );
+			expect( await getFeaturedImageFromDocument() ).toContain( expectedImage );
 
 			// The featured image in the store should not be 0, meaning it is set.
 			expect( await getFeaturedImageFromStore() ).not.toStrictEqual( 0 );
@@ -93,7 +94,8 @@ describe( 'Featured Image Automatically Set', () => {
 			await expect( page ).not.toMatch( FEATURED_IMAGE_NOTICE_TEXT );
 
 			// The featured image on the page should be set as the image that was uploaded as the 'Background Media'.
-			expect( await getFeaturedImageFromDocument() ).toContain( uploadedImage );
+			const expectedImage = uploadedImage.replace( '.jpg', '-150x150.jpg' );
+			expect( await getFeaturedImageFromDocument() ).toContain( expectedImage );
 
 			// The featured image in the store should not be 0, meaning it is set.
 			expect( await getFeaturedImageFromStore() ).not.toStrictEqual( 0 );

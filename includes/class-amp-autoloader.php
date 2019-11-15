@@ -56,7 +56,7 @@ class AMP_Autoloader {
 		'AMP_Reddit_Embed_Handler'           => 'includes/embeds/class-amp-reddit-embed-handler',
 		'AMP_SoundCloud_Embed_Handler'       => 'includes/embeds/class-amp-soundcloud-embed',
 		'AMP_Tumblr_Embed_Handler'           => 'includes/embeds/class-amp-tumblr-embed-handler',
-		'AMP_Twitter_Embed_Handler'          => 'includes/embeds/class-amp-twitter-embed',
+		'AMP_Twitter_Embed_Handler'          => 'includes/embeds/class-amp-twitter-embed-handler',
 		'AMP_Vimeo_Embed_Handler'            => 'includes/embeds/class-amp-vimeo-embed',
 		'AMP_Vine_Embed_Handler'             => 'includes/embeds/class-amp-vine-embed',
 		'AMP_WordPress_TV_Embed_Handler'     => 'includes/embeds/class-amp-wordpress-tv-embed-handler',

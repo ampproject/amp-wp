@@ -8,7 +8,11 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { AlignmentToolbar, BlockControls } from '@wordpress/block-editor';
-import { useEffect } from '@wordpress/element';
+import {
+	useEffect,
+	useState,
+	useCallback,
+} from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { dateI18n, __experimentalGetSettings as getDateSettings } from '@wordpress/date';
@@ -32,6 +36,7 @@ const MetaBlockEdit = ( props ) => {
 		customBackgroundColor,
 		textColor,
 		tagName,
+		isSelected,
 	} = props;
 
 	const {
@@ -88,6 +93,22 @@ const MetaBlockEdit = ( props ) => {
 		};
 	}, [ attribute ] );
 
+	const [ isEditing, setIsEditing ] = useState( false );
+
+	useEffect( () => {
+		// Unset `isEditing` when unselected.
+		if ( ! isSelected && isEditing ) {
+			setIsEditing( false );
+		}
+	}, [ isSelected, isEditing ] );
+
+	const handleOnClick = useCallback( () => {
+		// Set `isEditing` when click after being selected.
+		if ( isSelected && ! isEditing ) {
+			setIsEditing( true );
+		}
+	}, [ isSelected, isEditing ] );
+
 	useEffect( () => {
 		if ( ampFitText && ! isLoading ) {
 			maybeUpdateFontSize( props );
@@ -115,6 +136,7 @@ const MetaBlockEdit = ( props ) => {
 				/>
 			</BlockControls>
 			<ContentTag
+				onClick={ handleOnClick }
 				style={ {
 					backgroundColor: appliedBackgroundColor,
 					color: textColor.color,
@@ -129,6 +151,7 @@ const MetaBlockEdit = ( props ) => {
 					[ fontSize.class ]: fontSize.class,
 					'is-empty': ! content,
 					'is-amp-fit-text': ampFitText,
+					'is-editing': isEditing,
 				} ) }
 			>
 				{ content || placeholder }
@@ -148,6 +171,7 @@ MetaBlockEdit.propTypes = {
 		ampFontFamily: PropTypes.string,
 	} ).isRequired,
 	setAttributes: PropTypes.func.isRequired,
+	isSelected: PropTypes.bool.isRequired,
 	className: PropTypes.string,
 	tagName: PropTypes.string,
 	attribute: PropTypes.string,
