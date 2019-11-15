@@ -5,12 +5,16 @@
  * @package AMP
  */
 
+namespace AMP;
+
+use AMP_DOM_Utils;
+
 /**
  * Tests for AMP image collection classes.
  *
  * @covers AMP\Image_List, AMP\Captioned_Image, AMP\Image
  */
-class Test_Image_List extends WP_UnitTestCase {
+class Test_Image_List extends \WP_UnitTestCase {
 
 	/**
 	 * Gets the data to test adding images.
@@ -18,7 +22,7 @@ class Test_Image_List extends WP_UnitTestCase {
 	 * @return array[] An associative array, including the images and the expected count.
 	 */
 	public function get_image_list_data() {
-		$dom = new DOMDocument();
+		$dom = new \DOMDocument();
 		return [
 			'no_image' => [
 				[],
@@ -51,7 +55,7 @@ class Test_Image_List extends WP_UnitTestCase {
 	 * @param string  $expected_count The expected count after adding the images.
 	 */
 	public function test_image_list_add( $images, $expected_count ) {
-		$image_list = new AMP\Image_List();
+		$image_list = new Image_List();
 		foreach ( $images as $image ) {
 			$image_list->add( $image, '' );
 		}
@@ -70,7 +74,7 @@ class Test_Image_List extends WP_UnitTestCase {
 	 * @param string  $expected_count The expected count after adding the images.
 	 */
 	public function test_image_list_get_iterator( $images, $expected_count ) {
-		$image_list = new AMP\Image_List();
+		$image_list = new Image_List();
 		foreach ( $images as $image ) {
 			$image_list->add( $image, '' );
 		}
@@ -90,9 +94,9 @@ class Test_Image_List extends WP_UnitTestCase {
 	 * @covers \AMP\Captioned_Image::get_caption()
 	 */
 	public function test_get_caption() {
-		$image_node      = AMP_DOM_Utils::create_node( new DOMDocument(), 'amp-img', [] );
+		$image_node      = AMP_DOM_Utils::create_node( new \DOMDocument(), 'amp-img', [] );
 		$caption         = 'This is a caption';
-		$captioned_image = new AMP\Captioned_Image( $image_node, $caption );
+		$captioned_image = new Captioned_Image( $image_node, $caption );
 		$this->assertEquals( $caption, $captioned_image->get_caption() );
 	}
 
@@ -102,8 +106,8 @@ class Test_Image_List extends WP_UnitTestCase {
 	 * @covers \AMP\Image::get_image_node()
 	 */
 	public function test_get_image_node() {
-		$image_node = AMP_DOM_Utils::create_node( new DOMDocument(), 'amp-img', [] );
-		$amp_image  = new AMP\Image( $image_node );
+		$image_node = AMP_DOM_Utils::create_node( new \DOMDocument(), 'amp-img', [] );
+		$amp_image  = new Image( $image_node );
 		$this->assertEquals( $image_node, $amp_image->get_image_node() );
 	}
 }

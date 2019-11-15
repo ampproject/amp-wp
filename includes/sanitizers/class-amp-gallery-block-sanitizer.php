@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use AMP\Image_List;
+
 /**
  * Class AMP_Gallery_Block_Sanitizer
  *
@@ -104,7 +106,7 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			$images = new AMP\Image_List();
+			$images = new Image_List();
 
 			// If it's not AMP lightbox, look for links first.
 			if ( ! $is_amp_lightbox ) {
