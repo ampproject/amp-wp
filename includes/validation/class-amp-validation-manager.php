@@ -475,9 +475,6 @@ class AMP_Validation_Manager {
 			'id'     => 'amp-paired-browsing',
 			'title'  => esc_html__( 'Start paired browsing', 'amp' ),
 			'href'   => remove_query_arg( amp_get_slug(), add_query_arg( AMP_Theme_Support::PAIRED_BROWSING_QUERY_VAR, '1' ) ),
-			'meta'   => [
-				'target' => 'amp-paired-browsing',
-			],
 		];
 
 		// Add admin bar item to switch between AMP and non-AMP if parent node is also an AMP link.

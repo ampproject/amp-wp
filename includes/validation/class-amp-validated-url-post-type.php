@@ -1838,7 +1838,6 @@ class AMP_Validated_URL_Post_Type {
 							?>
 							<div id="paired-browsing-action">
 								<a class="button button-secondary"
-									target="amp-paired-browsing"
 									href="<?php echo esc_url( add_query_arg( AMP_Theme_Support::PAIRED_BROWSING_QUERY_VAR, '1', self::get_url_from_post( $post ) ) ); ?>"
 								>
 									<?php esc_html_e( 'Start paired browsing', 'amp' ); ?>
