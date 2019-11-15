@@ -91,12 +91,12 @@ class AMP_Twitter_Embed_Test extends WP_UnitTestCase {
 			],
 			'url_simple'                           => [
 				'https://twitter.com/wordpress/status/987437752164737025' . PHP_EOL,
-				'<p><amp-twitter data-tweetid="987437752164737025" layout="responsive" width="600" height="480">',
+				'<p><amp-twitter width="600" height="480" layout="responsive" data-tweetid="987437752164737025">',
 				"</amp-twitter></p>\n",
 			],
 			'url_with_big_tweet_id'                => [
 				'https://twitter.com/wordpress/status/705219971425574912' . PHP_EOL,
-				'<p><amp-twitter data-tweetid="705219971425574912" layout="responsive" width="600" height="480">',
+				'<p><amp-twitter width="600" height="480" layout="responsive" data-tweetid="705219971425574912">',
 				"</amp-twitter></p>\n",
 			],
 
@@ -227,22 +227,22 @@ class AMP_Twitter_Embed_Test extends WP_UnitTestCase {
 
 			'blockquote_embed'                        => [
 				wpautop( '<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">Celebrate the WordPress 15th Anniversary on May 27 <a href="https://t.co/jv62WkI9lr">https://t.co/jv62WkI9lr</a> <a href="https://t.co/4ZECodSK78">pic.twitter.com/4ZECodSK78</a></p>-- WordPress (@WordPress) <a href="https://twitter.com/WordPress/status/987437752164737025?ref_src=twsrc%5Etfw">April 20, 2018</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>' ), // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine
-				'<amp-twitter width="600" height="480" layout="responsive" data-tweetid="987437752164737025"><blockquote class="twitter-tweet" data-lang="en" placeholder=""><p lang="en" dir="ltr">Celebrate the WordPress 15th Anniversary on May 27 <a href="https://t.co/jv62WkI9lr">https://t.co/jv62WkI9lr</a> <a href="https://t.co/4ZECodSK78">pic.twitter.com/4ZECodSK78</a></p>-- WordPress (@WordPress) <a href="https://twitter.com/WordPress/status/987437752164737025?ref_src=twsrc%5Etfw">April 20, 2018</a></blockquote></amp-twitter>' . "\n\n",
+				'<amp-twitter width="600" height="480" layout="responsive" data-tweetid="987437752164737025" class="twitter-tweet" data-lang="en"><blockquote class="twitter-tweet" data-lang="en" placeholder="">' . "\n" . '<p lang="en" dir="ltr">Celebrate the WordPress 15th Anniversary on May 27 <a href="https://t.co/jv62WkI9lr">https://t.co/jv62WkI9lr</a> <a href="https://t.co/4ZECodSK78">pic.twitter.com/4ZECodSK78</a></p>' . "\n" . '<p>-- WordPress (@WordPress) <a href="https://twitter.com/WordPress/status/987437752164737025?ref_src=twsrc%5Etfw">April 20, 2018</a></p></blockquote></amp-twitter>' . "\n\n",
 			],
 
 			'blockquote_embed_with_data_conversation' => [
 				wpautop( '<blockquote class="twitter-tweet" data-conversation="none"><p lang="en" dir="ltr">Celebrate the WordPress 15th Anniversary on May 27 <a href="https://t.co/jv62WkI9lr">https://t.co/jv62WkI9lr</a> <a href="https://t.co/4ZECodSK78">pic.twitter.com/4ZECodSK78</a></p>&mdash; WordPress (@WordPress) <a href="https://twitter.com/WordPress/status/987437752164737025?ref_src=twsrc%5Etfw">April 20, 2018</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>' ), // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine
-				'<amp-twitter width="600" height="480" layout="responsive" data-tweetid="987437752164737025" class="twitter-tweet" data-conversation="none"></amp-twitter>' . "\n\n",
+				'<amp-twitter width="600" height="480" layout="responsive" data-tweetid="987437752164737025" class="twitter-tweet" data-conversation="none"><blockquote class="twitter-tweet" data-conversation="none" placeholder="">' . "\n" . '<p lang="en" dir="ltr">Celebrate the WordPress 15th Anniversary on May 27 <a href="https://t.co/jv62WkI9lr">https://t.co/jv62WkI9lr</a> <a href="https://t.co/4ZECodSK78">pic.twitter.com/4ZECodSK78</a></p>' . "\n" . '<p>— WordPress (@WordPress) <a href="https://twitter.com/WordPress/status/987437752164737025?ref_src=twsrc%5Etfw">April 20, 2018</a></p></blockquote></amp-twitter>' . "\n\n",
 			],
 
 			'blockquote_embed_with_data_theme'        => [
 				wpautop( '<blockquote class="twitter-tweet" data-theme="en"><p lang="en" dir="ltr">Celebrate the WordPress 15th Anniversary on May 27 <a href="https://t.co/jv62WkI9lr">https://t.co/jv62WkI9lr</a> <a href="https://t.co/4ZECodSK78">pic.twitter.com/4ZECodSK78</a></p>&mdash; WordPress (@WordPress) <a href="https://twitter.com/WordPress/status/987437752164737025?ref_src=twsrc%5Etfw">April 20, 2018</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>' ), // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine
-				'<amp-twitter width="600" height="480" layout="responsive" data-tweetid="987437752164737025" class="twitter-tweet" data-theme="en"></amp-twitter>' . "\n\n",
+				'<amp-twitter width="600" height="480" layout="responsive" data-tweetid="987437752164737025" class="twitter-tweet" data-theme="en"><blockquote class="twitter-tweet" data-theme="en" placeholder="">' . "\n" . '<p lang="en" dir="ltr">Celebrate the WordPress 15th Anniversary on May 27 <a href="https://t.co/jv62WkI9lr">https://t.co/jv62WkI9lr</a> <a href="https://t.co/4ZECodSK78">pic.twitter.com/4ZECodSK78</a></p>' . "\n" . '<p>— WordPress (@WordPress) <a href="https://twitter.com/WordPress/status/987437752164737025?ref_src=twsrc%5Etfw">April 20, 2018</a></p></blockquote></amp-twitter>' . "\n\n",
 			],
 
 			'blockquote_embed_not_autop'              => [
 				'<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">Celebrate the WordPress 15th Anniversary on May 27 <a href="https://t.co/jv62WkI9lr">https://t.co/jv62WkI9lr</a> <a href="https://t.co/4ZECodSK78">pic.twitter.com/4ZECodSK78</a></p>-- WordPress (@WordPress) <a href="https://twitter.com/WordPress/status/987437752164737025?ref_src=twsrc%5Etfw">April 20, 2018</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine
-				'<amp-twitter width="600" height="480" layout="responsive" data-tweetid="987437752164737025"><blockquote class="twitter-tweet" data-lang="en" placeholder=""><p lang="en" dir="ltr">Celebrate the WordPress 15th Anniversary on May 27 <a href="https://t.co/jv62WkI9lr">https://t.co/jv62WkI9lr</a> <a href="https://t.co/4ZECodSK78">pic.twitter.com/4ZECodSK78</a></p>-- WordPress (@WordPress) <a href="https://twitter.com/WordPress/status/987437752164737025?ref_src=twsrc%5Etfw">April 20, 2018</a></blockquote></amp-twitter> ',
+				'<amp-twitter width="600" height="480" layout="responsive" data-tweetid="987437752164737025" class="twitter-tweet" data-lang="en"><blockquote class="twitter-tweet" data-lang="en" placeholder=""><p lang="en" dir="ltr">Celebrate the WordPress 15th Anniversary on May 27 <a href="https://t.co/jv62WkI9lr">https://t.co/jv62WkI9lr</a> <a href="https://t.co/4ZECodSK78">pic.twitter.com/4ZECodSK78</a></p>-- WordPress (@WordPress) <a href="https://twitter.com/WordPress/status/987437752164737025?ref_src=twsrc%5Etfw">April 20, 2018</a></blockquote></amp-twitter> ',
 			],
 		];
 	}
