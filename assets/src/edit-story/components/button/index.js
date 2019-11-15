@@ -3,6 +3,12 @@
  */
 import styled from 'styled-components';
 
+/**
+ * Internal dependencies
+ */
+import UndoIcon from './undo.svg';
+import RedoIcon from './redo.svg';
+
 const Base = styled.button.attrs(
 	( { isDisabled } ) => ( { disabled: isDisabled } ),
 )`
@@ -11,7 +17,7 @@ const Base = styled.button.attrs(
 	border-radius: 4px;
 	background: transparent;
 	display: block;
-	min-width: 63px;
+	min-width: ${ ( { isIcon } ) => isIcon ? 'initial' : '63px' };
 	line-height: 28px;
 	height: 30px;
 	padding: 0 10px;
@@ -19,6 +25,10 @@ const Base = styled.button.attrs(
 
 	&:focus, &:active {
 		outline: none;
+	}
+
+	svg {
+		width: 1em;
 	}
 
 	${ ( { disabled } ) => disabled && `
@@ -43,3 +53,15 @@ export const Outline = styled( Base )`
 	border-color: ${ ( { theme } ) => theme.colors.fg.v2 };
 	color: ${ ( { theme } ) => theme.colors.fg.v1 };
 `;
+
+export const Undo = ( props ) => (
+	<Outline isIcon { ...props }>
+		<UndoIcon />
+	</Outline>
+);
+
+export const Redo = ( props ) => (
+	<Outline isIcon { ...props }>
+		<RedoIcon />
+	</Outline>
+);

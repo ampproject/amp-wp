@@ -11,7 +11,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { Outline, Primary } from '../button';
+import { Outline, Primary, Undo, Redo } from '../button';
 import useHistory from '../history';
 
 const Head = styled.header`
@@ -51,29 +51,25 @@ function Header() {
 	);
 }
 
-function Undo() {
+function Undoer() {
 	const { state: { canUndo }, actions: { undo } } = useHistory();
 	return (
-		<Outline onClick={ undo } isDisabled={ ! canUndo }>
-			{ __( 'Undo' ) }
-		</Outline>
+		<Undo onClick={ undo } isDisabled={ ! canUndo } />
 	);
 }
 
-function Redo() {
+function Redoer() {
 	const { state: { canRedo }, actions: { redo } } = useHistory();
 	return (
-		<Outline onClick={ redo } isDisabled={ ! canRedo }>
-			{ __( 'Redo' ) }
-		</Outline>
+		<Redo onClick={ redo } isDisabled={ ! canRedo } />
 	);
 }
 
 function Buttons() {
 	return (
 		<ButtonList>
-			<Undo />
-			<Redo />
+			<Undoer />
+			<Redoer />
 			<Outline>
 				{ __( 'Preview' ) }
 			</Outline>
