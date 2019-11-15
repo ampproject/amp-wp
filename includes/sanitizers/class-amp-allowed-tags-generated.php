@@ -11552,7 +11552,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -11578,7 +11577,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -11605,7 +11603,6 @@ class AMP_Allowed_Tags_Generated {
 						'version' => array(
 							'0.1',
 							'0.2',
-							'latest',
 						),
 					),
 					'requires_extension' => array(
@@ -11634,7 +11631,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => false,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 					'requires_extension' => array(
@@ -11663,7 +11659,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => false,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 					'requires_extension' => array(
@@ -11693,7 +11688,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -11752,7 +11746,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -11778,7 +11771,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -11804,7 +11796,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 					'spec_name' => 'amp-ad-custom extension .js script',
@@ -11832,7 +11823,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 					'spec_name' => 'amp-ad extension .js script',
@@ -11859,7 +11849,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -11886,7 +11875,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -11939,7 +11927,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -11965,7 +11952,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -12017,7 +12003,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -12044,7 +12029,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -12071,7 +12055,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -12097,7 +12080,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -12123,7 +12105,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -12174,7 +12155,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -12200,7 +12180,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -12226,7 +12205,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => false,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -12280,7 +12258,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -12307,7 +12284,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -12334,7 +12310,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -12360,7 +12335,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -12386,7 +12360,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -12414,7 +12387,6 @@ class AMP_Allowed_Tags_Generated {
 						'version' => array(
 							'0.1',
 							'0.2',
-							'latest',
 						),
 					),
 				),
@@ -12440,7 +12412,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -12466,7 +12437,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -12519,7 +12489,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -12545,7 +12514,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -12571,7 +12539,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -12597,7 +12564,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -12623,7 +12589,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -12650,7 +12615,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => false,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -12676,7 +12640,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -12704,7 +12667,6 @@ class AMP_Allowed_Tags_Generated {
 						'version' => array(
 							'0.1',
 							'1.0',
-							'latest',
 						),
 					),
 				),
@@ -12755,7 +12717,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -12781,7 +12742,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -12807,7 +12767,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -12834,7 +12793,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -12861,7 +12819,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -12888,7 +12845,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -12915,7 +12871,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -12941,7 +12896,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => false,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -12968,7 +12922,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -12994,7 +12947,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -13047,7 +12999,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -13073,7 +13024,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -13099,7 +13049,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -13125,7 +13074,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -13152,7 +13100,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -13178,7 +13125,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -13205,7 +13151,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -13231,7 +13176,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -13257,7 +13201,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -13283,7 +13226,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => false,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -13310,7 +13252,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -13337,7 +13278,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -13363,7 +13303,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -13390,7 +13329,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -13417,7 +13355,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -13443,7 +13380,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => false,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -13470,7 +13406,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -13496,7 +13431,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -13548,7 +13482,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -13574,7 +13507,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 					'mandatory_parent' => 'head',
@@ -13602,7 +13534,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -13628,7 +13559,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -13654,7 +13584,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -13680,7 +13609,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -13703,16 +13631,11 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'extension_spec' => array(
 						'deprecated_allow_duplicates' => true,
-						'deprecated_version' => array(
-							'0.1',
-						),
-						'extension_type' => 2,
 						'name' => 'amp-mustache',
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
 							'0.2',
-							'latest',
 						),
 					),
 				),
@@ -13776,7 +13699,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -13821,7 +13743,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -13848,7 +13769,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -13874,7 +13794,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -13900,7 +13819,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -13926,7 +13844,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -13953,7 +13870,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -13979,7 +13895,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -14005,7 +13920,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -14031,7 +13945,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -14058,7 +13971,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -14084,7 +13996,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -14111,7 +14022,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -14137,7 +14047,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -14163,7 +14072,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -14226,7 +14134,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -14253,7 +14160,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -14279,7 +14185,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -14305,7 +14210,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -14332,7 +14236,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -14359,7 +14262,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -14386,7 +14288,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -14408,15 +14309,11 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'extension_spec' => array(
-						'deprecated_version' => array(
-							'0.1',
-						),
 						'name' => 'amp-sticky-ad',
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
 							'1.0',
-							'latest',
 						),
 					),
 				),
@@ -14442,7 +14339,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -14494,7 +14390,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'1.0',
-							'latest',
 						),
 					),
 				),
@@ -14591,7 +14486,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => false,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -14649,7 +14543,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => false,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 					'requires_extension' => array(
@@ -14678,7 +14571,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -14704,7 +14596,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -14731,7 +14622,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -14757,7 +14647,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -14810,7 +14699,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -14836,7 +14724,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 					'spec_name' => 'amp-video-docking',
@@ -14863,7 +14750,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -14889,7 +14775,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => false,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 					'spec_name' => 'amp-video extension .js script',
@@ -14917,7 +14802,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -14944,7 +14828,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -14970,7 +14853,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -14996,7 +14878,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -15022,7 +14903,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -15048,7 +14928,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),
@@ -15074,7 +14953,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 					'spec_url' => 'https://amp.dev/documentation/components/amp-yotpo',
@@ -15102,7 +14980,6 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
-							'latest',
 						),
 					),
 				),

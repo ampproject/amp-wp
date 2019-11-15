@@ -535,6 +535,18 @@ def GetTagRules(tag_spec):
 		if 'name' not in extension_spec:
 			raise Exception( 'Missing required name field' )
 
+		# Get the versions and sort.
+		versions = set( extension_spec['version'] )
+		versions.remove( 'latest' )
+		extension_spec['version'] = sorted( versions, key=lambda version: map(int, version.split('.') ) )
+
+		# Unused since amp_filter_script_loader_tag() and \AMP_Tag_And_Attribute_Sanitizer::get_rule_spec_list_to_validate() just hard-codes the check for amp-mustache.
+		if 'extension_type' in extension_spec:
+			del extension_spec['extension_type']
+
+		if 'deprecated_version' in extension_spec:
+			del extension_spec['deprecated_version']
+
 		tag_rules['extension_spec'] = extension_spec
 
 	if tag_spec.HasField('mandatory'):

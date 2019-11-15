@@ -470,18 +470,11 @@ function amp_register_default_scripts( $wp_scripts ) {
 			continue;
 		}
 		$extension_spec = $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec'];
-		$versions       = array_filter(
-			$extension_spec['version'],
-			function ( $version ) {
-				// @todo Why are we including the latest version in the generated spec in the first place? We can just include the highest number version.
-				return 'latest' !== $version;
-			}
-		);
 
 		$src = sprintf(
 			'https://cdn.ampproject.org/v0/%s-%s.js',
 			$extension_spec['name'],
-			array_pop( $versions )
+			end( $extension_spec['version'] )
 		);
 
 		$wp_scripts->add(
@@ -580,6 +573,8 @@ function amp_filter_script_loader_tag( $tag, $handle ) {
 	if ( 'v0' === strtok( substr( $src, strlen( $prefix ) ), '/' ) ) {
 		/*
 		 * Per the spec, "Most extensions are custom-elements." In fact, there is only one custom template. So we hard-code it here.
+		 *
+		 * This could also be derived by looking at the extension_type in the extension_spec.
 		 *
 		 * @link https://github.com/ampproject/amphtml/blob/cd685d4e62153557519553ffa2183aedf8c93d62/validator/validator.proto#L326-L328
 		 * @link https://github.com/ampproject/amphtml/blob/cd685d4e62153557519553ffa2183aedf8c93d62/extensions/amp-mustache/validator-amp-mustache.protoascii#L27

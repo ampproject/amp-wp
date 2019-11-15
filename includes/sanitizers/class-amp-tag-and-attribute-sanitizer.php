@@ -332,19 +332,14 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		// Expand extension_spec into a set of attr_spec_list.
 		if ( isset( $rule_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec'] ) ) {
 			$extension_spec = $rule_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec'];
-			$custom_attr    = 'amp-mustache' === $extension_spec['name'] ? 'custom-template' : 'custom-element';
+
+			// This could also be derived from the extension_type in the extension_spec.
+			$custom_attr = 'amp-mustache' === $extension_spec['name'] ? 'custom-template' : 'custom-element';
 
 			$rule_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ][ $custom_attr ] = [
 				AMP_Rule_Spec::VALUE     => $extension_spec['name'],
 				AMP_Rule_Spec::MANDATORY => true,
 			];
-
-			$versions = array_unique(
-				array_merge(
-					isset( $extension_spec['allowed_versions'] ) ? $extension_spec['allowed_versions'] : [],
-					isset( $extension_spec['version'] ) ? $extension_spec['version'] : []
-				)
-			);
 
 			$rule_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ]['src'] = [
 				AMP_Rule_Spec::VALUE_REGEX => implode(
@@ -352,7 +347,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					[
 						'^',
 						preg_quote( 'https://cdn.ampproject.org/v0/' . $extension_spec['name'] . '-' ), // phpcs:ignore WordPress.PHP.PregQuoteDelimiter.Missing
-						'(' . implode( '|', $versions ) . ')',
+						'(' . implode( '|', array_merge( $extension_spec['version'], [ 'latest' ] ) ) . ')',
 						'\.js$',
 					]
 				),
