@@ -16,13 +16,13 @@ import {
 /**
  * Internal dependencies
  */
-import Layout from '../layout';
-import { HistoryProvider } from '../history';
-import { APIProvider } from '../api';
-import { ConfigProvider } from '../config';
-import { StoryProvider } from '../story';
-import { LibraryProvider } from '../library';
-import darkTheme, { GlobalStyle } from '../../theme';
+import theme, { GlobalStyle } from '../theme';
+import { LibraryProvider } from '../components/library';
+import { useHistory, HistoryProvider } from './history';
+import { useAPI, APIProvider } from './api';
+import { useConfig, ConfigProvider } from './config';
+import { useStory, StoryProvider } from './story';
+import Layout from './layout';
 
 import './register_blocks';
 
@@ -30,7 +30,7 @@ function App( { config } ) {
 	const { storyId } = config;
 	return (
 		<SlotFillProvider>
-			<ThemeProvider theme={ darkTheme }>
+			<ThemeProvider theme={ theme }>
 				<ConfigProvider config={ config }>
 					<APIProvider>
 						<HistoryProvider size={ 50 }>
@@ -54,3 +54,10 @@ App.propTypes = {
 };
 
 export default App;
+
+export {
+	useHistory,
+	useAPI,
+	useStory,
+	useConfig,
+};

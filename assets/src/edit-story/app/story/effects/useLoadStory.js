@@ -7,8 +7,7 @@ import { rawHandler, createBlock } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import { useAPI } from '../../api';
-import useHistory from '../../history';
+import { useAPI, useHistory } from '../../';
 
 // When ID is set, load story from API.
 function useLoadStory( {

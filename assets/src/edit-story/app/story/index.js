@@ -1,2 +1,2 @@
 export { default as StoryProvider } from './storyProvider';
-export { default } from './useStory';
+export { default as useStory } from './useStory';

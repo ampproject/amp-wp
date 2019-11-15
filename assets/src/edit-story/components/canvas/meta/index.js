@@ -6,7 +6,7 @@ import styled from 'styled-components';
 /**
  * Internal dependencies
  */
-import useStory from '../../story';
+import { useStory } from '../../../app';
 import Switch from '../../switch';
 import Delete from './delete.svg';
 import Duplicate from './duplicate.svg';

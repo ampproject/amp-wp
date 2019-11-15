@@ -6,7 +6,7 @@ import { useEffect } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import useHistory from '../../history';
+import { useHistory } from '../../';
 
 // Record any change to core variables in history (history will know if it's a replay)
 function useHistoryEntry( {

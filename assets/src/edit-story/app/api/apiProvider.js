@@ -12,7 +12,7 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
-import useConfig from '../config';
+import { useConfig } from '../';
 import Context from './context';
 
 function APIProvider( { children } ) {

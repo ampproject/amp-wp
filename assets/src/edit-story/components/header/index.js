@@ -12,7 +12,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { Outline, Primary, Undo, Redo } from '../button';
-import useHistory from '../history';
+import { useHistory } from '../../app';
 
 const Head = styled.header`
 	background-color: ${ ( { theme } ) => theme.colors.bg.v3 };

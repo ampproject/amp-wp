@@ -11,7 +11,7 @@ import { useCallback } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import useStory from '../../story';
+import { useStory } from '../../../app';
 import Icon from './plus.svg';
 
 const Wrapper = styled.div`

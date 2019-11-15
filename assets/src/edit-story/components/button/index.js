@@ -6,8 +6,8 @@ import styled from 'styled-components';
 /**
  * Internal dependencies
  */
-import UndoIcon from './undo.svg';
-import RedoIcon from './redo.svg';
+import UndoIcon from './icon_undo.svg';
+import RedoIcon from './icon_redo.svg';
 
 const Base = styled.button.attrs(
 	( { isDisabled } ) => ( { disabled: isDisabled } ),

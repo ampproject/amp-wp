@@ -7,10 +7,10 @@ import styled from 'styled-components';
 /**
  * Internal dependencies
  */
-import Header, { Buttons } from '../header';
-import Sidebar from '../sidebar';
-import Library, { LibraryTabs } from '../library';
-import Canvas, { AddPage, Meta, Carrousel } from '../canvas';
+import Header, { Buttons } from '../../components/header';
+import Sidebar from '../../components/sidebar';
+import Library, { LibraryTabs } from '../../components/library';
+import Canvas, { AddPage, Meta, Carrousel } from '../../components/canvas';
 
 const Editor = styled.div`
 	background-color: ${ ( { theme } ) => theme.colors.bg.v1 };

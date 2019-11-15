@@ -1,2 +1,2 @@
 export { default as HistoryProvider } from './historyProvider';
-export { default } from './useHistory';
+export { default as useHistory } from './useHistory';

@@ -6,7 +6,7 @@ import styled from 'styled-components';
 /**
  * Internal dependencies
  */
-import useStory from '../../story';
+import { useStory } from '../../../app';
 
 const List = styled.nav`
 	display: flex;

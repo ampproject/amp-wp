@@ -7,7 +7,7 @@ import { registerCoreBlocks } from '@wordpress/block-library';
 /**
  * Internal dependencies
  */
-import App from './components/app';
+import App from './app';
 
 /**
  * Initializes the block editor in the story edit screen.

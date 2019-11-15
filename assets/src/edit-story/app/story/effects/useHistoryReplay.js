@@ -6,7 +6,7 @@ import { useEffect } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import useHistory from '../../history';
+import { useHistory } from '../../';
 
 function useHistoryReplay( {
 	setCurrentPageById,
