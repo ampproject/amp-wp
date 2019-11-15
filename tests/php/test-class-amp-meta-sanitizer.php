@@ -17,11 +17,17 @@ class Test_AMP_Meta_Sanitizer extends WP_UnitTestCase {
 	 */
 	public function get_data_for_sanitize() {
 		return [
-			// Turn HTML 4 charset into HTML 5 charset.
+			// Don't break the correct charset tag.
 			[
 				'<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body></body></html>',
 				'<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body></body></html>',
 			],
+			// Add default charset tag if none is present.
+			[
+				'<!DOCTYPE html><html><head></head><body></body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"></head><body></body></html>',
+			],
+			// Turn HTML 4 charset tag into HTML 5 charset tag.
 			[
 				'<!DOCTYPE html><html><head><meta http-equiv="content-type" content="text/html"></head><body></body></html>',
 				'<!DOCTYPE html><html><head><meta charset="utf-8"></head><body></body></html>',
