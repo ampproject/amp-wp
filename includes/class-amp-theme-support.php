@@ -2624,7 +2624,7 @@ class AMP_Theme_Support {
 			]
 		);
 
-		return AMP__DIR__ . '/templates/amp-paired-browsing.php';
+		return AMP__DIR__ . '/includes/templates/amp-paired-browsing.php';
 	}
 
 	/**
