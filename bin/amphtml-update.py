@@ -219,12 +219,18 @@ def GenerateFooterPHP(out):
 	 * @return array Extension specs, keyed by extension name.
 	 */
 	public static function get_extension_specs() {
-		$extension_specs = [];
+		static $extension_specs = [];
+
+		if ( ! empty( $extension_specs ) ) {
+			return $extension_specs;
+		}
+
 		foreach ( self::get_allowed_tag( 'script' ) as $script_spec ) {
 			if ( isset( $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec'] ) ) {
 				$extension_specs[ $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec']['name'] ] = $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec'];
 			}
 		}
+
 		return $extension_specs;
 	}
 
