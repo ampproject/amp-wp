@@ -1534,7 +1534,6 @@ class AMP_Theme_Support {
 	 * @link https://www.ampproject.org/docs/reference/spec#required-markup
 	 * @link https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/optimize_amp/
 	 * @todo All of this might be better placed inside of a sanitizer.
-	 * @todo Consider removing any scripts that are not among the $script_handles.
 	 *
 	 * @param DOMDocument $dom            Document.
 	 * @param string[]    $script_handles AMP script handles for components identified during output buffering.
