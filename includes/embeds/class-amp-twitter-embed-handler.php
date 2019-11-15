@@ -79,7 +79,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 		$tweet_id = $matches[1];
 
 		$cache = preg_replace(
-			'#(<blockquote[^>]+?twitter-tweet[^>]+)(>.+)<script.*$#',
+			'#(<blockquote[^>]+?twitter-tweet[^>]+)(>[^\r]+)<script.*$#',
 			sprintf(
 				'<amp-twitter width="%d" height="%d" layout="responsive" data-tweetid="%s">$1 placeholder $2</amp-twitter>',
 				esc_attr( $this->DEFAULT_WIDTH ),
