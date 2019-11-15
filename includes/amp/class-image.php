@@ -10,8 +10,8 @@ namespace AMP;
 /**
  * Class Image
  *
- * @since 1.5.0
  * @internal
+ * @since 1.5.0
  */
 class Image {
 

@@ -10,8 +10,8 @@ namespace AMP;
 /**
  * Class Image_List
  *
- * @since 1.5.0
  * @internal
+ * @since 1.5.0
  */
 final class Image_List implements \IteratorAggregate, \Countable {
 

@@ -10,8 +10,8 @@ namespace AMP;
 /**
  * Interface Has_Caption
  *
- * @since 1.5.0
  * @internal
+ * @since 1.5.0
  */
 interface Has_Caption {
 	/**

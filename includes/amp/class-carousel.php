@@ -14,6 +14,7 @@ use AMP_DOM_Utils;
  *
  * Gets the markup for an <amp-carousel>.
  *
+ * @internal
  * @since 1.5.0
  */
 class Carousel {
