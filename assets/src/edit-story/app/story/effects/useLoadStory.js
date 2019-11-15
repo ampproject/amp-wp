@@ -2,12 +2,12 @@
  * WordPress dependencies
  */
 import { useEffect } from '@wordpress/element';
-import { rawHandler, createBlock } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
 import { useAPI, useHistory } from '../../';
+import { createPage } from '../../../elements';
 
 // When ID is set, load story from API.
 function useLoadStory( {
@@ -25,18 +25,22 @@ function useLoadStory( {
 				clearHistory();
 
 				// Then parse current story if any.
-				const rootBlocks = rawHandler( { HTML: raw } );
-
-				// If story is empty, create empty page and add to story:
-				if ( rootBlocks.length === 0 ) {
-					const firstPage = createBlock( 'amp/amp-story-page' );
-					rootBlocks.push( firstPage );
+				let pages = null;
+				try {
+					pages = JSON.parse( raw );
+				} catch {
+					pages = [];
 				}
 
-				setPages( rootBlocks );
+				// If story is empty, create empty page and add to story:
+				if ( pages.length === 0 ) {
+					pages = [ createPage() ];
+				}
+
+				setPages( pages );
 				// Mark first page as current
 				// TODO read "current page" from deeplink if present?
-				setCurrentPageById( rootBlocks[ 0 ].clientId );
+				setCurrentPageById( pages[ 0 ].id );
 
 				// TODO potentially also read selected elements from deeplink?
 				clearSelection();

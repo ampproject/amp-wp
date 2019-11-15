@@ -24,8 +24,6 @@ import { useConfig, ConfigProvider } from './config';
 import { useStory, StoryProvider } from './story';
 import Layout from './layout';
 
-import './register_blocks';
-
 function App( { config } ) {
 	const { storyId } = config;
 	return (

@@ -2,7 +2,11 @@
  * WordPress dependencies
  */
 import { useCallback } from '@wordpress/element';
-import { createBlock } from '@wordpress/blocks';
+
+/**
+ * Internal dependencies
+ */
+import { createPage } from '../../../elements';
 
 // If page id is changed, load current page and set page number.
 function useAddBlankPage( {
@@ -11,7 +15,7 @@ function useAddBlankPage( {
 	clearSelection,
 } ) {
 	const addBlankPage = useCallback( () => {
-		const newPage = createBlock( 'amp/amp-story-page' );
+		const newPage = createPage();
 		const newPages = [
 			...pages,
 			newPage,
