@@ -148,7 +148,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return string Rendered oEmbed.
 	 */
 	public function oembed( $matches ) {
-		_deprecated_function( __FUNCTION__, '1.1' );
+		_deprecated_function( __METHOD__, '1.1' );
 		$id = false;
 
 		if ( isset( $matches['tweet'] ) && is_numeric( $matches['tweet'] ) ) {
@@ -239,12 +239,13 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
-	 * Checks whether it's a twitter blockquote or not
+	 * Checks whether it's a twitter blockquote or not.
 	 *
 	 * @param DOMElement $node The DOMNode to adjust and replace.
 	 * @return bool Whether node is for raw embed.
 	 */
 	private function is_tweet_raw_embed( $node ) {
+		// Skip processing blockquotes that have already been passed through while being wrapped with <amp-twitter>.
 		if ( $node->parentNode && 'amp-twitter' === $node->parentNode->nodeName ) {
 			return false;
 		}

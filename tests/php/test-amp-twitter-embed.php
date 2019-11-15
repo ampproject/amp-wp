@@ -190,7 +190,12 @@ class AMP_Twitter_Embed_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test get_scripts().
+	 *
 	 * @dataProvider get_scripts_data
+	 *
+	 * @param string $source   Source content.
+	 * @param array  $expected Expected scripts.
 	 */
 	public function test__get_scripts( $source, $expected ) {
 		$embed = new AMP_Twitter_Embed_Handler();
@@ -212,7 +217,7 @@ class AMP_Twitter_Embed_Test extends WP_UnitTestCase {
 	/**
 	 * Data for test__raw_embed_sanitizer.
 	 *
-	 * @return array
+	 * @return array Data.
 	 */
 	public function get_raw_embed_dataset() {
 		return [
