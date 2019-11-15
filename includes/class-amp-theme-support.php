@@ -1674,15 +1674,12 @@ class AMP_Theme_Support {
 		 *
 		 * {@link https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/optimize_amp/ Optimize the AMP Runtime loading}
 		 */
-		$meta_viewport        = null;
 		$meta_amp_script_srcs = [];
 		$meta_elements        = [];
 		foreach ( $head->getElementsByTagName( 'meta' ) as $meta ) {
-			if ( 'viewport' === $meta->getAttribute( 'name' ) ) {
-				$meta_viewport = $meta;
-			} elseif ( 'amp-script-src' === $meta->getAttribute( 'name' ) ) {
+			if ( 'amp-script-src' === $meta->getAttribute( 'name' ) ) {
 				$meta_amp_script_srcs[] = $meta;
-			} else {
+			} elseif ( ! $meta->hasAttribute( 'charset' ) && 'viewport' !== $meta->getAttribute( 'name' ) )  {
 				$meta_elements[] = $meta;
 			}
 		}
@@ -1706,7 +1703,8 @@ class AMP_Theme_Support {
 		unset( $meta_amp_script_srcs, $first_meta_amp_script_src );
 
 		// Insert all the the meta elements next in the head.
-		$previous_node = $meta_viewport;
+		// We already sanitized the meta tags to enforce the charset to be index 0 and the viewport to be index 1.
+		$previous_node = $head->childNodes->item( 1 ); // The viewport node.
 		foreach ( $meta_elements as $meta_element ) {
 			$meta_element->parentNode->removeChild( $meta_element );
 			$head->insertBefore( $meta_element, $previous_node->nextSibling );
