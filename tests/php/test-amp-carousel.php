@@ -36,7 +36,7 @@ class Test_Carousel extends \WP_UnitTestCase {
 
 		return [
 			'image_without_caption' => [
-				( new Image_List() )->add( $image, null ),
+				( new Image_List() )->add( $image, '' ),
 				$dom,
 				'<amp-carousel width="' . $width . '" height="' . $height . '" type="slides" layout="responsive"><div class="slide"><amp-img src="' . $src . '" width="' . $width . '" height="' . $height . '" layout="fill" object-fit="cover"></amp-img></div></amp-carousel>',
 			],
@@ -55,8 +55,8 @@ class Test_Carousel extends \WP_UnitTestCase {
 	 * @covers \AMP\Carousel::create_and_get()
 	 *
 	 * @param array[]     $images_and_captions An array of arrays, with images and their captions (if any).
-	 * @param DOMDocument $dom The representation of the DOM.
-	 * @param string      $expected The expected return value of the tested function.
+	 * @param DOMDocument $dom                 The representation of the DOM.
+	 * @param string      $expected            The expected return value of the tested function.
 	 */
 	public function test_create_and_get( $images_and_captions, $dom, $expected ) {
 		$amp_carousel        = new Carousel( $dom );
@@ -143,8 +143,8 @@ class Test_Carousel extends \WP_UnitTestCase {
 	 * @dataProvider get_data_carousel_dimensions
 	 * @covers \AMP\Carousel::get_dimensions()
 	 *
-	 * @param \DOMElement[] $images The images to get the dimensions from.
-	 * @param array $expected The expected return value of the tested function.
+	 * @param \DOMElement[] $images   The images to get the dimensions from.
+	 * @param array         $expected The expected return value of the tested function.
 	 */
 	public function test_get_dimensions( $images, $expected ) {
 		$amp_carousel = new Carousel( new DOMDocument() );
