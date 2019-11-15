@@ -7,6 +7,7 @@ import styled from 'styled-components';
 /**
  * Internal dependencies
  */
+import { PanelTypes } from '../panels';
 import {
 	ElementWithPosition,
 	ElementWithSize,
@@ -16,6 +17,7 @@ import {
 } from './shared';
 
 const Element = styled.p`
+	margin: 0;
 	${ ElementWithPosition }
 	${ ElementWithSize }
 	${ ElementWithFont }
@@ -67,11 +69,12 @@ Text.defaultProps = {
 };
 
 Text.panels = [
-	'size',
-	'position',
-	'font',
-	'color',
-	'backgroundColor',
+	PanelTypes.TEXT,
+	PanelTypes.SIZE,
+	PanelTypes.POSITION,
+	PanelTypes.FONT,
+	PanelTypes.COLOR,
+	PanelTypes.BACKGROUND_COLOR,
 ];
 
 export default Text;

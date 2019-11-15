@@ -5,18 +5,18 @@ import { useEffect } from '@wordpress/element';
 
 // If page id is changed, load current page and set page number.
 function useCurrentPage( {
-	currentPageId,
+	currentPageIndex,
 	pages,
 	setCurrentPage,
 	setCurrentPageNumber,
 } ) {
 	useEffect( () => {
-		if ( currentPageId && pages.length ) {
-			const page = pages.find( ( { clientId } ) => clientId === currentPageId );
+		if ( typeof currentPageIndex === 'number' && pages.length ) {
+			const page = pages[ currentPageIndex ];
 			setCurrentPage( page );
-			setCurrentPageNumber( pages.indexOf( page ) + 1 );
+			setCurrentPageNumber( currentPageIndex + 1 );
 		}
-	}, [ currentPageId, pages, setCurrentPage, setCurrentPageNumber ] );
+	}, [ currentPageIndex, pages, setCurrentPage, setCurrentPageNumber ] );
 }
 
 export default useCurrentPage;

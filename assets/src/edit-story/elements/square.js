@@ -7,6 +7,7 @@ import styled from 'styled-components';
 /**
  * Internal dependencies
  */
+import { PanelTypes } from '../panels';
 import { ElementWithPosition, ElementWithSize, ElementWithBackgroundColor } from './shared';
 
 const Element = styled.div`
@@ -41,9 +42,9 @@ Square.defaultProps = {
 };
 
 Square.panels = [
-	'size',
-	'position',
-	'backgroundColor',
+	PanelTypes.SIZE,
+	PanelTypes.POSITION,
+	PanelTypes.BACKGROUND_COLOR,
 ];
 
 export default Square;

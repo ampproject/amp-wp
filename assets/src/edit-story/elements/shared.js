@@ -5,6 +5,7 @@ import { css } from 'styled-components';
 
 export const ElementWithPosition = css`
 	position: absolute;
+	z-index: 1;
 	left: ${ ( { x } ) => `${ x }%` };
 	top: ${ ( { y } ) => `${ y }%` };
 `;

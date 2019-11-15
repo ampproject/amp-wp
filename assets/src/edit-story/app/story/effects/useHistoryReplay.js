@@ -9,7 +9,7 @@ import { useEffect } from '@wordpress/element';
 import { useHistory } from '../../';
 
 function useHistoryReplay( {
-	setCurrentPageById,
+	setCurrentPageIndex,
 	setPages,
 	setSelectedElementIds,
 } ) {
@@ -18,11 +18,11 @@ function useHistoryReplay( {
 		if ( ! replayState ) {
 			return;
 		}
-		const { currentPageId, pages, selectedElementIds } = replayState;
-		setCurrentPageById( currentPageId );
+		const { currentPageIndex, pages, selectedElementIds } = replayState;
+		setCurrentPageIndex( currentPageIndex );
 		setPages( pages );
 		setSelectedElementIds( selectedElementIds );
-	}, [ setCurrentPageById, setPages, setSelectedElementIds, replayState ] );
+	}, [ setCurrentPageIndex, setPages, setSelectedElementIds, replayState ] );
 }
 
 export default useHistoryReplay;

@@ -11,7 +11,13 @@ import { useContext } from '@wordpress/element';
 /**
  * Internal dependencies
  */
+import { createNewElement } from '../../elements';
+import { useStory } from '../../app';
 import Context from './context';
+import MediaLibrary from './mediaLibrary';
+import TextLibrary from './textLibrary';
+import ShapeLibrary from './shapeLibrary';
+import LinkLibrary from './linkLibrary';
 
 const Background = styled.aside`
 	background-color: ${ ( { theme } ) => theme.colors.bg.v4 };
@@ -21,11 +27,25 @@ const Background = styled.aside`
 `;
 
 function Library() {
-	const { tab } = useContext( Context );
+	const { tab, tabs: { MEDIA, TEXT, SHAPES, LINKS } } = useContext( Context );
+	const { actions: { appendElementToCurrentPage } } = useStory();
+	const ContentLibrary = ( {
+		[ MEDIA ]: MediaLibrary,
+		[ TEXT ]: TextLibrary,
+		[ SHAPES ]: ShapeLibrary,
+		[ LINKS ]: LinkLibrary,
+	} )[ tab ];
+	const handleInsert = ( type, props ) => {
+		const element = createNewElement( type, {
+			...props,
+			x: Math.round( 80 * Math.random() ),
+			y: Math.round( 70 * Math.random() ),
+		} );
+		appendElementToCurrentPage( element );
+	};
 	return (
 		<Background>
-			{ 'Displaying: ' }
-			{ tab }
+			<ContentLibrary onInsert={ handleInsert } />
 		</Background>
 	);
 }

@@ -9,7 +9,7 @@ import styled from 'styled-components';
  */
 import Header, { Buttons } from '../../components/header';
 import Sidebar from '../../components/sidebar';
-import Library, { LibraryTabs } from '../../components/library';
+import { Library, LibraryTabs } from '../../components/library';
 import Canvas, { AddPage, Meta, Carrousel } from '../../components/canvas';
 
 const Editor = styled.div`

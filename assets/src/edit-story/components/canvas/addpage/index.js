@@ -42,11 +42,11 @@ const Circle = styled.a`
 `;
 
 function AddPage() {
-	const { actions: { addBlankPage, setCurrentPageById } } = useStory();
+	const { actions: { addBlankPage, setCurrentPageByIndex } } = useStory();
 	const handleClick = useCallback( () => {
 		const page = addBlankPage();
-		setCurrentPageById( page.clientId );
-	}, [ addBlankPage, setCurrentPageById ] );
+		setCurrentPageByIndex( page.index );
+	}, [ addBlankPage, setCurrentPageByIndex ] );
 	return (
 		<Wrapper>
 			<Circle onClick={ handleClick }>

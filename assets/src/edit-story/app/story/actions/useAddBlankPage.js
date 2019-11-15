@@ -15,7 +15,7 @@ function useAddBlankPage( {
 	clearSelection,
 } ) {
 	const addBlankPage = useCallback( () => {
-		const newPage = createPage();
+		const newPage = createPage( { index: pages.length } );
 		const newPages = [
 			...pages,
 			newPage,

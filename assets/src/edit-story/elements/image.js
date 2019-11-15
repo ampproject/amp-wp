@@ -7,6 +7,7 @@ import styled from 'styled-components';
 /**
  * Internal dependencies
  */
+import { PanelTypes } from '../panels';
 import { ElementWithPosition, ElementWithSize } from './shared';
 
 const Element = styled.img`
@@ -39,8 +40,8 @@ Image.defaultProps = {
 };
 
 Image.panels = [
-	'size',
-	'position',
+	PanelTypes.SIZE,
+	PanelTypes.POSITION,
 ];
 
 export default Image;

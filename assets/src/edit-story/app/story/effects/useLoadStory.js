@@ -12,41 +12,42 @@ import { createPage } from '../../../elements';
 // When ID is set, load story from API.
 function useLoadStory( {
 	storyId,
+	pages,
 	setPages,
-	setCurrentPageById,
+	setCurrentPageIndex,
 	clearSelection,
 } ) {
 	const { getStoryById } = useAPI();
 	const { actions: { clearHistory } } = useHistory();
 	useEffect( () => {
-		if ( storyId ) {
+		if ( storyId && pages.length === 0 ) {
 			getStoryById( storyId ).then( ( { content: { raw } } ) => {
 				// First clear history completely
 				clearHistory();
 
 				// Then parse current story if any.
-				let pages = null;
+				let newPages = null;
 				try {
-					pages = JSON.parse( raw );
+					newPages = JSON.parse( raw );
 				} catch {
-					pages = [];
+					newPages = [];
 				}
 
 				// If story is empty, create empty page and add to story:
-				if ( pages.length === 0 ) {
-					pages = [ createPage() ];
+				if ( newPages.length === 0 ) {
+					newPages = [ createPage( { index: 0 } ) ];
 				}
 
-				setPages( pages );
+				setPages( newPages );
 				// Mark first page as current
 				// TODO read "current page" from deeplink if present?
-				setCurrentPageById( pages[ 0 ].id );
+				setCurrentPageIndex( 0 );
 
 				// TODO potentially also read selected elements from deeplink?
 				clearSelection();
 			} );
 		}
-	}, [ storyId, getStoryById, clearHistory, setPages, setCurrentPageById, clearSelection ] );
+	}, [ storyId, pages, getStoryById, clearHistory, setPages, setCurrentPageIndex, clearSelection ] );
 }
 
 export default useLoadStory;

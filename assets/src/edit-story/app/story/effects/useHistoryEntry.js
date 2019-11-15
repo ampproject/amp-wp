@@ -10,18 +10,18 @@ import { useHistory } from '../../';
 
 // Record any change to core variables in history (history will know if it's a replay)
 function useHistoryEntry( {
-	currentPageId,
+	currentPageIndex,
 	pages,
 	selectedElementIds,
 } ) {
 	const { actions: { appendToHistory } } = useHistory();
 	useEffect( () => {
 		appendToHistory( {
-			currentPageId,
+			currentPageIndex,
 			pages,
 			selectedElementIds,
 		} );
-	}, [ appendToHistory, currentPageId, pages, selectedElementIds ] );
+	}, [ appendToHistory, currentPageIndex, pages, selectedElementIds ] );
 }
 
 export default useHistoryEntry;

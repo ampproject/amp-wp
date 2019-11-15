@@ -10,16 +10,37 @@ import Text from './text';
 import Image from './image';
 import Square from './square';
 
-export const createElement = ( type, props = {} ) => ( {
-	type,
-	id: uuid(),
-	...props,
-} );
+export const createNewElement = ( type, props = {} ) => {
+	const element = elementTypes.find( ( el ) => el.type === type );
+	const defaultProps = element ? element.defaultProps : {};
+	return {
+		type,
+		id: uuid(),
+		...defaultProps,
+		...props,
+	};
+};
 
-export const createPage = () => createElement( 'page' );
+export const createPage = ( props ) => createNewElement(
+	'page',
+	{
+		elements: [],
+		...props,
+	},
+);
 
 export const elementTypes = [
-	{ type: 'text', component: Text, name: 'Text', panels: Text.panels },
-	{ type: 'image', component: Image, name: 'Image', panels: Image.panels },
-	{ type: 'square', component: Square, name: 'Square', panels: Square.panels },
+	{ type: 'page', defaultProps: { elements: [] }, name: 'Page' },
+	{ type: 'text', defaultProps: Text.defaultProps, component: Text, name: 'Text', panels: Text.panels },
+	{ type: 'image', defaultProps: Image.defaultProps, component: Image, name: 'Image', panels: Image.panels },
+	{ type: 'square', defaultProps: Square.defaultProps, component: Square, name: 'Square', panels: Square.panels },
 ];
+
+export const getComponentForType =
+	( type ) => elementTypes.find( ( el ) => el.type === type ).component;
+
+export {
+	Text,
+	Image,
+	Square,
+};
