@@ -47,7 +47,6 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function register_embed() {
 		wp_embed_register_handler( $this->amp_tag, self::URL_PATTERN, [ $this, 'oembed' ], -1 );
-		add_shortcode( 'instagram', [ $this, 'shortcode' ] );
 	}
 
 	/**
@@ -55,11 +54,12 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function unregister_embed() {
 		wp_embed_unregister_handler( $this->amp_tag, -1 );
-		remove_shortcode( 'instagram' );
 	}
 
 	/**
 	 * WordPress shortcode rendering callback.
+	 *
+	 * @deprecated 1.5.0 Moved to Jetpack in jetpack_shortcode_instagram().
 	 *
 	 * @param array $attr Shortcode attributes.
 	 * @return string HTML markup for rendered embed.
