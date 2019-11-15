@@ -563,6 +563,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 				<?php wp_head(); ?>
 			</head>
 			<body>
+				<amp-mathml layout="container" data-formula="\[x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\]"></amp-mathml>
 				<?php wp_print_scripts( 'amp-mathml' ); ?>
 			</body>
 		</html>
@@ -1425,6 +1426,78 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test removing AMP scripts that are not needed.
+	 *
+	 * @covers AMP_Theme_Support::ensure_required_markup()
+	 */
+	public function test_unneeded_scripts_get_removed() {
+		wp();
+		add_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Theme_Support::init();
+		AMP_Theme_Support::finish_init();
+
+		// These should all get removed, unless used.
+		$required_usage_grandfathered = [
+			'amp-anim',
+			'amp-ad',
+			'amp-mustache',
+			'amp-list',
+			'amp-youtube',
+			'amp-form',
+			'amp-live-list',
+		];
+
+		// These also should get removed, unless used.
+		$required_usage_error = [
+			'amp-facebook-like',
+			'amp-date-picker',
+			'amp-call-tracking',
+		];
+
+		// These should not get removed, ever.
+		$required_usage_none = [
+			'amp-bind', // And yet, see https://github.com/ampproject/amphtml/blob/eb05855/extensions/amp-bind/validator-amp-bind.protoascii#L25-L28
+			'amp-dynamic-css-classes',
+			'amp-subscriptions',
+			'amp-lightbox-gallery',
+			'amp-video',
+		];
+
+		ob_start();
+		?>
+		<html>
+			<head></head>
+			<body>
+				<?php wp_print_scripts( array_merge( $required_usage_grandfathered, $required_usage_error, $required_usage_none ) ); ?>
+			</body>
+		</html>
+		<?php
+		$html = ob_get_clean();
+		$html = AMP_Theme_Support::prepare_response( $html );
+
+		$dom   = AMP_DOM_Utils::get_dom( $html );
+		$xpath = new DOMXPath( $dom );
+
+		/** @var DOMElement $script Script. */
+		$actual_script_srcs = [];
+		foreach ( $xpath->query( '//script[ not( @type ) or @type = "text/javascript" ]' ) as $script ) {
+			$actual_script_srcs[] = $script->getAttribute( 'src' );
+		}
+
+		$expected_script_srcs = [
+			wp_scripts()->registered['amp-runtime']->src,
+		];
+		foreach ( $required_usage_none as $handle ) {
+			$expected_script_srcs[] = wp_scripts()->registered[ $handle ]->src;
+		}
+
+		$this->assertEqualSets(
+			$expected_script_srcs,
+			$actual_script_srcs
+		);
+	}
+
+	/**
 	 * Test removing duplicate scripts.
 	 *
 	 * @covers AMP_Theme_Support::prepare_response()
@@ -2054,6 +2127,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 				{ "aExperiment": {} }
 			</script>
 		</amp-experiment>
+		<amp-list src="https://example.com/list.json?RANDOM"></amp-list>
 		</body>
 		</html>
 		<!--comment-after-html-->
