@@ -7,9 +7,13 @@ import styled from 'styled-components';
 /**
  * WordPress dependencies
  */
-import apiFetch from '@wordpress/api-fetch';
-import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import { Spinner } from '@wordpress/components';
+import { useEffect } from '@wordpress/element';
+
+/**
+ * Internal dependencies
+ */
+import useLibrary from './useLibrary';
 
 const Image = styled.img`
 	height: 150px;
@@ -20,72 +24,44 @@ const Image = styled.img`
 `;
 
 function MediaLibrary( { onInsert } ) {
-	const [ selectedMedia, setSelectedMedia ] = useState( null );
-	const [ isFetching, setIsFetching ] = useState( false );
-	const fetchRequest = useRef( null );
-	const isStillMounted = useRef( true );
+	const {
+		state: { media, isMediaLoading, isMediaLoaded },
+		actions: { loadMedia },
+	} = useLibrary();
 
-	const fetchSelectedPost = useCallback( () => {
-		isStillMounted.current = true;
-		setIsFetching( true );
-		const currentFetchRequest = fetchRequest.current = apiFetch( {
-			path: `/wp/v2/media/`,
-		} ).then(
-			( post ) => {
-				if ( isStillMounted.current && fetchRequest.current === currentFetchRequest ) {
-					setSelectedMedia( post );
-					setIsFetching( false );
-				}
-			},
-		).catch(
-			() => {
-				if ( isStillMounted.current && fetchRequest.current === currentFetchRequest ) {
-					setSelectedMedia( null );
-					setIsFetching( false );
-				}
-			},
+	useEffect( loadMedia );
+
+	if ( isMediaLoading || ! isMediaLoaded ) {
+		return <Spinner />;
+	}
+
+	if ( ! media.length ) {
+		return (
+			<div>
+				{ 'No media found' }
+			</div>
 		);
-	}, [] );
-
-	useEffect( () => {
-		return () => {
-			isStillMounted.current = false;
-		};
-	}, [] );
-
-	useEffect( () => {
-		fetchSelectedPost();
-	}, [ fetchSelectedPost ] );
+	}
 
 	return (
-		<>
-			{ isFetching && <Spinner /> }
-			{ ! isFetching && selectedMedia && Boolean( selectedMedia.length ) ? (
-				<div>
-					{ selectedMedia.map( ( attachment ) => (
-						<Image
-							key={ attachment.guid.rendered }
-							src={ attachment.guid.rendered }
-							width={ 150 }
-							height={ 150 }
-							onClick={ () => onInsert( 'image', {
-								src: attachment.guid.rendered,
-								width: 20,
-								height: 10,
-								x: 5,
-								y: 5,
-							} ) }
-						/>
-					) )
-					}
-				</div>
-			) : (
-				<div>
-					{ 'No media found' }
-				</div>
-			) }
-
-		</>
+		<div>
+			{ media.map( ( { src } ) => (
+				<Image
+					key={ src }
+					src={ src }
+					width={ 150 }
+					height={ 150 }
+					onClick={ () => onInsert( 'image', {
+						src,
+						width: 20,
+						height: 10,
+						x: 5,
+						y: 5,
+					} ) }
+				/>
+			) )
+			}
+		</div>
 	);
 }
 

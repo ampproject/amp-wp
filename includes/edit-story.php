@@ -20,6 +20,7 @@ $config = [];
 
 $config['api'] = [
 	'stories' => sprintf( '/wp/v2/%s', $post_type),
+	'media' => '/wp/v2/media',
 ];
 
 if ( ! empty( $post ) ) {

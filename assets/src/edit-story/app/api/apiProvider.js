@@ -16,16 +16,23 @@ import { useConfig } from '../';
 import Context from './context';
 
 function APIProvider( { children } ) {
-	const { api: { stories } } = useConfig();
+	const { api: { stories, media } } = useConfig();
 
 	const getStoryById = useCallback(
 		( storyId ) => apiFetch( { path: `${ stories }/${ storyId }?context=edit` } ),
 		[ stories ],
 	);
 
+	const getMedia = useCallback(
+		() => apiFetch( { path: `${ media }/` } )
+			.then( ( data ) => data.map( ( { guid: { rendered: src } } ) => ( { src } ) ) ),
+		[ media ],
+	);
+
 	const state = {
 		actions: {
 			getStoryById,
+			getMedia,
 		},
 	};
 
