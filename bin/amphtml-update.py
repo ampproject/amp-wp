@@ -212,6 +212,23 @@ def GenerateFooterPHP(out):
 	}
 
 	/**
+	 * Get extension specs.
+	 *
+	 * @since 1.5
+	 * @internal
+	 * @return array Extension specs, keyed by extension name.
+	 */
+	public static function get_extension_specs() {
+		$extension_specs = [];
+		foreach ( self::get_allowed_tag( 'script' ) as $script_spec ) {
+			if ( isset( $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec'] ) ) {
+				$extension_specs[ $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec']['name'] ] = $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec'];
+			}
+		}
+		return $extension_specs;
+	}
+
+	/**
 	 * Get allowed tag.
 	 *
 	 * Get the rules for a single tag so that the entire data structure needn't be passed around.

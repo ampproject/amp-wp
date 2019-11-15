@@ -1746,12 +1746,13 @@ class AMP_Theme_Support {
 		}
 
 		// Remove scripts that had already been added but couldn't be detected from output buffering.
+		$extension_specs            = AMP_Allowed_Tags_Generated::get_extension_specs();
 		$superfluous_script_handles = array_diff(
 			array_keys( $amp_scripts ),
 			array_merge( $script_handles, [ 'amp-runtime' ] )
 		);
 		foreach ( $superfluous_script_handles as $superfluous_script_handle ) {
-			if ( true === wp_scripts()->get_data( $superfluous_script_handle, 'amp_requires_usage' ) ) {
+			if ( ! empty( $extension_specs[ $superfluous_script_handle ]['requires_usage'] ) ) {
 				unset( $amp_scripts[ $superfluous_script_handle ] );
 			}
 		}

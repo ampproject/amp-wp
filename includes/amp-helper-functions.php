@@ -465,26 +465,19 @@ function amp_register_default_scripts( $wp_scripts ) {
 	);
 
 	// Register all AMP components as defined in the spec.
-	foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( 'script' ) as $script_spec ) {
-		if ( ! isset( $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec'] ) ) {
-			continue;
-		}
-		$extension_spec = $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec'];
-
+	foreach ( AMP_Allowed_Tags_Generated::get_extension_specs() as $extension_name => $extension_spec ) {
 		$src = sprintf(
 			'https://cdn.ampproject.org/v0/%s-%s.js',
-			$extension_spec['name'],
+			$extension_name,
 			end( $extension_spec['version'] )
 		);
 
 		$wp_scripts->add(
-			$extension_spec['name'],
+			$extension_name,
 			$src,
 			[ 'amp-runtime' ],
 			null
 		);
-
-		$wp_scripts->add_data( $extension_spec['name'], 'amp_requires_usage', ! empty( $extension_spec['requires_usage'] ) );
 	}
 
 	if ( $wp_scripts->query( 'amp-carousel', 'registered' ) ) {
