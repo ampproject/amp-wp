@@ -99,7 +99,6 @@ class AMP_Autoloader {
 		'AMP_Carousel'                       => 'includes/utils/class-amp-carousel',
 		'AMP_DOM_Utils'                      => 'includes/utils/class-amp-dom-utils',
 		'AMP_HTML_Utils'                     => 'includes/utils/class-amp-html-utils',
-		'AMP_Image_List'                     => 'includes/utils/class-amp-image-list',
 		'AMP_Image_Dimension_Extractor'      => 'includes/utils/class-amp-image-dimension-extractor',
 		'AMP_Validation_Manager'             => 'includes/validation/class-amp-validation-manager',
 		'AMP_Validation_Callback_Wrapper'    => 'includes/validation/class-amp-validation-callback-wrapper',

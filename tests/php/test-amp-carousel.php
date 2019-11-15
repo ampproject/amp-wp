@@ -31,12 +31,12 @@ class Test_AMP_Carousel extends WP_UnitTestCase {
 
 		return [
 			'image_without_caption' => [
-				( new AMP_Image_List() )->add( $image, null ),
+				( new AMP\Image_List() )->add( $image, null ),
 				$dom,
 				'<amp-carousel width="' . $width . '" height="' . $height . '" type="slides" layout="responsive"><div class="slide"><amp-img src="' . $src . '" width="' . $width . '" height="' . $height . '" layout="fill" object-fit="cover"></amp-img></div></amp-carousel>',
 			],
 			'image_with_caption'    => [
-				( new AMP_Image_List() )->add( $image, $caption ),
+				( new AMP\Image_List() )->add( $image, $caption ),
 				$dom,
 				'<amp-carousel width="' . $width . '" height="' . $height . '" type="slides" layout="responsive"><div class="slide"><amp-img src="' . $src . '" width="' . $width . '" height="' . $height . '" layout="fill" object-fit="cover"></amp-img><div class="amp-wp-gallery-caption"><span>' . $caption . '</span></div></div></amp-carousel>',
 			],
@@ -106,27 +106,27 @@ class Test_AMP_Carousel extends WP_UnitTestCase {
 
 		return [
 			'empty_image_list_as_argument'                 => [
-				( new AMP_Image_List() ),
+				( new AMP\Image_List() ),
 				[ AMP_Carousel::FALLBACK_WIDTH, AMP_Carousel::FALLBACK_HEIGHT ],
 			],
 			'single_small_image_passed_as_argument'        => [
-				( new AMP_Image_List() )->add( $narrow_image, '' ),
+				( new AMP\Image_List() )->add( $narrow_image, '' ),
 				[ $narrow_image_width, $narrow_image_height ],
 			],
 			'single_large_image_passed_as_argument'        => [
-				( new AMP_Image_List() )->add( $wide_image, '' ),
+				( new AMP\Image_List() )->add( $wide_image, '' ),
 				[ $wide_image_width, $wide_image_height ],
 			],
 			'image_with_0_height_should_not_affect_ratio'  => [
-				( new AMP_Image_List() )->add( $image_with_0_height, '' )->add( $wide_image, '' ),
+				( new AMP\Image_List() )->add( $image_with_0_height, '' )->add( $wide_image, '' ),
 				[ $wide_image_width, $wide_image_height ],
 			],
 			'two_images_passed_as_arguments'               => [
-				( new AMP_Image_List() )->add( $narrow_image, '' )->add( $wide_image, '' ),
+				( new AMP\Image_List() )->add( $narrow_image, '' )->add( $wide_image, '' ),
 				[ $wide_image_width, $wide_image_height ],
 			],
 			'two_images_passed_as_arguments_order_changed' => [
-				( new AMP_Image_List() )->add( $wide_image, '' )->add( $narrow_image, '' ),
+				( new AMP\Image_List() )->add( $wide_image, '' )->add( $narrow_image, '' ),
 				[ $wide_image_width, $wide_image_height ],
 			],
 		];

@@ -214,7 +214,7 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 			return '';
 		}
 
-		$images = new AMP_Image_List();
+		$images = new AMP\Image_List();
 		foreach ( $args['images'] as $props ) {
 			$image_atts = [
 				'src'    => $props['url'],
