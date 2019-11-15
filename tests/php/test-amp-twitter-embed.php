@@ -13,6 +13,72 @@
 class AMP_Twitter_Embed_Test extends WP_UnitTestCase {
 
 	/**
+	 * oEmbed response for the tweet ID 987437752164737025.
+	 *
+	 * @var string
+	 */
+	protected $oembed_response_1 = '{"url":"https:\/\/twitter.com\/WordPress\/status\/987437752164737025","author_name":"WordPress","author_url":"https:\/\/twitter.com\/WordPress","html":"\u003Cblockquote class=\"twitter-tweet\" data-width=\"500\" data-dnt=\"true\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003ECelebrate the WordPress 15th Anniversary on May 27 \u003Ca href=\"https:\/\/t.co\/jv62WkI9lr\"\u003Ehttps:\/\/t.co\/jv62WkI9lr\u003C\/a\u003E \u003Ca href=\"https:\/\/t.co\/4ZECodSK78\"\u003Epic.twitter.com\/4ZECodSK78\u003C\/a\u003E\u003C\/p\u003E&mdash; WordPress (@WordPress) \u003Ca href=\"https:\/\/twitter.com\/WordPress\/status\/987437752164737025?ref_src=twsrc%5Etfw\"\u003EApril 20, 2018\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n","width":500,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"}';
+
+	/**
+	 * oEmbed response for the tweet ID 705219971425574912.
+	 *
+	 * @var string
+	 */
+	protected $oembed_response_2 = '{"url":"https:\/\/twitter.com\/sengineland\/status\/705219971425574912","author_name":"Search Engine Land","author_url":"https:\/\/twitter.com\/sengineland","html":"\u003Cblockquote class=\"twitter-tweet\" data-width=\"500\" data-dnt=\"true\"\u003E\u003Cp lang=\"en\" dir=\"ltr\"\u003EOn our way to the \u003Ca href=\"https:\/\/twitter.com\/hashtag\/GoogleDance?src=hash&amp;ref_src=twsrc%5Etfw\"\u003E#GoogleDance\u003C\/a\u003E! \u003Ca href=\"https:\/\/twitter.com\/hashtag\/SMX?src=hash&amp;ref_src=twsrc%5Etfw\"\u003E#SMX\u003C\/a\u003E \uD83D\uDC83\uD83C\uDFFB \u003Ca href=\"https:\/\/t.co\/N8kZ9M3eN4\"\u003Epic.twitter.com\/N8kZ9M3eN4\u003C\/a\u003E\u003C\/p\u003E&mdash; Search Engine Land (@sengineland) \u003Ca href=\"https:\/\/twitter.com\/sengineland\/status\/705219971425574912?ref_src=twsrc%5Etfw\"\u003EMarch 3, 2016\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"https:\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E\n","width":500,"height":null,"type":"rich","cache_age":"3153600000","provider_name":"Twitter","provider_url":"https:\/\/twitter.com","version":"1.0"}';
+
+	/**
+	 * Set up each test.
+	 */
+	public function setUp() {
+		parent::setUp();
+
+		add_filter( 'pre_http_request', [ $this, 'mock_http_request' ], 10, 3 );
+	}
+
+	/**
+	 * After a test method runs, reset any state in WordPress the test method might have changed.
+	 */
+	public function tearDown() {
+		remove_filter( 'pre_http_request', [ $this, 'mock_http_request' ] );
+		parent::tearDown();
+	}
+
+	/**
+	 * Mock HTTP request.
+	 *
+	 * @param mixed  $preempt Whether to preempt an HTTP request's return value. Default false.
+	 * @param mixed  $r       HTTP request arguments.
+	 * @param string $url     The request URL.
+	 * @return array Response data.
+	 */
+	public function mock_http_request( $preempt, $r, $url ) {
+		$host = wp_parse_url( $url, PHP_URL_HOST );
+
+		if ( 'publish.twitter.com' !== $host ) {
+			return $preempt;
+		}
+
+		if ( false !== strpos( $url, '987437752164737025' ) ) {
+			$body = $this->oembed_response_1;
+		} else {
+			$body = $this->oembed_response_2;
+		}
+
+		unset( $r );
+
+		return [
+			'body'          => $body,
+			'headers'       => [],
+			'response'      => [
+				'code'    => 200,
+				'message' => 'ok',
+			],
+			'cookies'       => [],
+			'http_response' => null,
+		];
+	}
+
+	/**
 	 * Get conversion data.
 	 *
 	 * @return array
