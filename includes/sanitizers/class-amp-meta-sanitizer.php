@@ -47,7 +47,7 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 
 		$charset = $this->ensure_charset_is_present();
 
-		if ( static::AMP_CHARSET !== $charset ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement
+		if ( static::AMP_CHARSET !== strtolower( $charset ) ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement
 			// @TODO Re-encode the content into UTF-8.
 			// ... sure?
 		}
