@@ -4,16 +4,11 @@
 import styled from 'styled-components';
 
 /**
- * WordPress dependencies
- */
-import { useContext } from '@wordpress/element';
-
-/**
  * Internal dependencies
  */
 import { createNewElement } from '../../elements';
 import { useStory } from '../../app';
-import Context from './context';
+import useLibrary from './useLibrary';
 import MediaLibrary from './mediaLibrary';
 import TextLibrary from './textLibrary';
 import ShapeLibrary from './shapeLibrary';
@@ -27,8 +22,13 @@ const Background = styled.aside`
 `;
 
 function Library() {
-	const { tab, tabs: { MEDIA, TEXT, SHAPES, LINKS } } = useContext( Context );
-	const { actions: { appendElementToCurrentPage } } = useStory();
+	const {
+		state: { tab },
+		data: { tabs: { MEDIA, TEXT, SHAPES, LINKS } },
+	} = useLibrary();
+	const {
+		actions: { appendElementToCurrentPage },
+	} = useStory();
 	const ContentLibrary = ( {
 		[ MEDIA ]: MediaLibrary,
 		[ TEXT ]: TextLibrary,

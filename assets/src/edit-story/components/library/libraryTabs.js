@@ -1,16 +1,15 @@
 /**
- * WordPress dependencies
- */
-import { useContext } from '@wordpress/element';
-
-/**
  * Internal dependencies
  */
-import Context from './context';
+import useLibrary from './useLibrary';
 import { Tabs, Media, Text, Shapes, Links } from './tabs';
 
 function LibraryTabs() {
-	const { tab, setTab, tabs: { MEDIA, TEXT, SHAPES, LINKS } } = useContext( Context );
+	const {
+		state: { tab },
+		actions: { setTab },
+		data: { tabs: { MEDIA, TEXT, SHAPES, LINKS } },
+	} = useLibrary();
 	const tabs = [
 		[ MEDIA, Media ],
 		[ TEXT, Text ],

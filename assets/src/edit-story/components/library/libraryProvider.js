@@ -22,13 +22,19 @@ function LibraryProvider( { children } ) {
 	const [ tab, setTab ] = useState( MEDIA );
 
 	const state = {
-		tab,
-		setTab,
-		tabs: {
-			MEDIA,
-			TEXT,
-			SHAPES,
-			LINKS,
+		state: {
+			tab,
+		},
+		actions: {
+			setTab,
+		},
+		data: {
+			tabs: {
+				MEDIA,
+				TEXT,
+				SHAPES,
+				LINKS,
+			},
 		},
 	};
 

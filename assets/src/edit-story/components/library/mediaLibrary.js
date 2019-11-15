@@ -20,7 +20,6 @@ const Image = styled.img`
 `;
 
 function MediaLibrary( { onInsert } ) {
-
 	const [ selectedMedia, setSelectedMedia ] = useState( null );
 	const [ isFetching, setIsFetching ] = useState( false );
 	const fetchRequest = useRef( null );
@@ -33,20 +32,19 @@ function MediaLibrary( { onInsert } ) {
 			path: `/wp/v2/media/`,
 		} ).then(
 			( post ) => {
-				if (isStillMounted.current && fetchRequest.current === currentFetchRequest) {
+				if ( isStillMounted.current && fetchRequest.current === currentFetchRequest ) {
 					setSelectedMedia( post );
 					setIsFetching( false );
 				}
 			},
 		).catch(
 			() => {
-				if (isStillMounted.current && fetchRequest.current === currentFetchRequest) {
+				if ( isStillMounted.current && fetchRequest.current === currentFetchRequest ) {
 					setSelectedMedia( null );
 					setIsFetching( false );
 				}
 			},
 		);
-
 	}, [] );
 
 	useEffect( () => {
@@ -66,21 +64,26 @@ function MediaLibrary( { onInsert } ) {
 				<div>
 					{ selectedMedia.map( ( attachment ) => (
 						<Image
-							   src={ attachment.guid.rendered }
-							   width={ 150 }
-							   height={ 150 }
-							   onClick={ () => onInsert( 'image', {
-								   src: attachment.guid.rendered,
-								   width: 20,
-								   height: 10,
-								   x: 5,
-								   y: 5,
-							   } ) }/>
+							key={ attachment.guid.rendered }
+							src={ attachment.guid.rendered }
+							width={ 150 }
+							height={ 150 }
+							onClick={ () => onInsert( 'image', {
+								src: attachment.guid.rendered,
+								width: 20,
+								height: 10,
+								x: 5,
+								y: 5,
+							} ) }
+						/>
 					) )
 					}
 				</div>
-			) : ( <div>No media found</div> )
-			}
+			) : (
+				<div>
+					{ 'No media found' }
+				</div>
+			) }
 
 		</>
 	);
