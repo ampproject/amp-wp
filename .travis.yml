@@ -36,6 +36,7 @@ env:
 install:
   - nvm install
   - composer install
+  - composer dump-autoload -o
   - export DEV_LIB_PATH=vendor/xwp/wp-dev-lib/scripts
   - export DIFF_HEAD=HEAD
   - source "$DEV_LIB_PATH/travis.install.sh"
