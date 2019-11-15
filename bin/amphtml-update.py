@@ -547,6 +547,9 @@ def GetTagRules(tag_spec):
 		if 'deprecated_version' in extension_spec:
 			del extension_spec['deprecated_version']
 
+		if 'deprecated_allow_duplicates' in extension_spec:
+			del extension_spec['deprecated_allow_duplicates']
+
 		tag_rules['extension_spec'] = extension_spec
 
 	if tag_spec.HasField('mandatory'):
