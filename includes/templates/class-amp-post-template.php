@@ -148,6 +148,12 @@ class AMP_Post_Template {
 	 * @return mixed Value.
 	 */
 	public function get( $property, $default = null ) {
+
+		if ( isset( $this->data[ $property ] ) ) {
+			return $this->data[ $property ];
+		}
+
+		// @todo Some of the fields here were previously constructed and filtered in \AMP_Post_Template::__construct(). This may pose back-compat issues.
 		switch ( $property ) {
 			case 'amp_post_content':
 				/** This filter is documented in wp-includes/post-template.php */
@@ -175,10 +181,6 @@ class AMP_Post_Template {
 			case 'site_icon_url':
 				/** This filter is documented in includes/amp-helper-functions.php */
 				return apply_filters( 'amp_site_icon_url', function_exists( 'get_site_icon_url' ) ? get_site_icon_url( self::SITE_ICON_SIZE ) : '' );
-		}
-
-		if ( isset( $this->data[ $property ] ) ) {
-			return $this->data[ $property ];
 		}
 
 		/* translators: %s is key name */
