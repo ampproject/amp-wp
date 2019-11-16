@@ -519,7 +519,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		if ( ! empty( $cdata ) && $node instanceof DOMElement ) {
 			$validity = $this->validate_cdata_for_node( $node, $cdata );
 			if ( is_wp_error( $validity ) ) {
-				$this->remove_invalid_child( $node ); // @todo Code: illegal_cdata.
+				$this->remove_invalid_child( $node, [ 'code' => 'illegal_cdata' ] );
 				return null;
 			}
 		}

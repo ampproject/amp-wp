@@ -1915,8 +1915,8 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			',
 			[ 'amp-bind' ],
 			[
+				'illegal_cdata',
 				'invalid_attribute',
-				'invalid_element',
 				'invalid_element',
 				'invalid_element',
 			],

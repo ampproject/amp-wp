@@ -2936,6 +2936,8 @@ class AMP_Validation_Error_Taxonomy {
 					$title .= sprintf( ': <code>%s</code>', esc_html( $validation_error['property_name'] ) );
 				}
 				return $title;
+			case 'illegal_cdata':
+				return esc_html__( 'Illegal text content', 'amp' );
 			case 'illegal_css_important':
 				$title = esc_html__( 'Illegal CSS !important property', 'amp' );
 				if ( isset( $validation_error['property_name'] ) ) {
