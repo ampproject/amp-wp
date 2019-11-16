@@ -11,9 +11,7 @@
 function amp_post_template_init_hooks() {
 	add_action( 'amp_post_template_head', 'amp_post_template_add_title' );
 	add_action( 'amp_post_template_head', 'amp_post_template_add_canonical' );
-	add_action( 'amp_post_template_head', 'amp_post_template_add_scripts' );
 	add_action( 'amp_post_template_head', 'amp_post_template_add_fonts' );
-	add_action( 'amp_post_template_head', 'amp_post_template_add_boilerplate_css' );
 	add_action( 'amp_post_template_head', 'amp_print_schemaorg_metadata' );
 	add_action( 'amp_post_template_head', 'amp_add_generator_metadata' );
 	add_action( 'amp_post_template_head', 'wp_generator' );
@@ -47,11 +45,13 @@ function amp_post_template_add_canonical( $amp_template ) {
 /**
  * Print scripts.
  *
+ * @deprecated
  * @see amp_register_default_scripts()
  * @see amp_filter_script_loader_tag()
  * @param AMP_Post_Template $amp_template Template.
  */
 function amp_post_template_add_scripts( $amp_template ) {
+	_deprecated_function( __FUNCTION__, '1.5' );
 	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	echo amp_render_scripts(
 		array_merge(
@@ -79,10 +79,12 @@ function amp_post_template_add_fonts( $amp_template ) {
 /**
  * Print boilerplate CSS.
  *
+ * @deprecated
  * @since 0.3
  * @see amp_get_boilerplate_code()
  */
 function amp_post_template_add_boilerplate_css() {
+	_deprecated_function( __FUNCTION__, '1.5' );
 	echo amp_get_boilerplate_code(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 }
 

@@ -7,6 +7,8 @@
 
 /**
  * Class AMP_Content
+ *
+ * @deprecated
  */
 class AMP_Content {
 

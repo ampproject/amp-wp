@@ -1,6 +1,9 @@
 <?php
 
 class AMP_Render_Post_Test extends WP_UnitTestCase {
+	/**
+	 * @expectedDeprecated amp_render_post
+	 */
 	public function test__invalid_post() {
 		// No ob here since it bails early
 		$amp_rendered = amp_render_post( PHP_INT_MAX );
@@ -9,6 +12,9 @@ class AMP_Render_Post_Test extends WP_UnitTestCase {
 		$this->assertEquals( 0, did_action( 'pre_amp_render_post' ), 'pre_amp_render_post action fire when it should not have.' );
 	}
 
+	/**
+	 * @expectedDeprecated amp_render_post
+	 */
 	public function test__valid_post() {
 		$user_id = self::factory()->user->create();
 		$post_id = self::factory()->post->create( [ 'post_author' => $user_id ] );
@@ -30,6 +36,7 @@ class AMP_Render_Post_Test extends WP_UnitTestCase {
 	 * Test is_amp_endpoint.
 	 *
 	 * @covers ::is_amp_endpoint()
+	 * @expectedDeprecated amp_render_post
 	 */
 	public function test__is_amp_endpoint() {
 		$user_id = self::factory()->user->create();

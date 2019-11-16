@@ -379,9 +379,6 @@ function amp_init() {
 		add_action( 'wp_loaded', 'amp_editor_core_blocks' );
 		add_filter( 'request', 'amp_force_query_var_value' );
 
-		// Add actions for reader mode templates.
-		add_action( 'wp', 'amp_maybe_add_actions' );
-
 		// Redirect the old url of amp page to the updated url.
 		add_filter( 'old_slug_redirect_url', 'amp_redirect_old_slug_to_new_url' );
 	}
@@ -449,6 +446,7 @@ function amp_force_query_var_value( $query_vars ) {
  * @return void
  */
 function amp_maybe_add_actions() {
+	_deprecated_function( __FUNCTION__, '1.5' );
 
 	// Short-circuit when theme supports AMP, as everything is handled by AMP_Theme_Support.
 	if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
@@ -639,6 +637,7 @@ function amp_add_post_template_actions() {
  * @deprecated This function is not used when 'amp' theme support is added.
  */
 function amp_prepare_render() {
+	_deprecated_function( __FUNCTION__, '1.5' );
 	add_action( 'template_redirect', 'amp_render', 11 );
 }
 
@@ -649,6 +648,8 @@ function amp_prepare_render() {
  * @deprecated This function is not used when 'amp' theme support is added.
  */
 function amp_render() {
+	_deprecated_function( __FUNCTION__, '1.5' );
+
 	// Note that queried object is used instead of the ID so that the_preview for the queried post can apply.
 	$post = get_queried_object();
 	if ( $post instanceof WP_Post ) {
@@ -667,6 +668,7 @@ function amp_render() {
  * @global WP_Query $wp_query
  */
 function amp_render_post( $post ) {
+	_deprecated_function( __FUNCTION__, '1.5' );
 	global $wp_query;
 
 	if ( ! ( $post instanceof WP_Post ) ) {

@@ -1264,7 +1264,11 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 	}
 
 	// Show nothing if there are rejected validation errors for this URL.
-	if ( ! is_amp_endpoint() && count( AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( amp_get_current_url(), [ 'ignore_accepted' => true ] ) ) > 0 ) {
+	if (
+		! is_amp_endpoint() &&
+		AMP_Theme_Support::READER_MODE_SLUG !== AMP_Theme_Support::get_support_mode() &&
+		count( AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( amp_get_current_url(), [ 'ignore_accepted' => true ] ) ) > 0
+	) {
 		return;
 	}
 

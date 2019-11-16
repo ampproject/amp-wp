@@ -289,7 +289,7 @@ class AMP_Post_Template {
 	}
 
 	/**
-	 * Buuild post comments data.
+	 * Build post comments data.
 	 */
 	private function build_post_comments_data() {
 		if ( ! post_type_supports( $this->post->post_type, 'comments' ) ) {
@@ -319,20 +319,14 @@ class AMP_Post_Template {
 
 	/**
 	 * Build post content.
+	 *
+	 * @see the_content()
 	 */
 	private function build_post_content() {
-		$amp_content = new AMP_Content(
-			post_password_required( $this->post ) ? get_the_password_form( $this->post ) : $this->post->post_content,
-			amp_get_content_embed_handlers( $this->post ),
-			amp_get_content_sanitizers( $this->post ),
-			[
-				'content_max_width' => $this->get( 'content_max_width' ),
-			]
-		);
+		/** This filter is documented in wp-includes/post-template.php */
+		$content = apply_filters( 'the_content', get_the_content() );
 
-		$this->add_data_by_key( 'post_amp_content', $amp_content->get_amp_content() );
-		$this->merge_data_for_key( 'amp_component_scripts', $amp_content->get_amp_scripts() );
-		$this->add_data_by_key( 'post_amp_stylesheets', $amp_content->get_amp_stylesheets() );
+		$this->add_data_by_key( 'post_amp_content', $content );
 	}
 
 	/**
@@ -362,32 +356,13 @@ class AMP_Post_Template {
 			return;
 		}
 
-		$dom    = AMP_DOM_Utils::get_dom_from_content( $featured_html );
-		$assets = AMP_Content_Sanitizer::sanitize_document(
-			$dom,
-			amp_get_content_sanitizers( $this->post ),
-			[
-				'content_max_width' => $this->get( 'content_max_width' ),
-			]
-		);
-
-		$sanitized_html = AMP_DOM_Utils::get_content_from_dom( $dom );
-
 		$this->add_data_by_key(
 			'featured_image',
 			[
-				'amp_html' => $sanitized_html,
+				'amp_html' => $featured_image,
 				'caption'  => $featured_image->post_excerpt,
 			]
 		);
-
-		if ( $assets['scripts'] ) {
-			$this->merge_data_for_key( 'amp_component_scripts', $assets['scripts'] );
-		}
-
-		if ( $assets['stylesheets'] ) {
-			$this->merge_data_for_key( 'post_amp_stylesheets', $assets['stylesheets'] );
-		}
 	}
 
 	/**
