@@ -23,12 +23,44 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1">
-	<?php do_action( 'amp_post_template_head', $this ); ?>
+	<?php
+	/**
+	 * Fires when rendering <head> in Reader mode templates.
+	 *
+	 * @since 0.2
+	 *
+	 * @param AMP_Post_Template $this
+	 */
+	do_action( 'amp_post_template_head', $this );
+	?>
 	<style amp-custom>
 		<?php $this->load_parts( [ 'style' ] ); ?>
-		<?php do_action( 'amp_post_template_css', $this ); ?>
+		<?php
+		/**
+		 * Fires when printing CSS styles in Reader mode templates.
+		 *
+		 * Callbacks should print bare CSS without any `<style>` or `<link>` tags.
+		 * As an alternative to using this, please consider:
+		 *
+		 *     add_action( 'amp_post_template_head', function() { wp_print_styles( 'foo' ); } );
+		 *
+		 * @since 0.3
+		 *
+		 * @param AMP_Post_Template $this
+		 */
+		do_action( 'amp_post_template_css', $this );
+		?>
 	</style>
 </head>
 
 <body class="<?php echo esc_attr( $this->get( 'body_class' ) ); ?>">
-<?php do_action( 'amp_post_template_body_open', $this ); ?>
+<?php
+/**
+ * Fires when immediately after printing the <body>.
+ *
+ * @since 1.2.1
+ * @see wp_body_open()
+ *
+ * @param AMP_Post_Template $this
+ */
+do_action( 'amp_post_template_body_open', $this );
