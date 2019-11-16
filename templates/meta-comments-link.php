@@ -19,7 +19,7 @@
  */
 
 ?>
-<?php if ( comments_open() ) : ?>
+<?php if ( comments_open() || get_comment_count() > 0 ) : ?>
 	<div class="amp-wp-meta amp-wp-comments-link">
 		<a href="<?php echo esc_url( get_comments_link( get_the_ID() ) ); ?>">
 			<?php echo esc_html( $this->get( 'comments_link_text' ) ); ?>
