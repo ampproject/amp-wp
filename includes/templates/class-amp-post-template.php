@@ -349,7 +349,7 @@ class AMP_Post_Template {
 		$this->add_data_by_key(
 			'featured_image',
 			[
-				'amp_html' => $featured_image,
+				'amp_html' => $featured_html,
 				'caption'  => $featured_image->post_excerpt,
 			]
 		);
