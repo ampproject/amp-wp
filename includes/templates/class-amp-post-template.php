@@ -324,7 +324,7 @@ class AMP_Post_Template {
 	 */
 	private function build_post_content() {
 		/** This filter is documented in wp-includes/post-template.php */
-		$content = apply_filters( 'the_content', get_the_content() );
+		$content = apply_filters( 'the_content', get_the_content( null, false, $this->post ) );
 
 		$this->add_data_by_key( 'post_amp_content', $content );
 	}

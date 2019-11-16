@@ -19,6 +19,9 @@ class AMP_Render_Post_Test extends WP_UnitTestCase {
 		$user_id = self::factory()->user->create();
 		$post_id = self::factory()->post->create( [ 'post_author' => $user_id ] );
 
+		// Set global for WP<5.2 where get_the_content() doesn't take the $post parameter.
+		$GLOBALS['post'] = get_post( $post_id );
+
 		$output = get_echo( 'amp_render_post', [ $post_id ] );
 
 		$this->assertContains( '<html amp', $output, 'Response does not include html tag with amp attribute.' );
@@ -45,6 +48,9 @@ class AMP_Render_Post_Test extends WP_UnitTestCase {
 				'post_author' => $user_id,
 			]
 		);
+
+		// Set global for WP<5.2 where get_the_content() doesn't take the $post parameter.
+		$GLOBALS['post'] = get_post( $post_id );
 
 		$before_is_amp_endpoint = is_amp_endpoint();
 
