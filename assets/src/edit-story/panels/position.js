@@ -11,7 +11,7 @@ import { useEffect, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { Panel, Title, Save, InputGroup, getCommonValue } from './shared';
+import { Panel, Title, InputGroup, getCommonValue } from './shared';
 
 function PositionPanel( { selectedElements, onSetProperties } ) {
 	const x = getCommonValue( selectedElements, 'x' );
@@ -43,9 +43,6 @@ function PositionPanel( { selectedElements, onSetProperties } ) {
 				onChange={ ( value ) => setState( { ...state, y: isNaN( value ) || value === '' ? '' : parseFloat( value ) } ) }
 				postfix="%"
 			/>
-			<Save>
-				{ 'Save' }
-			</Save>
 		</Panel>
 	);
 }

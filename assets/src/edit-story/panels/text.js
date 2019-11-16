@@ -11,7 +11,7 @@ import { useEffect, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { Panel, Title, Save, InputGroup, getCommonValue } from './shared';
+import { Panel, Title, InputGroup, getCommonValue } from './shared';
 
 function TextPanel( { selectedElements, onSetProperties } ) {
 	const content = getCommonValue( selectedElements, 'content' );
@@ -34,9 +34,6 @@ function TextPanel( { selectedElements, onSetProperties } ) {
 				isMultiple={ content === '' }
 				onChange={ ( value ) => setState( { ...state, content: value } ) }
 			/>
-			<Save>
-				{ 'Save' }
-			</Save>
 		</Panel>
 	);
 }

@@ -11,7 +11,7 @@ import { useEffect, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { Panel, Title, Save, InputGroup, getCommonValue } from './shared';
+import { Panel, Title, InputGroup, getCommonValue } from './shared';
 
 function FontPanel( { selectedElements, onSetProperties } ) {
 	const fontFamily = getCommonValue( selectedElements, 'fontFamily' );
@@ -55,9 +55,6 @@ function FontPanel( { selectedElements, onSetProperties } ) {
 				isMultiple={ fontSize === '' }
 				onChange={ ( value ) => setState( { ...state, fontSize: value } ) }
 			/>
-			<Save>
-				{ 'Save' }
-			</Save>
 		</Panel>
 	);
 }

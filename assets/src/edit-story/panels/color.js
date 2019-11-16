@@ -11,7 +11,7 @@ import { useEffect, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { Panel, Title, Save, InputGroup, getCommonValue } from './shared';
+import { Panel, Title, InputGroup, getCommonValue } from './shared';
 
 function ColorPanel( { selectedElements, onSetProperties } ) {
 	const color = getCommonValue( selectedElements, 'color' );
@@ -34,9 +34,6 @@ function ColorPanel( { selectedElements, onSetProperties } ) {
 				isMultiple={ color === '' }
 				onChange={ ( value ) => setState( { ...state, color: value } ) }
 			/>
-			<Save>
-				{ 'Save' }
-			</Save>
 		</Panel>
 	);
 }

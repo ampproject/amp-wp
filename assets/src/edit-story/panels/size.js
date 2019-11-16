@@ -11,7 +11,7 @@ import { useEffect, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { Panel, Title, Save, InputGroup, getCommonValue } from './shared';
+import { Panel, Title, InputGroup, getCommonValue } from './shared';
 
 function SizePanel( { selectedElements, onSetProperties } ) {
 	const width = getCommonValue( selectedElements, 'width' );
@@ -43,9 +43,6 @@ function SizePanel( { selectedElements, onSetProperties } ) {
 				onChange={ ( value ) => setState( { ...state, height: isNaN( value ) || value === '' ? '' : parseFloat( value ) } ) }
 				postfix="%"
 			/>
-			<Save>
-				{ 'Save' }
-			</Save>
 		</Panel>
 	);
 }

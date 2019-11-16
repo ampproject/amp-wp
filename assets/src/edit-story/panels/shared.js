@@ -20,12 +20,6 @@ export const Title = styled.h2`
 	line-height: 19px;
 `;
 
-export const Save = styled( Outline ).attrs( { type: 'submit' } )`
-	color: ${ ( { theme } ) => theme.colors.bg.v2 };
-	font-size: 11px;
-	line-height: 16px;
-`;
-
 const Label = styled.span`
 	color: ${ ( { theme } ) => theme.colors.mg.v1 };
 	font-size: 11px;
@@ -56,7 +50,12 @@ function InputGroup( { label, value, isMultiple, onChange, postfix } ) {
 			<Label>
 				{ label }
 			</Label>
-			<Input onChange={ ( evt ) => onChange( evt.target.value ) } placeholder={ placeholder } value={ value } />
+			<Input
+				onChange={ ( evt ) => onChange( evt.target.value, evt ) }
+				onBlur={ ( evt ) => evt.target.form.dispatchEvent( new window.Event( 'submit' ) ) }
+				placeholder={ placeholder }
+				value={ value }
+			/>
 			{ postfix }
 		</Group>
 	);
