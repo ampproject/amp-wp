@@ -515,18 +515,11 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		// @todo Need to pass the $tag_spec['spec_name'] into the validation errors for each.
-		// @todo Will the is_missing_mandatory_attribute check here even be needed because it will be checked
-		if ( ! empty( $attr_spec_list ) && $this->is_missing_mandatory_attribute( $attr_spec_list, $node ) ) {
-			$this->remove_node( $node );
-			return null;
-		}
-
 		// Remove element if it has illegal CDATA.
 		if ( ! empty( $cdata ) && $node instanceof DOMElement ) {
 			$validity = $this->validate_cdata_for_node( $node, $cdata );
 			if ( is_wp_error( $validity ) ) {
-				$this->remove_node( $node );
+				$this->remove_invalid_child( $node ); // @todo Code: illegal_cdata.
 				return null;
 			}
 		}
@@ -569,12 +562,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		// Identify attribute values that don't conform to the attr_spec.
 		$disallowed_attributes = $this->sanitize_disallowed_attribute_values_in_node( $node, $merged_attr_spec_list, $disallowed_attributes );
 
-		// If $disallowed_attributes is false then the entire element should be removed.
-		if ( false === $disallowed_attributes ) {
-			$this->remove_node( $node );
-			return null;
-		}
-
 		// Remove all invalid attributes.
 		if ( ! empty( $disallowed_attributes ) ) {
 			/*
@@ -606,6 +593,13 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			foreach ( $removed_attributes as $removed_attribute ) {
 				$this->clean_up_after_attribute_removal( $node, $removed_attribute );
 			}
+		}
+
+		// @todo Need to pass the $tag_spec['spec_name'] into the validation errors for each.
+		// After attributes have been sanitized (and potentially removed), if mandatory attribute(s) are missing, remove the element.
+		if ( $this->is_missing_mandatory_attribute( $merged_attr_spec_list, $node ) ) {
+			$this->remove_invalid_child( $node, [ 'code' => 'missing_mandatory_attribute' ] );
+			return null;
 		}
 
 		// Add required AMP component scripts.
@@ -847,7 +841,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 			// If a mandatory attribute is required, and attribute exists, pass.
 			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::MANDATORY ] ) ) {
-				$mandatory_count ++;
+				$mandatory_count++;
 
 				$result = $this->check_attr_spec_rule_mandatory( $node, $attr_name, $attr_spec_rule );
 				if ( AMP_Rule_Spec::PASS === $result ) {
@@ -1002,29 +996,12 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				$should_remove_node = true;
 			}
 
-			// @todo Mandatory check is done where??
-
 			if ( $should_remove_node ) {
-				$is_mandatory =
-					isset( $attr_spec_rule[ AMP_Rule_Spec::MANDATORY ] )
-						? (bool) $attr_spec_rule[ AMP_Rule_Spec::MANDATORY ]
-						: false;
-
-				if ( $is_mandatory ) {
-					$this->remove_invalid_child(
-						$node,
-						[
-							'code'      => 'invalid_mandatory_attribute',
-							'attr_name' => $attr_name,
-						]
-					);
-					return false;
-				}
-
 				$attrs_to_remove[] = $attr_node;
 			}
 		}
 
+		// @todo Do not actually mutate the attributes here, but rather pass back what should be done?
 		// Remove the disallowed values.
 		foreach ( $attrs_to_remove as $attr_node ) {
 			if ( isset( $attr_spec_list[ $attr_node->nodeName ][ AMP_Rule_Spec::VALUE_URL ] ) &&
