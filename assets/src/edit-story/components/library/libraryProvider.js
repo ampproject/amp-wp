@@ -20,7 +20,7 @@ const SHAPES = 'shapes';
 const LINKS = 'links';
 
 function LibraryProvider( { children } ) {
-	const { getMedia } = useAPI();
+	const { actions: { getMedia } } = useAPI();
 	const [ media, setMedia ] = useState( [] );
 	const [ isMediaLoaded, setIsMediaLoaded ] = useState( false );
 	const [ isMediaLoading, setIsMediaLoading ] = useState( false );

@@ -10,8 +10,7 @@ import { useContext } from '@wordpress/element';
 import Context from './context';
 
 function useAPI() {
-	const { actions } = useContext( Context );
-	return actions;
+	return useContext( Context );
 }
 
 export default useAPI;

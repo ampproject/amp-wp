@@ -17,7 +17,7 @@ function useLoadStory( {
 	setCurrentPageIndex,
 	clearSelection,
 } ) {
-	const { getStoryById } = useAPI();
+	const { actions: { getStoryById } } = useAPI();
 	const { actions: { clearHistory } } = useHistory();
 	useEffect( () => {
 		if ( storyId && pages.length === 0 ) {
