@@ -49,7 +49,6 @@ class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function register_embed() {
 		wp_embed_register_handler( 'amp-dailymotion', self::URL_PATTERN, [ $this, 'oembed' ], -1 );
-		add_shortcode( 'dailymotion', [ $this, 'shortcode' ] );
 	}
 
 	/**
@@ -57,11 +56,12 @@ class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function unregister_embed() {
 		wp_embed_unregister_handler( 'amp-dailymotion', -1 );
-		remove_shortcode( 'dailymotion' );
 	}
 
 	/**
 	 * Gets AMP-compliant markup for the Dailymotion shortcode.
+	 *
+	 * @deprecated 1.5.0 Moved to Jetpack in dailymotion_shortcode().
 	 *
 	 * @param array $attr The Dailymotion attributes.
 	 * @return string Dailymotion shortcode markup.
