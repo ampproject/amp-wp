@@ -29,7 +29,7 @@ const Selection = styled.div`
 	top: ${ ( { y } ) => `${ y }%` };
 	width: ${ ( { width } ) => `${ width }%` };
 	height: ${ ( { height } ) => `${ height }%` };
-	position: relative;
+	position: absolute;
 	pointer-events:  none;
 `;
 

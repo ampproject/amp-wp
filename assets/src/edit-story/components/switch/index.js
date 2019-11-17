@@ -14,6 +14,10 @@ const Group = styled.label`
 	align-items: center;
 `;
 
+const Space = styled.div`
+	width: 6px;
+`;
+
 const Label = styled.span`
 	margin-right: 6px;
 	font-size: 11px;
@@ -81,6 +85,7 @@ function Switch( { label, checked, onChange } ) {
 			<Label>
 				{ label }
 			</Label>
+			<Space />
 			<Checkbox checked={ on } onChange={ handleChange } />
 			<Slider />
 		</Group>

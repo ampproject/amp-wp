@@ -31,14 +31,16 @@ const Options = styled.div`
 
 const Divider = styled.span`
 	background-color: ${ ( { theme } ) => theme.colors.fg.v1 };
-	margin-left: 1em;
 	opacity: .3;
 	height: 24px;
 	width: 1px;
 `;
 
+const Space = styled.div`
+	width: 1em;
+`;
+
 const Icon = styled.a`
-	margin-left: 1em;
 	cursor: pointer;
 	color: ${ ( { theme } ) => theme.colors.fg.v4 };
 
@@ -56,10 +58,13 @@ function Canvas() {
 			</PageCount>
 			<Options>
 				<Switch label="Helper" />
+				<Space />
 				<Divider />
+				<Space />
 				<Icon>
 					<Delete />
 				</Icon>
+				<Space />
 				<Icon>
 					<Duplicate />
 				</Icon>
