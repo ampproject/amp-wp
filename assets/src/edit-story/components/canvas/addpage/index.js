@@ -23,7 +23,7 @@ const Wrapper = styled.div`
 `;
 
 const Space = styled.div`
-	flex: 1 1 60px;
+	flex: 0 1 60px;
 `;
 
 const Circle = styled.a`
