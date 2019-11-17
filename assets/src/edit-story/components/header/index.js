@@ -11,10 +11,18 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { Outline, Primary, Undo, Redo } from '../button';
-import { useHistory } from '../../app';
+import { CENTRAL_RIGHT_PADDING, INSPECTOR_WIDTH } from '../../constants';
+import Buttons from './buttons';
+
+const Background = styled.div`
+	display: grid;
+	grid:
+    "header buttons" 1fr
+    / 1fr ${ CENTRAL_RIGHT_PADDING + INSPECTOR_WIDTH }px;
+`;
 
 const Head = styled.header`
+	grid-area: header;
 	background-color: ${ ( { theme } ) => theme.colors.bg.v3 };
 	height: 100%;
 	display: flex;
@@ -29,57 +37,24 @@ const Title = styled.h1`
 	line-height: 20px;
 `;
 
-const ButtonList = styled.nav`
-	background-color: ${ ( { theme } ) => theme.colors.bg.v3 };
-	display: flex;
-	justify-content: flex-end;
-	padding: 1em;
-	height: 100%;
-
-	button {
-		margin-left: 1em;
-	}
+const ButtonCell = styled.header`
+	grid-area: buttons;
 `;
 
 function Header() {
 	return (
-		<Head>
-			<Title>
-				{ __( 'New story (click to edit title)' ) }
-			</Title>
-		</Head>
-	);
-}
-
-function Undoer() {
-	const { state: { canUndo }, actions: { undo } } = useHistory();
-	return (
-		<Undo onClick={ undo } isDisabled={ ! canUndo } />
-	);
-}
-
-function Redoer() {
-	const { state: { canRedo }, actions: { redo } } = useHistory();
-	return (
-		<Redo onClick={ redo } isDisabled={ ! canRedo } />
-	);
-}
-
-function Buttons() {
-	return (
-		<ButtonList>
-			<Undoer />
-			<Redoer />
-			<Outline>
-				{ __( 'Preview' ) }
-			</Outline>
-			<Primary>
-				{ __( 'Publish' ) }
-			</Primary>
-		</ButtonList>
+		<Background>
+			<Head>
+				<Title>
+					{ __( 'New story (click to edit title)' ) }
+				</Title>
+			</Head>
+			<ButtonCell>
+				<Buttons />
+			</ButtonCell>
+		</Background>
 	);
 }
 
 export default Header;
 
-export { Buttons };

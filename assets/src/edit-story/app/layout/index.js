@@ -7,10 +7,11 @@ import styled from 'styled-components';
 /**
  * Internal dependencies
  */
-import Header, { Buttons } from '../../components/header';
-import Sidebar from '../../components/sidebar';
-import { Library, LibraryTabs } from '../../components/library';
-import Canvas, { AddPage, Meta, Carrousel } from '../../components/canvas';
+import Header from '../../components/header';
+import Inspector from '../../components/inspector';
+import Library from '../../components/library';
+import Canvas from '../../components/canvas';
+import { LIBRARY_WIDTH, INSPECTOR_WIDTH, HEADER_HEIGHT } from '../../constants';
 
 const Editor = styled.div`
 	background-color: ${ ( { theme } ) => theme.colors.bg.v1 };
@@ -23,11 +24,9 @@ const Editor = styled.div`
 
   display: grid;
   grid:
-    "tabs  head  head  head  btns  btns" 56px
-    "lib   .     meta  .     .     side" 1fr
-    "lib   .     page  add   .     side" 775px
-    "lib   .     carr  .     .     side" 1fr
-    / 355px 1fr 434px 1fr 46px 309px;
+    "lib  head  head" ${ HEADER_HEIGHT }px
+    "lib  canv  insp" 1fr
+    / ${ LIBRARY_WIDTH }px 1fr ${ INSPECTOR_WIDTH }px;
 `;
 
 const Area = styled.div`
@@ -43,26 +42,11 @@ function Layout() {
 			<Area area="lib">
 				<Library />
 			</Area>
-			<Area area="tabs">
-				<LibraryTabs />
-			</Area>
-			<Area area="page">
+			<Area area="canv">
 				<Canvas />
 			</Area>
-			<Area area="btns">
-				<Buttons />
-			</Area>
-			<Area area="side">
-				<Sidebar />
-			</Area>
-			<Area area="add">
-				<AddPage />
-			</Area>
-			<Area area="meta">
-				<Meta />
-			</Area>
-			<Area area="carr">
-				<Carrousel />
+			<Area area="insp">
+				<Inspector />
 			</Area>
 		</Editor>
 	);

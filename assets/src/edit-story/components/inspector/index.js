@@ -27,7 +27,7 @@ const Wrapper = styled.div`
 	padding: 1em;
 `;
 
-function Sidebar() {
+function Inspector() {
 	const {
 		state: { selectedElements },
 		actions: { setPropertiesOnSelectedElements },
@@ -58,4 +58,4 @@ function Sidebar() {
 	);
 }
 
-export default Sidebar;
+export default Inspector;

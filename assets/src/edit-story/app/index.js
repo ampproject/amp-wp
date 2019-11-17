@@ -17,7 +17,6 @@ import {
  * Internal dependencies
  */
 import theme, { GlobalStyle } from '../theme';
-import { LibraryProvider } from '../components/library';
 import { useHistory, HistoryProvider } from './history';
 import { useAPI, APIProvider } from './api';
 import { useConfig, ConfigProvider } from './config';
@@ -33,11 +32,9 @@ function App( { config } ) {
 					<APIProvider>
 						<HistoryProvider size={ 50 }>
 							<StoryProvider storyId={ storyId }>
-								<LibraryProvider>
-									<GlobalStyle />
-									<Layout />
-									<Popover.Slot />
-								</LibraryProvider>
+								<GlobalStyle />
+								<Layout />
+								<Popover.Slot />
 							</StoryProvider>
 						</HistoryProvider>
 					</APIProvider>

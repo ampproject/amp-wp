@@ -6,15 +6,26 @@ import styled from 'styled-components';
 /**
  * Internal dependencies
  */
-import { createNewElement } from '../../elements';
-import { useStory } from '../../app';
-import useLibrary from './useLibrary';
-import MediaLibrary from './mediaLibrary';
-import TextLibrary from './textLibrary';
-import ShapeLibrary from './shapeLibrary';
-import LinkLibrary from './linkLibrary';
+import { HEADER_HEIGHT } from '../../constants';
+import LibraryProvider from './libraryProvider';
+import LibraryContent from './libraryContent';
+import LibraryTabs from './libraryTabs';
 
-const Background = styled.aside`
+const Layout = styled.div`
+	height: 100%;
+  display: grid;
+  grid:
+    "tabs   " ${ HEADER_HEIGHT }px
+    "library" 1fr
+    / 1fr;
+`;
+
+const Tabs = styled.div`
+	grid-area: tabs
+`;
+
+const Background = styled.div`
+	grid-area: library;
 	background-color: ${ ( { theme } ) => theme.colors.bg.v4 };
 	height: 100%;
 	padding: 1em;
@@ -22,31 +33,17 @@ const Background = styled.aside`
 `;
 
 function Library() {
-	const {
-		state: { tab },
-		data: { tabs: { MEDIA, TEXT, SHAPES, LINKS } },
-	} = useLibrary();
-	const {
-		actions: { appendElementToCurrentPage },
-	} = useStory();
-	const ContentLibrary = ( {
-		[ MEDIA ]: MediaLibrary,
-		[ TEXT ]: TextLibrary,
-		[ SHAPES ]: ShapeLibrary,
-		[ LINKS ]: LinkLibrary,
-	} )[ tab ];
-	const handleInsert = ( type, props ) => {
-		const element = createNewElement( type, {
-			...props,
-			x: Math.round( 80 * Math.random() ),
-			y: Math.round( 70 * Math.random() ),
-		} );
-		appendElementToCurrentPage( element );
-	};
 	return (
-		<Background>
-			<ContentLibrary onInsert={ handleInsert } />
-		</Background>
+		<LibraryProvider>
+			<Layout>
+				<Tabs>
+					<LibraryTabs />
+				</Tabs>
+				<Background>
+					<LibraryContent />
+				</Background>
+			</Layout>
+		</LibraryProvider>
 	);
 }
 
