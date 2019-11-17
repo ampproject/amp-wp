@@ -110,19 +110,37 @@ class AMP_Post_Template {
 
 		$this->data = [
 			'content_max_width'     => $content_max_width,
+
+			'document_title'        => function_exists( 'wp_get_document_title' ) ? wp_get_document_title() : wp_title( '', false ), // Back-compat with 4.3.
+			'canonical_url'         => get_permalink( $this->ID ),
+			'home_url'              => home_url( '/' ),
+			'blog_name'             => get_bloginfo( 'name' ),
+
 			'html_tag_attributes'   => [],
 			'body_class'            => '',
+
+			/** This filter is documented in includes/amp-helper-functions.php */
+			'site_icon_url'         => apply_filters( 'amp_site_icon_url', function_exists( 'get_site_icon_url' ) ? get_site_icon_url( self::SITE_ICON_SIZE ) : '' ),
 			'placeholder_image_url' => amp_get_asset_url( 'images/placeholder-icon.png' ),
+
 			'featured_image'        => false,
 			'comments_link_url'     => false,
 			'comments_link_text'    => false,
+
+			'amp_runtime_script'    => 'https://cdn.ampproject.org/v0.js', // Deprecated.
+			'amp_component_scripts' => [], // Deprecated.
+
 			'customizer_settings'   => [],
+
 			'font_urls'             => [],
+
 			'post_amp_stylesheets'  => [],
 			'post_amp_styles'       => [], // Deprecated.
+
 			'amp_analytics'         => amp_add_custom_analytics(),
 		];
 
+		$this->build_post_content();
 		$this->build_post_data();
 		$this->build_customizer_settings();
 		$this->build_html_tag_attributes();
@@ -131,7 +149,6 @@ class AMP_Post_Template {
 		 * Filters AMP template data.
 		 *
 		 * @since 0.2
-		 * @deprecated
 		 *
 		 * @param array   $data Template data.
 		 * @param WP_Post $post Post.
@@ -148,39 +165,8 @@ class AMP_Post_Template {
 	 * @return mixed Value.
 	 */
 	public function get( $property, $default = null ) {
-
 		if ( isset( $this->data[ $property ] ) ) {
 			return $this->data[ $property ];
-		}
-
-		// @todo Some of the fields here were previously constructed and filtered in \AMP_Post_Template::__construct(). This may pose back-compat issues.
-		switch ( $property ) {
-			case 'amp_post_content':
-				/** This filter is documented in wp-includes/post-template.php */
-				return apply_filters( 'the_content', get_the_content( null, false, $this->post ) );
-			case 'post_title':
-				return get_the_title( $this->post );
-			case 'document_title':
-				return wp_get_document_title();
-			case 'canonical_url':
-				return get_permalink( $this->ID );
-			case 'home_url':
-				return home_url( '/' );
-			case 'blog_name':
-				return get_bloginfo( 'name', 'display' );
-			case 'post_author':
-				return get_userdata( $this->post->post_author );
-			case 'post_publish_timestamp':
-				return get_the_date( 'U', $this->ID );
-			case 'post_modified_timestamp':
-				return get_post_modified_time( 'U', false, $this->post );
-			case 'post':
-				return $this->post;
-			case 'post_id':
-				return $this->post->ID;
-			case 'site_icon_url':
-				/** This filter is documented in includes/amp-helper-functions.php */
-				return apply_filters( 'amp_site_icon_url', function_exists( 'get_site_icon_url' ) ? get_site_icon_url( self::SITE_ICON_SIZE ) : '' );
 		}
 
 		/* translators: %s is key name */
@@ -275,7 +261,18 @@ class AMP_Post_Template {
 	 * @since 0.2
 	 */
 	private function build_post_data() {
+		$post_title              = get_the_title( $this->ID );
+		$post_publish_timestamp  = get_the_date( 'U', $this->ID );
+		$post_modified_timestamp = get_post_modified_time( 'U', false, $this->post );
+		$post_author             = get_userdata( $this->post->post_author );
+
 		$data = [
+			'post'                     => $this->post,
+			'post_id'                  => $this->ID,
+			'post_title'               => $post_title,
+			'post_publish_timestamp'   => $post_publish_timestamp,
+			'post_modified_timestamp'  => $post_modified_timestamp,
+			'post_author'              => $post_author,
 			'post_canonical_link_url'  => '',
 			'post_canonical_link_text' => '',
 		];
@@ -319,6 +316,16 @@ class AMP_Post_Template {
 				'comments_link_text' => $comments_link_text,
 			]
 		);
+	}
+
+	/**
+	 * Build post content.
+	 */
+	private function build_post_content() {
+		/** This filter is documented in wp-includes/post-template.php */
+		$content = apply_filters( 'the_content', get_the_content( null, false, $this->post ) );
+
+		$this->add_data_by_key( 'post_amp_content', $content );
 	}
 
 	/**
