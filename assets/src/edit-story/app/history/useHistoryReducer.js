@@ -36,7 +36,7 @@ const reducer = ( size ) => ( state, { type, payload } ) => {
 				entries: [
 					payload,
 					...state.entries.slice( state.offset ),
-				].slice( -size ),
+				].slice( 0, size ),
 				offset: 0,
 				replayState: null,
 			};
