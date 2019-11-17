@@ -111,7 +111,7 @@ class AMP_Post_Template {
 		$this->data = [
 			'content_max_width'     => $content_max_width,
 
-			'document_title'        => function_exists( 'wp_get_document_title' ) ? wp_get_document_title() : wp_title( '', false ), // Back-compat with 4.3.
+			'document_title'        => wp_get_document_title(),
 			'canonical_url'         => get_permalink( $this->ID ),
 			'home_url'              => home_url( '/' ),
 			'blog_name'             => get_bloginfo( 'name' ),
@@ -120,7 +120,7 @@ class AMP_Post_Template {
 			'body_class'            => '',
 
 			/** This filter is documented in includes/amp-helper-functions.php */
-			'site_icon_url'         => apply_filters( 'amp_site_icon_url', function_exists( 'get_site_icon_url' ) ? get_site_icon_url( self::SITE_ICON_SIZE ) : '' ),
+			'site_icon_url'         => apply_filters( 'amp_site_icon_url', get_site_icon_url( self::SITE_ICON_SIZE ) ),
 			'placeholder_image_url' => amp_get_asset_url( 'images/placeholder-icon.png' ),
 
 			'featured_image'        => false,
