@@ -17,13 +17,17 @@ import { Outline, Primary, Undo, Redo } from '../button';
 const ButtonList = styled.nav`
 	background-color: ${ ( { theme } ) => theme.colors.bg.v3 };
 	display: flex;
-	justify-content: flex-end;
+	justify-content: space-between;
 	padding: 1em;
 	height: 100%;
+`;
 
-	button {
-		margin-left: 1em;
-	}
+const List = styled.div`
+	display: flex;
+`;
+
+const Space = styled.div`
+	width: 1em;
 `;
 
 function Undoer() {
@@ -43,14 +47,21 @@ function Redoer() {
 function Buttons() {
 	return (
 		<ButtonList>
-			<Undoer />
-			<Redoer />
-			<Outline>
-				{ __( 'Preview' ) }
-			</Outline>
-			<Primary>
-				{ __( 'Publish' ) }
-			</Primary>
+			<List>
+				<Undoer />
+				<Space />
+				<Redoer />
+			</List>
+			<List>
+				<Outline>
+					{ __( 'Preview' ) }
+				</Outline>
+				<Space />
+				<Primary>
+					{ __( 'Publish' ) }
+				</Primary>
+				<Space />
+			</List>
 		</ButtonList>
 	);
 }

@@ -15,15 +15,15 @@ import { CENTRAL_RIGHT_PADDING, INSPECTOR_WIDTH } from '../../constants';
 import Buttons from './buttons';
 
 const Background = styled.div`
+	background-color: ${ ( { theme } ) => theme.colors.bg.v3 };
 	display: grid;
 	grid:
-    "header buttons" 1fr
-    / 1fr ${ CENTRAL_RIGHT_PADDING + INSPECTOR_WIDTH }px;
+    "header . buttons" 1fr
+    / 1fr ${ CENTRAL_RIGHT_PADDING }px ${ INSPECTOR_WIDTH }px;
 `;
 
 const Head = styled.header`
 	grid-area: header;
-	background-color: ${ ( { theme } ) => theme.colors.bg.v3 };
 	height: 100%;
 	display: flex;
 	justify-content: center;

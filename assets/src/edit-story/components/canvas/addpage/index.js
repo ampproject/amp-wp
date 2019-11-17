@@ -22,11 +22,15 @@ const Wrapper = styled.div`
 	color:  ${ ( { theme } ) => theme.colors.fg.v1 };
 `;
 
+const Space = styled.div`
+	flex: 1 1 60px;
+`;
+
 const Circle = styled.a`
-	margin: 0 0 0 60px;
 	color: inherit;
 	height: 60px;
 	width: 60px;
+	flex: 0 0 60px;
 	border-radius: 50%;
 	border: 2px solid;
 	display: flex;
@@ -49,6 +53,7 @@ function AddPage() {
 	}, [ addBlankPage, setCurrentPageByIndex ] );
 	return (
 		<Wrapper>
+			<Space />
 			<Circle onClick={ handleClick }>
 				<Icon />
 			</Circle>

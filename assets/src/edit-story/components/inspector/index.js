@@ -23,6 +23,7 @@ const Background = styled.div`
 const Wrapper = styled.div`
 	background-color: ${ ( { theme } ) => theme.colors.fg.v1 };
 	border: 1px solid ${ ( { theme } ) => theme.colors.fg.v2 };
+	border-radius: 6px 6px 0 0;
 	height: 100%;
 	padding: 1em;
 `;
