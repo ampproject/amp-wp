@@ -17,6 +17,8 @@ $amp_url = add_query_arg( amp_get_slug(), '1', $url );
 		<?php print_admin_styles(); ?>
 	</head>
 	<body>
+		<a class="skip-link" href="#non-amp"><?php esc_html_e( 'Skip to the non-AMP iframe', 'amp' ); ?></a>
+		<a class="skip-link" href="#amp"><?php esc_html_e( 'Skip to the AMP iframe', 'amp' ); ?></a>
 		<section>
 			<nav id="header">
 				<ul>
