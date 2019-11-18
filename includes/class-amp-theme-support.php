@@ -1679,7 +1679,7 @@ class AMP_Theme_Support {
 		foreach ( $head->getElementsByTagName( 'meta' ) as $meta ) {
 			if ( 'amp-script-src' === $meta->getAttribute( 'name' ) ) {
 				$meta_amp_script_srcs[] = $meta;
-			} elseif ( ! $meta->hasAttribute( 'charset' ) && 'viewport' !== $meta->getAttribute( 'name' ) )  {
+			} elseif ( ! $meta->hasAttribute( 'charset' ) && 'viewport' !== $meta->getAttribute( 'name' ) ) {
 				$meta_elements[] = $meta;
 			}
 		}

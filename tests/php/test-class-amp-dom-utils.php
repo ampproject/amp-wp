@@ -299,7 +299,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	 * @covers \AMP_DOM_Utils::get_dom()
 	 */
 	public function test_get_dom_encoding() {
-		$html  = '<!DOCTYPE html><html><head><title>مرحبا بالعالم! Check out ‘this’ and “that” and—other things.</title><meta charset="UTF-8"></head><body>';
+		$html  = '<!DOCTYPE html><html><head><title>مرحبا بالعالم! Check out ‘this’ and “that” and—other things.</title><meta charset="utf-8"></head><body>';
 		$html .= '<p>مرحبا بالعالم! Check out ‘this’ and “that” and—other things.</p>';
 		$html .= '<p>&#x645;&#x631;&#x62D;&#x628;&#x627; &#x628;&#x627;&#x644;&#x639;&#x627;&#x644;&#x645;! Check out &#8216;this&#8217; and &#8220;that&#8221; and&#8212;other things.</p>';
 		$html .= '<p>&#x645;&#x631;&#x62D;&#x628;&#x627; &#x628;&#x627;&#x644;&#x639;&#x627;&#x644;&#x645;! Check out &lsquo;this&rsquo; and &ldquo;that&rdquo; and&mdash;other things.</p>';
@@ -307,7 +307,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 
 		$document = AMP_DOM_Utils::get_dom( $html );
 
-		$this->assertEquals( 'UTF-8', $document->encoding );
+		$this->assertEquals( 'utf-8', $document->encoding );
 		$paragraphs = $document->getElementsByTagName( 'p' );
 		$this->assertSame( 3, $paragraphs->length );
 		$this->assertSame( $paragraphs->item( 0 )->textContent, $paragraphs->item( 1 )->textContent );

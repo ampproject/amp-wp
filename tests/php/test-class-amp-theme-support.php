@@ -555,7 +555,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		<!DOCTYPE html>
 		<html lang="en-US" class="no-js">
 			<head>
-				<meta charset="UTF-8">
+				<meta charset="utf-8">
 				<meta name="viewport" content="maximum-scale=1.0">
 				<?php wp_head(); ?>
 			</head>
@@ -1935,7 +1935,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		$ordered_contains = [
 			'<html amp="">',
-			'<meta charset="' . get_bloginfo( 'charset' ) . '">',
+			'<meta charset="' . strtolower( get_bloginfo( 'charset' ) ) . '">',
 			'<meta name="viewport" content="width=device-width">',
 			'<meta name="generator" content="AMP Plugin',
 			'<title>',
@@ -2376,13 +2376,13 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$input  = '<html><head></head>Hello</html>';
 		$output = AMP_Theme_Support::prepare_response( $input );
 		$this->assertContains( '<html amp', $output );
-		$this->assertContains( '<meta charset="UTF-8">', $output );
+		$this->assertContains( '<meta charset="utf-8">', $output );
 
 		// HTML with doctype, comments, and whitespace before head.
 		$input  = "   <!--\nHello world!\n-->\n\n<!DOCTYPE html>  <html\n\n>\n<head profile='http://www.acme.com/profiles/core'></head><body>Hello</body></html>";
 		$output = AMP_Theme_Support::prepare_response( $input );
 		$this->assertContains( '<html amp', $output );
-		$this->assertContains( '<meta charset="UTF-8">', $output );
+		$this->assertContains( '<meta charset="utf-8">', $output );
 	}
 
 	/**

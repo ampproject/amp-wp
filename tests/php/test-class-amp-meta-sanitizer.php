@@ -17,22 +17,22 @@ class Test_AMP_Meta_Sanitizer extends WP_UnitTestCase {
 	 */
 	public function get_data_for_sanitize() {
 		return [
-			// Don't break the correct charset tag (note the caps, which deviates from the default).
+			// Don't break the correct charset tag.
 			[
-				'<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
-				'<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
 			],
 
-			// Don't break the correct viewport tag (note the scale, which deviates from the default).
+			// Don't break the correct viewport tag.
 			[
-				'<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"></head><body></body></html>',
-				'<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"></head><body></body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"></head><body></body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"></head><body></body></html>',
 			],
 
 			// Move charset and viewport tags from body to head.
 			[
-				'<!DOCTYPE html><html><head></head><body><meta charset="UTF-8"><meta name="viewport" content="width=device-width"></body></html>',
-				'<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
+				'<!DOCTYPE html><html><head></head><body><meta charset="utf-8"><meta name="viewport" content="width=device-width"></body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
 			],
 
 			// Add default charset tag if none is present.
@@ -59,11 +59,11 @@ class Test_AMP_Meta_Sanitizer extends WP_UnitTestCase {
 				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
 			],
 			[
-				'<!DOCTYPE html><html><head><meta http-equiv="content-type" content="text/html; charset=UTF-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
+				'<!DOCTYPE html><html><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
 				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
 			],
 			[
-				'<!DOCTYPE html><html><head><meta http-equiv="content-type" content="text/html; charset=UTF-8" charset="UTF-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
+				'<!DOCTYPE html><html><head><meta http-equiv="content-type" content="text/html; charset=utf-8" charset="utf-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
 				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
 			],
 		];

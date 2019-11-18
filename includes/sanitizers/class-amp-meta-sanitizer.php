@@ -44,6 +44,35 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	protected $head;
 
+	/*
+	 * Tags array keys.
+	 */
+	const TAG_CHARSET        = 'charset';
+	const TAG_VIEWPORT       = 'viewport';
+	const TAG_AMP_SCRIPT_SRC = 'amp_script_src';
+	const TAG_OTHER          = 'other';
+
+	/**
+	 * Associative array of DOMElement arrays.
+	 *
+	 * Each key in the root level defines one group of meta tags to process.
+	 *
+	 * @var array $tags {
+	 *     An array of meta tag groupings.
+	 *
+	 *     @type DOMElement[] $charset        Charset meta tag(s).
+	 *     @type DOMElement[] $viewport       Viewport meta tag(s).
+	 *     @type DOMElement[] $amp_script_src <amp-script> source meta tags.
+	 *     @type DOMElement[] $other          Remaining meta tags.
+	 * }
+	 */
+	protected $meta_tags = [
+		self::TAG_CHARSET        => [],
+		self::TAG_VIEWPORT       => [],
+		self::TAG_AMP_SCRIPT_SRC => [],
+		self::TAG_OTHER          => [],
+	];
+
 	/**
 	 * Charset to use for AMP markup.
 	 *
@@ -65,20 +94,38 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 		$this->xpath = new DOMXPath( $this->dom );
 		$this->head  = $this->ensure_head_is_present();
 
+		$charset = $this->detect_charset();
+
 		foreach ( $this->dom->getElementsByTagName( static::$tag ) as $element ) {
-			$this->sanitize_element( $element );
+			/**
+			 * Meta tag to process.
+			 *
+			 * @var DOMElement $element
+			 */
+			$element = $element->parentNode->removeChild( $element );
+			if ( $element->hasAttribute( 'charset' ) ) {
+				$this->meta_tags[ self::TAG_CHARSET ][] = $element;
+			} elseif ( 'viewport' === $element->getAttribute( 'name' ) ) {
+				$this->meta_tags[ self::TAG_VIEWPORT ][] = $element;
+			} elseif ( 'amp-script-src' === $element->getAttribute( 'name' ) ) {
+				$this->meta_tags[ self::TAG_AMP_SCRIPT_SRC ][] = $element;
+			} else {
+				$this->meta_tags[ self::TAG_OTHER ][] = $element;
+			}
 		}
 
-		$charset_element = $this->ensure_charset_is_present_and_first_in_head();
+		$this->ensure_charset_is_present( $charset );
 
-		if ( ! $this->is_correct_charset( $charset_element ) ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement
+		if ( ! $this->is_correct_charset() ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement
 			// @TODO Re-encode the content into UTF-8.
 			// ... sure?
 		}
 
-		$viewport_element = $this->ensure_viewport_is_present_and_after_charset( $charset_element );
+		$this->ensure_viewport_is_present();
 
-		$this->process_amp_script_meta_tags( $viewport_element );
+		$this->process_amp_script_meta_tags();
+
+		$this->re_add_meta_tags_in_optimized_order();
 	}
 
 	/**
@@ -98,111 +145,109 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Sanitize an individual meta tag.
+	 * Detect the charset of the document.
 	 *
-	 * @param DOMElement $element Meta tag to sanitize.
+	 * @return string|false Detected charset of the document, or false if none.
 	 */
-	protected function sanitize_element( DOMElement $element ) {
-		// Handle HTML 4 http-equiv meta tags.
-		if ( 'content-type' === strtolower( $element->getAttribute( 'http-equiv' ) ) ) {
-			$charset = $element->getAttribute( 'charset' );
-			if ( $charset ) {
-				// If we have a charset attribute included, use that as a separate tag.
-				$element->parentNode->appendChild( $this->create_charset_element( $charset ) );
-			} else {
+	protected function detect_charset() {
+		$charset = false;
+
+		// Check for HTML 4 http-equiv meta tags.
+		$http_equiv_tag = $this->xpath->query( '//meta[ @http-equiv and @content ]' )->item( 0 );
+		if ( $http_equiv_tag ) {
+			$http_equiv_tag->parentNode->removeChild( $http_equiv_tag );
+
+			// Check for the existence of a proper charset attribute first.
+			$charset = $http_equiv_tag->getAttribute( 'charset' );
+			if ( ! $charset ) {
 				// If not, check whether the charset is included with the content type, and use that.
-				$content = $element->getAttribute( 'content' );
+				$content = $http_equiv_tag->getAttribute( 'content' );
+
 				$matches = [];
 				if ( preg_match( '/;\s*charset=(?<charset>[^;]+)/', $content, $matches ) && ! empty( $matches['charset'] ) ) {
-					$element->parentNode->appendChild( $this->create_charset_element( $matches['charset'] ) );
+					$charset = $matches['charset'];
 				}
 			}
-			// In case we haven't found a charset by now, a default utf-8 one will be added in a later step.
-
-			// Always remove the HTML 4 http-equiv tag.
-			$element->parentNode->removeChild( $element );
 		}
+
+		// Check for HTML 5 charset meta tag. This overrides the HTML 4 charset.
+		$charset_tag = $this->xpath->query( '//meta[ @charset ]' )->item( 0 );
+		if ( $charset_tag ) {
+			$charset_tag = $charset_tag->parentNode->removeChild( $charset_tag );
+			$charset     = $charset_tag->getAttribute( 'charset' );
+		}
+
+		return $charset;
 	}
 
 	/**
-	 * Always ensure that we have an HTML 5 charset meta tag, and force it to be the first in <head>.
+	 * Always ensure that we have an HTML 5 charset meta tag.
 	 *
 	 * The charset defaults to utf-8, which is also what AMP requires.
 	 *
-	 * @return DOMElement The charset element that was detected or added.
+	 * @param string|false $charset Optional. Charset that was already detected. False if none. Defaults to false.
 	 */
-	protected function ensure_charset_is_present_and_first_in_head() {
-		// Retrieve the charset element or create a new one.
-		$charset_element = $this->xpath->query( '//meta[ @charset ]' )->item( 0 );
-		if ( $charset_element ) {
-			$charset_element->parentNode->removeChild( $charset_element ); // So that we can move it.
-		} else {
-			$charset_element = $this->create_charset_element( static::AMP_CHARSET );
+	protected function ensure_charset_is_present( $charset = false ) {
+		if ( ! empty( $this->meta_tags[ self::TAG_CHARSET ] ) ) {
+			return;
 		}
 
-		// (Re)insert the charset as first element of the head.
-		return $this->head->insertBefore( $charset_element, $this->head->firstChild );
+		$this->meta_tags[ self::TAG_CHARSET ][] = $this->create_charset_element( $charset ?: static::AMP_CHARSET );
 	}
 
 	/**
-	 * Always ensure we have a viewport tag and force it to be the second in <head> (after charset).
+	 * Always ensure we have a viewport tag.
 	 *
 	 * The viewport defaults to 'width=device-width', which is the bare minimum that AMP requires.
-	 *
-	 * @param DOMElement $charset_element The charset meta tag element to append the viewport to.
-	 *
-	 * @return DOMElement The viewport element that was detected or added.
 	 */
-	protected function ensure_viewport_is_present_and_after_charset( DOMElement $charset_element ) {
-		// Retrieve the viewport element or create a new one.
-		$viewport_element = $this->xpath->query( '//meta[ @name = "viewport" ]' )->item( 0 );
-		if ( $viewport_element ) {
-			$viewport_element->parentNode->removeChild( $viewport_element ); // So that we can move it.
-		} else {
-			$viewport_element = $this->create_viewport_element( static::AMP_VIEWPORT );
+	protected function ensure_viewport_is_present() {
+		if ( empty( $this->meta_tags[ self::TAG_VIEWPORT ] ) ) {
+			$this->meta_tags[ self::TAG_VIEWPORT ][] = $this->create_viewport_element( static::AMP_VIEWPORT );
+			return;
 		}
 
-		// (Re)insert the viewport as first element of the head.
-		return $this->head->insertBefore( $viewport_element, $charset_element->nextSibling );
+		// Ensure we have the 'width=device-width' setting included.
+		$viewport_tag      = $this->meta_tags[ self::TAG_VIEWPORT ][0];
+		$viewport_content  = $viewport_tag->getAttribute( 'content' );
+		$viewport_settings = array_map( 'trim', explode( ',', $viewport_content ) );
+		$width_found       = false;
+
+		foreach ( $viewport_settings as $index => $viewport_setting ) {
+			list( $property, $value ) = array_map( 'trim', explode( '=', $viewport_setting ) );
+			if ( 'width' === $property ) {
+				if ( 'device-width' !== $value ) {
+					$viewport_settings[ $index ] = 'width=device-width';
+				}
+				$width_found = true;
+				break;
+			}
+		}
+
+		if ( ! $width_found ) {
+			array_unshift( $viewport_settings, 'width=device-width' );
+		}
+
+		$viewport_tag->setAttribute( 'content', implode( ',', $viewport_settings ) );
 	}
 
-	protected function process_amp_script_meta_tags( DOMElement $previous_element ) {
-		$meta_amp_script_srcs = [];
-		$meta_elements        = [];
-		foreach ( $this->head->getElementsByTagName( 'meta' ) as $meta ) {
-			if ( 'amp-script-src' === $meta->getAttribute( 'name' ) ) {
-				$meta_amp_script_srcs[] = $meta;
-			} elseif ( ! $meta->hasAttribute( 'charset' ) && 'viewport' !== $meta->getAttribute( 'name' ) )  {
-				$meta_elements[] = $meta;
-			}
+	/**
+	 * Parse and concatenate <amp-script> source meta tags.
+	 */
+	protected function process_amp_script_meta_tags() {
+		if ( empty( $this->meta_tags[ self::TAG_AMP_SCRIPT_SRC ] ) ) {
+			return;
 		}
 
-		// Handle meta amp-script-src elements.
-		$first_meta_amp_script_src = array_shift( $meta_amp_script_srcs );
-		if ( $first_meta_amp_script_src ) {
-			$meta_elements[] = $first_meta_amp_script_src;
+		$first_meta_amp_script_src = array_shift( $this->meta_tags[ self::TAG_AMP_SCRIPT_SRC ] );
+		$content_values = [ $first_meta_amp_script_src->getAttribute( 'content' ) ];
 
-			// Merge (and remove) any subsequent meta amp-script-src elements.
-			if ( ! empty( $meta_amp_script_srcs ) ) {
-				$content_values = [ $first_meta_amp_script_src->getAttribute( 'content' ) ];
-				foreach ( $meta_amp_script_srcs as $meta_amp_script_src ) {
-					$meta_amp_script_src->parentNode->removeChild( $meta_amp_script_src );
-					$content_values[] = $meta_amp_script_src->getAttribute( 'content' );
-				}
-				$first_meta_amp_script_src->setAttribute( 'content', implode( ' ', $content_values ) );
-				unset( $meta_amp_script_src, $content_values );
-			}
+		// Merge (and remove) any subsequent meta amp-script-src elements.
+		while ( ! empty ( $this->meta_tags[ self::TAG_AMP_SCRIPT_SRC ] ) ) {
+			$meta_amp_script_src = array_shift( $this->meta_tags[ self::TAG_AMP_SCRIPT_SRC ] );
+			$content_values[]    = $meta_amp_script_src->getAttribute( 'content' );
 		}
-		unset( $meta_amp_script_srcs, $first_meta_amp_script_src );
 
-		// Insert all the the meta elements next in the head.
-		// We already sanitized the meta tags to enforce the charset to be index 0 and the viewport to be index 1.
-		$previous_node = $this->head->childNodes->item( 1 ); // The viewport node.
-		foreach ( $meta_elements as $meta_element ) {
-			$meta_element->parentNode->removeChild( $meta_element );
-			$this->head->insertBefore( $meta_element, $previous_node->nextSibling );
-			$previous_node = $meta_element;
-		}
+		$first_meta_amp_script_src->setAttribute( 'content', implode( ' ', $content_values ) );
 	}
 
 	/**
@@ -241,10 +286,38 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Check whether the charset is the correct one according to AMP requirements.
 	 *
-	 * @param DOMElement $charset_element Charset meta tag element.
 	 * @return bool Whether the charset is the correct one.
 	 */
-	protected function is_correct_charset( DOMElement $charset_element ) {
+	protected function is_correct_charset() {
+		if ( empty( $this->meta_tags[ self::TAG_CHARSET ] ) ) {
+			throw new LogicException( 'Failed to ensure a charset meta tag is present' );
+		}
+
+		$charset_element = $this->meta_tags[ self::TAG_CHARSET ][0];
+
 		return static::AMP_CHARSET === strtolower( $charset_element->getAttribute( 'charset' ) );
+	}
+
+	/**
+	 * Re-add the meta tags to the <head> node in the optimized order.
+	 *
+	 * The order is defined by the array entries in $this->meta_tags.
+	 */
+	protected function re_add_meta_tags_in_optimized_order() {
+		/**
+		 * Previous meta tag to append to.
+		 *
+		 * @var DOMElement $previous_meta_tag
+		 */
+		$previous_meta_tag = null;
+		foreach ( $this->meta_tags as $meta_tag_group ) {
+			foreach ( $meta_tag_group as $meta_tag ) {
+				if ( $previous_meta_tag ) {
+					$previous_meta_tag = $this->head->insertBefore( $meta_tag, $previous_meta_tag->nextSibling );
+				} else {
+					$previous_meta_tag = $this->head->insertBefore( $meta_tag, $this->head->firstChild );
+				}
+			}
+		}
 	}
 }
