@@ -93,6 +93,14 @@ class AMP_Post_Template {
 		if ( isset( $GLOBALS['content_width'] ) && $GLOBALS['content_width'] > 0 ) {
 			$content_max_width = $GLOBALS['content_width'];
 		}
+
+		/**
+		 * Filters the content max width for Reader templates.
+		 *
+		 * @since 0.2
+		 *
+		 * @param int $content_max_width Content max width.
+		 */
 		$content_max_width = apply_filters( 'amp_content_max_width', $content_max_width );
 
 		$this->data = [
@@ -268,20 +276,6 @@ class AMP_Post_Template {
 	}
 
 	/**
-	 * Merge data for key.
-	 *
-	 * @param string $key   Key.
-	 * @param mixed  $value Value.
-	 */
-	private function merge_data_for_key( $key, $value ) {
-		if ( is_array( $this->data[ $key ] ) ) {
-			$this->data[ $key ] = array_merge( $this->data[ $key ], $value );
-		} else {
-			$this->add_data_by_key( $key, $value );
-		}
-	}
-
-	/**
 	 * Build post data.
 	 *
 	 * @since 0.2
@@ -443,6 +437,15 @@ class AMP_Post_Template {
 			$file = $located_file;
 		}
 
+		/**
+		 * Filters the template file being loaded for a given template type.
+		 *
+		 * @since 0.2
+		 *
+		 * @param string  $file          Template file.
+		 * @param string  $template_type Template type.
+		 * @param WP_Post $post          Post.
+		 */
 		$file = apply_filters( 'amp_post_template_file', $file, $template_type, $this->post );
 		if ( ! $this->is_valid_template( $file ) ) {
 			/* translators: 1: the template file, 2: WP_CONTENT_DIR. */
@@ -450,7 +453,14 @@ class AMP_Post_Template {
 			return;
 		}
 
-		do_action( 'amp_post_template_include_' . $template_type, $this );
+		/**
+		 * Fires before including a template.
+		 *
+		 * @since 0.4
+		 *
+		 * @param AMP_Post_Template $this Post template.
+		 */
+		do_action( "amp_post_template_include_{$template_type}", $this );
 		include $file;
 	}
 
