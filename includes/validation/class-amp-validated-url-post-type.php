@@ -631,17 +631,13 @@ class AMP_Validated_URL_Post_Type {
 	/**
 	 * Normalize a URL for storage.
 	 *
-	 * This ensures that query vars like utm_* and the like will not cause duplicates.
 	 * The AMP query param is removed to facilitate switching between standard and transitional.
 	 * The URL scheme is also normalized to HTTPS to help with transition from HTTP to HTTPS.
 	 *
 	 * @param string $url URL.
 	 * @return string Normalized URL.
-	 * @global WP $wp
 	 */
 	protected static function normalize_url_for_storage( $url ) {
-		global $wp;
-
 		// Only ever store the canonical version.
 		$url = amp_remove_endpoint( $url );
 
@@ -651,12 +647,11 @@ class AMP_Validated_URL_Post_Type {
 		// Normalize query args, removing all that are not recognized or which are removable.
 		$url_parts = explode( '?', $url, 2 );
 		if ( 2 === count( $url_parts ) ) {
-			parse_str( $url_parts[1], $args );
+			$args = wp_parse_args( $url_parts[1] );
 			foreach ( wp_removable_query_args() as $removable_query_arg ) {
 				unset( $args[ $removable_query_arg ] );
 			}
-			$args = wp_array_slice_assoc( $args, $wp->public_query_vars );
-			$url  = $url_parts[0];
+			$url = $url_parts[0];
 			if ( ! empty( $args ) ) {
 				$url = $url_parts[0] . '?' . build_query( $args );
 			}

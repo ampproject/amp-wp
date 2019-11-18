@@ -265,7 +265,10 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 
 		// Test normalized.
 		$args = [ 'normalize' => false ];
-		$url  = add_query_arg( 'utm_foo', 'bar', get_permalink( $post ) . '#baz' );
+		$url  = add_query_arg(
+			array_fill_keys( wp_removable_query_args(), 'true' ),
+			get_permalink( $post ) . '#baz'
+		);
 		$url  = set_url_scheme( $url, 'http' );
 		$this->assertNull( AMP_Validated_URL_Post_Type::get_invalid_url_post( $url, $args ) );
 		$args = [ 'normalize' => true ];
