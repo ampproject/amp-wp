@@ -8,6 +8,8 @@
 /**
  * Class AMP_Post_Template
  *
+ * @property WP_Post $post
+ *
  * @since 0.2
  */
 class AMP_Post_Template {
@@ -49,14 +51,6 @@ class AMP_Post_Template {
 	const DEFAULT_NAVBAR_COLOR = '#fff';
 
 	/**
-	 * Template directory.
-	 *
-	 * @since 0.2
-	 * @var string
-	 */
-	private $template_dir;
-
-	/**
 	 * Post template data.
 	 *
 	 * @since 0.2
@@ -73,35 +67,28 @@ class AMP_Post_Template {
 	public $ID;
 
 	/**
-	 * Post.
-	 *
-	 * @since 0.2
-	 * @var WP_Post
-	 */
-	public $post;
-
-	/**
 	 * AMP_Post_Template constructor.
 	 *
 	 * @param WP_Post|int $post Post.
 	 */
 	public function __construct( $post ) {
-
-		$this->template_dir = apply_filters( 'amp_post_template_dir', AMP__DIR__ . '/templates' );
-
-		if ( $post instanceof WP_Post ) {
-			$this->post = $post;
-		} else {
-			$this->post = get_post( $post );
+		if ( is_int( $post ) ) {
+			$this->ID = $post;
+		} elseif ( $post instanceof WP_Post ) {
+			$this->ID = $post->ID;
 		}
+	}
 
-		// Make sure we have a post, or bail if not.
-		if ( $this->post instanceof WP_Post ) {
-			$this->ID = $this->post->ID;
-		} else {
-			return;
-		}
-
+	/**
+	 * Set data.
+	 *
+	 * This is called in the get method the first time it is called.
+	 *
+	 * @since 1.5
+	 *
+	 * @see \AMP_Post_Template::get()
+	 */
+	private function set_data() {
 		$content_max_width = self::CONTENT_MAX_WIDTH;
 		if ( isset( $GLOBALS['content_width'] ) && $GLOBALS['content_width'] > 0 ) {
 			$content_max_width = $GLOBALS['content_width'];
@@ -159,12 +146,51 @@ class AMP_Post_Template {
 	/**
 	 * Getter.
 	 *
+	 * @since 1.5
+	 *
+	 * @param string $name Property name.
+	 * @return mixed
+	 */
+	public function __get( $name ) {
+		switch ( $name ) {
+			case 'post':
+				return get_post( $this->ID );
+		}
+		return null;
+	}
+
+	/**
+	 * Get template directory for Reader mode.
+	 *
+	 * @since 0.2
+	 * @return string Template dir.
+	 */
+	private function get_template_dir() {
+		static $template_dir = null;
+		if ( ! isset( $template_dir ) ) {
+			/**
+			 * Filters the Reader template directory.
+			 *
+			 * @since 0.3.3
+			 */
+			$template_dir = apply_filters( 'amp_post_template_dir', AMP__DIR__ . '/templates' );
+		}
+		return $template_dir;
+	}
+
+	/**
+	 * Getter.
+	 *
 	 * @param string $property Property name.
 	 * @param mixed  $default  Default value.
 	 *
 	 * @return mixed Value.
 	 */
 	public function get( $property, $default = null ) {
+		if ( ! isset( $this->data ) ) {
+			$this->set_data();
+		}
+
 		if ( isset( $this->data[ $property ] ) ) {
 			return $this->data[ $property ];
 		}
@@ -219,7 +245,7 @@ class AMP_Post_Template {
 	 * @return string Template path.
 	 */
 	private function get_template_path( $template ) {
-		return sprintf( '%s/%s.php', $this->template_dir, $template );
+		return sprintf( '%s/%s.php', $this->get_template_dir(), $template );
 	}
 
 	/**

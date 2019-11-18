@@ -21,7 +21,7 @@
 
 <?php
 /**
- * Fires when just before printing the </body> closing tag.
+ * Fires just before printing the </body> closing tag.
  *
  * @since 0.2
  * @see wp_footer()
