@@ -424,9 +424,9 @@ class AMP_Theme_Support {
 		if ( ! empty( $theme_support['template_dir'] ) ) {
 			self::add_amp_template_filters();
 		} elseif ( $is_reader_mode ) {
-			add_action(
+			add_filter(
 				'template_include',
-				function() {
+				static function() {
 					return __DIR__ . '/templates/reader-template-loader.php';
 				},
 				PHP_INT_MAX
