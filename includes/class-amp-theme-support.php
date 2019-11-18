@@ -483,26 +483,24 @@ class AMP_Theme_Support {
 				}
 				return true;
 			}
-		} else {
+		} elseif ( $has_query_var && ! $has_url_param ) {
 			/*
 			 * When in AMP transitional mode *with* theme support, then the proper AMP URL has the 'amp' URL param
 			 * and not the /amp/ endpoint. The URL param is now the exclusive way to mark AMP in transitional mode
 			 * when amp theme support present. This is important for plugins to be able to reliably call
 			 * is_amp_endpoint() before the parse_query action.
 			 */
-			if ( $has_query_var && ! $has_url_param ) {
-				$old_url = amp_get_current_url();
-				$new_url = add_query_arg( amp_get_slug(), '', amp_remove_endpoint( $old_url ) );
-				if ( $old_url !== $new_url ) {
-					// A temporary redirect is used for admin users to allow them to see changes between reader mode and transitional modes.
-					wp_safe_redirect( $new_url, current_user_can( 'manage_options' ) ? 302 : 301 );
-					// @codeCoverageIgnoreStart
-					if ( $exit ) {
-						exit;
-					}
-					return true;
-					// @codeCoverageIgnoreEnd
+			$old_url = amp_get_current_url();
+			$new_url = add_query_arg( amp_get_slug(), '', amp_remove_endpoint( $old_url ) );
+			if ( $old_url !== $new_url ) {
+				// A temporary redirect is used for admin users to allow them to see changes between reader mode and transitional modes.
+				wp_safe_redirect( $new_url, current_user_can( 'manage_options' ) ? 302 : 301 );
+				// @codeCoverageIgnoreStart
+				if ( $exit ) {
+					exit;
 				}
+				return true;
+				// @codeCoverageIgnoreEnd
 			}
 		}
 		return false;
