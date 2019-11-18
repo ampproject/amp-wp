@@ -239,10 +239,10 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		$first_meta_amp_script_src = array_shift( $this->meta_tags[ self::TAG_AMP_SCRIPT_SRC ] );
-		$content_values = [ $first_meta_amp_script_src->getAttribute( 'content' ) ];
+		$content_values            = [ $first_meta_amp_script_src->getAttribute( 'content' ) ];
 
 		// Merge (and remove) any subsequent meta amp-script-src elements.
-		while ( ! empty ( $this->meta_tags[ self::TAG_AMP_SCRIPT_SRC ] ) ) {
+		while ( ! empty( $this->meta_tags[ self::TAG_AMP_SCRIPT_SRC ] ) ) {
 			$meta_amp_script_src = array_shift( $this->meta_tags[ self::TAG_AMP_SCRIPT_SRC ] );
 			$content_values[]    = $meta_amp_script_src->getAttribute( 'content' );
 		}
@@ -287,10 +287,11 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	 * Check whether the charset is the correct one according to AMP requirements.
 	 *
 	 * @return bool Whether the charset is the correct one.
+	 * @throws LengthException If the charset meta tag was not previously retrieved.
 	 */
 	protected function is_correct_charset() {
 		if ( empty( $this->meta_tags[ self::TAG_CHARSET ] ) ) {
-			throw new LogicException( 'Failed to ensure a charset meta tag is present' );
+			throw new LengthException( 'Failed to ensure a charset meta tag is present' );
 		}
 
 		$charset_element = $this->meta_tags[ self::TAG_CHARSET ][0];
