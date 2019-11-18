@@ -56,7 +56,7 @@
 <body class="<?php echo esc_attr( $this->get( 'body_class' ) ); ?>">
 <?php
 /**
- * Fires when immediately after printing the <body>.
+ * Fires immediately after printing the <body>.
  *
  * @since 1.2.1
  * @see wp_body_open()

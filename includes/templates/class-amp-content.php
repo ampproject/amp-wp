@@ -8,7 +8,7 @@
 /**
  * Class AMP_Content
  *
- * @deprecated
+ * @deprecated 1.5 Reader mode now sanitizes its entire template through the standard post-processor.
  */
 class AMP_Content {
 
