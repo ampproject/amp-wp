@@ -2068,7 +2068,7 @@ class AMP_Validated_URL_Post_Type {
 		}
 
 		return wp_nonce_url(
-			add_query_arg( $args, admin_url() ),
+			add_query_arg( rawurlencode_deep( $args ), admin_url() ),
 			self::NONCE_ACTION
 		);
 	}
