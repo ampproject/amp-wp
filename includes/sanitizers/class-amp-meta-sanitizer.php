@@ -76,7 +76,9 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 			// ... sure?
 		}
 
-		$this->ensure_viewport_is_present_and_after_charset( $charset_element );
+		$viewport_element = $this->ensure_viewport_is_present_and_after_charset( $charset_element );
+
+		$this->process_amp_script_meta_tags( $viewport_element );
 	}
 
 	/**
@@ -139,9 +141,7 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// (Re)insert the charset as first element of the head.
-		$charset_element = $this->head->insertBefore( $charset_element, $this->head->firstChild );
-
-		return $charset_element;
+		return $this->head->insertBefore( $charset_element, $this->head->firstChild );
 	}
 
 	/**
@@ -150,6 +150,8 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	 * The viewport defaults to 'width=device-width', which is the bare minimum that AMP requires.
 	 *
 	 * @param DOMElement $charset_element The charset meta tag element to append the viewport to.
+	 *
+	 * @return DOMElement The viewport element that was detected or added.
 	 */
 	protected function ensure_viewport_is_present_and_after_charset( DOMElement $charset_element ) {
 		// Retrieve the viewport element or create a new one.
@@ -161,7 +163,46 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// (Re)insert the viewport as first element of the head.
-		$this->head->insertBefore( $viewport_element, $charset_element->nextSibling );
+		return $this->head->insertBefore( $viewport_element, $charset_element->nextSibling );
+	}
+
+	protected function process_amp_script_meta_tags( DOMElement $previous_element ) {
+		$meta_amp_script_srcs = [];
+		$meta_elements        = [];
+		foreach ( $this->head->getElementsByTagName( 'meta' ) as $meta ) {
+			if ( 'amp-script-src' === $meta->getAttribute( 'name' ) ) {
+				$meta_amp_script_srcs[] = $meta;
+			} elseif ( ! $meta->hasAttribute( 'charset' ) && 'viewport' !== $meta->getAttribute( 'name' ) )  {
+				$meta_elements[] = $meta;
+			}
+		}
+
+		// Handle meta amp-script-src elements.
+		$first_meta_amp_script_src = array_shift( $meta_amp_script_srcs );
+		if ( $first_meta_amp_script_src ) {
+			$meta_elements[] = $first_meta_amp_script_src;
+
+			// Merge (and remove) any subsequent meta amp-script-src elements.
+			if ( ! empty( $meta_amp_script_srcs ) ) {
+				$content_values = [ $first_meta_amp_script_src->getAttribute( 'content' ) ];
+				foreach ( $meta_amp_script_srcs as $meta_amp_script_src ) {
+					$meta_amp_script_src->parentNode->removeChild( $meta_amp_script_src );
+					$content_values[] = $meta_amp_script_src->getAttribute( 'content' );
+				}
+				$first_meta_amp_script_src->setAttribute( 'content', implode( ' ', $content_values ) );
+				unset( $meta_amp_script_src, $content_values );
+			}
+		}
+		unset( $meta_amp_script_srcs, $first_meta_amp_script_src );
+
+		// Insert all the the meta elements next in the head.
+		// We already sanitized the meta tags to enforce the charset to be index 0 and the viewport to be index 1.
+		$previous_node = $this->head->childNodes->item( 1 ); // The viewport node.
+		foreach ( $meta_elements as $meta_element ) {
+			$meta_element->parentNode->removeChild( $meta_element );
+			$this->head->insertBefore( $meta_element, $previous_node->nextSibling );
+			$previous_node = $meta_element;
+		}
 	}
 
 	/**
