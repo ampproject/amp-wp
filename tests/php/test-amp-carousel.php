@@ -148,7 +148,7 @@ class Test_Carousel extends \WP_UnitTestCase {
 		$amp_carousel = new Carousel( new DOMDocument(), $images );
 		$this->assertEquals(
 			$expected,
-			$amp_carousel->get_dimensions( $images )
+			$amp_carousel->get_dimensions()
 		);
 	}
 }

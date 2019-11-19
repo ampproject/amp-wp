@@ -66,7 +66,7 @@ class Carousel {
 	 * @return DOMElement An <amp-carousel> with the images.
 	 */
 	public function get_dom_element() {
-		list( $width, $height ) = $this->get_dimensions( $this->images );
+		list( $width, $height ) = $this->get_dimensions();
 		$amp_carousel           = AMP_DOM_Utils::create_node(
 			$this->dom,
 			'amp-carousel',
@@ -126,7 +126,6 @@ class Carousel {
 	 * This will return the width and height of the image with the widest aspect ratio,
 	 * not necessarily the image with the biggest absolute width.
 	 *
-	 * @param Image_List $images The images to get the dimensions from.
 	 * @return array {
 	 *     The carousel dimensions.
 	 *
@@ -134,8 +133,8 @@ class Carousel {
 	 *     @type int $height The height of the carousel, at index 1.
 	 * }
 	 */
-	public function get_dimensions( Image_List $images ) {
-		if ( 0 === count( $images ) ) {
+	public function get_dimensions() {
+		if ( 0 === count( $this->images ) ) {
 			return [ self::FALLBACK_WIDTH, self::FALLBACK_HEIGHT ];
 		}
 
@@ -143,7 +142,7 @@ class Carousel {
 		$carousel_width   = 0;
 		$carousel_height  = 0;
 
-		foreach ( $images as $image ) {
+		foreach ( $this->images as $image ) {
 			$image_node = $image->get_image_node();
 			// Account for an <amp-img> that's wrapped in an <a>.
 			if ( 'amp-img' !== $image_node->tagName && isset( $image_node->firstChild->tagName ) && 'amp-img' === $image_node->firstChild->tagName ) {
