@@ -23,7 +23,7 @@ final class ImageList implements IteratorAggregate, Countable {
 	/**
 	 * The captioned images.
 	 *
-	 * @var CaptionedImage[]
+	 * @var Image[]
 	 */
 	private $elements = [];
 

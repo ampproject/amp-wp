@@ -91,7 +91,7 @@ class Test_Image_List extends \WP_UnitTestCase {
 	/**
 	 * Test get_caption.
 	 *
-	 * @covers \AMP\CaptionedImage::get_caption()
+	 * @covers \Amp\AmpWP\Component\CaptionedImage::get_caption()
 	 */
 	public function test_get_caption() {
 		$image_node      = AMP_DOM_Utils::create_node( new \DOMDocument(), 'amp-img', [] );
@@ -103,7 +103,7 @@ class Test_Image_List extends \WP_UnitTestCase {
 	/**
 	 * Test get_image_node.
 	 *
-	 * @covers \AMP\Image::get_image_node()
+	 * @covers \Amp\AmpWP\Component\Image::get_image_node()
 	 */
 	public function test_get_image_node() {
 		$image_node = AMP_DOM_Utils::create_node( new \DOMDocument(), 'amp-img', [] );
