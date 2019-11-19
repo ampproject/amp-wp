@@ -254,11 +254,15 @@ abstract class AMP_Base_Sanitizer {
 	 * @param array $attributes {
 	 *      Attributes.
 	 *
+	 *      @type string     $bottom
 	 *      @type int|string $height
-	 *      @type int|string $width
-	 *      @type string     $sizes
-	 *      @type string     $class
 	 *      @type string     $layout
+	 *      @type string     $left
+	 *      @type string     $position
+	 *      @type string     $right
+	 *      @type string     $style
+	 *      @type string     $top
+	 *      @type int|string $width
 	 * }
 	 * @return array Attributes.
 	 */

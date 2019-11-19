@@ -1347,6 +1347,16 @@ function amp_generate_script_hash( $script ) {
 	return 'sha384-' . $hash;
 }
 
+/**
+ * Check if an HTML attribute has a value.
+ *
+ * @param string $attribute Attribute value.
+ * @return bool
+ */
+function amp_is_attribute_empty( $attribute ) {
+	return ! isset( $attribute ) || '' === $attribute;
+}
+
 /*
  * The function below is copied from the ramsey/array_column package.
  *
