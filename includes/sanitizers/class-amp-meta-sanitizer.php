@@ -97,9 +97,12 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 		$elements    = $this->dom->getElementsByTagName( static::$tag );
 
 		// Remove all nodes for easy reordering later on.
-		$elements = array_map( static function ( $element ) {
-			return $element->parentNode->removeChild( $element );
-		}, iterator_to_array( $elements, false ) );
+		$elements = array_map(
+			static function ( $element ) {
+				return $element->parentNode->removeChild( $element );
+			},
+			iterator_to_array( $elements, false )
+		);
 
 		foreach ( $elements as $element ) {
 			/**
