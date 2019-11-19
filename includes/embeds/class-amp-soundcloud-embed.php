@@ -13,13 +13,6 @@
 class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 
 	/**
-	 * The tag (name) of the shortcode.
-	 *
-	 * @var string
-	 */
-	const SHORTCODE_TAG = 'soundcloud';
-
-	/**
 	 * Default height.
 	 *
 	 * @var int

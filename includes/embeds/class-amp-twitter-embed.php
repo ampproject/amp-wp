@@ -29,13 +29,6 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	const URL_PATTERN_TIMELINE = '#https?:\/\/twitter\.com(?:\/\#\!\/|\/)(?P<username>[a-zA-Z0-9_]{1,20})(?:$|\/(?P<type>likes|lists)(\/(?P<id>[a-zA-Z0-9_-]+))?)#i';
 
 	/**
-	 * The tag (name) of the shortcode.
-	 *
-	 * @var string
-	 */
-	const SHORTCODE_TAG = 'vimeo';
-
-	/**
 	 * Tag.
 	 *
 	 * @var string embed HTML blockquote tag to identify and replace with AMP version.
