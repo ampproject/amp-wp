@@ -185,8 +185,6 @@ class AMP_Theme_Support {
 				AMP_Core_Theme_Sanitizer::extend_theme_support();
 			}
 
-			require_once AMP__DIR__ . '/includes/amp-post-template-functions.php';
-
 			add_action( 'widgets_init', [ __CLASS__, 'register_widgets' ] );
 
 			/*
