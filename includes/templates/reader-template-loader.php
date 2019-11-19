@@ -18,7 +18,8 @@ the_post();
  */
 do_action( 'pre_amp_render_post', get_queried_object_id() );
 
-amp_add_post_template_actions();
+require_once AMP__DIR__ . '/includes/amp-post-template-functions.php';
+amp_post_template_init_hooks();
 
 $amp_post_template = new AMP_Post_Template( get_queried_object_id() );
 $amp_post_template->load();
