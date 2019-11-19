@@ -1663,54 +1663,6 @@ class AMP_Theme_Support {
 			$head->appendChild( $rel_canonical );
 		}
 
-		/*
-		 * Ensure meta charset and meta viewport are present.
-		 *
-		 * "AMP is already quite restrictive about which markup is allowed in the <head> section. However,
-		 * there are a few basic optimizations that you can apply. The key is to structure the <head> section
-		 * in a way so that all render-blocking scripts and custom fonts load as fast as possible."
-		 *
-		 * "1. The first tag should be the meta charset tag, followed by any remaining meta tags."
-		 *
-		 * {@link https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/optimize_amp/ Optimize the AMP Runtime loading}
-		 */
-		$meta_amp_script_srcs = [];
-		$meta_elements        = [];
-		foreach ( $head->getElementsByTagName( 'meta' ) as $meta ) {
-			if ( 'amp-script-src' === $meta->getAttribute( 'name' ) ) {
-				$meta_amp_script_srcs[] = $meta;
-			} elseif ( ! $meta->hasAttribute( 'charset' ) && 'viewport' !== $meta->getAttribute( 'name' ) ) {
-				$meta_elements[] = $meta;
-			}
-		}
-
-		// Handle meta amp-script-src elements.
-		$first_meta_amp_script_src = array_shift( $meta_amp_script_srcs );
-		if ( $first_meta_amp_script_src ) {
-			$meta_elements[] = $first_meta_amp_script_src;
-
-			// Merge (and remove) any subsequent meta amp-script-src elements.
-			if ( ! empty( $meta_amp_script_srcs ) ) {
-				$content_values = [ $first_meta_amp_script_src->getAttribute( 'content' ) ];
-				foreach ( $meta_amp_script_srcs as $meta_amp_script_src ) {
-					$meta_amp_script_src->parentNode->removeChild( $meta_amp_script_src );
-					$content_values[] = $meta_amp_script_src->getAttribute( 'content' );
-				}
-				$first_meta_amp_script_src->setAttribute( 'content', implode( ' ', $content_values ) );
-				unset( $meta_amp_script_src, $content_values );
-			}
-		}
-		unset( $meta_amp_script_srcs, $first_meta_amp_script_src );
-
-		// Insert all the the meta elements next in the head.
-		// We already sanitized the meta tags to enforce the charset to be index 0 and the viewport to be index 1.
-		$previous_node = $head->childNodes->item( 1 ); // The viewport node.
-		foreach ( $meta_elements as $meta_element ) {
-			$meta_element->parentNode->removeChild( $meta_element );
-			$head->insertBefore( $meta_element, $previous_node->nextSibling );
-			$previous_node = $meta_element;
-		}
-
 		// Handle the title.
 		$title = $head->getElementsByTagName( 'title' )->item( 0 );
 		if ( $title ) {
