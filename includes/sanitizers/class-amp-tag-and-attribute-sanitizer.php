@@ -1317,7 +1317,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @return AMP_CSS_Length
 	 */
-	private function calculate_width( $amp_layout_spec, $input_layout, $input_width ) {
+	private function calculate_width( $amp_layout_spec, $input_layout, AMP_CSS_Length $input_width ) {
 		if (
 			(
 				( isset( $input_layout ) && '' !== $input_layout ) ||
@@ -1347,7 +1347,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @return AMP_CSS_Length
 	 */
-	private function calculate_height( $amp_layout_spec, $input_layout, $input_height ) {
+	private function calculate_height( $amp_layout_spec, $input_layout, AMP_CSS_Length $input_height ) {
 		if (
 			(
 				( ( isset( $input_layout ) && '' !== $input_layout ) ) ||
@@ -1382,7 +1382,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string         $heights_attr Heights attribute.
 	 * @return string Layout type.
 	 */
-	private function calculate_layout( $layout_attr, $width, $height, $sizes_attr, $heights_attr ) {
+	private function calculate_layout( $layout_attr, AMP_CSS_Length $width, AMP_CSS_Length $height, $sizes_attr, $heights_attr ) {
 		if ( isset( $layout_attr ) && '' !== $layout_attr ) {
 			return $layout_attr;
 		} elseif ( ! $width->is_set() && ! $height->is_set() ) {
