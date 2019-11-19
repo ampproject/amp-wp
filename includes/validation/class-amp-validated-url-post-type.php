@@ -1274,7 +1274,7 @@ class AMP_Validated_URL_Post_Type {
 		}
 
 		if ( isset( $_GET['amp_validate_error'] ) && is_string( $_GET['amp_validate_error'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			// Note: The input var is validated by the deserialize_validation_error_messages method.
+			// Note: The input var is validated by the unserialize_validation_error_messages method.
 			$errors = AMP_Validation_Manager::unserialize_validation_error_messages( wp_unslash( $_GET['amp_validate_error'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( $errors ) {
 				foreach ( array_unique( $errors ) as $error_message ) {

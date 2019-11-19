@@ -1943,7 +1943,7 @@ class AMP_Validation_Manager {
 		}
 
 		$support_forum_message = ' ' . sprintf(
-			/* translators: 1: Link to support forum. 2: Link to new topic form in support forum. */
+			/* translators: %1$s: Link to support forum. %2$s: Link to new topic form in support forum. */
 			__( 'If you are stuck, please search the <a href="%1$s">support forum</a> for possible related topics, or otherwise start a <a href="%2$s">new support topic</a> including the error message, the URL to your site, and your active theme/plugins.', 'amp' ),
 			esc_url( 'https://wordpress.org/support/plugin/amp/' ),
 			esc_url( 'https://wordpress.org/support/plugin/amp/#new-topic-0' )
@@ -1967,7 +1967,7 @@ class AMP_Validation_Manager {
 			case 'http_request_failed':
 				return __( 'Failed to fetch URL to validate.', 'amp' ) . $error_message . $site_health_message . $support_forum_message;
 			case 'white_screen_of_death':
-				return __( 'Unable to validate URL. Encountered a white screen of death likely due to PHP a fatal error.', 'amp' ) . $error_message . $check_error_log . $support_forum_message;
+				return __( 'Unable to validate URL. Encountered a white screen of death likely due to a PHP fatal error.', 'amp' ) . $error_message . $check_error_log . $support_forum_message;
 			case '404':
 				return __( 'The fetched URL was not found. It may have been deleted. If so, you can trash this.', 'amp' ) . $error_message . $support_forum_message;
 			case '500':
