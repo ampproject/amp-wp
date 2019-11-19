@@ -5,14 +5,14 @@
  * @package AMP
  */
 
-namespace AMP;
-
-use AMP_DOM_Utils;
+use Amp\AmpWP\Component\Image_list;
+use Amp\AmpWP\Component\Image;
+use Amp\AmpWP\Component\Captioned_Image;
 
 /**
  * Tests for AMP image collection classes.
  *
- * @covers AMP\Image_List, AMP\Captioned_Image, AMP\Image
+ * @covers Amp\AmpWP\Component\Image_List, Amp\AmpWP\Component\Captioned_Image, Amp\AmpWP\Component\Image
  */
 class Test_Image_List extends \WP_UnitTestCase {
 
@@ -48,8 +48,8 @@ class Test_Image_List extends \WP_UnitTestCase {
 	 * Test adding images and counting them.
 	 *
 	 * @dataProvider get_image_list_data
-	 * @covers \AMP\Image_List::add()
-	 * @covers \AMP\Image_List::count()
+	 * @covers \Amp\AmpWP\Component\Image_List::add()
+	 * @covers \Amp\AmpWP\Component\Image_List::count()
 	 *
 	 * @param array[] $images         The images to add.
 	 * @param string  $expected_count The expected count after adding the images.
@@ -67,8 +67,8 @@ class Test_Image_List extends \WP_UnitTestCase {
 	 * Test the iteration of the images.
 	 *
 	 * @dataProvider get_image_list_data
-	 * @covers \AMP\Image_List::add()
-	 * @covers \AMP\Image_List::getIterator()
+	 * @covers \Amp\AmpWP\Component\Image_List::add()
+	 * @covers \Amp\AmpWP\Component\Image_List::getIterator()
 	 *
 	 * @param array[] $images         The images to add.
 	 * @param string  $expected_count The expected count after adding the images.

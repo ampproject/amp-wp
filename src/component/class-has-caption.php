@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-namespace AMP;
+namespace Amp\AmpWP\Component;
 
 /**
  * Interface Has_Caption

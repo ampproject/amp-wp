@@ -5,15 +5,13 @@
  * @package AMP
  */
 
-namespace AMP;
-
-use AMP_DOM_Utils;
-use DOMDocument;
+use Amp\AmpWP\Component\Carousel;
+use Amp\AmpWP\Component\Image_List;
 
 /**
  * Tests for Carousel class.
  *
- * @covers \AMP\Carousel
+ * @covers \Amp\AmpWP\Component\Carousel
  */
 class Test_Carousel extends \WP_UnitTestCase {
 
@@ -52,7 +50,7 @@ class Test_Carousel extends \WP_UnitTestCase {
 	 * Test getting the amp-carousel.
 	 *
 	 * @dataProvider get_carousel_data
-	 * @covers \AMP\Carousel::create_and_get()
+	 * @covers \Amp\AmpWP\Component\Carousel::create_and_get()
 	 *
 	 * @param array[]     $images_and_captions An array of arrays, with images and their captions (if any).
 	 * @param DOMDocument $dom                 The representation of the DOM.
@@ -141,7 +139,7 @@ class Test_Carousel extends \WP_UnitTestCase {
 	 * Test get_dimensions.
 	 *
 	 * @dataProvider get_data_carousel_dimensions
-	 * @covers \AMP\Carousel::get_dimensions()
+	 * @covers \Amp\AmpWP\Component\Carousel::get_dimensions()
 	 *
 	 * @param \DOMElement[] $images   The images to get the dimensions from.
 	 * @param array         $expected The expected return value of the tested function.

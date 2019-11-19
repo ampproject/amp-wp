@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-namespace AMP;
+namespace Amp\AmpWP\Component;
 
 use AMP_DOM_Utils;
 

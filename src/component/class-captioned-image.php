@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-namespace AMP;
+namespace Amp\AmpWP\Component;
 
 /**
  * Class Captioned_Image
