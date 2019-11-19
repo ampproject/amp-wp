@@ -43,28 +43,6 @@ function amp_post_template_add_canonical( $amp_template ) {
 }
 
 /**
- * Print scripts.
- *
- * @deprecated
- * @see amp_register_default_scripts()
- * @see amp_filter_script_loader_tag()
- * @param AMP_Post_Template $amp_template Template.
- */
-function amp_post_template_add_scripts( $amp_template ) {
-	_deprecated_function( __FUNCTION__, '1.5' );
-	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-	echo amp_render_scripts(
-		array_merge(
-			[
-				// Just in case the runtime has been overridden by amp_post_template_data filter.
-				'amp-runtime' => $amp_template->get( 'amp_runtime_script' ),
-			],
-			$amp_template->get( 'amp_component_scripts', [] )
-		)
-	);
-}
-
-/**
  * Print fonts.
  *
  * @param AMP_Post_Template $amp_template Template.
@@ -74,28 +52,6 @@ function amp_post_template_add_fonts( $amp_template ) {
 	foreach ( $font_urls as $slug => $url ) {
 		printf( '<link rel="stylesheet" href="%s">', esc_url( esc_url( $url ) ) ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 	}
-}
-
-/**
- * Print boilerplate CSS.
- *
- * @deprecated
- * @since 0.3
- * @see amp_get_boilerplate_code()
- */
-function amp_post_template_add_boilerplate_css() {
-	_deprecated_function( __FUNCTION__, '1.5' );
-	echo amp_get_boilerplate_code(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-}
-
-/**
- * Print Schema.org metadata.
- *
- * @deprecated Since 0.7
- */
-function amp_post_template_add_schemaorg_metadata() {
-	_deprecated_function( __FUNCTION__, '0.7', 'amp_print_schemaorg_metadata' );
-	amp_print_schemaorg_metadata();
 }
 
 /**
