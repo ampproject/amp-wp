@@ -255,8 +255,8 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 			$images->add( $image, $caption );
 		}
 
-		$amp_carousel  = new Carousel( $dom );
-		$carousel_node = $amp_carousel->create_and_get( $images );
+		$amp_carousel  = new Carousel( $dom, $images );
+		$carousel_node = $amp_carousel->get_dom_element();
 
 		// Prevent an error in get_content_from_dom_node() when it calls $node->parentNode->insertBefore().
 		$dom->appendChild( $carousel_node );

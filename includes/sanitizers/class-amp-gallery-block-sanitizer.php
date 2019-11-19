@@ -128,10 +128,8 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			$amp_carousel      = new Carousel( $this->dom );
-			$amp_carousel_node = $amp_carousel->create_and_get( $images );
-
-			$gallery_node->parentNode->replaceChild( $amp_carousel_node, $gallery_node );
+			$amp_carousel = new Carousel( $this->dom, $images );
+			$gallery_node->parentNode->replaceChild( $amp_carousel->get_dom_element(), $gallery_node );
 		}
 		$this->did_convert_elements = true;
 	}
