@@ -88,7 +88,7 @@ function amp_maybe_add_actions() {
  * @deprecated This function is not used when 'amp' theme support is added.
  */
 function amp_add_post_template_actions() {
-	// @todo This should have _deprecated_function( __FUNCTION__, '1.5' ) but expectedDeprecated in the tests is not working with multiple.
+	_deprecated_function( __FUNCTION__, '1.5' );
 	require_once AMP__DIR__ . '/includes/amp-post-template-functions.php';
 	amp_post_template_init_hooks();
 }
@@ -126,7 +126,7 @@ function amp_render() {
  * Render AMP post template.
  *
  * @since 0.5
- * @deprecated This function is not used when 'amp' theme support is added.
+ * @deprecated Rendering a post is now handled by AMP_Theme_Support.
  *
  * @param WP_Post|int $post Post.
  * @global WP_Query $wp_query

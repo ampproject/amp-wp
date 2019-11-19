@@ -14,6 +14,7 @@ class AMP_Render_Post_Test extends WP_UnitTestCase {
 
 	/**
 	 * @expectedDeprecated amp_render_post
+	 * @expectedDeprecated amp_add_post_template_actions
 	 */
 	public function test__valid_post() {
 		$user_id = self::factory()->user->create();
@@ -41,6 +42,7 @@ class AMP_Render_Post_Test extends WP_UnitTestCase {
 	 *
 	 * @covers ::is_amp_endpoint()
 	 * @expectedDeprecated amp_render_post
+	 * @expectedDeprecated amp_add_post_template_actions
 	 */
 	public function test__is_amp_endpoint() {
 		$user_id = self::factory()->user->create();
