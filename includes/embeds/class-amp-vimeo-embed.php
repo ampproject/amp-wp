@@ -67,9 +67,6 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function register_embed() {
 		wp_embed_register_handler( 'amp-vimeo', self::URL_PATTERN, [ $this, 'oembed' ], -1 );
-		if ( ! function_exists( 'jetpack_shortcode_get_vimeo_dimensions' ) ) {
-			add_shortcode( self::SHORTCODE_TAG, [ $this, 'shortcode' ] );
-		}
 		add_filter( 'wp_video_shortcode_override', [ $this, 'video_override' ], 10, 2 );
 	}
 
@@ -78,9 +75,6 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function unregister_embed() {
 		wp_embed_unregister_handler( 'amp-vimeo', -1 );
-		if ( ! function_exists( 'jetpack_shortcode_get_vimeo_dimensions' ) ) {
-			remove_shortcode( self::SHORTCODE_TAG );
-		}
 	}
 
 	/**
