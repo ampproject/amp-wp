@@ -1,6 +1,6 @@
 <?php
 /**
- * Class Captioned_Image
+ * Class CaptionedImage
  *
  * @package AMP
  */
@@ -10,12 +10,12 @@ namespace Amp\AmpWP\Component;
 use DOMElement;
 
 /**
- * Class Captioned_Image
+ * Class CaptionedImage
  *
  * @internal
  * @since 1.5.0
  */
-final class Captioned_Image extends Image implements Has_Caption {
+final class CaptionedImage extends Image implements HasCaption {
 
 	/**
 	 * The caption text.

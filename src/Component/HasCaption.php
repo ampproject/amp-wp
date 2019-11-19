@@ -1,6 +1,6 @@
 <?php
 /**
- * Interface Has_Caption
+ * Interface HasCaption
  *
  * @package AMP
  */
@@ -8,12 +8,12 @@
 namespace Amp\AmpWP\Component;
 
 /**
- * Interface Has_Caption
+ * Interface HasCaption
  *
  * @internal
  * @since 1.5.0
  */
-interface Has_Caption {
+interface HasCaption {
 	/**
 	 * Gets the caption.
 	 *

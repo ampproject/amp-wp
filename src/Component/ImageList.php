@@ -1,6 +1,6 @@
 <?php
 /**
- * Class Image_List
+ * Class ImageList
  *
  * @package AMP
  */
@@ -13,17 +13,17 @@ use DOMElement;
 use ArrayIterator;
 
 /**
- * Class Image_List
+ * Class ImageList
  *
  * @internal
  * @since 1.5.0
  */
-final class Image_List implements IteratorAggregate, Countable {
+final class ImageList implements IteratorAggregate, Countable {
 
 	/**
 	 * The captioned images.
 	 *
-	 * @var Captioned_Image[]
+	 * @var CaptionedImage[]
 	 */
 	private $elements = [];
 
@@ -35,7 +35,7 @@ final class Image_List implements IteratorAggregate, Countable {
 	 * @return self
 	 */
 	public function add( DOMElement $image_node, $caption = '' ) {
-		$this->elements[] = empty( $caption ) ? new Image( $image_node ) : new Captioned_Image( $image_node, $caption );
+		$this->elements[] = empty( $caption ) ? new Image( $image_node ) : new CaptionedImage( $image_node, $caption );
 		return $this;
 	}
 

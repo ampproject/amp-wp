@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use Amp\AmpWP\Component\Image_List;
+use Amp\AmpWP\Component\ImageList;
 use Amp\AmpWP\Component\Carousel;
 
 /**
@@ -107,7 +107,7 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			$images = new Image_List();
+			$images = new ImageList();
 
 			// If it's not AMP lightbox, look for links first.
 			if ( ! $is_amp_lightbox ) {

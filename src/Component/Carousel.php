@@ -45,7 +45,7 @@ class Carousel {
 	/**
 	 * The images to add to the carousel.
 	 *
-	 * @var Image_List
+	 * @var ImageList
 	 */
 	protected $images;
 
@@ -53,9 +53,9 @@ class Carousel {
 	 * Instantiates the class.
 	 *
 	 * @param DOMDocument $dom    The dom to use to create a carousel.
-	 * @param Image_List  $images The images from which to create a carousel.
+	 * @param ImageList   $images The images from which to create a carousel.
 	 */
-	public function __construct( $dom, Image_List $images ) {
+	public function __construct( $dom, ImageList $images ) {
 		$this->dom    = $dom;
 		$this->images = $images;
 	}
@@ -80,7 +80,7 @@ class Carousel {
 
 		foreach ( $this->images as $image ) {
 			$image_node = $image->get_image_node();
-			$caption    = $image instanceof Has_Caption ? $image->get_caption() : null;
+			$caption    = $image instanceof HasCaption ? $image->get_caption() : null;
 			$slide      = AMP_DOM_Utils::create_node(
 				$this->dom,
 				'div',

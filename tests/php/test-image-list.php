@@ -1,18 +1,18 @@
 <?php
 /**
- * Tests for Image_List, Captioned_Image, and Image classes.
+ * Tests for ImageList, CaptionedImage, and Image classes.
  *
  * @package AMP
  */
 
-use Amp\AmpWP\Component\Image_list;
+use Amp\AmpWP\Component\ImageList;
 use Amp\AmpWP\Component\Image;
-use Amp\AmpWP\Component\Captioned_Image;
+use Amp\AmpWP\Component\CaptionedImage;
 
 /**
  * Tests for AMP image collection classes.
  *
- * @covers Amp\AmpWP\Component\Image_List, Amp\AmpWP\Component\Captioned_Image, Amp\AmpWP\Component\Image
+ * @covers Amp\AmpWP\Component\ImageList, Amp\AmpWP\Component\CaptionedImage, Amp\AmpWP\Component\Image
  */
 class Test_Image_List extends \WP_UnitTestCase {
 
@@ -48,14 +48,14 @@ class Test_Image_List extends \WP_UnitTestCase {
 	 * Test adding images and counting them.
 	 *
 	 * @dataProvider get_image_list_data
-	 * @covers \Amp\AmpWP\Component\Image_List::add()
-	 * @covers \Amp\AmpWP\Component\Image_List::count()
+	 * @covers \Amp\AmpWP\Component\ImageList::add()
+	 * @covers \Amp\AmpWP\Component\ImageList::count()
 	 *
 	 * @param array[] $images         The images to add.
 	 * @param string  $expected_count The expected count after adding the images.
 	 */
 	public function test_image_list_add( $images, $expected_count ) {
-		$image_list = new Image_List();
+		$image_list = new ImageList();
 		foreach ( $images as $image ) {
 			$image_list->add( $image, '' );
 		}
@@ -67,14 +67,14 @@ class Test_Image_List extends \WP_UnitTestCase {
 	 * Test the iteration of the images.
 	 *
 	 * @dataProvider get_image_list_data
-	 * @covers \Amp\AmpWP\Component\Image_List::add()
-	 * @covers \Amp\AmpWP\Component\Image_List::getIterator()
+	 * @covers \Amp\AmpWP\Component\ImageList::add()
+	 * @covers \Amp\AmpWP\Component\ImageList::getIterator()
 	 *
 	 * @param array[] $images         The images to add.
 	 * @param string  $expected_count The expected count after adding the images.
 	 */
 	public function test_image_list_get_iterator( $images, $expected_count ) {
-		$image_list = new Image_List();
+		$image_list = new ImageList();
 		foreach ( $images as $image ) {
 			$image_list->add( $image, '' );
 		}
@@ -91,12 +91,12 @@ class Test_Image_List extends \WP_UnitTestCase {
 	/**
 	 * Test get_caption.
 	 *
-	 * @covers \AMP\Captioned_Image::get_caption()
+	 * @covers \AMP\CaptionedImage::get_caption()
 	 */
 	public function test_get_caption() {
 		$image_node      = AMP_DOM_Utils::create_node( new \DOMDocument(), 'amp-img', [] );
 		$caption         = 'This is a caption';
-		$captioned_image = new Captioned_Image( $image_node, $caption );
+		$captioned_image = new CaptionedImage( $image_node, $caption );
 		$this->assertEquals( $caption, $captioned_image->get_caption() );
 	}
 

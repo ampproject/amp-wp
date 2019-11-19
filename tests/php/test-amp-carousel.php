@@ -6,7 +6,7 @@
  */
 
 use Amp\AmpWP\Component\Carousel;
-use Amp\AmpWP\Component\Image_List;
+use Amp\AmpWP\Component\ImageList;
 
 /**
  * Tests for Carousel class.
@@ -34,12 +34,12 @@ class Test_Carousel extends \WP_UnitTestCase {
 
 		return [
 			'image_without_caption' => [
-				( new Image_List() )->add( $image, '' ),
+				( new ImageList() )->add( $image, '' ),
 				$dom,
 				'<amp-carousel width="' . $width . '" height="' . $height . '" type="slides" layout="responsive"><div class="slide"><amp-img src="' . $src . '" width="' . $width . '" height="' . $height . '" layout="fill" object-fit="cover"></amp-img></div></amp-carousel>',
 			],
 			'image_with_caption'    => [
-				( new Image_List() )->add( $image, $caption ),
+				( new ImageList() )->add( $image, $caption ),
 				$dom,
 				'<amp-carousel width="' . $width . '" height="' . $height . '" type="slides" layout="responsive"><div class="slide"><amp-img src="' . $src . '" width="' . $width . '" height="' . $height . '" layout="fill" object-fit="cover"></amp-img><div class="amp-wp-gallery-caption"><span>' . $caption . '</span></div></div></amp-carousel>',
 			],
@@ -109,27 +109,27 @@ class Test_Carousel extends \WP_UnitTestCase {
 
 		return [
 			'empty_image_list_as_argument'                 => [
-				( new Image_List() ),
+				( new ImageList() ),
 				[ Carousel::FALLBACK_WIDTH, Carousel::FALLBACK_HEIGHT ],
 			],
 			'single_small_image_passed_as_argument'        => [
-				( new Image_List() )->add( $narrow_image, '' ),
+				( new ImageList() )->add( $narrow_image, '' ),
 				[ $narrow_image_width, $narrow_image_height ],
 			],
 			'single_large_image_passed_as_argument'        => [
-				( new Image_List() )->add( $wide_image, '' ),
+				( new ImageList() )->add( $wide_image, '' ),
 				[ $wide_image_width, $wide_image_height ],
 			],
 			'image_with_0_height_should_not_affect_ratio'  => [
-				( new Image_List() )->add( $image_with_0_height, '' )->add( $wide_image, '' ),
+				( new ImageList() )->add( $image_with_0_height, '' )->add( $wide_image, '' ),
 				[ $wide_image_width, $wide_image_height ],
 			],
 			'two_images_passed_as_arguments'               => [
-				( new Image_List() )->add( $narrow_image, '' )->add( $wide_image, '' ),
+				( new ImageList() )->add( $narrow_image, '' )->add( $wide_image, '' ),
 				[ $wide_image_width, $wide_image_height ],
 			],
 			'two_images_passed_as_arguments_order_changed' => [
-				( new Image_List() )->add( $wide_image, '' )->add( $narrow_image, '' ),
+				( new ImageList() )->add( $wide_image, '' )->add( $narrow_image, '' ),
 				[ $wide_image_width, $wide_image_height ],
 			],
 		];
@@ -141,7 +141,7 @@ class Test_Carousel extends \WP_UnitTestCase {
 	 * @dataProvider get_data_carousel_dimensions
 	 * @covers \Amp\AmpWP\Component\Carousel::get_dimensions()
 	 *
-	 * @param Image_List $images  The images to get the dimensions from.
+	 * @param ImageList $images  The images to get the dimensions from.
 	 * @param array     $expected The expected return value of the tested function.
 	 */
 	public function test_get_dimensions( $images, $expected ) {

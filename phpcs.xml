@@ -22,6 +22,7 @@
 
 	<rule ref="WordPress.Files.FileName.InvalidClassFileName">
 		<exclude-pattern>tests/*</exclude-pattern>
+		<exclude-pattern>src/*</exclude-pattern>
 		<exclude-pattern>includes/admin/class-amp-customizer.php</exclude-pattern>
 		<exclude-pattern>includes/embeds/class-amp-dailymotion-embed.php</exclude-pattern>
 		<exclude-pattern>includes/embeds/class-amp-facebook-embed.php</exclude-pattern>
@@ -46,6 +47,7 @@
 		<exclude-pattern>includes/actions/class-amp-paired-post-actions.php</exclude-pattern>
 	</rule>
 	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
+		<exclude-pattern>src/*</exclude-pattern>
 		<exclude-pattern>includes/templates/single-amp_story.php</exclude-pattern>
 	</rule>
 	<rule ref="WordPress.NamingConventions.ValidVariableName">
