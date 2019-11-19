@@ -1030,6 +1030,12 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						}
 					}
 
+					@media (max-width: 999px) {
+						amp-lightbox.cover-modal.show-modal {
+							display: unset;
+						}
+					}
+
 				}
 				<?php elseif ( 'twentyseventeen' === get_template() ) : ?>
 					/* Show the button*/
