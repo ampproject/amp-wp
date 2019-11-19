@@ -568,11 +568,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$original_html  = trim( ob_get_clean() );
 		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
 
-		// Invalid viewport meta tag is not present.
+		// Insufficient viewport tag was not left in.
 		$this->assertNotContains( '<meta name="viewport" content="maximum-scale=1.0">', $sanitized_html );
 
-		// Correct viewport meta tag was added.
-		$this->assertContains( '<meta name="viewport" content="width=device-width">', $sanitized_html );
+		// Viewport tag was modified to include all requirements.
+		$this->assertContains( '<meta name="viewport" content="width=device-width,maximum-scale=1.0">', $sanitized_html );
 
 		// MathML script was added.
 		$this->assertContains( '<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-mathml-0.1.js" async custom-element="amp-mathml"></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
