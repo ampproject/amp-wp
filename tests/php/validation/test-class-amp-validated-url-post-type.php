@@ -808,14 +808,8 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 				];
 			}
 		);
-		$this->assertEquals(
-			add_query_arg(
-				[
-					AMP_Validated_URL_Post_Type::URLS_TESTED => $urls_tested,
-					'amp_validate_error' => [ 'response_comment_absent' ],
-				],
-				$initial_redirect
-			),
+		$this->assertContains(
+			'amp_validate_error=',
 			AMP_Validated_URL_Post_Type::handle_bulk_action( $initial_redirect, AMP_Validated_URL_Post_Type::BULK_VALIDATE_ACTION, $items )
 		);
 	}
@@ -824,6 +818,8 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 	 * Test for print_admin_notice()
 	 *
 	 * @covers \AMP_Validated_URL_Post_Type::print_admin_notice()
+	 * @covers \AMP_Validation_Manager::serialize_validation_error_messages()
+	 * @covers \AMP_Validation_Manager::unserialize_validation_error_messages()
 	 */
 	public function test_print_admin_notice() {
 		add_theme_support( AMP_Theme_Support::SLUG );
@@ -856,9 +852,10 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$output = get_echo( [ 'AMP_Validated_URL_Post_Type', 'print_admin_notice' ] );
 		$this->assertContains( 'The rechecked URL is free of non-removed invalid markup.', $output );
 
-		$_GET['amp_validate_error'] = [ 'http_request_failed' ];
+		$error_message              = 'Something <code>bad</code> happened!';
+		$_GET['amp_validate_error'] = AMP_Validation_Manager::serialize_validation_error_messages( [ $error_message ] );
 		$output                     = get_echo( [ 'AMP_Validated_URL_Post_Type', 'print_admin_notice' ] );
-		$this->assertContains( 'Failed to fetch URL(s) to validate', $output );
+		$this->assertContains( $error_message, $output );
 
 		unset( $GLOBALS['current_screen'] );
 	}
@@ -929,8 +926,8 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$exception = $handle_validate_request();
 		$this->assertInstanceOf( 'Exception', $exception );
 		$this->assertEquals( 302, $exception->getCode() );
-		$this->assertStringEndsWith(
-			'/edit.php?post_type=amp_validated_url&amp_validate_error=missing_url&amp_urls_tested=0',
+		$this->assertContains(
+			'/edit.php?post_type=amp_validated_url&amp_validate_error=',
 			$exception->getMessage()
 		);
 		unset( $_GET['post'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -940,8 +937,8 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$exception    = $handle_validate_request();
 		$this->assertInstanceOf( 'Exception', $exception );
 		$this->assertEquals( 302, $exception->getCode() );
-		$this->assertStringEndsWith(
-			'/edit.php?post_type=amp_validated_url&amp_validate_error=invalid_post&amp_urls_tested=0',
+		$this->assertContains(
+			'/edit.php?post_type=amp_validated_url&amp_validate_error=',
 			$exception->getMessage()
 		);
 		unset( $_GET['post'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -951,8 +948,8 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$exception    = $handle_validate_request();
 		$this->assertInstanceOf( 'Exception', $exception );
 		$this->assertEquals( 302, $exception->getCode() );
-		$this->assertStringEndsWith(
-			'/edit.php?post_type=amp_validated_url&amp_validate_error=invalid_post&amp_urls_tested=0',
+		$this->assertContains(
+			'/edit.php?post_type=amp_validated_url&amp_validate_error=',
 			$exception->getMessage()
 		);
 		unset( $_GET['post'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -962,8 +959,8 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$exception    = $handle_validate_request();
 		$this->assertInstanceOf( 'Exception', $exception );
 		$this->assertEquals( 302, $exception->getCode() );
-		$this->assertStringEndsWith(
-			sprintf( 'post.php?post=%s&action=edit&amp_urls_tested=1&amp_remaining_errors=2', $post_id ),
+		$this->assertContains(
+			sprintf( 'post.php?post=%s&action=edit&amp_urls_tested=', $post_id ),
 			$exception->getMessage()
 		);
 		unset( $_GET['post'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -993,8 +990,8 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$exception   = $handle_validate_request();
 		$this->assertInstanceOf( 'Exception', $exception );
 		$this->assertEquals( 302, $exception->getCode() );
-		$this->assertStringEndsWith(
-			'wp-admin/edit.php?post_type=amp_validated_url&amp_validate_error=illegal_url&amp_urls_tested=0',
+		$this->assertContains(
+			'wp-admin/edit.php?post_type=amp_validated_url&amp_validate_error=',
 			$exception->getMessage()
 		);
 	}
