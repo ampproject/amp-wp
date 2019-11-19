@@ -1663,6 +1663,10 @@ class AMP_Theme_Support {
 			$head->appendChild( $rel_canonical );
 		}
 
+		// Store the last meta tag as the previous node to append to.
+		$meta_tags     = $head->getElementsByTagName( 'meta' );
+		$previous_node = $meta_tags->length > 0 ? $meta_tags->item( $meta_tags->length - 1 ) : $head->firstChild;
+
 		// Handle the title.
 		$title = $head->getElementsByTagName( 'title' )->item( 0 );
 		if ( $title ) {

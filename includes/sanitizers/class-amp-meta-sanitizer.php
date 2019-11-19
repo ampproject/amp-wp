@@ -93,16 +93,20 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	public function sanitize() {
 		$this->xpath = new DOMXPath( $this->dom );
 		$this->head  = $this->ensure_head_is_present();
+		$charset     = $this->detect_charset();
+		$elements    = $this->dom->getElementsByTagName( static::$tag );
 
-		$charset = $this->detect_charset();
+		// Remove all nodes for easy reordering later on.
+		$elements = array_map( static function ( $element ) {
+			return $element->parentNode->removeChild( $element );
+		}, iterator_to_array( $elements, false ) );
 
-		foreach ( $this->dom->getElementsByTagName( static::$tag ) as $element ) {
+		foreach ( $elements as $element ) {
 			/**
 			 * Meta tag to process.
 			 *
 			 * @var DOMElement $element
 			 */
-			$element = $element->parentNode->removeChild( $element );
 			if ( $element->hasAttribute( 'charset' ) ) {
 				$this->meta_tags[ self::TAG_CHARSET ][] = $element;
 			} elseif ( 'viewport' === $element->getAttribute( 'name' ) ) {
@@ -248,6 +252,8 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		$first_meta_amp_script_src->setAttribute( 'content', implode( ' ', $content_values ) );
+
+		$this->meta_tags[ self::TAG_AMP_SCRIPT_SRC ][] = $first_meta_amp_script_src;
 	}
 
 	/**

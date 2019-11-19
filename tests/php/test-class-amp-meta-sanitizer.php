@@ -16,6 +16,16 @@ class Test_AMP_Meta_Sanitizer extends WP_UnitTestCase {
 	 * @return array[] Array of arrays with test data.
 	 */
 	public function get_data_for_sanitize() {
+		$script1 = 'document.body.textContent += "First!";';
+		$script2 = 'document.body.textContent += "Second!";';
+		$script3 = 'document.body.textContent += "Third!";';
+		$script4 = 'document.body.textContent += "Fourth! (And forbidden because no amp-script-src meta in head.)";';
+
+		$script1_hash = amp_generate_script_hash( $script1 );
+		$script2_hash = amp_generate_script_hash( $script2 );
+		$script3_hash = amp_generate_script_hash( $script3 );
+		$script4_hash = amp_generate_script_hash( $script4 );
+
 		return [
 			// Don't break the correct charset tag.
 			[
@@ -65,6 +75,12 @@ class Test_AMP_Meta_Sanitizer extends WP_UnitTestCase {
 			[
 				'<!DOCTYPE html><html><head><meta http-equiv="content-type" content="text/html; charset=utf-8" charset="utf-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
 				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
+			],
+
+			// Concatenate and reposition script hashes.
+			[
+				'<!DOCTYPE html><html><head><meta name="amp-script-src" content="' . esc_attr( $script1_hash ) . '"><meta charset="utf-8"><meta name="amp-script-src" content="' . esc_attr( $script2_hash ) . '"><meta name="viewport" content="width=device-width"><meta name="amp-script-src" content="' . esc_attr( $script3_hash ) . '"></head><body><meta name="amp-script-src" content="' . esc_attr( $script4_hash ) . '"></body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><meta name="amp-script-src" content="' . esc_attr( $script1_hash ) . ' ' . esc_attr( $script2_hash ) . ' ' . esc_attr( $script3_hash ) . ' ' . esc_attr( $script4_hash ) . '"></head><body></body></html>',
 			],
 		];
 	}
