@@ -7,6 +7,8 @@
 
 namespace Amp\AmpWP\Component;
 
+use DOMElement;
+
 /**
  * Class Image
  *
@@ -18,23 +20,23 @@ class Image {
 	/**
 	 * The image node.
 	 *
-	 * @var \DOMElement
+	 * @var DOMElement
 	 */
 	protected $image_node;
 
 	/**
 	 * Constructs the class.
 	 *
-	 * @param \DOMElement $image_node The image node.
+	 * @param DOMElement $image_node The image node.
 	 */
-	public function __construct( \DOMElement $image_node ) {
+	public function __construct( DOMElement $image_node ) {
 		$this->image_node = $image_node;
 	}
 
 	/**
 	 * Gets the image.
 	 *
-	 * @return \DOMElement
+	 * @return DOMElement
 	 */
 	public function get_image_node() {
 		return $this->image_node;

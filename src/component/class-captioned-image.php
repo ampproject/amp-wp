@@ -7,6 +7,8 @@
 
 namespace Amp\AmpWP\Component;
 
+use DOMElement;
+
 /**
  * Class Captioned_Image
  *
@@ -25,10 +27,10 @@ final class Captioned_Image extends Image implements Has_Caption {
 	/**
 	 * Constructs the class.
 	 *
-	 * @param \DOMElement $image_node The image node.
-	 * @param string      $caption    The caption text.
+	 * @param DOMElement $image_node The image node.
+	 * @param string     $caption    The caption text.
 	 */
-	public function __construct( \DOMElement $image_node, $caption ) {
+	public function __construct( DOMElement $image_node, $caption ) {
 		parent::__construct( $image_node );
 		$this->caption = $caption;
 	}

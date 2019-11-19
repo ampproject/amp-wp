@@ -7,6 +7,8 @@
 
 namespace Amp\AmpWP\Component;
 
+use DOMDocument;
+use DOMElement;
 use AMP_DOM_Utils;
 
 /**
@@ -36,14 +38,14 @@ class Carousel {
 	/**
 	 * An object representation of the DOM.
 	 *
-	 * @var \DOMDocument
+	 * @var DOMDocument
 	 */
 	protected $dom;
 
 	/**
 	 * Instantiates the class.
 	 *
-	 * @param \DOMDocument $dom The dom to use to create a carousel.
+	 * @param DOMDocument $dom The dom to use to create a carousel.
 	 */
 	public function __construct( $dom ) {
 		$this->dom = $dom;
@@ -53,7 +55,7 @@ class Carousel {
 	 * Creates and gets an <amp-carousel> with the given images and captions.
 	 *
 	 * @param Image_List $images The images from which to create a carousel.
-	 * @return \DOMElement An <amp-carousel> with the images.
+	 * @return DOMElement An <amp-carousel> with the images.
 	 */
 	public function create_and_get( Image_List $images ) {
 		list( $width, $height ) = $this->get_dimensions( $images );
