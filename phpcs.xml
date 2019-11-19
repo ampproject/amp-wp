@@ -1,7 +1,11 @@
 <?xml version="1.0"?>
 <ruleset name="WordPress Coding Standards for AMP">
 
-	<rule ref="WordPress-Core" />
+	<rule ref="WordPress-Core">
+		<exclude name="Generic.Arrays.DisallowShortArraySyntax" />
+		<exclude name="WordPress.PHP.DisallowShortTernary" />
+	</rule>
+
 	<rule ref="WordPress-Docs">
 		<exclude-pattern>tests/*</exclude-pattern>
 	</rule>
@@ -28,7 +32,6 @@
 		<exclude-pattern>includes/embeds/class-amp-twitter-embed.php</exclude-pattern>
 		<exclude-pattern>includes/embeds/class-amp-vimeo-embed.php</exclude-pattern>
 		<exclude-pattern>includes/embeds/class-amp-vine-embed.php</exclude-pattern>
-		<exclude-pattern>includes/embeds/class-amp-youtube-embed.php</exclude-pattern>
 	</rule>
 	<rule ref="WordPress.Arrays.MultipleStatementAlignment.LongIndexSpaceBeforeDoubleArrow">
 		<exclude-pattern>tests/test-tag-and-attribute-sanitizer.php</exclude-pattern>

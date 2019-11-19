@@ -1030,6 +1030,12 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						}
 					}
 
+					@media (max-width: 999px) {
+						amp-lightbox.cover-modal.show-modal {
+							display: unset;
+						}
+					}
+
 				}
 				<?php elseif ( 'twentyseventeen' === get_template() ) : ?>
 					/* Show the button*/
@@ -1594,7 +1600,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	public function add_twentytwenty_modals() {
 		$modals = $this->xpath->query( "//*[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' cover-modal ' ) ]" );
 
-		if ( false === $modals || 0 === $modals->count() ) {
+		if ( false === $modals || 0 === $modals->length ) {
 			return;
 		}
 
@@ -1672,7 +1678,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$toggles = $this->xpath->query( '//*[ @data-toggle-target ]' );
 		$body_id = AMP_DOM_Utils::get_element_id( $this->get_body_node(), 'body' );
 
-		if ( false === $toggles || 0 === $toggles->count() ) {
+		if ( false === $toggles || 0 === $toggles->length ) {
 			return;
 		}
 

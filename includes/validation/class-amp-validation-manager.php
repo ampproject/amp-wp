@@ -1426,31 +1426,21 @@ class AMP_Validation_Manager {
 	 *     @type string $type Source type (core, plugin, mu-plugin, or theme).
 	 *     @type string $name Source name.
 	 *     @type string $function Normalized function name.
-	 *     @type ReflectionMethod|ReflectionFunction $reflection
+	 *     @type ReflectionMethod|ReflectionFunction $reflection Reflection.
 	 * }
 	 */
 	public static function get_source( $callback ) {
 		$reflection = null;
-		$class_name = null; // Because ReflectionMethod::getDeclaringClass() can return a parent class.
 		try {
 			if ( is_string( $callback ) && is_callable( $callback ) ) {
 				// The $callback is a function or static method.
 				$exploded_callback = explode( '::', $callback, 2 );
 				if ( 2 === count( $exploded_callback ) ) {
-					$class_name = $exploded_callback[0];
 					$reflection = new ReflectionMethod( $exploded_callback[0], $exploded_callback[1] );
 				} else {
 					$reflection = new ReflectionFunction( $callback );
 				}
 			} elseif ( is_array( $callback ) && isset( $callback[0], $callback[1] ) && method_exists( $callback[0], $callback[1] ) ) {
-				// The $callback is a method.
-				if ( is_string( $callback[0] ) ) {
-					$class_name = $callback[0];
-				} elseif ( is_object( $callback[0] ) ) {
-					$class_name = get_class( $callback[0] );
-				}
-
-				// This is needed later for AMP_Validation_Manager::has_parameters_passed_by_reference().
 				$reflection = new ReflectionMethod( $callback[0], $callback[1] );
 
 				// Handle the special case of the class being a widget, in which case the display_callback method should
@@ -1465,6 +1455,7 @@ class AMP_Validation_Manager {
 			return null;
 		}
 
+		// The reflection is needed later for AMP_Validation_Manager::has_parameters_passed_by_reference().
 		if ( ! $reflection ) {
 			return null;
 		}
@@ -1482,7 +1473,7 @@ class AMP_Validation_Manager {
 			$source['type'] = 'theme';
 			$source['name'] = self::$template_slug;
 			$source['file'] = $matches['file'];
-		} elseif ( ! empty( self::$stylesheet_directory ) && preg_match( ':' . preg_quote( trailingslashit( self::$stylesheet_directory ), ':' ) . '/(?P<file>.*$):s', $file, $matches ) ) {
+		} elseif ( ! empty( self::$stylesheet_directory ) && preg_match( ':' . preg_quote( trailingslashit( self::$stylesheet_directory ), ':' ) . '(?P<file>.*$):s', $file, $matches ) ) {
 			$source['type'] = 'theme';
 			$source['name'] = self::$stylesheet_slug;
 			$source['file'] = $matches['file'];
@@ -1501,8 +1492,8 @@ class AMP_Validation_Manager {
 			$source['line'] = $reflection->getStartLine();
 		}
 
-		if ( $class_name ) {
-			$source['function'] = $class_name . '::' . $reflection->getName();
+		if ( $reflection instanceof ReflectionMethod ) {
+			$source['function'] = $reflection->getDeclaringClass()->getName() . '::' . $reflection->getName();
 		} else {
 			$source['function'] = $reflection->getName();
 		}
@@ -1909,21 +1900,22 @@ class AMP_Validation_Manager {
 	 * @return string Error message.
 	 */
 	public static function get_validate_url_error_message( $error_code ) {
+		$check_error_log = __( 'Please check your server\'s PHP error logs; to do this you may need to enable WP_DEBUG_LOG.', 'amp' );
 		switch ( $error_code ) {
 			case 'http_request_failed':
-				return __( 'Failed to fetch URL(s) to validate. This may be due to a request timeout.', 'amp' );
+				return __( 'Failed to fetch URL(s) to validate. This may be due to a request timeout.', 'amp' ) . ' ' . $check_error_log;
 			case 'white_screen_of_death':
-				return __( 'Unable to validate URL. Encountered a white screen of death likely due to a fatal error. Please check your server\'s PHP error logs.', 'amp' );
+				return __( 'Unable to validate URL. Encountered a white screen of death likely due to a fatal error.', 'amp' ) . ' ' . $check_error_log;
 			case '404':
 				return __( 'The fetched URL was not found. It may have been deleted. If so, you can trash this.', 'amp' );
 			case '500':
-				return __( 'An internal server error occurred when fetching the URL for validation.', 'amp' );
+				return __( 'An internal server error occurred when fetching the URL for validation.', 'amp' ) . ' ' . $check_error_log;
 			case 'response_comment_absent':
 				return sprintf(
 					/* translators: %s: AMP_VALIDATION */
-					__( 'URL validation failed to due to the absence of the expected JSON-containing %s comment after the body.', 'amp' ),
+					__( 'URL validation failed to due to the absence of the expected JSON-containing %s comment after the body. This is often due to a PHP fatal error occurring.', 'amp' ),
 					'AMP_VALIDATION'
-				);
+				) . ' ' . $check_error_log;
 			case 'malformed_json_validation_errors':
 				return sprintf(
 					/* translators: %s: AMP_VALIDATION */

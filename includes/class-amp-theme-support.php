@@ -1534,7 +1534,6 @@ class AMP_Theme_Support {
 	 * @link https://www.ampproject.org/docs/reference/spec#required-markup
 	 * @link https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/optimize_amp/
 	 * @todo All of this might be better placed inside of a sanitizer.
-	 * @todo Consider removing any scripts that are not among the $script_handles.
 	 *
 	 * @param DOMDocument $dom            Document.
 	 * @param string[]    $script_handles AMP script handles for components identified during output buffering.
@@ -1727,7 +1726,7 @@ class AMP_Theme_Support {
 			$script->parentNode->removeChild( $script ); // So we can move it.
 		}
 
-		// Create scripts for any components discovered from output buffering.
+		// Create scripts for any components discovered from output buffering that are missing.
 		foreach ( array_diff( $script_handles, array_keys( $amp_scripts ) ) as $missing_script_handle ) {
 			if ( ! wp_script_is( $missing_script_handle, 'registered' ) ) {
 				continue;
@@ -1743,6 +1742,18 @@ class AMP_Theme_Support {
 			}
 
 			$amp_scripts[ $missing_script_handle ] = AMP_DOM_Utils::create_node( $dom, 'script', $attrs );
+		}
+
+		// Remove scripts that had already been added but couldn't be detected from output buffering.
+		$extension_specs            = AMP_Allowed_Tags_Generated::get_extension_specs();
+		$superfluous_script_handles = array_diff(
+			array_keys( $amp_scripts ),
+			array_merge( $script_handles, [ 'amp-runtime' ] )
+		);
+		foreach ( $superfluous_script_handles as $superfluous_script_handle ) {
+			if ( ! empty( $extension_specs[ $superfluous_script_handle ]['requires_usage'] ) ) {
+				unset( $amp_scripts[ $superfluous_script_handle ] );
+			}
 		}
 
 		/* phpcs:ignore Squiz.PHP.CommentedOutCode.Found

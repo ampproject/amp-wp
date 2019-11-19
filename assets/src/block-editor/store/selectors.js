@@ -63,3 +63,25 @@ export function getDefaultStatus( state ) {
 export function getPossibleStatuses( state ) {
 	return state.possibleStatuses;
 }
+
+/**
+ * Returns the AMP validation error messages.
+ *
+ * @param {Object} state The editor state.
+ *
+ * @return {string[]} The validation error messages.
+ */
+export function getErrorMessages( state ) {
+	return state.errorMessages;
+}
+
+/**
+ * Returns the AMP slug used in the query var, like 'amp'.
+ *
+ * @param {Object} state The editor state.
+ *
+ * @return {string} The slug for AMP, like 'amp'.
+ */
+export function getAmpSlug( state ) {
+	return state.ampSlug;
+}

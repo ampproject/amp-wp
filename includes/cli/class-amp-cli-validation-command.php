@@ -545,7 +545,7 @@ final class AMP_CLI_Validation_Command {
 			return null;
 		}
 
-		return add_query_arg( 'year', date( 'Y' ), home_url( '/' ) );
+		return add_query_arg( 'year', gmdate( 'Y' ), home_url( '/' ) );
 	}
 
 	/**

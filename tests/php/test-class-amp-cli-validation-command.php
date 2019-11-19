@@ -390,7 +390,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 	 * @covers AMP_CLI_Validation_Command::get_date_page()
 	 */
 	public function test_get_date_page() {
-		$year = date( 'Y' );
+		$year = gmdate( 'Y' );
 
 		// Normally, this should return the date page, unless the user has opted out of that template.
 		$this->assertContains( $year, $this->call_private_method( $this->validation, 'get_date_page' ) );

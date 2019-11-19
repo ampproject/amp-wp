@@ -8,7 +8,7 @@ Official AMP plugin, supported by the AMP team. Formerly Accelerated Mobile Page
 **Tags:** [amp](https://wordpress.org/plugins/tags/amp), [stories](https://wordpress.org/plugins/tags/stories), [mobile](https://wordpress.org/plugins/tags/mobile), [optimization](https://wordpress.org/plugins/tags/optimization), [accelerated mobile pages](https://wordpress.org/plugins/tags/accelerated-mobile-pages), [framework](https://wordpress.org/plugins/tags/framework), [components](https://wordpress.org/plugins/tags/components), [blocks](https://wordpress.org/plugins/tags/blocks), [performance](https://wordpress.org/plugins/tags/performance), [ux](https://wordpress.org/plugins/tags/ux), [seo](https://wordpress.org/plugins/tags/seo), [official](https://wordpress.org/plugins/tags/official)  
 **Requires at least:** 4.9  
 **Tested up to:** 5.3  
-**Stable tag:** 1.4.0  
+**Stable tag:** 1.4.1  
 **License:** [GPLv2 or later](http://www.gnu.org/licenses/gpl-2.0.html)  
 **Requires PHP:** 5.4  
 
@@ -88,17 +88,21 @@ If you are a developer, we encourage you to [follow along](https://github.com/am
 
 ![The editor will surface validation issues during content authoring. The specific blocks with validation errors are indicated.](wp-assets/screenshot-11.png)
 
-### Each Validated URL shows the list of validation errors encountered, giving control over whether invalid markup is removed or kept.
+### Each Validated URL shows the list of validation errors encountered, giving control over whether invalid markup is removed or kept. Keeping invalid markup disables AMP.
 
-![Each Validated URL shows the list of validation errors encountered, giving control over whether invalid markup is removed or kept.](wp-assets/screenshot-12.png)
+![Each Validated URL shows the list of validation errors encountered, giving control over whether invalid markup is removed or kept. Keeping invalid markup disables AMP.](wp-assets/screenshot-12.png)
+
+### Each validation error provides a stack trace to identify which code is responsible for the invalid markup, whether a theme, plugin, embed, content block, and so on.
+
+![Each validation error provides a stack trace to identify which code is responsible for the invalid markup, whether a theme, plugin, embed, content block, and so on.](wp-assets/screenshot-13.png)
 
 ### Styles added by themes and plugins are automatically concatenated, minified, and tree-shaken to try to keep the total under 50KB of inline CSS.
 
-![Styles added by themes and plugins are automatically concatenated, minified, and tree-shaken to try to keep the total under 50KB of inline CSS.](wp-assets/screenshot-13.png)
+![Styles added by themes and plugins are automatically concatenated, minified, and tree-shaken to try to keep the total under 50KB of inline CSS.](wp-assets/screenshot-14.png)
 
 ### A WP-CLI command is provided to check the URLs on a site for AMP validity. Results are available in the admin for inspection.
 
-![A WP-CLI command is provided to check the URLs on a site for AMP validity. Results are available in the admin for inspection.](wp-assets/screenshot-14.png)
+![A WP-CLI command is provided to check the URLs on a site for AMP validity. Results are available in the admin for inspection.](wp-assets/screenshot-15.png)
 
 ## Changelog ##
 
