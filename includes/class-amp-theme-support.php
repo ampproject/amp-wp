@@ -425,7 +425,7 @@ class AMP_Theme_Support {
 			add_filter(
 				'template_include',
 				static function() {
-					return __DIR__ . '/templates/reader-template-loader.php';
+					return AMP__DIR__ . '/includes/templates/reader-template-loader.php';
 				},
 				PHP_INT_MAX
 			);
