@@ -1219,21 +1219,15 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		$allow_fluid = $node->hasAttribute( 'layout' ) ? AMP_Rule_Spec::LAYOUT_FLUID === $layout_attr : true;
 
 		// The layout is not validated as yet to allow for the width and height to be done first.
-		$input_width = new AMP_CSS_Length(
-			$node->getAttribute( 'width' ),
-			$allow_auto,
-			$allow_fluid
-		);
+		$input_width = new AMP_CSS_Length( $node->getAttribute( 'width' ) );
+		$input_width->validate( $allow_auto, $allow_fluid );
 
 		if ( ! $input_width->is_valid() ) {
 			return false;
 		}
 
-		$input_height = new AMP_CSS_Length(
-			$node->getAttribute( 'height' ),
-			$allow_auto,
-			$allow_fluid
-		);
+		$input_height = new AMP_CSS_Length( $node->getAttribute( 'height' ) );
+		$input_height->validate( $allow_auto, $allow_fluid );
 
 		if ( ! $input_height->is_valid() ) {
 			return false;
@@ -1332,7 +1326,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			! $input_width->is_set() &&
 			isset( $amp_layout_spec['defines_default_width'] )
 		) {
-			return new AMP_CSS_Length( '1px', false, false );
+			$css_length = new AMP_CSS_Length( '1px' );
+			$css_length->validate( false, false );
+			return $css_length;
 		}
 
 		return $input_width;
@@ -1363,7 +1359,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			! $input_height->is_set() &&
 			isset( $amp_layout_spec['defines_default_width'] )
 		) {
-			return new AMP_CSS_Length( '1px', false, false );
+			$css_length = new AMP_CSS_Length( '1px' );
+			$css_length->validate( false, false );
+			return $css_length;
 		}
 
 		return $input_height;

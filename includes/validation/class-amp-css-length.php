@@ -64,31 +64,45 @@ class AMP_CSS_Length {
 	protected $unit = 'px';
 
 	/**
+	 * Value of attribute.
+	 *
+	 * @var string
+	 */
+	protected $attr_value;
+
+	/**
 	 * AMP_CSS_Length constructor.
 	 *
 	 * @param string $attr_value  Attribute value to be parsed.
-	 * @param bool   $allow_auto  Whether or not to allow the 'auto' value as a value.
-	 * @param bool   $allow_fluid Whether or not to allow the 'fluid' value as a value.
 	 */
-	public function __construct( $attr_value, $allow_auto, $allow_fluid ) {
-		if ( ! isset( $attr_value ) || '' === $attr_value ) {
+	public function __construct( $attr_value ) {
+		if ( amp_is_attribute_empty( $attr_value ) ) {
 			$this->is_valid = true;
 			return;
 		}
 
-		$this->is_set = true;
+		$this->attr_value = $attr_value;
+		$this->is_set     = true;
+	}
 
-		if ( 'auto' === $attr_value ) {
+	/**
+	 * Validate the attribute value.
+	 *
+	 * @param bool $allow_auto  Whether or not to allow the 'auto' value as a value.
+	 * @param bool $allow_fluid Whether or not to allow the 'fluid' value as a value.
+	 */
+	public function validate( $allow_auto, $allow_fluid ) {
+		if ( 'auto' === $this->attr_value ) {
 			$this->is_auto  = true;
 			$this->is_valid = $allow_auto;
 			return;
-		} elseif ( 'fluid' === $attr_value ) {
+		} elseif ( 'fluid' === $this->attr_value ) {
 			$this->is_fluid = true;
 			$this->is_valid = $allow_fluid;
 		}
 
 		$pattern = '/^(?<numeral>\d+(?:\.\d+)?)(?<unit>px|em|rem|vh|vw|vmin|vmax)?$/';
-		if ( preg_match( $pattern, $attr_value, $match ) ) {
+		if ( preg_match( $pattern, $this->attr_value, $match ) ) {
 			$this->is_valid = true;
 			$this->numeral  = isset( $match['numeral'] ) ? (float) $match['numeral'] : $this->numeral;
 			$this->unit     = isset( $match['unit'] ) ? $match['unit'] : $this->unit;
