@@ -7,14 +7,13 @@ import styled from 'styled-components';
 /**
  * Internal dependencies
  */
-import { PanelTypes } from '../panels';
 import {
 	ElementWithPosition,
 	ElementWithSize,
 	ElementWithFont,
 	ElementWithBackgroundColor,
 	ElementWithFontColor,
-} from './shared';
+} from '../shared';
 
 const Element = styled.p`
 	margin: 0;
@@ -25,7 +24,7 @@ const Element = styled.p`
 	${ ElementWithFontColor }
 `;
 
-function Text( { content, color, backgroundColor, width, height, x, y, fontFamily, fontSize, fontWeight, fontStyle } ) {
+function TextDisplay( { content, color, backgroundColor, width, height, x, y, fontFamily, fontSize, fontWeight, fontStyle } ) {
 	const props = {
 		color,
 		backgroundColor,
@@ -45,7 +44,7 @@ function Text( { content, color, backgroundColor, width, height, x, y, fontFamil
 	);
 }
 
-Text.propTypes = {
+TextDisplay.propTypes = {
 	content: PropTypes.string,
 	color: PropTypes.string,
 	backgroundColor: PropTypes.string,
@@ -59,22 +58,4 @@ Text.propTypes = {
 	y: PropTypes.number.isRequired,
 };
 
-Text.defaultProps = {
-	fontFamily: 'Arial',
-	fontWeight: 'normal',
-	fontSize: 'auto',
-	fontStyle: 'normal',
-	color: 'black',
-	backgroundColor: 'transparent',
-};
-
-Text.panels = [
-	PanelTypes.TEXT,
-	PanelTypes.SIZE,
-	PanelTypes.POSITION,
-	PanelTypes.FONT,
-	PanelTypes.COLOR,
-	PanelTypes.BACKGROUND_COLOR,
-];
-
-export default Text;
+export default TextDisplay;

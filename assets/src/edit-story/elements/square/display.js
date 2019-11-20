@@ -7,41 +7,33 @@ import styled from 'styled-components';
 /**
  * Internal dependencies
  */
-import { PanelTypes } from '../panels';
-import { ElementWithPosition, ElementWithSize } from './shared';
+import { ElementWithPosition, ElementWithSize, ElementWithBackgroundColor } from '../shared';
 
-const Element = styled.img`
+const Element = styled.div`
 	${ ElementWithPosition }
 	${ ElementWithSize }
+	${ ElementWithBackgroundColor }
 `;
 
-function Image( { src, width, height, x, y } ) {
+function SquareDisplay( { backgroundColor, width, height, x, y } ) {
 	const props = {
+		backgroundColor,
 		width,
 		height,
 		x,
 		y,
-		src,
 	};
 	return (
 		<Element { ...props } />
 	);
 }
 
-Image.propTypes = {
-	src: PropTypes.string.isRequired,
+SquareDisplay.propTypes = {
+	backgroundColor: PropTypes.string,
 	width: PropTypes.number.isRequired,
 	height: PropTypes.number.isRequired,
 	x: PropTypes.number.isRequired,
 	y: PropTypes.number.isRequired,
 };
 
-Image.defaultProps = {
-};
-
-Image.panels = [
-	PanelTypes.SIZE,
-	PanelTypes.POSITION,
-];
-
-export default Image;
+export default SquareDisplay;
