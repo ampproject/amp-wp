@@ -2,6 +2,7 @@
  * External dependencies
  */
 import styled from 'styled-components';
+import Moveable from 'react-moveable';
 
 /**
  * WordPress dependencies
@@ -58,19 +59,41 @@ function Page() {
 	useEffect( () => {
 		setBackgroundClickHandler( () => clearSelection() );
 	}, [ setBackgroundClickHandler, clearSelection ] );
+	let selector;
 	return (
 		<Background>
 			{ currentPage && currentPage.elements.map( ( { type, id, ...rest } ) => {
 				const comp = getComponentForType( type );
 				const Comp = comp; // why u do dis, eslint?
+				selector = id; // @todo We should actually assign the selector only if the specific block is selected, too.
 				return (
-					<Element key={ id } onClick={ handleSelectElement( id ) }>
+					<Element id={ 'element-' + id } key={ id } onClick={ handleSelectElement( id ) }>
 						<Comp { ...rest } />
 					</Element>
 				);
 			} ) }
 			{ hasSelection && (
 				<Selection { ...selectionProps } />
+			) }
+			{ hasSelection && selector && (
+				<Moveable
+					target={ document.querySelector( '#element-' + selector + ' > :first-child' ) }
+					pinchThreshold={ 20 }
+					draggable={ true }
+					resizable={ true }
+					rotatable={ true }
+					onDrag={ ( { target, top, left } ) => {
+						target.style.left = `${ left }px`;
+						target.style.top = `${ top }px`;
+					} }
+					onResize={ ( { target, width, height } ) => {
+						target.style.width = `${ width }px`;
+						target.style.height = `${ height }px`;
+					} }
+					onRotate={ ( { target, transform } ) => {
+						target.style.transform = transform;
+					} }
+				/>
 			) }
 		</Background>
 	);
