@@ -2,7 +2,7 @@
  * Internal dependencies
  */
 import LibraryProvider from './libraryProvider';
-import LibraryLayout from './libraryTabs';
+import LibraryLayout from './libraryLayout';
 
 function Library() {
 	return (
