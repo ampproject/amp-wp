@@ -86,44 +86,6 @@ class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
 		];
 	}
 
-	/**
-	 * Test video_override().
-	 *
-	 * @covers AMP_YouTube_Embed_Handler::video_override()
-	 */
-	public function test_video_override() {
-		remove_all_filters( 'wp_video_shortcode_override' );
-		$this->handler->register_embed();
-		$youtube_id   = 'XOY3ZUO6P0k';
-		$youtube_src  = 'https://youtu.be/' . $youtube_id;
-		$attr_youtube = [
-			'src' => $youtube_src,
-		];
-
-		$youtube_shortcode = $this->handler->video_override( '', $attr_youtube );
-		$this->assertContains( '<amp-youtube', $youtube_shortcode );
-		$this->assertContains( $youtube_id, $youtube_shortcode );
-
-		$vimeo_id        = '64086087';
-		$vimeo_src       = 'https://vimeo.com/' . $vimeo_id;
-		$attr_vimeo      = [
-			'src' => $vimeo_src,
-		];
-		$yimeo_shortcode = $this->handler->video_override( '', $attr_vimeo );
-		$this->assertEquals( '', $yimeo_shortcode );
-
-		$daily_motion_id        = 'x6bacgf';
-		$daily_motion_src       = 'http://www.dailymotion.com/video/' . $daily_motion_id;
-		$attr_daily_motion      = [
-			'src' => $daily_motion_src,
-		];
-		$daily_motion_shortcode = $this->handler->video_override( '', $attr_daily_motion );
-		$this->assertEquals( '', $daily_motion_shortcode );
-		$no_attributes = $this->handler->video_override( '', [] );
-		$this->assertEquals( '', $no_attributes );
-		remove_all_filters( 'wp_video_shortcode_override' );
-	}
-
 	public function get_conversion_data() {
 		return [
 			'no_embed'                         => [
@@ -153,11 +115,6 @@ class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
 			'url_with_querystring_and_extra_?' => [
 				'http://www.youtube.com/watch?v=kfVsfOSbJY0?hl=en&fs=1&w=425&h=349' . PHP_EOL,
 				'<p>http://www.youtube.com/watch?v=kfVsfOSbJY0?hl=en&#038;fs=1&#038;w=425&#038;h=349</p>' . PHP_EOL,
-			],
-
-			'shortcode_unnamed_attr_as_url'    => [
-				'[youtube http://www.youtube.com/watch?v=kfVsfOSbJY0]' . PHP_EOL,
-				'<amp-youtube data-videoid="kfVsfOSbJY0" layout="responsive" width="600" height="338"></amp-youtube>' . PHP_EOL,
 			],
 
 			'embed_url'                        => [

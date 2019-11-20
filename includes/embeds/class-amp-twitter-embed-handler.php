@@ -90,53 +90,6 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
-	 * Gets AMP-compliant markup for the Twitter shortcode.
-	 *
-	 * @deprecated 1.5.0 Moved to jetpack in Jetpack_Tweet::jetpack_tweet_shortcode().
-	 *
-	 * @param array $attr The Twitter attributes.
-	 * @return string Twitter shortcode markup.
-	 */
-	public function shortcode( $attr ) {
-		$attr = wp_parse_args(
-			$attr,
-			[
-				'tweet' => false,
-			]
-		);
-
-		if ( empty( $attr['tweet'] ) && ! empty( $attr[0] ) ) {
-			$attr['tweet'] = $attr[0];
-		}
-
-		$id = false;
-		if ( is_numeric( $attr['tweet'] ) ) {
-			$id = $attr['tweet'];
-		} else {
-			preg_match( self::URL_PATTERN, $attr['tweet'], $matches );
-			if ( isset( $matches['tweet'] ) && is_numeric( $matches['tweet'] ) ) {
-				$id = $matches['tweet'];
-			}
-
-			if ( empty( $id ) ) {
-				return '';
-			}
-		}
-
-		$this->did_convert_elements = true;
-
-		return AMP_HTML_Utils::build_tag(
-			$this->amp_tag,
-			[
-				'data-tweetid' => $id,
-				'layout'       => 'responsive',
-				'width'        => $this->args['width'],
-				'height'       => $this->args['height'],
-			]
-		);
-	}
-
-	/**
 	 * Render oEmbed.
 	 *
 	 * @deprecated Since 1.1 as now the sanitize_raw_embeds() is used exclusively, allowing the original oEmbed response to be rapped by amp-twitter.

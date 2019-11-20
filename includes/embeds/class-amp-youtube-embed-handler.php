@@ -51,9 +51,6 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function register_embed() {
 		add_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ], 10, 2 );
-		if ( ! function_exists( 'jetpack_amp_youtube_shortcode' ) ) {
-			add_shortcode( 'youtube', [ $this, 'shortcode' ] );
-		}
 		add_filter( 'wp_video_shortcode_override', [ $this, 'video_override' ], 10, 2 );
 	}
 
@@ -62,9 +59,6 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function unregister_embed() {
 		remove_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ], 10 );
-		if ( ! function_exists( 'jetpack_amp_youtube_shortcode' ) ) {
-			remove_shortcode( 'youtube' );
-		}
 	}
 
 	/**
@@ -128,33 +122,6 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 		);
 
 		return $props;
-	}
-
-
-	/**
-	 * Gets AMP-compliant markup for the YouTube shortcode.
-	 *
-	 * @deprecated 1.5 Moved to Jetpack in jetpack_amp_youtube_shortcode().
-	 *
-	 * @param array $attr The YouTube attributes.
-	 * @return string YouTube shortcode markup.
-	 */
-	public function shortcode( $attr ) {
-		$url = false;
-
-		if ( isset( $attr[0] ) ) {
-			$url = ltrim( $attr[0], '=' );
-		} elseif ( function_exists( 'shortcode_new_to_old_params' ) ) {
-			$url = shortcode_new_to_old_params( $attr );
-		}
-
-		if ( empty( $url ) ) {
-			return '';
-		}
-
-		$video_id = $this->get_video_id_from_url( $url );
-
-		return $this->render( compact( 'video_id' ), $url );
 	}
 
 	/**
@@ -244,27 +211,4 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		return $value;
 	}
-
-	/**
-	 * Override the output of YouTube videos.
-	 *
-	 * This overrides the value in wp_video_shortcode().
-	 * The pattern matching is copied from WP_Widget_Media_Video::render().
-	 *
-	 * @param string $html Empty variable to be replaced with shortcode markup.
-	 * @param array  $attr The shortcode attributes.
-	 * @return string|null $markup The markup to output.
-	 */
-	public function video_override( $html, $attr ) {
-		if ( ! isset( $attr['src'] ) ) {
-			return $html;
-		}
-		$src             = $attr['src'];
-		$youtube_pattern = '#^https?://(?:www\.)?(?:youtube\.com/watch|youtu\.be/)#';
-		if ( 1 === preg_match( $youtube_pattern, $src ) ) {
-			return $this->shortcode( [ $src ] );
-		}
-		return $html;
-	}
-
 }

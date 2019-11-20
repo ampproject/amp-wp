@@ -59,36 +59,6 @@ class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
-	 * Gets AMP-compliant markup for the Dailymotion shortcode.
-	 *
-	 * @deprecated 1.5.0 Moved to Jetpack in dailymotion_shortcode().
-	 *
-	 * @param array $attr The Dailymotion attributes.
-	 * @return string Dailymotion shortcode markup.
-	 */
-	public function shortcode( $attr ) {
-		$video_id = false;
-
-		if ( isset( $attr['id'] ) ) {
-			$video_id = $attr['id'];
-		} elseif ( isset( $attr[0] ) ) {
-			$video_id = $attr[0];
-		} elseif ( function_exists( 'shortcode_new_to_old_params' ) ) {
-			$video_id = shortcode_new_to_old_params( $attr );
-		}
-
-		if ( empty( $video_id ) ) {
-			return '';
-		}
-
-		return $this->render(
-			[
-				'video_id' => $video_id,
-			]
-		);
-	}
-
-	/**
 	 * Render oEmbed.
 	 *
 	 * @see \WP_Embed::shortcode()

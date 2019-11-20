@@ -57,35 +57,6 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
-	 * WordPress shortcode rendering callback.
-	 *
-	 * @deprecated 1.5.0 Moved to Jetpack in jetpack_shortcode_instagram().
-	 *
-	 * @param array $attr Shortcode attributes.
-	 * @return string HTML markup for rendered embed.
-	 */
-	public function shortcode( $attr ) {
-		$url = false;
-
-		if ( isset( $attr['url'] ) ) {
-			$url = trim( $attr['url'] );
-		}
-
-		if ( empty( $url ) ) {
-			return '';
-		}
-
-		$instagram_id = $this->get_instagram_id_from_url( $url );
-
-		return $this->render(
-			[
-				'url'          => $url,
-				'instagram_id' => $instagram_id,
-			]
-		);
-	}
-
-	/**
 	 * WordPress OEmbed rendering callback.
 	 *
 	 * @param array  $matches URL pattern matches.
