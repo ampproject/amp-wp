@@ -312,6 +312,11 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	 * Re-add the meta tags to the <head> node in the optimized order.
 	 *
 	 * The order is defined by the array entries in $this->meta_tags.
+	 *
+	 * The optimal loading order for AMP pages is documented at:
+	 * https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/optimize_amp/#optimize-the-amp-runtime-loading
+	 *
+	 * "1. The first tag should be the meta charset tag, followed by any remaining meta tags."
 	 */
 	protected function re_add_meta_tags_in_optimized_order() {
 		/**
