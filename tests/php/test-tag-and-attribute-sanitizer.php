@@ -2075,6 +2075,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-img src="/img1.png" width="50" width="40" width="30" height="50" layout="responsive"></amp-img>',
 				'<amp-img src="/img1.png" width="50" height="50" layout="responsive"></amp-img>',
 			],
+
+			'fill_layout'                                  => [
+				'<amp-img src="/img1.png" width="30" height="30" layout="fill"></amp-img>',
+				null,
+			],
 		];
 	}
 

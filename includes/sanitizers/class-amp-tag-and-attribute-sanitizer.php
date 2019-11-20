@@ -1096,20 +1096,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	private function sanitize_disallowed_attribute_values_in_node( DOMElement $node, $tag_spec, $attr_spec_list ) {
 		$attrs_to_remove = [];
 
-		if (
-			! $node->hasAttribute( 'layout' ) &&
-			( $node->hasAttribute( 'width' ) || $node->hasAttribute( 'height' ) ) &&
-			isset( $tag_spec['amp_layout'] ) &&
-			! $this->has_valid_dimensions( $node )
-		) {
-			// If the dimensions are invalid, the node should be removed.
-			$this->remove_node( $node );
-			return false;
-		} elseif (
-			$node->hasAttribute( 'layout' ) &&
-			isset( $tag_spec['amp_layout'] ) &&
-			! $this->is_valid_layout( $tag_spec, $node )
-		) {
+		if ( ! $this->is_valid_layout( $tag_spec, $node ) ) {
 			// If the layout is invalid, the node should be removed.
 			$this->remove_node( $node );
 			return false;
@@ -1203,36 +1190,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Ensure the width and height for the element are valid.
-	 *
-	 * @param DOMElement $node Node.
-	 * @return bool True if both width and height are valid, false if either is not valid.
-	 */
-	private function has_valid_dimensions( $node ) {
-		$input_width = new AMP_CSS_Length(
-			$node->getAttribute( 'width' ),
-			true,
-			true
-		);
-
-		if ( ! $input_width->is_valid() ) {
-			return false;
-		}
-
-		$input_height = new AMP_CSS_Length(
-			$node->getAttribute( 'height' ),
-			true,
-			true
-		);
-
-		if ( ! $input_height->is_valid() ) {
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
 	 * Validates the layout for the given tag. This involves checking the
 	 * layout, width, height, sizes attributes with AMP specific logic.
 	 *
@@ -1247,12 +1204,25 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return bool True if layout is valid, false if validation fails.
 	 */
 	private function is_valid_layout( $tag_spec, $node ) {
-		$layout_attr = $node->getAttribute( 'layout' );
+		// No need to validate if there are no specifications for the layout.
+		if ( ! isset( $tag_spec['amp_layout'] ) ) {
+			return true;
+		}
 
+		// Elements without a width nor height don't need to be validated.
+		if ( ! $node->hasAttribute( 'width' ) && ! $node->hasAttribute( 'height' ) ) {
+			return true;
+		}
+
+		$layout_attr = $node->getAttribute( 'layout' );
+		$allow_auto  = true;
+		$allow_fluid = $node->hasAttribute( 'layout' ) ? AMP_Rule_Spec::LAYOUT_FLUID === $layout_attr : true;
+
+		// The layout is not validated as yet to allow for the width and height to be done first.
 		$input_width = new AMP_CSS_Length(
 			$node->getAttribute( 'width' ),
-			true,
-			AMP_Rule_Spec::LAYOUT_FLUID === $layout_attr
+			$allow_auto,
+			$allow_fluid
 		);
 
 		if ( ! $input_width->is_valid() ) {
@@ -1261,12 +1231,17 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		$input_height = new AMP_CSS_Length(
 			$node->getAttribute( 'height' ),
-			true,
-			AMP_Rule_Spec::LAYOUT_FLUID === $layout_attr
+			$allow_auto,
+			$allow_fluid
 		);
 
 		if ( ! $input_height->is_valid() ) {
 			return false;
+		}
+
+		// If no layout is supplied, there is nothing else to test.
+		if ( amp_is_attribute_empty( $layout_attr ) ) {
+			return true;
 		}
 
 		$sizes_attr   = $node->getAttribute( 'sizes' );
@@ -1381,7 +1356,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	private function calculate_height( $amp_layout_spec, $input_layout, AMP_CSS_Length $input_height ) {
 		if (
 			(
-				( ( isset( $input_layout ) && '' !== $input_layout ) ) ||
+				! amp_is_attribute_empty( $input_layout ) ||
 				AMP_Rule_Spec::LAYOUT_FIXED === $input_layout ||
 				AMP_Rule_Spec::LAYOUT_FIXED_HEIGHT === $input_layout
 			) &&
