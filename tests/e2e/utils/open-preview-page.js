@@ -22,6 +22,15 @@ export async function openPreviewPage( editorPage, selector ) {
 	}
 
 	const previewPage = last( openTabs );
+
+	// Ensure that Story preview page meets AMP desktop viewport requirements.
+	if ( 'amp-story' === selector ) {
+		await previewPage.setViewport( {
+			width: 1024,
+			height: 550,
+		} );
+	}
+
 	// Wait for the preview to load. We can't do interstitial detection here,
 	// because it might load too quickly for us to pick up, so we wait for
 	// the preview to load by waiting for the title to appear.
