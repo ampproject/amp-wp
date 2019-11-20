@@ -27,13 +27,6 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 	const RATIO = 0.5625;
 
 	/**
-	 * The tag (name) of the shortcode.
-	 *
-	 * @var string
-	 */
-	const SHORTCODE_TAG = 'vimeo';
-
-	/**
 	 * Default width.
 	 *
 	 * @var int
