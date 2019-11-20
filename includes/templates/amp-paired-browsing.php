@@ -23,7 +23,7 @@ $amp_url = add_query_arg( amp_get_slug(), '1', $url );
 			<nav id="header">
 				<ul>
 					<li>
-						<img src="<?php echo esc_url( amp_get_asset_url( 'images/amp-white-icon.svg' ) ); ?>" alt="">
+						<img src="<?php echo esc_url( amp_get_asset_url( 'images/amp-white-icon.svg' ) ); ?>" alt="AMP logo">
 					</li>
 					<li>
 						<span><?php esc_html_e( 'Paired Browsing', 'amp' ); ?></span>
@@ -42,11 +42,19 @@ $amp_url = add_query_arg( amp_get_slug(), '1', $url );
 
 		<div class="container">
 			<div id="non-amp">
-				<iframe src="<?php echo esc_url( $url ); ?>" sandbox="allow-forms allow-scripts allow-same-origin allow-popups" title="<?php esc_attr__( 'non-AMP version', 'amp' ); ?>"></iframe>
+				<iframe
+					src="<?php echo esc_url( $url ); ?>"
+					sandbox="allow-forms allow-scripts allow-same-origin allow-popups"
+					title="<?php esc_attr__( 'non-AMP version', 'amp' ); ?>"
+				></iframe>
 			</div>
 
 			<div id="amp">
-				<iframe src="<?php echo esc_url( $amp_url ); ?>" sandbox="allow-forms allow-scripts allow-same-origin allow-popups" title="<?php esc_attr__( 'AMP version', 'amp' ); ?>"></iframe>
+				<iframe
+					src="<?php echo esc_url( $amp_url ); ?>"
+					sandbox="allow-forms allow-scripts allow-same-origin allow-popups"
+					title="<?php esc_attr__( 'AMP version', 'amp' ); ?>"
+				></iframe>
 			</div>
 		</div>
 

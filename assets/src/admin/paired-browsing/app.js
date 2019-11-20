@@ -18,8 +18,8 @@ class PairedBrowsingApp {
 	 * Set the iframes on init.
 	 */
 	constructor() {
-		this.nonAmpIframe = document.getElementById( 'non-amp' ).firstElementChild;
-		this.ampIframe = document.getElementById( 'amp' ).firstElementChild;
+		this.nonAmpIframe = document.querySelector( '#non-amp iframe' );
+		this.ampIframe = document.querySelector( '#amp iframe' );
 
 		Promise.all( this.getIframeLoadedPromises() ).then( () => {
 			// Check to see if any of the iframes have been disconnected, at the specified interval.
