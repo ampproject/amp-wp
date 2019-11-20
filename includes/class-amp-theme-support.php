@@ -179,11 +179,11 @@ class AMP_Theme_Support {
 
 		self::$init_start_time = microtime( true );
 
-		if ( AMP_Options_Manager::is_website_experience_enabled() && current_theme_supports( self::SLUG ) ) {
-			// Ensure extra theme support for core themes is in place.
-			AMP_Core_Theme_Sanitizer::extend_theme_support();
-
-			require_once AMP__DIR__ . '/includes/amp-post-template-functions.php';
+		if ( AMP_Options_Manager::is_website_experience_enabled() ) {
+			if ( self::READER_MODE_SLUG !== self::get_support_mode() ) {
+				// Ensure extra theme support for core themes is in place.
+				AMP_Core_Theme_Sanitizer::extend_theme_support();
+			}
 
 			add_action( 'widgets_init', [ __CLASS__, 'register_widgets' ] );
 
@@ -417,15 +417,26 @@ class AMP_Theme_Support {
 
 		self::ensure_proper_amp_location();
 
-		$theme_support = self::get_theme_support_args();
+		$is_reader_mode = self::READER_MODE_SLUG === self::get_support_mode();
+		$theme_support  = self::get_theme_support_args();
 		if ( ! empty( $theme_support['template_dir'] ) ) {
 			self::add_amp_template_filters();
+		} elseif ( $is_reader_mode ) {
+			add_filter(
+				'template_include',
+				static function() {
+					return AMP__DIR__ . '/includes/templates/reader-template-loader.php';
+				},
+				PHP_INT_MAX
+			);
 		}
 
 		self::add_hooks();
 		self::$sanitizer_classes = amp_get_content_sanitizers();
-		self::$sanitizer_classes = AMP_Validation_Manager::filter_sanitizer_args( self::$sanitizer_classes );
-		self::$embed_handlers    = self::register_content_embed_handlers();
+		if ( ! $is_reader_mode ) {
+			self::$sanitizer_classes = AMP_Validation_Manager::filter_sanitizer_args( self::$sanitizer_classes );
+		}
+		self::$embed_handlers = self::register_content_embed_handlers();
 		self::$sanitizer_classes['AMP_Embed_Sanitizer']['embed_handlers'] = self::$embed_handlers;
 
 		foreach ( self::$sanitizer_classes as $sanitizer_class => $args ) {
@@ -458,26 +469,36 @@ class AMP_Theme_Support {
 			if ( $has_query_var || $has_url_param ) {
 				return self::redirect_non_amp_url( current_user_can( 'manage_options' ) ? 302 : 301, $exit );
 			}
-		} else {
+		} elseif ( self::READER_MODE_SLUG === self::get_support_mode() && is_singular() ) {
+			// Prevent infinite URL space under /amp/ endpoint.
+			global $wp;
+			$path_args = [];
+			wp_parse_str( $wp->matched_query, $path_args );
+			if ( isset( $path_args[ amp_get_slug() ] ) && '' !== $path_args[ amp_get_slug() ] ) {
+				wp_safe_redirect( amp_get_permalink( get_queried_object_id() ), 301 );
+				if ( $exit ) {
+					exit;
+				}
+				return true;
+			}
+		} elseif ( $has_query_var && ! $has_url_param ) {
 			/*
 			 * When in AMP transitional mode *with* theme support, then the proper AMP URL has the 'amp' URL param
 			 * and not the /amp/ endpoint. The URL param is now the exclusive way to mark AMP in transitional mode
 			 * when amp theme support present. This is important for plugins to be able to reliably call
 			 * is_amp_endpoint() before the parse_query action.
 			 */
-			if ( $has_query_var && ! $has_url_param ) {
-				$old_url = amp_get_current_url();
-				$new_url = add_query_arg( amp_get_slug(), '', amp_remove_endpoint( $old_url ) );
-				if ( $old_url !== $new_url ) {
-					// A temporary redirect is used for admin users to allow them to see changes between reader mode and transitional modes.
-					wp_safe_redirect( $new_url, current_user_can( 'manage_options' ) ? 302 : 301 );
-					// @codeCoverageIgnoreStart
-					if ( $exit ) {
-						exit;
-					}
-					return true;
-					// @codeCoverageIgnoreEnd
+			$old_url = amp_get_current_url();
+			$new_url = add_query_arg( amp_get_slug(), '', amp_remove_endpoint( $old_url ) );
+			if ( $old_url !== $new_url ) {
+				// A temporary redirect is used for admin users to allow them to see changes between reader mode and transitional modes.
+				wp_safe_redirect( $new_url, current_user_can( 'manage_options' ) ? 302 : 301 );
+				// @codeCoverageIgnoreStart
+				if ( $exit ) {
+					exit;
 				}
+				return true;
+				// @codeCoverageIgnoreEnd
 			}
 		}
 		return false;

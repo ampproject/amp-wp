@@ -123,44 +123,6 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that the analytics JS is added to the page
-	 */
-	public function test_analytics_js_added() {
-
-		/* Insert analytics option */
-		$this->insert_one_option(
-			$this->vendor,
-			$this->config_one
-		);
-
-		$amp_rendered = $this->render_post();
-
-		$libxml_previous_state = libxml_use_internal_errors( true );
-
-		// Create a new DOM document
-		$dom = new DOMDocument();
-		// Load the rendered page into it
-		$dom->loadHTML( $amp_rendered );
-
-		$head = $dom->getElementsByTagName( 'head' )->item( 0 );
-
-		$scripts            = $head->getElementsByTagName( 'script' );
-		$analytics_js_found = false;
-		foreach ( $scripts as $script ) {
-			if ( 'amp-analytics' === $script->getAttribute( 'custom-element' ) ) {
-				$analytics_js_found = true;
-				break;
-			}
-		}
-
-		libxml_clear_errors();
-		libxml_use_internal_errors( $libxml_previous_state );
-
-		$this->assertTrue( $analytics_js_found );
-
-	}
-
-	/**
 	 * Test that exactly one analytics component are added to the page
 	 */
 	public function test_one_analytics_component_added() {
@@ -171,8 +133,9 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 			$this->config_one
 		);
 
-		// Render AMP post
-		$amp_rendered = $this->render_post();
+		ob_start();
+		amp_print_analytics( [] );
+		$amp_rendered = ob_get_clean();
 
 		$libxml_previous_state = libxml_use_internal_errors( true );
 
@@ -203,7 +166,9 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 			$this->config_two
 		);
 
-		$amp_rendered = $this->render_post();
+		ob_start();
+		amp_print_analytics( [] );
+		$amp_rendered = ob_get_clean();
 
 		$libxml_previous_state = libxml_use_internal_errors( true );
 

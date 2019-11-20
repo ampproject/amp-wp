@@ -667,6 +667,8 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * @covers ::amp_is_dev_mode()
 	 */
 	public function test_amp_is_dev_mode() {
+		add_theme_support( 'amp' );
+
 		$this->assertFalse( amp_is_dev_mode() );
 		add_filter( 'amp_dev_mode_enabled', '__return_true' );
 		$this->assertTrue( amp_is_dev_mode() );
