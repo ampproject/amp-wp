@@ -56,7 +56,7 @@ class AMP_Content_Sanitizer {
 	 *     @type array $styles      Styles. If $args['return_styles'] is not empty. For legacy purposes.
 	 * }
 	 */
-	public static function sanitize_document( &$dom, $sanitizer_classes, $args ) {
+	public static function sanitize_document( $dom, $sanitizer_classes, $args ) {
 		$scripts     = [];
 		$stylesheets = [];
 		$styles      = [];
