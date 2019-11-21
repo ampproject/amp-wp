@@ -1,0 +1,28 @@
+{
+  "name": "amp-wp-github-release",
+  "private": true,
+  "version": "1.0.0",
+  "license": "GPL-2.0-or-later",
+  "description": "GitHub action that creates or updates the built zip for a GitHub release.",
+  "author": "XWP, Google, and contributors",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ampproject/amp-wp.git",
+    "directory": "github-actions/github-release"
+  },
+  "bugs": {
+    "url": "https://github.com/ampproject/amp-wp/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@actions/core": "^1.2.0",
+    "@actions/github": "^1.1.0"
+  }
+}

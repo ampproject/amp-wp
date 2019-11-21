@@ -1,0 +1,15 @@
+name: AMP WP Github Release
+description: Create or update the built zip for a GitHub release
+inputs:
+  repo-token:
+    description: GitHub secret token
+    required: true
+outputs:
+  git-tag:
+    description: The git tag this action received
+runs:
+  using: node12
+  main: index.js
+branding:
+  icon: git-merge
+  color: red
