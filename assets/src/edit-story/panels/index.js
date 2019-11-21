@@ -7,23 +7,28 @@ import BackgroundColorPanel from './backgroundColor';
 import FontPanel from './font';
 import SizePanel from './size';
 import PositionPanel from './position';
+import ScalePanel from './scale';
 import TextPanel from './text';
 
 const COLOR = 'color';
+const SCALE = 'scale';
 const FONT = 'font';
 const TEXT = 'text';
 const SIZE = 'size';
 const POSITION = 'position';
 const BACKGROUND_COLOR = 'backgroundColor';
 
-const ALL = [
+export const PanelTypes = {
 	POSITION,
 	SIZE,
+	SCALE,
 	BACKGROUND_COLOR,
 	COLOR,
 	FONT,
 	TEXT,
-];
+};
+
+const ALL = Object.values( PanelTypes );
 
 function intersect( a, b ) {
 	return a.filter( ( v ) => b.includes( v ) );
@@ -40,6 +45,7 @@ export function getPanels( elements ) {
 		.map( ( type ) => {
 			switch ( type ) {
 				case POSITION: return { type, Panel: PositionPanel };
+				case SCALE: return { type, Panel: ScalePanel };
 				case SIZE: return { type, Panel: SizePanel };
 				case BACKGROUND_COLOR: return { type, Panel: BackgroundColorPanel };
 				case COLOR: return { type, Panel: ColorPanel };
@@ -50,11 +56,3 @@ export function getPanels( elements ) {
 		} );
 }
 
-export const PanelTypes = {
-	POSITION,
-	SIZE,
-	BACKGROUND_COLOR,
-	COLOR,
-	FONT,
-	TEXT,
-};

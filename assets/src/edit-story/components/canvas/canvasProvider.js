@@ -14,7 +14,8 @@ import { useState, useCallback } from '@wordpress/element';
 import Context from './context';
 
 function CanvasProvider( { children } ) {
-	const [ isEditMode, setIsEditMode ] = useState( false );
+	const [ editingElement, setEditingElement ] = useState( false );
+
 	// It's a bit weird to directly set a state to be a function (as setFoo calls
 	// any function given to unwrap the inner value, which can then be a function),
 	// so we use a wrapper object in stead of double-functioning.
@@ -31,15 +32,22 @@ function CanvasProvider( { children } ) {
 		[ setBackgroundClick ],
 	);
 
+	const clearEditing = useCallback(
+		() => setEditingElement( null ),
+		[],
+	);
+
 	const state = {
 		state: {
-			isEditMode,
+			editingElement,
+			isEditing: Boolean( editingElement ),
 			backgroundClickHandler: backgroundClick.handler,
 		},
 		actions: {
 			setBackgroundClickHandler,
 			clearBackgroundClickHandler,
-			setIsEditMode,
+			setEditingElement,
+			clearEditing,
 		},
 	};
 

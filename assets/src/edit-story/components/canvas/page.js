@@ -6,14 +6,49 @@ import styled from 'styled-components';
 /**
  * WordPress dependencies
  */
-import { useCallback, useEffect } from '@wordpress/element';
+import { useCallback, useEffect, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { useStory } from '../../app';
-import { getComponentForType } from '../../elements';
+import { getDefinitionForType } from '../../elements';
 import useCanvas from './useCanvas';
+
+const useDoubleClick = ( onClick, onDoubleClick ) => {
+	const [ target, setTarget ] = useState( null );
+	const [ lastEvent, setLastEvent ] = useState( null );
+	const getHandler = ( newTarget ) => ( evt ) => {
+		evt.stopPropagation();
+
+		if ( target !== newTarget ) {
+			if ( target ) {
+				onClick( target, evt );
+			}
+			setTarget( newTarget );
+			evt.persist();
+			setLastEvent( evt );
+			return;
+		}
+
+		onDoubleClick( target, evt );
+		setTarget( null );
+	};
+	useEffect( () => {
+		if ( ! target ) {
+			return undefined;
+		}
+		const int = setTimeout( () => {
+			setTarget( null );
+			onClick( target, lastEvent );
+		}, 200 );
+		return () => {
+			clearTimeout( int );
+		};
+	}, [ target, lastEvent, onClick ] );
+
+	return getHandler;
+};
 
 const Background = styled.div`
 	background-color: ${ ( { theme } ) => theme.colors.fg.v1 };
@@ -34,8 +69,8 @@ const Selection = styled.div`
 `;
 
 const Element = styled.div`
-	cursor: pointer;
 	user-select: none;
+	${ ( { isPassive } ) => isPassive ? 'opacity: .4;' : 'cursor: pointer;' }
 `;
 
 function Page() {
@@ -44,9 +79,10 @@ function Page() {
 		actions: { clearSelection, selectElementById, toggleElementIdInSelection },
 	} = useStory();
 	const {
-		actions: { setBackgroundClickHandler },
+		state: { isEditing, editingElement },
+		actions: { setBackgroundClickHandler, setEditingElement },
 	} = useCanvas();
-	const handleSelectElement = useCallback( ( id ) => ( evt ) => {
+	const handleSelectElement = useCallback( ( id, evt ) => {
 		if ( evt.metaKey ) {
 			toggleElementIdInSelection( id );
 		} else {
@@ -54,6 +90,12 @@ function Page() {
 		}
 		evt.stopPropagation();
 	}, [ toggleElementIdInSelection, selectElementById ] );
+	const handleEnterEditMode = ( id ) => {
+		// Only edited element is selected.
+		selectElementById( id );
+		setEditingElement( id );
+	};
+	const getClickHandler = useDoubleClick( handleSelectElement, handleEnterEditMode );
 	const selectionProps = hasSelection ? getUnionSelection( selectedElements, 2 ) : {};
 	useEffect( () => {
 		setBackgroundClickHandler( () => clearSelection() );
@@ -61,15 +103,35 @@ function Page() {
 	return (
 		<Background>
 			{ currentPage && currentPage.elements.map( ( { type, id, ...rest } ) => {
-				const comp = getComponentForType( type );
-				const Comp = comp; // why u do dis, eslint?
+				const { hasEditMode, Display, Edit } = getDefinitionForType( type );
+
+				// Are we editing this element, display this as Edit component.
+				if ( editingElement === id ) {
+					return (
+						<Element key={ id }>
+							<Edit { ...rest } />
+						</Element>
+					);
+				}
+
+				// Are we editing some other element, display this as passive Display.
+				if ( isEditing ) {
+					return (
+						<Element key={ id } isPassive>
+							<Display { ...rest } />
+						</Element>
+					);
+				}
+
+				// Otherwise display this as non-passive Display.
+				const onClick = hasEditMode ? getClickHandler( id ) : ( evt ) => handleSelectElement( id, evt );
 				return (
-					<Element key={ id } onClick={ handleSelectElement( id ) }>
-						<Comp { ...rest } />
+					<Element key={ id } onClick={ onClick }>
+						<Display { ...rest } />
 					</Element>
 				);
 			} ) }
-			{ hasSelection && (
+			{ hasSelection && ! isEditing && (
 				<Selection { ...selectionProps } />
 			) }
 		</Background>

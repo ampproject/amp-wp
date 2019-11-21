@@ -25,7 +25,16 @@ function APIProvider( { children } ) {
 
 	const getMedia = useCallback(
 		() => apiFetch( { path: `${ media }/` } )
-			.then( ( data ) => data.map( ( { guid: { rendered: src } } ) => ( { src } ) ) ),
+			.then( ( data ) => data.map(
+				( {
+					guid: { rendered: src },
+					media_details: { width: origWidth, height: origHeight },
+				} ) => ( {
+					src,
+					origWidth,
+					origHeight,
+				} ),
+			) ),
 		[ media ],
 	);
 

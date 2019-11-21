@@ -14,26 +14,41 @@ import { getImgProps, ImageWithScale } from './util';
 const Element = styled.div`
 	${ ElementWithPosition }
 	${ ElementWithSize }
+`;
+
+const ActualBox = styled.div`
+	width: 100%;
+	height: 100%;
+	border: 1px solid ${ ( { theme } ) => theme.colors.mg.v1 }70;
 	overflow: hidden;
 `;
 
-const Img = styled.img`
+const FadedImg = styled.img`
+	position: absolute;
+	opacity: 0.4;
+	${ ImageWithScale }
+`;
+
+const ActualImg = styled.img`
 	position: relative;
 	${ ImageWithScale }
 `;
 
-function ImageDisplay( { src, origRatio, width, height, x, y, scale, offsetX, offsetY } ) {
+function ImageEdit( { src, origRatio, width, height, x, y, scale, offsetX, offsetY } ) {
 	const actualRatio = width / height * PAGE_WIDTH / PAGE_HEIGHT;
 	const imgProps = getImgProps( scale, offsetX, offsetY, origRatio, actualRatio );
 	const elementProps = { width, height, x, y };
 	return (
 		<Element { ...elementProps }>
-			<Img src={ src } { ...imgProps } />
+			<FadedImg src={ src } { ...imgProps } />
+			<ActualBox>
+				<ActualImg src={ src } { ...imgProps } />
+			</ActualBox>
 		</Element>
 	);
 }
 
-ImageDisplay.propTypes = {
+ImageEdit.propTypes = {
 	src: PropTypes.string.isRequired,
 	origRatio: PropTypes.number.isRequired,
 	width: PropTypes.number.isRequired,
@@ -45,10 +60,10 @@ ImageDisplay.propTypes = {
 	offsetY: PropTypes.number,
 };
 
-ImageDisplay.defaultProps = {
+ImageEdit.defaultProps = {
 	scale: null,
 	offsetX: null,
 	offsetY: null,
 };
 
-export default ImageDisplay;
+export default ImageEdit;

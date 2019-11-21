@@ -30,5 +30,5 @@ export const elementTypes = [
 	{ type: 'square', name: 'Square', ...squareElement },
 ];
 
-export const getComponentForType =
-	( type ) => elementTypes.find( ( el ) => el.type === type ).Display;
+export const getDefinitionForType =
+	( type ) => elementTypes.find( ( el ) => el.type === type );

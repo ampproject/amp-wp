@@ -45,7 +45,7 @@ function MediaLibrary( { onInsert } ) {
 
 	return (
 		<div>
-			{ media.map( ( { src } ) => (
+			{ media.map( ( { src, origWidth, origHeight } ) => (
 				<Image
 					key={ src }
 					src={ src }
@@ -53,6 +53,7 @@ function MediaLibrary( { onInsert } ) {
 					height={ 150 }
 					onClick={ () => onInsert( 'image', {
 						src,
+						origRatio: origWidth / origHeight,
 						width: 20,
 						height: 10,
 						x: 5,
