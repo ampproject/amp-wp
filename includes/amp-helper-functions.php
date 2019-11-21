@@ -464,38 +464,29 @@ function amp_register_default_scripts( $wp_scripts ) {
 		]
 	);
 
-	// Get all AMP components as defined in the spec.
-	$extensions = [];
-	foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( 'script' ) as $script_spec ) {
-		if ( isset( $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec']['name'], $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec']['version'] ) ) {
-			$versions = $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec']['version'];
-			array_pop( $versions );
-			$extensions[ $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec']['name'] ] = array_pop( $versions );
-		}
+	// Register all AMP components as defined in the spec.
+	foreach ( AMP_Allowed_Tags_Generated::get_extension_specs() as $extension_name => $extension_spec ) {
+		$src = sprintf(
+			'https://cdn.ampproject.org/v0/%s-%s.js',
+			$extension_name,
+			end( $extension_spec['version'] )
+		);
+
+		$wp_scripts->add(
+			$extension_name,
+			$src,
+			[ 'amp-runtime' ],
+			null
+		);
 	}
 
-	if ( isset( $extensions['amp-carousel'] ) ) {
+	if ( $wp_scripts->query( 'amp-carousel', 'registered' ) ) {
 		/*
 		 * The 0.2 version of amp-carousel depends on the amp-base-carousel component, but this is still experimental.
 		 * Also, the validator spec does not currently specify what base dependencies a given component has.
 		 * @todo Revisit once amp-base-carousel is no longer experimental. Add support for obtaining a list of extensions that depend on other extensions to include in the script dependencies when registering below.
 		 */
-		$extensions['amp-carousel'] = '0.1';
-	}
-
-	foreach ( $extensions as $extension => $version ) {
-		$src = sprintf(
-			'https://cdn.ampproject.org/v0/%s-%s.js',
-			$extension,
-			$version
-		);
-
-		$wp_scripts->add(
-			$extension,
-			$src,
-			[ 'amp-runtime' ],
-			null
-		);
+		$wp_scripts->registered['amp-carousel']->src = 'https://cdn.ampproject.org/v0/amp-carousel-0.1.js';
 	}
 }
 
@@ -575,6 +566,8 @@ function amp_filter_script_loader_tag( $tag, $handle ) {
 	if ( 'v0' === strtok( substr( $src, strlen( $prefix ) ), '/' ) ) {
 		/*
 		 * Per the spec, "Most extensions are custom-elements." In fact, there is only one custom template. So we hard-code it here.
+		 *
+		 * This could also be derived by looking at the extension_type in the extension_spec.
 		 *
 		 * @link https://github.com/ampproject/amphtml/blob/cd685d4e62153557519553ffa2183aedf8c93d62/validator/validator.proto#L326-L328
 		 * @link https://github.com/ampproject/amphtml/blob/cd685d4e62153557519553ffa2183aedf8c93d62/extensions/amp-mustache/validator-amp-mustache.protoascii#L27
@@ -845,8 +838,8 @@ function amp_is_dev_mode() {
 		(
 			// For the few sites that forcibly show the admin bar even when the user is logged out, only enable dev
 			// mode if the user is actually logged in. This prevents the dev mode from being served to crawlers
-			// when they index the AMP version.
-			( is_admin_bar_showing() && is_user_logged_in() )
+			// when they index the AMP version. The theme support check disables dev mode in Reader mode.
+			( is_admin_bar_showing() && is_user_logged_in() && current_theme_supports( 'amp' ) )
 			||
 			is_customize_preview()
 		)
@@ -1271,7 +1264,11 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 	}
 
 	// Show nothing if there are rejected validation errors for this URL.
-	if ( ! is_amp_endpoint() && count( AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( amp_get_current_url(), [ 'ignore_accepted' => true ] ) ) > 0 ) {
+	if (
+		! is_amp_endpoint() &&
+		AMP_Theme_Support::READER_MODE_SLUG !== AMP_Theme_Support::get_support_mode() &&
+		count( AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( amp_get_current_url(), [ 'ignore_accepted' => true ] ) ) > 0
+	) {
 		return;
 	}
 

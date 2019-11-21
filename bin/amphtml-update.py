@@ -212,6 +212,29 @@ def GenerateFooterPHP(out):
 	}
 
 	/**
+	 * Get extension specs.
+	 *
+	 * @since 1.5
+	 * @internal
+	 * @return array Extension specs, keyed by extension name.
+	 */
+	public static function get_extension_specs() {
+		static $extension_specs = [];
+
+		if ( ! empty( $extension_specs ) ) {
+			return $extension_specs;
+		}
+
+		foreach ( self::get_allowed_tag( 'script' ) as $script_spec ) {
+			if ( isset( $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec'] ) ) {
+				$extension_specs[ $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec']['name'] ] = $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec'];
+			}
+		}
+
+		return $extension_specs;
+	}
+
+	/**
 	 * Get allowed tag.
 	 *
 	 * Get the rules for a single tag so that the entire data structure needn't be passed around.
@@ -463,11 +486,20 @@ def GetTagRules(tag_spec):
 			also_requires_tag_list.append(UnicodeEscape(also_requires_tag))
 		tag_rules['also_requires_tag'] = also_requires_tag_list
 
+	requires_extension_list = set()
 	if hasattr(tag_spec, 'requires_extension') and len( tag_spec.requires_extension ) != 0:
-		requires_extension_list = []
 		for requires_extension in tag_spec.requires_extension:
-			requires_extension_list.append(requires_extension)
-		tag_rules['requires_extension'] = requires_extension_list
+			requires_extension_list.add(requires_extension)
+
+	if hasattr(tag_spec, 'also_requires_tag_warning') and len( tag_spec.also_requires_tag_warning ) != 0:
+		for also_requires_tag_warning in tag_spec.also_requires_tag_warning:
+			matches = re.search( r'(amp-\S+) extension .js script', also_requires_tag_warning )
+			if not matches:
+				raise Exception( 'Unexpected also_requires_tag_warning format: ' + also_requires_tag_warning )
+			requires_extension_list.add(matches.group(1))
+
+	if len( requires_extension_list ) > 0:
+		tag_rules['requires_extension'] = list( requires_extension_list )
 
 	if hasattr(tag_spec, 'reference_points') and len( tag_spec.reference_points ) != 0:
 		tag_reference_points = {}
@@ -478,12 +510,6 @@ def GetTagRules(tag_spec):
 			}
 		if len( tag_reference_points ) > 0:
 			tag_rules['reference_points'] = tag_reference_points
-
-	if hasattr(tag_spec, 'also_requires_tag_warning') and len( tag_spec.also_requires_tag_warning ) != 0:
-		also_requires_tag_warning_list = []
-		for also_requires_tag_warning in tag_spec.also_requires_tag_warning:
-			also_requires_tag_warning_list.append(also_requires_tag_warning)
-		tag_rules['also_requires_tag_warning'] = also_requires_tag_warning_list
 
 	if tag_spec.disallowed_ancestor:
 		disallowed_ancestor_list = []
@@ -510,7 +536,12 @@ def GetTagRules(tag_spec):
 		return None
 
 	if tag_spec.HasField('extension_spec'):
-		extension_spec = {}
+		# See https://github.com/ampproject/amphtml/blob/e37f50d/validator/validator.proto#L430-L454
+		ERROR = 1
+		NONE = 3
+		extension_spec = {
+			'requires_usage': 1 # (ERROR=1)
+		}
 		for field in tag_spec.extension_spec.ListFields():
 			if isinstance(field[1], (list, google.protobuf.internal.containers.RepeatedScalarFieldContainer, google.protobuf.pyext._message.RepeatedScalarContainer)):
 				extension_spec[ field[0].name ] = []
@@ -518,6 +549,30 @@ def GetTagRules(tag_spec):
 					extension_spec[ field[0].name ].append( val )
 			else:
 				extension_spec[ field[0].name ] = field[1]
+
+		# Normalize ERROR and GRANDFATHERED as true, since we control which scripts are added (or removed) from the output.
+		extension_spec['requires_usage'] = ( extension_spec['requires_usage'] != 3 ) # NONE=3
+
+		if 'version' not in extension_spec:
+			raise Exception( 'Missing required version field' )
+		if 'name' not in extension_spec:
+			raise Exception( 'Missing required name field' )
+
+		# Get the versions and sort.
+		versions = set( extension_spec['version'] )
+		versions.remove( 'latest' )
+		extension_spec['version'] = sorted( versions, key=lambda version: map(int, version.split('.') ) )
+
+		# Unused since amp_filter_script_loader_tag() and \AMP_Tag_And_Attribute_Sanitizer::get_rule_spec_list_to_validate() just hard-codes the check for amp-mustache.
+		if 'extension_type' in extension_spec:
+			del extension_spec['extension_type']
+
+		if 'deprecated_version' in extension_spec:
+			del extension_spec['deprecated_version']
+
+		if 'deprecated_allow_duplicates' in extension_spec:
+			del extension_spec['deprecated_allow_duplicates']
+
 		tag_rules['extension_spec'] = extension_spec
 
 	if tag_spec.HasField('mandatory'):
