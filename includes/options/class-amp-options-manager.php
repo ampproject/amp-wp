@@ -718,23 +718,9 @@ class AMP_Options_Manager {
 			$validation = AMP_Validation_Manager::validate_url( $url );
 
 			if ( is_wp_error( $validation ) ) {
-				$review_messages[] = esc_html(
-					sprintf(
-						/* translators: 1: error message. 2: error code. */
-						__( 'However, there was an error when checking the AMP validity for your site.', 'amp' ),
-						$validation->get_error_message(),
-						$validation->get_error_code()
-					)
-				);
-
-				$error_message = $validation->get_error_message();
-				if ( $error_message ) {
-					$review_messages[] = $error_message;
-				} else {
-					/* translators: %s is the error code */
-					$review_messages[] = esc_html( sprintf( __( 'Error code: %s.', 'amp' ), $validation->get_error_code() ) );
-				}
-				$notice_type = 'error';
+				$review_messages[] = esc_html__( 'However, there was an error when checking the AMP validity for your site.', 'amp' );
+				$review_messages[] = AMP_Validation_Manager::get_validate_url_error_message( $validation->get_error_code(), $validation->get_error_message() );
+				$notice_type       = 'error';
 			} elseif ( is_array( $validation ) ) {
 				$new_errors      = 0;
 				$rejected_errors = 0;
@@ -757,7 +743,7 @@ class AMP_Options_Manager {
 				if ( $rejected_errors > 0 ) {
 					$notice_type = 'error';
 
-					$message = wp_kses_post(
+					$message = esc_html(
 						sprintf(
 							/* translators: %s is count of rejected errors */
 							_n(
@@ -772,43 +758,37 @@ class AMP_Options_Manager {
 					);
 
 					if ( $invalid_url_screen_url ) {
-						$message .= ' ' . wp_kses_post(
-							sprintf(
-								/* translators: %s is URL to review issues */
-								_n(
-									'<a href="%s">Review Issue</a>.',
-									'<a href="%s">Review Issues</a>.',
-									$rejected_errors,
-									'amp'
-								),
-								esc_url( $invalid_url_screen_url )
-							)
+						$message .= ' ' . sprintf(
+							/* translators: %s is URL to review issues */
+							_n(
+								'<a href="%s">Review Issue</a>.',
+								'<a href="%s">Review Issues</a>.',
+								$rejected_errors,
+								'amp'
+							),
+							esc_url( $invalid_url_screen_url )
 						);
 					}
 
 					$review_messages[] = $message;
 				} else {
-					$message = wp_kses_post(
-						sprintf(
-							/* translators: %s is an AMP URL */
-							__( 'View an <a href="%s">AMP version of your site</a>.', 'amp' ),
-							esc_url( $url )
-						)
+					$message = sprintf(
+						/* translators: %s is an AMP URL */
+						__( 'View an <a href="%s">AMP version of your site</a>.', 'amp' ),
+						esc_url( $url )
 					);
 
 					if ( $new_errors > 0 && $invalid_url_screen_url ) {
-						$message .= ' ' . wp_kses_post(
-							sprintf(
-								/* translators: 1: URL to review issues. 2: count of new errors. */
-								_n(
-									'Please also <a href="%1$s">review %2$s issue</a> which may need to be fixed (for one URL at least).',
-									'Please also <a href="%1$s">review %2$s issues</a> which may need to be fixed (for one URL at least).',
-									$new_errors,
-									'amp'
-								),
-								esc_url( $invalid_url_screen_url ),
-								number_format_i18n( $new_errors )
-							)
+						$message .= ' ' . sprintf(
+							/* translators: 1: URL to review issues. 2: count of new errors. */
+							_n(
+								'Please also <a href="%1$s">review %2$s issue</a> which may need to be fixed (for one URL at least).',
+								'Please also <a href="%1$s">review %2$s issues</a> which may need to be fixed (for one URL at least).',
+								$new_errors,
+								'amp'
+							),
+							esc_url( $invalid_url_screen_url ),
+							number_format_i18n( $new_errors )
 						);
 					}
 
@@ -831,18 +811,16 @@ class AMP_Options_Manager {
 				}
 				break;
 			case AMP_Theme_Support::READER_MODE_SLUG:
-				$message = wp_kses_post(
-					sprintf(
-						/* translators: %s is an AMP URL */
-						__( 'Reader mode activated! View the <a href="%s">AMP version of a recent post</a>. It is recommended that you upgrade to Standard or Transitional mode.', 'amp' ),
-						esc_url( $url )
-					)
+				$message = sprintf(
+					/* translators: %s is an AMP URL */
+					__( 'Reader mode activated! View the <a href="%s">AMP version of a recent post</a>. It is recommended that you upgrade to Standard or Transitional mode.', 'amp' ),
+					esc_url( $url )
 				);
 				break;
 		}
 
 		if ( isset( $message ) ) {
-			add_settings_error( self::OPTION_NAME, 'template_mode_updated', $message, $notice_type );
+			add_settings_error( self::OPTION_NAME, 'template_mode_updated', wp_kses_post( $message ), $notice_type );
 		}
 	}
 }
