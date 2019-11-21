@@ -96,7 +96,7 @@ function Page() {
 		setEditingElement( id );
 	};
 	const getClickHandler = useDoubleClick( handleSelectElement, handleEnterEditMode );
-	const selectionProps = hasSelection ? getUnionSelection( selectedElements, 2 ) : {};
+	const selectionProps = hasSelection ? getUnionSelection( selectedElements ) : {};
 	useEffect( () => {
 		setBackgroundClickHandler( () => clearSelection() );
 	}, [ setBackgroundClickHandler, clearSelection ] );
@@ -147,13 +147,13 @@ function getUnionSelection( list, padding = 0 ) {
 		.map( ( { x, y, width, height } ) => ( { x1: x, y1: y, x2: x + width, y2: y + height } ) )
 		// then reduce to a single object by finding lowest {x,y}1 and highest {x,y}2
 		.reduce(
-			( el, sum ) => ( {
+			( sum, el ) => ( {
 				x1: Math.min( el.x1, sum.x1 ),
 				y1: Math.min( el.y1, sum.y1 ),
 				x2: Math.max( el.x2, sum.x2 ),
 				y2: Math.max( el.y2, sum.y2 ),
 			} ),
-			{ x1: 1000, y1: 1000, x2: 0, y2: 0 },
+			{ x1: Number.MAX_VALUE, y1: Number.MAX_VALUE, x2: 0, y2: 0 },
 		);
 
 	// finally convert back to x,y,width,height and add padding

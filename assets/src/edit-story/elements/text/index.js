@@ -3,6 +3,7 @@
  */
 import { PanelTypes } from '../../panels';
 export { default as Display } from './display';
+export { default as Edit } from './edit';
 
 export const defaultAttributes = {
 	fontFamily: 'Arial',
@@ -13,7 +14,7 @@ export const defaultAttributes = {
 	backgroundColor: 'transparent',
 };
 
-export const hasEditMode = false;
+export const hasEditMode = true;
 
 export const panels = [
 	PanelTypes.TEXT,

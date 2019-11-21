@@ -24,6 +24,8 @@ export const ElementWithFontColor = css`
 `;
 
 export const ElementWithFont = css`
+	line-height: 1.3;
+	white-space: pre-wrap;
 	font-family: ${ ( { fontFamily } ) => fontFamily };
 	font-style: ${ ( { fontStyle } ) => fontStyle };
 	font-size: ${ ( { fontSize } ) => fontSize };

@@ -38,9 +38,7 @@ function TextDisplay( { content, color, backgroundColor, width, height, x, y, fo
 		y,
 	};
 	return (
-		<Element { ...props }>
-			{ content }
-		</Element>
+		<Element { ...props } dangerouslySetInnerHTML={ { __html: content } } />
 	);
 }
 

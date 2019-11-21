@@ -19,8 +19,19 @@ const Element = styled.div`
 const ActualBox = styled.div`
 	width: 100%;
 	height: 100%;
-	border: 1px solid ${ ( { theme } ) => theme.colors.mg.v1 }70;
 	overflow: hidden;
+
+	&::after {
+		content: '';
+		display: block;
+		position: absolute;
+		left: 0;
+		top: 0;
+		width: 100%;
+		height: 100%;
+		border: 1px solid ${ ( { theme } ) => theme.colors.mg.v1 }70;
+		pointer-events: none;
+	}
 `;
 
 const FadedImg = styled.img`
