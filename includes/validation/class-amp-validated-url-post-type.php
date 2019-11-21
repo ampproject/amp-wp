@@ -631,17 +631,13 @@ class AMP_Validated_URL_Post_Type {
 	/**
 	 * Normalize a URL for storage.
 	 *
-	 * This ensures that query vars like utm_* and the like will not cause duplicates.
 	 * The AMP query param is removed to facilitate switching between standard and transitional.
 	 * The URL scheme is also normalized to HTTPS to help with transition from HTTP to HTTPS.
 	 *
 	 * @param string $url URL.
 	 * @return string Normalized URL.
-	 * @global WP $wp
 	 */
 	protected static function normalize_url_for_storage( $url ) {
-		global $wp;
-
 		// Only ever store the canonical version.
 		$url = amp_remove_endpoint( $url );
 
@@ -651,12 +647,11 @@ class AMP_Validated_URL_Post_Type {
 		// Normalize query args, removing all that are not recognized or which are removable.
 		$url_parts = explode( '?', $url, 2 );
 		if ( 2 === count( $url_parts ) ) {
-			parse_str( $url_parts[1], $args );
+			$args = wp_parse_args( $url_parts[1] );
 			foreach ( wp_removable_query_args() as $removable_query_arg ) {
 				unset( $args[ $removable_query_arg ] );
 			}
-			$args = wp_array_slice_assoc( $args, $wp->public_query_vars );
-			$url  = $url_parts[0];
+			$url = $url_parts[0];
 			if ( ! empty( $args ) ) {
 				$url = $url_parts[0] . '?' . build_query( $args );
 			}
@@ -1231,7 +1226,7 @@ class AMP_Validated_URL_Post_Type {
 
 			$validity = AMP_Validation_Manager::validate_url( $url );
 			if ( is_wp_error( $validity ) ) {
-				$errors[] = $validity->get_error_code();
+				$errors[] = AMP_Validation_Manager::get_validate_url_error_message( $validity->get_error_code(), $validity->get_error_message() );
 				continue;
 			}
 
@@ -1259,13 +1254,13 @@ class AMP_Validated_URL_Post_Type {
 			self::URLS_TESTED => count( $items ),
 		];
 		if ( ! empty( $errors ) ) {
-			$args['amp_validate_error'] = $errors;
+			$args['amp_validate_error'] = AMP_Validation_Manager::serialize_validation_error_messages( $errors );
 		} else {
 			$args[ self::REMAINING_ERRORS ] = count( $remaining_invalid_urls );
 		}
 
 		$redirect = remove_query_arg( wp_removable_query_args(), $redirect );
-		return add_query_arg( $args, $redirect );
+		return add_query_arg( rawurlencode_deep( $args ), $redirect );
 	}
 
 	/**
@@ -1278,14 +1273,23 @@ class AMP_Validated_URL_Post_Type {
 			return;
 		}
 
-		if ( isset( $_GET['amp_validate_error'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$error_codes = array_unique( array_map( 'sanitize_key', (array) $_GET['amp_validate_error'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			foreach ( $error_codes as $error_code ) {
-				printf(
-					'<div class="notice is-dismissible error"><p>%s</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">%s</span></button></div>',
-					esc_html( AMP_Validation_Manager::get_validate_url_error_message( $error_code ) ),
-					esc_html__( 'Dismiss this notice.', 'amp' )
-				);
+		if ( isset( $_GET['amp_validate_error'] ) && is_string( $_GET['amp_validate_error'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			// Note: The input var is validated by the unserialize_validation_error_messages method.
+			$errors = AMP_Validation_Manager::unserialize_validation_error_messages( wp_unslash( $_GET['amp_validate_error'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			if ( $errors ) {
+				foreach ( array_unique( $errors ) as $error_message ) {
+					printf(
+						'<div class="notice is-dismissible error"><p>%s</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">%s</span></button></div>',
+						wp_kses(
+							$error_message,
+							[
+								'a'    => array_fill_keys( [ 'href', 'target' ], true ),
+								'code' => [],
+							]
+						),
+						esc_html__( 'Dismiss this notice.', 'amp' )
+					);
+				}
 			}
 		}
 
@@ -1487,7 +1491,7 @@ class AMP_Validated_URL_Post_Type {
 
 			$validity = AMP_Validation_Manager::validate_url( $url );
 			if ( is_wp_error( $validity ) ) {
-				throw new Exception( esc_html( $validity->get_error_code() ) );
+				throw new Exception( AMP_Validation_Manager::get_validate_url_error_message( $validity->get_error_code(), $validity->get_error_message() ) );
 			}
 
 			$errors = wp_list_pluck( $validity['results'], 'error' );
@@ -1502,7 +1506,7 @@ class AMP_Validated_URL_Post_Type {
 				)
 			);
 			if ( is_wp_error( $stored ) ) {
-				throw new Exception( esc_html( $stored->get_error_code() ) );
+				throw new Exception( AMP_Validation_Manager::get_validate_url_error_message( $stored->get_error_code(), $stored->get_error_message() ) );
 			}
 			$redirect = get_edit_post_link( $stored, 'raw' );
 
@@ -1518,7 +1522,9 @@ class AMP_Validated_URL_Post_Type {
 			$args[ self::URLS_TESTED ]      = '1';
 			$args[ self::REMAINING_ERRORS ] = $error_count;
 		} catch ( Exception $e ) {
-			$args['amp_validate_error'] = $e->getMessage();
+			$args['amp_validate_error'] = AMP_Validation_Manager::serialize_validation_error_messages(
+				[ $e->getMessage() ]
+			);
 			$args[ self::URLS_TESTED ]  = '0';
 
 			if ( $post && self::POST_TYPE_SLUG === $post->post_type ) {
@@ -1533,7 +1539,7 @@ class AMP_Validated_URL_Post_Type {
 			}
 		}
 
-		wp_safe_redirect( add_query_arg( $args, $redirect ) );
+		wp_safe_redirect( add_query_arg( rawurlencode_deep( $args ), $redirect ) );
 		exit();
 	}
 
@@ -2073,7 +2079,7 @@ class AMP_Validated_URL_Post_Type {
 		}
 
 		return wp_nonce_url(
-			add_query_arg( $args, admin_url() ),
+			add_query_arg( rawurlencode_deep( $args ), admin_url() ),
 			self::NONCE_ACTION
 		);
 	}
