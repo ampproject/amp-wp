@@ -6,49 +6,15 @@ import styled from 'styled-components';
 /**
  * WordPress dependencies
  */
-import { useCallback, useEffect, useState } from '@wordpress/element';
+import { useCallback, useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { useStory } from '../../app';
+import useDoubleClick from '../../utils/useDoubleClick';
 import { getDefinitionForType } from '../../elements';
 import useCanvas from './useCanvas';
-
-const useDoubleClick = ( onClick, onDoubleClick ) => {
-	const [ target, setTarget ] = useState( null );
-	const [ lastEvent, setLastEvent ] = useState( null );
-	const getHandler = ( newTarget ) => ( evt ) => {
-		evt.stopPropagation();
-
-		if ( target !== newTarget ) {
-			if ( target ) {
-				onClick( target, evt );
-			}
-			setTarget( newTarget );
-			evt.persist();
-			setLastEvent( evt );
-			return;
-		}
-
-		onDoubleClick( target, evt );
-		setTarget( null );
-	};
-	useEffect( () => {
-		if ( ! target ) {
-			return undefined;
-		}
-		const int = setTimeout( () => {
-			setTarget( null );
-			onClick( target, lastEvent );
-		}, 200 );
-		return () => {
-			clearTimeout( int );
-		};
-	}, [ target, lastEvent, onClick ] );
-
-	return getHandler;
-};
 
 const Background = styled.div`
 	background-color: ${ ( { theme } ) => theme.colors.fg.v1 };
