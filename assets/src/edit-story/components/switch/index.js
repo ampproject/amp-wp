@@ -52,22 +52,30 @@ const Slider = styled.span`
 		content: '';
 		display: block;
 		position: absolute;
-		left: 2px;
+		left: 3px;
 		top: 2px;
 		width: 6px;
 		height: 6px;
-		border-radius: 50%;
+		border-radius: 3px;
 		background-color: ${ ( { theme } ) => theme.colors.fg.v3 };
 		transition: border-color .2s ease;
-		transition-property: border-color, left;
+		transition-property: border-color, left, width;
 	}
 
 	${ Checkbox }:checked + & {
 		border-color: ${ ( { theme } ) => theme.colors.action };
 		&::after {
 			background-color: ${ ( { theme } ) => theme.colors.action };
-			left: 13px;
+			left: 11px;
 		}
+	}
+
+	${ Checkbox }:active + &::after {
+		width: 9px;
+	}
+
+	${ Checkbox }:active:checked + &::after {
+		left: 8px;
 	}
 `;
 
