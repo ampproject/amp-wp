@@ -30,9 +30,9 @@ const Background = styled.div`
 `;
 
 const Area = styled.div`
-  grid-area: ${ ( { area } ) => area };
-  height: 100%;
-  width: 100%;
+	grid-area: ${ ( { area } ) => area };
+	height: 100%;
+	width: 100%;
 
 	${ ( { isPassive } ) => isPassive && `
 		pointer-events: none;
