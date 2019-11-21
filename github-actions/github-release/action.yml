@@ -4,6 +4,9 @@ inputs:
   repo-token:
     description: GitHub secret token
     required: true
+  zip:
+    description: Built zip
+    required: true
 outputs:
   git-tag:
     description: The git tag this action received

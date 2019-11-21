@@ -2,7 +2,6 @@
  * Node dependencies
  */
 const fs = require( 'fs' );
-const path = require( 'path' );
 
 /**
  * GitHub dependencies
@@ -13,6 +12,8 @@ const github = require( '@actions/github' );
 ( async () => {
 	try {
 		const repoToken = core.getInput( 'repo-token', { required: true } );
+		const zipPath = core.getInput( 'zip', { required: true } );
+
 		const client = new github.GitHub( repoToken );
 
 		const gitRef = github.context.ref;
@@ -55,16 +56,15 @@ const github = require( '@actions/github' );
 		core.info( 'Uploading assets' );
 
 		const fileName = 'amp.zip';
-		const filePath = path.resolve( process.cwd(), fileName );
 
 		await client.repos.uploadReleaseAsset( {
 			url: newReleaseInfo.data.upload_url,
 			headers: {
-				'Content-Length': fs.lstatSync( filePath ).size,
+				'Content-Length': fs.lstatSync( zipPath ).size,
 				'Content-Type': 'application/zip',
 			},
 			name: fileName,
-			file: fs.readFileSync( filePath ),
+			file: fs.readFileSync( zipPath ),
 		} );
 
 		core.setOutput( 'git-tag', gitTag );
