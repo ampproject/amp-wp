@@ -35,7 +35,7 @@ final class ImageList implements IteratorAggregate, Countable {
 	 * @return self
 	 */
 	public function add( DOMElement $image_node, $caption = '' ) {
-		$this->elements[] = empty( $caption ) ? new Image( $image_node ) : new CaptionedImage( $image_node, $caption );
+		$this->elements[] = empty( $caption ) ? $image_node : new CaptionedSlide( $image_node, $caption );
 		return $this;
 	}
 

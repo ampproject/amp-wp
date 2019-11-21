@@ -79,7 +79,7 @@ class Carousel {
 		);
 
 		foreach ( $this->images as $image ) {
-			$image_node = $image->get_image_node();
+			$image_node = $image instanceof HasCaption ? $image->get_slide_node() : $image;
 			$caption    = $image instanceof HasCaption ? $image->get_caption() : null;
 			$slide      = AMP_DOM_Utils::create_node(
 				$this->dom,
@@ -143,7 +143,7 @@ class Carousel {
 		$carousel_height  = 0;
 
 		foreach ( $this->images as $image ) {
-			$image_node = $image->get_image_node();
+			$image_node = $image instanceof HasCaption ? $image->get_slide_node() : $image;
 			// Account for an <amp-img> that's wrapped in an <a>.
 			if ( 'amp-img' !== $image_node->tagName && isset( $image_node->firstChild->tagName ) && 'amp-img' === $image_node->firstChild->tagName ) {
 				$image_node = $image_node->firstChild;

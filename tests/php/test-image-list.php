@@ -1,18 +1,18 @@
 <?php
 /**
- * Tests for ImageList, CaptionedImage, and Image classes.
+ * Tests for ImageList, CaptionedSlide, and Image classes.
  *
  * @package AMP
  */
 
 use Amp\AmpWP\Component\ImageList;
 use Amp\AmpWP\Component\Image;
-use Amp\AmpWP\Component\CaptionedImage;
+use Amp\AmpWP\Component\CaptionedSlide;
 
 /**
  * Tests for AMP image collection classes.
  *
- * @covers Amp\AmpWP\Component\ImageList, Amp\AmpWP\Component\CaptionedImage, Amp\AmpWP\Component\Image
+ * @covers Amp\AmpWP\Component\ImageList, Amp\AmpWP\Component\CaptionedSlide, Amp\AmpWP\Component\Image
  */
 class Test_Image_List extends \WP_UnitTestCase {
 
@@ -91,23 +91,23 @@ class Test_Image_List extends \WP_UnitTestCase {
 	/**
 	 * Test get_caption.
 	 *
-	 * @covers \Amp\AmpWP\Component\CaptionedImage::get_caption()
+	 * @covers \Amp\AmpWP\Component\CaptionedSlide::get_caption()
 	 */
 	public function test_get_caption() {
 		$image_node      = AMP_DOM_Utils::create_node( new \DOMDocument(), 'amp-img', [] );
 		$caption         = 'This is a caption';
-		$captioned_image = new CaptionedImage( $image_node, $caption );
+		$captioned_image = new CaptionedSlide( $image_node, $caption );
 		$this->assertEquals( $caption, $captioned_image->get_caption() );
 	}
 
 	/**
-	 * Test get_image_node.
+	 * Test get_slide_node.
 	 *
-	 * @covers \Amp\AmpWP\Component\Image::get_image_node()
+	 * @covers \Amp\AmpWP\Component\Image::get_slide_node()
 	 */
-	public function test_get_image_node() {
+	public function test_get_slide_node() {
 		$image_node = AMP_DOM_Utils::create_node( new \DOMDocument(), 'amp-img', [] );
-		$amp_image  = new Image( $image_node );
-		$this->assertEquals( $image_node, $amp_image->get_image_node() );
+		$amp_image  = new CaptionedSlide( $image_node, '' );
+		$this->assertEquals( $image_node, $amp_image->get_slide_node() );
 	}
 }
