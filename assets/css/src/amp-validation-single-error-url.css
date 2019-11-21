@@ -63,6 +63,10 @@ table.striped > tbody > tr.even {
 	font-weight: 600;
 }
 
+.detailed pre {
+	white-space: pre-wrap;
+}
+
 .column-status select {
 	vertical-align: top;
 }
