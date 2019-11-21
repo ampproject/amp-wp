@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "license": "GPL-2.0-or-later",
-  "description": "GitHub action that creates or updates the built zip for a GitHub release.",
+  "description": "GitHub Action that creates or updates the built zip for a GitHub release.",
   "author": "XWP, Google, and contributors",
   "main": "index.js",
   "scripts": {
