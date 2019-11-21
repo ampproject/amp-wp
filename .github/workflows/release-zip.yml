@@ -1,0 +1,77 @@
+name: Release built zip
+on:
+  push:
+    tags:
+      - '1.[0-9]+.[0-9]+' # Only trigger on 1.X.X tags
+
+jobs:
+  build-zip:
+    runs-on: ubuntu-18.04
+    # TODO: move third party actions in house.
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+
+      - name: Setup PHP & Composer
+        uses: shivammathur/setup-php@1.5.2
+        with:
+          php-version: '7.3'
+
+      - name: Get nvm version
+        id: nvm-version
+        run: echo "::set-output name=version::$(cat .nvmrc)"
+
+      - name: Setup Node
+        uses: dcodeIO/setup-node-nvm@v2.0.0
+        with:
+          node-version: ${{ steps.nvm-version.outputs.version }}
+
+      - name: Get Composer cache directory
+        id: composer-cache-dir
+        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - name: Get npm cache directory
+        id: npm-cache
+        run: echo "::set-output name=dir::$(npm config get cache)"
+
+      - name: Retrieve Composer cache
+        id: cache-composer-deps
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.composer-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Retrieve nvm cache
+        uses: actions/cache@v1
+        with:
+          path: ~/.nvm/.cache
+          key: ${{ runner.os }}-nvm
+
+      - name: Retrieve npm cache
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.npm-cache.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-node-
+
+      - name: Install Composer dependencies
+        # Scripts are not ignored as they are needed to apply patches for the
+        # `sabberworm/php-css-parser` dependency.
+        run: composer install --no-suggest --prefer-dist --optimize-autoloader
+
+      - name: Install Node dependencies
+        # Prevent malicious scripts from being run with `--ignore-scripts`
+        run: npm install --ignore-scripts
+        env:
+          PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: true
+
+      - name: Run build script
+        run: npm run build
+
+      - name: Release zip
+        uses: ./github-actions/github-release
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          zip: ./amp.zip

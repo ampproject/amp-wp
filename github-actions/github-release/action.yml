@@ -14,5 +14,5 @@ runs:
   using: node12
   main: dist/index.js
 branding:
-  icon: git-merge
-  color: red
+  icon: tag
+  color: green
