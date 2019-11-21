@@ -2,15 +2,11 @@
   "name": "amp-wp-github-release",
   "private": true,
   "version": "1.0.0",
-  "license": "GPL-2.0-or-later",
   "description": "GitHub Action that creates or updates the built zip for a GitHub release.",
   "author": "XWP, Google, and contributors",
-  "main": "index.js",
-  "scripts": {
-    "build": "ncc build index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "license": "GPL-2.0-or-later",
   "keywords": [],
+  "homepage": "https://github.com/ampproject/amp-wp/github-actions/github-release",
   "repository": {
     "type": "git",
     "url": "https://github.com/ampproject/amp-wp.git",
@@ -19,14 +15,19 @@
   "bugs": {
     "url": "https://github.com/ampproject/amp-wp/issues"
   },
-  "publishConfig": {
-    "access": "public"
-  },
+  "main": "index.js",
   "dependencies": {
     "@actions/core": "^1.2.0",
     "@actions/github": "^1.1.0"
   },
   "devDependencies": {
     "@zeit/ncc": "^0.20.5"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "ncc build index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   }
 }
