@@ -1058,11 +1058,16 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param DOMElement $node Node.
 	 */
 	private function adapt_dimensions_to_layout( DOMElement $node ) {
-		$layout = $node->getAttribute( 'layout' );
-
-		if ( ! amp_is_attribute_empty( $layout ) ) {
+		if ( $node->hasAttribute( 'layout' ) ) {
 			$width  = $node->getAttribute( 'width' );
 			$height = $node->getAttribute( 'height' );
+
+			// The `layout` attribute can also be defined through the `data-amp-layout` attribute.
+			if ( $node->hasAttribute( 'data-amp-layout' ) ) {
+				$layout = $node->getAttribute( 'data-amp-layout' );
+				$node->setAttribute( 'layout', $layout );
+				$node->removeAttribute( 'data-amp-layout' );
+			}
 
 			// If the width & height are `100%` the layout must be `fill`.
 			if ( '100%' === $width && '100%' === $height ) {
