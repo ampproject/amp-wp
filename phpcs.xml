@@ -81,6 +81,11 @@
 		</properties>
 	</rule>
 
+	<!-- Enforce PascalCase file names in src/ only. -->
+	<rule ref="Squiz.Classes.ClassFileName">
+		<include-pattern>src/*</include-pattern>
+	</rule>
+
 	<!-- Include sniffs for PHP cross-version compatibility. -->
 	<config name="testVersion" value="5.4-"/>
 	<rule ref="PHPCompatibilityWP">
