@@ -646,9 +646,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		// Fix any values for width & height that may be AMP incompatible.
-		$this->adapt_dimensions_to_layout( $node );
-
 		// Identify attribute values that don't conform to the attr_spec.
 		$disallowed_attributes = $this->sanitize_disallowed_attribute_values_in_node( $node, $tag_spec, $merged_attr_spec_list );
 
@@ -1049,39 +1046,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			);
 		} else {
 			return $element->nodeName;
-		}
-	}
-
-	/**
-	 * Adapt width and height to conform to the AMP layout.
-	 *
-	 * @param DOMElement $node Node.
-	 */
-	private function adapt_dimensions_to_layout( DOMElement $node ) {
-		if ( $node->hasAttribute( 'layout' ) ) {
-			$width  = $node->getAttribute( 'width' );
-			$height = $node->getAttribute( 'height' );
-
-			// The `layout` attribute can also be defined through the `data-amp-layout` attribute.
-			if ( $node->hasAttribute( 'data-amp-layout' ) ) {
-				$layout = $node->getAttribute( 'data-amp-layout' );
-				$node->setAttribute( 'layout', $layout );
-				$node->removeAttribute( 'data-amp-layout' );
-			}
-
-			// If the width & height are `100%` the layout must be `fill`.
-			if ( '100%' === $width && '100%' === $height ) {
-				$node->removeAttribute( 'width' );
-				$node->removeAttribute( 'height' );
-				$node->setAttribute( 'layout', AMP_Rule_Spec::LAYOUT_FILL );
-				return;
-			}
-
-			// If the width is `100%`, convert the layout to `fixed-height` and width to `auto`.
-			if ( '100%' === $width ) {
-				$node->setAttribute( 'width', 'auto' );
-				$node->setAttribute( 'layout', AMP_Rule_Spec::LAYOUT_FIXED_HEIGHT );
-			}
 		}
 	}
 

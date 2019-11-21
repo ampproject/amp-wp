@@ -88,6 +88,7 @@ class AMP_Autoloader {
 		'AMP_Style_Sanitizer'                => 'includes/sanitizers/class-amp-style-sanitizer',
 		'AMP_Script_Sanitizer'               => 'includes/sanitizers/class-amp-script-sanitizer',
 		'AMP_Embed_Sanitizer'                => 'includes/sanitizers/class-amp-embed-sanitizer',
+		'AMP_Layout_Sanitizer'               => 'includes/sanitizers/class-amp-layout-sanitizer',
 		'AMP_Tag_And_Attribute_Sanitizer'    => 'includes/sanitizers/class-amp-tag-and-attribute-sanitizer',
 		'AMP_Video_Sanitizer'                => 'includes/sanitizers/class-amp-video-sanitizer',
 		'AMP_Core_Theme_Sanitizer'           => 'includes/sanitizers/class-amp-core-theme-sanitizer',

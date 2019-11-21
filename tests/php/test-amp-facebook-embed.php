@@ -219,8 +219,8 @@ class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
 
 		$embed->sanitize_raw_embeds( $dom );
 
-		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
-		$whitelist_sanitizer->sanitize();
+		$layout_sanitizer = new AMP_Layout_Sanitizer( $dom );
+		$layout_sanitizer->sanitize();
 
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 
