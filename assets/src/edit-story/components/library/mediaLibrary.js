@@ -16,10 +16,10 @@ import { useEffect } from '@wordpress/element';
 import useLibrary from './useLibrary';
 
 const Image = styled.img`
-	height: 156px;
-	width: 156px;
-	padding: 4px;
-	margin: 4px;
+	height: 150px;
+	width: 150px;
+	padding: 3px;
+	margin: 3px;
 	border: 1px solid white;
 `;
 
@@ -113,8 +113,8 @@ function MediaLibrary( { onInsert } ) {
 				<Image
 					key={ src }
 					src={ src }
-					width={ 156 }
-					height={ 156 }
+					width={ 150 }
+					height={ 150 }
 					onClick={ () => onInsert( 'image', {
 						src,
 						width: 20,
