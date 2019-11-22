@@ -15,6 +15,10 @@ export const ElementWithSize = css`
 	height: ${ ( { height } ) => `${ height }%` };
 `;
 
+export const ElementWithRotation = css`
+	transform: ${ ( { rotationAngle } ) => `rotate(${ rotationAngle }deg)` };
+`;
+
 export const ElementWithBackgroundColor = css`
 	background-color: ${ ( { backgroundColor } ) => backgroundColor };
 `;

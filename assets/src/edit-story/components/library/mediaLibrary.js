@@ -57,6 +57,7 @@ function MediaLibrary( { onInsert } ) {
 						height: 10,
 						x: 5,
 						y: 5,
+						rotationAngle: 0,
 					} ) }
 				/>
 			) )

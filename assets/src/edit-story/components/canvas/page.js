@@ -30,6 +30,7 @@ const Selection = styled.div.attrs( { className: 'selection' } )`
 	top: ${ ( { y } ) => `${ y }px` };
 	width: ${ ( { width } ) => `${ width }%` };
 	height: ${ ( { height } ) => `${ height }%` };
+	transform: ${ ( { rotationAngle } ) => `rotate(${ rotationAngle }deg)` };
 	position: absolute;
 `;
 
@@ -63,6 +64,7 @@ function Page() {
 	let displayMoveable = false;
 	const frame = {
 		translate: [ 0, 0 ],
+		rotate: selectionProps.rotationAngle,
 	};
 
 	return (
@@ -104,8 +106,15 @@ function Page() {
 						target.style.width = `${ width }px`;
 						target.style.height = `${ height }px`;
 					} }
-					onRotate={ ( { target, transform } ) => {
-						target.style.transform = transform;
+					onRotateStart={ ( { set } ) => {
+						set( frame.rotate );
+					} }
+					onRotate={ ( { target, beforeRotate } ) => {
+						frame.rotate = beforeRotate;
+						target.style.transform = `rotate(${ beforeRotate }deg)`;
+					} }
+					onRotateEnd={ () => {
+						setPropertiesOnSelectedElements( { rotationAngle: frame.rotate } );
 					} }
 				/>
 			) }
@@ -116,8 +125,19 @@ function Page() {
 export default Page;
 
 function getUnionSelection( list, padding = 0 ) {
+	// Ignore multi-selection for now.
+	if ( 1 === list.length ) {
+		const { x, y, width, height, rotationAngle } = list[ 0 ];
+		return {
+			x: x - padding,
+			y: y - padding,
+			width: width + ( 2 * padding ),
+			height: height + ( 2 * padding ),
+			rotationAngle,
+		};
+	}
 	// return x,y,width,height that will encompass all elements in list
-	const { x1, y1, x2, y2 } = list
+	const { x1, y1, x2, y2, rotationAngle } = list
 	// first convert x1,y1 as upper left and x2,y2 as lower right
 		.map( ( { x, y, width, height } ) => ( { x1: x, y1: y, x2: x + width, y2: y + height } ) )
 		// then reduce to a single object by finding lowest {x,y}1 and highest {x,y}2
@@ -128,9 +148,9 @@ function getUnionSelection( list, padding = 0 ) {
 				x2: Math.max( el.x2, sum.x2 ),
 				y2: Math.max( el.y2, sum.y2 ),
 			} ),
-			{ x1: 1000, y1: 1000, x2: 0, y2: 0 },
+			{ x1: 1000, y1: 1000, x2: 0, y2: 0, angle: 0 },
 		);
 
 	// finally convert back to x,y,width,height and add padding
-	return { x: x1 - padding, y: y1 - padding, width: x2 - x1 + ( 2 * padding ), height: y2 - y1 + ( 2 * padding ) };
+	return { x: x1 - padding, y: y1 - padding, width: x2 - x1 + ( 2 * padding ), height: y2 - y1 + ( 2 * padding ), rotationAngle };
 }

@@ -8,19 +8,21 @@ import styled from 'styled-components';
  * Internal dependencies
  */
 import { PanelTypes } from '../panels';
-import { ElementWithPosition, ElementWithSize } from './shared';
+import { ElementWithPosition, ElementWithSize, ElementWithRotation } from './shared';
 
 const Element = styled.img`
 	${ ElementWithPosition }
 	${ ElementWithSize }
+	${ ElementWithRotation }
 `;
 
-function Image( { src, width, height, x, y } ) {
+function Image( { src, width, height, x, y, rotationAngle } ) {
 	const props = {
 		width,
 		height,
 		x,
 		y,
+		rotationAngle,
 		src,
 	};
 	return (
@@ -29,6 +31,7 @@ function Image( { src, width, height, x, y } ) {
 }
 
 Image.propTypes = {
+	rotationAngle: PropTypes.number.isRequired,
 	src: PropTypes.string.isRequired,
 	width: PropTypes.number.isRequired,
 	height: PropTypes.number.isRequired,
@@ -42,6 +45,7 @@ Image.defaultProps = {
 Image.panels = [
 	PanelTypes.SIZE,
 	PanelTypes.POSITION,
+	PanelTypes.ROTATION_ANGLE,
 ];
 
 export default Image;
