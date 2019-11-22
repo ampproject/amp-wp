@@ -160,7 +160,7 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 		$charset = false;
 
 		// Check for HTML 4 http-equiv meta tags.
-		$http_equiv_tag = $this->xpath->query( '//meta[ translate(@http-equiv, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz') = 'content-type' and @content ]' )->item( 0 );
+		$http_equiv_tag = $this->xpath->query( '//meta[ translate(@http-equiv, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz") = "content-type" and @content ]' )->item( 0 );
 		if ( $http_equiv_tag ) {
 			$http_equiv_tag->parentNode->removeChild( $http_equiv_tag );
 

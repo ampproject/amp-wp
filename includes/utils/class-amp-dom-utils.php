@@ -98,12 +98,13 @@ class AMP_DOM_Utils {
 	 * @see AMP_DOM_Utils::get_content_from_dom_node()
 	 *
 	 * @param string $document Valid HTML document to be represented by a DOMDocument.
+	 * @param string $encoding Optional. Encoding to use for the content. Defaults to `get_bloginfo( 'charset' )`.
 	 * @return DOMDocument|false Returns DOMDocument, or false if conversion failed.
 	 */
-	public static function get_dom( $document ) {
+	public static function get_dom( $document, $encoding = null ) {
 		$libxml_previous_state = libxml_use_internal_errors( true );
 
-		$dom = new DOMDocument();
+		$dom = new AMP_DOM_Document( '', $encoding );
 
 		// @todo In the future consider an AMP_DOMDocument subclass that does this automatically. See <https://github.com/ampproject/amp-wp/pull/895/files#r163825513>.
 		$document = self::convert_amp_bind_attributes( $document );
@@ -116,7 +117,6 @@ class AMP_DOM_Utils {
 		);
 
 		// Deal with bugs in older versions of libxml.
-		$added_back_compat_meta_content_type = false;
 		if ( version_compare( LIBXML_DOTTED_VERSION, '2.8', '<' ) ) {
 			/*
 			 * Replace noscript elements with placeholders since libxml<2.8 can parse them incorrectly.
@@ -145,22 +145,6 @@ class AMP_DOM_Utils {
 		}
 
 		/*
-		 * Add a pre-HTML5-style declaration of the encoding since libxml doesn't always recognize
-		 * HTML5's meta charset. In libxml<2.8 it never does, see <https://bugzilla.gnome.org/show_bug.cgi?id=655218>.
-		 * In libxml>=2.8, if the meta charset does not appear at the beginning of the head then it fails to be understood.
-		 */
-		$document = preg_replace(
-			'#(?=<meta\s+charset=["\']?([a-z0-9_-]+))#i',
-			'<meta http-equiv="Content-Type" content="text/html; charset=$1" id="meta-http-equiv-content-type">',
-			$document,
-			1,
-			$count
-		);
-		if ( 1 === $count ) {
-			$added_back_compat_meta_content_type = true;
-		}
-
-		/*
 		 * Wrap in dummy tags, since XML needs one parent node.
 		 * It also makes it easier to loop through nodes.
 		 * We can later use this to extract our nodes.
@@ -175,26 +159,7 @@ class AMP_DOM_Utils {
 			return false;
 		}
 
-		// Remove pre-HTML5-style encoding declaration if added above.
-		if ( $added_back_compat_meta_content_type ) {
-			$meta_http_equiv_element = $dom->getElementById( 'meta-http-equiv-content-type' );
-			if ( $meta_http_equiv_element ) {
-				$meta_http_equiv_element->parentNode->removeChild( $meta_http_equiv_element );
-			}
-		}
-
-		// Make sure there is a head and a body.
-		$head = $dom->getElementsByTagName( 'head' )->item( 0 );
-		if ( ! $head ) {
-			$head = $dom->createElement( 'head' );
-			$dom->documentElement->insertBefore( $head, $dom->documentElement->firstChild );
-		}
-		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
-		if ( ! $body ) {
-			$body = $dom->createElement( 'body' );
-			$dom->documentElement->appendChild( $body );
-		}
-		self::move_invalid_head_nodes_to_body( $head, $body );
+		self::move_invalid_head_nodes_to_body( $dom );
 
 		return $dom;
 	}
@@ -205,10 +170,12 @@ class AMP_DOM_Utils {
 	 * Apparently PHP's DOM is more lenient when parsing HTML to allow nodes in the HEAD which do not belong. A proper
 	 * HTML5 parser should rather prematurely short-circuit the HEAD when it finds an illegal element.
 	 *
-	 * @param DOMElement $head HEAD element.
-	 * @param DOMElement $body BODY element.
+	 * @param DOMDocument DOM Document to manipulate.
 	 */
-	private static function move_invalid_head_nodes_to_body( $head, $body ) {
+	private static function move_invalid_head_nodes_to_body( DOMDocument $dom ) {
+		$head = $dom->getElementsByTagName( 'head' )->item( 0 );
+		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
+
 		// Walking backwards makes it easier to move elements in the expected order.
 		$node = $head->lastChild;
 		while ( $node ) {
@@ -407,26 +374,25 @@ class AMP_DOM_Utils {
 	 *
 	 * @since 0.2
 	 *
-	 * @param string $content Valid HTML content to be represented by a DOMDocument.
+	 * @param string $content  Valid HTML content to be represented by a DOMDocument.
+	 * @param string $encoding Optional. Encoding to use for the content. Defaults to `get_bloginfo( 'charset' )`.
 	 *
 	 * @return DOMDocument|false Returns DOMDocument, or false if conversion failed.
 	 */
-	public static function get_dom_from_content( $content ) {
+	public static function get_dom_from_content( $content, $encoding = null ) {
+		// Detect encoding from the current WordPress installation.
+		if ( null === $encoding ) {
+			$encoding = get_bloginfo( 'charset' );
+		}
+
 		/*
 		 * Wrap in dummy tags, since XML needs one parent node.
 		 * It also makes it easier to loop through nodes.
 		 * We can later use this to extract our nodes.
-		 * Add utf-8 charset so loadHTML does not have problems parsing it.
-		 * See: http://php.net/manual/en/domdocument.loadhtml.php#78243
 		 */
-		$document = sprintf(
-			'<html><head><meta http-equiv="content-type" content="text/html; charset=%s"></head><body>%s</body></html>',
-			get_bloginfo( 'charset' ),
-			$content
-		);
+		$document = "<html><head></head><body>{$content}</body></html>";
 
-		return self::get_dom( $document );
-
+		return self::get_dom( $document, $encoding );
 	}
 
 	/**
@@ -523,16 +489,6 @@ class AMP_DOM_Utils {
 			 * be fixed in PHP 7.3, but for older versions of PHP the following workaround is needed.
 			 */
 
-			/*
-			 * First make sure meta[charset] gets http-equiv and content attributes to work around issue
-			 * with $dom->saveHTML() erroneously encoding UTF-8 as HTML entities.
-			 */
-			$meta_charset = $xpath->query( '/html/head/meta[ @charset ]' )->item( 0 );
-			if ( $meta_charset ) {
-				$meta_charset->setAttribute( 'http-equiv', 'Content-Type' );
-				$meta_charset->setAttribute( 'content', sprintf( 'text/html; charset=%s', $meta_charset->getAttribute( 'charset' ) ) );
-			}
-
 			$boundary       = 'fragment_boundary:' . wp_rand();
 			$start_boundary = $boundary . ':start';
 			$end_boundary   = $boundary . ':end';
@@ -545,16 +501,6 @@ class AMP_DOM_Utils {
 				'$1',
 				$dom->saveHTML()
 			);
-
-			// Remove meta[http-equiv] and meta[content] attributes which were added to meta[charset] for HTML serialization.
-			if ( $meta_charset ) {
-				if ( $dom->documentElement === $node ) {
-					$html = preg_replace( '#(<meta\scharset=\S+)[^<]*?>#i', '$1>', $html );
-				}
-
-				$meta_charset->removeAttribute( 'http-equiv' );
-				$meta_charset->removeAttribute( 'content' );
-			}
 
 			$node->parentNode->removeChild( $comment_start );
 			$node->parentNode->removeChild( $comment_end );

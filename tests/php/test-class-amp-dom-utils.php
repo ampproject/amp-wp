@@ -421,9 +421,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$this->assertEquals( 'head', $dom->documentElement->firstChild->nodeName );
 		$this->assertEquals( 0, $dom->documentElement->firstChild->childNodes->length );
 		$this->assertEquals( 'body', $dom->documentElement->lastChild->nodeName );
-		$p = $dom->getElementsByTagName( 'p' )->item( 0 );
-		$this->assertEquals( $dom->documentElement->lastChild, $p->parentNode );
-		$this->assertEquals( 'Hello world', $p->textContent );
+		$this->assertEquals( 'Hello world', $dom->documentElement->lastChild->lastChild->textContent );
 	}
 
 	/**
