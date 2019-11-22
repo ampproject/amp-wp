@@ -2,7 +2,7 @@
 /**
  * Interface HasCaption
  *
- * @package AMP
+ * @package Amp\AmpWP
  */
 
 namespace Amp\AmpWP\Component;
