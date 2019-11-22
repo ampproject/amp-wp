@@ -170,7 +170,7 @@ class AMP_DOM_Utils {
 	 * Apparently PHP's DOM is more lenient when parsing HTML to allow nodes in the HEAD which do not belong. A proper
 	 * HTML5 parser should rather prematurely short-circuit the HEAD when it finds an illegal element.
 	 *
-	 * @param DOMDocument DOM Document to manipulate.
+	 * @param DOMDocument $dom DOM Document to manipulate.
 	 */
 	private static function move_invalid_head_nodes_to_body( DOMDocument $dom ) {
 		$head = $dom->getElementsByTagName( 'head' )->item( 0 );

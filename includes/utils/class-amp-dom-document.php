@@ -94,7 +94,7 @@ final class AMP_DOM_Document extends DOMDocument {
 		}
 
 		// Force-add http-equiv charset to make DOMDocument behave as it should.
-		// See: http://php.net/manual/en/domdocument.loadhtml.php#78243
+		// See: http://php.net/manual/en/domdocument.loadhtml.php#78243.
 		$source = str_replace(
 			'<head>',
 			'<head><meta http-equiv="content-type" content="text/html; charset=' . self::AMP_ENCODING . '">',
@@ -105,7 +105,7 @@ final class AMP_DOM_Document extends DOMDocument {
 
 		if ( $success ) {
 			$this->encoding = self::AMP_ENCODING;
-			$head = $this->getElementsByTagName( 'head' )->item( 0 );
+			$head           = $this->getElementsByTagName( 'head' )->item( 0 );
 			$head->removeChild( $head->firstChild );
 		}
 
@@ -122,9 +122,16 @@ final class AMP_DOM_Document extends DOMDocument {
 	 */
 	public function saveHTML( DOMNode $node = null ) {
 		// Force-add http-equiv charset to make DOMDocument behave as it should.
-		// See: http://php.net/manual/en/domdocument.loadhtml.php#78243
+		// See: http://php.net/manual/en/domdocument.loadhtml.php#78243.
 		$head    = $this->getElementsByTagName( 'head' )->item( 0 );
-		$charset = AMP_DOM_Utils::create_node( $this, 'meta', [ 'http-equiv' => 'content-type', 'content' => 'text/html; charset=' . self::AMP_ENCODING ] );
+		$charset = AMP_DOM_Utils::create_node(
+			$this,
+			'meta',
+			[
+				'http-equiv' => 'content-type',
+				'content'    => 'text/html; charset=' . self::AMP_ENCODING,
+			]
+		);
 		$head->insertBefore( $charset, $head->firstChild );
 
 		return str_replace( '<meta http-equiv="content-type" content="text/html; charset=' . self::AMP_ENCODING . '">', '', parent::saveHTML( $node ) );
@@ -166,14 +173,14 @@ final class AMP_DOM_Document extends DOMDocument {
 			$this->original_encoding = mb_detect_encoding( $source );
 		}
 
-		// Guessing the encoding failed, so we assume UTF-8.
+		// Guessing the encoding seems to have failed, so we assume UTF-8 instead.
 		if ( empty( $this->original_encoding ) ) {
 			$this->original_encoding = self::AMP_ENCODING;
 		}
 
 		$this->original_encoding = $this->sanitize_encoding( $this->original_encoding );
 
-		$target = $source; //mb_convert_encoding( $source, self::AMP_ENCODING, $this->original_encoding );
+		$target = mb_convert_encoding( $source, self::AMP_ENCODING, $this->original_encoding );
 
 		return is_string( $target ) ? $target : $source;
 	}
@@ -188,12 +195,14 @@ final class AMP_DOM_Document extends DOMDocument {
 		$encoding = self::UNKNOWN_ENCODING;
 
 		// Check for HTML 4 http-equiv meta tags.
-		if ( $http_equiv_tag = $this->find_tag( $content, 'meta', 'http-equiv' ) ) {
+		$http_equiv_tag = $this->find_tag( $content, 'meta', 'http-equiv' );
+		if ( $http_equiv_tag ) {
 			$encoding = $this->extract_value( $http_equiv_tag, 'charset' );
 		}
 
 		// Check for HTML 5 charset meta tag. This overrides the HTML 4 charset.
-		if ( $charset_tag = $this->find_tag( $content, 'meta', 'charset' ) ) {
+		$charset_tag = $this->find_tag( $content, 'meta', 'charset' );
+		if ( $charset_tag ) {
 			$encoding = $this->extract_value( $charset_tag, 'charset' );
 		}
 
@@ -298,7 +307,7 @@ final class AMP_DOM_Document extends DOMDocument {
 		}
 
 		// Mimic regular PHP behavior for missing notices.
-		trigger_error( "Undefined property: AMP_DOM_Document::${$name}", E_NOTICE );
+		trigger_error( "Undefined property: AMP_DOM_Document::${$name}", E_NOTICE ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions,WordPress.Security.EscapeOutput
 		return null;
 	}
 }
