@@ -34,8 +34,10 @@ module.exports =
 /******/ 	// the startup function
 /******/ 	function startup() {
 /******/ 		// Load entry module and return exports
-/******/ 		return __webpack_require__(104);
+/******/ 		return __webpack_require__(539);
 /******/ 	};
+/******/ 	// initialize runtime
+/******/ 	runtime(__webpack_require__);
 /******/
 /******/ 	// run startup
 /******/ 	return startup();
@@ -642,88 +644,6 @@ function checkEncoding(name) {
 /***/ (function(module) {
 
 module.exports = require("os");
-
-/***/ }),
-
-/***/ 104:
-/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
-
-/**
- * Node dependencies
- */
-const fs = __webpack_require__( 747 );
-
-/**
- * GitHub dependencies
- */
-const core = __webpack_require__( 470 );
-const github = __webpack_require__( 469 );
-
-( async () => {
-	try {
-		const repoToken = core.getInput( 'repo-token', { required: true } );
-		const zipPath = core.getInput( 'zip', { required: true } );
-
-		const client = new github.GitHub( repoToken );
-
-		const gitRef = github.context.ref;
-		let gitTag = gitRef.match( /refs\/tags\/(.*)/ );
-
-		if ( null === gitTag ) {
-			throw new Error( `Failed to determine tag from git ref: ${ gitRef }` );
-		}
-
-		gitTag = gitTag[ 1 ];
-
-		core.info( `Fetching release details for git tag: ${ gitTag }` );
-
-		// const { owner, repo } = github.context.payload;
-		const { owner, repo } = { owner: 'pierlon', repo: 'amp-wp' };
-
-		const releaseInfo = {};
-
-		try {
-			// An error will be thrown if a release for the tag was not found.
-			const currentReleaseInfo = await client.repos.getReleaseByTag( { owner, repo, tag: gitTag } );
-
-			core.info( 'Tag was previously released, deleting it' );
-
-			releaseInfo.tag_name = currentReleaseInfo.data.tag_name;
-			releaseInfo.name = currentReleaseInfo.data.name;
-			releaseInfo.body = currentReleaseInfo.data.body;
-			await client.repos.deleteRelease( { owner, repo, release_id: currentReleaseInfo.data.id } );
-		} catch ( error ) {
-			core.info( 'Release not found for tag' );
-
-			releaseInfo.tag_name = gitTag;
-			releaseInfo.name = gitTag;
-			releaseInfo.body = `Build for ${ gitTag }`;
-		}
-
-		core.info( 'Creating new release' );
-
-		const newReleaseInfo = await client.repos.createRelease( { owner, repo, ...releaseInfo } );
-
-		core.info( 'Uploading assets' );
-
-		const fileName = 'amp.zip';
-
-		await client.repos.uploadReleaseAsset( {
-			url: newReleaseInfo.data.upload_url,
-			headers: {
-				'Content-Length': fs.lstatSync( zipPath ).size,
-				'Content-Type': 'application/zip',
-			},
-			name: fileName,
-			file: fs.readFileSync( zipPath ),
-		} );
-
-		core.setOutput( 'git-tag', gitTag );
-	} catch ( error ) {
-		core.setFailed( error.message );
-	}
-} )();
-
 
 /***/ }),
 
@@ -9072,6 +8992,150 @@ function hasFirstPage (link) {
 
 /***/ }),
 
+/***/ 539:
+/***/ (function(__unusedmodule, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+
+// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
+var core = __webpack_require__(470);
+var core_default = /*#__PURE__*/__webpack_require__.n(core);
+
+// EXTERNAL MODULE: ./node_modules/@actions/github/lib/github.js
+var github = __webpack_require__(469);
+var github_default = /*#__PURE__*/__webpack_require__.n(github);
+
+// EXTERNAL MODULE: external "fs"
+var external_fs_ = __webpack_require__(747);
+var external_fs_default = /*#__PURE__*/__webpack_require__.n(external_fs_);
+
+// EXTERNAL MODULE: external "path"
+var external_path_ = __webpack_require__(622);
+var external_path_default = /*#__PURE__*/__webpack_require__.n(external_path_);
+
+// CONCATENATED MODULE: ./src/utils.js
+/**
+ * External dependencies
+ */
+
+
+
+const getBranchName = ( ref ) => {
+	const branch = ref.match( /refs\/heads\/(.*)/ );
+
+	if ( null === branch ) {
+		throw new Error( `Failed to determine branch from git ref: ${ ref }` );
+	}
+
+	return branch[ 1 ];
+};
+
+const getCanonicalTag = ( branchName ) => {
+	return 'develop' === branchName ? 'nightly' : `${ branchName }-nightly`;
+};
+
+const getPluginVersion = () => {
+	const versionRegex = /\* Version: (\d+\.\d+\.\d+(?:-\w+)?)/;
+	const pluginFilePath = external_path_default().resolve( process.cwd(), '../../amp.php' );
+	const pluginFileContent = external_fs_default().readFileSync( pluginFilePath );
+
+	return versionRegex.exec( pluginFileContent )[ 1 ];
+};
+
+const createRelease = async ( githubClient, tagName, owner, repo, name, body, isPreRelease = true ) => {
+	await githubClient.repos.createRelease( {
+		owner,
+		repo,
+		tag_name: tagName,
+		name,
+		body,
+		prerelease: isPreRelease,
+	} );
+};
+
+const updateRelease = async ( githubClient, releaseId, owner, repo, name, body, isPreRelease = true ) => {
+	await githubClient.repos.updateRelease( {
+		owner,
+		repo,
+		release_id: releaseId,
+		name,
+		body,
+		prerelease: isPreRelease,
+	} );
+};
+
+const uploadReleaseAsset = async ( githubClient, uploadUrl, fileName, filePath ) => {
+	await githubClient.repos.uploadReleaseAsset( {
+		url: uploadUrl,
+		headers: {
+			'Content-Length': external_fs_default().lstatSync( filePath ).size,
+			'Content-Type': 'application/zip',
+		},
+		name: fileName,
+		file: external_fs_default().readFileSync( filePath ),
+	} );
+};
+
+// CONCATENATED MODULE: ./src/index.js
+/**
+ * External dependencies
+ */
+
+
+
+/**
+ * Internal dependencies
+ */
+
+
+( async () => {
+	try {
+		const repoToken = core_default().getInput( 'repo-token', { required: true } );
+		const zipPath = core_default().getInput( 'zip', { required: true } );
+		const client = new github_default.a.GitHub( repoToken );
+
+		const branch = getBranchName( github_default.a.context.ref );
+		const tag = getCanonicalTag( branch );
+
+		core_default().info( `Fetching release details for the ${ branch } branch` );
+
+		const { owner, repo } = github_default.a.context.payload;
+		let releaseId, releaseFunc;
+
+		try {
+			// An error will be thrown if a release for the tag was not found.
+			const release = await client.repos.getReleaseByTag( { owner, repo, tag } );
+			releaseId = release.data.id;
+			releaseFunc = updateRelease;
+
+			core_default().info( `Updating release description for '${ tag }'` );
+		} catch ( error ) {
+			releaseId = tag;
+			releaseFunc = createRelease;
+
+			core_default().info( `Creating a release for '${ tag }'` );
+		}
+
+		const releaseName = tag;
+		const releaseDesc = `Build for ${ getPluginVersion() }.`;
+		const release = releaseFunc( client, releaseId, owner, repo, releaseName, releaseDesc );
+
+		const uploadUrl = release.data.upload_url;
+
+		core_default().info( 'Uploading assets' );
+
+		await uploadReleaseAsset( client, uploadUrl, 'amp.zip', zipPath );
+
+		core_default().setOutput( 'branch', branch );
+	} catch ( error ) {
+		core_default().setFailed( error.message );
+	}
+} )();
+
+
+/***/ }),
+
 /***/ 550:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -14313,4 +14377,62 @@ function authenticationRequestError(state, error, options) {
 
 /***/ })
 
-/******/ });
+/******/ },
+/******/ function(__webpack_require__) { // webpackRuntimeModules
+/******/ 	"use strict";
+/******/ 
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	!function() {
+/******/ 		// define __esModule on exports
+/******/ 		__webpack_require__.r = function(exports) {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	}();
+/******/ 	
+/******/ 	/* webpack/runtime/define property getter */
+/******/ 	!function() {
+/******/ 		// define getter function for harmony exports
+/******/ 		var hasOwnProperty = Object.prototype.hasOwnProperty;
+/******/ 		__webpack_require__.d = function(exports, name, getter) {
+/******/ 			if(!hasOwnProperty.call(exports, name)) {
+/******/ 				Object.defineProperty(exports, name, { enumerable: true, get: getter });
+/******/ 			}
+/******/ 		};
+/******/ 	}();
+/******/ 	
+/******/ 	/* webpack/runtime/create fake namespace object */
+/******/ 	!function() {
+/******/ 		// create a fake namespace object
+/******/ 		// mode & 1: value is a module id, require it
+/******/ 		// mode & 2: merge all properties of value into the ns
+/******/ 		// mode & 4: return value when already ns object
+/******/ 		// mode & 8|1: behave like require
+/******/ 		__webpack_require__.t = function(value, mode) {
+/******/ 			if(mode & 1) value = this(value);
+/******/ 			if(mode & 8) return value;
+/******/ 			if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
+/******/ 			var ns = Object.create(null);
+/******/ 			__webpack_require__.r(ns);
+/******/ 			Object.defineProperty(ns, 'default', { enumerable: true, value: value });
+/******/ 			if(mode & 2 && typeof value != 'string') for(var key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
+/******/ 			return ns;
+/******/ 		};
+/******/ 	}();
+/******/ 	
+/******/ 	/* webpack/runtime/compat get default export */
+/******/ 	!function() {
+/******/ 		// getDefaultExport function for compatibility with non-harmony modules
+/******/ 		__webpack_require__.n = function(module) {
+/******/ 			var getter = module && module.__esModule ?
+/******/ 				function getDefault() { return module['default']; } :
+/******/ 				function getModuleExports() { return module; };
+/******/ 			__webpack_require__.d(getter, 'a', getter);
+/******/ 			return getter;
+/******/ 		};
+/******/ 	}();
+/******/ 	
+/******/ }
+);

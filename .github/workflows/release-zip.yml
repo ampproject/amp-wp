@@ -1,8 +1,9 @@
 name: Release built zip
 on:
   push:
-    tags:
-      - '1.[0-9]+.[0-9]+' # Only trigger on 1.X.X tags
+    branches:
+      - develop
+      - '[0-9]+.[0-9]+' # Target release branches of the format X.X.X
 
 jobs:
   build-zip:

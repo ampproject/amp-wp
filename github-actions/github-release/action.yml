@@ -8,7 +8,7 @@ inputs:
     description: Built zip
     required: true
 outputs:
-  git-tag:
+  branch:
     description: The git tag this action received
 runs:
   using: node12
