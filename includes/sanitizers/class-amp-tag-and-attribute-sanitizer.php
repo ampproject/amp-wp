@@ -786,7 +786,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param DOMElement $node           Node.
 	 * @param array[]    $attr_spec_list Attribute Spec list.
 	 *
-	 * @return float Number of times the attribute spec list matched. If there was a mismatch, then 0 is returned. 0.5 is returned if there is an implicit match.
+	 * @return int Score for how well the attribute spec list patched.
 	 */
 	private function validate_attr_spec_list_for_node( DOMElement $node, $attr_spec_list ) {
 		/*
