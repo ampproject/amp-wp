@@ -1318,7 +1318,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	private function calculate_height( $amp_layout_spec, $input_layout, AMP_CSS_Length $input_height ) {
 		if (
 			(
-				! amp_is_attribute_empty( $input_layout ) ||
+				( isset( $input_layout ) && '' !== $input_layout ) ||
 				AMP_Rule_Spec::LAYOUT_FIXED === $input_layout ||
 				AMP_Rule_Spec::LAYOUT_FIXED_HEIGHT === $input_layout
 			) &&

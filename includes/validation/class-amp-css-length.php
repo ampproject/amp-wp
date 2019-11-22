@@ -76,7 +76,7 @@ class AMP_CSS_Length {
 	 * @param string $attr_value  Attribute value to be parsed.
 	 */
 	public function __construct( $attr_value ) {
-		if ( amp_is_attribute_empty( $attr_value ) ) {
+		if ( ( ! isset( $attr_value ) || '' === $attr_value ) ) {
 			$this->is_valid = true;
 			return;
 		}

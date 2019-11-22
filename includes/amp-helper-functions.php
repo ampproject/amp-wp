@@ -1348,19 +1348,6 @@ function amp_generate_script_hash( $script ) {
 	return 'sha384-' . $hash;
 }
 
-/**
- * Validate that an HTML attribute is empty.
- *
- * The function `empty()` can't be used instead as it returns true for the values
- * `0` (int), `"0"` (string), and `0.0` (float), all of which are valid attribute values.
- *
- * @param string $attribute Attribute value.
- * @return bool
- */
-function amp_is_attribute_empty( $attribute ) {
-	return ! isset( $attribute ) || '' === $attribute;
-}
-
 /*
  * The function below is copied from the ramsey/array_column package.
  *
