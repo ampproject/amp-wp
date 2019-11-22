@@ -2008,6 +2008,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROCESSING_INSTRUCTION ],
 			],
 
+			'invalid_layout'                               => [
+				'<amp-img src="/img1.png" width="50" height="50%" layout="responsive"></amp-img>',
+				'',
+				[],
+				[ 'invalid_layout' ],
+			],
+
 			'invalid_xml_pi'                               => [
 				'<?xml version="1.0" encoding="utf-8"?>',
 				'',
@@ -2058,7 +2065,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'0_width_attribute'                            => [
 				'<amp-img src="/img1.png" width="0" height="50" layout="responsive"></amp-img>',
-				'<amp-img src="/img1.png" width="0" height="50" layout="responsive"></amp-img>',
+				null,
 			],
 
 			'empty_width_attribute'                        => [

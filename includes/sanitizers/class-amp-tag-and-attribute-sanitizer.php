@@ -646,8 +646,17 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
+		// Remove the element if it has a invalid layout attributes.
+		if (
+			! $this->is_valid_layout( $tag_spec, $node ) &&
+			$this->remove_invalid_child( $node, [ 'code' => 'invalid_layout' ] )
+		) {
+			$this->remove_node( $node );
+			return null;
+		}
+
 		// Identify attribute values that don't conform to the attr_spec.
-		$disallowed_attributes = $this->sanitize_disallowed_attribute_values_in_node( $node, $tag_spec, $merged_attr_spec_list );
+		$disallowed_attributes = $this->sanitize_disallowed_attribute_values_in_node( $node, $merged_attr_spec_list );
 
 		// Remove all invalid attributes.
 		if ( ! empty( $disallowed_attributes ) ) {
@@ -1058,18 +1067,11 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @see https://github.com/ampproject/amphtml/blob/b692bf32880910cd52273cb41935098b86fb6725/validator/engine/validator.js#L3210-L3289
 	 *
 	 * @param DOMElement $node           Node.
-	 * @param array[][]  $tag_spec       Tag spec list.
 	 * @param array[]    $attr_spec_list Attribute spec list.
 	 * @return array Tuples containing attribute to remove and error code.
 	 */
-	private function sanitize_disallowed_attribute_values_in_node( DOMElement $node, $tag_spec, $attr_spec_list ) {
+	private function sanitize_disallowed_attribute_values_in_node( DOMElement $node, $attr_spec_list ) {
 		$attrs_to_remove = [];
-
-		if ( ! $this->is_valid_layout( $tag_spec, $node ) ) {
-			// If the layout is invalid, the node should be removed.
-			$this->remove_node( $node );
-			return false;
-		}
 
 		foreach ( $attr_spec_list as $attr_name => $attr_val ) {
 			if ( isset( $attr_spec_list[ $attr_name ][ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
@@ -1159,7 +1161,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Validates the layout for the given tag. This involves checking the
+	 * Validates the layout attributes for the given tag. This involves checking the
 	 * layout, width, height, sizes attributes with AMP specific logic.
 	 *
 	 * @version 1911070201440
@@ -1184,26 +1186,21 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		$layout_attr = $node->getAttribute( 'layout' );
+		$allow_fluid = AMP_Rule_Spec::LAYOUT_FLUID === $layout_attr;
 		$allow_auto  = true;
-		$allow_fluid = $node->hasAttribute( 'layout' ) ? AMP_Rule_Spec::LAYOUT_FLUID === $layout_attr : true;
 
-		// The layout is not validated as yet to allow for the width and height to be done first.
-		$input_width = new AMP_CSS_Length( $node->getAttribute( 'width' ) );
-		$input_width->validate( $allow_auto, $allow_fluid );
-
-		if ( ! $input_width->is_valid() ) {
-			return false;
-		}
-
+		$input_width  = new AMP_CSS_Length( $node->getAttribute( 'width' ) );
 		$input_height = new AMP_CSS_Length( $node->getAttribute( 'height' ) );
+
+		$input_width->validate( $allow_auto, $allow_fluid );
 		$input_height->validate( $allow_auto, $allow_fluid );
 
-		if ( ! $input_height->is_valid() ) {
+		if ( ! $input_width->is_valid() || ! $input_height->is_valid() ) {
 			return false;
 		}
 
-		// If no layout is supplied, there is nothing else to test.
-		if ( amp_is_attribute_empty( $layout_attr ) ) {
+		// No need to go further if there is no layout attribute.
+		if ( ! $node->hasAttribute( 'layout' ) ) {
 			return true;
 		}
 
