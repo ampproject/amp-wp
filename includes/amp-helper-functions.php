@@ -972,7 +972,7 @@ function amp_get_content_sanitizers( $post = null ) {
 	}
 
 	// Force style sanitizer and whitelist sanitizer to be at end.
-	foreach ( [ 'AMP_Style_Sanitizer', 'AMP_Tag_And_Attribute_Sanitizer' ] as $class_name ) {
+	foreach ( [ 'AMP_Style_Sanitizer', 'AMP_Meta_Sanitizer', 'AMP_Tag_And_Attribute_Sanitizer' ] as $class_name ) {
 		if ( isset( $sanitizers[ $class_name ] ) ) {
 			$sanitizer = $sanitizers[ $class_name ];
 			unset( $sanitizers[ $class_name ] );
