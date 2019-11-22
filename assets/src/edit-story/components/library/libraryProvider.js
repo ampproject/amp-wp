@@ -46,6 +46,8 @@ function LibraryProvider( { children } ) {
 		},
 		actions: {
 			setTab,
+			setIsMediaLoading,
+			setIsMediaLoaded,
 			loadMedia,
 		},
 		data: {
