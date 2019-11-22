@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "description": "GitHub Action that creates or updates the built zip for a GitHub release.",
-  "author": "XWP, Google, and contributors",
+  "author": "AMP Project Contributors",
   "license": "GPL-2.0-or-later",
   "keywords": [],
   "homepage": "https://github.com/ampproject/amp-wp/github-actions/github-release",
