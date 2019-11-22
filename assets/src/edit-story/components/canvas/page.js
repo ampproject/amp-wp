@@ -102,9 +102,16 @@ function Page() {
 					onDragEnd={ () => {
 						setPropertiesOnSelectedElements( { x: selectionProps.x + frame.translate[ 0 ], y: selectionProps.y + frame.translate[ 1 ] } );
 					} }
-					onResize={ ( { target, width, height } ) => {
+					onResizeStart={ ( { target, set, setOrigin, dragStart } ) => {
+						// @todo
+					} }
+					onResize={ ( { target, width, height, drag } ) => {
 						target.style.width = `${ width }px`;
 						target.style.height = `${ height }px`;
+						// @todo properly by setting frame, too.
+					} }
+					onResizeEnd={ () => {
+						// @todo Set the correct width/height.
 					} }
 					onRotateStart={ ( { set } ) => {
 						set( frame.rotate );
