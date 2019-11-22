@@ -6,8 +6,8 @@ import { css } from 'styled-components';
 export const ElementWithPosition = css`
 	position: absolute;
 	z-index: 1;
-	left: ${ ( { x } ) => `${ x }%` };
-	top: ${ ( { y } ) => `${ y }%` };
+	left: ${ ( { x } ) => `${ x }px` };
+	top: ${ ( { y } ) => `${ y }px` };
 `;
 
 export const ElementWithSize = css`

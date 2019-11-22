@@ -16,22 +16,21 @@ import { useStory } from '../../app';
 import { getComponentForType } from '../../elements';
 import useCanvas from './useCanvas';
 
-const Background = styled.div`
+const Background = styled.div.attrs( { className: 'container' } )`
 	background-color: ${ ( { theme } ) => theme.colors.fg.v1 };
 	position: relative;
 	width: 100%;
 	height: 100%;
 `;
 
-const Selection = styled.div`
+const Selection = styled.div.attrs( { className: 'selection' } )`
 	z-index: 2;
 	border: 1px solid #448FFF;
-	left: ${ ( { x } ) => `${ x }%` };
-	top: ${ ( { y } ) => `${ y }%` };
+	left: ${ ( { x } ) => `${ x }px` };
+	top: ${ ( { y } ) => `${ y }px` };
 	width: ${ ( { width } ) => `${ width }%` };
 	height: ${ ( { height } ) => `${ height }%` };
 	position: absolute;
-	pointer-events:  none;
 `;
 
 const Element = styled.div`
@@ -42,7 +41,8 @@ const Element = styled.div`
 function Page() {
 	const {
 		state: { currentPage, hasSelection, selectedElements },
-		actions: { clearSelection, selectElementById, toggleElementIdInSelection },
+		actions: { clearSelection, selectElementById, setPropertiesOnSelectedElements, toggleElementIdInSelection },
+
 	} = useStory();
 	const {
 		actions: { setBackgroundClickHandler },
@@ -55,19 +55,27 @@ function Page() {
 		}
 		evt.stopPropagation();
 	}, [ toggleElementIdInSelection, selectElementById ] );
-	const selectionProps = hasSelection ? getUnionSelection( selectedElements, 2 ) : {};
+	const selectionProps = hasSelection ? getUnionSelection( selectedElements, 0 ) : {};
 	useEffect( () => {
 		setBackgroundClickHandler( () => clearSelection() );
 	}, [ setBackgroundClickHandler, clearSelection ] );
-	let selector;
+
+	let displayMoveable = false;
+	const frame = {
+		translate: [ 0, 0 ],
+	};
+
 	return (
 		<Background>
 			{ currentPage && currentPage.elements.map( ( { type, id, ...rest } ) => {
 				const comp = getComponentForType( type );
 				const Comp = comp; // why u do dis, eslint?
-				selector = id; // @todo We should actually assign the selector only if the specific block is selected, too.
+				// Ignore multi-selection for now.
+				if ( 1 === selectedElements.length && selectedElements[ 0 ].id === id ) {
+					displayMoveable = true;
+				}
 				return (
-					<Element id={ 'element-' + id } key={ id } onClick={ handleSelectElement( id ) }>
+					<Element key={ id } onClick={ handleSelectElement( id ) }>
 						<Comp { ...rest } />
 					</Element>
 				);
@@ -75,16 +83,22 @@ function Page() {
 			{ hasSelection && (
 				<Selection { ...selectionProps } />
 			) }
-			{ hasSelection && selector && (
+			{ displayMoveable && (
 				<Moveable
-					target={ document.querySelector( '#element-' + selector + ' > :first-child' ) }
+					target={ document.querySelector( '.selection' ) }
 					pinchThreshold={ 20 }
 					draggable={ true }
 					resizable={ true }
 					rotatable={ true }
-					onDrag={ ( { target, top, left } ) => {
-						target.style.left = `${ left }px`;
-						target.style.top = `${ top }px`;
+					onDrag={ ( { target, beforeTranslate } ) => {
+						frame.translate = beforeTranslate;
+						target.style.transform = `translate(${ beforeTranslate[ 0 ] }px, ${ beforeTranslate[ 1 ] }px)`;
+					} }
+					onDragStart={ ( { set } ) => {
+						set( frame.translate );
+					} }
+					onDragEnd={ () => {
+						setPropertiesOnSelectedElements( { x: selectionProps.x + frame.translate[ 0 ], y: selectionProps.y + frame.translate[ 1 ] } );
 					} }
 					onResize={ ( { target, width, height } ) => {
 						target.style.width = `${ width }px`;
@@ -104,7 +118,7 @@ export default Page;
 function getUnionSelection( list, padding = 0 ) {
 	// return x,y,width,height that will encompass all elements in list
 	const { x1, y1, x2, y2 } = list
-		// first convert x1,y1 as upper left and x2,y2 as lower right
+	// first convert x1,y1 as upper left and x2,y2 as lower right
 		.map( ( { x, y, width, height } ) => ( { x1: x, y1: y, x2: x + width, y2: y + height } ) )
 		// then reduce to a single object by finding lowest {x,y}1 and highest {x,y}2
 		.reduce(
