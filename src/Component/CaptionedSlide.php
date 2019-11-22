@@ -2,7 +2,7 @@
 /**
  * Class CaptionedSlide
  *
- * @package AMP
+ * @package Amp\AmpWP
  */
 
 namespace Amp\AmpWP\Component;
