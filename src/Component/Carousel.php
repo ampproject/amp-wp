@@ -45,17 +45,17 @@ class Carousel {
 	/**
 	 * The images to add to the carousel.
 	 *
-	 * @var ImageList
+	 * @var DOMElementList
 	 */
 	protected $images;
 
 	/**
 	 * Instantiates the class.
 	 *
-	 * @param DOMDocument $dom    The dom to use to create a carousel.
-	 * @param ImageList   $images The images from which to create a carousel.
+	 * @param DOMDocument    $dom    The dom to use to create a carousel.
+	 * @param DOMElementList $images The images from which to create a carousel.
 	 */
-	public function __construct( $dom, ImageList $images ) {
+	public function __construct( $dom, DOMElementList $images ) {
 		$this->dom    = $dom;
 		$this->images = $images;
 	}
