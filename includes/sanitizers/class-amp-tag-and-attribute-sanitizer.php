@@ -648,20 +648,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			if ( '\u' === substr( $attr_name, 0, 2 ) ) {
 				$attr_name = html_entity_decode( '&#x' . substr( $attr_name, 2 ) . ';' ); // Probably ⚡.
 			}
-			$is_mandatory     = isset( $attr_spec_rule_value[ AMP_Rule_Spec::MANDATORY ] ) ? ( true === $attr_spec_rule_value[ AMP_Rule_Spec::MANDATORY ] ) : false;
-			$attribute_exists = false;
-			if ( method_exists( $node, 'hasAttribute' ) ) {
-				$attribute_exists = $node->hasAttribute( $attr_name );
-				if ( ! $attribute_exists && ! empty( $attr_spec_rule_value[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
-					foreach ( $attr_spec_rule_value[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] as $alternative_attr_name ) {
-						if ( $node->hasAttribute( $alternative_attr_name ) ) {
-							$attribute_exists = true;
-							break;
-						}
-					}
-				}
-			}
-			if ( $is_mandatory && ! $attribute_exists ) {
+			if ( ! $node->hasAttribute( $attr_name ) && AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_mandatory( $node, $attr_name, $attr_spec_rule_value ) ) {
 				return true;
 			}
 		}
