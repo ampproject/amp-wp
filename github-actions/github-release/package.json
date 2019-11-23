@@ -28,7 +28,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "ncc --minify build src/index.js",
+    "build": "ncc build src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   }
 }
