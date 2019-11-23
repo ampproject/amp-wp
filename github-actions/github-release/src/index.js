@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import core from '@actions/core';
-import github from '@actions/github';
+import { getInput, info, setFailed, setOutput } from '@actions/core';
+import { GitHub, context } from '@actions/github';
 
 /**
  * Internal dependencies
@@ -17,16 +17,16 @@ import {
 } from './utils';
 
 const main = async () => {
-	const repoToken = core.getInput( 'repo-token', { required: true } );
-	const zipPath = core.getInput( 'zip', { required: true } );
-	const client = new github.GitHub( repoToken );
+	const repoToken = getInput( 'repo-token', { required: true } );
+	const zipPath = getInput( 'zip', { required: true } );
+	const client = new GitHub( repoToken );
 
-	const branch = getBranchName( github.context.ref );
+	const branch = getBranchName( context.ref );
 	const tag = getCanonicalTag( branch );
 
-	core.info( `Fetching release details for the ${ branch } branch` );
+	info( `Fetching release details for the ${ branch } branch` );
 
-	const { owner, repo } = github.context.payload;
+	const { owner, repo } = context.payload;
 	let releaseId, releaseFunc;
 
 	try {
@@ -35,12 +35,12 @@ const main = async () => {
 		releaseId = release.data.id;
 		releaseFunc = updateRelease;
 
-		core.info( `Updating release description for '${ tag }'` );
+		info( `Updating release description for '${ tag }'` );
 	} catch ( error ) {
 		releaseId = tag;
 		releaseFunc = createRelease;
 
-		core.info( `Creating a release for '${ tag }'` );
+		info( `Creating a release for '${ tag }'` );
 	}
 
 	const releaseName = tag;
@@ -49,15 +49,15 @@ const main = async () => {
 
 	const uploadUrl = release.data.upload_url;
 
-	core.info( 'Uploading assets' );
+	info( 'Uploading assets' );
 
 	await uploadReleaseAsset( client, uploadUrl, 'amp.zip', zipPath );
 
-	core.setOutput( 'branch', branch );
+	setOutput( 'branch', branch );
 };
 
 try {
 	main();
 } catch ( error ) {
-	core.setFailed( error.message );
+	setFailed( error.message );
 }
