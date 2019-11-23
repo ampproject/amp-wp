@@ -218,7 +218,7 @@ def GenerateErrorFormatsPHP(out, error_formats):
 		switch ( $code ) {''')
 
 	for ( code, message_format ) in error_formats.items():
-		out.append('\t\t\tcase \'%s\':' % code)
+		out.append('\t\t\tcase self::%s:' % code)
 		message_format = re.sub( r'%(\d+)', r'%\1$s', message_format )
 		out.append('\t\t\t\treturn __( %s, \'amp\' );' % Phpize( message_format ))
 

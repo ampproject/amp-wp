@@ -17702,217 +17702,217 @@ class AMP_Allowed_Tags_Generated {
 	 */
 	public static function get_error_message_format( $code ) {
 		switch ( $code ) {
-			case 'CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR':
+			case self::CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR:
 				return __( 'CSS syntax error in tag \'%1$s\' - invalid pseudo selector.', 'amp' );
-			case 'WARNING_EXTENSION_UNUSED':
+			case self::WARNING_EXTENSION_UNUSED:
 				return __( 'The extension \'%1$s\' was found on this page, but is unused (no \'%2$s\' tag seen). This may become an error in the future.', 'amp' );
-			case 'CSS_SYNTAX_NOT_A_SELECTOR_START':
+			case self::CSS_SYNTAX_NOT_A_SELECTOR_START:
 				return __( 'CSS syntax error in tag \'%1$s\' - not a selector start.', 'amp' );
-			case 'DOCUMENT_TOO_COMPLEX':
+			case self::DOCUMENT_TOO_COMPLEX:
 				return __( 'The document is too complex.', 'amp' );
-			case 'MANDATORY_TAG_ANCESTOR_WITH_HINT':
+			case self::MANDATORY_TAG_ANCESTOR_WITH_HINT:
 				return __( 'The tag \'%1$s\' may only appear as a descendant of tag \'%2$s\'. Did you mean \'%3$s\'?', 'amp' );
-			case 'CSS_SYNTAX_BAD_URL':
+			case self::CSS_SYNTAX_BAD_URL:
 				return __( 'CSS syntax error in tag \'%1$s\' - bad url.', 'amp' );
-			case 'MANDATORY_ATTR_MISSING':
+			case self::MANDATORY_ATTR_MISSING:
 				return __( 'The mandatory attribute \'%1$s\' is missing in tag \'%2$s\'.', 'amp' );
-			case 'DEPRECATED_ATTR':
+			case self::DEPRECATED_ATTR:
 				return __( 'The attribute \'%1$s\' in tag \'%2$s\' is deprecated - use \'%3$s\' instead.', 'amp' );
-			case 'TAG_REFERENCE_POINT_CONFLICT':
+			case self::TAG_REFERENCE_POINT_CONFLICT:
 				return __( 'The tag \'%1$s\' conflicts with reference point \'%2$s\' because both define reference points.', 'amp' );
-			case 'CSS_SYNTAX_STRAY_TRAILING_BACKSLASH':
+			case self::CSS_SYNTAX_STRAY_TRAILING_BACKSLASH:
 				return __( 'CSS syntax error in tag \'%1$s\' - stray trailing backslash.', 'amp' );
-			case 'STYLESHEET_AND_INLINE_STYLE_TOO_LONG':
+			case self::STYLESHEET_AND_INLINE_STYLE_TOO_LONG:
 				return __( 'The author stylesheet specified in tag \'style amp-custom\' and the combined inline styles is too large - document contains %1$s bytes whereas the limit is %2$s bytes.', 'amp' );
-			case 'UNESCAPED_TEMPLATE_IN_ATTR_VALUE':
+			case self::UNESCAPED_TEMPLATE_IN_ATTR_VALUE:
 				return __( 'The attribute \'%1$s\' in tag \'%2$s\' is set to \'%3$s\', which contains unescaped Mustache template syntax.', 'amp' );
-			case 'GENERAL_DISALLOWED_TAG':
+			case self::GENERAL_DISALLOWED_TAG:
 				return __( 'The tag \'%1$s\' is disallowed except in specific forms.', 'amp' );
-			case 'SPECIFIED_LAYOUT_INVALID':
+			case self::SPECIFIED_LAYOUT_INVALID:
 				return __( 'The specified layout \'%1$s\' is not supported by tag \'%2$s\'.', 'amp' );
-			case 'CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR':
+			case self::CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR:
 				return __( 'CSS syntax error in tag \'%1$s\' - unparsed input remains in selector.', 'amp' );
-			case 'CDATA_VIOLATES_BLACKLIST':
+			case self::CDATA_VIOLATES_BLACKLIST:
 				return __( 'The text inside tag \'%1$s\' contains \'%2$s\', which is disallowed.', 'amp' );
-			case 'CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE':
+			case self::CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE:
 				return __( 'CSS syntax error in tag \'%1$s\' - the property \'%2$s\' is disallowed within @%3$s. Allowed properties: %4$s.', 'amp' );
-			case 'MANDATORY_TAG_ANCESTOR':
+			case self::MANDATORY_TAG_ANCESTOR:
 				return __( 'The tag \'%1$s\' may only appear as a descendant of tag \'%2$s\'.', 'amp' );
-			case 'WARNING_TAG_REQUIRED_BY_MISSING':
+			case self::WARNING_TAG_REQUIRED_BY_MISSING:
 				return __( 'The tag \'%1$s\' is missing or incorrect, but required by \'%2$s\'. This will soon be an error.', 'amp' );
-			case 'TAG_EXCLUDED_BY_TAG':
+			case self::TAG_EXCLUDED_BY_TAG:
 				return __( 'The tag \'%1$s\' is present, but is excluded by the presence of \'%2$s\'.', 'amp' );
-			case 'INVALID_PROPERTY_VALUE_IN_ATTR_VALUE':
+			case self::INVALID_PROPERTY_VALUE_IN_ATTR_VALUE:
 				return __( 'The property \'%1$s\' in attribute \'%2$s\' in tag \'%3$s\' is set to \'%4$s\', which is invalid.', 'amp' );
-			case 'MANDATORY_REFERENCE_POINT_MISSING':
+			case self::MANDATORY_REFERENCE_POINT_MISSING:
 				return __( 'The mandatory reference point \'%1$s\' for \'%2$s\' is missing.', 'amp' );
-			case 'MISSING_URL':
+			case self::MISSING_URL:
 				return __( 'Missing URL for attribute \'%1$s\' in tag \'%2$s\'.', 'amp' );
-			case 'MANDATORY_ANYOF_ATTR_MISSING':
+			case self::MANDATORY_ANYOF_ATTR_MISSING:
 				return __( 'The tag \'%1$s\' is missing a mandatory attribute - pick at least one of %2$s.', 'amp' );
-			case 'DISALLOWED_TAG':
+			case self::DISALLOWED_TAG:
 				return __( 'The tag \'%1$s\' is disallowed.', 'amp' );
-			case 'CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT':
+			case self::CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT:
 				return __( 'The tag \'%1$s\', a child tag of \'%2$s\', does not satisfy one of the acceptable reference points: %3$s.', 'amp' );
-			case 'DOCUMENT_SIZE_LIMIT_EXCEEDED':
+			case self::DOCUMENT_SIZE_LIMIT_EXCEEDED:
 				return __( 'Document exceeded %1$s bytes limit. Actual size %2$s bytes.', 'amp' );
-			case 'INVALID_URL_PROTOCOL':
+			case self::INVALID_URL_PROTOCOL:
 				return __( 'Invalid URL protocol \'%3$s:\' for attribute \'%1$s\' in tag \'%2$s\'.', 'amp' );
-			case 'MANDATORY_CDATA_MISSING_OR_INCORRECT':
+			case self::MANDATORY_CDATA_MISSING_OR_INCORRECT:
 				return __( 'The mandatory text inside tag \'%1$s\' is missing or incorrect.', 'amp' );
-			case 'INCORRECT_NUM_CHILD_TAGS':
+			case self::INCORRECT_NUM_CHILD_TAGS:
 				return __( 'Tag \'%1$s\' must have %2$s child tags - saw %3$s child tags.', 'amp' );
-			case 'INVALID_UTF8':
+			case self::INVALID_UTF8:
 				return __( 'The document contains invalid UTF8.', 'amp' );
-			case 'ATTR_VALUE_REQUIRED_BY_LAYOUT':
+			case self::ATTR_VALUE_REQUIRED_BY_LAYOUT:
 				return __( 'Invalid value \'%1$s\' for attribute \'%2$s\' in tag \'%3$s\' - for layout \'%4$s\', set the attribute \'%2$s\' to value \'%5$s\'.', 'amp' );
-			case 'DUPLICATE_UNIQUE_TAG':
+			case self::DUPLICATE_UNIQUE_TAG:
 				return __( 'The tag \'%1$s\' appears more than once in the document.', 'amp' );
-			case 'MISSING_REQUIRED_EXTENSION':
+			case self::MISSING_REQUIRED_EXTENSION:
 				return __( 'The tag \'%1$s\' requires including the \'%2$s\' extension JavaScript.', 'amp' );
-			case 'MUTUALLY_EXCLUSIVE_ATTRS':
+			case self::MUTUALLY_EXCLUSIVE_ATTRS:
 				return __( 'Mutually exclusive attributes encountered in tag \'%1$s\' - pick one of %2$s.', 'amp' );
-			case 'DISALLOWED_FIRST_CHILD_TAG_NAME':
+			case self::DISALLOWED_FIRST_CHILD_TAG_NAME:
 				return __( 'Tag \'%1$s\' is disallowed as first child of tag \'%2$s\'. First child tag must be one of %3$s.', 'amp' );
-			case 'MANDATORY_LAST_CHILD_TAG':
+			case self::MANDATORY_LAST_CHILD_TAG:
 				return __( 'Tag \'%1$s\', if present, must be the last child of tag \'%2$s\'.', 'amp' );
-			case 'ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT':
+			case self::ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT:
 				return __( 'The attribute \'%1$s\' in tag \'%2$s\' is disallowed by specified layout \'%3$s\'.', 'amp' );
-			case 'DISALLOWED_RELATIVE_URL':
+			case self::DISALLOWED_RELATIVE_URL:
 				return __( 'The relative URL \'%3$s\' for attribute \'%1$s\' in tag \'%2$s\' is disallowed.', 'amp' );
-			case 'MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE':
+			case self::MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE:
 				return __( 'The property \'%1$s\' is missing from attribute \'%2$s\' in tag \'%3$s\'.', 'amp' );
-			case 'MANDATORY_TAG_MISSING':
+			case self::MANDATORY_TAG_MISSING:
 				return __( 'The mandatory tag \'%1$s\' is missing or incorrect.', 'amp' );
-			case 'CSS_SYNTAX_QUALIFIED_RULE_HAS_NO_DECLARATIONS':
+			case self::CSS_SYNTAX_QUALIFIED_RULE_HAS_NO_DECLARATIONS:
 				return __( 'CSS syntax error in tag \'%1$s\' - qualified rule \'%2$s\' has no declarations.', 'amp' );
-			case 'CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE':
+			case self::CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE:
 				return __( 'CSS syntax error in tag \'%1$s\' - the property \'%2$s\' is set to the disallowed value \'%3$s\'.', 'amp' );
-			case 'CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE':
+			case self::CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE:
 				return __( 'CSS syntax error in tag \'%1$s\' - end of stylesheet encountered in prelude of a qualified rule.', 'amp' );
-			case 'CSS_SYNTAX_DISALLOWED_DOMAIN':
+			case self::CSS_SYNTAX_DISALLOWED_DOMAIN:
 				return __( 'CSS syntax error in tag \'%1$s\' - invalid domain \'%2$s\'.', 'amp' );
-			case 'TEMPLATE_PARTIAL_IN_ATTR_VALUE':
+			case self::TEMPLATE_PARTIAL_IN_ATTR_VALUE:
 				return __( 'The attribute \'%1$s\' in tag \'%2$s\' is set to \'%3$s\', which contains a Mustache template partial.', 'amp' );
-			case 'MANDATORY_ONEOF_ATTR_MISSING':
+			case self::MANDATORY_ONEOF_ATTR_MISSING:
 				return __( 'The tag \'%1$s\' is missing a mandatory attribute - pick one of %2$s.', 'amp' );
-			case 'WRONG_PARENT_TAG':
+			case self::WRONG_PARENT_TAG:
 				return __( 'The parent tag of tag \'%1$s\' is \'%2$s\', but it can only be \'%3$s\'.', 'amp' );
-			case 'CSS_SYNTAX_UNTERMINATED_COMMENT':
+			case self::CSS_SYNTAX_UNTERMINATED_COMMENT:
 				return __( 'CSS syntax error in tag \'%1$s\' - unterminated comment.', 'amp' );
-			case 'DUPLICATE_ATTRIBUTE':
+			case self::DUPLICATE_ATTRIBUTE:
 				return __( 'The tag \'%1$s\' contains the attribute \'%2$s\' repeated multiple times.', 'amp' );
-			case 'DUPLICATE_DIMENSION':
+			case self::DUPLICATE_DIMENSION:
 				return __( 'Multiple image candidates with the same width or pixel density found in attribute \'%1$s\' in tag \'%2$s\'.', 'amp' );
-			case 'CSS_SYNTAX_DISALLOWED_QUALIFIED_RULE_MUST_BE_INSIDE_KEYFRAME':
+			case self::CSS_SYNTAX_DISALLOWED_QUALIFIED_RULE_MUST_BE_INSIDE_KEYFRAME:
 				return __( 'CSS syntax error in tag \'%1$s\' - qualified rule \'%2$s\' must be located inside of a keyframe.', 'amp' );
-			case 'CSS_SYNTAX_PROPERTY_DISALLOWED_TOGETHER_WITH':
+			case self::CSS_SYNTAX_PROPERTY_DISALLOWED_TOGETHER_WITH:
 				return __( 'CSS syntax error in tag \'%1$s\' - the property \'%2$s\' is disallowed together with \'%3$s\'. Allowed properties: %4$s.', 'amp' );
-			case 'STYLESHEET_TOO_LONG':
+			case self::STYLESHEET_TOO_LONG:
 				return __( 'The author stylesheet specified in tag \'%1$s\' is too long - document contains %2$s bytes whereas the limit is %3$s bytes.', 'amp' );
-			case 'TAG_NOT_ALLOWED_TO_HAVE_SIBLINGS':
+			case self::TAG_NOT_ALLOWED_TO_HAVE_SIBLINGS:
 				return __( 'Tag \'%1$s\' is not allowed to have any sibling tags (\'%2$s\' should only have 1 child).', 'amp' );
-			case 'INVALID_URL':
+			case self::INVALID_URL:
 				return __( 'Malformed URL \'%3$s\' for attribute \'%1$s\' in tag \'%2$s\'.', 'amp' );
-			case 'CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT_SINGULAR':
+			case self::CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT_SINGULAR:
 				return __( 'The tag \'%1$s\', a child tag of \'%2$s\', does not satisfy the reference point \'%3$s\'.', 'amp' );
-			case 'VALUE_SET_MISMATCH':
+			case self::VALUE_SET_MISMATCH:
 				return __( 'Attribute \'%1$s\' in tag \'%2$s\' contains a value that does not match any other tags on the page.', 'amp' );
-			case 'CSS_SYNTAX_INVALID_URL':
+			case self::CSS_SYNTAX_INVALID_URL:
 				return __( 'CSS syntax error in tag \'%1$s\' - invalid url \'%2$s\'.', 'amp' );
-			case 'MISSING_LAYOUT_ATTRIBUTES':
+			case self::MISSING_LAYOUT_ATTRIBUTES:
 				return __( 'Incomplete layout attributes specified for tag \'%1$s\'. For example, provide attributes \'width\' and \'height\'.', 'amp' );
-			case 'CSS_SYNTAX_MISSING_SELECTOR':
+			case self::CSS_SYNTAX_MISSING_SELECTOR:
 				return __( 'CSS syntax error in tag \'%1$s\' - missing selector.', 'amp' );
-			case 'CSS_SYNTAX_INVALID_PROPERTY':
+			case self::CSS_SYNTAX_INVALID_PROPERTY:
 				return __( 'CSS syntax error in tag \'%1$s\' - invalid property \'%2$s\'. The only allowed properties are \'%3$s\'.', 'amp' );
-			case 'CSS_SYNTAX_INVALID_ATTR_SELECTOR':
+			case self::CSS_SYNTAX_INVALID_ATTR_SELECTOR:
 				return __( 'CSS syntax error in tag \'%1$s\' - invalid attribute selector.', 'amp' );
-			case 'CSS_SYNTAX_INVALID_URL_PROTOCOL':
+			case self::CSS_SYNTAX_INVALID_URL_PROTOCOL:
 				return __( 'CSS syntax error in tag \'%1$s\' - invalid url protocol \'%2$s:\'.', 'amp' );
-			case 'DISALLOWED_MANUFACTURED_BODY':
+			case self::DISALLOWED_MANUFACTURED_BODY:
 				return __( 'Tag or text which is only allowed inside the body section found outside of the body section.', 'amp' );
-			case 'CSS_SYNTAX_INCOMPLETE_DECLARATION':
+			case self::CSS_SYNTAX_INCOMPLETE_DECLARATION:
 				return __( 'CSS syntax error in tag \'%1$s\' - incomplete declaration.', 'amp' );
-			case 'IMPLIED_LAYOUT_INVALID':
+			case self::IMPLIED_LAYOUT_INVALID:
 				return __( 'The implied layout \'%1$s\' is not supported by tag \'%2$s\'.', 'amp' );
-			case 'CSS_SYNTAX_PROPERTY_REQUIRES_QUALIFICATION':
+			case self::CSS_SYNTAX_PROPERTY_REQUIRES_QUALIFICATION:
 				return __( 'CSS syntax error in tag \'%1$s\' - the property \'%2$s\' is disallowed unless the enclosing rule is prefixed with the \'%3$s\' qualification.', 'amp' );
-			case 'DISALLOWED_CHILD_TAG_NAME':
+			case self::DISALLOWED_CHILD_TAG_NAME:
 				return __( 'Tag \'%1$s\' is disallowed as child of tag \'%2$s\'. Child tag must be one of %3$s.', 'amp' );
-			case 'CSS_SYNTAX_MISSING_URL':
+			case self::CSS_SYNTAX_MISSING_URL:
 				return __( 'CSS syntax error in tag \'%1$s\' - missing url.', 'amp' );
-			case 'CSS_SYNTAX_DISALLOWED_MEDIA_FEATURE':
+			case self::CSS_SYNTAX_DISALLOWED_MEDIA_FEATURE:
 				return __( 'CSS syntax error in tag \'%1$s\' - disallowed media feature \'%2$s\'.', 'amp' );
-			case 'TAG_REQUIRED_BY_MISSING':
+			case self::TAG_REQUIRED_BY_MISSING:
 				return __( 'The tag \'%1$s\' is missing or incorrect, but required by \'%2$s\'.', 'amp' );
-			case 'INCORRECT_MIN_NUM_CHILD_TAGS':
+			case self::INCORRECT_MIN_NUM_CHILD_TAGS:
 				return __( 'Tag \'%1$s\' must have a minimum of %2$s child tags - saw %3$s child tags.', 'amp' );
-			case 'DISALLOWED_SCRIPT_TAG':
+			case self::DISALLOWED_SCRIPT_TAG:
 				return __( 'Custom JavaScript is not allowed.', 'amp' );
-			case 'CSS_SYNTAX_DISALLOWED_KEYFRAME_INSIDE_KEYFRAME':
+			case self::CSS_SYNTAX_DISALLOWED_KEYFRAME_INSIDE_KEYFRAME:
 				return __( 'CSS syntax error in tag \'%1$s\' - keyframe inside keyframe is not allowed.', 'amp' );
-			case 'DISALLOWED_TAG_ANCESTOR':
+			case self::DISALLOWED_TAG_ANCESTOR:
 				return __( 'The tag \'%1$s\' may not appear as a descendant of tag \'%2$s\'.', 'amp' );
-			case 'DUPLICATE_UNIQUE_TAG_WARNING':
+			case self::DUPLICATE_UNIQUE_TAG_WARNING:
 				return __( 'The tag \'%1$s\' appears more than once in the document. This will soon be an error.', 'amp' );
-			case 'NON_WHITESPACE_CDATA_ENCOUNTERED':
+			case self::NON_WHITESPACE_CDATA_ENCOUNTERED:
 				return __( 'The tag \'%1$s\' contains text, which is disallowed.', 'amp' );
-			case 'WARNING_EXTENSION_DEPRECATED_VERSION':
+			case self::WARNING_EXTENSION_DEPRECATED_VERSION:
 				return __( 'The extension \'%1$s\' is referenced at version \'%2$s\' which is a deprecated version. Please use a more recent version of this extension. This may become an error in the future.', 'amp' );
-			case 'CSS_SYNTAX_INVALID_AT_RULE':
+			case self::CSS_SYNTAX_INVALID_AT_RULE:
 				return __( 'CSS syntax error in tag \'%1$s\' - saw invalid at rule \'@%2$s\'.', 'amp' );
-			case 'DISALLOWED_ATTR':
+			case self::DISALLOWED_ATTR:
 				return __( 'The attribute \'%1$s\' may not appear in tag \'%2$s\'.', 'amp' );
-			case 'CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE_WITH_HINT':
+			case self::CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE_WITH_HINT:
 				return __( 'CSS syntax error in tag \'%1$s\' - the property \'%2$s\' is set to the disallowed value \'%3$s\'. Allowed values: %4$s.', 'amp' );
-			case 'CSS_SYNTAX_INVALID_DECLARATION':
+			case self::CSS_SYNTAX_INVALID_DECLARATION:
 				return __( 'CSS syntax error in tag \'%1$s\' - invalid declaration.', 'amp' );
-			case 'ATTR_MISSING_REQUIRED_EXTENSION':
+			case self::ATTR_MISSING_REQUIRED_EXTENSION:
 				return __( 'The attribute \'%1$s\' requires including the \'%2$s\' extension JavaScript.', 'amp' );
-			case 'CSS_SYNTAX_DISALLOWED_RELATIVE_URL':
+			case self::CSS_SYNTAX_DISALLOWED_RELATIVE_URL:
 				return __( 'CSS syntax error in tag \'%1$s\' - disallowed relative url \'%2$s\'.', 'amp' );
-			case 'DEPRECATED_TAG':
+			case self::DEPRECATED_TAG:
 				return __( 'The tag \'%1$s\' is deprecated - use \'%2$s\' instead.', 'amp' );
-			case 'BASE_TAG_MUST_PRECEED_ALL_URLS':
+			case self::BASE_TAG_MUST_PRECEED_ALL_URLS:
 				return __( 'The tag \'%1$s\', which contains URLs, was found earlier in the document than the BASE element.', 'amp' );
-			case 'CSS_SYNTAX_INVALID_PROPERTY_NOLIST':
+			case self::CSS_SYNTAX_INVALID_PROPERTY_NOLIST:
 				return __( 'CSS syntax error in tag \'%1$s\' - invalid property \'%2$s\'.', 'amp' );
-			case 'ATTR_REQUIRED_BUT_MISSING':
+			case self::ATTR_REQUIRED_BUT_MISSING:
 				return __( 'The attribute \'%1$s\' in tag \'%2$s\' is missing or incorrect, but required by attribute \'%3$s\'.', 'amp' );
-			case 'INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT':
+			case self::INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT:
 				return __( 'Inconsistent units for width and height in tag \'%1$s\' - width is specified in \'%2$s\' whereas height is specified in \'%3$s\'.', 'amp' );
-			case 'UNKNOWN_CODE':
+			case self::UNKNOWN_CODE:
 				return __( 'Unknown error.', 'amp' );
-			case 'ATTR_DISALLOWED_BY_IMPLIED_LAYOUT':
+			case self::ATTR_DISALLOWED_BY_IMPLIED_LAYOUT:
 				return __( 'The attribute \'%1$s\' in tag \'%2$s\' is disallowed by implied layout \'%3$s\'.', 'amp' );
-			case 'DISALLOWED_PROPERTY_IN_ATTR_VALUE':
+			case self::DISALLOWED_PROPERTY_IN_ATTR_VALUE:
 				return __( 'The property \'%1$s\' in attribute \'%2$s\' in tag \'%3$s\' is disallowed.', 'amp' );
-			case 'DUPLICATE_REFERENCE_POINT':
+			case self::DUPLICATE_REFERENCE_POINT:
 				return __( 'The reference point \'%1$s\' for \'%2$s\' must be unique but a duplicate was encountered.', 'amp' );
-			case 'TEMPLATE_IN_ATTR_NAME':
+			case self::TEMPLATE_IN_ATTR_NAME:
 				return __( 'Mustache template syntax in attribute name \'%1$s\' in tag \'%2$s\'.', 'amp' );
-			case 'DISALLOWED_STYLE_ATTR':
+			case self::DISALLOWED_STYLE_ATTR:
 				return __( 'The inline \'style\' attribute is not allowed in AMP documents. Use \'style amp-custom\' tag instead.', 'amp' );
-			case 'CSS_EXCESSIVELY_NESTED':
+			case self::CSS_EXCESSIVELY_NESTED:
 				return __( 'CSS excessively nested in tag \'%1$s\'.', 'amp' );
-			case 'CSS_SYNTAX_MALFORMED_MEDIA_QUERY':
+			case self::CSS_SYNTAX_MALFORMED_MEDIA_QUERY:
 				return __( 'CSS syntax error in tag \'%1$s\' - malformed media query.', 'amp' );
-			case 'CSS_SYNTAX_UNTERMINATED_STRING':
+			case self::CSS_SYNTAX_UNTERMINATED_STRING:
 				return __( 'CSS syntax error in tag \'%1$s\' - unterminated string.', 'amp' );
-			case 'INVALID_ATTR_VALUE':
+			case self::INVALID_ATTR_VALUE:
 				return __( 'The attribute \'%1$s\' in tag \'%2$s\' is set to the invalid value \'%3$s\'.', 'amp' );
-			case 'EXTENSION_UNUSED':
+			case self::EXTENSION_UNUSED:
 				return __( 'The extension \'%1$s\' was found on this page, but is unused. Please remove this extension.', 'amp' );
-			case 'DISALLOWED_DOMAIN':
+			case self::DISALLOWED_DOMAIN:
 				return __( 'The domain \'%3$s\' for attribute \'%1$s\' in tag \'%2$s\' is disallowed.', 'amp' );
-			case 'INVALID_JSON_CDATA':
+			case self::INVALID_JSON_CDATA:
 				return __( 'The script tag contains invalid JSON that cannot be parsed.', 'amp' );
-			case 'CSS_SYNTAX_DISALLOWED_MEDIA_TYPE':
+			case self::CSS_SYNTAX_DISALLOWED_MEDIA_TYPE:
 				return __( 'CSS syntax error in tag \'%1$s\' - disallowed media type \'%2$s\'.', 'amp' );
-			case 'INLINE_STYLE_TOO_LONG':
+			case self::INLINE_STYLE_TOO_LONG:
 				return __( 'The inline style specified in tag \'%1$s\' is too long - it contains %2$s bytes whereas the limit is %3$s bytes.', 'amp' );
-			case 'DEV_MODE_ONLY':
+			case self::DEV_MODE_ONLY:
 				return __( 'Tag \'html\' marked with attribute \'data-ampdevmode\'. Validator will suppress errors regarding any other tag with this attribute.', 'amp' );
 
 			default:
