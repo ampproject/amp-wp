@@ -9089,49 +9089,51 @@ const uploadReleaseAsset = async ( githubClient, uploadUrl, fileName, filePath )
  */
 
 
-( async () => {
+const main = async () => {
+	const repoToken = core_default().getInput( 'repo-token', { required: true } );
+	const zipPath = core_default().getInput( 'zip', { required: true } );
+	const client = new github_default.a.GitHub( repoToken );
+
+	const branch = getBranchName( github_default.a.context.ref );
+	const tag = getCanonicalTag( branch );
+
+	core_default().info( `Fetching release details for the ${ branch } branch` );
+
+	const { owner, repo } = github_default.a.context.payload;
+	let releaseId, releaseFunc;
+
 	try {
-		const repoToken = core_default().getInput( 'repo-token', { required: true } );
-		const zipPath = core_default().getInput( 'zip', { required: true } );
-		const client = new github_default.a.GitHub( repoToken );
+		// An error will be thrown if a release for the tag was not found.
+		const release = await client.repos.getReleaseByTag( { owner, repo, tag } );
+		releaseId = release.data.id;
+		releaseFunc = updateRelease;
 
-		const branch = getBranchName( github_default.a.context.ref );
-		const tag = getCanonicalTag( branch );
-
-		core_default().info( `Fetching release details for the ${ branch } branch` );
-
-		const { owner, repo } = github_default.a.context.payload;
-		let releaseId, releaseFunc;
-
-		try {
-			// An error will be thrown if a release for the tag was not found.
-			const release = await client.repos.getReleaseByTag( { owner, repo, tag } );
-			releaseId = release.data.id;
-			releaseFunc = updateRelease;
-
-			core_default().info( `Updating release description for '${ tag }'` );
-		} catch ( error ) {
-			releaseId = tag;
-			releaseFunc = createRelease;
-
-			core_default().info( `Creating a release for '${ tag }'` );
-		}
-
-		const releaseName = tag;
-		const releaseDesc = `Build for ${ getPluginVersion() }.`;
-		const release = releaseFunc( client, releaseId, owner, repo, releaseName, releaseDesc );
-
-		const uploadUrl = release.data.upload_url;
-
-		core_default().info( 'Uploading assets' );
-
-		await uploadReleaseAsset( client, uploadUrl, 'amp.zip', zipPath );
-
-		core_default().setOutput( 'branch', branch );
+		core_default().info( `Updating release description for '${ tag }'` );
 	} catch ( error ) {
-		core_default().setFailed( error.message );
+		releaseId = tag;
+		releaseFunc = createRelease;
+
+		core_default().info( `Creating a release for '${ tag }'` );
 	}
-} )();
+
+	const releaseName = tag;
+	const releaseDesc = `Build for ${ getPluginVersion() }.`;
+	const release = releaseFunc( client, releaseId, owner, repo, releaseName, releaseDesc );
+
+	const uploadUrl = release.data.upload_url;
+
+	core_default().info( 'Uploading assets' );
+
+	await uploadReleaseAsset( client, uploadUrl, 'amp.zip', zipPath );
+
+	core_default().setOutput( 'branch', branch );
+};
+
+try {
+	main();
+} catch ( error ) {
+	core_default().setFailed( error.message );
+}
 
 
 /***/ }),
