@@ -584,7 +584,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				list( $attr_node, $error_code ) = $disallowed_attribute;
 				$validation_error['code']       = $error_code;
 
-				if ( $this->remove_invalid_attribute( $node, $attr_node, $validation_error, $merged_attr_spec_list ) ) {
+				$attr_spec = isset( $merged_attr_spec_list[ $attr_node->nodeName ] ) ? $merged_attr_spec_list[ $attr_node->nodeName ] : [];
+				if ( $this->remove_invalid_attribute( $node, $attr_node, $validation_error, $attr_spec ) ) {
 					$removed_attributes[] = $attr_node;
 				}
 			}
@@ -659,7 +660,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return bool $is_missing boolean Whether a required attribute is missing.
 	 */
 	public function is_missing_mandatory_attribute( $attr_spec, DOMElement $node ) {
-		return 0 === count( $this->get_missing_mandatory_attributes( $attr_spec, $node ) );
+		return 0 !== count( $this->get_missing_mandatory_attributes( $attr_spec, $node ) );
 	}
 
 	/**
