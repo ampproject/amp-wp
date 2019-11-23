@@ -26,7 +26,7 @@ import { getBranchName, getCanonicalTag, getPluginVersion, createZipFile } from 
 	info( `Plugin version: ${ pluginVersion }` );
 	info( `Fetching release details for the ${ branch } branch` );
 
-	const releaseDesc = `Build for ${ pluginVersion }.`;
+	const releaseDesc = `Build for ${ branch } branch.`;
 	let uploadUrl;
 
 	try {
@@ -34,7 +34,7 @@ import { getBranchName, getCanonicalTag, getPluginVersion, createZipFile } from 
 		const currentRelease = await client.getReleaseByTag( tag );
 
 		info( `Updating release description for '${ tag }'` );
-		const release = await client.updateRelease( currentRelease.data.id, tag, releaseDesc );
+		const release = await client.updateRelease( currentRelease.data.id, pluginVersion, releaseDesc );
 		uploadUrl = release.data.upload_url;
 
 		for ( const asset of release.data.assets ) {

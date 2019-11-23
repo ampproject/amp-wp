@@ -2451,7 +2451,7 @@ const createZipFile = ( zipName, buildPath ) => {
 	Object(core.info)( `Plugin version: ${ pluginVersion }` );
 	Object(core.info)( `Fetching release details for the ${ branch } branch` );
 
-	const releaseDesc = `Build for ${ pluginVersion }.`;
+	const releaseDesc = `Build for ${ branch } branch.`;
 	let uploadUrl;
 
 	try {
@@ -2459,7 +2459,7 @@ const createZipFile = ( zipName, buildPath ) => {
 		const currentRelease = await client.getReleaseByTag( tag );
 
 		Object(core.info)( `Updating release description for '${ tag }'` );
-		const release = await client.updateRelease( currentRelease.data.id, tag, releaseDesc );
+		const release = await client.updateRelease( currentRelease.data.id, pluginVersion, releaseDesc );
 		uploadUrl = release.data.upload_url;
 
 		for ( const asset of release.data.assets ) {
