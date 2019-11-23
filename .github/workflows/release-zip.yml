@@ -3,10 +3,12 @@ on:
   push:
     branches:
       - develop
-      - '[0-9]+.[0-9]+' # Target release branches of the format X.X.X
+      - '[0-9]+.[0-9]+' # Target release branches of the format X.X
+      - '[0-9]+.[0-9]+.[0-9]+' # Target release branches of the format X.X.X
 
 jobs:
   build-zip:
+    name: Build zip
     runs-on: ubuntu-18.04
     # TODO: move third party actions in house.
     steps:
@@ -71,7 +73,26 @@ jobs:
       - name: Run build script
         run: npm run build
 
-      - name: Release zip
+      - uses: actions/upload-artifact@v1
+        with:
+          name: built-zip
+          path: amp.zip
+
+  release-zip:
+    name: Release zip
+    runs-on: ubuntu-18.04
+    needs: build-zip
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+
+      - name: Download built zip
+        uses: actions/download-artifact@v1
+        with:
+          name: built-zip
+
+      - name: Upload zip to a release
         uses: ./github-actions/github-release
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
