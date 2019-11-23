@@ -94,7 +94,7 @@ def GeneratePHP(out_dir):
 	"""
 	logging.info('entering ...')
 
-	allowed_tags, attr_lists, descendant_lists, reference_points, versions = ParseRules(out_dir)
+	allowed_tags, attr_lists, descendant_lists, reference_points, versions, error_formats = ParseRules(out_dir)
 
 	#Generate the output
 	out = []
@@ -105,6 +105,7 @@ def GeneratePHP(out_dir):
 	GenerateLayoutAttributesPHP(out, attr_lists)
 	GenerateGlobalAttributesPHP(out, attr_lists)
 	GenerateReferencePointsPHP(out, reference_points)
+	GenerateErrorFormatsPHP(out, error_formats)
 	GenerateFooterPHP(out)
 
 	# join out array into a single string and remove unneeded whitespace
@@ -195,6 +196,40 @@ def GenerateReferencePointsPHP(out, reference_points):
 	out.append('\tprivate static $reference_points = %s;' % Phpize( reference_points, 1 ).lstrip() )
 	out.append('')
 	logging.info('... done')
+
+def GenerateErrorFormatsPHP(out, error_formats):
+	logging.info('entering ...')
+
+	# TODO: Delete the error formats which are not used!
+	for code in error_formats.keys():
+		out.append('\tconst %s = \'%s\';' % ( code, code ))
+
+	out.append('''
+	/**
+	 * Get error message format.
+	 *
+	 * @since 1.5.0
+	 * @internal
+	 *
+	 * @param string $code Error code.
+	 * @return string Error message format.
+	 */
+	public static function get_error_message_format( $code ) {
+		switch ( $code ) {''')
+
+	for ( code, message_format ) in error_formats.items():
+		out.append('\t\t\tcase \'%s\':' % code)
+		message_format = re.sub( r'%(\d+)', r'%\1$s', message_format )
+		out.append('\t\t\t\treturn __( %s, \'amp\' );' % Phpize( message_format ))
+
+	out.append('''
+			default:
+				return __( 'Unknown error', 'amp' );
+		}
+	}''')
+
+	logging.info('... done')
+
 
 def GenerateFooterPHP(out):
 	logging.info('entering ...')
@@ -333,12 +368,18 @@ def ParseRules(out_dir):
 	descendant_lists = {}
 	reference_points = {}
 	versions = {}
+	error_formats = {} # TODO: Include some additional error codes not accounted for in AMP Validator.
+	validation_error_code_lookup = {}
 
 	specfile='%s/validator.protoascii' % out_dir
 
 	# Merge specfile with message buffers.
 	rules = validator_pb2.ValidatorRules()
 	text_format.Merge(open(specfile).read(), rules)
+
+	validationError = validator_pb2.ValidationError()
+	for ( name, code ) in validationError.Code.items():
+		validation_error_code_lookup[ code ] = name
 
 	# Record the version of this specfile and the corresponding validator version.
 	if rules.HasField('spec_file_revision'):
@@ -404,9 +445,12 @@ def ParseRules(out_dir):
 						continue
 
 					descendant_lists[list.name].append( val.lower() )
+		elif 'error_formats' == field_desc.name:
+			for list in field_val:
+				error_formats[ validation_error_code_lookup[list.code] ] = list.format
 
 	logging.info('... done')
-	return allowed_tags, attr_lists, descendant_lists, reference_points, versions
+	return allowed_tags, attr_lists, descendant_lists, reference_points, versions, error_formats
 
 
 def GetTagSpec(tag_spec, attr_lists):
