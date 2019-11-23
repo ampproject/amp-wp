@@ -556,11 +556,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		// Identify any remaining disallowed attributes.
-		$disallowed_attributes = $this->get_disallowed_attributes_in_node( $node, $merged_attr_spec_list );
-
 		// Identify attribute values that don't conform to the attr_spec.
-		$disallowed_attributes = $this->sanitize_disallowed_attribute_values_in_node( $node, $merged_attr_spec_list, $disallowed_attributes );
+		$disallowed_attributes = $this->sanitize_disallowed_attribute_values_in_node( $node, $merged_attr_spec_list );
 
 		// Remove all invalid attributes.
 		if ( ! empty( $disallowed_attributes ) ) {
@@ -575,9 +572,20 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				$validation_error['element_attributes'][ $attribute->nodeName ] = $attribute->nodeValue;
 			}
 			$removed_attributes = [];
+
+			// @todo First needing to iterate over the $disallowed_attributes and if any are mandatory, skip removing attributes and instead remove the element.
 			foreach ( $disallowed_attributes as $disallowed_attribute ) {
-				if ( $this->remove_invalid_attribute( $node, $disallowed_attribute, $validation_error ) ) {
-					$removed_attributes[] = $disallowed_attribute;
+				/**
+				 * Returned vars.
+				 *
+				 * @var DOMAttr $attr_node
+				 * @var string  $error_code
+				 */
+				list( $attr_node, $error_code ) = $disallowed_attribute;
+				$validation_error['code']       = $error_code;
+
+				if ( $this->remove_invalid_attribute( $node, $attr_node, $validation_error, $merged_attr_spec_list ) ) {
+					$removed_attributes[] = $attr_node;
 				}
 			}
 
@@ -875,41 +883,17 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Remove attributes from $node that are not listed in $allowed_attrs.
-	 *
-	 * @param DOMElement $node           Node.
-	 * @param array[]    $attr_spec_list Attribute spec list.
-	 * @return DOMAttr[] Attributes to remove.
-	 */
-	private function get_disallowed_attributes_in_node( DOMElement $node, $attr_spec_list ) {
-		/*
-		 * We can't remove attributes inside the 'foreach' loop without
-		 * breaking the iteration. So we keep track of the attributes to
-		 * remove in the first loop, then remove them in the second loop.
-		 */
-		$attrs_to_remove = [];
-		foreach ( $node->attributes as $attr_name => $attr_node ) {
-			if ( ! $this->is_amp_allowed_attribute( $attr_node, $attr_spec_list ) ) {
-				$attrs_to_remove[] = $attr_node;
-			}
-		}
-
-		return $attrs_to_remove;
-	}
-
-	/**
 	 * Remove invalid AMP attributes values from $node that have been implicitly disallowed.
 	 *
 	 * Allowed values are found $this->globally_allowed_attributes and in parameter $attr_spec_list
 	 *
 	 * @see \AMP_Tag_And_Attribute_Sanitizer::validate_attr_spec_list_for_node()
 	 *
-	 * @param DOMElement $node                       Node.
-	 * @param array[][]  $attr_spec_list             Attribute spec list.
-	 * @param DOMAttr[]  $attributes_pending_removal Attributes pending removal.
-	 * @return DOMAttr[]|false Attributes to remove, or false if the element itself should be removed.
+	 * @param DOMElement $node           Node.
+	 * @param array[]    $attr_spec_list Attribute spec list.
+	 * @return array Tuples containing attribute to remove and error code.
 	 */
-	private function sanitize_disallowed_attribute_values_in_node( DOMElement $node, $attr_spec_list, $attributes_pending_removal ) {
+	private function sanitize_disallowed_attribute_values_in_node( DOMElement $node, $attr_spec_list ) {
 		$attrs_to_remove = [];
 
 		foreach ( $attr_spec_list as $attr_name => $attr_val ) {
@@ -921,8 +905,18 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		foreach ( $node->attributes as $attr_name => $attr_node ) {
+			/*
+			 * We can't remove attributes inside the 'foreach' loop without
+			 * breaking the iteration. So we keep track of the attributes to
+			 * remove in the first loop, then remove them in the second loop.
+			 */
+			if ( ! $this->is_amp_allowed_attribute( $attr_node, $attr_spec_list ) ) {
+				$attrs_to_remove[] = [ $attr_node, AMP_Validation_Error_Taxonomy::INVALID_ATTRIBUTE_CODE ];
+				continue;
+			}
 
-			if ( ! isset( $attr_spec_list[ $attr_name ] ) || in_array( $attr_node, $attributes_pending_removal, true ) ) {
+			// Skip unspecified attribute, likely being data-* attribute.
+			if ( ! isset( $attr_spec_list[ $attr_name ] ) ) {
 				continue;
 			}
 
@@ -932,8 +926,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			$should_remove_node = false;
-			$attr_spec_rule     = $attr_spec_list[ $attr_name ];
+			$error_code     = null;
+			$attr_spec_rule = $attr_spec_list[ $attr_name ];
 
 			/*
 			 * Note that the following checks may have been previously done in validate_attr_spec_list_for_node():
@@ -948,61 +942,48 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			 * However, if there was only one spec for a given tag, then then validate_attr_spec_list_for_node() would
 			 * not have been called. and thus these checks need to be performed here as well.
 			 */
+			// @todo Actual AMP validator error codes should be used whenever possible.
 			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_value( $node, $attr_name, $attr_spec_rule ) ) {
-				$should_remove_node = true;
+				$error_code = 'illegal_value';
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_CASEI ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_value_casei( $node, $attr_name, $attr_spec_rule ) ) {
-				$should_remove_node = true;
+				$error_code = 'illegal_case_insensitive_value';
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_REGEX ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_value_regex( $node, $attr_name, $attr_spec_rule ) ) {
-				$should_remove_node = true;
+				$error_code = 'illegal_value_for_pattern';
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_REGEX_CASEI ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_value_regex_casei( $node, $attr_name, $attr_spec_rule ) ) {
-				$should_remove_node = true;
+				$error_code = 'illegal_value_for_case_insensitive_pattern';
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOWED_PROTOCOL ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_allowed_protocol( $node, $attr_name, $attr_spec_rule ) ) {
-				$should_remove_node = true;
+				$error_code = 'illegal_url_protocol'; // @todo A javascript: protocol could be treated differently.
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_valid_url( $node, $attr_name, $attr_spec_rule ) ) {
-				$should_remove_node = true;
+				$error_code = 'invalid_url';
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_RELATIVE ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_disallowed_relative( $node, $attr_name, $attr_spec_rule ) ) {
-				$should_remove_node = true;
+				$error_code = 'illegal_relative_url';
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_disallowed_empty( $node, $attr_name, $attr_spec_rule ) ) {
-				$should_remove_node = true;
+				$error_code = 'illegal_empty_value';
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::DISALLOWED_DOMAIN ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_disallowed_domain( $node, $attr_name, $attr_spec_rule ) ) {
-				$should_remove_node = true;
+				$error_code = 'illegal_url_host';
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::BLACKLISTED_VALUE_REGEX ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_blacklisted_value_regex( $node, $attr_name, $attr_spec_rule ) ) {
-				$should_remove_node = true;
+				$error_code = 'illegal_value_by_pattern';
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_PROPERTIES ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_value_properties( $node, $attr_name, $attr_spec_rule ) ) {
-				$should_remove_node = true;
+				$error_code = 'illegal_value_properties'; // @todo Which property(s) in particular?
 			}
 
-			if ( $should_remove_node ) {
-				$attrs_to_remove[] = $attr_node;
-			}
-		}
-
-		// @todo Do not actually mutate the attributes here, but rather pass back what should be done?
-		// Remove the disallowed values.
-		foreach ( $attrs_to_remove as $attr_node ) {
-			if ( isset( $attr_spec_list[ $attr_node->nodeName ][ AMP_Rule_Spec::VALUE_URL ] ) &&
-				'href' === $attr_node->nodeName ) {
-				$attributes_pending_removal[] = $attr_node;
-			} elseif ( isset( $attr_spec_list[ $attr_node->nodeName ][ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] ) &&
-				( true === $attr_spec_list[ $attr_node->nodeName ][ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] ) ) {
-				$attr_node->nodeValue = '';
-			} else {
-				$attributes_pending_removal[] = $attr_node;
+			if ( isset( $error_code ) ) {
+				$attrs_to_remove[] = [ $attr_node, $error_code ];
 			}
 		}
 
-		return $attributes_pending_removal;
+		return $attrs_to_remove;
 	}
 
 	/**

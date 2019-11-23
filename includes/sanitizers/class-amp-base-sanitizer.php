@@ -472,9 +472,10 @@ abstract class AMP_Base_Sanitizer {
 	 * @param DOMElement     $element   The node for which to remove the attribute.
 	 * @param DOMAttr|string $attribute The attribute to remove from the element.
 	 * @param array          $validation_error Validation error details.
+	 * @param array          $attr_spec        Attribute spec.
 	 * @return bool Whether the node should have been removed, that is, that the node was sanitized for validity.
 	 */
-	public function remove_invalid_attribute( $element, $attribute, $validation_error = [] ) {
+	public function remove_invalid_attribute( $element, $attribute, $validation_error = [], $attr_spec = [] ) {
 		if ( $this->is_exempt_from_validation( $element ) ) {
 			return false;
 		}
@@ -484,10 +485,23 @@ abstract class AMP_Base_Sanitizer {
 		} else {
 			$node = $attribute;
 		}
-		$should_remove = $this->should_sanitize_validation_error( $validation_error, compact( 'node' ) );
-		if ( $should_remove && $element === $node->parentNode ) {
-			$element->removeAttributeNode( $node );
+
+		// Catch edge condition (no known possible way to reach).
+		if ( ! ( $node instanceof DOMAttr ) || $element !== $node->parentNode ) {
+			return false;
 		}
+
+		$should_remove = $this->should_sanitize_validation_error( $validation_error, compact( 'node' ) );
+		if ( $should_remove ) {
+			$allow_empty  = ! empty( $attr_spec[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] );
+			$is_href_attr = ( isset( $attr_spec[ AMP_Rule_Spec::VALUE_URL ] ) && 'href' === $node->nodeName );
+			if ( $allow_empty && ! $is_href_attr ) {
+				$node->nodeValue = '';
+			} else {
+				$element->removeAttributeNode( $node );
+			}
+		}
+
 		return $should_remove;
 	}
 
