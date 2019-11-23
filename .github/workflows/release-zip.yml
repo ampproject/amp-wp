@@ -7,8 +7,8 @@ on:
       - '[0-9]+.[0-9]+.[0-9]+' # Target release branches of the format X.X.X
 
 jobs:
-  build-zip:
-    name: Build zip
+  build-plugin:
+    name: Build plugin
     runs-on: ubuntu-18.04
     # TODO: move third party actions in house.
     steps:
@@ -73,27 +73,28 @@ jobs:
       - name: Run build script
         run: npm run build
 
-      - uses: actions/upload-artifact@v1
+      - name: Upload build folder
+        uses: actions/upload-artifact@v1
         with:
-          name: built-zip
-          path: amp.zip
+          name: build
+          path: build
 
   release-zip:
     name: Release zip
     runs-on: ubuntu-18.04
-    needs: build-zip
+    needs: build-plugin
     steps:
       - uses: actions/checkout@v1
         with:
           fetch-depth: 1
 
-      - name: Download built zip
+      - name: Download built plugin
         uses: actions/download-artifact@v1
         with:
-          name: built-zip
+          name: build
 
-      - name: Upload zip to a release
+      - name: Create ZIP and upload to release
         uses: ./github-actions/github-release
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          zip: ./amp.zip
+          build-path: build

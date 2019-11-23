@@ -2303,10 +2303,6 @@ function processEmit (ev, arg) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 
-// EXTERNAL MODULE: external "path"
-var external_path_ = __webpack_require__(622);
-var external_path_default = /*#__PURE__*/__webpack_require__.n(external_path_);
-
 // EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
 var core = __webpack_require__(470);
 
@@ -2383,10 +2379,18 @@ class githubClient_GitHubClient {
 
 /* harmony default export */ var githubClient = (githubClient_GitHubClient);
 
+// EXTERNAL MODULE: external "path"
+var external_path_ = __webpack_require__(622);
+var external_path_default = /*#__PURE__*/__webpack_require__.n(external_path_);
+
+// EXTERNAL MODULE: external "child_process"
+var external_child_process_ = __webpack_require__(129);
+
 // CONCATENATED MODULE: ./src/utils.js
 /**
  * External dependencies
  */
+
 
 
 
@@ -2404,19 +2408,24 @@ const getCanonicalTag = ( branchName ) => {
 	return 'develop' === branchName ? 'nightly' : `${ branchName }-nightly`;
 };
 
-const getPluginVersion = () => {
-	const versionRegex = /\* Version: (\d+\.\d+\.\d+(?:-\w+)?)/;
-	const pluginFilePath = external_path_default().resolve( process.env.GITHUB_WORKSPACE, 'amp.php' );
+const getPluginVersion = ( buildPath ) => {
+	const versionRegex = /\* Version: (\d+\.\d+\.\d+(?:-.+)?)/;
+	const pluginFilePath = `${ buildPath }/amp.php`;
 	const pluginFileContent = external_fs_default().readFileSync( pluginFilePath );
 
 	return versionRegex.exec( pluginFileContent )[ 1 ];
+};
+
+const createZipFile = ( zipName, buildPath ) => {
+	Object(external_child_process_.execSync)( `cd ${ buildPath } && zip -r ../${ zipName } .` );
+
+	return `${ external_path_default().dirname( buildPath ) }/${ zipName }`;
 };
 
 // CONCATENATED MODULE: ./src/index.js
 /**
  * External dependencies
  */
-
 
 
 
@@ -2428,15 +2437,16 @@ const getPluginVersion = () => {
 
 ( async () => {
 	const repoToken = Object(core.getInput)( 'repo-token', { required: true } );
-	const zipPath = Object(core.getInput)( 'zip', { required: true } );
-	const zipName = external_path_default().basename( zipPath );
+	const buildFolder = Object(core.getInput)( 'build-path', { required: true } );
+	const buildPath = `${ process.env.GITHUB_WORKSPACE }/${ buildFolder }`;
+	const zipName = 'amp.zip';
 
 	const { owner, repo } = github.context.repo;
 	const client = new githubClient( new github.GitHub( repoToken ), owner, repo );
 
 	const branch = getBranchName( github.context.ref );
 	const tag = getCanonicalTag( branch );
-	const pluginVersion = getPluginVersion();
+	const pluginVersion = getPluginVersion( buildPath );
 
 	Object(core.info)( `Plugin version: ${ pluginVersion }` );
 	Object(core.info)( `Fetching release details for the ${ branch } branch` );
@@ -2462,11 +2472,14 @@ const getPluginVersion = () => {
 		}
 	} catch ( error ) {
 		Object(core.info)( `Creating a release for '${ tag }'` );
-		const release = await client.createRelease( tag, tag, releaseDesc );
+		const release = await client.createRelease( tag, pluginVersion, releaseDesc );
 		uploadUrl = release.data.upload_url;
 	}
 
-	Object(core.info)( `Uploading ${ zipName }` );
+	Object(core.info)( 'Creating ZIP file' );
+	const zipPath = createZipFile( zipName, buildFolder );
+
+	Object(core.info)( `Uploading ${ zipName } asset` );
 	await client.uploadReleaseAsset( uploadUrl, zipName, zipPath );
 
 	Object(core.setOutput)( 'branch', branch );

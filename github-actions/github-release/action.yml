@@ -4,8 +4,8 @@ inputs:
   repo-token:
     description: GitHub secret token
     required: true
-  zip:
-    description: Built zip
+  build-path:
+    description: Path to built plugin
     required: true
 outputs:
   branch:

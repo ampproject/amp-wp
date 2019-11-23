@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import path from 'path';
 import { getInput, info, setFailed, setOutput } from '@actions/core';
 import { GitHub, context } from '@actions/github';
 
@@ -9,19 +8,20 @@ import { GitHub, context } from '@actions/github';
  * Internal dependencies
  */
 import GitHubClient from './githubClient.js';
-import { getBranchName, getCanonicalTag, getPluginVersion } from './utils.js';
+import { getBranchName, getCanonicalTag, getPluginVersion, createZipFile } from './utils.js';
 
 ( async () => {
 	const repoToken = getInput( 'repo-token', { required: true } );
-	const zipPath = getInput( 'zip', { required: true } );
-	const zipName = path.basename( zipPath );
+	const buildFolder = getInput( 'build-path', { required: true } );
+	const buildPath = `${ process.env.GITHUB_WORKSPACE }/${ buildFolder }`;
+	const zipName = 'amp.zip';
 
 	const { owner, repo } = context.repo;
 	const client = new GitHubClient( new GitHub( repoToken ), owner, repo );
 
 	const branch = getBranchName( context.ref );
 	const tag = getCanonicalTag( branch );
-	const pluginVersion = getPluginVersion();
+	const pluginVersion = getPluginVersion( buildPath );
 
 	info( `Plugin version: ${ pluginVersion }` );
 	info( `Fetching release details for the ${ branch } branch` );
@@ -47,11 +47,14 @@ import { getBranchName, getCanonicalTag, getPluginVersion } from './utils.js';
 		}
 	} catch ( error ) {
 		info( `Creating a release for '${ tag }'` );
-		const release = await client.createRelease( tag, tag, releaseDesc );
+		const release = await client.createRelease( tag, pluginVersion, releaseDesc );
 		uploadUrl = release.data.upload_url;
 	}
 
-	info( `Uploading ${ zipName }` );
+	info( 'Creating ZIP file' );
+	const zipPath = createZipFile( zipName, buildFolder );
+
+	info( `Uploading ${ zipName } asset` );
 	await client.uploadReleaseAsset( uploadUrl, zipName, zipPath );
 
 	setOutput( 'branch', branch );
