@@ -89,32 +89,6 @@ class Test_DOM_Element_List extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that the DOMElementList is immutable.
-	 *
-	 * @covers \Amp\AmpWP\Component\DOMElementList::add()
-	 * @covers \Amp\AmpWP\Component\DOMElementList::getIterator()
-	 */
-	public function test_dom_element_list_is_immutable() {
-		$dom              = new DOMDocument();
-		$tag_name         = 'amp-img';
-		$dom_element_list = new DOMElementList();
-
-		for ( $i = 0; $i < 5; $i++ ) {
-			$dom_element_list->add( AMP_DOM_Utils::create_node( $dom, $tag_name, [] ), '' );
-		}
-
-		foreach ( $dom_element_list as &$list_image ) {
-			$list_image->setAttribute( 'class', 'example-class' );
-		}
-
-		// If the DOMElementList is immutable, the class that was set above should not be present.
-		foreach ( $dom_element_list as $list_image ) {
-			$this->assertEmpty( $list_image->getAttribute( 'class' ) );
-			$this->assertEquals( $tag_name, $list_image->tagName );
-		}
-	}
-
-	/**
 	 * Test get_caption.
 	 *
 	 * @covers \Amp\AmpWP\Component\CaptionedSlide::get_caption()

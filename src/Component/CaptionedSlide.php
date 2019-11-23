@@ -57,6 +57,6 @@ final class CaptionedSlide implements HasCaption {
 	 * @return DOMNode
 	 */
 	public function get_slide_node() {
-		return $this->slide_node->cloneNode();
+		return $this->slide_node;
 	}
 }

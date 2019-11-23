@@ -35,7 +35,7 @@ final class DOMElementList implements IteratorAggregate, Countable {
 	 * @return self
 	 */
 	public function add( DOMElement $element, $caption = '' ) {
-		$this->elements[] = empty( $caption ) ? $element->cloneNode() : new CaptionedSlide( $element->cloneNode(), $caption );
+		$this->elements[] = empty( $caption ) ? $element : new CaptionedSlide( $element, $caption );
 		return $this;
 	}
 
@@ -48,14 +48,7 @@ final class DOMElementList implements IteratorAggregate, Countable {
 	 * @return ArrayIterator An iterator with the elements.
 	 */
 	public function getIterator() {
-		return new ArrayIterator(
-			array_map(
-				function( $element ) {
-					return $element instanceof DOMElement ? $element->cloneNode() : $element;
-				},
-				$this->elements
-			)
-		);
+		return new ArrayIterator( $this->elements );
 	}
 
 	/**
