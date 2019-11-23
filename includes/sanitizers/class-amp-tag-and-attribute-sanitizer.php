@@ -605,8 +605,15 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		// @todo Need to pass the $tag_spec['spec_name'] into the validation errors for each.
 		// After attributes have been sanitized (and potentially removed), if mandatory attribute(s) are missing, remove the element.
-		if ( $this->is_missing_mandatory_attribute( $merged_attr_spec_list, $node ) ) {
-			$this->remove_invalid_child( $node, [ 'code' => 'missing_mandatory_attribute' ] );
+		$missing_mandatory_attributes = $this->get_missing_mandatory_attributes( $merged_attr_spec_list, $node );
+		if ( ! empty( $missing_mandatory_attributes ) ) {
+			$this->remove_invalid_child(
+				$node,
+				[
+					'code'       => 'missing_mandatory_attribute',
+					'attributes' => $missing_mandatory_attributes,
+				]
+			);
 			return null;
 		}
 
@@ -649,18 +656,30 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @param array      $attr_spec The attribute specification.
 	 * @param DOMElement $node      The DOMElement of the node to check.
-	 * @return boolean $is_missing boolean Whether a required attribute is missing.
+	 * @return bool $is_missing boolean Whether a required attribute is missing.
 	 */
 	public function is_missing_mandatory_attribute( $attr_spec, DOMElement $node ) {
+		return 0 === count( $this->get_missing_mandatory_attributes( $attr_spec, $node ) );
+	}
+
+	/**
+	 * Get list of mandatory missing mandatory attributes.
+	 *
+	 * @param array      $attr_spec The attribute specification.
+	 * @param DOMElement $node      The DOMElement of the node to check.
+	 * @return string[] Names of missing attributes.
+	 */
+	private function get_missing_mandatory_attributes( $attr_spec, DOMElement $node ) {
+		$missing_attributes = [];
 		foreach ( $attr_spec as $attr_name => $attr_spec_rule_value ) {
 			if ( '\u' === substr( $attr_name, 0, 2 ) ) {
 				$attr_name = html_entity_decode( '&#x' . substr( $attr_name, 2 ) . ';' ); // Probably ⚡.
 			}
 			if ( ! $node->hasAttribute( $attr_name ) && AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_mandatory( $node, $attr_name, $attr_spec_rule_value ) ) {
-				return true;
+				$missing_attributes[] = $attr_name;
 			}
 		}
-		return false;
+		return $missing_attributes;
 	}
 
 	/**
@@ -942,7 +961,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			 * However, if there was only one spec for a given tag, then then validate_attr_spec_list_for_node() would
 			 * not have been called. and thus these checks need to be performed here as well.
 			 */
-			// @todo Actual AMP validator error codes should be used whenever possible.
+			// @todo Actual AMP validator error codes should be used whenever possible. And constants should be used.
+			// @todo The check methods should return an array of validation error data when failure.
 			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_value( $node, $attr_name, $attr_spec_rule ) ) {
 				$error_code = 'illegal_value';
@@ -957,7 +977,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				$error_code = 'illegal_value_for_case_insensitive_pattern';
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOWED_PROTOCOL ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_allowed_protocol( $node, $attr_name, $attr_spec_rule ) ) {
-				$error_code = 'illegal_url_protocol'; // @todo A javascript: protocol could be treated differently.
+				$error_code = 'illegal_url_protocol'; // @todo A javascript: protocol could be treated differently. It should have a JS error type.
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_valid_url( $node, $attr_name, $attr_spec_rule ) ) {
 				$error_code = 'invalid_url';
