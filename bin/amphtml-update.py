@@ -514,6 +514,11 @@ def GetTagSpec(tag_spec, attr_lists):
 
 				cdata_dict['css_spec'] = css_spec
 		if len( cdata_dict ) > 0:
+			if 'blacklisted_cdata_regex' in cdata_dict:
+				if 'error_message' not in cdata_dict['blacklisted_cdata_regex']:
+					raise Exception( 'Missing error_message for blacklisted_cdata_regex.' );
+				if cdata_dict['blacklisted_cdata_regex']['error_message'] not in ( 'CSS !important', 'contents', 'html comments' ):
+					raise Exception( 'Unexpected error_message "%s" for blacklisted_cdata_regex.' % cdata_dict['blacklisted_cdata_regex']['error_message'] );
 			tag_spec_dict['cdata'] = cdata_dict
 
 	return tag_spec_dict

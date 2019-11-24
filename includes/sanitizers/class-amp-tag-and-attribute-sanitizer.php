@@ -32,6 +32,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	const DUPLICATE_UNIQUE_TAG                 = 'DUPLICATE_UNIQUE_TAG';
 	const MANDATORY_CDATA_MISSING_OR_INCORRECT = 'MANDATORY_CDATA_MISSING_OR_INCORRECT';
 	const CDATA_TOO_LONG                       = 'CDATA_TOO_LONG';
+	const INVALID_CDATA_CSS_IMPORTANT          = 'INVALID_CDATA_CSS_IMPORTANT';
+	const INVALID_CDATA_CONTENTS               = 'INVALID_CDATA_CONTENTS';
+	const INVALID_CDATA_HTML_COMMENTS          = 'INVALID_CDATA_HTML_COMMENTS';
 	const INVALID_ATTR_VALUE                   = 'INVALID_ATTR_VALUE';
 	const INVALID_ATTR_VALUE_CASEI             = 'INVALID_ATTR_VALUE_CASEI';
 	const INVALID_ATTR_VALUE_REGEX             = 'INVALID_ATTR_VALUE_REGEX';
@@ -537,13 +540,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		// Remove element if it has illegal CDATA.
 		if ( ! empty( $cdata ) && $node instanceof DOMElement ) {
 			$validity = $this->validate_cdata_for_node( $node, $cdata );
-			if ( is_wp_error( $validity ) ) {
+			if ( true !== $validity ) {
 				$this->remove_invalid_child(
 					$node,
-					[
-						'code'    => $validity->get_error_code(),
-						'message' => $validity->get_error_message(), // @todo We need to ensure this gets translated.
-					]
+					[ 'code' => $validity ]
 				);
 				return null;
 			}
@@ -714,7 +714,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @param DOMElement $element    Element.
 	 * @param array      $cdata_spec CDATA.
-	 * @return true|WP_Error True when valid or error when invalid.
+	 * @return true|string True when valid or error code when invalid.
 	 */
 	private function validate_cdata_for_node( DOMElement $element, $cdata_spec ) {
 		if (
@@ -724,16 +724,29 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			// This would mean that AMP was disabled to not break the styling.
 			! ( 'style' === $element->nodeName && $element->hasAttribute( 'amp-custom' ) )
 		) {
-			return new WP_Error( self::CDATA_TOO_LONG );
+			return self::CDATA_TOO_LONG;
 		}
 		if ( isset( $cdata_spec['blacklisted_cdata_regex'] ) ) {
 			if ( preg_match( '@' . $cdata_spec['blacklisted_cdata_regex']['regex'] . '@u', $element->textContent ) ) {
-				return new WP_Error( self::CDATA_VIOLATES_BLACKLIST, $cdata_spec['blacklisted_cdata_regex']['error_message'] );
+				if ( isset( $cdata_spec['blacklisted_cdata_regex']['error_message'] ) ) {
+					// There are only a few error messages, so map them to error codes.
+					switch ( $cdata_spec['blacklisted_cdata_regex']['error_message'] ) {
+						case 'CSS !important':
+							return self::INVALID_CDATA_CSS_IMPORTANT;
+						case 'contents':
+							return self::INVALID_CDATA_CONTENTS;
+						case 'html comments':
+							return self::INVALID_CDATA_HTML_COMMENTS;
+					}
+				}
+
+				// Note: This fallback case is not currently reachable because all error messages are accounted for in the switch statement.
+				return self::CDATA_VIOLATES_BLACKLIST;
 			}
 		} elseif ( isset( $cdata_spec['cdata_regex'] ) ) {
 			$delimiter = false === strpos( $cdata_spec['cdata_regex'], '@' ) ? '@' : '#';
 			if ( ! preg_match( $delimiter . $cdata_spec['cdata_regex'] . $delimiter . 'u', $element->textContent ) ) {
-				return new WP_Error( self::MANDATORY_CDATA_MISSING_OR_INCORRECT );
+				return self::MANDATORY_CDATA_MISSING_OR_INCORRECT;
 			}
 		}
 		return true;
@@ -1618,7 +1631,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		$is_allowed_alt_name_attr = isset( $this->rev_alternate_attr_name_lookup[ $attr_name ], $attr_spec_list[ $this->rev_alternate_attr_name_lookup[ $attr_name ] ] );
 		if ( $is_allowed_alt_name_attr ) {
-			return true; // @todo Return error.
+			return true;
 		}
 
 		/*

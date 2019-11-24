@@ -1720,6 +1720,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE, AMP_Tag_And_Attribute_Sanitizer::INVALID_URL_PROTOCOL ],
 			],
+
+			'cdata_html_comments'                          => [
+				'<amp-geo layout="nodisplay"><script type="application/json"><!-- not allowed --></script></amp-geo>',
+				'<amp-geo layout="nodisplay"></amp-geo>',
+				[ 'amp-geo' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_HTML_COMMENTS ],
+			],
 		];
 	}
 
@@ -1870,6 +1877,18 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			'link_without_valid_mandatory_href'       => [
 				'<html amp><head><meta charset="utf-8"><link rel="manifest" href="https://bad@"></head><body></body></html>',
 				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
+			],
+			'cdata_css_important'                     => [
+				'<html amp><head><meta charset="utf-8"><style amp-custom>body { outline: solid 1px red !important; }</style></head><body></body></html>',
+				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_CSS_IMPORTANT ],
+			],
+			'cdata_contents'                          => [
+				'<html><head><meta charset="utf-8"><script type="application/ld+json"><!--{"@context":"http:\/\/schema.org"}--></script></head><body></body></html>',
+				'<html><head><meta charset="utf-8"></head><body></body></html>',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_HTML_COMMENTS ],
 			],
 		];
 
