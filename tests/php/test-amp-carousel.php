@@ -72,7 +72,7 @@ class Test_Carousel extends \WP_UnitTestCase {
 	/**
 	 * Gets the testing data for test_get_dimensions.
 	 *
-	 * @return array[] An associative array, including the $images argument and the expected return value.
+	 * @return array[] An associative array, including the DOMElementList and the expected return value.
 	 */
 	public function get_data_carousel_dimensions() {
 		$dom                 = new DOMDocument();

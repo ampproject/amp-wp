@@ -23,7 +23,7 @@ final class DOMElementList implements IteratorAggregate, Countable {
 	/**
 	 * The elements, possibly with captions.
 	 *
-	 * @var DOMElement[]
+	 * @var array
 	 */
 	public $elements = [];
 
@@ -31,7 +31,7 @@ final class DOMElementList implements IteratorAggregate, Countable {
 	 * Adds an element to the list, possibly with a caption.
 	 *
 	 * @param DOMElement $element The element to add, possibly an image.
-	 * @param string     $caption The caption to add.
+	 * @param string     $caption The caption to add, if any.
 	 * @return DOMElementList A clone of this list, with the new element added.
 	 */
 	public function add( DOMElement $element, $caption = '' ) {
