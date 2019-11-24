@@ -31,7 +31,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @var string
 	 */
-	const ILLEGAL_AT_RULE_ERROR_CODE = 'illegal_css_at_rule';
+	const ILLEGAL_AT_RULE_ERROR_CODE = 'illegal_css_at_rule'; // @todo CSS_SYNTAX_INVALID_AT_RULE
 
 	/**
 	 * Inline style selector's specificity multiplier, i.e. used to generate the number of ':not(#_)' placeholders.
@@ -326,10 +326,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	public static function get_css_parser_validation_error_codes() {
 		return [
 			'css_parse_error',
-			'excessive_css',
+			'excessive_css', // @todo STYLESHEET_TOO_LONG? But it's not technically the right error message?
 			self::ILLEGAL_AT_RULE_ERROR_CODE,
 			'illegal_css_important',
-			'illegal_css_property',
+			'illegal_css_property', // @todo CSS_SYNTAX_INVALID_PROPERTY_NOLIST
 			'unrecognized_css',
 			'disallowed_file_extension',
 			'file_path_not_found',

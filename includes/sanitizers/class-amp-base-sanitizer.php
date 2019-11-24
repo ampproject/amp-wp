@@ -551,13 +551,15 @@ abstract class AMP_Base_Sanitizer {
 
 		if ( $node instanceof DOMElement ) {
 			if ( ! isset( $error['code'] ) ) {
-				$error['code'] = AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE;
+				$error['code'] = AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG;
 			}
 
 			if ( ! isset( $error['type'] ) ) {
+				// @todo Also include javascript: protocol for URL errors.
 				$error['type'] = 'script' === $node->nodeName ? AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE : AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE;
 			}
 
+			// @todo Change from node_attributes to element_attributes to harmonize the two.
 			if ( ! isset( $error['node_attributes'] ) ) {
 				$error['node_attributes'] = [];
 				foreach ( $node->attributes as $attribute ) {
@@ -578,7 +580,7 @@ abstract class AMP_Base_Sanitizer {
 			}
 		} elseif ( $node instanceof DOMAttr ) {
 			if ( ! isset( $error['code'] ) ) {
-				$error['code'] = AMP_Validation_Error_Taxonomy::INVALID_ATTRIBUTE_CODE;
+				$error['code'] = AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR;
 			}
 			if ( ! isset( $error['type'] ) ) {
 				// If this is an attribute that begins with on, like onclick, it should be a js_error.

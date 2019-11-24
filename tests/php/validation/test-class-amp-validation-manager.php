@@ -235,7 +235,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 			'node_name'   => 'href',
 			'parent_name' => 'a',
 			'type'        => 'html_attribute_error',
-			'code'        => 'invalid_attribute',
+			'code'        => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
 		];
 		$excessive_css_error = [
 			'node_name' => 'style',
@@ -599,7 +599,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 			'amp_validation_error',
 			static function( $error, $context ) use ( $node, $that ) {
 				$error['filtered'] = true;
-				$that->assertEquals( AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE, $error['code'] );
+				$that->assertEquals( AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG, $error['code'] );
 				$that->assertSame( $node, $context['node'] );
 				return $error;
 			},
@@ -610,7 +610,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		AMP_Validation_Manager::add_validation_error(
 			[
 				'node_name'       => $this->node->nodeName,
-				'code'            => AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE,
+				'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 				'node_attributes' => [],
 			],
 			[
@@ -623,7 +623,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 			[
 				'node_name'       => 'img',
 				'sources'         => [],
-				'code'            => AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE,
+				'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 				'node_attributes' => [],
 				'filtered'        => true,
 			],
@@ -680,7 +680,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 
 		$validation_errors = [
 			[
-				'code'            => AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE,
+				'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 				'node_name'       => $this->disallowed_tag_name,
 				'parent_name'     => 'div',
 				'node_attributes' => [],
@@ -1540,7 +1540,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 
 		$validation_results                         = [
 			[
-				'error'       => [ 'code' => 'invalid_attribute' ],
+				'error'       => [ 'code' => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR ],
 				'sanitized'   => false,
 				'slug'        => '98765b4',
 				'term_status' => 0,

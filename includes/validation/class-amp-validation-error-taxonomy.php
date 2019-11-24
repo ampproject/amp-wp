@@ -121,24 +121,10 @@ class AMP_Validation_Error_Taxonomy {
 	const NO_FILTER_VALUE = '';
 
 	/**
-	 * Validation code for an invalid element.
-	 *
-	 * @var string
-	 */
-	const INVALID_ELEMENT_CODE = 'invalid_element';
-
-	/**
-	 * Validation code for an invalid attribute.
-	 *
-	 * @var string
-	 */
-	const INVALID_ATTRIBUTE_CODE = 'invalid_attribute';
-
-	/**
 	 * The 'type' of error for invalid HTML elements, like <frame>.
 	 *
-	 * These usually have the 'code' of 'invalid_element'.
-	 * Except for 'invalid_element' errors for a <script>, which have the JS_ERROR_TYPE.
+	 * These usually have the 'code' of AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG.
+	 * Except for AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG errors for a <script>, which have the JS_ERROR_TYPE.
 	 * This allows filtering by type in the taxonomy page, like displaying only HTML element errors, or only CSS errors.
 	 *
 	 * @var string
@@ -148,7 +134,6 @@ class AMP_Validation_Error_Taxonomy {
 	/**
 	 * The 'type' of error for invalid HTML attributes.
 	 *
-	 * These usually have the 'code' of 'invalid_attribute'.
 	 * Banned attributes include i-amp-*.
 	 * But on* attributes, like onclick, have the JS_ERROR_TYPE.
 	 *
@@ -157,7 +142,7 @@ class AMP_Validation_Error_Taxonomy {
 	const HTML_ATTRIBUTE_ERROR_TYPE = 'html_attribute_error';
 
 	/**
-	 * The 'type' of error that applies to the error 'code' of 'invalid_element' when the node is a <script>.
+	 * The 'type' of error that applies to the error 'code' of AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG when the node is a <script>.
 	 * This applies both when enqueuing a script, and when a <script> is echoed directly.
 	 *
 	 * @var string
@@ -684,17 +669,17 @@ class AMP_Validation_Error_Taxonomy {
 		foreach ( $validation_errors as $validation_error ) {
 			$code = isset( $validation_error['code'] ) ? $validation_error['code'] : null;
 
-			if ( self::INVALID_ELEMENT_CODE === $code ) {
+			if ( AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG === $code ) {
 				if ( ! isset( $removed_elements[ $validation_error['node_name'] ] ) ) {
 					$removed_elements[ $validation_error['node_name'] ] = 0;
 				}
 				++$removed_elements[ $validation_error['node_name'] ];
-			} elseif ( self::INVALID_ATTRIBUTE_CODE === $code ) {
+			} elseif ( AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR === $code ) {
 				if ( ! isset( $removed_attributes[ $validation_error['node_name'] ] ) ) {
 					$removed_attributes[ $validation_error['node_name'] ] = 0;
 				}
 				++$removed_attributes[ $validation_error['node_name'] ];
-			} elseif ( 'invalid_processing_instruction' === $code ) {
+			} elseif ( AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROCESSING_INSTRUCTION === $code ) {
 				if ( ! isset( $removed_pis[ $validation_error['node_name'] ] ) ) {
 					$removed_pis[ $validation_error['node_name'] ] = 0;
 				}
@@ -1768,9 +1753,9 @@ class AMP_Validation_Error_Taxonomy {
 	 */
 	public static function get_details_summary_label( $validation_error ) {
 		if (
-			self::INVALID_ATTRIBUTE_CODE === $validation_error['code'] ||
-			self::INVALID_ELEMENT_CODE === $validation_error['code'] ||
-			'invalid_processing_instruction' === $validation_error['code'] ||
+			AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR === $validation_error['code'] ||
+			AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG === $validation_error['code'] ||
+			AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROCESSING_INSTRUCTION === $validation_error['code'] ||
 			'duplicate_element' === $validation_error['code']
 		) {
 			$summary_label = sprintf( '<%s>', $validation_error['parent_name'] );
@@ -2095,7 +2080,7 @@ class AMP_Validation_Error_Taxonomy {
 				</p>
 			</dd>
 
-			<?php if ( self::INVALID_ELEMENT_CODE === $validation_error['code'] && isset( $validation_error['node_attributes'] ) ) : ?>
+			<?php if ( AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG === $validation_error['code'] && isset( $validation_error['node_attributes'] ) ) : ?>
 				<dt><?php esc_html_e( 'Invalid markup', 'amp' ); ?></dt>
 				<dd class="detailed">
 					<code>
@@ -2110,7 +2095,7 @@ class AMP_Validation_Error_Taxonomy {
 						</mark>
 					</code>
 				</dd>
-			<?php elseif ( self::INVALID_ATTRIBUTE_CODE === $validation_error['code'] && isset( $validation_error['element_attributes'] ) ) : ?>
+			<?php elseif ( AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR === $validation_error['code'] && isset( $validation_error['element_attributes'] ) ) : ?>
 				<dt><?php esc_html_e( 'Invalid markup', 'amp' ); ?></dt>
 				<dd class="detailed">
 					<code>
@@ -2872,12 +2857,14 @@ class AMP_Validation_Error_Taxonomy {
 	/**
 	 * Get Error Title from Code
 	 *
+	 * @todo The message here should be constructed in the sanitizer that emitted the validation error in the first place.
+	 *
 	 * @param array $validation_error Validation error.
 	 * @return string Title with some formatting markup.
 	 */
 	public static function get_error_title_from_code( $validation_error ) {
 		switch ( $validation_error['code'] ) {
-			case self::INVALID_ELEMENT_CODE:
+			case AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG:
 				if ( self::is_validation_error_for_js_script_element( $validation_error ) ) {
 					$title = esc_html__( 'Invalid script', 'amp' );
 
@@ -2892,13 +2879,13 @@ class AMP_Validation_Error_Taxonomy {
 					$title .= sprintf( ': <code>&lt;%s&gt;</code>', esc_html( $validation_error['node_name'] ) );
 				}
 				return $title;
-			case self::INVALID_ATTRIBUTE_CODE:
+			case AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR:
 				return sprintf(
 					'%s: <code>%s</code>',
 					esc_html__( 'Invalid attribute', 'amp' ),
 					esc_html( $validation_error['node_name'] )
 				);
-			case 'invalid_processing_instruction':
+			case AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROCESSING_INSTRUCTION:
 				return sprintf(
 					'%s: <code>&lt;%s%s&hellip;%s&gt;</code>',
 					esc_html__( 'Invalid processing instruction', 'amp' ),
@@ -2967,9 +2954,9 @@ class AMP_Validation_Error_Taxonomy {
 			case 'element_attributes':
 				return __( 'Element attributes', 'amp' );
 			case 'node_name':
-				if ( self::INVALID_ATTRIBUTE_CODE === $validation_error['code'] ) {
+				if ( AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR === $validation_error['code'] ) {
 					return __( 'Attribute name', 'amp' );
-				} elseif ( self::INVALID_ELEMENT_CODE === $validation_error['code'] ) {
+				} elseif ( AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG === $validation_error['code'] ) {
 					return __( 'Element name', 'amp' );
 				} else {
 					return __( 'Node name', 'amp' );

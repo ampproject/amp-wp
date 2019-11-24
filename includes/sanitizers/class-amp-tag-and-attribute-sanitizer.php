@@ -25,6 +25,26 @@
  */
 class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
+	const DISALLOWED_TAG                       = 'DISALLOWED_TAG';
+	const DISALLOWED_ATTR                      = 'DISALLOWED_ATTR';
+	const DISALLOWED_PROCESSING_INSTRUCTION    = 'DISALLOWED_PROCESSING_INSTRUCTION';
+	const CDATA_VIOLATES_BLACKLIST             = 'CDATA_VIOLATES_BLACKLIST';
+	const DUPLICATE_UNIQUE_TAG                 = 'DUPLICATE_UNIQUE_TAG';
+	const MANDATORY_CDATA_MISSING_OR_INCORRECT = 'MANDATORY_CDATA_MISSING_OR_INCORRECT';
+	const CDATA_TOO_LONG                       = 'CDATA_TOO_LONG';
+	const INVALID_ATTR_VALUE                   = 'INVALID_ATTR_VALUE';
+	const INVALID_ATTR_VALUE_CASEI             = 'INVALID_ATTR_VALUE_CASEI';
+	const INVALID_ATTR_VALUE_REGEX             = 'INVALID_ATTR_VALUE_REGEX';
+	const INVALID_ATTR_VALUE_REGEX_CASEI       = 'INVALID_ATTR_VALUE_REGEX_CASEI';
+	const INVALID_URL_PROTOCOL                 = 'INVALID_URL_PROTOCOL';
+	const INVALID_URL                          = 'INVALID_URL';
+	const DISALLOWED_RELATIVE_URL              = 'DISALLOWED_RELATIVE_URL';
+	const DISALLOWED_EMPTY                     = 'DISALLOWED_EMPTY';
+	const DISALLOWED_DOMAIN                    = 'DISALLOWED_DOMAIN';
+	const INVALID_BLACKLISTED_VALUE_REGEX      = 'INVALID_BLACKLISTED_VALUE_REGEX';
+	const DISALLOWED_PROPERTY_IN_ATTR_VALUE    = 'DISALLOWED_PROPERTY_IN_ATTR_VALUE';
+	const ATTR_REQUIRED_BUT_MISSING            = 'ATTR_REQUIRED_BUT_MISSING';
+
 	/**
 	 * Allowed tags.
 	 *
@@ -298,7 +318,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					);
 				}
 			} elseif ( $this_child instanceof DOMProcessingInstruction ) {
-				$this->remove_invalid_child( $this_child, [ 'code' => 'invalid_processing_instruction' ] );
+				$this->remove_invalid_child( $this_child, [ 'code' => self::DISALLOWED_PROCESSING_INSTRUCTION ] );
 			}
 			$this_child = $next_child;
 		}
@@ -476,7 +496,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 			// If no attribute spec lists match, then the element must be removed.
 			if ( empty( $attr_spec_scores ) ) {
-				// @todo How can we tell the reason for removal if none of the tag specs matched? Ignore attribute values?
 				$this->remove_node( $node );
 				return null;
 			}
@@ -519,7 +538,13 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		if ( ! empty( $cdata ) && $node instanceof DOMElement ) {
 			$validity = $this->validate_cdata_for_node( $node, $cdata );
 			if ( is_wp_error( $validity ) ) {
-				$this->remove_invalid_child( $node, [ 'code' => 'illegal_cdata' ] );
+				$this->remove_invalid_child(
+					$node,
+					[
+						'code'    => $validity->get_error_code(),
+						'message' => $validity->get_error_message(), // @todo We need to ensure this gets translated.
+					]
+				);
 				return null;
 			}
 		}
@@ -547,7 +572,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			if ( ! empty( $this->visited_unique_tag_specs[ $node->nodeName ][ $tag_spec_key ] ) ) {
 				$removed = $this->remove_invalid_child(
 					$node,
-					[ 'code' => 'duplicate_element' ]
+					[ 'code' => self::DUPLICATE_UNIQUE_TAG ]
 				);
 			}
 			$this->visited_unique_tag_specs[ $node->nodeName ][ $tag_spec_key ] = true;
@@ -573,7 +598,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			}
 			$removed_attributes = [];
 
-			// @todo First needing to iterate over the $disallowed_attributes and if any are mandatory, skip removing attributes and instead remove the element.
 			foreach ( $disallowed_attributes as $disallowed_attribute ) {
 				/**
 				 * Returned vars.
@@ -611,7 +635,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			$this->remove_invalid_child(
 				$node,
 				[
-					'code'       => 'missing_mandatory_attribute',
+					'code'       => self::ATTR_REQUIRED_BUT_MISSING,
 					'attributes' => $missing_mandatory_attributes,
 				]
 			);
@@ -700,16 +724,16 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			// This would mean that AMP was disabled to not break the styling.
 			! ( 'style' === $element->nodeName && $element->hasAttribute( 'amp-custom' ) )
 		) {
-			return new WP_Error( 'excessive_bytes' );
+			return new WP_Error( self::CDATA_TOO_LONG );
 		}
 		if ( isset( $cdata_spec['blacklisted_cdata_regex'] ) ) {
 			if ( preg_match( '@' . $cdata_spec['blacklisted_cdata_regex']['regex'] . '@u', $element->textContent ) ) {
-				return new WP_Error( $cdata_spec['blacklisted_cdata_regex']['error_message'] );
+				return new WP_Error( self::CDATA_VIOLATES_BLACKLIST, $cdata_spec['blacklisted_cdata_regex']['error_message'] );
 			}
 		} elseif ( isset( $cdata_spec['cdata_regex'] ) ) {
 			$delimiter = false === strpos( $cdata_spec['cdata_regex'], '@' ) ? '@' : '#';
 			if ( ! preg_match( $delimiter . $cdata_spec['cdata_regex'] . $delimiter . 'u', $element->textContent ) ) {
-				return new WP_Error( 'cdata_regex' );
+				return new WP_Error( self::MANDATORY_CDATA_MISSING_OR_INCORRECT );
 			}
 		}
 		return true;
@@ -908,6 +932,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * Allowed values are found $this->globally_allowed_attributes and in parameter $attr_spec_list
 	 *
 	 * @see \AMP_Tag_And_Attribute_Sanitizer::validate_attr_spec_list_for_node()
+	 * @see https://github.com/ampproject/amphtml/blob/b692bf32880910cd52273cb41935098b86fb6725/validator/engine/validator.js#L3210-L3289
 	 *
 	 * @param DOMElement $node           Node.
 	 * @param array[]    $attr_spec_list Attribute spec list.
@@ -931,7 +956,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			 * remove in the first loop, then remove them in the second loop.
 			 */
 			if ( ! $this->is_amp_allowed_attribute( $attr_node, $attr_spec_list ) ) {
-				$attrs_to_remove[] = [ $attr_node, AMP_Validation_Error_Taxonomy::INVALID_ATTRIBUTE_CODE ];
+				$attrs_to_remove[] = [ $attr_node, self::DISALLOWED_ATTR ];
 				continue;
 			}
 
@@ -966,37 +991,38 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			// @todo The check methods should return an array of validation error data when failure.
 			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_value( $node, $attr_name, $attr_spec_rule ) ) {
-				$error_code = 'illegal_value';
+				$error_code = self::INVALID_ATTR_VALUE;
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_CASEI ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_value_casei( $node, $attr_name, $attr_spec_rule ) ) {
-				$error_code = 'illegal_case_insensitive_value';
+				$error_code = self::INVALID_ATTR_VALUE_CASEI;
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_REGEX ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_value_regex( $node, $attr_name, $attr_spec_rule ) ) {
-				$error_code = 'illegal_value_for_pattern';
+				$error_code = self::INVALID_ATTR_VALUE_REGEX;
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_REGEX_CASEI ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_value_regex_casei( $node, $attr_name, $attr_spec_rule ) ) {
-				$error_code = 'illegal_value_for_case_insensitive_pattern';
+				$error_code = self::INVALID_ATTR_VALUE_REGEX_CASEI;
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOWED_PROTOCOL ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_allowed_protocol( $node, $attr_name, $attr_spec_rule ) ) {
-				$error_code = 'illegal_url_protocol'; // @todo A javascript: protocol could be treated differently. It should have a JS error type.
+				$error_code = self::INVALID_URL_PROTOCOL; // @todo A javascript: protocol could be treated differently. It should have a JS error type.
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_valid_url( $node, $attr_name, $attr_spec_rule ) ) {
-				$error_code = 'invalid_url';
+				$error_code = self::INVALID_URL;
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_RELATIVE ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_disallowed_relative( $node, $attr_name, $attr_spec_rule ) ) {
-				$error_code = 'illegal_relative_url';
+				$error_code = self::DISALLOWED_RELATIVE_URL;
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_disallowed_empty( $node, $attr_name, $attr_spec_rule ) ) {
-				$error_code = 'illegal_empty_value';
+				$error_code = self::DISALLOWED_EMPTY;
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::DISALLOWED_DOMAIN ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_disallowed_domain( $node, $attr_name, $attr_spec_rule ) ) {
-				$error_code = 'illegal_url_host';
+				$error_code = self::DISALLOWED_DOMAIN;
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::BLACKLISTED_VALUE_REGEX ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_blacklisted_value_regex( $node, $attr_name, $attr_spec_rule ) ) {
-				$error_code = 'illegal_value_by_pattern';
+				$error_code = self::INVALID_BLACKLISTED_VALUE_REGEX;
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_PROPERTIES ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_value_properties( $node, $attr_name, $attr_spec_rule ) ) {
-				$error_code = 'illegal_value_properties'; // @todo Which property(s) in particular?
+				// @todo Should there be a separate validation error for each invalid property?
+				$error_code = self::DISALLOWED_PROPERTY_IN_ATTR_VALUE; // @todo Which property(s) in particular?
 			}
 
 			if ( isset( $error_code ) ) {
@@ -1592,7 +1618,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		$is_allowed_alt_name_attr = isset( $this->rev_alternate_attr_name_lookup[ $attr_name ], $attr_spec_list[ $this->rev_alternate_attr_name_lookup[ $attr_name ] ] );
 		if ( $is_allowed_alt_name_attr ) {
-			return true;
+			return true; // @todo Return error.
 		}
 
 		/*

@@ -73,14 +73,14 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 				'<p><img width="300" height="300" /></p>',
 				'<p></p>',
 				[],
-				[ 'invalid_element' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ],
 			],
 
 			'image_with_empty_src'                     => [
 				'<p><img src="" width="300" height="300" /></p>',
 				'<p></p>',
 				[],
-				[ 'invalid_element' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ],
 			],
 
 			'image_with_layout'                        => [
@@ -107,7 +107,7 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 				'<p><img src="    " width="300" height="300" /></p>',
 				'<p></p>',
 				[],
-				[ 'invalid_element' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ],
 			],
 
 			'image_with_empty_width_and_height'        => [
@@ -165,7 +165,7 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-img src="https://placehold.it/350x150" on="tap:my-lightbox" media="(min-width: 650px)" role="button" itemscope="image" tabindex="0" width="350" height="150" alt="ALT!" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/350x150" on="tap:my-lightbox" role="button" itemscope="image" tabindex="0" width="350" height="150" alt="ALT!"></noscript></amp-img>',
 				[],
 				[
-					'invalid_attribute', // The onclick attribute.
+					AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR, // The onclick attribute.
 				],
 			],
 
@@ -331,7 +331,7 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 				[
 					'add_noscript_fallback' => false,
 				],
-				array_fill( 0, 51, 'invalid_attribute' ),
+				array_fill( 0, 51, AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR ),
 			],
 
 			'image_block_with_lightbox'                => [

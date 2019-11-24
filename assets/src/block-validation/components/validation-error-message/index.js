@@ -25,7 +25,7 @@ const ValidationErrorMessage = ( { message, code, node_name: nodeName, parent_na
 		return message;
 	}
 
-	if ( 'invalid_element' === code && nodeName ) {
+	if ( 'DISALLOWED_TAG' === code && nodeName ) { // @todo Needs to be fleshed out.
 		return (
 			<>
 				{ __( 'Invalid element: ', 'amp' ) }
@@ -34,7 +34,7 @@ const ValidationErrorMessage = ( { message, code, node_name: nodeName, parent_na
 				</code>
 			</>
 		);
-	} else if ( 'invalid_attribute' === code && nodeName ) {
+	} else if ( 'DISALLOWED_ATTR' === code && nodeName ) { // @todo Needs to be fleshed out.
 		return (
 			<>
 				{ __( 'Invalid attribute: ', 'amp' ) }

@@ -1625,7 +1625,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				str_repeat( '<amp-geo layout="nodisplay"><script type="application/json">{}</script></amp-geo>', 2 ),
 				'<amp-geo layout="nodisplay"><script type="application/json">{}</script></amp-geo>',
 				[ 'amp-geo' ],
-				[ 'duplicate_element' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::DUPLICATE_UNIQUE_TAG ],
 			],
 
 			'amp-autocomplete'                             => [
@@ -1697,28 +1697,28 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				str_repeat( '<div>', 200 ) . '<bad>hello world!</bad>' . str_repeat( '</div>', 200 ),
 				str_repeat( '<div>', 200 ) . 'hello world!' . str_repeat( '</div>', 200 ),
 				[],
-				[ 'invalid_element' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ],
 			],
 
 			'invalid_php_pi'                               => [
 				'<?php $schema = get_post_meta(get_the_ID(), \'schema\', true); if(!empty($schema)) { echo $schema; } ?>',
 				'',
 				[],
-				[ 'invalid_processing_instruction' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROCESSING_INSTRUCTION ],
 			],
 
 			'invalid_xml_pi'                               => [
 				'<?xml version="1.0" encoding="utf-8"?>',
 				'',
 				[],
-				[ 'invalid_processing_instruction' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROCESSING_INSTRUCTION ],
 			],
 
 			'malformed_attribute_syntax_curly_quotes'      => [
 				'<a href=“%E2%80%9Chttps://example.com/path/to/post/%E2%80%9D“ target=“_blank“ rel=“noopener“>Whatever</a>',
 				'<a>Whatever</a>',
 				[],
-				[ 'invalid_attribute', 'invalid_attribute' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE, AMP_Tag_And_Attribute_Sanitizer::INVALID_URL_PROTOCOL ],
 			],
 		];
 	}
@@ -1810,25 +1810,25 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<html amp><head><meta charset="utf-8"><link rel="stylesheet" href="https://fonts.example.com/css?family=Bad"></head><body></body></html>', // phpcs:ignore
 				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
 				[],
-				[ 'invalid_attribute', 'missing_mandatory_attribute' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING, AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE_REGEX ],
 			],
 			'bad_meta_ua_compatible'                  => [
 				'<html amp><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=9,chrome=1"></head><body></body></html>',
 				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
 				[],
-				[ 'invalid_attribute', 'missing_mandatory_attribute' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING, AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE ],
 			],
 			'bad_meta_charset'                        => [
 				'<html amp><head><meta charset="latin-1"><title>Mojibake?</title></head><body></body></html>',
 				'<html amp><head><meta><title>Mojibake?</title></head><body></body></html>', // Note the charset attribute is removed because it violates the attribute spec, but the entire element is not removed because charset is not mandatory.
 				[],
-				[ 'invalid_attribute' ], // @todo Should actually be invalid_mandatory_attribute?
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR ], // @todo Should actually be invalid_mandatory_attribute?
 			],
 			'bad_meta_viewport'                       => [
 				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="maximum-scale=1.0"></head><body></body></html>',
 				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
 				[],
-				[ 'invalid_attribute', 'missing_mandatory_attribute' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING, AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE ],
 			],
 			'edge_meta_ua_compatible'                 => [
 				'<html amp><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"></head><body></body></html>',
@@ -1855,13 +1855,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<html amp><head><meta charset="UTF-8"><meta charset="utf-8"><body><p>Content</p></body></html>',
 				'<html amp><head><meta charset="UTF-8"></head><body><p>Content</p></body></html>',
 				[],
-				[ 'duplicate_element' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::DUPLICATE_UNIQUE_TAG ],
 			],
 			'head_with_duplicate_viewport'            => [
 				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,minimum-scale=1"><meta name="viewport" content="width=device-width"></head><body><p>Content</p></body></html>',
 				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,minimum-scale=1"></head><body><p>Content</p></body></html>',
 				[],
-				[ 'duplicate_element' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::DUPLICATE_UNIQUE_TAG ],
 			],
 			'meta_amp_script_src'                     => [
 				'<html amp><head><meta charset="utf-8"><meta name="amp-script-src" content="sha384-abc123 sha384-def456"></head><body></body></html>',
@@ -1915,10 +1915,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			',
 			[ 'amp-bind' ],
 			[
-				'illegal_cdata',
-				'invalid_attribute',
-				'invalid_element',
-				'invalid_element',
+				AMP_Tag_And_Attribute_Sanitizer::CDATA_TOO_LONG,
+				AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
+				AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
+				AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 			],
 		];
 
@@ -2022,7 +2022,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 					[
 						'node_name'       => 'amp-image',
 						'parent_name'     => 'body',
-						'code'            => 'invalid_element',
+						'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 						'node_attributes' => [
 							'src'    => '/none.jpg',
 							'width'  => '100',
@@ -2041,7 +2041,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 					[
 						'node_name'       => 'baz',
 						'parent_name'     => 'body',
-						'code'            => 'invalid_element',
+						'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 						'node_attributes' => [ 'class' => 'baz-invalid' ],
 						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
 					],
@@ -2055,7 +2055,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 					[
 						'node_name'       => 'amp-story-grid-layer',
 						'parent_name'     => 'body',
-						'code'            => 'invalid_element',
+						'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 						'node_attributes' => [ 'class' => 'a-invalid' ],
 						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
 					],
@@ -2069,7 +2069,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 					[
 						'node_name'       => 'foo',
 						'parent_name'     => 'body',
-						'code'            => 'invalid_element',
+						'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 						'node_attributes' => [ 'class' => 'foo-invalid' ],
 						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
 					],
@@ -2083,7 +2083,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 					[
 						'node_name'       => 'bazbar',
 						'parent_name'     => 'body',
-						'code'            => 'invalid_element',
+						'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 						'node_attributes' => [],
 						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
 					],
@@ -2108,14 +2108,14 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 					[
 						'node_name'       => 'invalid_p',
 						'parent_name'     => 'div',
-						'code'            => 'invalid_element',
+						'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 						'node_attributes' => [ 'id' => 'invalid' ],
 						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
 					],
 					[
 						'node_name'       => 'bazfoo',
 						'parent_name'     => 'div',
-						'code'            => 'invalid_element',
+						'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 						'node_attributes' => [],
 						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
 					],
@@ -2134,7 +2134,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 					[
 						'node_name'       => 'lili',
 						'parent_name'     => 'ul',
-						'code'            => 'invalid_element',
+						'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 						'node_attributes' => [],
 						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
 					],
@@ -2148,14 +2148,14 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 					[
 						'node_name'       => 'foo',
 						'parent_name'     => 'divs',
-						'code'            => 'invalid_element',
+						'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 						'node_attributes' => [],
 						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
 					],
 					[
 						'node_name'       => 'divs',
 						'parent_name'     => 'body',
-						'code'            => 'invalid_element',
+						'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 						'node_attributes' => [],
 						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
 					],

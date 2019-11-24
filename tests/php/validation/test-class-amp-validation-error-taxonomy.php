@@ -504,7 +504,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		$element_node_name   = 'nonexistent-element';
 		$validation_errors   = [
 			[
-				'code'      => 'invalid_attribute',
+				'code'      => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
 				'node_name' => $attribute_node_name,
 				'sources'   => [
 					[
@@ -514,7 +514,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 				],
 			],
 			[
-				'code'      => 'invalid_element',
+				'code'      => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 				'node_name' => $element_node_name,
 				'sources'   => [
 					[
@@ -1081,7 +1081,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 	public function test_get_details_summary_label() {
 		$validation_error = $this->get_mock_error();
 		$this->assertEquals( '<code>&lt;link&gt;</code>', AMP_Validation_Error_Taxonomy::get_details_summary_label( $validation_error ) );
-		$validation_error['code'] = AMP_Validation_Error_Taxonomy::INVALID_ATTRIBUTE_CODE;
+		$validation_error['code'] = AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR;
 		$this->assertEquals( '<code>&lt;head&gt;</code>', AMP_Validation_Error_Taxonomy::get_details_summary_label( $validation_error ) );
 		unset( $validation_error['node_name'] );
 		$this->assertEquals( '<code>&lt;head&gt;</code>', AMP_Validation_Error_Taxonomy::get_details_summary_label( $validation_error ) );
@@ -1173,7 +1173,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 	 */
 	public function test_render_single_url_error_details() {
 		$validation_error         = self::get_mock_error();
-		$validation_error['code'] = AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE;
+		$validation_error['code'] = AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG;
 		$term                     = self::factory()->term->create_and_get( [ 'taxonomy' => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] );
 		$html                     = AMP_Validation_Error_Taxonomy::render_single_url_error_details( $validation_error, $term );
 		$this->assertContains( '<dl class="detailed">', $html );
@@ -1187,7 +1187,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 	public function test_get_translated_type_name() {
 		// When the error doesn't have a type, this should return null.
 		$error_without_type = [
-			'code' => AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE,
+			'code' => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 		];
 		$this->assertEmpty( AMP_Validation_Error_Taxonomy::get_translated_type_name( $error_without_type ) );
 

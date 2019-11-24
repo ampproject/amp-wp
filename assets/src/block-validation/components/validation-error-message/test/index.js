@@ -15,17 +15,17 @@ describe( 'ValidationErrorMessage', () => {
 	} );
 
 	it( 'renders an error for an invalid element', () => {
-		const errorMessage = render( <ValidationErrorMessage code="invalid_element" node_name="foo" /> );
+		const errorMessage = render( <ValidationErrorMessage code="DISALLOWED_TAG" node_name="foo" /> );
 		expect( errorMessage ).toMatchSnapshot();
 	} );
 
 	it( 'renders an error for an invalid attribute', () => {
-		const errorMessage = render( <ValidationErrorMessage code="invalid_attribute" node_name="bar" /> );
+		const errorMessage = render( <ValidationErrorMessage code="DISALLOWED_ATTR" node_name="bar" /> );
 		expect( errorMessage ).toMatchSnapshot();
 	} );
 
 	it( 'renders an error for an invalid attribute with parent node', () => {
-		const errorMessage = render( <ValidationErrorMessage code="invalid_attribute" node_name="bar" parent_name="baz" /> );
+		const errorMessage = render( <ValidationErrorMessage code="DISALLOWED_ATTR" node_name="bar" parent_name="baz" /> );
 		expect( errorMessage ).toMatchSnapshot();
 	} );
 
