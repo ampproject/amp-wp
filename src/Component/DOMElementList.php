@@ -28,11 +28,11 @@ final class DOMElementList implements IteratorAggregate, Countable {
 	public $elements = [];
 
 	/**
-	 * Adds an image to the list.
+	 * Adds an element to the list, possibly with a caption.
 	 *
 	 * @param DOMElement $element The element to add, possibly an image.
 	 * @param string     $caption The caption to add.
-	 * @return self
+	 * @return DOMElementList A clone of this list, with the new element added.
 	 */
 	public function add( DOMElement $element, $caption = '' ) {
 		$cloned_list             = clone $this;
@@ -53,9 +53,9 @@ final class DOMElementList implements IteratorAggregate, Countable {
 	}
 
 	/**
-	 * Gets the count of the images.
+	 * Gets the count of the elements.
 	 *
-	 * @return int The number of images.
+	 * @return int The number of elements.
 	 */
 	public function count() {
 		return count( $this->elements );
