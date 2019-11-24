@@ -23,9 +23,9 @@ $amp_url = add_query_arg( amp_get_slug(), '1', $url );
 			<nav id="header">
 				<ul>
 					<li>
-						<img src="<?php echo esc_url( amp_get_asset_url( 'images/amp-white-icon.svg' ) ); ?>" alt="AMP logo">
-					</li>
-					<li>
+						<span>
+							<img src="<?php echo esc_url( amp_get_asset_url( 'images/amp-white-icon.svg' ) ); ?>" alt="AMP logo">
+						</span>
 						<span><?php esc_html_e( 'Paired Browsing', 'amp' ); ?></span>
 					</li>
 					<li>

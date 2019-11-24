@@ -29,12 +29,20 @@ body * {
 	margin: 0 10px;
 	padding: 0 40px;
 	list-style: none;
-	align-items: center;
 	height: 100%;
 }
 
 #header li {
-	margin: 0 5px;
+	align-items: center;
+	display: flex;
+	line-height: 1.5;
+}
+
+#header li:first-child img {
+	display: block;
+	width: 20px;
+	height: 20px;
+	margin-right: 0.5rem;
 }
 
 #header li:last-child {
@@ -47,15 +55,11 @@ body * {
 
 #exit-link::before {
 	text-decoration: none;
+	vertical-align: text-top;
 }
 
 #exit-link:hover {
 	text-decoration: underline;
-}
-
-#header img {
-	display: block;
-	width: 24px;
 }
 
 #non-amp,
