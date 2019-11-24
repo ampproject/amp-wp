@@ -12,7 +12,6 @@ import { useCallback, useEffect } from '@wordpress/element';
  * Internal dependencies
  */
 import { useStory } from '../../app';
-import useDoubleClick from '../../utils/useDoubleClick';
 import { getDefinitionForType } from '../../elements';
 import useCanvas from './useCanvas';
 
@@ -35,7 +34,6 @@ const Selection = styled.div`
 `;
 
 const Element = styled.div`
-	user-select: none;
 	${ ( { isPassive } ) => isPassive ? 'opacity: .4;' : 'cursor: pointer;' }
 `;
 
@@ -46,7 +44,7 @@ function Page() {
 	} = useStory();
 	const {
 		state: { isEditing, editingElement },
-		actions: { setBackgroundClickHandler, setEditingElement },
+		actions: { setBackgroundClickHandler },
 	} = useCanvas();
 	const handleSelectElement = useCallback( ( id, evt ) => {
 		if ( evt.metaKey ) {
@@ -56,20 +54,15 @@ function Page() {
 		}
 		evt.stopPropagation();
 	}, [ toggleElementIdInSelection, selectElementById ] );
-	const handleEnterEditMode = ( id ) => {
-		// Only edited element is selected.
-		selectElementById( id );
-		setEditingElement( id );
-	};
-	const getClickHandler = useDoubleClick( handleSelectElement, handleEnterEditMode );
 	const selectionProps = hasSelection ? getUnionSelection( selectedElements ) : {};
 	useEffect( () => {
 		setBackgroundClickHandler( () => clearSelection() );
 	}, [ setBackgroundClickHandler, clearSelection ] );
 	return (
 		<Background>
-			{ currentPage && currentPage.elements.map( ( { type, id, ...rest } ) => {
-				const { hasEditMode, Display, Edit } = getDefinitionForType( type );
+			{ currentPage && currentPage.elements.map( ( { type, ...rest } ) => {
+				const { Display, Edit } = getDefinitionForType( type );
+				const { id } = rest;
 
 				// Are we editing this element, display this as Edit component.
 				if ( editingElement === id ) {
@@ -89,10 +82,8 @@ function Page() {
 					);
 				}
 
-				// Otherwise display this as non-passive Display.
-				const onClick = hasEditMode ? getClickHandler( id ) : ( evt ) => handleSelectElement( id, evt );
 				return (
-					<Element key={ id } onClick={ onClick }>
+					<Element key={ id } onClick={ ( evt ) => handleSelectElement( id, evt ) }>
 						<Display { ...rest } />
 					</Element>
 				);

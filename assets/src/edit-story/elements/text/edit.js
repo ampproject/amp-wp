@@ -3,19 +3,20 @@
  */
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Editor, EditorState } from 'draft-js';
+import { Editor, EditorState, SelectionState } from 'draft-js';
 import { stateFromHTML } from 'draft-js-import-html';
 import { stateToHTML } from 'draft-js-export-html';
 
 /**
  * WordPress dependencies
  */
-import { useState, useEffect, useRef } from '@wordpress/element';
+import { useState, useEffect, useLayoutEffect, useRef, useCallback } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { useStory } from '../../app';
+import { useCanvas } from '../../components/canvas';
 import {
 	ElementWithPosition,
 	ElementWithSize,
@@ -59,26 +60,48 @@ function TextEdit( { content, color, backgroundColor, width, height, x, y, fontF
 		x,
 		y,
 	};
-	const initialState = EditorState.createWithContent( stateFromHTML( content ) );
-	const [ editorState, setEditorState ] = useState( initialState );
 	const { actions: { setPropertiesOnSelectedElements } } = useStory();
+	const { state: { editingElementState } } = useCanvas();
+	const { offset, clearContent } = editingElementState || {};
+	// To clear content, we can't just use createEmpty() or even pure white-space.
+	// The editor needs some content to insert the first character in,
+	// so we use a non-breaking space instead and trim it on save if still present.
+	const EMPTY_VALUE = '\u00A0';
+	const initialState = (
+		clearContent ?
+			EditorState.createWithContent( stateFromHTML( EMPTY_VALUE ) ) :
+			EditorState.createWithContent( stateFromHTML( content ) )
+	);
+	const [ editorState, setEditorState ] = useState( initialState );
+	const mustAddOffset = useRef( offset ? 2 : 0 );
 
-	// This is to allow the useEffect to *not* depend on editorState,
+	// This is to allow the finalizing useEffect to *not* depend on editorState,
 	// as would otherwise be a lint error.
 	const lastKnownState = useRef( null );
 
 	// This filters out illegal content on paste and updates state accordingly.
-	const updateEditorState = ( newEditorState ) => {
-		const filteredState = getFilteredState( newEditorState, editorState );
+	const updateEditorState = useCallback( ( newEditorState ) => {
+		let filteredState = getFilteredState( newEditorState, editorState );
+		if ( mustAddOffset.current ) {
+			// For some reason forced selection only sticks the second time around?
+			// Several other checks have been attempted here without success.
+			// Optimize at your own perril!
+			mustAddOffset.current--;
+			const key = filteredState.getCurrentContent().getFirstBlock().getKey();
+			const selectionState = new SelectionState( { anchorKey: key, anchorOffset: offset } );
+			filteredState = EditorState.forceSelection( filteredState, selectionState );
+		}
 		lastKnownState.current = filteredState.getCurrentContent();
 		setEditorState( filteredState );
-	};
+	}, [ editorState, offset ] );
 
 	// Finally update content for element on unmount.
 	useEffect( () => () => {
 		if ( setPropertiesOnSelectedElements && lastKnownState.current ) {
+			// Remember to trim any trailing non-breaking space.
 			setPropertiesOnSelectedElements( {
-				content: stateToHTML( lastKnownState.current, { defaultBlockTag: null } ),
+				content: stateToHTML( lastKnownState.current, { defaultBlockTag: null } )
+					.replace( /&nbsp;$/, '' ),
 			} );
 		}
 	}, [ setPropertiesOnSelectedElements ] );
@@ -89,9 +112,16 @@ function TextEdit( { content, color, backgroundColor, width, height, x, y, fontF
 	// Handle basic key commands such as bold, italic and underscore.
 	const handleKeyCommand = getHandleKeyCommand( setEditorState );
 
+	// Set focus when initially rendered
+	const editor = useRef( null );
+	useLayoutEffect( () => {
+		editor.current.focus();
+	}, [] );
+
 	return (
 		<Element { ...props } onClick={ onClick }>
 			<Editor
+				ref={ editor }
 				onChange={ updateEditorState }
 				editorState={ editorState }
 				handleKeyCommand={ handleKeyCommand }

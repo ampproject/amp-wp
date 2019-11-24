@@ -15,6 +15,7 @@ import Context from './context';
 
 function CanvasProvider( { children } ) {
 	const [ editingElement, setEditingElement ] = useState( false );
+	const [ editingElementState, setEditingElementState ] = useState( {} );
 
 	// It's a bit weird to directly set a state to be a function (as setFoo calls
 	// any function given to unwrap the inner value, which can then be a function),
@@ -37,16 +38,34 @@ function CanvasProvider( { children } ) {
 		[],
 	);
 
+	const setEditingElementWithoutState = useCallback(
+		( id ) => {
+			setEditingElement( id );
+			setEditingElementState( {} );
+		},
+		[],
+	);
+
+	const setEditingElementWithState = useCallback(
+		( id, state ) => {
+			setEditingElement( id );
+			setEditingElementState( state );
+		},
+		[],
+	);
+
 	const state = {
 		state: {
 			editingElement,
+			editingElementState,
 			isEditing: Boolean( editingElement ),
 			backgroundClickHandler: backgroundClick.handler,
 		},
 		actions: {
 			setBackgroundClickHandler,
 			clearBackgroundClickHandler,
-			setEditingElement,
+			setEditingElement: setEditingElementWithoutState,
+			setEditingElementWithState,
 			clearEditing,
 		},
 	};
