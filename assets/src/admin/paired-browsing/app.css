@@ -58,7 +58,8 @@ body * {
 	vertical-align: text-top;
 }
 
-#exit-link:hover {
+#exit-link:hover,
+#exit-link:focus {
 	text-decoration: underline;
 }
 
