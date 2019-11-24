@@ -26,8 +26,8 @@ body * {
 
 #header ul {
 	display: flex;
-	margin: 0 10px;
-	padding: 0 40px;
+	margin: 0;
+	padding: 0;
 	list-style: none;
 	height: 100%;
 }
@@ -38,7 +38,13 @@ body * {
 	line-height: 1.5;
 }
 
-#header li:first-child img {
+#header-logo {
+	position: absolute;
+	left: 20px;
+	height: 32px;
+}
+
+#header-logo img {
 	display: block;
 	width: 20px;
 	height: 20px;
@@ -46,7 +52,17 @@ body * {
 }
 
 #header li:last-child {
-	margin-left: auto;
+	position: absolute;
+	right: 20px;
+	height: 32px;
+}
+
+#header .iframe-label {
+	margin: 0 auto;
+	font-weight: 600;
+	width: 50%;
+	justify-content: center;
+	text-decoration: underline;
 }
 
 #exit-link {
@@ -67,6 +83,14 @@ body * {
 #amp {
 	flex: 1 0 auto;
 	align-self: stretch;
+}
+
+#non-amp {
+	border-right: 1px solid #0075c2;
+}
+
+#amp {
+	border-left: 1px solid #0075c2;
 }
 
 .container {
