@@ -25,7 +25,7 @@ final class DOMElementList implements IteratorAggregate, Countable {
 	 *
 	 * @var DOMElement[]
 	 */
-	private $elements = [];
+	public $elements = [];
 
 	/**
 	 * Adds an image to the list.
@@ -35,8 +35,9 @@ final class DOMElementList implements IteratorAggregate, Countable {
 	 * @return self
 	 */
 	public function add( DOMElement $element, $caption = '' ) {
-		$this->elements[] = empty( $caption ) ? $element : new CaptionedSlide( $element, $caption );
-		return $this;
+		$cloned_list             = clone $this;
+		$cloned_list->elements[] = empty( $caption ) ? $element : new CaptionedSlide( $element, $caption );
+		return $cloned_list;
 	}
 
 	/**

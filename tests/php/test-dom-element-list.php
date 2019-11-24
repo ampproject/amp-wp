@@ -57,7 +57,7 @@ class Test_DOM_Element_List extends \WP_UnitTestCase {
 	public function test_dom_element_list_add( $images, $expected_count ) {
 		$dom_element_list = new DOMElementList();
 		foreach ( $images as $image ) {
-			$dom_element_list->add( $image, '' );
+			$dom_element_list = $dom_element_list->add( $image, '' );
 		}
 
 		$this->assertEquals( $expected_count, $dom_element_list->count() );
@@ -76,7 +76,7 @@ class Test_DOM_Element_List extends \WP_UnitTestCase {
 	public function test_dom_element_list_get_iterator( $images, $expected_count ) {
 		$dom_element_list = new DOMElementList();
 		foreach ( $images as $image ) {
-			$dom_element_list->add( $image, '' );
+			$dom_element_list = $dom_element_list->add( $image, '' );
 		}
 
 		$iteration_count = 0;
