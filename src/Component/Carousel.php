@@ -40,7 +40,7 @@ final class Carousel {
 	 *
 	 * @var DOMDocument
 	 */
-	protected $dom;
+	private $dom;
 
 	/**
 	 * The images to add to the carousel.
