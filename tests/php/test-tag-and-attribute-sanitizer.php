@@ -69,6 +69,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-sticky-ad layout="nodisplay"><span>not allowed</span><amp-ad width="320" height="50" type="doubleclick" data-slot="/35096353/amptesting/formats/sticky"></amp-ad><i>not ok</i></amp-sticky-ad>',
 				'',
 				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ],
 			],
 
 			'amp-animation'                                => [
@@ -87,6 +88,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-call-tracking config="https://example.com/calltracking.json"><b>bad</b>--and not great: <a href="tel:123456789">+1 (23) 456-789</a><i>more bad</i>not great</amp-call-tracking>',
 				'',
 				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ],
 			],
 
 			'amp-call-tracking_blacklisted_config'         => [
@@ -1728,7 +1730,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<a href=“%E2%80%9Chttps://example.com/path/to/post/%E2%80%9D“ target=“_blank“ rel=“noopener“>Whatever</a>',
 				'<a>Whatever</a>',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE, AMP_Tag_And_Attribute_Sanitizer::INVALID_URL_PROTOCOL ],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_URL_PROTOCOL, AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE ],
 			],
 
 			'cdata_html_comments'                          => [
@@ -1763,54 +1765,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test sanitization of tags and attributes.
-	 *
-	 * @dataProvider get_body_data
-	 * @group        allowed-tags
-	 *
-	 * @param string     $source           Markup to process.
-	 * @param string     $expected         The markup to expect.
-	 * @param array      $expected_scripts The AMP component script names that are obtained through sanitization.
-	 * @param array|null $expected_errors  Expected validation errors, either codes or validation error subsets. @todo Make always default to array.
-	 */
-	public function test_body_sanitizer( $source, $expected = null, $expected_scripts = [], $expected_errors = null ) {
-		$expected      = isset( $expected ) ? $expected : $source;
-		$dom           = AMP_DOM_Utils::get_dom_from_content( $source );
-		$actual_errors = [];
-		$sanitizer     = new AMP_Tag_And_Attribute_Sanitizer(
-			$dom,
-			[
-				'validation_error_callback' => static function( $error ) use ( &$actual_errors ) {
-					$actual_errors[] = $error;
-					return true;
-				},
-			]
-		);
-		$sanitizer->sanitize();
-		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
-
-		$this->assertEqualMarkup( $expected, $content );
-		$this->assertEqualSets( $expected_scripts, array_keys( $sanitizer->get_scripts() ) );
-
-		if ( isset( $expected_errors ) ) {
-			$expected_errors = array_map(
-				static function ( $error ) {
-					if ( is_string( $error ) ) {
-						return [ 'code' => $error ];
-					} else {
-						return $error;
-					}
-				},
-				$expected_errors
-			);
-			$this->assertEquals( wp_list_pluck( $expected_errors, 'code' ), wp_list_pluck( $actual_errors, 'code' ) );
-			foreach ( $expected_errors as $i => $expected_error ) {
-				$this->assertArraySubset( $expected_error, $actual_errors[ $i ] );
-			}
-		}
-	}
-
-	/**
 	 * Get data for testing sanitization in the html.
 	 *
 	 * @return array[] Each array item is a tuple containing pre-sanitized string, sanitized string, and scripts
@@ -1841,13 +1795,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<html amp><head><meta charset="utf-8"><link rel="stylesheet" href="https://fonts.example.com/css?family=Bad"></head><body></body></html>', // phpcs:ignore
 				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING, AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE_REGEX ],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE_REGEX, AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING ],
 			],
 			'bad_meta_ua_compatible'                  => [
 				'<html amp><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=9,chrome=1"></head><body></body></html>',
 				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING, AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE ],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE, AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING ],
 			],
 			'bad_meta_charset'                        => [
 				'<html amp><head><meta charset="latin-1"><title>Mojibake?</title></head><body></body></html>',
@@ -1859,7 +1813,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="maximum-scale=1.0"></head><body></body></html>',
 				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING, AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE ],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE, AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING ],
 			],
 			'edge_meta_ua_compatible'                 => [
 				'<html amp><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"></head><body></body></html>',
@@ -1958,9 +1912,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			',
 			[ 'amp-bind' ],
 			[
+				AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 				AMP_Tag_And_Attribute_Sanitizer::CDATA_TOO_LONG,
 				AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
-				AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 				AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 			],
 		];
@@ -1996,7 +1950,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 		// Also include the body tests.
 		$html_doc_format = '<html amp><head><meta charset="utf-8"></head><body><!-- before -->%s<!-- after --></body></html>';
-		foreach ( $this->get_body_data() as $body_test ) {
+		foreach ( $this->get_body_data() as $name => $body_test ) {
 			$html_test = [
 				sprintf( $html_doc_format, array_shift( $body_test ) ),
 			];
@@ -2004,10 +1958,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			if ( isset( $expected ) ) {
 				$expected = sprintf( $html_doc_format, $expected );
 			}
-			$html_test[] = $expected;
-			$html_test[] = array_shift( $body_test );
-			$html_test[] = array_shift( $body_test );
-			$data[]      = $html_test;
+			$html_test[]      = $expected;
+			$expected_scripts = array_shift( $body_test );
+			$html_test[]      = isset( $expected_scripts ) ? $expected_scripts : [];
+			$html_test[]      = array_shift( $body_test );
+
+			$data[ "html_{$name}" ] = $html_test;
 		}
 
 		return $data;
@@ -2018,22 +1974,23 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 	 *
 	 * @dataProvider get_html_data
 	 * @group        allowed-tags
+	 * @covers AMP_Tag_And_Attribute_Sanitizer::sanitize()
 	 *
-	 * @param string     $source               Markup to process.
-	 * @param string     $expected             The markup to expect.
-	 * @param array      $expected_scripts     The AMP component script names that are obtained through sanitization.
-	 * @param array|null $expected_error_codes Expected validation error codes.
+	 * @param string     $source           Markup to process.
+	 * @param string     $expected         The markup to expect.
+	 * @param array      $expected_scripts The AMP component script names that are obtained through sanitization.
+	 * @param array|null $expected_errors  Expected validation errors, either codes or validation error subsets. @todo Make always default to array.
 	 */
-	public function test_html_sanitizer( $source, $expected = null, $expected_scripts = [], $expected_error_codes = null ) {
-		$expected           = isset( $expected ) ? $expected : $source;
-		$dom                = AMP_DOM_Utils::get_dom( $source );
-		$actual_error_codes = [];
-		$sanitizer          = new AMP_Tag_And_Attribute_Sanitizer(
+	public function test_sanitize( $source, $expected = null, $expected_scripts = [], $expected_errors = null ) {
+		$expected      = isset( $expected ) ? $expected : $source;
+		$dom           = AMP_DOM_Utils::get_dom( $source );
+		$actual_errors = [];
+		$sanitizer     = new AMP_Tag_And_Attribute_Sanitizer(
 			$dom,
 			[
 				'use_document_element'      => true,
-				'validation_error_callback' => static function( $error ) use ( &$actual_error_codes ) {
-					$actual_error_codes[] = $error['code'];
+				'validation_error_callback' => static function( $error ) use ( &$actual_errors ) {
+					$actual_errors[] = $error;
 					return true;
 				},
 			]
@@ -2042,13 +1999,60 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 		$content = AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
 		$this->assertEqualMarkup( $expected, $content );
 
-		if ( is_array( $expected_error_codes ) ) {
-			$this->assertEqualSets( $expected_error_codes, $actual_error_codes );
-		}
+		$this->assertEqualSets( $expected_scripts, array_keys( $sanitizer->get_scripts() ) );
 
-		if ( is_array( $expected_scripts ) ) {
-			$this->assertEqualSets( $expected_scripts, array_keys( $sanitizer->get_scripts() ) );
+		if ( isset( $expected_errors ) ) {
+			$expected_errors = array_map(
+				static function ( $error ) {
+					if ( is_string( $error ) ) {
+						return [ 'code' => $error ];
+					} else {
+						return $error;
+					}
+				},
+				$expected_errors
+			);
+			$this->assertEquals( wp_list_pluck( $expected_errors, 'code' ), wp_list_pluck( $actual_errors, 'code' ) );
+			foreach ( $expected_errors as $i => $expected_error ) {
+				$this->assertArraySubset( $expected_error, $actual_errors[ $i ] );
+			}
 		}
+	}
+
+	/**
+	 * Ensure that sanitizing with use_document_element arg not supplied works as expected.
+	 *
+	 * @covers AMP_Tag_And_Attribute_Sanitizer::sanitize()
+	 */
+	public function test_sanitize_body_only() {
+		$source   = '<b>Hello</b><script>document.write("hi");</script><amp-sidebar></amp-sidebar>';
+		$expected = '<b>Hello</b><amp-sidebar></amp-sidebar>';
+
+		$dom           = AMP_DOM_Utils::get_dom( $source );
+		$actual_errors = [];
+		$sanitizer     = new AMP_Tag_And_Attribute_Sanitizer(
+			$dom,
+			[
+				'use_document_element'      => false,
+				'validation_error_callback' => static function( $error ) use ( &$actual_errors ) {
+					$actual_errors[] = $error;
+					return true;
+				},
+			]
+		);
+
+		$sanitizer->sanitize();
+		$actual = AMP_DOM_Utils::get_content_from_dom( $dom );
+		$this->assertEquals( $expected, $actual );
+		$this->assertEqualSets( [ 'amp-sidebar' ], array_keys( $sanitizer->get_scripts() ) );
+
+		$this->assertCount( 1, $actual_errors );
+		$this->assertArraySubset(
+			[
+				'code' => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG, // @todo Should be DISALLOWED_SCRIPT_TAG.
+			],
+			$actual_errors[0]
+		);
 	}
 
 	/**
