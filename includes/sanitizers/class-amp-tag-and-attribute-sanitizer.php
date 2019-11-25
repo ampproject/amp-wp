@@ -466,6 +466,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			} else {
 				$invalid_rule_spec_list[] = [
 					'error'    => $validity,
+					// @todo The tag_spec should be included always, whenever a validation error is raised. Or rather, just the spec_name. The spec_url can be looked up.
 					'tag_spec' => $rule_spec[ AMP_Rule_Spec::TAG_SPEC ],
 				];
 			}
@@ -477,7 +478,15 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				// If there was only one tag spec candidate that failed, use its error code for removing the node,
 				// since it's we know it is the specific reason for why the node had to be removed.
 				// This is the normal case.
-				$this->remove_invalid_child( $node, [ 'code' => $invalid_rule_spec_list[0]['error'] ] ); // @todo Need to pass tag_spec.
+				$this->remove_invalid_child(
+					$node,
+					array_merge(
+						$invalid_rule_spec_list[0]['error'],
+						[
+							'tag_spec' => $invalid_rule_spec_list[0]['tag_spec'],
+						]
+					)
+				);
 			} else {
 				$this->remove_node( $node );
 			}
@@ -563,10 +572,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		if ( ! empty( $cdata ) && $node instanceof DOMElement ) {
 			$validity = $this->validate_cdata_for_node( $node, $cdata );
 			if ( true !== $validity ) {
-				$this->remove_invalid_child(
-					$node,
-					[ 'code' => $validity ]
-				);
+				// @todo Need to pass tag_spec.
+				$this->remove_invalid_child( $node, $validity );
 				return null;
 			}
 		}
@@ -594,6 +601,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			if ( ! empty( $this->visited_unique_tag_specs[ $node->nodeName ][ $tag_spec_key ] ) ) {
 				$removed = $this->remove_invalid_child(
 					$node,
+					// @todo Need to pass tag_spec.
 					[ 'code' => self::DUPLICATE_UNIQUE_TAG ]
 				);
 			}
@@ -657,13 +665,13 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		// @todo Need to pass the $tag_spec['spec_name'] into the validation errors for each.
 		// After attributes have been sanitized (and potentially removed), if mandatory attribute(s) are missing, remove the element.
 		$missing_mandatory_attributes = $this->get_missing_mandatory_attributes( $merged_attr_spec_list, $node );
 		if ( ! empty( $missing_mandatory_attributes ) ) {
 			$this->remove_invalid_child(
 				$node,
 				[
+					// @todo Need to pass the $tag_spec['spec_name'] into the validation errors for each.
 					'code'       => self::ATTR_REQUIRED_BUT_MISSING,
 					'attributes' => $missing_mandatory_attributes,
 				]
@@ -743,7 +751,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @param DOMElement $element    Element.
 	 * @param array      $cdata_spec CDATA.
-	 * @return true|string True when valid or error code when invalid.
+	 * @return true|array True when valid or error data when invalid.
 	 */
 	private function validate_cdata_for_node( DOMElement $element, $cdata_spec ) {
 		if (
@@ -753,7 +761,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			// This would mean that AMP was disabled to not break the styling.
 			! ( 'style' === $element->nodeName && $element->hasAttribute( 'amp-custom' ) )
 		) {
-			return self::CDATA_TOO_LONG;
+			return [
+				'code'      => self::CDATA_TOO_LONG,
+				'max_bytes' => $cdata_spec['max_bytes'],
+			];
 		}
 		if ( isset( $cdata_spec['blacklisted_cdata_regex'] ) ) {
 			if ( preg_match( '@' . $cdata_spec['blacklisted_cdata_regex']['regex'] . '@u', $element->textContent ) ) {
@@ -761,21 +772,21 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					// There are only a few error messages, so map them to error codes.
 					switch ( $cdata_spec['blacklisted_cdata_regex']['error_message'] ) {
 						case 'CSS !important':
-							return self::INVALID_CDATA_CSS_IMPORTANT;
+							return [ 'code' => self::INVALID_CDATA_CSS_IMPORTANT ];
 						case 'contents':
-							return self::INVALID_CDATA_CONTENTS;
+							return [ 'code' => self::INVALID_CDATA_CONTENTS ];
 						case 'html comments':
-							return self::INVALID_CDATA_HTML_COMMENTS;
+							return [ 'code' => self::INVALID_CDATA_HTML_COMMENTS ];
 					}
 				}
 
 				// Note: This fallback case is not currently reachable because all error messages are accounted for in the switch statement.
-				return self::CDATA_VIOLATES_BLACKLIST;
+				return [ 'code' => self::CDATA_VIOLATES_BLACKLIST ];
 			}
 		} elseif ( isset( $cdata_spec['cdata_regex'] ) ) {
 			$delimiter = false === strpos( $cdata_spec['cdata_regex'], '@' ) ? '@' : '#';
 			if ( ! preg_match( $delimiter . $cdata_spec['cdata_regex'] . $delimiter . 'u', $element->textContent ) ) {
-				return self::MANDATORY_CDATA_MISSING_OR_INCORRECT;
+				return [ 'code' => self::MANDATORY_CDATA_MISSING_OR_INCORRECT ];
 			}
 		}
 		return true;
@@ -795,29 +806,40 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @param DOMElement $node     The node to validate.
 	 * @param array      $tag_spec The specification.
-	 * @return true|string True if node is valid for spec, or error code if otherwise.
+	 * @return true|array True if node is valid for spec, or error data array if otherwise.
 	 */
 	private function validate_tag_spec_for_node( DOMElement $node, $tag_spec ) {
 
 		if ( ! empty( $tag_spec[ AMP_Rule_Spec::MANDATORY_PARENT ] ) && ! $this->has_parent( $node, $tag_spec[ AMP_Rule_Spec::MANDATORY_PARENT ] ) ) {
-			return self::WRONG_PARENT_TAG; // @todo Pass back the expected parent tag name.
+			return [
+				'code'             => self::WRONG_PARENT_TAG,
+				'mandatory_parent' => $tag_spec[ AMP_Rule_Spec::MANDATORY_PARENT ],
+			];
 		}
 
 		// Extension scripts must be in the head. Note this currently never fails because all AMP scripts are moved to the head before sanitization.
 		if ( isset( $tag_spec['extension_spec'] ) && ! $this->has_parent( $node, 'head' ) ) {
-			return self::WRONG_PARENT_TAG;
+			return [
+				'code' => self::WRONG_PARENT_TAG,
+			];
 		}
 
 		if ( ! empty( $tag_spec[ AMP_Rule_Spec::DISALLOWED_ANCESTOR ] ) ) {
 			foreach ( $tag_spec[ AMP_Rule_Spec::DISALLOWED_ANCESTOR ] as $disallowed_ancestor_node_name ) {
 				if ( $this->has_ancestor( $node, $disallowed_ancestor_node_name ) ) {
-					return self::DISALLOWED_TAG_ANCESTOR; // @todo Need to pass back the ancestor that is a problem.
+					return [
+						'code'                => self::DISALLOWED_TAG_ANCESTOR,
+						'disallowed_ancestor' => $disallowed_ancestor_node_name,
+					];
 				}
 			}
 		}
 
 		if ( ! empty( $tag_spec[ AMP_Rule_Spec::MANDATORY_ANCESTOR ] ) && ! $this->has_ancestor( $node, $tag_spec[ AMP_Rule_Spec::MANDATORY_ANCESTOR ] ) ) {
-			return self::MANDATORY_TAG_ANCESTOR; // @todo Need to pass back the missing mandatory ancestor.
+			return [
+				'code'               => self::MANDATORY_TAG_ANCESTOR,
+				'mandatory_ancestor' => $tag_spec[ AMP_Rule_Spec::MANDATORY_ANCESTOR ],
+			];
 		}
 
 		if ( empty( $tag_spec[ AMP_Rule_Spec::CHILD_TAGS ] ) ) {
@@ -1801,7 +1823,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * Loop through node's descendants and remove the ones that are not whitelisted.
 	 *
 	 * @param DOMElement $node                Node.
-	 * @param array      $allowed_descendants List of allowed descendant tags.
+	 * @param string[]   $allowed_descendants List of allowed descendant tags.
 	 */
 	private function remove_disallowed_descendants( DOMElement $node, $allowed_descendants ) {
 		if ( ! $node->hasChildNodes() ) {
@@ -1818,7 +1840,14 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		foreach ( $child_elements as $child_element ) {
 			if ( ! in_array( $child_element->nodeName, $allowed_descendants, true ) ) {
-				$this->remove_invalid_child( $child_element, [ 'code' => self::DISALLOWED_DESCENDANT_TAG ] );
+				$this->remove_invalid_child(
+					$child_element,
+					[
+						// @todo Need to pass tag_spec.
+						'code'                => self::DISALLOWED_DESCENDANT_TAG,
+						'allowed_descendants' => $allowed_descendants,
+					]
+				);
 			} else {
 				$this->remove_disallowed_descendants( $child_element, $allowed_descendants );
 			}
@@ -1837,7 +1866,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *     @type int   $mandatory_num_child_tags     Mandatory number of child tags.
 	 *     @type int   $mandatory_min_num_child_tags Mandatory minimum number of child tags.
 	 * }
-	 * @return true|string True if the element satisfies the requirements, or error code if it should be removed. @todo Return validation error array instead?
+	 * @return true|array True if the element satisfies the requirements, or error data array if it should be removed.
 	 */
 	private function check_valid_children( DOMElement $node, $child_tags ) {
 		$child_elements = [];
@@ -1850,33 +1879,51 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		// If the first element is not of the required type, invalidate the entire element.
 		if ( isset( $child_tags['first_child_tag_name_oneof'] ) && ! empty( $child_elements[0] ) && ! in_array( $child_elements[0]->nodeName, $child_tags['first_child_tag_name_oneof'], true ) ) {
-			return self::DISALLOWED_FIRST_CHILD_TAG; // @todo Would be better if the name of the child were included as context.
+			return [
+				'code'                       => self::DISALLOWED_FIRST_CHILD_TAG,
+				'first_child_tag'            => $child_elements[0]->nodeName,
+				'first_child_tag_name_oneof' => $child_tags['first_child_tag_name_oneof'],
+			];
 		}
 
 		// Verify that all of the child are among the set of allowed elements.
 		if ( isset( $child_tags['child_tag_name_oneof'] ) ) {
 			foreach ( $child_elements as $child_element ) {
 				if ( ! in_array( $child_element->nodeName, $child_tags['child_tag_name_oneof'], true ) ) {
-					return self::DISALLOWED_CHILD_TAG; // @todo Would be better if the name of the child were included as context.
+					return [
+						'code'                 => self::DISALLOWED_CHILD_TAG,
+						'child_tag'            => $child_element->nodeName,
+						'child_tag_name_oneof' => $child_tags['child_tag_name_oneof'],
+					];
 				}
 			}
 		}
 
 		// If there aren't the exact number of elements, then mark this $node as being invalid.
 		if ( isset( $child_tags['mandatory_num_child_tags'] ) ) {
-			if ( count( $child_elements ) === $child_tags['mandatory_num_child_tags'] ) {
+			$child_element_count = count( $child_elements );
+			if ( $child_element_count === $child_tags['mandatory_num_child_tags'] ) {
 				return true;
 			} else {
-				return self::INCORRECT_NUM_CHILD_TAGS;
+				return [
+					'code'                     => self::INCORRECT_NUM_CHILD_TAGS,
+					'children_count'           => $child_element_count,
+					'mandatory_num_child_tags' => $child_tags['mandatory_num_child_tags'],
+				];
 			}
 		}
 
 		// If there aren't enough elements, then mark this $node as being invalid.
 		if ( isset( $child_tags['mandatory_min_num_child_tags'] ) ) {
-			if ( count( $child_elements ) >= $child_tags['mandatory_min_num_child_tags'] ) {
+			$child_element_count = count( $child_elements );
+			if ( $child_element_count >= $child_tags['mandatory_min_num_child_tags'] ) {
 				return true;
 			} else {
-				return self::INCORRECT_MIN_NUM_CHILD_TAGS;
+				return [
+					'code'                         => self::INCORRECT_MIN_NUM_CHILD_TAGS,
+					'children_count'               => $child_element_count,
+					'mandatory_min_num_child_tags' => $child_tags['mandatory_min_num_child_tags'],
+				];
 			}
 		}
 
@@ -1993,7 +2040,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			$this->remove_invalid_child( $node );
 		}
 
-		// @todo Does this parent removal even make sense anymore?
+		// @todo Does this parent removal even make sense anymore? Perhaps limit to <p> only.
 		while ( $parent && ! $parent->hasChildNodes() && ! $parent->hasAttributes() && $this->root_element !== $parent ) {
 			$node   = $parent;
 			$parent = $parent->parentNode;

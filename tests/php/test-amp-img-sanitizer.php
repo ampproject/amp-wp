@@ -73,14 +73,14 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 				'<p><img width="300" height="300" /></p>',
 				'<p></p>',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ],
+				[ AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING ],
 			],
 
 			'image_with_empty_src'                     => [
 				'<p><img src="" width="300" height="300" /></p>',
 				'<p></p>',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ],
+				[ AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING ],
 			],
 
 			'image_with_layout'                        => [
@@ -107,7 +107,7 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 				'<p><img src="    " width="300" height="300" /></p>',
 				'<p></p>',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ],
+				[ AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING ],
 			],
 
 			'image_with_empty_width_and_height'        => [

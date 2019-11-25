@@ -2339,11 +2339,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'',
 				[
 					[
-						'node_name'       => 'amp-story-grid-layer',
-						'parent_name'     => 'body',
-						'code'            => AMP_Tag_And_Attribute_Sanitizer::MANDATORY_TAG_ANCESTOR,
-						'node_attributes' => [ 'class' => 'a-invalid' ],
-						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+						'node_name'          => 'amp-story-grid-layer',
+						'parent_name'        => 'body',
+						'code'               => AMP_Tag_And_Attribute_Sanitizer::MANDATORY_TAG_ANCESTOR,
+						'node_attributes'    => [ 'class' => 'a-invalid' ],
+						'type'               => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+						'mandatory_ancestor' => 'amp-story-page',
 					],
 				],
 			],
@@ -2468,6 +2469,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'validation_error_callback' => function( $error, $context ) use ( &$expected_errors ) {
 					$expected = array_shift( $expected_errors );
 					$tag      = $expected['node_name'];
+					unset( $error['tag_spec'] ); // No need to check for this, although eventually we should assert it is present.
 					$this->assertEquals( $expected, $error );
 					$this->assertInstanceOf( 'DOMElement', $context['node'] );
 					$this->assertEquals( $tag, $context['node']->tagName );
