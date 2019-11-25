@@ -169,7 +169,7 @@ final class AMP_DOM_Document extends DOMDocument {
 	 */
 	private function adapt_encoding( $source ) {
 		// No encoding was provided, so we need to guess.
-		if ( self::UNKNOWN_ENCODING === $this->original_encoding ) {
+		if ( self::UNKNOWN_ENCODING === $this->original_encoding && function_exists( 'mb_detect_encoding' ) ) {
 			$this->original_encoding = mb_detect_encoding( $source );
 		}
 
@@ -180,7 +180,7 @@ final class AMP_DOM_Document extends DOMDocument {
 
 		$this->original_encoding = $this->sanitize_encoding( $this->original_encoding );
 
-		$target = mb_convert_encoding( $source, self::AMP_ENCODING, $this->original_encoding );
+		$target = function_exists( 'mb_convert_encoding' ) ? mb_convert_encoding( $source, self::AMP_ENCODING, $this->original_encoding ) : false;
 
 		return is_string( $target ) ? $target : $source;
 	}
@@ -276,6 +276,10 @@ final class AMP_DOM_Document extends DOMDocument {
 	 * @return string Sanitized encoding. Falls back to 'auto' on failure.
 	 */
 	private function sanitize_encoding( $encoding ) {
+		if ( ! function_exists( 'mb_list_encodings' ) ) {
+			return $encoding;
+		}
+
 		static $known_encodings = null;
 
 		if ( null === $known_encodings ) {
@@ -287,7 +291,7 @@ final class AMP_DOM_Document extends DOMDocument {
 		}
 
 		if ( ! in_array( $encoding, $known_encodings, true ) ) {
-			return 'auto';
+			return self::UNKNOWN_ENCODING;
 		}
 
 		return $encoding;
