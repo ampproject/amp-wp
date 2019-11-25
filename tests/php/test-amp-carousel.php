@@ -18,7 +18,7 @@ class Test_Carousel extends \WP_UnitTestCase {
 	/**
 	 * Gets the data to test the carousel.
 	 *
-	 * @return array[] An associative array, including the images and captions, the DOM, and the expected markup.
+	 * @return array[] An associative array, including the slides and captions, the DOM, and the expected markup.
 	 */
 	public function get_carousel_data() {
 		$dom     = new DOMDocument();
@@ -52,13 +52,13 @@ class Test_Carousel extends \WP_UnitTestCase {
 	 * @dataProvider get_carousel_data
 	 * @covers \Amp\AmpWP\Component\Carousel::get_dom_element()
 	 *
-	 * @param array[]     $images_and_captions An array of arrays, with images and their captions (if any).
-	 * @param DOMDocument $dom                 The representation of the DOM.
-	 * @param string      $expected            The expected return value of the tested function.
+	 * @param DOMElementList $slides   An array of arrays, with images and their captions (if any).
+	 * @param DOMDocument    $dom      The representation of the DOM.
+	 * @param string         $expected The expected return value of the tested function.
 	 */
-	public function test_get_dom_element( $images_and_captions, $dom, $expected ) {
-		$amp_carousel        = new Carousel( $dom, $images_and_captions );
-		$actual_amp_carousel = $amp_carousel->get_dom_element( $images_and_captions );
+	public function test_get_dom_element( $slides, $dom, $expected ) {
+		$amp_carousel        = new Carousel( $dom, $slides );
+		$actual_amp_carousel = $amp_carousel->get_dom_element();
 
 		// Prevent an error in get_content_from_dom_node().
 		$dom->appendChild( $actual_amp_carousel );
@@ -145,11 +145,11 @@ class Test_Carousel extends \WP_UnitTestCase {
 	 * @dataProvider get_data_carousel_dimensions
 	 * @covers \Amp\AmpWP\Component\Carousel::get_dimensions()
 	 *
-	 * @param DOMElementList $images  The images to get the dimensions from.
-	 * @param array     $expected The expected return value of the tested function.
+	 * @param DOMElementList $slides   The slides to get the dimensions from.
+	 * @param array          $expected The expected return value of the tested function.
 	 */
-	public function test_get_dimensions( $images, $expected ) {
-		$amp_carousel = new Carousel( new DOMDocument(), $images );
+	public function test_get_dimensions( $slides, $expected ) {
+		$amp_carousel = new Carousel( new DOMDocument(), $slides );
 		$this->assertEquals(
 			$expected,
 			$amp_carousel->get_dimensions()
