@@ -66,6 +66,10 @@ function Page() {
 		rotate: selectionProps.rotationAngle,
 	};
 
+	const setStyle = ( target ) => {
+		target.style.transform = `translate(${ frame.translate[ 0 ] }px, ${ frame.translate[ 1 ] }px) rotate(${ frame.rotate }deg)`;
+	};
+
 	return (
 		<Background>
 			{ currentPage && currentPage.elements.map( ( { type, id, ...rest } ) => {
@@ -87,13 +91,12 @@ function Page() {
 			{ displayMoveable && (
 				<Moveable
 					target={ document.querySelector( '.selection' ) }
-					pinchThreshold={ 20 }
 					draggable={ true }
 					resizable={ true }
 					rotatable={ true }
 					onDrag={ ( { target, beforeTranslate } ) => {
 						frame.translate = beforeTranslate;
-						target.style.transform = `translate(${ beforeTranslate[ 0 ] }px, ${ beforeTranslate[ 1 ] }px)`;
+						setStyle( target );
 					} }
 					onDragStart={ ( { set } ) => {
 						set( frame.translate );
@@ -101,13 +104,19 @@ function Page() {
 					onDragEnd={ () => {
 						setPropertiesOnSelectedElements( { x: selectionProps.x + frame.translate[ 0 ], y: selectionProps.y + frame.translate[ 1 ] } );
 					} }
-					onResizeStart={ ( { target, set, setOrigin, dragStart } ) => {
-						// @todo
+					onResizeStart={ ( { setOrigin, dragStart } ) => {
+						setOrigin( [ '%', '%' ] );
+						if ( dragStart ) {
+							dragStart.set( frame.translate );
+						}
 					} }
 					onResize={ ( { target, width, height, drag } ) => {
+						// @todo This is not really working, it's sliding away.
 						target.style.width = `${ width }px`;
 						target.style.height = `${ height }px`;
-						// @todo properly by setting frame, too.
+						console.log( drag.beforeTranslate );
+						//frame.translate = drag.beforeTranslate;
+						setStyle( target );
 					} }
 					onResizeEnd={ () => {
 						// @todo Set the correct width/height.
@@ -117,13 +126,12 @@ function Page() {
 					} }
 					onRotate={ ( { target, beforeRotate } ) => {
 						frame.rotate = beforeRotate;
-						target.style.transform = `rotate(${ beforeRotate }deg)`;
+						setStyle( target );
 					} }
 					onRotateEnd={ () => {
 						setPropertiesOnSelectedElements( { rotationAngle: frame.rotate } );
 					} }
 					origin={ false }
-					pinchable={ true }
 					keepRatio={ 'image' === selectedElements[ 0 ].type }
 					renderDirections={ 'image' === selectedElements[ 0 ].type ? [ 'nw', 'ne', 'sw', 'se' ] : null }
 				/>
