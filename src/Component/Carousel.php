@@ -19,7 +19,7 @@ use AMP_DOM_Utils;
  * @internal
  * @since 1.5.0
  */
-class Carousel {
+final class Carousel {
 
 	/**
 	 * Value used for width of amp-carousel.
