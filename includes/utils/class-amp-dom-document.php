@@ -10,7 +10,7 @@
  *
  * @since 1.5
  *
- * @property DOMXpath $xpath XPath query object for this document.
+ * @property DOMXPath $xpath XPath query object for this document.
  *
  * Abstract away some of the difficulties of working with PHP's DOMDocument.
  */
