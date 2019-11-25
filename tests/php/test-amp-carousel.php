@@ -108,28 +108,32 @@ class Test_Carousel extends \WP_UnitTestCase {
 		);
 
 		return [
-			'empty_dom_element_list_as_argument'           => [
+			'empty_dom_element_list_as_argument'          => [
 				( new DOMElementList() ),
 				[ Carousel::FALLBACK_WIDTH, Carousel::FALLBACK_HEIGHT ],
 			],
-			'single_small_image_passed_as_argument'        => [
-				( new DOMElementList() )->add( $narrow_image, '' ),
+			'element_no_width_or_height'                  => [
+				( new DOMElementList() )->add( AMP_DOM_Utils::create_node( $dom, 'div', [] ) ),
+				[ Carousel::FALLBACK_WIDTH, Carousel::FALLBACK_HEIGHT ],
+			],
+			'single_small_image_passed_as_argument'       => [
+				( new DOMElementList() )->add( $narrow_image ),
 				[ $narrow_image_width, $narrow_image_height ],
 			],
-			'single_large_image_passed_as_argument'        => [
-				( new DOMElementList() )->add( $wide_image, '' ),
+			'single_large_image_passed_as_argument'       => [
+				( new DOMElementList() )->add( $wide_image ),
 				[ $wide_image_width, $wide_image_height ],
 			],
-			'image_with_0_height_should_not_affect_ratio'  => [
-				( new DOMElementList() )->add( $image_with_0_height, '' )->add( $wide_image, '' ),
+			'image_with_0_height_should_not_affect_ratio' => [
+				( new DOMElementList() )->add( $image_with_0_height )->add( $wide_image, '' ),
 				[ $wide_image_width, $wide_image_height ],
 			],
-			'two_images_passed_as_arguments'               => [
-				( new DOMElementList() )->add( $narrow_image, '' )->add( $wide_image, '' ),
+			'two_images'                                  => [
+				( new DOMElementList() )->add( $narrow_image )->add( $wide_image, '' ),
 				[ $wide_image_width, $wide_image_height ],
 			],
-			'two_images_passed_as_arguments_order_changed' => [
-				( new DOMElementList() )->add( $wide_image, '' )->add( $narrow_image, '' ),
+			'two_images_order_changed'                    => [
+				( new DOMElementList() )->add( $wide_image )->add( $narrow_image, '' ),
 				[ $wide_image_width, $wide_image_height ],
 			],
 		];

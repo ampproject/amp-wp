@@ -43,27 +43,27 @@ final class Carousel {
 	private $dom;
 
 	/**
-	 * The images to add to the carousel.
+	 * The slides to add to the carousel, possibly images.
 	 *
 	 * @var DOMElementList
 	 */
-	private $images;
+	private $slides;
 
 	/**
 	 * Instantiates the class.
 	 *
 	 * @param DOMDocument    $dom    The dom to use to create a carousel.
-	 * @param DOMElementList $images The images from which to create a carousel.
+	 * @param DOMElementList $slides The slides from which to create a carousel.
 	 */
-	public function __construct( $dom, DOMElementList $images ) {
+	public function __construct( $dom, DOMElementList $slides ) {
 		$this->dom    = $dom;
-		$this->images = $images;
+		$this->slides = $slides;
 	}
 
 	/**
 	 * Gets the carousel element.
 	 *
-	 * @return DOMElement An <amp-carousel> with the images.
+	 * @return DOMElement An <amp-carousel> with the slides.
 	 */
 	public function get_dom_element() {
 		list( $width, $height ) = $this->get_dimensions();
@@ -78,26 +78,26 @@ final class Carousel {
 			]
 		);
 
-		foreach ( $this->images as $image ) {
-			$image_node = $image instanceof HasCaption ? $image->get_slide_node() : $image;
-			$caption    = $image instanceof HasCaption ? $image->get_caption() : null;
-			$slide      = AMP_DOM_Utils::create_node(
+		foreach ( $this->slides as $slide ) {
+			$slide_node      = $slide instanceof HasCaption ? $slide->get_slide_node() : $slide;
+			$caption         = $slide instanceof HasCaption ? $slide->get_caption() : null;
+			$slide_container = AMP_DOM_Utils::create_node(
 				$this->dom,
 				'div',
 				[ 'class' => 'slide' ]
 			);
 
-			// Ensure the image fills the entire <amp-carousel>, so the possible caption looks right.
-			if ( 'amp-img' === $image_node->tagName ) {
-				$image_node->setAttribute( 'layout', 'fill' );
-				$image_node->setAttribute( 'object-fit', 'cover' );
-			} elseif ( isset( $image_node->firstChild->tagName ) && 'amp-img' === $image_node->firstChild->tagName ) {
+			// Ensure an image fills the entire <amp-carousel>, so the possible caption looks right.
+			if ( 'amp-img' === $slide_node->tagName ) {
+				$slide_node->setAttribute( 'layout', 'fill' );
+				$slide_node->setAttribute( 'object-fit', 'cover' );
+			} elseif ( isset( $slide_node->firstChild->tagName ) && 'amp-img' === $slide_node->firstChild->tagName ) {
 				// If the <amp-img> is wrapped in an <a>.
-				$image_node->firstChild->setAttribute( 'layout', 'fill' );
-				$image_node->firstChild->setAttribute( 'object-fit', 'cover' );
+				$slide_node->firstChild->setAttribute( 'layout', 'fill' );
+				$slide_node->firstChild->setAttribute( 'object-fit', 'cover' );
 			}
 
-			$slide->appendChild( $image_node );
+			$slide_container->appendChild( $slide_node );
 
 			// If there's a caption, wrap it in a <div> and <span>, and append it to the slide.
 			if ( $caption ) {
@@ -111,20 +111,20 @@ final class Carousel {
 
 				$caption_span->appendChild( $text_node );
 				$caption_wrapper->appendChild( $caption_span );
-				$slide->appendChild( $caption_wrapper );
+				$slide_container->appendChild( $caption_wrapper );
 			}
 
-			$amp_carousel->appendChild( $slide );
+			$amp_carousel->appendChild( $slide_container );
 		}
 
 		return $amp_carousel;
 	}
 
 	/**
-	 * Gets the carousel's width and height, based on its images.
+	 * Gets the carousel's width and height, based on its elements.
 	 *
-	 * This will return the width and height of the image with the widest aspect ratio,
-	 * not necessarily the image with the biggest absolute width.
+	 * This will return the width and height of the slide (possibly image) with the widest aspect ratio,
+	 * not necessarily that with the biggest absolute width.
 	 *
 	 * @return array {
 	 *     The carousel dimensions.
@@ -134,7 +134,7 @@ final class Carousel {
 	 * }
 	 */
 	public function get_dimensions() {
-		if ( 0 === count( $this->images ) ) {
+		if ( 0 === count( $this->slides ) ) {
 			return [ self::FALLBACK_WIDTH, self::FALLBACK_HEIGHT ];
 		}
 
@@ -142,19 +142,19 @@ final class Carousel {
 		$carousel_width   = 0;
 		$carousel_height  = 0;
 
-		foreach ( $this->images as $image ) {
-			$image_node = $image instanceof HasCaption ? $image->get_slide_node() : $image;
+		foreach ( $this->slides as $slide ) {
+			$slide_node = $slide instanceof HasCaption ? $slide->get_slide_node() : $slide;
 			// Account for an <amp-img> that's wrapped in an <a>.
-			if ( 'amp-img' !== $image_node->tagName && isset( $image_node->firstChild->tagName ) && 'amp-img' === $image_node->firstChild->tagName ) {
-				$image_node = $image_node->firstChild;
+			if ( 'amp-img' !== $slide_node->tagName && isset( $slide_node->firstChild->tagName ) && 'amp-img' === $slide_node->firstChild->tagName ) {
+				$slide_node = $slide_node->firstChild;
 			}
 
-			if ( ! is_numeric( $image_node->getAttribute( 'width' ) ) || ! is_numeric( $image_node->getAttribute( 'height' ) ) ) {
+			if ( ! is_numeric( $slide_node->getAttribute( 'width' ) ) || ! is_numeric( $slide_node->getAttribute( 'height' ) ) ) {
 				continue;
 			}
 
-			$width  = (float) $image_node->getAttribute( 'width' );
-			$height = (float) $image_node->getAttribute( 'height' );
+			$width  = (float) $slide_node->getAttribute( 'width' );
+			$height = (float) $slide_node->getAttribute( 'height' );
 
 			if ( empty( $width ) || empty( $height ) ) {
 				continue;
@@ -166,6 +166,10 @@ final class Carousel {
 				$carousel_width   = $width;
 				$carousel_height  = $height;
 			}
+		}
+
+		if ( empty( $carousel_width ) && empty( $carousel_height ) ) {
+			return [ self::FALLBACK_WIDTH, self::FALLBACK_HEIGHT ];
 		}
 
 		return [ $carousel_width, $carousel_height ];
