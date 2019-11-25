@@ -104,8 +104,12 @@ final class AMP_DOM_Document extends DOMDocument {
 		$success = parent::loadHTML( $source, $options );
 
 		if ( $success ) {
+			// Remove http-equiv charset again.
 			$head = $this->getElementsByTagName( 'head' )->item( 0 );
-			$head->removeChild( $head->firstChild );
+			$meta = $head->firstChild;
+			if ( 'meta' === $meta->tagName && 'content-type' === $meta->getAttribute( 'http-equiv' ) && ( 'text/html; charset=' . self::AMP_ENCODING ) === $meta->getAttribute( 'content' ) ) {
+				$head->removeChild( $meta );
+			}
 		}
 
 		return $success;
