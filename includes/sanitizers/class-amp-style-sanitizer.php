@@ -2728,12 +2728,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		if ( $stylesheet_groups['keyframes']['included_count'] > 0 ) {
 			$body = $this->dom->getElementsByTagName( 'body' )->item( 0 );
 			if ( ! $body ) {
-				$this->should_sanitize_validation_error(
-					[
-						'code' => 'missing_body_element', // @todo Add the body.
-						'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
-					]
-				);
+				$body = $this->dom->createElement( 'body' );
+				$this->dom->documentElement->appendChild( $body );
 			} else {
 				$css = $stylesheet_groups['keyframes']['import_front_matter'];
 
