@@ -7,7 +7,7 @@ import Moveable from 'react-moveable';
 /**
  * WordPress dependencies
  */
-import { useCallback, useEffect } from '@wordpress/element';
+import { useCallback, useEffect, createRef, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -40,6 +40,13 @@ const Element = styled.div`
 `;
 
 function Page() {
+	const selectionRef = createRef();
+	const [ targetEl, setTargetEl ] = useState( null );
+
+	useEffect( () => {
+		setTargetEl( selectionRef.current );
+	}, [ selectionRef ] );
+
 	const {
 		state: { currentPage, hasSelection, selectedElements },
 		actions: { clearSelection, selectElementById, setPropertiesOnSelectedElements, toggleElementIdInSelection },
@@ -86,11 +93,11 @@ function Page() {
 				);
 			} ) }
 			{ hasSelection && (
-				<Selection { ...selectionProps } />
+				<Selection { ...selectionProps } ref={ selectionRef } />
 			) }
-			{ displayMoveable && (
+			{ displayMoveable && targetEl && (
 				<Moveable
-					target={ document.querySelector( '.selection' ) }
+					target={ targetEl }
 					draggable={ true }
 					resizable={ true }
 					rotatable={ true }
@@ -111,10 +118,9 @@ function Page() {
 						}
 					} }
 					onResize={ ( { target, width, height, drag } ) => {
-						// @todo This is not really working, it's sliding away.
+						// @todo This is sliding while resizing, not working well.
 						target.style.width = `${ width }px`;
 						target.style.height = `${ height }px`;
-						console.log( drag.beforeTranslate );
 						frame.translate = drag.beforeTranslate;
 						setStyle( target );
 					} }
