@@ -25,7 +25,7 @@ final class DOMElementList implements IteratorAggregate, Countable {
 	 *
 	 * @var array
 	 */
-	public $elements = [];
+	private $elements = [];
 
 	/**
 	 * Adds an element to the list, possibly with a caption.
