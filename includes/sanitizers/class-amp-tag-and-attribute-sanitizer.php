@@ -1695,18 +1695,16 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		 * https://github.com/ampproject/amphtml/blob/1526498116488/extensions/amp-selector/validator-amp-selector.protoascii#L81-L91
 		 */
 		$descendant_reference_points = [
-			'amp-selector'         => AMP_Allowed_Tags_Generated::get_reference_point_spec( 'AMP-SELECTOR option' ),
-			'amp-story-grid-layer' => AMP_Allowed_Tags_Generated::get_reference_point_spec( 'AMP-STORY-GRID-LAYER default' ), // @todo Consider the more restrictive 'AMP-STORY-GRID-LAYER animate-in'.
+			'amp-selector'         => 'AMP-SELECTOR option',
+			'amp-story-grid-layer' => 'AMP-STORY-GRID-LAYER default', // @todo Consider the more restrictive 'AMP-STORY-GRID-LAYER animate-in'.
 		];
-		foreach ( $descendant_reference_points as $ancestor_name => $reference_point_spec ) {
+		foreach ( $descendant_reference_points as $ancestor_name => $reference_point_spec_name ) {
+			if ( empty( $this->open_elements[ $ancestor_name ] ) ) {
+				continue;
+			}
+			$reference_point_spec = AMP_Allowed_Tags_Generated::get_reference_point_spec( $reference_point_spec_name );
 			if ( isset( $reference_point_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ][ $attr_name ] ) ) {
-				$parent = $attr_node->parentNode;
-				while ( $parent ) {
-					if ( $ancestor_name === $parent->nodeName ) {
-						return true;
-					}
-					$parent = $parent->parentNode;
-				}
+				return true;
 			}
 		}
 
