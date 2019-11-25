@@ -33,7 +33,6 @@
     "ext-zip": "Enables the use of ZipArchive to export AMP Stories."
   },
   "config": {
-    "optimize-autoloader": true,
     "platform": {
       "php": "5.4"
     },
