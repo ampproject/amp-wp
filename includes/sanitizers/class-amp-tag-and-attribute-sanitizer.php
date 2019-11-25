@@ -455,7 +455,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		 */
 		$rule_spec_list_to_validate = [];
 		$rule_spec_list             = [];
-		$invalid_rule_spec_list     = [];
+		$validation_errors          = [];
 		if ( isset( $this->allowed_tags[ $node->nodeName ] ) ) {
 			$rule_spec_list = $this->allowed_tags[ $node->nodeName ];
 		}
@@ -464,28 +464,22 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			if ( true === $validity ) {
 				$rule_spec_list_to_validate[ $id ] = $this->get_rule_spec_list_to_validate( $node, $rule_spec );
 			} else {
-				$invalid_rule_spec_list[] = [
-					'error'    => $validity,
-					// @todo The tag_spec should be included always, whenever a validation error is raised. Or rather, just the spec_name. The spec_url can be looked up.
-					'tag_spec' => $rule_spec[ AMP_Rule_Spec::TAG_SPEC ],
-				];
+				$validation_errors[] = array_merge(
+					$validity,
+					[ 'spec_name' => $this->get_spec_name( $node, $rule_spec[ AMP_Rule_Spec::TAG_SPEC ] ) ]
+				);
 			}
 		}
 
 		// If no valid rule_specs exist, then remove this node and return.
 		if ( empty( $rule_spec_list_to_validate ) ) {
-			if ( 1 === count( $invalid_rule_spec_list ) ) {
+			if ( 1 === count( $validation_errors ) ) {
 				// If there was only one tag spec candidate that failed, use its error code for removing the node,
 				// since it's we know it is the specific reason for why the node had to be removed.
 				// This is the normal case.
 				$this->remove_invalid_child(
 					$node,
-					array_merge(
-						$invalid_rule_spec_list[0]['error'],
-						[
-							'tag_spec' => $invalid_rule_spec_list[0]['tag_spec'],
-						]
-					)
+					$validation_errors[0]
 				);
 			} else {
 				$this->remove_node( $node );
@@ -572,8 +566,13 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		if ( ! empty( $cdata ) && $node instanceof DOMElement ) {
 			$validity = $this->validate_cdata_for_node( $node, $cdata );
 			if ( true !== $validity ) {
-				// @todo Need to pass tag_spec.
-				$this->remove_invalid_child( $node, $validity );
+				$this->remove_invalid_child(
+					$node,
+					array_merge(
+						$validity,
+						[ 'spec_name' => $this->get_spec_name( $node, $tag_spec ) ]
+					)
+				);
 				return null;
 			}
 		}
@@ -601,8 +600,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			if ( ! empty( $this->visited_unique_tag_specs[ $node->nodeName ][ $tag_spec_key ] ) ) {
 				$removed = $this->remove_invalid_child(
 					$node,
-					// @todo Need to pass tag_spec.
-					[ 'code' => self::DUPLICATE_UNIQUE_TAG ]
+					[
+						'code'      => self::DUPLICATE_UNIQUE_TAG,
+						'spec_name' => $this->get_spec_name( $node, $tag_spec ),
+					]
 				);
 			}
 			$this->visited_unique_tag_specs[ $node->nodeName ][ $tag_spec_key ] = true;
@@ -661,7 +662,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		if ( ! empty( $tag_spec[ AMP_Rule_Spec::DESCENDANT_TAG_LIST ] ) ) {
 			$allowed_tags = AMP_Allowed_Tags_Generated::get_descendant_tag_list( $tag_spec[ AMP_Rule_Spec::DESCENDANT_TAG_LIST ] );
 			if ( ! empty( $allowed_tags ) ) {
-				$this->remove_disallowed_descendants( $node, $allowed_tags );
+				$this->remove_disallowed_descendants( $node, $allowed_tags, $this->get_spec_name( $node, $tag_spec ) );
 			}
 		}
 
@@ -671,9 +672,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			$this->remove_invalid_child(
 				$node,
 				[
-					// @todo Need to pass the $tag_spec['spec_name'] into the validation errors for each.
 					'code'       => self::ATTR_REQUIRED_BUT_MISSING,
 					'attributes' => $missing_mandatory_attributes,
+					'spec_name'  => $this->get_spec_name( $node, $tag_spec ),
 				]
 			);
 			return null;
@@ -763,7 +764,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		) {
 			return [
 				'code'      => self::CDATA_TOO_LONG,
-				'max_bytes' => $cdata_spec['max_bytes'],
+				'max_bytes' => $cdata_spec['max_bytes'], // @todo This is not needed with the spec_name in hand.
 			];
 		}
 		if ( isset( $cdata_spec['blacklisted_cdata_regex'] ) ) {
@@ -813,7 +814,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		if ( ! empty( $tag_spec[ AMP_Rule_Spec::MANDATORY_PARENT ] ) && ! $this->has_parent( $node, $tag_spec[ AMP_Rule_Spec::MANDATORY_PARENT ] ) ) {
 			return [
 				'code'             => self::WRONG_PARENT_TAG,
-				'mandatory_parent' => $tag_spec[ AMP_Rule_Spec::MANDATORY_PARENT ],
+				'mandatory_parent' => $tag_spec[ AMP_Rule_Spec::MANDATORY_PARENT ], // @todo This is not needed with the spec_name in hand.
 			];
 		}
 
@@ -838,7 +839,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		if ( ! empty( $tag_spec[ AMP_Rule_Spec::MANDATORY_ANCESTOR ] ) && ! $this->has_ancestor( $node, $tag_spec[ AMP_Rule_Spec::MANDATORY_ANCESTOR ] ) ) {
 			return [
 				'code'               => self::MANDATORY_TAG_ANCESTOR,
-				'mandatory_ancestor' => $tag_spec[ AMP_Rule_Spec::MANDATORY_ANCESTOR ],
+				'mandatory_ancestor' => $tag_spec[ AMP_Rule_Spec::MANDATORY_ANCESTOR ], // @todo This is not needed with the spec_name in hand.
 			];
 		}
 
@@ -987,6 +988,29 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		return $score;
+	}
+
+	/**
+	 * Get spec name for a given tag spec.
+	 *
+	 * @since 1.5
+	 *
+	 * @param DOMElement $element  Element.
+	 * @param array      $tag_spec Tag spec.
+	 * @return string Spec name.
+	 */
+	private function get_spec_name( DOMElement $element, $tag_spec ) {
+		if ( isset( $tag_spec['spec_name'] ) ) {
+			return $tag_spec['spec_name'];
+		} elseif ( isset( $tag_spec['extension_spec']['name'] ) ) {
+			return sprintf(
+				'script[%s=%s]',
+				'amp-mustache' === $tag_spec['extension_spec']['name'] ? 'custom-template' : 'custom-element',
+				strtolower( $tag_spec['extension_spec']['name'] )
+			);
+		} else {
+			return $element->nodeName;
+		}
 	}
 
 	/**
@@ -1824,8 +1848,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @param DOMElement $node                Node.
 	 * @param string[]   $allowed_descendants List of allowed descendant tags.
+	 * @param string     $spec_name           Spec name.
 	 */
-	private function remove_disallowed_descendants( DOMElement $node, $allowed_descendants ) {
+	private function remove_disallowed_descendants( DOMElement $node, $allowed_descendants, $spec_name ) {
 		if ( ! $node->hasChildNodes() ) {
 			return;
 		}
@@ -1843,13 +1868,13 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				$this->remove_invalid_child(
 					$child_element,
 					[
-						// @todo Need to pass tag_spec.
 						'code'                => self::DISALLOWED_DESCENDANT_TAG,
 						'allowed_descendants' => $allowed_descendants,
+						'spec_name'           => $spec_name,
 					]
 				);
 			} else {
-				$this->remove_disallowed_descendants( $child_element, $allowed_descendants );
+				$this->remove_disallowed_descendants( $child_element, $allowed_descendants, $spec_name );
 			}
 		}
 	}
@@ -1882,7 +1907,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return [
 				'code'                       => self::DISALLOWED_FIRST_CHILD_TAG,
 				'first_child_tag'            => $child_elements[0]->nodeName,
-				'first_child_tag_name_oneof' => $child_tags['first_child_tag_name_oneof'],
+				'first_child_tag_name_oneof' => $child_tags['first_child_tag_name_oneof'], // @todo This is not needed with the spec_name in hand.
 			];
 		}
 
@@ -1893,7 +1918,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					return [
 						'code'                 => self::DISALLOWED_CHILD_TAG,
 						'child_tag'            => $child_element->nodeName,
-						'child_tag_name_oneof' => $child_tags['child_tag_name_oneof'],
+						'child_tag_name_oneof' => $child_tags['child_tag_name_oneof'], // @todo This is not needed with the spec_name in hand.
 					];
 				}
 			}
@@ -1908,7 +1933,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				return [
 					'code'                     => self::INCORRECT_NUM_CHILD_TAGS,
 					'children_count'           => $child_element_count,
-					'mandatory_num_child_tags' => $child_tags['mandatory_num_child_tags'],
+					'mandatory_num_child_tags' => $child_tags['mandatory_num_child_tags'], // @todo This is not needed with the spec_name in hand.
 				];
 			}
 		}
@@ -1922,7 +1947,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				return [
 					'code'                         => self::INCORRECT_MIN_NUM_CHILD_TAGS,
 					'children_count'               => $child_element_count,
-					'mandatory_min_num_child_tags' => $child_tags['mandatory_min_num_child_tags'],
+					'mandatory_min_num_child_tags' => $child_tags['mandatory_min_num_child_tags'], // @todo This is not needed with the spec_name in hand.
 				];
 			}
 		}
