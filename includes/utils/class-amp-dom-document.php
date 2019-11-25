@@ -104,8 +104,7 @@ final class AMP_DOM_Document extends DOMDocument {
 		$success = parent::loadHTML( $source, $options );
 
 		if ( $success ) {
-			$this->encoding = self::AMP_ENCODING;
-			$head           = $this->getElementsByTagName( 'head' )->item( 0 );
+			$head = $this->getElementsByTagName( 'head' )->item( 0 );
 			$head->removeChild( $head->firstChild );
 		}
 
