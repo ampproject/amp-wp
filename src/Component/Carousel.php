@@ -47,7 +47,7 @@ final class Carousel {
 	 *
 	 * @var DOMElementList
 	 */
-	protected $images;
+	private $images;
 
 	/**
 	 * Instantiates the class.
