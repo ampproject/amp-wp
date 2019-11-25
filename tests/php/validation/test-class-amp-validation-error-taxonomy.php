@@ -22,13 +22,6 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 	const TESTED_CLASS = 'AMP_Validation_Error_Taxonomy';
 
 	/**
-	 * A mock acceptable error code.
-	 *
-	 * @var string
-	 */
-	const MOCK_ACCEPTABLE_ERROR = 'illegal_css_at_rule';
-
-	/**
 	 * Resets the state after each test method.
 	 */
 	public function tearDown() {
@@ -385,7 +378,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		$this->assertNull( apply_filters( 'amp_validation_error_sanitized', null, $error ) );
 		remove_all_filters( 'amp_validation_error_sanitized' );
 
-		AMP_Validation_Error_Taxonomy::accept_validation_errors( [ self::MOCK_ACCEPTABLE_ERROR => true ] );
+		AMP_Validation_Error_Taxonomy::accept_validation_errors( [ AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE => true ] );
 		$this->assertTrue( apply_filters( 'amp_validation_error_sanitized', null, $error ) );
 		remove_all_filters( 'amp_validation_error_sanitized' );
 
@@ -1347,7 +1340,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 	public function get_mock_error() {
 		return [
 			'at_rule'         => '-ms-viewport',
-			'code'            => self::MOCK_ACCEPTABLE_ERROR,
+			'code'            => AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE,
 			'node_attributes' => [
 				'href'  => 'https://example.com',
 				'id'    => 'twentysixteen-style-css',

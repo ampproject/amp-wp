@@ -2893,39 +2893,41 @@ class AMP_Validation_Error_Taxonomy {
 					esc_html( $validation_error['node_name'] ),
 					'?'
 				);
-			case 'file_path_not_allowed':
-				return esc_html__( 'Stylesheet file path not allowed', 'amp' );
-			case 'excessive_css':
+			case AMP_Style_Sanitizer::STYLESHEET_TOO_LONG:
 				return esc_html__( 'Excessive CSS', 'amp' );
-			case 'illegal_css_at_rule':
+			case AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE:
 				return sprintf(
 					'%s: <code>@%s</code>',
 					esc_html__( 'Illegal CSS at-rule', 'amp' ),
 					esc_html( $validation_error['at_rule'] )
 				);
-			case 'disallowed_file_extension':
-				return esc_html__( 'Disallowed CSS file extension', 'amp' );
-			case 'duplicate_element':
+			case AMP_Tag_And_Attribute_Sanitizer::DUPLICATE_UNIQUE_TAG:
 				return sprintf(
 					'%s: <code>&lt;%s&gt;</code>',
 					esc_html__( 'Duplicate element', 'amp' ),
 					esc_html( $validation_error['node_name'] )
 				);
-			case 'unrecognized_css':
+			case AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_DECLARATION:
 				return esc_html__( 'Unrecognized CSS', 'amp' );
-			case 'css_parse_error':
+			case AMP_Style_Sanitizer::CSS_SYNTAX_PARSE_ERROR:
 				return esc_html__( 'CSS parse error', 'amp' );
-			case 'stylesheet_file_missing':
+			case AMP_Style_Sanitizer::STYLESHEET_INVALID_FILE_URL:
+			case AMP_Style_Sanitizer::STYLESHEET_INVALID_FILE_PATH:
 				return esc_html__( 'Missing stylesheet file', 'amp' );
-			case 'illegal_css_property':
+			case AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_PROPERTY:
+			case AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_PROPERTY_NOLIST:
 				$title = esc_html__( 'Illegal CSS property', 'amp' );
 				if ( isset( $validation_error['property_name'] ) ) {
 					$title .= sprintf( ': <code>%s</code>', esc_html( $validation_error['property_name'] ) );
 				}
 				return $title;
-			case 'illegal_cdata':
+			case AMP_Tag_And_Attribute_Sanitizer::CDATA_TOO_LONG:
+			case AMP_Tag_And_Attribute_Sanitizer::MANDATORY_CDATA_MISSING_OR_INCORRECT:
+			case AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_HTML_COMMENTS:
+			case AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_CSS_IMPORTANT:
+			case AMP_Tag_And_Attribute_Sanitizer::CDATA_VIOLATES_BLACKLIST:
 				return esc_html__( 'Illegal text content', 'amp' );
-			case 'illegal_css_important':
+			case AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_IMPORTANT:
 				$title = esc_html__( 'Illegal CSS !important property', 'amp' );
 				if ( isset( $validation_error['property_name'] ) ) {
 					$title .= sprintf( ': <code>%s</code>', esc_html( $validation_error['property_name'] ) );

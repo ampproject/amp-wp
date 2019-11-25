@@ -240,7 +240,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$excessive_css_error = [
 			'node_name' => 'style',
 			'type'      => 'css',
-			'code'      => 'excessive_css',
+			'code'      => AMP_Style_Sanitizer::STYLESHEET_TOO_LONG,
 		];
 
 		remove_theme_support( AMP_Theme_Support::SLUG );

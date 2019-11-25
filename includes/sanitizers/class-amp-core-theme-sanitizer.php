@@ -222,7 +222,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	public static function get_acceptable_errors( $template ) {
 		if ( isset( self::$theme_features[ $template ] ) ) {
 			return [
-				'illegal_css_at_rule' => [
+				AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE => [
 					[
 						'at_rule' => 'viewport',
 					],

@@ -26,12 +26,23 @@ use \Sabberworm\CSS\CSSList\Document;
  */
 class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
-	/**
-	 * Error code for illegal at-rule.
-	 *
-	 * @var string
-	 */
-	const ILLEGAL_AT_RULE_ERROR_CODE = 'illegal_css_at_rule'; // @todo CSS_SYNTAX_INVALID_AT_RULE
+	const CSS_SYNTAX_INVALID_AT_RULE         = 'CSS_SYNTAX_INVALID_AT_RULE';
+	const CSS_SYNTAX_INVALID_DECLARATION     = 'CSS_SYNTAX_INVALID_DECLARATION';
+	const CSS_SYNTAX_INVALID_PROPERTY        = 'CSS_SYNTAX_INVALID_PROPERTY';
+	const CSS_SYNTAX_INVALID_PROPERTY_NOLIST = 'CSS_SYNTAX_INVALID_PROPERTY_NOLIST';
+	const CSS_SYNTAX_INVALID_IMPORTANT       = 'CSS_SYNTAX_INVALID_IMPORTANT';
+	const CSS_SYNTAX_PARSE_ERROR             = 'CSS_SYNTAX_PARSE_ERROR';
+	const STYLESHEET_TOO_LONG                = 'STYLESHEET_TOO_LONG';
+	const STYLESHEET_INVALID_FILE_URL        = 'STYLESHEET_INVALID_FILE_URL';
+	const STYLESHEET_INVALID_FILE_PATH       = 'STYLESHEET_INVALID_FILE_PATH';
+
+	// These are internal to the sanitizer and not exposed as validation error codes.
+	const STYLESHEET_DISALLOWED_FILE_EXT   = 'STYLESHEET_DISALLOWED_FILE_EXT';
+	const STYLESHEET_EXTERNAL_FILE_URL     = 'STYLESHEET_EXTERNAL_FILE_URL';
+	const STYLESHEET_FILE_PATH_NOT_FOUND   = 'STYLESHEET_FILE_PATH_NOT_FOUND';
+	const STYLESHEET_FILE_PATH_NOT_ALLOWED = 'STYLESHEET_FILE_PATH_NOT_ALLOWED';
+	const STYLESHEET_URL_SYNTAX_ERROR      = 'STYLESHEET_URL_SYNTAX_ERROR';
+	const STYLESHEET_INVALID_RELATIVE_PATH = 'STYLESHEET_INVALID_RELATIVE_PATH';
 
 	/**
 	 * Inline style selector's specificity multiplier, i.e. used to generate the number of ':not(#_)' placeholders.
@@ -325,14 +336,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public static function get_css_parser_validation_error_codes() {
 		return [
-			'css_parse_error',
-			'excessive_css', // @todo STYLESHEET_TOO_LONG? But it's not technically the right error message?
-			self::ILLEGAL_AT_RULE_ERROR_CODE,
-			'illegal_css_important',
-			'illegal_css_property', // @todo CSS_SYNTAX_INVALID_PROPERTY_NOLIST
-			'unrecognized_css',
-			'disallowed_file_extension',
-			'file_path_not_found',
+			self::CSS_SYNTAX_INVALID_AT_RULE,
+			self::CSS_SYNTAX_INVALID_DECLARATION,
+			self::CSS_SYNTAX_INVALID_IMPORTANT,
+			self::CSS_SYNTAX_INVALID_PROPERTY,
+			self::CSS_SYNTAX_INVALID_PROPERTY_NOLIST,
+			self::CSS_SYNTAX_PARSE_ERROR,
+			self::STYLESHEET_INVALID_FILE_PATH,
+			self::STYLESHEET_INVALID_FILE_URL,
+			self::STYLESHEET_TOO_LONG,
 		];
 	}
 
@@ -884,7 +896,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * As with hooks, lower priorities mean they should be included first.
 	 * The higher the priority value, the more likely it will be that the
-	 * stylesheet will be among those excluded due to 'excessive_css' when
+	 * stylesheet will be among those excluded due to STYLESHEET_TOO_LONG when
 	 * concatenated CSS reaches 50KB.
 	 *
 	 * @todo This will eventually need to be abstracted to not be CMS-specific, allowing for the prioritization scheme to be defined by configuration.
@@ -1008,8 +1020,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		} while ( 0 !== $count );
 
 		if ( preg_match( '#(^|/)\.+/#', $path ) ) {
-			/* translators: %s is the path with the remaining relative segments. */
-			return new WP_Error( 'remaining_relativity', sprintf( __( 'There are remaining relative path segments: %s', 'amp' ), $path ) );
+			return new WP_Error( self::STYLESHEET_INVALID_RELATIVE_PATH );
 		}
 
 		return $path;
@@ -1058,7 +1069,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public function get_validated_url_file_path( $url, $allowed_extensions = [] ) {
 		if ( ! is_string( $url ) ) {
-			return new WP_Error( 'url_not_string' );
+			return new WP_Error( self::STYLESHEET_URL_SYNTAX_ERROR );
 		}
 
 		$needs_base_url = (
@@ -1072,12 +1083,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$parsed_url = wp_parse_url( $url );
 		if ( empty( $parsed_url['host'] ) ) {
-			/* translators: %s is the original URL */
-			return new WP_Error( 'no_url_host', sprintf( __( 'URL is missing host: %s', 'amp' ), $url ) );
+			return new WP_Error( self::STYLESHEET_URL_SYNTAX_ERROR );
 		}
 		if ( empty( $parsed_url['path'] ) ) {
-			/* translators: %s is the original URL */
-			return new WP_Error( 'no_url_path', sprintf( __( 'URL is missing path: %s', 'amp' ), $url ) );
+			return new WP_Error( self::STYLESHEET_URL_SYNTAX_ERROR );
 		}
 
 		$path = $this->unrelativize_path( $parsed_url['path'] );
@@ -1109,13 +1118,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$pattern = sprintf( '/\.(%s)$/i', implode( '|', $allowed_extensions ) );
 			if ( ! preg_match( $pattern, $url ) ) {
 				/* translators: %s: the file URL. */
-				return new WP_Error( 'disallowed_file_extension', sprintf( __( 'File does not have an allowed file extension for filesystem access (%s).', 'amp' ), $url ) );
+				return new WP_Error( self::STYLESHEET_DISALLOWED_FILE_EXT );
 			}
 		}
 
 		if ( ! in_array( $parsed_url['host'], $allowed_hosts, true ) ) {
 			/* translators: %s: the file URL */
-			return new WP_Error( 'external_file_url', sprintf( __( 'URL is located on an external domain: %s.', 'amp' ), $parsed_url['host'] ) );
+			return new WP_Error( self::STYLESHEET_EXTERNAL_FILE_URL );
 		}
 
 		$base_path  = null;
@@ -1137,12 +1146,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		if ( ! $file_path || false !== strpos( $file_path, '../' ) || false !== strpos( $file_path, '..\\' ) ) {
-			/* translators: %s: the file URL. */
-			return new WP_Error( 'file_path_not_allowed', sprintf( __( 'Disallowed URL filesystem path for %s.', 'amp' ), $url ) );
+			return new WP_Error( self::STYLESHEET_FILE_PATH_NOT_ALLOWED );
 		}
 		if ( ! file_exists( $base_path . $file_path ) ) {
-			/* translators: %s: the file URL. */
-			return new WP_Error( 'file_path_not_found', sprintf( __( 'Unable to locate filesystem path for %s.', 'amp' ), $url ) );
+			return new WP_Error( self::STYLESHEET_FILE_PATH_NOT_FOUND );
 		}
 
 		return $base_path . $file_path;
@@ -1261,6 +1268,17 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$css_file_path = $this->get_validated_url_file_path( $href, [ 'css', 'less', 'scss', 'sass' ] );
 		if ( ! is_wp_error( $css_file_path ) ) {
 			$stylesheet = file_get_contents( $css_file_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
+			if ( false === $stylesheet ) {
+				$this->remove_invalid_child(
+					$element,
+					[
+						// @todo Also include details about the error.
+						'code' => self::STYLESHEET_INVALID_FILE_PATH,
+						'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+					]
+				);
+				return;
+			}
 		} else {
 			// Fall back to doing an HTTP request for the stylesheet is not accessible directly from the filesystem.
 			$contents = $this->fetch_external_stylesheet( $normalized_url );
@@ -1270,24 +1288,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$this->remove_invalid_child(
 					$element,
 					[
-						'code'    => $contents->get_error_code(),
-						'message' => $contents->get_error_message(),
-						'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+						// @todo Also include details about the error.
+						'code' => self::STYLESHEET_INVALID_FILE_URL,
+						'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+						'url'  => $normalized_url,
 					]
 				);
 				return;
 			}
-		}
-
-		if ( false === $stylesheet ) {
-			$this->remove_invalid_child(
-				$element,
-				[
-					'code' => 'stylesheet_file_missing',
-					'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
-				]
-			);
-			return;
 		}
 
 		// Honor the link's media attribute.
@@ -1505,14 +1513,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$css_file_path = $this->get_validated_url_file_path( $import_stylesheet_url, [ 'css', 'less', 'scss', 'sass' ] );
 
-		if ( is_wp_error( $css_file_path ) && ( 'disallowed_file_extension' === $css_file_path->get_error_code() || 'external_file_url' === $css_file_path->get_error_code() ) ) {
+		if ( is_wp_error( $css_file_path ) && ( self::STYLESHEET_DISALLOWED_FILE_EXT === $css_file_path->get_error_code() || self::STYLESHEET_EXTERNAL_FILE_URL === $css_file_path->get_error_code() ) ) {
 			$contents = $this->fetch_external_stylesheet( $import_stylesheet_url );
 			if ( is_wp_error( $contents ) ) {
 				$error     = [
-					'code'    => $contents->get_error_code(),
-					'message' => $contents->get_error_message(),
-					'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
-					'url'     => $import_stylesheet_url,
+					// @todo Also include details about the error.
+					'code' => self::STYLESHEET_INVALID_FILE_URL,
+					'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+					'url'  => $import_stylesheet_url,
 				];
 				$sanitized = $this->should_sanitize_validation_error( $error );
 				if ( $sanitized ) {
@@ -1525,10 +1533,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$stylesheet = $contents;
 		} elseif ( is_wp_error( $css_file_path ) ) {
 			$error     = [
-				'code'    => $css_file_path->get_error_code(),
-				'message' => $css_file_path->get_error_message(),
-				'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
-				'url'     => $import_stylesheet_url,
+				// @todo Also include details about the error.
+				'code' => self::STYLESHEET_INVALID_FILE_PATH,
+				'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+				'url'  => $import_stylesheet_url,
 			];
 			$sanitized = $this->should_sanitize_validation_error( $error );
 			if ( $sanitized ) {
@@ -1618,7 +1626,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			);
 		} catch ( Exception $exception ) {
 			$error = [
-				'code'    => 'css_parse_error',
+				'code'    => self::CSS_SYNTAX_PARSE_ERROR,
 				'message' => $exception->getMessage(),
 				'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 			];
@@ -1917,7 +1925,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			} elseif ( $css_item instanceof AtRuleBlockList ) {
 				if ( ! in_array( $css_item->atRuleName(), $options['allowed_at_rules'], true ) ) {
 					$error     = [
-						'code'    => self::ILLEGAL_AT_RULE_ERROR_CODE,
+						'code'    => self::CSS_SYNTAX_INVALID_AT_RULE,
 						'at_rule' => $css_item->atRuleName(),
 						'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 					];
@@ -1938,7 +1946,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			} elseif ( $css_item instanceof AtRuleSet ) {
 				if ( ! in_array( $css_item->atRuleName(), $options['allowed_at_rules'], true ) ) {
 					$error     = [
-						'code'    => self::ILLEGAL_AT_RULE_ERROR_CODE,
+						'code'    => self::CSS_SYNTAX_INVALID_AT_RULE,
 						'at_rule' => $css_item->atRuleName(),
 						'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 					];
@@ -1955,7 +1963,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			} elseif ( $css_item instanceof KeyFrame ) {
 				if ( ! in_array( 'keyframes', $options['allowed_at_rules'], true ) ) {
 					$error     = [
-						'code'    => self::ILLEGAL_AT_RULE_ERROR_CODE,
+						'code'    => self::CSS_SYNTAX_INVALID_AT_RULE,
 						'at_rule' => $css_item->atRuleName(),
 						'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 					];
@@ -1980,7 +1988,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$sanitized = true;
 				} else {
 					$error     = [
-						'code'    => self::ILLEGAL_AT_RULE_ERROR_CODE,
+						'code'    => self::CSS_SYNTAX_INVALID_AT_RULE,
 						'at_rule' => $css_item->atRuleName(),
 						'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 					];
@@ -1989,7 +1997,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			} else {
 				$error     = [
-					'code' => 'unrecognized_css',
+					'code' => self::CSS_SYNTAX_INVALID_DECLARATION,
 					'item' => get_class( $css_item ),
 					'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 				];
@@ -2077,10 +2085,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$vendorless_property_name = preg_replace( '/^-\w+-/', '', $property->getRule() );
 				if ( ! in_array( $vendorless_property_name, $options['property_whitelist'], true ) ) {
 					$error     = [
-						'code'           => 'illegal_css_property',
-						'property_name'  => $property->getRule(),
-						'property_value' => $property->getValue(),
-						'type'           => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+						'code'               => self::CSS_SYNTAX_INVALID_PROPERTY,
+						'property_name'      => $property->getRule(),
+						'property_value'     => $property->getValue(),
+						'allowed_properties' => $options['property_whitelist'],
+						'type'               => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 					];
 					$sanitized = $this->should_sanitize_validation_error( $error );
 					if ( $sanitized ) {
@@ -2094,10 +2103,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$properties = $ruleset->getRules( $illegal_property_name );
 				foreach ( $properties as $property ) {
 					$error     = [
-						'code'           => 'illegal_css_property',
-						'property_name'  => $property->getRule(),
-						'property_value' => (string) $property->getValue(),
-						'type'           => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+						'code'               => self::CSS_SYNTAX_INVALID_PROPERTY_NOLIST,
+						'property_name'      => $property->getRule(),
+						'property_value'     => (string) $property->getValue(),
+						'allowed_properties' => $options['property_whitelist'],
+						'type'               => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 					];
 					$sanitized = $this->should_sanitize_validation_error( $error );
 					if ( $sanitized ) {
@@ -2306,7 +2316,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			foreach ( $css_list->getContents() as $rules ) {
 				if ( ! ( $rules instanceof DeclarationBlock ) ) {
 					$error     = [
-						'code' => 'unrecognized_css',
+						'code' => self::CSS_SYNTAX_INVALID_DECLARATION,
 						'item' => get_class( $rules ),
 						'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 					];
@@ -2328,10 +2338,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$vendorless_property_name = preg_replace( '/^-\w+-/', '', $property->getRule() );
 					if ( ! in_array( $vendorless_property_name, $options['property_whitelist'], true ) ) {
 						$error     = [
-							'code'           => 'illegal_css_property',
-							'property_name'  => $property->getRule(),
-							'property_value' => (string) $property->getValue(),
-							'type'           => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+							'code'               => self::CSS_SYNTAX_INVALID_PROPERTY,
+							'property_name'      => $property->getRule(),
+							'property_value'     => (string) $property->getValue(),
+							'allowed_properties' => $options['property_whitelist'],
+							'type'               => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 						];
 						$sanitized = $this->should_sanitize_validation_error( $error );
 						if ( $sanitized ) {
@@ -2376,7 +2387,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$ruleset->removeRule( $property->getRule() );
 				} else {
 					$error     = [
-						'code'           => 'illegal_css_important',
+						'code'           => self::CSS_SYNTAX_INVALID_IMPORTANT,
 						'type'           => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 						'property_name'  => $property->getRule(),
 						'property_value' => $property->getValue(),
@@ -2719,7 +2730,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			if ( ! $body ) {
 				$this->should_sanitize_validation_error(
 					[
-						'code' => 'missing_body_element',
+						'code' => 'missing_body_element', // @todo Add the body.
 						'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 					]
 				);
@@ -3135,7 +3146,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			// Report validation error if size is now too big.
 			if ( $current_concatenated_size + $this->pending_stylesheets[ $i ]['size'] > $max_bytes ) {
 				$validation_error = [
-					'code' => 'excessive_css',
+					'code' => self::STYLESHEET_TOO_LONG,
 					'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 				];
 				if ( isset( $this->pending_stylesheets[ $i ]['sources'] ) ) {
