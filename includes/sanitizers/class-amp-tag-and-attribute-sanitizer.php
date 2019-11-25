@@ -26,6 +26,7 @@
 class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 	const DISALLOWED_TAG                       = 'DISALLOWED_TAG';
+	const DISALLOWED_DESCENDANT_TAG            = 'DISALLOWED_DESCENDANT_TAG';
 	const DISALLOWED_ATTR                      = 'DISALLOWED_ATTR';
 	const DISALLOWED_PROCESSING_INSTRUCTION    = 'DISALLOWED_PROCESSING_INSTRUCTION';
 	const CDATA_VIOLATES_BLACKLIST             = 'CDATA_VIOLATES_BLACKLIST';
@@ -1790,7 +1791,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		foreach ( $child_elements as $child_element ) {
 			if ( ! in_array( $child_element->nodeName, $allowed_descendants, true ) ) {
-				$this->remove_invalid_child( $child_element );
+				$this->remove_invalid_child( $child_element, [ 'code' => self::DISALLOWED_DESCENDANT_TAG ] );
 			} else {
 				$this->remove_disallowed_descendants( $child_element, $allowed_descendants );
 			}

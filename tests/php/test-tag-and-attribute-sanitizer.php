@@ -362,6 +362,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						$html,
 						preg_replace( '#<\w+[^>]*>bad</\w+>#', '', $html ),
 						[ 'amp-story', 'amp-analytics', 'amp-twitter', 'amp-youtube', 'amp-video' ],
+						[
+							[
+								'code'      => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_DESCENDANT_TAG,
+								'node_name' => 'button',
+							],
+						],
 					];
 				}
 			),
