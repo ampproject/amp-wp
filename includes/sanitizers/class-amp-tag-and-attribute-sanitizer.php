@@ -1416,6 +1416,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_RELATIVE ] ) && ! $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_RELATIVE ] ) {
 			if ( $node->hasAttribute( $attr_name ) ) {
 				foreach ( $this->extract_attribute_urls( $node->getAttributeNode( $attr_name ) ) as $url ) {
+					if ( '__amp_source_origin' === $url ) {
+						return AMP_Rule_Spec::PASS;
+					}
+
 					$parsed_url = wp_parse_url( $url );
 
 					/*
@@ -1436,6 +1440,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				foreach ( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] as $alternative_name ) {
 					if ( $node->hasAttribute( $alternative_name ) ) {
 						foreach ( $this->extract_attribute_urls( $node->getAttributeNode( $alternative_name ), $attr_name ) as $url ) {
+							if ( '__amp_source_origin' === $url ) {
+								return AMP_Rule_Spec::PASS;
+							}
+
 							$parsed_url = wp_parse_url( $url );
 							if ( empty( $parsed_url['scheme'] ) ) {
 								return AMP_Rule_Spec::FAIL;

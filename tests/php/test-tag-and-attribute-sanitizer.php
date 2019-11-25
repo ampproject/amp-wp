@@ -93,6 +93,16 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-call-tracking config="__amp_source_origin"><a href="tel:123456789">+1 (23) 456-789</a></amp-call-tracking>',
 				'',
 				[], // Important: This needs to be empty because the amp-call-tracking is stripped.
+				[
+					[
+						'code'      => AMP_Tag_And_Attribute_Sanitizer::INVALID_BLACKLISTED_VALUE_REGEX,
+						'node_name' => 'config',
+					],
+					[
+						'code'      => AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING,
+						'node_name' => 'amp-call-tracking',
+					],
+				],
 			],
 
 			'amp-embed'                                    => [
@@ -1758,20 +1768,20 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 	 * @dataProvider get_body_data
 	 * @group        allowed-tags
 	 *
-	 * @param string     $source               Markup to process.
-	 * @param string     $expected             The markup to expect.
-	 * @param array      $expected_scripts     The AMP component script names that are obtained through sanitization.
-	 * @param array|null $expected_error_codes Expected validation error codes.
+	 * @param string     $source           Markup to process.
+	 * @param string     $expected         The markup to expect.
+	 * @param array      $expected_scripts The AMP component script names that are obtained through sanitization.
+	 * @param array|null $expected_errors  Expected validation errors, either codes or validation error subsets. @todo Make always default to array.
 	 */
-	public function test_body_sanitizer( $source, $expected = null, $expected_scripts = [], $expected_error_codes = null ) {
-		$expected           = isset( $expected ) ? $expected : $source;
-		$dom                = AMP_DOM_Utils::get_dom_from_content( $source );
-		$actual_error_codes = [];
-		$sanitizer          = new AMP_Tag_And_Attribute_Sanitizer(
+	public function test_body_sanitizer( $source, $expected = null, $expected_scripts = [], $expected_errors = null ) {
+		$expected      = isset( $expected ) ? $expected : $source;
+		$dom           = AMP_DOM_Utils::get_dom_from_content( $source );
+		$actual_errors = [];
+		$sanitizer     = new AMP_Tag_And_Attribute_Sanitizer(
 			$dom,
 			[
-				'validation_error_callback' => static function( $error ) use ( &$actual_error_codes ) {
-					$actual_error_codes[] = $error['code'];
+				'validation_error_callback' => static function( $error ) use ( &$actual_errors ) {
+					$actual_errors[] = $error;
 					return true;
 				},
 			]
@@ -1781,8 +1791,22 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 		$this->assertEqualMarkup( $expected, $content );
 		$this->assertEqualSets( $expected_scripts, array_keys( $sanitizer->get_scripts() ) );
-		if ( is_array( $expected_error_codes ) ) {
-			$this->assertEqualSets( $expected_error_codes, $actual_error_codes );
+
+		if ( isset( $expected_errors ) ) {
+			$expected_errors = array_map(
+				static function ( $error ) {
+					if ( is_string( $error ) ) {
+						return [ 'code' => $error ];
+					} else {
+						return $error;
+					}
+				},
+				$expected_errors
+			);
+			$this->assertEquals( wp_list_pluck( $expected_errors, 'code' ), wp_list_pluck( $actual_errors, 'code' ) );
+			foreach ( $expected_errors as $i => $expected_error ) {
+				$this->assertArraySubset( $expected_error, $actual_errors[ $i ] );
+			}
 		}
 	}
 
