@@ -629,6 +629,13 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
+		if ( ! empty( $tag_spec[ AMP_Rule_Spec::DESCENDANT_TAG_LIST ] ) ) {
+			$allowed_tags = AMP_Allowed_Tags_Generated::get_descendant_tag_list( $tag_spec[ AMP_Rule_Spec::DESCENDANT_TAG_LIST ] );
+			if ( ! empty( $allowed_tags ) ) {
+				$this->remove_disallowed_descendants( $node, $allowed_tags );
+			}
+		}
+
 		// @todo Need to pass the $tag_spec['spec_name'] into the validation errors for each.
 		// After attributes have been sanitized (and potentially removed), if mandatory attribute(s) are missing, remove the element.
 		$missing_mandatory_attributes = $this->get_missing_mandatory_attributes( $merged_attr_spec_list, $node );
@@ -761,6 +768,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * that can be an immediate parent or an ancestor of this node, then make
 	 * sure those restrictions are met.
 	 *
+	 * This method has no side effects. It should not sanitize the DOM. It is purely to see if the spec matches.
+	 *
 	 * @since 0.5
 	 *
 	 * @param DOMElement $node     The node to validate.
@@ -788,13 +797,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		if ( ! empty( $tag_spec[ AMP_Rule_Spec::MANDATORY_ANCESTOR ] ) && ! $this->has_ancestor( $node, $tag_spec[ AMP_Rule_Spec::MANDATORY_ANCESTOR ] ) ) {
 			return false;
-		}
-
-		if ( ! empty( $tag_spec[ AMP_Rule_Spec::DESCENDANT_TAG_LIST ] ) ) {
-			$allowed_tags = AMP_Allowed_Tags_Generated::get_descendant_tag_list( $tag_spec[ AMP_Rule_Spec::DESCENDANT_TAG_LIST ] );
-			if ( ! empty( $allowed_tags ) ) {
-				$this->remove_disallowed_descendants( $node, $allowed_tags );
-			}
 		}
 
 		return ! ( ! empty( $tag_spec[ AMP_Rule_Spec::CHILD_TAGS ] ) && ! $this->check_valid_children( $node, $tag_spec[ AMP_Rule_Spec::CHILD_TAGS ] ) );
