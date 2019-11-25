@@ -37,6 +37,11 @@ final class AMP_DOM_Document extends DOMDocument {
 	const CHARSET_META_TAG_PATTERN = '/<meta [^>]*?\s*charset=[^>]*?>[^<]*(?:<\/meta>)?/i';
 
 	/**
+	 * Regular expression pattern to match the main HTML structural tags.
+	 */
+	const HTML_STRUCTURE_PATTERN = '/(?:.*?(?<doctype><!doctype(?:\s+[^>]*)?>))?(?:.*?(?<html_start><html(?:\s+[^>]*)?>)(?:.*?(?<head_start><head(?:\s+[^>]*)?>).*?(?<head_end><\/head\s*>))?(?:.*?(?<body_start><body(?:\s+[^>]*)?>).*?(?<body_end><\/body\s*>))?.*?(?<html_end><\/html\s*>))?/is';
+
+	/**
 	 * ID of the hacky charset we need to add to make loadHTML() behave.
 	 */
 	const CHARSET_HACK_ID = '--amp-dom-document-charset--';
@@ -95,9 +100,9 @@ final class AMP_DOM_Document extends DOMDocument {
 
 		// Force-add http-equiv charset to make DOMDocument behave as it should.
 		// See: http://php.net/manual/en/domdocument.loadhtml.php#78243.
-		$source = str_replace(
-			'<head>',
-			'<head><meta http-equiv="content-type" content="text/html; charset=' . self::AMP_ENCODING . '">',
+		$source = preg_replace(
+			'/<head(?:\s+[^>]*)?>/i',
+			'$1<meta http-equiv="content-type" content="text/html; charset=' . self::AMP_ENCODING . '">',
 			$source
 		);
 
@@ -137,29 +142,75 @@ final class AMP_DOM_Document extends DOMDocument {
 		);
 		$head->insertBefore( $charset, $head->firstChild );
 
-		return str_replace( '<meta http-equiv="content-type" content="text/html; charset=' . self::AMP_ENCODING . '">', '', parent::saveHTML( $node ) );
+		return preg_replace(
+			sprintf(
+				'#<meta http-equiv=([\'"])content-type\1 content=([\'"])text/html; charset=%s\2>#i',
+				preg_quote( self::AMP_ENCODING, '#' )
+			),
+			'',
+			parent::saveHTML( $node )
+		);
 	}
 
 	/**
-	 * Maybe add the <head> and/or <body> tag(s).
+	 * Maybe add the <html>, <head> and/or <body> tag(s).
 	 *
 	 * @param string $content Content to add the head or body tags to.
 	 * @return string Adapted content.
 	 */
 	private function maybe_add_head_or_body( $content ) {
-		$substring = substr( $content, 0, 5000 );
-		if ( false === strpos( $substring, '<body' ) ) {
-			if ( false === strpos( $substring, '<head>' ) ) {
-				// Create the required HTML structure if none exists yet.
-				$content = "<html><head></head><body>{$content}</body></html>";
-			} else {
-				// <head> seems to be present without <body>.
-				$content = preg_replace( '#</head>(.*)</html>#', '</head><body>$1</body>', $content );
-			}
-		} elseif ( false === strpos( $substring, '<head>' ) ) {
-			// Create a <head> element if none exists yet.
-			$content = str_replace( '<body', '<head></head><body', $content );
+		$matches = [];
+
+		if ( false === preg_match( self::HTML_STRUCTURE_PATTERN, $content, $matches ) ) {
+			return $content;
 		}
+
+		if ( ! empty( $matches['doctype'] ) ) {
+			// Strip existing doctype.
+			$content = str_replace( $matches['doctype'], '', $content );
+		}
+
+		if ( empty( $matches['head_start'] ) && empty( $matches['body_start'] ) ) {
+			var_dump( $matches );
+			// Neither body, nor head, so wrap content in both.
+			$pattern = sprintf(
+				'/%s(.*)%s/i',
+				( empty( $matches['html_start'] ) ? '' : preg_quote( $matches['html_start'], '/' ) ),
+				( empty( $matches['html_end'] ) ? '' : preg_quote( $matches['html_end'], '/' ) )
+			);
+			$content = preg_replace(
+				$pattern,
+				( empty( $matches['html_start'] ) ? '' : $matches['html_start'] )
+					. '<head></head><body>$1</body>'
+					. ( empty( $matches['html_end'] ) ? '' : $matches['html_end'] ),
+				$content
+			);
+		} elseif ( empty( $matches['body_start'] ) && ! empty( $matches['head_start'] ) ) {
+			// Head without body, so wrap content in body.
+			$pattern = sprintf(
+				'/%s(.*)%s/i',
+				preg_quote( $matches['head_end'], '/' ),
+				( empty( $matches['html_end'] ) ? '' : preg_quote( $matches['html_end'], '/' ) )
+			);
+			$content = preg_replace(
+				$pattern,
+				$matches['head_end']
+					. '<body>$1</body>'
+					. ( empty( $matches['html_end'] ) ? '' : $matches['html_end'] ),
+				$content
+			);
+		} elseif ( empty( $matches['head_start'] ) && ! empty( $matches['body_start'] ) ) {
+			// Body without head, so add empty head before body.
+			$content = str_replace( $matches['body_start'], '<head></head>' . $matches['body_start'], $content );
+		}
+
+		if ( empty( $matches['html_start'] ) ) {
+			// No surround html tag, so wrap the content in html.
+			$content = "<html>{$content}</html>";
+		}
+
+		// Re-add AMP default doctype.
+		$content = "<!DOCTYPE html>{$content}";
 
 		return $content;
 	}
@@ -211,8 +262,13 @@ final class AMP_DOM_Document extends DOMDocument {
 
 		// Strip charset tags if they don't fit the AMP UTF-8 requirement.
 		if ( self::AMP_ENCODING !== strtolower( $encoding ) ) {
-			$http_equiv_tag && str_replace( $http_equiv_tag, '', $content );
-			$charset_tag && str_replace( $charset_tag, '', $content );
+			if ( $http_equiv_tag ) {
+				$content = str_replace( $http_equiv_tag, '', $content );
+			}
+
+			if ( $charset_tag ) {
+				$content = str_replace( $charset_tag, '', $content );
+			}
 		}
 
 		return $encoding;
