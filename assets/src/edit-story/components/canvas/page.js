@@ -115,7 +115,7 @@ function Page() {
 						target.style.width = `${ width }px`;
 						target.style.height = `${ height }px`;
 						console.log( drag.beforeTranslate );
-						//frame.translate = drag.beforeTranslate;
+						frame.translate = drag.beforeTranslate;
 						setStyle( target );
 					} }
 					onResizeEnd={ ( { target } ) => {
@@ -133,6 +133,7 @@ function Page() {
 						setPropertiesOnSelectedElements( { rotationAngle: frame.rotate } );
 					} }
 					origin={ false }
+					pinchable={ true }
 					keepRatio={ 'image' === selectedElements[ 0 ].type }
 					renderDirections={ 'image' === selectedElements[ 0 ].type ? [ 'nw', 'ne', 'sw', 'se' ] : null }
 				/>
