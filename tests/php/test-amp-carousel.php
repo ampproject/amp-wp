@@ -147,12 +147,16 @@ class Test_Carousel extends \WP_UnitTestCase {
 	 *
 	 * @param DOMElementList $slides   The slides to get the dimensions from.
 	 * @param array          $expected The expected return value of the tested function.
+	 * @throws ReflectionException If invoking the method reflection fails.
 	 */
 	public function test_get_dimensions( $slides, $expected ) {
-		$amp_carousel = new Carousel( new DOMDocument(), $slides );
+		$carousel       = new Carousel( new DOMDocument(), $slides );
+		$get_dimensions = new ReflectionMethod( $carousel, 'get_dimensions' );
+		$get_dimensions->setAccessible( true );
+
 		$this->assertEquals(
 			$expected,
-			$amp_carousel->get_dimensions()
+			$get_dimensions->invoke( $carousel )
 		);
 	}
 }

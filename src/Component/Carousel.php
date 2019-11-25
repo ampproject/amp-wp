@@ -133,7 +133,7 @@ final class Carousel {
 	 *     @type int $height The height of the carousel, at index 1.
 	 * }
 	 */
-	public function get_dimensions() {
+	private function get_dimensions() {
 		if ( 0 === count( $this->slides ) ) {
 			return [ self::FALLBACK_WIDTH, self::FALLBACK_HEIGHT ];
 		}
