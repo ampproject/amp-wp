@@ -11,8 +11,8 @@ export const ElementWithPosition = css`
 `;
 
 export const ElementWithSize = css`
-	width: ${ ( { width } ) => `${ width }%` };
-	height: ${ ( { height } ) => `${ height }%` };
+	width: ${ ( { width } ) => `${ width }px` };
+	height: ${ ( { height } ) => `${ height }px` };
 `;
 
 export const ElementWithRotation = css`

@@ -28,8 +28,8 @@ const Selection = styled.div.attrs( { className: 'selection' } )`
 	border: 1px solid #448FFF;
 	left: ${ ( { x } ) => `${ x }px` };
 	top: ${ ( { y } ) => `${ y }px` };
-	width: ${ ( { width } ) => `${ width }%` };
-	height: ${ ( { height } ) => `${ height }%` };
+	width: ${ ( { width } ) => `${ width }px` };
+	height: ${ ( { height } ) => `${ height }px` };
 	transform: ${ ( { rotationAngle } ) => `rotate(${ rotationAngle }deg)` };
 	position: absolute;
 `;
@@ -43,7 +43,6 @@ function Page() {
 	const {
 		state: { currentPage, hasSelection, selectedElements },
 		actions: { clearSelection, selectElementById, setPropertiesOnSelectedElements, toggleElementIdInSelection },
-
 	} = useStory();
 	const {
 		actions: { setBackgroundClickHandler },
@@ -123,6 +122,10 @@ function Page() {
 					onRotateEnd={ () => {
 						setPropertiesOnSelectedElements( { rotationAngle: frame.rotate } );
 					} }
+					origin={ false }
+					pinchable={ true }
+					keepRatio={ 'image' === selectedElements[ 0 ].type }
+					renderDirections={ 'image' === selectedElements[ 0 ].type ? [ 'nw', 'ne', 'sw', 'se' ] : null }
 				/>
 			) }
 		</Background>
