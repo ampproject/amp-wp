@@ -69,7 +69,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-sticky-ad layout="nodisplay"><span>not allowed</span><amp-ad width="320" height="50" type="doubleclick" data-slot="/35096353/amptesting/formats/sticky"></amp-ad><i>not ok</i></amp-sticky-ad>',
 				'',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_FIRST_CHILD_TAG ],
 			],
 
 			'amp-animation'                                => [
@@ -88,7 +88,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-call-tracking config="https://example.com/calltracking.json"><b>bad</b>--and not great: <a href="tel:123456789">+1 (23) 456-789</a><i>more bad</i>not great</amp-call-tracking>',
 				'',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_CHILD_TAG ],
 			],
 
 			'amp-call-tracking_blacklisted_config'         => [
@@ -904,11 +904,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-sidebar' ],
 				[
 					[
-						'code'      => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
+						'code'      => AMP_Tag_And_Attribute_Sanitizer::WRONG_PARENT_TAG,
 						'node_name' => 'amp-app-banner',
 					],
 					[
-						'code'      => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
+						'code'      => AMP_Tag_And_Attribute_Sanitizer::WRONG_PARENT_TAG,
 						'node_name' => 'amp-app-banner',
 					],
 				],
@@ -990,7 +990,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<div>All I have is this div, when all you want is a noscript tag.<audio>Sweet tunes</audio></div>',
 				'<div>All I have is this div, when all you want is a noscript tag.</div>',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ],
+				[ AMP_Tag_And_Attribute_Sanitizer::MANDATORY_TAG_ANCESTOR ],
 			],
 
 			'amp-img_with_good_protocols'                  => [
@@ -1005,7 +1005,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<p>Text</p><img src="/path/to/file.jpg">',
 				'<p>Text</p>',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ],
+				[ AMP_Tag_And_Attribute_Sanitizer::MANDATORY_TAG_ANCESTOR ],
 			],
 
 			'disallowed_attributes'                        => [
@@ -1260,7 +1260,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'',
 				[],
 				[
-					AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG, // @todo This should actually be DISALLOWED_FIRST_CHILD_TAG.
+					AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_FIRST_CHILD_TAG,
 				],
 			],
 
@@ -1415,7 +1415,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-geo layout="nodisplay"><div>bad</div><script type="application/json">{ "AmpBind": true, "ISOCountryGroups": { "nafta": [ "ca", "mx", "us", "unknown" ], "waldo": [ "unknown" ], "anz": [ "au", "nz" ] } }</script></amp-geo>',
 				'',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_FIRST_CHILD_TAG ],
 			],
 
 			'amp-addthis-valid'                            => [
@@ -1626,14 +1626,14 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-image-slider layout="responsive" width="100" height="200"><amp-img src="/green-apple.jpg" alt="A green apple"></amp-img></amp-image-slider>',
 				'',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ],
+				[ AMP_Tag_And_Attribute_Sanitizer::INCORRECT_MIN_NUM_CHILD_TAGS ],
 			],
 
 			'amp-image-slider-more-bad-children'           => [
 				'<amp-image-slider layout="responsive" width="100" height="200"><span>Not allowed</span><amp-img src="/green-apple.jpg" alt="A green apple"></amp-img><i>forbidden</i><amp-img src="/red-apple.jpg" alt="A red apple"></amp-img><div first>This apple is green</div><strong>not allowed</strong><div second>This apple is red</div><i>not</i> <span>ok</span></amp-image-slider>',
 				'',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_CHILD_TAG ],
 			],
 
 			'amp-fx-collection'                            => [
@@ -2341,7 +2341,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 					[
 						'node_name'       => 'amp-story-grid-layer',
 						'parent_name'     => 'body',
-						'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
+						'code'            => AMP_Tag_And_Attribute_Sanitizer::MANDATORY_TAG_ANCESTOR,
 						'node_attributes' => [ 'class' => 'a-invalid' ],
 						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
 					],

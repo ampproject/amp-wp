@@ -26,6 +26,13 @@
 class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 	const DISALLOWED_TAG                       = 'DISALLOWED_TAG';
+	const DISALLOWED_CHILD_TAG                 = 'DISALLOWED_CHILD_TAG';
+	const DISALLOWED_FIRST_CHILD_TAG           = 'DISALLOWED_FIRST_CHILD_TAG';
+	const INCORRECT_NUM_CHILD_TAGS             = 'INCORRECT_NUM_CHILD_TAGS';
+	const INCORRECT_MIN_NUM_CHILD_TAGS         = 'INCORRECT_MIN_NUM_CHILD_TAGS';
+	const WRONG_PARENT_TAG                     = 'WRONG_PARENT_TAG';
+	const DISALLOWED_TAG_ANCESTOR              = 'DISALLOWED_TAG_ANCESTOR';
+	const MANDATORY_TAG_ANCESTOR               = 'MANDATORY_TAG_ANCESTOR';
 	const DISALLOWED_DESCENDANT_TAG            = 'DISALLOWED_DESCENDANT_TAG';
 	const DISALLOWED_ATTR                      = 'DISALLOWED_ATTR';
 	const DISALLOWED_PROCESSING_INSTRUCTION    = 'DISALLOWED_PROCESSING_INSTRUCTION';
@@ -448,18 +455,32 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		 */
 		$rule_spec_list_to_validate = [];
 		$rule_spec_list             = [];
+		$invalid_rule_spec_list     = [];
 		if ( isset( $this->allowed_tags[ $node->nodeName ] ) ) {
 			$rule_spec_list = $this->allowed_tags[ $node->nodeName ];
 		}
 		foreach ( $rule_spec_list as $id => $rule_spec ) {
-			if ( $this->validate_tag_spec_for_node( $node, $rule_spec[ AMP_Rule_Spec::TAG_SPEC ] ) ) {
+			$validity = $this->validate_tag_spec_for_node( $node, $rule_spec[ AMP_Rule_Spec::TAG_SPEC ] );
+			if ( true === $validity ) {
 				$rule_spec_list_to_validate[ $id ] = $this->get_rule_spec_list_to_validate( $node, $rule_spec );
+			} else {
+				$invalid_rule_spec_list[] = [
+					'error'    => $validity,
+					'tag_spec' => $rule_spec[ AMP_Rule_Spec::TAG_SPEC ],
+				];
 			}
 		}
 
 		// If no valid rule_specs exist, then remove this node and return.
 		if ( empty( $rule_spec_list_to_validate ) ) {
-			$this->remove_node( $node );
+			if ( 1 === count( $invalid_rule_spec_list ) ) {
+				// If there was only one tag spec candidate that failed, use its error code for removing the node,
+				// since it's we know it is the specific reason for why the node had to be removed.
+				// This is the normal case.
+				$this->remove_invalid_child( $node, [ 'code' => $invalid_rule_spec_list[0]['error'] ] ); // @todo Need to pass tag_spec.
+			} else {
+				$this->remove_node( $node );
+			}
 			return null;
 		}
 
@@ -774,32 +795,36 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @param DOMElement $node     The node to validate.
 	 * @param array      $tag_spec The specification.
-	 * @return boolean $valid Whether the node's placement is valid.
+	 * @return true|string True if node is valid for spec, or error code if otherwise.
 	 */
 	private function validate_tag_spec_for_node( DOMElement $node, $tag_spec ) {
 
 		if ( ! empty( $tag_spec[ AMP_Rule_Spec::MANDATORY_PARENT ] ) && ! $this->has_parent( $node, $tag_spec[ AMP_Rule_Spec::MANDATORY_PARENT ] ) ) {
-			return false;
+			return self::WRONG_PARENT_TAG; // @todo Pass back the expected parent tag name.
 		}
 
-		// Extension scripts must be in the head.
+		// Extension scripts must be in the head. Note this currently never fails because all AMP scripts are moved to the head before sanitization.
 		if ( isset( $tag_spec['extension_spec'] ) && ! $this->has_parent( $node, 'head' ) ) {
-			return false;
+			return self::WRONG_PARENT_TAG;
 		}
 
 		if ( ! empty( $tag_spec[ AMP_Rule_Spec::DISALLOWED_ANCESTOR ] ) ) {
 			foreach ( $tag_spec[ AMP_Rule_Spec::DISALLOWED_ANCESTOR ] as $disallowed_ancestor_node_name ) {
 				if ( $this->has_ancestor( $node, $disallowed_ancestor_node_name ) ) {
-					return false;
+					return self::DISALLOWED_TAG_ANCESTOR; // @todo Need to pass back the ancestor that is a problem.
 				}
 			}
 		}
 
 		if ( ! empty( $tag_spec[ AMP_Rule_Spec::MANDATORY_ANCESTOR ] ) && ! $this->has_ancestor( $node, $tag_spec[ AMP_Rule_Spec::MANDATORY_ANCESTOR ] ) ) {
-			return false;
+			return self::MANDATORY_TAG_ANCESTOR; // @todo Need to pass back the missing mandatory ancestor.
 		}
 
-		return ! ( ! empty( $tag_spec[ AMP_Rule_Spec::CHILD_TAGS ] ) && ! $this->check_valid_children( $node, $tag_spec[ AMP_Rule_Spec::CHILD_TAGS ] ) );
+		if ( empty( $tag_spec[ AMP_Rule_Spec::CHILD_TAGS ] ) ) {
+			return true;
+		}
+
+		return $this->check_valid_children( $node, $tag_spec[ AMP_Rule_Spec::CHILD_TAGS ] );
 	}
 
 	/**
@@ -1812,7 +1837,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *     @type int   $mandatory_num_child_tags     Mandatory number of child tags.
 	 *     @type int   $mandatory_min_num_child_tags Mandatory minimum number of child tags.
 	 * }
-	 * @return bool Whether the element satisfies the requirements, or else it should be removed.
+	 * @return true|string True if the element satisfies the requirements, or error code if it should be removed. @todo Return validation error array instead?
 	 */
 	private function check_valid_children( DOMElement $node, $child_tags ) {
 		$child_elements = [];
@@ -1825,26 +1850,34 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		// If the first element is not of the required type, invalidate the entire element.
 		if ( isset( $child_tags['first_child_tag_name_oneof'] ) && ! empty( $child_elements[0] ) && ! in_array( $child_elements[0]->nodeName, $child_tags['first_child_tag_name_oneof'], true ) ) {
-			return false;
+			return self::DISALLOWED_FIRST_CHILD_TAG; // @todo Would be better if the name of the child were included as context.
 		}
 
 		// Verify that all of the child are among the set of allowed elements.
 		if ( isset( $child_tags['child_tag_name_oneof'] ) ) {
 			foreach ( $child_elements as $child_element ) {
 				if ( ! in_array( $child_element->nodeName, $child_tags['child_tag_name_oneof'], true ) ) {
-					return false;
+					return self::DISALLOWED_CHILD_TAG; // @todo Would be better if the name of the child were included as context.
 				}
 			}
 		}
 
 		// If there aren't the exact number of elements, then mark this $node as being invalid.
 		if ( isset( $child_tags['mandatory_num_child_tags'] ) ) {
-			return count( $child_elements ) === $child_tags['mandatory_num_child_tags'];
+			if ( count( $child_elements ) === $child_tags['mandatory_num_child_tags'] ) {
+				return true;
+			} else {
+				return self::INCORRECT_NUM_CHILD_TAGS;
+			}
 		}
 
 		// If there aren't enough elements, then mark this $node as being invalid.
 		if ( isset( $child_tags['mandatory_min_num_child_tags'] ) ) {
-			return count( $child_elements ) >= $child_tags['mandatory_min_num_child_tags'];
+			if ( count( $child_elements ) >= $child_tags['mandatory_min_num_child_tags'] ) {
+				return true;
+			} else {
+				return self::INCORRECT_MIN_NUM_CHILD_TAGS;
+			}
 		}
 
 		return true;
