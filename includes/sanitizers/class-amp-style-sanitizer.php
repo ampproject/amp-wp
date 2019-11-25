@@ -26,6 +26,12 @@ use \Sabberworm\CSS\CSSList\Document;
  */
 class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
+	const STYLE_AMP_CUSTOM_SPEC_NAME    = 'style amp-custom';
+	const STYLE_AMP_KEYFRAMES_SPEC_NAME = 'style[amp-keyframes]';
+
+	const STYLE_AMP_CUSTOM_GROUP_INDEX    = 0;
+	const STYLE_AMP_KEYFRAMES_GROUP_INDEX = 1;
+
 	const CSS_SYNTAX_INVALID_AT_RULE         = 'CSS_SYNTAX_INVALID_AT_RULE';
 	const CSS_SYNTAX_INVALID_DECLARATION     = 'CSS_SYNTAX_INVALID_DECLARATION';
 	const CSS_SYNTAX_INVALID_PROPERTY        = 'CSS_SYNTAX_INVALID_PROPERTY';
@@ -400,9 +406,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			if ( ! isset( $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) ) {
 				continue;
 			}
-			if ( 'style[amp-keyframes]' === $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) {
+			if ( self::STYLE_AMP_KEYFRAMES_SPEC_NAME === $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) {
 				$this->style_keyframes_cdata_spec = $spec_rule[ AMP_Rule_Spec::CDATA ];
-			} elseif ( 'style amp-custom' === $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) {
+			} elseif ( self::STYLE_AMP_CUSTOM_SPEC_NAME === $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) {
 				$this->style_custom_cdata_spec = $spec_rule[ AMP_Rule_Spec::CDATA ];
 			}
 		}
@@ -447,7 +453,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			array_filter(
 				$this->pending_stylesheets,
 				static function( $pending_stylesheet ) {
-					return $pending_stylesheet['included'] && 'custom' === $pending_stylesheet['group'];
+					return $pending_stylesheet['included'] && self::STYLE_AMP_CUSTOM_GROUP_INDEX === $pending_stylesheet['group'];
 				}
 			),
 			'stylesheet'
@@ -1199,12 +1205,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				'allowed_at_rules'   => $cdata_spec['css_spec']['allowed_at_rules'],
 				'property_whitelist' => $cdata_spec['css_spec']['declaration'],
 				'validate_keyframes' => $cdata_spec['css_spec']['validate_keyframes'],
+				'spec_name'          => $is_keyframes ? self::STYLE_AMP_KEYFRAMES_SPEC_NAME : self::STYLE_AMP_CUSTOM_SPEC_NAME,
 			]
 		);
 
 		$this->pending_stylesheets[] = array_merge(
 			[
-				'group'    => $is_keyframes ? 'keyframes' : 'custom',
+				'group'    => $is_keyframes ? self::STYLE_AMP_KEYFRAMES_GROUP_INDEX : self::STYLE_AMP_CUSTOM_GROUP_INDEX,
 				'node'     => $element,
 				'sources'  => $this->current_sources,
 				'priority' => $this->get_stylesheet_priority( $element ),
@@ -1313,12 +1320,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				'property_whitelist' => $this->style_custom_cdata_spec['css_spec']['declaration'],
 				'stylesheet_url'     => $href,
 				'stylesheet_path'    => $css_file_path,
+				'spec_name'          => self::STYLE_AMP_CUSTOM_SPEC_NAME,
 			]
 		);
 
 		$this->pending_stylesheets[] = array_merge(
 			[
-				'group'    => 'custom',
+				'group'    => self::STYLE_AMP_CUSTOM_GROUP_INDEX,
 				'node'     => $element,
 				'sources'  => $this->current_sources, // Needed because node is removed below.
 				'priority' => $this->get_stylesheet_priority( $element ),
@@ -1389,6 +1397,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *     @type string   $stylesheet_path             Original filesystem path for stylesheet when originating via link or @import.
 	 *     @type array    $allowed_at_rules            Allowed @-rules.
 	 *     @type bool     $validate_keyframes          Whether keyframes should be validated.
+	 *     @type string   $spec_name                   Spec name.
 	 * }
 	 * @return array {
 	 *    Processed stylesheet.
@@ -1593,6 +1602,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *    @type Document $css_document       CSS Document.
 	 *    @type array    $validation_results Validation results, array containing arrays with error and sanitized keys.
 	 *    @type string   $stylesheet_url     Stylesheet URL, if available.
+	 *    @type string   $spec_name          Spec name.
 	 * }
 	 */
 	private function parse_stylesheet( $stylesheet_string, $options ) {
@@ -1626,9 +1636,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			);
 		} catch ( Exception $exception ) {
 			$error = [
-				'code'    => self::CSS_SYNTAX_PARSE_ERROR,
-				'message' => $exception->getMessage(),
-				'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+				'code'      => self::CSS_SYNTAX_PARSE_ERROR,
+				'message'   => $exception->getMessage(),
+				'type'      => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+				'spec_name' => $options['spec_name'],
 			];
 
 			/*
@@ -1677,6 +1688,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				'validate_keyframes' => false,
 				'stylesheet_url'     => null,
 				'stylesheet_path'    => null,
+				'spec_name'          => null,
 			],
 			$options
 		);
@@ -1925,9 +1937,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			} elseif ( $css_item instanceof AtRuleBlockList ) {
 				if ( ! in_array( $css_item->atRuleName(), $options['allowed_at_rules'], true ) ) {
 					$error     = [
-						'code'    => self::CSS_SYNTAX_INVALID_AT_RULE,
-						'at_rule' => $css_item->atRuleName(),
-						'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+						'code'      => self::CSS_SYNTAX_INVALID_AT_RULE,
+						'at_rule'   => $css_item->atRuleName(),
+						'type'      => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+						'spec_name' => $options['spec_name'],
 					];
 					$sanitized = $this->should_sanitize_validation_error( $error );
 					$results[] = compact( 'error', 'sanitized' );
@@ -1946,9 +1959,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			} elseif ( $css_item instanceof AtRuleSet ) {
 				if ( ! in_array( $css_item->atRuleName(), $options['allowed_at_rules'], true ) ) {
 					$error     = [
-						'code'    => self::CSS_SYNTAX_INVALID_AT_RULE,
-						'at_rule' => $css_item->atRuleName(),
-						'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+						'code'      => self::CSS_SYNTAX_INVALID_AT_RULE,
+						'at_rule'   => $css_item->atRuleName(),
+						'type'      => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+						'spec_name' => $options['spec_name'],
 					];
 					$sanitized = $this->should_sanitize_validation_error( $error );
 					$results[] = compact( 'error', 'sanitized' );
@@ -1963,9 +1977,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			} elseif ( $css_item instanceof KeyFrame ) {
 				if ( ! in_array( 'keyframes', $options['allowed_at_rules'], true ) ) {
 					$error     = [
-						'code'    => self::CSS_SYNTAX_INVALID_AT_RULE,
-						'at_rule' => $css_item->atRuleName(),
-						'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+						'code'      => self::CSS_SYNTAX_INVALID_AT_RULE,
+						'at_rule'   => $css_item->atRuleName(),
+						'type'      => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+						'spec_name' => $options['spec_name'],
 					];
 					$sanitized = $this->should_sanitize_validation_error( $error );
 					$results[] = compact( 'error', 'sanitized' );
@@ -1988,18 +2003,20 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$sanitized = true;
 				} else {
 					$error     = [
-						'code'    => self::CSS_SYNTAX_INVALID_AT_RULE,
-						'at_rule' => $css_item->atRuleName(),
-						'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+						'code'      => self::CSS_SYNTAX_INVALID_AT_RULE,
+						'at_rule'   => $css_item->atRuleName(),
+						'type'      => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+						'spec_name' => $options['spec_name'],
 					];
 					$sanitized = $this->should_sanitize_validation_error( $error );
 					$results[] = compact( 'error', 'sanitized' );
 				}
 			} else {
 				$error     = [
-					'code' => self::CSS_SYNTAX_INVALID_DECLARATION,
-					'item' => get_class( $css_item ),
-					'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+					'code'      => self::CSS_SYNTAX_INVALID_DECLARATION,
+					'item'      => get_class( $css_item ),
+					'type'      => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+					'spec_name' => $options['spec_name'],
 				];
 				$sanitized = $this->should_sanitize_validation_error( $error );
 				$results[] = compact( 'error', 'sanitized' );
@@ -2090,6 +2107,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						'property_value'     => $property->getValue(),
 						'allowed_properties' => $options['property_whitelist'],
 						'type'               => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+						'spec_name'          => $options['spec_name'],
 					];
 					$sanitized = $this->should_sanitize_validation_error( $error );
 					if ( $sanitized ) {
@@ -2108,6 +2126,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						'property_value'     => (string) $property->getValue(),
 						'allowed_properties' => $options['property_whitelist'],
 						'type'               => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+						'spec_name'          => $options['spec_name'],
 					];
 					$sanitized = $this->should_sanitize_validation_error( $error );
 					if ( $sanitized ) {
@@ -2124,7 +2143,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$results = array_merge(
 			$results,
-			$this->transform_important_qualifiers( $ruleset, $css_list )
+			$this->transform_important_qualifiers( $ruleset, $css_list, $options )
 		);
 
 		// Remove the ruleset if it is now empty.
@@ -2316,9 +2335,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			foreach ( $css_list->getContents() as $rules ) {
 				if ( ! ( $rules instanceof DeclarationBlock ) ) {
 					$error     = [
-						'code' => self::CSS_SYNTAX_INVALID_DECLARATION,
-						'item' => get_class( $rules ),
-						'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+						'code'      => self::CSS_SYNTAX_INVALID_DECLARATION,
+						'item'      => get_class( $rules ),
+						'type'      => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+						'spec_name' => $options['spec_name'],
 					];
 					$sanitized = $this->should_sanitize_validation_error( $error );
 					if ( $sanitized ) {
@@ -2330,7 +2350,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 				$results = array_merge(
 					$results,
-					$this->transform_important_qualifiers( $rules, $css_list )
+					$this->transform_important_qualifiers( $rules, $css_list, $options )
 				);
 
 				$properties = $rules->getRules();
@@ -2343,6 +2363,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 							'property_value'     => (string) $property->getValue(),
 							'allowed_properties' => $options['property_whitelist'],
 							'type'               => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+							'spec_name'          => $options['spec_name'],
 						];
 						$sanitized = $this->should_sanitize_validation_error( $error );
 						if ( $sanitized ) {
@@ -2365,9 +2386,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @param RuleSet|DeclarationBlock $ruleset  Rule set.
 	 * @param CSSList                  $css_list CSS List.
+	 * @param array                    $options  Options.
 	 * @return array Validation results.
 	 */
-	private function transform_important_qualifiers( RuleSet $ruleset, CSSList $css_list ) {
+	private function transform_important_qualifiers( RuleSet $ruleset, CSSList $css_list, $options ) {
 		$results = [];
 
 		// An !important only makes sense for rulesets that have selectors.
@@ -2391,6 +2413,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						'type'           => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 						'property_name'  => $property->getRule(),
 						'property_value' => $property->getValue(),
+						'spec_name'      => $options['spec_name'],
 					];
 					$sanitized = $this->should_sanitize_validation_error( $error );
 					if ( $sanitized ) {
@@ -2482,6 +2505,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			[
 				'allowed_at_rules'   => [],
 				'property_whitelist' => $this->style_custom_cdata_spec['css_spec']['declaration'],
+				'spec_name'          => self::STYLE_AMP_CUSTOM_SPEC_NAME,
 			]
 		);
 
@@ -2489,7 +2513,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		if ( $processed['stylesheet'] ) {
 			$this->pending_stylesheets[] = [
-				'group'      => 'custom',
+				'group'      => self::STYLE_AMP_CUSTOM_GROUP_INDEX,
 				'stylesheet' => $processed['stylesheet'],
 				'node'       => $element,
 				'sources'    => $this->current_sources,
@@ -2517,14 +2541,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function finalize_styles() {
 		$stylesheet_groups = [
-			'custom'    => [
+			self::STYLE_AMP_CUSTOM_GROUP_INDEX    => [
 				'source_map_comment'  => "\n\n/*# sourceURL=amp-custom.css */",
 				'cdata_spec'          => $this->style_custom_cdata_spec,
 				'pending_stylesheets' => [],
 				'included_count'      => 0,
 				'import_front_matter' => '', // Extra @import statements that are prepended when fetch fails and validation error is rejected.
 			],
-			'keyframes' => [
+			self::STYLE_AMP_KEYFRAMES_GROUP_INDEX => [
 				'source_map_comment'  => "\n\n/*# sourceURL=amp-keyframes.css */",
 				'cdata_spec'          => $this->style_keyframes_cdata_spec,
 				'pending_stylesheets' => [],
@@ -2560,7 +2584,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// Add style[amp-custom] to document.
-		if ( $stylesheet_groups['custom']['included_count'] > 0 ) {
+		if ( $stylesheet_groups[ self::STYLE_AMP_CUSTOM_GROUP_INDEX ]['included_count'] > 0 ) {
 
 			// Ensure style[amp-custom] is present in the document.
 			if ( ! $this->amp_custom_style_element ) {
@@ -2573,10 +2597,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			 * On AMP-first themes when there are new/rejected validation errors present, a parsed stylesheet may include
 			 * @import rules. These must be moved to the beginning to be honored.
 			 */
-			$css = $stylesheet_groups['custom']['import_front_matter'];
+			$css = $stylesheet_groups[ self::STYLE_AMP_CUSTOM_GROUP_INDEX ]['import_front_matter'];
 
 			$css .= implode( '', $this->get_stylesheets() );
-			$css .= $stylesheet_groups['custom']['source_map_comment'];
+			$css .= $stylesheet_groups[ self::STYLE_AMP_CUSTOM_GROUP_INDEX ]['source_map_comment'];
 
 			/*
 			 * Let the style[amp-custom] be populated with the concatenated CSS.
@@ -2596,7 +2620,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$included_sources       = [];
 			$excluded_sources       = [];
 			foreach ( $this->pending_stylesheets as $j => $pending_stylesheet ) {
-				if ( 'custom' !== $pending_stylesheet['group'] || ! ( $pending_stylesheet['node'] instanceof DOMElement ) || ! empty( $pending_stylesheet['duplicate'] ) ) {
+				if ( self::STYLE_AMP_CUSTOM_GROUP_INDEX !== $pending_stylesheet['group'] || ! ( $pending_stylesheet['node'] instanceof DOMElement ) || ! empty( $pending_stylesheet['duplicate'] ) ) {
 					continue;
 				}
 				$message = sprintf( '% 6d B', $pending_stylesheet['size'] );
@@ -2725,13 +2749,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// Add style[amp-keyframes] to document.
-		if ( $stylesheet_groups['keyframes']['included_count'] > 0 ) {
+		if ( $stylesheet_groups[ self::STYLE_AMP_KEYFRAMES_GROUP_INDEX ]['included_count'] > 0 ) {
 			$body = $this->dom->getElementsByTagName( 'body' )->item( 0 );
 			if ( ! $body ) {
 				$body = $this->dom->createElement( 'body' );
 				$this->dom->documentElement->appendChild( $body );
 			} else {
-				$css = $stylesheet_groups['keyframes']['import_front_matter'];
+				$css = $stylesheet_groups[ self::STYLE_AMP_KEYFRAMES_GROUP_INDEX ]['import_front_matter'];
 
 				$css .= implode(
 					'',
@@ -2739,13 +2763,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						array_filter(
 							$this->pending_stylesheets,
 							static function( $pending_stylesheet ) {
-								return $pending_stylesheet['included'] && 'keyframes' === $pending_stylesheet['group'];
+								return $pending_stylesheet['included'] && self::STYLE_AMP_KEYFRAMES_GROUP_INDEX === $pending_stylesheet['group'];
 							}
 						),
 						'stylesheet'
 					)
 				);
-				$css .= $stylesheet_groups['keyframes']['source_map_comment'];
+				$css .= $stylesheet_groups[ self::STYLE_AMP_KEYFRAMES_GROUP_INDEX ]['source_map_comment'];
 
 				$style_element = $this->dom->createElement( 'style' );
 				$style_element->setAttribute( 'amp-keyframes', '' );
@@ -2776,7 +2800,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$included = true;
 		foreach ( $this->pending_stylesheets as &$pending_stylesheet ) {
 			$is_admin_bar_css = (
-				'custom' === $pending_stylesheet['group']
+				self::STYLE_AMP_CUSTOM_GROUP_INDEX === $pending_stylesheet['group']
 				&&
 				$pending_stylesheet['node'] instanceof DOMElement
 				&&
@@ -2980,8 +3004,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 1.2
 	 *
-	 * @param string $group        Group name (either 'custom' or 'keyframes').
-	 * @param array  $group_config Group config.
+	 * @param int   $group        Group name (either self::STYLE_AMP_CUSTOM_GROUP_INDEX or self::STYLE_AMP_KEYFRAMES_GROUP_INDEX ).
+	 * @param array $group_config Group config.
 	 * @return int Number of included stylesheets in group.
 	 */
 	private function finalize_stylesheet_group( $group, $group_config ) {
@@ -3142,8 +3166,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			// Report validation error if size is now too big.
 			if ( $current_concatenated_size + $this->pending_stylesheets[ $i ]['size'] > $max_bytes ) {
 				$validation_error = [
-					'code' => self::STYLESHEET_TOO_LONG,
-					'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+					'code'      => self::STYLESHEET_TOO_LONG,
+					'type'      => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+					'spec_name' => self::STYLE_AMP_KEYFRAMES_GROUP_INDEX === $group ? self::STYLE_AMP_KEYFRAMES_SPEC_NAME : self::STYLE_AMP_CUSTOM_SPEC_NAME,
 				];
 				if ( isset( $this->pending_stylesheets[ $i ]['sources'] ) ) {
 					$validation_error['sources'] = $this->pending_stylesheets[ $i ]['sources'];
