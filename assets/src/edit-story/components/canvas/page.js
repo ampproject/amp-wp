@@ -118,8 +118,9 @@ function Page() {
 						//frame.translate = drag.beforeTranslate;
 						setStyle( target );
 					} }
-					onResizeEnd={ () => {
-						// @todo Set the correct width/height.
+					onResizeEnd={ ( { target } ) => {
+						// @todo Update position as well based on new location after resizing (due to absolute positioning).
+						setPropertiesOnSelectedElements( { width: parseInt( target.style.width ), height: parseInt( target.style.height ) } );
 					} }
 					onRotateStart={ ( { set } ) => {
 						set( frame.rotate );
