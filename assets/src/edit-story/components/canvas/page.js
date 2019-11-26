@@ -7,7 +7,7 @@ import Moveable from 'react-moveable';
 /**
  * WordPress dependencies
  */
-import { useCallback, useEffect, createRef, useState } from '@wordpress/element';
+import { useCallback, useEffect, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -39,12 +39,7 @@ const Element = styled.div`
 `;
 
 function Page() {
-	const selectionRef = createRef();
 	const [ targetEl, setTargetEl ] = useState( null );
-
-	useEffect( () => {
-		setTargetEl( selectionRef.current );
-	}, [ selectionRef ] );
 
 	const {
 		state: { currentPage, hasSelection, selectedElements },
@@ -92,7 +87,7 @@ function Page() {
 				);
 			} ) }
 			{ hasSelection && (
-				<Selection { ...selectionProps } ref={ selectionRef } />
+				<Selection { ...selectionProps } ref={ setTargetEl } />
 			) }
 			{ displayMoveable && targetEl && (
 				<Moveable
@@ -117,7 +112,7 @@ function Page() {
 						}
 					} }
 					onResize={ ( { target, width, height, drag } ) => {
-						// @todo This is sliding while resizing, not working well.
+						// @todo This is sliding slightly while resizing an image element specifically, needs looking into.
 						target.style.width = `${ width }px`;
 						target.style.height = `${ height }px`;
 						frame.translate = drag.beforeTranslate;
