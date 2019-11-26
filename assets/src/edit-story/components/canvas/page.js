@@ -25,7 +25,6 @@ const Background = styled.div.attrs( { className: 'container' } )`
 
 const Selection = styled.div`
 	z-index: 2;
-	border: 1px solid #448FFF;
 	left: ${ ( { x } ) => `${ x }px` };
 	top: ${ ( { y } ) => `${ y }px` };
 	width: ${ ( { width } ) => `${ width }px` };
