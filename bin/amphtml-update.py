@@ -29,6 +29,8 @@ import google
 from collections import defaultdict
 import imp
 
+seen_spec_names = set()
+
 def Die(msg):
 	print >> sys.stderr, msg
 	sys.exit(1)
@@ -95,6 +97,14 @@ def GeneratePHP(out_dir):
 	logging.info('entering ...')
 
 	allowed_tags, attr_lists, descendant_lists, reference_points, versions = ParseRules(out_dir)
+
+	expected_spec_names = (
+		'style amp-custom',
+		'style[amp-keyframes]',
+	)
+	for expected_spec_name in expected_spec_names:
+		if expected_spec_name not in seen_spec_names:
+			raise Exception( 'Missing spec: %s' % expected_spec_name )
 
 	#Generate the output
 	out = []
@@ -476,6 +486,21 @@ def GetTagSpec(tag_spec, attr_lists):
 				if cdata_dict['blacklisted_cdata_regex']['error_message'] not in ( 'CSS !important', 'contents', 'html comments' ):
 					raise Exception( 'Unexpected error_message "%s" for blacklisted_cdata_regex.' % cdata_dict['blacklisted_cdata_regex']['error_message'] );
 			tag_spec_dict['cdata'] = cdata_dict
+
+	if 'spec_name' not in tag_spec_dict['tag_spec']:
+		if 'extension_spec' in tag_spec_dict['tag_spec']:
+			# CUSTOM_ELEMENT=1 (default), CUSTOM_TEMPLATE=2
+			extension_type = tag_spec_dict['tag_spec']['extension_spec'].get('extension_type', 1)
+			spec_name = 'script [%s=%s]' % ( 'custom-element' if 1 == extension_type else 'custom-template', tag_spec_dict['tag_spec']['extension_spec']['name'].lower() )
+		else:
+			spec_name = tag_spec.tag_name.lower()
+	else:
+		spec_name = tag_spec_dict['tag_spec']['spec_name']
+
+	if '$reference_point' != spec_name:
+		if spec_name in seen_spec_names:
+			raise Exception( 'Already seen spec_name: %s' % spec_name )
+		seen_spec_names.add( spec_name )
 
 	return tag_spec_dict
 
