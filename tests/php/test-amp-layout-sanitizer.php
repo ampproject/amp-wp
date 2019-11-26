@@ -21,6 +21,7 @@ class AMP_Layout_Sanitizer_Test extends WP_UnitTestCase {
 		return [
 			'no_width_or_height'                          => [
 				'<p data-amp-layout="fill"></p>',
+				'<p layout="fill"></p>',
 			],
 
 			'no_layout_attr'                              => [

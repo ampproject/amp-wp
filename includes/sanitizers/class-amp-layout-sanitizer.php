@@ -18,7 +18,8 @@ class AMP_Layout_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public function sanitize() {
 		$xpath = new DOMXPath( $this->dom );
-		$nodes = $xpath->query( '//*[ ( @data-amp-layout ) and ( @width or @height ) ]' );
+		// Elements with the `layout` attribute will be validated by `AMP_Tag_And_Attribute_Sanitizer`.
+		$nodes = $xpath->query( '//*[ not( @layout ) and ( @data-amp-layout or @width or @height ) ]' );
 
 		foreach ( $nodes as $node ) {
 			$width  = $node->getAttribute( 'width' );
