@@ -376,34 +376,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function get_rule_spec_list_to_validate( DOMElement $node, $rule_spec ) {
 
-		// Expand extension_spec into a set of attr_spec_list.
-		if ( isset( $rule_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec'] ) ) {
-			$extension_spec = $rule_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec'];
-
-			if ( isset( $rule_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec']['extension_type'] ) && 2 === $rule_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec']['extension_type'] ) {
-				$custom_attr = 'custom-template';
-			} else {
-				$custom_attr = 'custom-element';
-			}
-
-			$rule_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ][ $custom_attr ] = [
-				AMP_Rule_Spec::VALUE     => $extension_spec['name'],
-				AMP_Rule_Spec::MANDATORY => true,
-			];
-
-			$rule_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ]['src'] = [
-				AMP_Rule_Spec::VALUE_REGEX => implode(
-					'',
-					[
-						'^',
-						preg_quote( 'https://cdn.ampproject.org/v0/' . $extension_spec['name'] . '-' ), // phpcs:ignore WordPress.PHP.PregQuoteDelimiter.Missing
-						'(' . implode( '|', array_merge( $extension_spec['version'], [ 'latest' ] ) ) . ')',
-						'\.js$',
-					]
-				),
-			];
-		}
-
 		// Augment the attribute list according to the parent's reference points, if it has them.
 		if ( ! empty( $node->parentNode ) && isset( $this->allowed_tags[ $node->parentNode->nodeName ] ) ) {
 			foreach ( $this->allowed_tags[ $node->parentNode->nodeName ] as $parent_rule_spec ) {
@@ -468,16 +440,62 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		 */
 		$rule_spec_list_to_validate = [];
 		$validation_errors          = [];
-		$rule_spec_list             = $this->allowed_tags[ $node->nodeName ];
-		foreach ( $rule_spec_list as $id => $rule_spec ) {
-			$validity = $this->validate_tag_spec_for_node( $node, $rule_spec[ AMP_Rule_Spec::TAG_SPEC ] );
-			if ( true === $validity ) {
-				$rule_spec_list_to_validate[ $id ] = $this->get_rule_spec_list_to_validate( $node, $rule_spec );
-			} else {
-				$validation_errors[] = array_merge(
-					$validity,
-					[ 'spec_name' => $this->get_spec_name( $node, $rule_spec[ AMP_Rule_Spec::TAG_SPEC ] ) ]
-				);
+
+		if ( 'script' === $node->nodeName && ( $node->hasAttribute( 'custom-element' ) || $node->hasAttribute( 'custom-template' ) ) ) {
+			$extension_name = $node->hasAttribute( 'custom-element' ) ? $node->getAttribute( 'custom-element' ) : $node->getAttribute( 'custom-template' );
+			$extension_spec = AMP_Allowed_Tags_Generated::get_extension_spec( $extension_name );
+			if ( $extension_spec ) {
+				$attr_spec_list = [
+					'async' => [
+						'mandatory' => true,
+						'value'     => '',
+					],
+					'nonce' => [],
+					'type'  => [
+						'value_casei' => [
+							'text/javascript',
+						],
+					],
+				];
+
+				if ( isset( $extension_spec['extension_type'] ) && 2 === $extension_spec['extension_type'] ) {
+					$custom_attr = 'custom-template';
+				} else {
+					$custom_attr = 'custom-element';
+				}
+				$attr_spec_list[ $custom_attr ] = [
+					'value'     => $extension_name,
+					'mandatory' => true,
+				];
+
+				$attr_spec_list['src'] = [
+					AMP_Rule_Spec::VALUE_REGEX => implode(
+						'',
+						[
+							'^',
+							preg_quote( 'https://cdn.ampproject.org/v0/' . $extension_name . '-' ), // phpcs:ignore WordPress.PHP.PregQuoteDelimiter.Missing
+							'(' . implode( '|', array_merge( $extension_spec['version'], [ 'latest' ] ) ) . ')',
+							'\.js$',
+						]
+					),
+				];
+
+				$rule_spec_list_to_validate[] = [
+					'attr_spec_list' => $attr_spec_list,
+					'tag_spec'       => compact( 'extension_spec' ),
+				];
+			}
+		} elseif ( isset( $this->allowed_tags[ $node->nodeName ] ) ) {
+			foreach ( $this->allowed_tags[ $node->nodeName ] as $id => $rule_spec ) {
+				$validity = $this->validate_tag_spec_for_node( $node, $rule_spec[ AMP_Rule_Spec::TAG_SPEC ] );
+				if ( true === $validity ) {
+					$rule_spec_list_to_validate[ $id ] = $this->get_rule_spec_list_to_validate( $node, $rule_spec );
+				} else {
+					$validation_errors[] = array_merge(
+						$validity,
+						[ 'spec_name' => $this->get_spec_name( $node, $rule_spec[ AMP_Rule_Spec::TAG_SPEC ] ) ]
+					);
+				}
 			}
 		}
 
@@ -1057,11 +1075,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		if ( isset( $tag_spec['spec_name'] ) ) {
 			return $tag_spec['spec_name'];
 		} elseif ( isset( $tag_spec['extension_spec']['name'] ) ) {
-			return sprintf(
-				'script[%s=%s]',
-				isset( $tag_spec['extension_spec']['extension_type'] ) && 2 === $tag_spec['extension_spec']['extension_type'] ? 'custom-template' : 'custom-element',
-				strtolower( $tag_spec['extension_spec']['name'] )
-			);
+			return sprintf( 'script %s', strtolower( $tag_spec['extension_spec']['name'] ) );
 		} else {
 			return $element->nodeName;
 		}

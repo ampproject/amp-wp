@@ -11533,172 +11533,6 @@ class AMP_Allowed_Tags_Generated {
 			),
 			array(
 				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-3d-gltf',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-3d-gltf]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-3q-player',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-3q-player]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-access-laterpay',
-						'requires_usage' => false,
-						'version' => array(
-							'0.1',
-							'0.2',
-						),
-					),
-					'requires_extension' => array(
-						'amp-access',
-					),
-					'spec_name' => 'script [custom-element=amp-access-laterpay]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-access-poool',
-						'requires_usage' => false,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'requires_extension' => array(
-						'amp-access',
-					),
-					'spec_name' => 'script [custom-element=amp-access-poool]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-access-scroll',
-						'requires_usage' => false,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'requires_extension' => array(
-						'amp-access',
-					),
-					'spec_name' => 'script [custom-element=amp-access-scroll]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-access',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-access]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
 					'id' => array(
 						'dispatch_key' => 2,
 						'mandatory' => true,
@@ -11731,162 +11565,6 @@ class AMP_Allowed_Tags_Generated {
 			),
 			array(
 				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-accordion',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-accordion]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-action-macro',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-action-macro]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-ad-custom',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'amp-ad-custom extension .js script',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-ad',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'amp-ad extension .js script',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-addthis',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-addthis]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-analytics',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-analytics]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
 					'nonce' => array(),
 					'type' => array(
 						'dispatch_key' => 3,
@@ -11909,58 +11587,6 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'spec_name' => 'amp-analytics extension .json script',
 					'spec_url' => 'https://amp.dev/documentation/components/amp-analytics',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-anim',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-anim]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-animation',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-animation]',
 				),
 			),
 			array(
@@ -11990,136 +11616,6 @@ class AMP_Allowed_Tags_Generated {
 			),
 			array(
 				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-apester-media',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-apester-media]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-app-banner',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-app-banner]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-audio',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-audio]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-auto-ads',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-auto-ads]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-autocomplete',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-autocomplete]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
 					'nonce' => array(),
 					'type' => array(
 						'dispatch_key' => 3,
@@ -12141,84 +11637,6 @@ class AMP_Allowed_Tags_Generated {
 						'amp-autocomplete',
 					),
 					'spec_name' => 'amp-autocomplete JSON',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-base-carousel',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-base-carousel]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-beopinion',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-beopinion]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-bind',
-						'requires_usage' => false,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-bind]',
 				),
 			),
 			array(
@@ -12251,215 +11669,6 @@ class AMP_Allowed_Tags_Generated {
 			),
 			array(
 				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-bodymovin-animation',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-bodymovin-animation]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-brid-player',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-brid-player]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-brightcove',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-brightcove]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-byside-content',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-byside-content]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-call-tracking',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-call-tracking]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-carousel',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-							'0.2',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-carousel]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-connatix-player',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-connatix-player]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-consent',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-consent]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
 					'nonce' => array(),
 					'type' => array(
 						'dispatch_key' => 3,
@@ -12486,215 +11695,6 @@ class AMP_Allowed_Tags_Generated {
 			),
 			array(
 				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-dailymotion',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-dailymotion]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-date-countdown',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-date-countdown]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-date-display',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-date-display]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-date-picker',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-date-picker]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-delight-player',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-delight-player]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-dynamic-css-classes',
-						'requires_usage' => false,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-dynamic-css-classes]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-embedly-card',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-embedly-card]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-experiment',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-							'1.0',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-experiment]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
 					'nonce' => array(),
 					'type' => array(
 						'dispatch_key' => 3,
@@ -12716,266 +11716,6 @@ class AMP_Allowed_Tags_Generated {
 					'mandatory_parent' => 'amp-experiment',
 					'spec_name' => 'amp-experiment extension .json script',
 					'spec_url' => 'https://amp.dev/documentation/components/amp-experiment',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-facebook-comments',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-facebook-comments]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-facebook-like',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-facebook-like]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-facebook-page',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-facebook-page]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-facebook',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-facebook]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-fit-text',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-fit-text]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-font',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-font]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-form',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-form]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-fx-collection',
-						'requires_usage' => false,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-fx-collection]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-fx-flying-carpet',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-fx-flying-carpet]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-geo',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-geo]',
 				),
 			),
 			array(
@@ -13006,474 +11746,6 @@ class AMP_Allowed_Tags_Generated {
 			),
 			array(
 				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-gfycat',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-gfycat]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-gist',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-gist]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-google-document-embed',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-google-document-embed]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-hulu',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-hulu]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-iframe',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-iframe]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-ima-video',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-ima-video]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-image-lightbox',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-image-lightbox]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-image-slider',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-image-slider]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-imgur',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-imgur]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-inputmask',
-						'requires_usage' => false,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-inputmask]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-instagram',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-instagram]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-install-serviceworker',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-install-serviceworker]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-izlesene',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-izlesene]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-jwplayer',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-jwplayer]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-kaltura-player',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-kaltura-player]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-lightbox-gallery',
-						'requires_usage' => false,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-lightbox-gallery]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-lightbox',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-lightbox]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-link-rewriter',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-link-rewriter]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
 					'nonce' => array(),
 					'type' => array(
 						'dispatch_key' => 3,
@@ -13495,192 +11767,6 @@ class AMP_Allowed_Tags_Generated {
 						'amp-link-rewriter',
 					),
 					'spec_name' => 'amp-link-rewriter extension .json script',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-list',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-list]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-live-list',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'mandatory_parent' => 'head',
-					'spec_name' => 'script [custom-element=amp-live-list]',
-					'unique_warning' => true,
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-mathml',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-mathml]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-megaphone',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-megaphone]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-minute-media-player',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-minute-media-player]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-mowplayer',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-mowplayer]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'extension_type' => 2,
-						'name' => 'amp-mustache',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-							'0.2',
-						),
-					),
-					'spec_name' => 'script [custom-template=amp-mustache]',
 				),
 			),
 			array(
@@ -13723,32 +11809,6 @@ class AMP_Allowed_Tags_Generated {
 			),
 			array(
 				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-next-page',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-next-page]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
 					'type' => array(
 						'dispatch_key' => 3,
 						'mandatory' => true,
@@ -13764,370 +11824,6 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'spec_name' => 'amp-next-page extension .json configuration',
 					'spec_url' => 'https://amp.dev/documentation/components/amp-next-page',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-nexxtv-player',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-nexxtv-player]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-o2-player',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-o2-player]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-ooyala-player',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-ooyala-player]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-orientation-observer',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-orientation-observer]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-pan-zoom',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-pan-zoom]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-pinterest',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-pinterest]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-playbuzz',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-playbuzz]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-position-observer',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-position-observer]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-powr-player',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-powr-player]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-reach-player',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-reach-player]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-recaptcha-input',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-recaptcha-input]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-reddit',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-reddit]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-riddle-quiz',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-riddle-quiz]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-script',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-script]',
 				),
 			),
 			array(
@@ -14169,241 +11865,6 @@ class AMP_Allowed_Tags_Generated {
 			),
 			array(
 				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-selector',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-selector]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-sidebar',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-sidebar]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-skimlinks',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-skimlinks]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-smartlinks',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-smartlinks]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-social-share',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-social-share]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-soundcloud',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-soundcloud]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-springboard-player',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-springboard-player]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-sticky-ad',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-							'1.0',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-sticky-ad]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-story-auto-ads',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-story-auto-ads]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
 					'nonce' => array(),
 					'type' => array(
 						'dispatch_key' => 3,
@@ -14426,32 +11887,6 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'spec_name' => 'amp-story-auto-ads config script',
 					'spec_url' => 'https://amp.dev/documentation/components/amp-story-auto-ads',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-story',
-						'requires_usage' => true,
-						'version' => array(
-							'1.0',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-story]',
 				),
 			),
 			array(
@@ -14527,32 +11962,6 @@ class AMP_Allowed_Tags_Generated {
 			),
 			array(
 				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-subscriptions',
-						'requires_usage' => false,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-subscriptions]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
 					'id' => array(
 						'dispatch_key' => 2,
 						'mandatory' => true,
@@ -14585,139 +11994,6 @@ class AMP_Allowed_Tags_Generated {
 			),
 			array(
 				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-subscriptions-google',
-						'requires_usage' => false,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'requires_extension' => array(
-						'amp-subscriptions',
-					),
-					'spec_name' => 'script [custom-element=amp-subscriptions-google]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-timeago',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-timeago]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-truncate-text',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-truncate-text]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-twitter',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-twitter]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-user-location',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-user-location]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
 					'nonce' => array(),
 					'type' => array(
 						'dispatch_key' => 3,
@@ -14740,319 +12016,6 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'spec_name' => 'amp-user-location extension .json script',
 					'spec_url' => 'https://amp.dev/documentation/components/amp-user-location',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-user-notification',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-user-notification]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-video-docking',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'amp-video-docking',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-video-iframe',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-video-iframe]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-video',
-						'requires_usage' => false,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'amp-video extension .js script',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-vimeo',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-vimeo]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-vine',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-vine]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-viqeo-player',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-viqeo-player]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-vk',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-vk]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-web-push',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-web-push]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-wistia-player',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-wistia-player]',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-yotpo',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-yotpo]',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-yotpo',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-youtube',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-					'spec_name' => 'script [custom-element=amp-youtube]',
 				),
 			),
 		),
@@ -17698,6 +14661,712 @@ class AMP_Allowed_Tags_Generated {
 	);
 
 
+	private static $extension_specs = array(
+		'amp-3d-gltf' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-3q-player' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-access' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-access-laterpay' => array(
+			'requires_usage' => false,
+			'version' => array(
+				'0.1',
+				'0.2',
+			),
+		),
+		'amp-access-poool' => array(
+			'requires_usage' => false,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-access-scroll' => array(
+			'requires_usage' => false,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-accordion' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-action-macro' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-ad' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-ad-custom' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-addthis' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-analytics' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-anim' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-animation' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-apester-media' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-app-banner' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-audio' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-auto-ads' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-autocomplete' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-base-carousel' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-beopinion' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-bind' => array(
+			'requires_usage' => false,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-bodymovin-animation' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-brid-player' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-brightcove' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-byside-content' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-call-tracking' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-carousel' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+				'0.2',
+			),
+		),
+		'amp-connatix-player' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-consent' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-dailymotion' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-date-countdown' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-date-display' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-date-picker' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-delight-player' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-dynamic-css-classes' => array(
+			'requires_usage' => false,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-embedly-card' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-experiment' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+				'1.0',
+			),
+		),
+		'amp-facebook' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-facebook-comments' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-facebook-like' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-facebook-page' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-fit-text' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-font' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-form' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-fx-collection' => array(
+			'requires_usage' => false,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-fx-flying-carpet' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-geo' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-gfycat' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-gist' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-google-document-embed' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-hulu' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-iframe' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-ima-video' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-image-lightbox' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-image-slider' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-imgur' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-inputmask' => array(
+			'requires_usage' => false,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-instagram' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-install-serviceworker' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-izlesene' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-jwplayer' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-kaltura-player' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-lightbox' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-lightbox-gallery' => array(
+			'requires_usage' => false,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-link-rewriter' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-list' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-live-list' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-mathml' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-megaphone' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-minute-media-player' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-mowplayer' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-mustache' => array(
+			'extension_type' => 2,
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+				'0.2',
+			),
+		),
+		'amp-next-page' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-nexxtv-player' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-o2-player' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-ooyala-player' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-orientation-observer' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-pan-zoom' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-pinterest' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-playbuzz' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-position-observer' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-powr-player' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-reach-player' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-recaptcha-input' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-reddit' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-riddle-quiz' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-script' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-selector' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-sidebar' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-skimlinks' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-smartlinks' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-social-share' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-soundcloud' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-springboard-player' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-sticky-ad' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+				'1.0',
+			),
+		),
+		'amp-story' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'1.0',
+			),
+		),
+		'amp-story-auto-ads' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-subscriptions' => array(
+			'requires_usage' => false,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-subscriptions-google' => array(
+			'requires_usage' => false,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-timeago' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-truncate-text' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-twitter' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-user-location' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-user-notification' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-video' => array(
+			'requires_usage' => false,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-video-docking' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-video-iframe' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-vimeo' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-vine' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-viqeo-player' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-vk' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-web-push' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-wistia-player' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-yotpo' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+		'amp-youtube' => array(
+			'requires_usage' => true,
+			'version' => array(
+				'0.1',
+			),
+		),
+	);
+
+
 	/**
 	 * Get allowed tags.
 	 *
@@ -17713,22 +15382,27 @@ class AMP_Allowed_Tags_Generated {
 	 *
 	 * @since 1.5
 	 * @internal
+	 *
 	 * @return array Extension specs, keyed by extension name.
 	 */
 	public static function get_extension_specs() {
-		static $extension_specs = [];
+		return self::$extension_specs;
+	}
 
-		if ( ! empty( $extension_specs ) ) {
-			return $extension_specs;
+	/**
+	 * Get extension specs.
+	 *
+	 * @since 1.5
+	 * @internal
+	 *
+	 * @param string $name Extension name.
+	 * @return array Extension specs, keyed by extension name.
+	 */
+	public static function get_extension_spec( $name ) {
+		if ( isset( self::$extension_specs[ $name ] ) ) {
+			return self::$extension_specs[ $name ];
 		}
-
-		foreach ( self::get_allowed_tag( 'script' ) as $script_spec ) {
-			if ( isset( $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec'] ) ) {
-				$extension_specs[ $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec']['name'] ] = $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec'];
-			}
-		}
-
-		return $extension_specs;
+		return null;
 	}
 
 	/**
@@ -17738,23 +15412,23 @@ class AMP_Allowed_Tags_Generated {
 	 *
 	 * @since 0.7
 	 *
-	 * @param string      $node_name Tag name.
+	 * @param string      $tag_name  Tag name.
 	 * @param string|null $spec_name Spec name.
-	 * @return array|null Allowed tag, or null if the tag does not exist.
+	 * @return array[]|array|null Allowed tags, allowed tag spec, or null if the tag does not exist.
 	 */
-	public static function get_allowed_tag( $node_name, $spec_name = null ) {
-		if ( isset( self::$allowed_tags[ $node_name ] ) ) {
-			$rule_specs = self::$allowed_tags[ $node_name ];
+	public static function get_allowed_tag( $tag_name, $spec_name = null ) {
+		if ( isset( self::$allowed_tags[ $tag_name ] ) ) {
+			$rule_specs = self::$allowed_tags[ $tag_name ];
 			if ( empty( $spec_name ) ) {
 				return $rule_specs;
 			}
 			foreach ( $rule_specs as $rule_spec ) {
 				if (
-					( ! isset( $rule_spec['tag_spec']['spec_name'] ) && $node_name === $spec_name )
+					( ! isset( $rule_spec['tag_spec']['spec_name'] ) && $tag_name === $spec_name )
 					||
 					( isset( $rule_spec['tag_spec']['spec_name'] ) && $rule_spec['tag_spec']['spec_name'] === $spec_name )
 				) {
-					return $rule_spec;
+					return array_merge( compact( 'tag_name' ), $rule_spec );
 				}
 			}
 		}

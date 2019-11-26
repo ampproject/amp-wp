@@ -96,7 +96,7 @@ def GeneratePHP(out_dir):
 	"""
 	logging.info('entering ...')
 
-	allowed_tags, attr_lists, descendant_lists, reference_points, versions = ParseRules(out_dir)
+	allowed_tags, extension_specs, attr_lists, descendant_lists, reference_points, versions = ParseRules(out_dir)
 
 	expected_spec_names = (
 		'style amp-custom',
@@ -116,6 +116,7 @@ def GeneratePHP(out_dir):
 	GenerateLayoutAttributesPHP(out, attr_lists)
 	GenerateGlobalAttributesPHP(out, attr_lists)
 	GenerateReferencePointsPHP(out, reference_points)
+	GenerateExtensionSpecsPHP(out, extension_specs)
 	GenerateFooterPHP(out)
 
 	# join out array into a single string and remove unneeded whitespace
@@ -207,6 +208,15 @@ def GenerateReferencePointsPHP(out, reference_points):
 	out.append('')
 	logging.info('... done')
 
+def GenerateExtensionSpecsPHP(out, extension_specs):
+	logging.info('entering ...')
+
+	# Output the reference points.
+	out.append('')
+	out.append('\tprivate static $extension_specs = %s;' % Phpize( extension_specs, 1 ).lstrip() )
+	out.append('')
+	logging.info('... done')
+
 def GenerateFooterPHP(out):
 	logging.info('entering ...')
 
@@ -227,22 +237,27 @@ def GenerateFooterPHP(out):
 	 *
 	 * @since 1.5
 	 * @internal
+	 *
 	 * @return array Extension specs, keyed by extension name.
 	 */
 	public static function get_extension_specs() {
-		static $extension_specs = [];
+		return self::$extension_specs;
+	}
 
-		if ( ! empty( $extension_specs ) ) {
-			return $extension_specs;
+	/**
+	 * Get extension specs.
+	 *
+	 * @since 1.5
+	 * @internal
+	 *
+	 * @param string $name Extension name.
+	 * @return array Extension specs, keyed by extension name.
+	 */
+	public static function get_extension_spec( $name ) {
+		if ( isset( self::$extension_specs[ $name ] ) ) {
+			return self::$extension_specs[ $name ];
 		}
-
-		foreach ( self::get_allowed_tag( 'script' ) as $script_spec ) {
-			if ( isset( $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec'] ) ) {
-				$extension_specs[ $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec']['name'] ] = $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec'];
-			}
-		}
-
-		return $extension_specs;
+		return null;
 	}
 
 	/**
@@ -252,23 +267,23 @@ def GenerateFooterPHP(out):
 	 *
 	 * @since 0.7
 	 *
-	 * @param string      $node_name Tag name.
+	 * @param string      $tag_name  Tag name.
 	 * @param string|null $spec_name Spec name.
-	 * @return array|null Allowed tag, or null if the tag does not exist.
+	 * @return array[]|array|null Allowed tags, allowed tag spec, or null if the tag does not exist.
 	 */
-	public static function get_allowed_tag( $node_name, $spec_name = null ) {
-		if ( isset( self::$allowed_tags[ $node_name ] ) ) {
-			$rule_specs = self::$allowed_tags[ $node_name ];
+	public static function get_allowed_tag( $tag_name, $spec_name = null ) {
+		if ( isset( self::$allowed_tags[ $tag_name ] ) ) {
+			$rule_specs = self::$allowed_tags[ $tag_name ];
 			if ( empty( $spec_name ) ) {
 				return $rule_specs;
 			}
 			foreach ( $rule_specs as $rule_spec ) {
 				if (
-					( ! isset( $rule_spec['tag_spec']['spec_name'] ) && $node_name === $spec_name )
+					( ! isset( $rule_spec['tag_spec']['spec_name'] ) && $tag_name === $spec_name )
 					||
 					( isset( $rule_spec['tag_spec']['spec_name'] ) && $rule_spec['tag_spec']['spec_name'] === $spec_name )
 				) {
-					return $rule_spec;
+					return array_merge( compact( 'tag_name' ), $rule_spec );
 				}
 			}
 		}
@@ -354,6 +369,7 @@ def ParseRules(out_dir):
 	validator_pb2 = imp.load_source('validator_pb2', os.path.join( out_dir, 'validator_pb2.py' ))
 
 	allowed_tags = {}
+	extension_specs = {}
 	attr_lists = {}
 	descendant_lists = {}
 	reference_points = {}
@@ -413,12 +429,16 @@ def ParseRules(out_dir):
 					tag_list = []
 				else:
 					tag_list = allowed_tags[UnicodeEscape(tag_spec.tag_name).lower()]
-				# AddTag(allowed_tags, tag_spec, attr_lists)
 
 				gotten_tag_spec = GetTagSpec(tag_spec, attr_lists)
 				if gotten_tag_spec is not None:
-					tag_list.append(gotten_tag_spec)
-					allowed_tags[UnicodeEscape(tag_spec.tag_name).lower()] = tag_list
+					if 'extension_spec' in gotten_tag_spec['tag_spec']:
+						extension_name = gotten_tag_spec['tag_spec']['extension_spec']['name']
+						del gotten_tag_spec['tag_spec']['extension_spec']['name']
+						extension_specs[ extension_name ] = gotten_tag_spec['tag_spec']['extension_spec']
+					else:
+						tag_list.append(gotten_tag_spec)
+						allowed_tags[UnicodeEscape(tag_spec.tag_name).lower()] = tag_list
 		elif 'descendant_tag_list' == field_desc.name:
 			for list in field_val:
 				descendant_lists[list.name] = []
@@ -431,7 +451,7 @@ def ParseRules(out_dir):
 					descendant_lists[list.name].append( val.lower() )
 
 	logging.info('... done')
-	return allowed_tags, attr_lists, descendant_lists, reference_points, versions
+	return allowed_tags, extension_specs, attr_lists, descendant_lists, reference_points, versions
 
 
 def GetTagSpec(tag_spec, attr_lists):
@@ -504,22 +524,16 @@ def GetTagSpec(tag_spec, attr_lists):
 
 	if 'spec_name' not in tag_spec_dict['tag_spec']:
 		if 'extension_spec' in tag_spec_dict['tag_spec']:
-			# CUSTOM_ELEMENT=1 (default), CUSTOM_TEMPLATE=2
-			extension_type = tag_spec_dict['tag_spec']['extension_spec'].get('extension_type', 1)
-			spec_name = 'script [%s=%s]' % ( 'custom-element' if 1 == extension_type else 'custom-template', tag_spec_dict['tag_spec']['extension_spec']['name'].lower() )
+			extension_name = tag_spec_dict['tag_spec']['extension_spec']['name'].lower()
+			spec_name      = 'script %s' % extension_name
 		else:
 			spec_name = tag_spec.tag_name.lower()
 	else:
 		spec_name = tag_spec_dict['tag_spec']['spec_name']
-
 	if '$reference_point' != spec_name:
 		if spec_name in seen_spec_names:
 			raise Exception( 'Already seen spec_name: %s' % spec_name )
 		seen_spec_names.add( spec_name )
-
-		# Add the spec_name to the tag spec if it isn't the same as the tag name.
-		if spec_name != tag_spec.tag_name.lower():
-			tag_spec_dict['tag_spec']['spec_name'] = spec_name
 
 	return tag_spec_dict
 
