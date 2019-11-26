@@ -40,7 +40,7 @@ cd "$BUILD_DIR"
 
 # Run the build.
 status "Installing dependencies... 📦"
-composer install
+composer install -o
 PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true npm install
 
 status "Generating build... ⚙️"
