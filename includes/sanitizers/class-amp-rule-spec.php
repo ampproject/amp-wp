@@ -144,18 +144,4 @@ abstract class AMP_Rule_Spec {
 		'typemustmatch',
 		'visible',
 	];
-
-	/**
-	 * Additional allowed tags.
-	 *
-	 * @var array
-	 */
-	public static $additional_allowed_tags = [
-
-		// An experimental tag with no protoascii.
-		'amp-share-tracking' => [
-			'attr_spec_list' => [],
-			'tag_spec'       => [],
-		],
-	];
 }

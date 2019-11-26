@@ -224,17 +224,11 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			];
 		}
 
-		// Prepare whitelists.
-		foreach ( AMP_Rule_Spec::$additional_allowed_tags as $tag_name => $tag_rule_spec ) {
-			$this->allowed_tags[ $tag_name ][] = $tag_rule_spec;
-		}
-
 		// @todo Do the same for body when !use_document_element?
 		if ( ! empty( $this->args['use_document_element'] ) ) {
 			foreach ( $this->allowed_tags['html'] as &$rule_spec ) {
 				unset( $rule_spec[ AMP_Rule_Spec::TAG_SPEC ][ AMP_Rule_Spec::MANDATORY_PARENT ] );
 			}
-
 			unset( $rule_spec );
 		}
 
@@ -244,10 +238,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					$tag_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ] = $this->process_alternate_names( $tag_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ] );
 				}
 			}
-
 			unset( $tag_spec );
 		}
-
 		unset( $tag_specs );
 
 		$this->globally_allowed_attributes = $this->process_alternate_names( $this->globally_allowed_attributes );
