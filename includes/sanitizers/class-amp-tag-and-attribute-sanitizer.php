@@ -380,8 +380,11 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		if ( isset( $rule_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec'] ) ) {
 			$extension_spec = $rule_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec'];
 
-			// This could also be derived from the extension_type in the extension_spec.
-			$custom_attr = 'amp-mustache' === $extension_spec['name'] ? 'custom-template' : 'custom-element';
+			if ( isset( $rule_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec']['extension_type'] ) && 2 === $rule_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec']['extension_type'] ) {
+				$custom_attr = 'custom-template';
+			} else {
+				$custom_attr = 'custom-element';
+			}
 
 			$rule_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ][ $custom_attr ] = [
 				AMP_Rule_Spec::VALUE     => $extension_spec['name'],
@@ -1056,7 +1059,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		} elseif ( isset( $tag_spec['extension_spec']['name'] ) ) {
 			return sprintf(
 				'script[%s=%s]',
-				'amp-mustache' === $tag_spec['extension_spec']['name'] ? 'custom-template' : 'custom-element',
+				isset( $tag_spec['extension_spec']['extension_type'] ) && 2 === $tag_spec['extension_spec']['extension_type'] ? 'custom-template' : 'custom-element',
 				strtolower( $tag_spec['extension_spec']['name'] )
 			);
 		} else {

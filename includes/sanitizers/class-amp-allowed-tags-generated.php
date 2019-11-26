@@ -13602,6 +13602,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'extension_spec' => array(
+						'extension_type' => 2,
 						'name' => 'amp-mustache',
 						'requires_usage' => true,
 						'version' => array(
