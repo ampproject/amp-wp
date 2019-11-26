@@ -152,28 +152,25 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param array    $args Args.
 	 */
 	public function __construct( $dom, $args = [] ) {
-		// @todo It is pointless to have this DEFAULT_ARGS copying the array values. We should only get the data from AMP_Allowed_Tags_Generated.
-		$this->DEFAULT_ARGS = [
-			'amp_allowed_tags'                => AMP_Allowed_Tags_Generated::get_allowed_tags(),
-			'amp_globally_allowed_attributes' => AMP_Allowed_Tags_Generated::get_allowed_attributes(),
-			'amp_layout_allowed_attributes'   => AMP_Allowed_Tags_Generated::get_layout_attributes(),
-		];
-
 		parent::__construct( $dom, $args );
+
+		$this->allowed_tags                = AMP_Allowed_Tags_Generated::get_allowed_tags();
+		$this->globally_allowed_attributes = AMP_Allowed_Tags_Generated::get_allowed_attributes();
+		$this->layout_allowed_attributes   = AMP_Allowed_Tags_Generated::get_layout_attributes();
 
 		// @todo AMP dev mode should eventually be used instead of allow_dirty_styles.
 		if ( ! empty( $this->args['allow_dirty_styles'] ) ) {
 
 			// Allow style attribute on all elements.
-			$this->args['amp_globally_allowed_attributes']['style'] = [];
+			$this->globally_allowed_attributes['style'] = [];
 
 			// Remove restrictions on use of !important.
-			foreach ( $this->args['amp_allowed_tags']['style'] as &$style ) {
+			foreach ( $this->allowed_tags['style'] as &$style ) {
 				$style['cdata'] = [];
 			}
 
 			// Allow style elements.
-			$this->args['amp_allowed_tags']['style'][] = [
+			$this->allowed_tags['style'][] = [
 				'attr_spec_list' => [
 					'type' => [
 						'value_casei' => 'text/css',
@@ -186,7 +183,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			];
 
 			// Allow stylesheet links.
-			$this->args['amp_allowed_tags']['link'][] = [
+			$this->allowed_tags['link'][] = [
 				'attr_spec_list' => [
 					'async'       => [],
 					'crossorigin' => [],
@@ -213,7 +210,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		// @todo AMP dev mode should eventually be used instead of allow_dirty_scripts.
 		// Allow scripts if requested.
 		if ( ! empty( $this->args['allow_dirty_scripts'] ) ) {
-			$this->args['amp_allowed_tags']['script'][] = [
+			$this->allowed_tags['script'][] = [
 				'attr_spec_list' => [
 					'type'  => [],
 					'src'   => [],
@@ -228,7 +225,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// Prepare whitelists.
-		$this->allowed_tags = $this->args['amp_allowed_tags'];
 		foreach ( AMP_Rule_Spec::$additional_allowed_tags as $tag_name => $tag_rule_spec ) {
 			$this->allowed_tags[ $tag_name ][] = $tag_rule_spec;
 		}
@@ -254,8 +250,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		unset( $tag_specs );
 
-		$this->globally_allowed_attributes = $this->process_alternate_names( $this->args['amp_globally_allowed_attributes'] );
-		$this->layout_allowed_attributes   = $this->process_alternate_names( $this->args['amp_layout_allowed_attributes'] );
+		$this->globally_allowed_attributes = $this->process_alternate_names( $this->globally_allowed_attributes );
+		$this->layout_allowed_attributes   = $this->process_alternate_names( $this->layout_allowed_attributes );
 	}
 
 	/**
