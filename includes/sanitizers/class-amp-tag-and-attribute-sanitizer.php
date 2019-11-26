@@ -475,7 +475,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		if ( empty( $rule_spec_list_to_validate ) ) {
 			if ( 1 === count( $validation_errors ) ) {
 				// If there was only one tag spec candidate that failed, use its error code for removing the node,
-				// since it's we know it is the specific reason for why the node had to be removed.
+				// since we know it is the specific reason for why the node had to be removed.
 				// This is the normal case.
 				$this->remove_invalid_child(
 					$node,
@@ -886,7 +886,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param DOMElement $node           Node.
 	 * @param array[]    $attr_spec_list Attribute Spec list.
 	 *
-	 * @return int Score for how well the attribute spec list patched.
+	 * @return int Score for how well the attribute spec list matched.
 	 */
 	private function validate_attr_spec_list_for_node( DOMElement $node, $attr_spec_list ) {
 		/*
