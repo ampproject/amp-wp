@@ -101,6 +101,7 @@ def GeneratePHP(out_dir):
 	expected_spec_names = (
 		'style amp-custom',
 		'style[amp-keyframes]',
+		'link rel=stylesheet for fonts',
 	)
 	for expected_spec_name in expected_spec_names:
 		if expected_spec_name not in seen_spec_names:
@@ -250,12 +251,26 @@ def GenerateFooterPHP(out):
 	 * Get the rules for a single tag so that the entire data structure needn't be passed around.
 	 *
 	 * @since 0.7
-	 * @param string $node_name Tag name.
+	 *
+	 * @param string      $node_name Tag name.
+	 * @param string|null $spec_name Spec name.
 	 * @return array|null Allowed tag, or null if the tag does not exist.
 	 */
-	public static function get_allowed_tag( $node_name ) {
+	public static function get_allowed_tag( $node_name, $spec_name = null ) {
 		if ( isset( self::$allowed_tags[ $node_name ] ) ) {
-			return self::$allowed_tags[ $node_name ];
+			$rule_specs = self::$allowed_tags[ $node_name ];
+			if ( empty( $spec_name ) ) {
+				return $rule_specs;
+			}
+			foreach ( $rule_specs as $rule_spec ) {
+				if (
+					( ! isset( $rule_spec['tag_spec']['spec_name'] ) && $node_name === $spec_name )
+					||
+					( isset( $rule_spec['tag_spec']['spec_name'] ) && $rule_spec['tag_spec']['spec_name'] === $spec_name )
+				) {
+					return $rule_spec;
+				}
+			}
 		}
 		return null;
 	}
@@ -501,6 +516,10 @@ def GetTagSpec(tag_spec, attr_lists):
 		if spec_name in seen_spec_names:
 			raise Exception( 'Already seen spec_name: %s' % spec_name )
 		seen_spec_names.add( spec_name )
+
+		# Add the spec_name to the tag spec if it isn't the same as the tag name.
+		if spec_name != tag_spec.tag_name.lower():
+			tag_spec_dict['tag_spec']['spec_name'] = spec_name
 
 	return tag_spec_dict
 

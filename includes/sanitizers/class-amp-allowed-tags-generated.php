@@ -11554,6 +11554,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-3d-gltf]',
 				),
 			),
 			array(
@@ -11579,6 +11580,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-3q-player]',
 				),
 			),
 			array(
@@ -11608,6 +11610,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-access',
 					),
+					'spec_name' => 'script [custom-element=amp-access-laterpay]',
 				),
 			),
 			array(
@@ -11636,6 +11639,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-access',
 					),
+					'spec_name' => 'script [custom-element=amp-access-poool]',
 				),
 			),
 			array(
@@ -11664,6 +11668,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-access',
 					),
+					'spec_name' => 'script [custom-element=amp-access-scroll]',
 				),
 			),
 			array(
@@ -11689,6 +11694,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-access]',
 				),
 			),
 			array(
@@ -11746,6 +11752,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-accordion]',
 				),
 			),
 			array(
@@ -11771,6 +11778,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-action-macro]',
 				),
 			),
 			array(
@@ -11848,6 +11856,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-addthis]',
 				),
 			),
 			array(
@@ -11873,6 +11882,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-analytics]',
 				),
 			),
 			array(
@@ -11924,6 +11934,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-anim]',
 				),
 			),
 			array(
@@ -11949,6 +11960,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-animation]',
 				),
 			),
 			array(
@@ -11999,6 +12011,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-apester-media]',
 				),
 			),
 			array(
@@ -12024,6 +12037,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-app-banner]',
 				),
 			),
 			array(
@@ -12049,6 +12063,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-audio]',
 				),
 			),
 			array(
@@ -12074,6 +12089,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-auto-ads]',
 				),
 			),
 			array(
@@ -12099,6 +12115,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-autocomplete]',
 				),
 			),
 			array(
@@ -12149,6 +12166,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-base-carousel]',
 				),
 			),
 			array(
@@ -12174,6 +12192,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-beopinion]',
 				),
 			),
 			array(
@@ -12199,6 +12218,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-bind]',
 				),
 			),
 			array(
@@ -12252,6 +12272,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-bodymovin-animation]',
 				),
 			),
 			array(
@@ -12277,6 +12298,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-brid-player]',
 				),
 			),
 			array(
@@ -12302,6 +12324,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-brightcove]',
 				),
 			),
 			array(
@@ -12327,6 +12350,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-byside-content]',
 				),
 			),
 			array(
@@ -12352,6 +12376,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-call-tracking]',
 				),
 			),
 			array(
@@ -12378,6 +12403,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.2',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-carousel]',
 				),
 			),
 			array(
@@ -12403,6 +12429,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-connatix-player]',
 				),
 			),
 			array(
@@ -12428,6 +12455,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-consent]',
 				),
 			),
 			array(
@@ -12479,6 +12507,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-dailymotion]',
 				),
 			),
 			array(
@@ -12504,6 +12533,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-date-countdown]',
 				),
 			),
 			array(
@@ -12529,6 +12559,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-date-display]',
 				),
 			),
 			array(
@@ -12554,6 +12585,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-date-picker]',
 				),
 			),
 			array(
@@ -12579,6 +12611,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-delight-player]',
 				),
 			),
 			array(
@@ -12604,6 +12637,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-dynamic-css-classes]',
 				),
 			),
 			array(
@@ -12629,6 +12663,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-embedly-card]',
 				),
 			),
 			array(
@@ -12655,6 +12690,7 @@ class AMP_Allowed_Tags_Generated {
 							'1.0',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-experiment]',
 				),
 			),
 			array(
@@ -12705,6 +12741,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-facebook-comments]',
 				),
 			),
 			array(
@@ -12730,6 +12767,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-facebook-like]',
 				),
 			),
 			array(
@@ -12755,6 +12793,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-facebook-page]',
 				),
 			),
 			array(
@@ -12780,6 +12819,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-facebook]',
 				),
 			),
 			array(
@@ -12805,6 +12845,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-fit-text]',
 				),
 			),
 			array(
@@ -12830,6 +12871,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-font]',
 				),
 			),
 			array(
@@ -12855,6 +12897,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-form]',
 				),
 			),
 			array(
@@ -12880,6 +12923,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-fx-collection]',
 				),
 			),
 			array(
@@ -12905,6 +12949,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-fx-flying-carpet]',
 				),
 			),
 			array(
@@ -12930,6 +12975,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-geo]',
 				),
 			),
 			array(
@@ -12981,6 +13027,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-gfycat]',
 				),
 			),
 			array(
@@ -13006,6 +13053,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-gist]',
 				),
 			),
 			array(
@@ -13031,6 +13079,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-google-document-embed]',
 				),
 			),
 			array(
@@ -13056,6 +13105,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-hulu]',
 				),
 			),
 			array(
@@ -13081,6 +13131,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-iframe]',
 				),
 			),
 			array(
@@ -13106,6 +13157,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-ima-video]',
 				),
 			),
 			array(
@@ -13131,6 +13183,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-image-lightbox]',
 				),
 			),
 			array(
@@ -13156,6 +13209,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-image-slider]',
 				),
 			),
 			array(
@@ -13181,6 +13235,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-imgur]',
 				),
 			),
 			array(
@@ -13206,6 +13261,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-inputmask]',
 				),
 			),
 			array(
@@ -13231,6 +13287,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-instagram]',
 				),
 			),
 			array(
@@ -13256,6 +13313,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-install-serviceworker]',
 				),
 			),
 			array(
@@ -13281,6 +13339,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-izlesene]',
 				),
 			),
 			array(
@@ -13306,6 +13365,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-jwplayer]',
 				),
 			),
 			array(
@@ -13331,6 +13391,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-kaltura-player]',
 				),
 			),
 			array(
@@ -13356,6 +13417,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-lightbox-gallery]',
 				),
 			),
 			array(
@@ -13381,6 +13443,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-lightbox]',
 				),
 			),
 			array(
@@ -13406,6 +13469,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-link-rewriter]',
 				),
 			),
 			array(
@@ -13456,6 +13520,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-list]',
 				),
 			),
 			array(
@@ -13482,6 +13547,7 @@ class AMP_Allowed_Tags_Generated {
 						),
 					),
 					'mandatory_parent' => 'head',
+					'spec_name' => 'script [custom-element=amp-live-list]',
 					'unique_warning' => true,
 				),
 			),
@@ -13508,6 +13574,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-mathml]',
 				),
 			),
 			array(
@@ -13533,6 +13600,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-megaphone]',
 				),
 			),
 			array(
@@ -13558,6 +13626,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-minute-media-player]',
 				),
 			),
 			array(
@@ -13583,6 +13652,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-mowplayer]',
 				),
 			),
 			array(
@@ -13610,6 +13680,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.2',
 						),
 					),
+					'spec_name' => 'script [custom-template=amp-mustache]',
 				),
 			),
 			array(
@@ -13673,6 +13744,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-next-page]',
 				),
 			),
 			array(
@@ -13717,6 +13789,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-nexxtv-player]',
 				),
 			),
 			array(
@@ -13742,6 +13815,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-o2-player]',
 				),
 			),
 			array(
@@ -13767,6 +13841,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-ooyala-player]',
 				),
 			),
 			array(
@@ -13792,6 +13867,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-orientation-observer]',
 				),
 			),
 			array(
@@ -13817,6 +13893,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-pan-zoom]',
 				),
 			),
 			array(
@@ -13842,6 +13919,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-pinterest]',
 				),
 			),
 			array(
@@ -13867,6 +13945,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-playbuzz]',
 				),
 			),
 			array(
@@ -13892,6 +13971,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-position-observer]',
 				),
 			),
 			array(
@@ -13917,6 +13997,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-powr-player]',
 				),
 			),
 			array(
@@ -13942,6 +14023,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-reach-player]',
 				),
 			),
 			array(
@@ -13967,6 +14049,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-recaptcha-input]',
 				),
 			),
 			array(
@@ -13992,6 +14075,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-reddit]',
 				),
 			),
 			array(
@@ -14017,6 +14101,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-riddle-quiz]',
 				),
 			),
 			array(
@@ -14042,6 +14127,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-script]',
 				),
 			),
 			array(
@@ -14104,6 +14190,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-selector]',
 				),
 			),
 			array(
@@ -14129,6 +14216,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-sidebar]',
 				),
 			),
 			array(
@@ -14154,6 +14242,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-skimlinks]',
 				),
 			),
 			array(
@@ -14179,6 +14268,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-smartlinks]',
 				),
 			),
 			array(
@@ -14204,6 +14294,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-social-share]',
 				),
 			),
 			array(
@@ -14229,6 +14320,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-soundcloud]',
 				),
 			),
 			array(
@@ -14254,6 +14346,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-springboard-player]',
 				),
 			),
 			array(
@@ -14280,6 +14373,7 @@ class AMP_Allowed_Tags_Generated {
 							'1.0',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-sticky-ad]',
 				),
 			),
 			array(
@@ -14305,6 +14399,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-story-auto-ads]',
 				),
 			),
 			array(
@@ -14356,6 +14451,7 @@ class AMP_Allowed_Tags_Generated {
 							'1.0',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-story]',
 				),
 			),
 			array(
@@ -14452,6 +14548,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-subscriptions]',
 				),
 			),
 			array(
@@ -14512,6 +14609,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-subscriptions',
 					),
+					'spec_name' => 'script [custom-element=amp-subscriptions-google]',
 				),
 			),
 			array(
@@ -14537,6 +14635,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-timeago]',
 				),
 			),
 			array(
@@ -14562,6 +14661,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-truncate-text]',
 				),
 			),
 			array(
@@ -14587,6 +14687,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-twitter]',
 				),
 			),
 			array(
@@ -14612,6 +14713,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-user-location]',
 				),
 			),
 			array(
@@ -14663,6 +14765,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-user-notification]',
 				),
 			),
 			array(
@@ -14714,6 +14817,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-video-iframe]',
 				),
 			),
 			array(
@@ -14765,6 +14869,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-vimeo]',
 				),
 			),
 			array(
@@ -14790,6 +14895,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-vine]',
 				),
 			),
 			array(
@@ -14815,6 +14921,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-viqeo-player]',
 				),
 			),
 			array(
@@ -14840,6 +14947,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-vk]',
 				),
 			),
 			array(
@@ -14865,6 +14973,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-web-push]',
 				),
 			),
 			array(
@@ -14890,6 +14999,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-wistia-player]',
 				),
 			),
 			array(
@@ -14915,6 +15025,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-yotpo]',
 					'spec_url' => 'https://amp.dev/documentation/components/amp-yotpo',
 				),
 			),
@@ -14941,6 +15052,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
+					'spec_name' => 'script [custom-element=amp-youtube]',
 				),
 			),
 		),
@@ -17625,12 +17737,26 @@ class AMP_Allowed_Tags_Generated {
 	 * Get the rules for a single tag so that the entire data structure needn't be passed around.
 	 *
 	 * @since 0.7
-	 * @param string $node_name Tag name.
+	 *
+	 * @param string      $node_name Tag name.
+	 * @param string|null $spec_name Spec name.
 	 * @return array|null Allowed tag, or null if the tag does not exist.
 	 */
-	public static function get_allowed_tag( $node_name ) {
+	public static function get_allowed_tag( $node_name, $spec_name = null ) {
 		if ( isset( self::$allowed_tags[ $node_name ] ) ) {
-			return self::$allowed_tags[ $node_name ];
+			$rule_specs = self::$allowed_tags[ $node_name ];
+			if ( empty( $spec_name ) ) {
+				return $rule_specs;
+			}
+			foreach ( $rule_specs as $rule_spec ) {
+				if (
+					( ! isset( $rule_spec['tag_spec']['spec_name'] ) && $node_name === $spec_name )
+					||
+					( isset( $rule_spec['tag_spec']['spec_name'] ) && $rule_spec['tag_spec']['spec_name'] === $spec_name )
+				) {
+					return $rule_spec;
+				}
+			}
 		}
 		return null;
 	}

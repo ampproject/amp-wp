@@ -39,6 +39,15 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Ensure the specs required by the constructor are present.
+	 */
+	public function test_constructor_dependencies() {
+		$this->assertInternalType( 'array', AMP_Allowed_Tags_Generated::get_allowed_tag( 'style', AMP_Style_Sanitizer::STYLE_AMP_CUSTOM_SPEC_NAME )[ AMP_Rule_Spec::CDATA ] );
+		$this->assertInternalType( 'array', AMP_Allowed_Tags_Generated::get_allowed_tag( 'style', AMP_Style_Sanitizer::STYLE_AMP_KEYFRAMES_SPEC_NAME )[ AMP_Rule_Spec::CDATA ] );
+		$this->assertInternalType( 'string', AMP_Allowed_Tags_Generated::get_allowed_tag( 'link', 'link rel=stylesheet for fonts' )[ AMP_Rule_Spec::ATTR_SPEC_LIST ]['href']['value_regex'] ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+	}
+
+	/**
 	 * Get data for tests.
 	 *
 	 * @return array

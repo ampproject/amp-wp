@@ -388,24 +388,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	public function __construct( $dom, array $args = [] ) {
 		parent::__construct( $dom, $args );
 
-		foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( 'style' ) as $spec_rule ) {
-			if ( ! isset( $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) ) {
-				continue;
-			}
-			if ( self::STYLE_AMP_KEYFRAMES_SPEC_NAME === $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) {
-				$this->style_keyframes_cdata_spec = $spec_rule[ AMP_Rule_Spec::CDATA ];
-			} elseif ( self::STYLE_AMP_CUSTOM_SPEC_NAME === $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) {
-				$this->style_custom_cdata_spec = $spec_rule[ AMP_Rule_Spec::CDATA ];
-			}
-		}
+		$style_custom_rule_spec        = AMP_Allowed_Tags_Generated::get_allowed_tag( 'style', self::STYLE_AMP_CUSTOM_SPEC_NAME );
+		$this->style_custom_cdata_spec = $style_custom_rule_spec[ AMP_Rule_Spec::CDATA ];
 
-		$spec_name = 'link rel=stylesheet for fonts'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-		foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( 'link' ) as $spec_rule ) {
-			if ( isset( $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) && $spec_name === $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) {
-				$this->allowed_font_src_regex = '@^(' . $spec_rule[ AMP_Rule_Spec::ATTR_SPEC_LIST ]['href']['value_regex'] . ')$@';
-				break;
-			}
-		}
+		$style_keyframes_rule_spec        = AMP_Allowed_Tags_Generated::get_allowed_tag( 'style', self::STYLE_AMP_KEYFRAMES_SPEC_NAME );
+		$this->style_keyframes_cdata_spec = $style_keyframes_rule_spec[ AMP_Rule_Spec::CDATA ];
+
+		$font_stylesheet_tag_spec     = AMP_Allowed_Tags_Generated::get_allowed_tag( 'link', 'link rel=stylesheet for fonts' ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$this->allowed_font_src_regex = '@^(' . $font_stylesheet_tag_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ]['href']['value_regex'] . ')$@';
 
 		$guessurl = site_url();
 		if ( ! $guessurl ) {
