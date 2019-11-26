@@ -43,6 +43,36 @@ $amp_url = add_query_arg( amp_get_slug(), '1', $url );
 		</section>
 
 		<div class="container">
+			<div class="disconnect-overlay">
+				<div class="dialog" role="dialog">
+					<div class="dialog-icon">
+						<span class="dashicons dashicons-warning"></span>
+					</div>
+
+					<div class="dialog-text">
+						<span class="general">
+							<?php esc_html_e( 'The navigated URL is not available for paired browsing. Would you like to go back or exit to continue to that URL?', 'amp' ); ?>
+						</span>
+
+						<span class="invalid-amp">
+							<?php esc_html_e( 'The navigated page does not have an AMP counterpart due to validation errors.', 'amp' ); ?>
+						</span>
+					</div>
+
+					<div class="dialog-buttons">
+						<button class="button exit">
+							<?php esc_html_e( 'Exit', 'amp' ); ?>
+						</button>
+						<button class="button go-back">
+							<?php esc_html_e( 'Go Back', 'amp' ); ?>
+						</button>
+						<button class="button continue">
+							<?php esc_html_e( 'Continue', 'amp' ); ?>
+						</button>
+					</div>
+				</div>
+			</div>
+
 			<div id="non-amp">
 				<iframe
 					src="<?php echo esc_url( $url ); ?>"

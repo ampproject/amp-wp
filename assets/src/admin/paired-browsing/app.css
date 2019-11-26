@@ -104,8 +104,75 @@ iframe {
 	border: 0;
 }
 
-iframe.disconnected {
-	opacity: 0.5;
+.disconnect-overlay {
+	display: none;
+	position: fixed;
+	width: 50%;
+	height: 100%;
+	overflow-y: auto;
+	background-color: rgba(0, 0, 0, 0.4);
+	text-align: center;
+}
+
+.disconnect-overlay::before {
+	content: " ";
+	display: inline-block;
+	vertical-align: middle;
+	height: 100%;
+}
+
+.disconnect-overlay.disconnected {
+	display: block;
+}
+
+.disconnect-overlay	.dialog {
+	width: 480px;
+	background-color: #fff;
+	border-radius: 5px;
+	position: static;
+	margin: 20px 0;
+	padding: 0 20px;
+	display: inline-block;
+	vertical-align: middle;
+	pointer-events: auto;
+}
+
+.disconnect-overlay.amp {
+	left: 50%;
+}
+
+.disconnect-overlay .dialog .dialog-icon {
+	margin: 20px auto;
+}
+
+.disconnect-overlay .dialog .dialog-icon .dashicons-warning {
+	width: 80px;
+	height: 80px;
+	font-size: 80px;
+	color: #fe7f2d;
+}
+
+.disconnect-overlay .dialog .dialog-text {
+	font-size: 16px;
+	padding: 0 10px;
+	max-width: calc(100% - 20px);
+	overflow-wrap: break-word;
+}
+
+.disconnect-overlay .dialog .dialog-buttons {
+	margin-top: 13px;
+	padding: 13px 16px;
+}
+
+.disconnect-overlay .dialog .dialog-buttons button {
+	margin: 5px;
+	border: none;
+	box-shadow: none;
+	border-radius: 5px;
+	font-weight: 600;
+	font-size: 14px;
+	padding: 10px 24px;
+	cursor: pointer;
 }
 
 .skip-link {
@@ -133,4 +200,8 @@ iframe.disconnected {
 	color: #0075c2;
 	height: auto;
 	width: auto;
+}
+
+.hidden {
+	display: none;
 }
