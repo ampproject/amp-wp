@@ -23,7 +23,7 @@ const Background = styled.div.attrs( { className: 'container' } )`
 	height: 100%;
 `;
 
-const Selection = styled.div.attrs( { className: 'selection' } )`
+const Selection = styled.div`
 	z-index: 2;
 	border: 1px solid #448FFF;
 	left: ${ ( { x } ) => `${ x }px` };
@@ -145,7 +145,7 @@ function Page() {
 					origin={ false }
 					pinchable={ true }
 					keepRatio={ 'image' === selectedElements[ 0 ].type }
-					renderDirections={ 'image' === selectedElements[ 0 ].type ? [ 'nw', 'ne', 'sw', 'se' ] : null }
+					renderDirections={ 'image' === selectedElements[ 0 ].type ? [ 'nw', 'ne', 'sw', 'se' ] : [ 'n', 's', 'e', 'w', 'nw', 'ne', 'sw', 'se' ] }
 				/>
 			) }
 		</Background>
