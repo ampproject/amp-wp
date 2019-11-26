@@ -763,8 +763,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			! ( 'style' === $element->nodeName && $element->hasAttribute( 'amp-custom' ) )
 		) {
 			return [
-				'code'      => self::CDATA_TOO_LONG,
-				'max_bytes' => $cdata_spec['max_bytes'], // @todo This is not needed with the spec_name in hand.
+				'code' => self::CDATA_TOO_LONG,
 			];
 		}
 		if ( isset( $cdata_spec['blacklisted_cdata_regex'] ) ) {
@@ -813,8 +812,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		if ( ! empty( $tag_spec[ AMP_Rule_Spec::MANDATORY_PARENT ] ) && ! $this->has_parent( $node, $tag_spec[ AMP_Rule_Spec::MANDATORY_PARENT ] ) ) {
 			return [
-				'code'             => self::WRONG_PARENT_TAG,
-				'mandatory_parent' => $tag_spec[ AMP_Rule_Spec::MANDATORY_PARENT ], // @todo This is not needed with the spec_name in hand.
+				'code' => self::WRONG_PARENT_TAG,
 			];
 		}
 
@@ -838,8 +836,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		if ( ! empty( $tag_spec[ AMP_Rule_Spec::MANDATORY_ANCESTOR ] ) && ! $this->has_ancestor( $node, $tag_spec[ AMP_Rule_Spec::MANDATORY_ANCESTOR ] ) ) {
 			return [
-				'code'               => self::MANDATORY_TAG_ANCESTOR,
-				'mandatory_ancestor' => $tag_spec[ AMP_Rule_Spec::MANDATORY_ANCESTOR ], // @todo This is not needed with the spec_name in hand.
+				'code' => self::MANDATORY_TAG_ANCESTOR,
 			];
 		}
 
@@ -1074,8 +1071,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			 * However, if there was only one spec for a given tag, then then validate_attr_spec_list_for_node() would
 			 * not have been called. and thus these checks need to be performed here as well.
 			 */
-			// @todo Actual AMP validator error codes should be used whenever possible. And constants should be used.
-			// @todo The check methods should return an array of validation error data when failure.
 			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_value( $node, $attr_name, $attr_spec_rule ) ) {
 				$error_code = self::INVALID_ATTR_VALUE;
