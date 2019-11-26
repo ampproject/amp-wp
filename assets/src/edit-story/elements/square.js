@@ -8,19 +8,26 @@ import styled from 'styled-components';
  * Internal dependencies
  */
 import { PanelTypes } from '../panels';
-import { ElementWithPosition, ElementWithSize, ElementWithBackgroundColor } from './shared';
+import {
+	ElementWithPosition,
+	ElementWithSize,
+	ElementWithBackgroundColor,
+	ElementWithRotation,
+} from './shared';
 
 const Element = styled.div`
 	${ ElementWithPosition }
 	${ ElementWithSize }
+	${ ElementWithRotation }
 	${ ElementWithBackgroundColor }
 `;
 
-function Square( { backgroundColor, width, height, x, y } ) {
+function Square( { backgroundColor, width, height, x, y, rotationAngle } ) {
 	const props = {
 		backgroundColor,
 		width,
 		height,
+		rotationAngle,
 		x,
 		y,
 	};
@@ -30,6 +37,7 @@ function Square( { backgroundColor, width, height, x, y } ) {
 }
 
 Square.propTypes = {
+	rotationAngle: PropTypes.number.isRequired,
 	backgroundColor: PropTypes.string,
 	width: PropTypes.number.isRequired,
 	height: PropTypes.number.isRequired,
@@ -43,6 +51,7 @@ Square.defaultProps = {
 
 Square.panels = [
 	PanelTypes.SIZE,
+	PanelTypes.ROTATION_ANGLE,
 	PanelTypes.POSITION,
 	PanelTypes.BACKGROUND_COLOR,
 ];

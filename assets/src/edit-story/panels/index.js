@@ -5,12 +5,14 @@ import { elementTypes } from '../elements';
 import ColorPanel from './color';
 import BackgroundColorPanel from './backgroundColor';
 import FontPanel from './font';
+import RotationPanel from './rotationAngle';
 import SizePanel from './size';
 import PositionPanel from './position';
 import TextPanel from './text';
 
 const COLOR = 'color';
 const FONT = 'font';
+const ROTATION_ANGLE = 'rotationAngle';
 const TEXT = 'text';
 const SIZE = 'size';
 const POSITION = 'position';
@@ -23,6 +25,7 @@ const ALL = [
 	COLOR,
 	FONT,
 	TEXT,
+	ROTATION_ANGLE,
 ];
 
 function intersect( a, b ) {
@@ -40,6 +43,7 @@ export function getPanels( elements ) {
 		.map( ( type ) => {
 			switch ( type ) {
 				case POSITION: return { type, Panel: PositionPanel };
+				case ROTATION_ANGLE: return { type, Panel: RotationPanel };
 				case SIZE: return { type, Panel: SizePanel };
 				case BACKGROUND_COLOR: return { type, Panel: BackgroundColorPanel };
 				case COLOR: return { type, Panel: ColorPanel };
@@ -57,4 +61,5 @@ export const PanelTypes = {
 	COLOR,
 	FONT,
 	TEXT,
+	ROTATION_ANGLE,
 };

@@ -34,14 +34,14 @@ function PositionPanel( { selectedElements, onSetProperties } ) {
 				value={ state.x }
 				isMultiple={ x === '' }
 				onChange={ ( value ) => setState( { ...state, x: isNaN( value ) || value === '' ? '' : parseFloat( value ) } ) }
-				postfix="%"
+				postfix="px"
 			/>
 			<InputGroup
 				label="Y"
 				value={ state.y }
 				isMultiple={ y === '' }
 				onChange={ ( value ) => setState( { ...state, y: isNaN( value ) || value === '' ? '' : parseFloat( value ) } ) }
-				postfix="%"
+				postfix="px"
 			/>
 		</Panel>
 	);
