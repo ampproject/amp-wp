@@ -308,7 +308,7 @@ This will create an `amp.zip` in the plugin directory which you can install. The
 1. Create changelog draft on [Wiki page](https://github.com/ampproject/amp-wp/wiki/Release-Changelog-Draft).
 1. Check out the branch intended for release (`develop` for major, `x.y` for minor) and pull latest commits.
 1. Bump plugin versions in `amp.php` (×2: the metadata block in the header and also the `AMP__VERSION` constant).
-1. Do `npm install && composer selfupdate && composer install`.
+1. Do `npm install && composer selfupdate && composer install -o`.
 1. Do `npm run build` and install the `amp.zip` onto a normal WordPress install running a stable release build; do smoke test to ensure it works.
 1. [Draft new release](https://github.com/ampproject/amp-wp/releases/new) on GitHub targeting the required branch (`develop` for major, `x.y` for minor).
     1. Use the new plugin version as the tag (e.g. `1.2-beta3` or `1.2.1-RC1`)
@@ -334,7 +334,7 @@ Contributors who want to make a new release, follow these steps:
 1. For major release, draft blog post about the new release.
 1. For minor releases, make sure all merged commits in `develop` have been also merged onto release branch.
 1. Check out the branch intended for release (`develop` for major, `x.y` for minor) and pull latest commits.
-1. Do `npm install && composer selfupdate && composer install`.
+1. Do `npm install && composer selfupdate && composer install -o`.
 1. Bump plugin versions in `amp.php` (×2: the metadata block in the header and also the `AMP__VERSION` constant). Verify via `npx grunt shell:verify_matching_versions`. Ensure patch version number is supplied for major releases, so `1.2-RC1` should bump to `1.2.0`.
 1. Do `npm run build` and install the `amp.zip` onto a normal WordPress install running a stable release build; do smoke test to ensure it works.
 1. Optionally do sanity check by comparing the `build` directory with the previously-deployed plugin on WordPress.org for example: `svn export https://plugins.svn.wordpress.org/amp/trunk /tmp/amp-trunk; diff /tmp/amp-trunk/ ./build/` (instead of straight `diff`, it's best to use a GUI like `idea diff`, `phpstorm diff`, or `opendiff`).
