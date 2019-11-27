@@ -99,7 +99,7 @@ class AMP_DOM_Utils {
 	 *
 	 * @param string $document Valid HTML document to be represented by a DOMDocument.
 	 * @param string $encoding Optional. Encoding to use for the content. Defaults to `get_bloginfo( 'charset' )`.
-	 * @return DOMDocument|false Returns DOMDocument, or false if conversion failed.
+	 * @return AMP_DOM_Document|false Returns DOMDocument, or false if conversion failed.
 	 */
 	public static function get_dom( $document, $encoding = null ) {
 		$libxml_previous_state = libxml_use_internal_errors( true );
@@ -170,18 +170,15 @@ class AMP_DOM_Utils {
 	 * Apparently PHP's DOM is more lenient when parsing HTML to allow nodes in the HEAD which do not belong. A proper
 	 * HTML5 parser should rather prematurely short-circuit the HEAD when it finds an illegal element.
 	 *
-	 * @param DOMDocument $dom DOM Document to manipulate.
+	 * @param AMP_DOM_Document $dom DOM Document to manipulate.
 	 */
-	private static function move_invalid_head_nodes_to_body( DOMDocument $dom ) {
-		$head = $dom->getElementsByTagName( 'head' )->item( 0 );
-		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
-
+	private static function move_invalid_head_nodes_to_body( AMP_DOM_Document $dom ) {
 		// Walking backwards makes it easier to move elements in the expected order.
-		$node = $head->lastChild;
+		$node = $dom->head->lastChild;
 		while ( $node ) {
 			$next_sibling = $node->previousSibling;
 			if ( ! self::is_valid_head_node( $node ) ) {
-				$body->insertBefore( $head->removeChild( $node ), $body->firstChild );
+				$dom->body->insertBefore( $dom->head->removeChild( $node ), $dom->body->firstChild );
 			}
 			$node = $next_sibling;
 		}
@@ -377,7 +374,7 @@ class AMP_DOM_Utils {
 	 * @param string $content  Valid HTML content to be represented by a DOMDocument.
 	 * @param string $encoding Optional. Encoding to use for the content. Defaults to `get_bloginfo( 'charset' )`.
 	 *
-	 * @return DOMDocument|false Returns DOMDocument, or false if conversion failed.
+	 * @return AMP_DOM_Document|false Returns a DOM document, or false if conversion failed.
 	 */
 	public static function get_dom_from_content( $content, $encoding = null ) {
 		// Detect encoding from the current WordPress installation.
@@ -401,21 +398,14 @@ class AMP_DOM_Utils {
 	 * @since 0.2
 	 * @see AMP_DOM_Utils::get_content_from_dom_node() Reciprocal function.
 	 *
-	 * @param DOMDocument $dom Represents an HTML document from which to extract HTML content.
+	 * @param AMP_DOM_Document $dom Represents an HTML document from which to extract HTML content.
 	 * @return string Returns the HTML content of the body element represented in the DOMDocument.
 	 */
-	public static function get_content_from_dom( $dom ) {
-		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
-
-		// The DOMDocument may contain no body. In which case return nothing.
-		if ( null === $body ) {
-			return '';
-		}
-
+	public static function get_content_from_dom( AMP_DOM_Document $dom ) {
 		return preg_replace(
 			'#^.*?<body.*?>(.*)</body>.*?$#si',
 			'$1',
-			self::get_content_from_dom_node( $dom, $body )
+			self::get_content_from_dom_node( $dom, $dom->body )
 		);
 	}
 
@@ -426,13 +416,12 @@ class AMP_DOM_Utils {
 	 * @since 0.6
 	 * @see AMP_DOM_Utils::get_dom() Where the operations in this method are mirrored.
 	 * @see AMP_DOM_Utils::get_content_from_dom() Reciprocal function.
-	 * @todo In the future consider an AMP_DOMDocument subclass that does this automatically at saveHTML(). See <https://github.com/ampproject/amp-wp/pull/895/files#r163825513>.
 	 *
-	 * @param DOMDocument $dom  Represents an HTML document.
-	 * @param DOMElement  $node Represents an HTML element of the $dom from which to extract HTML content.
+	 * @param AMP_DOM_Document $dom  Represents an HTML document.
+	 * @param DOMElement       $node Represents an HTML element of the $dom from which to extract HTML content.
 	 * @return string Returns the HTML content represented in the DOMNode
 	 */
-	public static function get_content_from_dom_node( $dom, $node ) {
+	public static function get_content_from_dom_node( AMP_DOM_Document $dom, $node ) {
 		/**
 		 * Self closing tags regex.
 		 *
@@ -460,12 +449,11 @@ class AMP_DOM_Utils {
 		 */
 		$mustache_tag_placeholders = self::get_mustache_tag_placeholders();
 		$mustache_tags_replaced    = false;
-		$xpath                     = new DOMXPath( $dom );
 		$templates                 = $dom->getElementsByTagName( 'template' );
 		foreach ( $templates as $template ) {
 
 			// These attributes are the only ones that saveHTML() will URL-encode.
-			foreach ( $xpath->query( './/*/@src|.//*/@href|.//*/@action', $template ) as $attribute ) {
+			foreach ( $dom->xpath->query( './/*/@src|.//*/@href|.//*/@action', $template ) as $attribute ) {
 				$attribute->nodeValue = str_replace(
 					array_keys( $mustache_tag_placeholders ),
 					array_values( $mustache_tag_placeholders ),
@@ -624,15 +612,15 @@ class AMP_DOM_Utils {
 	 * @since 0.2
 	 * @deprecated
 	 *
-	 * @param DOMDocument $dom  Represents HTML document on which to force closing tags.
-	 * @param DOMElement  $node Represents HTML element to start closing tags on.
-	 *                          If not passed, defaults to first child of body.
+	 * @param AMP_DOM_Document $dom  Represents HTML document on which to force closing tags.
+	 * @param DOMElement       $node      Represents HTML element to start closing tags on.
+	 *                                    If not passed, defaults to first child of body.
 	 */
 	public static function recursive_force_closing_tags( $dom, $node = null ) {
 		_deprecated_function( __METHOD__, '0.7' );
 
 		if ( null === $node ) {
-			$node = $dom->getElementsByTagName( 'body' )->item( 0 );
+			$node = $dom->body;
 		}
 
 		if ( XML_ELEMENT_NODE !== $node->nodeType ) {
