@@ -46,7 +46,7 @@ class AMP_Post_Type_Support {
 				)
 			),
 			[
-				AMP_Story_Post_Type::POST_TYPE_SLUG,
+				AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG,
 			]
 		);
 	}

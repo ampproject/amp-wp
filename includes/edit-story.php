@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 require_once ABSPATH . 'wp-admin/admin-header.php';
 
-AMP_Story_Post_Type::enqueue_block_editor_scripts();
+AMP_Story_Legacy_Post_Type::enqueue_block_editor_scripts();
 
 global $post, $post_type;
 

@@ -1,14 +1,14 @@
 <?php
 /**
- * Class AMP_Story_Post_Type
+ * Class AMP_Story_Legacy_Post_Type
  *
  * @package AMP
  */
 
 /**
- * Class AMP_Story_Post_Type
+ * Class AMP_Story_Legacy_Post_Type
  */
-class AMP_Story_Post_Type {
+class AMP_Story_Legacy_Post_Type {
 
 	/**
 	 * The slug of the post type to store URLs that have AMP errors.
@@ -53,7 +53,7 @@ class AMP_Story_Post_Type {
 	 *
 	 * @var string
 	 */
-	const AMP_STORIES_SCRIPT_HANDLE = 'amp-edit-story';
+	const AMP_STORIES_SCRIPT_HANDLE = 'amp-stories-editor';
 
 	/**
 	 * AMP Stories style handle.
@@ -222,7 +222,7 @@ class AMP_Story_Post_Type {
 				/*
 				 * Same as wp_print_styles() but importantly omitting the wp_print_styles action, which themes/plugins
 				 * can use to output arbitrary styling. Styling is constrained in story template via the
-				 * \AMP_Story_Post_Type::filter_frontend_print_styles_array() method.
+				 * \AMP_Story_Legacy_Post_Type::filter_frontend_print_styles_array() method.
 				 */
 				wp_styles()->do_items();
 			},
@@ -384,23 +384,6 @@ class AMP_Story_Post_Type {
 		}
 
 		add_action( 'wp_insert_post', [ __CLASS__, 'add_story_settings_meta_to_new_story' ], 10, 3 );
-
-		add_filter(
-			'replace_editor',
-			function ( $replace, $post ) {
-				if ( 'amp_story' === get_post_type( $post ) ) {
-					$replace = true;
-					// In lieu of an action being available to actually load the replacement editor, include it here
-					// after the current_screen action has occurred because the replace_editor filter fires twice.
-					if ( did_action( 'current_screen' ) ) {
-						include_once __DIR__ . '/edit-story.php';
-					}
-				}
-				return $replace;
-			},
-			10,
-			2
-		);
 
 		AMP_Story_Media::init();
 	}
@@ -830,7 +813,7 @@ class AMP_Story_Post_Type {
 		wp_styles()->add_data( self::AMP_STORIES_EDITOR_STYLE_HANDLE, 'rtl', 'replace' );
 
 		// Include all fonts in the editor since new fonts can be selected at runtime.
-		// In a frontend context, the fonts are added only as needed via \AMP_Story_Post_Type::render_block_with_google_fonts().
+		// In a frontend context, the fonts are added only as needed via \AMP_Story_Legacy_Post_Type::render_block_with_google_fonts().
 		$fonts = self::get_fonts();
 		foreach ( $fonts as $font ) {
 			wp_add_inline_style(
@@ -1408,11 +1391,12 @@ class AMP_Story_Post_Type {
 	/**
 	 * Include any required Google Font styles when rendering a block in AMP Stories.
 	 *
-	 * @see AMP_Story_Post_Type::enqueue_block_editor_styles() Where fonts are added in the story editor.
-	 *
 	 * @param string $block_content The block content about to be appended.
 	 * @param array  $block         The full block, including name and attributes.
+	 *
 	 * @return string Block content.
+	 *@see AMP_Story_Legacy_Post_Type::enqueue_block_editor_styles() Where fonts are added in the story editor.
+	 *
 	 */
 	public static function render_block_with_google_fonts( $block_content, $block ) {
 		$font_family_attribute = 'ampFontFamily';
@@ -1702,30 +1686,30 @@ class AMP_Story_Post_Type {
 
 		?>
 		<<?php echo esc_attr( $wrapper_tag_name ); ?> <?php echo isset( $href ) ? wp_kses_post( $href ) : ''; ?> class="latest_stories__link">
-			<?php
-			$url = wp_get_attachment_image_url( $thumbnail_id, $args['size'] );
-			printf(
-				'<img src="%s" width="%d" height="%d" alt="%s" class="latest-stories__featured-img" data-amp-layout="fixed">',
-				esc_url( $url ),
-				esc_attr( AMP_Story_Media::STORY_SMALL_IMAGE_DIMENSION / 2 ),
-				esc_attr( AMP_Story_Media::STORY_LARGE_IMAGE_DIMENSION / 2 ),
-				esc_attr( get_the_title( $post ) )
-			);
-			?>
-			<span class="latest-stories__title"><?php echo esc_html( get_the_title( $post ) ); ?></span>
-			<div class="latest-stories__meta">
-				<?php echo wp_kses_post( $avatar ); ?>
-				<span class="latest-stories__author">
+		<?php
+		$url = wp_get_attachment_image_url( $thumbnail_id, $args['size'] );
+		printf(
+			'<img src="%s" width="%d" height="%d" alt="%s" class="latest-stories__featured-img" data-amp-layout="fixed">',
+			esc_url( $url ),
+			esc_attr( AMP_Story_Media::STORY_SMALL_IMAGE_DIMENSION / 2 ),
+			esc_attr( AMP_Story_Media::STORY_LARGE_IMAGE_DIMENSION / 2 ),
+			esc_attr( get_the_title( $post ) )
+		);
+		?>
+		<span class="latest-stories__title"><?php echo esc_html( get_the_title( $post ) ); ?></span>
+		<div class="latest-stories__meta">
+			<?php echo wp_kses_post( $avatar ); ?>
+			<span class="latest-stories__author">
 					<?php
 					printf(
-						/* translators: 1: the post author. 2: the amount of time ago. */
+					/* translators: 1: the post author. 2: the amount of time ago. */
 						esc_html__( '%1$s &#8226; %2$s ago', 'amp' ),
 						esc_html( $author_display_name ),
 						esc_html( human_time_diff( get_post_time( 'U', false, $post ), time() ) )
 					);
 					?>
 				</span>
-			</div>
+		</div>
 		</<?php echo esc_attr( $wrapper_tag_name ); ?>>
 		<?php
 	}
@@ -1862,25 +1846,25 @@ class AMP_Story_Post_Type {
 		?>
 		<div class="<?php echo esc_attr( $class ); ?>">
 			<?php if ( $is_amp_carousel ) : ?>
-				<amp-carousel layout="fixed-height" height="<?php echo esc_attr( $min_height ); ?>" type="carousel" class="latest-stories-carousel">
-			<?php else : ?>
+			<amp-carousel layout="fixed-height" height="<?php echo esc_attr( $min_height ); ?>" type="carousel" class="latest-stories-carousel">
+				<?php else : ?>
 				<ul class="latest-stories-carousel">
-			<?php endif; ?>
-				<?php foreach ( $story_query->posts as $post ) : ?>
+					<?php endif; ?>
+					<?php foreach ( $story_query->posts as $post ) : ?>
 					<<?php echo $is_amp_carousel ? 'div' : 'li'; ?> class="slide latest-stories__slide">
-						<?php
-						self::the_single_story_card(
-							[
-								'post'         => $post,
-								'size'         => $size,
-								'disable_link' => ! $is_amp_carousel,
-							]
-						);
-						?>
-					</<?php echo $is_amp_carousel ? 'div' : 'li'; ?>>
 					<?php
-				endforeach;
-				?>
+					self::the_single_story_card(
+						[
+							'post'         => $post,
+							'size'         => $size,
+							'disable_link' => ! $is_amp_carousel,
+						]
+					);
+					?>
+				</<?php echo $is_amp_carousel ? 'div' : 'li'; ?>>
+			<?php
+			endforeach;
+			?>
 			</<?php echo $is_amp_carousel ? 'amp-carousel' : 'ul'; ?>>
 		</div>
 		<?php

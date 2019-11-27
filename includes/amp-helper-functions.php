@@ -70,7 +70,7 @@ function amp_get_permalink( $post_id ) {
 	// When theme support is present, the plain query var should always be used.
 	if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 		$permalink = get_permalink( $post_id );
-		if ( ! amp_is_canonical() && AMP_Story_Post_Type::POST_TYPE_SLUG !== get_post_type( $post_id ) ) {
+		if ( ! amp_is_canonical() && AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG !== get_post_type( $post_id ) ) {
 			$permalink = add_query_arg( amp_get_slug(), '', $permalink );
 		}
 		return $permalink;
@@ -288,7 +288,7 @@ function is_amp_endpoint() {
 	}
 
 	// AMP Stories are always an AMP endpoint.
-	if ( $wp_query instanceof WP_Query && $wp_query->is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
+	if ( $wp_query instanceof WP_Query && $wp_query->is_singular( AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG ) ) {
 		return true;
 	}
 
@@ -1077,7 +1077,7 @@ function amp_get_post_image_metadata( $post = null ) {
 function amp_get_publisher_logo() {
 	$logo_image_url = null;
 
-	$is_amp_story = is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG );
+	$is_amp_story = is_singular( AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG );
 	if ( $is_amp_story ) {
 		// This should be square, at least 96px in width/height. The 512 is used because the site icon would have this size generated.
 		$logo_width  = 512;

@@ -387,7 +387,7 @@ function amp_init() {
 	}
 
 	if ( AMP_Options_Manager::is_stories_experience_enabled() ) {
-		AMP_Story_Post_Type::register();
+		AMP_Story_Legacy_Post_Type::register();
 	}
 
 	// Does its own is_stories_experience_enabled() check.
@@ -461,7 +461,7 @@ function amp_maybe_add_actions() {
 		return;
 	}
 
-	if ( is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
+	if ( is_singular( AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG ) ) {
 		return;
 	}
 

@@ -197,7 +197,7 @@ class AMP_Theme_Support {
 			add_action(
 				'wp',
 				static function () {
-					if ( is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
+					if ( is_singular( AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG ) ) {
 						self::finish_init();
 					}
 				},
@@ -447,7 +447,7 @@ class AMP_Theme_Support {
 		$has_query_var = false !== get_query_var( amp_get_slug(), false ); // May come from URL param or endpoint slug.
 		$has_url_param = isset( $_GET[ amp_get_slug() ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
-		if ( amp_is_canonical() || is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
+		if ( amp_is_canonical() || is_singular( AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG ) ) {
 			/*
 			 * When AMP-first/canonical, then when there is an /amp/ endpoint or ?amp URL param,
 			 * then a redirect needs to be done to the URL without any AMP indicator in the URL.
@@ -2181,7 +2181,7 @@ class AMP_Theme_Support {
 				AMP_HTTP::send_server_timing( 'amp_processor_cache_hit', -$prepare_response_start );
 
 				// Redirect to non-AMP version.
-				if ( ! amp_is_canonical() && ! is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) && $blocking_error_count > 0 ) {
+				if ( ! amp_is_canonical() && ! is_singular( AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG ) && $blocking_error_count > 0 ) {
 					if ( AMP_Validation_Manager::has_cap() ) {
 						$non_amp_url = add_query_arg( AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR, $blocking_error_count, $non_amp_url );
 					}
@@ -2313,7 +2313,7 @@ class AMP_Theme_Support {
 			 * already surfaced inside of WordPress. This is intended to not serve dirty AMP, but rather a
 			 * non-AMP document (intentionally not valid AMP) that contains the AMP runtime and AMP components.
 			 */
-			if ( amp_is_canonical() || is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
+			if ( amp_is_canonical() || is_singular( AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG ) ) {
 				$dom->documentElement->removeAttribute( 'amp' );
 				$dom->documentElement->removeAttribute( '⚡️' );
 

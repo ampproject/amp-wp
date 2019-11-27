@@ -183,7 +183,7 @@ class AMP_Options_Menu {
 	public function render_experiences() {
 		$experiences = AMP_Options_Manager::get_option( 'experiences' );
 
-		$has_required_block_capabilities = AMP_Story_Post_Type::has_required_block_capabilities();
+		$has_required_block_capabilities = AMP_Story_Legacy_Post_Type::has_required_block_capabilities();
 		?>
 		<style>
 			label[for="stories_experience"] span {
@@ -605,11 +605,11 @@ class AMP_Options_Menu {
 	 * @since 1.3
 	 */
 	private function render_stories_settings_page_advance() {
-		$definitions                = AMP_Story_Post_Type::get_stories_settings_definitions();
+		$definitions                = AMP_Story_Legacy_Post_Type::get_stories_settings_definitions();
 		$auto_advance_after_options = $definitions['auto_advance_after']['data']['options'];
 
 		$story_settings            = AMP_Options_Manager::get_option( 'story_settings' );
-		$story_settings_field_name = sprintf( '%s[%s]', AMP_Options_Manager::OPTION_NAME, AMP_Story_Post_Type::STORY_SETTINGS_OPTION );
+		$story_settings_field_name = sprintf( '%s[%s]', AMP_Options_Manager::OPTION_NAME, AMP_Story_Legacy_Post_Type::STORY_SETTINGS_OPTION );
 		?>
 		<fieldset>
 			<p>

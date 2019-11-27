@@ -15,7 +15,7 @@ class AMP_Autoloader {
 	/**
 	 * Map of Classname to relative filepath sans extension.
 	 *
-	 * @note We omitted the leading slash and the .php extension from each
+	 * @note    We omitted the leading slash and the .php extension from each
 	 *       relative filepath because they are redundant and to include
 	 *       them would take up unnecessary bytes of memory at runtime.
 	 *
@@ -109,7 +109,7 @@ class AMP_Autoloader {
 		'AMP_Widget_Archives'                => 'includes/widgets/class-amp-widget-archives',
 		'AMP_Widget_Categories'              => 'includes/widgets/class-amp-widget-categories',
 		'AMP_Widget_Text'                    => 'includes/widgets/class-amp-widget-text',
-		'AMP_Story_Post_Type'                => 'includes/class-amp-story-post-type',
+		'AMP_Story_Legacy_Post_Type'         => 'includes/class-amp-story-legacy-post-type',
 		'AMP_Story_Media'                    => 'includes/class-amp-story-media',
 		'AMP_Story_Templates'                => 'includes/admin/class-amp-story-templates',
 		'AMP_Story_Sanitizer'                => 'includes/sanitizers/class-amp-story-sanitizer',
@@ -131,9 +131,10 @@ class AMP_Autoloader {
 	 *
 	 * Design Goal: Execute as few lines of code as possible each call.
 	 *
+	 * @param string $class_name Class name.
+	 *
 	 * @since 0.6
 	 *
-	 * @param string $class_name Class name.
 	 */
 	protected static function autoload( $class_name ) {
 		if ( ! isset( self::$classmap[ $class_name ] ) ) {
@@ -164,10 +165,11 @@ class AMP_Autoloader {
 	/**
 	 * Allows an extensions plugin to register a class and its file for autoloading
 	 *
-	 * @since 0.6
-	 *
 	 * @param string $class_name Full classname (include namespace if applicable).
 	 * @param string $filepath   Absolute filepath to class file, including .php extension.
+	 *
+	 * @since 0.6
+	 *
 	 */
 	public static function register_autoload_class( $class_name, $filepath ) {
 		self::$classmap[ $class_name ] = '!' . $filepath;

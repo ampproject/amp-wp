@@ -92,12 +92,12 @@ class AMP_Options_Manager {
 		if ( $old_post_types !== $new_post_types || $old_experiences !== $new_experiences ) {
 
 			// Ensure story post type registration is up to date prior to flushing rewrite rules.
-			$story_post_type = get_post_type_object( AMP_Story_Post_Type::POST_TYPE_SLUG );
+			$story_post_type = get_post_type_object( AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG );
 			if ( self::is_stories_experience_enabled() && ! $story_post_type ) {
-				AMP_Story_Post_Type::register();
+				AMP_Story_Legacy_Post_Type::register();
 			} elseif ( ! self::is_stories_experience_enabled() && $story_post_type ) {
 				$story_post_type->remove_rewrite_rules();
-				unregister_post_type( AMP_Story_Post_Type::POST_TYPE_SLUG );
+				unregister_post_type( AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG );
 			}
 
 			// Flush rewrite rules, with ensuring up to date for website experience.
@@ -203,7 +203,7 @@ class AMP_Options_Manager {
 	 */
 	public static function is_stories_experience_enabled() {
 		return (
-			AMP_Story_Post_Type::has_required_block_capabilities()
+			AMP_Story_Legacy_Post_Type::has_required_block_capabilities()
 			&&
 			in_array( self::STORIES_EXPERIENCE, self::get_option( 'experiences' ), true )
 		);
@@ -347,12 +347,12 @@ class AMP_Options_Manager {
 		$options['story_export_base_url'] = isset( $new_options['story_export_base_url'] ) ? esc_url_raw( $new_options['story_export_base_url'], [ 'https' ] ) : '';
 
 		// AMP stories settings definitions.
-		$definitions = AMP_Story_Post_Type::get_stories_settings_definitions();
+		$definitions = AMP_Story_Legacy_Post_Type::get_stories_settings_definitions();
 
 		// Handle the AMP stories settings sanitization.
 		foreach ( $definitions as $option_name => $definition ) {
-			$value = $new_options[ AMP_Story_Post_Type::STORY_SETTINGS_OPTION ][ $option_name ];
-			$options[ AMP_Story_Post_Type::STORY_SETTINGS_OPTION ][ $option_name ] = call_user_func( $definition['meta_args']['sanitize_callback'], $value );
+			$value                                                                        = $new_options[ AMP_Story_Legacy_Post_Type::STORY_SETTINGS_OPTION ][ $option_name ];
+			$options[ AMP_Story_Legacy_Post_Type::STORY_SETTINGS_OPTION ][ $option_name ] = call_user_func( $definition['meta_args']['sanitize_callback'], $value );
 		}
 
 		return $options;
