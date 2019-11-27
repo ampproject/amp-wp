@@ -31,13 +31,6 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	];
 
 	/**
-	 * Reference to the shared XPath object to query the DOM.
-	 *
-	 * @var DOMXPath
-	 */
-	protected $xpath;
-
-	/**
 	 * The document's <head> element.
 	 *
 	 * @var DOMElement
@@ -91,9 +84,6 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	 * Sanitize.
 	 */
 	public function sanitize() {
-		$this->xpath = new DOMXPath( $this->dom );
-		$this->head  = $this->ensure_head_is_present();
-		$charset     = $this->detect_charset();
 		$elements    = $this->dom->getElementsByTagName( static::$tag );
 
 		// Remove all nodes for easy reordering later on.
@@ -121,12 +111,7 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		$this->ensure_charset_is_present( $charset );
-
-		if ( ! $this->is_correct_charset() ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement
-			// @TODO Re-encode the content into UTF-8.
-			// ... sure?
-		}
+		$this->ensure_charset_is_present();
 
 		$this->ensure_viewport_is_present();
 
@@ -135,71 +120,18 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 		$this->re_add_meta_tags_in_optimized_order();
 	}
 
-	/**
-	 * Ensure that the <head> element is present in the document.
-	 *
-	 * @return DOMElement The document's <head> element.
-	 */
-	protected function ensure_head_is_present() {
-		$head = $this->dom->getElementsByTagName( 'head' )->item( 0 );
-
-		if ( ! $head ) {
-			$head = $this->dom->createElement( 'head' );
-			$head = $this->dom->documentElement->insertBefore( $head, $this->dom->documentElement->firstChild );
-		}
-
-		return $head;
-	}
-
-	/**
-	 * Detect the charset of the document.
-	 *
-	 * @return string|false Detected charset of the document, or false if none.
-	 */
-	protected function detect_charset() {
-		$charset = false;
-
-		// Check for HTML 4 http-equiv meta tags.
-		$http_equiv_tag = $this->xpath->query( '//meta[ translate(@http-equiv, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz") = "content-type" and @content ]' )->item( 0 );
-		if ( $http_equiv_tag ) {
-			$http_equiv_tag->parentNode->removeChild( $http_equiv_tag );
-
-			// Check for the existence of a proper charset attribute first.
-			$charset = $http_equiv_tag->getAttribute( 'charset' );
-			if ( ! $charset ) {
-				// If not, check whether the charset is included with the content type, and use that.
-				$content = $http_equiv_tag->getAttribute( 'content' );
-
-				$matches = [];
-				if ( preg_match( '/;\s*charset=(?<charset>[^;]+)/', $content, $matches ) && ! empty( $matches['charset'] ) ) {
-					$charset = trim( $matches['charset'] );
-				}
-			}
-		}
-
-		// Check for HTML 5 charset meta tag. This overrides the HTML 4 charset.
-		$charset_tag = $this->xpath->query( '//meta[ @charset ]' )->item( 0 );
-		if ( $charset_tag ) {
-			$charset_tag = $charset_tag->parentNode->removeChild( $charset_tag );
-			$charset     = $charset_tag->getAttribute( 'charset' );
-		}
-
-		return $charset;
-	}
 
 	/**
 	 * Always ensure that we have an HTML 5 charset meta tag.
 	 *
-	 * The charset defaults to utf-8, which is also what AMP requires.
-	 *
-	 * @param string|false $charset Optional. Charset that was already detected. False if none. Defaults to false.
+	 * The charset is set to utf-8, which is what AMP requires.
 	 */
-	protected function ensure_charset_is_present( $charset = false ) {
+	protected function ensure_charset_is_present() {
 		if ( ! empty( $this->meta_tags[ self::TAG_CHARSET ] ) ) {
 			return;
 		}
 
-		$this->meta_tags[ self::TAG_CHARSET ][] = $this->create_charset_element( $charset ?: static::AMP_CHARSET );
+		$this->meta_tags[ self::TAG_CHARSET ][] = $this->create_charset_element();
 	}
 
 	/**
@@ -262,15 +194,14 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Create a new meta tag for the charset value.
 	 *
-	 * @param string $charset Character set to use.
 	 * @return DOMElement New meta tag with requested charset.
 	 */
-	protected function create_charset_element( $charset ) {
+	protected function create_charset_element() {
 		return AMP_DOM_Utils::create_node(
 			$this->dom,
 			'meta',
 			[
-				'charset' => strtolower( $charset ),
+				'charset' => self::AMP_CHARSET,
 			]
 		);
 	}
@@ -290,22 +221,6 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 				'content' => $viewport,
 			]
 		);
-	}
-
-	/**
-	 * Check whether the charset is the correct one according to AMP requirements.
-	 *
-	 * @return bool Whether the charset is the correct one.
-	 * @throws LengthException If the charset meta tag was not previously retrieved.
-	 */
-	protected function is_correct_charset() {
-		if ( empty( $this->meta_tags[ self::TAG_CHARSET ] ) ) {
-			throw new LengthException( 'Failed to ensure a charset meta tag is present' );
-		}
-
-		$charset_element = $this->meta_tags[ self::TAG_CHARSET ][0];
-
-		return static::AMP_CHARSET === strtolower( $charset_element->getAttribute( 'charset' ) );
 	}
 
 	/**
