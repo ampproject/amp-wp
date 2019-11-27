@@ -240,8 +240,14 @@
 					}
 
 					if ( scrollIntoView && ! isHeaderVisible() ) {
+						const siteContent = document.querySelector( '.site-content-contain' );
+
+						if ( ! siteContent ) {
+							return;
+						}
+
 						// @todo The scroll position is not correct when admin bar is used. Consider scrolling to Y coordinate smoothly instead.
-						document.querySelector( '.site-content-contain' ).scrollIntoView( {
+						siteContent.scrollIntoView( {
 							block: 'start',
 							inline: 'start',
 							behavior: 'smooth'
