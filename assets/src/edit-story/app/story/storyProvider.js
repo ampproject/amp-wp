@@ -46,13 +46,7 @@ function StoryProvider( { storyId, children } ) {
 	const hasSelection = Boolean( selectedElementIds.length );
 
 	const clearSelection = useClearSelection( { selectedElementIds, setSelectedElementIds } );
-	const deleteCurrentSelection = useDeleteCurrentSelection( {
-		currentPageIndex,
-		pages,
-		selectedElementIds,
-		setPages,
-		setSelectedElementIds,
-	} );
+	const deleteCurrentSelection = useDeleteCurrentSelection( { currentPageIndex, pages, selectedElementIds, setPages, setSelectedElementIds } );
 	const setCurrentPageByIndex = useSetCurrentPageByIndex( { clearSelection, setCurrentPageIndex } );
 	const addBlankPage = useAddBlankPage( { pages, setPages, clearSelection } );
 	const deletePage = useDeletePage( { currentPage, pages, setPages, addBlankPage, setCurrentPageIndex, currentPageIndex } );
@@ -60,7 +54,6 @@ function StoryProvider( { storyId, children } ) {
 	const toggleElementIdInSelection = useToggleElementIdInSelection( { selectedElementIds, setSelectedElementIds } );
 	const appendElementToCurrentPage = useAppendElementToCurrentPage( { currentPageIndex, pages, setPages, setSelectedElementIds } );
 	const setPropertiesOnSelectedElements = useSetPropertiesOnSelectedElements( { currentPageIndex, pages, selectedElementIds, setPages } );
-
 
 	useLoadStory( { storyId, pages, setPages, setCurrentPageIndex, clearSelection } );
 	useCurrentPage( { currentPageIndex, pages, setCurrentPage, setCurrentPageNumber } );
