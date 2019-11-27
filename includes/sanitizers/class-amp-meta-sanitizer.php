@@ -30,13 +30,6 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 		'use_document_element' => true, // We want to work on the header, so we need the entire document.
 	];
 
-	/**
-	 * The document's <head> element.
-	 *
-	 * @var DOMElement
-	 */
-	protected $head;
-
 	/*
 	 * Tags array keys.
 	 */
@@ -84,7 +77,7 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	 * Sanitize.
 	 */
 	public function sanitize() {
-		$elements    = $this->dom->getElementsByTagName( static::$tag );
+		$elements = $this->dom->getElementsByTagName( static::$tag );
 
 		// Remove all nodes for easy reordering later on.
 		$elements = array_map(
@@ -243,9 +236,9 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 		foreach ( $this->meta_tags as $meta_tag_group ) {
 			foreach ( $meta_tag_group as $meta_tag ) {
 				if ( $previous_meta_tag ) {
-					$previous_meta_tag = $this->head->insertBefore( $meta_tag, $previous_meta_tag->nextSibling );
+					$previous_meta_tag = $this->dom->head->insertBefore( $meta_tag, $previous_meta_tag->nextSibling );
 				} else {
-					$previous_meta_tag = $this->head->insertBefore( $meta_tag, $this->head->firstChild );
+					$previous_meta_tag = $this->dom->head->insertBefore( $meta_tag, $this->dom->head->firstChild );
 				}
 			}
 		}

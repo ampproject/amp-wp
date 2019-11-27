@@ -10,7 +10,9 @@
  *
  * @since 1.5
  *
- * @property DOMXPath $xpath XPath query object for this document.
+ * @property DOMXPath   $xpath XPath query object for this document.
+ * @property DOMElement $head  The document's <head> element.
+ * @property DOMElement $body  The document's <body> element.
  *
  * Abstract away some of the difficulties of working with PHP's DOMDocument.
  */
@@ -144,7 +146,6 @@ final class AMP_DOM_Document extends DOMDocument {
 	public function saveHTML( DOMNode $node = null ) {
 		// Force-add http-equiv charset to make DOMDocument behave as it should.
 		// See: http://php.net/manual/en/domdocument.loadhtml.php#78243.
-		$head    = $this->getElementsByTagName( 'head' )->item( 0 );
 		$charset = AMP_DOM_Utils::create_node(
 			$this,
 			'meta',
@@ -153,7 +154,7 @@ final class AMP_DOM_Document extends DOMDocument {
 				'content'    => 'text/html; charset=' . self::AMP_ENCODING,
 			]
 		);
-		$head->insertBefore( $charset, $head->firstChild );
+		$this->head->insertBefore( $charset, $this->head->firstChild );
 
 		return preg_replace(
 			sprintf(
@@ -408,6 +409,12 @@ final class AMP_DOM_Document extends DOMDocument {
 			case 'xpath':
 				$this->xpath = new DOMXPath( $this );
 				return $this->xpath;
+			case 'head':
+				$this->head = $this->getElementsByTagName( 'head' )->item( 0 );
+				return $this->head;
+			case 'body':
+				$this->body = $this->getElementsByTagName( 'body' )->item( 0 );
+				return $this->body;
 		}
 
 		// Mimic regular PHP behavior for missing notices.
