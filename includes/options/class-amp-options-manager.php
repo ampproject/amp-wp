@@ -30,6 +30,13 @@ class AMP_Options_Manager {
 	const STORIES_EXPERIENCE = 'stories';
 
 	/**
+	 * Slug for stories editor.
+	 *
+	 * @var
+	 */
+	const STORIES_EDITOR = 'stories_editor';
+
+	/**
 	 * Default option values.
 	 *
 	 * @var array

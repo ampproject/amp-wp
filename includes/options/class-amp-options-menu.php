@@ -186,6 +186,7 @@ class AMP_Options_Menu {
 		$has_required_block_capabilities = AMP_Story_Legacy_Post_Type::has_required_block_capabilities();
 		?>
 		<style>
+			label[for="stories_editor"] span,
 			label[for="stories_experience"] span {
 				text-transform: uppercase;
 				font-size: 0.7em;
@@ -219,9 +220,26 @@ class AMP_Options_Menu {
 					?>
 				</dd>
 				<dt>
+					<input type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[experiences][]' ); ?>" id="stories_editor" value="<?php echo esc_attr( AMP_Options_Manager::STORIES_EDITOR ); ?>" <?php checked( in_array( AMP_Options_Manager::STORIES_EDITOR, $experiences, true ) ); ?>>
+					<label for="stories_editor">
+						<strong><?php echo wp_kses_post( __( 'Stories <span>Beta</span>', 'amp' ) ); ?></strong>
+					</label>
+				</dt>
+				<dd>
+					<?php
+					echo wp_kses_post(
+						sprintf(
+						/* translators: %s: Stories documentation URL. */
+							__( 'Stories is a visual storytelling format for the open web which immerses your readers in fast-loading, full-screen, and visually rich experiences. Stories can be a great addition to your overall content strategy. Read more about <a href="%s" target="_blank">AMP Stories</a>.', 'amp' ),
+							esc_url( 'https://amp.dev/about/stories' )
+						)
+					);
+					?>
+				</dd>
+				<dt>
 					<input type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[experiences][]' ); ?>" id="stories_experience" value="<?php echo esc_attr( AMP_Options_Manager::STORIES_EXPERIENCE ); ?>" <?php disabled( ! $has_required_block_capabilities ); ?> <?php checked( in_array( AMP_Options_Manager::STORIES_EXPERIENCE, $experiences, true ) ); ?>>
 					<label for="stories_experience">
-						<strong><?php echo wp_kses_post( __( 'Stories <span>Beta</span>', 'amp' ) ); ?></strong>
+						<strong><?php echo wp_kses_post( __( 'Stories <span>Legacy</span>', 'amp' ) ); ?></strong>
 					</label>
 				</dt>
 				<dd>
@@ -244,15 +262,6 @@ class AMP_Options_Menu {
 							</p>
 						</div>
 					<?php endif; ?>
-					<?php
-					echo wp_kses_post(
-						sprintf(
-							/* translators: %s: Stories documentation URL. */
-							__( 'Stories is a visual storytelling format for the open web which immerses your readers in fast-loading, full-screen, and visually rich experiences. Stories can be a great addition to your overall content strategy. Read more about <a href="%s" target="_blank">AMP Stories</a>.', 'amp' ),
-							esc_url( 'https://amp.dev/about/stories' )
-						)
-					);
-					?>
 				</dd>
 			</dl>
 			<script>
