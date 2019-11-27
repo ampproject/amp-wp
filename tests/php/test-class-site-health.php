@@ -37,6 +37,8 @@ class Test_Site_Health extends WP_UnitTestCase {
 	public function test_init() {
 		$this->instance->init();
 		$this->assertEquals( 10, has_action( 'site_status_tests', [ $this->instance, 'add_tests' ] ) );
+		$this->assertEquals( 10, has_action( 'debug_information', [ $this->instance, 'add_debug_information' ] ) );
+		$this->assertEquals( 10, has_action( 'site_status_test_php_modules', [ $this->instance, 'add_extension' ] ) );
 	}
 
 	/**
@@ -55,18 +57,6 @@ class Test_Site_Health extends WP_UnitTestCase {
 					'curl_multi_functions'    => [
 						'label' => 'curl_multi_* functions',
 						'test'  => [ $this->instance, 'curl_multi_functions' ],
-					],
-					'amp_mode_enabled'        => [
-						'label' => 'AMP mode enabled',
-						'test'  => [ $this->instance, 'amp_mode_enabled' ],
-					],
-					'amp_experiences_enabled' => [
-						'label' => 'AMP experiences enabled',
-						'test'  => [ $this->instance, 'amp_experiences_enabled' ],
-					],
-					'amp_templates_enabled'   => [
-						'label' => 'AMP templates enabled',
-						'test'  => [ $this->instance, 'amp_templates_enabled' ],
 					],
 				],
 			],
@@ -126,6 +116,138 @@ class Test_Site_Health extends WP_UnitTestCase {
 				'test'        => 'curl_multi_functions',
 			],
 			$this->instance->curl_multi_functions()
+		);
+	}
+
+	/**
+	 * Test add_debug_information.
+	 *
+	 * @covers \Amp\AmpWP\Admin\SiteHealth::add_debug_information()
+	 */
+	public function test_add_debug_information() {
+		$this->assertArraySubset(
+			[
+				'amp' => [
+					'label'       => 'AMP',
+					'description' => 'Debugging information for the Official AMP Plugin for WordPress.',
+					'fields'      => [
+						'amp_mode_enabled'        => [
+							'label'   => 'AMP mode enabled',
+							'private' => false,
+						],
+						'amp_experiences_enabled' => [
+							'label'   => 'AMP experiences enabled',
+							'private' => false,
+						],
+						'amp_templates_enabled'   => [
+							'label'   => 'AMP templates enabled',
+							'private' => false,
+						],
+					],
+				],
+			],
+			$this->instance->add_debug_information( [] )
+		);
+	}
+
+	/**
+	 * Gets the test data for test_get_experiences_enabled().
+	 *
+	 * @return array The test data.
+	 */
+	public function get_experiences_enabled_data() {
+		return [
+			'no_experience_enabled' => [
+				[],
+				'No experience enabled',
+			],
+			'only_website'          => [
+				[ AMP_Options_Manager::WEBSITE_EXPERIENCE ],
+				'website',
+			],
+			'only_stories'          => [
+				[ AMP_Options_Manager::STORIES_EXPERIENCE ],
+				'stories',
+			],
+			'website_and_stories'   => [
+				[ AMP_Options_Manager::WEBSITE_EXPERIENCE, AMP_Options_Manager::STORIES_EXPERIENCE ],
+				'website, stories',
+			],
+		];
+	}
+
+	/**
+	 * Test add_debug_information.
+	 *
+	 * @dataProvider get_experiences_enabled_data
+	 * @covers \Amp\AmpWP\Admin\SiteHealth::add_debug_information()
+	 *
+	 * @param array  $experiences_enabled The AMP experiences that are enabled, if any.
+	 * @param string $expected            The expected return value.
+	 */
+	public function test_get_experiences_enabled( $experiences_enabled, $expected ) {
+		AMP_Options_Manager::update_option( 'experiences', $experiences_enabled );
+		$this->assertEquals( $expected, $this->instance->get_experiences_enabled() );
+	}
+
+	/**
+	 * Gets the testing data for test_get_supported_templates().
+	 */
+	public function get_supported_templates_data() {
+		return [
+			'no_template_supported' => [
+				[],
+				'No template supported',
+			],
+			'only_singular'         => [
+				[ 'is_singular' ],
+				'is_singular',
+			],
+			'only_author'           => [
+				[ 'is_author' ],
+				'is_author',
+			],
+			'two_templates'         => [
+				[ 'is_singular', 'is_author' ],
+				'is_singular, is_author',
+			],
+			'three_templates'       => [
+				[ 'is_singular', 'is_author', 'is_tag' ],
+				'is_singular, is_author, is_tag',
+			],
+		];
+	}
+
+	/**
+	 * Test add_debug_information.
+	 *
+	 * @dataProvider get_supported_templates_data
+	 * @covers \Amp\AmpWP\Admin\SiteHealth::get_supported_templates()
+	 *
+	 * @param array  $supported_templates The supported templates.
+	 * @param string $expected            The expected string of supported templates.
+	 */
+	public function test_get_supported_templates( $supported_templates, $expected ) {
+		AMP_Options_Manager::update_option( 'all_templates_supported', false );
+		AMP_Options_Manager::update_option( 'supported_templates', $supported_templates );
+		$this->assertEquals( $expected, $this->instance->get_supported_templates() );
+	}
+
+	/**
+	 * Test add_extension.
+	 *
+	 * @covers \Amp\AmpWP\Admin\SiteHealth::add_extension()
+	 */
+	public function test_add_extension() {
+		$this->assertEquals(
+			[
+				'spl' => [
+					'extension' => 'spl',
+					'function'  => 'spl_autoload_register',
+					'required'  => true,
+				],
+			],
+			$this->instance->add_extension( [] )
 		);
 	}
 }

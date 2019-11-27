@@ -7,6 +7,9 @@
 
 namespace Amp\AmpWP\Admin;
 
+use AMP_Options_Manager;
+use AMP_Theme_Support;
+
 /**
  * Class SiteHealth
  *
@@ -21,6 +24,8 @@ class SiteHealth {
 	 */
 	public function init() {
 		add_filter( 'site_status_tests', [ $this, 'add_tests' ] );
+		add_filter( 'debug_information', [ $this, 'add_debug_information' ] );
+		add_filter( 'site_status_test_php_modules', [ $this, 'add_extension' ] );
 	}
 
 	/**
@@ -32,11 +37,8 @@ class SiteHealth {
 	public function add_tests( $tests ) {
 		$direct_tests = [
 			'persistent_object_cache' => esc_html__( 'Persistent object cache', 'amp' ),
-			/* translators: %s: a PHP function type */
+			/* translators: %s: a type of PHP function */
 			'curl_multi_functions'    => sprintf( esc_html__( '%s functions', 'amp' ), 'curl_multi_*' ),
-			'amp_mode_enabled'        => esc_html__( 'AMP mode enabled', 'amp' ),
-			'amp_experiences_enabled' => esc_html__( 'AMP experiences enabled', 'amp' ),
-			'amp_templates_enabled'   => esc_html__( 'AMP templates enabled', 'amp' ),
 		];
 
 		foreach ( $direct_tests as $test_name => $test_label ) {
@@ -140,21 +142,21 @@ class SiteHealth {
 					),
 					'description' => wp_kses(
 						sprintf(
+							/* translators: %s: the name(s) of the curl_multi_* PHP function(s) */
 							_n(
-								/* translators: %s: the name(s) of the curl_multi_* PHP function(s) */
 								'The following curl_multi_* function is not defined: %s. The AMP plugin performs better when this function is available.',
 								'The following curl_multi_* functions are not defined: %s. The AMP plugin performs better when these functions are available.',
 								count( $undefined_curl_functions ),
 								'amp'
 							),
 							implode(
+								', ',
 								array_map(
 									static function( $function_name ) {
 										return sprintf( '<code>%s()</code>', $function_name );
 									},
 									$undefined_curl_functions
-								),
-								', '
+								)
 							)
 						),
 						[ 'code' => [] ]
@@ -170,5 +172,99 @@ class SiteHealth {
 				]
 			);
 		}
+	}
+
+	/**
+	 * Adds debug information for AMP.
+	 *
+	 * @param array $debugging_information The debugging information from Core.
+	 * @return array The debugging information, with added information for AMP.
+	 */
+	public function add_debug_information( $debugging_information ) {
+		add_theme_support( 'amp' );
+
+		return array_merge(
+			$debugging_information,
+			[
+				'amp' => [
+					'label'       => __( 'AMP', 'amp' ),
+					'description' => __( 'Debugging information for the Official AMP Plugin for WordPress.', 'amp' ),
+					'fields'      => [
+						'amp_mode_enabled'        => [
+							'label'   => 'AMP mode enabled',
+							'value'   => 'native',
+							'private' => false,
+						],
+						'amp_experiences_enabled' => [
+							'label'   => 'AMP experiences enabled',
+							'value'   => $this->get_experiences_enabled(),
+							'private' => false,
+						],
+						'amp_templates_enabled'   => [
+							'label'   => 'AMP templates enabled',
+							'value'   => $this->get_supported_templates(),
+							'private' => false,
+						],
+					],
+				],
+			]
+		);
+	}
+
+	/**
+	 * Gets the AMP experiences that are enabled.
+	 *
+	 * @return string The experiences, in a comma-separated string.
+	 */
+	public function get_experiences_enabled() {
+		$experiences = AMP_Options_Manager::get_option( 'experiences' );
+		if ( empty( $experiences ) ) {
+			return __( 'No experience enabled', 'amp' );
+		}
+
+		return implode( ', ', $experiences );
+	}
+
+	/**
+	 * Gets the templates that support AMP.
+	 *
+	 * @return string The supported template(s), in a comma-separated string.
+	 */
+	public function get_supported_templates() {
+		$supported_templates = array_filter(
+			AMP_Theme_Support::get_supportable_templates(),
+			static function( $option ) {
+				return (
+					( empty( $option['immutable'] ) && ! empty( $option['user_supported'] ) )
+					||
+					! empty( $option['supported'] )
+				);
+			}
+		);
+
+		if ( empty( $supported_templates ) ) {
+			return esc_html__( 'No template supported', 'amp' );
+		}
+
+		return implode( ', ', array_keys( $supported_templates ) );
+	}
+
+	/**
+	 * Adds a PHP extension to those that Core depends on.
+	 *
+	 * @param array $extensions The existing extensions from Core.
+	 * @return array The extensions, with one more added.
+	 */
+	public function add_extension( $extensions ) {
+		return array_merge(
+			$extensions,
+			[
+				'spl' => [
+					'extension' => 'spl',
+					'function'  => 'spl_autoload_register',
+					'required'  => true,
+				],
+			]
+		);
 	}
 }

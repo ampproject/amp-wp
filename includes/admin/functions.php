@@ -1,12 +1,11 @@
 <?php
-
-use Amp\AmpWP\Admin\SiteHealth;
-
 /**
  * Callbacks for adding AMP-related things to the admin.
  *
  * @package AMP
  */
+
+use Amp\AmpWP\Admin\SiteHealth;
 
 /**
  * Obsolete constant for flagging when Customizer is opened for AMP.
