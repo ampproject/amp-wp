@@ -63,20 +63,6 @@ class Test_AMP_Meta_Sanitizer extends WP_UnitTestCase {
 				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
 			],
 
-			// Turn HTML 4 charset tag into HTML 5 charset tag.
-			[
-				'<!DOCTYPE html><html><head><meta http-equiv="content-type" content="text/html"><meta name="viewport" content="width=device-width"></head><body></body></html>',
-				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
-			],
-			[
-				'<!DOCTYPE html><html><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
-				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
-			],
-			[
-				'<!DOCTYPE html><html><head><meta http-equiv="content-type" content="text/html; charset=utf-8" charset="utf-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
-				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
-			],
-
 			// Concatenate and reposition script hashes.
 			[
 				'<!DOCTYPE html><html><head><meta name="amp-script-src" content="' . esc_attr( $script1_hash ) . '"><meta charset="utf-8"><meta name="amp-script-src" content="' . esc_attr( $script2_hash ) . '"><meta name="viewport" content="width=device-width"><meta name="amp-script-src" content="' . esc_attr( $script3_hash ) . '"></head><body><meta name="amp-script-src" content="' . esc_attr( $script4_hash ) . '"></body></html>',
