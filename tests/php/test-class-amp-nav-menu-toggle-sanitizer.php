@@ -38,8 +38,8 @@ class Test_AMP_Nav_Menu_Toggle_Sanitizer extends WP_UnitTestCase {
 
 		return [
 			'container_before_toggle' => [
-				'<html><body>' . $container . $toggle . '</body></html>',
-				'<html><body>' . $amp_state . str_replace( '></div>', $amp_get_container_attrs( 'nav-menu-wrapper' ) . '></div>', $container ) . str_replace( '>Toggle', $amp_get_toggle_attrs() . '>Toggle', $toggle ) . '</body></html>',
+				'<html><head></head><body>' . $container . $toggle . '</body></html>',
+				'<html><head></head><body>' . $amp_state . str_replace( '></div>', $amp_get_container_attrs( 'nav-menu-wrapper' ) . '></div>', $container ) . str_replace( '>Toggle', $amp_get_toggle_attrs() . '>Toggle', $toggle ) . '</body></html>',
 				[
 					'nav_container_id'           => $container_id,
 					'menu_button_id'             => $toggle_id,
@@ -48,8 +48,8 @@ class Test_AMP_Nav_Menu_Toggle_Sanitizer extends WP_UnitTestCase {
 				],
 			],
 			'toggle_before_container' => [
-				'<html><body>' . $toggle . $container . '</body></html>',
-				'<html><body>' . str_replace( '>Toggle', $amp_get_toggle_attrs() . '>Toggle', $toggle ) . $amp_state . str_replace( '></div>', $amp_get_container_attrs( 'nav-menu-wrapper' ) . '></div>', $container ) . '</body></html>',
+				'<html><head></head><body>' . $toggle . $container . '</body></html>',
+				'<html><head></head><body>' . str_replace( '>Toggle', $amp_get_toggle_attrs() . '>Toggle', $toggle ) . $amp_state . str_replace( '></div>', $amp_get_container_attrs( 'nav-menu-wrapper' ) . '></div>', $container ) . '</body></html>',
 				[
 					'nav_container_id'           => $container_id,
 					'menu_button_id'             => $toggle_id,
@@ -58,8 +58,8 @@ class Test_AMP_Nav_Menu_Toggle_Sanitizer extends WP_UnitTestCase {
 				],
 			],
 			'container_is_body'       => [
-				'<html><body>' . $container . $toggle . '</body></html>',
-				'<html><body' . $amp_get_container_attrs( '', 'nav-menu-toggled-on' ) . '>' . $amp_state . $container . str_replace( '>Toggle', $amp_get_toggle_attrs( '', '' ) . '>Toggle', $toggle ) . '</body></html>',
+				'<html><head></head><body>' . $container . $toggle . '</body></html>',
+				'<html><head></head><body' . $amp_get_container_attrs( '', 'nav-menu-toggled-on' ) . '>' . $amp_state . $container . str_replace( '>Toggle', $amp_get_toggle_attrs( '', '' ) . '>Toggle', $toggle ) . '</body></html>',
 				[
 					'nav_container_xpath'        => '//body',
 					'menu_button_id'             => $toggle_id,
@@ -67,8 +67,8 @@ class Test_AMP_Nav_Menu_Toggle_Sanitizer extends WP_UnitTestCase {
 				],
 			],
 			'container_is_html'       => [
-				'<html><body>' . $container . $toggle . '</body></html>',
-				'<html' . $amp_get_container_attrs( '', 'nav-menu-toggled-on' ) . '><body>' . $amp_state . $container . str_replace( '>Toggle', $amp_get_toggle_attrs( '', '' ) . '>Toggle', $toggle ) . '</body></html>',
+				'<html><head></head><body>' . $container . $toggle . '</body></html>',
+				'<html' . $amp_get_container_attrs( '', 'nav-menu-toggled-on' ) . '><head></head><body>' . $amp_state . $container . str_replace( '>Toggle', $amp_get_toggle_attrs( '', '' ) . '>Toggle', $toggle ) . '</body></html>',
 				[
 					'nav_container_xpath'        => '//html',
 					'menu_button_id'             => $toggle_id,
@@ -76,16 +76,16 @@ class Test_AMP_Nav_Menu_Toggle_Sanitizer extends WP_UnitTestCase {
 				],
 			],
 			'no_container_provided'   => [
-				'<html><body>' . $container . $toggle . '</body></html>',
-				'<html><body>' . $container . '</body></html>',
+				'<html><head></head><body>' . $container . $toggle . '</body></html>',
+				'<html><head></head><body>' . $container . '</body></html>',
 				[
 					'menu_button_id'             => $toggle_id,
 					'nav_container_toggle_class' => 'toggled-on',
 				],
 			],
 			'no_arguments_provided'   => [
-				'<html><body>' . $container . $toggle . '</body></html>',
-				'<html><body>' . $container . $toggle . '</body></html>',
+				'<html><head></head><body>' . $container . $toggle . '</body></html>',
+				'<html><head></head><body>' . $container . $toggle . '</body></html>',
 				[],
 			],
 		];

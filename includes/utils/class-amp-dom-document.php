@@ -23,8 +23,19 @@ final class AMP_DOM_Document extends DOMDocument {
 
 	/**
 	 * Encoding identifier to use for an unknown encoding.
+	 *
+	 * "auto" is recognized by mb_convert_encoding() as a special value.
 	 */
 	const UNKNOWN_ENCODING = 'auto';
+
+	/**
+	 * Encoding detection order in case we have to guess.
+	 *
+	 * This list of encoding detection order is just a wild guess and might need fine-tuning over time.
+	 * If the charset was not provided explicitly, we can really only guess, as the detection can
+	 * never be 100% accurate and reliable.
+	 */
+	const ENCODING_DETECTION_ORDER = 'UTF-8, EUC-JP, eucJP-win, JIS, ISO-2022-JP, ISO-8859-15, ISO-8859-1, ASCII';
 
 	/**
 	 * Regular expression pattern to match the http-equiv meta tag.
@@ -39,7 +50,7 @@ final class AMP_DOM_Document extends DOMDocument {
 	/**
 	 * Regular expression pattern to match the main HTML structural tags.
 	 */
-	const HTML_STRUCTURE_PATTERN = '/(?:.*?(?<doctype><!doctype(?:\s+[^>]*)?>))?(?:.*?(?<html_start><html(?:\s+[^>]*)?>)(?:.*?(?<head_start><head(?:\s+[^>]*)?>).*?(?<head_end><\/head\s*>))?(?:.*?(?<body_start><body(?:\s+[^>]*)?>).*?(?<body_end><\/body\s*>))?.*?(?<html_end><\/html\s*>))?/is';
+	const HTML_STRUCTURE_PATTERN = '/(?:.*?(?<doctype><!doctype(?:\s+[^>]*)?>))?(?:(?<pre_html>.*?)(?<html_start><html(?:\s+[^>]*)?>))?(?:.*?(?<head><head(?:\s+[^>]*)?>.*?<\/head\s*>))?(?:.*?(?<body><body(?:\s+[^>]*)?>.*?<\/body\s*>))?.*?(?:(?:.*(?<html_end><\/html\s*>)|.*)(?<post_html>.*))/is';
 
 	/**
 	 * ID of the hacky charset we need to add to make loadHTML() behave.
@@ -64,7 +75,8 @@ final class AMP_DOM_Document extends DOMDocument {
 	 * @var string[]
 	 */
 	private $encoding_map = [
-		'latin-1' => 'iso-8859-1',
+		// Assume ISO-8859-1 for some charsets.
+		'latin-1' => 'ISO-8859-1',
 	];
 
 	/**
@@ -90,7 +102,7 @@ final class AMP_DOM_Document extends DOMDocument {
 	 * @return bool true on success or false on failure.
 	 */
 	public function loadHTML( $source, $options = 0 ) {
-		$source = $this->maybe_add_head_or_body( $source );
+		$source = $this->normalize_document_structure( $source );
 
 		$this->original_encoding = $this->detect_and_strip_encoding( $source );
 
@@ -103,7 +115,8 @@ final class AMP_DOM_Document extends DOMDocument {
 		$source = preg_replace(
 			'/<head(?:\s+[^>]*)?>/i',
 			'$1<meta http-equiv="content-type" content="text/html; charset=' . self::AMP_ENCODING . '">',
-			$source
+			$source,
+			1
 		);
 
 		$success = parent::loadHTML( $source, $options );
@@ -148,60 +161,83 @@ final class AMP_DOM_Document extends DOMDocument {
 				preg_quote( self::AMP_ENCODING, '#' )
 			),
 			'',
-			parent::saveHTML( $node )
+			parent::saveHTML( $node ),
+			1
 		);
 	}
 
 	/**
-	 * Maybe add the <html>, <head> and/or <body> tag(s).
+	 * Normalize the document structure.
 	 *
-	 * @param string $content Content to add the head or body tags to.
-	 * @return string Adapted content.
+	 * This makes sure the document adheres to the general structure that AMP requires:
+	 *   ```
+	 *   <!doctype html>
+	 *   <html>
+	 *     <head>
+	 *       <meta charset="utf-8">
+	 *     </head>
+	 *     <body>
+	 *     </body>
+	 *   </html>
+	 *   ```
+	 *
+	 * @param string $content Content to normalize the structure of.
+	 * @return string Normalized content.
 	 */
-	private function maybe_add_head_or_body( $content ) {
+	private function normalize_document_structure( $content ) {
 		$matches = [];
 
+		// Unable to parse, so skip normalization and hope for the best.
 		if ( false === preg_match( self::HTML_STRUCTURE_PATTERN, $content, $matches ) ) {
 			return $content;
 		}
 
+		// Strip doctype for now.
 		if ( ! empty( $matches['doctype'] ) ) {
-			// Strip existing doctype.
-			$content = str_replace( $matches['doctype'], '', $content );
+			$content = preg_replace(
+				sprintf(
+					'/^.*?%s/s',
+					str_replace( "\n", '\R', preg_quote( $matches['doctype'], '/' ) )
+				),
+				'',
+				$content,
+				1
+			);
 		}
 
-		if ( empty( $matches['head_start'] ) && empty( $matches['body_start'] ) ) {
-			var_dump( $matches );
+		if ( empty( $matches['head'] ) && empty( $matches['body'] ) ) {
 			// Neither body, nor head, so wrap content in both.
 			$pattern = sprintf(
-				'/%s(.*)%s/i',
-				( empty( $matches['html_start'] ) ? '' : preg_quote( $matches['html_start'], '/' ) ),
-				( empty( $matches['html_end'] ) ? '' : preg_quote( $matches['html_end'], '/' ) )
+				'/%s(.*)%s/is',
+				( empty( $matches['html_start'] ) ? '^\s*' : preg_quote( $matches['html_start'], '/' ) ),
+				( empty( $matches['html_end'] ) ? '$\s*' : preg_quote( $matches['html_end'], '/' ) )
 			);
 			$content = preg_replace(
 				$pattern,
 				( empty( $matches['html_start'] ) ? '' : $matches['html_start'] )
 					. '<head></head><body>$1</body>'
 					. ( empty( $matches['html_end'] ) ? '' : $matches['html_end'] ),
-				$content
+				$content,
+				1
 			);
-		} elseif ( empty( $matches['body_start'] ) && ! empty( $matches['head_start'] ) ) {
+		} elseif ( empty( $matches['body'] ) && ! empty( $matches['head'] ) ) {
 			// Head without body, so wrap content in body.
 			$pattern = sprintf(
-				'/%s(.*)%s/i',
-				preg_quote( $matches['head_end'], '/' ),
+				'/%s(.*)%s/is',
+				preg_quote( $matches['head'], '/' ),
 				( empty( $matches['html_end'] ) ? '' : preg_quote( $matches['html_end'], '/' ) )
 			);
 			$content = preg_replace(
 				$pattern,
-				$matches['head_end']
+				$matches['head']
 					. '<body>$1</body>'
 					. ( empty( $matches['html_end'] ) ? '' : $matches['html_end'] ),
-				$content
+				$content,
+				1
 			);
-		} elseif ( empty( $matches['head_start'] ) && ! empty( $matches['body_start'] ) ) {
+		} elseif ( empty( $matches['head'] ) && ! empty( $matches['body'] ) ) {
 			// Body without head, so add empty head before body.
-			$content = str_replace( $matches['body_start'], '<head></head>' . $matches['body_start'], $content );
+			$content = str_replace( $matches['body'], '<head></head>' . $matches['body'], $content );
 		}
 
 		if ( empty( $matches['html_start'] ) ) {
@@ -209,7 +245,7 @@ final class AMP_DOM_Document extends DOMDocument {
 			$content = "<html>{$content}</html>";
 		}
 
-		// Re-add AMP default doctype.
+		// Reinsert a standard doctype.
 		$content = "<!DOCTYPE html>{$content}";
 
 		return $content;
@@ -224,7 +260,7 @@ final class AMP_DOM_Document extends DOMDocument {
 	private function adapt_encoding( $source ) {
 		// No encoding was provided, so we need to guess.
 		if ( self::UNKNOWN_ENCODING === $this->original_encoding && function_exists( 'mb_detect_encoding' ) ) {
-			$this->original_encoding = mb_detect_encoding( $source );
+			$this->original_encoding = mb_detect_encoding( $source, self::ENCODING_DETECTION_ORDER, true );
 		}
 
 		// Guessing the encoding seems to have failed, so we assume UTF-8 instead.
@@ -234,9 +270,14 @@ final class AMP_DOM_Document extends DOMDocument {
 
 		$this->original_encoding = $this->sanitize_encoding( $this->original_encoding );
 
-		$target = function_exists( 'mb_convert_encoding' ) ? mb_convert_encoding( $source, self::AMP_ENCODING, $this->original_encoding ) : false;
+		$target = false;
+		if ( self::AMP_ENCODING !== strtolower( $this->original_encoding ) ) {
+			$target = function_exists( 'mb_convert_encoding' )
+				? mb_convert_encoding( $source, self::AMP_ENCODING, $this->original_encoding )
+				: false;
+		}
 
-		return is_string( $target ) ? $target : $source;
+		return false !== $target ? $target : $source;
 	}
 
 	/**
@@ -345,11 +386,11 @@ final class AMP_DOM_Document extends DOMDocument {
 			$known_encodings = array_map( 'strtolower', mb_list_encodings() );
 		}
 
-		if ( array_key_exists( $encoding, $this->encoding_map ) ) {
-			$encoding = $this->encoding_map[ $encoding ];
+		if ( array_key_exists( strtolower( $encoding ), $this->encoding_map ) ) {
+			$encoding = $this->encoding_map[ strtolower( $encoding ) ];
 		}
 
-		if ( ! in_array( $encoding, $known_encodings, true ) ) {
+		if ( ! in_array( strtolower( $encoding ), $known_encodings, true ) ) {
 			return self::UNKNOWN_ENCODING;
 		}
 
