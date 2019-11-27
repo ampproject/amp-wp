@@ -21,6 +21,8 @@ import useSelectedElements from './effects/useSelectedElements';
 
 import useAddBlankPage from './actions/useAddBlankPage';
 import useClearSelection from './actions/useClearSelection';
+import useDeleteCurrentSelection from './actions/useDeleteCurrentSelection';
+import useDeletePage from './actions/useDeletePage';
 import useToggleElementIdInSelection from './actions/useToggleElementIdInSelection';
 import useSelectElementById from './actions/useSelectElementById';
 import useAppendElementToCurrentPage from './actions/useAppendElementToCurrentPage';
@@ -44,12 +46,21 @@ function StoryProvider( { storyId, children } ) {
 	const hasSelection = Boolean( selectedElementIds.length );
 
 	const clearSelection = useClearSelection( { selectedElementIds, setSelectedElementIds } );
+	const deleteCurrentSelection = useDeleteCurrentSelection( {
+		currentPageIndex,
+		pages,
+		selectedElementIds,
+		setPages,
+		setSelectedElementIds,
+	} );
 	const setCurrentPageByIndex = useSetCurrentPageByIndex( { clearSelection, setCurrentPageIndex } );
 	const addBlankPage = useAddBlankPage( { pages, setPages, clearSelection } );
+	const deletePage = useDeletePage( { currentPage, pages, setPages, addBlankPage, setCurrentPageIndex, currentPageIndex } );
 	const selectElementById = useSelectElementById( { setSelectedElementIds } );
 	const toggleElementIdInSelection = useToggleElementIdInSelection( { selectedElementIds, setSelectedElementIds } );
 	const appendElementToCurrentPage = useAppendElementToCurrentPage( { currentPageIndex, pages, setPages, setSelectedElementIds } );
 	const setPropertiesOnSelectedElements = useSetPropertiesOnSelectedElements( { currentPageIndex, pages, selectedElementIds, setPages } );
+
 
 	useLoadStory( { storyId, pages, setPages, setCurrentPageIndex, clearSelection } );
 	useCurrentPage( { currentPageIndex, pages, setCurrentPage, setCurrentPageNumber } );
@@ -71,6 +82,8 @@ function StoryProvider( { storyId, children } ) {
 			setCurrentPageByIndex,
 			addBlankPage,
 			clearSelection,
+			deleteCurrentSelection,
+			deletePage,
 			appendElementToCurrentPage,
 			toggleElementIdInSelection,
 			selectElementById,
