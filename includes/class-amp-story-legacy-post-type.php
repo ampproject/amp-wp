@@ -123,8 +123,8 @@ class AMP_Story_Legacy_Post_Type {
 			self::POST_TYPE_SLUG,
 			[
 				'labels'       => [
-					'name'                     => _x( 'Stories', 'post type general name', 'amp' ),
-					'singular_name'            => _x( 'Story', 'post type singular name', 'amp' ),
+					'name'                     => _x( 'Stories ( Legacy )', 'post type general name', 'amp' ),
+					'singular_name'            => _x( 'Story ( Legacy )', 'post type singular name', 'amp' ),
 					'add_new'                  => _x( 'New', 'story', 'amp' ),
 					'add_new_item'             => __( 'Add New Story', 'amp' ),
 					'edit_item'                => __( 'Edit Story', 'amp' ),
@@ -134,7 +134,7 @@ class AMP_Story_Legacy_Post_Type {
 					'search_items'             => __( 'Search Stories', 'amp' ),
 					'not_found'                => __( 'No stories found.', 'amp' ),
 					'not_found_in_trash'       => __( 'No stories found in Trash.', 'amp' ),
-					'all_items'                => __( 'All Stories', 'amp' ),
+					'all_items'                => __( 'All Stories ( Legacy )', 'amp' ),
 					'archives'                 => __( 'Story Archives', 'amp' ),
 					'attributes'               => __( 'Story Attributes', 'amp' ),
 					'insert_into_item'         => __( 'Insert into story', 'amp' ),
@@ -151,8 +151,8 @@ class AMP_Story_Legacy_Post_Type {
 					'item_reverted_to_draft'   => __( 'Story reverted to draft.', 'amp' ),
 					'item_scheduled'           => __( 'Story scheduled', 'amp' ),
 					'item_updated'             => __( 'Story updated.', 'amp' ),
-					'menu_name'                => _x( 'Stories', 'admin menu', 'amp' ),
-					'name_admin_bar'           => _x( 'Story', 'add new on admin bar', 'amp' ),
+					'menu_name'                => _x( 'Stories ( Legacy )', 'admin menu', 'amp' ),
+					'name_admin_bar'           => _x( 'Story ( Legacy )', 'add new on admin bar', 'amp' ),
 				],
 				'menu_icon'    => 'dashicons-book',
 				'taxonomies'   => [
@@ -396,7 +396,7 @@ class AMP_Story_Legacy_Post_Type {
 	 * @return array Actions.
 	 */
 	public static function remove_classic_editor_link( $actions, $post ) {
-		if ( 'amp_story' === $post->post_type ) {
+		if ( self::POST_TYPE_SLUG === $post->post_type ) {
 			unset( $actions['classic'] );
 		}
 		return $actions;
