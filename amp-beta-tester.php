@@ -5,7 +5,7 @@
  * Plugin URI: https://amp-wp.org
  * Author: AMP Project Contributors
  * Author URI: https://github.com/ampproject/amp-wp/graphs/contributors
- * Version: 1.4.0-beta1
+ * Version: 1.5.0-alpha
  * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
