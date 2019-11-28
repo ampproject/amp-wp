@@ -973,10 +973,6 @@ class AMP_Story_Legacy_Post_Type {
 			false
 		);
 
-		if ( function_exists( 'wp_set_script_translations' ) ) {
-			wp_set_script_translations( 'amp-editor-story-blocks-build', 'amp' );
-		} 
-
 		/**
 		 * Filter list of allowed video mime types.
 		 *
