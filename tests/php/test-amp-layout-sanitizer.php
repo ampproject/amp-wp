@@ -20,39 +20,41 @@ class AMP_Layout_Sanitizer_Test extends WP_UnitTestCase {
 	public function get_body_data() {
 		return [
 			'no_width_or_height'                          => [
-				'<p data-amp-layout="fill"></p>',
-				'<p layout="fill"></p>',
+				'<amp-img src="foo.jpg" data-amp-layout="fill"></amp-img>',
+				'<amp-img src="foo.jpg" layout="fill"></amp-img>',
 			],
 
 			'no_layout_attr'                              => [
-				'<p width="10"></p>',
+				'<amp-img src="foo.jpg" width="10"></amp-img>',
 			],
 
 			'no_data_layout_attr'                         => [
-				'<p width="10"></p>',
+				'<amp-img src="foo.jpg" width="10"></amp-img>',
 			],
 
 			'data_layout_attr'                            => [
-				'<p width="10" data-amp-layout="fill"></p>',
-				'<p width="10" layout="fill"></p>',
+				'<amp-img src="foo.jpg" width="10" data-amp-layout="fill"></amp-img>',
+				'<amp-img src="foo.jpg" width="10" layout="fill"></amp-img>',
 			],
 
 			'data_layout_attr_with_100%_width'            => [
-				'<p width="100%" data-amp-layout="fill"></p>',
-				'<p width="auto" layout="fixed-height"></p>',
+				'<amp-img src="foo.jpg" width="100%" height="10" data-amp-layout="fill"></amp-img>',
+				'<amp-img src="foo.jpg" width="auto" height="10" layout="fixed-height"></amp-img>',
 			],
 
 			'data_layout_attr_with_100%_width_and_height' => [
-				'<p width="100%" height="100%" data-amp-layout="fill"></p>',
-				'<p layout="fill"></p>',
+				'<amp-img src="foo.jpg" width="100%" height="100%" data-amp-layout="fill"></amp-img>',
+				'<amp-img src="foo.jpg" layout="fill"></amp-img>',
 			],
 
 			'100%_width_with_layout_attr'                 => [
-				'<p width="100%" layout="fill"></p>',
+				'<amp-img src="foo.jpg" width="100%" height="10" layout="fill"></amp-img>',
+				'',
 			],
 
 			'100%_width_and_height_with_layout_attr'      => [
-				'<p width="100%" height="100%" layout="fill"></p>',
+				'<amp-img src="foo.jpg" width="100%" height="100%" layout="fill"></amp-img>',
+				'',
 			],
 		];
 	}
