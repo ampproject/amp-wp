@@ -66,9 +66,6 @@ $amp_url = add_query_arg( amp_get_slug(), '1', $url );
 						<button class="button go-back">
 							<?php esc_html_e( 'Go Back', 'amp' ); ?>
 						</button>
-						<button class="button continue">
-							<?php esc_html_e( 'Continue', 'amp' ); ?>
-						</button>
 					</div>
 				</div>
 			</div>

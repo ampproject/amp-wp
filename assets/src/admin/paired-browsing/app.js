@@ -11,6 +11,7 @@ const { app, history } = window;
 const { ampSlug, ampPairedBrowsingQueryVar, ampValidationErrorsQueryVar } = app;
 
 class PairedBrowsingApp {
+	disconnectedClient;
 	exitLink;
 
 	/**
@@ -31,7 +32,6 @@ class PairedBrowsingApp {
 			invalidAmp: document.querySelector( '.disconnect-overlay .dialog-text span.invalid-amp' ),
 		};
 		this.disconnectButtons = {
-			continue: document.querySelector( '.disconnect-overlay .button.continue' ),
 			exit: document.querySelector( '.disconnect-overlay .button.exit' ),
 			goBack: document.querySelector( '.disconnect-overlay .button.go-back' ),
 		};
@@ -45,19 +45,12 @@ class PairedBrowsingApp {
 	 * Add event listeners for buttons on disconnect overlay.
 	 */
 	addDisconnectButtonListeners() {
-		// The 'Continue' button simply hides the 'disconnected' overlay.
-		this.disconnectButtons.continue.addEventListener( 'click', () => {
-			this.disconnectOverlay.classList.remove( 'disconnected' );
-		} );
-
-		// The 'Exit' button navigates the parent window to the non-AMP version of the current URL.
+		// The 'Exit' button navigates the parent window to the URL of the disconnected client.
 		this.disconnectButtons.exit.addEventListener( 'click', () => {
-			window.location.assign( this.exitLink.href );
+			window.location.assign( this.disconnectedClient.contentWindow.location.href );
 		} );
 
-		/*
-		 * The 'Go back' button goes back to the previous page of the parent window.
-		 */
+		// The 'Go back' button goes back to the previous page of the parent window.
 		this.disconnectButtons.goBack.addEventListener( 'click', () => {
 			window.history.back();
 		} );
@@ -106,21 +99,19 @@ class PairedBrowsingApp {
 
 		if ( ! isClientConnected ) {
 			if ( this.ampIframe === iframe && this.ampPageHasErrors ) {
-				this.disconnectButtons.continue.classList.toggle( 'hidden', true );
-				this.disconnectButtons.exit.classList.toggle( 'hidden', false );
-
 				this.disconnectText.general.classList.toggle( 'hidden', true );
 				this.disconnectText.invalidAmp.classList.toggle( 'hidden', false );
 			} else {
-				this.disconnectButtons.continue.classList.toggle( 'hidden', false );
-				this.disconnectButtons.exit.classList.toggle( 'hidden', true );
-
 				this.disconnectText.general.classList.toggle( 'hidden', false );
 				this.disconnectText.invalidAmp.classList.toggle( 'hidden', true );
 			}
 
 			// Show the 'Go Back' button if the parent window has history.
 			this.disconnectButtons.goBack.classList.toggle( 'hidden', 0 >= window.history.length );
+			// If the document is not available, the window URL cannot be accessed.
+			this.disconnectButtons.exit.classList.toggle( 'hidden', null === iframe.contentDocument );
+
+			this.disconnectedClient = iframe;
 		}
 
 		// Applying the 'amp' class will overlay it on the AMP iframe.
