@@ -49,19 +49,17 @@ class AMP_Layout_Sanitizer_Test extends WP_UnitTestCase {
 
 			'100%_width_with_layout_attr'                 => [
 				'<amp-img src="foo.jpg" width="100%" height="10" layout="fill"></amp-img>',
-				'',
 			],
 
 			'100%_width_and_height_with_layout_attr'      => [
 				'<amp-img src="foo.jpg" width="100%" height="100%" layout="fill"></amp-img>',
-				'',
 			],
 		];
 	}
 
 	/**
-	 * @param string $source  Content.
-	 * @param string $expected Expected content.
+	 * @param string      $source  Content.
+	 * @param string|null $expected Expected content.
 	 * @dataProvider get_body_data
 	 * @covers AMP_Layout_Sanitizer::sanitize()
 	 */

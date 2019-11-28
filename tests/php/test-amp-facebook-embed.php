@@ -125,7 +125,7 @@ class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
 
 			'post_embed'            => [
 				'<div class="fb-post" data-href="https://www.facebook.com/notes/facebook-engineering/under-the-hood-the-javascript-sdk-truly-asynchronous-loading/10151176218703920/"></div>',
-				'<amp-facebook layout="responsive" width="600" height="400" data-href="https://www.facebook.com/notes/facebook-engineering/under-the-hood-the-javascript-sdk-truly-asynchronous-loading/10151176218703920/" data-embed-as="post"></amp-facebook>',
+				'<amp-facebook width="600" height="400" data-href="https://www.facebook.com/notes/facebook-engineering/under-the-hood-the-javascript-sdk-truly-asynchronous-loading/10151176218703920/" data-embed-as="post" layout="responsive"></amp-facebook>',
 			],
 
 			'post_with_fallbacks'   => [
@@ -137,7 +137,7 @@ class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
 					</div>
 				',
 				'
-					<amp-facebook layout="responsive" width="500" height="400" data-href="https://www.facebook.com/20531316728/posts/10154009990506729/"  data-show-text="true" data-embed-as="post">
+					<amp-facebook width="500" height="400" data-href="https://www.facebook.com/20531316728/posts/10154009990506729/"  data-show-text="true" data-embed-as="post" layout="responsive">
 						<blockquote cite="https://developers.facebook.com/20531316728/posts/10154009990506729/" class="fb-xfbml-parse-ignore" fallback="">
 							Posted by <a href="https://www.facebook.com/facebook/">Facebook</a> on <a href="https://developers.facebook.com/20531316728/posts/10154009990506729/">Thursday, August 27, 2015</a>
 						</blockquote>
@@ -147,7 +147,7 @@ class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
 
 			'video_embed'           => [
 				'<div class="fb-video" data-href="https://www.facebook.com/amanda.orr.56/videos/10212156330049017/" data-show-text="false"></div>',
-				'<amp-facebook layout="responsive" width="600" height="400" data-href="https://www.facebook.com/amanda.orr.56/videos/10212156330049017/" data-show-text="false" data-embed-as="video"></amp-facebook>',
+				'<amp-facebook width="600" height="400" data-href="https://www.facebook.com/amanda.orr.56/videos/10212156330049017/" data-show-text="false" data-embed-as="video" layout="responsive"></amp-facebook>',
 			],
 
 			'page_embed'            => [
@@ -159,7 +159,7 @@ class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
 					</div>
 				',
 				'
-					<amp-facebook-page layout="responsive" width="340" height="432" data-href="https://www.facebook.com/xwp.co/" data-hide-cover="true" data-show-facepile="true" data-show-posts="false">
+					<amp-facebook-page width="340" height="432" data-href="https://www.facebook.com/xwp.co/" data-hide-cover="true" data-show-facepile="true" data-show-posts="false" layout="responsive">
 						<div class="fb-xfbml-parse-ignore" fallback="">
 							<blockquote cite="https://www.facebook.com/xwp.co/"><a href="https://www.facebook.com/xwp.co/">Like Us</a></blockquote>
 						</div>
@@ -172,7 +172,7 @@ class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
 					<div class="fb-like" data-href="https://developers.facebook.com/docs/plugins/" data-width="400" data-layout="standard" data-action="like" data-size="small" data-show-faces="true" data-share="true"></div>
 				',
 				'
-					<amp-facebook-like layout="responsive" width="400" height="400" data-href="https://developers.facebook.com/docs/plugins/" data-layout="standard" data-action="like" data-size="small" data-show-faces="true" data-share="true">
+					<amp-facebook-like width="400" height="400" data-href="https://developers.facebook.com/docs/plugins/" data-layout="standard" data-action="like" data-size="small" data-show-faces="true" data-share="true" layout="responsive">
 					</amp-facebook-like>
 				',
 			],
@@ -181,21 +181,21 @@ class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
 				'
 					<div class="fb-comments" data-href="https://developers.facebook.com/docs/plugins/comments#configurator" data-numposts="5"></div>
 				',
-				'<amp-facebook-comments layout="responsive" width="600" height="400" data-href="https://developers.facebook.com/docs/plugins/comments#configurator" data-numposts="5"></amp-facebook-comments>',
+				'<amp-facebook-comments width="600" height="400" data-href="https://developers.facebook.com/docs/plugins/comments#configurator" data-numposts="5" layout="responsive"></amp-facebook-comments>',
 			],
 
 			'comments_full_width'   => [
 				'
 					<div class="fb-comments" data-href="https://developers.facebook.com/docs/plugins/comments#configurator" data-width="100%" data-numposts="5"></div>
 				',
-				'<amp-facebook-comments layout="fixed-height" width="auto" height="400" data-href="https://developers.facebook.com/docs/plugins/comments#configurator" data-numposts="5"></amp-facebook-comments>',
+				'<amp-facebook-comments width="auto" height="400" data-href="https://developers.facebook.com/docs/plugins/comments#configurator" data-numposts="5" layout="fixed-height"></amp-facebook-comments>',
 			],
 
 			'comment_embed'         => [
 				'
 					<div class="fb-comment-embed" data-href="https://www.facebook.com/zuck/posts/10102735452532991?comment_id=1070233703036185" data-width="500"></div>
 				',
-				'<amp-facebook layout="responsive" width="500" height="400" data-href="https://www.facebook.com/zuck/posts/10102735452532991?comment_id=1070233703036185" data-embed-as="comment"></amp-facebook>',
+				'<amp-facebook width="500" height="400" data-href="https://www.facebook.com/zuck/posts/10102735452532991?comment_id=1070233703036185" data-embed-as="comment" layout="responsive"></amp-facebook>',
 			],
 
 			'remove_fb_root'        => [
