@@ -1938,6 +1938,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-geo' ],
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_HTML_COMMENTS ],
 			],
+
+			'amp-social-share-relative-url'                => [
+				'<amp-social-share type="foo" data-share-endpoint="./foo/relative/" data-param-text="Check out this article: TITLE - CANONICAL_URL"></amp-social-share>',
+				'<amp-social-share type="foo" data-param-text="Check out this article: TITLE - CANONICAL_URL"></amp-social-share>',
+				[ 'amp-social-share' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_RELATIVE_URL ],
+			],
 		];
 	}
 
@@ -2088,11 +2095,17 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_CSS_IMPORTANT ],
 			],
-			'cdata_contents'                          => [
+			'cdata_contents_bad_comment'              => [
 				'<html><head><meta charset="utf-8"><script type="application/ld+json"><!--{"@context":"http:\/\/schema.org"}--></script></head><body></body></html>',
 				'<html><head><meta charset="utf-8"></head><body></body></html>',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_HTML_COMMENTS ],
+			],
+			'script_cdata_contents_bad'               => [
+				'<html><head><meta charset="utf-8"><script async src="https://cdn.ampproject.org/v0.js">document.write("bad");</script></head><body></body></html>',
+				'<html><head><meta charset="utf-8"></head><body></body></html>',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_CONTENTS ],
 			],
 		];
 
