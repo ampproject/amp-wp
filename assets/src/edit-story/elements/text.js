@@ -14,18 +14,20 @@ import {
 	ElementWithFont,
 	ElementWithBackgroundColor,
 	ElementWithFontColor,
+	ElementWithRotation,
 } from './shared';
 
 const Element = styled.p`
 	margin: 0;
 	${ ElementWithPosition }
 	${ ElementWithSize }
+	${ ElementWithRotation }
 	${ ElementWithFont }
 	${ ElementWithBackgroundColor }
 	${ ElementWithFontColor }
 `;
 
-function Text( { content, color, backgroundColor, width, height, x, y, fontFamily, fontSize, fontWeight, fontStyle } ) {
+function Text( { content, color, backgroundColor, width, height, x, y, fontFamily, fontSize, fontWeight, fontStyle, rotationAngle } ) {
 	const props = {
 		color,
 		backgroundColor,
@@ -35,6 +37,7 @@ function Text( { content, color, backgroundColor, width, height, x, y, fontFamil
 		fontWeight,
 		width,
 		height,
+		rotationAngle,
 		x,
 		y,
 	};
@@ -46,6 +49,7 @@ function Text( { content, color, backgroundColor, width, height, x, y, fontFamil
 }
 
 Text.propTypes = {
+	rotationAngle: PropTypes.number.isRequired,
 	content: PropTypes.string,
 	color: PropTypes.string,
 	backgroundColor: PropTypes.string,
@@ -71,6 +75,7 @@ Text.defaultProps = {
 Text.panels = [
 	PanelTypes.TEXT,
 	PanelTypes.SIZE,
+	PanelTypes.ROTATION_ANGLE,
 	PanelTypes.POSITION,
 	PanelTypes.FONT,
 	PanelTypes.COLOR,
