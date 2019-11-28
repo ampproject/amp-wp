@@ -469,14 +469,6 @@ class AMP_Validation_Manager {
 			'href'   => esc_url( is_amp_endpoint() ? $non_amp_url : $amp_url ),
 		];
 
-		// Construct admin bar item to link to AMP version or non-AMP version.
-		$paired_browsing_item = [
-			'parent' => 'amp',
-			'id'     => 'amp-paired-browsing',
-			'title'  => esc_html__( 'Start paired browsing', 'amp' ),
-			'href'   => remove_query_arg( amp_get_slug(), add_query_arg( AMP_Theme_Support::PAIRED_BROWSING_QUERY_VAR, '1' ) ),
-		];
-
 		// Add admin bar item to switch between AMP and non-AMP if parent node is also an AMP link.
 		$is_single_version_available = (
 			amp_is_canonical()
@@ -502,6 +494,14 @@ class AMP_Validation_Manager {
 		}
 
 		if ( AMP_Theme_Support::is_paired_available() ) {
+			// Construct admin bar item to link to paired browsing experience.
+			$paired_browsing_item = [
+				'parent' => 'amp',
+				'id'     => 'amp-paired-browsing',
+				'title'  => esc_html__( 'Start paired browsing', 'amp' ),
+				'href'   => remove_query_arg( amp_get_slug(), add_query_arg( AMP_Theme_Support::PAIRED_BROWSING_QUERY_VAR, '1' ) ),
+			];
+
 			$wp_admin_bar->add_node( $paired_browsing_item );
 		}
 
