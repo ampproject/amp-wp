@@ -146,10 +146,10 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
-	 * 	/**
+	 *
 	 * Enqueue scripts for the element editor.
 	 *
-	 * @param $hook
+	 * @param string $hook The current admin page.
 	 */
 	public static function admin_enqueue_scripts( $hook ) {
 		$screen = get_current_screen();
@@ -161,9 +161,9 @@ class AMP_Story_Post_Type {
 		if ( self::POST_TYPE_SLUG !== $screen->post_type ) {
 			return;
 		}
-		
+
 		// Only output scripts and styles where in edit screens.
-		if ( ! in_array( $hook, [ 'post.php', 'post-new.php' ] ) ) {
+		if ( ! in_array( $hook, [ 'post.php', 'post-new.php' ], true ) ) {
 			return;
 		}
 
