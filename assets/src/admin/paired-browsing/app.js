@@ -93,8 +93,7 @@ class PairedBrowsingApp {
 	 * @return {boolean} True if AMP compatible, false if not.
 	 */
 	documentIsAmp( doc ) {
-		return doc.documentElement.hasAttribute( 'amp' ) ||
-			doc.documentElement.hasAttribute( '⚡️' );
+		return doc.querySelector( 'head > script[src="https://cdn.ampproject.org/v0.js"]' );
 	}
 
 	/**
