@@ -2529,12 +2529,7 @@ class AMP_Theme_Support {
 
 		// Force dev mode to be enabled. This ensures that the enqueued script and its dependencies
 		// will be present when the admin bar is not showing.
-		add_filter(
-			'amp_dev_mode_enabled',
-			static function () {
-				return true;
-			}
-		);
+		add_filter( 'amp_dev_mode_enabled', '__return_true' );
 
 		// Whitelist enqueued script so that it is not removed.
 		add_filter( 'script_loader_tag', [ __CLASS__, 'filter_paired_browsing_client_script_loader_tag' ], 10, 2 );
