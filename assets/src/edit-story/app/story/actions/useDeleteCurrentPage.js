@@ -3,9 +3,8 @@
  */
 import { useCallback } from '@wordpress/element';
 
-// @todo this might need more appropriate naming depending on how the deleting Page logic will be.
-// Delete the currently selected Page.
-function useDeletePage( {
+// Delete the current Page.
+function useDeleteCurrentPage( {
 	currentPage,
 	pages,
 	setPages,
@@ -13,7 +12,7 @@ function useDeletePage( {
 	setCurrentPageIndex,
 	currentPageIndex,
 } ) {
-	const deletePage = useCallback( () => {
+	const deleteCurrentPage = useCallback( () => {
 		// If we have just one page, then let's add a clean Page insead of that.
 		// Otherwise, let's remove the page based on the current page's index.
 		const newPages = 1 === pages.length ?
@@ -27,7 +26,7 @@ function useDeletePage( {
 		setCurrentPageIndex( newIndex );
 		return true;
 	}, [ addBlankPage, setPages, pages, currentPage, currentPageIndex, setCurrentPageIndex ] );
-	return deletePage;
+	return deleteCurrentPage;
 }
 
-export default useDeletePage;
+export default useDeleteCurrentPage;

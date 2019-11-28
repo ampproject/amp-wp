@@ -55,10 +55,10 @@ const Icon = styled.a`
 `;
 
 function Canvas() {
-	const { state: { currentPageNumber }, actions: { deletePage } } = useStory();
+	const { state: { currentPageNumber }, actions: { deleteCurrentPage } } = useStory();
 	const handleDelete = useCallback( () => {
-		deletePage();
-	}, [ deletePage ] );
+		deleteCurrentPage();
+	}, [ deleteCurrentPage ] );
 
 	return (
 		<Box>
