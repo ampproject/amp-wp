@@ -169,7 +169,7 @@ class AMP_Story_Post_Type {
 			amp_get_asset_url( 'js/' . self::AMP_STORIES_SCRIPT_HANDLE . '.js' ),
 			$dependencies,
 			$version,
-			true
+			false
 		);
 
 		if ( function_exists( 'wp_set_script_translations' ) ) {

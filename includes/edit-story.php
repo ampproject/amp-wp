@@ -16,5 +16,5 @@ require_once ABSPATH . 'wp-admin/admin-header.php';
 ?>
 
 <div id="edit-story">
-	<h1><?php esc_html_e( 'Please wait...', 'amp' ); ?></h1>
+	<h1 class="loading-message"><?php esc_html_e( 'Please wait...', 'amp' ); ?></h1>
 </div>
