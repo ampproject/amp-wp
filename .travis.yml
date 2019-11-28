@@ -74,6 +74,13 @@ jobs:
       name: Lint (PHP, JavaScript, and configuration files)
       php: "7.3"
       env: WP_VERSION=latest DEV_LIB_ONLY=phpsyntax
+      install:
+        - nvm install
+        - composer install
+        - export DEV_LIB_PATH=vendor/xwp/wp-dev-lib/scripts
+        - export DIFF_HEAD=HEAD
+        - source "$DEV_LIB_PATH/travis.install.sh"
+        - npm install --prefix github-actions/github-release
       before_script:
         - phpenv config-rm xdebug.ini || echo "xdebug.ini does not exist."
         - composer require --dev localheinz/composer-normalize --ignore-platform-reqs
