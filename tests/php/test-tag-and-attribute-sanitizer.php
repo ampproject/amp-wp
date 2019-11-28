@@ -2107,6 +2107,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_CONTENTS ],
 			],
+			'cdata_regex_failure'                    => [
+				'<html><head><meta charset="utf-8"><style amp-boilerplate>body { content: "bad!"; }</style></head><body></body></html>',
+				'<html><head><meta charset="utf-8"></head><body></body></html>',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::MANDATORY_CDATA_MISSING_OR_INCORRECT ],
+			],
 		];
 
 		$bad_dev_mode_document = sprintf(
