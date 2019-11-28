@@ -110,6 +110,7 @@ class AMP_Autoloader {
 		'AMP_Widget_Categories'              => 'includes/widgets/class-amp-widget-categories',
 		'AMP_Widget_Text'                    => 'includes/widgets/class-amp-widget-text',
 		'AMP_Story_Legacy_Post_Type'         => 'includes/class-amp-story-legacy-post-type',
+		'AMP_Story_Post_Type'                => 'includes/class-amp-story-post-type',
 		'AMP_Story_Media'                    => 'includes/class-amp-story-media',
 		'AMP_Story_Templates'                => 'includes/admin/class-amp-story-templates',
 		'AMP_Story_Sanitizer'                => 'includes/sanitizers/class-amp-story-sanitizer',
@@ -134,7 +135,6 @@ class AMP_Autoloader {
 	 * @param string $class_name Class name.
 	 *
 	 * @since 0.6
-	 *
 	 */
 	protected static function autoload( $class_name ) {
 		if ( ! isset( self::$classmap[ $class_name ] ) ) {
@@ -169,7 +169,6 @@ class AMP_Autoloader {
 	 * @param string $filepath   Absolute filepath to class file, including .php extension.
 	 *
 	 * @since 0.6
-	 *
 	 */
 	public static function register_autoload_class( $class_name, $filepath ) {
 		self::$classmap[ $class_name ] = '!' . $filepath;

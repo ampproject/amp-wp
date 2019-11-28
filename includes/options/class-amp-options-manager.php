@@ -217,6 +217,17 @@ class AMP_Options_Manager {
 	}
 
 	/**
+	 * Determine whether stories editor is enabled.
+	 *
+	 * @since 2.0
+	 *
+	 * @return bool Enabled.
+	 */
+	public static function is_stories_editor_enabled() {
+		return in_array( self::STORIES_EDITOR, self::get_option( 'experiences' ), true );
+	}
+
+	/**
 	 * Validate options.
 	 *
 	 * @param array $new_options Plugin options.
@@ -238,6 +249,7 @@ class AMP_Options_Manager {
 				[
 					self::WEBSITE_EXPERIENCE,
 					self::STORIES_EXPERIENCE,
+					self::STORIES_EDITOR,
 				]
 			);
 
@@ -358,7 +370,7 @@ class AMP_Options_Manager {
 
 		// Handle the AMP stories settings sanitization.
 		foreach ( $definitions as $option_name => $definition ) {
-			$value                                                                        = $new_options[ AMP_Story_Legacy_Post_Type::STORY_SETTINGS_OPTION ][ $option_name ];
+			$value = $new_options[ AMP_Story_Legacy_Post_Type::STORY_SETTINGS_OPTION ][ $option_name ];
 			$options[ AMP_Story_Legacy_Post_Type::STORY_SETTINGS_OPTION ][ $option_name ] = call_user_func( $definition['meta_args']['sanitize_callback'], $value );
 		}
 

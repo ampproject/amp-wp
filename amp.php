@@ -390,6 +390,10 @@ function amp_init() {
 		AMP_Story_Legacy_Post_Type::register();
 	}
 
+	if ( AMP_Options_Manager::is_stories_editor_enabled() ) {
+		AMP_Story_Post_Type::register();
+	}
+
 	// Does its own is_stories_experience_enabled() check.
 	add_action( 'wp_loaded', 'amp_story_templates' );
 

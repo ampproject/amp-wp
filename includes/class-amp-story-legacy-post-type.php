@@ -1395,8 +1395,7 @@ class AMP_Story_Legacy_Post_Type {
 	 * @param array  $block         The full block, including name and attributes.
 	 *
 	 * @return string Block content.
-	 *@see AMP_Story_Legacy_Post_Type::enqueue_block_editor_styles() Where fonts are added in the story editor.
-	 *
+	 * @see AMP_Story_Legacy_Post_Type::enqueue_block_editor_styles() Where fonts are added in the story editor.
 	 */
 	public static function render_block_with_google_fonts( $block_content, $block ) {
 		$font_family_attribute = 'ampFontFamily';
@@ -1702,7 +1701,7 @@ class AMP_Story_Legacy_Post_Type {
 			<span class="latest-stories__author">
 					<?php
 					printf(
-					/* translators: 1: the post author. 2: the amount of time ago. */
+						/* translators: 1: the post author. 2: the amount of time ago. */
 						esc_html__( '%1$s &#8226; %2$s ago', 'amp' ),
 						esc_html( $author_display_name ),
 						esc_html( human_time_diff( get_post_time( 'U', false, $post ), time() ) )
@@ -1852,19 +1851,19 @@ class AMP_Story_Legacy_Post_Type {
 					<?php endif; ?>
 					<?php foreach ( $story_query->posts as $post ) : ?>
 					<<?php echo $is_amp_carousel ? 'div' : 'li'; ?> class="slide latest-stories__slide">
-					<?php
-					self::the_single_story_card(
-						[
-							'post'         => $post,
-							'size'         => $size,
-							'disable_link' => ! $is_amp_carousel,
-						]
-					);
-					?>
+						<?php
+						self::the_single_story_card(
+							[
+								'post'         => $post,
+								'size'         => $size,
+								'disable_link' => ! $is_amp_carousel,
+							]
+						);
+						?>
 				</<?php echo $is_amp_carousel ? 'div' : 'li'; ?>>
-			<?php
+						<?php
 			endforeach;
-			?>
+					?>
 			</<?php echo $is_amp_carousel ? 'amp-carousel' : 'ul'; ?>>
 		</div>
 		<?php
