@@ -875,7 +875,12 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return true;
 		}
 
-		return $this->check_valid_children( $node, $tag_spec[ AMP_Rule_Spec::CHILD_TAGS ] );
+		$validity = $this->check_valid_children( $node, $tag_spec[ AMP_Rule_Spec::CHILD_TAGS ] );
+		if ( true !== $validity ) {
+			$validity['tag_spec'] = $this->get_spec_name( $node, $tag_spec );
+			return $validity;
+		}
+		return true;
 	}
 
 	/**
@@ -1897,9 +1902,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		// If the first element is not of the required type, invalidate the entire element.
 		if ( isset( $child_tags['first_child_tag_name_oneof'] ) && ! empty( $child_elements[0] ) && ! in_array( $child_elements[0]->nodeName, $child_tags['first_child_tag_name_oneof'], true ) ) {
 			return [
-				'code'                       => self::DISALLOWED_FIRST_CHILD_TAG,
-				'first_child_tag'            => $child_elements[0]->nodeName,
-				'first_child_tag_name_oneof' => $child_tags['first_child_tag_name_oneof'], // @todo This is not needed with the spec_name in hand.
+				'code'            => self::DISALLOWED_FIRST_CHILD_TAG,
+				'first_child_tag' => $child_elements[0]->nodeName,
 			];
 		}
 
@@ -1908,9 +1912,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			foreach ( $child_elements as $child_element ) {
 				if ( ! in_array( $child_element->nodeName, $child_tags['child_tag_name_oneof'], true ) ) {
 					return [
-						'code'                 => self::DISALLOWED_CHILD_TAG,
-						'child_tag'            => $child_element->nodeName,
-						'child_tag_name_oneof' => $child_tags['child_tag_name_oneof'], // @todo This is not needed with the spec_name in hand.
+						'code'      => self::DISALLOWED_CHILD_TAG,
+						'child_tag' => $child_element->nodeName,
 					];
 				}
 			}
@@ -1923,9 +1926,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				return true;
 			} else {
 				return [
-					'code'                     => self::INCORRECT_NUM_CHILD_TAGS,
-					'children_count'           => $child_element_count,
-					'mandatory_num_child_tags' => $child_tags['mandatory_num_child_tags'], // @todo This is not needed with the spec_name in hand.
+					'code'           => self::INCORRECT_NUM_CHILD_TAGS,
+					'children_count' => $child_element_count,
 				];
 			}
 		}
@@ -1937,9 +1939,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				return true;
 			} else {
 				return [
-					'code'                         => self::INCORRECT_MIN_NUM_CHILD_TAGS,
-					'children_count'               => $child_element_count,
-					'mandatory_min_num_child_tags' => $child_tags['mandatory_min_num_child_tags'], // @todo This is not needed with the spec_name in hand.
+					'code'           => self::INCORRECT_MIN_NUM_CHILD_TAGS,
+					'children_count' => $child_element_count,
 				];
 			}
 		}

@@ -1326,7 +1326,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'',
 				[],
 				[
-					AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_FIRST_CHILD_TAG,
+					[
+						'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_FIRST_CHILD_TAG,
+						'first_child_tag' => 'i',
+					],
 				],
 			],
 
@@ -1692,21 +1695,36 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-image-slider layout="responsive" width="100" height="200"><amp-img src="/green-apple.jpg" alt="A green apple"></amp-img></amp-image-slider>',
 				'',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::INCORRECT_MIN_NUM_CHILD_TAGS ],
+				[
+					[
+						'code'           => AMP_Tag_And_Attribute_Sanitizer::INCORRECT_MIN_NUM_CHILD_TAGS,
+						'children_count' => 1,
+					],
+				],
 			],
 
 			'amp-animation-bad-number-children'            => [
 				'<amp-animation layout="nodisplay"><script type="application/json">{}</script><script type="application/json">{}</script></amp-animation>',
 				'',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::INCORRECT_NUM_CHILD_TAGS ],
+				[
+					[
+						'code'           => AMP_Tag_And_Attribute_Sanitizer::INCORRECT_NUM_CHILD_TAGS,
+						'children_count' => 2,
+					],
+				],
 			],
 
 			'amp-image-slider-more-bad-children'           => [
 				'<amp-image-slider layout="responsive" width="100" height="200"><span>Not allowed</span><amp-img src="/green-apple.jpg" alt="A green apple"></amp-img><i>forbidden</i><amp-img src="/red-apple.jpg" alt="A red apple"></amp-img><div first>This apple is green</div><strong>not allowed</strong><div second>This apple is red</div><i>not</i> <span>ok</span></amp-image-slider>',
 				'',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_CHILD_TAG ],
+				[
+					[
+						'code'      => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_CHILD_TAG,
+						'child_tag' => 'span',
+					],
+				],
 			],
 
 			'amp-fx-collection'                            => [
