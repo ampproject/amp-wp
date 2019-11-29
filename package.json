@@ -64,7 +64,7 @@
     "@wordpress/url": "2.8.2",
     "@wordpress/wordcount": "2.6.2",
     "accessible-autocomplete": "1.6.2",
-    "autoprefixer": "9.7.0",
+    "autoprefixer": "9.7.2",
     "babel-eslint": "10.0.3",
     "babel-jest": "24.9.0",
     "babel-loader": "8.0.6",
