@@ -13,6 +13,7 @@ import { createPage } from '../../../elements';
 function useLoadStory( {
 	storyId,
 	pages,
+	setTitle,
 	setPages,
 	setCurrentPageIndex,
 	clearSelection,
@@ -21,14 +22,19 @@ function useLoadStory( {
 	const { actions: { clearHistory } } = useHistory();
 	useEffect( () => {
 		if ( storyId && pages.length === 0 ) {
-			getStoryById( storyId ).then( ( { content: { raw } } ) => {
+			getStoryById( storyId ).then( ( post ) => {
+				const { content: { raw: content } } = post;
+				const { title: { raw: title } } = post;
+
 				// First clear history completely
 				clearHistory();
+
+				setTitle( title );
 
 				// Then parse current story if any.
 				let newPages = null;
 				try {
-					newPages = JSON.parse( raw );
+					newPages = JSON.parse( content );
 				} catch {
 					newPages = [];
 				}
@@ -47,7 +53,7 @@ function useLoadStory( {
 				clearSelection();
 			} );
 		}
-	}, [ storyId, pages, getStoryById, clearHistory, setPages, setCurrentPageIndex, clearSelection ] );
+	}, [ storyId, pages, getStoryById, clearHistory, setTitle, setPages, setCurrentPageIndex, clearSelection ] );
 }
 
 export default useLoadStory;

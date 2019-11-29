@@ -23,6 +23,19 @@ function APIProvider( { children } ) {
 		[ stories ],
 	);
 
+	const saveStoryById = useCallback(
+		( storyId, title ) => {
+			return apiFetch( {
+				path: `${ stories }/${ storyId }`,
+				data: {
+					title,
+				},
+				method: 'POST',
+			} );
+		},
+		[ stories ],
+	);
+
 	const getMedia = useCallback(
 		() => apiFetch( { path: `${ media }/` } )
 			.then( ( data ) => data.map( ( { guid: { rendered: src } } ) => ( { src } ) ) ),
@@ -33,6 +46,7 @@ function APIProvider( { children } ) {
 		actions: {
 			getStoryById,
 			getMedia,
+			saveStoryById,
 		},
 	};
 

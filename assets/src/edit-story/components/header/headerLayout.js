@@ -13,6 +13,7 @@ import { __ } from '@wordpress/i18n';
  */
 import { CENTRAL_RIGHT_PADDING, INSPECTOR_WIDTH } from '../../constants';
 import Buttons from './buttons';
+import { useStory } from '../../app/story';
 
 const Background = styled.div`
 	background-color: ${ ( { theme } ) => theme.colors.bg.v3 };
@@ -30,11 +31,14 @@ const Head = styled.header`
 	align-items: center;
 `;
 
-const Title = styled.h1`
+const Title = styled.input`
 	color: ${ ( { theme } ) => theme.colors.fg.v1 };
 	margin: 0;
 	font-size: 19px;
 	line-height: 20px;
+	background: none !important;
+	border: 0px none !important;
+	color: #fff !important;
 `;
 
 const ButtonCell = styled.header`
@@ -42,12 +46,17 @@ const ButtonCell = styled.header`
 `;
 
 function HeaderLayout() {
+
+	const { state: { title }, actions: { setTitle } } = useStory();
+
 	return (
 		<Background>
 			<Head>
-				<Title>
-					{ __( 'New story (click to edit title)' ) }
-				</Title>
+				<Title
+					value={ title }
+					type={ 'text' }
+					onChange={ ( evt ) => setTitle( evt.target.value ) }
+				/>
 			</Head>
 			<ButtonCell>
 				<Buttons />

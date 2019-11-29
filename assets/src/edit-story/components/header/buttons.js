@@ -7,12 +7,14 @@ import styled from 'styled-components';
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { useCallback, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import { useHistory } from '../../app';
+import { useAPI, useHistory, useStory } from '../../app';
 import { Outline, Primary, Undo, Redo } from '../button';
+
 
 const ButtonList = styled.nav`
 	background-color: ${ ( { theme } ) => theme.colors.bg.v3 };
@@ -44,6 +46,27 @@ function Redoer() {
 	);
 }
 
+function Publish() {
+	const { actions: { saveStoryById } } = useAPI();
+	const {
+		state: { storyId, title },
+	} = useStory();
+	const [ isSaving, setIsSaving ] = useState( false );
+
+	const savePost = useCallback( () => {
+		if ( ! isSaving ) {
+			setIsSaving( true );
+			saveStoryById(storyId, title).then( () => {
+				setIsSaving( false );
+			} );
+		}
+	}, [ storyId, title, isSaving, saveStoryById ] );
+
+	return (
+		<Primary onClick={ savePost } isDisabled={ isSaving }>{ __( 'Publish' ) }</Primary>
+	);
+}
+
 function Buttons() {
 	return (
 		<ButtonList>
@@ -57,9 +80,7 @@ function Buttons() {
 					{ __( 'Preview' ) }
 				</Outline>
 				<Space />
-				<Primary>
-					{ __( 'Publish' ) }
-				</Primary>
+				<Publish />
 				<Space />
 			</List>
 		</ButtonList>
