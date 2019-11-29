@@ -26,6 +26,7 @@
 class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 	const DISALLOWED_TAG                       = 'DISALLOWED_TAG';
+	const DISALLOWED_TAG_MULTIPLE_CHOICES      = 'DISALLOWED_TAG_MULTIPLE_CHOICES';
 	const DISALLOWED_CHILD_TAG                 = 'DISALLOWED_CHILD_TAG';
 	const DISALLOWED_FIRST_CHILD_TAG           = 'DISALLOWED_FIRST_CHILD_TAG';
 	const INCORRECT_NUM_CHILD_TAGS             = 'INCORRECT_NUM_CHILD_TAGS';
@@ -453,11 +454,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		 * based on tag name of the node.
 		 */
 		$rule_spec_list_to_validate = [];
-		$rule_spec_list             = [];
 		$validation_errors          = [];
-		if ( isset( $this->allowed_tags[ $node->nodeName ] ) ) {
-			$rule_spec_list = $this->allowed_tags[ $node->nodeName ];
-		}
+		$rule_spec_list             = $this->allowed_tags[ $node->nodeName ];
 		foreach ( $rule_spec_list as $id => $rule_spec ) {
 			$validity = $this->validate_tag_spec_for_node( $node, $rule_spec[ AMP_Rule_Spec::TAG_SPEC ] );
 			if ( true === $validity ) {
@@ -481,7 +479,41 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					$validation_errors[0]
 				);
 			} else {
-				$this->remove_node( $node );
+				$spec_names = wp_list_pluck( $validation_errors, 'spec_name' );
+
+				$unique_validation_error_count = count(
+					array_unique(
+						array_map(
+							static function ( $validation_error ) {
+								unset( $validation_error['spec_name'] );
+								return json_encode( $validation_error ); // phpcs:ignore
+							},
+							$validation_errors
+						)
+					)
+				);
+
+				if ( 1 === $unique_validation_error_count ) {
+					// If all of the validation errors are the same except for the spec_name, use the common error code.
+					$validation_error = $validation_errors[0];
+					unset( $validation_error['spec_name'] );
+					$this->remove_invalid_child(
+						$node,
+						array_merge(
+							$validation_error,
+							compact( 'spec_names' )
+						)
+					);
+				} else {
+					// Otherwise, we have a rare rare condition where multiple tag specs fail for different reasons.
+					$this->remove_invalid_child(
+						$node,
+						[
+							'code'   => self::DISALLOWED_TAG_MULTIPLE_CHOICES,
+							'errors' => $validation_errors,
+						]
+					);
+				}
 			}
 			return null;
 		}

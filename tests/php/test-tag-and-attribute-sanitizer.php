@@ -41,6 +41,69 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-ad' ],
 			],
 
+			'amp-app-banner-bad-ads'                       => [
+				'
+					<amp-app-banner layout="nodisplay" id="my-app-banner">
+						<amp-img src="https://cdn-images-1.medium.com/max/50/1*JLegdtjFMNgqHgnxdd04fg.png" width="50" height="43" layout="fixed"></amp-img>
+						<div class="banner-text"><amp-ad width="300" height="250" type="a9" data-aax_size="300x250" data-aax_pubname="test123" data-aax_src="302"><div placeholder=""></div><div fallback=""></div></amp-ad></div>
+						<button open-button>View in app</button>
+					</amp-app-banner>
+				',
+				'
+					<amp-app-banner layout="nodisplay" id="my-app-banner">
+						<amp-img src="https://cdn-images-1.medium.com/max/50/1*JLegdtjFMNgqHgnxdd04fg.png" width="50" height="43" layout="fixed"></amp-img>
+						<div class="banner-text"></div>
+						<button open-button>View in app</button>
+					</amp-app-banner>
+				',
+				[ 'amp-app-banner' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG_ANCESTOR ],
+			],
+
+			'amp-script-nested'                            => [
+				'<amp-script layout="container" src="https://example.com/hello-world.js"><amp-script layout="container" src="https://example.com/goodbye-world.js"><button>Goodbye!</button></amp-script></amp-script>',
+				'<amp-script layout="container" src="https://example.com/hello-world.js"></amp-script>',
+				[ 'amp-script' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG_ANCESTOR ],
+			],
+
+			'bad-svg-stop'                                 => [
+				'<stop offset="5%" stop-color="gold" />',
+				'',
+				[],
+				[
+					[
+						'code'       => AMP_Tag_And_Attribute_Sanitizer::MANDATORY_TAG_ANCESTOR,
+						'spec_names' => [
+							'lineargradient > stop',
+							'radialgradient > stop',
+						],
+					],
+				],
+			],
+
+			'bad-noscript'                                 => [
+				'<noscript><noscript>hello</noscript></noscript>',
+				'<noscript></noscript>',
+				[],
+				[
+					[
+						'code'   => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG_MULTIPLE_CHOICES,
+						'errors' => [
+							[
+								'code'      => AMP_Tag_And_Attribute_Sanitizer::WRONG_PARENT_TAG,
+								'spec_name' => 'noscript enclosure for boilerplate',
+							],
+							[
+								'code'                => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG_ANCESTOR,
+								'disallowed_ancestor' => 'noscript',
+								'spec_name'           => 'noscript',
+							],
+						],
+					]
+				]
+			],
+
 			'adsense'                                      => [
 				'<amp-ad width="300" height="250" type="adsense" data-ad-client="ca-pub-2005682797531342" data-ad-slot="7046626912"><div placeholder=""></div><div fallback=""></div></amp-ad>',
 				null, // No change.
@@ -2102,12 +2165,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_HTML_COMMENTS ],
 			],
 			'script_cdata_contents_bad'               => [
-				'<html><head><meta charset="utf-8"><script async src="https://cdn.ampproject.org/v0.js">document.write("bad");</script></head><body></body></html>',
+				'<html><head><meta charset="utf-8"><script async src="https://cdn.ampproject.org/v0.js">document.write("bad");</script></head><body></body></html>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 				'<html><head><meta charset="utf-8"></head><body></body></html>',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_CONTENTS ],
 			],
-			'cdata_regex_failure'                    => [
+			'cdata_regex_failure'                     => [
 				'<html><head><meta charset="utf-8"><style amp-boilerplate>body { content: "bad!"; }</style></head><body></body></html>',
 				'<html><head><meta charset="utf-8"></head><body></body></html>',
 				[],
