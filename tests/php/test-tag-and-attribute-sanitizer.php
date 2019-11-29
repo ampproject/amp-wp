@@ -100,8 +100,8 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 								'spec_name'           => 'noscript',
 							],
 						],
-					]
-				]
+					],
+				],
 			],
 
 			'adsense'                                      => [
@@ -1693,6 +1693,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::INCORRECT_MIN_NUM_CHILD_TAGS ],
+			],
+
+			'amp-animation-bad-number-children'            => [
+				'<amp-animation layout="nodisplay"><script type="application/json">{}</script><script type="application/json">{}</script></amp-animation>',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::INCORRECT_NUM_CHILD_TAGS ],
 			],
 
 			'amp-image-slider-more-bad-children'           => [
