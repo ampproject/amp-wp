@@ -17,7 +17,6 @@ class PairedBrowsingApp {
 	 * @type {HTMLIFrameElement}
 	 */
 	disconnectedClient;
-	exitLink;
 
 	/**
 	 * AMP IFrame
@@ -56,7 +55,6 @@ class PairedBrowsingApp {
 		this.ampPageHasErrors = false;
 
 		// Link to exit paired browsing.
-		this.exitLink = document.getElementById( 'exit-link' );
 		this.nonAmpLink = /** @type {HTMLAnchorElement} */ document.getElementById( 'non-amp-link' );
 		this.ampLink = /** @type {HTMLAnchorElement} */ document.getElementById( 'amp-link' );
 
@@ -272,6 +270,7 @@ class PairedBrowsingApp {
 				return;
 			}
 
+			// Update the AMP link above the iframe used for exiting paired browsing.
 			this.ampLink.href = this.ampIframe.contentWindow.location.href;
 
 			this.ampPageHasErrors = false;
@@ -283,8 +282,7 @@ class PairedBrowsingApp {
 				return;
 			}
 
-			// Update the link used for exiting paired browsing.
-			this.exitLink.href = this.nonAmpIframe.contentWindow.location.href;
+			// Update the non-AMP link above the iframe used for exiting paired browsing.
 			this.nonAmpLink.href = this.nonAmpIframe.contentWindow.location.href;
 
 			oppositeWindow = this.ampIframe.contentWindow;

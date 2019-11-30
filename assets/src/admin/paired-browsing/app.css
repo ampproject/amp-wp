@@ -37,25 +37,6 @@ body * {
 	line-height: 1.5;
 }
 
-#header-logo {
-	position: absolute;
-	left: 20px;
-	height: 32px;
-}
-
-#header-logo img {
-	display: block;
-	width: 20px;
-	height: 20px;
-	margin-right: 0.5rem;
-}
-
-#header li:last-child {
-	position: absolute;
-	right: 20px;
-	height: 32px;
-}
-
 #header .iframe-label {
 	margin: 0 auto;
 	font-weight: 600;
@@ -71,20 +52,18 @@ body * {
 	background-color: #666;
 }
 
-.iframe-label a,
-#exit-link {
+.iframe-label a {
 	text-decoration: none;
 }
 
-#exit-link::before {
+.iframe-label .dashicons-migrate {
+	padding-left: 4px;
 	text-decoration: none;
 	vertical-align: text-top;
 }
 
 .iframe-label a:hover,
-.iframe-label a:focus,
-#exit-link:hover,
-#exit-link:focus {
+.iframe-label a:focus {
 	text-decoration: underline;
 }
 
