@@ -2554,15 +2554,30 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Get paired browsing URL for a given URL.
+	 *
+	 * @param string $url URL.
+	 * @return string Paired browsing URL.
+	 */
+	public static function get_paired_browsing_url( $url = null ) {
+		if ( ! $url ) {
+			$url = wp_unslash( $_SERVER['REQUEST_URI'] );
+		}
+		$url = remove_query_arg(
+			[ amp_get_slug(), AMP_Validated_URL_Post_Type::VALIDATE_ACTION, AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ],
+			$url
+		);
+		$url = add_query_arg( self::PAIRED_BROWSING_QUERY_VAR, '1', $url );
+		return $url;
+	}
+
+	/**
 	 * Remove any unnecessary query vars that could hamper the paired browsing experience.
 	 */
 	public static function sanitize_url_for_paired_browsing() {
 		if ( isset( $_GET[ self::PAIRED_BROWSING_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$original_url = wp_unslash( $_SERVER['REQUEST_URI'] );
-			$updated_url  = remove_query_arg(
-				[ amp_get_slug(), AMP_Validated_URL_Post_Type::VALIDATE_ACTION, AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ],
-				$original_url
-			);
+			$updated_url  = self::get_paired_browsing_url( $original_url );
 			if ( $updated_url !== $original_url ) {
 				wp_safe_redirect( $updated_url );
 				exit;

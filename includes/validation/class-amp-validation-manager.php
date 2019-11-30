@@ -499,7 +499,7 @@ class AMP_Validation_Manager {
 				'parent' => 'amp',
 				'id'     => 'amp-paired-browsing',
 				'title'  => esc_html__( 'Start paired browsing', 'amp' ),
-				'href'   => remove_query_arg( amp_get_slug(), add_query_arg( AMP_Theme_Support::PAIRED_BROWSING_QUERY_VAR, '1' ) ),
+				'href'   => AMP_Theme_Support::get_paired_browsing_url(),
 			];
 
 			$wp_admin_bar->add_node( $paired_browsing_item );
