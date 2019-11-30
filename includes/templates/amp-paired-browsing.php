@@ -14,6 +14,7 @@ $amp_url = add_query_arg( amp_get_slug(), '1', $url );
 	<head>
 		<meta charset="<?php bloginfo( 'charset' ); ?>">
 		<title><?php esc_html_e( 'Loading&#8230;', 'amp' ); ?></title>
+		<meta name="robots" content="noindex,nofollow">
 		<?php print_admin_styles(); ?>
 	</head>
 	<body>
