@@ -11,8 +11,41 @@ const { app, history } = window;
 const { ampSlug, ampPairedBrowsingQueryVar, ampValidationErrorsQueryVar } = app;
 
 class PairedBrowsingApp {
+	/**
+	 * Disconnected client.
+	 *
+	 * @type {HTMLIFrameElement}
+	 */
 	disconnectedClient;
 	exitLink;
+
+	/**
+	 * AMP IFrame
+	 *
+	 * @type {HTMLIFrameElement}
+	 */
+	ampIframe;
+
+	/**
+	 * Non-AMP IFrame
+	 *
+	 * @type {HTMLIFrameElement}
+	 */
+	nonAmpIframe;
+
+	/**
+	 * Non-AMP Link
+	 *
+	 * @type {HTMLAnchorElement}
+	 */
+	nonAmpLink;
+
+	/**
+	 * AMP Link
+	 *
+	 * @type {HTMLAnchorElement}
+	 */
+	ampLink;
 
 	/**
 	 * Constructor.
@@ -24,6 +57,8 @@ class PairedBrowsingApp {
 
 		// Link to exit paired browsing.
 		this.exitLink = document.getElementById( 'exit-link' );
+		this.nonAmpLink = /** @type {HTMLAnchorElement} */ document.getElementById( 'non-amp-link' );
+		this.ampLink = /** @type {HTMLAnchorElement} */ document.getElementById( 'amp-link' );
 
 		// Overlay that is displayed on the client that becomes disconnected.
 		this.disconnectOverlay = document.querySelector( '.disconnect-overlay' );
@@ -237,6 +272,8 @@ class PairedBrowsingApp {
 				return;
 			}
 
+			this.ampLink.href = this.ampIframe.contentWindow.location.href;
+
 			this.ampPageHasErrors = false;
 			oppositeWindow = this.nonAmpIframe.contentWindow;
 		} else {
@@ -248,6 +285,7 @@ class PairedBrowsingApp {
 
 			// Update the link used for exiting paired browsing.
 			this.exitLink.href = this.nonAmpIframe.contentWindow.location.href;
+			this.nonAmpLink.href = this.nonAmpIframe.contentWindow.location.href;
 
 			oppositeWindow = this.ampIframe.contentWindow;
 		}

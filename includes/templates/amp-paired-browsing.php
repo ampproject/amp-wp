@@ -28,8 +28,8 @@ $amp_url = add_query_arg( amp_get_slug(), '1', $url );
 						</span>
 						<span><?php esc_html_e( 'Paired Browsing', 'amp' ); ?></span>
 					</li>
-					<li class="iframe-label non-amp"><?php esc_html_e( 'Non-AMP', 'amp' ); ?></li>
-					<li class="iframe-label amp"><?php esc_html_e( 'AMP', 'amp' ); ?></li>
+					<li class="iframe-label non-amp"><a id="non-amp-link" class="exit-link" href="<?php echo esc_url( $url ); ?>"><?php esc_html_e( 'Non-AMP', 'amp' ); ?></a></li>
+					<li class="iframe-label amp"><a id="amp-link" class="exit-link" href="<?php echo esc_url( $amp_url ); ?>"><?php esc_html_e( 'AMP', 'amp' ); ?></a></li>
 					<li>
 						<a id="exit-link"
 							class="dashicons-before dashicons-migrate"

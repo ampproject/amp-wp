@@ -71,6 +71,7 @@ body * {
 	background-color: #666;
 }
 
+.iframe-label a,
 #exit-link {
 	text-decoration: none;
 }
@@ -80,6 +81,8 @@ body * {
 	vertical-align: text-top;
 }
 
+.iframe-label a:hover,
+.iframe-label a:focus,
 #exit-link:hover,
 #exit-link:focus {
 	text-decoration: underline;
