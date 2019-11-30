@@ -17,7 +17,6 @@ body * {
 
 #header {
 	height: 32px;
-	background-color: #0075c2;
 }
 
 #header * {
@@ -64,6 +63,14 @@ body * {
 	justify-content: center;
 }
 
+#header .iframe-label.amp {
+	background-color: #0075c2;
+}
+
+#header .iframe-label.non-amp {
+	background-color: #666;
+}
+
 #exit-link {
 	text-decoration: none;
 }
@@ -85,7 +92,7 @@ body * {
 }
 
 #non-amp {
-	border-right: 1px solid #0075c2;
+	border-right: 1px solid #666;
 }
 
 #amp {
