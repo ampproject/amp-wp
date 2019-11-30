@@ -44,5 +44,10 @@
         "PHP-CSS-Parser: Fix parsing CSS selectors which contain commas <https://github.com/sabberworm/PHP-CSS-Parser/pull/138>": "https://github.com/sabberworm/PHP-CSS-Parser/commit/fa139f65c5b098ae652c970b25e6eb03fc495eb4.diff"
       }
     }
+  },
+  "autoload": {
+    "psr-4": {
+      "Amp\\AmpWP\\": "src/"
+    }
   }
 }

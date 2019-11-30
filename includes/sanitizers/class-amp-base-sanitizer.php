@@ -20,15 +20,6 @@ abstract class AMP_Base_Sanitizer {
 	const FALLBACK_HEIGHT = 400;
 
 	/**
-	 * Value for <amp-image-lightbox> ID.
-	 *
-	 * @since 1.0
-	 *
-	 * @const string
-	 */
-	const AMP_IMAGE_LIGHTBOX_ID = 'amp-image-lightbox';
-
-	/**
 	 * Placeholder for default args, to be set in child classes.
 	 *
 	 * @since 0.2
@@ -685,33 +676,6 @@ abstract class AMP_Base_Sanitizer {
 		}
 
 		return $new_attributes;
-	}
-
-	/**
-	 * Add <amp-image-lightbox> element to body tag if it doesn't exist yet.
-	 */
-	public function maybe_add_amp_image_lightbox_node() {
-
-		$nodes = $this->dom->getElementById( self::AMP_IMAGE_LIGHTBOX_ID );
-		if ( null !== $nodes ) {
-			return;
-		}
-
-		$nodes = $this->dom->getElementsByTagName( 'body' );
-		if ( ! $nodes->length ) {
-			return;
-		}
-		$body_node          = $nodes->item( 0 );
-		$amp_image_lightbox = AMP_DOM_Utils::create_node(
-			$this->dom,
-			'amp-image-lightbox',
-			[
-				'id'                           => self::AMP_IMAGE_LIGHTBOX_ID,
-				'layout'                       => 'nodisplay',
-				'data-close-button-aria-label' => __( 'Close', 'amp' ),
-			]
-		);
-		$body_node->appendChild( $amp_image_lightbox );
 	}
 
 	/**
