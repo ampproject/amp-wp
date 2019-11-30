@@ -95,6 +95,8 @@ class AMP_Theme_Support {
 	 */
 	const READER_MODE_TEMPLATE_DIRECTORY = 'amp';
 
+	const PAIRED_BROWSING_QUERY_VAR = 'amp-paired-browsing';
+
 	/**
 	 * Sanitizer classes.
 	 *
@@ -400,6 +402,12 @@ class AMP_Theme_Support {
 	 * @since 0.7
 	 */
 	public static function finish_init() {
+		if ( self::is_paired_available() ) {
+			self::setup_paired_browsing_client();
+			add_action( 'template_redirect', [ __CLASS__, 'sanitize_url_for_paired_browsing' ] );
+			add_filter( 'template_include', [ __CLASS__, 'serve_paired_browsing_experience' ] );
+		}
+
 		if ( ! is_amp_endpoint() ) {
 			/*
 			 * Redirect to AMP-less variable if AMP is not available for this URL and yet the query var is present.
@@ -2493,6 +2501,140 @@ class AMP_Theme_Support {
 		// Enqueue default styles expected by sanitizer.
 		wp_enqueue_style( 'amp-default', amp_get_asset_url( 'css/amp-default.css' ), [], AMP__VERSION );
 		wp_styles()->add_data( 'amp-default', 'rtl', 'replace' );
+	}
+
+	/**
+	 * Setup pages to have the paired browsing client script so that the app can interact with it.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @return void
+	 */
+	public static function setup_paired_browsing_client() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET[ self::PAIRED_BROWSING_QUERY_VAR ] ) ) {
+			return;
+		}
+
+		$asset_file   = AMP__DIR__ . '/assets/js/amp-paired-browsing-client.asset.php';
+		$asset        = require $asset_file;
+		$dependencies = $asset['dependencies'];
+		$version      = $asset['version'];
+
+		wp_enqueue_script(
+			'amp-paired-browsing-client',
+			amp_get_asset_url( '/js/amp-paired-browsing-client.js' ),
+			$dependencies,
+			$version,
+			true
+		);
+
+		// Force dev mode to be enabled. This ensures that the enqueued script and its dependencies
+		// will be present when the admin bar is not showing.
+		add_filter( 'amp_dev_mode_enabled', '__return_true' );
+
+		// Whitelist enqueued script for AMP dev mdoe so that it is not removed.
+		// @todo Revisit with <https://github.com/google/site-kit-wp/pull/505#discussion_r348683617>.
+		add_filter(
+			'script_loader_tag',
+			static function( $tag, $handle ) {
+				if ( self::has_dependency( wp_scripts(), 'amp-paired-browsing-client', $handle ) ) {
+					$tag = preg_replace( '/(?<=<script)(?=\s|>)/i', ' ' . AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, $tag );
+				}
+				return $tag;
+			},
+			10,
+			2
+		);
+	}
+
+	/**
+	 * Get paired browsing URL for a given URL.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @param string $url URL.
+	 * @return string Paired browsing URL.
+	 */
+	public static function get_paired_browsing_url( $url = null ) {
+		if ( ! $url ) {
+			$url = wp_unslash( $_SERVER['REQUEST_URI'] );
+		}
+		$url = remove_query_arg(
+			[ amp_get_slug(), AMP_Validated_URL_Post_Type::VALIDATE_ACTION, AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ],
+			$url
+		);
+		$url = add_query_arg( self::PAIRED_BROWSING_QUERY_VAR, '1', $url );
+		return $url;
+	}
+
+	/**
+	 * Remove any unnecessary query vars that could hamper the paired browsing experience.
+	 *
+	 * @since 1.5.0
+	 */
+	public static function sanitize_url_for_paired_browsing() {
+		if ( isset( $_GET[ self::PAIRED_BROWSING_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$original_url = wp_unslash( $_SERVER['REQUEST_URI'] );
+			$updated_url  = self::get_paired_browsing_url( $original_url );
+			if ( $updated_url !== $original_url ) {
+				wp_safe_redirect( $updated_url );
+				exit;
+			}
+		}
+	}
+
+	/**
+	 * Serve paired browsing experience if it is being requested.
+	 *
+	 * Includes a custom template that acts as an interface to facilitate a side-by-side comparison of a
+	 * non-AMP page and its AMP version to review any discrepancies.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @param string $template Path of the template to include.
+	 * @return string Custom template if in paired browsing mode, else the supplied template.
+	 */
+	public static function serve_paired_browsing_experience( $template ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! isset( $_GET[ self::PAIRED_BROWSING_QUERY_VAR ] ) ) {
+			return $template;
+		}
+
+		wp_enqueue_style(
+			'amp-paired-browsing-app',
+			amp_get_asset_url( '/css/amp-paired-browsing-app-compiled.css' ),
+			[ 'dashicons' ],
+			AMP__VERSION
+		);
+
+		wp_styles()->add_data( 'amp-paired-browsing-app', 'rtl', 'replace' );
+
+		$asset_file   = AMP__DIR__ . '/assets/js/amp-paired-browsing-app.asset.php';
+		$asset        = require $asset_file;
+		$dependencies = $asset['dependencies'];
+		$version      = $asset['version'];
+
+		wp_enqueue_script(
+			'amp-paired-browsing-app',
+			amp_get_asset_url( '/js/amp-paired-browsing-app.js' ),
+			$dependencies,
+			$version,
+			true
+		);
+
+		wp_localize_script(
+			'amp-paired-browsing-app',
+			'app',
+			[
+				'ampSlug'                     => amp_get_slug(),
+				'ampPairedBrowsingQueryVar'   => self::PAIRED_BROWSING_QUERY_VAR,
+				'ampValidationErrorsQueryVar' => AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR,
+				'documentTitlePrefix'         => __( 'AMP Paired Browsing:', 'amp' ),
+			]
+		);
+
+		return AMP__DIR__ . '/includes/templates/amp-paired-browsing.php';
 	}
 
 	/**

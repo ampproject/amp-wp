@@ -173,9 +173,31 @@ const admin = {
 	...sharedConfig,
 	entry: {
 		'amp-validation-tooltips': './assets/src/admin/amp-validation-tooltips.js',
+		'amp-paired-browsing-app': './assets/src/admin/paired-browsing/app.js',
+		'amp-paired-browsing-client': './assets/src/admin/paired-browsing/client.js',
+	},
+	module: {
+		...defaultConfig.module,
+		rules: [
+			...defaultConfig.module.rules,
+			{
+				test: /\.css$/,
+				use: [
+					MiniCssExtractPlugin.loader,
+					'css-loader',
+					'postcss-loader',
+				],
+			},
+		],
 	},
 	plugins: [
 		...defaultConfig.plugins,
+		new MiniCssExtractPlugin( {
+			filename: '../css/[name]-compiled.css',
+		} ),
+		new RtlCssPlugin( {
+			filename: '../css/[name]-compiled-rtl.css',
+		} ),
 		new WebpackBar( {
 			name: 'Admin',
 			color: '#67b255',

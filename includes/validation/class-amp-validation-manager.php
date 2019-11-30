@@ -493,6 +493,18 @@ class AMP_Validation_Manager {
 			$wp_admin_bar->add_node( $link_item );
 		}
 
+		if ( AMP_Theme_Support::is_paired_available() && $error_count <= 0 ) {
+			// Construct admin bar item to link to paired browsing experience.
+			$paired_browsing_item = [
+				'parent' => 'amp',
+				'id'     => 'amp-paired-browsing',
+				'title'  => esc_html__( 'Paired browsing', 'amp' ),
+				'href'   => AMP_Theme_Support::get_paired_browsing_url(),
+			];
+
+			$wp_admin_bar->add_node( $paired_browsing_item );
+		}
+
 		// Scrub the query var from the URL.
 		if ( ! is_amp_endpoint() && isset( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			add_action(
