@@ -1832,20 +1832,6 @@ class AMP_Validated_URL_Post_Type {
 						<?php elseif ( ! $is_amp_enabled ) : ?>
 							<?php esc_html_e( 'AMP is disabled because there is invalid markup kept. To unblock AMP from being served, either mark the invalid markup as removed or fix the code that adds the invalid markup.', 'amp' ); ?>
 						<?php endif; ?>
-
-						<?php
-						if ( $is_amp_enabled && AMP_Theme_Support::is_paired_available() ) {
-							?>
-							<div id="paired-browsing-action">
-								<a class="button button-secondary"
-									href="<?php echo esc_url( AMP_Theme_Support::get_paired_browsing_url( self::get_url_from_post( $post ) ) ); ?>"
-								>
-									<?php esc_html_e( 'Start paired browsing', 'amp' ); ?>
-								</a>
-							</div>
-							<?php
-						}
-						?>
 					</div>
 
 					<div class="misc-pub-section">
@@ -1871,6 +1857,14 @@ class AMP_Validated_URL_Post_Type {
 							}
 						}
 						printf( '<a href="%s">%s</a>', esc_url( self::get_url_from_post( $post ) ), esc_html( $view_label ) );
+
+						if ( $is_amp_enabled && AMP_Theme_Support::is_paired_available() ) {
+							printf(
+								' | <a href="%s">%s</a>',
+								esc_url( AMP_Theme_Support::get_paired_browsing_url( self::get_url_from_post( $post ) ) ),
+								esc_html__( 'Paired browsing', 'amp' )
+							);
+						}
 						?>
 					</div>
 				</div>

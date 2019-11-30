@@ -498,7 +498,7 @@ class AMP_Validation_Manager {
 			$paired_browsing_item = [
 				'parent' => 'amp',
 				'id'     => 'amp-paired-browsing',
-				'title'  => esc_html__( 'Start paired browsing', 'amp' ),
+				'title'  => esc_html__( 'Paired browsing', 'amp' ),
 				'href'   => AMP_Theme_Support::get_paired_browsing_url(),
 			];
 
