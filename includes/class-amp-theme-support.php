@@ -2614,6 +2614,7 @@ class AMP_Theme_Support {
 				'ampSlug'                     => amp_get_slug(),
 				'ampPairedBrowsingQueryVar'   => self::PAIRED_BROWSING_QUERY_VAR,
 				'ampValidationErrorsQueryVar' => AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR,
+				'documentTitlePrefix'         => __( 'AMP Paired Browsing:', 'amp' ),
 			]
 		);
 

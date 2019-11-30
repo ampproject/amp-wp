@@ -8,7 +8,7 @@ import { addQueryArgs, hasQueryArg, removeQueryArgs } from '@wordpress/url';
 import './app.css';
 
 const { app, history } = window;
-const { ampSlug, ampPairedBrowsingQueryVar, ampValidationErrorsQueryVar } = app;
+const { ampSlug, ampPairedBrowsingQueryVar, ampValidationErrorsQueryVar, documentTitlePrefix } = app;
 
 class PairedBrowsingApp {
 	/**
@@ -317,7 +317,7 @@ class PairedBrowsingApp {
 			return;
 		}
 
-		document.title = '🔄 ' + win.document.title;
+		document.title = documentTitlePrefix + ' ' + win.document.title;
 
 		history.replaceState(
 			{},
