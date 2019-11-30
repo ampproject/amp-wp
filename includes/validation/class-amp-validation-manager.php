@@ -493,7 +493,7 @@ class AMP_Validation_Manager {
 			$wp_admin_bar->add_node( $link_item );
 		}
 
-		if ( AMP_Theme_Support::is_paired_available() ) {
+		if ( AMP_Theme_Support::is_paired_available() && $error_count <= 0 ) {
 			// Construct admin bar item to link to paired browsing experience.
 			$paired_browsing_item = [
 				'parent' => 'amp',

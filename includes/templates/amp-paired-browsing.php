@@ -41,7 +41,7 @@ $amp_url = add_query_arg( amp_get_slug(), '1', $url );
 						</span>
 
 						<span class="invalid-amp">
-							<?php esc_html_e( 'The navigated page does not have an AMP counterpart due to validation errors.', 'amp' ); ?>
+							<?php esc_html_e( 'The navigated page does not have an AMP counterpart due to invalid AMP markup being kept.', 'amp' ); ?>
 						</span>
 					</div>
 
@@ -60,7 +60,7 @@ $amp_url = add_query_arg( amp_get_slug(), '1', $url );
 				<iframe
 					src="<?php echo esc_url( $url ); ?>"
 					sandbox="allow-forms allow-scripts allow-same-origin allow-popups"
-					title="<?php esc_attr__( 'non-AMP version', 'amp' ); ?>"
+					title="<?php esc_attr__( 'Non-AMP version', 'amp' ); ?>"
 				></iframe>
 			</div>
 
