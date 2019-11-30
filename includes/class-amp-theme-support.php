@@ -2506,6 +2506,8 @@ class AMP_Theme_Support {
 	/**
 	 * Setup pages to have the paired browsing client script so that the app can interact with it.
 	 *
+	 * @since 1.5.0
+	 *
 	 * @return void
 	 */
 	public static function setup_paired_browsing_client() {
@@ -2531,30 +2533,25 @@ class AMP_Theme_Support {
 		// will be present when the admin bar is not showing.
 		add_filter( 'amp_dev_mode_enabled', '__return_true' );
 
-		// Whitelist enqueued script so that it is not removed.
-		add_filter( 'script_loader_tag', [ __CLASS__, 'filter_paired_browsing_client_script_loader_tag' ], 10, 2 );
-	}
-
-	/**
-	 * Add the `data-ampdevmode` attribute to any enqueued script that the paired browsing interface
-	 * depends on.
-	 *
-	 * @since 1.3
-	 *
-	 * @param string $tag    The link tag for the enqueued script.
-	 * @param string $handle The script's registered handle.
-	 * @return string Tag.
-	 */
-	public static function filter_paired_browsing_client_script_loader_tag( $tag, $handle ) {
-		if ( self::has_dependency( wp_scripts(), 'amp-paired-browsing-client', $handle ) ) {
-			$tag = preg_replace( '/(?<=<script)(?=\s|>)/i', ' ' . AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, $tag );
-		}
-
-		return $tag;
+		// Whitelist enqueued script for AMP dev mdoe so that it is not removed.
+		// @todo Revisit with <https://github.com/google/site-kit-wp/pull/505#discussion_r348683617>.
+		add_filter(
+			'script_loader_tag',
+			static function( $tag, $handle ) {
+				if ( self::has_dependency( wp_scripts(), 'amp-paired-browsing-client', $handle ) ) {
+					$tag = preg_replace( '/(?<=<script)(?=\s|>)/i', ' ' . AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, $tag );
+				}
+				return $tag;
+			},
+			10,
+			2
+		);
 	}
 
 	/**
 	 * Get paired browsing URL for a given URL.
+	 *
+	 * @since 1.5.0
 	 *
 	 * @param string $url URL.
 	 * @return string Paired browsing URL.
@@ -2573,6 +2570,8 @@ class AMP_Theme_Support {
 
 	/**
 	 * Remove any unnecessary query vars that could hamper the paired browsing experience.
+	 *
+	 * @since 1.5.0
 	 */
 	public static function sanitize_url_for_paired_browsing() {
 		if ( isset( $_GET[ self::PAIRED_BROWSING_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -2586,8 +2585,12 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Serve paired browsing experience if it is being requested.
+	 *
 	 * Includes a custom template that acts as an interface to facilitate a side-by-side comparison of a
 	 * non-AMP page and its AMP version to review any discrepancies.
+	 *
+	 * @since 1.5.0
 	 *
 	 * @param string $template Path of the template to include.
 	 * @return string Custom template if in paired browsing mode, else the supplied template.
