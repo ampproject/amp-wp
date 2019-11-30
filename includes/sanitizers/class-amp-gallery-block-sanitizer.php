@@ -99,7 +99,6 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 			// If lightbox is set, we should add lightbox feature to the gallery images.
 			if ( $is_amp_lightbox ) {
 				$this->add_lightbox_attributes_to_image_nodes( $node );
-				$this->maybe_add_amp_image_lightbox_node();
 			}
 
 			// If amp-carousel is not set, nothing else to do here.
@@ -145,18 +144,10 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 		if ( 0 === $num_images ) {
 			return;
 		}
-		$attributes = [
-			'data-amp-lightbox' => '',
-			'on'                => 'tap:' . self::AMP_IMAGE_LIGHTBOX_ID,
-			'role'              => 'button',
-			'tabindex'          => 0,
-		];
 
 		for ( $j = $num_images - 1; $j >= 0; $j-- ) {
 			$image_node = $images->item( $j );
-			foreach ( $attributes as $att => $value ) {
-				$image_node->setAttribute( $att, $value );
-			}
+			$image_node->setAttribute( 'lightbox', '' );
 		}
 	}
 
