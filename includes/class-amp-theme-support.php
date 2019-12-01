@@ -2516,6 +2516,11 @@ class AMP_Theme_Support {
 			return;
 		}
 
+		// Paired browsing requires a custom script which in turn requires dev mode.
+		if ( ! amp_is_dev_mode() ) {
+			return;
+		}
+
 		$asset_file   = AMP__DIR__ . '/assets/js/amp-paired-browsing-client.asset.php';
 		$asset        = require $asset_file;
 		$dependencies = $asset['dependencies'];
@@ -2529,17 +2534,14 @@ class AMP_Theme_Support {
 			true
 		);
 
-		// Force dev mode to be enabled. This ensures that the enqueued script and its dependencies
-		// will be present when the admin bar is not showing.
-		add_filter( 'amp_dev_mode_enabled', '__return_true' );
-
 		// Whitelist enqueued script for AMP dev mdoe so that it is not removed.
 		// @todo Revisit with <https://github.com/google/site-kit-wp/pull/505#discussion_r348683617>.
 		add_filter(
 			'script_loader_tag',
 			static function( $tag, $handle ) {
 				if ( self::has_dependency( wp_scripts(), 'amp-paired-browsing-client', $handle ) ) {
-					$tag = preg_replace( '/(?<=<script)(?=\s|>)/i', ' ' . AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, $tag );
+					$attrs = [ AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, 'async' ];
+					$tag   = preg_replace( '/(?<=<script)(?=\s|>)/i', ' ' . implode( ' ', $attrs ), $tag );
 				}
 				return $tag;
 			},
@@ -2599,6 +2601,14 @@ class AMP_Theme_Support {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( ! isset( $_GET[ self::PAIRED_BROWSING_QUERY_VAR ] ) ) {
 			return $template;
+		}
+
+		if ( ! amp_is_dev_mode() ) {
+			wp_die(
+				esc_html__( 'Paired browsing is only available when AMP dev mode is enabled (e.g. when logged-in and admin bar is showing).', 'amp' ),
+				esc_html__( 'AMP Paired Browsing Unavailable', 'amp' ),
+				[ 'response' => 403 ]
+			);
 		}
 
 		wp_enqueue_style(

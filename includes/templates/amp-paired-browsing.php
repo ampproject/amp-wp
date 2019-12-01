@@ -38,7 +38,7 @@ $amp_url = add_query_arg( amp_get_slug(), '1', $url );
 
 					<div class="dialog-text">
 						<span class="general">
-							<?php esc_html_e( 'The navigated URL is not available for paired browsing. Would you like to go back or exit to continue to that URL?', 'amp' ); ?>
+							<?php esc_html_e( 'The navigated URL is not available for paired browsing.', 'amp' ); ?>
 						</span>
 
 						<span class="invalid-amp">
