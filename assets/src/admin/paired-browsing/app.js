@@ -1,6 +1,10 @@
 /* global HTMLPortalElement */
 
 /**
+ * @typedef {(HTMLIFrameElement|HTMLPortalElement)} Frame
+ */
+
+/**
  * WordPress dependencies
  */
 import { addQueryArgs, hasQueryArg, removeQueryArgs } from '@wordpress/url';
@@ -16,21 +20,21 @@ class PairedBrowsingApp {
 	/**
 	 * Disconnected client.
 	 *
-	 * @type {HTMLIFrameElement}
+	 * @type {Frame}
 	 */
 	disconnectedClient;
 
 	/**
 	 * AMP IFrame
 	 *
-	 * @type {HTMLIFrameElement|HTMLPortalElement}
+	 * @type {Frame}
 	 */
 	ampFrame;
 
 	/**
 	 * Non-AMP IFrame
 	 *
-	 * @type {HTMLIFrameElement|HTMLPortalElement}
+	 * @type {Frame}
 	 */
 	nonAmpFrame;
 
@@ -71,7 +75,16 @@ class PairedBrowsingApp {
 		this.addDisconnectButtonListeners();
 
 		// Load clients.
-		this.initializeFrames();
+		if ( window.portalHost ) {
+			window.addEventListener( 'portalactivate', ( event ) => {
+				const portal = /** @type {Frame} */ event.adoptPredecessor();
+				this.initializeFrames( {
+					[ event.data.isAmp ? 'ampFrame' : 'nonAmpFrame' ]: portal,
+				} );
+			} );
+		} else {
+			this.initializeFrames();
+		}
 	}
 
 	/**
@@ -80,7 +93,11 @@ class PairedBrowsingApp {
 	addDisconnectButtonListeners() {
 		// The 'Exit' button navigates the parent window to the URL of the disconnected client.
 		this.disconnectButtons.exit.addEventListener( 'click', () => {
-			window.location.assign( this.disconnectedClient.contentWindow.location.href );
+			if ( 'HTMLPortalElement' in window ) {
+				throw new Error( 'Need to activate the disconnected client.' );
+			} else {
+				window.location.assign( this.disconnectedClient.contentWindow.location.href );
+			}
 		} );
 
 		// The 'Go back' button goes back to the previous page of the parent window.
@@ -90,24 +107,69 @@ class PairedBrowsingApp {
 	}
 
 	/**
-	 * Return promises to load iframes asynchronously.
+	 * Return promises to load frames asynchronously.
 	 *
+	 * @param {Object.<string, any>} arg
+	 * @param {?Frame} arg.nonAmpFrame
+	 * @param {?Frame} arg.ampFrame
 	 * @return {[Promise<Function>, Promise<Function>]} Promises that determine if the iframes are loaded.
 	 */
-	initializeFrames() {
+	initializeFrames( { nonAmpFrame = null, ampFrame = null } = {} ) {
 		const sandbox = 'allow-forms allow-scripts allow-same-origin allow-popups';
 
 		if ( 'HTMLPortalElement' in window ) {
-			throw new Error( 'Not implemented' );
-		} else {
-			this.nonAmpFrame = document.createElement( 'iframe' );
+			// @todo Problem: Portal is not scrollable.
+			if ( nonAmpFrame ) {
+				this.nonAmpFrame = nonAmpFrame;
+				nonAmpFrame.postMessage( 'ampPairedBrowsingEmbedded' );
+			} else {
+				this.nonAmpFrame = /** @type {Frame} */ document.createElement( 'portal' );
+				this.nonAmpFrame.src = this.nonAmpLink.href;
+			}
 			this.nonAmpFrame.setAttribute( 'sandbox', sandbox );
 			this.nonAmpFrame.src = this.nonAmpLink.href;
 			this.nonAmpFrame.title = nonAmpFrameTitle;
+			this.nonAmpFrame.scrolling = 'yes';
+			document.getElementById( 'non-amp' ).appendChild( /** @type {Frame} */ this.nonAmpFrame );
+
+			this.nonAmpLink.addEventListener( 'click', ( event ) => {
+				event.preventDefault();
+				this.nonAmpFrame.activate();
+			} );
+
+			if ( ampFrame ) {
+				this.ampFrame = ampFrame;
+				ampFrame.postMessage( 'ampPairedBrowsingEmbedded' );
+			} else {
+				this.ampFrame = /** @type {Frame} */ document.createElement( 'portal' );
+				this.ampFrame.src = this.ampLink.href;
+			}
+			this.ampFrame.setAttribute( 'sandbox', sandbox );
+			this.ampFrame.title = ampFrameTitle;
+			this.ampFrame.scrolling = 'yes';
+			document.getElementById( 'amp' ).appendChild( /** @type {Frame} */ this.ampFrame );
+
+			this.ampLink.addEventListener( 'click', ( event ) => {
+				event.preventDefault();
+				this.ampFrame.activate();
+			} );
+		} else {
+			if ( nonAmpFrame ) {
+				this.nonAmpFrame = nonAmpFrame;
+			} else {
+				this.nonAmpFrame = document.createElement( 'iframe' );
+				this.nonAmpFrame.src = this.nonAmpLink.href;
+			}
+			this.nonAmpFrame.setAttribute( 'sandbox', sandbox );
+			this.nonAmpFrame.title = nonAmpFrameTitle;
 			document.getElementById( 'non-amp' ).appendChild( this.nonAmpFrame );
 
-			this.ampFrame = document.createElement( 'iframe' );
-			this.ampFrame.setAttribute( 'sandbox', sandbox );
+			if ( ampFrame ) {
+				this.ampFrame = ampFrame;
+			} else {
+				this.ampFrame = document.createElement( 'iframe' );
+				this.ampFrame.setAttribute( 'sandbox', sandbox );
+			}
 			this.ampFrame.src = this.ampLink.href;
 			this.ampFrame.title = ampFrameTitle;
 			document.getElementById( 'amp' ).appendChild( this.ampFrame );
@@ -180,16 +242,20 @@ class PairedBrowsingApp {
 	/**
 	 * Determines the status of the paired browsing client in an iframe.
 	 *
-	 * @param {HTMLIFrameElement} iframe The iframe.
+	 * @param {Frame} frame The iframe or portal.
 	 */
-	isClientConnected( iframe ) {
-		if ( this.ampFrame === iframe && this.ampPageHasErrors ) {
+	isClientConnected( frame ) {
+		if ( frame.activate ) {
+			return true; // @todo The HTMLPortalElement has no contentWindow.
+		}
+
+		if ( this.ampFrame === frame && this.ampPageHasErrors ) {
 			return false;
 		}
 
-		return null !== iframe.contentWindow &&
-			null !== iframe.contentDocument &&
-			true === iframe.contentWindow.ampPairedBrowsingClient;
+		return frame.contentWindow &&
+			frame.contentDocument &&
+			true === frame.contentWindow.ampPairedBrowsingClient;
 	}
 
 	/**
