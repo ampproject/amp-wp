@@ -315,6 +315,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertInternalType( 'object', $admin_bar->get_node( 'amp-validity' ) );
 
 		// Admin bar item available in paired mode.
+		add_filter( 'amp_dev_mode_enabled', '__return_true' );
 		add_theme_support( AMP_Theme_Support::SLUG, [ AMP_Theme_Support::PAIRED_FLAG => true ] );
 		$admin_bar = new WP_Admin_Bar();
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
