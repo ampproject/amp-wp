@@ -2540,7 +2540,8 @@ class AMP_Theme_Support {
 			'script_loader_tag',
 			static function( $tag, $handle ) {
 				if ( self::has_dependency( wp_scripts(), 'amp-paired-browsing-client', $handle ) ) {
-					$tag = preg_replace( '/(?<=<script)(?=\s|>)/i', ' ' . AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, $tag );
+					$attrs = [ AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, 'async' ];
+					$tag   = preg_replace( '/(?<=<script)(?=\s|>)/i', ' ' . implode( ' ', $attrs ), $tag );
 				}
 				return $tag;
 			},
