@@ -71,7 +71,7 @@ class PairedBrowsingApp {
 		this.addDisconnectButtonListeners();
 
 		// Load clients.
-		Promise.all( this.initializeFrames() );
+		this.initializeFrames();
 	}
 
 	/**
