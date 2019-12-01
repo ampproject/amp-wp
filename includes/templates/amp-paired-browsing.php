@@ -57,21 +57,8 @@ $amp_url = add_query_arg( amp_get_slug(), '1', $url );
 				</div>
 			</div>
 
-			<div id="non-amp">
-				<iframe
-					src="<?php echo esc_url( $url ); ?>"
-					sandbox="allow-forms allow-scripts allow-same-origin allow-popups"
-					title="<?php esc_attr__( 'Non-AMP version', 'amp' ); ?>"
-				></iframe>
-			</div>
-
-			<div id="amp">
-				<iframe
-					src="<?php echo esc_url( $amp_url ); ?>"
-					sandbox="allow-forms allow-scripts allow-same-origin allow-popups"
-					title="<?php esc_attr__( 'AMP version', 'amp' ); ?>"
-				></iframe>
-			</div>
+			<div id="non-amp"></div>
+			<div id="amp"></div>
 		</div>
 
 		<?php print_footer_scripts(); ?>

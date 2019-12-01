@@ -2641,6 +2641,8 @@ class AMP_Theme_Support {
 				'ampPairedBrowsingQueryVar'   => self::PAIRED_BROWSING_QUERY_VAR,
 				'ampValidationErrorsQueryVar' => AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR,
 				'documentTitlePrefix'         => __( 'AMP Paired Browsing:', 'amp' ),
+				'ampFrameTitle'               => __( 'AMP version', 'amp' ),
+				'nonAmpFrameTitle'            => __( 'Non-AMP version', 'amp' ),
 			]
 		);
 

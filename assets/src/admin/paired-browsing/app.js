@@ -1,3 +1,5 @@
+/* global HTMLPortalElement */
+
 /**
  * WordPress dependencies
  */
@@ -8,7 +10,7 @@ import { addQueryArgs, hasQueryArg, removeQueryArgs } from '@wordpress/url';
 import './app.css';
 
 const { app, history } = window;
-const { ampSlug, ampPairedBrowsingQueryVar, ampValidationErrorsQueryVar, documentTitlePrefix } = app;
+const { ampSlug, ampPairedBrowsingQueryVar, ampValidationErrorsQueryVar, documentTitlePrefix, ampFrameTitle, nonAmpFrameTitle } = app;
 
 class PairedBrowsingApp {
 	/**
@@ -21,16 +23,16 @@ class PairedBrowsingApp {
 	/**
 	 * AMP IFrame
 	 *
-	 * @type {HTMLIFrameElement}
+	 * @type {HTMLIFrameElement|HTMLPortalElement}
 	 */
-	ampIframe;
+	ampFrame;
 
 	/**
 	 * Non-AMP IFrame
 	 *
-	 * @type {HTMLIFrameElement}
+	 * @type {HTMLIFrameElement|HTMLPortalElement}
 	 */
-	nonAmpIframe;
+	nonAmpFrame;
 
 	/**
 	 * Non-AMP Link
@@ -50,8 +52,6 @@ class PairedBrowsingApp {
 	 * Constructor.
 	 */
 	constructor() {
-		this.nonAmpIframe = document.querySelector( '#non-amp iframe' );
-		this.ampIframe = document.querySelector( '#amp iframe' );
 		this.ampPageHasErrors = false;
 
 		// Link to exit paired browsing.
@@ -71,7 +71,7 @@ class PairedBrowsingApp {
 		this.addDisconnectButtonListeners();
 
 		// Load clients.
-		Promise.all( this.getIframeLoadedPromises() );
+		Promise.all( this.initializeFrames() );
 	}
 
 	/**
@@ -94,18 +94,36 @@ class PairedBrowsingApp {
 	 *
 	 * @return {[Promise<Function>, Promise<Function>]} Promises that determine if the iframes are loaded.
 	 */
-	getIframeLoadedPromises() {
+	initializeFrames() {
+		const sandbox = 'allow-forms allow-scripts allow-same-origin allow-popups';
+
+		if ( 'HTMLPortalElement' in window ) {
+			throw new Error( 'Not implemented' );
+		} else {
+			this.nonAmpFrame = document.createElement( 'iframe' );
+			this.nonAmpFrame.setAttribute( 'sandbox', sandbox );
+			this.nonAmpFrame.src = this.nonAmpLink.href;
+			this.nonAmpFrame.title = nonAmpFrameTitle;
+			document.getElementById( 'non-amp' ).appendChild( this.nonAmpFrame );
+
+			this.ampFrame = document.createElement( 'iframe' );
+			this.ampFrame.setAttribute( 'sandbox', sandbox );
+			this.ampFrame.src = this.ampLink.href;
+			this.ampFrame.title = ampFrameTitle;
+			document.getElementById( 'amp' ).appendChild( this.ampFrame );
+		}
+
 		return [
 			new Promise( ( resolve ) => {
-				this.nonAmpIframe.addEventListener( 'load', () => {
-					this.toggleDisconnectOverlay( this.nonAmpIframe );
+				this.nonAmpFrame.addEventListener( 'load', () => {
+					this.toggleDisconnectOverlay( this.nonAmpFrame );
 					resolve();
 				} );
 			} ),
 
 			new Promise( ( resolve ) => {
-				this.ampIframe.addEventListener( 'load', () => {
-					this.toggleDisconnectOverlay( this.ampIframe );
+				this.ampFrame.addEventListener( 'load', () => {
+					this.toggleDisconnectOverlay( this.ampFrame );
 					resolve();
 				} );
 			} ),
@@ -131,7 +149,7 @@ class PairedBrowsingApp {
 		const isClientConnected = this.isClientConnected( iframe );
 
 		if ( ! isClientConnected ) {
-			if ( this.ampIframe === iframe && this.ampPageHasErrors ) {
+			if ( this.ampFrame === iframe && this.ampPageHasErrors ) {
 				this.disconnectText.general.classList.toggle( 'hidden', true );
 				this.disconnectText.invalidAmp.classList.toggle( 'hidden', false );
 			} else {
@@ -150,7 +168,7 @@ class PairedBrowsingApp {
 		// Applying the 'amp' class will overlay it on the AMP iframe.
 		this.disconnectOverlay.classList.toggle(
 			'amp',
-			! isClientConnected && this.ampIframe === iframe,
+			! isClientConnected && this.ampFrame === iframe,
 		);
 
 		this.disconnectOverlay.classList.toggle(
@@ -165,7 +183,7 @@ class PairedBrowsingApp {
 	 * @param {HTMLIFrameElement} iframe The iframe.
 	 */
 	isClientConnected( iframe ) {
-		if ( this.ampIframe === iframe && this.ampPageHasErrors ) {
+		if ( this.ampFrame === iframe && this.ampPageHasErrors ) {
 			return false;
 		}
 
@@ -244,7 +262,7 @@ class PairedBrowsingApp {
 	registerClientWindow( win ) {
 		let oppositeWindow;
 
-		if ( win === this.ampIframe.contentWindow ) {
+		if ( win === this.ampFrame.contentWindow ) {
 			if ( ! this.documentIsAmp( win.document ) ) {
 				if ( this.urlHasValidationErrorQueryVar( win.location.href ) ) {
 					/*
@@ -252,7 +270,7 @@ class PairedBrowsingApp {
 					 * 'disconnected' overlay can be shown.
 					 */
 					this.ampPageHasErrors = true;
-					this.toggleDisconnectOverlay( this.ampIframe );
+					this.toggleDisconnectOverlay( this.ampFrame );
 					return;
 				} else if ( win.document.querySelector( 'head > link[rel=amphtml]' ) ) {
 					// Force the AMP iframe to always have an AMP URL, if an AMP version is available.
@@ -266,15 +284,15 @@ class PairedBrowsingApp {
 				 * overlay.
 				 */
 				this.ampPageHasErrors = true;
-				this.toggleDisconnectOverlay( this.ampIframe );
+				this.toggleDisconnectOverlay( this.ampFrame );
 				return;
 			}
 
 			// Update the AMP link above the iframe used for exiting paired browsing.
-			this.ampLink.href = this.ampIframe.contentWindow.location.href;
+			this.ampLink.href = this.ampFrame.contentWindow.location.href;
 
 			this.ampPageHasErrors = false;
-			oppositeWindow = this.nonAmpIframe.contentWindow;
+			oppositeWindow = this.nonAmpFrame.contentWindow;
 		} else {
 			// Force the non-AMP iframe to always have a non-AMP URL.
 			if ( this.documentIsAmp( win.document ) ) {
@@ -283,9 +301,9 @@ class PairedBrowsingApp {
 			}
 
 			// Update the non-AMP link above the iframe used for exiting paired browsing.
-			this.nonAmpLink.href = this.nonAmpIframe.contentWindow.location.href;
+			this.nonAmpLink.href = this.nonAmpFrame.contentWindow.location.href;
 
-			oppositeWindow = this.ampIframe.contentWindow;
+			oppositeWindow = this.ampFrame.contentWindow;
 		}
 
 		// Synchronize scrolling from current window to its opposite.
@@ -308,7 +326,7 @@ class PairedBrowsingApp {
 				this.removeAmpQueryVars( this.removeUrlHash( win.location.href ) )
 			)
 		) {
-			const url = oppositeWindow === this.ampIframe.contentWindow ?
+			const url = oppositeWindow === this.ampFrame.contentWindow ?
 				this.addAmpQueryVar( win.location.href ) :
 				this.removeAmpQueryVars( win.location.href );
 
