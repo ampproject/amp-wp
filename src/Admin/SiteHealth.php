@@ -9,6 +9,7 @@ namespace Amp\AmpWP\Admin;
 
 use AMP_Options_Manager;
 use AMP_Theme_Support;
+use AMP_Post_Type_Support;
 
 /**
  * Class SiteHealth
@@ -187,21 +188,21 @@ class SiteHealth {
 			$debugging_information,
 			[
 				'amp' => [
-					'label'       => __( 'AMP', 'amp' ),
-					'description' => __( 'Debugging information for the Official AMP Plugin for WordPress.', 'amp' ),
+					'label'       => esc_html__( 'AMP', 'amp' ),
+					'description' => esc_html__( 'Debugging information for the Official AMP Plugin for WordPress.', 'amp' ),
 					'fields'      => [
 						'amp_mode_enabled'        => [
 							'label'   => 'AMP mode enabled',
-							'value'   => 'native',
+							'value'   => AMP_Theme_Support::get_support_mode(),
 							'private' => false,
 						],
 						'amp_experiences_enabled' => [
-							'label'   => 'AMP experiences enabled',
+							'label'   => esc_html__( 'AMP experiences enabled', 'amp' ),
 							'value'   => $this->get_experiences_enabled(),
 							'private' => false,
 						],
 						'amp_templates_enabled'   => [
-							'label'   => 'AMP templates enabled',
+							'label'   => esc_html__( 'Templates enabled', 'amp' ),
 							'value'   => $this->get_supported_templates(),
 							'private' => false,
 						],
@@ -219,7 +220,7 @@ class SiteHealth {
 	public function get_experiences_enabled() {
 		$experiences = AMP_Options_Manager::get_option( 'experiences' );
 		if ( empty( $experiences ) ) {
-			return __( 'No experience enabled', 'amp' );
+			return esc_html__( 'No experience enabled', 'amp' );
 		}
 
 		return implode( ', ', $experiences );
@@ -231,22 +232,45 @@ class SiteHealth {
 	 * @return string The supported template(s), in a comma-separated string.
 	 */
 	public function get_supported_templates() {
+		$possible_post_types = AMP_Options_Manager::get_option( 'supported_post_types' );
+
+		// Get the supported content types, like 'post'.
 		$supported_templates = array_filter(
-			AMP_Theme_Support::get_supportable_templates(),
-			static function( $option ) {
+			AMP_Post_Type_Support::get_eligible_post_types(),
+			static function( $template ) use ( $possible_post_types ) {
+				$post_type = get_post_type_object( $template );
 				return (
-					( empty( $option['immutable'] ) && ! empty( $option['user_supported'] ) )
+					post_type_supports( $post_type->name, AMP_Post_Type_Support::SLUG )
 					||
-					! empty( $option['supported'] )
+					( ! AMP_Options_Manager::is_website_experience_enabled() && in_array( $post_type->name, $possible_post_types, true ) )
 				);
 			}
 		);
+
+		// Add the supported templates, like 'is_author', if not in 'Reader' mode.
+		if ( AMP_Theme_Support::READER_MODE_SLUG !== AMP_Theme_Support::get_support_mode() ) {
+			$supported_templates = array_merge(
+				$supported_templates,
+				array_keys(
+					array_filter(
+						AMP_Theme_Support::get_supportable_templates(),
+						static function( $option ) {
+							return (
+								( empty( $option['immutable'] ) && ! empty( $option['user_supported'] ) )
+								||
+								! empty( $option['supported'] )
+							);
+						}
+					)
+				)
+			);
+		}
 
 		if ( empty( $supported_templates ) ) {
 			return esc_html__( 'No template supported', 'amp' );
 		}
 
-		return implode( ', ', array_keys( $supported_templates ) );
+		return implode( ', ', $supported_templates );
 	}
 
 	/**

@@ -27,6 +27,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 		$this->instance = new SiteHealth();
+		remove_post_type_support( 'post', AMP_Theme_Support::SLUG );
 	}
 
 	/**
@@ -140,7 +141,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 							'private' => false,
 						],
 						'amp_templates_enabled'   => [
-							'label'   => 'AMP templates enabled',
+							'label'   => 'Templates enabled',
 							'private' => false,
 						],
 					],
@@ -191,29 +192,53 @@ class Test_Site_Health extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Gets the testing data for test_get_supported_templates().
+	 * Gets the test data for test_get_supported_templates().
+	 *
+	 * @return array The test data.
 	 */
 	public function get_supported_templates_data() {
 		return [
-			'no_template_supported' => [
+			'no_template_supported'       => [
 				[],
+				[],
+				'standard',
 				'No template supported',
 			],
-			'only_singular'         => [
+			'only_singular'               => [
+				[],
 				[ 'is_singular' ],
+				'transitional',
 				'is_singular',
 			],
-			'only_author'           => [
+			'only_post'                   => [
+				[ 'post' ],
+				[],
+				'transitional',
+				'post',
+			],
+			'only_post_and_author'        => [
+				[ 'post' ],
 				[ 'is_author' ],
-				'is_author',
+				'transitional',
+				'post, is_author',
 			],
-			'two_templates'         => [
+			'two_templates'               => [
+				[ 'post' ],
 				[ 'is_singular', 'is_author' ],
-				'is_singular, is_author',
+				'transitional',
+				'post, is_singular, is_author',
 			],
-			'three_templates'       => [
+			'three_templates'             => [
+				[ 'post', 'page' ],
 				[ 'is_singular', 'is_author', 'is_tag' ],
-				'is_singular, is_author, is_tag',
+				'transitional',
+				'post, page, is_singular, is_author, is_tag',
+			],
+			'three_templates_reader_mode' => [
+				[ 'post', 'page' ],
+				[ 'is_singular', 'is_author', 'is_tag' ],
+				'reader',
+				'post, page',
 			],
 		];
 	}
@@ -224,12 +249,21 @@ class Test_Site_Health extends WP_UnitTestCase {
 	 * @dataProvider get_supported_templates_data
 	 * @covers \Amp\AmpWP\Admin\SiteHealth::get_supported_templates()
 	 *
-	 * @param array  $supported_templates The supported templates.
-	 * @param string $expected            The expected string of supported templates.
+	 * @param array  $supported_content_types The supported content types, like 'post'.
+	 * @param array  $supported_templates     The supported templates, like 'is_author'.
+	 * @param string $theme_support           The theme support, like 'standard'.
+	 * @param string $expected                The expected string of supported templates.
 	 */
-	public function test_get_supported_templates( $supported_templates, $expected ) {
+	public function test_get_supported_templates( $supported_content_types, $supported_templates, $theme_support, $expected ) {
 		AMP_Options_Manager::update_option( 'all_templates_supported', false );
 		AMP_Options_Manager::update_option( 'supported_templates', $supported_templates );
+		AMP_Options_Manager::update_option( 'theme_support', $theme_support );
+		AMP_Theme_Support::read_theme_support();
+
+		foreach ( $supported_content_types as $post_type ) {
+			add_post_type_support( $post_type, AMP_Theme_Support::SLUG );
+		}
+
 		$this->assertEquals( $expected, $this->instance->get_supported_templates() );
 	}
 
