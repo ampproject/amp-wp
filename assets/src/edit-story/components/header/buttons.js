@@ -15,7 +15,6 @@ import { useCallback, useState } from '@wordpress/element';
 import { useAPI, useHistory, useStory } from '../../app';
 import { Outline, Primary, Undo, Redo } from '../button';
 
-
 const ButtonList = styled.nav`
 	background-color: ${ ( { theme } ) => theme.colors.bg.v3 };
 	display: flex;
@@ -49,21 +48,28 @@ function Redoer() {
 function Publish() {
 	const { actions: { saveStoryById } } = useAPI();
 	const {
-		state: { storyId, title },
+		state: { storyId, title, postStatus, pages },
+		actions: { setPostStatus },
 	} = useStory();
 	const [ isSaving, setIsSaving ] = useState( false );
+
+	const status = ( postStatus !== 'publish' ) ? 'publish' : postStatus;
+	const text = ( postStatus !== 'publish' ) ? __( 'Publish' ) : __( 'Update' );
 
 	const savePost = useCallback( () => {
 		if ( ! isSaving ) {
 			setIsSaving( true );
-			saveStoryById(storyId, title).then( () => {
+			saveStoryById( storyId, title, status, pages ).then( () => {
 				setIsSaving( false );
+				setPostStatus( status );
 			} );
 		}
-	}, [ storyId, title, isSaving, saveStoryById ] );
+	}, [ isSaving, saveStoryById, storyId, title, status, pages, setPostStatus ] );
 
 	return (
-		<Primary onClick={ savePost } isDisabled={ isSaving }>{ __( 'Publish' ) }</Primary>
+		<Primary onClick={ savePost } isDisabled={ isSaving }>
+			{ text }
+		</Primary>
 	);
 }
 

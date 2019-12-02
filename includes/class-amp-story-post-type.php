@@ -191,6 +191,36 @@ class AMP_Story_Post_Type {
 			]
 		);
 
+		$meta_args = [
+			'auth_callback'  => '__return_true',
+			'type'           => 'array',
+			'object_subtype' => self::POST_TYPE_SLUG,
+			'single'         => true,
+			'show_in_rest'   => [
+				'schema' => [
+					'type'  => 'array',
+					'items' => [
+						'id'       => [
+							'type' => 'string',
+						],
+						'type'     => [
+							'type'    => 'string',
+							'default' => 'page',
+						],
+						'elements' => [
+							'type'    => 'array',
+							'default' => [],
+						],
+						'index'    => [
+							'type'    => 'integer',
+							'default' => 0,
+						],
+					],
+				],
+			],
+		];
+		register_meta( 'post', 'amp_pages', $meta_args );
+
 		add_filter( 'post_row_actions', [ __CLASS__, 'remove_classic_editor_link' ], 11, 2 );
 
 		add_filter( 'wp_kses_allowed_html', [ __CLASS__, 'filter_kses_allowed_html' ], 10, 2 );

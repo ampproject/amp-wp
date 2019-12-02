@@ -4,16 +4,11 @@
 import styled from 'styled-components';
 
 /**
- * WordPress dependencies
- */
-import { __ } from '@wordpress/i18n';
-
-/**
  * Internal dependencies
  */
 import { CENTRAL_RIGHT_PADDING, INSPECTOR_WIDTH } from '../../constants';
-import Buttons from './buttons';
 import { useStory } from '../../app/story';
+import Buttons from './buttons';
 
 const Background = styled.div`
 	background-color: ${ ( { theme } ) => theme.colors.bg.v3 };
@@ -39,6 +34,7 @@ const Title = styled.input`
 	background: none !important;
 	border: 0px none !important;
 	color: #fff !important;
+	text-align: center;
 `;
 
 const ButtonCell = styled.header`
@@ -46,7 +42,6 @@ const ButtonCell = styled.header`
 `;
 
 function HeaderLayout() {
-
 	const { state: { title }, actions: { setTitle } } = useStory();
 
 	return (

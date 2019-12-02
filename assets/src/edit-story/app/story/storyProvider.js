@@ -33,6 +33,7 @@ function StoryProvider( { storyId, children } ) {
 	// Only update these directly as a response to user or api interactions.
 	const [ pages, setPages ] = useState( [] );
 	const [ title, setTitle ] = useState( [] );
+	const [ postStatus, setPostStatus ] = useState( [] );
 	const [ currentPageIndex, setCurrentPageIndex ] = useState( null );
 	const [ selectedElementIds, setSelectedElementIds ] = useState( [] );
 
@@ -52,7 +53,7 @@ function StoryProvider( { storyId, children } ) {
 	const appendElementToCurrentPage = useAppendElementToCurrentPage( { currentPageIndex, pages, setPages, setSelectedElementIds } );
 	const setPropertiesOnSelectedElements = useSetPropertiesOnSelectedElements( { currentPageIndex, pages, selectedElementIds, setPages } );
 
-	useLoadStory( { storyId, pages, setPages, title, setTitle, setCurrentPageIndex, clearSelection } );
+	useLoadStory( { storyId, pages, setPages, setTitle, setPostStatus, setCurrentPageIndex, clearSelection } );
 	useCurrentPage( { currentPageIndex, pages, setCurrentPage, setCurrentPageNumber } );
 	useHistoryEntry( { currentPageIndex, pages, selectedElementIds } );
 	useHistoryReplay( { setCurrentPageIndex, setPages, setSelectedElementIds } );
@@ -68,6 +69,7 @@ function StoryProvider( { storyId, children } ) {
 			selectedElements,
 			hasSelection,
 			title,
+			postStatus,
 			storyId,
 		},
 		actions: {
@@ -79,6 +81,7 @@ function StoryProvider( { storyId, children } ) {
 			selectElementById,
 			setPropertiesOnSelectedElements,
 			setTitle,
+			setPostStatus,
 		},
 	};
 
