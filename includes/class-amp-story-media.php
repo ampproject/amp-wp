@@ -137,7 +137,7 @@ class AMP_Story_Media {
 	 * @return array Metadata.
 	 */
 	public static function filter_schemaorg_metadata_images( $data ) {
-		if ( ! is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
+		if ( ! is_singular( AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG ) ) {
 			return $data;
 		}
 
@@ -219,7 +219,7 @@ class AMP_Story_Media {
 	 */
 	public static function add_new_max_image_size( $image_sizes ) {
 
-		if ( AMP_Story_Post_Type::POST_TYPE_SLUG === get_post_type() ) {
+		if ( AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG === get_post_type() ) {
 			$image_sizes[ self::MAX_IMAGE_SIZE_SLUG ] = __( 'Story Page', 'amp' );
 		}
 		return $image_sizes;

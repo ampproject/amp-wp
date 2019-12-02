@@ -16,7 +16,7 @@ class AMP_Story_Media_Test extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 
-		if ( ! AMP_Story_Post_Type::has_required_block_capabilities() ) {
+		if ( ! AMP_Story_Legacy_Post_Type::has_required_block_capabilities() ) {
 			$this->markTestSkipped( 'The function register_block_type() is not present, so the AMP Story post type was not registered.' );
 		}
 
@@ -32,7 +32,7 @@ class AMP_Story_Media_Test extends WP_UnitTestCase {
 		$wp_styles = null;
 		AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::STORIES_EXPERIENCE ] );
 
-		AMP_Story_Post_Type::register(); // This calls AMP_Story_Media::init().
+		AMP_Story_Legacy_Post_Type::register(); // This calls AMP_Story_Media::init().
 	}
 
 	/**
@@ -44,7 +44,7 @@ class AMP_Story_Media_Test extends WP_UnitTestCase {
 		global $wp_rewrite;
 
 		AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::WEBSITE_EXPERIENCE ] );
-		unregister_post_type( AMP_Story_Post_Type::POST_TYPE_SLUG );
+		unregister_post_type( AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG );
 
 		$wp_rewrite->set_permalink_structure( false );
 		unset( $_SERVER['HTTPS'] );
@@ -60,9 +60,9 @@ class AMP_Story_Media_Test extends WP_UnitTestCase {
 	public function test_filter_schemaorg_metadata_images() {
 		$this->assertSame( [], AMP_Story_Media::filter_schemaorg_metadata_images( [] ) );
 
-		$post_id = $this->factory()->post->create( [ 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ] );
+		$post_id = $this->factory()->post->create( [ 'post_type' => AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG ] );
 		$this->go_to( get_permalink( $post_id ) );
-		$this->assertTrue( is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) );
+		$this->assertTrue( is_singular( AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG ) );
 
 		$custom_image_url   = 'https://example.com/foo.jpg';
 		$custom_image_obj   = [

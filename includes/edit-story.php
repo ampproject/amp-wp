@@ -12,23 +12,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 require_once ABSPATH . 'wp-admin/admin-header.php';
 
-AMP_Story_Post_Type::enqueue_block_editor_scripts();
-
-global $post, $post_type;
-
-$config = [];
-
-$config['api'] = [
-	'stories' => sprintf( '/wp/v2/%s', $post_type ),
-	'media' => '/wp/v2/media',
-];
-
-if ( ! empty( $post ) ) {
-	$config['storyId'] = $post->ID;
-}
 
 ?>
 
-<div id="edit-story" data-config="<?php echo esc_attr( wp_json_encode( $config ) ); ?>">
-	<h1>Please wait...</h1>
+<div id="edit-story">
+	<h1 class="loading-message"><?php esc_html_e( 'Please wait...', 'amp' ); ?></h1>
 </div>
