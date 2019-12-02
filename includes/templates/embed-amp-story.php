@@ -15,7 +15,7 @@ if ( have_posts() ) {
 		?>
 		<div class="amp-story-embed">
 			<?php
-			AMP_Story_Post_Type::the_single_story_card(
+			AMP_Story_Legacy_Post_Type::the_single_story_card(
 				[
 					'post' => get_post(),
 					'size' => AMP_Story_Media::STORY_CARD_IMAGE_SIZE,

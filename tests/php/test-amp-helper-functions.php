@@ -1091,11 +1091,11 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * @covers ::amp_get_publisher_logo()
 	 */
 	public function test_amp_get_schemaorg_metadata_story() {
-		if ( ! AMP_Story_Post_Type::has_required_block_capabilities() ) {
+		if ( ! AMP_Story_Legacy_Post_Type::has_required_block_capabilities() ) {
 			$this->markTestSkipped( 'Lacking required block capabilities.' );
 		}
 		AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::WEBSITE_EXPERIENCE, AMP_Options_Manager::STORIES_EXPERIENCE ] );
-		AMP_Story_Post_Type::register();
+		AMP_Story_Legacy_Post_Type::register();
 
 		$site_icon_attachment_id   = $this->insert_site_icon_attachment( DIR_TESTDATA . '/images/33772.jpg' );
 		$custom_logo_attachment_id = self::factory()->attachment->create_upload_object( DIR_TESTDATA . '/images/canola.jpg', null );
@@ -1103,12 +1103,12 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 
 		$post_id = self::factory()->post->create(
 			[
-				'post_type'  => AMP_Story_Post_Type::POST_TYPE_SLUG,
+				'post_type'  => AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG,
 				'post_title' => 'Example Story',
 			]
 		);
 		$this->go_to( get_permalink( $post_id ) );
-		$this->assertTrue( is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) );
+		$this->assertTrue( is_singular( AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG ) );
 
 		// Test default fallback icon.
 		$metadata = amp_get_schemaorg_metadata();

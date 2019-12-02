@@ -2,40 +2,30 @@
  * WordPress dependencies
  */
 import { render } from '@wordpress/element';
-import { registerCoreBlocks } from '@wordpress/block-library';
+import domReady from '@wordpress/dom-ready';
 
 /**
  * Internal dependencies
  */
 import App from './app';
+import './style.css'; // This way the general editor styles are loaded before all the component styles.
 
 /**
- * Initializes the block editor in the story edit screen.
+ * Initializes the block editor in the widgets screen.
  *
- * @param {Node} element           DOM element to render the screen in
- * @param {Object} config          Configuration for the editor
+ * @param {string} id       ID of the root element to render the screen in.
+ * @param {Object} config   Story editor settings.
  */
-export function initialize( element, config ) {
-	registerCoreBlocks();
+const initialize = ( id, config ) => {
 	render(
 		<App
 			config={ config }
 		/>,
-		element,
+		document.getElementById( id ),
 	);
-}
+};
 
-if ( window && document.getElementById( 'edit-story' ) ) {
-	const element = document.getElementById( 'edit-story' );
-	const elementConfig = element.getAttribute( 'data-config' ) ? JSON.parse( element.getAttribute( 'data-config' ) ) : {};
-	const settings = window.ampStoriesEditorSettings || {};
-	const fonts = window.ampStoriesFonts || {};
-	const exportSettings = window.ampStoriesExport || {};
-	const config = {
-		...elementConfig,
-		settings,
-		fonts,
-		exportSettings,
-	};
-	initialize( element, config );
-}
+domReady( () => {
+	const { id, config } = window.ampStoriesEditSettings;
+	initialize( id, config );
+} );

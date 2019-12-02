@@ -4,11 +4,6 @@
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 
-/**
- * Internal dependencies
- */
-import { Outline } from '../components/button';
-
 export const Panel = styled.form`
 	display: flex;
 	flex-direction: column;
