@@ -18,6 +18,7 @@ function useLoadStory( {
 	setPostStatus,
 	setPostAuthor,
 	setSlug,
+	setLink,
 	setCurrentPageIndex,
 	clearSelection,
 } ) {
@@ -26,7 +27,7 @@ function useLoadStory( {
 	useEffect( () => {
 		if ( storyId && pages.length === 0 ) {
 			getStoryById( storyId ).then( ( post ) => {
-				const { title: { raw: title }, status, author, slug } = post;
+				const { title: { raw: title }, status, author, slug, link } = post;
 				let { meta: { amp_pages: newPages } } = post;
 
 				// First clear history completely
@@ -36,6 +37,7 @@ function useLoadStory( {
 				setPostStatus( status );
 				setPostAuthor( author );
 				setSlug( slug );
+				setLink( link );
 
 				// If story is empty, create empty page and add to story:
 				if ( newPages.length === 0 ) {
@@ -51,7 +53,7 @@ function useLoadStory( {
 				clearSelection();
 			} );
 		}
-	}, [ storyId, pages, getStoryById, clearHistory, setTitle, setPages, setCurrentPageIndex, clearSelection, setPostStatus ] );
+	}, [ storyId, pages, getStoryById, clearHistory, setTitle, setPages, setCurrentPageIndex, clearSelection, setPostStatus, setPostAuthor, setSlug, setLink ] );
 }
 
 export default useLoadStory;

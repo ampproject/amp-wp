@@ -15,6 +15,7 @@ function useSavePost( {
 	postAuthor,
 	slug,
 	pages,
+	setLink,
 	setPostStatus,
 	setIsSaving,
 } ) {
@@ -23,12 +24,14 @@ function useSavePost( {
 	const savePost = useCallback( () => {
 		if ( ! isSaving ) {
 			setIsSaving( true );
-			saveStoryById( storyId, title, status, pages, postAuthor, slug ).then( () => {
+			saveStoryById( storyId, title, status, pages, postAuthor, slug ).then( ( post ) => {
+				const { status: thisPostStatus, link } = post;
 				setIsSaving( false );
-				setPostStatus( status );
+				setPostStatus( thisPostStatus );
+				setLink( link );
 			} );
 		}
-	}, [ isSaving, setIsSaving, storyId, title, pages, setPostStatus ] );
+	}, [ isSaving, setIsSaving, saveStoryById, storyId, title, status, pages, postAuthor, slug, setPostStatus, setLink ] );
 
 	return savePost;
 }

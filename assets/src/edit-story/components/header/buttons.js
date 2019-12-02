@@ -7,6 +7,7 @@ import styled from 'styled-components';
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -44,6 +45,22 @@ function Redoer() {
 	);
 }
 
+function PreviewButton() {
+	const {
+		state: { isSaving, link },
+	} = useStory();
+
+	const previewButton = () => {
+		const previewLink = addQueryArgs( link, { preview: 'true' } );
+		window.open( previewLink, '_blank' );
+	};
+	return (
+		<Outline onClick={ previewButton } isDisabled={ isSaving }>
+			{ __( 'Preview' ) }
+		</Outline>
+	);
+}
+
 function Publish() {
 	const {
 		state: { isSaving, postStatus },
@@ -68,9 +85,7 @@ function Buttons() {
 				<Redoer />
 			</List>
 			<List>
-				<Outline>
-					{ __( 'Preview' ) }
-				</Outline>
+				<PreviewButton />
 				<Space />
 				<Publish />
 				<Space />

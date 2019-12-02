@@ -34,6 +34,7 @@ function StoryProvider( { storyId, children } ) {
 	// Only update these directly as a response to user or api interactions.
 	const [ pages, setPages ] = useState( [] );
 	const [ title, setTitle ] = useState( '' );
+	const [ link, setLink ] = useState( '' );
 	const [ postStatus, setPostStatus ] = useState( 'draft' );
 	const [ postAuthor, setPostAuthor ] = useState( 0 );
 	const [ slug, setSlug ] = useState( '' );
@@ -56,9 +57,9 @@ function StoryProvider( { storyId, children } ) {
 	const toggleElementIdInSelection = useToggleElementIdInSelection( { selectedElementIds, setSelectedElementIds } );
 	const appendElementToCurrentPage = useAppendElementToCurrentPage( { currentPageIndex, pages, setPages, setSelectedElementIds } );
 	const setPropertiesOnSelectedElements = useSetPropertiesOnSelectedElements( { currentPageIndex, pages, selectedElementIds, setPages } );
-	const savePost = useSavePost( { isSaving, storyId, title, postStatus, postAuthor, slug, pages, setPostStatus,	setIsSaving } );
+	const savePost = useSavePost( { isSaving, storyId, title, postStatus, postAuthor, slug, pages, setLink, setPostStatus, setIsSaving } );
 
-	useLoadStory( { storyId, pages, setPages, setTitle, setPostStatus, setPostAuthor, setSlug, setCurrentPageIndex, clearSelection } );
+	useLoadStory( { storyId, pages, setPages, setTitle, setPostStatus, setPostAuthor, setSlug, setLink, setCurrentPageIndex, clearSelection } );
 	useCurrentPage( { currentPageIndex, pages, setCurrentPage, setCurrentPageNumber } );
 	useHistoryEntry( { currentPageIndex, pages, selectedElementIds } );
 	useHistoryReplay( { setCurrentPageIndex, setPages, setSelectedElementIds } );
@@ -76,6 +77,7 @@ function StoryProvider( { storyId, children } ) {
 			title,
 			postStatus,
 			isSaving,
+			link,
 		},
 		actions: {
 			setCurrentPageByIndex,
@@ -85,6 +87,7 @@ function StoryProvider( { storyId, children } ) {
 			toggleElementIdInSelection,
 			selectElementById,
 			setPropertiesOnSelectedElements,
+			setTitle,
 			savePost,
 		},
 	};
