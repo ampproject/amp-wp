@@ -2,6 +2,8 @@
  * WordPress dependencies
  */
 import { useCallback } from '@wordpress/element';
+import { addQueryArgs } from '@wordpress/url';
+
 /**
  * Internal dependencies
  */
@@ -21,6 +23,16 @@ function useSavePost( {
 } ) {
 	const status = ( postStatus !== 'publish' ) ? 'publish' : postStatus;
 	const { actions: { saveStoryById } } = useAPI();
+
+	const refreshPostEditURL = ( postId ) => {
+		const getPostEditURL = addQueryArgs( 'post.php', { post: postId, action: 'edit' } );
+		window.history.replaceState(
+			{ id: postId },
+			'Post ' + postId,
+			getPostEditURL,
+		);
+	};
+
 	const savePost = useCallback( () => {
 		if ( ! isSaving ) {
 			setIsSaving( true );
@@ -29,6 +41,7 @@ function useSavePost( {
 				setIsSaving( false );
 				setPostStatus( thisPostStatus );
 				setLink( link );
+				refreshPostEditURL( storyId );
 			} );
 		}
 	}, [ isSaving, setIsSaving, saveStoryById, storyId, title, status, pages, postAuthor, slug, setPostStatus, setLink ] );
