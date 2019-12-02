@@ -192,7 +192,6 @@ class AMP_Story_Post_Type {
 		);
 
 		$meta_args = [
-			'auth_callback'  => '__return_true',
 			'type'           => 'array',
 			'object_subtype' => self::POST_TYPE_SLUG,
 			'single'         => true,
@@ -219,6 +218,12 @@ class AMP_Story_Post_Type {
 				],
 			],
 		];
+
+		// Hide the pages data from none logged in users. 
+		if ( ! is_user_logged_in() ) {
+			$meta_args['show_in_rest'] = false;
+		}
+
 		register_meta( 'post', 'amp_pages', $meta_args );
 
 		add_filter( 'post_row_actions', [ __CLASS__, 'remove_classic_editor_link' ], 11, 2 );
