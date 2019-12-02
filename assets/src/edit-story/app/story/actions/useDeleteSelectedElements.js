@@ -4,14 +4,14 @@
 import { useCallback } from '@wordpress/element';
 
 // Delete the elements currently selected.
-function useDeleteCurrentSelection( {
+function useDeleteSelectedElements( {
 	currentPageIndex,
 	pages,
 	selectedElementIds,
 	setPages,
 	setSelectedElementIds,
 } ) {
-	const deleteCurrentSelection = useCallback( () => {
+	const deleteSelectedElements = useCallback( () => {
 		if ( 0 === selectedElementIds.length ) {
 			return false;
 		}
@@ -29,7 +29,7 @@ function useDeleteCurrentSelection( {
 		setSelectedElementIds( [] );
 		return true;
 	}, [ selectedElementIds, setSelectedElementIds, setPages, pages, currentPageIndex ] );
-	return deleteCurrentSelection;
+	return deleteSelectedElements;
 }
 
-export default useDeleteCurrentSelection;
+export default useDeleteSelectedElements;

@@ -24,13 +24,13 @@ const Delete = styled.a`
 	}
 `;
 
-function ActionsPanel( { deleteCurrentSelection } ) {
+function ActionsPanel( { deleteSelectedElements } ) {
 	return (
 		<Panel>
 			<Title>
 				{ 'Actions' }
 			</Title>
-			<Delete onClick={ deleteCurrentSelection } >
+			<Delete onClick={ deleteSelectedElements } >
 				{ 'Remove element' }
 			</Delete>
 		</Panel>
@@ -38,7 +38,7 @@ function ActionsPanel( { deleteCurrentSelection } ) {
 }
 
 ActionsPanel.propTypes = {
-	deleteCurrentSelection: PropTypes.func.isRequired,
+	deleteSelectedElements: PropTypes.func.isRequired,
 };
 
 export default ActionsPanel;
