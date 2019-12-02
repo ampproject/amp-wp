@@ -26,6 +26,7 @@ import useSelectElementById from './actions/useSelectElementById';
 import useAppendElementToCurrentPage from './actions/useAppendElementToCurrentPage';
 import useSetCurrentPageByIndex from './actions/useSetCurrentPageByIndex';
 import useSetPropertiesOnSelectedElements from './actions/useSetPropertiesOnSelectedElements';
+import useSavePost from './actions/useSavePost';
 
 function StoryProvider( { storyId, children } ) {
 	// Story state is stored in these three immutable variables only!
@@ -34,6 +35,7 @@ function StoryProvider( { storyId, children } ) {
 	const [ pages, setPages ] = useState( [] );
 	const [ title, setTitle ] = useState( [] );
 	const [ postStatus, setPostStatus ] = useState( [] );
+	const [ isSaving, setIsSaving ] = useState( false );
 	const [ currentPageIndex, setCurrentPageIndex ] = useState( null );
 	const [ selectedElementIds, setSelectedElementIds ] = useState( [] );
 
@@ -52,6 +54,7 @@ function StoryProvider( { storyId, children } ) {
 	const toggleElementIdInSelection = useToggleElementIdInSelection( { selectedElementIds, setSelectedElementIds } );
 	const appendElementToCurrentPage = useAppendElementToCurrentPage( { currentPageIndex, pages, setPages, setSelectedElementIds } );
 	const setPropertiesOnSelectedElements = useSetPropertiesOnSelectedElements( { currentPageIndex, pages, selectedElementIds, setPages } );
+	const savePost = useSavePost( { isSaving, storyId, title, postStatus, pages, setPostStatus,	setIsSaving } );
 
 	useLoadStory( { storyId, pages, setPages, setTitle, setPostStatus, setCurrentPageIndex, clearSelection } );
 	useCurrentPage( { currentPageIndex, pages, setCurrentPage, setCurrentPageNumber } );
@@ -70,7 +73,7 @@ function StoryProvider( { storyId, children } ) {
 			hasSelection,
 			title,
 			postStatus,
-			storyId,
+			isSaving,
 		},
 		actions: {
 			setCurrentPageByIndex,
@@ -80,8 +83,7 @@ function StoryProvider( { storyId, children } ) {
 			toggleElementIdInSelection,
 			selectElementById,
 			setPropertiesOnSelectedElements,
-			setTitle,
-			setPostStatus,
+			savePost,
 		},
 	};
 

@@ -7,12 +7,11 @@ import styled from 'styled-components';
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useCallback, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import { useAPI, useHistory, useStory } from '../../app';
+import { useHistory, useStory } from '../../app';
 import { Outline, Primary, Undo, Redo } from '../button';
 
 const ButtonList = styled.nav`
@@ -46,25 +45,12 @@ function Redoer() {
 }
 
 function Publish() {
-	const { actions: { saveStoryById } } = useAPI();
 	const {
-		state: { storyId, title, postStatus, pages },
-		actions: { setPostStatus },
+		state: { isSaving, postStatus },
+		actions: { savePost },
 	} = useStory();
-	const [ isSaving, setIsSaving ] = useState( false );
 
-	const status = ( postStatus !== 'publish' ) ? 'publish' : postStatus;
 	const text = ( postStatus !== 'publish' ) ? __( 'Publish' ) : __( 'Update' );
-
-	const savePost = useCallback( () => {
-		if ( ! isSaving ) {
-			setIsSaving( true );
-			saveStoryById( storyId, title, status, pages ).then( () => {
-				setIsSaving( false );
-				setPostStatus( status );
-			} );
-		}
-	}, [ isSaving, saveStoryById, storyId, title, status, pages, setPostStatus ] );
 
 	return (
 		<Primary onClick={ savePost } isDisabled={ isSaving }>
