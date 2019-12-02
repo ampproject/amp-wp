@@ -175,7 +175,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::init()
 	 */
 	public function test_init_with_stories_and_without_theme_support() {
-		if ( ! AMP_Story_Post_Type::has_required_block_capabilities() ) {
+		if ( ! AMP_Story_Legacy_Post_Type::has_required_block_capabilities() ) {
 			$this->markTestSkipped( 'Environment does not support Stories.' );
 		}
 		AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::STORIES_EXPERIENCE ] );
@@ -196,9 +196,9 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		// Ensure that story posts can be validated even when theme support is absent.
 		remove_theme_support( AMP_Theme_Support::SLUG );
 		AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::WEBSITE_EXPERIENCE, AMP_Options_Manager::STORIES_EXPERIENCE ] );
-		AMP_Story_Post_Type::register();
-		if ( post_type_exists( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
-			$post = $this->factory()->post->create( [ 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ] );
+		AMP_Story_Legacy_Post_Type::register();
+		if ( post_type_exists( AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG ) ) {
+			$post = $this->factory()->post->create( [ 'post_type' => AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG ] );
 			$this->assertTrue( AMP_Validation_Manager::post_supports_validation( $post ) );
 		}
 
@@ -1783,9 +1783,9 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::WEBSITE_EXPERIENCE, AMP_Options_Manager::STORIES_EXPERIENCE ] );
 		$this->assertTrue( AMP_Options_Manager::is_website_experience_enabled() );
 		$this->assertTrue( AMP_Options_Manager::is_stories_experience_enabled() );
-		AMP_Story_Post_Type::register();
-		if ( post_type_exists( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
-			$post = $this->factory()->post->create_and_get( [ 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ] );
+		AMP_Story_Legacy_Post_Type::register();
+		if ( post_type_exists( AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG ) ) {
+			$post = $this->factory()->post->create_and_get( [ 'post_type' => AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG ] );
 			AMP_Validation_Manager::enqueue_block_validation();
 			$this->assertContains( $slug, wp_scripts()->queue );
 		}

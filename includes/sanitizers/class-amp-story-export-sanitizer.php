@@ -97,7 +97,7 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 					$args = [
 						$this->args['canonical_url'],
 						'assets',
-						AMP_Story_Post_Type::export_image_basename( $image_url ),
+						AMP_Story_Legacy_Post_Type::export_image_basename( $image_url ),
 					];
 
 					$metadata->image->url = implode( '/', $args );
@@ -108,7 +108,7 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 					$args = [
 						$this->args['canonical_url'],
 						'assets',
-						AMP_Story_Post_Type::export_image_basename( $logo_url ),
+						AMP_Story_Legacy_Post_Type::export_image_basename( $logo_url ),
 					];
 
 					$metadata->publisher->logo->url = implode( '/', $args );
@@ -171,7 +171,7 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 				$args = [
 					$update_path,
 					'assets',
-					AMP_Story_Post_Type::export_image_basename( $asset ),
+					AMP_Story_Legacy_Post_Type::export_image_basename( $asset ),
 				];
 				return implode( '/', $args );
 			}
