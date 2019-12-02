@@ -276,7 +276,7 @@ class AMP_Story_Post_Type {
 		wp_enqueue_style(
 			self::AMP_STORIES_STYLE_HANDLE,
 			amp_get_asset_url( 'css/amp-edit-story-compiled.css' ),
-			[],
+			[ 'wp-components' ],
 			AMP__VERSION
 		);
 

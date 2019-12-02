@@ -8,6 +8,7 @@ import styled from 'styled-components';
  */
 import { __ } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
+import { Spinner } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -76,6 +77,14 @@ function Publish() {
 	);
 }
 
+function Loading() {
+	const {
+		state: { isSaving },
+	} = useStory();
+
+	return ( isSaving ) ? <Spinner /> : <Space />;
+}
+
 function Buttons() {
 	return (
 		<ButtonList>
@@ -85,6 +94,7 @@ function Buttons() {
 				<Redoer />
 			</List>
 			<List>
+				<Loading />
 				<PreviewButton />
 				<Space />
 				<Publish />
