@@ -69,7 +69,7 @@ the_post();
 		</amp-story>
 
 		<?php
-		// Note that \AMP_Story_Post_Type::filter_frontend_print_styles_array() will limit which styles are printed.
+		// Note that \AMP_Story_Legacy_Post_Type::filter_frontend_print_styles_array() will limit which styles are printed.
 		print_late_styles();
 		?>
 	</body>

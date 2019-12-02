@@ -87,11 +87,11 @@ class AMP_Story_Templates {
 		if ( isset( $referer['query'] ) ) {
 			$parsed_args = wp_parse_args( $referer['query'] );
 
-			if ( isset( $parsed_args['post_type'] ) && AMP_Story_Post_Type::POST_TYPE_SLUG === $parsed_args['post_type'] ) {
+			if ( isset( $parsed_args['post_type'] ) && AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG === $parsed_args['post_type'] ) {
 				$is_story_page = true; // This is in the editor for a new AMP Story.
 			}
 
-			if ( isset( $parsed_args['post'] ) && AMP_Story_Post_Type::POST_TYPE_SLUG === get_post_type( $parsed_args['post'] ) ) {
+			if ( isset( $parsed_args['post'] ) && AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG === get_post_type( $parsed_args['post'] ) ) {
 				$is_story_page = true; // This is in the editor for an existing AMP Story.
 			}
 		}

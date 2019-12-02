@@ -39,11 +39,66 @@ const sharedConfig = {
 	},
 };
 
-const ampStories = {
+const ampStoriesLegacy = {
 	...defaultConfig,
 	...sharedConfig,
 	entry: {
 		'amp-stories-editor': './assets/src/stories-editor/index.js',
+	},
+	output: {
+		path: path.resolve( process.cwd(), 'assets', 'js' ),
+		filename: '[name].js',
+	},
+	module: {
+		...defaultConfig.module,
+		rules: [
+			...defaultConfig.module.rules,
+			{
+				test: /\.svg$/,
+				loader: 'svg-inline-loader',
+			},
+			{
+				test: /\.css$/,
+				use: [
+					MiniCssExtractPlugin.loader,
+					'css-loader',
+					'postcss-loader',
+				],
+			},
+		],
+	},
+	plugins: [
+		...defaultConfig.plugins,
+		new MiniCssExtractPlugin( {
+			filename: '../css/[name]-compiled.css',
+		} ),
+		new RtlCssPlugin( {
+			filename: '../css/[name]-compiled-rtl.css',
+		} ),
+		new WebpackBar( {
+			name: 'AMP Stories ( Legacy )',
+			color: '#ffd7d4',
+		} ),
+	],
+	optimization: {
+		...sharedConfig.optimization,
+		splitChunks: {
+			cacheGroups: {
+				stories: {
+					name: 'amp-stories-editor',
+					test: /\.css$/,
+					chunks: 'all',
+					enforce: true,
+				},
+			},
+		},
+	},
+};
+
+const ampStories = {
+	...defaultConfig,
+	...sharedConfig,
+	entry: {
 		'amp-edit-story': './assets/src/edit-story/index.js',
 	},
 	output: {
@@ -86,7 +141,7 @@ const ampStories = {
 		splitChunks: {
 			cacheGroups: {
 				stories: {
-					name: 'amp-stories-editor',
+					name: 'amp-edit-story',
 					test: /\.css$/,
 					chunks: 'all',
 					enforce: true,
@@ -245,6 +300,7 @@ const wpPolyfills = {
 
 module.exports = [
 	ampStories,
+	ampStoriesLegacy,
 	ampValidation,
 	blockEditor,
 	classicEditor,
