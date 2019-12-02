@@ -2263,19 +2263,26 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$guessed_urls[] = $stylesheet_base_url . sprintf( 'fonts/%s.%s', strtolower( $font_basename ), $extension );
 				}
 
-				// As fallback, look for fonts bundled with the AMP plugin.
-				if ( $font_basename ) {
-					$guessed_urls[] = plugin_dir_url( AMP__FILE__ ) . sprintf( 'assets/fonts/%s.%s', strtolower( $font_basename ), $extension );
-				}
-
 				// Find the font file that exists, and then replace the data: URL with the external URL for the font.
 				foreach ( $guessed_urls as $guessed_url ) {
 					$path = $this->get_validated_url_file_path( $guessed_url, [ 'woff', 'woff2', 'ttf', 'otf', 'svg' ] );
 					if ( ! is_wp_error( $path ) ) {
 						$data_url->getURL()->setString( $guessed_url );
 						$converted_count++;
-						break;
+						continue 2;
 					}
+				}
+
+				// As fallback, look for fonts bundled with the AMP plugin.
+				$font_filename = sprintf( '%s.%s', strtolower( $font_basename ), $extension );
+				$bundled_fonts = [
+					'nonbreakingspaceoverride.woff',
+					'nonbreakingspaceoverride.woff2',
+					'genericons.woff',
+				];
+				if ( in_array( $font_filename, $bundled_fonts, true ) ) {
+					$data_url->getURL()->setString( plugin_dir_url( AMP__FILE__ ) . "assets/fonts/$font_filename" );
+					$converted_count++;
 				}
 			} // End foreach $source_data_url_objects.
 		} // End foreach $src_properties.
