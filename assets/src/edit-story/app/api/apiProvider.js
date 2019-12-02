@@ -24,12 +24,14 @@ function APIProvider( { children } ) {
 	);
 
 	const saveStoryById = useCallback(
-		( storyId, title, status, pages ) => {
+		( storyId, title, status, pages, author, slug ) => {
 			return apiFetch( {
 				path: `${ stories }/${ storyId }`,
 				data: {
 					title,
 					status,
+					author,
+					slug,
 					meta: {
 						amp_pages: pages,
 					},

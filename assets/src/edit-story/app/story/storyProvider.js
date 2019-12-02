@@ -33,8 +33,10 @@ function StoryProvider( { storyId, children } ) {
 	// Don't update 1 of these in an effect based off another base variable.
 	// Only update these directly as a response to user or api interactions.
 	const [ pages, setPages ] = useState( [] );
-	const [ title, setTitle ] = useState( [] );
-	const [ postStatus, setPostStatus ] = useState( [] );
+	const [ title, setTitle ] = useState( '' );
+	const [ postStatus, setPostStatus ] = useState( 'draft' );
+	const [ postAuthor, setPostAuthor ] = useState( 0 );
+	const [ slug, setSlug ] = useState( '' );
 	const [ isSaving, setIsSaving ] = useState( false );
 	const [ currentPageIndex, setCurrentPageIndex ] = useState( null );
 	const [ selectedElementIds, setSelectedElementIds ] = useState( [] );
@@ -54,9 +56,9 @@ function StoryProvider( { storyId, children } ) {
 	const toggleElementIdInSelection = useToggleElementIdInSelection( { selectedElementIds, setSelectedElementIds } );
 	const appendElementToCurrentPage = useAppendElementToCurrentPage( { currentPageIndex, pages, setPages, setSelectedElementIds } );
 	const setPropertiesOnSelectedElements = useSetPropertiesOnSelectedElements( { currentPageIndex, pages, selectedElementIds, setPages } );
-	const savePost = useSavePost( { isSaving, storyId, title, postStatus, pages, setPostStatus,	setIsSaving } );
+	const savePost = useSavePost( { isSaving, storyId, title, postStatus, postAuthor, slug, pages, setPostStatus,	setIsSaving } );
 
-	useLoadStory( { storyId, pages, setPages, setTitle, setPostStatus, setCurrentPageIndex, clearSelection } );
+	useLoadStory( { storyId, pages, setPages, setTitle, setPostStatus, setPostAuthor, setSlug, setCurrentPageIndex, clearSelection } );
 	useCurrentPage( { currentPageIndex, pages, setCurrentPage, setCurrentPageNumber } );
 	useHistoryEntry( { currentPageIndex, pages, selectedElementIds } );
 	useHistoryReplay( { setCurrentPageIndex, setPages, setSelectedElementIds } );
