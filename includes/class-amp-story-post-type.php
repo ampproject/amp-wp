@@ -219,7 +219,7 @@ class AMP_Story_Post_Type {
 			],
 		];
 
-		// Hide the pages data from none logged in users. 
+		// Hide the pages data from none logged in users.
 		if ( ! is_user_logged_in() ) {
 			$meta_args['show_in_rest'] = false;
 		}
