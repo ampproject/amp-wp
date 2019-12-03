@@ -14,6 +14,8 @@ use Amp\AmpWP\Tests\PrivateAccess;
  */
 class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 
+	use PrivateAccess;
+
 	/**
 	 * Set up.
 	 */
