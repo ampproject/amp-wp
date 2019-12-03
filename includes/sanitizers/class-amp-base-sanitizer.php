@@ -82,7 +82,7 @@ abstract class AMP_Base_Sanitizer {
 	 *
 	 * @var array
 	 */
-	private $should_not_removed_nodes = [];
+	private $nodes_to_keep = [];
 
 	/**
 	 * AMP_Base_Sanitizer constructor.
@@ -439,7 +439,7 @@ abstract class AMP_Base_Sanitizer {
 		}
 
 		// Prevent double-reporting nodes that are rejected for sanitization.
-		if ( isset( $this->should_not_removed_nodes[ $node->nodeName ] ) && in_array( $node, $this->should_not_removed_nodes[ $node->nodeName ], true ) ) {
+		if ( isset( $this->nodes_to_keep[ $node->nodeName ] ) && in_array( $node, $this->nodes_to_keep[ $node->nodeName ], true ) ) {
 			return false;
 		}
 
@@ -447,7 +447,7 @@ abstract class AMP_Base_Sanitizer {
 		if ( $should_remove ) {
 			$node->parentNode->removeChild( $node );
 		} else {
-			$this->should_not_removed_nodes[ $node->nodeName ][] = $node;
+			$this->nodes_to_keep[ $node->nodeName ][] = $node;
 		}
 		return $should_remove;
 	}
