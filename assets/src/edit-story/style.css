@@ -1,4 +1,4 @@
-.edit-story {
+.edit-story #edit-story {
 	background-color: #191c28;
 }
 
@@ -9,4 +9,8 @@
 
 .edit-story #wpfooter {
 	display: none;
+}
+
+.edit-story #edit-story .components-spinner {
+	float: none;
 }

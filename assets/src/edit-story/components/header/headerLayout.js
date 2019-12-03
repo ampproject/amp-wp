@@ -42,15 +42,18 @@ const ButtonCell = styled.header`
 `;
 
 function HeaderLayout() {
-	const { state: { title }, actions: { setTitle } } = useStory();
+	const { state: { title, postStatus }, actions: { setTitle } } = useStory();
+	// TODO Make sure that Auto Draft checks translations.
+	const titleFormatted = ( postStatus === 'auto-draft' && title === 'Auto Draft' ) ? '' : title;
 
 	return (
 		<Background>
 			<Head>
 				<Title
-					value={ title }
+					value={ titleFormatted }
 					type={ 'text' }
 					onChange={ ( evt ) => setTitle( evt.target.value ) }
+					placeholder={ 'Add title' }
 				/>
 			</Head>
 			<ButtonCell>
