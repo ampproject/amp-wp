@@ -142,6 +142,7 @@ class AMP_Story_Post_Type {
 		add_filter( 'show_admin_bar', [ __CLASS__, 'show_admin_bar' ] );
 		add_filter( 'replace_editor', [ __CLASS__, 'replace_editor' ], 10, 2 );
 		add_filter( 'admin_body_class', [ __CLASS__, 'admin_body_class' ], 99 );
+		add_filter( 'wp_kses_allowed_html', [ __CLASS__, 'filter_kses_allowed_html' ], 10, 2 );
 	}
 
 	/**
@@ -304,5 +305,41 @@ class AMP_Story_Post_Type {
 
 		$class .= ' edit-story ';
 		return $class;
+	}
+
+	/**
+	 * Filter the allowed tags for KSES to allow for amp-story children.
+	 *
+	 * @param array $allowed_tags Allowed tags.
+	 * @return array Allowed tags.
+	 */
+	public static function filter_kses_allowed_html( $allowed_tags ) {
+		$story_components = [
+			'amp-story-page',
+			'amp-story-grid-layer',
+			'amp-story-cta-layer',
+			'amp-story-page-attachment',
+			'amp-img',
+			'amp-video',
+			'img',
+		];
+		foreach ( $story_components as $story_component ) {
+			$attributes = array_fill_keys( array_keys( AMP_Allowed_Tags_Generated::get_allowed_attributes() ), true );
+			$rule_specs = AMP_Allowed_Tags_Generated::get_allowed_tag( $story_component );
+			foreach ( $rule_specs as $rule_spec ) {
+				$attributes = array_merge( $attributes, array_fill_keys( array_keys( $rule_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ] ), true ) );
+			}
+			$allowed_tags[ $story_component ] = $attributes;
+		}
+
+		foreach ( $allowed_tags as &$allowed_tag ) {
+			$allowed_tag['animate-in']           = true;
+			$allowed_tag['animate-in-duration']  = true;
+			$allowed_tag['animate-in-delay']     = true;
+			$allowed_tag['animate-in-after']     = true;
+			$allowed_tag['layout']               = true;
+		}
+
+		return $allowed_tags;
 	}
 }
