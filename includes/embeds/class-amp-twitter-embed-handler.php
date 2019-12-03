@@ -46,7 +46,6 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Registers embed.
 	 */
 	public function register_embed() {
-		add_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ], 10, 2 );
 		add_shortcode( 'tweet', [ $this, 'shortcode' ] ); // Note: This is a Jetpack shortcode.
 		wp_embed_register_handler( 'amp-twitter-timeline', self::URL_PATTERN_TIMELINE, [ $this, 'oembed_timeline' ], -1 );
 	}
@@ -55,7 +54,6 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Unregisters embed.
 	 */
 	public function unregister_embed() {
-		remove_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ] );
 		remove_shortcode( 'tweet' ); // Note: This is a Jetpack shortcode.
 		wp_embed_unregister_handler( 'amp-twitter-timeline', -1 );
 	}
@@ -88,6 +86,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 			),
 			$cache
 		);
+
 		return $cache;
 	}
 
@@ -141,7 +140,9 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Render oEmbed.
 	 *
-	 * @deprecated Since 1.1 as now the sanitize_raw_embeds() is used exclusively, allowing the original oEmbed response to be rapped by amp-twitter.
+	 * @deprecated Since 1.1 as now the sanitize_raw_embeds() is used exclusively, allowing the
+	 * original oEmbed response to be wrapped with `amp-twitter`.
+	 *
 	 * @see \WP_Embed::shortcode()
 	 *
 	 * @param array $matches URL pattern matches.
