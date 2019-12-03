@@ -904,9 +904,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$element_id      = (string) $node->getAttribute( 'id' );
 			$schemeless_href = $remove_url_scheme( $node->getAttribute( 'href' ) );
 			$is_plugin_asset = (
-				0 === strpos( $schemeless_href, $remove_url_scheme( trailingslashit( plugins_url( WP_PLUGIN_DIR ) ) ) )
+				0 === strpos( $schemeless_href, $remove_url_scheme( trailingslashit( WP_PLUGIN_URL ) ) )
 				||
-				0 === strpos( $schemeless_href, $remove_url_scheme( trailingslashit( plugins_url( WPMU_PLUGIN_URL ) ) ) )
+				0 === strpos( $schemeless_href, $remove_url_scheme( trailingslashit( WPMU_PLUGIN_URL ) ) )
 			);
 			$style_handle    = null;
 			if ( preg_match( '/^(.+)-css$/', $element_id, $matches ) ) {
@@ -956,15 +956,22 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$priority += $print_priority_base;
 			}
 		} elseif ( $node instanceof DOMElement && 'style' === $node->nodeName ) {
-			$element_id = (string) $node->getAttribute( 'id' );
-			if ( 'admin-bar-inline-css' === $element_id ) {
-				$priority = $admin_bar_priority;
-			} elseif ( 'wp-custom-css' === $element_id ) {
-				// Additional CSS from Customizer.
-				$priority = 60;
-			} else {
-				// Other style elements, including from Recent Comments widget.
-				$priority = 70;
+			switch ( (string) $node->getAttribute( 'id' ) ) {
+				case 'twentytwenty-style-inline-css':
+					// @todo The core theme sanitizer should be able to provide this instead of hardcoding it here.
+					// Not easily implementable right now, we'll wait for the middleware make-over.
+					$priority = 2;
+					break;
+				case 'admin-bar-inline-css':
+					$priority = $admin_bar_priority;
+					break;
+				case 'wp-custom-css':
+					// Additional CSS from Customizer.
+					$priority = 60;
+					break;
+				default:
+					// Other style elements, including from Recent Comments widget.
+					$priority = 70;
 			}
 
 			if ( 'print' === $node->getAttribute( 'media' ) ) {
