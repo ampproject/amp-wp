@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use Amp\AmpWP\Tests\PrivateAccess;
+
 /**
  * Class AMP_Img_Sanitizer_Test
  *
@@ -517,16 +519,13 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 	 *
 	 * @param string $source The source markup to test.
 	 * @param string $expected The expected return of the tested function, using the source markup.
-	 * @throws ReflectionException If invoking the private method fails.
 	 */
 	public function test_does_node_have_block_class( $source, $expected ) {
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Img_Sanitizer( $dom );
 		$figures   = $dom->getElementsByTagName( 'figure' );
-		$method    = new ReflectionMethod( $sanitizer, 'does_node_have_block_class' );
 
-		$method->setAccessible( true );
-		$this->assertEquals( $expected, $method->invoke( $sanitizer, $figures->item( 0 ) ) );
+		$this->assertEquals( $expected, $this->call_private_method( $sanitizer, 'does_node_have_block_class', [ $figures->item( 0 ) ] ) );
 	}
 
 	/**

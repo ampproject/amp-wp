@@ -5,39 +5,14 @@
  * @package AMP
  */
 
+use Amp\AmpWP\Tests\PrivateAccess;
+
 /**
  * Class AMP_Core_Theme_Sanitizer_Test
  */
 class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 
-	/**
-	 * Call a private method as if it was public.
-	 *
-	 * @param object $object      Object instance to call the method on.
-	 * @param string $method_name Name of the method to call.
-	 * @param array  $args        Optional. Array of arguments to pass to the method.
-	 * @return mixed Return value of the method call.
-	 * @throws ReflectionException If the object could not be reflected upon.
-	 */
-	private function call_private_method( $object, $method_name, $args = [] ) {
-		$method = ( new ReflectionClass( $object ) )->getMethod( $method_name );
-		$method->setAccessible( true );
-		return $method->invokeArgs( $object, $args );
-	}
-
-	/**
-	 * Set a private property as if it was public.
-	 *
-	 * @param object $object        Object instance to the property of.
-	 * @param string $property_name Name of the property to set.
-	 * @param mixed  $value         Value to set the property to.
-	 * @throws ReflectionException If the object could not be reflected upon.
-	 */
-	private function set_private_property( $object, $property_name, $value ) {
-		$property = ( new ReflectionClass( $object ) )->getProperty( $property_name );
-		$property->setAccessible( true );
-		$property->setValue( $object, $value );
-	}
+	use PrivateAccess;
 
 	public function get_xpath_from_css_selector_data() {
 		return [
