@@ -2429,13 +2429,15 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			// Dashicons handle.
 			[ AMP_DOM_Utils::create_node( $dom, 'link', [ 'id' => 'dashicons-css' ] ), 90 ],
 			// Parent theme styles.
-			[ AMP_DOM_Utils::create_node( $dom, 'link', [ 'href' => '//example.org/wp-content/themes/parent-theme/' ] ), 1 ],
+			[ AMP_DOM_Utils::create_node( $dom, 'link', [ 'href' => '//example.org/wp-content/themes/parent-theme/style.css' ] ), 1 ],
 			// Child theme styles.
-			[ AMP_DOM_Utils::create_node( $dom, 'link', [ 'href' => '//example.org/wp-content/themes/child-theme/' ] ), 10 ],
+			[ AMP_DOM_Utils::create_node( $dom, 'link', [ 'href' => '//example.org/wp-content/themes/child-theme/style.css' ] ), 10 ],
 			// Core frontend handle.
 			[ AMP_DOM_Utils::create_node( $dom, 'link', [ 'id' => 'wp-block-library-css' ] ), 20 ],
 			// Plugin asset.
-			[ AMP_DOM_Utils::create_node( $dom, 'link', [ 'href' => '//example.org/wp-content/plugins/some-plugin' ] ), 30 ],
+			[ AMP_DOM_Utils::create_node( $dom, 'link', [ 'href' => '//example.org/wp-content/plugins/some-plugin/style.css' ] ), 30 ],
+			// Query monitor plugin asset.
+			[ AMP_DOM_Utils::create_node( $dom, 'link', [ 'href' => '//example.org/wp-content/plugins/query-monitor/style.css' ] ), 150 ],
 			// Other styles from wp-includes.
 			[ AMP_DOM_Utils::create_node( $dom, 'link', [ 'href' => '//example.org/wp-includes/' ] ), 40 ],
 			// All other links.
@@ -2490,7 +2492,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					$dom,
 					'link',
 					[
-						'href' => '//example.org/wp-content/themes/parent-theme/',
+						'href' => '//example.org/wp-content/themes/parent-theme/style.css',
 						'media' => 'print',
 					]
 				),
@@ -2502,7 +2504,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					$dom,
 					'link',
 					[
-						'href' => '//example.org/wp-content/themes/child-theme/',
+						'href' => '//example.org/wp-content/themes/child-theme/style.css',
 						'media' => 'print',
 					]
 				),
@@ -2526,11 +2528,23 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					$dom,
 					'link',
 					[
-						'href' => '//example.org/wp-content/plugins/some-plugin',
+						'href' => '//example.org/wp-content/plugins/some-plugin/style.css',
 						'media' => 'print',
 					]
 				),
 				130,
+			],
+			// Query monitor plugin asset for print.
+			[
+				AMP_DOM_Utils::create_node(
+					$dom,
+					'link',
+					[
+						'href' => '//example.org/wp-content/plugins/query-monitor/style.css',
+						'media' => 'print',
+					]
+				),
+				250,
 			],
 			// Other styles from wp-includes for print.
 			[

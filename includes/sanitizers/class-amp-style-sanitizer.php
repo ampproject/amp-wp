@@ -903,12 +903,21 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		if ( $node instanceof DOMElement && 'link' === $node->nodeName ) {
 			$element_id      = (string) $node->getAttribute( 'id' );
 			$schemeless_href = $remove_url_scheme( $node->getAttribute( 'href' ) );
-			$is_plugin_asset = (
-				0 === strpos( $schemeless_href, $remove_url_scheme( trailingslashit( WP_PLUGIN_URL ) ) )
-				||
-				0 === strpos( $schemeless_href, $remove_url_scheme( trailingslashit( WPMU_PLUGIN_URL ) ) )
-			);
-			$style_handle    = null;
+
+			$plugin = null;
+			if ( preg_match(
+				sprintf(
+					'#^(?:%s|%s)(?<plugin>[^/]+)#i',
+					preg_quote( $remove_url_scheme( trailingslashit( WP_PLUGIN_URL ) ), '#' ),
+					preg_quote( $remove_url_scheme( trailingslashit( WPMU_PLUGIN_URL ) ), '#' )
+				),
+				$schemeless_href,
+				$matches
+			) ) {
+				$plugin = $matches['plugin'];
+			}
+
+			$style_handle = null;
 			if ( preg_match( '/^(.+)-css$/', $element_id, $matches ) ) {
 				$style_handle = $matches[1];
 			}
@@ -921,6 +930,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				'mediaelement',
 				'wp-mediaelement',
 				'thickbox',
+			];
+			$low_priority_plugins  = [
+				'query-monitor',
 			];
 
 			if ( in_array( $style_handle, $non_amp_handles, true ) ) {
@@ -941,9 +953,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			} elseif ( in_array( $style_handle, $core_frontend_handles, true ) ) {
 				// Styles from wp-includes which are enqueued for themes are next highest priority.
 				$priority = 20;
-			} elseif ( $is_plugin_asset ) {
-				// Styles from plugins are next-highest priority.
-				$priority = 30;
+			} elseif ( $plugin ) {
+				// Styles from plugins are next-highest priority, unless they are in the list of low-priority plugins.
+				$priority = in_array( $plugin, $low_priority_plugins, true ) ? 150 : 30;
 			} elseif ( 0 === strpos( $schemeless_href, $remove_url_scheme( includes_url() ) ) ) {
 				// Other styles from wp-includes come next.
 				$priority = 40;
