@@ -22,12 +22,12 @@ const getStoryMarkupFromPages = ( pages ) => {
 						};
 						// @todo this should be redone by using dynamic tag.
 						if ( 'image' === type ) {
-							return <amp-img style={ { ...style } } src={ src } layout="fixed" width={ width } height={ height } />;
+							return <amp-img key={ 'el' + id } style={ { ...style } } src={ src } layout="fixed" width={ width } height={ height } />;
 						}
 						style.width = width + 'px';
 						style.height = height + 'px';
 						return (
-							<div style={ { ...style } }>
+							<div key={ 'el' + id } style={ { ...style } }>
 								{ content }
 							</div>
 						);

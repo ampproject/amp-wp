@@ -185,13 +185,16 @@ class AMP_Story_Post_Type {
 			}
 		);
 
-		add_filter( 'the_content',
+		add_filter(
+			'the_content',
 			static function( $content ) {
 				if ( is_singular( self::POST_TYPE_SLUG ) ) {
 					remove_filter( 'the_content', 'wpautop' );
 				}
 				return $content;
-		}, 0 );
+			},
+			0
+		);
 
 		// @todo Check if there's something to skip in the new version.
 		add_action( 'amp_story_head', 'amp_add_generator_metadata' );
@@ -422,11 +425,11 @@ class AMP_Story_Post_Type {
 		}
 
 		foreach ( $allowed_tags as &$allowed_tag ) {
-			$allowed_tag['animate-in']           = true;
-			$allowed_tag['animate-in-duration']  = true;
-			$allowed_tag['animate-in-delay']     = true;
-			$allowed_tag['animate-in-after']     = true;
-			$allowed_tag['layout']               = true;
+			$allowed_tag['animate-in']          = true;
+			$allowed_tag['animate-in-duration'] = true;
+			$allowed_tag['animate-in-delay']    = true;
+			$allowed_tag['animate-in-after']    = true;
+			$allowed_tag['layout']              = true;
 		}
 
 		return $allowed_tags;
