@@ -43,10 +43,11 @@ class AMP_Story_Legacy_Post_Type {
 
 	/**
 	 * The rewrite slug for this post type.
+	 * @todo Figure out a suitable rewrite slug for this.
 	 *
 	 * @var string
 	 */
-	const REWRITE_SLUG = 'stories';
+	const REWRITE_SLUG = 'amp-stories';
 
 	/**
 	 * AMP Stories script handle.
@@ -261,7 +262,7 @@ class AMP_Story_Legacy_Post_Type {
 		add_filter( 'print_styles_array', [ __CLASS__, 'filter_frontend_print_styles_array' ] );
 		add_filter( 'print_styles_array', [ __CLASS__, 'filter_editor_print_styles_array' ] );
 
-		// Select the single-amp_story.php template for AMP Stories.
+		// Select the single-legacy_amp_story.php template for AMP Stories.
 		add_filter( 'template_include', [ __CLASS__, 'filter_template_include' ] );
 
 		// Get an embed template for this post type.
@@ -1082,7 +1083,7 @@ class AMP_Story_Legacy_Post_Type {
 	 */
 	public static function filter_template_include( $template ) {
 		if ( is_singular( self::POST_TYPE_SLUG ) && ! is_embed() ) {
-			$template = AMP__DIR__ . '/includes/templates/single-amp_story.php';
+			$template = AMP__DIR__ . '/includes/templates/single-legacy_amp_story.php';
 		}
 		return $template;
 	}

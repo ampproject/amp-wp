@@ -1,11 +1,41 @@
 /**
  * WordPress dependencies
  */
-import { useCallback } from '@wordpress/element';
+import { useCallback, renderToString } from '@wordpress/element';
 /**
  * Internal dependencies
  */
 import { useAPI } from '../../api';
+
+const getStoryMarkupFromPages = ( pages ) => {
+	// @todo look into: We should rather use renderToStaticMarkup here, however, it doesn't seem to be exposed via @wordpress/element.
+	const markup = pages.map( ( page ) => {
+		const { id } = page;
+		return renderToString(
+			<amp-story-page id={ id }>
+				<amp-story-grid-layer template="vertical">
+					{ page.elements.map( ( { type, src, width, height, content } ) => {
+						const style = {
+							position: 'absolute',
+						};
+						// @todo this should be redone by using dynamic tag.
+						if ( 'image' === type ) {
+							return <amp-img style={ { ...style } } src={ src } layout="fixed" width={ width } height={ height } />;
+						}
+						style.width = width + 'px';
+						style.height = height + 'px';
+						return (
+							<div style={ { ...style } }>
+								{ content }
+							</div>
+						);
+					} ) }
+				</amp-story-grid-layer>
+			</amp-story-page>,
+		);
+	} );
+	return markup.join();
+};
 
 function useSavePost( {
 	isSaving,
@@ -24,7 +54,8 @@ function useSavePost( {
 	const savePost = useCallback( () => {
 		if ( ! isSaving ) {
 			setIsSaving( true );
-			saveStoryById( storyId, title, status, pages, postAuthor, slug ).then( ( post ) => {
+			const content = getStoryMarkupFromPages( pages );
+			saveStoryById( storyId, title, status, pages, postAuthor, slug, content ).then( ( post ) => {
 				const { status: thisPostStatus, link } = post;
 				setIsSaving( false );
 				setPostStatus( thisPostStatus );
