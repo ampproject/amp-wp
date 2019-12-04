@@ -32,7 +32,7 @@
     "@babel/plugin-proposal-class-properties": "7.7.4",
     "@babel/plugin-proposal-object-rest-spread": "7.6.2",
     "@babel/plugin-transform-react-jsx": "7.7.4",
-    "@wordpress/api-fetch": "3.6.4",
+    "@wordpress/api-fetch": "3.7.0",
     "@wordpress/babel-preset-default": "4.6.2",
     "@wordpress/blob": "2.5.1",
     "@wordpress/block-editor": "3.2.3",
