@@ -46,7 +46,6 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Registers embed.
 	 */
 	public function register_embed() {
-		add_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ], 10, 2 );
 		wp_embed_register_handler( 'amp-twitter-timeline', self::URL_PATTERN_TIMELINE, [ $this, 'oembed_timeline' ], -1 );
 	}
 
@@ -54,7 +53,6 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Unregisters embed.
 	 */
 	public function unregister_embed() {
-		remove_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ] );
 		wp_embed_unregister_handler( 'amp-twitter-timeline', -1 );
 	}
 
@@ -92,7 +90,10 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Render oEmbed.
 	 *
-	 * @deprecated Shortcode support has been moved to Jetpack.
+	 * @deprecated Since 1.1 as now the sanitize_raw_embeds() is used exclusively, allowing the
+	 *             original oEmbed response to be wrapped with `amp-twitter`.
+	 *
+	 * @see \WP_Embed::shortcode()
 	 *
 	 * @return string Rendered oEmbed.
 	 */
@@ -269,7 +270,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Removes Twitter's embed <script> tag.
 	 *
-	 * @param DOMElement $node The DOMNode to whose sibling is the instagram script.
+	 * @param DOMElement $node The DOMNode to whose sibling is the Twitter script.
 	 */
 	private function sanitize_embed_script( $node ) {
 		$next_element_sibling = $node->nextSibling;
