@@ -3140,45 +3140,46 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		unset( $pending_stylesheet );
 
-		// Sort stylesheets by their priority.
+		// Determine which stylesheets are included based on their priorities.
+		$pending_stylesheet_indices = array_keys( $this->pending_stylesheets );
 		usort(
-			$this->pending_stylesheets,
-			static function ( $a, $b ) {
-				return $a['priority'] - $b['priority'];
+			$pending_stylesheet_indices,
+			function ( $a, $b ) {
+				return $this->pending_stylesheets[ $a ]['priority'] - $this->pending_stylesheets[ $b ]['priority'];
 			}
 		);
 
 		$current_concatenated_size = 0;
-		foreach ( $this->pending_stylesheets as $index => $pending_stylesheet ) {
-			if ( $group !== $pending_stylesheet['group'] ) {
+		foreach ( $pending_stylesheet_indices as $i ) {
+			if ( $group !== $this->pending_stylesheets[ $i ]['group'] ) {
 				continue;
 			}
 
 			// Skip duplicates.
-			if ( false === $pending_stylesheet['included'] ) {
+			if ( false === $this->pending_stylesheets[ $i ]['included'] ) {
 				continue;
 			}
 
 			// Report validation error if size is now too big.
-			if ( $current_concatenated_size + $pending_stylesheet['size'] > $max_bytes ) {
+			if ( $current_concatenated_size + $this->pending_stylesheets[ $i ]['size'] > $max_bytes ) {
 				$validation_error = [
 					'code' => 'excessive_css',
 					'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 				];
-				if ( isset( $pending_stylesheet['sources'] ) ) {
-					$validation_error['sources'] = $pending_stylesheet['sources'];
+				if ( isset( $this->pending_stylesheets[ $i ]['sources'] ) ) {
+					$validation_error['sources'] = $this->pending_stylesheets[ $i ]['sources'];
 				}
 
-				if ( $this->should_sanitize_validation_error( $validation_error, wp_array_slice_assoc( $pending_stylesheet, [ 'node' ] ) ) ) {
-					$this->pending_stylesheets[ $index ]['included'] = false;
+				if ( $this->should_sanitize_validation_error( $validation_error, wp_array_slice_assoc( $this->pending_stylesheets[ $i ], [ 'node' ] ) ) ) {
+					$this->pending_stylesheets[ $i ]['included'] = false;
 					continue; // Skip to the next stylesheet.
 				}
 			}
 
-			if ( ! isset( $pending_stylesheet['included'] ) ) {
-				$this->pending_stylesheets[ $index ]['included'] = true;
+			if ( ! isset( $this->pending_stylesheets[ $i ]['included'] ) ) {
+				$this->pending_stylesheets[ $i ]['included'] = true;
 				$included_count++;
-				$current_concatenated_size += $pending_stylesheet['size'];
+				$current_concatenated_size += $this->pending_stylesheets[ $i ]['size'];
 			}
 		}
 
