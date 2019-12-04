@@ -80,7 +80,6 @@ function MediaLibrary( { onInsert } ) {
 			multiple: false,
 			library: {
 				type: mediaType,
-				uploadedTo: storyId,
 			},
 		} );
 		let attachment;
