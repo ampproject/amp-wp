@@ -2420,220 +2420,205 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * @return array[] Array of test data.
 	 */
 	public function get_get_stylesheet_priority_data() {
-		$dom = new DOMDocument();
 		return [
 			// Non-AMP handle.
-			[ AMP_DOM_Utils::create_node( $dom, 'link', [ 'id' => 'mediaelement-css' ] ), 1000 ],
+			[ [ 'link', [ 'id' => 'mediaelement-css' ] ], 1000 ],
 			// Admin bar handle.
-			[ AMP_DOM_Utils::create_node( $dom, 'link', [ 'id' => 'admin-bar-css' ] ), 200 ],
+			[ [ 'link', [ 'id' => 'admin-bar-css' ] ], 200 ],
 			// Dashicons handle.
-			[ AMP_DOM_Utils::create_node( $dom, 'link', [ 'id' => 'dashicons-css' ] ), 90 ],
+			[ [ 'link', [ 'id' => 'dashicons-css' ] ], 90 ],
 			// Parent theme styles.
-			[ AMP_DOM_Utils::create_node( $dom, 'link', [ 'href' => '//example.org/wp-content/themes/parent-theme/style.css' ] ), 1 ],
+			[ [ 'link', [ 'href' => '//example.org/wp-content/themes/parent-theme/style.css' ] ], 1 ],
 			// Child theme styles.
-			[ AMP_DOM_Utils::create_node( $dom, 'link', [ 'href' => '//example.org/wp-content/themes/child-theme/style.css' ] ), 10 ],
+			[ [ 'link', [ 'href' => '//example.org/wp-content/themes/child-theme/style.css' ] ], 10 ],
 			// Core frontend handle.
-			[ AMP_DOM_Utils::create_node( $dom, 'link', [ 'id' => 'wp-block-library-css' ] ), 20 ],
+			[ [ 'link', [ 'id' => 'wp-block-library-css' ] ], 20 ],
 			// Plugin asset.
-			[ AMP_DOM_Utils::create_node( $dom, 'link', [ 'href' => '//example.org/wp-content/plugins/some-plugin/style.css' ] ), 30 ],
+			[ [ 'link', [ 'href' => '//example.org/wp-content/plugins/some-plugin/style.css' ] ], 30 ],
 			// Query monitor plugin asset.
-			[ AMP_DOM_Utils::create_node( $dom, 'link', [ 'href' => '//example.org/wp-content/plugins/query-monitor/style.css' ] ), 150 ],
+			[ [ 'link', [ 'href' => '//example.org/wp-content/plugins/query-monitor/style.css' ] ], 150 ],
 			// Other styles from wp-includes.
-			[ AMP_DOM_Utils::create_node( $dom, 'link', [ 'href' => '//example.org/wp-includes/' ] ), 40 ],
+			[ [ 'link', [ 'href' => '//example.org/wp-includes/' ] ], 40 ],
 			// All other links.
-			[ AMP_DOM_Utils::create_node( $dom, 'link', [ 'id' => 'something-else' ] ), 50 ],
+			[ [ 'link', [ 'id' => 'something-else' ] ], 50 ],
 			// Parent theme inline styles.
-			[ AMP_DOM_Utils::create_node( $dom, 'style', [ 'id' => 'parent-theme-inline-css' ] ), 2 ],
+			[ [ 'style', [ 'id' => 'parent-theme-inline-css' ] ], 2 ],
 			// Child theme inline styles.
-			[ AMP_DOM_Utils::create_node( $dom, 'style', [ 'id' => 'child-theme-inline-css' ] ), 12 ],
+			[ [ 'style', [ 'id' => 'child-theme-inline-css' ] ], 12 ],
 			// Admin bar inline styles.
-			[ AMP_DOM_Utils::create_node( $dom, 'style', [ 'id' => 'admin-bar-inline-css' ] ), 200 ],
+			[ [ 'style', [ 'id' => 'admin-bar-inline-css' ] ], 200 ],
 			// Customizer inline styles.
-			[ AMP_DOM_Utils::create_node( $dom, 'style', [ 'id' => 'wp-custom-css' ] ), 60 ],
+			[ [ 'style', [ 'id' => 'wp-custom-css' ] ], 60 ],
 			// Other inline styles.
-			[ AMP_DOM_Utils::create_node( $dom, 'style', [ 'id' => 'something-else' ] ), 70 ],
+			[ [ 'style', [ 'id' => 'something-else' ] ], 70 ],
 			// Non-AMP handle for print.
 			[
-				AMP_DOM_Utils::create_node(
-					$dom,
+				[
 					'link',
 					[
 						'id' => 'mediaelement-css',
 						'media' => 'print',
-					]
-				),
+					],
+				],
 				1100,
 			],
 			// Admin bar handle for print.
 			[
-				AMP_DOM_Utils::create_node(
-					$dom,
+				[
 					'link',
 					[
 						'id' => 'admin-bar-css',
 						'media' => 'print',
-					]
-				),
+					],
+				],
 				300,
 			],
 			// Dashicons handle for print.
 			[
-				AMP_DOM_Utils::create_node(
-					$dom,
+				[
 					'link',
 					[
 						'id' => 'dashicons-css',
 						'media' => 'print',
-					]
-				),
+					],
+				],
 				190,
 			],
 			// Parent theme styles for print.
 			[
-				AMP_DOM_Utils::create_node(
-					$dom,
+				[
 					'link',
 					[
 						'href' => '//example.org/wp-content/themes/parent-theme/style.css',
 						'media' => 'print',
-					]
-				),
+					],
+				],
 				101,
 			],
 			// Child theme styles for print.
 			[
-				AMP_DOM_Utils::create_node(
-					$dom,
+				[
 					'link',
 					[
 						'href' => '//example.org/wp-content/themes/child-theme/style.css',
 						'media' => 'print',
-					]
-				),
+					],
+				],
 				110,
 			],
 			// Core frontend handle for print.
 			[
-				AMP_DOM_Utils::create_node(
-					$dom,
+				[
 					'link',
 					[
 						'id' => 'wp-block-library-css',
 						'media' => 'print',
-					]
-				),
+					],
+				],
 				120,
 			],
 			// Plugin asset for print.
 			[
-				AMP_DOM_Utils::create_node(
-					$dom,
+				[
 					'link',
 					[
 						'href' => '//example.org/wp-content/plugins/some-plugin/style.css',
 						'media' => 'print',
-					]
-				),
+					],
+				],
 				130,
 			],
 			// Query monitor plugin asset for print.
 			[
-				AMP_DOM_Utils::create_node(
-					$dom,
+				[
 					'link',
 					[
 						'href' => '//example.org/wp-content/plugins/query-monitor/style.css',
 						'media' => 'print',
-					]
-				),
+					],
+				],
 				250,
 			],
 			// Other styles from wp-includes for print.
 			[
-				AMP_DOM_Utils::create_node(
-					$dom,
+				[
 					'link',
 					[
 						'href' => '//example.org/wp-includes/',
 						'media' => 'print',
-					]
-				),
+					],
+				],
 				140,
 			],
 			// All other links for print.
 			[
-				AMP_DOM_Utils::create_node(
-					$dom,
+				[
 					'link',
 					[
 						'id' => 'something-else',
 						'media' => 'print',
-					]
-				),
+					],
+				],
 				150,
 			],
 			// Parent theme inline styles for print.
 			[
-				AMP_DOM_Utils::create_node(
-					$dom,
+				[
 					'style',
 					[
 						'id' => 'parent-theme-inline-css',
 						'media' => 'print',
-					]
-				),
+					],
+				],
 				102,
 			],
 			// Child theme inline styles for print.
 			[
-				AMP_DOM_Utils::create_node(
-					$dom,
+				[
 					'style',
 					[
 						'id' => 'child-theme-inline-css',
 						'media' => 'print',
-					]
-				),
+					],
+				],
 				112,
 			],
 			// Admin bar inline styles for print.
 			[
-				AMP_DOM_Utils::create_node(
+				[
 					$dom,
 					'style',
 					[
 						'id' => 'admin-bar-inline-css',
 						'media' => 'print',
-					]
-				),
+					],
+				],
 				300,
 			],
 			// Customizer inline styles for print.
 			[
-				AMP_DOM_Utils::create_node(
-					$dom,
+				[
 					'style',
 					[
 						'id' => 'wp-custom-css',
 						'media' => 'print',
-					]
-				),
+					],
+				],
 				160,
 			],
 			// Other inline styles for print.
 			[
-				AMP_DOM_Utils::create_node(
-					$dom,
+				[
 					'style',
 					[
 						'id' => 'something-else',
 						'media' => 'print',
-					]
-				),
+					],
+				],
 				170,
 			],
 			// Style attribute.
-			[ $dom->createAttribute( 'something' ), 70 ],
+			[ [ null, [ 'something' ] ], 70 ],
 		];
 	}
 
@@ -2644,10 +2629,10 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 *
 	 * @dataProvider get_get_stylesheet_priority_data
 	 *
-	 * @param string $node     Node to check the priority of.
-	 * @param int    $expected Expected priority.
+	 * @param array $node_data Node to check the priority of.
+	 * @param int   $expected  Expected priority.
 	 */
-	public function test_get_stylesheet_priority( $node, $expected ) {
+	public function test_get_stylesheet_priority( $node_data, $expected ) {
 		global $wp_styles;
 		$wp_styles = new WP_Styles();
 
@@ -2658,14 +2643,25 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			return 'child-theme';
 		};
 
-		$dom       = new DOMDocument();
+		$dom = new DOMDocument();
+
+		if ( isset( $node_data[0] ) ) {
+			$node = AMP_DOM_Utils::create_node( $dom, $node_data[0], $node_data[1] );
+		} else {
+			$node = $dom->createAttribute( $node_data[1][0] );
+		}
+
 		$sanitizer = new AMP_Style_Sanitizer( $dom );
 
 		add_filter( 'template', $parent_theme_filter );
 		add_filter( 'stylesheet', $child_theme_filter );
 		$wp_styles->add( 'parent-theme', get_template_directory_uri() . '/style.css' );
 		$wp_styles->add( 'child-theme', get_stylesheet_directory_uri() . '/style.css' );
-		$this->assertEquals( $expected, $this->call_private_method( $sanitizer, 'get_stylesheet_priority', [ $node ] ) );
+		$this->assertEquals(
+			$expected,
+			$this->call_private_method( $sanitizer, 'get_stylesheet_priority', [ $node ] ),
+			'Node data: ' . wp_json_encode( $node_data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT )
+		);
 		remove_filter( 'stylesheet', $child_theme_filter );
 		remove_filter( 'template', $parent_theme_filter );
 	}
