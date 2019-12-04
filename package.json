@@ -48,7 +48,7 @@
     "@wordpress/e2e-test-utils": "3.0.0",
     "@wordpress/edit-post": "3.8.4",
     "@wordpress/editor": "9.7.4",
-    "@wordpress/element": "2.8.2",
+    "@wordpress/element": "2.9.0",
     "@wordpress/eslint-plugin": "3.2.0",
     "@wordpress/hooks": "2.6.0",
     "@wordpress/html-entities": "2.5.0",
