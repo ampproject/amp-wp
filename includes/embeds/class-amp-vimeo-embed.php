@@ -164,10 +164,16 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 		}
 		$src           = $attr['src'];
 		$vimeo_pattern = '#^https?://(.+\.)?vimeo\.com/.*#';
-		if ( 1 === preg_match( $vimeo_pattern, $src ) ) {
-			return $this->shortcode( [ $src ] );
+		if ( 1 !== preg_match( $vimeo_pattern, $src ) ) {
+			return $html;
 		}
-		return $html;
+
+		$video_id = $this->get_video_id_from_url( $src );
+		if ( empty( $video_id ) ) {
+			return '';
+		}
+
+		return $this->render( compact( 'video_id' ) );
 	}
 
 }

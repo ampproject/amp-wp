@@ -74,6 +74,7 @@ class AMP_Vimeo_Embed_Test extends WP_UnitTestCase {
 	 * Test get_scripts().
 	 *
 	 * @dataProvider get_scripts_data
+	 * @covers AMP_Vimeo_Embed_Handler::get_scripts()
 	 *
 	 * @param string $source   Source.
 	 * @param string $expected Expected.
@@ -92,5 +93,64 @@ class AMP_Vimeo_Embed_Test extends WP_UnitTestCase {
 		);
 
 		$this->assertEquals( $expected, $scripts );
+	}
+
+	/**
+	 * Gets the test data for test_video_override().
+	 *
+	 * @return array The test data.
+	 */
+	public function get_video_override_data() {
+		return [
+			'no_src_empty_html'    => [
+				'',
+				[ 'foo' => 'baz' ],
+				null,
+			],
+			'no_src_with_html'     => [
+				'Initial HTML here',
+				[ 'foo' => 'baz' ],
+				null,
+			],
+			'non_vimeo_src'        => [
+				'Initial HTML here',
+				[ 'src' => 'https://youtube.com/1234567' ],
+				null,
+			],
+			'non_numeric_video_id' => [
+				'Initial HTML here',
+				[ 'src' => 'https://vimeo.com/abcdefg' ],
+				'',
+			],
+			'valid_video_id'       => [
+				'Initial HTML here',
+				[ 'src' => 'https://vimeo.com/1234567' ],
+				'<amp-vimeo data-videoid="1234567" layout="responsive" width="600" height="338"></amp-vimeo>',
+			],
+			'http_url'             => [
+				'Initial HTML here',
+				[ 'src' => 'https://vimeo.com/1234567' ],
+				'<amp-vimeo data-videoid="1234567" layout="responsive" width="600" height="338"></amp-vimeo>',
+			],
+		];
+	}
+
+	/**
+	 * Test video_override().
+	 *
+	 * @dataProvider get_video_override_data
+	 * @covers AMP_Vimeo_Embed_Handler::test_video_override()
+	 *
+	 * @param string $html The initial HTML.
+	 * @param array  $attr The attributes of the shortcode.
+	 * @param string $expected Expected.
+	 */
+	public function test_video_override( $html, $attr, $expected ) {
+		if ( null === $expected ) {
+			$expected = $html;
+		}
+
+		$embed = new AMP_Vimeo_Embed_Handler();
+		$this->assertEquals( $expected, $embed->video_override( $html, $attr ) );
 	}
 }
