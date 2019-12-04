@@ -94,21 +94,24 @@ class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
 	public function test_video_override() {
 		remove_all_filters( 'wp_video_shortcode_override' );
 		$this->handler->register_embed();
-		$youtube_id        = 'XOY3ZUO6P0k';
-		$youtube_src       = 'https://youtu.be/' . $youtube_id;
-		$attr_youtube      = [
+		$youtube_id   = 'XOY3ZUO6P0k';
+		$youtube_src  = 'https://youtu.be/' . $youtube_id;
+		$attr_youtube = [
 			'src' => $youtube_src,
 		];
+
 		$youtube_shortcode = $this->handler->video_override( '', $attr_youtube );
 		$this->assertContains( '<amp-youtube', $youtube_shortcode );
 		$this->assertContains( $youtube_id, $youtube_shortcode );
+
 		$vimeo_id        = '64086087';
 		$vimeo_src       = 'https://vimeo.com/' . $vimeo_id;
 		$attr_vimeo      = [
 			'src' => $vimeo_src,
 		];
-		$yimeo_shortcode = $this->handler->video_override( '', $attr_vimeo );
-		$this->assertEquals( '', $yimeo_shortcode );
+		$vimeo_shortcode = $this->handler->video_override( '', $attr_vimeo );
+		$this->assertEquals( '', $vimeo_shortcode );
+
 		$daily_motion_id        = 'x6bacgf';
 		$daily_motion_src       = 'http://www.dailymotion.com/video/' . $daily_motion_id;
 		$attr_daily_motion      = [
