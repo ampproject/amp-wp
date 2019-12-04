@@ -23,4 +23,5 @@ export const panels = [
 	PanelTypes.FONT,
 	PanelTypes.COLOR,
 	PanelTypes.BACKGROUND_COLOR,
+	PanelTypes.ROTATION_ANGLE,
 ];

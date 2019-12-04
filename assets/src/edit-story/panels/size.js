@@ -34,14 +34,14 @@ function SizePanel( { selectedElements, onSetProperties } ) {
 				value={ state.width }
 				isMultiple={ width === '' }
 				onChange={ ( value ) => setState( { ...state, width: isNaN( value ) || value === '' ? '' : parseFloat( value ) } ) }
-				postfix="%"
+				postfix="px"
 			/>
 			<InputGroup
 				label="Height"
 				value={ state.height }
 				isMultiple={ height === '' }
 				onChange={ ( value ) => setState( { ...state, height: isNaN( value ) || value === '' ? '' : parseFloat( value ) } ) }
-				postfix="%"
+				postfix="px"
 			/>
 		</Panel>
 	);

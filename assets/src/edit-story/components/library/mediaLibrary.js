@@ -54,10 +54,11 @@ function MediaLibrary( { onInsert } ) {
 					onClick={ () => onInsert( 'image', {
 						src,
 						origRatio: origWidth / origHeight,
-						width: 20,
-						height: 10,
+						width: 200,
+						height: 100,
 						x: 5,
 						y: 5,
+						rotationAngle: 0,
 					} ) }
 				/>
 			) )

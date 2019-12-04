@@ -94,14 +94,14 @@ class AMP_Admin_Pointers {
 			new AMP_Admin_Pointer(
 				'amp_stories_menu_pointer_12',
 				[
-					'selector'        => '#menu-posts-' . AMP_Story_Post_Type::POST_TYPE_SLUG,
+					'selector'        => '#menu-posts-' . AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG,
 					'heading'         => __( 'AMP', 'amp' ),
 					'description'     => __( 'Head over here to create your first story.', 'amp' ),
 					'position'        => [
 						'align' => 'middle',
 					],
 					'active_callback' => static function( $hook_suffix ) {
-						if ( 'edit.php' === $hook_suffix && AMP_Story_Post_Type::POST_TYPE_SLUG === filter_input( INPUT_GET, 'post_type' ) ) {
+						if ( 'edit.php' === $hook_suffix && AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG === filter_input( INPUT_GET, 'post_type' ) ) {
 							return false;
 						}
 						return AMP_Options_Manager::is_stories_experience_enabled();

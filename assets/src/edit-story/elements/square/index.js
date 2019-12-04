@@ -14,4 +14,5 @@ export const panels = [
 	PanelTypes.SIZE,
 	PanelTypes.POSITION,
 	PanelTypes.BACKGROUND_COLOR,
+	PanelTypes.ROTATION_ANGLE,
 ];

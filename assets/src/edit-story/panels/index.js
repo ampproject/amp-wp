@@ -5,6 +5,7 @@ import { elementTypes } from '../elements';
 import ColorPanel from './color';
 import BackgroundColorPanel from './backgroundColor';
 import FontPanel from './font';
+import RotationPanel from './rotationAngle';
 import SizePanel from './size';
 import PositionPanel from './position';
 import ScalePanel from './scale';
@@ -13,6 +14,7 @@ import TextPanel from './text';
 const COLOR = 'color';
 const SCALE = 'scale';
 const FONT = 'font';
+const ROTATION_ANGLE = 'rotationAngle';
 const TEXT = 'text';
 const SIZE = 'size';
 const POSITION = 'position';
@@ -26,6 +28,7 @@ export const PanelTypes = {
 	COLOR,
 	FONT,
 	TEXT,
+	ROTATION_ANGLE,
 };
 
 const ALL = Object.values( PanelTypes );
@@ -46,6 +49,7 @@ export function getPanels( elements ) {
 			switch ( type ) {
 				case POSITION: return { type, Panel: PositionPanel };
 				case SCALE: return { type, Panel: ScalePanel };
+				case ROTATION_ANGLE: return { type, Panel: RotationPanel };
 				case SIZE: return { type, Panel: SizePanel };
 				case BACKGROUND_COLOR: return { type, Panel: BackgroundColorPanel };
 				case COLOR: return { type, Panel: ColorPanel };
@@ -55,4 +59,3 @@ export function getPanels( elements ) {
 			}
 		} );
 }
-

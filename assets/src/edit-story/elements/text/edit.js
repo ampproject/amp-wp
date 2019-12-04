@@ -20,6 +20,7 @@ import { useCanvas } from '../../components/canvas';
 import {
 	ElementWithPosition,
 	ElementWithSize,
+	ElementWithRotation,
 	ElementWithFont,
 	ElementWithBackgroundColor,
 	ElementWithFontColor,
@@ -30,6 +31,7 @@ const Element = styled.div`
 	margin: 0;
 	${ ElementWithPosition }
 	${ ElementWithSize }
+	${ ElementWithRotation }
 	${ ElementWithFont }
 	${ ElementWithBackgroundColor }
 	${ ElementWithFontColor }
@@ -47,7 +49,7 @@ const Element = styled.div`
 	}
 `;
 
-function TextEdit( { content, color, backgroundColor, width, height, x, y, fontFamily, fontSize, fontWeight, fontStyle } ) {
+function TextEdit( { content, color, backgroundColor, width, height, x, y, fontFamily, fontSize, fontWeight, fontStyle, rotationAngle } ) {
 	const props = {
 		color,
 		backgroundColor,
@@ -59,6 +61,7 @@ function TextEdit( { content, color, backgroundColor, width, height, x, y, fontF
 		height,
 		x,
 		y,
+		rotationAngle,
 	};
 	const { actions: { setPropertiesOnSelectedElements } } = useStory();
 	const { state: { editingElementState } } = useCanvas();
@@ -140,6 +143,7 @@ TextEdit.propTypes = {
 	fontStyle: PropTypes.string,
 	width: PropTypes.number.isRequired,
 	height: PropTypes.number.isRequired,
+	rotationAngle: PropTypes.number.isRequired,
 	x: PropTypes.number.isRequired,
 	y: PropTypes.number.isRequired,
 };

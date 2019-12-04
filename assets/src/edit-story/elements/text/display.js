@@ -18,6 +18,7 @@ import { useCanvas } from '../../components/canvas';
 import {
 	ElementWithPosition,
 	ElementWithSize,
+	ElementWithRotation,
 	ElementWithFont,
 	ElementWithBackgroundColor,
 	ElementWithFontColor,
@@ -27,6 +28,7 @@ const Element = styled.p`
 	margin: 0;
 	${ ElementWithPosition }
 	${ ElementWithSize }
+	${ ElementWithRotation }
 	${ ElementWithFont }
 	${ ElementWithBackgroundColor }
 	${ ElementWithFontColor }
@@ -38,7 +40,7 @@ const Element = styled.p`
 	}
 `;
 
-function TextDisplay( { id, content, color, backgroundColor, width, height, x, y, fontFamily, fontSize, fontWeight, fontStyle } ) {
+function TextDisplay( { id, content, color, backgroundColor, width, height, x, y, fontFamily, fontSize, fontWeight, fontStyle, rotationAngle } ) {
 	const props = {
 		color,
 		backgroundColor,
@@ -50,6 +52,7 @@ function TextDisplay( { id, content, color, backgroundColor, width, height, x, y
 		height,
 		x,
 		y,
+		rotationAngle,
 	};
 	const {
 		state: { selectedElementIds },
@@ -122,6 +125,7 @@ TextDisplay.propTypes = {
 	fontStyle: PropTypes.string,
 	width: PropTypes.number.isRequired,
 	height: PropTypes.number.isRequired,
+	rotationAngle: PropTypes.number.isRequired,
 	x: PropTypes.number.isRequired,
 	y: PropTypes.number.isRequired,
 };

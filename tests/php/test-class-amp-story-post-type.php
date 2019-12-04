@@ -1,14 +1,14 @@
 <?php
 /**
- * Test AMP_Story_Post_Type.
+ * Test AMP_Story_Legacy_Post_Type.
  *
  * @package AMP
  */
 
 /**
- * Test AMP_Story_Post_Type.
+ * Test AMP_Story_Legacy_Post_Type.
  */
-class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
+class AMP_Story_Legacy_Post_Type_Test extends WP_UnitTestCase {
 
 	private $original_options;
 
@@ -18,7 +18,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 
-		if ( ! AMP_Story_Post_Type::has_required_block_capabilities() ) {
+		if ( ! AMP_Story_Legacy_Post_Type::has_required_block_capabilities() ) {
 			$this->markTestSkipped( 'The function register_block_type() is not present, so the AMP Story post type was not registered.' );
 		}
 
@@ -37,7 +37,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 
 		// Set stories settings for testing.
 		AMP_Options_Manager::update_option(
-			AMP_Story_Post_Type::STORY_SETTINGS_OPTION,
+			AMP_Story_Legacy_Post_Type::STORY_SETTINGS_OPTION,
 			[
 				'auto_advance_after'          => 'time',
 				'auto_advance_after_duration' => '10',
@@ -61,7 +61,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		}
 
 		AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::WEBSITE_EXPERIENCE ] );
-		unregister_post_type( AMP_Story_Post_Type::POST_TYPE_SLUG );
+		unregister_post_type( AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG );
 
 		$wp_rewrite->set_permalink_structure( false );
 		unset( $_SERVER['HTTPS'] );
@@ -73,21 +73,21 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	 * Test requires opt_in.
 	 *
 	 * @dataProvider get_default_settings_definitions
-	 * @covers \AMP_Story_Post_Type::register()
+	 * @covers \AMP_Story_Legacy_Post_Type::register()
 	 */
 	public function test_requires_opt_in( $definitions ) {
-		unregister_post_type( AMP_Story_Post_Type::POST_TYPE_SLUG );
+		unregister_post_type( AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG );
 
 		AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::WEBSITE_EXPERIENCE ] );
-		AMP_Story_Post_Type::register();
-		$this->assertFalse( post_type_exists( AMP_Story_Post_Type::POST_TYPE_SLUG ) );
+		AMP_Story_Legacy_Post_Type::register();
+		$this->assertFalse( post_type_exists( AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG ) );
 
 		AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::STORIES_EXPERIENCE ] );
-		AMP_Story_Post_Type::register();
-		$this->assertTrue( post_type_exists( AMP_Story_Post_Type::POST_TYPE_SLUG ) );
+		AMP_Story_Legacy_Post_Type::register();
+		$this->assertTrue( post_type_exists( AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG ) );
 
 		foreach ( $definitions as $option_key => $definition ) {
-			$is_meta_registered = registered_meta_key_exists( 'post', AMP_Story_Post_Type::STORY_SETTINGS_META_PREFIX . $option_key, AMP_Story_Post_Type::POST_TYPE_SLUG );
+			$is_meta_registered = registered_meta_key_exists( 'post', AMP_Story_Legacy_Post_Type::STORY_SETTINGS_META_PREFIX . $option_key, AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG );
 			$this->assertTrue( $is_meta_registered );
 		}
 	}
@@ -95,7 +95,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	/**
 	 * Test the_single_story_card.
 	 *
-	 * @covers AMP_Story_Post_Type::the_single_story_card()
+	 * @covers AMP_Story_Legacy_Post_Type::the_single_story_card()
 	 */
 	public function test_the_single_story_card() {
 		$featured_image_dimensions = [ [ 1200, 1300 ], [ 1300, 1400 ], [ 1400, 1500 ] ];
@@ -103,7 +103,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 
 		foreach ( $stories as $story ) {
 			$card_markup = get_echo(
-				[ 'AMP_Story_Post_Type', 'the_single_story_card' ],
+				[ 'AMP_Story_Legacy_Post_Type', 'the_single_story_card' ],
 				[
 					[
 						'post' => $story,
@@ -119,7 +119,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 
 		$first_story = reset( $stories );
 		$card_markup = get_echo(
-			[ 'AMP_Story_Post_Type', 'the_single_story_card' ],
+			[ 'AMP_Story_Legacy_Post_Type', 'the_single_story_card' ],
 			[
 				[
 					'post'         => $first_story,
@@ -132,7 +132,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 
 		// If the 'post' argument isn't either an int or a WP_Post, this shouldn't output anything.
 		$card_markup = get_echo(
-			[ 'AMP_Story_Post_Type', 'the_single_story_card' ],
+			[ 'AMP_Story_Legacy_Post_Type', 'the_single_story_card' ],
 			[ [ 'post' => 'foo post' ] ]
 		);
 		$this->assertEmpty( $card_markup );
@@ -141,65 +141,65 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	/**
 	 * Test get_embed_template.
 	 *
-	 * @covers AMP_Story_Post_Type::get_embed_template()
+	 * @covers AMP_Story_Legacy_Post_Type::get_embed_template()
 	 */
 	public function test_get_embed_template() {
 		$template          = '/srv/www/baz.php';
 		$wrong_type        = 'post';
 		$correct_type      = 'embed';
 		$wrong_templates   = [ 'embed-testimonal.php', 'embed.php' ];
-		$correct_template  = sprintf( 'embed-%s.php', AMP_Story_Post_Type::POST_TYPE_SLUG );
+		$correct_template  = sprintf( 'embed-%s.php', AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG );
 		$expected_template = 'embed-amp-story.php';
 		$correct_templates = [ $correct_template, 'embed.php' ];
 
-		$this->assertEquals( $template, AMP_Story_Post_Type::get_embed_template( $template, $wrong_type, $correct_templates ) );
-		$this->assertEquals( $template, AMP_Story_Post_Type::get_embed_template( $template, $correct_type, $wrong_templates ) );
-		$this->assertContains( $expected_template, AMP_Story_Post_Type::get_embed_template( $template, $correct_type, $correct_templates ) );
+		$this->assertEquals( $template, AMP_Story_Legacy_Post_Type::get_embed_template( $template, $wrong_type, $correct_templates ) );
+		$this->assertEquals( $template, AMP_Story_Legacy_Post_Type::get_embed_template( $template, $correct_type, $wrong_templates ) );
+		$this->assertContains( $expected_template, AMP_Story_Legacy_Post_Type::get_embed_template( $template, $correct_type, $correct_templates ) );
 	}
 
 	/**
 	 * Test enqueue_embed_styling.
 	 *
-	 * @covers AMP_Story_Post_Type::enqueue_embed_styling()
+	 * @covers AMP_Story_Legacy_Post_Type::enqueue_embed_styling()
 	 */
 	public function test_enqueue_embed_styling() {
-		AMP_Story_Post_Type::register();
+		AMP_Story_Legacy_Post_Type::register();
 
 		// None of the conditional is satisfied, so this should not enqueue the stylesheet.
-		AMP_Story_Post_Type::enqueue_embed_styling();
-		$this->assertFalse( wp_style_is( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG ) );
+		AMP_Story_Legacy_Post_Type::enqueue_embed_styling();
+		$this->assertFalse( wp_style_is( AMP_Story_Legacy_Post_Type::STORY_CARD_CSS_SLUG ) );
 
 		// Only the first part of the conditional is satisfied, so this again should not enqueue the stylesheet.
 		$this->go_to( add_query_arg( 'embed', '' ) );
-		AMP_Story_Post_Type::enqueue_embed_styling();
-		$this->assertFalse( wp_style_is( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG ) );
+		AMP_Story_Legacy_Post_Type::enqueue_embed_styling();
+		$this->assertFalse( wp_style_is( AMP_Story_Legacy_Post_Type::STORY_CARD_CSS_SLUG ) );
 
 		// Now that the conditional is satisfied, this should enqueue the stylesheet.
-		$amp_story_post = self::factory()->post->create_and_get( [ 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ] );
+		$amp_story_post = self::factory()->post->create_and_get( [ 'post_type' => AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG ] );
 		$this->go_to( add_query_arg( 'embed', '', get_post_permalink( $amp_story_post ) ) );
-		AMP_Story_Post_Type::enqueue_embed_styling();
+		AMP_Story_Legacy_Post_Type::enqueue_embed_styling();
 	}
 
 	/**
 	 * Test override_story_embed_callback.
 	 *
-	 * @covers AMP_Story_Post_Type::override_story_embed_callback()
+	 * @covers AMP_Story_Legacy_Post_Type::override_story_embed_callback()
 	 */
 	public function test_override_story_embed_callback() {
 		global $wp_rewrite;
 
-		AMP_Story_Post_Type::register();
+		AMP_Story_Legacy_Post_Type::register();
 
 		/*
 		 * It looks like embedding custom post types does not work with the plain permalink structure.
 		 * Also, this adds the permastruct for the AMP story post type, like http://example.com/stories/example-story-name.
-		 * It seems that it's not enough to call AMP_Story_Post_Type::register().
+		 * It seems that it's not enough to call AMP_Story_Legacy_Post_Type::register().
 		 */
 		$wp_rewrite->set_permalink_structure( '/%postname%/' );
-		$wp_rewrite->add_permastruct( AMP_Story_Post_Type::POST_TYPE_SLUG, AMP_Story_Post_Type::REWRITE_SLUG . '/%' . AMP_Story_Post_Type::POST_TYPE_SLUG . '%' );
+		$wp_rewrite->add_permastruct( AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG, AMP_Story_Legacy_Post_Type::REWRITE_SLUG . '/%' . AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG . '%' );
 
 		// The second argument is an empty array, so this should simply exit.
-		$this->assertEmpty( AMP_Story_Post_Type::override_story_embed_callback( null, [] ) );
+		$this->assertEmpty( AMP_Story_Legacy_Post_Type::override_story_embed_callback( null, [] ) );
 
 		// The conditional is not satisfied, so this should return null.
 		$wrong_url   = 'https://incorrect-domain.com/example-story';
@@ -207,7 +207,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 			'attrs'     => [ 'url' => $wrong_url ],
 			'blockName' => 'core/incorrect-block',
 		];
-		$this->assertEquals( null, AMP_Story_Post_Type::override_story_embed_callback( null, $wrong_block ) );
+		$this->assertEquals( null, AMP_Story_Legacy_Post_Type::override_story_embed_callback( null, $wrong_block ) );
 
 		// The conditional is only partially satisfied, as the URL is still wrong.
 		$correct_block_name = 'core-embed/wordpress';
@@ -216,7 +216,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 			'attrs'     => [ 'url' => $wrong_url ],
 			'blockName' => $correct_block_name,
 		];
-		$this->assertEquals( null, AMP_Story_Post_Type::override_story_embed_callback( null, $wrong_block ) );
+		$this->assertEquals( null, AMP_Story_Legacy_Post_Type::override_story_embed_callback( null, $wrong_block ) );
 
 		// The conditional is now satisfied, so this should return the overridden callback.
 		$story_posts    = $this->create_story_posts_with_featured_images( [ [ 400, 400 ] ] );
@@ -227,7 +227,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 			'blockName' => $correct_block_name,
 		];
 
-		$overriden_render_callback = AMP_Story_Post_Type::override_story_embed_callback( null, $correct_block );
+		$overriden_render_callback = AMP_Story_Legacy_Post_Type::override_story_embed_callback( null, $correct_block );
 		$this->assertContains( get_permalink( $amp_story_post ), $overriden_render_callback );
 		$this->assertContains( get_the_post_thumbnail_url( $amp_story_post ), $overriden_render_callback );
 
@@ -238,7 +238,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 			'blockName' => $correct_block_name,
 		];
 
-		$overriden_render_callback = AMP_Story_Post_Type::override_story_embed_callback( null, $correct_block );
+		$overriden_render_callback = AMP_Story_Legacy_Post_Type::override_story_embed_callback( null, $correct_block );
 		$this->assertContains( get_permalink( $amp_story_post ), $overriden_render_callback );
 		$this->assertContains( get_the_post_thumbnail_url( $amp_story_post ), $overriden_render_callback );
 	}
@@ -246,10 +246,10 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	/**
 	 * Test register_block_latest_stories.
 	 *
-	 * @covers AMP_Story_Post_Type::register_block_latest_stories()
+	 * @covers AMP_Story_Legacy_Post_Type::register_block_latest_stories()
 	 */
 	public function test_register_block_latest_stories() {
-		AMP_Story_Post_Type::register_block_latest_stories();
+		AMP_Story_Legacy_Post_Type::register_block_latest_stories();
 
 		set_current_screen( 'edit.php' );
 		$block_name           = 'amp/amp-latest-stories';
@@ -283,7 +283,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		$this->assertEquals( null, $latest_stories_block->editor_script );
 		$this->assertEquals( null, $latest_stories_block->editor_style );
 		$this->assertEquals( $block_name, $latest_stories_block->name );
-		$this->assertEquals( [ 'AMP_Story_Post_Type', 'render_block_latest_stories' ], $latest_stories_block->render_callback );
+		$this->assertEquals( [ 'AMP_Story_Legacy_Post_Type', 'render_block_latest_stories' ], $latest_stories_block->render_callback );
 		$this->assertEquals( null, $latest_stories_block->script );
 		$this->assertEquals( null, $latest_stories_block->style );
 	}
@@ -291,10 +291,10 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	/**
 	 * Test render_block_latest_stories.
 	 *
-	 * @covers \AMP_Story_Post_Type::render_block_latest_stories()
+	 * @covers \AMP_Story_Legacy_Post_Type::render_block_latest_stories()
 	 */
 	public function test_render_block_latest_stories() {
-		AMP_Story_Post_Type::register();
+		AMP_Story_Legacy_Post_Type::register();
 
 		$attributes = [
 			'storiesToShow' => 10,
@@ -307,45 +307,45 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		$minimum_height = 200;
 		$dimensions     = [ [ $minimum_height, 200 ], [ 300, 400 ], [ 500, 600 ] ];
 		$this->create_story_posts_with_featured_images( $dimensions );
-		$rendered_block = AMP_Story_Post_Type::render_block_latest_stories( $attributes );
+		$rendered_block = AMP_Story_Legacy_Post_Type::render_block_latest_stories( $attributes );
 		$this->assertContains( '<amp-carousel', $rendered_block );
 		$this->assertContains( '<div class="slide latest-stories__slide">', $rendered_block );
 		$this->assertContains( '<div class="latest-stories__meta">', $rendered_block );
 
 		// Assert that wp_enqueue_style() was called in the render callback.
-		$this->assertTrue( wp_style_is( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG, 'registered' ) );
-		$this->assertTrue( wp_style_is( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG, 'enqueued' ) );
+		$this->assertTrue( wp_style_is( AMP_Story_Legacy_Post_Type::STORY_CARD_CSS_SLUG, 'registered' ) );
+		$this->assertTrue( wp_style_is( AMP_Story_Legacy_Post_Type::STORY_CARD_CSS_SLUG, 'enqueued' ) );
 	}
 
 	/**
 	 * Test remove_title_from_embed.
 	 *
-	 * @covers \AMP_Story_Post_Type::remove_title_from_embed()
+	 * @covers \AMP_Story_Legacy_Post_Type::remove_title_from_embed()
 	 */
 	public function test_remove_title_from_embed() {
 		$initial_output = '<iframe src="https://example.com/baz"></iframe>';
 		$wrong_post     = self::factory()->post->create_and_get();
 
 		// The post type is not amp_story, so this should return the same $output it's passed.
-		$this->assertEquals( $initial_output, AMP_Story_Post_Type::remove_title_from_embed( $initial_output, $wrong_post ) );
+		$this->assertEquals( $initial_output, AMP_Story_Legacy_Post_Type::remove_title_from_embed( $initial_output, $wrong_post ) );
 
 		// The post type is correct, but the <blockquote> does not have the expected class, so this should again return the same $output.
-		$correct_post              = self::factory()->post->create_and_get( [ 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ] );
+		$correct_post              = self::factory()->post->create_and_get( [ 'post_type' => AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG ] );
 		$block_quote_without_class = '<blockquote>Example Title</blockquote>';
 		$output_with_blockquote    = $block_quote_without_class . $initial_output;
-		$this->assertEquals( $output_with_blockquote, AMP_Story_Post_Type::remove_title_from_embed( $output_with_blockquote, $correct_post ) );
+		$this->assertEquals( $output_with_blockquote, AMP_Story_Legacy_Post_Type::remove_title_from_embed( $output_with_blockquote, $correct_post ) );
 
 		// All of the conditions are satisfied, so this should remove the <blockquote> and the elements it contains.
-		$correct_post           = self::factory()->post->create_and_get( [ 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ] );
+		$correct_post           = self::factory()->post->create_and_get( [ 'post_type' => AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG ] );
 		$block_quote            = '<blockquote class="wp-embedded-content">Example Title</blockquote>';
 		$output_with_blockquote = $block_quote . $initial_output;
-		$this->assertEquals( $initial_output, AMP_Story_Post_Type::remove_title_from_embed( $output_with_blockquote, $correct_post ) );
+		$this->assertEquals( $initial_output, AMP_Story_Legacy_Post_Type::remove_title_from_embed( $output_with_blockquote, $correct_post ) );
 	}
 
 	/**
 	 * Test change_embed_iframe_attributes.
 	 *
-	 * @covers \AMP_Story_Post_Type::change_embed_iframe_attributes()
+	 * @covers \AMP_Story_Legacy_Post_Type::change_embed_iframe_attributes()
 	 */
 	public function test_change_embed_iframe_attributes() {
 		remove_theme_support( 'amp' );
@@ -353,17 +353,17 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		$non_amp_story         = self::factory()->post->create_and_get();
 
 		// This isn't an AMP story embed, so it shouldn't change the markup.
-		$this->assertEquals( $original_embed_markup, AMP_Story_Post_Type::change_embed_iframe_attributes( $original_embed_markup, $non_amp_story ) );
+		$this->assertEquals( $original_embed_markup, AMP_Story_Legacy_Post_Type::change_embed_iframe_attributes( $original_embed_markup, $non_amp_story ) );
 
 		// This is an AMP story embed, but the markup doesn't have an <iframe>, so it shouldn't be changed.
-		$amp_story                   = self::factory()->post->create_and_get( [ 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ] );
+		$amp_story                   = self::factory()->post->create_and_get( [ 'post_type' => AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG ] );
 		$embed_markup_without_iframe = '<div class="wp-embed"><img alt=baz src="https://example.com/baz.jpeg></div>';
-		$this->assertEquals( $embed_markup_without_iframe, AMP_Story_Post_Type::change_embed_iframe_attributes( $embed_markup_without_iframe, $amp_story ) );
+		$this->assertEquals( $embed_markup_without_iframe, AMP_Story_Legacy_Post_Type::change_embed_iframe_attributes( $embed_markup_without_iframe, $amp_story ) );
 
 		// This is an AMP story embed, so it should change the height.
 		$this->assertEquals(
 			'<iframe sandbox="allow-scripts" width="600" height="468" security="restricted" marginwidth="10" marginheight="10">',
-			AMP_Story_Post_Type::change_embed_iframe_attributes( $original_embed_markup, $amp_story )
+			AMP_Story_Legacy_Post_Type::change_embed_iframe_attributes( $original_embed_markup, $amp_story )
 		);
 	}
 
@@ -382,7 +382,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		$stories = [];
 		foreach ( $featured_images as $dimensions ) {
 			$new_story = self::factory()->post->create_and_get(
-				[ 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ]
+				[ 'post_type' => AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG ]
 			);
 			$stories[] = $new_story;
 
@@ -444,19 +444,19 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test AMP_Story_Post_Type::filter_rest_request_for_kses().
+	 * Test AMP_Story_Legacy_Post_Type::filter_rest_request_for_kses().
 	 *
-	 * @covers AMP_Story_Post_Type::filter_rest_request_for_kses
+	 * @covers AMP_Story_Legacy_Post_Type::filter_rest_request_for_kses
 	 */
 	public function test_filter_rest_request_for_kses() {
-		AMP_Story_Post_Type::register();
+		AMP_Story_Legacy_Post_Type::register();
 
 		$author_id = self::factory()->user->create( [ 'role' => 'author' ] );
 		wp_set_current_user( $author_id );
 
 		$story = self::factory()->post->create(
 			[
-				'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG,
+				'post_type' => AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG,
 			]
 		);
 
@@ -470,7 +470,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 <amp-story-grid-layer template="vertical" data-block-name="amp/amp-story-text"><div class="amp-story-block-wrapper" style="position:absolute;top:10%;left:5%;width:76.22%;height:10.85%"><h1 style="background-color:rgba(207, 46, 46, 1);color:#ffffff;display:flex;transform:rotate(-27deg)" class="wp-block-amp-amp-story-text has-text-color has-background has-vivid-red-background-color" id="ccf08639-cb18-4c65-b35d-8cf2347c700b"><amp-fit-text layout="flex-item" class="amp-text-content">Hello World</amp-fit-text></h1></div></amp-story-grid-layer>
 <!-- /wp:amp/amp-story-text --></amp-story-page><!-- /wp:amp/amp-story-page -->';
 
-		$request = new WP_REST_Request( 'PUT', sprintf( '/wp/v2/%s/%d', AMP_Story_Post_Type::POST_TYPE_SLUG, $story ) );
+		$request = new WP_REST_Request( 'PUT', sprintf( '/wp/v2/%s/%d', AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG, $story ) );
 		$request->add_header( 'content-type', 'application/x-www-form-urlencoded' );
 		$request->set_body_params(
 			[
@@ -485,14 +485,14 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test AMP_Story_Post_Type::render_block_with_grid_layer().
+	 * Test AMP_Story_Legacy_Post_Type::render_block_with_grid_layer().
 	 *
-	 * @covers AMP_Story_Post_Type::render_block_with_grid_layer
+	 * @covers AMP_Story_Legacy_Post_Type::render_block_with_grid_layer
 	 */
 	public function test_render_block_with_grid_layer() {
 		$GLOBALS['post'] = self::factory()->post->create_and_get(
 			[
-				'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG,
+				'post_type' => AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG,
 			]
 		);
 
@@ -512,19 +512,19 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		];
 		$expected      = '<amp-story-grid-layer template="vertical"><div class="amp-story-block-wrapper" style="position:absolute;top:0%;left:15%;width:100.00%;height:100.00%;" animate-in="pulse" animate-in-delay="500" animate-in-after="123"><p>Some block.</p></div></amp-story-grid-layer>';
 
-		$filtered_block = AMP_Story_Post_Type::render_block_with_grid_layer( $block_content, $block );
+		$filtered_block = AMP_Story_Legacy_Post_Type::render_block_with_grid_layer( $block_content, $block );
 		$this->assertEquals( $expected, $filtered_block );
 	}
 
 	/**
-	 * Test AMP_Story_Post_Type::render_block_with_grid_layer() when wrapper already exists.
+	 * Test AMP_Story_Legacy_Post_Type::render_block_with_grid_layer() when wrapper already exists.
 	 *
-	 * @covers AMP_Story_Post_Type::render_block_with_grid_layer
+	 * @covers AMP_Story_Legacy_Post_Type::render_block_with_grid_layer
 	 */
 	public function test_render_block_with_grid_layer_with_existing_wrappers() {
 		$GLOBALS['post'] = self::factory()->post->create_and_get(
 			[
-				'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG,
+				'post_type' => AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG,
 			]
 		);
 
@@ -538,19 +538,19 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		];
 		$expected      = '<amp-story-grid-layer><p>Some block.</p></amp-story-grid-layer>';
 
-		$filtered_block = AMP_Story_Post_Type::render_block_with_grid_layer( $block_content, $block );
+		$filtered_block = AMP_Story_Legacy_Post_Type::render_block_with_grid_layer( $block_content, $block );
 		$this->assertEquals( $expected, $filtered_block );
 	}
 
 	/**
-	 * Test AMP_Story_Post_Type::render_block_with_grid_layer() with not movable block type.
+	 * Test AMP_Story_Legacy_Post_Type::render_block_with_grid_layer() with not movable block type.
 	 *
-	 * @covers AMP_Story_Post_Type::render_block_with_grid_layer
+	 * @covers AMP_Story_Legacy_Post_Type::render_block_with_grid_layer
 	 */
 	public function test_render_block_with_grid_layer_with_not_movable_block() {
 		$GLOBALS['post'] = self::factory()->post->create_and_get(
 			[
-				'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG,
+				'post_type' => AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG,
 			]
 		);
 
@@ -564,18 +564,18 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		];
 		$expected      = '<p>Some block.</p>';
 
-		$filtered_block = AMP_Story_Post_Type::render_block_with_grid_layer( $block_content, $block );
+		$filtered_block = AMP_Story_Legacy_Post_Type::render_block_with_grid_layer( $block_content, $block );
 		$this->assertEquals( $expected, $filtered_block );
 	}
 
 	/**
 	 * Test getting fonts.
 	 *
-	 * @covers AMP_Story_Post_Type::get_font
-	 * @covers AMP_Story_Post_Type::get_fonts
+	 * @covers AMP_Story_Legacy_Post_Type::get_font
+	 * @covers AMP_Story_Legacy_Post_Type::get_fonts
 	 */
 	public function test_get_fonts() {
-		$fonts = AMP_Story_Post_Type::get_fonts();
+		$fonts = AMP_Story_Legacy_Post_Type::get_fonts();
 		$this->assertInternalType( 'array', $fonts );
 
 		$arial_font = current(
@@ -600,11 +600,11 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	/**
 	 * Test process google fonts.
 	 *
-	 * @covers AMP_Story_Post_Type::get_google_fonts
+	 * @covers AMP_Story_Legacy_Post_Type::get_google_fonts
 	 */
 	public function test_google_fonts() {
 		$file  = __DIR__ . '/data/json/fonts.json';
-		$fonts = AMP_Story_Post_Type::get_google_fonts( $file );
+		$fonts = AMP_Story_Legacy_Post_Type::get_google_fonts( $file );
 		$this->assertInternalType( 'array', $fonts );
 		$this->assertCount( 952, $fonts );
 
@@ -618,11 +618,11 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	/**
 	 * Test processing non-existent google font file.
 	 *
-	 * @covers AMP_Story_Post_Type::get_google_fonts
+	 * @covers AMP_Story_Legacy_Post_Type::get_google_fonts
 	 */
 	public function test_empty_google_fonts_file() {
 		$file  = __DIR__ . '/data/json/nofiles.json';
-		$fonts = AMP_Story_Post_Type::get_google_fonts( $file );
+		$fonts = AMP_Story_Legacy_Post_Type::get_google_fonts( $file );
 		$this->assertInternalType( 'array', $fonts );
 		$this->assertEmpty( $fonts );
 	}
@@ -630,11 +630,11 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	/**
 	 * Test processing invalid google font file.
 	 *
-	 * @covers AMP_Story_Post_Type::get_google_fonts
+	 * @covers AMP_Story_Legacy_Post_Type::get_google_fonts
 	 */
 	public function test_invalid_google_fonts_file() {
 		$file  = __DIR__ . '/data/json/invalid.json';
-		$fonts = AMP_Story_Post_Type::get_google_fonts( $file );
+		$fonts = AMP_Story_Legacy_Post_Type::get_google_fonts( $file );
 		$this->assertInternalType( 'array', $fonts );
 		$this->assertEmpty( $fonts );
 	}
@@ -642,7 +642,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	/**
 	 * Test valid Google Font processing
 	 *
-	 * @covers AMP_Story_Post_Type::get_google_fonts
+	 * @covers AMP_Story_Legacy_Post_Type::get_google_fonts
 	 * @dataProvider get_gfont_data
 	 *
 	 * @param string $font Font name.
@@ -652,7 +652,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	public function test_google_fonts_entries( $font, $gfont, $fallbacks ) {
 		$file = __DIR__ . '/data/json/fonts.json';
 
-		$fonts = AMP_Story_Post_Type::get_google_fonts( $file );
+		$fonts = AMP_Story_Legacy_Post_Type::get_google_fonts( $file );
 
 		$key = $this->find_key( $fonts, 'name', $font );
 
@@ -666,14 +666,14 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	/**
 	 * Test fallback fonts.
 	 *
-	 * @covers AMP_Story_Post_Type::get_font_fallback
+	 * @covers AMP_Story_Legacy_Post_Type::get_font_fallback
 	 * @dataProvider get_font_fallback_data
 	 *
 	 * @param string $expected Expected.
 	 * @param string $category Category.
 	 */
 	public function test_get_font_fallback( $expected, $category ) {
-		$this->assertEquals( $expected, AMP_Story_Post_Type::get_font_fallback( $category ) );
+		$this->assertEquals( $expected, AMP_Story_Legacy_Post_Type::get_font_fallback( $category ) );
 	}
 
 	/**
@@ -776,7 +776,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	 * @param string $enqueued_style Enqueued style.
 	 *
 	 * @dataProvider get_render_block_with_fonts_test_data
-	 * @covers AMP_Story_Post_Type::render_block_with_google_fonts
+	 * @covers AMP_Story_Legacy_Post_Type::render_block_with_google_fonts
 	 */
 	public function test_render_block_with_google_fonts( $font_name, $enqueued_style ) {
 		$block_name = 'amp/amp-story-text';
@@ -788,7 +788,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 			wp_json_encode( $system_block_attrs ),
 			$font_name
 		);
-		$filtered_block     = AMP_Story_Post_Type::render_block_with_google_fonts(
+		$filtered_block     = AMP_Story_Legacy_Post_Type::render_block_with_google_fonts(
 			$system_text_block,
 			[
 				'name'  => $block_name,
@@ -878,28 +878,28 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	 * Test the definitions return value
 	 *
 	 * @dataProvider get_default_settings_definitions
-	 * @covers AMP_Story_Post_Type::get_stories_settings_definitions()
+	 * @covers AMP_Story_Legacy_Post_Type::get_stories_settings_definitions()
 	 *
 	 * @param array $default_definitions Default definitions.
 	 */
 	public function test_get_stories_settings_meta_definitions( $default_definitions ) {
-		$definitions = AMP_Story_Post_Type::get_stories_settings_definitions();
+		$definitions = AMP_Story_Legacy_Post_Type::get_stories_settings_definitions();
 		$this->assertEquals( $default_definitions, $definitions );
 	}
 
 	/**
 	 * Test that default settings are added as post meta to new posts.
 	 *
-	 * @covers AMP_Story_Post_Type::add_story_settings_meta_to_new_story
+	 * @covers AMP_Story_Legacy_Post_Type::add_story_settings_meta_to_new_story
 	 */
 	public function test_add_story_settings_meta_to_new_story() {
 		$new_story = self::factory()->post->create_and_get(
-			[ 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ]
+			[ 'post_type' => AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG ]
 		);
-		AMP_Story_Post_Type::add_story_settings_meta_to_new_story( $new_story->ID, $new_story, false );
+		AMP_Story_Legacy_Post_Type::add_story_settings_meta_to_new_story( $new_story->ID, $new_story, false );
 
-		$advance_after          = get_post_meta( $new_story->ID, AMP_Story_Post_Type::STORY_SETTINGS_META_PREFIX . 'auto_advance_after', true );
-		$advance_after_duration = get_post_meta( $new_story->ID, AMP_Story_Post_Type::STORY_SETTINGS_META_PREFIX . 'auto_advance_after_duration', true );
+		$advance_after          = get_post_meta( $new_story->ID, AMP_Story_Legacy_Post_Type::STORY_SETTINGS_META_PREFIX . 'auto_advance_after', true );
+		$advance_after_duration = get_post_meta( $new_story->ID, AMP_Story_Legacy_Post_Type::STORY_SETTINGS_META_PREFIX . 'auto_advance_after_duration', true );
 
 		$this->assertEquals( 'time', $advance_after );
 		$this->assertEquals( 10, $advance_after_duration );
@@ -908,16 +908,16 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	/**
 	 * Test that default settings are NOT added as post meta to existing posts that are just being updated.
 	 *
-	 * @covers AMP_Story_Post_Type::add_story_settings_meta_to_new_story
+	 * @covers AMP_Story_Legacy_Post_Type::add_story_settings_meta_to_new_story
 	 */
 	public function test_not_add_story_settings_meta_to_updated_story() {
 		$new_story = self::factory()->post->create_and_get(
-			[ 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ]
+			[ 'post_type' => AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG ]
 		);
-		AMP_Story_Post_Type::add_story_settings_meta_to_new_story( $new_story->ID, $new_story, true );
+		AMP_Story_Legacy_Post_Type::add_story_settings_meta_to_new_story( $new_story->ID, $new_story, true );
 
-		$advance_after          = get_post_meta( $new_story->ID, AMP_Story_Post_Type::STORY_SETTINGS_META_PREFIX . 'auto_advance_after', true );
-		$advance_after_duration = get_post_meta( $new_story->ID, AMP_Story_Post_Type::STORY_SETTINGS_META_PREFIX . 'auto_advance_after_duration', true );
+		$advance_after          = get_post_meta( $new_story->ID, AMP_Story_Legacy_Post_Type::STORY_SETTINGS_META_PREFIX . 'auto_advance_after', true );
+		$advance_after_duration = get_post_meta( $new_story->ID, AMP_Story_Legacy_Post_Type::STORY_SETTINGS_META_PREFIX . 'auto_advance_after_duration', true );
 
 		$this->assertEquals( '', $advance_after );
 		$this->assertEquals( '', $advance_after_duration );

@@ -8,12 +8,13 @@ import styled from 'styled-components';
  * Internal dependencies
  */
 import { PAGE_WIDTH, PAGE_HEIGHT } from '../../constants';
-import { ElementWithPosition, ElementWithSize } from '../shared';
+import { ElementWithPosition, ElementWithSize, ElementWithRotation } from '../shared';
 import { getImgProps, ImageWithScale } from './util';
 
 const Element = styled.div`
 	${ ElementWithPosition }
 	${ ElementWithSize }
+	${ ElementWithRotation }
 `;
 
 const ActualBox = styled.div`
@@ -45,10 +46,16 @@ const ActualImg = styled.img`
 	${ ImageWithScale }
 `;
 
-function ImageEdit( { src, origRatio, width, height, x, y, scale, offsetX, offsetY } ) {
+function ImageEdit( { src, origRatio, width, height, x, y, scale, offsetX, offsetY, rotationAngle } ) {
 	const actualRatio = width / height * PAGE_WIDTH / PAGE_HEIGHT;
 	const imgProps = getImgProps( scale, offsetX, offsetY, origRatio, actualRatio );
-	const elementProps = { width, height, x, y };
+	const elementProps = {
+		width,
+		height,
+		x,
+		y,
+		rotationAngle,
+	};
 	return (
 		<Element { ...elementProps }>
 			<FadedImg src={ src } { ...imgProps } />
@@ -67,6 +74,7 @@ ImageEdit.propTypes = {
 	x: PropTypes.number.isRequired,
 	y: PropTypes.number.isRequired,
 	scale: PropTypes.number,
+	rotationAngle: PropTypes.number.isRequired,
 	offsetX: PropTypes.number,
 	offsetY: PropTypes.number,
 };
