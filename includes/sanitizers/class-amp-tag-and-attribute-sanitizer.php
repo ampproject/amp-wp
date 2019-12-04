@@ -111,6 +111,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param array       $args Args.
 	 */
 	public function __construct( $dom, $args = [] ) {
+		// @todo It is pointless to have this DEFAULT_ARGS copying the array values. We should only get the data from AMP_Allowed_Tags_Generated.
 		$this->DEFAULT_ARGS = [
 			'amp_allowed_tags'                => AMP_Allowed_Tags_Generated::get_allowed_tags(),
 			'amp_globally_allowed_attributes' => AMP_Allowed_Tags_Generated::get_allowed_attributes(),
@@ -124,6 +125,11 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 			// Allow style attribute on all elements.
 			$this->args['amp_globally_allowed_attributes']['style'] = [];
+
+			// Remove restrictions on use of !important.
+			foreach ( $this->args['amp_allowed_tags']['style'] as &$style ) {
+				$style['cdata'] = [];
+			}
 
 			// Allow style elements.
 			$this->args['amp_allowed_tags']['style'][] = [
@@ -1687,18 +1693,16 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		 * https://github.com/ampproject/amphtml/blob/1526498116488/extensions/amp-selector/validator-amp-selector.protoascii#L81-L91
 		 */
 		$descendant_reference_points = [
-			'amp-selector'         => AMP_Allowed_Tags_Generated::get_reference_point_spec( 'AMP-SELECTOR option' ),
-			'amp-story-grid-layer' => AMP_Allowed_Tags_Generated::get_reference_point_spec( 'AMP-STORY-GRID-LAYER default' ), // @todo Consider the more restrictive 'AMP-STORY-GRID-LAYER animate-in'.
+			'amp-selector'         => 'AMP-SELECTOR option',
+			'amp-story-grid-layer' => 'AMP-STORY-GRID-LAYER default', // @todo Consider the more restrictive 'AMP-STORY-GRID-LAYER animate-in'.
 		];
-		foreach ( $descendant_reference_points as $ancestor_name => $reference_point_spec ) {
+		foreach ( $descendant_reference_points as $ancestor_name => $reference_point_spec_name ) {
+			if ( empty( $this->open_elements[ $ancestor_name ] ) ) {
+				continue;
+			}
+			$reference_point_spec = AMP_Allowed_Tags_Generated::get_reference_point_spec( $reference_point_spec_name );
 			if ( isset( $reference_point_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ][ $attr_name ] ) ) {
-				$parent = $attr_node->parentNode;
-				while ( $parent ) {
-					if ( $ancestor_name === $parent->nodeName ) {
-						return true;
-					}
-					$parent = $parent->parentNode;
-				}
+				return true;
 			}
 		}
 

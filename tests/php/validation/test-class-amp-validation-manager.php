@@ -315,6 +315,26 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertInternalType( 'object', $admin_bar->get_node( 'amp-validity' ) );
 
 		// Admin bar item available in paired mode.
+		add_filter( 'amp_dev_mode_enabled', '__return_true' );
+		add_theme_support( AMP_Theme_Support::SLUG, [ AMP_Theme_Support::PAIRED_FLAG => true ] );
+		$admin_bar = new WP_Admin_Bar();
+		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
+		$node = $admin_bar->get_node( 'amp' );
+		$this->assertInternalType( 'object', $node );
+		$this->assertInternalType( 'object', $admin_bar->get_node( 'amp-paired-browsing' ) );
+
+		/*
+		 * Admin bar item available in transitional mode.
+		 * Transitional mode is available once template_dir is supplied.
+		 */
+		add_theme_support( AMP_Theme_Support::SLUG, [ 'template_dir' => 'amp' ] );
+		$admin_bar = new WP_Admin_Bar();
+		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
+		$node = $admin_bar->get_node( 'amp' );
+		$this->assertInternalType( 'object', $node );
+		$this->assertInternalType( 'object', $admin_bar->get_node( 'amp-paired-browsing' ) );
+
+		// Admin bar item available in paired mode.
 		add_theme_support( AMP_Theme_Support::SLUG, [ AMP_Theme_Support::PAIRED_FLAG => true ] );
 		$admin_bar = new WP_Admin_Bar();
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );

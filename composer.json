@@ -22,7 +22,7 @@
     "phpcompatibility/phpcompatibility-wp": "2.1.0",
     "roave/security-advisories": "dev-master",
     "sirbrillig/phpcs-variable-analysis": "2.6.2",
-    "wp-cli/wp-cli": "2.3.0",
+    "wp-cli/wp-cli": "2.4.0",
     "wp-coding-standards/wpcs": "2.2.0",
     "xwp/wp-dev-lib": "1.3.0"
   },
@@ -43,6 +43,11 @@
       "sabberworm/php-css-parser": {
         "PHP-CSS-Parser: Fix parsing CSS selectors which contain commas <https://github.com/sabberworm/PHP-CSS-Parser/pull/138>": "https://github.com/sabberworm/PHP-CSS-Parser/commit/fa139f65c5b098ae652c970b25e6eb03fc495eb4.diff"
       }
+    }
+  },
+  "autoload": {
+    "psr-4": {
+      "Amp\\AmpWP\\": "src/"
     }
   }
 }

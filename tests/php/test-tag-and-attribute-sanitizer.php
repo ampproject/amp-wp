@@ -1124,6 +1124,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-selector', 'amp-form', 'amp-carousel' ],
 			],
 
+			'reference-point-descendant-attr-outside-parent' => [
+				'<div option="foo">Foo!</div>',
+				'<div>Foo!</div>',
+				[],
+			],
+
 			'amp_live_list_sort'                           => [
 				'<amp-live-list sort="ascending" data-poll-interval="15000" data-max-items-per-page="5" id="amp-live-list-insert-blog"><button update on="tap:amp-live-list-insert-blog.update" class="ampstart-btn ml1 caps">You have updates</button><div items><div id="A green landscape with trees." data-sort-time="20180317225019">Hello</div></div></amp-live-list>',
 				null, // No change.

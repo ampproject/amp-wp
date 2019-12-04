@@ -493,6 +493,18 @@ class AMP_Validation_Manager {
 			$wp_admin_bar->add_node( $link_item );
 		}
 
+		if ( AMP_Theme_Support::is_paired_available() && $error_count <= 0 && amp_is_dev_mode() ) {
+			// Construct admin bar item to link to paired browsing experience.
+			$paired_browsing_item = [
+				'parent' => 'amp',
+				'id'     => 'amp-paired-browsing',
+				'title'  => esc_html__( 'Paired browsing', 'amp' ),
+				'href'   => AMP_Theme_Support::get_paired_browsing_url(),
+			];
+
+			$wp_admin_bar->add_node( $paired_browsing_item );
+		}
+
 		// Scrub the query var from the URL.
 		if ( ! is_amp_endpoint() && isset( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			add_action(
@@ -1874,17 +1886,14 @@ class AMP_Validation_Manager {
 
 		$response = wp_remote_retrieve_body( $r );
 		if ( trim( $response ) === '' ) {
-			$error_code = 'white_screen_of_death';
-			return new WP_Error( $error_code, self::get_validate_url_error_message( $error_code ) );
+			return new WP_Error( 'white_screen_of_death' );
 		}
 		if ( ! preg_match( '#</body>.*?<!--\s*AMP_VALIDATION\s*:\s*(\{.*?\})\s*-->#s', $response, $matches ) ) {
-			$error_code = 'response_comment_absent';
-			return new WP_Error( $error_code, self::get_validate_url_error_message( $error_code ) );
+			return new WP_Error( 'response_comment_absent' );
 		}
 		$validation = json_decode( $matches[1], true );
 		if ( json_last_error() || ! isset( $validation['results'] ) || ! is_array( $validation['results'] ) ) {
-			$error_code = 'malformed_json_validation_errors';
-			return new WP_Error( $error_code, self::get_validate_url_error_message( $error_code ) );
+			return new WP_Error( 'malformed_json_validation_errors' );
 		}
 
 		return array_merge(
@@ -1894,37 +1903,104 @@ class AMP_Validation_Manager {
 	}
 
 	/**
+	 * Serialize validation error messages.
+	 *
+	 * In order to safely pass validation error messages through redirects with query parameters, they must be serialized
+	 * with a HMAC for security. The messages contain markup so the HMAC prevents tampering.
+	 *
+	 * @since 1.4.2
+	 * @see AMP_Validation_Manager::unserialize_validation_error_messages()
+	 *
+	 * @param string[] $messages Messages.
+	 * @return string Serialized.
+	 */
+	public static function serialize_validation_error_messages( $messages ) {
+		$encoded_messages = base64_encode( wp_json_encode( array_unique( $messages ) ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+		return wp_hash( $encoded_messages ) . ':' . $encoded_messages;
+	}
+
+	/**
+	 * Unserialize validation error messages.
+	 *
+	 * @since 1.4.2
+	 * @see AMP_Validation_Manager::serialize_validation_error_messages()
+	 *
+	 * @param string $serialized Serialized messages.
+	 * @return string[]|null
+	 */
+	public static function unserialize_validation_error_messages( $serialized ) {
+		$parts = explode( ':', $serialized, 2 );
+		if ( count( $parts ) !== 2 || wp_hash( $parts[1] ) !== $parts[0] ) {
+			return null;
+		}
+		return json_decode( base64_decode( $parts[1] ), true ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
+	}
+
+	/**
 	 * Get error message for a validate URL failure.
 	 *
-	 * @param string $error_code Error code.
-	 * @return string Error message.
+	 * @param string $error_code    Error code.
+	 * @param string $error_message Error message, typically technical such as from HTTP status text or cURL error message.
+	 * @return string Error message with HTML markup.
 	 */
-	public static function get_validate_url_error_message( $error_code ) {
-		$check_error_log = __( 'Please check your server\'s PHP error logs; to do this you may need to enable WP_DEBUG_LOG.', 'amp' );
+	public static function get_validate_url_error_message( $error_code, $error_message = '' ) {
+		$check_error_log = sprintf(
+			/* translators: %s is link to Debugging in WordPress */
+			' ' . __( 'Please check your server PHP error logs; to do this you may need to <a href="%s" target="_blank">enable</a> <code>WP_DEBUG_LOG</code>.', 'amp' ),
+			esc_url( 'https://wordpress.org/support/article/debugging-in-wordpress/' )
+		);
+
+		if ( $error_message ) {
+			$error_message = ' ' . rtrim( $error_message, '.' ) . '.';
+		}
+
+		$support_forum_message = ' ' . sprintf(
+			/* translators: %1$s: Link to support forum. %2$s: Link to new topic form in support forum. */
+			__( 'If you are stuck, please search the <a href="%1$s">support forum</a> for possible related topics, or otherwise start a <a href="%2$s">new support topic</a> including the error message, the URL to your site, and your active theme/plugins.', 'amp' ),
+			esc_url( 'https://wordpress.org/support/plugin/amp/' ),
+			esc_url( 'https://wordpress.org/support/plugin/amp/#new-topic-0' )
+		);
+
+		$site_health_message = '';
+		if ( version_compare( get_bloginfo( 'version' ), '5.2', '>=' ) ) {
+			$site_health_message .= ' ' . sprintf(
+				/* translators: %s is link to Site Health */
+				__( 'Please check your <a href="%s">Site Health</a> to verify it can perform loopback requests.', 'amp' ),
+				esc_url( admin_url( 'site-health.php' ) )
+			);
+			$support_forum_message .= ' ' . sprintf(
+				/* translators: %s is the URL to Site Health Info. */
+				__( 'Please include your <a href="%s">Site Health Info</a>.', 'amp' ),
+				esc_url( admin_url( 'site-health.php?tab=debug' ) )
+			);
+		}
+
 		switch ( $error_code ) {
 			case 'http_request_failed':
-				return __( 'Failed to fetch URL(s) to validate. This may be due to a request timeout.', 'amp' ) . ' ' . $check_error_log;
+				return __( 'Failed to fetch URL to validate.', 'amp' ) . $error_message . $site_health_message . $support_forum_message;
 			case 'white_screen_of_death':
-				return __( 'Unable to validate URL. Encountered a white screen of death likely due to a fatal error.', 'amp' ) . ' ' . $check_error_log;
+				return __( 'Unable to validate URL. Encountered a white screen of death likely due to a PHP fatal error.', 'amp' ) . $error_message . $check_error_log . $support_forum_message;
 			case '404':
-				return __( 'The fetched URL was not found. It may have been deleted. If so, you can trash this.', 'amp' );
+				return __( 'The fetched URL was not found. It may have been deleted. If so, you can trash this.', 'amp' ) . $error_message . $support_forum_message;
 			case '500':
-				return __( 'An internal server error occurred when fetching the URL for validation.', 'amp' ) . ' ' . $check_error_log;
+				return __( 'An internal server error occurred when fetching the URL for validation.', 'amp' ) . $error_message . $check_error_log . $support_forum_message;
 			case 'response_comment_absent':
 				return sprintf(
-					/* translators: %s: AMP_VALIDATION */
-					__( 'URL validation failed to due to the absence of the expected JSON-containing %s comment after the body. This is often due to a PHP fatal error occurring.', 'amp' ),
-					'AMP_VALIDATION'
-				) . ' ' . $check_error_log;
+					/* translators: %1$s: AMP_VALIDATION, %2$s: </body> */
+					__( 'URL validation failed to due to the absence of the expected JSON-containing %1$s HTML comment after %2$s. This is often due to a PHP fatal error occurring.', 'amp' ),
+					'<code>AMP_VALIDATION</code>',
+					'<code>&lt;/body&gt;</code>'
+				) . $error_message . $check_error_log . $support_forum_message;
 			case 'malformed_json_validation_errors':
 				return sprintf(
-					/* translators: %s: AMP_VALIDATION */
-					__( 'URL validation failed to due to unexpected JSON in the %s comment after the body.', 'amp' ),
-					'AMP_VALIDATION'
-				);
+					/* translators: %1$s: AMP_VALIDATION, %2$s: </body> */
+					__( 'URL validation failed to due to unexpected JSON in the %1$s HTML comment after %2$s.', 'amp' ),
+					'<code>AMP_VALIDATION</code>',
+					'<code>&lt;/body&gt;</code>'
+				) . $error_message . $support_forum_message;
 			default:
 				/* translators: %s is error code */
-				return sprintf( __( 'URL validation failed. Error code: %s.', 'amp' ), $error_code ); // Note that $error_code has been sanitized with sanitize_key(); will be escaped below as well.
+				return sprintf( __( 'URL validation failed. Error code: %s.', 'amp' ), $error_code ) . $error_message . $support_forum_message;
 		}
 	}
 
