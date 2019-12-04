@@ -2442,8 +2442,10 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			[ AMP_DOM_Utils::create_node( $dom, 'link', [ 'href' => '//example.org/wp-includes/' ] ), 40 ],
 			// All other links.
 			[ AMP_DOM_Utils::create_node( $dom, 'link', [ 'id' => 'something-else' ] ), 50 ],
-			// Twentytwenty inline styles.
-			[ AMP_DOM_Utils::create_node( $dom, 'style', [ 'id' => 'twentytwenty-style-inline-css' ] ), 2 ],
+			// Parent theme inline styles.
+			[ AMP_DOM_Utils::create_node( $dom, 'style', [ 'id' => 'parent-theme-inline-css' ] ), 2 ],
+			// Child theme inline styles.
+			[ AMP_DOM_Utils::create_node( $dom, 'style', [ 'id' => 'child-theme-inline-css' ] ), 12 ],
 			// Admin bar inline styles.
 			[ AMP_DOM_Utils::create_node( $dom, 'style', [ 'id' => 'admin-bar-inline-css' ] ), 200 ],
 			// Customizer inline styles.
@@ -2570,17 +2572,29 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				),
 				150,
 			],
-			// Twentytwenty inline styles for print.
+			// Parent theme inline styles for print.
 			[
 				AMP_DOM_Utils::create_node(
 					$dom,
 					'style',
 					[
-						'id' => 'twentytwenty-style-inline-css',
+						'id' => 'parent-theme-inline-css',
 						'media' => 'print',
 					]
 				),
 				102,
+			],
+			// Child theme inline styles for print.
+			[
+				AMP_DOM_Utils::create_node(
+					$dom,
+					'style',
+					[
+						'id' => 'child-theme-inline-css',
+						'media' => 'print',
+					]
+				),
+				112,
 			],
 			// Admin bar inline styles for print.
 			[
@@ -2634,16 +2648,23 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * @param int    $expected Expected priority.
 	 */
 	public function test_get_stylesheet_priority( $node, $expected ) {
-		$dom                 = new DOMDocument();
-		$sanitizer           = new AMP_Style_Sanitizer( $dom );
+		global $wp_styles;
+		$wp_styles = new WP_Styles();
+
 		$parent_theme_filter = static function () {
 			return 'parent-theme';
 		};
 		$child_theme_filter  = static function () {
 			return 'child-theme';
 		};
+
+		$dom       = new DOMDocument();
+		$sanitizer = new AMP_Style_Sanitizer( $dom );
+
 		add_filter( 'template', $parent_theme_filter );
 		add_filter( 'stylesheet', $child_theme_filter );
+		$wp_styles->add( 'parent-theme', get_template_directory_uri() . '/style.css' );
+		$wp_styles->add( 'child-theme', get_stylesheet_directory_uri() . '/style.css' );
 		$this->assertEquals( $expected, $this->call_private_method( $sanitizer, 'get_stylesheet_priority', [ $node ] ) );
 		remove_filter( 'stylesheet', $child_theme_filter );
 		remove_filter( 'template', $parent_theme_filter );

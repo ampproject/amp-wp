@@ -967,23 +967,30 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			if ( 'print' === $node->getAttribute( 'media' ) ) {
 				$priority += $print_priority_base;
 			}
-		} elseif ( $node instanceof DOMElement && 'style' === $node->nodeName ) {
-			switch ( (string) $node->getAttribute( 'id' ) ) {
-				case 'twentytwenty-style-inline-css':
-					// @todo The core theme sanitizer should be able to provide this instead of hardcoding it here.
-					// Not easily implementable right now, we'll wait for the middleware make-over.
-					$priority = 2;
-					break;
-				case 'admin-bar-inline-css':
-					$priority = $admin_bar_priority;
-					break;
-				case 'wp-custom-css':
-					// Additional CSS from Customizer.
-					$priority = 60;
-					break;
-				default:
-					// Other style elements, including from Recent Comments widget.
-					$priority = 70;
+		} elseif ( $node instanceof DOMElement && 'style' === $node->nodeName && $node->hasAttribute( 'id' ) ) {
+			$id = $node->getAttribute( 'id' );
+			if (
+				preg_match( '/^(?<handle>.+)-inline-css$/', $id, $matches ) &&
+				wp_style_is( $matches['handle'], 'registered' ) &&
+				0 === strpos( wp_styles()->registered[ $matches['handle'] ]->src, get_template_directory_uri() )
+			) {
+				// Parent theme inline style.
+				$priority = 2;
+			} elseif (
+				preg_match( '/^(?<handle>.+)-inline-css$/', $id, $matches ) &&
+				wp_style_is( $matches['handle'], 'registered' ) &&
+				0 === strpos( wp_styles()->registered[ $matches['handle'] ]->src, get_stylesheet_directory_uri() )
+			) {
+				// Child theme inline style.
+				$priority = 12;
+			} elseif ( 'admin-bar-inline-css' === $id ) {
+				$priority = $admin_bar_priority;
+			} elseif ( 'wp-custom-css' === $id ) {
+				// Additional CSS from Customizer.
+				$priority = 60;
+			} else {
+				// Other style elements, including from Recent Comments widget.
+				$priority = 70;
 			}
 
 			if ( 'print' === $node->getAttribute( 'media' ) ) {
