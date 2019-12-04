@@ -66,7 +66,7 @@ function MediaLibrary( { onInsert } ) {
 
 	const mediaPicker = () => {
 		// Create the media frame.
-		const fileFrame = new wp.media( {
+		const fileFrame = wp.media( {
 			title: 'Upload to Story',
 			button: {
 				text: 'Insert into page',
