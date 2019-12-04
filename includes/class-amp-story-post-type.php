@@ -688,6 +688,10 @@ class AMP_Story_Post_Type {
 	 * @return array Allowed tags.
 	 */
 	public static function filter_kses_allowed_html( $allowed_tags ) {
+		if ( ! is_array( $allowed_tags ) ) {
+			return $allowed_tags;
+		}
+
 		$story_components = [
 			'amp-story-page',
 			'amp-story-grid-layer',
