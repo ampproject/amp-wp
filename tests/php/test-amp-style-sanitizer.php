@@ -1128,6 +1128,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 		$html  = '<html amp><head><meta charset="utf-8">';
 		$html .= sprintf( '<link rel="stylesheet" href="%s">', esc_url( $theme->get_stylesheet_directory_uri() . '/style.css' ) ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$html .= '<style>@font-face { font-family: "Genericons"; src: url("data:application/x-font-woff;charset=utf-8;base64,d09GRgABAAA") format("woff"); }</style>';
+		$html .= '<style>@font-face { font-family: "Custom"; src: url("data:application/x-font-woff;charset=utf-8;base64,d09GRgABAAA") format("woff"); }</style>';
 		$html .= '</head><body></body></html>';
 
 		$dom         = AMP_DOM_Utils::get_dom( $html );
@@ -1141,8 +1143,9 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer->sanitize();
 		$this->assertEquals( [], $error_codes );
 		$actual_stylesheets = array_values( $sanitizer->get_stylesheets() );
-		$this->assertCount( 1, $actual_stylesheets );
+		$this->assertCount( 3, $actual_stylesheets );
 
+		// Check font included in theme.
 		$this->assertContains( '@font-face{font-family:"NonBreakingSpaceOverride";', $actual_stylesheets[0] );
 		$this->assertContains( 'format("woff2")', $actual_stylesheets[0] );
 		$this->assertContains( 'format("woff")', $actual_stylesheets[0] );
@@ -1150,6 +1153,19 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertContains( 'fonts/NonBreakingSpaceOverride.woff2', $actual_stylesheets[0] );
 		$this->assertContains( 'fonts/NonBreakingSpaceOverride.woff', $actual_stylesheets[0] );
 		$this->assertContains( 'font-display:swap', $actual_stylesheets[0] );
+
+		// Check font not included in theme, but included in plugin.
+		$this->assertContains( '@font-face{font-family:"Genericons";', $actual_stylesheets[1] );
+		$this->assertContains( 'format("woff")', $actual_stylesheets[1] );
+		$this->assertNotContains( 'data:', $actual_stylesheets[1] );
+		$this->assertContains( 'assets/fonts/genericons.woff', $actual_stylesheets[1] );
+		$this->assertContains( 'font-display:swap', $actual_stylesheets[1] );
+
+		// Check font not included anywhere, so must remain inline.
+		$this->assertContains( '@font-face{font-family:"Custom";', $actual_stylesheets[2] );
+		$this->assertContains( 'url("data:application/x-font-woff;charset=utf-8;base64,d09GRgABAAA")', $actual_stylesheets[2] );
+		$this->assertContains( 'format("woff")', $actual_stylesheets[2] );
+		$this->assertNotContains( 'font-display:swap', $actual_stylesheets[2] );
 	}
 
 	/**

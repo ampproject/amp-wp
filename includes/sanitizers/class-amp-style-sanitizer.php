@@ -2269,8 +2269,20 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					if ( ! is_wp_error( $path ) ) {
 						$data_url->getURL()->setString( $guessed_url );
 						$converted_count++;
-						break;
+						continue 2;
 					}
+				}
+
+				// As fallback, look for fonts bundled with the AMP plugin.
+				$font_filename = sprintf( '%s.%s', strtolower( $font_basename ), $extension );
+				$bundled_fonts = [
+					'nonbreakingspaceoverride.woff',
+					'nonbreakingspaceoverride.woff2',
+					'genericons.woff',
+				];
+				if ( in_array( $font_filename, $bundled_fonts, true ) ) {
+					$data_url->getURL()->setString( plugin_dir_url( AMP__FILE__ ) . "assets/fonts/$font_filename" );
+					$converted_count++;
 				}
 			} // End foreach $source_data_url_objects.
 		} // End foreach $src_properties.
