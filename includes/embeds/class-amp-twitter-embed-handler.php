@@ -79,7 +79,16 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 			return '';
 		}
 
-		return $this->shortcode( [ 'tweet' => $id ] );
+		$this->did_convert_elements = true;
+		return AMP_HTML_Utils::build_tag(
+			$this->amp_tag,
+			[
+				'data-tweetid' => $id,
+				'layout'       => 'responsive',
+				'width'        => $this->args['width'],
+				'height'       => $this->args['height'],
+			]
+		);
 	}
 
 	/**
