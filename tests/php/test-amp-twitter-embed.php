@@ -91,34 +91,28 @@ class AMP_Twitter_Embed_Test extends WP_UnitTestCase {
 			],
 			'url_simple'                           => [
 				'https://twitter.com/wordpress/status/987437752164737025' . PHP_EOL,
-				'<p><amp-twitter width="600" height="480" layout="responsive" data-tweetid="987437752164737025">',
-				"</amp-twitter></p>\n",
+				"<amp-twitter width=\"600\" height=\"480\" layout=\"responsive\" data-tweetid=\"987437752164737025\" class=\"twitter-tweet\" data-width=\"500\" data-dnt=\"true\"><blockquote class=\"twitter-tweet\" data-width=\"500\" data-dnt=\"true\" placeholder=\"\">\n<p lang=\"en\" dir=\"ltr\">Celebrate the WordPress 15th Anniversary on May 27 <a href=\"https://t.co/jv62WkI9lr\">https://t.co/jv62WkI9lr</a> <a href=\"https://t.co/4ZECodSK78\">pic.twitter.com/4ZECodSK78</a></p>\n<p>— WordPress (@WordPress) <a href=\"https://twitter.com/WordPress/status/987437752164737025?ref_src=twsrc%5Etfw\">April 20, 2018</a></p></blockquote></amp-twitter>\n\n",
 			],
 			'url_with_big_tweet_id'                => [
 				'https://twitter.com/wordpress/status/705219971425574912' . PHP_EOL,
-				'<p><amp-twitter width="600" height="480" layout="responsive" data-tweetid="705219971425574912">',
-				"</amp-twitter></p>\n",
+				"<amp-twitter width=\"600\" height=\"480\" layout=\"responsive\" data-tweetid=\"705219971425574912\" class=\"twitter-tweet\" data-width=\"500\" data-dnt=\"true\"><blockquote class=\"twitter-tweet\" data-width=\"500\" data-dnt=\"true\" placeholder=\"\">\n<p lang=\"en\" dir=\"ltr\">On our way to the <a href=\"https://twitter.com/hashtag/GoogleDance?src=hash&amp;ref_src=twsrc%5Etfw\">#GoogleDance</a>! <a href=\"https://twitter.com/hashtag/SMX?src=hash&amp;ref_src=twsrc%5Etfw\">#SMX</a> 💃🏻 <a href=\"https://t.co/N8kZ9M3eN4\">pic.twitter.com/N8kZ9M3eN4</a></p>\n<p>— Search Engine Land (@sengineland) <a href=\"https://twitter.com/sengineland/status/705219971425574912?ref_src=twsrc%5Etfw\">March 3, 2016</a></p></blockquote></amp-twitter>\n\n",
 			],
 
 			'timeline_url_with_profile'            => [
 				'https://twitter.com/wordpress' . PHP_EOL,
-				'<p><amp-twitter data-timeline-source-type="profile" data-timeline-screen-name="wordpress" layout="responsive" width="600" height="480">',
-				"</amp-twitter></p>\n",
+				"<p><amp-twitter data-timeline-source-type=\"profile\" data-timeline-screen-name=\"wordpress\" layout=\"responsive\" width=\"600\" height=\"480\"></amp-twitter></p>\n",
 			],
 			'timeline_url_with_likes'              => [
 				'https://twitter.com/wordpress/likes' . PHP_EOL,
-				'<p><amp-twitter data-timeline-source-type="likes" data-timeline-screen-name="wordpress" layout="responsive" width="600" height="480">',
-				"</amp-twitter></p>\n",
+				"<p><amp-twitter data-timeline-source-type=\"likes\" data-timeline-screen-name=\"wordpress\" layout=\"responsive\" width=\"600\" height=\"480\"></amp-twitter></p>\n",
 			],
 			'timeline_url_with_list'               => [
 				'https://twitter.com/wordpress/lists/random_list' . PHP_EOL,
-				'<p><amp-twitter data-timeline-source-type="list" data-timeline-slug="random_list" data-timeline-owner-screen-name="wordpress" layout="responsive" width="600" height="480">',
-				"</amp-twitter></p>\n",
+				"<p><amp-twitter data-timeline-source-type=\"list\" data-timeline-slug=\"random_list\" data-timeline-owner-screen-name=\"wordpress\" layout=\"responsive\" width=\"600\" height=\"480\"></amp-twitter></p>\n",
 			],
 			'timeline_url_with_list2'              => [
 				'https://twitter.com/robertnyman/lists/web-gdes' . PHP_EOL,
-				'<p><amp-twitter data-timeline-source-type="list" data-timeline-slug="web-gdes" data-timeline-owner-screen-name="robertnyman" layout="responsive" width="600" height="480">',
-				"</amp-twitter></p>\n",
+				"<p><amp-twitter data-timeline-source-type=\"list\" data-timeline-slug=\"web-gdes\" data-timeline-owner-screen-name=\"robertnyman\" layout=\"responsive\" width=\"600\" height=\"480\"></amp-twitter></p>\n",
 			],
 
 			'shortcode_without_id'                 => [
@@ -127,28 +121,24 @@ class AMP_Twitter_Embed_Test extends WP_UnitTestCase {
 			],
 			'shortcode_simple'                     => [
 				'[tweet 987437752164737025]' . PHP_EOL,
-				'<amp-twitter data-tweetid="987437752164737025" layout="responsive" width="600" height="480">',
+				'<amp-twitter data-tweetid="987437752164737025" layout="responsive" width="600" height="480"></amp-twitter>',
 				"</amp-twitter>\n",
 			],
 			'shortcode_with_tweet_attribute'       => [
 				'[tweet tweet=987437752164737025]' . PHP_EOL,
-				'<amp-twitter data-tweetid="987437752164737025" layout="responsive" width="600" height="480">',
-				"</amp-twitter>\n",
+				'<amp-twitter data-tweetid="987437752164737025" layout="responsive" width="600" height="480"></amp-twitter>',
 			],
 			'shortcode_with_big_tweet_id'          => [
 				'[tweet 705219971425574912]' . PHP_EOL,
-				'<amp-twitter data-tweetid="705219971425574912" layout="responsive" width="600" height="480">',
-				"</amp-twitter>\n",
+				'<amp-twitter data-tweetid="705219971425574912" layout="responsive" width="600" height="480"></amp-twitter>',
 			],
 			'shortcode_with_url'                   => [
 				'[tweet https://twitter.com/wordpress/status/987437752164737025]' . PHP_EOL,
-				'<amp-twitter data-tweetid="987437752164737025" layout="responsive" width="600" height="480">',
-				"</amp-twitter>\n",
+				'<amp-twitter data-tweetid="987437752164737025" layout="responsive" width="600" height="480"></amp-twitter>',
 			],
 			'shortcode_with_url_with_big_tweet_id' => [
 				'[tweet https://twitter.com/wordpress/status/705219971425574912]' . PHP_EOL,
-				'<amp-twitter data-tweetid="705219971425574912" layout="responsive" width="600" height="480">',
-				"</amp-twitter>\n",
+				'<amp-twitter data-tweetid="705219971425574912" layout="responsive" width="600" height="480"></amp-twitter>',
 			],
 			'shortcode_with_non_numeric_tweet_id'  => [
 				'[tweet abcd]' . PHP_EOL,
@@ -162,18 +152,19 @@ class AMP_Twitter_Embed_Test extends WP_UnitTestCase {
 	 *
 	 * @dataProvider get_conversion_data
 	 * @param string $source   Source.
-	 * @param string $expected_start Expected start.
-	 * @param string $expected_end   Expected end.
+	 * @param string $expected Expected content.
 	 */
-	public function test__conversion( $source, $expected_start, $expected_end = null ) {
+	public function test__conversion( $source, $expected ) {
 		$embed = new AMP_Twitter_Embed_Handler();
 		$embed->register_embed();
-		$filtered_content = apply_filters( 'the_content', $source );
 
-		$this->assertStringStartsWith( $expected_start, $filtered_content );
-		if ( $expected_end ) {
-			$this->assertStringEndsWith( $expected_end, $filtered_content );
-		}
+		$filtered_content = apply_filters( 'the_content', $source );
+		$dom              = AMP_DOM_Utils::get_dom_from_content( $filtered_content );
+		$embed->sanitize_raw_embeds( $dom );
+
+		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+
+		$this->assertEquals( $content, $expected );
 	}
 
 	public function get_scripts_data() {
@@ -200,10 +191,12 @@ class AMP_Twitter_Embed_Test extends WP_UnitTestCase {
 	public function test__get_scripts( $source, $expected ) {
 		$embed = new AMP_Twitter_Embed_Handler();
 		$embed->register_embed();
-		$source = apply_filters( 'the_content', $source );
-		$source = preg_replace( '#(<amp-twitter.+?>).*?(</amp-twitter>)#s', '$1$2', $source );
 
-		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( AMP_DOM_Utils::get_dom_from_content( $source ) );
+		$filtered_content = apply_filters( 'the_content', $source );
+		$dom              = AMP_DOM_Utils::get_dom_from_content( $filtered_content );
+		$embed->sanitize_raw_embeds( $dom );
+
+		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 		$whitelist_sanitizer->sanitize();
 
 		$scripts = array_merge(
