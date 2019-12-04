@@ -2428,17 +2428,17 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			// Dashicons handle.
 			[ [ 'link', [ 'id' => 'dashicons-css' ] ], 90 ],
 			// Parent theme styles.
-			[ [ 'link', [ 'href' => '//example.org/wp-content/themes/parent-theme/style.css' ] ], 1 ],
+			[ [ 'link', [ 'href' => get_theme_root_uri() . '/parent-theme/style.css' ] ], 1 ],
 			// Child theme styles.
-			[ [ 'link', [ 'href' => '//example.org/wp-content/themes/child-theme/style.css' ] ], 10 ],
+			[ [ 'link', [ 'href' => get_theme_root_uri() . '/child-theme/style.css' ] ], 10 ],
 			// Core frontend handle.
 			[ [ 'link', [ 'id' => 'wp-block-library-css' ] ], 20 ],
 			// Plugin asset.
-			[ [ 'link', [ 'href' => '//example.org/wp-content/plugins/some-plugin/style.css' ] ], 30 ],
+			[ [ 'link', [ 'href' => plugins_url() . '/some-plugin/style.css' ] ], 30 ],
 			// Query monitor plugin asset.
-			[ [ 'link', [ 'href' => '//example.org/wp-content/plugins/query-monitor/style.css' ] ], 150 ],
+			[ [ 'link', [ 'href' => plugins_url() . '/query-monitor/style.css' ] ], 150 ],
 			// Other styles from wp-includes.
-			[ [ 'link', [ 'href' => '//example.org/wp-includes/' ] ], 40 ],
+			[ [ 'link', [ 'href' => includes_url() ] ], 40 ],
 			// All other links.
 			[ [ 'link', [ 'id' => 'something-else' ] ], 50 ],
 			// Parent theme inline styles.
@@ -2489,7 +2489,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				[
 					'link',
 					[
-						'href' => '//example.org/wp-content/themes/parent-theme/style.css',
+						'href' => get_theme_root_uri() . '/parent-theme/style.css',
 						'media' => 'print',
 					],
 				],
@@ -2500,7 +2500,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				[
 					'link',
 					[
-						'href' => '//example.org/wp-content/themes/child-theme/style.css',
+						'href' => get_theme_root_uri() . '/child-theme/style.css',
 						'media' => 'print',
 					],
 				],
@@ -2522,7 +2522,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				[
 					'link',
 					[
-						'href' => '//example.org/wp-content/plugins/some-plugin/style.css',
+						'href' => plugins_url() . '/some-plugin/style.css',
 						'media' => 'print',
 					],
 				],
@@ -2533,7 +2533,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				[
 					'link',
 					[
-						'href' => '//example.org/wp-content/plugins/query-monitor/style.css',
+						'href' => plugins_url() . '/query-monitor/style.css',
 						'media' => 'print',
 					],
 				],
@@ -2544,7 +2544,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				[
 					'link',
 					[
-						'href' => '//example.org/wp-includes/',
+						'href' => includes_url(),
 						'media' => 'print',
 					],
 				],
@@ -2586,7 +2586,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			// Admin bar inline styles for print.
 			[
 				[
-					$dom,
 					'style',
 					[
 						'id' => 'admin-bar-inline-css',
