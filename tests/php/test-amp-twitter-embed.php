@@ -31,7 +31,6 @@ class AMP_Twitter_Embed_Test extends WP_UnitTestCase {
 	 */
 	public function setUp() {
 		parent::setUp();
-
 		add_filter( 'pre_http_request', [ $this, 'mock_http_request' ], 10, 3 );
 	}
 
