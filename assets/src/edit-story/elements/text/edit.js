@@ -82,7 +82,9 @@ function TextEdit( { content, color, backgroundColor, width, height, x, y, fontF
 	// as would otherwise be a lint error.
 	const lastKnownState = useRef( null );
 
-	// This filters out illegal content on paste and updates state accordingly.
+	// This filters out illegal content (see `getFilteredState`)
+	// on paste and updates state accordingly.
+	// Furthermore it also sets initial selection if relevant.
 	const updateEditorState = useCallback( ( newEditorState ) => {
 		let filteredState = getFilteredState( newEditorState, editorState );
 		if ( mustAddOffset.current ) {

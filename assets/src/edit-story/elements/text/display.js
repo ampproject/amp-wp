@@ -7,7 +7,7 @@ import styled from 'styled-components';
 /**
  * WordPress dependencies
  */
-import { useRef, useEffect } from '@wordpress/element';
+import { useRef, useEffect, useCallback } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -40,7 +40,7 @@ const Element = styled.p`
 	}
 `;
 
-function TextDisplay( { id, content, color, backgroundColor, width, height, x, y, fontFamily, fontSize, fontWeight, fontStyle, rotationAngle } ) {
+function TextDisplay( { id, content, color, backgroundColor, width, height, x, y, fontFamily, fontSize, fontWeight, fontStyle, rotationAngle, setClickHandler } ) {
 	const props = {
 		color,
 		backgroundColor,
@@ -62,15 +62,22 @@ function TextDisplay( { id, content, color, backgroundColor, width, height, x, y
 	} = useCanvas();
 	const isElementSelected = selectedElementIds.includes( id );
 	const isElementOnlySelection = isElementSelected && selectedElementIds.length === 1;
-	const handleClick = ( evt ) => {
+	const handleClick = useCallback( ( evt ) => {
+		evt.persist();
 		if ( evt.shiftKey || evt.metaKey || evt.altKey || evt.ctrlKey ) {
 			// Some modifier was pressed. Ignore and bubble
 			return;
 		}
 		// Enter editing without and place cursor at current selection offset
-		setEditingElementWithState( id, { offset: getCaretCharacterOffsetWithin( element.current ) } );
+		setEditingElementWithState( id, { offset: getCaretCharacterOffsetWithin( element.current, evt.clientX, evt.clientY ) } );
 		evt.stopPropagation();
-	};
+	}, [ id, setEditingElementWithState ] );
+	useEffect( () => {
+		if ( setClickHandler ) {
+			setClickHandler( handleClick );
+		}
+	}, [ setClickHandler, handleClick ] );
+
 	const handleKeyDown = ( evt ) => {
 		if ( evt.metaKey || evt.altKey || evt.ctrlKey ) {
 			// Some modifier (except shift) was pressed. Ignore and bubble
@@ -92,7 +99,6 @@ function TextDisplay( { id, content, color, backgroundColor, width, height, x, y
 
 		// ignore everything else and bubble.
 	};
-	const onClick = isElementOnlySelection ? handleClick : null;
 	const onKeyDown = isElementOnlySelection ? handleKeyDown : null;
 	const tabIndex = isElementOnlySelection ? 0 : null;
 	const element = useRef();
@@ -104,7 +110,6 @@ function TextDisplay( { id, content, color, backgroundColor, width, height, x, y
 	return (
 		<Element
 			canSelect={ isElementOnlySelection }
-			onMouseUp={ onClick }
 			onKeyDown={ onKeyDown }
 			tabIndex={ tabIndex }
 			ref={ element }
@@ -128,6 +133,7 @@ TextDisplay.propTypes = {
 	rotationAngle: PropTypes.number.isRequired,
 	x: PropTypes.number.isRequired,
 	y: PropTypes.number.isRequired,
+	setClickHandler: PropTypes.func,
 };
 
 export default TextDisplay;

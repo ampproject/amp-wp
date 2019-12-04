@@ -7,7 +7,7 @@ import Moveable from 'react-moveable';
 /**
  * WordPress dependencies
  */
-import { useCallback, useEffect, useState } from '@wordpress/element';
+import { useCallback, useEffect, useState, useRef } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -39,6 +39,10 @@ const Element = styled.div`
 
 function Page() {
 	const [ targetEl, setTargetEl ] = useState( null );
+	const [ clickHandler, rawSetClickHandler ] = useState( null );
+	const moveable = useRef();
+
+	const setClickHandler = useCallback( ( ch ) => rawSetClickHandler( () => ch ), [ rawSetClickHandler ] );
 
 	const {
 		state: { currentPage, hasSelection, selectedElements },
@@ -71,9 +75,29 @@ function Page() {
 		target.style.transform = `translate(${ frame.translate[ 0 ] }px, ${ frame.translate[ 1 ] }px) rotate(${ frame.rotate }deg)`;
 	};
 
+	// Whenever selection change, update moveable rect
+	useEffect( () => {
+		if ( moveable.current ) {
+			moveable.current.updateRect();
+		}
+	}, [ selectedElements ] );
+
+	// This handles single clicks to any selected element.
+	// TODO: Multi selection.
+	// TODO: don't invoke if *any* transformation has happened.
+	const handleSelectionClick = useCallback( ( evt ) => {
+		if ( clickHandler ) {
+			// Make selection box "transparent", click element and make selection opaque again,
+			targetEl.style.pointerEvents = 'none';
+			clickHandler( evt );
+			targetEl.style.pointerEvents = '';
+		}
+	}, [ clickHandler, targetEl ] );
+
 	return (
 		<Background>
-			{ currentPage && currentPage.elements.map( ( { type, ...rest } ) => {
+			{ currentPage && currentPage.elements.map( ( el ) => {
+				const { type, ...rest } = el;
 				const { Display, Edit } = getDefinitionForType( type );
 				const { id } = rest;
 
@@ -97,16 +121,17 @@ function Page() {
 
 				return (
 					<Element key={ id } onClick={ ( evt ) => handleSelectElement( id, evt ) }>
-						<Display { ...rest } />
+						<Display { ...rest } setClickHandler={ selectedElements.includes( el ) ? setClickHandler : null } />
 					</Element>
 				);
 			} ) }
 
 			{ hasSelection && ! isEditing && (
-				<Selection { ...selectionProps } ref={ setTargetEl } />
+				<Selection { ...selectionProps } ref={ setTargetEl } onClick={ handleSelectionClick } />
 			) }
 			{ displayMoveable && targetEl && (
 				<Moveable
+					ref={ moveable }
 					target={ targetEl }
 					draggable={ true }
 					resizable={ true }
