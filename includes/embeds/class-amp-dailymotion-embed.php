@@ -64,7 +64,7 @@ class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @see \WP_Embed::shortcode()
 	 *
 	 * @param array  $matches URL pattern matches.
-	 * @param array  $attr    Shortcode attribues.
+	 * @param array  $attr    Shortcode attributes.
 	 * @param string $url     URL.
 	 * @param string $rawattr Unmodified shortcode attributes.
 	 * @return string Rendered oEmbed.

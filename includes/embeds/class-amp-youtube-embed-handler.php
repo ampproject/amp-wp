@@ -130,14 +130,11 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @see \WP_Embed::shortcode()
 	 * @deprecated This is no longer being used.
 	 *
-	 * @param array  $matches URL pattern matches.
-	 * @param array  $attr    Shortcode attribues.
-	 * @param string $url     URL.
 	 * @return string Rendered oEmbed.
 	 */
-	public function oembed( $matches, $attr, $url ) {
+	public function oembed() {
 		_deprecated_function( __METHOD__, '1.5.0' );
-		return $this->shortcode( [ $url ] );
+		return '';
 	}
 
 	/**
