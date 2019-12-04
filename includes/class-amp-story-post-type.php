@@ -684,10 +684,14 @@ class AMP_Story_Post_Type {
 	/**
 	 * Filter the allowed tags for KSES to allow for amp-story children.
 	 *
-	 * @param array $allowed_tags Allowed tags.
-	 * @return array Allowed tags.
+	 * @param array|string $allowed_tags Allowed tags.
+	 * @return array|string Allowed tags.
 	 */
 	public static function filter_kses_allowed_html( $allowed_tags ) {
+		if ( ! is_array( $allowed_tags ) ) {
+			return $allowed_tags;
+		}
+
 		$story_components = [
 			'amp-story-page',
 			'amp-story-grid-layer',
