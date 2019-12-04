@@ -125,16 +125,45 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
+	 * Gets AMP-compliant markup for the YouTube shortcode.
+	 *
+	 * @deprecated This should be moved to Jetpack. See <https://github.com/ampproject/amp-wp/issues/3309>.
+	 *
+	 * @param array $attr The YouTube attributes.
+	 * @return string YouTube shortcode markup.
+	 */
+	public function shortcode( $attr ) {
+		$url = false;
+
+		if ( isset( $attr[0] ) ) {
+			$url = ltrim( $attr[0], '=' );
+		} elseif ( function_exists( 'shortcode_new_to_old_params' ) ) {
+			$url = shortcode_new_to_old_params( $attr );
+		}
+
+		if ( empty( $url ) ) {
+			return '';
+		}
+
+		$video_id = $this->get_video_id_from_url( $url );
+
+		return $this->render( compact( 'video_id' ), $url );
+	}
+
+	/**
 	 * Render oEmbed.
 	 *
 	 * @see \WP_Embed::shortcode()
 	 * @deprecated This is no longer being used.
 	 *
+	 * @param array  $matches URL pattern matches.
+	 * @param array  $attr    Shortcode attribues.
+	 * @param string $url     URL.
 	 * @return string Rendered oEmbed.
 	 */
-	public function oembed() {
+	public function oembed( $matches, $attr, $url ) {
 		_deprecated_function( __METHOD__, '1.5.0' );
-		return '';
+		return $this->shortcode( [ $url ] );
 	}
 
 	/**
@@ -208,4 +237,31 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		return $value;
 	}
+
+	/**
+	 * Override the output of YouTube videos.
+	 *
+	 * This overrides the value in wp_video_shortcode().
+	 * The pattern matching is copied from WP_Widget_Media_Video::render().
+	 *
+	 * @param string $html Empty variable to be replaced with shortcode markup.
+	 * @param array  $attr The shortcode attributes.
+	 * @return string|null $markup The markup to output.
+	 */
+	public function video_override( $html, $attr ) {
+		if ( ! isset( $attr['src'] ) ) {
+			return $html;
+		}
+		$src             = $attr['src'];
+		$youtube_pattern = '#^https?://(?:www\.)?(?:youtube\.com/watch|youtu\.be/)#';
+		if ( 1 !== preg_match( $youtube_pattern, $src ) ) {
+			return $html;
+		}
+
+		$url      = ltrim( $src, '=' );
+		$video_id = $this->get_video_id_from_url( $url );
+
+		return $this->render( compact( 'video_id' ), $url );
+	}
+
 }

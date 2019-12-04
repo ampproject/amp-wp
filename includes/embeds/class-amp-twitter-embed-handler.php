@@ -70,9 +70,11 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	public function oembed( $matches ) {
 		_deprecated_function( __METHOD__, '1.1' );
 		$id = false;
+
 		if ( isset( $matches['tweet'] ) && is_numeric( $matches['tweet'] ) ) {
 			$id = $matches['tweet'];
 		}
+
 		if ( ! $id ) {
 			return '';
 		}
