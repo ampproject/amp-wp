@@ -13,7 +13,6 @@ import { useEffect } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import useStory from '../../app/story/useStory';
 import useLibrary from './useLibrary';
 
 const Image = styled.img`
@@ -58,11 +57,6 @@ function MediaLibrary( { onInsert } ) {
 		state: { media, isMediaLoading, isMediaLoaded, mediaType },
 		actions: { loadMedia, setIsMediaLoading, setIsMediaLoaded },
 	} = useLibrary();
-
-	const {
-		state: { storyId },
-	} = useStory();
-
 
 	useEffect( () => {
 		loadMedia();

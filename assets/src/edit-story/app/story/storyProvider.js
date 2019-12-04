@@ -66,7 +66,6 @@ function StoryProvider( { storyId, children } ) {
 			selectedElementIds,
 			selectedElements,
 			hasSelection,
-			storyId,
 		},
 		actions: {
 			setCurrentPageByIndex,
