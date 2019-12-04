@@ -59,38 +59,6 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
-	 * Filter oEmbed HTML for Twitter to prepare it for AMP.
-	 *
-	 * @param string $cache Cache for oEmbed.
-	 * @param string $url   Embed URL.
-	 * @return string Embed.
-	 */
-	public function filter_embed_oembed_html( $cache, $url ) {
-		$parsed_url = wp_parse_url( $url );
-		if ( false === strpos( $parsed_url['host'], 'twitter.com' ) ) {
-			return $cache;
-		}
-
-		if ( ! preg_match( '#^https?://twitter.com/.+/status/(\d+)#', $url, $matches ) ) {
-			return $cache;
-		}
-		$tweet_id = $matches[1];
-
-		$cache = preg_replace(
-			'#(<blockquote[^>]+?twitter-tweet[^>]+)(>[^\r]+)<script.*$#',
-			sprintf(
-				'<amp-twitter width="%d" height="%d" layout="responsive" data-tweetid="%s">$1 placeholder $2</amp-twitter>',
-				esc_attr( $this->DEFAULT_WIDTH ),
-				esc_attr( $this->DEFAULT_HEIGHT ),
-				esc_attr( $tweet_id )
-			),
-			$cache
-		);
-
-		return $cache;
-	}
-
-	/**
 	 * Gets AMP-compliant markup for the Twitter shortcode.
 	 *
 	 * Note that this shortcode is is defined in Jetpack.
@@ -141,7 +109,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Render oEmbed.
 	 *
 	 * @deprecated Since 1.1 as now the sanitize_raw_embeds() is used exclusively, allowing the
-	 * original oEmbed response to be wrapped with `amp-twitter`.
+	 *             original oEmbed response to be wrapped with `amp-twitter`.
 	 *
 	 * @see \WP_Embed::shortcode()
 	 *
@@ -331,7 +299,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Removes Twitter's embed <script> tag.
 	 *
-	 * @param DOMElement $node The DOMNode to whose sibling is the instagram script.
+	 * @param DOMElement $node The DOMNode to whose sibling is the Twitter script.
 	 */
 	private function sanitize_embed_script( $node ) {
 		$next_element_sibling = $node->nextSibling;
