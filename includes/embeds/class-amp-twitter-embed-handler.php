@@ -64,11 +64,20 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	 *
 	 * @see \WP_Embed::shortcode()
 	 *
+	 * @param array $matches URL pattern matches.
 	 * @return string Rendered oEmbed.
 	 */
-	public function oembed() {
+	public function oembed( $matches ) {
 		_deprecated_function( __METHOD__, '1.1' );
-		return '';
+		$id = false;
+		if ( isset( $matches['tweet'] ) && is_numeric( $matches['tweet'] ) ) {
+			$id = $matches['tweet'];
+		}
+		if ( ! $id ) {
+			return '';
+		}
+
+		return $this->shortcode( [ 'tweet' => $id ] );
 	}
 
 	/**
