@@ -132,6 +132,7 @@ function MediaLibrary( { onInsert } ) {
 						src={ src }
 						width={ 150 }
 						height={ 150 }
+						loading={ 'lazy' }
 						onClick={ () => onInsert( 'image', {
 							src,
 							width: 200,
