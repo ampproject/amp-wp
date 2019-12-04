@@ -48,7 +48,7 @@ function Page() {
 	const {
 		actions: { setBackgroundClickHandler },
 	} = useCanvas();
-	const handleSelectElement = useCallback( ( id ) => ( evt ) => {
+	const handleSelectElement = useCallback( ( id, evt ) => {
 		if ( evt.metaKey ) {
 			toggleElementIdInSelection( id );
 		} else {
@@ -58,7 +58,12 @@ function Page() {
 	}, [ toggleElementIdInSelection, selectElementById ] );
 	const selectionProps = hasSelection ? getUnionSelection( selectedElements, 0 ) : {};
 	useEffect( () => {
-		setBackgroundClickHandler( () => clearSelection() );
+		setBackgroundClickHandler( ( e ) => {
+			// @todo For some reason, the propagation stop above doesn't seem to be working.
+			if ( 3 !== e.eventPhase ) {
+				clearSelection();
+			}
+		} );
 	}, [ setBackgroundClickHandler, clearSelection ] );
 
 	let displayMoveable = false;
@@ -71,6 +76,11 @@ function Page() {
 		target.style.transform = `translate(${ frame.translate[ 0 ] }px, ${ frame.translate[ 1 ] }px) rotate(${ frame.rotate }deg)`;
 	};
 
+	const resetMoveable = ( target ) => {
+		frame.translate = [ 0, 0 ];
+		setStyle( target );
+	};
+
 	return (
 		<Background>
 			{ currentPage && currentPage.elements.map( ( { type, id, ...rest } ) => {
@@ -81,17 +91,14 @@ function Page() {
 					displayMoveable = true;
 				}
 				return (
-					<Element key={ id } onClick={ handleSelectElement( id ) }>
+					<Element ref={ setTargetEl } key={ id } onClick={ ( evt ) => handleSelectElement( id, evt ) }>
 						<Comp { ...rest } />
 					</Element>
 				);
 			} ) }
-			{ hasSelection && (
-				<Selection { ...selectionProps } ref={ setTargetEl } />
-			) }
 			{ displayMoveable && targetEl && (
 				<Moveable
-					target={ targetEl }
+					target={ targetEl.firstChild }
 					draggable={ true }
 					resizable={ true }
 					rotatable={ true }
@@ -102,8 +109,9 @@ function Page() {
 					onDragStart={ ( { set } ) => {
 						set( frame.translate );
 					} }
-					onDragEnd={ () => {
+					onDragEnd={ ( { target } ) => {
 						setPropertiesOnSelectedElements( { x: selectionProps.x + frame.translate[ 0 ], y: selectionProps.y + frame.translate[ 1 ] } );
+						resetMoveable( target );
 					} }
 					onResizeStart={ ( { setOrigin, dragStart } ) => {
 						setOrigin( [ '%', '%' ] );
@@ -112,7 +120,6 @@ function Page() {
 						}
 					} }
 					onResize={ ( { target, width, height, drag } ) => {
-						// @todo This is sliding slightly while resizing an image element specifically, needs looking into.
 						target.style.width = `${ width }px`;
 						target.style.height = `${ height }px`;
 						frame.translate = drag.beforeTranslate;
@@ -125,6 +132,7 @@ function Page() {
 							x: selectionProps.x + frame.translate[ 0 ],
 							y: selectionProps.y + frame.translate[ 1 ],
 						} );
+						resetMoveable( target );
 					} }
 					onRotateStart={ ( { set } ) => {
 						set( frame.rotate );
