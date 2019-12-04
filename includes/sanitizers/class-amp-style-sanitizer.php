@@ -89,6 +89,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *      @type string   $parsed_cache_variant       Additional value by which to vary parsed cache.
 	 *      @type string   $include_manifest_comment   Whether to show the manifest HTML comment in the response before the style[amp-custom] element. Can be 'always', 'never', or 'when_excessive'.
 	 *      @type string[] $focus_within_classes       Class names in selectors that should be replaced with :focus-within pseudo classes.
+	 *      @type string[] $low_priority_plugins       Plugin slugs of the plugins to deprioritize when hitting the CSS limit.
 	 * }
 	 */
 	protected $args;
@@ -110,6 +111,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		'parsed_cache_variant'      => null,
 		'include_manifest_comment'  => 'always',
 		'focus_within_classes'      => [ 'focus' ],
+		'low_priority_plugins'      => [ 'query-monitor' ],
 	];
 
 	/**
@@ -931,9 +933,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				'wp-mediaelement',
 				'thickbox',
 			];
-			$low_priority_plugins  = [
-				'query-monitor',
-			];
 
 			if ( in_array( $style_handle, $non_amp_handles, true ) ) {
 				// Styles are for non-AMP JS only so not be used in AMP at all.
@@ -955,7 +954,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$priority = 20;
 			} elseif ( $plugin ) {
 				// Styles from plugins are next-highest priority, unless they are in the list of low-priority plugins.
-				$priority = in_array( $plugin, $low_priority_plugins, true ) ? 150 : 30;
+				$priority = in_array( $plugin, $this->args['low_priority_plugins'], true ) ? 150 : 30;
 			} elseif ( 0 === strpos( $schemeless_href, $remove_url_scheme( includes_url() ) ) ) {
 				// Other styles from wp-includes come next.
 				$priority = 40;
