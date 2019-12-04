@@ -6,13 +6,12 @@ import styled from 'styled-components';
 /**
  * WordPress dependencies
  */
-import { useCallback, useEffect, useState } from '@wordpress/element';
+import { useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { useStory } from '../../app';
-import { getComponentForType } from '../../elements';
 import useCanvas from './useCanvas';
 import Movable from './../moveable';
 
@@ -23,29 +22,15 @@ const Background = styled.div.attrs( { className: 'container' } )`
 	height: 100%;
 `;
 
-const Element = styled.div`
-	cursor: pointer;
-	user-select: none;
-`;
-
 function Page() {
-	const [ targetEl, setTargetEl ] = useState( null );
-
-	const {
-		state: { currentPage, selectedElements },
-		actions: { clearSelection, selectElementById, toggleElementIdInSelection },
-	} = useStory();
 	const {
 		actions: { setBackgroundClickHandler },
 	} = useCanvas();
-	const handleSelectElement = useCallback( ( id, evt ) => {
-		if ( evt.metaKey ) {
-			toggleElementIdInSelection( id );
-		} else {
-			selectElementById( id );
-		}
-		evt.stopPropagation();
-	}, [ toggleElementIdInSelection, selectElementById ] );
+
+	const {
+		state: { currentPage, selectedElements },
+		actions: { clearSelection },
+	} = useStory();
 
 	useEffect( () => {
 		setBackgroundClickHandler( ( e ) => {
@@ -59,24 +44,17 @@ function Page() {
 	return (
 		<Background>
 			{ currentPage && currentPage.elements.map( ( { type, id, ...rest } ) => {
-				const comp = getComponentForType( type );
-				const Comp = comp; // why u do dis, eslint?
 				return (
-					<>
-						<Element ref={ setTargetEl } key={ id } onClick={ ( evt ) => handleSelectElement( id, evt ) }>
-							<Comp { ...rest } />
-						</Element>
-						{ targetEl && (
-							<Movable
-								type={ type }
-								x={ rest.x }
-								y={ rest.y }
-								rotationAngle={ rest.rotationAngle }
-								targetEl={ targetEl }
-								selected={ 1 === selectedElements.length && selectedElements[ 0 ].id === id }
-							/>
-						) }
-					</>
+					<Movable
+						key={ 'moveable-' + id }
+						type={ type }
+						x={ rest.x }
+						y={ rest.y }
+						rotationAngle={ rest.rotationAngle }
+						selected={ 1 === selectedElements.length && selectedElements[ 0 ].id === id }
+						rest={ rest }
+						id={ id }
+					/>
 				);
 			} ) }
 		</Background>
