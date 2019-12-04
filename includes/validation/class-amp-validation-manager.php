@@ -2021,8 +2021,10 @@ class AMP_Validation_Manager {
 			$invalid_plugins = isset( $errors[ AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT ]['plugin'] ) ? array_unique( $errors[ AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT ]['plugin'] ) : null;
 			if ( isset( $invalid_plugins ) ) {
 				$reported_plugins = [];
-				foreach ( $invalid_plugins as $plugin ) {
-					$reported_plugins[] = sprintf( '<code>%s</code>', esc_html( $plugin ) );
+				foreach ( $invalid_plugins as $plugin_slug ) {
+					$plugin_data        = AMP_Validation_Error_Taxonomy::get_plugin_from_slug( $plugin_slug );
+					$plugin_name        = is_array( $plugin_data ) ? $plugin_data['data']['Name'] : $plugin_slug;
+					$reported_plugins[] = sprintf( '<code>%s</code>', esc_html( $plugin_name ) );
 				}
 
 				$more_details_link = sprintf(

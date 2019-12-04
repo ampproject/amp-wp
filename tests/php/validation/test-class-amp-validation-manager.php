@@ -1718,6 +1718,18 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$pagenow          = 'plugins.php';
 		$_GET['activate'] = 'true';
 
+		$cache_plugins_backup = wp_cache_get( 'plugins', 'plugins' );
+
+		$plugins = [
+			'' => [
+				$this->plugin_name => [
+					'Name' => 'Foo Bar',
+				],
+			],
+		];
+
+		wp_cache_set( 'plugins', $plugins, 'plugins' );
+
 		set_transient(
 			AMP_Validation_Manager::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY,
 			[
@@ -1734,9 +1746,13 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		);
 		$output = get_echo( [ 'AMP_Validation_Manager', 'print_plugin_notice' ] );
 		$this->assertContains( 'Warning: The following plugin may be incompatible with AMP', $output );
-		$this->assertContains( $this->plugin_name, $output );
+		$this->assertContains( 'Foo Bar', $output );
 		$this->assertContains( 'More details', $output );
 		$this->assertContains( admin_url( 'edit.php' ), $output );
+
+		if ( $cache_plugins_backup ) {
+			wp_cache_set( 'plugins', $cache_plugins_backup, 'plugins' );
+		}
 	}
 
 	/**
