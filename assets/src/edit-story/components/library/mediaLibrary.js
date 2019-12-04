@@ -13,11 +13,12 @@ import { useEffect } from '@wordpress/element';
 /**
  * Internal dependencies
  */
+import useStory from '../../app/story/useStory';
 import useLibrary from './useLibrary';
 
 const Image = styled.img`
 	height: 150px;
-	width: 150px;
+	width: 48%;
 	padding: 3px;
 	margin: 3px;
 	border: 1px solid white;
@@ -40,39 +41,46 @@ const Button = styled.button`
 	 flex: 1 0 0;
 	 text-align: center;
 	 border: 0px none;
-`
+`;
 
 const Header = styled.div`
 	display: flex;
 	margin: 0px 4px 10px;
-`
+`;
+
+const Message = styled.div`
+	color: #ffffff;
+	font-size: 19px;
+`;
 
 function MediaLibrary( { onInsert } ) {
 	const {
-		state: { media, isMediaLoading, isMediaLoaded },
+		state: { media, isMediaLoading, isMediaLoaded, mediaType },
 		actions: { loadMedia, setIsMediaLoading, setIsMediaLoaded },
 	} = useLibrary();
 
-	useEffect( loadMedia );
+	const {
+		state: { storyId },
+	} = useStory();
 
-	if ( ! isMediaLoaded || isMediaLoading) {
-		return <Spinner />;
-	}
 
-	if ( ! media.length ) {
-		return (
-			<div>
-				{ 'No media found' }
-			</div>
-		);
-	}
+	useEffect( () => {
+		loadMedia();
+		// Work around that forces default tab as upload tab.
+		wp.media.controller.Library.prototype.defaults.contentUserSetting = false;
+	} );
 
 	const mediaPicker = () => {
 		// Create the media frame.
-		const fileFrame = wp.media( {
+		const fileFrame = new wp.media( {
+			title: 'Upload to Story',
+			button: {
+				text: 'Insert into page',
+			},
 			multiple: false,
 			library: {
-				type: 'image',
+				type: mediaType,
+				uploadedTo: storyId,
 			},
 		} );
 		let attachment;
@@ -83,10 +91,11 @@ function MediaLibrary( { onInsert } ) {
 			const { url } = attachment;
 			onInsert( 'image', {
 				src: url,
-				width: 20,
-				height: 10,
+				width: 100,
+				height: 100,
 				x: 5,
 				y: 5,
+				rotationAngle: 0,
 			} );
 		} );
 
@@ -94,37 +103,52 @@ function MediaLibrary( { onInsert } ) {
 			setIsMediaLoading( false );
 			setIsMediaLoaded( false );
 		} );
+
 		// Finally, open the modal
 		fileFrame.open();
 	};
 
-
 	const uploadMedia = () => {
 		mediaPicker();
-	}
+	};
 
 	return (
 		<div>
 			<Header>
-				<Title>{ 'Media' }</Title>
-				<Button onClick={ uploadMedia }>{ 'Upload Media' }</Button>
+				<Title>
+					{ 'Media' }
+				</Title>
+				<Button onClick={ uploadMedia }>
+					{ 'Upload' }
+				</Button>
 			</Header>
-			{ media.map( ( { src } ) => (
-				<Image
-					key={ src }
-					src={ src }
-					width={ 150 }
-					height={ 150 }
-					onClick={ () => onInsert( 'image', {
-						src,
-						width: 200,
-						height: 100,
-						x: 5,
-						y: 5,
-						rotationAngle: 0,
-					} ) }
-				/>
-			) )
+
+			{ ( ! isMediaLoaded || isMediaLoading ) &&
+				<Spinner />
+			}
+
+			{ ( isMediaLoaded && ! media.length ) ? (
+				<Message>
+					{ 'No media found' }
+				</Message>
+			) : (
+
+				media.map( ( { src } ) => (
+					<Image
+						key={ src }
+						src={ src }
+						width={ 150 }
+						height={ 150 }
+						onClick={ () => onInsert( 'image', {
+							src,
+							width: 200,
+							height: 100,
+							x: 5,
+							y: 5,
+							rotationAngle: 0,
+						} ) }
+					/>
+				) ) )
 			}
 		</div>
 	);
