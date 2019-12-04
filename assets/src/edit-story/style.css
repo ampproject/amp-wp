@@ -2,10 +2,6 @@
 	background-color: #191c28;
 }
 
-#edit-story .components-spinner {
-	float: none;
-}
-
 .edit-story .loading-message {
 	color: #fff;
 	text-align: center;

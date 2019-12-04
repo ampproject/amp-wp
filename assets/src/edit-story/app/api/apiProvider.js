@@ -34,7 +34,7 @@ function APIProvider( { children } ) {
 				apiPath = addQueryArgs( apiPath, { media_type: mediaType } );
 			}
 
-			return apiFetch( { path: apiPath } ).then( ( data ) => data.map( ( { guid: { rendered: src }, media_type: mediaType } ) => ( { src, mediaType } ) ) );
+			return apiFetch( { path: apiPath } ).then( ( data ) => data.map( ( { guid: { rendered: src } } ) => ( { src } ) ) );
 		},	[ media ],
 	);
 

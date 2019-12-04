@@ -110,15 +110,14 @@ function MediaLibrary( { onInsert } ) {
 			<Header>
 				<Title>
 					{ 'Media' }
+					{ ( ! isMediaLoaded || isMediaLoading ) &&
+						<Spinner />
+					}
 				</Title>
 				<Button onClick={ uploadMedia }>
 					{ 'Upload' }
 				</Button>
 			</Header>
-
-			{ ( ! isMediaLoaded || isMediaLoading ) &&
-				<Spinner />
-			}
 
 			{ ( isMediaLoaded && ! media.length ) ? (
 				<Message>
