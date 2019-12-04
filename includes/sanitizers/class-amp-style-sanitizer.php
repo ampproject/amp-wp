@@ -967,19 +967,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$priority += $print_priority_base;
 			}
 		} elseif ( $node instanceof DOMElement && 'style' === $node->nodeName && $node->hasAttribute( 'id' ) ) {
-			$id = $node->getAttribute( 'id' );
-			if (
-				preg_match( '/^(?<handle>.+)-inline-css$/', $id, $matches ) &&
-				wp_style_is( $matches['handle'], 'registered' ) &&
-				0 === strpos( wp_styles()->registered[ $matches['handle'] ]->src, get_template_directory_uri() )
-			) {
+			$id                  = $node->getAttribute( 'id' );
+			$is_theme_inline_css = preg_match( '/^(?<handle>.+)-inline-css$/', $id, $matches ) && wp_style_is( $matches['handle'], 'registered' );
+			if ( $is_theme_inline_css && 0 === strpos( wp_styles()->registered[ $matches['handle'] ]->src, get_template_directory_uri() ) ) {
 				// Parent theme inline style.
 				$priority = 2;
-			} elseif (
-				preg_match( '/^(?<handle>.+)-inline-css$/', $id, $matches ) &&
-				wp_style_is( $matches['handle'], 'registered' ) &&
-				0 === strpos( wp_styles()->registered[ $matches['handle'] ]->src, get_stylesheet_directory_uri() )
-			) {
+			} elseif ( $is_theme_inline_css && get_stylesheet() !== get_template() && 0 === strpos( wp_styles()->registered[ $matches['handle'] ]->src, get_stylesheet_directory_uri() ) ) {
 				// Child theme inline style.
 				$priority = 12;
 			} elseif ( 'admin-bar-inline-css' === $id ) {
