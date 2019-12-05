@@ -13,8 +13,8 @@ import { useCallback, useEffect, useState, useRef } from '@wordpress/element';
  * Internal dependencies
  */
 import { useStory } from '../../app';
-import { getDefinitionForType } from '../../elements';
 import useCanvas from './useCanvas';
+import Element from './element';
 
 const Background = styled.div.attrs( { className: 'container' } )`
 	background-color: ${ ( { theme } ) => theme.colors.fg.v1 };
@@ -31,10 +31,6 @@ const Selection = styled.div`
 	height: ${ ( { height } ) => `${ height }px` };
 	transform: ${ ( { rotationAngle } ) => `rotate(${ rotationAngle }deg)` };
 	position: absolute;
-`;
-
-const Element = styled.div`
-	${ ( { isPassive } ) => isPassive ? 'opacity: .4;' : 'cursor: pointer;' }
 `;
 
 function Page() {
@@ -57,7 +53,7 @@ function Page() {
 	} = useStory();
 	const {
 		state: { isEditing, editingElement },
-		actions: { setBackgroundClickHandler },
+		actions: { setBackgroundClickHandler, addNodeById },
 	} = useCanvas();
 	const handleSelectElement = useCallback( ( id, evt ) => {
 		if ( evt.metaKey ) {
@@ -107,35 +103,16 @@ function Page() {
 
 	return (
 		<Background>
-			{ currentPage && currentPage.elements.map( ( el ) => {
-				const { type, ...rest } = el;
-				const { Display, Edit } = getDefinitionForType( type );
-				const { id } = rest;
-
-				// Are we editing this element, display this as Edit component.
-				if ( editingElement === id ) {
-					return (
-						<Element key={ id }>
-							<Edit { ...rest } />
-						</Element>
-					);
-				}
-
-				// Are we editing some other element, display this as passive Display.
-				if ( isEditing ) {
-					return (
-						<Element key={ id } isPassive>
-							<Display { ...rest } />
-						</Element>
-					);
-				}
-
-				return (
-					<Element key={ id } onClick={ ( evt ) => handleSelectElement( id, evt ) }>
-						<Display { ...rest } setClickHandler={ setClickHandler } />
-					</Element>
-				);
-			} ) }
+			{ currentPage && currentPage.elements.map( ( { id, ...rest } ) => (
+				<Element
+					key={ id }
+					setClickHandler={ setClickHandler }
+					addNodeById={ addNodeById }
+					handleSelectElement={ handleSelectElement }
+					isEditing={ editingElement === id }
+					element={ { id, ...rest } }
+				/>
+			) ) }
 
 			{ hasSelection && ! isEditing && (
 				<Selection { ...selectionProps } ref={ setTargetEl } onClick={ handleSelectionClick } />

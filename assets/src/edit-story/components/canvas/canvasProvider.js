@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { useState, useCallback } from '@wordpress/element';
+import { useState, useCallback, useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -16,6 +16,7 @@ import Context from './context';
 function CanvasProvider( { children } ) {
 	const [ editingElement, setEditingElement ] = useState( false );
 	const [ editingElementState, setEditingElementState ] = useState( {} );
+	const [ nodesById, setNodesById ] = useState( {} );
 
 	// It's a bit weird to directly set a state to be a function (as setFoo calls
 	// any function given to unwrap the inner value, which can then be a function),
@@ -54,6 +55,38 @@ function CanvasProvider( { children } ) {
 		[],
 	);
 
+	const addNodeById = useCallback(
+		( id, ref ) => setNodesById( ( oldNodes ) => ( { ...oldNodes, [ id ]: ref } ) ),
+		[ setNodesById ],
+	);
+
+	// if any element is edited, make sure any touch or click outside this element exits edit mode.
+	useEffect( () => {
+		if ( ! editingElement ) {
+			return undefined;
+		}
+
+		const root = nodesById[ editingElement ];
+
+		if ( ! root ) {
+			return undefined;
+		}
+
+		const handleClick = ( evt ) => {
+			if ( ! root.contains( evt.target ) ) {
+				clearEditing();
+			}
+		};
+
+		// as soon as something is clicked/touched, check if we should exit edit mode.
+		const doc = root.ownerDocument || root.document;
+		doc.addEventListener( 'click', handleClick, true );
+
+		return () => {
+			doc.removeEventListener( 'click', handleClick, true );
+		};
+	}, [ editingElement, clearEditing, nodesById ] );
+
 	const state = {
 		state: {
 			editingElement,
@@ -62,6 +95,7 @@ function CanvasProvider( { children } ) {
 			backgroundClickHandler: backgroundClick.handler,
 		},
 		actions: {
+			addNodeById,
 			setBackgroundClickHandler,
 			clearBackgroundClickHandler,
 			setEditingElement: setEditingElementWithoutState,

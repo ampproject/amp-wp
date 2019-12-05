@@ -14,7 +14,7 @@ import Carrousel from './carrousel';
 import AddPage from './addpage';
 
 const Background = styled.div`
-	background-color: ${ ( { isPassive, theme } ) => isPassive ? theme.colors.bg.v5 : theme.colors.bg.v1 };
+	background-color: ${ ( { theme } ) => theme.colors.bg.v1 };
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -33,28 +33,23 @@ const Area = styled.div`
 	grid-area: ${ ( { area } ) => area };
 	height: 100%;
 	width: 100%;
-
-	${ ( { isPassive } ) => isPassive && `
-		pointer-events: none;
-		opacity: 0.4;
-	` };
 `;
 
 function CanvasLayout() {
-	const { state: { isEditing, backgroundClickHandler }, actions: { clearEditing } } = useCanvas();
-	const onClick = isEditing ? clearEditing : backgroundClickHandler;
+	const { state: { isEditing, backgroundClickHandler } } = useCanvas();
+	const onClick = isEditing ? () => {} : backgroundClickHandler;
 	return (
-		<Background isPassive={ isEditing } onClick={ onClick || null }>
+		<Background onClick={ onClick || null }>
 			<Area area="page">
 				<Page />
 			</Area>
-			<Area area="meta" isPassive={ isEditing }>
+			<Area area="meta">
 				<Meta />
 			</Area>
-			<Area area="carrousel" isPassive={ isEditing }>
+			<Area area="carrousel">
 				<Carrousel />
 			</Area>
-			<Area area="addpage" isPassive={ isEditing }>
+			<Area area="addpage">
 				<AddPage />
 			</Area>
 		</Background>
