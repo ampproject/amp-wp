@@ -40,7 +40,7 @@ if ( file_exists( AMP__BETA_TESTER__DIR__ . '/amp.php' ) ) {
 }
 
 register_activation_hook( __FILE__, __NAMESPACE__ . '\force_plugin_update_check' );
-register_deactivation_hook( __FILE__, __NAMESPACE__ . '\restore_update_plugins_transient' );
+register_deactivation_hook( __FILE__, __NAMESPACE__ . '\remove_plugin_data' );
 add_action( 'plugins_loaded', __NAMESPACE__ . '\init' );
 
 /**
@@ -55,10 +55,15 @@ function force_plugin_update_check() {
 }
 
 /**
- * Restore `update_plugins` transient and remove any plugin data.
+ * Remove any plugin data.
  */
-function restore_update_plugins_transient() {
+function remove_plugin_data() {
 	delete_site_transient( AMP__BETA__TESTER__RELEASES__TRANSIENT );
+
+	/*
+	 * Delete the `update_plugins` transient to force a plugin update check, and to get rid of any
+	 * custom update manifest for the plugin.
+	 */
 	delete_site_transient( 'update_plugins' );
 }
 
