@@ -284,7 +284,6 @@ final class Document extends DOMDocument {
 		$html = $this->restore_mustache_template_tokens( $html );
 		$html = $this->maybe_restore_noscript_elements( $html );
 		$html = $this->restore_self_closing_tags( $html );
-		$html = $this->restore_amp_bind_attributes( $html );
 
 		return $html;
 	}
@@ -546,11 +545,8 @@ final class Document extends DOMDocument {
 	 * This is necessary because attributes in square brackets are not understood in PHP and
 	 * get dropped with an error raised:
 	 * > Warning: DOMDocument::loadHTML(): error parsing attribute name
-	 * This is a reciprocal function of Document::restore_amp_bind_attributes().
 	 *
 	 * @link https://www.ampproject.org/docs/reference/components/amp-bind
-	 *
-	 * @see restore_amp_bind_attributes() Reciprocal function.
 	 *
 	 * @param string $html HTML containing amp-bind attributes.
 	 * @return string HTML with AMP binding attributes replaced with HTML5 data-* attributes.
@@ -623,23 +619,6 @@ final class Document extends DOMDocument {
 		 * See http://php.net/manual/en/pcre.constants.php for additional info on PCRE errors.
 		 */
 		return ( null !== $converted ) ? $converted : $html;
-	}
-
-
-	/**
-	 * Convert AMP bind-attributes back to their original syntax.
-	 *
-	 * @see convert_amp_bind_attributes() Reciprocal function.
-	 *
-	 * @param string $html HTML with amp-bind attributes converted.
-	 * @return string HTML with amp-bind attributes restored.
-	 */
-	private function restore_amp_bind_attributes( $html ) {
-		return preg_replace(
-			'#\s' . self::AMP_BIND_DATA_ATTR_PREFIX . '([a-zA-Z0-9_\-]+)#',
-			' [$1]',
-			$html
-		);
 	}
 
 	/**
