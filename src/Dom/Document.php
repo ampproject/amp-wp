@@ -452,12 +452,7 @@ final class Document extends DOMDocument {
 			$regex_pattern = '#<(' . implode( '|', self::$self_closing_tags ) . ')[^>]*>(?!</\1>)#';
 		}
 
-		// Force all self-closing tags to have closing tags since DOMDocument isn't fully aware.
-		return preg_replace(
-			$regex_pattern,
-			'$0</$1>',
-			$html
-		);
+		return preg_replace( $regex_pattern, '$0</$1>', $html );
 	}
 
 	/**
@@ -475,8 +470,7 @@ final class Document extends DOMDocument {
 			$regex_pattern = '#</(' . implode( '|', self::$self_closing_tags ) . ')>#i';
 		}
 
-		// Force all self-closing tags to have closing tags since DOMDocument isn't fully aware.
-		return preg_replace( $regex_pattern, '$0</$1>', $html );
+		return preg_replace( $regex_pattern, '', $html );
 	}
 
 	/**
