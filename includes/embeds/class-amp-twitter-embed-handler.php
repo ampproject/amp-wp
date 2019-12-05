@@ -57,41 +57,6 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
-	 * Render oEmbed.
-	 *
-	 * @deprecated Since 1.1 as now the sanitize_raw_embeds() is used exclusively, allowing the
-	 *             original oEmbed response to be wrapped with `amp-twitter`.
-	 *
-	 * @see \WP_Embed::shortcode()
-	 *
-	 * @param array $matches URL pattern matches.
-	 * @return string Rendered oEmbed.
-	 */
-	public function oembed( $matches ) {
-		_deprecated_function( __METHOD__, '1.1' );
-		$id = false;
-
-		if ( isset( $matches['tweet'] ) && is_numeric( $matches['tweet'] ) ) {
-			$id = $matches['tweet'];
-		}
-
-		if ( ! $id ) {
-			return '';
-		}
-
-		$this->did_convert_elements = true;
-		return AMP_HTML_Utils::build_tag(
-			$this->amp_tag,
-			[
-				'data-tweetid' => $id,
-				'layout'       => 'responsive',
-				'width'        => $this->args['width'],
-				'height'       => $this->args['height'],
-			]
-		);
-	}
-
-	/**
 	 * Render oEmbed for a timeline.
 	 *
 	 * @since 1.0
