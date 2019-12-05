@@ -167,6 +167,9 @@ class AMP_Story_Post_Type {
 			return;
 		}
 
+		// Force media model to load.
+		wp_enqueue_media();
+
 		$asset_file   = AMP__DIR__ . '/assets/js/' . self::AMP_STORIES_SCRIPT_HANDLE . '.asset.php';
 		$asset        = require $asset_file;
 		$dependencies = $asset['dependencies'];

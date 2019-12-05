@@ -15,12 +15,25 @@ import { useEffect } from '@wordpress/element';
  */
 import useLibrary from './useLibrary';
 
+const Container = styled.div`
+	display: grid;
+    grid-gap: 10px;
+    grid-template-columns: 1fr 1fr;
+`;
+
+const Column = styled.div`
+
+`;
 const Image = styled.img`
-	height: 150px;
-	width: 48%;
-	padding: 3px;
-	margin: 3px;
-	border: 1px solid white;
+	width: 100%;
+	border-radius: 10px;
+	margin-bottom: 10px;
+`;
+
+const Video = styled.video`
+	width: 100%;
+	border-radius: 10px;
+	margin-bottom: 10px;
 `;
 
 const Title = styled.h3`
@@ -44,7 +57,7 @@ const Button = styled.button`
 
 const Header = styled.div`
 	display: flex;
-	margin: 0px 4px 10px;
+	margin: 0px 0px 10px;
 `;
 
 const Message = styled.div`
@@ -52,10 +65,35 @@ const Message = styled.div`
 	font-size: 19px;
 `;
 
+const FilterButtons = styled.div`
+	border-bottom:  2px solid #606877;
+	padding: 18px 0px;
+	margin: 0px 0px 15px;
+`;
+
+const FilterButton = styled.button`
+	border: 0px;
+	background: none;
+	padding: 0px;
+	margin: 0px 28px 0px 0px;
+	color: rgba(255, 255, 255, 0.34);
+	font-size: 13px;
+	${ ( { active } ) => active && `
+    	color: #FFFFFF;
+  	` }
+`;
+
+const Search = styled.input`
+	width: 100%;
+	background: #616877 !important;
+	color: rgba(255, 255, 255, 0.34)  !important;
+	padding: 2px 10px !important;
+`;
+
 function MediaLibrary( { onInsert } ) {
 	const {
-		state: { media, isMediaLoading, isMediaLoaded, mediaType },
-		actions: { loadMedia, setIsMediaLoading, setIsMediaLoaded },
+		state: { media, isMediaLoading, isMediaLoaded, mediaType, searchTerm },
+		actions: { loadMedia, setIsMediaLoading, setIsMediaLoaded, setMediaType, setSearchTerm },
 	} = useLibrary();
 
 	useEffect( () => {
@@ -72,9 +110,6 @@ function MediaLibrary( { onInsert } ) {
 				text: 'Insert into page',
 			},
 			multiple: false,
-			library: {
-				type: mediaType,
-			},
 		} );
 		let attachment;
 
@@ -93,6 +128,8 @@ function MediaLibrary( { onInsert } ) {
 		} );
 
 		fileFrame.on( 'close', () => {
+			setMediaType( '' );
+			setSearchTerm( '' );
 			setIsMediaLoading( false );
 			setIsMediaLoaded( false );
 		} );
@@ -103,6 +140,50 @@ function MediaLibrary( { onInsert } ) {
 
 	const uploadMedia = () => {
 		mediaPicker();
+	};
+
+	const isEven = ( n ) => {
+		return n % 2 === 0;
+	};
+
+	const filters = [
+		{ filter: '', name: 'All' },
+		{ filter: 'image', name: 'Images' },
+		{ filter: 'video', name: 'Video' },
+	];
+
+	const getMediaElement = ( mediaEl, width ) => {
+		const { src, oWidth, oHeight, mimeType } = mediaEl;
+		const racio = oWidth / width;
+		const height = Math.round( oHeight / racio );
+		if ( [ 'image/png', 'image/jpeg' ].includes( mimeType ) ) {
+			return ( <Image
+				key={ src }
+				src={ src }
+				width={ width }
+				height={ height }
+				loading={ 'lazy' }
+				onClick={ () => onInsert( 'image', {
+					src,
+					width: 200,
+					height: 100,
+					x: 5,
+					y: 5,
+					rotationAngle: 0,
+				} ) }
+			/> );
+		} else if ( [ 'video/mp4' ].includes( mimeType ) ) {
+			return ( <Video
+				key={ src }
+				controls={ true }
+				width={ width }
+				height={ height }
+				onClick={ () => {} }
+			>
+				<source src={ src } type={ mimeType } />
+			</Video> );
+		}
+		return null;
 	};
 
 	return (
@@ -119,30 +200,55 @@ function MediaLibrary( { onInsert } ) {
 				</Button>
 			</Header>
 
+			<div>
+				<Search
+					type={ 'text' }
+					value={ searchTerm }
+					placeholder={ 'Search Media' }
+					onChange={ ( evt ) => {
+						setSearchTerm( evt.target.value ); setIsMediaLoading( false );
+						setIsMediaLoaded( false );
+					} } />
+			</div>
+
+			<FilterButtons>
+				{
+					filters.map( ( { filter, name }, index ) => (
+						<FilterButton
+							key={ index }
+							active={ filter === mediaType }
+							onClick={ () => {
+								setMediaType( filter );
+								setIsMediaLoading( false );
+								setIsMediaLoaded( false );
+							} }>
+							{ name }
+						</FilterButton>
+					) )
+				}
+			</FilterButtons>
+
 			{ ( isMediaLoaded && ! media.length ) ? (
 				<Message>
 					{ 'No media found' }
 				</Message>
 			) : (
-
-				media.map( ( { src } ) => (
-					<Image
-						key={ src }
-						src={ src }
-						width={ 150 }
-						height={ 150 }
-						loading={ 'lazy' }
-						onClick={ () => onInsert( 'image', {
-							src,
-							width: 200,
-							height: 100,
-							x: 5,
-							y: 5,
-							rotationAngle: 0,
+				<Container>
+					<Column>
+						{ media.map( ( mediaEl, index ) => {
+							return ( isEven( index ) ) ? getMediaElement( mediaEl, 150 ) : null;
 						} ) }
-					/>
-				) ) )
+					</Column>
+					<Column>
+						{ media.map( ( mediaEl, index ) => {
+							return ( ! isEven( index ) ) ? getMediaElement( mediaEl, 150 ) : null;
+						} ) }
+					</Column>
+				</Container>
+
+			)
 			}
+
 		</div>
 	);
 }
