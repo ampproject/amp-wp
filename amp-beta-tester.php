@@ -85,26 +85,23 @@ function init() {
  * @return \stdClass
  */
 function update_amp_manifest( $updates ) {
+	// Nothing to do if there is no `no_update` property.
 	if ( ! isset( $updates->no_update ) ) {
 		return $updates;
 	}
 
+	// Nothing to do if the AMP plugin update manifest cannot be retrieved.
 	if ( ! get_amp_update_manifest() ) {
 		return $updates;
 	}
 
-	$latest_manifest = fetch_amp_update_manifest();
+	if ( ! on_latest_amp_release() ) {
+		// Get the latest AMP release from GitHub.
+		$latest_release_manifest = get_github_amp_update_manifest();
 
-	if ( ! $latest_manifest ) {
-		$current_manifest = fetch_amp_update_manifest( get_amp_version() );
-
-		if ( $current_manifest ) {
-			unset( $updates->response[ AMP__PLUGIN__BASENAME ] );
-			$updates->no_update[ AMP__PLUGIN__BASENAME ] = $current_manifest;
-		}
-	} else {
 		unset( $updates->no_update[ AMP__PLUGIN__BASENAME ] );
-		$updates->response[ AMP__PLUGIN__BASENAME ] = $latest_manifest;
+		// Mark AMP plugin as having an update available.
+		$updates->response[ AMP__PLUGIN__BASENAME ] = $latest_release_manifest;
 	}
 
 	return $updates;
@@ -173,6 +170,12 @@ function move_plugin_to_correct_folder( $response, $hook_extra, $result ) {
  * @return array|false Array of releases in descending order, or false if an error occurred parsing response.
  */
 function get_amp_github_releases() {
+	$releases = get_site_transient( AMP__BETA__TESTER__RELEASES__TRANSIENT );
+
+	if ( ! empty( $releases ) ) {
+		return $releases;
+	}
+
 	$raw_response = wp_remote_get( 'https://api.github.com/repos/ampproject/amp-wp/releases' );
 
 	if ( is_wp_error( $raw_response ) ) {
@@ -188,6 +191,14 @@ function get_amp_github_releases() {
 	$releases_by_name = [];
 
 	foreach ( $releases as $release ) {
+		$zip_url = get_download_url_from_amp_release( $release );
+
+		// If there is not an 'amp.zip' asset for the release, ignore it.
+		if ( ! $zip_url ) {
+			continue;
+		}
+
+		$release->zip_url                   = $zip_url;
 		$releases_by_name[ $release->name ] = $release;
 	}
 
@@ -203,7 +214,13 @@ function get_amp_github_releases() {
 		}
 	);
 
-	return $releases;
+	set_site_transient(
+		AMP__BETA__TESTER__RELEASES__TRANSIENT,
+		$releases_by_name,
+		DAY_IN_SECONDS
+	);
+
+	return $releases_by_name;
 }
 
 /**
@@ -236,62 +253,57 @@ function generate_amp_update_manifest( $release ) {
 		return false;
 	}
 
-	$manifest = [];
-	$zip_url  = get_download_url_from_amp_release( $release );
-
-	if ( $zip_url ) {
-		$manifest['package'] = $zip_url;
-	}
-
-	$manifest['new_version'] = $release->tag_name;
-	$manifest['url']         = $release->html_url;
+	$manifest = [
+		'package'     => $release->zip_url,
+		'new_version' => $release->name,
+		'url'         => $release->html_url,
+	];
 
 	return array_merge( (array) $current_manifest, $manifest );
 }
 
 /**
+ * Determine whether or not the latest AMP plugin is in use.
+ *
+ * @return bool True if on latest release, false if not.
+ */
+function on_latest_amp_release() {
+	$releases = get_amp_github_releases();
+
+	// The first release is always the latest.
+	$release_ver = key( $releases );
+
+	return version_compare( get_amp_version(), $release_ver, '>=' );
+}
+
+/**
  * Fetch the AMP plugin update manifest for the specified version from GitHub.
  *
- * @param string $version Version to get manifest for. Defaults to getting the latest pre-release.
+ * @param string $version Version to get manifest for. Defaults to getting the latest release.
  * @return object|false Latest release, or false on failure.
  */
-function fetch_amp_update_manifest( $version = 'pre-release' ) {
-	$amp_manifest = null;
-	$releases     = get_site_transient( AMP__BETA__TESTER__RELEASES__TRANSIENT );
+function get_github_amp_update_manifest( $version = 'latest' ) {
+	$github_release = null;
+	$releases       = get_amp_github_releases();
 
-	if ( empty( $releases ) ) {
-		$releases = get_amp_github_releases();
-		set_site_transient( AMP__BETA__TESTER__RELEASES__TRANSIENT, $releases, DAY_IN_SECONDS );
-	}
-
-	if ( is_array( $releases ) ) {
-		$amp_version = get_amp_version();
-
-		foreach ( $releases as $release ) {
-			if (
-				'pre-release' === $version
-				&& true === $release->prerelease
-				&& version_compare( $release->tag_name, $amp_version, '>' )
-			) {
-				$amp_manifest = generate_amp_update_manifest( $release );
-				break;
-			}
-
-			if ( $version === $release->tag_name ) {
-				$amp_manifest = generate_amp_update_manifest( $release );
-				break;
-			}
+	if ( is_array( $releases ) && 0 !== count( $releases ) ) {
+		if ( 'latest' === $version ) {
+			$github_release = $releases[ key( $releases ) ];
+		} elseif ( array_key_exists( $version, $releases ) ) {
+			$github_release = $releases[ $version ];
 		}
 	} else {
 		// Something went wrong fetching the releases.
 		return false;
 	}
 
-	if ( empty( $amp_manifest ) ) {
+	if ( null === $github_release ) {
 		return false;
 	}
 
-	return (object) $amp_manifest;
+	$amp_manifest = generate_amp_update_manifest( $github_release );
+
+	return $amp_manifest ? (object) $amp_manifest : false;
 }
 
 /**
@@ -318,31 +330,12 @@ function get_amp_update_manifest() {
 }
 
 /**
- * Determine if the supplied version code is a prerelease.
- *
- * @param string $plugin_version Plugin version code.
- * @return bool
- */
-function is_pre_release( $plugin_version ) {
-	return (bool) preg_match( '/^\d+\.\d+(\.\d+)?-/', $plugin_version );
-}
-
-/**
  * Get the current AMP version.
  *
- * @param bool $strip_build_info Whether to strip build information or not.
  * @return string Current AMP version.
  */
-function get_amp_version( $strip_build_info = true ) {
-	$amp_version = defined( 'AMP__VERSION' )
+function get_amp_version() {
+	return defined( 'AMP__VERSION' )
 		? AMP__VERSION
 		: get_plugin_data( WP_PLUGIN_DIR . '/' . AMP__PLUGIN__BASENAME )['Version'];
-
-	if ( $strip_build_info ) {
-		// Strip the timestamp and commit hash from the plugin version if it exists.
-		preg_match( '/[^-]*-[^-]*/', $amp_version, $amp_version );
-		$amp_version = $amp_version[0];
-	}
-
-	return $amp_version;
 }
