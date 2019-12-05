@@ -1,5 +1,7 @@
 <?php
 
+use Amp\AmpWP\Dom\Document;
+
 class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 
 	/**
@@ -139,7 +141,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 
 		$libxml_previous_state = libxml_use_internal_errors( true );
 
-		$dom = new DOMDocument();
+		$dom = new Document();
 		$dom->loadHTML( $amp_rendered );
 
 		$components = $dom->getElementsByTagName( 'amp-analytics' );
@@ -172,7 +174,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 
 		$libxml_previous_state = libxml_use_internal_errors( true );
 
-		$dom = new DOMDocument();
+		$dom = new Document();
 		$dom->loadHTML( $amp_rendered );
 		$components = $dom->getElementsByTagName( 'amp-analytics' );
 

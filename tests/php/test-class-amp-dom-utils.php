@@ -1,5 +1,7 @@
 <?php
 
+use Amp\AmpWP\Dom\Document;
+
 /**
  * Class AMP_DOM_Utils_Test
  *
@@ -369,7 +371,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test preserving whitespace when serializing DOMDocument as HTML string.
+	 * Test preserving whitespace when serializing Dom\Document as HTML string.
 	 *
 	 * @covers \AMP_DOM_Utils::get_content_from_dom_node()
 	 * @covers \AMP_DOM_Utils::get_content_from_dom()
@@ -430,7 +432,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	 * @return array Head node data.
 	 */
 	public function get_head_node_data() {
-		$dom = new DOMDocument();
+		$dom = new Document();
 		return [
 			[
 				AMP_DOM_Utils::create_node( $dom, 'title', [] ),
@@ -559,7 +561,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	}
 
 	public function get_has_class_data() {
-		$dom = new DOMDocument();
+		$dom = new Document();
 
 		return [
 			// Element without class attribute.
@@ -597,7 +599,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	}
 
 	public function get_get_element_id_data() {
-		$dom = new DOMDocument();
+		$dom = new Document();
 
 		$same_element = AMP_DOM_Utils::create_node( $dom, 'div', [] );
 
@@ -635,7 +637,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	}
 
 	public function get_add_amp_action_data() {
-		$dom    = new DOMDocument();
+		$dom    = new Document();
 		$button = AMP_DOM_Utils::create_node( $dom, 'button', [] );
 		$form   = AMP_DOM_Utils::create_node( $dom, 'form', [] );
 
@@ -708,7 +710,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	}
 
 	public function get_copy_attributes_data() {
-		$dom = new DOMDocument();
+		$dom = new Document();
 
 		return [
 			// No attributes from full to empty.

@@ -7,6 +7,7 @@
 
 // phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
 
+use Amp\AmpWP\Dom\Document;
 use Amp\AmpWP\Tests\PrivateAccess;
 
 /**
@@ -2354,10 +2355,10 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					/**
 					 * Vars.
 					 *
-					 * @var DOMDocument $original_dom
-					 * @var string      $original_source
-					 * @var DOMDocument $amphtml_dom
-					 * @var string      $amphtml_source
+					 * @var Document $original_dom
+					 * @var string   $original_source
+					 * @var Document $amphtml_dom
+					 * @var string   $amphtml_source
 					 */
 					$this->assertInstanceOf( 'DOMElement', $original_dom->getElementById( 'wpadminbar' ), 'Expected admin bar element to be present originally.' );
 					$this->assertInstanceOf( 'DOMElement', $original_dom->getElementById( 'admin-bar-css' ), 'Expected admin bar CSS to be present originally.' );

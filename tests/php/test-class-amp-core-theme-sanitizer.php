@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use Amp\AmpWP\Dom\Document;
 use Amp\AmpWP\Tests\PrivateAccess;
 
 /**
@@ -40,7 +41,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	 * @covers AMP_Core_Theme_Sanitizer::xpath_from_css_selector()
 	 */
 	public function test_xpath_from_css_selector( $css_selector, $expected ) {
-		$dom       = new DOMDocument();
+		$dom       = new Document();
 		$sanitizer = new AMP_Core_Theme_Sanitizer( $dom );
 		$actual    = $this->call_private_method( $sanitizer, 'xpath_from_css_selector', [ $css_selector ] );
 		$this->assertEquals( $expected, $actual );

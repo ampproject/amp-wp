@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use Amp\AmpWP\Dom\Document;
 use Amp\AmpWP\Tests\PrivateAccess;
 
 /**
@@ -31,7 +32,7 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 		$GLOBALS['post'] = self::factory()->post->create_and_get();
-		$this->dom       = new DOMDocument();
+		$this->dom       = new Document();
 	}
 
 	/**

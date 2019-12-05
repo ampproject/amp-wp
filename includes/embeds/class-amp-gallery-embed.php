@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use Amp\AmpWP\Dom\Document;
 use Amp\AmpWP\Dom\ElementList;
 use Amp\AmpWP\Component\Carousel;
 
@@ -203,7 +204,7 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return string Rendered.
 	 */
 	public function render( $args ) {
-		$dom                        = new DOMDocument();
+		$dom                        = new Document();
 		$this->did_convert_elements = true;
 
 		$args = wp_parse_args(

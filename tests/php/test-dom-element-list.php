@@ -1,18 +1,18 @@
 <?php
 /**
- * Tests for ElementList, CaptionedSlide, and Image classes.
+ * Tests for ElementList and CaptionedSlide classes.
  *
  * @package AMP
  */
 
+use Amp\AmpWP\Dom\Document;
 use Amp\AmpWP\Dom\ElementList;
-use Amp\AmpWP\Component\Image;
 use Amp\AmpWP\Component\CaptionedSlide;
 
 /**
  * Tests for AMP carousel and slide classes.
  *
- * @covers Amp\AmpWP\Dom\ElementList, Amp\AmpWP\Component\CaptionedSlide, Amp\AmpWP\Component\Image
+ * @covers Amp\AmpWP\Dom\ElementList, Amp\AmpWP\Component\CaptionedSlide
  */
 class Test_DOM_Element_List extends \WP_UnitTestCase {
 
@@ -22,7 +22,7 @@ class Test_DOM_Element_List extends \WP_UnitTestCase {
 	 * @return array[] An associative array, including the images and the expected count.
 	 */
 	public function get_dom_element_list_data() {
-		$dom = new DOMDocument();
+		$dom = new Document();
 		return [
 			'no_image' => [
 				[],
@@ -48,8 +48,8 @@ class Test_DOM_Element_List extends \WP_UnitTestCase {
 	 * Test adding images and counting them.
 	 *
 	 * @dataProvider get_dom_element_list_data
-	 * @covers \Amp\AmpWP\Dom\ElementList::add()
-	 * @covers \Amp\AmpWP\Dom\ElementList::count()
+	 * @covers Amp\AmpWP\Dom\ElementList::add()
+	 * @covers Amp\AmpWP\Dom\ElementList::count()
 	 *
 	 * @param DOMElement[] $images         The images to add.
 	 * @param string       $expected_count The expected count after adding the images.
@@ -67,8 +67,8 @@ class Test_DOM_Element_List extends \WP_UnitTestCase {
 	 * Test the iteration of the images.
 	 *
 	 * @dataProvider get_dom_element_list_data
-	 * @covers \Amp\AmpWP\Dom\ElementList::add()
-	 * @covers \Amp\AmpWP\Dom\ElementList::getIterator()
+	 * @covers Amp\AmpWP\Dom\ElementList::add()
+	 * @covers Amp\AmpWP\Dom\ElementList::getIterator()
 	 *
 	 * @param DOMElement[] $images         The images to add.
 	 * @param string       $expected_count The expected count after adding the images.
@@ -94,7 +94,7 @@ class Test_DOM_Element_List extends \WP_UnitTestCase {
 	 * @covers \Amp\AmpWP\Component\CaptionedSlide::get_caption()
 	 */
 	public function test_get_caption() {
-		$image_node      = AMP_DOM_Utils::create_node( new DOMDocument(), 'amp-img', [] );
+		$image_node      = AMP_DOM_Utils::create_node( new Document(), 'amp-img', [] );
 		$caption         = 'This is a caption';
 		$captioned_image = new CaptionedSlide( $image_node, $caption );
 		$this->assertEquals( $caption, $captioned_image->get_caption() );
@@ -103,10 +103,10 @@ class Test_DOM_Element_List extends \WP_UnitTestCase {
 	/**
 	 * Test get_slide_node.
 	 *
-	 * @covers \Amp\AmpWP\Component\Image::get_slide_node()
+	 * @covers \Amp\AmpWP\Component\CaptionedSlide::get_slide_node()
 	 */
 	public function test_get_slide_node() {
-		$image_node = AMP_DOM_Utils::create_node( new DOMDocument(), 'amp-img', [] );
+		$image_node = AMP_DOM_Utils::create_node( new Document(), 'amp-img', [] );
 		$amp_image  = new CaptionedSlide( $image_node, '' );
 		$this->assertEquals( $image_node, $amp_image->get_slide_node() );
 	}

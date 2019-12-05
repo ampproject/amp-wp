@@ -6,8 +6,9 @@
  */
 
 use Amp\AmpWP\Component\Carousel;
+use Amp\AmpWP\Dom\Document;
 use Amp\AmpWP\Dom\ElementList;
-se Amp\AmpWP\Tests\PrivateAccess;
+use Amp\AmpWP\Tests\PrivateAccess;
 
 /**
  * Tests for Carousel class.
@@ -24,7 +25,7 @@ class Test_Carousel extends \WP_UnitTestCase {
 	 * @return array[] An associative array, including the slides and captions, the DOM, and the expected markup.
 	 */
 	public function get_carousel_data() {
-		$dom     = new DOMDocument();
+		$dom     = new Document();
 		$src     = 'https://example.com/img.png';
 		$width   = '1200';
 		$height  = '800';
@@ -56,7 +57,7 @@ class Test_Carousel extends \WP_UnitTestCase {
 	 * @covers \Amp\AmpWP\Component\Carousel::get_dom_element()
 	 *
 	 * @param ElementList $slides   An array of arrays, with images and their captions (if any).
-	 * @param DOMDocument $dom      The representation of the DOM.
+	 * @param Document    $dom      The representation of the DOM.
 	 * @param string      $expected The expected return value of the tested function.
 	 */
 	public function test_get_dom_element( $slides, $dom, $expected ) {
@@ -78,7 +79,7 @@ class Test_Carousel extends \WP_UnitTestCase {
 	 * @return array[] An associative array, including the ElementList and the expected return value.
 	 */
 	public function get_data_carousel_dimensions() {
-		$dom                 = new DOMDocument();
+		$dom                 = new Document();
 		$narrow_image_width  = '300';
 		$narrow_image_height = '600';
 		$narrow_image        = AMP_DOM_Utils::create_node(
@@ -153,7 +154,7 @@ class Test_Carousel extends \WP_UnitTestCase {
 	 * @throws ReflectionException If invoking the method reflection fails.
 	 */
 	public function test_get_dimensions( $slides, $expected ) {
-		$carousel = new Carousel( new DOMDocument(), $slides );
+		$carousel = new Carousel( new Document(), $slides );
 
 		$this->assertEquals(
 			$expected,
