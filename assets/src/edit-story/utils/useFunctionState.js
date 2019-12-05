@@ -24,7 +24,7 @@ function useFunctionState( initialValue ) {
 		[ setValue ],
 	);
 
-	return [ value, setter, clearer ];
+	return [ value.handler, setter, clearer ];
 }
 
 export default useFunctionState;

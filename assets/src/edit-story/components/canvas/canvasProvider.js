@@ -20,14 +20,14 @@ function CanvasProvider( { children } ) {
 		addNodeForElement,
 	} = useEditingElement();
 
-	const [ backgroundClick, setBackgroundClickHandler, clearBackgroundClickHandler ] = useFunctionState( null );
+	const [ backgroundClickHandler, setBackgroundClickHandler, clearBackgroundClickHandler ] = useFunctionState( null );
 
 	const state = {
 		state: {
 			editingElement,
 			editingElementState,
 			isEditing: Boolean( editingElement ),
-			backgroundClickHandler: backgroundClick.handler,
+			backgroundClickHandler,
 		},
 		actions: {
 			addNodeForElement,
