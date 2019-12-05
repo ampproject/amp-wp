@@ -2024,7 +2024,7 @@ class AMP_Validation_Manager {
 				foreach ( $invalid_plugins as $plugin_slug ) {
 					$plugin_data        = AMP_Validation_Error_Taxonomy::get_plugin_from_slug( $plugin_slug );
 					$plugin_name        = is_array( $plugin_data ) ? $plugin_data['data']['Name'] : $plugin_slug;
-					$reported_plugins[] = sprintf( '<code>%s</code>', esc_html( $plugin_name ) );
+					$reported_plugins[] = $plugin_name;
 				}
 
 				$more_details_link = sprintf(
@@ -2040,9 +2040,19 @@ class AMP_Validation_Manager {
 				);
 
 				printf(
-					'<div class="notice notice-warning is-dismissible"><p>%s %s %s</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">%s</span></button></div>',
-					esc_html( _n( 'Warning: The following plugin may be incompatible with AMP:', 'Warning: The following plugins may be incompatible with AMP:', count( $invalid_plugins ), 'amp' ) ),
-					implode( ', ', $reported_plugins ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					'<div class="notice notice-warning is-dismissible"><p>%s %s</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">%s</span></button></div>',
+					esc_html(
+						sprintf(
+							/* translators: %s is comma-separated list of one or more plugins */
+							_n(
+								'Warning: The following plugin may be incompatible with AMP: %s.',
+								'Warning: The following plugins may be incompatible with AMP: %s.',
+								count( $invalid_plugins ),
+								'amp'
+							),
+							implode( ', ', $reported_plugins ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						)
+					),
 					$more_details_link, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 					esc_html__( 'Dismiss this notice.', 'amp' )
 				);
