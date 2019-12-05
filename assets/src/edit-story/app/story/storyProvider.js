@@ -26,6 +26,7 @@ import useSelectElementById from './actions/useSelectElementById';
 import useAppendElementToCurrentPage from './actions/useAppendElementToCurrentPage';
 import useSetCurrentPageByIndex from './actions/useSetCurrentPageByIndex';
 import useSetPropertiesOnSelectedElements from './actions/useSetPropertiesOnSelectedElements';
+import useSetPropertiesById from './actions/useSetPropertiesById';
 
 function StoryProvider( { storyId, children } ) {
 	// Story state is stored in these three immutable variables only!
@@ -50,6 +51,7 @@ function StoryProvider( { storyId, children } ) {
 	const toggleElementIdInSelection = useToggleElementIdInSelection( { selectedElementIds, setSelectedElementIds } );
 	const appendElementToCurrentPage = useAppendElementToCurrentPage( { currentPageIndex, pages, setPages, setSelectedElementIds } );
 	const setPropertiesOnSelectedElements = useSetPropertiesOnSelectedElements( { currentPageIndex, pages, selectedElementIds, setPages } );
+	const setPropertiesById = useSetPropertiesById( { currentPageIndex, pages, setPages } );
 
 	useLoadStory( { storyId, pages, setPages, setCurrentPageIndex, clearSelection } );
 	useCurrentPage( { currentPageIndex, pages, setCurrentPage, setCurrentPageNumber } );
@@ -75,6 +77,7 @@ function StoryProvider( { storyId, children } ) {
 			toggleElementIdInSelection,
 			selectElementById,
 			setPropertiesOnSelectedElements,
+			setPropertiesById,
 		},
 	};
 
