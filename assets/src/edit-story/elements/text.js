@@ -27,7 +27,7 @@ const Element = styled.p`
 	${ ElementWithFontColor }
 `;
 
-function Text( { content, color, backgroundColor, width, height, x, y, fontFamily, fontSize, fontWeight, fontStyle, rotationAngle } ) {
+function Text( { content, color, backgroundColor, width, height, x, y, fontFamily, fontSize, fontWeight, fontStyle, rotationAngle, forwardedRef } ) {
 	const props = {
 		color,
 		backgroundColor,
@@ -35,6 +35,7 @@ function Text( { content, color, backgroundColor, width, height, x, y, fontFamil
 		fontStyle,
 		fontSize,
 		fontWeight,
+		ref: forwardedRef,
 		width,
 		height,
 		rotationAngle,
@@ -57,6 +58,7 @@ Text.propTypes = {
 	fontSize: PropTypes.string,
 	fontWeight: PropTypes.string,
 	fontStyle: PropTypes.string,
+	forwardedRef: PropTypes.func,
 	width: PropTypes.number.isRequired,
 	height: PropTypes.number.isRequired,
 	x: PropTypes.number.isRequired,

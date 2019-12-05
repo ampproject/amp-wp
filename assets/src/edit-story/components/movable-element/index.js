@@ -72,14 +72,13 @@ const MovableElement = ( props ) => {
 	return (
 		<>
 			<Element
-				ref={ setTargetEl }
 				key={ id }
 				onClick={ ( evt ) => handleSelectElement( id, evt ) }
 			>
-				<Comp { ...rest } />
+				<Comp { ...rest } forwardedRef={ setTargetEl } />
 			</Element>
 			{ targetEl && <Moveable
-				target={ targetEl.firstChild }
+				target={ targetEl }
 				draggable={ true }
 				resizable={ selected }
 				rotatable={ selected }
