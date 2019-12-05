@@ -415,21 +415,21 @@ final class Document extends DOMDocument {
 		$head = $this->getElementsByTagName( self::TAG_HEAD )->item( 0 );
 		if ( ! $head ) {
 			$head = $this->createElement( self::TAG_HEAD );
-			$this->documentElement->insertBefore( $head, $this->documentElement->firstChild );
+			$this->insertBefore( $head, $this->firstChild );
 		}
 
 		$body = $this->getElementsByTagName( self::TAG_BODY )->item( 0 );
 		if ( ! $body ) {
 			$body = $this->createElement( self::TAG_BODY );
-			$this->documentElement->appendChild( $body );
+			$this->appendChild( $body );
 		}
 
 		// Walking backwards makes it easier to move elements in the expected order.
-		$node = $this->head->lastChild;
+		$node = $head->lastChild;
 		while ( $node ) {
 			$next_sibling = $node->previousSibling;
 			if ( ! AMP_DOM_Utils::is_valid_head_node( $node ) ) {
-				$this->body->insertBefore( $this->head->removeChild( $node ), $this->body->firstChild );
+				$body->insertBefore( $head->removeChild( $node ), $body->firstChild );
 			}
 			$node = $next_sibling;
 		}

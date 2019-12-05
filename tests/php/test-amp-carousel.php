@@ -65,7 +65,7 @@ class Test_Carousel extends \WP_UnitTestCase {
 		$actual_amp_carousel = $amp_carousel->get_dom_element();
 
 		// Prevent an error in get_content_from_dom_node().
-		$dom->appendChild( $actual_amp_carousel );
+		$dom->body->appendChild( $actual_amp_carousel );
 
 		$this->assertEquals(
 			$expected,
