@@ -847,8 +847,8 @@ final class Document extends DOMDocument {
 		$mustache_tag_placeholders = $this->get_mustache_tag_placeholders();
 
 		return str_replace(
-			array_values( $mustache_tag_placeholders ),
 			$mustache_tag_placeholders,
+			array_keys( $mustache_tag_placeholders ),
 			$html
 		);
 	}
