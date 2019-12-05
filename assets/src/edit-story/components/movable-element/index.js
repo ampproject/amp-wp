@@ -3,6 +3,7 @@
  */
 import Moveable from 'react-moveable';
 import styled from 'styled-components';
+import PropTypes from 'prop-types';
 
 /**
  * WordPress dependencies
@@ -20,7 +21,7 @@ const Element = styled.div`
 	user-select: none;
 `;
 
-const Movable = ( props ) => {
+const MovableElement = ( props ) => {
 	const {
 		rotationAngle,
 		x,
@@ -33,8 +34,11 @@ const Movable = ( props ) => {
 
 	const [ targetEl, setTargetEl ] = useState( false );
 
+	// @todo This is here for forcing Moveable to re-render.
+	const [ initPosition, setInitPosition ] = useState( [ x, y ] );
+
 	const {
-		actions: { setPropertiesOnSelectedElements },
+		actions: { setPropertiesOnSelectedElements, setPropertiesById, selectElementById, toggleElementIdInSelection },
 	} = useStory();
 
 	const frame = {
@@ -49,11 +53,9 @@ const Movable = ( props ) => {
 	const resetMoveable = ( target ) => {
 		frame.translate = [ 0, 0 ];
 		setStyle( target );
+		// @todo This is currently for forcing Moveable to re-render with the correct translate values.
+		setInitPosition( [ x, y ] );
 	};
-
-	const {
-		actions: { selectElementById, toggleElementIdInSelection },
-	} = useStory();
 
 	const handleSelectElement = useCallback( ( elId, evt ) => {
 		if ( evt.metaKey ) {
@@ -77,7 +79,6 @@ const Movable = ( props ) => {
 				<Comp { ...rest } />
 			</Element>
 			<Moveable
-				className={ selected ? 'selected' : null }
 				target={ targetEl.firstChild }
 				draggable={ true }
 				resizable={ selected }
@@ -90,7 +91,15 @@ const Movable = ( props ) => {
 					set( frame.translate );
 				} }
 				onDragEnd={ ( { target } ) => {
-					setPropertiesOnSelectedElements( { x: x + frame.translate[ 0 ], y: y + frame.translate[ 1 ] } );
+					const newProps = { x: x + frame.translate[ 0 ], y: y + frame.translate[ 1 ] };
+					if ( ! selected ) {
+						// Multi-selection is always selected previously,
+						// we can use just setting single element properties here.
+						selectElementById( id );
+						setPropertiesById( id, newProps );
+					} else {
+						setPropertiesOnSelectedElements( newProps );
+					}
 					resetMoveable( target );
 				} }
 				onResizeStart={ ( { setOrigin, dragStart } ) => {
@@ -133,4 +142,15 @@ const Movable = ( props ) => {
 	);
 };
 
-export default Movable;
+MovableElement.propTypes = {
+	rotationAngle: PropTypes.number.isRequired,
+	src: PropTypes.string,
+	type: PropTypes.string.isRequired,
+	selected: PropTypes.bool,
+	id: PropTypes.string.isRequired,
+	x: PropTypes.number.isRequired,
+	y: PropTypes.number.isRequired,
+	rest: PropTypes.array,
+};
+
+export default MovableElement;

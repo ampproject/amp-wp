@@ -13,7 +13,7 @@ import { useEffect } from '@wordpress/element';
  */
 import { useStory } from '../../app';
 import useCanvas from './useCanvas';
-import Movable from './../moveable';
+import MovableElement from './../movable-element';
 
 const Background = styled.div.attrs( { className: 'container' } )`
 	background-color: ${ ( { theme } ) => theme.colors.fg.v1 };
@@ -33,20 +33,15 @@ function Page() {
 	} = useStory();
 
 	useEffect( () => {
-		setBackgroundClickHandler( ( e ) => {
-			// @todo For some reason, the propagation stop above doesn't seem to be working.
-			if ( 3 !== e.eventPhase ) {
-				clearSelection();
-			}
-		} );
+		setBackgroundClickHandler( () => clearSelection() );
 	}, [ setBackgroundClickHandler, clearSelection ] );
 
 	return (
 		<Background>
 			{ currentPage && currentPage.elements.map( ( { type, id, ...rest } ) => {
 				return (
-					<Movable
-						key={ 'moveable-' + id }
+					<MovableElement
+						key={ 'element-' + id }
 						type={ type }
 						x={ rest.x }
 						y={ rest.y }
