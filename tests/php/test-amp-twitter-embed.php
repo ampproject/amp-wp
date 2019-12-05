@@ -112,6 +112,35 @@ class AMP_Twitter_Embed_Test extends WP_UnitTestCase {
 				'https://twitter.com/robertnyman/lists/web-gdes' . PHP_EOL,
 				"<p><amp-twitter data-timeline-source-type=\"list\" data-timeline-slug=\"web-gdes\" data-timeline-owner-screen-name=\"robertnyman\" layout=\"responsive\" width=\"600\" height=\"480\"></amp-twitter></p>\n",
 			],
+
+			'shortcode_without_id'                 => [
+				'[tweet]' . PHP_EOL,
+				'' . PHP_EOL,
+			],
+			'shortcode_simple'                     => [
+				'[tweet 987437752164737025]' . PHP_EOL,
+				'<amp-twitter data-tweetid="987437752164737025" layout="responsive" width="600" height="480"></amp-twitter>',
+			],
+			'shortcode_with_tweet_attribute'       => [
+				'[tweet tweet=987437752164737025]' . PHP_EOL,
+				'<amp-twitter data-tweetid="987437752164737025" layout="responsive" width="600" height="480"></amp-twitter>',
+			],
+			'shortcode_with_big_tweet_id'          => [
+				'[tweet 705219971425574912]' . PHP_EOL,
+				'<amp-twitter data-tweetid="705219971425574912" layout="responsive" width="600" height="480"></amp-twitter>',
+			],
+			'shortcode_with_url'                   => [
+				'[tweet https://twitter.com/wordpress/status/987437752164737025]' . PHP_EOL,
+				'<amp-twitter data-tweetid="987437752164737025" layout="responsive" width="600" height="480"></amp-twitter>',
+			],
+			'shortcode_with_url_with_big_tweet_id' => [
+				'[tweet https://twitter.com/wordpress/status/705219971425574912]' . PHP_EOL,
+				'<amp-twitter data-tweetid="705219971425574912" layout="responsive" width="600" height="480"></amp-twitter>',
+			],
+			'shortcode_with_non_numeric_tweet_id'  => [
+				'[tweet abcd]' . PHP_EOL,
+				'' . PHP_EOL,
+			],
 		];
 	}
 
@@ -132,7 +161,7 @@ class AMP_Twitter_Embed_Test extends WP_UnitTestCase {
 
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 
-		$this->assertEquals( $content, $expected );
+		$this->assertEquals( $expected, $content );
 	}
 
 	public function get_scripts_data() {
