@@ -6,8 +6,8 @@
  */
 
 use Amp\AmpWP\Component\Carousel;
-use Amp\AmpWP\Component\DOMElementList;
-use Amp\AmpWP\Tests\PrivateAccess;
+use Amp\AmpWP\Dom\ElementList;
+se Amp\AmpWP\Tests\PrivateAccess;
 
 /**
  * Tests for Carousel class.
@@ -37,12 +37,12 @@ class Test_Carousel extends \WP_UnitTestCase {
 
 		return [
 			'image_without_caption' => [
-				( new DOMElementList() )->add( $image, '' ),
+				( new ElementList() )->add( $image, '' ),
 				$dom,
 				'<amp-carousel width="' . $width . '" height="' . $height . '" type="slides" layout="responsive"><div class="slide"><amp-img src="' . $src . '" width="' . $width . '" height="' . $height . '" layout="fill" object-fit="cover"></amp-img></div></amp-carousel>',
 			],
 			'image_with_caption'    => [
-				( new DOMElementList() )->add( $image, $caption ),
+				( new ElementList() )->add( $image, $caption ),
 				$dom,
 				'<amp-carousel width="' . $width . '" height="' . $height . '" type="slides" layout="responsive"><div class="slide"><amp-img src="' . $src . '" width="' . $width . '" height="' . $height . '" layout="fill" object-fit="cover"></amp-img><div class="amp-wp-gallery-caption"><span>' . $caption . '</span></div></div></amp-carousel>',
 			],
@@ -55,9 +55,9 @@ class Test_Carousel extends \WP_UnitTestCase {
 	 * @dataProvider get_carousel_data
 	 * @covers \Amp\AmpWP\Component\Carousel::get_dom_element()
 	 *
-	 * @param DOMElementList $slides   An array of arrays, with images and their captions (if any).
-	 * @param DOMDocument    $dom      The representation of the DOM.
-	 * @param string         $expected The expected return value of the tested function.
+	 * @param ElementList $slides   An array of arrays, with images and their captions (if any).
+	 * @param DOMDocument $dom      The representation of the DOM.
+	 * @param string      $expected The expected return value of the tested function.
 	 */
 	public function test_get_dom_element( $slides, $dom, $expected ) {
 		$amp_carousel        = new Carousel( $dom, $slides );
@@ -75,7 +75,7 @@ class Test_Carousel extends \WP_UnitTestCase {
 	/**
 	 * Gets the testing data for test_get_dimensions.
 	 *
-	 * @return array[] An associative array, including the DOMElementList and the expected return value.
+	 * @return array[] An associative array, including the ElementList and the expected return value.
 	 */
 	public function get_data_carousel_dimensions() {
 		$dom                 = new DOMDocument();
@@ -112,31 +112,31 @@ class Test_Carousel extends \WP_UnitTestCase {
 
 		return [
 			'empty_dom_element_list_as_argument'          => [
-				( new DOMElementList() ),
+				( new ElementList() ),
 				[ Carousel::FALLBACK_WIDTH, Carousel::FALLBACK_HEIGHT ],
 			],
 			'element_no_width_or_height'                  => [
-				( new DOMElementList() )->add( AMP_DOM_Utils::create_node( $dom, 'div', [] ) ),
+				( new ElementList() )->add( AMP_DOM_Utils::create_node( $dom, 'div', [] ) ),
 				[ Carousel::FALLBACK_WIDTH, Carousel::FALLBACK_HEIGHT ],
 			],
 			'single_small_image_passed_as_argument'       => [
-				( new DOMElementList() )->add( $narrow_image ),
+				( new ElementList() )->add( $narrow_image ),
 				[ $narrow_image_width, $narrow_image_height ],
 			],
 			'single_large_image_passed_as_argument'       => [
-				( new DOMElementList() )->add( $wide_image ),
+				( new ElementList() )->add( $wide_image ),
 				[ $wide_image_width, $wide_image_height ],
 			],
 			'image_with_0_height_should_not_affect_ratio' => [
-				( new DOMElementList() )->add( $image_with_0_height )->add( $wide_image, '' ),
+				( new ElementList() )->add( $image_with_0_height )->add( $wide_image, '' ),
 				[ $wide_image_width, $wide_image_height ],
 			],
 			'two_images'                                  => [
-				( new DOMElementList() )->add( $narrow_image )->add( $wide_image, '' ),
+				( new ElementList() )->add( $narrow_image )->add( $wide_image, '' ),
 				[ $wide_image_width, $wide_image_height ],
 			],
 			'two_images_order_changed'                    => [
-				( new DOMElementList() )->add( $wide_image )->add( $narrow_image, '' ),
+				( new ElementList() )->add( $wide_image )->add( $narrow_image, '' ),
 				[ $wide_image_width, $wide_image_height ],
 			],
 		];
@@ -148,8 +148,9 @@ class Test_Carousel extends \WP_UnitTestCase {
 	 * @dataProvider get_data_carousel_dimensions
 	 * @covers \Amp\AmpWP\Component\Carousel::get_dimensions()
 	 *
-	 * @param DOMElementList $slides   The slides to get the dimensions from.
-	 * @param array          $expected The expected return value of the tested function.
+	 * @param ElementList $slides   The slides to get the dimensions from.
+	 * @param array       $expected The expected return value of the tested function.
+	 * @throws ReflectionException If invoking the method reflection fails.
 	 */
 	public function test_get_dimensions( $slides, $expected ) {
 		$carousel = new Carousel( new DOMDocument(), $slides );

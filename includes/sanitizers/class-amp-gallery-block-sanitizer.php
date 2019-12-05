@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use Amp\AmpWP\Component\DOMElementList;
+use Amp\AmpWP\Dom\ElementList;
 use Amp\AmpWP\Component\Carousel;
 
 /**
@@ -106,7 +106,7 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			$images = new DOMElementList();
+			$images = new ElementList();
 
 			// If it's not AMP lightbox, look for links first.
 			if ( ! $is_amp_lightbox ) {

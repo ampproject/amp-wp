@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use Amp\AmpWP\Dom\Document;
+
 /**
  * Class AMP_Base_Sanitizer
  */
@@ -31,7 +33,7 @@ abstract class AMP_Base_Sanitizer {
 	/**
 	 * DOM.
 	 *
-	 * @var AMP_DOM_Document A standard PHP representation of an HTML document in object form.
+	 * @var Document A standard PHP representation of an HTML document in object form.
 	 *
 	 * @since 0.2
 	 */

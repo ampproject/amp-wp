@@ -1,18 +1,18 @@
 <?php
 /**
- * Tests for DOMElementList, CaptionedSlide, and Image classes.
+ * Tests for ElementList, CaptionedSlide, and Image classes.
  *
  * @package AMP
  */
 
-use Amp\AmpWP\Component\DOMElementList;
+use Amp\AmpWP\Dom\ElementList;
 use Amp\AmpWP\Component\Image;
 use Amp\AmpWP\Component\CaptionedSlide;
 
 /**
  * Tests for AMP carousel and slide classes.
  *
- * @covers Amp\AmpWP\Component\DOMElementList, Amp\AmpWP\Component\CaptionedSlide, Amp\AmpWP\Component\Image
+ * @covers Amp\AmpWP\Dom\ElementList, Amp\AmpWP\Component\CaptionedSlide, Amp\AmpWP\Component\Image
  */
 class Test_DOM_Element_List extends \WP_UnitTestCase {
 
@@ -48,14 +48,14 @@ class Test_DOM_Element_List extends \WP_UnitTestCase {
 	 * Test adding images and counting them.
 	 *
 	 * @dataProvider get_dom_element_list_data
-	 * @covers \Amp\AmpWP\Component\DOMElementList::add()
-	 * @covers \Amp\AmpWP\Component\DOMElementList::count()
+	 * @covers \Amp\AmpWP\Dom\ElementList::add()
+	 * @covers \Amp\AmpWP\Dom\ElementList::count()
 	 *
 	 * @param DOMElement[] $images         The images to add.
 	 * @param string       $expected_count The expected count after adding the images.
 	 */
 	public function test_dom_element_list_add( $images, $expected_count ) {
-		$dom_element_list = new DOMElementList();
+		$dom_element_list = new ElementList();
 		foreach ( $images as $image ) {
 			$dom_element_list = $dom_element_list->add( $image, '' );
 		}
@@ -67,14 +67,14 @@ class Test_DOM_Element_List extends \WP_UnitTestCase {
 	 * Test the iteration of the images.
 	 *
 	 * @dataProvider get_dom_element_list_data
-	 * @covers \Amp\AmpWP\Component\DOMElementList::add()
-	 * @covers \Amp\AmpWP\Component\DOMElementList::getIterator()
+	 * @covers \Amp\AmpWP\Dom\ElementList::add()
+	 * @covers \Amp\AmpWP\Dom\ElementList::getIterator()
 	 *
 	 * @param DOMElement[] $images         The images to add.
 	 * @param string       $expected_count The expected count after adding the images.
 	 */
 	public function test_dom_element_list_get_iterator( $images, $expected_count ) {
-		$dom_element_list = new DOMElementList();
+		$dom_element_list = new ElementList();
 		foreach ( $images as $image ) {
 			$dom_element_list = $dom_element_list->add( $image, '' );
 		}

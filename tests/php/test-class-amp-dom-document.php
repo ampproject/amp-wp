@@ -1,19 +1,21 @@
 <?php
 /**
- * Tests for AMP_DOM_Document.
+ * Tests for Amp\AmpWP\Dom\Document.
  *
  * @package AMP
  */
 
+use Amp\AmpWP\Dom\Document;
+
 /**
- * Tests for AMP_DOM_Document.
+ * Tests for Amp\AmpWP\Dom\Document.
  *
- * @covers AMP_DOM_Document
+ * @covers Document
  */
 class Test_AMP_DOM_Document extends WP_UnitTestCase {
 
 	/**
-	 * Data for AMP_DOM_Document test.
+	 * Data for Amp\AmpWP\Dom\Document test.
 	 *
 	 * @return array Data.
 	 */
@@ -129,18 +131,18 @@ class Test_AMP_DOM_Document extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests loading and saving the content via AMP_DOM_Document.
+	 * Tests loading and saving the content via Amp\AmpWP\Dom\Document.
 	 *
 	 * @param string $charset  Charset to use.
 	 * @param string $source   Source content.
 	 * @param string $expected Expected target content.
 	 *
 	 * @dataProvider data_dom_document
-	 * @covers AMP_DOM_Document::loadHTML()
-	 * @covers AMP_DOM_Document::saveHTML()
+	 * @covers Document::loadHTML()
+	 * @covers Document::saveHTML()
 	 */
 	public function test_dom_document( $charset, $source, $expected ) {
-		$document = new AMP_DOM_Document( '', $charset );
+		$document = new Document( '', $charset );
 		$document->loadHTML( $source );
 
 		$this->assertEqualMarkup( $expected, $document->saveHTML() );

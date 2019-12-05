@@ -6,6 +6,7 @@
  * @since 0.7
  */
 
+use Amp\AmpWP\Dom\Document;
 use org\bovigo\vfs;
 use Amp\AmpWP\Tests\PrivateAccess;
 
@@ -1567,7 +1568,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 */
 	public function test_ensure_required_markup_schemaorg( $script, $expected ) {
 		$page = '<html><head><script type="application/ld+json">%s</script></head><body>Test</body></html>';
-		$dom  = new AMP_DOM_Document();
+		$dom  = new Document();
 		$dom->loadHTML( sprintf( $page, $script ) );
 		AMP_Theme_Support::ensure_required_markup( $dom );
 		$this->assertEquals( $expected, substr_count( $dom->saveHTML(), 'schema.org' ) );

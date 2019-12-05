@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use Amp\AmpWP\Dom\Document;
+
 /**
  * Class AMP_Theme_Support
  *
@@ -1600,10 +1602,10 @@ class AMP_Theme_Support {
 	 * @link https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/optimize_amp/
 	 * @todo All of this might be better placed inside of a sanitizer.
 	 *
-	 * @param AMP_DOM_Document $dom            Document.
-	 * @param string[]         $script_handles AMP script handles for components identified during output buffering.
+	 * @param Document $dom            Document.
+	 * @param string[] $script_handles AMP script handles for components identified during output buffering.
 	 */
-	public static function ensure_required_markup( AMP_DOM_Document $dom, $script_handles = [] ) {
+	public static function ensure_required_markup( Document $dom, $script_handles = [] ) {
 		/**
 		 * Elements.
 		 *

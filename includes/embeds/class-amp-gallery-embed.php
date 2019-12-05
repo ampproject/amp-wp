@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use Amp\AmpWP\Component\DOMElementList;
+use Amp\AmpWP\Dom\ElementList;
 use Amp\AmpWP\Component\Carousel;
 
 /**
@@ -217,7 +217,7 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 			return '';
 		}
 
-		$images = new DOMElementList();
+		$images = new ElementList();
 		foreach ( $args['images'] as $props ) {
 			$image_atts = [
 				'src'    => $props['url'],

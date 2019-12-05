@@ -1,12 +1,20 @@
 <?php
 /**
- * Class AMP_DOM_Document.
+ * Class Amp\AmpWP\Dom\Document.
  *
  * @package AMP
  */
 
+namespace Amp\AmpWP\Dom;
+
+use AMP_DOM_Utils;
+use DOMDocument;
+use DOMElement;
+use DOMNode;
+use DOMXPath;
+
 /**
- * Class AMP_DOM_Document.
+ * Class Amp\AmpWP\Dom\Document.
  *
  * @since 1.5
  *
@@ -16,7 +24,7 @@
  *
  * Abstract away some of the difficulties of working with PHP's DOMDocument.
  */
-final class AMP_DOM_Document extends DOMDocument {
+final class Document extends DOMDocument {
 
 	/**
 	 * AMP requires the HTML markup to be encoded in UTF-8.
@@ -60,7 +68,7 @@ final class AMP_DOM_Document extends DOMDocument {
 	const CHARSET_HACK_ID = '--amp-dom-document-charset--';
 
 	/**
-	 * The original encoding of how the AMP_DOM_Document was created.
+	 * The original encoding of how the Amp\AmpWP\Dom\Document was created.
 	 *
 	 * This is stored to do an automatic conversion to UTF-8, which is
 	 * a requirement for AMP.
@@ -82,7 +90,7 @@ final class AMP_DOM_Document extends DOMDocument {
 	];
 
 	/**
-	 * Creates a new AMP_DOM_Document object
+	 * Creates a new Amp\AmpWP\Dom\Document object
 	 *
 	 * @link  https://php.net/manual/domdocument.construct.php
 	 *
@@ -216,8 +224,8 @@ final class AMP_DOM_Document extends DOMDocument {
 			$content = preg_replace(
 				$pattern,
 				( empty( $matches['html_start'] ) ? '' : $matches['html_start'] )
-					. '<head></head><body>$1</body>'
-					. ( empty( $matches['html_end'] ) ? '' : $matches['html_end'] ),
+				. '<head></head><body>$1</body>'
+				. ( empty( $matches['html_end'] ) ? '' : $matches['html_end'] ),
 				$content,
 				1
 			);
@@ -231,8 +239,8 @@ final class AMP_DOM_Document extends DOMDocument {
 			$content = preg_replace(
 				$pattern,
 				$matches['head']
-					. '<body>$1</body>'
-					. ( empty( $matches['html_end'] ) ? '' : $matches['html_end'] ),
+				. '<body>$1</body>'
+				. ( empty( $matches['html_end'] ) ? '' : $matches['html_end'] ),
 				$content,
 				1
 			);
@@ -418,7 +426,7 @@ final class AMP_DOM_Document extends DOMDocument {
 		}
 
 		// Mimic regular PHP behavior for missing notices.
-		trigger_error( "Undefined property: AMP_DOM_Document::${$name}", E_NOTICE ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions,WordPress.Security.EscapeOutput
+		trigger_error( "Undefined property: Amp\AmpWP\Dom\AMP_DOM_Document::${$name}", E_NOTICE ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions,WordPress.Security.EscapeOutput
 		return null;
 	}
 }
