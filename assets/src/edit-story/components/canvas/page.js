@@ -39,10 +39,17 @@ const Element = styled.div`
 
 function Page() {
 	const [ targetEl, setTargetEl ] = useState( null );
-	const [ clickHandler, rawSetClickHandler ] = useState( null );
+	const [ clickHandlers, setClickHandlers ] = useState( {} );
 	const moveable = useRef();
 
-	const setClickHandler = useCallback( ( ch ) => rawSetClickHandler( () => ch ), [ rawSetClickHandler ] );
+	const setClickHandler = useCallback(
+		( id, handler ) =>
+			setClickHandlers( ( handlers ) => ( { ...handlers, [ id ]: handler } ) ),
+		[ setClickHandlers ] );
+
+	const getClickHandler = useCallback(
+		( id ) => clickHandlers[ id ] || ( () => {} ),
+		[ clickHandlers ] );
 
 	const {
 		state: { currentPage, hasSelection, selectedElements },
@@ -64,8 +71,6 @@ function Page() {
 	useEffect( () => {
 		setBackgroundClickHandler( () => clearSelection() );
 	}, [ setBackgroundClickHandler, clearSelection ] );
-
-	const displayMoveable = selectedElements.length === 1;
 	const frame = {
 		translate: [ 0, 0 ],
 		rotate: selectionProps.rotationAngle,
@@ -82,17 +87,21 @@ function Page() {
 		}
 	}, [ selectedElements ] );
 
+	const selectedElement = selectedElements.length === 1 ? selectedElements[ 0 ] : null;
+	const hasMoveable = selectedElement !== null;
+
 	// This handles single clicks to any selected element.
-	// TODO: Multi selection.
+	// TODO: proper multi-select
 	// TODO: don't invoke if *any* transformation has happened.
 	const handleSelectionClick = useCallback( ( evt ) => {
+		const clickHandler = getClickHandler( selectedElement.id );
 		if ( clickHandler ) {
 			// Make selection box "transparent", click element and make selection opaque again,
 			targetEl.style.pointerEvents = 'none';
 			clickHandler( evt );
 			targetEl.style.pointerEvents = '';
 		}
-	}, [ clickHandler, targetEl ] );
+	}, [ getClickHandler, selectedElement, targetEl ] );
 
 	return (
 		<Background>
@@ -121,7 +130,7 @@ function Page() {
 
 				return (
 					<Element key={ id } onClick={ ( evt ) => handleSelectElement( id, evt ) }>
-						<Display { ...rest } setClickHandler={ selectedElements.includes( el ) ? setClickHandler : null } />
+						<Display { ...rest } setClickHandler={ setClickHandler } />
 					</Element>
 				);
 			} ) }
@@ -129,7 +138,7 @@ function Page() {
 			{ hasSelection && ! isEditing && (
 				<Selection { ...selectionProps } ref={ setTargetEl } onClick={ handleSelectionClick } />
 			) }
-			{ displayMoveable && targetEl && (
+			{ hasMoveable && targetEl && (
 				<Moveable
 					ref={ moveable }
 					target={ targetEl }

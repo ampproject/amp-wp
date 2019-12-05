@@ -74,9 +74,9 @@ function TextDisplay( { id, content, color, backgroundColor, width, height, x, y
 	}, [ id, setEditingElementWithState ] );
 	useEffect( () => {
 		if ( setClickHandler ) {
-			setClickHandler( handleClick );
+			setClickHandler( id, handleClick );
 		}
-	}, [ setClickHandler, handleClick ] );
+	}, [ id, setClickHandler, handleClick ] );
 
 	const handleKeyDown = ( evt ) => {
 		if ( evt.metaKey || evt.altKey || evt.ctrlKey ) {
