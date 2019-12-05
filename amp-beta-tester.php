@@ -73,9 +73,9 @@ function remove_plugin_data() {
  * @return void
  */
 function init() {
-	add_filter( 'plugins_api_result', __NAMESPACE__ . '\update_amp_plugin_information', 10, 3 );
+	add_filter( 'plugins_api_result', __NAMESPACE__ . '\update_amp_plugin_details', 10, 3 );
 	add_filter( 'pre_set_site_transient_update_plugins', __NAMESPACE__ . '\update_amp_manifest' );
-	add_filter( 'upgrader_post_install', __NAMESPACE__ . '\move_plugin_to_correct_folder', 10, 4 );
+	add_filter( 'upgrader_post_install', __NAMESPACE__ . '\move_plugin_to_correct_folder', 10, 3 );
 }
 
 /**
@@ -108,34 +108,30 @@ function update_amp_manifest( $updates ) {
 }
 
 /**
- * Update the AMP plugin information data to reflect that of the GitHub release.
+ * Update the AMP plugin details to reflect that of the GitHub release.
  *
  * @param false|object|array $value  The result object or array. Default false.
  * @param string             $action The type of information being requested from the Plugin Installation API.
  * @param object             $args   Plugin API arguments.
  * @return false|object|array Updated $value, or passed-through $value on failure.
  */
-function update_amp_plugin_information( $value, $action, $args ) {
+function update_amp_plugin_details( $value, $action, $args ) {
 	if ( 'plugin_information' !== $action || 'amp' !== $args->slug ) {
 		return $value;
 	}
 
-	$amp_version = get_amp_version();
-
-	if ( ! is_pre_release( $amp_version ) ) {
-		return $value;
-	}
-
-	$amp_manifest = fetch_amp_update_manifest( $amp_version );
-
-	if ( ! $amp_manifest ) {
-		return $value;
-	}
+	$amp_version             = get_amp_version();
+	$latest_release_manifest = get_github_amp_update_manifest();
 
 	$value->version = $amp_version;
 
-	$value->download_link            = $amp_manifest->package;
-	$value->versions[ $amp_version ] = $amp_manifest->package;
+	/*
+	 * Note: When the 'Install Update' button is shown, it will install the latest stable version of
+	 * the AMP plugin from WordPress if the latest release manifest from GitHub cannot be obtained.
+	 */
+	if ( $latest_release_manifest ) {
+		$value->download_link = $latest_release_manifest->package;
+	}
 
 	return $value;
 }
