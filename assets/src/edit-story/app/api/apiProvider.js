@@ -25,7 +25,7 @@ function APIProvider( { children } ) {
 	);
 
 	const getMedia = useCallback(
-		( { perPage, mediaType } ) => {
+		( { perPage, mediaType, searchTerm } ) => {
 			let apiPath = media;
 			if ( perPage ) {
 				apiPath = addQueryArgs( apiPath, { per_page: perPage } );
@@ -33,8 +33,11 @@ function APIProvider( { children } ) {
 			if ( mediaType ) {
 				apiPath = addQueryArgs( apiPath, { media_type: mediaType } );
 			}
+			if ( searchTerm ) {
+				apiPath = addQueryArgs( apiPath, { search: searchTerm } );
+			}
 
-			return apiFetch( { path: apiPath } ).then( ( data ) => data.map( ( { guid: { rendered: src } } ) => ( { src } ) ) );
+			return apiFetch( { path: apiPath } ).then( ( data ) => data.map( ( { guid: { rendered: src }, media_details: { width: oWidth, height: oHeight }, mime_type: mimeType } ) => ( { src, oWidth, oHeight, mimeType } ) ) );
 		},	[ media ],
 	);
 
