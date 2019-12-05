@@ -125,51 +125,6 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
-	 * Gets AMP-compliant markup for the YouTube shortcode.
-	 *
-	 * @deprecated 1.5.0 This was moved to Jetpack, in jetpack_amp_youtube_shortcode().
-	 *
-	 * @param array $attr The YouTube attributes.
-	 * @return string YouTube shortcode markup.
-	 */
-	public function shortcode( $attr ) {
-		_deprecated_function( __METHOD__, '1.5.0' );
-		$url = false;
-
-		if ( isset( $attr[0] ) ) {
-			$url = ltrim( $attr[0], '=' );
-		} elseif ( function_exists( 'shortcode_new_to_old_params' ) ) {
-			$url = shortcode_new_to_old_params( $attr );
-		}
-
-		if ( empty( $url ) ) {
-			return '';
-		}
-
-		$video_id = $this->get_video_id_from_url( $url );
-
-		return $this->render( compact( 'video_id' ), $url );
-	}
-
-	/**
-	 * Render oEmbed.
-	 *
-	 * @see \WP_Embed::shortcode()
-	 * @deprecated This is no longer being used.
-	 *
-	 * @param array  $matches URL pattern matches.
-	 * @param array  $attr    Shortcode attribues.
-	 * @param string $url     URL.
-	 * @return string Rendered oEmbed.
-	 */
-	public function oembed( $matches, $attr, $url ) {
-		unset( $matches, $attr );
-		_deprecated_function( __METHOD__, '1.5.0' );
-
-		return $this->shortcode( [ $url ] );
-	}
-
-	/**
 	 * Render embed.
 	 *
 	 * @param array  $args Args.
