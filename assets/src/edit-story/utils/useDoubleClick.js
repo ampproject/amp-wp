@@ -1,12 +1,12 @@
 /**
  * WordPress dependencies
  */
-import { useEffect, useState } from '@wordpress/element';
+import { useCallback, useEffect, useState } from '@wordpress/element';
 
 const useDoubleClick = ( onClick, onDoubleClick ) => {
 	const [ target, setTarget ] = useState( null );
 	const [ lastEvent, setLastEvent ] = useState( null );
-	const getHandler = ( newTarget ) => ( evt ) => {
+	const getHandler = useCallback( ( newTarget ) => ( evt ) => {
 		evt.stopPropagation();
 
 		if ( target !== newTarget ) {
@@ -21,7 +21,7 @@ const useDoubleClick = ( onClick, onDoubleClick ) => {
 
 		onDoubleClick( target, evt );
 		setTarget( null );
-	};
+	}, [ onClick, onDoubleClick, target ] );
 	useEffect( () => {
 		if ( ! target ) {
 			return undefined;

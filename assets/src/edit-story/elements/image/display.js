@@ -5,9 +5,16 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 /**
+ * WordPress dependencies
+ */
+import { useCallback, useEffect } from '@wordpress/element';
+
+/**
  * Internal dependencies
  */
 import { PAGE_WIDTH, PAGE_HEIGHT } from '../../constants';
+import { useCanvas } from '../../components/canvas';
+import useDoubleClick from '../../utils/useDoubleClick';
 import { ElementWithPosition, ElementWithSize, ElementWithRotation } from '../shared';
 import { getImgProps, ImageWithScale } from './util';
 
@@ -23,7 +30,7 @@ const Img = styled.img`
 	${ ImageWithScale }
 `;
 
-function ImageDisplay( { src, origRatio, width, height, x, y, scale, offsetX, offsetY, rotationAngle } ) {
+function ImageDisplay( { id, src, origRatio, width, height, x, y, scale, offsetX, offsetY, rotationAngle, setClickHandler } ) {
 	// Width and height are percent of the actual page dimensions,
 	// Thus 20-by-20 doesn't mean square, but "same as page ratio".
 	const actualRatio = width / height * PAGE_WIDTH / PAGE_HEIGHT;
@@ -35,6 +42,18 @@ function ImageDisplay( { src, origRatio, width, height, x, y, scale, offsetX, of
 		y,
 		rotationAngle,
 	};
+	const {
+		actions: { setEditingElement },
+	} = useCanvas();
+	const handleSingleClick = useCallback( () => {}, [] );
+	const handleDoubleClick = useCallback( () => setEditingElement( id ), [ id, setEditingElement ] );
+	const getHandleClick = useDoubleClick( handleSingleClick, handleDoubleClick );
+	useEffect( () => {
+		if ( setClickHandler ) {
+			const handleClick = getHandleClick( id );
+			setClickHandler( id, handleClick );
+		}
+	}, [ id, setClickHandler, getHandleClick ] );
 	return (
 		<Element { ...elementProps }>
 			<Img src={ src } { ...imgProps } />
@@ -43,6 +62,8 @@ function ImageDisplay( { src, origRatio, width, height, x, y, scale, offsetX, of
 }
 
 ImageDisplay.propTypes = {
+	id: PropTypes.string.isRequired,
+	setClickHandler: PropTypes.func,
 	src: PropTypes.string.isRequired,
 	origRatio: PropTypes.number.isRequired,
 	width: PropTypes.number.isRequired,

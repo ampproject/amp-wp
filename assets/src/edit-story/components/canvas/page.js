@@ -97,10 +97,12 @@ function Page() {
 		const clickHandler = getClickHandler( selectedElement.id );
 		if ( clickHandler ) {
 			// Make selection box "transparent", click element and make selection opaque again,
+			evt.persist();
 			targetEl.style.pointerEvents = 'none';
 			clickHandler( evt );
 			targetEl.style.pointerEvents = '';
 		}
+		evt.stopPropagation();
 	}, [ getClickHandler, selectedElement, targetEl ] );
 
 	return (
