@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { useCallback, useState } from '@wordpress/element';
+import { useCallback, useState, useRef } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -34,8 +34,7 @@ const MovableElement = ( props ) => {
 
 	const [ targetEl, setTargetEl ] = useState( false );
 
-	// @todo This is here for forcing Moveable to re-render.
-	const [ initPosition, setInitPosition ] = useState( [ x, y ] );
+	const moveable = useRef();
 
 	const {
 		actions: { setPropertiesOnSelectedElements, setPropertiesById, selectElementById, toggleElementIdInSelection },
@@ -53,8 +52,9 @@ const MovableElement = ( props ) => {
 	const resetMoveable = ( target ) => {
 		frame.translate = [ 0, 0 ];
 		setStyle( target );
-		// @todo This is currently for forcing Moveable to re-render with the correct translate values.
-		setInitPosition( [ x, y ] );
+		if ( moveable.current ) {
+			moveable.current.updateRect();
+		}
 	};
 
 	const handleSelectElement = useCallback( ( elId, evt ) => {
@@ -78,6 +78,7 @@ const MovableElement = ( props ) => {
 				<Comp { ...rest } forwardedRef={ setTargetEl } />
 			</Element>
 			{ targetEl && <Moveable
+				ref={ moveable }
 				target={ targetEl }
 				draggable={ true }
 				resizable={ selected }
