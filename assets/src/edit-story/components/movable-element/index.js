@@ -78,7 +78,7 @@ const MovableElement = ( props ) => {
 			>
 				<Comp { ...rest } />
 			</Element>
-			<Moveable
+			{ targetEl && <Moveable
 				target={ targetEl.firstChild }
 				draggable={ true }
 				resizable={ selected }
@@ -137,7 +137,7 @@ const MovableElement = ( props ) => {
 				pinchable={ true }
 				keepRatio={ 'image' === type }
 				renderDirections={ 'image' === type ? [ 'nw', 'ne', 'sw', 'se' ] : [ 'n', 's', 'e', 'w', 'nw', 'ne', 'sw', 'se' ] }
-			/>
+			/> }
 		</>
 	);
 };
@@ -150,7 +150,7 @@ MovableElement.propTypes = {
 	id: PropTypes.string.isRequired,
 	x: PropTypes.number.isRequired,
 	y: PropTypes.number.isRequired,
-	rest: PropTypes.array,
+	rest: PropTypes.object,
 };
 
 export default MovableElement;
