@@ -1162,7 +1162,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
 	 * Validates the layout attributes for the given tag. This involves checking the
-	 * layout, width, height, sizes attributes with AMP specific logic.
+	 * layout, width, height and sizes attributes with AMP specific logic.
 	 *
 	 * @version 1911070201440
 	 * @link https://github.com/ampproject/amphtml/blob/1911070201440/validator/engine/validator.js#L3937
@@ -1180,7 +1180,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return true;
 		}
 
-		// Elements without a width nor height don't need to be validated.
+		// Elements without a width or height don't need to be validated.
 		if ( ! $node->hasAttribute( 'width' ) && ! $node->hasAttribute( 'height' ) ) {
 			return true;
 		}
