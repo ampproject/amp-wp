@@ -505,7 +505,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 						)
 					);
 				} else {
-					// Otherwise, we have a rare rare condition where multiple tag specs fail for different reasons.
+					// Otherwise, we have a rare condition where multiple tag specs fail for different reasons.
 					$this->remove_invalid_child(
 						$node,
 						[
@@ -1102,10 +1102,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			 * - check_attr_spec_rule_value_casei
 			 *
 			 * They have already been checked because the tag spec should only be considered a candidate for a given
-			 * node if if passes those checks, that is, if the shape of the node matches the spec close enough.
+			 * node if it passes those checks, that is, if the shape of the node matches the spec close enough.
 			 *
-			 * However, if there was only one spec for a given tag, then then validate_attr_spec_list_for_node() would
-			 * not have been called. and thus these checks need to be performed here as well.
+			 * However, if there was only one spec for a given tag, then the validate_attr_spec_list_for_node() would
+			 * not have been called, and thus these checks need to be performed here as well.
 			 */
 			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_value( $node, $attr_name, $attr_spec_rule ) ) {
@@ -1584,7 +1584,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Check if attribute has blacklisted value via regex match determine if value matches.
+	 * Check if attribute has blacklisted value via regex match and determine if value matches.
 	 *
 	 * @since 0.5
 	 *

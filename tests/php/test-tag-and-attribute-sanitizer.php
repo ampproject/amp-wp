@@ -2394,7 +2394,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 			'noloading'   => [],
 		];
-		$dom  = new DomDocument();
+		$dom  = new DOMDocument();
 		$node = new DOMElement( 'amp-gist' );
 		$dom->appendChild( $node );
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );

@@ -1033,7 +1033,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 						],
 					],
 				],
-				2, // Allow empty is not not used until sanitization.
+				2, // Allow empty is not used until sanitization.
 			],
 			'attributes_blacklisted_regex' => [
 				[
