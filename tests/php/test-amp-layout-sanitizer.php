@@ -64,6 +64,16 @@ class AMP_Layout_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-img src="foo.jpg" style="width:100%; height:100%; color:#000"></amp-img>',
 				'<amp-img src="foo.jpg" style="color:#000" layout="fill"></amp-img>',
 			],
+
+			'fill_height_attribute_and_width_style'       => [
+				'<amp-img src="foo.jpg" style="width:100%;" height="100%"></amp-img>',
+				'<amp-img src="foo.jpg" layout="fill"></amp-img>',
+			],
+
+			'fill_width_attribute_and_height_style'       => [
+				'<amp-img src="foo.jpg" style="height:100%;" width="100%"></amp-img>',
+				'<amp-img src="foo.jpg" layout="fill"></amp-img>',
+			],
 		];
 	}
 

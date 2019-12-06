@@ -36,12 +36,29 @@ class AMP_Layout_Sanitizer extends AMP_Base_Sanitizer {
 			if ( ! $this->attribute_empty( $style ) ) {
 				$styles = $this->parse_style_string( $style );
 
-				// If both height & width descriptors are 100%, apply fill layout.
+				/*
+				 * If both height & width descriptors are 100%, or
+				 *    width attribute is 100% and height style descriptor is 100%, or
+				 *    height attribute is 100% and width style descriptor is 100%
+				 * then apply fill layout.
+				 */
 				if (
-					isset( $styles['width'], $styles['height'] ) &&
-					( '100%' === $styles['width'] && '100%' === $styles['height'] )
+					(
+						isset( $styles['width'], $styles['height'] ) &&
+						( '100%' === $styles['width'] && '100%' === $styles['height'] )
+					) ||
+					(
+						( ! $this->attribute_empty( $width ) && '100%' === $width ) &&
+						( isset( $styles['height'] ) && '100%' === $styles['height'] )
+					) ||
+					(
+						( ! $this->attribute_empty( $height ) && '100%' === $height ) &&
+						( isset( $styles['width'] ) && '100%' === $styles['width'] )
+					)
 				) {
 					unset( $styles['width'], $styles['height'] );
+					$node->removeAttribute( 'width' );
+					$node->removeAttribute( 'height' );
 
 					if ( empty( $styles ) ) {
 						$node->removeAttribute( 'style' );
