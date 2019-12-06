@@ -419,10 +419,8 @@ function get_amp_update_manifest() {
 
 	if ( isset( $updates->response[ AMP_PLUGIN_BASENAME ] ) ) {
 		$manifest = $updates->response[ AMP_PLUGIN_BASENAME ];
-	} elseif ( isset( $updates->no_update[ AMP_PLUGIN_BASENAME ] ) ) {
-		$manifest = $updates->no_update[ AMP_PLUGIN_BASENAME ];
 	} else {
-		return false;
+		$manifest = $updates->no_update[ AMP_PLUGIN_BASENAME ];
 	}
 
 	return $manifest;
