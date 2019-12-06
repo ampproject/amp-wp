@@ -161,39 +161,6 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test convert_amp_bind_attributes.
-	 *
-	 * @covers \AMP_DOM_Utils::convert_amp_bind_attributes()
-	 */
-	public function test_amp_bind_conversion() {
-		$original  = '<amp-img width=300 height="200" data-foo="bar" selected src="/img/dog.jpg" [src]="myAnimals[currentAnimal].imageUrl"></amp-img>';
-		$converted = AMP_DOM_Utils::convert_amp_bind_attributes( $original );
-		$this->assertNotEquals( $converted, $original );
-		$this->assertContains( AMP_DOM_Utils::AMP_BIND_DATA_ATTR_PREFIX . 'src="myAnimals[currentAnimal].imageUrl"', $converted );
-		$this->assertContains( 'width=300 height="200" data-foo="bar" selected', $converted );
-
-		// Check tag with self-closing attribute.
-		$original  = '<input type="text" role="textbox" class="calc-input" id="liens" name="liens" [value]="(result1 != null) ? result1.liens : \'verifying…\'" />';
-		$converted = AMP_DOM_Utils::convert_amp_bind_attributes( $original );
-		$this->assertNotEquals( $converted, $original );
-
-		// Preserve trailing slash that is actually the attribute value.
-		$original = '<a href=/>Home</a>';
-		$this->assertEquals( AMP_DOM_Utils::convert_amp_bind_attributes( $original ), $original );
-
-		// Test malformed.
-		$malformed_html = [
-			'<amp-img width="123" [text]="..."</amp-img>',
-			'<amp-img width="123" [text="..."]></amp-img>',
-			'<amp-img width="123" [text]="..." *bad*></amp-img>',
-		];
-		foreach ( $malformed_html as $html ) {
-			$converted = AMP_DOM_Utils::convert_amp_bind_attributes( $html );
-			$this->assertNotContains( AMP_DOM_Utils::AMP_BIND_DATA_ATTR_PREFIX, $converted, "Source: $html" );
-		}
-	}
-
-	/**
 	 * Test handling of empty elements.
 	 *
 	 * @covers \AMP_DOM_Utils::get_dom()

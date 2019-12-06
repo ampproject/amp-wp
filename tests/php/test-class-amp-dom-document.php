@@ -165,4 +165,46 @@ class Test_AMP_DOM_Document extends WP_UnitTestCase {
 			array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $actual, -1, PREG_SPLIT_DELIM_CAPTURE ) )
 		);
 	}
+
+	/**
+	 * Test convert_amp_bind_attributes.
+	 *
+	 * @covers \Amp\AmpWP\Dom\Document::convert_amp_bind_attributes()
+	 */
+	public function test_amp_bind_conversion() {
+		$original  = '<amp-img width=300 height="200" data-foo="bar" selected src="/img/dog.jpg" [src]="myAnimals[currentAnimal].imageUrl"></amp-img>';
+		$dom = new Document();
+		$dom->loadHTML( $original );
+		$converted = $dom->saveHTML();
+		$this->assertNotEquals( $original, $converted );
+		$this->assertContains( Document::AMP_BIND_DATA_ATTR_PREFIX . 'src="myAnimals[currentAnimal].imageUrl"', $converted );
+		$this->assertContains( 'width="300" height="200" data-foo="bar" selected', $converted );
+
+		// Check tag with self-closing attribute.
+		$original  = '<input type="text" role="textbox" class="calc-input" id="liens" name="liens" [value]="(result1 != null) ? result1.liens : \'verifying…\'" />';
+		$dom = new Document();
+		$dom->loadHTML( $original );
+		$converted = $dom->saveHTML();
+		$this->assertNotEquals( $original, $converted );
+
+		// Preserve trailing slash that is actually the attribute value.
+		$original = '<a href=/>Home</a>';
+		$dom = new Document();
+		$dom->loadHTML( $original );
+		$converted = $dom->saveHTML( $dom->body->firstChild );
+		$this->assertEquals( '<a href="/">Home</a>', $converted );
+
+		// Test malformed.
+		$malformed_html = [
+			'<amp-img width="123" [text]="..."</amp-img>',
+			'<amp-img width="123" [text="..."]></amp-img>',
+			'<amp-img width="123" [text]="..." *bad*></amp-img>',
+		];
+		foreach ( $malformed_html as $html ) {
+			$dom = new Document();
+			$dom->loadHTML( $html );
+			$converted = $dom->saveHTML();
+			$this->assertNotContains( Document::AMP_BIND_DATA_ATTR_PREFIX, $converted, "Source: $html" );
+		}
+	}
 }
