@@ -18,6 +18,7 @@ namespace AMP_Beta_Tester;
 define( 'AMP__BETA_TESTER__DIR__', dirname( __FILE__ ) );
 define( 'AMP__BETA__TESTER__RELEASES__TRANSIENT', 'amp_releases' );
 define( 'AMP__PLUGIN__BASENAME', 'amp/amp.php' );
+define( 'AMP__BETA__OPTION__NAME', 'amp-beta-options' );
 
 // DEV_CODE. This block of code is removed during the build process.
 if ( file_exists( AMP__BETA_TESTER__DIR__ . '/amp.php' ) ) {
@@ -73,9 +74,103 @@ function remove_plugin_data() {
  * @return void
  */
 function init() {
+	if ( defined( 'AMP__VERSION' ) ) {
+		add_action( 'admin_init', __NAMESPACE__ . '\register_settings' );
+		add_action( 'admin_menu', __NAMESPACE__ . '\add_to_setting_pages' );
+	}
+
 	add_filter( 'plugins_api_result', __NAMESPACE__ . '\update_amp_plugin_details', 10, 3 );
 	add_filter( 'pre_set_site_transient_update_plugins', __NAMESPACE__ . '\update_amp_manifest' );
 	add_filter( 'upgrader_post_install', __NAMESPACE__ . '\move_plugin_to_correct_folder', 10, 3 );
+	add_filter( 'auto_update_plugin', 'auto_update_amp_plugin', 10, 2 );
+}
+
+/**
+ * Register plugin settings.
+ */
+function register_settings() {
+	\register_setting(
+		\AMP_Options_Manager::OPTION_NAME,
+		AMP__BETA__OPTION__NAME,
+		[
+			'type'              => 'array',
+			'default'           => [],
+			'sanitize_callback' => __NAMESPACE__ . '\validate_settings',
+		]
+	);
+}
+
+/**
+ * Validate new settings before being saved.
+ *
+ * @param array|null $options New settings.
+ * @return mixed
+ */
+function validate_settings( $options ) {
+	if ( empty( $options ) ) {
+		return $options;
+	}
+
+	if ( isset( $options['should_auto_update'] ) ) {
+		$options['should_auto_update'] = ! empty( $options['should_auto_update'] );
+	}
+
+	return $options;
+}
+
+/**
+ * Add plugin settings to relevant pages.
+ */
+function add_to_setting_pages() {
+	add_settings_section(
+		'beta-tester',
+		false,
+		'__return_false',
+		\AMP_Options_Manager::OPTION_NAME
+	);
+
+	add_settings_field(
+		'auto_updates',
+		__( 'Automatic Updates', 'amp' ),
+		__NAMESPACE__ . '\render_update_settings',
+		\AMP_Options_Manager::OPTION_NAME,
+		'beta-tester'
+	);
+}
+
+/**
+ * Display auto update setting field.
+ */
+function render_update_settings() {
+	$should_auto_update = get_option( 'should_auto_update' );
+	?>
+	<p>
+		<label for="should_auto_update">
+			<input id="should_auto_update" type="checkbox" name="<?php echo esc_attr( AMP__BETA__OPTION__NAME . '[should_auto_update]' ); ?>" <?php checked( $should_auto_update ); ?>>
+			<?php esc_html_e( 'Allow the AMP plugin to be automatically updated.', 'amp' ); ?>
+		</label>
+	</p>
+	<p class="description">
+		<?php esc_html_e( 'This will include pre-release updates.', 'amp' ); ?>
+	</p>
+	<?php
+}
+
+/**
+ * Whether or not to auto update the AMP plugin.
+ *
+ * @param bool   $should_update     Whether to update or not.
+ * @param object $plugin_manifest  Plugin update manifest.
+ * @return bool True if it should auto update, false if not.
+ */
+function auto_update_amp_plugin( $should_update, $plugin_manifest ) {
+	$should_auto_update = get_option( 'should_auto_update' );
+
+	if ( true === $should_auto_update && AMP__PLUGIN__BASENAME === $plugin_manifest->plugin ) {
+		return true;
+	}
+
+	return $should_update;
 }
 
 /**
@@ -334,4 +429,15 @@ function get_amp_version() {
 	return defined( 'AMP__VERSION' )
 		? AMP__VERSION
 		: get_plugin_data( WP_PLUGIN_DIR . '/' . AMP__PLUGIN__BASENAME )['Version'];
+}
+
+/**
+ * Retrieve an option by name.
+ *
+ * @param string $name Option name.
+ * @return mixed|null Option value, `null` if it cannot be found.
+ */
+function get_option( $name ) {
+	$options = \get_option( AMP__BETA__OPTION__NAME, [] );
+	return isset( $options[ $name ] ) ? $options[ $name ] : null;
 }
