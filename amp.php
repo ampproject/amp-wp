@@ -165,7 +165,7 @@ if ( ! file_exists( AMP__DIR__ . '/vendor/autoload.php' ) || ! file_exists( AMP_
 if ( file_exists( AMP__DIR__ . '/amp-beta-tester.php' ) ) {
 	add_filter(
 		'site_transient_update_plugins',
-		function ( $updates ) {
+		static function ( $updates ) {
 			if ( isset( $updates->response ) && is_array( $updates->response ) ) {
 				if ( array_key_exists( 'amp/amp-beta-tester.php', $updates->response ) ) {
 					unset( $updates->response['amp/amp-beta-tester.php'] );

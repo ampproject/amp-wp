@@ -26,7 +26,7 @@ define( 'AMP_BETA_OPTION_NAME', 'amp-beta-options' );
 if ( file_exists( AMP_BETA_TESTER_DIR . '/amp.php' ) ) {
 	add_filter(
 		'site_transient_update_plugins',
-		function ( $updates ) {
+		static function ( $updates ) {
 			if ( isset( $updates->response ) && is_array( $updates->response ) ) {
 				if ( array_key_exists( 'amp/amp-beta-tester.php', $updates->response ) ) {
 					unset( $updates->response['amp/amp-beta-tester.php'] );
