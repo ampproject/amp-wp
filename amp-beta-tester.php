@@ -213,7 +213,13 @@ function update_amp_manifest( $updates ) {
  * @return false|object|array Updated $value, or passed-through $value on failure.
  */
 function update_amp_plugin_details( $value, $action, $args ) {
-	if ( 'plugin_information' !== $action || 'amp' !== $args->slug ) {
+	if (
+		'plugin_information' !== $action
+		||
+		( is_object( $args ) && isset( $args->slug ) && 'amp' !== $args->slug )
+		||
+		! is_object( $value )
+	) {
 		return $value;
 	}
 
