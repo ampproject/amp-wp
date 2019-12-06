@@ -17,13 +17,13 @@
 
 namespace AMP_Beta_Tester;
 
-define( 'AMP__BETA_TESTER__DIR__', dirname( __FILE__ ) );
-define( 'AMP__BETA__TESTER__RELEASES__TRANSIENT', 'amp_releases' );
-define( 'AMP__PLUGIN__BASENAME', 'amp/amp.php' );
-define( 'AMP__BETA__OPTION__NAME', 'amp-beta-options' );
+define( 'AMP_BETA_TESTER_DIR', __DIR__ );
+define( 'AMP_BETA_TESTER_RELEASES_TRANSIENT', 'amp_releases' );
+define( 'AMP_PLUGIN_BASENAME', 'amp/amp.php' );
+define( 'AMP_BETA_OPTION_NAME', 'amp-beta-options' );
 
 // DEV_CODE. This block of code is removed during the build process.
-if ( file_exists( AMP__BETA_TESTER__DIR__ . '/amp.php' ) ) {
+if ( file_exists( AMP_BETA_TESTER_DIR . '/amp.php' ) ) {
 	add_filter(
 		'site_transient_update_plugins',
 		function ( $updates ) {
@@ -61,7 +61,7 @@ function force_plugin_update_check() {
  * Remove any plugin data.
  */
 function remove_plugin_data() {
-	delete_site_transient( AMP__BETA__TESTER__RELEASES__TRANSIENT );
+	delete_site_transient( AMP_BETA_TESTER_RELEASES_TRANSIENT );
 
 	/*
 	 * Delete the `update_plugins` transient to force a plugin update check, and to get rid of any
@@ -93,7 +93,7 @@ function init() {
 function register_settings() {
 	\register_setting(
 		\AMP_Options_Manager::OPTION_NAME,
-		AMP__BETA__OPTION__NAME,
+		AMP_BETA_OPTION_NAME,
 		[
 			'type'              => 'array',
 			'default'           => [],
@@ -148,7 +148,7 @@ function render_update_settings() {
 	?>
 	<p>
 		<label for="should_auto_update">
-			<input id="should_auto_update" type="checkbox" name="<?php echo esc_attr( AMP__BETA__OPTION__NAME . '[should_auto_update]' ); ?>" <?php checked( $should_auto_update ); ?>>
+			<input id="should_auto_update" type="checkbox" name="<?php echo esc_attr( AMP_BETA_OPTION_NAME . '[should_auto_update]' ); ?>" <?php checked( $should_auto_update ); ?>>
 			<?php esc_html_e( 'Allow the AMP plugin to be automatically updated.', 'amp' ); ?>
 		</label>
 	</p>
@@ -168,7 +168,7 @@ function render_update_settings() {
 function auto_update_amp_plugin( $should_update, $plugin_manifest ) {
 	$should_auto_update = get_option( 'should_auto_update' );
 
-	if ( true === $should_auto_update && AMP__PLUGIN__BASENAME === $plugin_manifest->plugin ) {
+	if ( true === $should_auto_update && AMP_PLUGIN_BASENAME === $plugin_manifest->plugin ) {
 		return true;
 	}
 
@@ -196,9 +196,9 @@ function update_amp_manifest( $updates ) {
 		// Get the latest AMP release from GitHub.
 		$latest_release_manifest = get_github_amp_update_manifest();
 
-		unset( $updates->no_update[ AMP__PLUGIN__BASENAME ] );
+		unset( $updates->no_update[ AMP_PLUGIN_BASENAME ] );
 		// Mark AMP plugin as having an update available.
-		$updates->response[ AMP__PLUGIN__BASENAME ] = $latest_release_manifest;
+		$updates->response[ AMP_PLUGIN_BASENAME ] = $latest_release_manifest;
 	}
 
 	return $updates;
@@ -246,7 +246,7 @@ function update_amp_plugin_details( $value, $action, $args ) {
 function move_plugin_to_correct_folder( $response, $hook_extra, $result ) {
 	global $wp_filesystem;
 
-	if ( ! isset( $hook_extra['plugin'] ) || AMP__PLUGIN__BASENAME !== $hook_extra['plugin'] ) {
+	if ( ! isset( $hook_extra['plugin'] ) || AMP_PLUGIN_BASENAME !== $hook_extra['plugin'] ) {
 		return $response;
 	}
 
@@ -263,7 +263,7 @@ function move_plugin_to_correct_folder( $response, $hook_extra, $result ) {
  * @return array|false Array of releases in descending order, or false if an error occurred parsing response.
  */
 function get_amp_github_releases() {
-	$releases = get_site_transient( AMP__BETA__TESTER__RELEASES__TRANSIENT );
+	$releases = get_site_transient( AMP_BETA_TESTER_RELEASES_TRANSIENT );
 
 	if ( ! empty( $releases ) ) {
 		return $releases;
@@ -308,7 +308,7 @@ function get_amp_github_releases() {
 	);
 
 	set_site_transient(
-		AMP__BETA__TESTER__RELEASES__TRANSIENT,
+		AMP_BETA_TESTER_RELEASES_TRANSIENT,
 		$releases_by_name,
 		DAY_IN_SECONDS
 	);
@@ -411,10 +411,10 @@ function get_amp_update_manifest() {
 		return false;
 	}
 
-	if ( isset( $updates->response[ AMP__PLUGIN__BASENAME ] ) ) {
-		$manifest = $updates->response[ AMP__PLUGIN__BASENAME ];
-	} elseif ( isset( $updates->no_update[ AMP__PLUGIN__BASENAME ] ) ) {
-		$manifest = $updates->no_update[ AMP__PLUGIN__BASENAME ];
+	if ( isset( $updates->response[ AMP_PLUGIN_BASENAME ] ) ) {
+		$manifest = $updates->response[ AMP_PLUGIN_BASENAME ];
+	} elseif ( isset( $updates->no_update[ AMP_PLUGIN_BASENAME ] ) ) {
+		$manifest = $updates->no_update[ AMP_PLUGIN_BASENAME ];
 	} else {
 		return false;
 	}
@@ -430,7 +430,7 @@ function get_amp_update_manifest() {
 function get_amp_version() {
 	return defined( 'AMP__VERSION' )
 		? AMP__VERSION
-		: get_plugin_data( WP_PLUGIN_DIR . '/' . AMP__PLUGIN__BASENAME )['Version'];
+		: get_plugin_data( WP_PLUGIN_DIR . '/' . AMP_PLUGIN_BASENAME )['Version'];
 }
 
 /**
@@ -440,6 +440,6 @@ function get_amp_version() {
  * @return mixed|null Option value, `null` if it cannot be found.
  */
 function get_option( $name ) {
-	$options = \get_option( AMP__BETA__OPTION__NAME, [] );
+	$options = \get_option( AMP_BETA_OPTION_NAME, [] );
 	return isset( $options[ $name ] ) ? $options[ $name ] : null;
 }
