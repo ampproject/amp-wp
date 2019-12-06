@@ -326,9 +326,11 @@ abstract class AMP_Base_Sanitizer {
 				&& '100%' === $attributes['width']
 				&& '100%' === $attributes['height']
 			) {
-				unset( $attributes['style'], $attributes['width'], $attributes['height'] );
+				unset( $attributes['style'], $styles['position'], $attributes['width'], $attributes['height'] );
+				if ( ! empty( $styles ) ) {
+					$attributes['style'] = $this->reassemble_style_string( $styles );
+				}
 				$attributes['layout'] = 'fill';
-				unset( $attributes['height'], $attributes['width'] );
 				return $attributes;
 			}
 		}
