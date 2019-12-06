@@ -5,12 +5,16 @@
  * @package AMP
  */
 
+use Amp\AmpWP\Tests\PrivateAccess;
+
 /**
  * Tests for Test_AMP_CLI_Validation_Command class.
  *
  * @since 1.0
  */
 class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
+
+	use PrivateAccess;
 
 	/**
 	 * Store a reference to the validation command object.
@@ -30,29 +34,6 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 		add_filter( 'pre_http_request', [ $this, 'add_comment' ] );
 		$this->validation->include_conditionals      = [];
 		$this->validation->limit_type_validate_count = 100;
-	}
-
-	/**
-	 * Call a private method as if it was public.
-	 *
-	 * This is currently being used to test the internals of the validation
-	 * command.
-	 *
-	 * The command should be refactored to rely on abstractions, instead of
-	 * having so much of its own logic. This would then make testing the
-	 * internals unnecessary.
-	 * See: https://github.com/ampproject/amp-wp/issues/3077
-	 *
-	 * @param object $object      Object instance to call the method on.
-	 * @param string $method_name Name of the method to call.
-	 * @param array  $args        Optional. Array of arguments to pass to the method.
-	 * @return mixed Return value of the method call.
-	 * @throws ReflectionException If the object could not be reflected upon.
-	 */
-	private function call_private_method( $object, $method_name, $args = [] ) {
-		$method = ( new ReflectionClass( $object ) )->getMethod( $method_name );
-		$method->setAccessible( true );
-		return $method->invokeArgs( $object, $args );
 	}
 
 	/**

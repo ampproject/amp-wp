@@ -7,6 +7,7 @@
 
 use Amp\AmpWP\Component\Carousel;
 use Amp\AmpWP\Component\DOMElementList;
+use Amp\AmpWP\Tests\PrivateAccess;
 
 /**
  * Tests for Carousel class.
@@ -14,6 +15,8 @@ use Amp\AmpWP\Component\DOMElementList;
  * @covers \Amp\AmpWP\Component\Carousel
  */
 class Test_Carousel extends \WP_UnitTestCase {
+
+	use PrivateAccess;
 
 	/**
 	 * Gets the data to test the carousel.
@@ -147,16 +150,13 @@ class Test_Carousel extends \WP_UnitTestCase {
 	 *
 	 * @param DOMElementList $slides   The slides to get the dimensions from.
 	 * @param array          $expected The expected return value of the tested function.
-	 * @throws ReflectionException If invoking the method reflection fails.
 	 */
 	public function test_get_dimensions( $slides, $expected ) {
-		$carousel       = new Carousel( new DOMDocument(), $slides );
-		$get_dimensions = new ReflectionMethod( $carousel, 'get_dimensions' );
-		$get_dimensions->setAccessible( true );
+		$carousel = new Carousel( new DOMDocument(), $slides );
 
 		$this->assertEquals(
 			$expected,
-			$get_dimensions->invoke( $carousel )
+			$this->call_private_method( $carousel, 'get_dimensions' )
 		);
 	}
 }

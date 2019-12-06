@@ -7,6 +7,7 @@
  */
 
 use org\bovigo\vfs;
+use Amp\AmpWP\Tests\PrivateAccess;
 
 /**
  * Tests for Theme Support.
@@ -14,6 +15,8 @@ use org\bovigo\vfs;
  * @covers AMP_Theme_Support
  */
 class Test_AMP_Theme_Support extends WP_UnitTestCase {
+
+	use PrivateAccess;
 
 	/**
 	 * The name of the tested class.
@@ -521,10 +524,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::add_amp_template_filters()
 	 */
 	public function test_add_amp_template_filters() {
-		$reflection = new ReflectionClass( 'AMP_Theme_Support' );
-		$property   = $reflection->getProperty( 'template_types' );
-		$property->setAccessible( true );
-		$template_types = $property->getValue();
+		$template_types = $this->get_private_property( 'AMP_Theme_Support', 'template_types' );
 
 		AMP_Theme_Support::add_amp_template_filters();
 
@@ -1055,10 +1055,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$embed_handlers = AMP_Theme_Support::register_content_embed_handlers();
 		foreach ( $embed_handlers as $embed_handler ) {
 			$this->assertTrue( is_subclass_of( $embed_handler, 'AMP_Base_Embed_Handler' ) );
-			$reflection = new ReflectionObject( $embed_handler );
-			$args       = $reflection->getProperty( 'args' );
-			$args->setAccessible( true );
-			$property = $args->getValue( $embed_handler );
+			$property = $this->get_private_property( $embed_handler, 'args' );
 			$this->assertEquals( $content_width, $property['content_max_width'] );
 		}
 	}

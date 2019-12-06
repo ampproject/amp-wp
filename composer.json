@@ -49,5 +49,10 @@
     "psr-4": {
       "Amp\\AmpWP\\": "src/"
     }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Amp\\AmpWP\\Tests\\": "tests/php/src/"
+    }
   }
 }
