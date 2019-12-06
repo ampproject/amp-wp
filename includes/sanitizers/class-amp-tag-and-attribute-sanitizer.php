@@ -486,10 +486,11 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 						array_map(
 							static function ( $validation_error ) {
 								unset( $validation_error['spec_name'] );
-								return json_encode( $validation_error ); // phpcs:ignore
+								return $validation_error;
 							},
 							$validation_errors
-						)
+						),
+						SORT_REGULAR
 					)
 				);
 
