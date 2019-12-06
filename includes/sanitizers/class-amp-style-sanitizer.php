@@ -40,7 +40,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	const CSS_SYNTAX_PARSE_ERROR             = 'CSS_SYNTAX_PARSE_ERROR';
 	const STYLESHEET_TOO_LONG                = 'STYLESHEET_TOO_LONG';
 	const STYLESHEET_INVALID_FILE_URL        = 'STYLESHEET_INVALID_FILE_URL';
-	const STYLESHEET_INVALID_FILE_PATH       = 'STYLESHEET_INVALID_FILE_PATH';
 
 	// These are internal to the sanitizer and not exposed as validation error codes.
 	const STYLESHEET_DISALLOWED_FILE_EXT   = 'STYLESHEET_DISALLOWED_FILE_EXT';
@@ -350,7 +349,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			self::CSS_SYNTAX_INVALID_PROPERTY,
 			self::CSS_SYNTAX_INVALID_PROPERTY_NOLIST,
 			self::CSS_SYNTAX_PARSE_ERROR,
-			self::STYLESHEET_INVALID_FILE_PATH,
 			self::STYLESHEET_INVALID_FILE_URL,
 			self::STYLESHEET_TOO_LONG,
 		];
@@ -1290,37 +1288,18 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		$css_file_path = $this->get_validated_url_file_path( $href, [ 'css', 'less', 'scss', 'sass' ] );
-		if ( ! is_wp_error( $css_file_path ) ) {
-			$stylesheet = file_get_contents( $css_file_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
-			if ( false === $stylesheet ) {
-				$this->remove_invalid_child(
-					$element,
-					[
-						// @todo Also include details about the error.
-						'code' => self::STYLESHEET_INVALID_FILE_PATH,
-						'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
-					]
-				);
-				return;
-			}
-		} else {
-			// Fall back to doing an HTTP request for the stylesheet is not accessible directly from the filesystem.
-			$contents = $this->fetch_external_stylesheet( $normalized_url );
-			if ( ! is_wp_error( $contents ) ) {
-				$stylesheet = $contents;
-			} else {
-				$this->remove_invalid_child(
-					$element,
-					[
-						// @todo Also include details about the error.
-						'code' => self::STYLESHEET_INVALID_FILE_URL,
-						'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
-						'url'  => $normalized_url,
-					]
-				);
-				return;
-			}
+		$stylesheet = $this->get_stylesheet_from_url( $href );
+		if ( $stylesheet instanceof WP_Error ) {
+			$this->remove_invalid_child(
+				$element,
+				[
+					// @todo Also include details about the error.
+					'code' => self::STYLESHEET_INVALID_FILE_URL,
+					'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+					'url'  => $normalized_url,
+				]
+			);
+			return;
 		}
 
 		// Honor the link's media attribute.
@@ -1337,7 +1316,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				'allowed_at_rules'   => $this->style_custom_cdata_spec['css_spec']['allowed_at_rules'],
 				'property_whitelist' => $this->style_custom_cdata_spec['css_spec']['declaration'],
 				'stylesheet_url'     => $href,
-				'stylesheet_path'    => $css_file_path,
 				'spec_name'          => self::STYLE_AMP_CUSTOM_SPEC_NAME,
 			]
 		);
@@ -1356,6 +1334,28 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$element->parentNode->removeChild( $element );
 
 		$this->set_current_node( null );
+	}
+
+	/**
+	 * Get stylesheet from URL.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @param string $stylesheet_url Stylesheet URL.
+	 * @return string|WP_Error Stylesheet string on success, or WP_Error on failure.
+	 */
+	private function get_stylesheet_from_url( $stylesheet_url ) {
+		$stylesheet    = false;
+		$css_file_path = $this->get_validated_url_file_path( $stylesheet_url, [ 'css', 'less', 'scss', 'sass' ] );
+		if ( ! is_wp_error( $css_file_path ) ) {
+			$stylesheet = file_get_contents( $css_file_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
+		}
+		if ( is_string( $stylesheet ) ) {
+			return $stylesheet;
+		}
+
+		// Fall back to doing an HTTP request for the stylesheet is not accessible directly from the filesystem.
+		return $this->fetch_external_stylesheet( $stylesheet_url );
 	}
 
 	/**
@@ -1412,7 +1412,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *     @type string[] $property_whitelist          Exclusively-allowed properties.
 	 *     @type string[] $property_blacklist          Disallowed properties.
 	 *     @type string   $stylesheet_url              Original URL for stylesheet when originating via link or @import.
-	 *     @type string   $stylesheet_path             Original filesystem path for stylesheet when originating via link or @import.
 	 *     @type array    $allowed_at_rules            Allowed @-rules.
 	 *     @type bool     $validate_keyframes          Whether keyframes should be validated.
 	 *     @type string   $spec_name                   Spec name.
@@ -1538,30 +1537,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			return [];
 		}
 
-		$css_file_path = $this->get_validated_url_file_path( $import_stylesheet_url, [ 'css', 'less', 'scss', 'sass' ] );
-
-		if ( is_wp_error( $css_file_path ) && ( self::STYLESHEET_DISALLOWED_FILE_EXT === $css_file_path->get_error_code() || self::STYLESHEET_EXTERNAL_FILE_URL === $css_file_path->get_error_code() ) ) {
-			$contents = $this->fetch_external_stylesheet( $import_stylesheet_url );
-			if ( is_wp_error( $contents ) ) {
-				$error     = [
-					// @todo Also include details about the error.
-					'code' => self::STYLESHEET_INVALID_FILE_URL,
-					'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
-					'url'  => $import_stylesheet_url,
-				];
-				$sanitized = $this->should_sanitize_validation_error( $error );
-				if ( $sanitized ) {
-					$css_list->remove( $item );
-				}
-				$results[] = compact( 'error', 'sanitized' );
-				return $results;
-			}
-
-			$stylesheet = $contents;
-		} elseif ( is_wp_error( $css_file_path ) ) {
+		$stylesheet = $this->get_stylesheet_from_url( $import_stylesheet_url );
+		if ( $stylesheet instanceof WP_Error ) {
 			$error     = [
 				// @todo Also include details about the error.
-				'code' => self::STYLESHEET_INVALID_FILE_PATH,
+				'code' => self::STYLESHEET_INVALID_FILE_URL,
 				'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 				'url'  => $import_stylesheet_url,
 			];
@@ -1571,8 +1551,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 			$results[] = compact( 'error', 'sanitized' );
 			return $results;
-		} else {
-			$stylesheet = file_get_contents( $css_file_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
 		}
 
 		if ( $media_query ) {
@@ -1705,7 +1683,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				'property_whitelist' => [],
 				'validate_keyframes' => false,
 				'stylesheet_url'     => null,
-				'stylesheet_path'    => null,
 				'spec_name'          => null,
 			],
 			$options

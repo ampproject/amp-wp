@@ -1959,7 +1959,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'https://bogus.example.com/remote-also-does-not-exist.css',
 				],
 				'<style>div::after{content:"End"}</style><style>@import url("https://bogus.example.com/remote-finally-does-not-exist.css");</style><body class="locale-he-il"><div class="login message"></div><table class="form-table"><td></td></table></body>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-				3, // Three HTTP requests (to bogus.example.com). The local-does-not-exist.css checks filesystem directly.
+				4, // All four result in HTTP requests, even the local one because it doesn't exist on the filesystem.
 				static function ( $requested_url ) {
 					if ( false !== strpos( $requested_url, 'does-not-exist' ) ) {
 						return new WP_Error( 'does_not_exist' );
@@ -1999,7 +1999,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'https://bogus.example.com/remote-also-does-not-exist.css',
 				],
 				'<style>div::after{content:"End"}</style><style>@import url("https://bogus.example.com/remote-finally-does-not-exist.css");</style><body class="locale-he-il"><div class="login message"></div><table class="form-table"><td></td></table></body>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-				3, // Three HTTP requests (to bogus.example.com). The local-does-not-exist.css checks filesystem directly.
+				4, // All four result in HTTP requests, even the local one because it doesn't exist on the filesystem.
 				static function ( $requested_url ) {
 					if ( false !== strpos( $requested_url, 'does-not-exist' ) ) {
 						return new WP_Error( 'does_not_exist' );

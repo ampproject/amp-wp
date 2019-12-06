@@ -2912,7 +2912,6 @@ class AMP_Validation_Error_Taxonomy {
 			case AMP_Style_Sanitizer::CSS_SYNTAX_PARSE_ERROR:
 				return esc_html__( 'CSS parse error', 'amp' );
 			case AMP_Style_Sanitizer::STYLESHEET_INVALID_FILE_URL:
-			case AMP_Style_Sanitizer::STYLESHEET_INVALID_FILE_PATH:
 				return esc_html__( 'Missing stylesheet file', 'amp' );
 			case AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_PROPERTY:
 			case AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_PROPERTY_NOLIST:
