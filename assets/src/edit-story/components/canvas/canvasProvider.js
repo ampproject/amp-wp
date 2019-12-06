@@ -24,7 +24,7 @@ function CanvasProvider( { children } ) {
 		backgroundClickHandler,
 		setBackgroundClickHandler,
 		clearBackgroundClickHandler,
-	] = useFunctionState( null );
+	] = useFunctionState();
 
 	const state = {
 		state: {

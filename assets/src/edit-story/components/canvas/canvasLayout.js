@@ -36,10 +36,9 @@ const Area = styled.div`
 `;
 
 function CanvasLayout() {
-	const { state: { isEditing, backgroundClickHandler } } = useCanvas();
-	const onClick = isEditing ? () => {} : backgroundClickHandler;
+	const { state: { backgroundClickHandler } } = useCanvas();
 	return (
-		<Background onClick={ onClick || null }>
+		<Background onClick={ backgroundClickHandler }>
 			<Area area="page">
 				<Page />
 			</Area>

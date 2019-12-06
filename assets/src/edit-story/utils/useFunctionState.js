@@ -11,16 +11,16 @@ import { useState, useCallback } from '@wordpress/element';
  * @param {Function} initialValue  Initial value of the variable
  * @return {Array} Array of value, setter and clearer.
  */
-function useFunctionState( initialValue ) {
+function useFunctionState( initialValue = undefined ) {
 	const [ value, setValue ] = useState( { handler: initialValue } );
 
 	const setter = useCallback(
-		( handler ) => setValue( { handler: typeof handler === 'function' ? handler : null } ),
+		( handler ) => setValue( { handler: typeof handler === 'function' ? handler : undefined } ),
 		[ setValue ],
 	);
 
 	const clearer = useCallback(
-		() => setValue( { handler: null } ),
+		() => setValue( { handler: undefined } ),
 		[ setValue ],
 	);
 
