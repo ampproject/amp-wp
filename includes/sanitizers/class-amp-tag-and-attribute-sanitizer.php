@@ -1167,8 +1167,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @version 1911070201440
 	 * @link https://github.com/ampproject/amphtml/blob/1911070201440/validator/engine/validator.js#L3937
 	 *
-	 * Adapted from the <code>validateLayout</code> method found in validator.js of the
-	 * <a href="https://github.com/ampproject/amphtml">ampproject/amphtml</a> project.
+	 * Adapted from the `validateLayout` method found in `validator.js` from the `ampproject/amphtml`
+	 * project on GitHub.
 	 *
 	 * @param array[][]  $tag_spec Tag spec list.
 	 * @param DOMElement $node     Tag to validate.
@@ -1271,8 +1271,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * amp-pixel, have natural dimensions (browser or implementation-specific
 	 * defaults for width / height).
 	 *
-	 * Adapted from the <code>CalculateWidth</code> method found in validator.js of the
-	 * <a href="https://github.com/ampproject/amphtml">ampproject/amphtml</a> project.
+	 * Adapted from the `CalculateWidth` method found in `validator.js` from the `ampproject/amphtml`
+	 * project on GitHub.
 	 *
 	 * @version 1911070201440
 	 * @link https://github.com/ampproject/amphtml/blob/1911070201440/validator/engine/validator.js#L3451
@@ -1300,8 +1300,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Calculates the effective height from input layout and input height.
 	 *
-	 * Adapted from the <code>CalculateHeight</code> method found in validator.js of the
-	 * <a href="https://github.com/ampproject/amphtml">ampproject/amphtml</a> project.
+	 * Adapted from the `CalculateHeight` method found in `validator.js` from the `ampproject/amphtml`
+	 * project on GitHub.
 	 *
 	 * @version 1911070201440
 	 * @link https://github.com/ampproject/amphtml/blob/1911070201440/validator/engine/validator.js#L3493
@@ -1336,8 +1336,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * fixed-sized mocks first and then the layout determines how things
 	 * will change for different viewports / devices / etc.
 	 *
-	 * Adapted from the <code>CalculateLayout</code> method found in validator.js of the
-	 * <a href="https://github.com/ampproject/amphtml">ampproject/amphtml</a> project.
+	 * Adapted from the `CalculateLayout` method found in `validator.js` from the `ampproject/amphtml`
+	 * project on GitHub.
 	 *
 	 * @version 1911070201440
 	 * @link https://github.com/ampproject/amphtml/blob/1911070201440/validator/engine/validator.js#L3516
