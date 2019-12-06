@@ -61,11 +61,6 @@ class AMP_SoundCloud_Embed_Test extends WP_UnitTestCase {
 			$post = $this->factory()->post->create_and_get();
 		}
 
-		// @todo This should be moved to Jetpack.
-		if ( function_exists( 'soundcloud_shortcode' ) ) {
-			add_shortcode( 'soundcloud', 'soundcloud_shortcode' );
-		}
-
 		add_filter( 'pre_http_request', [ $this, 'mock_http_request' ], 10, 3 );
 	}
 
@@ -110,12 +105,12 @@ class AMP_SoundCloud_Embed_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Get conversion data.
+	 * Get the embed conversion data.
 	 *
 	 * @return array
 	 */
-	public function get_conversion_data() {
-		$data = [
+	public function get_embed_conversion_data() {
+		return [
 			'no_embed'        => [
 				'<p>Hello world.</p>',
 				'<p>Hello world.</p>' . PHP_EOL,
@@ -131,64 +126,19 @@ class AMP_SoundCloud_Embed_Test extends WP_UnitTestCase {
 				'<p><amp-soundcloud data-playlistid="40936190" data-visual="true" height="450" width="500" layout="responsive">' . ( function_exists( 'wp_filter_oembed_iframe_title_attribute' ) ? '<a fallback href="https://soundcloud.com/classical-music-playlist/sets/classical-music-essential-collection">Classical Music &#8211; The Essential Collection by Classical Music</a>' : '' ) . '</amp-soundcloud></p>' . PHP_EOL,
 			],
 		];
-
-		// @todo All the following should be moved to Jetpack.
-		if ( defined( 'JETPACK__PLUGIN_DIR' ) ) {
-			require_once JETPACK__PLUGIN_DIR . 'modules/shortcodes/soundcloud.php';
-		}
-		if ( function_exists( 'soundcloud_shortcode' ) ) {
-			$data = array_merge(
-				$data,
-				[
-					'shortcode_with_bare_track_api_url'   => [
-						'[soundcloud https://api.soundcloud.com/tracks/90097394]' . PHP_EOL,
-						'<amp-soundcloud data-trackid="90097394" data-visual="false" height="166" layout="fixed-height"></amp-soundcloud>' . PHP_EOL,
-					],
-
-					'shortcode_with_track_api_url'        => [
-						'[soundcloud url=https://api.soundcloud.com/tracks/90097394]' . PHP_EOL,
-						'<amp-soundcloud data-trackid="90097394" data-visual="false" height="166" layout="fixed-height"></amp-soundcloud>' . PHP_EOL,
-					],
-
-					'shortcode_with_track_permalink'      => [
-						"[soundcloud url=$this->track_url]",
-						'<amp-soundcloud data-trackid="90097394" data-visual="true" height="400" width="500" layout="responsive">' . ( function_exists( 'wp_filter_oembed_iframe_title_attribute' ) ? '<a fallback href="https://soundcloud.com/jack-villano-villano/mozart-requiem-in-d-minor">Mozart - Requiem in D minor Complete Full by Jack Villano Villano</a>' : '' ) . '</amp-soundcloud>' . PHP_EOL,
-					],
-
-					'shortcode_with_bare_track_permalink' => [
-						"[soundcloud $this->track_url]",
-						'<amp-soundcloud data-trackid="90097394" data-visual="true" height="400" width="500" layout="responsive">' . ( function_exists( 'wp_filter_oembed_iframe_title_attribute' ) ? '<a fallback href="https://soundcloud.com/jack-villano-villano/mozart-requiem-in-d-minor">Mozart - Requiem in D minor Complete Full by Jack Villano Villano</a>' : '' ) . '</amp-soundcloud>' . PHP_EOL,
-					],
-
-					'shortcode_with_playlist_permalink'   => [
-						"[soundcloud url=$this->playlist_url]",
-						'<amp-soundcloud data-playlistid="40936190" data-visual="true" height="450" width="500" layout="responsive">' . ( function_exists( 'wp_filter_oembed_iframe_title_attribute' ) ? '<a fallback href="https://soundcloud.com/classical-music-playlist/sets/classical-music-essential-collection">Classical Music - The Essential Collection by Classical Music</a>' : '' ) . '</amp-soundcloud>' . PHP_EOL,
-					],
-
-					// This apparently only works on WordPress.com.
-					'shortcode_with_id'                   => [
-						'[soundcloud id=90097394]' . PHP_EOL,
-						'<amp-soundcloud data-trackid="90097394" data-visual="false" height="166" layout="fixed-height"></amp-soundcloud>' . PHP_EOL,
-					],
-				]
-			);
-		}
-
-		return $data;
 	}
 
 	/**
 	 * Test conversion.
 	 *
+	 * @dataProvider get_embed_conversion_data
 	 * @covers AMP_SoundCloud_Embed_Handler::filter_embed_oembed_html()
-	 * @covers AMP_SoundCloud_Embed_Handler::shortcode()
 	 * @covers AMP_SoundCloud_Embed_Handler::render()
-	 * @dataProvider get_conversion_data
 	 *
 	 * @param string $source   Source.
 	 * @param string $expected Expected.
 	 */
-	public function test__conversion( $source, $expected ) {
+	public function test_embed_conversion( $source, $expected ) {
 		$embed = new AMP_SoundCloud_Embed_Handler();
 		$embed->register_embed();
 		$filtered_content = apply_filters( 'the_content', $source );

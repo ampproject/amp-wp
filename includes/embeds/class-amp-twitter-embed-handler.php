@@ -46,8 +46,6 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Registers embed.
 	 */
 	public function register_embed() {
-		add_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ], 10, 2 );
-		add_shortcode( 'tweet', [ $this, 'shortcode' ] ); // Note: This is a Jetpack shortcode.
 		wp_embed_register_handler( 'amp-twitter-timeline', self::URL_PATTERN_TIMELINE, [ $this, 'oembed_timeline' ], -1 );
 	}
 
@@ -55,111 +53,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Unregisters embed.
 	 */
 	public function unregister_embed() {
-		remove_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ] );
-		remove_shortcode( 'tweet' ); // Note: This is a Jetpack shortcode.
 		wp_embed_unregister_handler( 'amp-twitter-timeline', -1 );
-	}
-
-	/**
-	 * Filter oEmbed HTML for Twitter to prepare it for AMP.
-	 *
-	 * @param string $cache Cache for oEmbed.
-	 * @param string $url   Embed URL.
-	 * @return string Embed.
-	 */
-	public function filter_embed_oembed_html( $cache, $url ) {
-		$parsed_url = wp_parse_url( $url );
-		if ( false === strpos( $parsed_url['host'], 'twitter.com' ) ) {
-			return $cache;
-		}
-
-		if ( ! preg_match( '#^https?://twitter.com/.+/status/(\d+)#', $url, $matches ) ) {
-			return $cache;
-		}
-		$tweet_id = $matches[1];
-
-		$cache = preg_replace(
-			'#(<blockquote[^>]+?twitter-tweet[^>]+)(>[^\r]+)<script.*$#',
-			sprintf(
-				'<amp-twitter width="%d" height="%d" layout="responsive" data-tweetid="%s">$1 placeholder $2</amp-twitter>',
-				esc_attr( $this->DEFAULT_WIDTH ),
-				esc_attr( $this->DEFAULT_HEIGHT ),
-				esc_attr( $tweet_id )
-			),
-			$cache
-		);
-		return $cache;
-	}
-
-	/**
-	 * Gets AMP-compliant markup for the Twitter shortcode.
-	 *
-	 * Note that this shortcode is is defined in Jetpack.
-	 *
-	 * @param array $attr The Twitter attributes.
-	 * @return string Twitter shortcode markup.
-	 */
-	public function shortcode( $attr ) {
-		$attr = wp_parse_args(
-			$attr,
-			[
-				'tweet' => false,
-			]
-		);
-
-		if ( empty( $attr['tweet'] ) && ! empty( $attr[0] ) ) {
-			$attr['tweet'] = $attr[0];
-		}
-
-		$id = false;
-		if ( is_numeric( $attr['tweet'] ) ) {
-			$id = $attr['tweet'];
-		} else {
-			preg_match( self::URL_PATTERN, $attr['tweet'], $matches );
-			if ( isset( $matches['tweet'] ) && is_numeric( $matches['tweet'] ) ) {
-				$id = $matches['tweet'];
-			}
-
-			if ( empty( $id ) ) {
-				return '';
-			}
-		}
-
-		$this->did_convert_elements = true;
-
-		return AMP_HTML_Utils::build_tag(
-			$this->amp_tag,
-			[
-				'data-tweetid' => $id,
-				'layout'       => 'responsive',
-				'width'        => $this->args['width'],
-				'height'       => $this->args['height'],
-			]
-		);
-	}
-
-	/**
-	 * Render oEmbed.
-	 *
-	 * @deprecated Since 1.1 as now the sanitize_raw_embeds() is used exclusively, allowing the original oEmbed response to be rapped by amp-twitter.
-	 * @see \WP_Embed::shortcode()
-	 *
-	 * @param array $matches URL pattern matches.
-	 * @return string Rendered oEmbed.
-	 */
-	public function oembed( $matches ) {
-		_deprecated_function( __METHOD__, '1.1' );
-		$id = false;
-
-		if ( isset( $matches['tweet'] ) && is_numeric( $matches['tweet'] ) ) {
-			$id = $matches['tweet'];
-		}
-
-		if ( ! $id ) {
-			return '';
-		}
-
-		return $this->shortcode( [ 'tweet' => $id ] );
 	}
 
 	/**
@@ -330,7 +224,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Removes Twitter's embed <script> tag.
 	 *
-	 * @param DOMElement $node The DOMNode to whose sibling is the instagram script.
+	 * @param DOMElement $node The DOMNode to whose sibling is the Twitter script.
 	 */
 	private function sanitize_embed_script( $node ) {
 		$next_element_sibling = $node->nextSibling;

@@ -5,12 +5,16 @@
  * @package AMP
  */
 
+use Amp\AmpWP\Tests\PrivateAccess;
+
 /**
  * Tests for AMP_Comments_Sanitizer class.
  *
  * @since 0.7
  */
 class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
+
+	use PrivateAccess;
 
 	/**
 	 * Representation of the DOM.
@@ -75,11 +79,9 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 	public function test_process_comment_form() {
 		$instance = new AMP_Comments_Sanitizer( $this->dom );
 
-		$form          = $this->create_form( '/wp-comments-post.php' );
-		$reflection    = new ReflectionObject( $instance );
-		$tested_method = $reflection->getMethod( 'process_comment_form' );
-		$tested_method->setAccessible( true );
-		$tested_method->invoke( $instance, $form );
+		$form = $this->create_form( '/wp-comments-post.php' );
+		$this->call_private_method( $instance, 'process_comment_form', [ $form ] );
+
 		$on        = $form->getAttribute( 'on' );
 		$amp_state = $this->dom->getElementsByTagName( 'amp-state' )->item( 0 );
 

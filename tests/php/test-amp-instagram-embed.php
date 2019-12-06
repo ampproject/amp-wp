@@ -3,33 +3,17 @@
 class AMP_Instagram_Embed_Test extends WP_UnitTestCase {
 	public function get_conversion_data() {
 		return [
-			'no_embed'                 => [
+			'no_embed'   => [
 				'<p>Hello world.</p>',
 				'<p>Hello world.</p>' . PHP_EOL,
 			],
-			'simple_url'               => [
+			'simple_url' => [
 				'https://instagram.com/p/7-l0z_p4A4/' . PHP_EOL,
 				'<p><amp-instagram data-shortcode="7-l0z_p4A4" data-captioned layout="responsive" width="600" height="600"></amp-instagram></p>' . PHP_EOL,
 			],
-
-			'short_url'                => [
+			'short_url'  => [
 				'https://instagr.am/p/7-l0z_p4A4' . PHP_EOL,
 				'<p><amp-instagram data-shortcode="7-l0z_p4A4" data-captioned layout="responsive" width="600" height="600"></amp-instagram></p>' . PHP_EOL,
-			],
-
-			'shortcode_simple'         => [
-				'[instagram url=https://www.instagram.com/p/BIyO4vXjE6b]' . PHP_EOL,
-				'<amp-instagram data-shortcode="BIyO4vXjE6b" data-captioned layout="responsive" width="600" height="600"></amp-instagram>' . PHP_EOL,
-			],
-
-			'shortcode_url_with_query' => [
-				'[instagram url=https://www.instagram.com/p/BIyO4vXjE6b/?taken-by=natgeo]' . PHP_EOL,
-				'<amp-instagram data-shortcode="BIyO4vXjE6b" data-captioned layout="responsive" width="600" height="600"></amp-instagram>' . PHP_EOL,
-			],
-
-			'shortcode_with_short_url' => [
-				'[instagram url=https://instagr.am/p/7-l0z_p4A4]' . PHP_EOL,
-				'<amp-instagram data-shortcode="7-l0z_p4A4" data-captioned layout="responsive" width="600" height="600"></amp-instagram>' . PHP_EOL,
 			],
 		];
 	}

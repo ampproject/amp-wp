@@ -106,6 +106,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *      @type string   $parsed_cache_variant       Additional value by which to vary parsed cache.
 	 *      @type string   $include_manifest_comment   Whether to show the manifest HTML comment in the response before the style[amp-custom] element. Can be 'always', 'never', or 'when_excessive'.
 	 *      @type string[] $focus_within_classes       Class names in selectors that should be replaced with :focus-within pseudo classes.
+	 *      @type string[] $low_priority_plugins       Plugin slugs of the plugins to deprioritize when hitting the CSS limit.
 	 * }
 	 */
 	protected $args;
@@ -127,6 +128,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		'parsed_cache_variant'      => null,
 		'include_manifest_comment'  => 'always',
 		'focus_within_classes'      => [ 'focus' ],
+		'low_priority_plugins'      => [ 'query-monitor' ],
 	];
 
 	/**
@@ -921,12 +923,21 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		if ( $node instanceof DOMElement && 'link' === $node->nodeName ) {
 			$element_id      = (string) $node->getAttribute( 'id' );
 			$schemeless_href = $remove_url_scheme( $node->getAttribute( 'href' ) );
-			$is_plugin_asset = (
-				0 === strpos( $schemeless_href, $remove_url_scheme( trailingslashit( plugins_url( WP_PLUGIN_DIR ) ) ) )
-				||
-				0 === strpos( $schemeless_href, $remove_url_scheme( trailingslashit( plugins_url( WPMU_PLUGIN_URL ) ) ) )
-			);
-			$style_handle    = null;
+
+			$plugin = null;
+			if ( preg_match(
+				sprintf(
+					'#^(?:%s|%s)(?<plugin>[^/]+)#i',
+					preg_quote( $remove_url_scheme( trailingslashit( WP_PLUGIN_URL ) ), '#' ),
+					preg_quote( $remove_url_scheme( trailingslashit( WPMU_PLUGIN_URL ) ), '#' )
+				),
+				$schemeless_href,
+				$matches
+			) ) {
+				$plugin = $matches['plugin'];
+			}
+
+			$style_handle = null;
 			if ( preg_match( '/^(.+)-css$/', $element_id, $matches ) ) {
 				$style_handle = $matches[1];
 			}
@@ -959,9 +970,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			} elseif ( in_array( $style_handle, $core_frontend_handles, true ) ) {
 				// Styles from wp-includes which are enqueued for themes are next highest priority.
 				$priority = 20;
-			} elseif ( $is_plugin_asset ) {
-				// Styles from plugins are next-highest priority.
-				$priority = 30;
+			} elseif ( $plugin ) {
+				// Styles from plugins are next-highest priority, unless they are in the list of low-priority plugins.
+				$priority = in_array( $plugin, $this->args['low_priority_plugins'], true ) ? 150 : 30;
 			} elseif ( 0 === strpos( $schemeless_href, $remove_url_scheme( includes_url() ) ) ) {
 				// Other styles from wp-includes come next.
 				$priority = 40;
@@ -973,11 +984,18 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			if ( 'print' === $node->getAttribute( 'media' ) ) {
 				$priority += $print_priority_base;
 			}
-		} elseif ( $node instanceof DOMElement && 'style' === $node->nodeName ) {
-			$element_id = (string) $node->getAttribute( 'id' );
-			if ( 'admin-bar-inline-css' === $element_id ) {
+		} elseif ( $node instanceof DOMElement && 'style' === $node->nodeName && $node->hasAttribute( 'id' ) ) {
+			$id                  = $node->getAttribute( 'id' );
+			$is_theme_inline_css = preg_match( '/^(?<handle>.+)-inline-css$/', $id, $matches ) && wp_style_is( $matches['handle'], 'registered' );
+			if ( $is_theme_inline_css && 0 === strpos( wp_styles()->registered[ $matches['handle'] ]->src, get_template_directory_uri() ) ) {
+				// Parent theme inline style.
+				$priority = 2;
+			} elseif ( $is_theme_inline_css && get_stylesheet() !== get_template() && 0 === strpos( wp_styles()->registered[ $matches['handle'] ]->src, get_stylesheet_directory_uri() ) ) {
+				// Child theme inline style.
+				$priority = 12;
+			} elseif ( 'admin-bar-inline-css' === $id ) {
 				$priority = $admin_bar_priority;
-			} elseif ( 'wp-custom-css' === $element_id ) {
+			} elseif ( 'wp-custom-css' === $id ) {
 				// Additional CSS from Customizer.
 				$priority = 60;
 			} else {
@@ -1411,7 +1429,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private function process_stylesheet( $stylesheet, $options = [] ) {
 		$parsed      = null;
 		$cache_key   = null;
-		$cache_group = 'amp-parsed-stylesheet-v21'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
+		$cache_group = 'amp-parsed-stylesheet-v22'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
 
 		$cache_impacting_options = array_merge(
 			wp_array_slice_assoc(
@@ -2296,8 +2314,20 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					if ( ! is_wp_error( $path ) ) {
 						$data_url->getURL()->setString( $guessed_url );
 						$converted_count++;
-						break;
+						continue 2;
 					}
+				}
+
+				// As fallback, look for fonts bundled with the AMP plugin.
+				$font_filename = sprintf( '%s.%s', strtolower( $font_basename ), $extension );
+				$bundled_fonts = [
+					'nonbreakingspaceoverride.woff',
+					'nonbreakingspaceoverride.woff2',
+					'genericons.woff',
+				];
+				if ( in_array( $font_filename, $bundled_fonts, true ) ) {
+					$data_url->getURL()->setString( plugin_dir_url( AMP__FILE__ ) . "assets/fonts/$font_filename" );
+					$converted_count++;
 				}
 			} // End foreach $source_data_url_objects.
 		} // End foreach $src_properties.
@@ -2620,9 +2650,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				if ( self::STYLE_AMP_CUSTOM_GROUP_INDEX !== $pending_stylesheet['group'] || ! ( $pending_stylesheet['node'] instanceof DOMElement ) || ! empty( $pending_stylesheet['duplicate'] ) ) {
 					continue;
 				}
-				$message = sprintf( '% 6d B', $pending_stylesheet['size'] );
+				$message = sprintf( '[%3d] % 6d B', $pending_stylesheet['priority'], $pending_stylesheet['size'] );
 				if ( $pending_stylesheet['size'] && $pending_stylesheet['size'] !== $pending_stylesheet['original_size'] ) {
-					$message .= sprintf( ' (%d%%)', $pending_stylesheet['size'] / $pending_stylesheet['original_size'] * 100 );
+					$message .= sprintf( ' (%2d%%)', $pending_stylesheet['size'] / $pending_stylesheet['original_size'] * 100 );
+				} else {
+					$message .= '      ';
 				}
 				$message .= ': ';
 				$message .= $pending_stylesheet['node']->nodeName;
@@ -3145,10 +3177,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$pending_stylesheet_indices = array_keys( $this->pending_stylesheets );
 		usort(
 			$pending_stylesheet_indices,
-			function( $a, $b ) {
+			function ( $a, $b ) {
 				return $this->pending_stylesheets[ $a ]['priority'] - $this->pending_stylesheets[ $b ]['priority'];
 			}
 		);
+
 		$current_concatenated_size = 0;
 		foreach ( $pending_stylesheet_indices as $i ) {
 			if ( $group !== $this->pending_stylesheets[ $i ]['group'] ) {
