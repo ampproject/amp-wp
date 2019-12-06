@@ -182,21 +182,6 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
-	 * Sanitize the v= argument in the URL.
-	 *
-	 * @param string $value query parameters.
-	 * @return string First set of query parameters.
-	 */
-	private function sanitize_v_arg( $value ) {
-		// Deal with broken params like `?v=123?rel=0`.
-		if ( false !== strpos( $value, '?' ) ) {
-			$value = strtok( $value, '?' );
-		}
-
-		return $value;
-	}
-
-	/**
 	 * Override the output of YouTube videos.
 	 *
 	 * This overrides the value in wp_video_shortcode().
