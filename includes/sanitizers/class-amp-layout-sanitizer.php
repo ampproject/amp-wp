@@ -33,7 +33,7 @@ class AMP_Layout_Sanitizer extends AMP_Base_Sanitizer {
 				$node->removeAttribute( 'data-amp-layout' );
 			}
 
-			if ( ! $this->attr_empty( $style ) ) {
+			if ( ! $this->attribute_empty( $style ) ) {
 				$styles = $this->parse_style_string( $style );
 
 				// If both height & width descriptors are 100%, apply fill layout.

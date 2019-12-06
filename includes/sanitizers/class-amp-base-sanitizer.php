@@ -254,7 +254,7 @@ abstract class AMP_Base_Sanitizer {
 	 * @param string $attribute Attribute value.
 	 * @return bool True if empty, false if not.
 	 */
-	public function attr_empty( $attribute ) {
+	public function attribute_empty( $attribute ) {
 		return ! isset( $attribute ) || '' === $attribute;
 	}
 
