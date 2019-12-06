@@ -112,6 +112,9 @@ const FILTERS = [
 	{ filter: 'video', name: 'Video' },
 ];
 
+const DEFAULT_WIDTH = 150;
+
+
 function MediaLibrary( { onInsert } ) {
 	const {
 		state: { media, isMediaLoading, isMediaLoaded, mediaType, searchTerm },
@@ -138,19 +141,18 @@ function MediaLibrary( { onInsert } ) {
 		// When an image is selected, run a callback.
 		fileFrame.on( 'select', () => {
 			attachment = fileFrame.state().get( 'selection' ).first().toJSON();
-			const { url: src, mime, width: oWidth, height: oHeight } = attachment;
-			const width = 100;
-			const height = getRelativeHeight( oWidth, oHeight, width );
-			if ( SUPPORTED_IMAGE_TYPES.includes( mime ) ) {
+			const { url: src, mime: mimeType, width: oWidth, height: oHeight } = attachment;
+			const height = getRelativeHeight( oWidth, oHeight, DEFAULT_WIDTH );
+			if ( SUPPORTED_IMAGE_TYPES.includes( mimeType ) ) {
 				onInsert( 'image', {
 					src,
-					width,
+					width: DEFAULT_WIDTH,
 					height,
 					x: 5,
 					y: 5,
 					rotationAngle: 0,
 				} );
-			} else if ( SUPPORTED_VIDEO_TYPES.includes( mime ) ) {
+			} else if ( SUPPORTED_VIDEO_TYPES.includes( mimeType ) ) {
 				// TODO Implemenet Video element.
 			}
 		} );
@@ -278,12 +280,12 @@ function MediaLibrary( { onInsert } ) {
 				<Container>
 					<Column>
 						{ media.map( ( mediaEl, index ) => {
-							return ( isEven( index ) ) ? getMediaElement( mediaEl, 150 ) : null;
+							return ( isEven( index ) ) ? getMediaElement( mediaEl, DEFAULT_WIDTH ) : null;
 						} ) }
 					</Column>
 					<Column>
 						{ media.map( ( mediaEl, index ) => {
-							return ( ! isEven( index ) ) ? getMediaElement( mediaEl, 150 ) : null;
+							return ( ! isEven( index ) ) ? getMediaElement( mediaEl, DEFAULT_WIDTH ) : null;
 						} ) }
 					</Column>
 				</Container>
