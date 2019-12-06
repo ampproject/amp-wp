@@ -46,7 +46,6 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Registers embed.
 	 */
 	public function register_embed() {
-		add_shortcode( 'tweet', [ $this, 'shortcode' ] ); // Note: This is a Jetpack shortcode.
 		wp_embed_register_handler( 'amp-twitter-timeline', self::URL_PATTERN_TIMELINE, [ $this, 'oembed_timeline' ], -1 );
 	}
 
@@ -54,81 +53,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Unregisters embed.
 	 */
 	public function unregister_embed() {
-		remove_shortcode( 'tweet' ); // Note: This is a Jetpack shortcode.
 		wp_embed_unregister_handler( 'amp-twitter-timeline', -1 );
-	}
-
-	/**
-	 * Gets AMP-compliant markup for the Twitter shortcode.
-	 *
-	 * Note that this shortcode is is defined in Jetpack.
-	 *
-	 * @param array $attr The Twitter attributes.
-	 * @return string Twitter shortcode markup.
-	 */
-	public function shortcode( $attr ) {
-		$attr = wp_parse_args(
-			$attr,
-			[
-				'tweet' => false,
-			]
-		);
-
-		if ( empty( $attr['tweet'] ) && ! empty( $attr[0] ) ) {
-			$attr['tweet'] = $attr[0];
-		}
-
-		$id = false;
-		if ( is_numeric( $attr['tweet'] ) ) {
-			$id = $attr['tweet'];
-		} else {
-			preg_match( self::URL_PATTERN, $attr['tweet'], $matches );
-			if ( isset( $matches['tweet'] ) && is_numeric( $matches['tweet'] ) ) {
-				$id = $matches['tweet'];
-			}
-
-			if ( empty( $id ) ) {
-				return '';
-			}
-		}
-
-		$this->did_convert_elements = true;
-
-		return AMP_HTML_Utils::build_tag(
-			$this->amp_tag,
-			[
-				'data-tweetid' => $id,
-				'layout'       => 'responsive',
-				'width'        => $this->args['width'],
-				'height'       => $this->args['height'],
-			]
-		);
-	}
-
-	/**
-	 * Render oEmbed.
-	 *
-	 * @deprecated Since 1.1 as now the sanitize_raw_embeds() is used exclusively, allowing the
-	 *             original oEmbed response to be wrapped with `amp-twitter`.
-	 *
-	 * @see \WP_Embed::shortcode()
-	 *
-	 * @param array $matches URL pattern matches.
-	 * @return string Rendered oEmbed.
-	 */
-	public function oembed( $matches ) {
-		_deprecated_function( __METHOD__, '1.1' );
-		$id = false;
-
-		if ( isset( $matches['tweet'] ) && is_numeric( $matches['tweet'] ) ) {
-			$id = $matches['tweet'];
-		}
-
-		if ( ! $id ) {
-			return '';
-		}
-
-		return $this->shortcode( [ 'tweet' => $id ] );
 	}
 
 	/**

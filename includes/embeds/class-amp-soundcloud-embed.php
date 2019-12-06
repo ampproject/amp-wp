@@ -23,10 +23,6 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Register embed.
 	 */
 	public function register_embed() {
-		if ( function_exists( 'soundcloud_shortcode' ) ) {
-			// @todo Move this to Jetpack.
-			add_shortcode( 'soundcloud', [ $this, 'shortcode' ] );
-		}
 		add_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ], 10, 2 );
 	}
 
@@ -34,10 +30,6 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Unregister embed.
 	 */
 	public function unregister_embed() {
-		if ( function_exists( 'soundcloud_shortcode' ) ) {
-			// @todo Move this to Jetpack.
-			remove_shortcode( 'soundcloud' );
-		}
 		remove_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ], 10 );
 	}
 
@@ -109,44 +101,6 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		return $this->render( $props, $url );
-	}
-
-	/**
-	 * Render shortcode.
-	 *
-	 * @todo Move this to Jetpack.
-	 *
-	 * @param array  $attr    Shortcode attributes.
-	 * @param string $content Shortcode content.
-	 * @return string Rendered shortcode.
-	 */
-	public function shortcode( $attr, $content = null ) {
-		if ( ! function_exists( 'soundcloud_shortcode' ) ) {
-			return '';
-		}
-
-		if ( isset( $attr['url'] ) ) {
-			$url = $attr['url'];
-		} elseif ( isset( $attr['id'] ) ) {
-			$url = 'https://api.soundcloud.com/tracks/' . $attr['id'];
-		} elseif ( isset( $attr[0] ) ) {
-			$url = is_numeric( $attr[0] ) ? 'https://api.soundcloud.com/tracks/' . $attr[0] : $attr[0];
-		} elseif ( function_exists( 'shortcode_new_to_old_params' ) ) {
-			$url = shortcode_new_to_old_params( $attr );
-		}
-
-		// Defer to oEmbed if an oEmbeddable URL is provided.
-		if ( isset( $url ) && 'api.soundcloud.com' !== wp_parse_url( $url, PHP_URL_HOST ) ) {
-			global $wp_embed;
-			return $wp_embed->shortcode( $attr, $url );
-		}
-
-		if ( isset( $url ) && ! isset( $attr['url'] ) ) {
-			$attr['url'] = $url;
-		}
-		$output = soundcloud_shortcode( $attr, $content );
-
-		return $this->parse_amp_component_from_iframe( $output, null );
 	}
 
 	/**

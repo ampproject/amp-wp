@@ -109,8 +109,8 @@ class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
 		$attr_vimeo      = [
 			'src' => $vimeo_src,
 		];
-		$yimeo_shortcode = $this->handler->video_override( '', $attr_vimeo );
-		$this->assertEquals( '', $yimeo_shortcode );
+		$vimeo_shortcode = $this->handler->video_override( '', $attr_vimeo );
+		$this->assertEquals( '', $vimeo_shortcode );
 
 		$daily_motion_id        = 'x6bacgf';
 		$daily_motion_src       = 'http://www.dailymotion.com/video/' . $daily_motion_id;
@@ -153,11 +153,6 @@ class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
 			'url_with_querystring_and_extra_?' => [
 				'http://www.youtube.com/watch?v=kfVsfOSbJY0?hl=en&fs=1&w=425&h=349' . PHP_EOL,
 				'<p>http://www.youtube.com/watch?v=kfVsfOSbJY0?hl=en&#038;fs=1&#038;w=425&#038;h=349</p>' . PHP_EOL,
-			],
-
-			'shortcode_unnamed_attr_as_url'    => [
-				'[youtube http://www.youtube.com/watch?v=kfVsfOSbJY0]' . PHP_EOL,
-				'<amp-youtube data-videoid="kfVsfOSbJY0" layout="responsive" width="600" height="338"></amp-youtube>' . PHP_EOL,
 			],
 
 			'embed_url'                        => [
