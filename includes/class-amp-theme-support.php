@@ -2086,6 +2086,8 @@ class AMP_Theme_Support {
 			return $response;
 		}
 
+		$should_validate_response = AMP_Validation_Manager::should_validate_response();
+
 		/**
 		 * Filters whether response (post-processor) caching is enabled.
 		 *
@@ -2104,7 +2106,7 @@ class AMP_Theme_Support {
 		$enable_response_caching = (
 			$enable_response_caching
 			&&
-			! AMP_Validation_Manager::should_validate_response()
+			! $should_validate_response
 			&&
 			! is_customize_preview()
 		);
@@ -2314,6 +2316,11 @@ class AMP_Theme_Support {
 
 		$assets = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
 
+		if ( $should_validate_response ) {
+			header( 'Content-Type: application/json' );
+			return wp_json_encode( AMP_Validation_Manager::get_validation_response_data(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
+		}
+
 		// Determine what the validation errors are.
 		$blocking_error_count = 0;
 		$validation_results   = [];
@@ -2347,7 +2354,7 @@ class AMP_Theme_Support {
 
 		self::ensure_required_markup( $dom, array_keys( $amp_scripts ) );
 
-		if ( $blocking_error_count > 0 && ! AMP_Validation_Manager::should_validate_response() ) {
+		if ( $blocking_error_count > 0 ) {
 			/*
 			 * In AMP-first, strip html@amp attribute to prevent GSC from complaining about a validation error
 			 * already surfaced inside of WordPress. This is intended to not serve dirty AMP, but rather a
@@ -2393,12 +2400,7 @@ class AMP_Theme_Support {
 			trigger_error( esc_html( sprintf( __( 'The database has the %s encoding when it needs to be utf-8 to work with AMP.', 'amp' ), get_bloginfo( 'charset' ) ) ), E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 		}
 
-		AMP_Validation_Manager::finalize_validation(
-			$dom,
-			[
-				'remove_source_comments' => ! isset( $_GET['amp_preserve_source_comments'] ), // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			]
-		);
+		AMP_Validation_Manager::finalize_validation( $dom );
 
 		$response  = "<!DOCTYPE html>\n";
 		$response .= AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );

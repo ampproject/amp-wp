@@ -371,13 +371,7 @@ class AMP_Validation_Manager {
 		$non_amp_url = amp_remove_endpoint( $current_url );
 
 		$amp_url = remove_query_arg(
-			array_merge(
-				wp_removable_query_args(),
-				[
-					self::VALIDATE_QUERY_VAR,
-					'amp_preserve_source_comments',
-				]
-			),
+			wp_removable_query_args(),
 			$current_url
 		);
 		if ( ! amp_is_canonical() ) {
@@ -1126,24 +1120,6 @@ class AMP_Validation_Manager {
 	}
 
 	/**
-	 * Remove source comments.
-	 *
-	 * @param DOMDocument $dom Document.
-	 */
-	public static function remove_source_comments( $dom ) {
-		$xpath    = new DOMXPath( $dom );
-		$comments = [];
-		foreach ( $xpath->query( '//comment()[ starts-with( ., "amp-source-stack" ) or starts-with( ., "/amp-source-stack" ) ]' ) as $comment ) {
-			if ( self::parse_source_comment( $comment ) ) {
-				$comments[] = $comment;
-			}
-		}
-		foreach ( $comments as $comment ) {
-			$comment->parentNode->removeChild( $comment );
-		}
-	}
-
-	/**
 	 * Add block source comments.
 	 *
 	 * @param string $content Content prior to blocks being processed.
@@ -1633,27 +1609,40 @@ class AMP_Validation_Manager {
 	}
 
 	/**
+	 * Get validation response data.
+	 *
+	 * @return array Validation response data.
+	 */
+	public static function get_validation_response_data() {
+		$data = [
+			'results' => self::$validation_results,
+		];
+		if ( get_queried_object() ) {
+			$data['queried_object'] = [];
+			if ( get_queried_object_id() ) {
+				$data['queried_object']['id'] = get_queried_object_id();
+			}
+			if ( get_queried_object() instanceof WP_Post ) {
+				$data['queried_object']['type'] = 'post';
+			} elseif ( get_queried_object() instanceof WP_Term ) {
+				$data['queried_object']['type'] = 'term';
+			} elseif ( get_queried_object() instanceof WP_User ) {
+				$data['queried_object']['type'] = 'user';
+			} elseif ( get_queried_object() instanceof WP_Post_Type ) {
+				$data['queried_object']['type'] = 'post_type';
+			}
+		}
+		return $data;
+	}
+
+	/**
 	 * Finalize validation.
 	 *
 	 * @see AMP_Validation_Manager::add_admin_bar_menu_items()
 	 *
 	 * @param DOMDocument $dom Document.
-	 * @param array       $args {
-	 *     Args.
-	 *
-	 *     @type bool $remove_source_comments           Whether source comments should be removed. Defaults to true.
-	 *     @type bool $append_validation_status_comment Whether the validation errors should be appended as an HTML comment. Defaults to true.
-	 * }
 	 */
-	public static function finalize_validation( DOMDocument $dom, $args = [] ) {
-		$args = array_merge(
-			[
-				'remove_source_comments'           => true,
-				'append_validation_status_comment' => true,
-			],
-			$args
-		);
-
+	public static function finalize_validation( DOMDocument $dom ) {
 		/*
 		 * Override AMP status in admin bar set in \AMP_Validation_Manager::add_admin_bar_menu_items()
 		 * when there are validation errors which have not been explicitly accepted.
@@ -1694,38 +1683,6 @@ class AMP_Validation_Manager {
 				if ( $admin_bar_icon ) {
 					$admin_bar_icon->textContent = "\xE2\x9A\xA0\xEF\xB8\x8F"; // WARNING SIGN: U+26A0, U+FE0F.
 				}
-			}
-		}
-
-		if ( self::should_validate_response() ) {
-			if ( $args['remove_source_comments'] ) {
-				self::remove_source_comments( $dom );
-			}
-
-			if ( $args['append_validation_status_comment'] ) {
-				$data = [
-					'results' => self::$validation_results,
-				];
-				if ( get_queried_object() ) {
-					$data['queried_object'] = [];
-					if ( get_queried_object_id() ) {
-						$data['queried_object']['id'] = get_queried_object_id();
-					}
-					if ( get_queried_object() instanceof WP_Post ) {
-						$data['queried_object']['type'] = 'post';
-					} elseif ( get_queried_object() instanceof WP_Term ) {
-						$data['queried_object']['type'] = 'term';
-					} elseif ( get_queried_object() instanceof WP_User ) {
-						$data['queried_object']['type'] = 'user';
-					} elseif ( get_queried_object() instanceof WP_Post_Type ) {
-						$data['queried_object']['type'] = 'post_type';
-					}
-				}
-
-				$encoded = wp_json_encode( $data, 128 /* JSON_PRETTY_PRINT */ );
-				$encoded = str_replace( '--', '\u002d\u002d', $encoded ); // Prevent "--" in strings from breaking out of HTML comments.
-				$comment = $dom->createComment( 'AMP_VALIDATION:' . $encoded . "\n" );
-				$dom->documentElement->appendChild( $comment );
 			}
 		}
 	}
@@ -1884,14 +1841,14 @@ class AMP_Validation_Manager {
 			$validation_url
 		);
 
-		$response = wp_remote_retrieve_body( $r );
-		if ( trim( $response ) === '' ) {
+		$response = trim( wp_remote_retrieve_body( $r ) );
+		if ( '' === $response ) {
 			return new WP_Error( 'white_screen_of_death' );
 		}
-		if ( ! preg_match( '#</body>.*?<!--\s*AMP_VALIDATION\s*:\s*(\{.*?\})\s*-->#s', $response, $matches ) ) {
-			return new WP_Error( 'response_comment_absent' );
+		if ( '{' !== substr( $response, 0, 1 ) ) {
+			return new WP_Error( 'response_not_json' );
 		}
-		$validation = json_decode( $matches[1], true );
+		$validation = json_decode( $response, true );
 		if ( json_last_error() || ! isset( $validation['results'] ) || ! is_array( $validation['results'] ) ) {
 			return new WP_Error( 'malformed_json_validation_errors' );
 		}
@@ -1946,15 +1903,15 @@ class AMP_Validation_Manager {
 	public static function get_validate_url_error_message( $error_code, $error_message = '' ) {
 		$check_error_log = sprintf(
 			/* translators: %s is link to Debugging in WordPress */
-			' ' . __( 'Please check your server PHP error logs; to do this you may need to <a href="%s" target="_blank">enable</a> <code>WP_DEBUG_LOG</code>.', 'amp' ),
+			__( 'Please check your server PHP error logs; to do this you may need to <a href="%s" target="_blank">enable</a> <code>WP_DEBUG_LOG</code>.', 'amp' ),
 			esc_url( 'https://wordpress.org/support/article/debugging-in-wordpress/' )
 		);
 
 		if ( $error_message ) {
-			$error_message = ' ' . rtrim( $error_message, '.' ) . '.';
+			$error_message = rtrim( $error_message, '.' ) . '.';
 		}
 
-		$support_forum_message = ' ' . sprintf(
+		$support_forum_message = sprintf(
 			/* translators: %1$s: Link to support forum. %2$s: Link to new topic form in support forum. */
 			__( 'If you are stuck, please search the <a href="%1$s">support forum</a> for possible related topics, or otherwise start a <a href="%2$s">new support topic</a> including the error message, the URL to your site, and your active theme/plugins.', 'amp' ),
 			esc_url( 'https://wordpress.org/support/plugin/amp/' ),
@@ -1963,12 +1920,12 @@ class AMP_Validation_Manager {
 
 		$site_health_message = '';
 		if ( version_compare( get_bloginfo( 'version' ), '5.2', '>=' ) ) {
-			$site_health_message .= ' ' . sprintf(
+			$site_health_message .= sprintf(
 				/* translators: %s is link to Site Health */
 				__( 'Please check your <a href="%s">Site Health</a> to verify it can perform loopback requests.', 'amp' ),
 				esc_url( admin_url( 'site-health.php' ) )
 			);
-			$support_forum_message .= ' ' . sprintf(
+			$support_forum_message .= sprintf(
 				/* translators: %s is the URL to Site Health Info. */
 				__( 'Please include your <a href="%s">Site Health Info</a>.', 'amp' ),
 				esc_url( admin_url( 'site-health.php?tab=debug' ) )
@@ -1977,31 +1934,62 @@ class AMP_Validation_Manager {
 
 		switch ( $error_code ) {
 			case 'http_request_failed':
-				return __( 'Failed to fetch URL to validate.', 'amp' ) . $error_message . $site_health_message . $support_forum_message;
+				$error_messages = [
+					__( 'Failed to fetch URL to validate.', 'amp' ),
+					$error_message,
+					$site_health_message,
+					$support_forum_message,
+				];
+				break;
 			case 'white_screen_of_death':
-				return __( 'Unable to validate URL. Encountered a white screen of death likely due to a PHP fatal error.', 'amp' ) . $error_message . $check_error_log . $support_forum_message;
+				$error_messages = [
+					__( 'Unable to validate URL. Encountered a white screen of death likely due to a PHP fatal error.', 'amp' ),
+					$error_message,
+					$check_error_log,
+					$support_forum_message,
+				];
+				break;
 			case '404':
-				return __( 'The fetched URL was not found. It may have been deleted. If so, you can trash this.', 'amp' ) . $error_message . $support_forum_message;
+				$error_messages = [
+					__( 'The fetched URL was not found. It may have been deleted. If so, you can trash this.', 'amp' ),
+					$error_message,
+					$support_forum_message,
+				];
+				break;
 			case '500':
-				return __( 'An internal server error occurred when fetching the URL for validation.', 'amp' ) . $error_message . $check_error_log . $support_forum_message;
-			case 'response_comment_absent':
-				return sprintf(
-					/* translators: %1$s: AMP_VALIDATION, %2$s: </body> */
-					__( 'URL validation failed to due to the absence of the expected JSON-containing %1$s HTML comment after %2$s. This is often due to a PHP fatal error occurring.', 'amp' ),
-					'<code>AMP_VALIDATION</code>',
-					'<code>&lt;/body&gt;</code>'
-				) . $error_message . $check_error_log . $support_forum_message;
+				$error_messages = [
+					__( 'An internal server error occurred when fetching the URL for validation.', 'amp' ),
+					$error_message,
+					$check_error_log,
+					$support_forum_message,
+				];
+				break;
+			case 'response_not_json':
+				$error_messages = [
+					__( 'URL validation failed to due to the AMP validation request not returning JSON data. This is may be due to a PHP fatal error occurring.', 'amp' ),
+					$error_message,
+					$check_error_log,
+					$support_forum_message,
+				];
+				break;
 			case 'malformed_json_validation_errors':
-				return sprintf(
-					/* translators: %1$s: AMP_VALIDATION, %2$s: </body> */
-					__( 'URL validation failed to due to unexpected JSON in the %1$s HTML comment after %2$s.', 'amp' ),
-					'<code>AMP_VALIDATION</code>',
-					'<code>&lt;/body&gt;</code>'
-				) . $error_message . $support_forum_message;
+				$error_messages = [
+					__( 'URL validation failed to due to unexpected JSON in AMP validation response.', 'amp' ),
+					$error_message,
+					$support_forum_message,
+				];
+				break;
 			default:
-				/* translators: %s is error code */
-				return sprintf( __( 'URL validation failed. Error code: %s.', 'amp' ), $error_code ) . $error_message . $support_forum_message;
+				$error_messages = [
+					/* translators: %s is error code */
+					sprintf( __( 'URL validation failed. Error code: %s.', 'amp' ), $error_code ),
+					$error_message,
+					$support_forum_message,
+				];
+				break;
 		}
+
+		return implode( ' ', array_filter( $error_messages ) );
 	}
 
 	/**

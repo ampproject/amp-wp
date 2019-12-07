@@ -567,7 +567,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 			'pre_http_request',
 			static function() {
 				return [
-					'body'     => '<html><body></body><!--AMP_VALIDATION:{"results":[]}--></html>',
+					'body'     => wp_json_encode( [ 'results' => [] ] ),
 					'response' => [
 						'code'    => 200,
 						'message' => 'ok',
@@ -747,7 +747,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::locate_sources()
 	 * @covers AMP_Validation_Manager::parse_source_comment()
 	 * @covers AMP_Validation_Manager::get_source_comment()
-	 * @covers AMP_Validation_Manager::remove_source_comments()
 	 */
 	public function test_source_comments() {
 		$source1 = [
@@ -807,9 +806,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$parsed_comment = AMP_Validation_Manager::parse_source_comment( $comments[2] );
 		$this->assertEquals( $source2, $parsed_comment['source'] );
 		$this->assertTrue( $parsed_comment['closing'] );
-
-		AMP_Validation_Manager::remove_source_comments( $dom );
-		$this->assertEquals( 0, $xpath->query( '//comment()' )->length );
 	}
 
 	/**
@@ -1551,7 +1547,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 * @covers \AMP_Validation_Manager::finalize_validation()
 	 */
 	public function test_finalize_validation() {
-		global $post, $show_admin_bar;
+		global $show_admin_bar;
 
 		$show_admin_bar = true;
 		$dom            = new DOMDocument( '1.0' );
@@ -1568,18 +1564,9 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		];
 		AMP_Validation_Manager::$validation_results = $validation_results;
 
-		// should_validate_response() will be false, so finalize_validation() won't append the _RESULTS comment.
+		self::set_capability();
 		AMP_Validation_Manager::finalize_validation( $dom );
-		$this->assertNotContains( 'AMP_VALIDATION:{', $dom->documentElement->lastChild->nodeValue );
-
-		// Ensure that should_validate_response() is true, so finalize_validation() will append the AMP_VALIDATION comment.
-		$post = self::factory()->post->create();
-		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = 1;
-		$this->set_capability();
-		AMP_Validation_Manager::finalize_validation( $dom );
-		$this->assertTrue( (bool) preg_match( '#AMP_VALIDATION:({.+})#s', $dom->documentElement->lastChild->nodeValue, $matches ) );
-		$returned_valudation = json_decode( $matches[1], true );
-		$this->assertEquals( $validation_results, $returned_valudation['results'] );
+		$this->markTestIncomplete( '\AMP_Validation_Manager::add_admin_bar_menu_items() needs to be called to set up the admin menu.' );
 	}
 
 	/**
@@ -1632,10 +1619,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		self::factory()->post->create();
 		$filter = static function() use ( $validation ) {
 			return [
-				'body' => sprintf(
-					'<html amp><head></head><body></body><!--%s--></html>',
-					'AMP_VALIDATION:' . wp_json_encode( $validation )
-				),
+				'body' => wp_json_encode( $validation ),
 			];
 		};
 		add_filter( 'pre_http_request', $filter, 10, 3 );
@@ -1692,10 +1676,10 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 			}
 
 			return [
-				'body' => sprintf(
-					'<html amp><head></head><body></body><!--%s--></html>',
-					'AMP_VALIDATION:' . wp_json_encode( $validation )
-				),
+				'body'    => wp_json_encode( $validation ),
+				'headers' => [
+					'content-type' => 'application/json',
+				],
 			];
 		};
 		add_filter( 'pre_http_request', $filter, 10, 3 );
