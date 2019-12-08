@@ -1658,43 +1658,47 @@ class AMP_Validation_Manager {
 		 * Override AMP status in admin bar set in \AMP_Validation_Manager::add_admin_bar_menu_items()
 		 * when there are validation errors which have not been explicitly accepted.
 		 */
-		if ( is_admin_bar_showing() && self::$amp_admin_bar_item_added ) {
-			$error_count = 0;
-			foreach ( self::$validation_results as $validation_result ) {
-				$validation_status = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $validation_result['error'] );
+		if ( ! is_admin_bar_showing() || ! self::$amp_admin_bar_item_added ) {
+			return;
+		}
 
-				$is_unaccepted = 'with_preview' === $validation_status['forced'] ?
-					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $validation_status['status']
-					:
-					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $validation_status['term_status'];
-				if ( $is_unaccepted ) {
-					$error_count++;
-				}
+		$error_count = 0;
+		foreach ( self::$validation_results as $validation_result ) {
+			$validation_status = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $validation_result['error'] );
+
+			$is_unaccepted = 'with_preview' === $validation_status['forced'] ?
+				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $validation_status['status']
+				:
+				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $validation_status['term_status'];
+			if ( $is_unaccepted ) {
+				$error_count++;
 			}
+		}
 
-			if ( $error_count > 0 ) {
-				$validate_item = $dom->getElementById( 'wp-admin-bar-amp-validity' );
-				if ( $validate_item ) {
-					$link = $validate_item->getElementsByTagName( 'a' )->item( 0 );
-					if ( $link ) {
-						$link->textContent = sprintf(
-							/* translators: %s is count of validation errors */
-							_n(
-								'Review %s validation issue',
-								'Review %s validation issues',
-								$error_count,
-								'amp'
-							),
-							number_format_i18n( $error_count )
-						);
-					}
-				}
+		if ( 0 === $error_count ) {
+			return;
+		}
 
-				$admin_bar_icon = $dom->getElementById( 'amp-admin-bar-item-status-icon' );
-				if ( $admin_bar_icon ) {
-					$admin_bar_icon->textContent = "\xE2\x9A\xA0\xEF\xB8\x8F"; // WARNING SIGN: U+26A0, U+FE0F.
-				}
+		$validate_item = $dom->getElementById( 'wp-admin-bar-amp-validity' );
+		if ( $validate_item ) {
+			$link = $validate_item->getElementsByTagName( 'a' )->item( 0 );
+			if ( $link ) {
+				$link->textContent = sprintf(
+					/* translators: %s is count of validation errors */
+					_n(
+						'Review %s validation issue',
+						'Review %s validation issues',
+						$error_count,
+						'amp'
+					),
+					number_format_i18n( $error_count )
+				);
 			}
+		}
+
+		$admin_bar_icon = $dom->getElementById( 'amp-admin-bar-item-status-icon' );
+		if ( $admin_bar_icon ) {
+			$admin_bar_icon->textContent = "\xE2\x9A\xA0\xEF\xB8\x8F"; // WARNING SIGN: U+26A0, U+FE0F.
 		}
 	}
 

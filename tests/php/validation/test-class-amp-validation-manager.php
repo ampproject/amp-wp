@@ -1592,8 +1592,8 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		];
 
 		AMP_Validation_Manager::finalize_validation( $dom );
-		$this->assertEquals( '⚠️', $status_icon_element->textContent );
 		$this->assertEquals( 'Review 1 validation issue', trim( $validity_link_element->textContent ) );
+		$this->assertEquals( '⚠️', $status_icon_element->textContent );
 	}
 
 	/**
