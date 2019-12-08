@@ -1610,7 +1610,10 @@ class AMP_Validation_Manager {
 
 		$validate_key = wp_unslash( $_GET[ self::VALIDATE_QUERY_VAR ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( self::get_amp_validate_nonce() !== $validate_key ) {
-			return new WP_Error( 'invalid_nonce' );
+			return new WP_Error(
+				'http_request_failed',
+				__( 'Nonce authentication failed.', 'amp' )
+			);
 		}
 
 		return true;
@@ -1925,7 +1928,7 @@ class AMP_Validation_Manager {
 		);
 
 		if ( $error_message ) {
-			$error_message = esc_html( rtrim( $error_message, '.' ) . '.' );
+			$error_message = rtrim( $error_message, '.' ) . '.';
 		}
 
 		$support_forum_message = sprintf(
@@ -1942,78 +1945,80 @@ class AMP_Validation_Manager {
 				__( 'Please check your <a href="%s">Site Health</a> to verify it can perform loopback requests.', 'amp' ),
 				esc_url( admin_url( 'site-health.php' ) )
 			);
-			$support_forum_message .= sprintf(
+			$support_forum_message .= ' ' . sprintf(
 				/* translators: %s is the URL to Site Health Info. */
 				__( 'Please include your <a href="%s">Site Health Info</a>.', 'amp' ),
 				esc_url( admin_url( 'site-health.php?tab=debug' ) )
 			);
 		}
 
-		switch ( $error_code ) {
-			case 'invalid_nonce':
-				$error_messages = [
-					__( 'Failed to authenticate for validation request.', 'amp' ),
-					$error_message,
-					$support_forum_message,
-				];
-				break;
-			case 'http_request_failed':
-				$error_messages = [
-					__( 'Failed to fetch URL to validate.', 'amp' ),
-					$error_message,
-					$site_health_message,
-					$support_forum_message,
-				];
-				break;
-			case 'white_screen_of_death':
-				$error_messages = [
-					__( 'Unable to validate URL. A white screen of death was encountered which is likely due to a PHP fatal error.', 'amp' ),
-					$error_message,
-					$check_error_log,
-					$support_forum_message,
-				];
-				break;
-			case '404':
-				$error_messages = [
-					__( 'The fetched URL was not found. It may have been deleted. If so, you can trash this.', 'amp' ),
-					$error_message,
-					$support_forum_message,
-				];
-				break;
-			case '500':
-				$error_messages = [
-					__( 'An internal server error occurred when fetching the URL for validation.', 'amp' ),
-					$error_message,
-					$check_error_log,
-					$support_forum_message,
-				];
-				break;
-			case 'response_not_json':
-				$error_messages = [
-					__( 'URL validation failed to due to the AMP validation request not returning JSON data. This is may be due to a PHP fatal error occurring.', 'amp' ),
-					$error_message,
-					$check_error_log,
-					$support_forum_message,
-				];
-				break;
-			case 'malformed_json_validation_errors':
-				$error_messages = [
-					__( 'URL validation failed to due to unexpected JSON in AMP validation response.', 'amp' ),
-					$error_message,
-					$support_forum_message,
-				];
-				break;
-			default:
-				$error_messages = [
-					/* translators: %s is error code */
-					sprintf( __( 'URL validation failed. Error code: %s.', 'amp' ), $error_code ),
-					$error_message,
-					$support_forum_message,
-				];
-				break;
-		}
+		$implode_non_empty_strings_with_spaces = static function ( $strings ) {
+			return implode( ' ', array_filter( $strings ) );
+		};
 
-		return implode( ' ', array_filter( $error_messages ) );
+		switch ( $error_code ) {
+			case 'http_request_failed':
+				return $implode_non_empty_strings_with_spaces(
+					[
+						esc_html__( 'Failed to fetch URL to validate.', 'amp' ),
+						esc_html( $error_message ),
+						$site_health_message,
+						$support_forum_message,
+					]
+				);
+			case 'white_screen_of_death':
+				return $implode_non_empty_strings_with_spaces(
+					[
+						esc_html__( 'Unable to validate URL. A white screen of death was encountered which is likely due to a PHP fatal error.', 'amp' ),
+						esc_html( $error_message ),
+						$check_error_log,
+						$support_forum_message,
+					]
+				);
+			case '404':
+				return $implode_non_empty_strings_with_spaces(
+					[
+						esc_html__( 'The fetched URL was not found. It may have been deleted. If so, you can trash this.', 'amp' ),
+						esc_html( $error_message ),
+						$support_forum_message,
+					]
+				);
+			case '500':
+				return $implode_non_empty_strings_with_spaces(
+					[
+						esc_html__( 'An internal server error occurred when fetching the URL for validation.', 'amp' ),
+						esc_html( $error_message ),
+						$check_error_log,
+						$support_forum_message,
+					]
+				);
+			case 'response_not_json':
+				return $implode_non_empty_strings_with_spaces(
+					[
+						esc_html__( 'URL validation failed to due to the AMP validation request not returning JSON data. This is may be due to a PHP fatal error occurring.', 'amp' ),
+						esc_html( $error_message ),
+						$check_error_log,
+						$support_forum_message,
+					]
+				);
+			case 'malformed_json_validation_errors':
+				return $implode_non_empty_strings_with_spaces(
+					[
+						esc_html__( 'URL validation failed to due to unexpected JSON in AMP validation response.', 'amp' ),
+						esc_html( $error_message ),
+						$support_forum_message,
+					]
+				);
+			default:
+				return $implode_non_empty_strings_with_spaces(
+					[
+						/* translators: %s is error code */
+						esc_html( sprintf( __( 'URL validation failed. Error code: %s.', 'amp' ), $error_code ) ),
+						esc_html( $error_message ),
+						$support_forum_message,
+					]
+				);
+		}
 	}
 
 	/**

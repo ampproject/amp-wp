@@ -1535,7 +1535,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = 'invalid';
 		$result = AMP_Validation_Manager::should_validate_response();
 		$this->assertInstanceOf( 'WP_Error', $result );
-		$this->assertEquals( 'invalid_nonce', $result->get_error_code() );
+		$this->assertEquals( 'http_request_failed', $result->get_error_code() );
 
 		// Making a request with a valid nonce.
 		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = AMP_Validation_Manager::get_amp_validate_nonce();
