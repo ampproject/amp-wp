@@ -2086,8 +2086,6 @@ class AMP_Theme_Support {
 			return $response;
 		}
 
-		$should_validate_response = AMP_Validation_Manager::should_validate_response();
-
 		/**
 		 * Filters whether response (post-processor) caching is enabled.
 		 *
@@ -2106,7 +2104,7 @@ class AMP_Theme_Support {
 		$enable_response_caching = (
 			$enable_response_caching
 			&&
-			! $should_validate_response
+			! AMP_Validation_Manager::$should_locate_sources
 			&&
 			! is_customize_preview()
 		);
@@ -2316,8 +2314,9 @@ class AMP_Theme_Support {
 
 		$assets = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
 
-		if ( $should_validate_response ) {
-			header( 'Content-Type: application/json' );
+
+		if ( AMP_Validation_Manager::$should_locate_sources ) {
+			header( 'Content-Type: application/json; charset=utf-8' );
 			return wp_json_encode( AMP_Validation_Manager::get_validation_response_data(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
 		}
 

@@ -117,6 +117,8 @@ class AMP_Validation_Manager {
 	/**
 	 * Whether validation error sources should be located.
 	 *
+	 * @todo Rename this to is_validate_request.
+	 *
 	 * @var bool
 	 */
 	public static $should_locate_sources = false;
@@ -168,24 +170,25 @@ class AMP_Validation_Manager {
 	protected static $stylesheet_slug;
 
 	/**
-	 * Add the actions.
+	 * Initialize.
 	 *
-	 * @param array $args {
-	 *     Args.
-	 *
-	 *     @type bool $should_locate_sources Whether to locate sources.
-	 * }
 	 * @return void
 	 */
-	public static function init( $args = [] ) {
-		$args = array_merge(
-			[
-				'should_locate_sources' => self::should_validate_response(),
-			],
-			$args
-		);
+	public static function init() {
+		$should_validate_response = self::should_validate_response();
 
-		self::$should_locate_sources = $args['should_locate_sources'];
+		// Short-circuit validation requests that are unauthorized.
+		if ( $should_validate_response instanceof WP_Error ) {
+			wp_send_json(
+				[
+					'code'    => $should_validate_response->get_error_code(),
+					'message' => $should_validate_response->get_error_message(),
+				],
+				400
+			);
+		} else {
+			self::$should_locate_sources = $should_validate_response;
+		}
 
 		AMP_Validated_URL_Post_Type::register();
 		AMP_Validation_Error_Taxonomy::register();
@@ -1593,19 +1596,30 @@ class AMP_Validation_Manager {
 	}
 
 	/**
-	 * Whether to validate the front end response.
+	 * Whether the request is for validation data for a given URL.
 	 *
-	 * @return boolean Whether to validate.
+	 * All AMP responses get validated, but when the amp_validate query parameter is present, then the source information
+	 * for each validation error is captured and the validation results are returned as JSON instead of the AMP HTML page.
+	 *
+	 * @return bool|WP_Error Whether to validate. False is returned if it is not a validation request. WP_Error returned
+	 *                       if unauthenticated, unauthorized, and/or invalid nonce supplied. True returned if
+	 *                       validation response should be served.
 	 */
 	public static function should_validate_response() {
 		if ( ! isset( $_GET[ self::VALIDATE_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			return false;
 		}
-		if ( self::has_cap() ) {
+		$validate_key = wp_unslash( $_GET[ self::VALIDATE_QUERY_VAR ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( self::has_cap() || self::get_amp_validate_nonce() === $validate_key ) {
 			return true;
 		}
-		$validate_key = wp_unslash( $_GET[ self::VALIDATE_QUERY_VAR ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		return self::get_amp_validate_nonce() === $validate_key;
+		if ( ! empty( $validate_key ) ) {
+			return new WP_Error( 'invalid_nonce' );
+		}
+		if ( ! is_user_logged_in() ) {
+			return new WP_Error( 'unauthenticated' );
+		}
+		return new WP_Error( 'unauthorized' );
 	}
 
 	/**
@@ -1829,10 +1843,20 @@ class AMP_Validation_Manager {
 		if ( is_wp_error( $r ) ) {
 			return $r;
 		}
+
+		$response = trim( wp_remote_retrieve_body( $r ) );
+		if ( wp_remote_retrieve_response_code( $r ) >= 400 ) {
+			$data = json_decode( $response, true );
+			return new WP_Error(
+				is_array( $data ) && isset( $data['code'] ) ? $data['code'] : wp_remote_retrieve_response_code( $r ),
+				is_array( $data ) && isset( $data['message'] ) ? $data['message'] : wp_remote_retrieve_response_message( $r )
+			);
+		}
+
 		if ( wp_remote_retrieve_response_code( $r ) >= 300 ) {
 			return new WP_Error(
-				wp_remote_retrieve_response_code( $r ),
-				wp_remote_retrieve_response_message( $r )
+				'http_request_failed',
+				__( 'Too many redirects', 'amp' )
 			);
 		}
 
@@ -1841,7 +1865,6 @@ class AMP_Validation_Manager {
 			$validation_url
 		);
 
-		$response = trim( wp_remote_retrieve_body( $r ) );
 		if ( '' === $response ) {
 			return new WP_Error( 'white_screen_of_death' );
 		}
@@ -1908,7 +1931,7 @@ class AMP_Validation_Manager {
 		);
 
 		if ( $error_message ) {
-			$error_message = rtrim( $error_message, '.' ) . '.';
+			$error_message = esc_html( rtrim( $error_message, '.' ) . '.' );
 		}
 
 		$support_forum_message = sprintf(
@@ -1933,6 +1956,15 @@ class AMP_Validation_Manager {
 		}
 
 		switch ( $error_code ) {
+			case 'unauthenticated':
+			case 'unauthorized':
+			case 'invalid_nonce':
+				$error_messages = [
+					__( 'Failed to authenticate for validation request.', 'amp' ),
+					$error_message,
+					$support_forum_message,
+				];
+				break;
 			case 'http_request_failed':
 				$error_messages = [
 					__( 'Failed to fetch URL to validate.', 'amp' ),

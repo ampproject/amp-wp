@@ -148,11 +148,8 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		// Make sure should_locate_sources arg is recognized.
 		remove_all_filters( 'amp_validation_error_sanitized' );
 		$this->accept_sanitization_by_default( false );
-		AMP_Validation_Manager::init(
-			[
-				'should_locate_sources' => true,
-			]
-		);
+		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = AMP_Validation_Manager::get_amp_validate_nonce();
+		AMP_Validation_Manager::init();
 		$this->assertEquals( 10, has_action( 'wp', [ self::TESTED_CLASS, 'wrap_widget_callbacks' ] ) );
 	}
 
@@ -1532,12 +1529,34 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::should_validate_response()
 	 */
 	public function test_should_validate_response() {
-		global $post;
-		$post = self::factory()->post->create();
 		$this->assertFalse( AMP_Validation_Manager::should_validate_response() );
-		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = 1;
-		$this->assertFalse( AMP_Validation_Manager::should_validate_response() );
+
+		// Making a request while unauthenticated.
+		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = '';
+		$result = AMP_Validation_Manager::should_validate_response();
+		$this->assertInstanceOf( 'WP_Error', $result );
+		$this->assertEquals( 'unauthenticated', $result->get_error_code() );
+
+		// Making a request with an invalid nonce.
+		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = 'invalid';
+		$result = AMP_Validation_Manager::should_validate_response();
+		$this->assertInstanceOf( 'WP_Error', $result );
+		$this->assertEquals( 'invalid_nonce', $result->get_error_code() );
+
+		// Making a request with a valid nonce.
+		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = AMP_Validation_Manager::get_amp_validate_nonce();
+		$this->assertTrue( AMP_Validation_Manager::should_validate_response() );
+
+		// Making a request without sufficient capabilities.
+		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'subscriber' ] ) );
+		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = '';
+		$result = AMP_Validation_Manager::should_validate_response();
+		$this->assertInstanceOf( 'WP_Error', $result );
+		$this->assertEquals( 'unauthorized', $result->get_error_code() );
+
+		// Making a request as an authenticated user.
 		$this->set_capability();
+		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = '';
 		$this->assertTrue( AMP_Validation_Manager::should_validate_response() );
 	}
 
@@ -1579,7 +1598,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertEquals( '✅', $status_icon_element->textContent );
 		$validity_link_element = $dom->getElementById( 'wp-admin-bar-amp-validity' );
 		$this->assertInstanceOf( 'DOMElement', $validity_link_element );
-		$this->assertEquals( 'Validate', $validity_link_element->textContent );
+		$this->assertEquals( 'Validate', trim( $validity_link_element->textContent ) );
 
 		AMP_Validation_Manager::$validation_results = [
 			[
