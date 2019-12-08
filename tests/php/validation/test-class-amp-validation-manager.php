@@ -1531,12 +1531,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	public function test_should_validate_response() {
 		$this->assertFalse( AMP_Validation_Manager::should_validate_response() );
 
-		// Making a request while unauthenticated.
-		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = '';
-		$result = AMP_Validation_Manager::should_validate_response();
-		$this->assertInstanceOf( 'WP_Error', $result );
-		$this->assertEquals( 'unauthenticated', $result->get_error_code() );
-
 		// Making a request with an invalid nonce.
 		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = 'invalid';
 		$result = AMP_Validation_Manager::should_validate_response();
@@ -1545,18 +1539,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 
 		// Making a request with a valid nonce.
 		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = AMP_Validation_Manager::get_amp_validate_nonce();
-		$this->assertTrue( AMP_Validation_Manager::should_validate_response() );
-
-		// Making a request without sufficient capabilities.
-		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'subscriber' ] ) );
-		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = '';
-		$result = AMP_Validation_Manager::should_validate_response();
-		$this->assertInstanceOf( 'WP_Error', $result );
-		$this->assertEquals( 'unauthorized', $result->get_error_code() );
-
-		// Making a request as an authenticated user.
-		$this->set_capability();
-		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = '';
 		$this->assertTrue( AMP_Validation_Manager::should_validate_response() );
 	}
 

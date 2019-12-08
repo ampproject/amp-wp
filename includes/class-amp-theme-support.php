@@ -2314,7 +2314,7 @@ class AMP_Theme_Support {
 
 		$assets = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
 
-
+		// Respond early with validation results if performing a validation request.
 		if ( AMP_Validation_Manager::$should_locate_sources ) {
 			header( 'Content-Type: application/json; charset=utf-8' );
 			return wp_json_encode( AMP_Validation_Manager::get_validation_response_data(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );

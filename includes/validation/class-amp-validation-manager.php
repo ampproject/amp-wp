@@ -1609,17 +1609,13 @@ class AMP_Validation_Manager {
 		if ( ! isset( $_GET[ self::VALIDATE_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			return false;
 		}
+
 		$validate_key = wp_unslash( $_GET[ self::VALIDATE_QUERY_VAR ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( self::has_cap() || self::get_amp_validate_nonce() === $validate_key ) {
-			return true;
-		}
-		if ( ! empty( $validate_key ) ) {
+		if ( self::get_amp_validate_nonce() !== $validate_key ) {
 			return new WP_Error( 'invalid_nonce' );
 		}
-		if ( ! is_user_logged_in() ) {
-			return new WP_Error( 'unauthenticated' );
-		}
-		return new WP_Error( 'unauthorized' );
+
+		return true;
 	}
 
 	/**
@@ -1956,8 +1952,6 @@ class AMP_Validation_Manager {
 		}
 
 		switch ( $error_code ) {
-			case 'unauthenticated':
-			case 'unauthorized':
 			case 'invalid_nonce':
 				$error_messages = [
 					__( 'Failed to authenticate for validation request.', 'amp' ),
