@@ -1545,16 +1545,43 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 * Test finalize_validation.
 	 *
 	 * @covers \AMP_Validation_Manager::finalize_validation()
+	 * @covers \AMP_Validation_Manager::add_admin_bar_menu_items()
 	 */
 	public function test_finalize_validation() {
-		global $show_admin_bar;
+		self::set_capability();
+		require_once ABSPATH . WPINC . '/class-wp-admin-bar.php';
+		show_admin_bar( true );
+		add_theme_support( 'amp' );
+		$this->go_to( home_url( '/' ) );
 
-		$show_admin_bar = true;
-		$dom            = new DOMDocument( '1.0' );
-		$html           = '<html><body><div id="wp-admin-bar-amp-validity"><a href="#"></a></div><span id="amp-admin-bar-item-status-icon"></span><br></body></html>';
+		$admin_bar = new WP_Admin_Bar();
+		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
+		ob_start();
+
+		?>
+		<html>
+			<head>
+				<meta charset="utf-8">
+			</head>
+			<body>
+				<?php $admin_bar->render(); ?>
+			</body>
+		</html>
+		<?php
+		$html = ob_get_clean();
+
+		$dom = new DOMDocument();
 		$dom->loadHTML( $html );
 
-		$validation_results                         = [
+		$this->assertInstanceOf( 'DOMElement', $dom->getElementById( 'wp-admin-bar-amp' ) );
+		$status_icon_element = $dom->getElementById( 'amp-admin-bar-item-status-icon' );
+		$this->assertInstanceOf( 'DOMElement', $status_icon_element );
+		$this->assertEquals( '✅', $status_icon_element->textContent );
+		$validity_link_element = $dom->getElementById( 'wp-admin-bar-amp-validity' );
+		$this->assertInstanceOf( 'DOMElement', $validity_link_element );
+		$this->assertEquals( 'Validate', $validity_link_element->textContent );
+
+		AMP_Validation_Manager::$validation_results = [
 			[
 				'error'       => [ 'code' => 'invalid_attribute' ],
 				'sanitized'   => false,
@@ -1562,11 +1589,10 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 				'term_status' => 0,
 			],
 		];
-		AMP_Validation_Manager::$validation_results = $validation_results;
 
-		self::set_capability();
 		AMP_Validation_Manager::finalize_validation( $dom );
-		$this->markTestIncomplete( '\AMP_Validation_Manager::add_admin_bar_menu_items() needs to be called to set up the admin menu.' );
+		$this->assertEquals( '⚠️', $status_icon_element->textContent );
+		$this->assertEquals( 'Review 1 validation issue', $validity_link_element->textContent );
 	}
 
 	/**

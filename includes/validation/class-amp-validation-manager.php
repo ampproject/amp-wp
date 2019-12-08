@@ -505,18 +505,18 @@ class AMP_Validation_Manager {
 				'wp_before_admin_bar_render',
 				function() {
 					?>
-				<script>
-				(function( queryVar ) {
-					var urlParser = document.createElement( 'a' );
-					urlParser.href = location.href;
-					urlParser.search = urlParser.search.substr( 1 ).split( /&/ ).filter( function( part ) {
-						return 0 !== part.indexOf( queryVar + '=' );
-					} );
-					if ( urlParser.href !== location.href ) {
-						history.replaceState( {}, '', urlParser.href );
-					}
-				})( <?php echo wp_json_encode( AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR ); ?> );
-				</script>
+					<script>
+					(function( queryVar ) {
+						var urlParser = document.createElement( 'a' );
+						urlParser.href = location.href;
+						urlParser.search = urlParser.search.substr( 1 ).split( /&/ ).filter( function( part ) {
+							return 0 !== part.indexOf( queryVar + '=' );
+						} );
+						if ( urlParser.href !== location.href ) {
+							history.replaceState( {}, '', urlParser.href );
+						}
+					})( <?php echo wp_json_encode( AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR ); ?> );
+					</script>
 					<?php
 				}
 			);
