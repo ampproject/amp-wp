@@ -115,13 +115,11 @@ class AMP_Validation_Manager {
 	public static $hook_source_stack = [];
 
 	/**
-	 * Whether validation error sources should be located.
-	 *
-	 * @todo Rename this to is_validate_request.
+	 * Whether the current request is to obtain the validation results.
 	 *
 	 * @var bool
 	 */
-	public static $should_locate_sources = false;
+	public static $is_validate_request = false;
 
 	/**
 	 * Overrides for validation errors.
@@ -187,7 +185,7 @@ class AMP_Validation_Manager {
 				400
 			);
 		} else {
-			self::$should_locate_sources = $should_validate_response;
+			self::$is_validate_request = $should_validate_response;
 		}
 
 		AMP_Validated_URL_Post_Type::register();
@@ -229,7 +227,7 @@ class AMP_Validation_Manager {
 			add_action( 'admin_bar_menu', [ __CLASS__, 'add_admin_bar_menu_items' ], 101 );
 		}
 
-		if ( self::$should_locate_sources ) {
+		if ( self::$is_validate_request ) {
 			self::add_validation_error_sourcing();
 		}
 	}
@@ -798,7 +796,7 @@ class AMP_Validation_Manager {
 			$node = $data['node'];
 		}
 
-		if ( self::$should_locate_sources ) {
+		if ( self::$is_validate_request ) {
 			if ( ! empty( $error['sources'] ) ) {
 				$sources = $error['sources'];
 			} elseif ( $node ) {
@@ -1709,7 +1707,7 @@ class AMP_Validation_Manager {
 		}
 
 		if ( isset( $sanitizers['AMP_Style_Sanitizer'] ) ) {
-			$sanitizers['AMP_Style_Sanitizer']['should_locate_sources'] = self::$should_locate_sources;
+			$sanitizers['AMP_Style_Sanitizer']['should_locate_sources'] = self::$is_validate_request;
 
 			$css_validation_errors = [];
 			foreach ( self::$validation_error_status_overrides as $slug => $status ) {
@@ -1852,7 +1850,7 @@ class AMP_Validation_Manager {
 		if ( wp_remote_retrieve_response_code( $r ) >= 300 ) {
 			return new WP_Error(
 				'http_request_failed',
-				__( 'Too many redirects', 'amp' )
+				__( 'Too many redirects.', 'amp' )
 			);
 		}
 
@@ -1969,7 +1967,7 @@ class AMP_Validation_Manager {
 				break;
 			case 'white_screen_of_death':
 				$error_messages = [
-					__( 'Unable to validate URL. Encountered a white screen of death likely due to a PHP fatal error.', 'amp' ),
+					__( 'Unable to validate URL. A white screen of death was encountered which is likely due to a PHP fatal error.', 'amp' ),
 					$error_message,
 					$check_error_log,
 					$support_forum_message,

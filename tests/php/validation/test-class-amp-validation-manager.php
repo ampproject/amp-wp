@@ -113,9 +113,9 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		AMP_Theme_Support::read_theme_support();
 		$_REQUEST = [];
 		unset( $GLOBALS['current_screen'] );
-		AMP_Validation_Manager::$should_locate_sources = false;
-		AMP_Validation_Manager::$hook_source_stack     = [];
-		AMP_Validation_Manager::$validation_results    = [];
+		AMP_Validation_Manager::$is_validate_request = false;
+		AMP_Validation_Manager::$hook_source_stack   = [];
+		AMP_Validation_Manager::$validation_results  = [];
 		AMP_Validation_Manager::reset_validation_results();
 		parent::tearDown();
 	}
@@ -607,7 +607,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::add_validation_error()
 	 */
 	public function test_add_validation_error_track_removed() {
-		AMP_Validation_Manager::$should_locate_sources = true;
+		AMP_Validation_Manager::$is_validate_request = true;
 		$this->assertEmpty( AMP_Validation_Manager::$validation_results );
 
 		$that = $this;
