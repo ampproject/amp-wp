@@ -1683,7 +1683,7 @@ class AMP_Validation_Manager {
 		if ( $validate_item ) {
 			$link = $validate_item->getElementsByTagName( 'a' )->item( 0 );
 			if ( $link ) {
-				$link->textContent = sprintf(
+				$link->firstChild->nodeValue = sprintf(
 					/* translators: %s is count of validation errors */
 					_n(
 						'Review %s validation issue',
@@ -1698,7 +1698,7 @@ class AMP_Validation_Manager {
 
 		$admin_bar_icon = $dom->getElementById( 'amp-admin-bar-item-status-icon' );
 		if ( $admin_bar_icon ) {
-			$admin_bar_icon->textContent = "\xE2\x9A\xA0\xEF\xB8\x8F"; // WARNING SIGN: U+26A0, U+FE0F.
+			$admin_bar_icon->firstChild->nodeValue = "\xE2\x9A\xA0\xEF\xB8\x8F"; // WARNING SIGN: U+26A0, U+FE0F.
 		}
 	}
 
