@@ -114,7 +114,6 @@ const FILTERS = [
 
 const DEFAULT_WIDTH = 150;
 
-
 function MediaLibrary( { onInsert } ) {
 	const {
 		state: { media, isMediaLoading, isMediaLoaded, mediaType, searchTerm },
@@ -142,27 +141,8 @@ function MediaLibrary( { onInsert } ) {
 		fileFrame.on( 'select', () => {
 			attachment = fileFrame.state().get( 'selection' ).first().toJSON();
 			const { url: src, mime: mimeType, width: oWidth, height: oHeight } = attachment;
-			const height = getRelativeHeight( oWidth, oHeight, DEFAULT_WIDTH );
-			if ( SUPPORTED_IMAGE_TYPES.includes( mimeType ) ) {
-				onInsert( 'image', {
-					src,
-					width: DEFAULT_WIDTH,
-					height,
-					x: 5,
-					y: 5,
-					rotationAngle: 0,
-				} );
-			} else if ( SUPPORTED_VIDEO_TYPES.includes( mimeType ) ) {
-				onInsert( 'video', {
-					src,
-					width: DEFAULT_WIDTH,
-					height,
-					mimeType,
-					x: 5,
-					y: 5,
-					rotationAngle: 0,
-				} );
-			}
+			const mediaEl = { src, mimeType, oWidth, oHeight };
+			insertMediaElement( mediaEl, DEFAULT_WIDTH );
 		} );
 
 		fileFrame.on( 'close', () => {
@@ -190,6 +170,31 @@ function MediaLibrary( { onInsert } ) {
 		return height;
 	};
 
+	const insertMediaElement = ( attachment, width ) => {
+		const { src, mimeType, oWidth, oHeight } = attachment;
+		const height = getRelativeHeight( oWidth, oHeight, DEFAULT_WIDTH );
+		if ( SUPPORTED_IMAGE_TYPES.includes( mimeType ) ) {
+			onInsert( 'image', {
+				src,
+				width,
+				height,
+				x: 5,
+				y: 5,
+				rotationAngle: 0,
+			} );
+		} else if ( SUPPORTED_VIDEO_TYPES.includes( mimeType ) ) {
+			onInsert( 'video', {
+				src,
+				width,
+				height,
+				mimeType,
+				x: 5,
+				y: 5,
+				rotationAngle: 0,
+			} );
+		}
+	};
+
 	const getMediaElement = ( mediaEl, width ) => {
 		const { src, oWidth, oHeight, mimeType } = mediaEl;
 		const height = getRelativeHeight( oWidth, oHeight, width );
@@ -200,14 +205,7 @@ function MediaLibrary( { onInsert } ) {
 				width={ width }
 				height={ height }
 				loading={ 'lazy' }
-				onClick={ () => onInsert( 'image', {
-					src,
-					width,
-					height,
-					x: 5,
-					y: 5,
-					rotationAngle: 0,
-				} ) }
+				onClick={ () => insertMediaElement( mediaEl, width ) }
 			/> );
 		} else if ( SUPPORTED_VIDEO_TYPES.includes( mimeType ) ) {
 			/* eslint-disable react/jsx-closing-tag-location */
@@ -216,14 +214,7 @@ function MediaLibrary( { onInsert } ) {
 				controls={ true }
 				width={ width }
 				height={ height }
-				onClick={ () => onInsert( 'video', {
-					src,
-					width,
-					height,
-					x: 5,
-					y: 5,
-					rotationAngle: 0,
-				} ) }
+				onClick={ () => insertMediaElement( mediaEl, width ) }
 			>
 				<source src={ src } type={ mimeType } />
 			</Video> );
