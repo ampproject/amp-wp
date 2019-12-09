@@ -2,6 +2,7 @@
  * Internal dependencies
  */
 import { elementTypes } from '../elements';
+import ActionsPanel from './actions';
 import ColorPanel from './color';
 import BackgroundColorPanel from './backgroundColor';
 import FontPanel from './font';
@@ -10,6 +11,7 @@ import SizePanel from './size';
 import PositionPanel from './position';
 import TextPanel from './text';
 
+const ACTIONS = 'actions';
 const COLOR = 'color';
 const FONT = 'font';
 const ROTATION_ANGLE = 'rotationAngle';
@@ -19,6 +21,7 @@ const POSITION = 'position';
 const BACKGROUND_COLOR = 'backgroundColor';
 
 const ALL = [
+	ACTIONS,
 	POSITION,
 	SIZE,
 	BACKGROUND_COLOR,
@@ -36,8 +39,13 @@ export function getPanels( elements ) {
 	if ( elements.length === 0 ) {
 		return [];
 	}
-	// Find whichs panels all the selected elements have in common
-	return elements
+
+	// Panels to always display, independent of the selected element.
+	const sharedPanels = [
+		{ type: ACTIONS, Panel: ActionsPanel },
+	];
+	// Find which panels all the selected elements have in common
+	const selectionPanels = elements
 		.map( ( { type } ) => elementTypes.find( ( elType ) => elType.type === type ).panels )
 		.reduce( ( commonPanels, panels ) => intersect( commonPanels, panels ), ALL )
 		.map( ( type ) => {
@@ -52,9 +60,14 @@ export function getPanels( elements ) {
 				default: throw new Error( `Unknown panel: ${ type }` );
 			}
 		} );
+	return [
+		...sharedPanels,
+		...selectionPanels,
+	];
 }
 
 export const PanelTypes = {
+	ACTIONS,
 	POSITION,
 	SIZE,
 	BACKGROUND_COLOR,
