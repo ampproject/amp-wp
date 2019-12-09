@@ -81,6 +81,18 @@ final class Document extends DOMDocument {
 	 */
 	const HTML_STRUCTURE_PATTERN = '/(?:.*?(?<doctype><!doctype(?:\s+[^>]*)?>))?(?:(?<pre_html>.*?)(?<html_start><html(?:\s+[^>]*)?>))?(?:.*?(?<head><head(?:\s+[^>]*)?>.*?<\/head\s*>))?(?:.*?(?<body><body(?:\s+[^>]*)?>.*?<\/body\s*>))?.*?(?:(?:.*(?<html_end><\/html\s*>)|.*)(?<post_html>.*))/is';
 
+	/*
+	 * Regular expressions to fetch the individual structural tags.
+	 * These patterns were optimized to avoid extreme backtracking on large documents.
+	 */
+	const HTML_STRUCTURE_DOCTYPE_PATTERN = '/^[^<]*<!doctype(?:\s+[^>]+)?>/i';
+	const HTML_STRUCTURE_HTML_START_TAG  = '/^[^<]*(?<html_start><html(?:\s+[^>]*)?>)/i';
+	const HTML_STRUCTURE_HTML_END_TAG    = '/(?:<\/html(?:\s+[^>]*)?>)[^<>]*$/i';
+	const HTML_STRUCTURE_HEAD_START_TAG  = '/^[^<]*(?:<head(?:\s+[^>]*)?>)/i';
+	const HTML_STRUCTURE_BODY_START_TAG  = '/^[^<]*(?:<body(?:\s+[^>]*)?>)/i';
+	const HTML_STRUCTURE_BODY_END_TAG    = '/(?:<\/body(?:\s+[^>]*)?>)[^<>]*$/i';
+	const HTML_STRUCTURE_HEAD_TAG        = '/^(?:[^<]*(?:<head(?:\s+[^>]*)?>).*?<\/head(?:\s+[^>]*)?>)/is';
+
 	/**
 	 * Xpath query to fetch the attributes that are being URL-encoded by saveHTML().
 	 *
@@ -341,65 +353,38 @@ final class Document extends DOMDocument {
 	 * @return string Normalized content.
 	 */
 	private function normalize_document_structure( $content ) {
-		$matches = [];
+		$matches    = [];
+		$html_start = '<html>';
 
-		// Unable to parse, so skip normalization and hope for the best.
-		if ( false === preg_match( self::HTML_STRUCTURE_PATTERN, $content, $matches ) ) {
-			return $content;
+		// Strip <!doctype> for now.
+		$content = preg_replace( self::HTML_STRUCTURE_DOCTYPE_PATTERN, '', $content, 1 );
+
+		// Detect and strip <html> tags.
+		if ( preg_match( self::HTML_STRUCTURE_HTML_START_TAG, $content, $matches ) ) {
+			$html_start = $matches['html_start'];
+			$content    = preg_replace( self::HTML_STRUCTURE_HTML_START_TAG, '', $content, 1 );
+			$content    = preg_replace( self::HTML_STRUCTURE_HTML_END_TAG, '', $content, 1 );
 		}
 
-		// Strip doctype for now.
-		if ( ! empty( $matches['doctype'] ) ) {
-			$content = preg_replace(
-				sprintf(
-					'/^.*?%s/s',
-					str_replace( "\n", '\R', preg_quote( $matches['doctype'], '/' ) )
-				),
-				'',
-				$content,
-				1
-			);
+		// Detect <head> and <body> tags and add as needed.
+		if ( ! preg_match( self::HTML_STRUCTURE_HEAD_START_TAG, $content, $matches ) ) {
+			if ( ! preg_match( self::HTML_STRUCTURE_BODY_START_TAG, $content, $matches ) ) {
+				// Both <head> and <body> missing.
+				$content = "<head></head><body>{$content}</body>";
+			} else {
+				// Only <head> missing.
+				$content = "<head></head>{$content}";
+			}
+		} else {
+			if ( ! preg_match( self::HTML_STRUCTURE_BODY_END_TAG, $content, $matches ) ) {
+				// Only <body> missing.
+				// @todo This is an expensive regex operation, look into further optimization.
+				$content = preg_replace( self::HTML_STRUCTURE_HEAD_TAG, '$0<body>', $content, 1 );
+				$content .= '</body>';
+			}
 		}
 
-		if ( empty( $matches[ self::TAG_HEAD ] ) && empty( $matches[ self::TAG_BODY ] ) ) {
-			// Neither body, nor head, so wrap content in both.
-			$pattern = sprintf(
-				'/%s(.*)%s/is',
-				( empty( $matches['html_start'] ) ? '^\s*' : preg_quote( $matches['html_start'], '/' ) ),
-				( empty( $matches['html_end'] ) ? '$\s*' : preg_quote( $matches['html_end'], '/' ) )
-			);
-			$content = preg_replace(
-				$pattern,
-				( empty( $matches['html_start'] ) ? '' : $matches['html_start'] )
-				. '<head></head><body>$1</body>'
-				. ( empty( $matches['html_end'] ) ? '' : $matches['html_end'] ),
-				$content,
-				1
-			);
-		} elseif ( empty( $matches[ self::TAG_BODY ] ) && ! empty( $matches[ self::TAG_HEAD ] ) ) {
-			// Head without body, so wrap content in body.
-			$pattern = sprintf(
-				'/%s(.*)%s/is',
-				preg_quote( $matches[ self::TAG_HEAD ], '/' ),
-				( empty( $matches['html_end'] ) ? '' : preg_quote( $matches['html_end'], '/' ) )
-			);
-			$content = preg_replace(
-				$pattern,
-				$matches[ self::TAG_HEAD ]
-				. '<body>$1</body>'
-				. ( empty( $matches['html_end'] ) ? '' : $matches['html_end'] ),
-				$content,
-				1
-			);
-		} elseif ( empty( $matches[ self::TAG_HEAD ] ) && ! empty( $matches[ self::TAG_BODY ] ) ) {
-			// Body without head, so add empty head before body.
-			$content = str_replace( $matches[ self::TAG_BODY ], '<head></head>' . $matches[ self::TAG_BODY ], $content );
-		}
-
-		if ( empty( $matches['html_start'] ) ) {
-			// No surround html tag, so wrap the content in html.
-			$content = "<html>{$content}</html>";
-		}
+		$content = "{$html_start}{$content}</html>";
 
 		// Reinsert a standard doctype.
 		$content = "<!DOCTYPE html>{$content}";

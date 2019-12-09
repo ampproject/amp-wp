@@ -285,59 +285,6 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Get Table Row Iterations
-	 *
-	 * @return array An array of arrays holding an integer representation of iterations.
-	 */
-	public function get_table_row_iterations() {
-		return [
-			[ 1 ],
-			[ 10 ],
-			[ 100 ],
-			[ 1000 ],
-			[ 10000 ],
-			[ 100000 ],
-		];
-	}
-
-	/**
-	 * Tests attribute conversions on content with iframe srcdocs of variable lengths.
-	 *
-	 * @dataProvider get_table_row_iterations
-	 *
-	 * @param int $iterations The number of table rows to append to iframe srcdoc.
-	 */
-	public function test_attribute_conversion_on_long_iframe_srcdocs( $iterations ) {
-		$html = '<html amp><head><meta charset="utf-8"></head><body><table>';
-
-		for ( $i = 0; $i < $iterations; $i++ ) {
-			$html .= '
-				<tr>
-				<td class="rank" style="width:2%;">1453</td>
-				<td class="text" style="width:10%;">1947</td>
-				<td class="text">Pittsburgh Ironmen</td>
-				<td class="boolean" style="width:10%;text-align:center;"></td>
-				<td class="number" style="width:10%;">1242</td>
-				<td class="number">1192</td>
-				<td class="number">1111</td>
-				<td class="number highlight">1182</td>
-				</tr>
-			';
-		}
-
-		$html .= '</table></body></html>';
-
-		$to_convert = sprintf(
-			'<amp-iframe sandbox="allow-scripts" srcdoc="%s"> </amp-iframe>',
-			htmlentities( $html )
-		);
-
-		AMP_DOM_Utils::convert_amp_bind_attributes( $to_convert );
-
-		$this->assertSame( PREG_NO_ERROR, preg_last_error(), 'Probably failed when backtrack limit was exhausted.' );
-	}
-
-	/**
 	 * Test preserving whitespace when serializing Dom\Document as HTML string.
 	 *
 	 * @covers \AMP_DOM_Utils::get_content_from_dom_node()
