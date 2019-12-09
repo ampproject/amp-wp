@@ -182,8 +182,6 @@ class SiteHealth {
 	 * @return array The debugging information, with added information for AMP.
 	 */
 	public function add_debug_information( $debugging_information ) {
-		add_theme_support( 'amp' );
-
 		return array_merge(
 			$debugging_information,
 			[
