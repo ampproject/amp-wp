@@ -33,7 +33,7 @@ function Canvas() {
 	const { state: { pages, currentPageIndex }, actions: { setCurrentPageByIndex } } = useStory();
 	return (
 		<List>
-			{ pages.map( ( { index } ) => (
+			{ pages.map( ( page, index ) => (
 				<Page key={ index } onClick={ () => setCurrentPageByIndex( index ) } isActive={ index === currentPageIndex } />
 			) ) }
 		</List>

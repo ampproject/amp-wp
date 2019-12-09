@@ -31,7 +31,7 @@ const Wrapper = styled.div`
 function Inspector() {
 	const {
 		state: { selectedElements },
-		actions: { setPropertiesOnSelectedElements },
+		actions: { setPropertiesOnSelectedElements, deleteSelectedElements },
 	} = useStory();
 	const panels = getPanels( selectedElements );
 	const handleSetProperties = useCallback( ( properties ) => {
@@ -52,7 +52,7 @@ function Inspector() {
 		<Background>
 			<Wrapper>
 				{ panels.map( ( { Panel, type } ) => (
-					<Panel key={ type } selectedElements={ selectedElements } onSetProperties={ handleSetProperties } />
+					<Panel key={ type } deleteSelectedElements={ deleteSelectedElements } selectedElements={ selectedElements } onSetProperties={ handleSetProperties } />
 				) ) }
 			</Wrapper>
 		</Background>
