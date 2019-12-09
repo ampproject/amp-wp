@@ -27,6 +27,7 @@ branches:
   only:
     - master
     - develop
+    - develop-stories
     - /^\d+\.\d+$/
 
 env:
