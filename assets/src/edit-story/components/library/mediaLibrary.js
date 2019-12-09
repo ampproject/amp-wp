@@ -153,7 +153,15 @@ function MediaLibrary( { onInsert } ) {
 					rotationAngle: 0,
 				} );
 			} else if ( SUPPORTED_VIDEO_TYPES.includes( mimeType ) ) {
-				// TODO Implemenet Video element.
+				onInsert( 'video', {
+					src,
+					width: DEFAULT_WIDTH,
+					height,
+					mimeType,
+					x: 5,
+					y: 5,
+					rotationAngle: 0,
+				} );
 			}
 		} );
 
@@ -208,9 +216,14 @@ function MediaLibrary( { onInsert } ) {
 				controls={ true }
 				width={ width }
 				height={ height }
-				onClick={ () => {
-					// TODO Implement insert video.
-				} }
+				onClick={ () => onInsert( 'video', {
+					src,
+					width,
+					height,
+					x: 5,
+					y: 5,
+					rotationAngle: 0,
+				} ) }
 			>
 				<source src={ src } type={ mimeType } />
 			</Video> );
