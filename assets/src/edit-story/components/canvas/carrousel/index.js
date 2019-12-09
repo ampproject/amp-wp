@@ -51,9 +51,9 @@ const Page = styled( Navigable ).attrs( {
 function CarouselPage( { index } ) {
 	const {
 		state: { currentPageIndex },
-		actions: { setCurrentPageByIndex, deleteCurrentPageByIndex },
+		actions: { setCurrentPageByIndex, deletePageByIndex },
 	} = useStory();
-	const deletePage = () => deleteCurrentPageByIndex( index );
+	const deletePage = () => deletePageByIndex( index );
 	const shortcuts = { backspace: deletePage, del: deletePage };
 	return (
 		<Page
@@ -70,7 +70,7 @@ function Carousel() {
 	} = useStory();
 	return (
 		<List>
-			{ pages.map( ( { index } ) => (
+			{ pages.map( ( page, index ) => (
 				<CarouselPage key={ index } index={ index } />
 			) ) }
 		</List>

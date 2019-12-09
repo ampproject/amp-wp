@@ -21,11 +21,13 @@ import useSelectedElements from './effects/useSelectedElements';
 
 import useAddBlankPage from './actions/useAddBlankPage';
 import useClearSelection from './actions/useClearSelection';
+import useDeleteSelectedElements from './actions/useDeleteSelectedElements';
+import useDeleteCurrentPage from './actions/useDeleteCurrentPage';
 import useToggleElementIdInSelection from './actions/useToggleElementIdInSelection';
 import useSelectElementById from './actions/useSelectElementById';
 import useAppendElementToCurrentPage from './actions/useAppendElementToCurrentPage';
 import useSetCurrentPageByIndex from './actions/useSetCurrentPageByIndex';
-import useDeleteCurrentPageByIndex from './actions/useDeleteCurrentPageByIndex';
+import useDeletePageByIndex from './actions/useDeletePageByIndex';
 import useSetPropertiesOnSelectedElements from './actions/useSetPropertiesOnSelectedElements';
 
 function StoryProvider( { storyId, children } ) {
@@ -42,9 +44,11 @@ function StoryProvider( { storyId, children } ) {
 	const selectedElements = ! currentPage ? [] : currentPage.elements.filter( ( { id } ) => selectedElementIds.includes( id ) );
 
 	const clearSelection = useClearSelection( { selectedElementIds, setSelectedElementIds } );
+	const deleteSelectedElements = useDeleteSelectedElements( { currentPageIndex, pages, selectedElementIds, setPages, setSelectedElementIds } );
 	const setCurrentPageByIndex = useSetCurrentPageByIndex( { clearSelection, setCurrentPageIndex } );
-	const deleteCurrentPageByIndex = useDeleteCurrentPageByIndex( { clearSelection, setPages, setCurrentPageIndex } );
+	const deletePageByIndex = useDeletePageByIndex( { clearSelection, setPages, setCurrentPageIndex } );
 	const addBlankPage = useAddBlankPage( { pages, setPages, clearSelection } );
+	const deleteCurrentPage = useDeleteCurrentPage( { currentPage, pages, setPages, addBlankPage, setCurrentPageIndex, currentPageIndex } );
 	const selectElementById = useSelectElementById( { setSelectedElementIds } );
 	const toggleElementIdInSelection = useToggleElementIdInSelection( { selectedElementIds, setSelectedElementIds } );
 	const appendElementToCurrentPage = useAppendElementToCurrentPage( { currentPageIndex, pages, setPages, setSelectedElementIds } );
@@ -66,9 +70,11 @@ function StoryProvider( { storyId, children } ) {
 		},
 		actions: {
 			setCurrentPageByIndex,
-			deleteCurrentPageByIndex,
+			deletePageByIndex,
 			addBlankPage,
 			clearSelection,
+			deleteSelectedElements,
+			deleteCurrentPage,
 			appendElementToCurrentPage,
 			toggleElementIdInSelection,
 			selectElementById,
