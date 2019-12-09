@@ -1827,7 +1827,7 @@ class AMP_Theme_Support {
 		 */
 		$ordered_scripts = array_merge( $ordered_scripts, $amp_scripts );
 		foreach ( $ordered_scripts as $ordered_script ) {
-			$dom->insertBefore( $ordered_script, $previous_node->nextSibling );
+			$dom->head->insertBefore( $ordered_script, $previous_node->nextSibling );
 			$previous_node = $ordered_script;
 		}
 
@@ -1840,12 +1840,12 @@ class AMP_Theme_Support {
 			if ( $style->previousSibling instanceof DOMComment ) {
 				$comment = $style->previousSibling;
 				$comment->parentNode->removeChild( $comment );
-				$dom->insertBefore( $comment, $previous_node->nextSibling );
+				$dom->head->insertBefore( $comment, $previous_node->nextSibling );
 				$previous_node = $comment;
 			}
 
 			$style->parentNode->removeChild( $style );
-			$dom->insertBefore( $style, $previous_node->nextSibling );
+			$dom->head->insertBefore( $style, $previous_node->nextSibling );
 			$previous_node = $style;
 		}
 
