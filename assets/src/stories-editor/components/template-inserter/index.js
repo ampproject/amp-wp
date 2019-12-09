@@ -98,7 +98,6 @@ const TemplateInserter = ( props ) => {
 					<div className="amp-stories__editor-inserter__menu">
 						<div
 							className="amp-stories__editor-inserter__results"
-							tabIndex="0"
 							role="region"
 							aria-label={ __( 'Available templates', 'amp' ) }
 						>

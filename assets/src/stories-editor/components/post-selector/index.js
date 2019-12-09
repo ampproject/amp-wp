@@ -275,6 +275,7 @@ class PostSelector extends Component {
 					placeholder={ placeholder || __( 'Type to search', 'amp' ) }
 					onKeyDown={ this.onKeyDown }
 					role="combobox"
+					aria-controls={ id }
 					aria-expanded={ showSuggestions }
 					aria-autocomplete="list"
 					aria-owns={ suggestionsListboxId }

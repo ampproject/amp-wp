@@ -84,7 +84,7 @@ class Autocomplete extends OriginalAutocomplete {
 			'';
 
 		return (
-			<div className={ wrapperClassName } onKeyDown={ this.handleKeyDown } role="combobox" tabIndex="-1" aria-expanded={ menuOpen ? 'true' : 'false' }>
+			<div className={ wrapperClassName } onKeyDown={ this.handleKeyDown } role="combobox" aria-controls={ id } tabIndex="-1" aria-expanded={ menuOpen ? 'true' : 'false' }>
 				<Status
 					length={ options.length }
 					queryLength={ queryLength }
@@ -168,6 +168,7 @@ class Autocomplete extends OriginalAutocomplete {
 							className={ `${ optionClassName } ${ optionClassName }--no-results` }
 							role="option"
 							tabIndex="-1"
+							aria-selected="false"
 						>
 							{ tNoResults() }
 						</li>

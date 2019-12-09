@@ -291,7 +291,6 @@ export class InserterMenu extends Component {
 				<div
 					className="editor-inserter__results amp__block-editor-inserter__results block-editor-inserter__results"
 					ref={ this.inserterResults }
-					tabIndex="0"
 					role="region"
 					aria-label={ __( 'Available block types', 'amp' ) }
 				>
