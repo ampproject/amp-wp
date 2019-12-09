@@ -172,8 +172,8 @@ class Test_AMP_DOM_Document extends WP_UnitTestCase {
 	 * @covers \Amp\AmpWP\Dom\Document::convert_amp_bind_attributes()
 	 */
 	public function test_amp_bind_conversion() {
-		$original  = '<amp-img width=300 height="200" data-foo="bar" selected src="/img/dog.jpg" [src]="myAnimals[currentAnimal].imageUrl"></amp-img>';
-		$dom = new Document();
+		$original = '<amp-img width=300 height="200" data-foo="bar" selected src="/img/dog.jpg" [src]="myAnimals[currentAnimal].imageUrl"></amp-img>';
+		$dom      = new Document();
 		$dom->loadHTML( $original );
 		$converted = $dom->saveHTML();
 		$this->assertNotEquals( $original, $converted );
@@ -181,15 +181,15 @@ class Test_AMP_DOM_Document extends WP_UnitTestCase {
 		$this->assertContains( 'width="300" height="200" data-foo="bar" selected', $converted );
 
 		// Check tag with self-closing attribute.
-		$original  = '<input type="text" role="textbox" class="calc-input" id="liens" name="liens" [value]="(result1 != null) ? result1.liens : \'verifying…\'" />';
-		$dom = new Document();
+		$original = '<input type="text" role="textbox" class="calc-input" id="liens" name="liens" [value]="(result1 != null) ? result1.liens : \'verifying…\'" />';
+		$dom      = new Document();
 		$dom->loadHTML( $original );
 		$converted = $dom->saveHTML();
 		$this->assertNotEquals( $original, $converted );
 
 		// Preserve trailing slash that is actually the attribute value.
 		$original = '<a href=/>Home</a>';
-		$dom = new Document();
+		$dom      = new Document();
 		$dom->loadHTML( $original );
 		$converted = $dom->saveHTML( $dom->body->firstChild );
 		$this->assertEquals( '<a href="/">Home</a>', $converted );
