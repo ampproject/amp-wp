@@ -104,6 +104,15 @@
         "jest/prefer-expect-assertions": "off",
         "jest/prefer-inline-snapshots": "off",
       }
+    },
+    {
+      "files": [ "assets/src/stories-editor/**/*.js" ],
+      "plugins": [
+        "jsx-a11y",
+      ],
+      "extends": [
+        "plugin:jsx-a11y/recommended",
+      ],
     }
   ]
 }
