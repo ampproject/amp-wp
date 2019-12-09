@@ -106,7 +106,7 @@
       }
     },
     {
-      "files": [ "assets/src/stories-editor/**/*.js" ],
+      "files": [ "assets/src/edit-story/**/*.js" ],
       "plugins": [
         "jsx-a11y"
       ],
