@@ -2,7 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 /**
  * WordPress dependencies
@@ -24,16 +24,19 @@ const Container = styled.div`
 const Column = styled.div`
 
 `;
-const Image = styled.img`
+
+export const StyledTiles = css`
 	width: 100%;
 	border-radius: 10px;
 	margin-bottom: 10px;
 `;
 
+const Image = styled.img`
+	${ StyledTiles }
+`;
+
 const Video = styled.video`
-	width: 100%;
-	border-radius: 10px;
-	margin-bottom: 10px;
+	${ StyledTiles }
 `;
 
 const Title = styled.h3`
@@ -47,12 +50,12 @@ const Title = styled.h3`
 
 const Button = styled.button`
 	 background: none;
-	 color: #ffffff;
+	 color: ${ ( { theme } ) => theme.colors.fg.v1 };;
 	 padding: 5px;
 	 font-weight: bold;
 	 flex: 1 0 0;
 	 text-align: center;
-	 border: 1px solid #616877;;
+	 border: 1px solid ${ ( { theme } ) => theme.colors.mg.v1 };
 	 border-radius: 3px;
 `;
 
@@ -62,12 +65,12 @@ const Header = styled.div`
 `;
 
 const Message = styled.div`
-	color: #ffffff;
+	color: ${ ( { theme } ) => theme.colors.fg.v1 };;
 	font-size: 19px;
 `;
 
 const FilterButtons = styled.div`
-	border-bottom:  2px solid #606877;
+	border-bottom:  2px solid ${ ( { theme } ) => theme.colors.mg.v1 };
 	padding: 18px 0px;
 	margin: 10px 0px 15px;
 `;
@@ -80,18 +83,19 @@ const FilterButton = styled.button`
 	color: rgba(255, 255, 255, 0.34);
 	font-size: 13px;
 	${ ( { active } ) => active && `
-    	color: #FFFFFF;
-  	` }
+    		color: ${ ( { theme } ) => theme.colors.fg.v1 };;
+  		`
+}
 `;
 
 const Search = styled.input`
 	width: 100%;
-	background: #616877 !important;
-	border-color: #616877 !important;
-	color: #DADADA !important;
+	background: ${ ( { theme } ) => theme.colors.mg.v1 } !important;
+	border-color: ${ ( { theme } ) => theme.colors.mg.v1 } !important;
+	color: ${ ( { theme } ) => theme.colors.mg.v2 } !important;
 	padding: 2px 10px 2px 33px !important;
 	&::placeholder {
-	  color: #DADADA;
+	  color: ${ ( { theme } ) => theme.colors.mg.v2 };
 	}
 `;
 
