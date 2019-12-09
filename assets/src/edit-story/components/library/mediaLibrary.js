@@ -50,7 +50,7 @@ const Title = styled.h3`
 
 const Button = styled.button`
 	 background: none;
-	 color: ${ ( { theme } ) => theme.colors.fg.v1 };;
+	 color: ${ ( { theme } ) => theme.colors.fg.v1 };
 	 padding: 5px;
 	 font-weight: bold;
 	 flex: 1 0 0;
@@ -65,7 +65,7 @@ const Header = styled.div`
 `;
 
 const Message = styled.div`
-	color: ${ ( { theme } ) => theme.colors.fg.v1 };;
+	color: ${ ( { theme } ) => theme.colors.fg.v1 };
 	font-size: 19px;
 `;
 
@@ -80,12 +80,9 @@ const FilterButton = styled.button`
 	background: none;
 	padding: 0px;
 	margin: 0px 28px 0px 0px;
-	color: rgba(255, 255, 255, 0.34);
+	color: ${ ( { theme } ) => theme.colors.mg.v1 };
 	font-size: 13px;
-	${ ( { active } ) => active && `
-    		color: ${ ( { theme } ) => theme.colors.fg.v1 };;
-  		`
-}
+	${ ( { active } ) => active && ` color: #fff; font-weight: bold; `};
 `;
 
 const Search = styled.input`
