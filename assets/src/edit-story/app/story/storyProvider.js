@@ -25,6 +25,7 @@ import useToggleElementIdInSelection from './actions/useToggleElementIdInSelecti
 import useSelectElementById from './actions/useSelectElementById';
 import useAppendElementToCurrentPage from './actions/useAppendElementToCurrentPage';
 import useSetCurrentPageByIndex from './actions/useSetCurrentPageByIndex';
+import useDeleteCurrentPageByIndex from './actions/useDeleteCurrentPageByIndex';
 import useSetPropertiesOnSelectedElements from './actions/useSetPropertiesOnSelectedElements';
 
 function StoryProvider( { storyId, children } ) {
@@ -35,16 +36,14 @@ function StoryProvider( { storyId, children } ) {
 	const [ currentPageIndex, setCurrentPageIndex ] = useState( null );
 	const [ selectedElementIds, setSelectedElementIds ] = useState( [] );
 
-	// These states are all derived from the above three variables and help keep the api easier.
-	// These will update based off the above in effects but should never be directly manipulated outside this component.
-	const [ currentPageNumber, setCurrentPageNumber ] = useState( null );
-	const [ currentPage, setCurrentPage ] = useState( null );
-	const [ selectedElements, setSelectedElements ] = useState( [] );
-
 	const hasSelection = Boolean( selectedElementIds.length );
+	const currentPage = pages[ currentPageIndex ] || null;
+	const currentPageNumber = ! currentPage ? null : currentPageIndex + 1;
+	const selectedElements = ! currentPage ? [] : currentPage.elements.filter( ( { id } ) => selectedElementIds.includes( id ) );
 
 	const clearSelection = useClearSelection( { selectedElementIds, setSelectedElementIds } );
 	const setCurrentPageByIndex = useSetCurrentPageByIndex( { clearSelection, setCurrentPageIndex } );
+	const deleteCurrentPageByIndex = useDeleteCurrentPageByIndex( { clearSelection, setPages, setCurrentPageIndex } );
 	const addBlankPage = useAddBlankPage( { pages, setPages, clearSelection } );
 	const selectElementById = useSelectElementById( { setSelectedElementIds } );
 	const toggleElementIdInSelection = useToggleElementIdInSelection( { selectedElementIds, setSelectedElementIds } );
@@ -52,10 +51,8 @@ function StoryProvider( { storyId, children } ) {
 	const setPropertiesOnSelectedElements = useSetPropertiesOnSelectedElements( { currentPageIndex, pages, selectedElementIds, setPages } );
 
 	useLoadStory( { storyId, pages, setPages, setCurrentPageIndex, clearSelection } );
-	useCurrentPage( { currentPageIndex, pages, setCurrentPage, setCurrentPageNumber } );
 	useHistoryEntry( { currentPageIndex, pages, selectedElementIds } );
 	useHistoryReplay( { setCurrentPageIndex, setPages, setSelectedElementIds } );
-	useSelectedElements( { currentPageIndex, pages, selectedElementIds, setSelectedElements } );
 
 	const state = {
 		state: {
@@ -69,6 +66,7 @@ function StoryProvider( { storyId, children } ) {
 		},
 		actions: {
 			setCurrentPageByIndex,
+			deleteCurrentPageByIndex,
 			addBlankPage,
 			clearSelection,
 			appendElementToCurrentPage,

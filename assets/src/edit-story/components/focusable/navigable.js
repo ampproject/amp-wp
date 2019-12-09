@@ -20,7 +20,7 @@ Navigable.propTypes = {
 	children: PropTypes.oneOfType( [
 		PropTypes.arrayOf( PropTypes.node ),
 		PropTypes.node,
-	] ).isRequired,
+	] ),
 
 	element: PropTypes.string,
 	className: PropTypes.string,
