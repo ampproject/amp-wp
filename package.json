@@ -146,6 +146,7 @@
     "lint:php": "vendor/bin/phpcs",
     "lint:php:fix": "./bin/phpcbf.sh",
     "lint:pkg-json": "wp-scripts lint-pkg-json --ignorePath .gitignore",
+    "preinstall": "composer install",
     "start": "wp-scripts start",
     "test": "npm-run-all --parallel test:*",
     "test:e2e": "cross-env WP_BASE_URL=http://localhost:8890 node ./bin/local-env/run-e2e-tests.js --config=tests/e2e/jest.config.js",
