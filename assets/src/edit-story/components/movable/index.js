@@ -36,9 +36,10 @@ function Movable( {
 		target.style.transform = `translate(${ frame.translate[ 0 ] }px, ${ frame.translate[ 1 ] }px) rotate(${ frame.rotate }deg)`;
 	};
 
-	const frames = targetList ? targetList.map( () => ( {
+	// @todo Is there any time when translate would differ among the elements? If not, we can use just one translate for these.
+	const frames = targetList ? targetList.map( ( e, i ) => ( {
 		translate: [ 0, 0 ],
-		rotationAngle: 0,
+		rotate: selectedElements[ i ].rotationAngle,
 	} ) ) : [];
 
 	const resetMoveable = ( target ) => {
@@ -46,7 +47,7 @@ function Movable( {
 		if ( targetList && targetList.length ) {
 			targetList.forEach( ( el, i ) => {
 				frames[ i ].translate = [ 0, 0 ];
-				el.style.transform = `translate(0px, 0px) rotate(0deg)`;
+				el.style.transform = `translate(0px, 0px) rotate(${ frames[ i ].rotate }deg)`;
 			} );
 		} else {
 			frame.translate = [ 0, 0 ];
@@ -91,8 +92,39 @@ function Movable( {
 					}
 					resetMoveable( null );
 				} }
+				onRotateGroupStart={ ( { events } ) => {
+					events.forEach( ( ev, i ) => {
+						const sFrame = frames[ i ];
+						ev.set( sFrame.rotate );
+					} );
+				} }
+				onRotateGroup={ ( { events } ) => {
+					events.forEach( ( { target, beforeRotate, drag }, i ) => {
+						const sFrame = frames[ i ];
+						sFrame.rotate = beforeRotate;
+						sFrame.translate = drag.beforeTranslate;
+						target.style.transform = `translate(${ drag.beforeTranslate[ 0 ] }px, ${ drag.beforeTranslate[ 1 ] }px) rotate(${ beforeRotate }deg)`;
+					} );
+				} }
+				onRotateGroupEnd={ ( { targets } ) => {
+					const updatedElements = [];
+					// Set together updated elements.
+					targets.forEach( ( target, i ) => {
+						// @todo Improve this here.
+						updatedElements.push( {
+							id: selectedElements[ i ].id,
+							x: selectedElements[ i ].x + frames[ i ].translate[ 0 ],
+							y: selectedElements[ i ].y + frames[ i ].translate[ 1 ],
+							rotationAngle: frames[ i ].rotate,
+						} );
+					} );
+					if ( updatedElements.length ) {
+						// Update the elements.
+						updateElementsByIds( updatedElements );
+					}
+					resetMoveable( null );
+				} }
 				origin={ false }
-				pinchable={ true }
 			/>
 		);
 	}
