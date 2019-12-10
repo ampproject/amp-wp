@@ -11,12 +11,12 @@ import { useCallback } from '@wordpress/element';
  * @param {Function} setPages Setting the state of pages.
  * @return {Function} Sets properties by element Id.
  */
-function useSetPropertiesById( {
-   currentPageIndex,
-   pages,
-   setPages,
+function useUpdateElementsByIds( {
+	currentPageIndex,
+	pages,
+	setPages,
 } ) {
-	const setPropertiesById = useCallback( ( elementId, properties ) => {
+	const updateElementsByIds = useCallback( ( newElements ) => {
 		const currentPage = pages[ currentPageIndex ];
 		const newPages = [
 			...pages.slice( 0, currentPageIndex ),
@@ -25,10 +25,14 @@ function useSetPropertiesById( {
 				elements: [
 					...currentPage.elements.map( ( element ) => {
 						const { id } = element;
-						// If ids don't match, let's return the element as it was.
-						if ( elementId !== id ) {
-							return element;
-						}
+						let properties = {};
+						newElements.forEach( ( el ) => {
+							if ( el.id === id ) {
+								properties = el;
+								return false;
+							}
+							return true;
+						} );
 						return {
 							...element,
 							...properties,
@@ -40,7 +44,7 @@ function useSetPropertiesById( {
 		];
 		setPages( newPages );
 	}, [ currentPageIndex, pages, setPages ] );
-	return setPropertiesById;
+	return updateElementsByIds;
 }
 
-export default useSetPropertiesById;
+export default useUpdateElementsByIds;

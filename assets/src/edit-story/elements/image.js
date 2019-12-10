@@ -25,7 +25,7 @@ function Image( { src, width, height, x, y, rotationAngle, forwardedRef, classNa
 		rotationAngle,
 		src,
 		ref: forwardedRef,
-		className,
+		className, // @todo Tmp, remove this, ideally use refs instead.
 	};
 	return (
 		<Element { ...props } />
@@ -39,6 +39,7 @@ Image.propTypes = {
 	height: PropTypes.number.isRequired,
 	x: PropTypes.number.isRequired,
 	y: PropTypes.number.isRequired,
+	forwardedRef: PropTypes.object,
 };
 
 Image.defaultProps = {

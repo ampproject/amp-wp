@@ -2,6 +2,7 @@
  * External dependencies
  */
 import Moveable from 'react-moveable';
+import PropTypes from 'prop-types';
 
 /**
  * WordPress dependencies
@@ -20,7 +21,7 @@ function Movable( {
 } ) {
 	const {
 		state: { selectedElements },
-		actions: { setPropertiesOnSelectedElements, setPropertiesById },
+		actions: { setPropertiesOnSelectedElements, updateElementsByIds },
 	} = useStory();
 
 	const moveable = useRef();
@@ -41,9 +42,11 @@ function Movable( {
 	} ) ) : [];
 
 	const resetMoveable = ( target ) => {
+		// @todo Improve this logic.
 		if ( targetList && targetList.length ) {
-			targetList.forEach( ( target, i ) => {
+			targetList.forEach( ( el, i ) => {
 				frames[ i ].translate = [ 0, 0 ];
+				el.style.transform = `translate(0px, 0px) rotate(0deg)`;
 			} );
 		} else {
 			frame.translate = [ 0, 0 ];
@@ -55,9 +58,6 @@ function Movable( {
 	};
 
 	if ( targetList && targetList.length ) {
-		console.log( targetList.length );
-		console.log( selectedElements.length );
-
 		return (
 			<Moveable
 				ref={ moveable }
@@ -79,15 +79,17 @@ function Movable( {
 					} );
 				} }
 				onDragGroupEnd={ ( { targets } ) => {
+					const updatedElements = [];
+					// Set together updated elements.
 					targets.forEach( ( target, i ) => {
-						console.log( target );
-						setPropertiesById(
-							selectedElements[ i ].id,
-							{ x: selectedElements[ i ].x + frames[ i ].translate[ 0 ], y: selectedElements[ i ].y + frames[ i ].translate[ 1 ] }
-						);
+						// @todo Improve this here.
+						updatedElements.push( { id: selectedElements[ i ].id, x: selectedElements[ i ].x + frames[ i ].translate[ 0 ], y: selectedElements[ i ].y + frames[ i ].translate[ 1 ] } );
 					} );
-					//setPropertiesOnSelectedElements( { x: selectedEl.x + frame.translate[ 0 ], y: selectedEl.y + frame.translate[ 1 ] } );
-					// resetMoveable( target );
+					if ( updatedElements.length ) {
+						// Update the elements.
+						updateElementsByIds( updatedElements );
+					}
+					resetMoveable( null );
 				} }
 				origin={ false }
 				pinchable={ true }
@@ -157,5 +159,11 @@ function Movable( {
 		/>
 	);
 }
+
+Movable.propTypes = {
+	selectedEl: PropTypes.object,
+	targetEl: PropTypes.object,
+	targets: PropTypes.array,
+};
 
 export default Movable;

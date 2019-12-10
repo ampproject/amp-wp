@@ -38,6 +38,7 @@ function Page() {
 	const {
 		actions: { setBackgroundClickHandler },
 	} = useCanvas();
+
 	const handleSelectElement = useCallback( ( id ) => ( evt ) => {
 		if ( evt.metaKey ) {
 			toggleElementIdInSelection( id );
@@ -46,6 +47,7 @@ function Page() {
 		}
 		evt.stopPropagation();
 	}, [ toggleElementIdInSelection, selectElementById ] );
+
 	useEffect( () => {
 		setBackgroundClickHandler( () => clearSelection() );
 	}, [ setBackgroundClickHandler, clearSelection ] );
@@ -56,7 +58,8 @@ function Page() {
 				const comp = getComponentForType( type );
 				const Comp = comp; // why u do dis, eslint?
 
-				const isSelected = selectedElements.map( ( { id: selectedId } ) => id === selectedId ).length;
+				// @todo Improve this here, create some reasonable variables.
+				const isSelected = selectedElements.filter( ( { id: selectedId } ) => id === selectedId ).length;
 				return (
 					<Element key={ id } onClick={ handleSelectElement( id ) }>
 						<Comp
@@ -75,7 +78,7 @@ function Page() {
 			) }
 			{ 1 < selectedElements.length && (
 				<Movable
-					targets={ [].slice.call( document.querySelectorAll( '.target' ) ) }
+					targets={ [].slice.call( document.querySelectorAll( '.target' ) ) } // @todo Array of references instead.
 					targetEl={ null }
 					selectedEl={ {} }
 				/>
