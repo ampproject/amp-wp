@@ -13,6 +13,7 @@ import { useEffect } from '@wordpress/element';
 /**
  * Internal dependencies
  */
+import UploadButton from '../uploadButton';
 import useLibrary from './useLibrary';
 
 const Container = styled.div`
@@ -48,17 +49,6 @@ const Title = styled.h3`
 	flex: 3 0 0;
 `;
 
-const Button = styled.button`
-	 background: none;
-	 color: ${ ( { theme } ) => theme.colors.fg.v1 };
-	 padding: 5px;
-	 font-weight: bold;
-	 flex: 1 0 0;
-	 text-align: center;
-	 border: 1px solid ${ ( { theme } ) => theme.colors.mg.v1 };
-	 border-radius: 3px;
-`;
-
 const Header = styled.div`
 	display: flex;
 	margin: 0px 0px 25px;
@@ -82,7 +72,7 @@ const FilterButton = styled.button`
 	margin: 0px 28px 0px 0px;
 	color: ${ ( { theme } ) => theme.colors.mg.v1 };
 	font-size: 13px;
-	${ ( { active } ) => active && ` color: #fff; font-weight: bold; `};
+	${ ( { active } ) => active && ` color: #fff; font-weight: bold; ` };
 `;
 
 const Search = styled.input`
@@ -121,45 +111,7 @@ function MediaLibrary( { onInsert } ) {
 		actions: { loadMedia, setIsMediaLoading, setIsMediaLoaded, setMediaType, setSearchTerm },
 	} = useLibrary();
 
-	useEffect( () => {
-		loadMedia();
-		// Work around that forces default tab as upload tab.
-		wp.media.controller.Library.prototype.defaults.contentUserSetting = false;
-	} );
-
-	const mediaPicker = () => {
-		// Create the media frame.
-		const fileFrame = wp.media( {
-			title: 'Upload to Story',
-			button: {
-				text: 'Insert into page',
-			},
-			multiple: false,
-		} );
-		let attachment;
-
-		// When an image is selected, run a callback.
-		fileFrame.on( 'select', () => {
-			attachment = fileFrame.state().get( 'selection' ).first().toJSON();
-			const { url: src, mime: mimeType, width: oWidth, height: oHeight } = attachment;
-			const mediaEl = { src, mimeType, oWidth, oHeight };
-			insertMediaElement( mediaEl, DEFAULT_WIDTH );
-		} );
-
-		fileFrame.on( 'close', () => {
-			setMediaType( '' );
-			setSearchTerm( '' );
-			setIsMediaLoading( false );
-			setIsMediaLoaded( false );
-		} );
-
-		// Finally, open the modal
-		fileFrame.open();
-	};
-
-	const uploadMedia = () => {
-		mediaPicker();
-	};
+	useEffect( loadMedia );
 
 	const isEven = ( n ) => {
 		return n % 2 === 0;
@@ -169,6 +121,17 @@ function MediaLibrary( { onInsert } ) {
 		const racio = oWidth / width;
 		const height = Math.round( oHeight / racio );
 		return height;
+	};
+
+	const onClose = () => {
+		setIsMediaLoading( false );
+		setIsMediaLoaded( false );
+	};
+
+	const onSelect = ( attachment ) => {
+		const { url: src, mime: mimeType, width: oWidth, height: oHeight } = attachment;
+		const mediaEl = { src, mimeType, oWidth, oHeight };
+		insertMediaElement( mediaEl, DEFAULT_WIDTH );
 	};
 
 	const insertMediaElement = ( attachment, width ) => {
@@ -212,10 +175,16 @@ function MediaLibrary( { onInsert } ) {
 			/* eslint-disable react/jsx-closing-tag-location */
 			return ( <Video
 				key={ src }
-				controls={ true }
 				width={ width }
 				height={ height }
 				onClick={ () => insertMediaElement( mediaEl, width ) }
+				onMouseEnter={ ( evt ) => {
+					evt.target.play();
+				} }
+				onMouseLeave={ ( evt ) => {
+					evt.target.pause();
+					evt.target.currentTime = 0;
+				} }
 			>
 				<source src={ src } type={ mimeType } />
 			</Video> );
@@ -233,9 +202,10 @@ function MediaLibrary( { onInsert } ) {
 						<Spinner />
 					}
 				</Title>
-				<Button onClick={ uploadMedia }>
-					{ 'Upload' }
-				</Button>
+				<UploadButton
+					onClose={ onClose }
+					onSelect={ onSelect }
+				/>
 			</Header>
 
 			<div style={ {
