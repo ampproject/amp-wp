@@ -237,9 +237,11 @@ function MediaLibrary( { onInsert } ) {
 							key={ index }
 							active={ filter === mediaType }
 							onClick={ () => {
-								setMediaType( filter );
-								setIsMediaLoading( false );
-								setIsMediaLoaded( false );
+								if ( filter !== mediaType ) {
+									setMediaType( filter );
+									setIsMediaLoading( false );
+									setIsMediaLoaded( false );
+								}
 							} }>
 							{ name }
 						</FilterButton>
