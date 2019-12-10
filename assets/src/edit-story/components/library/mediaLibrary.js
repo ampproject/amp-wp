@@ -48,7 +48,7 @@ const Header = styled.div`
 `;
 
 const Message = styled.div`
-	color: #ffffff;
+	 color: ${ ( { theme } ) => theme.colors.fg.v1 };
 	font-size: 19px;
 `;
 
