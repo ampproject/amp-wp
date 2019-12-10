@@ -6,7 +6,7 @@ import Moveable from 'react-moveable';
 /**
  * WordPress dependencies
  */
-import { useRef } from '@wordpress/element';
+import { useEffect, useRef } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -16,29 +16,88 @@ import { useStory } from '../../app';
 function Movable( {
 	selectedEl,
 	targetEl,
+	targets: targetList,
 } ) {
 	const {
 		state: { selectedElements },
-		actions: { setPropertiesOnSelectedElements },
+		actions: { setPropertiesOnSelectedElements, setPropertiesById },
 	} = useStory();
 
 	const moveable = useRef();
 
-	const frame = {
-		translate: [ 0, 0 ],
-		rotate: selectedEl.rotationAngle,
-	};
+	useEffect( () => {
+		if ( moveable.current ) {
+			moveable.current.updateRect();
+		}
+	}, [ selectedElements ] );
 
 	const setStyle = ( target ) => {
 		target.style.transform = `translate(${ frame.translate[ 0 ] }px, ${ frame.translate[ 1 ] }px) rotate(${ frame.rotate }deg)`;
 	};
 
+	const frames = targetList ? targetList.map( () => ( {
+		translate: [ 0, 0 ],
+		rotationAngle: 0,
+	} ) ) : [];
+
 	const resetMoveable = ( target ) => {
-		frame.translate = [ 0, 0 ];
-		setStyle( target );
+		if ( targetList && targetList.length ) {
+			targetList.forEach( ( target, i ) => {
+				frames[ i ].translate = [ 0, 0 ];
+			} );
+		} else {
+			frame.translate = [ 0, 0 ];
+			setStyle( target );
+		}
 		if ( moveable.current ) {
 			moveable.current.updateRect();
 		}
+	};
+
+	if ( targetList && targetList.length ) {
+		console.log( targetList.length );
+		console.log( selectedElements.length );
+
+		return (
+			<Moveable
+				ref={ moveable }
+				target={ targetList }
+				draggable={ true }
+				resizable={ false }
+				rotatable={ true }
+				onDragGroup={ ( { events } ) => {
+					events.forEach( ( { target, beforeTranslate }, i ) => {
+						const sFrame = frames[ i ];
+						sFrame.translate = beforeTranslate;
+						target.style.transform = `translate(${ beforeTranslate[ 0 ] }px, ${ beforeTranslate[ 1 ] }px)`;
+					} );
+				} }
+				onDragGroupStart={ ( { events } ) => {
+					events.forEach( ( ev, i ) => {
+						const sFrame = frames[ i ];
+						ev.set( sFrame.translate );
+					} );
+				} }
+				onDragGroupEnd={ ( { targets } ) => {
+					targets.forEach( ( target, i ) => {
+						console.log( target );
+						setPropertiesById(
+							selectedElements[ i ].id,
+							{ x: selectedElements[ i ].x + frames[ i ].translate[ 0 ], y: selectedElements[ i ].y + frames[ i ].translate[ 1 ] }
+						);
+					} );
+					//setPropertiesOnSelectedElements( { x: selectedEl.x + frame.translate[ 0 ], y: selectedEl.y + frame.translate[ 1 ] } );
+					// resetMoveable( target );
+				} }
+				origin={ false }
+				pinchable={ true }
+			/>
+		);
+	}
+
+	const frame = {
+		translate: [ 0, 0 ],
+		rotate: selectedEl.rotationAngle,
 	};
 
 	return (

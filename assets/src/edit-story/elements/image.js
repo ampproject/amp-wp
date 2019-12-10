@@ -16,7 +16,7 @@ const Element = styled.img`
 	${ ElementWithRotation }
 `;
 
-function Image( { src, width, height, x, y, rotationAngle, forwardedRef } ) {
+function Image( { src, width, height, x, y, rotationAngle, forwardedRef, className } ) {
 	const props = {
 		width,
 		height,
@@ -25,6 +25,7 @@ function Image( { src, width, height, x, y, rotationAngle, forwardedRef } ) {
 		rotationAngle,
 		src,
 		ref: forwardedRef,
+		className,
 	};
 	return (
 		<Element { ...props } />

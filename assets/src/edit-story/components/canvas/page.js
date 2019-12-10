@@ -55,11 +55,15 @@ function Page() {
 			{ currentPage && currentPage.elements.map( ( { type, id, ...rest } ) => {
 				const comp = getComponentForType( type );
 				const Comp = comp; // why u do dis, eslint?
-				// Ignore multi-selection for now.
-				const isSelected = 1 === selectedElements.length && selectedElements[ 0 ].id === id;
+
+				const isSelected = selectedElements.map( ( { id: selectedId } ) => id === selectedId ).length;
 				return (
 					<Element key={ id } onClick={ handleSelectElement( id ) }>
-						<Comp { ...rest } forwardedRef={ isSelected ? setTargetEl : null } />
+						<Comp
+							{ ...rest }
+							forwardedRef={ isSelected && 1 === selectedElements.length ? setTargetEl : null }
+							className={ isSelected && 1 < selectedElements.length ? 'target' : null }
+						/>
 					</Element>
 				);
 			} ) }
@@ -67,6 +71,13 @@ function Page() {
 				<Movable
 					targetEl={ targetEl }
 					selectedEl={ selectedElements[ 0 ] }
+				/>
+			) }
+			{ 1 < selectedElements.length && (
+				<Movable
+					targets={ [].slice.call( document.querySelectorAll( '.target' ) ) }
+					targetEl={ null }
+					selectedEl={ {} }
 				/>
 			) }
 		</Background>
