@@ -13,6 +13,7 @@ import { useEffect } from '@wordpress/element';
 /**
  * Internal dependencies
  */
+import UploadButton from '../uploadButton';
 import useLibrary from './useLibrary';
 
 const Image = styled.img`
@@ -30,16 +31,6 @@ const Title = styled.h3`
 	line-height: 20px;
 	line-height: 1.4em;
 	flex: 2 0 0;
-`;
-
-const Button = styled.button`
-	 background: ${ ( { theme } ) => theme.colors.bg.v3 };
-	 color: ${ ( { theme } ) => theme.colors.fg.v1 };
-	 padding: 5px;
-	 font-weight: bold;
-	 flex: 1 0 0;
-	 text-align: center;
-	 border: 0px none;
 `;
 
 const Header = styled.div`
@@ -60,49 +51,23 @@ function MediaLibrary( { onInsert } ) {
 
 	useEffect( () => {
 		loadMedia();
-		// Work around that forces default tab as upload tab.
-		wp.media.controller.Library.prototype.defaults.contentUserSetting = false;
 	} );
 
-	const mediaPicker = () => {
-		// Create the media frame.
-		const fileFrame = wp.media( {
-			title: 'Upload to Story',
-			button: {
-				text: 'Insert into page',
-			},
-			multiple: false,
-			library: {
-				type: mediaType,
-			},
-		} );
-		let attachment;
-
-		// When an image is selected, run a callback.
-		fileFrame.on( 'select', () => {
-			attachment = fileFrame.state().get( 'selection' ).first().toJSON();
-			const { url } = attachment;
-			onInsert( 'image', {
-				src: url,
-				width: 100,
-				height: 100,
-				x: 5,
-				y: 5,
-				rotationAngle: 0,
-			} );
-		} );
-
-		fileFrame.on( 'close', () => {
-			setIsMediaLoading( false );
-			setIsMediaLoaded( false );
-		} );
-
-		// Finally, open the modal
-		fileFrame.open();
+	const onClose = () => {
+		setIsMediaLoading( false );
+		setIsMediaLoaded( false );
 	};
 
-	const uploadMedia = () => {
-		mediaPicker();
+	const onSelect = ( attachment ) => {
+		const { url } = attachment;
+		onInsert( 'image', {
+			src: url,
+			width: 100,
+			height: 100,
+			x: 5,
+			y: 5,
+			rotationAngle: 0,
+		} );
 	};
 
 	return (
@@ -114,9 +79,7 @@ function MediaLibrary( { onInsert } ) {
 						<Spinner />
 					}
 				</Title>
-				<Button onClick={ uploadMedia }>
-					{ 'Upload' }
-				</Button>
+				<UploadButton mediaType={ mediaType } onClose={ onClose } onSelect={ onSelect } />
 			</Header>
 
 			{ ( isMediaLoaded && ! media.length ) ? (
