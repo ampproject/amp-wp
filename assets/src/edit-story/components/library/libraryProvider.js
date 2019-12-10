@@ -50,7 +50,6 @@ function LibraryProvider( { children } ) {
 			setTab,
 			setIsMediaLoading,
 			setIsMediaLoaded,
-			setPerPage,
 			setMediaType,
 			loadMedia,
 		},

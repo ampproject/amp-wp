@@ -49,17 +49,14 @@ function MediaLibrary( { onInsert } ) {
 		actions: { loadMedia, setIsMediaLoading, setIsMediaLoaded },
 	} = useLibrary();
 
-	useEffect( () => {
-		loadMedia();
-	} );
+	useEffect( loadMedia );
 
 	const onClose = () => {
 		setIsMediaLoading( false );
 		setIsMediaLoaded( false );
 	};
 
-	const onSelect = ( attachment ) => {
-		const { url } = attachment;
+	const onSelect = ( { url } ) => {
 		onInsert( 'image', {
 			src: url,
 			width: 100,

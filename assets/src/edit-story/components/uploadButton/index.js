@@ -52,9 +52,7 @@ function UploadButton( {
 			onSelect( attachment );
 		} );
 
-		fileFrame.on( 'close', () => {
-			onClose();
-		} );
+		fileFrame.on( 'close', onClose );
 
 		// Finally, open the modal
 		fileFrame.open();
