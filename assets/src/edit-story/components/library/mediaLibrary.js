@@ -34,7 +34,7 @@ const Title = styled.h3`
 
 const Button = styled.button`
 	 background: ${ ( { theme } ) => theme.colors.bg.v3 };
-	 color: #ffffff;
+	 color: ${ ( { theme } ) => theme.colors.fg.v1 };
 	 padding: 5px;
 	 font-weight: bold;
 	 flex: 1 0 0;
