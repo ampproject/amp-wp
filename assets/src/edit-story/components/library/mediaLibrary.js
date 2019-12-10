@@ -147,15 +147,7 @@ function MediaLibrary( { onInsert } ) {
 				rotationAngle: 0,
 			} );
 		} else if ( SUPPORTED_VIDEO_TYPES.includes( mimeType ) ) {
-			onInsert( 'video', {
-				src,
-				width,
-				height,
-				mimeType,
-				x: 5,
-				y: 5,
-				rotationAngle: 0,
-			} );
+			// TODO Insert Video here.
 		}
 	};
 
