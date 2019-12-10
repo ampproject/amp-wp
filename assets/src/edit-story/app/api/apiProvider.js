@@ -25,11 +25,11 @@ function APIProvider( { children } ) {
 	);
 
 	const getMedia = useCallback(
-		( { perPage, mediaType, searchTerm } ) => {
+		( { mediaType, searchTerm } ) => {
 			let apiPath = media;
-			if ( perPage ) {
-				apiPath = addQueryArgs( apiPath, { per_page: perPage } );
-			}
+			const perPage = 100;
+			apiPath = addQueryArgs( apiPath, { per_page: perPage } );
+
 			if ( mediaType ) {
 				apiPath = addQueryArgs( apiPath, { media_type: mediaType } );
 			}
