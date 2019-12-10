@@ -33,7 +33,7 @@ const Title = styled.h3`
 `;
 
 const Button = styled.button`
-	 background: #242A3B;
+	 background: ${ ( { theme } ) => theme.colors.bg.v3 };
 	 color: #ffffff;
 	 padding: 5px;
 	 font-weight: bold;
