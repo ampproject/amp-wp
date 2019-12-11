@@ -78,7 +78,7 @@ const SearchField = styled.div`
 	position: relative;
 `;
 
-const Search = styled.input`
+const Search = styled.input.attrs( { type: 'text' } )`
 	width: 100%;
 	background: ${ ( { theme } ) => theme.colors.mg.v1 } !important;
 	border-color: ${ ( { theme } ) => theme.colors.mg.v1 } !important;
@@ -145,6 +145,30 @@ function MediaLibrary( { onInsert } ) {
 		const ratio = oWidth / width;
 		const height = Math.round( oHeight / ratio );
 		return height;
+	};
+
+	/**
+	 * Handle search term changes.
+	 *
+	 * @param {Object}evt Doc Event
+	 */
+	const onSearch = ( evt ) => {
+		setSearchTerm( evt.target.value );
+		setIsMediaLoading( false );
+		setIsMediaLoaded( false );
+	};
+
+	/**
+	 * Filter REST API calls and re-request API.
+	 *
+	 * @param {string}filter Value that is passed to rest api to filter.
+	 */
+	const onFilter = ( filter ) => {
+		if ( filter !== mediaType ) {
+			setMediaType( filter );
+			setIsMediaLoading( false );
+			setIsMediaLoaded( false );
+		}
 	};
 
 	const onClose = () => {
@@ -248,14 +272,9 @@ function MediaLibrary( { onInsert } ) {
 			<SearchField>
 				<Icon icon="search"	 />
 				<Search
-					type={ 'text' }
 					value={ searchTerm }
 					placeholder={ 'Search Media' }
-					onChange={ ( evt ) => {
-						setSearchTerm( evt.target.value );
-						setIsMediaLoading( false );
-						setIsMediaLoaded( false );
-					} } />
+					onChange={ onSearch } />
 			</SearchField>
 
 			<FilterButtons>
@@ -264,13 +283,7 @@ function MediaLibrary( { onInsert } ) {
 						<FilterButton
 							key={ index }
 							active={ filter === mediaType }
-							onClick={ () => {
-								if ( filter !== mediaType ) {
-									setMediaType( filter );
-									setIsMediaLoading( false );
-									setIsMediaLoaded( false );
-								}
-							} }>
+							onClick={ () => onFilter( filter ) }>
 							{ name }
 						</FilterButton>
 					) )
