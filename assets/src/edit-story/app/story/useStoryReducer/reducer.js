@@ -18,12 +18,8 @@ function reducer( state, { type, payload } ) {
 			return reducers.updatePage( state, payload );
 		}
 
-		case types.DUPLICATE_PAGE: {
-			return reducers.duplicatePage( state, payload );
-		}
-
-		case types.MOVE_PAGE: {
-			return reducers.movePage( state, payload );
+		case types.ARRANGE_PAGE: {
+			return reducers.arrangePage( state, payload );
 		}
 
 		case types.SET_CURRENT_PAGE: {
@@ -42,12 +38,8 @@ function reducer( state, { type, payload } ) {
 			return reducers.updateElements( state, payload );
 		}
 
-		case types.DUPLICATE_ELEMENTS: {
-			return reducers.duplicateElements( state, payload );
-		}
-
-		case types.MOVE_ELEMENT: {
-			return reducers.moveElement( state, payload );
+		case types.ARRANGE_ELEMENT: {
+			return reducers.arrangeElement( state, payload );
 		}
 
 		case types.SET_SELECTED_ELEMENTS: {

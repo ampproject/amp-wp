@@ -18,14 +18,8 @@ const updatePageProperties = ( dispatch ) => ( { pageId, properties } ) =>
 const updateCurrentPageProperties = ( dispatch ) => ( { properties } ) =>
 	dispatch( { type: types.UPDATE_PAGE, payload: { pageId: null, properties } } );
 
-const duplicatePage = ( dispatch ) => ( { pageId } ) =>
-	dispatch( { type: types.DUPLICATE_PAGE, payload: { pageId } } );
-
-const duplicateCurrentPage = ( dispatch ) => () =>
-	dispatch( { type: types.DUPLICATE_PAGE, payload: { pageId: null } } );
-
-const movePage = ( dispatch ) => ( { pageId, position } ) =>
-	dispatch( { type: types.MOVE_PAGE, payload: { pageId, position } } );
+const arrangePage = ( dispatch ) => ( { pageId, position } ) =>
+	dispatch( { type: types.ARRANGE_PAGE, payload: { pageId, position } } );
 
 const setCurrentPage = ( dispatch ) => ( { pageId } ) =>
 	dispatch( { type: types.SET_CURRENT_PAGE, payload: { pageId } } );
@@ -45,9 +39,6 @@ const deleteSelectedElements = ( dispatch ) => () =>
 const deleteElementById = ( dispatch ) => ( { elementId } ) =>
 	dispatch( { type: types.DELETE_ELEMENTS, payload: { elementIds: [ elementId ] } } );
 
-const duplicateElementsById = ( dispatch ) => ( { elementIds } ) =>
-	dispatch( { type: types.DUPLICATE_ELEMENTS, payload: { elementIds } } );
-
 const updateElementsById = ( dispatch ) => ( { elementIds, properties } ) =>
 	dispatch( { type: types.UPDATE_ELEMENTS, payload: { elementIds, properties } } );
 
@@ -57,11 +48,11 @@ const updateElementById = ( dispatch ) => ( { elementId, properties } ) =>
 const updateSelectedElements = ( dispatch ) => ( { properties } ) =>
 	dispatch( { type: types.UPDATE_ELEMENTS, payload: { elementIds: null, properties } } );
 
-const moveElement = ( dispatch ) => ( { elementId, position } ) =>
-	dispatch( { type: types.MOVE_ELEMENT, payload: { elementId, position } } );
+const arrangeElement = ( dispatch ) => ( { elementId, position } ) =>
+	dispatch( { type: types.ARRANGE_ELEMENT, payload: { elementId, position } } );
 
-const moveSelectedElement = ( dispatch ) => ( { position } ) =>
-	dispatch( { type: types.MOVE_ELEMENT, payload: { elementId: null, position } } );
+const arrangeSelectedElement = ( dispatch ) => ( { position } ) =>
+	dispatch( { type: types.ARRANGE_ELEMENT, payload: { elementId: null, position } } );
 
 const setSelectedElementsById = ( dispatch ) => ( { selectedElementIds } ) =>
 	dispatch( { type: types.SET_SELECTED_ELEMENTS, payload: { selectedElementIds } } );
@@ -84,24 +75,18 @@ export default {
 	deleteCurrentPage,
 	updatePageProperties,
 	updateCurrentPageProperties,
-	duplicatePage,
-	duplicateCurrentPage,
-	movePage,
+	arrangePage,
 	setCurrentPage,
 	addElements,
 	addElement,
-	addElementsToPage,
-	addElementToPage,
 	deleteElementsById,
 	deleteElementById,
 	deleteSelectedElements,
-	duplicateElementsById,
 	updateElementsById,
 	updateElementById,
 	updateSelectedElements,
-	moveElement,
-	moveSelectedElement,
-	moveElementOnPage,
+	arrangeElement,
+	arrangeSelectedElement,
 	setSelectedElementsById,
 	clearSelection,
 	addElementToSelection,

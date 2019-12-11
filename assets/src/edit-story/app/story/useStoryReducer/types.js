@@ -2,15 +2,13 @@
 export const ADD_PAGE = 'ADD_PAGE';
 export const UPDATE_PAGE = 'UPDATE_PAGE';
 export const DELETE_PAGE = 'DELETE_PAGE';
-export const DUPLICATE_PAGE = 'DUPLICATE_PAGE';
-export const MOVE_PAGE = 'MOVE_PAGE';
+export const ARRANGE_PAGE = 'ARRANGE_PAGE';
 
 // Manipulate elements on a page.
 export const DELETE_ELEMENTS = 'DELETE_ELEMENTS';
 export const ADD_ELEMENTS = 'ADD_ELEMENTS';
 export const UPDATE_ELEMENTS = 'UPDATE_ELEMENTS';
-export const DUPLICATE_ELEMENTS = 'DUPLICATE_ELEMENTS';
-export const MOVE_ELEMENT = 'MOVE_ELEMENT';
+export const ARRANGE_ELEMENT = 'ARRANGE_ELEMENT';
 
 // Manipulate current page.
 export const SET_CURRENT_PAGE = 'SET_CURRENT_PAGE';

@@ -2,16 +2,14 @@
 // Manipulate pages.
 export addPage from './addPage';
 export deletePage from './deletePage';
-export duplicatePage from './duplicatePage';
 export updatePage from './updatePage';
-export movePage from './movePage';
+export arrangePage from './arrangePage';
 
 // Manipulate elements on a page.
 export addElements from './addElements';
 export deleteElements from './deleteElements';
-export duplicateElements from './duplicateElements';
 export updateElements from './updateElements';
-export moveElement from './moveElement';
+export arrangeElement from './arrangeElement';
 
 // Manipulate current page.
 export setCurrentPage from './setCurrentPage';
