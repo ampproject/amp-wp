@@ -22,9 +22,7 @@ const Container = styled.div`
     grid-template-columns: 1fr 1fr;
 `;
 
-const Column = styled.div`
-
-`;
+const Column = styled.div``;
 
 export const StyledTiles = css`
 	width: 100%;
@@ -70,9 +68,14 @@ const FilterButton = styled.button`
 	background: none;
 	padding: 0px;
 	margin: 0px 28px 0px 0px;
-	color: ${ ( { theme } ) => theme.colors.mg.v1 };
+	color: ${ ( { theme, active } ) => ( active ? theme.colors.fg.v1 : theme.colors.mg.v1 ) };
+	font-weight: ${ ( { active } ) => ( active ? 'bold' : 'normal' ) };
 	font-size: 13px;
-	${ ( { active } ) => active && ` color: #fff; font-weight: bold; ` };
+
+`;
+
+const SearchField = styled.div`
+	position: relative;
 `;
 
 const Search = styled.input`
@@ -84,6 +87,13 @@ const Search = styled.input`
 	&::placeholder {
 	  color: ${ ( { theme } ) => theme.colors.mg.v2 };
 	}
+`;
+
+const Icon = styled( Dashicon )`
+	position: absolute;
+	top: 8px;
+	left: 10px;
+	fill: ${ ( { theme } ) => theme.colors.mg.v2 };
 `;
 
 const SUPPORTED_IMAGE_TYPES = [
@@ -113,13 +123,27 @@ function MediaLibrary( { onInsert } ) {
 
 	useEffect( loadMedia );
 
+	/**
+	 * Check if number is odd or even.
+	 *
+	 * @param {number}n Number
+	 * @return {boolean} Is even.
+	 */
 	const isEven = ( n ) => {
 		return n % 2 === 0;
 	};
 
+	/**
+	 * Generate height based on ratio of original height / width.
+	 *
+	 * @param {number}oWidth Original element width.
+	 * @param {number}oHeight Original element height.
+	 * @param {number}width Desired width.
+	 * @return {number} Relative height compared to height.
+	 */
 	const getRelativeHeight = ( oWidth, oHeight, width ) => {
-		const racio = oWidth / width;
-		const height = Math.round( oHeight / racio );
+		const ratio = oWidth / width;
+		const height = Math.round( oHeight / ratio );
 		return height;
 	};
 
@@ -128,17 +152,29 @@ function MediaLibrary( { onInsert } ) {
 		setIsMediaLoaded( false );
 	};
 
+	/**
+	 * Callback of select in media picker to insert media element.
+	 *
+	 * @param {Object}attachment Attachment object from backbone media picker.
+	 */
 	const onSelect = ( attachment ) => {
 		const { url: src, mime: mimeType, width: oWidth, height: oHeight } = attachment;
 		const mediaEl = { src, mimeType, oWidth, oHeight };
 		insertMediaElement( mediaEl, DEFAULT_WIDTH );
 	};
 
+	/**
+	 * Insert element such image, video and audio into the editor.
+	 *
+	 * @param {Object}attachment Attachment object
+	 * @param {number}width      Width that element is inserted into editor.
+	 * @return {null|*}          Return onInsert or null.
+	 */
 	const insertMediaElement = ( attachment, width ) => {
 		const { src, mimeType, oWidth, oHeight } = attachment;
 		const height = getRelativeHeight( oWidth, oHeight, width );
 		if ( SUPPORTED_IMAGE_TYPES.includes( mimeType ) ) {
-			onInsert( 'image', {
+			return onInsert( 'image', {
 				src,
 				width,
 				height,
@@ -148,9 +184,18 @@ function MediaLibrary( { onInsert } ) {
 			} );
 		} else if ( SUPPORTED_VIDEO_TYPES.includes( mimeType ) ) {
 			// TODO Insert Video here.
+			return null;
 		}
+		return null;
 	};
 
+	/**
+	 * Get a formatted element for different media types.
+	 *
+	 * @param {Object}mediaEl Attachment object
+	 * @param {number}width      Width that element is inserted into editor.
+	 * @return {null|*}          Element or null if does not map to video/image.
+	 */
 	const getMediaElement = ( mediaEl, width ) => {
 		const { src, oWidth, oHeight, mimeType } = mediaEl;
 		const height = getRelativeHeight( oWidth, oHeight, width );
@@ -186,7 +231,7 @@ function MediaLibrary( { onInsert } ) {
 	};
 
 	return (
-		<div>
+		<>
 			<Header>
 				<Title>
 					{ 'Media' }
@@ -200,17 +245,8 @@ function MediaLibrary( { onInsert } ) {
 				/>
 			</Header>
 
-			<div style={ {
-				position: `relative`,
-			} }>
-				<Dashicon
-					icon="search"
-					style={ {
-						position: `absolute`,
-						top: `8px`,
-						left: `10px`,
-						fill: `#DADADA`,
-					} } />
+			<SearchField>
+				<Icon icon="search"	 />
 				<Search
 					type={ 'text' }
 					value={ searchTerm }
@@ -220,7 +256,7 @@ function MediaLibrary( { onInsert } ) {
 						setIsMediaLoading( false );
 						setIsMediaLoaded( false );
 					} } />
-			</div>
+			</SearchField>
 
 			<FilterButtons>
 				{
@@ -262,7 +298,7 @@ function MediaLibrary( { onInsert } ) {
 			)
 			}
 
-		</div>
+		</>
 	);
 }
 
