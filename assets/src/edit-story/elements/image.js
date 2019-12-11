@@ -39,6 +39,7 @@ Image.propTypes = {
 	x: PropTypes.number.isRequired,
 	y: PropTypes.number.isRequired,
 	forwardedRef: PropTypes.func,
+	onPointerDown: PropTypes.func,
 };
 
 Image.defaultProps = {
