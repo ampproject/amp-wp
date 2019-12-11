@@ -21,6 +21,7 @@ const Movable = ( props ) => {
 		y,
 		type,
 		targetEl,
+		pushEvent,
 	} = props;
 
 	const moveable = useRef();
@@ -31,9 +32,12 @@ const Movable = ( props ) => {
 
 	useEffect( () => {
 		if ( moveable.current ) {
+			if ( pushEvent ) {
+				moveable.current.moveable.dragStart( pushEvent );
+			}
 			moveable.current.updateRect();
 		}
-	}, [ targetEl, moveable ] );
+	}, [ targetEl, moveable, pushEvent ] );
 
 	const frame = {
 		translate: [ 0, 0 ],

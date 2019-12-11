@@ -27,7 +27,7 @@ function Image( { src, width, height, x, y, rotationAngle, forwardedRef, onPoint
 		ref: forwardedRef,
 	};
 	return (
-		<Element { ...props } onPointerDown={ onPointerDown } />
+		<Element draggable="false" { ...props } onPointerDown={ onPointerDown } />
 	);
 }
 

@@ -39,6 +39,7 @@ function Page() {
 	} = useStory();
 
 	const [ targetEl, setTargetEl ] = useState( false );
+	const [ pushEvent, setPushEvent ] = useState( null );
 
 	useEffect( () => {
 		setBackgroundClickHandler( () => clearSelection() );
@@ -51,6 +52,10 @@ function Page() {
 			selectElementById( elId );
 		}
 		evt.stopPropagation();
+
+		// @todo That's not necessary for multi-selection.
+		evt.persist();
+		setPushEvent( evt );
 	}, [ toggleElementIdInSelection, selectElementById ] );
 
 	return (
@@ -82,11 +87,12 @@ function Page() {
 			} ) }
 			{ 1 === selectedElements.length && targetEl && (
 				<Movable
-					rotationAngle={ selectedElements[ 0 ].rotationAngle }
+					rotationAngle={ 1 === selectedElements.length ? selectedElements[ 0 ].rotationAngle : 0 }
 					targetEl={ targetEl }
-					type={ selectedElements[ 0 ].type }
-					x={ selectedElements[ 0 ].x }
-					y={ selectedElements[ 0 ].y }
+					pushEvent={ pushEvent }
+					type={ 1 === selectedElements.length ? selectedElements[ 0 ].type : null }
+					x={ 1 === selectedElements.length ? selectedElements[ 0 ].x : 0 }
+					y={ 1 === selectedElements.length ? selectedElements[ 0 ].y : 0 }
 				/>
 			) }
 		</Background>
