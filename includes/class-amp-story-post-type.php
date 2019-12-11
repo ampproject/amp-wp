@@ -174,7 +174,7 @@ class AMP_Story_Post_Type {
 		$asset        = require $asset_file;
 		$dependencies = $asset['dependencies'];
 		$version      = $asset['version'];
-		
+
 		wp_enqueue_script(
 			self::AMP_STORIES_SCRIPT_HANDLE,
 			amp_get_asset_url( 'js/' . self::AMP_STORIES_SCRIPT_HANDLE . '.js' ),
@@ -246,7 +246,7 @@ class AMP_Story_Post_Type {
 		wp_enqueue_style(
 			self::AMP_STORIES_STYLE_HANDLE,
 			amp_get_asset_url( 'css/amp-edit-story-compiled.css' ),
-			['wp-components'],
+			[ 'wp-components' ],
 			AMP__VERSION
 		);
 
