@@ -6,20 +6,26 @@ import styled from 'styled-components';
 /**
  * WordPress dependencies
  */
-import { useEffect } from '@wordpress/element';
+import { useCallback, useEffect, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { useStory } from '../../app';
+import { getComponentForType } from '../../elements';
 import useCanvas from './useCanvas';
-import MovableElement from './../movable-element';
+import Movable from './../movable';
 
 const Background = styled.div.attrs( { className: 'container' } )`
 	background-color: ${ ( { theme } ) => theme.colors.fg.v1 };
 	position: relative;
 	width: 100%;
 	height: 100%;
+`;
+
+const Element = styled.div`
+	cursor: pointer;
+	user-select: none;
 `;
 
 function Page() {
@@ -29,29 +35,69 @@ function Page() {
 
 	const {
 		state: { currentPage, selectedElements },
-		actions: { clearSelection },
+		actions: { clearSelection, selectElementById, toggleElementIdInSelection },
 	} = useStory();
+
+	const [ targetEl, setTargetEl ] = useState( null );
+	const [ pushEvent, setPushEvent ] = useState( null );
 
 	useEffect( () => {
 		setBackgroundClickHandler( () => clearSelection() );
 	}, [ setBackgroundClickHandler, clearSelection ] );
 
+	const handleSelectElement = useCallback( ( elId, evt ) => {
+		if ( evt.metaKey ) {
+			toggleElementIdInSelection( elId );
+		} else {
+			selectElementById( elId );
+		}
+		evt.stopPropagation();
+
+		// @todo That's not necessary for multi-selection.
+		if ( 'pointerdown' === evt.type ) {
+			evt.persist();
+			setPushEvent( evt );
+		}
+	}, [ toggleElementIdInSelection, selectElementById ] );
+
+	const singleSelection = 1 === selectedElements.length;
+
 	return (
 		<Background>
 			{ currentPage && currentPage.elements.map( ( { type, id, ...rest } ) => {
+				const comp = getComponentForType( type );
+				const Comp = comp; // why u do dis, eslint?
+
+				// Ignore multi-selection for now.
+				const isSelected = selectedElements.length ? selectedElements[ 0 ].id === id : false;
 				return (
-					<MovableElement
-						key={ 'element-' + id }
-						type={ type }
-						x={ rest.x }
-						y={ rest.y }
-						rotationAngle={ rest.rotationAngle }
-						selected={ 1 === selectedElements.length && selectedElements[ 0 ].id === id }
-						rest={ rest }
-						id={ id }
-					/>
+					<Element
+						key={ id }
+						onClick={ ( evt ) => handleSelectElement( id, evt ) }
+					>
+						<Comp
+							{ ...rest }
+							onPointerDown={ ( evt ) => {
+								if ( ! isSelected ) {
+									handleSelectElement( id, evt );
+								}
+							} }
+							forwardedRef={ isSelected ? setTargetEl : null }
+						/>
+					</Element>
 				);
 			} ) }
+			{ singleSelection && targetEl && (
+				<Movable
+					rotationAngle={ selectedElements[ 0 ].rotationAngle }
+					targetEl={ targetEl }
+					pushEvent={ pushEvent }
+					setPushEvent={ setPushEvent }
+					type={ selectedElements[ 0 ].type }
+					x={ selectedElements[ 0 ].x }
+					y={ selectedElements[ 0 ].y }
+				/>
+			) }
 		</Background>
 	);
 }
