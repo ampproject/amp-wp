@@ -46,11 +46,13 @@ const Circle = styled.a`
 `;
 
 function AddPage() {
-	const { actions: { addBlankPage, setCurrentPageByIndex } } = useStory();
+	const { actions: { addBlankPage, setCurrentPageByIndex }, state: { pages } } = useStory();
 	const handleClick = useCallback( () => {
-		const page = addBlankPage();
-		setCurrentPageByIndex( page.index );
-	}, [ addBlankPage, setCurrentPageByIndex ] );
+		addBlankPage();
+		// Blank pages is always added to the end at this moment, let's set the last page as the current.
+		// Since a new page was added then we're using pages.length without -1.
+		setCurrentPageByIndex( pages.length );
+	}, [ addBlankPage, setCurrentPageByIndex, pages.length ] );
 	return (
 		<Wrapper>
 			<Space />
