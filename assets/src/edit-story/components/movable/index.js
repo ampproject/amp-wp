@@ -14,17 +14,18 @@ import { useRef, useEffect } from '@wordpress/element';
  */
 import { useStory } from '../../app';
 
-const Movable = ( props ) => {
-	const {
-		rotationAngle,
-		x,
-		y,
-		type,
-		targetEl,
-		pushEvent,
-		setPushEvent,
-	} = props;
+const CORNER_HANDLES = [ 'nw', 'ne', 'sw', 'se' ];
+const ALL_HANDLES = [ 'n', 's', 'e', 'w', 'nw', 'ne', 'sw', 'se' ];
 
+function Movable( {
+	rotationAngle,
+	x,
+	y,
+	type,
+	targetEl,
+	pushEvent,
+	setPushEvent,
+} ) {
 	const moveable = useRef();
 
 	const {
@@ -33,8 +34,10 @@ const Movable = ( props ) => {
 
 	useEffect( () => {
 		if ( moveable.current ) {
+			// If we have persistent event then let's use that.
 			if ( pushEvent ) {
 				moveable.current.moveable.dragStart( pushEvent );
+				// Remove the event right after using, not to influence other elements.
 				setPushEvent( null );
 			}
 			moveable.current.updateRect();
@@ -52,6 +55,11 @@ const Movable = ( props ) => {
 		target.style.transform = `translate(${ frame.translate[ 0 ] }px, ${ frame.translate[ 1 ] }px) rotate(${ frame.rotate }deg)`;
 	};
 
+	/**
+	 * Resets Movable once the action is done, sets the initial values.
+	 *
+	 * @param {Object} target Target element.
+	 */
 	const resetMoveable = ( target ) => {
 		frame.translate = [ 0, 0 ];
 		setStyle( target );
@@ -76,6 +84,7 @@ const Movable = ( props ) => {
 				set( frame.translate );
 			} }
 			onDragEnd={ ( { target } ) => {
+				// When dragging finishes, set the new properties based on the original + what moved meanwhile.
 				const newProps = { x: x + frame.translate[ 0 ], y: y + frame.translate[ 1 ] };
 				setPropertiesOnSelectedElements( newProps );
 				resetMoveable( target );
@@ -114,10 +123,10 @@ const Movable = ( props ) => {
 			origin={ false }
 			pinchable={ true }
 			keepRatio={ 'image' === type }
-			renderDirections={ 'image' === type ? [ 'nw', 'ne', 'sw', 'se' ] : [ 'n', 's', 'e', 'w', 'nw', 'ne', 'sw', 'se' ] }
+			renderDirections={ 'image' === type ? CORNER_HANDLES : ALL_HANDLES }
 		/>
 	);
-};
+}
 
 Movable.propTypes = {
 	rotationAngle: PropTypes.number.isRequired,
