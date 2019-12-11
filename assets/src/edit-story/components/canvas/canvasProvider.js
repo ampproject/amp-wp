@@ -17,7 +17,7 @@ function CanvasProvider( { children } ) {
 		setEditingElementWithState,
 		setEditingElementWithoutState,
 		clearEditing,
-		addNodeForElement,
+		setNodeForElement,
 	} = useEditingElement();
 
 	const [
@@ -34,7 +34,7 @@ function CanvasProvider( { children } ) {
 			backgroundClickHandler,
 		},
 		actions: {
-			addNodeForElement,
+			setNodeForElement,
 			setBackgroundClickHandler,
 			clearBackgroundClickHandler,
 			setEditingElement: setEditingElementWithoutState,

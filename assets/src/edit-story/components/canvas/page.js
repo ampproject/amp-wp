@@ -53,7 +53,7 @@ function Page() {
 	} = useStory();
 	const {
 		state: { isEditing, editingElement },
-		actions: { setBackgroundClickHandler, addNodeForElement },
+		actions: { setBackgroundClickHandler, setNodeForElement },
 	} = useCanvas();
 	const handleSelectElement = useCallback( ( id, evt ) => {
 		if ( evt.metaKey ) {
@@ -107,7 +107,7 @@ function Page() {
 				<Element
 					key={ id }
 					setClickHandler={ setClickHandler }
-					addNodeForElement={ addNodeForElement }
+					setNodeForElement={ setNodeForElement }
 					handleSelectElement={ handleSelectElement }
 					isEditing={ editingElement === id }
 					element={ { id, ...rest } }

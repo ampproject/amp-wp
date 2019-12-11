@@ -29,7 +29,7 @@ function useEditingElement() {
 		[],
 	);
 
-	const addNodeForElement = useCallback(
+	const setNodeForElement = useCallback(
 		( id, ref ) => setNodesById( ( oldNodes ) => ( { ...oldNodes, [ id ]: ref } ) ),
 		[ setNodesById ],
 	);
@@ -40,6 +40,8 @@ function useEditingElement() {
 			return undefined;
 		}
 
+		// TODO: it would make a hell of a lot more sense that this node is set when entering edit mode.
+		// However, with the current data flow, that's a bit too complex.
 		const root = nodesById[ editingElement ];
 
 		if ( ! root ) {
@@ -67,7 +69,7 @@ function useEditingElement() {
 		setEditingElementWithState,
 		setEditingElementWithoutState,
 		clearEditing,
-		addNodeForElement,
+		setNodeForElement,
 	};
 }
 
