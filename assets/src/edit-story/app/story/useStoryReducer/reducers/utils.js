@@ -1,3 +1,8 @@
+/**
+ * Internal dependencies
+ */
+import { LAYER_DIRECTIONS } from '../../../../constants';
+
 export function intersect( first, ...rest ) {
 	if ( ! first || ! rest || rest.length === 0 ) {
 		return first;
@@ -38,13 +43,13 @@ export function getAbsolutePosition( currentPosition, maxPosition, newPosition )
 	}
 
 	switch ( newPosition ) {
-		case 'FRONT':
+		case LAYER_DIRECTIONS.FRONT:
 			return maxPosition;
-		case 'BACK':
+		case LAYER_DIRECTIONS.BACK:
 			return 0;
-		case 'FORWARD':
+		case LAYER_DIRECTIONS.FORWARD:
 			return currentPosition + 1;
-		case 'BACKWARD':
+		case LAYER_DIRECTIONS.BACKWARD:
 			return currentPosition - 1;
 		default:
 			return currentPosition;
