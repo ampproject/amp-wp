@@ -21,6 +21,8 @@ import useSelectedElements from './effects/useSelectedElements';
 
 import useAddBlankPage from './actions/useAddBlankPage';
 import useClearSelection from './actions/useClearSelection';
+import useDeleteSelectedElements from './actions/useDeleteSelectedElements';
+import useDeleteCurrentPage from './actions/useDeleteCurrentPage';
 import useToggleElementIdInSelection from './actions/useToggleElementIdInSelection';
 import useSelectElementById from './actions/useSelectElementById';
 import useAppendElementToCurrentPage from './actions/useAppendElementToCurrentPage';
@@ -44,8 +46,10 @@ function StoryProvider( { storyId, children } ) {
 	const hasSelection = Boolean( selectedElementIds.length );
 
 	const clearSelection = useClearSelection( { selectedElementIds, setSelectedElementIds } );
+	const deleteSelectedElements = useDeleteSelectedElements( { currentPageIndex, pages, selectedElementIds, setPages, setSelectedElementIds } );
 	const setCurrentPageByIndex = useSetCurrentPageByIndex( { clearSelection, setCurrentPageIndex } );
 	const addBlankPage = useAddBlankPage( { pages, setPages, clearSelection } );
+	const deleteCurrentPage = useDeleteCurrentPage( { currentPage, pages, setPages, addBlankPage, setCurrentPageIndex, currentPageIndex } );
 	const selectElementById = useSelectElementById( { setSelectedElementIds } );
 	const toggleElementIdInSelection = useToggleElementIdInSelection( { selectedElementIds, setSelectedElementIds } );
 	const appendElementToCurrentPage = useAppendElementToCurrentPage( { currentPageIndex, pages, setPages, setSelectedElementIds } );
@@ -71,6 +75,8 @@ function StoryProvider( { storyId, children } ) {
 			setCurrentPageByIndex,
 			addBlankPage,
 			clearSelection,
+			deleteSelectedElements,
+			deleteCurrentPage,
 			appendElementToCurrentPage,
 			toggleElementIdInSelection,
 			selectElementById,
