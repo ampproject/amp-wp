@@ -15,6 +15,7 @@ import { Panel, Title, InputGroup, getCommonValue } from './shared';
 
 function RotationPanel( { selectedElements, onSetProperties } ) {
 	const rotationAngle = getCommonValue( selectedElements, 'rotationAngle' );
+	const isFullbleed = getCommonValue( selectedElements, 'isFullbleed' );
 	const [ state, setState ] = useState( { rotationAngle } );
 	useEffect( () => {
 		setState( { rotationAngle } );
@@ -34,6 +35,7 @@ function RotationPanel( { selectedElements, onSetProperties } ) {
 				isMultiple={ rotationAngle === '' }
 				onChange={ ( value ) => setState( { ...state, rotationAngle: isNaN( value ) || value === '' ? '' : parseFloat( value ) } ) }
 				postfix="deg"
+				disabled={ isFullbleed }
 			/>
 		</Panel>
 	);
