@@ -2228,7 +2228,7 @@ class AMP_Theme_Support {
 			);
 		}
 
-		$dom = AMP_DOM_Utils::get_dom( $response );
+		$dom = Document::from_html( $response );
 
 		// Move anything after </html>, such as Query Monitor output added at shutdown, to be moved before </body>.
 		while ( $dom->documentElement->nextSibling ) {
@@ -2343,7 +2343,7 @@ class AMP_Theme_Support {
 		AMP_Validation_Manager::finalize_validation( $dom );
 
 		$response  = "<!DOCTYPE html>\n";
-		$response .= AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
+		$response .= $dom->saveHTML( $dom->documentElement );
 
 		AMP_HTTP::send_server_timing( 'amp_dom_serialize', -$dom_serialize_start, 'AMP DOM Serialize' );
 

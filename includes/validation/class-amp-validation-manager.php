@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use Amp\AmpWP\Dom\Document;
+
 /**
  * Class AMP_Validation_Manager
  *
@@ -1048,8 +1050,12 @@ class AMP_Validation_Manager {
 	 * }
 	 */
 	public static function locate_sources( DOMNode $node ) {
-		$xpath    = new DOMXPath( $node->ownerDocument );
-		$comments = $xpath->query( 'preceding::comment()[ starts-with( ., "amp-source-stack" ) or starts-with( ., "/amp-source-stack" ) ]', $node );
+		$dom = $node->ownerDocument;
+		if ( ! $dom instanceof Document ) {
+			_doing_it_wrong( 'locate_sources', 'Ended up with a non-normalized DOMDocument. Use Amp\AmpWP\Dom\Document instead.', '1.5.0' );
+		}
+
+		$comments = $dom->xpath->query( 'preceding::comment()[ starts-with( ., "amp-source-stack" ) or starts-with( ., "/amp-source-stack" ) ]', $node );
 		$sources  = [];
 		$matches  = [];
 
@@ -1678,9 +1684,9 @@ class AMP_Validation_Manager {
 	 *
 	 * @see AMP_Validation_Manager::add_admin_bar_menu_items()
 	 *
-	 * @param DOMDocument $dom Document.
+	 * @param Document $dom Document.
 	 */
-	public static function finalize_validation( DOMDocument $dom ) {
+	public static function finalize_validation( Document $dom ) {
 		/*
 		 * Override AMP status in admin bar set in \AMP_Validation_Manager::add_admin_bar_menu_items()
 		 * when there are validation errors which have not been explicitly accepted.

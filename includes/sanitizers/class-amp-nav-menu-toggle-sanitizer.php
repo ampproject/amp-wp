@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use Amp\AmpWP\Dom\Document;
+
 /**
  * Class AMP_Nav_Menu_Toggle_Sanitizer
  *
@@ -31,20 +33,12 @@ class AMP_Nav_Menu_Toggle_Sanitizer extends AMP_Base_Sanitizer {
 	];
 
 	/**
-	 * XPath.
-	 *
-	 * @since 1.1.0
-	 * @var DOMXPath
-	 */
-	protected $xpath;
-
-	/**
 	 * AMP_Nav_Menu_Toggle_Sanitizer constructor.
 	 *
 	 * @since 1.1.0
 	 *
-	 * @param DOMDocument $dom  DOM.
-	 * @param array       $args Args.
+	 * @param Document $dom  DOM.
+	 * @param array    $args Args.
 	 */
 	public function __construct( $dom, $args = [] ) {
 		parent::__construct( $dom, $args );
@@ -61,8 +55,6 @@ class AMP_Nav_Menu_Toggle_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 1.1.0
 	 */
 	public function sanitize() {
-		$this->xpath = new DOMXPath( $this->dom );
-
 		$nav_el    = $this->get_nav_container();
 		$button_el = $this->get_menu_button();
 
@@ -103,8 +95,7 @@ class AMP_Nav_Menu_Toggle_Sanitizer extends AMP_Base_Sanitizer {
 		if ( 'body' === $nav_el->nodeName ) {
 			$nav_el->insertBefore( $state_el, $nav_el->firstChild );
 		} elseif ( $nav_el === $this->dom->documentElement ) {
-			$body = $this->dom->getElementsByTagName( 'body' )->item( 0 );
-			$body->insertBefore( $state_el, $body->firstChild );
+			$this->dom->body->insertBefore( $state_el, $this->dom->body->firstChild );
 		} else {
 			$nav_el->parentNode->insertBefore( $state_el, $nav_el );
 		}
@@ -134,7 +125,7 @@ class AMP_Nav_Menu_Toggle_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		if ( ! empty( $this->args['nav_container_xpath'] ) ) {
-			return $this->xpath->query( $this->args['nav_container_xpath'] )->item( 0 );
+			return $this->dom->xpath->query( $this->args['nav_container_xpath'] )->item( 0 );
 		}
 
 		return null;
@@ -153,7 +144,7 @@ class AMP_Nav_Menu_Toggle_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		if ( ! empty( $this->args['menu_button_xpath'] ) ) {
-			return $this->xpath->query( $this->args['menu_button_xpath'] )->item( 0 );
+			return $this->dom->xpath->query( $this->args['menu_button_xpath'] )->item( 0 );
 		}
 
 		return null;

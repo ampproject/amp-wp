@@ -10,7 +10,7 @@ use Amp\AmpWP\Dom\Document;
 /**
  * Class AMP_DOM_Utils
  *
- * Functionality to simplify working with DOMDocuments and DOMElements.
+ * Functionality to simplify working with Dom\Documents and DOMElements.
  */
 class AMP_DOM_Utils {
 
@@ -42,7 +42,7 @@ class AMP_DOM_Utils {
 	/**
 	 * Regular expression pattern to match the contents of the <body> element.
 	 *
-	 * @sinc 1.5.0
+	 * @since 1.5.0
 	 * @var string
 	 */
 	const HTML_BODY_CONTENTS_PATTERN = '#^.*?<body.*?>(.*)</body>.*?$#si';
@@ -68,23 +68,19 @@ class AMP_DOM_Utils {
 	];
 
 	/**
-	 * Return a valid DOMDocument representing HTML document passed as a parameter.
+	 * Return a valid Dom\Document representing HTML document passed as a parameter.
 	 *
 	 * @since 0.7
 	 * @see AMP_DOM_Utils::get_content_from_dom_node()
+	 * @deprecated Use Dom\Document::from_html( $html, $encoding ) instead.
 	 *
-	 * @param string $document Valid HTML document to be represented by a DOMDocument.
-	 * @param string $encoding Optional. Encoding to use for the content. Defaults to `get_bloginfo( 'charset' )`.
-	 * @return Document|false Returns DOMDocument, or false if conversion failed.
+	 * @param string $document Valid HTML document to be represented by a Dom\Document.
+	 * @param string $encoding Optional. Encoding to use for the content.
+	 * @return Document|false Returns Dom\Document, or false if conversion failed.
 	 */
 	public static function get_dom( $document, $encoding = null ) {
-		$dom = new Document( '', $encoding );
-
-		if ( ! $dom->loadHTML( $document ) ) {
-			return false;
-		}
-
-		return $dom;
+		_deprecated_function( __METHOD__, '1.5.0', 'Dom\Document::from_html()' );
+		return Document::from_html( $document, $encoding );
 	}
 
 	/**
@@ -165,13 +161,13 @@ class AMP_DOM_Utils {
 	}
 
 	/**
-	 * Return a valid DOMDocument representing arbitrary HTML content passed as a parameter.
+	 * Return a valid Dom\Document representing arbitrary HTML content passed as a parameter.
 	 *
 	 * @see Reciprocal function get_content_from_dom()
 	 *
 	 * @since 0.2
 	 *
-	 * @param string $content  Valid HTML content to be represented by a DOMDocument.
+	 * @param string $content  Valid HTML content to be represented by a Dom\Document.
 	 * @param string $encoding Optional. Encoding to use for the content. Defaults to `get_bloginfo( 'charset' )`.
 	 *
 	 * @return Document|false Returns a DOM document, or false if conversion failed.
@@ -189,23 +185,23 @@ class AMP_DOM_Utils {
 		 */
 		$document = "<html><head></head><body>{$content}</body></html>";
 
-		return self::get_dom( $document, $encoding );
+		return Document::from_html( $document, $encoding );
 	}
 
 	/**
-	 * Return valid HTML *body* content extracted from the DOMDocument passed as a parameter.
+	 * Return valid HTML *body* content extracted from the Dom\Document passed as a parameter.
 	 *
 	 * @since 0.2
 	 * @see AMP_DOM_Utils::get_content_from_dom_node() Reciprocal function.
 	 *
 	 * @param Document $dom Represents an HTML document from which to extract HTML content.
-	 * @return string Returns the HTML content of the body element represented in the DOMDocument.
+	 * @return string Returns the HTML content of the body element represented in the Dom\Document.
 	 */
 	public static function get_content_from_dom( Document $dom ) {
 		return preg_replace(
 			static::HTML_BODY_CONTENTS_PATTERN,
 			'$1',
-			self::get_content_from_dom_node( $dom, $dom->body )
+			$dom->saveHTML( $dom->body )
 		);
 	}
 
@@ -216,35 +212,29 @@ class AMP_DOM_Utils {
 	 * @since 0.6
 	 * @see AMP_DOM_Utils::get_dom() Where the operations in this method are mirrored.
 	 * @see AMP_DOM_Utils::get_content_from_dom() Reciprocal function.
+	 * @deprecated Use Dom\Document->saveHtml( $node ) instead.
 	 *
 	 * @param Document   $dom  Represents an HTML document.
 	 * @param DOMElement $node Represents an HTML element of the $dom from which to extract HTML content.
 	 * @return string Returns the HTML content represented in the DOMNode
 	 */
 	public static function get_content_from_dom_node( Document $dom, $node ) {
-
-		$html = $dom->saveHTML( $node );
-
-		// Whitespace just causes unit tests to fail... so whitespace begone.
-		if ( '' === trim( $html ) ) {
-			return '';
-		}
-
-		return $html;
+		_deprecated_function( __METHOD__, '1.5.0', 'Dom\Document->saveHtml( $node )' );
+		return $dom->saveHTML( $node );
 	}
 
 	/**
-	 * Create a new node w/attributes (a DOMElement) and add to the passed DOMDocument.
+	 * Create a new node w/attributes (a DOMElement) and add to the passed Dom\Document.
 	 *
 	 * @since 0.2
 	 *
-	 * @param DOMDocument $dom        A representation of an HTML document to add the new node to.
-	 * @param string      $tag        A valid HTML element tag for the element to be added.
-	 * @param string[]    $attributes One of more valid attributes for the new node.
+	 * @param Document $dom        A representation of an HTML document to add the new node to.
+	 * @param string   $tag        A valid HTML element tag for the element to be added.
+	 * @param string[] $attributes One of more valid attributes for the new node.
 	 *
 	 * @return DOMElement|false The DOMElement for the given $tag, or false on failure
 	 */
-	public static function create_node( $dom, $tag, $attributes ) {
+	public static function create_node( Document $dom, $tag, $attributes ) {
 		$node = $dom->createElement( $tag );
 		self::add_attributes_to_node( $node, $attributes );
 
@@ -312,7 +302,7 @@ class AMP_DOM_Utils {
 	}
 
 	/**
-	 * Forces HTML element closing tags given a DOMDocument and optional DOMElement
+	 * Forces HTML element closing tags given a Dom\Document and optional DOMElement
 	 *
 	 * @since 0.2
 	 * @deprecated

@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use Amp\AmpWP\Dom\Document;
+
 /**
  * Strips the tags and attributes from the content that are not allowed by the AMP spec.
  *
@@ -138,8 +140,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 0.5
 	 *
-	 * @param DOMDocument $dom  DOM.
-	 * @param array       $args Args.
+	 * @param Document $dom  DOM.
+	 * @param array    $args Args.
 	 */
 	public function __construct( $dom, $args = [] ) {
 		// @todo It is pointless to have this DEFAULT_ARGS copying the array values. We should only get the data from AMP_Allowed_Tags_Generated.
@@ -287,7 +289,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Sanitize the elements from the HTML contained in this instance's DOMDocument.
+	 * Sanitize the elements from the HTML contained in this instance's Dom\Document.
 	 *
 	 * @since 0.5
 	 */

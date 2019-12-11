@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use Amp\AmpWP\Dom\Document;
+
 /**
  * Test AMP_Tag_And_Attribute_Sanitizer
  *
@@ -2312,7 +2314,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function test_sanitize( $source, $expected = null, $expected_scripts = [], $expected_errors = [] ) {
 		$expected      = isset( $expected ) ? $expected : $source;
-		$dom           = AMP_DOM_Utils::get_dom( $source );
+		$dom           = Document::from_html( $source );
 		$actual_errors = [];
 		$sanitizer     = new AMP_Tag_And_Attribute_Sanitizer(
 			$dom,
@@ -2325,7 +2327,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			]
 		);
 		$sanitizer->sanitize();
-		$content = AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
+		$content = $dom->saveHTML( $dom->documentElement );
 		$this->assertEqualMarkup( $expected, $content );
 
 		$this->assertEqualSets( $expected_scripts, array_keys( $sanitizer->get_scripts() ) );

@@ -262,7 +262,7 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 		// Prevent an error in get_content_from_dom_node() when it calls $node->parentNode->insertBefore().
 		$dom->appendChild( $carousel_node );
 
-		return AMP_DOM_Utils::get_content_from_dom_node( $dom, $carousel_node );
+		return $dom->saveHTML( $carousel_node );
 	}
 
 	/**

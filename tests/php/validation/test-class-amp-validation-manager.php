@@ -816,8 +816,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		 * @var DOMComment[] $comments
 		 */
 		$comments = [];
-		$xpath    = new DOMXPath( $dom );
-		foreach ( $xpath->query( '//comment()' ) as $comment ) {
+		foreach ( $dom->xpath->query( '//comment()' ) as $comment ) {
 			$comments[] = $comment;
 		}
 		$this->assertCount( 4, $comments );

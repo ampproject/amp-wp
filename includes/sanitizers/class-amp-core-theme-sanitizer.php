@@ -29,22 +29,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	protected $args;
 
 	/**
-	 * Body element.
-	 *
-	 * @since 1.0
-	 * @var DOMElement
-	 */
-	protected $body;
-
-	/**
-	 * XPath.
-	 *
-	 * @since 1.0
-	 * @var DOMXPath
-	 */
-	protected $xpath;
-
-	/**
 	 * Array of themes that are supported.
 	 *
 	 * @var array
@@ -552,13 +536,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 1.0
 	 */
 	public function sanitize() {
-		$this->body = $this->dom->getElementsByTagName( 'body' )->item( 0 );
-		if ( ! $this->body ) {
-			return;
-		}
-
-		$this->xpath = new DOMXPath( $this->dom );
-
 		$theme_features = self::get_theme_features( $this->args, false );
 		foreach ( $theme_features as $theme_feature => $feature_args ) {
 			if ( method_exists( $this, $theme_feature ) ) {
@@ -613,7 +590,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public function add_smooth_scrolling( $link_xpaths ) {
 		foreach ( $link_xpaths as $link_xpath ) {
-			foreach ( $this->xpath->query( $link_xpath ) as $link ) {
+			foreach ( $this->dom->xpath->query( $link_xpath ) as $link ) {
 				if ( $link instanceof DOMElement && preg_match( '/#(.+)/', $link->getAttribute( 'href' ), $matches ) ) {
 					$link->setAttribute( 'on', sprintf( 'tap:%s.scrollTo(duration=600)', $matches[1] ) );
 
@@ -942,7 +919,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		 * @var DOMElement $navigation_top
 		 * @var DOMElement $navigation_top_fixed
 		 */
-		$navigation_top = $this->xpath->query( '//header[ @id = "masthead" ]//div[ contains( @class, "navigation-top" ) ]' )->item( 0 );
+		$navigation_top = $this->dom->xpath->query( '//header[ @id = "masthead" ]//div[ contains( @class, "navigation-top" ) ]' )->item( 0 );
 		if ( ! $navigation_top ) {
 			return;
 		}
@@ -956,7 +933,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		$navigation_top->parentNode->insertBefore( $navigation_top_fixed, $navigation_top->nextSibling );
-		foreach ( $this->xpath->query( './/*[ @id ]', $navigation_top_fixed ) as $element ) {
+		foreach ( $this->dom->xpath->query( './/*[ @id ]', $navigation_top_fixed ) as $element ) {
 			$element->setAttribute( 'id', $element->getAttribute( 'id' ) . '-fixed' );
 		}
 
@@ -1017,7 +994,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			$position_script->setAttribute( 'type', 'application/json' );
 			$position_script->appendChild( $this->dom->createTextNode( wp_json_encode( $animation ) ) );
 			$amp_animation->appendChild( $position_script );
-			$this->body->appendChild( $amp_animation );
+			$this->dom->body->appendChild( $amp_animation );
 		}
 	}
 
@@ -1398,7 +1375,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		$featured_content_inner = $this->xpath->query( './div[ @class = "featured-content-inner" ]', $featured_content )->item( 0 );
+		$featured_content_inner = $this->dom->xpath->query( './div[ @class = "featured-content-inner" ]', $featured_content )->item( 0 );
 		if ( ! $featured_content_inner ) {
 			return;
 		}
@@ -1490,8 +1467,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @link https://github.com/WordPress/wordpress-develop/blob/fc2a8f0e11316d066a686995b8578d82cd5546cf/src/wp-content/themes/twentyfourteen/js/functions.js#L69-L87
 	 */
 	public function add_twentyfourteen_search() {
-		$search_toggle_div  = $this->xpath->query( '//div[ contains( @class, "search-toggle" ) ]' )->item( 0 );
-		$search_toggle_link = $this->xpath->query( './a', $search_toggle_div )->item( 0 );
+		$search_toggle_div  = $this->dom->xpath->query( '//div[ contains( @class, "search-toggle" ) ]' )->item( 0 );
+		$search_toggle_link = $this->dom->xpath->query( './a', $search_toggle_div )->item( 0 );
 		$search_container   = $this->dom->getElementById( 'search-container' );
 		if ( ! $search_toggle_div || ! $search_toggle_link || ! $search_container ) {
 			return;
@@ -1510,7 +1487,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Update AMP state to show the search bar and focus on search input when tapping on the search button.
 		$search_input_id = 'twentyfourteen_search_input';
-		$search_input_el = $this->xpath->query( './/input[ @name = "s" ]', $search_container )->item( 0 );
+		$search_input_el = $this->dom->xpath->query( './/input[ @name = "s" ]', $search_container )->item( 0 );
 		$search_toggle_link->removeAttribute( 'href' );
 		$on = "tap:AMP.setState( { $hidden_state_id: ! $hidden_state_id } )";
 		if ( $search_input_el ) {
@@ -1548,13 +1525,13 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		$modal_id           = $args['modal_id'];
-		$modal_content_node = $this->xpath->query( $args['modal_content_xpath'] )->item( 0 );
+		$modal_content_node = $this->dom->xpath->query( $args['modal_content_xpath'] )->item( 0 );
 
 		if ( ! is_string( $modal_id ) || ! $modal_content_node instanceof DOMElement ) {
 			return;
 		}
 
-		$body_id = AMP_DOM_Utils::get_element_id( $this->get_body_node(), 'body' );
+		$body_id = AMP_DOM_Utils::get_element_id( $this->dom->body, 'body' );
 
 		$open_xpaths  = isset( $args['open_button_xpath'] ) ? $args['open_button_xpath'] : [];
 		$close_xpaths = isset( $args['close_button_xpath'] ) ? $args['close_button_xpath'] : [];
@@ -1577,7 +1554,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		// retrieve a single result.
 		foreach ( $modal_actions as $modal_action => $toggle_xpaths ) {
 			foreach ( $toggle_xpaths as $toggle_xpath ) {
-				foreach ( $this->xpath->query( $toggle_xpath ) as $toggle_node ) {
+				foreach ( $this->dom->xpath->query( $toggle_xpath ) as $toggle_node ) {
 					if ( $toggle_node instanceof DOMElement ) {
 						AMP_DOM_Utils::add_amp_action( $toggle_node, 'tap', $modal_action );
 					}
@@ -1599,7 +1576,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$amp_lightbox->setAttribute( 'animate-in', isset( $args['animate_in'] ) ? $args['animate_in'] : 'fade-in' );
 		$amp_lightbox->setAttribute( 'scrollable', isset( $args['scrollable'] ) ? $args['scrollable'] : true );
 
-		$amp_lightbox_inner_content = $this->xpath->query( ".//*[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' modal-inner ' ) ]", $modal_content_node )->item( 0 );
+		$amp_lightbox_inner_content = $this->dom->xpath->query( ".//*[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' modal-inner ' ) ]", $modal_content_node )->item( 0 );
 		foreach ( [ $amp_lightbox, $amp_lightbox_inner_content ] as $event_element ) {
 			$event_element->setAttribute( 'role', $this->guess_modal_role( $modal_content_node ) );
 			// Setting tabindex to -1 (not reachable) as keyboard focus is handled through toggles.
@@ -1641,7 +1618,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * with the tap actions being attached to their associated toggles.
 	 */
 	public function add_twentytwenty_modals() {
-		$modals = $this->xpath->query( "//*[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' cover-modal ' ) ]" );
+		$modals = $this->dom->xpath->query( "//*[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' cover-modal ' ) ]" );
 
 		if ( false === $modals || 0 === $modals->length ) {
 			return;
@@ -1659,7 +1636,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			$modal_target = $modal->getAttribute( 'data-modal-target-string' );
-			$toggles      = $this->xpath->query( "//*[ @data-toggle-target = '{$modal_target}' ]" );
+			$toggles      = $this->dom->xpath->query( "//*[ @data-toggle-target = '{$modal_target}' ]" );
 
 			$open_button_xpaths  = [];
 			$close_button_xpaths = [];
@@ -1718,8 +1695,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * with <amp-state> components storing the CSS classes to set.
 	 */
 	public function add_twentytwenty_toggles() {
-		$toggles = $this->xpath->query( '//*[ @data-toggle-target ]' );
-		$body_id = AMP_DOM_Utils::get_element_id( $this->get_body_node(), 'body' );
+		$toggles = $this->dom->xpath->query( '//*[ @data-toggle-target ]' );
+		$body_id = AMP_DOM_Utils::get_element_id( $this->dom->body, 'body' );
 
 		if ( false === $toggles || 0 === $toggles->length ) {
 			return;
@@ -1738,12 +1715,12 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			if ( 'next' === $toggle_target ) {
 				$target_node = $toggle->nextSibling;
 			} else {
-				$target_xpath = $this->xpath_from_css_selector( $toggle_target );
+				$target_xpath = $this->dom->xpath_from_css_selector( $toggle_target );
 				if ( null === $target_xpath ) {
 					continue;
 				}
 
-				$target_nodes = $this->xpath->query( $target_xpath, $toggle );
+				$target_nodes = $this->dom->xpath->query( $target_xpath, $toggle );
 				if ( false === $target_nodes || 0 === count( $target_nodes ) ) {
 					continue;
 				}
@@ -1775,7 +1752,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				AMP_DOM_Utils::add_amp_action( $toggle, 'tap', "{$toggle_id}.toggleClass(class='active')" );
 			} else {
 				// If not, toggle all toggles with this toggle target.
-				$target_toggles = $this->xpath->query( "//*[ @data-toggle-target = '{$toggle_target}' ]" );
+				$target_toggles = $this->dom->xpath->query( "//*[ @data-toggle-target = '{$toggle_target}' ]" );
 				foreach ( $target_toggles as $target_toggle ) {
 					if ( AMP_DOM_Utils::has_class( $target_toggle, 'close-nav-toggle' ) ) {
 						// Skip adding the 'active' class on the "Close" button in the primary nav menu.
@@ -1796,8 +1773,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				$focus_selector = $toggle->getAttribute( 'data-set-focus' );
 
 				if ( ! empty( $focus_selector ) ) {
-					$focus_xpath   = $this->xpath_from_css_selector( $focus_selector );
-					$focus_element = $this->xpath->query( $focus_xpath )->item( 0 );
+					$focus_xpath   = $this->dom->xpath_from_css_selector( $focus_selector );
+					$focus_element = $this->dom->xpath->query( $focus_xpath )->item( 0 );
 
 					if ( $focus_element instanceof DOMElement ) {
 						$focus_element_id = AMP_DOM_Utils::get_element_id( $focus_element );
@@ -1825,7 +1802,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		$sub_menu = $this->xpath->query( ".//*[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' sub-menu ' ) ]", $menu_item )->item( 0 );
+		$sub_menu = $this->dom->xpath->query( ".//*[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' sub-menu ' ) ]", $menu_item )->item( 0 );
 
 		if ( ! $sub_menu instanceof DOMElement ) {
 			return $element;
@@ -1838,10 +1815,10 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * Automatically open the submenus related to the current page in the menu modal.
 	 */
 	public function add_twentytwenty_current_page_awareness() {
-		$page_ancestors = $this->xpath->query( "//li[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' current_page_ancestor ' ) ]" );
+		$page_ancestors = $this->dom->xpath->query( "//li[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' current_page_ancestor ' ) ]" );
 		foreach ( $page_ancestors as $page_ancestor ) {
-			$toggle   = $this->xpath->query( "./div/button[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' sub-menu-toggle ' ) ]", $page_ancestor )->item( 0 );
-			$children = $this->xpath->query( "./ul[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' children ' ) ]", $page_ancestor )->item( 0 );
+			$toggle   = $this->dom->xpath->query( "./div/button[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' sub-menu-toggle ' ) ]", $page_ancestor )->item( 0 );
+			$children = $this->dom->xpath->query( "./ul[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' children ' ) ]", $page_ancestor )->item( 0 );
 			foreach ( [ $toggle, $children ] as $element ) {
 				if ( ! $element instanceof DOMElement ) {
 					continue;

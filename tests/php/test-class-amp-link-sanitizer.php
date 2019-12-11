@@ -142,10 +142,9 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 		}
 
 		// Confirm changes to form.
-		$xpath = new DOMXPath( $dom );
-		$this->assertEquals( 1, $xpath->query( '//form[ @id = "internal-search" ]//input[ @name = "amp" ]' )->length );
-		$this->assertEquals( 0, $xpath->query( '//form[ @id = "internal-post" ]//input[ @name = "amp" ]' )->length );
-		$this->assertEquals( 0, $xpath->query( '//form[ @id = "external-search" ]//input[ @name = "amp" ]' )->length );
+		$this->assertEquals( 1, $dom->xpath->query( '//form[ @id = "internal-search" ]//input[ @name = "amp" ]' )->length );
+		$this->assertEquals( 0, $dom->xpath->query( '//form[ @id = "internal-post" ]//input[ @name = "amp" ]' )->length );
+		$this->assertEquals( 0, $dom->xpath->query( '//form[ @id = "external-search" ]//input[ @name = "amp" ]' )->length );
 	}
 
 	/**
@@ -176,13 +175,12 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 	 * @param string $expected_meta Expected meta content.
 	 */
 	public function test_amp_to_amp_meta_tag( $sanitizer_args, $expected_meta ) {
-		$dom   = AMP_DOM_Utils::get_dom_from_content( '<div>Hello</div>' );
-		$xpath = new DOMXPath( $dom );
+		$dom = AMP_DOM_Utils::get_dom_from_content( '<div>Hello</div>' );
 
 		$sanitizer = new AMP_Link_Sanitizer( $dom, $sanitizer_args );
 		$sanitizer->sanitize();
 
-		$meta_tag = $xpath->query( "//meta[ @name = 'amp-to-amp-navigation' ]" )->item( 0 );
+		$meta_tag = $dom->xpath->query( "//meta[ @name = 'amp-to-amp-navigation' ]" )->item( 0 );
 		$this->assertInstanceOf( 'DOMElement', $meta_tag );
 		$this->assertEquals( $expected_meta, $meta_tag->getAttribute( 'content' ) );
 	}

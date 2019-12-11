@@ -32,10 +32,9 @@ final class AMP_Dev_Mode_Sanitizer extends AMP_Base_Sanitizer {
 	public function sanitize() {
 		$this->dom->documentElement->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
 
-		$xpath          = new DOMXPath( $this->dom );
 		$element_xpaths = ! empty( $this->args['element_xpaths'] ) ? $this->args['element_xpaths'] : [];
 		foreach ( $element_xpaths as $element_xpath ) {
-			foreach ( $xpath->query( $element_xpath ) as $node ) {
+			foreach ( $this->dom->xpath->query( $element_xpath ) as $node ) {
 				if ( $node instanceof DOMElement ) {
 					$node->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
 				}

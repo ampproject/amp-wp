@@ -45,7 +45,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Sanitize the <video> elements from the HTML contained in this instance's DOMDocument.
+	 * Sanitize the <video> elements from the HTML contained in this instance's Dom\Document.
 	 *
 	 * @since 0.2
 	 * @since 1.0 Set the filtered child node's src attribute.

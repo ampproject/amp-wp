@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use Amp\AmpWP\Dom\Document;
+
 /**
  * Test AMP_Script_Sanitizer.
  *
@@ -54,13 +56,13 @@ class AMP_Script_Sanitizer_Test extends WP_UnitTestCase {
 		if ( null === $expected ) {
 			$expected = $source;
 		}
-		$dom = AMP_DOM_Utils::get_dom( $source );
+		$dom = Document::from_html( $source );
 		$this->assertSame( 1, $dom->getElementsByTagName( 'noscript' )->length );
 		$sanitizer = new AMP_Script_Sanitizer( $dom );
 		$sanitizer->sanitize();
 		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 		$whitelist_sanitizer->sanitize();
-		$content = AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
+		$content = $dom->saveHTML( $dom->documentElement );
 		$this->assertEquals( $expected, $content );
 	}
 
@@ -103,10 +105,10 @@ class AMP_Script_Sanitizer_Test extends WP_UnitTestCase {
 			'use_document_element' => true,
 		];
 
-		$dom = AMP_DOM_Utils::get_dom( $html );
+		$dom = Document::from_html( $html );
 		AMP_Content_Sanitizer::sanitize_document( $dom, amp_get_content_sanitizers(), $args );
 
-		$content = AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
+		$content = $dom->saveHTML( $dom->documentElement );
 
 		$this->assertRegExp( '/<!-- Google Tag Manager -->\s*<!-- End Google Tag Manager -->/', $content );
 		$this->assertContains( '<noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>', $content );

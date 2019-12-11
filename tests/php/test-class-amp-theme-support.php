@@ -1600,10 +1600,9 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$html = ob_get_clean();
 		$html = AMP_Theme_Support::prepare_response( $html );
 
-		$dom   = AMP_DOM_Utils::get_dom( $html );
-		$xpath = new DOMXPath( $dom );
+		$dom = Document::from_html( $html );
 
-		$scripts = $xpath->query( '//script[ not( @type ) or @type = "text/javascript" ]' );
+		$scripts = $dom->xpath->query( '//script[ not( @type ) or @type = "text/javascript" ]' );
 		$this->assertSame( 3, $scripts->length );
 		foreach ( $scripts as $script ) {
 			$this->assertSame( 'head', $script->parentNode->nodeName );
@@ -1660,12 +1659,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$html = ob_get_clean();
 		$html = AMP_Theme_Support::prepare_response( $html );
 
-		$dom   = AMP_DOM_Utils::get_dom( $html );
-		$xpath = new DOMXPath( $dom );
+		$dom = Document::from_html( $html );
 
 		/** @var DOMElement $script Script. */
 		$actual_script_srcs = [];
-		foreach ( $xpath->query( '//script[ not( @type ) or @type = "text/javascript" ]' ) as $script ) {
+		foreach ( $dom->xpath->query( '//script[ not( @type ) or @type = "text/javascript" ]' ) as $script ) {
 			$actual_script_srcs[] = $script->getAttribute( 'src' );
 		}
 
@@ -1713,8 +1711,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$html = ob_get_clean();
 		$html = AMP_Theme_Support::prepare_response( $html );
 
-		$dom   = AMP_DOM_Utils::get_dom( $html );
-		$xpath = new DOMXPath( $dom );
+		$dom = Document::from_html( $html );
 
 		$script_srcs = [];
 		/**
@@ -1722,7 +1719,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		 *
 		 * @var DOMElement $script
 		 */
-		$scripts = $xpath->query( '//script[ @src ]' );
+		$scripts = $dom->xpath->query( '//script[ @src ]' );
 		foreach ( $scripts as $script ) {
 			$script_srcs[] = $script->getAttribute( 'src' );
 		}

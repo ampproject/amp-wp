@@ -46,8 +46,7 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		if ( ! empty( $this->args['comments_live_list'] ) ) {
-			$xpath    = new DOMXPath( $this->dom );
-			$comments = $xpath->query( '//amp-live-list/*[ @items ]/*[ starts-with( @id, "comment-" ) ]' );
+			$comments = $this->dom->xpath->query( '//amp-live-list/*[ @items ]/*[ starts-with( @id, "comment-" ) ]' );
 
 			foreach ( $comments as $comment ) {
 				$this->add_amp_live_list_comment_attributes( $comment );

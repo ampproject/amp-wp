@@ -142,9 +142,7 @@ class Test_AMP_DOM_Document extends WP_UnitTestCase {
 	 * @covers Document::saveHTML()
 	 */
 	public function test_dom_document( $charset, $source, $expected ) {
-		$document = new Document( '', $charset );
-		$document->loadHTML( $source );
-
+		$document = Document::from_html( $source );
 		$this->assertEqualMarkup( $expected, $document->saveHTML() );
 	}
 
@@ -172,25 +170,20 @@ class Test_AMP_DOM_Document extends WP_UnitTestCase {
 	 * @covers \Amp\AmpWP\Dom\Document::convert_amp_bind_attributes()
 	 */
 	public function test_amp_bind_conversion() {
-		$original = '<amp-img width=300 height="200" data-foo="bar" selected src="/img/dog.jpg" [src]="myAnimals[currentAnimal].imageUrl"></amp-img>';
-		$dom      = new Document();
-		$dom->loadHTML( $original );
-		$converted = $dom->saveHTML();
+		$original  = '<amp-img width=300 height="200" data-foo="bar" selected src="/img/dog.jpg" [src]="myAnimals[currentAnimal].imageUrl"></amp-img>';
+		$converted = Document::from_html( $original )->saveHTML();
 		$this->assertNotEquals( $original, $converted );
 		$this->assertContains( Document::AMP_BIND_DATA_ATTR_PREFIX . 'src="myAnimals[currentAnimal].imageUrl"', $converted );
 		$this->assertContains( 'width="300" height="200" data-foo="bar" selected', $converted );
 
 		// Check tag with self-closing attribute.
-		$original = '<input type="text" role="textbox" class="calc-input" id="liens" name="liens" [value]="(result1 != null) ? result1.liens : \'verifying…\'" />';
-		$dom      = new Document();
-		$dom->loadHTML( $original );
-		$converted = $dom->saveHTML();
+		$original  = '<input type="text" role="textbox" class="calc-input" id="liens" name="liens" [value]="(result1 != null) ? result1.liens : \'verifying…\'" />';
+		$converted = Document::from_html( $original )->saveHTML();
 		$this->assertNotEquals( $original, $converted );
 
 		// Preserve trailing slash that is actually the attribute value.
-		$original = '<a href=/>Home</a>';
-		$dom      = new Document();
-		$dom->loadHTML( $original );
+		$original  = '<a href=/>Home</a>';
+		$dom       = Document::from_html( $original );
 		$converted = $dom->saveHTML( $dom->body->firstChild );
 		$this->assertEquals( '<a href="/">Home</a>', $converted );
 
@@ -201,9 +194,7 @@ class Test_AMP_DOM_Document extends WP_UnitTestCase {
 			'<amp-img width="123" [text]="..." *bad*></amp-img>',
 		];
 		foreach ( $malformed_html as $html ) {
-			$dom = new Document();
-			$dom->loadHTML( $html );
-			$converted = $dom->saveHTML();
+			$converted = Document::from_html( $html )->saveHTML();
 			$this->assertNotContains( Document::AMP_BIND_DATA_ATTR_PREFIX, $converted, "Source: {$html}" );
 		}
 	}
@@ -256,10 +247,73 @@ class Test_AMP_DOM_Document extends WP_UnitTestCase {
 			htmlentities( $html )
 		);
 
-		$dom = new Document();
-		$dom->loadHTML( $to_convert );
-		$dom->saveHTML();
+		Document::from_html( $to_convert )->saveHTML();
 
 		$this->assertSame( PREG_NO_ERROR, preg_last_error(), 'Probably failed when backtrack limit was exhausted.' );
+	}
+
+	/**
+	 * Test that HEAD and BODY elements are always present.
+	 *
+	 * @covers \Amp\AmpWP\Dom\Document::normalize_document_structure()
+	 */
+	public function test_ensuring_head_body() {
+		$html = '<html><body><p>Hello</p></body></html>';
+		$dom  = Document::from_html( $html );
+		$this->assertEquals( 'head', $dom->documentElement->firstChild->nodeName );
+		$this->assertEquals( 0, $dom->documentElement->firstChild->childNodes->length );
+		$this->assertEquals( 'body', $dom->documentElement->lastChild->nodeName );
+		$this->assertEquals( $dom->documentElement->lastChild, $dom->getElementsByTagName( 'p' )->item( 0 )->parentNode );
+
+		$html = '<html><head><title>foo</title></head></html>';
+		$dom  = Document::from_html( $html );
+		$this->assertEquals( 'head', $dom->documentElement->firstChild->nodeName );
+		$this->assertEquals( $dom->documentElement->firstChild, $dom->getElementsByTagName( 'title' )->item( 0 )->parentNode );
+		$this->assertEquals( 'body', $dom->documentElement->lastChild->nodeName );
+		$this->assertEquals( 0, $dom->documentElement->lastChild->childNodes->length );
+
+		$html = '<html><head><title>foo</title></head><p>no body</p></html>';
+		$dom  = Document::from_html( $html );
+		$this->assertEquals( 'head', $dom->documentElement->firstChild->nodeName );
+		$this->assertEquals( $dom->documentElement->firstChild, $dom->getElementsByTagName( 'title' )->item( 0 )->parentNode );
+		$p = $dom->getElementsByTagName( 'p' )->item( 0 );
+		$this->assertEquals( $dom->documentElement->lastChild, $p->parentNode );
+		$this->assertEquals( 'no body', $p->textContent );
+
+		$html = 'Hello world';
+		$dom  = Document::from_html( $html );
+		$this->assertEquals( 'head', $dom->documentElement->firstChild->nodeName );
+		$this->assertEquals( 0, $dom->documentElement->firstChild->childNodes->length );
+		$this->assertEquals( 'body', $dom->documentElement->lastChild->nodeName );
+		$this->assertEquals( 'Hello world', $dom->documentElement->lastChild->lastChild->textContent );
+	}
+
+
+	/**
+	 * Test that invalid head nodes are moved to body.
+	 *
+	 * @covers \Amp\AmpWP\Dom\Document::move_invalid_head_nodes_to_body()
+	 */
+	public function test_invalid_head_nodes() {
+
+		// Text node.
+		$html = '<html><head>text</head><body><span>end</span></body></html>';
+		$dom  = Document::from_html( $html );
+		$this->assertNull( $dom->head->firstChild );
+		$body_first_child = $dom->body->firstChild;
+		$this->assertInstanceOf( 'DOMElement', $body_first_child );
+		$this->assertEquals( 'text', $body_first_child->textContent );
+
+		// Valid nodes.
+		$html = '<html><head><!--foo--><title>a</title><base href="/"><meta name="foo" content="bar"><link rel="test" href="/"><style></style><noscript><img src="http://example.com/foo.png"></noscript><script></script></head><body></body></html>';
+		$dom  = Document::from_html( $html );
+		$this->assertEquals( 8, $dom->head->childNodes->length );
+		$this->assertNull( $dom->body->firstChild );
+
+		// Invalid nodes.
+		$html = '<html><head><?pi ?><span></span><div></div><p>hi</p><img src="https://example.com"><iframe src="/"></iframe></head><body></body></html>';
+		$dom  = Document::from_html( $html );
+		$this->assertNull( $dom->head->firstChild );
+		$this->assertEquals( 6, $dom->body->childNodes->length );
 	}
 }

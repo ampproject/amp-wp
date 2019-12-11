@@ -66,8 +66,7 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 			]
 		);
 
-		$xpath           = new DOMXPath( $this->dom );
-		$schema_org_meta = $xpath->query( '//head/script[@type="application/ld+json"]' )->item( 0 );
+		$schema_org_meta = $this->dom->xpath->query( '//head/script[@type="application/ld+json"]' )->item( 0 );
 
 		if ( $schema_org_meta && $schema_org_meta->firstChild instanceof DOMText ) {
 			$metadata = json_decode( $schema_org_meta->firstChild->nodeValue );
@@ -123,7 +122,7 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Add or update Canonical URL in the document head.
 		if ( $this->args['base_url'] && $this->args['canonical_url'] ) {
-			$canonical_link = $xpath->query( '/html/head/link[ @rel = "canonical" ]' )->item( 0 );
+			$canonical_link = $this->dom->xpath->query( '/html/head/link[ @rel = "canonical" ]' )->item( 0 );
 			if ( $canonical_link instanceof DOMElement ) {
 				$canonical_link->setAttribute( 'href', $this->args['canonical_url'] );
 			} else {
@@ -135,7 +134,7 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 						'href' => $this->args['canonical_url'],
 					]
 				);
-				$this->dom->getElementsByTagName( 'head' )->item( 0 )->appendChild( $canonical_link );
+				$this->dom->head->appendChild( $canonical_link );
 			}
 		}
 

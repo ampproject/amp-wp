@@ -69,7 +69,7 @@ class Test_Carousel extends \WP_UnitTestCase {
 
 		$this->assertEquals(
 			$expected,
-			AMP_DOM_Utils::get_content_from_dom_node( $dom, $actual_amp_carousel )
+			$dom->saveHTML( $actual_amp_carousel )
 		);
 	}
 

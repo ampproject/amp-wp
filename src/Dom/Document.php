@@ -213,6 +213,23 @@ final class Document extends DOMDocument {
 	}
 
 	/**
+	 * Named constructor to provide convenient way of transforming HTML into DOM.
+	 *
+	 * @param string $html     HTML to turn into a DOM.
+	 * @param string $encoding Optional. Encoding of the provided HTML string.
+	 * @return Document|false DOM generated from provided HTML, or false if the transformation failed.
+	 */
+	public static function from_html( $html, $encoding = null ) {
+		$dom = new self( '', $encoding );
+
+		if ( ! $dom->loadHTML( $html ) ) {
+			return false;
+		}
+
+		return $dom;
+	}
+
+	/**
 	 * Load HTML from a string.
 	 *
 	 * @link  https://php.net/manual/domdocument.loadhtml.php
@@ -246,16 +263,18 @@ final class Document extends DOMDocument {
 
 		if ( $success ) {
 			// Remove http-equiv charset again.
-			$head = $this->getElementsByTagName( self::TAG_HEAD )->item( 0 );
-			$meta = $head->firstChild;
+			$meta = $this->head->firstChild;
 			if (
 				'meta' === $meta->tagName
 				&& self::HTML_HTTP_EQUIV_VALUE === $meta->getAttribute( 'http-equiv' )
 				&& ( self::HTML_HTTP_EQUIV_CONTENT_VALUE ) === $meta->getAttribute( 'content' )
 			) {
-				$head->removeChild( $meta );
+				$this->head->removeChild( $meta );
 			}
 		}
+
+		// Do some further clean-up.
+		$this->move_invalid_head_nodes_to_body();
 
 		return $success;
 	}
@@ -296,6 +315,11 @@ final class Document extends DOMDocument {
 		$html = $this->restore_mustache_template_tokens( $html );
 		$html = $this->maybe_restore_noscript_elements( $html );
 		$html = $this->restore_self_closing_tags( $html );
+
+		// Whitespace just causes unit tests to fail... so whitespace begone.
+		if ( '' === trim( $html ) ) {
+			return '';
+		}
 
 		return $html;
 	}
@@ -398,22 +422,29 @@ final class Document extends DOMDocument {
 	public function normalize_dom_structure() {
 		$head = $this->getElementsByTagName( self::TAG_HEAD )->item( 0 );
 		if ( ! $head ) {
-			$head = $this->createElement( self::TAG_HEAD );
-			$this->insertBefore( $head, $this->firstChild );
+			$this->head = $this->createElement( self::TAG_HEAD );
+			$this->insertBefore( $this->head, $this->firstChild );
 		}
 
 		$body = $this->getElementsByTagName( self::TAG_BODY )->item( 0 );
 		if ( ! $body ) {
-			$body = $this->createElement( self::TAG_BODY );
-			$this->appendChild( $body );
+			$this->body = $this->createElement( self::TAG_BODY );
+			$this->appendChild( $this->body );
 		}
 
+		$this->move_invalid_head_nodes_to_body();
+	}
+
+	/**
+	 * Move invalid head nodes back to the body.
+	 */
+	private function move_invalid_head_nodes_to_body() {
 		// Walking backwards makes it easier to move elements in the expected order.
-		$node = $head->lastChild;
+		$node = $this->head->lastChild;
 		while ( $node ) {
 			$next_sibling = $node->previousSibling;
 			if ( ! AMP_DOM_Utils::is_valid_head_node( $node ) ) {
-				$body->insertBefore( $head->removeChild( $node ), $body->firstChild );
+				$this->body->insertBefore( $this->head->removeChild( $node ), $this->body->firstChild );
 			}
 			$node = $next_sibling;
 		}

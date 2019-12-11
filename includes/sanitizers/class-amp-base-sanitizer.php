@@ -33,7 +33,7 @@ abstract class AMP_Base_Sanitizer {
 	/**
 	 * DOM.
 	 *
-	 * @var Document A standard PHP representation of an HTML document in object form.
+	 * @var Document An Amp\Document representation of an HTML document.
 	 *
 	 * @since 0.2
 	 */
@@ -64,7 +64,7 @@ abstract class AMP_Base_Sanitizer {
 
 	/**
 	 * Flag to be set in child class' sanitize() method indicating if the
-	 * HTML contained in the DOMDocument has been sanitized yet or not.
+	 * HTML contained in the Dom\Document has been sanitized yet or not.
 	 *
 	 * @since 0.2
 	 *
@@ -91,8 +91,8 @@ abstract class AMP_Base_Sanitizer {
 	 *
 	 * @since 0.2
 	 *
-	 * @param DOMDocument $dom Represents the HTML document to sanitize.
-	 * @param array       $args {
+	 * @param Document $dom Represents the HTML document to sanitize.
+	 * @param array    $args {
 	 *      Args.
 	 *
 	 *      @type int $content_max_width
@@ -110,7 +110,7 @@ abstract class AMP_Base_Sanitizer {
 		if ( ! empty( $this->args['use_document_element'] ) ) {
 			$this->root_element = $this->dom->documentElement;
 		} else {
-			$this->root_element = $this->dom->getElementsByTagName( 'body' )->item( 0 );
+			$this->root_element = $this->dom->body;
 		}
 	}
 
@@ -201,13 +201,14 @@ abstract class AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Get HTML body as DOMElement from DOMDocument received by the constructor.
+	 * Get HTML body as DOMElement from Dom\Document received by the constructor.
 	 *
-	 * @deprecated Just reference $root_element instead.
+	 * @deprecated Use $this->dom->body instead.
 	 * @return DOMElement The body element.
 	 */
 	protected function get_body_node() {
-		return $this->dom->getElementsByTagName( 'body' )->item( 0 );
+		_deprecated_function( 'Use $this->dom->body instead', '1.5.0' );
+		return $this->dom->body;
 	}
 
 	/**

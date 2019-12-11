@@ -57,8 +57,7 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 			$fragment->appendChild( $this->dom->createComment( '/noscript' ) );
 
 			if ( $must_move_to_body ) {
-				$body = $this->dom->getElementsByTagName( 'body' )->item( 0 );
-				$body->insertBefore( $fragment, $body->firstChild );
+				$this->dom->body->insertBefore( $fragment, $this->dom->body->firstChild );
 				$noscript->parentNode->removeChild( $noscript );
 			} else {
 				$noscript->parentNode->replaceChild( $fragment, $noscript );

@@ -20,7 +20,7 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 	/**
 	 * Representation of the DOM.
 	 *
-	 * @var DOMDocument
+	 * @var Document
 	 */
 	public $dom;
 
@@ -122,8 +122,7 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 		$this->create_comments_list( $comment_objects );
 		$instance->sanitize();
 
-		$xpath    = new DOMXPath( $this->dom );
-		$comments = $xpath->query( '//*[ starts-with( @id, "comment-" ) ]' );
+		$comments = $this->dom->xpath->query( '//*[ starts-with( @id, "comment-" ) ]' );
 
 		foreach ( $comments as $comment ) {
 			/**

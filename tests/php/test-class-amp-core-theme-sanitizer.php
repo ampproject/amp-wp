@@ -48,7 +48,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	}
 
 	public function get_get_closest_submenu_data() {
-		$html  = '
+		$html = '
 			<nav>
 				<ul class="primary-menu">
 					<li id="menu-item-1" class="menu-item menu-item-1"><a href="https://example.com/a">Link A</a></li>
@@ -72,17 +72,16 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 				</ul>
 			</nav>
 		';
-		$dom   = AMP_DOM_Utils::get_dom_from_content( $html );
-		$xpath = new DOMXPath( $dom );
+		$dom  = AMP_DOM_Utils::get_dom_from_content( $html );
 		return [
 			// First sub-menu.
-			[ $dom, $xpath, $xpath->query( "//*[ @id = 'menu-item-2' ]" )->item( 0 ), $xpath->query( "//*[ @id = 'sub-menu-1' ]" )->item( 0 ) ],
+			[ $dom, $dom->xpath->query( "//*[ @id = 'menu-item-2' ]" )->item( 0 ), $dom->xpath->query( "//*[ @id = 'sub-menu-1' ]" )->item( 0 ) ],
 
 			// Second sub-menu.
-			[ $dom, $xpath, $xpath->query( "//*[ @id = 'menu-item-5' ]" )->item( 0 ), $xpath->query( "//*[ @id = 'sub-menu-2' ]" )->item( 0 ) ],
+			[ $dom, $dom->xpath->query( "//*[ @id = 'menu-item-5' ]" )->item( 0 ), $dom->xpath->query( "//*[ @id = 'sub-menu-2' ]" )->item( 0 ) ],
 
 			// Sub-menu of second sub-menu.
-			[ $dom, $xpath, $xpath->query( "//*[ @id = 'menu-item-6' ]" )->item( 0 ), $xpath->query( "//*[ @id = 'sub-menu-3' ]" )->item( 0 ) ],
+			[ $dom, $dom->xpath->query( "//*[ @id = 'menu-item-6' ]" )->item( 0 ), $dom->xpath->query( "//*[ @id = 'sub-menu-3' ]" )->item( 0 ) ],
 		];
 	}
 
@@ -92,10 +91,9 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	 * @dataProvider get_get_closest_submenu_data
 	 * @covers AMP_Core_Theme_Sanitizer::get_closest_submenu()
 	 */
-	public function test_get_closest_submenu( $dom, $xpath, $element, $expected ) {
+	public function test_get_closest_submenu( $dom, $element, $expected ) {
 		$sanitizer = new AMP_Core_Theme_Sanitizer( $dom );
-		$this->set_private_property( $sanitizer, 'xpath', $xpath );
-		$actual = $this->call_private_method( $sanitizer, 'get_closest_submenu', [ $element ] );
+		$actual    = $this->call_private_method( $sanitizer, 'get_closest_submenu', [ $element ] );
 		$this->assertEquals( $expected, $actual );
 	}
 }

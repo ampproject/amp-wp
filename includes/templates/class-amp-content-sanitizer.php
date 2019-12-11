@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use Amp\AmpWP\Dom\Document;
+
 /**
  * Class AMP_Content_Sanitizer
  *
@@ -45,9 +47,9 @@ class AMP_Content_Sanitizer {
 	 *
 	 * @since 0.7
 	 *
-	 * @param DOMDocument $dom               HTML document.
-	 * @param string[]    $sanitizer_classes Sanitizer classes.
-	 * @param array       $args              Global args passed into sanitizers.
+	 * @param Document $dom               HTML document.
+	 * @param string[] $sanitizer_classes Sanitizer classes.
+	 * @param array    $args              Global args passed into sanitizers.
 	 * @return array {
 	 *     Scripts and stylesheets needed by sanitizers.
 	 *
@@ -56,7 +58,7 @@ class AMP_Content_Sanitizer {
 	 *     @type array $styles      Styles. If $args['return_styles'] is not empty. For legacy purposes.
 	 * }
 	 */
-	public static function sanitize_document( $dom, $sanitizer_classes, $args ) {
+	public static function sanitize_document( Document $dom, $sanitizer_classes, $args ) {
 		$scripts     = [];
 		$stylesheets = [];
 		$styles      = [];

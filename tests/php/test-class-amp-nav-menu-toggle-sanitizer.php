@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use Amp\AmpWP\Dom\Document;
+
 /**
  * Tests for AMP_Nav_Menu_Toggle_Sanitizer.
  *
@@ -104,12 +106,12 @@ class Test_AMP_Nav_Menu_Toggle_Sanitizer extends WP_UnitTestCase {
 	 * @covers AMP_Nav_Menu_Toggle_Sanitizer::get_menu_button()
 	 */
 	public function test_converter( $source, $expected, $args = [] ) {
-		$dom       = AMP_DOM_Utils::get_dom( $source );
+		$dom       = Document::from_html( $source );
 		$sanitizer = new AMP_Nav_Menu_Toggle_Sanitizer( $dom, $args );
 
 		$sanitizer->sanitize();
 
-		$content = AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
+		$content = $dom->saveHTML( $dom->documentElement );
 
 		$this->assertEquals( $expected, $content );
 	}
