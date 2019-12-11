@@ -146,11 +146,17 @@ All submissions, including submissions by project members, require review. We us
 
 ### Coding standards
 
-All contributions to this project will be checked against [WordPress-Coding-Standards](https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards) with PHPCS, and for JavaScript linting is done with ESLint.
+This project uses PHPCS, ESLint and StyleLint for maintaining standards and all code contributions will be validated against specific coding standards for each language.
 
 To verify your code meets the requirements, you can run `npm run lint`.
 
-You can also install a `pre-commit` hook by running `bash vendor/xwp/wp-dev-lib/scripts/install-pre-commit-hook.sh`. This way, your code will be checked automatically before committing any changes.
+#### Validation in Git Hooks (pre-commit)
+
+Since all code standard checks run in Travis upon creation of a pull request, it is benifical to utilize the Git `pre-commit` hook to ensure your submission meets coding standards __before__ pushing up changes. This project includes a `pre-commit` hook, provided by the `xwp/wp-dev-lib` package and will be run  automatically when adding a commit.
+
+#### Validation in IDE
+
+If using an Integrated Development Enviornment (IDE) validation can occur at the time of coding. For example, using the [`vscode-eslint`](https://github.com/microsoft/vscode-eslint) extention will display valdiation information directly in the IDE. While this is not required, it is very helpful to understand coding standards without even saving the file.
 
 ### Updating Google fonts list
 
