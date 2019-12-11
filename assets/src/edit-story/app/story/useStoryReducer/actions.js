@@ -4,7 +4,10 @@
 import * as types from './types';
 
 const addPage = ( dispatch ) => ( { properties } ) =>
-	dispatch( { type: types.ADD_PAGE, payload: { properties } } );
+	dispatch( { type: types.ADD_PAGE, payload: { properties, position: null } } );
+
+const addPageAt = ( dispatch ) => ( { properties, position } ) =>
+	dispatch( { type: types.ADD_PAGE, payload: { properties, position } } );
 
 const deletePage = ( dispatch ) => ( { pageId } ) =>
 	dispatch( { type: types.DELETE_PAGE, payload: { pageId } } );
@@ -71,6 +74,7 @@ const toggleElementInSelection = ( dispatch ) => ( { elementId } ) =>
 
 export default {
 	addPage,
+	addPageAt,
 	deletePage,
 	deleteCurrentPage,
 	updatePageProperties,
