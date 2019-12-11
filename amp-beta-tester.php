@@ -84,7 +84,7 @@ function init() {
 	add_filter( 'plugins_api_result', __NAMESPACE__ . '\update_amp_plugin_details', 10, 3 );
 	add_filter( 'pre_set_site_transient_update_plugins', __NAMESPACE__ . '\update_amp_manifest' );
 	add_filter( 'upgrader_post_install', __NAMESPACE__ . '\move_plugin_to_correct_folder', 10, 3 );
-	add_filter( 'auto_update_plugin', 'auto_update_amp_plugin', 10, 2 );
+	add_filter( 'auto_update_plugin', __NAMESPACE__ . '\can_auto_update_amp_plugin', 10, 2 );
 }
 
 /**
@@ -165,14 +165,10 @@ function render_update_settings() {
  * @param object $plugin_manifest  Plugin update manifest.
  * @return bool True if it should auto update, false if not.
  */
-function auto_update_amp_plugin( $should_update, $plugin_manifest ) {
+function can_auto_update_amp_plugin( $should_update, $plugin_manifest ) {
 	$should_auto_update = get_option( 'should_auto_update' );
 
-	if ( true === $should_auto_update && AMP_PLUGIN_BASENAME === $plugin_manifest->plugin ) {
-		return true;
-	}
-
-	return $should_update;
+	return true === $should_auto_update && AMP_PLUGIN_BASENAME === $plugin_manifest->plugin;
 }
 
 /**
@@ -182,13 +178,8 @@ function auto_update_amp_plugin( $should_update, $plugin_manifest ) {
  * @return \stdClass
  */
 function update_amp_manifest( $updates ) {
-	// Nothing to do if there is no `no_update` property.
-	if ( ! isset( $updates->no_update ) ) {
-		return $updates;
-	}
-
 	// Nothing to do if the AMP plugin update manifest cannot be retrieved.
-	if ( ! get_amp_update_manifest() ) {
+	if ( false === get_amp_update_manifest() ) {
 		return $updates;
 	}
 
@@ -196,9 +187,11 @@ function update_amp_manifest( $updates ) {
 		// Get the latest AMP release from GitHub.
 		$latest_release_manifest = get_github_amp_update_manifest();
 
-		unset( $updates->no_update[ AMP_PLUGIN_BASENAME ] );
-		// Mark AMP plugin as having an update available.
-		$updates->response[ AMP_PLUGIN_BASENAME ] = $latest_release_manifest;
+		if ( false !== $latest_release_manifest ) {
+			unset( $updates->no_update[ AMP_PLUGIN_BASENAME ] );
+			// Mark AMP plugin as having an update available.
+			$updates->response[ AMP_PLUGIN_BASENAME ] = $latest_release_manifest;
+		}
 	}
 
 	return $updates;
@@ -247,7 +240,7 @@ function update_amp_plugin_details( $value, $action, $args ) {
  * @param array $hook_extra Extra arguments passed to hooked filters.
  * @param array $result     Installation result data.
  *
- * @return WP_Error|bool
+ * @return \WP_Error|bool
  */
 function move_plugin_to_correct_folder( $response, $hook_extra, $result ) {
 	global $wp_filesystem;
@@ -257,9 +250,10 @@ function move_plugin_to_correct_folder( $response, $hook_extra, $result ) {
 	}
 
 	if ( $wp_filesystem->move( $result['destination'], WP_PLUGIN_DIR . DIRECTORY_SEPARATOR . 'amp', true ) ) {
-		return $response;
+		return true;
 	} else {
-		return new WP_Error();
+		// Returning a WP error invalidates the installation process.
+		return new \WP_Error();
 	}
 }
 
@@ -284,21 +278,29 @@ function get_amp_github_releases() {
 	$releases = json_decode( $raw_response['body'] );
 
 	if ( ! is_array( $releases ) ) {
-		false;
+		return false;
 	}
 
 	$releases_by_name = [];
 
 	foreach ( $releases as $release ) {
+		if ( ! isset( $release->name ) ) {
+			continue;
+		}
+
 		$zip_url = get_download_url_from_amp_release( $release );
 
 		// If there is not an 'amp.zip' asset for the release, ignore it.
-		if ( ! $zip_url ) {
+		if ( false === $zip_url ) {
 			continue;
 		}
 
 		$release->zip_url                   = $zip_url;
 		$releases_by_name[ $release->name ] = $release;
+	}
+
+	if ( 0 === count( $releases_by_name ) ) {
+		return false;
 	}
 
 	// Sort releases in descending order by version.
@@ -316,7 +318,7 @@ function get_amp_github_releases() {
 	set_site_transient(
 		AMP_BETA_TESTER_RELEASES_TRANSIENT,
 		$releases_by_name,
-		DAY_IN_SECONDS
+		HOUR_IN_SECONDS
 	);
 
 	return $releases_by_name;
@@ -329,8 +331,12 @@ function get_amp_github_releases() {
  * @return string|false Download URL if it exists, false if not.
  */
 function get_download_url_from_amp_release( $release ) {
+	if ( ! isset( $release->assets ) ) {
+		return false;
+	}
+
 	foreach ( $release->assets as $asset ) {
-		if ( 'amp.zip' === $asset->name ) {
+		if ( isset( $asset->name, $asset->browser_download_url ) && 'amp.zip' === $asset->name ) {
 			return $asset->browser_download_url;
 		}
 	}
@@ -343,12 +349,16 @@ function get_download_url_from_amp_release( $release ) {
  * from its GitHub release.
  *
  * @param object $release GitHub release JSON object.
- * @return array|false Updated manifest, or false if it fails to retrieve the current update manifest.
+ * @return object|false Updated manifest, or false if it fails to retrieve the current update manifest.
  */
 function generate_amp_update_manifest( $release ) {
+	if ( ! isset( $release->zip_url, $release->name, $release->html_url ) ) {
+		return false;
+	}
+
 	$current_manifest = get_amp_update_manifest();
 
-	if ( ! $current_manifest ) {
+	if ( false === $current_manifest ) {
 		return false;
 	}
 
@@ -358,7 +368,7 @@ function generate_amp_update_manifest( $release ) {
 		'url'         => $release->html_url,
 	];
 
-	return array_merge( (array) $current_manifest, $manifest );
+	return (object) array_merge( (array) $current_manifest, $manifest );
 }
 
 /**
@@ -368,6 +378,10 @@ function generate_amp_update_manifest( $release ) {
  */
 function on_latest_amp_release() {
 	$releases = get_amp_github_releases();
+
+	if ( false === $releases ) {
+		return false;
+	}
 
 	// The first release is always the latest.
 	$release_ver = key( $releases );
@@ -385,24 +399,22 @@ function get_github_amp_update_manifest( $version = 'latest' ) {
 	$github_release = null;
 	$releases       = get_amp_github_releases();
 
-	if ( is_array( $releases ) && 0 !== count( $releases ) ) {
-		if ( 'latest' === $version ) {
-			$github_release = $releases[ key( $releases ) ];
-		} elseif ( array_key_exists( $version, $releases ) ) {
-			$github_release = $releases[ $version ];
-		}
-	} else {
+	if ( ! is_array( $releases ) || 0 === count( $releases ) ) {
 		// Something went wrong fetching the releases.
 		return false;
 	}
 
-	if ( null === $github_release ) {
+	if ( 'latest' === $version ) {
+		$github_release = $releases[ key( $releases ) ];
+	} elseif ( array_key_exists( $version, $releases ) ) {
+		$github_release = $releases[ $version ];
+	}
+
+	if ( null === $github_release || ! is_object( $github_release ) ) {
 		return false;
 	}
 
-	$amp_manifest = generate_amp_update_manifest( $github_release );
-
-	return $amp_manifest ? (object) $amp_manifest : false;
+	return generate_amp_update_manifest( $github_release );
 }
 
 /**
@@ -413,7 +425,10 @@ function get_github_amp_update_manifest( $version = 'latest' ) {
 function get_amp_update_manifest() {
 	$updates = get_site_transient( 'update_plugins' );
 
-	if ( ! isset( $updates->response, $updates->no_update ) ) {
+	if (
+		! isset( $updates->response, $updates->no_update ) ||
+		! ( isset( $updates->response[ AMP_PLUGIN_BASENAME ] ) || isset( $updates->no_update[ AMP_PLUGIN_BASENAME ] ) )
+	) {
 		return false;
 	}
 
