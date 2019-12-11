@@ -29,7 +29,7 @@ function addElements( state, { pageIndex, elements } ) {
 	const isInsertingOnCurrentPage = indexToAddTo === state.current;
 
 	const isWithinBounds = isInsideRange( indexToAddTo, 0, state.pages.length - 1 );
-	if ( isWithinBounds || ! Array.isArray( elements ) ) {
+	if ( ! isWithinBounds || ! Array.isArray( elements ) ) {
 		return state;
 	}
 
