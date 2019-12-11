@@ -7,10 +7,9 @@ import { intersect } from './utils';
  * Delete elements by the given list of ids.
  * If given list of ids is `null`, delete all currently selected elements.
  *
- * Elements will be deleted regardless of which page they belong to. Even if
- * elements are located on different pages, all given elements will be deleted.
+ * Elements will be deleted on the current page only.
  *
- * If an element id does not correspond do an element on any page, id is ignored.
+ * If an element id does not correspond do an element on the current page, id is ignored.
  *
  * If an empty list or a list of only unknown ids is given, state is unchanged.
  *
@@ -31,34 +30,28 @@ function deleteElements( state, { elementIds } ) {
 		return state;
 	}
 
-	const allElementIdsAcrossPages = state.pages.reduce(
-		( list, { elements } ) => [
-			...list,
-			...elements.map( ( { id } ) => id ),
-		],
-		[],
-	);
+	const pageIndex = state.pages.find( ( { id } ) => id === state.current );
 
-	// If no element on any page is to be deleted, just return the state unchanged.
-	if ( ! intersect( allElementIdsAcrossPages, idsToDelete ) ) {
+	const oldPage = state.pages[ pageIndex ];
+	const pageElementIds = oldPage.elements.map( ( { id } ) => id );
+
+	// Nothing to delete?
+	if ( ! intersect( pageElementIds, idsToDelete ) ) {
 		return state;
 	}
 
-	const newPages = state.pages.map( ( page ) => {
-		const pageElementIds = page.elements.map( ( { id } ) => id );
+	const filteredElements = oldPage.elements.filter( ( element ) => ! idsToDelete.includes( element.id ) );
 
-		// Don't touch pages unnecessarily
-		if ( ! intersect( pageElementIds, idsToDelete ) ) {
-			return page;
-		}
+	const newPage = {
+		...oldPage,
+		elements: filteredElements,
+	};
 
-		const filteredElements = page.elements.filter( ( element ) => ! idsToDelete.includes( element.id ) );
-
-		return {
-			...page,
-			elements: filteredElements,
-		};
-	} );
+	const newPages = [
+		...state.pages.slice( 0, pageIndex ),
+		newPage,
+		...state.pages.slice( pageIndex + 1 ),
+	];
 
 	// This check is to make sure not to modify the selection array if no update is necessary.
 	const wasAnySelected = intersect( state.selection, idsToDelete );

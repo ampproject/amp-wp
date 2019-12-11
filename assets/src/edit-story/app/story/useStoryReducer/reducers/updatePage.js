@@ -1,39 +1,38 @@
 /**
- * Internal dependencies
- */
-import { isInsideRange } from './utils';
-
-/**
- * Update page by index or current page if no index given.
+ * Update page by id or current page if no id given.
  *
- * If index is outside bounds of available pages, nothing happens.
+ * If id doesn't exist, nothing happens.
  *
  * Current page and selection is unchanged.
  *
  * @param {Object} state Current state
  * @param {Object} payload Action payload
- * @param {number} payload.pageIndex Page index to update. If null, update current page.
+ * @param {number} payload.pageId Page index to update. If null, update current page.
  * @param {number} payload.properties Object with properties to set for given page.
  * @return {Object} New state
  */
-function updatePage( state, { pageIndex, properties } ) {
-	const indexToUpdate = pageIndex === null ? state.current : pageIndex;
+function updatePage( state, { pageId, properties } ) {
+	const idToUpdate = pageId === null ? state.current : pageId;
 
-	const isWithinBounds = isInsideRange( indexToUpdate, 0, state.pages.length - 1 );
-	if ( ! isWithinBounds ) {
+	const pageIndex = state.pages.find( ( { id } ) => id === idToUpdate );
+	if ( pageIndex === -1 ) {
 		return state;
 	}
 
+	const newPage = {
+		...state.pages[ pageIndex ],
+		...properties,
+	};
+
+	const newPages = [
+		...state.pages.slice( 0, pageIndex ),
+		newPage,
+		...state.pages.slice( pageIndex + 1 ),
+	];
+
 	return {
 		...state,
-		pages: [
-			...state.pages.slice( 0, indexToUpdate ),
-			{
-				...state.pages[ indexToUpdate ],
-				...properties,
-			},
-			...state.pages.slice( indexToUpdate + 1 ),
-		],
+		pages: newPages,
 	};
 }
 

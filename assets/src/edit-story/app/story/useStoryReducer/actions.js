@@ -6,41 +6,35 @@ import * as types from './types';
 const addPage = ( dispatch ) => ( { properties } ) =>
 	dispatch( { type: types.ADD_PAGE, payload: { properties } } );
 
-const deletePage = ( dispatch ) => ( { pageIndex } ) =>
-	dispatch( { type: types.DELETE_PAGE, payload: { pageIndex } } );
+const deletePage = ( dispatch ) => ( { pageId } ) =>
+	dispatch( { type: types.DELETE_PAGE, payload: { pageId } } );
 
 const deleteCurrentPage = ( dispatch ) => () =>
-	dispatch( { type: types.DELETE_PAGE, payload: { pageIndex: null } } );
+	dispatch( { type: types.DELETE_PAGE, payload: { pageId: null } } );
 
-const updatePageProperties = ( dispatch ) => ( { pageIndex, properties } ) =>
-	dispatch( { type: types.UPDATE_PAGE, payload: { pageIndex, properties } } );
+const updatePageProperties = ( dispatch ) => ( { pageId, properties } ) =>
+	dispatch( { type: types.UPDATE_PAGE, payload: { pageId, properties } } );
 
 const updateCurrentPageProperties = ( dispatch ) => ( { properties } ) =>
-	dispatch( { type: types.UPDATE_PAGE, payload: { pageIndex: null, properties } } );
+	dispatch( { type: types.UPDATE_PAGE, payload: { pageId: null, properties } } );
 
-const duplicatePage = ( dispatch ) => ( { pageIndex } ) =>
-	dispatch( { type: types.DUPLICATE_PAGE, payload: { pageIndex } } );
+const duplicatePage = ( dispatch ) => ( { pageId } ) =>
+	dispatch( { type: types.DUPLICATE_PAGE, payload: { pageId } } );
 
 const duplicateCurrentPage = ( dispatch ) => () =>
-	dispatch( { type: types.DUPLICATE_PAGE, payload: { pageIndex: null } } );
+	dispatch( { type: types.DUPLICATE_PAGE, payload: { pageId: null } } );
 
-const movePage = ( dispatch ) => ( { pageIndex, position } ) =>
-	dispatch( { type: types.MOVE_PAGE, payload: { pageIndex, position } } );
+const movePage = ( dispatch ) => ( { pageId, position } ) =>
+	dispatch( { type: types.MOVE_PAGE, payload: { pageId, position } } );
 
-const setCurrentPage = ( dispatch ) => ( { pageIndex } ) =>
-	dispatch( { type: types.SET_CURRENT_PAGE, payload: { pageIndex } } );
+const setCurrentPage = ( dispatch ) => ( { pageId } ) =>
+	dispatch( { type: types.SET_CURRENT_PAGE, payload: { pageId } } );
 
 const addElements = ( dispatch ) => ( { elements } ) =>
-	dispatch( { type: types.ADD_ELEMENTS, payload: { pageIndex: null, elements } } );
+	dispatch( { type: types.ADD_ELEMENTS, payload: { elements } } );
 
 const addElement = ( dispatch ) => ( { element } ) =>
-	dispatch( { type: types.ADD_ELEMENTS, payload: { pageIndex: null, elements: [ element ] } } );
-
-const addElementsToPage = ( dispatch ) => ( { pageIndex, elements } ) =>
-	dispatch( { type: types.ADD_ELEMENTS, payload: { pageIndex, elements } } );
-
-const addElementToPage = ( dispatch ) => ( { pageIndex, element } ) =>
-	dispatch( { type: types.ADD_ELEMENTS, payload: { pageIndex, elements: [ element ] } } );
+	dispatch( { type: types.ADD_ELEMENTS, payload: { elements: [ element ] } } );
 
 const deleteElementsById = ( dispatch ) => ( { elementIds } ) =>
 	dispatch( { type: types.DELETE_ELEMENTS, payload: { elementIds } } );
@@ -64,13 +58,10 @@ const updateSelectedElements = ( dispatch ) => ( { properties } ) =>
 	dispatch( { type: types.UPDATE_ELEMENTS, payload: { elementIds: null, properties } } );
 
 const moveElement = ( dispatch ) => ( { elementId, position } ) =>
-	dispatch( { type: types.MOVE_ELEMENT, payload: { pageIndex: null, elementId, position } } );
+	dispatch( { type: types.MOVE_ELEMENT, payload: { elementId, position } } );
 
 const moveSelectedElement = ( dispatch ) => ( { position } ) =>
-	dispatch( { type: types.MOVE_ELEMENT, payload: { pageIndex: null, elementId: null, position } } );
-
-const moveElementOnPage = ( dispatch ) => ( { pageIndex, elementId, position } ) =>
-	dispatch( { type: types.MOVE_ELEMENT, payload: { pageIndex, elementId, position } } );
+	dispatch( { type: types.MOVE_ELEMENT, payload: { elementId: null, position } } );
 
 const setSelectedElementsById = ( dispatch ) => ( { selectedElementIds } ) =>
 	dispatch( { type: types.SET_SELECTED_ELEMENTS, payload: { selectedElementIds } } );
@@ -109,7 +100,7 @@ export default {
 	updateElementById,
 	updateSelectedElements,
 	moveElement,
-	moveSelectedElement
+	moveSelectedElement,
 	moveElementOnPage,
 	setSelectedElementsById,
 	clearSelection,

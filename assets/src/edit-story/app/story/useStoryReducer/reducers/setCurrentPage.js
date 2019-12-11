@@ -1,29 +1,23 @@
 /**
- * Internal dependencies
- */
-import { isInsideRange } from './utils';
-
-/**
- * Set current page to the given index.
+ * Set current page to the given id.
  *
- * If index is outside bounds of available pages, nothing happens.
+ * If id doesn't match an existing page, nothing happens.
  *
  * If page is changed, selection is cleared
  *
  * @param {Object} state Current state
  * @param {Object} payload Action payload
- * @param {number} payload.pageIndex Page index to set as current page
+ * @param {number} payload.pageId Page id to set as current page
  * @return {Object} New state
  */
-function setCurrentPage( state, { pageIndex } ) {
-	const isWithinBounds = isInsideRange( pageIndex, 0, state.pages.length - 1 );
-	if ( ! isWithinBounds ) {
+function setCurrentPage( state, { pageId } ) {
+	if ( ! state.pages.some( ( { id } ) => id === pageId ) ) {
 		return state;
 	}
 
 	return {
 		...state,
-		current: pageIndex,
+		current: pageId,
 		selection: [],
 	};
 }

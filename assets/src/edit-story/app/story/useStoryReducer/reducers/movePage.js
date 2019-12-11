@@ -4,13 +4,12 @@
 import { isInsideRange, moveArrayElement } from './utils';
 
 /**
- * Move page in page order from the given index to the given position.
+ * Move page in page order with the given id to the given position.
  *
- * If either index is outside bounds, nothing happens.
- * If indexes are the same, nothing happens.
+ * If new position is outside bounds, nothing happens.
+ * If page is already at the new position, nothing happens.
  *
- * Current page remains unchanged in that current page index will point to
- * the same page object after the page has been moved.
+ * Current page remains unchanged (but might have moved in the page order).
  *
  * Current selection is unchanged.
  *
@@ -18,27 +17,23 @@ import { isInsideRange, moveArrayElement } from './utils';
  *
  * @param {Object} state Current state
  * @param {Object} payload Action payload
- * @param {number} payload.pageIndex Index of page to move to a new position.
+ * @param {number} payload.pageId Id of page to move to a new position.
  * @param {number} payload.position Index of where page should be moved to.
  * @return {Object} New state
  */
-function movePage( state, { pageIndex, position } ) {
-	const isIndexWithinBounds = isInsideRange( pageIndex, 0, state.pages.length - 1 );
+function movePage( state, { pageId, position } ) {
+	const pageIndex = state.pages.find( ( { id } ) => id === pageId );
 	const isTargetWithinBounds = isInsideRange( position, 0, state.pages.length - 1 );
 	const isSimilar = pageIndex === position;
-	if ( ! isIndexWithinBounds || ! isTargetWithinBounds || isSimilar ) {
+	if ( pageIndex === -1 || ! isTargetWithinBounds || isSimilar ) {
 		return state;
 	}
 
 	const newPages = moveArrayElement( state.pages, pageIndex, position );
 
-	const oldCurrentPage = state.pages[ state.current ];
-	const newCurrent = newPages.indexOf( oldCurrentPage );
-
 	return {
 		...state,
 		pages: newPages,
-		current: newCurrent,
 	};
 }
 

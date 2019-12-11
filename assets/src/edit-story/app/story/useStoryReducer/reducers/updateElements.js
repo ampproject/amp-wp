@@ -7,10 +7,9 @@ import { intersect } from './utils';
  * Update elements by the given list of ids with the given properties.
  * If given list of ids is `null`, update all currently selected elements.
  *
- * Elements will be updated regardless of which page they belong to. Even if
- * elements are located on different pages, all given elements will be updated.
+ * Elements will be updated only on the current page.
  *
- * If an element id does not correspond do an element on any page, id is ignored.
+ * If an element id does not correspond do an element on the current page, id is ignored.
  *
  * If an empty list or a list of only unknown ids is given, state is unchanged.
  *
@@ -26,45 +25,38 @@ import { intersect } from './utils';
  */
 function updateElements( state, { elementIds, properties } ) {
 	const idsToUpdate = elementIds === null ? state.selection : elementIds;
-	const hasAnyProperties = Object.keys( properties ).length > 0;
 
-	if ( idsToUpdate.length === 0 || ! hasAnyProperties ) {
+	if ( idsToUpdate.length === 0 ) {
 		return state;
 	}
 
-	const allElementIdsAcrossPages = state.pages.reduce(
-		( list, { elements } ) => [
-			...list,
-			...elements.map( ( { id } ) => id ),
-		],
-		[],
-	);
+	const pageIndex = state.pages.find( ( { id } ) => id === state.current );
 
-	// If no element on any page is to be updated, just return the state unchanged.
-	if ( ! intersect( allElementIdsAcrossPages, idsToUpdate ) ) {
+	const oldPage = state.pages[ pageIndex ];
+	const pageElementIds = oldPage.elements.map( ( { id } ) => id );
+
+	// Nothing to update?
+	if ( ! intersect( pageElementIds, idsToUpdate ) ) {
 		return state;
 	}
 
-	const newPages = state.pages.map( ( page ) => {
-		const pageElementIds = page.elements.map( ( { id } ) => id );
+	const updatedElements = oldPage.elements.map(
+		( element ) => (
+			idsToUpdate.includes( element.id ) ?
+				{ ...element, ...properties } :
+				element
+		) );
 
-		// Don't touch pages unnecessarily
-		if ( ! intersect( pageElementIds, idsToUpdate ) ) {
-			return page;
-		}
+	const newPage = {
+		...oldPage,
+		elements: updatedElements,
+	};
 
-		const updatedElements = page.elements.map(
-			( element ) => (
-				idsToUpdate.includes( element.id ) ?
-					{ ...element, ...properties } :
-					element
-			) );
-
-		return {
-			...page,
-			elements: updatedElements,
-		};
-	} );
+	const newPages = [
+		...state.pages.slice( 0, pageIndex ),
+		newPage,
+		...state.pages.slice( pageIndex + 1 ),
+	];
 
 	return {
 		...state,

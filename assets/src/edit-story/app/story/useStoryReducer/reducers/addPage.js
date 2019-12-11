@@ -11,14 +11,14 @@
  * @return {Object} New state
  */
 function addPage( state, { page } ) {
-	const newIndex = state.pages.length;
+	const { id } = page;
 	return {
 		...state,
 		pages: [
 			...state.pages,
 			page,
 		],
-		current: newIndex,
+		current: id,
 		selection: [],
 	};
 }
