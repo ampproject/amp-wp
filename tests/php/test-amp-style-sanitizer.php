@@ -7,10 +7,14 @@
 
 // phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
 
+use Amp\AmpWP\Tests\PrivateAccess;
+
 /**
  * Test AMP_Style_Sanitizer.
  */
 class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
+
+	use PrivateAccess;
 
 	/**
 	 * Set up.
@@ -1128,6 +1132,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 		$html  = '<html amp><head><meta charset="utf-8">';
 		$html .= sprintf( '<link rel="stylesheet" href="%s">', esc_url( $theme->get_stylesheet_directory_uri() . '/style.css' ) ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$html .= '<style>@font-face { font-family: "Genericons"; src: url("data:application/x-font-woff;charset=utf-8;base64,d09GRgABAAA") format("woff"); }</style>';
+		$html .= '<style>@font-face { font-family: "Custom"; src: url("data:application/x-font-woff;charset=utf-8;base64,d09GRgABAAA") format("woff"); }</style>';
 		$html .= '</head><body></body></html>';
 
 		$dom         = AMP_DOM_Utils::get_dom( $html );
@@ -1141,8 +1147,9 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer->sanitize();
 		$this->assertEquals( [], $error_codes );
 		$actual_stylesheets = array_values( $sanitizer->get_stylesheets() );
-		$this->assertCount( 1, $actual_stylesheets );
+		$this->assertCount( 3, $actual_stylesheets );
 
+		// Check font included in theme.
 		$this->assertContains( '@font-face{font-family:"NonBreakingSpaceOverride";', $actual_stylesheets[0] );
 		$this->assertContains( 'format("woff2")', $actual_stylesheets[0] );
 		$this->assertContains( 'format("woff")', $actual_stylesheets[0] );
@@ -1150,6 +1157,19 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertContains( 'fonts/NonBreakingSpaceOverride.woff2', $actual_stylesheets[0] );
 		$this->assertContains( 'fonts/NonBreakingSpaceOverride.woff', $actual_stylesheets[0] );
 		$this->assertContains( 'font-display:swap', $actual_stylesheets[0] );
+
+		// Check font not included in theme, but included in plugin.
+		$this->assertContains( '@font-face{font-family:"Genericons";', $actual_stylesheets[1] );
+		$this->assertContains( 'format("woff")', $actual_stylesheets[1] );
+		$this->assertNotContains( 'data:', $actual_stylesheets[1] );
+		$this->assertContains( 'assets/fonts/genericons.woff', $actual_stylesheets[1] );
+		$this->assertContains( 'font-display:swap', $actual_stylesheets[1] );
+
+		// Check font not included anywhere, so must remain inline.
+		$this->assertContains( '@font-face{font-family:"Custom";', $actual_stylesheets[2] );
+		$this->assertContains( 'url("data:application/x-font-woff;charset=utf-8;base64,d09GRgABAAA")', $actual_stylesheets[2] );
+		$this->assertContains( 'format("woff")', $actual_stylesheets[2] );
+		$this->assertNotContains( 'font-display:swap', $actual_stylesheets[2] );
 	}
 
 	/**
@@ -1376,9 +1396,9 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$comment = $style->previousSibling;
 		$this->assertContains( 'The style[amp-custom] element is populated with', $comment->nodeValue );
 		$this->assertNotContains( 'The following stylesheets are too large to be included', $comment->nodeValue );
-		$this->assertContains( '15 B: style.body', $comment->nodeValue );
-		$this->assertNotContains( '17 B: style.foo1', $comment->nodeValue );
-		$this->assertContains( '0 B: style.bard', $comment->nodeValue );
+		$this->assertRegExp( '/15 B\s*:\s*style.body/', $comment->nodeValue );
+		$this->assertNotRegExp( '/17 B\s*:\s*style.foo1/', $comment->nodeValue );
+		$this->assertRegExp( '/0 B\s*:\s*style.bard/', $comment->nodeValue );
 		$this->assertNotContains( 'style.foo2', $comment->nodeValue );
 		$this->assertContains( 'style.foo3', $comment->nodeValue );
 		$this->assertContains( 'Total included size: 32 bytes (72% of 44 total after tree shaking)', $comment->nodeValue );
@@ -1395,13 +1415,13 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$comment = $style->previousSibling;
 		$this->assertContains( 'The style[amp-custom] element is populated with', $comment->nodeValue );
 		$this->assertContains( 'The following stylesheets are too large to be included', $comment->nodeValue );
-		$this->assertContains( '15 B: style.body', $comment->nodeValue );
-		$this->assertNotContains( '17 B: style.foo1', $comment->nodeValue );
-		$this->assertContains( '0 B: style.bard', $comment->nodeValue );
+		$this->assertRegExp( '/15 B\s*:\s*style.body/', $comment->nodeValue );
+		$this->assertNotRegExp( '/17 B\s*:\s*style.foo1/', $comment->nodeValue );
+		$this->assertRegExp( '/0 B\s*:\s*style.bard/', $comment->nodeValue );
 		$this->assertNotContains( 'style.foo2', $comment->nodeValue );
 		$this->assertContains( 'style.foo3', $comment->nodeValue );
 		$this->assertContains( 'Total included size: 32 bytes (72% of 44 total after tree shaking)', $comment->nodeValue );
-		$this->assertContains( '50024 B: style.excessive', $comment->nodeValue );
+		$this->assertRegExp( '/50024 B\s*:\s*style.excessive/', $comment->nodeValue );
 		$this->assertContains( 'Total excluded size: 50,024 bytes (100% of 50,024 total after tree shaking)', $comment->nodeValue );
 		$this->assertContains( 'Total combined size: 50,056 bytes (99% of 50,068 total after tree shaking)', $comment->nodeValue );
 	}
@@ -2408,5 +2428,225 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$whitelist_sanitizer->sanitize();
 
 		$assert( $original_dom, $html, $amphtml_dom, $amphtml_dom->saveHTML(), $sanitizer->get_stylesheets() );
+	}
+
+	/**
+	 * Provide data to test_get_stylesheet_priority().
+	 *
+	 * @return array[] Array of test data.
+	 */
+	public function get_stylesheet_priority_data() {
+		return [
+			'Non-AMP handle' => [ [ 'link', [ 'id' => 'mediaelement-css' ] ], 1000 ],
+			'Admin bar handle' => [ [ 'link', [ 'id' => 'admin-bar-css' ] ], 200 ],
+			'Dashicons handle' => [ [ 'link', [ 'id' => 'dashicons-css' ] ], 90 ],
+			'Parent theme styles' => [ [ 'link', [ 'href' => get_theme_root_uri() . '/parent-theme/style.css' ] ], 1 ],
+			'Child theme styles' => [ [ 'link', [ 'href' => get_theme_root_uri() . '/child-theme/style.css' ] ], 10 ],
+			'Core frontend handle' => [ [ 'link', [ 'id' => 'wp-block-library-css' ] ], 20 ],
+			'Plugin asset' => [ [ 'link', [ 'href' => plugins_url() . '/some-plugin/style.css' ] ], 30 ],
+			'Query monitor plugin asset' => [ [ 'link', [ 'href' => plugins_url() . '/query-monitor/style.css' ] ], 150 ],
+			'Other styles from wp-includes' => [ [ 'link', [ 'href' => includes_url() ] ], 40 ],
+			'All other links' => [ [ 'link', [ 'id' => 'something-else' ] ], 50 ],
+			'Parent theme inline styles' => [ [ 'style', [ 'id' => 'parent-theme-inline-css' ] ], 2 ],
+			'Child theme inline styles' => [ [ 'style', [ 'id' => 'child-theme-inline-css' ] ], 12 ],
+			'Admin bar inline styles' => [ [ 'style', [ 'id' => 'admin-bar-inline-css' ] ], 200 ],
+			'Customizer inline styles' => [ [ 'style', [ 'id' => 'wp-custom-css' ] ], 60 ],
+			'Other inline styles' => [ [ 'style', [ 'id' => 'something-else' ] ], 70 ],
+			'Non-AMP handle for print' => [
+				[
+					'link',
+					[
+						'id' => 'mediaelement-css',
+						'media' => 'print',
+					],
+				],
+				1100,
+			],
+			'Admin bar handle for print' => [
+				[
+					'link',
+					[
+						'id' => 'admin-bar-css',
+						'media' => 'print',
+					],
+				],
+				300,
+			],
+			'Dashicons handle for print' => [
+				[
+					'link',
+					[
+						'id' => 'dashicons-css',
+						'media' => 'print',
+					],
+				],
+				190,
+			],
+			'Parent theme styles for print' => [
+				[
+					'link',
+					[
+						'href' => get_theme_root_uri() . '/parent-theme/style.css',
+						'media' => 'print',
+					],
+				],
+				101,
+			],
+			'Child theme styles for print' => [
+				[
+					'link',
+					[
+						'href' => get_theme_root_uri() . '/child-theme/style.css',
+						'media' => 'print',
+					],
+				],
+				110,
+			],
+			'Core frontend handle for print' => [
+				[
+					'link',
+					[
+						'id' => 'wp-block-library-css',
+						'media' => 'print',
+					],
+				],
+				120,
+			],
+			'Plugin asset for print' => [
+				[
+					'link',
+					[
+						'href' => plugins_url() . '/some-plugin/style.css',
+						'media' => 'print',
+					],
+				],
+				130,
+			],
+			'Query monitor plugin asset for print' => [
+				[
+					'link',
+					[
+						'href' => plugins_url() . '/query-monitor/style.css',
+						'media' => 'print',
+					],
+				],
+				250,
+			],
+			'Other styles from wp-includes for print' => [
+				[
+					'link',
+					[
+						'href' => includes_url(),
+						'media' => 'print',
+					],
+				],
+				140,
+			],
+			'All other links for print' => [
+				[
+					'link',
+					[
+						'id' => 'something-else',
+						'media' => 'print',
+					],
+				],
+				150,
+			],
+			'Parent theme inline styles for print' => [
+				[
+					'style',
+					[
+						'id' => 'parent-theme-inline-css',
+						'media' => 'print',
+					],
+				],
+				102,
+			],
+			'Child theme inline styles for print' => [
+				[
+					'style',
+					[
+						'id' => 'child-theme-inline-css',
+						'media' => 'print',
+					],
+				],
+				112,
+			],
+			'Admin bar inline styles for print' => [
+				[
+					'style',
+					[
+						'id' => 'admin-bar-inline-css',
+						'media' => 'print',
+					],
+				],
+				300,
+			],
+			'Customizer inline styles for print' => [
+				[
+					'style',
+					[
+						'id' => 'wp-custom-css',
+						'media' => 'print',
+					],
+				],
+				160,
+			],
+			'Other inline styles for print' => [
+				[
+					'style',
+					[
+						'id' => 'something-else',
+						'media' => 'print',
+					],
+				],
+				170,
+			],
+			'Style attribute' => [ [ null, [ 'something' ] ], 70 ],
+		];
+	}
+
+	/**
+	 * Test retrieval of stylesheet priorities.
+	 *
+	 * @covers       \AMP_Style_Sanitizer::get_stylesheet_priority()
+	 *
+	 * @dataProvider get_stylesheet_priority_data
+	 *
+	 * @param array $node_data Node to check the priority of.
+	 * @param int   $expected  Expected priority.
+	 */
+	public function test_get_stylesheet_priority( $node_data, $expected ) {
+		global $wp_styles;
+		$wp_styles = new WP_Styles();
+
+		$parent_theme_filter = static function () {
+			return 'parent-theme';
+		};
+		$child_theme_filter  = static function () {
+			return 'child-theme';
+		};
+
+		$dom = new DOMDocument();
+
+		if ( isset( $node_data[0] ) ) {
+			$node = AMP_DOM_Utils::create_node( $dom, $node_data[0], $node_data[1] );
+		} else {
+			$node = $dom->createAttribute( $node_data[1][0] );
+		}
+
+		$sanitizer = new AMP_Style_Sanitizer( $dom );
+
+		add_filter( 'template', $parent_theme_filter );
+		add_filter( 'stylesheet', $child_theme_filter );
+		$wp_styles->add( 'parent-theme', get_template_directory_uri() . '/style.css' );
+		$wp_styles->add( 'child-theme', get_stylesheet_directory_uri() . '/style.css' );
+		$this->assertEquals(
+			$expected,
+			$this->call_private_method( $sanitizer, 'get_stylesheet_priority', [ $node ] ),
+			'Node data: ' . wp_json_encode( $node_data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT )
+		);
+		remove_filter( 'stylesheet', $child_theme_filter );
+		remove_filter( 'template', $parent_theme_filter );
 	}
 }

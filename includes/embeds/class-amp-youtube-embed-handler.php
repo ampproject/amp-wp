@@ -51,7 +51,6 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function register_embed() {
 		add_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ], 10, 2 );
-		add_shortcode( 'youtube', [ $this, 'shortcode' ] ); // @todo Deprecated. See <https://github.com/ampproject/amp-wp/issues/3309>.
 		add_filter( 'wp_video_shortcode_override', [ $this, 'video_override' ], 10, 2 );
 	}
 
@@ -60,7 +59,6 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function unregister_embed() {
 		remove_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ], 10 );
-		remove_shortcode( 'youtube' ); // @todo Deprecated. See <https://github.com/ampproject/amp-wp/issues/3309>.
 	}
 
 	/**
@@ -126,49 +124,6 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 		return $props;
 	}
 
-
-	/**
-	 * Gets AMP-compliant markup for the YouTube shortcode.
-	 *
-	 * @deprecated This should be moved to Jetpack. See <https://github.com/ampproject/amp-wp/issues/3309>.
-	 *
-	 * @param array $attr The YouTube attributes.
-	 * @return string YouTube shortcode markup.
-	 */
-	public function shortcode( $attr ) {
-		$url = false;
-
-		if ( isset( $attr[0] ) ) {
-			$url = ltrim( $attr[0], '=' );
-		} elseif ( function_exists( 'shortcode_new_to_old_params' ) ) {
-			$url = shortcode_new_to_old_params( $attr );
-		}
-
-		if ( empty( $url ) ) {
-			return '';
-		}
-
-		$video_id = $this->get_video_id_from_url( $url );
-
-		return $this->render( compact( 'video_id' ), $url );
-	}
-
-	/**
-	 * Render oEmbed.
-	 *
-	 * @see \WP_Embed::shortcode()
-	 * @deprecated This is no longer being used.
-	 *
-	 * @param array  $matches URL pattern matches.
-	 * @param array  $attr    Shortcode attribues.
-	 * @param string $url     URL.
-	 * @return string Rendered oEmbed.
-	 */
-	public function oembed( $matches, $attr, $url ) {
-		_deprecated_function( __METHOD__, '1.5.0' );
-		return $this->shortcode( [ $url ] );
-	}
-
 	/**
 	 * Render embed.
 	 *
@@ -227,21 +182,6 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
-	 * Sanitize the v= argument in the URL.
-	 *
-	 * @param string $value query parameters.
-	 * @return string First set of query parameters.
-	 */
-	private function sanitize_v_arg( $value ) {
-		// Deal with broken params like `?v=123?rel=0`.
-		if ( false !== strpos( $value, '?' ) ) {
-			$value = strtok( $value, '?' );
-		}
-
-		return $value;
-	}
-
-	/**
 	 * Override the output of YouTube videos.
 	 *
 	 * This overrides the value in wp_video_shortcode().
@@ -257,10 +197,14 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 		}
 		$src             = $attr['src'];
 		$youtube_pattern = '#^https?://(?:www\.)?(?:youtube\.com/watch|youtu\.be/)#';
-		if ( 1 === preg_match( $youtube_pattern, $src ) ) {
-			return $this->shortcode( [ $src ] );
+		if ( 1 !== preg_match( $youtube_pattern, $src ) ) {
+			return $html;
 		}
-		return $html;
+
+		$url      = ltrim( $src, '=' );
+		$video_id = $this->get_video_id_from_url( $url );
+
+		return $this->render( compact( 'video_id' ), $url );
 	}
 
 }
