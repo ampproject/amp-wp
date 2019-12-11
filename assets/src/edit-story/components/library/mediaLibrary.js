@@ -13,6 +13,7 @@ import { useEffect } from '@wordpress/element';
 /**
  * Internal dependencies
  */
+import UploadButton from '../uploadButton';
 import useLibrary from './useLibrary';
 
 const Image = styled.img`
@@ -32,23 +33,13 @@ const Title = styled.h3`
 	flex: 2 0 0;
 `;
 
-const Button = styled.button`
-	 background: #242A3B;
-	 color: #ffffff;
-	 padding: 5px;
-	 font-weight: bold;
-	 flex: 1 0 0;
-	 text-align: center;
-	 border: 0px none;
-`;
-
 const Header = styled.div`
 	display: flex;
 	margin: 0px 4px 10px;
 `;
 
 const Message = styled.div`
-	color: #ffffff;
+	 color: ${ ( { theme } ) => theme.colors.fg.v1 };
 	font-size: 19px;
 `;
 
@@ -58,51 +49,22 @@ function MediaLibrary( { onInsert } ) {
 		actions: { loadMedia, setIsMediaLoading, setIsMediaLoaded },
 	} = useLibrary();
 
-	useEffect( () => {
-		loadMedia();
-		// Work around that forces default tab as upload tab.
-		wp.media.controller.Library.prototype.defaults.contentUserSetting = false;
-	} );
+	useEffect( loadMedia );
 
-	const mediaPicker = () => {
-		// Create the media frame.
-		const fileFrame = wp.media( {
-			title: 'Upload to Story',
-			button: {
-				text: 'Insert into page',
-			},
-			multiple: false,
-			library: {
-				type: mediaType,
-			},
-		} );
-		let attachment;
-
-		// When an image is selected, run a callback.
-		fileFrame.on( 'select', () => {
-			attachment = fileFrame.state().get( 'selection' ).first().toJSON();
-			const { url } = attachment;
-			onInsert( 'image', {
-				src: url,
-				width: 100,
-				height: 100,
-				x: 5,
-				y: 5,
-				rotationAngle: 0,
-			} );
-		} );
-
-		fileFrame.on( 'close', () => {
-			setIsMediaLoading( false );
-			setIsMediaLoaded( false );
-		} );
-
-		// Finally, open the modal
-		fileFrame.open();
+	const onClose = () => {
+		setIsMediaLoading( false );
+		setIsMediaLoaded( false );
 	};
 
-	const uploadMedia = () => {
-		mediaPicker();
+	const onSelect = ( { url } ) => {
+		onInsert( 'image', {
+			src: url,
+			width: 100,
+			height: 100,
+			x: 5,
+			y: 5,
+			rotationAngle: 0,
+		} );
 	};
 
 	return (
@@ -114,9 +76,7 @@ function MediaLibrary( { onInsert } ) {
 						<Spinner />
 					}
 				</Title>
-				<Button onClick={ uploadMedia }>
-					{ 'Upload' }
-				</Button>
+				<UploadButton mediaType={ mediaType } onClose={ onClose } onSelect={ onSelect } />
 			</Header>
 
 			{ ( isMediaLoaded && ! media.length ) ? (
