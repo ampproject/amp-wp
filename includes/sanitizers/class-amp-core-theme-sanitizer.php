@@ -64,10 +64,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					'twentytwenty_skip_link_focus_fix', // See <https://github.com/WordPress/twentynineteen/pull/47>.
 				],
 			],
-			'add_smooth_scrolling'                    => [
-				// @todo Only replaces twentytwenty.smoothscroll.scrollToAnchor, but not twentytwenty.smoothscroll.scrollToElement
-				'//a[ starts-with( @href, "#" ) and not( @href = "#" )and not( @href = "#0" ) and not( contains( @class, "do-not-scroll" ) ) and not( contains( @class, "skip-link" ) ) ]',
-			],
 			'add_twentytwenty_modals'                 => [],
 			'add_twentytwenty_toggles'                => [],
 			'add_nav_menu_styles'                     => [],
