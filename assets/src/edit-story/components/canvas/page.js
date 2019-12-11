@@ -38,7 +38,7 @@ function Page() {
 		actions: { clearSelection, selectElementById, toggleElementIdInSelection },
 	} = useStory();
 
-	const [ targetEl, setTargetEl ] = useState( false );
+	const [ targetEl, setTargetEl ] = useState( null );
 	const [ pushEvent, setPushEvent ] = useState( null );
 
 	useEffect( () => {
@@ -54,9 +54,13 @@ function Page() {
 		evt.stopPropagation();
 
 		// @todo That's not necessary for multi-selection.
-		evt.persist();
-		setPushEvent( evt );
+		if ( 'pointerdown' === evt.type ) {
+			evt.persist();
+			setPushEvent( evt );
+		}
 	}, [ toggleElementIdInSelection, selectElementById ] );
+
+	const singleSelection = 1 === selectedElements.length;
 
 	return (
 		<Background>
@@ -76,8 +80,6 @@ function Page() {
 							onPointerDown={ ( evt ) => {
 								if ( ! isSelected ) {
 									handleSelectElement( id, evt );
-									// Setting target directly works, however, it doesn't get updated information from the selected elements state.
-									// setTargetEl( evt.currentTarget );
 								}
 							} }
 							forwardedRef={ isSelected ? setTargetEl : null }
@@ -85,14 +87,15 @@ function Page() {
 					</Element>
 				);
 			} ) }
-			{ 1 === selectedElements.length && targetEl && (
+			{ singleSelection && targetEl && (
 				<Movable
-					rotationAngle={ 1 === selectedElements.length ? selectedElements[ 0 ].rotationAngle : 0 }
+					rotationAngle={ selectedElements[ 0 ].rotationAngle }
 					targetEl={ targetEl }
 					pushEvent={ pushEvent }
-					type={ 1 === selectedElements.length ? selectedElements[ 0 ].type : null }
-					x={ 1 === selectedElements.length ? selectedElements[ 0 ].x : 0 }
-					y={ 1 === selectedElements.length ? selectedElements[ 0 ].y : 0 }
+					setPushEvent={ setPushEvent }
+					type={ selectedElements[ 0 ].type }
+					x={ selectedElements[ 0 ].x }
+					y={ selectedElements[ 0 ].y  }
 				/>
 			) }
 		</Background>
