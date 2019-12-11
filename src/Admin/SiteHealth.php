@@ -26,7 +26,7 @@ class SiteHealth {
 	public function init() {
 		add_filter( 'site_status_tests', [ $this, 'add_tests' ] );
 		add_filter( 'debug_information', [ $this, 'add_debug_information' ] );
-		add_filter( 'site_status_test_php_modules', [ $this, 'add_extension' ] );
+		add_filter( 'site_status_test_php_modules', [ $this, 'add_extensions' ] );
 	}
 
 	/**
@@ -272,19 +272,32 @@ class SiteHealth {
 	}
 
 	/**
-	 * Adds a PHP extension to those that Core depends on.
+	 * Adds suggested PHP extensions to those that Core depends on.
 	 *
 	 * @param array $extensions The existing extensions from Core.
 	 * @return array The extensions, with one more added.
 	 */
-	public function add_extension( $extensions ) {
+	public function add_extensions( $extensions ) {
 		return array_merge(
 			$extensions,
 			[
-				'spl' => [
-					'extension' => 'spl',
-					'function'  => 'spl_autoload_register',
-					'required'  => true,
+				'intl'     => [
+					'extension' => 'intl',
+					'function'  => 'idn_to_utf8',
+					'required'  => false,
+				],
+				'json'     => [
+					'extension' => 'json',
+					'function'  => 'json_encode',
+					'required'  => false,
+				],
+				'mbstring' => [
+					'extension' => 'mbstring',
+					'required'  => false,
+				],
+				'zip'      => [
+					'extension' => 'zip',
+					'required'  => false,
 				],
 			]
 		);

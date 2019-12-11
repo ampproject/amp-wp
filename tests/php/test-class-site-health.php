@@ -39,7 +39,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 		$this->instance->init();
 		$this->assertEquals( 10, has_action( 'site_status_tests', [ $this->instance, 'add_tests' ] ) );
 		$this->assertEquals( 10, has_action( 'debug_information', [ $this->instance, 'add_debug_information' ] ) );
-		$this->assertEquals( 10, has_action( 'site_status_test_php_modules', [ $this->instance, 'add_extension' ] ) );
+		$this->assertEquals( 10, has_action( 'site_status_test_php_modules', [ $this->instance, 'add_extensions' ] ) );
 	}
 
 	/**
@@ -268,20 +268,33 @@ class Test_Site_Health extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test add_extension.
+	 * Test add_extensions.
 	 *
-	 * @covers \Amp\AmpWP\Admin\SiteHealth::add_extension()
+	 * @covers \Amp\AmpWP\Admin\SiteHealth::add_extensions()
 	 */
-	public function test_add_extension() {
+	public function test_add_extensions() {
 		$this->assertEquals(
 			[
-				'spl' => [
-					'extension' => 'spl',
-					'function'  => 'spl_autoload_register',
-					'required'  => true,
+				'intl'     => [
+					'extension' => 'intl',
+					'function'  => 'idn_to_utf8',
+					'required'  => false,
+				],
+				'json'     => [
+					'extension' => 'json',
+					'function'  => 'json_encode',
+					'required'  => false,
+				],
+				'mbstring' => [
+					'extension' => 'mbstring',
+					'required'  => false,
+				],
+				'zip'      => [
+					'extension' => 'zip',
+					'required'  => false,
 				],
 			],
-			$this->instance->add_extension( [] )
+			$this->instance->add_extensions( [] )
 		);
 	}
 }
