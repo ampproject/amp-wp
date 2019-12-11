@@ -84,7 +84,11 @@
         ],
         "jest/no-hooks": "off",
         "jest/prefer-expect-assertions": "off",
-        "jest/prefer-inline-snapshots": "off"
+        "jest/prefer-inline-snapshots": "off",
+        "import/namespace": [ "error", {
+          "allowComputed": true
+          }
+        ]
       }
     },
     {

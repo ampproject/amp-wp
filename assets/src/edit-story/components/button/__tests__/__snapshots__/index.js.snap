@@ -1,0 +1,173 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`button should match snapshot and contain a modified color and border-color 1`] = `
+.c0 {
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 4px;
+  background: transparent;
+  display: block;
+  min-width: 63px;
+  line-height: 28px;
+  height: 30px;
+  padding: 0 10px;
+  cursor: pointer;
+  border-color: #E5E5E5;
+  color: #FFFFFF;
+}
+
+.c0:focus,
+.c0:active {
+  outline: none;
+}
+
+.c0 svg {
+  width: 1em;
+}
+
+<button
+  class="c0"
+/>
+`;
+
+exports[`button should match snapshot and contain a modified color, border-color and background-color 1`] = `
+.c0 {
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 4px;
+  background: transparent;
+  display: block;
+  min-width: 63px;
+  line-height: 28px;
+  height: 30px;
+  padding: 0 10px;
+  cursor: pointer;
+  border-color: #47A0F4;
+  background-color: #47A0F4;
+  color: #FFFFFF;
+}
+
+.c0:focus,
+.c0:active {
+  outline: none;
+}
+
+.c0 svg {
+  width: 1em;
+}
+
+<button
+  class="c0"
+/>
+`;
+
+exports[`button should match snapshot and contain a modified color, border-color and background-color 2`] = `
+.c0 {
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 4px;
+  background: transparent;
+  display: block;
+  min-width: 63px;
+  line-height: 28px;
+  height: 30px;
+  padding: 0 10px;
+  cursor: pointer;
+  border-color: #FFFFFF;
+  background-color: #D4D3D4;
+  color: #575D65;
+}
+
+.c0:focus,
+.c0:active {
+  outline: none;
+}
+
+.c0 svg {
+  width: 1em;
+}
+
+<button
+  class="c0"
+/>
+`;
+
+exports[`button should match snapshot and contain the redo svg icon 1`] = `
+.c0 {
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 4px;
+  background: transparent;
+  display: block;
+  min-width: initial;
+  line-height: 28px;
+  height: 30px;
+  padding: 0 10px;
+  cursor: pointer;
+  border-color: #E5E5E5;
+  color: #FFFFFF;
+}
+
+.c0:focus,
+.c0:active {
+  outline: none;
+}
+
+.c0 svg {
+  width: 1em;
+}
+
+<button
+  class="c0"
+>
+  <svg
+    viewBox="0 0 497.25 497.25"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M248.625 89.25V0l127.5 127.5-127.5 127.5V140.25c-84.15 0-153 68.85-153 153s68.85 153 153 153 153-68.85 153-153h51c0 112.2-91.8 204-204 204s-204-91.8-204-204 91.8-204 204-204z"
+      fill="currentColor"
+    />
+  </svg>
+</button>
+`;
+
+exports[`button should match snapshot and contain the undo svg icon 1`] = `
+.c0 {
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 4px;
+  background: transparent;
+  display: block;
+  min-width: initial;
+  line-height: 28px;
+  height: 30px;
+  padding: 0 10px;
+  cursor: pointer;
+  border-color: #E5E5E5;
+  color: #FFFFFF;
+}
+
+.c0:focus,
+.c0:active {
+  outline: none;
+}
+
+.c0 svg {
+  width: 1em;
+}
+
+<button
+  class="c0"
+>
+  <svg
+    viewBox="0 0 497.25 497.25"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M248.625 89.25V0l-127.5 127.5 127.5 127.5V140.25c84.15 0 153 68.85 153 153s-68.85 153-153 153-153-68.85-153-153h-51c0 112.2 91.8 204 204 204s204-91.8 204-204-91.8-204-204-204z"
+      fill="currentColor"
+    />
+  </svg>
+</button>
+`;
