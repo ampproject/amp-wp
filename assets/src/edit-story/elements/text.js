@@ -63,6 +63,7 @@ Text.propTypes = {
 	height: PropTypes.number.isRequired,
 	x: PropTypes.number.isRequired,
 	y: PropTypes.number.isRequired,
+	onPointerDown: PropTypes.func,
 };
 
 Text.defaultProps = {
