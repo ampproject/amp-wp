@@ -95,7 +95,7 @@ function Page() {
 					setPushEvent={ setPushEvent }
 					type={ selectedElements[ 0 ].type }
 					x={ selectedElements[ 0 ].x }
-					y={ selectedElements[ 0 ].y  }
+					y={ selectedElements[ 0 ].y }
 				/>
 			) }
 		</Background>
