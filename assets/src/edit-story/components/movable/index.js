@@ -31,10 +31,9 @@ const Movable = ( props ) => {
 		actions: { setPropertiesOnSelectedElements },
 	} = useStory();
 
-	useEffect( ( test ) => {
+	useEffect( () => {
 		if ( moveable.current ) {
 			if ( pushEvent ) {
-				console.log( pushEvent );
 				moveable.current.moveable.dragStart( pushEvent );
 				setPushEvent( null );
 			}
@@ -75,7 +74,6 @@ const Movable = ( props ) => {
 			throttleDrag={ 0 }
 			onDragStart={ ( { set } ) => {
 				set( frame.translate );
-				setPushEvent( null );
 			} }
 			onDragEnd={ ( { target } ) => {
 				const newProps = { x: x + frame.translate[ 0 ], y: y + frame.translate[ 1 ] };
@@ -125,6 +123,7 @@ Movable.propTypes = {
 	rotationAngle: PropTypes.number.isRequired,
 	targetEl: PropTypes.object.isRequired,
 	pushEvent: PropTypes.object,
+	setPushEvent: PropTypes.func,
 	type: PropTypes.string.isRequired,
 	x: PropTypes.number.isRequired,
 	y: PropTypes.number.isRequired,
