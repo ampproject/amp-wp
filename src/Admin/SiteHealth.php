@@ -14,14 +14,14 @@ use AMP_Post_Type_Support;
 /**
  * Class SiteHealth
  *
- * Adds tests to Site Health.
+ * Adds tests and debugging information for Site Health.
  *
  * @since 1.5.0
  */
 class SiteHealth {
 
 	/**
-	 * Adds the filter.
+	 * Adds the filters.
 	 */
 	public function init() {
 		add_filter( 'site_status_tests', [ $this, 'add_tests' ] );
@@ -85,7 +85,7 @@ class SiteHealth {
 					'label'   => esc_html__( 'Persistent object caching is not enabled', 'amp' ),
 					'actions' => sprintf(
 						'<p><a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s <span class="screen-reader-text">%3$s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
-						esc_url( 'https://codex.wordpress.org/Class_Reference/WP_Object_Cache#Persistent_Caching' ),
+						'https://codex.wordpress.org/Class_Reference/WP_Object_Cache#Persistent_Caching',
 						esc_html__( 'Learn more about persistent object caching', 'amp' ),
 						/* translators: The accessibility text. */
 						esc_html__( '(opens in a new tab)', 'amp' )
@@ -120,7 +120,7 @@ class SiteHealth {
 			'description' => esc_html__( 'The AMP plugin performs better when these functions are available.', 'amp' ),
 			'actions'     => sprintf(
 				'<p><a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s <span class="screen-reader-text">%3$s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
-				esc_url( 'https://www.php.net/manual/book.curl.php' ),
+				'https://www.php.net/manual/book.curl.php',
 				esc_html__( 'Learn more about these functions', 'amp' ),
 				/* translators: The accessibility text. */
 				esc_html__( '(opens in a new tab)', 'amp' )
@@ -275,7 +275,7 @@ class SiteHealth {
 	 * Adds suggested PHP extensions to those that Core depends on.
 	 *
 	 * @param array $extensions The existing extensions from Core.
-	 * @return array The extensions, with one more added.
+	 * @return array The extensions, including those for AMP.
 	 */
 	public function add_extensions( $extensions ) {
 		return array_merge(
