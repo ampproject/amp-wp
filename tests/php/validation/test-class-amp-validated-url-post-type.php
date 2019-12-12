@@ -598,19 +598,19 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		];
 		$errors = [
 			[
-				'code'      => AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE,
+				'code'      => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 				'node_name' => 'script',
 				'sources'   => [ $source ],
 			],
 			[
-				'code'      => AMP_Validation_Error_Taxonomy::INVALID_ATTRIBUTE_CODE,
+				'code'      => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
 				'node_name' => 'onclick',
 				'sources'   => [ $source ],
 			],
 		];
 
 		return [
-			'invalid_element'       => [
+			AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG => [
 				AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT,
 				'<strong class="source"><span class="dashicons dashicons-admin-plugins"></span>AMP</strong>',
 				$errors,
@@ -1661,7 +1661,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 	public function get_mock_errors() {
 		return [
 			[
-				'code'            => AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE,
+				'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 				'node_name'       => 'script',
 				'parent_name'     => 'div',
 				'node_attributes' => [],
@@ -1673,7 +1673,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 				],
 			],
 			[
-				'code'               => AMP_Validation_Error_Taxonomy::INVALID_ATTRIBUTE_CODE,
+				'code'               => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
 				'node_name'          => 'onclick',
 				'parent_name'        => 'div',
 				'element_attributes' => [

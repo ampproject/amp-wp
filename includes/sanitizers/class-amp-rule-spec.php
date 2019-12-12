@@ -45,7 +45,6 @@ abstract class AMP_Rule_Spec {
 	const ALLOWED_PROTOCOL        = 'protocol';
 	const ALTERNATIVE_NAMES       = 'alternative_names';
 	const BLACKLISTED_VALUE_REGEX = 'blacklisted_value_regex';
-	const DISALLOWED_DOMAIN       = 'disallowed_domain';
 	const MANDATORY               = 'mandatory';
 	const VALUE                   = 'value';
 	const VALUE_CASEI             = 'value_casei';
