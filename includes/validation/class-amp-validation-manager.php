@@ -182,11 +182,11 @@ class AMP_Validation_Manager {
 					'code'    => $should_validate_response->get_error_code(),
 					'message' => $should_validate_response->get_error_message(),
 				],
-				400
+				401
 			);
-		} else {
-			self::$is_validate_request = $should_validate_response;
 		}
+
+		self::$is_validate_request = $should_validate_response;
 
 		AMP_Validated_URL_Post_Type::register();
 		AMP_Validation_Error_Taxonomy::register();
