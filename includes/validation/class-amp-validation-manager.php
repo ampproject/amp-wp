@@ -1633,18 +1633,21 @@ class AMP_Validation_Manager {
 		$data = [
 			'results' => self::$validation_results,
 		];
-		if ( get_queried_object() ) {
+
+		$queried_object = get_queried_object();
+		if ( $queried_object ) {
 			$data['queried_object'] = [];
-			if ( get_queried_object_id() ) {
-				$data['queried_object']['id'] = get_queried_object_id();
+			$queried_object_id      = get_queried_object_id();
+			if ( $queried_object_id ) {
+				$data['queried_object']['id'] = $queried_object_id;
 			}
-			if ( get_queried_object() instanceof WP_Post ) {
+			if ( $queried_object instanceof WP_Post ) {
 				$data['queried_object']['type'] = 'post';
-			} elseif ( get_queried_object() instanceof WP_Term ) {
+			} elseif ( $queried_object instanceof WP_Term ) {
 				$data['queried_object']['type'] = 'term';
-			} elseif ( get_queried_object() instanceof WP_User ) {
+			} elseif ( $queried_object instanceof WP_User ) {
 				$data['queried_object']['type'] = 'user';
-			} elseif ( get_queried_object() instanceof WP_Post_Type ) {
+			} elseif ( $queried_object instanceof WP_Post_Type ) {
 				$data['queried_object']['type'] = 'post_type';
 			}
 		}
