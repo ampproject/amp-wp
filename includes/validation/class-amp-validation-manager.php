@@ -2014,7 +2014,7 @@ class AMP_Validation_Manager {
 			case 'response_not_json':
 				return $implode_non_empty_strings_with_spaces_and_sanitize(
 					[
-						esc_html__( 'URL validation failed to due to the AMP validation request not returning JSON data. This is may be due to a PHP fatal error occurring.', 'amp' ),
+						esc_html__( 'URL validation failed due to the AMP validation request not returning JSON data. This may be due to a PHP fatal error occurring.', 'amp' ),
 						esc_html( $error_message ),
 						$check_error_log,
 						$support_forum_message,
@@ -2023,7 +2023,7 @@ class AMP_Validation_Manager {
 			case 'malformed_json_validation_errors':
 				return $implode_non_empty_strings_with_spaces_and_sanitize(
 					[
-						esc_html__( 'URL validation failed to due to unexpected JSON in AMP validation response.', 'amp' ),
+						esc_html__( 'URL validation failed due to unexpected JSON in AMP validation response.', 'amp' ),
 						esc_html( $error_message ),
 						$support_forum_message,
 					]
