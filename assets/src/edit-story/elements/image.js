@@ -16,7 +16,7 @@ const Element = styled.img`
 	${ ElementWithRotation }
 `;
 
-function Image( { src, width, height, x, y, rotationAngle } ) {
+function Image( { src, width, height, x, y, rotationAngle, forwardedRef, onPointerDown } ) {
 	const props = {
 		width,
 		height,
@@ -24,9 +24,10 @@ function Image( { src, width, height, x, y, rotationAngle } ) {
 		y,
 		rotationAngle,
 		src,
+		ref: forwardedRef,
 	};
 	return (
-		<Element { ...props } />
+		<Element draggable="false" { ...props } onPointerDown={ onPointerDown } />
 	);
 }
 
@@ -37,6 +38,8 @@ Image.propTypes = {
 	height: PropTypes.number.isRequired,
 	x: PropTypes.number.isRequired,
 	y: PropTypes.number.isRequired,
+	forwardedRef: PropTypes.func,
+	onPointerDown: PropTypes.func,
 };
 
 Image.defaultProps = {
