@@ -948,16 +948,6 @@ function amp_get_content_sanitizers( $post = null ) {
 		];
 	}
 
-	if ( 'twentytwenty' === get_stylesheet() ) {
-		$theme = wp_get_theme( 'twentytwenty' );
-
-		if ( $theme->exists() && version_compare( $theme->get( 'Version' ), '1.0.0', '<=' ) ) {
-			$sanitizers['AMP_Core_Theme_Sanitizer']['theme_features']['add_smooth_scrolling'] = [
-				'//a[ starts-with( @href, "#" ) and not( @href = "#" )and not( @href = "#0" ) and not( contains( @class, "do-not-scroll" ) ) and not( contains( @class, "skip-link" ) ) ]',
-			];
-		}
-	}
-
 	/**
 	 * Filters the content sanitizers.
 	 *
