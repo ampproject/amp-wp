@@ -59,6 +59,8 @@ function Page() {
 		}
 		evt.stopPropagation();
 
+		// Persist the event so that a dragstart could be
+		// later triggered without having to select the element first.
 		if ( 'pointerdown' === evt.type ) {
 			evt.persist();
 			setPushEvent( evt );
@@ -66,6 +68,7 @@ function Page() {
 	}, [ toggleElementIdInSelection, selectElementById ] );
 
 	const singleSelection = 1 === selectedElements.length;
+	const multiSelection = 1 < selectedElements.length;
 
 	return (
 		<Background>
@@ -94,6 +97,7 @@ function Page() {
 									if ( ! isSelected ) {
 										return;
 									}
+									// Add the element to the list of refs.
 									targetRefs.current[ i ] = {
 										id,
 										...rest,
@@ -112,10 +116,9 @@ function Page() {
 					selectedEl={ selectedElements[ 0 ] }
 				/>
 			) }
-			{ 1 < targetRefs.current.length && (
+			{ multiSelection && (
 				<Movable
 					targets={ targetRefs.current }
-					targetEl={ null }
 					selectedEl={ {} }
 					pushEvent={ pushEvent }
 				/>

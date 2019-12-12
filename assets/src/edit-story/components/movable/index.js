@@ -87,7 +87,7 @@ function Movable( {
 
 	// @todo Perhaps split the group movable into a separate file.
 	// Moveable for group. Ensure that the targets list matches the selected elements list length.
-	if ( targetList && targetList.length === selectedElements.length ) {
+	if ( targetList && targetList.length ) {
 		return (
 			<Moveable
 				ref={ moveable }
@@ -99,7 +99,7 @@ function Movable( {
 					events.forEach( ( { target, beforeTranslate }, i ) => {
 						const sFrame = frames[ i ];
 						sFrame.translate = beforeTranslate;
-						target.style.transform = `translate(${ beforeTranslate[ 0 ] }px, ${ beforeTranslate[ 1 ] }px)`;
+						setStyle( target, sFrame );
 					} );
 				} }
 				onDragGroupStart={ ( { events } ) => {
@@ -132,14 +132,13 @@ function Movable( {
 						const sFrame = frames[ i ];
 						sFrame.rotate = beforeRotate;
 						sFrame.translate = drag.beforeTranslate;
-						target.style.transform = `translate(${ drag.beforeTranslate[ 0 ] }px, ${ drag.beforeTranslate[ 1 ] }px) rotate(${ beforeRotate }deg)`;
+						setStyle( target, sFrame );
 					} );
 				} }
 				onRotateGroupEnd={ ( { targets } ) => {
 					const updatedElements = [];
 					// Set together updated elements.
 					targets.forEach( ( target, i ) => {
-						// @todo Improve this here.
 						updatedElements.push( {
 							id: targetList[ i ].id,
 							x: targetList[ i ].x + frames[ i ].translate[ 0 ],
