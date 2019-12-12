@@ -24,7 +24,6 @@ function Movable( {
 	type,
 	targetEl,
 	pushEvent,
-	setPushEvent,
 } ) {
 	const moveable = useRef();
 
@@ -34,15 +33,13 @@ function Movable( {
 
 	useEffect( () => {
 		if ( moveable.current ) {
-			// If we have persistent event then let's use that.
-			if ( pushEvent ) {
+			// If we have persistent event then let's use that, ensuring the targets match.
+			if ( pushEvent && pushEvent.target === targetEl ) {
 				moveable.current.moveable.dragStart( pushEvent );
-				// Remove the event right after using, not to influence other elements.
-				setPushEvent( null );
 			}
 			moveable.current.updateRect();
 		}
-		// Disable reason: we should not run this when pushEvent changes!
+		// Disable reason: we should not run this when pushEvent changes.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [ targetEl, moveable ] );
 
@@ -122,7 +119,7 @@ function Movable( {
 			} }
 			origin={ false }
 			pinchable={ true }
-			keepRatio={ 'image' === type }
+			keepRatio={ 'image' === type } // @†odo Even image doesn't always keep ratio, consider moving to element's model.
 			renderDirections={ 'image' === type ? CORNER_HANDLES : ALL_HANDLES }
 		/>
 	);
@@ -132,7 +129,6 @@ Movable.propTypes = {
 	rotationAngle: PropTypes.number.isRequired,
 	targetEl: PropTypes.object.isRequired,
 	pushEvent: PropTypes.object,
-	setPushEvent: PropTypes.func,
 	type: PropTypes.string.isRequired,
 	x: PropTypes.number.isRequired,
 	y: PropTypes.number.isRequired,
