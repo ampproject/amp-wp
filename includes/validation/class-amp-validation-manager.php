@@ -27,6 +27,13 @@ class AMP_Validation_Manager {
 	const VALIDATION_ERRORS_QUERY_VAR = 'amp_validation_errors';
 
 	/**
+	 * Action name for previewing the status change for invaliud markup.
+	 *
+	 * @var string
+	 */
+	const MARKUP_STATUS_PREVIEW_ACTION = 'amp_markup_status_preview';
+
+	/**
 	 * Query var for passing status preview/update for validation error.
 	 *
 	 * @var string
@@ -231,6 +238,8 @@ class AMP_Validation_Manager {
 
 			add_action( 'admin_bar_menu', [ __CLASS__, 'add_admin_bar_menu_items' ], 101 );
 		}
+
+		self::override_validation_error_statuses();
 
 		if ( self::$is_validate_request ) {
 			self::add_validation_error_sourcing();
@@ -532,33 +541,47 @@ class AMP_Validation_Manager {
 	}
 
 	/**
-	 * Add hooks for doing determining sources for validation errors during preprocessing/sanitizing.
+	 * Override validation error statuses (when requested).
+	 *
+	 * When a query var is present along with the required nonce, override the status of the status of the invalud markup
+	 * as requested.
+	 *
+	 * @since 1.5.0
 	 */
-	public static function add_validation_error_sourcing() {
-
-		// Capture overrides validation error status overrides from query var.
-		$can_override_validation_error_statuses = (
-			isset( $_REQUEST[ self::VALIDATE_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			&&
-			self::get_amp_validate_nonce() === $_REQUEST[ self::VALIDATE_QUERY_VAR ] // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			&&
+	public static function override_validation_error_statuses() {
+		$override_validation_error_statuses = (
 			isset( $_REQUEST[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			&&
 			is_array( $_REQUEST[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		);
-		if ( $can_override_validation_error_statuses ) {
-			/*
-			 * This can't just easily add an amp_validation_error_sanitized filter because the the filter_sanitizer_args() method
-			 * currently needs to obtain the list of overrides to create a parsed_cache_variant.
-			 */
-			foreach ( $_REQUEST[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] as $slug => $status ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				$slug   = sanitize_key( $slug );
-				$status = (int) $status;
-				self::$validation_error_status_overrides[ $slug ] = $status;
-				ksort( self::$validation_error_status_overrides );
-			}
+		if ( ! $override_validation_error_statuses ) {
+			return;
 		}
+		if ( ! isset( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( $_REQUEST['_wpnonce'] ), self::MARKUP_STATUS_PREVIEW_ACTION ) ) {
+			wp_die(
+				esc_html__( 'Preview link expired. Please try again.', 'amp' ),
+				esc_html__( 'Error', 'amp' ),
+				[ 'response' => 401 ]
+			);
+		}
+		$statuses = $_REQUEST[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ]; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
+		/*
+		 * This can't just easily add an amp_validation_error_sanitized filter because the the filter_sanitizer_args() method
+		 * currently needs to obtain the list of overrides to create a parsed_cache_variant.
+		 */
+		foreach ( $statuses as $slug => $status ) {
+			$slug   = sanitize_key( $slug );
+			$status = (int) $status;
+			self::$validation_error_status_overrides[ $slug ] = $status;
+			ksort( self::$validation_error_status_overrides );
+		}
+	}
+
+	/**
+	 * Add hooks for doing determining sources for validation errors during preprocessing/sanitizing.
+	 */
+	public static function add_validation_error_sourcing() {
 		self::$template_directory   = wp_normalize_path( get_template_directory() );
 		self::$template_slug        = get_template();
 		self::$stylesheet_directory = wp_normalize_path( get_stylesheet_directory() );
