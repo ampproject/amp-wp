@@ -46,16 +46,22 @@ function Movable( {
 		if ( moveable.current ) {
 			moveable.current.updateRect();
 		}
-	}, [ selectedElements ] );
+	}, [ selectedElements, targetList ] );
 
-	const setStyle = ( target ) => {
-		target.style.transform = `translate(${ frame.translate[ 0 ] }px, ${ frame.translate[ 1 ] }px) rotate(${ frame.rotate }deg)`;
+	/**
+	 * Set style to the element.
+	 *
+	 * @param {Object} target Target element to update.
+	 * @param {Object} frameProps Properties from the frame for that specific element.
+	 */
+	const setStyle = ( target, frameProps ) => {
+		target.style.transform = `translate(${ frameProps.translate[ 0 ] }px, ${ frameProps.translate[ 1 ] }px) rotate(${ frameProps.rotate }deg)`;
 	};
 
-	// @todo Is there any time when translate would differ among the elements? If not, we can use just one translate for these.
-	const frames = targetList ? targetList.map( ( e, i ) => ( {
+	// @todo Is there any time when translate would differ among the elements? If not, we caould use just one translate for these.
+	const frames = targetList ? targetList.map( ( target ) => ( {
 		translate: [ 0, 0 ],
-		rotate: selectedElements[ i ].rotationAngle,
+		rotate: target.rotationAngle,
 	} ) ) : [];
 
 	/**
@@ -66,24 +72,25 @@ function Movable( {
 	const resetMoveable = ( target ) => {
 		// @todo Improve this logic.
 		if ( targetList && targetList.length ) {
-			targetList.forEach( ( el, i ) => {
+			targetList.forEach( ( { ref }, i ) => {
 				frames[ i ].translate = [ 0, 0 ];
-				el.style.transform = `translate(0px, 0px) rotate(${ frames[ i ].rotate }deg)`;
+				setStyle( ref, frames[ i ] );
 			} );
 		} else {
 			frame.translate = [ 0, 0 ];
-			setStyle( target );
+			setStyle( target, frame );
 		}
 		if ( moveable.current ) {
 			moveable.current.updateRect();
 		}
 	};
 
-	if ( targetList && targetList.length ) {
+	// Moveable for group. Ensure that the targets list matches the selected elements list length.
+	if ( targetList && targetList.length === selectedElements.length ) {
 		return (
 			<Moveable
 				ref={ moveable }
-				target={ targetList }
+				target={ targetList.map( ( { ref } ) => ref ) }
 				draggable={ true }
 				resizable={ false }
 				rotatable={ true }
@@ -105,7 +112,7 @@ function Movable( {
 					// Set together updated elements.
 					targets.forEach( ( target, i ) => {
 						// @todo Improve this here.
-						updatedElements.push( { id: selectedElements[ i ].id, x: selectedElements[ i ].x + frames[ i ].translate[ 0 ], y: selectedElements[ i ].y + frames[ i ].translate[ 1 ] } );
+						updatedElements.push( { id: targetList[ i ].id, x: targetList[ i ].x + frames[ i ].translate[ 0 ], y: targetList[ i ].y + frames[ i ].translate[ 1 ] } );
 					} );
 					if ( updatedElements.length ) {
 						// Update the elements.
@@ -133,9 +140,9 @@ function Movable( {
 					targets.forEach( ( target, i ) => {
 						// @todo Improve this here.
 						updatedElements.push( {
-							id: selectedElements[ i ].id,
-							x: selectedElements[ i ].x + frames[ i ].translate[ 0 ],
-							y: selectedElements[ i ].y + frames[ i ].translate[ 1 ],
+							id: targetList[ i ].id,
+							x: targetList[ i ].x + frames[ i ].translate[ 0 ],
+							y: targetList[ i ].y + frames[ i ].translate[ 1 ],
 							rotationAngle: frames[ i ].rotate,
 						} );
 					} );
@@ -164,7 +171,7 @@ function Movable( {
 			rotatable={ true }
 			onDrag={ ( { target, beforeTranslate } ) => {
 				frame.translate = beforeTranslate;
-				setStyle( target );
+				setStyle( target, frame );
 			} }
 			throttleDrag={ 0 }
 			onDragStart={ ( { set } ) => {
@@ -186,7 +193,7 @@ function Movable( {
 				target.style.width = `${ width }px`;
 				target.style.height = `${ height }px`;
 				frame.translate = drag.beforeTranslate;
-				setStyle( target );
+				setStyle( target, frame );
 			} }
 			onResizeEnd={ ( { target } ) => {
 				setPropertiesOnSelectedElements( {
@@ -202,7 +209,7 @@ function Movable( {
 			} }
 			onRotate={ ( { target, beforeRotate } ) => {
 				frame.rotate = beforeRotate;
-				setStyle( target );
+				setStyle( target, frame );
 			} }
 			onRotateEnd={ ( { target } ) => {
 				setPropertiesOnSelectedElements( { rotationAngle: frame.rotate } );

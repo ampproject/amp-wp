@@ -16,7 +16,7 @@ const Element = styled.img`
 	${ ElementWithRotation }
 `;
 
-function Image( { src, width, height, x, y, rotationAngle, forwardedRef, onPointerDown, className } ) {
+function Image( { src, width, height, x, y, rotationAngle, forwardedRef, onPointerDown } ) {
 	const props = {
 		width,
 		height,
@@ -25,7 +25,6 @@ function Image( { src, width, height, x, y, rotationAngle, forwardedRef, onPoint
 		rotationAngle,
 		src,
 		ref: forwardedRef,
-		className, // @todo Tmp, remove this, ideally use refs instead.
 	};
 	return (
 		<Element draggable="false" { ...props } onPointerDown={ onPointerDown } />

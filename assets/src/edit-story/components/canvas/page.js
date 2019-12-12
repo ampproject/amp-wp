@@ -6,7 +6,7 @@ import styled from 'styled-components';
 /**
  * WordPress dependencies
  */
-import { useCallback, useEffect, useState } from '@wordpress/element';
+import { useCallback, useEffect, useState, useRef } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -41,6 +41,12 @@ function Page() {
 	const [ targetEl, setTargetEl ] = useState( null );
 	const [ pushEvent, setPushEvent ] = useState( null );
 
+	const targetRefs = useRef( [] );
+	useEffect( () => {
+		// Update the size of targetRefs when the selected elements changes.
+		targetRefs.current = targetRefs.current.slice( 0, selectedElements.length );
+	}, [ selectedElements ] );
+
 	useEffect( () => {
 		setBackgroundClickHandler( () => clearSelection() );
 	}, [ setBackgroundClickHandler, clearSelection ] );
@@ -63,11 +69,10 @@ function Page() {
 
 	return (
 		<Background>
-			{ currentPage && currentPage.elements.map( ( { type, id, ...rest } ) => {
+			{ currentPage && currentPage.elements.map( ( { type, id, ...rest }, i ) => {
 				const comp = getComponentForType( type );
 				const Comp = comp; // why u do dis, eslint?
 
-				// @todo Improve this here, create some reasonable variables.
 				const isSelected = selectedElements.filter( ( { id: selectedId } ) => id === selectedId ).length;
 				// @todo Use the wrapper element around <Comp> as the target for Moveable instead.
 				return (
@@ -83,8 +88,20 @@ function Page() {
 									handleSelectElement( id, evt );
 								}
 							} }
-							forwardedRef={ isSelected ? setTargetEl : null }
-							className={ isSelected && 1 < selectedElements.length ? 'target' : null }
+							forwardedRef={ ( el ) => {
+								if ( ! isSelected ) {
+									return;
+								}
+								if ( singleSelection ) {
+									setTargetEl( el );
+									return;
+								}
+								targetRefs.current[ i ] = {
+									id,
+									...rest,
+									ref: el,
+								};
+							} }
 						/>
 					</Element>
 				);
@@ -96,9 +113,9 @@ function Page() {
 					selectedEl={ selectedElements[ 0 ] }
 				/>
 			) }
-			{ 1 < selectedElements.length && (
+			{ 1 < targetRefs.current.length && (
 				<Movable
-					targets={ [].slice.call( document.querySelectorAll( '.target' ) ) } // @todo Array of references instead.
+					targets={ targetRefs.current }
 					targetEl={ null }
 					selectedEl={ {} }
 					pushEvent={ pushEvent }
