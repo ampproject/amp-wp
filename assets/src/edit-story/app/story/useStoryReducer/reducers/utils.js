@@ -37,20 +37,29 @@ export function moveArrayElement( array, oldPosition, newPosition ) {
 	];
 }
 
-export function getAbsolutePosition( currentPosition, maxPosition, newPosition ) {
-	if ( typeof newPosition !== 'string' ) {
-		return newPosition;
+export function getAbsolutePosition( {
+	currentPosition,
+	minPosition,
+	maxPosition,
+	desiredPosition,
+} ) {
+	if ( typeof newPosition === 'number' ) {
+		return Math.min( maxPosition, Math.max( minPosition, desiredPosition ) );
 	}
 
-	switch ( newPosition ) {
+	if ( typeof newPosition !== 'string' ) {
+		return currentPosition;
+	}
+
+	switch ( desiredPosition ) {
 		case LAYER_DIRECTIONS.FRONT:
 			return maxPosition;
 		case LAYER_DIRECTIONS.BACK:
-			return 0;
+			return minPosition;
 		case LAYER_DIRECTIONS.FORWARD:
-			return currentPosition + 1;
+			return Math.min( maxPosition, currentPosition + 1 );
 		case LAYER_DIRECTIONS.BACKWARD:
-			return currentPosition - 1;
+			return Math.max( minPosition, currentPosition - 1 );
 		default:
 			return currentPosition;
 	}

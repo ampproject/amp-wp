@@ -13,6 +13,8 @@ import { intersect } from './utils';
  *
  * If an empty list or a list of only unknown ids is given, state is unchanged.
  *
+ * If any id to delete is the current background element, background element will be unset for the page.
+ *
  * If any id to delete is in current selection, deleted ids are removed from selection.
  * Otherwise selection is unchanged.
  *
@@ -46,6 +48,11 @@ function deleteElements( state, { elementIds } ) {
 		...oldPage,
 		elements: filteredElements,
 	};
+
+	// Clear background if it has been deleted.
+	if ( oldPage.backgroundElementId !== null && idsToDelete.includes( oldPage.backgroundElementId ) ) {
+		newPage.backgroundElementId = null;
+	}
 
 	const newPages = [
 		...state.pages.slice( 0, pageIndex ),

@@ -15,6 +15,23 @@ const INITIAL_STATE = {
 	selection: [],
 };
 
+/**
+ * More description to follow - especially about return value.
+ *
+ * Invariants kept by the system:
+ * - Pages is always an array.
+ * - All pages have a elements array.
+ * - If there's at least one page, current page points to a valid page.
+ * - Selection is always a unique array (and never null, never has duplicates).
+ * - Pages always have a backgroundElementId property.
+ * - If a page has non-empty background element, it will be the id of the first element in the elements array.
+ *
+ * Invariants *not* kept by the system:
+ * - New pages and objects aren't checked for id's and id's aren't validated for type
+ * - New pages aren't validated for type of elements property when adde
+ *
+ * @return {Object} An object with keys `state`, `internal` and `api`.
+ */
 function useStoryReducer() {
 	const [ state, dispatch ] = useReducer( reducer, INITIAL_STATE );
 

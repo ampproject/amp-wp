@@ -52,6 +52,12 @@ const updateElementById = ( dispatch ) => ( { elementId, properties } ) =>
 const updateSelectedElements = ( dispatch ) => ( { properties } ) =>
 	dispatch( { type: types.UPDATE_ELEMENTS, payload: { elementIds: null, properties } } );
 
+const setBackgroundElement = ( dispatch ) => ( { elementId } ) =>
+	dispatch( { type: types.SET_BACKGROUND_ELEMENT, payload: { elementId } } );
+
+const clearBackgroundElement = ( dispatch ) => () =>
+	dispatch( { type: types.SET_BACKGROUND_ELEMENT, payload: { elementId: null } } );
+
 const arrangeElement = ( dispatch ) => ( { elementId, position } ) =>
 	dispatch( { type: types.ARRANGE_ELEMENT, payload: { elementId, position } } );
 
@@ -90,6 +96,8 @@ export const exposedActions = {
 	updateElementsById,
 	updateElementById,
 	updateSelectedElements,
+	setBackgroundElement,
+	clearBackgroundElement,
 	arrangeElement,
 	arrangeSelection,
 	setSelectedElementsById,

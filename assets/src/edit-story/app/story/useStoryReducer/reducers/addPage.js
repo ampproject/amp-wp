@@ -24,11 +24,19 @@ function addPage( state, { page, position } ) {
 	const insertionPoint = isWithinBounds ? position : currentPageIndex + 1;
 
 	const { id } = page;
+
+	// Ensure new page has elements array and background id
+	const newPage = {
+		elements: [],
+		backgroundElementId: null,
+		...page,
+	};
+
 	return {
 		...state,
 		pages: [
 			...state.pages.slice( 0, insertionPoint ),
-			page,
+			newPage,
 			...state.pages.slice( insertionPoint ),
 		],
 		current: id,

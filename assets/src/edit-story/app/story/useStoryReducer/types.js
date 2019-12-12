@@ -8,6 +8,7 @@ export const ARRANGE_PAGE = 'ARRANGE_PAGE';
 export const DELETE_ELEMENTS = 'DELETE_ELEMENTS';
 export const ADD_ELEMENTS = 'ADD_ELEMENTS';
 export const UPDATE_ELEMENTS = 'UPDATE_ELEMENTS';
+export const SET_BACKGROUND_ELEMENT = 'SET_BACKGROUND_ELEMENT';
 export const ARRANGE_ELEMENT = 'ARRANGE_ELEMENT';
 
 // Manipulate current page.
@@ -23,5 +24,5 @@ export const TOGGLE_ELEMENT_IN_SELECTION = 'TOGGLE_ELEMENT_IN_SELECTION';
 export const RESTORE = 'RESTORE';
 
 // Reserved property names for pages and elements.
-export const PAGE_RESERVED_PROPERTIES = [ 'id', 'elements' ];
+export const PAGE_RESERVED_PROPERTIES = [ 'id', 'elements', 'backgroundElementId' ];
 export const ELEMENT_RESERVED_PROPERTIES = [ 'id' ];

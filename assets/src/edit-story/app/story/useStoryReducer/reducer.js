@@ -38,6 +38,10 @@ function reducer( state, { type, payload } ) {
 			return reducers.updateElements( state, payload );
 		}
 
+		case types.SET_BACKGROUND_ELEMENT: {
+			return reducers.setBackgroundElement( state, payload );
+		}
+
 		case types.ARRANGE_ELEMENT: {
 			return reducers.arrangeElement( state, payload );
 		}
