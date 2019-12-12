@@ -45,156 +45,203 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	protected $xpath;
 
 	/**
-	 * Config for features needed by themes.
+	 * Array of themes that are supported.
 	 *
-	 * @since 1.0
 	 * @var array
 	 */
-	protected static $theme_features = [
-		// Twenty Twenty.
-		'twentytwenty'    => [
-			'dequeue_scripts'                         => [
-				'twentytwenty-js',
-			],
-			'remove_actions'                          => [
-				'wp_head'                 => [
-					'twentytwenty_no_js_class', // AMP is essentially no-js, with any interactivity added explicitly via amp-bind.
-				],
-				'wp_print_footer_scripts' => [
-					'twentytwenty_skip_link_focus_fix', // See <https://github.com/WordPress/twentynineteen/pull/47>.
-				],
-			],
-			'add_twentytwenty_modals'                 => [],
-			'add_twentytwenty_toggles'                => [],
-			'add_nav_menu_styles'                     => [],
-			'add_twentytwenty_masthead_styles'        => [],
-			'add_twentytwenty_current_page_awareness' => [],
-		],
-
-		// Twenty Nineteen.
-		'twentynineteen'  => [
-			'dequeue_scripts'                    => [
-				'twentynineteen-skip-link-focus-fix', // This is part of AMP. See <https://github.com/ampproject/amphtml/issues/18671>.
-				'twentynineteen-priority-menu',
-				'twentynineteen-touch-navigation', // @todo There could be an AMP implementation of this, similar to what is implemented on ampproject.org.
-			],
-			'remove_actions'                     => [
-				'wp_print_footer_scripts' => [
-					'twentynineteen_skip_link_focus_fix', // See <https://github.com/WordPress/twentynineteen/pull/47>.
-				],
-			],
-			'add_twentynineteen_masthead_styles' => [],
-			'adjust_twentynineteen_images'       => [],
-		],
-
-		// Twenty Seventeen.
-		'twentyseventeen' => [
-			// @todo Try to implement belowEntryMetaClass().
-			'dequeue_scripts'                     => [
-				'twentyseventeen-html5', // Only relevant for IE<9.
-				'twentyseventeen-global', // There are somethings not yet implemented in AMP. See todos below.
-				'jquery-scrollto', // Implemented via add_smooth_scrolling().
-				'twentyseventeen-navigation', // Handled by add_nav_menu_styles, add_nav_menu_toggle, add_nav_sub_menu_buttons.
-				'twentyseventeen-skip-link-focus-fix', // Unnecessary since part of the AMP runtime.
-			],
-			'remove_actions'                      => [
-				'wp_head' => [
-					'twentyseventeen_javascript_detection', // AMP is essentially no-js, with any interactivity added explicitly via amp-bind.
-				],
-			],
-			'force_fixed_background_support'      => [],
-			'add_twentyseventeen_masthead_styles' => [],
-			'add_twentyseventeen_image_styles'    => [],
-			'add_twentyseventeen_sticky_nav_menu' => [],
-			'add_has_header_video_body_class'     => [],
-			'add_nav_menu_styles'                 => [
-				'sub_menu_button_toggle_class' => 'toggled-on',
-				'no_js_submenu_visible'        => true,
-			],
-			'add_smooth_scrolling'                => [
-				'//header[@id = "masthead"]//a[ contains( @class, "menu-scroll-down" ) ]',
-			],
-			'set_twentyseventeen_quotes_icon'     => [],
-			'add_twentyseventeen_attachment_image_attributes' => [],
-		],
-
-		// Twenty Sixteen.
-		'twentysixteen'   => [
-			// @todo Figure out an AMP solution for onResizeARIA().
-			// @todo Try to implement belowEntryMetaClass().
-			'dequeue_scripts'     => [
-				'twentysixteen-script',
-				'twentysixteen-html5', // Only relevant for IE<9.
-				'twentysixteen-keyboard-image-navigation', // AMP does not yet allow for listening to keydown events.
-				'twentysixteen-skip-link-focus-fix', // Unnecessary since part of the AMP runtime.
-			],
-			'remove_actions'      => [
-				'wp_head' => [
-					'twentysixteen_javascript_detection', // AMP is essentially no-js, with any interactivity added explicitly via amp-bind.
-				],
-			],
-			'add_nav_menu_styles' => [
-				'sub_menu_button_toggle_class' => 'toggled-on',
-				'no_js_submenu_visible'        => true,
-			],
-		],
-
-		// Twenty Fifteen.
-		'twentyfifteen'   => [
-			// @todo Figure out an AMP solution for onResizeARIA().
-			'dequeue_scripts'     => [
-				'twentyfifteen-script',
-				'twentyfifteen-keyboard-image-navigation', // AMP does not yet allow for listening to keydown events.
-				'twentyfifteen-skip-link-focus-fix', // Unnecessary since part of the AMP runtime.
-			],
-			'remove_actions'      => [
-				'wp_head' => [
-					'twentyfifteen_javascript_detection', // AMP is essentially no-js, with any interactivity added explicitly via amp-bind.
-				],
-			],
-			'add_nav_menu_styles' => [
-				'sub_menu_button_toggle_class' => 'toggle-on',
-				'no_js_submenu_visible'        => true,
-			],
-		],
-
-		// Twenty Fourteen.
-		'twentyfourteen'  => [
-			// @todo Figure out an AMP solution for onResizeARIA().
-			'dequeue_scripts'                    => [
-				'twentyfourteen-script',
-				'twentyfourteen-keyboard-image-navigation', // AMP does not yet allow for listening to keydown events.
-				'jquery-masonry', // Masonry style layout is not supported in AMP.
-				'twentyfourteen-slider',
-			],
-			'add_nav_menu_styles'                => [],
-			'add_twentyfourteen_masthead_styles' => [],
-			'add_twentyfourteen_slider_carousel' => [],
-			'add_twentyfourteen_search'          => [],
-		],
-
-		// Twenty Thirteen.
-		'twentythirteen'  => [
-			'dequeue_scripts'          => [
-				'jquery-masonry', // Masonry style layout is not supported in AMP.
-				'twentythirteen-script',
-			],
-			'add_nav_menu_toggle'      => [],
-			'add_nav_sub_menu_buttons' => [],
-			'add_nav_menu_styles'      => [],
-		],
-
-		// Twenty Twelve.
-		'twentytwelve'    => [
-			'dequeue_scripts'     => [
-				'twentytwelve-navigation',
-			],
-			'add_nav_menu_styles' => [],
-		],
-
-		'twentyeleven'    => [],
-		'twentyten'       => [],
+	protected static $supported_themes = [
+		'twentytwenty',
+		'twentynineteen',
+		'twentyseventeen',
+		'twentysixteen',
+		'twentyfifteen',
+		'twentyfourteen',
+		'twentythirteen',
+		'twentytwelve',
+		'twentyeleven',
+		'twentyten',
 	];
+
+	/**
+	 * Retrieve the config for features needed by a theme.
+	 *
+	 * @since 1.0
+	 * @since 1.5.0 Converted `theme_features` variable into `get_theme_config` function.
+	 *
+	 * @param string $theme_slug Theme slug.
+	 * @return array|null Array comprising of the theme config if its slug is found, null if it is not.
+	 */
+	protected static function get_theme_features_config( $theme_slug ) {
+		switch ( $theme_slug ) {
+			// Twenty Twenty.
+			case 'twentytwenty':
+				$config = [
+					'dequeue_scripts'                  => [
+						'twentytwenty-js',
+					],
+					'remove_actions'                   => [
+						'wp_head'                 => [
+							'twentytwenty_no_js_class', // AMP is essentially no-js, with any interactivity added explicitly via amp-bind.
+						],
+						'wp_print_footer_scripts' => [
+							'twentytwenty_skip_link_focus_fix', // See <https://github.com/WordPress/twentynineteen/pull/47>.
+						],
+					],
+					'add_twentytwenty_modals'          => [],
+					'add_twentytwenty_toggles'         => [],
+					'add_nav_menu_styles'              => [],
+					'add_twentytwenty_masthead_styles' => [],
+					'add_twentytwenty_current_page_awareness' => [],
+				];
+
+				$theme = wp_get_theme( 'twentytwenty' );
+
+				if ( $theme->exists() && version_compare( $theme->get( 'Version' ), '1.0.0', '<=' ) ) {
+					$config['add_smooth_scrolling'] = [
+						'//a[ starts-with( @href, "#" ) and not( @href = "#" )and not( @href = "#0" ) and not( contains( @class, "do-not-scroll" ) ) and not( contains( @class, "skip-link" ) ) ]',
+					];
+				}
+
+				return $config;
+
+			// Twenty Nineteen.
+			case 'twentynineteen':
+				return [
+					'dequeue_scripts'                    => [
+						'twentynineteen-skip-link-focus-fix', // This is part of AMP. See <https://github.com/ampproject/amphtml/issues/18671>.
+						'twentynineteen-priority-menu',
+						'twentynineteen-touch-navigation', // @todo There could be an AMP implementation of this, similar to what is implemented on ampproject.org.
+					],
+					'remove_actions'                     => [
+						'wp_print_footer_scripts' => [
+							'twentynineteen_skip_link_focus_fix', // See <https://github.com/WordPress/twentynineteen/pull/47>.
+						],
+					],
+					'add_twentynineteen_masthead_styles' => [],
+					'adjust_twentynineteen_images'       => [],
+				];
+
+			// Twenty Seventeen.
+			case 'twentyseventeen':
+				return [
+					// @todo Try to implement belowEntryMetaClass().
+					'dequeue_scripts'                     => [
+						'twentyseventeen-html5', // Only relevant for IE<9.
+						'twentyseventeen-global', // There are somethings not yet implemented in AMP. See todos below.
+						'jquery-scrollto', // Implemented via add_smooth_scrolling().
+						'twentyseventeen-navigation', // Handled by add_nav_menu_styles, add_nav_menu_toggle, add_nav_sub_menu_buttons.
+						'twentyseventeen-skip-link-focus-fix', // Unnecessary since part of the AMP runtime.
+					],
+					'remove_actions'                      => [
+						'wp_head' => [
+							'twentyseventeen_javascript_detection', // AMP is essentially no-js, with any interactivity added explicitly via amp-bind.
+						],
+					],
+					'force_fixed_background_support'      => [],
+					'add_twentyseventeen_masthead_styles' => [],
+					'add_twentyseventeen_image_styles'    => [],
+					'add_twentyseventeen_sticky_nav_menu' => [],
+					'add_has_header_video_body_class'     => [],
+					'add_nav_menu_styles'                 => [
+						'sub_menu_button_toggle_class' => 'toggled-on',
+						'no_js_submenu_visible'        => true,
+					],
+					'add_smooth_scrolling'                => [
+						'//header[@id = "masthead"]//a[ contains( @class, "menu-scroll-down" ) ]',
+					],
+					'set_twentyseventeen_quotes_icon'     => [],
+					'add_twentyseventeen_attachment_image_attributes' => [],
+				];
+
+			// Twenty Sixteen.
+			case 'twentysixteen':
+				return [
+					// @todo Figure out an AMP solution for onResizeARIA().
+					// @todo Try to implement belowEntryMetaClass().
+					'dequeue_scripts'     => [
+						'twentysixteen-script',
+						'twentysixteen-html5', // Only relevant for IE<9.
+						'twentysixteen-keyboard-image-navigation', // AMP does not yet allow for listening to keydown events.
+						'twentysixteen-skip-link-focus-fix', // Unnecessary since part of the AMP runtime.
+					],
+					'remove_actions'      => [
+						'wp_head' => [
+							'twentysixteen_javascript_detection', // AMP is essentially no-js, with any interactivity added explicitly via amp-bind.
+						],
+					],
+					'add_nav_menu_styles' => [
+						'sub_menu_button_toggle_class' => 'toggled-on',
+						'no_js_submenu_visible'        => true,
+					],
+				];
+
+			// Twenty Fifteen.
+			case 'twentyfifteen':
+				return [
+					// @todo Figure out an AMP solution for onResizeARIA().
+					'dequeue_scripts'     => [
+						'twentyfifteen-script',
+						'twentyfifteen-keyboard-image-navigation', // AMP does not yet allow for listening to keydown events.
+						'twentyfifteen-skip-link-focus-fix', // Unnecessary since part of the AMP runtime.
+					],
+					'remove_actions'      => [
+						'wp_head' => [
+							'twentyfifteen_javascript_detection', // AMP is essentially no-js, with any interactivity added explicitly via amp-bind.
+						],
+					],
+					'add_nav_menu_styles' => [
+						'sub_menu_button_toggle_class' => 'toggle-on',
+						'no_js_submenu_visible'        => true,
+					],
+				];
+
+			// Twenty Fourteen.
+			case 'twentyfourteen':
+				return [
+					// @todo Figure out an AMP solution for onResizeARIA().
+					'dequeue_scripts'                    => [
+						'twentyfourteen-script',
+						'twentyfourteen-keyboard-image-navigation', // AMP does not yet allow for listening to keydown events.
+						'jquery-masonry', // Masonry style layout is not supported in AMP.
+						'twentyfourteen-slider',
+					],
+					'add_nav_menu_styles'                => [],
+					'add_twentyfourteen_masthead_styles' => [],
+					'add_twentyfourteen_slider_carousel' => [],
+					'add_twentyfourteen_search'          => [],
+				];
+
+			// Twenty Thirteen.
+			case 'twentythirteen':
+				return [
+					'dequeue_scripts'          => [
+						'jquery-masonry', // Masonry style layout is not supported in AMP.
+						'twentythirteen-script',
+					],
+					'add_nav_menu_toggle'      => [],
+					'add_nav_sub_menu_buttons' => [],
+					'add_nav_menu_styles'      => [],
+				];
+
+			// Twenty Twelve.
+			case 'twentytwelve':
+				return [
+					'dequeue_scripts'     => [
+						'twentytwelve-navigation',
+					],
+					'add_nav_menu_styles' => [],
+				];
+
+			// Twenty Eleven.
+			case 'twentyeleven':
+				// Twenty Ten.
+			case 'twentyten':
+				return [];
+
+			default:
+				return null;
+		}
+	}
 
 	/**
 	 * Get list of supported core themes.
@@ -204,7 +251,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return string[] Slugs for supported themes.
 	 */
 	public static function get_supported_themes() {
-		return array_keys( self::$theme_features );
+		return self::$supported_themes;
 	}
 
 	/**
@@ -216,7 +263,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array Acceptable errors.
 	 */
 	public static function get_acceptable_errors( $template ) {
-		if ( isset( self::$theme_features[ $template ] ) ) {
+		if ( in_array( $template, self::$supported_themes, true ) ) {
 			return [
 				'illegal_css_at_rule' => [
 					[
@@ -395,8 +442,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$theme_features   = [];
 		$theme_candidates = wp_array_slice_assoc( $args, [ 'stylesheet', 'template' ] );
 		foreach ( $theme_candidates as $theme_candidate ) {
-			if ( isset( self::$theme_features[ $theme_candidate ] ) ) {
-				$theme_features = self::$theme_features[ $theme_candidate ];
+			if ( in_array( $theme_candidate, self::$supported_themes, true ) ) {
+				$theme_features = self::get_theme_features_config( $theme_candidate );
 				break;
 			}
 		}
