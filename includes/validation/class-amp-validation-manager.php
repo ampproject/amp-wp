@@ -297,11 +297,7 @@ class AMP_Validation_Manager {
 	 * @return bool Whether theme support forced.
 	 */
 	public static function is_theme_support_forced() {
-		return (
-			isset( $_GET[ self::VALIDATE_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			&&
-			( self::has_cap() || self::get_amp_validate_nonce() === $_GET[ self::VALIDATE_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		);
+		return self::$is_validate_request;
 	}
 
 	/**
