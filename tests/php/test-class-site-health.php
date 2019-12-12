@@ -27,7 +27,6 @@ class Test_Site_Health extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 		$this->instance = new SiteHealth();
-		remove_post_type_support( 'post', AMP_Theme_Support::SLUG );
 	}
 
 	/**
@@ -259,6 +258,11 @@ class Test_Site_Health extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( 'supported_templates', $supported_templates );
 		AMP_Options_Manager::update_option( 'theme_support', $theme_support );
 		AMP_Theme_Support::read_theme_support();
+
+		$basic_post_types = [ 'post', 'page' ];
+		foreach ( array_diff( $basic_post_types, $supported_content_types ) as $post_type ) {
+			remove_post_type_support( $post_type, AMP_Theme_Support::SLUG );
+		}
 
 		foreach ( $supported_content_types as $post_type ) {
 			add_post_type_support( $post_type, AMP_Theme_Support::SLUG );
