@@ -88,18 +88,19 @@ function Page() {
 									handleSelectElement( id, evt );
 								}
 							} }
-							forwardedRef={ ! isSelected ? null : ( el ) => {
-								// @todo This doesn't really work as expected, we should probably create a ref for targetEl.
-								if ( singleSelection ) {
-									setTargetEl( el );
-									return;
+							forwardedRef={ singleSelection && isSelected ?
+								setTargetEl :
+								( el ) => {
+									if ( ! isSelected ) {
+										return;
+									}
+									targetRefs.current[ i ] = {
+										id,
+										...rest,
+										ref: el,
+									};
 								}
-								targetRefs.current[ i ] = {
-									id,
-									...rest,
-									ref: el,
-								};
-							} }
+							}
 						/>
 					</Element>
 				);
