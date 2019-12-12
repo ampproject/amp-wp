@@ -110,7 +110,14 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			 * @see: https://github.com/ampproject/amphtml/issues/2261
 			 */
 			if ( empty( $normalized_attributes['src'] ) ) {
-				$this->remove_invalid_child( $node );
+				$this->remove_invalid_child(
+					$node,
+					[
+						'code'       => AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING,
+						'attributes' => [ 'src' ],
+						'spec_name'  => 'amp-iframe',
+					]
+				);
 				continue;
 			}
 

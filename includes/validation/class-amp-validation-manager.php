@@ -311,7 +311,7 @@ class AMP_Validation_Manager {
 
 		if ( $error && amp_is_canonical() ) {
 			// Excessive CSS on AMP-first sites must not be removed by default since removing CSS can severely break a site.
-			$accepted = 'excessive_css' !== $error['code'];
+			$accepted = AMP_Style_Sanitizer::STYLESHEET_TOO_LONG !== $error['code'];
 		} else {
 			$accepted = true;
 		}

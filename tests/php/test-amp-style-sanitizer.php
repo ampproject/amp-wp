@@ -147,7 +147,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'button{font-weight:bold}',
 					'@media screen{button{font-weight:bold}}',
 				],
-				[ 'illegal_css_property', 'illegal_css_property', 'illegal_css_property', 'illegal_css_property' ],
+				array_fill( 0, 4, AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_PROPERTY_NOLIST ),
 			],
 
 			'illegal_at_rule_in_style_attribute' => [
@@ -165,7 +165,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				[
 					'@page{margin:1cm}body{color:black}',
 				],
-				[ 'illegal_css_at_rule', 'illegal_css_at_rule', 'illegal_css_at_rule' ],
+				[ AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE, AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE, AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE ],
 			],
 
 			'allowed_at_rules_retained' => [
@@ -1298,7 +1298,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		);
 
 		$this->assertEquals(
-			[ 'excessive_css' ],
+			[ AMP_Style_Sanitizer::STYLESHEET_TOO_LONG ],
 			$error_codes
 		);
 	}
@@ -1410,7 +1410,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			],
 			true
 		);
-		$this->assertEquals( [ 'excessive_css' ], $error_codes );
+		$this->assertEquals( [ AMP_Style_Sanitizer::STYLESHEET_TOO_LONG ], $error_codes );
 		$this->assertInstanceOf( 'DOMComment', $style->previousSibling, 'Expected manifest comment to be present because excessive.' );
 		$comment = $style->previousSibling;
 		$this->assertContains( 'The style[amp-custom] element is populated with', $comment->nodeValue );
@@ -1478,7 +1478,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				home_url( '/this.is.not.css' ),
 				'image/jpeg',
 				'JPEG...',
-				[ 'no_css_content_type' ],
+				[ AMP_Style_Sanitizer::STYLESHEET_INVALID_FILE_URL ],
 			],
 		];
 	}
@@ -1579,7 +1579,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			'style_amp_keyframes_max_overflow' => [
 				'<style amp-keyframes>@keyframes anim1 {} @media (min-width: 600px) {@keyframes ' . str_repeat( 'a', $keyframes_max_size + 1 ) . ' {} }</style>',
 				'',
-				[ 'excessive_css' ],
+				[ AMP_Style_Sanitizer::STYLESHEET_TOO_LONG ],
 			],
 
 			'style_amp_keyframes_last_child'   => [
@@ -1591,13 +1591,13 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			'blacklisted_and_whitelisted_keyframe_properties' => [
 				'<style amp-keyframes>@keyframes anim1 { 50% { width: 50%; animation-timing-function: ease; opacity: 0.5; height:10%; offset-distance: 50%; visibility: visible; transform: rotate(0.5turn); -webkit-transform: rotate(0.5turn); color:red; } }</style>',
 				'<style amp-keyframes="">@keyframes anim1{50%{animation-timing-function:ease;opacity:.5;offset-distance:50%;visibility:visible;transform:rotate(.5 turn);-webkit-transform:rotate(.5 turn)}}</style>',
-				[ 'illegal_css_property', 'illegal_css_property', 'illegal_css_property' ],
+				array_fill( 0, 3, AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_PROPERTY ),
 			],
 
 			'style_amp_keyframes_with_disallowed_rules' => [
 				'<style amp-keyframes>body { color:red; opacity:1; } @keyframes anim1 { 50% { opacity:0.5 !important; } } @font-face { font-family: "Open Sans"; src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"); }</style>',
 				'<style amp-keyframes="">@keyframes anim1{50%{opacity:.5}}</style>',
-				[ 'unrecognized_css', 'illegal_css_important', 'illegal_css_at_rule' ],
+				[ AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_DECLARATION, AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_IMPORTANT, AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE ],
 			],
 		];
 	}
@@ -1652,12 +1652,12 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			'url_without_path' => [
 				'https://example.com',
 				null,
-				'no_url_path',
+				AMP_Style_Sanitizer::STYLESHEET_URL_SYNTAX_ERROR,
 			],
 			'url_not_string' => [
 				false,
 				null,
-				'url_not_string',
+				AMP_Style_Sanitizer::STYLESHEET_URL_SYNTAX_ERROR,
 			],
 			'theme_stylesheet_without_host' => [
 				'/wp-content/themes/twentyseventeen/style.css',
@@ -1674,7 +1674,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			'theme_stylesheet_with_trailing_dot' => [
 				$theme->get_stylesheet_directory_uri() . '/foo./bar.css',
 				null,
-				'file_path_not_found',
+				AMP_Style_Sanitizer::STYLESHEET_FILE_PATH_NOT_FOUND,
 			],
 			'dashicons_without_host' => [
 				'/wp-includes/css/dashicons.css',
@@ -1707,32 +1707,32 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			'amp_disallowed_file_extension' => [
 				content_url( 'themes/twentyseventeen/index.php' ),
 				null,
-				'disallowed_file_extension',
+				AMP_Style_Sanitizer::STYLESHEET_DISALLOWED_FILE_EXT,
 			],
 			'amp_file_path_not_found' => [
 				content_url( 'themes/twentyseventeen/404.css' ),
 				null,
-				'file_path_not_found',
+				AMP_Style_Sanitizer::STYLESHEET_FILE_PATH_NOT_FOUND,
 			],
 			'amp_file_path_illegal_linux' => [
 				content_url( '../../../../../../../../../../../../../../../bad.css' ),
 				null,
-				'remaining_relativity',
+				AMP_Style_Sanitizer::STYLESHEET_INVALID_RELATIVE_PATH,
 			],
 			'amp_file_path_illegal_windows' => [
 				content_url( '..\..\..\..\..\..\..\..\..\..\..\..\..\..\..\bad.css' ),
 				null,
-				'file_path_not_allowed',
+				AMP_Style_Sanitizer::STYLESHEET_FILE_PATH_NOT_ALLOWED,
 			],
 			'amp_file_path_illegal_location' => [
 				site_url( 'outside/root.css' ),
 				null,
-				'file_path_not_allowed',
+				AMP_Style_Sanitizer::STYLESHEET_FILE_PATH_NOT_ALLOWED,
 			],
 			'amp_external_file' => [
 				'//s.w.org/wp-includes/css/dashicons.css',
 				false,
-				'external_file_url',
+				AMP_Style_Sanitizer::STYLESHEET_EXTERNAL_FILE_URL,
 			],
 		];
 	}
@@ -1959,7 +1959,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'https://bogus.example.com/remote-also-does-not-exist.css',
 				],
 				'<style>div::after{content:"End"}</style><style>@import url("https://bogus.example.com/remote-finally-does-not-exist.css");</style><body class="locale-he-il"><div class="login message"></div><table class="form-table"><td></td></table></body>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-				3, // Three HTTP requests (to bogus.example.com). The local-does-not-exist.css checks filesystem directly.
+				4, // All four result in HTTP requests, even the local one because it doesn't exist on the filesystem.
 				static function ( $requested_url ) {
 					if ( false !== strpos( $requested_url, 'does-not-exist' ) ) {
 						return new WP_Error( 'does_not_exist' );
@@ -1999,7 +1999,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'https://bogus.example.com/remote-also-does-not-exist.css',
 				],
 				'<style>div::after{content:"End"}</style><style>@import url("https://bogus.example.com/remote-finally-does-not-exist.css");</style><body class="locale-he-il"><div class="login message"></div><table class="form-table"><td></td></table></body>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-				3, // Three HTTP requests (to bogus.example.com). The local-does-not-exist.css checks filesystem directly.
+				4, // All four result in HTTP requests, even the local one because it doesn't exist on the filesystem.
 				static function ( $requested_url ) {
 					if ( false !== strpos( $requested_url, 'does-not-exist' ) ) {
 						return new WP_Error( 'does_not_exist' );

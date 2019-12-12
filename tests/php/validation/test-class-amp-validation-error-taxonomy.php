@@ -22,13 +22,6 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 	const TESTED_CLASS = 'AMP_Validation_Error_Taxonomy';
 
 	/**
-	 * A mock acceptable error code.
-	 *
-	 * @var string
-	 */
-	const MOCK_ACCEPTABLE_ERROR = 'illegal_css_at_rule';
-
-	/**
 	 * Resets the state after each test method.
 	 */
 	public function tearDown() {
@@ -385,7 +378,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		$this->assertNull( apply_filters( 'amp_validation_error_sanitized', null, $error ) );
 		remove_all_filters( 'amp_validation_error_sanitized' );
 
-		AMP_Validation_Error_Taxonomy::accept_validation_errors( [ self::MOCK_ACCEPTABLE_ERROR => true ] );
+		AMP_Validation_Error_Taxonomy::accept_validation_errors( [ AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE => true ] );
 		$this->assertTrue( apply_filters( 'amp_validation_error_sanitized', null, $error ) );
 		remove_all_filters( 'amp_validation_error_sanitized' );
 
@@ -504,7 +497,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		$element_node_name   = 'nonexistent-element';
 		$validation_errors   = [
 			[
-				'code'      => 'invalid_attribute',
+				'code'      => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
 				'node_name' => $attribute_node_name,
 				'sources'   => [
 					[
@@ -514,7 +507,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 				],
 			],
 			[
-				'code'      => 'invalid_element',
+				'code'      => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 				'node_name' => $element_node_name,
 				'sources'   => [
 					[
@@ -1081,7 +1074,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 	public function test_get_details_summary_label() {
 		$validation_error = $this->get_mock_error();
 		$this->assertEquals( '<code>&lt;link&gt;</code>', AMP_Validation_Error_Taxonomy::get_details_summary_label( $validation_error ) );
-		$validation_error['code'] = AMP_Validation_Error_Taxonomy::INVALID_ATTRIBUTE_CODE;
+		$validation_error['code'] = AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR;
 		$this->assertEquals( '<code>&lt;head&gt;</code>', AMP_Validation_Error_Taxonomy::get_details_summary_label( $validation_error ) );
 		unset( $validation_error['node_name'] );
 		$this->assertEquals( '<code>&lt;head&gt;</code>', AMP_Validation_Error_Taxonomy::get_details_summary_label( $validation_error ) );
@@ -1173,7 +1166,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 	 */
 	public function test_render_single_url_error_details() {
 		$validation_error         = self::get_mock_error();
-		$validation_error['code'] = AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE;
+		$validation_error['code'] = AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG;
 		$term                     = self::factory()->term->create_and_get( [ 'taxonomy' => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] );
 		$html                     = AMP_Validation_Error_Taxonomy::render_single_url_error_details( $validation_error, $term );
 		$this->assertContains( '<dl class="detailed">', $html );
@@ -1187,7 +1180,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 	public function test_get_translated_type_name() {
 		// When the error doesn't have a type, this should return null.
 		$error_without_type = [
-			'code' => AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE,
+			'code' => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 		];
 		$this->assertEmpty( AMP_Validation_Error_Taxonomy::get_translated_type_name( $error_without_type ) );
 
@@ -1347,7 +1340,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 	public function get_mock_error() {
 		return [
 			'at_rule'         => '-ms-viewport',
-			'code'            => self::MOCK_ACCEPTABLE_ERROR,
+			'code'            => AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE,
 			'node_attributes' => [
 				'href'  => 'https://example.com',
 				'id'    => 'twentysixteen-style-css',

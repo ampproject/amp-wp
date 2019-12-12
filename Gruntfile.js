@@ -12,6 +12,7 @@ module.exports = function( grunt ) {
 		'back-compat',
 		'includes',
 		'readme.txt',
+		'src',
 		'templates',
 		'vendor',
 	];

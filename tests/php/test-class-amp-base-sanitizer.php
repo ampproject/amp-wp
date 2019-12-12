@@ -287,7 +287,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 		$parent->appendChild( $child );
 
 		$expected_error = [
-			'code'            => AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE,
+			'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 			'node_name'       => $child->nodeName,
 			'parent_name'     => $parent_tag_name,
 			'node_attributes' => [
@@ -397,7 +397,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 						[
 							'node_name'          => 'onload',
 							'parent_name'        => 'amp-video',
-							'code'               => 'invalid_attribute',
+							'code'               => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
 							'element_attributes' =>
 								[
 									'id'     => 'bar',
@@ -427,7 +427,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 						[
 							'node_name'          => 'onload',
 							'parent_name'        => 'amp-video',
-							'code'               => 'invalid_attribute',
+							'code'               => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
 							'element_attributes' =>
 								[
 									'id'     => 'bar',
