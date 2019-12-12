@@ -18,9 +18,10 @@ const Wrapper = styled.div``;
 
 function Element( {
 	isEditing,
+	isSelected,
 	setNodeForElement,
-	setClickHandler,
 	handleSelectElement,
+	forwardedRef,
 	element: {
 		id,
 		type,
@@ -51,17 +52,29 @@ function Element( {
 			onClick={ ( evt ) => handleSelectElement( id, evt ) }
 			ref={ element }
 		>
-			<Display { ...props } setClickHandler={ setClickHandler } />
+			<Display
+				{ ...props }
+				onPointerDown={ ( evt ) => {
+					if ( ! isSelected ) {
+						handleSelectElement( id, evt );
+					}
+				} }
+				forwardedRef={ forwardedRef }
+			/>
 		</Wrapper>
 	);
 }
 
 Element.propTypes = {
 	isEditing: PropTypes.bool.isRequired,
+	isSelected: PropTypes.bool.isRequired,
 	setNodeForElement: PropTypes.func.isRequired,
-	setClickHandler: PropTypes.func.isRequired,
 	handleSelectElement: PropTypes.func.isRequired,
 	element: PropTypes.object.isRequired,
+	forwardedRef: PropTypes.oneOfType( [
+		PropTypes.object,
+		PropTypes.func,
+	] ),
 };
 
 export default Element;

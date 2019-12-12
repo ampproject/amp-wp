@@ -7,7 +7,7 @@ import styled from 'styled-components';
 /**
  * WordPress dependencies
  */
-import { useCallback, useEffect } from '@wordpress/element';
+import { useCallback } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -30,7 +30,7 @@ const Img = styled.img`
 	${ ImageWithScale }
 `;
 
-function ImageDisplay( { id, src, origRatio, width, height, x, y, scale, offsetX, offsetY, rotationAngle, setClickHandler, forwardedRef, onPointerDown } ) {
+function ImageDisplay( { id, src, origRatio, width, height, x, y, scale, offsetX, offsetY, rotationAngle, forwardedRef, onPointerDown } ) {
 	// Width and height are percent of the actual page dimensions,
 	// Thus 20-by-20 doesn't mean square, but "same as page ratio".
 	const actualRatio = width / height * PAGE_WIDTH / PAGE_HEIGHT;
@@ -50,14 +50,8 @@ function ImageDisplay( { id, src, origRatio, width, height, x, y, scale, offsetX
 	const handleSingleClick = useCallback( () => {}, [] );
 	const handleDoubleClick = useCallback( () => setEditingElement( id ), [ id, setEditingElement ] );
 	const getHandleClick = useDoubleClick( handleSingleClick, handleDoubleClick );
-	useEffect( () => {
-		if ( setClickHandler ) {
-			const handleClick = getHandleClick( id );
-			setClickHandler( id, handleClick );
-		}
-	}, [ id, setClickHandler, getHandleClick ] );
 	return (
-		<Element { ...elementProps }>
+		<Element { ...elementProps } onClick={ getHandleClick( id ) }>
 			<Img src={ src } { ...imgProps } />
 		</Element>
 	);
@@ -65,7 +59,6 @@ function ImageDisplay( { id, src, origRatio, width, height, x, y, scale, offsetX
 
 ImageDisplay.propTypes = {
 	id: PropTypes.string.isRequired,
-	setClickHandler: PropTypes.func,
 	src: PropTypes.string.isRequired,
 	origRatio: PropTypes.number.isRequired,
 	width: PropTypes.number.isRequired,
@@ -76,7 +69,10 @@ ImageDisplay.propTypes = {
 	rotationAngle: PropTypes.number.isRequired,
 	offsetX: PropTypes.number,
 	offsetY: PropTypes.number,
-	forwardedRef: PropTypes.func,
+	forwardedRef: PropTypes.oneOfType( [
+		PropTypes.object,
+		PropTypes.func,
+	] ),
 	onPointerDown: PropTypes.func,
 };
 

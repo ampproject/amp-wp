@@ -25,7 +25,6 @@ const Background = styled.div.attrs( { className: 'container' } )`
 
 function Page() {
 	const [ targetEl, setTargetEl ] = useState( null );
-	const moveable = useRef();
 
 	const {
 		state: { currentPage, selectedElements },
@@ -57,45 +56,34 @@ function Page() {
 		}
 	}, [ toggleElementIdInSelection, selectElementById ] );
 
-	const singleSelection = 1 === selectedElements.length;
-
-	// Whenever selection change, update moveable rect
-	useEffect( () => {
-		if ( moveable.current ) {
-			moveable.current.updateRect();
-		}
-	}, [ selectedElements ] );
+	const selectedElement = selectedElements.length === 1 ? selectedElements[ 0 ] : null;
 
 	return (
 		<Background>
 			{ currentPage && currentPage.elements.map( ( { id, ...rest } ) => {
-				const isSelected = selectedElements.length === 1 && selectedElements.contains( id );
+				const isSelected = Boolean( selectedElement && selectedElement.id === id );
 
 				return (
 					<Element
 						key={ id }
 						setNodeForElement={ setNodeForElement }
-						handleSelectElement={ handleSelectElement }
 						isEditing={ editingElement === id }
 						element={ { id, ...rest } }
-						onPointerDown={ ( evt ) => {
-							if ( ! isSelected ) {
-								handleSelectElement( id, evt );
-							}
-						} }
+						isSelected={ isSelected }
+						handleSelectElement={ handleSelectElement }
 						forwardedRef={ isSelected ? setTargetEl : null }
 					/>
 				);
 			} ) }
 
-			{ singleSelection && targetEl && (
+			{ selectedElement && targetEl && (
 				<Movable
-					rotationAngle={ selectedElements[ 0 ].rotationAngle }
+					rotationAngle={ selectedElement.rotationAngle }
 					targetEl={ targetEl }
 					pushEvent={ pushEvent }
-					type={ selectedElements[ 0 ].type }
-					x={ selectedElements[ 0 ].x }
-					y={ selectedElements[ 0 ].y }
+					type={ selectedElement.type }
+					x={ selectedElement.x }
+					y={ selectedElement.y }
 				/>
 			) }
 		</Background>

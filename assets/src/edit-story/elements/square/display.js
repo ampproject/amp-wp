@@ -43,7 +43,10 @@ SquareDisplay.propTypes = {
 	height: PropTypes.number.isRequired,
 	x: PropTypes.number.isRequired,
 	y: PropTypes.number.isRequired,
-	forwardedRef: PropTypes.func,
+	forwardedRef: PropTypes.oneOfType( [
+		PropTypes.object,
+		PropTypes.func,
+	] ),
 };
 
 export default SquareDisplay;

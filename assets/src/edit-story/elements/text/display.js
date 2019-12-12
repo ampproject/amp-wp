@@ -7,12 +7,13 @@ import styled from 'styled-components';
 /**
  * WordPress dependencies
  */
-import { useRef, useEffect, useCallback } from '@wordpress/element';
+import { useRef, useEffect, useCallback, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import getCaretCharacterOffsetWithin from '../../utils/getCaretCharacterOffsetWithin';
+import useCombinedRefs from '../../utils/useCombinedRefs';
 import { useStory } from '../../app';
 import { useCanvas } from '../../components/canvas';
 import {
@@ -40,7 +41,7 @@ const Element = styled.p`
 	}
 `;
 
-function TextDisplay( { id, content, color, backgroundColor, width, height, x, y, fontFamily, fontSize, fontWeight, fontStyle, rotationAngle, setClickHandler, forwardedRef, onPointerDown } ) {
+function TextDisplay( { id, content, color, backgroundColor, width, height, x, y, fontFamily, fontSize, fontWeight, fontStyle, rotationAngle, forwardedRef, onPointerDown } ) {
 	const props = {
 		color,
 		backgroundColor,
@@ -53,7 +54,6 @@ function TextDisplay( { id, content, color, backgroundColor, width, height, x, y
 		x,
 		y,
 		rotationAngle,
-		ref: forwardedRef,
 		onPointerDown,
 	};
 	const {
@@ -64,21 +64,33 @@ function TextDisplay( { id, content, color, backgroundColor, width, height, x, y
 	} = useCanvas();
 	const isElementSelected = selectedElementIds.includes( id );
 	const isElementOnlySelection = isElementSelected && selectedElementIds.length === 1;
-	const handleClick = useCallback( ( evt ) => {
-		evt.persist();
-		if ( evt.shiftKey || evt.metaKey || evt.altKey || evt.ctrlKey ) {
-			// Some modifier was pressed. Ignore and bubble
+	const [ hasFocus, setHasFocus ] = useState( false );
+	useEffect( () => {
+		if ( isElementOnlySelection ) {
+			const timeout = window.setTimeout( setHasFocus, 300, true );
+			return () => {
+				window.clearTimeout( timeout );
+			};
+		}
+
+		clickTime.current = 0;
+		setHasFocus( false );
+		return undefined;
+	}, [ isElementOnlySelection ] );
+	const clickTime = useRef();
+	const handleMouseDown = useCallback( () => {
+		clickTime.current = window.performance.now();
+	}, [] );
+	const handleMouseUp = useCallback( ( evt ) => {
+		const timingDifference = window.performance.now() - clickTime.current;
+		if ( timingDifference > 100 ) {
+			// Only short clicks count
 			return;
 		}
-		// Enter editing without and place cursor at current selection offset
-		setEditingElementWithState( id, { offset: getCaretCharacterOffsetWithin( element.current, evt.clientX, evt.clientY ) } );
+		// Enter editing mode and place cursor at current selection offset
 		evt.stopPropagation();
+		setEditingElementWithState( id, { offset: getCaretCharacterOffsetWithin( element.current, evt.clientX, evt.clientY ) } );
 	}, [ id, setEditingElementWithState ] );
-	useEffect( () => {
-		if ( setClickHandler ) {
-			setClickHandler( id, handleClick );
-		}
-	}, [ id, setClickHandler, handleClick ] );
 
 	const handleKeyDown = ( evt ) => {
 		if ( evt.metaKey || evt.altKey || evt.ctrlKey ) {
@@ -101,9 +113,16 @@ function TextDisplay( { id, content, color, backgroundColor, width, height, x, y
 
 		// ignore everything else and bubble.
 	};
-	const onKeyDown = isElementOnlySelection ? handleKeyDown : null;
-	const tabIndex = isElementOnlySelection ? 0 : null;
+
+	if ( hasFocus ) {
+		props.onKeyDown = handleKeyDown;
+		props.onMouseDown = handleMouseDown;
+		props.onMouseUp = handleMouseUp;
+		props.tabIndex = 0;
+	}
+
 	const element = useRef();
+	const setRef = useCombinedRefs( element, forwardedRef );
 	useEffect( () => {
 		if ( isElementOnlySelection && element.current ) {
 			element.current.focus();
@@ -111,10 +130,8 @@ function TextDisplay( { id, content, color, backgroundColor, width, height, x, y
 	}, [ isElementOnlySelection ] );
 	return (
 		<Element
-			canSelect={ isElementOnlySelection }
-			onKeyDown={ onKeyDown }
-			tabIndex={ tabIndex }
-			ref={ element }
+			canSelect={ hasFocus }
+			ref={ setRef }
 			dangerouslySetInnerHTML={ { __html: content } }
 			{ ...props }
 		/>
@@ -136,7 +153,10 @@ TextDisplay.propTypes = {
 	x: PropTypes.number.isRequired,
 	y: PropTypes.number.isRequired,
 	setClickHandler: PropTypes.func,
-	forwardedRef: PropTypes.func,
+	forwardedRef: PropTypes.oneOfType( [
+		PropTypes.object,
+		PropTypes.func,
+	] ),
 	onPointerDown: PropTypes.func,
 };
 
