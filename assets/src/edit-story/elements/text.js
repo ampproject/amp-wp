@@ -27,7 +27,7 @@ const Element = styled.p`
 	${ ElementWithFontColor }
 `;
 
-function Text( { content, color, backgroundColor, width, height, x, y, fontFamily, fontSize, fontWeight, fontStyle, rotationAngle } ) {
+function Text( { content, color, backgroundColor, width, height, x, y, fontFamily, fontSize, fontWeight, fontStyle, rotationAngle, forwardedRef, onPointerDown } ) {
 	const props = {
 		color,
 		backgroundColor,
@@ -35,6 +35,7 @@ function Text( { content, color, backgroundColor, width, height, x, y, fontFamil
 		fontStyle,
 		fontSize,
 		fontWeight,
+		ref: forwardedRef,
 		width,
 		height,
 		rotationAngle,
@@ -42,7 +43,7 @@ function Text( { content, color, backgroundColor, width, height, x, y, fontFamil
 		y,
 	};
 	return (
-		<Element { ...props }>
+		<Element draggable="false" { ...props } onPointerDown={ onPointerDown }>
 			{ content }
 		</Element>
 	);
@@ -57,10 +58,12 @@ Text.propTypes = {
 	fontSize: PropTypes.string,
 	fontWeight: PropTypes.string,
 	fontStyle: PropTypes.string,
+	forwardedRef: PropTypes.func,
 	width: PropTypes.number.isRequired,
 	height: PropTypes.number.isRequired,
 	x: PropTypes.number.isRequired,
 	y: PropTypes.number.isRequired,
+	onPointerDown: PropTypes.func,
 };
 
 Text.defaultProps = {

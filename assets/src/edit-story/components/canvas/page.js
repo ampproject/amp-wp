@@ -29,28 +29,37 @@ const Element = styled.div`
 `;
 
 function Page() {
-	const [ targetEl, setTargetEl ] = useState( null );
+	const {
+		actions: { setBackgroundClickHandler },
+	} = useCanvas();
 
 	const {
 		state: { currentPage, selectedElements },
 		actions: { clearSelection, selectElementById, toggleElementIdInSelection },
 	} = useStory();
-	const {
-		actions: { setBackgroundClickHandler },
-	} = useCanvas();
 
-	const handleSelectElement = useCallback( ( id ) => ( evt ) => {
-		if ( evt.metaKey ) {
-			toggleElementIdInSelection( id );
-		} else {
-			selectElementById( id );
-		}
-		evt.stopPropagation();
-	}, [ toggleElementIdInSelection, selectElementById ] );
+	const [ targetEl, setTargetEl ] = useState( null );
+	const [ pushEvent, setPushEvent ] = useState( null );
 
 	useEffect( () => {
 		setBackgroundClickHandler( () => clearSelection() );
 	}, [ setBackgroundClickHandler, clearSelection ] );
+
+	const handleSelectElement = useCallback( ( elId, evt ) => {
+		if ( evt.metaKey ) {
+			toggleElementIdInSelection( elId );
+		} else {
+			selectElementById( elId );
+		}
+		evt.stopPropagation();
+
+		if ( 'pointerdown' === evt.type ) {
+			evt.persist();
+			setPushEvent( evt );
+		}
+	}, [ toggleElementIdInSelection, selectElementById ] );
+
+	const singleSelection = 1 === selectedElements.length;
 
 	return (
 		<Background>
@@ -60,19 +69,29 @@ function Page() {
 
 				// @todo Improve this here, create some reasonable variables.
 				const isSelected = selectedElements.filter( ( { id: selectedId } ) => id === selectedId ).length;
+				// @todo Use the wrapper element around <Comp> as the target for Moveable instead.
 				return (
-					<Element key={ id } onClick={ handleSelectElement( id ) }>
+					<Element
+						key={ id }
+						onClick={ ( evt ) => handleSelectElement( id, evt ) }
+					>
 						<Comp
 							{ ...rest }
-							forwardedRef={ isSelected && 1 === selectedElements.length ? setTargetEl : null }
+							onPointerDown={ ( evt ) => {
+								if ( ! isSelected ) {
+									handleSelectElement( id, evt );
+								}
+							} }
+							forwardedRef={ isSelected ? setTargetEl : null }
 							className={ isSelected && 1 < selectedElements.length ? 'target' : null }
 						/>
 					</Element>
 				);
 			} ) }
-			{ targetEl && 1 === selectedElements.length && (
+			{ singleSelection && targetEl && (
 				<Movable
 					targetEl={ targetEl }
+					pushEvent={ pushEvent }
 					selectedEl={ selectedElements[ 0 ] }
 				/>
 			) }
@@ -81,6 +100,7 @@ function Page() {
 					targets={ [].slice.call( document.querySelectorAll( '.target' ) ) } // @todo Array of references instead.
 					targetEl={ null }
 					selectedEl={ {} }
+					pushEvent={ pushEvent }
 				/>
 			) }
 		</Background>

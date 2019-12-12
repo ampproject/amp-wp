@@ -7,30 +7,51 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { useEffect, useRef } from '@wordpress/element';
+import { useRef, useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { useStory } from '../../app';
 
+const CORNER_HANDLES = [ 'nw', 'ne', 'sw', 'se' ];
+const ALL_HANDLES = [ 'n', 's', 'e', 'w', 'nw', 'ne', 'sw', 'se' ];
+
 function Movable( {
 	selectedEl,
 	targetEl,
 	targets: targetList,
+	pushEvent,
 } ) {
+	const moveable = useRef();
+
 	const {
 		state: { selectedElements },
 		actions: { setPropertiesOnSelectedElements, updateElementsByIds },
 	} = useStory();
 
-	const moveable = useRef();
+	useEffect( () => {
+		if ( moveable.current ) {
+			// If we have persistent event then let's use that, ensuring the targets match.
+			if ( pushEvent && pushEvent.target === targetEl ) {
+				moveable.current.moveable.dragStart( pushEvent );
+			}
+			moveable.current.updateRect();
+		}
+		// Disable reason: we should not run this when pushEvent changes.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ targetEl, moveable ] );
 
 	useEffect( () => {
 		if ( moveable.current ) {
 			moveable.current.updateRect();
 		}
 	}, [ selectedElements ] );
+
+	const frame = {
+		translate: [ 0, 0 ],
+		rotate: rotationAngle,
+	};
 
 	const setStyle = ( target ) => {
 		target.style.transform = `translate(${ frame.translate[ 0 ] }px, ${ frame.translate[ 1 ] }px) rotate(${ frame.rotate }deg)`;
@@ -42,6 +63,11 @@ function Movable( {
 		rotate: selectedElements[ i ].rotationAngle,
 	} ) ) : [];
 
+	/**
+	 * Resets Movable once the action is done, sets the initial values.
+	 *
+	 * @param {Object} target Target element.
+	 */
 	const resetMoveable = ( target ) => {
 		// @todo Improve this logic.
 		if ( targetList && targetList.length ) {
@@ -145,11 +171,14 @@ function Movable( {
 				frame.translate = beforeTranslate;
 				setStyle( target );
 			} }
+			throttleDrag={ 0 }
 			onDragStart={ ( { set } ) => {
 				set( frame.translate );
 			} }
 			onDragEnd={ ( { target } ) => {
-				setPropertiesOnSelectedElements( { x: selectedEl.x + frame.translate[ 0 ], y: selectedEl.y + frame.translate[ 1 ] } );
+				// When dragging finishes, set the new properties based on the original + what moved meanwhile.
+				const newProps = { x: selectedEl.x + frame.translate[ 0 ], y: selectedEl.y + frame.translate[ 1 ] };
+				setPropertiesOnSelectedElements( newProps );
 				resetMoveable( target );
 			} }
 			onResizeStart={ ( { setOrigin, dragStart } ) => {
@@ -186,8 +215,8 @@ function Movable( {
 			} }
 			origin={ false }
 			pinchable={ true }
-			keepRatio={ 'image' === selectedElements[ 0 ].type }
-			renderDirections={ 'image' === selectedElements[ 0 ].type ? [ 'nw', 'ne', 'sw', 'se' ] : [ 'n', 's', 'e', 'w', 'nw', 'ne', 'sw', 'se' ] }
+			keepRatio={ 'image' === selectedEl.type } // @†odo Even image doesn't always keep ratio, consider moving to element's model.
+			renderDirections={ 'image' === selectedEl.type ? CORNER_HANDLES : ALL_HANDLES }
 		/>
 	);
 }
@@ -196,6 +225,7 @@ Movable.propTypes = {
 	selectedEl: PropTypes.object,
 	targetEl: PropTypes.object,
 	targets: PropTypes.array,
+	pushEvent: PropTypes.object,
 };
 
 export default Movable;
