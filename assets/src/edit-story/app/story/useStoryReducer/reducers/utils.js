@@ -55,3 +55,13 @@ export function getAbsolutePosition( currentPosition, maxPosition, newPosition )
 			return currentPosition;
 	}
 }
+
+export function objectWithout( obj, propertiesToRemove ) {
+	return Object.keys( obj )
+		.filter( ( key ) => ! propertiesToRemove.includes( key ) )
+		.reduce(
+			( newObj, key ) => ( { ...newObj, [ key ]: obj[ key ] } ),
+			{},
+		);
+}
+

@@ -1,7 +1,8 @@
 /**
  * Internal dependencies
  */
-import { intersect } from './utils';
+import { ELEMENT_RESERVED_PROPERTIES } from '../types';
+import { intersect, objectWithout } from './utils';
 
 /**
  * Update elements by the given list of ids with the given properties.
@@ -40,10 +41,12 @@ function updateElements( state, { elementIds, properties } ) {
 		return state;
 	}
 
+	const allowedProperties = objectWithout( properties, ELEMENT_RESERVED_PROPERTIES );
+
 	const updatedElements = oldPage.elements.map(
 		( element ) => (
 			idsToUpdate.includes( element.id ) ?
-				{ ...element, ...properties } :
+				{ ...element, ...allowedProperties } :
 				element
 		) );
 

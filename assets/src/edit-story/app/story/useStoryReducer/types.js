@@ -21,3 +21,7 @@ export const TOGGLE_ELEMENT_IN_SELECTION = 'TOGGLE_ELEMENT_IN_SELECTION';
 
 // Manipulate entire internal state.
 export const RESTORE = 'RESTORE';
+
+// Reserved property names for pages and elements.
+export const PAGE_RESERVED_PROPERTIES = [ 'id', 'elements' ];
+export const ELEMENT_RESERVED_PROPERTIES = [ 'id' ];

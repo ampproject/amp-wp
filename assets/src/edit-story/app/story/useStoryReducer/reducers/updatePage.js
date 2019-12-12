@@ -1,4 +1,10 @@
 /**
+ * Internal dependencies
+ */
+import { PAGE_RESERVED_PROPERTIES } from '../types';
+import { objectWithout } from './utils';
+
+/**
  * Update page by id or current page if no id given.
  *
  * If id doesn't exist, nothing happens.
@@ -19,9 +25,11 @@ function updatePage( state, { pageId, properties } ) {
 		return state;
 	}
 
+	const allowedProperties = objectWithout( properties, PAGE_RESERVED_PROPERTIES );
+
 	const newPage = {
 		...state.pages[ pageIndex ],
-		...properties,
+		...allowedProperties,
 	};
 
 	const newPages = [
