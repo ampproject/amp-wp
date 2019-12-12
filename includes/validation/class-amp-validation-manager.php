@@ -1930,13 +1930,14 @@ class AMP_Validation_Manager {
 	 *
 	 * @param string $error_code    Error code.
 	 * @param string $error_message Error message, typically technical such as from HTTP status text or cURL error message.
-	 * @return string Error message with HTML markup.
+	 * @return string Error message with HTML markup which has had its translated strings passed through wp_kses().
 	 */
 	public static function get_validate_url_error_message( $error_code, $error_message = '' ) {
 		$check_error_log = sprintf(
-			/* translators: %s is link to Debugging in WordPress */
-			__( 'Please check your server PHP error logs; to do this you may need to <a href="%s" target="_blank">enable</a> <code>WP_DEBUG_LOG</code>.', 'amp' ),
-			esc_url( 'https://wordpress.org/support/article/debugging-in-wordpress/' )
+			/* translators: %1$s is link to Debugging in WordPress, %2$s is WP_DEBUG_LOG */
+			__( 'Please check your server PHP error logs; to do this you may need to <a href="%1$s" target="_blank">enable</a> %2$s.', 'amp' ),
+			esc_url( 'https://wordpress.org/support/article/debugging-in-wordpress/' ),
+			'<code>WP_DEBUG_LOG</code>'
 		);
 
 		if ( $error_message ) {
@@ -1964,13 +1965,19 @@ class AMP_Validation_Manager {
 			);
 		}
 
-		$implode_non_empty_strings_with_spaces = static function ( $strings ) {
-			return implode( ' ', array_filter( $strings ) );
+		$implode_non_empty_strings_with_spaces_and_sanitize = static function ( $strings ) {
+			return wp_kses(
+				implode( ' ', array_filter( $strings ) ),
+				[
+					'a'    => array_fill_keys( [ 'href', 'target' ], true ),
+					'code' => [],
+				]
+			);
 		};
 
 		switch ( $error_code ) {
 			case 'http_request_failed':
-				return $implode_non_empty_strings_with_spaces(
+				return $implode_non_empty_strings_with_spaces_and_sanitize(
 					[
 						esc_html__( 'Failed to fetch URL to validate.', 'amp' ),
 						esc_html( $error_message ),
@@ -1979,7 +1986,7 @@ class AMP_Validation_Manager {
 					]
 				);
 			case 'white_screen_of_death':
-				return $implode_non_empty_strings_with_spaces(
+				return $implode_non_empty_strings_with_spaces_and_sanitize(
 					[
 						esc_html__( 'Unable to validate URL. A white screen of death was encountered which is likely due to a PHP fatal error.', 'amp' ),
 						esc_html( $error_message ),
@@ -1988,7 +1995,7 @@ class AMP_Validation_Manager {
 					]
 				);
 			case '404':
-				return $implode_non_empty_strings_with_spaces(
+				return $implode_non_empty_strings_with_spaces_and_sanitize(
 					[
 						esc_html__( 'The fetched URL was not found. It may have been deleted. If so, you can trash this.', 'amp' ),
 						esc_html( $error_message ),
@@ -1996,7 +2003,7 @@ class AMP_Validation_Manager {
 					]
 				);
 			case '500':
-				return $implode_non_empty_strings_with_spaces(
+				return $implode_non_empty_strings_with_spaces_and_sanitize(
 					[
 						esc_html__( 'An internal server error occurred when fetching the URL for validation.', 'amp' ),
 						esc_html( $error_message ),
@@ -2005,7 +2012,7 @@ class AMP_Validation_Manager {
 					]
 				);
 			case 'response_not_json':
-				return $implode_non_empty_strings_with_spaces(
+				return $implode_non_empty_strings_with_spaces_and_sanitize(
 					[
 						esc_html__( 'URL validation failed to due to the AMP validation request not returning JSON data. This is may be due to a PHP fatal error occurring.', 'amp' ),
 						esc_html( $error_message ),
@@ -2014,7 +2021,7 @@ class AMP_Validation_Manager {
 					]
 				);
 			case 'malformed_json_validation_errors':
-				return $implode_non_empty_strings_with_spaces(
+				return $implode_non_empty_strings_with_spaces_and_sanitize(
 					[
 						esc_html__( 'URL validation failed to due to unexpected JSON in AMP validation response.', 'amp' ),
 						esc_html( $error_message ),
@@ -2022,7 +2029,7 @@ class AMP_Validation_Manager {
 					]
 				);
 			default:
-				return $implode_non_empty_strings_with_spaces(
+				return $implode_non_empty_strings_with_spaces_and_sanitize(
 					[
 						/* translators: %s is error code */
 						esc_html( sprintf( __( 'URL validation failed. Error code: %s.', 'amp' ), $error_code ) ),
