@@ -3,6 +3,7 @@
  */
 import * as types from './types';
 
+// Exposed actions
 const addPage = ( dispatch ) => ( { properties } ) =>
 	dispatch( { type: types.ADD_PAGE, payload: { properties, position: null } } );
 
@@ -54,7 +55,7 @@ const updateSelectedElements = ( dispatch ) => ( { properties } ) =>
 const arrangeElement = ( dispatch ) => ( { elementId, position } ) =>
 	dispatch( { type: types.ARRANGE_ELEMENT, payload: { elementId, position } } );
 
-const arrangeSelectedElement = ( dispatch ) => ( { position } ) =>
+const arrangeSelection = ( dispatch ) => ( { position } ) =>
 	dispatch( { type: types.ARRANGE_ELEMENT, payload: { elementId: null, position } } );
 
 const setSelectedElementsById = ( dispatch ) => ( { selectedElementIds } ) =>
@@ -72,7 +73,7 @@ const removeElementFromSelection = ( dispatch ) => ( { elementId } ) =>
 const toggleElementInSelection = ( dispatch ) => ( { elementId } ) =>
 	dispatch( { type: types.TOGGLE_ELEMENT_IN_SELECTION, payload: { elementId } } );
 
-export default {
+export const exposedActions = {
 	addPage,
 	addPageAt,
 	deletePage,
@@ -90,10 +91,18 @@ export default {
 	updateElementById,
 	updateSelectedElements,
 	arrangeElement,
-	arrangeSelectedElement,
+	arrangeSelection,
 	setSelectedElementsById,
 	clearSelection,
 	addElementToSelection,
 	removeElementFromSelection,
 	toggleElementInSelection,
+};
+
+// Internal actions
+const restore = ( dispatch ) => ( { pages, selection, current } ) =>
+	dispatch( { type: types.RESTORE, payload: { pages, selection, current } } );
+
+export const internalActions = {
+	restore,
 };

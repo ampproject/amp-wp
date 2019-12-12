@@ -20,4 +20,4 @@ export const UNSELECT_ELEMENT = 'UNSELECT_ELEMENT';
 export const TOGGLE_ELEMENT_IN_SELECTION = 'TOGGLE_ELEMENT_IN_SELECTION';
 
 // Manipulate entire internal state.
-export const RESTORE_FROM_HISTORY = 'RESTORE_FROM_HISTORY';
+export const RESTORE = 'RESTORE';
