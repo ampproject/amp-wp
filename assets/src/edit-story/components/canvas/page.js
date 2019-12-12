@@ -53,7 +53,6 @@ function Page() {
 		}
 		evt.stopPropagation();
 
-		// @todo That's not necessary for multi-selection.
 		if ( 'pointerdown' === evt.type ) {
 			evt.persist();
 			setPushEvent( evt );
@@ -70,6 +69,7 @@ function Page() {
 
 				// Ignore multi-selection for now.
 				const isSelected = selectedElements.length ? selectedElements[ 0 ].id === id : false;
+				// @todo Use the wrapper element around <Comp> as the target for Moveable instead.
 				return (
 					<Element
 						key={ id }
@@ -92,7 +92,6 @@ function Page() {
 					rotationAngle={ selectedElements[ 0 ].rotationAngle }
 					targetEl={ targetEl }
 					pushEvent={ pushEvent }
-					setPushEvent={ setPushEvent }
 					type={ selectedElements[ 0 ].type }
 					x={ selectedElements[ 0 ].x }
 					y={ selectedElements[ 0 ].y }
