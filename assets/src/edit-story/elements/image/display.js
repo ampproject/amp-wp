@@ -30,7 +30,7 @@ const Img = styled.img`
 	${ ImageWithScale }
 `;
 
-function ImageDisplay( { id, src, origRatio, width, height, x, y, scale, offsetX, offsetY, rotationAngle, setClickHandler } ) {
+function ImageDisplay( { id, src, origRatio, width, height, x, y, scale, offsetX, offsetY, rotationAngle, setClickHandler, forwardedRef, onPointerDown } ) {
 	// Width and height are percent of the actual page dimensions,
 	// Thus 20-by-20 doesn't mean square, but "same as page ratio".
 	const actualRatio = width / height * PAGE_WIDTH / PAGE_HEIGHT;
@@ -41,6 +41,8 @@ function ImageDisplay( { id, src, origRatio, width, height, x, y, scale, offsetX
 		x,
 		y,
 		rotationAngle,
+		ref: forwardedRef,
+		onPointerDown,
 	};
 	const {
 		actions: { setEditingElement },
@@ -74,6 +76,8 @@ ImageDisplay.propTypes = {
 	rotationAngle: PropTypes.number.isRequired,
 	offsetX: PropTypes.number,
 	offsetY: PropTypes.number,
+	forwardedRef: PropTypes.func,
+	onPointerDown: PropTypes.func,
 };
 
 ImageDisplay.defaultProps = {

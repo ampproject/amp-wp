@@ -21,7 +21,7 @@ const Element = styled.div`
 	${ ElementWithBackgroundColor }
 `;
 
-function SquareDisplay( { backgroundColor, width, height, x, y, rotationAngle } ) {
+function SquareDisplay( { backgroundColor, width, height, x, y, rotationAngle, forwardedRef } ) {
 	const props = {
 		backgroundColor,
 		width,
@@ -29,6 +29,7 @@ function SquareDisplay( { backgroundColor, width, height, x, y, rotationAngle } 
 		rotationAngle,
 		x,
 		y,
+		ref: forwardedRef,
 	};
 	return (
 		<Element { ...props } />
@@ -42,6 +43,7 @@ SquareDisplay.propTypes = {
 	height: PropTypes.number.isRequired,
 	x: PropTypes.number.isRequired,
 	y: PropTypes.number.isRequired,
+	forwardedRef: PropTypes.func,
 };
 
 export default SquareDisplay;
