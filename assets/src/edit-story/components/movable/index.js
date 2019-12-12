@@ -48,11 +48,6 @@ function Movable( {
 		}
 	}, [ selectedElements ] );
 
-	const frame = {
-		translate: [ 0, 0 ],
-		rotate: rotationAngle,
-	};
-
 	const setStyle = ( target ) => {
 		target.style.transform = `translate(${ frame.translate[ 0 ] }px, ${ frame.translate[ 1 ] }px) rotate(${ frame.rotate }deg)`;
 	};

@@ -39,7 +39,7 @@ Image.propTypes = {
 	height: PropTypes.number.isRequired,
 	x: PropTypes.number.isRequired,
 	y: PropTypes.number.isRequired,
-	forwardedRef: PropTypes.object,
+	forwardedRef: PropTypes.func,
 	onPointerDown: PropTypes.func,
 };
 

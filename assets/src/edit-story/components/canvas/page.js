@@ -78,7 +78,8 @@ function Page() {
 						<Comp
 							{ ...rest }
 							onPointerDown={ ( evt ) => {
-								if ( ! isSelected ) {
+								// Ignore this event if multi-selection is being done.
+								if ( ! isSelected && ! evt.metaKey ) {
 									handleSelectElement( id, evt );
 								}
 							} }
