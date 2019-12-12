@@ -52,7 +52,7 @@ function ImageDisplay( { id, src, origRatio, width, height, x, y, scale, offsetX
 	const getHandleClick = useDoubleClick( handleSingleClick, handleDoubleClick );
 	return (
 		<Element { ...elementProps } onClick={ getHandleClick( id ) }>
-			<Img src={ src } { ...imgProps } />
+			<Img draggable={ false } src={ src } { ...imgProps } />
 		</Element>
 	);
 }

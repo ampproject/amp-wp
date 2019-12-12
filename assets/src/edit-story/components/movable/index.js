@@ -40,7 +40,7 @@ function Movable( {
 	useEffect( () => {
 		if ( moveable.current ) {
 			// If we have persistent event then let's use that, ensuring the targets match.
-			if ( latestEvent.current && latestEvent.current.target === targetEl ) {
+			if ( latestEvent.current && targetEl.contains( latestEvent.current.target ) ) {
 				moveable.current.moveable.dragStart( latestEvent.current );
 			}
 			moveable.current.updateRect();
