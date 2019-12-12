@@ -115,7 +115,12 @@ class AMP_Validation_Manager {
 	public static $hook_source_stack = [];
 
 	/**
-	 * Whether the current request is to obtain the validation results.
+	 * Whether a validate request is being performed.
+	 *
+	 * When responding to a request to validate a URL, instead of an HTML document being returned, a JSON document is
+	 * returned with any errors that were encountered during validation.
+	 *
+	 * @see AMP_Validation_Manager::get_validate_response_data()
 	 *
 	 * @var bool
 	 */
@@ -1594,14 +1599,14 @@ class AMP_Validation_Manager {
 	}
 
 	/**
-	 * Whether the request is for validation data for a given URL.
+	 * Whether the request is to validate URL for validation errors.
 	 *
 	 * All AMP responses get validated, but when the amp_validate query parameter is present, then the source information
 	 * for each validation error is captured and the validation results are returned as JSON instead of the AMP HTML page.
 	 *
-	 * @return bool|WP_Error Whether to validate. False is returned if it is not a validation request. WP_Error returned
+	 * @return bool|WP_Error Whether to validate. False is returned if it is not a validate request. WP_Error returned
 	 *                       if unauthenticated, unauthorized, and/or invalid nonce supplied. True returned if
-	 *                       validation response should be served.
+	 *                       validate response should be served.
 	 */
 	public static function should_validate_response() {
 		if ( ! isset( $_GET[ self::VALIDATE_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -1620,11 +1625,11 @@ class AMP_Validation_Manager {
 	}
 
 	/**
-	 * Get validation response data.
+	 * Get response data for a validate request.
 	 *
-	 * @return array Validation response data.
+	 * @return array Validate response data.
 	 */
-	public static function get_validation_response_data() {
+	public static function get_validate_response_data() {
 		$data = [
 			'results' => self::$validation_results,
 		];

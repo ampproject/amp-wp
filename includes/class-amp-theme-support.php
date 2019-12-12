@@ -2314,10 +2314,10 @@ class AMP_Theme_Support {
 
 		$assets = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
 
-		// Respond early with validation results if performing a validation request.
+		// Respond early with results if performing a validate request.
 		if ( AMP_Validation_Manager::$is_validate_request ) {
 			header( 'Content-Type: application/json; charset=utf-8' );
-			return wp_json_encode( AMP_Validation_Manager::get_validation_response_data(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
+			return wp_json_encode( AMP_Validation_Manager::get_validate_response_data(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
 		}
 
 		// Determine what the validation errors are.
