@@ -46,7 +46,7 @@ function Movable( {
 		if ( moveable.current ) {
 			moveable.current.updateRect();
 		}
-	}, [ selectedElements, targetList ] );
+	}, [ selectedElements ] );
 
 	/**
 	 * Set style to the element.
@@ -85,6 +85,7 @@ function Movable( {
 		}
 	};
 
+	// @todo Perhaps split the group movable into a separate file.
 	// Moveable for group. Ensure that the targets list matches the selected elements list length.
 	if ( targetList && targetList.length === selectedElements.length ) {
 		return (

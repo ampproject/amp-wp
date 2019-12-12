@@ -88,10 +88,8 @@ function Page() {
 									handleSelectElement( id, evt );
 								}
 							} }
-							forwardedRef={ ( el ) => {
-								if ( ! isSelected ) {
-									return;
-								}
+							forwardedRef={ ! isSelected ? null : ( el ) => {
+								// @todo This doesn't really work as expected, we should probably create a ref for targetEl.
 								if ( singleSelection ) {
 									setTargetEl( el );
 									return;
