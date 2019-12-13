@@ -36,10 +36,10 @@ import { isInsideRange, getAbsolutePosition, moveArrayElement } from './utils';
  * @return {Object} New state
  */
 function moveElement( state, { elementId, position } ) {
-	const pageIndex = state.pages.find( ( { id } ) => id === state.current );
+	const pageIndex = state.pages.findIndex( ( { id } ) => id === state.current );
 
 	const page = state.pages[ pageIndex ];
-	const currentPosition = page.elements.find( ( { id } ) => id === elementId );
+	const currentPosition = page.elements.findIndex( ( { id } ) => id === elementId );
 
 	if ( currentPosition === -1 || page.backgroundElementId === elementId ) {
 		return state;

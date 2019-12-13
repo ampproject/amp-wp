@@ -20,7 +20,7 @@ import { objectWithout } from './utils';
 function updatePage( state, { pageId, properties } ) {
 	const idToUpdate = pageId === null ? state.current : pageId;
 
-	const pageIndex = state.pages.find( ( { id } ) => id === idToUpdate );
+	const pageIndex = state.pages.findIndex( ( { id } ) => id === idToUpdate );
 	if ( pageIndex === -1 ) {
 		return state;
 	}

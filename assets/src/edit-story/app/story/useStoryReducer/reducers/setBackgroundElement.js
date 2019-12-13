@@ -16,7 +16,7 @@ import { moveArrayElement } from './utils';
  * @return {Object} New state
  */
 function setBackgroundElement( state, { elementId } ) {
-	const pageIndex = state.pages.find( ( { id } ) => id === state.current );
+	const pageIndex = state.pages.findIndex( ( { id } ) => id === state.current );
 
 	const page = state.pages[ pageIndex ];
 
@@ -30,7 +30,7 @@ function setBackgroundElement( state, { elementId } ) {
 		};
 	} else {
 		// Does the element even exist?
-		const elementPosition = page.elements.find( ( { id } ) => id === elementId );
+		const elementPosition = page.elements.findIndex( ( { id } ) => id === elementId );
 		if ( elementPosition === -1 ) {
 			return state;
 		}

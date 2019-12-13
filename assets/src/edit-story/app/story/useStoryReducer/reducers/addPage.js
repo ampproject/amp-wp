@@ -14,22 +14,22 @@ import { isInsideRange } from './utils';
  *
  * @param {Object} state Current state
  * @param {Object} payload Action payload
- * @param {Object} payload.page Object with properties of new page
+ * @param {Object} payload.properties Object with properties of new page
  * @param {Object} payload.position Position at which to insert the new page. If null, insert after current
  * @return {Object} New state
  */
-function addPage( state, { page, position } ) {
+function addPage( state, { properties, position } ) {
 	const isWithinBounds = position !== null && isInsideRange( position, 0, state.pages.length - 1 );
-	const currentPageIndex = state.pages.find( ( { id } ) => id === state.current );
+	const currentPageIndex = state.pages.findIndex( ( { id } ) => id === state.current );
 	const insertionPoint = isWithinBounds ? position : currentPageIndex + 1;
 
-	const { id } = page;
+	const { id } = properties;
 
 	// Ensure new page has elements array and background id
 	const newPage = {
 		elements: [],
 		backgroundElementId: null,
-		...page,
+		...properties,
 	};
 
 	return {

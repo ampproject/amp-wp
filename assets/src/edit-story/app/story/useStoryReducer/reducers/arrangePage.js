@@ -22,7 +22,7 @@ import { isInsideRange, moveArrayElement } from './utils';
  * @return {Object} New state
  */
 function movePage( state, { pageId, position } ) {
-	const pageIndex = state.pages.find( ( { id } ) => id === pageId );
+	const pageIndex = state.pages.findIndex( ( { id } ) => id === pageId );
 	const isTargetWithinBounds = isInsideRange( position, 0, state.pages.length - 1 );
 	const isSimilar = pageIndex === position;
 	if ( pageIndex === -1 || ! isTargetWithinBounds || isSimilar ) {

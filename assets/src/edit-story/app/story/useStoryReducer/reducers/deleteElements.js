@@ -32,7 +32,7 @@ function deleteElements( state, { elementIds } ) {
 		return state;
 	}
 
-	const pageIndex = state.pages.find( ( { id } ) => id === state.current );
+	const pageIndex = state.pages.findIndex( ( { id } ) => id === state.current );
 
 	const oldPage = state.pages[ pageIndex ];
 	const pageElementIds = oldPage.elements.map( ( { id } ) => id );

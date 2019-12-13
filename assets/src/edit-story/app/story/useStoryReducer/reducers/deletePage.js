@@ -18,7 +18,7 @@
 function deletePage( state, { pageId } ) {
 	const idToDelete = pageId === null ? state.current : pageId;
 
-	const pageIndex = state.pages.find( ( { id } ) => id === idToDelete );
+	const pageIndex = state.pages.findIndex( ( { id } ) => id === idToDelete );
 
 	if ( pageIndex === -1 ) {
 		return state;
