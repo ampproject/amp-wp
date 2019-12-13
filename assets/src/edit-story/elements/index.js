@@ -6,9 +6,16 @@ import uuid from 'uuid/v4';
 /**
  * Internal dependencies
  */
+<<<<<<< HEAD
 import * as textElement from './text';
 import * as imageElement from './image';
 import * as squareElement from './square';
+=======
+import Text from './text';
+import Image from './image';
+import Square from './square';
+import Video from './video';
+>>>>>>> develop-stories
 
 export const createNewElement = ( type, attributes = {} ) => {
 	const element = elementTypes.find( ( el ) => el.type === type );
@@ -28,6 +35,7 @@ export const elementTypes = [
 	{ type: 'text', name: 'Text', ...textElement },
 	{ type: 'image', name: 'Image', ...imageElement },
 	{ type: 'square', name: 'Square', ...squareElement },
+	{ type: 'video', name: 'Video', ...videoElement },
 ];
 
 export const getDefinitionForType =
