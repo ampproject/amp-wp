@@ -102,6 +102,7 @@ class AMP_Story_Post_Type {
 				'public'       => true,
 				'show_ui'      => true,
 				'show_in_rest' => true,
+				'rest_controller_class' => 'AMP_REST_Stories_Controller',
 			]
 		);
 
