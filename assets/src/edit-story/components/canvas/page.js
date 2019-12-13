@@ -6,14 +6,14 @@ import styled from 'styled-components';
 /**
  * WordPress dependencies
  */
-import { useCallback, useEffect, useState } from '@wordpress/element';
+import { useCallback, useEffect, useState, useRef } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { useStory } from '../../app';
-import { getComponentForType } from '../../elements';
 import useCanvas from './useCanvas';
+import Element from './element';
 import Movable from './../movable';
 
 const Background = styled.div.attrs( { className: 'container' } )`
@@ -23,22 +23,19 @@ const Background = styled.div.attrs( { className: 'container' } )`
 	height: 100%;
 `;
 
-const Element = styled.div`
-	cursor: pointer;
-	user-select: none;
-`;
-
 function Page() {
-	const {
-		actions: { setBackgroundClickHandler },
-	} = useCanvas();
+	const [ targetEl, setTargetEl ] = useState( null );
 
 	const {
 		state: { currentPage, selectedElements },
 		actions: { clearSelection, selectElementById, toggleElementIdInSelection },
 	} = useStory();
 
-	const [ targetEl, setTargetEl ] = useState( null );
+	const {
+		state: { editingElement },
+		actions: { setBackgroundClickHandler, setNodeForElement },
+	} = useCanvas();
+
 	const [ pushEvent, setPushEvent ] = useState( null );
 
 	useEffect( () => {
@@ -59,42 +56,34 @@ function Page() {
 		}
 	}, [ toggleElementIdInSelection, selectElementById ] );
 
-	const singleSelection = 1 === selectedElements.length;
+	const selectedElement = selectedElements.length === 1 ? selectedElements[ 0 ] : null;
 
 	return (
 		<Background>
-			{ currentPage && currentPage.elements.map( ( { type, id, ...rest } ) => {
-				const comp = getComponentForType( type );
-				const Comp = comp; // why u do dis, eslint?
+			{ currentPage && currentPage.elements.map( ( { id, ...rest } ) => {
+				const isSelected = Boolean( selectedElement && selectedElement.id === id );
 
-				// Ignore multi-selection for now.
-				const isSelected = selectedElements.length ? selectedElements[ 0 ].id === id : false;
-				// @todo Use the wrapper element around <Comp> as the target for Moveable instead.
 				return (
 					<Element
 						key={ id }
-						onClick={ ( evt ) => handleSelectElement( id, evt ) }
-					>
-						<Comp
-							{ ...rest }
-							onPointerDown={ ( evt ) => {
-								if ( ! isSelected ) {
-									handleSelectElement( id, evt );
-								}
-							} }
-							forwardedRef={ isSelected ? setTargetEl : null }
-						/>
-					</Element>
+						setNodeForElement={ setNodeForElement }
+						isEditing={ editingElement === id }
+						element={ { id, ...rest } }
+						isSelected={ isSelected }
+						handleSelectElement={ handleSelectElement }
+						forwardedRef={ isSelected ? setTargetEl : null }
+					/>
 				);
 			} ) }
-			{ singleSelection && targetEl && (
+
+			{ selectedElement && targetEl && (
 				<Movable
-					rotationAngle={ selectedElements[ 0 ].rotationAngle }
+					rotationAngle={ selectedElement.rotationAngle }
 					targetEl={ targetEl }
 					pushEvent={ pushEvent }
-					type={ selectedElements[ 0 ].type }
-					x={ selectedElements[ 0 ].x }
-					y={ selectedElements[ 0 ].y }
+					type={ selectedElement.type }
+					x={ selectedElement.x }
+					y={ selectedElement.y }
 				/>
 			) }
 		</Background>
