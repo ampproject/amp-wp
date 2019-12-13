@@ -12,8 +12,8 @@ import { useCallback, useEffect, useState, useRef } from '@wordpress/element';
  * Internal dependencies
  */
 import { useStory } from '../../app';
-import { getComponentForType } from '../../elements';
 import useCanvas from './useCanvas';
+import Element from './element';
 import Movable from './../movable';
 
 const Background = styled.div.attrs( { className: 'container' } )`
@@ -23,22 +23,19 @@ const Background = styled.div.attrs( { className: 'container' } )`
 	height: 100%;
 `;
 
-const Element = styled.div`
-	cursor: pointer;
-	user-select: none;
-`;
-
 function Page() {
-	const {
-		actions: { setBackgroundClickHandler },
-	} = useCanvas();
+	const [ targetEl, setTargetEl ] = useState( null );
 
 	const {
 		state: { currentPage, selectedElements },
 		actions: { clearSelection, selectElementById, toggleElementIdInSelection },
 	} = useStory();
 
-	const [ targetEl, setTargetEl ] = useState( null );
+	const {
+		state: { editingElement },
+		actions: { setBackgroundClickHandler, setNodeForElement },
+	} = useCanvas();
+
 	const [ pushEvent, setPushEvent ] = useState( null );
 
 	const targetRefs = useRef( [] );
@@ -66,48 +63,42 @@ function Page() {
 	const singleSelection = 1 === selectedElements.length;
 	const hasSelection = 1 <= selectedElements.length;
 
+	useEffect( () => {
+		console.log( selectedElements.length );
+	}, [ selectedElements ] );
+
 	return (
 		<Background>
-			{ currentPage && currentPage.elements.map( ( { type, id, ...rest }, i ) => {
-				const comp = getComponentForType( type );
-				const Comp = comp; // why u do dis, eslint?
+			{ currentPage && currentPage.elements.map( ( { id, ...rest }, i ) => {
+				const isSelected = Boolean( selectedElements.filter( ( { id: selectedId } ) => id === selectedId ).length );
 
-				const isSelected = selectedElements.filter( ( { id: selectedId } ) => id === selectedId ).length;
-				// @todo Use the wrapper element around <Comp> as the target for Moveable instead.
 				return (
 					<Element
 						key={ id }
-						onClick={ ( evt ) => handleSelectElement( id, evt ) }
-					>
-						<Comp
-							{ ...rest }
-							onPointerDown={ ( evt ) => {
-								// Ignore this event if multi-selection is being done.
-								if ( ! isSelected && ! evt.metaKey ) {
-									handleSelectElement( id, evt );
+						setNodeForElement={ setNodeForElement }
+						isEditing={ editingElement === id }
+						element={ { id, ...rest } }
+						isSelected={ isSelected }
+						handleSelectElement={ handleSelectElement }
+						forwardedRef={ singleSelection && isSelected ?
+							setTargetEl :
+							( el ) => {
+								// @TODO We should also remove the nodes that don't exist anymore!
+								if ( ! isSelected ) {
+									return;
 								}
-							} }
-							forwardedRef={ singleSelection && isSelected ?
-								setTargetEl :
-								( el ) => {
-									// @TODO We should also remove the nodes that don't exist anymore!
-									if ( ! isSelected ) {
-										return;
-									}
-									// Add the element to the list of refs.
-									targetRefs.current[ i ] = {
-										id,
-										...rest,
-										ref: el,
-									};
-								}
+								// Add the element to the list of refs.
+								targetRefs.current[ i ] = {
+									id,
+									...rest,
+									ref: el,
+								};
 							}
-						/>
-					</Element>
+						}
+					/>
 				);
 			} ) }
-			{ }
-			{ hasSelection && (
+			{ hasSelection && ( targetEl || Boolean( targetRefs.current.length ) ) && (
 				<Movable
 					targets={ targetRefs.current }
 					targetEl={ targetEl }
