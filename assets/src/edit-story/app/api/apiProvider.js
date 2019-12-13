@@ -32,9 +32,7 @@ function APIProvider( { children } ) {
 					status,
 					author,
 					slug,
-					meta: {
-						amp_pages: pages,
-					},
+					content_filtered: pages,
 				},
 				method: 'POST',
 			} );

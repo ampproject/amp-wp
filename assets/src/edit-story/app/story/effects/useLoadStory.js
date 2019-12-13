@@ -28,7 +28,7 @@ function useLoadStory( {
 		if ( storyId && pages.length === 0 ) {
 			getStoryById( storyId ).then( ( post ) => {
 				const { title: { raw: title }, status, author, slug, link } = post;
-				let { meta: { amp_pages: newPages } } = post;
+				let { content_filtered: { raw: newPages } } = post;
 
 				// First clear history completely
 				clearHistory();
