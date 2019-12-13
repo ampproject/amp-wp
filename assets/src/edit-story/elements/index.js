@@ -9,6 +9,7 @@ import uuid from 'uuid/v4';
 import * as textElement from './text';
 import * as imageElement from './image';
 import * as squareElement from './square';
+import * as videoElement from './video';
 
 export const createNewElement = ( type, attributes = {} ) => {
 	const element = elementTypes.find( ( el ) => el.type === type );
@@ -28,6 +29,7 @@ export const elementTypes = [
 	{ type: 'text', name: 'Text', ...textElement },
 	{ type: 'image', name: 'Image', ...imageElement },
 	{ type: 'square', name: 'Square', ...squareElement },
+	{ type: 'video', name: 'Video', ...videoElement },
 ];
 
 export const getDefinitionForType =
