@@ -42,10 +42,6 @@ function Page() {
 	const [ pushEvent, setPushEvent ] = useState( null );
 
 	const targetRefs = useRef( [] );
-	useEffect( () => {
-		// Update the size of targetRefs when the selected elements changes.
-		targetRefs.current = targetRefs.current.slice( 0, selectedElements.length );
-	}, [ selectedElements ] );
 
 	useEffect( () => {
 		setBackgroundClickHandler( () => clearSelection() );
@@ -94,6 +90,7 @@ function Page() {
 							forwardedRef={ singleSelection && isSelected ?
 								setTargetEl :
 								( el ) => {
+									// @TODO We should also remove the nodes that don't exist anymore!
 									if ( ! isSelected ) {
 										return;
 									}

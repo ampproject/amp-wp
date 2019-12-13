@@ -18,11 +18,15 @@ function MovableGroup( {
 	targets: targetList,
 } ) {
 	const moveable = useRef();
-
 	const {
 		state: { selectedElements },
 		actions: { updateElementsByIds },
 	} = useStory();
+
+	// @todo Not working as expected, temporary commit!
+	targetList = targetList.filter( ( { id, ref } ) => {
+		return null !== ref && selectedElements.filter( ( { id: selectedId } ) => id === selectedId ).length;
+	} );
 
 	useEffect( () => {
 		if ( moveable.current ) {

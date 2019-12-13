@@ -6,6 +6,7 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
+import { useStory } from '../../app/story';
 import MovableGroup from './movableGroup';
 import MovableSingle from './movableSingle';
 
@@ -15,7 +16,11 @@ function Movable( {
 	targets: targetList,
 	pushEvent,
 } ) {
-	if ( targetList && 1 <= targetList.length ) {
+	const {
+		state: { selectedElements },
+	} = useStory();
+
+	if ( 1 < selectedElements.length ) {
 		return (
 			<MovableGroup targets={ targetList } />
 		);
