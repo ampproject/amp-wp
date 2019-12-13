@@ -19,5 +19,10 @@ module.exports = {
 	coveragePathIgnorePatterns: [ '/node_modules/', '<rootDir>/build/' ],
 	coverageReporters: [ 'lcov' ],
 	coverageDirectory: '<rootDir>/build/logs',
+	collectCoverage: true,
+	collectCoverageFrom: [
+		'<rootDir>/assets/src/edit-story/**/*.js',
+		'!**/test/**',
+	],
 	reporters: [ [ 'jest-silent-reporter', { useDots: true } ] ],
 };
