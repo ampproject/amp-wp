@@ -33,17 +33,3 @@ export function setupReducer() {
 		...result.current.internal,
 	} );
 }
-
-export function addRandomPage( { addPage } ) {
-	const res = addPage( { id: getRandomId(), elements: [] } );
-	console.log( 'res', res );
-	return res;
-}
-
-export function addRandomPages( reducer, count ) {
-	return Array.from( Array( count ) ).reduce( () => addRandomPage( reducer ), {} );
-}
-
-function getRandomId() {
-	return `id-${ Math.floor( Math.random() * 1000000 ) }`;
-}
