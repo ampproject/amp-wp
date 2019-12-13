@@ -29,6 +29,7 @@ import useAppendElementToCurrentPage from './actions/useAppendElementToCurrentPa
 import useSetCurrentPageByIndex from './actions/useSetCurrentPageByIndex';
 import useSetPropertiesOnSelectedElements from './actions/useSetPropertiesOnSelectedElements';
 import useSavePost from './actions/useSavePost';
+import useSetPropertiesById from './actions/useSetPropertiesById';
 
 function StoryProvider( { storyId, children } ) {
 	// Story state is stored in these three immutable variables only!
@@ -62,6 +63,7 @@ function StoryProvider( { storyId, children } ) {
 	const appendElementToCurrentPage = useAppendElementToCurrentPage( { currentPageIndex, pages, setPages, setSelectedElementIds } );
 	const setPropertiesOnSelectedElements = useSetPropertiesOnSelectedElements( { currentPageIndex, pages, selectedElementIds, setPages } );
 	const savePost = useSavePost( { isSaving, storyId, title, postStatus, postAuthor, slug, pages, setLink, setPostStatus, setIsSaving } );
+	const setPropertiesById = useSetPropertiesById( { currentPageIndex, pages, setPages } );
 
 	useLoadStory( { storyId, pages, setPages, setTitle, setPostStatus, setPostAuthor, setSlug, setLink, setCurrentPageIndex, clearSelection } );
 	useCurrentPage( { currentPageIndex, pages, setCurrentPage, setCurrentPageNumber } );
@@ -95,6 +97,7 @@ function StoryProvider( { storyId, children } ) {
 			setPropertiesOnSelectedElements,
 			setTitle,
 			savePost,
+			setPropertiesById,
 		},
 	};
 
