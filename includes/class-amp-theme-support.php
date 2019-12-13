@@ -1498,6 +1498,38 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Check if a handle is exclusively a dependency of another handle.
+	 *
+	 * For example, check if dashicons is being added exclusively because it is a dependency of admin-bar, as opposed
+	 * to being added because it was directly enqueued by a theme or a dependency of some other style.
+	 *
+	 * @since 1.4.2
+	 *
+	 * @param WP_Dependencies $dependencies         Dependencies.
+	 * @param string          $handle               Handle.
+	 * @param string          $exclusive_dependency Exclusive dependency handle.
+	 * @return bool Whether the $handle is exclusively a handle of the $exclusive_dependency handle.
+	 */
+	protected static function is_exclusive_dependency( WP_Dependencies $dependencies, $handle, $exclusive_dependency ) {
+		foreach ( $dependencies->queue as $queued_handle ) {
+			if (
+				// If a theme or plugin directly enqueued handle, then it is not added via $exclusive_dependency and it is not part of dev mode.
+				$handle === $queued_handle
+				||
+				// If a stylesheet has $handle as a dependency without also having $exclusive_dependency as a dependency, then no dev mode.
+				(
+					self::has_dependency( $dependencies, $queued_handle, $handle )
+					&&
+					! self::has_dependency( $dependencies, $queued_handle, $exclusive_dependency )
+				)
+			) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
 	 * Add data-ampdevmode attribute to any enqueued style that depends on the admin-bar.
 	 *
 	 * @since 1.3
@@ -1507,30 +1539,11 @@ class AMP_Theme_Support {
 	 * @return string Tag.
 	 */
 	public static function filter_admin_bar_style_loader_tag( $tag, $handle ) {
-		if ( 'dashicons' === $handle ) {
-			// Conditionally include Dashicons in dev mode only if was included because it is a dependency of admin-bar.
-			$needs_dev_mode = true;
-			foreach ( wp_styles()->queue as $queued_handle ) {
-				if (
-					// If a theme or plugin directly enqueued dashicons, then it is not added via admin-bar dependency and it is not part of dev mode.
-					'dashicons' === $queued_handle
-					||
-					// If a stylesheet has dashicons as a dependency without also having admin-bar as a dependency, then no dev mode.
-					(
-						self::has_dependency( wp_styles(), $queued_handle, 'dashicons' )
-						&&
-						! self::has_dependency( wp_styles(), $queued_handle, 'admin-bar' )
-					)
-				) {
-					$needs_dev_mode = false;
-					break;
-				}
-			}
-		} else {
-			$needs_dev_mode = self::has_dependency( wp_styles(), $handle, 'admin-bar' );
-		}
-
-		if ( $needs_dev_mode ) {
+		if (
+			in_array( $handle, wp_styles()->registered['admin-bar']->deps, true ) ?
+				self::is_exclusive_dependency( wp_styles(), $handle, 'admin-bar' ) :
+				self::has_dependency( wp_styles(), $handle, 'admin-bar' )
+		) {
 			$tag = preg_replace( '/(?<=<link)(?=\s|>)/i', ' ' . AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, $tag );
 		}
 		return $tag;
@@ -1547,9 +1560,9 @@ class AMP_Theme_Support {
 	 */
 	public static function filter_admin_bar_script_loader_tag( $tag, $handle ) {
 		if (
-			self::has_dependency( wp_scripts(), $handle, 'admin-bar' )
-			||
-			in_array( $handle, wp_scripts()->registered['admin-bar']->deps, true )
+			in_array( $handle, wp_scripts()->registered['admin-bar']->deps, true ) ?
+				self::is_exclusive_dependency( wp_scripts(), $handle, 'admin-bar' ) :
+				self::has_dependency( wp_scripts(), $handle, 'admin-bar' )
 		) {
 			$tag = preg_replace( '/(?<=<script)(?=\s|>)/i', ' ' . AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, $tag );
 		}
