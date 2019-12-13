@@ -82,7 +82,7 @@ abstract class AMP_Base_Sanitizer {
 	 *
 	 * @var array
 	 */
-	private $should_not_removed_nodes = [];
+	private $nodes_to_keep = [];
 
 	/**
 	 * AMP_Base_Sanitizer constructor.
@@ -439,7 +439,7 @@ abstract class AMP_Base_Sanitizer {
 		}
 
 		// Prevent double-reporting nodes that are rejected for sanitization.
-		if ( isset( $this->should_not_removed_nodes[ $node->nodeName ] ) && in_array( $node, $this->should_not_removed_nodes[ $node->nodeName ], true ) ) {
+		if ( isset( $this->nodes_to_keep[ $node->nodeName ] ) && in_array( $node, $this->nodes_to_keep[ $node->nodeName ], true ) ) {
 			return false;
 		}
 
@@ -447,7 +447,7 @@ abstract class AMP_Base_Sanitizer {
 		if ( $should_remove ) {
 			$node->parentNode->removeChild( $node );
 		} else {
-			$this->should_not_removed_nodes[ $node->nodeName ][] = $node;
+			$this->nodes_to_keep[ $node->nodeName ][] = $node;
 		}
 		return $should_remove;
 	}
@@ -463,9 +463,10 @@ abstract class AMP_Base_Sanitizer {
 	 * @param DOMElement     $element   The node for which to remove the attribute.
 	 * @param DOMAttr|string $attribute The attribute to remove from the element.
 	 * @param array          $validation_error Validation error details.
+	 * @param array          $attr_spec        Attribute spec.
 	 * @return bool Whether the node should have been removed, that is, that the node was sanitized for validity.
 	 */
-	public function remove_invalid_attribute( $element, $attribute, $validation_error = [] ) {
+	public function remove_invalid_attribute( $element, $attribute, $validation_error = [], $attr_spec = [] ) {
 		if ( $this->is_exempt_from_validation( $element ) ) {
 			return false;
 		}
@@ -475,10 +476,23 @@ abstract class AMP_Base_Sanitizer {
 		} else {
 			$node = $attribute;
 		}
+
+		// Catch edge condition (no known possible way to reach).
+		if ( ! ( $node instanceof DOMAttr ) || $element !== $node->parentNode ) {
+			return false;
+		}
+
 		$should_remove = $this->should_sanitize_validation_error( $validation_error, compact( 'node' ) );
 		if ( $should_remove ) {
-			$element->removeAttributeNode( $node );
+			$allow_empty  = ! empty( $attr_spec[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] );
+			$is_href_attr = ( isset( $attr_spec[ AMP_Rule_Spec::VALUE_URL ] ) && 'href' === $node->nodeName );
+			if ( $allow_empty && ! $is_href_attr ) {
+				$node->nodeValue = '';
+			} else {
+				$element->removeAttributeNode( $node );
+			}
 		}
+
 		return $should_remove;
 	}
 
@@ -528,13 +542,15 @@ abstract class AMP_Base_Sanitizer {
 
 		if ( $node instanceof DOMElement ) {
 			if ( ! isset( $error['code'] ) ) {
-				$error['code'] = AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE;
+				$error['code'] = AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG;
 			}
 
 			if ( ! isset( $error['type'] ) ) {
+				// @todo Also include javascript: protocol for URL errors.
 				$error['type'] = 'script' === $node->nodeName ? AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE : AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE;
 			}
 
+			// @todo Change from node_attributes to element_attributes to harmonize the two.
 			if ( ! isset( $error['node_attributes'] ) ) {
 				$error['node_attributes'] = [];
 				foreach ( $node->attributes as $attribute ) {
@@ -555,7 +571,7 @@ abstract class AMP_Base_Sanitizer {
 			}
 		} elseif ( $node instanceof DOMAttr ) {
 			if ( ! isset( $error['code'] ) ) {
-				$error['code'] = AMP_Validation_Error_Taxonomy::INVALID_ATTRIBUTE_CODE;
+				$error['code'] = AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR;
 			}
 			if ( ! isset( $error['type'] ) ) {
 				// If this is an attribute that begins with on, like onclick, it should be a js_error.
