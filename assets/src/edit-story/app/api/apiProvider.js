@@ -44,7 +44,9 @@ function APIProvider( { children } ) {
 					status,
 					author,
 					slug,
-					content_filtered: pages,
+					content_filtered: {
+						raw: pages,
+					},
 				},
 				method: 'POST',
 			} );
