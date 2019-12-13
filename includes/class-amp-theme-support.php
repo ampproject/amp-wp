@@ -1517,7 +1517,11 @@ class AMP_Theme_Support {
 	 * @return string Tag.
 	 */
 	public static function filter_admin_bar_script_loader_tag( $tag, $handle ) {
-		if ( self::has_dependency( wp_scripts(), $handle, 'admin-bar' ) ) {
+		if (
+			self::has_dependency( wp_scripts(), $handle, 'admin-bar' )
+			||
+			in_array( $handle, wp_scripts()->registered['admin-bar']->deps, true )
+		) {
 			$tag = preg_replace( '/(?<=<script)(?=\s|>)/i', ' ' . AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, $tag );
 		}
 		return $tag;
