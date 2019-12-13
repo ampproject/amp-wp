@@ -56,9 +56,10 @@ function MediaLibrary( { onInsert } ) {
 		setIsMediaLoaded( false );
 	};
 
-	const onSelect = ( { url } ) => {
+	const onSelect = ( { url, origWidth, origHeight } ) => {
 		onInsert( 'image', {
 			src: url,
+			origRatio: origWidth / origHeight,
 			width: 100,
 			height: 100,
 			x: 5,
@@ -85,7 +86,7 @@ function MediaLibrary( { onInsert } ) {
 				</Message>
 			) : (
 
-				media.map( ( { src } ) => (
+				media.map( ( { src, origWidth, origHeight } ) => (
 					<Image
 						key={ src }
 						src={ src }
@@ -94,6 +95,7 @@ function MediaLibrary( { onInsert } ) {
 						loading={ 'lazy' }
 						onClick={ () => onInsert( 'image', {
 							src,
+							origRatio: origWidth / origHeight,
 							width: 200,
 							height: 100,
 							x: 5,

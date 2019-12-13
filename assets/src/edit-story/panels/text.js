@@ -26,7 +26,7 @@ function TextPanel( { selectedElements, onSetProperties } ) {
 	return (
 		<Panel onSubmit={ handleSubmit }>
 			<Title>
-				{ 'Color' }
+				{ 'Text' }
 			</Title>
 			<InputGroup
 				label="Text content"

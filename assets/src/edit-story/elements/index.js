@@ -6,44 +6,31 @@ import uuid from 'uuid/v4';
 /**
  * Internal dependencies
  */
-import Text from './text';
-import Image from './image';
-import Square from './square';
-import Video from './video';
+import * as textElement from './text';
+import * as imageElement from './image';
+import * as squareElement from './square';
+import * as videoElement from './video';
 
-export const createNewElement = ( type, props = {} ) => {
+export const createNewElement = ( type, attributes = {} ) => {
 	const element = elementTypes.find( ( el ) => el.type === type );
-	const defaultProps = element ? element.defaultProps : {};
+	const defaultAttributes = element ? element.defaultAttributes : {};
 	return {
 		type,
 		id: uuid(),
-		...defaultProps,
-		...props,
+		...defaultAttributes,
+		...attributes,
 	};
 };
 
-export const createPage = ( props ) => createNewElement(
-	'page',
-	{
-		elements: [],
-		...props,
-	},
-);
+export const createPage = ( attributes ) => createNewElement( 'page', attributes );
 
 export const elementTypes = [
-	{ type: 'page', defaultProps: { elements: [] }, name: 'Page' },
-	{ type: 'text', defaultProps: Text.defaultProps, component: Text, name: 'Text', panels: Text.panels },
-	{ type: 'image', defaultProps: Image.defaultProps, component: Image, name: 'Image', panels: Image.panels },
-	{ type: 'square', defaultProps: Square.defaultProps, component: Square, name: 'Square', panels: Square.panels },
-	{ type: 'video', defaultProps: Video.defaultProps, component: Video, name: 'Video', panels: Video.panels },
+	{ type: 'page', defaultAttributes: { elements: [] }, name: 'Page' },
+	{ type: 'text', name: 'Text', ...textElement },
+	{ type: 'image', name: 'Image', ...imageElement },
+	{ type: 'square', name: 'Square', ...squareElement },
+	{ type: 'video', name: 'Video', ...videoElement },
 ];
 
-export const getComponentForType =
-	( type ) => elementTypes.find( ( el ) => el.type === type ).component;
-
-export {
-	Text,
-	Image,
-	Square,
-	Video,
-};
+export const getDefinitionForType =
+	( type ) => elementTypes.find( ( el ) => el.type === type );
