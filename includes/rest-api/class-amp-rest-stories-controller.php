@@ -1,6 +1,13 @@
 <?php
+/**
+ * Class AMP_REST_Stories_Controller
+ *
+ * @package AMP
+ */
 
 /**
+ * Override the WP_REST_Posts_Controller class to add `post_content_filtered` to REST request.
+ *
  * Class AMP_REST_Stories_Controller
  */
 class AMP_REST_Stories_Controller extends WP_REST_Posts_Controller {
@@ -26,15 +33,13 @@ class AMP_REST_Stories_Controller extends WP_REST_Posts_Controller {
 			$prepared_story->post_content_filtered = maybe_serialize( $prepared_story->post_content_filtered );
 		}
 
-
 		return $prepared_story;
 	}
 
 	/**
 	 * Prepares a single story output for response. Add post_content_filtered field to output.
 	 *
-	 *
-	 * @param WP_Post $post Post object.
+	 * @param WP_Post         $post Post object.
 	 * @param WP_REST_Request $request Request object.
 	 *
 	 * @return WP_REST_Response Response object.
@@ -47,9 +52,9 @@ class AMP_REST_Stories_Controller extends WP_REST_Posts_Controller {
 
 		if ( in_array( 'content_filtered', $fields, true ) ) {
 			$post_content_filtered    = maybe_unserialize( $post->post_content_filtered );
-			$data['content_filtered'] = array(
+			$data['content_filtered'] = [
 				'raw' => rest_sanitize_value_from_schema( $post_content_filtered, $schema['properties']['content_filtered']['properties']['raw'] ),
-			);
+			];
 		}
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
@@ -68,7 +73,6 @@ class AMP_REST_Stories_Controller extends WP_REST_Posts_Controller {
 		 *
 		 * The dynamic portion of the hook name, `$this->post_type`, refers to the post type slug.
 		 *
-		 *
 		 * @param WP_REST_Response $response The response object.
 		 * @param WP_Post $post Post object.
 		 * @param WP_REST_Request $request Request object.
@@ -79,7 +83,6 @@ class AMP_REST_Stories_Controller extends WP_REST_Posts_Controller {
 	/**
 	 * Retrieves the attachment's schema, conforming to JSON Schema.
 	 *
-	 *
 	 * @return array Item schema as an array.
 	 */
 	public function get_item_schema() {
@@ -88,16 +91,16 @@ class AMP_REST_Stories_Controller extends WP_REST_Posts_Controller {
 		}
 		$schema = parent::get_item_schema();
 
-		$schema['properties']['content_filtered'] = array(
+		$schema['properties']['content_filtered'] = [
 			'description' => __( 'The post content filtered for the object.', 'amp' ),
 			'type'        => 'object',
-			'context'     => array( 'view', 'edit', 'embed' ),
-			'arg_options' => array(
-				'sanitize_callback' => null, // Note: sanitization implemented in self::prepare_item_for_database()
-				'validate_callback' => null, // Note: validation implemented in self::prepare_item_for_database()
-			),
-			'properties'  => array(
-				'raw' => array(
+			'context'     => [ 'view', 'edit', 'embed' ],
+			'arg_options' => [
+				'sanitize_callback' => null, // Note: sanitization implemented in self::prepare_item_for_database().
+				'validate_callback' => null, // Note: validation implemented in self::prepare_item_for_database().
+			],
+			'properties'  => [
+				'raw' => [
 					'description' => __( 'Content filtered for the object, as it exists in the database.', 'amp' ),
 					'type'        => 'array',
 					'items'       => [
@@ -117,11 +120,11 @@ class AMP_REST_Stories_Controller extends WP_REST_Posts_Controller {
 							'default' => 0,
 						],
 					],
-					'context'     => array( 'edit' ),
-					'default'     => array(),
-				),
-			),
-		);
+					'context'     => [ 'edit' ],
+					'default'     => [],
+				],
+			],
+		];
 
 		$this->schema = $schema;
 

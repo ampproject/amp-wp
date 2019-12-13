@@ -96,7 +96,7 @@ class AMP_Autoloader {
 		'AMP_Content'                        => 'includes/templates/class-amp-content',
 		'AMP_Content_Sanitizer'              => 'includes/templates/class-amp-content-sanitizer',
 		'AMP_Post_Template'                  => 'includes/templates/class-amp-post-template',
-		'AMP_REST_Stories_Controller'        => 'includes/rest-api/class-wp-rest-stories-controller',
+		'AMP_REST_Stories_Controller'        => 'includes/rest-api/class-amp-rest-stories-controller',
 		'AMP_DOM_Utils'                      => 'includes/utils/class-amp-dom-utils',
 		'AMP_HTML_Utils'                     => 'includes/utils/class-amp-html-utils',
 		'AMP_Image_Dimension_Extractor'      => 'includes/utils/class-amp-image-dimension-extractor',
