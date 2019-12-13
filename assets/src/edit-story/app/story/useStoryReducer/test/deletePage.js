@@ -15,9 +15,7 @@ describe( 'deletePage', () => {
 		expect( result.pages ).toStrictEqual( [ { id: '111' } ] );
 	} );
 
-	// Disable reason: Awaiting UX decision on what should actually happen
-	// eslint-disable-next-line jest/no-disabled-tests
-	it.skip( 'should not delete the page if it\'s the only page', () => {
+	it( 'should not delete the page if it\'s the only page', () => {
 		const { restore, deletePage } = setupReducer();
 
 		// Set an initial state with only one page.
