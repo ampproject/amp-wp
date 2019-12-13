@@ -292,6 +292,9 @@ class AMP_Story_Post_Type {
 			return;
 		}
 
+		// Force media model to load.
+		wp_enqueue_media();
+
 		$asset_file   = AMP__DIR__ . '/assets/js/' . self::AMP_STORIES_SCRIPT_HANDLE . '.asset.php';
 		$asset        = require $asset_file;
 		$dependencies = $asset['dependencies'];
@@ -368,7 +371,7 @@ class AMP_Story_Post_Type {
 		wp_enqueue_style(
 			self::AMP_STORIES_STYLE_HANDLE,
 			amp_get_asset_url( 'css/amp-edit-story-compiled.css' ),
-			[ 'wp-components' ],
+			['wp-components'],
 			AMP__VERSION
 		);
 

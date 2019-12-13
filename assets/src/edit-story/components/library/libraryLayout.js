@@ -29,6 +29,7 @@ const LibraryBackground = styled.div`
 	height: 100%;
 	padding: 1em;
 	color: ${ ( { theme } ) => theme.colors.fg.v1 };
+	overflow: auto;
 `;
 
 function LibraryLayout() {

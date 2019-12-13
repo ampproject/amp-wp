@@ -8,6 +8,7 @@ import PropTypes from 'prop-types';
  */
 import { useCallback } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -44,9 +45,17 @@ function APIProvider( { children } ) {
 	);
 
 	const getMedia = useCallback(
-		() => apiFetch( { path: `${ media }/` } )
-			.then( ( data ) => data.map( ( { guid: { rendered: src } } ) => ( { src } ) ) ),
-		[ media ],
+		( { mediaType } ) => {
+			let apiPath = media;
+			const perPage = 100;
+			apiPath = addQueryArgs( apiPath, { per_page: perPage } );
+
+			if ( mediaType ) {
+				apiPath = addQueryArgs( apiPath, { media_type: mediaType } );
+			}
+
+			return apiFetch( { path: apiPath } ).then( ( data ) => data.map( ( { guid: { rendered: src } } ) => ( { src } ) ) );
+		},	[ media ],
 	);
 
 	const state = {

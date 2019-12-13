@@ -10,45 +10,47 @@ import styled from 'styled-components';
 import { PanelTypes } from '../panels';
 import { ElementWithPosition, ElementWithSize, ElementWithRotation } from './shared';
 
-const Element = styled.img`
+const Element = styled.video`
 	${ ElementWithPosition }
 	${ ElementWithSize }
 	${ ElementWithRotation }
 `;
 
-function Image( { src, width, height, x, y, rotationAngle, forwardedRef, onPointerDown } ) {
+function Video( { src, width, height, x, y, rotationAngle, controls, mimeType } ) {
 	const props = {
 		width,
 		height,
 		x,
 		y,
 		rotationAngle,
-		src,
-		ref: forwardedRef,
+		controls,
 	};
 	return (
-		<Element draggable="false" { ...props } onPointerDown={ onPointerDown } />
+		<Element { ...props }>
+			<source src={ src } type={ mimeType } />
+		</Element>
 	);
 }
 
-Image.propTypes = {
+Video.propTypes = {
 	rotationAngle: PropTypes.number.isRequired,
+	controls: PropTypes.bool,
+	mimeType: PropTypes.string.isRequired,
 	src: PropTypes.string.isRequired,
 	width: PropTypes.number.isRequired,
 	height: PropTypes.number.isRequired,
 	x: PropTypes.number.isRequired,
 	y: PropTypes.number.isRequired,
-	forwardedRef: PropTypes.func,
-	onPointerDown: PropTypes.func,
 };
 
-Image.defaultProps = {
+Video.defaultProps = {
+	controls: true,
 };
 
-Image.panels = [
+Video.panels = [
 	PanelTypes.SIZE,
 	PanelTypes.POSITION,
 	PanelTypes.ROTATION_ANGLE,
 ];
 
-export default Image;
+export default Video;
