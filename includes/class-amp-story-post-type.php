@@ -105,40 +105,7 @@ class AMP_Story_Post_Type {
 				'rest_controller_class' => 'AMP_REST_Stories_Controller',
 			]
 		);
-
-		$meta_args = [
-			'type'           => 'array',
-			'object_subtype' => self::POST_TYPE_SLUG,
-			'single'         => true,
-			'show_in_rest'   => [
-				'schema' => [
-					'type'  => 'array',
-					'items' => [
-						'id'       => [
-							'type' => 'string',
-						],
-						'type'     => [
-							'type'    => 'string',
-							'default' => 'page',
-						],
-						'elements' => [
-							'type'    => 'array',
-							'default' => [],
-						],
-						'index'    => [
-							'type'    => 'integer',
-							'default' => 0,
-						],
-					],
-				],
-			],
-		];
-		// Hide the pages data from none logged in users.
-		if ( ! is_user_logged_in() ) {
-			$meta_args['show_in_rest'] = false;
-		}
-		register_meta( 'post', 'amp_pages', $meta_args );
-
+		
 		add_action( 'admin_enqueue_scripts', [ __CLASS__, 'admin_enqueue_scripts' ] );
 		add_filter( 'show_admin_bar', [ __CLASS__, 'show_admin_bar' ] );
 		add_filter( 'replace_editor', [ __CLASS__, 'replace_editor' ], 10, 2 );
