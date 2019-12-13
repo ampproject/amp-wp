@@ -30,6 +30,7 @@ class AMP_REST_Stories_Controller extends WP_REST_Posts_Controller {
 			if ( isset( $request['content_filtered']['raw'] ) ) {
 				$prepared_story->post_content_filtered = $request['content_filtered']['raw'];
 			}
+
 			$prepared_story->post_content_filtered = maybe_serialize( $prepared_story->post_content_filtered );
 		}
 
@@ -95,29 +96,28 @@ class AMP_REST_Stories_Controller extends WP_REST_Posts_Controller {
 			'description' => __( 'The post content filtered for the object.', 'amp' ),
 			'type'        => 'object',
 			'context'     => [ 'view', 'edit', 'embed' ],
-			'arg_options' => [
-				'sanitize_callback' => null, // Note: sanitization implemented in self::prepare_item_for_database().
-				'validate_callback' => null, // Note: validation implemented in self::prepare_item_for_database().
-			],
 			'properties'  => [
 				'raw' => [
 					'description' => __( 'Content filtered for the object, as it exists in the database.', 'amp' ),
 					'type'        => 'array',
 					'items'       => [
-						'id'       => [
-							'type' => 'string',
-						],
-						'type'     => [
-							'type'    => 'string',
-							'default' => 'page',
-						],
-						'elements' => [
-							'type'    => 'array',
-							'default' => [],
-						],
-						'index'    => [
-							'type'    => 'integer',
-							'default' => 0,
+						'type'       => 'object',
+						'properties' => [
+							'id'       => [
+								'type' => 'string',
+							],
+							'type'     => [
+								'type'    => 'string',
+								'default' => 'page',
+							],
+							'elements' => [
+								'type'    => 'array',
+								'default' => [],
+							],
+							'index'    => [
+								'type'    => 'integer',
+								'default' => 0,
+							],
 						],
 					],
 					'context'     => [ 'edit' ],
