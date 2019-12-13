@@ -68,7 +68,7 @@ function Page() {
 	}, [ toggleElementIdInSelection, selectElementById ] );
 
 	const singleSelection = 1 === selectedElements.length;
-	const multiSelection = 1 < selectedElements.length;
+	const hasSelection = 1 <= selectedElements.length;
 
 	return (
 		<Background>
@@ -109,18 +109,13 @@ function Page() {
 					</Element>
 				);
 			} ) }
-			{ singleSelection && targetEl && (
-				<Movable
-					targetEl={ targetEl }
-					pushEvent={ pushEvent }
-					selectedEl={ selectedElements[ 0 ] }
-				/>
-			) }
-			{ multiSelection && (
+			{ }
+			{ hasSelection && (
 				<Movable
 					targets={ targetRefs.current }
-					selectedEl={ {} }
+					targetEl={ targetEl }
 					pushEvent={ pushEvent }
+					selectedEl={ singleSelection ? selectedElements[ 0 ] : {} }
 				/>
 			) }
 		</Background>
