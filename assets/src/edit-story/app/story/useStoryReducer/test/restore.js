@@ -88,6 +88,20 @@ describe( 'restore', () => {
 		} );
 	} );
 
+	it( 'should restore to an empty state if empty', () => {
+		const reducer = setupReducer();
+
+		const { restore } = reducer;
+
+		const result = restore( {} );
+
+		expect( result ).toStrictEqual( {
+			pages: [],
+			selection: [],
+			current: null,
+		} );
+	} );
+
 	it( 'should override existing content', () => {
 		const reducer = setupReducer();
 

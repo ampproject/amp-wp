@@ -24,7 +24,7 @@ function restore( state, { pages, current, selection } ) {
 		newCurrent = pages.some( ( { id } ) => id === current ) ? current : pages[ 0 ].id;
 
 		if ( Array.isArray( selection ) ) {
-			newSelection = Array.isArray( selection ) ? [ ...new Set( selection ) ] : [];
+			newSelection = [ ...new Set( selection ) ];
 		}
 	}
 
