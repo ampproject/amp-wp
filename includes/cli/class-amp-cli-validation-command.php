@@ -350,11 +350,19 @@ final class AMP_CLI_Validation_Command {
 		$host            = wp_parse_url( $url, PHP_URL_HOST );
 		$parsed_home_url = wp_parse_url( home_url( '/' ) );
 
+		if ( ! isset( $parsed_home_url['host'], $parsed_home_url['scheme'] ) ) {
+			WP_CLI::error(
+				sprintf(
+					'The home URL (%s) is missing a scheme and host.',
+					home_url( '/' )
+				)
+			);
+		}
+
 		if ( $host && $host !== $parsed_home_url['host'] ) {
 			WP_CLI::error(
 				sprintf(
-					/* translators: %1$s is the expected host, %2$s is the actual host */
-					__( 'Supplied URL must be for this WordPress install. Expected host "%1$s" but provided is "%2$s".', 'amp' ),
+					'Supplied URL must be for this WordPress install. Expected host "%1$s" but provided is "%2$s".',
 					$parsed_home_url['host'],
 					$host
 				)
@@ -374,7 +382,7 @@ final class AMP_CLI_Validation_Command {
 			WP_CLI::error( $result );
 		}
 
-		print wp_json_encode( AMP_Validation_Manager::validate_url( $url ), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
+		WP_CLI::line( wp_json_encode( AMP_Validation_Manager::validate_url( $url ), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) );
 	}
 
 	/**

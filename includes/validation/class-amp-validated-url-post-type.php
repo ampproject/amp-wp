@@ -631,9 +631,11 @@ class AMP_Validated_URL_Post_Type {
 	/**
 	 * Get the markup status preview URL.
 	 *
+	 * Adds a _wpnonce query param for the markup status preview action.
+	 *
 	 * @since 1.5.0
 	 *
-	 * @param string $url URL.
+	 * @param string $url Frontend URL to preview markup status changes.
 	 * @return string Preview URL.
 	 */
 	protected static function get_markup_status_preview_url( $url ) {
