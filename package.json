@@ -32,6 +32,7 @@
     "@babel/plugin-proposal-class-properties": "7.5.5",
     "@babel/plugin-proposal-object-rest-spread": "7.6.2",
     "@babel/plugin-transform-react-jsx": "7.3.0",
+    "@testing-library/react-hooks": "3.2.1",
     "@wordpress/api-fetch": "3.6.4",
     "@wordpress/babel-preset-default": "4.6.2",
     "@wordpress/blob": "2.5.1",

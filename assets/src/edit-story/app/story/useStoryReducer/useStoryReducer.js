@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { useReducer } from '@wordpress/element';
+import { useReducer, useMemo } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -35,14 +35,21 @@ const INITIAL_STATE = {
 function useStoryReducer() {
 	const [ state, dispatch ] = useReducer( reducer, INITIAL_STATE );
 
-	const wrapWithDispatch = ( actions ) => Object.keys( actions )
-		.reduce(
-			( collection, action ) => ( { ...collection, [ action ]: actions[ action ]( dispatch ) } ),
-			{},
-		);
+	const {
+		internal,
+		api,
+	} = useMemo( () => {
+		const wrapWithDispatch = ( actions ) => Object.keys( actions )
+			.reduce(
+				( collection, action ) => ( { ...collection, [ action ]: actions[ action ]( dispatch ) } ),
+				{},
+			);
 
-	const internal = wrapWithDispatch( internalActions, dispatch );
-	const api = wrapWithDispatch( exposedActions, dispatch );
+		return {
+			internal: wrapWithDispatch( internalActions, dispatch ),
+			api: wrapWithDispatch( exposedActions, dispatch ),
+		};
+	}, [ dispatch ] );
 
 	return {
 		state,

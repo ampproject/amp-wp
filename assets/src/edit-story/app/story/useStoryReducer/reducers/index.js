@@ -1,24 +1,25 @@
 
 // Manipulate pages.
-export addPage from './addPage';
-export deletePage from './deletePage';
-export updatePage from './updatePage';
-export arrangePage from './arrangePage';
+export { default as addPage } from './addPage';
+export { default as deletePage } from './deletePage';
+export { default as updatePage } from './updatePage';
+export { default as arrangePage } from './arrangePage';
 
 // Manipulate elements on a page.
-export addElements from './addElements';
-export deleteElements from './deleteElements';
-export updateElements from './updateElements';
-export arrangeElement from './arrangeElement';
+export { default as addElements } from './addElements';
+export { default as deleteElements } from './deleteElements';
+export { default as updateElements } from './updateElements';
+export { default as setBackgroundElement } from './arrangeElement';
+export { default as arrangeElement } from './arrangeElement';
 
 // Manipulate current page.
-export setCurrentPage from './setCurrentPage';
+export { default as setCurrentPage } from './setCurrentPage';
 
 // Manipulate list of selected elements.
-export setSelectedElements from './setSelectedElements';
-export selectElement from './selectElement';
-export unselectElement from './unselectElement';
-export toggleElement from './toggleElement';
+export { default as setSelectedElements } from './setSelectedElements';
+export { default as selectElement } from './selectElement';
+export { default as unselectElement } from './unselectElement';
+export { default as toggleElement } from './toggleElement';
 
 // Manipulate entire internal state.
-export restore from './restore';
+export { default as restore } from './restore';

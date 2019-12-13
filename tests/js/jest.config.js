@@ -14,6 +14,7 @@ module.exports = {
 		'<rootDir>/.git',
 		'<rootDir>/node_modules',
 		'<rootDir>/build',
+		'_utils',
 	],
 	coveragePathIgnorePatterns: [ '/node_modules/', '<rootDir>/build/' ],
 	coverageReporters: [ 'lcov' ],

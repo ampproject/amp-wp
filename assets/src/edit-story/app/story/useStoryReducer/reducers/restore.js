@@ -6,7 +6,7 @@
  *
  * - `pages` must be an array (if not, nothing happens).
  * - `current` must point to a legal page, if at least one page exists.
- * - `selection` is an array.
+ * - `selection` is a unique array.
  *
  * @param {Object} state Current state
  * @param {Object} payload New state to set.
@@ -24,7 +24,7 @@ function restore( state, { pages, current, selection } ) {
 		newCurrent = pages.some( ( { id } ) => id === current ) ? current : pages[ 0 ].id;
 
 		if ( Array.isArray( selection ) ) {
-			newSelection = Array.isArray( selection ) ? selection : [];
+			newSelection = Array.isArray( selection ) ? [ ...new Set( selection ) ] : [];
 		}
 	}
 
