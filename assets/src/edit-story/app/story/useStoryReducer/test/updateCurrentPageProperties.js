@@ -3,12 +3,19 @@
  */
 import { setupReducer } from './_utils';
 
-describe.skip( 'updateCurrentPageProperties', () => {
-	it( 'should work', () => {
-		const { updateCurrentPageProperties } = setupReducer();
+describe( 'updateCurrentPageProperties', () => {
+	it( 'should update properties of the current page', () => {
+		const { restore, updateCurrentPageProperties } = setupReducer();
 
-		const result = updateCurrentPageProperties( { } );
+		// Set an initial state with multiple pages.
+		restore( { pages: [ { id: '111' }, { id: '222' } ], current: '222' } );
 
-		expect( result ).not.toStrictEqual( {} );
+		// Add x=1 to page 222
+		const result = updateCurrentPageProperties( { properties: { x: 1 } } );
+
+		expect( result.pages ).toStrictEqual( [
+			{ id: '111' },
+			{ id: '222', x: 1 },
+		] );
 	} );
 } );

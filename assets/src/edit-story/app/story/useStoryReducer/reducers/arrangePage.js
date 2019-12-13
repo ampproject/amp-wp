@@ -21,7 +21,7 @@ import { isInsideRange, moveArrayElement } from './utils';
  * @param {number} payload.position Index of where page should be moved to.
  * @return {Object} New state
  */
-function movePage( state, { pageId, position } ) {
+function arrangePage( state, { pageId, position } ) {
 	const pageIndex = state.pages.findIndex( ( { id } ) => id === pageId );
 	const isTargetWithinBounds = isInsideRange( position, 0, state.pages.length - 1 );
 	const isSimilar = pageIndex === position;
@@ -37,4 +37,4 @@ function movePage( state, { pageId, position } ) {
 	};
 }
 
-export default movePage;
+export default arrangePage;

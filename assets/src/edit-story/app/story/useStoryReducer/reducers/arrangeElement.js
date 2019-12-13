@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { isInsideRange, getAbsolutePosition, moveArrayElement } from './utils';
+import { getAbsolutePosition, moveArrayElement } from './utils';
 
 /**
  * Move element in element order on the current page.
@@ -35,7 +35,7 @@ import { isInsideRange, getAbsolutePosition, moveArrayElement } from './utils';
  * @param {number} payload.position New position of element to move
  * @return {Object} New state
  */
-function moveElement( state, { elementId, position } ) {
+function arrangeElement( state, { elementId, position } ) {
 	const pageIndex = state.pages.findIndex( ( { id } ) => id === state.current );
 
 	const page = state.pages[ pageIndex ];
@@ -76,4 +76,4 @@ function moveElement( state, { elementId, position } ) {
 	};
 }
 
-export default moveElement;
+export default arrangeElement;
