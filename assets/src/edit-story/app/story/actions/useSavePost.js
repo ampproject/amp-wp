@@ -43,11 +43,12 @@ function useSavePost( {
 			setIsSaving( true );
 			saveStoryById( storyId, title, status, pages, postAuthor, slug ).then( ( post ) => {
 				const { status: thisPostStatus, link } = post;
-				setIsSaving( false );
 				setPostStatus( thisPostStatus );
 				setLink( link );
 				refreshPostEditURL( storyId );
-			} );
+			} ).catch( () => {
+				// TODO Display error message to user as save as failed.
+			} ).finally(() => setIsSaving( false ) );
 		}
 	}, [ isSaving, setIsSaving, saveStoryById, storyId, title, status, pages, postAuthor, slug, setPostStatus, setLink ] );
 
