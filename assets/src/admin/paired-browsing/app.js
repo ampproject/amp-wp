@@ -299,6 +299,9 @@ class PairedBrowsingApp {
 			{ passive: true },
 		);
 
+		// Scrolling is not synchronized if `scroll-behavior` is set to `smooth`.
+		win.document.documentElement.style.setProperty( 'scroll-behavior', 'auto', 'important' );
+
 		// Make sure the opposite iframe is set to match.
 		if (
 			oppositeWindow &&
