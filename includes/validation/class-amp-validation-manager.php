@@ -1614,7 +1614,7 @@ class AMP_Validation_Manager {
 	 * @return string Nonce.
 	 */
 	public static function get_amp_validate_nonce() {
-		return substr( wp_hash( self::VALIDATE_QUERY_VAR . wp_nonce_tick(), 'nonce' ), -12, 10 );
+		return wp_hash( self::VALIDATE_QUERY_VAR . wp_nonce_tick(), 'nonce' );
 	}
 
 	/**
