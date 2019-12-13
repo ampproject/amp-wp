@@ -111,6 +111,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$GLOBALS['wp_registered_widgets'] = $this->original_wp_registered_widgets;
 		remove_theme_support( AMP_Theme_Support::SLUG );
 		AMP_Theme_Support::read_theme_support();
+		AMP_Validation_Manager::$validation_error_status_overrides = [];
 		$_REQUEST = [];
 		unset( $GLOBALS['current_screen'] );
 		AMP_Validation_Manager::$is_validate_request = false;
@@ -354,27 +355,62 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test overrides.
+	 *
+	 * @covers AMP_Validation_Manager::override_validation_error_statuses()
+	 */
+	public function test_override_validation_error_statuses_with_good_nonce() {
+		$this->assertEmpty( AMP_Validation_Manager::$validation_error_status_overrides );
+		$validation_error_term_1 = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( [ 'test' => 1 ] );
+		$validation_error_term_2 = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( [ 'test' => 2 ] );
+		$_REQUEST['_wpnonce'] = wp_create_nonce( AMP_Validation_Manager::MARKUP_STATUS_PREVIEW_ACTION );
+		$_REQUEST[ AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] = [
+			$validation_error_term_1['slug'] => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+			$validation_error_term_2['slug'] => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS,
+		];
+		AMP_Validation_Manager::override_validation_error_statuses();
+		$this->assertCount( 2, AMP_Validation_Manager::$validation_error_status_overrides );
+	}
+
+	/**
+	 * Test validation error overrides for when bad nonce is supplied.
+	 *
+	 * @covers AMP_Validation_Manager::override_validation_error_statuses()
+	 * @expectedException WPDieException
+	 */
+	public function test_override_validation_error_statuses_with_bad_nonce() {
+		$validation_error_term_1 = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( [ 'test' => 1 ] );
+		$_REQUEST['_wpnonce'] = 'bad';
+		$_REQUEST[ AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] = [
+			$validation_error_term_1['slug'] => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+		];
+		AMP_Validation_Manager::override_validation_error_statuses();
+	}
+
+	/**
+	 * Test validation error overrides for when no nonce is supplied.
+	 *
+	 * @covers AMP_Validation_Manager::override_validation_error_statuses()
+	 * @expectedException WPDieException
+	 */
+	public function test_override_validation_error_statuses_with_no_nonce() {
+		$validation_error_term_1 = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( [ 'test' => 1 ] );
+		$_REQUEST[ AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] = [
+			$validation_error_term_1['slug'] => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+		];
+		AMP_Validation_Manager::override_validation_error_statuses();
+	}
+
+	/**
 	 * Test add_validation_error_sourcing.
 	 *
 	 * @covers AMP_Validation_Manager::add_validation_error_sourcing()
 	 */
 	public function test_add_validation_error_sourcing() {
 		AMP_Validation_Manager::add_validation_error_sourcing();
-		$this->assertEmpty( AMP_Validation_Manager::$validation_error_status_overrides );
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'the_content', [ self::TESTED_CLASS, 'decorate_filter_source' ] ) );
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'the_excerpt', [ self::TESTED_CLASS, 'decorate_filter_source' ] ) );
 		$this->assertEquals( PHP_INT_MAX, has_action( 'do_shortcode_tag', [ self::TESTED_CLASS, 'decorate_shortcode_source' ] ) );
-
-		// Test overrides.
-		$validation_error_term_1 = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( [ 'test' => 1 ] );
-		$validation_error_term_2 = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( [ 'test' => 2 ] );
-		$_REQUEST[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = AMP_Validation_Manager::get_amp_validate_nonce();
-		$_REQUEST[ AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] = [
-			$validation_error_term_1['slug'] => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
-			$validation_error_term_2['slug'] => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS,
-		];
-		AMP_Validation_Manager::add_validation_error_sourcing();
-		$this->assertCount( 2, AMP_Validation_Manager::$validation_error_status_overrides );
 	}
 
 	/**
@@ -1520,7 +1556,8 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	public function test_get_amp_validate_nonce() {
 		$nonce = AMP_Validation_Manager::get_amp_validate_nonce();
 		$this->assertInternalType( 'string', $nonce );
-		$this->assertEquals( 10, strlen( $nonce ) );
+		$this->assertEquals( 32, strlen( $nonce ) );
+		$this->assertNotEquals( $nonce, AMP_Validation_Manager::get_amp_validate_nonce() );
 	}
 
 	/**
