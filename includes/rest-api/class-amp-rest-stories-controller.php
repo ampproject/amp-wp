@@ -52,7 +52,7 @@ class AMP_REST_Stories_Controller extends WP_REST_Posts_Controller {
 		$schema   = $this->get_item_schema();
 
 		if ( in_array( 'content_filtered', $fields, true ) ) {
-			$post_content_filtered    = json_decode( $post->post_content_filtered );
+			$post_content_filtered    = json_decode( $post->post_content_filtered, true );
 			$data['content_filtered'] = [
 				'raw' => rest_sanitize_value_from_schema( $post_content_filtered, $schema['properties']['content_filtered']['properties']['raw'] ),
 			];
