@@ -1557,7 +1557,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$nonce = AMP_Validation_Manager::get_amp_validate_nonce();
 		$this->assertInternalType( 'string', $nonce );
 		$this->assertEquals( 32, strlen( $nonce ) );
-		$this->assertNotEquals( $nonce, AMP_Validation_Manager::get_amp_validate_nonce() );
 	}
 
 	/**
