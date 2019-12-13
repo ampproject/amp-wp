@@ -18,8 +18,8 @@ function toggleElement( state, { elementId } ) {
 	}
 
 	const newSelection = state.selection.includes( elementId ) ?
-		[ ...state.selection, elementId ] :
-		state.selection.filter( ( id ) => id !== elementId );
+		state.selection.filter( ( id ) => id !== elementId ) :
+		[ ...state.selection, elementId ];
 
 	return {
 		...state,

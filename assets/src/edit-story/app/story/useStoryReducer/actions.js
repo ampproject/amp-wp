@@ -64,11 +64,11 @@ const arrangeElement = ( dispatch ) => ( { elementId, position } ) =>
 const arrangeSelection = ( dispatch ) => ( { position } ) =>
 	dispatch( { type: types.ARRANGE_ELEMENT, payload: { elementId: null, position } } );
 
-const setSelectedElementsById = ( dispatch ) => ( { selectedElementIds } ) =>
-	dispatch( { type: types.SET_SELECTED_ELEMENTS, payload: { selectedElementIds } } );
+const setSelectedElementsById = ( dispatch ) => ( { elementIds } ) =>
+	dispatch( { type: types.SET_SELECTED_ELEMENTS, payload: { elementIds } } );
 
 const clearSelection = ( dispatch ) => () =>
-	dispatch( { type: types.SET_SELECTED_ELEMENTS, payload: { selectedElementIds: [] } } );
+	dispatch( { type: types.SET_SELECTED_ELEMENTS, payload: { elementIds: [] } } );
 
 const addElementToSelection = ( dispatch ) => ( { elementId } ) =>
 	dispatch( { type: types.SELECT_ELEMENT, payload: { elementId } } );

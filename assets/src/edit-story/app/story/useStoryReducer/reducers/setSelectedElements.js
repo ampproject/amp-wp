@@ -6,7 +6,7 @@ import { intersect } from './utils';
 /**
  * Set selected elements to the given list of ids.
  *
- * If given list is not a list, nothing happens.
+ * If given list is not a list, do nothing.
  *
  * If given list matches (ignoring permutations) the current selection,
  * nothing happens.
@@ -27,12 +27,15 @@ function setSelectedElements( state, { elementIds } ) {
 
 	const uniqueElementIds = [ ...new Set( elementIds ) ];
 
-	// If intersection of the two lists has the same length as the old list,
-	// nothing will change.
-	// NB: this assumes selection is always without duplicates.
-	const commonElements = intersect( state.selection, uniqueElementIds );
-	if ( commonElements.length === state.selection.length ) {
-		return state;
+	// They can only be similar if they have the same length
+	if ( state.selection.length === uniqueElementIds.length ) {
+		// If intersection of the two lists has the same length as the old list,
+		// nothing will change.
+		// NB: this assumes selection is always without duplicates.
+		const commonElements = intersect( state.selection, uniqueElementIds );
+		if ( commonElements.length === state.selection.length ) {
+			return state;
+		}
 	}
 
 	return {

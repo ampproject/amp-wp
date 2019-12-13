@@ -24,5 +24,5 @@ module.exports = {
 		'<rootDir>/assets/src/edit-story/**/*.js',
 		'!**/test/**',
 	],
-	//reporters: [ [ 'jest-silent-reporter', { useDots: true } ] ],
+	reporters: [ [ 'jest-silent-reporter', { useDots: true } ] ],
 };
