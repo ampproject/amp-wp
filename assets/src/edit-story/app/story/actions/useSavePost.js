@@ -24,6 +24,11 @@ function useSavePost( {
 	const status = ( postStatus !== 'publish' ) ? 'publish' : postStatus;
 	const { actions: { saveStoryById } } = useAPI();
 
+	/**
+	 * Refresh page to edit url.
+	 *
+	 * @param {number}postId Current story id.
+	 */
 	const refreshPostEditURL = ( postId ) => {
 		const getPostEditURL = addQueryArgs( 'post.php', { post: postId, action: 'edit' } );
 		window.history.replaceState(

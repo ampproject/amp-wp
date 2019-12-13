@@ -51,12 +51,15 @@ function PreviewButton() {
 		state: { isSaving, link },
 	} = useStory();
 
-	const previewButton = () => {
+	/**
+	 * Open a preview of the story in current window.
+	 */
+	const openPreviewLink = () => {
 		const previewLink = addQueryArgs( link, { preview: 'true' } );
 		window.open( previewLink, '_blank' );
 	};
 	return (
-		<Outline onClick={ previewButton } isDisabled={ isSaving }>
+		<Outline onClick={ openPreviewLink } isDisabled={ isSaving }>
 			{ __( 'Preview' ) }
 		</Outline>
 	);
