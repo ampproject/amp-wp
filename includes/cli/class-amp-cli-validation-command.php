@@ -346,7 +346,6 @@ final class AMP_CLI_Validation_Command {
 	 */
 	public function check_url( $args ) {
 		list( $url ) = $args;
-		AMP_Validation_Manager::get_amp_validate_nonce();
 
 		$host            = wp_parse_url( $url, PHP_URL_HOST );
 		$parsed_home_url = wp_parse_url( home_url( '/' ) );
