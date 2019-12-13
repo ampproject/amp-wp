@@ -1633,7 +1633,7 @@ class AMP_Validation_Manager {
 		}
 
 		$validate_key = wp_unslash( $_GET[ self::VALIDATE_QUERY_VAR ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( self::get_amp_validate_nonce() !== $validate_key ) {
+		if ( ! hash_equals( self::get_amp_validate_nonce(), $validate_key ) ) {
 			return new WP_Error(
 				'http_request_failed',
 				__( 'Nonce authentication failed.', 'amp' )
