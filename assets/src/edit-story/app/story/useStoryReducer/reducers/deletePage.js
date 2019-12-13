@@ -32,8 +32,9 @@ function deletePage( state, { pageId } ) {
 	let newCurrent = state.current;
 
 	if ( idToDelete === state.current ) {
-		const newCurrentIndex = pageIndex >= newPages.length ? pageIndex : pageIndex - 1;
-		newCurrent = state.pages[ newCurrentIndex ].id;
+		// Current page is at the same index unless it's off the end of the array
+		const newCurrentIndex = Math.min( newPages.length - 1, pageIndex );
+		newCurrent = newPages[ newCurrentIndex ].id;
 	}
 
 	return {
