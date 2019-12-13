@@ -31,7 +31,7 @@ class AMP_REST_Stories_Controller extends WP_REST_Posts_Controller {
 				$prepared_story->post_content_filtered = $request['content_filtered']['raw'];
 			}
 
-			$prepared_story->post_content_filtered = maybe_serialize( $prepared_story->post_content_filtered );
+			$prepared_story->post_content_filtered = wp_json_encode( $prepared_story->post_content_filtered );
 		}
 
 		return $prepared_story;
@@ -52,7 +52,7 @@ class AMP_REST_Stories_Controller extends WP_REST_Posts_Controller {
 		$schema   = $this->get_item_schema();
 
 		if ( in_array( 'content_filtered', $fields, true ) ) {
-			$post_content_filtered    = maybe_unserialize( $post->post_content_filtered );
+			$post_content_filtered    = json_decode( $post->post_content_filtered );
 			$data['content_filtered'] = [
 				'raw' => rest_sanitize_value_from_schema( $post_content_filtered, $schema['properties']['content_filtered']['properties']['raw'] ),
 			];
