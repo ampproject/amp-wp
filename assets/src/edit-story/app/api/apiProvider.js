@@ -20,7 +20,10 @@ function APIProvider( { children } ) {
 	const { api: { stories, media } } = useConfig();
 
 	const getStoryById = useCallback(
-		( storyId ) => apiFetch( { path: `${ stories }/${ storyId }?context=edit` } ),
+		( storyId ) => {
+			const path = addQueryArgs( `${ stories }/${ storyId }`, { context: `edit` } );
+			return apiFetch( { path } );
+		},
 		[ stories ],
 	);
 
