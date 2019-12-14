@@ -112,6 +112,9 @@
 	 */
 	function isHeaderVisible() {
 		const element = document.querySelector( '.site-branding' );
+		if ( ! element ) { 
+			return;
+		} 
 		const clientRect = element.getBoundingClientRect();
 		return clientRect.height + clientRect.top >= 0;
 	}
@@ -124,7 +127,8 @@
 	 */
 	function fetchShadowDocResponse( url ) {
 		const ampUrl = new URL( url );
-		ampUrl.searchParams.set( ampAppShell.componentQueryVar, 'inner' );
+		const pathSuffix = '_' + ampAppShell.componentQueryVar + '_inner';
+		ampUrl.pathname = ampUrl.pathname + pathSuffix;
 
 		return fetch( ampUrl.toString(), {
 			method: 'GET',
