@@ -1290,6 +1290,212 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Assert that dev mode attribute *is* on the queried element.
+	 *
+	 * @param DOMXPath $xpath XPath.
+	 * @param string   $query Query.
+	 */
+	public function assert_dev_mode_is_on_queried_element( DOMXPath $xpath, $query ) {
+		$element = $xpath->query( $query )->item( 0 );
+		$this->assertInstanceOf( 'DOMElement', $element, 'Expected element for query: ' . $query );
+		$this->assertTrue( $element->hasAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE ), 'Expected dev mode to be enabled on element for query: ' . $query );
+	}
+
+	/**
+	 * Assert that dev mode attribute is *not* on the queried element.
+	 *
+	 * @param DOMXPath $xpath XPath.
+	 * @param string   $query Query.
+	 */
+	public function assert_dev_mode_is_not_on_queried_element( DOMXPath $xpath, $query ) {
+		$element = $xpath->query( $query )->item( 0 );
+		$this->assertInstanceOf( 'DOMElement', $element, 'Expected element for query: ' . $query );
+		$this->assertFalse( $element->hasAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE ), 'Expected dev mode to not be enabled on element for query: ' . $query );
+	}
+
+	/**
+	 * Get data to test AMP_Theme_Support::filter_admin_bar_style_loader_tag().
+	 *
+	 * @return array
+	 */
+	public function get_data_to_test_filtering_admin_bar_style_loader_tag_data() {
+		return [
+			'admin_bar_exclusively_dependent'             => [
+				static function () {
+					wp_enqueue_style( 'example-admin-bar', 'https://example.com/example-admin-bar.css', [ 'admin-bar' ], '0.1' );
+				},
+				function ( DOMXPath $xpath ) {
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//link[ @id = "example-admin-bar-css" ]' );
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//link[ @id = "dashicons-css" ]' );
+				},
+			],
+
+			'dashicons_enqueued_independent_of_admin_bar' => [
+				static function () {
+					wp_enqueue_style( 'dashicons' );
+				},
+				function ( DOMXPath $xpath ) {
+					$this->assert_dev_mode_is_not_on_queried_element( $xpath, '//link[ @id = "dashicons-css" ]' );
+				},
+			],
+
+			'dashicons_enqueued_independent_of_also_enqueued_admin_bar' => [
+				static function () {
+					wp_enqueue_style( 'admin-bar' );
+					wp_enqueue_style( 'dashicons' );
+				},
+				function ( DOMXPath $xpath ) {
+					$this->assert_dev_mode_is_not_on_queried_element( $xpath, '//link[ @id = "dashicons-css" ]' );
+				},
+			],
+
+			'dashicons_not_dev_mode_because_non_admin_bar_dependency' => [
+				static function () {
+					wp_enqueue_style( 'admin-bar' );
+					wp_enqueue_style( 'special-icons', 'https://example.com/special-icons.css', [ 'dashicons' ], '0.1' );
+				},
+				function ( DOMXPath $xpath ) {
+					$this->assert_dev_mode_is_not_on_queried_element( $xpath, '//link[ @id = "dashicons-css" ]' );
+				},
+			],
+
+			'dashicons_in_dev_mode_because_all_dependents_depend_on_admin_bar' => [
+				static function () {
+					wp_enqueue_style( 'admin-bar' );
+					wp_enqueue_style( 'special-icons', 'https://example.com/special-icons.css', [ 'dashicons', 'admin-bar' ], '0.1' );
+				},
+				function ( DOMXPath $xpath ) {
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//link[ @id = "dashicons-css" ]' );
+				},
+			],
+
+			'dashicons_in_dev_mode_because_all_recursive_dependents_depend_on_admin_bar' => [
+				static function () {
+					wp_enqueue_style( 'admin-bar' );
+					wp_register_style( 'special-dashicons', 'https://example.com/special-dashicons.css', [ 'dashicons' ], '0.1' );
+					wp_enqueue_style( 'colorized-admin-bar', 'https://example.com/special-icons.css', [ 'admin-bar' ], '0.1' );
+					wp_enqueue_style( 'special-icons', 'https://example.com/special-icons.css', [ 'special-dashicons', 'colorized-admin-bar' ], '0.1' );
+				},
+				function ( DOMXPath $xpath ) {
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//link[ @id = "dashicons-css" ]' );
+				},
+			],
+		];
+	}
+
+	/**
+	 * Test filter_admin_bar_style_loader_tag.
+	 *
+	 * @dataProvider get_data_to_test_filtering_admin_bar_style_loader_tag_data
+	 * @covers \AMP_Theme_Support::filter_admin_bar_style_loader_tag()
+	 * @covers \AMP_Theme_Support::is_exclusively_dependent()
+	 *
+	 * @param callable $setup_callback  Setup callback.
+	 * @param callable $assert_callback Assert callback.
+	 */
+	public function test_filter_admin_bar_style_loader_tag( $setup_callback, $assert_callback ) {
+		add_theme_support( 'amp' );
+		$this->go_to( '/' );
+		add_filter( 'amp_dev_mode_enabled', '__return_true' );
+		add_filter( 'style_loader_tag', [ 'AMP_Theme_Support', 'filter_admin_bar_style_loader_tag' ], 10, 2 );
+		$setup_callback();
+		ob_start();
+		echo '<html><head>';
+		wp_print_styles();
+		echo '</head><body></body></html>';
+		$output = ob_get_clean();
+
+		$dom = new DOMDocument();
+		$dom->loadHTML( $output );
+
+		$assert_callback( new DOMXPath( $dom ) );
+	}
+
+	/**
+	 * Get data to test AMP_Theme_Support::filter_admin_bar_script_loader_tag().
+	 *
+	 * @return array
+	 */
+	public function get_data_to_test_filtering_admin_bar_script_loader_tag_data() {
+		return [
+			'admin_bar_scripts_have_dev_mode'        => [
+				static function () {
+					wp_enqueue_script( 'admin-bar' );
+					wp_enqueue_script( 'example-admin-bar', 'https://example.com/example-admin-bar.js', [ 'admin-bar' ], '0.1', false );
+				},
+				function ( DOMXPath $xpath ) {
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/example-admin-bar" ) ]' );
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/admin-bar" ) ]' );
+					if ( wp_script_is( 'hoverintent-js', 'registered' ) ) {
+						$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/hoverintent-js" ) ]' );
+					}
+				},
+			],
+
+			'admin_bar_scripts_have_dev_mode_with_paired_browsing' => [
+				static function () {
+					AMP_Theme_Support::setup_paired_browsing_client();
+					wp_enqueue_script( 'admin-bar' );
+					wp_enqueue_script( 'example-admin-bar', 'https://example.com/example-admin-bar.js', [ 'admin-bar' ], '0.1', false );
+				},
+				function ( DOMXPath $xpath ) {
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/example-admin-bar" ) ]' );
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/admin-bar" ) ]' );
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/amp-paired-browsing-client" ) ]' );
+					if ( wp_script_is( 'hoverintent-js', 'registered' ) ) {
+						$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/hoverintent-js" ) ]' );
+					}
+				},
+			],
+
+			'hoverintent_enqueued_prevents_dev_mode' => [
+				function () {
+					if ( ! wp_script_is( 'hoverintent-js', 'registered' ) ) {
+						$this->markTestSkipped( 'The hoverintent-js script is not registered.' );
+					}
+					wp_enqueue_script( 'admin-bar' );
+					wp_enqueue_script( 'theme-hover', 'https://example.com/theme-hover.js', [ 'hoverintent-js' ], '0.1', false );
+				},
+				function ( DOMXPath $xpath ) {
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/admin-bar" ) ]' );
+					$this->assert_dev_mode_is_not_on_queried_element( $xpath, '//script[ contains( @src, "/theme-hover" ) ]' );
+					$this->assert_dev_mode_is_not_on_queried_element( $xpath, '//script[ contains( @src, "/hoverintent-js" ) ]' );
+				},
+			],
+		];
+	}
+
+	/**
+	 * Test filter_admin_bar_script_loader_tag.
+	 *
+	 * @dataProvider get_data_to_test_filtering_admin_bar_script_loader_tag_data
+	 * @covers \AMP_Theme_Support::filter_admin_bar_script_loader_tag()
+	 * @covers \AMP_Theme_Support::is_exclusively_dependent()
+	 *
+	 * @param callable $setup_callback  Setup callback.
+	 * @param callable $assert_callback Assert callback.
+	 */
+	public function test_filter_admin_bar_script_loader_tag( $setup_callback, $assert_callback ) {
+		add_theme_support( 'amp' );
+		$this->go_to( '/' );
+		add_filter( 'amp_dev_mode_enabled', '__return_true' );
+		add_filter( 'script_loader_tag', [ 'AMP_Theme_Support', 'filter_admin_bar_script_loader_tag' ], 10, 2 );
+		$setup_callback();
+		ob_start();
+		echo '<html><head>';
+		wp_print_scripts();
+		echo '</head><body>';
+		wp_print_footer_scripts();
+		echo '</body></html>';
+		$output = ob_get_clean();
+
+		$dom = new DOMDocument();
+		@$dom->loadHTML( $output ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+
+		$assert_callback( new DOMXPath( $dom ) );
+	}
+
+	/**
 	 * Test init_admin_bar to ensure dashicons are not added to dev mode when directly enqueued.
 	 *
 	 * @covers \AMP_Theme_Support::init_admin_bar()
