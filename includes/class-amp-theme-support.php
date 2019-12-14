@@ -2557,7 +2557,7 @@ class AMP_Theme_Support {
 		add_filter(
 			'script_loader_tag',
 			static function( $tag, $handle ) {
-				if ( self::has_dependency( wp_scripts(), 'amp-paired-browsing-client', $handle ) ) {
+				if ( is_amp_endpoint() && self::has_dependency( wp_scripts(), 'amp-paired-browsing-client', $handle ) ) {
 					$attrs = [ AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, 'async' ];
 					$tag   = preg_replace( '/(?<=<script)(?=\s|>)/i', ' ' . implode( ' ', $attrs ), $tag );
 				}
