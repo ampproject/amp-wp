@@ -7,6 +7,8 @@
  * @package AMP
  */
 
+use WP_CLI\Formatter;
+
 /**
  * Crawls the site for validation errors or resets the stored validation errors.
  *
@@ -334,6 +336,26 @@ final class AMP_CLI_Validation_Command {
 	 * <url>
 	 * : The URL to check. The host name need not be included. The URL must be local to this WordPress install.
 	 *
+	 * [--<field>=<value>]
+	 * : Filter to only display errors matching certain criteria.
+	 *
+	 * [--field=<field>]
+	 * : Prints the value of a single field for each validation error.
+	 *
+	 * [--fields=<fields>]
+	 * : Limit the output to specific validation error fields.
+	 *
+	 * [--format=<format>]
+	 * : Render output in a particular format.
+	 * ---
+	 * default: table
+	 * options:
+	 *   - table
+	 *   - json
+	 *   - count
+	 *   - yaml
+	 * ---
+	 *
 	 * ## EXAMPLES
 	 *
 	 *     wp amp validation check-url /about/
@@ -342,9 +364,10 @@ final class AMP_CLI_Validation_Command {
 	 * @subcommand check-url
 	 * @alias check
 	 *
-	 * @param array $args Args.
+	 * @param array $args       Positional arguments.
+	 * @param array $assoc_args Associative arguments.
 	 */
-	public function check_url( $args ) {
+	public function check_url( $args, $assoc_args ) {
 		list( $url ) = $args;
 
 		$host            = wp_parse_url( $url, PHP_URL_HOST );
@@ -377,12 +400,191 @@ final class AMP_CLI_Validation_Command {
 			$url = $origin . '/' . ltrim( $url, '/' );
 		}
 
-		$result = AMP_Validation_Manager::validate_url( $url );
-		if ( $result instanceof WP_Error ) {
-			WP_CLI::error( $result );
+		$response = AMP_Validation_Manager::validate_url( $url );
+		if ( $response instanceof WP_Error ) {
+			WP_CLI::error( $response );
 		}
 
-		WP_CLI::line( wp_json_encode( $result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) );
+		if ( 'count' === $assoc_args['format'] ) {
+			$count = count( $response['results'] );
+			WP_CLI::line( $count );
+			exit( $count ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		}
+
+		if ( empty( $response['results'] ) ) {
+			WP_CLI::success( 'The supplied URL does not contain any validation errors.' );
+			exit( 0 );
+		}
+
+		$errors = $this->flatten_validation_errors( $response['results'] );
+
+		if ( 'json' === $assoc_args['format'] ) {
+			WP_CLI::line( wp_json_encode( $errors, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) );
+			exit( 1 );
+		}
+
+		if ( 'table' === $assoc_args['format'] ) {
+			$errors = array_map( [ $this, 'prettify_validation_error' ], $errors );
+		}
+
+		$formatter = $this->get_formatter( $assoc_args, array_keys( $errors[0] ) );
+		$formatter->display_items( $errors, true );
+		exit( 1 );
+	}
+
+	/**
+	 * Flatten a multidimensional array of validation errors to display in a tabular format.
+	 *
+	 * @param array $errors Multidimensional array of validation errors to flatten.
+	 * @return array Flattened array of validation errors.
+	 */
+	private function flatten_validation_errors( $errors ) {
+		return array_map(
+			static function ( $result ) {
+				return array_merge( $result['error'], [ 'sanitized' => $result['sanitized'] ] );
+			},
+			$errors
+		);
+	}
+
+	/**
+	 * Prettify the individual fields of a validation error.
+	 *
+	 * @param array $error Associative array of validation error data.
+	 * @return array Associative array of prettified validation error data.
+	 */
+	private function prettify_validation_error( $error ) {
+		foreach ( $error as $key => $value ) {
+			$method = "prettify_{$key}";
+			if ( method_exists( $this, $method ) ) {
+				$error[ $key ] = $this->$method( $value );
+			}
+		}
+		return $error;
+	}
+
+	/**
+	 * Prettify the code field.
+	 *
+	 * @param string $data Data to prettify.
+	 * @return string Prettified value.
+	 */
+	private function prettify_code( $data ) {
+		return WP_CLI::colorize( "%r{$data}%n" );
+	}
+
+	/**
+	 * Prettify the spec_name field.
+	 *
+	 * @param string $data Data to prettify.
+	 * @return string Prettified value.
+	 */
+	private function prettify_spec_name( $data ) {
+		return WP_CLI::colorize( "%y{$data}%n" );
+	}
+
+	/**
+	 * Prettify the node_attributes field.
+	 *
+	 * @param array $data Data to prettify.
+	 * @return string Prettified value.
+	 */
+	private function prettify_node_attributes( $data ) {
+		if ( [ 'rel', 'id', 'href', 'media' ] === array_keys( $data ) ) {
+			return WP_CLI::colorize(
+				sprintf(
+					'%s@%s: %s (%s)',
+					$data['rel'],
+					$data['media'],
+					"%y{$data['id']}%n",
+					$data['href']
+				)
+			);
+		}
+
+		return wp_json_encode( $data, JSON_UNESCAPED_SLASHES );
+	}
+
+	/**
+	 * Prettify the sources field.
+	 *
+	 * @param array $trace Trace data to prettify.
+	 * @return string Prettified value.
+	 */
+	private function prettify_sources( $trace ) {
+		$index  = 1;
+		$string = '';
+		foreach ( $trace as $data ) {
+			if ( ! empty( $string ) ) {
+				$string .= ' | ';
+			}
+
+			$keys    = array_keys( $data );
+			$string .= "{$index}. ";
+
+			if ( [] === array_diff( [ 'type', 'name' ], $keys ) ) {
+				$string .= sprintf(
+					'[%s] %s',
+					WP_CLI::colorize( "%g{$data['type']}%n" ),
+					WP_CLI::colorize( "%y{$data['name']}%n" )
+				);
+				unset( $data['type'], $data['name'] );
+			}
+
+			if ( [] === array_diff( [ 'file', 'line' ], $keys ) ) {
+				$string .= "/{$data['file']}:{$data['line']}";
+				unset( $data['file'], $data['line'] );
+			}
+
+			if ( [] === array_diff( [ 'function', 'hook', 'priority' ], $keys ) ) {
+				$string .= " => {$data['function']}@{$data['hook']}:{$data['priority']}";
+				unset( $data['function'], $data['hook'], $data['priority'] );
+			}
+
+			if ( [] === array_diff( [ 'dependency_type', 'handle' ], $keys ) ) {
+				$string .= " ({$data['dependency_type']}:{$data['handle']})";
+				unset( $data['dependency_type'], $data['handle'] );
+			}
+
+			if ( ! empty( $data ) ) {
+				$remaining_data = wp_json_encode( $data, JSON_UNESCAPED_SLASHES );
+				$string        .= " [{$remaining_data}]";
+			}
+
+			$index++;
+		}
+
+		return $string;
+	}
+
+	/**
+	 * Prettify the sanitized field.
+	 *
+	 * @param bool $data Data to prettify.
+	 * @return string Prettified value.
+	 */
+	private function prettify_sanitized( $data ) {
+		return WP_CLI::colorize( $data ? '%Gyes%n' : '%Rno%n' );
+	}
+
+	/**
+	 * Get Formatter object based on supplied parameters.
+	 *
+	 * @param array $assoc_args     Parameters passed to command. Determines formatting.
+	 * @param array $default_fields Array of default fields to use.
+	 * @return Formatter
+	 */
+	private function get_formatter( &$assoc_args, $default_fields ) {
+		if ( ! empty( $assoc_args['fields'] ) ) {
+			if ( is_string( $assoc_args['fields'] ) ) {
+				$fields = explode( ',', $assoc_args['fields'] );
+			} else {
+				$fields = $assoc_args['fields'];
+			}
+		} else {
+			$fields = $default_fields;
+		}
+		return new Formatter( $assoc_args, $fields, $default_fields );
 	}
 
 	/**
