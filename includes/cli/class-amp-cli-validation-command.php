@@ -382,7 +382,7 @@ final class AMP_CLI_Validation_Command {
 			WP_CLI::error( $result );
 		}
 
-		WP_CLI::line( wp_json_encode( AMP_Validation_Manager::validate_url( $url ), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) );
+		WP_CLI::line( wp_json_encode( $result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) );
 	}
 
 	/**
