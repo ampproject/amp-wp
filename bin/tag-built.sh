@@ -2,10 +2,14 @@
 
 set -e
 
-tag=$(git describe --tags)
+tag=$(cat build/amp.php | grep 'Version:' | sed 's/.*: //' | sed 's/-[0-9]\{8\}T[0-9]\{6\}Z-[a-f0-9]*$//')
 if [[ -z "$tag" ]]; then
-    echo "Error: Unable to determine tag."
+    echo "Error: Unable to determine tag from build/amp.php."
     exit 1
+fi
+if ! git rev-parse "$tag" >/dev/null 2>&1; then
+    echo "Error: Tag does not exist: $tag"
+    exit 2
 fi
 
 built_tag="$tag-built"
@@ -19,8 +23,9 @@ if ! git diff-files --quiet || ! git diff-index --quiet --cached HEAD --; then
     exit 3
 fi
 
-git checkout "$tag"
-npm run build
+if [[ -e built ]]; then
+    rm -rf built
+fi
 mkdir built
 git clone . built/
 cd built

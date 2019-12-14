@@ -11,15 +11,7 @@
  * Converts <iframe> tags to <amp-iframe>
  */
 class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
-
-	/**
-	 * Value used for height attribute when $attributes['height'] is empty.
-	 *
-	 * @since 0.2
-	 *
-	 * @const int
-	 */
-	const FALLBACK_HEIGHT = 400;
+	use AMP_Noscript_Fallback;
 
 	/**
 	 * Default values for sandboxing IFrame.
@@ -42,11 +34,21 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Default args.
 	 *
-	 * @var array
+	 * @var array {
+	 *     Default args.
+	 *
+	 *     @type bool   $add_placeholder       Whether to add a placeholder element.
+	 *     @type bool   $add_noscript_fallback Whether to add a noscript fallback.
+	 *     @type string $current_origin        The current origin serving the page. Normally this will be the $_SERVER[HTTP_HOST].
+	 *     @type string $alias_origin          An alternative origin which can be supplied which is used when encountering same-origin iframes.
+	 * }
 	 */
-	protected $DEFAULT_ARGS = array(
-		'add_placeholder' => false,
-	);
+	protected $DEFAULT_ARGS = [
+		'add_placeholder'       => false,
+		'add_noscript_fallback' => true,
+		'current_origin'        => null,
+		'alias_origin'          => null,
+	];
 
 	/**
 	 * Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
@@ -54,11 +56,11 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array Mapping.
 	 */
 	public function get_selector_conversion_mapping() {
-		return array(
-			'iframe' => array(
+		return [
+			'iframe' => [
 				'amp-iframe',
-			),
-		);
+			],
+		];
 	}
 
 	/**
@@ -73,32 +75,68 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
+		if ( $this->args['add_noscript_fallback'] ) {
+			$this->initialize_noscript_allowed_attributes( self::$tag );
+		}
+
+		// Ensure origins are normalized.
+		$this->args['current_origin'] = $this->get_origin_from_url( $this->args['current_origin'] );
+		if ( ! empty( $this->args['alias_origin'] ) ) {
+			$this->args['alias_origin'] = $this->get_origin_from_url( $this->args['alias_origin'] );
+		}
+
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
+			/**
+			 * Iframe element.
+			 *
+			 * @var DOMElement $node
+			 */
 			$node = $nodes->item( $i );
 
-			// Skip element if in AMP-element fallbacks.
-			if ( 'noscript' === $node->parentNode->nodeName && $node->parentNode->parentNode && 'amp-' === substr( $node->parentNode->parentNode->nodeName, 0, 4 ) ) {
+			// Skip element if already inside of an AMP element as a noscript fallback, or if it has a dev mode exemption.
+			if ( $this->is_inside_amp_noscript( $node ) || $this->has_dev_mode_exemption( $node ) ) {
 				continue;
 			}
 
-			$normalized_attributes = $this->normalize_attributes( AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node ) );
+			$normalized_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
+			$normalized_attributes = $this->set_layout( $normalized_attributes );
+			$normalized_attributes = $this->normalize_attributes( $normalized_attributes );
 
 			/**
 			 * If the src doesn't exist, remove the node. Either it never
 			 * existed or was invalidated while filtering attributes above.
 			 *
-			 * @todo: add a filter to allow for a fallback element in this instance.
+			 * @todo: add an arg to allow for a fallback element in this instance (note that filter cannot be used inside a sanitizer).
 			 * @see: https://github.com/ampproject/amphtml/issues/2261
 			 */
 			if ( empty( $normalized_attributes['src'] ) ) {
-				$this->remove_invalid_child( $node );
+				$this->remove_invalid_child(
+					$node,
+					[
+						'code'       => AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING,
+						'attributes' => [ 'src' ],
+						'spec_name'  => 'amp-iframe',
+					]
+				);
 				continue;
 			}
 
 			$this->did_convert_elements = true;
-			$normalized_attributes      = $this->set_layout( $normalized_attributes );
 			if ( empty( $normalized_attributes['layout'] ) && ! empty( $normalized_attributes['width'] ) && ! empty( $normalized_attributes['height'] ) ) {
 				$normalized_attributes['layout'] = 'intrinsic';
+
+				// Set layout to responsive if the iframe is aligned to full width.
+				$figure_node = null;
+				if ( $node->parentNode instanceof DOMElement && 'figure' === $node->parentNode->tagName ) {
+					$figure_node = $node->parentNode;
+				}
+				if ( $node->parentNode->parentNode instanceof DOMElement && 'figure' === $node->parentNode->parentNode->tagName ) {
+					$figure_node = $node->parentNode->parentNode;
+				}
+				if ( $figure_node && $figure_node->hasAttribute( 'class' ) && in_array( 'alignfull', explode( ' ', $figure_node->getAttribute( 'class' ) ), true ) ) {
+					$normalized_attributes['layout'] = 'responsive';
+				}
+
 				$this->add_or_append_attribute( $normalized_attributes, 'class', 'amp-wp-enforced-sizes' );
 			}
 
@@ -109,12 +147,19 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 				$new_node->appendChild( $placeholder_node );
 			}
 
-			// Preserve original node in noscript for no-JS environments.
-			$node->setAttribute( 'src', $normalized_attributes['src'] );
 			$node->parentNode->replaceChild( $new_node, $node );
-			$noscript = $this->dom->createElement( 'noscript' );
-			$noscript->appendChild( $node );
-			$new_node->appendChild( $noscript );
+
+			if ( $this->args['add_noscript_fallback'] ) {
+				$node->setAttribute( 'src', $normalized_attributes['src'] );
+
+				// AMP is stricter than HTML5 for this attribute, so make sure we use a normalized value.
+				if ( $node->hasAttribute( 'frameborder' ) ) {
+					$node->setAttribute( 'frameborder', $normalized_attributes['frameborder'] );
+				}
+
+				// Preserve original node in noscript for no-JS environments.
+				$this->append_old_node_noscript( $new_node, $node, $this->dom );
+			}
 		}
 	}
 
@@ -135,15 +180,32 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 *      @type bool $allowfullscreen <iframe> `allowfullscreen` attribute - Convert 'false' to empty string ''
 	 *      @type bool $allowtransparency <iframe> `allowtransparency` attribute - Convert 'false' to empty string ''
 	 * }
-	 * @return array Returns HTML attributes; normalizes src, dimensions, frameborder, sandox, allowtransparency and allowfullscreen
+	 * @return array Returns HTML attributes; normalizes src, dimensions, frameborder, sandbox, allowtransparency and allowfullscreen
 	 */
 	private function normalize_attributes( $attributes ) {
-		$out = array();
+		$out = [];
 
+		$remove_allow_same_origin = false;
 		foreach ( $attributes as $name => $value ) {
 			switch ( $name ) {
 				case 'src':
-					$out[ $name ] = $this->maybe_enforce_https_src( $value, true );
+					// Make the URL absolute since relative URLs are not allowed in amp-iframe.
+					if ( '/' === substr( $value, 0, 1 ) && '/' !== substr( $value, 1, 1 ) ) {
+						$value = untrailingslashit( $this->args['current_origin'] ) . $value;
+					}
+
+					$value = $this->maybe_enforce_https_src( $value, true );
+
+					// Handle case where iframe source origin is the same as the host page's origin.
+					if ( $this->get_origin_from_url( $value ) === $this->args['current_origin'] ) {
+						if ( ! empty( $this->args['alias_origin'] ) ) {
+							$value = preg_replace( '#^\w+://[^/]+#', $this->args['alias_origin'], $value );
+						} else {
+							$remove_allow_same_origin = true;
+						}
+					}
+
+					$out[ $name ] = $value;
 					break;
 
 				case 'width':
@@ -152,10 +214,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 					break;
 
 				case 'frameborder':
-					if ( '0' !== $value && '1' !== $value ) {
-						$value = '0';
-					}
-					$out[ $name ] = $value;
+					$out[ $name ] = $this->sanitize_boolean_digit( $value );
 					break;
 
 				case 'allowfullscreen':
@@ -163,6 +222,11 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 					if ( 'false' !== $value ) {
 						$out[ $name ] = '';
 					}
+					break;
+
+				case 'mozallowfullscreen':
+				case 'webkitallowfullscreen':
+					// Omit these since amp-iframe will add them if needed if the `allowfullscreen` attribute is present.
 					break;
 
 				default:
@@ -175,7 +239,34 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			$out['sandbox'] = self::SANDBOX_DEFAULTS;
 		}
 
+		// Remove allow-same-origin from sandbox if required.
+		if ( $remove_allow_same_origin ) {
+			$out['sandbox'] = trim( preg_replace( '/(^|\s)allow-same-origin(\s|$)/', ' ', $out['sandbox'] ) );
+		}
+
 		return $out;
+	}
+
+	/**
+	 * Obtain the origin part of a given URL (scheme, host, port).
+	 *
+	 * @param string $url URL.
+	 * @return string|null Origin URL or null if parse failed.
+	 */
+	private function get_origin_from_url( $url ) {
+		$parsed_url = wp_parse_url( $url );
+		if ( ! isset( $parsed_url['host'] ) ) {
+			return null;
+		}
+		if ( ! isset( $parsed_url['scheme'] ) ) {
+			$parsed_url['scheme'] = wp_parse_url( $this->args['current_origin'], PHP_URL_SCHEME );
+		}
+		$origin  = $parsed_url['scheme'] . '://';
+		$origin .= $parsed_url['host'];
+		if ( isset( $parsed_url['port'] ) ) {
+			$origin .= ':' . $parsed_url['port'];
+		}
+		return $origin;
 	}
 
 	/**
@@ -198,13 +289,43 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 		$placeholder_node = AMP_DOM_Utils::create_node(
 			$this->dom,
 			'span',
-			array(
+			[
 				'placeholder' => '',
 				'class'       => 'amp-wp-iframe-placeholder',
-			)
+			]
 		);
 
 		return $placeholder_node;
 	}
 
+	/**
+	 * Sanitizes a boolean character (or string) into a '0' or '1' character.
+	 *
+	 * @param string $value A boolean character to sanitize. If a string containing more than a single
+	 *                      character is provided, only the first character is taken into account.
+	 *
+	 * @return string Returns either '0' or '1'.
+	 */
+	private function sanitize_boolean_digit( $value ) {
+
+		// Default to false if the value was forgotten.
+		if ( empty( $value ) ) {
+			return '0';
+		}
+
+		// Default to false if the value has an unexpected type.
+		if ( ! is_string( $value ) && ! is_numeric( $value ) ) {
+			return '0';
+		}
+
+		// See: https://github.com/ampproject/amp-wp/issues/2335#issuecomment-493209861.
+		switch ( substr( (string) $value, 0, 1 ) ) {
+			case '1':
+			case 'y':
+			case 'Y':
+				return '1';
+		}
+
+		return '0';
+	}
 }

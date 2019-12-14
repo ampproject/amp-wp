@@ -24,7 +24,7 @@ class AMP_Content_Sanitizer {
 	 * @param array    $global_args       Global args.
 	 * @return array Tuple containing sanitized HTML, scripts array, and styles array (or stylesheets, if return_styles=false is passed in $global_args).
 	 */
-	public static function sanitize( $content, array $sanitizer_classes, $global_args = array() ) {
+	public static function sanitize( $content, array $sanitizer_classes, $global_args = [] ) {
 		$dom = AMP_DOM_Utils::get_dom_from_content( $content );
 
 		// For back-compat.
@@ -33,11 +33,11 @@ class AMP_Content_Sanitizer {
 		}
 
 		$results = self::sanitize_document( $dom, $sanitizer_classes, $global_args );
-		return array(
+		return [
 			AMP_DOM_Utils::get_content_from_dom( $dom ),
 			$results['scripts'],
 			empty( $global_args['return_styles'] ) ? $results['stylesheets'] : $results['styles'],
-		);
+		];
 	}
 
 	/**
@@ -57,9 +57,9 @@ class AMP_Content_Sanitizer {
 	 * }
 	 */
 	public static function sanitize_document( &$dom, $sanitizer_classes, $args ) {
-		$scripts     = array();
-		$stylesheets = array();
-		$styles      = array();
+		$scripts     = [];
+		$stylesheets = [];
+		$styles      = [];
 
 		$return_styles = ! empty( $args['return_styles'] );
 		unset( $args['return_styles'] );
@@ -69,7 +69,7 @@ class AMP_Content_Sanitizer {
 		 *
 		 * @var AMP_Base_Sanitizer[] $sanitizers
 		 */
-		$sanitizers = array();
+		$sanitizers = [];
 
 		// Instantiate the sanitizers.
 		foreach ( $sanitizer_classes as $sanitizer_class => $sanitizer_args ) {
@@ -86,7 +86,7 @@ class AMP_Content_Sanitizer {
 			 */
 			$sanitizer = new $sanitizer_class( $dom, array_merge( $args, $sanitizer_args ) );
 
-			if ( ! is_subclass_of( $sanitizer, 'AMP_Base_Sanitizer' ) ) {
+			if ( ! $sanitizer instanceof AMP_Base_Sanitizer ) {
 				_doing_it_wrong(
 					__METHOD__,
 					esc_html(

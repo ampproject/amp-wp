@@ -21,22 +21,22 @@ class AMP_Issuu_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Register embed.
 	 */
 	public function register_embed() {
-		add_filter( 'embed_oembed_html', array( $this, 'filter_embed_oembed_html' ), 10, 3 );
+		add_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ], 10, 3 );
 	}
 
 	/**
 	 * Unregister embed.
 	 */
 	public function unregister_embed() {
-		remove_filter( 'embed_oembed_html', array( $this, 'filter_embed_oembed_html' ), 10 );
+		remove_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ], 10 );
 	}
 
 	/**
 	 * Filter oEmbed HTML for Meetup to prepare it for AMP.
 	 *
-	 * @param mixed  $return The shortcode callback function to call.
+	 * @param mixed  $return The oEmbed HTML.
 	 * @param string $url    The attempted embed URL.
-	 * @param array  $attr   An array of shortcode attributes.
+	 * @param array  $attr   Attributes.
 	 * @return string Embed.
 	 */
 	public function filter_embed_oembed_html( $return, $url, $attr ) {
@@ -51,12 +51,12 @@ class AMP_Issuu_Embed_Handler extends AMP_Base_Embed_Handler {
 
 			$return = AMP_HTML_Utils::build_tag(
 				'amp-iframe',
-				array(
+				[
 					'width'   => $attr['width'],
 					'height'  => $attr['height'],
 					'src'     => $url,
 					'sandbox' => 'allow-scripts allow-same-origin',
-				)
+				]
 			);
 		}
 		return $return;

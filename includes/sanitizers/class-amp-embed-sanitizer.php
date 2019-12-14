@@ -17,7 +17,7 @@ class AMP_Embed_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @var AMP_Base_Embed_Handler[] AMP_Base_Embed_Handler[]
 	 */
-	private $embed_handlers = array();
+	private $embed_handlers = [];
 
 	/**
 	 * AMP_Embed_Sanitizer constructor.
@@ -25,7 +25,7 @@ class AMP_Embed_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param DOMDocument $dom  DOM.
 	 * @param array       $args Args.
 	 */
-	public function __construct( $dom, $args = array() ) {
+	public function __construct( $dom, $args = [] ) {
 		parent::__construct( $dom, $args );
 
 		if ( ! empty( $this->args['embed_handlers'] ) ) {

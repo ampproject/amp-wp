@@ -12,7 +12,7 @@ if ( 'cli' !== php_sapi_name() ) {
 	exit( 1 );
 }
 
-$versions = array();
+$versions = [];
 
 $readme_txt = file_get_contents( dirname( __FILE__ ) . '/../readme.txt' );
 if ( ! preg_match( '/Stable tag:\s+(?P<version>\S+)/i', $readme_txt, $matches ) ) {
@@ -20,19 +20,6 @@ if ( ! preg_match( '/Stable tag:\s+(?P<version>\S+)/i', $readme_txt, $matches ) 
 	exit( 1 );
 }
 $versions['readme.txt#stable-tag'] = $matches['version'];
-
-if ( ! preg_match( '/== Changelog ==\s+=\s+(?P<version>\d+\.\d+(?:.\d+)?)/', $readme_txt, $matches ) ) {
-	echo "Could not find version i  n readme.txt changelog\n";
-	exit( 1 );
-}
-$versions['readme.txt#changelog'] = $matches['version'];
-
-$readme_md = file_get_contents( dirname( __FILE__ ) . '/../readme.md' );
-if ( ! preg_match( '/## Changelog ##\s+###\s+(?P<version>\d+\.\d+(?:.\d+)?)/', $readme_md, $matches ) ) {
-	echo "Could not find version in readme.md changelog\n";
-	exit( 1 );
-}
-$versions['readme.md#changelog'] = $matches['version'];
 
 $plugin_file = file_get_contents( dirname( __FILE__ ) . '/../amp.php' );
 if ( ! preg_match( '/\*\s*Version:\s*(?P<version>\d+\.\d+(?:.\d+)?(-\w+)?)/', $plugin_file, $matches ) ) {

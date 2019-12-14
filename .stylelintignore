@@ -1,0 +1,5 @@
+/assets/css/*.css
+/bin
+/build
+/tests
+/vendor

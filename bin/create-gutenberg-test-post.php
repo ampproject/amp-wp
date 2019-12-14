@@ -55,48 +55,48 @@ function get_test_block_fixtures() {
  * @return string $content The blocks as HTML.
  */
 function get_test_block_permutations() {
-	$blocks = array(
-		array(
+	$blocks = [
+		[
 			'title'   => '(Reusable) Block With Video',
 			'content' => sprintf( '<!-- wp:block {"ref":%d} /-->', create_test_reusable_block() ),
-		),
-		array(
+		],
+		[
 			'title'   => 'Categories With Dropdown',
 			'content' => '<!-- wp:core/categories {"showPostCounts":false,"displayAsDropdown":true,"showHierarchy":false} /-->',
-		),
-		array(
+		],
+		[
 			'title'   => 'Columns, With 2 Columns',
 			'content' => '<!-- wp:core/columns {"columns":2} --><div class="wp-block-columns has-2-columns"><!-- wp:core/paragraph {"layout":"column-1"} --><p class="layout-column-1">Column One, Paragraph One</p><!-- /wp:core/paragraph --><!-- wp:core/paragraph {"layout":"column-1"} --><p class="layout-column-1">Column One, Paragraph Two</p><!-- /wp:core/paragraph --><!-- wp:core/paragraph {"layout":"column-2"} --><p class="layout-column-2">Column Two, Paragraph One</p><!-- /wp:core/paragraph --></div><!-- /wp:core/columns -->',
-		),
-		array(
+		],
+		[
 			'title'   => 'Cover Image With Fixed Background',
 			'content' => '<!-- wp:core/cover-image {"url":"https://cldup.com/uuUqE_dXzy.jpg","dimRatio":40} --><section class="wp-block-cover-image has-background-dim-40 has-background-dim has-parallax" style="background-image:url(https://cldup.com/uuUqE_dXzy.jpg)"><h2>Guten Berg!</h2></section><!-- /wp:core/cover-image -->',
-		),
-		array(
+		],
+		[
 			'title'   => 'WordPress Embed',
 			'content' => '<!-- wp:core-embed/wordpress {"url":"https://make.wordpress.org/core/2017/12/11/whats-new-in-gutenberg-11th-december/"} --><figure class="wp-block-embed-wordpress wp-block-embed">https://make.wordpress.org/core/2017/12/11/whats-new-in-gutenberg-11th-december/<figcaption>Embedded content from WordPress</figcaption></figure><!-- /wp:core-embed/wordpress -->',
-		),
-		array(
+		],
+		[
 			'title'   => 'YouTube Embed',
 			'content' => '<!-- wp:core-embed/youtube {"url":"https://www.youtube.com/watch?v=GGS-tKTXw4Y"} --><figure class="wp-block-embed-youtube wp-block-embed">https://www.youtube.com/watch?v=GGS-tKTXw4Y<figcaption>Embedded content from youtube</figcaption></figure><!-- /wp:core-embed/youtube -->',
-		),
-		array(
+		],
+		[
 			'title'   => 'Twitter Embed',
 			'content' => '<!-- wp:core-embed/twitter {"url":"https://twitter.com/AMPhtml/status/963443140005957632"} --><figure class="wp-block-embed-twitter wp-block-embed">https://twitter.com/AMPhtml/status/963443140005957632<figcaption>We are Automattic</figcaption></figure><!-- /wp:core-embed/twitter -->',
-		),
-		array(
+		],
+		[
 			'title'   => 'Gallery With 3 Columns',
 			'content' => '<!-- wp:core/gallery --><ul class="wp-block-gallery alignnone columns-3 is-cropped"><li class="blocks-gallery-item"><figure><img src="https://cldup.com/uuUqE_dXzy.jpg" alt="title" /></figure></li><li class="blocks-gallery-item"><figure><img src="https://cldup.com/-3VMmmrPm9.jpg" alt="title" /></figure></li><li class="blocks-gallery-item"><figure><img src="https://cldup.com/aMbxBM0zAi.jpg" alt="title" /></figure></li></ul><!-- /wp:core/gallery -->',
-		),
-		array(
+		],
+		[
 			'title'   => 'Audio Shortcode',
 			'content' => '<!-- wp:core/shortcode -->[audio src=https://wptavern.com/wp-content/uploads/2017/11/EPISODE-296-Gutenberg-Telemetry-Calypso-and-More-With-Matt-Mullenweg.mp3]<!-- /wp:core/shortcode -->',
-		),
-		array(
+		],
+		[
 			'title'   => 'Caption Shortcode',
 			'content' => '<!-- wp:core/shortcode -->[caption width=150]This is a caption[/caption]<!-- /wp:core/shortcode -->',
-		),
-	);
+		],
+	];
 
 	$content = '';
 	foreach ( $blocks as $block ) {
@@ -117,12 +117,12 @@ function get_test_block_permutations() {
  */
 function create_test_reusable_block() {
 	return wp_insert_post(
-		array(
+		[
 			'post_type'    => 'wp_block',
 			'post_title'   => 'Test Reusable Block',
 			'post_content' => '<!-- wp:core/video --><figure class="wp-block-video"><video src="https://videos.files.wordpress.com/DK5mLrbr/video-ca6dc0ab4a_hd.mp4" controls=""></video></figure><!-- /wp:core/video -->',
 			'post_status'  => 'publish',
-		)
+		]
 	);
 }
 
@@ -142,11 +142,11 @@ function create_gutenberg_test_post( $content ) {
 		$page_id = $page->ID;
 	} else {
 		$page_id = wp_insert_post(
-			array(
+			[
 				'post_name'  => $slug,
 				'post_title' => $title,
 				'post_type'  => 'page',
-			)
+			]
 		);
 
 		if ( ! $page_id || is_wp_error( $page_id ) ) {
@@ -155,10 +155,10 @@ function create_gutenberg_test_post( $content ) {
 	}
 
 	$update = wp_update_post(
-		array(
+		[
 			'ID'           => $page_id,
 			'post_content' => $content,
-		)
+		]
 	);
 
 	if ( ! $update ) {

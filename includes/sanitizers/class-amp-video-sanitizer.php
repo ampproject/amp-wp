@@ -13,15 +13,7 @@
  * Converts <video> tags to <amp-video>
  */
 class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
-
-	/**
-	 * Value used for height attribute when $attributes['height'] is empty.
-	 *
-	 * @since 0.2
-	 *
-	 * @const int
-	 */
-	const FALLBACK_HEIGHT = 400;
+	use AMP_Noscript_Fallback;
 
 	/**
 	 * Tag.
@@ -33,14 +25,23 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	public static $tag = 'video';
 
 	/**
+	 * Default args.
+	 *
+	 * @var array
+	 */
+	protected $DEFAULT_ARGS = [
+		'add_noscript_fallback' => true,
+	];
+
+	/**
 	 * Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
 	 *
 	 * @return array Mapping.
 	 */
 	public function get_selector_conversion_mapping() {
-		return array(
-			'video' => array( 'amp-video', 'amp-youtube' ),
-		);
+		return [
+			'video' => [ 'amp-video', 'amp-youtube' ],
+		];
 	}
 
 	/**
@@ -56,11 +57,20 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
+		if ( $this->args['add_noscript_fallback'] ) {
+			$this->initialize_noscript_allowed_attributes( self::$tag );
+		}
+
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
+			/**
+			 * Node.
+			 *
+			 * @var DOMElement $node
+			 */
 			$node = $nodes->item( $i );
 
-			// Skip element if already inside of an AMP element as a noscript fallback.
-			if ( 'noscript' === $node->parentNode->nodeName && $node->parentNode->parentNode && 'amp-' === substr( $node->parentNode->parentNode->nodeName, 0, 4 ) ) {
+			// Skip element if already inside of an AMP element as a noscript fallback, or if the element is in dev mode.
+			if ( $this->is_inside_amp_noscript( $node ) || $this->has_dev_mode_exemption( $node ) ) {
 				continue;
 			}
 
@@ -68,7 +78,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
 			$old_attributes = $this->filter_data_amp_attributes( $old_attributes, $amp_data );
 
-			$sources        = array();
+			$sources        = [];
 			$new_attributes = $this->filter_attributes( $old_attributes );
 			$layout         = isset( $amp_data['layout'] ) ? $amp_data['layout'] : false;
 			if ( isset( $new_attributes['src'] ) ) {
@@ -87,7 +97,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 
 			// Gather all child nodes and supply empty video dimensions from sources.
 			$fallback    = null;
-			$child_nodes = array();
+			$child_nodes = [];
 			while ( $node->firstChild ) {
 				$child_node = $node->removeChild( $node->firstChild );
 				if ( $child_node instanceof DOMElement && 'source' === $child_node->nodeName && $child_node->hasAttribute( 'src' ) ) {
@@ -137,7 +147,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			// Make sure the updated src and poster are applied to the original.
-			foreach ( array( 'src', 'poster', 'artwork' ) as $attr_name ) {
+			foreach ( [ 'src', 'poster', 'artwork' ] as $attr_name ) {
 				if ( $new_node->hasAttribute( $attr_name ) ) {
 					$old_node->setAttribute( $attr_name, $new_node->getAttribute( $attr_name ) );
 				}
@@ -151,12 +161,21 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			 * See: https://github.com/ampproject/amphtml/issues/2261
 			 */
 			if ( empty( $sources ) ) {
-				$this->remove_invalid_child( $node );
+				$this->remove_invalid_child(
+					$node,
+					[
+						'code'       => AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING,
+						'attributes' => [ 'src' ],
+						'spec_name'  => 'amp-video',
+					]
+				);
 			} else {
-				$noscript = $this->dom->createElement( 'noscript' );
-				$new_node->appendChild( $noscript );
 				$node->parentNode->replaceChild( $new_node, $node );
-				$noscript->appendChild( $old_node );
+
+				if ( $this->args['add_noscript_fallback'] ) {
+					// Preserve original node in noscript for no-JS environments.
+					$this->append_old_node_noscript( $new_node, $old_node, $this->dom );
+				}
 			}
 
 			$this->did_convert_elements = true;
@@ -166,6 +185,10 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
 	 * Filter video dimensions, try to get width and height from original file if missing.
+	 *
+	 * The video block will automatically have the width/height supplied for attachments.
+	 *
+	 * @see \AMP_Core_Block_Handler::ampify_video_block()
 	 *
 	 * @param array  $new_attributes Attributes.
 	 * @param string $src            Video URL.
@@ -178,12 +201,12 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			$path = wp_parse_url( $src, PHP_URL_PATH );
 			$ext  = pathinfo( $path, PATHINFO_EXTENSION );
 			$name = sanitize_title( wp_basename( $path, ".$ext" ) );
-			$args = array(
+			$args = [
 				'name'        => $name,
 				'post_type'   => 'attachment',
 				'post_status' => 'inherit',
 				'numberposts' => 1,
-			);
+			];
 
 			$attachment = get_posts( $args );
 
@@ -223,7 +246,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array Returns HTML attributes; removes any not specifically declared above from input.
 	 */
 	private function filter_attributes( $attributes ) {
-		$out = array();
+		$out = [];
 
 		foreach ( $attributes as $name => $value ) {
 			switch ( $name ) {

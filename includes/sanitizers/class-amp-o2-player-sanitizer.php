@@ -99,12 +99,12 @@ class AMP_O2_Player_Sanitizer extends AMP_Base_Sanitizer {
 		if ( ! empty( $o2_attributes ) ) {
 			$component_attributes = array_merge(
 				$o2_attributes,
-				array(
+				[
 					'data-macros' => 'm.playback=click',
 					'layout'      => 'responsive',
 					'width'       => self::$width,
 					'height'      => self::$height,
-				)
+				]
 			);
 
 			$amp_o2_player = AMP_DOM_Utils::create_node( $dom, self::$amp_tag, $component_attributes );
@@ -129,13 +129,13 @@ class AMP_O2_Player_Sanitizer extends AMP_Base_Sanitizer {
 	private function get_o2_player_attributes( $src ) {
 		$found = preg_match( self::URL_PATTERN, $src, $matches );
 		if ( $found ) {
-			return array(
+			return [
 				'data-pid'  => $matches['data_pid'],
 				'data-vid'  => $matches['data_vid'],
 				'data-bcid' => $matches['data_bcid'],
-			);
+			];
 		}
-		return array();
+		return [];
 	}
 
 }

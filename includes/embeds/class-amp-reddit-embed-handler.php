@@ -21,7 +21,7 @@ class AMP_Reddit_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Register embed.
 	 */
 	public function register_embed() {
-		wp_embed_register_handler( 'amp-reddit', self::URL_PATTERN, array( $this, 'oembed' ), -1 );
+		wp_embed_register_handler( 'amp-reddit', self::URL_PATTERN, [ $this, 'oembed' ], -1 );
 	}
 
 	/**
@@ -40,7 +40,7 @@ class AMP_Reddit_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return string Embed.
 	 */
 	public function oembed( $matches, $attr, $url ) {
-		return $this->render( array( 'url' => $url ) );
+		return $this->render( [ 'url' => $url ] );
 	}
 
 	/**
@@ -52,25 +52,23 @@ class AMP_Reddit_Embed_Handler extends AMP_Base_Embed_Handler {
 	public function render( $args ) {
 		$args = wp_parse_args(
 			$args,
-			array(
+			[
 				'url' => false,
-			)
+			]
 		);
 
 		if ( empty( $args['url'] ) ) {
 			return '';
 		}
 
-		// @todo Sizing is not yet correct. See <https://github.com/ampproject/amphtml/issues/11869>.
 		return AMP_HTML_Utils::build_tag(
-			'amp-reddit',
-			array(
-				'layout'         => 'responsive',
-				'data-embedtype' => 'post',
-				'width'          => '100',
-				'height'         => '100',
-				'data-src'       => $args['url'],
-			)
+			'amp-embedly-card',
+			[
+				'layout'   => 'responsive',
+				'width'    => '100',
+				'height'   => '100',
+				'data-url' => $args['url'],
+			]
 		);
 	}
 }

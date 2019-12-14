@@ -46,9 +46,9 @@ class AMP_Playbuzz_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array Mapping.
 	 */
 	public function get_selector_conversion_mapping() {
-		return array(
-			'div.pb_feed' => array( 'amp-playbuzz.pb_feed' ),
-		);
+		return [
+			'div.pb_feed' => [ 'amp-playbuzz.pb_feed' ],
+		];
 	}
 
 	/**
@@ -108,7 +108,7 @@ class AMP_Playbuzz_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array Returns HTML attributes; removes any not specifically declared above from input.
 	 */
 	private function filter_attributes( $attributes ) {
-		$out = array();
+		$out = [];
 
 		foreach ( $attributes as $name => $value ) {
 			switch ( $name ) {

@@ -15,7 +15,7 @@ function amp_populate_sidebar() {
 	global $wp_registered_sidebars;
 	$widgets         = amp_get_widgets();
 	$sidebar         = amp_get_first_sidebar();
-	$created_widgets = array();
+	$created_widgets = [];
 	foreach ( $widgets as $widget ) {
 		if ( ! amp_widget_already_in_sidebar( $widget, $sidebar ) ) {
 			amp_create_widget( $widget );
@@ -32,89 +32,89 @@ function amp_populate_sidebar() {
  * @return array $widgets Data for the widgets.
  */
 function amp_get_widgets() {
-	return array(
-		array(
+	return [
+		[
 			'widget'   => 'media_audio',
 			'settings' => array_merge(
 				amp_media_widget( 'audio' ),
-				array(
+				[
 					'title' => 'Test Audio Widget: No Loop or Preload',
-				)
+				]
 			),
-		),
-		array(
+		],
+		[
 			'widget'   => 'media_audio',
 			'settings' => array_merge(
 				amp_media_widget( 'audio' ),
-				array(
+				[
 					'title'   => 'Test Audio Widget: With Loop, Preload',
 					'loop'    => true,
 					'preload' => 'auto',
-				)
+				]
 			),
-		),
-		array(
+		],
+		[
 			'widget'   => 'archives',
-			'settings' => array(
+			'settings' => [
 				'title' => 'Test Archives Widget: No Dropdown or Count',
-			),
-		),
-		array(
+			],
+		],
+		[
 			'widget'   => 'archives',
-			'settings' => array(
+			'settings' => [
 				'title'    => 'Test Archives Widget: With Dropdown, Count',
 				'count'    => 1,
 				'dropdown' => 1,
-			),
-		),
-		array(
+			],
+		],
+		[
 			'widget' => 'calendar',
-		),
-		array(
+		],
+		[
 			'widget'   => 'categories',
-			'settings' => array(
+			'settings' => [
 				'title' => 'Test Categories Widget: No Count, Dropdown, or Hierarchical',
-			),
-		),
-		array(
+			],
+		],
+		[
 			'widget'   => 'categories',
-			'settings' => array(
+			'settings' => [
 				'title' => 'Test Categories Widget: With Count',
 				'count' => 1,
-			),
-		),
-		array(
+			],
+		],
+		[
 			'widget'   => 'categories',
-			'settings' => array(
+			'settings' => [
 				'title'        => 'Test Categories Widget: With Count, Dropdown, And Hierarchical',
 				'count'        => 1,
 				'dropdown'     => 1,
 				'hierarchical' => 1,
-			),
-		),
-		array(
+			],
+		],
+		[
 			'widget'   => 'custom_html',
-			'settings' => array(
+			'settings' => [
 				'title'   => 'Test Custom HTML Widget',
 				'content' => '<h2>Example Custom HTML widget</h2><article>Here is some custom HTML with a <a href="http://example.com/m">link</a></article>',
-			),
-		),
-		array(
+			],
+		],
+		[
 			'widget'   => 'media_gallery',
 			'settings' => array_merge(
 				amp_gallery_widget(),
-				array(
+				[
 					'link_type'      => 'post',
 					'orderby_random' => false,
 					'size'           => 'thumbnail',
-				)
+				]
 			),
-		),
-		array(
+		],
+		[
 			'widget'   => 'media_image',
 			'settings' => array_merge(
 				amp_image_widget(),
-				array(
+				[
 					'alt'               => 'Example alt value',
 					'caption'           => 'Example caption',
 					'image_classes'     => 'foo bar',
@@ -125,97 +125,97 @@ function amp_get_widgets() {
 					'link_type'         => 'custom',
 					'link_url'          => 'http://example.com/amp-test',
 					'size'              => 'full',
-				)
+				]
 			),
-		),
-		array(
+		],
+		[
 			'widget' => 'meta',
-		),
-		array(
+		],
+		[
 			'widget'   => 'nav_menu',
-			'settings' => array(
+			'settings' => [
 				'nav_menu' => amp_menu(),
-			),
-		),
-		array(
+			],
+		],
+		[
 			'widget' => 'pages',
-		),
-		array(
+		],
+		[
 			'widget' => 'recent-comments',
-		),
-		array(
+		],
+		[
 			'widget'   => 'recent-posts',
-			'settings' => array(
+			'settings' => [
 				'show_date' => true,
-			),
-		),
-		array(
+			],
+		],
+		[
 			'widget'   => 'rss',
-			'settings' => array(
+			'settings' => [
 				'title'        => 'Test RSS Widget: No Content, Author, or Date',
 				'url'          => 'https://amphtml.wordpress.com/feed/',
 				'show_author'  => 0,
 				'show_date'    => 0,
 				'show_summary' => 0,
-			),
-		),
-		array(
+			],
+		],
+		[
 			'widget'   => 'rss',
-			'settings' => array(
+			'settings' => [
 				'title'        => 'Test RSS Widget: With Content, Author, Date',
 				'url'          => 'https://amphtml.wordpress.com/feed/',
 				'show_author'  => 1,
 				'show_date'    => 1,
 				'show_summary' => 1,
-			),
-		),
-		array(
+			],
+		],
+		[
 			'widget' => 'search',
-		),
-		array(
+		],
+		[
 			'widget'   => 'tag_cloud',
-			'settings' => array(
+			'settings' => [
 				'title' => 'Test Tag Widget, No Count',
-			),
-		),
-		array(
+			],
+		],
+		[
 			'widget'   => 'tag_cloud',
-			'settings' => array(
+			'settings' => [
 				'title' => 'Test Tag Widget, With Count',
 				'count' => 1,
-			),
-		),
-		array(
+			],
+		],
+		[
 			'widget'   => 'text',
-			'settings' => array(
+			'settings' => [
 				'filter' => true,
 				'text'   => '<strong>Example Headline</strong><ul><li>This is to test possible text</li><li>This should display as expected</li></ul>',
 				'visual' => true,
-			),
-		),
-		array(
+			],
+		],
+		[
 			'widget'   => 'media_video',
 			'settings' => array_merge(
 				amp_media_widget( 'video' ),
-				array(
+				[
 					'title'   => 'Test Video Widget: No Loop or Preload',
 					'loop'    => false,
 					'preload' => 'none',
-				)
+				]
 			),
-		),
-		array(
+		],
+		[
 			'widget'   => 'media_video',
 			'settings' => array_merge(
 				amp_media_widget( 'video' ),
-				array(
+				[
 					'title'   => 'Test Video Widget: With Loop, Preload',
 					'loop'    => true,
 					'preload' => 'metadata',
-				)
+				]
 			),
-		),
-	);
+		],
+	];
 }
 
 /**
@@ -231,10 +231,10 @@ function amp_get_widgets() {
 function amp_media_widget( $type ) {
 	$all_media = amp_media( $type, 1 );
 	$media     = reset( $all_media );
-	return array(
+	return [
 		'attachment_id' => $media->ID,
 		'url'           => $media->guid,
-	);
+	];
 }
 
 /**
@@ -244,9 +244,9 @@ function amp_media_widget( $type ) {
  */
 function amp_gallery_widget() {
 	$images = amp_media( 'image', 3 );
-	return array(
+	return [
 		'ids' => wp_list_pluck( $images, 'ID' ),
-	);
+	];
 }
 
 /**
@@ -259,12 +259,12 @@ function amp_image_widget() {
 	$image             = reset( $all_images );
 	$metadata          = wp_get_attachment_metadata( $image->ID );
 	$default_dimension = 100;
-	return array(
+	return [
 		'attachment_id' => $image->ID,
 		'height'        => isset( $metadata['height'] ) ? $metadata['height'] : $default_dimension,
 		'width'         => isset( $metadata['width'] ) ? $metadata['width'] : $default_dimension,
 		'url'           => wp_get_attachment_url( $image->ID ),
-	);
+	];
 }
 
 /**
@@ -276,13 +276,13 @@ function amp_image_widget() {
  * @return array|WP_CLI::error The media IDs, or an error on failure.
  */
 function amp_media( $type, $count = 3 ) {
-	$query = new \WP_Query(
-		array(
+	$query = new WP_Query(
+		[
 			'post_type'      => 'attachment',
 			'post_mime_type' => $type,
 			'post_status'    => 'inherit',
 			'posts_per_page' => $count,
-		)
+		]
 	);
 	if ( $query->post_count < $count ) {
 		throw new Exception(
@@ -335,7 +335,7 @@ function amp_widget_already_in_sidebar( $widget, $sidebar ) {
 	}
 
 	$id_base         = $widget['widget'];
-	$all_widget_data = get_option( 'widget_' . $id_base, array() );
+	$all_widget_data = get_option( 'widget_' . $id_base, [] );
 
 	foreach ( $sidebars[ $sidebar ] as $possible_widget ) {
 		if ( false !== strpos( $possible_widget, $id_base ) ) {
@@ -356,7 +356,7 @@ function amp_widget_already_in_sidebar( $widget, $sidebar ) {
 			}
 
 			// Find if all of the settings in $widget['settings'] are present in the widget that's already in the sidebar.
-			if ( array() === array_diff_assoc( array_map( 'serialize', $widget['settings'] ), array_map( 'serialize', $widget_data ) ) ) {
+			if ( [] === array_diff_assoc( array_map( 'serialize', $widget['settings'] ), array_map( 'serialize', $widget_data ) ) ) {
 				return true;
 			}
 		}
@@ -377,12 +377,11 @@ function amp_create_widget( $widget ) {
 
 	$id_base    = $widget['widget'];
 	$option_key = 'widget_' . $id_base;
-	$widgets    = get_option( $option_key, array() );
-	$settings   = isset( $widget['settings'] ) ? $widget['settings'] : array();
+	$widgets    = get_option( $option_key, [] );
+	$settings   = isset( $widget['settings'] ) ? $widget['settings'] : [];
 
 	if ( ! isset( $settings['title'] ) ) {
-		$title             = str_replace( '_', ' ', $id_base );
-		$title             = str_replace( '-', ' ', $title );
+		$title             = str_replace( [ '_', '-' ], ' ', $id_base );
 		$settings['title'] = sprintf( 'Test %s Widget', ucwords( $title ) );
 	}
 
@@ -422,7 +421,7 @@ function amp_get_first_sidebar() {
  * @return string $widget_id The ID of the widget, like 'text-2'.
  */
 function amp_get_widget_id( $id_base ) {
-	$settings = get_option( "widget_{$id_base}", array() );
+	$settings = get_option( "widget_{$id_base}", [] );
 	if ( $settings instanceof ArrayObject || $settings instanceof ArrayIterator ) {
 		$settings = $settings->getArrayCopy();
 	}

@@ -1,203 +1,109 @@
 {
-	"root": true,
-	"extends": [
-		"wordpress",
-		"eslint:recommended",
-		"plugin:react/recommended"
-	],
-	"parser": "babel-eslint",
-	"parserOptions": {
-		"ecmaVersion": 6,
-		"sourceType": "module",
-		"ecmaFeatures": {
-			"jsx": true
-		}
-	},
-	"plugins": [
-		"react"
-	],
-	"env": {
-		"browser": true,
-		"es6": true
-	},
-	"globals": {
-		"wp": true,
-		"window": true,
-		"document": true
-	},
-	"settings": {
-		"react": {
-			"pragma": "wp",
-			"version": "16.6"
-		}
-	},
-	"rules": {
-		"no-magic-numbers": [2, { "ignoreArrayIndexes": true, "ignore": [ -1, 0, 1 ] }],
-		"array-bracket-spacing": [
-			"error",
-			"always"
-		],
-		"brace-style": [
-			"error",
-			"1tbs"
-		],
-		"camelcase": [
-			"error",
-			{
-				"properties": "never"
-			}
-		],
-		"comma-dangle": [
-			"error",
-			"never"
-		],
-		"comma-spacing": "error",
-		"comma-style": "error",
-		"computed-property-spacing": [
-			"error",
-			"always"
-		],
-		"dot-notation": "error",
-		"eol-last": "error",
-		"eqeqeq": "error",
-		"func-call-spacing": "error",
-		"indent": [
-			"error",
-			"tab",
-			{
-				"SwitchCase": 1
-			}
-		],
-		"key-spacing": "error",
-		"keyword-spacing": "error",
-		"lines-around-comment": "off",
-		"no-alert": "error",
-		"no-bitwise": "error",
-		"no-caller": "error",
-		"no-console": "error",
-		"no-debugger": "error",
-		"no-dupe-args": "error",
-		"no-dupe-keys": "error",
-		"no-duplicate-case": "error",
-		"no-else-return": "error",
-		"no-eval": "error",
-		"no-extra-semi": "error",
-		"no-fallthrough": "error",
-		"no-lonely-if": "error",
-		"no-mixed-operators": "error",
-		"no-mixed-spaces-and-tabs": "error",
-		"no-multiple-empty-lines": [
-			"error",
-			{
-				"max": 1
-			}
-		],
-		"no-multi-spaces": "error",
-		"no-multi-str": "off",
-		"no-negated-in-lhs": "error",
-		"no-nested-ternary": "error",
-		"no-redeclare": "error",
-		"no-restricted-syntax": [
-			"error",
-			{
-				"selector": "CallExpression[callee.name=/^__|_n|_x$/]:not([arguments.0.type=/^Literal|BinaryExpression$/])",
-				"message": "Translate function arguments must be string literals."
-			},
-			{
-				"selector": "CallExpression[callee.name=/^_n|_x$/]:not([arguments.1.type=/^Literal|BinaryExpression$/])",
-				"message": "Translate function arguments must be string literals."
-			},
-			{
-				"selector": "CallExpression[callee.name=_nx]:not([arguments.2.type=/^Literal|BinaryExpression$/])",
-				"message": "Translate function arguments must be string literals."
-			}
-		],
-		"no-shadow": "error",
-		"no-undef": "error",
-		"no-undef-init": "error",
-		"no-unreachable": "error",
-		"no-unsafe-negation": "error",
-		"no-unused-expressions": "error",
-		"no-unused-vars": "error",
-		"no-useless-return": "error",
-		"no-whitespace-before-property": "error",
-		"object-curly-spacing": [
-			"error",
-			"always"
-		],
-		"padded-blocks": [
-			"error",
-			"never"
-		],
-		"quote-props": [
-			"error",
-			"as-needed"
-		],
-		"react/display-name": "off",
-		"react/no-children-prop": "off",
-		"react/prop-types": "off",
-		"react/react-in-jsx-scope": "off",
-		"semi": "error",
-		"semi-spacing": "error",
-		"space-before-blocks": [
-			"error",
-			"always"
-		],
-		"space-before-function-paren": [
-			"error",
-			{
-				"anonymous": "never",
-				"named": "never",
-				"asyncArrow": "always"
-			}
-		],
-		"space-in-parens": [
-			"error",
-			"always"
-		],
-		"space-infix-ops": [
-			"error",
-			{
-				"int32Hint": false
-			}
-		],
-		"space-unary-ops": [
-			"error",
-			{
-				"overrides": {
-					"!": true,
-					"yield": true
-				}
-			}
-		],
-		"valid-jsdoc": [
-			"error",
-			{
-				"prefer": {
-					"arg": "param",
-					"argument": "param",
-					"extends": "augments",
-					"returns": "return"
-				},
-				"preferType": {
-					"array": "Array",
-					"bool": "boolean",
-					"Boolean": "boolean",
-					"float": "number",
-					"Float": "number",
-					"int": "number",
-					"integer": "number",
-					"Integer": "number",
-					"Number": "number",
-					"object": "Object",
-					"String": "string",
-					"Void": "void"
-				},
-				"requireParamDescription": false,
-				"requireReturn": false
-			}
-		],
-		"valid-typeof": "error",
-		"yoda": "off"
-	}
+  "root": true,
+  "extends": [
+    "plugin:@wordpress/eslint-plugin/recommended",
+    "plugin:import/recommended",
+    "plugin:eslint-comments/recommended"
+  ],
+  "rules": {
+    "block-scoped-var": "error",
+    "complexity": ["error", { "max": 20 } ],
+    "consistent-return": "error",
+    "default-case": "error",
+    "guard-for-in": "error",
+    "no-await-in-loop": "error",
+    "no-extra-bind": "error",
+    "no-extra-label": "error",
+    "no-floating-decimal": "error",
+    "no-implicit-coercion": "error",
+    "no-implicit-globals": "error",
+    "no-implied-eval": "error",
+    "no-loop-func": "error",
+    "no-new": "error",
+    "no-new-func": "error",
+    "no-new-wrappers": "error",
+    "no-restricted-properties": "error",
+    "no-return-assign": "error",
+    "no-return-await": "error",
+    "no-sequences": "error",
+    "no-shadow": "error",
+    "no-template-curly-in-string": "error",
+    "no-throw-literal": "error",
+    "no-unmodified-loop-condition": "error",
+    "no-unused-vars": [
+      "error",
+      {
+        "ignoreRestSiblings": true
+      }
+    ],
+    "no-useless-call": "error",
+    "no-useless-concat": "error",
+    "prefer-object-spread": "error",
+    "prefer-promise-reject-errors": "error",
+    "prefer-rest-params": "error",
+    "prefer-spread": "error",
+    "radix": [ "error", "as-needed" ],
+    "require-await": "error",
+    "rest-spread-spacing": [ "error", "never" ],
+    "react/prop-types": "error",
+    "react-hooks/exhaustive-deps": [ "error", { "additionalHooks": "useSelect" } ],
+    "react/jsx-closing-tag-location": "error",
+    "react/jsx-fragments": "error",
+    "react/jsx-first-prop-new-line": "error",
+    "react/jsx-max-props-per-line": [ "error", { "when":  "multiline" } ],
+    "react/jsx-no-literals": "error",
+    "react/jsx-no-useless-fragment": "error",
+    "react/jsx-one-expression-per-line": "error",
+    "react/no-unused-prop-types": "error",
+    "react/self-closing-comp": "error",
+    "import/no-unresolved": [ "error", {
+      "ignore": [ "jquery", "amp-block-editor-data" ]
+    } ],
+    "import/order": [ "error", { "groups": [ "builtin", [ "external", "unknown" ], "internal", "parent", "sibling", "index" ] } ],
+    "jsdoc/check-indentation": "error",
+    "@wordpress/dependency-group": "error",
+    "@wordpress/react-no-unsafe-timeout": "error"
+  },
+  "overrides": [
+    {
+      "files":[
+        "**/__tests__/**/*.js",
+        "**/test/*.js",
+        "**/?(*.)test.js",
+        "tests/js/**/*.js"
+      ],
+      "extends": [
+        "plugin:jest/all"
+      ],
+      "rules": {
+        "jest/lowercase-name": [
+          "error",
+          {
+            "ignore": [ "describe" ]
+          }
+        ],
+        "jest/no-hooks": "off",
+        "jest/prefer-expect-assertions": "off",
+        "jest/prefer-inline-snapshots": "off"
+      }
+    },
+    {
+      "files": [ "tests/e2e/**/*.js" ],
+      "extends": [
+        "plugin:@wordpress/eslint-plugin/test-e2e",
+        "plugin:jest/all"
+      ],
+      "rules": {
+        "jest/lowercase-name": [
+          "error",
+          {
+            "ignore": [ "describe" ]
+          }
+        ],
+        "jest/no-hooks": "off",
+        "jest/prefer-expect-assertions": "off",
+        "jest/prefer-inline-snapshots": "off"
+      }
+    }
+  ]
 }
