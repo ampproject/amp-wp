@@ -25,7 +25,6 @@ function FullbleedPanel( { selectedElements, onSetProperties } ) {
 		const newState = { isFullbleed: ! state.isFullbleed };
 		setState( newState );
 		onSetProperties( newState );
-		evt.preventDefault();
 	};
 	return (
 		<Panel>
