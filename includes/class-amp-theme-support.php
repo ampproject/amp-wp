@@ -1476,23 +1476,42 @@ class AMP_Theme_Support {
 	 *
 	 * @since 1.4.2
 	 *
-	 * @param WP_Dependencies $dependencies         Dependencies.
-	 * @param string          $handle               Handle.
-	 * @param string          $exclusive_dependency Exclusive dependency handle.
+	 * @param WP_Dependencies $dependencies      Dependencies.
+	 * @param string          $dependency_handle Dependency handle.
+	 * @param string          $dependent_handle  Dependent handle.
 	 * @return bool Whether the $handle is exclusively a handle of the $exclusive_dependency handle.
 	 */
-	protected static function is_exclusive_dependency( WP_Dependencies $dependencies, $handle, $exclusive_dependency ) {
+	protected static function is_exclusively_dependent( WP_Dependencies $dependencies, $dependency_handle, $dependent_handle ) {
+
+		// If a dependency handle is the same as the dependent handle, then this self-referential relationship is exclusive.
+		if ( $dependency_handle === $dependent_handle ) {
+			return true;
+		}
+
+		// Short-circuit if there is no dependency relationship up front.
+		if ( ! self::has_dependency( $dependencies, $dependent_handle, $dependency_handle ) ) {
+			return false;
+		}
+
+		// Check whether any enqueued handle depends on the dependency.
 		foreach ( $dependencies->queue as $queued_handle ) {
+			// Skip considering the dependent handle.
+			if ( $dependent_handle === $queued_handle ) {
+				continue;
+			}
+
+			// If the dependency handle was directly enqueued, then it is not exclusively dependent.
+			if ( $dependency_handle === $queued_handle ) {
+				return false;
+			}
+
+			// Otherwise, if the dependency handle is depended on by the queued handle while at the same time the queued
+			// handle _does_ have a dependency on the supplied dependent handle, then the dependency handle is not
+			// exclusively dependent on the dependent handle.
 			if (
-				// If a theme or plugin directly enqueued handle, then it is not added via $exclusive_dependency and it is not part of dev mode.
-				$handle === $queued_handle
-				||
-				// If a stylesheet has $handle as a dependency without also having $exclusive_dependency as a dependency, then no dev mode.
-				(
-					self::has_dependency( $dependencies, $queued_handle, $handle )
-					&&
-					! self::has_dependency( $dependencies, $queued_handle, $exclusive_dependency )
-				)
+				self::has_dependency( $dependencies, $queued_handle, $dependency_handle )
+				&&
+				! self::has_dependency( $dependencies, $queued_handle, $dependent_handle )
 			) {
 				return false;
 			}
@@ -1512,7 +1531,7 @@ class AMP_Theme_Support {
 	public static function filter_admin_bar_style_loader_tag( $tag, $handle ) {
 		if (
 			in_array( $handle, wp_styles()->registered['admin-bar']->deps, true ) ?
-				self::is_exclusive_dependency( wp_styles(), $handle, 'admin-bar' ) :
+				self::is_exclusively_dependent( wp_styles(), $handle, 'admin-bar' ) :
 				self::has_dependency( wp_styles(), $handle, 'admin-bar' )
 		) {
 			$tag = preg_replace( '/(?<=<link)(?=\s|>)/i', ' ' . AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, $tag );
@@ -1532,7 +1551,7 @@ class AMP_Theme_Support {
 	public static function filter_admin_bar_script_loader_tag( $tag, $handle ) {
 		if (
 			in_array( $handle, wp_scripts()->registered['admin-bar']->deps, true ) ?
-				self::is_exclusive_dependency( wp_scripts(), $handle, 'admin-bar' ) :
+				self::is_exclusively_dependent( wp_scripts(), $handle, 'admin-bar' ) :
 				self::has_dependency( wp_scripts(), $handle, 'admin-bar' )
 		) {
 			$tag = preg_replace( '/(?<=<script)(?=\s|>)/i', ' ' . AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, $tag );
