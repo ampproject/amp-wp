@@ -462,7 +462,7 @@ function amp_register_default_scripts( $wp_scripts ) {
 		$handle,
 		sprintf(
 			'if ( ! Element.prototype.attachShadow ) { const script = document.createElement( "script" ); script.src = %s; script.async = true; document.head.appendChild( script ); }',
-			wp_json_encode( 'https://cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/1.3.3/webcomponents-sd-ce.js' )
+			wp_json_encode( 'https://cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/2.4.0/webcomponents-bundle.js' )
 		),
 		'after'
 	);
