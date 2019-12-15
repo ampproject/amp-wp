@@ -1432,22 +1432,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 				},
 			],
 
-			'admin_bar_scripts_have_dev_mode_with_paired_browsing' => [
-				static function () {
-					AMP_Theme_Support::setup_paired_browsing_client();
-					wp_enqueue_script( 'admin-bar' );
-					wp_enqueue_script( 'example-admin-bar', 'https://example.com/example-admin-bar.js', [ 'admin-bar' ], '0.1', false );
-				},
-				function ( DOMXPath $xpath ) {
-					$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/example-admin-bar" ) ]' );
-					$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/admin-bar" ) ]' );
-					$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/amp-paired-browsing-client" ) ]' );
-					if ( wp_script_is( 'hoverintent-js', 'registered' ) ) {
-						$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/hoverintent-js" ) ]' );
-					}
-				},
-			],
-
 			'hoverintent_enqueued_prevents_dev_mode' => [
 				function () {
 					if ( ! wp_script_is( 'hoverintent-js', 'registered' ) ) {
