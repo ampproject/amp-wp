@@ -315,6 +315,77 @@ final class AMP_CLI_Validation_Command {
 	}
 
 	/**
+	 * Generate the authorization nonce needed for a validate request.
+	 *
+	 * @subcommand generate-nonce
+	 * @alias nonce
+	 */
+	public function generate_nonce() {
+		WP_CLI::line( AMP_Validation_Manager::get_amp_validate_nonce() );
+	}
+
+	/**
+	 * Get the validation results for a given URL.
+	 *
+	 * The results are returned in JSON format.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <url>
+	 * : The URL to check. The host name need not be included. The URL must be local to this WordPress install.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp amp validation check-url /about/
+	 *     wp amp validation check-url $( wp option get home )/?p=1
+	 *
+	 * @subcommand check-url
+	 * @alias check
+	 *
+	 * @param array $args Args.
+	 */
+	public function check_url( $args ) {
+		list( $url ) = $args;
+
+		$host            = wp_parse_url( $url, PHP_URL_HOST );
+		$parsed_home_url = wp_parse_url( home_url( '/' ) );
+
+		if ( ! isset( $parsed_home_url['host'], $parsed_home_url['scheme'] ) ) {
+			WP_CLI::error(
+				sprintf(
+					'The home URL (%s) is missing a scheme and host.',
+					home_url( '/' )
+				)
+			);
+		}
+
+		if ( $host && $host !== $parsed_home_url['host'] ) {
+			WP_CLI::error(
+				sprintf(
+					'Supplied URL must be for this WordPress install. Expected host "%1$s" but provided is "%2$s".',
+					$parsed_home_url['host'],
+					$host
+				)
+			);
+		}
+
+		if ( ! $host ) {
+			$origin = $parsed_home_url['scheme'] . '://' . $parsed_home_url['host'];
+			if ( ! empty( $parsed_home_url['port'] ) ) {
+				$origin .= ':' . $parsed_home_url['port'];
+			}
+			$url = $origin . '/' . ltrim( $url, '/' );
+		}
+
+		$result = AMP_Validation_Manager::validate_url( $url );
+		if ( $result instanceof WP_Error ) {
+			WP_CLI::error( $result );
+		}
+
+		WP_CLI::line( wp_json_encode( $result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) );
+	}
+
+	/**
 	 * Gets the total number of URLs to validate.
 	 *
 	 * By default, this only counts AMP-enabled posts and terms.

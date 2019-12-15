@@ -26,7 +26,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	public function tearDown() {
 		parent::tearDown();
 		AMP_Validation_Manager::reset_validation_results();
-		AMP_Validation_Manager::$should_locate_sources = false;
+		AMP_Validation_Manager::$is_validate_request = false;
 	}
 
 	/**

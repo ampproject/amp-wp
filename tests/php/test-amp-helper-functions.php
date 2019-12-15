@@ -24,6 +24,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 */
 	public function tearDown() {
 		remove_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Validation_Manager::$is_validate_request = false;
 		global $wp_scripts, $pagenow, $show_admin_bar;
 		$wp_scripts     = null;
 		$show_admin_bar = null;
@@ -422,7 +423,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertFalse( is_amp_endpoint() );
 
 		// When the user passes a flag to the WP-CLI command, it forces AMP validation no matter whether the user disabled AMP on any template.
-		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = AMP_Validation_Manager::get_amp_validate_nonce();
+		AMP_Validation_Manager::$is_validate_request = true;
 		$this->assertTrue( is_amp_endpoint() );
 	}
 

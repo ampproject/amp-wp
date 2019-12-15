@@ -345,7 +345,7 @@ class AMP_Theme_Support {
 				]
 			);
 			self::$support_added_via_option = $is_paired ? self::TRANSITIONAL_MODE_SLUG : self::STANDARD_MODE_SLUG;
-		} elseif ( AMP_Validation_Manager::is_theme_support_forced() ) {
+		} elseif ( true === AMP_Validation_Manager::should_validate_response() ) { // @todo Eventually reader mode should allow for validate requests.
 			self::$support_added_via_option = self::STANDARD_MODE_SLUG;
 			add_theme_support( self::SLUG );
 		}
@@ -2104,7 +2104,7 @@ class AMP_Theme_Support {
 		$enable_response_caching = (
 			$enable_response_caching
 			&&
-			! AMP_Validation_Manager::should_validate_response()
+			! AMP_Validation_Manager::$is_validate_request
 			&&
 			! is_customize_preview()
 		);
@@ -2314,6 +2314,12 @@ class AMP_Theme_Support {
 
 		$assets = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
 
+		// Respond early with results if performing a validate request.
+		if ( AMP_Validation_Manager::$is_validate_request ) {
+			header( 'Content-Type: application/json; charset=utf-8' );
+			return wp_json_encode( AMP_Validation_Manager::get_validate_response_data(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
+		}
+
 		// Determine what the validation errors are.
 		$blocking_error_count = 0;
 		$validation_results   = [];
@@ -2347,7 +2353,7 @@ class AMP_Theme_Support {
 
 		self::ensure_required_markup( $dom, array_keys( $amp_scripts ) );
 
-		if ( $blocking_error_count > 0 && ! AMP_Validation_Manager::should_validate_response() ) {
+		if ( $blocking_error_count > 0 && empty( AMP_Validation_Manager::$validation_error_status_overrides ) ) {
 			/*
 			 * In AMP-first, strip html@amp attribute to prevent GSC from complaining about a validation error
 			 * already surfaced inside of WordPress. This is intended to not serve dirty AMP, but rather a
@@ -2393,12 +2399,7 @@ class AMP_Theme_Support {
 			trigger_error( esc_html( sprintf( __( 'The database has the %s encoding when it needs to be utf-8 to work with AMP.', 'amp' ), get_bloginfo( 'charset' ) ) ), E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 		}
 
-		AMP_Validation_Manager::finalize_validation(
-			$dom,
-			[
-				'remove_source_comments' => ! isset( $_GET['amp_preserve_source_comments'] ), // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			]
-		);
+		AMP_Validation_Manager::finalize_validation( $dom );
 
 		$response  = "<!DOCTYPE html>\n";
 		$response .= AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
