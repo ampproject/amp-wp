@@ -87,7 +87,7 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 				[
 					'add_noscript_fallback' => true,
 				],
-				array_fill( 0, 2, AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR )
+				array_fill( 0, 2, AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR ),
 			],
 
 			'simple_image_without_noscript'            => [
