@@ -126,7 +126,7 @@ function MediaLibrary( { onInsert } ) {
 	/**
 	 * Check if number is odd or even.
 	 *
-	 * @param {number}n Number
+	 * @param {number} n Number
 	 * @return {boolean} Is even.
 	 */
 	const isEven = ( n ) => {
@@ -136,9 +136,9 @@ function MediaLibrary( { onInsert } ) {
 	/**
 	 * Generate height based on ratio of original height / width.
 	 *
-	 * @param {number}oWidth Original element width.
-	 * @param {number}oHeight Original element height.
-	 * @param {number}width Desired width.
+	 * @param {number} oWidth Original element width.
+	 * @param {number} oHeight Original element height.
+	 * @param {number} width Desired width.
 	 * @return {number} Relative height compared to height.
 	 */
 	const getRelativeHeight = ( oWidth, oHeight, width ) => {
@@ -150,7 +150,7 @@ function MediaLibrary( { onInsert } ) {
 	/**
 	 * Handle search term changes.
 	 *
-	 * @param {Object}evt Doc Event
+	 * @param {Object} evt Doc Event
 	 */
 	const onSearch = ( evt ) => {
 		setSearchTerm( evt.target.value );
@@ -161,7 +161,7 @@ function MediaLibrary( { onInsert } ) {
 	/**
 	 * Filter REST API calls and re-request API.
 	 *
-	 * @param {string}filter Value that is passed to rest api to filter.
+	 * @param {string} filter Value that is passed to rest api to filter.
 	 */
 	const onFilter = ( filter ) => {
 		if ( filter !== mediaType ) {
@@ -179,7 +179,7 @@ function MediaLibrary( { onInsert } ) {
 	/**
 	 * Callback of select in media picker to insert media element.
 	 *
-	 * @param {Object}attachment Attachment object from backbone media picker.
+	 * @param {Object} attachment Attachment object from backbone media picker.
 	 */
 	const onSelect = ( attachment ) => {
 		const { url: src, mime: mimeType, width: oWidth, height: oHeight } = attachment;
@@ -190,8 +190,8 @@ function MediaLibrary( { onInsert } ) {
 	/**
 	 * Insert element such image, video and audio into the editor.
 	 *
-	 * @param {Object}attachment Attachment object
-	 * @param {number}width      Width that element is inserted into editor.
+	 * @param {Object} attachment Attachment object
+	 * @param {number} width      Width that element is inserted into editor.
 	 * @return {null|*}          Return onInsert or null.
 	 */
 	const insertMediaElement = ( attachment, width ) => {
@@ -226,8 +226,8 @@ function MediaLibrary( { onInsert } ) {
 	/**
 	 * Get a formatted element for different media types.
 	 *
-	 * @param {Object}mediaEl Attachment object
-	 * @param {number}width      Width that element is inserted into editor.
+	 * @param {Object} mediaEl Attachment object
+	 * @param {number} width      Width that element is inserted into editor.
 	 * @return {null|*}          Element or null if does not map to video/image.
 	 */
 	const getMediaElement = ( mediaEl, width ) => {
