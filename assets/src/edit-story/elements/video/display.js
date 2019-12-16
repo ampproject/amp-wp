@@ -7,31 +7,34 @@ import styled from 'styled-components';
 /**
  * Internal dependencies
  */
-import { PanelTypes } from '../panels';
-import { ElementWithPosition, ElementWithSize, ElementWithRotation } from './shared';
+import { ElementWithPosition, ElementWithSize, ElementWithRotation } from '../shared';
 
-const Element = styled.img`
+const Element = styled.video`
 	${ ElementWithPosition }
 	${ ElementWithSize }
 	${ ElementWithRotation }
 `;
 
-function Image( { src, width, height, x, y, rotationAngle } ) {
+function VideoDisplay( { src, width, height, x, y, rotationAngle, controls, mimeType } ) {
 	const props = {
 		width,
 		height,
 		x,
 		y,
 		rotationAngle,
-		src,
+		controls,
 	};
 	return (
-		<Element { ...props } />
+		<Element { ...props }>
+			<source src={ src } type={ mimeType } />
+		</Element>
 	);
 }
 
-Image.propTypes = {
+VideoDisplay.propTypes = {
 	rotationAngle: PropTypes.number.isRequired,
+	controls: PropTypes.bool,
+	mimeType: PropTypes.string.isRequired,
 	src: PropTypes.string.isRequired,
 	width: PropTypes.number.isRequired,
 	height: PropTypes.number.isRequired,
@@ -39,13 +42,4 @@ Image.propTypes = {
 	y: PropTypes.number.isRequired,
 };
 
-Image.defaultProps = {
-};
-
-Image.panels = [
-	PanelTypes.SIZE,
-	PanelTypes.POSITION,
-	PanelTypes.ROTATION_ANGLE,
-];
-
-export default Image;
+export default VideoDisplay;
