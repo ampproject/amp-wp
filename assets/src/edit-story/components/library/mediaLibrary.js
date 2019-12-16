@@ -197,6 +197,7 @@ function MediaLibrary( { onInsert } ) {
 	const insertMediaElement = ( attachment, width ) => {
 		const { src, mimeType, oWidth, oHeight } = attachment;
 		const height = getRelativeHeight( oWidth, oHeight, width );
+		const origRatio = oWidth / width;
 		if ( SUPPORTED_IMAGE_TYPES.includes( mimeType ) ) {
 			return onInsert( 'image', {
 				src,
@@ -205,10 +206,19 @@ function MediaLibrary( { onInsert } ) {
 				x: 5,
 				y: 5,
 				rotationAngle: 0,
+				origRatio,
 			} );
 		} else if ( SUPPORTED_VIDEO_TYPES.includes( mimeType ) ) {
-			// TODO Insert Video here.
-			return null;
+			return onInsert( 'video', {
+				src,
+				width,
+				height,
+				x: 5,
+				y: 5,
+				rotationAngle: 0,
+				origRatio,
+				mimeType,
+			} );
 		}
 		return null;
 	};
