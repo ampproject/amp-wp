@@ -8,6 +8,7 @@ import { addQueryArgs } from '@wordpress/url';
  * Internal dependencies
  */
 import { useAPI } from '../../api';
+import { getDefinitionForType } from '../../../elements';
 
 const getStoryMarkupFromPages = ( pages ) => {
 	// @todo look into: We should rather use renderToStaticMarkup here, however, it doesn't seem to be exposed via @wordpress/element.
@@ -16,21 +17,11 @@ const getStoryMarkupFromPages = ( pages ) => {
 		return renderToString(
 			<amp-story-page id={ id }>
 				<amp-story-grid-layer template="vertical">
-					{ page.elements.map( ( { type, src, width, height, content } ) => {
-						const style = {
-							position: 'absolute',
-						};
-						// @todo this should be redone by using dynamic tag.
-						if ( 'image' === type ) {
-							return <amp-img key={ 'el' + id } style={ { ...style } } src={ src } layout="fixed" width={ width } height={ height } />;
-						}
-						style.width = width + 'px';
-						style.height = height + 'px';
-						return (
-							<div key={ 'el' + id } style={ { ...style } }>
-								{ content }
-							</div>
-						);
+					{ page.elements.map( ( { type, ...rest } ) => {
+						const { id: elId } = rest;
+						// eslint-disable-next-line @wordpress/no-unused-vars-before-return
+						const { Save } = getDefinitionForType( type );
+						return <Save key={ 'element-' + elId } { ...rest } />;
 					} ) }
 				</amp-story-grid-layer>
 			</amp-story-page>,
