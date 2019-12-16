@@ -23,9 +23,7 @@ function TextSave( { id, content, color, backgroundColor, width, height, x, y, f
 	};
 
 	return (
-		<p id={ 'el-' + id } style={ { ...style } } >
-			{ content }
-		</p>
+		<p id={ 'el-' + id } style={ { ...style } } dangerouslySetInnerHTML={ { __html: content } } />
 	);
 }
 
