@@ -22,7 +22,8 @@ const LINKS = 'links';
 function LibraryProvider( { children } ) {
 	const { actions: { getMedia } } = useAPI();
 	const [ media, setMedia ] = useState( [] );
-	const [ mediaType, setMediaType ] = useState( 'image' );
+	const [ mediaType, setMediaType ] = useState( '' );
+	const [ searchTerm, setSearchTerm ] = useState( '' );
 	const [ isMediaLoaded, setIsMediaLoaded ] = useState( false );
 	const [ isMediaLoading, setIsMediaLoading ] = useState( false );
 	const [ tab, setTab ] = useState( MEDIA );
@@ -30,13 +31,13 @@ function LibraryProvider( { children } ) {
 	const loadMedia = useCallback( () => {
 		if ( ! isMediaLoaded && ! isMediaLoading ) {
 			setIsMediaLoading( true );
-			getMedia( { mediaType } ).then( ( loadedMedia ) => {
+			getMedia( { mediaType, searchTerm } ).then( ( loadedMedia ) => {
 				setIsMediaLoading( false );
 				setIsMediaLoaded( true );
 				setMedia( loadedMedia );
 			} );
 		}
-	}, [ isMediaLoaded, isMediaLoading, getMedia, mediaType ] );
+	}, [ isMediaLoaded, isMediaLoading, getMedia, mediaType, searchTerm ] );
 
 	const state = {
 		state: {
@@ -45,6 +46,7 @@ function LibraryProvider( { children } ) {
 			isMediaLoading,
 			isMediaLoaded,
 			mediaType,
+			searchTerm,
 		},
 		actions: {
 			setTab,
@@ -52,6 +54,7 @@ function LibraryProvider( { children } ) {
 			setIsMediaLoaded,
 			setMediaType,
 			loadMedia,
+			setSearchTerm,
 		},
 		data: {
 			tabs: {
