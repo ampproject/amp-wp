@@ -31,12 +31,12 @@ function APIProvider( { children } ) {
 		/**
 		 * Fire REST API call to save story.
 		 *
-		 * @param {number}storyId Story post id.
-		 * @param {string}title Story title.
-		 * @param {string}status Post status, draft or published.
-		 * @param {Array}pages Array of all pages.
-		 * @param {number}author User ID of story author.
-		 * @param {string}slug   The slug of the story.
+		 * @param {number}   storyId Story post id.
+		 * @param {string}   title Story title.
+		 * @param {string}   status Post status, draft or published.
+		 * @param {Array}    pages Array of all pages.
+		 * @param {number}   author User ID of story author.
+		 * @param {string}   slug   The slug of the story.
 		 * @return {Promise} Return apiFetch promise.
 		 */
 		( storyId, title, status, pages, author, slug ) => {

@@ -12,16 +12,16 @@ import { useAPI } from '../../api';
 /**
  * Custom hook to save story.
  *
- * @param {boolean}isSaving Boolean if post is currently saving.
- * @param {number}storyId Story post id.
- * @param {string}title Story title.
- * @param {string}postStatus Post status, draft or published.
- * @param {Array}pages Array of all pages.
- * @param {number}postAuthor User ID of story author.
- * @param {string}slug   The slug of the story.
- * @param {Function}setLink
- * @param {Function}setPostStatus
- * @param {Function}setIsSaving
+ * @param {boolean}   isSaving Boolean if post is currently saving.
+ * @param {number}    storyId Story post id.
+ * @param {string}    title Story title.
+ * @param {string}    postStatus Post status, draft or published.
+ * @param {Array}     pages Array of all pages.
+ * @param {number}    postAuthor User ID of story author.
+ * @param {string}    slug   The slug of the story.
+ * @param {Function}  setLink Set link in state.
+ * @param {Function}  setPostStatus Set Post Status in state.
+ * @param {Function}  setIsSaving Set saving state.
  * @return {Function} Function that can be called to save a story.
  */
 function useSavePost( {
