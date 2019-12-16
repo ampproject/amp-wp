@@ -30,15 +30,15 @@ const Background = styled.div`
 `;
 
 const Area = styled.div`
-  grid-area: ${ ( { area } ) => area };
-  height: 100%;
-  width: 100%;
+	grid-area: ${ ( { area } ) => area };
+	height: 100%;
+	width: 100%;
 `;
 
 function CanvasLayout() {
 	const { state: { backgroundClickHandler } } = useCanvas();
 	return (
-		<Background onClick={ backgroundClickHandler ? backgroundClickHandler : null }>
+		<Background onClick={ backgroundClickHandler }>
 			<Area area="page">
 				<Page />
 			</Area>
