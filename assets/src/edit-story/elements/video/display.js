@@ -19,7 +19,6 @@ function VideoDisplay( props ) {
 	const {
 		mimeType,
 		src,
-		id,
 	} = props;
 
 	return (
