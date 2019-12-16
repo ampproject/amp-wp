@@ -280,7 +280,7 @@ function MediaLibrary( { onInsert } ) {
 			</Header>
 
 			<SearchField>
-				<Icon icon="search"	 />
+				<Icon icon="search" />
 				<Search
 					value={ searchTerm }
 					placeholder={ 'Search Media' }
