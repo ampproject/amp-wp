@@ -15,17 +15,15 @@ const Element = styled.video`
 	${ ElementWithRotation }
 `;
 
-function VideoDisplay( { src, width, height, x, y, rotationAngle, controls, mimeType } ) {
-	const props = {
-		width,
-		height,
-		x,
-		y,
-		rotationAngle,
-		controls,
-	};
+function VideoDisplay( props ) {
+	const {
+		mimeType,
+		src,
+		id,
+	} = props;
+
 	return (
-		<Element { ...props }>
+		<Element { ...props } >
 			<source src={ src } type={ mimeType } />
 		</Element>
 	);
@@ -34,6 +32,8 @@ function VideoDisplay( { src, width, height, x, y, rotationAngle, controls, mime
 VideoDisplay.propTypes = {
 	rotationAngle: PropTypes.number.isRequired,
 	controls: PropTypes.bool,
+	autoPlay: PropTypes.bool,
+	loop: PropTypes.bool,
 	mimeType: PropTypes.string.isRequired,
 	src: PropTypes.string.isRequired,
 	width: PropTypes.number.isRequired,
