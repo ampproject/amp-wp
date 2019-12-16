@@ -4,16 +4,21 @@
 import PropTypes from 'prop-types';
 
 /**
+ * Internal dependencies
+ */
+import getPercentageFromPixels from '../../utils/getPercentageFromPixels';
+
+/**
  * Returns AMP HTML for saving into post content for displaying in the FE.
  */
 function TextSave( { id, content, color, backgroundColor, width, height, x, y, fontFamily, fontSize, fontWeight, fontStyle, rotationAngle } ) {
 	const style = {
 		position: 'absolute',
-		top: x + 'px',
-		left: y + 'px',
+		left: getPercentageFromPixels( x, 'x' ) + '%',
+		top: getPercentageFromPixels( y, 'y' ) + '%',
 		transform: `rotate(${ rotationAngle }deg)`,
-		width: width + 'px',
-		height: height + 'px',
+		width: getPercentageFromPixels( width, 'x' ) + '%',
+		height: getPercentageFromPixels( height, 'y' ) + '%',
 		fontSize: fontSize ? fontSize : null,
 		fontStyle: fontStyle ? fontStyle : null,
 		fontFamily: fontFamily ? fontFamily : null,

@@ -37,6 +37,7 @@ function APIProvider( { children } ) {
 		 * @param {Array}    pages Array of all pages.
 		 * @param {number}   author User ID of story author.
 		 * @param {string}   slug   The slug of the story.
+		 * @param {string}  content AMP HTML content.
 		 * @return {Promise} Return apiFetch promise.
 		 */
 		( storyId, title, status, pages, author, slug, content ) => {

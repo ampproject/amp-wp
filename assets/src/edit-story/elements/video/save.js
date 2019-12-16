@@ -3,29 +3,40 @@
  */
 import PropTypes from 'prop-types';
 
+/**
+ * Internal dependencies
+ */
+import getPercentageFromPixels from '../../utils/getPercentageFromPixels';
+
 function VideoSave( { autoPlay, id, mimeType, src, width, height, x, y, rotationAngle } ) {
 	const sourceProps = {
 		type: mimeType,
 		src,
 	};
 	const props = {
-		width,
-		height,
-		layout: 'fixed',
-		id: 'el-' + id,
 		autoPlay,
 		poster: '/wp-content/plugins/amp/assets/images/stories-editor/story-fallback-poster.jpg', // @todo Replace this!
+		layout: 'fill',
 	};
+
+	const wrapperProps = {
+		id: 'el-' + id,
+	};
+
 	const style = {
 		position: 'absolute',
-		top: x + 'px',
-		left: y + 'px',
+		left: getPercentageFromPixels( x, 'x' ) + '%',
+		top: getPercentageFromPixels( y, 'y' ) + '%',
 		transform: `rotate(${ rotationAngle }deg)`,
+		width: getPercentageFromPixels( width, 'x' ) + '%',
+		height: getPercentageFromPixels( height, 'y' ) + '%',
 	};
 	return (
-		<amp-video { ...props } style={ { ...style } }>
-			<source { ...sourceProps } />
-		</amp-video>
+		<div style={ { ...style } } { ...wrapperProps } >
+			<amp-video { ...props }>
+				<source { ...sourceProps } />
+			</amp-video>
+		</div>
 	);
 }
 

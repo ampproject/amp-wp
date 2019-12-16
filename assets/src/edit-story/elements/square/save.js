@@ -4,16 +4,21 @@
 import PropTypes from 'prop-types';
 
 /**
+ * Internal dependencies
+ */
+import getPercentageFromPixels from '../../utils/getPercentageFromPixels';
+
+/**
  * Returns AMP HTML for saving into post content for displaying in the FE.
  */
 function SquareSave( { id, backgroundColor, width, height, x, y, rotationAngle } ) {
 	const style = {
 		position: 'absolute',
-		top: x + 'px',
-		left: y + 'px',
+		left: getPercentageFromPixels( x, 'x' ) + '%',
+		top: getPercentageFromPixels( y, 'y' ) + '%',
 		transform: `rotate(${ rotationAngle }deg)`,
-		width: width + 'px',
-		height: height + 'px',
+		width: getPercentageFromPixels( width, 'x' ) + '%',
+		height: getPercentageFromPixels( height, 'y' ) + '%',
 		background: backgroundColor,
 	};
 	return (

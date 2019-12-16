@@ -4,23 +4,34 @@
 import PropTypes from 'prop-types';
 
 /**
+ * Internal dependencies
+ */
+import getPercentageFromPixels from '../../utils/getPercentageFromPixels';
+
+/**
  * Returns AMP HTML for saving into post content for displaying in the FE.
  */
 function ImageSave( { id, src, width, height, x, y, rotationAngle } ) {
 	const props = {
-		width,
-		height,
-		layout: 'fixed',
+		layout: 'fill',
 		src,
+	};
+	const wrapperProps = {
+		id: 'el-' + id,
 	};
 	const style = {
 		position: 'absolute',
-		top: x + 'px',
-		left: y + 'px',
+		left: getPercentageFromPixels( x, 'x' ) + '%',
+		top: getPercentageFromPixels( y, 'y' ) + '%',
+		width: getPercentageFromPixels( width, 'x' ) + '%',
+		height: getPercentageFromPixels( height, 'y' ) + '%',
 		transform: `rotate(${ rotationAngle }deg)`,
 	};
+
 	return (
-		<amp-img id={ 'el-' + id } { ...props } style={ { ...style } } />
+		<div style={ { ...style } } { ...wrapperProps }>
+			<amp-img { ...props } />
+		</div>
 	);
 }
 
