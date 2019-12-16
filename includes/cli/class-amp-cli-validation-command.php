@@ -427,7 +427,11 @@ final class AMP_CLI_Validation_Command {
 			$errors = array_map( [ $this, 'prettify_validation_error' ], $errors );
 		}
 
-		$formatter = $this->get_formatter( $assoc_args, array_keys( $errors[0] ) );
+		// Take varying combinations of fields into account.
+		$fields = $this->get_validation_error_fields( $errors );
+		$errors = $this->pad_validation_error_fields( $errors, $fields );
+
+		$formatter = $this->get_formatter( $assoc_args, $fields );
 		$formatter->display_items( $errors, true );
 		exit( 1 );
 	}
@@ -442,6 +446,43 @@ final class AMP_CLI_Validation_Command {
 		return array_map(
 			static function ( $result ) {
 				return array_merge( $result['error'], [ 'sanitized' => $result['sanitized'] ] );
+			},
+			$errors
+		);
+	}
+
+	/**
+	 * Check all errors to retrieve all the fields that are present.
+	 *
+	 * Fields can change depending on the validation error type.
+	 *
+	 * @param array $errors Flattened array of validation errors.
+	 * @return array Array of string with field names.
+	 */
+	private function get_validation_error_fields( $errors ) {
+		return array_reduce(
+			$errors,
+			static function ( $fields, $error ) {
+				return array_unique( array_merge( $fields, array_keys( $error ) ) );
+			},
+			[]
+		);
+	}
+
+	/**
+	 * Pad the fields in the array of validation errors.
+	 *
+	 * This adds fields with an empty value in case a specific error didn't have that field.
+	 *
+	 * @param array $errors Flattened array of validation errors.
+	 * @param array $fields Array of strings with field names that were encountered.
+	 * @return array Padded multidimensional array of validation errors.
+	 */
+	private function pad_validation_error_fields( $errors, $fields ) {
+		$padding = array_combine( $fields, array_pad( [], count( $fields ), '' ) );
+		return array_map(
+			static function ( $error ) use ( $padding ) {
+				return array_merge( $padding, $error );
 			},
 			$errors
 		);
