@@ -40,6 +40,7 @@ class SiteHealth {
 			'persistent_object_cache' => esc_html__( 'Persistent object cache', 'amp' ),
 			/* translators: %s: a type of PHP function */
 			'curl_multi_functions'    => sprintf( esc_html__( '%s functions', 'amp' ), 'curl_multi_*' ),
+			'icu_version'             => esc_html__( 'ICU version', 'amp' ),
 		];
 
 		foreach ( $direct_tests as $test_name => $test_label ) {
@@ -173,6 +174,67 @@ class SiteHealth {
 				]
 			);
 		}
+	}
+
+	/**
+	 * Gets the test result data for whether the proper ICU version is available.
+	 *
+	 * @return array The test data.
+	 */
+	public function icu_version() {
+		$icu_version       = defined( 'INTL_ICU_VERSION' ) ? (float) INTL_ICU_VERSION : null;
+		$minimum_version   = 65;
+		$is_proper_version = $icu_version >= $minimum_version;
+
+		$data = [
+			'badge'       => [
+				'label' => esc_html__( 'AMP', 'amp' ),
+				'color' => $is_proper_version ? 'green' : 'orange',
+			],
+			'description' => sprintf(
+				esc_html__( 'The version of ICU can affect how the intl extension runs. The minimum recommended version of ICU is %s.', 'amp' ),
+				$minimum_version
+			),
+			'actions'     => sprintf(
+				'<p><a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s <span class="screen-reader-text">%3$s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
+				'http://site.icu-project.org/',
+				esc_html__( 'Learn more about ICU', 'amp' ),
+				/* translators: The accessibility text. */
+				esc_html__( '(opens in a new tab)', 'amp' )
+			),
+			'test'        => 'icu_version',
+		];
+
+		if ( ! defined( 'INTL_ICU_VERSION' ) ) {
+			return array_merge(
+				$data,
+				[
+					'status' => 'recommended',
+					/* translators: %s: the constant for the ICU version */
+					'label'  => sprintf( esc_html__( 'The ICU version is unknown, as the constant %s is not defined', 'amp' ), 'INTL_ICU_VERSION' ),
+				]
+			);
+		}
+
+		if ( ! $is_proper_version ) {
+			return array_merge(
+				$data,
+				[
+					'status' => 'recommended',
+					/* translators: %1$s: the ICU version */
+					'label'  => sprintf( esc_html__( 'The version of ICU, %1$s, is out of date.', 'amp' ), $icu_version ),
+				]
+			);
+		}
+
+		return array_merge(
+			$data,
+			[
+				'status' => 'good',
+				/* translators: %1$s: the ICU version */
+				'label'  => sprintf( esc_html__( 'The version of ICU, %1$s, looks good.', 'amp' ), $icu_version ),
+			]
+		);
 	}
 
 	/**

@@ -58,6 +58,10 @@ class Test_Site_Health extends WP_UnitTestCase {
 						'label' => 'curl_multi_* functions',
 						'test'  => [ $this->instance, 'curl_multi_functions' ],
 					],
+					'icu_version'             => [
+						'label' => 'ICU version',
+						'test'  => [ $this->instance, 'icu_version' ],
+					],
 				],
 			],
 			$this->instance->add_tests( [] )
@@ -116,6 +120,22 @@ class Test_Site_Health extends WP_UnitTestCase {
 				'test'        => 'curl_multi_functions',
 			],
 			$this->instance->curl_multi_functions()
+		);
+	}
+
+	/**
+	 * Test icu_version.
+	 *
+	 * @covers \Amp\AmpWP\Admin\SiteHealth::icu_version()
+	 */
+	public function test_icu_version() {
+		$this->assertArraySubset(
+			[
+				'description' => 'The version of ICU can affect how the intl extension runs. The minimum recommended version of ICU is 65.',
+				'actions'     => '<p><a href="http://site.icu-project.org/" target="_blank" rel="noopener noreferrer">Learn more about ICU <span class="screen-reader-text">(opens in a new tab)</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
+				'test'        => 'icu_version',
+			],
+			$this->instance->icu_version()
 		);
 	}
 
