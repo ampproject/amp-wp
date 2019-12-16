@@ -31,16 +31,20 @@ function Movable( {
 		actions: { setPropertiesOnSelectedElements },
 	} = useStory();
 
+	const latestEvent = useRef();
+
+	useEffect( () => {
+		latestEvent.current = pushEvent;
+	}, [ pushEvent ] );
+
 	useEffect( () => {
 		if ( moveable.current ) {
 			// If we have persistent event then let's use that, ensuring the targets match.
-			if ( pushEvent && pushEvent.target === targetEl ) {
-				moveable.current.moveable.dragStart( pushEvent );
+			if ( latestEvent.current && targetEl.contains( latestEvent.current.target ) ) {
+				moveable.current.moveable.dragStart( latestEvent.current );
 			}
 			moveable.current.updateRect();
 		}
-		// Disable reason: we should not run this when pushEvent changes.
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [ targetEl, moveable ] );
 
 	const frame = {

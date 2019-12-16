@@ -4,7 +4,9 @@
 import { createGlobalStyle } from 'styled-components';
 
 export const GlobalStyle = createGlobalStyle`
-	* { box-sizing: border-box; }
+	*,
+	*::after,
+	*::before { box-sizing: border-box; }
 `;
 
 const theme = {
@@ -18,6 +20,7 @@ const theme = {
 		},
 		mg: {
 			v1: '#616877',
+			v2: '#DADADA',
 		},
 		fg: {
 			v1: '#FFFFFF',
