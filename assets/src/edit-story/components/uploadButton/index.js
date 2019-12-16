@@ -9,17 +9,17 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 const Button = styled.button`
-	 background: ${ ( { theme } ) => theme.colors.bg.v3 };
+	 background: none;
 	 color: ${ ( { theme } ) => theme.colors.fg.v1 };
 	 padding: 5px;
 	 font-weight: bold;
 	 flex: 1 0 0;
 	 text-align: center;
-	 border: 0px none;
+	 border: 1px solid ${ ( { theme } ) => theme.colors.mg.v1 };
+	 border-radius: 3px;
 `;
 
 function UploadButton( {
-	mediaType,
 	title,
 	buttonText,
 	buttonInsertText,
@@ -40,9 +40,6 @@ function UploadButton( {
 				text: buttonInsertText,
 			},
 			multiple,
-			library: {
-				type: mediaType,
-			},
 		} );
 		let attachment;
 
@@ -66,7 +63,6 @@ function UploadButton( {
 }
 
 UploadButton.propTypes = {
-	mediaType: PropTypes.string.isRequired,
 	title: PropTypes.string,
 	buttonInsertText: PropTypes.string,
 	buttonText: PropTypes.string,
