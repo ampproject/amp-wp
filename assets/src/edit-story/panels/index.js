@@ -11,11 +11,15 @@ import SizePanel from './size';
 import PositionPanel from './position';
 import ScalePanel from './scale';
 import TextPanel from './text';
+import MediaPanel from './media';
+import VideoPanel from './video';
 
 const ACTIONS = 'actions';
 const COLOR = 'color';
 const SCALE = 'scale';
 const FONT = 'font';
+const MEDIA = 'media';
+const VIDEO = 'video';
 const ROTATION_ANGLE = 'rotationAngle';
 const TEXT = 'text';
 const SIZE = 'size';
@@ -32,6 +36,8 @@ export const PanelTypes = {
 	FONT,
 	TEXT,
 	ROTATION_ANGLE,
+	MEDIA,
+	VIDEO,
 };
 
 const ALL = Object.values( PanelTypes );
@@ -63,6 +69,8 @@ export function getPanels( elements ) {
 				case COLOR: return { type, Panel: ColorPanel };
 				case FONT: return { type, Panel: FontPanel };
 				case TEXT: return { type, Panel: TextPanel };
+				case MEDIA: return { type, Panel: MediaPanel };
+				case VIDEO: return { type, Panel: VideoPanel };
 				default: throw new Error( `Unknown panel: ${ type }` );
 			}
 		} );

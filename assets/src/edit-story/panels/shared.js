@@ -68,6 +68,38 @@ InputGroup.defaultProps = {
 	postfix: '',
 };
 
+function Checkbox( { label, value, onChange, postfix, checked } ) {
+	return (
+		<Group>
+			<Label>
+				{ label }
+			</Label>
+			<Input
+				onChange={ ( evt ) => onChange( evt.target.checked, evt ) }
+				onBlur={ ( evt ) => evt.target.form.dispatchEvent( new window.Event( 'submit' ) ) }
+				value={ value }
+				type={ 'checkbox' }
+				checked={ checked }
+			/>
+			{ postfix }
+		</Group>
+	);
+}
+
+Checkbox.propTypes = {
+	label: PropTypes.string.isRequired,
+	value: PropTypes.any,
+	onChange: PropTypes.func.isRequired,
+	postfix: PropTypes.string,
+	checked: PropTypes.bool,
+};
+
+Checkbox.defaultProps = {
+	postfix: '',
+	checked: false,
+	value: '',
+};
+
 function getCommonValue( list, property ) {
 	const first = list[ 0 ][ property ];
 	const allMatch = list.every( ( el ) => el[ property ] === first );
@@ -76,6 +108,7 @@ function getCommonValue( list, property ) {
 
 export {
 	InputGroup,
+	Checkbox,
 	getCommonValue,
 };
 
