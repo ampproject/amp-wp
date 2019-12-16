@@ -28,8 +28,8 @@ import useSelectElementById from './actions/useSelectElementById';
 import useAppendElementToCurrentPage from './actions/useAppendElementToCurrentPage';
 import useSetCurrentPageByIndex from './actions/useSetCurrentPageByIndex';
 import useSetPropertiesOnSelectedElements from './actions/useSetPropertiesOnSelectedElements';
-import useSetPropertiesById from './actions/useSetPropertiesById';
 import useSavePost from './actions/useSavePost';
+import useSetPropertiesById from './actions/useSetPropertiesById';
 
 function StoryProvider( { storyId, children } ) {
 	// Story state is stored in these three immutable variables only!

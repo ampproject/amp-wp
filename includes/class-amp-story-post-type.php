@@ -50,7 +50,7 @@ class AMP_Story_Post_Type {
 		register_post_type(
 			self::POST_TYPE_SLUG,
 			[
-				'labels'       => [
+				'labels'                => [
 					'name'                     => _x( 'Stories', 'post type general name', 'amp' ),
 					'singular_name'            => _x( 'Story', 'post type singular name', 'amp' ),
 					'add_new'                  => _x( 'New', 'story', 'amp' ),
@@ -82,12 +82,12 @@ class AMP_Story_Post_Type {
 					'menu_name'                => _x( 'Stories', 'admin menu', 'amp' ),
 					'name_admin_bar'           => _x( 'Story', 'add new on admin bar', 'amp' ),
 				],
-				'menu_icon'    => 'dashicons-book',
-				'taxonomies'   => [
+				'menu_icon'             => 'dashicons-book',
+				'taxonomies'            => [
 					'post_tag',
 					'category',
 				],
-				'supports'     => [
+				'supports'              => [
 					'title', // Used for amp-story[title].
 					'author', // Used for the amp/amp-story-post-author block.
 					'editor',
@@ -96,47 +96,15 @@ class AMP_Story_Post_Type {
 					'revisions', // Without this, the REST API will return 404 for an autosave request.
 					'custom-fields', // Used for global stories settings.
 				],
-				'rewrite'      => [
+				'rewrite'               => [
 					'slug' => self::REWRITE_SLUG,
 				],
-				'public'       => true,
-				'show_ui'      => true,
-				'show_in_rest' => true,
+				'public'                => true,
+				'show_ui'               => true,
+				'show_in_rest'          => true,
+				'rest_controller_class' => 'AMP_REST_Stories_Controller',
 			]
 		);
-
-		$meta_args = [
-			'type'           => 'array',
-			'object_subtype' => self::POST_TYPE_SLUG,
-			'single'         => true,
-			'show_in_rest'   => [
-				'schema' => [
-					'type'  => 'array',
-					'items' => [
-						'id'       => [
-							'type' => 'string',
-						],
-						'type'     => [
-							'type'    => 'string',
-							'default' => 'page',
-						],
-						'elements' => [
-							'type'    => 'array',
-							'default' => [],
-						],
-						'index'    => [
-							'type'    => 'integer',
-							'default' => 0,
-						],
-					],
-				],
-			],
-		];
-		// Hide the pages data from none logged in users.
-		if ( ! is_user_logged_in() ) {
-			$meta_args['show_in_rest'] = false;
-		}
-		register_meta( 'post', 'amp_pages', $meta_args );
 
 		add_action( 'admin_enqueue_scripts', [ __CLASS__, 'admin_enqueue_scripts' ] );
 		add_filter( 'show_admin_bar', [ __CLASS__, 'show_admin_bar' ] );
