@@ -25,13 +25,8 @@ class AMP_REST_Stories_Controller extends WP_REST_Posts_Controller {
 			return $prepared_story;
 		}
 
-		if ( isset( $request['content_filtered'] ) ) {
-			$prepared_story->post_content_filtered = $request['content_filtered'];
-			if ( isset( $request['content_filtered']['raw'] ) ) {
-				$prepared_story->post_content_filtered = $request['content_filtered']['raw'];
-			}
-
-			$prepared_story->post_content_filtered = wp_json_encode( $prepared_story->post_content_filtered );
+		if ( isset( $request['story_data'] ) ) {
+			$prepared_story->post_content_filtered = wp_json_encode( $request['story_data'] );
 		}
 
 		return $prepared_story;
@@ -51,11 +46,9 @@ class AMP_REST_Stories_Controller extends WP_REST_Posts_Controller {
 		$data     = $response->get_data();
 		$schema   = $this->get_item_schema();
 
-		if ( in_array( 'content_filtered', $fields, true ) ) {
-			$post_content_filtered    = json_decode( $post->post_content_filtered, true );
-			$data['content_filtered'] = [
-				'raw' => rest_sanitize_value_from_schema( $post_content_filtered, $schema['properties']['content_filtered']['properties']['raw'] ),
-			];
+		if ( in_array( 'story_data', $fields, true ) ) {
+			$post_story_data    = json_decode( $post->post_content_filtered, true );
+			$data['story_data'] = rest_sanitize_value_from_schema( $post_story_data, $schema['properties']['story_data'] );
 		}
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
@@ -92,38 +85,31 @@ class AMP_REST_Stories_Controller extends WP_REST_Posts_Controller {
 		}
 		$schema = parent::get_item_schema();
 
-		$schema['properties']['content_filtered'] = [
-			'description' => __( 'The post content filtered for the object.', 'amp' ),
-			'type'        => 'object',
-			'context'     => [ 'view', 'edit', 'embed' ],
-			'properties'  => [
-				'raw' => [
-					'description' => __( 'Content filtered for the object, as it exists in the database.', 'amp' ),
-					'type'        => 'array',
-					'items'       => [
-						'type'       => 'object',
-						'properties' => [
-							'id'       => [
-								'type' => 'string',
-							],
-							'type'     => [
-								'type'    => 'string',
-								'default' => 'page',
-							],
-							'elements' => [
-								'type'    => 'array',
-								'default' => [],
-							],
-							'index'    => [
-								'type'    => 'integer',
-								'default' => 0,
-							],
-						],
+		$schema['properties']['story_data'] = [
+			'description' => __( 'Story data stored as a JSON object. Stored in post_content_filtered field.', 'amp' ),
+			'type'        => 'array',
+			'items'       => [
+				'type'       => 'object',
+				'properties' => [
+					'id'       => [
+						'type' => 'string',
 					],
-					'context'     => [ 'edit' ],
-					'default'     => [],
+					'type'     => [
+						'type'    => 'string',
+						'default' => 'page',
+					],
+					'elements' => [
+						'type'    => 'array',
+						'default' => [],
+					],
+					'index'    => [
+						'type'    => 'integer',
+						'default' => 0,
+					],
 				],
 			],
+			'context'     => [ 'edit' ],
+			'default'     => [],
 		];
 
 		$this->schema = $schema;
