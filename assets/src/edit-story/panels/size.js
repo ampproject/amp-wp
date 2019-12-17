@@ -33,7 +33,6 @@ function SizePanel( { selectedElements, onSetProperties } ) {
 				{ 'Size' }
 			</Title>
 			<InputGroup
-				type="number"
 				label="Width"
 				value={ state.width }
 				isMultiple={ width === '' }
@@ -51,7 +50,6 @@ function SizePanel( { selectedElements, onSetProperties } ) {
 				disabled={ isFullbleed }
 			/>
 			<InputGroup
-				type="number"
 				label="Height"
 				value={ state.height }
 				isMultiple={ height === '' }

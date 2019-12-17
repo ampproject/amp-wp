@@ -53,7 +53,7 @@ function InputGroup( { type, label, value, isMultiple, onChange, postfix, disabl
 				{ label }
 			</Label>
 			<Input
-				type={ type || 'text' }
+				type={ type || 'number' }
 				disabled={ disabled }
 				onChange={ ( evt ) => onChange( isCheckbox ? evt.target.checked : evt.target.value, evt ) }
 				onBlur={ ( evt ) => evt.target.form.dispatchEvent( new window.Event( 'submit' ) ) }
@@ -77,6 +77,7 @@ InputGroup.propTypes = {
 };
 
 InputGroup.defaultProps = {
+	type: 'number',
 	postfix: '',
 };
 
