@@ -22,26 +22,27 @@ const Wrapper = styled.div`
 	color:  ${ ( { theme } ) => theme.colors.fg.v1 };
 `;
 
-const Space = styled.div`
-	flex: 0 1 60px;
-`;
-
-const Circle = styled.a`
-	color: inherit;
-	height: 60px;
-	width: 60px;
-	flex: 0 0 60px;
-	border-radius: 50%;
-	border: 2px solid;
+const Button = styled.button`
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	color: inherit;
+	background: transparent;
+	padding: 0;
+	height: 100px;
+	width: 56px;
+	border: 1px dashed;
 	opacity: .25;
 	cursor: pointer;
 
 	&:hover {
 		color: inherit;
 		opacity: 1;
+	}
+
+	svg {
+		width: 1em;
+		height: 1em;
 	}
 `;
 
@@ -55,10 +56,9 @@ function AddPage() {
 	}, [ addBlankPage, setCurrentPageByIndex, pages.length ] );
 	return (
 		<Wrapper>
-			<Space />
-			<Circle onClick={ handleClick }>
+			<Button onClick={ handleClick }>
 				<Icon />
-			</Circle>
+			</Button>
 		</Wrapper>
 	);
 }
