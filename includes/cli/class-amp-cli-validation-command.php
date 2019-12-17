@@ -582,6 +582,11 @@ final class AMP_CLI_Validation_Command {
 				unset( $data['function'], $data['hook'], $data['priority'] );
 			}
 
+			if ( array_key_exists( 'function', $keys ) ) {
+				$string .= " => {$data['function']}";
+				unset( $data['function'] );
+			}
+
 			if ( [] === array_diff( [ 'dependency_type', 'handle' ], $keys ) ) {
 				$string .= " ({$data['dependency_type']}:{$data['handle']})";
 				unset( $data['dependency_type'], $data['handle'] );
