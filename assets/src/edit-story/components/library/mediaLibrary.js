@@ -34,7 +34,7 @@ const Image = styled.img`
 	${ StyledTiles }
 `;
 
-const Video = styled.video`
+const Video = styled.video.attrs( { muted: true, loop: true } )`
 	${ StyledTiles }
 `;
 
@@ -89,12 +89,31 @@ const Search = styled.input.attrs( { type: 'text' } )`
 	}
 `;
 
+const Tile = styled.div`
+	position: relative;
+`;
+
 const Icon = styled( Dashicon )`
 	position: absolute;
 	top: 8px;
 	left: 10px;
 	fill: ${ ( { theme } ) => theme.colors.mg.v2 };
 `;
+
+const PlayIcon = styled( Dashicon )`
+	position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 30px;
+    height: 30px;
+    z-index: 10;
+	fill: ${ ( { theme } ) => theme.colors.mg.v2 };
+	${Tile}:hover & {
+    	fill: transparent;
+  	}
+`;
+
 
 const SUPPORTED_IMAGE_TYPES = [
 	'image/png',
@@ -230,24 +249,28 @@ function MediaLibrary( { onInsert } ) {
 	 * @param {number} width      Width that element is inserted into editor.
 	 * @return {null|*}          Element or null if does not map to video/image.
 	 */
-	const getMediaElement = ( mediaEl, width ) => {
+	const getMediaElement = ( mediaEl, width, index ) => {
 		const { src, oWidth, oHeight, mimeType } = mediaEl;
 		const height = getRelativeHeight( oWidth, oHeight, width );
+		const style = { width, height };
 		if ( SUPPORTED_IMAGE_TYPES.includes( mimeType ) ) {
-			return ( <Image
+			return ( <Tile style={style} key={index}><Image
 				key={ src }
 				src={ src }
 				width={ width }
 				height={ height }
 				loading={ 'lazy' }
 				onClick={ () => insertMediaElement( mediaEl, width ) }
-			/> );
+			/></Tile> );
 		} else if ( SUPPORTED_VIDEO_TYPES.includes( mimeType ) ) {
 			/* eslint-disable react/jsx-closing-tag-location */
-			return ( <Video
+			return ( <Tile style={style} key={index}>
+				<PlayIcon icon="controls-play" />
+				<Video
 				key={ src }
 				width={ width }
 				height={ height }
+
 				onClick={ () => insertMediaElement( mediaEl, width ) }
 				onMouseEnter={ ( evt ) => {
 					evt.target.play();
@@ -258,7 +281,7 @@ function MediaLibrary( { onInsert } ) {
 				} }
 			>
 				<source src={ src } type={ mimeType } />
-			</Video> );
+			</Video></Tile> );
 			/* eslint-enable react/jsx-closing-tag-location */
 		}
 		return null;
@@ -308,12 +331,12 @@ function MediaLibrary( { onInsert } ) {
 				<Container>
 					<Column>
 						{ media.map( ( mediaEl, index ) => {
-							return ( isEven( index ) ) ? getMediaElement( mediaEl, DEFAULT_WIDTH ) : null;
+							return ( isEven( index ) ) ? getMediaElement( mediaEl, DEFAULT_WIDTH, index ) : null;
 						} ) }
 					</Column>
 					<Column>
 						{ media.map( ( mediaEl, index ) => {
-							return ( ! isEven( index ) ) ? getMediaElement( mediaEl, DEFAULT_WIDTH ) : null;
+							return ( ! isEven( index ) ) ? getMediaElement( mediaEl, DEFAULT_WIDTH, index ) : null;
 						} ) }
 					</Column>
 				</Container>

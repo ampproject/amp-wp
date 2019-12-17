@@ -9,7 +9,6 @@ import styled from 'styled-components';
  */
 import { ElementWithPosition, ElementWithSize, ElementWithRotation } from '../shared';
 import { VideoWithScale } from './util';
-import ImageDisplay from '../image/display';
 
 const Element = styled.figure`
 	${ ElementWithPosition }
@@ -17,7 +16,7 @@ const Element = styled.figure`
 	${ ElementWithRotation }
 `;
 
-const Video = styled.video`
+const Video = styled.video.attrs( { muted: true } )`
 	position: relative;
 	${ VideoWithScale }
 `;
@@ -44,6 +43,7 @@ function VideoDisplay( props ) {
 				loop={ loop }
 				controls={ controls }
 				autoPlay={ autoPlay }
+				muted={ true }
 			>
 				<source src={ src } type={ mimeType } />
 			</Video>
@@ -75,7 +75,6 @@ VideoDisplay.propTypes = {
 
 VideoDisplay.defaultProps = {
 	controls: false,
-	autoPlay: true,
 	loop: false,
 	videoCaption: '',
 	ampAriaLabel: '',
