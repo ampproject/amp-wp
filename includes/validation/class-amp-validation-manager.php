@@ -262,7 +262,7 @@ class AMP_Validation_Manager {
 		}
 
 		// Story post type always supports validation.
-		if ( AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG === $post->post_type || AMP_Story_Post_Type::POST_TYPE_SLUG === $post->post_type ) {
+		if ( in_array( $post->post_type, [ AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG, AMP_Story_Post_Type::POST_TYPE_SLUG ] ) ) {
 			return AMP_Options_Manager::is_stories_experience_enabled();
 		}
 

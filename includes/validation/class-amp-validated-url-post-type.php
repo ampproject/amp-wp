@@ -615,8 +615,7 @@ class AMP_Validated_URL_Post_Type {
 		$url = $post->post_title;
 
 		$queried_object = get_post_meta( $post->ID, '_amp_queried_object', true );
-		$is_amp_story   = isset( $queried_object['id'], $queried_object['type'] ) && 'post' === $queried_object['type'] && ( AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG === get_post_type( $queried_object['id'] || AMP_Story_Post_Type::POST_TYPE_SLUG === get_post_type( $queried_object['id'] ) ) );
-
+		$is_amp_story   = isset( $queried_object['id'], $queried_object['type'] ) && 'post' === $queried_object['type'] && ( in_array( get_post_type( $queried_object['id'] ), [ AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG, AMP_Story_Post_Type::POST_TYPE_SLUG ], true ) );
 		// Add AMP query var if in transitional mode.
 		if ( ! amp_is_canonical() && ! $is_amp_story ) {
 			$url = add_query_arg( amp_get_slug(), '', $url );
