@@ -47,7 +47,7 @@ const ActualImg = styled.img`
 `;
 
 function ImageEdit( { src, origRatio, width, height, x, y, scale, offsetX, offsetY, rotationAngle } ) {
-	const actualRatio = width / height * PAGE_WIDTH / PAGE_HEIGHT;
+	const actualRatio = ( width / height ) * ( PAGE_WIDTH / PAGE_HEIGHT );
 	const imgProps = getImgProps( scale, offsetX, offsetY, origRatio, actualRatio );
 	const elementProps = {
 		width,

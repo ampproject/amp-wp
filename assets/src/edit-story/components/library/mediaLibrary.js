@@ -197,7 +197,7 @@ function MediaLibrary( { onInsert } ) {
 	const insertMediaElement = ( attachment, width ) => {
 		const { src, mimeType, oWidth, oHeight } = attachment;
 		const height = getRelativeHeight( oWidth, oHeight, width );
-		const origRatio = oWidth / width;
+		const origRatio = oHeight / oWidth;
 		if ( SUPPORTED_IMAGE_TYPES.includes( mimeType ) ) {
 			return onInsert( 'image', {
 				src,
