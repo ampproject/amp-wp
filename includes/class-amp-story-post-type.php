@@ -30,7 +30,6 @@ class AMP_Story_Post_Type {
 	 */
 	const AMP_STORIES_STYLE_HANDLE = 'amp-edit-story';
 
-
 	/**
 	 * The rewrite slug for this post type.
 	 *

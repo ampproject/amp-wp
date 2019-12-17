@@ -19,15 +19,16 @@ class AMP_REST_Stories_Controller extends WP_REST_Posts_Controller {
 	 * @return stdClass|WP_Error Post object or WP_Error.
 	 */
 	protected function prepare_item_for_database( $request ) {
+		// If either story data or content field is not set, we shouldn't update.
+		if ( ! isset( $request['story_data'] ) || ! isset( $request['content'] ) ) {
+			return new WP_Error( 'rest_story_invalid_data', __( 'Missing value for content or story_data.' ), array( 'status' => 412 ) );
+		}
 		$prepared_story = parent::prepare_item_for_database( $request );
 
 		if ( is_wp_error( $prepared_story ) ) {
 			return $prepared_story;
 		}
-
-		if ( isset( $request['story_data'] ) ) {
-			$prepared_story->post_content_filtered = wp_json_encode( $request['story_data'] );
-		}
+		$prepared_story->post_content_filtered = wp_json_encode( $request['story_data'] );
 
 		return $prepared_story;
 	}
