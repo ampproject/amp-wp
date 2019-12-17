@@ -20,112 +20,114 @@ class Test_AMP_DOM_Document extends WP_UnitTestCase {
 	 * @return array Data.
 	 */
 	public function data_dom_document() {
+		$head = '<head><meta charset="utf-8"></head>';
+
 		return [
 			'minimum_valid_document'                   => [
 				'utf-8',
 				'<!DOCTYPE html><html><head></head><body></body></html>',
-				'<!DOCTYPE html><html><head></head><body></body></html>',
+				'<!DOCTYPE html><html>' . $head . '<body></body></html>',
 			],
 			'valid_document_with_attributes'           => [
 				'utf-8',
-				'<!DOCTYPE html><html amp lang="en"><head><meta charset="utf-8"></head><body class="some-class"><p>Text</p></body></html>',
-				'<!DOCTYPE html><html amp lang="en"><head><meta charset="utf-8"></head><body class="some-class"><p>Text</p></body></html>',
+				'<!DOCTYPE html><html amp lang="en">' . $head . '<body class="some-class"><p>Text</p></body></html>',
+				'<!DOCTYPE html><html amp lang="en">' . $head . '<body class="some-class"><p>Text</p></body></html>',
 			],
 			'missing_head'                             => [
 				'utf-8',
 				'<!DOCTYPE html><html amp lang="en"><body class="some-class"><p>Text</p></body></html>',
-				'<!DOCTYPE html><html amp lang="en"><head></head><body class="some-class"><p>Text</p></body></html>',
+				'<!DOCTYPE html><html amp lang="en">' . $head . '<body class="some-class"><p>Text</p></body></html>',
 			],
 			'missing_body'                             => [
 				'utf-8',
-				'<!DOCTYPE html><html amp lang="en"><head><meta charset="utf-8"></head><p>Text</p></html>',
-				'<!DOCTYPE html><html amp lang="en"><head><meta charset="utf-8"></head><body><p>Text</p></body></html>',
+				'<!DOCTYPE html><html amp lang="en">' . $head . '<p>Text</p></html>',
+				'<!DOCTYPE html><html amp lang="en">' . $head . '<body><p>Text</p></body></html>',
 			],
 			'missing_head_and_body'                    => [
 				'utf-8',
 				'<!DOCTYPE html><html amp lang="en"><p>Text</p></html>',
-				'<!DOCTYPE html><html amp lang="en"><head></head><body><p>Text</p></body></html>',
+				'<!DOCTYPE html><html amp lang="en">' . $head . '<body><p>Text</p></body></html>',
 			],
 			'missing_html_and_head_and_body'           => [
 				'utf-8',
 				'<!DOCTYPE html><p>Text</p>',
-				'<!DOCTYPE html><html><head></head><body><p>Text</p></body></html>',
+				'<!DOCTYPE html><html>' . $head . '<body><p>Text</p></body></html>',
 			],
 			'content_only'                             => [
 				'utf-8',
 				'<p>Text</p>',
-				'<!DOCTYPE html><html><head></head><body><p>Text</p></body></html>',
+				'<!DOCTYPE html><html>' . $head . '<body><p>Text</p></body></html>',
 			],
 			'missing_doctype'                          => [
 				'utf-8',
-				'<html amp lang="en"><head><meta charset="utf-8"></head><body class="some-class"><p>Text</p></body></html>',
-				'<!DOCTYPE html><html amp lang="en"><head><meta charset="utf-8"></head><body class="some-class"><p>Text</p></body></html>',
+				'<html amp lang="en">' . $head . '<body class="some-class"><p>Text</p></body></html>',
+				'<!DOCTYPE html><html amp lang="en">' . $head . '<body class="some-class"><p>Text</p></body></html>',
 			],
 			'html_4_doctype'                           => [
 				'utf-8',
-				'<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><html amp lang="en"><head><meta charset="utf-8"></head><body class="some-class"><p>Text</p></body></html>',
-				'<!DOCTYPE html><html amp lang="en"><head><meta charset="utf-8"></head><body class="some-class"><p>Text</p></body></html>',
+				'<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><html amp lang="en">' . $head . '<body class="some-class"><p>Text</p></body></html>',
+				'<!DOCTYPE html><html amp lang="en">' . $head . '<body class="some-class"><p>Text</p></body></html>',
 			],
 			'lots_of_whitespace'                       => [
 				'utf-8',
 				" \n <!DOCTYPE \n html \n > \n <html \n amp \n lang=\"en\"   \n  >  \n   <head >   \n<meta \n   charset=\"utf-8\">  \n  </head>  \n  <body   \n class=\"some-class\"  \n >  \n  <p>  \n  Text  \n  </p>  \n\n  </body  >  \n  </html  >  \n  ",
-				'<!DOCTYPE html><html amp lang="en"><head><meta charset="utf-8"></head><body class="some-class"><p> Text </p></body></html>',
+				'<!DOCTYPE html><html amp lang="en">' . $head . '<body class="some-class"><p> Text </p></body></html>',
 			],
 			'utf_8_encoding_predefined'                => [
 				'utf-8',
 				'<p>مرحبا بالعالم! Check out ‘this’ and “that” and—other things.</p>',
-				'<!DOCTYPE html><html><head></head><body><p>مرحبا بالعالم! Check out ‘this’ and “that” and—other things.</p></body></html>',
+				'<!DOCTYPE html><html>' . $head . '<body><p>مرحبا بالعالم! Check out ‘this’ and “that” and—other things.</p></body></html>',
 			],
 			'utf_8_encoding_guessed_via_charset'       => [
 				'',
-				'<html><head><meta charset="utf-8"></head><body><p>مرحبا بالعالم! Check out ‘this’ and “that” and—other things.</p></body>',
-				'<!DOCTYPE html><html><head><meta charset="utf-8"></head><body><p>مرحبا بالعالم! Check out ‘this’ and “that” and—other things.</p></body></html>',
+				'<html>' . $head . '<body><p>مرحبا بالعالم! Check out ‘this’ and “that” and—other things.</p></body>',
+				'<!DOCTYPE html><html>' . $head . '<body><p>مرحبا بالعالم! Check out ‘this’ and “that” and—other things.</p></body></html>',
 			],
 			'utf_8_encoding_guessed_via_content'       => [
 				'',
 				'<p>مرحبا بالعالم! Check out ‘this’ and “that” and—other things.</p>',
-				'<!DOCTYPE html><html><head></head><body><p>مرحبا بالعالم! Check out ‘this’ and “that” and—other things.</p></body></html>',
+				'<!DOCTYPE html><html>' . $head . '<body><p>مرحبا بالعالم! Check out ‘this’ and “that” and—other things.</p></body></html>',
 			],
 			'iso_8859_1_encoding_predefined'           => [
 				'iso-8859-1',
 				utf8_decode( '<!DOCTYPE html><html><head></head><body><p>ÄÖÜ</p></body></html>' ),
-				'<!DOCTYPE html><html><head></head><body><p>ÄÖÜ</p></body></html>',
+				'<!DOCTYPE html><html>' . $head . '<body><p>ÄÖÜ</p></body></html>',
 			],
 			'iso_8859_1_encoding_guessed_via_charset'  => [
 				'',
 				utf8_decode( '<!DOCTYPE html><html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" /></head><body><p>ÄÖÜ</p></body></html>' ),
-				'<!DOCTYPE html><html><head></head><body><p>ÄÖÜ</p></body></html>',
+				'<!DOCTYPE html><html>' . $head . '<body><p>ÄÖÜ</p></body></html>',
 			],
 			'iso_8859_1_encoding_guessed_via_content'  => [
 				'',
 				utf8_decode( '<!DOCTYPE html><html><body><p>ÄÖÜ</p></body></html>' ),
-				'<!DOCTYPE html><html><head></head><body><p>ÄÖÜ</p></body></html>',
+				'<!DOCTYPE html><html>' . $head . '<body><p>ÄÖÜ</p></body></html>',
 			],
 			'raw_iso_8859_1'                           => [
 				'',
 				utf8_decode( 'ÄÖÜ' ),
-				'<!DOCTYPE html><html><head></head><body>ÄÖÜ</body></html>',
+				'<!DOCTYPE html><html>' . $head . '<body>ÄÖÜ</body></html>',
 			],
 			// Make sure we correctly identify the ISO-8859 sub-charsets ("€" does not exist in ISO-8859-1).
 			'iso_8859_15_encoding_predefined'          => [
 				'iso-8859-1',
 				mb_convert_encoding( '<!DOCTYPE html><html><head></head><body><p>€</p></body></html>', 'ISO-8859-15', 'UTF-8' ),
-				'<!DOCTYPE html><html><head></head><body><p>€</p></body></html>',
+				'<!DOCTYPE html><html>' . $head . '<body><p>€</p></body></html>',
 			],
 			'iso_8859_15_encoding_guessed_via_charset' => [
 				'',
 				mb_convert_encoding( '<!DOCTYPE html><html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-15" /></head><body><p>€</p></body></html>', 'ISO-8859-15', 'UTF-8' ),
-				'<!DOCTYPE html><html><head></head><body><p>€</p></body></html>',
+				'<!DOCTYPE html><html>' . $head . '<body><p>€</p></body></html>',
 			],
 			'iso_8859_15_encoding_guessed_via_content' => [
 				'',
 				mb_convert_encoding( '<!DOCTYPE html><html><body><p>€</p></body></html>', 'ISO-8859-15', 'UTF-8' ),
-				'<!DOCTYPE html><html><head></head><body><p>€</p></body></html>',
+				'<!DOCTYPE html><html>' . $head . '<body><p>€</p></body></html>',
 			],
 			'raw_iso_8859_15'                          => [
 				'',
 				mb_convert_encoding( '€', 'ISO-8859-15', 'UTF-8' ),
-				'<!DOCTYPE html><html><head></head><body>€</body></html>',
+				'<!DOCTYPE html><html>' . $head . '<body>€</body></html>',
 			],
 		];
 	}
@@ -258,34 +260,38 @@ class Test_AMP_DOM_Document extends WP_UnitTestCase {
 	 * @covers \Amp\AmpWP\Dom\Document::normalize_document_structure()
 	 */
 	public function test_ensuring_head_body() {
+		// The meta charset tag that is automatically added needs to always be taken into account.
+
 		$html = '<html><body><p>Hello</p></body></html>';
 		$dom  = Document::from_html( $html );
 		$this->assertEquals( 'head', $dom->documentElement->firstChild->nodeName );
-		$this->assertEquals( 0, $dom->documentElement->firstChild->childNodes->length );
+		$this->assertEquals( 1, $dom->head->childNodes->length );
 		$this->assertEquals( 'body', $dom->documentElement->lastChild->nodeName );
-		$this->assertEquals( $dom->documentElement->lastChild, $dom->getElementsByTagName( 'p' )->item( 0 )->parentNode );
+		$this->assertEquals( $dom->body, $dom->getElementsByTagName( 'p' )->item( 0 )->parentNode );
 
 		$html = '<html><head><title>foo</title></head></html>';
 		$dom  = Document::from_html( $html );
 		$this->assertEquals( 'head', $dom->documentElement->firstChild->nodeName );
-		$this->assertEquals( $dom->documentElement->firstChild, $dom->getElementsByTagName( 'title' )->item( 0 )->parentNode );
+		$this->assertEquals( $dom->head->firstChild, $dom->getElementsByTagName( 'meta' )->item( 0 ) );
+		$this->assertEquals( $dom->head->firstChild->nextSibling, $dom->getElementsByTagName( 'title' )->item( 0 ) );
 		$this->assertEquals( 'body', $dom->documentElement->lastChild->nodeName );
-		$this->assertEquals( 0, $dom->documentElement->lastChild->childNodes->length );
+		$this->assertEquals( 0, $dom->body->childNodes->length );
 
 		$html = '<html><head><title>foo</title></head><p>no body</p></html>';
 		$dom  = Document::from_html( $html );
 		$this->assertEquals( 'head', $dom->documentElement->firstChild->nodeName );
-		$this->assertEquals( $dom->documentElement->firstChild, $dom->getElementsByTagName( 'title' )->item( 0 )->parentNode );
+		$this->assertEquals( $dom->head->firstChild, $dom->getElementsByTagName( 'meta' )->item( 0 ) );
+		$this->assertEquals( $dom->head->firstChild->nextSibling, $dom->getElementsByTagName( 'title' )->item( 0 ) );
 		$p = $dom->getElementsByTagName( 'p' )->item( 0 );
-		$this->assertEquals( $dom->documentElement->lastChild, $p->parentNode );
+		$this->assertEquals( $dom->body, $p->parentNode );
 		$this->assertEquals( 'no body', $p->textContent );
 
 		$html = 'Hello world';
 		$dom  = Document::from_html( $html );
 		$this->assertEquals( 'head', $dom->documentElement->firstChild->nodeName );
-		$this->assertEquals( 0, $dom->documentElement->firstChild->childNodes->length );
+		$this->assertEquals( 1, $dom->head->childNodes->length );
 		$this->assertEquals( 'body', $dom->documentElement->lastChild->nodeName );
-		$this->assertEquals( 'Hello world', $dom->documentElement->lastChild->lastChild->textContent );
+		$this->assertEquals( 'Hello world', $dom->body->lastChild->textContent );
 	}
 
 
@@ -295,11 +301,13 @@ class Test_AMP_DOM_Document extends WP_UnitTestCase {
 	 * @covers \Amp\AmpWP\Dom\Document::move_invalid_head_nodes_to_body()
 	 */
 	public function test_invalid_head_nodes() {
+		// The meta charset tag that is automatically added needs to always be taken into account.
 
 		// Text node.
 		$html = '<html><head>text</head><body><span>end</span></body></html>';
 		$dom  = Document::from_html( $html );
-		$this->assertNull( $dom->head->firstChild );
+		$this->assertEquals( 'meta', $dom->head->firstChild->tagName );
+		$this->assertNull( $dom->head->firstChild->nextSibling );
 		$body_first_child = $dom->body->firstChild;
 		$this->assertInstanceOf( 'DOMElement', $body_first_child );
 		$this->assertEquals( 'text', $body_first_child->textContent );
@@ -307,13 +315,14 @@ class Test_AMP_DOM_Document extends WP_UnitTestCase {
 		// Valid nodes.
 		$html = '<html><head><!--foo--><title>a</title><base href="/"><meta name="foo" content="bar"><link rel="test" href="/"><style></style><noscript><img src="http://example.com/foo.png"></noscript><script></script></head><body></body></html>';
 		$dom  = Document::from_html( $html );
-		$this->assertEquals( 8, $dom->head->childNodes->length );
+		$this->assertEquals( 9, $dom->head->childNodes->length );
 		$this->assertNull( $dom->body->firstChild );
 
 		// Invalid nodes.
 		$html = '<html><head><?pi ?><span></span><div></div><p>hi</p><img src="https://example.com"><iframe src="/"></iframe></head><body></body></html>';
 		$dom  = Document::from_html( $html );
-		$this->assertNull( $dom->head->firstChild );
+		$this->assertEquals( 'meta', $dom->head->firstChild->tagName );
+		$this->assertNull( $dom->head->firstChild->nextSibling );
 		$this->assertEquals( 6, $dom->body->childNodes->length );
 	}
 }

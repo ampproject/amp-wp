@@ -268,6 +268,9 @@ final class Document extends DOMDocument {
 	 * @return bool true on success or false on failure.
 	 */
 	public function loadHTML( $source, $options = 0 ) {
+		// Drop references to old DOM document.
+		unset ( $this->xpath, $this->head, $this->body );
+
 		$source = $this->convert_amp_bind_attributes( $source );
 		$source = $this->replace_self_closing_tags( $source );
 		$source = $this->normalize_document_structure( $source );
@@ -301,6 +304,10 @@ final class Document extends DOMDocument {
 				$this->head->removeChild( $meta );
 			}
 		}
+
+		// Add the required utf-8 meta charset tag.
+		$charset = AMP_DOM_Utils::create_node( $this, 'meta', [ 'charset' => self::AMP_ENCODING ] );
+		$this->head->insertBefore( $charset, $this->head->firstChild );
 
 		// Do some further clean-up.
 		$this->move_invalid_head_nodes_to_body();
@@ -705,9 +712,11 @@ final class Document extends DOMDocument {
 		$encoding = self::UNKNOWN_ENCODING;
 
 		// Check for HTML 4 http-equiv meta tags.
-		$http_equiv_tag = $this->find_tag( $content, 'meta', 'http-equiv' );
-		if ( $http_equiv_tag ) {
-			$encoding = $this->extract_value( $http_equiv_tag, 'charset' );
+		foreach ( $this->find_tags( $content, 'meta', 'http-equiv' ) as $potential_http_equiv_tag ) {
+			$encoding = $this->extract_value( $potential_http_equiv_tag, 'charset' );
+			if ( false !== $encoding ) {
+				$http_equiv_tag = $potential_http_equiv_tag;
+			}
 		}
 
 		// Check for HTML 5 charset meta tag. This overrides the HTML 4 charset.
@@ -716,15 +725,13 @@ final class Document extends DOMDocument {
 			$encoding = $this->extract_value( $charset_tag, 'charset' );
 		}
 
-		// Strip charset tags if they don't fit the AMP UTF-8 requirement.
-		if ( self::AMP_ENCODING !== strtolower( $encoding ) ) {
-			if ( $http_equiv_tag ) {
-				$content = str_replace( $http_equiv_tag, '', $content );
-			}
+		// Strip all charset tags.
+		if ( isset( $http_equiv_tag ) ) {
+			$content = str_replace( $http_equiv_tag, '', $content );
+		}
 
-			if ( $charset_tag ) {
-				$content = str_replace( $charset_tag, '', $content );
-			}
+		if ( $charset_tag ) {
+			$content = str_replace( $charset_tag, '', $content );
 		}
 
 		return $encoding;
@@ -738,9 +745,9 @@ final class Document extends DOMDocument {
 	 * @param string $content   Content in which to find the tag.
 	 * @param string $element   Element of the tag.
 	 * @param string $attribute Attribute that the tag contains.
-	 * @return string|false The requested tag, or false if not found.
+	 * @return string[] The requested tags. Returns an empty array if none found.
 	 */
-	private function find_tag( $content, $element, $attribute = null ) {
+	private function find_tags( $content, $element, $attribute = null ) {
 		$matches = [];
 		$pattern = empty( $attribute )
 			? sprintf(
@@ -754,10 +761,30 @@ final class Document extends DOMDocument {
 			);
 
 		if ( preg_match( $pattern, $content, $matches ) ) {
-			return $matches[0];
+			return $matches;
 		}
 
-		return false;
+		return [];
+	}
+
+	/**
+	 * Find a given tag with a given attribute.
+	 *
+	 * If multiple tags match, this method will only return the first one.
+	 *
+	 * @param string $content   Content in which to find the tag.
+	 * @param string $element   Element of the tag.
+	 * @param string $attribute Attribute that the tag contains.
+	 * @return string|false The requested tag, or false if not found.
+	 */
+	private function find_tag( $content, $element, $attribute = null ) {
+		$matches = $this->find_tags( $content, $element, $attribute );
+
+		if ( empty( $matches ) ) {
+			return false;
+		}
+
+		return $matches[0];
 	}
 
 	/**
