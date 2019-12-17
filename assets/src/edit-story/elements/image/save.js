@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import getPercentageFromPixels from '../../utils/getPercentageFromPixels';
+import { getCommonAttributes } from '../shared';
 
 /**
  * Returns AMP HTML for saving into post content for displaying in the FE.
@@ -19,14 +19,7 @@ function ImageSave( { id, src, width, height, x, y, rotationAngle } ) {
 	const wrapperProps = {
 		id: 'el-' + id,
 	};
-	const style = {
-		position: 'absolute',
-		left: getPercentageFromPixels( x, 'x' ) + '%',
-		top: getPercentageFromPixels( y, 'y' ) + '%',
-		width: getPercentageFromPixels( width, 'x' ) + '%',
-		height: getPercentageFromPixels( height, 'y' ) + '%',
-		transform: `rotate(${ rotationAngle }deg)`,
-	};
+	const style = getCommonAttributes( { width, height, x, y, rotationAngle } );
 
 	return (
 		<div style={ { ...style } } { ...wrapperProps }>

@@ -10,6 +10,12 @@ import { addQueryArgs } from '@wordpress/url';
 import { useAPI } from '../../api';
 import { getDefinitionForType } from '../../../elements';
 
+/**
+ * Creates AMP HTML markup for saving to DB for rendering in the FE.
+ *
+ * @param {Object} pages Object of pages.
+ * @return {Element} Markup of pages.
+ */
 const getStoryMarkupFromPages = ( pages ) => {
 	// @todo look into: We should rather use renderToStaticMarkup here, however, it doesn't seem to be exposed via @wordpress/element.
 	const markup = pages.map( ( page ) => {

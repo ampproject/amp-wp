@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import getPercentageFromPixels from '../../utils/getPercentageFromPixels';
+import { getCommonAttributes } from '../shared';
 
 function VideoSave( { autoPlay, id, mimeType, src, width, height, x, y, rotationAngle } ) {
 	const sourceProps = {
@@ -23,14 +23,7 @@ function VideoSave( { autoPlay, id, mimeType, src, width, height, x, y, rotation
 		id: 'el-' + id,
 	};
 
-	const style = {
-		position: 'absolute',
-		left: getPercentageFromPixels( x, 'x' ) + '%',
-		top: getPercentageFromPixels( y, 'y' ) + '%',
-		transform: `rotate(${ rotationAngle }deg)`,
-		width: getPercentageFromPixels( width, 'x' ) + '%',
-		height: getPercentageFromPixels( height, 'y' ) + '%',
-	};
+	const style = getCommonAttributes( { width, height, x, y, rotationAngle } );
 	return (
 		<div style={ { ...style } } { ...wrapperProps } >
 			<amp-video { ...props }>
