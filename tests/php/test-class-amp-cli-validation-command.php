@@ -628,4 +628,107 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 	public function test_get_validation_error_fields( $errors, $expected ) {
 		$this->assertEquals( $expected, $this->call_private_method( $this->validation, 'get_validation_error_fields', [ $errors ] ) );
 	}
+
+	/**
+	 * Get the data to test pad_validation_error_fields().
+	 *
+	 * @return array[]
+	 */
+	public function data_pad_validation_error_fields() {
+		return [
+			'keep_correct_fields'    => [
+				[
+					[
+						'a' => 1,
+						'b' => 2,
+						'c' => 3,
+					],
+				],
+				[ 'a', 'b', 'c' ],
+				[
+					[
+						'a' => 1,
+						'b' => 2,
+						'c' => 3,
+					],
+				],
+			],
+			'padding_missing_fields' => [
+				[
+					[
+						'b' => 1,
+						'c' => 2,
+						'd' => 3,
+					],
+				],
+				[ 'a', 'b', 'c', 'd', 'e' ],
+				[
+					[
+						'a' => '',
+						'b' => 1,
+						'c' => 2,
+						'd' => 3,
+						'e' => '',
+					],
+				],
+			],
+			'padding_per_error'      => [
+				[
+					[
+						'a' => 1,
+						'b' => 2,
+						'c' => 3,
+					],
+					[
+						'b' => 1,
+						'c' => 2,
+						'd' => 3,
+					],
+					[
+						'c' => 1,
+						'd' => 2,
+						'e' => 3,
+					],
+				],
+				[ 'a', 'b', 'c', 'd', 'e' ],
+				[
+					[
+						'a' => 1,
+						'b' => 2,
+						'c' => 3,
+						'd' => '',
+						'e' => '',
+					],
+					[
+						'a' => '',
+						'b' => 1,
+						'c' => 2,
+						'd' => 3,
+						'e' => '',
+					],
+					[
+						'a' => '',
+						'b' => '',
+						'c' => 1,
+						'd' => 2,
+						'e' => 3,
+					],
+				],
+			],
+		];
+	}
+
+	/**
+	 * Test pad_validation_error_fields().
+	 *
+	 * @covers       AMP_CLI_Validation_Command::pad_validation_error_fields()
+	 * @dataProvider data_pad_validation_error_fields
+	 *
+	 * @param array[]  $errors   Array of errors to process.
+	 * @param string[] $fields   Array of fields to pad to.
+	 * @param array[]  $expected Expected array of padded errors.
+	 */
+	public function test_pad_validation_error_fields( $errors, $fields, $expected ) {
+		$this->assertEquals( $expected, $this->call_private_method( $this->validation, 'pad_validation_error_fields', [ $errors, $fields ] ) );
+	}
 }
