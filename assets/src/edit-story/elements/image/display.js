@@ -12,10 +12,9 @@ import { useCallback } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { PAGE_WIDTH, PAGE_HEIGHT } from '../../constants';
 import { useCanvas } from '../../components/canvas';
 import useDoubleClick from '../../utils/useDoubleClick';
-import { ElementWithPosition, ElementWithSize, ElementWithRotation } from '../shared';
+import { ElementWithPosition, ElementWithSize, ElementWithRotation, getBox } from '../shared';
 import { getImgProps, ImageWithScale } from './util';
 
 const Element = styled.div`
@@ -26,24 +25,17 @@ const Element = styled.div`
 `;
 
 const Img = styled.img`
-	position: relative;
+	position: absolute;
 	${ ImageWithScale }
 `;
 
-function ImageDisplay( { id, src, origRatio, width, height, x, y, scale, offsetX, offsetY, rotationAngle, forwardedRef, onPointerDown } ) {
-	// Width and height are percent of the actual page dimensions,
-	// Thus 20-by-20 doesn't mean square, but "same as page ratio".
-	const actualRatio = width / height * PAGE_WIDTH / PAGE_HEIGHT;
-	const imgProps = getImgProps( scale, offsetX, offsetY, origRatio, actualRatio );
+function ImageDisplay( { id, src, origRatio, width, height, x, y, scale, focalX, focalY, rotationAngle, isFullbleed, forwardedRef, onPointerDown } ) {
 	const elementProps = {
-		width,
-		height,
-		x,
-		y,
-		rotationAngle,
+		...getBox( { x, y, width, height, rotationAngle, isFullbleed } ),
 		ref: forwardedRef,
 		onPointerDown,
 	};
+	const imgProps = getImgProps( elementProps.width, elementProps.height, scale, focalX, focalY, origRatio );
 	const {
 		actions: { setEditingElement },
 	} = useCanvas();
@@ -67,8 +59,9 @@ ImageDisplay.propTypes = {
 	y: PropTypes.number.isRequired,
 	scale: PropTypes.number,
 	rotationAngle: PropTypes.number.isRequired,
-	offsetX: PropTypes.number,
-	offsetY: PropTypes.number,
+	isFullbleed: PropTypes.bool,
+	focalX: PropTypes.number,
+	focalY: PropTypes.number,
 	forwardedRef: PropTypes.oneOfType( [
 		PropTypes.object,
 		PropTypes.func,
@@ -78,8 +71,8 @@ ImageDisplay.propTypes = {
 
 ImageDisplay.defaultProps = {
 	scale: null,
-	offsetX: null,
-	offsetY: null,
+	focalX: null,
+	focalY: null,
 };
 
 export default ImageDisplay;

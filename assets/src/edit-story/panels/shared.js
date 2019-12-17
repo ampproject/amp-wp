@@ -36,16 +36,23 @@ const Group = styled.label`
 	display: flex;
 	align-items: center;
 	margin-bottom: 5px;
+	opacity: ${ ( { disabled } ) => disabled ? 0.7 : 1 };
 `;
 
-function InputGroup( { label, value, isMultiple, onChange, postfix } ) {
+export const ActionButton = styled.button`
+	color: ${ ( { theme } ) => theme.colors.mg.v1 };
+	font-size: 11px;
+`;
+
+function InputGroup( { label, value, isMultiple, onChange, postfix, disabled } ) {
 	const placeholder = isMultiple ? '( multiple )' : '';
 	return (
-		<Group>
+		<Group disabled={ disabled }>
 			<Label>
 				{ label }
 			</Label>
 			<Input
+				disabled={ disabled }
 				onChange={ ( evt ) => onChange( evt.target.value, evt ) }
 				onBlur={ ( evt ) => evt.target.form.dispatchEvent( new window.Event( 'submit' ) ) }
 				placeholder={ placeholder }
@@ -62,6 +69,7 @@ InputGroup.propTypes = {
 	isMultiple: PropTypes.bool.isRequired,
 	onChange: PropTypes.func.isRequired,
 	postfix: PropTypes.string,
+	disabled: PropTypes.bool,
 };
 
 InputGroup.defaultProps = {
