@@ -463,7 +463,7 @@ final class AMP_CLI_Validation_Command {
 		return array_reduce(
 			$errors,
 			static function ( $fields, $error ) {
-				return array_unique( array_merge( $fields, array_keys( $error ) ) );
+				return array_values( array_unique( array_merge( $fields, array_keys( $error ) ) ) );
 			},
 			[]
 		);
