@@ -229,6 +229,16 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 					// Omit these since amp-iframe will add them if needed if the `allowfullscreen` attribute is present.
 					break;
 
+				case 'loading':
+					/*
+					 * The `amp-iframe` component already does lazy-loading by default; trigger a validation error only
+					 * if the value is not `lazy`.
+					 */
+					if ( 'lazy' !== $value ) {
+						$out[ $name ] = $value;
+					}
+					break;
+
 				default:
 					$out[ $name ] = $value;
 					break;
