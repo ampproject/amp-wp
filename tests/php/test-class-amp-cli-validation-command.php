@@ -520,4 +520,215 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 			],
 		];
 	}
+
+	/**
+	 * Get the data to test get_validation_error_fields().
+	 *
+	 * @return array[]
+	 */
+	public function data_get_validation_error_fields() {
+		return [
+			'single_error'                              => [
+				[
+					[
+						'a' => 1,
+						'b' => 2,
+						'c' => 3,
+					],
+				],
+				[ 'a', 'b', 'c' ],
+			],
+			'errors_with_same_fields'                   => [
+				[
+					[
+						'a' => 1,
+						'b' => 2,
+						'c' => 3,
+					],
+					[
+						'a' => 4,
+						'b' => 5,
+						'c' => 6,
+					],
+					[
+						'a' => 7,
+						'b' => 8,
+						'c' => 9,
+					],
+				],
+				[ 'a', 'b', 'c' ],
+			],
+			'errors_with_differing_fields_no_overlap'   => [
+				[
+					[
+						'a' => 1,
+						'b' => 2,
+						'c' => 3,
+					],
+					[
+						'd' => 4,
+						'e' => 5,
+						'f' => 6,
+					],
+					[
+						'g' => 7,
+						'h' => 8,
+						'i' => 9,
+					],
+				],
+				[ 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i' ],
+			],
+			'errors_with_differing_fields_some_overlap' => [
+				[
+					[
+						'a' => 1,
+						'b' => 2,
+						'c' => 3,
+					],
+					[
+						'b' => 4,
+						'c' => 5,
+						'd' => 6,
+					],
+					[
+						'c' => 7,
+						'd' => 8,
+						'e' => 9,
+					],
+				],
+				[ 'a', 'b', 'c', 'd', 'e' ],
+			],
+			'errors_with_differing_count'               => [
+				[
+					[ 'a' => 1 ],
+					[
+						'a' => 2,
+						'b' => 3,
+					],
+					[
+						'a' => 4,
+						'b' => 5,
+						'c' => 6,
+					],
+				],
+				[ 'a', 'b', 'c' ],
+			],
+		];
+	}
+
+	/**
+	 * Test get_validation_error_fields().
+	 *
+	 * @covers       AMP_CLI_Validation_Command::get_validation_error_fields()
+	 * @dataProvider data_get_validation_error_fields
+	 *
+	 * @param array[]  $errors   Array of errors to process.
+	 * @param string[] $expected Expected array of field names.
+	 */
+	public function test_get_validation_error_fields( $errors, $expected ) {
+		$this->assertEquals( $expected, $this->call_private_method( $this->validation, 'get_validation_error_fields', [ $errors ] ) );
+	}
+
+	/**
+	 * Get the data to test pad_validation_error_fields().
+	 *
+	 * @return array[]
+	 */
+	public function data_pad_validation_error_fields() {
+		return [
+			'keep_correct_fields'    => [
+				[
+					[
+						'a' => 1,
+						'b' => 2,
+						'c' => 3,
+					],
+				],
+				[ 'a', 'b', 'c' ],
+				[
+					[
+						'a' => 1,
+						'b' => 2,
+						'c' => 3,
+					],
+				],
+			],
+			'padding_missing_fields' => [
+				[
+					[
+						'b' => 1,
+						'c' => 2,
+						'd' => 3,
+					],
+				],
+				[ 'a', 'b', 'c', 'd', 'e' ],
+				[
+					[
+						'a' => '',
+						'b' => 1,
+						'c' => 2,
+						'd' => 3,
+						'e' => '',
+					],
+				],
+			],
+			'padding_per_error'      => [
+				[
+					[
+						'a' => 1,
+						'b' => 2,
+						'c' => 3,
+					],
+					[
+						'b' => 1,
+						'c' => 2,
+						'd' => 3,
+					],
+					[
+						'c' => 1,
+						'd' => 2,
+						'e' => 3,
+					],
+				],
+				[ 'a', 'b', 'c', 'd', 'e' ],
+				[
+					[
+						'a' => 1,
+						'b' => 2,
+						'c' => 3,
+						'd' => '',
+						'e' => '',
+					],
+					[
+						'a' => '',
+						'b' => 1,
+						'c' => 2,
+						'd' => 3,
+						'e' => '',
+					],
+					[
+						'a' => '',
+						'b' => '',
+						'c' => 1,
+						'd' => 2,
+						'e' => 3,
+					],
+				],
+			],
+		];
+	}
+
+	/**
+	 * Test pad_validation_error_fields().
+	 *
+	 * @covers       AMP_CLI_Validation_Command::pad_validation_error_fields()
+	 * @dataProvider data_pad_validation_error_fields
+	 *
+	 * @param array[]  $errors   Array of errors to process.
+	 * @param string[] $fields   Array of fields to pad to.
+	 * @param array[]  $expected Expected array of padded errors.
+	 */
+	public function test_pad_validation_error_fields( $errors, $fields, $expected ) {
+		$this->assertEquals( $expected, $this->call_private_method( $this->validation, 'pad_validation_error_fields', [ $errors, $fields ] ) );
+	}
 }
