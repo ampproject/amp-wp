@@ -1931,8 +1931,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertNotContains( 'handle=', $sanitized_html );
 		$this->assertEquals( 2, substr_count( $sanitized_html, '<!-- wp_print_scripts -->' ) );
 
-		var_dump( $sanitized_html );
-
 		$ordered_contains = [
 			'<html amp="">',
 			'<meta charset="' . strtolower( get_bloginfo( 'charset' ) ) . '">',

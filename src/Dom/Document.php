@@ -269,7 +269,7 @@ final class Document extends DOMDocument {
 	 */
 	public function loadHTML( $source, $options = 0 ) {
 		// Drop references to old DOM document.
-		unset ( $this->xpath, $this->head, $this->body );
+		unset( $this->xpath, $this->head, $this->body );
 
 		$source = $this->convert_amp_bind_attributes( $source );
 		$source = $this->replace_self_closing_tags( $source );
