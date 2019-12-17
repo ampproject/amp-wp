@@ -288,7 +288,7 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 			'attributes_removed_from_noscript_iframe'   => [
 				'<iframe src="https://example.com/embed/132886713" width="500" height="281" onclick="foo()" data-foo="bar"></iframe>',
 				'
-					<amp-iframe src="https://example.com/embed/132886713" width="500" height="281" data-foo="bar" sandbox="allow-scripts allow-same-origin" layout="intrinsic" class="amp-wp-enforced-sizes">
+					<amp-iframe src="https://example.com/embed/132886713" width="500" height="281" onclick="foo()" data-foo="bar" sandbox="allow-scripts allow-same-origin" layout="intrinsic" class="amp-wp-enforced-sizes">
 						<span placeholder="" class="amp-wp-iframe-placeholder"></span>
 						<noscript>
 							<iframe src="https://example.com/embed/132886713" width="500" height="281"></iframe>
@@ -410,6 +410,26 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 						</noscript>
 					</amp-iframe>',
 			],
+
+			'iframe_with_loading_lazy_attr' => [
+				'<iframe loading="lazy" src="https://example.com" width="320" height="640"></iframe>',
+				'
+					<amp-iframe src="https://example.com" width="320" height="640" sandbox="allow-scripts allow-same-origin" layout="intrinsic" class="amp-wp-enforced-sizes">
+						<noscript>
+							<iframe src="https://example.com" width="320" height="640"></iframe>
+						</noscript>
+					</amp-iframe>',
+			],
+
+			'iframe_with_loading_eager_attr' => [
+				'<iframe loading="eager" src="https://example.com" width="320" height="640"></iframe>',
+				'
+					<amp-iframe loading="eager" src="https://example.com" width="320" height="640" sandbox="allow-scripts allow-same-origin" layout="intrinsic" class="amp-wp-enforced-sizes">
+						<noscript>
+							<iframe src="https://example.com" width="320" height="640"></iframe>
+						</noscript>
+					</amp-iframe>',
+			],
 		];
 	}
 
@@ -433,9 +453,6 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 
 		$sanitizer = new AMP_Iframe_Sanitizer( $dom, $args );
 		$sanitizer->sanitize();
-
-		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
-		$whitelist_sanitizer->sanitize();
 
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$this->assertEqualMarkup( $expected, $content );
