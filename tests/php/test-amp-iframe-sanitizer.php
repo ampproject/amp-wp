@@ -43,7 +43,7 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 			],
 
 			'simple_iframe_without_noscript_or_placeholder' => [
-				'<iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class" allowtransparency="false" allowfullscreen></iframe>',
+				'<iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class" allowtransparency="FALSE" allowfullscreen></iframe>',
 				'<amp-iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class amp-wp-enforced-sizes" allowfullscreen="" sandbox="allow-scripts allow-same-origin" layout="intrinsic"></amp-iframe>',
 				[
 					'add_noscript_fallback' => false,
