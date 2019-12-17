@@ -219,7 +219,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 
 				case 'allowfullscreen':
 				case 'allowtransparency':
-					if ( 'false' !== $value ) {
+					if ( 'false' !== strtolower( $value ) ) {
 						$out[ $name ] = '';
 					}
 					break;
@@ -227,6 +227,16 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 				case 'mozallowfullscreen':
 				case 'webkitallowfullscreen':
 					// Omit these since amp-iframe will add them if needed if the `allowfullscreen` attribute is present.
+					break;
+
+				case 'loading':
+					/*
+					 * The `amp-iframe` component already does lazy-loading by default; trigger a validation error only
+					 * if the value is not `lazy`.
+					 */
+					if ( 'lazy' !== strtolower( $value ) ) {
+						$out[ $name ] = $value;
+					}
 					break;
 
 				default:
