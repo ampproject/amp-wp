@@ -130,8 +130,8 @@ function Movable( {
 			} }
 			origin={ false }
 			pinchable={ true }
-			keepRatio={ 'image' === selectedElement.type } // @†odo Even image doesn't always keep ratio, consider moving to element's model.
-			renderDirections={ 'image' === selectedElement.type ? CORNER_HANDLES : ALL_HANDLES }
+			keepRatio={ selectedElement.keepRatio || false }
+			renderDirections={ selectedElement.keepRatio ? CORNER_HANDLES : ALL_HANDLES }
 		/>
 	);
 }

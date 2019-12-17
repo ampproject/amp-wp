@@ -44,19 +44,22 @@ export const ActionButton = styled.button`
 	font-size: 11px;
 `;
 
-function InputGroup( { label, value, isMultiple, onChange, postfix, disabled } ) {
+function InputGroup( { type, label, value, isMultiple, onChange, postfix, disabled } ) {
 	const placeholder = isMultiple ? '( multiple )' : '';
+	const isCheckbox = type === 'checkbox';
 	return (
 		<Group disabled={ disabled }>
 			<Label>
 				{ label }
 			</Label>
 			<Input
+				type={ type || 'text' }
 				disabled={ disabled }
-				onChange={ ( evt ) => onChange( evt.target.value, evt ) }
+				onChange={ ( evt ) => onChange( isCheckbox ? evt.target.checked : evt.target.value, evt ) }
 				onBlur={ ( evt ) => evt.target.form.dispatchEvent( new window.Event( 'submit' ) ) }
 				placeholder={ placeholder }
-				value={ value }
+				value={ isCheckbox ? null : value }
+				checked={ isCheckbox ? value : null }
 			/>
 			{ postfix }
 		</Group>
@@ -64,6 +67,7 @@ function InputGroup( { label, value, isMultiple, onChange, postfix, disabled } )
 }
 
 InputGroup.propTypes = {
+	type: PropTypes.string,
 	label: PropTypes.string.isRequired,
 	value: PropTypes.any.isRequired,
 	isMultiple: PropTypes.bool.isRequired,
