@@ -69,6 +69,8 @@ function Movable( {
 	const resetMoveable = ( target ) => {
 		frame.translate = [ 0, 0 ];
 		setStyle( target );
+		target.style.width = '';
+		target.style.height = '';
 		if ( moveable.current ) {
 			moveable.current.updateRect();
 		}
