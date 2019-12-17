@@ -93,6 +93,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		parent::setUp();
 		$dom_document = new Document( '1.0', 'utf-8' );
 		$this->node   = $dom_document->createElement( self::TAG_NAME );
+		$dom_document->appendChild( $this->node );
 		AMP_Validation_Manager::reset_validation_results();
 		$this->original_wp_registered_widgets = $GLOBALS['wp_registered_widgets'];
 

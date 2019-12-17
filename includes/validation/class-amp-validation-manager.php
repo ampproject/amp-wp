@@ -1050,11 +1050,7 @@ class AMP_Validation_Manager {
 	 * }
 	 */
 	public static function locate_sources( DOMNode $node ) {
-		$dom = $node->ownerDocument;
-		if ( ! $dom instanceof Document ) {
-			_doing_it_wrong( 'locate_sources', 'Ended up with a non-normalized DOMDocument. Use Amp\AmpWP\Dom\Document instead.', '1.5.0' );
-		}
-
+		$dom      = Document::from_node( $node );
 		$comments = $dom->xpath->query( 'preceding::comment()[ starts-with( ., "amp-source-stack" ) or starts-with( ., "/amp-source-stack" ) ]', $node );
 		$sources  = [];
 		$matches  = [];

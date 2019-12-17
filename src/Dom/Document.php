@@ -230,6 +230,35 @@ final class Document extends DOMDocument {
 	}
 
 	/**
+	 * Named constructor to provide convenient way of retrieving the DOM from a node.
+	 *
+	 * @param DOMNode $node Node to retrieve the DOM from. This is being modified by reference (!).
+	 * @return Document DOM generated from provided HTML, or false if the transformation failed.
+	 */
+	public static function from_node( DOMNode &$node ) {
+		$root = $node->ownerDocument;
+
+		// If the node is the document itself, ownerDocument returns null.
+		if ( null === $root ) {
+			$root = $node;
+		}
+
+		if ( $root instanceof Document ) {
+			return $root;
+		}
+
+		$dom = new self();
+
+		// We replace the $node by reference, to make sure the next lines of code will
+		// work as expected with the new document.
+		// Otherwise $dom and $node would refer to two different DOMDocuments.
+		$node = $dom->importNode( $root->documentElement ?: $root, true );
+		$dom->appendChild( $node );
+
+		return $dom;
+	}
+
+	/**
 	 * Load HTML from a string.
 	 *
 	 * @link  https://php.net/manual/domdocument.loadhtml.php
