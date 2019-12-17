@@ -21,13 +21,13 @@ function FullbleedPanel( { selectedElements, onSetProperties } ) {
 	useEffect( () => {
 		setState( { isFullbleed } );
 	}, [ isFullbleed ] );
-	const handleClick = ( evt ) => {
+	const handleClick = ( ) => {
 		const newState = { isFullbleed: ! state.isFullbleed };
 		setState( newState );
 		onSetProperties( newState );
 	};
 	return (
-		<Panel>
+		<Panel onSubmit={ ( event ) => event.preventDefault() }>
 			<Title>
 				{ 'Fullbleed' }
 			</Title>

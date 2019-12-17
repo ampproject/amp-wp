@@ -18,10 +18,7 @@ const CORNER_HANDLES = [ 'nw', 'ne', 'sw', 'se' ];
 const ALL_HANDLES = [ 'n', 's', 'e', 'w', 'nw', 'ne', 'sw', 'se' ];
 
 function Movable( {
-	rotationAngle,
-	x,
-	y,
-	type,
+	selectedElement,
 	targetEl,
 	pushEvent,
 } ) {
@@ -47,9 +44,17 @@ function Movable( {
 		}
 	}, [ targetEl, moveable ] );
 
+	// Update moveable with whatever properties could be updated outside moveable
+	// itself.
+	useEffect( () => {
+		if ( moveable.current ) {
+			moveable.current.updateRect();
+		}
+	} );
+
 	const frame = {
 		translate: [ 0, 0 ],
-		rotate: rotationAngle,
+		rotate: selectedElement.rotationAngle,
 	};
 
 	const setStyle = ( target ) => {
@@ -73,9 +78,9 @@ function Movable( {
 		<Moveable
 			ref={ moveable }
 			target={ targetEl }
-			draggable={ true }
-			resizable={ true }
-			rotatable={ true }
+			draggable={ ! selectedElement.isFullbleed }
+			resizable={ ! selectedElement.isFullbleed }
+			rotatable={ ! selectedElement.isFullbleed }
 			onDrag={ ( { target, beforeTranslate } ) => {
 				frame.translate = beforeTranslate;
 				setStyle( target );
@@ -86,7 +91,7 @@ function Movable( {
 			} }
 			onDragEnd={ ( { target } ) => {
 				// When dragging finishes, set the new properties based on the original + what moved meanwhile.
-				const newProps = { x: x + frame.translate[ 0 ], y: y + frame.translate[ 1 ] };
+				const newProps = { x: selectedElement.x + frame.translate[ 0 ], y: selectedElement.y + frame.translate[ 1 ] };
 				setPropertiesOnSelectedElements( newProps );
 				resetMoveable( target );
 			} }
@@ -106,8 +111,8 @@ function Movable( {
 				setPropertiesOnSelectedElements( {
 					width: parseInt( target.style.width ),
 					height: parseInt( target.style.height ),
-					x: x + frame.translate[ 0 ],
-					y: y + frame.translate[ 1 ],
+					x: selectedElement.x + frame.translate[ 0 ],
+					y: selectedElement.y + frame.translate[ 1 ],
 				} );
 				resetMoveable( target );
 			} }
@@ -123,19 +128,16 @@ function Movable( {
 			} }
 			origin={ false }
 			pinchable={ true }
-			keepRatio={ 'image' === type } // @†odo Even image doesn't always keep ratio, consider moving to element's model.
-			renderDirections={ 'image' === type ? CORNER_HANDLES : ALL_HANDLES }
+			keepRatio={ 'image' === selectedElement.type } // @†odo Even image doesn't always keep ratio, consider moving to element's model.
+			renderDirections={ 'image' === selectedElement.type ? CORNER_HANDLES : ALL_HANDLES }
 		/>
 	);
 }
 
 Movable.propTypes = {
-	rotationAngle: PropTypes.number.isRequired,
+	selectedElement: PropTypes.object,
 	targetEl: PropTypes.object.isRequired,
 	pushEvent: PropTypes.object,
-	type: PropTypes.string.isRequired,
-	x: PropTypes.number.isRequired,
-	y: PropTypes.number.isRequired,
 };
 
 export default Movable;
