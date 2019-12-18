@@ -415,7 +415,7 @@ function amp_register_default_scripts( $wp_scripts ) {
 	 * Polyfill dependencies that are registered in Gutenberg and WordPress 5.0.
 	 * Note that Gutenberg will override these at wp_enqueue_scripts if it is active.
 	 */
-	$handles = [ 'wp-i18n', 'wp-dom-ready', 'wp-server-side-render' ];
+	$handles = [ 'wp-i18n', 'wp-dom-ready', 'wp-polyfill', 'wp-server-side-render', 'wp-url' ];
 	foreach ( $handles as $handle ) {
 		if ( ! isset( $wp_scripts->registered[ $handle ] ) ) {
 			$asset_file   = AMP__DIR__ . '/assets/js/' . $handle . '.asset.php';

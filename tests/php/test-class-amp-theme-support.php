@@ -1291,6 +1291,17 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Assert that the queried element exists.
+	 *
+	 * @param DOMXPath $xpath XPath.
+	 * @param string   $query Query.
+	 */
+	public function assert_queried_element_exists( DOMXPath $xpath, $query ) {
+		$element = $xpath->query( $query )->item( 0 );
+		$this->assertInstanceOf( 'DOMElement', $element, 'Expected element for query: ' . $query );
+	}
+
+	/**
 	 * Assert that dev mode attribute *is* on the queried element.
 	 *
 	 * @param DOMXPath $xpath XPath.
@@ -1433,7 +1444,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 				},
 			],
 
-			'admin_bar_scripts_have_dev_mode_with_paired_browsing' => [
+			'admin_bar_scripts_have_dev_mode_with_paired_browsing_client' => [
 				static function () {
 					AMP_Theme_Support::setup_paired_browsing_client();
 					wp_enqueue_script( 'admin-bar' );
@@ -1445,6 +1456,24 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 					$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/amp-paired-browsing-client" ) ]' );
 					if ( wp_script_is( 'hoverintent-js', 'registered' ) ) {
 						$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/hoverintent-js" ) ]' );
+					}
+				},
+			],
+
+			'admin_bar_scripts_have_dev_mode_with_paired_browsing_app' => [
+				static function () {
+					$_GET[ AMP_Theme_Support::PAIRED_BROWSING_QUERY_VAR ] = 1;
+					AMP_Theme_Support::serve_paired_browsing_experience( 'foo' );
+					unset( $_GET[ AMP_Theme_Support::PAIRED_BROWSING_QUERY_VAR ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+					wp_enqueue_script( 'admin-bar' );
+					wp_enqueue_script( 'example-admin-bar', 'https://example.com/example-admin-bar.js', [ 'admin-bar' ], '0.1', false );
+				},
+				function ( DOMXPath $xpath ) {
+					$this->assert_queried_element_exists( $xpath, '//script[ contains( @src, "/example-admin-bar" ) ]' );
+					$this->assert_queried_element_exists( $xpath, '//script[ contains( @src, "/admin-bar" ) ]' );
+					$this->assert_queried_element_exists( $xpath, '//script[ contains( @src, "/amp-paired-browsing-app" ) ]' );
+					if ( wp_script_is( 'hoverintent-js', 'registered' ) ) {
+						$this->assert_queried_element_exists( $xpath, '//script[ contains( @src, "/hoverintent-js" ) ]' );
 					}
 				},
 			],

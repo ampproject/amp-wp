@@ -32,6 +32,7 @@
     "@babel/plugin-proposal-class-properties": "7.7.4",
     "@babel/plugin-proposal-object-rest-spread": "7.7.7",
     "@babel/plugin-transform-react-jsx": "7.7.4",
+    "@babel/polyfill": "7.7.0",
     "@wordpress/api-fetch": "3.8.0",
     "@wordpress/babel-preset-default": "4.8.0",
     "@wordpress/blob": "2.5.1",
