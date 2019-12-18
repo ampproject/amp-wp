@@ -2334,31 +2334,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test prepare_response to inject html[amp] attribute and ensure HTML5 doctype.
-	 *
-	 * @covers AMP_Theme_Support::prepare_response()
-	 */
-	public function test_prepare_response_to_add_html5_doctype_and_amp_attribute() {
-		wp_scripts();
-		wp();
-		add_filter( 'amp_validation_error_sanitized', '__return_true' );
-		add_theme_support( AMP_Theme_Support::SLUG );
-		AMP_Theme_Support::init();
-		AMP_Theme_Support::finish_init();
-		ob_start();
-		?>
-		<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
-		<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><?php wp_head(); ?></head><body><?php wp_footer(); ?></body></html>
-		<?php
-		$original_html  = trim( ob_get_clean() );
-		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
-
-		$this->assertStringStartsWith( '<!DOCTYPE html>', $sanitized_html );
-		$this->assertContains( '<html amp', $sanitized_html );
-		$this->assertContains( '<meta charset="utf-8">', $sanitized_html );
-	}
-
-	/**
 	 * Test prepare_response will cache redirects when validation errors happen.
 	 *
 	 * @covers AMP_Theme_Support::prepare_response()
