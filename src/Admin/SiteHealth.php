@@ -192,6 +192,7 @@ class SiteHealth {
 				'color' => $is_proper_version ? 'green' : 'orange',
 			],
 			'description' => sprintf(
+				/* translators: %s: the minimum recommended ICU version */
 				esc_html__( 'The version of ICU can affect how the intl extension runs. The minimum recommended version of ICU is %s.', 'amp' ),
 				$minimum_version
 			),
