@@ -2,6 +2,10 @@
  * External dependencies
  */
 import { css } from 'styled-components';
+/**
+ * Internal dependencies
+ */
+import { PAGE_HEIGHT, PAGE_WIDTH } from '../constants';
 
 export const ElementWithPosition = css`
 	position: absolute;
@@ -35,3 +39,13 @@ export const ElementWithFont = css`
 	font-size: ${ ( { fontSize } ) => fontSize };
 	font-weight: ${ ( { fontWeight } ) => fontWeight };
 `;
+
+export function getBox( { x, y, width, height, rotationAngle, isFullbleed } ) {
+	return {
+		x: isFullbleed ? 0 : x,
+		y: isFullbleed ? 0 : y,
+		width: isFullbleed ? PAGE_WIDTH : width,
+		height: isFullbleed ? PAGE_HEIGHT : height,
+		rotationAngle: isFullbleed ? 0 : rotationAngle,
+	};
+}

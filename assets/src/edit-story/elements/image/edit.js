@@ -7,8 +7,7 @@ import styled from 'styled-components';
 /**
  * Internal dependencies
  */
-import { PAGE_WIDTH, PAGE_HEIGHT } from '../../constants';
-import { ElementWithPosition, ElementWithSize, ElementWithRotation } from '../shared';
+import { ElementWithPosition, ElementWithSize, ElementWithRotation, getBox } from '../shared';
 import { getImgProps, ImageWithScale } from './util';
 
 const Element = styled.div`
@@ -20,6 +19,7 @@ const Element = styled.div`
 const ActualBox = styled.div`
 	width: 100%;
 	height: 100%;
+	position: relative;
 	overflow: hidden;
 
 	&::after {
@@ -42,20 +42,13 @@ const FadedImg = styled.img`
 `;
 
 const ActualImg = styled.img`
-	position: relative;
+	position: absolute;
 	${ ImageWithScale }
 `;
 
-function ImageEdit( { src, origRatio, width, height, x, y, scale, offsetX, offsetY, rotationAngle } ) {
-	const actualRatio = ( width / height ) * ( PAGE_WIDTH / PAGE_HEIGHT );
-	const imgProps = getImgProps( scale, offsetX, offsetY, origRatio, actualRatio );
-	const elementProps = {
-		width,
-		height,
-		x,
-		y,
-		rotationAngle,
-	};
+function ImageEdit( { src, origRatio, width, height, x, y, scale, focalX, focalY, rotationAngle, isFullbleed } ) {
+	const elementProps = getBox( { x, y, width, height, rotationAngle, isFullbleed } );
+	const imgProps = getImgProps( elementProps.width, elementProps.height, scale, focalX, focalY, origRatio );
 	return (
 		<Element { ...elementProps }>
 			<FadedImg src={ src } { ...imgProps } />
@@ -75,14 +68,15 @@ ImageEdit.propTypes = {
 	y: PropTypes.number.isRequired,
 	scale: PropTypes.number,
 	rotationAngle: PropTypes.number.isRequired,
-	offsetX: PropTypes.number,
-	offsetY: PropTypes.number,
+	isFullbleed: PropTypes.bool,
+	focalX: PropTypes.number,
+	focalY: PropTypes.number,
 };
 
 ImageEdit.defaultProps = {
 	scale: null,
-	offsetX: null,
-	offsetY: null,
+	focalX: null,
+	focalY: null,
 };
 
 export default ImageEdit;

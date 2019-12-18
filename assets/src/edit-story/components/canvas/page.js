@@ -103,7 +103,7 @@ function Page() {
 					targets={ targetRefs.current }
 					targetEl={ targetEl }
 					pushEvent={ pushEvent }
-					selectedEl={ singleSelection ? selectedElements[ 0 ] : {} }
+					selectedElement={ singleSelection ? selectedElements[ 0 ] : {} }
 				/>
 			) }
 		</Background>

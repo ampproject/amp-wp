@@ -23,6 +23,13 @@ function MovableSingle( {
 	pushEvent,
 } ) {
 	const moveable = useRef();
+	// Update moveable with whatever properties could be updated outside moveable
+	// itself.
+	useEffect( () => {
+		if ( moveable.current ) {
+			moveable.current.updateRect();
+		}
+	} );
 
 	const {
 		state: { selectedElements },
@@ -69,6 +76,8 @@ function MovableSingle( {
 	const resetMoveable = () => {
 		frame.translate = [ 0, 0 ];
 		setStyle();
+		targetEl.style.width = '';
+		targetEl.style.height = '';
 		if ( moveable.current ) {
 			moveable.current.updateRect();
 		}
@@ -78,9 +87,9 @@ function MovableSingle( {
 		<Moveable
 			ref={ moveable }
 			target={ targetEl }
-			draggable={ true }
-			resizable={ true }
-			rotatable={ true }
+			draggable={ ! selectedEl.isFullbleed }
+			resizable={ ! selectedEl.isFullbleed }
+			rotatable={ ! selectedEl.isFullbleed }
 			onDrag={ ( { target, beforeTranslate } ) => {
 				frame.translate = beforeTranslate;
 				setStyle( target, frame );

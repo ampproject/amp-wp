@@ -11,7 +11,7 @@ import MovableGroup from './movableGroup';
 import MovableSingle from './movableSingle';
 
 function Movable( {
-	selectedEl,
+	selectedElement,
 	targetEl,
 	targets: targetList,
 	pushEvent,
@@ -27,12 +27,12 @@ function Movable( {
 	}
 
 	return (
-		<MovableSingle targetEl={ targetEl } pushEvent={ pushEvent } selectedEl={ selectedEl } />
+		<MovableSingle targetEl={ targetEl } pushEvent={ pushEvent } selectedEl={ selectedElement } />
 	);
 }
 
 Movable.propTypes = {
-	selectedEl: PropTypes.object,
+	selectedElement: PropTypes.object,
 	targetEl: PropTypes.object,
 	targets: PropTypes.array,
 	pushEvent: PropTypes.object,
