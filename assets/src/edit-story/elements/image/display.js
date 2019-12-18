@@ -7,7 +7,7 @@ import styled from 'styled-components';
 /**
  * WordPress dependencies
  */
-import { useCallback } from '@wordpress/element';
+import { useCallback, useLayoutEffect, useRef } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -29,12 +29,30 @@ const Img = styled.img`
 	${ ImageWithScale }
 `;
 
-function ImageDisplay( { id, src, origRatio, width, height, x, y, scale, focalX, focalY, rotationAngle, isFullbleed, forwardedRef, onPointerDown } ) {
+function ImageDisplay( { id, src, origRatio, width, height, x, y, scale, focalX, focalY, rotationAngle, isFullbleed, forwardedRef, onPointerDown, setTargetRefs } ) {
+	const element = useRef();
 	const elementProps = {
 		...getBox( { x, y, width, height, rotationAngle, isFullbleed } ),
-		ref: forwardedRef,
+		ref: forwardedRef ? forwardedRef : element,
 		onPointerDown,
 	};
+
+	useLayoutEffect( () => {
+		setTargetRefs( ( targets ) => {
+			const hasId = Boolean( targets.filter( ( { id: existingId } ) => id === existingId ).length );
+			if ( ! hasId ) {
+				targets.push( {
+					id,
+					ref: element.current,
+					x,
+					y,
+					rotationAngle,
+				} );
+			}
+			return targets;
+		} );
+	}, [ id, setTargetRefs, forwardedRef ] );
+
 	const imgProps = getImgProps( elementProps.width, elementProps.height, scale, focalX, focalY, origRatio );
 	const {
 		actions: { setEditingElement },

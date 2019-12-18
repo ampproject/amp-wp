@@ -48,8 +48,6 @@ const useDoubleClick = ( onSingleClick, onDoubleClick, ms = null ) => {
 	const [ target, setTarget ] = useState( null );
 	const [ lastEvent, setLastEvent ] = useState( null );
 	const getHandler = useCallback( ( newTarget ) => ( evt ) => {
-		evt.stopPropagation();
-
 		if ( target !== newTarget ) {
 			if ( target ) {
 				onSingleClick( evt, target );
@@ -60,6 +58,8 @@ const useDoubleClick = ( onSingleClick, onDoubleClick, ms = null ) => {
 			return;
 		}
 
+		// Stop propagation only for double click for now.
+		evt.stopPropagation();
 		onDoubleClick( evt, target );
 		setTarget( null );
 	}, [ onSingleClick, onDoubleClick, target ] );

@@ -25,6 +25,7 @@ const Background = styled.div.attrs( { className: 'container' } )`
 
 function Page() {
 	const [ targetEl, setTargetEl ] = useState( null );
+	const [ targetRefs, setTargetRefs ] = useState( [] );
 
 	const {
 		state: { currentPage, selectedElements },
@@ -37,8 +38,6 @@ function Page() {
 	} = useCanvas();
 
 	const [ pushEvent, setPushEvent ] = useState( null );
-
-	const targetRefs = useRef( [] );
 
 	useEffect( () => {
 		setBackgroundClickHandler( () => clearSelection() );
@@ -64,43 +63,32 @@ function Page() {
 	const hasSelection = 1 <= selectedElements.length;
 
 	useEffect( () => {
-		console.log( selectedElements.length );
+		console.log( selectedElements );
+		console.log( 'targets', targetRefs );
 	}, [ selectedElements ] );
 
 	return (
 		<Background>
 			{ currentPage && currentPage.elements.map( ( { id, ...rest }, i ) => {
 				const isSelected = Boolean( selectedElements.filter( ( { id: selectedId } ) => id === selectedId ).length );
-
 				return (
 					<Element
 						key={ id }
 						setNodeForElement={ setNodeForElement }
+						setTargetRefs={ setTargetRefs }
 						isEditing={ editingElement === id }
 						element={ { id, ...rest } }
 						isSelected={ isSelected }
 						handleSelectElement={ handleSelectElement }
 						forwardedRef={ singleSelection && isSelected ?
-							setTargetEl :
-							( el ) => {
-								// @TODO We should also remove the nodes that don't exist anymore!
-								if ( ! isSelected ) {
-									return;
-								}
-								// Add the element to the list of refs.
-								targetRefs.current[ i ] = {
-									id,
-									...rest,
-									ref: el,
-								};
-							}
+							setTargetEl : null
 						}
 					/>
 				);
 			} ) }
-			{ hasSelection && ( targetEl || Boolean( targetRefs.current.length ) ) && (
+			{ hasSelection && ( targetEl || 1 < selectedElements.length ) && (
 				<Movable
-					targets={ targetRefs.current }
+					targets={ targetRefs }
 					targetEl={ targetEl }
 					pushEvent={ pushEvent }
 					selectedElement={ singleSelection ? selectedElements[ 0 ] : {} }

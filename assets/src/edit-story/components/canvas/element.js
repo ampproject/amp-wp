@@ -20,6 +20,7 @@ function Element( {
 	isEditing,
 	isSelected,
 	setNodeForElement,
+	setTargetRefs,
 	handleSelectElement,
 	forwardedRef,
 	element: {
@@ -61,6 +62,7 @@ function Element( {
 					}
 				} }
 				forwardedRef={ forwardedRef }
+				setTargetRefs={ setTargetRefs }
 			/>
 		</Wrapper>
 	);
