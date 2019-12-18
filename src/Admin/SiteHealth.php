@@ -18,7 +18,7 @@ use AMP_Post_Type_Support;
  *
  * @since 1.5.0
  */
-class SiteHealth {
+final class SiteHealth {
 
 	/**
 	 * Adds the filters.
