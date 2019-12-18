@@ -17,7 +17,6 @@ import { getDefinitionForType } from '../../../elements';
  * @return {Element} Markup of pages.
  */
 const getStoryMarkupFromPages = ( pages ) => {
-	// @todo look into: We should rather use renderToStaticMarkup here, however, it doesn't seem to be exposed via @wordpress/element.
 	const markup = pages.map( ( page ) => {
 		const { id } = page;
 		return renderToString(
