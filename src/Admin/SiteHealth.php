@@ -2,7 +2,7 @@
 /**
  * Class SiteHealth.
  *
- * @package AMP
+ * @package Amp\AmpWP
  */
 
 namespace Amp\AmpWP\Admin;

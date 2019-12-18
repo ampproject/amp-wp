@@ -2,7 +2,7 @@
 /**
  * Test Site_Health.
  *
- * @package AMP
+ * @package Amp\AmpWP
  */
 
 use Amp\AmpWP\Admin\SiteHealth;
