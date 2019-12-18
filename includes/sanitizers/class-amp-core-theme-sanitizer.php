@@ -1715,7 +1715,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			if ( 'next' === $toggle_target ) {
 				$target_node = $toggle->nextSibling;
 			} else {
-				$target_xpath = $this->dom->xpath_from_css_selector( $toggle_target );
+				$target_xpath = $this->xpath_from_css_selector( $toggle_target );
 				if ( null === $target_xpath ) {
 					continue;
 				}
@@ -1773,7 +1773,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				$focus_selector = $toggle->getAttribute( 'data-set-focus' );
 
 				if ( ! empty( $focus_selector ) ) {
-					$focus_xpath   = $this->dom->xpath_from_css_selector( $focus_selector );
+					$focus_xpath   = $this->xpath_from_css_selector( $focus_selector );
 					$focus_element = $this->dom->xpath->query( $focus_xpath )->item( 0 );
 
 					if ( $focus_element instanceof DOMElement ) {
