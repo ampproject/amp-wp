@@ -84,35 +84,41 @@ class Test_Site_Health extends WP_UnitTestCase {
 	 * @covers \Amp\AmpWP\Admin\SiteHealth::persistent_object_cache()
 	 */
 	public function test_persistent_object_cache() {
+		$data = [
+			'description' => 'The AMP plugin performs at its best when persistent object cache is enabled.',
+			'actions'     => '<p><a href="https://codex.wordpress.org/Class_Reference/WP_Object_Cache#Persistent_Caching" target="_blank" rel="noopener noreferrer">Learn more about persistent object caching <span class="screen-reader-text">(opens in a new tab)</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
+			'test'        => 'amp_persistent_object_cache',
+		];
+
 		$GLOBALS['_wp_using_ext_object_cache'] = false;
 		$this->assertEquals(
-			[
-				'label'       => 'Persistent object caching is not enabled',
-				'status'      => 'recommended',
-				'badge'       => [
-					'label' => 'AMP',
-					'color' => 'orange',
-				],
-				'description' => 'The AMP plugin performs at its best when persistent object cache is enabled.',
-				'actions'     => '<p><a href="https://codex.wordpress.org/Class_Reference/WP_Object_Cache#Persistent_Caching" target="_blank" rel="noopener noreferrer">Learn more about persistent object caching <span class="screen-reader-text">(opens in a new tab)</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
-				'test'        => 'amp_persistent_object_cache',
-			],
+			array_merge(
+				$data,
+				[
+					'label'  => 'Persistent object caching is not enabled',
+					'status' => 'recommended',
+					'badge'  => [
+						'label' => 'AMP',
+						'color' => 'orange',
+					],
+				]
+			),
 			$this->instance->persistent_object_cache()
 		);
 
 		$GLOBALS['_wp_using_ext_object_cache'] = true;
 		$this->assertEquals(
-			[
-				'label'       => 'Persistent object caching is enabled',
-				'status'      => 'good',
-				'badge'       => [
-					'label' => 'AMP',
-					'color' => 'green',
-				],
-				'description' => 'The AMP plugin performs at its best when persistent object cache is enabled.',
-				'actions'     => '',
-				'test'        => 'amp_persistent_object_cache',
-			],
+			array_merge(
+				$data,
+				[
+					'label'  => 'Persistent object caching is enabled',
+					'status' => 'good',
+					'badge'  => [
+						'label' => 'AMP',
+						'color' => 'green',
+					],
+				]
+			),
 			$this->instance->persistent_object_cache()
 		);
 	}

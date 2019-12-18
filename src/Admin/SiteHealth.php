@@ -66,7 +66,13 @@ class SiteHealth {
 				'color' => $is_using_object_cache ? 'green' : 'orange',
 			],
 			'description' => esc_html__( 'The AMP plugin performs at its best when persistent object cache is enabled.', 'amp' ),
-			'actions'     => '',
+			'actions'     => sprintf(
+				'<p><a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s <span class="screen-reader-text">%3$s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
+				'https://codex.wordpress.org/Class_Reference/WP_Object_Cache#Persistent_Caching',
+				esc_html__( 'Learn more about persistent object caching', 'amp' ),
+				/* translators: The accessibility text. */
+				esc_html__( '(opens in a new tab)', 'amp' )
+			),
 			'test'        => 'amp_persistent_object_cache',
 		];
 
@@ -82,15 +88,8 @@ class SiteHealth {
 			return array_merge(
 				$data,
 				[
-					'status'  => 'recommended',
-					'label'   => esc_html__( 'Persistent object caching is not enabled', 'amp' ),
-					'actions' => sprintf(
-						'<p><a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s <span class="screen-reader-text">%3$s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
-						'https://codex.wordpress.org/Class_Reference/WP_Object_Cache#Persistent_Caching',
-						esc_html__( 'Learn more about persistent object caching', 'amp' ),
-						/* translators: The accessibility text. */
-						esc_html__( '(opens in a new tab)', 'amp' )
-					),
+					'status' => 'recommended',
+					'label'  => esc_html__( 'Persistent object caching is not enabled', 'amp' ),
 				]
 			);
 		}
@@ -222,8 +221,8 @@ class SiteHealth {
 				$data,
 				[
 					'status' => 'recommended',
-					/* translators: %1$s: the ICU version */
-					'label'  => sprintf( esc_html__( 'The version of ICU, %1$s, is out of date.', 'amp' ), $icu_version ),
+					/* translators: %1$d: the ICU version */
+					'label'  => sprintf( esc_html__( 'The version of ICU, %1$d, is out of date.', 'amp' ), $icu_version ),
 				]
 			);
 		}
@@ -232,8 +231,8 @@ class SiteHealth {
 			$data,
 			[
 				'status' => 'good',
-				/* translators: %1$s: the ICU version */
-				'label'  => sprintf( esc_html__( 'The version of ICU, %1$s, looks good.', 'amp' ), $icu_version ),
+				/* translators: %1$d: the ICU version */
+				'label'  => sprintf( esc_html__( 'The version of ICU, %1$d, looks good.', 'amp' ), $icu_version ),
 			]
 		);
 	}
