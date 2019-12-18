@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use Amp\AmpWP\Dom\Document;
+
 /**
  * Class AMP_Comments_Sanitizer
  *
@@ -109,7 +111,7 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		$amp_bind_attr_format = AMP_DOM_Utils::AMP_BIND_DATA_ATTR_PREFIX . '%s';
+		$amp_bind_attr_format = Document::AMP_BIND_DATA_ATTR_PREFIX . '%s';
 		foreach ( $form_fields as $name => $form_field ) {
 			foreach ( $form_field as $element ) {
 

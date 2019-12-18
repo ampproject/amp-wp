@@ -738,7 +738,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		// Check if element needs amp-bind component.
 		if ( $node instanceof DOMElement && ! in_array( 'amp-bind', $this->script_components, true ) ) {
 			foreach ( $node->attributes as $name => $value ) {
-				if ( AMP_DOM_Utils::AMP_BIND_DATA_ATTR_PREFIX === substr( $name, 0, 14 ) ) {
+				if ( Document::AMP_BIND_DATA_ATTR_PREFIX === substr( $name, 0, 14 ) ) {
 					$script_components[] = 'amp-bind';
 					break;
 				}
@@ -1703,7 +1703,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		if (
 			isset( $attr_spec_list[ $attr_name ] )
 			||
-			( 'data-' === substr( $attr_name, 0, 5 ) && AMP_DOM_Utils::AMP_BIND_DATA_ATTR_PREFIX !== substr( $attr_name, 0, 14 ) )
+			( 'data-' === substr( $attr_name, 0, 5 ) && Document::AMP_BIND_DATA_ATTR_PREFIX !== substr( $attr_name, 0, 14 ) )
 			||
 			// Allow the 'amp' or '⚡' attribute in <html>, like <html ⚡>.
 			( 'html' === $attr_node->parentNode->nodeName && in_array( $attr_node->nodeName, [ 'amp', '⚡' ], true ) )
