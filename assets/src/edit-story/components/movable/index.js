@@ -57,7 +57,7 @@ function Movable( {
 		rotate: selectedElement.rotationAngle,
 	};
 
-	const setStyle = ( target ) => {
+	const setTransformStyle = ( target ) => {
 		target.style.transform = `translate(${ frame.translate[ 0 ] }px, ${ frame.translate[ 1 ] }px) rotate(${ frame.rotate }deg)`;
 	};
 
@@ -68,7 +68,9 @@ function Movable( {
 	 */
 	const resetMoveable = ( target ) => {
 		frame.translate = [ 0, 0 ];
-		setStyle( target );
+		// Inline start resetting has to be done very carefully here to avoid
+		// conflicts with stylesheets. See #3951.
+		target.style.transform = '';
 		target.style.width = '';
 		target.style.height = '';
 		if ( moveable.current ) {
@@ -85,7 +87,7 @@ function Movable( {
 			rotatable={ ! selectedElement.isFullbleed }
 			onDrag={ ( { target, beforeTranslate } ) => {
 				frame.translate = beforeTranslate;
-				setStyle( target );
+				setTransformStyle( target );
 			} }
 			throttleDrag={ 0 }
 			onDragStart={ ( { set } ) => {
@@ -107,7 +109,7 @@ function Movable( {
 				target.style.width = `${ width }px`;
 				target.style.height = `${ height }px`;
 				frame.translate = drag.beforeTranslate;
-				setStyle( target );
+				setTransformStyle( target );
 			} }
 			onResizeEnd={ ( { target } ) => {
 				setPropertiesOnSelectedElements( {
@@ -123,10 +125,11 @@ function Movable( {
 			} }
 			onRotate={ ( { target, beforeRotate } ) => {
 				frame.rotate = beforeRotate;
-				setStyle( target );
+				setTransformStyle( target );
 			} }
-			onRotateEnd={ () => {
+			onRotateEnd={ ( { target } ) => {
 				setPropertiesOnSelectedElements( { rotationAngle: frame.rotate } );
+				resetMoveable( target );
 			} }
 			origin={ false }
 			pinchable={ true }
