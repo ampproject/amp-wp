@@ -28,6 +28,7 @@ import useSelectElementById from './actions/useSelectElementById';
 import useAppendElementToCurrentPage from './actions/useAppendElementToCurrentPage';
 import useSetCurrentPageByIndex from './actions/useSetCurrentPageByIndex';
 import useSetPropertiesOnSelectedElements from './actions/useSetPropertiesOnSelectedElements';
+import useSavePost from './actions/useSavePost';
 import useUpdateElementsByIds from './actions/useUpdateElementsByIds';
 
 function StoryProvider( { storyId, children } ) {
@@ -35,6 +36,12 @@ function StoryProvider( { storyId, children } ) {
 	// Don't update 1 of these in an effect based off another base variable.
 	// Only update these directly as a response to user or api interactions.
 	const [ pages, setPages ] = useState( [] );
+	const [ title, setTitle ] = useState( '' );
+	const [ link, setLink ] = useState( '' );
+	const [ postStatus, setPostStatus ] = useState( 'draft' );
+	const [ postAuthor, setPostAuthor ] = useState( 0 );
+	const [ slug, setSlug ] = useState( '' );
+	const [ isSaving, setIsSaving ] = useState( false );
 	const [ currentPageIndex, setCurrentPageIndex ] = useState( null );
 	const [ selectedElementIds, setSelectedElementIds ] = useState( [] );
 
@@ -55,9 +62,10 @@ function StoryProvider( { storyId, children } ) {
 	const toggleElementIdInSelection = useToggleElementIdInSelection( { selectedElementIds, setSelectedElementIds } );
 	const appendElementToCurrentPage = useAppendElementToCurrentPage( { currentPageIndex, pages, setPages, setSelectedElementIds } );
 	const setPropertiesOnSelectedElements = useSetPropertiesOnSelectedElements( { currentPageIndex, pages, selectedElementIds, setPages } );
+	const savePost = useSavePost( { isSaving, storyId, title, postStatus, postAuthor, slug, pages, setLink, setPostStatus, setIsSaving } );
 	const updateElementsByIds = useUpdateElementsByIds( { currentPageIndex, pages, setPages } );
 
-	useLoadStory( { storyId, pages, setPages, setCurrentPageIndex, clearSelection } );
+	useLoadStory( { storyId, pages, setPages, setTitle, setPostStatus, setPostAuthor, setSlug, setLink, setCurrentPageIndex, clearSelection } );
 	useCurrentPage( { currentPageIndex, pages, setCurrentPage, setCurrentPageNumber } );
 	useHistoryEntry( { currentPageIndex, pages, selectedElementIds } );
 	useHistoryReplay( { setCurrentPageIndex, setPages, setSelectedElementIds } );
@@ -72,6 +80,10 @@ function StoryProvider( { storyId, children } ) {
 			selectedElementIds,
 			selectedElements,
 			hasSelection,
+			title,
+			postStatus,
+			isSaving,
+			link,
 		},
 		actions: {
 			setCurrentPageByIndex,
@@ -83,6 +95,8 @@ function StoryProvider( { storyId, children } ) {
 			toggleElementIdInSelection,
 			selectElementById,
 			setPropertiesOnSelectedElements,
+			setTitle,
+			savePost,
 			updateElementsByIds,
 		},
 	};
