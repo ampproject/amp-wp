@@ -125,7 +125,10 @@ class AMP_Nav_Menu_Toggle_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		if ( ! empty( $this->args['nav_container_xpath'] ) ) {
-			return $this->dom->xpath->query( $this->args['nav_container_xpath'] )->item( 0 );
+			$node = $this->dom->xpath->query( $this->args['nav_container_xpath'] )->item( 0 );
+			if ( $node instanceof DOMElement ) {
+				return $node;
+			}
 		}
 
 		return null;
@@ -144,7 +147,10 @@ class AMP_Nav_Menu_Toggle_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		if ( ! empty( $this->args['menu_button_xpath'] ) ) {
-			return $this->dom->xpath->query( $this->args['menu_button_xpath'] )->item( 0 );
+			$node = $this->dom->xpath->query( $this->args['menu_button_xpath'] )->item( 0 );
+			if ( $node instanceof DOMElement ) {
+				return $node;
+			}
 		}
 
 		return null;

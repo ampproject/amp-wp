@@ -75,8 +75,9 @@ class AMP_O2_Player_Sanitizer extends AMP_Base_Sanitizer {
 
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
 			$node = $nodes->item( $i );
-
-			$this->create_amp_o2_player( $this->dom, $node );
+			if ( $node instanceof DOMElement ) {
+				$this->create_amp_o2_player( $this->dom, $node );
+			}
 		}
 
 	}
