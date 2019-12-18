@@ -2115,9 +2115,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 			'bad_meta_charset'                        => [
 				'<html amp><head><meta charset="latin-1"><title>Mojibake?</title></head><body></body></html>',
-				'<html amp><head><meta><meta charset="utf-8"><title>Mojibake?</title></head><body></body></html>', // Note the charset attribute is removed because it violates the attribute spec, but the entire element is not removed because charset is not mandatory.
-				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR ], // @todo Should actually be invalid_mandatory_attribute?
+				'<html amp><head><meta charset="utf-8"><title>Mojibake?</title></head><body></body></html>', // Note the charset attribute is removed because it violates the attribute spec, but the entire element is not removed because charset is not mandatory.
 			],
 			'bad_meta_viewport'                       => [
 				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="maximum-scale=1.0"></head><body></body></html>',
@@ -2357,7 +2355,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 		$source   = '<b>Hello</b><script>document.write("hi");</script><amp-sidebar></amp-sidebar>';
 		$expected = '<b>Hello</b><amp-sidebar></amp-sidebar>';
 
-		$dom           = AMP_DOM_Utils::get_dom( $source );
+		$dom           = Document::from_html( $source );
 		$actual_errors = [];
 		$sanitizer     = new AMP_Tag_And_Attribute_Sanitizer(
 			$dom,
@@ -2396,7 +2394,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 			'noloading'   => [],
 		];
-		$dom  = new DOMDocument();
+		$dom  = new Document();
 		$node = new DOMElement( 'amp-gist' );
 		$dom->appendChild( $node );
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
