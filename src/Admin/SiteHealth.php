@@ -183,8 +183,8 @@ class SiteHealth {
 	 */
 	public function icu_version() {
 		$icu_version       = defined( 'INTL_ICU_VERSION' ) ? (float) INTL_ICU_VERSION : null;
-		$minimum_version   = 65;
-		$is_proper_version = $icu_version >= $minimum_version;
+		$minimum_version   = 4.6;
+		$is_proper_version = version_compare( $icu_version, $minimum_version, '>=' );
 
 		$data = [
 			'badge'       => [
