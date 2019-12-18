@@ -239,6 +239,21 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 					}
 					break;
 
+				case 'security':
+					/*
+					 * Omit the `security` attribute as it now been superseded by the `sandbox` attribute. It is
+					 * (apparently) only supported by IE <https://stackoverflow.com/a/20071528>.
+					 */
+					break;
+
+				case 'marginwidth':
+				case 'marginheight':
+					// These attributes have been obsolete since HTML5. If they have the value `0` they can be omitted.
+					if ( '0' !== $value ) {
+						$out[ $name ] = $value;
+					}
+					break;
+
 				default:
 					$out[ $name ] = $value;
 					break;
