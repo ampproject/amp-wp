@@ -108,52 +108,52 @@ function ImageEdit( { id, src, origRatio, width, height, x, y, scale, focalX, fo
 					pinchable={ false }
 
 					resizable={ true }
-					onResize={ ( { width, height, delta, drag } ) => {
-	            const [ tx, ty ] = [ drag.beforeTranslate[ 0 ], drag.beforeTranslate[ 1 ] ];
-	            cropBox.style.transform = `translate(${ tx }px, ${ ty }px)`;
-	            croppedImage.style.transform = `translate(${ -tx }px, ${ -ty }px)`;
-	            if ( delta[ 0 ] ) {
-	              cropBox.style.width = `${ width }px`;
-	            }
-	            if ( delta[ 1 ] ) {
-	              cropBox.style.height = `${ height }px`;
-	            }
-	            cropRef.current = [ tx, ty, width, height ];
-	          } }
+					onResize={ ( { width: resizeWidth, height: resizeHeight, delta, drag } ) => {
+						const [ tx, ty ] = [ drag.beforeTranslate[ 0 ], drag.beforeTranslate[ 1 ] ];
+						cropBox.style.transform = `translate(${ tx }px, ${ ty }px)`;
+						croppedImage.style.transform = `translate(${ -tx }px, ${ -ty }px)`;
+						if ( delta[ 0 ] ) {
+							cropBox.style.width = `${ resizeWidth }px`;
+						}
+						if ( delta[ 1 ] ) {
+							cropBox.style.height = `${ resizeHeight }px`;
+						}
+						cropRef.current = [ tx, ty, resizeWidth, resizeHeight ];
+					} }
 					onResizeEnd={ () => {
-	          	cropBox.style.transform = '';
-	          	croppedImage.style.transform = '';
-	          	cropBox.style.width = '';
-	          	cropBox.style.height = '';
-	            const [ tx, ty, width, height ] = cropRef.current;
-	            cropRef.current = [ 0, 0 ];
-	            const { offsetX, offsetY, width: imgWidth, height: imgHeight } = imgProps;
-	            const scale = Math.min( imgWidth / width, imgHeight / height ) * 100;
-	            const focalX = getFocalFromOffset( width, imgWidth, offsetX + tx );
-	            const focalY = getFocalFromOffset( height, imgHeight, offsetY + ty );
-	            setPropertiesById( id, {
-	            	x: elementProps.x + tx,
-	            	y: elementProps.y + ty,
-	            	keepRatio: false,
-	              width,
-	              height,
-	              scale,
-	            	focalX,
-	            	focalY,
-	            } );
-	          } }
+						cropBox.style.transform = '';
+						croppedImage.style.transform = '';
+						cropBox.style.width = '';
+						cropBox.style.height = '';
+						const [ tx, ty, resizeWidth, resizeHeight ] = cropRef.current;
+						cropRef.current = [ 0, 0 ];
+						const { offsetX, offsetY, width: imgWidth, height: imgHeight } = imgProps;
+						const resizeScale = Math.min( imgWidth / resizeWidth, imgHeight / resizeHeight ) * 100;
+						const resizeFocalX = getFocalFromOffset( resizeWidth, imgWidth, offsetX + tx );
+						const resizeFocalY = getFocalFromOffset( resizeHeight, imgHeight, offsetY + ty );
+						setPropertiesById( id, {
+							x: elementProps.x + tx,
+							y: elementProps.y + ty,
+							keepRatio: false,
+							width: resizeWidth,
+							height: resizeHeight,
+							scale: resizeScale,
+							focalX: resizeFocalX,
+							focalY: resizeFocalY,
+						} );
+					} }
 
 					snappable={ true }
-	          // todo@: it looks like resizing bounds are not supported.
+					// todo@: it looks like resizing bounds are not supported.
 					verticalGuidelines={ [
-	            elementProps.x - imgProps.offsetX,
-	            elementProps.x - imgProps.offsetX + imgProps.width,
-	          ] }
-					horizontalGuidelines={ [
-	            elementProps.y - imgProps.offsetY,
-	            elementProps.y - imgProps.offsetY + imgProps.height,
+						elementProps.x - imgProps.offsetX,
+						elementProps.x - imgProps.offsetX + imgProps.width,
 					] }
-	        />
+					horizontalGuidelines={ [
+						elementProps.y - imgProps.offsetY,
+						elementProps.y - imgProps.offsetY + imgProps.height,
+					] }
+				/>
 			) }
 
 			{ /* Draggable moveable for panning */ }
@@ -179,11 +179,11 @@ function ImageEdit( { id, src, origRatio, width, height, x, y, scale, focalX, fo
 				onDragEnd={ () => {
 					const [ tx, ty ] = translateRef.current;
 					translateRef.current = [ 0, 0 ];
-					const { width, height } = elementProps;
 					const { offsetX, offsetY, width: imgWidth, height: imgHeight } = imgProps;
-					const focalX = getFocalFromOffset( width, imgWidth, offsetX - tx );
-					const focalY = getFocalFromOffset( height, imgHeight, offsetY - ty );
-					setPropertiesById( id, { focalX, focalY } );
+					setPropertiesById( id, {
+						focalX: getFocalFromOffset( elementProps.width, imgWidth, offsetX - tx ),
+						focalY: getFocalFromOffset( elementProps.height, imgHeight, offsetY - ty ),
+					} );
 					updatePan();
 				} }
 
@@ -198,12 +198,12 @@ function ImageEdit( { id, src, origRatio, width, height, x, y, scale, focalX, fo
 				} }
 				verticalGuidelines={ [
 					elementProps.x,
-					elementProps.x + elementProps.width / 2,
+					elementProps.x + ( elementProps.width / 2 ),
 					elementProps.x + elementProps.width,
 				] }
 				horizontalGuidelines={ [
 					elementProps.y,
-					elementProps.y + elementProps.height / 2,
+					elementProps.y + ( elementProps.height / 2 ),
 					elementProps.y + elementProps.height,
 				] }
 			/>
