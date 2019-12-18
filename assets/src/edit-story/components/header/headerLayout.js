@@ -4,14 +4,10 @@
 import styled from 'styled-components';
 
 /**
- * WordPress dependencies
- */
-import { __ } from '@wordpress/i18n';
-
-/**
  * Internal dependencies
  */
 import { CENTRAL_RIGHT_PADDING, INSPECTOR_WIDTH } from '../../constants';
+import { useStory } from '../../app/story';
 import Buttons from './buttons';
 
 const Background = styled.div`
@@ -30,11 +26,15 @@ const Head = styled.header`
 	align-items: center;
 `;
 
-const Title = styled.h1`
+const Title = styled.input`
 	color: ${ ( { theme } ) => theme.colors.fg.v1 };
 	margin: 0;
 	font-size: 19px;
 	line-height: 20px;
+	background: none !important;
+	border: 0px none !important;
+	color: #fff !important;
+	text-align: center;
 `;
 
 const ButtonCell = styled.header`
@@ -42,12 +42,19 @@ const ButtonCell = styled.header`
 `;
 
 function HeaderLayout() {
+	const { state: { title, postStatus }, actions: { setTitle } } = useStory();
+	// TODO Make sure that Auto Draft checks translations.
+	const titleFormatted = ( postStatus === 'auto-draft' && title === 'Auto Draft' ) ? '' : title;
+
 	return (
 		<Background>
 			<Head>
-				<Title>
-					{ __( 'New story (click to edit title)' ) }
-				</Title>
+				<Title
+					value={ titleFormatted }
+					type={ 'text' }
+					onChange={ ( evt ) => setTitle( evt.target.value ) }
+					placeholder={ 'Add title' }
+				/>
 			</Head>
 			<ButtonCell>
 				<Buttons />

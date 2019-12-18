@@ -20,6 +20,7 @@ const theme = {
 		},
 		mg: {
 			v1: '#616877',
+			v2: '#DADADA',
 		},
 		fg: {
 			v1: '#FFFFFF',

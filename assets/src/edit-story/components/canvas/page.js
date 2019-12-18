@@ -6,7 +6,7 @@ import styled from 'styled-components';
 /**
  * WordPress dependencies
  */
-import { useCallback, useEffect, useState, useRef } from '@wordpress/element';
+import { useCallback, useEffect, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -78,12 +78,9 @@ function Page() {
 
 			{ selectedElement && targetEl && (
 				<Movable
-					rotationAngle={ selectedElement.rotationAngle }
+					selectedElement={ selectedElement }
 					targetEl={ targetEl }
 					pushEvent={ pushEvent }
-					type={ selectedElement.type }
-					x={ selectedElement.x }
-					y={ selectedElement.y }
 				/>
 			) }
 		</Background>
