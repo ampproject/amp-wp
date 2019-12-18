@@ -30,6 +30,16 @@ class Test_Site_Health extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Tears down after each test.
+	 *
+	 * @inheritDoc
+	 */
+	public function tearDown() {
+		unset( $GLOBALS['_wp_using_ext_object_cache'] );
+		parent::tearDown();
+	}
+
+	/**
 	 * Test init.
 	 *
 	 * @covers \Amp\AmpWP\Admin\SiteHealth::init()
