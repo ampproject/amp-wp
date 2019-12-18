@@ -191,8 +191,8 @@ class SiteHealth {
 				'color' => $is_proper_version ? 'green' : 'orange',
 			],
 			'description' => sprintf(
-				/* translators: %d: the minimum recommended ICU version */
-				esc_html__( 'The version of ICU can affect how the intl extension runs. The minimum recommended version of ICU is %d.', 'amp' ),
+				/* translators: %s: the minimum recommended ICU version */
+				esc_html__( 'The version of ICU can affect how the intl extension runs. The minimum recommended version of ICU is %s.', 'amp' ),
 				$minimum_version
 			),
 			'actions'     => sprintf(
@@ -221,8 +221,8 @@ class SiteHealth {
 				$data,
 				[
 					'status' => 'recommended',
-					/* translators: %d: the ICU version */
-					'label'  => sprintf( esc_html__( 'The version of ICU, %d, is out of date.', 'amp' ), $icu_version ),
+					/* translators: %s: the ICU version */
+					'label'  => sprintf( esc_html__( 'The version of ICU, %s, is out of date.', 'amp' ), $icu_version ),
 				]
 			);
 		}
