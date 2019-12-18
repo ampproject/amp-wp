@@ -20,7 +20,38 @@ function APIProvider( { children } ) {
 	const { api: { stories, media } } = useConfig();
 
 	const getStoryById = useCallback(
-		( storyId ) => apiFetch( { path: `${ stories }/${ storyId }?context=edit` } ),
+		( storyId ) => {
+			const path = addQueryArgs( `${ stories }/${ storyId }`, { context: `edit` } );
+			return apiFetch( { path } );
+		},
+		[ stories ],
+	);
+
+	const saveStoryById = useCallback(
+		/**
+		 * Fire REST API call to save story.
+		 *
+		 * @param {number}   storyId Story post id.
+		 * @param {string}   title Story title.
+		 * @param {string}   status Post status, draft or published.
+		 * @param {Array}    pages Array of all pages.
+		 * @param {number}   author User ID of story author.
+		 * @param {string}   slug   The slug of the story.
+		 * @return {Promise} Return apiFetch promise.
+		 */
+		( storyId, title, status, pages, author, slug ) => {
+			return apiFetch( {
+				path: `${ stories }/${ storyId }`,
+				data: {
+					title,
+					status,
+					author,
+					slug,
+					story_data: pages,
+				},
+				method: 'POST',
+			} );
+		},
 		[ stories ],
 	);
 
@@ -58,6 +89,7 @@ function APIProvider( { children } ) {
 		actions: {
 			getStoryById,
 			getMedia,
+			saveStoryById,
 		},
 	};
 
