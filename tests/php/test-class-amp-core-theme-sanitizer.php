@@ -39,6 +39,9 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	 *
 	 * @dataProvider get_xpath_from_css_selector_data
 	 * @covers AMP_Core_Theme_Sanitizer::xpath_from_css_selector()
+	 *
+	 * @param string $css_selector CSS Selector.
+	 * @param string $expected     Expected XPath expression.
 	 */
 	public function test_xpath_from_css_selector( $css_selector, $expected ) {
 		$dom       = new Document();
@@ -90,6 +93,10 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	 *
 	 * @dataProvider get_get_closest_submenu_data
 	 * @covers AMP_Core_Theme_Sanitizer::get_closest_submenu()
+	 *
+	 * @param Document   $dom      Document.
+	 * @param DOMElement $element  Element.
+	 * @param DOMElement $expected Expected element.
 	 */
 	public function test_get_closest_submenu( $dom, $element, $expected ) {
 		$sanitizer = new AMP_Core_Theme_Sanitizer( $dom );

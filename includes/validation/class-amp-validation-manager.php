@@ -29,7 +29,7 @@ class AMP_Validation_Manager {
 	const VALIDATION_ERRORS_QUERY_VAR = 'amp_validation_errors';
 
 	/**
-	 * Action name for previewing the status change for invaliud markup.
+	 * Action name for previewing the status change for invalid markup.
 	 *
 	 * @var string
 	 */
@@ -541,7 +541,7 @@ class AMP_Validation_Manager {
 	/**
 	 * Override validation error statuses (when requested).
 	 *
-	 * When a query var is present along with the required nonce, override the status of the status of the invalud markup
+	 * When a query var is present along with the required nonce, override the status of the status of the invalid markup
 	 * as requested.
 	 *
 	 * @since 1.5.0
@@ -1284,7 +1284,7 @@ class AMP_Validation_Manager {
 				/**
 				 * Reflection.
 				 *
-				 * @var ReflectionFunctionAbstract $reflection
+				 * @var ReflectionFunction|ReflectionMethod $reflection
 				 */
 				$reflection = $source['reflection'];
 				unset( $source['reflection'] ); // Omit from stored source.

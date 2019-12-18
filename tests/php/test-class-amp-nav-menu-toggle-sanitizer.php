@@ -11,7 +11,6 @@ use Amp\AmpWP\Dom\Document;
  * Tests for AMP_Nav_Menu_Toggle_Sanitizer.
  *
  * @covers AMP_Nav_Menu_Toggle_Sanitizer
- * @group testtt
  */
 class Test_AMP_Nav_Menu_Toggle_Sanitizer extends WP_UnitTestCase {
 

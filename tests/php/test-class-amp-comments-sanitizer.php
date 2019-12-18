@@ -97,6 +97,11 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 			$this->assertContains( $name, $amp_state->nodeValue );
 		}
 		foreach ( $form->getElementsByTagName( 'input' ) as $input ) {
+			/**
+			 * Input.
+			 *
+			 * @var DOMElement $input
+			 */
 			$on = $input->getAttribute( 'on' );
 			$this->assertContains( 'change:AMP.setState(', $on );
 			$this->assertContains( strval( $GLOBALS['post']->ID ), $on );

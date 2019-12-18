@@ -1389,7 +1389,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			foreach ( $this->extract_attribute_urls( $node->getAttributeNode( $attr_name ) ) as $url ) {
 				$url = urldecode( $url );
 
-				// Check whether the URL is parseable.
+				// Check whether the URL is parsable.
 				$parts = wp_parse_url( $url );
 				if ( false === $parts ) {
 					return AMP_Rule_Spec::FAIL;

@@ -441,6 +441,10 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	 *
 	 * @dataProvider get_has_class_data
 	 * @covers \AMP_DOM_Utils::has_class()
+	 *
+	 * @param DOMElement $element  Element.
+	 * @param string     $class    Class names.
+	 * @param bool       $expected Expected has class name.
 	 */
 	public function test_has_class( DOMElement $element, $class, $expected ) {
 		$actual = AMP_DOM_Utils::has_class( $element, $class );
@@ -479,6 +483,10 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	 *
 	 * @dataProvider get_get_element_id_data
 	 * @covers \AMP_DOM_Utils::get_element_id()
+	 *
+	 * @param DOMElement $element  Element.
+	 * @param string     $prefix   Prefix.
+	 * @param string     $expected Expected element ID.
 	 */
 	public function test_get_element_id( DOMElement $element, $prefix, $expected ) {
 		$actual = AMP_DOM_Utils::get_element_id( $element, $prefix );
@@ -517,6 +525,11 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	 *
 	 * @dataProvider get_add_amp_action_data
 	 * @covers \AMP_DOM_Utils::add_amp_action()
+	 *
+	 * @param DOMElement $element  Element.
+	 * @param string     $event    Event.
+	 * @param string     $action   Action.
+	 * @param string     $expected Expected.
 	 */
 	public function test_add_amp_action( DOMElement $element, $event, $action, $expected ) {
 		AMP_DOM_Utils::add_amp_action( $element, $event, $action );
@@ -552,6 +565,10 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	 *
 	 * @dataProvider get_merge_amp_actions_data
 	 * @covers \AMP_DOM_Utils::merge_amp_actions()
+	 *
+	 * @param string $first    First action.
+	 * @param string $second   Second action.
+	 * @param string $expected Expected merged actions.
 	 */
 	public function test_merge_amp_actions( $first, $second, $expected ) {
 		$actual = AMP_DOM_Utils::merge_amp_actions( $first, $second );
@@ -739,6 +756,11 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	 *
 	 * @dataProvider get_copy_attributes_data
 	 * @covers \AMP_DOM_Utils::copy_attributes()
+	 *
+	 * @param array      $attributes Attributes.
+	 * @param DOMElement $from       From element.
+	 * @param DOMElement $to         To element.
+	 * @param array      $expected   Expected.
 	 */
 	public function test_copy_attributes( $attributes, DOMElement $from, DOMElement $to, $expected ) {
 		AMP_DOM_Utils::copy_attributes( $attributes, $from, $to );
