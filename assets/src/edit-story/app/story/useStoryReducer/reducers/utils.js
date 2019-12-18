@@ -28,12 +28,10 @@ export function moveArrayElement( array, oldPosition, newPosition ) {
 	];
 
 	// Then re-insert at the right point
-	const isMovingForward = newPosition > oldPosition;
-	const insertionPoint = isMovingForward ? newPosition - 1 : newPosition;
 	return [
-		...arrayWithoutElement.slice( 0, insertionPoint ),
+		...arrayWithoutElement.slice( 0, newPosition ),
 		element,
-		...arrayWithoutElement.slice( insertionPoint ),
+		...arrayWithoutElement.slice( newPosition ),
 	];
 }
 
@@ -43,11 +41,11 @@ export function getAbsolutePosition( {
 	maxPosition,
 	desiredPosition,
 } ) {
-	if ( typeof newPosition === 'number' ) {
+	if ( typeof desiredPosition === 'number' ) {
 		return Math.min( maxPosition, Math.max( minPosition, desiredPosition ) );
 	}
 
-	if ( typeof newPosition !== 'string' ) {
+	if ( typeof desiredPosition !== 'string' ) {
 		return currentPosition;
 	}
 

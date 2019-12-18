@@ -9,7 +9,7 @@ export { default as arrangePage } from './arrangePage';
 export { default as addElements } from './addElements';
 export { default as deleteElements } from './deleteElements';
 export { default as updateElements } from './updateElements';
-export { default as setBackgroundElement } from './arrangeElement';
+export { default as setBackgroundElement } from './setBackgroundElement';
 export { default as arrangeElement } from './arrangeElement';
 
 // Manipulate current page.

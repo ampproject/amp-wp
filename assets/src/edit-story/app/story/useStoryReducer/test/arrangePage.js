@@ -12,8 +12,8 @@ describe( 'arrangePage', () => {
 			pages: [ { id: '111' }, { id: '222' }, { id: '333' }, { id: '444' } ],
 		} );
 
-		// Reorder page 111 to fit between 222 and 333 - position 2
-		const result = arrangePage( { pageId: '111', position: 2 } );
+		// Reorder page 111 from 1st place (position 0) to 2nd place (position 1)
+		const result = arrangePage( { pageId: '111', position: 1 } );
 		const pageIds = result.pages.map( ( { id } ) => id );
 		expect( pageIds ).toStrictEqual( [ '222', '111', '333', '444' ] );
 	} );

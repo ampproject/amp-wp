@@ -14,7 +14,7 @@
  * @return {Object} New state
  */
 function addElements( state, { elements } ) {
-	const pageIndex = state.pages.finIndex( ( { id } ) => id === state.current );
+	const pageIndex = state.pages.findIndex( ( { id } ) => id === state.current );
 	const oldPage = state.pages[ pageIndex ];
 	const newPage = {
 		...oldPage,

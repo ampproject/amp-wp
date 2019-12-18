@@ -37,7 +37,8 @@ function updateElements( state, { elementIds, properties } ) {
 	const pageElementIds = oldPage.elements.map( ( { id } ) => id );
 
 	// Nothing to update?
-	if ( ! intersect( pageElementIds, idsToUpdate ) ) {
+	const hasAnythingToUpdate = intersect( pageElementIds, idsToUpdate ).length > 0;
+	if ( ! hasAnythingToUpdate ) {
 		return state;
 	}
 

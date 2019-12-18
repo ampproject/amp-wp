@@ -36,12 +36,18 @@ import { getAbsolutePosition, moveArrayElement } from './utils';
  * @return {Object} New state
  */
 function arrangeElement( state, { elementId, position } ) {
+	if ( elementId === null && state.selection.length !== 1 ) {
+		return state;
+	}
+
+	const idToArrange = elementId !== null ? elementId : state.selection[ 0 ];
+
 	const pageIndex = state.pages.findIndex( ( { id } ) => id === state.current );
 
 	const page = state.pages[ pageIndex ];
-	const currentPosition = page.elements.findIndex( ( { id } ) => id === elementId );
+	const currentPosition = page.elements.findIndex( ( { id } ) => id === idToArrange );
 
-	if ( currentPosition === -1 || page.backgroundElementId === elementId ) {
+	if ( currentPosition === -1 || page.backgroundElementId === idToArrange ) {
 		return state;
 	}
 
@@ -63,7 +69,7 @@ function arrangeElement( state, { elementId, position } ) {
 
 	const newPages = [
 		...state.pages.slice( 0, pageIndex ),
-		...{
+		{
 			...page,
 			elements: newElements,
 		},

@@ -9,6 +9,7 @@ import { moveArrayElement } from './utils';
  * If element id is null, background id is cleared for the page.
  *
  * If page had a background element before, that element is deleted!
+ * And if that element was selected, selection is cleared.
  *
  * @param {Object} state Current state
  * @param {Object} payload Action payload
@@ -21,26 +22,43 @@ function setBackgroundElement( state, { elementId } ) {
 	const page = state.pages[ pageIndex ];
 
 	let newPage;
+	let newSelection = state.selection;
 
 	// If new id is null, clear background attribute and proceed
 	if ( elementId === null ) {
+		if ( page.backgroundElementId === null ) {
+			// Nothing to do here, there isn't any background to clear
+			return state;
+		}
+
 		newPage = {
 			...page,
 			backgroundElementId: null,
 		};
 	} else {
-		// Does the element even exist?
-		const elementPosition = page.elements.findIndex( ( { id } ) => id === elementId );
-		if ( elementPosition === -1 ) {
+		// Does the element even exist or is it already background
+		let elementPosition = page.elements.findIndex( ( { id } ) => id === elementId );
+		if ( elementPosition === -1 || page.backgroundElementId === elementId ) {
 			return state;
 		}
+		let pageElements = page.elements;
 
-		// Check if we already had a background id, if so, slice from after the first element.
-		const sliceFrom = page.backgroundElementId !== null ? 1 : 0;
+		// Check if we already had a background id.
+		const hadBackground = page.backgroundElementId !== null;
+		if ( hadBackground ) {
+			// If so, slice first element out and update position
+			pageElements = pageElements.slice( 1 );
+			elementPosition = elementPosition - 1;
+
+			// Also remove old element from selection
+			if ( state.selection.includes( page.backgroundElementId ) ) {
+				newSelection = state.selection.filter( ( id ) => id !== page.backgroundElementId );
+			}
+		}
 
 		// Reorder elements
 		const newElements = moveArrayElement(
-			page.elements.slice( sliceFrom ),
+			pageElements,
 			elementPosition,
 			0,
 		);
@@ -61,6 +79,7 @@ function setBackgroundElement( state, { elementId } ) {
 	return {
 		...state,
 		pages: newPages,
+		selection: newSelection,
 	};
 }
 

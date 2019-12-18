@@ -3,12 +3,46 @@
  */
 import { setupReducer } from './_utils';
 
-describe.skip( 'updateSelectedElements', () => {
-	it( 'should work', () => {
-		const { updateSelectedElements } = setupReducer();
+describe( 'updateSelectedElements', () => {
+	it( 'should update the selected elements', () => {
+		const { restore, updateSelectedElements } = setupReducer();
 
-		const result = updateSelectedElements( { } );
+		// Set an initial state with a current page and some elements selected.
+		restore( {
+			pages: [
+				{ id: '111', elements: [ { id: '123' }, { id: '456' }, { id: '789' } ] },
+			],
+			current: '111',
+			selection: [ '123', '456' ],
+		} );
 
-		expect( result ).not.toStrictEqual( {} );
+		const result = updateSelectedElements( { properties: { a: 1 } } );
+
+		expect( result ).toStrictEqual( {
+			pages: [ { id: '111', elements: [ { id: '123', a: 1 }, { id: '456', a: 1 }, { id: '789' } ] } ],
+			current: '111',
+			selection: [ '123', '456' ],
+		} );
+	} );
+
+	it( 'should do nothing if no elements selected', () => {
+		const { restore, updateSelectedElements } = setupReducer();
+
+		// Set an initial state with a current page and some elements, none selected.
+		restore( {
+			pages: [
+				{ id: '111', elements: [ { id: '123' }, { id: '456' }, { id: '789' } ] },
+			],
+			current: '111',
+			selection: [],
+		} );
+
+		const result = updateSelectedElements( { properties: { a: 1 } } );
+
+		expect( result ).toStrictEqual( {
+			pages: [ { id: '111', elements: [ { id: '123' }, { id: '456' }, { id: '789' } ] } ],
+			current: '111',
+			selection: [],
+		} );
 	} );
 } );

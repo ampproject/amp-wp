@@ -38,7 +38,8 @@ function deleteElements( state, { elementIds } ) {
 	const pageElementIds = oldPage.elements.map( ( { id } ) => id );
 
 	// Nothing to delete?
-	if ( ! intersect( pageElementIds, idsToDelete ) ) {
+	const hasAnythingToDelete = intersect( pageElementIds, idsToDelete ).length > 0;
+	if ( ! hasAnythingToDelete ) {
 		return state;
 	}
 
@@ -61,7 +62,7 @@ function deleteElements( state, { elementIds } ) {
 	];
 
 	// This check is to make sure not to modify the selection array if no update is necessary.
-	const wasAnySelected = intersect( state.selection, idsToDelete );
+	const wasAnySelected = intersect( state.selection, idsToDelete ).length > 0;
 	const newSelection = wasAnySelected ?
 		state.selection.filter( ( id ) => ! idsToDelete.includes( id ) ) :
 		state.selection;
