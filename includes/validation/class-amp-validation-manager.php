@@ -262,7 +262,7 @@ class AMP_Validation_Manager {
 		}
 
 		// Story post type always supports validation.
-		if ( AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG === $post->post_type ) {
+		if ( in_array( $post->post_type, [ AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG, AMP_Story_Post_Type::POST_TYPE_SLUG ] ) ) {
 			return AMP_Options_Manager::is_stories_experience_enabled();
 		}
 
@@ -682,7 +682,7 @@ class AMP_Validation_Manager {
 	 */
 	public static function add_rest_api_fields() {
 		if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-			$object_types = [ AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG ]; // Eventually validation should be done in Reader mode as well, but for now, limit to stories.
+			$object_types = [ AMP_Story_Legacy_Post_Type::POST_TYPE_SLUG, AMP_Story_Post_Type::POST_TYPE_SLUG ]; // Eventually validation should be done in Reader mode as well, but for now, limit to stories.
 		} elseif ( amp_is_canonical() ) {
 			$object_types = get_post_types_by_support( 'editor' ); // @todo Shouldn't this actually only be those with 'amp' support, or if if all_templates_supported?
 		} else {

@@ -1,13 +1,39 @@
 /**
  * WordPress dependencies
  */
-import { useCallback } from '@wordpress/element';
+import { useCallback, renderToString } from '@wordpress/element';
 import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
  */
 import { useAPI } from '../../api';
+import { getDefinitionForType } from '../../../elements';
+
+/**
+ * Creates AMP HTML markup for saving to DB for rendering in the FE.
+ *
+ * @param {Object} pages Object of pages.
+ * @return {Element} Markup of pages.
+ */
+const getStoryMarkupFromPages = ( pages ) => {
+	const markup = pages.map( ( page ) => {
+		const { id } = page;
+		return renderToString(
+			<amp-story-page id={ id }>
+				<amp-story-grid-layer template="vertical">
+					{ page.elements.map( ( { type, ...rest } ) => {
+						const { id: elId } = rest;
+						// eslint-disable-next-line @wordpress/no-unused-vars-before-return
+						const { Save } = getDefinitionForType( type );
+						return <Save key={ 'element-' + elId } { ...rest } />;
+					} ) }
+				</amp-story-grid-layer>
+			</amp-story-page>,
+		);
+	} );
+	return markup.join();
+};
 
 /**
  * Custom hook to save story.
@@ -56,7 +82,8 @@ function useSavePost( {
 	const savePost = useCallback( () => {
 		if ( ! isSaving ) {
 			setIsSaving( true );
-			saveStoryById( storyId, title, status, pages, postAuthor, slug ).then( ( post ) => {
+			const content = getStoryMarkupFromPages( pages );
+			saveStoryById( storyId, title, status, pages, postAuthor, slug, content ).then( ( post ) => {
 				const { status: thisPostStatus, link } = post;
 				setPostStatus( thisPostStatus );
 				setLink( link );

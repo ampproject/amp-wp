@@ -30,7 +30,6 @@ class AMP_Story_Post_Type {
 	 */
 	const AMP_STORIES_STYLE_HANDLE = 'amp-edit-story';
 
-
 	/**
 	 * The rewrite slug for this post type.
 	 *
@@ -110,6 +109,98 @@ class AMP_Story_Post_Type {
 		add_filter( 'show_admin_bar', [ __CLASS__, 'show_admin_bar' ] );
 		add_filter( 'replace_editor', [ __CLASS__, 'replace_editor' ], 10, 2 );
 		add_filter( 'admin_body_class', [ __CLASS__, 'admin_body_class' ], 99 );
+		add_filter( 'wp_kses_allowed_html', [ __CLASS__, 'filter_kses_allowed_html' ], 10, 2 );
+
+		// Select the single-amp-story.php template for Stories.
+		add_filter( 'template_include', [ __CLASS__, 'filter_template_include' ] );
+
+		add_action(
+			'amp_story_head',
+			function() {
+				// Theme support for title-tag is implied for stories. See _wp_render_title_tag().
+				echo '<title>' . esc_html( wp_get_document_title() ) . '</title>' . "\n";
+			},
+			1
+		);
+		add_action( 'amp_story_head', 'wp_enqueue_scripts', 1 );
+		add_action(
+			'amp_story_head',
+			function() {
+				/*
+				 * Same as wp_print_styles() but importantly omitting the wp_print_styles action, which themes/plugins
+				 * can use to output arbitrary styling. Styling is constrained in story template via the
+				 * \AMP_Story_Legacy_Post_Type::filter_frontend_print_styles_array() method.
+				 */
+				wp_styles()->do_items();
+			},
+			8
+		);
+
+		add_filter(
+			'amp_content_sanitizers',
+			static function( $sanitizers ) {
+				if ( is_singular( self::POST_TYPE_SLUG ) ) {
+					$sanitizers['AMP_Story_Sanitizer'] = [];
+
+					// Disable noscript fallbacks since not allowed in AMP Stories.
+					$sanitizers['AMP_Img_Sanitizer']['add_noscript_fallback']    = false;
+					$sanitizers['AMP_Audio_Sanitizer']['add_noscript_fallback']  = false;
+					$sanitizers['AMP_Video_Sanitizer']['add_noscript_fallback']  = false;
+					$sanitizers['AMP_Iframe_Sanitizer']['add_noscript_fallback'] = false; // Note that iframe is not yet allowed in an AMP Story.
+				}
+				return $sanitizers;
+			}
+		);
+
+		add_filter(
+			'the_content',
+			static function( $content ) {
+				if ( is_singular( self::POST_TYPE_SLUG ) ) {
+					remove_filter( 'the_content', 'wpautop' );
+				}
+				return $content;
+			},
+			0
+		);
+
+		// @todo Check if there's something to skip in the new version.
+		add_action( 'amp_story_head', 'amp_add_generator_metadata' );
+		add_action( 'amp_story_head', 'rest_output_link_wp_head', 10, 0 );
+		add_action( 'amp_story_head', 'wp_resource_hints', 2 );
+		add_action( 'amp_story_head', 'feed_links', 2 );
+		add_action( 'amp_story_head', 'feed_links_extra', 3 );
+		add_action( 'amp_story_head', 'rsd_link' );
+		add_action( 'amp_story_head', 'wlwmanifest_link' );
+		add_action( 'amp_story_head', 'adjacent_posts_rel_link_wp_head', 10, 0 );
+		add_action( 'amp_story_head', 'noindex', 1 );
+		add_action( 'amp_story_head', 'wp_generator' );
+		add_action( 'amp_story_head', 'rel_canonical' );
+		add_action( 'amp_story_head', 'wp_shortlink_wp_head', 10, 0 );
+		add_action( 'amp_story_head', 'wp_site_icon', 99 );
+		add_action( 'amp_story_head', 'wp_oembed_add_discovery_links' );
+
+		// Limit the styles that are printed in a story.
+		add_filter( 'print_styles_array', [ __CLASS__, 'filter_frontend_print_styles_array' ] );
+	}
+
+	/**
+	 * Filter which styles will be printed on an AMP Story.
+	 *
+	 * @param array $handles Style handles.
+	 * @return array Styles to print.
+	 */
+	public static function filter_frontend_print_styles_array( $handles ) {
+		if ( ! is_singular( self::POST_TYPE_SLUG ) || is_embed() ) {
+			return $handles;
+		}
+
+		return array_filter(
+			$handles,
+			static function( $handle ) {
+				// @todo Add the plugin's style here.
+				return false;
+			}
+		);
 	}
 
 	/**
@@ -275,5 +366,55 @@ class AMP_Story_Post_Type {
 
 		$class .= ' edit-story ';
 		return $class;
+	}
+
+	/**
+	 * Filter the allowed tags for KSES to allow for amp-story children.
+	 *
+	 * @param array $allowed_tags Allowed tags.
+	 * @return array Allowed tags.
+	 */
+	public static function filter_kses_allowed_html( $allowed_tags ) {
+		$story_components = [
+			'amp-story',
+			'amp-story-page',
+			'amp-story-grid-layer',
+			'amp-story-cta-layer',
+			'amp-story-page-attachment',
+			'amp-img',
+			'amp-video',
+			'img',
+		];
+		foreach ( $story_components as $story_component ) {
+			$attributes = array_fill_keys( array_keys( AMP_Allowed_Tags_Generated::get_allowed_attributes() ), true );
+			$rule_specs = AMP_Allowed_Tags_Generated::get_allowed_tag( $story_component );
+			foreach ( $rule_specs as $rule_spec ) {
+				$attributes = array_merge( $attributes, array_fill_keys( array_keys( $rule_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ] ), true ) );
+			}
+			$allowed_tags[ $story_component ] = $attributes;
+		}
+
+		foreach ( $allowed_tags as &$allowed_tag ) {
+			$allowed_tag['animate-in']          = true;
+			$allowed_tag['animate-in-duration'] = true;
+			$allowed_tag['animate-in-delay']    = true;
+			$allowed_tag['animate-in-after']    = true;
+			$allowed_tag['layout']              = true;
+		}
+
+		return $allowed_tags;
+	}
+
+	/**
+	 * Set template for amp-story post type.
+	 *
+	 * @param string $template Template.
+	 * @return string Template.
+	 */
+	public static function filter_template_include( $template ) {
+		if ( is_singular( self::POST_TYPE_SLUG ) && ! is_embed() ) {
+			$template = AMP__DIR__ . '/includes/templates/single-amp-story.php';
+		}
+		return $template;
 	}
 }
