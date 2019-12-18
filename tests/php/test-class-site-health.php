@@ -50,15 +50,15 @@ class Test_Site_Health extends WP_UnitTestCase {
 		$this->assertEquals(
 			[
 				'direct' => [
-					'persistent_object_cache' => [
+					'amp_persistent_object_cache' => [
 						'label' => 'Persistent object cache',
 						'test'  => [ $this->instance, 'persistent_object_cache' ],
 					],
-					'curl_multi_functions'    => [
+					'amp_curl_multi_functions'    => [
 						'label' => 'curl_multi_* functions',
 						'test'  => [ $this->instance, 'curl_multi_functions' ],
 					],
-					'icu_version'             => [
+					'amp_icu_version'             => [
 						'label' => 'ICU version',
 						'test'  => [ $this->instance, 'icu_version' ],
 					],
@@ -85,7 +85,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 				],
 				'description' => 'The AMP plugin performs at its best when persistent object cache is enabled.',
 				'actions'     => '<p><a href="https://codex.wordpress.org/Class_Reference/WP_Object_Cache#Persistent_Caching" target="_blank" rel="noopener noreferrer">Learn more about persistent object caching <span class="screen-reader-text">(opens in a new tab)</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
-				'test'        => 'persistent_object_cache',
+				'test'        => 'amp_persistent_object_cache',
 			],
 			$this->instance->persistent_object_cache()
 		);
@@ -101,7 +101,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 				],
 				'description' => 'The AMP plugin performs at its best when persistent object cache is enabled.',
 				'actions'     => '',
-				'test'        => 'persistent_object_cache',
+				'test'        => 'amp_persistent_object_cache',
 			],
 			$this->instance->persistent_object_cache()
 		);
@@ -117,7 +117,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 			[
 				'description' => 'The AMP plugin performs better when these functions are available.',
 				'actions'     => '<p><a href="https://www.php.net/manual/book.curl.php" target="_blank" rel="noopener noreferrer">Learn more about these functions <span class="screen-reader-text">(opens in a new tab)</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
-				'test'        => 'curl_multi_functions',
+				'test'        => 'amp_curl_multi_functions',
 			],
 			$this->instance->curl_multi_functions()
 		);
@@ -133,7 +133,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 			[
 				'description' => 'The version of ICU can affect how the intl extension runs. The minimum recommended version of ICU is 65.',
 				'actions'     => '<p><a href="http://site.icu-project.org/" target="_blank" rel="noopener noreferrer">Learn more about ICU <span class="screen-reader-text">(opens in a new tab)</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
-				'test'        => 'icu_version',
+				'test'        => 'amp_icu_version',
 			],
 			$this->instance->icu_version()
 		);

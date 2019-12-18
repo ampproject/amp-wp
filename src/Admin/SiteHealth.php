@@ -33,22 +33,22 @@ class SiteHealth {
 	 * Adds Site Health tests related to this plugin.
 	 *
 	 * @param array $tests The Site Health tests.
-	 * @return array $tests The filtered tests.
+	 * @return array $tests The filtered tests, with tests for AMP.
 	 */
 	public function add_tests( $tests ) {
-		$direct_tests = [
-			'persistent_object_cache' => esc_html__( 'Persistent object cache', 'amp' ),
-			/* translators: %s: a type of PHP function */
-			'curl_multi_functions'    => sprintf( esc_html__( '%s functions', 'amp' ), 'curl_multi_*' ),
-			'icu_version'             => esc_html__( 'ICU version', 'amp' ),
+		$tests['direct']['amp_persistent_object_cache'] = [
+			'label' => esc_html__( 'Persistent object cache', 'amp' ),
+			'test'  => [ $this, 'persistent_object_cache' ],
 		];
-
-		foreach ( $direct_tests as $test_name => $test_label ) {
-			$tests['direct'][ $test_name ] = [
-				'label' => $test_label,
-				'test'  => [ $this, $test_name ],
-			];
-		}
+		$tests['direct']['amp_curl_multi_functions']    = [
+			/* translators: %s: a type of PHP function */
+			'label' => sprintf( esc_html__( '%s functions', 'amp' ), 'curl_multi_*' ),
+			'test'  => [ $this, 'curl_multi_functions' ],
+		];
+		$tests['direct']['amp_icu_version']             = [
+			'label' => esc_html__( 'ICU version', 'amp' ),
+			'test'  => [ $this, 'icu_version' ],
+		];
 
 		return $tests;
 	}
@@ -67,7 +67,7 @@ class SiteHealth {
 			],
 			'description' => esc_html__( 'The AMP plugin performs at its best when persistent object cache is enabled.', 'amp' ),
 			'actions'     => '',
-			'test'        => 'persistent_object_cache',
+			'test'        => 'amp_persistent_object_cache',
 		];
 
 		if ( $is_using_object_cache ) {
@@ -126,7 +126,7 @@ class SiteHealth {
 				/* translators: The accessibility text. */
 				esc_html__( '(opens in a new tab)', 'amp' )
 			),
-			'test'        => 'curl_multi_functions',
+			'test'        => 'amp_curl_multi_functions',
 		];
 
 		if ( $undefined_curl_functions ) {
@@ -203,7 +203,7 @@ class SiteHealth {
 				/* translators: The accessibility text. */
 				esc_html__( '(opens in a new tab)', 'amp' )
 			),
-			'test'        => 'icu_version',
+			'test'        => 'amp_icu_version',
 		];
 
 		if ( ! defined( 'INTL_ICU_VERSION' ) ) {
