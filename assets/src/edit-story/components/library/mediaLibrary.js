@@ -134,20 +134,6 @@ function MediaLibrary( { onInsert } ) {
 	};
 
 	/**
-	 * Generate height based on ratio of original height / width.
-	 *
-	 * @param {number} oWidth Original element width.
-	 * @param {number} oHeight Original element height.
-	 * @param {number} width Desired width.
-	 * @return {number} Relative height compared to height.
-	 */
-	const getRelativeHeight = ( oWidth, oHeight, width ) => {
-		const ratio = oWidth / width;
-		const height = Math.round( oHeight / ratio );
-		return height;
-	};
-
-	/**
 	 * Handle search term changes.
 	 *
 	 * @param {Object} evt Doc Event
@@ -196,8 +182,8 @@ function MediaLibrary( { onInsert } ) {
 	 */
 	const insertMediaElement = ( attachment, width ) => {
 		const { src, mimeType, oWidth, oHeight } = attachment;
-		const height = getRelativeHeight( oWidth, oHeight, width );
-		const origRatio = oWidth / width;
+		const origRatio = oWidth / oHeight;
+		const height = width / origRatio;
 		if ( SUPPORTED_IMAGE_TYPES.includes( mimeType ) ) {
 			return onInsert( 'image', {
 				src,
@@ -207,6 +193,8 @@ function MediaLibrary( { onInsert } ) {
 				y: 5,
 				rotationAngle: 0,
 				origRatio,
+				origWidth: oWidth,
+				origHeight: oHeight,
 			} );
 		} else if ( SUPPORTED_VIDEO_TYPES.includes( mimeType ) ) {
 			return onInsert( 'video', {
@@ -217,6 +205,8 @@ function MediaLibrary( { onInsert } ) {
 				y: 5,
 				rotationAngle: 0,
 				origRatio,
+				origWidth: oWidth,
+				origHeight: oHeight,
 				mimeType,
 			} );
 		}
@@ -232,7 +222,8 @@ function MediaLibrary( { onInsert } ) {
 	 */
 	const getMediaElement = ( mediaEl, width ) => {
 		const { src, oWidth, oHeight, mimeType } = mediaEl;
-		const height = getRelativeHeight( oWidth, oHeight, width );
+		const origRatio = oWidth / oHeight;
+		const height = width / origRatio;
 		if ( SUPPORTED_IMAGE_TYPES.includes( mimeType ) ) {
 			return ( <Image
 				key={ src }
