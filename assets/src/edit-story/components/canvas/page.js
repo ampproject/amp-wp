@@ -78,12 +78,9 @@ function Page() {
 
 			{ selectedElement && targetEl && (
 				<Movable
-					rotationAngle={ selectedElement.rotationAngle }
+					selectedElement={ selectedElement }
 					targetEl={ targetEl }
 					pushEvent={ pushEvent }
-					type={ selectedElement.type }
-					x={ selectedElement.x }
-					y={ selectedElement.y }
 				/>
 			) }
 		</Background>

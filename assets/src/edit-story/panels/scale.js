@@ -15,17 +15,17 @@ import { Panel, Title, InputGroup, getCommonValue } from './shared';
 
 function ScalePanel( { selectedElements, onSetProperties } ) {
 	const scale = getCommonValue( selectedElements, 'scale' );
-	const offsetX = getCommonValue( selectedElements, 'offsetX' );
-	const offsetY = getCommonValue( selectedElements, 'offsetY' );
-	const [ state, setState ] = useState( { scale, offsetX, offsetY } );
+	const focalX = getCommonValue( selectedElements, 'focalX' );
+	const focalY = getCommonValue( selectedElements, 'focalY' );
+	const [ state, setState ] = useState( { scale, focalX, focalY } );
 	useEffect( () => {
-		setState( { scale, offsetX, offsetY } );
-	}, [ scale, offsetX, offsetY ] );
+		setState( { scale, focalX, focalY } );
+	}, [ scale, focalX, focalY ] );
 	const handleSubmit = ( evt ) => {
 		onSetProperties( {
 			scale: typeof state.scale === 'string' ? null : state.scale,
-			offsetX: typeof state.offsetX === 'string' ? null : state.offsetX,
-			offsetY: typeof state.offsetY === 'string' ? null : state.offsetY,
+			focalX: typeof state.focalX === 'string' ? null : state.focalX,
+			focalY: typeof state.focalY === 'string' ? null : state.focalY,
 		} );
 		evt.preventDefault();
 	};
@@ -42,17 +42,17 @@ function ScalePanel( { selectedElements, onSetProperties } ) {
 				postfix="%"
 			/>
 			<InputGroup
-				label="Offset X"
-				value={ typeof state.offsetX === 'number' ? state.offsetX : '(auto)' }
-				isMultiple={ offsetX === '' }
-				onChange={ ( value ) => setState( { ...state, offsetX: isNaN( value ) || value === '' ? '(auto)' : parseFloat( value ) } ) }
+				label="Focal X"
+				value={ typeof state.focalX === 'number' ? state.focalX : '(auto)' }
+				isMultiple={ focalX === '' }
+				onChange={ ( value ) => setState( { ...state, focalX: isNaN( value ) || value === '' ? '(auto)' : parseFloat( value ) } ) }
 				postfix="%"
 			/>
 			<InputGroup
-				label="Offset Y"
-				value={ typeof state.offsetY === 'number' ? state.offsetY : '(auto)' }
-				isMultiple={ offsetY === '' }
-				onChange={ ( value ) => setState( { ...state, offsetY: isNaN( value ) || value === '' ? '(auto)' : parseFloat( value ) } ) }
+				label="Focal Y"
+				value={ typeof state.focalY === 'number' ? state.focalY : '(auto)' }
+				isMultiple={ focalY === '' }
+				onChange={ ( value ) => setState( { ...state, focalY: isNaN( value ) || value === '' ? '(auto)' : parseFloat( value ) } ) }
 				postfix="%"
 			/>
 		</Panel>

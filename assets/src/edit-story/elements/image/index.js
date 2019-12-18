@@ -16,4 +16,5 @@ export const panels = [
 	PanelTypes.POSITION,
 	PanelTypes.SCALE,
 	PanelTypes.ROTATION_ANGLE,
+	PanelTypes.FULLBLEED,
 ];

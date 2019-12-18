@@ -16,6 +16,7 @@ import { Panel, Title, InputGroup, getCommonValue } from './shared';
 function SizePanel( { selectedElements, onSetProperties } ) {
 	const width = getCommonValue( selectedElements, 'width' );
 	const height = getCommonValue( selectedElements, 'height' );
+	const isFullbleed = getCommonValue( selectedElements, 'isFullbleed' );
 	const [ state, setState ] = useState( { width, height } );
 	useEffect( () => {
 		setState( { width, height } );
@@ -35,6 +36,7 @@ function SizePanel( { selectedElements, onSetProperties } ) {
 				isMultiple={ width === '' }
 				onChange={ ( value ) => setState( { ...state, width: isNaN( value ) || value === '' ? '' : parseFloat( value ) } ) }
 				postfix="px"
+				disabled={ isFullbleed }
 			/>
 			<InputGroup
 				label="Height"
@@ -42,6 +44,7 @@ function SizePanel( { selectedElements, onSetProperties } ) {
 				isMultiple={ height === '' }
 				onChange={ ( value ) => setState( { ...state, height: isNaN( value ) || value === '' ? '' : parseFloat( value ) } ) }
 				postfix="px"
+				disabled={ isFullbleed }
 			/>
 		</Panel>
 	);
