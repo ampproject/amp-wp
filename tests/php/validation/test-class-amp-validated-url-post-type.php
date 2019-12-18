@@ -768,21 +768,18 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$that   = $this;
 		$filter = static function() use ( $that ) {
 			return [
-				'body' => sprintf(
-					'<html amp><head></head><body></body><!--%s--></html>',
-					'AMP_VALIDATION:' . wp_json_encode(
-						[
-							'results' => array_map(
-								static function( $error ) {
-									return array_merge(
-										compact( 'error' ),
-										[ 'sanitized' => false ]
-									);
-								},
-								$that->get_mock_errors()
-							),
-						]
-					)
+				'body' => wp_json_encode(
+					[
+						'results' => array_map(
+							static function( $error ) {
+								return array_merge(
+									compact( 'error' ),
+									[ 'sanitized' => false ]
+								);
+							},
+							$that->get_mock_errors()
+						),
+					]
 				),
 			];
 		};
@@ -893,21 +890,18 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$that   = $this;
 		$filter = static function() use ( $that ) {
 			return [
-				'body' => sprintf(
-					'<html amp><head></head><body></body><!--%s--></html>',
-					'AMP_VALIDATION:' . wp_json_encode(
-						[
-							'results' => array_map(
-								static function( $error ) {
-									return array_merge(
-										compact( 'error' ),
-										[ 'sanitized' => false ]
-									);
-								},
-								$that->get_mock_errors()
-							),
-						]
-					)
+				'body' => wp_json_encode(
+					[
+						'results' => array_map(
+							static function( $error ) {
+								return array_merge(
+									compact( 'error' ),
+									[ 'sanitized' => false ]
+								);
+							},
+							$that->get_mock_errors()
+						),
+					]
 				),
 			];
 		};
@@ -1022,26 +1016,23 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 			'pre_http_request',
 			static function() {
 				return [
-					'body' => sprintf(
-						'<html amp><head></head><body></body><!--%s--></html>',
-						'AMP_VALIDATION:' . wp_json_encode(
-							[
-								'results' => [
-									[
-										'sanitized' => false,
-										'error'     => [
-											'code' => 'bar',
-										],
-									],
-									[
-										'sanitized' => false,
-										'error'     => [
-											'code' => 'baz',
-										],
+					'body' => wp_json_encode(
+						[
+							'results' => [
+								[
+									'sanitized' => false,
+									'error'     => [
+										'code' => 'bar',
 									],
 								],
-							]
-						)
+								[
+									'sanitized' => false,
+									'error'     => [
+										'code' => 'baz',
+									],
+								],
+							],
+						]
 					),
 				];
 			}
@@ -1086,18 +1077,15 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 			'pre_http_request',
 			static function() use ( $error ) {
 				return [
-					'body' => sprintf(
-						'<html amp><head></head><body></body><!--%s--></html>',
-						'AMP_VALIDATION:' . wp_json_encode(
-							[
-								'results' => [
-									[
-										'sanitized' => false,
-										'error'     => $error,
-									],
+					'body' => wp_json_encode(
+						[
+							'results' => [
+								[
+									'sanitized' => false,
+									'error'     => $error,
 								],
-							]
-						)
+							],
+						]
 					),
 				];
 			}

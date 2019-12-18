@@ -629,6 +629,24 @@ class AMP_Validated_URL_Post_Type {
 	}
 
 	/**
+	 * Get the markup status preview URL.
+	 *
+	 * Adds a _wpnonce query param for the markup status preview action.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @param string $url Frontend URL to preview markup status changes.
+	 * @return string Preview URL.
+	 */
+	protected static function get_markup_status_preview_url( $url ) {
+		return add_query_arg(
+			'_wpnonce',
+			wp_create_nonce( AMP_Validation_Manager::MARKUP_STATUS_PREVIEW_ACTION ),
+			$url
+		);
+	}
+
+	/**
 	 * Normalize a URL for storage.
 	 *
 	 * The AMP query param is removed to facilitate switching between standard and transitional.
@@ -1885,7 +1903,7 @@ class AMP_Validated_URL_Post_Type {
 		<script>
 		jQuery( function( $ ) {
 			var validateUrl, postId;
-			validateUrl = <?php echo wp_json_encode( add_query_arg( AMP_Validation_Manager::VALIDATE_QUERY_VAR, AMP_Validation_Manager::get_amp_validate_nonce(), self::get_url_from_post( $post ) ) ); ?>;
+			validateUrl = <?php echo wp_json_encode( self::get_markup_status_preview_url( self::get_url_from_post( $post ) ) ); ?>;
 			postId = <?php echo wp_json_encode( $post->ID ); ?>;
 			$( '#preview_validation_errors' ).on( 'click', function() {
 				var params = {}, validatePreviewUrl = validateUrl;

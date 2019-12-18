@@ -345,7 +345,7 @@ class AMP_Theme_Support {
 				]
 			);
 			self::$support_added_via_option = $is_paired ? self::TRANSITIONAL_MODE_SLUG : self::STANDARD_MODE_SLUG;
-		} elseif ( AMP_Validation_Manager::is_theme_support_forced() ) {
+		} elseif ( true === AMP_Validation_Manager::should_validate_response() ) { // @todo Eventually reader mode should allow for validate requests.
 			self::$support_added_via_option = self::STANDARD_MODE_SLUG;
 			add_theme_support( self::SLUG );
 		}
@@ -1498,6 +1498,57 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Check if a handle is exclusively a dependency of another handle.
+	 *
+	 * For example, check if dashicons is being added exclusively because it is a dependency of admin-bar, as opposed
+	 * to being added because it was directly enqueued by a theme or a dependency of some other style.
+	 *
+	 * @since 1.4.2
+	 *
+	 * @param WP_Dependencies $dependencies      Dependencies.
+	 * @param string          $dependency_handle Dependency handle.
+	 * @param string          $dependent_handle  Dependent handle.
+	 * @return bool Whether the $handle is exclusively a handle of the $exclusive_dependency handle.
+	 */
+	protected static function is_exclusively_dependent( WP_Dependencies $dependencies, $dependency_handle, $dependent_handle ) {
+
+		// If a dependency handle is the same as the dependent handle, then this self-referential relationship is exclusive.
+		if ( $dependency_handle === $dependent_handle ) {
+			return true;
+		}
+
+		// Short-circuit if there is no dependency relationship up front.
+		if ( ! self::has_dependency( $dependencies, $dependent_handle, $dependency_handle ) ) {
+			return false;
+		}
+
+		// Check whether any enqueued handle depends on the dependency.
+		foreach ( $dependencies->queue as $queued_handle ) {
+			// Skip considering the dependent handle.
+			if ( $dependent_handle === $queued_handle ) {
+				continue;
+			}
+
+			// If the dependency handle was directly enqueued, then it is not exclusively dependent.
+			if ( $dependency_handle === $queued_handle ) {
+				return false;
+			}
+
+			// Otherwise, if the dependency handle is depended on by the queued handle while at the same time the queued
+			// handle _does_ have a dependency on the supplied dependent handle, then the dependency handle is not
+			// exclusively dependent on the dependent handle.
+			if (
+				self::has_dependency( $dependencies, $queued_handle, $dependency_handle )
+				&&
+				! self::has_dependency( $dependencies, $queued_handle, $dependent_handle )
+			) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
 	 * Add data-ampdevmode attribute to any enqueued style that depends on the admin-bar.
 	 *
 	 * @since 1.3
@@ -1507,30 +1558,11 @@ class AMP_Theme_Support {
 	 * @return string Tag.
 	 */
 	public static function filter_admin_bar_style_loader_tag( $tag, $handle ) {
-		if ( 'dashicons' === $handle ) {
-			// Conditionally include Dashicons in dev mode only if was included because it is a dependency of admin-bar.
-			$needs_dev_mode = true;
-			foreach ( wp_styles()->queue as $queued_handle ) {
-				if (
-					// If a theme or plugin directly enqueued dashicons, then it is not added via admin-bar dependency and it is not part of dev mode.
-					'dashicons' === $queued_handle
-					||
-					// If a stylesheet has dashicons as a dependency without also having admin-bar as a dependency, then no dev mode.
-					(
-						self::has_dependency( wp_styles(), $queued_handle, 'dashicons' )
-						&&
-						! self::has_dependency( wp_styles(), $queued_handle, 'admin-bar' )
-					)
-				) {
-					$needs_dev_mode = false;
-					break;
-				}
-			}
-		} else {
-			$needs_dev_mode = self::has_dependency( wp_styles(), $handle, 'admin-bar' );
-		}
-
-		if ( $needs_dev_mode ) {
+		if (
+			in_array( $handle, wp_styles()->registered['admin-bar']->deps, true ) ?
+				self::is_exclusively_dependent( wp_styles(), $handle, 'admin-bar' ) :
+				self::has_dependency( wp_styles(), $handle, 'admin-bar' )
+		) {
 			$tag = preg_replace( '/(?<=<link)(?=\s|>)/i', ' ' . AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, $tag );
 		}
 		return $tag;
@@ -1546,7 +1578,11 @@ class AMP_Theme_Support {
 	 * @return string Tag.
 	 */
 	public static function filter_admin_bar_script_loader_tag( $tag, $handle ) {
-		if ( self::has_dependency( wp_scripts(), $handle, 'admin-bar' ) ) {
+		if (
+			in_array( $handle, wp_scripts()->registered['admin-bar']->deps, true ) ?
+				self::is_exclusively_dependent( wp_scripts(), $handle, 'admin-bar' ) :
+				self::has_dependency( wp_scripts(), $handle, 'admin-bar' )
+		) {
 			$tag = preg_replace( '/(?<=<script)(?=\s|>)/i', ' ' . AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, $tag );
 		}
 		return $tag;
@@ -2104,7 +2140,7 @@ class AMP_Theme_Support {
 		$enable_response_caching = (
 			$enable_response_caching
 			&&
-			! AMP_Validation_Manager::should_validate_response()
+			! AMP_Validation_Manager::$is_validate_request
 			&&
 			! is_customize_preview()
 		);
@@ -2314,6 +2350,12 @@ class AMP_Theme_Support {
 
 		$assets = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
 
+		// Respond early with results if performing a validate request.
+		if ( AMP_Validation_Manager::$is_validate_request ) {
+			header( 'Content-Type: application/json; charset=utf-8' );
+			return wp_json_encode( AMP_Validation_Manager::get_validate_response_data(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
+		}
+
 		// Determine what the validation errors are.
 		$blocking_error_count = 0;
 		$validation_results   = [];
@@ -2347,7 +2389,7 @@ class AMP_Theme_Support {
 
 		self::ensure_required_markup( $dom, array_keys( $amp_scripts ) );
 
-		if ( $blocking_error_count > 0 && ! AMP_Validation_Manager::should_validate_response() ) {
+		if ( $blocking_error_count > 0 && empty( AMP_Validation_Manager::$validation_error_status_overrides ) ) {
 			/*
 			 * In AMP-first, strip html@amp attribute to prevent GSC from complaining about a validation error
 			 * already surfaced inside of WordPress. This is intended to not serve dirty AMP, but rather a
@@ -2393,12 +2435,7 @@ class AMP_Theme_Support {
 			trigger_error( esc_html( sprintf( __( 'The database has the %s encoding when it needs to be utf-8 to work with AMP.', 'amp' ), get_bloginfo( 'charset' ) ) ), E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 		}
 
-		AMP_Validation_Manager::finalize_validation(
-			$dom,
-			[
-				'remove_source_comments' => ! isset( $_GET['amp_preserve_source_comments'] ), // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			]
-		);
+		AMP_Validation_Manager::finalize_validation( $dom );
 
 		$response  = "<!DOCTYPE html>\n";
 		$response .= AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
@@ -2539,7 +2576,7 @@ class AMP_Theme_Support {
 		add_filter(
 			'script_loader_tag',
 			static function( $tag, $handle ) {
-				if ( self::has_dependency( wp_scripts(), 'amp-paired-browsing-client', $handle ) ) {
+				if ( is_amp_endpoint() && self::has_dependency( wp_scripts(), 'amp-paired-browsing-client', $handle ) ) {
 					$attrs = [ AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, 'async' ];
 					$tag   = preg_replace( '/(?<=<script)(?=\s|>)/i', ' ' . implode( ' ', $attrs ), $tag );
 				}
