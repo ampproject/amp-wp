@@ -120,7 +120,7 @@ final class SiteHealth {
 			'description' => esc_html__( 'The AMP plugin performs better when these functions are available.', 'amp' ),
 			'actions'     => sprintf(
 				'<p><a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s <span class="screen-reader-text">%3$s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
-				'https://www.php.net/manual/book.curl.php',
+				esc_url( __( 'https://www.php.net/manual/en/book.curl.php', 'amp' ) ),
 				esc_html__( 'Learn more about these functions', 'amp' ),
 				/* translators: The accessibility text. */
 				esc_html__( '(opens in a new tab)', 'amp' )
