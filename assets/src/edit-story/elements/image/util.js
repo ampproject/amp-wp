@@ -30,6 +30,6 @@ export function getImgProps( width, height, scale, focalX, focalY, imgRatio ) {
 	};
 }
 
-export function getFocalFromOffset( side, imgSide, offset) {
-	return (offset + (side * 0.5)) / imgSide * 100;
+export function getFocalFromOffset( side, imgSide, offset ) {
+	return ( offset + ( side * 0.5 ) ) / imgSide * 100;
 }

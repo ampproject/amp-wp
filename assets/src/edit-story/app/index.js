@@ -17,7 +17,7 @@ import {
  * Internal dependencies
  */
 import theme, { GlobalStyle } from '../theme';
-import {GlobalStyle as CropMoveableGlobalStyle} from '../components/movable/cropStyle';
+import { GlobalStyle as CropMoveableGlobalStyle } from '../components/movable/cropStyle';
 import { useHistory, HistoryProvider } from './history';
 import { useAPI, APIProvider } from './api';
 import { useConfig, ConfigProvider } from './config';
