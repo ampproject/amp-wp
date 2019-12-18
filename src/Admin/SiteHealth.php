@@ -267,6 +267,11 @@ class SiteHealth {
 							'value'   => $this->get_supported_templates(),
 							'private' => false,
 						],
+						'amp_serve_all_templates' => [
+							'label'   => esc_html__( 'Serve all templates as AMP?', 'amp' ),
+							'value'   => $this->get_serve_all_templates(),
+							'private' => false,
+						],
 					],
 				],
 			]
@@ -332,6 +337,20 @@ class SiteHealth {
 		}
 
 		return implode( ', ', $supported_templates );
+	}
+
+	/**
+	 * Gets whether the option to serve all templates is selected.
+	 *
+	 * @return string The value of the option to serve all templates.
+	 */
+	public function get_serve_all_templates() {
+		if ( AMP_Theme_Support::READER_MODE_SLUG === AMP_Theme_Support::get_support_mode() ) {
+			return esc_html__( 'This option does not apply to Reader mode.', 'amp' );
+		}
+
+		// Not translated, as this is debugging information, and it could be confusing getting this from different languages.
+		return AMP_Options_Manager::get_option( 'all_templates_supported' ) ? 'true' : 'false';
 	}
 
 	/**

@@ -141,7 +141,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 	public function test_icu_version() {
 		$this->assertArraySubset(
 			[
-				'description' => 'The version of ICU can affect how the intl extension runs. The minimum recommended version of ICU is 65.',
+				'description' => 'The version of ICU can affect how the intl extension runs. The minimum recommended version of ICU is 4.6.',
 				'actions'     => '<p><a href="http://site.icu-project.org/" target="_blank" rel="noopener noreferrer">Learn more about ICU <span class="screen-reader-text">(opens in a new tab)</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
 				'test'        => 'amp_icu_version',
 			],
@@ -171,6 +171,10 @@ class Test_Site_Health extends WP_UnitTestCase {
 						],
 						'amp_templates_enabled'   => [
 							'label'   => 'Templates enabled',
+							'private' => false,
+						],
+						'amp_serve_all_templates' => [
+							'label'   => 'Serve all templates as AMP?',
 							'private' => false,
 						],
 					],
@@ -299,6 +303,64 @@ class Test_Site_Health extends WP_UnitTestCase {
 		}
 
 		$this->assertEquals( $expected, $this->instance->get_supported_templates() );
+	}
+
+	/**
+	 * Gets the test data for test_get_serve_all_templates().
+	 *
+	 * @return array The test data.
+	 */
+	public function get_serve_all_templates_data() {
+		return [
+			'reader_mode_and_option_true'        => [
+				'reader',
+				true,
+				'This option does not apply to Reader mode.',
+			],
+			'reader_mode_and_option_false'       => [
+				'reader',
+				false,
+				'This option does not apply to Reader mode.',
+			],
+			'standard_mode_and_option_true'      => [
+				'standard',
+				true,
+				'true',
+			],
+			'standard_mode_and_option_false'     => [
+				'standard',
+				false,
+				'false',
+			],
+			'transitional_mode_and_option_true'  => [
+				'transitional',
+				false,
+				'false',
+			],
+			'transitional_mode_and_option_false' => [
+				'transitional',
+				false,
+				'false',
+			],
+		];
+	}
+
+	/**
+	 * Test get_serve_all_templates.
+	 *
+	 * @dataProvider get_serve_all_templates_data
+	 * @covers \Amp\AmpWP\Admin\SiteHealth::get_serve_all_templates()
+	 *
+	 * @param string $theme_support          The template mode, like 'standard'.
+	 * @param bool   $do_serve_all_templates Whether the option to serve all templates is true.
+	 * @param string $expected               The expected return value.
+	 */
+	public function test_get_serve_all_templates( $theme_support, $do_serve_all_templates, $expected ) {
+		AMP_Options_Manager::update_option( 'theme_support', $theme_support );
+		AMP_Options_Manager::update_option( 'all_templates_supported', $do_serve_all_templates );
+		AMP_Theme_Support::read_theme_support();
+
+		$this->assertEquals( $expected, $this->instance->get_serve_all_templates() );
 	}
 
 	/**
