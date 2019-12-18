@@ -21,6 +21,7 @@ function Element( {
 	isSelected,
 	setNodeForElement,
 	handleSelectElement,
+	setPushEvent,
 	forwardedRef,
 	element: {
 		id,
@@ -49,7 +50,9 @@ function Element( {
 
 	return (
 		<Wrapper
-			onClick={ ( evt ) => handleSelectElement( id, evt ) }
+			onClick={ ( evt ) => {
+				handleSelectElement( id, evt );
+			} }
 			ref={ element }
 		>
 			<Display
@@ -59,6 +62,7 @@ function Element( {
 						handleSelectElement( id, evt );
 					}
 				} }
+				onPointerUp={ () => setPushEvent( null ) }
 				forwardedRef={ forwardedRef }
 			/>
 		</Wrapper>
@@ -70,6 +74,7 @@ Element.propTypes = {
 	isSelected: PropTypes.bool.isRequired,
 	setNodeForElement: PropTypes.func.isRequired,
 	handleSelectElement: PropTypes.func.isRequired,
+	setPushEvent: PropTypes.func.isRequired,
 	element: PropTypes.object.isRequired,
 	forwardedRef: PropTypes.oneOfType( [
 		PropTypes.object,

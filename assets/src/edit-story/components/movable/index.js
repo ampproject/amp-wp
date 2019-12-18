@@ -23,6 +23,10 @@ function Movable( {
 	pushEvent,
 } ) {
 	const moveable = useRef();
+	const frame = useRef( {
+		translate: [ 0, 0 ],
+		rotate: selectedElement.rotationAngle,
+	} );
 
 	const {
 		actions: { setPropertiesOnSelectedElements },
@@ -52,13 +56,8 @@ function Movable( {
 		}
 	} );
 
-	const frame = {
-		translate: [ 0, 0 ],
-		rotate: selectedElement.rotationAngle,
-	};
-
 	const setStyle = ( target ) => {
-		target.style.transform = `translate(${ frame.translate[ 0 ] }px, ${ frame.translate[ 1 ] }px) rotate(${ frame.rotate }deg)`;
+		target.style.transform = `translate(${ frame.current.translate[ 0 ] }px, ${ frame.current.translate[ 1 ] }px) rotate(${ frame.current.rotate }deg)`;
 	};
 
 	/**
@@ -67,7 +66,7 @@ function Movable( {
 	 * @param {Object} target Target element.
 	 */
 	const resetMoveable = ( target ) => {
-		frame.translate = [ 0, 0 ];
+		frame.current.translate = [ 0, 0 ];
 		setStyle( target );
 		target.style.width = '';
 		target.style.height = '';
@@ -84,49 +83,49 @@ function Movable( {
 			resizable={ ! selectedElement.isFullbleed }
 			rotatable={ ! selectedElement.isFullbleed }
 			onDrag={ ( { target, beforeTranslate } ) => {
-				frame.translate = beforeTranslate;
+				frame.current.translate = beforeTranslate;
 				setStyle( target );
 			} }
 			throttleDrag={ 0 }
 			onDragStart={ ( { set } ) => {
-				set( frame.translate );
+				set( frame.current.translate );
 			} }
 			onDragEnd={ ( { target } ) => {
 				// When dragging finishes, set the new properties based on the original + what moved meanwhile.
-				const newProps = { x: selectedElement.x + frame.translate[ 0 ], y: selectedElement.y + frame.translate[ 1 ] };
+				const newProps = { x: selectedElement.x + frame.current.translate[ 0 ], y: selectedElement.y + frame.current.translate[ 1 ] };
 				setPropertiesOnSelectedElements( newProps );
 				resetMoveable( target );
 			} }
 			onResizeStart={ ( { setOrigin, dragStart } ) => {
 				setOrigin( [ '%', '%' ] );
 				if ( dragStart ) {
-					dragStart.set( frame.translate );
+					dragStart.set( frame.current.translate );
 				}
 			} }
 			onResize={ ( { target, width, height, drag } ) => {
 				target.style.width = `${ width }px`;
 				target.style.height = `${ height }px`;
-				frame.translate = drag.beforeTranslate;
+				frame.current.translate = drag.beforeTranslate;
 				setStyle( target );
 			} }
 			onResizeEnd={ ( { target } ) => {
 				setPropertiesOnSelectedElements( {
 					width: parseInt( target.style.width ),
 					height: parseInt( target.style.height ),
-					x: selectedElement.x + frame.translate[ 0 ],
-					y: selectedElement.y + frame.translate[ 1 ],
+					x: selectedElement.x + frame.current.translate[ 0 ],
+					y: selectedElement.y + frame.current.translate[ 1 ],
 				} );
 				resetMoveable( target );
 			} }
 			onRotateStart={ ( { set } ) => {
-				set( frame.rotate );
+				set( frame.current.rotate );
 			} }
 			onRotate={ ( { target, beforeRotate } ) => {
-				frame.rotate = beforeRotate;
+				frame.current.rotate = beforeRotate;
 				setStyle( target );
 			} }
 			onRotateEnd={ () => {
-				setPropertiesOnSelectedElements( { rotationAngle: frame.rotate } );
+				setPropertiesOnSelectedElements( { rotationAngle: frame.current.rotate } );
 			} }
 			origin={ false }
 			pinchable={ true }

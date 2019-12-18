@@ -71,6 +71,7 @@ function Page() {
 						element={ { id, ...rest } }
 						isSelected={ isSelected }
 						handleSelectElement={ handleSelectElement }
+						setPushEvent={ setPushEvent }
 						forwardedRef={ isSelected ? setTargetEl : null }
 					/>
 				);
