@@ -325,7 +325,6 @@ class Test_AMP_DOM_Document extends WP_UnitTestCase {
 		$this->assertEquals( 6, $dom->body->childNodes->length );
 	}
 
-
 	/**
 	 * Get head node data.
 	 *
