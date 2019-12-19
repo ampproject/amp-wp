@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use Amp\AmpWP\Dom\Document;
+
 /**
  * Class AMP_Validation_Manager
  *
@@ -27,7 +29,7 @@ class AMP_Validation_Manager {
 	const VALIDATION_ERRORS_QUERY_VAR = 'amp_validation_errors';
 
 	/**
-	 * Action name for previewing the status change for invaliud markup.
+	 * Action name for previewing the status change for invalid markup.
 	 *
 	 * @var string
 	 */
@@ -539,7 +541,7 @@ class AMP_Validation_Manager {
 	/**
 	 * Override validation error statuses (when requested).
 	 *
-	 * When a query var is present along with the required nonce, override the status of the status of the invalud markup
+	 * When a query var is present along with the required nonce, override the status of the status of the invalid markup
 	 * as requested.
 	 *
 	 * @since 1.5.0
@@ -1048,8 +1050,8 @@ class AMP_Validation_Manager {
 	 * }
 	 */
 	public static function locate_sources( DOMNode $node ) {
-		$xpath    = new DOMXPath( $node->ownerDocument );
-		$comments = $xpath->query( 'preceding::comment()[ starts-with( ., "amp-source-stack" ) or starts-with( ., "/amp-source-stack" ) ]', $node );
+		$dom      = Document::from_node( $node );
+		$comments = $dom->xpath->query( 'preceding::comment()[ starts-with( ., "amp-source-stack" ) or starts-with( ., "/amp-source-stack" ) ]', $node );
 		$sources  = [];
 		$matches  = [];
 
@@ -1282,7 +1284,7 @@ class AMP_Validation_Manager {
 				/**
 				 * Reflection.
 				 *
-				 * @var ReflectionFunctionAbstract $reflection
+				 * @var ReflectionFunction|ReflectionMethod $reflection
 				 */
 				$reflection = $source['reflection'];
 				unset( $source['reflection'] ); // Omit from stored source.
@@ -1678,9 +1680,9 @@ class AMP_Validation_Manager {
 	 *
 	 * @see AMP_Validation_Manager::add_admin_bar_menu_items()
 	 *
-	 * @param DOMDocument $dom Document.
+	 * @param Document $dom Document.
 	 */
-	public static function finalize_validation( DOMDocument $dom ) {
+	public static function finalize_validation( Document $dom ) {
 		/*
 		 * Override AMP status in admin bar set in \AMP_Validation_Manager::add_admin_bar_menu_items()
 		 * when there are validation errors which have not been explicitly accepted.

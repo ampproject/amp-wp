@@ -25,7 +25,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 	public static $tag = 'form';
 
 	/**
-	 * Sanitize the <form> elements from the HTML contained in this instance's DOMDocument.
+	 * Sanitize the <form> elements from the HTML contained in this instance's Dom\Document.
 	 *
 	 * @link https://www.ampproject.org/docs/reference/components/amp-form
 	 * @since 0.7

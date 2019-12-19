@@ -64,7 +64,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Sanitize the <iframe> elements from the HTML contained in this instance's DOMDocument.
+	 * Sanitize the <iframe> elements from the HTML contained in this instance's Dom\Document.
 	 *
 	 * @since 0.2
 	 */
