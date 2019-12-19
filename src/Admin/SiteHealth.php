@@ -41,8 +41,7 @@ final class SiteHealth {
 			'test'  => [ $this, 'persistent_object_cache' ],
 		];
 		$tests['direct']['amp_curl_multi_functions']    = [
-			/* translators: %s: a type of PHP function */
-			'label' => esc_html( sprintf( __( '%s functions', 'amp' ), 'curl_multi_*' ) ),
+			'label' => esc_html__( 'cURL multi functions', 'amp' ),
 			'test'  => [ $this, 'curl_multi_functions' ],
 		];
 		$tests['direct']['amp_icu_version']             = [
@@ -117,7 +116,7 @@ final class SiteHealth {
 				'label' => esc_html__( 'AMP', 'amp' ),
 				'color' => $undefined_curl_functions ? 'orange' : 'green',
 			],
-			'description' => esc_html__( 'The AMP plugin performs better when these functions are available.', 'amp' ),
+			'description' => esc_html__( 'The AMP plugin is able to more efficiently determine the dimensions of images lacking width or height by making parallel requests via cURL multi.', 'amp' ),
 			'actions'     => sprintf(
 				'<p><a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s <span class="screen-reader-text">%3$s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
 				esc_url( __( 'https://www.php.net/manual/en/book.curl.php', 'amp' ) ),
@@ -135,18 +134,18 @@ final class SiteHealth {
 					'status'      => 'recommended',
 					'label'       => esc_html(
 						_n(
-							'A curl_multi_* function is not defined',
-							'Some curl_multi_* functions are not defined',
+							'A cURL multi function is not defined',
+							'Some cURL multi functions are not defined',
 							count( $undefined_curl_functions ),
 							'amp'
 						)
 					),
 					'description' => wp_kses(
 						sprintf(
-							/* translators: %s: the name(s) of the curl_multi_* PHP function(s) */
+							/* translators: %s: the name(s) of the cURL multi PHP function(s) */
 							_n(
-								'The following curl_multi_* function is not defined: %s. The AMP plugin performs better when this function is available.',
-								'The following curl_multi_* functions are not defined: %s. The AMP plugin performs better when these functions are available.',
+								'The following cURL multi function is not defined: %s. The AMP plugin performs better when this function is available.',
+								'The following cURL multi functions are not defined: %s. The AMP plugin performs better when these functions are available.',
 								count( $undefined_curl_functions ),
 								'amp'
 							),
@@ -169,7 +168,7 @@ final class SiteHealth {
 				$data,
 				[
 					'status' => 'good',
-					'label'  => esc_html__( 'The curl_multi_* functions are defined', 'amp' ),
+					'label'  => esc_html__( 'The cURL multi functions are defined', 'amp' ),
 				]
 			);
 		}
