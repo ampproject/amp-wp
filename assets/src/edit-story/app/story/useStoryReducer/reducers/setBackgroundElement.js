@@ -38,7 +38,7 @@ function setBackgroundElement( state, { elementId } ) {
 	} else {
 		// Does the element even exist or is it already background
 		let elementPosition = page.elements.findIndex( ( { id } ) => id === elementId );
-		if ( elementPosition === -1 || page.backgroundElementId === elementId ) {
+		if ( elementPosition === -1 || page.backgroundElementId === elementId ) {
 			return state;
 		}
 		let pageElements = page.elements;
@@ -62,6 +62,11 @@ function setBackgroundElement( state, { elementId } ) {
 			elementPosition,
 			0,
 		);
+
+		//  remove new element from selection if there's more than one element there
+		if ( state.selection.includes( elementId ) && state.selection.length > 1 ) {
+			newSelection = state.selection.filter( ( id ) => id !== elementId );
+		}
 
 		newPage = {
 			...page,

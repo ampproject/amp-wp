@@ -43,4 +43,21 @@ describe( 'toggleElementInSelection', () => {
 		const failedAttempt = toggleElementInSelection( { elementId: null } );
 		expect( failedAttempt ).toStrictEqual( initialState );
 	} );
+
+	it( 'should not allow adding background element to non-empty selection', () => {
+		const { restore, toggleElementInSelection } = setupReducer();
+
+		// Set an initial state.
+		const initialState = restore( {
+			pages: [
+				{ id: '111', backgroundElementId: 'e1', elements: [ { id: 'e1' }, { id: 'e2' }, { id: 'e3' } ] },
+			],
+			current: '111',
+			selection: [ 'e2', 'e3' ],
+		} );
+
+		// Toggle no element
+		const failedAttempt = toggleElementInSelection( { elementId: 'e1' } );
+		expect( failedAttempt ).toStrictEqual( initialState );
+	} );
 } );

@@ -26,6 +26,7 @@ const INITIAL_STATE = {
  * - Selection is always a unique array (and never null, never has duplicates).
  * - Pages always have a backgroundElementId property.
  * - If a page has non-empty background element, it will be the id of the first element in the elements array.
+ * - If selection has multiple elements, it can never include the background element.
  *
  * Invariants *not* kept by the system:
  * - New pages and objects aren't checked for id's and id's aren't validated for type.

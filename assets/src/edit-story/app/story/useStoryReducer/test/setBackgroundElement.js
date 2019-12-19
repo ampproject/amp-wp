@@ -30,6 +30,28 @@ describe( 'setBackgroundElement', () => {
 		} );
 	} );
 
+	it( 'should remove the new background element from selection if there is more than it there', () => {
+		const { restore, setBackgroundElement } = setupReducer();
+
+		// Set an initial state with a current page and some elements selected.
+		restore( {
+			pages: [
+				{
+					id: '111',
+					elements: [ { id: '123' }, { id: '456' }, { id: '789' } ],
+					backgroundElementId: null,
+				},
+			],
+			current: '111',
+			selection: [ '456', '789' ],
+		} );
+
+		// 456 is to be bg
+		const result = setBackgroundElement( { elementId: '456' } );
+
+		expect( result.selection ).toStrictEqual( [ '789' ] );
+	} );
+
 	it( 'should do nothing if already background', () => {
 		const { restore, setBackgroundElement } = setupReducer();
 
@@ -104,7 +126,7 @@ describe( 'setBackgroundElement', () => {
 		it( 'should also delete existing background element from selection', () => {
 			const { restore, setBackgroundElement } = setupReducer();
 
-			// Set an initial state with a current page and all elements selected.
+			// Set an initial state with a current page and background element selected.
 			restore( {
 				pages: [
 					{
@@ -114,7 +136,7 @@ describe( 'setBackgroundElement', () => {
 					},
 				],
 				current: '111',
-				selection: [ '123', '456', '789' ],
+				selection: [ '123' ],
 			} );
 
 			// 789 becomes background, 123 is deleted (also from selection)
@@ -125,7 +147,7 @@ describe( 'setBackgroundElement', () => {
 				backgroundElementId: '789',
 				elements: [ { id: '789' }, { id: '456' } ],
 			} );
-			expect( result.selection ).toStrictEqual( [ '456', '789' ] );
+			expect( result.selection ).toStrictEqual( [] );
 		} );
 	} );
 } );
