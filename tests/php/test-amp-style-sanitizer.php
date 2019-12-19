@@ -2406,7 +2406,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$html = $html_generator();
 
 		$original_dom = Document::from_html( $html );
-		$amphtml_dom  = Document::from_html( $html );
+		$amphtml_dom  = clone( $original_dom );
 
 		$error_codes = [];
 		$args        = [

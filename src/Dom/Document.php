@@ -280,6 +280,22 @@ final class Document extends DOMDocument {
 	}
 
 	/**
+	 * Reset the internal optimizations of the Document object.
+	 *
+	 * This might be needed if you are doing an operation that causes the cached
+	 * nodes and XPath objects to point to the wrong document.
+	 *
+	 * @return self Reset version of the Document object.
+	 */
+	public function reset() {
+		// Drop references to old DOM document.
+		unset( $this->xpath, $this->head, $this->body );
+
+		// Reference of the document itself doesn't change here, but might need to change in the future.
+		return $this;
+	}
+
+	/**
 	 * Load HTML from a string.
 	 *
 	 * @link  https://php.net/manual/domdocument.loadhtml.php
@@ -289,8 +305,7 @@ final class Document extends DOMDocument {
 	 * @return bool true on success or false on failure.
 	 */
 	public function loadHTML( $source, $options = 0 ) {
-		// Drop references to old DOM document.
-		unset( $this->xpath, $this->head, $this->body );
+		$this->reset();
 
 		$source = $this->convert_amp_bind_attributes( $source );
 		$source = $this->replace_self_closing_tags( $source );
@@ -1011,5 +1026,14 @@ final class Document extends DOMDocument {
 		// Mimic regular PHP behavior for missing notices.
 		trigger_error( self::PROPERTY_GETTER_ERROR_MESSAGE . $name, E_NOTICE ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions,WordPress.Security.EscapeOutput
 		return null;
+	}
+
+	/**
+	 * Make sure we properly reinitialize on clone.
+	 *
+	 * @return void
+	 */
+	public function __clone() {
+		$this->reset();
 	}
 }
