@@ -2795,7 +2795,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		if ( ! $included ) {
 			// Remove admin-bar class from body element.
 			// @todo It would be nice if any style rules which refer to .admin-bar could also be removed, but this would mean retroactively going back over the CSS again and re-shaking it.
-			if ( $this->dom->body instanceof DOMElement && $this->dom->body->hasAttribute( 'class' ) ) {
+			if ( $this->dom->body->hasAttribute( 'class' ) ) {
 				$this->dom->body->setAttribute(
 					'class',
 					preg_replace( '/(^|\s)admin-bar(\s|$)/', ' ', $this->dom->body->getAttribute( 'class' ) )

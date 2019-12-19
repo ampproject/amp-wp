@@ -294,7 +294,6 @@ class Test_AMP_DOM_Document extends WP_UnitTestCase {
 		$this->assertEquals( 'Hello world', $dom->body->lastChild->textContent );
 	}
 
-
 	/**
 	 * Test that invalid head nodes are moved to body.
 	 *

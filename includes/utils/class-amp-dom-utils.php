@@ -72,14 +72,14 @@ class AMP_DOM_Utils {
 	 *
 	 * @since 0.7
 	 * @see AMP_DOM_Utils::get_content_from_dom_node()
-	 * @deprecated Use Dom\Document::from_html( $html, $encoding ) instead.
+	 * @deprecated Use Amp\AmpWP\Dom\Document::from_html( $html, $encoding ) instead.
 	 *
 	 * @param string $document Valid HTML document to be represented by a Dom\Document.
 	 * @param string $encoding Optional. Encoding to use for the content.
 	 * @return Document|false Returns Dom\Document, or false if conversion failed.
 	 */
 	public static function get_dom( $document, $encoding = null ) {
-		_deprecated_function( __METHOD__, '1.5.0', 'Dom\Document::from_html()' );
+		_deprecated_function( __METHOD__, '1.5.0', 'Amp\AmpWP\Dom\Document::from_html()' );
 		return Document::from_html( $document, $encoding );
 	}
 
@@ -219,7 +219,7 @@ class AMP_DOM_Utils {
 	 * @return string Returns the HTML content represented in the DOMNode
 	 */
 	public static function get_content_from_dom_node( Document $dom, $node ) {
-		_deprecated_function( __METHOD__, '1.5.0', 'Dom\Document->saveHtml( $node )' );
+		_deprecated_function( __METHOD__, '1.5.0', 'Amp\AmpWP\Dom\Document::saveHtml()' );
 		return $dom->saveHTML( $node );
 	}
 

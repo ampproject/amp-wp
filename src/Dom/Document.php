@@ -119,7 +119,6 @@ final class Document extends DOMDocument {
 	const HTML_FIND_TAG_WITH_ATTRIBUTE_PATTERN    = '/<%1$s [^>]*?\s*%2$s=[^>]*?>[^<]*(?:<\/%1$s>)?/i';
 	const HTML_EXTRACT_ATTRIBUTE_VALUE_PATTERN    = '/%s=(?:([\'"])(?<full>.*)?\1|(?<partial>[^ \'";]+))/';
 
-
 	// Tags constants used throughout.
 	const TAG_HEAD     = 'head';
 	const TAG_BODY     = 'body';
@@ -661,7 +660,7 @@ final class Document extends DOMDocument {
 			$html
 		);
 
-		/**
+		/*
 		 * If the regex engine incurred an error during processing, for example exceeding the backtrack
 		 * limit, $converted will be null. In this case we return the originally passed document to allow
 		 * DOMDocument to attempt to load it.  If the AMP HTML doesn't make use of amp-bind or similar
