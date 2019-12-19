@@ -368,8 +368,7 @@ function amp_init() {
 	AMP_Service_Worker::init();
 	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
 	add_action( 'wp_loaded', 'amp_add_options_menu' );
-	add_action( 'wp_loaded', 'amp_admin_pointer' );
-	add_action( 'wp_loaded', 'amp_post_meta_box' ); // Used in both Website and Stories experiences.
+	add_action( 'wp_loaded', 'amp_bootstrap_admin' );
 
 	if ( AMP_Options_Manager::is_website_experience_enabled() ) {
 		add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );

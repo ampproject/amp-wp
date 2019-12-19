@@ -221,3 +221,25 @@ function amp_post_template_add_schemaorg_metadata() {
 	_deprecated_function( __FUNCTION__, '0.7', 'amp_print_schemaorg_metadata' );
 	amp_print_schemaorg_metadata();
 }
+
+/**
+ * Bootstrap AMP post meta box.
+ *
+ * This function must be invoked only once through the 'wp_loaded' action.
+ *
+ * @since 0.6
+ * @deprecated Since 1.5.0, as admin class bootstrapping is moved to amp_bootstrap_admin().
+ */
+function amp_post_meta_box() {
+	_deprecated_function( __FUNCTION__, '1.5.0' );
+}
+
+/**
+ * Bootstrap the AMP admin pointer class.
+ *
+ * @since 1.0
+ * @deprecated Since 1.5.0, as admin class bootstrapping is moved to amp_bootstrap_admin().
+ */
+function amp_admin_pointer() {
+	_deprecated_function( __FUNCTION__, '1.5.0' );
+}
