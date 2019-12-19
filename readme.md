@@ -7,8 +7,8 @@ Official AMP plugin, supported by the AMP team. Formerly Accelerated Mobile Page
 **Contributors:** [google](https://profiles.wordpress.org/google), [xwp](https://profiles.wordpress.org/xwp), [automattic](https://profiles.wordpress.org/automattic), [westonruter](https://profiles.wordpress.org/westonruter), [swissspidy](https://profiles.wordpress.org/swissspidy), [miinasikk](https://profiles.wordpress.org/miinasikk), [ryankienstra](https://profiles.wordpress.org/ryankienstra), [albertomedina](https://profiles.wordpress.org/albertomedina), [tweetythierry](https://profiles.wordpress.org/tweetythierry)  
 **Tags:** [amp](https://wordpress.org/plugins/tags/amp), [stories](https://wordpress.org/plugins/tags/stories), [mobile](https://wordpress.org/plugins/tags/mobile), [optimization](https://wordpress.org/plugins/tags/optimization), [accelerated mobile pages](https://wordpress.org/plugins/tags/accelerated-mobile-pages), [framework](https://wordpress.org/plugins/tags/framework), [components](https://wordpress.org/plugins/tags/components), [blocks](https://wordpress.org/plugins/tags/blocks), [performance](https://wordpress.org/plugins/tags/performance), [ux](https://wordpress.org/plugins/tags/ux), [seo](https://wordpress.org/plugins/tags/seo), [official](https://wordpress.org/plugins/tags/official)  
 **Requires at least:** 4.9  
-**Tested up to:** 5.3  
-**Stable tag:** 1.4.1  
+**Tested up to:** 5.3.2  
+**Stable tag:** 1.4.2  
 **License:** [GPLv2 or later](http://www.gnu.org/licenses/gpl-2.0.html)  
 **Requires PHP:** 5.4  
 
