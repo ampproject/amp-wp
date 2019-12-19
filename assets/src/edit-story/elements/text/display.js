@@ -7,7 +7,7 @@ import styled from 'styled-components';
 /**
  * WordPress dependencies
  */
-import { useRef, useEffect, useCallback, useState } from '@wordpress/element';
+import { useRef, useEffect, useCallback, useState, useLayoutEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -22,7 +22,7 @@ import {
 	ElementWithRotation,
 	ElementWithFont,
 	ElementWithBackgroundColor,
-	ElementWithFontColor,
+	ElementWithFontColor, updateMovableTargets,
 } from '../shared';
 
 const Element = styled.p`
@@ -41,7 +41,7 @@ const Element = styled.p`
 	}
 `;
 
-function TextDisplay( { id, content, color, backgroundColor, width, height, x, y, fontFamily, fontSize, fontWeight, fontStyle, rotationAngle, forwardedRef, onPointerDown } ) {
+function TextDisplay( { id, content, color, backgroundColor, width, height, x, y, fontFamily, fontSize, fontWeight, fontStyle, rotationAngle, forwardedRef, onPointerDown, setTargetRefs } ) {
 	const props = {
 		color,
 		backgroundColor,
@@ -123,6 +123,11 @@ function TextDisplay( { id, content, color, backgroundColor, width, height, x, y
 
 	const element = useRef();
 	const setRef = useCombinedRefs( element, forwardedRef );
+
+	useLayoutEffect( () => {
+		updateMovableTargets( element, id, setTargetRefs, forwardedRef, x, y, rotationAngle );
+	}, [ id, setTargetRefs, forwardedRef, x, y, rotationAngle ] );
+
 	useEffect( () => {
 		if ( isElementOnlySelection && element.current ) {
 			element.current.focus();
@@ -157,6 +162,7 @@ TextDisplay.propTypes = {
 		PropTypes.object,
 		PropTypes.func,
 	] ),
+	setTargetRefs: PropTypes.func.isRequired,
 	onPointerDown: PropTypes.func,
 };
 

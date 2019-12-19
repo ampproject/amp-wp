@@ -5,6 +5,11 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 /**
+ * WordPress dependencies
+ */
+import { useLayoutEffect, useRef } from '@wordpress/element';
+
+/**
  * Internal dependencies
  */
 import {
@@ -12,6 +17,7 @@ import {
 	ElementWithSize,
 	ElementWithBackgroundColor,
 	ElementWithRotation,
+	updateMovableTargets,
 } from '../shared';
 
 const Element = styled.div`
@@ -21,7 +27,8 @@ const Element = styled.div`
 	${ ElementWithBackgroundColor }
 `;
 
-function SquareDisplay( { backgroundColor, width, height, x, y, rotationAngle, forwardedRef } ) {
+function SquareDisplay( { id, backgroundColor, width, height, x, y, rotationAngle, forwardedRef, setTargetRefs } ) {
+	const element = useRef();
 	const props = {
 		backgroundColor,
 		width,
@@ -29,14 +36,18 @@ function SquareDisplay( { backgroundColor, width, height, x, y, rotationAngle, f
 		rotationAngle,
 		x,
 		y,
-		ref: forwardedRef,
+		ref: forwardedRef ? forwardedRef : element,
 	};
+	useLayoutEffect( () => {
+		updateMovableTargets( element, id, setTargetRefs, forwardedRef, x, y, rotationAngle );
+	}, [ id, setTargetRefs, forwardedRef, x, y, rotationAngle ] );
 	return (
 		<Element { ...props } />
 	);
 }
 
 SquareDisplay.propTypes = {
+	id: PropTypes.string.isRequired,
 	rotationAngle: PropTypes.number.isRequired,
 	backgroundColor: PropTypes.string,
 	width: PropTypes.number.isRequired,
@@ -47,6 +58,7 @@ SquareDisplay.propTypes = {
 		PropTypes.object,
 		PropTypes.func,
 	] ),
+	setTargetRefs: PropTypes.func.isRequired,
 };
 
 export default SquareDisplay;

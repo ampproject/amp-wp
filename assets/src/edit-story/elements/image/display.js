@@ -14,7 +14,7 @@ import { useCallback, useLayoutEffect, useRef } from '@wordpress/element';
  */
 import { useCanvas } from '../../components/canvas';
 import useDoubleClick from '../../utils/useDoubleClick';
-import { ElementWithPosition, ElementWithSize, ElementWithRotation, getBox } from '../shared';
+import { ElementWithPosition, ElementWithSize, ElementWithRotation, getBox, updateMovableTargets } from '../shared';
 import { getImgProps, ImageWithScale } from './util';
 
 const Element = styled.div`
@@ -38,28 +38,7 @@ function ImageDisplay( { id, src, origRatio, width, height, x, y, scale, focalX,
 	};
 
 	useLayoutEffect( () => {
-		setTargetRefs( ( targets ) => {
-			const hasId = Boolean( targets.filter( ( { id: existingId } ) => id === existingId ).length );
-			const newTarget = {
-				id,
-				ref: element.current,
-				x,
-				y,
-				rotationAngle,
-			};
-			// If the ID doesn't exist, add.
-			if ( ! hasId ) {
-				targets.push( newTarget );
-				return targets;
-			}
-			// If the ID exists, replace.
-			return targets.map( ( target ) => {
-				if ( id === target.id ) {
-					return newTarget;
-				}
-				return target;
-			} );
-		} );
+		updateMovableTargets( element, id, setTargetRefs, forwardedRef, x, y, rotationAngle );
 	}, [ id, setTargetRefs, forwardedRef, x, y, rotationAngle ] );
 
 	const imgProps = getImgProps( elementProps.width, elementProps.height, scale, focalX, focalY, origRatio );

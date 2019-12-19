@@ -65,3 +65,39 @@ export function getBox( { x, y, width, height, rotationAngle, isFullbleed } ) {
 		rotationAngle: isFullbleed ? 0 : rotationAngle,
 	};
 }
+
+/**
+ * Updates target refs for Movable.
+ *
+ * @param {Object}   element       Element.
+ * @param {string}   id            Element ID.
+ * @param {Function} setTargetRefs Set refs.
+ * @param {Function} forwardedRef  Forwarded ref.
+ * @param {number}   x             Left position.
+ * @param {number}   y             Top position.
+ * @param {number}   rotationAngle Rotation angle.
+ */
+export function updateMovableTargets( element, id, setTargetRefs, forwardedRef, x, y, rotationAngle ) {
+	setTargetRefs( ( targets ) => {
+		const hasId = Boolean( targets.filter( ( { id: existingId } ) => id === existingId ).length );
+		const newTarget = {
+			id,
+			ref: element.current,
+			x,
+			y,
+			rotationAngle,
+		};
+		// If the ID doesn't exist, add.
+		if ( ! hasId ) {
+			targets.push( newTarget );
+			return targets;
+		}
+		// If the ID exists, replace.
+		return targets.map( ( target ) => {
+			if ( id === target.id ) {
+				return newTarget;
+			}
+			return target;
+		} );
+	} );
+}
