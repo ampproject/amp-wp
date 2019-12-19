@@ -34,7 +34,7 @@ git rm -r $(git ls-files)
 rsync -avz ../build/ ./
 git add -A .
 git commit -m "Build $tag" --no-verify
-git tag "$built_tag"
+git tag "$built_tag" -m "Build $tag"
 git push origin "$built_tag"
 cd ..
 git push origin "$built_tag"
