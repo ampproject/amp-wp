@@ -163,7 +163,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 	public function test_add_debug_information() {
 		$this->assertArraySubset(
 			[
-				'amp' => [
+				'amp_wp' => [
 					'label'       => 'AMP',
 					'description' => 'Debugging information for the Official AMP Plugin for WordPress.',
 					'fields'      => [

@@ -247,7 +247,7 @@ final class SiteHealth {
 		return array_merge(
 			$debugging_information,
 			[
-				'amp' => [
+				'amp_wp' => [
 					'label'       => esc_html__( 'AMP', 'amp' ),
 					'description' => esc_html__( 'Debugging information for the Official AMP Plugin for WordPress.', 'amp' ),
 					'fields'      => [
