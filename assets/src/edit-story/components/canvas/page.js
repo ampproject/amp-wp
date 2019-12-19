@@ -62,14 +62,9 @@ function Page() {
 	const singleSelection = 1 === selectedElements.length;
 	const hasSelection = 1 <= selectedElements.length;
 
-	useEffect( () => {
-		console.log( selectedElements );
-		console.log( 'targets', targetRefs );
-	}, [ selectedElements ] );
-
 	return (
 		<Background>
-			{ currentPage && currentPage.elements.map( ( { id, ...rest }, i ) => {
+			{ currentPage && currentPage.elements.map( ( { id, ...rest } ) => {
 				const isSelected = Boolean( selectedElements.filter( ( { id: selectedId } ) => id === selectedId ).length );
 				return (
 					<Element

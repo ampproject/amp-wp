@@ -40,18 +40,27 @@ function ImageDisplay( { id, src, origRatio, width, height, x, y, scale, focalX,
 	useLayoutEffect( () => {
 		setTargetRefs( ( targets ) => {
 			const hasId = Boolean( targets.filter( ( { id: existingId } ) => id === existingId ).length );
+			const newTarget = {
+				id,
+				ref: element.current,
+				x,
+				y,
+				rotationAngle,
+			};
+			// If the ID doesn't exist, add.
 			if ( ! hasId ) {
-				targets.push( {
-					id,
-					ref: element.current,
-					x,
-					y,
-					rotationAngle,
-				} );
+				targets.push( newTarget );
+				return targets;
 			}
-			return targets;
+			// If the ID exists, replace.
+			return targets.map( ( target ) => {
+				if ( id === target.id ) {
+					return newTarget;
+				}
+				return target;
+			} );
 		} );
-	}, [ id, setTargetRefs, forwardedRef ] );
+	}, [ id, setTargetRefs, forwardedRef, x, y, rotationAngle ] );
 
 	const imgProps = getImgProps( elementProps.width, elementProps.height, scale, focalX, focalY, origRatio );
 	const {

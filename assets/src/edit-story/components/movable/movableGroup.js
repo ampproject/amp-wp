@@ -86,14 +86,13 @@ function MovableGroup( {
 				const updatedElements = [];
 				// Set together updated elements.
 				targets.forEach( ( target, i ) => {
-					// @todo Improve this here.
 					updatedElements.push( { id: targetList[ i ].id, x: targetList[ i ].x + frames[ i ].translate[ 0 ], y: targetList[ i ].y + frames[ i ].translate[ 1 ] } );
 				} );
 				if ( updatedElements.length ) {
 					// Update the elements.
 					updateElementsByIds( updatedElements );
 				}
-				resetMoveable( null );
+				resetMoveable();
 			} }
 			onRotateGroupStart={ ( { events } ) => {
 				events.forEach( ( ev, i ) => {
@@ -124,7 +123,7 @@ function MovableGroup( {
 					// Update the elements.
 					updateElementsByIds( updatedElements );
 				}
-				resetMoveable( null );
+				resetMoveable();
 			} }
 			origin={ false }
 		/>
