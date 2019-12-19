@@ -64,7 +64,7 @@ final class SiteHealth {
 				'label' => esc_html__( 'AMP', 'amp' ),
 				'color' => $is_using_object_cache ? 'green' : 'orange',
 			],
-			'description' => esc_html__( 'The AMP plugin performs at its best when persistent object cache is enabled.', 'amp' ),
+			'description' => esc_html__( 'The AMP plugin performs at its best when persistent object cache is enabled. Object caching is used to more effectively store image dimensions and parsed CSS. It also allows for post-processor caching to be used.', 'amp' ),
 			'actions'     => sprintf(
 				'<p><a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s <span class="screen-reader-text">%3$s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
 				'https://codex.wordpress.org/Class_Reference/WP_Object_Cache#Persistent_Caching',
@@ -144,8 +144,8 @@ final class SiteHealth {
 						sprintf(
 							/* translators: %s: the name(s) of the cURL multi PHP function(s) */
 							_n(
-								'The following cURL multi function is not defined: %s. The AMP plugin performs better when this function is available.',
-								'The following cURL multi functions are not defined: %s. The AMP plugin performs better when these functions are available.',
+								'The following cURL multi function is not defined: %s.',
+								'The following cURL multi functions are not defined: %s.',
 								count( $undefined_curl_functions ),
 								'amp'
 							),
@@ -158,7 +158,7 @@ final class SiteHealth {
 									$undefined_curl_functions
 								)
 							)
-						),
+						) . ' ' . $data['description'],
 						[ 'code' => [] ]
 					),
 				]
