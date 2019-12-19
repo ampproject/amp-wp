@@ -30,6 +30,7 @@ const INITIAL_STATE = {
  *
  * Invariants *not* kept by the system:
  * - New pages and objects aren't checked for id's and id's aren't validated for type.
+ * - Selection isn't guaranteed to refer to objects on the current page.
  * - New pages aren't validated for type of elements property when added.
  * - No validation of keys or values in the story object.
  *

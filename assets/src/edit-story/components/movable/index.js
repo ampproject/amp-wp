@@ -25,7 +25,7 @@ function Movable( {
 	const moveable = useRef();
 
 	const {
-		actions: { setPropertiesOnSelectedElements },
+		actions: { updateSelectedElements },
 	} = useStory();
 
 	const latestEvent = useRef();
@@ -78,6 +78,8 @@ function Movable( {
 		}
 	};
 
+	const update = ( properties ) => updateSelectedElements( { properties } );
+
 	return (
 		<Moveable
 			ref={ moveable }
@@ -96,7 +98,7 @@ function Movable( {
 			onDragEnd={ ( { target } ) => {
 				// When dragging finishes, set the new properties based on the original + what moved meanwhile.
 				const newProps = { x: selectedElement.x + frame.translate[ 0 ], y: selectedElement.y + frame.translate[ 1 ] };
-				setPropertiesOnSelectedElements( newProps );
+				update( newProps );
 				resetMoveable( target );
 			} }
 			onResizeStart={ ( { setOrigin, dragStart } ) => {
@@ -112,7 +114,7 @@ function Movable( {
 				setTransformStyle( target );
 			} }
 			onResizeEnd={ ( { target } ) => {
-				setPropertiesOnSelectedElements( {
+				update( {
 					width: parseInt( target.style.width ),
 					height: parseInt( target.style.height ),
 					x: selectedElement.x + frame.translate[ 0 ],
@@ -128,7 +130,7 @@ function Movable( {
 				setTransformStyle( target );
 			} }
 			onRotateEnd={ ( { target } ) => {
-				setPropertiesOnSelectedElements( { rotationAngle: frame.rotate } );
+				update( { rotationAngle: frame.rotate } );
 				resetMoveable( target );
 			} }
 			origin={ false }

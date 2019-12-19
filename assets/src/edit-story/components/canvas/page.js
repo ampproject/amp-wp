@@ -28,7 +28,7 @@ function Page() {
 
 	const {
 		state: { currentPage, selectedElements },
-		actions: { clearSelection, selectElementById, toggleElementIdInSelection },
+		actions: { clearSelection, addElementToSelection, toggleElementInSelection },
 	} = useStory();
 
 	const {
@@ -44,9 +44,9 @@ function Page() {
 
 	const handleSelectElement = useCallback( ( elId, evt ) => {
 		if ( evt.metaKey ) {
-			toggleElementIdInSelection( elId );
+			toggleElementInSelection( { elementId: elId } );
 		} else {
-			selectElementById( elId );
+			addElementToSelection( { elementId: elId } );
 		}
 		evt.stopPropagation();
 
@@ -54,7 +54,7 @@ function Page() {
 			evt.persist();
 			setPushEvent( evt );
 		}
-	}, [ toggleElementIdInSelection, selectElementById ] );
+	}, [ toggleElementInSelection, addElementToSelection ] );
 
 	const selectedElement = selectedElements.length === 1 ? selectedElements[ 0 ] : null;
 

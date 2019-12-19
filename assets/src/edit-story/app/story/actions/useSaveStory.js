@@ -38,63 +38,52 @@ const getStoryMarkupFromPages = ( pages ) => {
 /**
  * Custom hook to save story.
  *
- * @param {boolean}   isSaving Boolean if post is currently saving.
- * @param {number}    storyId Story post id.
- * @param {string}    title Story title.
- * @param {string}    postStatus Post status, draft or published.
- * @param {Array}     pages Array of all pages.
- * @param {number}    postAuthor User ID of story author.
- * @param {string}    slug   The slug of the story.
- * @param {Function}  setLink Set link in state.
- * @param {Function}  setPostStatus Set Post Status in state.
- * @param {Function}  setIsSaving Set saving state.
+ * @param {Object}    properties Properties to update.
+ * @param {number}    properties.storyId Story post id.
+ * @param {Array}     properties.pages Array of all pages.
+ * @param {Object}    properties.story Story-global properties
  * @return {Function} Function that can be called to save a story.
  */
-function useSavePost( {
-	isSaving,
+function useSaveStory( {
 	storyId,
-	title,
-	postStatus,
-	postAuthor,
-	slug,
 	pages,
-	setLink,
-	setPostStatus,
-	setIsSaving,
+	story,
+	updateStory,
 } ) {
-	const status = ( postStatus !== 'publish' ) ? 'publish' : postStatus;
 	const { actions: { saveStoryById } } = useAPI();
 
 	/**
 	 * Refresh page to edit url.
 	 *
-	 * @param {number}postId Current story id.
+	 * @param {number} postId Current story id.
 	 */
-	const refreshPostEditURL = ( postId ) => {
+	const refreshPostEditURL = useCallback( ( postId ) => {
 		const getPostEditURL = addQueryArgs( 'post.php', { post: postId, action: 'edit' } );
 		window.history.replaceState(
 			{ id: postId },
 			'Post ' + postId,
 			getPostEditURL,
 		);
-	};
+	}, [] );
 
 	const savePost = useCallback( () => {
-		if ( ! isSaving ) {
-			setIsSaving( true );
-			const content = getStoryMarkupFromPages( pages );
-			saveStoryById( storyId, title, status, pages, postAuthor, slug, content ).then( ( post ) => {
-				const { status: thisPostStatus, link } = post;
-				setPostStatus( thisPostStatus );
-				setLink( link );
-				refreshPostEditURL( storyId );
-			} ).catch( () => {
-				// TODO Display error message to user as save as failed.
-			} ).finally( () => setIsSaving( false ) );
-		}
-	}, [ isSaving, setIsSaving, saveStoryById, storyId, title, status, pages, postAuthor, slug, setPostStatus, setLink ] );
+		const { title, status: postStatus, author, slug } = story;
+		const status = ( postStatus !== 'publish' ) ? 'publish' : postStatus;
+
+		const content = getStoryMarkupFromPages( pages );
+		saveStoryById( storyId, title, status, pages, author, slug, content ).then( ( post ) => {
+			const { status: newStatus, link } = post;
+			updateStory( {
+				status: newStatus,
+				link,
+			} );
+			refreshPostEditURL( storyId );
+		} ).catch( () => {
+			// TODO Display error message to user as save as failed.
+		} );
+	}, [ storyId, pages, story, updateStory, saveStoryById, refreshPostEditURL ] );
 
 	return savePost;
 }
 
-export default useSavePost;
+export default useSaveStory;
