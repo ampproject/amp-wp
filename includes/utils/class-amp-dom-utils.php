@@ -48,26 +48,6 @@ class AMP_DOM_Utils {
 	const HTML_BODY_CONTENTS_PATTERN = '#^.*?<body.*?>(.*)</body>.*?$#si';
 
 	/**
-	 * List of elements allowed in head.
-	 *
-	 * @link https://github.com/ampproject/amphtml/blob/445d6e3be8a5063e2738c6f90fdcd57f2b6208be/validator/engine/htmlparser.js#L83-L100
-	 * @link https://www.w3.org/TR/html5/document-metadata.html
-	 *
-	 * @todo Turn into const array once PHP minimum is bumped to 5.6+.
-	 *
-	 * @var array
-	 */
-	private static $elements_allowed_in_head = [
-		'title',
-		'base',
-		'link',
-		'meta',
-		'style',
-		'noscript',
-		'script',
-	];
-
-	/**
 	 * Return a valid Dom\Document representing HTML document passed as a parameter.
 	 *
 	 * @since 0.7
@@ -88,18 +68,14 @@ class AMP_DOM_Utils {
 	 *
 	 * @link https://github.com/ampproject/amphtml/blob/445d6e3be8a5063e2738c6f90fdcd57f2b6208be/validator/engine/htmlparser.js#L83-L100
 	 * @link https://www.w3.org/TR/html5/document-metadata.html
+	 * @deprecated Use Amp\AmpWP\Dom\Document->is_valid_head_node() instead.
 	 *
 	 * @param DOMNode $node Node.
 	 * @return bool Whether valid head node.
 	 */
 	public static function is_valid_head_node( DOMNode $node ) {
-		return (
-			( $node instanceof DOMElement && in_array( $node->nodeName, self::$elements_allowed_in_head, true ) )
-			||
-			( $node instanceof DOMText && preg_match( '/^\s*$/', $node->nodeValue ) ) // Whitespace text nodes are OK.
-			||
-			$node instanceof DOMComment
-		);
+		_deprecated_function( __METHOD__, '1.5.0', 'Amp\AmpWP\Dom\Document->is_valid_head_node()' );
+		return Document::from_node( $node )->is_valid_head_node( $node );
 	}
 
 	/**

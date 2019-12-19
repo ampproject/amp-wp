@@ -324,4 +324,127 @@ class Test_AMP_DOM_Document extends WP_UnitTestCase {
 		$this->assertNull( $dom->head->firstChild->nextSibling );
 		$this->assertEquals( 6, $dom->body->childNodes->length );
 	}
+
+
+	/**
+	 * Get head node data.
+	 *
+	 * @return array Head node data.
+	 */
+	public function get_head_node_data() {
+		$dom = new Document();
+		return [
+			[
+				$dom,
+				AMP_DOM_Utils::create_node( $dom, 'title', [] ),
+				true,
+			],
+			[
+				$dom,
+				AMP_DOM_Utils::create_node(
+					$dom,
+					'base',
+					[ 'href' => '/' ]
+				),
+				true,
+			],
+			[
+				$dom,
+				AMP_DOM_Utils::create_node(
+					$dom,
+					'script',
+					[ 'src' => 'http://example.com/test.js' ]
+				),
+				true,
+			],
+			[
+				$dom,
+				AMP_DOM_Utils::create_node( $dom, 'style', [ 'media' => 'print' ] ),
+				true,
+			],
+			[
+				$dom,
+				AMP_DOM_Utils::create_node( $dom, 'noscript', [] ),
+				true,
+			],
+			[
+				$dom,
+				AMP_DOM_Utils::create_node(
+					$dom,
+					'link',
+					[
+						'rel'  => 'stylesheet',
+						'href' => 'https://example.com/foo.css',
+					]
+				),
+				true,
+			],
+			[
+				$dom,
+				AMP_DOM_Utils::create_node(
+					$dom,
+					'meta',
+					[
+						'name'    => 'foo',
+						'content' => 'https://example.com/foo.css',
+					]
+				),
+				true,
+			],
+			[
+				$dom,
+				$dom->createTextNode( " \n\t" ),
+				true,
+			],
+			[
+				$dom,
+				$dom->createTextNode( 'no' ),
+				false,
+			],
+			[
+				$dom,
+				$dom->createComment( 'hello world' ),
+				true,
+			],
+			[
+				$dom,
+				$dom->createProcessingInstruction( 'test' ),
+				false,
+			],
+			[
+				$dom,
+				$dom->createCDATASection( 'nope' ),
+				false,
+			],
+			[
+				$dom,
+				$dom->createEntityReference( 'bad' ),
+				false,
+			],
+			[
+				$dom,
+				$dom->createElementNS( 'http://www.w3.org/2000/svg', 'svg' ),
+				false,
+			],
+			[
+				$dom,
+				AMP_DOM_Utils::create_node( $dom, 'span', [] ),
+				false,
+			],
+		];
+	}
+
+	/**
+	 * Test is_valid_head_node().
+	 *
+	 * @dataProvider get_head_node_data
+	 * @covers       \Amp\AmpWP\Dom\Document::is_valid_head_node()
+	 *
+	 * @param Document $dom   DOM document to use.
+	 * @param DOMNode  $node  Node.
+	 * @param bool     $valid Expected valid.
+	 */
+	public function test_is_valid_head_node( $dom, $node, $valid ) {
+		$this->assertEquals( $valid, $dom->is_valid_head_node( $node ) );
+	}
 }

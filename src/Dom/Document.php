@@ -8,9 +8,11 @@
 namespace Amp\AmpWP\Dom;
 
 use AMP_DOM_Utils;
+use DOMComment;
 use DOMDocument;
 use DOMElement;
 use DOMNode;
+use DOMText;
 use DOMXPath;
 
 /**
@@ -178,6 +180,26 @@ final class Document extends DOMDocument {
 		'source',
 		'track',
 		'wbr',
+	];
+
+	/**
+	 * List of elements allowed in head.
+	 *
+	 * @link https://github.com/ampproject/amphtml/blob/445d6e3be8a5063e2738c6f90fdcd57f2b6208be/validator/engine/htmlparser.js#L83-L100
+	 * @link https://www.w3.org/TR/html5/document-metadata.html
+	 *
+	 * @todo Turn into const array once PHP minimum is bumped to 5.6+.
+	 *
+	 * @var string[]
+	 */
+	private static $elements_allowed_in_head = [
+		'title',
+		'base',
+		'link',
+		'meta',
+		'style',
+		'noscript',
+		'script',
 	];
 
 	/**
@@ -478,7 +500,7 @@ final class Document extends DOMDocument {
 		$node = $this->head->lastChild;
 		while ( $node ) {
 			$next_sibling = $node->previousSibling;
-			if ( ! AMP_DOM_Utils::is_valid_head_node( $node ) ) {
+			if ( ! $this->is_valid_head_node( $node ) ) {
 				$this->body->insertBefore( $this->head->removeChild( $node ), $this->body->firstChild );
 			}
 			$node = $next_sibling;
@@ -929,6 +951,25 @@ final class Document extends DOMDocument {
 		}
 
 		return $placeholders;
+	}
+
+	/**
+	 * Determine whether a node can be in the head.
+	 *
+	 * @link https://github.com/ampproject/amphtml/blob/445d6e3be8a5063e2738c6f90fdcd57f2b6208be/validator/engine/htmlparser.js#L83-L100
+	 * @link https://www.w3.org/TR/html5/document-metadata.html
+	 *
+	 * @param DOMNode $node Node.
+	 * @return bool Whether valid head node.
+	 */
+	public function is_valid_head_node( DOMNode $node ) {
+		return (
+			( $node instanceof DOMElement && in_array( $node->nodeName, self::$elements_allowed_in_head, true ) )
+			||
+			( $node instanceof DOMText && preg_match( '/^\s*$/', $node->nodeValue ) ) // Whitespace text nodes are OK.
+			||
+			$node instanceof DOMComment
+		);
 	}
 
 	/**
