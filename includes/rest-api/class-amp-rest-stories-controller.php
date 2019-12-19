@@ -24,7 +24,15 @@ class AMP_REST_Stories_Controller extends WP_REST_Posts_Controller {
 		if ( is_wp_error( $prepared_story ) ) {
 			return $prepared_story;
 		}
+		// Ensure that content and story_data are updated together.
+		if (
+			! empty( $request['story_data'] ) && empty( $request['content'] ) ||
+			! empty( $request['content'] ) && empty( $request['story_data'] )
+		) {
+			return new WP_Error( 'rest_empty_content', __( 'content and story_data should always be updated together.', 'amp' ), [ 'status' => 412 ] );
+		}
 
+		// If the request is updating the content as well, let's make sure the JSON representation of the story is saved, too.
 		if ( isset( $request['story_data'] ) ) {
 			$prepared_story->post_content_filtered = wp_json_encode( $request['story_data'] );
 		}
