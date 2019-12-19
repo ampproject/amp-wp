@@ -286,7 +286,7 @@ final class Document extends DOMDocument {
 	 *
 	 * @return self Reset version of the Document object.
 	 */
-	public function reset() {
+	private function reset() {
 		// Drop references to old DOM document.
 		unset( $this->xpath, $this->head, $this->body );
 
