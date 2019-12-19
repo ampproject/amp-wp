@@ -8,7 +8,7 @@ describe( 'deleteSelectedElements', () => {
 		const { restore, deleteSelectedElements } = setupReducer();
 
 		// Set an initial state with a current page and some elements selected.
-		restore( {
+		const initialState = restore( {
 			pages: [
 				{ id: '111', elements: [ { id: '123' }, { id: '456' }, { id: '789' } ] },
 			],
@@ -19,8 +19,8 @@ describe( 'deleteSelectedElements', () => {
 		const result = deleteSelectedElements();
 
 		expect( result ).toStrictEqual( {
+			...initialState,
 			pages: [ { id: '111', elements: [ { id: '789' } ] } ],
-			current: '111',
 			selection: [],
 		} );
 	} );
@@ -29,7 +29,7 @@ describe( 'deleteSelectedElements', () => {
 		const { restore, deleteSelectedElements } = setupReducer();
 
 		// Set an initial state with a current page and some elements, none selected.
-		restore( {
+		const initialState = restore( {
 			pages: [
 				{ id: '111', elements: [ { id: '123' }, { id: '456' }, { id: '789' } ] },
 			],
@@ -39,10 +39,6 @@ describe( 'deleteSelectedElements', () => {
 
 		const result = deleteSelectedElements();
 
-		expect( result ).toStrictEqual( {
-			pages: [ { id: '111', elements: [ { id: '123' }, { id: '456' }, { id: '789' } ] } ],
-			current: '111',
-			selection: [],
-		} );
+		expect( result ).toStrictEqual( initialState );
 	} );
 } );

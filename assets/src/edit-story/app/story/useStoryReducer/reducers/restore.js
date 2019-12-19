@@ -7,31 +7,26 @@
  * - `pages` must be an array (if not, nothing happens).
  * - `current` must point to a legal page, if at least one page exists.
  * - `selection` is a unique array.
+ * - `story` is an object.
  *
  * @param {Object} state Current state
  * @param {Object} payload New state to set.
  * @return {Object} New state
  */
-function restore( state, { pages, current, selection } ) {
-	if ( ! Array.isArray( pages ) ) {
+function restore( state, { pages, current, selection, story } ) {
+	if ( ! Array.isArray( pages ) || pages.length === 0 ) {
 		return state;
 	}
 
-	let newCurrent = null;
-	let newSelection = [];
-
-	if ( pages.length > 0 ) {
-		newCurrent = pages.some( ( { id } ) => id === current ) ? current : pages[ 0 ].id;
-
-		if ( Array.isArray( selection ) ) {
-			newSelection = [ ...new Set( selection ) ];
-		}
-	}
+	const newStory = typeof story === 'object' ? story : {};
+	const newCurrent = pages.some( ( { id } ) => id === current ) ? current : pages[ 0 ].id;
+	const newSelection = Array.isArray( selection ) ? [ ...new Set( selection ) ] : [];
 
 	return {
 		pages,
 		current: newCurrent,
 		selection: newSelection,
+		story: newStory,
 	};
 }
 

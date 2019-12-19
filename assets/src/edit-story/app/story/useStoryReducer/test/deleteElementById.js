@@ -48,7 +48,7 @@ describe( 'deleteElementById', () => {
 		const { restore, deleteElementById } = setupReducer();
 
 		// Set an initial state with a current page and a selected element.
-		restore( {
+		const initialState = restore( {
 			pages: [
 				{ id: '111', elements: [ { id: '123' }, { id: '456' } ] },
 			],
@@ -59,8 +59,8 @@ describe( 'deleteElementById', () => {
 		const result = deleteElementById( { elementId: '123' } );
 
 		expect( result ).toStrictEqual( {
+			...initialState,
 			pages: [ { id: '111', elements: [ { id: '456' } ] } ],
-			current: '111',
 			selection: [ '456' ],
 		} );
 	} );
@@ -69,7 +69,7 @@ describe( 'deleteElementById', () => {
 		const { restore, deleteElementById } = setupReducer();
 
 		// Set an initial state with a current page and a selected element.
-		restore( {
+		const initialState = restore( {
 			pages: [
 				{
 					backgroundElementId: '123',
@@ -84,8 +84,8 @@ describe( 'deleteElementById', () => {
 		const result = deleteElementById( { elementId: '123' } );
 
 		expect( result ).toStrictEqual( {
+			...initialState,
 			pages: [ { backgroundElementId: null, id: '111', elements: [ { id: '456' } ] } ],
-			current: '111',
 			selection: [ '456' ],
 		} );
 	} );

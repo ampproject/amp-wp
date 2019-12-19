@@ -79,6 +79,9 @@ const removeElementFromSelection = ( dispatch ) => ( { elementId } ) =>
 const toggleElementInSelection = ( dispatch ) => ( { elementId } ) =>
 	dispatch( { type: types.TOGGLE_ELEMENT_IN_SELECTION, payload: { elementId } } );
 
+const updateStory = ( dispatch ) => ( { properties } ) =>
+	dispatch( { type: types.UPDATE_STORY, payload: { properties } } );
+
 export const exposedActions = {
 	addPage,
 	addPageAt,
@@ -105,11 +108,12 @@ export const exposedActions = {
 	addElementToSelection,
 	removeElementFromSelection,
 	toggleElementInSelection,
+	updateStory,
 };
 
 // Internal actions
-const restore = ( dispatch ) => ( { pages, selection, current } ) =>
-	dispatch( { type: types.RESTORE, payload: { pages, selection, current } } );
+const restore = ( dispatch ) => ( { pages, selection, current, story } ) =>
+	dispatch( { type: types.RESTORE, payload: { pages, selection, current, story } } );
 
 export const internalActions = {
 	restore,

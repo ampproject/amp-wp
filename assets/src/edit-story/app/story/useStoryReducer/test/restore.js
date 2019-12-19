@@ -17,6 +17,7 @@ describe( 'restore', () => {
 			pages,
 			selection: [],
 			current: '123',
+			story: {},
 		} );
 	} );
 
@@ -55,6 +56,19 @@ describe( 'restore', () => {
 		expect( result.selection ).toHaveLength( 1 );
 	} );
 
+	it( 'should restore story if set', () => {
+		const reducer = setupReducer();
+
+		const { restore } = reducer;
+
+		const result = restore( {
+			pages: [ { id: '111' } ],
+			story: { a: 1, b: [ 2 ] },
+		} );
+
+		expect( result.story ).toStrictEqual( { a: 1, b: [ 2 ] } );
+	} );
+
 	it( 'should force current to be a valid page id', () => {
 		const reducer = setupReducer();
 
@@ -79,12 +93,14 @@ describe( 'restore', () => {
 			pages: [],
 			current: '111',
 			selection: [ '222' ],
+			story: { a: 1 },
 		} );
 
 		expect( result ).toStrictEqual( {
 			pages: [],
 			selection: [],
 			current: null,
+			story: {},
 		} );
 	} );
 
@@ -99,6 +115,7 @@ describe( 'restore', () => {
 			pages: [],
 			selection: [],
 			current: null,
+			story: {},
 		} );
 	} );
 
@@ -115,12 +132,14 @@ describe( 'restore', () => {
 			],
 			current: '222',
 			selection: [ '333' ],
+			story: { a: 1 },
 		} );
 
 		// And validate that it is non-initial.
 		expect( stateWithContent.pages ).not.toHaveLength( 0 );
 		expect( stateWithContent.current ).not.toBeNull();
 		expect( stateWithContent.selection ).not.toHaveLength( 0 );
+		expect( Object.keys( stateWithContent.story ) ).not.toHaveLength( 0 );
 
 		// Then override by restoring to a new state.
 		const pages = [ { id: '123' } ];
@@ -130,6 +149,7 @@ describe( 'restore', () => {
 			pages,
 			selection: [],
 			current: '123',
+			story: {},
 		} );
 	} );
 } );

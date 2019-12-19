@@ -62,6 +62,10 @@ function reducer( state, { type, payload } ) {
 			return reducers.toggleElement( state, payload );
 		}
 
+		case types.UPDATE_STORY: {
+			return reducers.updateStory( state, payload );
+		}
+
 		case types.RESTORE: {
 			return reducers.restore( state, payload );
 		}

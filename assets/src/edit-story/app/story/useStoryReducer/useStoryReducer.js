@@ -13,6 +13,7 @@ const INITIAL_STATE = {
 	pages: [],
 	current: null,
 	selection: [],
+	story: {},
 };
 
 /**
@@ -27,8 +28,9 @@ const INITIAL_STATE = {
  * - If a page has non-empty background element, it will be the id of the first element in the elements array.
  *
  * Invariants *not* kept by the system:
- * - New pages and objects aren't checked for id's and id's aren't validated for type
- * - New pages aren't validated for type of elements property when adde
+ * - New pages and objects aren't checked for id's and id's aren't validated for type.
+ * - New pages aren't validated for type of elements property when added.
+ * - No validation of keys or values in the story object.
  *
  * @return {Object} An object with keys `state`, `internal` and `api`.
  */

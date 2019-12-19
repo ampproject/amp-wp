@@ -23,3 +23,6 @@ export { default as toggleElement } from './toggleElement';
 
 // Manipulate entire internal state.
 export { default as restore } from './restore';
+
+// Manipulate story-global properties.
+export { default as updateStory } from './updateStory';

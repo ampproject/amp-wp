@@ -20,6 +20,9 @@ export const SELECT_ELEMENT = 'SELECT_ELEMENT';
 export const UNSELECT_ELEMENT = 'UNSELECT_ELEMENT';
 export const TOGGLE_ELEMENT_IN_SELECTION = 'TOGGLE_ELEMENT_IN_SELECTION';
 
+// Manipulate story-global state.
+export const UPDATE_STORY = 'UPDATE_STORY';
+
 // Manipulate entire internal state.
 export const RESTORE = 'RESTORE';
 
