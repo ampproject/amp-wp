@@ -72,6 +72,7 @@ Element.propTypes = {
 	isEditing: PropTypes.bool.isRequired,
 	isSelected: PropTypes.bool.isRequired,
 	setNodeForElement: PropTypes.func.isRequired,
+	setTargetRefs: PropTypes.func.isRequired,
 	handleSelectElement: PropTypes.func.isRequired,
 	element: PropTypes.object.isRequired,
 	forwardedRef: PropTypes.oneOfType( [

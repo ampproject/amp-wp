@@ -39,7 +39,7 @@ function MovableGroup( {
 	 * @param {Object} target Target element to update.
 	 * @param {Object} frame Properties from the frame for that specific element.
 	 */
-	const setStyle = ( target, frame ) => {
+	const setTransformStyle = ( target, frame ) => {
 		target.style.transform = `translate(${ frame.translate[ 0 ] }px, ${ frame.translate[ 1 ] }px) rotate(${ frame.rotate }deg)`;
 	};
 
@@ -55,7 +55,9 @@ function MovableGroup( {
 	const resetMoveable = () => {
 		targetList.forEach( ( { ref }, i ) => {
 			frames[ i ].translate = [ 0, 0 ];
-			setStyle( ref, frames[ i ] );
+			ref.style.transform = '';
+			ref.style.width = '';
+			ref.style.height = '';
 		} );
 		if ( moveable.current ) {
 			moveable.current.updateRect();
@@ -73,7 +75,7 @@ function MovableGroup( {
 				events.forEach( ( { target, beforeTranslate }, i ) => {
 					const sFrame = frames[ i ];
 					sFrame.translate = beforeTranslate;
-					setStyle( target, sFrame );
+					setTransformStyle( target, sFrame );
 				} );
 			} }
 			onDragGroupStart={ ( { events } ) => {
@@ -105,7 +107,7 @@ function MovableGroup( {
 					const sFrame = frames[ i ];
 					sFrame.rotate = beforeRotate;
 					sFrame.translate = drag.beforeTranslate;
-					setStyle( target, sFrame );
+					setTransformStyle( target, sFrame );
 				} );
 			} }
 			onRotateGroupEnd={ ( { targets } ) => {

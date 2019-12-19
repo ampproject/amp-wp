@@ -86,6 +86,7 @@ ImageDisplay.propTypes = {
 	y: PropTypes.number.isRequired,
 	scale: PropTypes.number,
 	rotationAngle: PropTypes.number.isRequired,
+	setTargetRefs: PropTypes.func.isRequired,
 	isFullbleed: PropTypes.bool,
 	focalX: PropTypes.number,
 	focalY: PropTypes.number,

@@ -37,9 +37,10 @@ function APIProvider( { children } ) {
 		 * @param {Array}    pages Array of all pages.
 		 * @param {number}   author User ID of story author.
 		 * @param {string}   slug   The slug of the story.
+		 * @param {string}  content AMP HTML content.
 		 * @return {Promise} Return apiFetch promise.
 		 */
-		( storyId, title, status, pages, author, slug ) => {
+		( storyId, title, status, pages, author, slug, content ) => {
 			return apiFetch( {
 				path: `${ stories }/${ storyId }`,
 				data: {
@@ -47,6 +48,7 @@ function APIProvider( { children } ) {
 					status,
 					author,
 					slug,
+					content,
 					story_data: pages,
 				},
 				method: 'POST',

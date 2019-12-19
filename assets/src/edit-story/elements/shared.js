@@ -2,9 +2,11 @@
  * External dependencies
  */
 import { css } from 'styled-components';
+
 /**
  * Internal dependencies
  */
+import getPercentageFromPixels from '../utils/getPercentageFromPixels';
 import { PAGE_HEIGHT, PAGE_WIDTH } from '../constants';
 
 export const ElementWithPosition = css`
@@ -39,6 +41,20 @@ export const ElementWithFont = css`
 	font-size: ${ ( { fontSize } ) => fontSize };
 	font-weight: ${ ( { fontWeight } ) => fontWeight };
 `;
+
+/**
+ * Returns common attributes used for all elements when saving to DB.
+ */
+export const getCommonAttributes = ( ( { width, height, x, y, rotationAngle } ) => {
+	return {
+		position: 'absolute',
+		left: getPercentageFromPixels( x, 'x' ) + '%',
+		top: getPercentageFromPixels( y, 'y' ) + '%',
+		transform: rotationAngle ? `rotate(${ rotationAngle }deg)` : null,
+		width: getPercentageFromPixels( width, 'x' ) + '%',
+		height: getPercentageFromPixels( height, 'y' ) + '%',
+	};
+} );
 
 export function getBox( { x, y, width, height, rotationAngle, isFullbleed } ) {
 	return {

@@ -66,7 +66,7 @@ function MovableSingle( {
 	/**
 	 * Set style to the element.
 	 */
-	const setStyle = () => {
+	const setTransformStyle = () => {
 		targetEl.style.transform = `translate(${ frame.translate[ 0 ] }px, ${ frame.translate[ 1 ] }px) rotate(${ frame.rotate }deg)`;
 	};
 
@@ -75,9 +75,9 @@ function MovableSingle( {
 	 */
 	const resetMoveable = () => {
 		frame.translate = [ 0, 0 ];
-		setStyle();
 		targetEl.style.width = '';
 		targetEl.style.height = '';
+		targetEl.style.transform = '';
 		if ( moveable.current ) {
 			moveable.current.updateRect();
 		}
@@ -92,7 +92,7 @@ function MovableSingle( {
 			rotatable={ ! selectedEl.isFullbleed }
 			onDrag={ ( { target, beforeTranslate } ) => {
 				frame.translate = beforeTranslate;
-				setStyle( target, frame );
+				setTransformStyle( target, frame );
 			} }
 			throttleDrag={ 0 }
 			onDragStart={ ( { set } ) => {
@@ -114,7 +114,7 @@ function MovableSingle( {
 				target.style.width = `${ width }px`;
 				target.style.height = `${ height }px`;
 				frame.translate = drag.beforeTranslate;
-				setStyle( target, frame );
+				setTransformStyle( target, frame );
 			} }
 			onResizeEnd={ ( { target } ) => {
 				setPropertiesOnSelectedElements( {
@@ -130,7 +130,7 @@ function MovableSingle( {
 			} }
 			onRotate={ ( { target, beforeRotate } ) => {
 				frame.rotate = beforeRotate;
-				setStyle( target, frame );
+				setTransformStyle( target, frame );
 			} }
 			onRotateEnd={ ( { target } ) => {
 				setPropertiesOnSelectedElements( { rotationAngle: frame.rotate } );
