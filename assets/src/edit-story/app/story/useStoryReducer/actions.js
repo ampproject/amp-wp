@@ -4,11 +4,11 @@
 import * as types from './types';
 
 // Exposed actions
-const addPage = ( dispatch ) => ( { properties } ) =>
-	dispatch( { type: types.ADD_PAGE, payload: { properties, position: null } } );
+const addPage = ( dispatch ) => ( { page } ) =>
+	dispatch( { type: types.ADD_PAGE, payload: { page, position: null } } );
 
-const addPageAt = ( dispatch ) => ( { properties, position } ) =>
-	dispatch( { type: types.ADD_PAGE, payload: { properties, position } } );
+const addPageAt = ( dispatch ) => ( { page, position } ) =>
+	dispatch( { type: types.ADD_PAGE, payload: { page, position } } );
 
 const deletePage = ( dispatch ) => ( { pageId } ) =>
 	dispatch( { type: types.DELETE_PAGE, payload: { pageId } } );

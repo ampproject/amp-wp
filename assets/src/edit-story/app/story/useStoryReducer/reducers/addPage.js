@@ -18,18 +18,18 @@ import { isInsideRange } from './utils';
  * @param {Object} payload.position Position at which to insert the new page. If null, insert after current
  * @return {Object} New state
  */
-function addPage( state, { properties, position } ) {
+function addPage( state, { page, position } ) {
 	const isWithinBounds = position !== null && isInsideRange( position, 0, state.pages.length - 1 );
 	const currentPageIndex = state.pages.findIndex( ( { id } ) => id === state.current );
 	const insertionPoint = isWithinBounds ? position : currentPageIndex + 1;
 
-	const { id } = properties;
+	const { id } = page;
 
 	// Ensure new page has elements array and background id
 	const newPage = {
 		elements: [],
 		backgroundElementId: null,
-		...properties,
+		...page,
 	};
 
 	return {

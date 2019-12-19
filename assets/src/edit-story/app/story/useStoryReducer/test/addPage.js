@@ -7,7 +7,7 @@ describe( 'addPage', () => {
 	it( 'should add a page and make sure to initialise elements and background element', () => {
 		const { addPage } = setupReducer();
 
-		const result = addPage( { properties: { id: '123' } } );
+		const result = addPage( { page: { id: '123' } } );
 
 		expect( result.pages ).toStrictEqual( [
 			{
@@ -27,7 +27,7 @@ describe( 'addPage', () => {
 			current: '111',
 		} );
 
-		const result = addPage( { properties: { id: '123' } } );
+		const result = addPage( { page: { id: '123' } } );
 
 		expect( result.current ).toStrictEqual( '123' );
 	} );
@@ -41,7 +41,7 @@ describe( 'addPage', () => {
 			current: '111',
 		} );
 
-		const result = addPage( { properties: { id: '123' } } );
+		const result = addPage( { page: { id: '123' } } );
 
 		const pageIds = result.pages.map( ( { id } ) => id );
 

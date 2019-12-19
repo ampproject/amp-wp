@@ -13,9 +13,8 @@ describe( 'addPageAt', () => {
 			current: '222',
 		} );
 
-		const result = addPageAt( { properties: { id: '123' }, position: 1 } );
-		const pageIds = result.pages.map( ( { id } ) => id );
-		expect( pageIds ).toStrictEqual( [ '111', '123', '222' ] );
+		const result = addPageAt( { page: { id: '123' }, position: 1 } );
+		expect( getPageIds( result ) ).toStrictEqual( [ '111', '123', '222' ] );
 	} );
 
 	it( 'should treat illegal positions as "add after current"', () => {
@@ -27,12 +26,14 @@ describe( 'addPageAt', () => {
 			current: '222',
 		} );
 
-		const firstResult = addPageAt( { properties: { id: '123' }, position: -50 } );
-		const firstSetOfPageIds = firstResult.pages.map( ( { id } ) => id );
-		expect( firstSetOfPageIds ).toStrictEqual( [ '111', '222', '123' ] );
+		const firstResult = addPageAt( { page: { id: '123' }, position: -50 } );
+		expect( getPageIds( firstResult ) ).toStrictEqual( [ '111', '222', '123' ] );
 
-		const secondResult = addPageAt( { properties: { id: '321' }, position: 50 } );
-		const secondSetOfPageIds = secondResult.pages.map( ( { id } ) => id );
-		expect( secondSetOfPageIds ).toStrictEqual( [ '111', '222', '123', '321' ] );
+		const secondResult = addPageAt( { page: { id: '321' }, position: 50 } );
+		expect( getPageIds( secondResult ) ).toStrictEqual( [ '111', '222', '123', '321' ] );
 	} );
 } );
+
+function getPageIds( { pages } ) {
+	return pages.map( ( { id } ) => id );
+}
