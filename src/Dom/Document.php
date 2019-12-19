@@ -854,11 +854,13 @@ final class Document extends DOMDocument {
 			$known_encodings = array_map( 'strtolower', mb_list_encodings() );
 		}
 
-		if ( array_key_exists( strtolower( $encoding ), self::$encoding_map ) ) {
-			$encoding = self::$encoding_map[ strtolower( $encoding ) ];
+		$lc_encoding = strtolower( $encoding );
+
+		if ( isset( self::$encoding_map[ $lc_encoding ] ) ) {
+			$encoding = self::$encoding_map[ $lc_encoding ];
 		}
 
-		if ( ! in_array( strtolower( $encoding ), $known_encodings, true ) ) {
+		if ( ! in_array( $lc_encoding, $known_encodings, true ) ) {
 			return self::UNKNOWN_ENCODING;
 		}
 
