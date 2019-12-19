@@ -42,7 +42,7 @@ final class SiteHealth {
 		];
 		$tests['direct']['amp_curl_multi_functions']    = [
 			/* translators: %s: a type of PHP function */
-			'label' => sprintf( esc_html__( '%s functions', 'amp' ), 'curl_multi_*' ),
+			'label' => esc_html( sprintf( __( '%s functions', 'amp' ), 'curl_multi_*' ) ),
 			'test'  => [ $this, 'curl_multi_functions' ],
 		];
 		$tests['direct']['amp_icu_version']             = [
@@ -181,8 +181,8 @@ final class SiteHealth {
 	 * @return array The test data.
 	 */
 	public function icu_version() {
-		$icu_version       = defined( 'INTL_ICU_VERSION' ) ? (float) INTL_ICU_VERSION : null;
-		$minimum_version   = 4.6;
+		$icu_version       = defined( 'INTL_ICU_VERSION' ) ? INTL_ICU_VERSION : null;
+		$minimum_version   = '4.6';
 		$is_proper_version = version_compare( $icu_version, $minimum_version, '>=' );
 
 		$data = [
@@ -190,10 +190,12 @@ final class SiteHealth {
 				'label' => esc_html__( 'AMP', 'amp' ),
 				'color' => $is_proper_version ? 'green' : 'orange',
 			],
-			'description' => sprintf(
-				/* translators: %s: the minimum recommended ICU version */
-				esc_html__( 'The version of ICU can affect how the intl extension runs. The minimum recommended version of ICU is %s.', 'amp' ),
-				$minimum_version
+			'description' => esc_html(
+				sprintf(
+					/* translators: %s: the minimum recommended ICU version */
+					__( 'The version of ICU can affect how the intl extension runs. This extension is used to derive AMP Cache URLs for internationalized domain names (IDNs). The minimum recommended version of ICU is v%s.', 'amp' ),
+					$minimum_version
+				)
 			),
 			'actions'     => sprintf(
 				'<p><a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s <span class="screen-reader-text">%3$s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
@@ -211,7 +213,7 @@ final class SiteHealth {
 				[
 					'status' => 'recommended',
 					/* translators: %s: the constant for the ICU version */
-					'label'  => sprintf( esc_html__( 'The ICU version is unknown, as the constant %s is not defined', 'amp' ), 'INTL_ICU_VERSION' ),
+					'label'  => esc_html( sprintf( __( 'The ICU version is unknown, as the constant %s is not defined', 'amp' ), 'INTL_ICU_VERSION' ) ),
 				]
 			);
 		}
@@ -222,7 +224,7 @@ final class SiteHealth {
 				[
 					'status' => 'recommended',
 					/* translators: %s: the ICU version */
-					'label'  => sprintf( esc_html__( 'The version of ICU, %s, is out of date.', 'amp' ), $icu_version ),
+					'label'  => esc_html( sprintf( __( 'The version of ICU (v%s) is out of date.', 'amp' ), $icu_version ) ),
 				]
 			);
 		}
@@ -231,8 +233,8 @@ final class SiteHealth {
 			$data,
 			[
 				'status' => 'good',
-				/* translators: %d the ICU version */
-				'label'  => sprintf( esc_html__( 'The version of ICU, %d, looks good.', 'amp' ), $icu_version ),
+				/* translators: %s the ICU version */
+				'label'  => esc_html( sprintf( __( 'The version of ICU (v%s) looks good.', 'amp' ), $icu_version ) ),
 			]
 		);
 	}
