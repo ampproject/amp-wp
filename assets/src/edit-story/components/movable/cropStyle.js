@@ -75,6 +75,7 @@ export const GlobalStyle = createGlobalStyle`
   }
 
   .crop-movable .moveable-control.moveable-nw {
+    transform-origin: 2px 2px !important;
     clip-path: polygon(0px 0px, 16px 0px, 16px 4px, 4px 4px, 4px 16px, 0px 16px) !important;
   }
   .crop-movable .moveable-control.moveable-nw:after {
@@ -82,6 +83,7 @@ export const GlobalStyle = createGlobalStyle`
   }
 
   .crop-movable .moveable-control.moveable-ne {
+    transform-origin: 14px 2px !important;
     clip-path: polygon(0px 0px, 16px 0px, 16px 16px, 12px 16px, 12px 4px, 0px 4px) !important;
   }
   .crop-movable .moveable-control.moveable-ne:after {
@@ -89,6 +91,7 @@ export const GlobalStyle = createGlobalStyle`
   }
 
   .crop-movable .moveable-control.moveable-sw {
+    transform-origin: 2px 14px !important;
     clip-path: polygon(0px 0px, 0px 16px, 16px 16px, 16px 12px, 4px 12px, 4px 0px) !important;
   }
   .crop-movable .moveable-control.moveable-sw:after {
@@ -96,6 +99,7 @@ export const GlobalStyle = createGlobalStyle`
   }
 
   .crop-movable .moveable-control.moveable-se {
+    transform-origin: 14px 14px !important;
     clip-path: polygon(16px 0px, 16px 16px, 0px 16px, 0px 12px, 12px 12px, 12px 0px) !important;
   }
   .crop-movable .moveable-control.moveable-se:after {

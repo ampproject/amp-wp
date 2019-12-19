@@ -188,24 +188,25 @@ function ImageEdit( { id, src, origRatio, width, height, x, y, scale, focalX, fo
 				} }
 
 				// Snappable
-				snappable={ true }
-				snapCenter={ true }
-				bounds={ {
-					left: elementProps.x + elementProps.width - imgProps.width,
-					top: elementProps.y + elementProps.height - imgProps.height,
-					right: elementProps.x + imgProps.width,
-					bottom: elementProps.y + imgProps.height,
-				} }
-				verticalGuidelines={ [
-					elementProps.x,
-					elementProps.x + ( elementProps.width / 2 ),
-					elementProps.x + elementProps.width,
-				] }
-				horizontalGuidelines={ [
-					elementProps.y,
-					elementProps.y + ( elementProps.height / 2 ),
-					elementProps.y + elementProps.height,
-				] }
+				//QQQQQ
+				// snappable={ true }
+				// snapCenter={ true }
+				// bounds={ {
+				// 	left: elementProps.x + elementProps.width - imgProps.width,
+				// 	top: elementProps.y + elementProps.height - imgProps.height,
+				// 	right: elementProps.x + imgProps.width,
+				// 	bottom: elementProps.y + imgProps.height,
+				// } }
+				// verticalGuidelines={ [
+				// 	elementProps.x,
+				// 	elementProps.x + ( elementProps.width / 2 ),
+				// 	elementProps.x + elementProps.width,
+				// ] }
+				// horizontalGuidelines={ [
+				// 	elementProps.y,
+				// 	elementProps.y + ( elementProps.height / 2 ),
+				// 	elementProps.y + elementProps.height,
+				// ] }
 			/>
 
 		</Element>
