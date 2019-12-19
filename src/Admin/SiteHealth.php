@@ -169,7 +169,7 @@ final class SiteHealth {
 				$data,
 				[
 					'status' => 'good',
-					'label'  => esc_html__( 'The curl_multi_* functions are defined.', 'amp' ),
+					'label'  => esc_html__( 'The curl_multi_* functions are defined', 'amp' ),
 				]
 			);
 		}
@@ -224,7 +224,7 @@ final class SiteHealth {
 				[
 					'status' => 'recommended',
 					/* translators: %s: the ICU version */
-					'label'  => esc_html( sprintf( __( 'The version of ICU (v%s) is out of date.', 'amp' ), $icu_version ) ),
+					'label'  => esc_html( sprintf( __( 'The version of ICU (v%s) is out of date', 'amp' ), $icu_version ) ),
 				]
 			);
 		}
@@ -234,7 +234,7 @@ final class SiteHealth {
 			[
 				'status' => 'good',
 				/* translators: %s the ICU version */
-				'label'  => esc_html( sprintf( __( 'The version of ICU (v%s) looks good.', 'amp' ), $icu_version ) ),
+				'label'  => esc_html( sprintf( __( 'The version of ICU (v%s) looks good', 'amp' ), $icu_version ) ),
 			]
 		);
 	}
