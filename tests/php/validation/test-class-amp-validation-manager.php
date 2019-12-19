@@ -7,6 +7,8 @@
 
 // phpcs:disable Generic.Formatting.MultipleStatementAlignment.NotSameWarning
 
+use Amp\AmpWP\Dom\Document;
+
 /**
  * Tests for AMP_Validation_Manager class.
  *
@@ -89,8 +91,9 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	public function setUp() {
 		unset( $GLOBALS['wp_scripts'], $GLOBALS['wp_styles'] );
 		parent::setUp();
-		$dom_document = new DOMDocument( '1.0', 'utf-8' );
+		$dom_document = new Document( '1.0', 'utf-8' );
 		$this->node   = $dom_document->createElement( self::TAG_NAME );
+		$dom_document->appendChild( $this->node );
 		AMP_Validation_Manager::reset_validation_results();
 		$this->original_wp_registered_widgets = $GLOBALS['wp_registered_widgets'];
 
@@ -814,8 +817,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		 * @var DOMComment[] $comments
 		 */
 		$comments = [];
-		$xpath    = new DOMXPath( $dom );
-		foreach ( $xpath->query( '//comment()' ) as $comment ) {
+		foreach ( $dom->xpath->query( '//comment()' ) as $comment ) {
 			$comments[] = $comment;
 		}
 		$this->assertCount( 4, $comments );
@@ -1607,7 +1609,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		<?php
 		$html = ob_get_clean();
 
-		$dom = new DOMDocument();
+		$dom = new Document();
 		$dom->loadHTML( $html );
 
 		$this->assertInstanceOf( 'DOMElement', $dom->getElementById( 'wp-admin-bar-amp' ) );

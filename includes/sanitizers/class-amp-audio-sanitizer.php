@@ -42,7 +42,7 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Sanitize the <audio> elements from the HTML contained in this instance's DOMDocument.
+	 * Sanitize the <audio> elements from the HTML contained in this instance's Dom\Document.
 	 *
 	 * @since 0.2
 	 */

@@ -1,24 +1,25 @@
 <?php
 /**
- * Class DOMElementList
+ * Class ElementList
  *
  * @package Amp\AmpWP
  */
 
-namespace Amp\AmpWP\Component;
+namespace Amp\AmpWP\Dom;
 
+use Amp\AmpWP\Component\CaptionedSlide;
 use IteratorAggregate;
 use Countable;
 use DOMElement;
 use ArrayIterator;
 
 /**
- * Class DOMElementList
+ * Class ElementList
  *
  * @internal
  * @since 1.5.0
  */
-final class DOMElementList implements IteratorAggregate, Countable {
+final class ElementList implements IteratorAggregate, Countable {
 
 	/**
 	 * The elements, possibly with captions.
@@ -32,7 +33,7 @@ final class DOMElementList implements IteratorAggregate, Countable {
 	 *
 	 * @param DOMElement $element The element to add, possibly an image.
 	 * @param string     $caption The caption to add, if any.
-	 * @return DOMElementList A clone of this list, with the new element added.
+	 * @return ElementList A clone of this list, with the new element added.
 	 */
 	public function add( DOMElement $element, $caption = '' ) {
 		$cloned_list             = clone $this;

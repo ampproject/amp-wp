@@ -7,7 +7,8 @@
 
 namespace Amp\AmpWP\Component;
 
-use DOMDocument;
+use Amp\AmpWP\Dom\Document;
+use Amp\AmpWP\Dom\ElementList;
 use DOMElement;
 use AMP_DOM_Utils;
 
@@ -38,24 +39,24 @@ final class Carousel {
 	/**
 	 * An object representation of the DOM.
 	 *
-	 * @var DOMDocument
+	 * @var Document
 	 */
 	private $dom;
 
 	/**
 	 * The slides to add to the carousel, possibly images.
 	 *
-	 * @var DOMElementList
+	 * @var ElementList
 	 */
 	private $slides;
 
 	/**
 	 * Instantiates the class.
 	 *
-	 * @param DOMDocument    $dom    The dom to use to create a carousel.
-	 * @param DOMElementList $slides The slides from which to create a carousel.
+	 * @param Document    $dom    The dom to use to create a carousel.
+	 * @param ElementList $slides The slides from which to create a carousel.
 	 */
-	public function __construct( $dom, DOMElementList $slides ) {
+	public function __construct( Document $dom, ElementList $slides ) {
 		$this->dom    = $dom;
 		$this->slides = $slides;
 	}

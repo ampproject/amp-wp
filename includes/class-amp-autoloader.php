@@ -78,6 +78,7 @@ class AMP_Autoloader {
 		'AMP_Iframe_Sanitizer'               => 'includes/sanitizers/class-amp-iframe-sanitizer',
 		'AMP_Img_Sanitizer'                  => 'includes/sanitizers/class-amp-img-sanitizer',
 		'AMP_Link_Sanitizer'                 => 'includes/sanitizers/class-amp-link-sanitizer',
+		'AMP_Meta_Sanitizer'                 => 'includes/sanitizers/class-amp-meta-sanitizer',
 		'AMP_Nav_Menu_Toggle_Sanitizer'      => 'includes/sanitizers/class-amp-nav-menu-toggle-sanitizer',
 		'AMP_Nav_Menu_Dropdown_Sanitizer'    => 'includes/sanitizers/class-amp-nav-menu-dropdown-sanitizer',
 		'AMP_Comments_Sanitizer'             => 'includes/sanitizers/class-amp-comments-sanitizer',

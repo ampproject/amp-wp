@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use Amp\AmpWP\Dom\Document;
+
 /**
  * Trait AMP_Noscript_Fallback
  *
@@ -69,11 +71,11 @@ trait AMP_Noscript_Fallback {
 	 *
 	 * @since 1.1
 	 *
-	 * @param DOMNode     $new_node New node to append a noscript with the old node to.
-	 * @param DOMNode     $old_node Old node to append in a noscript.
-	 * @param DOMDocument $dom DOM document instance.
+	 * @param DOMNode  $new_node New node to append a noscript with the old node to.
+	 * @param DOMNode  $old_node Old node to append in a noscript.
+	 * @param Document $dom DOM document instance.
 	 */
-	protected function append_old_node_noscript( DOMNode $new_node, DOMNode $old_node, DOMDocument $dom ) {
+	protected function append_old_node_noscript( DOMNode $new_node, DOMNode $old_node, Document $dom ) {
 		$noscript = $dom->createElement( 'noscript' );
 		$noscript->appendChild( $old_node );
 		$new_node->appendChild( $noscript );

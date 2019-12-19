@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use Amp\AmpWP\Dom\Document;
 use Amp\AmpWP\Tests\PrivateAccess;
 
 /**
@@ -19,7 +20,7 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 	/**
 	 * Representation of the DOM.
 	 *
-	 * @var DOMDocument
+	 * @var Document
 	 */
 	public $dom;
 
@@ -31,7 +32,7 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 		$GLOBALS['post'] = self::factory()->post->create_and_get();
-		$this->dom       = new DOMDocument();
+		$this->dom       = new Document();
 	}
 
 	/**
@@ -96,6 +97,11 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 			$this->assertContains( $name, $amp_state->nodeValue );
 		}
 		foreach ( $form->getElementsByTagName( 'input' ) as $input ) {
+			/**
+			 * Input.
+			 *
+			 * @var DOMElement $input
+			 */
 			$on = $input->getAttribute( 'on' );
 			$this->assertContains( 'change:AMP.setState(', $on );
 			$this->assertContains( strval( $GLOBALS['post']->ID ), $on );
@@ -121,8 +127,7 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 		$this->create_comments_list( $comment_objects );
 		$instance->sanitize();
 
-		$xpath    = new DOMXPath( $this->dom );
-		$comments = $xpath->query( '//*[ starts-with( @id, "comment-" ) ]' );
+		$comments = $this->dom->xpath->query( '//*[ starts-with( @id, "comment-" ) ]' );
 
 		foreach ( $comments as $comment ) {
 			/**

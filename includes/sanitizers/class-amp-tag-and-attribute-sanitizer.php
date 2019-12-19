@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use Amp\AmpWP\Dom\Document;
+
 /**
  * Strips the tags and attributes from the content that are not allowed by the AMP spec.
  *
@@ -138,8 +140,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 0.5
 	 *
-	 * @param DOMDocument $dom  DOM.
-	 * @param array       $args Args.
+	 * @param Document $dom  DOM.
+	 * @param array    $args Args.
 	 */
 	public function __construct( $dom, $args = [] ) {
 		// @todo It is pointless to have this DEFAULT_ARGS copying the array values. We should only get the data from AMP_Allowed_Tags_Generated.
@@ -287,7 +289,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Sanitize the elements from the HTML contained in this instance's DOMDocument.
+	 * Sanitize the elements from the HTML contained in this instance's Dom\Document.
 	 *
 	 * @since 0.5
 	 */
@@ -736,7 +738,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		// Check if element needs amp-bind component.
 		if ( $node instanceof DOMElement && ! in_array( 'amp-bind', $this->script_components, true ) ) {
 			foreach ( $node->attributes as $name => $value ) {
-				if ( AMP_DOM_Utils::AMP_BIND_DATA_ATTR_PREFIX === substr( $name, 0, 14 ) ) {
+				if ( Document::AMP_BIND_DATA_ATTR_PREFIX === substr( $name, 0, 14 ) ) {
 					$script_components[] = 'amp-bind';
 					break;
 				}
@@ -1387,7 +1389,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			foreach ( $this->extract_attribute_urls( $node->getAttributeNode( $attr_name ) ) as $url ) {
 				$url = urldecode( $url );
 
-				// Check whether the URL is parseable.
+				// Check whether the URL is parsable.
 				$parts = wp_parse_url( $url );
 				if ( false === $parts ) {
 					return AMP_Rule_Spec::FAIL;
@@ -1701,7 +1703,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		if (
 			isset( $attr_spec_list[ $attr_name ] )
 			||
-			( 'data-' === substr( $attr_name, 0, 5 ) && AMP_DOM_Utils::AMP_BIND_DATA_ATTR_PREFIX !== substr( $attr_name, 0, 14 ) )
+			( 'data-' === substr( $attr_name, 0, 5 ) && Document::AMP_BIND_DATA_ATTR_PREFIX !== substr( $attr_name, 0, 14 ) )
 			||
 			// Allow the 'amp' or '⚡' attribute in <html>, like <html ⚡>.
 			( 'html' === $attr_node->parentNode->nodeName && in_array( $attr_node->nodeName, [ 'amp', '⚡' ], true ) )

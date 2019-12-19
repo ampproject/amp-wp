@@ -71,7 +71,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Sanitize the <img> elements from the HTML contained in this instance's DOMDocument.
+	 * Sanitize the <img> elements from the HTML contained in this instance's Dom\Document.
 	 *
 	 * @since 0.2
 	 */

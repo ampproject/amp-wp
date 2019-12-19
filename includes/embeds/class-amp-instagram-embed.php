@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use Amp\AmpWP\Dom\Document;
+
 /**
  * Class AMP_Instagram_Embed_Handler
  *
@@ -132,9 +134,9 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Sanitized <blockquote class="instagram-media"> tags to <amp-instagram>
 	 *
-	 * @param DOMDocument $dom DOM.
+	 * @param Document $dom DOM.
 	 */
-	public function sanitize_raw_embeds( $dom ) {
+	public function sanitize_raw_embeds( Document $dom ) {
 		/**
 		 * Node list.
 		 *
@@ -162,8 +164,8 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Make final modifications to DOMNode
 	 *
-	 * @param DOMDocument $dom The HTML Document.
-	 * @param DOMElement  $node The DOMNode to adjust and replace.
+	 * @param Document   $dom The HTML Document.
+	 * @param DOMElement $node The DOMNode to adjust and replace.
 	 */
 	private function create_amp_instagram_and_replace_node( $dom, $node ) {
 		$instagram_id = $this->get_instagram_id_from_url( $node->getAttribute( 'data-instgrm-permalink' ) );

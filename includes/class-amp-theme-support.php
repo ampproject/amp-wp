@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use Amp\AmpWP\Dom\Document;
+
 /**
  * Class AMP_Theme_Support
  *
@@ -1600,10 +1602,10 @@ class AMP_Theme_Support {
 	 * @link https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/optimize_amp/
 	 * @todo All of this might be better placed inside of a sanitizer.
 	 *
-	 * @param DOMDocument $dom            Document.
-	 * @param string[]    $script_handles AMP script handles for components identified during output buffering.
+	 * @param Document $dom            Document.
+	 * @param string[] $script_handles AMP script handles for components identified during output buffering.
 	 */
-	public static function ensure_required_markup( DOMDocument $dom, $script_handles = [] ) {
+	public static function ensure_required_markup( Document $dom, $script_handles = [] ) {
 		/**
 		 * Elements.
 		 *
@@ -1614,23 +1616,14 @@ class AMP_Theme_Support {
 		 * @var DOMElement $noscript
 		 */
 
-		$xpath = new DOMXPath( $dom );
-
-		// Make sure the HEAD element is in the doc.
-		$head = $dom->getElementsByTagName( 'head' )->item( 0 );
-		if ( ! $head ) {
-			$head = $dom->createElement( 'head' );
-			$dom->documentElement->insertBefore( $head, $dom->documentElement->firstChild );
-		}
-
 		// Ensure there is a schema.org script in the document.
 		// @todo Consider applying the amp_schemaorg_metadata filter on the contents when a script is already present.
-		$schema_org_meta_script = $xpath->query( '//script[ @type = "application/ld+json" ][ contains( ./text(), "schema.org" ) ]' )->item( 0 );
+		$schema_org_meta_script = $dom->xpath->query( '//script[ @type = "application/ld+json" ][ contains( ./text(), "schema.org" ) ]' )->item( 0 );
 		if ( ! $schema_org_meta_script ) {
 			$script = $dom->createElement( 'script' );
 			$script->setAttribute( 'type', 'application/ld+json' );
 			$script->appendChild( $dom->createTextNode( wp_json_encode( amp_get_schemaorg_metadata(), JSON_UNESCAPED_UNICODE ) ) );
-			$head->appendChild( $script );
+			$dom->head->appendChild( $script );
 		}
 
 		// Gather all links.
@@ -1647,7 +1640,7 @@ class AMP_Theme_Support {
 				),
 			],
 		];
-		$link_elements = $head->getElementsByTagName( 'link' );
+		$link_elements = $dom->head->getElementsByTagName( 'link' );
 		foreach ( $link_elements as $link ) {
 			if ( $link->hasAttribute( 'rel' ) ) {
 				$links[ $link->getAttribute( 'rel' ) ][] = $link;
@@ -1665,97 +1658,18 @@ class AMP_Theme_Support {
 					'href' => self::get_current_canonical_url(),
 				]
 			);
-			$head->appendChild( $rel_canonical );
+			$dom->head->appendChild( $rel_canonical );
 		}
 
-		/*
-		 * Ensure meta charset and meta viewport are present.
-		 *
-		 * "AMP is already quite restrictive about which markup is allowed in the <head> section. However,
-		 * there are a few basic optimizations that you can apply. The key is to structure the <head> section
-		 * in a way so that all render-blocking scripts and custom fonts load as fast as possible."
-		 *
-		 * "1. The first tag should be the meta charset tag, followed by any remaining meta tags."
-		 *
-		 * {@link https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/optimize_amp/ Optimize the AMP Runtime loading}
-		 */
-		$meta_charset         = null;
-		$meta_viewport        = null;
-		$meta_amp_script_srcs = [];
-		$meta_elements        = [];
-		foreach ( $head->getElementsByTagName( 'meta' ) as $meta ) {
-			if ( $meta->hasAttribute( 'charset' ) ) { // There will not be a meta[http-equiv] because the sanitizer removed it.
-				$meta_charset = $meta;
-			} elseif ( 'viewport' === $meta->getAttribute( 'name' ) ) {
-				$meta_viewport = $meta;
-			} elseif ( 'amp-script-src' === $meta->getAttribute( 'name' ) ) {
-				$meta_amp_script_srcs[] = $meta;
-			} else {
-				$meta_elements[] = $meta;
-			}
-		}
-
-		// Handle meta charset.
-		if ( ! $meta_charset ) {
-			// Warning: This probably means the character encoding needs to be converted.
-			$meta_charset = AMP_DOM_Utils::create_node(
-				$dom,
-				'meta',
-				[
-					'charset' => 'utf-8',
-				]
-			);
-		} else {
-			$head->removeChild( $meta_charset ); // So we can move it.
-		}
-		$head->insertBefore( $meta_charset, $head->firstChild );
-
-		// Handle meta viewport.
-		if ( ! $meta_viewport ) {
-			$meta_viewport = AMP_DOM_Utils::create_node(
-				$dom,
-				'meta',
-				[
-					'name'    => 'viewport',
-					'content' => 'width=device-width',
-				]
-			);
-		} else {
-			$head->removeChild( $meta_viewport ); // So we can move it.
-		}
-		$head->insertBefore( $meta_viewport, $meta_charset->nextSibling );
-
-		// Handle meta amp-script-src elements.
-		$first_meta_amp_script_src = array_shift( $meta_amp_script_srcs );
-		if ( $first_meta_amp_script_src ) {
-			$meta_elements[] = $first_meta_amp_script_src;
-
-			// Merge (and remove) any subsequent meta amp-script-src elements.
-			if ( ! empty( $meta_amp_script_srcs ) ) {
-				$content_values = [ $first_meta_amp_script_src->getAttribute( 'content' ) ];
-				foreach ( $meta_amp_script_srcs as $meta_amp_script_src ) {
-					$meta_amp_script_src->parentNode->removeChild( $meta_amp_script_src );
-					$content_values[] = $meta_amp_script_src->getAttribute( 'content' );
-				}
-				$first_meta_amp_script_src->setAttribute( 'content', implode( ' ', $content_values ) );
-				unset( $meta_amp_script_src, $content_values );
-			}
-		}
-		unset( $meta_amp_script_srcs, $first_meta_amp_script_src );
-
-		// Insert all the the meta elements next in the head.
-		$previous_node = $meta_viewport;
-		foreach ( $meta_elements as $meta_element ) {
-			$meta_element->parentNode->removeChild( $meta_element );
-			$head->insertBefore( $meta_element, $previous_node->nextSibling );
-			$previous_node = $meta_element;
-		}
+		// Store the last meta tag as the previous node to append to.
+		$meta_tags     = $dom->head->getElementsByTagName( 'meta' );
+		$previous_node = $meta_tags->length > 0 ? $meta_tags->item( $meta_tags->length - 1 ) : $dom->head->firstChild;
 
 		// Handle the title.
-		$title = $head->getElementsByTagName( 'title' )->item( 0 );
+		$title = $dom->head->getElementsByTagName( 'title' )->item( 0 );
 		if ( $title ) {
 			$title->parentNode->removeChild( $title ); // So we can move it.
-			$head->insertBefore( $title, $previous_node->nextSibling );
+			$dom->head->insertBefore( $title, $previous_node->nextSibling );
 			$previous_node = $title;
 		}
 
@@ -1771,7 +1685,7 @@ class AMP_Theme_Support {
 		$ordered_scripts = [];
 		$head_scripts    = [];
 		$runtime_src     = wp_scripts()->registered['amp-runtime']->src;
-		foreach ( $head->getElementsByTagName( 'script' ) as $script ) { // Note that prepare_response() already moved body scripts to head.
+		foreach ( $dom->head->getElementsByTagName( 'script' ) as $script ) { // Note that prepare_response() already moved body scripts to head.
 			$head_scripts[] = $script;
 		}
 		foreach ( $head_scripts as $script ) {
@@ -1879,7 +1793,7 @@ class AMP_Theme_Support {
 				if ( $link->parentNode ) {
 					$link->parentNode->removeChild( $link ); // So we can move it.
 				}
-				$head->insertBefore( $link, $previous_node->nextSibling );
+				$dom->head->insertBefore( $link, $previous_node->nextSibling );
 				$previous_node = $link;
 			}
 		}
@@ -1913,25 +1827,25 @@ class AMP_Theme_Support {
 		 */
 		$ordered_scripts = array_merge( $ordered_scripts, $amp_scripts );
 		foreach ( $ordered_scripts as $ordered_script ) {
-			$head->insertBefore( $ordered_script, $previous_node->nextSibling );
+			$dom->head->insertBefore( $ordered_script, $previous_node->nextSibling );
 			$previous_node = $ordered_script;
 		}
 
 		/*
 		 * "8. Specify any custom styles by using the <style amp-custom> tag."
 		 */
-		$style = $xpath->query( './style[ @amp-custom ]', $head )->item( 0 );
+		$style = $dom->xpath->query( './style[ @amp-custom ]', $dom->head )->item( 0 );
 		if ( $style ) {
 			// Ensure the CSS manifest comment remains before style[amp-custom].
 			if ( $style->previousSibling instanceof DOMComment ) {
 				$comment = $style->previousSibling;
 				$comment->parentNode->removeChild( $comment );
-				$head->insertBefore( $comment, $previous_node->nextSibling );
+				$dom->head->insertBefore( $comment, $previous_node->nextSibling );
 				$previous_node = $comment;
 			}
 
 			$style->parentNode->removeChild( $style );
-			$head->insertBefore( $style, $previous_node->nextSibling );
+			$dom->head->insertBefore( $style, $previous_node->nextSibling );
 			$previous_node = $style;
 		}
 
@@ -1944,7 +1858,7 @@ class AMP_Theme_Support {
 		 * "10. Finally, specify the AMP boilerplate code. By putting the boilerplate code last, it prevents custom styles
 		 * from accidentally overriding the boilerplate css rules."
 		 */
-		$style = $xpath->query( './style[ @amp-boilerplate ]', $head )->item( 0 );
+		$style = $dom->xpath->query( './style[ @amp-boilerplate ]', $dom->head )->item( 0 );
 		if ( ! $style ) {
 			$style = $dom->createElement( 'style' );
 			$style->setAttribute( 'amp-boilerplate', '' );
@@ -1952,9 +1866,9 @@ class AMP_Theme_Support {
 		} else {
 			$style->parentNode->removeChild( $style ); // So we can move it.
 		}
-		$head->appendChild( $style );
+		$dom->head->appendChild( $style );
 
-		$noscript = $xpath->query( './noscript[ style[ @amp-boilerplate ] ]', $head )->item( 0 );
+		$noscript = $dom->xpath->query( './noscript[ style[ @amp-boilerplate ] ]', $dom->head )->item( 0 );
 		if ( ! $noscript ) {
 			$noscript = $dom->createElement( 'noscript' );
 			$style    = $dom->createElement( 'style' );
@@ -1964,7 +1878,7 @@ class AMP_Theme_Support {
 		} else {
 			$noscript->parentNode->removeChild( $noscript ); // So we can move it.
 		}
-		$head->appendChild( $noscript );
+		$dom->head->appendChild( $noscript );
 
 		unset( $previous_node );
 	}
@@ -2314,33 +2228,26 @@ class AMP_Theme_Support {
 			);
 		}
 
-		$dom   = AMP_DOM_Utils::get_dom( $response );
-		$xpath = new DOMXPath( $dom );
-		$head  = $dom->getElementsByTagName( 'head' )->item( 0 );
+		$dom = Document::from_html( $response );
 
 		// Move anything after </html>, such as Query Monitor output added at shutdown, to be moved before </body>.
-		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
-		if ( $body ) {
-			while ( $dom->documentElement->nextSibling ) {
-				// Trailing elements after </html> will get wrapped in additional <html> elements.
-				if ( 'html' === $dom->documentElement->nextSibling->nodeName ) {
-					while ( $dom->documentElement->nextSibling->firstChild ) {
-						$body->appendChild( $dom->documentElement->nextSibling->firstChild );
-					}
-					$dom->removeChild( $dom->documentElement->nextSibling );
-				} else {
-					$body->appendChild( $dom->documentElement->nextSibling );
+		while ( $dom->documentElement->nextSibling ) {
+			// Trailing elements after </html> will get wrapped in additional <html> elements.
+			if ( 'html' === $dom->documentElement->nextSibling->nodeName ) {
+				while ( $dom->documentElement->nextSibling->firstChild ) {
+					$dom->body->appendChild( $dom->documentElement->nextSibling->firstChild );
 				}
+				$dom->removeChild( $dom->documentElement->nextSibling );
+			} else {
+				$dom->body->appendChild( $dom->documentElement->nextSibling );
 			}
 		}
 
 		AMP_HTTP::send_server_timing( 'amp_dom_parse', -$dom_parse_start, 'AMP DOM Parse' );
 
 		// Make sure scripts from the body get moved to the head.
-		if ( isset( $head ) ) {
-			foreach ( $xpath->query( '//body//script[ @custom-element or @custom-template or @src = "https://cdn.ampproject.org/v0.js" ]' ) as $script ) {
-				$head->appendChild( $script->parentNode->removeChild( $script ) );
-			}
+		foreach ( $dom->xpath->query( '//body//script[ @custom-element or @custom-template or @src = "https://cdn.ampproject.org/v0.js" ]' ) as $script ) {
+			$dom->head->appendChild( $script->parentNode->removeChild( $script ) );
 		}
 
 		// Ensure the mandatory amp attribute is present on the html element.
@@ -2403,11 +2310,9 @@ class AMP_Theme_Support {
 				 * Make sure that document.write() is disabled to prevent dynamically-added content (such as added
 				 * via amp-live-list) from wiping out the page by introducing any scripts that call this function.
 				 */
-				if ( $head ) {
-					$script = $dom->createElement( 'script' );
-					$script->appendChild( $dom->createTextNode( 'document.addEventListener( "DOMContentLoaded", function() { document.write = function( text ) { throw new Error( "[AMP-WP] Prevented document.write() call with: "  + text ); }; } );' ) );
-					$head->appendChild( $script );
-				}
+				$script = $dom->createElement( 'script' );
+				$script->appendChild( $dom->createTextNode( 'document.addEventListener( "DOMContentLoaded", function() { document.write = function( text ) { throw new Error( "[AMP-WP] Prevented document.write() call with: "  + text ); }; } );' ) );
+				$dom->head->appendChild( $script );
 			} elseif ( ! self::is_customize_preview_iframe() ) {
 				$response = esc_html__( 'Redirecting to non-AMP version.', 'amp' );
 
@@ -2438,7 +2343,7 @@ class AMP_Theme_Support {
 		AMP_Validation_Manager::finalize_validation( $dom );
 
 		$response  = "<!DOCTYPE html>\n";
-		$response .= AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
+		$response .= $dom->saveHTML( $dom->documentElement );
 
 		AMP_HTTP::send_server_timing( 'amp_dom_serialize', -$dom_serialize_start, 'AMP DOM Serialize' );
 

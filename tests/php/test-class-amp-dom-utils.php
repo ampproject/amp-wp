@@ -1,5 +1,7 @@
 <?php
 
+use Amp\AmpWP\Dom\Document;
+
 /**
  * Class AMP_DOM_Utils_Test
  *
@@ -159,42 +161,9 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test convert_amp_bind_attributes.
-	 *
-	 * @covers \AMP_DOM_Utils::convert_amp_bind_attributes()
-	 */
-	public function test_amp_bind_conversion() {
-		$original  = '<amp-img width=300 height="200" data-foo="bar" selected src="/img/dog.jpg" [src]="myAnimals[currentAnimal].imageUrl"></amp-img>';
-		$converted = AMP_DOM_Utils::convert_amp_bind_attributes( $original );
-		$this->assertNotEquals( $converted, $original );
-		$this->assertContains( AMP_DOM_Utils::AMP_BIND_DATA_ATTR_PREFIX . 'src="myAnimals[currentAnimal].imageUrl"', $converted );
-		$this->assertContains( 'width=300 height="200" data-foo="bar" selected', $converted );
-
-		// Check tag with self-closing attribute.
-		$original  = '<input type="text" role="textbox" class="calc-input" id="liens" name="liens" [value]="(result1 != null) ? result1.liens : \'verifying…\'" />';
-		$converted = AMP_DOM_Utils::convert_amp_bind_attributes( $original );
-		$this->assertNotEquals( $converted, $original );
-
-		// Preserve trailing slash that is actually the attribute value.
-		$original = '<a href=/>Home</a>';
-		$this->assertEquals( AMP_DOM_Utils::convert_amp_bind_attributes( $original ), $original );
-
-		// Test malformed.
-		$malformed_html = [
-			'<amp-img width="123" [text]="..."</amp-img>',
-			'<amp-img width="123" [text="..."]></amp-img>',
-			'<amp-img width="123" [text]="..." *bad*></amp-img>',
-		];
-		foreach ( $malformed_html as $html ) {
-			$converted = AMP_DOM_Utils::convert_amp_bind_attributes( $html );
-			$this->assertNotContains( AMP_DOM_Utils::AMP_BIND_DATA_ATTR_PREFIX, $converted, "Source: $html" );
-		}
-	}
-
-	/**
 	 * Test handling of empty elements.
 	 *
-	 * @covers \AMP_DOM_Utils::get_dom()
+	 * @covers \Amp\AmpWP\Dom\Document::from_html()
 	 * @covers \AMP_DOM_Utils::get_content_from_dom_node()
 	 */
 	public function test_html5_empty_elements() {
@@ -222,7 +191,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	/**
 	 * Test parsing DOM with Mustache or Mustache-like templates.
 	 *
-	 * @covers \AMP_DOM_Utils::get_dom()
+	 * @covers \Amp\AmpWP\Dom\Document::from_html()
 	 * @covers \AMP_DOM_Utils::get_content_from_dom_node()
 	 */
 	public function test_mustache_replacements() {
@@ -255,11 +224,10 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 			]
 		);
 
-		$dom   = AMP_DOM_Utils::get_dom_from_content( $html );
-		$xpath = new DOMXPath( $dom );
+		$dom = AMP_DOM_Utils::get_dom_from_content( $html );
 
 		// Ensure that JSON in scripts are left intact.
-		$script = $xpath->query( '//script' )->item( 0 );
+		$script = $dom->xpath->query( '//script' )->item( 0 );
 		$this->assertEquals(
 			$data,
 			json_decode( $script->nodeValue, true )
@@ -273,19 +241,19 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		 * @var DOMElement $template_img
 		 * @var DOMElement $template_blockquote
 		 */
-		$template_link = $xpath->query( '//template/a' )->item( 0 );
+		$template_link = $dom->xpath->query( '//template/a' )->item( 0 );
 		$this->assertSame( '{{href}}', $template_link->getAttribute( 'href' ) );
 		$this->assertEquals( 'Hello {{name}}', $template_link->getAttribute( 'title' ) );
 
 		// Ensure that mustache var in img[src] attribute is intact.
-		$template_img = $xpath->query( '//template/a/img' )->item( 0 );
+		$template_img = $dom->xpath->query( '//template/a/img' )->item( 0 );
 		$this->assertEquals( '{{src}}', $template_img->getAttribute( 'src' ) );
 
 		// Ensure that mustache var in blockquote[cite] is not changed.
-		$template_blockquote = $xpath->query( '//template/blockquote' )->item( 0 );
+		$template_blockquote = $dom->xpath->query( '//template/blockquote' )->item( 0 );
 		$this->assertEquals( '{{cite}}', $template_blockquote->getAttribute( 'cite' ) );
 
-		$serialized_html = AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
+		$serialized_html = $dom->saveHTML( $dom->documentElement );
 
 		$this->assertContains( '<a href="{{href}}" title="Hello {{name}}">', $serialized_html );
 		$this->assertContains( '<img src="{{src}}">', $serialized_html );
@@ -296,18 +264,18 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	/**
 	 * Test encoding.
 	 *
-	 * @covers \AMP_DOM_Utils::get_dom()
+	 * @covers \Amp\AmpWP\Dom\Document::from_html()
 	 */
 	public function test_get_dom_encoding() {
-		$html  = '<!DOCTYPE html><html><head><title>مرحبا بالعالم! Check out ‘this’ and “that” and—other things.</title><meta charset="UTF-8"></head><body>';
+		$html  = '<!DOCTYPE html><html><head><title>مرحبا بالعالم! Check out ‘this’ and “that” and—other things.</title><meta charset="utf-8"></head><body>';
 		$html .= '<p>مرحبا بالعالم! Check out ‘this’ and “that” and—other things.</p>';
 		$html .= '<p>&#x645;&#x631;&#x62D;&#x628;&#x627; &#x628;&#x627;&#x644;&#x639;&#x627;&#x644;&#x645;! Check out &#8216;this&#8217; and &#8220;that&#8221; and&#8212;other things.</p>';
 		$html .= '<p>&#x645;&#x631;&#x62D;&#x628;&#x627; &#x628;&#x627;&#x644;&#x639;&#x627;&#x644;&#x645;! Check out &lsquo;this&rsquo; and &ldquo;that&rdquo; and&mdash;other things.</p>';
 		$html .= '</body></html>';
 
-		$document = AMP_DOM_Utils::get_dom( $html );
+		$document = Document::from_html( $html );
 
-		$this->assertEquals( 'UTF-8', $document->encoding );
+		$this->assertEquals( 'utf-8', $document->encoding );
 		$paragraphs = $document->getElementsByTagName( 'p' );
 		$this->assertSame( 3, $paragraphs->length );
 		$this->assertSame( $paragraphs->item( 0 )->textContent, $paragraphs->item( 1 )->textContent );
@@ -316,60 +284,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Get Table Row Iterations
-	 *
-	 * @return array An array of arrays holding an integer representation of iterations.
-	 */
-	public function get_table_row_iterations() {
-		return [
-			[ 1 ],
-			[ 10 ],
-			[ 100 ],
-			[ 1000 ],
-			[ 10000 ],
-			[ 100000 ],
-		];
-	}
-
-	/**
-	 * Tests attribute conversions on content with iframe srcdocs of variable lengths.
-	 *
-	 * @dataProvider get_table_row_iterations
-	 *
-	 * @param int $iterations The number of table rows to append to iframe srcdoc.
-	 */
-	public function test_attribute_conversion_on_long_iframe_srcdocs( $iterations ) {
-		$html = '<html amp><head><meta charset="utf-8"></head><body><table>';
-
-		for ( $i = 0; $i < $iterations; $i++ ) {
-			$html .= '
-				<tr>
-				<td class="rank" style="width:2%;">1453</td>
-				<td class="text" style="width:10%;">1947</td>
-				<td class="text">Pittsburgh Ironmen</td>
-				<td class="boolean" style="width:10%;text-align:center;"></td>
-				<td class="number" style="width:10%;">1242</td>
-				<td class="number">1192</td>
-				<td class="number">1111</td>
-				<td class="number highlight">1182</td>
-				</tr>
-			';
-		}
-
-		$html .= '</table></body></html>';
-
-		$to_convert = sprintf(
-			'<amp-iframe sandbox="allow-scripts" srcdoc="%s"> </amp-iframe>',
-			htmlentities( $html )
-		);
-
-		AMP_DOM_Utils::convert_amp_bind_attributes( $to_convert );
-
-		$this->assertSame( PREG_NO_ERROR, preg_last_error(), 'Probably failed when backtrack limit was exhausted.' );
-	}
-
-	/**
-	 * Test preserving whitespace when serializing DOMDocument as HTML string.
+	 * Test preserving whitespace when serializing Dom\Document as HTML string.
 	 *
 	 * @covers \AMP_DOM_Utils::get_content_from_dom_node()
 	 * @covers \AMP_DOM_Utils::get_content_from_dom()
@@ -379,189 +294,17 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$body = " start <ul><li>First</li><li>Second</li></ul><style>pre::before { content:'⚡️'; }</style><script type=\"application/json\">\"⚡️\"</script><pre>\t* one\n\t* two\n\t* three</pre> end ";
 		$html = "<html><head><meta charset=\"utf-8\"></head><body data-foo=\"&gt;\">$body</body></html>";
 
-		$dom = AMP_DOM_Utils::get_dom( "<!DOCTYPE html>$html" );
+		$dom = Document::from_html( "<!DOCTYPE html>$html" );
 
-		$output = AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
+		$output = $dom->saveHTML( $dom->documentElement );
 		$this->assertEquals( $html, $output );
 
 		$output = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$this->assertEquals( $body, $output );
 	}
 
-	/**
-	 * Test that HEAD and BODY elements are always present.
-	 *
-	 * @covers \AMP_DOM_Utils::get_dom()
-	 */
-	public function test_ensuring_head_body() {
-		$html = '<html><body><p>Hello</p></body></html>';
-		$dom  = AMP_DOM_Utils::get_dom( $html );
-		$this->assertEquals( 'head', $dom->documentElement->firstChild->nodeName );
-		$this->assertEquals( 0, $dom->documentElement->firstChild->childNodes->length );
-		$this->assertEquals( 'body', $dom->documentElement->lastChild->nodeName );
-		$this->assertEquals( $dom->documentElement->lastChild, $dom->getElementsByTagName( 'p' )->item( 0 )->parentNode );
-
-		$html = '<html><head><title>foo</title></head></html>';
-		$dom  = AMP_DOM_Utils::get_dom( $html );
-		$this->assertEquals( 'head', $dom->documentElement->firstChild->nodeName );
-		$this->assertEquals( $dom->documentElement->firstChild, $dom->getElementsByTagName( 'title' )->item( 0 )->parentNode );
-		$this->assertEquals( 'body', $dom->documentElement->lastChild->nodeName );
-		$this->assertEquals( 0, $dom->documentElement->lastChild->childNodes->length );
-
-		$html = '<html><head><title>foo</title></head><p>no body</p></html>';
-		$dom  = AMP_DOM_Utils::get_dom( $html );
-		$this->assertEquals( 'head', $dom->documentElement->firstChild->nodeName );
-		$this->assertEquals( $dom->documentElement->firstChild, $dom->getElementsByTagName( 'title' )->item( 0 )->parentNode );
-		$p = $dom->getElementsByTagName( 'p' )->item( 0 );
-		$this->assertEquals( $dom->documentElement->lastChild, $p->parentNode );
-		$this->assertEquals( 'no body', $p->textContent );
-
-		$html = 'Hello world';
-		$dom  = AMP_DOM_Utils::get_dom( $html );
-		$this->assertEquals( 'head', $dom->documentElement->firstChild->nodeName );
-		$this->assertEquals( 0, $dom->documentElement->firstChild->childNodes->length );
-		$this->assertEquals( 'body', $dom->documentElement->lastChild->nodeName );
-		$p = $dom->getElementsByTagName( 'p' )->item( 0 );
-		$this->assertEquals( $dom->documentElement->lastChild, $p->parentNode );
-		$this->assertEquals( 'Hello world', $p->textContent );
-	}
-
-	/**
-	 * Get head node data.
-	 *
-	 * @return array Head node data.
-	 */
-	public function get_head_node_data() {
-		$dom = new DOMDocument();
-		return [
-			[
-				AMP_DOM_Utils::create_node( $dom, 'title', [] ),
-				true,
-			],
-			[
-				AMP_DOM_Utils::create_node(
-					$dom,
-					'base',
-					[ 'href' => '/' ]
-				),
-				true,
-			],
-			[
-				AMP_DOM_Utils::create_node(
-					$dom,
-					'script',
-					[ 'src' => 'http://example.com/test.js' ]
-				),
-				true,
-			],
-			[
-				AMP_DOM_Utils::create_node( $dom, 'style', [ 'media' => 'print' ] ),
-				true,
-			],
-			[
-				AMP_DOM_Utils::create_node( $dom, 'noscript', [] ),
-				true,
-			],
-			[
-				AMP_DOM_Utils::create_node(
-					$dom,
-					'link',
-					[
-						'rel'  => 'stylesheet',
-						'href' => 'https://example.com/foo.css',
-					]
-				),
-				true,
-			],
-			[
-				AMP_DOM_Utils::create_node(
-					$dom,
-					'meta',
-					[
-						'name'    => 'foo',
-						'content' => 'https://example.com/foo.css',
-					]
-				),
-				true,
-			],
-			[
-				$dom->createTextNode( " \n\t" ),
-				true,
-			],
-			[
-				$dom->createTextNode( 'no' ),
-				false,
-			],
-			[
-				$dom->createComment( 'hello world' ),
-				true,
-			],
-			[
-				$dom->createProcessingInstruction( 'test' ),
-				false,
-			],
-			[
-				$dom->createCDATASection( 'nope' ),
-				false,
-			],
-			[
-				$dom->createEntityReference( 'bad' ),
-				false,
-			],
-			[
-				$dom->createElementNS( 'http://www.w3.org/2000/svg', 'svg' ),
-				false,
-			],
-			[
-				AMP_DOM_Utils::create_node( $dom, 'span', [] ),
-				false,
-			],
-		];
-	}
-
-	/**
-	 * Test is_valid_head_node().
-	 *
-	 * @dataProvider get_head_node_data
-	 * @covers \AMP_DOM_Utils::is_valid_head_node()
-	 *
-	 * @param DOMNode $node  Node.
-	 * @param bool    $valid Expected valid.
-	 */
-	public function test_is_valid_head_node( $node, $valid ) {
-		$this->assertEquals( $valid, AMP_DOM_Utils::is_valid_head_node( $node ) );
-	}
-
-	/**
-	 * Test that invalid head nodes are moved to body.
-	 *
-	 * @covers \AMP_DOM_Utils::move_invalid_head_nodes_to_body()
-	 */
-	public function test_invalid_head_nodes() {
-
-		// Text node.
-		$html = '<html><head>text</head><body><span>end</span></body></html>';
-		$dom  = AMP_DOM_Utils::get_dom( $html );
-		$this->assertNull( $dom->getElementsByTagName( 'head' )->item( 0 )->firstChild );
-		$body_first_child = $dom->getElementsByTagName( 'body' )->item( 0 )->firstChild;
-		$this->assertInstanceOf( 'DOMElement', $body_first_child );
-		$this->assertEquals( 'text', $body_first_child->textContent );
-
-		// Valid nodes.
-		$html = '<html><head><!--foo--><title>a</title><base href="/"><meta name="foo" content="bar"><link rel="test" href="/"><style></style><noscript><img src="http://example.com/foo.png"></noscript><script></script></head><body></body></html>';
-		$dom  = AMP_DOM_Utils::get_dom( $html );
-		$this->assertEquals( 8, $dom->getElementsByTagName( 'head' )->item( 0 )->childNodes->length );
-		$this->assertNull( $dom->getElementsByTagName( 'body' )->item( 0 )->firstChild );
-
-		// Invalid nodes.
-		$html = '<html><head><?pi ?><span></span><div></div><p>hi</p><img src="https://example.com"><iframe src="/"></iframe></head><body></body></html>';
-		$dom  = AMP_DOM_Utils::get_dom( $html );
-		$this->assertNull( $dom->getElementsByTagName( 'head' )->item( 0 )->firstChild );
-		$this->assertEquals( 6, $dom->getElementsByTagName( 'body' )->item( 0 )->childNodes->length );
-	}
-
 	public function get_has_class_data() {
-		$dom = new DOMDocument();
+		$dom = new Document();
 
 		return [
 			// Element without class attribute.
@@ -592,6 +335,10 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	 *
 	 * @dataProvider get_has_class_data
 	 * @covers \AMP_DOM_Utils::has_class()
+	 *
+	 * @param DOMElement $element  Element.
+	 * @param string     $class    Class names.
+	 * @param bool       $expected Expected has class name.
 	 */
 	public function test_has_class( DOMElement $element, $class, $expected ) {
 		$actual = AMP_DOM_Utils::has_class( $element, $class );
@@ -599,7 +346,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	}
 
 	public function get_get_element_id_data() {
-		$dom = new DOMDocument();
+		$dom = new Document();
 
 		$same_element = AMP_DOM_Utils::create_node( $dom, 'div', [] );
 
@@ -630,6 +377,10 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	 *
 	 * @dataProvider get_get_element_id_data
 	 * @covers \AMP_DOM_Utils::get_element_id()
+	 *
+	 * @param DOMElement $element  Element.
+	 * @param string     $prefix   Prefix.
+	 * @param string     $expected Expected element ID.
 	 */
 	public function test_get_element_id( DOMElement $element, $prefix, $expected ) {
 		$actual = AMP_DOM_Utils::get_element_id( $element, $prefix );
@@ -637,7 +388,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	}
 
 	public function get_add_amp_action_data() {
-		$dom    = new DOMDocument();
+		$dom    = new Document();
 		$button = AMP_DOM_Utils::create_node( $dom, 'button', [] );
 		$form   = AMP_DOM_Utils::create_node( $dom, 'form', [] );
 
@@ -668,6 +419,11 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	 *
 	 * @dataProvider get_add_amp_action_data
 	 * @covers \AMP_DOM_Utils::add_amp_action()
+	 *
+	 * @param DOMElement $element  Element.
+	 * @param string     $event    Event.
+	 * @param string     $action   Action.
+	 * @param string     $expected Expected.
 	 */
 	public function test_add_amp_action( DOMElement $element, $event, $action, $expected ) {
 		AMP_DOM_Utils::add_amp_action( $element, $event, $action );
@@ -703,6 +459,10 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	 *
 	 * @dataProvider get_merge_amp_actions_data
 	 * @covers \AMP_DOM_Utils::merge_amp_actions()
+	 *
+	 * @param string $first    First action.
+	 * @param string $second   Second action.
+	 * @param string $expected Expected merged actions.
 	 */
 	public function test_merge_amp_actions( $first, $second, $expected ) {
 		$actual = AMP_DOM_Utils::merge_amp_actions( $first, $second );
@@ -710,7 +470,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	}
 
 	public function get_copy_attributes_data() {
-		$dom = new DOMDocument();
+		$dom = new Document();
 
 		return [
 			// No attributes from full to empty.
@@ -890,6 +650,11 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	 *
 	 * @dataProvider get_copy_attributes_data
 	 * @covers \AMP_DOM_Utils::copy_attributes()
+	 *
+	 * @param array      $attributes Attributes.
+	 * @param DOMElement $from       From element.
+	 * @param DOMElement $to         To element.
+	 * @param array      $expected   Expected.
 	 */
 	public function test_copy_attributes( $attributes, DOMElement $from, DOMElement $to, $expected ) {
 		AMP_DOM_Utils::copy_attributes( $attributes, $from, $to );
