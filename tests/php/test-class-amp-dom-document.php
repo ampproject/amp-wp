@@ -144,7 +144,7 @@ class Test_AMP_DOM_Document extends WP_UnitTestCase {
 	 * @covers Document::saveHTML()
 	 */
 	public function test_dom_document( $charset, $source, $expected ) {
-		$document = Document::from_html( $source );
+		$document = Document::from_html( $source, $charset );
 		$this->assertEqualMarkup( $expected, $document->saveHTML() );
 	}
 
