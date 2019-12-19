@@ -132,7 +132,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 		$this->assertArraySubset(
 			[
 				'description' => 'The AMP plugin performs better when these functions are available.',
-				'actions'     => '<p><a href="https://www.php.net/en/manual/book.curl.php" target="_blank" rel="noopener noreferrer">Learn more about these functions <span class="screen-reader-text">(opens in a new tab)</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
+				'actions'     => '<p><a href="https://www.php.net/manual/en/book.curl.php" target="_blank" rel="noopener noreferrer">Learn more about these functions <span class="screen-reader-text">(opens in a new tab)</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
 				'test'        => 'amp_curl_multi_functions',
 			],
 			$this->instance->curl_multi_functions()
