@@ -7,7 +7,6 @@
 
 namespace Amp\AmpWP\Dom;
 
-use AMP_DOM_Utils;
 use DOMComment;
 use DOMDocument;
 use DOMElement;
@@ -342,7 +341,8 @@ final class Document extends DOMDocument {
 		}
 
 		// Add the required utf-8 meta charset tag.
-		$charset = AMP_DOM_Utils::create_node( $this, 'meta', [ 'charset' => self::AMP_ENCODING ] );
+		$charset = $this->createElement( 'meta' );
+		$charset->setAttribute( 'charset', self::AMP_ENCODING );
 		$this->head->insertBefore( $charset, $this->head->firstChild );
 
 		// Do some further clean-up.
@@ -364,15 +364,9 @@ final class Document extends DOMDocument {
 
 		// Force-add http-equiv charset to make DOMDocument behave as it should.
 		// See: http://php.net/manual/en/domdocument.loadhtml.php#78243.
-		$charset = AMP_DOM_Utils::create_node(
-			$this,
-			'meta',
-			[
-				'http-equiv' => self::HTML_HTTP_EQUIV_VALUE,
-				'content'    => self::HTML_HTTP_EQUIV_CONTENT_VALUE,
-			]
-		);
-
+		$charset = $this->createElement( 'meta' );
+		$charset->setAttribute( 'http-equiv', self::HTML_HTTP_EQUIV_VALUE );
+		$charset->setAttribute( 'content', self::HTML_HTTP_EQUIV_CONTENT_VALUE );
 		$this->head->insertBefore( $charset, $this->head->firstChild );
 
 		if ( null === $node || PHP_VERSION_ID >= 70300 ) {
