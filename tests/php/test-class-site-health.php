@@ -57,25 +57,11 @@ class Test_Site_Health extends WP_UnitTestCase {
 	 * @covers \Amp\AmpWP\Admin\SiteHealth::add_tests()
 	 */
 	public function test_add_tests() {
-		$this->assertEquals(
-			[
-				'direct' => [
-					'amp_persistent_object_cache' => [
-						'label' => 'Persistent object cache',
-						'test'  => [ $this->instance, 'persistent_object_cache' ],
-					],
-					'amp_curl_multi_functions'    => [
-						'label' => 'curl_multi_* functions',
-						'test'  => [ $this->instance, 'curl_multi_functions' ],
-					],
-					'amp_icu_version'             => [
-						'label' => 'ICU version',
-						'test'  => [ $this->instance, 'icu_version' ],
-					],
-				],
-			],
-			$this->instance->add_tests( [] )
-		);
+		$tests = $this->instance->add_tests( [] );
+		$this->assertArrayHasKey( 'direct', $tests );
+		$this->assertArrayHasKey( 'amp_persistent_object_cache', $tests['direct'] );
+		$this->assertArrayHasKey( 'amp_curl_multi_functions', $tests['direct'] );
+		$this->assertArrayHasKey( 'amp_icu_version', $tests['direct'] );
 	}
 
 	/**
@@ -85,17 +71,14 @@ class Test_Site_Health extends WP_UnitTestCase {
 	 */
 	public function test_persistent_object_cache() {
 		$data = [
-			'description' => 'The AMP plugin performs at its best when persistent object cache is enabled.',
-			'actions'     => '<p><a href="https://codex.wordpress.org/Class_Reference/WP_Object_Cache#Persistent_Caching" target="_blank" rel="noopener noreferrer">Learn more about persistent object caching <span class="screen-reader-text">(opens in a new tab)</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
-			'test'        => 'amp_persistent_object_cache',
+			'test' => 'amp_persistent_object_cache',
 		];
 
 		$GLOBALS['_wp_using_ext_object_cache'] = false;
-		$this->assertEquals(
+		$this->assertArraySubset(
 			array_merge(
 				$data,
 				[
-					'label'  => 'Persistent object caching is not enabled',
 					'status' => 'recommended',
 					'badge'  => [
 						'label' => 'AMP',
@@ -107,7 +90,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 		);
 
 		$GLOBALS['_wp_using_ext_object_cache'] = true;
-		$this->assertEquals(
+		$this->assertArraySubset(
 			array_merge(
 				$data,
 				[
@@ -131,9 +114,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 	public function test_curl_multi_functions() {
 		$this->assertArraySubset(
 			[
-				'description' => 'The AMP plugin performs better when these functions are available.',
-				'actions'     => '<p><a href="https://www.php.net/manual/en/book.curl.php" target="_blank" rel="noopener noreferrer">Learn more about these functions <span class="screen-reader-text">(opens in a new tab)</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
-				'test'        => 'amp_curl_multi_functions',
+				'test' => 'amp_curl_multi_functions',
 			],
 			$this->instance->curl_multi_functions()
 		);
@@ -147,9 +128,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 	public function test_icu_version() {
 		$this->assertArraySubset(
 			[
-				'description' => 'The version of ICU can affect how the intl extension runs. The minimum recommended version of ICU is 4.6.',
-				'actions'     => '<p><a href="http://site.icu-project.org/" target="_blank" rel="noopener noreferrer">Learn more about ICU <span class="screen-reader-text">(opens in a new tab)</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
-				'test'        => 'amp_icu_version',
+				'test' => 'amp_icu_version',
 			],
 			$this->instance->icu_version()
 		);
@@ -161,33 +140,14 @@ class Test_Site_Health extends WP_UnitTestCase {
 	 * @covers \Amp\AmpWP\Admin\SiteHealth::add_debug_information()
 	 */
 	public function test_add_debug_information() {
-		$this->assertArraySubset(
-			[
-				'amp_wp' => [
-					'label'       => 'AMP',
-					'description' => 'Debugging information for the Official AMP Plugin for WordPress.',
-					'fields'      => [
-						'amp_mode_enabled'        => [
-							'label'   => 'AMP mode enabled',
-							'private' => false,
-						],
-						'amp_experiences_enabled' => [
-							'label'   => 'AMP experiences enabled',
-							'private' => false,
-						],
-						'amp_templates_enabled'   => [
-							'label'   => 'Templates enabled',
-							'private' => false,
-						],
-						'amp_serve_all_templates' => [
-							'label'   => 'Serve all templates as AMP?',
-							'private' => false,
-						],
-					],
-				],
-			],
-			$this->instance->add_debug_information( [] )
-		);
+		$debug_info = $this->instance->add_debug_information( [] );
+		$this->assertArrayHasKey( 'amp_wp', $debug_info );
+		$this->assertArrayHasKey( 'fields', $debug_info['amp_wp'] );
+		$keys = [ 'amp_mode_enabled', 'amp_experiences_enabled', 'amp_templates_enabled', 'amp_serve_all_templates' ];
+		foreach ( $keys as $key ) {
+			$this->assertArrayHasKey( $key, $debug_info['amp_wp']['fields'], "Expected key: $key" );
+			$this->assertFalse( $debug_info['amp_wp']['fields'][ $key ]['private'], "Expected private for key: $key" );
+		}
 	}
 
 	/**
