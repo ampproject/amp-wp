@@ -297,7 +297,7 @@ final class Document extends DOMDocument {
 		$source = $this->normalize_document_structure( $source );
 		$source = $this->maybe_replace_noscript_elements( $source );
 
-		$this->original_encoding = $this->detect_and_strip_encoding( $source );
+		list( $source, $this->original_encoding ) = $this->detect_and_strip_encoding( $source );
 
 		if ( self::AMP_ENCODING !== strtolower( $this->original_encoding ) ) {
 			$source = $this->adapt_encoding( $source );
@@ -727,9 +727,14 @@ final class Document extends DOMDocument {
 	 * Detect the encoding of the document.
 	 *
 	 * @param string $content Content of which to detect the encoding.
-	 * @return string|false Detected encoding of the document, or false if none.
+	 * @return array {
+	 *     Detected encoding of the document, or false if none.
+	 *
+	 *     @type string $content Potentially modified content.
+	 *     @type string|false $encoding Encoding of the content, or false if not detected.
+	 * }
 	 */
-	private function detect_and_strip_encoding( &$content ) {
+	private function detect_and_strip_encoding( $content ) {
 		$encoding = self::UNKNOWN_ENCODING;
 
 		// Check for HTML 4 http-equiv meta tags.
@@ -755,7 +760,7 @@ final class Document extends DOMDocument {
 			$content = str_replace( $charset_tag, '', $content );
 		}
 
-		return $encoding;
+		return [ $content, $encoding ];
 	}
 
 	/**
