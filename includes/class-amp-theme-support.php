@@ -1098,6 +1098,8 @@ class AMP_Theme_Support {
 		);
 
 		add_action( 'admin_bar_init', [ __CLASS__, 'init_admin_bar' ] );
+		add_filter( 'style_loader_tag', [ __CLASS__, 'filter_style_loader_tag_for_dev_mode' ], 10, 2 );
+		add_filter( 'script_loader_tag', [ __CLASS__, 'filter_script_loader_tag_for_dev_mode' ], 10, 2 );
 		add_action( 'wp_head', 'amp_add_generator_metadata', 20 );
 		add_action( 'wp_enqueue_scripts', [ __CLASS__, 'enqueue_assets' ], 0 ); // Enqueue before theme's styles.
 		add_action( 'wp_enqueue_scripts', [ __CLASS__, 'dequeue_customize_preview_scripts' ], 1000 );
@@ -1427,8 +1429,6 @@ class AMP_Theme_Support {
 	 * @since 1.0
 	 */
 	public static function init_admin_bar() {
-		add_filter( 'style_loader_tag', [ __CLASS__, 'filter_admin_bar_style_loader_tag' ], 10, 2 );
-		add_filter( 'script_loader_tag', [ __CLASS__, 'filter_admin_bar_script_loader_tag' ], 10, 2 );
 
 		// Inject the data-ampdevmode attribute into the admin bar bump style. See \WP_Admin_Bar::initialize().
 		if ( current_theme_supports( 'admin-bar' ) ) {
@@ -1551,40 +1551,53 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Add data-ampdevmode attribute to any enqueued style that depends on the admin-bar.
+	 * Determine whether a given dependency handle needs dev mode.
 	 *
-	 * @since 1.3
+	 * @since 1.5
+	 *
+	 * @param WP_Dependencies $dependencies Dependencies (wither WP_Scripts or WP_Styles).
+	 * @param string          $handle       Dependency handle (for script or style).
+	 * @return bool Whether the <script>, <link>, or <style> needs dev mode.
+	 */
+	public static function dependency_needs_dev_mode( WP_Dependencies $dependencies, $handle ) {
+		return (
+			$dependencies->get_data( $handle, 'ampdevmode' )
+			||
+			(
+			in_array( $handle, $dependencies->registered['admin-bar']->deps, true ) ?
+				self::is_exclusively_dependent( $dependencies, $handle, 'admin-bar' ) :
+				self::has_dependency( $dependencies, $handle, 'admin-bar' )
+			)
+		);
+	}
+
+	/**
+	 * Add data-ampdevmode attribute to any enqueued style that is flagged for dev mode or which depends on the admin-bar.
+	 *
+	 * @since 1.5
 	 *
 	 * @param string $tag    The link tag for the enqueued style.
 	 * @param string $handle The style's registered handle.
 	 * @return string Tag.
 	 */
-	public static function filter_admin_bar_style_loader_tag( $tag, $handle ) {
-		if (
-			in_array( $handle, wp_styles()->registered['admin-bar']->deps, true ) ?
-				self::is_exclusively_dependent( wp_styles(), $handle, 'admin-bar' ) :
-				self::has_dependency( wp_styles(), $handle, 'admin-bar' )
-		) {
+	public static function filter_style_loader_tag_for_dev_mode( $tag, $handle ) {
+		if ( self::dependency_needs_dev_mode( wp_styles(), $handle ) ) {
 			$tag = preg_replace( '/(?<=<link)(?=\s|>)/i', ' ' . AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, $tag );
 		}
 		return $tag;
 	}
 
 	/**
-	 * Add data-ampdevmode attribute to any enqueued script that depends on the admin-bar.
+	 * Add data-ampdevmode attribute to any enqueued script that is flagged for dev mode or which depends on the admin-bar.
 	 *
-	 * @since 1.3
+	 * @since 1.5
 	 *
 	 * @param string $tag    The `<script>` tag for the enqueued script.
 	 * @param string $handle The script's registered handle.
 	 * @return string Tag.
 	 */
-	public static function filter_admin_bar_script_loader_tag( $tag, $handle ) {
-		if (
-			in_array( $handle, wp_scripts()->registered['admin-bar']->deps, true ) ?
-				self::is_exclusively_dependent( wp_scripts(), $handle, 'admin-bar' ) :
-				self::has_dependency( wp_scripts(), $handle, 'admin-bar' )
-		) {
+	public static function filter_script_loader_tag_for_dev_mode( $tag, $handle ) {
+		if ( self::dependency_needs_dev_mode( wp_scripts(), $handle ) ) {
 			$tag = preg_replace( '/(?<=<script)(?=\s|>)/i', ' ' . AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, $tag );
 		}
 		return $tag;
@@ -2467,23 +2480,26 @@ class AMP_Theme_Support {
 		$asset        = require $asset_file;
 		$dependencies = $asset['dependencies'];
 		$version      = $asset['version'];
+		$handle       = 'amp-paired-browsing-client';
 
 		wp_enqueue_script(
-			'amp-paired-browsing-client',
+			$handle,
 			amp_get_asset_url( '/js/amp-paired-browsing-client.js' ),
 			$dependencies,
 			$version,
 			true
 		);
+		wp_script_add_data( $handle, 'ampdevmode', true );
+		foreach ( $dependencies as $dependency ) {
+			wp_script_add_data( $dependency, 'ampdevmode', true );
+		}
 
-		// Whitelist enqueued script for AMP dev mdoe so that it is not removed.
-		// @todo Revisit with <https://github.com/google/site-kit-wp/pull/505#discussion_r348683617>.
 		add_filter(
 			'script_loader_tag',
-			static function( $tag, $handle ) {
-				if ( is_amp_endpoint() && self::has_dependency( wp_scripts(), 'amp-paired-browsing-client', $handle ) ) {
-					$attrs = [ AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, 'async' ];
-					$tag   = preg_replace( '/(?<=<script)(?=\s|>)/i', ' ' . implode( ' ', $attrs ), $tag );
+			static function( $tag, $filtered_handle ) use ( $handle ) {
+				if ( is_amp_endpoint() && self::has_dependency( wp_scripts(), $handle, $filtered_handle ) ) {
+					// Inject async attribute into script tag.
+					$tag = preg_replace( '/(<script[^>]*)(?=\ssrc=)/i', '$1 async ', $tag );
 				}
 				return $tag;
 			},

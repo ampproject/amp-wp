@@ -794,7 +794,6 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 				[
 					'//*[ @id = "wpadminbar" ]',
 					'//*[ @id = "wpadminbar" ]//*',
-					'//style[ @id = "admin-bar-inline-css" ]',
 				]
 			),
 			$sanitizers['AMP_Dev_Mode_Sanitizer']['element_xpaths']
