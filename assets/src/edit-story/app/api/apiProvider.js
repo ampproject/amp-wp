@@ -17,7 +17,7 @@ import { useConfig } from '../';
 import Context from './context';
 
 function APIProvider( { children } ) {
-	const { api: { stories, media } } = useConfig();
+	const { api: { stories, media, fonts } } = useConfig();
 
 	const getStoryById = useCallback(
 		( storyId ) => {
@@ -87,11 +87,19 @@ function APIProvider( { children } ) {
 		},	[ media ],
 	);
 
+	const getAllFonts = useCallback(
+		( {} ) => {
+			return apiFetch( { path: fonts } )
+				.then( ( data ) => data );
+		}, [ fonts ],
+	);
+
 	const state = {
 		actions: {
 			getStoryById,
 			getMedia,
 			saveStoryById,
+			getAllFonts,
 		},
 	};
 
