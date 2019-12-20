@@ -103,6 +103,9 @@ function Movable( {
 				if ( dragStart ) {
 					dragStart.set( frame.translate );
 				}
+				// Lock ratio for diagonal directions (nw, ne, sw, se). Both
+				// `direction[]` values for diagonals are either 1 or -1. Non-diagonal
+				// directions have 0s.
 				const newKeepRatioMode = direction[ 0 ] !== 0 && direction[ 1 ] !== 0;
 				if ( keepRatioMode !== newKeepRatioMode ) {
 					setKeepRatioMode( newKeepRatioMode );
