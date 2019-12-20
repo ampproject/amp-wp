@@ -99,14 +99,6 @@ function ImageEdit( { id, src, origRatio, width, height, x, y, scale, focalX, fo
 					targets={ cropBox }
 
 					origin={ false }
-					edge={ false }
-
-					draggable={ false }
-					scalable={ false }
-					rotatable={ false }
-					warpable={ false }
-					pinchable={ false }
-
 					resizable={ true }
 					onResize={ ( { width: resizeWidth, height: resizeHeight, delta, drag } ) => {
 						const [ tx, ty ] = [ drag.beforeTranslate[ 0 ], drag.beforeTranslate[ 1 ] ];
@@ -162,14 +154,6 @@ function ImageEdit( { id, src, origRatio, width, height, x, y, scale, focalX, fo
 				targets={ croppedImage }
 
 				origin={ true }
-
-				edge={ false }
-				resizable={ false }
-				scalable={ false }
-				rotatable={ false }
-				warpable={ false }
-				pinchable={ false }
-
 				draggable={ true }
 				throttleDrag={ 0 }
 				onDrag={ ( { dist } ) => {
