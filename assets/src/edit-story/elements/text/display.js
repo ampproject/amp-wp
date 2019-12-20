@@ -24,6 +24,7 @@ import {
 	ElementWithBackgroundColor,
 	ElementWithFontColor,
 } from '../shared';
+import { maybeEnqueueFontStyle } from './util';
 
 const Element = styled.p`
 	margin: 0;
@@ -57,7 +58,7 @@ function TextDisplay( { id, content, color, backgroundColor, width, height, x, y
 		onPointerDown,
 	};
 	const {
-		state: { selectedElementIds },
+		state: { selectedElementIds, fonts },
 	} = useStory();
 	const {
 		actions: { setEditingElement, setEditingElementWithState },
@@ -77,6 +78,11 @@ function TextDisplay( { id, content, color, backgroundColor, width, height, x, y
 		setHasFocus( false );
 		return undefined;
 	}, [ isElementOnlySelection ] );
+
+	useEffect( () => {
+		maybeEnqueueFontStyle( fontFamily, fonts );
+	}, [ fontFamily, fonts ] );
+
 	const clickTime = useRef();
 	const handleMouseDown = useCallback( () => {
 		clickTime.current = window.performance.now();
