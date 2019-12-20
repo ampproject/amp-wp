@@ -76,6 +76,43 @@ InputGroup.defaultProps = {
 	postfix: '',
 };
 
+function SelectMenu( { label, options, value, onChange, postfix, disabled } ) {
+	return (
+		<Group disabled={ disabled }>
+			<Label>
+				{ label }
+			</Label>
+			<select
+				style={ { width: 100 } }
+				disabled={ disabled }
+				value={ value }
+				onChange={ ( evt ) => onChange( evt.target.value, evt ) }
+				onBlur={ ( evt ) => evt.target.form.dispatchEvent( new window.Event( 'submit' ) ) }
+			>
+				{ options && options.map( ( { name, slug } ) => (
+					<option key={ slug } value={ name }>
+						{ name }
+					</option>
+				) ) }
+			</select>
+			{ postfix }
+		</Group>
+	);
+}
+
+SelectMenu.propTypes = {
+	label: PropTypes.string.isRequired,
+	value: PropTypes.any.isRequired,
+	options: PropTypes.array.isRequired,
+	onChange: PropTypes.func.isRequired,
+	postfix: PropTypes.string,
+	disabled: PropTypes.bool,
+};
+
+SelectMenu.defaultProps = {
+	postfix: '',
+};
+
 function getCommonValue( list, property ) {
 	const first = list[ 0 ][ property ];
 	const allMatch = list.every( ( el ) => el[ property ] === first );
@@ -85,5 +122,6 @@ function getCommonValue( list, property ) {
 export {
 	InputGroup,
 	getCommonValue,
+	SelectMenu,
 };
 

@@ -11,13 +11,15 @@ import { useEffect, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { Panel, Title, InputGroup, getCommonValue } from './shared';
+import { useStory } from '../app';
+import { Panel, Title, InputGroup, getCommonValue, SelectMenu } from './shared';
 
 function FontPanel( { selectedElements, onSetProperties } ) {
 	const fontFamily = getCommonValue( selectedElements, 'fontFamily' );
 	const fontSize = getCommonValue( selectedElements, 'fontSize' );
 	const fontWeight = getCommonValue( selectedElements, 'fontWeight' );
 	const fontStyle = getCommonValue( selectedElements, 'fontStyle' );
+	const { state: { fonts } } = useStory();
 	const [ state, setState ] = useState( { fontFamily, fontStyle, fontSize, fontWeight } );
 	useEffect( () => {
 		setState( { fontFamily, fontStyle, fontSize, fontWeight } );
@@ -26,27 +28,40 @@ function FontPanel( { selectedElements, onSetProperties } ) {
 		onSetProperties( state );
 		evt.preventDefault();
 	};
+
+	const fontWeights = [
+		{ name: 'normal', slug: 'normal' },
+		{ name: 'bold', slug: 'bold' },
+		{ name: 'bolder', slug: 'bolder' },
+		{ name: 'lighter', slug: 'lighter' },
+	];
+
+	const fontStyles = [
+		{ name: 'normal', slug: 'normal' },
+		{ name: 'italic', slug: 'italic' },
+	];
+
 	return (
 		<Panel onSubmit={ handleSubmit }>
 			<Title>
 				{ 'Font' }
 			</Title>
-			<InputGroup
+			<SelectMenu
 				label="Font family"
+				options={ fonts }
 				value={ state.fontFamily }
-				isMultiple={ fontFamily === '' }
 				onChange={ ( value ) => setState( { ...state, fontFamily: value } ) }
 			/>
-			<InputGroup
+			<SelectMenu
 				label="Font style"
+				options={ fontStyles }
 				value={ state.fontStyle }
-				isMultiple={ fontStyle === '' }
 				onChange={ ( value ) => setState( { ...state, fontStyle: value } ) }
 			/>
-			<InputGroup
+			<SelectMenu
 				label="Font weight"
+				options={ fontWeights }
 				value={ state.fontWeight }
-				isMultiple={ fontWeight === '' }
 				onChange={ ( value ) => setState( { ...state, fontWeight: value } ) }
 			/>
 			<InputGroup
