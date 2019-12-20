@@ -62,7 +62,7 @@
     "@wordpress/rich-text": "3.9.0",
     "@wordpress/scripts": "5.1.0",
     "@wordpress/server-side-render": "1.5.0",
-    "@wordpress/url": "2.8.2",
+    "@wordpress/url": "2.9.0",
     "@wordpress/wordcount": "2.6.2",
     "accessible-autocomplete": "1.6.2",
     "autoprefixer": "9.7.3",
