@@ -188,25 +188,28 @@ function ImageEdit( { id, src, origRatio, width, height, x, y, scale, focalX, fo
 				} }
 
 				// Snappable
-				//QQQQQ
-				// snappable={ true }
-				// snapCenter={ true }
-				// bounds={ {
-				// 	left: elementProps.x + elementProps.width - imgProps.width,
-				// 	top: elementProps.y + elementProps.height - imgProps.height,
-				// 	right: elementProps.x + imgProps.width,
-				// 	bottom: elementProps.y + imgProps.height,
-				// } }
-				// verticalGuidelines={ [
-				// 	elementProps.x,
-				// 	elementProps.x + ( elementProps.width / 2 ),
-				// 	elementProps.x + elementProps.width,
-				// ] }
-				// horizontalGuidelines={ [
-				// 	elementProps.y,
-				// 	elementProps.y + ( elementProps.height / 2 ),
-				// 	elementProps.y + elementProps.height,
-				// ] }
+				snappable={ true }
+				snapCenter={ true }
+				// todo@: Moveable defines bounds and guidelines as the vertical and
+				// horizontal lines and doesn't work well with `rotationAngle > 0` for
+				// cropping/panning. It's possible to define a larger bounds using
+				// the expansion radius, but the UX is very poor for a rotated shape.
+				bounds={ rotationAngle === 0 ? {
+					left: elementProps.x + elementProps.width - imgProps.width,
+					top: elementProps.y + elementProps.height - imgProps.height,
+					right: elementProps.x + imgProps.width,
+					bottom: elementProps.y + imgProps.height,
+				} : {} }
+				verticalGuidelines={ rotationAngle === 0 ? [
+					elementProps.x,
+					elementProps.x + ( elementProps.width / 2 ),
+					elementProps.x + elementProps.width,
+				] : [ elementProps.x + ( elementProps.width / 2 ) ] }
+				horizontalGuidelines={ rotationAngle === 0 ? [
+					elementProps.y,
+					elementProps.y + ( elementProps.height / 2 ),
+					elementProps.y + elementProps.height,
+				] : [ elementProps.y + ( elementProps.height / 2 ) ] }
 			/>
 
 		</Element>
