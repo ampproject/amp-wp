@@ -330,6 +330,7 @@ class AMP_Story_Post_Type {
 					'api'                            => [
 						'stories' => sprintf( '/wp/v2/%s', $rest_base ),
 						'media'   => '/wp/v2/media',
+						'fonts'   => '/amp/v1/fonts',
 					],
 				],
 			]
