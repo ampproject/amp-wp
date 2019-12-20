@@ -43,7 +43,7 @@
     "@wordpress/compose": "3.9.0",
     "@wordpress/core-data": "2.9.0",
     "@wordpress/data": "4.11.0",
-    "@wordpress/date": "3.6.0",
+    "@wordpress/date": "3.7.0",
     "@wordpress/dom": "2.6.0",
     "@wordpress/dom-ready": "2.5.1",
     "@wordpress/e2e-test-utils": "4.0.0",
