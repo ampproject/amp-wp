@@ -19,6 +19,8 @@ import { getDefinitionForType } from '../../../elements';
 const getStoryMarkupFromPages = ( pages ) => {
 	const markup = pages.map( ( page ) => {
 		const { id } = page;
+		// Disable reason: Stop enforcing trailing comma to avoid it being saved to content.
+		/* eslint-disable comma-dangle */
 		return renderToString(
 			<amp-story-page id={ id }>
 				<amp-story-grid-layer template="vertical">
@@ -29,8 +31,9 @@ const getStoryMarkupFromPages = ( pages ) => {
 						return <Save key={ 'element-' + elId } { ...rest } />;
 					} ) }
 				</amp-story-grid-layer>
-			</amp-story-page>,
+			</amp-story-page>
 		);
+		/* eslint-enable comma-dangle */
 	} );
 	return markup.join();
 };
