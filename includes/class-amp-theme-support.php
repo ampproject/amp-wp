@@ -100,13 +100,6 @@ class AMP_Theme_Support {
 	const PAIRED_BROWSING_QUERY_VAR = 'amp-paired-browsing';
 
 	/**
-	 * Sanitizer classes.
-	 *
-	 * @var array
-	 */
-	protected static $sanitizer_classes = [];
-
-	/**
 	 * Embed handlers.
 	 *
 	 * @var AMP_Base_Embed_Handler[]
@@ -442,18 +435,30 @@ class AMP_Theme_Support {
 		}
 
 		self::add_hooks();
-		self::$sanitizer_classes = amp_get_content_sanitizers();
-		if ( ! $is_reader_mode ) {
-			self::$sanitizer_classes = AMP_Validation_Manager::filter_sanitizer_args( self::$sanitizer_classes );
-		}
 		self::$embed_handlers = self::register_content_embed_handlers();
-		self::$sanitizer_classes['AMP_Embed_Sanitizer']['embed_handlers'] = self::$embed_handlers;
 
-		foreach ( self::$sanitizer_classes as $sanitizer_class => $args ) {
+		// @todo It is not ideal that get_sanitizer_classes() is called here before the template is rendered and after the template is rendered.
+		foreach ( self::get_sanitizer_classes() as $sanitizer_class => $args ) {
 			if ( method_exists( $sanitizer_class, 'add_buffering_hooks' ) ) {
 				call_user_func( [ $sanitizer_class, 'add_buffering_hooks' ], $args );
 			}
 		}
+	}
+
+	/**
+	 * Get sanitizer classes.
+	 *
+	 * @see amp_get_content_sanitizers()
+	 *
+	 * @return array Mapping of sanitizer class name to constructor args array.
+	 */
+	protected static function get_sanitizer_classes() {
+		$sanitizer_classes = amp_get_content_sanitizers();
+		if ( self::READER_MODE_SLUG !== self::get_support_mode() ) {
+			$sanitizer_classes = AMP_Validation_Manager::filter_sanitizer_args( $sanitizer_classes );
+		}
+		$sanitizer_classes['AMP_Embed_Sanitizer']['embed_handlers'] = self::$embed_handlers;
+		return $sanitizer_classes;
 	}
 
 	/**
@@ -1985,7 +1990,7 @@ class AMP_Theme_Support {
 				'allow_dirty_styles'   => true,
 				'allow_dirty_scripts'  => false,
 			];
-			AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args ); // @todo Include script assets in response?
+			AMP_Content_Sanitizer::sanitize_document( $dom, self::get_sanitizer_classes(), $args ); // @todo Include script assets in response?
 			$partial = AMP_DOM_Utils::get_content_from_dom( $dom );
 		}
 		return $partial;
@@ -2095,6 +2100,8 @@ class AMP_Theme_Support {
 		$current_url = amp_get_current_url();
 		$non_amp_url = amp_remove_endpoint( $current_url );
 
+		$sanitizers = self::get_sanitizer_classes();
+
 		/*
 		 * Set response cache hash, the data values dictates whether a new hash key should be generated or not.
 		 * This is also used as the ETag.
@@ -2104,7 +2111,7 @@ class AMP_Theme_Support {
 				[
 					$args,
 					$response,
-					self::$sanitizer_classes,
+					$sanitizers,
 					self::$embed_handlers,
 					AMP__VERSION,
 				]
@@ -2268,7 +2275,7 @@ class AMP_Theme_Support {
 			$dom->documentElement->setAttribute( 'amp', '' );
 		}
 
-		$assets = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
+		$assets = AMP_Content_Sanitizer::sanitize_document( $dom, $sanitizers, $args );
 
 		// Respond early with results if performing a validate request.
 		if ( AMP_Validation_Manager::$is_validate_request ) {

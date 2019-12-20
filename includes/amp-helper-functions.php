@@ -965,7 +965,7 @@ function amp_get_content_sanitizers( $post = null ) {
 		// Ensure script localization data gets flagged for dev mode. This only applies to wp_localize_script() as
 		// inline scripts added via wp_add_inline_script() get filtered by script_loader_tag and thus will have the
 		// data-ampdevmode attribute added via AMP_Theme_Support::filter_script_loader_tag_for_dev_mode().
-		foreach ( wp_scripts()->done as $script_handle ) { // @todo Fail! This is currently being called _before_ the template is rendered, so it will always be empty.
+		foreach ( wp_scripts()->done as $script_handle ) {
 			if ( ! AMP_Theme_Support::dependency_needs_dev_mode( wp_scripts(), $script_handle ) ) {
 				continue;
 			}
@@ -976,7 +976,7 @@ function amp_get_content_sanitizers( $post = null ) {
 		}
 
 		// Ensure all inline styles added via wp_add_inline_style() get the data-ampdevmode attribute.
-		foreach ( wp_styles()->done as $style_handle ) { // @todo Fail! This is currently being called _before_ the template is rendered, so it will always be empty.
+		foreach ( wp_styles()->done as $style_handle ) {
 			if ( AMP_Theme_Support::dependency_needs_dev_mode( wp_styles(), $style_handle ) ) {
 				$dev_mode_xpaths[] = sprintf( '//style[ @id = "%s" ]', "$style_handle-inline-css" );
 			}
