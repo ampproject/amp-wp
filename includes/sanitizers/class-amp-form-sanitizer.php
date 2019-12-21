@@ -73,10 +73,10 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 					$schemeless_host = '//' . $_SERVER['HTTP_HOST'];
 					if ( '?' === $action_url[0] || '#' === $action_url[0] ) {
 						// For actions consisting of only a query or URL fragment, include the schemeless-host and the REQUEST URI of the current page.
-						$action_url = '//' . $_SERVER['HTTP_HOST'] . wp_unslash( $_SERVER['REQUEST_URI'] ) . $action_url;
+						$action_url = $schemeless_host . wp_unslash( $_SERVER['REQUEST_URI'] ) . $action_url;
 					} elseif ( '.' === $action_url[0] ) {
 						// For actions consisting of relative paths (e.g. '../'), prepend the schemeless-host and a trailing-slashed REQUEST URI.
-						$action_url = '//' . $_SERVER['HTTP_HOST'] . trailingslashit( wp_unslash( $_SERVER['REQUEST_URI'] ) ) . $action_url;
+						$action_url = $schemeless_host . trailingslashit( wp_unslash( $_SERVER['REQUEST_URI'] ) ) . $action_url;
 					} else {
 						// Otherwise, when the action URL includes an absolute path, just append it to the schemeless-host.
 						$action_url = $schemeless_host . $action_url;
