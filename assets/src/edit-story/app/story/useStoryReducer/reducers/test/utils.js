@@ -63,6 +63,16 @@ describe( 'moveArrayElement', () => {
 		const result = moveArrayElement( ABCD, 2, 1 );
 		expect( result ).toStrictEqual( [ 'A', 'C', 'B', 'D' ] );
 	} );
+
+	it( 'should not allow to move element outside of range', () => {
+		// Move C from being 3rd (position 2) to being last (position 3+)
+		const firstResult = moveArrayElement( ABCD, 2, 100 );
+		expect( firstResult ).toStrictEqual( [ 'A', 'B', 'D', 'C' ] );
+
+		// Move C from being 3rd (position 2) to being first (position 0-)
+		const secondResult = moveArrayElement( ABCD, 2, -100 );
+		expect( secondResult ).toStrictEqual( [ 'C', 'A', 'B', 'D' ] );
+	} );
 } );
 
 describe( 'getAbsolutePosition', () => {
