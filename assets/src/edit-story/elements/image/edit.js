@@ -7,15 +7,16 @@ import styled from 'styled-components';
 /**
  * WordPress dependencies
  */
-import { useEffect, useRef, useState } from '@wordpress/element';
+import { useCallback, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { ElementWithPosition, ElementWithSize, ElementWithRotation, getBox } from '../shared';
 import { useStory } from '../../app';
-import Movable from '../../components/movable';
-import { getFocalFromOffset, getImgProps, ImageWithScale } from './util';
+import EditPanMovable from './editPanMovable';
+import EditCropMovable from './editCropMovable';
+import { getImgProps, ImageWithScale } from './util';
 
 const Element = styled.div`
 	${ ElementWithPosition }
@@ -59,30 +60,12 @@ function ImageEdit( { id, src, origRatio, width, height, x, y, scale, focalX, fo
 	const [ cropBox, setCropBox ] = useState( null );
 
 	const { actions: { setPropertiesById } } = useStory();
+	const setProperties = useCallback(
+		( props ) => setPropertiesById( id, props ),
+		[ id, setPropertiesById ] );
 
 	const elementProps = getBox( { x, y, width, height, rotationAngle, isFullbleed } );
 	const imgProps = getImgProps( elementProps.width, elementProps.height, scale, focalX, focalY, origRatio );
-
-	const resizeMoveableRef = useRef();
-	const panMoveableRef = useRef();
-	const translateRef = useRef( [ 0, 0 ] );
-	const cropRef = useRef( [ 0, 0, 0, 0 ] );
-
-	const updatePan = () => {
-		const [ tx, ty ] = translateRef.current;
-		fullImage.style.transform = `translate(${ tx }px, ${ ty }px)`;
-		croppedImage.style.transform = `translate(${ tx }px, ${ ty }px)`;
-	};
-
-	// Refresh moveables to ensure that the selection rect is always correct.
-	useEffect( () => {
-		if ( resizeMoveableRef.current ) {
-			resizeMoveableRef.current.updateRect();
-		}
-		if ( panMoveableRef.current ) {
-			panMoveableRef.current.updateRect();
-		}
-	} );
 
 	return (
 		<Element { ...elementProps }>
@@ -91,111 +74,31 @@ function ImageEdit( { id, src, origRatio, width, height, x, y, scale, focalX, fo
 				<CropImg ref={ setCroppedImage } draggable={ false } src={ src } { ...imgProps } />
 			</CropBox>
 
-			{ /* Resizable moveable for cropping */ }
-			{ ! isFullbleed && (
-				<Movable
-					ref={ resizeMoveableRef }
-					className="crop-movable"
-					targets={ cropBox }
-
-					origin={ false }
-					resizable={ true }
-					onResize={ ( { width: resizeWidth, height: resizeHeight, delta, drag } ) => {
-						const [ tx, ty ] = [ drag.beforeTranslate[ 0 ], drag.beforeTranslate[ 1 ] ];
-						cropBox.style.transform = `translate(${ tx }px, ${ ty }px)`;
-						croppedImage.style.transform = `translate(${ -tx }px, ${ -ty }px)`;
-						if ( delta[ 0 ] ) {
-							cropBox.style.width = `${ resizeWidth }px`;
-						}
-						if ( delta[ 1 ] ) {
-							cropBox.style.height = `${ resizeHeight }px`;
-						}
-						cropRef.current = [ tx, ty, resizeWidth, resizeHeight ];
-					} }
-					onResizeEnd={ () => {
-						cropBox.style.transform = '';
-						croppedImage.style.transform = '';
-						cropBox.style.width = '';
-						cropBox.style.height = '';
-						const [ tx, ty, resizeWidth, resizeHeight ] = cropRef.current;
-						cropRef.current = [ 0, 0 ];
-						const { offsetX, offsetY, width: imgWidth, height: imgHeight } = imgProps;
-						const resizeScale = Math.min( imgWidth / resizeWidth, imgHeight / resizeHeight ) * 100;
-						const resizeFocalX = getFocalFromOffset( resizeWidth, imgWidth, offsetX + tx );
-						const resizeFocalY = getFocalFromOffset( resizeHeight, imgHeight, offsetY + ty );
-						setPropertiesById( id, {
-							x: elementProps.x + tx,
-							y: elementProps.y + ty,
-							keepRatio: false,
-							width: resizeWidth,
-							height: resizeHeight,
-							scale: resizeScale,
-							focalX: resizeFocalX,
-							focalY: resizeFocalY,
-						} );
-					} }
-
-					snappable={ true }
-					// todo@: it looks like resizing bounds are not supported.
-					verticalGuidelines={ [
-						elementProps.x - imgProps.offsetX,
-						elementProps.x - imgProps.offsetX + imgProps.width,
-					] }
-					horizontalGuidelines={ [
-						elementProps.y - imgProps.offsetY,
-						elementProps.y - imgProps.offsetY + imgProps.height,
-					] }
+			{ ! isFullbleed && cropBox && croppedImage && (
+				<EditCropMovable
+					setProperties={ setProperties }
+					cropBox={ cropBox }
+					croppedImage={ croppedImage }
+					{ ...elementProps }
+					offsetX={ imgProps.offsetX }
+					offsetY={ imgProps.offsetY }
+					imgWidth={ imgProps.width }
+					imgHeight={ imgProps.height }
 				/>
 			) }
 
-			{ /* Draggable moveable for panning */ }
-			<Movable
-				ref={ panMoveableRef }
-				targets={ croppedImage }
-
-				origin={ true }
-				draggable={ true }
-				throttleDrag={ 0 }
-				onDrag={ ( { dist } ) => {
-					translateRef.current = dist;
-					updatePan();
-				} }
-				onDragEnd={ () => {
-					const [ tx, ty ] = translateRef.current;
-					translateRef.current = [ 0, 0 ];
-					const { offsetX, offsetY, width: imgWidth, height: imgHeight } = imgProps;
-					setPropertiesById( id, {
-						focalX: getFocalFromOffset( elementProps.width, imgWidth, offsetX - tx ),
-						focalY: getFocalFromOffset( elementProps.height, imgHeight, offsetY - ty ),
-					} );
-					updatePan();
-				} }
-
-				// Snappable
-				snappable={ true }
-				snapCenter={ true }
-				// todo@: Moveable defines bounds and guidelines as the vertical and
-				// horizontal lines and doesn't work well with `rotationAngle > 0` for
-				// cropping/panning. It's possible to define a larger bounds using
-				// the expansion radius, but the UX is very poor for a rotated shape.
-				bounds={ rotationAngle === 0 ? {
-					left: elementProps.x + elementProps.width - imgProps.width,
-					top: elementProps.y + elementProps.height - imgProps.height,
-					right: elementProps.x + imgProps.width,
-					bottom: elementProps.y + imgProps.height,
-				} : {} }
-				verticalGuidelines={ rotationAngle === 0 ? [
-					elementProps.x,
-					elementProps.x + ( elementProps.width / 2 ),
-					elementProps.x + elementProps.width,
-				] : [ elementProps.x + ( elementProps.width / 2 ) ] }
-				horizontalGuidelines={ rotationAngle === 0 ? [
-					elementProps.y,
-					elementProps.y + ( elementProps.height / 2 ),
-					elementProps.y + elementProps.height,
-				] : [ elementProps.y + ( elementProps.height / 2 ) ] }
-			/>
-
+			{ fullImage && croppedImage && (
+				<EditPanMovable
+					setProperties={ setProperties }
+					fullImage={ fullImage }
+					croppedImage={ croppedImage }
+					{ ...elementProps }
+					offsetX={ imgProps.offsetX }
+					offsetY={ imgProps.offsetY }
+					imgWidth={ imgProps.width }
+					imgHeight={ imgProps.height }
+				/>
+			) }
 		</Element>
 	);
 }
