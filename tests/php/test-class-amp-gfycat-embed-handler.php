@@ -32,7 +32,7 @@ class AMP_Gfycat_Embed_Handler_Test extends WP_UnitTestCase {
 				if ( false === strpos( $url, 'tautwhoppingcougar' ) ) {
 					return $pre;
 				}
-				return '<iframe src=\'https://gfycat.com/ifr/tautwhoppingcougar\' frameborder=\'0\' scrolling=\'no\' width=\'500\' height=\'281.25\'  allowfullscreen></iframe>';
+				return '<iframe src=\'https://gfycat.com/ifr/tautwhoppingcougar\' frameborder=\'0\' scrolling=\'no\' width=\'100\' height=\'100\'  allowfullscreen></iframe>';
 			},
 			10,
 			2
