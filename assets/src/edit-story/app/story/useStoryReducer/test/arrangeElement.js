@@ -80,6 +80,30 @@ describe( 'arrangeElement', () => {
 		] );
 	} );
 
+	it( 'should only allow element in positions inside the bounds', () => {
+		const { restore, arrangeElement } = setupReducer();
+
+		restore( getInitialState() );
+
+		// Try to move element from 2nd position before the start.
+		const firstResult = arrangeElement( { elementId: '234', position: -100 } );
+		expect( getElementIdsFromCurrentPage( firstResult ) ).toStrictEqual( [
+			'234',
+			'123',
+			'345',
+			'456',
+		] );
+
+		// Try to move element from 2nd position after the end.
+		const secondResult = arrangeElement( { elementId: '234', position: 100 } );
+		expect( getElementIdsFromCurrentPage( secondResult ) ).toStrictEqual( [
+			'123',
+			'345',
+			'456',
+			'234',
+		] );
+	} );
+
 	describe( 'when there is a background element', () => {
 		it( 'should not be able to move background element at all', () => {
 			const { restore, arrangeElement } = setupReducer();
