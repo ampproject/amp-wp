@@ -45,6 +45,12 @@ function arrangeElement( state, { elementId, position } ) {
 	const pageIndex = state.pages.findIndex( ( { id } ) => id === state.current );
 
 	const page = state.pages[ pageIndex ];
+
+	// Abort if there's less than two elements (nothing to rearrange)
+	if ( page.elements.length < 2 ) {
+		return state;
+	}
+
 	const currentPosition = page.elements.findIndex( ( { id } ) => id === idToArrange );
 
 	if ( currentPosition === -1 || page.backgroundElementId === idToArrange ) {
