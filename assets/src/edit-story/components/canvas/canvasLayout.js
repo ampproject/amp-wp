@@ -23,9 +23,9 @@ const Background = styled.div`
 
 	display: grid;
 	grid:
-    ".   meta       .        ." 1fr
-    ".   page       addpage  ." ${ PAGE_HEIGHT }px
-    ".   carrousel  .        ." 1fr
+    "meta  meta       meta     ." 1fr
+    ".     page       addpage  ." ${ PAGE_HEIGHT }px
+    ".     carrousel  .        ." 1fr
     / 1fr ${ PAGE_WIDTH }px 1fr ${ CENTRAL_RIGHT_PADDING }px;
 `;
 

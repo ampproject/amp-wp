@@ -20,7 +20,7 @@ const Space = styled.div`
 
 const Label = styled.span`
 	margin-right: 6px;
-	font-size: 11px;
+	font-size: 12px;
 	text-transform: uppercase;
 `;
 
