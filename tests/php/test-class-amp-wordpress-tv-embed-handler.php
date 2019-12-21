@@ -38,6 +38,10 @@ class Test_AMP_WordPress_TV_Embed_Handler extends WP_UnitTestCase {
 	 * @return array Response data.
 	 */
 	public function mock_http_request( $preempt, $r, $url ) {
+		if ( in_array( 'external-http', $_SERVER['argv'], true ) ) {
+			return $preempt;
+		}
+
 		if ( false === strpos( $url, 'wordpress.tv' ) ) {
 			return $preempt;
 		}
