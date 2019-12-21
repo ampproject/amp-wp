@@ -18,7 +18,7 @@ class AMP_Crowdsignal_Embed_Handler_Test extends WP_UnitTestCase {
 	 * @return array
 	 */
 	public function get_conversion_data() {
-		$poll_response   = [
+		$poll_response = [
 			'type'          => 'rich',
 			'version'       => '1.0',
 			'provider_name' => 'Crowdsignal',
@@ -26,6 +26,9 @@ class AMP_Crowdsignal_Embed_Handler_Test extends WP_UnitTestCase {
 			'title'         => 'Which design do you prefer?',
 			'html'          => '<script type="text/javascript" charset="utf-8" src="https://secure.polldaddy.com/p/7012505.js"></script><noscript><iframe title="Which design do you prefer?" src="https://poll.fm/7012505/embed" frameborder="0" class="cs-iframe-embed"></iframe></noscript>', // phpcs:ignore
 		];
+
+		$poll_response['html'] = $this->adapt_iframe_title( $poll_response['html'] );
+
 		$survey_response = [
 			'type'          => 'rich',
 			'version'       => '1.0',
@@ -106,6 +109,17 @@ class AMP_Crowdsignal_Embed_Handler_Test extends WP_UnitTestCase {
 		$embed->register_embed();
 		$filtered_content = apply_filters( 'the_content', $url );
 
+		$expected = $this->adapt_iframe_title( $expected );
+
 		$this->assertEquals( trim( $expected ), trim( $filtered_content ) );
+	}
+
+	private function adapt_iframe_title( $html ) {
+		// Prior to 5.2, there was no 'title' attribute on an iframe.
+		if ( version_compare( get_bloginfo( 'version' ), '5.2', '<' ) ) {
+			$html = preg_replace( '/(<iframe.+)(\stitle=".+?")/', '${1}', $html );
+		}
+
+		return $html;
 	}
 }
