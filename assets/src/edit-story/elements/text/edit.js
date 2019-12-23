@@ -63,6 +63,7 @@ function TextEdit( { content, color, backgroundColor, width, height, x, y, fontF
 		y,
 		rotationAngle,
 	};
+	const editorRef = useRef( null );
 	const { actions: { setPropertiesOnSelectedElements } } = useStory();
 	const { state: { editingElementState } } = useCanvas();
 	const { offset, clearContent } = editingElementState || {};
@@ -112,21 +113,26 @@ function TextEdit( { content, color, backgroundColor, width, height, x, y, fontF
 	}, [ setPropertiesOnSelectedElements ] );
 
 	// Make sure to allow the user to click in the text box while working on the text.
-	const onClick = ( evt ) => evt.stopPropagation();
+	const onClick = ( evt ) => {
+		const editor = editorRef.current;
+		if ( ! editor.editorContainer.contains( evt.target ) ) {
+			editor.focus();
+		}
+		evt.stopPropagation();
+	};
 
 	// Handle basic key commands such as bold, italic and underscore.
 	const handleKeyCommand = getHandleKeyCommand( setEditorState );
 
 	// Set focus when initially rendered
-	const editor = useRef( null );
 	useLayoutEffect( () => {
-		editor.current.focus();
+		editorRef.current.focus();
 	}, [] );
 
 	return (
 		<Element { ...props } onClick={ onClick }>
 			<Editor
-				ref={ editor }
+				ref={ editorRef }
 				onChange={ updateEditorState }
 				editorState={ editorState }
 				handleKeyCommand={ handleKeyCommand }
