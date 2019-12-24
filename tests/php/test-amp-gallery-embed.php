@@ -30,7 +30,7 @@ class AMP_Gallery_Embed_Test extends WP_UnitTestCase {
 	 * @return array[]
 	 */
 	public function get_conversion_data() {
-		$amp_carousel_caption = '<div class="amp-wp-gallery-caption"><span>' . self::CAPTION_TEXT . '</span></div>';
+		$amp_carousel_caption = '<span class="amp-wp-gallery-caption"><span>' . self::CAPTION_TEXT . '</span></span>';
 
 		return [
 			'shortcode_with_invalid_id'               => [
@@ -39,38 +39,38 @@ class AMP_Gallery_Embed_Test extends WP_UnitTestCase {
 			],
 			'shortcode_with_valid_id'                 => [
 				'[gallery ids={{id1}}]',
-				'<amp-carousel width="50" height="50" type="slides" layout="responsive"><div class="slide"><amp-img src="{{file1}}.jpg" width="50" height="50" layout="fill" alt="Alt text" object-fit="cover"></amp-img>' . $amp_carousel_caption . '</div></amp-carousel>',
+				'<amp-carousel width="50" height="50" type="slides" layout="responsive"><span class="slide"><img src="{{file1}}.jpg" width="50" height="50" layout="fill" alt="Alt text" object-fit="cover">' . $amp_carousel_caption . '</span></amp-carousel>',
 			],
 			'shortcode_with_multiple_ids'             => [
 				'[gallery ids={{id1}},{{id2}},{{id3}}]',
 				'<amp-carousel width="600" height="450" type="slides" layout="responsive">' .
-					'<div class="slide"><amp-img src="{{file1}}.jpg" width="50" height="50" layout="fill" alt="Alt text" object-fit="cover"></amp-img>' . $amp_carousel_caption . '</div>' .
-					'<div class="slide"><amp-img src="{{file2}}.jpg" width="600" height="450" layout="fill" alt="Alt text" srcset="{{file2}}.jpg 640w, {{file2}}-300x225.jpg 300w" object-fit="cover"></amp-img></div>' .
-					'<div class="slide"><amp-img src="{{file3}}.jpg" width="100" height="100" layout="fill" alt="Alt text" object-fit="cover"></amp-img></div>' .
+					'<span class="slide"><img src="{{file1}}.jpg" width="50" height="50" layout="fill" alt="Alt text" object-fit="cover">' . $amp_carousel_caption . '</span>' .
+					'<span class="slide"><img src="{{file2}}.jpg" width="600" height="450" layout="fill" alt="Alt text" srcset="{{file2}}.jpg 640w, {{file2}}-300x225.jpg 300w" object-fit="cover"></span>' .
+					'<span class="slide"><img src="{{file3}}.jpg" width="100" height="100" layout="fill" alt="Alt text" object-fit="cover"></span>' .
 				'</amp-carousel>',
 			],
 			'shortcode_linking_to_file'               => [
 				'[gallery link="file" ids={{id1}},{{id2}},{{id3}}]',
 				'<amp-carousel width="600" height="450" type="slides" layout="responsive">' .
-					'<div class="slide"><a href="{{file1}}.jpg"><amp-img src="{{file1}}.jpg" width="50" height="50" layout="fill" alt="Alt text" object-fit="cover"></amp-img></a>' . $amp_carousel_caption . '</div>' .
-					'<div class="slide"><a href="{{file2}}.jpg"><amp-img src="{{file2}}.jpg" width="600" height="450" layout="fill" alt="Alt text" srcset="{{file2}}.jpg 640w, {{file2}}-300x225.jpg 300w" object-fit="cover"></amp-img></a></div>' .
-					'<div class="slide"><a href="{{file3}}.jpg"><amp-img src="{{file3}}.jpg" width="100" height="100" layout="fill" alt="Alt text" object-fit="cover"></amp-img></a></div>' .
+					'<span class="slide"><a href="{{file1}}.jpg"><img src="{{file1}}.jpg" width="50" height="50" layout="fill" alt="Alt text" object-fit="cover"></a>' . $amp_carousel_caption . '</span>' .
+					'<span class="slide"><a href="{{file2}}.jpg"><img src="{{file2}}.jpg" width="600" height="450" layout="fill" alt="Alt text" srcset="{{file2}}.jpg 640w, {{file2}}-300x225.jpg 300w" object-fit="cover"></a></span>' .
+					'<span class="slide"><a href="{{file3}}.jpg"><img src="{{file3}}.jpg" width="100" height="100" layout="fill" alt="Alt text" object-fit="cover"></a></span>' .
 				'</amp-carousel>',
 			],
 			'shortcode_with_carousel'                 => [
 				'[gallery amp-lightbox=false amp-carousel=true ids={{id1}},{{id2}},{{id3}}]',
 				'<amp-carousel width="600" height="450" type="slides" layout="responsive">' .
-					'<div class="slide"><amp-img src="{{file1}}.jpg" width="50" height="50" layout="fill" alt="Alt text" object-fit="cover"></amp-img>' . $amp_carousel_caption . '</div>' .
-					'<div class="slide"><amp-img src="{{file2}}.jpg" width="600" height="450" layout="fill" alt="Alt text" srcset="{{file2}}.jpg 640w, {{file2}}-300x225.jpg 300w" object-fit="cover"></amp-img></div>' .
-					'<div class="slide"><amp-img src="{{file3}}.jpg" width="100" height="100" layout="fill" alt="Alt text" object-fit="cover"></amp-img></div>' .
+					'<span class="slide"><img src="{{file1}}.jpg" width="50" height="50" layout="fill" alt="Alt text" object-fit="cover">' . $amp_carousel_caption . '</span>' .
+					'<span class="slide"><img src="{{file2}}.jpg" width="600" height="450" layout="fill" alt="Alt text" srcset="{{file2}}.jpg 640w, {{file2}}-300x225.jpg 300w" object-fit="cover"></span>' .
+					'<span class="slide"><img src="{{file3}}.jpg" width="100" height="100" layout="fill" alt="Alt text" object-fit="cover"></span>' .
 				'</amp-carousel>',
 			],
 			'shortcode_with_carousel_linking_to_file' => [
 				'[gallery amp-lightbox=false amp-carousel=true link="file" ids={{id1}},{{id2}},{{id3}}]',
 				'<amp-carousel width="600" height="450" type="slides" layout="responsive">' .
-					'<div class="slide"><a href="{{file1}}.jpg"><amp-img src="{{file1}}.jpg" width="50" height="50" layout="fill" alt="Alt text" object-fit="cover"></amp-img></a>' . $amp_carousel_caption . '</div>' .
-					'<div class="slide"><a href="{{file2}}.jpg"><amp-img src="{{file2}}.jpg" width="600" height="450" layout="fill" alt="Alt text" srcset="{{file2}}.jpg 640w, {{file2}}-300x225.jpg 300w" object-fit="cover"></amp-img></a></div>' .
-					'<div class="slide"><a href="{{file3}}.jpg"><amp-img src="{{file3}}.jpg" width="100" height="100" layout="fill" alt="Alt text" object-fit="cover"></amp-img></a></div>' .
+					'<span class="slide"><a href="{{file1}}.jpg"><img src="{{file1}}.jpg" width="50" height="50" layout="fill" alt="Alt text" object-fit="cover"></a>' . $amp_carousel_caption . '</span>' .
+					'<span class="slide"><a href="{{file2}}.jpg"><img src="{{file2}}.jpg" width="600" height="450" layout="fill" alt="Alt text" srcset="{{file2}}.jpg 640w, {{file2}}-300x225.jpg 300w" object-fit="cover"></a></span>' .
+					'<span class="slide"><a href="{{file3}}.jpg"><img src="{{file3}}.jpg" width="100" height="100" layout="fill" alt="Alt text" object-fit="cover"></a></span>' .
 				'</amp-carousel>',
 			],
 			'shortcode_with_lightbox'                 => [
@@ -108,17 +108,17 @@ class AMP_Gallery_Embed_Test extends WP_UnitTestCase {
 			'shortcode_with_lightbox_and_carousel'    => [
 				'[gallery amp-lightbox=true amp-carousel=true ids={{id1}},{{id2}},{{id3}}]',
 				'<amp-carousel width="600" height="450" type="slides" layout="responsive">' .
-					'<div class="slide"><amp-img src="{{file1}}.jpg" width="50" height="50" layout="fill" alt="Alt text" lightbox="" object-fit="cover"></amp-img>' . $amp_carousel_caption . '</div>' .
-					'<div class="slide"><amp-img src="{{file2}}.jpg" width="600" height="450" layout="fill" alt="Alt text" srcset="{{file2}}.jpg 640w, {{file2}}-300x225.jpg 300w" lightbox="" object-fit="cover"></amp-img></div>' .
-					'<div class="slide"><amp-img src="{{file3}}.jpg" width="100" height="100" layout="fill" alt="Alt text" lightbox="" object-fit="cover"></amp-img></div>' .
+					'<span class="slide"><img src="{{file1}}.jpg" width="50" height="50" layout="fill" alt="Alt text" lightbox="" object-fit="cover">' . $amp_carousel_caption . '</span>' .
+					'<span class="slide"><img src="{{file2}}.jpg" width="600" height="450" layout="fill" alt="Alt text" srcset="{{file2}}.jpg 640w, {{file2}}-300x225.jpg 300w" lightbox="" object-fit="cover"></span>' .
+					'<span class="slide"><img src="{{file3}}.jpg" width="100" height="100" layout="fill" alt="Alt text" lightbox="" object-fit="cover"></span>' .
 				'</amp-carousel>',
 			],
 			'shortcode_with_lightbox_and_carousel_linking_to_file' => [
 				'[gallery amp-lightbox=true amp-carousel=true link="file" ids={{id1}},{{id2}},{{id3}}]',
 				'<amp-carousel width="600" height="450" type="slides" layout="responsive">' .
-					'<div class="slide"><amp-img src="{{file1}}.jpg" width="50" height="50" layout="fill" alt="Alt text" lightbox="" object-fit="cover"></amp-img>' . $amp_carousel_caption . '</div>' .
-					'<div class="slide"><amp-img src="{{file2}}.jpg" width="600" height="450" layout="fill" alt="Alt text" srcset="{{file2}}.jpg 640w, {{file2}}-300x225.jpg 300w" lightbox="" object-fit="cover"></amp-img></div>' .
-					'<div class="slide"><amp-img src="{{file3}}.jpg" width="100" height="100" layout="fill" alt="Alt text" lightbox="" object-fit="cover"></amp-img></div>' .
+					'<span class="slide"><img src="{{file1}}.jpg" width="50" height="50" layout="fill" alt="Alt text" lightbox="" object-fit="cover">' . $amp_carousel_caption . '</span>' .
+					'<span class="slide"><img src="{{file2}}.jpg" width="600" height="450" layout="fill" alt="Alt text" srcset="{{file2}}.jpg 640w, {{file2}}-300x225.jpg 300w" lightbox="" object-fit="cover"></span>' .
+					'<span class="slide"><img src="{{file3}}.jpg" width="100" height="100" layout="fill" alt="Alt text" lightbox="" object-fit="cover"></span>' .
 				'</amp-carousel>',
 			],
 		];
