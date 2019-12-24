@@ -41,6 +41,9 @@ function Element( {
 		return (
 			<Wrapper
 				ref={ element }
+				onMouseDown={ ( evt ) => {
+					evt.stopPropagation();
+				} }
 			>
 				<Edit { ...props } />
 			</Wrapper>
@@ -54,10 +57,11 @@ function Element( {
 		>
 			<Display
 				{ ...props }
-				onPointerDown={ ( evt ) => {
+				onMouseDown={ ( evt ) => {
 					if ( ! isSelected ) {
 						handleSelectElement( id, evt );
 					}
+					evt.stopPropagation();
 				} }
 				forwardedRef={ forwardedRef }
 			/>
