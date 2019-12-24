@@ -30,7 +30,9 @@ function MovableWithRef( { zIndex, ...moveableProps }, ref ) {
 		return null;
 	}
 	const slot = (
-		<Wrapper zIndex={ zIndex || DEFAULT_Z_INDEX }>
+		<Wrapper
+			zIndex={ zIndex || DEFAULT_Z_INDEX }
+			onMouseDown={ ( evt ) => evt.stopPropagation() }>
 			<Moveable
 				ref={ ref }
 				container={ container }

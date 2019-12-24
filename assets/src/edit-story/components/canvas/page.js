@@ -33,15 +33,15 @@ function Page() {
 	} = useStory();
 
 	const {
-		state: { editingElement },
-		actions: { setBackgroundClickHandler, setNodeForElement },
+		state: { backgroundMouseDownHandler, editingElement },
+		actions: { setBackgroundMouseDownHandler, setNodeForElement },
 	} = useCanvas();
 
 	const [ pushEvent, setPushEvent ] = useState( null );
 
 	useEffect( () => {
-		setBackgroundClickHandler( () => clearSelection() );
-	}, [ setBackgroundClickHandler, clearSelection ] );
+		setBackgroundMouseDownHandler( () => clearSelection() );
+	}, [ setBackgroundMouseDownHandler, clearSelection ] );
 
 	const handleSelectElement = useCallback( ( elId, evt ) => {
 		if ( evt.metaKey ) {
@@ -60,7 +60,7 @@ function Page() {
 	const selectedElement = selectedElements.length === 1 ? selectedElements[ 0 ] : null;
 
 	return (
-		<Background>
+		<Background onMouseDown={ backgroundMouseDownHandler }>
 			<MovableLayer>
 				{ currentPage && currentPage.elements.map( ( { id, ...rest } ) => {
 					const isSelected = Boolean( selectedElement && selectedElement.id === id );
