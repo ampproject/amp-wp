@@ -52,17 +52,16 @@ function Element( {
 
 	return (
 		<Wrapper
-			onClick={ ( evt ) => handleSelectElement( id, evt ) }
+			onMouseDown={ ( evt ) => {
+				if ( ! isSelected ) {
+					handleSelectElement( id, evt );
+				}
+				evt.stopPropagation();
+			} }
 			ref={ element }
 		>
 			<Display
 				{ ...props }
-				onMouseDown={ ( evt ) => {
-					if ( ! isSelected ) {
-						handleSelectElement( id, evt );
-					}
-					evt.stopPropagation();
-				} }
 				forwardedRef={ forwardedRef }
 			/>
 		</Wrapper>

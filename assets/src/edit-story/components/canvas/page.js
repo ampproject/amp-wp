@@ -54,7 +54,7 @@ function Page() {
 		}
 		evt.stopPropagation();
 
-		if ( 'pointerdown' === evt.type ) {
+		if ( 'mousedown' === evt.type ) {
 			evt.persist();
 			setPushEvent( evt );
 		}
@@ -63,7 +63,7 @@ function Page() {
 	const selectedElement = selectedElements.length === 1 ? selectedElements[ 0 ] : null;
 
 	return (
-		<Background onMouseDown={ backgroundMouseDownHandler }>
+		<Background>
 			<MovableLayer>
 				{ currentPage && currentPage.elements.map( ( { id, ...rest } ) => {
 					const isSelected = Boolean( selectedElement && selectedElement.id === id );
