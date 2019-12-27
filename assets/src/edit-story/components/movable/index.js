@@ -15,11 +15,13 @@ import { forwardRef, useContext, createPortal } from '@wordpress/element';
  */
 import Context from './context';
 
+const DEFAULT_Z_INDEX = 10;
+
 const Wrapper = styled.div`
   position: absolute;
   top: 0;
   left: 0;
-  zIndex: ${ ( { zIndex } ) => `${ zIndex }` };
+  z-index: ${ ( { zIndex } ) => `${ zIndex }` };
 `;
 
 function MovableWithRef( { zIndex, ...moveableProps }, ref ) {
@@ -28,7 +30,7 @@ function MovableWithRef( { zIndex, ...moveableProps }, ref ) {
 		return null;
 	}
 	const slot = (
-		<Wrapper zIndex={ zIndex }>
+		<Wrapper zIndex={ zIndex || DEFAULT_Z_INDEX }>
 			<Moveable
 				ref={ ref }
 				container={ container }
@@ -39,10 +41,14 @@ function MovableWithRef( { zIndex, ...moveableProps }, ref ) {
 	return createPortal( slot, layer );
 }
 
-const Movable = forwardRef( MovableWithRef );
-
-Movable.propTypes = {
-	zIndex: PropTypes.number.isRequired,
+MovableWithRef.propTypes = {
+	zIndex: PropTypes.number,
 };
+
+MovableWithRef.defaultProps = {
+	zIndex: DEFAULT_Z_INDEX,
+};
+
+const Movable = forwardRef( MovableWithRef );
 
 export default Movable;
