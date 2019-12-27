@@ -56,6 +56,9 @@ function EditCropMovable( {
 				cropBox.style.height = '';
 				const [ tx, ty, resizeWidth, resizeHeight ] = cropRef.current;
 				cropRef.current = [ 0, 0, 0, 0 ];
+				if (resizeWidth === 0 || resizeHeight === 0) {
+					return;
+				}
 				const resizeScale = Math.min( imgWidth / resizeWidth, imgHeight / resizeHeight ) * 100;
 				const resizeFocalX = getFocalFromOffset( resizeWidth, imgWidth, offsetX + tx );
 				const resizeFocalY = getFocalFromOffset( resizeHeight, imgHeight, offsetY + ty );
