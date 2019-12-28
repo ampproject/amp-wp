@@ -197,6 +197,13 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	protected function filter_video_dimensions( $new_attributes, $src ) {
 		if ( empty( $new_attributes['width'] ) || empty( $new_attributes['height'] ) ) {
 
+			// @todo This is not the right placement. It should perhaps even go into AMP_Core_Block_Handler as a new method specifically for fixing up the cover block.
+			if ( isset( $new_attributes['class'] ) && false !== strpos( $new_attributes['class'], 'wp-block-cover__video-background' ) ) {
+				$new_attributes['layout']     = 'fill';
+				$new_attributes['object-fit'] = 'cover';
+				return $new_attributes;
+			}
+
 			// Get the width and height from the file.
 			$path = wp_parse_url( $src, PHP_URL_PATH );
 			$ext  = pathinfo( $path, PATHINFO_EXTENSION );
