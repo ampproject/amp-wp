@@ -335,14 +335,18 @@ abstract class AMP_Base_Sanitizer {
 			}
 		}
 
-		if ( empty( $attributes['height'] ) ) {
-			unset( $attributes['width'] );
-			$attributes['height'] = self::FALLBACK_HEIGHT;
-		}
-
-		if ( empty( $attributes['width'] ) || '100%' === $attributes['width'] ) {
-			$attributes['layout'] = 'fixed-height';
-			$attributes['width']  = 'auto';
+		if ( isset( $attributes['width'], $attributes['height'] ) && '100%' === $attributes['width'] && '100%' === $attributes['height'] ) {
+			unset( $attributes['width'], $attributes['height'] );
+			$attributes['layout'] = 'fill';
+		} else {
+			if ( empty( $attributes['height'] ) ) {
+				unset( $attributes['width'] );
+				$attributes['height'] = self::FALLBACK_HEIGHT;
+			}
+			if ( empty( $attributes['width'] ) || '100%' === $attributes['width'] ) {
+				$attributes['layout'] = 'fixed-height';
+				$attributes['width']  = 'auto';
+			}
 		}
 
 		return $attributes;

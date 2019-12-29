@@ -95,6 +95,17 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 				',
 			],
 
+			'iframe_with_100_percent_width_and_height'  => [
+				'<iframe src="https://example.com/video/132886713" width="100%" height="100%"></iframe>',
+				'
+					<amp-iframe src="https://example.com/video/132886713" layout="fill" sandbox="allow-scripts allow-same-origin">
+						<noscript>
+							<iframe src="https://example.com/video/132886713" width="100%" height="100%"></iframe>
+						</noscript>
+					</amp-iframe>
+				',
+			],
+
 			'iframe_with_width_only'                    => [
 				'<iframe src="https://example.com/video/132886713" width="600"></iframe>',
 				'
@@ -472,6 +483,9 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 		}
 
 		$sanitizer = new AMP_Iframe_Sanitizer( $dom, $args );
+		$sanitizer->sanitize();
+
+		$sanitizer = new AMP_Layout_Sanitizer( $dom, $args );
 		$sanitizer->sanitize();
 
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );

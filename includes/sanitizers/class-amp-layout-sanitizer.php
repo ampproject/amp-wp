@@ -12,6 +12,7 @@
  * @since 1.5.0
  */
 class AMP_Layout_Sanitizer extends AMP_Base_Sanitizer {
+	use AMP_Noscript_Fallback;
 
 	/**
 	 * Sanitize any element that has the `layout` or `data-amp-layout` attribute.
@@ -22,6 +23,15 @@ class AMP_Layout_Sanitizer extends AMP_Base_Sanitizer {
 		$nodes = $xpath->query( '//*[ not( @layout ) and ( @data-amp-layout or @width or @height or @style ) ]' );
 
 		foreach ( $nodes as $node ) {
+			/**
+			 * Element.
+			 *
+			 * @var DOMElement $node
+			 */
+			if ( $this->is_inside_amp_noscript( $node ) ) {
+				continue;
+			}
+
 			$width  = $node->getAttribute( 'width' );
 			$height = $node->getAttribute( 'height' );
 			$style  = $node->getAttribute( 'style' );
