@@ -192,6 +192,7 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		$attributes = [
 			// The layout sanitizer will convert this to `layout` when being sanitized.
+			// The data attribute needs to be used so that the layout sanitizer will process it.
 			'data-amp-layout' => 'responsive',
 			'width'           => $node->hasAttribute( 'data-width' ) ? $node->getAttribute( 'data-width' ) : $this->DEFAULT_WIDTH,
 			'height'          => $node->hasAttribute( 'data-height' ) ? $node->getAttribute( 'data-height' ) : $this->DEFAULT_HEIGHT,

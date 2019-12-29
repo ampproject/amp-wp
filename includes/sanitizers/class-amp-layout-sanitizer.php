@@ -19,6 +19,7 @@ class AMP_Layout_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public function sanitize() {
 		$xpath = new DOMXPath( $this->dom );
+
 		// Elements with the `layout` attribute will be validated by `AMP_Tag_And_Attribute_Sanitizer`.
 		$nodes = $xpath->query( '//*[ not( @layout ) and ( @data-amp-layout or @width or @height or @style ) ]' );
 
@@ -28,6 +29,8 @@ class AMP_Layout_Sanitizer extends AMP_Base_Sanitizer {
 			 *
 			 * @var DOMElement $node
 			 */
+
+			// Layout does not apply inside of noscript.
 			if ( $this->is_inside_amp_noscript( $node ) ) {
 				continue;
 			}
@@ -43,7 +46,7 @@ class AMP_Layout_Sanitizer extends AMP_Base_Sanitizer {
 				$node->removeAttribute( 'data-amp-layout' );
 			}
 
-			if ( ! $this->attribute_empty( $style ) ) {
+			if ( ! $this->is_empty_attribute_value( $style ) ) {
 				$styles = $this->parse_style_string( $style );
 
 				/*
@@ -58,11 +61,11 @@ class AMP_Layout_Sanitizer extends AMP_Base_Sanitizer {
 						( '100%' === $styles['width'] && '100%' === $styles['height'] )
 					) ||
 					(
-						( ! $this->attribute_empty( $width ) && '100%' === $width ) &&
+						( ! $this->is_empty_attribute_value( $width ) && '100%' === $width ) &&
 						( isset( $styles['height'] ) && '100%' === $styles['height'] )
 					) ||
 					(
-						( ! $this->attribute_empty( $height ) && '100%' === $height ) &&
+						( ! $this->is_empty_attribute_value( $height ) && '100%' === $height ) &&
 						( isset( $styles['width'] ) && '100%' === $styles['width'] )
 					)
 				) {
@@ -102,7 +105,7 @@ class AMP_Layout_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @param DOMElement $node Node.
 	 */
-	private function set_layout_fill( $node ) {
+	private function set_layout_fill( DOMElement $node ) {
 		if ( $node->hasAttribute( 'width' ) && $node->hasAttribute( 'height' ) ) {
 			$node->removeAttribute( 'width' );
 			$node->removeAttribute( 'height' );

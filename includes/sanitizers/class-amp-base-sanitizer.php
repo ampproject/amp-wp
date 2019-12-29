@@ -249,13 +249,13 @@ abstract class AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Determine if an attribute is empty.
+	 * Determine if an attribute value is empty.
 	 *
-	 * @param string $attribute Attribute value.
+	 * @param string|null $value Attribute value.
 	 * @return bool True if empty, false if not.
 	 */
-	public function attribute_empty( $attribute ) {
-		return ! isset( $attribute ) || '' === $attribute;
+	public function is_empty_attribute_value( $value ) {
+		return ! isset( $value ) || '' === $value;
 	}
 
 	/**
