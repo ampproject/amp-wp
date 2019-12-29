@@ -2040,14 +2040,14 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-img src="/img1.png" width="50%" height="50"></amp-img>',
 				'',
 				[],
-				[ 'INVALID_LAYOUT_WIDTH' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_WIDTH ],
 			],
 
 			'illegal_height_attribute'                     => [
 				'<amp-img src="/img1.png" width="50" height="50%"></amp-img>',
 				'',
 				[],
-				[ 'INVALID_LAYOUT_HEIGHT' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_HEIGHT ],
 			],
 
 			'0_width_attribute'                            => [
@@ -2059,63 +2059,63 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-img src="/img1.png" width="" height="50" layout="responsive"></amp-img>',
 				'',
 				[],
-				[ 'INVALID_LAYOUT_AUTO_WIDTH' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_AUTO_WIDTH ],
 			],
 
 			'auto_height_attribute'                        => [
 				'<amp-img src="/img1.png" width="50" height="auto" layout="responsive"></amp-img>',
 				'',
 				[],
-				[ 'INVALID_LAYOUT_AUTO_HEIGHT' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_AUTO_HEIGHT ],
 			],
 
 			'no_height_fixed_layout'                       => [
 				'<amp-img src="/img1.png" width="50" height="" layout="fixed"></amp-img>',
 				'',
 				[],
-				[ 'INVALID_LAYOUT_NO_HEIGHT' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_NO_HEIGHT ],
 			],
 
 			'no_height_fixed_height_layout'                => [
 				'<amp-img src="/img1.png" width="50" height="" layout="fixed-height"></amp-img>',
 				'',
 				[],
-				[ 'INVALID_LAYOUT_NO_HEIGHT' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_NO_HEIGHT ],
 			],
 
 			'no_height_intrinsic_layout'                   => [
 				'<amp-img src="/img1.png" width="50" height="" layout="intrinsic"></amp-img>',
 				'',
 				[],
-				[ 'INVALID_LAYOUT_NO_HEIGHT' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_NO_HEIGHT ],
 			],
 
 			'no_height_responsive_layout'                  => [
 				'<amp-img src="/img1.png" width="50" height="" layout="responsive"></amp-img>',
 				'',
 				[],
-				[ 'INVALID_LAYOUT_NO_HEIGHT' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_NO_HEIGHT ],
 			],
 
 			'static_width_fixed_height_layout'             => [
 				'<amp-img src="/img1.png" width="50" height="50" layout="fixed-height"></amp-img>',
 				'',
 				[],
-				[ 'INVALID_LAYOUT_FIXED_HEIGHT' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_FIXED_HEIGHT ],
 			],
 
 			'responsive_layout_different_unit_dimensions'  => [
 				'<amp-img src="/img1.png" width="50px" height="50em" layout="responsive"></amp-img>',
 				'',
 				[],
-				[ 'INVALID_LAYOUT_UNIT_DIMENSIONS' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_UNIT_DIMENSIONS ],
 			],
 
 			'intrinsic_layout_different_unit_dimensions'   => [
 				'<amp-img src="/img1.png" width="50px" height="50em" layout="intrinsic"></amp-img>',
 				'',
 				[],
-				[ 'INVALID_LAYOUT_UNIT_DIMENSIONS' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_UNIT_DIMENSIONS ],
 			],
 
 			'responsive_layout_heights_attribute'          => [
