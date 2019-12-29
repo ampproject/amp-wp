@@ -2118,6 +2118,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_UNIT_DIMENSIONS ],
 			],
 
+			'fixed_layout_with_invalid_heights_attr'       => [
+				'<amp-img layout="fixed" alt="AMP" src="/static/inline-examples/images/amp.jpg" width="320" height="256" heights="(min-width:500px) 200px, 80%"></amp-img>',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_HEIGHTS ],
+			],
+
 			'responsive_layout_heights_attribute'          => [
 				'<amp-img src="/img1.png" width="50" height="50" heights="(min-width:500px) 200px, 80%" layout="responsive"></amp-img>',
 				null,
