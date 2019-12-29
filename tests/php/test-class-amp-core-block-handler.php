@@ -28,6 +28,35 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Tear down.
+	 */
+	public function tearDown() {
+		if ( did_action( 'add_attachment' ) ) {
+			$this->remove_added_uploads();
+		}
+		parent::tearDown();
+	}
+
+	/**
+	 * Get video attachment ID.
+	 *
+	 * @return int|WP_Error ID or error.
+	 */
+	protected function get_video_attachment_id() {
+		$temp_file = trailingslashit( get_temp_dir() ) . 'core-block-handler-test-' . wp_generate_uuid4() . '.mp4';
+		copy( DIR_TESTDATA . '/uploads/small-video.mp4', $temp_file );
+		$attachment_id = self::factory()->attachment->create_upload_object( $temp_file );
+
+		// Remove the file extension from the post_title media_handle_upload().
+		$attachment               = get_post( $attachment_id, ARRAY_A );
+		$attachment['post_title'] = str_replace( '.mp4', '', $attachment['post_title'] );
+		$attachment['post_name']  = str_replace( '-mp4', '', $attachment['post_name'] );
+		wp_update_post( wp_slash( $attachment ) );
+
+		return $attachment_id;
+	}
+
+	/**
 	 * Test register_embed().
 	 *
 	 * @covers AMP_Core_Block_Handler::register_embed()
@@ -92,7 +121,7 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 	 * @covers \AMP_Core_Block_Handler::ampify_video_block()
 	 */
 	public function test_ampify_video_block() {
-		$attachment_id = self::factory()->attachment->create_upload_object( DIR_TESTDATA . '/uploads/small-video.mp4' );
+		$attachment_id = $this->get_video_attachment_id();
 
 		$post_id = self::factory()->post->create(
 			[
@@ -120,7 +149,7 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 	 * @covers \AMP_Core_Block_Handler::ampify_cover_block()
 	 */
 	public function test_ampify_cover_block() {
-		$attachment_id = self::factory()->attachment->create_upload_object( DIR_TESTDATA . '/uploads/small-video.mp4' );
+		$attachment_id = $this->get_video_attachment_id();
 
 		$post_id = self::factory()->post->create(
 			[

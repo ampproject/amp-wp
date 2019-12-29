@@ -11,6 +11,16 @@
 class AMP_Gallery_Embed_Test extends WP_UnitTestCase {
 
 	/**
+	 * Tear down.
+	 */
+	public function tearDown() {
+		if ( did_action( 'add_attachment' ) ) {
+			$this->remove_added_uploads();
+		}
+		parent::tearDown();
+	}
+
+	/**
 	 * Mock caption text.
 	 *
 	 * @var string

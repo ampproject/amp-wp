@@ -210,7 +210,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 		// Get the width and height from the file.
 		$path = wp_parse_url( $src, PHP_URL_PATH );
 		$ext  = pathinfo( $path, PATHINFO_EXTENSION );
-		$name = sanitize_title( wp_basename( $path, ".$ext" ) );
+		$name = sanitize_title( wp_basename( $path, ".$ext" ) ); // Extension removed by media_handle_upload().
 		$args = [
 			'name'        => $name,
 			'post_type'   => 'attachment',
@@ -218,10 +218,10 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			'numberposts' => 1,
 		];
 
-		$attachment = get_posts( $args );
-
-		if ( ! empty( $attachment ) ) {
-			$meta_data = wp_get_attachment_metadata( $attachment[0]->ID );
+		$attachments = get_posts( $args );
+		if ( ! empty( $attachments ) ) {
+			$attachment = array_shift( $attachments );
+			$meta_data  = wp_get_attachment_metadata( $attachment->ID );
 			if ( empty( $new_attributes['width'] ) && ! empty( $meta_data['width'] ) && 'fixed-height' !== $layout ) {
 				$new_attributes['width'] = $meta_data['width'];
 			}
