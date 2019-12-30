@@ -2260,7 +2260,10 @@ class AMP_Theme_Support {
 		// Respond early with results if performing a validate request.
 		if ( AMP_Validation_Manager::$is_validate_request ) {
 			header( 'Content-Type: application/json; charset=utf-8' );
-			return wp_json_encode( AMP_Validation_Manager::get_validate_response_data(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
+			return wp_json_encode(
+				AMP_Validation_Manager::get_validate_response_data( $sanitization_results ),
+				JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
+			);
 		}
 
 		// Determine what the validation errors are.

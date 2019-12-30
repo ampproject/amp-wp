@@ -1650,11 +1650,22 @@ class AMP_Validation_Manager {
 	/**
 	 * Get response data for a validate request.
 	 *
+	 * @see AMP_Content_Sanitizer::sanitize_document()
+	 *
+	 * @param array $sanitization_results {
+	 *     Results of sanitizing a document, as returned by AMP_Content_Sanitizer::sanitize_document().
+	 *
+	 *     @type array                $scripts     Scripts.
+	 *     @type array                $stylesheets Stylesheets.
+	 *     @type AMP_Base_Sanitizer[] $sanitizers  Sanitizers.
+	 * }
 	 * @return array Validate response data.
 	 */
-	public static function get_validate_response_data() {
+	public static function get_validate_response_data( $sanitization_results ) {
 		$data = [
-			'results' => self::$validation_results,
+			'results'        => self::$validation_results,
+			'queried_object' => null,
+			'url'            => amp_get_current_url(),
 		];
 
 		$queried_object = get_queried_object();
