@@ -1430,7 +1430,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 					[
 						'<amp-img src="/img1.png" width="50" height="50" layout="fill"></amp-img>',
 						'<amp-img src="/img1.png" width="50" height="50" layout="fixed"></amp-img>',
-						'<amp-img src="/img1.png" width="50" height="50" layout="fixed-height"></amp-img>',
+						'<amp-img src="/img1.png" width="auto" height="50" layout="fixed-height"></amp-img>',
 						'<amp-img src="/img1.png" width="50" height="50" layout="flex-item"></amp-img>',
 						'<amp-img src="/img1.png" width="50" height="50" layout="intrinsic"></amp-img>',
 						'<amp-img src="/img1.png" width="50" height="50" layout="nodisplay"></amp-img>',
@@ -2034,6 +2034,122 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-social-share type="foo" data-param-text="Check out this article: TITLE - CANONICAL_URL"></amp-social-share>',
 				[ 'amp-social-share' ],
 				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_RELATIVE_URL ],
+			],
+
+			'illegal_width_attribute'                      => [
+				'<amp-img src="/img1.png" width="50%" height="50"></amp-img>',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_WIDTH ],
+			],
+
+			'illegal_height_attribute'                     => [
+				'<amp-img src="/img1.png" width="50" height="50%"></amp-img>',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_HEIGHT ],
+			],
+
+			'0_width_attribute'                            => [
+				'<amp-img src="/img1.png" width="0" height="50" layout="responsive"></amp-img>',
+				null,
+			],
+
+			'empty_width_attribute'                        => [
+				'<amp-img src="/img1.png" width="" height="50" layout="responsive"></amp-img>',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_AUTO_WIDTH ],
+			],
+
+			'auto_height_attribute'                        => [
+				'<amp-img src="/img1.png" width="50" height="auto" layout="responsive"></amp-img>',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_AUTO_HEIGHT ],
+			],
+
+			'no_height_fixed_layout'                       => [
+				'<amp-img src="/img1.png" width="50" height="" layout="fixed"></amp-img>',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_NO_HEIGHT ],
+			],
+
+			'no_height_fixed_height_layout'                => [
+				'<amp-img src="/img1.png" width="50" height="" layout="fixed-height"></amp-img>',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_NO_HEIGHT ],
+			],
+
+			'no_height_intrinsic_layout'                   => [
+				'<amp-img src="/img1.png" width="50" height="" layout="intrinsic"></amp-img>',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_NO_HEIGHT ],
+			],
+
+			'no_height_responsive_layout'                  => [
+				'<amp-img src="/img1.png" width="50" height="" layout="responsive"></amp-img>',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_NO_HEIGHT ],
+			],
+
+			'static_width_fixed_height_layout'             => [
+				'<amp-img src="/img1.png" width="50" height="50" layout="fixed-height"></amp-img>',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_FIXED_HEIGHT ],
+			],
+
+			'responsive_layout_different_unit_dimensions'  => [
+				'<amp-img src="/img1.png" width="50px" height="50em" layout="responsive"></amp-img>',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_UNIT_DIMENSIONS ],
+			],
+
+			'intrinsic_layout_different_unit_dimensions'   => [
+				'<amp-img src="/img1.png" width="50px" height="50em" layout="intrinsic"></amp-img>',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_UNIT_DIMENSIONS ],
+			],
+
+			'fixed_layout_with_invalid_heights_attr'       => [
+				'<amp-img layout="fixed" alt="AMP" src="/static/inline-examples/images/amp.jpg" width="320" height="256" heights="(min-width:500px) 200px, 80%"></amp-img>',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_HEIGHTS ],
+			],
+
+			'responsive_layout_heights_attribute'          => [
+				'<amp-img src="/img1.png" width="50" height="50" heights="(min-width:500px) 200px, 80%" layout="responsive"></amp-img>',
+				null,
+			],
+
+			'multiple_width_attributes'                    => [
+				'<amp-img src="/img1.png" width="50" width="40" width="30" height="50" layout="responsive"></amp-img>',
+				'<amp-img src="/img1.png" width="50" height="50" layout="responsive"></amp-img>',
+			],
+
+			'fill_layout'                                  => [
+				'<amp-img src="/img1.png" width="30" height="30" layout="fill"></amp-img>',
+				null,
+			],
+			'fill_layout_no_height'                        => [
+				'<amp-img src="/img1.png" width="30" layout="fill"></amp-img>',
+				null,
+			],
+			'fill_layout_no_width'                         => [
+				'<amp-img src="/img1.png" height="30" layout="fill"></amp-img>',
+				null,
+			],
+			'fill_layout_no_dimensions'                    => [
+				'<amp-img src="/img1.png" layout="fill"></amp-img>',
+				null,
 			],
 		];
 	}

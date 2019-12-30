@@ -28,6 +28,35 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Tear down.
+	 */
+	public function tearDown() {
+		if ( did_action( 'add_attachment' ) ) {
+			$this->remove_added_uploads();
+		}
+		parent::tearDown();
+	}
+
+	/**
+	 * Get video attachment ID.
+	 *
+	 * @return int|WP_Error ID or error.
+	 */
+	protected function get_video_attachment_id() {
+		$temp_file = trailingslashit( get_temp_dir() ) . 'core-block-handler-test-' . wp_generate_uuid4() . '.mp4';
+		copy( DIR_TESTDATA . '/uploads/small-video.mp4', $temp_file );
+		$attachment_id = self::factory()->attachment->create_upload_object( $temp_file );
+
+		// Remove the file extension from the post_title media_handle_upload().
+		$attachment               = get_post( $attachment_id, ARRAY_A );
+		$attachment['post_title'] = str_replace( '.mp4', '', $attachment['post_title'] );
+		$attachment['post_name']  = str_replace( '-mp4', '', $attachment['post_name'] );
+		wp_update_post( wp_slash( $attachment ) );
+
+		return $attachment_id;
+	}
+
+	/**
 	 * Test register_embed().
 	 *
 	 * @covers AMP_Core_Block_Handler::register_embed()
@@ -92,7 +121,7 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 	 * @covers \AMP_Core_Block_Handler::ampify_video_block()
 	 */
 	public function test_ampify_video_block() {
-		$attachment_id = self::factory()->attachment->create_upload_object( DIR_TESTDATA . '/uploads/small-video.mp4' );
+		$attachment_id = $this->get_video_attachment_id();
 
 		$post_id = self::factory()->post->create(
 			[
@@ -112,5 +141,36 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 		$content = apply_filters( 'the_content', get_post( $post_id )->post_content );
 
 		$this->assertContains( '<video width="560" height="320" ', $content );
+	}
+
+	/**
+	 * Test that cover video gets fill layout and object-fit=cover.
+	 *
+	 * @covers \AMP_Core_Block_Handler::ampify_cover_block()
+	 */
+	public function test_ampify_cover_block() {
+		$attachment_id = $this->get_video_attachment_id();
+
+		$post_id = self::factory()->post->create(
+			[
+				'post_title'   => 'Cover Video',
+				'post_content' => sprintf(
+					"<!-- wp:cover {\"url\":%s,\"id\":%s,\"backgroundType\":\"video\",\"align\":\"center\"} -->\n<div class=\"wp-block-cover aligncenter has-background-dim\"><video class=\"wp-block-cover__video-background\" autoplay muted loop src=\"%s\"></video><div class=\"wp-block-cover__inner-container\"><!-- wp:paragraph {\"align\":\"center\",\"placeholder\":\"Write title…\",\"fontSize\":\"large\"} -->\n<p class=\"has-text-align-center has-large-font-size\">Compare the video and image blocks.<br>This block is centered.</p>\n<!-- /wp:paragraph --></div></div>\n<!-- /wp:cover -->",
+					wp_json_encode( wp_get_attachment_url( $attachment_id ) ),
+					wp_json_encode( $attachment_id ),
+					esc_attr( wp_get_attachment_url( $attachment_id ) )
+				),
+			]
+		);
+
+		$handler = new AMP_Core_Block_Handler();
+		$handler->unregister_embed(); // Make sure we are on the initial clean state.
+		$handler->register_embed();
+
+		$content = apply_filters( 'the_content', get_post( $post_id )->post_content );
+
+		$this->assertContains( '<video layout="fill" object-fit="cover"', $content );
+		$this->assertNotContains( 'width=', $content );
+		$this->assertNotContains( 'height=', $content );
 	}
 }

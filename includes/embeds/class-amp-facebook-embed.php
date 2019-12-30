@@ -191,14 +191,12 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 	private function create_amp_facebook_and_replace_node( Document $dom, DOMElement $node, $embed_type ) {
 
 		$attributes = [
-			'layout' => 'responsive',
-			'width'  => $node->hasAttribute( 'data-width' ) ? $node->getAttribute( 'data-width' ) : $this->DEFAULT_WIDTH,
-			'height' => $node->hasAttribute( 'data-height' ) ? $node->getAttribute( 'data-height' ) : $this->DEFAULT_HEIGHT,
+			// The layout sanitizer will convert this to `layout` when being sanitized.
+			// The data attribute needs to be used so that the layout sanitizer will process it.
+			'data-amp-layout' => 'responsive',
+			'width'           => $node->hasAttribute( 'data-width' ) ? $node->getAttribute( 'data-width' ) : $this->DEFAULT_WIDTH,
+			'height'          => $node->hasAttribute( 'data-height' ) ? $node->getAttribute( 'data-height' ) : $this->DEFAULT_HEIGHT,
 		];
-		if ( '100%' === $attributes['width'] ) {
-			$attributes['layout'] = 'fixed-height';
-			$attributes['width']  = 'auto';
-		}
 
 		$node->removeAttribute( 'data-width' );
 		$node->removeAttribute( 'data-height' );

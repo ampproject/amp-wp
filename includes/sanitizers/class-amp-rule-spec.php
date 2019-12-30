@@ -11,15 +11,14 @@
  * Set of constants used throughout the sanitizer.
  */
 abstract class AMP_Rule_Spec {
-
-	/**
+	/*
 	 * AMP rule_spec types
 	 */
 	const ATTR_SPEC_LIST = 'attr_spec_list';
 	const TAG_SPEC       = 'tag_spec';
 	const CDATA          = 'cdata';
 
-	/**
+	/*
 	 * AMP attr_spec value check results.
 	 *
 	 * In 0.7 these changed from strings to integers to speed up comparisons.
@@ -28,7 +27,7 @@ abstract class AMP_Rule_Spec {
 	const FAIL           = 0;
 	const NOT_APPLICABLE = -1;
 
-	/**
+	/*
 	 * HTML Element Tag rule names
 	 */
 	const DISALLOWED_ANCESTOR = 'disallowed_ancestor';
@@ -37,7 +36,7 @@ abstract class AMP_Rule_Spec {
 	const DESCENDANT_TAG_LIST = 'descendant_tag_list';
 	const CHILD_TAGS          = 'child_tags';
 
-	/**
+	/*
 	 * HTML Element Attribute rule names
 	 */
 	const ALLOW_EMPTY             = 'allow_empty';
@@ -52,6 +51,19 @@ abstract class AMP_Rule_Spec {
 	const VALUE_REGEX_CASEI       = 'value_regex_casei';
 	const VALUE_PROPERTIES        = 'value_properties';
 	const VALUE_URL               = 'value_url';
+
+	/*
+	 * AMP layout types
+	 */
+	const LAYOUT_NODISPLAY    = 'nodisplay';
+	const LAYOUT_FIXED        = 'fixed';
+	const LAYOUT_FIXED_HEIGHT = 'fixed-height';
+	const LAYOUT_RESPONSIVE   = 'responsive';
+	const LAYOUT_CONTAINER    = 'container';
+	const LAYOUT_FILL         = 'fill';
+	const LAYOUT_FLEX_ITEM    = 'flex-item';
+	const LAYOUT_FLUID        = 'fluid';
+	const LAYOUT_INTRINSIC    = 'intrinsic';
 
 	/**
 	 * Attribute name for AMP dev mode.

@@ -249,16 +249,30 @@ abstract class AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Determine if an attribute value is empty.
+	 *
+	 * @param string|null $value Attribute value.
+	 * @return bool True if empty, false if not.
+	 */
+	public function is_empty_attribute_value( $value ) {
+		return ! isset( $value ) || '' === $value;
+	}
+
+	/**
 	 * Sets the layout, and possibly the 'height' and 'width' attributes.
 	 *
 	 * @param array $attributes {
 	 *      Attributes.
 	 *
+	 *      @type string     $bottom
 	 *      @type int|string $height
-	 *      @type int|string $width
-	 *      @type string     $sizes
-	 *      @type string     $class
 	 *      @type string     $layout
+	 *      @type string     $left
+	 *      @type string     $position
+	 *      @type string     $right
+	 *      @type string     $style
+	 *      @type string     $top
+	 *      @type int|string $width
 	 * }
 	 * @return array Attributes.
 	 */
@@ -312,21 +326,27 @@ abstract class AMP_Base_Sanitizer {
 				&& '100%' === $attributes['width']
 				&& '100%' === $attributes['height']
 			) {
-				unset( $attributes['style'], $attributes['width'], $attributes['height'] );
+				unset( $attributes['style'], $styles['position'], $attributes['width'], $attributes['height'] );
+				if ( ! empty( $styles ) ) {
+					$attributes['style'] = $this->reassemble_style_string( $styles );
+				}
 				$attributes['layout'] = 'fill';
-				unset( $attributes['height'], $attributes['width'] );
 				return $attributes;
 			}
 		}
 
-		if ( empty( $attributes['height'] ) ) {
-			unset( $attributes['width'] );
-			$attributes['height'] = self::FALLBACK_HEIGHT;
-		}
-
-		if ( empty( $attributes['width'] ) || '100%' === $attributes['width'] ) {
-			$attributes['layout'] = 'fixed-height';
-			$attributes['width']  = 'auto';
+		if ( isset( $attributes['width'], $attributes['height'] ) && '100%' === $attributes['width'] && '100%' === $attributes['height'] ) {
+			unset( $attributes['width'], $attributes['height'] );
+			$attributes['layout'] = 'fill';
+		} else {
+			if ( empty( $attributes['height'] ) ) {
+				unset( $attributes['width'] );
+				$attributes['height'] = self::FALLBACK_HEIGHT;
+			}
+			if ( empty( $attributes['width'] ) || '100%' === $attributes['width'] ) {
+				$attributes['layout'] = 'fixed-height';
+				$attributes['width']  = 'auto';
+			}
 		}
 
 		return $attributes;

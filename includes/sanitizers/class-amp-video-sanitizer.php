@@ -195,29 +195,38 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array Modified attributes.
 	 */
 	protected function filter_video_dimensions( $new_attributes, $src ) {
-		if ( empty( $new_attributes['width'] ) || empty( $new_attributes['height'] ) ) {
 
-			// Get the width and height from the file.
-			$path = wp_parse_url( $src, PHP_URL_PATH );
-			$ext  = pathinfo( $path, PATHINFO_EXTENSION );
-			$name = sanitize_title( wp_basename( $path, ".$ext" ) );
-			$args = [
-				'name'        => $name,
-				'post_type'   => 'attachment',
-				'post_status' => 'inherit',
-				'numberposts' => 1,
-			];
+		// Short-circuit if width and height are already defined.
+		if ( ! empty( $new_attributes['width'] ) && ! empty( $new_attributes['height'] ) ) {
+			return $new_attributes;
+		}
 
-			$attachment = get_posts( $args );
+		// Short-circuit if no width and height are required based on the layout.
+		$layout = isset( $new_attributes['layout'] ) ? $new_attributes['layout'] : null;
+		if ( in_array( $layout, [ 'fill', 'nodisplay', 'flex-item' ], true ) ) {
+			return $new_attributes;
+		}
 
-			if ( ! empty( $attachment ) ) {
-				$meta_data = wp_get_attachment_metadata( $attachment[0]->ID );
-				if ( empty( $new_attributes['width'] ) && ! empty( $meta_data['width'] ) ) {
-					$new_attributes['width'] = $meta_data['width'];
-				}
-				if ( empty( $new_attributes['height'] ) && ! empty( $meta_data['height'] ) ) {
-					$new_attributes['height'] = $meta_data['height'];
-				}
+		// Get the width and height from the file.
+		$path = wp_parse_url( $src, PHP_URL_PATH );
+		$ext  = pathinfo( $path, PATHINFO_EXTENSION );
+		$name = sanitize_title( wp_basename( $path, ".$ext" ) ); // Extension removed by media_handle_upload().
+		$args = [
+			'name'        => $name,
+			'post_type'   => 'attachment',
+			'post_status' => 'inherit',
+			'numberposts' => 1,
+		];
+
+		$attachments = get_posts( $args );
+		if ( ! empty( $attachments ) ) {
+			$attachment = array_shift( $attachments );
+			$meta_data  = wp_get_attachment_metadata( $attachment->ID );
+			if ( empty( $new_attributes['width'] ) && ! empty( $meta_data['width'] ) && 'fixed-height' !== $layout ) {
+				$new_attributes['width'] = $meta_data['width'];
+			}
+			if ( empty( $new_attributes['height'] ) && ! empty( $meta_data['height'] ) ) {
+				$new_attributes['height'] = $meta_data['height'];
 			}
 		}
 

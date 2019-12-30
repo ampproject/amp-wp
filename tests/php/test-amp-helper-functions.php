@@ -38,6 +38,10 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			}
 		}
 
+		if ( did_action( 'add_attachment' ) ) {
+			$this->remove_added_uploads();
+		}
+
 		parent::tearDown();
 	}
 
