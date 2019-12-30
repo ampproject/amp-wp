@@ -1401,7 +1401,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertRegExp( '/0 B\s*:\s*style.bard/', $comment->nodeValue );
 		$this->assertNotContains( 'style.foo2', $comment->nodeValue );
 		$this->assertContains( 'style.foo3', $comment->nodeValue );
-		$this->assertContains( 'Total included size: 32 bytes (72% of 44 total after tree shaking)', $comment->nodeValue );
+		$this->assertContains( 'Total included size: 32 bytes (65% of 49 total after tree shaking)', $comment->nodeValue );
 
 		// Test that it contains the comment with duplicate styles removed with excessive CSS.
 		list( $style, $error_codes ) = $get_sanitized_dom(
@@ -1420,10 +1420,10 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertRegExp( '/0 B\s*:\s*style.bard/', $comment->nodeValue );
 		$this->assertNotContains( 'style.foo2', $comment->nodeValue );
 		$this->assertContains( 'style.foo3', $comment->nodeValue );
-		$this->assertContains( 'Total included size: 32 bytes (72% of 44 total after tree shaking)', $comment->nodeValue );
+		$this->assertContains( 'Total included size: 32 bytes (65% of 49 total after tree shaking)', $comment->nodeValue );
 		$this->assertRegExp( '/50024 B\s*:\s*style.excessive/', $comment->nodeValue );
 		$this->assertContains( 'Total excluded size: 50,024 bytes (100% of 50,024 total after tree shaking)', $comment->nodeValue );
-		$this->assertContains( 'Total combined size: 50,056 bytes (99% of 50,068 total after tree shaking)', $comment->nodeValue );
+		$this->assertContains( 'Total combined size: 50,056 bytes (99% of 50,073 total after tree shaking)', $comment->nodeValue );
 	}
 
 	/**

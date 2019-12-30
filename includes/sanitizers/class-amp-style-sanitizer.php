@@ -1205,10 +1205,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$this->pending_stylesheets[] = array_merge(
 			[
-				'group'    => $is_keyframes ? self::STYLE_AMP_KEYFRAMES_GROUP_INDEX : self::STYLE_AMP_CUSTOM_GROUP_INDEX,
-				'node'     => $element,
-				'sources'  => $this->current_sources,
-				'priority' => $this->get_stylesheet_priority( $element ),
+				'group'         => $is_keyframes ? self::STYLE_AMP_KEYFRAMES_GROUP_INDEX : self::STYLE_AMP_CUSTOM_GROUP_INDEX,
+				'original_size' => strlen( $stylesheet ),
+				'node'          => $element,
+				'sources'       => $this->current_sources,
+				'priority'      => $this->get_stylesheet_priority( $element ),
 			],
 			wp_array_slice_assoc( $processed, [ 'stylesheet', 'imported_font_urls' ] )
 		);
@@ -1300,10 +1301,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$this->pending_stylesheets[] = array_merge(
 			[
-				'group'    => self::STYLE_AMP_CUSTOM_GROUP_INDEX,
-				'node'     => $element,
-				'sources'  => $this->current_sources, // Needed because node is removed below.
-				'priority' => $this->get_stylesheet_priority( $element ),
+				'group'         => self::STYLE_AMP_CUSTOM_GROUP_INDEX,
+				'original_size' => strlen( $stylesheet ),
+				'node'          => $element,
+				'sources'       => $this->current_sources, // Needed because node is removed below.
+				'priority'      => $this->get_stylesheet_priority( $element ),
 			],
 			wp_array_slice_assoc( $processed, [ 'stylesheet', 'imported_font_urls' ] )
 		);
@@ -2495,11 +2497,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		if ( $processed['stylesheet'] ) {
 			$this->pending_stylesheets[] = [
-				'group'      => self::STYLE_AMP_CUSTOM_GROUP_INDEX,
-				'stylesheet' => $processed['stylesheet'],
-				'node'       => $element,
-				'sources'    => $this->current_sources,
-				'priority'   => $this->get_stylesheet_priority( $style_attribute ),
+				'group'         => self::STYLE_AMP_CUSTOM_GROUP_INDEX,
+				'original_size' => strlen( $rule ),
+				'stylesheet'    => $processed['stylesheet'],
+				'node'          => $element,
+				'sources'       => $this->current_sources,
+				'priority'      => $this->get_stylesheet_priority( $style_attribute ),
 			];
 
 			if ( $element->hasAttribute( 'class' ) ) {
@@ -2994,11 +2997,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			$stylesheet_parts = [];
-			$original_size    = 0;
 			foreach ( $pending_stylesheet['stylesheet'] as $stylesheet_part ) {
 				if ( is_string( $stylesheet_part ) ) {
 					$stylesheet_parts[] = $stylesheet_part;
-					$original_size     += strlen( $stylesheet_part );
 					continue;
 				}
 
@@ -3047,7 +3048,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					}
 				}
 				$stylesheet_part = implode( ',', $selectors ) . $declaration_block;
-				$original_size  += strlen( $stylesheet_part );
 				if ( ! empty( $selectors ) ) {
 					$stylesheet_parts[] = $stylesheet_part;
 				}
@@ -3102,11 +3102,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 
-			$pending_stylesheet['stylesheet']    = implode( '', $stylesheet_parts );
-			$pending_stylesheet['original_size'] = $original_size;
-			$pending_stylesheet['included']      = null; // To be determined below.
-			$pending_stylesheet['size']          = strlen( $pending_stylesheet['stylesheet'] );
-			$pending_stylesheet['hash']          = md5( $pending_stylesheet['stylesheet'] );
+			$pending_stylesheet['stylesheet'] = implode( '', $stylesheet_parts );
+			$pending_stylesheet['included']   = null; // To be determined below.
+			$pending_stylesheet['size']       = strlen( $pending_stylesheet['stylesheet'] );
+			$pending_stylesheet['hash']       = md5( $pending_stylesheet['stylesheet'] );
 
 			// If this stylesheet is a duplicate of something that came before, mark the previous as not included automatically.
 			if ( isset( $previously_seen_stylesheet_index[ $pending_stylesheet['hash'] ] ) ) {
