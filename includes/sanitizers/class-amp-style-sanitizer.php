@@ -2526,14 +2526,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			self::STYLE_AMP_CUSTOM_GROUP_INDEX    => [
 				'source_map_comment'  => "\n\n/*# sourceURL=amp-custom.css */",
 				'cdata_spec'          => $this->style_custom_cdata_spec,
-				'pending_stylesheets' => [],
 				'included_count'      => 0,
 				'import_front_matter' => '', // Extra @import statements that are prepended when fetch fails and validation error is rejected.
 			],
 			self::STYLE_AMP_KEYFRAMES_GROUP_INDEX => [
 				'source_map_comment'  => "\n\n/*# sourceURL=amp-keyframes.css */",
 				'cdata_spec'          => $this->style_keyframes_cdata_spec,
-				'pending_stylesheets' => [],
 				'included_count'      => 0,
 				'import_front_matter' => '',
 			],
