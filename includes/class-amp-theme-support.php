@@ -2255,7 +2255,7 @@ class AMP_Theme_Support {
 			$dom->documentElement->setAttribute( 'amp', '' );
 		}
 
-		$assets = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
+		$sanitization_results = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
 
 		// Respond early with results if performing a validate request.
 		if ( AMP_Validation_Manager::$is_validate_request ) {
@@ -2277,7 +2277,7 @@ class AMP_Theme_Support {
 		$dom_serialize_start = microtime( true );
 
 		// Gather all component scripts that are used in the document and then render any not already printed.
-		$amp_scripts = $assets['scripts'];
+		$amp_scripts = $sanitization_results['scripts'];
 		foreach ( self::$embed_handlers as $embed_handler ) {
 			$amp_scripts = array_merge(
 				$amp_scripts,
