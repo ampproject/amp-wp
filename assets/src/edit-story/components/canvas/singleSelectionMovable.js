@@ -16,7 +16,7 @@ import Movable from '../movable';
 
 const ALL_HANDLES = [ 'n', 's', 'e', 'w', 'nw', 'ne', 'sw', 'se' ];
 
-function SelectionMovable( {
+function SingleSelectionMovable( {
 	selectedElement,
 	targetEl,
 	pushEvent,
@@ -148,10 +148,10 @@ function SelectionMovable( {
 	);
 }
 
-SelectionMovable.propTypes = {
+SingleSelectionMovable.propTypes = {
 	selectedElement: PropTypes.object,
 	targetEl: PropTypes.object.isRequired,
 	pushEvent: PropTypes.object,
 };
 
-export default SelectionMovable;
+export default SingleSelectionMovable;
