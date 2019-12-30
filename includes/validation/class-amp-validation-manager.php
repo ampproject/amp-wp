@@ -1685,6 +1685,28 @@ class AMP_Validation_Manager {
 				$data['queried_object']['type'] = 'post_type';
 			}
 		}
+
+		/**
+		 * Sanitizers
+		 *
+		 * @var AMP_Base_Sanitizer[] $sanitizers
+		 */
+		$sanitizers = $sanitization_results['sanitizers'];
+		foreach ( $sanitizers as $class_name => $sanitizer ) {
+			$sanitizer_data = $sanitizer->get_validate_response_data();
+
+			$conflicting_keys = array_intersect( array_keys( $sanitizer_data ), array_keys( $data ) );
+			if ( ! empty( $conflicting_keys ) ) {
+				_doing_it_wrong(
+					esc_html( "$class_name::get_validate_response_data" ),
+					esc_html( 'Method is returning array with conflicting keys: ' . implode( ', ', $conflicting_keys ) ),
+					'1.5'
+				);
+			} else {
+				$data = array_merge( $data, $sanitizer_data );
+			}
+		}
+
 		return $data;
 	}
 
