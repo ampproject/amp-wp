@@ -3063,9 +3063,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 				// Delete empty at-rules.
 				if ( '{}' === substr( $stylesheet_part, -2 ) ) {
-					$stylesheet_part_count--;
-					array_splice( $stylesheet_parts, $i, 1 );
-					$i--;
+					$stylesheet_parts[ $i ] = '';
 					continue;
 				}
 
@@ -3093,9 +3091,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 						// Splice out the parts that are empty.
 						if ( 0 === $open_braces ) {
-							array_splice( $stylesheet_parts, $i, $j - $i + 1 );
-							$stylesheet_part_count = count( $stylesheet_parts );
-							$i--;
+							$length = $j - $i + 1;
+							array_splice( $stylesheet_parts, $i, $length, array_fill( 0, $length, '' ) );
 							continue 2;
 						}
 					}
