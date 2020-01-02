@@ -3095,6 +3095,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						if ( 0 === $open_braces ) {
 							$length = $j - $i + 1;
 							array_splice( $stylesheet_parts, $i, $length, array_fill( 0, $length, '' ) );
+							$i = $j; // Jump the outer loop ahead to skip over what has been already marked as removed.
 							continue 2;
 						}
 					}
