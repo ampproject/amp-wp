@@ -1211,7 +1211,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				'sources'       => $this->current_sources,
 				'priority'      => $this->get_stylesheet_priority( $element ),
 			],
-			wp_array_slice_assoc( $processed, [ 'stylesheet', 'imported_font_urls' ] )
+			wp_array_slice_assoc( $processed, [ 'stylesheet', 'imported_font_urls', 'hash' ] )
 		);
 
 		if ( $element->hasAttribute( 'amp-custom' ) && ! $this->amp_custom_style_element ) {
@@ -1307,7 +1307,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				'sources'       => $this->current_sources, // Needed because node is removed below.
 				'priority'      => $this->get_stylesheet_priority( $element ),
 			],
-			wp_array_slice_assoc( $processed, [ 'stylesheet', 'imported_font_urls' ] )
+			wp_array_slice_assoc( $processed, [ 'stylesheet', 'imported_font_urls', 'hash' ] )
 		);
 
 		// Remove now that styles have been processed.
@@ -1399,10 +1399,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array {
 	 *    Processed stylesheet.
 	 *
-	 *    @type array $stylesheet         Stylesheet parts, where arrays are tuples for declaration blocks.
-	 *    @type array $validation_results Validation results, array containing arrays with error and sanitized keys.
-	 *    @type array $imported_font_urls Imported font stylesheet URLs.
-	 *    @type int   $priority           The priority of the stylesheet.
+	 *    @type array  $stylesheet         Stylesheet parts, where arrays are tuples for declaration blocks.
+	 *    @type string $hash               MD5 hash of the parsed stylesheet.
+	 *    @type array  $validation_results Validation results, array containing arrays with error and sanitized keys.
+	 *    @type array  $imported_font_urls Imported font stylesheet URLs.
+	 *    @type int    $priority           The priority of the stylesheet.
 	 * }
 	 */
 	private function process_stylesheet( $stylesheet, $options = [] ) {
@@ -1644,9 +1645,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array {
 	 *    Prepared stylesheet.
 	 *
-	 *    @type array $stylesheet         Stylesheet parts, where arrays are tuples for declaration blocks.
-	 *    @type array $validation_results Validation results, array containing arrays with error and sanitized keys.
-	 *    @type array $imported_font_urls Imported font stylesheet URLs.
+	 *    @type array  $stylesheet         Stylesheet parts, where arrays are tuples for declaration blocks.
+	 *    @type string $hash               MD5 hash of the parsed stylesheet.
+	 *    @type array  $validation_results Validation results, array containing arrays with error and sanitized keys.
+	 *    @type array  $imported_font_urls Imported font stylesheet URLs.
 	 * }
 	 */
 	private function prepare_stylesheet( $stylesheet_string, $options = [] ) {
@@ -1826,6 +1828,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			compact( 'stylesheet', 'validation_results' ),
 			[
 				'imported_font_urls' => $parsed_stylesheet['imported_font_urls'],
+				'hash'               => md5( wp_json_encode( $stylesheet ) ),
 			]
 		);
 	}
@@ -2506,6 +2509,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				'group'         => self::STYLE_AMP_CUSTOM_GROUP_INDEX,
 				'original_size' => strlen( $rule ),
 				'stylesheet'    => $processed['stylesheet'],
+				'hash'          => $processed['hash'],
 				'node'          => $element,
 				'sources'       => $this->current_sources,
 				'priority'      => $this->get_stylesheet_priority( $style_attribute ),
@@ -3118,10 +3122,36 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 
-			$pending_stylesheet['stylesheet'] = implode( '', $stylesheet_parts );
-			$pending_stylesheet['included']   = null; // To be determined below.
-			$pending_stylesheet['size']       = strlen( $pending_stylesheet['stylesheet'] );
-			$pending_stylesheet['hash']       = md5( $pending_stylesheet['stylesheet'] );
+			// @todo Do not implode at this point. Do it later.
+			$pending_stylesheet['stylesheet'] = implode(
+				'',
+				array_map(
+					static function ( $stylesheet_part ) {
+						if ( is_array( $stylesheet_part[1] ) ) {
+							// Construct a declaration block.
+							$selectors = array_keys( array_filter( $stylesheet_part[1] ) );
+							if ( empty( $selectors ) ) {
+								return '';
+							} else {
+								return implode( ',', $selectors ) . $stylesheet_part[2];
+							}
+						} else {
+							// Pass through parts other than declaration blocks.
+							return $stylesheet_part[1];
+						}
+					},
+					// Include the stylesheet parts that were not marked for exclusion during tree shaking.
+					array_filter(
+						$stylesheet_parts,
+						static function( $stylesheet_part ) {
+							return false !== $stylesheet_part[0];
+						}
+					)
+				)
+			);
+
+			$pending_stylesheet['included'] = null; // To be determined below.
+			$pending_stylesheet['size']     = strlen( $pending_stylesheet['stylesheet'] ); // @todo The strlen will not work if not serialized.
 
 			// If this stylesheet is a duplicate of something that came before, mark the previous as not included automatically.
 			if ( isset( $previously_seen_stylesheet_index[ $pending_stylesheet['hash'] ] ) ) {

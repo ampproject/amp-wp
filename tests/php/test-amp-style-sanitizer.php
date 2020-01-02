@@ -356,7 +356,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				[
 					'form [submit-success] b{color:green}', // The [submit-failure] selector is removed because there is no div[submit-failure].
 					'amp-live-list li .highlighted{background:yellow}',
-					'',
 					'body amp-list .portland{color:blue}',
 					'amp-script .loaded{color:brown}',
 				],
@@ -468,7 +467,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'.amp-mode-mouse{color:bisque}',
 					'.amp-mode-keyboard-active{color:burlywood}',
 					'.amp-referrer-www-google-com{color:red}',
-					'', // Because there is no <form>, <amp-carousel>, and no non-existent.
 				],
 				[],
 			],
@@ -530,7 +528,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'.amp-iso-country-us{color:oldlace}',
 					'.amp-video-eq{display:none}',
 					'#accord section[expanded]{outline:solid 1px blue}',
-					'', // Because no non-existent.
 				],
 				[],
 			],
@@ -591,7 +588,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$whitelist_sanitizer->sanitize();
 
 		$sanitized_html     = $dom->saveHTML( $dom->documentElement );
-		$actual_stylesheets = array_values( $sanitizer->get_stylesheets() );
+		$actual_stylesheets = array_values( array_filter( $sanitizer->get_stylesheets() ) );
 		$this->assertEquals( $expected_errors, $error_codes );
 		$this->assertCount( count( $expected_stylesheets ), $actual_stylesheets );
 		foreach ( $expected_stylesheets as $i => $expected_stylesheet ) {
