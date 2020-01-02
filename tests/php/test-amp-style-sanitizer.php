@@ -2233,7 +2233,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Test style element with old-school XHTML CDATA.
 	 *
-	 * @covers \AMP_Style_Sanitizer::prepare_stylesheet()
+	 * @covers \AMP_Style_Sanitizer::parse_stylesheet()
 	 */
 	public function test_style_element_cdata() {
 		$html  = '<!DOCTYPE html><html amp><head><meta charset="utf-8">';
