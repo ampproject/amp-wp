@@ -138,7 +138,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 1.0
 	 * @var array[] {
-	 *     @type array              $stylesheet Array of stylesheet chunked, with declaration blocks being represented as arrays.
+	 *     @type array              $tokens     Stylesheet tokens, with declaration blocks being represented as arrays.
+	 *     @type string             $hash       MD5 hash of the parsed stylesheet.
 	 *     @type DOMElement|DOMAttr $node       Origin for styles.
 	 *     @type array              $sources    Sources for the node.
 	 *     @type bool               $keyframes  Whether an amp-keyframes.
@@ -1209,7 +1210,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			'node'               => $element,
 			'sources'            => $this->current_sources,
 			'priority'           => $this->get_stylesheet_priority( $element ),
-			'tokens'             => $parsed['stylesheet'],
+			'tokens'             => $parsed['tokens'],
 			'hash'               => $parsed['hash'],
 			'imported_font_urls' => $parsed['imported_font_urls'],
 		];
@@ -1305,7 +1306,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			'node'               => $element,
 			'sources'            => $this->current_sources, // Needed because node is removed below.
 			'priority'           => $this->get_stylesheet_priority( $element ),
-			'tokens'             => $parsed['stylesheet'],
+			'tokens'             => $parsed['tokens'],
 			'hash'               => $parsed['hash'],
 			'imported_font_urls' => $parsed['imported_font_urls'],
 		];
@@ -1400,7 +1401,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array {
 	 *    Processed stylesheet.
 	 *
-	 *    @type array  $stylesheet         Stylesheet tokens, where arrays are tuples for declaration blocks.
+	 *    @type array  $tokens             Stylesheet tokens, where arrays are tuples for declaration blocks.
 	 *    @type string $hash               MD5 hash of the parsed stylesheet.
 	 *    @type array  $validation_results Validation results, array containing arrays with error and sanitized keys.
 	 *    @type array  $imported_font_urls Imported font stylesheet URLs.
@@ -1448,7 +1449,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		if ( ! $parsed || ! isset( $parsed['stylesheet'] ) || ! is_array( $parsed['stylesheet'] ) ) {
+		if ( ! $parsed || ! isset( $parsed['tokens'] ) || ! is_array( $parsed['tokens'] ) ) {
 			$parsed = $this->parse_stylesheet( $stylesheet, $options );
 
 			/*
@@ -1650,7 +1651,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array {
 	 *    Parsed stylesheet.
 	 *
-	 *    @type array  $stylesheet         Stylesheet parts, where arrays are tuples for declaration blocks.
+	 *    @type array  $tokens             Stylesheet tokens, where arrays are tuples for declaration blocks.
 	 *    @type string $hash               MD5 hash of the parsed stylesheet.
 	 *    @type array  $validation_results Validation results, array containing arrays with error and sanitized keys.
 	 *    @type array  $imported_font_urls Imported font stylesheet URLs.
@@ -1684,7 +1685,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$stylesheet_string = preg_replace( '#\]\]>\s*$#', '', $stylesheet_string );
 		$stylesheet_string = preg_replace( '#-->\s*$#', '', $stylesheet_string );
 
-		$stylesheet         = [];
+		$tokens             = [];
 		$parsed_stylesheet  = $this->create_validated_css_document( $stylesheet_string, $options );
 		$validation_results = $parsed_stylesheet['validation_results'];
 		if ( ! empty( $parsed_stylesheet['css_document'] ) ) {
@@ -1750,7 +1751,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 					// Skip keyframe-selector, which is can be: from | to | <percentage>.
 					if ( preg_match( '/^((from|to)\b|-?\d+(\.\d+)?%)/i', $split_stylesheet[ $i + 1 ] ) ) {
-						$stylesheet[] = str_replace( $between_selectors, '', $split_stylesheet[ ++$i ] ) . $split_stylesheet[ ++$i ];
+						$tokens[] = str_replace( $between_selectors, '', $split_stylesheet[ ++$i ] ) . $split_stylesheet[ ++$i ];
 						continue;
 					}
 
@@ -1817,12 +1818,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						unset( $reduced_selector );
 					}
 
-					$stylesheet[] = [
+					$tokens[] = [
 						$selectors_parsed,
 						$declaration,
 					];
 				} else {
-					$stylesheet[] = $split_stylesheet[ $i ];
+					$tokens[] = $split_stylesheet[ $i ];
 				}
 			}
 		}
@@ -1831,10 +1832,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$this->parse_css_duration += ( microtime( true ) - $start_time );
 
 		return array_merge(
-			compact( 'stylesheet', 'validation_results' ),
+			compact( 'tokens', 'validation_results' ),
 			[
 				'imported_font_urls' => $parsed_stylesheet['imported_font_urls'],
-				'hash'               => md5( wp_json_encode( $stylesheet ) ),
+				'hash'               => md5( wp_json_encode( $tokens ) ),
 			]
 		);
 	}
@@ -2510,14 +2511,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$element->removeAttribute( 'style' );
 
-		if ( $parsed['stylesheet'] ) {
+		if ( $parsed['tokens'] ) {
 			$this->pending_stylesheets[] = [
 				'group'         => self::STYLE_AMP_CUSTOM_GROUP_INDEX,
 				'original_size' => strlen( $rule ),
 				'node'          => $element,
 				'sources'       => $this->current_sources,
 				'priority'      => $this->get_stylesheet_priority( $style_attribute ),
-				'tokens'        => $parsed['stylesheet'],
+				'tokens'        => $parsed['tokens'],
 				'hash'          => $parsed['hash'],
 			];
 
