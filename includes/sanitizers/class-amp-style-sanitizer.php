@@ -1408,7 +1408,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private function process_stylesheet( $stylesheet, $options = [] ) {
 		$parsed      = null;
 		$cache_key   = null;
-		$cache_group = 'amp-parsed-stylesheet-v22'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
+		$cache_group = 'amp-parsed-stylesheet-v23'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
 
 		$cache_impacting_options = array_merge(
 			wp_array_slice_assoc(
@@ -1733,6 +1733,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$split_stylesheet = preg_split( $pattern, $stylesheet_string, -1, PREG_SPLIT_DELIM_CAPTURE );
 			$length           = count( $split_stylesheet );
 			for ( $i = 0; $i < $length; $i++ ) {
+				// Skip empty tokens.
+				if ( '' === $split_stylesheet[ $i ] ) {
+					unset( $split_stylesheet[ $i ] );
+					continue;
+				}
+
 				if ( $before_declaration_block === $split_stylesheet[ $i ] ) {
 
 					// Skip keyframe-selector, which is can be: from | to | <percentage>.
@@ -3073,10 +3079,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					for ( $j = $i + 1; $j < $stylesheet_part_count; $j++ ) {
 						$stylesheet_part = $stylesheet_parts[ $j ];
 						$is_at_rule      = '@' === substr( $stylesheet_part, 0, 1 );
-						if ( empty( $stylesheet_part ) ) {
-							continue; // There was a shaken rule.
-						}
-
 						if ( $is_at_rule && '{}' === substr( $stylesheet_part, -2 ) ) {
 							continue; // The rule opens is empty from the start.
 						}
