@@ -8,6 +8,11 @@ use PHPUnit\Framework\TestCase;
 final class ErrorCollectionTest extends TestCase
 {
 
+    /**
+     * Test whether we can add errors to the collection.
+     *
+     * @covers \Amp\Optimizer\ErrorCollection::add()
+     */
     public function testAddingErrors()
     {
         $errorCollection = new ErrorCollection();
@@ -17,6 +22,12 @@ final class ErrorCollectionTest extends TestCase
         $this->assertEquals(2, $errorCollection->count());
     }
 
+    /**
+     * Test whether we can check for errors within the collection.
+     *
+     * @covers \Amp\Optimizer\ErrorCollection::add()
+     * @covers \Amp\Optimizer\ErrorCollection::has()
+     */
     public function testCheckingForErrors()
     {
         $errorCollection = new ErrorCollection();
@@ -26,6 +37,12 @@ final class ErrorCollectionTest extends TestCase
         $this->assertFalse($errorCollection->has('BAD_CODE'));
     }
 
+    /**
+     * Test whether we can iterate over errors in the collection.
+     *
+     * @covers \Amp\Optimizer\ErrorCollection::add()
+     * @covers \Amp\Optimizer\ErrorCollection::getIterator()
+     */
     public function testIteratingOverErrors()
     {
         $errorCollection = new ErrorCollection();

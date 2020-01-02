@@ -53,7 +53,8 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "Amp\\AmpWP\\Tests\\": "tests/php/src/"
+      "Amp\\AmpWP\\Tests\\": "tests/php/src/",
+      "Amp\\Optimizer\\Tests\\": "tests/php/optimizer/src/"
     }
   }
 }

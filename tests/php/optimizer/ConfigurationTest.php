@@ -9,6 +9,12 @@ use PHPUnit\Framework\TestCase;
 final class ConfigurationTest extends TestCase
 {
 
+    /**
+     * Test whether we can retrieve the default configuration.
+     *
+     * @covers \Amp\Optimizer\Configuration::has()
+     * @covers \Amp\Optimizer\Configuration::get()
+     */
     public function testDefaultConfiguration()
     {
         $configuration = new Configuration();
@@ -17,6 +23,12 @@ final class ConfigurationTest extends TestCase
         $this->assertEquals(Configuration::DEFAULT_TRANSFORMERS, $configuration->get(Configuration::KEY_TRANSFORMERS));
     }
 
+    /**
+     * Test whether we can add to the default configuration.
+     *
+     * @covers \Amp\Optimizer\Configuration::has()
+     * @covers \Amp\Optimizer\Configuration::get()
+     */
     public function testUserProvidedConfigurationCanAddKeys()
     {
         $configuration = new Configuration(['custom_key' => 'custom_value']);
@@ -26,6 +38,12 @@ final class ConfigurationTest extends TestCase
         $this->assertEquals('custom_value', $configuration->get('custom_key'));
     }
 
+    /**
+     * Test whether we can override the default configuration.
+     *
+     * @covers \Amp\Optimizer\Configuration::has()
+     * @covers \Amp\Optimizer\Configuration::get()
+     */
     public function testUserProvidedConfigurationCanOverrideKeys()
     {
         $configuration = new Configuration([Configuration::KEY_TRANSFORMERS => ['my_transformer']]);
@@ -33,6 +51,11 @@ final class ConfigurationTest extends TestCase
         $this->assertEquals(['my_transformer'], $configuration->get(Configuration::KEY_TRANSFORMERS));
     }
 
+    /**
+     * Test whether unknown keys throw an exception.
+     *
+     * @covers \Amp\Optimizer\Configuration::get()
+     */
     public function testUnknownKeyThrowsException()
     {
         $configuration = new Configuration();
@@ -40,6 +63,12 @@ final class ConfigurationTest extends TestCase
         $configuration->get('unknown_key');
     }
 
+    /**
+     * Test whether invalid keys throw an exception.
+     *
+     * @covers \Amp\Optimizer\Configuration::validateConfigurationKey()
+     * @covers \Amp\Optimizer\Configuration::validateConfigurationKeys()
+     */
     public function testInvalidTransformersTypeThrowsException()
     {
         $this->expectException(InvalidConfigurationValue::class);
@@ -47,6 +76,12 @@ final class ConfigurationTest extends TestCase
         new Configuration([Configuration::KEY_TRANSFORMERS => 42]);
     }
 
+    /**
+     * Test whether invalid sub-keys throw an exception.
+     *
+     * @covers \Amp\Optimizer\Configuration::validateConfigurationKey()
+     * @covers \Amp\Optimizer\Configuration::validateConfigurationKeys()
+     */
     public function testInvalidTransformersSubTypeThrowsException()
     {
         $this->expectException(InvalidConfigurationValue::class);

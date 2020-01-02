@@ -19,11 +19,12 @@ use DOMXPath;
  *
  * @since 1.5
  *
- * @property DOMXPath   $xpath XPath query object for this document.
- * @property DOMElement $html  The document's <html> element.
- * @property DOMElement $head  The document's <head> element.
- * @property DOMElement $body  The document's <body> element.
- * @property DOMNodeList $amp_elements  The document's <amp-*> elements.
+ * @property DOMXPath     $xpath        XPath query object for this document.
+ * @property DOMElement   $html         The document's <html> element.
+ * @property DOMElement   $head         The document's <head> element.
+ * @property DOMElement   $body         The document's <body> element.
+ * @property DOMElement[] $amp_elements The document's <amp-*> elements. Technically, this returns a DOMNodeList, but
+ *                                      we're hinting directly to elements, not nodes, for convenience.
  *
  * Abstract away some of the difficulties of working with PHP's DOMDocument.
  */
@@ -291,7 +292,7 @@ final class Document extends DOMDocument {
 	 */
 	private function reset() {
 		// Drop references to old DOM document.
-		unset( $this->xpath, $this->html, $this->head, $this->body );
+		unset( $this->xpath, $this->head, $this->body );
 
 		// Reference of the document itself doesn't change here, but might need to change in the future.
 		return $this;
@@ -1027,7 +1028,8 @@ final class Document extends DOMDocument {
 				}
 				return $this->body;
 			case 'amp_elements':
-				$this->amp_elements = $this->xpath->query( "//*[ starts-with( name(), 'amp-' ) ]");
+				$this->amp_elements = $this->xpath->query( "//*[ starts-with( name(), 'amp-' ) ]" );
+
 				return $this->amp_elements;
 		}
 
