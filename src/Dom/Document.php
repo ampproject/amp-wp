@@ -20,8 +20,10 @@ use DOMXPath;
  * @since 1.5
  *
  * @property DOMXPath   $xpath XPath query object for this document.
+ * @property DOMElement $html  The document's <html> element.
  * @property DOMElement $head  The document's <head> element.
  * @property DOMElement $body  The document's <body> element.
+ * @property DOMNodeList $amp_elements  The document's <amp-*> elements.
  *
  * Abstract away some of the difficulties of working with PHP's DOMDocument.
  */
@@ -121,6 +123,7 @@ final class Document extends DOMDocument {
 	const HTML_EXTRACT_ATTRIBUTE_VALUE_PATTERN    = '/%s=(?:([\'"])(?<full>.*)?\1|(?<partial>[^ \'";]+))/';
 
 	// Tags constants used throughout.
+	const TAG_HTML     = 'html';
 	const TAG_HEAD     = 'head';
 	const TAG_BODY     = 'body';
 	const TAG_TEMPLATE = 'template';
@@ -288,7 +291,7 @@ final class Document extends DOMDocument {
 	 */
 	private function reset() {
 		// Drop references to old DOM document.
-		unset( $this->xpath, $this->head, $this->body );
+		unset( $this->xpath, $this->html, $this->head, $this->body );
 
 		// Reference of the document itself doesn't change here, but might need to change in the future.
 		return $this;
@@ -999,6 +1002,14 @@ final class Document extends DOMDocument {
 			case 'xpath':
 				$this->xpath = new DOMXPath( $this );
 				return $this->xpath;
+			case self::TAG_HTML:
+				$this->html = $this->getElementsByTagName( self::TAG_HTML )->item( 0 );
+				if ( null === $this->html ) {
+					// Document was assembled manually and bypassed normalisation.
+					$this->normalize_dom_structure();
+					$this->html = $this->getElementsByTagName( self::TAG_HTML )->item( 0 );
+				}
+				return $this->html;
 			case self::TAG_HEAD:
 				$this->head = $this->getElementsByTagName( self::TAG_HEAD )->item( 0 );
 				if ( null === $this->head ) {
@@ -1015,10 +1026,13 @@ final class Document extends DOMDocument {
 					$this->body = $this->getElementsByTagName( self::TAG_BODY )->item( 0 );
 				}
 				return $this->body;
+			case 'amp_elements':
+				$this->amp_elements = $this->xpath->query( "//*[ starts-with( name(), 'amp-' ) ]");
+				return $this->amp_elements;
 		}
 
 		// Mimic regular PHP behavior for missing notices.
-		trigger_error( self::PROPERTY_GETTER_ERROR_MESSAGE . $name, E_NOTICE ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions,WordPress.Security.EscapeOutput
+		trigger_error( self::PROPERTY_GETTER_ERROR_MESSAGE . $name, E_USER_NOTICE ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions,WordPress.Security.EscapeOutput
 		return null;
 	}
 

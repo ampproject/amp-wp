@@ -12,7 +12,10 @@
 	<testsuites>
 		<!-- Default test suite to run all tests -->
 		<testsuite name="default">
-			<directory prefix="test-" suffix=".php">./tests/</directory>
+			<directory prefix="test-" suffix=".php">./tests/php/</directory>
+		</testsuite>
+		<testsuite name="optimizer">
+			<directory suffix="Test.php">./tests/php/optimizer/</directory>
 		</testsuite>
 	</testsuites>
 	<groups>
