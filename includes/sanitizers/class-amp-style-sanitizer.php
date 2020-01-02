@@ -2606,7 +2606,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 			$this->amp_custom_style_element->appendChild( $this->dom->createTextNode( $css ) );
 
-			$included_size          = 0;
+			$included_size          = strlen( $stylesheet_groups[ self::STYLE_AMP_CUSTOM_GROUP_INDEX ]['import_front_matter'] );
 			$included_original_size = 0;
 			$excluded_size          = 0;
 			$excluded_original_size = 0;
