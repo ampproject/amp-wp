@@ -3005,13 +3005,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$stylesheet_parts = [];
 			foreach ( $pending_stylesheet['stylesheet'] as $stylesheet_part ) {
 				if ( is_string( $stylesheet_part ) ) {
-					$stylesheet_parts[] = $stylesheet_part;
+					$stylesheet_parts[] = [ true, $stylesheet_part ];
 					continue;
 				}
 
 				list( $selectors_parsed, $declaration_block ) = $stylesheet_part;
 
-				$selectors = [];
+				$used_selector_count = 0;
+				$selectors           = [];
 				foreach ( $selectors_parsed as $selector => $parsed_selector ) {
 					$should_include = (
 						// If all class names are used in the doc.
@@ -3049,43 +3050,57 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 							$this->has_used_attributes( $parsed_selector[ self::SELECTOR_EXTRACTED_ATTRIBUTES ] )
 						)
 					);
+					$selectors[ $selector ] = $should_include;
 					if ( $should_include ) {
-						$selectors[] = $selector;
+						$used_selector_count++;
 					}
 				}
-				$stylesheet_part = implode( ',', $selectors ) . $declaration_block;
-				if ( ! empty( $selectors ) ) {
-					$stylesheet_parts[] = $stylesheet_part;
-				}
+				$stylesheet_parts[] = [
+					0 !== $used_selector_count,
+					$selectors,
+					$declaration_block,
+				];
 			}
 
 			// Strip empty at-rules after tree shaking.
 			$stylesheet_part_count = count( $stylesheet_parts );
 			for ( $i = 0; $i < $stylesheet_part_count; $i++ ) {
-				$stylesheet_part = $stylesheet_parts[ $i ];
-				if ( '@' !== substr( $stylesheet_part, 0, 1 ) ) {
+
+				// Skip anything that isn't an at-rule.
+				if ( ! is_string( $stylesheet_parts[ $i ][1] ) || '@' !== substr( $stylesheet_parts[ $i ][1], 0, 1 ) ) {
 					continue;
 				}
 
 				// Delete empty at-rules.
-				if ( '{}' === substr( $stylesheet_part, -2 ) ) {
-					$stylesheet_parts[ $i ] = '';
+				if ( '{}' === substr( $stylesheet_parts[ $i ][1], -2 ) ) {
+					$stylesheet_parts[ $i ][0] = false;
 					continue;
 				}
 
 				// Delete at-rules that were emptied due to tree-shaking.
-				if ( '{' === substr( $stylesheet_part, -1 ) ) {
+				if ( '{' === substr( $stylesheet_parts[ $i ][1], -1 ) ) {
 					$open_braces = 1;
 					for ( $j = $i + 1; $j < $stylesheet_part_count; $j++ ) {
-						$stylesheet_part = $stylesheet_parts[ $j ];
-						$is_at_rule      = '@' === substr( $stylesheet_part, 0, 1 );
-						if ( $is_at_rule && '{}' === substr( $stylesheet_part, -2 ) ) {
-							continue; // The rule opens is empty from the start.
+						if ( is_array( $stylesheet_parts[ $j ][1] ) ) { // Is declaration block.
+							if ( true === $stylesheet_parts[ $j ][0] ) {
+								// The declaration block has selectors which survived tree shaking, so the contained at-
+								// rule cannot be removed and so we must abort.
+								break;
+							} else {
+								// Continue to the next stylesheet part as this declaration block can be included in the
+								// list of parts that may be part of an at-rule that is now empty and should be removed.
+								continue;
+							}
 						}
 
-						if ( $is_at_rule && '{' === substr( $stylesheet_part, -1 ) ) {
+						$is_at_rule = '@' === substr( $stylesheet_parts[ $j ][1], 0, 1 );
+						if ( $is_at_rule && '{}' === substr( $stylesheet_parts[ $j ][1], -2 ) ) {
+							continue; // The rule opened is empty from the start.
+						}
+
+						if ( $is_at_rule && '{' === substr( $stylesheet_parts[ $j ][1], -1 ) ) {
 							$open_braces++;
-						} elseif ( '}' === $stylesheet_part ) {
+						} elseif ( '}' === $stylesheet_parts[ $j ][1] ) {
 							$open_braces--;
 						} else {
 							break;
@@ -3093,8 +3108,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 						// Splice out the parts that are empty.
 						if ( 0 === $open_braces ) {
-							$length = $j - $i + 1;
-							array_splice( $stylesheet_parts, $i, $length, array_fill( 0, $length, '' ) );
+							for ( $k = $i; $k <= $j; $k++ ) {
+								$stylesheet_parts[ $k ][0] = false;
+							}
 							$i = $j; // Jump the outer loop ahead to skip over what has been already marked as removed.
 							continue 2;
 						}
