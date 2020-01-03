@@ -139,7 +139,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 1.0
 	 * @var array[] {
 	 *     @type array              $tokens     Stylesheet tokens, with declaration blocks being represented as arrays.
-	 *     @type string             $hash       MD5 hash of the parsed stylesheet.
+	 *     @type string             $serialized Stylesheet tokens serialized into CSS.
+	 *     @type string             $hash       MD5 hash of the parsed stylesheet tokens, prior to tree-shaking.
 	 *     @type DOMElement|DOMAttr $node       Origin for styles.
 	 *     @type array              $sources    Sources for the node.
 	 *     @type bool               $keyframes  Whether an amp-keyframes.
@@ -442,7 +443,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					return $pending_stylesheet['included'] && self::STYLE_AMP_CUSTOM_GROUP_INDEX === $pending_stylesheet['group'];
 				}
 			),
-			'stylesheet'
+			'serialized'
 		);
 	}
 
@@ -2763,7 +2764,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 							return $pending_stylesheet['included'] && self::STYLE_AMP_KEYFRAMES_GROUP_INDEX === $pending_stylesheet['group'];
 						}
 					),
-					'stylesheet'
+					'serialized'
 				)
 			);
 			$css .= $stylesheet_groups[ self::STYLE_AMP_KEYFRAMES_GROUP_INDEX ]['source_map_comment'];
@@ -3013,14 +3014,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			$stylesheet_parts = [];
-			foreach ( $pending_stylesheet['tokens'] as $stylesheet_part ) {
-				if ( is_string( $stylesheet_part ) ) {
-					$stylesheet_parts[] = [ true, $stylesheet_part ];
+			$shaken_tokens = [];
+			foreach ( $pending_stylesheet['tokens'] as $token ) {
+				if ( is_string( $token ) ) {
+					$shaken_tokens[] = [ true, $token ];
 					continue;
 				}
 
-				list( $selectors_parsed, $declaration_block ) = $stylesheet_part;
+				list( $selectors_parsed, $declaration_block ) = $token;
 
 				$used_selector_count = 0;
 				$selectors           = [];
@@ -3066,7 +3067,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						$used_selector_count++;
 					}
 				}
-				$stylesheet_parts[] = [
+				$shaken_tokens[] = [
 					0 !== $used_selector_count,
 					$selectors,
 					$declaration_block,
@@ -3074,26 +3075,26 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			// Strip empty at-rules after tree shaking.
-			$stylesheet_part_count = count( $stylesheet_parts );
+			$stylesheet_part_count = count( $shaken_tokens );
 			for ( $i = 0; $i < $stylesheet_part_count; $i++ ) {
 
 				// Skip anything that isn't an at-rule.
-				if ( ! is_string( $stylesheet_parts[ $i ][1] ) || '@' !== substr( $stylesheet_parts[ $i ][1], 0, 1 ) ) {
+				if ( ! is_string( $shaken_tokens[ $i ][1] ) || '@' !== substr( $shaken_tokens[ $i ][1], 0, 1 ) ) {
 					continue;
 				}
 
 				// Delete empty at-rules.
-				if ( '{}' === substr( $stylesheet_parts[ $i ][1], -2 ) ) {
-					$stylesheet_parts[ $i ][0] = false;
+				if ( '{}' === substr( $shaken_tokens[ $i ][1], -2 ) ) {
+					$shaken_tokens[ $i ][0] = false;
 					continue;
 				}
 
 				// Delete at-rules that were emptied due to tree-shaking.
-				if ( '{' === substr( $stylesheet_parts[ $i ][1], -1 ) ) {
+				if ( '{' === substr( $shaken_tokens[ $i ][1], -1 ) ) {
 					$open_braces = 1;
 					for ( $j = $i + 1; $j < $stylesheet_part_count; $j++ ) {
-						if ( is_array( $stylesheet_parts[ $j ][1] ) ) { // Is declaration block.
-							if ( true === $stylesheet_parts[ $j ][0] ) {
+						if ( is_array( $shaken_tokens[ $j ][1] ) ) { // Is declaration block.
+							if ( true === $shaken_tokens[ $j ][0] ) {
 								// The declaration block has selectors which survived tree shaking, so the contained at-
 								// rule cannot be removed and so we must abort.
 								break;
@@ -3104,14 +3105,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 							}
 						}
 
-						$is_at_rule = '@' === substr( $stylesheet_parts[ $j ][1], 0, 1 );
-						if ( $is_at_rule && '{}' === substr( $stylesheet_parts[ $j ][1], -2 ) ) {
+						$is_at_rule = '@' === substr( $shaken_tokens[ $j ][1], 0, 1 );
+						if ( $is_at_rule && '{}' === substr( $shaken_tokens[ $j ][1], -2 ) ) {
 							continue; // The rule opened is empty from the start.
 						}
 
-						if ( $is_at_rule && '{' === substr( $stylesheet_parts[ $j ][1], -1 ) ) {
+						if ( $is_at_rule && '{' === substr( $shaken_tokens[ $j ][1], -1 ) ) {
 							$open_braces++;
-						} elseif ( '}' === $stylesheet_parts[ $j ][1] ) {
+						} elseif ( '}' === $shaken_tokens[ $j ][1] ) {
 							$open_braces--;
 						} else {
 							break;
@@ -3120,7 +3121,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						// Splice out the parts that are empty.
 						if ( 0 === $open_braces ) {
 							for ( $k = $i; $k <= $j; $k++ ) {
-								$stylesheet_parts[ $k ][0] = false;
+								$shaken_tokens[ $k ][0] = false;
 							}
 							$i = $j; // Jump the outer loop ahead to skip over what has been already marked as removed.
 							continue 2;
@@ -3129,36 +3130,36 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 
-			// @todo Do not implode at this point. Do it later. Or rather, go ahead and do it now but then optionally decide to preseve the stylesheet parts.
-			$pending_stylesheet['stylesheet'] = implode(
+			// @todo After this point we could unset( $pending_stylesheet['tokens'] ) since they wouldn't be used in the course of generating a page, though they would still be useful for other purposes.
+			$pending_stylesheet['serialized'] = implode(
 				'',
 				array_map(
-					static function ( $stylesheet_part ) {
-						if ( is_array( $stylesheet_part[1] ) ) {
+					static function ( $shaken_token ) {
+						if ( is_array( $shaken_token[1] ) ) {
 							// Construct a declaration block.
-							$selectors = array_keys( array_filter( $stylesheet_part[1] ) );
+							$selectors = array_keys( array_filter( $shaken_token[1] ) );
 							if ( empty( $selectors ) ) {
 								return '';
 							} else {
-								return implode( ',', $selectors ) . $stylesheet_part[2];
+								return implode( ',', $selectors ) . $shaken_token[2];
 							}
 						} else {
 							// Pass through parts other than declaration blocks.
-							return $stylesheet_part[1];
+							return $shaken_token[1];
 						}
 					},
 					// Include the stylesheet parts that were not marked for exclusion during tree shaking.
 					array_filter(
-						$stylesheet_parts,
-						static function( $stylesheet_part ) {
-							return false !== $stylesheet_part[0];
+						$shaken_tokens,
+						static function( $shaken_token ) {
+							return false !== $shaken_token[0];
 						}
 					)
 				)
 			);
 
 			$pending_stylesheet['included'] = null; // To be determined below.
-			$pending_stylesheet['size']     = strlen( $pending_stylesheet['stylesheet'] ); // @todo The strlen will not work if not serialized.
+			$pending_stylesheet['size']     = strlen( $pending_stylesheet['serialized'] );
 
 			// If this stylesheet is a duplicate of something that came before, mark the previous as not included automatically.
 			if ( isset( $previously_seen_stylesheet_index[ $pending_stylesheet['hash'] ] ) ) {
@@ -3166,7 +3167,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$this->pending_stylesheets[ $previously_seen_stylesheet_index[ $pending_stylesheet['hash'] ] ]['duplicate'] = true;
 			}
 			$previously_seen_stylesheet_index[ $pending_stylesheet['hash'] ] = $pending_stylesheet_index;
-			unset( $stylesheet_parts );
+			unset( $shaken_tokens );
 		}
 
 		unset( $pending_stylesheet );
