@@ -29,6 +29,7 @@ function TextPanel( { selectedElements, onSetProperties } ) {
 				{ 'Text' }
 			</Title>
 			<InputGroup
+				type="text"
 				label="Text content"
 				value={ state.content }
 				isMultiple={ content === '' }
