@@ -11,6 +11,7 @@ import Header from '../../components/header';
 import Inspector from '../../components/inspector';
 import Library from '../../components/library';
 import Canvas from '../../components/canvas';
+import BitmapRenderer from '../../components/bitmapRenderer';
 import { LIBRARY_WIDTH, INSPECTOR_WIDTH, HEADER_HEIGHT } from '../../constants';
 
 const Editor = styled.div`
@@ -34,6 +35,13 @@ const Area = styled.div`
   position: relative;
 `;
 
+const Fixed = styled.div`
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  z-index: 1000;
+`;
+
 function Layout() {
 	return (
 		<Editor>
@@ -49,6 +57,9 @@ function Layout() {
 			<Area area="insp">
 				<Inspector />
 			</Area>
+			<Fixed>
+				<BitmapRenderer />
+			</Fixed>
 		</Editor>
 	);
 }

@@ -5,6 +5,7 @@ import { PanelTypes } from '../../panels';
 export { default as Display } from './display';
 export { default as Edit } from './edit';
 export { default as Save } from './save';
+export { default as Render } from './render';
 
 export const defaultAttributes = {
 };
