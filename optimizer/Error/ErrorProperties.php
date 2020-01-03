@@ -6,6 +6,17 @@ trait ErrorProperties
 {
 
     /**
+     * Instantiate an Error object.
+     *
+     * @param string $message Message for the error.
+     */
+    public function __construct($message)
+    {
+        $this->code    = self::CODE;
+        $this->message = $message;
+    }
+
+    /**
      * Code of the error.
      *
      * @var string

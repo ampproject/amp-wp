@@ -3,20 +3,36 @@
 namespace Amp\Optimizer\Transformer;
 
 use Amp\AmpWP\Dom\Document;
+use Amp\Optimizer\Layout;
 use Amp\Optimizer\Error;
 use Amp\Optimizer\ErrorCollection;
 use Amp\Optimizer\Transformer;
+use AMP_CSS_Length;
 use DOMElement;
 
 final class ServerSideRendering implements Transformer
 {
 
-    const LAYOUT_ATTRIBUTE         = 'i-amphtml-layout';
-    const NO_BOILERPLATE_ATTRIBUTE = 'i-amphtml-no-boilerplate';
+    const LAYOUT_ATTRIBUTE          = 'i-amphtml-layout';
+    const NO_BOILERPLATE_ATTRIBUTE  = 'i-amphtml-no-boilerplate';
+    const LAYOUT_CLASS_PREFIX       = 'i-amphtml-layout-';
+    const LAYOUT_SIZE_DEFINED_CLASS = 'i-amphtml-layout-size-defined';
+    const SIZER_ELEMENT             = 'i-amphtml-sizer';
 
     const RENDER_DELAYING_EXTENSIONS = [
         'amp-dynamic-css-classes',
         'amp-experiment',
+    ];
+
+    const SUPPORTED_LAYOUTS = [
+        '',
+        Layout::NODISPLAY,
+        Layout::FIXED,
+        Layout::FIXED_HEIGHT,
+        Layout::RESPONSIVE,
+        Layout::CONTAINER,
+        Layout::FILL,
+        Layout::FLEX_ITEM,
     ];
 
     /**
@@ -43,7 +59,7 @@ final class ServerSideRendering implements Transformer
              * boilerplate - they require the boilerplate.
              */
             if ($amp_element->hasAttribute('heights') || $amp_element->hasAttribute('media') || $amp_element->hasAttribute('sizes')) {
-                $errors->add(Error\CannotRemoveBoilerplate::from_attributes_requiring_boilerplate($amp_element));
+                $errors->add(Error\CannotRemoveBoilerplate::fromAttributesRequiringBoilerplate($amp_element));
                 $canRemoveBoilerplate = false;
             }
 
@@ -52,7 +68,7 @@ final class ServerSideRendering implements Transformer
              * rather than checking for the existence of the amp-experiment script in IsRenderDelayingExtension below.
              */
             if ($amp_element->tagName === 'amp-experiment') {
-                $errors->add(Error\CannotRemoveBoilerplate::from_amp_experiment($amp_element));
+                $errors->add(Error\CannotRemoveBoilerplate::fromAmpExperiment($amp_element));
                 $canRemoveBoilerplate = false;
             }
 
@@ -61,7 +77,7 @@ final class ServerSideRendering implements Transformer
              * if amp-audio is present in the document.
              */
             if ($amp_element->tagName === 'amp-audio') {
-                $errors->add(Error\CannotRemoveBoilerplate::from_amp_audio($amp_element));
+                $errors->add(Error\CannotRemoveBoilerplate::fromAmpAudio($amp_element));
                 $canRemoveBoilerplate = false;
                 continue;
             }
@@ -70,8 +86,8 @@ final class ServerSideRendering implements Transformer
              * Now apply the layout to the custom elements. If we encounter any unsupported layout, the applyLayout()
              * method returns false and we can't remove the boilerplate.
              */
-            if (! $this->applyLayout($amp_element)) {
-                $errors->add(Error\CannotRemoveBoilerplate::from_unsupported_layout($amp_element));
+            if (! $this->applyLayout($document, $amp_element, $errors)) {
+                $errors->add(Error\CannotRemoveBoilerplate::fromUnsupportedLayout($amp_element));
                 $canRemoveBoilerplate = false;
             }
         }
@@ -83,7 +99,7 @@ final class ServerSideRendering implements Transformer
 
         foreach ($document->xpath->query('.//script[ @custom-element ]', $document->head) as $customElementScript) {
             if ($this->isRenderDelayingExtension($customElementScript)) {
-                $errors->add(Error\CannotRemoveBoilerplate::from_render_delaying_script($customElementScript));
+                $errors->add(Error\CannotRemoveBoilerplate::fromRenderDelayingScript($customElementScript));
                 $canRemoveBoilerplate = false;
             }
         }
@@ -158,12 +174,296 @@ final class ServerSideRendering implements Transformer
     /**
      * Apply the adequate layout to a custom element.
      *
-     * @param DOMElement $element Element to apply the layout to.
+     * @param DOMElement      $element  Element to apply the layout to.
+     * @param Document        $document DOM document to apply the transformations to.
+     * @param ErrorCollection $errors   Collection of errors that are collected during transformation.
      * @return boolean Whether applying the layout was successful or not.
      */
-    private function applyLayout(DOMElement $element)
+    private function applyLayout(Document $document, DOMElement $element, ErrorCollection $errors)
     {
-        // @todo
+        // @todo Remove dependency on plugin's AMP_CSS_Length objects here.
+        $ampLayout = $this->parseLayout($element->getAttribute('layout'));
+
+        $inputWidth = new AMP_CSS_Length($element->getAttribute('width'));
+        $inputWidth->validate(/* $allow_auto */ true, /* $allow_fluid */ false);
+        if (! $inputWidth->is_valid()) {
+            $errors->add(Error\CannotPerformServerSideRendering::fromInvalidInputWidth($element));
+            return false;
+        }
+
+        $inputHeight = new AMP_CSS_Length($element->getAttribute('height'));
+        $inputHeight->validate(/* $allow_auto */ true, /* $allow_fluid */ $ampLayout === Layout::FLUID);
+        if (! $inputHeight->is_valid()) {
+            $errors->add(Error\CannotPerformServerSideRendering::fromInvalidInputHeight($element));
+            return false;
+        }
+
+        // Calculate effective width, height and layout.
+        $width  = $this->calculateWidth($ampLayout, $inputWidth, $element->tagName);
+        $height = $this->calculateHeight($ampLayout, $inputHeight, $element->tagName);
+        $layout = $this->calculateLayout($ampLayout, $width, $height, $element->getAttribute('sizes'), $element->getAttribute('heights'));
+
+        if (! $this->isSupportedLayout($layout)) {
+            $errors->add(Error\CannotPerformServerSideRendering::fromUnsupportedLayout($element, $layout));
+            return false;
+        }
+
+        $this->applyLayoutAttributes($element, $layout, $width, $height);
+        $this->maybeAddSizerInto($document, $element, $layout, $width, $height);
+
         return true;
+    }
+
+    /**
+     * Parse the layout attribute value.
+     *
+     * @param string $layout Layout attribute value.
+     * @return string Validated AMP layout, or empty string if none.
+     */
+    private function parseLayout($layout)
+    {
+        if (empty($layout)) {
+            return '';
+        }
+
+        $layout = strtolower($layout);
+
+        if (in_array($layout, Layout::VALID_LAYOUTS, true)) {
+            return $layout;
+        }
+
+        return '';
+    }
+
+    /**
+     * Calculate the width of an element for its requested layout.
+     *
+     * @param string         $inputLayout Requested layout.
+     * @param AMP_CSS_Length $inputWidth  Input value for the width.
+     * @param string         $tagName     Tag name of the element.
+     * @return AMP_CSS_Length Calculated Width.
+     */
+    private function calculateWidth($inputLayout, AMP_CSS_Length $inputWidth, $tagName)
+    {
+        if ((empty($inputLayout) || $inputLayout === Layout::FIXED) && ! $inputWidth->is_set()) {
+            // These values come from AMP's runtime and can be found in
+            // https://github.com/ampproject/amphtml/blob/master/src/layout.js#L70
+            switch ($tagName) {
+                case 'amp-analytics':
+                case 'amp-pixel':
+                    $width = new AMP_CSS_Length('1px');
+                    $width->validate(/* $allow_auto */ false, /* $allow_fluid */ false);
+                    return $width;
+                case 'amp-audio':
+                    $width = new AMP_CSS_Length('auto');
+                    $width->validate(/* $allow_auto */ true, /* $allow_fluid */ false);
+                    return $width;
+                case 'amp-social-share':
+                    $width = new AMP_CSS_Length('60px');
+                    $width->validate(/* $allow_auto */ false, /* $allow_fluid */ false);
+                    return $width;
+            }
+        }
+
+        return $inputWidth;
+    }
+
+    /**
+     * Calculate the height of an element for its requested layout.
+     *
+     * @param string         $inputLayout Requested layout.
+     * @param AMP_CSS_Length $inputHeight Input value for the height.
+     * @param string         $tagName     Tag name of the element.
+     * @return AMP_CSS_Length Calculated Height.
+     */
+    private function calculateHeight($inputLayout, AMP_CSS_Length $inputHeight, $tagName)
+    {
+        if ((empty($inputLayout) || $inputLayout === Layout::FIXED || $inputLayout === Layout::FIXED_HEIGHT) && ! $inputHeight->is_set()) {
+            // These values come from AMP's runtime and can be found in
+            // https://github.com/ampproject/amphtml/blob/master/src/layout.js#L70
+            switch ($tagName) {
+                case 'amp-analytics':
+                case 'amp-pixel':
+                    $height = new AMP_CSS_Length('1px');
+                    $height->validate(/* $allow_auto */ false, /* $allow_fluid */ false);
+                    return $height;
+                case 'amp-audio':
+                    $height = new AMP_CSS_Length('auto');
+                    $height->validate(/* $allow_auto */ true, /* $allow_fluid */ false);
+                    return $height;
+                case 'amp-social-share':
+                    $height = new AMP_CSS_Length('44px');
+                    $height->validate(/* $allow_auto */ false, /* $allow_fluid */ false);
+                    return $height;
+            }
+        }
+
+        return $inputHeight;
+    }
+
+    /**
+     * Calculate the final AMP layout attribute for an element.
+     *
+     * @param string         $inputLayout Requested layout.
+     * @param AMP_CSS_Length $width       Calculated width.
+     * @param AMP_CSS_Length $height      Calculated height.
+     * @param string         $sizesAttr   Sizes attribute value.
+     * @param string         $heightsAttr Heights attribute value.
+     * @return string Calculated layout.
+     */
+    private function calculateLayout(
+        $inputLayout,
+        AMP_CSS_Length $width,
+        AMP_CSS_Length $height,
+        $sizesAttr,
+        $heightsAttr
+    ) {
+        if (! empty($inputLayout)) {
+            return $inputLayout;
+        }
+
+        if (! $width->is_set() && ! $height->is_set()) {
+            return Layout::CONTAINER;
+        }
+
+        if ($height->is_set() && (! $width->is_set() || $width->is_auto())) {
+            return Layout::FIXED_HEIGHT;
+        }
+
+        if ($height->is_set() && $width->is_set() && (! empty($sizesAttr) || ! empty($heightsAttr))) {
+            return Layout::RESPONSIVE;
+        }
+
+        return Layout::FIXED;
+    }
+
+    /**
+     * Check whether a layout is support for SSR.
+     *
+     * @param string $layout Layout to check.
+     * @return bool Whether the layout is supported for SSR.
+     */
+    private function isSupportedLayout($layout)
+    {
+        return in_array($layout, self::SUPPORTED_LAYOUTS, true);
+    }
+
+    /**
+     * Apply the calculated layout attributes to an element.
+     *
+     * @param DOMElement     $element Element to apply the layout attributes to.
+     * @param string         $layout  Final layout.
+     * @param AMP_CSS_Length $width   Calculated width.
+     * @param AMP_CSS_Length $height  Calculated height.
+     */
+    private function applyLayoutAttributes(DOMElement $element, $layout, AMP_CSS_Length $width, AMP_CSS_Length $height)
+    {
+        $this->addClass($element, $this->getLayoutClass($layout));
+
+        if ($this->isLayoutSizeDefined($layout)) {
+            $this->addClass($element, self::LAYOUT_SIZE_DEFINED_CLASS);
+        }
+
+        $styles = '';
+        switch ($layout) {
+            case Layout::NODISPLAY:
+                $element->setAttribute('hidden', 'hidden');
+                break;
+            case Layout::FIXED:
+                $styles = "width:{$width->get_numeral()}{$width->get_unit()};height:{$height->get_numeral()}{$height->get_unit()};";
+                break;
+            case Layout::FIXED_HEIGHT:
+                $styles = "height:{$height->get_numeral()}{$height->get_unit()};";
+                break;
+            case Layout::RESPONSIVE:
+                // Do nothing here but emit <i-amphtml-sizer> later.
+                break;
+            case Layout::FILL:
+            case Layout::CONTAINER:
+                // Do nothing here.
+                break;
+            case Layout::FLEX_ITEM:
+                if ($width->is_set()) {
+                    $styles = "width:{$width->get_numeral()}{$width->get_unit()};";
+                }
+                if ($height->is_set()) {
+                    $styles .= "height:{$height->get_numeral()}{$height->get_unit()};";
+                }
+                break;
+        }
+
+        // We prepend just in case an existing value (which shouldn't be there for valid docs) doesn't end with ';'.
+        if ($element->hasAttribute('style')) {
+            $styles .= $element->getAttribute('style');
+        }
+        if (! empty($styles)) {
+            $element->setAttribute('style', $styles);
+        }
+
+        $element->setAttribute(self::LAYOUT_ATTRIBUTE, $layout);
+    }
+
+    /**
+     * Get the class to use for a given layout.
+     *
+     * @param string $layout Layout to get the class for.
+     * @return string Class name to use for the layout.
+     */
+    private function getLayoutClass($layout)
+    {
+        if (empty($layout)) {
+            return '';
+        }
+
+        return self::LAYOUT_CLASS_PREFIX . $layout;
+    }
+
+    /**
+     * Add a class to an element.
+     *
+     * This makes sure we keep existing classes on the element.
+     *
+     * @param DOMElement $element Element to add a class to.
+     * @param string     $class   Class to add.
+     */
+    private function addClass(DOMElement $element, $class)
+    {
+        if ($element->hasAttribute('class')) {
+            $class = "{$element->getAttribute($class)} {$class}";
+        }
+
+        $element->setAttribute('class', $class);
+    }
+
+    /**
+     * Check whether the provided layout is a layout with a defined size.
+     *
+     * @param string $layout Layout to check.
+     * @return bool Whether the layout has a defined size.
+     */
+    private function isLayoutSizeDefined($layout)
+    {
+        return in_array($layout, Layout::SIZE_DEFINED_LAYOUTS, true);
+    }
+
+    private function maybeAddSizerInto(
+        Document $document,
+        DOMElement $element,
+        $layout,
+        AMP_CSS_Length $width,
+        AMP_CSS_Length $height
+    ) {
+        if ($layout !== Layout::RESPONSIVE
+            || ! $width->is_set()
+            || $width->get_numeral() === 0
+            || ! $height->is_set()
+            || $width->get_unit() !== $height->get_unit()) {
+            return;
+        }
+
+        $padding = $height->get_numeral() / $width->get_numeral() * 100;
+        $sizer   = $document->createElement(self::SIZER_ELEMENT);
+        $sizer->setAttribute('style', sprintf('display:block;padding-top:%1.4F%%;', $padding));
+        $element->insertBefore($sizer, $element->firstChild);
     }
 }

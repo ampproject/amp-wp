@@ -153,4 +153,14 @@ class AMP_CSS_Length {
 	public function get_unit() {
 		return $this->unit;
 	}
+
+
+	/**
+	 * The numeral of the attribute.
+	 *
+	 * @return float
+	 */
+	public function get_numeral() {
+		return $this->numeral;
+	}
 }

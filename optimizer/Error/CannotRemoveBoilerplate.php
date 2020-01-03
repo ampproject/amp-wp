@@ -23,23 +23,12 @@ final class CannotRemoveBoilerplate implements Error
     const UNSUPPORTED_LAYOUT_STRING     = 'Cannot remove boilerplate because of an unsupported layout: ';
 
     /**
-     * Instantiate a CannotRemoveBoilerplate object.
-     *
-     * @param string $message Message for the error.
-     */
-    public function __construct($message)
-    {
-        $this->code    = self::CODE;
-        $this->message = $message;
-    }
-
-    /**
      * Instantiate a CannotRemoveBoilerplate object for attributes that require the boilerplate to be around.
      *
      * @param DOMElement $element Element that contains the attributes that need the boilerplate.
      * @return self
      */
-    public static function from_attributes_requiring_boilerplate(DOMElement $element)
+    public static function fromAttributesRequiringBoilerplate(DOMElement $element)
     {
         return new self(self::ATTRIBUTES_STRING . new ElementDump($element));
     }
@@ -50,7 +39,7 @@ final class CannotRemoveBoilerplate implements Error
      * @param DOMElement $element amp-experiment element.
      * @return self
      */
-    public static function from_amp_experiment(DOMElement $element)
+    public static function fromAmpExperiment(DOMElement $element)
     {
         return new self(self::RENDER_DELAYING_SCRIPT_STRING . $element->tagName);
     }
@@ -61,7 +50,7 @@ final class CannotRemoveBoilerplate implements Error
      * @param DOMElement $element amp-audio element.
      * @return self
      */
-    public static function from_amp_audio(DOMElement $element)
+    public static function fromAmpAudio(DOMElement $element)
     {
         return new self(self::AMP_AUDIO_STRING . new ElementDump($element));
     }
@@ -72,18 +61,18 @@ final class CannotRemoveBoilerplate implements Error
      * @param DOMElement $element Element with an unsupported layout.
      * @return self
      */
-    public static function from_unsupported_layout(DOMElement $element)
+    public static function fromUnsupportedLayout(DOMElement $element)
     {
         return new self(self::UNSUPPORTED_LAYOUT_STRING . new ElementDump($element));
     }
 
     /**
-     * Instantiate a CannotRemoveBoilerplate object for an element with an unsupported layout.
+     * Instantiate a CannotRemoveBoilerplate object for render-delaying script element.
      *
      * @param DOMElement $element Element with an unsupported layout.
      * @return self
      */
-    public static function from_render_delaying_script(DOMElement $element)
+    public static function fromRenderDelayingScript(DOMElement $element)
     {
         $elementName = $element->hasAttribute('custom-element') ? $element->getAttribute('custom-element') : '<unknown>';
 
