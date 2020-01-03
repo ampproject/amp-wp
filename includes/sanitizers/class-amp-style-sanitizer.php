@@ -2640,9 +2640,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 			$this->amp_custom_style_element->appendChild( $this->dom->createTextNode( $css ) );
 
-			$included_size          = strlen( $stylesheet_groups[ self::STYLE_AMP_CUSTOM_GROUP_INDEX ]['import_front_matter'] );
+			$included_final_size    = strlen( $stylesheet_groups[ self::STYLE_AMP_CUSTOM_GROUP_INDEX ]['import_front_matter'] );
 			$included_original_size = 0;
-			$excluded_size          = 0;
+			$excluded_final_size    = 0;
 			$excluded_original_size = 0;
 			$included_sources       = [];
 			$excluded_sources       = [];
@@ -2672,11 +2672,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 				if ( $pending_stylesheet['included'] ) {
 					$included_sources[]      = $message;
-					$included_size          += $pending_stylesheet['final_size'];
+					$included_final_size    += $pending_stylesheet['final_size'];
 					$included_original_size += $pending_stylesheet['original_size'];
 				} else {
 					$excluded_sources[]      = $message;
-					$excluded_size          += $pending_stylesheet['final_size'];
+					$excluded_final_size    += $pending_stylesheet['final_size'];
 					$excluded_original_size += $pending_stylesheet['original_size'];
 				}
 			}
@@ -2684,7 +2684,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$include_manifest_comment = (
 				'always' === $this->args['include_manifest_comment']
 				||
-				( $excluded_size > 0 && 'when_excessive' === $this->args['include_manifest_comment'] )
+				( $excluded_final_size > 0 && 'when_excessive' === $this->args['include_manifest_comment'] )
 			);
 
 			$comment = '';
@@ -2698,16 +2698,16 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$comment .= sprintf(
 						/* translators: 1: number of included bytes. 2: percentage of total CSS actually included after tree shaking. 3: total included size. */
 						esc_html__( 'Total included size: %1$s bytes (%2$d%% of %3$s total after tree shaking)', 'amp' ),
-						number_format_i18n( $included_size ),
-						$included_size / $included_original_size * 100,
+						number_format_i18n( $included_final_size ),
+						$included_final_size / $included_original_size * 100,
 						number_format_i18n( $included_original_size )
 					) . "\n";
 				} else {
 					$comment .= sprintf(
 						/* translators: %s: number of included bytes. */
 						esc_html__( 'Total included size: %s bytes', 'amp' ),
-						number_format_i18n( $included_size ),
-						$included_size / $included_original_size * 100,
+						number_format_i18n( $included_final_size ),
+						$included_final_size / $included_original_size * 100,
 						number_format_i18n( $included_original_size )
 					) . "\n";
 				}
@@ -2726,19 +2726,19 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$comment .= sprintf(
 						/* translators: 1: number of excluded bytes. 2: percentage of total CSS actually excluded even after tree shaking. 3: total excluded size. */
 						esc_html__( 'Total excluded size: %1$s bytes (%2$d%% of %3$s total after tree shaking)', 'amp' ),
-						number_format_i18n( $excluded_size ),
-						$excluded_size / $excluded_original_size * 100,
+						number_format_i18n( $excluded_final_size ),
+						$excluded_final_size / $excluded_original_size * 100,
 						number_format_i18n( $excluded_original_size )
 					) . "\n";
 				} else {
 					$comment .= sprintf(
 						/* translators: %s: number of excluded bytes. */
 						esc_html__( 'Total excluded size: %s bytes', 'amp' ),
-						number_format_i18n( $excluded_size )
+						number_format_i18n( $excluded_final_size )
 					) . "\n";
 				}
 
-				$total_size          = $included_size + $excluded_size;
+				$total_size          = $included_final_size + $excluded_final_size;
 				$total_original_size = $included_original_size + $excluded_original_size;
 				if ( $total_size !== $total_original_size ) {
 					$comment .= "\n";
