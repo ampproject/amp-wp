@@ -11,7 +11,7 @@ import { useCallback, useEffect, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { useStory } from '../../app';
+import { DesignMode, useStory } from '../../app';
 import useCanvas from './useCanvas';
 import Element from './element';
 import Movable from './../movable';
@@ -27,8 +27,8 @@ function Page() {
 	const [ targetEl, setTargetEl ] = useState( null );
 
 	const {
-		state: { currentPage, selectedElements },
-		actions: { clearSelection, selectElementById, toggleElementIdInSelection },
+		state: { designMode, currentPage, selectedElements },
+		actions: { setDesignMode, clearSelection, selectElementById, toggleElementIdInSelection },
 	} = useStory();
 
 	const {
@@ -39,8 +39,14 @@ function Page() {
 	const [ pushEvent, setPushEvent ] = useState( null );
 
 	useEffect( () => {
-		setBackgroundClickHandler( () => clearSelection() );
-	}, [ setBackgroundClickHandler, clearSelection ] );
+		setBackgroundClickHandler( () => {
+			if ( designMode === DesignMode.REPLAY ) {
+				setDesignMode( DesignMode.DESIGN );
+				return;
+			}
+			clearSelection();
+		} );
+	}, [ designMode, setBackgroundClickHandler, clearSelection, setDesignMode ] );
 
 	const handleSelectElement = useCallback( ( elId, evt ) => {
 		if ( evt.metaKey ) {
@@ -76,7 +82,7 @@ function Page() {
 				);
 			} ) }
 
-			{ selectedElement && targetEl && (
+			{ designMode === DesignMode.DESIGN && selectedElement && targetEl && (
 				<Movable
 					selectedElement={ selectedElement }
 					targetEl={ targetEl }

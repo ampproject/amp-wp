@@ -17,6 +17,7 @@ import {
  * Internal dependencies
  */
 import theme, { GlobalStyle } from '../theme';
+import DesignMode from './designMode';
 import { useHistory, HistoryProvider } from './history';
 import { useAPI, APIProvider } from './api';
 import { useConfig, ConfigProvider } from './config';
@@ -51,6 +52,7 @@ App.propTypes = {
 export default App;
 
 export {
+	DesignMode,
 	useHistory,
 	useAPI,
 	useStory,

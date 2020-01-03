@@ -3,6 +3,7 @@
  */
 import { elementTypes } from '../elements';
 import ActionsPanel from './actions';
+import AnimationsPanel from './animations';
 import ColorPanel from './color';
 import BackgroundColorPanel from './backgroundColor';
 import FullbleedPanel from './fullbleed';
@@ -14,6 +15,7 @@ import ScalePanel from './scale';
 import TextPanel from './text';
 
 const ACTIONS = 'actions';
+const ANIMATIONS = 'animations';
 const COLOR = 'color';
 const SCALE = 'scale';
 const FONT = 'font';
@@ -26,6 +28,7 @@ const BACKGROUND_COLOR = 'backgroundColor';
 
 export const PanelTypes = {
 	ACTIONS,
+	ANIMATIONS,
 	POSITION,
 	SIZE,
 	SCALE,
@@ -51,6 +54,7 @@ export function getPanels( elements ) {
 	// Panels to always display, independent of the selected element.
 	const sharedPanels = [
 		{ type: ACTIONS, Panel: ActionsPanel },
+		{ type: ANIMATIONS, Panel: AnimationsPanel },
 	];
 	// Find which panels all the selected elements have in common
 	const selectionPanels = elements

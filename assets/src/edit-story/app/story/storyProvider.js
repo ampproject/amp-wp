@@ -11,6 +11,7 @@ import { useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
+import DesignMode from '../designMode';
 import Context from './context';
 
 import useLoadStory from './effects/useLoadStory';
@@ -35,6 +36,7 @@ function StoryProvider( { storyId, children } ) {
 	// Story state is stored in these three immutable variables only!
 	// Don't update 1 of these in an effect based off another base variable.
 	// Only update these directly as a response to user or api interactions.
+	const [ designMode, setDesignMode ] = useState( DesignMode.DESIGN );
 	const [ pages, setPages ] = useState( [] );
 	const [ title, setTitle ] = useState( '' );
 	const [ link, setLink ] = useState( '' );
@@ -73,6 +75,7 @@ function StoryProvider( { storyId, children } ) {
 
 	const state = {
 		state: {
+			designMode,
 			pages,
 			currentPageIndex,
 			currentPageNumber,
@@ -86,6 +89,7 @@ function StoryProvider( { storyId, children } ) {
 			link,
 		},
 		actions: {
+			setDesignMode,
 			setCurrentPageByIndex,
 			addBlankPage,
 			clearSelection,

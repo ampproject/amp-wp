@@ -12,9 +12,12 @@ import { useLayoutEffect, useRef } from '@wordpress/element';
 /**
  * Internal dependencies
  */
+import { DesignMode, useStory } from '../../app';
 import { getDefinitionForType } from '../../elements';
 
 const Wrapper = styled.div``;
+
+const AnimationWrapper = styled.div``;
 
 function Element( {
 	isEditing,
@@ -28,13 +31,43 @@ function Element( {
 		...rest
 	},
 } ) {
-	const { Display, Edit } = getDefinitionForType( type );
+	const { Display, Edit, Replay } = getDefinitionForType( type );
 	const element = useRef();
 	const props = { ...rest, id };
+
+	const {
+		state: { designMode },
+	} = useStory();
 
 	useLayoutEffect( () => {
 		setNodeForElement( id, element.current );
 	}, [ id, setNodeForElement ] );
+
+	// Replay mode.
+	if ( designMode === DesignMode.REPLAY ) {
+		// DO NOT SUBMIT: It's critical for this to have a positioned/sized wrapper
+		// as defined in the #4018.
+		const Comp = Replay || Display;
+		const { animations } = rest;
+		const AnimationsCountdown = ( { animationIndex } ) => {
+			if ( animations && animationIndex < animations.length ) {
+				return (
+					<AnimationWrapper data-animation-id={ animations[ animationIndex ].id } >
+						<AnimationsCountdown animationIndex={ animationIndex + 1 } />
+					</AnimationWrapper>
+				);
+			}
+			return ( <Comp { ...props } /> );
+		};
+		AnimationsCountdown.propTypes = {
+			animationIndex: PropTypes.number.isRequired,
+		};
+		return (
+			<Wrapper>
+				<AnimationsCountdown animationIndex={ 0 } />
+			</Wrapper>
+		);
+	}
 
 	// Are we editing this element, display this as Edit component.
 	if ( isEditing ) {
