@@ -138,14 +138,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 1.0
 	 * @var array[] {
-	 *     @type array              $tokens     Stylesheet tokens, with declaration blocks being represented as arrays.
-	 *     @type string             $serialized Stylesheet tokens serialized into CSS.
-	 *     @type string             $hash       MD5 hash of the parsed stylesheet tokens, prior to tree-shaking.
-	 *     @type DOMElement|DOMAttr $node       Origin for styles.
-	 *     @type array              $sources    Sources for the node.
-	 *     @type bool               $keyframes  Whether an amp-keyframes.
-	 *     @type float              $parse_time The time duration it took to parse the stylesheet, in milliseconds.
-	 *     @type bool               $cached     Whether the parsed stylesheet was retrieved from cache.
+	 *     @type array|null         $tokens        Stylesheet tokens, with declaration blocks being represented as arrays. Null after shaking occurs.
+	 *     @type array|null         $shaken_tokens Shaken stylesheet tokens, where first array index of each array item is whether the token is included. Null until shaking occurs.
+	 *     @type string             $serialized    Stylesheet tokens serialized into CSS.
+	 *     @type string             $hash          MD5 hash of the parsed stylesheet tokens, prior to tree-shaking.
+	 *     @type DOMElement|DOMAttr $element       Origin element for the styles.
+	 *     @type array              $sources       Sources for the node.
+	 *     @type bool               $keyframes     Whether an amp-keyframes.
+	 *     @type float              $parse_time    The time duration it took to parse the stylesheet, in milliseconds.
+	 *     @type bool               $cached        Whether the parsed stylesheet was retrieved from cache.
 	 * }
 	 */
 	private $pending_stylesheets = [];
@@ -1207,7 +1208,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$this->pending_stylesheets[] = [
 			'group'              => $is_keyframes ? self::STYLE_AMP_KEYFRAMES_GROUP_INDEX : self::STYLE_AMP_CUSTOM_GROUP_INDEX,
 			'original_size'      => strlen( $stylesheet ),
-			'node'               => $element,
+			'element'            => $element,
+			'origin'             => 'style_element',
 			'sources'            => $this->current_sources,
 			'priority'           => $this->get_stylesheet_priority( $element ),
 			'tokens'             => $parsed['tokens'],
@@ -1306,7 +1308,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$this->pending_stylesheets[] = [
 			'group'              => self::STYLE_AMP_CUSTOM_GROUP_INDEX,
 			'original_size'      => strlen( $stylesheet ),
-			'node'               => $element,
+			'element'            => $element,
+			'origin'             => 'link_element',
 			'sources'            => $this->current_sources, // Needed because node is removed below.
 			'priority'           => $this->get_stylesheet_priority( $element ),
 			'tokens'             => $parsed['tokens'],
@@ -2526,7 +2529,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$this->pending_stylesheets[] = [
 				'group'         => self::STYLE_AMP_CUSTOM_GROUP_INDEX,
 				'original_size' => strlen( $rule ),
-				'node'          => $element,
+				'element'       => $element,
+				'origin'        => 'style_attribute',
 				'sources'       => $this->current_sources,
 				'priority'      => $this->get_stylesheet_priority( $style_attribute ),
 				'tokens'        => $parsed['tokens'],
@@ -2634,7 +2638,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$included_sources       = [];
 			$excluded_sources       = [];
 			foreach ( $this->pending_stylesheets as $j => $pending_stylesheet ) {
-				if ( self::STYLE_AMP_CUSTOM_GROUP_INDEX !== $pending_stylesheet['group'] || ! ( $pending_stylesheet['node'] instanceof DOMElement ) || ! empty( $pending_stylesheet['duplicate'] ) ) {
+				if ( self::STYLE_AMP_CUSTOM_GROUP_INDEX !== $pending_stylesheet['group'] || ! empty( $pending_stylesheet['duplicate'] ) ) {
 					continue;
 				}
 				$message = sprintf( '[%3d] % 6d B', $pending_stylesheet['priority'], $pending_stylesheet['size'] );
@@ -2644,14 +2648,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$message .= '      ';
 				}
 				$message .= ': ';
-				$message .= $pending_stylesheet['node']->nodeName;
-				if ( $pending_stylesheet['node']->getAttribute( 'id' ) ) {
-					$message .= '#' . $pending_stylesheet['node']->getAttribute( 'id' );
+				$message .= $pending_stylesheet['element']->nodeName;
+				if ( $pending_stylesheet['element']->getAttribute( 'id' ) ) {
+					$message .= '#' . $pending_stylesheet['element']->getAttribute( 'id' );
 				}
-				if ( $pending_stylesheet['node']->getAttribute( 'class' ) ) {
-					$message .= '.' . $pending_stylesheet['node']->getAttribute( 'class' );
+				if ( $pending_stylesheet['element']->getAttribute( 'class' ) ) {
+					$message .= '.' . $pending_stylesheet['element']->getAttribute( 'class' );
 				}
-				foreach ( $pending_stylesheet['node']->attributes as $attribute ) {
+				foreach ( $pending_stylesheet['element']->attributes as $attribute ) {
 					if ( 'id' !== $attribute->nodeName && 'class' !== $attribute->nodeName ) {
 						$message .= sprintf( '[%s=%s]', $attribute->nodeName, $attribute->nodeValue );
 					}
@@ -2812,9 +2816,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$is_admin_bar_css = (
 				self::STYLE_AMP_CUSTOM_GROUP_INDEX === $pending_stylesheet['group']
 				&&
-				$pending_stylesheet['node'] instanceof DOMElement
-				&&
-				'admin-bar-css' === $pending_stylesheet['node']->getAttribute( 'id' )
+				'admin-bar-css' === $pending_stylesheet['element']->getAttribute( 'id' )
 			);
 			if ( $is_admin_bar_css ) {
 				$included = $pending_stylesheet['included'];
@@ -3143,6 +3145,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					}
 				}
 			}
+			$pending_stylesheet['shaken_tokens'] = $shaken_tokens;
+			unset( $pending_stylesheet['tokens'], $shaken_tokens );
 
 			// @todo After this point we could unset( $pending_stylesheet['tokens'] ) since they wouldn't be used in the course of generating a page, though they would still be useful for other purposes.
 			$pending_stylesheet['serialized'] = implode(
@@ -3164,7 +3168,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					},
 					// Include the stylesheet parts that were not marked for exclusion during tree shaking.
 					array_filter(
-						$shaken_tokens,
+						$pending_stylesheet['shaken_tokens'],
 						static function( $shaken_token ) {
 							return false !== $shaken_token[0];
 						}
@@ -3219,7 +3223,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$validation_error['sources'] = $this->pending_stylesheets[ $i ]['sources'];
 				}
 
-				if ( $this->should_sanitize_validation_error( $validation_error, wp_array_slice_assoc( $this->pending_stylesheets[ $i ], [ 'node' ] ) ) ) {
+				$data = [
+					'node' => $this->pending_stylesheets[ $i ]['element'],
+				];
+				if ( $this->should_sanitize_validation_error( $validation_error, $data ) ) {
 					$this->pending_stylesheets[ $i ]['included'] = false;
 					continue; // Skip to the next stylesheet.
 				}
