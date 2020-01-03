@@ -65,7 +65,11 @@ final class TransformationEngine
         if (null === $transformers) {
             $transformers = [];
             foreach ($this->configuration->get(Configuration::KEY_TRANSFORMERS) as $transformerClass) {
-                $transformers[$transformerClass] = new $transformerClass();
+                if ($this->configuration->has($transformerClass)) {
+                    $transformers[$transformerClass] = new $transformerClass($this->configuration->get($transformerClass));
+                } else {
+                    $transformers[$transformerClass] = new $transformerClass();
+                }
             }
         }
 
