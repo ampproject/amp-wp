@@ -54,6 +54,12 @@ final class ServerSideRendering implements Transformer
          */
         $canRemoveBoilerplate = true;
         foreach ($document->amp_elements as $amp_element) {
+
+            // Skip tags inside a template tag.
+            if ($this->hasAncestorWithTag($amp_element, 'template')) {
+                continue;
+            }
+
             /*
              * If these attributes are used on any AMP custom element tags within the document, we can't remove the
              * boilerplate - they require the boilerplate.
@@ -67,7 +73,7 @@ final class ServerSideRendering implements Transformer
              * amp-experiment is a render delaying extension iff the tag is used in the doc. We check for that here
              * rather than checking for the existence of the amp-experiment script in IsRenderDelayingExtension below.
              */
-            if ($amp_element->tagName === 'amp-experiment') {
+            if ($amp_element->tagName === 'amp-experiment' && $this->isAmpExperimentUsed($amp_element)) {
                 $errors->add(Error\CannotRemoveBoilerplate::fromAmpExperiment($amp_element));
                 $canRemoveBoilerplate = false;
             }
@@ -91,11 +97,6 @@ final class ServerSideRendering implements Transformer
                 $canRemoveBoilerplate = false;
             }
         }
-
-        // Emit the amp-runtime marker to indicate that we're applying server side rendering in the document.
-        $ampRuntimeMarker = $document->createElement('style');
-        $ampRuntimeMarker->setAttribute('amp-runtime', '');
-        $document->head->insertBefore($ampRuntimeMarker, $document->head->firstChild);
 
         foreach ($document->xpath->query('.//script[ @custom-element ]', $document->head) as $customElementScript) {
             if ($this->isRenderDelayingExtension($customElementScript)) {
@@ -124,7 +125,7 @@ final class ServerSideRendering implements Transformer
             $noscriptTagInHead->parentNode->removeChild($noscriptTagInHead);
         }
 
-        foreach ($document->xpath->query('.//style[ @amp-boilerplate ]', $document->head) as $boilerplateStyleTag) {
+        foreach ($document->xpath->query('.//style[ @amp-boilerplate or @amp4ads-boilerplate or @amp4email-boilerplate ]', $document->head) as $boilerplateStyleTag) {
             /** @var DOMElement $boilerplateStyleTag */
             $boilerplateStyleTag->parentNode->removeChild($boilerplateStyleTag);
         }
@@ -428,8 +429,8 @@ final class ServerSideRendering implements Transformer
      */
     private function addClass(DOMElement $element, $class)
     {
-        if ($element->hasAttribute('class')) {
-            $class = "{$element->getAttribute($class)} {$class}";
+        if ($element->hasAttribute('class') && ! empty($element->getAttribute('class'))) {
+            $class = "{$element->getAttribute('class')} {$class}";
         }
 
         $element->setAttribute('class', $class);
@@ -465,5 +466,81 @@ final class ServerSideRendering implements Transformer
         $sizer   = $document->createElement(self::SIZER_ELEMENT);
         $sizer->setAttribute('style', sprintf('display:block;padding-top:%1.4F%%;', $padding));
         $element->insertBefore($sizer, $element->firstChild);
+    }
+
+    /**
+     * Check whether the element has an ancestor of a given tag type.
+     *
+     * @param DOMElement $element Element to check the ancestor tree of.
+     * @param string     $tagName Name of the tag to look for.
+     * @return bool Whether the element has an ancestor of the given tag name.
+     */
+    private function hasAncestorWithTag(DOMElement $element, $tagName)
+    {
+        $parent = $element->parentNode;
+        while ($parent !== null) {
+            if ($parent instanceof DOMElement && $parent->tagName === $tagName) {
+                return true;
+            }
+            $parent = $parent->parentNode;
+        }
+        return false;
+    }
+
+    /**
+     * Check if the amp-experiment element is actually used.
+     *
+     * This checks if amp-experiment has one child that is a script/json tag with a textnode that is parsable JSON and
+     * not empty. The validator ensures that the script/json is parsable but since transformers may be used outside of
+     * validation it is checked here as well.
+     *
+     * @param DOMElement $element Element to check,
+     * @return bool Whether the amp-experiment element is actually used.
+     */
+    private function isAmpExperimentUsed(DOMElement $element)
+    {
+        $script = null;
+        $child  = $element->firstChild;
+
+        while ($child) {
+            if ($child->tagName === 'script' && strtolower($child->getAttribute('type')) === 'application/json') {
+                $script = $child;
+                break;
+            }
+            $child = $child->nextSibling;
+        }
+
+        // If not script/json tag, then not used.
+        if ($script === null) {
+            return false;
+        }
+
+        // If not exactly one child is present, then not used.
+        if ($script->childNodes->length !== 1) {
+            return false;
+        }
+
+        $child = $script->firstChild;
+
+        // If child is not a text node or CDATA section, then not used.
+        if ($child->nodeType !== XML_TEXT_NODE && $child->nodeType !== XML_CDATA_SECTION_NODE) {
+            return false;
+        }
+
+        $json = $child->textContent;
+
+        // If textnode is not JSON parsable, then not used.
+        $experiment = json_decode($json, /*$assoc*/ true);
+        if ($experiment === null) {
+            return false;
+        }
+
+        // If JSON is empty, then not used.
+        if (count($experiment) === 0) {
+            return false;
+        }
+
+        // Otherwise, used.
+        return true;
     }
 }

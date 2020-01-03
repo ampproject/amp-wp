@@ -4,6 +4,7 @@ namespace Amp\Optimizer;
 
 use Amp\AmpWP\Dom\Document;
 use Amp\Optimizer\Tests\MarkupComparison;
+use Amp\Optimizer\Tests\TestMarkup;
 use PHPUnit\Framework\TestCase;
 
 final class TransformationEngineTest extends TestCase
@@ -12,7 +13,7 @@ final class TransformationEngineTest extends TestCase
     use MarkupComparison;
 
     const MINIMAL_HTML_MARKUP           = '<html></html>';
-    const MINIMAL_OPTIMIZED_HTML_MARKUP = '<!DOCTYPE html><html i-amphtml-layout="" i-amphtml-no-boilerplate=""><head><style amp-runtime=""></style><meta charset="utf-8"></head><body></body></html>';
+    const MINIMAL_OPTIMIZED_HTML_MARKUP = TestMarkup::DOCTYPE . '<html i-amphtml-layout="" i-amphtml-no-boilerplate=""><head>' . TestMarkup::META_CHARSET . '</head><body></body></html>';
 
     /**
      * Provide data to test optimizing a string of HTML.

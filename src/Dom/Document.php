@@ -129,6 +129,9 @@ final class Document extends DOMDocument {
 	const TAG_BODY     = 'body';
 	const TAG_TEMPLATE = 'template';
 
+	// Attribute to use as a placeholder to move the emoji AMP symbol (⚡) over to DOM.
+	const EMOJI_AMP_ATTRIBUTE = 'emoji-amp';
+
 	/**
 	 * The original encoding of how the Amp\AmpWP\Dom\Document was created.
 	 *
@@ -314,6 +317,7 @@ final class Document extends DOMDocument {
 		$source = $this->replace_self_closing_tags( $source );
 		$source = $this->normalize_document_structure( $source );
 		$source = $this->maybe_replace_noscript_elements( $source );
+		$source = $this->convert_amp_emoji_attribute( $source );
 
 		list( $source, $this->original_encoding ) = $this->detect_and_strip_encoding( $source );
 
@@ -385,6 +389,7 @@ final class Document extends DOMDocument {
 		$html = $this->restore_mustache_template_tokens( $html );
 		$html = $this->maybe_restore_noscript_elements( $html );
 		$html = $this->restore_self_closing_tags( $html );
+		$html = $this->restore_amp_emoji_attribute( $html );
 
 		// Whitespace just causes unit tests to fail... so whitespace begone.
 		if ( '' === trim( $html ) ) {
@@ -974,6 +979,28 @@ final class Document extends DOMDocument {
 	}
 
 	/**
+	 * Covert the emoji AMP symbol (⚡) into pure text.
+	 *
+	 * The emoji symbol gets stripped by DOMDocument::loadHTML().
+	 *
+	 * @param string $source Source HTML string to convert the emoji AMP symbol in.
+	 * @return string Adapted source HTML string.
+	 */
+	private function convert_amp_emoji_attribute( $source ) {
+		return preg_replace( '/(<html [^>]*?)⚡([^\s^>]*)/i', '\1' . self::EMOJI_AMP_ATTRIBUTE . '="\2"', $source, 1 );
+	}
+
+	/**
+	 * Restore the emoji AMP symbol (⚡) from its pure text placeholder.
+	 *
+	 * @param string $html HTML string to restore the AMP emoji symbol in.
+	 * @return string Adapted HTML string.
+	 */
+	private function restore_amp_emoji_attribute( $html ) {
+		return preg_replace( '/(<html [^>]*?)' . preg_quote( self::EMOJI_AMP_ATTRIBUTE, '/' ) . '="([^"]*)"/i', '\1⚡\2', $html, 1 );
+	}
+
+	/**
 	 * Determine whether a node can be in the head.
 	 *
 	 * @link https://github.com/ampproject/amphtml/blob/445d6e3be8a5063e2738c6f90fdcd57f2b6208be/validator/engine/htmlparser.js#L83-L100
@@ -1028,7 +1055,7 @@ final class Document extends DOMDocument {
 				}
 				return $this->body;
 			case 'amp_elements':
-				$this->amp_elements = $this->xpath->query( "//*[ starts-with( name(), 'amp-' ) ]" );
+				$this->amp_elements = $this->xpath->query( ".//*[ starts-with( name(), 'amp-' ) ]", $this->body );
 
 				return $this->amp_elements;
 		}
