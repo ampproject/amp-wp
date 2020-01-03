@@ -138,11 +138,17 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 1.0
 	 * @var array[] {
+	 *     @type int                $group         Either STYLE_AMP_CUSTOM_GROUP_INDEX or STYLE_AMP_KEYFRAMES_GROUP_INDEX.
+	 *     @type int                $original_size The byte size of the stylesheet prior to parsing and tree shaking.
+	 *     @type int                $final_size    The byte size of the stylesheet after parsing and tree shaking.
+	 *     @type DOMElement|DOMAttr $element       Origin element for the styles.
+	 *     @type string             $origin        Either 'style_element', 'style_attribute', or 'link_element'.
+	 *     @type array              $sources       Source stack.
+	 *     @type int                $priority      Priority of the stylesheet.
 	 *     @type array|null         $tokens        Stylesheet tokens, with declaration blocks being represented as arrays. Null after shaking occurs.
 	 *     @type array|null         $shaken_tokens Shaken stylesheet tokens, where first array index of each array item is whether the token is included. Null until shaking occurs.
 	 *     @type string             $serialized    Stylesheet tokens serialized into CSS.
 	 *     @type string             $hash          MD5 hash of the parsed stylesheet tokens, prior to tree-shaking.
-	 *     @type DOMElement|DOMAttr $element       Origin element for the styles.
 	 *     @type array              $sources       Sources for the node.
 	 *     @type bool               $keyframes     Whether an amp-keyframes.
 	 *     @type float              $parse_time    The time duration it took to parse the stylesheet, in milliseconds.
@@ -1208,6 +1214,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$this->pending_stylesheets[] = [
 			'group'              => $is_keyframes ? self::STYLE_AMP_KEYFRAMES_GROUP_INDEX : self::STYLE_AMP_CUSTOM_GROUP_INDEX,
 			'original_size'      => strlen( $stylesheet ),
+			'final_size'         => null,
 			'element'            => $element,
 			'origin'             => 'style_element',
 			'sources'            => $this->current_sources,
@@ -1308,6 +1315,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$this->pending_stylesheets[] = [
 			'group'              => self::STYLE_AMP_CUSTOM_GROUP_INDEX,
 			'original_size'      => strlen( $stylesheet ),
+			'final_size'         => null,
 			'element'            => $element,
 			'origin'             => 'link_element',
 			'sources'            => $this->current_sources, // Needed because node is removed below.
@@ -2529,6 +2537,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$this->pending_stylesheets[] = [
 				'group'         => self::STYLE_AMP_CUSTOM_GROUP_INDEX,
 				'original_size' => strlen( $rule ),
+				'final_size'    => null,
 				'element'       => $element,
 				'origin'        => 'style_attribute',
 				'sources'       => $this->current_sources,
@@ -2641,9 +2650,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				if ( self::STYLE_AMP_CUSTOM_GROUP_INDEX !== $pending_stylesheet['group'] || ! empty( $pending_stylesheet['duplicate'] ) ) {
 					continue;
 				}
-				$message = sprintf( '[%3d] % 6d B', $pending_stylesheet['priority'], $pending_stylesheet['size'] );
-				if ( $pending_stylesheet['size'] && $pending_stylesheet['size'] !== $pending_stylesheet['original_size'] ) {
-					$message .= sprintf( ' (%2d%%)', $pending_stylesheet['size'] / $pending_stylesheet['original_size'] * 100 );
+				$message = sprintf( '[%3d] % 6d B', $pending_stylesheet['priority'], $pending_stylesheet['final_size'] );
+				if ( $pending_stylesheet['final_size'] && $pending_stylesheet['final_size'] !== $pending_stylesheet['original_size'] ) {
+					$message .= sprintf( ' (%2d%%)', $pending_stylesheet['final_size'] / $pending_stylesheet['original_size'] * 100 );
 				} else {
 					$message .= '      ';
 				}
@@ -2663,11 +2672,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 				if ( $pending_stylesheet['included'] ) {
 					$included_sources[]      = $message;
-					$included_size          += $pending_stylesheet['size'];
+					$included_size          += $pending_stylesheet['final_size'];
 					$included_original_size += $pending_stylesheet['original_size'];
 				} else {
 					$excluded_sources[]      = $message;
-					$excluded_size          += $pending_stylesheet['size'];
+					$excluded_size          += $pending_stylesheet['final_size'];
 					$excluded_original_size += $pending_stylesheet['original_size'];
 				}
 			}
@@ -3176,8 +3185,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				)
 			);
 
-			$pending_stylesheet['included'] = null; // To be determined below.
-			$pending_stylesheet['size']     = strlen( $pending_stylesheet['serialized'] );
+			$pending_stylesheet['included']   = null; // To be determined below.
+			$pending_stylesheet['final_size'] = strlen( $pending_stylesheet['serialized'] );
 
 			// If this stylesheet is a duplicate of something that came before, mark the previous as not included automatically.
 			if ( isset( $previously_seen_stylesheet_index[ $pending_stylesheet['hash'] ] ) ) {
@@ -3213,7 +3222,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			// Report validation error if size is now too big.
-			if ( $current_concatenated_size + $this->pending_stylesheets[ $i ]['size'] > $max_bytes ) {
+			if ( $current_concatenated_size + $this->pending_stylesheets[ $i ]['final_size'] > $max_bytes ) {
 				$validation_error = [
 					'code'      => self::STYLESHEET_TOO_LONG,
 					'type'      => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
@@ -3235,7 +3244,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			if ( ! isset( $this->pending_stylesheets[ $i ]['included'] ) ) {
 				$this->pending_stylesheets[ $i ]['included'] = true;
 				$included_count++;
-				$current_concatenated_size += $this->pending_stylesheets[ $i ]['size'];
+				$current_concatenated_size += $this->pending_stylesheets[ $i ]['final_size'];
 			}
 		}
 
