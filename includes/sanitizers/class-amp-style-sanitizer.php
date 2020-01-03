@@ -144,6 +144,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *     @type DOMElement|DOMAttr $node       Origin for styles.
 	 *     @type array              $sources    Sources for the node.
 	 *     @type bool               $keyframes  Whether an amp-keyframes.
+	 *     @type float              $parse_time The time duration it took to parse the stylesheet, in milliseconds.
+	 *     @type bool               $cached     Whether the parsed stylesheet was retrieved from cache.
 	 * }
 	 */
 	private $pending_stylesheets = [];
@@ -249,14 +251,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	private $used_tag_names;
-
-	/**
-	 * Amount of time that was spent parsing CSS.
-	 *
-	 * @since 1.0
-	 * @var float
-	 */
-	private $parse_css_duration = 0.0;
 
 	/**
 	 * Current node being processed.
@@ -797,8 +791,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				null
 		);
 
-		$this->parse_css_duration = 0.0;
-
 		/*
 		 * Note that xpath is used to query the DOM so that the link and style elements will be
 		 * in document order. DOMNode::compareDocumentPosition() is not yet implemented.
@@ -872,9 +864,16 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$this->did_convert_elements = true;
 
-		if ( $this->parse_css_duration > 0.0 ) {
-			AMP_HTTP::send_server_timing( 'amp_parse_css', $this->parse_css_duration, 'AMP Parse CSS' );
+		$parse_css_duration = 0.0;
+		$shake_css_duration = 0.0;
+		foreach ( $this->pending_stylesheets as $pending_stylesheet ) {
+			if ( ! $pending_stylesheet['cached'] ) {
+				$parse_css_duration += $pending_stylesheet['parse_time'];
+			}
+			$shake_css_duration += $pending_stylesheet['shake_time'];
 		}
+		AMP_HTTP::send_server_timing( 'amp_parse_css', $parse_css_duration, 'AMP Parse CSS' );
+		AMP_HTTP::send_server_timing( 'amp_shake_css', $shake_css_duration, 'AMP Tree-Shake CSS' );
 	}
 
 	/**
@@ -1213,6 +1212,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			'priority'           => $this->get_stylesheet_priority( $element ),
 			'tokens'             => $parsed['tokens'],
 			'hash'               => $parsed['hash'],
+			'parse_time'         => $parsed['parse_time'],
+			'shake_time'         => null,
+			'cached'             => $parsed['cached'],
 			'imported_font_urls' => $parsed['imported_font_urls'],
 		];
 
@@ -1309,6 +1311,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			'priority'           => $this->get_stylesheet_priority( $element ),
 			'tokens'             => $parsed['tokens'],
 			'hash'               => $parsed['hash'],
+			'parse_time'         => $parsed['parse_time'],
+			'shake_time'         => null,
+			'cached'             => $parsed['cached'],
 			'imported_font_urls' => $parsed['imported_font_urls'],
 		];
 
@@ -1407,11 +1412,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *    @type array  $validation_results Validation results, array containing arrays with error and sanitized keys.
 	 *    @type array  $imported_font_urls Imported font stylesheet URLs.
 	 *    @type int    $priority           The priority of the stylesheet.
+	 *    @type float  $parse_time         The time duration it took to parse the stylesheet, in milliseconds.
+	 *    @type float  $shake_time         The time duration it took to tree-shake the stylesheet, in milliseconds.
+	 *    @type bool   $cached             Whether the parsed stylesheet was cached.
 	 * }
 	 */
 	private function get_parsed_stylesheet( $stylesheet, $options = [] ) {
 		$parsed      = null;
 		$cache_key   = null;
+		$cached      = true;
 		$cache_group = 'amp-parsed-stylesheet-v23'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
 
 		$cache_impacting_options = array_merge(
@@ -1452,6 +1461,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		if ( ! $parsed || ! isset( $parsed['tokens'] ) || ! is_array( $parsed['tokens'] ) ) {
 			$parsed = $this->parse_stylesheet( $stylesheet, $options );
+			$cached = false;
 
 			/*
 			 * When an object cache is not available, we cache with an expiration to prevent the options table from
@@ -1466,6 +1476,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
+		$parsed['cached'] = $cached;
 		return $parsed;
 	}
 
@@ -1656,6 +1667,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *    @type string $hash               MD5 hash of the parsed stylesheet.
 	 *    @type array  $validation_results Validation results, array containing arrays with error and sanitized keys.
 	 *    @type array  $imported_font_urls Imported font stylesheet URLs.
+	 *    @type float  $parse_time         The time duration it took to parse the stylesheet, in milliseconds.
 	 * }
 	 */
 	private function parse_stylesheet( $stylesheet_string, $options = [] ) {
@@ -1829,14 +1841,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		// @todo This should rather be returned as an arg and included in pending_stylesheets.
-		$this->parse_css_duration += ( microtime( true ) - $start_time );
-
 		return array_merge(
 			compact( 'tokens', 'validation_results' ),
 			[
 				'imported_font_urls' => $parsed_stylesheet['imported_font_urls'],
 				'hash'               => md5( wp_json_encode( $tokens ) ),
+				'parse_time'         => ( microtime( true ) - $start_time ),
 			]
 		);
 	}
@@ -2521,6 +2531,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				'priority'      => $this->get_stylesheet_priority( $style_attribute ),
 				'tokens'        => $parsed['tokens'],
 				'hash'          => $parsed['hash'],
+				'parse_time'    => $parsed['parse_time'],
+				'shake_time'    => null,
+				'cached'        => $parsed['cached'],
 			];
 
 			if ( $element->hasAttribute( 'class' ) ) {
@@ -3014,6 +3027,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
+			$start_time    = microtime( true );
 			$shaken_tokens = [];
 			foreach ( $pending_stylesheet['tokens'] as $token ) {
 				if ( is_string( $token ) ) {
@@ -3168,7 +3182,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 			$previously_seen_stylesheet_index[ $pending_stylesheet['hash'] ] = $pending_stylesheet_index;
 			unset( $shaken_tokens );
-		}
+
+			$pending_stylesheet['shake_time'] = microtime( true ) - $start_time;
+		} // End foreach pending_stylesheets.
 
 		unset( $pending_stylesheet );
 
