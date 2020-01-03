@@ -14,6 +14,7 @@ import { useRef } from '@wordpress/element';
 import { PAGE_WIDTH, PAGE_HEIGHT } from '../../constants';
 import { useStory } from '../../app';
 import { getDefinitionForType } from '../../elements';
+import { getBox } from '../../elements/shared';
 import useEffectSinglePath from '../../utils/useEffectSinglePath';
 
 const WIDTH = 200;
@@ -33,9 +34,10 @@ function BitmapRenderer( {} ) {
 	useEffectSinglePath( () => {
 		const canvas = canvasRef.current;
 		const context = canvas.getContext( '2d' );
+		const scaleX = WIDTH / PAGE_WIDTH;
+		const scaleY = HEIGHT / PAGE_HEIGHT;
 		context.resetTransform();
-		context.scale( WIDTH / PAGE_WIDTH, HEIGHT / PAGE_HEIGHT );
-		context.clearRect( 0, 0, PAGE_WIDTH, PAGE_HEIGHT );
+		context.clearRect( 0, 0, WIDTH, HEIGHT );
 
 		if ( ! currentPage ) {
 			return null;
@@ -44,16 +46,29 @@ function BitmapRenderer( {} ) {
 		let promise = Promise.resolve();
 		currentPage.elements.forEach( ( element ) => {
 			promise = promise.then( () => {
-				const { type, x, y, width, height } = element;
+				const { type } = element;
 				const { Render } = getDefinitionForType( type );
+				const { x, y, width, height, rotationAngle } = getBox( element );
+
+				context.resetTransform();
+				context.scale( scaleX, scaleY );
+				if ( rotationAngle !== 0 ) {
+					// Rotate around center origin.
+					context.translate( x + ( width / 2 ), y + ( height / 2 ) );
+					context.rotate( rotationAngle * Math.PI / 180 );
+					context.translate( -width / 2, -height / 2 );
+				} else {
+					context.translate( x, y );
+				}
+
 				if ( Render ) {
-					return Render( context, element );
+					return Render( context, { ...element, x: 0, y: 0, width, height, rotationAngle } );
 				}
 
 				// Show that a renderer is absent for debugging for now.
 				context.lineWidth = 0.5;
 				context.strokeStyle = 'red';
-				context.strokeRect( x, y, width, height );
+				context.strokeRect( 0, 0, width, height );
 				return null;
 			} );
 		} );

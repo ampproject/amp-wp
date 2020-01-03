@@ -2,23 +2,21 @@
 /**
  * Internal dependencies
  */
-import { getBox } from '../shared';
 import { getImgProps } from './util';
 
-function ImageRender( context, { src, origRatio, width, height, x, y, scale, focalX, focalY, rotationAngle, isFullbleed } ) {
+function ImageRender( context, { src, origRatio, width, height, scale, focalX, focalY } ) {
 	return loadImage( src ).then( ( image ) => {
 		const { naturalWidth } = image;
-		const elementProps = getBox( { x, y, width, height, rotationAngle, isFullbleed } );
-		const imgProps = getImgProps( elementProps.width, elementProps.height, scale, focalX, focalY, origRatio );
+		const imgProps = getImgProps( width, height, scale, focalX, focalY, origRatio );
 		const naturalScale = naturalWidth / imgProps.width;
 		const sx = imgProps.offsetX * naturalScale;
 		const sy = imgProps.offsetY * naturalScale;
-		const sw = elementProps.width * naturalScale;
-		const sh = elementProps.height * naturalScale;
+		const sw = width * naturalScale;
+		const sh = height * naturalScale;
 		context.drawImage(
 			image,
 			sx, sy, sw, sh,
-			elementProps.x, elementProps.y, elementProps.width, elementProps.height,
+			0, 0, width, height,
 		);
 	} );
 }
