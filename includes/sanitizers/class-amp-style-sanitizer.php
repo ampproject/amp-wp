@@ -1213,7 +1213,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$this->pending_stylesheets[] = [
 			'group'              => $is_keyframes ? self::STYLE_AMP_KEYFRAMES_GROUP_INDEX : self::STYLE_AMP_CUSTOM_GROUP_INDEX,
-			'original_size'      => strlen( $stylesheet ),
+			'original_size'      => (int) strlen( $stylesheet ),
 			'final_size'         => null,
 			'element'            => $element,
 			'origin'             => 'style_element',
@@ -2590,7 +2590,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		foreach ( $this->pending_stylesheets as $i => $pending_stylesheet ) {
 			foreach ( $pending_stylesheet['tokens'] as $j => $part ) {
 				if ( is_string( $part ) && 0 === strpos( $part, '@import' ) ) {
-					$stylesheet_groups[ $pending_stylesheet['group'] ]['import_front_matter'] .= $part;
+					$stylesheet_groups[ $pending_stylesheet['group'] ]['import_front_matter'] .= $part; // @todo Not currently relayed in stylesheet data.
 					unset( $this->pending_stylesheets[ $i ]['tokens'][ $j ] );
 				}
 			}
@@ -2670,6 +2670,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					}
 				}
 
+				// @todo The included size needs to be exposed for inclusion in the admin bar. There could be a new sanitizer method for extending the admin bar.
 				if ( $pending_stylesheet['included'] ) {
 					$included_sources[]      = $message;
 					$included_final_size    += $pending_stylesheet['final_size'];
@@ -2856,6 +2857,43 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$admin_bar
 			);
 		}
+	}
+
+	/**
+	 * Get data to amend to the validate response.
+	 *
+	 * @return array {
+	 *     Validate response data.
+	 *
+	 *     @type array $stylesheets Stylesheets.
+	 * }
+	 */
+	public function get_validate_response_data() {
+		$stylesheets = [];
+		foreach ( $this->pending_stylesheets as $j => $pending_stylesheet ) {
+			$attributes = [];
+			foreach ( $pending_stylesheet['element']->attributes as $attribute ) {
+				$attributes[ $attribute->nodeName ] = $attribute->nodeValue;
+			}
+			$pending_stylesheet['element'] = [
+				'name'       => $pending_stylesheet['element']->nodeName,
+				'attributes' => $attributes,
+			];
+
+			switch ( $pending_stylesheet['group'] ) {
+				case self::STYLE_AMP_CUSTOM_GROUP_INDEX:
+					$pending_stylesheet['group'] = 'amp-custom';
+					break;
+				case self::STYLE_AMP_KEYFRAMES_SPEC_NAME:
+					$pending_stylesheet['group'] = 'amp-keyframes';
+					break;
+			}
+
+			unset( $pending_stylesheet['serialized'] );
+			$stylesheets[] = $pending_stylesheet;
+		}
+
+		return compact( 'stylesheets' );
 	}
 
 	/**

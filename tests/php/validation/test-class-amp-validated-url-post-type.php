@@ -667,12 +667,12 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		];
 
 		// If there is an embed and a theme source, this should only output the embed icon.
-		$sources_column = get_echo( [ 'AMP_Validated_URL_Post_Type', 'render_sources_column' ], [ $error_summary, $post_id ] );
+		$sources_column = get_echo( [ 'AMP_Validated_URL_Post_Type', 'render_sources_column' ], [ $error_summary['sources_with_invalid_output'], $post_id ] );
 		$this->assertEquals( '<strong class="source"><span class="dashicons dashicons-wordpress-alt"></span>Embed</strong>', $sources_column );
 
 		// If there is no embed source, but there is a theme, this should output the theme icon.
 		unset( $error_summary['sources_with_invalid_output']['embed'] );
-		$sources_column      = get_echo( [ 'AMP_Validated_URL_Post_Type', 'render_sources_column' ], [ $error_summary, $post_id ] );
+		$sources_column      = get_echo( [ 'AMP_Validated_URL_Post_Type', 'render_sources_column' ], [ $error_summary['sources_with_invalid_output'], $post_id ] );
 		$expected_theme_icon = '<strong class="source"><span class="dashicons dashicons-admin-appearance"></span>' . $theme_name . '</strong>';
 		$this->assertEquals( $expected_theme_icon, $sources_column );
 
@@ -681,28 +681,28 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$error_summary['sources_with_invalid_output']['plugin'] = [ $plugin_name ];
 		$expected_plugin_icon                                   = '<strong class="source"><span class="dashicons dashicons-admin-plugins"></span>' . $plugin_name . '</strong>';
 		unset( $error_summary['sources_with_invalid_output']['embed'] );
-		$sources_column = get_echo( [ 'AMP_Validated_URL_Post_Type', 'render_sources_column' ], [ $error_summary, $post_id ] );
+		$sources_column = get_echo( [ 'AMP_Validated_URL_Post_Type', 'render_sources_column' ], [ $error_summary['sources_with_invalid_output'], $post_id ] );
 		$this->assertEquals( $expected_plugin_icon . $expected_theme_icon, $sources_column );
 
 		// If there is a 'core' source, it should appear in the column output.
 		$error_summary['sources_with_invalid_output']['core'] = [];
-		$sources_column                                       = get_echo( [ 'AMP_Validated_URL_Post_Type', 'render_sources_column' ], [ $error_summary, $post_id ] );
+		$sources_column                                       = get_echo( [ 'AMP_Validated_URL_Post_Type', 'render_sources_column' ], [ $error_summary['sources_with_invalid_output'], $post_id ] );
 		$this->assertContains( '<strong><span class="dashicons dashicons-wordpress-alt"></span>Other (0)</strong>', $sources_column );
 
 		// Even if there is a hook in the sources, it should not appear in the column if there is any other source.
 		$hook_name = 'wp_header';
 		$error_summary['sources_with_invalid_output']['hook'] = [ $hook_name ];
-		$sources_column                                       = get_echo( [ 'AMP_Validated_URL_Post_Type', 'render_sources_column' ], [ $error_summary, $post_id ] );
+		$sources_column                                       = get_echo( [ 'AMP_Validated_URL_Post_Type', 'render_sources_column' ], [ $error_summary['sources_with_invalid_output'], $post_id ] );
 		$this->assertNotContains( $hook_name, $sources_column );
 
 		// If a hook is the only source, it should appear in the column.
 		$error_summary['sources_with_invalid_output'] = [ 'hook' => $hook_name ];
-		$sources_column                               = get_echo( [ 'AMP_Validated_URL_Post_Type', 'render_sources_column' ], [ $error_summary, $post_id ] );
+		$sources_column                               = get_echo( [ 'AMP_Validated_URL_Post_Type', 'render_sources_column' ], [ $error_summary['sources_with_invalid_output'], $post_id ] );
 		$this->assertEquals( '<strong class="source"><span class="dashicons dashicons-wordpress-alt"></span>Hook: ' . $hook_name . '</strong>', $sources_column );
 
 		// Content gets a translated name.
 		$error_summary['sources_with_invalid_output'] = [ 'hook' => 'the_content' ];
-		$sources_column                               = get_echo( [ 'AMP_Validated_URL_Post_Type', 'render_sources_column' ], [ $error_summary, $post_id ] );
+		$sources_column                               = get_echo( [ 'AMP_Validated_URL_Post_Type', 'render_sources_column' ], [ $error_summary['sources_with_invalid_output'], $post_id ] );
 		$this->assertEquals( '<strong class="source"><span class="dashicons dashicons-edit"></span>Content</strong>', $sources_column );
 
 		// Blocks are listed separately, overriding Content.
@@ -710,13 +710,13 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 			'hook'   => 'the_content',
 			'blocks' => [ 'core/html' ],
 		];
-		$sources_column                               = get_echo( [ 'AMP_Validated_URL_Post_Type', 'render_sources_column' ], [ $error_summary, $post_id ] );
+		$sources_column                               = get_echo( [ 'AMP_Validated_URL_Post_Type', 'render_sources_column' ], [ $error_summary['sources_with_invalid_output'], $post_id ] );
 		$this->assertEquals( '<strong class="source"><span class="dashicons dashicons-edit"></span>Custom HTML</strong>', $sources_column );
 
 		// If there's no source in 'sources_with_invalid_output', this should output the theme name.
 		update_post_meta( $post_id, '_amp_validated_environment', [ 'theme' => $theme_name ] );
 		$error_summary['sources_with_invalid_output'] = [];
-		$sources_column                               = get_echo( [ 'AMP_Validated_URL_Post_Type', 'render_sources_column' ], [ $error_summary, $post_id ] );
+		$sources_column                               = get_echo( [ 'AMP_Validated_URL_Post_Type', 'render_sources_column' ], [ $error_summary['sources_with_invalid_output'], $post_id ] );
 		$this->assertEquals( '<div class="source"><span class="dashicons dashicons-admin-appearance"></span>' . $theme_name . ' (?)</div>', $sources_column );
 	}
 

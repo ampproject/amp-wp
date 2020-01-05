@@ -31,6 +31,7 @@ domReady( () => {
 	handleStatusChange();
 	handleBulkActions();
 	watchForUnsavedChanges();
+	setupStylesheetsMetabox();
 } );
 
 let beforeUnloadPromptAdded = false;
@@ -375,4 +376,26 @@ const handleBulkActions = () => {
 			}
 		} );
 	} );
+};
+
+/**
+ * Set up stylesheet metabox.
+ */
+const setupStylesheetsMetabox = () => {
+	const metabox = document.getElementById( 'amp_stylesheets' );
+
+	for ( const toggleStylesheetDetailsButton of metabox.querySelectorAll( '.toggle-stylesheet-details' ) ) {
+		const row = toggleStylesheetDetailsButton.closest( 'tr' );
+		row.addEventListener( 'click', () => {
+			row.classList.toggle( 'expanded' );
+		} );
+	}
+
+	for ( const stylesheetDetailsElements of metabox.querySelectorAll( '.stylesheet-details' ) ) {
+		const showRemovedStylesCheckbox = stylesheetDetailsElements.querySelector( '.show-removed-styles' );
+		const shakenStylesheetContainer = stylesheetDetailsElements.querySelector( '.shaken-stylesheet' );
+		showRemovedStylesCheckbox.addEventListener( 'click', () => {
+			shakenStylesheetContainer.classList.toggle( 'removed-styles-shown', showRemovedStylesCheckbox.checked );
+		} );
+	}
 };

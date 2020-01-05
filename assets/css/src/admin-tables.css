@@ -2,8 +2,7 @@
 	color: #767676;
 }
 
-.column-sources .dashicons,
-.column-sources_with_invalid_output .dashicons {
+.source > .dashicons {
 	margin-right: 5px;
 }
 
@@ -17,7 +16,6 @@
 	color: #ebb04f;
 }
 
-.column-source,
 .dashicons-wordpress-alt,
 .column-sources_with_invalid_output .dashicons-wordpress-alt {
 	color: #92b371;
