@@ -34,7 +34,7 @@ TextSave.propTypes = {
 	backgroundColor: PropTypes.string,
 	fontFamily: PropTypes.string,
 	fontSize: PropTypes.string,
-	fontWeight: PropTypes.string,
+	fontWeight: PropTypes.number,
 	fontStyle: PropTypes.string,
 	width: PropTypes.number.isRequired,
 	height: PropTypes.number.isRequired,
