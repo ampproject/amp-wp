@@ -85,7 +85,7 @@ function TextDisplay( { id, content, color, backgroundColor, width, height, x, y
 
 	useEffect( () => {
 		maybeEnqueueFontStyle( fontFamily, getFont );
-	}, [ fontFamily ] );
+	}, [ fontFamily, getFont ] );
 
 	const clickTime = useRef();
 	const handleMouseDown = useCallback( () => {

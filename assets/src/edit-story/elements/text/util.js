@@ -51,7 +51,7 @@ export const getHandleKeyCommand = ( setEditorState ) => ( command, currentEdito
  * Allows dynamically enqueuing font styles when needed.
  *
  * @param {string} name Font name.
- * @param {function} fonts List of font objects.
+ * @param {Function} fonts List of font objects.
  */
 export const maybeEnqueueFontStyle = ( name, getFont ) => {
 	if ( ! name ) {
