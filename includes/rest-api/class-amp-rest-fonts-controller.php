@@ -62,15 +62,14 @@ class AMP_REST_Fonts_Controller extends WP_REST_Controller {
 
 		$fonts = array_slice( $fonts, ( ( $page - 1 ) * $per_page ), $per_page );
 
-		$formatted_fonts = array();
+		$formatted_fonts = [];
 		foreach ( $fonts as $font ) {
-			if ( ! $this->check_read_permission( $font, $request ) ) {
+			if ( ! $this->check_read_permission( $font ) ) {
 				continue;
 			}
 			$data              = $this->prepare_item_for_response( $font, $request );
 			$formatted_fonts[] = $this->prepare_response_for_collection( $data );
 		}
-
 
 		$response = rest_ensure_response( $formatted_fonts );
 
@@ -103,16 +102,15 @@ class AMP_REST_Fonts_Controller extends WP_REST_Controller {
 	/**
 	 * Prepares a single font output for response.
 	 *
-	 * @param Object $font Comment object.
+	 * @param Object          $font Comment object.
 	 * @param WP_REST_Request $request Request object.
 	 *
 	 * @return WP_REST_Response Response object.
-	 *
 	 */
 	public function prepare_item_for_response( $font, $request ) {
 		$fields = $this->get_fields_for_response( $request );
 		$schema = $this->get_item_schema();
-		$data   = array();
+		$data   = [];
 
 		if ( in_array( 'name', $fields, true ) ) {
 			$data['name'] = $font['name'];
@@ -149,7 +147,6 @@ class AMP_REST_Fonts_Controller extends WP_REST_Controller {
 		 *
 		 * Allows modification of the font right before it is returned.
 		 *
-		 *
 		 * @param WP_REST_Response $response The response object.
 		 * @param Object $font The original comment object.
 		 * @param WP_REST_Request $request Request used to generate the response.
@@ -166,24 +163,22 @@ class AMP_REST_Fonts_Controller extends WP_REST_Controller {
 	 * @return true|WP_Error True if the request has read access, WP_Error object otherwise.
 	 */
 	public function get_items_permissions_check( $request ) {
-		return true; //current_user_can( 'edit_posts' );
+		return current_user_can( 'edit_posts' );
 	}
 
 	/**
 	 * Checks if the font can be read.
 	 *
 	 * @param Object $font Font object.
-	 * @param WP_REST_Request $request Request data to check.
 	 *
 	 * @return bool Whether the comment can be read.
 	 */
-	protected function check_read_permission( $font, $request ) {
-		return true;
+	protected function check_read_permission( $font ) {
+		return current_user_can( 'edit_posts' );
 	}
 
 	/**
 	 * Retrieves the font' schema, conforming to JSON Schema.
-	 *
 	 *
 	 * @return array Item schema data.
 	 */
@@ -191,53 +186,53 @@ class AMP_REST_Fonts_Controller extends WP_REST_Controller {
 		if ( $this->schema ) {
 			return $this->add_additional_fields_schema( $this->schema );
 		}
-		$schema       = array(
+		$schema       = [
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
 			'title'      => 'font',
 			'type'       => 'object',
-			'properties' => array(
-				'name'      => array(
-					'description' => __( 'The title for the status.' ),
+			'properties' => [
+				'name'      => [
+					'description' => __( 'The title for the status.', 'amp' ),
 					'type'        => 'string',
-					'context'     => array( 'embed', 'view', 'edit' ),
+					'context'     => [ 'embed', 'view', 'edit' ],
 					'readonly'    => true,
-				),
-				'slug'      => array(
-					'description' => __( 'An alphanumeric identifier for the status.' ),
+				],
+				'slug'      => [
+					'description' => __( 'An alphanumeric identifier for the status.', 'amp' ),
 					'type'        => 'string',
-					'context'     => array( 'embed', 'view', 'edit' ),
+					'context'     => [ 'embed', 'view', 'edit' ],
 					'readonly'    => true,
-				),
-				'handle'    => array(
-					'description' => __( 'An alphanumeric identifier for the handle.' ),
+				],
+				'handle'    => [
+					'description' => __( 'An alphanumeric identifier for the handle.', 'amp' ),
 					'type'        => 'string',
-					'context'     => array( 'embed', 'view', 'edit' ),
+					'context'     => [ 'embed', 'view', 'edit' ],
 					'readonly'    => true,
-				),
-				'fallbacks' => array(
-					'description' => __( 'Array of fallback fonts' ),
+				],
+				'fallbacks' => [
+					'description' => __( 'Array of fallback fonts', 'amp' ),
 					'type'        => 'array',
-					'context'     => array( 'embed', 'view', 'edit' ),
+					'context'     => [ 'embed', 'view', 'edit' ],
 					'readonly'    => true,
-					'default'     => array(),
-				),
-				'weights'   => array(
-					'description' => __( 'Array of fallback fonts' ),
+					'default'     => [],
+				],
+				'weights'   => [
+					'description' => __( 'Array of fallback fonts', 'amp' ),
 					'type'        => 'array',
-					'context'     => array( 'embed', 'view', 'edit' ),
+					'context'     => [ 'embed', 'view', 'edit' ],
 					'readonly'    => true,
-					'default'     => array('normal', 'bold', 'bolder', 'lighter'),
-				),
-				'src'       => array(
-					'description' => __( 'URL for the object font.' ),
+					'default'     => [ 'normal', 'bold', 'bolder', 'lighter' ],
+				],
+				'src'       => [
+					'description' => __( 'URL for the object font.', 'amp' ),
 					'type'        => 'string',
 					'format'      => 'uri',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => [ 'view', 'edit', 'embed' ],
 					'readonly'    => true,
 					'default'     => '',
-				),
-			),
-		);
+				],
+			],
+		];
 		$this->schema = $schema;
 
 		return $this->add_additional_fields_schema( $this->schema );
@@ -251,7 +246,7 @@ class AMP_REST_Fonts_Controller extends WP_REST_Controller {
 	public function get_collection_params() {
 		$query_params = parent::get_collection_params();
 
-		$query_params['context'] = $this->get_context_param( array( 'default' => 'view' ) );
+		$query_params['context'] = $this->get_context_param( [ 'default' => 'view' ] );
 
 		$query_params['per_page']['maximum'] = 10000;
 		$query_params['per_page']['default'] = 1000;

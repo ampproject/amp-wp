@@ -1,7 +1,21 @@
 <?php
+/**
+ * Class AMP_Fonts
+ *
+ * @package AMP
+ */
 
-
+/**
+ * Class AMP_Fonts
+ */
 class AMP_Fonts {
+	/**
+	 * The URL of Google fonts.
+	 *
+	 * @var string
+	 */
+	const URL = 'https://fonts.googleapis.com/css';
+
 	/**
 	 * Get list of fonts used in AMP Stories.
 	 *
@@ -14,7 +28,7 @@ class AMP_Fonts {
 			return $fonts;
 		}
 
-		$default_weight = array('400', '700');
+		$default_weight = [ '400', '700' ];
 
 		// Default system fonts.
 		$fonts = [
@@ -120,26 +134,8 @@ class AMP_Fonts {
 		$columns = wp_list_pluck( $fonts, 'name' );
 		array_multisort( $columns, SORT_ASC, $fonts );
 
-		$fonts_url = 'https://fonts.googleapis.com/css';
-		$subsets   = [ 'latin', 'latin-ext' ];
-
-		/*
-		 * Translators: To add an additional character subset specific to your language,
-		 * translate this to 'greek', 'cyrillic', 'devanagari' or 'vietnamese'. Do not translate into your own language.
-		 */
-		$subset = _x( 'no-subset', 'Add new subset (greek, cyrillic, devanagari, vietnamese)', 'amp' );
-
-		if ( 'cyrillic' === $subset ) {
-			$subsets[] = 'cyrillic';
-			$subsets[] = 'cyrillic-ext';
-		} elseif ( 'greek' === $subset ) {
-			$subsets[] = 'greek';
-			$subsets[] = 'greek-ext';
-		} elseif ( 'devanagari' === $subset ) {
-			$subsets[] = 'devanagari';
-		} elseif ( 'vietnamese' === $subset ) {
-			$subsets[] = 'vietnamese';
-		}
+		$fonts_url = self::URL;
+		$subsets   = self::get_subsets();
 
 		$fonts = array_map(
 			static function ( $font ) use ( $fonts_url, $subsets ) {
@@ -163,6 +159,35 @@ class AMP_Fonts {
 		);
 
 		return $fonts;
+	}
+
+	/**
+	 * Get subsets of fonts based on language settings.
+	 *
+	 * @return array
+	 */
+	public static function get_subsets() {
+		$subsets = [ 'latin', 'latin-ext' ];
+
+		/*
+		 * Translators: To add an additional character subset specific to your language,
+		 * translate this to 'greek', 'cyrillic', 'devanagari' or 'vietnamese'. Do not translate into your own language.
+		 */
+		$subset = _x( 'no-subset', 'Add new subset (greek, cyrillic, devanagari, vietnamese)', 'amp' );
+
+		if ( 'cyrillic' === $subset ) {
+			$subsets[] = 'cyrillic';
+			$subsets[] = 'cyrillic-ext';
+		} elseif ( 'greek' === $subset ) {
+			$subsets[] = 'greek';
+			$subsets[] = 'greek-ext';
+		} elseif ( 'devanagari' === $subset ) {
+			$subsets[] = 'devanagari';
+		} elseif ( 'vietnamese' === $subset ) {
+			$subsets[] = 'vietnamese';
+		}
+
+		return $subsets;
 	}
 
 	/**
@@ -215,7 +240,7 @@ class AMP_Fonts {
 				$gfont = $font['family'] . ':' . implode( ',', $variants );
 			}
 
-			$weights = array();
+			$weights = [];
 			foreach ( $font['variants'] as $variant ) {
 				$variant   = str_replace( 'italic', '', $variant );
 				$variant   = str_replace( 'regular', '400', $variant );
