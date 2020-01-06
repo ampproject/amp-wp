@@ -353,42 +353,44 @@ class AMP_Story_Post_Type {
 	public static function load_fonts( $post ) {
 		$post_story_data = json_decode( $post->post_content_filtered, true );
 		$g_fonts         = [];
-		foreach ( $post_story_data as $page ) {
-			foreach ( $page['elements'] as $element ) {
-				$font = AMP_Fonts::get_font( $element['fontFamily'] );
+		if( $post_story_data ){
+			foreach ( $post_story_data as $page ) {
+				foreach ( $page['elements'] as $element ) {
+					$font = AMP_Fonts::get_font( $element['fontFamily'] );
 
-				if ( $font && isset( $font['gfont'] ) && $font['gfont'] ) {
-					if ( isset( $g_fonts[ $font['name'] ] ) && ! in_array( $element['fontWeight'], $g_fonts[ $font['name'] ], true ) ) {
-						$g_fonts[ $font['name'] ][] = $element['fontWeight'];
-					} else {
-						$g_fonts[ $font['name'] ][] = $element['fontWeight'];
+					if ( $font && isset( $font['gfont'] ) && $font['gfont'] ) {
+						if ( isset( $g_fonts[ $font['name'] ] ) && ! in_array( $element['fontWeight'], $g_fonts[ $font['name'] ], true ) ) {
+							$g_fonts[ $font['name'] ][] = $element['fontWeight'];
+						} else {
+							$g_fonts[ $font['name'] ][] = $element['fontWeight'];
+						}
 					}
 				}
 			}
-		}
 
-		if ( $g_fonts ) {
-			$subsets        = AMP_Fonts::get_subsets();
-			$g_font_display = '';
-			foreach ( $g_fonts as $name => $numbers ) {
-				$g_font_display .= $name . ':' . implode( ',', $numbers ) . '|';
+			if ( $g_fonts ) {
+				$subsets        = AMP_Fonts::get_subsets();
+				$g_font_display = '';
+				foreach ( $g_fonts as $name => $numbers ) {
+					$g_font_display .= $name . ':' . implode( ',', $numbers ) . '|';
+				}
+
+				$src = add_query_arg(
+					[
+						'family'  => rawurlencode( $g_font_display ),
+						'subset'  => rawurlencode( implode( ',', $subsets ) ),
+						'display' => 'swap',
+					],
+					AMP_Fonts::URL
+				);
+				wp_enqueue_style(
+					self::AMP_STORIES_STYLE_HANDLE . '_fonts',
+					$src,
+					[],
+					AMP__VERSION
+				);
+
 			}
-
-			$src = add_query_arg(
-				[
-					'family'  => rawurlencode( $g_font_display ),
-					'subset'  => rawurlencode( implode( ',', $subsets ) ),
-					'display' => 'swap',
-				],
-				AMP_Fonts::URL
-			);
-			wp_enqueue_style(
-				self::AMP_STORIES_STYLE_HANDLE . '_fonts',
-				$src,
-				[],
-				AMP__VERSION
-			);
-
 		}
 	}
 
