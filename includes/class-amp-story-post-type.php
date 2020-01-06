@@ -106,6 +106,7 @@ class AMP_Story_Post_Type {
 		);
 
 		add_action( 'admin_enqueue_scripts', [ __CLASS__, 'admin_enqueue_scripts' ] );
+		add_action( 'wp_enqueue_scripts', [ __CLASS__, 'wp_enqueue_scripts' ] );
 		add_filter( 'show_admin_bar', [ __CLASS__, 'show_admin_bar' ] );
 		add_filter( 'replace_editor', [ __CLASS__, 'replace_editor' ], 10, 2 );
 		add_filter( 'admin_body_class', [ __CLASS__, 'admin_body_class' ], 99 );
@@ -212,6 +213,33 @@ class AMP_Story_Post_Type {
 			}
 		}
 		return $replace;
+	}
+
+	/**
+	 * Enqueue Google fonts.
+	 */
+	public static function wp_enqueue_scripts() {
+		if ( is_singular( self::POST_TYPE_SLUG ) ) {
+			$post            = get_post();
+			$post_story_data = json_decode( $post->post_content_filtered, true );
+			$fonts           = [];
+			foreach ( $post_story_data as $page ) {
+				foreach ( $page['elements'] as $element ) {
+					$font = AMP_Fonts::get_font( $element['fontFamily'] );
+					if ( $font && isset( $font['handle'] ) && isset( $font['src'] ) && ! empty( $font['src'] ) ) {
+						$fonts[ $font['handle'] ] = $font['src'];
+					}
+				}
+			}
+			foreach($fonts as $handle => $src){
+				wp_enqueue_style(
+					$handle,
+					$src,
+					[],
+					AMP__VERSION
+				);
+			}
+		}
 	}
 
 	/**
