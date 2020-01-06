@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import { useStory } from '../../app/story';
+import { useStory } from '../../app';
 import MovableGroup from './movableGroup';
 import MovableSingle from './movableSingle';
 

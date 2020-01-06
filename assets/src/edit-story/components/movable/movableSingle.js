@@ -7,14 +7,13 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { useRef, useEffect } from '@wordpress/element';
+import { useRef, useEffect, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { useStory } from '../../app';
 
-const CORNER_HANDLES = [ 'nw', 'ne', 'sw', 'se' ];
 const ALL_HANDLES = [ 'n', 's', 'e', 'w', 'nw', 'ne', 'sw', 'se' ];
 
 function MovableSingle( {
@@ -23,6 +22,7 @@ function MovableSingle( {
 	pushEvent,
 } ) {
 	const moveable = useRef();
+	const [ keepRatioMode, setKeepRatioMode ] = useState( true );
 	// Update moveable with whatever properties could be updated outside moveable
 	// itself.
 	useEffect( () => {
@@ -75,9 +75,12 @@ function MovableSingle( {
 	 */
 	const resetMoveable = () => {
 		frame.translate = [ 0, 0 ];
+		// Inline start resetting has to be done very carefully here to avoid
+		// conflicts with stylesheets. See #3951.
+		targetEl.style.transform = '';
 		targetEl.style.width = '';
 		targetEl.style.height = '';
-		targetEl.style.transform = '';
+		setKeepRatioMode( true );
 		if ( moveable.current ) {
 			moveable.current.updateRect();
 		}
@@ -138,8 +141,8 @@ function MovableSingle( {
 			} }
 			origin={ false }
 			pinchable={ true }
-			keepRatio={ 'image' === selectedEl.type } // @†odo Even image doesn't always keep ratio, consider moving to element's model.
-			renderDirections={ 'image' === selectedEl.type ? CORNER_HANDLES : ALL_HANDLES }
+			keepRatio={ 'image' === selectedEl.type && keepRatioMode }
+			renderDirections={ ALL_HANDLES }
 		/>
 	);
 }

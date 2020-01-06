@@ -32,24 +32,29 @@ function FontPanel( { selectedElements, onSetProperties } ) {
 				{ 'Font' }
 			</Title>
 			<InputGroup
+				type="text"
 				label="Font family"
 				value={ state.fontFamily }
 				isMultiple={ fontFamily === '' }
 				onChange={ ( value ) => setState( { ...state, fontFamily: value } ) }
 			/>
 			<InputGroup
+				type="text"
 				label="Font style"
 				value={ state.fontStyle }
 				isMultiple={ fontStyle === '' }
 				onChange={ ( value ) => setState( { ...state, fontStyle: value } ) }
 			/>
 			<InputGroup
+				type="text"
 				label="Font weight"
 				value={ state.fontWeight }
 				isMultiple={ fontWeight === '' }
 				onChange={ ( value ) => setState( { ...state, fontWeight: value } ) }
 			/>
 			<InputGroup
+				// @todo: why is this a "px" value and not a number?
+				type="text"
 				label="Font size"
 				value={ state.fontSize }
 				isMultiple={ fontSize === '' }

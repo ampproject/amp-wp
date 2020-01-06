@@ -32,7 +32,7 @@ const getStoryMarkupFromPages = ( pages ) => {
 			</amp-story-page>,
 		);
 	} );
-	return markup.join();
+	return markup.join( '' );
 };
 
 /**

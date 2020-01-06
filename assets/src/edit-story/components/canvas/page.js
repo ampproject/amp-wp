@@ -34,7 +34,7 @@ function Page() {
 
 	const {
 		state: { editingElement },
-		actions: { setBackgroundClickHandler, setNodeForElement },
+		actions: { setBackgroundClickHandler, setNodeForElement, clearEditing },
 	} = useCanvas();
 
 	const [ pushEvent, setPushEvent ] = useState( null );
@@ -44,6 +44,9 @@ function Page() {
 	}, [ setBackgroundClickHandler, clearSelection ] );
 
 	const handleSelectElement = useCallback( ( elId, evt ) => {
+		if ( editingElement && elId !== editingElement ) {
+			clearEditing();
+		}
 		if ( evt.metaKey ) {
 			toggleElementIdInSelection( elId );
 		} else {
@@ -57,7 +60,7 @@ function Page() {
 			evt.persist();
 			setPushEvent( evt );
 		}
-	}, [ toggleElementIdInSelection, selectElementById ] );
+	}, [ editingElement, clearEditing, toggleElementIdInSelection, selectElementById ] );
 
 	const singleSelection = 1 === selectedElements.length;
 	const hasSelection = 1 <= selectedElements.length;

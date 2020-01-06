@@ -51,9 +51,9 @@ function ImageEdit( { src, origRatio, width, height, x, y, scale, focalX, focalY
 	const imgProps = getImgProps( elementProps.width, elementProps.height, scale, focalX, focalY, origRatio );
 	return (
 		<Element { ...elementProps }>
-			<FadedImg src={ src } { ...imgProps } />
+			<FadedImg draggable={ false } src={ src } { ...imgProps } />
 			<ActualBox>
-				<ActualImg src={ src } { ...imgProps } />
+				<ActualImg draggable={ false } src={ src } { ...imgProps } />
 			</ActualBox>
 		</Element>
 	);
