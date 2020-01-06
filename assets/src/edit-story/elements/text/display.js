@@ -14,7 +14,7 @@ import { useRef, useEffect, useCallback, useState } from '@wordpress/element';
  */
 import getCaretCharacterOffsetWithin from '../../utils/getCaretCharacterOffsetWithin';
 import useCombinedRefs from '../../utils/useCombinedRefs';
-import { useStory } from '../../app';
+import { useStory, useFont } from '../../app';
 import { useCanvas } from '../../components/canvas';
 import {
 	ElementWithPosition,
@@ -58,8 +58,12 @@ function TextDisplay( { id, content, color, backgroundColor, width, height, x, y
 		onPointerDown,
 	};
 	const {
-		state: { selectedElementIds, fonts },
+		state: { selectedElementIds },
 	} = useStory();
+	const {
+		actions: { getFont },
+	} = useFont();
+
 	const {
 		actions: { setEditingElement, setEditingElementWithState },
 	} = useCanvas();
@@ -80,8 +84,8 @@ function TextDisplay( { id, content, color, backgroundColor, width, height, x, y
 	}, [ isElementOnlySelection ] );
 
 	useEffect( () => {
-		maybeEnqueueFontStyle( fontFamily, fonts );
-	}, [ fontFamily, fonts ] );
+		maybeEnqueueFontStyle( fontFamily, getFont );
+	}, [ fontFamily ] );
 
 	const clickTime = useRef();
 	const handleMouseDown = useCallback( () => {

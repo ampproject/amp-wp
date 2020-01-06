@@ -14,7 +14,6 @@ import { useState } from '@wordpress/element';
 import Context from './context';
 
 import useLoadStory from './effects/useLoadStory';
-import useLoadFonts from './effects/useLoadFonts';
 import useCurrentPage from './effects/useCurrentPage';
 import useHistoryEntry from './effects/useHistoryEntry';
 import useHistoryReplay from './effects/useHistoryReplay';
@@ -37,7 +36,6 @@ function StoryProvider( { storyId, children } ) {
 	// Don't update 1 of these in an effect based off another base variable.
 	// Only update these directly as a response to user or api interactions.
 	const [ pages, setPages ] = useState( [] );
-	const [ fonts, setFonts ] = useState( [] );
 	const [ title, setTitle ] = useState( '' );
 	const [ link, setLink ] = useState( '' );
 	const [ postStatus, setPostStatus ] = useState( 'draft' );
@@ -68,7 +66,6 @@ function StoryProvider( { storyId, children } ) {
 	const setPropertiesById = useSetPropertiesById( { currentPageIndex, pages, setPages } );
 
 	useLoadStory( { storyId, pages, setPages, setTitle, setPostStatus, setPostAuthor, setSlug, setLink, setCurrentPageIndex, clearSelection } );
-	useLoadFonts( { fonts, setFonts } );
 	useCurrentPage( { currentPageIndex, pages, setCurrentPage, setCurrentPageNumber } );
 	useHistoryEntry( { currentPageIndex, pages, selectedElementIds } );
 	useHistoryReplay( { setCurrentPageIndex, setPages, setSelectedElementIds } );
@@ -87,7 +84,6 @@ function StoryProvider( { storyId, children } ) {
 			postStatus,
 			isSaving,
 			link,
-			fonts,
 		},
 		actions: {
 			setCurrentPageByIndex,

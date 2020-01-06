@@ -11,7 +11,7 @@ import { useEffect, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { useStory } from '../app';
+import { useFont } from '../app';
 import { Panel, Title, InputGroup, getCommonValue, SelectMenu } from './shared';
 
 function FontPanel( { selectedElements, onSetProperties } ) {
@@ -19,7 +19,7 @@ function FontPanel( { selectedElements, onSetProperties } ) {
 	const fontSize = getCommonValue( selectedElements, 'fontSize' );
 	const fontWeight = getCommonValue( selectedElements, 'fontWeight' );
 	const fontStyle = getCommonValue( selectedElements, 'fontStyle' );
-	const { state: { fonts } } = useStory();
+	const { state: { fonts } } = useFont();
 	const [ state, setState ] = useState( { fontFamily, fontStyle, fontSize, fontWeight } );
 	useEffect( () => {
 		setState( { fontFamily, fontStyle, fontSize, fontWeight } );
@@ -50,7 +50,9 @@ function FontPanel( { selectedElements, onSetProperties } ) {
 				label="Font family"
 				options={ fonts }
 				value={ state.fontFamily }
-				onChange={ ( value ) => setState( { ...state, fontFamily: value } ) }
+				onChange={ ( value ) => {
+					setState( { ...state, fontFamily: value, fontWeight: 'normal' } )
+				} }
 			/>
 			<SelectMenu
 				label="Font style"

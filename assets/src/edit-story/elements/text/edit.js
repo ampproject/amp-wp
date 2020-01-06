@@ -15,7 +15,7 @@ import { useState, useEffect, useLayoutEffect, useRef, useCallback } from '@word
 /**
  * Internal dependencies
  */
-import { useStory } from '../../app';
+import { useStory, useFont } from '../../app';
 import { useCanvas } from '../../components/canvas';
 import {
 	ElementWithPosition,
@@ -63,7 +63,8 @@ function TextEdit( { content, color, backgroundColor, width, height, x, y, fontF
 		y,
 		rotationAngle,
 	};
-	const { actions: { setPropertiesOnSelectedElements }, state: { fonts } } = useStory();
+	const { actions: { setPropertiesOnSelectedElements } } = useStory();
+	const { actions: { getFont } } = useFont();
 	const { state: { editingElementState } } = useCanvas();
 	const { offset, clearContent } = editingElementState || {};
 	// To clear content, we can't just use createEmpty() or even pure white-space.
@@ -124,8 +125,8 @@ function TextEdit( { content, color, backgroundColor, width, height, x, y, fontF
 	}, [] );
 
 	useEffect( () => {
-		maybeEnqueueFontStyle( fontFamily, fonts );
-	}, [ fontFamily, fonts ] );
+		maybeEnqueueFontStyle( fontFamily, getFont );
+	}, [ fontFamily ] );
 
 	return (
 		<Element { ...props } onClick={ onClick }>
