@@ -7,14 +7,13 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { useRef, useEffect } from '@wordpress/element';
+import { useRef, useEffect, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { useStory } from '../../app';
 
-const CORNER_HANDLES = [ 'nw', 'ne', 'sw', 'se' ];
 const ALL_HANDLES = [ 'n', 's', 'e', 'w', 'nw', 'ne', 'sw', 'se' ];
 
 function Movable( {
@@ -23,6 +22,7 @@ function Movable( {
 	pushEvent,
 } ) {
 	const moveable = useRef();
+	const [ keepRatioMode, setKeepRatioMode ] = useState( true );
 
 	const {
 		actions: { setPropertiesOnSelectedElements },
@@ -73,6 +73,7 @@ function Movable( {
 		target.style.transform = '';
 		target.style.width = '';
 		target.style.height = '';
+		setKeepRatioMode( true );
 		if ( moveable.current ) {
 			moveable.current.updateRect();
 		}
@@ -99,10 +100,17 @@ function Movable( {
 				setPropertiesOnSelectedElements( newProps );
 				resetMoveable( target );
 			} }
-			onResizeStart={ ( { setOrigin, dragStart } ) => {
+			onResizeStart={ ( { setOrigin, dragStart, direction } ) => {
 				setOrigin( [ '%', '%' ] );
 				if ( dragStart ) {
 					dragStart.set( frame.translate );
+				}
+				// Lock ratio for diagonal directions (nw, ne, sw, se). Both
+				// `direction[]` values for diagonals are either 1 or -1. Non-diagonal
+				// directions have 0s.
+				const newKeepRatioMode = direction[ 0 ] !== 0 && direction[ 1 ] !== 0;
+				if ( keepRatioMode !== newKeepRatioMode ) {
+					setKeepRatioMode( newKeepRatioMode );
 				}
 			} }
 			onResize={ ( { target, width, height, drag } ) => {
@@ -133,8 +141,8 @@ function Movable( {
 			} }
 			origin={ false }
 			pinchable={ true }
-			keepRatio={ 'image' === selectedElement.type } // @†odo Even image doesn't always keep ratio, consider moving to element's model.
-			renderDirections={ 'image' === selectedElement.type ? CORNER_HANDLES : ALL_HANDLES }
+			keepRatio={ 'image' === selectedElement.type && keepRatioMode }
+			renderDirections={ ALL_HANDLES }
 		/>
 	);
 }

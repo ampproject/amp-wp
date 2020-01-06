@@ -17,14 +17,19 @@ import { getPanels } from '../../panels';
 const Background = styled.div`
 	background-color: ${ ( { theme } ) => theme.colors.bg.v2 };
 	padding: 16px 16px 0;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
 	height: 100%;
+	overflow: hidden auto;
 `;
 
 const Wrapper = styled.div`
 	background-color: ${ ( { theme } ) => theme.colors.fg.v1 };
 	border: 1px solid ${ ( { theme } ) => theme.colors.fg.v2 };
 	border-radius: 6px 6px 0 0;
-	height: 100%;
+	min-height: 100%;
 	padding: 1em;
 `;
 

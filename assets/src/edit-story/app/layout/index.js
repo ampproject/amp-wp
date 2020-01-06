@@ -31,6 +31,7 @@ const Editor = styled.div`
 
 const Area = styled.div`
   grid-area: ${ ( { area } ) => area };
+  position: relative;
 `;
 
 function Layout() {

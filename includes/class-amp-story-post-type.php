@@ -178,29 +178,6 @@ class AMP_Story_Post_Type {
 		add_action( 'amp_story_head', 'wp_shortlink_wp_head', 10, 0 );
 		add_action( 'amp_story_head', 'wp_site_icon', 99 );
 		add_action( 'amp_story_head', 'wp_oembed_add_discovery_links' );
-
-		// Limit the styles that are printed in a story.
-		add_filter( 'print_styles_array', [ __CLASS__, 'filter_frontend_print_styles_array' ] );
-	}
-
-	/**
-	 * Filter which styles will be printed on an AMP Story.
-	 *
-	 * @param array $handles Style handles.
-	 * @return array Styles to print.
-	 */
-	public static function filter_frontend_print_styles_array( $handles ) {
-		if ( ! is_singular( self::POST_TYPE_SLUG ) || is_embed() ) {
-			return $handles;
-		}
-
-		return array_filter(
-			$handles,
-			static function( $handle ) {
-				// @todo Add the plugin's style here.
-				return false;
-			}
-		);
 	}
 
 	/**
