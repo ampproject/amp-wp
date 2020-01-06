@@ -87,7 +87,7 @@
     "grunt": "1.0.4",
     "grunt-contrib-clean": "2.0.0",
     "grunt-contrib-copy": "1.0.0",
-    "grunt-http": "2.3.2",
+    "grunt-http": "2.3.3",
     "grunt-shell": "3.0.1",
     "grunt-wp-deploy": "2.0.0",
     "jest-silent-reporter": "0.1.2",
