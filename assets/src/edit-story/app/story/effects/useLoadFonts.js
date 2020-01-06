@@ -18,7 +18,7 @@ function useLoadFonts( { fonts, setFonts } ) {
 
 	useEffect( () => {
 		if ( fonts.length === 0 ) {
-			getAllFonts( {} ).then( ( loadedFont ) => {
+			getAllFonts( {} ).then( setFonts );
 				setFonts( loadedFont );
 			} );
 		}
