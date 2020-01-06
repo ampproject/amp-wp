@@ -19,22 +19,26 @@ function FontPanel( { selectedElements, onSetProperties } ) {
 	const fontSize = getCommonValue( selectedElements, 'fontSize' );
 	const fontWeight = getCommonValue( selectedElements, 'fontWeight' );
 	const fontStyle = getCommonValue( selectedElements, 'fontStyle' );
-	const { state: { fonts } } = useFont();
-	const [ state, setState ] = useState( { fontFamily, fontStyle, fontSize, fontWeight } );
+	const defaultFontWeights = [
+		{ name: 400, slug: 400 },
+	];
+	const { state: { fonts }, actions: { getFont } } = useFont();
+	const [ state, setState ] = useState( { fontFamily, fontStyle, fontSize, fontWeight, fontWeights: defaultFontWeights } );
 	useEffect( () => {
-		setState( { fontFamily, fontStyle, fontSize, fontWeight } );
-	}, [ fontFamily, fontStyle, fontSize, fontWeight ] );
+		const currentFont = getFont( fontFamily );
+		let fontWeights = defaultFontWeights;
+		if ( currentFont ) {
+			const { weights } = currentFont;
+			if ( weights ) {
+				fontWeights = weights.map( ( weight ) => ( { name: weight, slug: weight } ) );
+			}
+		}
+		setState( { fontFamily, fontStyle, fontSize, fontWeight, fontWeights } );
+	}, [ fontFamily, fontStyle, fontSize, fontWeight, getFont ] );
 	const handleSubmit = ( evt ) => {
 		onSetProperties( state );
 		evt.preventDefault();
 	};
-
-	const fontWeights = [
-		{ name: 'normal', slug: 'normal' },
-		{ name: 'bold', slug: 'bold' },
-		{ name: 'bolder', slug: 'bolder' },
-		{ name: 'lighter', slug: 'lighter' },
-	];
 
 	const fontStyles = [
 		{ name: 'normal', slug: 'normal' },
@@ -51,7 +55,7 @@ function FontPanel( { selectedElements, onSetProperties } ) {
 				options={ fonts }
 				value={ state.fontFamily }
 				onChange={ ( value ) => {
-					setState( { ...state, fontFamily: value, fontWeight: 'normal' } )
+					setState( { ...state, fontFamily: value, fontWeight: 400 } );
 				} }
 			/>
 			<SelectMenu
@@ -62,7 +66,7 @@ function FontPanel( { selectedElements, onSetProperties } ) {
 			/>
 			<SelectMenu
 				label="Font weight"
-				options={ fontWeights }
+				options={ state.fontWeights }
 				value={ state.fontWeight }
 				onChange={ ( value ) => setState( { ...state, fontWeight: value } ) }
 			/>
