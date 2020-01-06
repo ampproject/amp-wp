@@ -16,7 +16,6 @@ import Context from './context';
 import useLoadFonts from './effects/useLoadFonts';
 
 function FontProvider( { children } ) {
-
 	const [ fonts, setFonts ] = useState( [] );
 
 	useLoadFonts( { fonts, setFonts } );
