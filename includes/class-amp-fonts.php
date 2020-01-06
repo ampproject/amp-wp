@@ -211,16 +211,7 @@ class AMP_Fonts {
 		$fonts = [];
 
 		foreach ( $google_fonts as $font ) {
-			$variants = array_intersect(
-				$font['variants'],
-				[
-					'regular',
-					'italic',
-					'700',
-					'700italic',
-				]
-			);
-
+			
 			$variants = array_map(
 				static function ( $variant ) {
 					$variant = str_replace(
@@ -231,7 +222,7 @@ class AMP_Fonts {
 
 					return $variant;
 				},
-				$variants
+				$font['variants']
 			);
 
 			$gfont = '';
