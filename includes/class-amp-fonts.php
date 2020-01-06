@@ -14,83 +14,104 @@ class AMP_Fonts {
 			return $fonts;
 		}
 
+		$default_weight = array('400', '700');
+
 		// Default system fonts.
 		$fonts = [
 			[
 				'name'      => 'Arial',
 				'fallbacks' => [ 'Helvetica Neue', 'Helvetica', 'sans-serif' ],
+				'weights'   => $default_weight,
 			],
 			[
 				'name'      => 'Arial Black',
 				'fallbacks' => [ 'Arial Black', 'Arial Bold', 'Gadget', 'sans-serif' ],
+				'weights'   => $default_weight,
 			],
 			[
 				'name'      => 'Arial Narrow',
 				'fallbacks' => [ 'Arial', 'sans-serif' ],
+				'weights'   => $default_weight,
 			],
 			[
 				'name'      => 'Baskerville',
 				'fallbacks' => [ 'Baskerville Old Face', 'Hoefler Text', 'Garamond', 'Times New Roman', 'serif' ],
+				'weights'   => $default_weight,
 			],
 			[
 				'name'      => 'Brush Script MT',
 				'fallbacks' => [ 'cursive' ],
+				'weights'   => $default_weight,
 			],
 			[
 				'name'      => 'Copperplate',
 				'fallbacks' => [ 'Copperplate Gothic Light', 'fantasy' ],
+				'weights'   => $default_weight,
 			],
 			[
 				'name'      => 'Courier New',
 				'fallbacks' => [ 'Courier', 'Lucida Sans Typewriter', 'Lucida Typewriter', 'monospace' ],
+				'weights'   => $default_weight,
 			],
 			[
 				'name'      => 'Century Gothic',
 				'fallbacks' => [ 'CenturyGothic', 'AppleGothic', 'sans-serif' ],
+				'weights'   => $default_weight,
 			],
 			[
 				'name'      => 'Garamond',
 				'fallbacks' => [ 'Baskerville', 'Baskerville Old Face', 'Hoefler Text', 'Times New Roman', 'serif' ],
+				'weights'   => $default_weight,
 			],
 			[
 				'name'      => 'Georgia',
 				'fallbacks' => [ 'Times', 'Times New Roman', 'serif' ],
+				'weights'   => $default_weight,
 			],
 			[
 				'name'      => 'Gill Sans',
 				'fallbacks' => [ 'Gill Sans MT', 'Calibri', 'sans-serif' ],
+				'weights'   => $default_weight,
 			],
 			[
 				'name'      => 'Lucida Bright',
 				'fallbacks' => [ 'Georgia', 'serif' ],
+				'weights'   => $default_weight,
 			],
 			[
 				'name'      => 'Lucida Sans Typewriter',
 				'fallbacks' => [ 'Lucida Console', 'monaco', 'Bitstream Vera Sans Mono', 'monospace' ],
+				'weights'   => $default_weight,
 			],
 			[
 				'name'      => 'Palatino',
 				'fallbacks' => [ 'Palatino Linotype', 'Palatino LT STD', 'Book Antiqua', 'Georgia', 'serif' ],
+				'weights'   => $default_weight,
 			],
 			[
 				'name'      => 'Papyrus',
 				'fallbacks' => [ 'fantasy' ],
+				'weights'   => $default_weight,
 			],
 			[
 				'name'      => 'Tahoma',
 				'fallbacks' => [ 'Verdana', 'Segoe', 'sans-serif' ],
+				'weights'   => $default_weight,
 			],
 			[
 				'name'      => 'Times New Roman',
 				'fallbacks' => [ 'Times New Roman', 'Times', 'Baskerville', 'Georgia', 'serif' ],
+				'weights'   => $default_weight,
 			],
 			[
 				'name'      => 'Trebuchet MS',
 				'fallbacks' => [ 'Lucida Grande', 'Lucida Sans Unicode', 'Lucida Sans', 'Tahoma', 'sans-serif' ],
+				'weights'   => $default_weight,
 			],
 			[
 				'name'      => 'Verdana',
 				'fallbacks' => [ 'Geneva', 'sans-serif' ],
+				'weights'   => $default_weight,
 			],
 		];
 		$file  = __DIR__ . '/data/fonts.json';
@@ -194,10 +215,22 @@ class AMP_Fonts {
 				$gfont = $font['family'] . ':' . implode( ',', $variants );
 			}
 
+			$weights = array();
+			foreach ( $font['variants'] as $variant ) {
+				$variant   = str_replace( 'italic', '', $variant );
+				$variant   = str_replace( 'regular', '400', $variant );
+				$weights[] = $variant;
+			}
+
+			$weights = array_unique( $weights );
+			$weights = array_filter( $weights );
+			$weights = array_values( $weights );
+
 			$fonts[] = [
 				'name'      => $font['family'],
 				'fallbacks' => (array) self::get_font_fallback( $font['category'] ),
 				'gfont'     => $gfont,
+				'weights'   => $weights,
 			];
 		}
 

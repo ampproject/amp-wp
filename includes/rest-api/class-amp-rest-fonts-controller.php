@@ -46,6 +46,7 @@ class AMP_REST_Fonts_Controller extends WP_REST_Controller {
 	 * Gets a collection of fonts.
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
+	 *
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function get_items( $request ) {
@@ -61,7 +62,17 @@ class AMP_REST_Fonts_Controller extends WP_REST_Controller {
 
 		$fonts = array_slice( $fonts, ( ( $page - 1 ) * $per_page ), $per_page );
 
-		$response = rest_ensure_response( $fonts );
+		$formatted_fonts = array();
+		foreach ( $fonts as $font ) {
+			if ( ! $this->check_read_permission( $font, $request ) ) {
+				continue;
+			}
+			$data              = $this->prepare_item_for_response( $font, $request );
+			$formatted_fonts[] = $this->prepare_response_for_collection( $data );
+		}
+
+
+		$response = rest_ensure_response( $formatted_fonts );
 
 		$response->header( 'X-WP-Total', (int) $total_posts );
 		$response->header( 'X-WP-TotalPages', (int) $max_pages );
@@ -90,13 +101,146 @@ class AMP_REST_Fonts_Controller extends WP_REST_Controller {
 	}
 
 	/**
+	 * Prepares a single font output for response.
+	 *
+	 * @param Object $font Comment object.
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response Response object.
+	 *
+	 */
+	public function prepare_item_for_response( $font, $request ) {
+		$fields = $this->get_fields_for_response( $request );
+		$schema = $this->get_item_schema();
+		$data   = array();
+
+		if ( in_array( 'name', $fields, true ) ) {
+			$data['name'] = $font['name'];
+		}
+
+		if ( in_array( 'slug', $fields, true ) ) {
+			$data['slug'] = $font['slug'];
+		}
+
+		if ( in_array( 'handle', $fields, true ) ) {
+			$data['handle'] = isset( $font['handle'] ) ? $font['handle'] : '';
+		}
+
+		if ( in_array( 'src', $fields, true ) ) {
+			$data['src'] = isset( $font['src'] ) ? $font['src'] : $schema['properties']['src']['default'];
+		}
+
+		if ( in_array( 'fallbacks', $fields, true ) ) {
+			$data['fallbacks'] = isset( $font['fallbacks'] ) ? (array) $font['fallbacks'] : $schema['properties']['fallbacks']['default'];
+		}
+
+		if ( in_array( 'weights', $fields, true ) ) {
+			$data['weights'] = isset( $font['weights'] ) ? (array) $font['weights'] : $schema['properties']['weights']['default'];
+		}
+
+		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		$data    = $this->add_additional_fields_to_object( $data, $request );
+		$data    = $this->filter_response_by_context( $data, $context );
+		// Wrap the data in a response object.
+		$response = rest_ensure_response( $data );
+
+		/**
+		 * Filters a font returned from the API.
+		 *
+		 * Allows modification of the font right before it is returned.
+		 *
+		 *
+		 * @param WP_REST_Response $response The response object.
+		 * @param Object $font The original comment object.
+		 * @param WP_REST_Request $request Request used to generate the response.
+		 */
+		return apply_filters( 'rest_prepare_font', $response, $font, $request );
+	}
+
+
+	/**
 	 * Checks if a given request has access to get fonts.
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
+	 *
 	 * @return true|WP_Error True if the request has read access, WP_Error object otherwise.
 	 */
 	public function get_items_permissions_check( $request ) {
-		return current_user_can( 'edit_posts' );
+		return true; //current_user_can( 'edit_posts' );
+	}
+
+	/**
+	 * Checks if the font can be read.
+	 *
+	 * @param Object $font Font object.
+	 * @param WP_REST_Request $request Request data to check.
+	 *
+	 * @return bool Whether the comment can be read.
+	 */
+	protected function check_read_permission( $font, $request ) {
+		return true;
+	}
+
+	/**
+	 * Retrieves the font' schema, conforming to JSON Schema.
+	 *
+	 *
+	 * @return array Item schema data.
+	 */
+	public function get_item_schema() {
+		if ( $this->schema ) {
+			return $this->add_additional_fields_schema( $this->schema );
+		}
+		$schema       = array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'font',
+			'type'       => 'object',
+			'properties' => array(
+				'name'      => array(
+					'description' => __( 'The title for the status.' ),
+					'type'        => 'string',
+					'context'     => array( 'embed', 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'slug'      => array(
+					'description' => __( 'An alphanumeric identifier for the status.' ),
+					'type'        => 'string',
+					'context'     => array( 'embed', 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'handle'    => array(
+					'description' => __( 'An alphanumeric identifier for the handle.' ),
+					'type'        => 'string',
+					'context'     => array( 'embed', 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'fallbacks' => array(
+					'description' => __( 'Array of fallback fonts' ),
+					'type'        => 'array',
+					'context'     => array( 'embed', 'view', 'edit' ),
+					'readonly'    => true,
+					'default'     => array(),
+				),
+				'weights'   => array(
+					'description' => __( 'Array of fallback fonts' ),
+					'type'        => 'array',
+					'context'     => array( 'embed', 'view', 'edit' ),
+					'readonly'    => true,
+					'default'     => array('normal', 'bold', 'bolder', 'lighter'),
+				),
+				'src'       => array(
+					'description' => __( 'URL for the object font.' ),
+					'type'        => 'string',
+					'format'      => 'uri',
+					'context'     => array( 'view', 'edit', 'embed' ),
+					'readonly'    => true,
+					'default'     => '',
+				),
+			),
+		);
+		$this->schema = $schema;
+
+		return $this->add_additional_fields_schema( $this->schema );
 	}
 
 	/**
@@ -107,7 +251,7 @@ class AMP_REST_Fonts_Controller extends WP_REST_Controller {
 	public function get_collection_params() {
 		$query_params = parent::get_collection_params();
 
-		$query_params['context']['default'] = 'view';
+		$query_params['context'] = $this->get_context_param( array( 'default' => 'view' ) );
 
 		$query_params['per_page']['maximum'] = 10000;
 		$query_params['per_page']['default'] = 1000;
