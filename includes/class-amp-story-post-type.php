@@ -201,7 +201,7 @@ class AMP_Story_Post_Type {
 	/**
 	 * Highjack editor with custom editor.
 	 *
-	 * @param bool    $replace Bool if to replace editor or not.
+	 * @param bool $replace Bool if to replace editor or not.
 	 * @param WP_Post $post Current post object.
 	 *
 	 * @return bool
@@ -224,46 +224,8 @@ class AMP_Story_Post_Type {
 	 */
 	public static function wp_enqueue_scripts() {
 		if ( is_singular( self::POST_TYPE_SLUG ) ) {
-			$post            = get_post();
-			$post_story_data = json_decode( $post->post_content_filtered, true );
-			$g_fonts         = [];
-			foreach ( $post_story_data as $page ) {
-				foreach ( $page['elements'] as $element ) {
-					$font = AMP_Fonts::get_font( $element['fontFamily'] );
-
-					if ( $font && isset( $font['gfont'] ) && $font['gfont'] ) {
-						if ( isset( $g_fonts[ $font['name'] ] ) && ! in_array( $element['fontWeight'], $g_fonts[ $font['name'] ], true ) ) {
-							$g_fonts[ $font['name'] ][] = $element['fontWeight'];
-						} else {
-							$g_fonts[ $font['name'] ][] = $element['fontWeight'];
-						}
-					}
-				}
-			}
-
-			if ( $g_fonts ) {
-				$subsets        = AMP_Fonts::get_subsets();
-				$g_font_display = '';
-				foreach ( $g_fonts as $name => $numbers ) {
-					$g_font_display .= $name . ':' . implode( ',', $numbers ) . '|';
-				}
-
-				$src = add_query_arg(
-					[
-						'family'  => rawurlencode( $g_font_display ),
-						'subset'  => rawurlencode( implode( ',', $subsets ) ),
-						'display' => 'swap',
-					],
-					AMP_Fonts::URL
-				);
-				wp_enqueue_style(
-					self::AMP_STORIES_STYLE_HANDLE . '_fonts',
-					$src,
-					[],
-					AMP__VERSION
-				);
-
-			}
+			$post = get_post();
+			self::load_fonts( $post );
 		}
 	}
 
@@ -353,6 +315,8 @@ class AMP_Story_Post_Type {
 		$post_type_object = get_post_type_object( self::POST_TYPE_SLUG );
 		$rest_base        = ! empty( $post_type_object->rest_base ) ? $post_type_object->rest_base : $post_type_object->name;
 
+		self::load_fonts( $post );
+
 		wp_localize_script(
 			self::AMP_STORIES_SCRIPT_HANDLE,
 			'ampStoriesEditSettings',
@@ -381,6 +345,51 @@ class AMP_Story_Post_Type {
 
 		wp_styles()->add_data( self::AMP_STORIES_STYLE_HANDLE, 'rtl', 'replace' );
 
+	}
+
+	/**
+	 * @param $post
+	 */
+	public static function load_fonts( $post ) {
+		$post_story_data = json_decode( $post->post_content_filtered, true );
+		$g_fonts         = [];
+		foreach ( $post_story_data as $page ) {
+			foreach ( $page['elements'] as $element ) {
+				$font = AMP_Fonts::get_font( $element['fontFamily'] );
+
+				if ( $font && isset( $font['gfont'] ) && $font['gfont'] ) {
+					if ( isset( $g_fonts[ $font['name'] ] ) && ! in_array( $element['fontWeight'], $g_fonts[ $font['name'] ], true ) ) {
+						$g_fonts[ $font['name'] ][] = $element['fontWeight'];
+					} else {
+						$g_fonts[ $font['name'] ][] = $element['fontWeight'];
+					}
+				}
+			}
+		}
+
+		if ( $g_fonts ) {
+			$subsets        = AMP_Fonts::get_subsets();
+			$g_font_display = '';
+			foreach ( $g_fonts as $name => $numbers ) {
+				$g_font_display .= $name . ':' . implode( ',', $numbers ) . '|';
+			}
+
+			$src = add_query_arg(
+				[
+					'family'  => rawurlencode( $g_font_display ),
+					'subset'  => rawurlencode( implode( ',', $subsets ) ),
+					'display' => 'swap',
+				],
+				AMP_Fonts::URL
+			);
+			wp_enqueue_style(
+				self::AMP_STORIES_STYLE_HANDLE . '_fonts',
+				$src,
+				[],
+				AMP__VERSION
+			);
+
+		}
 	}
 
 	/**
