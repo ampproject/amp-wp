@@ -72,7 +72,7 @@ function FontPanel( { selectedElements, onSetProperties } ) {
 				onChange={ ( value ) => setState( { ...state, fontWeight: value } ) }
 			/>
 			<InputGroup
-				type="text"
+				type="number"
 				label="Font size"
 				value={ state.fontSize }
 				isMultiple={ fontSize === '' }

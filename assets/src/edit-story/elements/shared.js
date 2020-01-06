@@ -38,7 +38,7 @@ export const ElementWithFont = css`
 	white-space: pre-wrap;
 	font-family: ${ ( { fontFamily } ) => fontFamily };
 	font-style: ${ ( { fontStyle } ) => fontStyle };
-	font-size: ${ ( { fontSize } ) => fontSize };
+	font-size: ${ ( { fontSize } ) => fontSize }px;
 	font-weight: ${ ( { fontWeight } ) => fontWeight };
 `;
 

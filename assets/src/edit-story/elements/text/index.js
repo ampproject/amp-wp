@@ -9,7 +9,7 @@ export { default as Save } from './save';
 export const defaultAttributes = {
 	fontFamily: 'Arial',
 	fontWeight: 400,
-	fontSize: 'auto',
+	fontSize: 14,
 	fontStyle: 'normal',
 	color: 'black',
 	backgroundColor: 'transparent',
