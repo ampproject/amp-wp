@@ -34,6 +34,7 @@ function FontPanel( { selectedElements, onSetProperties } ) {
 			}
 		}
 		setState( { fontFamily, fontStyle, fontSize, fontWeight, fontWeights } );
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [ fontFamily, fontStyle, fontSize, fontWeight, getFont ] );
 	const handleSubmit = ( evt ) => {
 		onSetProperties( state );

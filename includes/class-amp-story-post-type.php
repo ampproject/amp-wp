@@ -201,7 +201,7 @@ class AMP_Story_Post_Type {
 	/**
 	 * Highjack editor with custom editor.
 	 *
-	 * @param bool $replace Bool if to replace editor or not.
+	 * @param bool    $replace Bool if to replace editor or not.
 	 * @param WP_Post $post Current post object.
 	 *
 	 * @return bool
@@ -348,12 +348,14 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
-	 * @param $post
+	 * Load font from story data.
+	 *
+	 * @param WP_Post $post Post Object.
 	 */
 	public static function load_fonts( $post ) {
 		$post_story_data = json_decode( $post->post_content_filtered, true );
 		$g_fonts         = [];
-		if( $post_story_data ){
+		if ( $post_story_data ) {
 			foreach ( $post_story_data as $page ) {
 				foreach ( $page['elements'] as $element ) {
 					$font = AMP_Fonts::get_font( $element['fontFamily'] );
