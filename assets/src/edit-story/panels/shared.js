@@ -79,6 +79,7 @@ InputGroup.propTypes = {
 InputGroup.defaultProps = {
 	type: 'number',
 	postfix: '',
+	disabled: false,
 };
 
 function SelectMenu( { label, options, value, onChange, postfix, disabled } ) {
@@ -116,6 +117,7 @@ SelectMenu.propTypes = {
 
 SelectMenu.defaultProps = {
 	postfix: '',
+	disabled: false,
 };
 
 function getCommonValue( list, property ) {
