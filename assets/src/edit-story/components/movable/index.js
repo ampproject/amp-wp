@@ -2,7 +2,6 @@
  * External dependencies
  */
 import Moveable from 'react-moveable';
-import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 /**
@@ -40,14 +39,6 @@ function MovableWithRef( { zIndex, ...moveableProps }, ref ) {
 	);
 	return createPortal( slot, layer );
 }
-
-MovableWithRef.propTypes = {
-	zIndex: PropTypes.number,
-};
-
-MovableWithRef.defaultProps = {
-	zIndex: DEFAULT_Z_INDEX,
-};
 
 const Movable = forwardRef( MovableWithRef );
 
