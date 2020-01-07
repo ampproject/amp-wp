@@ -126,7 +126,7 @@ function TextEdit( { content, color, backgroundColor, width, height, x, y, fontF
 
 	useEffect( () => {
 		maybeEnqueueFontStyle( fontFamily );
-	}, [ fontFamily ] );
+	}, [ fontFamily, maybeEnqueueFontStyle ] );
 
 	return (
 		<Element { ...props } onClick={ onClick }>

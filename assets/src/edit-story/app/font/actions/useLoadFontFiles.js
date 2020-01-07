@@ -1,11 +1,7 @@
 /**
- * External dependencies
+ * WordPress dependencies
  */
-import PropTypes from 'prop-types';
-
-
 import { useCallback } from '@wordpress/element';
-
 
 function useLoadFontFiles( { getFontByName } ) {
 	/**
@@ -45,16 +41,9 @@ function useLoadFontFiles( { getFontByName } ) {
 		fontStylesheet.crossOrigin = 'anonymous';
 
 		document.head.appendChild( fontStylesheet );
-	}, [ getFontByName ]);
+	}, [ getFontByName ] );
 
 	return maybeEnqueueFontStyle;
 }
-
-useLoadFontFiles.propTypes = {
-	children: PropTypes.oneOfType( [
-		PropTypes.arrayOf( PropTypes.node ),
-		PropTypes.node,
-	] ).isRequired,
-};
 
 export default useLoadFontFiles;
