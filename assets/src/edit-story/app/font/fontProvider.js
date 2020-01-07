@@ -14,6 +14,7 @@ import { useCallback, useState } from '@wordpress/element';
 import Context from './context';
 
 import useLoadFonts from './effects/useLoadFonts';
+import useLoadFontFiles from './actions/useLoadFontFiles';
 
 function FontProvider( { children } ) {
 	const [ fonts, setFonts ] = useState( [] );
@@ -40,6 +41,8 @@ function FontProvider( { children } ) {
 		},	[ fonts ],
 	);
 
+	const maybeEnqueueFontStyle = useLoadFontFiles( { getFontByName } );
+
 	const state = {
 		state: {
 			fonts,
@@ -47,6 +50,7 @@ function FontProvider( { children } ) {
 		actions: {
 			getFontByName,
 			getFontBySlug,
+			maybeEnqueueFontStyle,
 		},
 	};
 

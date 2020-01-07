@@ -25,7 +25,7 @@ import {
 	ElementWithBackgroundColor,
 	ElementWithFontColor,
 } from '../shared';
-import { getFilteredState, getHandleKeyCommand, maybeEnqueueFontStyle } from './util';
+import { getFilteredState, getHandleKeyCommand } from './util';
 
 const Element = styled.div`
 	margin: 0;
@@ -64,7 +64,7 @@ function TextEdit( { content, color, backgroundColor, width, height, x, y, fontF
 		rotationAngle,
 	};
 	const { actions: { setPropertiesOnSelectedElements } } = useStory();
-	const { actions: { getFontByName } } = useFont();
+	const { actions: { maybeEnqueueFontStyle } } = useFont();
 	const { state: { editingElementState } } = useCanvas();
 	const { offset, clearContent } = editingElementState || {};
 	// To clear content, we can't just use createEmpty() or even pure white-space.
@@ -125,8 +125,8 @@ function TextEdit( { content, color, backgroundColor, width, height, x, y, fontF
 	}, [] );
 
 	useEffect( () => {
-		maybeEnqueueFontStyle( fontFamily, getFontByName );
-	}, [ fontFamily, getFontByName ] );
+		maybeEnqueueFontStyle( fontFamily );
+	}, [ fontFamily ] );
 
 	return (
 		<Element { ...props } onClick={ onClick }>
