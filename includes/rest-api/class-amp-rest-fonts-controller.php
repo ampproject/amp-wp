@@ -64,9 +64,6 @@ class AMP_REST_Fonts_Controller extends WP_REST_Controller {
 
 		$formatted_fonts = [];
 		foreach ( $fonts as $font ) {
-			if ( ! $this->check_read_permission( $font ) ) {
-				continue;
-			}
 			$data              = $this->prepare_item_for_response( $font, $request );
 			$formatted_fonts[] = $this->prepare_response_for_collection( $data );
 		}
@@ -102,7 +99,7 @@ class AMP_REST_Fonts_Controller extends WP_REST_Controller {
 	/**
 	 * Prepares a single font output for response.
 	 *
-	 * @param Object          $font Comment object.
+	 * @param Object          $font Font object.
 	 * @param WP_REST_Request $request Request object.
 	 *
 	 * @return WP_REST_Response Response object.
@@ -148,7 +145,7 @@ class AMP_REST_Fonts_Controller extends WP_REST_Controller {
 		 * Allows modification of the font right before it is returned.
 		 *
 		 * @param WP_REST_Response $response The response object.
-		 * @param Object $font The original comment object.
+		 * @param Object $font The original font object.
 		 * @param WP_REST_Request $request Request used to generate the response.
 		 */
 		return apply_filters( 'rest_prepare_font', $response, $font, $request );
@@ -163,17 +160,6 @@ class AMP_REST_Fonts_Controller extends WP_REST_Controller {
 	 * @return true|WP_Error True if the request has read access, WP_Error object otherwise.
 	 */
 	public function get_items_permissions_check( $request ) {
-		return current_user_can( 'edit_posts' );
-	}
-
-	/**
-	 * Checks if the font can be read.
-	 *
-	 * @param Object $font Font object.
-	 *
-	 * @return bool Whether the comment can be read.
-	 */
-	protected function check_read_permission( $font ) {
 		return current_user_can( 'edit_posts' );
 	}
 
@@ -224,7 +210,7 @@ class AMP_REST_Fonts_Controller extends WP_REST_Controller {
 					'default'     => [ 'normal', 'bold', 'bolder', 'lighter' ],
 				],
 				'src'       => [
-					'description' => __( 'URL for the object font.', 'amp' ),
+					'description' => __( 'URL to enqueue the font', 'amp' ),
 					'type'        => 'string',
 					'format'      => 'uri',
 					'context'     => [ 'view', 'edit', 'embed' ],
