@@ -39,6 +39,10 @@ const Group = styled.label`
 	opacity: ${ ( { disabled } ) => disabled ? 0.7 : 1 };
 `;
 
+const Select = styled.select`
+	width: 100px;
+`;
+
 export const ActionButton = styled.button`
 	color: ${ ( { theme } ) => theme.colors.mg.v1 };
 	font-size: 11px;
@@ -88,8 +92,7 @@ function SelectMenu( { label, options, value, onChange, postfix, disabled } ) {
 			<Label>
 				{ label }
 			</Label>
-			<select
-				style={ { width: 100 } }
+			<Select
 				disabled={ disabled }
 				value={ value }
 				onChange={ ( evt ) => onChange( evt.target.value, evt ) }
@@ -100,7 +103,7 @@ function SelectMenu( { label, options, value, onChange, postfix, disabled } ) {
 						{ name }
 					</option>
 				) ) }
-			</select>
+			</Select>
 			{ postfix }
 		</Group>
 	);
