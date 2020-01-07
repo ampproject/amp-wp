@@ -20,35 +20,13 @@ function FontPanel( { selectedElements, onSetProperties } ) {
 	const fontWeight = getCommonValue( selectedElements, 'fontWeight' );
 	const fontStyle = getCommonValue( selectedElements, 'fontStyle' );
 
-	const fontWeightNames = {
-		100: 'Hairline',
-		200: 'Thin',
-		300: 'Light',
-		400: 'Normal',
-		500: 'Medium',
-		600: 'Semi bold',
-		700: 'Bold',
-		800: 'Extra bold',
-		900: 'Super bold',
-	};
-
-	const defaultFontWeights = [
-		{ name: fontWeightNames[ 400 ], slug: 400, thisValue: 400 },
-	];
-	const { state: { fonts }, actions: { getFontByName } } = useFont();
-	const [ state, setState ] = useState( { fontFamily, fontStyle, fontSize, fontWeight, fontWeights: defaultFontWeights } );
+	const { state: { fonts }, actions: { getFontWeight } } = useFont();
+	const [ state, setState ] = useState( { fontFamily, fontStyle, fontSize, fontWeight, fontWeights: [] } );
 	useEffect( () => {
-		const currentFont = getFontByName( fontFamily );
-		let fontWeights = defaultFontWeights;
-		if ( currentFont ) {
-			const { weights } = currentFont;
-			if ( weights ) {
-				fontWeights = weights.map( ( weight ) => ( { name: fontWeightNames[ weight ], slug: weight, thisValue: weight } ) );
-			}
-		}
+		const fontWeights = getFontWeight( fontFamily );
 		setState( { fontFamily, fontStyle, fontSize, fontWeight, fontWeights } );
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ fontFamily, fontStyle, fontSize, fontWeight, getFontByName ] );
+	}, [ fontFamily, fontStyle, fontSize, fontWeight, getFontWeight ] );
 	const handleSubmit = ( evt ) => {
 		onSetProperties( state );
 		evt.preventDefault();
@@ -69,7 +47,10 @@ function FontPanel( { selectedElements, onSetProperties } ) {
 				options={ fonts }
 				value={ state.fontFamily }
 				onChange={ ( value ) => {
-					setState( { ...state, fontFamily: value, fontWeight: 400 } );
+					const fontWeights = getFontWeight( value );
+					const fontWeightsArr = fontWeights.map( ( { thisValue } ) => thisValue );
+					const newFontWeight = ( fontWeightsArr && fontWeightsArr.includes( state.fontWeight ) ) ? state.fontWeight : 400;
+					setState( { ...state, fontWeights, fontFamily: value, fontWeight: parseInt( newFontWeight ) } );
 				} }
 			/>
 			<SelectMenu

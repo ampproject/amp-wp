@@ -41,6 +41,36 @@ function FontProvider( { children } ) {
 		},	[ fonts ],
 	);
 
+	const getFontWeight = useCallback(
+		( name ) => {
+			const fontWeightNames = {
+				100: 'Hairline',
+				200: 'Thin',
+				300: 'Light',
+				400: 'Normal',
+				500: 'Medium',
+				600: 'Semi bold',
+				700: 'Bold',
+				800: 'Extra bold',
+				900: 'Super bold',
+			};
+
+			const defaultFontWeights = [
+				{ name: fontWeightNames[ 400 ], slug: 400, thisValue: 400 },
+			];
+
+			const currentFont = getFontByName( name );
+			let fontWeights = defaultFontWeights;
+			if ( currentFont ) {
+				const { weights } = currentFont;
+				if ( weights ) {
+					fontWeights = weights.map( ( weight ) => ( { name: fontWeightNames[ weight ], slug: weight, thisValue: weight } ) );
+				}
+			}
+			return fontWeights;
+		},	[ getFontByName ],
+	);
+
 	const maybeEnqueueFontStyle = useLoadFontFiles( { getFontByName } );
 
 	const state = {
@@ -51,6 +81,7 @@ function FontProvider( { children } ) {
 			getFontByName,
 			getFontBySlug,
 			maybeEnqueueFontStyle,
+			getFontWeight,
 		},
 	};
 
