@@ -128,6 +128,12 @@ final class ServerSideRenderingTest extends TestCase
                 [Error\CannotRemoveBoilerplate::CODE],
             ],
 
+            'amp-story' => [
+                $input('', TestMarkup::SCRIPT_AMPSTORY),
+                $expectWithBoilerplate('', TestMarkup::SCRIPT_AMPSTORY),
+                [Error\CannotRemoveBoilerplate::CODE],
+            ],
+
             'amp-dynamic-css-classes' => [
                 $input('', TestMarkup::SCRIPT_AMPDYNAMIC_CSSCLASSES),
                 $expectWithBoilerplate('', TestMarkup::SCRIPT_AMPDYNAMIC_CSSCLASSES),

@@ -22,6 +22,7 @@ final class ServerSideRendering implements Transformer
     const RENDER_DELAYING_EXTENSIONS = [
         'amp-dynamic-css-classes',
         'amp-experiment',
+        'amp-story',
     ];
 
     const SUPPORTED_LAYOUTS = [
