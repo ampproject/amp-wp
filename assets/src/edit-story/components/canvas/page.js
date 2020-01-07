@@ -34,14 +34,14 @@ function Page() {
 
 	const {
 		state: { editingElement },
-		actions: { setBackgroundClickHandler, setNodeForElement, clearEditing },
+		actions: { setBackgroundMouseDownHandler, setNodeForElement, clearEditing },
 	} = useCanvas();
 
 	const [ pushEvent, setPushEvent ] = useState( null );
 
 	useEffect( () => {
-		setBackgroundClickHandler( () => clearSelection() );
-	}, [ setBackgroundClickHandler, clearSelection ] );
+		setBackgroundMouseDownHandler( () => clearSelection() );
+	}, [ setBackgroundMouseDownHandler, clearSelection ] );
 
 	const handleSelectElement = useCallback( ( elId, evt ) => {
 		if ( editingElement && elId !== editingElement ) {
@@ -54,7 +54,7 @@ function Page() {
 		}
 		evt.stopPropagation();
 
-		if ( 'pointerdown' === evt.type ) {
+		if ( 'mousedown' === evt.type ) {
 			evt.persist();
 			setPushEvent( evt );
 		}

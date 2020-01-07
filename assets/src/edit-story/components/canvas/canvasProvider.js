@@ -21,9 +21,9 @@ function CanvasProvider( { children } ) {
 	} = useEditingElement();
 
 	const [
-		backgroundClickHandler,
-		setBackgroundClickHandler,
-		clearBackgroundClickHandler,
+		backgroundMouseDownHandler,
+		setBackgroundMouseDownHandler,
+		clearBackgroundMouseDownHandler,
 	] = useFunctionState();
 
 	const state = {
@@ -31,12 +31,12 @@ function CanvasProvider( { children } ) {
 			editingElement,
 			editingElementState,
 			isEditing: Boolean( editingElement ),
-			backgroundClickHandler,
+			backgroundMouseDownHandler,
 		},
 		actions: {
 			setNodeForElement,
-			setBackgroundClickHandler,
-			clearBackgroundClickHandler,
+			setBackgroundMouseDownHandler,
+			clearBackgroundMouseDownHandler,
 			setEditingElement: setEditingElementWithoutState,
 			setEditingElementWithState,
 			clearEditing,
