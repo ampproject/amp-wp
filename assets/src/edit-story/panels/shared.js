@@ -95,8 +95,8 @@ function SelectMenu( { label, options, value, onChange, postfix, disabled } ) {
 				onChange={ ( evt ) => onChange( evt.target.value, evt ) }
 				onBlur={ ( evt ) => evt.target.form.dispatchEvent( new window.Event( 'submit' ) ) }
 			>
-				{ options && options.map( ( { name, slug } ) => (
-					<option key={ slug } value={ name }>
+				{ options && options.map( ( { name, slug, thisValue } ) => (
+					<option key={ slug } value={ thisValue }>
 						{ name }
 					</option>
 				) ) }

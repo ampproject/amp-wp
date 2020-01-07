@@ -14,7 +14,7 @@ import { getCommonAttributes } from '../shared';
 function TextSave( { id, content, color, backgroundColor, width, height, x, y, fontFamily, fontSize, fontWeight, fontStyle, rotationAngle } ) {
 	const style = {
 		...getCommonAttributes( { width, height, x, y, rotationAngle } ),
-		fontSize: `${fontSize}px`,
+		fontSize: `${ fontSize }px`,
 		fontStyle: fontStyle ? fontStyle : null,
 		fontFamily: fontFamily ? fontFamily : null,
 		fontWeight: fontWeight ? fontWeight : null,

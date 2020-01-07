@@ -61,7 +61,7 @@ function TextDisplay( { id, content, color, backgroundColor, width, height, x, y
 		state: { selectedElementIds },
 	} = useStory();
 	const {
-		actions: { getFont },
+		actions: { getFontByName },
 	} = useFont();
 
 	const {
@@ -84,8 +84,8 @@ function TextDisplay( { id, content, color, backgroundColor, width, height, x, y
 	}, [ isElementOnlySelection ] );
 
 	useEffect( () => {
-		maybeEnqueueFontStyle( fontFamily, getFont );
-	}, [ fontFamily, getFont ] );
+		maybeEnqueueFontStyle( fontFamily, getFontByName );
+	}, [ fontFamily, getFontByName ] );
 
 	const clickTime = useRef();
 	const handleMouseDown = useCallback( () => {

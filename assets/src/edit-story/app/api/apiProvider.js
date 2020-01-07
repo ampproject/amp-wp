@@ -90,7 +90,12 @@ function APIProvider( { children } ) {
 	const getAllFonts = useCallback(
 		( {} ) => {
 			return apiFetch( { path: fonts } )
-				.then( ( data ) => data );
+				.then( ( data ) => data.map(
+					( font ) => ( {
+						thisValue: font.name,
+						...font,
+					} ),
+				) );
 		}, [ fonts ],
 	);
 
