@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { useRef, useEffect } from '@wordpress/element';
+import { useRef, useEffect, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -14,7 +14,6 @@ import { useRef, useEffect } from '@wordpress/element';
 import { useStory } from '../../app';
 import Movable from '../movable';
 
-const CORNER_HANDLES = [ 'nw', 'ne', 'sw', 'se' ];
 const ALL_HANDLES = [ 'n', 's', 'e', 'w', 'nw', 'ne', 'sw', 'se' ];
 
 function SelectionMovable( {
@@ -23,6 +22,7 @@ function SelectionMovable( {
 	pushEvent,
 } ) {
 	const moveable = useRef();
+	const [ keepRatioMode, setKeepRatioMode ] = useState( true );
 
 	const {
 		actions: { setPropertiesOnSelectedElements },
@@ -57,20 +57,23 @@ function SelectionMovable( {
 		rotate: selectedElement.rotationAngle,
 	};
 
-	const setStyle = ( target ) => {
+	const setTransformStyle = ( target ) => {
 		target.style.transform = `translate(${ frame.translate[ 0 ] }px, ${ frame.translate[ 1 ] }px) rotate(${ frame.rotate }deg)`;
 	};
 
 	/**
-  * Resets SelectionMovable once the action is done, sets the initial values.
-  *
-  * @param {Object} target Target element.
-  */
+	 * Resets Movable once the action is done, sets the initial values.
+	 *
+	 * @param {Object} target Target element.
+	 */
 	const resetMoveable = ( target ) => {
 		frame.translate = [ 0, 0 ];
-		setStyle( target );
+		// Inline start resetting has to be done very carefully here to avoid
+		// conflicts with stylesheets. See #3951.
+		target.style.transform = '';
 		target.style.width = '';
 		target.style.height = '';
+		setKeepRatioMode( true );
 		if ( moveable.current ) {
 			moveable.current.updateRect();
 		}
@@ -78,15 +81,15 @@ function SelectionMovable( {
 
 	return (
 		<Movable
-			ref={ moveable }
 			zIndex={ 0 }
+			ref={ moveable }
 			target={ targetEl }
 			draggable={ ! selectedElement.isFullbleed }
 			resizable={ ! selectedElement.isFullbleed }
 			rotatable={ ! selectedElement.isFullbleed }
 			onDrag={ ( { target, beforeTranslate } ) => {
 				frame.translate = beforeTranslate;
-				setStyle( target );
+				setTransformStyle( target );
 			} }
 			throttleDrag={ 0 }
 			onDragStart={ ( { set } ) => {
@@ -98,17 +101,24 @@ function SelectionMovable( {
 				setPropertiesOnSelectedElements( newProps );
 				resetMoveable( target );
 			} }
-			onResizeStart={ ( { setOrigin, dragStart } ) => {
+			onResizeStart={ ( { setOrigin, dragStart, direction } ) => {
 				setOrigin( [ '%', '%' ] );
 				if ( dragStart ) {
 					dragStart.set( frame.translate );
+				}
+				// Lock ratio for diagonal directions (nw, ne, sw, se). Both
+				// `direction[]` values for diagonals are either 1 or -1. Non-diagonal
+				// directions have 0s.
+				const newKeepRatioMode = direction[ 0 ] !== 0 && direction[ 1 ] !== 0;
+				if ( keepRatioMode !== newKeepRatioMode ) {
+					setKeepRatioMode( newKeepRatioMode );
 				}
 			} }
 			onResize={ ( { target, width, height, drag } ) => {
 				target.style.width = `${ width }px`;
 				target.style.height = `${ height }px`;
 				frame.translate = drag.beforeTranslate;
-				setStyle( target );
+				setTransformStyle( target );
 			} }
 			onResizeEnd={ ( { target } ) => {
 				setPropertiesOnSelectedElements( {
@@ -124,15 +134,16 @@ function SelectionMovable( {
 			} }
 			onRotate={ ( { target, beforeRotate } ) => {
 				frame.rotate = beforeRotate;
-				setStyle( target );
+				setTransformStyle( target );
 			} }
-			onRotateEnd={ () => {
+			onRotateEnd={ ( { target } ) => {
 				setPropertiesOnSelectedElements( { rotationAngle: frame.rotate } );
+				resetMoveable( target );
 			} }
 			origin={ false }
 			pinchable={ true }
-			keepRatio={ 'image' === selectedElement.type } // @†odo Even image doesn't always keep ratio, consider moving to element's model.
-			renderDirections={ 'image' === selectedElement.type ? CORNER_HANDLES : ALL_HANDLES }
+			keepRatio={ 'image' === selectedElement.type && keepRatioMode }
+			renderDirections={ ALL_HANDLES }
 		/>
 	);
 }
