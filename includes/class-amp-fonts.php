@@ -211,7 +211,7 @@ class AMP_Fonts {
 		$fonts = [];
 
 		foreach ( $google_fonts as $font ) {
-			
+
 			$variants = array_map(
 				static function ( $variant ) {
 					$variant = str_replace(
