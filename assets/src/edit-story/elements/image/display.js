@@ -29,11 +29,11 @@ const Img = styled.img`
 	${ ImageWithScale }
 `;
 
-function ImageDisplay( { id, src, origRatio, width, height, x, y, scale, focalX, focalY, rotationAngle, isFullbleed, forwardedRef, onPointerDown } ) {
+function ImageDisplay( { id, src, origRatio, width, height, x, y, scale, focalX, focalY, rotationAngle, isFullbleed, forwardedRef, onMouseDown } ) {
 	const elementProps = {
 		...getBox( { x, y, width, height, rotationAngle, isFullbleed } ),
 		ref: forwardedRef,
-		onPointerDown,
+		onMouseDown,
 	};
 	const imgProps = getImgProps( elementProps.width, elementProps.height, scale, focalX, focalY, origRatio );
 	const {
@@ -66,7 +66,7 @@ ImageDisplay.propTypes = {
 		PropTypes.object,
 		PropTypes.func,
 	] ),
-	onPointerDown: PropTypes.func,
+	onMouseDown: PropTypes.func,
 };
 
 ImageDisplay.defaultProps = {
