@@ -20,7 +20,7 @@ function FontPanel( { selectedElements, onSetProperties } ) {
 	const fontWeight = getCommonValue( selectedElements, 'fontWeight' );
 	const fontStyle = getCommonValue( selectedElements, 'fontStyle' );
 
-	const fontNames = {
+	const fontWeightNames = {
 		100: 'Hairline',
 		200: 'Thin',
 		300: 'Light',
@@ -33,7 +33,7 @@ function FontPanel( { selectedElements, onSetProperties } ) {
 	};
 
 	const defaultFontWeights = [
-		{ name: fontNames[ 400 ], slug: 400, thisValue: 400 },
+		{ name: fontWeightNames[ 400 ], slug: 400, thisValue: 400 },
 	];
 	const { state: { fonts }, actions: { getFontByName } } = useFont();
 	const [ state, setState ] = useState( { fontFamily, fontStyle, fontSize, fontWeight, fontWeights: defaultFontWeights } );
@@ -43,7 +43,7 @@ function FontPanel( { selectedElements, onSetProperties } ) {
 		if ( currentFont ) {
 			const { weights } = currentFont;
 			if ( weights ) {
-				fontWeights = weights.map( ( weight ) => ( { name: fontNames[ weight ], slug: weight, thisValue: weight } ) );
+				fontWeights = weights.map( ( weight ) => ( { name: fontWeightNames[ weight ], slug: weight, thisValue: weight } ) );
 			}
 		}
 		setState( { fontFamily, fontStyle, fontSize, fontWeight, fontWeights } );
