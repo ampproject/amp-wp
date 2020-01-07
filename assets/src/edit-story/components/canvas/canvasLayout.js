@@ -7,6 +7,7 @@ import styled from 'styled-components';
  * Internal dependencies
  */
 import { CENTRAL_RIGHT_PADDING, PAGE_WIDTH, PAGE_HEIGHT } from '../../constants';
+import useCanvas from './useCanvas';
 import Page from './page';
 import Meta from './meta';
 import Carrousel from './carrousel';
@@ -35,8 +36,9 @@ const Area = styled.div`
 `;
 
 function CanvasLayout() {
+	const { state: { backgroundMouseDownHandler } } = useCanvas();
 	return (
-		<Background>
+		<Background onMouseDown={ backgroundMouseDownHandler }>
 			<Area area="page">
 				<Page />
 			</Area>
