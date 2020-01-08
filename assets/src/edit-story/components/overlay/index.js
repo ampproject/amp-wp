@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 /**
@@ -38,14 +37,6 @@ function InOverlayWithRef( { zIndex, render, children }, ref ) {
 	);
 	return createPortal( slot, overlay );
 }
-
-InOverlayWithRef.propTypes = {
-	zIndex: PropTypes.number,
-};
-
-InOverlayWithRef.defaultProps = {
-	zIndex: 0,
-};
 
 const InOverlay = forwardRef( InOverlayWithRef );
 
