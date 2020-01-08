@@ -12,7 +12,7 @@ import { useCallback, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { ElementFillContent, ElementWithPosition, ElementWithSize, ElementWithRotation, getBox } from '../shared';
+import { ElementFillContent } from '../shared';
 import { useStory } from '../../app';
 import EditPanMovable from './editPanMovable';
 import EditCropMovable from './editCropMovable';
