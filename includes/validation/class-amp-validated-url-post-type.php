@@ -1965,11 +1965,13 @@ class AMP_Validated_URL_Post_Type {
 		$excluded_final_size    = 0;
 		$excluded_original_size = 0;
 		$excluded_stylesheets   = 0;
+		$max_final_size         = 0;
 		foreach ( $stylesheets as $stylesheet ) {
 			// @todo Add information about amp-keyframes as well.
 			if ( ! isset( $stylesheet['group'] ) || 'amp-custom' !== $stylesheet['group'] || ! empty( $stylesheet['duplicate'] ) ) {
 				continue;
 			}
+			$max_final_size = max( $max_final_size, $stylesheet['final_size'] );
 			if ( $stylesheet['included'] ) {
 				$included_final_size    += $stylesheet['final_size'];
 				$included_original_size += $stylesheet['original_size'];
@@ -2057,13 +2059,14 @@ class AMP_Validated_URL_Post_Type {
 			</div>
 		<?php endif; ?>
 
-		<table class="wp-list-table widefat fixed striped">
+		<table class="amp-stylesheet-list wp-list-table widefat fixed striped">
 			<thead>
 			<tr>
 				<th class="column-stylesheet_expand"></th>
 				<th class="column-original_size"><?php esc_html_e( 'Original Size', 'amp' ); ?></th>
 				<th class="column-minified"><?php esc_html_e( 'Minified', 'amp' ); ?></th>
 				<th class="column-final_size"><?php esc_html_e( 'Final Size', 'amp' ); ?></th>
+				<th class="column-percentage"><?php esc_html_e( 'Percentage', 'amp' ); ?></th>
 				<th class="column-priority"><?php esc_html_e( 'Priority', 'amp' ); ?></th>
 				<th class="column-stylesheet_status"><?php esc_html_e( 'Status', 'amp' ); ?></th>
 				<th class="column-markup"><?php esc_html_e( 'Markup', 'amp' ); ?></th>
@@ -2077,14 +2080,6 @@ class AMP_Validated_URL_Post_Type {
 				// @todo Add information about amp-keyframes as well.
 				if ( ! isset( $stylesheet['group'] ) || 'amp-custom' !== $stylesheet['group'] || ! empty( $stylesheet['duplicate'] ) ) {
 					continue;
-				}
-
-				if ( $stylesheet['included'] ) {
-					$included_final_size    += $stylesheet['final_size'];
-					$included_original_size += $stylesheet['original_size'];
-				} else {
-					$excluded_final_size    += $stylesheet['final_size'];
-					$excluded_original_size += $stylesheet['original_size'];
 				}
 
 				$origin_html = '<' . $stylesheet['element']['name'];
@@ -2124,6 +2119,14 @@ class AMP_Validated_URL_Post_Type {
 						echo esc_html( number_format_i18n( $stylesheet['final_size'] ) );
 						echo '<small>B</small>';
 						?>
+					</td>
+					<td class="column-percentage">
+						<?php
+						$percentage = $stylesheet['final_size'] / ( $included_final_size + $excluded_final_size );
+						?>
+						<meter value="<?php echo esc_attr( $stylesheet['final_size'] ); ?>" min="0" max="<?php echo esc_attr( $included_final_size + $excluded_final_size ); ?>" title="<?php esc_attr_e( 'Stylesheet bytes of total CSS added to page', 'amp' ); ?>">
+							<?php echo esc_html( round( ( $percentage ) * 100 ) ) . '%'; ?>
+						</meter>
 					</td>
 					<td class="column-priority">
 						<?php echo esc_html( $stylesheet['priority'] ); ?>
@@ -2169,7 +2172,7 @@ class AMP_Validated_URL_Post_Type {
 					</td>
 				</tr>
 				<tr class="<?php echo esc_attr( sprintf( 'stylesheet-details level-0 %s', 0 === $row % 2 ? 'even' : 'odd' ) ); ?>">
-					<td colspan="8">
+					<td colspan="9">
 						<dl class="detailed">
 							<dt><?php esc_html_e( 'Origin Markup', 'amp' ); ?></dt>
 							<dd><code class="stylesheet-origin-markup"><?php echo esc_html( $origin_html ); ?></code></dd>

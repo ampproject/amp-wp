@@ -433,11 +433,21 @@ body.taxonomy-amp_validation_error .wp-list-table .new th.check-column input {
 	margin-bottom: 1em;
 }
 
+#amp_stylesheets .amp-stylesheet-list th {
+	overflow-wrap: normal;
+}
+
 #amp_stylesheets .column-original_size,
+#amp_stylesheets .column-minified,
 #amp_stylesheets .column-final_size,
-#amp_stylesheets .column-minified {
+#amp_stylesheets .column-percentage {
 	width: 10%;
 	text-align: right;
+}
+
+#amp_stylesheets .column-markup {
+	width: 10%;
+	white-space: nowrap;
 }
 
 #amp_stylesheets .column-origin {
@@ -449,17 +459,22 @@ body.taxonomy-amp_validation_error .wp-list-table .new th.check-column input {
 }
 
 #amp_stylesheets .column-priority {
-	width: 10%;
+	width: 7%;
 	text-align: right;
 }
 
 #amp_stylesheets .column-stylesheet_status {
-	width: 10%;
+	width: 5%;
 	white-space: nowrap;
+	text-align: center;
+}
+
+#amp_stylesheets .column-percentage {
+	text-align: center;
 }
 
 #amp_stylesheets .column-source {
-	width: 30%;
+	width: 25%;
 }
 
 .toggle-stylesheet-details {
