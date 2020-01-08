@@ -66,7 +66,7 @@ function useSaveStory( {
 		);
 	}, [] );
 
-	const savePost = useCallback( () => {
+	const saveStory = useCallback( () => {
 		const { title, status: postStatus, author, slug } = story;
 		const status = ( postStatus !== 'publish' ) ? 'publish' : postStatus;
 
@@ -83,7 +83,7 @@ function useSaveStory( {
 		} );
 	}, [ storyId, pages, story, updateStory, saveStoryById, refreshPostEditURL ] );
 
-	return savePost;
+	return saveStory;
 }
 
 export default useSaveStory;
