@@ -5,9 +5,17 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 /**
+ * WordPress dependencies
+ */
+import { useCallback, useState } from '@wordpress/element';
+
+/**
  * Internal dependencies
  */
 import { ElementWithPosition, ElementWithSize, ElementWithRotation, getBox } from '../shared';
+import { useStory } from '../../app';
+import EditPanMovable from './editPanMovable';
+import EditCropMovable from './editCropMovable';
 import { getImgProps, ImageWithScale } from './util';
 
 const Element = styled.div`
@@ -16,7 +24,7 @@ const Element = styled.div`
 	${ ElementWithRotation }
 `;
 
-const ActualBox = styled.div`
+const CropBox = styled.div`
 	width: 100%;
 	height: 100%;
 	position: relative;
@@ -41,25 +49,62 @@ const FadedImg = styled.img`
 	${ ImageWithScale }
 `;
 
-const ActualImg = styled.img`
+const CropImg = styled.img`
 	position: absolute;
 	${ ImageWithScale }
 `;
 
-function ImageEdit( { src, origRatio, width, height, x, y, scale, focalX, focalY, rotationAngle, isFullbleed } ) {
+function ImageEdit( { id, src, origRatio, width, height, x, y, scale, focalX, focalY, rotationAngle, isFullbleed } ) {
+	const [ fullImage, setFullImage ] = useState( null );
+	const [ croppedImage, setCroppedImage ] = useState( null );
+	const [ cropBox, setCropBox ] = useState( null );
+
+	const { actions: { setPropertiesById } } = useStory();
+	const setProperties = useCallback(
+		( props ) => setPropertiesById( id, props ),
+		[ id, setPropertiesById ] );
+
 	const elementProps = getBox( { x, y, width, height, rotationAngle, isFullbleed } );
 	const imgProps = getImgProps( elementProps.width, elementProps.height, scale, focalX, focalY, origRatio );
+
 	return (
 		<Element { ...elementProps }>
-			<FadedImg draggable={ false } src={ src } { ...imgProps } />
-			<ActualBox>
-				<ActualImg draggable={ false } src={ src } { ...imgProps } />
-			</ActualBox>
+			<FadedImg ref={ setFullImage } draggable={ false } src={ src } { ...imgProps } />
+			<CropBox ref={ setCropBox }>
+				<CropImg ref={ setCroppedImage } draggable={ false } src={ src } { ...imgProps } />
+			</CropBox>
+
+			{ ! isFullbleed && cropBox && croppedImage && (
+				<EditCropMovable
+					setProperties={ setProperties }
+					cropBox={ cropBox }
+					croppedImage={ croppedImage }
+					{ ...elementProps }
+					offsetX={ imgProps.offsetX }
+					offsetY={ imgProps.offsetY }
+					imgWidth={ imgProps.width }
+					imgHeight={ imgProps.height }
+				/>
+			) }
+
+			{ fullImage && croppedImage && (
+				<EditPanMovable
+					setProperties={ setProperties }
+					fullImage={ fullImage }
+					croppedImage={ croppedImage }
+					{ ...elementProps }
+					offsetX={ imgProps.offsetX }
+					offsetY={ imgProps.offsetY }
+					imgWidth={ imgProps.width }
+					imgHeight={ imgProps.height }
+				/>
+			) }
 		</Element>
 	);
 }
 
 ImageEdit.propTypes = {
+	id: PropTypes.string.isRequired,
 	src: PropTypes.string.isRequired,
 	origRatio: PropTypes.number.isRequired,
 	width: PropTypes.number.isRequired,
