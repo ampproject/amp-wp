@@ -435,7 +435,7 @@ body.taxonomy-amp_validation_error .wp-list-table .new th.check-column input {
 
 #amp_stylesheets .column-original_size,
 #amp_stylesheets .column-final_size,
-#amp_stylesheets .column-delta {
+#amp_stylesheets .column-minified {
 	width: 10%;
 	text-align: right;
 }

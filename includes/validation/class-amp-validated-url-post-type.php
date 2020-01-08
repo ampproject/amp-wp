@@ -2062,8 +2062,8 @@ class AMP_Validated_URL_Post_Type {
 			<tr>
 				<th class="column-stylesheet_expand"></th>
 				<th class="column-original_size"><?php esc_html_e( 'Original Size', 'amp' ); ?></th>
+				<th class="column-minified"><?php esc_html_e( 'Minified', 'amp' ); ?></th>
 				<th class="column-final_size"><?php esc_html_e( 'Final Size', 'amp' ); ?></th>
-				<th class="column-delta"><?php esc_html_e( 'Delta', 'amp' ); ?></th>
 				<th class="column-priority"><?php esc_html_e( 'Priority', 'amp' ); ?></th>
 				<th class="column-stylesheet_status"><?php esc_html_e( 'Status', 'amp' ); ?></th>
 				<th class="column-markup"><?php esc_html_e( 'Markup', 'amp' ); ?></th>
@@ -2110,19 +2110,19 @@ class AMP_Validated_URL_Post_Type {
 						echo '<small>B</small>';
 						?>
 					</td>
-					<td class="column-final_size">
-						<?php
-						echo esc_html( number_format_i18n( $stylesheet['final_size'] ) );
-						echo '<small>B</small>';
-						?>
-					</td>
-					<td class="column-delta">
+					<td class="column-minified">
 						<?php
 						if ( $ratio <= 1 ) {
 							echo esc_html( sprintf( '-%.1f%%', ( 1.0 - $ratio ) * 100 ) );
 						} else {
 							echo esc_html( sprintf( '+%.1f%%', -1 * ( 1.0 - $ratio ) * 100 ) );
 						}
+						?>
+					</td>
+					<td class="column-final_size">
+						<?php
+						echo esc_html( number_format_i18n( $stylesheet['final_size'] ) );
+						echo '<small>B</small>';
 						?>
 					</td>
 					<td class="column-priority">
