@@ -4,6 +4,18 @@
 import { setupReducer } from './_utils';
 
 describe( 'arrangePage', () => {
+	it( 'should do nothing if there is only one page', () => {
+		const { restore, arrangePage } = setupReducer();
+
+		// Set an initial state with multiple pages.
+		const initialState = restore( {
+			pages: [ { id: '111' } ],
+		} );
+
+		const result = arrangePage( { pageId: '111', position: 3 } );
+		expect( result ).toStrictEqual( initialState );
+	} );
+
 	it( 'should reorder a page to the specified position', () => {
 		const { restore, arrangePage } = setupReducer();
 

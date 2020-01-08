@@ -5,6 +5,25 @@ import { LAYER_DIRECTIONS } from '../../../../constants';
 import { setupReducer } from './_utils';
 
 describe( 'arrangeElement', () => {
+	it( 'should do nothing if there is only one element on page', () => {
+		const { restore, arrangeElement } = setupReducer();
+
+		const initialState = restore( {
+			pages: [ {
+				backgroundElementId: null,
+				id: '111',
+				elements: [
+					{ id: '123' },
+				],
+			} ],
+			current: '111',
+		} );
+
+		const result = arrangeElement( { elementId: '123', position: 2 } );
+
+		expect( result ).toStrictEqual( initialState );
+	} );
+
 	it( 'should move element to specified position', () => {
 		const { restore, arrangeElement } = setupReducer();
 
