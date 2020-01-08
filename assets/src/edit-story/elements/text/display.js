@@ -13,7 +13,6 @@ import { useRef, useEffect, useCallback, useState } from '@wordpress/element';
  * Internal dependencies
  */
 import getCaretCharacterOffsetWithin from '../../utils/getCaretCharacterOffsetWithin';
-import useCombinedRefs from '../../utils/useCombinedRefs';
 import { useStory } from '../../app';
 import { useCanvas } from '../../components/canvas';
 import {

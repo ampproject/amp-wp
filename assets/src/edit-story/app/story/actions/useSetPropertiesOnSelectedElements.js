@@ -21,14 +21,14 @@ function useSetPropertiesOnSelectedElements( {
 		const hasChanges = currentPage.elements.reduce( ( acc, element ) => {
 			if ( selectedElementIds.includes( element.id ) ) {
 				for ( const k in properties ) {
-					if ( !Object.is(properties[k], element[k]) ) {
+					if ( ! Object.is( properties[ k ], element[ k ] ) ) {
 						return true;
 					}
 				}
 			}
 			return acc;
-		}, false);
-		if (!hasChanges) {
+		}, false );
+		if ( ! hasChanges ) {
 			return;
 		}
 
