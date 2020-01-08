@@ -2,6 +2,11 @@
 
 namespace Amp\Optimizer\Error;
 
+/**
+ * Default set of properties and methods to use for errors.
+ *
+ * @package Amp\Optimizer
+ */
 trait ErrorProperties
 {
 
@@ -12,16 +17,8 @@ trait ErrorProperties
      */
     public function __construct($message)
     {
-        $this->code    = self::CODE;
         $this->message = $message;
     }
-
-    /**
-     * Code of the error.
-     *
-     * @var string
-     */
-    protected $code;
 
     /**
      * Message of the error.
@@ -37,7 +34,7 @@ trait ErrorProperties
      */
     public function getCode()
     {
-        return $this->code;
+        return basename(get_class($this));
     }
 
     /**

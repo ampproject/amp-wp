@@ -9,13 +9,6 @@ final class CannotRemoveBoilerplate implements Error
 {
     use ErrorProperties;
 
-    /**
-     * Code to use for the error.
-     *
-     * @var string
-     */
-    const CODE = 'CANNOT_REMOVE_BOILERPLATE';
-
     const ATTRIBUTES_STRING             = 'Cannot remove boilerplate as either heights, media or sizes attribute is set: ';
     const RENDER_DELAYING_SCRIPT_STRING = 'Cannot remove boilerplate because the document contains a render-delaying extension: ';
     const AMP_AUDIO_STRING              = 'Cannot remove boilerplate because the document contains an extension that needs to know the dimensions of the browser: ';
@@ -73,7 +66,9 @@ final class CannotRemoveBoilerplate implements Error
      */
     public static function fromRenderDelayingScript(DOMElement $element)
     {
-        $elementName = $element->hasAttribute('custom-element') ? $element->getAttribute('custom-element') : '<unknown>';
+        $elementName = $element->hasAttribute('custom-element')
+            ? $element->getAttribute('custom-element')
+            : '<unknown>';
 
         return new self(self::UNSUPPORTED_LAYOUT_STRING . $elementName);
     }

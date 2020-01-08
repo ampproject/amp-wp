@@ -9,13 +9,6 @@ final class CannotPerformServerSideRendering implements Error
 {
     use ErrorProperties;
 
-    /**
-     * Code to use for the error.
-     *
-     * @var string
-     */
-    const CODE = 'CANNOT_PERFORM_SSR';
-
     const INVALID_INPUT_WIDTH  = 'Cannot perform serverside rendering, invalid input width: ';
     const INVALID_INPUT_HEIGHT = 'Cannot perform serverside rendering, invalid input height: ';
     const UNSUPPORTED_LAYOUT   = 'Cannot perform serverside rendering, unsupported layout: ';
