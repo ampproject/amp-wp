@@ -22,7 +22,6 @@ function useSetPropertiesOnSelectedElements( {
 			if ( selectedElementIds.includes( element.id ) ) {
 				for ( const k in properties ) {
 					if ( !Object.is(properties[k], element[k]) ) {
-						console.log('- change in ', k, properties[k], element[k]);
 						return true;
 					}
 				}
