@@ -60,7 +60,7 @@ class AMP_DOM_Utils {
 	 */
 	public static function get_dom( $document, $encoding = null ) {
 		_deprecated_function( __METHOD__, '1.5.0', 'Amp\Dom\Document::fromHtml()' );
-		return Document::fromHtml($document, $encoding );
+		return Document::fromHtml( $document, $encoding );
 	}
 
 	/**
@@ -75,7 +75,7 @@ class AMP_DOM_Utils {
 	 */
 	public static function is_valid_head_node( DOMNode $node ) {
 		_deprecated_function( __METHOD__, '1.5.0', 'Amp\Dom\Document->isValidHeadNode()' );
-		return Document::fromNode($node )->isValidHeadNode($node );
+		return Document::fromNode( $node )->isValidHeadNode( $node );
 	}
 
 	/**
@@ -161,7 +161,7 @@ class AMP_DOM_Utils {
 		 */
 		$document = "<html><head></head><body>{$content}</body></html>";
 
-		return Document::fromHtml($document, $encoding );
+		return Document::fromHtml( $document, $encoding );
 	}
 
 	/**

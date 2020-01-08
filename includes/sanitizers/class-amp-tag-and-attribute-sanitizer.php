@@ -1225,7 +1225,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		$layout = $this->calculate_layout( $layout_attr, $width, $height, $sizes_attr, $heights_attr );
 
 		// Only FLEX_ITEM allows for height to be set to auto.
-		if ($height->isAuto() && AMP_Rule_Spec::LAYOUT_FLEX_ITEM !== $layout ) {
+		if ( $height->isAuto() && AMP_Rule_Spec::LAYOUT_FLEX_ITEM !== $layout ) {
 			return [ 'code' => self::INVALID_LAYOUT_AUTO_HEIGHT ];
 		}
 
@@ -1253,7 +1253,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			AMP_Rule_Spec::LAYOUT_INTRINSIC === $layout ||
 			AMP_Rule_Spec::LAYOUT_RESPONSIVE === $layout
 		) {
-			if (! $width->isDefined() || $width->isAuto() ) {
+			if ( ! $width->isDefined() || $width->isAuto() ) {
 				return [ 'code' => self::INVALID_LAYOUT_AUTO_WIDTH ];
 			}
 		}
@@ -1264,7 +1264,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				AMP_Rule_Spec::LAYOUT_INTRINSIC === $layout ||
 				AMP_Rule_Spec::LAYOUT_RESPONSIVE === $layout
 			) &&
-            $width->getUnit() !== $height->getUnit()
+			$width->getUnit() !== $height->getUnit()
 		) {
 			return [ 'code' => self::INVALID_LAYOUT_UNIT_DIMENSIONS ];
 		}
@@ -1299,7 +1299,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		if (
 			( ! $this->is_empty_attribute_value( $input_layout ) || AMP_Rule_Spec::LAYOUT_FIXED === $input_layout ) &&
 			! $input_width->isDefined() &&
-            isset( $amp_layout_spec['defines_default_width'] )
+			isset( $amp_layout_spec['defines_default_width'] )
 		) {
 			$css_length = new CssLength( '1px' );
 			$css_length->validate( false, false );
@@ -1331,7 +1331,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				AMP_Rule_Spec::LAYOUT_FIXED_HEIGHT === $input_layout
 			) &&
 			! $input_height->isDefined() &&
-            isset( $amp_layout_spec['defines_default_width'] )
+			isset( $amp_layout_spec['defines_default_width'] )
 		) {
 			$css_length = new CssLength( '1px' );
 			$css_length->validate( false, false );
@@ -1365,22 +1365,22 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	private function calculate_layout( $layout_attr, CssLength $width, CssLength $height, $sizes_attr, $heights_attr ) {
 		if ( ! $this->is_empty_attribute_value( $layout_attr ) ) {
 			return $layout_attr;
-		} elseif (! $width->isDefined() && ! $height->isDefined() ) {
+		} elseif ( ! $width->isDefined() && ! $height->isDefined() ) {
 			return AMP_Rule_Spec::LAYOUT_CONTAINER;
 		} elseif (
-            ($height->isDefined() && $height->isFluid() ) ||
-            ($width->isDefined() && $width->isFluid() )
+			( $height->isDefined() && $height->isFluid() ) ||
+			( $width->isDefined() && $width->isFluid() )
 		) {
 			return AMP_Rule_Spec::LAYOUT_FLUID;
 		} elseif (
-            $height->isDefined() &&
-            (! $width->isDefined() || $width->isAuto() )
+			$height->isDefined() &&
+			( ! $width->isDefined() || $width->isAuto() )
 		) {
 			return AMP_Rule_Spec::LAYOUT_FIXED_HEIGHT;
 		} elseif (
-            $height->isDefined() &&
-            $width->isDefined() &&
-            (
+			$height->isDefined() &&
+			$width->isDefined() &&
+			(
 				! $this->is_empty_attribute_value( $sizes_attr ) ||
 				! $this->is_empty_attribute_value( $heights_attr )
 			)

@@ -56,7 +56,7 @@ class AMP_Script_Sanitizer_Test extends WP_UnitTestCase {
 		if ( null === $expected ) {
 			$expected = $source;
 		}
-		$dom = Document::fromHtml($source );
+		$dom = Document::fromHtml( $source );
 		$this->assertSame( 1, $dom->getElementsByTagName( 'noscript' )->length );
 		$sanitizer = new AMP_Script_Sanitizer( $dom );
 		$sanitizer->sanitize();
@@ -105,7 +105,7 @@ class AMP_Script_Sanitizer_Test extends WP_UnitTestCase {
 			'use_document_element' => true,
 		];
 
-		$dom = Document::fromHtml($html );
+		$dom = Document::fromHtml( $html );
 		AMP_Content_Sanitizer::sanitize_document( $dom, amp_get_content_sanitizers(), $args );
 
 		$content = $dom->saveHTML( $dom->documentElement );

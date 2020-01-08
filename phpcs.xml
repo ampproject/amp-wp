@@ -1,9 +1,8 @@
 <?xml version="1.0"?>
 <ruleset name="WordPress Coding Standards for AMP">
 
-	<!-- Exclude the optimizer library completely for now -->
-	<exclude-pattern>optimizer/*</exclude-pattern>
-	<exclude-pattern>tests/php/optimizer/*</exclude-pattern>
+	<!-- Exclude libraries that are meant to be externalized -->
+	<exclude-pattern>lib/*</exclude-pattern>
 
 	<rule ref="WordPress-Core">
 		<exclude name="Generic.Arrays.DisallowShortArraySyntax" />
