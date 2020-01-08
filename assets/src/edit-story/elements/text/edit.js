@@ -18,9 +18,7 @@ import { useState, useEffect, useLayoutEffect, useRef, useCallback } from '@word
 import { useStory } from '../../app';
 import { useCanvas } from '../../components/canvas';
 import {
-	ElementWithPosition,
-	ElementWithSize,
-	ElementWithRotation,
+	ElementFillContent,
 	ElementWithFont,
 	ElementWithBackgroundColor,
 	ElementWithFontColor,
@@ -29,9 +27,7 @@ import { getFilteredState, getHandleKeyCommand } from './util';
 
 const Element = styled.div`
 	margin: 0;
-	${ ElementWithPosition }
-	${ ElementWithSize }
-	${ ElementWithRotation }
+	${ ElementFillContent }
 	${ ElementWithFont }
 	${ ElementWithBackgroundColor }
 	${ ElementWithFontColor }
@@ -49,7 +45,7 @@ const Element = styled.div`
 	}
 `;
 
-function TextEdit( { content, color, backgroundColor, width, height, x, y, fontFamily, fontSize, fontWeight, fontStyle, rotationAngle } ) {
+function TextEdit( { content, color, backgroundColor, width, height, fontFamily, fontSize, fontWeight, fontStyle } ) {
 	const props = {
 		color,
 		backgroundColor,
@@ -59,9 +55,6 @@ function TextEdit( { content, color, backgroundColor, width, height, x, y, fontF
 		fontWeight,
 		width,
 		height,
-		x,
-		y,
-		rotationAngle,
 	};
 	const editorRef = useRef( null );
 	const { actions: { setPropertiesOnSelectedElements } } = useStory();
@@ -152,9 +145,6 @@ TextEdit.propTypes = {
 	fontStyle: PropTypes.string,
 	width: PropTypes.number.isRequired,
 	height: PropTypes.number.isRequired,
-	rotationAngle: PropTypes.number.isRequired,
-	x: PropTypes.number.isRequired,
-	y: PropTypes.number.isRequired,
 };
 
 export default TextEdit;
