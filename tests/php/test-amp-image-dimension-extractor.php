@@ -210,12 +210,16 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 	 */
 	public function test__multiple_valid_image_files() {
 		$sources  = [
+			IMG_SVG_VIEWPORT => false,
 			IMG_350          => false,
 			IMG_1024         => false,
 			IMG_SVG          => false,
-			IMG_SVG_VIEWPORT => false,
 		];
 		$expected = [
+			IMG_SVG_VIEWPORT => [
+				'width'  => 251,
+				'height' => 80,
+			],
 			IMG_350          => [
 				'width'  => 350,
 				'height' => 150,
@@ -227,10 +231,6 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 			IMG_SVG          => [
 				'width'  => 175,
 				'height' => 60,
-			],
-			IMG_SVG_VIEWPORT => [
-				'width'  => 251,
-				'height' => 80,
 			],
 		];
 
