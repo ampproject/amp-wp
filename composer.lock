@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "40ebc4ad63e7102983deab8dd89566c5",
+    "content-hash": "c14b3956b1077313bf7a705beabc60cf",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -52,16 +52,16 @@
         },
         {
             "name": "fasterimage/fasterimage",
-            "version": "v1.5.0",
+            "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "https://github.com/willwashburn/fasterimage.git",
-                "reference": "42d125a15dc124520aff2157bbed9a4b2d4f310a"
+                "url": "https://github.com/pierlon/fasterimage.git",
+                "reference": "0ea9c2b4f78db19b00ef14e167d36ab76b16a0a0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/willwashburn/fasterimage/zipball/42d125a15dc124520aff2157bbed9a4b2d4f310a",
-                "reference": "42d125a15dc124520aff2157bbed9a4b2d4f310a",
+                "url": "https://api.github.com/repos/pierlon/fasterimage/zipball/0ea9c2b4f78db19b00ef14e167d36ab76b16a0a0",
+                "reference": "0ea9c2b4f78db19b00ef14e167d36ab76b16a0a0",
                 "shasum": ""
             },
             "require": {
@@ -79,7 +79,6 @@
                     "src"
                 ]
             },
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -103,7 +102,10 @@
                 "image size",
                 "parallel"
             ],
-            "time": "2019-05-25T14:33:33+00:00"
+            "support": {
+                "source": "https://github.com/pierlon/fasterimage/tree/master"
+            },
+            "time": "2020-01-08T02:03:26+00:00"
         },
         {
             "name": "sabberworm/php-css-parser",
@@ -318,16 +320,16 @@
         },
         {
             "name": "mustache/mustache",
-            "version": "v2.12.0",
+            "version": "v2.13.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/bobthecow/mustache.php.git",
-                "reference": "fe8fe72e9d580591854de404cc59a1b83ca4d19e"
+                "reference": "e95c5a008c23d3151d59ea72484d4f72049ab7f4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bobthecow/mustache.php/zipball/fe8fe72e9d580591854de404cc59a1b83ca4d19e",
-                "reference": "fe8fe72e9d580591854de404cc59a1b83ca4d19e",
+                "url": "https://api.github.com/repos/bobthecow/mustache.php/zipball/e95c5a008c23d3151d59ea72484d4f72049ab7f4",
+                "reference": "e95c5a008c23d3151d59ea72484d4f72049ab7f4",
                 "shasum": ""
             },
             "require": {
@@ -360,20 +362,20 @@
                 "mustache",
                 "templating"
             ],
-            "time": "2017-07-11T12:54:05+00:00"
+            "time": "2019-11-23T21:40:31+00:00"
         },
         {
             "name": "phpcompatibility/php-compatibility",
-            "version": "9.3.4",
+            "version": "9.3.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPCompatibility/PHPCompatibility.git",
-                "reference": "1f37659196e4f3113ea506a7efba201c52303bf1"
+                "reference": "9fb324479acf6f39452e0655d2429cc0d3914243"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPCompatibility/PHPCompatibility/zipball/1f37659196e4f3113ea506a7efba201c52303bf1",
-                "reference": "1f37659196e4f3113ea506a7efba201c52303bf1",
+                "url": "https://api.github.com/repos/PHPCompatibility/PHPCompatibility/zipball/9fb324479acf6f39452e0655d2429cc0d3914243",
+                "reference": "9fb324479acf6f39452e0655d2429cc0d3914243",
                 "shasum": ""
             },
             "require": {
@@ -418,7 +420,7 @@
                 "phpcs",
                 "standards"
             ],
-            "time": "2019-11-15T04:12:02+00:00"
+            "time": "2019-12-27T09:44:58+00:00"
         },
         {
             "name": "phpcompatibility/phpcompatibility-paragonie",
@@ -577,12 +579,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "40fb2c205dd261ab6bb42ec29545934f0db7026f"
+                "reference": "67ac6ea8f4a078c3c9b7aec5d7ae70f098c37389"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/40fb2c205dd261ab6bb42ec29545934f0db7026f",
-                "reference": "40fb2c205dd261ab6bb42ec29545934f0db7026f",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/67ac6ea8f4a078c3c9b7aec5d7ae70f098c37389",
+                "reference": "67ac6ea8f4a078c3c9b7aec5d7ae70f098c37389",
                 "shasum": ""
             },
             "conflict": {
@@ -603,7 +605,7 @@
                 "composer/composer": "<=1-alpha.11",
                 "contao-components/mediaelement": ">=2.14.2,<2.21.1",
                 "contao/core": ">=2,<3.5.39",
-                "contao/core-bundle": ">=4,<4.4.39|>=4.5,<4.7.5",
+                "contao/core-bundle": ">=4,<4.4.46|>=4.5,<4.8.6",
                 "contao/listing-bundle": ">=4,<4.4.8",
                 "datadog/dd-trace": ">=0.30,<0.30.2",
                 "david-garcia/phpwhois": "<=4.3.1",
@@ -617,8 +619,9 @@
                 "doctrine/mongodb-odm-bundle": ">=2,<3.0.1",
                 "doctrine/orm": ">=2,<2.4.8|>=2.5,<2.5.1",
                 "dompdf/dompdf": ">=0.6,<0.6.2",
-                "drupal/core": ">=7,<7.67|>=8,<8.6.16|>=8.7,<8.7.1|>8.7.3,<8.7.5",
-                "drupal/drupal": ">=7,<7.67|>=8,<8.6.16|>=8.7,<8.7.1|>8.7.3,<8.7.5",
+                "drupal/core": ">=7,<7.69|>=8,<8.7.11|>=8.8,<8.8.1",
+                "drupal/drupal": ">=7,<7.69|>=8,<8.7.11|>=8.8,<8.8.1",
+                "endroid/qr-code-bundle": "<3.4.2",
                 "erusev/parsedown": "<1.7.2",
                 "ezsystems/ezplatform-admin-ui": ">=1.3,<1.3.5|>=1.4,<1.4.4",
                 "ezsystems/ezpublish-kernel": ">=5.3,<5.3.12.1|>=5.4,<5.4.13.1|>=6,<6.7.9.1|>=6.8,<6.13.5.1|>=7,<7.2.4.1|>=7.3,<7.3.2.1",
@@ -650,7 +653,7 @@
                 "league/commonmark": "<0.18.3",
                 "magento/magento1ce": "<1.9.4.3",
                 "magento/magento1ee": ">=1,<1.14.4.3",
-                "magento/product-community-edition": ">=2,<2.2.10|>=2.3,<2.3.2",
+                "magento/product-community-edition": ">=2,<2.2.10|>=2.3,<2.3.2-p.2",
                 "monolog/monolog": ">=1.8,<1.12",
                 "namshi/jose": "<2.2",
                 "onelogin/php-saml": "<2.10.4",
@@ -673,6 +676,7 @@
                 "pusher/pusher-php-server": "<2.2.1",
                 "robrichards/xmlseclibs": ">=1,<3.0.4",
                 "sabre/dav": ">=1.6,<1.6.99|>=1.7,<1.7.11|>=1.8,<1.8.9",
+                "scheb/two-factor-bundle": ">=0,<3.26|>=4,<4.11",
                 "sensiolabs/connect": "<4.2.3",
                 "serluck/phpwhois": "<=4.2.6",
                 "shopware/shopware": "<5.3.7",
@@ -685,7 +689,7 @@
                 "silverstripe/userforms": "<3",
                 "simple-updates/phpwhois": "<=1",
                 "simplesamlphp/saml2": "<1.10.6|>=2,<2.3.8|>=3,<3.1.4",
-                "simplesamlphp/simplesamlphp": "<1.17.3",
+                "simplesamlphp/simplesamlphp": "<1.17.8",
                 "simplesamlphp/simplesamlphp-module-infocard": "<1.0.1",
                 "slim/slim": "<2.6",
                 "smarty/smarty": "<3.1.33",
@@ -732,8 +736,8 @@
                 "titon/framework": ">=0,<9.9.99",
                 "truckersmp/phpwhois": "<=4.3.1",
                 "twig/twig": "<1.38|>=2,<2.7",
-                "typo3/cms": ">=6.2,<6.2.30|>=7,<7.6.32|>=8,<8.7.27|>=9,<9.5.8",
-                "typo3/cms-core": ">=8,<8.7.27|>=9,<9.5.8",
+                "typo3/cms": ">=6.2,<6.2.30|>=7,<7.6.32|>=8,<8.7.30|>=9,<9.5.12|>=10,<10.2.1",
+                "typo3/cms-core": ">=8,<8.7.30|>=9,<9.5.12|>=10,<10.2.1",
                 "typo3/flow": ">=1,<1.0.4|>=1.1,<1.1.1|>=2,<2.0.1|>=2.3,<2.3.16|>=3,<3.0.10|>=3.1,<3.1.7|>=3.2,<3.2.7|>=3.3,<3.3.5",
                 "typo3/neos": ">=1.1,<1.1.3|>=1.2,<1.2.13|>=2,<2.0.4",
                 "typo3/phar-stream-wrapper": ">=1,<2.1.1|>=3,<3.1.1",
@@ -787,7 +791,7 @@
                 }
             ],
             "description": "Prevents installation of composer packages with known security vulnerabilities: no API, simply require it",
-            "time": "2019-11-19T14:18:57+00:00"
+            "time": "2020-01-06T19:16:46+00:00"
         },
         {
             "name": "sirbrillig/phpcs-variable-analysis",
@@ -838,16 +842,16 @@
         },
         {
             "name": "squizlabs/php_codesniffer",
-            "version": "3.5.2",
+            "version": "3.5.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/squizlabs/PHP_CodeSniffer.git",
-                "reference": "65b12cdeaaa6cd276d4c3033a95b9b88b12701e7"
+                "reference": "557a1fc7ac702c66b0bbfe16ab3d55839ef724cb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/squizlabs/PHP_CodeSniffer/zipball/65b12cdeaaa6cd276d4c3033a95b9b88b12701e7",
-                "reference": "65b12cdeaaa6cd276d4c3033a95b9b88b12701e7",
+                "url": "https://api.github.com/repos/squizlabs/PHP_CodeSniffer/zipball/557a1fc7ac702c66b0bbfe16ab3d55839ef724cb",
+                "reference": "557a1fc7ac702c66b0bbfe16ab3d55839ef724cb",
                 "shasum": ""
             },
             "require": {
@@ -885,7 +889,7 @@
                 "phpcs",
                 "standards"
             ],
-            "time": "2019-10-28T04:36:32+00:00"
+            "time": "2019-12-04T04:46:47+00:00"
         },
         {
             "name": "symfony/finder",
@@ -1189,6 +1193,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
+        "fasterimage/fasterimage": 20,
         "roave/security-advisories": 20
     },
     "prefer-stable": false,
