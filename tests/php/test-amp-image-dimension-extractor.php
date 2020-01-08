@@ -234,48 +234,8 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 			],
 		];
 
-		// Will revert, only to test if cUrl requests for all of the images pass.
-		// Mainly copied from FasterImage::handle.
-		foreach ( $sources as $source => $status ) {
-			$ch = curl_init();
-			curl_setopt( $ch, CURLOPT_URL, $source );
-			curl_setopt( $ch, CURLOPT_HEADER, 0 );
-			curl_setopt( $ch, CURLOPT_FOLLOWLOCATION, true );
-			curl_setopt( $ch, CURLOPT_BUFFERSIZE, 1024 );
-			curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, 1 );
-			curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, 2 );
-			curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
-			curl_setopt( $ch, CURLOPT_CONNECTTIMEOUT, 10 );
-			curl_setopt( $ch, CURLOPT_TIMEOUT, 10 );
-
-			#  Some web servers require the useragent to be not a bot. So we are liars.
-			curl_setopt( $ch, CURLOPT_USERAGENT, apply_filters( 'amp_extract_image_dimensions_get_user_agent', AMP_Image_Dimension_Extractor::get_default_user_agent() ) );
-			curl_setopt(
-				$ch,
-				CURLOPT_HTTPHEADER,
-				[
-					'Accept: image/webp,image/*,*/*;q=0.8',
-					'Cache-Control: max-age=0',
-					'Connection: keep-alive',
-					'Keep-Alive: 300',
-					'Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7',
-					'Accept-Language: en-us,en;q=0.5',
-					'Pragma: ', // browsers keep this blank.
-				]
-			);
-			curl_setopt( $ch, CURLOPT_ENCODING, '' );
-			curl_exec( $ch );
-
-			$this->assertArraySubset(
-				[ 'http_code' => 200 ],
-				curl_getinfo( $ch ),
-				$source
-			);
-
-			curl_close( $ch );
-		}
-
 		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources );
+
 		$this->assertEquals( $expected, $dimensions );
 	}
 
