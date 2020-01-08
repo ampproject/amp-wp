@@ -2067,7 +2067,7 @@ class AMP_Validated_URL_Post_Type {
 				<th class="column-stylesheet_expand"></th>
 				<th class="column-priority"><?php esc_html_e( 'Priority', 'amp' ); ?></th>
 				<th class="column-stylesheet_status"><?php esc_html_e( 'Status', 'amp' ); ?></th>
-				<th class="column-source"><?php esc_html_e( 'Sources', 'amp' ); ?></th>
+				<th class="column-sources_with_invalid_output"><?php esc_html_e( 'Sources', 'amp' ); ?></th>
 			</tr>
 			</thead>
 			<tbody>
@@ -2158,7 +2158,7 @@ class AMP_Validated_URL_Post_Type {
 						}
 						?>
 					</td>
-					<td class="column-source">
+					<td class="column-sources_with_invalid_output">
 						<?php
 						if ( empty( $stylesheet['sources'] ) ) {
 							esc_html_e( '--', 'amp' );
