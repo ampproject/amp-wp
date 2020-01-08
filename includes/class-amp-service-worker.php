@@ -19,6 +19,13 @@ class AMP_Service_Worker {
 	const INSTALL_SERVICE_WORKER_IFRAME_QUERY_VAR = 'amp_install_service_worker_iframe';
 
 	/**
+	 * Web push enabled.
+	 *
+	 * @var bool
+	 */
+	protected static $web_push_enabled = false;
+
+	/**
 	 * Init.
 	 */
 	public static function init() {
@@ -44,6 +51,7 @@ class AMP_Service_Worker {
 			'cdn_script_caching'   => true,
 			'image_caching'        => false,
 			'google_fonts_caching' => false,
+			'web_push'             => false,
 		];
 		if ( isset( $theme_support['service_worker'] ) && is_array( $theme_support['service_worker'] ) ) {
 			$enabled_options = array_merge(
@@ -60,6 +68,10 @@ class AMP_Service_Worker {
 		}
 		if ( $enabled_options['google_fonts_caching'] ) {
 			add_action( 'wp_front_service_worker', [ __CLASS__, 'add_google_fonts_caching' ] );
+		}
+		if ( $enabled_options['web_push'] ) {
+			self::$web_push_enabled = true;
+			add_action( 'wp_front_service_worker', [ __CLASS__, 'add_web_push_script' ] );
 		}
 	}
 
@@ -197,6 +209,27 @@ class AMP_Service_Worker {
 	}
 
 	/**
+	 * Add required amp-web-push logic.
+	 *
+	 * @param WP_Service_Worker_Scripts $service_workers Service workers.
+	 */
+	public static function add_web_push_script( $service_workers ) {
+		if ( ! ( $service_workers instanceof WP_Service_Worker_Scripts ) ) {
+			/* translators: %s: WP_Service_Worker_Cache_Registry. */
+			_doing_it_wrong( __METHOD__, sprintf( esc_html__( 'Please update to PWA v0.2. Expected argument to be %s.', 'amp' ), 'WP_Service_Worker_Cache_Registry' ), '1.1' );
+			return;
+		}
+
+		// Add AMP scripts to runtime cache which will then get stale-while-revalidate strategy.
+		$service_workers->register(
+			'amp-cdn-runtime-caching',
+			static function() {
+				return file_get_contents( AMP__DIR__ . '/includes/web-push/service-worker.js' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.WP.AlternativeFunctions.file_system_read_file_get_contents
+			}
+		);
+	}
+
+	/**
 	 * Register URLs that will be precached in the runtime cache. (Yes, this sounds somewhat strange.)
 	 *
 	 * Note that the PWA plugin handles the precaching of custom logo, custom header,
@@ -244,6 +277,10 @@ class AMP_Service_Worker {
 		if ( current_theme_supports( 'amp' ) && is_amp_endpoint() ) {
 			add_action( 'wp_footer', [ __CLASS__, 'install_service_worker' ] );
 
+			if ( self::$web_push_enabled ) {
+				add_action( 'wp_footer', [ __CLASS__, 'add_web_push_component' ] );
+			}
+
 			// Prevent validation error due to the script that installs the service worker on non-AMP pages.
 			foreach ( [ 'wp_print_scripts', 'wp_print_footer_scripts' ] as $action ) {
 				$priority = has_action( $action, 'wp_print_service_workers' );
@@ -265,7 +302,7 @@ class AMP_Service_Worker {
 	}
 
 	/**
-	 * Install service worker(s).
+	 * Install service worker.
 	 *
 	 * @since 1.1
 	 * @see wp_print_service_workers()
@@ -276,7 +313,6 @@ class AMP_Service_Worker {
 			return;
 		}
 
-		$src        = wp_get_service_worker_url( WP_Service_Workers::SCOPE_FRONT );
 		$iframe_src = add_query_arg(
 			self::INSTALL_SERVICE_WORKER_IFRAME_QUERY_VAR,
 			WP_Service_Workers::SCOPE_FRONT,
@@ -284,11 +320,27 @@ class AMP_Service_Worker {
 		);
 		?>
 		<amp-install-serviceworker
-			src="<?php echo esc_url( $src ); ?>"
+			src="<?php echo esc_url( wp_get_service_worker_url( WP_Service_Workers::SCOPE_FRONT ) ); ?>"
 			data-iframe-src="<?php echo esc_url( $iframe_src ); ?>"
 			layout="nodisplay"
 		>
 		</amp-install-serviceworker>
+		<?php
+	}
+
+	/**
+	 * Add amp-web-push component.
+	 */
+	public static function add_web_push_component() {
+		?>
+		<amp-web-push
+			id="amp-web-push"
+			layout="nodisplay"
+			helper-iframe-url="<?php echo esc_url( plugin_dir_url( AMP__FILE__ ) . 'includes/web-push/helper-frame.html' ); ?>"
+			permission-dialog-url="<?php echo esc_url( plugin_dir_url( AMP__FILE__ ) . 'includes/web-push/permission-dialog.html' ); ?>"
+			service-worker-url="<?php echo esc_url( wp_get_service_worker_url( WP_Service_Workers::SCOPE_FRONT ) ); ?>"
+		>
+		</amp-web-push>
 		<?php
 	}
 
