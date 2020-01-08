@@ -42,6 +42,11 @@ install:
 
 before_script:
   - phpenv config-rm xdebug.ini || echo "xdebug.ini does not exist."
+  - |
+    for i in {1..10}
+    do
+        time curl --request GET --url https://amp-wp.org/wp-content/plugin-test-files/google.svg --header 'accept: image/webp,image/*,*/*;q=0.8' --header 'accept-charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7' --header 'accept-encoding: deflate, gzip' --header 'accept-language: en-us,en;q=0.5' --header 'cache-control: max-age=0' --header 'connection: keep-alive' --header 'host: amp-wp.org' --header 'keep-alive: 300' --header 'user-agent: amp-wp, v1.5.0-alpha, http://example.org'
+    done
 
 script:
   - npm run build:js
@@ -86,7 +91,7 @@ jobs:
 #      after_success:
 #        - npx sizereport --config
 
-    - stage: test
+#    - stage: test
 #      name: JavaScript unit tests
 #      php: "7.3"
 #      env: WP_VERSION=latest DEV_LIB_SKIP=phpcs,eslint,xmllint,phpsyntax,phpunit
