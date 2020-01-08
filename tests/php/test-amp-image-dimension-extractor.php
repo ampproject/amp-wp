@@ -234,10 +234,6 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 			],
 		];
 
-		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources );
-
-		$this->assertEquals( $expected, $dimensions );
-
 		// Will revert, only to test if cUrl requests for all of the images pass.
 		// Mainly copied from FasterImage::handle.
 		foreach ( $sources as $source => $status ) {
@@ -278,6 +274,9 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 
 			curl_close( $ch );
 		}
+
+		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources );
+		$this->assertEquals( $expected, $dimensions );
 	}
 
 	/**
