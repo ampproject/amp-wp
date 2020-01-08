@@ -92,7 +92,8 @@ function StoryProvider( { storyId, children } ) {
 	useHistoryReplay( { restore } );
 
 	// This action allows the user to save the story
-	// (and it will have side-effects, thus the need for `updateStory`)
+	// (and it will have side-effects because saving can update url and status,
+	//  thus the need for `updateStory`)
 	const { updateStory } = api;
 	const saveStory = useSaveStory( { storyId, pages, story, updateStory } );
 
