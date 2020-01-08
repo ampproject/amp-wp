@@ -206,7 +206,7 @@ class DocumentTest extends TestCase
         ];
         foreach ($malformed_html as $html) {
             $converted = Document::fromHtml($html)->saveHTML();
-            $this->assertNotContains(Document::AMP_BIND_DATA_ATTR_PREFIX, $converted, "Source: {$html}");
+            $this->assertStringNotContains(Document::AMP_BIND_DATA_ATTR_PREFIX, $converted, "Source: {$html}");
         }
     }
 
