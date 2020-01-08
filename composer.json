@@ -4,12 +4,6 @@
   "description": "WordPress plugin for adding AMP support.",
   "homepage": "https://github.com/ampproject/amp-wp",
   "license": "GPL-2.0-or-later",
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "https://github.com/pierlon/fasterimage"
-    }
-  ],
   "require": {
     "php": "^5.4 || ^7.0",
     "ext-curl": "*",
@@ -60,5 +54,11 @@
     "psr-4": {
       "Amp\\AmpWP\\Tests\\": "tests/php/src/"
     }
-  }
+  },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/pierlon/fasterimage"
+    }
+  ]
 }
