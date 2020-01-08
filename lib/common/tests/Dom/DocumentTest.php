@@ -445,7 +445,7 @@ class DocumentTest extends TestCase
                     . '  </body>'
                     . '</html>';
         $document = Document::fromHtml($html);
-        $this->assertCount(3, $document->ampElements);
+        $this->assertEquals(3, $document->ampElements->length);
         foreach ($document->ampElements as $element) {
             $this->assertEquals('correct-element', $element->getAttribute('data-test'));
         }
