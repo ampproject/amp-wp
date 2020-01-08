@@ -1966,19 +1966,39 @@ class AMP_Validated_URL_Post_Type {
 		$excluded_original_size = 0;
 		$excluded_stylesheets   = 0;
 		$max_final_size         = 0;
-		foreach ( $stylesheets as $stylesheet ) {
+
+		$included_status  = 1;
+		$excessive_status = 2;
+		$excluded_status  = 3;
+
+		// Determine which stylesheets are included based on their priorities.
+		$pending_stylesheet_indices = array_keys( $stylesheets );
+		usort(
+			$pending_stylesheet_indices,
+			function ( $a, $b ) use ( $stylesheets ) {
+				return $stylesheets[ $a ]['priority'] - $stylesheets[ $b ]['priority'];
+			}
+		);
+		foreach ( $pending_stylesheet_indices as $i ) {
 			// @todo Add information about amp-keyframes as well.
-			if ( ! isset( $stylesheet['group'] ) || 'amp-custom' !== $stylesheet['group'] || ! empty( $stylesheet['duplicate'] ) ) {
+			if ( ! isset( $stylesheets[ $i ]['group'] ) || 'amp-custom' !== $stylesheets[ $i ]['group'] || ! empty( $stylesheets[ $i ]['duplicate'] ) ) {
 				continue;
 			}
-			$max_final_size = max( $max_final_size, $stylesheet['final_size'] );
-			if ( $stylesheet['included'] ) {
-				$included_final_size    += $stylesheet['final_size'];
-				$included_original_size += $stylesheet['original_size'];
+			$max_final_size = max( $max_final_size, $stylesheets[ $i ]['final_size'] );
+			if ( $stylesheets[ $i ]['included'] ) {
+				$included_final_size    += $stylesheets[ $i ]['final_size'];
+				$included_original_size += $stylesheets[ $i ]['original_size'];
+
+				if ( $included_final_size >= $style_custom_cdata_spec['max_bytes'] ) {
+					$stylesheets[ $i ]['status'] = $excessive_status;
+				} else {
+					$stylesheets[ $i ]['status'] = $included_status;
+				}
 			} else {
-				$excluded_final_size    += $stylesheet['final_size'];
-				$excluded_original_size += $stylesheet['original_size'];
+				$excluded_final_size    += $stylesheets[ $i ]['final_size'];
+				$excluded_original_size += $stylesheets[ $i ]['original_size'];
 				$excluded_stylesheets++;
+				$stylesheets[ $i ]['status'] = $excluded_status;
 			}
 		}
 
@@ -2019,7 +2039,7 @@ class AMP_Validated_URL_Post_Type {
 					printf( '%.1f%% ', $percentage_budget_used ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 					if ( $percentage_budget_used > 100 ) {
 						echo '🚫';
-					} elseif ( $percentage_budget_used > 80 ) {
+					} elseif ( $percentage_budget_used >= AMP_Style_Sanitizer::CSS_BUDGET_WARNING_PERCENTAGE ) {
 						echo '⚠️';
 					} else {
 						echo '✅';
@@ -2048,10 +2068,15 @@ class AMP_Validated_URL_Post_Type {
 		<?php if ( $percentage_budget_used > 100 ) : ?>
 			<div class="notice notice-alt notice-error inline">
 				<p>
-					<?php esc_html_e( 'You have exceeded the CSS budget. Because of this, stylesheets deemed of lesser priority have been excluded from the page. Please review the excluded stylesheets below and determine if the current theme or a particular plugin is including excessive CSS.', 'amp' ); ?>
+					<?php if ( 0 === $excluded_stylesheets ) : ?>
+						<?php esc_html_e( 'You have exceeded the CSS budget. Because of this, the page will not be served as a valid AMP page.', 'amp' ); ?>
+					<?php else : ?>
+						<?php esc_html_e( 'You have exceeded the CSS budget. Because of this, stylesheets deemed of lesser priority have been excluded from the page.', 'amp' ); ?>
+					<?php endif; ?>
+					<?php esc_html_e( 'Please review the flagged stylesheets below and determine if the current theme or a particular plugin is including excessive CSS.', 'amp' ); ?>
 				</p>
 			</div>
-		<?php elseif ( $percentage_budget_used > 80 ) : ?>
+		<?php elseif ( $percentage_budget_used >= AMP_Style_Sanitizer::CSS_BUDGET_WARNING_PERCENTAGE ) : ?>
 			<div class="notice notice-alt notice-warning inline">
 				<p>
 					<?php esc_html_e( 'You are nearing the limit of the CSS budget. Once reaching this limit, stylesheets deemed of lesser priority will be excluded from the page. Please review the stylesheets below and determine if the current theme or a particular plugin is including excessive CSS.', 'amp' ); ?>
@@ -2133,10 +2158,16 @@ class AMP_Validated_URL_Post_Type {
 					</td>
 					<td class="column-stylesheet_status">
 						<?php
-						if ( $stylesheet['included'] ) {
-							echo '✅';
-						} else {
-							echo '🚫';
+						switch ( $stylesheet['status'] ) {
+							case $included_status:
+								printf( '<span title="%s">✅</span>', esc_attr__( 'Stylesheet included', 'amp' ) );
+								break;
+							case $excessive_status:
+								printf( '<span title="%s">⚠️</span>', esc_attr__( 'Stylesheet overruns CSS budget yet it is still included on page', 'amp' ) );
+								break;
+							case $excluded_status:
+								printf( '<span title="%s">🚫</span>', esc_attr__( 'Stylesheet excluded due to exceeding CSS budget', 'amp' ) );
+								break;
 						}
 						?>
 					</td>
@@ -2144,7 +2175,7 @@ class AMP_Validated_URL_Post_Type {
 						<?php
 						$origin_abbr_text = '?';
 						if ( 'link_element' === $stylesheet['origin'] ) {
-							$origin_abbr_text = '<link&nbsp;&hellip;>';
+							$origin_abbr_text = '<link&nbsp;&hellip;>'; // @todo Consider adding the basename of the CSS file.
 						} elseif ( 'style_element' === $stylesheet['origin'] ) {
 							$origin_abbr_text = '<style>';
 						} elseif ( 'style_attribute' === $stylesheet['origin'] ) {

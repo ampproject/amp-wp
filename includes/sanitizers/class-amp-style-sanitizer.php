@@ -51,6 +51,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	const STYLESHEET_INVALID_RELATIVE_PATH = 'STYLESHEET_INVALID_RELATIVE_PATH';
 
 	/**
+	 * Percentage at which the used CSS budget becomes a warning.
+	 *
+	 * @var int
+	 */
+	const CSS_BUDGET_WARNING_PERCENTAGE = 80;
+
+	/**
 	 * Inline style selector's specificity multiplier, i.e. used to generate the number of ':not(#_)' placeholders.
 	 *
 	 * @var int
