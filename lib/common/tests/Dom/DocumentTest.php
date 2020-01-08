@@ -181,8 +181,8 @@ class DocumentTest extends TestCase
         $original  = '<amp-img width=300 height="200" data-foo="bar" selected src="/img/dog.jpg" [src]="myAnimals[currentAnimal].imageUrl"></amp-img>';
         $converted = Document::fromHtml($original)->saveHTML();
         $this->assertNotEquals($original, $converted);
-        $this->assertContains(Document::AMP_BIND_DATA_ATTR_PREFIX . 'src="myAnimals[currentAnimal].imageUrl"', $converted);
-        $this->assertContains('width="300" height="200" data-foo="bar" selected', $converted);
+        $this->assertStringContainsString(Document::AMP_BIND_DATA_ATTR_PREFIX . 'src="myAnimals[currentAnimal].imageUrl"', $converted);
+        $this->assertStringContainsString('width="300" height="200" data-foo="bar" selected', $converted);
 
         // Check tag with self-closing attribute.
         $original  = '<input type="text" role="textbox" class="calc-input" id="liens" name="liens" [value]="(result1 != null) ? result1.liens : \'verifying…\'" />';
