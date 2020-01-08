@@ -6,6 +6,7 @@
  */
 
 use Amp\Dom\Document;
+use Amp\Tests\AssertContainsCompatibility;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -15,6 +16,8 @@ use PHPUnit\Framework\TestCase;
  */
 class DocumentTest extends TestCase
 {
+
+    use AssertContainsCompatibility;
 
     /**
      * Data for Amp\Dom\Document test.
@@ -181,8 +184,8 @@ class DocumentTest extends TestCase
         $original  = '<amp-img width=300 height="200" data-foo="bar" selected src="/img/dog.jpg" [src]="myAnimals[currentAnimal].imageUrl"></amp-img>';
         $converted = Document::fromHtml($original)->saveHTML();
         $this->assertNotEquals($original, $converted);
-        $this->assertStringContainsString(Document::AMP_BIND_DATA_ATTR_PREFIX . 'src="myAnimals[currentAnimal].imageUrl"', $converted);
-        $this->assertStringContainsString('width="300" height="200" data-foo="bar" selected', $converted);
+        $this->assertStringContains(Document::AMP_BIND_DATA_ATTR_PREFIX . 'src="myAnimals[currentAnimal].imageUrl"', $converted);
+        $this->assertStringContains('width="300" height="200" data-foo="bar" selected', $converted);
 
         // Check tag with self-closing attribute.
         $original  = '<input type="text" role="textbox" class="calc-input" id="liens" name="liens" [value]="(result1 != null) ? result1.liens : \'verifying…\'" />';
@@ -208,7 +211,7 @@ class DocumentTest extends TestCase
     }
 
     /**
-     * Get Table Row Iterations
+     * Get Table Row Iterations.
      *
      * @return array An array of arrays holding an integer representation of iterations.
      */
