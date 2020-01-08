@@ -6,6 +6,21 @@ use Amp\Dom\Document;
 use Amp\Optimizer\ErrorCollection;
 use Amp\Optimizer\Transformer;
 
+/**
+ * Transformer applying the server-side rendering transformations to the HTML input.
+ *
+ * This is ported from the NodeJS optimizer while verifying against the Go version.
+ *
+ * NodeJS:
+ * @version 2ca65a94b77130c91ac11fcc32c94b93cbd2b7a0
+ * @link https://github.com/ampproject/amp-toolbox/blob/2ca65a94b77130c91ac11fcc32c94b93cbd2b7a0/packages/optimizer/lib/transformers/AddTransformedFlag.js
+ *
+ * Go:
+ * @version b26a35142e0ed1458158435b252a0fcd659f93c4
+ * @link https://github.com/ampproject/amppackager/blob/b26a35142e0ed1458158435b252a0fcd659f93c4/transformer/transformers/serversiderendering.go
+ *
+ * @package Amp\Optimizer
+ */
 final class TransformedIdentifier implements Transformer
 {
 

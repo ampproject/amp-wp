@@ -10,6 +10,21 @@ use Amp\Optimizer\ErrorCollection;
 use Amp\Optimizer\Transformer;
 use DOMElement;
 
+/**
+ * Transformer applying the server-side rendering transformations to the HTML input.
+ *
+ * This is ported from the NodeJS optimizer while verifying against the Go version.
+ *
+ * NodeJS:
+ * @version c92d6023ea4c9edadff593742a992da2b400a75d
+ * @link https://github.com/ampproject/amp-toolbox/blob/c92d6023ea4c9edadff593742a992da2b400a75d/packages/optimizer/lib/transformers/ServerSideRendering.js
+ *
+ * Go:
+ * @version ea0959046c179953de43077eafaeb720f9b20bdf
+ * @link https://github.com/ampproject/amppackager/blob/ea0959046c179953de43077eafaeb720f9b20bdf/transformer/transformers/transformedidentifier.go
+ *
+ * @package Amp\Optimizer
+ */
 final class ServerSideRendering implements Transformer
 {
 
