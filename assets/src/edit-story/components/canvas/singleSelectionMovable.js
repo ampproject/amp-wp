@@ -97,8 +97,10 @@ function SingleSelectionMovable( {
 			} }
 			onDragEnd={ ( { target } ) => {
 				// When dragging finishes, set the new properties based on the original + what moved meanwhile.
-				const newProps = { x: selectedElement.x + frame.translate[ 0 ], y: selectedElement.y + frame.translate[ 1 ] };
-				setPropertiesOnSelectedElements( newProps );
+				if (frame.translate[ 0 ] !== 0 && frame.translate[ 1 ] !== 0) {
+					const newProps = { x: selectedElement.x + frame.translate[ 0 ], y: selectedElement.y + frame.translate[ 1 ] };
+					setPropertiesOnSelectedElements( newProps );
+				}
 				resetMoveable( target );
 			} }
 			onResizeStart={ ( { setOrigin, dragStart, direction } ) => {

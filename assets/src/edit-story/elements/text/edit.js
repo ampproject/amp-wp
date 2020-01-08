@@ -58,6 +58,7 @@ function TextEdit( { content, color, backgroundColor, width, height, fontFamily,
 	};
 	const editorRef = useRef( null );
 	const { actions: { setPropertiesOnSelectedElements } } = useStory();
+
 	const { state: { editingElementState } } = useCanvas();
 	const { offset, clearContent } = editingElementState || {};
 	// To clear content, we can't just use createEmpty() or even pure white-space.
@@ -96,7 +97,7 @@ function TextEdit( { content, color, backgroundColor, width, height, fontFamily,
 
 	// Finally update content for element on unmount.
 	useEffect( () => () => {
-		if ( setPropertiesOnSelectedElements && lastKnownState.current ) {
+		if ( lastKnownState.current ) {
 			// Remember to trim any trailing non-breaking space.
 			setPropertiesOnSelectedElements( {
 				content: stateToHTML( lastKnownState.current, { defaultBlockTag: null } )
