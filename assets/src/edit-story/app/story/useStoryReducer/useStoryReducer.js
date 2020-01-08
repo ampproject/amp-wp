@@ -25,6 +25,7 @@ const INITIAL_STATE = {
  * - If there's at least one page, current page points to a valid page.
  * - Selection is always a unique array (and never null, never has duplicates).
  * - Pages always have a backgroundElementId property.
+ * - A page can only have non-duplicated element ids, however two different pages can have the same element id.
  * - If a page has non-empty background element, it will be the id of the first element in the elements array.
  * - If selection has multiple elements, it can never include the background element.
  *

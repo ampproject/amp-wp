@@ -14,7 +14,7 @@ import { isInsideRange } from './utils';
  *
  * @param {Object} state Current state
  * @param {Object} payload Action payload
- * @param {Object} payload.properties Object with properties of new page
+ * @param {Object} payload.page Object with properties of new page
  * @param {Object} payload.position Position at which to insert the new page. If null, insert after current
  * @return {Object} New state
  */

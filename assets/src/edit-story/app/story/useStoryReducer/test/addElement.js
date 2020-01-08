@@ -40,4 +40,23 @@ describe( 'addElement', () => {
 		} );
 		expect( result.selection ).toStrictEqual( [ '123' ] );
 	} );
+
+	it( 'should not add an element with an id that already exists', () => {
+		const { restore, addElement } = setupReducer();
+
+		// Set an initial state with a current page and one element.
+		restore( {
+			pages: [ { id: '111', elements: [ { id: '321' } ] } ],
+			current: '111',
+			selection: [ '321' ],
+		} );
+
+		const result = addElement( { element: { id: '321' } } );
+
+		expect( result.pages[ 0 ] ).toStrictEqual( {
+			id: '111',
+			elements: [ { id: '321' } ],
+		} );
+		expect( result.selection ).toStrictEqual( [ '321' ] );
+	} );
 } );
