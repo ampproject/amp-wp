@@ -17,7 +17,7 @@ import useCanvas from '../canvas/useCanvas';
 import withOverlay from '../overlay/withOverlay';
 import InOverlay from '../overlay';
 
-const LasoMode = {
+const LassoMode = {
 	OFF: 0,
 	ON: 1,
 	MAYBE: 2,
@@ -29,7 +29,7 @@ const Container = withOverlay( styled.div`
   user-select: none;
 ` );
 
-const Laso = styled.div`
+const Lasso = styled.div`
   display: none;
   position: absolute;
   border: 1px dotted ${ ( { theme } ) => theme.colors.selection };
@@ -47,13 +47,13 @@ function SelectionCanvas( { children } ) {
 	} = useCanvas();
 
 	const overlayRef = useRef( null );
-	const lasoRef = useRef( null );
+	const lassoRef = useRef( null );
 	const offsetRef = useRef( [ 0, 0 ] );
 	const startRef = useRef( [ 0, 0 ] );
 	const endRef = useRef( [ 0, 0 ] );
-	const lasoModeRef = useRef( LasoMode.OFF );
+	const lassoModeRef = useRef( LassoMode.OFF );
 
-	const getLasoBox = () => {
+	const getLassoBox = () => {
 		const [ x1, y1 ] = startRef.current;
 		const [ x2, y2 ] = endRef.current;
 		const x = Math.min( x1, x2 );
@@ -63,18 +63,18 @@ function SelectionCanvas( { children } ) {
 		return [ x, y, w, h ];
 	};
 
-	const updateLaso = () => {
-		const laso = lasoRef.current;
-		if ( ! laso ) {
+	const updateLasso = () => {
+		const lasso = lassoRef.current;
+		if ( ! lasso ) {
 			return;
 		}
-		const lasoMode = lasoModeRef.current;
-		const [ x, y, w, h ] = getLasoBox();
-		laso.style.left = `${ x }px`;
-		laso.style.top = `${ y }px`;
-		laso.style.width = `${ w }px`;
-		laso.style.height = `${ h }px`;
-		laso.style.display = lasoMode === LasoMode.ON ? 'block' : 'none';
+		const lassoMode = lassoModeRef.current;
+		const [ x, y, w, h ] = getLassoBox();
+		lasso.style.left = `${ x }px`;
+		lasso.style.top = `${ y }px`;
+		lasso.style.width = `${ w }px`;
+		lasso.style.height = `${ h }px`;
+		lasso.style.display = lassoMode === LassoMode.ON ? 'block' : 'none';
 	};
 
 	const onMouseDown = ( evt ) => {
@@ -93,12 +93,12 @@ function SelectionCanvas( { children } ) {
 		offsetRef.current = [ offsetX, offsetY ];
 		startRef.current = [ x, y ];
 		endRef.current = [ x, y ];
-		lasoModeRef.current = LasoMode.MAYBE;
-		updateLaso();
+		lassoModeRef.current = LassoMode.MAYBE;
+		updateLasso();
 	};
 
 	const onMouseMove = ( evt ) => {
-		if ( lasoModeRef.current === LasoMode.OFF ) {
+		if ( lassoModeRef.current === LassoMode.OFF ) {
 			return;
 		}
 		const [ offsetX, offsetY ] = offsetRef.current;
@@ -106,24 +106,24 @@ function SelectionCanvas( { children } ) {
 		const y2 = evt.pageY - offsetY;
 		endRef.current[ 0 ] = x2;
 		endRef.current[ 1 ] = y2;
-		lasoModeRef.current = LasoMode.ON;
-		updateLaso();
+		lassoModeRef.current = LassoMode.ON;
+		updateLasso();
 	};
 
 	const onMouseUp = ( ) => {
-		if ( lasoModeRef.current === LasoMode.ON ) {
-			const [ ox, oy, width, height ] = getLasoBox();
+		if ( lassoModeRef.current === LassoMode.ON ) {
+			const [ ox, oy, width, height ] = getLassoBox();
 			const x = ox - pageContainer.offsetLeft;
 			const y = oy - pageContainer.offsetTop;
 			clearSelection();
 			clearEditing();
 			selectIntersection( { x, y, width, height } );
 		}
-		lasoModeRef.current = LasoMode.OFF;
-		updateLaso();
+		lassoModeRef.current = LassoMode.OFF;
+		updateLasso();
 	};
 
-	useEffect( updateLaso );
+	useEffect( updateLasso );
 
 	return (
 		<Container
@@ -133,7 +133,7 @@ function SelectionCanvas( { children } ) {
 		>
 			{ children }
 			<InOverlay ref={ overlayRef }>
-				<Laso ref={ lasoRef } />
+				<Lasso ref={ lassoRef } />
 			</InOverlay>
 		</Container>
 	);
