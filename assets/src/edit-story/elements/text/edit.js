@@ -115,6 +115,7 @@ function TextEdit( { content, color, backgroundColor, width, height, x, y, fontF
 	// Make sure to allow the user to click in the text box while working on the text.
 	const onClick = ( evt ) => {
 		const editor = editorRef.current;
+		// Refocus the editor if the container outside it is clicked.
 		if ( ! editor.editorContainer.contains( evt.target ) ) {
 			editor.focus();
 		}
