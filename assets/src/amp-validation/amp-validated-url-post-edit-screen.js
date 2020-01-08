@@ -386,7 +386,7 @@ const setupStylesheetsMetabox = () => {
 
 	for ( const toggleStylesheetDetailsButton of metabox.querySelectorAll( '.toggle-stylesheet-details' ) ) {
 		const row = toggleStylesheetDetailsButton.closest( 'tr' );
-		row.addEventListener( 'click', () => {
+		toggleStylesheetDetailsButton.addEventListener( 'click', () => {
 			row.classList.toggle( 'expanded' );
 		} );
 	}

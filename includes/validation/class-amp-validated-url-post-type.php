@@ -2060,10 +2060,10 @@ class AMP_Validated_URL_Post_Type {
 		<table class="wp-list-table widefat fixed striped">
 			<thead>
 			<tr>
+				<th class="column-stylesheet_expand"></th>
 				<th class="column-original_size"><?php esc_html_e( 'Original Size', 'amp' ); ?></th>
 				<th class="column-final_size"><?php esc_html_e( 'Final Size', 'amp' ); ?></th>
 				<th class="column-delta"><?php esc_html_e( 'Delta', 'amp' ); ?></th>
-				<th class="column-stylesheet_expand"></th>
 				<th class="column-priority"><?php esc_html_e( 'Priority', 'amp' ); ?></th>
 				<th class="column-stylesheet_status"><?php esc_html_e( 'Status', 'amp' ); ?></th>
 				<th class="column-markup"><?php esc_html_e( 'Markup', 'amp' ); ?></th>
@@ -2099,6 +2099,11 @@ class AMP_Validated_URL_Post_Type {
 				$ratio = $stylesheet['final_size'] / $stylesheet['original_size'];
 				?>
 				<tr class="<?php echo esc_attr( sprintf( 'stylesheet level-0 %s', 0 === $row % 2 ? 'even' : 'odd' ) ); ?>">
+					<td class="column-stylesheet_expand">
+						<button class="toggle-stylesheet-details" type="button">
+							<span class="screen-reader-text"><?php esc_html_e( 'Expand/collapse', 'amp' ); ?></span>
+						</button>
+					</td>
 					<td class="column-original_size">
 						<?php
 						echo esc_html( number_format_i18n( $stylesheet['original_size'] ) );
@@ -2119,11 +2124,6 @@ class AMP_Validated_URL_Post_Type {
 							echo esc_html( sprintf( '+%.1f%%', -1 * ( 1.0 - $ratio ) * 100 ) );
 						}
 						?>
-					</td>
-					<td class="column-stylesheet_expand">
-						<button class="toggle-stylesheet-details" type="button">
-							<span class="screen-reader-text"><?php esc_html_e( 'Expand/collapse', 'amp' ); ?></span>
-						</button>
 					</td>
 					<td class="column-priority">
 						<?php echo esc_html( $stylesheet['priority'] ); ?>
