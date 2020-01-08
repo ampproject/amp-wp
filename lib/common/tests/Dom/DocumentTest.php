@@ -437,8 +437,15 @@ class DocumentTest extends TestCase
      */
     public function testAmpElementsProperty()
     {
-        $html     = '<!doctype html><html><head><style amp-custom data-test="wrong-element"></style></head><body><amp-text data-test="correct-element"></amp-text><amp-img data-test="correct-element"></amp-img></body></html>';
+        $html     = '<!doctype html><html>'
+                    . '  <head><style amp-custom data-test="wrong-element"></style></head>'
+                    . '  <body>'
+                    . '    <amp-text data-test="correct-element"></amp-text><amp-img data-test="correct-element"></amp-img>'
+                    . '    <template type="amp-mustache" data-test="wrong-element"><amp-img data-test="correct-element" alt="{{foo}}"></amp-img></template>'
+                    . '  </body>'
+                    . '</html>';
         $document = Document::fromHtml($html);
+        $this->assertCount(3, $document->ampElements);
         foreach ($document->ampElements as $element) {
             $this->assertEquals('correct-element', $element->getAttribute('data-test'));
         }
