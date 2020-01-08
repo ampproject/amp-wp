@@ -24,9 +24,7 @@ function EditCropMovable( {
 
 	// Refresh moveables to ensure that the selection rect is always correct.
 	useEffect( () => {
-		if ( moveableRef.current ) {
-			moveableRef.current.updateRect();
-		}
+		moveableRef.current.updateRect();
 	} );
 
 	return (
