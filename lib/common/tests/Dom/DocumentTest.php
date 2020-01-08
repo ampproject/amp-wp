@@ -217,14 +217,7 @@ class DocumentTest extends TestCase
      */
     public function getTableRowIterations()
     {
-        return [
-            [1],
-            [10],
-            [100],
-            [1000],
-            [10000],
-            [100000],
-        ];
+        return [[1], [10], [100], [1000], [10000], [100000]];
     }
 
     /**
@@ -356,99 +349,29 @@ class DocumentTest extends TestCase
         };
 
         return [
-            [
+            'title'                  => [$dom, $newNode('title', []), true],
+            'base'                   => [$dom, $newNode('base', ['href' => '/']), true],
+            'script'                 => [$dom, $newNode('script', ['src' => 'http://example.com/test.js']), true],
+            'style'                  => [$dom, $newNode('style', ['media' => 'print']), true],
+            'noscript'               => [$dom, $newNode('noscript', []), true],
+            'link'                   => [
                 $dom,
-                $newNode('title', []),
+                $newNode('link', ['rel' => 'stylesheet', 'href' => 'https://example.com/foo.css']),
                 true,
             ],
-            [
+            'meta'                   => [
                 $dom,
-                $newNode(
-                    'base',
-                    ['href' => '/']
-                ),
+                $newNode('meta', ['name' => 'foo', 'content' => 'https://example.com/foo.css']),
                 true,
             ],
-            [
-                $dom,
-                $newNode(
-                    'script',
-                    ['src' => 'http://example.com/test.js']
-                ),
-                true,
-            ],
-            [
-                $dom,
-                $newNode('style', ['media' => 'print']),
-                true,
-            ],
-            [
-                $dom,
-                $newNode('noscript', []),
-                true,
-            ],
-            [
-                $dom,
-                $newNode(
-                    'link',
-                    [
-                        'rel'  => 'stylesheet',
-                        'href' => 'https://example.com/foo.css',
-                    ]
-                ),
-                true,
-            ],
-            [
-                $dom,
-                $newNode(
-                    'meta',
-                    [
-                        'name'    => 'foo',
-                        'content' => 'https://example.com/foo.css',
-                    ]
-                ),
-                true,
-            ],
-            [
-                $dom,
-                $dom->createTextNode(" \n\t"),
-                true,
-            ],
-            [
-                $dom,
-                $dom->createTextNode('no'),
-                false,
-            ],
-            [
-                $dom,
-                $dom->createComment('hello world'),
-                true,
-            ],
-            [
-                $dom,
-                $dom->createProcessingInstruction('test'),
-                false,
-            ],
-            [
-                $dom,
-                $dom->createCDATASection('nope'),
-                false,
-            ],
-            [
-                $dom,
-                $dom->createEntityReference('bad'),
-                false,
-            ],
-            [
-                $dom,
-                $dom->createElementNS('http://www.w3.org/2000/svg', 'svg'),
-                false,
-            ],
-            [
-                $dom,
-                $newNode('span', []),
-                false,
-            ],
+            'empty textnode'         => [$dom, $dom->createTextNode(" \n\t"), true],
+            'non-empty texnode'      => [$dom, $dom->createTextNode('no'), false],
+            'comment'                => [$dom, $dom->createComment('hello world'), true],
+            'processing instruction' => [$dom, $dom->createProcessingInstruction('test'), false],
+            'cdata'                  => [$dom, $dom->createCDATASection('nope'), false],
+            'entity reference'       => [$dom, $dom->createEntityReference('bad'), false],
+            'svg'                    => [$dom, $dom->createElementNS('http://www.w3.org/2000/svg', 'svg'), false],
+            'span'                   => [$dom, $newNode('span', []), false],
         ];
     }
 
@@ -465,5 +388,59 @@ class DocumentTest extends TestCase
     public function testIsValidHeadNode($dom, $node, $valid)
     {
         $this->assertEquals($valid, $dom->isValidHeadNode($node));
+    }
+
+    /**
+     * Test that the $html property fetches the right element.
+     *
+     * @covers Document::__get()
+     * @covers Document::$html
+     */
+    public function testHtmlProperty()
+    {
+        $html     = '<!doctype html><html data-test="correct-element"><head></head><body></body></html>';
+        $document = Document::fromHtml($html);
+        $this->assertEquals('correct-element', $document->html->getAttribute('data-test'));
+    }
+
+    /**
+     * Test that the $head property fetches the right element.
+     *
+     * @covers Document::__get()
+     * @covers Document::$head
+     */
+    public function testHeadProperty()
+    {
+        $html     = '<!doctype html><html><head data-test="correct-element"></head><body></body></html>';
+        $document = Document::fromHtml($html);
+        $this->assertEquals('correct-element', $document->head->getAttribute('data-test'));
+    }
+
+    /**
+     * Test that the $body property fetches the right element.
+     *
+     * @covers Document::__get()
+     * @covers Document::$body
+     */
+    public function testBodyProperty()
+    {
+        $html     = '<!doctype html><html><head></head><body data-test="correct-element"></body></html>';
+        $document = Document::fromHtml($html);
+        $this->assertEquals('correct-element', $document->body->getAttribute('data-test'));
+    }
+
+    /**
+     * Test that the $ampElements property fetches the right elements.
+     *
+     * @covers Document::__get()
+     * @covers Document::$ampElements
+     */
+    public function testAmpElementsProperty()
+    {
+        $html     = '<!doctype html><html><head><style amp-custom data-test="wrong-element"></style></head><body><amp-text data-test="correct-element"></amp-text><amp-img data-test="correct-element"></amp-img></body></html>';
+        $document = Document::fromHtml($html);
+        foreach ($document->ampElements as $element) {
+            $this->assertEquals('correct-element', $element->getAttribute('data-test'));
+        }
     }
 }
