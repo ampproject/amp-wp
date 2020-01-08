@@ -2,7 +2,7 @@
 
 namespace Amp\Optimizer;
 
-use Amp\AmpWP\Dom\Document;
+use Amp\Dom\Document;
 
 final class TransformationEngine
 {
@@ -47,7 +47,7 @@ final class TransformationEngine
      */
     public function optimizeHtml($html, ErrorCollection $errors)
     {
-        $dom = Document::from_html($html);
+        $dom = Document::fromHtml($html);
         $this->optimizeDom($dom, $errors);
 
         return $dom->saveHTML();

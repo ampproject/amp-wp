@@ -7,7 +7,7 @@
 
 namespace Amp\AmpWP\Component;
 
-use Amp\AmpWP\Dom\Document;
+use Amp\Dom\Document;
 use Amp\AmpWP\Dom\ElementList;
 use DOMElement;
 use AMP_DOM_Utils;

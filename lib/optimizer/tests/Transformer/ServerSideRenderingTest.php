@@ -2,7 +2,7 @@
 
 namespace Amp\Optimizer\Transformer;
 
-use Amp\AmpWP\Dom\Document;
+use Amp\Dom\Document;
 use Amp\Optimizer\Error;
 use Amp\Optimizer\ErrorCollection;
 use Amp\Optimizer\Tests\ErrorComparison;
@@ -173,7 +173,7 @@ final class ServerSideRenderingTest extends TestCase
      */
     public function testTransform($source, $expectedHtml, $expectedErrors = [])
     {
-        $document    = Document::from_html($source);
+        $document    = Document::fromHtml($source);
         $transformer = new ServerSideRendering();
         $errors      = new ErrorCollection();
 

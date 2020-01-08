@@ -2,7 +2,7 @@
 
 namespace Amp\Optimizer\Transformer;
 
-use Amp\AmpWP\Dom\Document;
+use Amp\Dom\Document;
 use Amp\Optimizer\ErrorCollection;
 use Amp\Optimizer\Tests\MarkupComparison;
 use Amp\Optimizer\Tests\TestMarkup;
@@ -66,7 +66,7 @@ final class TransformedIdentifierTest extends TestCase
      */
     public function testTransform($source, $expectedHtml, $version = null)
     {
-        $document = Document::from_html($source);
+        $document = Document::fromHtml($source);
         $config   = null;
         if ($version !== null) {
             $config = [TransformedIdentifier::CONFIG_KEY_VERSION => $version];

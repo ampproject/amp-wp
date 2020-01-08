@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use Amp\AmpWP\Dom\Document;
+use Amp\Dom\Document;
 use Amp\AmpWP\Dom\ElementList;
 use Amp\AmpWP\Component\Carousel;
 

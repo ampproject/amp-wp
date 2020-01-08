@@ -4,6 +4,16 @@
   "description": "WordPress plugin for adding AMP support.",
   "homepage": "https://github.com/ampproject/amp-wp",
   "license": "GPL-2.0-or-later",
+  "repositories": [
+    {
+      "type": "path",
+      "url": "lib/common"
+    },
+    {
+      "type": "path",
+      "url": "lib/optimizer"
+    }
+  ],
   "require": {
     "php": "^5.6 || ^7.0",
     "ext-curl": "*",
@@ -14,7 +24,9 @@
     "ext-spl": "*",
     "cweagans/composer-patches": "1.6.7",
     "fasterimage/fasterimage": "1.5.0",
-    "sabberworm/php-css-parser": "8.3.0"
+    "sabberworm/php-css-parser": "8.3.0",
+    "amp/common": "^1",
+    "amp/optimizer": "^1"
   },
   "require-dev": {
     "dealerdirect/phpcodesniffer-composer-installer": "0.5.0",
@@ -47,14 +59,14 @@
   },
   "autoload": {
     "psr-4": {
-      "Amp\\AmpWP\\": "src/",
-      "Amp\\Optimizer\\": "optimizer/"
+      "Amp\\AmpWP\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Amp\\AmpWP\\Tests\\": "tests/php/src/",
-      "Amp\\Optimizer\\Tests\\": "tests/php/optimizer/src/"
+      "Amp\\AmpWP\\Tests\\": "tests/php/src/"
     }
-  }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
 }

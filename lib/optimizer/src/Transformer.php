@@ -3,7 +3,7 @@
 namespace Amp\Optimizer;
 
 // @todo The Document class should not be WP-specific.
-use Amp\AmpWP\Dom\Document;
+use Amp\Dom\Document;
 
 interface Transformer
 {

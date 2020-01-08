@@ -6,7 +6,7 @@
  */
 
 use Amp\AmpWP\Component\Carousel;
-use Amp\AmpWP\Dom\Document;
+use Amp\Dom\Document;
 use Amp\AmpWP\Dom\ElementList;
 use Amp\AmpWP\Tests\PrivateAccess;
 

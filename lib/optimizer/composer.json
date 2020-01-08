@@ -1,0 +1,65 @@
+{
+  "name": "amp/optimizer",
+  "type": "library",
+  "description": "PHP library for optimizing AMP pages.",
+  "homepage": "https://github.com/ampproject/php-optimizer",
+  "license": "MIT",
+  "repositories": [
+    {
+      "type": "path",
+      "url": "../common"
+    }
+  ],
+  "require": {
+    "php": "^5.6 || ^7.0",
+    "ext-dom": "*",
+    "ext-iconv": "*",
+    "ext-libxml": "*",
+    "amp/common": "^1"
+  },
+  "require-dev": {
+    "dealerdirect/phpcodesniffer-composer-installer": "0.5.0",
+    "roave/security-advisories": "dev-master"
+  },
+  "suggest": {
+    "ext-json": "Provides native implementation of json_encode()/json_decode()."
+  },
+  "config": {
+    "platform": {
+      "php": "5.6"
+    },
+    "sort-packages": true
+  },
+  "autoload": {
+    "psr-4": {
+      "Amp\\Optimizer\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Amp\\Optimizer\\Tests\\": "tests/src/"
+    }
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "1.0.x-dev",
+      "dev-add/958-amp-optimizer": "1.0.x-dev"
+    }
+  },
+  "scripts": {
+    "cs": "phpcs --standard=PSR2 -n src",
+    "cbf": "phpcbf --standard=PSR2 -n src",
+    "unit": "phpunit --colors=always",
+    "lint": [
+      "find src -name '*.php' -print0 | xargs -0 -n1 php -l",
+      "find tests/src -name '*.php' -print0 | xargs -0 -n1 php -l"
+    ],
+    "test": [
+      "@lint",
+      "@unit",
+      "@cs"
+    ]
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}

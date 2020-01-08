@@ -2,7 +2,7 @@
 
 namespace Amp\Optimizer;
 
-use Amp\AmpWP\Dom\Document;
+use Amp\Dom\Document;
 use Amp\Optimizer\Tests\MarkupComparison;
 use Amp\Optimizer\Tests\TestMarkup;
 use PHPUnit\Framework\TestCase;
@@ -58,7 +58,7 @@ final class TransformationEngineTest extends TestCase
      */
     public function testOptimizeDom()
     {
-        $dom    = Document::from_html(self::MINIMAL_HTML_MARKUP);
+        $dom    = Document::fromHtml(self::MINIMAL_HTML_MARKUP);
         $engine = new TransformationEngine(new Configuration([]));
         $errors = new ErrorCollection();
         $engine->optimizeDom($dom, $errors);

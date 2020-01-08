@@ -6,7 +6,7 @@
  * @since 0.7
  */
 
-use Amp\AmpWP\Dom\Document;
+use Amp\Dom\Document;
 use org\bovigo\vfs;
 use Amp\AmpWP\Tests\PrivateAccess;
 
@@ -1645,7 +1645,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$html = ob_get_clean();
 		$html = AMP_Theme_Support::prepare_response( $html );
 
-		$dom = Document::from_html( $html );
+		$dom = Document::fromHtml($html );
 
 		$scripts = $dom->xpath->query( '//script[ not( @type ) or @type = "text/javascript" ]' );
 		$this->assertSame( 3, $scripts->length );
@@ -1704,7 +1704,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$html = ob_get_clean();
 		$html = AMP_Theme_Support::prepare_response( $html );
 
-		$dom = Document::from_html( $html );
+		$dom = Document::fromHtml($html );
 
 		/** @var DOMElement $script Script. */
 		$actual_script_srcs = [];
@@ -1756,7 +1756,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$html = ob_get_clean();
 		$html = AMP_Theme_Support::prepare_response( $html );
 
-		$dom = Document::from_html( $html );
+		$dom = Document::fromHtml($html );
 
 		$script_srcs = [];
 		/**

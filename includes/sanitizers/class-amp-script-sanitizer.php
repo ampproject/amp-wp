@@ -50,7 +50,7 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 			$fragment->appendChild( $this->dom->createComment( 'noscript' ) );
 			while ( $noscript->firstChild ) {
 				if ( $is_inside_head_el && ! $must_move_to_body ) {
-					$must_move_to_body = ! $this->dom->is_valid_head_node( $noscript->firstChild );
+					$must_move_to_body = ! $this->dom->isValidHeadNode($noscript->firstChild );
 				}
 				$fragment->appendChild( $noscript->firstChild );
 			}

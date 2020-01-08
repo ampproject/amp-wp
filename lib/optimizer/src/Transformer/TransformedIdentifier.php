@@ -2,7 +2,7 @@
 
 namespace Amp\Optimizer\Transformer;
 
-use Amp\AmpWP\Dom\Document;
+use Amp\Dom\Document;
 use Amp\Optimizer\ErrorCollection;
 use Amp\Optimizer\Transformer;
 

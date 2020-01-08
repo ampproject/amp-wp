@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use Amp\AmpWP\Dom\Document;
+use Amp\Dom\Document;
 
 /**
  * Class AMP_Theme_Support
@@ -2228,7 +2228,7 @@ class AMP_Theme_Support {
 			);
 		}
 
-		$dom = Document::from_html( $response );
+		$dom = Document::fromHtml($response );
 
 		// Move anything after </html>, such as Query Monitor output added at shutdown, to be moved before </body>.
 		while ( $dom->documentElement->nextSibling ) {

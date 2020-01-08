@@ -2,12 +2,12 @@
 
 namespace Amp\Optimizer\Transformer;
 
-use Amp\AmpWP\Dom\Document;
-use Amp\Optimizer\Layout;
+use Amp\Dom\Document;
+use Amp\CssLength;
+use Amp\Layout;
 use Amp\Optimizer\Error;
 use Amp\Optimizer\ErrorCollection;
 use Amp\Optimizer\Transformer;
-use AMP_CSS_Length;
 use DOMElement;
 
 final class ServerSideRendering implements Transformer
@@ -54,8 +54,7 @@ final class ServerSideRendering implements Transformer
          * we also look for reasons not to remove the boilerplate.
          */
         $canRemoveBoilerplate = true;
-        foreach ($document->amp_elements as $amp_element) {
-
+        foreach ($document->ampElements as $amp_element) {
             // Skip tags inside a template tag.
             if ($this->hasAncestorWithTag($amp_element, 'template')) {
                 continue;
@@ -183,19 +182,19 @@ final class ServerSideRendering implements Transformer
      */
     private function applyLayout(Document $document, DOMElement $element, ErrorCollection $errors)
     {
-        // @todo Remove dependency on plugin's AMP_CSS_Length objects here.
+        // @todo Remove dependency on plugin's CssLength objects here.
         $ampLayout = $this->parseLayout($element->getAttribute('layout'));
 
-        $inputWidth = new AMP_CSS_Length($element->getAttribute('width'));
-        $inputWidth->validate(/* $allow_auto */ true, /* $allow_fluid */ false);
-        if (! $inputWidth->is_valid()) {
+        $inputWidth = new CssLength($element->getAttribute('width'));
+        $inputWidth->validate(/* $allowAuto */ true, /* $allowFluid */ false);
+        if (! $inputWidth->isValid()) {
             $errors->add(Error\CannotPerformServerSideRendering::fromInvalidInputWidth($element));
             return false;
         }
 
-        $inputHeight = new AMP_CSS_Length($element->getAttribute('height'));
-        $inputHeight->validate(/* $allow_auto */ true, /* $allow_fluid */ $ampLayout === Layout::FLUID);
-        if (! $inputHeight->is_valid()) {
+        $inputHeight = new CssLength($element->getAttribute('height'));
+        $inputHeight->validate(/* $allowAuto */ true, /* $allowFluid */ $ampLayout === Layout::FLUID);
+        if (! $inputHeight->isValid()) {
             $errors->add(Error\CannotPerformServerSideRendering::fromInvalidInputHeight($element));
             return false;
         }
@@ -240,29 +239,29 @@ final class ServerSideRendering implements Transformer
     /**
      * Calculate the width of an element for its requested layout.
      *
-     * @param string         $inputLayout Requested layout.
-     * @param AMP_CSS_Length $inputWidth  Input value for the width.
-     * @param string         $tagName     Tag name of the element.
-     * @return AMP_CSS_Length Calculated Width.
+     * @param string    $inputLayout Requested layout.
+     * @param CssLength $inputWidth  Input value for the width.
+     * @param string    $tagName     Tag name of the element.
+     * @return CssLength Calculated Width.
      */
-    private function calculateWidth($inputLayout, AMP_CSS_Length $inputWidth, $tagName)
+    private function calculateWidth($inputLayout, CssLength $inputWidth, $tagName)
     {
-        if ((empty($inputLayout) || $inputLayout === Layout::FIXED) && ! $inputWidth->is_set()) {
+        if ((empty($inputLayout) || $inputLayout === Layout::FIXED) && ! $inputWidth->isDefined()) {
             // These values come from AMP's runtime and can be found in
             // https://github.com/ampproject/amphtml/blob/master/src/layout.js#L70
             switch ($tagName) {
                 case 'amp-analytics':
                 case 'amp-pixel':
-                    $width = new AMP_CSS_Length('1px');
-                    $width->validate(/* $allow_auto */ false, /* $allow_fluid */ false);
+                    $width = new CssLength('1px');
+                    $width->validate(/* $allowAuto */ false, /* $allowFluid */ false);
                     return $width;
                 case 'amp-audio':
-                    $width = new AMP_CSS_Length('auto');
-                    $width->validate(/* $allow_auto */ true, /* $allow_fluid */ false);
+                    $width = new CssLength('auto');
+                    $width->validate(/* $allowAuto */ true, /* $allowFluid */ false);
                     return $width;
                 case 'amp-social-share':
-                    $width = new AMP_CSS_Length('60px');
-                    $width->validate(/* $allow_auto */ false, /* $allow_fluid */ false);
+                    $width = new CssLength('60px');
+                    $width->validate(/* $allowAuto */ false, /* $allowFluid */ false);
                     return $width;
             }
         }
@@ -273,29 +272,29 @@ final class ServerSideRendering implements Transformer
     /**
      * Calculate the height of an element for its requested layout.
      *
-     * @param string         $inputLayout Requested layout.
-     * @param AMP_CSS_Length $inputHeight Input value for the height.
-     * @param string         $tagName     Tag name of the element.
-     * @return AMP_CSS_Length Calculated Height.
+     * @param string    $inputLayout Requested layout.
+     * @param CssLength $inputHeight Input value for the height.
+     * @param string    $tagName     Tag name of the element.
+     * @return CssLength Calculated Height.
      */
-    private function calculateHeight($inputLayout, AMP_CSS_Length $inputHeight, $tagName)
+    private function calculateHeight($inputLayout, CssLength $inputHeight, $tagName)
     {
-        if ((empty($inputLayout) || $inputLayout === Layout::FIXED || $inputLayout === Layout::FIXED_HEIGHT) && ! $inputHeight->is_set()) {
+        if ((empty($inputLayout) || $inputLayout === Layout::FIXED || $inputLayout === Layout::FIXED_HEIGHT) && ! $inputHeight->isDefined()) {
             // These values come from AMP's runtime and can be found in
             // https://github.com/ampproject/amphtml/blob/master/src/layout.js#L70
             switch ($tagName) {
                 case 'amp-analytics':
                 case 'amp-pixel':
-                    $height = new AMP_CSS_Length('1px');
-                    $height->validate(/* $allow_auto */ false, /* $allow_fluid */ false);
+                    $height = new CssLength('1px');
+                    $height->validate(/* $allowAuto */ false, /* $allowFluid */ false);
                     return $height;
                 case 'amp-audio':
-                    $height = new AMP_CSS_Length('auto');
-                    $height->validate(/* $allow_auto */ true, /* $allow_fluid */ false);
+                    $height = new CssLength('auto');
+                    $height->validate(/* $allowAuto */ true, /* $allowFluid */ false);
                     return $height;
                 case 'amp-social-share':
-                    $height = new AMP_CSS_Length('44px');
-                    $height->validate(/* $allow_auto */ false, /* $allow_fluid */ false);
+                    $height = new CssLength('44px');
+                    $height->validate(/* $allowAuto */ false, /* $allowFluid */ false);
                     return $height;
             }
         }
@@ -306,17 +305,17 @@ final class ServerSideRendering implements Transformer
     /**
      * Calculate the final AMP layout attribute for an element.
      *
-     * @param string         $inputLayout Requested layout.
-     * @param AMP_CSS_Length $width       Calculated width.
-     * @param AMP_CSS_Length $height      Calculated height.
-     * @param string         $sizesAttr   Sizes attribute value.
-     * @param string         $heightsAttr Heights attribute value.
+     * @param string    $inputLayout Requested layout.
+     * @param CssLength $width       Calculated width.
+     * @param CssLength $height      Calculated height.
+     * @param string    $sizesAttr   Sizes attribute value.
+     * @param string    $heightsAttr Heights attribute value.
      * @return string Calculated layout.
      */
     private function calculateLayout(
         $inputLayout,
-        AMP_CSS_Length $width,
-        AMP_CSS_Length $height,
+        CssLength $width,
+        CssLength $height,
         $sizesAttr,
         $heightsAttr
     ) {
@@ -324,15 +323,15 @@ final class ServerSideRendering implements Transformer
             return $inputLayout;
         }
 
-        if (! $width->is_set() && ! $height->is_set()) {
+        if (! $width->isDefined() && ! $height->isDefined()) {
             return Layout::CONTAINER;
         }
 
-        if ($height->is_set() && (! $width->is_set() || $width->is_auto())) {
+        if ($height->isDefined() && (! $width->isDefined() || $width->isAuto())) {
             return Layout::FIXED_HEIGHT;
         }
 
-        if ($height->is_set() && $width->is_set() && (! empty($sizesAttr) || ! empty($heightsAttr))) {
+        if ($height->isDefined() && $width->isDefined() && (! empty($sizesAttr) || ! empty($heightsAttr))) {
             return Layout::RESPONSIVE;
         }
 
@@ -353,12 +352,12 @@ final class ServerSideRendering implements Transformer
     /**
      * Apply the calculated layout attributes to an element.
      *
-     * @param DOMElement     $element Element to apply the layout attributes to.
-     * @param string         $layout  Final layout.
-     * @param AMP_CSS_Length $width   Calculated width.
-     * @param AMP_CSS_Length $height  Calculated height.
+     * @param DOMElement $element Element to apply the layout attributes to.
+     * @param string     $layout  Final layout.
+     * @param CssLength  $width   Calculated width.
+     * @param CssLength  $height  Calculated height.
      */
-    private function applyLayoutAttributes(DOMElement $element, $layout, AMP_CSS_Length $width, AMP_CSS_Length $height)
+    private function applyLayoutAttributes(DOMElement $element, $layout, CssLength $width, CssLength $height)
     {
         $this->addClass($element, $this->getLayoutClass($layout));
 
@@ -372,10 +371,10 @@ final class ServerSideRendering implements Transformer
                 $element->setAttribute('hidden', 'hidden');
                 break;
             case Layout::FIXED:
-                $styles = "width:{$width->get_numeral()}{$width->get_unit()};height:{$height->get_numeral()}{$height->get_unit()};";
+                $styles = "width:{$width->getNumeral()}{$width->getUnit()};height:{$height->getNumeral()}{$height->getUnit()};";
                 break;
             case Layout::FIXED_HEIGHT:
-                $styles = "height:{$height->get_numeral()}{$height->get_unit()};";
+                $styles = "height:{$height->getNumeral()}{$height->getUnit()};";
                 break;
             case Layout::RESPONSIVE:
                 // Do nothing here but emit <i-amphtml-sizer> later.
@@ -385,11 +384,11 @@ final class ServerSideRendering implements Transformer
                 // Do nothing here.
                 break;
             case Layout::FLEX_ITEM:
-                if ($width->is_set()) {
-                    $styles = "width:{$width->get_numeral()}{$width->get_unit()};";
+                if ($width->isDefined()) {
+                    $styles = "width:{$width->getNumeral()}{$width->getUnit()};";
                 }
-                if ($height->is_set()) {
-                    $styles .= "height:{$height->get_numeral()}{$height->get_unit()};";
+                if ($height->isDefined()) {
+                    $styles .= "height:{$height->getNumeral()}{$height->getUnit()};";
                 }
                 break;
         }
@@ -452,18 +451,18 @@ final class ServerSideRendering implements Transformer
         Document $document,
         DOMElement $element,
         $layout,
-        AMP_CSS_Length $width,
-        AMP_CSS_Length $height
+        CssLength $width,
+        CssLength $height
     ) {
         if ($layout !== Layout::RESPONSIVE
-            || ! $width->is_set()
-            || $width->get_numeral() === 0
-            || ! $height->is_set()
-            || $width->get_unit() !== $height->get_unit()) {
+            || ! $width->isDefined()
+            || $width->getNumeral() === 0
+            || ! $height->isDefined()
+            || $width->getUnit() !== $height->getUnit()) {
             return;
         }
 
-        $padding = $height->get_numeral() / $width->get_numeral() * 100;
+        $padding = $height->getNumeral() / $width->getNumeral() * 100;
         $sizer   = $document->createElement(self::SIZER_ELEMENT);
         $sizer->setAttribute('style', sprintf('display:block;padding-top:%1.4F%%;', $padding));
         $element->insertBefore($sizer, $element->firstChild);

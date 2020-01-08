@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use Amp\AmpWP\Dom\Document;
+use Amp\Dom\Document;
 
 /**
  * Class AMP_DOM_Utils
@@ -18,7 +18,7 @@ class AMP_DOM_Utils {
 	 * Attribute prefix for AMP-bind data attributes.
 	 *
 	 * @since 1.2.1
-	 * @deprecated Use Amp\AmpWP\Dom\Document::AMP_BIND_DATA_ATTR_PREFIX instead.
+	 * @deprecated Use Amp\Dom\Document::AMP_BIND_DATA_ATTR_PREFIX instead.
 	 * @var string
 	 */
 	const AMP_BIND_DATA_ATTR_PREFIX = Document::AMP_BIND_DATA_ATTR_PREFIX;
@@ -52,15 +52,15 @@ class AMP_DOM_Utils {
 	 *
 	 * @since 0.7
 	 * @see AMP_DOM_Utils::get_content_from_dom_node()
-	 * @deprecated Use Amp\AmpWP\Dom\Document::from_html( $html, $encoding ) instead.
+	 * @deprecated Use Amp\Dom\Document::fromHtml( $html, $encoding ) instead.
 	 *
 	 * @param string $document Valid HTML document to be represented by a Dom\Document.
 	 * @param string $encoding Optional. Encoding to use for the content.
 	 * @return Document|false Returns Dom\Document, or false if conversion failed.
 	 */
 	public static function get_dom( $document, $encoding = null ) {
-		_deprecated_function( __METHOD__, '1.5.0', 'Amp\AmpWP\Dom\Document::from_html()' );
-		return Document::from_html( $document, $encoding );
+		_deprecated_function( __METHOD__, '1.5.0', 'Amp\Dom\Document::fromHtml()' );
+		return Document::fromHtml($document, $encoding );
 	}
 
 	/**
@@ -68,14 +68,14 @@ class AMP_DOM_Utils {
 	 *
 	 * @link https://github.com/ampproject/amphtml/blob/445d6e3be8a5063e2738c6f90fdcd57f2b6208be/validator/engine/htmlparser.js#L83-L100
 	 * @link https://www.w3.org/TR/html5/document-metadata.html
-	 * @deprecated Use Amp\AmpWP\Dom\Document->is_valid_head_node() instead.
+	 * @deprecated Use Amp\Dom\Document->isValidHeadNode() instead.
 	 *
 	 * @param DOMNode $node Node.
 	 * @return bool Whether valid head node.
 	 */
 	public static function is_valid_head_node( DOMNode $node ) {
-		_deprecated_function( __METHOD__, '1.5.0', 'Amp\AmpWP\Dom\Document->is_valid_head_node()' );
-		return Document::from_node( $node )->is_valid_head_node( $node );
+		_deprecated_function( __METHOD__, '1.5.0', 'Amp\Dom\Document->isValidHeadNode()' );
+		return Document::fromNode($node )->isValidHeadNode($node );
 	}
 
 	/**
@@ -87,7 +87,7 @@ class AMP_DOM_Utils {
 	 * @since 0.7
 	 * @see \AMP_DOM_Utils::convert_amp_bind_attributes()
 	 * @see \AMP_DOM_Utils::restore_amp_bind_attributes()
-	 * @deprecated Use Amp\AmpWP\Dom\Document::AMP_BIND_DATA_ATTR_PREFIX instead.
+	 * @deprecated Use Amp\Dom\Document::AMP_BIND_DATA_ATTR_PREFIX instead.
 	 * @link https://www.ampproject.org/docs/reference/components/amp-bind
 	 *
 	 * @return string HTML5 data-* attribute name prefix for AMP binding attributes.
@@ -106,7 +106,7 @@ class AMP_DOM_Utils {
 	 * This is a reciprocal function of AMP_DOM_Utils::restore_amp_bind_attributes().
 	 *
 	 * @since 0.7
-	 * @deprecated This is handled automatically via Amp\AmpWP\Dom\Document.
+	 * @deprecated This is handled automatically via Amp\Dom\Document.
 	 * @see \AMP_DOM_Utils::convert_amp_bind_attributes()
 	 * @link https://www.ampproject.org/docs/reference/components/amp-bind
 	 *
@@ -125,7 +125,7 @@ class AMP_DOM_Utils {
 	 *
 	 * @since 0.7
 	 * @see \AMP_DOM_Utils::convert_amp_bind_attributes()
-	 * @deprecated This is handled automatically via Amp\AmpWP\Dom\Document.
+	 * @deprecated This is handled automatically via Amp\Dom\Document.
 	 * @link https://www.ampproject.org/docs/reference/components/amp-bind
 	 *
 	 * @param string $html HTML with amp-bind attributes converted.
@@ -161,7 +161,7 @@ class AMP_DOM_Utils {
 		 */
 		$document = "<html><head></head><body>{$content}</body></html>";
 
-		return Document::from_html( $document, $encoding );
+		return Document::fromHtml($document, $encoding );
 	}
 
 	/**
@@ -195,7 +195,7 @@ class AMP_DOM_Utils {
 	 * @return string Returns the HTML content represented in the DOMNode
 	 */
 	public static function get_content_from_dom_node( Document $dom, $node ) {
-		_deprecated_function( __METHOD__, '1.5.0', 'Amp\AmpWP\Dom\Document::saveHtml()' );
+		_deprecated_function( __METHOD__, '1.5.0', 'Amp\Dom\Document::saveHtml()' );
 		return $dom->saveHTML( $node );
 	}
 

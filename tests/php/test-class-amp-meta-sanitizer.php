@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use Amp\AmpWP\Dom\Document;
+use Amp\Dom\Document;
 
 /**
  * Tests for AMP_Meta_Sanitizer.
@@ -83,7 +83,7 @@ class Test_AMP_Meta_Sanitizer extends WP_UnitTestCase {
 	 * @param string  $expected_content Expected content after sanitization.
 	 */
 	public function test_sanitize( $source_content, $expected_content ) {
-		$dom       = Document::from_html( $source_content );
+		$dom       = Document::fromHtml($source_content );
 		$sanitizer = new AMP_Meta_Sanitizer( $dom );
 		$sanitizer->sanitize();
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Amp\Optimizer;
+namespace Amp;
 
 interface Layout
 {
