@@ -7,7 +7,6 @@ use DOMElement;
 
 final class CannotPerformServerSideRendering implements Error
 {
-
     use ErrorProperties;
 
     /**

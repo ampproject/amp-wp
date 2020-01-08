@@ -454,11 +454,13 @@ final class ServerSideRendering implements Transformer
         CssLength $width,
         CssLength $height
     ) {
-        if ($layout !== Layout::RESPONSIVE
+        if (
+            $layout !== Layout::RESPONSIVE
             || ! $width->isDefined()
             || $width->getNumeral() === 0
             || ! $height->isDefined()
-            || $width->getUnit() !== $height->getUnit()) {
+            || $width->getUnit() !== $height->getUnit()
+        ) {
             return;
         }
 

@@ -7,7 +7,6 @@ use DOMElement;
 
 final class CannotRemoveBoilerplate implements Error
 {
-
     use ErrorProperties;
 
     /**

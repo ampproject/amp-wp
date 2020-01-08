@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Amp\Dom\Document.
  *
@@ -345,7 +346,8 @@ final class Document extends DOMDocument
         if ($success) {
             // Remove http-equiv charset again.
             $meta = $this->head->firstChild;
-            if ('meta' === $meta->tagName
+            if (
+                'meta' === $meta->tagName
                 && self::HTML_HTTP_EQUIV_VALUE === $meta->getAttribute('http-equiv')
                 && (self::HTML_HTTP_EQUIV_CONTENT_VALUE) === $meta->getAttribute('content')
             ) {
