@@ -119,44 +119,44 @@ final class ServerSideRenderingTest extends TestCase
             'amp-audio' => [
                 $input('<amp-audio></amp-audio>'),
                 $expectWithBoilerplate('<amp-audio></amp-audio>'),
-                [Error\CannotRemoveBoilerplate::CODE],
+                [Error\CannotRemoveBoilerplate::class],
             ],
 
             'amp-experiment is non-empty' => [
                 $input('<amp-experiment><script type="application/json">{ "exp": { "variants": { "a": 25, "b": 25 } } }</script></amp-experiment>'),
                 $expectWithBoilerplate('<amp-experiment class="i-amphtml-layout-container" i-amphtml-layout="container"><script type="application/json">{ "exp": { "variants": { "a": 25, "b": 25 } } }</script></amp-experiment>'),
-                [Error\CannotRemoveBoilerplate::CODE],
+                [Error\CannotRemoveBoilerplate::class],
             ],
 
             'amp-story' => [
                 $input('', TestMarkup::SCRIPT_AMPSTORY),
                 $expectWithBoilerplate('', TestMarkup::SCRIPT_AMPSTORY),
-                [Error\CannotRemoveBoilerplate::CODE],
+                [Error\CannotRemoveBoilerplate::class],
             ],
 
             'amp-dynamic-css-classes' => [
                 $input('', TestMarkup::SCRIPT_AMPDYNAMIC_CSSCLASSES),
                 $expectWithBoilerplate('', TestMarkup::SCRIPT_AMPDYNAMIC_CSSCLASSES),
-                [Error\CannotRemoveBoilerplate::CODE],
+                [Error\CannotRemoveBoilerplate::class],
             ],
 
             'heights attribute' => [
                 $input('<amp-img height="256" heights="(min-width:500px) 200px, 80%" layout="responsive" width="320"></amp-img>'),
                 $expectWithBoilerplate('<amp-img height="256" heights="(min-width:500px) 200px, 80%" layout="responsive" width="320" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive"><i-amphtml-sizer style="display:block;padding-top:80.0000%;"></i-amphtml-sizer></amp-img>'),
-                [Error\CannotRemoveBoilerplate::CODE],
+                [Error\CannotRemoveBoilerplate::class],
             ],
 
             'media attribute' => [
                 $input('<amp-img height="355" layout="fixed" media="(min-width: 650px) and handheld" src="wide.jpg" width="466"></amp-img>'),
                 $expectWithBoilerplate('<amp-img height="355" layout="fixed" media="(min-width: 650px) and handheld" src="wide.jpg" width="466" class="i-amphtml-layout-fixed i-amphtml-layout-size-defined" style="width:466px;height:355px;" i-amphtml-layout="fixed"></amp-img>'),
-                [Error\CannotRemoveBoilerplate::CODE],
+                [Error\CannotRemoveBoilerplate::class],
             ],
 
 
             'sizes attribute' => [
                 $input('<amp-img height="300" layout="responsive" sizes="(min-width: 320px) 320px, 100vw" src="https://acme.org/image1.png" width="400"></amp-img>'),
                 $expectWithBoilerplate('<amp-img height="300" layout="responsive" sizes="(min-width: 320px) 320px, 100vw" src="https://acme.org/image1.png" width="400" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive"><i-amphtml-sizer style="display:block;padding-top:75.0000%;"></i-amphtml-sizer></amp-img>'),
-                [Error\CannotRemoveBoilerplate::CODE],
+                [Error\CannotRemoveBoilerplate::class],
             ],
         ];
     }

@@ -33,7 +33,7 @@ final class ErrorCollectionTest extends TestCase
         $errorCollection = new ErrorCollection();
         $errorCollection->add(new UnknownError('first error'));
         $errorCollection->add(new UnknownError('second error'));
-        $this->assertTrue($errorCollection->has(UnknownError::CODE));
+        $this->assertTrue($errorCollection->has(UnknownError::class));
         $this->assertFalse($errorCollection->has('BAD_CODE'));
     }
 
@@ -50,7 +50,7 @@ final class ErrorCollectionTest extends TestCase
         $errorCollection->add(new UnknownError('second error'));
         foreach ($errorCollection as $error) {
             $this->assertInstanceOf(Error::class, $error);
-            $this->assertEquals(UnknownError::CODE, $error->getCode());
+            $this->assertEquals(UnknownError::class, $error->getCode());
         }
         $errors = iterator_to_array($errorCollection, false);
         $this->assertEquals('first error', $errors[0]->getMessage());

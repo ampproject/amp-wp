@@ -553,7 +553,7 @@ final class ServerSideRendering implements Transformer
         }
 
         // If JSON is empty, then not used.
-        if (count($experiment) === 0) {
+        if (empty($experiment)) {
             return false;
         }
 

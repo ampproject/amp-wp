@@ -31,7 +31,8 @@ trait ErrorComparison
             $actualError   = $actualErrors[$index];
             if ( is_string( $expectedError ) ) {
                 // If strings were passed, assume the error code is used.
-                $this->assertEquals($expectedError, $actualError->getCode(), 'Unexpected error code');
+                $this->assertInstanceOf($expectedError, $actualError, 'Unexpected error instance type');
+                $this->assertEquals(basename($expectedError), $actualError->getCode(), 'Unexpected error code');
             } else {
                 $this->assertInstanceOf(get_class($expectedError), $actualError, 'Unexpected error type');
                 $this->assertEquals($expectedError->getCode(), $actualError->getCode(), 'Unexpected error code');
