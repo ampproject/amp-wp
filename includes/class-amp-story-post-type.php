@@ -361,11 +361,10 @@ class AMP_Story_Post_Type {
 					$font = AMP_Fonts::get_font( $element['fontFamily'] );
 
 					if ( $font && isset( $font['gfont'] ) && $font['gfont'] ) {
-						if ( isset( $g_fonts[ $font['name'] ] ) && ! in_array( $element['fontWeight'], $g_fonts[ $font['name'] ], true ) ) {
-							$g_fonts[ $font['name'] ][] = $element['fontWeight'];
-						} else {
-							$g_fonts[ $font['name'] ][] = $element['fontWeight'];
+						if ( isset( $g_fonts[ $font['name'] ] ) && in_array( $element['fontWeight'], $g_fonts[ $font['name'] ], true ) ) {
+							continue;
 						}
+						$g_fonts[ $font['name'] ][] = $element['fontWeight'];
 					}
 				}
 			}
