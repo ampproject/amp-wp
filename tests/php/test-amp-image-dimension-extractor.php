@@ -11,7 +11,7 @@ define( 'AMP_IMG_DIMENSION_TEST_INVALID_FILE', dirname( __FILE__ ) . '/assets/no
 define( 'IMG_350', 'http://amp-wp.org/wp-content/plugin-test-files/350x150.png' );
 define( 'IMG_1024', 'http://amp-wp.org/wp-content/plugin-test-files/1024x768.png' );
 define( 'IMG_SVG', 'https://amp-wp.org/wp-content/plugin-test-files/amp.svg' ); // @todo For some reason, FasterImage times out on this if the XML PI is absent.
-define( 'IMG_SVG_VIEWPORT', 'https://gist.githubusercontent.com/kienstra/7aef6fcd42067174fcdc78f5f6110197/raw/a7875528d90db3a427823727ef3ecd4cfe00880e/google.svg' );
+define( 'IMG_SVG_VIEWPORT', 'https://amp-wp.org/wp-content/plugin-test-files/google.svg' );
 
 /**
  * Tests for AMP_Image_Dimension_Extractor.
