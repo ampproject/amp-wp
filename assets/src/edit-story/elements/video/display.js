@@ -7,12 +7,10 @@ import styled from 'styled-components';
 /**
  * Internal dependencies
  */
-import { ElementWithPosition, ElementWithSize, ElementWithRotation } from '../shared';
+import { ElementFillContent } from '../shared';
 
 const Element = styled.video`
-	${ ElementWithPosition }
-	${ ElementWithSize }
-	${ ElementWithRotation }
+	${ ElementFillContent }
 `;
 
 function VideoDisplay( props ) {
@@ -29,7 +27,6 @@ function VideoDisplay( props ) {
 }
 
 VideoDisplay.propTypes = {
-	rotationAngle: PropTypes.number.isRequired,
 	controls: PropTypes.bool,
 	autoPlay: PropTypes.bool,
 	loop: PropTypes.bool,
@@ -37,8 +34,6 @@ VideoDisplay.propTypes = {
 	src: PropTypes.string.isRequired,
 	width: PropTypes.number.isRequired,
 	height: PropTypes.number.isRequired,
-	x: PropTypes.number.isRequired,
-	y: PropTypes.number.isRequired,
 };
 
 export default VideoDisplay;
