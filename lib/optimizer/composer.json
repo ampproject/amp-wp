@@ -4,12 +4,6 @@
   "description": "PHP library for optimizing AMP pages.",
   "homepage": "https://github.com/ampproject/php-optimizer",
   "license": "MIT",
-  "repositories": [
-    {
-      "type": "path",
-      "url": "../common"
-    }
-  ],
   "require": {
     "php": "^5.6 || ^7.0",
     "ext-dom": "*",
@@ -18,8 +12,8 @@
     "amp/common": "^1"
   },
   "require-dev": {
-    "dealerdirect/phpcodesniffer-composer-installer": "0.5.0",
-    "roave/security-advisories": "dev-master"
+    "roave/security-advisories": "dev-master",
+    "squizlabs/php_codesniffer": "^3"
   },
   "suggest": {
     "ext-json": "Provides native implementation of json_encode()/json_decode()."
@@ -29,6 +23,12 @@
       "php": "5.6"
     },
     "sort-packages": true
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "1.0.x-dev",
+      "dev-add/958-amp-optimizer": "1.0.x-dev"
+    }
   },
   "autoload": {
     "psr-4": {
@@ -40,16 +40,17 @@
       "Amp\\Optimizer\\Tests\\": "tests/src/"
     }
   },
-  "extra": {
-    "branch-alias": {
-      "dev-master": "1.0.x-dev",
-      "dev-add/958-amp-optimizer": "1.0.x-dev"
+  "repositories": [
+    {
+      "type": "path",
+      "url": "../common"
     }
-  },
+  ],
+  "minimum-stability": "dev",
+  "prefer-stable": true,
   "scripts": {
-    "cs": "phpcs --standard=PSR12 -n src",
     "cbf": "phpcbf --standard=PSR12 -n src",
-    "unit": "phpunit --colors=always",
+    "cs": "phpcs --standard=PSR12 -n src",
     "lint": [
       "find src -name '*.php' -print0 | xargs -0 -n1 php -l",
       "find tests/src -name '*.php' -print0 | xargs -0 -n1 php -l"
@@ -58,8 +59,7 @@
       "@lint",
       "@unit",
       "@cs"
-    ]
-  },
-  "minimum-stability": "dev",
-  "prefer-stable": true
+    ],
+    "unit": "phpunit --colors=always"
+  }
 }

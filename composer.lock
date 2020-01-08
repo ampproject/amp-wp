@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cccc65c02b618e3163bcab195c7602ee",
+    "content-hash": "b6afaacc449006926c217f8fe4a86305",
     "packages": [
         {
             "name": "amp/common",
@@ -12,7 +12,7 @@
             "dist": {
                 "type": "path",
                 "url": "lib/common",
-                "reference": "bdfd77c3c0a1b87dfc1e84244553b73d1499d9d2"
+                "reference": "ddf577018b63cb3ffd3f56441c9a5e760cac8816"
             },
             "require": {
                 "ext-dom": "*",
@@ -21,8 +21,8 @@
                 "php": "^5.6 || ^7.0"
             },
             "require-dev": {
-                "dealerdirect/phpcodesniffer-composer-installer": "0.5.0",
-                "roave/security-advisories": "dev-master"
+                "roave/security-advisories": "dev-master",
+                "squizlabs/php_codesniffer": "^3"
             },
             "suggest": {
                 "ext-json": "Provides native implementation of json_encode()/json_decode()."
@@ -44,6 +44,26 @@
                     "Amp\\Tests\\": "tests/src/"
                 }
             },
+            "scripts": {
+                "cs": [
+                    "phpcs --standard=PSR12 -n src"
+                ],
+                "cbf": [
+                    "phpcbf --standard=PSR12 -n src"
+                ],
+                "unit": [
+                    "phpunit --colors=always"
+                ],
+                "lint": [
+                    "find src -name '*.php' -print0 | xargs -0 -n1 php -l",
+                    "find tests/src -name '*.php' -print0 | xargs -0 -n1 php -l"
+                ],
+                "test": [
+                    "@lint",
+                    "@unit",
+                    "@cs"
+                ]
+            },
             "license": [
                 "MIT"
             ],
@@ -56,7 +76,7 @@
             "dist": {
                 "type": "path",
                 "url": "lib/optimizer",
-                "reference": "dab414a7ab1bcb05ae4a668c49467c8cb5b368fb"
+                "reference": "1e821e56ddab3a2a7584b38ece4d8cd6a8e0e833"
             },
             "require": {
                 "amp/common": "^1",
@@ -88,6 +108,26 @@
                 "psr-4": {
                     "Amp\\Optimizer\\Tests\\": "tests/src/"
                 }
+            },
+            "scripts": {
+                "cs": [
+                    "phpcs --standard=PSR12 -n src"
+                ],
+                "cbf": [
+                    "phpcbf --standard=PSR12 -n src"
+                ],
+                "unit": [
+                    "phpunit --colors=always"
+                ],
+                "lint": [
+                    "find src -name '*.php' -print0 | xargs -0 -n1 php -l",
+                    "find tests/src -name '*.php' -print0 | xargs -0 -n1 php -l"
+                ],
+                "test": [
+                    "@lint",
+                    "@unit",
+                    "@cs"
+                ]
             },
             "license": [
                 "MIT"
