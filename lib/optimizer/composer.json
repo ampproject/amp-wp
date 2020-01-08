@@ -54,7 +54,7 @@
     "cs": "phpcs --standard=PSR12 -n src",
     "lint": [
       "find src -name '*.php' -print0 | xargs -0 -n1 php -l",
-      "find tests/src -name '*.php' -print0 | xargs -0 -n1 php -l"
+      "find tests -name '*.php' -print0 | xargs -0 -n1 php -l"
     ],
     "test": [
       "@lint",
