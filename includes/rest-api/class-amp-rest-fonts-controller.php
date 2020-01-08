@@ -158,13 +158,13 @@ class AMP_REST_Fonts_Controller extends WP_REST_Controller {
 			'type'       => 'object',
 			'properties' => [
 				'name'      => [
-					'description' => __( 'The title for the status.', 'amp' ),
+					'description' => __( 'The title for the font.', 'amp' ),
 					'type'        => 'string',
 					'context'     => [ 'embed', 'view', 'edit' ],
 					'readonly'    => true,
 				],
 				'slug'      => [
-					'description' => __( 'An alphanumeric identifier for the status.', 'amp' ),
+					'description' => __( 'An alphanumeric identifier for the font.', 'amp' ),
 					'type'        => 'string',
 					'context'     => [ 'embed', 'view', 'edit' ],
 					'readonly'    => true,
