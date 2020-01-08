@@ -51,12 +51,12 @@ class AMP_REST_Fonts_Controller extends WP_REST_Controller {
 	 */
 	public function get_items( $request ) {
 		$fonts       = AMP_Fonts::get_fonts();
-		$total_posts = count( $fonts );
+		$total_fonts = count( $fonts );
 		$page        = $request['page'];
 		$per_page    = $request['per_page'];
-		$max_pages   = ceil( $total_posts / (int) $per_page );
+		$max_pages   = ceil( $total_fonts / (int) $per_page );
 
-		if ( $page > $max_pages && $total_posts > 0 ) {
+		if ( $page > $max_pages && $total_fonts > 0 ) {
 			return new WP_Error( 'rest_post_invalid_page_number', __( 'The page number requested is larger than the number of pages available.', 'amp' ), [ 'status' => 400 ] );
 		}
 
@@ -70,7 +70,7 @@ class AMP_REST_Fonts_Controller extends WP_REST_Controller {
 
 		$response = rest_ensure_response( $formatted_fonts );
 
-		$response->header( 'X-WP-Total', (int) $total_posts );
+		$response->header( 'X-WP-Total', (int) $total_fonts );
 		$response->header( 'X-WP-TotalPages', (int) $max_pages );
 
 		return $response;
