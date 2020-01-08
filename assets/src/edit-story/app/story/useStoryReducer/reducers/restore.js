@@ -1,7 +1,6 @@
 /**
  * Restore internal state completely from given state.
  *
- *
  * Some validation is performed:
  *
  * - `pages` must be an array (if not, nothing happens).
