@@ -74,8 +74,10 @@ function useSaveStory( {
 		saveStoryById( storyId, title, status, pages, author, slug, content ).then( ( post ) => {
 			const { status: newStatus, link } = post;
 			updateStory( {
-				status: newStatus,
-				link,
+				properties: {
+					status: newStatus,
+					link,
+				},
 			} );
 			refreshPostEditURL( storyId );
 		} ).catch( () => {
