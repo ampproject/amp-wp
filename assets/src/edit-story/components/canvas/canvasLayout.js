@@ -36,9 +36,9 @@ const Area = styled.div`
 `;
 
 function CanvasLayout() {
-	const { state: { backgroundClickHandler } } = useCanvas();
+	const { state: { backgroundMouseDownHandler } } = useCanvas();
 	return (
-		<Background onClick={ backgroundClickHandler }>
+		<Background onMouseDown={ backgroundMouseDownHandler }>
 			<Area area="page">
 				<Page />
 			</Area>
