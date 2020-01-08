@@ -175,16 +175,21 @@ class AMP_Fonts {
 		 */
 		$subset = _x( 'no-subset', 'Add new subset (greek, cyrillic, devanagari, vietnamese)', 'amp' );
 
-		if ( 'cyrillic' === $subset ) {
-			$subsets[] = 'cyrillic';
-			$subsets[] = 'cyrillic-ext';
-		} elseif ( 'greek' === $subset ) {
-			$subsets[] = 'greek';
-			$subsets[] = 'greek-ext';
-		} elseif ( 'devanagari' === $subset ) {
-			$subsets[] = 'devanagari';
-		} elseif ( 'vietnamese' === $subset ) {
-			$subsets[] = 'vietnamese';
+		switch ( $subset ) {
+			case 'cyrillic':
+				$subsets[] = 'cyrillic';
+				$subsets[] = 'cyrillic-ext';
+				break;
+			case 'greek':
+				$subsets[] = 'greek';
+				$subsets[] = 'greek-ext';
+				break;
+			case 'devanagari':
+				$subsets[] = 'devanagari';
+				break;
+			case 'vietnamese':
+				$subsets[] = 'vietnamese';
+				break;
 		}
 
 		return $subsets;
