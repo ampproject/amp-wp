@@ -236,6 +236,7 @@ class AMP_Image_Dimension_Extractor {
 		$client->setBufferSize( 1024 );
 		$client->setSslVerifyHost( true );
 		$client->setSslVerifyPeer( true );
+		$client->setTimeout( 1 );
 
 		$images = $client->batch( $urls );
 	}
