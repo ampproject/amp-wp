@@ -21,9 +21,9 @@ function FontProvider( { children } ) {
 
 	useLoadFonts( { fonts, setFonts } );
 
-	const getFontByName = useCallback(
-		( name ) => {
-			const foundFont = fonts.find( ( thisFont ) => thisFont.name === name );
+	const getFontBy = useCallback(
+		( key, value ) => {
+			const foundFont = fonts.find( ( thisFont ) => thisFont[ key ] === value );
 			if ( ! foundFont ) {
 				return {};
 			}
@@ -31,14 +31,16 @@ function FontProvider( { children } ) {
 		},	[ fonts ],
 	);
 
+	const getFontByName = useCallback(
+		( name ) => {
+			return getFontBy( 'name', name );
+		},	[ getFontBy ],
+	);
+
 	const getFontBySlug = useCallback(
 		( slug ) => {
-			const foundFont = fonts.find( ( thisFont ) => thisFont.slug === slug );
-			if ( ! foundFont ) {
-				return {};
-			}
-			return foundFont;
-		},	[ fonts ],
+			return getFontBy( 'slug', slug );
+		},	[ getFontBy ],
 	);
 
 	const getFontWeight = useCallback(
