@@ -174,7 +174,7 @@ class DocumentTest extends TestCase
     /**
      * Test convertAmpBindAttributes.
      *
-     * @covers Document::convert_amp_bind_attributes()
+     * @covers Document::convertAmpBindAttributes()
      */
     public function testAmpBindConversion()
     {
@@ -265,7 +265,7 @@ class DocumentTest extends TestCase
     /**
      * Test that HEAD and BODY elements are always present.
      *
-     * @covers Document::normalize_document_structure()
+     * @covers Document::normalizeDocumentStructure()
      */
     public function testEnsuringHeadBody()
     {
@@ -306,7 +306,7 @@ class DocumentTest extends TestCase
     /**
      * Test that invalid head nodes are moved to body.
      *
-     * @covers Document::move_invalid_head_nodes_to_body()
+     * @covers Document::moveInvalidHeadNodesToBody()
      */
     public function testInvalidHeadNodes()
     {
