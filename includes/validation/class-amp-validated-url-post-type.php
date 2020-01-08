@@ -2063,10 +2063,10 @@ class AMP_Validated_URL_Post_Type {
 				<th class="column-original_size"><?php esc_html_e( 'Original Size', 'amp' ); ?></th>
 				<th class="column-final_size"><?php esc_html_e( 'Final Size', 'amp' ); ?></th>
 				<th class="column-delta"><?php esc_html_e( 'Delta', 'amp' ); ?></th>
-				<th class="column-origin"><?php esc_html_e( 'Origin', 'amp' ); ?></th>
 				<th class="column-stylesheet_expand"></th>
 				<th class="column-priority"><?php esc_html_e( 'Priority', 'amp' ); ?></th>
 				<th class="column-stylesheet_status"><?php esc_html_e( 'Status', 'amp' ); ?></th>
+				<th class="column-markup"><?php esc_html_e( 'Markup', 'amp' ); ?></th>
 				<th class="column-sources_with_invalid_output"><?php esc_html_e( 'Sources', 'amp' ); ?></th>
 			</tr>
 			</thead>
@@ -2120,7 +2120,24 @@ class AMP_Validated_URL_Post_Type {
 						}
 						?>
 					</td>
-					<td class="column-origin">
+					<td class="column-stylesheet_expand">
+						<button class="toggle-stylesheet-details" type="button">
+							<span class="screen-reader-text"><?php esc_html_e( 'Expand/collapse', 'amp' ); ?></span>
+						</button>
+					</td>
+					<td class="column-priority">
+						<?php echo esc_html( $stylesheet['priority'] ); ?>
+					</td>
+					<td class="column-stylesheet_status">
+						<?php
+						if ( $stylesheet['included'] ) {
+							echo '✅';
+						} else {
+							echo '🚫';
+						}
+						?>
+					</td>
+					<td class="column-markup">
 						<?php
 						$origin_abbr_text = '?';
 						if ( 'link_element' === $stylesheet['origin'] ) {
@@ -2139,23 +2156,6 @@ class AMP_Validated_URL_Post_Type {
 							echo '</abbr>';
 						}
 						echo '</code>';
-						?>
-					</td>
-					<td class="column-stylesheet_expand">
-						<button class="toggle-stylesheet-details" type="button">
-							<span class="screen-reader-text"><?php esc_html_e( 'Expand/collapse', 'amp' ); ?></span>
-						</button>
-					</td>
-					<td class="column-priority">
-						<?php echo esc_html( $stylesheet['priority'] ); ?>
-					</td>
-					<td class="column-stylesheet_status">
-						<?php
-						if ( $stylesheet['included'] ) {
-							echo '✅';
-						} else {
-							echo '🚫';
-						}
 						?>
 					</td>
 					<td class="column-sources_with_invalid_output">
