@@ -141,7 +141,7 @@ function TextDisplay( { id, content, color, backgroundColor, width, height, x, y
 			element.current.focus();
 		}
 	}, [ isElementOnlySelection ] );
-console.log(props);
+
 	return (
 		<Element
 			canSelect={ hasFocus }

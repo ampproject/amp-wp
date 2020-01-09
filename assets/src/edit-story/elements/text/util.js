@@ -46,11 +46,9 @@ export const getHandleKeyCommand = ( setEditorState ) => ( command, currentEdito
 };
 
 export const generateFontFamily = ( fontFamily, fontFallback ) => {
-	let fontFamilyDisplay = fontFamily ? `'${fontFamily}'` : null;
+	let fontFamilyDisplay = fontFamily ? `${ fontFamily }` : null;
 	if ( fontFallback && fontFallback.length ) {
-		fontFamilyDisplay += `, '`;
-		fontFamilyDisplay += fontFallback.join( `','` );
-		fontFamilyDisplay += `'`;
+		fontFamilyDisplay += `,${ fontFallback.join( `,` ) }`;
 	}
 	return fontFamilyDisplay;
-}
+};
