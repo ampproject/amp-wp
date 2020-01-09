@@ -4,11 +4,6 @@
 import styled from 'styled-components';
 
 /**
- * WordPress dependencies
- */
-import { useCallback } from '@wordpress/element';
-
-/**
  * Internal dependencies
  */
 import { useStory } from '../../../app';
@@ -55,10 +50,7 @@ const Icon = styled.a`
 `;
 
 function Canvas() {
-	const { state: { currentPageNumber }, actions: { deleteCurrentPage } } = useStory();
-	const handleDelete = useCallback( () => {
-		deleteCurrentPage();
-	}, [ deleteCurrentPage ] );
+	const { state: { currentPageNumber, currentPageId }, actions: { deletePage } } = useStory();
 
 	return (
 		<Box>
@@ -70,7 +62,7 @@ function Canvas() {
 				<Space />
 				<Divider />
 				<Space />
-				<Icon onClick={ handleDelete }>
+				<Icon onClick={ () => deletePage( { pageId: currentPageId } ) }>
 					<Delete />
 				</Icon>
 				<Space />
