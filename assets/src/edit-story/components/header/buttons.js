@@ -48,7 +48,7 @@ function Redoer() {
 
 function PreviewButton() {
 	const {
-		state: { isSaving, link },
+		state: { isSaving, story: { link } },
 	} = useStory();
 
 	/**

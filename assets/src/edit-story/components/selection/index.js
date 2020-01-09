@@ -25,7 +25,7 @@ function SelectionMovable( {
 	const [ keepRatioMode, setKeepRatioMode ] = useState( true );
 
 	const {
-		actions: { setPropertiesOnSelectedElements },
+		actions: { updateSelectedElements },
 	} = useStory();
 
 	const latestEvent = useRef();
@@ -97,8 +97,8 @@ function SelectionMovable( {
 			} }
 			onDragEnd={ ( { target } ) => {
 				// When dragging finishes, set the new properties based on the original + what moved meanwhile.
-				const newProps = { x: selectedElement.x + frame.translate[ 0 ], y: selectedElement.y + frame.translate[ 1 ] };
-				setPropertiesOnSelectedElements( newProps );
+				const properties = { x: selectedElement.x + frame.translate[ 0 ], y: selectedElement.y + frame.translate[ 1 ] };
+				updateSelectedElements( { properties } );
 				resetMoveable( target );
 			} }
 			onResizeStart={ ( { setOrigin, dragStart, direction } ) => {
@@ -121,12 +121,13 @@ function SelectionMovable( {
 				setTransformStyle( target );
 			} }
 			onResizeEnd={ ( { target } ) => {
-				setPropertiesOnSelectedElements( {
+				const properties = {
 					width: parseInt( target.style.width ),
 					height: parseInt( target.style.height ),
 					x: selectedElement.x + frame.translate[ 0 ],
 					y: selectedElement.y + frame.translate[ 1 ],
-				} );
+				};
+				updateSelectedElements( { properties } );
 				resetMoveable( target );
 			} }
 			onRotateStart={ ( { set } ) => {
@@ -137,7 +138,8 @@ function SelectionMovable( {
 				setTransformStyle( target );
 			} }
 			onRotateEnd={ ( { target } ) => {
-				setPropertiesOnSelectedElements( { rotationAngle: frame.rotate } );
+				const properties = { rotationAngle: frame.rotate };
+				updateSelectedElements( { properties } );
 				resetMoveable( target );
 			} }
 			origin={ false }
