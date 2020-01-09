@@ -17,6 +17,7 @@ import {
  * Internal dependencies
  */
 import theme, { GlobalStyle } from '../theme';
+import { GlobalStyle as CropMoveableGlobalStyle } from '../components/movable/cropStyle';
 import { useHistory, HistoryProvider } from './history';
 import { useAPI, APIProvider } from './api';
 import { useConfig, ConfigProvider } from './config';
@@ -34,10 +35,11 @@ function App( { config } ) {
 						<HistoryProvider size={ 50 }>
 							<StoryProvider storyId={ storyId }>
 								<FontProvider>
-									<GlobalStyle />
-									<Layout />
-									<Popover.Slot />
-								</FontProvider>
+								  <GlobalStyle />
+								  <CropMoveableGlobalStyle />
+								  <Layout />
+								  <Popover.Slot />
+                </FontProvider>
 							</StoryProvider>
 						</HistoryProvider>
 					</APIProvider>

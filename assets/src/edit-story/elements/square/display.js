@@ -8,28 +8,18 @@ import styled from 'styled-components';
  * Internal dependencies
  */
 import {
-	ElementWithPosition,
-	ElementWithSize,
+	ElementFillContent,
 	ElementWithBackgroundColor,
-	ElementWithRotation,
 } from '../shared';
 
 const Element = styled.div`
-	${ ElementWithPosition }
-	${ ElementWithSize }
-	${ ElementWithRotation }
+	${ ElementFillContent }
 	${ ElementWithBackgroundColor }
 `;
 
-function SquareDisplay( { backgroundColor, width, height, x, y, rotationAngle, forwardedRef } ) {
+function SquareDisplay( { backgroundColor } ) {
 	const props = {
 		backgroundColor,
-		width,
-		height,
-		rotationAngle,
-		x,
-		y,
-		ref: forwardedRef,
 	};
 	return (
 		<Element { ...props } />
@@ -37,16 +27,7 @@ function SquareDisplay( { backgroundColor, width, height, x, y, rotationAngle, f
 }
 
 SquareDisplay.propTypes = {
-	rotationAngle: PropTypes.number.isRequired,
 	backgroundColor: PropTypes.string,
-	width: PropTypes.number.isRequired,
-	height: PropTypes.number.isRequired,
-	x: PropTypes.number.isRequired,
-	y: PropTypes.number.isRequired,
-	forwardedRef: PropTypes.oneOfType( [
-		PropTypes.object,
-		PropTypes.func,
-	] ),
 };
 
 export default SquareDisplay;
