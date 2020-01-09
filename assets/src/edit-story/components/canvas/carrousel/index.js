@@ -35,12 +35,24 @@ function Canvas() {
 	return (
 		<List>
 			{ pages.map( ( page, index ) => {
-				const onDrop = () => {
-					arrangePage( index, 0 );
+				const onDrop = ( evt ) => {
+					const data = JSON.parse( evt.dataTransfer.getData( 'text' ) );
+					if ( ! data || 'page' !== data.type ) {
+						return;
+					}
+					arrangePage( data.index, index );
+				};
+				// @todo Create a Draggable component for setting data and setting "draggable".
+				const onDragStart = ( evt ) => {
+					const pageData = {
+						type: 'page',
+						index,
+					};
+					evt.dataTransfer.setData( 'text', JSON.stringify( pageData ) );
 				};
 				return (
 					<DropZone onDrop={ onDrop } >
-						<Page key={ index } onClick={ () => setCurrentPageByIndex( index ) } isActive={ index === currentPageIndex } />
+						<Page draggable="true" onDragStart={ onDragStart } key={ index } onClick={ () => setCurrentPageByIndex( index ) } isActive={ index === currentPageIndex } />
 					</DropZone>
 				);
 			} ) }
