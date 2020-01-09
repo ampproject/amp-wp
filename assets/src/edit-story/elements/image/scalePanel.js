@@ -9,12 +9,20 @@ import styled from 'styled-components';
  */
 import InOverlay from '../../components/overlay';
 
+const MIN_WIDTH = 165;
+const HEIGHT = 28;
+const OFFSET_Y = 8;
+// @todo: Should maxScale depend on the maximum resolution? Or should that
+// be left up to the helper errors? Both? In either case there'd be maximum
+// bounding scale.
+const MAX_SCALE = 400;
+
 const Container = styled.div`
   position: absolute;
-  left: ${ ( { x, width } ) => `${ x + ( ( width - Math.max( width, 165 ) ) / 2 ) }px` };
-  top: ${ ( { y, height } ) => `${ y + height + 8 }px` };
-  width: ${ ( { width } ) => `${ Math.max( width, 165 ) }px` };
-  height: 28px;
+  left: ${ ( { x, width } ) => `${ x + ( ( width - Math.max( width, MIN_WIDTH ) ) / 2 ) }px` };
+  top: ${ ( { y, height } ) => `${ y + height + OFFSET_Y }px` };
+  width: ${ ( { width } ) => `${ Math.max( width, MIN_WIDTH ) }px` };
+  height: ${ HEIGHT }px;
 
   background: ${ ( { theme } ) => theme.colors.bg.v7 };
   border-radius: 4px;
@@ -52,7 +60,7 @@ function ScalePanel( { setProperties, width, height, x, y, scale } ) {
 				<Range
 					type="range"
 					min={ 100 }
-					max={ 400 }
+					max={ MAX_SCALE }
 					step={ 10 }
 					value={ scale }
 					onChange={ ( evt ) => setProperties( { scale: evt.target.valueAsNumber } ) }
