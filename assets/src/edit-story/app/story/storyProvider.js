@@ -94,6 +94,7 @@ function StoryProvider( { storyId, children } ) {
 			appendElementToCurrentPage,
 			toggleElementIdInSelection,
 			selectElementById,
+			setSelectedElementIds,
 			setPropertiesOnSelectedElements,
 			setTitle,
 			savePost,

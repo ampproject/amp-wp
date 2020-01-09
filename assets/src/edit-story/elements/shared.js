@@ -9,6 +9,14 @@ import { css } from 'styled-components';
 import getPercentageFromPixels from '../utils/getPercentageFromPixels';
 import { PAGE_HEIGHT, PAGE_WIDTH } from '../constants';
 
+export const ElementFillContent = css`
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+`;
+
 export const ElementWithPosition = css`
 	position: absolute;
 	z-index: 1;
