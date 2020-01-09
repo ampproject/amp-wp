@@ -35,12 +35,19 @@ function Canvas() {
 	return (
 		<List>
 			{ pages.map( ( page, index ) => {
-				const onDrop = ( evt ) => {
-					const data = JSON.parse( evt.dataTransfer.getData( 'text' ) );
-					if ( ! data || 'page' !== data.type ) {
+				const onDrop = ( evt, position ) => {
+					const droppedEl = JSON.parse( evt.dataTransfer.getData( 'text' ) );
+					if ( ! droppedEl || 'page' !== droppedEl.type ) {
 						return;
 					}
-					arrangePage( data.index, index );
+					// If the dropped element is before the dropzone index then we have to deduct
+					// that from the index to make up for the "lost" element in the row.
+					const indexSubstraction = droppedEl.index < index ? -1 : 0;
+					if ( 'left' === position.x ) {
+						arrangePage( droppedEl.index, index + indexSubstraction );
+					} else {
+						arrangePage( droppedEl.index, index + 1 + indexSubstraction );
+					}
 				};
 				// @todo Create a Draggable component for setting data and setting "draggable".
 				const onDragStart = ( evt ) => {
@@ -51,8 +58,8 @@ function Canvas() {
 					evt.dataTransfer.setData( 'text', JSON.stringify( pageData ) );
 				};
 				return (
-					<DropZone onDrop={ onDrop } >
-						<Page draggable="true" onDragStart={ onDragStart } key={ index } onClick={ () => setCurrentPageByIndex( index ) } isActive={ index === currentPageIndex } />
+					<DropZone key={ index } onDrop={ onDrop } >
+						<Page draggable="true" onDragStart={ onDragStart } onClick={ () => setCurrentPageByIndex( index ) } isActive={ index === currentPageIndex } />
 					</DropZone>
 				);
 			} ) }
