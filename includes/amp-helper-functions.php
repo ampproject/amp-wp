@@ -912,9 +912,7 @@ function amp_get_content_sanitizers( $post = null ) {
 		],
 		'AMP_Block_Sanitizer'             => [], // Note: Block sanitizer must come after embed / media sanitizers since its logic is using the already sanitized content.
 		'AMP_Script_Sanitizer'            => [],
-		'AMP_Style_Sanitizer'             => [
-			'include_manifest_comment' => ( defined( 'WP_DEBUG' ) && WP_DEBUG ) ? 'always' : 'when_excessive',
-		],
+		'AMP_Style_Sanitizer'             => [],
 		'AMP_Meta_Sanitizer'              => [],
 		'AMP_Layout_Sanitizer'            => [],
 		'AMP_Tag_And_Attribute_Sanitizer' => [], // Note: This whitelist sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.

@@ -111,7 +111,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *      @type callable $validation_error_callback  Function to call when a validation error is encountered.
 	 *      @type bool     $should_locate_sources      Whether to locate the sources when reporting validation errors.
 	 *      @type string   $parsed_cache_variant       Additional value by which to vary parsed cache.
-	 *      @type string   $include_manifest_comment   Whether to show the manifest HTML comment in the response before the style[amp-custom] element. Can be 'always', 'never', or 'when_excessive'.
 	 *      @type string[] $focus_within_classes       Class names in selectors that should be replaced with :focus-within pseudo classes.
 	 *      @type string[] $low_priority_plugins       Plugin slugs of the plugins to deprioritize when hitting the CSS limit.
 	 * }
@@ -133,7 +132,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		],
 		'should_locate_sources'     => false,
 		'parsed_cache_variant'      => null,
-		'include_manifest_comment'  => 'always',
 		'focus_within_classes'      => [ 'focus' ],
 		'low_priority_plugins'      => [ 'query-monitor' ],
 	];
@@ -2687,88 +2685,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$excluded_final_size    += $pending_stylesheet['final_size'];
 					$excluded_original_size += $pending_stylesheet['original_size'];
 				}
-			}
-
-			$include_manifest_comment = (
-				'always' === $this->args['include_manifest_comment']
-				||
-				( $excluded_final_size > 0 && 'when_excessive' === $this->args['include_manifest_comment'] )
-			);
-
-			$comment = '';
-			if ( $include_manifest_comment && ! empty( $included_sources ) && $included_original_size > 0 ) {
-				$comment .= sprintf(
-					/* translators: %s: style[amp-custom] */
-					esc_html__( 'The %s element is populated with:', 'amp' ),
-					'style[amp-custom]'
-				) . "\n" . implode( "\n", $included_sources ) . "\n";
-				if ( self::has_required_php_css_parser() ) {
-					$comment .= sprintf(
-						/* translators: 1: number of included bytes. 2: percentage of total CSS actually included after tree shaking. 3: total included size. */
-						esc_html__( 'Total included size: %1$s bytes (%2$d%% of %3$s total after tree shaking)', 'amp' ),
-						number_format_i18n( $included_final_size ),
-						$included_final_size / $included_original_size * 100,
-						number_format_i18n( $included_original_size )
-					) . "\n";
-				} else {
-					$comment .= sprintf(
-						/* translators: %s: number of included bytes. */
-						esc_html__( 'Total included size: %s bytes', 'amp' ),
-						number_format_i18n( $included_final_size ),
-						$included_final_size / $included_original_size * 100,
-						number_format_i18n( $included_original_size )
-					) . "\n";
-				}
-			}
-			if ( $include_manifest_comment && ! empty( $excluded_sources ) && $excluded_original_size > 0 ) {
-				if ( $comment ) {
-					$comment .= "\n";
-				}
-				$comment .= sprintf(
-					/* translators: %s: style[amp-custom] */
-					esc_html__( 'The following stylesheets are too large to be included in %s:', 'amp' ),
-					'style[amp-custom]'
-				) . "\n" . implode( "\n", $excluded_sources ) . "\n";
-
-				if ( self::has_required_php_css_parser() ) {
-					$comment .= sprintf(
-						/* translators: 1: number of excluded bytes. 2: percentage of total CSS actually excluded even after tree shaking. 3: total excluded size. */
-						esc_html__( 'Total excluded size: %1$s bytes (%2$d%% of %3$s total after tree shaking)', 'amp' ),
-						number_format_i18n( $excluded_final_size ),
-						$excluded_final_size / $excluded_original_size * 100,
-						number_format_i18n( $excluded_original_size )
-					) . "\n";
-				} else {
-					$comment .= sprintf(
-						/* translators: %s: number of excluded bytes. */
-						esc_html__( 'Total excluded size: %s bytes', 'amp' ),
-						number_format_i18n( $excluded_final_size )
-					) . "\n";
-				}
-
-				$total_size          = $included_final_size + $excluded_final_size;
-				$total_original_size = $included_original_size + $excluded_original_size;
-				if ( $total_size !== $total_original_size ) {
-					$comment .= "\n";
-					$comment .= sprintf(
-						/* translators: 1: total combined bytes. 2: is percentage of CSS after tree shaking. 3: is total before tree shaking. */
-						esc_html__( 'Total combined size: %1$s bytes (%2$d%% of %3$s total after tree shaking)', 'amp' ),
-						number_format_i18n( $total_size ),
-						( $total_size / $total_original_size ) * 100,
-						number_format_i18n( $total_original_size )
-					) . "\n";
-				}
-			}
-
-			if ( $include_manifest_comment && ! self::has_required_php_css_parser() ) {
-				$comment .= "\n" . esc_html__( 'Warning! AMP CSS processing is limited because a conflicting version of PHP-CSS-Parser has been loaded by another plugin or theme. Tree shaking is not available.', 'amp' ) . "\n";
-			}
-
-			if ( $comment ) {
-				$this->amp_custom_style_element->parentNode->insertBefore(
-					$this->dom->createComment( "\n$comment" ),
-					$this->amp_custom_style_element
-				);
 			}
 		}
 
