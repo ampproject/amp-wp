@@ -29,7 +29,7 @@ function Page() {
 
 	const {
 		state: { currentPage, selectedElements },
-		actions: { clearSelection, addElementToSelection, toggleElementInSelection },
+		actions: { clearSelection, setSelectedElementsById, toggleElementInSelection },
 	} = useStory();
 
 	const {
@@ -50,7 +50,7 @@ function Page() {
 		if ( evt.metaKey ) {
 			toggleElementInSelection( { elementId: elId } );
 		} else {
-			addElementToSelection( { elementId: elId } );
+			setSelectedElementsById( { elementIds: [ elId ] } );
 		}
 		evt.stopPropagation();
 
@@ -58,7 +58,7 @@ function Page() {
 			evt.persist();
 			setPushEvent( evt );
 		}
-	}, [ editingElement, clearEditing, toggleElementInSelection, addElementToSelection ] );
+	}, [ editingElement, clearEditing, toggleElementInSelection, setSelectedElementsById ] );
 
 	const selectedElement = selectedElements.length === 1 ? selectedElements[ 0 ] : null;
 
