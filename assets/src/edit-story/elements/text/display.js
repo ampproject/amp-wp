@@ -43,12 +43,10 @@ const Element = styled.p`
 `;
 
 function TextDisplay( { id, content, color, backgroundColor, width, height, x, y, fontFamily, fontFallback, fontSize, fontWeight, fontStyle, rotationAngle, forwardedRef, onPointerDown } ) {
-	const fontFamilyDisplay = generateFontFamily( fontFamily, fontFallback );
-
 	const props = {
 		color,
 		backgroundColor,
-		fontFamily: fontFamilyDisplay,
+		fontFamily: generateFontFamily( fontFamily, fontFallback ),
 		fontFallback,
 		fontStyle,
 		fontSize,

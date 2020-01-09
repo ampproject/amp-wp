@@ -13,13 +13,11 @@ import { generateFontFamily } from './util';
  * Returns AMP HTML for saving into post content for displaying in the FE.
  */
 function TextSave( { id, content, color, backgroundColor, width, height, x, y, fontFamily, fontFallback, fontSize, fontWeight, fontStyle, rotationAngle } ) {
-	const fontFamilyDisplay = generateFontFamily( fontFamily, fontFallback );
-
 	const style = {
 		...getCommonAttributes( { width, height, x, y, rotationAngle } ),
 		fontSize: `${ fontSize }px`,
 		fontStyle: fontStyle ? fontStyle : null,
-		fontFamily: fontFamilyDisplay,
+		fontFamily: generateFontFamily( fontFamily, fontFallback ),
 		fontWeight: fontWeight ? fontWeight : null,
 		background: backgroundColor,
 		color,
