@@ -62,7 +62,7 @@ function Canvas() {
 				<Space />
 				<Divider />
 				<Space />
-				<Icon onClick={ () => deletePage( currentPageId ) }>
+				<Icon onClick={ () => deletePage( { pageId: currentPageId } ) }>
 					<Delete />
 				</Icon>
 				<Space />
