@@ -14,6 +14,8 @@ module.exports = {
 	testPathIgnorePatterns: [
 		'.git',
 		'node_modules',
+		'tests/e2e/specs/block-editor',
+		'tests/e2e/specs/stories-editor',
 	],
 	reporters: [ [ 'jest-silent-reporter', { useDots: true } ] ],
 };
