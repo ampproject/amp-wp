@@ -32,6 +32,15 @@ const Page = styled.a`
 
 function Canvas() {
 	const { state: { pages, currentPageIndex }, actions: { setCurrentPageByIndex, arrangePage } } = useStory();
+	const getArrangeIndex = ( sourceIndex, dstIndex, position ) => {
+		// If the dropped element is before the dropzone index then we have to deduct
+		// that from the index to make up for the "lost" element in the row.
+		const indexSubstraction = sourceIndex < dstIndex ? -1 : 0;
+		if ( 'left' === position.x ) {
+			return dstIndex + indexSubstraction;
+		}
+		return dstIndex + 1 + indexSubstraction;
+	};
 	return (
 		<List>
 			{ pages.map( ( page, index ) => {
@@ -40,14 +49,9 @@ function Canvas() {
 					if ( ! droppedEl || 'page' !== droppedEl.type ) {
 						return;
 					}
-					// If the dropped element is before the dropzone index then we have to deduct
-					// that from the index to make up for the "lost" element in the row.
-					const indexSubstraction = droppedEl.index < index ? -1 : 0;
-					if ( 'left' === position.x ) {
-						arrangePage( droppedEl.index, index + indexSubstraction );
-					} else {
-						arrangePage( droppedEl.index, index + 1 + indexSubstraction );
-					}
+					const arrangedIndex = getArrangeIndex( droppedEl.index, index, position );
+					arrangePage( droppedEl.index, arrangedIndex );
+					setCurrentPageByIndex( arrangedIndex );
 				};
 				// @todo Create a Draggable component for setting data and setting "draggable".
 				const onDragStart = ( evt ) => {
