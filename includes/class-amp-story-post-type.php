@@ -315,7 +315,7 @@ class AMP_Story_Post_Type {
 		$post_type_object = get_post_type_object( self::POST_TYPE_SLUG );
 		$rest_base        = ! empty( $post_type_object->rest_base ) ? $post_type_object->rest_base : $post_type_object->name;
 
-		self::load_fonts( $post );
+		self::load_admin_fonts( $post );
 
 		wp_localize_script(
 			self::AMP_STORIES_SCRIPT_HANDLE,
@@ -391,6 +391,41 @@ class AMP_Story_Post_Type {
 					AMP__VERSION
 				);
 
+			}
+		}
+	}
+
+	/**
+	 * Load font in admin from story data.
+	 *
+	 * @param WP_Post $post Post Object.
+	 */
+	public static function load_admin_fonts( $post ) {
+		$post_story_data = json_decode( $post->post_content_filtered, true );
+		$fonts           = [];
+		$font_slugs      = [];
+		if ( $post_story_data ) {
+			foreach ( $post_story_data as $page ) {
+				foreach ( $page['elements'] as $element ) {
+					$font = AMP_Fonts::get_font( $element['fontFamily'] );
+					if ( $font && ! in_array( $font['slug'], $font_slugs, true ) ) {
+						$fonts[]      = $font;
+						$font_slugs[] = $font['slug'];
+					}
+				}
+			}
+
+			if ( $fonts ) {
+				foreach ( $fonts as $font ) {
+					if ( $font['src'] ) {
+						wp_enqueue_style(
+							$font['handle'],
+							$font['src'],
+							[],
+							AMP__VERSION
+						);
+					}
+				}
 			}
 		}
 	}

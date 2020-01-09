@@ -32,8 +32,9 @@ function useLoadFontFiles( { getFontByName } ) {
 			return;
 		}
 
+		const id = `${ handle }-css`;
 		const fontStylesheet = document.createElement( 'link' );
-		fontStylesheet.id = handle;
+		fontStylesheet.id = id;
 		fontStylesheet.href = src;
 		fontStylesheet.rel = 'stylesheet';
 		fontStylesheet.type = 'text/css';
