@@ -25,14 +25,13 @@ function useLoadFontFiles( { getFontByName } ) {
 		if ( ! handle || ! src ) {
 			return;
 		}
-
-		const element = document.getElementById( handle );
+		const id = `${ handle }-css`;
+		const element = document.getElementById( id );
 
 		if ( element ) {
 			return;
 		}
 
-		const id = `${ handle }-css`;
 		const fontStylesheet = document.createElement( 'link' );
 		fontStylesheet.id = id;
 		fontStylesheet.href = src;
