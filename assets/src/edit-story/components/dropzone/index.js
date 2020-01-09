@@ -20,6 +20,19 @@ function DropZone( { children, onDrop } ) {
 		evt.preventDefault();
 	};
 
+	const getDragType = ( { dataTransfer } ) => {
+		if ( dataTransfer ) {
+			// @todo Support Edge since types is DomStringList there.
+			if ( dataTransfer.types.includes( 'Files' ) ) {
+				return 'file';
+			}
+			if ( dataTransfer.types.includes( 'text/html' ) ) {
+				return 'html';
+			}
+		}
+		return 'default';
+	};
+
 	const onDropHandler = ( evt ) => {
 		if ( dropZoneElement.current ) {
 			const rect = dropZoneElement.current.getBoundingClientRect();
@@ -28,8 +41,12 @@ function DropZone( { children, onDrop } ) {
 				x: evt.clientX - rect.left < rect.right - evt.clientX ? 'left' : 'right',
 				y: evt.clientY - rect.top < rect.bottom - evt.clientY ? 'top' : 'bottom',
 			};
-			onDrop( evt, position );
+			if ( 'default' === getDragType( evt ) ) {
+				onDrop( evt, position );
+			}
+			// @todo Support for files when it becomes necessary.
 		}
+		evt.preventDefault();
 	};
 
 	return (

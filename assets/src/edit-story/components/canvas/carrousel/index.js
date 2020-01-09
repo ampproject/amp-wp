@@ -35,11 +35,11 @@ function Canvas() {
 	const getArrangeIndex = ( sourceIndex, dstIndex, position ) => {
 		// If the dropped element is before the dropzone index then we have to deduct
 		// that from the index to make up for the "lost" element in the row.
-		const indexSubstraction = sourceIndex < dstIndex ? -1 : 0;
+		const indexAdjustment = sourceIndex < dstIndex ? -1 : 0;
 		if ( 'left' === position.x ) {
-			return dstIndex + indexSubstraction;
+			return dstIndex + indexAdjustment;
 		}
-		return dstIndex + 1 + indexSubstraction;
+		return dstIndex + 1 + indexAdjustment;
 	};
 	return (
 		<List>
