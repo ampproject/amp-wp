@@ -7,6 +7,7 @@ import styled from 'styled-components';
  * Internal dependencies
  */
 import { useStory } from '../../../app';
+import DropZone from '../../../components/dropzone';
 
 const List = styled.nav`
 	display: flex;
@@ -30,12 +31,19 @@ const Page = styled.a`
 `;
 
 function Canvas() {
-	const { state: { pages, currentPageIndex }, actions: { setCurrentPageByIndex } } = useStory();
+	const { state: { pages, currentPageIndex }, actions: { setCurrentPageByIndex, arrangePage } } = useStory();
 	return (
 		<List>
-			{ pages.map( ( page, index ) => (
-				<Page key={ index } onClick={ () => setCurrentPageByIndex( index ) } isActive={ index === currentPageIndex } />
-			) ) }
+			{ pages.map( ( page, index ) => {
+				const onDrop = () => {
+					arrangePage( index, 0 );
+				};
+				return (
+					<DropZone onDrop={ onDrop } >
+						<Page key={ index } onClick={ () => setCurrentPageByIndex( index ) } isActive={ index === currentPageIndex } />
+					</DropZone>
+				);
+			} ) }
 		</List>
 	);
 }
