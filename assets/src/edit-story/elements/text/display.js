@@ -13,13 +13,10 @@ import { useRef, useEffect, useCallback, useState } from '@wordpress/element';
  * Internal dependencies
  */
 import getCaretCharacterOffsetWithin from '../../utils/getCaretCharacterOffsetWithin';
-import useCombinedRefs from '../../utils/useCombinedRefs';
 import { useStory } from '../../app';
 import { useCanvas } from '../../components/canvas';
 import {
-	ElementWithPosition,
-	ElementWithSize,
-	ElementWithRotation,
+	ElementFillContent,
 	ElementWithFont,
 	ElementWithBackgroundColor,
 	ElementWithFontColor,
@@ -27,9 +24,7 @@ import {
 
 const Element = styled.p`
 	margin: 0;
-	${ ElementWithPosition }
-	${ ElementWithSize }
-	${ ElementWithRotation }
+	${ ElementFillContent }
 	${ ElementWithFont }
 	${ ElementWithBackgroundColor }
 	${ ElementWithFontColor }
@@ -41,7 +36,7 @@ const Element = styled.p`
 	}
 `;
 
-function TextDisplay( { id, content, color, backgroundColor, width, height, x, y, fontFamily, fontSize, fontWeight, fontStyle, rotationAngle, forwardedRef } ) {
+function TextDisplay( { id, content, color, backgroundColor, width, height, fontFamily, fontSize, fontWeight, fontStyle } ) {
 	const props = {
 		color,
 		backgroundColor,
@@ -51,9 +46,6 @@ function TextDisplay( { id, content, color, backgroundColor, width, height, x, y
 		fontWeight,
 		width,
 		height,
-		x,
-		y,
-		rotationAngle,
 	};
 	const {
 		state: { selectedElementIds },
@@ -121,7 +113,6 @@ function TextDisplay( { id, content, color, backgroundColor, width, height, x, y
 	}
 
 	const element = useRef();
-	const setRef = useCombinedRefs( element, forwardedRef );
 	useEffect( () => {
 		if ( isElementOnlySelection && element.current ) {
 			element.current.focus();
@@ -130,7 +121,7 @@ function TextDisplay( { id, content, color, backgroundColor, width, height, x, y
 	return (
 		<Element
 			canSelect={ hasFocus }
-			ref={ setRef }
+			ref={ element }
 			dangerouslySetInnerHTML={ { __html: content } }
 			{ ...props }
 		/>
@@ -148,14 +139,7 @@ TextDisplay.propTypes = {
 	fontStyle: PropTypes.string,
 	width: PropTypes.number.isRequired,
 	height: PropTypes.number.isRequired,
-	rotationAngle: PropTypes.number.isRequired,
-	x: PropTypes.number.isRequired,
-	y: PropTypes.number.isRequired,
 	setClickHandler: PropTypes.func,
-	forwardedRef: PropTypes.oneOfType( [
-		PropTypes.object,
-		PropTypes.func,
-	] ),
 };
 
 export default TextDisplay;

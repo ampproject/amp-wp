@@ -50,7 +50,7 @@ const Icon = styled.a`
 `;
 
 function Canvas() {
-	const { state: { currentPageNumber }, actions: { deleteCurrentPage } } = useStory();
+	const { state: { currentPageNumber, currentPageId }, actions: { deletePage } } = useStory();
 
 	return (
 		<Box>
@@ -62,7 +62,7 @@ function Canvas() {
 				<Space />
 				<Divider />
 				<Space />
-				<Icon onClick={ deleteCurrentPage }>
+				<Icon onClick={ () => deletePage( currentPageId ) }>
 					<Delete />
 				</Icon>
 				<Space />

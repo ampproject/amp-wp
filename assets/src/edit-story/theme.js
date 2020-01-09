@@ -30,6 +30,7 @@ const theme = {
 		},
 		action: '#47A0F4',
 		danger: '#FF0000',
+		selection: '#44aaff',
 	},
 };
 

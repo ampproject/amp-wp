@@ -16,7 +16,7 @@ import Movable from '../movable';
 
 const ALL_HANDLES = [ 'n', 's', 'e', 'w', 'nw', 'ne', 'sw', 'se' ];
 
-function SelectionMovable( {
+function SingleSelectionMovable( {
 	selectedElement,
 	targetEl,
 	pushEvent,
@@ -97,8 +97,10 @@ function SelectionMovable( {
 			} }
 			onDragEnd={ ( { target } ) => {
 				// When dragging finishes, set the new properties based on the original + what moved meanwhile.
-				const properties = { x: selectedElement.x + frame.translate[ 0 ], y: selectedElement.y + frame.translate[ 1 ] };
-				updateSelectedElements( { properties } );
+				if ( frame.translate[ 0 ] !== 0 && frame.translate[ 1 ] !== 0 ) {
+					const properties = { x: selectedElement.x + frame.translate[ 0 ], y: selectedElement.y + frame.translate[ 1 ] };
+					updateSelectedElements( { properties } );
+				}
 				resetMoveable( target );
 			} }
 			onResizeStart={ ( { setOrigin, dragStart, direction } ) => {
@@ -150,10 +152,10 @@ function SelectionMovable( {
 	);
 }
 
-SelectionMovable.propTypes = {
+SingleSelectionMovable.propTypes = {
 	selectedElement: PropTypes.object,
 	targetEl: PropTypes.object.isRequired,
 	pushEvent: PropTypes.object,
 };
 
-export default SelectionMovable;
+export default SingleSelectionMovable;

@@ -4,91 +4,42 @@
 import styled from 'styled-components';
 
 /**
- * WordPress dependencies
- */
-import { useCallback, useEffect, useState } from '@wordpress/element';
-
-/**
  * Internal dependencies
  */
 import { useStory } from '../../app';
-import SelectionMovable from '../selection';
-import MovableLayer from '../movable/movableLayer';
+import withOverlay from '../overlay/withOverlay';
+import Selection from './selection';
 import useCanvas from './useCanvas';
 import Element from './element';
 
-const Background = styled.div.attrs( { className: 'container' } )`
+const Background = withOverlay( styled.div.attrs( { className: 'container' } )`
 	background-color: ${ ( { theme } ) => theme.colors.fg.v1 };
 	position: relative;
 	width: 100%;
 	height: 100%;
-`;
+` );
 
 function Page() {
-	const [ targetEl, setTargetEl ] = useState( null );
-
 	const {
-		state: { currentPage, selectedElements },
-		actions: { clearSelection, setSelectedElementsById, toggleElementInSelection },
+		state: { currentPage },
 	} = useStory();
 
 	const {
-		state: { editingElement },
-		actions: { setBackgroundMouseDownHandler, setNodeForElement, clearEditing },
+		actions: { setPageContainer },
 	} = useCanvas();
 
-	const [ pushEvent, setPushEvent ] = useState( null );
-
-	useEffect( () => {
-		setBackgroundMouseDownHandler( () => clearSelection() );
-	}, [ setBackgroundMouseDownHandler, clearSelection ] );
-
-	const handleSelectElement = useCallback( ( elId, evt ) => {
-		if ( editingElement && elId !== editingElement ) {
-			clearEditing();
-		}
-		if ( evt.metaKey ) {
-			toggleElementInSelection( { elementId: elId } );
-		} else {
-			setSelectedElementsById( { elementIds: [ elId ] } );
-		}
-		evt.stopPropagation();
-
-		if ( 'mousedown' === evt.type ) {
-			evt.persist();
-			setPushEvent( evt );
-		}
-	}, [ editingElement, clearEditing, toggleElementInSelection, setSelectedElementsById ] );
-
-	const selectedElement = selectedElements.length === 1 ? selectedElements[ 0 ] : null;
-
 	return (
-		<Background>
-			<MovableLayer>
-				{ currentPage && currentPage.elements.map( ( { id, ...rest } ) => {
-					const isSelected = Boolean( selectedElement && selectedElement.id === id );
-
-					return (
-						<Element
-							key={ id }
-							setNodeForElement={ setNodeForElement }
-							isEditing={ editingElement === id }
-							element={ { id, ...rest } }
-							isSelected={ isSelected }
-							handleSelectElement={ handleSelectElement }
-							forwardedRef={ isSelected ? setTargetEl : null }
-						/>
-					);
-				} ) }
-
-				{ selectedElement && targetEl && (
-					<SelectionMovable
-						selectedElement={ selectedElement }
-						targetEl={ targetEl }
-						pushEvent={ pushEvent }
+		<Background ref={ setPageContainer }>
+			{ currentPage && currentPage.elements.map( ( { id, ...rest } ) => {
+				return (
+					<Element
+						key={ id }
+						element={ { id, ...rest } }
 					/>
-				) }
-			</MovableLayer>
+				);
+			} ) }
+
+			<Selection />
 		</Background>
 	);
 }
