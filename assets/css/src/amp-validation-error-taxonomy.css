@@ -437,6 +437,11 @@ body.taxonomy-amp_validation_error .wp-list-table .new th.check-column input {
 	overflow-wrap: normal;
 }
 
+#amp_stylesheets .column-stylesheet_order {
+	width: 5%;
+	text-align: right;
+}
+
 #amp_stylesheets .column-original_size,
 #amp_stylesheets .column-minified,
 #amp_stylesheets .column-final_size,

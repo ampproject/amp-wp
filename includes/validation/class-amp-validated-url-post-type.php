@@ -2088,6 +2088,7 @@ class AMP_Validated_URL_Post_Type {
 			<thead>
 			<tr>
 				<th class="column-stylesheet_expand"></th>
+				<th class="column-stylesheet_order"><?php esc_html_e( 'Order', 'amp' ); ?></th>
 				<th class="column-original_size"><?php esc_html_e( 'Original Size', 'amp' ); ?></th>
 				<th class="column-minified"><?php esc_html_e( 'Minified', 'amp' ); ?></th>
 				<th class="column-final_size"><?php esc_html_e( 'Final Size', 'amp' ); ?></th>
@@ -2123,6 +2124,9 @@ class AMP_Validated_URL_Post_Type {
 						<button class="toggle-stylesheet-details" type="button">
 							<span class="screen-reader-text"><?php esc_html_e( 'Expand/collapse', 'amp' ); ?></span>
 						</button>
+					</td>
+					<td class="column-stylesheet_order">
+						<?php echo (int) $row; ?>
 					</td>
 					<td class="column-original_size">
 						<?php
@@ -2203,7 +2207,7 @@ class AMP_Validated_URL_Post_Type {
 					</td>
 				</tr>
 				<tr class="<?php echo esc_attr( sprintf( 'stylesheet-details level-0 %s', 0 === $row % 2 ? 'even' : 'odd' ) ); ?>">
-					<td colspan="9">
+					<td colspan="10">
 						<dl class="detailed">
 							<dt><?php esc_html_e( 'Origin Markup', 'amp' ); ?></dt>
 							<dd><code class="stylesheet-origin-markup"><?php echo esc_html( $origin_html ); ?></code></dd>
