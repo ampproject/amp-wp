@@ -41,7 +41,7 @@ const Element = styled.p`
 	}
 `;
 
-function TextDisplay( { id, content, color, backgroundColor, width, height, x, y, fontFamily, fontSize, fontWeight, fontStyle, rotationAngle, forwardedRef, onPointerDown } ) {
+function TextDisplay( { id, content, color, backgroundColor, width, height, x, y, fontFamily, fontSize, fontWeight, fontStyle, rotationAngle, forwardedRef } ) {
 	const props = {
 		color,
 		backgroundColor,
@@ -54,7 +54,6 @@ function TextDisplay( { id, content, color, backgroundColor, width, height, x, y
 		x,
 		y,
 		rotationAngle,
-		onPointerDown,
 	};
 	const {
 		state: { selectedElementIds },
@@ -157,7 +156,6 @@ TextDisplay.propTypes = {
 		PropTypes.object,
 		PropTypes.func,
 	] ),
-	onPointerDown: PropTypes.func,
 };
 
 export default TextDisplay;
