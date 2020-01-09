@@ -2810,6 +2810,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		$this->remove_admin_bar_if_css_excluded();
+		$this->add_css_budget_to_admin_bar();
 	}
 
 	/**
@@ -2901,6 +2902,56 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		return compact( 'stylesheets' );
+	}
+
+	/**
+	 * Update admin bar.
+	 */
+	public function add_css_budget_to_admin_bar() {
+		if ( ! is_admin_bar_showing() ) {
+			return;
+		}
+		$validity_li_element = $this->dom->getElementById( 'wp-admin-bar-amp-validity' );
+		if ( ! $validity_li_element ) {
+			return;
+		}
+
+		$stylesheets_li_element = $validity_li_element->cloneNode( true );
+		$stylesheets_a_element  = $stylesheets_li_element->getElementsByTagName( 'a' )->item( 0 );
+		if ( ! ( $stylesheets_a_element instanceof DOMElement ) ) {
+			return;
+		}
+		$stylesheets_a_element->setAttribute(
+			'href',
+			$stylesheets_a_element->getAttribute( 'href' ) . '#amp_stylesheets'
+		);
+
+		while ( $stylesheets_a_element->firstChild ) {
+			$stylesheets_a_element->removeChild( $stylesheets_a_element->firstChild );
+		}
+
+		$total_size = 0;
+		foreach ( $this->pending_stylesheets as $pending_stylesheet ) {
+			if ( empty( $pending_stylesheet['duplicate'] ) ) {
+				$total_size += $pending_stylesheet['final_size'];
+			}
+		}
+
+		$css_usage_percentage = ceil( ( $total_size / $this->style_custom_cdata_spec['max_bytes'] ) * 100 );
+		$meter_text_overlay   = sprintf(
+			/* translators: %d is percentage of CSS budget used */
+			__( 'CSS Usage: %d%%', 'amp' ),
+			$css_usage_percentage
+		);
+
+		if ( $css_usage_percentage > 100 ) {
+			$meter_text_overlay .= ' 🚫';
+		} elseif ( $css_usage_percentage >= self::CSS_BUDGET_WARNING_PERCENTAGE ) {
+			$meter_text_overlay .= ' ⚠️';
+		}
+		$stylesheets_a_element->appendChild( $this->dom->createTextNode( $meter_text_overlay ) );
+
+		$validity_li_element->parentNode->insertBefore( $stylesheets_li_element, $validity_li_element->nextSibling );
 	}
 
 	/**
