@@ -48,7 +48,7 @@ function Redoer() {
 
 function PreviewButton() {
 	const {
-		state: { isSaving, story: { link } },
+		state: { meta: { isSaving }, story: { link } },
 	} = useStory();
 
 	/**
@@ -67,7 +67,7 @@ function PreviewButton() {
 
 function Publish() {
 	const {
-		state: { isSaving, story: { status } },
+		state: { meta: { isSaving }, story: { status } },
 		actions: { saveStory },
 	} = useStory();
 

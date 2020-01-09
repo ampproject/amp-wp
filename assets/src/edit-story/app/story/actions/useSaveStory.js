@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { useCallback, renderToString } from '@wordpress/element';
+import { useCallback, renderToString, useState } from '@wordpress/element';
 import { addQueryArgs } from '@wordpress/url';
 
 /**
@@ -51,6 +51,7 @@ function useSaveStory( {
 	updateStory,
 } ) {
 	const { actions: { saveStoryById } } = useAPI();
+	const [ isSaving, setIsSaving ] = useState( false );
 
 	/**
 	 * Refresh page to edit url.
@@ -67,11 +68,13 @@ function useSaveStory( {
 	}, [] );
 
 	const saveStory = useCallback( () => {
+		setIsSaving( true );
 		const { title, status: postStatus, author, slug } = story;
 		const status = ( postStatus !== 'publish' ) ? 'publish' : postStatus;
 
 		const content = getStoryMarkupFromPages( pages );
 		saveStoryById( storyId, title, status, pages, author, slug, content ).then( ( post ) => {
+			setIsSaving( false );
 			const { status: newStatus, link } = post;
 			updateStory( {
 				properties: {
@@ -81,11 +84,12 @@ function useSaveStory( {
 			} );
 			refreshPostEditURL( storyId );
 		} ).catch( () => {
+			setIsSaving( false );
 			// TODO Display error message to user as save as failed.
 		} );
 	}, [ storyId, pages, story, updateStory, saveStoryById, refreshPostEditURL ] );
 
-	return saveStory;
+	return { saveStory, isSaving };
 }
 
 export default useSaveStory;

@@ -95,7 +95,7 @@ function StoryProvider( { storyId, children } ) {
 	// (and it will have side-effects because saving can update url and status,
 	//  thus the need for `updateStory`)
 	const { updateStory } = api;
-	const saveStory = useSaveStory( { storyId, pages, story, updateStory } );
+	const { saveStory, isSaving } = useSaveStory( { storyId, pages, story, updateStory } );
 
 	const state = {
 		state: {
@@ -108,6 +108,9 @@ function StoryProvider( { storyId, children } ) {
 			selectedElements,
 			hasSelection,
 			story,
+			meta: {
+				isSaving,
+			},
 		},
 		actions: {
 			...api,
