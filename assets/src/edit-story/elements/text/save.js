@@ -7,16 +7,19 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import { getCommonAttributes } from '../shared';
+import { generateFontFamily } from './util';
 
 /**
  * Returns AMP HTML for saving into post content for displaying in the FE.
  */
-function TextSave( { id, content, color, backgroundColor, width, height, x, y, fontFamily, fontSize, fontWeight, fontStyle, rotationAngle } ) {
+function TextSave( { id, content, color, backgroundColor, width, height, x, y, fontFamily, fontFallback, fontSize, fontWeight, fontStyle, rotationAngle } ) {
+	const fontFamilyDisplay = generateFontFamily( fontFamily, fontFallback );
+
 	const style = {
 		...getCommonAttributes( { width, height, x, y, rotationAngle } ),
 		fontSize: `${ fontSize }px`,
 		fontStyle: fontStyle ? fontStyle : null,
-		fontFamily: fontFamily ? fontFamily : null,
+		fontFamily: fontFamilyDisplay,
 		fontWeight: fontWeight ? fontWeight : null,
 		background: backgroundColor,
 		color,
@@ -33,6 +36,7 @@ TextSave.propTypes = {
 	color: PropTypes.string,
 	backgroundColor: PropTypes.string,
 	fontFamily: PropTypes.string,
+	fontFallback: PropTypes.array,
 	fontSize: PropTypes.number,
 	fontWeight: PropTypes.number,
 	fontStyle: PropTypes.string,

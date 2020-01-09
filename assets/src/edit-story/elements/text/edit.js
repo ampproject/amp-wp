@@ -49,11 +49,12 @@ const Element = styled.div`
 	}
 `;
 
-function TextEdit( { content, color, backgroundColor, width, height, x, y, fontFamily, fontSize, fontWeight, fontStyle, rotationAngle } ) {
+function TextEdit( { content, color, backgroundColor, width, height, x, y, fontFamily, fontFallback, fontSize, fontWeight, fontStyle, rotationAngle } ) {
 	const props = {
 		color,
 		backgroundColor,
 		fontFamily,
+		fontFallback,
 		fontStyle,
 		fontSize,
 		fontWeight,
@@ -145,6 +146,7 @@ TextEdit.propTypes = {
 	color: PropTypes.string,
 	backgroundColor: PropTypes.string,
 	fontFamily: PropTypes.string,
+	fontFallback: PropTypes.array,
 	fontSize: PropTypes.number,
 	fontWeight: PropTypes.number,
 	fontStyle: PropTypes.string,

@@ -24,6 +24,7 @@ import {
 	ElementWithBackgroundColor,
 	ElementWithFontColor,
 } from '../shared';
+import { generateFontFamily } from './util';
 
 const Element = styled.p`
 	margin: 0;
@@ -41,11 +42,14 @@ const Element = styled.p`
 	}
 `;
 
-function TextDisplay( { id, content, color, backgroundColor, width, height, x, y, fontFamily, fontSize, fontWeight, fontStyle, rotationAngle, forwardedRef, onPointerDown } ) {
+function TextDisplay( { id, content, color, backgroundColor, width, height, x, y, fontFamily, fontFallback, fontSize, fontWeight, fontStyle, rotationAngle, forwardedRef, onPointerDown } ) {
+	const fontFamilyDisplay = generateFontFamily( fontFamily, fontFallback );
+
 	const props = {
 		color,
 		backgroundColor,
-		fontFamily,
+		fontFamily: fontFamilyDisplay,
+		fontFallback,
 		fontStyle,
 		fontSize,
 		fontWeight,
@@ -137,6 +141,7 @@ function TextDisplay( { id, content, color, backgroundColor, width, height, x, y
 			element.current.focus();
 		}
 	}, [ isElementOnlySelection ] );
+console.log(props);
 	return (
 		<Element
 			canSelect={ hasFocus }
@@ -153,6 +158,7 @@ TextDisplay.propTypes = {
 	color: PropTypes.string,
 	backgroundColor: PropTypes.string,
 	fontFamily: PropTypes.string,
+	fontFallback: PropTypes.array,
 	fontSize: PropTypes.number,
 	fontWeight: PropTypes.number,
 	fontStyle: PropTypes.string,

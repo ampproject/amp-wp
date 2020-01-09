@@ -19,9 +19,10 @@ function FontPanel( { selectedElements, onSetProperties } ) {
 	const fontSize = getCommonValue( selectedElements, 'fontSize' );
 	const fontWeight = getCommonValue( selectedElements, 'fontWeight' );
 	const fontStyle = getCommonValue( selectedElements, 'fontStyle' );
+	const fontFallback = getCommonValue( selectedElements, 'fontFallback' );
 
-	const { state: { fonts }, actions: { getFontWeight } } = useFont();
-	const [ state, setState ] = useState( { fontFamily, fontStyle, fontSize, fontWeight, fontWeights: [] } );
+	const { state: { fonts }, actions: { getFontWeight, getFontFallback } } = useFont();
+	const [ state, setState ] = useState( { fontFamily, fontStyle, fontSize, fontWeight, fontFallback, fontWeights: [] } );
 	useEffect( () => {
 		const fontWeights = getFontWeight( fontFamily );
 		setState( { fontFamily, fontStyle, fontSize, fontWeight, fontWeights } );
@@ -48,9 +49,10 @@ function FontPanel( { selectedElements, onSetProperties } ) {
 				value={ state.fontFamily }
 				onChange={ ( value ) => {
 					const fontWeights = getFontWeight( value );
+					const currentFontFallback = getFontFallback( value );
 					const fontWeightsArr = fontWeights.map( ( { thisValue } ) => thisValue );
 					const newFontWeight = ( fontWeightsArr && fontWeightsArr.includes( state.fontWeight ) ) ? state.fontWeight : 400;
-					setState( { ...state, fontWeights, fontFamily: value, fontWeight: parseInt( newFontWeight ) } );
+					setState( { ...state, fontWeights, fontFamily: value, fontWeight: parseInt( newFontWeight ), fontFallback: currentFontFallback } );
 				} }
 			/>
 			<SelectMenu

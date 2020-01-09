@@ -73,6 +73,14 @@ function FontProvider( { children } ) {
 		},	[ getFontByName ],
 	);
 
+	const getFontFallback = useCallback(
+		( name ) => {
+			const currentFont = getFontByName( name );
+			const fontFallback = ( currentFont && currentFont.fallbacks ) ? currentFont.fallbacks : [];
+			return fontFallback;
+		},	[ getFontByName ],
+	);
+
 	const maybeEnqueueFontStyle = useLoadFontFiles( { getFontByName } );
 
 	const state = {
@@ -84,6 +92,7 @@ function FontProvider( { children } ) {
 			getFontBySlug,
 			maybeEnqueueFontStyle,
 			getFontWeight,
+			getFontFallback,
 		},
 	};
 
