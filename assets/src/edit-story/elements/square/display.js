@@ -17,11 +17,9 @@ const Element = styled.div`
 	${ ElementWithBackgroundColor }
 `;
 
-function SquareDisplay( { backgroundColor, width, height } ) {
+function SquareDisplay( { backgroundColor } ) {
 	const props = {
 		backgroundColor,
-		width,
-		height,
 	};
 	return (
 		<Element { ...props } />
@@ -30,8 +28,6 @@ function SquareDisplay( { backgroundColor, width, height } ) {
 
 SquareDisplay.propTypes = {
 	backgroundColor: PropTypes.string,
-	width: PropTypes.number.isRequired,
-	height: PropTypes.number.isRequired,
 };
 
 export default SquareDisplay;
