@@ -22,12 +22,21 @@ function DropZone( { children, onDrop } ) {
 
 	const getDragType = ( { dataTransfer } ) => {
 		if ( dataTransfer ) {
-			// @todo Support Edge since types is DomStringList there.
-			if ( dataTransfer.types.includes( 'Files' ) ) {
-				return 'file';
-			}
-			if ( dataTransfer.types.includes( 'text/html' ) ) {
-				return 'html';
+			if ( Array.isArray( dataTransfer.types ) ) {
+				if ( dataTransfer.types.includes( 'Files' ) ) {
+					return 'file';
+				}
+				if ( dataTransfer.types.includes( 'text/html' ) ) {
+					return 'html';
+				}
+			} else {
+				// For Edge, types is DomStringList and not array.
+				if ( dataTransfer.types.contains( 'Files' ) ) {
+					return 'file';
+				}
+				if ( dataTransfer.types.contains( 'text/html' ) ) {
+					return 'html';
+				}
 			}
 		}
 		return 'default';
