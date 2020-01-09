@@ -417,7 +417,7 @@ class AMP_Story_Post_Type {
 
 			if ( $fonts ) {
 				foreach ( $fonts as $font ) {
-					if ( $font['src'] ) {
+					if ( isset( $font['src'] ) && $font['src'] ) {
 						wp_enqueue_style(
 							$font['handle'],
 							$font['src'],
