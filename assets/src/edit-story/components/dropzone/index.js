@@ -2,16 +2,21 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
 
 /**
  * WordPress dependencies
  */
 import { useRef } from '@wordpress/element';
 
+const DropZoneComponent = styled.div`
+	display: inherit;
+`;
+
 function DropZone( { children, onDrop } ) {
 	const dropZoneElement = useRef( null );
 	const onDragOver = ( evt ) => {
-		// @todo Display highlighted if dragging over.
+		// @todo Display highlighted if dragging over?
 		evt.preventDefault();
 	};
 
@@ -28,9 +33,9 @@ function DropZone( { children, onDrop } ) {
 	};
 
 	return (
-		<div style={ { display: 'inherit' } } ref={ dropZoneElement } onDrop={ onDropHandler } onDragOver={ onDragOver } >
+		<DropZoneComponent ref={ dropZoneElement } onDrop={ onDropHandler } onDragOver={ onDragOver } >
 			{ children }
-		</div>
+		</DropZoneComponent>
 	);
 }
 

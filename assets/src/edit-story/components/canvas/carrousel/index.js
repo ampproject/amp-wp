@@ -50,8 +50,11 @@ function Canvas() {
 						return;
 					}
 					const arrangedIndex = getArrangeIndex( droppedEl.index, index, position );
-					arrangePage( droppedEl.index, arrangedIndex );
-					setCurrentPageByIndex( arrangedIndex );
+					// Do nothing if the index didn't change.
+					if ( droppedEl.index !== arrangedIndex ) {
+						arrangePage( droppedEl.index, arrangedIndex );
+						setCurrentPageByIndex( arrangedIndex );
+					}
 				};
 				// @todo Create a Draggable component for setting data and setting "draggable".
 				const onDragStart = ( evt ) => {
