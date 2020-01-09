@@ -45,7 +45,7 @@ function FontPanel( { selectedElements, onSetProperties } ) {
 			<Title>
 				{ 'Font' }
 			</Title>
-			<SelectMenu
+			{ fonts && <SelectMenu
 				label="Font family"
 				options={ fonts }
 				value={ state.fontFamily }
@@ -56,19 +56,19 @@ function FontPanel( { selectedElements, onSetProperties } ) {
 					const newFontWeight = ( fontWeightsArr && fontWeightsArr.includes( state.fontWeight ) ) ? state.fontWeight : 400;
 					setState( { ...state, fontFamily: value, fontWeight: parseInt( newFontWeight ), fontWeights: currentFontWeights, fontFallback: currentFontFallback } );
 				} }
-			/>
+			/> }
 			<SelectMenu
 				label="Font style"
 				options={ fontStyles }
 				value={ state.fontStyle }
 				onChange={ ( value ) => setState( { ...state, fontStyle: value } ) }
 			/>
-			<SelectMenu
+			{ state.fontWeights && <SelectMenu
 				label="Font weight"
 				options={ state.fontWeights }
 				value={ state.fontWeight }
 				onChange={ ( value ) => setState( { ...state, fontWeight: parseInt( value ) } ) }
-			/>
+			/> }
 			<InputGroup
 				type="number"
 				label="Font size"
