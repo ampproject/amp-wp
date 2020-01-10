@@ -5,30 +5,15 @@
  * @package AMP
  */
 
+use Amp\AmpWP\Dom\ElementList;
+use Amp\AmpWP\Component\Carousel;
+
 /**
  * Class AMP_Gallery_Block_Sanitizer
  *
  * Modifies gallery block to match the block's AMP-specific configuration.
  */
 class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
-
-	/**
-	 * Value used for width of amp-carousel.
-	 *
-	 * @since 1.0
-	 *
-	 * @const int
-	 */
-	const FALLBACK_WIDTH = 600;
-
-	/**
-	 * Value used for height of amp-carousel.
-	 *
-	 * @since 1.0
-	 *
-	 * @const int
-	 */
-	const FALLBACK_HEIGHT = 480;
 
 	/**
 	 * Tag.
@@ -63,9 +48,9 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @var array
 	 */
-	protected $DEFAULT_ARGS = array(
+	protected $DEFAULT_ARGS = [
 		'carousel_required' => false,
-	);
+	];
 
 	/**
 	 * Sanitize the gallery block contained by <ul> element where necessary.
@@ -73,23 +58,37 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.2
 	 */
 	public function sanitize() {
-		$nodes     = $this->dom->getElementsByTagName( self::$tag );
-		$num_nodes = $nodes->length;
-		if ( 0 === $num_nodes ) {
-			return;
+		$class_query = 'contains( concat( " ", normalize-space( @class ), " " ), " wp-block-gallery " )';
+		$expr        = sprintf(
+			'//ul[ %s ]',
+			implode(
+				' or ',
+				[
+					sprintf( '( parent::figure[ %s ] )', $class_query ),
+					$class_query,
+				]
+			)
+		);
+		$query       = $this->dom->xpath->query( $expr );
+
+		$nodes = [];
+		foreach ( $query as $node ) {
+			$nodes[] = $node;
 		}
 
-		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
-			$node = $nodes->item( $i );
+		foreach ( $nodes as $node ) {
+			// In WordPress 5.3, the Gallery block's <ul> is wrapped in a <figure class="wp-block-gallery">, so look for that node also.
+			$gallery_node = isset( $node->parentNode ) && AMP_DOM_Utils::has_class( $node->parentNode, self::$class ) ? $node->parentNode : $node;
+			$attributes   = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $gallery_node );
 
-			// We're looking for <ul> elements that have at least one child and the proper class.
-			if ( 0 === count( $node->childNodes ) || false === strpos( $node->getAttribute( 'class' ), self::$class ) ) {
-				continue;
-			}
-
-			$attributes      = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
 			$is_amp_lightbox = isset( $attributes['data-amp-lightbox'] ) && true === filter_var( $attributes['data-amp-lightbox'], FILTER_VALIDATE_BOOLEAN );
-			$is_amp_carousel = ! empty( $this->args['carousel_required'] ) || ( isset( $attributes['data-amp-carousel'] ) && true === filter_var( $attributes['data-amp-carousel'], FILTER_VALIDATE_BOOLEAN ) );
+			$is_amp_carousel = (
+				! empty( $this->args['carousel_required'] )
+				||
+				filter_var( $node->getAttribute( 'data-amp-carousel' ), FILTER_VALIDATE_BOOLEAN )
+				||
+				filter_var( $node->parentNode->getAttribute( 'data-amp-carousel' ), FILTER_VALIDATE_BOOLEAN )
+			);
 
 			// We are only looking for <ul> elements which have amp-carousel / amp-lightbox true.
 			if ( ! $is_amp_carousel && ! $is_amp_lightbox ) {
@@ -99,7 +98,6 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 			// If lightbox is set, we should add lightbox feature to the gallery images.
 			if ( $is_amp_lightbox ) {
 				$this->add_lightbox_attributes_to_image_nodes( $node );
-				$this->maybe_add_amp_image_lightbox_node();
 			}
 
 			// If amp-carousel is not set, nothing else to do here.
@@ -107,80 +105,31 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			$images = array();
+			$images = new ElementList();
 
 			// If it's not AMP lightbox, look for links first.
 			if ( ! $is_amp_lightbox ) {
 				foreach ( $node->getElementsByTagName( 'a' ) as $element ) {
-					$images[] = $element;
+					$images = $images->add( $element, $this->possibly_get_caption_text( $element ) );
 				}
 			}
 
 			// If not linking to anything then look for <amp-img>.
-			if ( empty( $images ) ) {
+			if ( 0 === count( $images ) ) {
 				foreach ( $node->getElementsByTagName( 'amp-img' ) as $element ) {
-					$images[] = $element;
+					$images = $images->add( $element, $this->possibly_get_caption_text( $element ) );
 				}
 			}
 
 			// Skip if no images found.
-			if ( empty( $images ) ) {
+			if ( 0 === count( $images ) ) {
 				continue;
 			}
 
-			$amp_carousel = AMP_DOM_Utils::create_node(
-				$this->dom,
-				'amp-carousel',
-				array(
-					'height' => $this->get_carousel_height( $node ),
-					'type'   => 'slides',
-					'layout' => 'fixed-height',
-				)
-			);
-			foreach ( $images as $image ) {
-				$amp_carousel->appendChild( $image );
-			}
-
-			$node->parentNode->replaceChild( $amp_carousel, $node );
+			$amp_carousel = new Carousel( $this->dom, $images );
+			$gallery_node->parentNode->replaceChild( $amp_carousel->get_dom_element(), $gallery_node );
 		}
 		$this->did_convert_elements = true;
-	}
-
-	/**
-	 * Get carousel height by containing images.
-	 *
-	 * @param DOMElement $element The UL element.
-	 * @return int Height.
-	 */
-	protected function get_carousel_height( $element ) {
-		$images     = $element->getElementsByTagName( 'amp-img' );
-		$num_images = $images->length;
-		$max_height = 0;
-		$max_width  = 0;
-		if ( 0 === $num_images ) {
-			return self::FALLBACK_HEIGHT;
-		}
-		foreach ( $images as $image ) {
-			/**
-			 * Image.
-			 *
-			 * @var DOMElement $image
-			 */
-			$image_height = $image->getAttribute( 'height' );
-			if ( is_numeric( $image_height ) ) {
-				$max_height = max( $max_height, $image_height );
-			}
-			$image_width = $image->getAttribute( 'height' );
-			if ( is_numeric( $image_width ) ) {
-				$max_width = max( $max_width, $image_width );
-			}
-		}
-
-		if ( ! empty( $this->args['content_max_width'] ) && $max_height > 0 && $max_width > $this->args['content_max_width'] ) {
-			$max_height = ( $max_width * $this->args['content_max_width'] ) / $max_height;
-		}
-
-		return ! $max_height ? self::FALLBACK_HEIGHT : $max_height;
 	}
 
 	/**
@@ -194,18 +143,30 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 		if ( 0 === $num_images ) {
 			return;
 		}
-		$attributes = array(
-			'data-amp-lightbox' => '',
-			'on'                => 'tap:' . self::AMP_IMAGE_LIGHTBOX_ID,
-			'role'              => 'button',
-			'tabindex'          => 0,
-		);
 
 		for ( $j = $num_images - 1; $j >= 0; $j-- ) {
 			$image_node = $images->item( $j );
-			foreach ( $attributes as $att => $value ) {
-				$image_node->setAttribute( $att, $value );
-			}
+			$image_node->setAttribute( 'lightbox', '' );
 		}
+	}
+
+	/**
+	 * Gets the caption of an image, if it exists.
+	 *
+	 * @param DOMElement $element The element for which to search for a caption.
+	 * @return string The caption for the image, or ''.
+	 */
+	public function possibly_get_caption_text( $element ) {
+		$caption_tag = 'figcaption';
+		if ( isset( $element->nextSibling->nodeName ) && $caption_tag === $element->nextSibling->nodeName ) {
+			return $element->nextSibling->textContent;
+		}
+
+		// If 'Link To' is selected, the image will be wrapped in an <a>, so search for the sibling of the <a>.
+		if ( isset( $element->parentNode->nextSibling->nodeName ) && $caption_tag === $element->parentNode->nextSibling->nodeName ) {
+			return $element->parentNode->nextSibling->textContent;
+		}
+
+		return '';
 	}
 }

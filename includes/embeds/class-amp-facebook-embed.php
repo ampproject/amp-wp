@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use Amp\AmpWP\Dom\Document;
+
 /**
  * Class AMP_Facebook_Embed_Handler
  */
@@ -43,7 +45,7 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Registers embed.
 	 */
 	public function register_embed() {
-		wp_embed_register_handler( $this->amp_tag, self::URL_PATTERN, array( $this, 'oembed' ), -1 );
+		wp_embed_register_handler( $this->amp_tag, self::URL_PATTERN, [ $this, 'oembed' ], -1 );
 	}
 
 	/**
@@ -59,11 +61,10 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @param array  $matches URL pattern matches.
 	 * @param array  $attr    Matched attributes.
 	 * @param string $url     Matched URL.
-	 * @param string $rawattr Raw attributes string.
 	 * @return string HTML markup for rendered embed.
 	 */
-	public function oembed( $matches, $attr, $url, $rawattr ) {
-		return $this->render( array( 'url' => $url ) );
+	public function oembed( $matches, $attr, $url ) {
+		return $this->render( [ 'url' => $url ] );
 	}
 
 	/**
@@ -75,9 +76,9 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 	public function render( $args ) {
 		$args = wp_parse_args(
 			$args,
-			array(
+			[
 				'url' => false,
-			)
+			]
 		);
 
 		if ( empty( $args['url'] ) ) {
@@ -88,26 +89,21 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		return AMP_HTML_Utils::build_tag(
 			$this->amp_tag,
-			array(
+			[
 				'data-href' => $args['url'],
 				'layout'    => 'responsive',
 				'width'     => $this->args['width'],
 				'height'    => $this->args['height'],
-			)
+			]
 		);
 	}
 
 	/**
 	 * Sanitized <div class="fb-video" data-href=> tags to <amp-facebook>.
 	 *
-	 * @param DOMDocument $dom DOM.
+	 * @param Document $dom DOM.
 	 */
-	public function sanitize_raw_embeds( $dom ) {
-		/**
-		 * Node list.
-		 *
-		 * @var DOMNodeList $node
-		 */
+	public function sanitize_raw_embeds( Document $dom ) {
 		$nodes     = $dom->getElementsByTagName( $this->sanitize_tag );
 		$num_nodes = $nodes->length;
 
@@ -135,9 +131,8 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 		 */
 		$fb_root = $dom->getElementById( 'fb-root' );
 		if ( $fb_root ) {
-			$xpath   = new DOMXPath( $dom );
-			$scripts = array();
-			foreach ( $xpath->query( '//script[ starts-with( @src, "https://connect.facebook.net" ) and contains( @src, "sdk.js" ) ]' ) as $script ) {
+			$scripts = [];
+			foreach ( $dom->xpath->query( '//script[ starts-with( @src, "https://connect.facebook.net" ) and contains( @src, "sdk.js" ) ]' ) as $script ) {
 				$scripts[] = $script;
 			}
 			foreach ( $scripts as $script ) {
@@ -153,7 +148,7 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @param DOMElement $node The DOMNode to adjust and replace.
 	 * @return string|null Embed type or null if not detected.
 	 */
-	private function get_embed_type( $node ) {
+	private function get_embed_type( DOMElement $node ) {
 		$class_attr = $node->getAttribute( 'class' );
 		if ( null === $class_attr || ! $node->hasAttribute( 'data-href' ) ) {
 			return null;
@@ -161,15 +156,25 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		if ( false !== strpos( $class_attr, 'fb-post' ) ) {
 			return 'post';
-		} elseif ( false !== strpos( $class_attr, 'fb-video' ) ) {
+		}
+
+		if ( false !== strpos( $class_attr, 'fb-video' ) ) {
 			return 'video';
-		} elseif ( false !== strpos( $class_attr, 'fb-page' ) ) {
+		}
+
+		if ( false !== strpos( $class_attr, 'fb-page' ) ) {
 			return 'page';
-		} elseif ( false !== strpos( $class_attr, 'fb-like' ) ) {
+		}
+
+		if ( false !== strpos( $class_attr, 'fb-like' ) ) {
 			return 'like';
-		} elseif ( false !== strpos( $class_attr, 'fb-comments' ) ) {
+		}
+
+		if ( false !== strpos( $class_attr, 'fb-comments' ) ) {
 			return 'comments';
-		} elseif ( false !== strpos( $class_attr, 'fb-comment-embed' ) ) {
+		}
+
+		if ( false !== strpos( $class_attr, 'fb-comment-embed' ) ) {
 			return 'comment';
 		}
 
@@ -179,17 +184,19 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Create amp-facebook and replace node.
 	 *
-	 * @param DOMDocument $dom        The HTML Document.
-	 * @param DOMElement  $node       The DOMNode to adjust and replace.
-	 * @param string      $embed_type Embed type.
+	 * @param Document   $dom        The HTML Document.
+	 * @param DOMElement $node       The DOMNode to adjust and replace.
+	 * @param string     $embed_type Embed type.
 	 */
-	private function create_amp_facebook_and_replace_node( $dom, $node, $embed_type ) {
+	private function create_amp_facebook_and_replace_node( Document $dom, DOMElement $node, $embed_type ) {
 
-		$attributes = array(
-			'layout' => 'responsive',
-			'width'  => $node->hasAttribute( 'data-width' ) ? $node->getAttribute( 'data-width' ) : $this->DEFAULT_WIDTH,
-			'height' => $node->hasAttribute( 'data-height' ) ? $node->getAttribute( 'data-height' ) : $this->DEFAULT_HEIGHT,
-		);
+		$attributes = [
+			// The layout sanitizer will convert this to `layout` when being sanitized.
+			// The data attribute needs to be used so that the layout sanitizer will process it.
+			'data-amp-layout' => 'responsive',
+			'width'           => $node->hasAttribute( 'data-width' ) ? $node->getAttribute( 'data-width' ) : $this->DEFAULT_WIDTH,
+			'height'          => $node->hasAttribute( 'data-height' ) ? $node->getAttribute( 'data-height' ) : $this->DEFAULT_HEIGHT,
+		];
 
 		$node->removeAttribute( 'data-width' );
 		$node->removeAttribute( 'data-height' );

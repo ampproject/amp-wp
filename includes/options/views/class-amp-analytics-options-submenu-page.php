@@ -106,7 +106,7 @@ class AMP_Analytics_Options_Submenu_Page {
 								/* translators: 1: AMP Analytics docs URL. 2: AMP for WordPress analytics docs URL. 3: AMP analytics code reference. 4: amp-analytics, 5: {. 6: }. 7: <script>, 8: googleanalytics. 9: AMP analytics vendor docs URL. 10: UA-XXXXX-Y. */
 								__( 'For Google Analytics, please see <a href="%1$s" target="_blank">Adding Analytics to your AMP pages</a>; see also the <a href="%2$s" target="_blank">Analytics wiki page</a> and the AMP project\'s <a href="%3$s" target="_blank">%4$s documentation</a>. The analytics configuration supplied below must take the form of JSON objects, which begin with a %5$s and end with a %6$s. Do not include any HTML tags like %4$s or %7$s. A common entry would have the type %8$s (see <a href="%9$s" target="_blank">available vendors</a>) and a configuration that looks like the following (where %10$s is replaced with your own site\'s account number):', 'amp' ),
 								__( 'https://developers.google.com/analytics/devguides/collection/amp-analytics/', 'amp' ),
-								__( 'https://github.com/ampproject/amp-wp/wiki/Analytics', 'amp' ),
+								__( 'https://amp-wp.org/documentation/playbooks/analytics/', 'amp' ),
 								__( 'https://www.ampproject.org/docs/reference/components/amp-analytics', 'amp' ),
 								'<code>amp-analytics</code>',
 								'<code>{</code>',
@@ -186,7 +186,7 @@ class AMP_Analytics_Options_Submenu_Page {
 	public function render() {
 		$this->render_styles();
 
-		$analytics_entries = AMP_Options_Manager::get_option( 'analytics', array() );
+		$analytics_entries = AMP_Options_Manager::get_option( 'analytics', [] );
 
 		$this->render_title( ! empty( $analytics_entries ) );
 

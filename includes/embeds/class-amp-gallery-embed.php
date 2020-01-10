@@ -5,6 +5,10 @@
  * @package AMP
  */
 
+use Amp\AmpWP\Dom\Document;
+use Amp\AmpWP\Dom\ElementList;
+use Amp\AmpWP\Component\Carousel;
+
 /**
  * Class AMP_Gallery_Embed_Handler
  *
@@ -16,8 +20,8 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Register embed.
 	 */
 	public function register_embed() {
-		add_filter( 'post_gallery', array( $this, 'maybe_override_gallery' ), 10, 2 );
-		add_action( 'wp_print_styles', array( $this, 'print_styles' ) );
+		add_filter( 'post_gallery', [ $this, 'maybe_override_gallery' ], 10, 2 );
+		add_action( 'wp_print_styles', [ $this, 'print_styles' ] );
 	}
 
 	/**
@@ -43,15 +47,15 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		$atts = shortcode_atts(
-			array(
+			[
 				'order'   => 'ASC',
 				'orderby' => 'menu_order ID',
 				'id'      => $post ? $post->ID : 0,
 				'include' => '',
 				'exclude' => '',
-				'size'    => array( $this->args['width'], $this->args['height'] ),
+				'size'    => [ $this->args['width'], $this->args['height'] ],
 				'link'    => 'none',
-			),
+			],
 			$attr,
 			'gallery'
 		);
@@ -60,11 +64,11 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 			$atts['lightbox'] = filter_var( $attr['amp-lightbox'], FILTER_VALIDATE_BOOLEAN );
 		}
 
-		$id = intval( $atts['id'] );
+		$id = (int) $atts['id'];
 
 		if ( ! empty( $atts['include'] ) ) {
 			$attachments = get_posts(
-				array(
+				[
 					'include'        => $atts['include'],
 					'post_status'    => 'inherit',
 					'post_type'      => 'attachment',
@@ -72,11 +76,11 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 					'order'          => $atts['order'],
 					'orderby'        => $atts['orderby'],
 					'fields'         => 'ids',
-				)
+				]
 			);
 		} elseif ( ! empty( $atts['exclude'] ) ) {
 			$attachments = get_children(
-				array(
+				[
 					'post_parent'    => $id,
 					'exclude'        => $atts['exclude'],
 					'post_status'    => 'inherit',
@@ -85,11 +89,11 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 					'order'          => $atts['order'],
 					'orderby'        => $atts['orderby'],
 					'fields'         => 'ids',
-				)
+				]
 			);
 		} else {
 			$attachments = get_children(
-				array(
+				[
 					'post_parent'    => $id,
 					'post_status'    => 'inherit',
 					'post_type'      => 'attachment',
@@ -97,7 +101,7 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 					'order'          => $atts['order'],
 					'orderby'        => $atts['orderby'],
 					'fields'         => 'ids',
-				)
+				]
 			);
 		}
 
@@ -105,7 +109,7 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 			return '';
 		}
 
-		$urls = array();
+		$urls = [];
 		foreach ( $attachments as $attachment_id ) {
 			list( $url, $width, $height ) = wp_get_attachment_image_src( $attachment_id, $atts['size'], true );
 
@@ -114,38 +118,29 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 			}
 
 			$href = null;
-			if ( empty( $atts['lightbox'] ) ) {
-				if ( ! empty( $atts['link'] ) && 'file' === $atts['link'] ) {
+			if ( empty( $atts['lightbox'] ) && ! empty( $atts['link'] ) ) {
+				if ( 'file' === $atts['link'] ) {
 					$href = $url;
-				} elseif ( ! empty( $atts['link'] ) && 'post' === $atts['link'] ) {
+				} elseif ( 'post' === $atts['link'] ) {
 					$href = get_attachment_link( $attachment_id );
 				}
 			}
 
-			$urls[] = array(
+			$urls[] = [
 				'href'   => $href,
 				'url'    => $url,
+				'srcset' => wp_get_attachment_image_srcset( $attachment_id, $atts['size'] ),
 				'width'  => $width,
 				'height' => $height,
-			);
+				'alt'    => trim( wp_strip_all_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) ), // Logic from wp_get_attachment_image().
+				'id'     => $attachment_id,
+			];
 		}
 
-		$args = array(
-			'images' => $urls,
-		);
-		if ( ! empty( $atts['lightbox'] ) ) {
-			$args['lightbox'] = true;
-			$lightbox_tag     = AMP_HTML_Utils::build_tag(
-				'amp-image-lightbox',
-				array(
-					'id'                           => AMP_Base_Sanitizer::AMP_IMAGE_LIGHTBOX_ID,
-					'layout'                       => 'nodisplay',
-					'data-close-button-aria-label' => __( 'Close', 'amp' ),
-				)
-			);
-			/* We need to add lightbox tag, too. @todo Could there be a better alternative for this? */
-			return $this->render( $args ) . $lightbox_tag;
-		}
+		$args = [
+			'images'   => $urls,
+			'lightbox' => ! empty( $atts['lightbox'] ),
+		];
 
 		return $this->render( $args );
 	}
@@ -164,14 +159,31 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 		$is_lightbox = isset( $attributes['amp-lightbox'] ) && true === filter_var( $attributes['amp-lightbox'], FILTER_VALIDATE_BOOLEAN );
 		if ( isset( $attributes['amp-carousel'] ) && false === filter_var( $attributes['amp-carousel'], FILTER_VALIDATE_BOOLEAN ) ) {
 			if ( true === $is_lightbox ) {
-				remove_filter( 'post_gallery', array( $this, 'maybe_override_gallery' ), 10 );
-				$attributes['link'] = 'none';
-				$html               = '<ul class="amp-lightbox">' . gallery_shortcode( $attributes ) . '</ul>';
-				add_filter( 'post_gallery', array( $this, 'maybe_override_gallery' ), 10, 2 );
+				$add_lightbox_attribute = static function ( $attr ) {
+					$attr['lightbox'] = '';
+					return $attr;
+				};
+
+				$set_link_attribute = static function ( $attributes ) {
+					$attributes['link'] = 'none';
+					return $attributes;
+				};
+
+				remove_filter( 'post_gallery', [ $this, 'maybe_override_gallery' ], 10 );
+				add_filter( 'wp_get_attachment_image_attributes', $add_lightbox_attribute );
+				add_filter( 'shortcode_atts_gallery', $set_link_attribute, PHP_INT_MAX );
+
+				$html = gallery_shortcode( $attributes );
+
+				remove_filter( 'wp_get_attachment_image_attributes', $add_lightbox_attribute );
+				add_filter( 'post_gallery', [ $this, 'maybe_override_gallery' ], 10, 2 );
+				remove_filter( 'shortcode_atts_gallery', $set_link_attribute, PHP_INT_MAX );
 			}
 
 			return $html;
-		} elseif ( isset( $attributes['size'] ) && 'thumbnail' === $attributes['size'] ) {
+		}
+
+		if ( isset( $attributes['size'] ) && 'thumbnail' === $attributes['size'] ) {
 			/*
 			 * If the 'gallery' shortcode has a 'size' attribute of 'thumbnail', prevent outputting an <amp-carousel>.
 			 * That will often get thumbnail images around 150 x 150,
@@ -181,6 +193,7 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 			 */
 			return '';
 		}
+
 		return $this->shortcode( $attributes );
 	}
 
@@ -191,61 +204,65 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return string Rendered.
 	 */
 	public function render( $args ) {
+		$dom                        = new Document();
 		$this->did_convert_elements = true;
 
 		$args = wp_parse_args(
 			$args,
-			array(
+			[
 				'images' => false,
-			)
+			]
 		);
 
 		if ( empty( $args['images'] ) ) {
 			return '';
 		}
 
-		$images = array();
+		$images = new ElementList();
 		foreach ( $args['images'] as $props ) {
-			$image_atts = array(
+			$image_atts = [
 				'src'    => $props['url'],
 				'width'  => $props['width'],
 				'height' => $props['height'],
 				'layout' => 'responsive',
-			);
+				'alt'    => $props['alt'],
+			];
+			if ( ! empty( $props['srcset'] ) ) {
+				$image_atts['srcset'] = $props['srcset'];
+			}
+
 			if ( ! empty( $args['lightbox'] ) ) {
 				$image_atts['lightbox'] = '';
-				$image_atts['on']       = 'tap:' . AMP_Img_Sanitizer::AMP_IMAGE_LIGHTBOX_ID;
-				$image_atts['role']     = 'button';
-				$image_atts['tabindex'] = 0;
 			}
-			$image = AMP_HTML_Utils::build_tag(
-				'amp-img',
+			$image = AMP_DOM_Utils::create_node(
+				$dom,
+				'img',
 				$image_atts
 			);
 
 			if ( ! empty( $props['href'] ) ) {
-				$image = AMP_HTML_Utils::build_tag(
+				$previous_image = $image;
+				$image          = AMP_DOM_Utils::create_node(
+					$dom,
 					'a',
-					array(
+					[
 						'href' => $props['href'],
-					),
-					$image
+					]
 				);
+				$image->appendChild( $previous_image );
 			}
 
-			$images[] = $image;
+			$caption = isset( $props['id'] ) ? wp_get_attachment_caption( $props['id'] ) : '';
+			$images  = $images->add( $image, $caption );
 		}
 
-		return AMP_HTML_Utils::build_tag(
-			'amp-carousel',
-			array(
-				'width'  => $this->args['width'],
-				'height' => $this->args['height'],
-				'type'   => 'slides',
-				'layout' => 'responsive',
-			),
-			implode( PHP_EOL, $images )
-		);
+		$amp_carousel  = new Carousel( $dom, $images );
+		$carousel_node = $amp_carousel->get_dom_element();
+
+		// Prevent an error in get_content_from_dom_node() when it calls $node->parentNode->insertBefore().
+		$dom->appendChild( $carousel_node );
+
+		return $dom->saveHTML( $carousel_node );
 	}
 
 	/**

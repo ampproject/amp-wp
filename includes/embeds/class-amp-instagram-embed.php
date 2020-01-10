@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use Amp\AmpWP\Dom\Document;
+
 /**
  * Class AMP_Instagram_Embed_Handler
  *
@@ -12,7 +14,7 @@
  */
 class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	const SHORT_URL_HOST = 'instagr.am';
-	const URL_PATTERN    = '#http(s?)://(www\.)?instagr(\.am|am\.com)/p/([^/?]+)#i';
+	const URL_PATTERN    = '#https?:\/\/(www\.)?instagr(\.am|am\.com)\/(p|tv)\/([A-Za-z0-9-_]+)#i';
 
 	/**
 	 * Default width.
@@ -46,8 +48,7 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Registers embed.
 	 */
 	public function register_embed() {
-		wp_embed_register_handler( $this->amp_tag, self::URL_PATTERN, array( $this, 'oembed' ), -1 );
-		add_shortcode( 'instagram', array( $this, 'shortcode' ) );
+		wp_embed_register_handler( $this->amp_tag, self::URL_PATTERN, [ $this, 'oembed' ], -1 );
 	}
 
 	/**
@@ -55,35 +56,6 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function unregister_embed() {
 		wp_embed_unregister_handler( $this->amp_tag, -1 );
-		remove_shortcode( 'instagram' );
-	}
-
-	/**
-	 * WordPress shortcode rendering callback.
-	 *
-	 * @param array $attr Shortcode attributes.
-	 * @return string HTML markup for rendered embed.
-	 */
-	public function shortcode( $attr ) {
-		$url = false;
-
-		$instagram_id = false;
-		if ( isset( $attr['url'] ) ) {
-			$url = trim( $attr['url'] );
-		}
-
-		if ( empty( $url ) ) {
-			return '';
-		}
-
-		$instagram_id = $this->get_instagram_id_from_url( $url );
-
-		return $this->render(
-			array(
-				'url'          => $url,
-				'instagram_id' => $instagram_id,
-			)
-		);
 	}
 
 	/**
@@ -92,15 +64,14 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @param array  $matches URL pattern matches.
 	 * @param array  $attr    Matched attributes.
 	 * @param string $url     Matched URL.
-	 * @param string $rawattr Raw attributes string.
 	 * @return string HTML markup for rendered embed.
 	 */
-	public function oembed( $matches, $attr, $url, $rawattr ) {
+	public function oembed( $matches, $attr, $url ) {
 		return $this->render(
-			array(
+			[
 				'url'          => $url,
 				'instagram_id' => end( $matches ),
-			)
+			]
 		);
 	}
 
@@ -113,19 +84,19 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	public function render( $args ) {
 		$args = wp_parse_args(
 			$args,
-			array(
+			[
 				'url'          => false,
 				'instagram_id' => false,
-			)
+			]
 		);
 
 		if ( empty( $args['instagram_id'] ) ) {
 			return AMP_HTML_Utils::build_tag(
 				'a',
-				array(
-					'href'  => esc_url( $args['url'] ),
+				[
+					'href'  => esc_url_raw( $args['url'] ),
 					'class' => 'amp-wp-embed-fallback',
-				),
+				],
 				esc_html( $args['url'] )
 			);
 		}
@@ -134,13 +105,13 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		return AMP_HTML_Utils::build_tag(
 			$this->amp_tag,
-			array(
+			[
 				'data-shortcode' => $args['instagram_id'],
 				'data-captioned' => '',
 				'layout'         => 'responsive',
 				'width'          => $this->args['width'],
 				'height'         => $this->args['height'],
-			)
+			]
 		);
 	}
 
@@ -163,9 +134,9 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Sanitized <blockquote class="instagram-media"> tags to <amp-instagram>
 	 *
-	 * @param DOMDocument $dom DOM.
+	 * @param Document $dom DOM.
 	 */
-	public function sanitize_raw_embeds( $dom ) {
+	public function sanitize_raw_embeds( Document $dom ) {
 		/**
 		 * Node list.
 		 *
@@ -193,18 +164,18 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Make final modifications to DOMNode
 	 *
-	 * @param DOMDocument $dom The HTML Document.
-	 * @param DOMElement  $node The DOMNode to adjust and replace.
+	 * @param Document   $dom The HTML Document.
+	 * @param DOMElement $node The DOMNode to adjust and replace.
 	 */
 	private function create_amp_instagram_and_replace_node( $dom, $node ) {
 		$instagram_id = $this->get_instagram_id_from_url( $node->getAttribute( 'data-instgrm-permalink' ) );
 
-		$node_args = array(
+		$node_args = [
 			'data-shortcode' => $instagram_id,
 			'layout'         => 'responsive',
 			'width'          => $this->DEFAULT_WIDTH,
 			'height'         => $this->DEFAULT_HEIGHT,
-		);
+		];
 
 		if ( true === $node->hasAttribute( 'data-instgrm-captioned' ) ) {
 			$node_args['data-captioned'] = '';

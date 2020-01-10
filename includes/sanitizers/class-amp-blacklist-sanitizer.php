@@ -22,11 +22,11 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @var array
 	 */
-	protected $DEFAULT_ARGS = array(
-		'add_blacklisted_protocols'  => array(),
-		'add_blacklisted_tags'       => array(),
-		'add_blacklisted_attributes' => array(),
-	);
+	protected $DEFAULT_ARGS = [
+		'add_blacklisted_protocols'  => [],
+		'add_blacklisted_tags'       => [],
+		'add_blacklisted_attributes' => [],
+	];
 
 	/**
 	 * Sanitize.
@@ -62,7 +62,9 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 		if ( 'font' === $node_name ) {
 			$this->replace_node_with_children( $node, $bad_attributes, $bad_protocols );
 			return;
-		} elseif ( 'a' === $node_name && false === $this->validate_a_node( $node ) ) {
+		}
+
+		if ( 'a' === $node_name && false === $this->validate_a_node( $node ) ) {
 			$this->replace_node_with_children( $node, $bad_attributes, $bad_protocols );
 			return;
 		}
@@ -81,7 +83,9 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 				if ( 0 === stripos( $attribute_name, 'on' ) && 'on' !== $attribute_name ) {
 					$this->remove_invalid_attribute( $node, $attribute_name );
 					continue;
-				} elseif ( 'a' === $node_name ) {
+				}
+
+				if ( 'a' === $node_name ) {
 					$this->sanitize_a_attribute( $node, $attribute );
 				}
 			}
@@ -179,12 +183,12 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// If the href starts with a '/', append the home_url to it for validation purposes.
-		if ( 0 === stripos( $href, '/' ) ) {
+		if ( 0 === strpos( $href, '/' ) ) {
 			$href = untrailingslashit( get_home_url() ) . $href;
 		}
 
-		$valid_protocols   = array( 'http', 'https', 'mailto', 'sms', 'tel', 'viber', 'whatsapp' );
-		$special_protocols = array( 'tel', 'sms' ); // These ones don't valid with `filter_var+FILTER_VALIDATE_URL`.
+		$valid_protocols   = [ 'http', 'https', 'mailto', 'sms', 'tel', 'viber', 'whatsapp' ];
+		$special_protocols = [ 'tel', 'sms' ]; // These ones don't valid with `filter_var+FILTER_VALIDATE_URL`.
 		$protocol          = strtok( $href, ':' );
 
 		if ( false === filter_var( $href, FILTER_VALIDATE_URL )
@@ -248,9 +252,9 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 	private function get_blacklisted_protocols() {
 		return $this->merge_defaults_with_args(
 			'add_blacklisted_protocols',
-			array(
+			[
 				'javascript',
-			)
+			]
 		);
 	}
 
@@ -262,7 +266,7 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 	private function get_blacklisted_tags() {
 		return $this->merge_defaults_with_args(
 			'add_blacklisted_tags',
-			array(
+			[
 				'script',
 				'noscript',
 				'style',
@@ -286,7 +290,7 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 
 				// Other weird ones.
 				'comments-count',
-			)
+			]
 		);
 	}
 
@@ -298,13 +302,13 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 	private function get_blacklisted_attributes() {
 		return $this->merge_defaults_with_args(
 			'add_blacklisted_attributes',
-			array(
+			[
 				'style',
 				'size',
 				'clear',
 				'align',
 				'valign',
-			)
+			]
 		);
 	}
 }

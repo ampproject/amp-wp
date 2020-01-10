@@ -33,7 +33,7 @@ class AMP_Pinterest_Embed_Handler extends AMP_Base_Embed_Handler {
 		wp_embed_register_handler(
 			'amp-pinterest',
 			self::URL_PATTERN,
-			array( $this, 'oembed' ),
+			[ $this, 'oembed' ],
 			-1
 		);
 	}
@@ -51,11 +51,10 @@ class AMP_Pinterest_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @param array  $matches URL pattern matches.
 	 * @param array  $attr    Matched attributes.
 	 * @param string $url     Matched URL.
-	 * @param string $rawattr Raw attributes string.
 	 * @return string HTML markup for rendered embed.
 	 */
-	public function oembed( $matches, $attr, $url, $rawattr ) {
-		return $this->render( array( 'url' => $url ) );
+	public function oembed( $matches, $attr, $url ) {
+		return $this->render( [ 'url' => $url ] );
 	}
 
 	/**
@@ -67,9 +66,9 @@ class AMP_Pinterest_Embed_Handler extends AMP_Base_Embed_Handler {
 	public function render( $args ) {
 		$args = wp_parse_args(
 			$args,
-			array(
+			[
 				'url' => false,
-			)
+			]
 		);
 
 		if ( empty( $args['url'] ) ) {
@@ -80,12 +79,12 @@ class AMP_Pinterest_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		return AMP_HTML_Utils::build_tag(
 			'amp-pinterest',
-			array(
+			[
 				'width'    => $this->args['width'],
 				'height'   => $this->args['height'],
 				'data-do'  => 'embedPin',
 				'data-url' => $args['url'],
-			)
+			]
 		);
 	}
 }

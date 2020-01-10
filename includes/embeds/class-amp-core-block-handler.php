@@ -17,23 +17,25 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 *
 	 * @var array
 	 */
-	protected $block_ampify_methods = array(
+	protected $block_ampify_methods = [
 		'core/categories' => 'ampify_categories_block',
 		'core/archives'   => 'ampify_archives_block',
-	);
+		'core/video'      => 'ampify_video_block',
+		'core/cover'      => 'ampify_cover_block',
+	];
 
 	/**
 	 * Register embed.
 	 */
 	public function register_embed() {
-		add_filter( 'render_block', array( $this, 'filter_rendered_block' ), 0, 2 );
+		add_filter( 'render_block', [ $this, 'filter_rendered_block' ], 0, 2 );
 	}
 
 	/**
 	 * Unregister embed.
 	 */
 	public function unregister_embed() {
-		remove_filter( 'render_block', array( $this, 'filter_rendered_block' ), 0 );
+		remove_filter( 'render_block', [ $this, 'filter_rendered_block' ], 0 );
 	}
 
 	/**
@@ -44,11 +46,22 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 * @return string Filtered block content.
 	 */
 	public function filter_rendered_block( $block_content, $block ) {
-		if ( isset( $block['blockName'] ) && isset( $this->block_ampify_methods[ $block['blockName'] ] ) ) {
-			$block_content = call_user_func(
-				array( $this, $this->block_ampify_methods[ $block['blockName'] ] ),
-				$block_content
-			);
+		if ( ! isset( $block['blockName'] ) ) {
+			return $block_content;
+		}
+		if ( isset( $this->block_ampify_methods[ $block['blockName'] ] ) ) {
+			$method_name   = $this->block_ampify_methods[ $block['blockName'] ];
+			$block_content = $this->{$method_name}( $block_content, $block );
+		} elseif ( 'core/image' === $block['blockName'] || 'core/audio' === $block['blockName'] ) {
+			/*
+			 * While the video block placeholder just outputs an empty video element, the placeholders for image and
+			 * audio blocks output empty <img> and <audio> respectively. These will result in AMP validation errors,
+			 * so we need to empty out the block content to prevent this from happening. Note that <source> is used
+			 * for <img> because eventually the image block could use <picture>.
+			 */
+			if ( ! preg_match( '/src=|<source/', $block_content ) ) {
+				$block_content = '';
+			}
 		}
 		return $block_content;
 	}
@@ -115,4 +128,54 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		return $block_content;
 	}
 
+	/**
+	 * Ampify video block.
+	 *
+	 * Inject the video attachment's dimensions if available. This prevents having to try to look up the attachment
+	 * post by the video URL in `\AMP_Video_Sanitizer::filter_video_dimensions()`.
+	 *
+	 * @see \AMP_Video_Sanitizer::filter_video_dimensions()
+	 *
+	 * @param string $block_content The block content about to be appended.
+	 * @param array  $block         The full block, including name and attributes.
+	 * @return string Filtered block content.
+	 */
+	public function ampify_video_block( $block_content, $block ) {
+		if ( empty( $block['attrs']['id'] ) || 'attachment' !== get_post_type( $block['attrs']['id'] ) ) {
+			return $block_content;
+		}
+
+		$meta_data = wp_get_attachment_metadata( $block['attrs']['id'] );
+		if ( isset( $meta_data['width'], $meta_data['height'] ) ) {
+			$block_content = preg_replace(
+				'/(?<=<video\s)/',
+				sprintf( 'width="%d" height="%d" ', $meta_data['width'], $meta_data['height'] ),
+				$block_content
+			);
+		}
+
+		return $block_content;
+	}
+
+	/**
+	 * Ampify cover block.
+	 *
+	 * This specifically fixes the layout of the block when a background video is assigned.
+	 *
+	 * @see \AMP_Video_Sanitizer::filter_video_dimensions()
+	 *
+	 * @param string $block_content The block content about to be appended.
+	 * @param array  $block         The full block, including name and attributes.
+	 * @return string Filtered block content.
+	 */
+	public function ampify_cover_block( $block_content, $block ) {
+		if ( isset( $block['attrs']['backgroundType'] ) && 'video' === $block['attrs']['backgroundType'] ) {
+			$block_content = preg_replace(
+				'/(?<=<video\s)/',
+				'layout="fill" object-fit="cover" ',
+				$block_content
+			);
+		}
+		return $block_content;
+	}
 }

@@ -1,8 +1,44 @@
 /* eslint-env node */
-/* eslint-disable camelcase, no-console, no-param-reassign */
 
 module.exports = function( grunt ) {
 	'use strict';
+	require( 'dotenv' ).config();
+
+	// Root paths to include in the plugin build ZIP when running `npm run build`.
+	const productionIncludedRootFiles = [
+		'LICENSE',
+		'amp.php',
+		'assets',
+		'back-compat',
+		'includes',
+		'readme.txt',
+		'src',
+		'templates',
+		'vendor',
+	];
+
+	// These patterns paths will be excluded from among the above directory.
+	const productionExcludedPathPatterns = [
+		/.*\/src\/.*/,
+		/.*images\/stories-editor\/.*\.svg/,
+	];
+
+	// These will be removed from the vendor directory after installing but prior to creating a ZIP.
+	// ⚠️ Warning: These paths are passed straight to rm command in the shell, without any escaping.
+	const productionVendorExcludedFilePatterns = [
+		'composer.*',
+		'vendor/*/*/.editorconfig',
+		'vendor/*/*/.gitignore',
+		'vendor/*/*/composer.*',
+		'vendor/*/*/Doxyfile',
+		'vendor/*/*/LICENSE',
+		'vendor/*/*/phpunit.*',
+		'vendor/*/*/*.md',
+		'vendor/*/*/*.txt',
+		'vendor/*/*/*.yml',
+		'vendor/*/*/.*.yml',
+		'vendor/*/*/tests',
+	];
 
 	grunt.initConfig( {
 
@@ -11,34 +47,37 @@ module.exports = function( grunt ) {
 		// Clean up the build.
 		clean: {
 			compiled: {
-				src: [ 'assets/js/*-compiled.js' ]
+				src: [
+					'assets/js/*.js',
+					'!assets/js/amp-service-worker-runtime-precaching.js',
+					'!assets/js/amp-service-worker-offline-commenting.js',
+					'!assets/js/amp-wp-app-shell.js',
+					'assets/js/*.asset.php',
+				],
 			},
 			build: {
-				src: [ 'build' ]
-			}
+				src: [ 'build' ],
+			},
 		},
 
 		// Shell actions.
 		shell: {
 			options: {
 				stdout: true,
-				stderr: true
+				stderr: true,
 			},
 			readme: {
-				command: './vendor/xwp/wp-dev-lib/scripts/generate-markdown-readme' // Generate the readme.md.
-			},
-			phpunit: {
-				command: 'phpunit'
+				command: './vendor/xwp/wp-dev-lib/scripts/generate-markdown-readme', // Generate the readme.md.
 			},
 			verify_matching_versions: {
-				command: 'php bin/verify-version-consistency.php'
+				command: 'php bin/verify-version-consistency.php',
 			},
-			webpack_production: {
-				command: 'cross-env BABEL_ENV=production webpack'
+			composer_install: {
+				command: 'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi; cd build; composer install --no-dev -o && composer remove cweagans/composer-patches --update-no-dev -o && rm -r ' + productionVendorExcludedFilePatterns.join( ' ' ),
 			},
 			create_build_zip: {
-				command: 'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi; if [ -e amp.zip ]; then rm amp.zip; fi; cd build; zip -r ../amp.zip .; cd ..; echo; echo "ZIP of build: $(pwd)/amp.zip"'
-			}
+				command: 'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi; if [ -e amp.zip ]; then rm amp.zip; fi; cd build; zip -r ../amp.zip .; cd ..; echo; echo "ZIP of build: $(pwd)/amp.zip"',
+			},
 		},
 
 		// Deploys a git Repo to the WordPress SVN repo.
@@ -47,11 +86,18 @@ module.exports = function( grunt ) {
 				options: {
 					plugin_slug: 'amp',
 					build_dir: 'build',
-					assets_dir: 'wp-assets'
-				}
-			}
-		}
-
+					assets_dir: 'wp-assets',
+				},
+			},
+		},
+		http: {
+			google_fonts: {
+				options: {
+					url: 'https://www.googleapis.com/webfonts/v1/webfonts?fields=items&prettyPrint=false&key=' + process.env.GOOGLE_FONTS_API_KEY,
+				},
+				dest: 'includes/data/fonts.json',
+			},
+		},
 	} );
 
 	// Load tasks.
@@ -59,53 +105,57 @@ module.exports = function( grunt ) {
 	grunt.loadNpmTasks( 'grunt-contrib-copy' );
 	grunt.loadNpmTasks( 'grunt-shell' );
 	grunt.loadNpmTasks( 'grunt-wp-deploy' );
+	grunt.loadNpmTasks( 'grunt-http' );
 
 	// Register tasks.
 	grunt.registerTask( 'default', [
-		'build'
+		'build',
 	] );
 
 	grunt.registerTask( 'readme', [
-		'shell:readme'
+		'shell:readme',
 	] );
 
 	grunt.registerTask( 'build', function() {
-		var done, spawnQueue, stdout;
-		done = this.async();
-		spawnQueue = [];
-		stdout = [];
-
-		// Clear out all existing compiled files first.
-		grunt.task.run( 'clean' );
-
-		grunt.task.run( 'shell:webpack_production' );
+		const done = this.async();
+		const spawnQueue = [];
+		const stdout = [];
 
 		spawnQueue.push(
 			{
 				cmd: 'git',
-				args: [ '--no-pager', 'log', '-1', '--format=%h', '--date=short' ]
+				args: [ '--no-pager', 'log', '-1', '--format=%h', '--date=short' ],
 			},
 			{
 				cmd: 'git',
-				args: [ 'ls-files' ]
-			}
+				args: [ 'ls-files' ],
+			},
 		);
 
 		function finalize() {
-			var commitHash, lsOutput, versionAppend, paths;
-			commitHash = stdout.shift();
-			lsOutput = stdout.shift();
-			versionAppend = new Date().toISOString().replace( /\.\d+/, '' ).replace( /-|:/g, '' ) + '-' + commitHash;
+			const commitHash = stdout.shift();
+			const lsOutput = stdout.shift();
+			const versionAppend = new Date().toISOString().replace( /\.\d+/, '' ).replace( /-|:/g, '' ) + '-' + commitHash;
 
-			paths = lsOutput.trim().split( /\n/ ).filter( function( file ) {
-				return ! /^(blocks|\.|bin|([^/]+)+\.(md|json|xml)|Gruntfile\.js|tests|wp-assets|readme\.md|composer\..*|patches|webpack.*|assets\/src)/.test( file );
+			const paths = lsOutput.trim().split( /\n/ ).filter( function( file ) {
+				const topSegment = file.replace( /\/.*/, '' );
+				if ( ! productionIncludedRootFiles.includes( topSegment ) ) {
+					return false;
+				}
+
+				for ( const productionExcludedPathPattern of productionExcludedPathPatterns ) {
+					if ( productionExcludedPathPattern.test( file ) ) {
+						return false;
+					}
+				}
+
+				return true;
 			} );
-			paths.push( 'vendor/autoload.php' );
-			paths.push( 'assets/js/*-compiled.js' );
-			paths.push( 'vendor/composer/**' );
-			paths.push( 'vendor/sabberworm/php-css-parser/lib/**' );
-			paths.push( 'vendor/fasterimage/fasterimage/src/**' );
-			paths.push( 'vendor/willwashburn/stream/src/**' );
+
+			paths.push( 'composer.*' ); // Copy in order to be able to do run composer_install.
+			paths.push( 'assets/js/*.js' ); // @todo Also include *.map files?
+			paths.push( 'assets/js/*.asset.php' );
+			paths.push( 'assets/css/*.css' );
 
 			grunt.config.set( 'copy', {
 				build: {
@@ -113,9 +163,9 @@ module.exports = function( grunt ) {
 					dest: 'build',
 					expand: true,
 					options: {
-						noProcess: [ '*/**', 'LICENSE', 'jetpack-helper.php', 'wpcom-helper.php' ], // That is, only process amp.php and readme.txt.
-						process: function( content, srcpath ) {
-							var matches, version, versionRegex;
+						noProcess: [ '*/**', 'LICENSE' ], // That is, only process amp.php and readme.txt.
+						process( content, srcpath ) {
+							let matches, version, versionRegex;
 							if ( /amp\.php$/.test( srcpath ) ) {
 								versionRegex = /(\*\s+Version:\s+)(\d+(\.\d+)+-\w+)/;
 
@@ -123,24 +173,28 @@ module.exports = function( grunt ) {
 								matches = content.match( versionRegex );
 								if ( matches ) {
 									version = matches[ 2 ] + '-' + versionAppend;
-									console.log( 'Updating version in amp.php to ' + version );
+									console.log( 'Updating version in amp.php to ' + version ); // eslint-disable-line no-console
 									content = content.replace( versionRegex, '$1' + version );
 									content = content.replace( /(define\(\s*'AMP__VERSION',\s*')(.+?)(?=')/, '$1' + version );
 								}
+
+								// Remove dev mode code blocks.
+								content = content.replace( /\n\/\/\s*DEV_CODE.+?\n}\n/s, '' );
 							}
 							return content;
-						}
-					}
-				}
+						},
+					},
+				},
 			} );
 			grunt.task.run( 'readme' );
 			grunt.task.run( 'copy' );
+			grunt.task.run( 'shell:composer_install' );
 
 			done();
 		}
 
 		function doNext() {
-			var nextSpawnArgs = spawnQueue.shift();
+			const nextSpawnArgs = spawnQueue.shift();
 			if ( ! nextSpawnArgs ) {
 				finalize();
 			} else {
@@ -152,7 +206,7 @@ module.exports = function( grunt ) {
 						}
 						stdout.push( res.stdout );
 						doNext();
-					}
+					},
 				);
 			}
 		}
@@ -160,13 +214,34 @@ module.exports = function( grunt ) {
 		doNext();
 	} );
 
+	grunt.registerTask( 'process-fonts', function() {
+		const fileName = 'includes/data/fonts.json';
+		let map = grunt.file.readJSON( fileName );
+		map = JSON.stringify( map );
+		map = JSON.parse( map );
+		if ( map ) {
+			const stripped = map.items.map( ( font ) => {
+				return {
+					family: font.family,
+					variants: font.variants,
+					category: font.category,
+				};
+			} );
+			grunt.file.write( fileName, JSON.stringify( stripped ) );
+		}
+	} );
+
+	grunt.registerTask( 'download-fonts', [
+		'http',
+		'process-fonts',
+	] );
+
 	grunt.registerTask( 'create-build-zip', [
-		'shell:create_build_zip'
+		'shell:create_build_zip',
 	] );
 
 	grunt.registerTask( 'deploy', [
-		'shell:phpunit',
 		'shell:verify_matching_versions',
-		'wp_deploy'
+		'wp_deploy',
 	] );
 };

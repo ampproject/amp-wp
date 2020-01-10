@@ -58,11 +58,11 @@ class AMP_Widget_Archives extends WP_Widget_Archives {
 					/** This filter is documented in wp-includes/widgets/class-wp-widget-archives.php */
 					$dropdown_args = apply_filters(
 						'widget_archives_dropdown_args',
-						array(
+						[
 							'type'            => 'monthly',
 							'format'          => 'option',
 							'show_post_count' => $c,
-						)
+						]
 					);
 
 					switch ( $dropdown_args['type'] ) {
@@ -95,10 +95,10 @@ class AMP_Widget_Archives extends WP_Widget_Archives {
 				wp_get_archives(
 					apply_filters(
 						'widget_archives_args',
-						array(
+						[
 							'type'            => 'monthly',
 							'show_post_count' => $c,
-						)
+						]
 					)
 				);
 				?>

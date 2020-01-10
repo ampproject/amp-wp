@@ -12,13 +12,38 @@
 class AMP_HTTP {
 
 	/**
+	 * Query var which is submitted with a form which had an action attribute which was automatically converted into action-xhr.
+	 *
+	 * @see \AMP_Form_Sanitizer::sanitize()
+	 * @var string
+	 */
+	const ACTION_XHR_CONVERTED_QUERY_VAR = '_wp_amp_action_xhr_converted';
+
+	/**
 	 * Headers sent (or attempted to be sent).
+	 *
+	 * This is used primarily for the benefit of unit testing. Otherwise, `headers_list()` should be used.
 	 *
 	 * @since 1.0
 	 * @see AMP_HTTP::send_header()
 	 * @var array[]
 	 */
-	public static $headers_sent = array();
+	public static $headers_sent = [];
+
+	/**
+	 * Whether Server-Timing headers are sent.
+	 *
+	 * By default this is false to prevent breaking some web servers with an unexpected number of response headers. To
+	 * enable in `WP_DEBUG` mode, consider the following plugin code:
+	 *
+	 *     add_action( 'amp_init', function () {
+	 *         AMP_HTTP::$server_timing = ( ( defined( 'WP_DEBUG' ) && WP_DEBUG ) || current_user_can( 'manage_options' ) );
+	 *     } );
+	 *
+	 * @link https://gist.github.com/westonruter/053f8f47c21df51f1a081fc41b47f547
+	 * @var bool
+	 */
+	public static $server_timing = false;
 
 	/**
 	 * AMP-specific query vars that were purged.
@@ -28,7 +53,7 @@ class AMP_HTTP {
 	 * @see AMP_HTTP::purge_amp_query_vars()
 	 * @var string[]
 	 */
-	public static $purged_amp_query_vars = array();
+	public static $purged_amp_query_vars = [];
 
 	/**
 	 * Send an HTTP response header.
@@ -48,12 +73,12 @@ class AMP_HTTP {
 	 * }
 	 * @return bool Whether the header was sent.
 	 */
-	public static function send_header( $name, $value, $args = array() ) {
+	public static function send_header( $name, $value, $args = [] ) {
 		$args = array_merge(
-			array(
+			[
 				'replace'     => true,
 				'status_code' => null,
-			),
+			],
 			$args
 		);
 
@@ -83,12 +108,12 @@ class AMP_HTTP {
 	 * @return bool Return value of send_header call. If WP_DEBUG is not enabled or admin user (who can manage_options) is not logged-in, this will always return false.
 	 */
 	public static function send_server_timing( $name, $duration = null, $description = null ) {
-		if ( ! WP_DEBUG && ! current_user_can( 'manage_options' ) ) {
+		if ( ! self::$server_timing ) {
 			return false;
 		}
 		$value = $name;
 		if ( isset( $description ) ) {
-			$value .= sprintf( ';desc="%s"', str_replace( array( '\\', '"' ), '', substr( $description, 0, 100 ) ) );
+			$value .= sprintf( ';desc="%s"', str_replace( [ '\\', '"' ], '', substr( $description, 0, 100 ) ) );
 		}
 		if ( isset( $duration ) ) {
 			if ( $duration < 0 ) {
@@ -96,7 +121,7 @@ class AMP_HTTP {
 			}
 			$value .= sprintf( ';dur=%f', $duration * 1000 );
 		}
-		return self::send_header( 'Server-Timing', $value, array( 'replace' => false ) );
+		return self::send_header( 'Server-Timing', $value, [ 'replace' => false ] );
 	}
 
 	/**
@@ -113,35 +138,35 @@ class AMP_HTTP {
 	 * @since 1.0 Moved to AMP_HTTP class.
 	 */
 	public static function purge_amp_query_vars() {
-		$query_vars = array(
+		$query_vars = [
 			'__amp_source_origin',
-			'_wp_amp_action_xhr_converted',
+			self::ACTION_XHR_CONVERTED_QUERY_VAR,
 			'amp_latest_update_time',
 			'amp_last_check_time',
 			AMP_Theme_Support::APP_SHELL_COMPONENT_QUERY_VAR,
-		);
+		];
 
 		// Scrub input vars.
 		foreach ( $query_vars as $query_var ) {
-			if ( ! isset( $_GET[ $query_var ] ) ) { // phpcs:ignore
+			if ( ! isset( $_GET[ $query_var ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				continue;
 			}
-			self::$purged_amp_query_vars[ $query_var ] = wp_unslash( $_GET[ $query_var ] ); // phpcs:ignore
-			unset( $_REQUEST[ $query_var ], $_GET[ $query_var ] );
+			self::$purged_amp_query_vars[ $query_var ] = wp_unslash( $_GET[ $query_var ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			unset( $_REQUEST[ $query_var ], $_GET[ $query_var ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$scrubbed = true;
 		}
 
 		if ( isset( $scrubbed ) ) {
-			$build_query = function ( $query ) use ( $query_vars ) {
-				$pattern = '/^(' . join( '|', $query_vars ) . ')(?==|$)/';
-				$pairs   = array();
+			$build_query = static function ( $query ) use ( $query_vars ) {
+				$pattern = '/^(' . implode( '|', $query_vars ) . ')(?==|$)/';
+				$pairs   = [];
 				foreach ( explode( '&', $query ) as $pair ) {
 					if ( ! preg_match( $pattern, $pair ) ) {
 						$pairs[] = $pair;
 					}
 				}
 
-				return join( '&', $pairs );
+				return implode( '&', $pairs );
 			};
 
 			// Scrub QUERY_STRING.
@@ -198,17 +223,17 @@ class AMP_HTTP {
 	 * @return array AMP cache hosts.
 	 */
 	public static function get_amp_cache_hosts() {
-		$hosts = array();
+		$hosts = [];
 
 		// Google AMP Cache (legacy).
 		$hosts[] = 'cdn.ampproject.org';
 
 		// From the publisher’s own origins.
 		$domains = array_unique(
-			array(
+			[
 				wp_parse_url( site_url(), PHP_URL_HOST ),
 				wp_parse_url( home_url(), PHP_URL_HOST ),
-			)
+			]
 		);
 
 		/*
@@ -223,14 +248,10 @@ class AMP_HTTP {
 				// phpcs:ignore PHPCompatibility.Constants.RemovedConstants.intl_idna_variant_2003Deprecated
 				$domain = idn_to_utf8( $domain, IDNA_DEFAULT, defined( 'INTL_IDNA_VARIANT_UTS46' ) ? INTL_IDNA_VARIANT_UTS46 : INTL_IDNA_VARIANT_2003 );
 			}
-			$subdomain = str_replace( '-', '--', $domain );
-			$subdomain = str_replace( '.', '-', $subdomain );
+			$subdomain = str_replace( [ '-', '.' ], [ '--', '-' ], $domain );
 
 			// Google AMP Cache subdomain.
 			$hosts[] = sprintf( '%s.cdn.ampproject.org', $subdomain );
-
-			// Cloudflare AMP Cache.
-			$hosts[] = sprintf( '%s.amp.cloudflare.com', $subdomain );
 
 			// Bing AMP Cache.
 			$hosts[] = sprintf( '%s.bing-amp.com', $subdomain );
@@ -285,13 +306,13 @@ class AMP_HTTP {
 		}
 
 		if ( $origin ) {
-			self::send_header( 'Access-Control-Allow-Origin', $origin, array( 'replace' => false ) );
+			self::send_header( 'Access-Control-Allow-Origin', $origin, [ 'replace' => false ] );
 			self::send_header( 'Access-Control-Allow-Credentials', 'true' );
-			self::send_header( 'Vary', 'Origin', array( 'replace' => false ) );
+			self::send_header( 'Vary', 'Origin', [ 'replace' => false ] );
 		}
 		if ( $source_origin ) {
 			self::send_header( 'AMP-Access-Control-Allow-Source-Origin', $source_origin );
-			self::send_header( 'Access-Control-Expose-Headers', 'AMP-Access-Control-Allow-Source-Origin', array( 'replace' => false ) );
+			self::send_header( 'Access-Control-Expose-Headers', 'AMP-Access-Control-Allow-Source-Origin', [ 'replace' => false ] );
 		}
 	}
 
@@ -303,7 +324,7 @@ class AMP_HTTP {
 	 */
 	public static function handle_xhr_request() {
 		$is_amp_xhr = (
-			! empty( self::$purged_amp_query_vars['_wp_amp_action_xhr_converted'] )
+			! empty( self::$purged_amp_query_vars[ self::ACTION_XHR_CONVERTED_QUERY_VAR ] )
 			&&
 			( ! empty( $_SERVER['REQUEST_METHOD'] ) && 'POST' === $_SERVER['REQUEST_METHOD'] )
 		);
@@ -312,18 +333,17 @@ class AMP_HTTP {
 		}
 
 		// Intercept POST requests which redirect.
-		add_filter( 'wp_redirect', array( __CLASS__, 'intercept_post_request_redirect' ), PHP_INT_MAX );
+		add_filter( 'wp_redirect', [ __CLASS__, 'intercept_post_request_redirect' ], PHP_INT_MAX );
 
 		// Add special handling for redirecting after comment submission.
-		add_filter( 'comment_post_redirect', array( __CLASS__, 'filter_comment_post_redirect' ), PHP_INT_MAX, 2 );
+		add_filter( 'comment_post_redirect', [ __CLASS__, 'filter_comment_post_redirect' ], PHP_INT_MAX, 2 );
 
 		// Add die handler for AMP error display, most likely due to problem with comment.
-		add_filter(
-			'wp_die_handler',
-			function () {
-				return array( __CLASS__, 'handle_wp_die' );
-			}
-		);
+		$handle_wp_die = static function () {
+			return [ __CLASS__, 'handle_wp_die' ];
+		};
+		add_filter( 'wp_die_json_handler', $handle_wp_die );
+		add_filter( 'wp_die_handler', $handle_wp_die ); // Needed for WP<5.1.
 	}
 
 	/**
@@ -339,11 +359,11 @@ class AMP_HTTP {
 
 		// Make sure relative redirects get made absolute.
 		$parsed_location = array_merge(
-			array(
+			[
 				'scheme' => 'https',
 				'host'   => wp_parse_url( home_url(), PHP_URL_HOST ),
 				'path'   => isset( $_SERVER['REQUEST_URI'] ) ? strtok( wp_unslash( $_SERVER['REQUEST_URI'] ), '?' ) : '/',
-			),
+			],
 			wp_parse_url( $location )
 		);
 
@@ -364,9 +384,15 @@ class AMP_HTTP {
 		}
 
 		self::send_header( 'AMP-Redirect-To', $absolute_location );
-		self::send_header( 'Access-Control-Expose-Headers', 'AMP-Redirect-To', array( 'replace' => false ) );
+		self::send_header( 'Access-Control-Expose-Headers', 'AMP-Redirect-To', [ 'replace' => false ] );
 
-		wp_send_json_success();
+		wp_send_json(
+			[
+				'message'     => __( 'Redirecting…', 'amp' ),
+				'redirecting' => true, // Make sure that the submit-success doesn't get styled as success since redirection _could_ be to error page.
+			],
+			200
+		);
 	}
 
 	/**
@@ -387,8 +413,10 @@ class AMP_HTTP {
 	 *
 	 *     @type int $response The HTTP response code. Default 200 for Ajax requests, 500 otherwise.
 	 * }
+	 * @global string $pagenow
 	 */
-	public static function handle_wp_die( $error, $title = '', $args = array() ) {
+	public static function handle_wp_die( $error, $title = '', $args = [] ) {
+		global $pagenow;
 		if ( is_int( $title ) ) {
 			$status_code = $title;
 		} elseif ( is_int( $args ) ) {
@@ -398,7 +426,20 @@ class AMP_HTTP {
 		} else {
 			$status_code = 500;
 		}
-		status_header( $status_code );
+
+		/*
+		 * Handle apparent defect in core where invalid comment form submissions return with a 200 status code.
+		 * Successful requests to wp-comments-post.php should always end up doing a redirect after applying the
+		 * comment_post_redirect filter, and as such the \AMP_HTTP::filter_comment_post_redirect() method will
+		 * ensure that redirect works in AMP. When there is no comment_post_redirect then the alternative is a wp_die()
+		 * scenario which should always be considered an error. This workaround is important because otherwise an error
+		 * case will get rendered unexpectedly in the div[submit-success] element, when it should be rendered in the
+		 * div[submit-error] element. For a fix to the core defect which will make this unnecessary,
+		 * see <https://core.trac.wordpress.org/ticket/47393>.
+		 */
+		if ( 200 === $status_code && isset( $pagenow ) && 'wp-comments-post.php' === $pagenow ) {
+			$status_code = 400;
+		}
 
 		if ( is_wp_error( $error ) ) {
 			$error = $error->get_error_message();
@@ -406,9 +447,10 @@ class AMP_HTTP {
 
 		// Message will be shown in template defined by AMP_Theme_Support::amend_comment_form().
 		wp_send_json(
-			array(
-				'error' => amp_wp_kses_mustache( $error ),
-			)
+			[
+				'message' => amp_wp_kses_mustache( $error ),
+			],
+			$status_code
 		);
 	}
 
@@ -454,11 +496,31 @@ class AMP_HTTP {
 
 		// Message will be shown in template defined by AMP_Theme_Support::amend_comment_form().
 		wp_send_json(
-			array(
+			[
 				'message' => amp_wp_kses_mustache( $message ),
-			)
+			],
+			200
 		);
 
 		return null;
+	}
+
+	/**
+	 * Get the Content-Type for the response.
+	 *
+	 * @since 1.2
+	 *
+	 * @return string Content type.
+	 */
+	public static function get_response_content_type() {
+		$content_type = ini_get( 'default_mimetype' );
+		foreach ( headers_list() as $header ) {
+			list( $name, $value ) = explode( ':', $header, 2 );
+			if ( 'content-type' === strtolower( $name ) ) {
+				$content_type = trim( $value );
+				break;
+			}
+		}
+		return $content_type;
 	}
 }
