@@ -143,6 +143,7 @@ function TextEdit( { id, content, color, backgroundColor, width, height, fontFam
 }
 
 TextEdit.propTypes = {
+	id: PropTypes.string.isRequired,
 	content: PropTypes.string,
 	color: PropTypes.string,
 	backgroundColor: PropTypes.string,
