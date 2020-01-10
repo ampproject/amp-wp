@@ -593,10 +593,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				],
 			];
 			return [
-				'body' => sprintf(
-					'<html amp><head></head><body></body><!--%s--></html>',
-					'AMP_VALIDATION:' . wp_json_encode( $validation )
-				),
+				'body' => wp_json_encode( $validation ),
 			];
 		};
 		add_filter( 'pre_http_request', $filter, 10, 3 );
@@ -680,10 +677,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				],
 			];
 			return [
-				'body' => sprintf(
-					'<html amp><head></head><body></body><!--%s--></html>',
-					'AMP_VALIDATION:' . wp_json_encode( $validation )
-				),
+				'body' => wp_json_encode( $validation ),
 			];
 		};
 		add_filter( 'pre_http_request', $filter, 10, 3 );

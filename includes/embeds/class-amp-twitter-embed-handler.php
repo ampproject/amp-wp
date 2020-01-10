@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use Amp\AmpWP\Dom\Document;
+
 /**
  * Class AMP_Twitter_Embed_Handler
  *
@@ -105,14 +107,9 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Sanitized <blockquote class="twitter-tweet"> tags to <amp-twitter>.
 	 *
-	 * @param DOMDocument $dom DOM.
+	 * @param Document $dom DOM.
 	 */
-	public function sanitize_raw_embeds( $dom ) {
-		/**
-		 * Node list.
-		 *
-		 * @var DOMNodeList $node
-		 */
+	public function sanitize_raw_embeds( Document $dom ) {
 		$nodes     = $dom->getElementsByTagName( $this->sanitize_tag );
 		$num_nodes = $nodes->length;
 
@@ -152,10 +149,10 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Make final modifications to DOMNode
 	 *
-	 * @param DOMDocument $dom The HTML Document.
-	 * @param DOMElement  $node The DOMNode to adjust and replace.
+	 * @param Document   $dom The HTML Document.
+	 * @param DOMElement $node The DOMNode to adjust and replace.
 	 */
-	private function create_amp_twitter_and_replace_node( $dom, $node ) {
+	private function create_amp_twitter_and_replace_node( Document $dom, DOMElement $node ) {
 		$tweet_id = $this->get_tweet_id( $node );
 		if ( ! $tweet_id ) {
 			return;

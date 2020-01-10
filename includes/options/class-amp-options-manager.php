@@ -550,17 +550,15 @@ class AMP_Options_Manager {
 	 */
 	public static function persistent_object_caching_notice() {
 		if ( ! wp_using_ext_object_cache() && 'toplevel_page_' . self::OPTION_NAME === get_current_screen()->id ) {
+			echo '<div class="notice notice-warning"><p>';
+			esc_html_e( 'The AMP plugin performs at its best when persistent object cache is enabled. Object caching is used to more effectively store image dimensions and parsed CSS. It also allows for post-processor caching to be used.', 'amp' );
+			echo ' ';
 			printf(
-				'<div class="notice notice-warning"><p>%s</p></div>',
-				wp_kses(
-					sprintf(
-						/* translators: %s: Persistent object cache support URL */
-						__( 'The AMP plugin performs at its best when persistent object cache is enabled. <a href="%s">More details</a>', 'amp' ),
-						esc_url( __( 'https://codex.wordpress.org/Class_Reference/WP_Object_Cache#Persistent_Caching', 'amp' ) )
-					),
-					[ 'a' => [ 'href' => true ] ]
-				)
+				'<a href="%s">%s</a>',
+				esc_url( __( 'https://codex.wordpress.org/Class_Reference/WP_Object_Cache#Persistent_Caching', 'amp' ) ),
+				esc_html__( 'More details', 'amp' )
 			);
+			echo '</p></div>';
 		}
 	}
 
@@ -578,17 +576,15 @@ class AMP_Options_Manager {
 			return;
 		}
 
+		echo '<div class="notice notice-warning is-dismissible"><p>';
+		esc_html_e( 'The AMP plugin&lsquo;s post-processor cache was disabled due to the detection of highly-variable content.', 'amp' );
+		echo ' ';
 		printf(
-			'<div class="notice notice-warning is-dismissible"><p>%s</p></div>',
-			wp_kses(
-				sprintf(
-					/* translators: %s: post-processor cache support URL */
-					__( 'The AMP plugin&lsquo;s post-processor cache was disabled due to the detection of highly-variable content. <a href="%s">More details</a>', 'amp' ),
-					esc_url( __( 'https://github.com/ampproject/amp-wp/wiki/Post-Processor-Cache', 'amp' ) )
-				),
-				[ 'a' => [ 'href' => true ] ]
-			)
+			'<a href="%s">%s</a>',
+			esc_url( __( 'https://github.com/ampproject/amp-wp/wiki/Post-Processor-Cache', 'amp' ) ),
+			esc_html__( 'More details', 'amp' )
 		);
+		echo '</p></div>';
 	}
 
 	/**

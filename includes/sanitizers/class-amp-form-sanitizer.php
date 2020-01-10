@@ -25,7 +25,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 	public static $tag = 'form';
 
 	/**
-	 * Sanitize the <form> elements from the HTML contained in this instance's DOMDocument.
+	 * Sanitize the <form> elements from the HTML contained in this instance's Dom\Document.
 	 *
 	 * @link https://www.ampproject.org/docs/reference/components/amp-form
 	 * @since 0.7
@@ -67,9 +67,21 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 				$action_url = esc_url_raw( '//' . $_SERVER['HTTP_HOST'] . wp_unslash( $_SERVER['REQUEST_URI'] ) );
 			} else {
 				$action_url = $node->getAttribute( 'action' );
-				// Check if action_url is a relative path and add the host to it.
+
+				// Handle relative URLs.
 				if ( ! preg_match( '#^(https?:)?//#', $action_url ) ) {
-					$action_url = esc_url_raw( '//' . $_SERVER['HTTP_HOST'] . $action_url );
+					$schemeless_host = '//' . $_SERVER['HTTP_HOST'];
+					if ( '?' === $action_url[0] || '#' === $action_url[0] ) {
+						// For actions consisting of only a query or URL fragment, include the schemeless-host and the REQUEST URI of the current page.
+						$action_url = $schemeless_host . wp_unslash( $_SERVER['REQUEST_URI'] ) . $action_url;
+					} elseif ( '.' === $action_url[0] ) {
+						// For actions consisting of relative paths (e.g. '../'), prepend the schemeless-host and a trailing-slashed REQUEST URI.
+						$action_url = $schemeless_host . trailingslashit( wp_unslash( $_SERVER['REQUEST_URI'] ) ) . $action_url;
+					} else {
+						// Otherwise, when the action URL includes an absolute path, just append it to the schemeless-host.
+						$action_url = $schemeless_host . $action_url;
+					}
+					$action_url = esc_url_raw( $action_url );
 				}
 			}
 			$xhr_action = $node->getAttribute( 'action-xhr' );

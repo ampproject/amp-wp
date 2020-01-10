@@ -5,19 +5,20 @@
  * @package AMP
  */
 
-use \Sabberworm\CSS\RuleSet\DeclarationBlock;
-use \Sabberworm\CSS\CSSList\CSSList;
-use \Sabberworm\CSS\Property\Selector;
-use \Sabberworm\CSS\RuleSet\RuleSet;
-use \Sabberworm\CSS\Property\AtRule;
-use \Sabberworm\CSS\Rule\Rule;
-use \Sabberworm\CSS\CSSList\KeyFrame;
-use \Sabberworm\CSS\RuleSet\AtRuleSet;
-use \Sabberworm\CSS\Property\Import;
-use \Sabberworm\CSS\CSSList\AtRuleBlockList;
-use \Sabberworm\CSS\Value\RuleValueList;
-use \Sabberworm\CSS\Value\URL;
-use \Sabberworm\CSS\CSSList\Document;
+use Amp\AmpWP\Dom\Document;
+use Sabberworm\CSS\RuleSet\DeclarationBlock;
+use Sabberworm\CSS\CSSList\CSSList;
+use Sabberworm\CSS\Property\Selector;
+use Sabberworm\CSS\RuleSet\RuleSet;
+use Sabberworm\CSS\Property\AtRule;
+use Sabberworm\CSS\Rule\Rule;
+use Sabberworm\CSS\CSSList\KeyFrame;
+use Sabberworm\CSS\RuleSet\AtRuleSet;
+use Sabberworm\CSS\Property\Import;
+use Sabberworm\CSS\CSSList\AtRuleBlockList;
+use Sabberworm\CSS\Value\RuleValueList;
+use Sabberworm\CSS\Value\URL;
+use Sabberworm\CSS\CSSList\Document as CSSDocument;
 
 /**
  * Class AMP_Style_Sanitizer
@@ -249,27 +250,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private $used_tag_names;
 
 	/**
-	 * XPath.
-	 *
-	 * @since 1.0
-	 * @var DOMXPath
-	 */
-	private $xpath;
-
-	/**
 	 * Amount of time that was spent parsing CSS.
 	 *
 	 * @since 1.0
 	 * @var float
 	 */
 	private $parse_css_duration = 0.0;
-
-	/**
-	 * THe HEAD element.
-	 *
-	 * @var DOMElement
-	 */
-	private $head;
 
 	/**
 	 * Current node being processed.
@@ -397,10 +383,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 0.7
 	 *
-	 * @param DOMDocument $dom  Represents the HTML document to sanitize.
-	 * @param array       $args Args.
+	 * @param Document $dom  Represents the HTML document to sanitize.
+	 * @param array    $args Args.
 	 */
-	public function __construct( DOMDocument $dom, array $args = [] ) {
+	public function __construct( $dom, array $args = [] ) {
 		parent::__construct( $dom, $args );
 
 		foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( 'style' ) as $spec_rule ) {
@@ -428,11 +414,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 		$this->base_url    = untrailingslashit( $guessurl );
 		$this->content_url = WP_CONTENT_URL;
-		$this->xpath       = new DOMXPath( $dom );
 	}
 
 	/**
-	 * Get list of CSS styles in HTML content of DOMDocument ($this->dom).
+	 * Get list of CSS styles in HTML content of Dom\Document ($this->dom).
 	 *
 	 * @since 0.4
 	 * @deprecated As of 1.0, use get_stylesheets().
@@ -487,12 +472,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		];
 
 		$classes = ' ';
-		foreach ( $this->xpath->query( '//*/@class' ) as $class_attribute ) {
+		foreach ( $this->dom->xpath->query( '//*/@class' ) as $class_attribute ) {
 			$classes .= ' ' . $class_attribute->nodeValue;
 		}
 
 		// Find all [class] attributes and capture the contents of any single- or double-quoted strings.
-		foreach ( $this->xpath->query( '//*/@' . AMP_DOM_Utils::AMP_BIND_DATA_ATTR_PREFIX . 'class' ) as $bound_class_attribute ) {
+		foreach ( $this->dom->xpath->query( '//*/@' . Document::AMP_BIND_DATA_ATTR_PREFIX . 'class' ) as $bound_class_attribute ) {
 			if ( preg_match_all( '/([\'"])([^\1]*?)\1/', $bound_class_attribute->nodeValue, $matches ) ) {
 				$classes .= ' ' . implode( ' ', $matches[2] );
 			}
@@ -504,7 +489,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		);
 
 		// Find all instances of the toggleClass() action to prevent the class name from being tree-shaken.
-		foreach ( $this->xpath->query( '//*/@on[ contains( ., "toggleClass" ) ]' ) as $on_attribute ) {
+		foreach ( $this->dom->xpath->query( '//*/@on[ contains( ., "toggleClass" ) ]' ) as $on_attribute ) {
 			if ( preg_match_all( '/\.\s*toggleClass\s*\(\s*class\s*=\s*(([\'"])([^\1]*?)\2|[a-zA-Z0-9_\-]+)/', $on_attribute->nodeValue, $matches ) ) {
 				$class_names = array_merge(
 					$class_names,
@@ -726,7 +711,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			if ( ! isset( $this->used_attributes[ $attribute_name ] ) ) {
 				$expression = sprintf( '(//@%s)[1]', $attribute_name );
 
-				$this->used_attributes[ $attribute_name ] = ( 0 !== $this->xpath->query( $expression )->length );
+				$this->used_attributes[ $attribute_name ] = ( 0 !== $this->dom->xpath->query( $expression )->length );
 			}
 
 			// Attributes for amp-accordion, see <https://amp.dev/documentation/components/amp-accordion/#styling>.
@@ -792,7 +777,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Sanitize CSS styles within the HTML contained in this instance's DOMDocument.
+	 * Sanitize CSS styles within the HTML contained in this instance's Dom\Document.
 	 *
 	 * @since 0.4
 	 */
@@ -811,19 +796,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				null
 		);
 
-		$this->head = $this->dom->getElementsByTagName( 'head' )->item( 0 );
-		if ( ! $this->head ) {
-			$this->head = $this->dom->createElement( 'head' );
-			$this->dom->documentElement->insertBefore( $this->head, $this->dom->documentElement->firstChild );
-		}
-
 		$this->parse_css_duration = 0.0;
 
 		/*
 		 * Note that xpath is used to query the DOM so that the link and style elements will be
 		 * in document order. DOMNode::compareDocumentPosition() is not yet implemented.
 		 */
-		$xpath = $this->xpath;
 
 		$dev_mode_predicate = '';
 		if ( $this->is_document_in_dev_mode() ) {
@@ -836,7 +814,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			sprintf( '( self::link and @href and %s = "stylesheet" %s )', sprintf( $lower_case, '@rel' ), $dev_mode_predicate ),
 		];
 
-		foreach ( $xpath->query( '//*[ ' . implode( ' or ', $predicates ) . ' ]' ) as $element ) {
+		foreach ( $this->dom->xpath->query( '//*[ ' . implode( ' or ', $predicates ) . ' ]' ) as $element ) {
 			$elements[] = $element;
 		}
 
@@ -876,13 +854,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 				// If the element is still in the document, it is a font stylesheet; make sure it gets moved to the head as required.
 				if ( $element->parentNode && 'head' !== $element->parentNode->nodeName ) {
-					$this->head->appendChild( $element->parentNode->removeChild( $element ) );
+					$this->dom->head->appendChild( $element->parentNode->removeChild( $element ) );
 				}
 			}
 		}
 
 		$elements = [];
-		foreach ( $xpath->query( "//*[ @style $dev_mode_predicate ]" ) as $element ) {
+		foreach ( $this->dom->xpath->query( "//*[ @style $dev_mode_predicate ]" ) as $element ) {
 			$elements[] = $element;
 		}
 		foreach ( $elements as $element ) {
@@ -1272,7 +1250,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$needs_preconnect_link = (
 				'https://fonts.googleapis.com/' === substr( $normalized_url, 0, 29 )
 				&&
-				0 === $this->xpath->query( '//link[ @rel = "preconnect" and @crossorigin and starts-with( @href, "https://fonts.gstatic.com" ) ]', $this->head )->length
+				0 === $this->dom->xpath->query( '//link[ @rel = "preconnect" and @crossorigin and starts-with( @href, "https://fonts.gstatic.com" ) ]', $this->dom->head )->length
 			);
 			if ( $needs_preconnect_link ) {
 				$link = AMP_DOM_Utils::create_node(
@@ -1284,7 +1262,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						'crossorigin' => '',
 					]
 				);
-				$this->head->insertBefore( $link ); // Note that \AMP_Theme_Support::ensure_required_markup() will put this in the optimal order.
+				$this->dom->head->insertBefore( $link ); // Note that \AMP_Theme_Support::ensure_required_markup() will put this in the optimal order.
 			}
 			return;
 		}
@@ -1571,7 +1549,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			/**
 			 * CSS Doc.
 			 *
-			 * @var Document $css_document
+			 * @var CSSDocument $css_document
 			 */
 			$css_document = $parsed_stylesheet['css_document'];
 
@@ -1596,10 +1574,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array {
 	 *    Parsed stylesheet.
 	 *
-	 *    @type Document $css_document       CSS Document.
-	 *    @type array    $validation_results Validation results, array containing arrays with error and sanitized keys.
-	 *    @type string   $stylesheet_url     Stylesheet URL, if available.
-	 *    @type string   $spec_name          Spec name.
+	 *    @type CSSDocument $css_document       CSS Document.
+	 *    @type array       $validation_results Validation results, array containing arrays with error and sanitized keys.
+	 *    @type string      $stylesheet_url     Stylesheet URL, if available.
+	 *    @type string      $spec_name          Spec name.
 	 * }
 	 */
 	private function parse_stylesheet( $stylesheet_string, $options ) {
@@ -2482,14 +2460,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Collect and store all CSS style attributes.
 	 *
-	 * Collects the CSS styles from within the HTML contained in this instance's DOMDocument.
+	 * Collects the CSS styles from within the HTML contained in this instance's Dom\Document.
 	 *
 	 * @see Retrieve array of styles using $this->get_styles() after calling this method.
 	 *
 	 * @since 0.4
 	 * @since 0.7 Modified to use element passed by XPath query.
 	 *
-	 * @note Uses recursion to traverse down the tree of DOMDocument nodes.
+	 * @note Uses recursion to traverse down the tree of Dom\Document nodes.
 	 *
 	 * @param DOMElement $element Node.
 	 */
@@ -2595,7 +2573,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			if ( ! $this->amp_custom_style_element ) {
 				$this->amp_custom_style_element = $this->dom->createElement( 'style' );
 				$this->amp_custom_style_element->setAttribute( 'amp-custom', '' );
-				$this->head->appendChild( $this->amp_custom_style_element );
+				$this->dom->head->appendChild( $this->amp_custom_style_element );
 			}
 
 			/*
@@ -2752,37 +2730,31 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$link = $this->dom->createElement( 'link' );
 			$link->setAttribute( 'rel', 'stylesheet' );
 			$link->setAttribute( 'href', $imported_font_url );
-			$this->head->appendChild( $link );
+			$this->dom->head->appendChild( $link );
 		}
 
 		// Add style[amp-keyframes] to document.
 		if ( $stylesheet_groups[ self::STYLE_AMP_KEYFRAMES_GROUP_INDEX ]['included_count'] > 0 ) {
-			$body = $this->dom->getElementsByTagName( 'body' )->item( 0 );
-			if ( ! $body ) {
-				$body = $this->dom->createElement( 'body' );
-				$this->dom->documentElement->appendChild( $body );
-			} else {
-				$css = $stylesheet_groups[ self::STYLE_AMP_KEYFRAMES_GROUP_INDEX ]['import_front_matter'];
+			$css = $stylesheet_groups[ self::STYLE_AMP_KEYFRAMES_GROUP_INDEX ]['import_front_matter'];
 
-				$css .= implode(
-					'',
-					wp_list_pluck(
-						array_filter(
-							$this->pending_stylesheets,
-							static function( $pending_stylesheet ) {
-								return $pending_stylesheet['included'] && self::STYLE_AMP_KEYFRAMES_GROUP_INDEX === $pending_stylesheet['group'];
-							}
-						),
-						'stylesheet'
-					)
-				);
-				$css .= $stylesheet_groups[ self::STYLE_AMP_KEYFRAMES_GROUP_INDEX ]['source_map_comment'];
+			$css .= implode(
+				'',
+				wp_list_pluck(
+					array_filter(
+						$this->pending_stylesheets,
+						static function( $pending_stylesheet ) {
+							return $pending_stylesheet['included'] && self::STYLE_AMP_KEYFRAMES_GROUP_INDEX === $pending_stylesheet['group'];
+						}
+					),
+					'stylesheet'
+				)
+			);
+			$css .= $stylesheet_groups[ self::STYLE_AMP_KEYFRAMES_GROUP_INDEX ]['source_map_comment'];
 
-				$style_element = $this->dom->createElement( 'style' );
-				$style_element->setAttribute( 'amp-keyframes', '' );
-				$style_element->appendChild( $this->dom->createTextNode( $css ) );
-				$body->appendChild( $style_element );
-			}
+			$style_element = $this->dom->createElement( 'style' );
+			$style_element->setAttribute( 'amp-keyframes', '' );
+			$style_element->appendChild( $this->dom->createTextNode( $css ) );
+			$this->dom->body->appendChild( $style_element );
 		}
 
 		$this->remove_admin_bar_if_css_excluded();
@@ -2824,11 +2796,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		if ( ! $included ) {
 			// Remove admin-bar class from body element.
 			// @todo It would be nice if any style rules which refer to .admin-bar could also be removed, but this would mean retroactively going back over the CSS again and re-shaking it.
-			$body = $this->dom->getElementsByTagName( 'body' )->item( 0 );
-			if ( $body instanceof DOMElement && $body->hasAttribute( 'class' ) ) {
-				$body->setAttribute(
+			if ( $this->dom->body->hasAttribute( 'class' ) ) {
+				$this->dom->body->setAttribute(
 					'class',
-					preg_replace( '/(^|\s)admin-bar(\s|$)/', ' ', $body->getAttribute( 'class' ) )
+					preg_replace( '/(^|\s)admin-bar(\s|$)/', ' ', $this->dom->body->getAttribute( 'class' ) )
 				);
 			}
 

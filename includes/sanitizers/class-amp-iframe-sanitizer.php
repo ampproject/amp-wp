@@ -64,7 +64,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Sanitize the <iframe> elements from the HTML contained in this instance's DOMDocument.
+	 * Sanitize the <iframe> elements from the HTML contained in this instance's Dom\Document.
 	 *
 	 * @since 0.2
 	 */
@@ -219,7 +219,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 
 				case 'allowfullscreen':
 				case 'allowtransparency':
-					if ( 'false' !== $value ) {
+					if ( 'false' !== strtolower( $value ) ) {
 						$out[ $name ] = '';
 					}
 					break;
@@ -227,6 +227,31 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 				case 'mozallowfullscreen':
 				case 'webkitallowfullscreen':
 					// Omit these since amp-iframe will add them if needed if the `allowfullscreen` attribute is present.
+					break;
+
+				case 'loading':
+					/*
+					 * The `amp-iframe` component already does lazy-loading by default; trigger a validation error only
+					 * if the value is not `lazy`.
+					 */
+					if ( 'lazy' !== strtolower( $value ) ) {
+						$out[ $name ] = $value;
+					}
+					break;
+
+				case 'security':
+					/*
+					 * Omit the `security` attribute as it now been superseded by the `sandbox` attribute. It is
+					 * (apparently) only supported by IE <https://stackoverflow.com/a/20071528>.
+					 */
+					break;
+
+				case 'marginwidth':
+				case 'marginheight':
+					// These attributes have been obsolete since HTML5. If they have the value `0` they can be omitted.
+					if ( '0' !== $value ) {
+						$out[ $name ] = $value;
+					}
 					break;
 
 				default:

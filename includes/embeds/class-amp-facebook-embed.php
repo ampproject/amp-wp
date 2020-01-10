@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use Amp\AmpWP\Dom\Document;
+
 /**
  * Class AMP_Facebook_Embed_Handler
  */
@@ -99,14 +101,9 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Sanitized <div class="fb-video" data-href=> tags to <amp-facebook>.
 	 *
-	 * @param DOMDocument $dom DOM.
+	 * @param Document $dom DOM.
 	 */
-	public function sanitize_raw_embeds( $dom ) {
-		/**
-		 * Node list.
-		 *
-		 * @var DOMNodeList $node
-		 */
+	public function sanitize_raw_embeds( Document $dom ) {
 		$nodes     = $dom->getElementsByTagName( $this->sanitize_tag );
 		$num_nodes = $nodes->length;
 
@@ -134,9 +131,8 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 		 */
 		$fb_root = $dom->getElementById( 'fb-root' );
 		if ( $fb_root ) {
-			$xpath   = new DOMXPath( $dom );
 			$scripts = [];
-			foreach ( $xpath->query( '//script[ starts-with( @src, "https://connect.facebook.net" ) and contains( @src, "sdk.js" ) ]' ) as $script ) {
+			foreach ( $dom->xpath->query( '//script[ starts-with( @src, "https://connect.facebook.net" ) and contains( @src, "sdk.js" ) ]' ) as $script ) {
 				$scripts[] = $script;
 			}
 			foreach ( $scripts as $script ) {
@@ -152,7 +148,7 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @param DOMElement $node The DOMNode to adjust and replace.
 	 * @return string|null Embed type or null if not detected.
 	 */
-	private function get_embed_type( $node ) {
+	private function get_embed_type( DOMElement $node ) {
 		$class_attr = $node->getAttribute( 'class' );
 		if ( null === $class_attr || ! $node->hasAttribute( 'data-href' ) ) {
 			return null;
@@ -188,21 +184,19 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Create amp-facebook and replace node.
 	 *
-	 * @param DOMDocument $dom        The HTML Document.
-	 * @param DOMElement  $node       The DOMNode to adjust and replace.
-	 * @param string      $embed_type Embed type.
+	 * @param Document   $dom        The HTML Document.
+	 * @param DOMElement $node       The DOMNode to adjust and replace.
+	 * @param string     $embed_type Embed type.
 	 */
-	private function create_amp_facebook_and_replace_node( $dom, $node, $embed_type ) {
+	private function create_amp_facebook_and_replace_node( Document $dom, DOMElement $node, $embed_type ) {
 
 		$attributes = [
-			'layout' => 'responsive',
-			'width'  => $node->hasAttribute( 'data-width' ) ? $node->getAttribute( 'data-width' ) : $this->DEFAULT_WIDTH,
-			'height' => $node->hasAttribute( 'data-height' ) ? $node->getAttribute( 'data-height' ) : $this->DEFAULT_HEIGHT,
+			// The layout sanitizer will convert this to `layout` when being sanitized.
+			// The data attribute needs to be used so that the layout sanitizer will process it.
+			'data-amp-layout' => 'responsive',
+			'width'           => $node->hasAttribute( 'data-width' ) ? $node->getAttribute( 'data-width' ) : $this->DEFAULT_WIDTH,
+			'height'          => $node->hasAttribute( 'data-height' ) ? $node->getAttribute( 'data-height' ) : $this->DEFAULT_HEIGHT,
 		];
-		if ( '100%' === $attributes['width'] ) {
-			$attributes['layout'] = 'fixed-height';
-			$attributes['width']  = 'auto';
-		}
 
 		$node->removeAttribute( 'data-width' );
 		$node->removeAttribute( 'data-height' );

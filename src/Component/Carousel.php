@@ -7,7 +7,8 @@
 
 namespace Amp\AmpWP\Component;
 
-use DOMDocument;
+use Amp\AmpWP\Dom\Document;
+use Amp\AmpWP\Dom\ElementList;
 use DOMElement;
 use AMP_DOM_Utils;
 
@@ -38,24 +39,24 @@ final class Carousel {
 	/**
 	 * An object representation of the DOM.
 	 *
-	 * @var DOMDocument
+	 * @var Document
 	 */
 	private $dom;
 
 	/**
 	 * The slides to add to the carousel, possibly images.
 	 *
-	 * @var DOMElementList
+	 * @var ElementList
 	 */
 	private $slides;
 
 	/**
 	 * Instantiates the class.
 	 *
-	 * @param DOMDocument    $dom    The dom to use to create a carousel.
-	 * @param DOMElementList $slides The slides from which to create a carousel.
+	 * @param Document    $dom    The dom to use to create a carousel.
+	 * @param ElementList $slides The slides from which to create a carousel.
 	 */
-	public function __construct( $dom, DOMElementList $slides ) {
+	public function __construct( Document $dom, ElementList $slides ) {
 		$this->dom    = $dom;
 		$this->slides = $slides;
 	}
@@ -83,15 +84,15 @@ final class Carousel {
 			$caption         = $slide instanceof HasCaption ? $slide->get_caption() : null;
 			$slide_container = AMP_DOM_Utils::create_node(
 				$this->dom,
-				'div',
+				'span', // This cannot be a <div> because if the gallery is inside of a <p>, then the DOM will break.
 				[ 'class' => 'slide' ]
 			);
 
 			// Ensure an image fills the entire <amp-carousel>, so the possible caption looks right.
-			if ( 'amp-img' === $slide_node->tagName ) {
+			if ( $this->is_image_element( $slide_node ) ) {
 				$slide_node->setAttribute( 'layout', 'fill' );
 				$slide_node->setAttribute( 'object-fit', 'cover' );
-			} elseif ( isset( $slide_node->firstChild->tagName ) && 'amp-img' === $slide_node->firstChild->tagName ) {
+			} elseif ( $slide_node->firstChild instanceof DOMElement && $this->is_image_element( $slide_node->firstChild ) ) {
 				// If the <amp-img> is wrapped in an <a>.
 				$slide_node->firstChild->setAttribute( 'layout', 'fill' );
 				$slide_node->firstChild->setAttribute( 'object-fit', 'cover' );
@@ -99,11 +100,11 @@ final class Carousel {
 
 			$slide_container->appendChild( $slide_node );
 
-			// If there's a caption, wrap it in a <div> and <span>, and append it to the slide.
+			// If there's a caption, wrap it and append it to the slide.
 			if ( $caption ) {
 				$caption_wrapper = AMP_DOM_Utils::create_node(
 					$this->dom,
-					'div',
+					'span', // This cannot be a <div> because if the gallery is inside of a <p>, then the DOM will break.
 					[ 'class' => 'amp-wp-gallery-caption' ]
 				);
 				$caption_span    = AMP_DOM_Utils::create_node( $this->dom, 'span', [] );
@@ -145,7 +146,7 @@ final class Carousel {
 		foreach ( $this->slides as $slide ) {
 			$slide_node = $slide instanceof HasCaption ? $slide->get_slide_node() : $slide;
 			// Account for an <amp-img> that's wrapped in an <a>.
-			if ( 'amp-img' !== $slide_node->tagName && isset( $slide_node->firstChild->tagName ) && 'amp-img' === $slide_node->firstChild->tagName ) {
+			if ( ! $this->is_image_element( $slide_node ) && $slide_node->firstChild instanceof DOMElement && $this->is_image_element( $slide_node->firstChild ) ) {
 				$slide_node = $slide_node->firstChild;
 			}
 
@@ -173,5 +174,15 @@ final class Carousel {
 		}
 
 		return [ $carousel_width, $carousel_height ];
+	}
+
+	/**
+	 * Determine whether an element is an image (either an <amp-img> or an <img>).
+	 *
+	 * @param DOMElement $element Element.
+	 * @return bool If it is an image.
+	 */
+	private function is_image_element( DOMElement $element ) {
+		return 'amp-img' === $element->tagName || 'img' === $element->tagName;
 	}
 }

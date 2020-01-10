@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use Amp\AmpWP\Dom\Document;
+
 /**
  * Class AMP_Theme_Support
  *
@@ -362,7 +364,7 @@ class AMP_Theme_Support {
 				]
 			);
 			self::$support_added_via_option = $is_paired ? self::TRANSITIONAL_MODE_SLUG : self::STANDARD_MODE_SLUG;
-		} elseif ( AMP_Validation_Manager::is_theme_support_forced() ) {
+		} elseif ( true === AMP_Validation_Manager::should_validate_response() ) { // @todo Eventually reader mode should allow for validate requests.
 			self::$support_added_via_option = self::STANDARD_MODE_SLUG;
 			add_theme_support( self::SLUG );
 		}
@@ -1574,6 +1576,57 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Check if a handle is exclusively a dependency of another handle.
+	 *
+	 * For example, check if dashicons is being added exclusively because it is a dependency of admin-bar, as opposed
+	 * to being added because it was directly enqueued by a theme or a dependency of some other style.
+	 *
+	 * @since 1.4.2
+	 *
+	 * @param WP_Dependencies $dependencies      Dependencies.
+	 * @param string          $dependency_handle Dependency handle.
+	 * @param string          $dependent_handle  Dependent handle.
+	 * @return bool Whether the $handle is exclusively a handle of the $exclusive_dependency handle.
+	 */
+	protected static function is_exclusively_dependent( WP_Dependencies $dependencies, $dependency_handle, $dependent_handle ) {
+
+		// If a dependency handle is the same as the dependent handle, then this self-referential relationship is exclusive.
+		if ( $dependency_handle === $dependent_handle ) {
+			return true;
+		}
+
+		// Short-circuit if there is no dependency relationship up front.
+		if ( ! self::has_dependency( $dependencies, $dependent_handle, $dependency_handle ) ) {
+			return false;
+		}
+
+		// Check whether any enqueued handle depends on the dependency.
+		foreach ( $dependencies->queue as $queued_handle ) {
+			// Skip considering the dependent handle.
+			if ( $dependent_handle === $queued_handle ) {
+				continue;
+			}
+
+			// If the dependency handle was directly enqueued, then it is not exclusively dependent.
+			if ( $dependency_handle === $queued_handle ) {
+				return false;
+			}
+
+			// Otherwise, if the dependency handle is depended on by the queued handle while at the same time the queued
+			// handle _does_ have a dependency on the supplied dependent handle, then the dependency handle is not
+			// exclusively dependent on the dependent handle.
+			if (
+				self::has_dependency( $dependencies, $queued_handle, $dependency_handle )
+				&&
+				! self::has_dependency( $dependencies, $queued_handle, $dependent_handle )
+			) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
 	 * Add data-ampdevmode attribute to any enqueued style that depends on the admin-bar.
 	 *
 	 * @since 1.3
@@ -1583,30 +1636,11 @@ class AMP_Theme_Support {
 	 * @return string Tag.
 	 */
 	public static function filter_admin_bar_style_loader_tag( $tag, $handle ) {
-		if ( 'dashicons' === $handle ) {
-			// Conditionally include Dashicons in dev mode only if was included because it is a dependency of admin-bar.
-			$needs_dev_mode = true;
-			foreach ( wp_styles()->queue as $queued_handle ) {
-				if (
-					// If a theme or plugin directly enqueued dashicons, then it is not added via admin-bar dependency and it is not part of dev mode.
-					'dashicons' === $queued_handle
-					||
-					// If a stylesheet has dashicons as a dependency without also having admin-bar as a dependency, then no dev mode.
-					(
-						self::has_dependency( wp_styles(), $queued_handle, 'dashicons' )
-						&&
-						! self::has_dependency( wp_styles(), $queued_handle, 'admin-bar' )
-					)
-				) {
-					$needs_dev_mode = false;
-					break;
-				}
-			}
-		} else {
-			$needs_dev_mode = self::has_dependency( wp_styles(), $handle, 'admin-bar' );
-		}
-
-		if ( $needs_dev_mode ) {
+		if (
+			in_array( $handle, wp_styles()->registered['admin-bar']->deps, true ) ?
+				self::is_exclusively_dependent( wp_styles(), $handle, 'admin-bar' ) :
+				self::has_dependency( wp_styles(), $handle, 'admin-bar' )
+		) {
 			$tag = preg_replace( '/(?<=<link)(?=\s|>)/i', ' ' . AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, $tag );
 		}
 		return $tag;
@@ -1622,7 +1656,11 @@ class AMP_Theme_Support {
 	 * @return string Tag.
 	 */
 	public static function filter_admin_bar_script_loader_tag( $tag, $handle ) {
-		if ( self::has_dependency( wp_scripts(), $handle, 'admin-bar' ) ) {
+		if (
+			in_array( $handle, wp_scripts()->registered['admin-bar']->deps, true ) ?
+				self::is_exclusively_dependent( wp_scripts(), $handle, 'admin-bar' ) :
+				self::has_dependency( wp_scripts(), $handle, 'admin-bar' )
+		) {
 			$tag = preg_replace( '/(?<=<script)(?=\s|>)/i', ' ' . AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, $tag );
 		}
 		return $tag;
@@ -1640,10 +1678,10 @@ class AMP_Theme_Support {
 	 * @link https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/optimize_amp/
 	 * @todo All of this might be better placed inside of a sanitizer.
 	 *
-	 * @param DOMDocument $dom            Document.
-	 * @param string[]    $script_handles AMP script handles for components identified during output buffering.
+	 * @param Document $dom            Document.
+	 * @param string[] $script_handles AMP script handles for components identified during output buffering.
 	 */
-	public static function ensure_required_markup( DOMDocument $dom, $script_handles = [] ) {
+	public static function ensure_required_markup( Document $dom, $script_handles = [] ) {
 		/**
 		 * Elements.
 		 *
@@ -1654,23 +1692,14 @@ class AMP_Theme_Support {
 		 * @var DOMElement $noscript
 		 */
 
-		$xpath = new DOMXPath( $dom );
-
-		// Make sure the HEAD element is in the doc.
-		$head = $dom->getElementsByTagName( 'head' )->item( 0 );
-		if ( ! $head ) {
-			$head = $dom->createElement( 'head' );
-			$dom->documentElement->insertBefore( $head, $dom->documentElement->firstChild );
-		}
-
 		// Ensure there is a schema.org script in the document.
 		// @todo Consider applying the amp_schemaorg_metadata filter on the contents when a script is already present.
-		$schema_org_meta_script = $xpath->query( '//script[ @type = "application/ld+json" ][ contains( ./text(), "schema.org" ) ]' )->item( 0 );
+		$schema_org_meta_script = $dom->xpath->query( '//script[ @type = "application/ld+json" ][ contains( ./text(), "schema.org" ) ]' )->item( 0 );
 		if ( ! $schema_org_meta_script ) {
 			$script = $dom->createElement( 'script' );
 			$script->setAttribute( 'type', 'application/ld+json' );
 			$script->appendChild( $dom->createTextNode( wp_json_encode( amp_get_schemaorg_metadata(), JSON_UNESCAPED_UNICODE ) ) );
-			$head->appendChild( $script );
+			$dom->head->appendChild( $script );
 		}
 
 		// Gather all links.
@@ -1687,7 +1716,7 @@ class AMP_Theme_Support {
 				),
 			],
 		];
-		$link_elements = $head->getElementsByTagName( 'link' );
+		$link_elements = $dom->head->getElementsByTagName( 'link' );
 		foreach ( $link_elements as $link ) {
 			if ( $link->hasAttribute( 'rel' ) ) {
 				$links[ $link->getAttribute( 'rel' ) ][] = $link;
@@ -1705,97 +1734,18 @@ class AMP_Theme_Support {
 					'href' => self::get_current_canonical_url(),
 				]
 			);
-			$head->appendChild( $rel_canonical );
+			$dom->head->appendChild( $rel_canonical );
 		}
 
-		/*
-		 * Ensure meta charset and meta viewport are present.
-		 *
-		 * "AMP is already quite restrictive about which markup is allowed in the <head> section. However,
-		 * there are a few basic optimizations that you can apply. The key is to structure the <head> section
-		 * in a way so that all render-blocking scripts and custom fonts load as fast as possible."
-		 *
-		 * "1. The first tag should be the meta charset tag, followed by any remaining meta tags."
-		 *
-		 * {@link https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/optimize_amp/ Optimize the AMP Runtime loading}
-		 */
-		$meta_charset         = null;
-		$meta_viewport        = null;
-		$meta_amp_script_srcs = [];
-		$meta_elements        = [];
-		foreach ( $head->getElementsByTagName( 'meta' ) as $meta ) {
-			if ( $meta->hasAttribute( 'charset' ) ) { // There will not be a meta[http-equiv] because the sanitizer removed it.
-				$meta_charset = $meta;
-			} elseif ( 'viewport' === $meta->getAttribute( 'name' ) ) {
-				$meta_viewport = $meta;
-			} elseif ( 'amp-script-src' === $meta->getAttribute( 'name' ) ) {
-				$meta_amp_script_srcs[] = $meta;
-			} else {
-				$meta_elements[] = $meta;
-			}
-		}
-
-		// Handle meta charset.
-		if ( ! $meta_charset ) {
-			// Warning: This probably means the character encoding needs to be converted.
-			$meta_charset = AMP_DOM_Utils::create_node(
-				$dom,
-				'meta',
-				[
-					'charset' => 'utf-8',
-				]
-			);
-		} else {
-			$head->removeChild( $meta_charset ); // So we can move it.
-		}
-		$head->insertBefore( $meta_charset, $head->firstChild );
-
-		// Handle meta viewport.
-		if ( ! $meta_viewport ) {
-			$meta_viewport = AMP_DOM_Utils::create_node(
-				$dom,
-				'meta',
-				[
-					'name'    => 'viewport',
-					'content' => 'width=device-width',
-				]
-			);
-		} else {
-			$head->removeChild( $meta_viewport ); // So we can move it.
-		}
-		$head->insertBefore( $meta_viewport, $meta_charset->nextSibling );
-
-		// Handle meta amp-script-src elements.
-		$first_meta_amp_script_src = array_shift( $meta_amp_script_srcs );
-		if ( $first_meta_amp_script_src ) {
-			$meta_elements[] = $first_meta_amp_script_src;
-
-			// Merge (and remove) any subsequent meta amp-script-src elements.
-			if ( ! empty( $meta_amp_script_srcs ) ) {
-				$content_values = [ $first_meta_amp_script_src->getAttribute( 'content' ) ];
-				foreach ( $meta_amp_script_srcs as $meta_amp_script_src ) {
-					$meta_amp_script_src->parentNode->removeChild( $meta_amp_script_src );
-					$content_values[] = $meta_amp_script_src->getAttribute( 'content' );
-				}
-				$first_meta_amp_script_src->setAttribute( 'content', implode( ' ', $content_values ) );
-				unset( $meta_amp_script_src, $content_values );
-			}
-		}
-		unset( $meta_amp_script_srcs, $first_meta_amp_script_src );
-
-		// Insert all the the meta elements next in the head.
-		$previous_node = $meta_viewport;
-		foreach ( $meta_elements as $meta_element ) {
-			$meta_element->parentNode->removeChild( $meta_element );
-			$head->insertBefore( $meta_element, $previous_node->nextSibling );
-			$previous_node = $meta_element;
-		}
+		// Store the last meta tag as the previous node to append to.
+		$meta_tags     = $dom->head->getElementsByTagName( 'meta' );
+		$previous_node = $meta_tags->length > 0 ? $meta_tags->item( $meta_tags->length - 1 ) : $dom->head->firstChild;
 
 		// Handle the title.
-		$title = $head->getElementsByTagName( 'title' )->item( 0 );
+		$title = $dom->head->getElementsByTagName( 'title' )->item( 0 );
 		if ( $title ) {
 			$title->parentNode->removeChild( $title ); // So we can move it.
-			$head->insertBefore( $title, $previous_node->nextSibling );
+			$dom->head->insertBefore( $title, $previous_node->nextSibling );
 			$previous_node = $title;
 		}
 
@@ -1812,7 +1762,7 @@ class AMP_Theme_Support {
 		$head_scripts    = [];
 		$runtime_handle  = 'amp-runtime';
 		$runtime_src     = wp_scripts()->registered[ $runtime_handle ]->src;
-		foreach ( $head->getElementsByTagName( 'script' ) as $script ) { // Note that prepare_response() already moved body scripts to head.
+		foreach ( $dom->head->getElementsByTagName( 'script' ) as $script ) { // Note that prepare_response() already moved body scripts to head.
 			$head_scripts[] = $script;
 		}
 		foreach ( $head_scripts as $script ) {
@@ -1920,7 +1870,7 @@ class AMP_Theme_Support {
 				if ( $link->parentNode ) {
 					$link->parentNode->removeChild( $link ); // So we can move it.
 				}
-				$head->insertBefore( $link, $previous_node->nextSibling );
+				$dom->head->insertBefore( $link, $previous_node->nextSibling );
 				$previous_node = $link;
 			}
 		}
@@ -1954,25 +1904,25 @@ class AMP_Theme_Support {
 		 */
 		$ordered_scripts = array_merge( $ordered_scripts, $amp_scripts );
 		foreach ( $ordered_scripts as $ordered_script ) {
-			$head->insertBefore( $ordered_script, $previous_node->nextSibling );
+			$dom->head->insertBefore( $ordered_script, $previous_node->nextSibling );
 			$previous_node = $ordered_script;
 		}
 
 		/*
 		 * "8. Specify any custom styles by using the <style amp-custom> tag."
 		 */
-		$style = $xpath->query( './style[ @amp-custom ]', $head )->item( 0 );
+		$style = $dom->xpath->query( './style[ @amp-custom ]', $dom->head )->item( 0 );
 		if ( $style ) {
 			// Ensure the CSS manifest comment remains before style[amp-custom].
 			if ( $style->previousSibling instanceof DOMComment ) {
 				$comment = $style->previousSibling;
 				$comment->parentNode->removeChild( $comment );
-				$head->insertBefore( $comment, $previous_node->nextSibling );
+				$dom->head->insertBefore( $comment, $previous_node->nextSibling );
 				$previous_node = $comment;
 			}
 
 			$style->parentNode->removeChild( $style );
-			$head->insertBefore( $style, $previous_node->nextSibling );
+			$dom->head->insertBefore( $style, $previous_node->nextSibling );
 			$previous_node = $style;
 		}
 
@@ -1985,7 +1935,7 @@ class AMP_Theme_Support {
 		 * "10. Finally, specify the AMP boilerplate code. By putting the boilerplate code last, it prevents custom styles
 		 * from accidentally overriding the boilerplate css rules."
 		 */
-		$style = $xpath->query( './style[ @amp-boilerplate ]', $head )->item( 0 );
+		$style = $dom->xpath->query( './style[ @amp-boilerplate ]', $dom->head )->item( 0 );
 		if ( ! $style ) {
 			$style = $dom->createElement( 'style' );
 			$style->setAttribute( 'amp-boilerplate', '' );
@@ -1993,9 +1943,9 @@ class AMP_Theme_Support {
 		} else {
 			$style->parentNode->removeChild( $style ); // So we can move it.
 		}
-		$head->appendChild( $style );
+		$dom->head->appendChild( $style );
 
-		$noscript = $xpath->query( './noscript[ style[ @amp-boilerplate ] ]', $head )->item( 0 );
+		$noscript = $dom->xpath->query( './noscript[ style[ @amp-boilerplate ] ]', $dom->head )->item( 0 );
 		if ( ! $noscript ) {
 			$noscript = $dom->createElement( 'noscript' );
 			$style    = $dom->createElement( 'style' );
@@ -2005,7 +1955,7 @@ class AMP_Theme_Support {
 		} else {
 			$noscript->parentNode->removeChild( $noscript ); // So we can move it.
 		}
-		$head->appendChild( $noscript );
+		$dom->head->appendChild( $noscript );
 
 		unset( $previous_node );
 	}
@@ -2292,7 +2242,7 @@ class AMP_Theme_Support {
 		$enable_response_caching = (
 			$enable_response_caching
 			&&
-			! AMP_Validation_Manager::should_validate_response()
+			! AMP_Validation_Manager::$is_validate_request
 			&&
 			! is_customize_preview()
 		);
@@ -2470,9 +2420,7 @@ class AMP_Theme_Support {
 			);
 		}
 
-		$dom   = AMP_DOM_Utils::get_dom( $response );
-		$xpath = new DOMXPath( $dom );
-		$head  = $dom->getElementsByTagName( 'head' )->item( 0 );
+		$dom = Document::from_html( $response );
 
 		// Remove the children of the content if requesting the outer app shell.
 		$content_element = null;
@@ -2488,28 +2436,23 @@ class AMP_Theme_Support {
 		}
 
 		// Move anything after </html>, such as Query Monitor output added at shutdown, to be moved before </body>.
-		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
-		if ( $body ) {
-			while ( $dom->documentElement->nextSibling ) {
-				// Trailing elements after </html> will get wrapped in additional <html> elements.
-				if ( 'html' === $dom->documentElement->nextSibling->nodeName ) {
-					while ( $dom->documentElement->nextSibling->firstChild ) {
-						$body->appendChild( $dom->documentElement->nextSibling->firstChild );
-					}
-					$dom->removeChild( $dom->documentElement->nextSibling );
-				} else {
-					$body->appendChild( $dom->documentElement->nextSibling );
+		while ( $dom->documentElement->nextSibling ) {
+			// Trailing elements after </html> will get wrapped in additional <html> elements.
+			if ( 'html' === $dom->documentElement->nextSibling->nodeName ) {
+				while ( $dom->documentElement->nextSibling->firstChild ) {
+					$dom->body->appendChild( $dom->documentElement->nextSibling->firstChild );
 				}
+				$dom->removeChild( $dom->documentElement->nextSibling );
+			} else {
+				$dom->body->appendChild( $dom->documentElement->nextSibling );
 			}
 		}
 
 		AMP_HTTP::send_server_timing( 'amp_dom_parse', -$dom_parse_start, 'AMP DOM Parse' );
 
 		// Make sure scripts from the body get moved to the head.
-		if ( isset( $head ) ) {
-			foreach ( $xpath->query( '//body//script[ @custom-element or @custom-template or @src = "https://cdn.ampproject.org/v0.js" ]' ) as $script ) {
-				$head->appendChild( $script->parentNode->removeChild( $script ) );
-			}
+		foreach ( $dom->xpath->query( '//body//script[ @custom-element or @custom-template or @src = "https://cdn.ampproject.org/v0.js" ]' ) as $script ) {
+			$dom->head->appendChild( $script->parentNode->removeChild( $script ) );
 		}
 
 		// Ensure the mandatory amp attribute is present on the html element.
@@ -2518,6 +2461,12 @@ class AMP_Theme_Support {
 		}
 
 		$assets = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
+
+		// Respond early with results if performing a validate request.
+		if ( AMP_Validation_Manager::$is_validate_request ) {
+			header( 'Content-Type: application/json; charset=utf-8' );
+			return wp_json_encode( AMP_Validation_Manager::get_validate_response_data(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
+		}
 
 		// Determine what the validation errors are.
 		$blocking_error_count = 0;
@@ -2552,7 +2501,7 @@ class AMP_Theme_Support {
 
 		self::ensure_required_markup( $dom, array_keys( $amp_scripts ) );
 
-		if ( $blocking_error_count > 0 && ! AMP_Validation_Manager::should_validate_response() ) {
+		if ( $blocking_error_count > 0 && empty( AMP_Validation_Manager::$validation_error_status_overrides ) ) {
 			/*
 			 * In AMP-first, strip html@amp attribute to prevent GSC from complaining about a validation error
 			 * already surfaced inside of WordPress. This is intended to not serve dirty AMP, but rather a
@@ -2566,11 +2515,9 @@ class AMP_Theme_Support {
 				 * Make sure that document.write() is disabled to prevent dynamically-added content (such as added
 				 * via amp-live-list) from wiping out the page by introducing any scripts that call this function.
 				 */
-				if ( $head ) {
-					$script = $dom->createElement( 'script' );
-					$script->appendChild( $dom->createTextNode( 'document.addEventListener( "DOMContentLoaded", function() { document.write = function( text ) { throw new Error( "[AMP-WP] Prevented document.write() call with: "  + text ); }; } );' ) );
-					$head->appendChild( $script );
-				}
+				$script = $dom->createElement( 'script' );
+				$script->appendChild( $dom->createTextNode( 'document.addEventListener( "DOMContentLoaded", function() { document.write = function( text ) { throw new Error( "[AMP-WP] Prevented document.write() call with: "  + text ); }; } );' ) );
+				$dom->head->appendChild( $script );
 			} elseif ( ! self::is_customize_preview_iframe() ) {
 				$response = esc_html__( 'Redirecting to non-AMP version.', 'amp' );
 
@@ -2598,15 +2545,10 @@ class AMP_Theme_Support {
 			trigger_error( esc_html( sprintf( __( 'The database has the %s encoding when it needs to be utf-8 to work with AMP.', 'amp' ), get_bloginfo( 'charset' ) ) ), E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 		}
 
-		AMP_Validation_Manager::finalize_validation(
-			$dom,
-			[
-				'remove_source_comments' => ! isset( $_GET['amp_preserve_source_comments'] ), // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			]
-		);
+		AMP_Validation_Manager::finalize_validation( $dom );
 
 		$response  = "<!DOCTYPE html>\n";
-		$response .= AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
+		$response .= $dom->saveHTML( $dom->documentElement );
 
 		AMP_HTTP::send_server_timing( 'amp_dom_serialize', -$dom_serialize_start, 'AMP DOM Serialize' );
 
@@ -2744,7 +2686,7 @@ class AMP_Theme_Support {
 		add_filter(
 			'script_loader_tag',
 			static function( $tag, $handle ) {
-				if ( self::has_dependency( wp_scripts(), 'amp-paired-browsing-client', $handle ) ) {
+				if ( is_amp_endpoint() && self::has_dependency( wp_scripts(), 'amp-paired-browsing-client', $handle ) ) {
 					$attrs = [ AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, 'async' ];
 					$tag   = preg_replace( '/(?<=<script)(?=\s|>)/i', ' ' . implode( ' ', $attrs ), $tag );
 				}

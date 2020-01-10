@@ -422,7 +422,7 @@ function amp_register_default_scripts( $wp_scripts ) {
 	 * Polyfill dependencies that are registered in Gutenberg and WordPress 5.0.
 	 * Note that Gutenberg will override these at wp_enqueue_scripts if it is active.
 	 */
-	$handles = [ 'wp-i18n', 'wp-dom-ready', 'wp-server-side-render' ];
+	$handles = [ 'wp-i18n', 'wp-dom-ready', 'wp-polyfill', 'wp-server-side-render', 'wp-url' ];
 	foreach ( $handles as $handle ) {
 		if ( ! isset( $wp_scripts->registered[ $handle ] ) ) {
 			$asset_file   = AMP__DIR__ . '/assets/js/' . $handle . '.asset.php';
@@ -933,6 +933,8 @@ function amp_get_content_sanitizers( $post = null ) {
 		'AMP_Style_Sanitizer'             => [
 			'include_manifest_comment' => ( defined( 'WP_DEBUG' ) && WP_DEBUG ) ? 'always' : 'when_excessive',
 		],
+		'AMP_Meta_Sanitizer'              => [],
+		'AMP_Layout_Sanitizer'            => [],
 		'AMP_Tag_And_Attribute_Sanitizer' => [], // Note: This whitelist sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
 	];
 
@@ -989,7 +991,7 @@ function amp_get_content_sanitizers( $post = null ) {
 	}
 
 	// Force style sanitizer and whitelist sanitizer to be at end.
-	foreach ( [ 'AMP_Style_Sanitizer', 'AMP_Tag_And_Attribute_Sanitizer' ] as $class_name ) {
+	foreach ( [ 'AMP_Style_Sanitizer', 'AMP_Meta_Sanitizer', 'AMP_Tag_And_Attribute_Sanitizer' ] as $class_name ) {
 		if ( isset( $sanitizers[ $class_name ] ) ) {
 			$sanitizer = $sanitizers[ $class_name ];
 			unset( $sanitizers[ $class_name ] );

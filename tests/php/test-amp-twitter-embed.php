@@ -132,7 +132,7 @@ class AMP_Twitter_Embed_Test extends WP_UnitTestCase {
 
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 
-		$this->assertEquals( $content, $expected );
+		$this->assertEquals( $expected, $content );
 	}
 
 	public function get_scripts_data() {

@@ -67,8 +67,6 @@ jobs:
     # PHP unit tests (7.4, WordPress trunk)
     - env: WP_VERSION=trunk  DEV_LIB_ONLY=phpunit                               INSTALL_PWA_PLUGIN=1
       php: 7.4snapshot
-    # E2E tests, since flaky.
-    - env: WP_VERSION=latest DEV_LIB_SKIP=phpcs,eslint,xmllint,phpsyntax,phpunit PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=
   include:
     - stage: lint
       name: Lint (PHP, JavaScript, and configuration files)
@@ -128,16 +126,16 @@ jobs:
       php: "5.6"
       env: WP_VERSION=latest DEV_LIB_ONLY=phpunit,phpsyntax                      INSTALL_PWA_PLUGIN=1
 
-    - name: PHP unit tests (5.6, WordPress 5.1)
-      php: "5.6"
+    - name: PHP unit tests (5.4, WordPress 5.1)
+      php: "5.4"
       env: WP_VERSION=5.1    DEV_LIB_ONLY=phpunit
 
     - name: PHP unit tests (5.5, WordPress 5.0)
       php: "5.5"
       env: WP_VERSION=5.0    DEV_LIB_ONLY=phpunit,phpsyntax
 
-    - name: PHP unit tests w/ external-http (5.4, WordPress 4.9)
-      php: "5.4"
+    - name: PHP unit tests w/ external-http (5.6, WordPress 4.9)
+      php: "5.6"
       env: WP_VERSION=4.9    DEV_LIB_ONLY=phpunit,phpsyntax                     PHPUNIT_EXTRA_GROUP=external-http
 
     - name: PHP unit tests (7.3, WordPress trunk)

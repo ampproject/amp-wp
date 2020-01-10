@@ -82,7 +82,7 @@ class AMP_Crowdsignal_Embed_Test extends WP_UnitTestCase {
 		add_filter(
 			'pre_http_request',
 			static function ( $pre, $r, $request_url ) use ( $oembed_response ) {
-				if ( false === strpos( $request_url, 'crowdsignal' ) ) {
+				if ( ! preg_match( '/crowdsignal|polldaddy/', $request_url ) ) {
 					return $pre;
 				}
 

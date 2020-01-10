@@ -13,7 +13,7 @@ class AMP_Test_World_Sanitizer extends AMP_Base_Sanitizer {
 		$node = $this->dom->createElement( 'em' );
 		$text = $this->dom->createTextNode( 'World' );
 		$node->appendChild( $text );
-		$this->dom->getElementsByTagName( 'body' )->item( 0 )->appendChild( $node );
+		$this->dom->body->appendChild( $node );
 	}
 
 	public function get_scripts() {

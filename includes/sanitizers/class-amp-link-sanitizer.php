@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use Amp\AmpWP\Dom\Document;
+
 /**
  * Class AMP_Link_Sanitizer.
  *
@@ -63,10 +65,10 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Sanitizer constructor.
 	 *
-	 * @param DOMDocument $dom  Document.
-	 * @param array       $args Args.
+	 * @param Document $dom  Document.
+	 * @param array    $args Args.
 	 */
-	public function __construct( DOMDocument $dom, array $args = [] ) {
+	public function __construct( $dom, array $args = [] ) {
 		if ( ! isset( $args['meta_content'] ) ) {
 			$args['meta_content'] = self::DEFAULT_META_CONTENT;
 		}
@@ -96,14 +98,13 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return DOMElement|null The added meta element if successful.
 	 */
 	public function add_meta_tag( $content = self::DEFAULT_META_CONTENT ) {
-		$head = $this->dom->documentElement->getElementsByTagName( 'head' )->item( 0 );
-		if ( ! $head || ! $content ) {
+		if ( ! $content ) {
 			return null;
 		}
 		$meta = $this->dom->createElement( 'meta' );
 		$meta->setAttribute( 'name', 'amp-to-amp-navigation' );
 		$meta->setAttribute( 'content', $content );
-		$head->appendChild( $meta );
+		$this->dom->head->appendChild( $meta );
 		return $meta;
 	}
 
@@ -116,7 +117,6 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 		 *
 		 * @var DOMElement $element
 		 */
-		$xpath = new DOMXPath( $this->dom );
 
 		// Remove admin bar from DOM to prevent mutating it.
 		$admin_bar_container   = $this->dom->getElementById( 'wpadminbar' );
@@ -126,7 +126,7 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 			$admin_bar_container->parentNode->replaceChild( $admin_bar_placeholder, $admin_bar_container );
 		}
 
-		foreach ( $xpath->query( '//*[ local-name() = "a" or local-name() = "area" ]' ) as $element ) {
+		foreach ( $this->dom->xpath->query( '//*[ local-name() = "a" or local-name() = "area" ]' ) as $element ) {
 			if ( ! $element->hasAttribute( 'href' ) ) {
 				continue;
 			}
@@ -147,7 +147,7 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		foreach ( $xpath->query( '//form[ @action and translate( @method, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz") = "get" ]' ) as $element ) {
+		foreach ( $this->dom->xpath->query( '//form[ @action and translate( @method, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz") = "get" ]' ) as $element ) {
 			if ( $this->is_frontend_url( $element->getAttribute( 'action' ) ) ) {
 				$input = $this->dom->createElement( 'input' );
 				$input->setAttribute( 'name', amp_get_slug() );

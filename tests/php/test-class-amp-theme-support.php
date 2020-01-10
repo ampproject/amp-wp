@@ -6,6 +6,7 @@
  * @since 0.7
  */
 
+use Amp\AmpWP\Dom\Document;
 use org\bovigo\vfs;
 use Amp\AmpWP\Tests\PrivateAccess;
 
@@ -555,7 +556,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		<!DOCTYPE html>
 		<html lang="en-US" class="no-js">
 			<head>
-				<meta charset="UTF-8">
+				<meta charset="utf-8">
 				<meta name="viewport" content="maximum-scale=1.0">
 				<?php wp_head(); ?>
 			</head>
@@ -568,11 +569,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$original_html  = trim( ob_get_clean() );
 		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
 
-		// Invalid viewport meta tag is not present.
+		// Insufficient viewport tag was not left in.
 		$this->assertNotContains( '<meta name="viewport" content="maximum-scale=1.0">', $sanitized_html );
 
-		// Correct viewport meta tag was added.
-		$this->assertContains( '<meta name="viewport" content="width=device-width">', $sanitized_html );
+		// Viewport tag was modified to include all requirements.
+		$this->assertContains( '<meta name="viewport" content="width=device-width,maximum-scale=1.0">', $sanitized_html );
 
 		// MathML script was added.
 		$this->assertContains( '<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-mathml-0.1.js" async custom-element="amp-mathml"></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
@@ -1290,6 +1291,241 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Assert that the queried element exists.
+	 *
+	 * @param DOMXPath $xpath XPath.
+	 * @param string   $query Query.
+	 */
+	public function assert_queried_element_exists( DOMXPath $xpath, $query ) {
+		$element = $xpath->query( $query )->item( 0 );
+		$this->assertInstanceOf( 'DOMElement', $element, 'Expected element for query: ' . $query );
+	}
+
+	/**
+	 * Assert that dev mode attribute *is* on the queried element.
+	 *
+	 * @param DOMXPath $xpath XPath.
+	 * @param string   $query Query.
+	 */
+	public function assert_dev_mode_is_on_queried_element( DOMXPath $xpath, $query ) {
+		$element = $xpath->query( $query )->item( 0 );
+		$this->assertInstanceOf( 'DOMElement', $element, 'Expected element for query: ' . $query );
+		$this->assertTrue( $element->hasAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE ), 'Expected dev mode to be enabled on element for query: ' . $query );
+	}
+
+	/**
+	 * Assert that dev mode attribute is *not* on the queried element.
+	 *
+	 * @param DOMXPath $xpath XPath.
+	 * @param string   $query Query.
+	 */
+	public function assert_dev_mode_is_not_on_queried_element( DOMXPath $xpath, $query ) {
+		$element = $xpath->query( $query )->item( 0 );
+		$this->assertInstanceOf( 'DOMElement', $element, 'Expected element for query: ' . $query );
+		$this->assertFalse( $element->hasAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE ), 'Expected dev mode to not be enabled on element for query: ' . $query );
+	}
+
+	/**
+	 * Get data to test AMP_Theme_Support::filter_admin_bar_style_loader_tag().
+	 *
+	 * @return array
+	 */
+	public function get_data_to_test_filtering_admin_bar_style_loader_tag_data() {
+		return [
+			'admin_bar_exclusively_dependent'             => [
+				static function () {
+					wp_enqueue_style( 'example-admin-bar', 'https://example.com/example-admin-bar.css', [ 'admin-bar' ], '0.1' );
+				},
+				function ( DOMXPath $xpath ) {
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//link[ @id = "example-admin-bar-css" ]' );
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//link[ @id = "dashicons-css" ]' );
+				},
+			],
+
+			'dashicons_enqueued_independent_of_admin_bar' => [
+				static function () {
+					wp_enqueue_style( 'dashicons' );
+				},
+				function ( DOMXPath $xpath ) {
+					$this->assert_dev_mode_is_not_on_queried_element( $xpath, '//link[ @id = "dashicons-css" ]' );
+				},
+			],
+
+			'dashicons_enqueued_independent_of_also_enqueued_admin_bar' => [
+				static function () {
+					wp_enqueue_style( 'admin-bar' );
+					wp_enqueue_style( 'dashicons' );
+				},
+				function ( DOMXPath $xpath ) {
+					$this->assert_dev_mode_is_not_on_queried_element( $xpath, '//link[ @id = "dashicons-css" ]' );
+				},
+			],
+
+			'dashicons_not_dev_mode_because_non_admin_bar_dependency' => [
+				static function () {
+					wp_enqueue_style( 'admin-bar' );
+					wp_enqueue_style( 'special-icons', 'https://example.com/special-icons.css', [ 'dashicons' ], '0.1' );
+				},
+				function ( DOMXPath $xpath ) {
+					$this->assert_dev_mode_is_not_on_queried_element( $xpath, '//link[ @id = "dashicons-css" ]' );
+				},
+			],
+
+			'dashicons_in_dev_mode_because_all_dependents_depend_on_admin_bar' => [
+				static function () {
+					wp_enqueue_style( 'admin-bar' );
+					wp_enqueue_style( 'special-icons', 'https://example.com/special-icons.css', [ 'dashicons', 'admin-bar' ], '0.1' );
+				},
+				function ( DOMXPath $xpath ) {
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//link[ @id = "dashicons-css" ]' );
+				},
+			],
+
+			'dashicons_in_dev_mode_because_all_recursive_dependents_depend_on_admin_bar' => [
+				static function () {
+					wp_enqueue_style( 'admin-bar' );
+					wp_register_style( 'special-dashicons', 'https://example.com/special-dashicons.css', [ 'dashicons' ], '0.1' );
+					wp_enqueue_style( 'colorized-admin-bar', 'https://example.com/special-icons.css', [ 'admin-bar' ], '0.1' );
+					wp_enqueue_style( 'special-icons', 'https://example.com/special-icons.css', [ 'special-dashicons', 'colorized-admin-bar' ], '0.1' );
+				},
+				function ( DOMXPath $xpath ) {
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//link[ @id = "dashicons-css" ]' );
+				},
+			],
+		];
+	}
+
+	/**
+	 * Test filter_admin_bar_style_loader_tag.
+	 *
+	 * @dataProvider get_data_to_test_filtering_admin_bar_style_loader_tag_data
+	 * @covers \AMP_Theme_Support::filter_admin_bar_style_loader_tag()
+	 * @covers \AMP_Theme_Support::is_exclusively_dependent()
+	 *
+	 * @param callable $setup_callback  Setup callback.
+	 * @param callable $assert_callback Assert callback.
+	 */
+	public function test_filter_admin_bar_style_loader_tag( $setup_callback, $assert_callback ) {
+		add_theme_support( 'amp' );
+		$this->go_to( '/' );
+		add_filter( 'amp_dev_mode_enabled', '__return_true' );
+		add_filter( 'style_loader_tag', [ 'AMP_Theme_Support', 'filter_admin_bar_style_loader_tag' ], 10, 2 );
+		$setup_callback();
+		ob_start();
+		echo '<html><head>';
+		wp_print_styles();
+		echo '</head><body></body></html>';
+		$output = ob_get_clean();
+
+		$dom = new DOMDocument();
+		$dom->loadHTML( $output );
+
+		$assert_callback( new DOMXPath( $dom ) );
+	}
+
+	/**
+	 * Get data to test AMP_Theme_Support::filter_admin_bar_script_loader_tag().
+	 *
+	 * @return array
+	 */
+	public function get_data_to_test_filtering_admin_bar_script_loader_tag_data() {
+		return [
+			'admin_bar_scripts_have_dev_mode'        => [
+				static function () {
+					wp_enqueue_script( 'admin-bar' );
+					wp_enqueue_script( 'example-admin-bar', 'https://example.com/example-admin-bar.js', [ 'admin-bar' ], '0.1', false );
+				},
+				function ( DOMXPath $xpath ) {
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/example-admin-bar" ) ]' );
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/admin-bar" ) ]' );
+					if ( wp_script_is( 'hoverintent-js', 'registered' ) ) {
+						$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/hoverintent-js" ) ]' );
+					}
+				},
+			],
+
+			'admin_bar_scripts_have_dev_mode_with_paired_browsing_client' => [
+				static function () {
+					AMP_Theme_Support::setup_paired_browsing_client();
+					wp_enqueue_script( 'admin-bar' );
+					wp_enqueue_script( 'example-admin-bar', 'https://example.com/example-admin-bar.js', [ 'admin-bar' ], '0.1', false );
+				},
+				function ( DOMXPath $xpath ) {
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/example-admin-bar" ) ]' );
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/admin-bar" ) ]' );
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/amp-paired-browsing-client" ) ]' );
+					if ( wp_script_is( 'hoverintent-js', 'registered' ) ) {
+						$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/hoverintent-js" ) ]' );
+					}
+				},
+			],
+
+			'admin_bar_scripts_have_dev_mode_with_paired_browsing_app' => [
+				static function () {
+					$_GET[ AMP_Theme_Support::PAIRED_BROWSING_QUERY_VAR ] = 1;
+					AMP_Theme_Support::serve_paired_browsing_experience( 'foo' );
+					unset( $_GET[ AMP_Theme_Support::PAIRED_BROWSING_QUERY_VAR ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+					wp_enqueue_script( 'admin-bar' );
+					wp_enqueue_script( 'example-admin-bar', 'https://example.com/example-admin-bar.js', [ 'admin-bar' ], '0.1', false );
+				},
+				function ( DOMXPath $xpath ) {
+					$this->assert_queried_element_exists( $xpath, '//script[ contains( @src, "/example-admin-bar" ) ]' );
+					$this->assert_queried_element_exists( $xpath, '//script[ contains( @src, "/admin-bar" ) ]' );
+					$this->assert_queried_element_exists( $xpath, '//script[ contains( @src, "/amp-paired-browsing-app" ) ]' );
+					if ( wp_script_is( 'hoverintent-js', 'registered' ) ) {
+						$this->assert_queried_element_exists( $xpath, '//script[ contains( @src, "/hoverintent-js" ) ]' );
+					}
+				},
+			],
+
+			'hoverintent_enqueued_prevents_dev_mode' => [
+				function () {
+					if ( ! wp_script_is( 'hoverintent-js', 'registered' ) ) {
+						$this->markTestSkipped( 'The hoverintent-js script is not registered.' );
+					}
+					wp_enqueue_script( 'admin-bar' );
+					wp_enqueue_script( 'theme-hover', 'https://example.com/theme-hover.js', [ 'hoverintent-js' ], '0.1', false );
+				},
+				function ( DOMXPath $xpath ) {
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/admin-bar" ) ]' );
+					$this->assert_dev_mode_is_not_on_queried_element( $xpath, '//script[ contains( @src, "/theme-hover" ) ]' );
+					$this->assert_dev_mode_is_not_on_queried_element( $xpath, '//script[ contains( @src, "/hoverintent-js" ) ]' );
+				},
+			],
+		];
+	}
+
+	/**
+	 * Test filter_admin_bar_script_loader_tag.
+	 *
+	 * @dataProvider get_data_to_test_filtering_admin_bar_script_loader_tag_data
+	 * @covers \AMP_Theme_Support::filter_admin_bar_script_loader_tag()
+	 * @covers \AMP_Theme_Support::is_exclusively_dependent()
+	 *
+	 * @param callable $setup_callback  Setup callback.
+	 * @param callable $assert_callback Assert callback.
+	 */
+	public function test_filter_admin_bar_script_loader_tag( $setup_callback, $assert_callback ) {
+		add_theme_support( 'amp' );
+		$this->go_to( '/' );
+		add_filter( 'amp_dev_mode_enabled', '__return_true' );
+		add_filter( 'script_loader_tag', [ 'AMP_Theme_Support', 'filter_admin_bar_script_loader_tag' ], 10, 2 );
+		$setup_callback();
+		ob_start();
+		echo '<html><head>';
+		wp_print_scripts();
+		echo '</head><body>';
+		wp_print_footer_scripts();
+		echo '</body></html>';
+		$output = ob_get_clean();
+
+		$dom = new DOMDocument();
+		@$dom->loadHTML( $output ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+
+		$assert_callback( new DOMXPath( $dom ) );
+	}
+
+	/**
 	 * Test init_admin_bar to ensure dashicons are not added to dev mode when directly enqueued.
 	 *
 	 * @covers \AMP_Theme_Support::init_admin_bar()
@@ -1377,7 +1613,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 */
 	public function test_ensure_required_markup_schemaorg( $script, $expected ) {
 		$page = '<html><head><script type="application/ld+json">%s</script></head><body>Test</body></html>';
-		$dom  = new DOMDocument();
+		$dom  = new Document();
 		$dom->loadHTML( sprintf( $page, $script ) );
 		AMP_Theme_Support::ensure_required_markup( $dom );
 		$this->assertEquals( $expected, substr_count( $dom->saveHTML(), 'schema.org' ) );
@@ -1409,10 +1645,9 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$html = ob_get_clean();
 		$html = AMP_Theme_Support::prepare_response( $html );
 
-		$dom   = AMP_DOM_Utils::get_dom( $html );
-		$xpath = new DOMXPath( $dom );
+		$dom = Document::from_html( $html );
 
-		$scripts = $xpath->query( '//script[ not( @type ) or @type = "text/javascript" ]' );
+		$scripts = $dom->xpath->query( '//script[ not( @type ) or @type = "text/javascript" ]' );
 		$this->assertSame( 3, $scripts->length );
 		foreach ( $scripts as $script ) {
 			$this->assertSame( 'head', $script->parentNode->nodeName );
@@ -1469,12 +1704,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$html = ob_get_clean();
 		$html = AMP_Theme_Support::prepare_response( $html );
 
-		$dom   = AMP_DOM_Utils::get_dom( $html );
-		$xpath = new DOMXPath( $dom );
+		$dom = Document::from_html( $html );
 
 		/** @var DOMElement $script Script. */
 		$actual_script_srcs = [];
-		foreach ( $xpath->query( '//script[ not( @type ) or @type = "text/javascript" ]' ) as $script ) {
+		foreach ( $dom->xpath->query( '//script[ not( @type ) or @type = "text/javascript" ]' ) as $script ) {
 			$actual_script_srcs[] = $script->getAttribute( 'src' );
 		}
 
@@ -1522,8 +1756,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$html = ob_get_clean();
 		$html = AMP_Theme_Support::prepare_response( $html );
 
-		$dom   = AMP_DOM_Utils::get_dom( $html );
-		$xpath = new DOMXPath( $dom );
+		$dom = Document::from_html( $html );
 
 		$script_srcs = [];
 		/**
@@ -1531,7 +1764,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		 *
 		 * @var DOMElement $script
 		 */
-		$scripts = $xpath->query( '//script[ @src ]' );
+		$scripts = $dom->xpath->query( '//script[ @src ]' );
 		foreach ( $scripts as $script ) {
 			$script_srcs[] = $script->getAttribute( 'src' );
 		}
@@ -1745,7 +1978,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		$ordered_contains = [
 			'<html amp="">',
-			'<meta charset="' . get_bloginfo( 'charset' ) . '">',
+			'<meta charset="' . strtolower( get_bloginfo( 'charset' ) ) . '">',
 			'<meta name="viewport" content="width=device-width">',
 			'<meta name="generator" content="AMP Plugin',
 			'<title>',
@@ -1925,56 +2158,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		unset( AMP_HTTP::$purged_amp_query_vars[ AMP_HTTP::ACTION_XHR_CONVERTED_QUERY_VAR ] );
 		unset( $_SERVER['REQUEST_METHOD'] );
-	}
-
-	/**
-	 * Test combining amp-script-src meta tags.
-	 *
-	 * @covers \amp_generate_script_hash()
-	 */
-	public function test_prepare_response_for_amp_script() {
-		$script1 = 'document.body.textContent += "First!";';
-		$script2 = 'document.body.textContent += "Second!";';
-		$script3 = 'document.body.textContent += "Third!";';
-		$script4 = 'document.body.textContent += "Fourth! (And forbidden because no amp-script-src meta in head.)";';
-
-		$script1_hash = amp_generate_script_hash( $script1 );
-		$script2_hash = amp_generate_script_hash( $script2 );
-		$script3_hash = amp_generate_script_hash( $script3 );
-		$script4_hash = amp_generate_script_hash( $script4 );
-
-		ob_start();
-		?>
-		<html>
-			<head>
-				<meta name="amp-script-src" content="<?php echo esc_attr( $script1_hash ); ?>">
-				<meta name="amp-script-src" content="<?php echo esc_attr( $script2_hash ); ?>">
-				<style>
-					body { background: black; color:white }
-				</style>
-				<meta name="amp-script-src" content="<?php echo esc_attr( $script3_hash ); ?>">
-			</head>
-			<body>
-				<meta name="amp-script-src" content="<?php echo esc_attr( $script4_hash ); ?>">
-
-				<amp-script script="s1" layout="fixed-height" height="30"></amp-script><script type="text/plain" target="amp-script" id="s1"><?php echo $script1; // phpcs:ignore ?></script>
-				<amp-script script="s2" layout="fixed-height" height="30"></amp-script><script type="text/plain" target="amp-script" id="s2"><?php echo $script2; // phpcs:ignore ?></script>
-				<amp-script script="s3" layout="fixed-height" height="30"></amp-script><script type="text/plain" target="amp-script" id="s3"><?php echo $script3; // phpcs:ignore ?></script>
-				<amp-script script="s4" layout="fixed-height" height="30"></amp-script><script type="text/plain" target="amp-script" id="s4"><?php echo $script4; // phpcs:ignore ?></script>
-			</body>
-		</html>
-		<?php
-		$output = ob_get_clean();
-
-		$processed = AMP_Theme_Support::prepare_response( $output );
-		$dom       = AMP_DOM_Utils::get_dom( $processed );
-		$xpath     = new DOMXPath( $dom );
-
-		$meta_elements = $xpath->query( '/html/head/meta[ @name = "amp-script-src" ]' );
-		$this->assertSame( 1, $meta_elements->length );
-
-		$meta = $meta_elements->item( 0 );
-		$this->assertSame( "$script1_hash $script2_hash $script3_hash", $meta->getAttribute( 'content' ) );
 	}
 
 	/**
@@ -2186,38 +2369,13 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$input  = '<html><head></head>Hello</html>';
 		$output = AMP_Theme_Support::prepare_response( $input );
 		$this->assertContains( '<html amp', $output );
-		$this->assertContains( '<meta charset="UTF-8">', $output );
+		$this->assertContains( '<meta charset="utf-8">', $output );
 
 		// HTML with doctype, comments, and whitespace before head.
 		$input  = "   <!--\nHello world!\n-->\n\n<!DOCTYPE html>  <html\n\n>\n<head profile='http://www.acme.com/profiles/core'></head><body>Hello</body></html>";
 		$output = AMP_Theme_Support::prepare_response( $input );
 		$this->assertContains( '<html amp', $output );
-		$this->assertContains( '<meta charset="UTF-8">', $output );
-	}
-
-	/**
-	 * Test prepare_response to inject html[amp] attribute and ensure HTML5 doctype.
-	 *
-	 * @covers AMP_Theme_Support::prepare_response()
-	 */
-	public function test_prepare_response_to_add_html5_doctype_and_amp_attribute() {
-		wp_scripts();
-		wp();
-		add_filter( 'amp_validation_error_sanitized', '__return_true' );
-		add_theme_support( AMP_Theme_Support::SLUG );
-		AMP_Theme_Support::init();
-		AMP_Theme_Support::finish_init();
-		ob_start();
-		?>
-		<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
-		<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><?php wp_head(); ?></head><body><?php wp_footer(); ?></body></html>
-		<?php
-		$original_html  = trim( ob_get_clean() );
-		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
-
-		$this->assertStringStartsWith( '<!DOCTYPE html>', $sanitized_html );
-		$this->assertContains( '<html amp', $sanitized_html );
-		$this->assertContains( '<meta charset="utf-8">', $sanitized_html );
+		$this->assertContains( '<meta charset="utf-8">', $output );
 	}
 
 	/**

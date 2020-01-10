@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use Amp\AmpWP\Admin\SiteHealth;
+
 /**
  * Obsolete constant for flagging when Customizer is opened for AMP.
  *
@@ -170,18 +172,6 @@ function amp_add_custom_analytics( $analytics = [] ) {
 }
 
 /**
- * Bootstrap AMP post meta box.
- *
- * This function must be invoked only once through the 'wp_loaded' action.
- *
- * @since 0.6
- */
-function amp_post_meta_box() {
-	$post_meta_box = new AMP_Post_Meta_Box();
-	$post_meta_box->init();
-}
-
-/**
  * Bootstrap AMP Editor core blocks.
  */
 function amp_editor_core_blocks() {
@@ -190,13 +180,19 @@ function amp_editor_core_blocks() {
 }
 
 /**
- * Bootstrap the AMP admin pointer class.
+ * Bootstraps AMP admin classes.
  *
- * @since 1.0
+ * @since 1.5.0
  */
-function amp_admin_pointer() {
+function amp_bootstrap_admin() {
 	$admin_pointers = new AMP_Admin_Pointers();
 	$admin_pointers->init();
+
+	$post_meta_box = new AMP_Post_Meta_Box();
+	$post_meta_box->init();
+
+	$site_health = new SiteHealth();
+	$site_health->init();
 }
 
 /**
