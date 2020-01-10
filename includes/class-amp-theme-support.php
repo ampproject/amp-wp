@@ -204,7 +204,7 @@ class AMP_Theme_Support {
 			}
 
 			add_action( 'widgets_init', [ __CLASS__, 'register_widgets' ] );
-			add_action( 'parse_query', array( __CLASS__, 'init_app_shell' ), 9 );
+			add_action( 'parse_query', [ __CLASS__, 'init_app_shell' ], 9 );
 
 			/*
 			 * Note that wp action is use instead of template_redirect because some themes/plugins output
@@ -212,7 +212,7 @@ class AMP_Theme_Support {
 			 * action to template_redirect--the wp action--is used instead.
 			 */
 			if ( ! is_admin() ) {
-				add_action( 'wp', array( __CLASS__, 'finish_init' ), PHP_INT_MAX );
+				add_action( 'wp', [ __CLASS__, 'finish_init' ], PHP_INT_MAX );
 			}
 		} elseif ( AMP_Options_Manager::is_stories_experience_enabled() ) {
 			add_action(
@@ -495,7 +495,7 @@ class AMP_Theme_Support {
 					wp_die(
 						esc_html__( 'Outer app shell can only be requested of the non-AMP version (thus requires paired mode).', 'amp' ),
 						esc_html__( 'AMP Outer App Shell Problem', 'amp' ),
-						array( 'response' => 400 )
+						[ 'response' => 400 ]
 					);
 				}
 			);
@@ -519,13 +519,13 @@ class AMP_Theme_Support {
 					}
 					wp_enqueue_script( 'amp-shadow' );
 					wp_enqueue_script( 'amp-wp-app-shell' );
-					$exports = array(
+					$exports = [
 						'contentElementId'  => AMP_Theme_Support::APP_SHELL_CONTENT_ELEMENT_ID,
 						'homeUrl'           => home_url( '/' ),
 						'adminUrl'          => admin_url( '/' ),
 						'componentQueryVar' => AMP_Theme_Support::APP_SHELL_COMPONENT_QUERY_VAR,
 						'isOuterAppShell'   => 'outer' === $requested_app_shell_component,
-					);
+					];
 					wp_add_inline_script( 'amp-wp-app-shell', sprintf( 'var ampAppShell = %s;', wp_json_encode( $exports ) ), 'before' );
 				}
 			);
@@ -2069,7 +2069,7 @@ class AMP_Theme_Support {
 			return null;
 		}
 		$component = AMP_HTTP::$purged_amp_query_vars[ self::APP_SHELL_COMPONENT_QUERY_VAR ];
-		if ( in_array( $component, array( 'inner', 'outer' ), true ) ) {
+		if ( in_array( $component, [ 'inner', 'outer' ], true ) ) {
 			return $component;
 		}
 		return null;
@@ -2092,12 +2092,12 @@ class AMP_Theme_Support {
 			$admin_bar->parentNode->removeChild( $admin_bar );
 		}
 		// Extract all stylesheet elements before the body gets isolated.
-		$style_elements = array();
+		$style_elements = [];
 		$lower_case     = 'translate( %s, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz" )'; // In XPath 2.0 this is lower-case().
-		$predicates     = array(
+		$predicates     = [
 			sprintf( '( self::style and ( not( @type ) or %s = "text/css" ) )', sprintf( $lower_case, '@type' ) ),
 			sprintf( '( self::link and @href and %s = "stylesheet" )', sprintf( $lower_case, '@rel' ) ),
-		);
+		];
 		foreach ( $xpath->query( './/*[ ' . implode( ' or ', $predicates ) . ' ]', $body ) as $element ) {
 			$style_elements[] = $element;
 		}
@@ -2105,7 +2105,7 @@ class AMP_Theme_Support {
 			$style_element->parentNode->removeChild( $style_element );
 		}
 		// Preserve all svg defs which aren't inside the content element.
-		$svgs_with_def = array();
+		$svgs_with_def = [];
 		foreach ( $xpath->query( '//svg[.//defs]' ) as $svg ) {
 			$svgs_with_def[] = $svg;
 		}
@@ -2118,7 +2118,7 @@ class AMP_Theme_Support {
 				$node->parentNode->removeChild( $node->nextSibling );
 			}
 		};
-		$node = $content_element;
+		$node            = $content_element;
 		do {
 			$remove_siblings( $node );
 			$node = $node->parentNode;
@@ -2148,7 +2148,7 @@ class AMP_Theme_Support {
 			}
 			// Re-add the SVG element to the body with only its defs elements.
 			if ( ! $is_connected ) {
-				$defs = array();
+				$defs = [];
 				foreach ( $svg->getElementsByTagName( 'defs' ) as $def ) {
 					$defs[] = $def;
 				}

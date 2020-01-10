@@ -471,7 +471,7 @@ function amp_register_default_scripts( $wp_scripts ) {
 	$wp_scripts->add(
 		$handle,
 		amp_get_asset_url( 'js/amp-wp-app-shell.js' ),
-		array( 'amp-shadow' ),
+		[ 'amp-shadow' ],
 		AMP__VERSION . ( WP_DEBUG ? '-' . md5( file_get_contents( AMP__DIR__ . '/assets/js/amp-wp-app-shell.js' ) ) : '' ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.WP.AlternativeFunctions.file_system_read_file_get_contents
 	);
 	$wp_scripts->add_data(
@@ -558,14 +558,14 @@ function amp_render_scripts( $scripts ) {
  * @return string Script loader tag.
  */
 function amp_filter_script_loader_tag( $tag, $handle ) {
-	$prefix = 'https://cdn.ampproject.org/';
-	$src    = wp_scripts()->registered[ $handle ]->src;
+	$prefix     = 'https://cdn.ampproject.org/';
+	$src        = wp_scripts()->registered[ $handle ]->src;
 	$attributes = wp_scripts()->get_data( $handle, 'amp_script_attributes' );
 	if ( empty( $attributes ) && 0 === strpos( $src, $prefix ) ) {
 		// All scripts from AMP CDN should be loaded async.
-		$attributes = array(
+		$attributes = [
 			'async' => true,
-		);
+		];
 	}
 	if ( empty( $attributes ) ) {
 		return $tag;

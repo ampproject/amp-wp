@@ -82,9 +82,9 @@ class AMP_Service_Worker {
 				'amp_supportable_templates',
 				function( $supportable_templates ) {
 					if ( ! isset( $supportable_templates['is_offline'] ) ) {
-						$supportable_templates['is_offline'] = array(
+						$supportable_templates['is_offline'] = [
 							'label' => __( 'Offline', 'amp' ),
-						);
+						];
 					}
 					return $supportable_templates;
 				},
