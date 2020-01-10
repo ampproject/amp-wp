@@ -17,7 +17,7 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 	 *
 	 * @var string
 	 */
-	const URL_PATTERN = '#https?:\/\/(www\.)?vimeo\.com\/.*#i';
+	const URL_PATTERN = '#https?:\/\/(.+\.)?vimeo\.com\/.*#i';
 
 	/**
 	 * The aspect ratio.
@@ -141,7 +141,7 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		// @todo This will not get the private key for unlisted videos (which look like https://vimeo.com/123456789/abcdef0123), but amp-vimeo doesn't support them currently anyway.
 		$video_id = '';
-		if ( $path && preg_match( ':^/(\d+):', $path, $matches ) ) {
+		if ( $path && preg_match( ':/(\d+):', $path, $matches ) ) {
 			$video_id = $matches[1];
 		}
 
