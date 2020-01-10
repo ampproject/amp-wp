@@ -3,7 +3,7 @@
  */
 import { useEffect } from '@wordpress/element';
 
-const BLACKLIST_CLIPBOARD_ELEMENTS = [ 'INPUT', 'TEXTAREA' ];
+const BLACKLIST_CLIPBOARD_ELEMENTS = [ 'INPUT', 'TEXTAREA', 'BUTTON' ];
 
 /**
  * @param {?Element} container
@@ -20,9 +20,7 @@ function useClipboardHandlers( container, copyCutHandler, pasteHandler ) {
 			const { target, clipboardData } = evt;
 
 			// Elements that either handle their own clipboard or use platform.
-			if ( ! target ||
-          BLACKLIST_CLIPBOARD_ELEMENTS.includes( target.tagName ) ||
-          target.closest( '[contenteditable="true"]' ) ) {
+			if ( ! isCopyPasteTarget( target ) ) {
 				return;
 			}
 
@@ -44,9 +42,7 @@ function useClipboardHandlers( container, copyCutHandler, pasteHandler ) {
 			const { target } = evt;
 
 			// Elements that either handle their own clipboard or use platform.
-			if ( ! target ||
-          BLACKLIST_CLIPBOARD_ELEMENTS.includes( target.tagName ) ||
-          target.closest( '[contenteditable="true"]' ) ) {
+			if ( ! isCopyPasteTarget( target ) ) {
 				return;
 			}
 
@@ -68,6 +64,14 @@ function useClipboardHandlers( container, copyCutHandler, pasteHandler ) {
 			document.removeEventListener( 'paste', pasteHandlerWrapper );
 		};
 	}, [ container, copyCutHandler, pasteHandler ] );
+}
+
+/**
+ * @param {?Element} target
+ * @return {boolean}
+ */
+function isCopyPasteTarget( target ) {
+	return ( target && ! BLACKLIST_CLIPBOARD_ELEMENTS.includes( target.tagName ) && ! target.closest( '[contenteditable="true"]' ) );
 }
 
 export default useClipboardHandlers;
