@@ -97,9 +97,10 @@ class AMP_Service_Worker {
 		 * See <https://github.com/ampproject/amp-by-example/blob/e093edb401b1617859b5365e80b639d81b06f058/boilerplate-generator/templates/files/serviceworkerJs.js>.
 		 */
 		$enabled_options = [
-			'cdn_script_caching'   => true,
-			'image_caching'        => false,
-			'google_fonts_caching' => false,
+			'cdn_script_caching'           => true,
+			'image_caching'                => false,
+			'google_fonts_caching'         => false,
+			'live_list_offline_commenting' => false,
 		];
 		if ( isset( $theme_support['service_worker'] ) && is_array( $theme_support['service_worker'] ) ) {
 			$enabled_options = array_merge(
@@ -116,6 +117,9 @@ class AMP_Service_Worker {
 		}
 		if ( $enabled_options['google_fonts_caching'] ) {
 			add_action( 'wp_front_service_worker', [ __CLASS__, 'add_google_fonts_caching' ] );
+		}
+		if ( $enabled_options['google_fonts_caching'] ) {
+			add_action( 'wp_front_service_worker', [ __CLASS__, 'add_live_list_offline_commenting' ] );
 		}
 	}
 
@@ -250,6 +254,43 @@ class AMP_Service_Worker {
 				],
 			]
 		);
+	}
+
+	/**
+	 * Add live list offline commenting service worker script.
+	 *
+	 * @param WP_Service_Worker_Scripts $service_workers WP Service Workers object.
+	 */
+	public static function add_live_list_offline_commenting( $service_workers ) {
+		if ( ! ( $service_workers instanceof WP_Service_Worker_Scripts ) ) {
+			_doing_it_wrong( __METHOD__, esc_html__( 'Expected argument to be WP_Service_Worker_Scripts.', 'amp' ), '1.0' );
+			return;
+		}
+
+		$theme_support = AMP_Theme_Support::get_theme_support_args();
+		if ( empty( $theme_support['comments_live_list'] ) ) {
+			return;
+		}
+
+		$service_workers->register(
+			'amp-offline-commenting',
+			function() {
+				$js = file_get_contents( AMP__DIR__ . '/assets/js/amp-service-worker-offline-commenting.js' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.WP.AlternativeFunctions.file_system_read_file_get_contents
+				$js = preg_replace( '#/\*\s*global.+?\*/#', '', $js );
+				$js = str_replace(
+					'ERROR_MESSAGES',
+					wp_json_encode( wp_service_worker_get_error_messages() ),
+					$js
+				);
+				$js = str_replace(
+					'SITE_URL',
+					wp_json_encode( site_url() ),
+					$js
+				);
+				return $js;
+			}
+		);
+
 	}
 
 	/**
