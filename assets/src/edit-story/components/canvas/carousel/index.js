@@ -100,14 +100,13 @@ const Page = styled.a`
 	}
 `;
 
-function CarouselPage( { index } ) {
-	const {
-		state: { currentPageIndex },
-		actions: { setCurrentPageByIndex },
-	} = useStory();
+function CarouselPage( { page } ) {
+	const { id, index } = page;
+	const { state: { currentPageIndex }, actions: { setCurrentPage } } = useStory();
+	const handleClickPage = () => setCurrentPage( { pageId: id } );
 
 	return (
-		<Page key={ index } onClick={ () => setCurrentPageByIndex( index ) } isActive={ index === currentPageIndex } />
+		<Page onClick={ handleClickPage( page ) } isActive={ index === currentPageIndex } />
 	);
 }
 
@@ -139,7 +138,7 @@ function Carousel() {
 			<Wrapper ref={ element }>
 				<List area="carousel">
 					{ pages.map( ( page, index ) => (
-						<CarouselPage key={ index } index={ index } />
+						<CarouselPage key={ index } page={ page } />
 					) ) }
 				</List>
 				<ActionArea area="action">
@@ -157,7 +156,7 @@ function Carousel() {
 			{ /* TODO: don't cut off elements at beginning and end of the list */ }
 			<List area="carousel" ref={ element } hasHorizontalOverflow={ hasHorizontalOverflow }>
 				{ pages.map( ( page, index ) => (
-					<CarouselPage key={ index } index={ index } />
+					<CarouselPage key={ index } page={ page } />
 				) ) }
 			</List>
 			<RightNavigationButton onClick={ () => scrollBy( ( PAGE_WIDTH + 10 ) ) }>
@@ -174,5 +173,5 @@ function Carousel() {
 export default Carousel;
 
 CarouselPage.propTypes = {
-	index: PropTypes.number.isRequired,
+	page: PropTypes.object.isRequired,
 };

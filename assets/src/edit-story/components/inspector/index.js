@@ -36,11 +36,12 @@ const Wrapper = styled.div`
 function Inspector() {
 	const {
 		state: { selectedElements },
-		actions: { setPropertiesOnSelectedElements, deleteSelectedElements },
+		actions: { deleteSelectedElements, updateSelectedElements },
 	} = useStory();
 	const panels = getPanels( selectedElements );
+
 	const handleSetProperties = useCallback( ( properties ) => {
-		// Filter out empty properties (only empty strings)
+		// Filter out empty properties (empty strings specifically)
 		const updatedKeys = Object.keys( properties )
 			.filter( ( key ) => properties[ key ] !== '' );
 
@@ -51,8 +52,8 @@ function Inspector() {
 
 		const actualProperties = updatedKeys
 			.reduce( ( obj, key ) => ( { ...obj, [ key ]: properties[ key ] } ), {} );
-		setPropertiesOnSelectedElements( actualProperties );
-	}, [ setPropertiesOnSelectedElements ] );
+		updateSelectedElements( { properties: actualProperties } );
+	}, [ updateSelectedElements ] );
 	return (
 		<Background>
 			<Wrapper>
