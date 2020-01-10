@@ -35,7 +35,7 @@ function CanvasProvider( { children } ) {
 
 	const {
 		state: { currentPage, selectedElementIds },
-		actions: { selectElementById, toggleElementIdInSelection, setSelectedElementIds },
+		actions: { toggleElementInSelection, setSelectedElementsById },
 	} = useStory();
 
 	const handleSelectElement = useCallback( ( elId, evt ) => {
@@ -44,9 +44,9 @@ function CanvasProvider( { children } ) {
 		}
 
 		if ( evt.metaKey ) {
-			toggleElementIdInSelection( elId );
+			toggleElementInSelection( { elementId: elId } );
 		} else {
-			selectElementById( elId );
+			setSelectedElementsById( { elementIds: [ elId ] } );
 		}
 		evt.stopPropagation();
 
@@ -54,7 +54,7 @@ function CanvasProvider( { children } ) {
 			evt.persist();
 			setLastSelectionEvent( evt );
 		}
-	}, [ editingElement, clearEditing, toggleElementIdInSelection, selectElementById ] );
+	}, [ editingElement, clearEditing, toggleElementInSelection, setSelectedElementsById ] );
 
 	const selectIntersection = useCallback( ( { x: lx, y: ly, width: lw, height: lh } ) => {
 		const newSelectedElementIds =
@@ -66,8 +66,8 @@ function CanvasProvider( { children } ) {
 					ly <= y + height
 				);
 			} ).map( ( { id } ) => id );
-		setSelectedElementIds( newSelectedElementIds );
-	}, [ currentPage, setSelectedElementIds ] );
+		setSelectedElementsById( { elementIds: newSelectedElementIds } );
+	}, [ currentPage, setSelectedElementsById ] );
 
 	// Reset editing mode when selection changes.
 	useEffect( () => {

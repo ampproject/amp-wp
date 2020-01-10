@@ -30,11 +30,12 @@ const Page = styled.a`
 `;
 
 function Canvas() {
-	const { state: { pages, currentPageIndex }, actions: { setCurrentPageByIndex } } = useStory();
+	const { state: { pages, currentPageIndex }, actions: { setCurrentPage } } = useStory();
+	const handleClickPage = ( page ) => () => setCurrentPage( { pageId: page.id } );
 	return (
 		<List>
 			{ pages.map( ( page, index ) => (
-				<Page key={ index } onClick={ () => setCurrentPageByIndex( index ) } isActive={ index === currentPageIndex } />
+				<Page key={ index } onClick={ handleClickPage( page ) } isActive={ index === currentPageIndex } />
 			) ) }
 		</List>
 	);

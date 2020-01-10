@@ -15,7 +15,7 @@ function Library() {
 		data: { tabs: { MEDIA, TEXT, SHAPES, LINKS } },
 	} = useLibrary();
 	const {
-		actions: { appendElementToCurrentPage },
+		actions: { addElement },
 	} = useStory();
 	const ContentLibrary = ( {
 		[ MEDIA ]: MediaLibrary,
@@ -29,7 +29,7 @@ function Library() {
 			x: Math.round( 80 * Math.random() ),
 			y: Math.round( 70 * Math.random() ),
 		} );
-		appendElementToCurrentPage( element );
+		addElement( { element } );
 	};
 	return <ContentLibrary onInsert={ handleInsert } />;
 }

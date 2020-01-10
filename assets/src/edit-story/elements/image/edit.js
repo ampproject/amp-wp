@@ -58,10 +58,10 @@ function ImageEdit( { id, src, origRatio, width, height, x, y, scale, focalX, fo
 	const [ croppedImage, setCroppedImage ] = useState( null );
 	const [ cropBox, setCropBox ] = useState( null );
 
-	const { actions: { setPropertiesById } } = useStory();
+	const { actions: { updateElementById } } = useStory();
 	const setProperties = useCallback(
-		( props ) => setPropertiesById( id, props ),
-		[ id, setPropertiesById ] );
+		( properties ) => updateElementById( { elementId: id, properties } ),
+		[ id, updateElementById ] );
 
 	const imgProps = getImgProps( width, height, scale, focalX, focalY, origRatio );
 

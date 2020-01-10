@@ -45,7 +45,7 @@ const Element = styled.div`
 	}
 `;
 
-function TextEdit( { content, color, backgroundColor, width, height, fontFamily, fontFallback, fontSize, fontWeight, fontStyle } ) {
+function TextEdit( { id, content, color, backgroundColor, width, height, fontFamily, fontFallback, fontSize, fontWeight, fontStyle } ) {
 	const props = {
 		color,
 		backgroundColor,
@@ -58,8 +58,8 @@ function TextEdit( { content, color, backgroundColor, width, height, fontFamily,
 		height,
 	};
 	const editorRef = useRef( null );
-	const { actions: { setPropertiesOnSelectedElements } } = useStory();
 	const { actions: { maybeEnqueueFontStyle } } = useFont();
+	const { actions: { updateElementById } } = useStory();
 	const { state: { editingElementState } } = useCanvas();
 	const { offset, clearContent } = editingElementState || {};
 	// To clear content, we can't just use createEmpty() or even pure white-space.
@@ -100,12 +100,13 @@ function TextEdit( { content, color, backgroundColor, width, height, fontFamily,
 	useEffect( () => () => {
 		if ( lastKnownState.current ) {
 			// Remember to trim any trailing non-breaking space.
-			setPropertiesOnSelectedElements( {
+			const properties = {
 				content: stateToHTML( lastKnownState.current, { defaultBlockTag: null } )
 					.replace( /&nbsp;$/, '' ),
-			} );
+			};
+			updateElementById( { elementId: id, properties } );
 		}
-	}, [ setPropertiesOnSelectedElements ] );
+	}, [ id, updateElementById ] );
 
 	// Make sure to allow the user to click in the text box while working on the text.
 	const onClick = ( evt ) => {

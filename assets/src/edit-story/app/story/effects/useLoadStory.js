@@ -12,48 +12,48 @@ import { createPage } from '../../../elements';
 // When ID is set, load story from API.
 function useLoadStory( {
 	storyId,
-	pages,
-	setTitle,
-	setPages,
-	setPostStatus,
-	setPostAuthor,
-	setSlug,
-	setLink,
-	setCurrentPageIndex,
-	clearSelection,
+	shouldLoad,
+	restore,
 } ) {
 	const { actions: { getStoryById } } = useAPI();
 	const { actions: { clearHistory } } = useHistory();
 	useEffect( () => {
-		if ( storyId && pages.length === 0 ) {
+		if ( storyId && shouldLoad ) {
 			getStoryById( storyId ).then( ( post ) => {
-				const { title: { raw: title }, status, author, slug, link } = post;
-				let { story_data: newPages } = post;
+				const {
+					title: { raw: title },
+					status,
+					author,
+					slug,
+					link,
+					story_data: storyData,
+				} = post;
 
-				// First clear history completely
+				// First clear history completely.
 				clearHistory();
 
-				setTitle( title );
-				setPostStatus( status );
-				setPostAuthor( author );
-				setSlug( slug );
-				setLink( link );
+				// Set story-global variables.
+				const story = {
+					title,
+					status,
+					author,
+					slug,
+					link,
+				};
 
-				// If story is empty, create empty page and add to story:
-				if ( newPages.length === 0 ) {
-					newPages = [ createPage( { index: 0 } ) ];
-				}
+				// If there are no pages, create empty page.
+				const pages = storyData.length === 0 ? [ createPage() ] : storyData;
 
-				setPages( newPages );
-				// Mark first page as current
-				// TODO read "current page" from deeplink if present?
-				setCurrentPageIndex( 0 );
-
-				// TODO potentially also read selected elements from deeplink?
-				clearSelection();
+				// TODO read current page and selection from deeplink?
+				restore( {
+					pages,
+					story,
+					selection: [],
+					current: null, // will be set to first page by `restore`
+				} );
 			} );
 		}
-	}, [ storyId, pages, getStoryById, clearHistory, setTitle, setPages, setCurrentPageIndex, clearSelection, setPostStatus, setPostAuthor, setSlug, setLink ] );
+	}, [ storyId, shouldLoad, restore, getStoryById, clearHistory ] );
 }
 
 export default useLoadStory;
