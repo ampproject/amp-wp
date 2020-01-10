@@ -2315,6 +2315,7 @@ class AMP_Theme_Support {
 				'allow_dirty_styles'   => self::is_customize_preview_iframe(), // Dirty styles only needed when editing (e.g. for edit shortcuts).
 				'allow_dirty_scripts'  => is_customize_preview(), // Scripts are always needed to inject changeset UUID.
 				'user_can_validate'    => AMP_Validation_Manager::has_cap(),
+				'app_shell_component'  => $app_shell_component,
 			],
 			$args,
 			compact( 'enable_response_caching' )

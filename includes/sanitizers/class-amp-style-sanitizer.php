@@ -128,6 +128,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		'include_manifest_comment'  => 'always',
 		'focus_within_classes'      => [ 'focus' ],
 		'low_priority_plugins'      => [ 'query-monitor' ],
+		'app_shell_component'       => null,
 	];
 
 	/**
@@ -3074,6 +3075,19 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						)
 					);
 					if ( $should_include ) {
+						// Make changes for serving stylesheet inside shadow DOM.
+						if ( 'inner' === $this->args['app_shell_component'] ) {
+							/*
+							 * The :root pseudo selector does not work inside shadow DOM. Additionally,
+							 * the shadow DOM is not including the root html element (or the head element),
+							 * however there is a body element. The AMP plugin uses :root in the transformation
+							 * of !important rules to give selectors high specificity. Replacing :root with
+							 * body will not work all of the time.
+							 * @todo The use of :root pseudo selectors in stylesheets needs to be revisited in Shadow DOM.
+							 */
+							$selector = preg_replace( '/:root\b/', 'body', $selector );
+						}
+
 						$selectors[] = $selector;
 					}
 				}
