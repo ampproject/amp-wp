@@ -11,54 +11,70 @@ import { useEffect, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { Panel, Title, InputGroup, getCommonValue } from './shared';
+import { useFont } from '../app';
+import { Panel, Title, InputGroup, getCommonValue, SelectMenu } from './shared';
 
 function FontPanel( { selectedElements, onSetProperties } ) {
 	const fontFamily = getCommonValue( selectedElements, 'fontFamily' );
 	const fontSize = getCommonValue( selectedElements, 'fontSize' );
 	const fontWeight = getCommonValue( selectedElements, 'fontWeight' );
+	const fontWeights = getCommonValue( selectedElements, 'fontWeights' );
 	const fontStyle = getCommonValue( selectedElements, 'fontStyle' );
-	const [ state, setState ] = useState( { fontFamily, fontStyle, fontSize, fontWeight } );
+	const fontFallback = getCommonValue( selectedElements, 'fontFallback' );
+
+	const { state: { fonts }, actions: { getFontWeight, getFontFallback } } = useFont();
+	const [ state, setState ] = useState( { fontFamily, fontStyle, fontSize, fontWeight, fontFallback, fontWeights } );
 	useEffect( () => {
-		setState( { fontFamily, fontStyle, fontSize, fontWeight } );
-	}, [ fontFamily, fontStyle, fontSize, fontWeight ] );
+		const currentFontWeights = getFontWeight( fontFamily );
+		const currentFontFallback = getFontFallback( fontFamily );
+		setState( { fontFamily, fontStyle, fontSize, fontWeight, fontWeights: currentFontWeights, fontFallback: currentFontFallback } );
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ fontFamily, fontStyle, fontSize, fontWeight, getFontWeight ] );
 	const handleSubmit = ( evt ) => {
 		onSetProperties( state );
 		evt.preventDefault();
 	};
+
+	const fontStyles = [
+		{ name: 'Normal', slug: 'normal', thisValue: 'normal' },
+		{ name: 'Italic', slug: 'italic', thisValue: 'italic' },
+	];
+
 	return (
 		<Panel onSubmit={ handleSubmit }>
 			<Title>
 				{ 'Font' }
 			</Title>
-			<InputGroup
-				type="text"
+			{ fonts && <SelectMenu
 				label="Font family"
+				options={ fonts }
 				value={ state.fontFamily }
-				isMultiple={ fontFamily === '' }
-				onChange={ ( value ) => setState( { ...state, fontFamily: value } ) }
-			/>
-			<InputGroup
-				type="text"
+				onChange={ ( value ) => {
+					const currentFontWeights = getFontWeight( value );
+					const currentFontFallback = getFontFallback( value );
+					const fontWeightsArr = currentFontWeights.map( ( { thisValue } ) => thisValue );
+					const newFontWeight = ( fontWeightsArr && fontWeightsArr.includes( state.fontWeight ) ) ? state.fontWeight : 400;
+					setState( { ...state, fontFamily: value, fontWeight: parseInt( newFontWeight ), fontWeights: currentFontWeights, fontFallback: currentFontFallback } );
+				} }
+			/> }
+			<SelectMenu
 				label="Font style"
+				options={ fontStyles }
 				value={ state.fontStyle }
-				isMultiple={ fontStyle === '' }
 				onChange={ ( value ) => setState( { ...state, fontStyle: value } ) }
 			/>
-			<InputGroup
-				type="text"
+			{ state.fontWeights && <SelectMenu
 				label="Font weight"
+				options={ state.fontWeights }
 				value={ state.fontWeight }
-				isMultiple={ fontWeight === '' }
-				onChange={ ( value ) => setState( { ...state, fontWeight: value } ) }
-			/>
+				onChange={ ( value ) => setState( { ...state, fontWeight: parseInt( value ) } ) }
+			/> }
 			<InputGroup
-				// @todo: why is this a "px" value and not a number?
-				type="text"
+				type="number"
 				label="Font size"
 				value={ state.fontSize }
 				isMultiple={ fontSize === '' }
-				onChange={ ( value ) => setState( { ...state, fontSize: value } ) }
+				onChange={ ( value ) => setState( { ...state, fontSize: parseInt( value ) } ) }
 			/>
 		</Panel>
 	);

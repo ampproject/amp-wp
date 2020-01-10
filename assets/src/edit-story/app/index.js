@@ -21,6 +21,7 @@ import { GlobalStyle as CropMoveableGlobalStyle } from '../components/movable/cr
 import { useHistory, HistoryProvider } from './history';
 import { useAPI, APIProvider } from './api';
 import { useConfig, ConfigProvider } from './config';
+import { useFont, FontProvider } from './font';
 import { useStory, StoryProvider } from './story';
 import Layout from './layout';
 
@@ -33,10 +34,12 @@ function App( { config } ) {
 					<APIProvider>
 						<HistoryProvider size={ 50 }>
 							<StoryProvider storyId={ storyId }>
-								<GlobalStyle />
-								<CropMoveableGlobalStyle />
-								<Layout />
-								<Popover.Slot />
+								<FontProvider>
+									<GlobalStyle />
+									<CropMoveableGlobalStyle />
+									<Layout />
+									<Popover.Slot />
+								</FontProvider>
 							</StoryProvider>
 						</HistoryProvider>
 					</APIProvider>
@@ -57,4 +60,5 @@ export {
 	useAPI,
 	useStory,
 	useConfig,
+	useFont,
 };

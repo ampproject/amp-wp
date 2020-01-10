@@ -13,7 +13,7 @@ import { useRef, useEffect, useCallback, useState } from '@wordpress/element';
  * Internal dependencies
  */
 import getCaretCharacterOffsetWithin from '../../utils/getCaretCharacterOffsetWithin';
-import { useStory } from '../../app';
+import { useStory, useFont } from '../../app';
 import { useCanvas } from '../../components/canvas';
 import {
 	ElementFillContent,
@@ -21,6 +21,7 @@ import {
 	ElementWithBackgroundColor,
 	ElementWithFontColor,
 } from '../shared';
+import { generateFontFamily } from './util';
 
 const Element = styled.p`
 	margin: 0;
@@ -36,11 +37,12 @@ const Element = styled.p`
 	}
 `;
 
-function TextDisplay( { id, content, color, backgroundColor, width, height, fontFamily, fontSize, fontWeight, fontStyle } ) {
+function TextDisplay( { id, content, color, backgroundColor, width, height, fontFamily, fontFallback, fontSize, fontWeight, fontStyle } ) {
 	const props = {
 		color,
 		backgroundColor,
-		fontFamily,
+		fontFamily: generateFontFamily( fontFamily, fontFallback ),
+		fontFallback,
 		fontStyle,
 		fontSize,
 		fontWeight,
@@ -50,6 +52,10 @@ function TextDisplay( { id, content, color, backgroundColor, width, height, font
 	const {
 		state: { selectedElementIds },
 	} = useStory();
+	const {
+		actions: { maybeEnqueueFontStyle },
+	} = useFont();
+
 	const {
 		actions: { setEditingElement, setEditingElementWithState },
 	} = useCanvas();
@@ -68,6 +74,11 @@ function TextDisplay( { id, content, color, backgroundColor, width, height, font
 		setHasFocus( false );
 		return undefined;
 	}, [ isElementOnlySelection ] );
+
+	useEffect( () => {
+		maybeEnqueueFontStyle( fontFamily );
+	}, [ fontFamily, maybeEnqueueFontStyle ] );
+
 	const clickTime = useRef();
 	const handleMouseDown = useCallback( () => {
 		clickTime.current = window.performance.now();
@@ -118,6 +129,7 @@ function TextDisplay( { id, content, color, backgroundColor, width, height, font
 			element.current.focus();
 		}
 	}, [ isElementOnlySelection ] );
+
 	return (
 		<Element
 			canSelect={ hasFocus }
@@ -134,8 +146,9 @@ TextDisplay.propTypes = {
 	color: PropTypes.string,
 	backgroundColor: PropTypes.string,
 	fontFamily: PropTypes.string,
-	fontSize: PropTypes.string,
-	fontWeight: PropTypes.string,
+	fontFallback: PropTypes.array,
+	fontSize: PropTypes.number,
+	fontWeight: PropTypes.number,
 	fontStyle: PropTypes.string,
 	width: PropTypes.number.isRequired,
 	height: PropTypes.number.isRequired,

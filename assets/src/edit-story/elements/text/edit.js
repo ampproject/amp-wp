@@ -15,7 +15,7 @@ import { useState, useEffect, useLayoutEffect, useRef, useCallback } from '@word
 /**
  * Internal dependencies
  */
-import { useStory } from '../../app';
+import { useStory, useFont } from '../../app';
 import { useCanvas } from '../../components/canvas';
 import {
 	ElementFillContent,
@@ -45,11 +45,12 @@ const Element = styled.div`
 	}
 `;
 
-function TextEdit( { id, content, color, backgroundColor, width, height, fontFamily, fontSize, fontWeight, fontStyle } ) {
+function TextEdit( { id, content, color, backgroundColor, width, height, fontFamily, fontFallback, fontSize, fontWeight, fontStyle } ) {
 	const props = {
 		color,
 		backgroundColor,
 		fontFamily,
+		fontFallback,
 		fontStyle,
 		fontSize,
 		fontWeight,
@@ -57,6 +58,7 @@ function TextEdit( { id, content, color, backgroundColor, width, height, fontFam
 		height,
 	};
 	const editorRef = useRef( null );
+	const { actions: { maybeEnqueueFontStyle } } = useFont();
 	const { actions: { updateElementById } } = useStory();
 	const { state: { editingElementState } } = useCanvas();
 	const { offset, clearContent } = editingElementState || {};
@@ -124,6 +126,10 @@ function TextEdit( { id, content, color, backgroundColor, width, height, fontFam
 		editorRef.current.focus();
 	}, [] );
 
+	useEffect( () => {
+		maybeEnqueueFontStyle( fontFamily );
+	}, [ fontFamily, maybeEnqueueFontStyle ] );
+
 	return (
 		<Element { ...props } onClick={ onClick }>
 			<Editor
@@ -137,12 +143,14 @@ function TextEdit( { id, content, color, backgroundColor, width, height, fontFam
 }
 
 TextEdit.propTypes = {
+	id: PropTypes.string.isRequired,
 	content: PropTypes.string,
 	color: PropTypes.string,
 	backgroundColor: PropTypes.string,
 	fontFamily: PropTypes.string,
-	fontSize: PropTypes.string,
-	fontWeight: PropTypes.string,
+	fontFallback: PropTypes.array,
+	fontSize: PropTypes.number,
+	fontWeight: PropTypes.number,
 	fontStyle: PropTypes.string,
 	width: PropTypes.number.isRequired,
 	height: PropTypes.number.isRequired,
