@@ -290,7 +290,6 @@ class AMP_Service_Worker {
 				return $js;
 			}
 		);
-
 	}
 
 	/**

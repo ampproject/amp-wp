@@ -63,6 +63,7 @@ class AMP_Theme_Support {
 	 * @var string
 	 */
 	const APP_SHELL_COMPONENT_QUERY_VAR = 'amp_app_shell_component';
+
 	/**
 	 * ID for element that contains the content for app shell.
 	 *
@@ -483,7 +484,9 @@ class AMP_Theme_Support {
 		if ( ! isset( $theme_support['app_shell'] ) ) {
 			return;
 		}
+
 		$requested_app_shell_component = self::get_requested_app_shell_component();
+
 		// When inner app shell is requested, it is always an AMP request. Do not allow AMP when getting outer app shell for now (but this should be allowed in the future).
 		if ( 'outer' === $requested_app_shell_component ) {
 			add_action(
@@ -500,6 +503,7 @@ class AMP_Theme_Support {
 				}
 			);
 		}
+
 		// @todo This query param should be standardized and then this can be handled in the same place as WP_Service_Worker_Navigation_Routing_Component::filter_title_for_streaming_header().
 		if ( 'outer' === $requested_app_shell_component ) {
 			add_filter(
@@ -509,6 +513,7 @@ class AMP_Theme_Support {
 				}
 			);
 		}
+
 		// Enqueue scripts for (outer) app shell, including precached app shell and normal site navigation prior to service worker installation.
 		if ( 'inner' !== $requested_app_shell_component ) {
 			add_action(
@@ -519,6 +524,7 @@ class AMP_Theme_Support {
 					}
 					wp_enqueue_script( 'amp-shadow' );
 					wp_enqueue_script( 'amp-wp-app-shell' );
+
 					$exports = [
 						'contentElementId'  => AMP_Theme_Support::APP_SHELL_CONTENT_ELEMENT_ID,
 						'homeUrl'           => home_url( '/' ),
@@ -2064,33 +2070,33 @@ class AMP_Theme_Support {
 		if ( ! isset( AMP_HTTP::$purged_amp_query_vars[ self::APP_SHELL_COMPONENT_QUERY_VAR ] ) ) {
 			return null;
 		}
+
 		$theme_support_args = self::get_theme_support_args();
 		if ( ! isset( $theme_support_args['app_shell'] ) ) {
 			return null;
 		}
+
 		$component = AMP_HTTP::$purged_amp_query_vars[ self::APP_SHELL_COMPONENT_QUERY_VAR ];
 		if ( in_array( $component, [ 'inner', 'outer' ], true ) ) {
 			return $component;
 		}
 		return null;
 	}
+
 	/**
 	 * Prepare inner app shell.
 	 *
 	 * @param DOMElement $content_element Content element.
 	 */
 	protected static function prepare_inner_app_shell_document( DOMElement $content_element ) {
-		$dom  = $content_element->ownerDocument;
-		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
-		if ( ! $body ) {
-			return;
-		}
-		$xpath = new DOMXPath( $dom );
+		$dom = Document::from_node( $content_element );
+
 		// Preserve the admin bar.
 		$admin_bar = $dom->getElementById( 'wpadminbar' );
 		if ( $admin_bar ) {
 			$admin_bar->parentNode->removeChild( $admin_bar );
 		}
+
 		// Extract all stylesheet elements before the body gets isolated.
 		$style_elements = [];
 		$lower_case     = 'translate( %s, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz" )'; // In XPath 2.0 this is lower-case().
@@ -2098,17 +2104,19 @@ class AMP_Theme_Support {
 			sprintf( '( self::style and ( not( @type ) or %s = "text/css" ) )', sprintf( $lower_case, '@type' ) ),
 			sprintf( '( self::link and @href and %s = "stylesheet" )', sprintf( $lower_case, '@rel' ) ),
 		];
-		foreach ( $xpath->query( './/*[ ' . implode( ' or ', $predicates ) . ' ]', $body ) as $element ) {
+		foreach ( $dom->xpath->query( './/*[ ' . implode( ' or ', $predicates ) . ' ]', $dom->body ) as $element ) {
 			$style_elements[] = $element;
 		}
 		foreach ( $style_elements as $style_element ) {
 			$style_element->parentNode->removeChild( $style_element );
 		}
+
 		// Preserve all svg defs which aren't inside the content element.
 		$svgs_with_def = [];
-		foreach ( $xpath->query( '//svg[.//defs]' ) as $svg ) {
+		foreach ( $dom->xpath->query( '//svg[.//defs]' ) as $svg ) {
 			$svgs_with_def[] = $svg;
 		}
+
 		// Isolate the content element from the rest of the elements in the body.
 		$remove_siblings = function( DOMElement $node ) {
 			while ( $node->previousSibling ) {
@@ -2122,15 +2130,18 @@ class AMP_Theme_Support {
 		do {
 			$remove_siblings( $node );
 			$node = $node->parentNode;
-		} while ( $node && $node !== $body );
+		} while ( $node && $node !== $dom->body );
+
 		// Restore admin bar element.
-		if ( $body && $admin_bar ) {
-			$body->appendChild( $admin_bar );
+		if ( $admin_bar ) {
+			$dom->body->appendChild( $admin_bar );
 		}
+
 		// Restore style elements.
 		foreach ( $style_elements as $style_element ) {
-			$body->appendChild( $style_element );
+			$dom->body->appendChild( $style_element );
 		}
+
 		// Restore SVGs with defs.
 		foreach ( $svgs_with_def as $svg ) {
 			/*
@@ -2146,22 +2157,26 @@ class AMP_Theme_Support {
 				}
 				$node = $node->parentNode;
 			}
+
 			// Re-add the SVG element to the body with only its defs elements.
 			if ( ! $is_connected ) {
 				$defs = [];
 				foreach ( $svg->getElementsByTagName( 'defs' ) as $def ) {
 					$defs[] = $def;
 				}
+
 				// Remove all children.
 				while ( $svg->firstChild ) {
 					$svg->removeChild( $svg->firstChild );
 				}
+
 				// Re-add all defs.
 				foreach ( $defs as $def ) {
 					$svg->appendChild( $def );
 				}
+
 				// Add to body.
-				$body->appendChild( $svg );
+				$dom->body->appendChild( $svg );
 			}
 		}
 	}

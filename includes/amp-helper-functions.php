@@ -466,6 +466,7 @@ function amp_register_default_scripts( $wp_scripts ) {
 		),
 		'after'
 	);
+
 	// App shell library.
 	$handle = 'amp-wp-app-shell';
 	$wp_scripts->add(
@@ -1260,10 +1261,13 @@ function amp_start_app_shell_content() {
 	if ( ! isset( $support_args['app_shell'] ) ) {
 		return;
 	}
+
 	printf( '<div id="%s">', esc_attr( AMP_Theme_Support::APP_SHELL_CONTENT_ELEMENT_ID ) );
+
 	// Start output buffering if requesting outer shell, since all content will be omitted from the response.
 	if ( 'outer' === AMP_Theme_Support::get_requested_app_shell_component() ) {
 		$content_placeholder = '<p>' . esc_html__( 'Loading&hellip;', 'amp' ) . '</p>';
+
 		/**
 		 * Filters the content which is shown in the app shell for the content before it is loaded.
 		 *
@@ -1275,6 +1279,7 @@ function amp_start_app_shell_content() {
 		 * @param string $content_placeholder Content placeholder.
 		 */
 		echo apply_filters( 'amp_app_shell_content_placeholder', $content_placeholder ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+
 		ob_start();
 	}
 }
@@ -1290,10 +1295,12 @@ function amp_end_app_shell_content() {
 	if ( ! isset( $support_args['app_shell'] ) ) {
 		return;
 	}
+
 	// Clean output buffer if requesting outer shell, since all content will be omitted from the response.
 	if ( 'outer' === AMP_Theme_Support::get_requested_app_shell_component() ) {
 		ob_end_clean();
 	}
+
 	echo '</div><!-- #amp-app-shell-content -->';
 }
 
