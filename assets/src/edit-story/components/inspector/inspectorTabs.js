@@ -24,15 +24,15 @@ const Tab = styled.button`
 	background: none;
 	text-transform: uppercase;
 	color: ${ ( { theme } ) => theme.colors.bg.v4 };
-	
-	font-weight: ${ ( { isActive } ) => isActive ? 'bold' : 'normal;' };;
+	font-weight: ${ ( { isActive } ) => isActive ? 'bold' : 'normal;' };
+	&:focus, &:active {
+		outline: none;
+	}
 	${ ( { isActive } ) => ! isActive && `
 		opacity: .4;
 		&:hover { opacity: 1; }
 	` }
-	&:focus, &:active {
-		outline: none;
-	}
+
 `;
 
 function InspectorTabs() {
