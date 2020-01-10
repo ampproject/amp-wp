@@ -45,7 +45,7 @@ const Element = styled.div`
 	}
 `;
 
-function TextEdit( { content, color, backgroundColor, width, height, fontFamily,fontFallback, fontSize, fontWeight, fontStyle } ) {
+function TextEdit( { content, color, backgroundColor, width, height, fontFamily, fontFallback, fontSize, fontWeight, fontStyle } ) {
 	const props = {
 		color,
 		backgroundColor,

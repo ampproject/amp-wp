@@ -35,11 +35,11 @@ function App( { config } ) {
 						<HistoryProvider size={ 50 }>
 							<StoryProvider storyId={ storyId }>
 								<FontProvider>
-								  <GlobalStyle />
-								  <CropMoveableGlobalStyle />
-								  <Layout />
-								  <Popover.Slot />
-                </FontProvider>
+									<GlobalStyle />
+									<CropMoveableGlobalStyle />
+									<Layout />
+									<Popover.Slot />
+								</FontProvider>
 							</StoryProvider>
 						</HistoryProvider>
 					</APIProvider>
