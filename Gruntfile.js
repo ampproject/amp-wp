@@ -47,7 +47,13 @@ module.exports = function( grunt ) {
 		// Clean up the build.
 		clean: {
 			compiled: {
-				src: [ 'assets/js/*.js', '!assets/js/amp-service-worker-runtime-precaching.js', 'assets/js/*.asset.php' ],
+				src: [
+					'assets/js/*.js',
+					'!assets/js/amp-service-worker-runtime-precaching.js',
+					'!assets/js/amp-service-worker-offline-commenting.js',
+					'!assets/js/amp-wp-app-shell.js',
+					'assets/js/*.asset.php',
+				],
 			},
 			build: {
 				src: [ 'build' ],
