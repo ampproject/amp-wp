@@ -14,6 +14,7 @@ import { useCallback, useState } from '@wordpress/element';
  */
 import { ElementFillContent } from '../shared';
 import { useStory } from '../../app';
+import { WithElementMask } from '../../masks';
 import EditPanMovable from './editPanMovable';
 import EditCropMovable from './editCropMovable';
 import { getImgProps, ImageWithScale } from './util';
@@ -53,7 +54,7 @@ const CropImg = styled.img`
 	${ ImageWithScale }
 `;
 
-function ImageEdit( { id, src, origRatio, width, height, x, y, scale, focalX, focalY, rotationAngle, isFullbleed } ) {
+function ImageEdit( { id, src, origRatio, width, height, x, y, scale, focalX, focalY, rotationAngle, isFullbleed, type, ...rest } ) {
 	const [ fullImage, setFullImage ] = useState( null );
 	const [ croppedImage, setCroppedImage ] = useState( null );
 	const [ cropBox, setCropBox ] = useState( null );
@@ -69,7 +70,9 @@ function ImageEdit( { id, src, origRatio, width, height, x, y, scale, focalX, fo
 		<Element>
 			<FadedImg ref={ setFullImage } draggable={ false } src={ src } { ...imgProps } />
 			<CropBox ref={ setCropBox }>
-				<CropImg ref={ setCroppedImage } draggable={ false } src={ src } { ...imgProps } />
+				<WithElementMask type={ type } { ...rest } >
+					<CropImg ref={ setCroppedImage } draggable={ false } src={ src } { ...imgProps } />
+				</WithElementMask>
 			</CropBox>
 
 			{ ! isFullbleed && cropBox && croppedImage && (
@@ -108,6 +111,7 @@ function ImageEdit( { id, src, origRatio, width, height, x, y, scale, focalX, fo
 
 ImageEdit.propTypes = {
 	id: PropTypes.string.isRequired,
+	type: PropTypes.string.isRequired,
 	src: PropTypes.string.isRequired,
 	origRatio: PropTypes.number.isRequired,
 	width: PropTypes.number.isRequired,

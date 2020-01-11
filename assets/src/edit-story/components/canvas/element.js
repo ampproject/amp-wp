@@ -15,12 +15,16 @@ import { useLayoutEffect, useRef } from '@wordpress/element';
 import { getDefinitionForType } from '../../elements';
 import { useStory } from '../../app';
 import { ElementWithPosition, ElementWithSize, ElementWithRotation, getBox } from '../../elements/shared';
+import { WithElementMask } from '../../masks';
 import useCanvas from './useCanvas';
 
+// Pointer events are disabled in the display mode to ensure that selection
+// can be limited to the mask.
 const Wrapper = styled.div`
 	${ ElementWithPosition }
 	${ ElementWithSize }
 	${ ElementWithRotation }
+	pointer-events: ${ ( { isEditing } ) => isEditing ? 'initial' : 'none' };
 `;
 
 function Element( {
@@ -62,6 +66,7 @@ function Element( {
 		<Wrapper
 			ref={ element }
 			{ ...box }
+			isEditing={ isEditing }
 			onMouseDown={ ( evt ) => {
 				if ( ! isSelected ) {
 					handleSelectElement( id, evt );
@@ -71,7 +76,11 @@ function Element( {
 		>
 			{ isEditing ?
 				( <Edit { ...props } /> ) :
-				( <Display { ...props } /> ) }
+				(
+					<WithElementMask type={ type } { ...rest } >
+						<Display { ...props } />
+					</WithElementMask>
+				) }
 		</Wrapper>
 	);
 }

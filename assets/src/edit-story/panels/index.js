@@ -7,6 +7,7 @@ import ColorPanel from './color';
 import BackgroundColorPanel from './backgroundColor';
 import FullbleedPanel from './fullbleed';
 import FontPanel from './font';
+import MaskPanel from './mask';
 import RotationPanel from './rotationAngle';
 import SizePanel from './size';
 import PositionPanel from './position';
@@ -23,6 +24,7 @@ const SIZE = 'size';
 const POSITION = 'position';
 const FULLBLEED = 'fullbleed';
 const BACKGROUND_COLOR = 'backgroundColor';
+const MASK = 'mask';
 
 export const PanelTypes = {
 	ACTIONS,
@@ -35,6 +37,7 @@ export const PanelTypes = {
 	TEXT,
 	ROTATION_ANGLE,
 	FULLBLEED,
+	MASK,
 };
 
 const ALL = Object.values( PanelTypes );
@@ -67,6 +70,7 @@ export function getPanels( elements ) {
 				case COLOR: return { type, Panel: ColorPanel };
 				case FONT: return { type, Panel: FontPanel };
 				case TEXT: return { type, Panel: TextPanel };
+				case MASK: return { type, Panel: MaskPanel };
 				default: throw new Error( `Unknown panel: ${ type }` );
 			}
 		} );
