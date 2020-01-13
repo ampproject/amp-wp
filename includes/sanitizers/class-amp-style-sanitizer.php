@@ -1723,13 +1723,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$output_format = Sabberworm\CSS\OutputFormat::createCompact();
 			$output_format->setSemicolonAfterLastRule( false );
 
-			$before_declaration_block          = '/*AMP_WP_BEFORE_DECLARATION_BLOCK*/';
-			$between_selectors                 = '/*AMP_WP_BETWEEN_SELECTORS*/';
-			$after_declaration_block_selectors = '/*AMP_WP_BEFORE_DECLARATION_SELECTORS*/';
-			$between_properties                = '/*AMP_WP_BETWEEN_PROPERTIES*/';
-			$after_declaration_block           = '/*AMP_WP_AFTER_DECLARATION*/';
-			$before_at_rule                    = '/*AMP_WP_BEFORE_AT_RULE*/';
-			$after_at_rule                     = '/*AMP_WP_AFTER_AT_RULE*/';
+			$before_declaration_block          = sprintf( '/*%s*/', chr( 1 ) );
+			$between_selectors                 = sprintf( '/*%s*/', chr( 2 ) );
+			$after_declaration_block_selectors = sprintf( '/*%s*/', chr( 3 ) );
+			$between_properties                = sprintf( '/*%s*/', chr( 4 ) );
+			$after_declaration_block           = sprintf( '/*%s*/', chr( 5 ) );
+			$before_at_rule                    = sprintf( '/*%s*/', chr( 6 ) );
+			$after_at_rule                     = sprintf( '/*%s*/', chr( 7 ) );
 
 			// Add comments to stylesheet if PHP-CSS-Parser has the required extensions for tree shaking.
 			if ( self::has_required_php_css_parser() ) {
