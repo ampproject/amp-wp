@@ -8,6 +8,7 @@ import styled from 'styled-components';
  * Internal dependencies
  */
 import InOverlay from '../../components/overlay';
+import { Z_INDEX_CANVAS } from '../../constants';
 
 const MIN_WIDTH = 165;
 const HEIGHT = 28;
@@ -34,7 +35,12 @@ const Container = styled.div`
   padding: 0 4px;
 `;
 
-const Range = styled.input`
+const Range = styled.input.attrs( {
+	type: 'range',
+	min: 100,
+	max: MAX_SCALE,
+	step: 10,
+} )`
   flex: 1 1;
   margin: 4px;
   min-width: 100px;
@@ -55,13 +61,9 @@ const ResetButton = styled.button`
 
 function ScalePanel( { setProperties, width, height, x, y, scale } ) {
 	return (
-		<InOverlay zIndex={ 11 }>
+		<InOverlay zIndex={ Z_INDEX_CANVAS.FLOAT_PANEL }>
 			<Container x={ x } y={ y } width={ width } height={ height } >
 				<Range
-					type="range"
-					min={ 100 }
-					max={ MAX_SCALE }
-					step={ 10 }
 					value={ scale }
 					onChange={ ( evt ) => setProperties( { scale: evt.target.valueAsNumber } ) }
 				/>

@@ -10,8 +10,13 @@ export const PAGE_WIDTH = 412;
 export const PAGE_HEIGHT = 732;
 
 export const LAYER_DIRECTIONS = {
-	FRONT: 'FRONT',
-	BACK: 'BACK',
-	FORWARD: 'FORWARD',
-	BACKWARD: 'BACKWARD',
+  FRONT: 'FRONT',
+  BACK: 'BACK',
+  FORWARD: 'FORWARD',
+  BACKWARD: 'BACKWARD',
+};
+
+export const Z_INDEX_CANVAS = {
+	MOVABLE: 10,
+	FLOAT_PANEL: 11,
 };
