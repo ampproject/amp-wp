@@ -7,6 +7,7 @@ import styled from 'styled-components';
  * WordPress dependencies
  */
 import { useCallback } from '@wordpress/element';
+import { cleanForSlug } from '@wordpress/editor';
 
 /**
  * Internal dependencies
@@ -25,7 +26,7 @@ const Input = styled.input`
 
 function Title() {
 	const {
-		state: { story: { title, status } },
+		state: { story: { title, status, slug } },
 		actions: { updateStory },
 	} = useStory();
 
@@ -34,17 +35,27 @@ function Title() {
 		[ updateStory ],
 	);
 
+	const handleBlur = useCallback(
+		( evt ) => {
+			if ( ! slug ) {
+				updateStory( { properties: { slug: cleanForSlug( evt.target.value ) } } );
+			}
+		}, [ slug, updateStory ],
+
+	);
+
 	if ( typeof title !== 'string' ) {
 		return null;
 	}
 
 	// TODO Make sure that Auto Draft checks translations.
-	const titleFormatted = ( status === 'auto-draft' && title === 'Auto Draft' ) ? '' : title;
+	const titleFormatted = ( [ 'auto-draft', 'draft', 'pending' ].includes( status ) && title === 'Auto Draft' ) ? '' : title;
 
 	return (
 		<Input
 			value={ titleFormatted }
 			type={ 'text' }
+			onBlur={ handleBlur }
 			onChange={ handleChange }
 			placeholder={ 'Add title' }
 		/>

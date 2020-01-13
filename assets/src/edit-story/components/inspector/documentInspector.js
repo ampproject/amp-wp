@@ -43,7 +43,7 @@ function DocumentInspector() {
 	} = useInspector();
 
 	const {
-		state: { meta: { isSaving }, story: { author, status, date, excerpt, featuredMediaUrl }, capabilities },
+		state: { meta: { isSaving }, story: { author, status, slug, date, excerpt, featuredMediaUrl }, capabilities },
 		actions: { updateStory },
 	} = useStory();
 
@@ -80,8 +80,13 @@ function DocumentInspector() {
 		[ updateStory ],
 	);
 
+	const handleChangeSlug = useCallback(
+		( value, evt ) => updateStory( { properties: { slug: evt.target.value } } ),
+		[ updateStory ],
+	);
+
 	const handleChangeImage = useCallback(
-		( image ) => updateStory( { properties: { featuredMedia: image.id, featuredMediaUrl: image.url } } ),
+		( image ) => updateStory( { properties: { featuredMedia: image.id, featuredMediaUrl: ( image.sizes && image.sizes.medium ) ? image.sizes.medium.url : image.url } } ),
 		[ updateStory ],
 	);
 
@@ -121,6 +126,14 @@ function DocumentInspector() {
 				value={ excerpt }
 				disabled={ isSaving }
 				onChange={ handleChangeExcerpt }
+			/>
+
+			<InputGroup
+				label={ 'Slug' }
+				type={ 'text' }
+				value={ slug }
+				disabled={ isSaving }
+				onChange={ handleChangeSlug }
 			/>
 			<Group>
 				{ featuredMediaUrl && <Img src={ featuredMediaUrl } /> }
