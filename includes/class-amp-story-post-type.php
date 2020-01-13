@@ -314,7 +314,7 @@ class AMP_Story_Post_Type {
 		$story_id         = ( $post ) ? $post->ID : null;
 		$post_type_object = get_post_type_object( self::POST_TYPE_SLUG );
 		$rest_base        = ! empty( $post_type_object->rest_base ) ? $post_type_object->rest_base : $post_type_object->name;
-		$post_thumbnails   = get_theme_support( 'post-thumbnails' );
+		$post_thumbnails  = get_theme_support( 'post-thumbnails' );
 
 		self::load_admin_fonts( $post );
 
@@ -411,10 +411,12 @@ class AMP_Story_Post_Type {
 		if ( $post_story_data ) {
 			foreach ( $post_story_data as $page ) {
 				foreach ( $page['elements'] as $element ) {
-					$font = AMP_Fonts::get_font( $element['fontFamily'] );
-					if ( $font && ! in_array( $font['slug'], $font_slugs, true ) ) {
-						$fonts[]      = $font;
-						$font_slugs[] = $font['slug'];
+					if ( isset( $element['fontFamily'] ) ) {
+						$font = AMP_Fonts::get_font( $element['fontFamily'] );
+						if ( $font && ! in_array( $font['slug'], $font_slugs, true ) ) {
+							$fonts[]      = $font;
+							$font_slugs[] = $font['slug'];
+						}
 					}
 				}
 			}

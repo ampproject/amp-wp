@@ -60,7 +60,7 @@ class AMP_REST_Stories_Controller extends WP_REST_Posts_Controller {
 		}
 
 		if ( in_array( 'featured_media_url', $fields, true ) ) {
-			$image                      = get_the_post_thumbnail_url( $post, 'full' );
+			$image                      = get_the_post_thumbnail_url( $post, 'medium' );
 			$data['featured_media_url'] = ! empty( $image ) ? $image : $schema['properties']['featured_media_url']['default'];
 		}
 
