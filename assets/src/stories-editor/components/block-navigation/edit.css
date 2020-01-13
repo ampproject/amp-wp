@@ -5,7 +5,7 @@
 	top: 75px;
 	width: 300px;
 	min-width: 115px;
-	z-index: 80;
+	z-index: 25;
 	list-style-type: none;
 	padding: 0;
 	margin: 0;
@@ -20,7 +20,7 @@
 
 @media (min-width: 1001px) and (max-width: 1100px) {
 
-	.is-sidebar-opened .editor-block-list__layout {
+	.is-sidebar-opened .block-editor-block-list__layout {
 		margin-right: -100px;
 	}
 }

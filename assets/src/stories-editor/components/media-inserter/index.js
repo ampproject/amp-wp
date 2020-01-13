@@ -114,7 +114,7 @@ const MediaInserter = () => {
 			hasArrowIndicator={ true }
 			popoverProps={ POPOVER_PROPS }
 			toggleProps={
-				{ labelPosition: 'bottom' }
+				{ tooltipPosition: 'bottom' }
 			}
 		/>
 	);

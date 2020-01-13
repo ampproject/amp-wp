@@ -23,7 +23,7 @@ import {
 	STORY_PAGE_INNER_HEIGHT_FOR_CTA,
 } from '../constants';
 
-const wrapperElSelector = 'div[data-amp-selected="parent"] .editor-inner-blocks';
+const wrapperElSelector = 'div[data-amp-selected="parent"] .block-editor-inner-blocks';
 
 const BlockDropZone = ( { srcBlockName, srcClientId } ) => {
 	const blockIsCTA = isCTABlock( srcBlockName );
@@ -45,7 +45,7 @@ const BlockDropZone = ( { srcBlockName, srcClientId } ) => {
 		if ( blockIsCTA ) {
 			elementId = `amp-story-cta-button-${ srcClientId }`;
 			cloneElementId = `clone-amp-story-cta-button-${ srcClientId }`;
-			const btnWrapperSelector = `#block-${ srcClientId } .editor-block-list__block-edit`;
+			const btnWrapperSelector = `#block-${ srcClientId } .block-editor-block-list__block-edit`;
 
 			// Get the editor wrapper element for calculating the width and height.
 			wrapperEl = document.querySelector( btnWrapperSelector );

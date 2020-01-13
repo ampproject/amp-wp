@@ -1,4 +1,4 @@
-.editor-block-list__layout div[data-type="amp/amp-story-cta"] {
+.block-editor-block-list__layout div[data-type="amp/amp-story-cta"] {
 	top: 80%;
 	left: 0;
 	width: 100%;
@@ -9,7 +9,7 @@
 	margin-top: 0;
 }
 
-.editor-block-list__layout div[data-type="amp/amp-story-cta"] img {
+.block-editor-block-list__layout div[data-type="amp/amp-story-cta"] img {
 
 	/* Remove the top/bottom padding from the available space. */
 	max-height: calc(110px - 24px);
@@ -34,7 +34,7 @@ div[data-type="amp/amp-story-cta"] .amp-overlay {
 	bottom: 0;
 }
 
-.editor-block-list__layout div[data-type="amp/amp-story-cta"] .editor-block-mover {
+.block-editor-block-list__layout div[data-type="amp/amp-story-cta"] .editor-block-mover {
 	display: none;
 }
 

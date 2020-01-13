@@ -148,7 +148,7 @@
 
 .amp-stories__editor-inserter__results .components-disabled,
 .amp-stories__editor-inserter__results .components-disabled div:first-of-type,
-.amp-stories__editor-inserter__results .components-disabled .editor-inner-blocks {
+.amp-stories__editor-inserter__results .components-disabled .block-editor-inner-blocks {
 	padding: 0;
 	height: 268px;
 }

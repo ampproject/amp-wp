@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { IconButton } from '@wordpress/components';
+import { Button } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
 import { createBlock } from '@wordpress/blocks';
 
@@ -20,7 +20,7 @@ function PageInserter() {
 
 	return (
 		<div className="block-editor-inserter">
-			<IconButton
+			<Button
 				icon={ addTemplateIcon( { width: 16, height: 16 } ) }
 				label={ __( 'Insert Blank Page', 'amp' ) }
 				onClick={ onClick }

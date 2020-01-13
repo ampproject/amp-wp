@@ -194,11 +194,11 @@
  * Fixes Gutenberg bug where an extra wrapping div is causing no pointer events on the notice layer.
  */
 
-.editor-block-list__layout .block-editor-block-list__block.has-warning .block-editor-block-list__block-edit > :not(.editor-warning) {
+.block-editor-block-list__layout .block-editor-block-list__block.has-warning .block-editor-block-list__block-edit > :not(.editor-warning) {
 	pointer-events: all;
 }
 
-.editor-block-list__layout .block-editor-block-list__block.has-warning .block-editor-block-list__block-edit > div > div:not(.editor-warning) {
+.block-editor-block-list__layout .block-editor-block-list__block.has-warning .block-editor-block-list__block-edit > div > div:not(.editor-warning) {
 	pointer-events: none;
 }
 

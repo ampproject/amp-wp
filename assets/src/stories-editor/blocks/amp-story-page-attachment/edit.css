@@ -13,7 +13,7 @@ div[data-type="amp/amp-story-page-attachment"] .components-notice.is-warning {
 	position: absolute;
 }
 
-div[data-type="amp/amp-story-page-attachment"] .editor-block-list__block-edit.block-editor-block-list__block-edit,
+div[data-type="amp/amp-story-page-attachment"] .block-editor-block-list__block-edit.block-editor-block-list__block-edit,
 div[data-type="amp/amp-story-page-attachment"] .attachment-wrapper {
 	width: 100%;
 	height: 100%;

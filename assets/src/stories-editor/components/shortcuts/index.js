@@ -4,7 +4,7 @@
 import { getBlockType, createBlock } from '@wordpress/blocks';
 import { BlockIcon } from '@wordpress/block-editor';
 import { useSelect, useDispatch } from '@wordpress/data';
-import { IconButton } from '@wordpress/components';
+import { Button } from '@wordpress/components';
 import { useCallback } from '@wordpress/element';
 
 /**
@@ -56,12 +56,12 @@ const Shortcuts = () => {
 			const blockType = getBlockType( block );
 
 			return (
-				<IconButton
+				<Button
 					key={ block }
 					icon={ <BlockIcon icon={ blockType.icon } /> }
 					onClick={ () => onClick( block ) }
 					label={ blockType.title }
-					labelPosition="bottom"
+					tooltipPosition="bottom"
 				/>
 			);
 		} )

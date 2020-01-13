@@ -14,7 +14,7 @@
 	overflow: hidden;
 }
 
-#amp-story-editor > .editor-block-list__layout {
+#amp-story-editor > .block-editor-block-list__layout {
 	padding-left: 0;
 	padding-right: 0;
 	display: flex;
@@ -23,7 +23,7 @@
 	transition: transform 300ms ease-in-out;
 }
 
-#amp-story-editor > .editor-block-list__layout .block-list-appender {
+#amp-story-editor > .block-editor-block-list__layout .block-list-appender {
 	display: none;
 }
 

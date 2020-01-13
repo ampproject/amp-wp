@@ -7,7 +7,7 @@ import { ReactElement } from 'react';
 /**
  * WordPress dependencies
  */
-import { RangeControl, SelectControl, IconButton } from '@wordpress/components';
+import { RangeControl, SelectControl, Button } from '@wordpress/components';
 import { useCallback } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
@@ -106,13 +106,13 @@ const AnimationControls = ( {
 						options={ animatedBlocks() }
 						onChange={ onAnimationAfterChange }
 					/>
-					<IconButton
+					<Button
 						icon={ isPlayingAnimation ? stopIcon( { width: 20, height: 20 } ) : 'controls-play' }
 						className="is-button is-default"
 						onClick={ isPlayingAnimation ? onAnimationStop : onAnimationStart }
 					>
 						{ isPlayingAnimation ? __( 'Stop Animation', 'amp' ) : __( 'Play Animation', 'amp' ) }
-					</IconButton>
+					</Button>
 				</>
 			) }
 		</>

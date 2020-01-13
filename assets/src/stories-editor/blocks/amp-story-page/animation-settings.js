@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { sprintf, __, _n } from '@wordpress/i18n';
 import {
 	PanelBody,
-	IconButton,
+	Button,
 } from '@wordpress/components';
 import { useCallback } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
@@ -67,13 +67,13 @@ const AnimationSettings = ( { clientId } ) => {
 		<PanelBody
 			title={ __( 'Animation', 'amp' ) }
 		>
-			<IconButton
+			<Button
 				icon={ isPlayingAnimation ? stopIcon( { width: 20, height: 20 } ) : 'controls-play' }
 				className="is-button is-default"
 				onClick={ isPlayingAnimation ? onAnimationStop : onAnimationStart }
 			>
 				{ buttonLabel }
-			</IconButton>
+			</Button>
 		</PanelBody>
 	);
 };

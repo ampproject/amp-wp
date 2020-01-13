@@ -6,7 +6,7 @@ import OriginalAutocomplete from 'accessible-autocomplete/react';
  * WordPress dependencies
  */
 import {
-	IconButton,
+	Button,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
@@ -123,7 +123,7 @@ class Autocomplete extends OriginalAutocomplete {
 				/>
 				{ query && ! menuOpen && queryLongEnough && (
 
-					<IconButton
+					<Button
 						icon="no"
 						label={ __( 'Clear Font', 'amp' ) }
 						onClick={ ( event ) => this.handleClearClick( event ) }

@@ -12,8 +12,8 @@ import { BlockNavigation, EditorCarousel, Inserter, MediaInserter, Shortcuts, St
  * Add some additional elements needed to render our custom UI controls.
  */
 const renderStoryComponents = () => {
-	const editorBlockList = document.querySelector( '.editor-block-list__layout' );
-	const editorBlockNavigation = document.querySelector( '.editor-block-navigation' );
+	const editorBlockList = document.querySelector( '.block-editor-block-list__layout' );
+	const editorBlockNavigation = document.querySelector( '.block-editor-block-navigation' );
 
 	if ( editorBlockList && ! document.getElementById( 'amp-story-editor' ) ) {
 		const ampStoryWrapper = document.createElement( 'div' );
@@ -96,13 +96,14 @@ const renderStoryComponents = () => {
 		const customInserter = document.createElement( 'div' );
 		customInserter.id = 'amp-story-inserter';
 
-		const inserterWrapper = editorBlockNavigation.parentNode.parentNode.querySelector( '.block-editor-inserter' ).parentNode;
-		inserterWrapper.parentNode.replaceChild( customInserter, inserterWrapper );
+		editorBlockNavigation.parentNode.parentNode.replaceChild( customInserter, editorBlockNavigation.parentNode.parentNode.firstChild );
 
 		render(
 			<Inserter position="bottom right" />,
 			customInserter,
 		);
+
+		editorBlockNavigation.remove();
 	}
 
 	// Prevent WritingFlow component from focusing on last text field when clicking below the carousel.

@@ -17,7 +17,7 @@ import { ReactElement } from 'react';
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Dropdown, IconButton } from '@wordpress/components';
+import { Dropdown, Button } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 
 /**
@@ -27,12 +27,12 @@ import InserterMenu from './menu'; // eslint-disable-line import/no-named-as-def
 import './edit.css';
 
 const defaultRenderToggle = ( { onToggle, disabled, isOpen } ) => (
-	<IconButton
+	<Button
 		icon="insert"
 		label={ __( 'Add element', 'amp' ) }
-		labelPosition="bottom"
+		tooltipPosition="bottom"
 		onClick={ onToggle }
-		className="editor-inserter__toggle block-editor-inserter__toggle"
+		className="block-editor-inserter__toggle"
 		aria-haspopup="true"
 		aria-expanded={ isOpen }
 		disabled={ disabled }
@@ -99,8 +99,8 @@ const Inserter = ( props ) => {
 
 	return (
 		<Dropdown
-			className="editor-inserter block-editor-inserter"
-			contentClassName="editor-inserter__popover block-editor-inserter__popover"
+			className="block-editor-inserter"
+			contentClassName="block-editor-inserter__popover"
 			position={ position }
 			onToggle={ onToggle }
 			expandOnMobile

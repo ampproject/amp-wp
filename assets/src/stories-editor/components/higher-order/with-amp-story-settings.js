@@ -13,7 +13,7 @@ import { getBlockType } from '@wordpress/blocks';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { compose, createHigherOrderComponent } from '@wordpress/compose';
 import {
-	IconButton,
+	Button,
 	PanelBody,
 	RangeControl,
 	SelectControl,
@@ -348,7 +348,7 @@ export default createHigherOrderComponent(
 								title={ __( 'Block Position', 'amp' ) }
 							>
 								<div className="amp-story-order-controls-wrap">
-									<IconButton
+									<Button
 										className="amp-story-controls-bring-front"
 										onClick={ moveFront }
 										icon={ bringFrontIcon( { width: 24, height: 24 } ) }
@@ -357,8 +357,8 @@ export default createHigherOrderComponent(
 										aria-disabled={ isLast }
 									>
 										{ __( 'Front', 'amp' ) }
-									</IconButton>
-									<IconButton
+									</Button>
+									<Button
 										className="amp-story-controls-bring-forward"
 										onClick={ bringForward }
 										icon={ bringForwardIcon( { width: 24, height: 24 } ) }
@@ -367,8 +367,8 @@ export default createHigherOrderComponent(
 										aria-disabled={ isLast }
 									>
 										{ __( 'Forward', 'amp' ) }
-									</IconButton>
-									<IconButton
+									</Button>
+									<Button
 										className="amp-story-controls-send-backwards"
 										onClick={ sendBackward }
 										icon={ sendBackwardIcon( { width: 24, height: 24 } ) }
@@ -377,8 +377,8 @@ export default createHigherOrderComponent(
 										aria-disabled={ isFirst }
 									>
 										{ __( 'Backward', 'amp' ) }
-									</IconButton>
-									<IconButton
+									</Button>
+									<Button
 										className="amp-story-controls-send-back"
 										onClick={ moveBack }
 										icon={ sendBackIcon( { width: 24, height: 24 } ) }
@@ -387,7 +387,7 @@ export default createHigherOrderComponent(
 										aria-disabled={ isFirst }
 									>
 										{ __( 'Back', 'amp' ) }
-									</IconButton>
+									</Button>
 								</div>
 								<span className="amp-story-controls-description" id={ `amp-story-controls-bring-front-description-${ clientId }` }>
 									{

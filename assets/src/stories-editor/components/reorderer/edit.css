@@ -26,8 +26,8 @@
 	padding: 0;
 }
 
-.amp-story-reorderer .editor-block-list__layout.block-editor-block-list__layout,
-.amp-story-reorderer .editor-inner-blocks.block-editor-inner-blocks {
+.amp-story-reorderer .block-editor-block-list__layout.block-editor-block-list__layout,
+.amp-story-reorderer .block-editor-inner-blocks.block-editor-inner-blocks {
 	height: 100%;
 	padding: 0;
 }
@@ -116,7 +116,7 @@
 	height: 260px;
 }
 
-.amp-story-reorderer .amp-story-page-preview .editor-block-list__layout {
+.amp-story-reorderer .amp-story-page-preview .block-editor-block-list__layout {
 	padding: 0;
 }
 

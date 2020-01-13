@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
  */
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect, useRef, useCallback } from '@wordpress/element';
-import { Dashicon, IconButton } from '@wordpress/components';
+import { Dashicon, Button } from '@wordpress/components';
 import { URLInput, RichText } from '@wordpress/block-editor';
 import { useSelect } from '@wordpress/data';
 
@@ -168,7 +168,7 @@ const CallToActionEdit = ( {
 						onChange={ ( value ) => setAttributes( { url: value } ) }
 						autoFocus={ false /* eslint-disable-line jsx-a11y/no-autofocus */ }
 					/>
-					<IconButton icon="editor-break" label={ __( 'Apply', 'amp' ) } type="submit" />
+					<Button icon="editor-break" label={ __( 'Apply', 'amp' ) } type="submit" />
 				</form>
 			) }
 		</div>

@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { IconButton, Button } from '@wordpress/components';
+import { Button } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
 
 /**
@@ -33,13 +33,13 @@ function StoryControls() {
 	if ( isReordering ) {
 		return (
 			<>
-				<IconButton
+				<Button
 					className="amp-story-controls-reorder-cancel"
 					onClick={ () => resetOrder( blockOrder ) }
 					icon="no-alt"
 				>
 					{ __( 'Cancel', 'amp' ) }
-				</IconButton>
+				</Button>
 				<Button
 					className="amp-story-controls-reorder-save"
 					onClick={ saveOrder }
@@ -55,7 +55,7 @@ function StoryControls() {
 	return (
 		<>
 			<PageInserter />
-			<IconButton
+			<Button
 				className="amp-story-controls-reorder"
 				icon={ reorderIcon( { width: 24, height: 19 } ) }
 				label={ __( 'Reorder Pages', 'amp' ) }

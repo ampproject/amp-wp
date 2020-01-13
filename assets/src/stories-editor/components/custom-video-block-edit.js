@@ -13,7 +13,6 @@ import { useRef, useState, useEffect } from '@wordpress/element';
 import {
 	BaseControl,
 	Button,
-	IconButton,
 	Notice,
 	PanelBody,
 	Path,
@@ -280,7 +279,7 @@ const CustomVideoBlockEdit = ( { instanceId, isSelected, className, attributes, 
 		<>
 			<BlockControls>
 				<Toolbar>
-					<IconButton
+					<Button
 						className="components-icon-button components-toolbar__control"
 						label={ __( 'Edit video', 'amp' ) }
 						onClick={ switchToEditing }

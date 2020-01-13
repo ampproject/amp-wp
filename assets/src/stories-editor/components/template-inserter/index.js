@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Dropdown, IconButton } from '@wordpress/components';
+import { Dropdown, Button } from '@wordpress/components';
 import { useState, useEffect } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { createBlock } from '@wordpress/blocks';
@@ -77,7 +77,7 @@ const TemplateInserter = ( props ) => {
 			onToggle={ onToggle }
 			expandOnMobile
 			renderToggle={ ( { onToggle: onClick, isOpen } ) => (
-				<IconButton
+				<Button
 					icon={ addTemplateIcon( { width: 16, height: 16 } ) }
 					label={ __( 'Insert Template', 'amp' ) }
 					onClick={ onClick }
@@ -104,7 +104,7 @@ const TemplateInserter = ( props ) => {
 						>
 							<div role="list" className="editor-block-types-list block-editor-block-types-list">
 								<div className="editor-block-preview block-editor-block-preview">
-									<IconButton
+									<Button
 										icon={ pageIcon( { width: 86, height: 96 } ) }
 										label={ __( 'Blank Page', 'amp' ) }
 										onClick={ () => {

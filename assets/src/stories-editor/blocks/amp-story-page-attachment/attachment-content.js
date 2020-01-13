@@ -123,7 +123,7 @@ const AttachmentContent = ( props ) => {
 		<div className="attachment-container">
 			<div className="attachment-wrapper">
 				<div className="attachment-header">
-					{ /* This does not use an IconButton as it replicates the close button on the frontend */ }
+					{ /* This does not use a Button as it replicates the close button on the frontend */ }
 					<span
 						tabIndex="0"
 						className="amp-story-page-attachment-close-button"

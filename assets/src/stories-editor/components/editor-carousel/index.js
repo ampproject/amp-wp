@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { DropZoneProvider, IconButton } from '@wordpress/components';
+import { DropZoneProvider, Button } from '@wordpress/components';
 import { useEffect, useRef } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 
@@ -84,7 +84,7 @@ const EditorCarousel = () => {
 	return (
 		<DropZoneProvider>
 			<div className="amp-story-editor-carousel-navigation">
-				<IconButton
+				<Button
 					icon={ isRTL ? 'arrow-right-alt2' : 'arrow-left-alt2' }
 					label={ __( 'Previous Page', 'amp' ) }
 					onClick={ ( e ) => {
@@ -98,7 +98,7 @@ const EditorCarousel = () => {
 					currentPage={ currentPage }
 					onClick={ goToPage }
 				/>
-				<IconButton
+				<Button
 					icon={ isRTL ? 'arrow-left-alt2' : 'arrow-right-alt2' }
 					label={ __( 'Next Page', 'amp' ) }
 					onClick={ ( e ) => {

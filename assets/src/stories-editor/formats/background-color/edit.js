@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
  */
 import { __ } from '@wordpress/i18n';
 import { BlockControls, ColorPalette } from '@wordpress/block-editor';
-import { Toolbar, Dropdown, IconButton } from '@wordpress/components';
+import { Toolbar, Dropdown, Button } from '@wordpress/components';
 import { getActiveFormat, applyFormat, removeFormat } from '@wordpress/rich-text';
 
 /**
@@ -33,7 +33,7 @@ const FormatEdit = ( { isActive, value, onChange } ) => {
 				<Dropdown
 					position="bottom right"
 					renderToggle={ ( { isOpen, onToggle } ) => (
-						<IconButton
+						<Button
 							icon={ markerIcon( { width: 16, height: 16, viewBox: '0 0 24 24' } ) }
 							tooltip={ __( 'Highlight Color', 'amp' ) }
 							onClick={ onToggle }
@@ -45,7 +45,7 @@ const FormatEdit = ( { isActive, value, onChange } ) => {
 									backgroundColor: activeColor,
 								} }
 							/>
-						</IconButton>
+						</Button>
 					) }
 					renderContent={ () => (
 						<div className="components-background-color-popover-content">
