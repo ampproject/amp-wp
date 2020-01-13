@@ -2294,10 +2294,12 @@ class AMP_Validated_URL_Post_Type {
 								}
 
 								if ( 0 !== $ins_count || 0 !== $del_count ) {
-									printf(
-										'<p><label><input type="checkbox" class="show-removed-styles"> %s</label></p>',
-										esc_html__( 'Show styles removed during tree-shaking', 'amp' )
-									);
+									if ( $del_count > 0 ) {
+										printf(
+											'<p><label><input type="checkbox" class="show-removed-styles"> %s</label></p>',
+											esc_html__( 'Show styles removed during tree-shaking', 'amp' )
+										);
+									}
 									echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 								}
 								?>
