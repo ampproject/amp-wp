@@ -1,10 +1,11 @@
 /**
- * Internal dependencies
- */
-/**
  * External dependencies
  */
 import styled from 'styled-components';
+/**
+ * Internal dependencies
+ */
+import { getTabId } from './shared';
 import useInspector from './useInspector';
 
 const Tabs = styled.div`
@@ -14,7 +15,7 @@ const Tabs = styled.div`
 	margin: 0;
 `;
 
-const Tab = styled.button`
+const Tab = styled.button.attrs( { role: 'tab' } )`
 	width: 33.33%;
 	line-height: 40px;
 	height: 100%;
@@ -49,7 +50,7 @@ function InspectorTabs() {
 	return (
 		<Tabs>
 			{ tabs.map( ( [ id, Text ] ) => (
-				<Tab key={ id } id={ id } isActive={ tab === id } aria-controls={ `${ id }-tab` } role="tab" aria-selected={ tab === id } onClick={ () => setTab( id ) }>
+				<Tab key={ id } id={ id } isActive={ tab === id } aria-controls={ getTabId( id ) } aria-selected={ tab === id } onClick={ () => setTab( id ) }>
 					{ Text }
 				</Tab>
 			) ) }
