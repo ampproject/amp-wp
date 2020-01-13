@@ -2258,7 +2258,7 @@ class AMP_Validated_URL_Post_Type {
 
 										echo $shaken_token[0] ? '<ins>' : '<del>';
 										echo str_repeat( "\t", $open_parens + 1 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-										echo '{ ' . esc_html( $shaken_token[2] ) . ' }';
+										echo '{ ' . esc_html( implode( '; ', $shaken_token[2] ) ) . '; }';
 										echo $shaken_token[0] ? '</ins>' : '</del>';
 
 										echo '</span>';

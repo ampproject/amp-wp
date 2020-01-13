@@ -1726,6 +1726,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$before_declaration_block          = '/*AMP_WP_BEFORE_DECLARATION_BLOCK*/';
 			$between_selectors                 = '/*AMP_WP_BETWEEN_SELECTORS*/';
 			$after_declaration_block_selectors = '/*AMP_WP_BEFORE_DECLARATION_SELECTORS*/';
+			$between_properties                = '/*AMP_WP_BETWEEN_PROPERTIES*/';
 			$after_declaration_block           = '/*AMP_WP_AFTER_DECLARATION*/';
 			$before_at_rule                    = '/*AMP_WP_BEFORE_AT_RULE*/';
 			$after_at_rule                     = '/*AMP_WP_AFTER_AT_RULE*/';
@@ -1739,6 +1740,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$output_format->set( 'BeforeAtRuleBlock', $before_at_rule );
 				$output_format->set( 'AfterAtRuleBlock', $after_at_rule );
 			}
+			$output_format->set( 'SpaceBetweenRules', $between_properties );
 
 			$stylesheet_string = $css_document->render( $output_format );
 
@@ -1780,12 +1782,16 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 					// Skip keyframe-selector, which is can be: from | to | <percentage>.
 					if ( preg_match( '/^((from|to)\b|-?\d+(\.\d+)?%)/i', $split_stylesheet[ $i + 1 ] ) ) {
-						$tokens[] = str_replace( $between_selectors, '', $split_stylesheet[ ++$i ] ) . $split_stylesheet[ ++$i ];
+						$tokens[] = (
+							str_replace( $between_selectors, '', $split_stylesheet[ ++$i ] )
+							.
+							str_replace( $between_properties, '', $split_stylesheet[ ++$i ] )
+						);
 						continue;
 					}
 
 					$selectors   = explode( $between_selectors . ',', $split_stylesheet[ ++$i ] );
-					$declaration = $split_stylesheet[ ++$i ];
+					$declaration = explode( ';' . $between_properties, trim( $split_stylesheet[ ++$i ], '{}' ) );
 
 					// @todo The following logic could be made much more robust if PHP-CSS-Parser did parsing of selectors. See <https://github.com/sabberworm/PHP-CSS-Parser/pull/138#issuecomment-418193262> and <https://github.com/ampproject/amp-wp/issues/2102>.
 					$selectors_parsed = [];
@@ -1849,10 +1855,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 					$tokens[] = [
 						$selectors_parsed,
-						trim( $declaration, '{}' ),
+						$declaration,
 					];
 				} else {
-					$tokens[] = $split_stylesheet[ $i ];
+					$tokens[] = str_replace( $between_properties, '', $split_stylesheet[ $i ] );
 				}
 			}
 		}
@@ -3180,7 +3186,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 							if ( empty( $selectors ) ) {
 								return '';
 							} else {
-								return implode( ',', $selectors ) . '{' . $shaken_token[2] . '}';
+								return implode( ',', $selectors ) . '{' . implode( ';', $shaken_token[2] ) . '}';
 							}
 						} else {
 							// Pass through parts other than declaration blocks.
