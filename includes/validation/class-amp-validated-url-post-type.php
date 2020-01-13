@@ -2218,7 +2218,7 @@ class AMP_Validated_URL_Post_Type {
 				<tr class="<?php echo esc_attr( sprintf( 'stylesheet-details level-0 %s', 0 === $row % 2 ? 'even' : 'odd' ) ); ?>">
 					<td colspan="10">
 						<dl class="detailed">
-							<dt><?php esc_html_e( 'Origin Markup', 'amp' ); ?></dt>
+							<dt><?php esc_html_e( 'Original Markup', 'amp' ); ?></dt>
 							<dd><code class="stylesheet-origin-markup"><?php echo esc_html( $origin_html ); ?></code></dd>
 
 							<dt><?php esc_html_e( 'Sources', 'amp' ); ?></dt>
