@@ -2650,48 +2650,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$this->amp_custom_style_element->removeChild( $this->amp_custom_style_element->firstChild );
 			}
 			$this->amp_custom_style_element->appendChild( $this->dom->createTextNode( $css ) );
-
-			$included_final_size    = strlen( $stylesheet_groups[ self::STYLE_AMP_CUSTOM_GROUP_INDEX ]['import_front_matter'] );
-			$included_original_size = 0;
-			$excluded_final_size    = 0;
-			$excluded_original_size = 0;
-			$included_sources       = [];
-			$excluded_sources       = [];
-			foreach ( $this->pending_stylesheets as $j => $pending_stylesheet ) {
-				if ( self::STYLE_AMP_CUSTOM_GROUP_INDEX !== $pending_stylesheet['group'] || ! empty( $pending_stylesheet['duplicate'] ) ) {
-					continue;
-				}
-				$message = sprintf( '[%3d] % 6d B', $pending_stylesheet['priority'], $pending_stylesheet['final_size'] );
-				if ( $pending_stylesheet['final_size'] && $pending_stylesheet['final_size'] !== $pending_stylesheet['original_size'] ) {
-					$message .= sprintf( ' (%2d%%)', $pending_stylesheet['final_size'] / $pending_stylesheet['original_size'] * 100 );
-				} else {
-					$message .= '      ';
-				}
-				$message .= ': ';
-				$message .= $pending_stylesheet['element']->nodeName;
-				if ( $pending_stylesheet['element']->getAttribute( 'id' ) ) {
-					$message .= '#' . $pending_stylesheet['element']->getAttribute( 'id' );
-				}
-				if ( $pending_stylesheet['element']->getAttribute( 'class' ) ) {
-					$message .= '.' . $pending_stylesheet['element']->getAttribute( 'class' );
-				}
-				foreach ( $pending_stylesheet['element']->attributes as $attribute ) {
-					if ( 'id' !== $attribute->nodeName && 'class' !== $attribute->nodeName ) {
-						$message .= sprintf( '[%s=%s]', $attribute->nodeName, $attribute->nodeValue );
-					}
-				}
-
-				// @todo The included size needs to be exposed for inclusion in the admin bar. There could be a new sanitizer method for extending the admin bar.
-				if ( $pending_stylesheet['included'] ) {
-					$included_sources[]      = $message;
-					$included_final_size    += $pending_stylesheet['final_size'];
-					$included_original_size += $pending_stylesheet['original_size'];
-				} else {
-					$excluded_sources[]      = $message;
-					$excluded_final_size    += $pending_stylesheet['final_size'];
-					$excluded_original_size += $pending_stylesheet['original_size'];
-				}
-			}
 		}
 
 		/*
