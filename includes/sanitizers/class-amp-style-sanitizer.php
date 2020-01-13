@@ -1849,7 +1849,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 					$tokens[] = [
 						$selectors_parsed,
-						$declaration,
+						trim( $declaration, '{}' ),
 					];
 				} else {
 					$tokens[] = $split_stylesheet[ $i ];
@@ -3180,7 +3180,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 							if ( empty( $selectors ) ) {
 								return '';
 							} else {
-								return implode( ',', $selectors ) . $shaken_token[2];
+								return implode( ',', $selectors ) . '{' . $shaken_token[2] . '}';
 							}
 						} else {
 							// Pass through parts other than declaration blocks.
