@@ -60,9 +60,8 @@ function DocumentInspector() {
 	}, [ status, setDisabledStatuses ] );
 
 	const handleChangeStatus = useCallback(
-		( evt ) => {
-			updateStory( { properties: { status: evt.target.value } } );
-		}, [ updateStory ],
+		( evt ) => 	updateStory( { properties: { status: evt.target.value } } ),
+		[ updateStory ],
 	);
 
 	const handleChangeAuthor = useCallback(
