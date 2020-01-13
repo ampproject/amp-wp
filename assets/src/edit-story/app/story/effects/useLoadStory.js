@@ -68,9 +68,8 @@ function useLoadStory( {
 
 				const hasPublishAction = getPerm( post, 'wp:action-publish' );
 				const hasAssignAuthorAction = getPerm( post, 'wp:action-assign-author' );
-				const postThumbnails = getPerm( post, 'wp:featuredmedia' );
 
-				const capabilities = { hasPublishAction, hasAssignAuthorAction, postThumbnails };
+				const capabilities = { hasPublishAction, hasAssignAuthorAction };
 				// TODO read current page and selection from deeplink?
 				restore( {
 					pages,

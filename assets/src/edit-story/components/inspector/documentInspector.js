@@ -2,21 +2,20 @@
  * WordPress dependencies
  */
 import { useCallback, useEffect } from '@wordpress/element';
-/**
- * Internal dependencies
- */
+
 /**
  * External dependencies
  */
 import styled, { css } from 'styled-components';
+
+/**
+ * Internal dependencies
+ */
 import { useStory } from '../../app/story';
 import { useConfig } from '../../app/config';
 import UploadButton from '../uploadButton';
 import useInspector from './useInspector';
 import { SelectMenu, InputGroup } from './shared';
-/**
- * External dependencies
- */
 
 const ButtonCSS = css`
 	color: ${ ( { theme } ) => theme.colors.mg.v1 };
