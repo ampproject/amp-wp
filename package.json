@@ -42,7 +42,7 @@
     "@wordpress/components": "8.5.0",
     "@wordpress/compose": "3.9.0",
     "@wordpress/core-data": "2.9.0",
-    "@wordpress/data": "4.11.0",
+    "@wordpress/data": "4.12.0",
     "@wordpress/date": "3.7.0",
     "@wordpress/dom": "2.6.0",
     "@wordpress/dom-ready": "2.5.1",
