@@ -11,15 +11,8 @@ import { useEffect } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { useAPI, useConfig, useHistory } from '../../';
+import { useAPI, useHistory } from '../../';
 import { createPage } from '../../../elements';
-
-const getTaxPerms = ( restBase, post ) => {
-	return {
-		hasCreateAction: getPerm( post, 'wp:action-create-' + restBase ),
-		hasAssignAction: getPerm( post, 'wp:action-assign-' + restBase ),
-	};
-};
 
 const getPerm = ( post, field ) => {
 	return Boolean( get( post, [ '_links', field ], false ) );
@@ -33,7 +26,6 @@ function useLoadStory( {
 } ) {
 	const { actions: { getStoryById } } = useAPI();
 	const { actions: { clearHistory } } = useHistory();
-	const { taxonomies, postThumbnails } = useConfig();
 
 	useEffect( () => {
 		if ( storyId && shouldLoad ) {
@@ -48,6 +40,8 @@ function useLoadStory( {
 					excerpt: { raw: excerpt },
 					link,
 					story_data: storyData,
+					featured_media: featuredMedia,
+					featured_media_url: featuredMediaUrl,
 				} = post;
 
 				const statusFormat = ( status === 'auto-draft' ) ? 'draft' : status;
@@ -65,6 +59,8 @@ function useLoadStory( {
 					excerpt,
 					slug,
 					link,
+					featuredMedia,
+					featuredMediaUrl,
 				};
 
 				// If there are no pages, create empty page.
@@ -72,12 +68,9 @@ function useLoadStory( {
 
 				const hasPublishAction = getPerm( post, 'wp:action-publish' );
 				const hasAssignAuthorAction = getPerm( post, 'wp:action-assign-author' );
-				const termPerm = {};
-				taxonomies.forEach( ( { name, rest_base: restBase } ) => {
-					termPerm[ name ] = getTaxPerms( restBase, post );
-				} );
+				const postThumbnails = getPerm( post, 'wp:featuredmedia' );
 
-				const capabilities = { hasPublishAction, hasAssignAuthorAction, termPerm, postThumbnails };
+				const capabilities = { hasPublishAction, hasAssignAuthorAction, postThumbnails };
 				// TODO read current page and selection from deeplink?
 				restore( {
 					pages,
@@ -88,7 +81,7 @@ function useLoadStory( {
 				} );
 			} );
 		}
-	}, [ storyId, shouldLoad, restore, getStoryById, clearHistory, taxonomies ] );
+	}, [ storyId, shouldLoad, restore, getStoryById, clearHistory ] );
 }
 
 export default useLoadStory;

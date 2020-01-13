@@ -1,13 +1,41 @@
 /**
  * WordPress dependencies
  */
-import { useCallback, useEffect, useState } from '@wordpress/element';
+import { useCallback, useEffect } from '@wordpress/element';
 /**
  * Internal dependencies
  */
+/**
+ * External dependencies
+ */
+import styled, { css } from 'styled-components';
 import { useStory } from '../../app/story';
+import { useConfig } from '../../app/config';
+import UploadButton from '../uploadButton';
 import useInspector from './useInspector';
 import { SelectMenu, InputGroup } from './shared';
+/**
+ * External dependencies
+ */
+
+const ButtonCSS = css`
+	color: ${ ( { theme } ) => theme.colors.mg.v1 };
+	font-size: 14px;
+	width: 100%;
+	padding: 15px;
+	background: none;
+`;
+const Img = styled.img`
+	width: 100%;
+	max-height: 300px
+`;
+
+const Group = styled.div`
+	border-color: ${ ( { theme } ) => theme.colors.mg.v1 };
+	display: block;
+	align-items: center;
+	margin: 15px 0px;
+`;
 
 function DocumentInspector() {
 	const {
@@ -16,23 +44,16 @@ function DocumentInspector() {
 	} = useInspector();
 
 	const {
-		state: { meta: { isSaving }, story: { author, status, date, excerpt }, capabilities },
+		state: { meta: { isSaving }, story: { author, status, date, excerpt, featuredMediaUrl }, capabilities },
 		actions: { updateStory },
 	} = useStory();
 
-	const [ state, setState ] = useState( { hasPublishAction: false, hasAssignAuthorAction: false } );
-
-
+	const { postThumbnails } = useConfig();
 
 	useEffect( () => {
 		loadStatuses();
 		loadUsers();
 	} );
-
-	useEffect(() => {
-		const { hasPublishAction, hasAssignAuthorAction } = capabilities;
-		setState({ hasPublishAction, hasAssignAuthorAction });
-	}, [capabilities, setState]);
 
 	useEffect( () => {
 		const states = ( status === 'future' ) ? [ 'pending' ] : [ 'future', 'pending' ];
@@ -60,12 +81,17 @@ function DocumentInspector() {
 		[ updateStory ],
 	);
 
+	const handleChangeImage = useCallback(
+		( image ) => updateStory( { properties: { featuredMedia: image.id, featuredMediaUrl: image.url } } ),
+		[ updateStory ],
+	);
+
 	return (
 		<>
 			<h2>
 				{ 'Document' }
 			</h2>
-			{ state.hasPublishAction && statuses && <SelectMenu
+			{ capabilities && capabilities.hasPublishAction && statuses && <SelectMenu
 				label="Status"
 				name="status"
 				options={ statuses }
@@ -81,7 +107,7 @@ function DocumentInspector() {
 				disabled={ isSaving }
 				onChange={ handleChangeDate }
 			/>
-			{ state.hasAssignAuthorAction && users && <SelectMenu
+			{ capabilities && capabilities.hasAssignAuthorAction && users && <SelectMenu
 				label="Author"
 				name="user"
 				options={ users }
@@ -89,6 +115,7 @@ function DocumentInspector() {
 				disabled={ isSaving }
 				onChange={ handleChangeAuthor }
 			/> }
+
 			<InputGroup
 				label={ 'Excerpt' }
 				type={ 'text' }
@@ -96,6 +123,18 @@ function DocumentInspector() {
 				disabled={ isSaving }
 				onChange={ handleChangeExcerpt }
 			/>
+			<Group>
+				{ featuredMediaUrl && <Img src={ featuredMediaUrl } /> }
+
+				{ postThumbnails && <UploadButton
+					onSelect={ handleChangeImage }
+					title={ 'Select as featured image' }
+					type={ 'image' }
+					buttonInsertText={ 'Set as featured image' }
+					buttonText={ featuredMediaUrl ? 'Update a featured image' : 'Upload a featured image' }
+					buttonCSS={ ButtonCSS }
+				/> }
+			</Group>
 		</>
 	);
 }

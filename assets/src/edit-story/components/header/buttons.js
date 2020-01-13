@@ -82,7 +82,7 @@ function Publish() {
 			text = __( 'Sceduled' );
 			break;
 		default:
-			text = __( 'Publish' );
+			text = __( 'Save draft' );
 			break;
 	}
 

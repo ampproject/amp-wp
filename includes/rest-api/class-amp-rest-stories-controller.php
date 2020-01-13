@@ -59,6 +59,11 @@ class AMP_REST_Stories_Controller extends WP_REST_Posts_Controller {
 			$data['story_data'] = rest_sanitize_value_from_schema( $post_story_data, $schema['properties']['story_data'] );
 		}
 
+		if ( in_array( 'featured_media_url', $fields, true ) ) {
+			$image                      = get_the_post_thumbnail_url( $post, 'full' );
+			$data['featured_media_url'] = ! empty( $image ) ? $image : $schema['properties']['featured_media_url']['default'];
+		}
+
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data    = $this->filter_response_by_context( $data, $context );
 		$links   = $response->get_links();
@@ -118,6 +123,15 @@ class AMP_REST_Stories_Controller extends WP_REST_Posts_Controller {
 			],
 			'context'     => [ 'edit' ],
 			'default'     => [],
+		];
+
+		$schema['properties']['featured_media_url'] = [
+			'description' => __( 'URL to enqueue the image', 'amp' ),
+			'type'        => 'string',
+			'format'      => 'uri',
+			'context'     => [ 'view', 'edit', 'embed' ],
+			'readonly'    => true,
+			'default'     => '',
 		];
 
 		$this->schema = $schema;

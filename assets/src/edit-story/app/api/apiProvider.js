@@ -42,7 +42,7 @@ function APIProvider( { children } ) {
 		 * @param {string}  content AMP HTML content.
 		 * @return {Promise} Return apiFetch promise.
 		 */
-		( storyId, title, status, pages, author, date, modified, slug, content, excerpt ) => {
+		( storyId, title, status, pages, author, date, modified, slug, content, excerpt, featuredMedia ) => {
 			return apiFetch( {
 				path: `${ stories }/${ storyId }`,
 				data: {
@@ -55,6 +55,7 @@ function APIProvider( { children } ) {
 					content,
 					excerpt,
 					story_data: pages,
+					featured_media: featuredMedia,
 				},
 				method: 'POST',
 			} );

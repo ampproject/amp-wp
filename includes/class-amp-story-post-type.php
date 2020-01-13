@@ -314,8 +314,6 @@ class AMP_Story_Post_Type {
 		$story_id         = ( $post ) ? $post->ID : null;
 		$post_type_object = get_post_type_object( self::POST_TYPE_SLUG );
 		$rest_base        = ! empty( $post_type_object->rest_base ) ? $post_type_object->rest_base : $post_type_object->name;
-		$taxonomies       = get_object_taxonomies( self::POST_TYPE_SLUG, 'objects' );
-		$taxonomies       = array_values( $taxonomies );
 		$post_thumbnails   = get_theme_support( 'post-thumbnails' );
 
 		self::load_admin_fonts( $post );
@@ -328,7 +326,6 @@ class AMP_Story_Post_Type {
 				'config' => [
 					'allowedVideoMimeTypes'          => $allowed_video_mime_types,
 					'allowedPageAttachmentPostTypes' => $post_types,
-					'taxonomies'                     => $taxonomies,
 					'postThumbnails'                 => $post_thumbnails,
 					'storyId'                        => $story_id,
 					'previewLink'                    => get_preview_post_link( $story_id ),

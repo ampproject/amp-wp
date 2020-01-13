@@ -69,10 +69,10 @@ function useSaveStory( {
 
 	const saveStory = useCallback( () => {
 		setIsSaving( true );
-		const { title, status, author, date, modified, slug, excerpt } = story;
+		const { title, status, author, date, modified, slug, excerpt, featuredMedia } = story;
 
 		const content = getStoryMarkupFromPages( pages );
-		saveStoryById( storyId, title, status, pages, author, date, modified, slug, content, excerpt ).then( ( post ) => {
+		saveStoryById( storyId, title, status, pages, author, date, modified, slug, content, excerpt, featuredMedia ).then( ( post ) => {
 			setIsSaving( false );
 			const { status: newStatus, link } = post;
 			updateStory( {
