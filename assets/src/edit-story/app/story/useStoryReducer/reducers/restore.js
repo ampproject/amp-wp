@@ -12,12 +12,13 @@
  * @param {Object} payload New state to set.
  * @return {Object} New state
  */
-function restore( state, { pages, current, selection, story } ) {
+function restore( state, { pages, current, selection, story, capabilities } ) {
 	if ( ! Array.isArray( pages ) || pages.length === 0 ) {
 		return state;
 	}
 
 	const newStory = typeof story === 'object' ? story : {};
+	const newCapabilities = typeof story === 'object' ? capabilities : {};
 	const newCurrent = pages.some( ( { id } ) => id === current ) ? current : pages[ 0 ].id;
 	const newSelection = Array.isArray( selection ) ? [ ...new Set( selection ) ] : [];
 
@@ -26,6 +27,7 @@ function restore( state, { pages, current, selection, story } ) {
 		current: newCurrent,
 		selection: newSelection,
 		story: newStory,
+		capabilities: newCapabilities,
 	};
 }
 

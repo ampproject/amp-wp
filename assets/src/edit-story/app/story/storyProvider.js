@@ -26,6 +26,7 @@ function StoryProvider( { storyId, children } ) {
 			current,
 			selection,
 			story,
+			capabilities,
 		},
 		api,
 		internal: {
@@ -108,6 +109,7 @@ function StoryProvider( { storyId, children } ) {
 			selectedElements,
 			hasSelection,
 			story,
+			capabilities,
 			meta: {
 				isSaving,
 			},

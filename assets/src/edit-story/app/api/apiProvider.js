@@ -17,7 +17,7 @@ import { useConfig } from '../';
 import Context from './context';
 
 function APIProvider( { children } ) {
-	const { api: { stories, media, fonts } } = useConfig();
+	const { api: { stories, media, fonts, users, statuses } } = useConfig();
 
 	const getStoryById = useCallback(
 		( storyId ) => {
@@ -37,10 +37,12 @@ function APIProvider( { children } ) {
 		 * @param {Array}    pages Array of all pages.
 		 * @param {number}   author User ID of story author.
 		 * @param {string}   slug   The slug of the story.
+		 * @param {string}   date   The slug of the story.
+		 * @param {string}   modified   The slug of the story.
 		 * @param {string}  content AMP HTML content.
 		 * @return {Promise} Return apiFetch promise.
 		 */
-		( storyId, title, status, pages, author, slug, content ) => {
+		( storyId, title, status, pages, author, date, modified, slug, content, excerpt ) => {
 			return apiFetch( {
 				path: `${ stories }/${ storyId }`,
 				data: {
@@ -48,7 +50,10 @@ function APIProvider( { children } ) {
 					status,
 					author,
 					slug,
+					date,
+					modified,
 					content,
+					excerpt,
 					story_data: pages,
 				},
 				method: 'POST',
@@ -99,12 +104,27 @@ function APIProvider( { children } ) {
 		}, [ fonts ],
 	);
 
+	const getAllStatuses = useCallback(
+		() => {
+			const path = addQueryArgs( statuses, { context: `edit` } );
+			return apiFetch( { path } );
+		}, [ statuses ],
+	);
+
+	const getAllUsers = useCallback(
+		() => {
+			return apiFetch( { path: users } );
+		}, [ users ],
+	);
+
 	const state = {
 		actions: {
 			getStoryById,
 			getMedia,
 			saveStoryById,
 			getAllFonts,
+			getAllStatuses,
+			getAllUsers,
 		},
 	};
 

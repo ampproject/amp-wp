@@ -12,6 +12,7 @@ import PrepublishInspector from './prepublishInspector';
 import { getTabId } from './shared';
 
 const InspectorWrapper = styled.div.attrs( { tabIndex: '0', role: 'tabpanel' } )``;
+const InspectorForm = styled.form``;
 
 function Inspector() {
 	const {
@@ -27,7 +28,9 @@ function Inspector() {
 
 	return (
 		<InspectorWrapper aria-labelledby={ tab } id={ getTabId( tab ) }>
-			<ContentInspector />
+			<InspectorForm>
+				<ContentInspector />
+			</InspectorForm>
 		</InspectorWrapper>
 	);
 }
