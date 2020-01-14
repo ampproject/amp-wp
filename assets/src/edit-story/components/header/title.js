@@ -44,7 +44,7 @@ function Title() {
 				const clearSlug = encodeURIComponent( cleanForSlug( titleFormatted( title ) ) ) || storyId;
 				updateStory( { properties: { slug: clearSlug } } );
 			}
-		}, [ slug, storyId, title, updateStory ],
+		}, [ slug, storyId, title, titleFormatted, updateStory ],
 	);
 
 	// TODO Make sure that Auto Draft checks translations.

@@ -23,6 +23,7 @@ const ButtonCSS = css`
 	width: 100%;
 	padding: 15px;
 	background: none;
+	margin: 0px 0px 5px;
 `;
 const Img = styled.img`
 	width: 100%;
@@ -34,6 +35,10 @@ const Group = styled.div`
 	display: block;
 	align-items: center;
 	margin: 15px 0px;
+`;
+
+const RemoveButton = styled.button`
+	${ ButtonCSS }
 `;
 
 function DocumentInspector() {
@@ -89,6 +94,13 @@ function DocumentInspector() {
 		[ updateStory ],
 	);
 
+	const handleRemoveImage = useCallback(
+		( evt ) => {
+			updateStory( { properties: { featuredMedia: 0, featuredMediaUrl: '' } } );
+			evt.preventDefault();
+		},	[ updateStory ],
+	);
+
 	return (
 		<>
 			<h2>
@@ -136,16 +148,18 @@ function DocumentInspector() {
 			/>
 			<Group>
 				{ featuredMediaUrl && <Img src={ featuredMediaUrl } /> }
+				{ featuredMediaUrl && <RemoveButton onClick={ handleRemoveImage } dangerouslySetInnerHTML={ { __html: 'Remove image' } } /> }
 
 				{ postThumbnails && <UploadButton
 					onSelect={ handleChangeImage }
 					title={ 'Select as featured image' }
 					type={ 'image' }
 					buttonInsertText={ 'Set as featured image' }
-					buttonText={ featuredMediaUrl ? 'Update a featured image' : 'Upload a featured image' }
+					buttonText={ featuredMediaUrl ? 'Replace image' : 'Set featured image' }
 					buttonCSS={ ButtonCSS }
 				/> }
 			</Group>
+
 		</>
 	);
 }
