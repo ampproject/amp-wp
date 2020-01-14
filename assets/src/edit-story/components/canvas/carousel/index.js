@@ -58,6 +58,8 @@ const Page = styled.button`
 `;
 
 const IconButton = styled.button`
+	width: 53px;
+	height: 28px;
 	padding: 0;
 	margin: 0;
 	border: none;
@@ -69,14 +71,7 @@ const IconButton = styled.button`
 	}
 `;
 
-const NavigationButton = styled( IconButton )`
-	width: 53px;
-	height: 28px;
-`;
-
 const GridViewButton = styled( IconButton )`
-	width: 53px;
-	height: 28px;
 	position: absolute;
 	bottom: 24px;
 `;
@@ -139,9 +134,9 @@ function Carousel() {
 		<Wrapper>
 			<Area area="left-navigation">
 				{ hasHorizontalOverflow && (
-					<NavigationButton onClick={ () => scrollBy( -( 2 * PAGE_WIDTH ) ) }>
+					<IconButton onClick={ () => scrollBy( -( 2 * PAGE_WIDTH ) ) }>
 						<LeftArrowIcon />
-					</NavigationButton>
+					</IconButton>
 				) }
 			</Area>
 			<List area="carousel" ref={ listRef } hasHorizontalOverflow={ hasHorizontalOverflow }>
@@ -156,9 +151,9 @@ function Carousel() {
 			</List>
 			<Area area="right-navigation">
 				{ hasHorizontalOverflow && (
-					<NavigationButton onClick={ () => scrollBy( ( 2 * PAGE_WIDTH ) ) }>
+					<IconButton onClick={ () => scrollBy( ( 2 * PAGE_WIDTH ) ) }>
 						<RightArrowIcon />
-					</NavigationButton>
+					</IconButton>
 				) }
 				<GridViewButton disabled>
 					<GridViewIcon />
