@@ -26,7 +26,16 @@ const Space = styled.div`
 	flex: 0 1 ${ ( { isNext } ) => isNext ? 60 : 115 }px;
 `;
 
-const NavLink = styled.a``;
+const NavButton = styled.button`
+	display: block;
+	background: transparent;
+	border: none;
+	width: 40px;
+	height: 40px;
+	&:focus {
+		outline: 1px dotted -webkit-focus-ring-color
+	}
+`;
 
 const IconStyle = css`
 	border: solid ${ ( { theme } ) => theme.colors.fg.v1 };
@@ -65,13 +74,16 @@ function PageNav( { isNext } ) {
 			setCurrentPage( { pageId: newPage.id } );
 		}
 	}, [ setCurrentPage, currentPageIndex, isNext, pages ] );
+	const displayNav = ( isNext && currentPageIndex < pages.length - 1 ) || ( ! isNext && currentPageIndex > 0 );
 	return (
 		<Wrapper>
 			<Space isNext={ isNext } />
-			<NavLink aria-label={ isNext ? 'Next Page' : 'Previous Page' } onClick={ handleClick }>
-				{ isNext && currentPageIndex < pages.length - 1 && ( <IconNext /> ) }
-				{ ! isNext && currentPageIndex > 0 && ( <IconPrev /> ) }
-			</NavLink>
+			{ displayNav && (
+				<NavButton aria-label={ isNext ? 'Next Page' : 'Previous Page' } onClick={ handleClick }>
+					{ isNext && ( <IconNext /> ) }
+					{ ! isNext && ( <IconPrev /> ) }
+				</NavButton>
+			) }
 		</Wrapper>
 	);
 }
