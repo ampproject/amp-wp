@@ -28,9 +28,6 @@ function MultiSelectionMovable( { selectedElements, nodesById } ) {
 	const { actions: { updateElementsById } } = useStory();
 
 	const targetList = selectedElements.map( ( element ) => {
-		if ( undefined === nodesById[ element.id ] ) {
-			return undefined;
-		}
 		return {
 			ref: nodesById[ element.id ],
 			id: element.id,
@@ -40,7 +37,7 @@ function MultiSelectionMovable( { selectedElements, nodesById } ) {
 		};
 	} );
 	// Not all targets have been defined yet.
-	if ( targetList.includes( undefined ) ) {
+	if ( targetList.some( ( { ref } ) => ref === undefined ) ) {
 		return null;
 	}
 
