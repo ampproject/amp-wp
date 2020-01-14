@@ -13,6 +13,7 @@ import { cleanForSlug } from '@wordpress/editor';
  * Internal dependencies
  */
 import { useStory } from '../../app/story';
+import { useConfig } from '../../app/config';
 
 const Input = styled.input`
 	color: ${ ( { theme } ) => `${ theme.colors.fg.v1 } !important` };
@@ -30,30 +31,36 @@ function Title() {
 		actions: { updateStory },
 	} = useStory();
 
+	const { storyId } = useConfig();
+
 	const handleChange = useCallback(
 		( evt ) => updateStory( { properties: { title: evt.target.value } } ),
 		[ updateStory ],
 	);
 
 	const handleBlur = useCallback(
-		( evt ) => {
-			if ( ! slug ) {
-				updateStory( { properties: { slug: cleanForSlug( evt.target.value ) } } );
+		() => {
+			if ( ! slug || slug === storyId ) {
+				const clearSlug = encodeURIComponent( cleanForSlug( titleFormatted( title ) ) ) || storyId;
+				updateStory( { properties: { slug: clearSlug } } );
 			}
-		}, [ slug, updateStory ],
+		}, [ slug, storyId, title, updateStory ],
+	);
 
+	// TODO Make sure that Auto Draft checks translations.
+	const titleFormatted = useCallback(
+		() => {
+			return ( [ 'auto-draft', 'draft', 'pending' ].includes( status ) && title === 'Auto Draft' ) ? '' : title;
+		}, [ status, title ],
 	);
 
 	if ( typeof title !== 'string' ) {
 		return null;
 	}
 
-	// TODO Make sure that Auto Draft checks translations.
-	const titleFormatted = ( [ 'auto-draft', 'draft', 'pending' ].includes( status ) && title === 'Auto Draft' ) ? '' : title;
-
 	return (
 		<Input
-			value={ titleFormatted }
+			value={ titleFormatted() }
 			type={ 'text' }
 			onBlur={ handleBlur }
 			onChange={ handleChange }
