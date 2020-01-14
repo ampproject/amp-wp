@@ -75,24 +75,22 @@ final class Document extends DOMDocument {
 	 */
 	const CHARSET_META_TAG_PATTERN = '/<meta [^>]*?\s*charset=[^>]*?>[^<]*(?:<\/meta>)?/i';
 
-	/**
-	 * Regular expression pattern to match the main HTML structural tags.
-	 *
-	 * @var string
-	 */
-	const HTML_STRUCTURE_PATTERN = '/(?:.*?(?<doctype><!doctype(?:\s+[^>]*)?>))?(?:(?<pre_html>.*?)(?<html_start><html(?:\s+[^>]*)?>))?(?:.*?(?<head><head(?:\s+[^>]*)?>.*?<\/head\s*>))?(?:.*?(?<body><body(?:\s+[^>]*)?>.*?<\/body\s*>))?.*?(?:(?:.*(?<html_end><\/html\s*>)|.*)(?<post_html>.*))/is';
-
 	/*
 	 * Regular expressions to fetch the individual structural tags.
 	 * These patterns were optimized to avoid extreme backtracking on large documents.
 	 */
-	const HTML_STRUCTURE_DOCTYPE_PATTERN = '/^[^<]*<!doctype(?:\s+[^>]+)?>/i';
-	const HTML_STRUCTURE_HTML_START_TAG  = '/^[^<]*(?<html_start><html(?:\s+[^>]*)?>)/i';
+	const HTML_STRUCTURE_DOCTYPE_PATTERN = '/^(?<doctype>[^<]*(?:\s*<!--[^>]*>\s*)*<!doctype(?:\s+[^>]+)?>)/i';
+	const HTML_STRUCTURE_HTML_START_TAG  = '/^(?<html_start>[^<]*(?:\s*<!--[^>]*>\s*)*<html(?:\s+[^>]*)?>)/i';
 	const HTML_STRUCTURE_HTML_END_TAG    = '/(?:<\/html(?:\s+[^>]*)?>)[^<>]*$/i';
-	const HTML_STRUCTURE_HEAD_START_TAG  = '/^[^<]*(?:<head(?:\s+[^>]*)?>)/i';
-	const HTML_STRUCTURE_BODY_START_TAG  = '/^[^<]*(?:<body(?:\s+[^>]*)?>)/i';
+	const HTML_STRUCTURE_HEAD_START_TAG  = '/^[^<]*(?:\s*<!--[^>]*>\s*)*(?:<head(?:\s+[^>]*)?>)/i';
+	const HTML_STRUCTURE_BODY_START_TAG  = '/^[^<]*(?:\s*<!--[^>]*>\s*)*(?:<body(?:\s+[^>]*)?>)/i';
 	const HTML_STRUCTURE_BODY_END_TAG    = '/(?:<\/body(?:\s+[^>]*)?>)[^<>]*$/i';
 	const HTML_STRUCTURE_HEAD_TAG        = '/^(?:[^<]*(?:<head(?:\s+[^>]*)?>).*?<\/head(?:\s+[^>]*)?>)/is';
+	const HTML_DOCTYPE_HTML_4_SUFFIX     = ' PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"';
+
+	//Regex patterns used for securing and restoring the doctype node.
+    const HTML_SECURE_DOCTYPE_IF_NOT_FIRST_PATTERN = '/(^[^<]*(?:\s*<!--[^>]*>\s*)+<)(!)(doctype)(\s+[^>]+?)(>)/i';
+    const HTML_RESTORE_DOCTYPE_PATTERN             = '/(^[^<]*(?:\s*<!--[^>]*>\s*)+<)(!--amp-)(doctype)(\s+[^>]+?)(-->)/i';
 
 	/**
 	 * Xpath query to fetch the attributes that are being URL-encoded by saveHTML().
@@ -219,6 +217,15 @@ final class Document extends DOMDocument {
 	 */
 	private $mustache_tags_replaced = false;
 
+    /**
+     * Whether we had secured a doctype that needs restoring or not.
+     *
+     * This is an int as it receives the $count from the preg_replace().
+     *
+     * @var int
+     */
+	private $secured_doctype = 0;
+
 	/**
 	 * Creates a new Amp\AmpWP\Dom\Document object
 	 *
@@ -310,6 +317,7 @@ final class Document extends DOMDocument {
 		$source = $this->replace_self_closing_tags( $source );
 		$source = $this->normalize_document_structure( $source );
 		$source = $this->maybe_replace_noscript_elements( $source );
+		$source = $this->secure_doctype_node( $source );
 
 		list( $source, $this->original_encoding ) = $this->detect_and_strip_encoding( $source );
 
@@ -323,7 +331,7 @@ final class Document extends DOMDocument {
 
 		$libxml_previous_state = libxml_use_internal_errors( true );
 
-		$success = parent::loadHTML( $source, $options );
+		$success = parent::loadHTML( $source, $options | LIBXML_COMPACT | LIBXML_HTML_NODEFDTD );
 
 		libxml_clear_errors();
 		libxml_use_internal_errors( $libxml_previous_state );
@@ -338,15 +346,15 @@ final class Document extends DOMDocument {
 			) {
 				$this->head->removeChild( $meta );
 			}
+
+            // Add the required utf-8 meta charset tag.
+            $charset = $this->createElement( 'meta' );
+            $charset->setAttribute( 'charset', self::AMP_ENCODING );
+            $this->head->insertBefore( $charset, $this->head->firstChild );
+
+            // Do some further clean-up.
+            $this->move_invalid_head_nodes_to_body();
 		}
-
-		// Add the required utf-8 meta charset tag.
-		$charset = $this->createElement( 'meta' );
-		$charset->setAttribute( 'charset', self::AMP_ENCODING );
-		$this->head->insertBefore( $charset, $this->head->firstChild );
-
-		// Do some further clean-up.
-		$this->move_invalid_head_nodes_to_body();
 
 		return $success;
 	}
@@ -378,6 +386,7 @@ final class Document extends DOMDocument {
 		// Remove http-equiv charset again.
 		$html = preg_replace( self::HTML_GET_HTTP_EQUIV_TAG_PATTERN, '', $html, 1 );
 
+        $html = $this->restore_doctype_node( $html );
 		$html = $this->restore_mustache_template_tokens( $html );
 		$html = $this->maybe_restore_noscript_elements( $html );
 		$html = $this->restore_self_closing_tags( $html );
@@ -429,7 +438,7 @@ final class Document extends DOMDocument {
 	 *
 	 * This makes sure the document adheres to the general structure that AMP requires:
 	 *   ```
-	 *   <!doctype html>
+	 *   <!DOCTYPE html>
 	 *   <html>
 	 *     <head>
 	 *       <meta charset="utf-8">
@@ -444,10 +453,14 @@ final class Document extends DOMDocument {
 	 */
 	private function normalize_document_structure( $content ) {
 		$matches    = [];
+		$doctype    = '<!DOCTYPE html>';
 		$html_start = '<html>';
 
-		// Strip <!doctype> for now.
-		$content = preg_replace( self::HTML_STRUCTURE_DOCTYPE_PATTERN, '', $content, 1 );
+		// Detect and strip <!doctype> tags.
+		if ( preg_match( self::HTML_STRUCTURE_DOCTYPE_PATTERN, $content, $matches ) ) {
+			$doctype = $matches['doctype'];
+			$content = preg_replace( self::HTML_STRUCTURE_DOCTYPE_PATTERN, '', $content, 1 );
+		}
 
 		// Detect and strip <html> tags.
 		if ( preg_match( self::HTML_STRUCTURE_HTML_START_TAG, $content, $matches ) ) {
@@ -465,19 +478,18 @@ final class Document extends DOMDocument {
 				// Only <head> missing.
 				$content = "<head></head>{$content}";
 			}
-		} else {
-			if ( ! preg_match( self::HTML_STRUCTURE_BODY_END_TAG, $content, $matches ) ) {
-				// Only <body> missing.
-				// @todo This is an expensive regex operation, look into further optimization.
-				$content  = preg_replace( self::HTML_STRUCTURE_HEAD_TAG, '$0<body>', $content, 1 );
-				$content .= '</body>';
-			}
+		} elseif ( ! preg_match( self::HTML_STRUCTURE_BODY_END_TAG, $content, $matches ) ) {
+            // Only <body> missing.
+            // @todo This is an expensive regex operation, look into further optimization.
+            $content  = preg_replace( self::HTML_STRUCTURE_HEAD_TAG, '$0<body>', $content, 1 );
+            $content .= '</body>';
 		}
 
 		$content = "{$html_start}{$content}</html>";
 
-		// Reinsert a standard doctype.
-		$content = "<!DOCTYPE html>{$content}";
+		// Reinsert a standard doctype (while preserving any potentially leading comments).
+        $doctype = str_ireplace( self::HTML_DOCTYPE_HTML_4_SUFFIX, '', $doctype );
+		$content = "{$doctype}{$content}";
 
 		return $content;
 	}
@@ -967,6 +979,40 @@ final class Document extends DOMDocument {
 		}
 
 		return $placeholders;
+	}
+
+    /**
+     * Secure the original doctype node.
+     *
+     * We need to keep elements around that were prepended to the doctype, like comment node used for source-tracking.
+     * As DOM_Document prepends a new doctype node and removes the old one if the first element is not the doctype, we
+     * need to ensure the original one is not stripped (by changing its node type) and restore it later on.
+	 *
+	 * @see restore_doctype_node() Reciprocal function.
+	 *
+	 * @param string $html HTML string to adapt.
+	 * @return string Adapted HTML string.
+     */
+    private function secure_doctype_node( $html )
+    {
+        return preg_replace( self::HTML_SECURE_DOCTYPE_IF_NOT_FIRST_PATTERN, '\1!--amp-\3\4-->', $html, 1, $this->secured_doctype );
+	}
+
+    /**
+     * Restore the original doctype node.
+     *
+	 * @see secure_doctype_node() Reciprocal function.
+	 *
+	 * @param string $html HTML string to adapt.
+	 * @return string Adapted HTML string.
+     */
+    private function restore_doctype_node( $html )
+    {
+        if ( ! $this->secured_doctype ) {
+            return $html;
+        }
+
+        return preg_replace( self::HTML_RESTORE_DOCTYPE_PATTERN, '\1!\3\4>', $html, 1 );
 	}
 
 	/**
