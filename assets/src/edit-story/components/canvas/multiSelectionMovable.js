@@ -27,6 +27,7 @@ function MultiSelectionMovable( { selectedElements, nodesById } ) {
 
 	const { actions: { updateElementsById } } = useStory();
 
+	// Create targets list including nodes and also necessary attributes.
 	const targetList = selectedElements.map( ( element ) => {
 		return {
 			ref: nodesById[ element.id ],
