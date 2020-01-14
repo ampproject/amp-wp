@@ -88,9 +88,9 @@ final class Document extends DOMDocument {
 	const HTML_STRUCTURE_HEAD_TAG        = '/^(?:[^<]*(?:<head(?:\s+[^>]*)?>).*?<\/head(?:\s+[^>]*)?>)/is';
 	const HTML_DOCTYPE_HTML_4_SUFFIX     = ' PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"';
 
-	//Regex patterns used for securing and restoring the doctype node.
-    const HTML_SECURE_DOCTYPE_IF_NOT_FIRST_PATTERN = '/(^[^<]*(?:\s*<!--[^>]*>\s*)+<)(!)(doctype)(\s+[^>]+?)(>)/i';
-    const HTML_RESTORE_DOCTYPE_PATTERN             = '/(^[^<]*(?:\s*<!--[^>]*>\s*)+<)(!--amp-)(doctype)(\s+[^>]+?)(-->)/i';
+	// Regex patterns used for securing and restoring the doctype node.
+	const HTML_SECURE_DOCTYPE_IF_NOT_FIRST_PATTERN = '/(^[^<]*(?:\s*<!--[^>]*>\s*)+<)(!)(doctype)(\s+[^>]+?)(>)/i';
+	const HTML_RESTORE_DOCTYPE_PATTERN             = '/(^[^<]*(?:\s*<!--[^>]*>\s*)+<)(!--amp-)(doctype)(\s+[^>]+?)(-->)/i';
 
 	/**
 	 * Xpath query to fetch the attributes that are being URL-encoded by saveHTML().
@@ -217,13 +217,13 @@ final class Document extends DOMDocument {
 	 */
 	private $mustache_tags_replaced = false;
 
-    /**
-     * Whether we had secured a doctype that needs restoring or not.
-     *
-     * This is an int as it receives the $count from the preg_replace().
-     *
-     * @var int
-     */
+	/**
+	 * Whether we had secured a doctype that needs restoring or not.
+	 *
+	 * This is an int as it receives the $count from the preg_replace().
+	 *
+	 * @var int
+	 */
 	private $secured_doctype = 0;
 
 	/**
@@ -347,13 +347,13 @@ final class Document extends DOMDocument {
 				$this->head->removeChild( $meta );
 			}
 
-            // Add the required utf-8 meta charset tag.
-            $charset = $this->createElement( 'meta' );
-            $charset->setAttribute( 'charset', self::AMP_ENCODING );
-            $this->head->insertBefore( $charset, $this->head->firstChild );
+			// Add the required utf-8 meta charset tag.
+			$charset = $this->createElement( 'meta' );
+			$charset->setAttribute( 'charset', self::AMP_ENCODING );
+			$this->head->insertBefore( $charset, $this->head->firstChild );
 
-            // Do some further clean-up.
-            $this->move_invalid_head_nodes_to_body();
+			// Do some further clean-up.
+			$this->move_invalid_head_nodes_to_body();
 		}
 
 		return $success;
@@ -386,7 +386,7 @@ final class Document extends DOMDocument {
 		// Remove http-equiv charset again.
 		$html = preg_replace( self::HTML_GET_HTTP_EQUIV_TAG_PATTERN, '', $html, 1 );
 
-        $html = $this->restore_doctype_node( $html );
+		$html = $this->restore_doctype_node( $html );
 		$html = $this->restore_mustache_template_tokens( $html );
 		$html = $this->maybe_restore_noscript_elements( $html );
 		$html = $this->restore_self_closing_tags( $html );
@@ -479,16 +479,16 @@ final class Document extends DOMDocument {
 				$content = "<head></head>{$content}";
 			}
 		} elseif ( ! preg_match( self::HTML_STRUCTURE_BODY_END_TAG, $content, $matches ) ) {
-            // Only <body> missing.
-            // @todo This is an expensive regex operation, look into further optimization.
-            $content  = preg_replace( self::HTML_STRUCTURE_HEAD_TAG, '$0<body>', $content, 1 );
-            $content .= '</body>';
+			// Only <body> missing.
+			// @todo This is an expensive regex operation, look into further optimization.
+			$content  = preg_replace( self::HTML_STRUCTURE_HEAD_TAG, '$0<body>', $content, 1 );
+			$content .= '</body>';
 		}
 
 		$content = "{$html_start}{$content}</html>";
 
 		// Reinsert a standard doctype (while preserving any potentially leading comments).
-        $doctype = str_ireplace( self::HTML_DOCTYPE_HTML_4_SUFFIX, '', $doctype );
+		$doctype = str_ireplace( self::HTML_DOCTYPE_HTML_4_SUFFIX, '', $doctype );
 		$content = "{$doctype}{$content}";
 
 		return $content;
@@ -981,38 +981,36 @@ final class Document extends DOMDocument {
 		return $placeholders;
 	}
 
-    /**
-     * Secure the original doctype node.
-     *
-     * We need to keep elements around that were prepended to the doctype, like comment node used for source-tracking.
-     * As DOM_Document prepends a new doctype node and removes the old one if the first element is not the doctype, we
-     * need to ensure the original one is not stripped (by changing its node type) and restore it later on.
+	/**
+	 * Secure the original doctype node.
+	 *
+	 * We need to keep elements around that were prepended to the doctype, like comment node used for source-tracking.
+	 * As DOM_Document prepends a new doctype node and removes the old one if the first element is not the doctype, we
+	 * need to ensure the original one is not stripped (by changing its node type) and restore it later on.
 	 *
 	 * @see restore_doctype_node() Reciprocal function.
 	 *
 	 * @param string $html HTML string to adapt.
 	 * @return string Adapted HTML string.
-     */
-    private function secure_doctype_node( $html )
-    {
-        return preg_replace( self::HTML_SECURE_DOCTYPE_IF_NOT_FIRST_PATTERN, '\1!--amp-\3\4-->', $html, 1, $this->secured_doctype );
+	 */
+	private function secure_doctype_node( $html ) {
+		return preg_replace( self::HTML_SECURE_DOCTYPE_IF_NOT_FIRST_PATTERN, '\1!--amp-\3\4-->', $html, 1, $this->secured_doctype );
 	}
 
-    /**
-     * Restore the original doctype node.
-     *
+	/**
+	 * Restore the original doctype node.
+	 *
 	 * @see secure_doctype_node() Reciprocal function.
 	 *
 	 * @param string $html HTML string to adapt.
 	 * @return string Adapted HTML string.
-     */
-    private function restore_doctype_node( $html )
-    {
-        if ( ! $this->secured_doctype ) {
-            return $html;
-        }
+	 */
+	private function restore_doctype_node( $html ) {
+		if ( ! $this->secured_doctype ) {
+			return $html;
+		}
 
-        return preg_replace( self::HTML_RESTORE_DOCTYPE_PATTERN, '\1!\3\4>', $html, 1 );
+		return preg_replace( self::HTML_RESTORE_DOCTYPE_PATTERN, '\1!\3\4>', $html, 1 );
 	}
 
 	/**

@@ -129,11 +129,11 @@ class Test_AMP_DOM_Document extends WP_UnitTestCase {
 				mb_convert_encoding( '€', 'ISO-8859-15', 'UTF-8' ),
 				'<!DOCTYPE html><html>' . $head . '<body>€</body></html>',
 			],
-            'comments_around_main_elements' => [
-                'utf-8',
+			'comments_around_main_elements'            => [
+				'utf-8',
 				' <!-- comment 1 --> <!doctype html> <!-- comment 2 --> <html> <!-- comment 3 --> <head></head> <!-- comment 4 --> <body></body> <!-- comment 5 --></html>',
 				' <!-- comment 1 --> <!doctype html> <!-- comment 2 --> <html> <!-- comment 3 --> ' . $head . ' <!-- comment 4 --> <body></body> <!-- comment 5 --></html>',
-            ]
+			],
 		];
 	}
 
