@@ -39,6 +39,10 @@ const Group = styled.label`
 	opacity: ${ ( { disabled } ) => disabled ? 0.7 : 1 };
 `;
 
+const Select = styled.select`
+	width: 100px;
+`;
+
 export const ActionButton = styled.button`
 	color: ${ ( { theme } ) => theme.colors.mg.v1 };
 	font-size: 11px;
@@ -79,6 +83,44 @@ InputGroup.propTypes = {
 InputGroup.defaultProps = {
 	type: 'number',
 	postfix: '',
+	disabled: false,
+};
+
+function SelectMenu( { label, options, value, onChange, postfix, disabled } ) {
+	return (
+		<Group disabled={ disabled }>
+			<Label>
+				{ label }
+			</Label>
+			<Select
+				disabled={ disabled }
+				value={ value }
+				onChange={ ( evt ) => onChange( evt.target.value, evt ) }
+				onBlur={ ( evt ) => evt.target.form.dispatchEvent( new window.Event( 'submit' ) ) }
+			>
+				{ options && options.map( ( { name, slug, thisValue } ) => (
+					<option key={ slug } value={ thisValue }>
+						{ name }
+					</option>
+				) ) }
+			</Select>
+			{ postfix }
+		</Group>
+	);
+}
+
+SelectMenu.propTypes = {
+	label: PropTypes.string.isRequired,
+	value: PropTypes.any.isRequired,
+	options: PropTypes.array.isRequired,
+	onChange: PropTypes.func.isRequired,
+	postfix: PropTypes.string,
+	disabled: PropTypes.bool,
+};
+
+SelectMenu.defaultProps = {
+	postfix: '',
+	disabled: false,
 };
 
 function getCommonValue( list, property ) {
@@ -90,5 +132,6 @@ function getCommonValue( list, property ) {
 export {
 	InputGroup,
 	getCommonValue,
+	SelectMenu,
 };
 

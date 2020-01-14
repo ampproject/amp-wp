@@ -9,20 +9,21 @@ import { useEffect } from '@wordpress/element';
 import { useHistory } from '../../';
 
 function useHistoryReplay( {
-	setCurrentPageIndex,
-	setPages,
-	setSelectedElementIds,
+	restore,
 } ) {
 	const { state: { replayState } } = useHistory();
 	useEffect( () => {
 		if ( ! replayState ) {
 			return;
 		}
-		const { currentPageIndex, pages, selectedElementIds } = replayState;
-		setCurrentPageIndex( currentPageIndex );
-		setPages( pages );
-		setSelectedElementIds( selectedElementIds );
-	}, [ setCurrentPageIndex, setPages, setSelectedElementIds, replayState ] );
+		const { current, pages, selection, story } = replayState;
+		restore( {
+			pages,
+			current,
+			story,
+			selection,
+		} );
+	}, [ restore, replayState ] );
 }
 
 export default useHistoryReplay;

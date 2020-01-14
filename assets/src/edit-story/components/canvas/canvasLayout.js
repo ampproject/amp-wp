@@ -7,11 +7,11 @@ import styled from 'styled-components';
  * Internal dependencies
  */
 import { CENTRAL_RIGHT_PADDING, PAGE_WIDTH, PAGE_HEIGHT } from '../../constants';
-import useCanvas from './useCanvas';
 import Page from './page';
 import Meta from './meta';
 import Carrousel from './carrousel';
 import AddPage from './addpage';
+import SelectionCanvas from './selectionCanvas';
 
 const Background = styled.div`
 	background-color: ${ ( { theme } ) => theme.colors.bg.v1 };
@@ -36,22 +36,23 @@ const Area = styled.div`
 `;
 
 function CanvasLayout() {
-	const { state: { backgroundMouseDownHandler } } = useCanvas();
 	return (
-		<Background onMouseDown={ backgroundMouseDownHandler }>
-			<Area area="page">
-				<Page />
-			</Area>
-			<Area area="meta">
-				<Meta />
-			</Area>
-			<Area area="carrousel">
-				<Carrousel />
-			</Area>
-			<Area area="addpage">
-				<AddPage />
-			</Area>
-		</Background>
+		<SelectionCanvas>
+			<Background>
+				<Area area="page">
+					<Page />
+				</Area>
+				<Area area="meta">
+					<Meta />
+				</Area>
+				<Area area="carrousel">
+					<Carrousel />
+				</Area>
+				<Area area="addpage">
+					<AddPage />
+				</Area>
+			</Background>
+		</SelectionCanvas>
 	);
 }
 

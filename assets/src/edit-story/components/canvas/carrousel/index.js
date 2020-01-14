@@ -31,7 +31,7 @@ const Page = styled.a`
 `;
 
 function Canvas() {
-	const { state: { pages, currentPageIndex }, actions: { setCurrentPageByIndex, arrangePage } } = useStory();
+	const { state: { pages, currentPageIndex }, actions: { setCurrentPage, arrangePage } } = useStory();
 	const getArrangeIndex = ( sourceIndex, dstIndex, position ) => {
 		// If the dropped element is before the dropzone index then we have to deduct
 		// that from the index to make up for the "lost" element in the row.
@@ -41,6 +41,7 @@ function Canvas() {
 		}
 		return dstIndex + 1 + indexAdjustment;
 	};
+	const handleClickPage = ( page ) => () => setCurrentPage( { pageId: page.id } );
 	return (
 		<List>
 			{ pages.map( ( page, index ) => {
@@ -53,7 +54,7 @@ function Canvas() {
 					// Do nothing if the index didn't change.
 					if ( droppedEl.index !== arrangedIndex ) {
 						arrangePage( droppedEl.index, arrangedIndex );
-						setCurrentPageByIndex( arrangedIndex );
+						setCurrentPage( { pageId: pages[ droppedEl.index ].id } );
 					}
 				};
 				// @todo Create a Draggable component for setting data and setting "draggable".
@@ -66,7 +67,7 @@ function Canvas() {
 				};
 				return (
 					<DropZone key={ index } onDrop={ onDrop } >
-						<Page draggable="true" onDragStart={ onDragStart } onClick={ () => setCurrentPageByIndex( index ) } isActive={ index === currentPageIndex } />
+						<Page draggable="true" onDragStart={ onDragStart } onClick={ () => handleClickPage( page ) } isActive={ index === currentPageIndex } />
 					</DropZone>
 				);
 			} ) }

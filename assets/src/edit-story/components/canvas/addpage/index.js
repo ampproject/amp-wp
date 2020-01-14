@@ -12,6 +12,7 @@ import { useCallback } from '@wordpress/element';
  * Internal dependencies
  */
 import { useStory } from '../../../app';
+import { createPage } from '../../../elements';
 import Icon from './plus.svg';
 
 const Wrapper = styled.div`
@@ -46,13 +47,10 @@ const Circle = styled.a`
 `;
 
 function AddPage() {
-	const { actions: { addBlankPage, setCurrentPageByIndex }, state: { pages } } = useStory();
+	const { actions: { addPage } } = useStory();
 	const handleClick = useCallback( () => {
-		addBlankPage();
-		// Blank pages is always added to the end at this moment, let's set the last page as the current.
-		// Since a new page was added then we're using pages.length without -1.
-		setCurrentPageByIndex( pages.length );
-	}, [ addBlankPage, setCurrentPageByIndex, pages.length ] );
+		addPage( { page: createPage() } );
+	}, [ addPage ] );
 	return (
 		<Wrapper>
 			<Space />
