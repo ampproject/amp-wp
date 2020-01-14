@@ -31,7 +31,7 @@
     "@babel/core": "7.8.0",
     "@babel/plugin-proposal-class-properties": "7.8.3",
     "@babel/plugin-proposal-object-rest-spread": "7.8.3",
-    "@babel/plugin-transform-react-jsx": "7.8.0",
+    "@babel/plugin-transform-react-jsx": "7.8.3",
     "@babel/polyfill": "7.8.3",
     "@wordpress/api-fetch": "3.9.0",
     "@wordpress/babel-preset-default": "4.9.0",
