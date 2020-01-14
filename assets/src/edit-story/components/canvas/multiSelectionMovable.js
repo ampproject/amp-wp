@@ -54,7 +54,6 @@ function MultiSelectionMovable( { selectedElements, nodesById } ) {
 		target.style.transform = `translate(${ frame.translate[ 0 ] }px, ${ frame.translate[ 1 ] }px) rotate(${ frame.rotate }deg)`;
 	};
 
-	// @todo Is there any time when translate would differ among the elements? If not, we caould use just one translate for these.
 	const frames = targetList ? targetList.map( ( target ) => ( {
 		translate: [ 0, 0 ],
 		rotate: target.rotationAngle,
@@ -81,7 +80,7 @@ function MultiSelectionMovable( { selectedElements, nodesById } ) {
 			zIndex={ 0 }
 			target={ targetList.map( ( { ref } ) => ref ) }
 
-			// todo@: implement group transformations.
+			// @todo: implement group resizing.
 			draggable={ true }
 			resizable={ false }
 			rotatable={ true }
@@ -102,6 +101,33 @@ function MultiSelectionMovable( { selectedElements, nodesById } ) {
 			onDragGroupEnd={ ( { targets } ) => {
 				targets.forEach( ( target, i ) => {
 					const properties = { x: targetList[ i ].x + frames[ i ].translate[ 0 ], y: targetList[ i ].y + frames[ i ].translate[ 1 ] };
+					updateElementsById( { elementIds: [ targetList[ i ].id ], properties } );
+				} );
+				resetMoveable();
+			} }
+
+			onRotateGroupStart={ ( { events } ) => {
+				events.forEach( ( ev, i ) => {
+					const sFrame = frames[ i ];
+					ev.set( sFrame.rotate );
+				} );
+			} }
+			onRotateGroup={ ( { events } ) => {
+				events.forEach( ( { target, beforeRotate, drag }, i ) => {
+					const sFrame = frames[ i ];
+					sFrame.rotate = beforeRotate;
+					sFrame.translate = drag.beforeTranslate;
+					setTransformStyle( target, sFrame );
+				} );
+			} }
+			onRotateGroupEnd={ ( { targets } ) => {
+				// Set together updated elements.
+				targets.forEach( ( target, i ) => {
+					const properties = {
+						x: targetList[ i ].x + frames[ i ].translate[ 0 ],
+						y: targetList[ i ].y + frames[ i ].translate[ 1 ],
+						rotationAngle: frames[ i ].rotate,
+					};
 					updateElementsById( { elementIds: [ targetList[ i ].id ], properties } );
 				} );
 				resetMoveable();
