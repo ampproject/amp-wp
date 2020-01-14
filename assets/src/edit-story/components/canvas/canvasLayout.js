@@ -44,10 +44,10 @@ function CanvasLayout() {
 					<Page />
 				</Area>
 				<Area area="prev">
-					<PageNav prev={ true } />
+					<PageNav next={ false } />
 				</Area>
 				<Area area="next">
-					<PageNav next={ true } />
+					<PageNav />
 				</Area>
 				<Area area="meta">
 					<Meta />

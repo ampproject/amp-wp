@@ -23,7 +23,7 @@ const Wrapper = styled.div`
 `;
 
 const Space = styled.div`
-	flex: 0 1 ${ ( { direction } ) => 'next' === direction ? 60 : 115 }px;
+	flex: 0 1 ${ ( { next } ) => next ? 60 : 115 }px;
 `;
 
 const IconStyle = css`
@@ -55,32 +55,29 @@ const IconPrev = styled.i`
 	transform: rotate(135deg);
 `;
 
-function PageNav( { next, prev } ) {
-	const { actions: { setCurrentPageByIndex }, state: { pages, currentPageIndex } } = useStory();
+function PageNav( { next } ) {
+	const { state: { pages, currentPageIndex }, actions: { setCurrentPage } } = useStory();
 	const handleClick = useCallback( () => {
-		if ( next ) {
-			setCurrentPageByIndex( currentPageIndex + 1 );
-		} else if ( prev ) {
-			setCurrentPageByIndex( currentPageIndex - 1 );
+		const newPage = next ? pages[ currentPageIndex + 1 ] : pages[ currentPageIndex - 1 ];
+		if ( newPage ) {
+			setCurrentPage( { pageId: newPage.id } );
 		}
-	}, [ setCurrentPageByIndex, currentPageIndex, next, prev ] );
+	}, [ setCurrentPage, currentPageIndex, next, pages ] );
 	return (
 		<Wrapper>
-			<Space direction={ next ? 'next' : 'prev' } />
+			<Space next={ next } />
 			{ next && currentPageIndex < pages.length - 1 && ( <IconNext onClick={ handleClick } /> ) }
-			{ prev && currentPageIndex > 0 && ( <IconPrev onClick={ handleClick } /> ) }
+			{ ! next && currentPageIndex > 0 && ( <IconPrev onClick={ handleClick } /> ) }
 		</Wrapper>
 	);
 }
 
 PageNav.propTypes = {
 	next: PropTypes.bool,
-	prev: PropTypes.bool,
 };
 
 PageNav.defaultProps = {
-	next: false,
-	prev: false,
+	next: true,
 };
 
 export default PageNav;
