@@ -49,7 +49,7 @@ function DocumentInspector() {
 
 	const {
 		state: { meta: { isSaving }, story: { author, status, slug, date, excerpt, featuredMediaUrl }, capabilities },
-		actions: { updateStory },
+		actions: { updateStory, deleteStory },
 	} = useStory();
 
 	const { postThumbnails } = useConfig();
@@ -101,6 +101,13 @@ function DocumentInspector() {
 		},	[ updateStory ],
 	);
 
+	const handleRemoveStory = useCallback(
+		( evt ) => {
+			deleteStory();
+			evt.preventDefault();
+		},	[ deleteStory ],
+	);
+
 	return (
 		<>
 			<h2>
@@ -115,6 +122,7 @@ function DocumentInspector() {
 				value={ status }
 				onChange={ handleChangeStatus }
 			/> }
+			<RemoveButton onClick={ handleRemoveStory } dangerouslySetInnerHTML={ { __html: 'Move to trash' } } />
 			<InputGroup
 				label={ 'Published date' }
 				type={ 'datetime-local' }

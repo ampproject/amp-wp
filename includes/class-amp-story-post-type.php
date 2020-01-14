@@ -326,6 +326,7 @@ class AMP_Story_Post_Type {
 				'config' => [
 					'allowedVideoMimeTypes'          => $allowed_video_mime_types,
 					'allowedPageAttachmentPostTypes' => $post_types,
+					'postType'                       => self::POST_TYPE_SLUG,
 					'postThumbnails'                 => $post_thumbnails,
 					'storyId'                        => $story_id,
 					'previewLink'                    => get_preview_post_link( $story_id ),

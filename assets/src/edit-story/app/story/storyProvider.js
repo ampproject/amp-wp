@@ -18,6 +18,7 @@ import useSaveStory from './actions/useSaveStory';
 import useHistoryEntry from './effects/useHistoryEntry';
 import useHistoryReplay from './effects/useHistoryReplay';
 import useStoryReducer from './useStoryReducer';
+import useDeleteStory from './actions/useDeleteStory';
 
 function StoryProvider( { storyId, children } ) {
 	const {
@@ -97,6 +98,7 @@ function StoryProvider( { storyId, children } ) {
 	//  thus the need for `updateStory`)
 	const { updateStory } = api;
 	const { saveStory, isSaving } = useSaveStory( { storyId, pages, story, updateStory } );
+	const { deleteStory } = useDeleteStory( { storyId } );
 
 	const state = {
 		state: {
@@ -117,6 +119,7 @@ function StoryProvider( { storyId, children } ) {
 		actions: {
 			...api,
 			saveStory,
+			deleteStory,
 		},
 	};
 
