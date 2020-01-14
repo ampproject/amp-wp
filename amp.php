@@ -392,6 +392,7 @@ function amp_init() {
 
 	if ( AMP_Options_Manager::is_stories_editor_enabled() ) {
 		AMP_Story_Post_Type::register();
+		add_action( 'rest_api_init', '_amp_bootstrap_rest_api', 10 );
 	}
 
 	// Does its own is_stories_experience_enabled() check.
@@ -714,6 +715,15 @@ function amp_render_post( $post ) {
 	if ( ! $was_set ) {
 		unset( $wp_query->query_vars[ amp_get_slug() ] );
 	}
+}
+
+/**
+ * Register AMP REST API endpoints.
+ */
+function _amp_bootstrap_rest_api() {
+	// Fonts.
+	$controller = new AMP_REST_Fonts_Controller();
+	$controller->register_routes();
 }
 
 /**

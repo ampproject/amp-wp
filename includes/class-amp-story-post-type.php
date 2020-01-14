@@ -106,6 +106,7 @@ class AMP_Story_Post_Type {
 		);
 
 		add_action( 'admin_enqueue_scripts', [ __CLASS__, 'admin_enqueue_scripts' ] );
+		add_action( 'wp_enqueue_scripts', [ __CLASS__, 'wp_enqueue_scripts' ] );
 		add_filter( 'show_admin_bar', [ __CLASS__, 'show_admin_bar' ] );
 		add_filter( 'replace_editor', [ __CLASS__, 'replace_editor' ], 10, 2 );
 		add_filter( 'admin_body_class', [ __CLASS__, 'admin_body_class' ], 99 );
@@ -116,7 +117,7 @@ class AMP_Story_Post_Type {
 
 		add_action(
 			'amp_story_head',
-			function() {
+			function () {
 				// Theme support for title-tag is implied for stories. See _wp_render_title_tag().
 				echo '<title>' . esc_html( wp_get_document_title() ) . '</title>' . "\n";
 			},
@@ -125,7 +126,7 @@ class AMP_Story_Post_Type {
 		add_action( 'amp_story_head', 'wp_enqueue_scripts', 1 );
 		add_action(
 			'amp_story_head',
-			function() {
+			function () {
 				/*
 				 * Same as wp_print_styles() but importantly omitting the wp_print_styles action, which themes/plugins
 				 * can use to output arbitrary styling. Styling is constrained in story template via the
@@ -138,7 +139,7 @@ class AMP_Story_Post_Type {
 
 		add_filter(
 			'amp_content_sanitizers',
-			static function( $sanitizers ) {
+			static function ( $sanitizers ) {
 				if ( is_singular( self::POST_TYPE_SLUG ) ) {
 					$sanitizers['AMP_Story_Sanitizer'] = [];
 
@@ -148,16 +149,18 @@ class AMP_Story_Post_Type {
 					$sanitizers['AMP_Video_Sanitizer']['add_noscript_fallback']  = false;
 					$sanitizers['AMP_Iframe_Sanitizer']['add_noscript_fallback'] = false; // Note that iframe is not yet allowed in an AMP Story.
 				}
+
 				return $sanitizers;
 			}
 		);
 
 		add_filter(
 			'the_content',
-			static function( $content ) {
+			static function ( $content ) {
 				if ( is_singular( self::POST_TYPE_SLUG ) ) {
 					remove_filter( 'the_content', 'wpautop' );
 				}
+
 				return $content;
 			},
 			0
@@ -191,6 +194,7 @@ class AMP_Story_Post_Type {
 		if ( is_singular( self::POST_TYPE_SLUG ) ) {
 			$show = false;
 		}
+
 		return $show;
 	}
 
@@ -211,7 +215,18 @@ class AMP_Story_Post_Type {
 				require_once AMP__DIR__ . '/includes/edit-story.php';
 			}
 		}
+
 		return $replace;
+	}
+
+	/**
+	 * Enqueue Google fonts.
+	 */
+	public static function wp_enqueue_scripts() {
+		if ( is_singular( self::POST_TYPE_SLUG ) ) {
+			$post = get_post();
+			self::load_fonts( $post );
+		}
 	}
 
 	/**
@@ -258,9 +273,9 @@ class AMP_Story_Post_Type {
 		 * This can be used to add additionally supported formats, for example by plugins
 		 * that do video transcoding.
 		 *
-		 * @since 1.3
-		 *
 		 * @param array Allowed video mime types.
+		 *
+		 * @since 1.3
 		 */
 		$allowed_video_mime_types = apply_filters( 'amp_story_allowed_video_types', [ 'video/mp4' ] );
 
@@ -275,11 +290,17 @@ class AMP_Story_Post_Type {
 		/**
 		 * Filters the list of allowed post types for use in page attachments.
 		 *
-		 * @since 1.3
-		 *
 		 * @param array Allowed post types.
+		 *
+		 * @since 1.3
 		 */
-		$page_attachment_post_types = apply_filters( 'amp_story_allowed_page_attachment_post_types', [ 'page', 'post' ] );
+		$page_attachment_post_types = apply_filters(
+			'amp_story_allowed_page_attachment_post_types',
+			[
+				'page',
+				'post',
+			]
+		);
 		$post_types                 = [];
 		foreach ( $page_attachment_post_types as $post_type ) {
 			$post_type_object = get_post_type_object( $post_type );
@@ -294,6 +315,8 @@ class AMP_Story_Post_Type {
 		$post_type_object = get_post_type_object( self::POST_TYPE_SLUG );
 		$rest_base        = ! empty( $post_type_object->rest_base ) ? $post_type_object->rest_base : $post_type_object->name;
 
+		self::load_admin_fonts( $post );
+
 		wp_localize_script(
 			self::AMP_STORIES_SCRIPT_HANDLE,
 			'ampStoriesEditSettings',
@@ -307,6 +330,7 @@ class AMP_Story_Post_Type {
 					'api'                            => [
 						'stories' => sprintf( '/wp/v2/%s', $rest_base ),
 						'media'   => '/wp/v2/media',
+						'fonts'   => '/amp/v1/fonts',
 					],
 				],
 			]
@@ -321,6 +345,89 @@ class AMP_Story_Post_Type {
 
 		wp_styles()->add_data( self::AMP_STORIES_STYLE_HANDLE, 'rtl', 'replace' );
 
+	}
+
+	/**
+	 * Load font from story data.
+	 *
+	 * @param WP_Post $post Post Object.
+	 */
+	public static function load_fonts( $post ) {
+		$post_story_data = json_decode( $post->post_content_filtered, true );
+		$g_fonts         = [];
+		if ( $post_story_data ) {
+			foreach ( $post_story_data as $page ) {
+				foreach ( $page['elements'] as $element ) {
+					$font = AMP_Fonts::get_font( $element['fontFamily'] );
+
+					if ( $font && isset( $font['gfont'] ) && $font['gfont'] ) {
+						if ( isset( $g_fonts[ $font['name'] ] ) && in_array( $element['fontWeight'], $g_fonts[ $font['name'] ], true ) ) {
+							continue;
+						}
+						$g_fonts[ $font['name'] ][] = $element['fontWeight'];
+					}
+				}
+			}
+
+			if ( $g_fonts ) {
+				$subsets        = AMP_Fonts::get_subsets();
+				$g_font_display = '';
+				foreach ( $g_fonts as $name => $numbers ) {
+					$g_font_display .= $name . ':' . implode( ',', $numbers ) . '|';
+				}
+
+				$src = add_query_arg(
+					[
+						'family'  => rawurlencode( $g_font_display ),
+						'subset'  => rawurlencode( implode( ',', $subsets ) ),
+						'display' => 'swap',
+					],
+					AMP_Fonts::URL
+				);
+				wp_enqueue_style(
+					self::AMP_STORIES_STYLE_HANDLE . '_fonts',
+					$src,
+					[],
+					AMP__VERSION
+				);
+
+			}
+		}
+	}
+
+	/**
+	 * Load font in admin from story data.
+	 *
+	 * @param WP_Post $post Post Object.
+	 */
+	public static function load_admin_fonts( $post ) {
+		$post_story_data = json_decode( $post->post_content_filtered, true );
+		$fonts           = [];
+		$font_slugs      = [];
+		if ( $post_story_data ) {
+			foreach ( $post_story_data as $page ) {
+				foreach ( $page['elements'] as $element ) {
+					$font = AMP_Fonts::get_font( $element['fontFamily'] );
+					if ( $font && ! in_array( $font['slug'], $font_slugs, true ) ) {
+						$fonts[]      = $font;
+						$font_slugs[] = $font['slug'];
+					}
+				}
+			}
+
+			if ( $fonts ) {
+				foreach ( $fonts as $font ) {
+					if ( isset( $font['src'] ) && $font['src'] ) {
+						wp_enqueue_style(
+							$font['handle'],
+							$font['src'],
+							[],
+							AMP__VERSION
+						);
+					}
+				}
+			}
+		}
 	}
 
 	/**
@@ -342,6 +449,7 @@ class AMP_Story_Post_Type {
 		}
 
 		$class .= ' edit-story ';
+
 		return $class;
 	}
 
@@ -349,6 +457,7 @@ class AMP_Story_Post_Type {
 	 * Filter the allowed tags for KSES to allow for amp-story children.
 	 *
 	 * @param array $allowed_tags Allowed tags.
+	 *
 	 * @return array Allowed tags.
 	 */
 	public static function filter_kses_allowed_html( $allowed_tags ) {
@@ -386,12 +495,14 @@ class AMP_Story_Post_Type {
 	 * Set template for amp-story post type.
 	 *
 	 * @param string $template Template.
+	 *
 	 * @return string Template.
 	 */
 	public static function filter_template_include( $template ) {
 		if ( is_singular( self::POST_TYPE_SLUG ) && ! is_embed() ) {
 			$template = AMP__DIR__ . '/includes/templates/single-amp-story.php';
 		}
+
 		return $template;
 	}
 }

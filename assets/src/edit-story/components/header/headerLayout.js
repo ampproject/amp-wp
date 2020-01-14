@@ -7,8 +7,8 @@ import styled from 'styled-components';
  * Internal dependencies
  */
 import { CENTRAL_RIGHT_PADDING, INSPECTOR_WIDTH } from '../../constants';
-import { useStory } from '../../app/story';
 import Buttons from './buttons';
+import Title from './title';
 
 const Background = styled.div`
 	background-color: ${ ( { theme } ) => theme.colors.bg.v3 };
@@ -26,35 +26,15 @@ const Head = styled.header`
 	align-items: center;
 `;
 
-const Title = styled.input`
-	color: ${ ( { theme } ) => theme.colors.fg.v1 };
-	margin: 0;
-	font-size: 19px;
-	line-height: 20px;
-	background: none !important;
-	border: 0px none !important;
-	color: #fff !important;
-	text-align: center;
-`;
-
 const ButtonCell = styled.header`
 	grid-area: buttons;
 `;
 
 function HeaderLayout() {
-	const { state: { title, postStatus }, actions: { setTitle } } = useStory();
-	// TODO Make sure that Auto Draft checks translations.
-	const titleFormatted = ( postStatus === 'auto-draft' && title === 'Auto Draft' ) ? '' : title;
-
 	return (
 		<Background>
 			<Head>
-				<Title
-					value={ titleFormatted }
-					type={ 'text' }
-					onChange={ ( evt ) => setTitle( evt.target.value ) }
-					placeholder={ 'Add title' }
-				/>
+				<Title />
 			</Head>
 			<ButtonCell>
 				<Buttons />

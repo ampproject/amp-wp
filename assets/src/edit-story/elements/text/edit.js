@@ -15,12 +15,10 @@ import { useState, useEffect, useLayoutEffect, useRef, useCallback } from '@word
 /**
  * Internal dependencies
  */
-import { useStory } from '../../app';
+import { useStory, useFont } from '../../app';
 import { useCanvas } from '../../components/canvas';
 import {
-	ElementWithPosition,
-	ElementWithSize,
-	ElementWithRotation,
+	ElementFillContent,
 	ElementWithFont,
 	ElementWithBackgroundColor,
 	ElementWithFontColor,
@@ -29,9 +27,7 @@ import { getFilteredState, getHandleKeyCommand } from './util';
 
 const Element = styled.div`
 	margin: 0;
-	${ ElementWithPosition }
-	${ ElementWithSize }
-	${ ElementWithRotation }
+	${ ElementFillContent }
 	${ ElementWithFont }
 	${ ElementWithBackgroundColor }
 	${ ElementWithFontColor }
@@ -49,21 +45,21 @@ const Element = styled.div`
 	}
 `;
 
-function TextEdit( { content, color, backgroundColor, width, height, x, y, fontFamily, fontSize, fontWeight, fontStyle, rotationAngle } ) {
+function TextEdit( { id, content, color, backgroundColor, width, height, fontFamily, fontFallback, fontSize, fontWeight, fontStyle } ) {
 	const props = {
 		color,
 		backgroundColor,
 		fontFamily,
+		fontFallback,
 		fontStyle,
 		fontSize,
 		fontWeight,
 		width,
 		height,
-		x,
-		y,
-		rotationAngle,
 	};
-	const { actions: { setPropertiesOnSelectedElements } } = useStory();
+	const editorRef = useRef( null );
+	const { actions: { maybeEnqueueFontStyle } } = useFont();
+	const { actions: { updateElementById } } = useStory();
 	const { state: { editingElementState } } = useCanvas();
 	const { offset, clearContent } = editingElementState || {};
 	// To clear content, we can't just use createEmpty() or even pure white-space.
@@ -102,31 +98,42 @@ function TextEdit( { content, color, backgroundColor, width, height, x, y, fontF
 
 	// Finally update content for element on unmount.
 	useEffect( () => () => {
-		if ( setPropertiesOnSelectedElements && lastKnownState.current ) {
+		if ( lastKnownState.current ) {
 			// Remember to trim any trailing non-breaking space.
-			setPropertiesOnSelectedElements( {
+			const properties = {
 				content: stateToHTML( lastKnownState.current, { defaultBlockTag: null } )
 					.replace( /&nbsp;$/, '' ),
-			} );
+			};
+			updateElementById( { elementId: id, properties } );
 		}
-	}, [ setPropertiesOnSelectedElements ] );
+	}, [ id, updateElementById ] );
 
 	// Make sure to allow the user to click in the text box while working on the text.
-	const onClick = ( evt ) => evt.stopPropagation();
+	const onClick = ( evt ) => {
+		const editor = editorRef.current;
+		// Refocus the editor if the container outside it is clicked.
+		if ( ! editor.editorContainer.contains( evt.target ) ) {
+			editor.focus();
+		}
+		evt.stopPropagation();
+	};
 
 	// Handle basic key commands such as bold, italic and underscore.
 	const handleKeyCommand = getHandleKeyCommand( setEditorState );
 
 	// Set focus when initially rendered
-	const editor = useRef( null );
 	useLayoutEffect( () => {
-		editor.current.focus();
+		editorRef.current.focus();
 	}, [] );
+
+	useEffect( () => {
+		maybeEnqueueFontStyle( fontFamily );
+	}, [ fontFamily, maybeEnqueueFontStyle ] );
 
 	return (
 		<Element { ...props } onClick={ onClick }>
 			<Editor
-				ref={ editor }
+				ref={ editorRef }
 				onChange={ updateEditorState }
 				editorState={ editorState }
 				handleKeyCommand={ handleKeyCommand }
@@ -136,18 +143,17 @@ function TextEdit( { content, color, backgroundColor, width, height, x, y, fontF
 }
 
 TextEdit.propTypes = {
+	id: PropTypes.string.isRequired,
 	content: PropTypes.string,
 	color: PropTypes.string,
 	backgroundColor: PropTypes.string,
 	fontFamily: PropTypes.string,
-	fontSize: PropTypes.string,
-	fontWeight: PropTypes.string,
+	fontFallback: PropTypes.array,
+	fontSize: PropTypes.number,
+	fontWeight: PropTypes.number,
 	fontStyle: PropTypes.string,
 	width: PropTypes.number.isRequired,
 	height: PropTypes.number.isRequired,
-	rotationAngle: PropTypes.number.isRequired,
-	x: PropTypes.number.isRequired,
-	y: PropTypes.number.isRequired,
 };
 
 export default TextEdit;

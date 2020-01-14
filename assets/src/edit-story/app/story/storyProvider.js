@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { useState } from '@wordpress/element';
+import { useMemo } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -14,90 +14,107 @@ import { useState } from '@wordpress/element';
 import Context from './context';
 
 import useLoadStory from './effects/useLoadStory';
-import useCurrentPage from './effects/useCurrentPage';
+import useSaveStory from './actions/useSaveStory';
 import useHistoryEntry from './effects/useHistoryEntry';
 import useHistoryReplay from './effects/useHistoryReplay';
-import useSelectedElements from './effects/useSelectedElements';
-
-import useAddBlankPage from './actions/useAddBlankPage';
-import useClearSelection from './actions/useClearSelection';
-import useDeleteSelectedElements from './actions/useDeleteSelectedElements';
-import useDeleteCurrentPage from './actions/useDeleteCurrentPage';
-import useToggleElementIdInSelection from './actions/useToggleElementIdInSelection';
-import useSelectElementById from './actions/useSelectElementById';
-import useAppendElementToCurrentPage from './actions/useAppendElementToCurrentPage';
-import useSetCurrentPageByIndex from './actions/useSetCurrentPageByIndex';
-import useSetPropertiesOnSelectedElements from './actions/useSetPropertiesOnSelectedElements';
-import useSavePost from './actions/useSavePost';
-import useSetPropertiesById from './actions/useSetPropertiesById';
+import useStoryReducer from './useStoryReducer';
 
 function StoryProvider( { storyId, children } ) {
-	// Story state is stored in these three immutable variables only!
-	// Don't update 1 of these in an effect based off another base variable.
-	// Only update these directly as a response to user or api interactions.
-	const [ pages, setPages ] = useState( [] );
-	const [ title, setTitle ] = useState( '' );
-	const [ link, setLink ] = useState( '' );
-	const [ postStatus, setPostStatus ] = useState( 'draft' );
-	const [ postAuthor, setPostAuthor ] = useState( 0 );
-	const [ slug, setSlug ] = useState( '' );
-	const [ isSaving, setIsSaving ] = useState( false );
-	const [ currentPageIndex, setCurrentPageIndex ] = useState( null );
-	const [ selectedElementIds, setSelectedElementIds ] = useState( [] );
+	const {
+		state: {
+			pages,
+			current,
+			selection,
+			story,
+		},
+		api,
+		internal: {
+			restore,
+		},
+	} = useStoryReducer();
 
-	// These states are all derived from the above three variables and help keep the api easier.
-	// These will update based off the above in effects but should never be directly manipulated outside this component.
-	const [ currentPageNumber, setCurrentPageNumber ] = useState( null );
-	const [ currentPage, setCurrentPage ] = useState( null );
-	const [ selectedElements, setSelectedElements ] = useState( [] );
+	// Generate current page info.
+	const {
+		currentPageId,
+		currentPageIndex,
+		currentPageNumber,
+		currentPage,
+	} = useMemo( () => {
+		if ( ! current ) {
+			return {
+				currentPageId: null,
+				currentPageIndex: null,
+				currentPageNumber: null,
+				currentPage: null,
+			};
+		}
+		const index = pages.findIndex( ( { id } ) => id === current );
+		const number = index + 1;
+		const page = pages[ index ];
+		return {
+			currentPageId: current,
+			currentPageIndex: index,
+			currentPageNumber: number,
+			currentPage: page,
+		};
+	}, [ pages, current ] );
 
-	const hasSelection = Boolean( selectedElementIds.length );
+	// Generate selection info
+	const {
+		selectedElementIds,
+		selectedElements,
+		hasSelection,
+	} = useMemo(
+		() => {
+			if ( ! currentPage ) {
+				return {
+					selectedElements: [],
+					selectedElementIds: [],
+					hasSelection: false,
+				};
+			}
+			const els = currentPage.elements.filter( ( { id } ) => selection.includes( id ) );
+			return {
+				selectedElementIds: selection,
+				selectedElements: els,
+				hasSelection: els.length > 0,
+			};
+		},
+		[ currentPage, selection ],
+	);
 
-	const clearSelection = useClearSelection( { selectedElementIds, setSelectedElementIds } );
-	const deleteSelectedElements = useDeleteSelectedElements( { currentPageIndex, pages, selectedElementIds, setPages, setSelectedElementIds } );
-	const setCurrentPageByIndex = useSetCurrentPageByIndex( { clearSelection, setCurrentPageIndex } );
-	const addBlankPage = useAddBlankPage( { pages, setPages, clearSelection } );
-	const deleteCurrentPage = useDeleteCurrentPage( { currentPage, pages, setPages, addBlankPage, setCurrentPageIndex, currentPageIndex } );
-	const selectElementById = useSelectElementById( { setSelectedElementIds } );
-	const toggleElementIdInSelection = useToggleElementIdInSelection( { selectedElementIds, setSelectedElementIds } );
-	const appendElementToCurrentPage = useAppendElementToCurrentPage( { currentPageIndex, pages, setPages, setSelectedElementIds } );
-	const setPropertiesOnSelectedElements = useSetPropertiesOnSelectedElements( { currentPageIndex, pages, selectedElementIds, setPages } );
-	const savePost = useSavePost( { isSaving, storyId, title, postStatus, postAuthor, slug, pages, setLink, setPostStatus, setIsSaving } );
-	const setPropertiesById = useSetPropertiesById( { currentPageIndex, pages, setPages } );
+	// This effect loads and initialises the story on first load (when there's no pages).
+	const shouldLoad = pages.length === 0;
+	useLoadStory( { restore, shouldLoad, storyId } );
 
-	useLoadStory( { storyId, pages, setPages, setTitle, setPostStatus, setPostAuthor, setSlug, setLink, setCurrentPageIndex, clearSelection } );
-	useCurrentPage( { currentPageIndex, pages, setCurrentPage, setCurrentPageNumber } );
-	useHistoryEntry( { currentPageIndex, pages, selectedElementIds } );
-	useHistoryReplay( { setCurrentPageIndex, setPages, setSelectedElementIds } );
-	useSelectedElements( { currentPageIndex, pages, selectedElementIds, setSelectedElements } );
+	// These effects send updates to and restores state from history.
+	useHistoryEntry( { pages, current, selection, story } );
+	useHistoryReplay( { restore } );
+
+	// This action allows the user to save the story
+	// (and it will have side-effects because saving can update url and status,
+	//  thus the need for `updateStory`)
+	const { updateStory } = api;
+	const { saveStory, isSaving } = useSaveStory( { storyId, pages, story, updateStory } );
 
 	const state = {
 		state: {
 			pages,
+			currentPageId,
 			currentPageIndex,
 			currentPageNumber,
 			currentPage,
 			selectedElementIds,
 			selectedElements,
 			hasSelection,
-			title,
-			postStatus,
-			isSaving,
-			link,
+			story,
+			meta: {
+				isSaving,
+			},
 		},
 		actions: {
-			setCurrentPageByIndex,
-			addBlankPage,
-			clearSelection,
-			deleteSelectedElements,
-			deleteCurrentPage,
-			appendElementToCurrentPage,
-			toggleElementIdInSelection,
-			selectElementById,
-			setPropertiesOnSelectedElements,
-			setTitle,
-			savePost,
-			setPropertiesById,
+			...api,
+			saveStory,
 		},
 	};
 

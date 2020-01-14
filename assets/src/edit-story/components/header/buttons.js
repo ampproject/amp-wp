@@ -48,7 +48,7 @@ function Redoer() {
 
 function PreviewButton() {
 	const {
-		state: { isSaving, link },
+		state: { meta: { isSaving }, story: { link } },
 	} = useStory();
 
 	/**
@@ -67,14 +67,14 @@ function PreviewButton() {
 
 function Publish() {
 	const {
-		state: { isSaving, postStatus },
-		actions: { savePost },
+		state: { meta: { isSaving }, story: { status } },
+		actions: { saveStory },
 	} = useStory();
 
-	const text = ( postStatus !== 'publish' ) ? __( 'Publish' ) : __( 'Update' );
+	const text = ( status !== 'publish' ) ? __( 'Publish' ) : __( 'Update' );
 
 	return (
-		<Primary onClick={ savePost } isDisabled={ isSaving }>
+		<Primary onClick={ saveStory } isDisabled={ isSaving }>
 			{ text }
 		</Primary>
 	);

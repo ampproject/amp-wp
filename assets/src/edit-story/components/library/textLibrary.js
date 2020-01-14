@@ -13,9 +13,9 @@ function MediaLibrary( { onInsert } ) {
 			</button>
 			<br />
 			<button
-				onClick={ () => onInsert( 'text', { content: 'Hello <strong>World</strong>', color: 'purple', fontSize: '40px', fontFamily: 'Comic Sans MS', width: 50, height: 20, x: 5, y: 5, rotationAngle: 0 } ) }
+				onClick={ () => onInsert( 'text', { content: 'Hello <strong>World</strong>', color: 'purple', fontSize: 40, fontFamily: 'Ubuntu', fontWeight: 400, width: 50, height: 20, x: 5, y: 5, rotationAngle: 0 } ) }
 			>
-				{ 'Insert big purple comic sans' }
+				{ 'Insert big purple ubuntu' }
 			</button>
 		</>
 	);
