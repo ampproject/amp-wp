@@ -41,7 +41,7 @@ function Canvas() {
 		}
 		return dstIndex + 1 + indexAdjustment;
 	};
-	const handleClickPage = ( page ) => () => setCurrentPage( { pageId: page.id } );
+	const handleClickPage = ( page ) => setCurrentPage( { pageId: page.id } );
 	return (
 		<List>
 			{ pages.map( ( page, index ) => {
@@ -53,8 +53,9 @@ function Canvas() {
 					const arrangedIndex = getArrangeIndex( droppedEl.index, index, position );
 					// Do nothing if the index didn't change.
 					if ( droppedEl.index !== arrangedIndex ) {
-						arrangePage( droppedEl.index, arrangedIndex );
-						setCurrentPage( { pageId: pages[ droppedEl.index ].id } );
+						const pageId = pages[ droppedEl.index ].id;
+						arrangePage( { pageId, position: arrangedIndex } );
+						setCurrentPage( { pageId } );
 					}
 				};
 				// @todo Create a Draggable component for setting data and setting "draggable".

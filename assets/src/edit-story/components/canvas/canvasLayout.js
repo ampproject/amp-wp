@@ -23,10 +23,10 @@ const Background = styled.div`
 
 	display: grid;
 	grid:
-    ".   meta       .        ." 1fr
-    ".   page       addpage  ." ${ PAGE_HEIGHT }px
-    ".   carrousel  .        ." 1fr
-    / 1fr ${ PAGE_WIDTH }px 1fr ${ CENTRAL_RIGHT_PADDING }px;
+	".   meta       .        ." 1fr
+	".   page       addpage  ." ${ PAGE_HEIGHT }px
+	".   carrousel  .        ." 1fr
+	/ 1fr ${ PAGE_WIDTH }px 1fr ${ CENTRAL_RIGHT_PADDING }px;
 `;
 
 const Area = styled.div`
@@ -37,22 +37,22 @@ const Area = styled.div`
 
 function CanvasLayout() {
 	return (
-		<SelectionCanvas>
-			<Background>
-				<Area area="page">
+		<Background>
+			<Area area="page">
+				<SelectionCanvas>
 					<Page />
-				</Area>
-				<Area area="meta">
-					<Meta />
-				</Area>
-				<Area area="carrousel">
-					<Carrousel />
-				</Area>
-				<Area area="addpage">
-					<AddPage />
-				</Area>
-			</Background>
-		</SelectionCanvas>
+				</SelectionCanvas>
+			</Area>
+			<Area area="meta">
+				<Meta />
+			</Area>
+			<Area area="carrousel">
+				<Carrousel />
+			</Area>
+			<Area area="addpage">
+				<AddPage />
+			</Area>
+		</Background>
 	);
 }
 
