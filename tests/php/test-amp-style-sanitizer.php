@@ -53,7 +53,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 			'span_one_style' => [
 				'<span style="color: #00ff00;">This is green.</span>',
-				'<span class="amp-wp-bb01159">This is green.</span>',
+				'<span data-amp-original-style="color: #00ff00;" class="amp-wp-bb01159">This is green.</span>',
 				[
 					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-bb01159{color:#0f0}',
 				],
@@ -61,7 +61,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 			'span_one_style_bad_format' => [
 				'<span style="color  :   #00ff00">This is green.</span>',
-				'<span class="amp-wp-0837823">This is green.</span>',
+				'<span data-amp-original-style="color  :   #00ff00" class="amp-wp-0837823">This is green.</span>',
 				[
 					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-0837823{color:#0f0}',
 				],
@@ -69,7 +69,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 			'span_two_styles_reversed' => [
 				'<span style="color: #00ff00; background-color: #000; ">This is green.</span>',
-				'<span class="amp-wp-c71affe">This is green.</span>',
+				'<span data-amp-original-style="color: #00ff00; background-color: #000; " class="amp-wp-c71affe">This is green.</span>',
 				[
 					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-c71affe{color:#0f0;background-color:#000}',
 				],
@@ -77,7 +77,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 			'span_display_none' => [
 				'<span style="display: none;">Kses-banned properties are allowed since Kses will have already applied if user does not have unfiltered_html.</span>',
-				'<span class="amp-wp-224b51a">Kses-banned properties are allowed since Kses will have already applied if user does not have unfiltered_html.</span>',
+				'<span data-amp-original-style="display: none;" class="amp-wp-224b51a">Kses-banned properties are allowed since Kses will have already applied if user does not have unfiltered_html.</span>',
 				[
 					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-224b51a{display:none}',
 				],
@@ -85,7 +85,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 			'!important_is_ok' => [
 				'<span style="padding:1px; margin: 2px !important; outline: 3px;">!important is converted.</span>',
-				'<span class="amp-wp-6a75598">!important is converted.</span>',
+				'<span data-amp-original-style="padding:1px; margin: 2px !important; outline: 3px;" class="amp-wp-6a75598">!important is converted.</span>',
 				[
 					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-6a75598{padding:1px;outline:3px}:root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-6a75598{margin:2px}',
 				],
@@ -93,7 +93,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 			'!important_with_spaces_also_converted' => [
 				'<span style="color: red  !  important;">!important is converted.</span>',
-				'<span class="amp-wp-952600b">!important is converted.</span>',
+				'<span data-amp-original-style="color: red  !  important;" class="amp-wp-952600b">!important is converted.</span>',
 				[
 					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-952600b{color:red}',
 				],
@@ -101,7 +101,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 			'!important_multiple_is_converted' => [
 				'<span style="color: red !important; background: blue!important;">!important is converted.</span>',
-				'<span class="amp-wp-1e2bfaa">!important is converted.</span>',
+				'<span data-amp-original-style="color: red !important; background: blue!important;" class="amp-wp-1e2bfaa">!important is converted.</span>',
 				[
 					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-1e2bfaa{color:red;background:blue}',
 				],
@@ -109,7 +109,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 			'!important_takes_precedence_over_inline' => [
 				'<header id="header" style="display: none;"><h1>This is the header.</h1></header><style>#header { display: block !important;width: 100%;background: #fff; }',
-				'<header id="header" class="amp-wp-224b51a"><h1>This is the header.</h1></header>',
+				'<header id="header" data-amp-original-style="display: none;" class="amp-wp-224b51a"><h1>This is the header.</h1></header>',
 				[
 					'#header{width:100%;background:#fff}:root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) #header{display:block}',
 					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-224b51a{display:none}',
@@ -118,7 +118,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 			'two_nodes' => [
 				'<span style="color: #00ff00;"><span style="color: #ff0000;">This is red.</span></span>',
-				'<span class="amp-wp-bb01159"><span class="amp-wp-cc68ddc">This is red.</span></span>',
+				'<span data-amp-original-style="color: #00ff00;" class="amp-wp-bb01159"><span data-amp-original-style="color: #ff0000;" class="amp-wp-cc68ddc">This is red.</span></span>',
 				[
 					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-bb01159{color:#0f0}',
 					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-cc68ddc{color:#f00}',
@@ -127,7 +127,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 			'existing_class_attribute' => [
 				'<figure class="alignleft" style="background: #000"></figure>',
-				'<figure class="alignleft amp-wp-2864855"></figure>',
+				'<figure class="alignleft amp-wp-2864855" data-amp-original-style="background: #000"></figure>',
 				[
 					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-2864855{background:#000}',
 				],
@@ -153,7 +153,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 			'illegal_at_rule_in_style_attribute' => [
 				'<span style="color:brown; @media screen { color:green }">invalid @-rule omitted.</span>',
-				'<span class="amp-wp-481af57">invalid @-rule omitted.</span>',
+				'<span data-amp-original-style="color:brown; @media screen { color:green }" class="amp-wp-481af57">invalid @-rule omitted.</span>',
 				[
 					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-481af57{color:brown}',
 				],
@@ -179,7 +179,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 			'selector_specificity' => [
 				'<style>#child {color:red !important} #parent #child {color:pink !important} .foo { color:blue !important; } #me .foo { color: green !important; }</style><div id="parent"><span id="child" class="foo bar baz">one</span><span style="color: yellow;">two</span><span style="color: purple !important;">three</span></div><div id="me"><span class="foo"></span></div>',
-				'<div id="parent"><span id="child" class="foo bar baz">one</span><span class="amp-wp-64b4fd4">two</span><span class="amp-wp-ab79d9e">three</span></div><div id="me"><span class="foo"></span></div>',
+				'<div id="parent"><span id="child" class="foo bar baz">one</span><span data-amp-original-style="color: yellow;" class="amp-wp-64b4fd4">two</span><span data-amp-original-style="color: purple !important;" class="amp-wp-ab79d9e">three</span></div><div id="me"><span class="foo"></span></div>',
 				[
 					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) #child{color:red}:root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) #parent #child{color:pink}:root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .foo{color:blue}:root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) #me .foo{color:green}',
 					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-64b4fd4{color:yellow}',
@@ -197,7 +197,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 			'col_with_width_attribute' => [
 				'<table><colgroup><col width="253"/></colgroup></table>',
-				'<table><colgroup><col class="amp-wp-cbcb5c2"></colgroup></table>',
+				'<table><colgroup><col data-amp-original-style="width: 253px" class="amp-wp-cbcb5c2"></colgroup></table>',
 				[
 					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-cbcb5c2{width:253px}',
 				],
@@ -205,7 +205,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 			'col_with_percent_width_attribute' => [
 				'<table><colgroup><col width="50%"/></colgroup></table>',
-				'<table><colgroup><col class="amp-wp-cd7753e"></colgroup></table>',
+				'<table><colgroup><col data-amp-original-style="width: 50%" class="amp-wp-cd7753e"></colgroup></table>',
 				[
 					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-cd7753e{width:50%}',
 				],
@@ -219,7 +219,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 			'col_with_width_attribute_and_existing_style' => [
 				'<table><colgroup><col width="50" style="background-color: red; width: 60px"/></colgroup></table>',
-				'<table><colgroup><col class="amp-wp-c8aa9e9"></colgroup></table>',
+				'<table><colgroup><col data-amp-original-style="width: 50px;background-color: red; width: 60px" class="amp-wp-c8aa9e9"></colgroup></table>',
 				[
 					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-c8aa9e9{width:50px;width:60px;background-color:red}',
 				],
@@ -709,6 +709,11 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'<nav class="main-navigation focused"><ul><li><a href="https://example.com/">Example</a><ul><li><a href="https://example.org">Another example</a></li></ul></li></ul></nav>',
 				'.main-navigation ul ul li:hover > ul, .main-navigation ul ul li.focus > ul { left: 100%; right: auto; } nav.focused { outline:solid 1px red; }',
 				'.main-navigation ul ul li:hover > ul,.main-navigation ul ul li:focus-within > ul{left:100%;right:auto}nav.focused{outline:solid 1px red}',
+			],
+			'style_attribute_selector' => [
+				'<figure class="wp-block-pullquote" style="border-color:#ce3a0d">',
+				'.wp-block-pullquote:not(.is-style-solid-color)[style*="border-color"] { border: 2px solid; }',
+				'.wp-block-pullquote:not(.is-style-solid-color)[data-amp-original-style*="border-color"]{border:2px solid}',
 			],
 		];
 	}
