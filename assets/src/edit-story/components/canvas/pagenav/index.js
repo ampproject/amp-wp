@@ -55,26 +55,32 @@ const IconPrev = styled.i`
 	transform: rotate(135deg);
 `;
 
-function PageNav( { direction } ) {
+function PageNav( { next, prev } ) {
 	const { actions: { setCurrentPageByIndex }, state: { pages, currentPageIndex } } = useStory();
 	const handleClick = useCallback( () => {
-		if ( 'next' === direction ) {
+		if ( next ) {
 			setCurrentPageByIndex( currentPageIndex + 1 );
-		} else if ( 'prev' === direction ) {
+		} else if ( prev ) {
 			setCurrentPageByIndex( currentPageIndex - 1 );
 		}
-	}, [ setCurrentPageByIndex, currentPageIndex, direction ] );
+	}, [ setCurrentPageByIndex, currentPageIndex, next, prev ] );
 	return (
 		<Wrapper>
-			<Space direction={ direction } />
-			{ 'next' === direction && currentPageIndex < pages.length - 1 && ( <IconNext onClick={ handleClick } /> ) }
-			{ 'prev' === direction && currentPageIndex > 0 && ( <IconPrev onClick={ handleClick } /> ) }
+			<Space direction={ next ? 'next' : 'prev' } />
+			{ next && currentPageIndex < pages.length - 1 && ( <IconNext onClick={ handleClick } /> ) }
+			{ prev && currentPageIndex > 0 && ( <IconPrev onClick={ handleClick } /> ) }
 		</Wrapper>
 	);
 }
 
 PageNav.propTypes = {
-	direction: PropTypes.string.isRequired,
+	next: PropTypes.bool,
+	prev: PropTypes.bool,
+};
+
+PageNav.defaultProps = {
+	next: false,
+	prev: false,
 };
 
 export default PageNav;
