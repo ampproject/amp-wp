@@ -23,8 +23,10 @@ const Wrapper = styled.div`
 `;
 
 const Space = styled.div`
-	flex: 0 1 ${ ( { next } ) => next ? 60 : 115 }px;
+	flex: 0 1 ${ ( { isNext } ) => isNext ? 60 : 115 }px;
 `;
+
+const NavLink = styled.a``;
 
 const IconStyle = css`
 	border: solid ${ ( { theme } ) => theme.colors.fg.v1 };
@@ -55,29 +57,31 @@ const IconPrev = styled.i`
 	transform: rotate(135deg);
 `;
 
-function PageNav( { next } ) {
+function PageNav( { isNext } ) {
 	const { state: { pages, currentPageIndex }, actions: { setCurrentPage } } = useStory();
 	const handleClick = useCallback( () => {
-		const newPage = next ? pages[ currentPageIndex + 1 ] : pages[ currentPageIndex - 1 ];
+		const newPage = isNext ? pages[ currentPageIndex + 1 ] : pages[ currentPageIndex - 1 ];
 		if ( newPage ) {
 			setCurrentPage( { pageId: newPage.id } );
 		}
-	}, [ setCurrentPage, currentPageIndex, next, pages ] );
+	}, [ setCurrentPage, currentPageIndex, isNext, pages ] );
 	return (
 		<Wrapper>
-			<Space next={ next } />
-			{ next && currentPageIndex < pages.length - 1 && ( <IconNext onClick={ handleClick } /> ) }
-			{ ! next && currentPageIndex > 0 && ( <IconPrev onClick={ handleClick } /> ) }
+			<Space isNext={ isNext } />
+			<NavLink aria-label={ isNext ? 'Next Page' : 'Previous Page' } onClick={ handleClick }>
+				{ isNext && currentPageIndex < pages.length - 1 && ( <IconNext /> ) }
+				{ ! isNext && currentPageIndex > 0 && ( <IconPrev /> ) }
+			</NavLink>
 		</Wrapper>
 	);
 }
 
 PageNav.propTypes = {
-	next: PropTypes.bool,
+	isNext: PropTypes.bool,
 };
 
 PageNav.defaultProps = {
-	next: true,
+	isNext: true,
 };
 
 export default PageNav;
