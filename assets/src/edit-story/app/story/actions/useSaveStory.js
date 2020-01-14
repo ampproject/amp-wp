@@ -72,7 +72,7 @@ function useSaveStory( {
 		const { title, status, author, date, modified, slug, excerpt, featuredMedia } = story;
 
 		const content = getStoryMarkupFromPages( pages );
-		saveStoryById( storyId, title, status, pages, author, date, modified, slug, content, excerpt, featuredMedia ).then( ( post ) => {
+		saveStoryById( storyId, title, status, pages, author, slug, date, modified, content, excerpt, featuredMedia ).then( ( post ) => {
 			setIsSaving( false );
 			const { status: newStatus, slug: newSlug, link } = post;
 			updateStory( {
