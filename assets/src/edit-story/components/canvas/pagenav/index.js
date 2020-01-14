@@ -38,7 +38,7 @@ const IconStyle = css`
 	justify-content: center;
 	color: inherit;
 	height: 25px;
-    width: 25px;
+	width: 25px;
 	&:hover {
 		color: inherit;
 		opacity: 1;
@@ -48,13 +48,11 @@ const IconStyle = css`
 const IconNext = styled.i`
 	${ IconStyle }
 	transform: rotate(-45deg);
-    -webkit-transform: rotate(-45deg);
 `;
 
 const IconPrev = styled.i`
 	${ IconStyle }
 	transform: rotate(135deg);
-	-webkit-transform: rotate(135deg);
 `;
 
 function PageNav( { direction } ) {
