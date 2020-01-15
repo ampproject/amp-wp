@@ -145,7 +145,7 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 			],
 
 			'audio_block_and_shortcode_output' => [
-			    // Note: the IE conditional comment is stripped, as AMP doesn't support those browsers anyway.
+				// Note: the IE conditional comment is stripped, as AMP doesn't support those browsers anyway.
 				'
 					<figure class="wp-block-audio">
 						<audio controls src="https://wordpressdev.lndo.site/content/uploads/2019/02/do-you-know-I-am-batman.mp3"></audio>
