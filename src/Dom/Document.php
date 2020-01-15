@@ -7,6 +7,7 @@
 
 namespace Amp\AmpWP\Dom;
 
+use DOMAttr;
 use DOMComment;
 use DOMDocument;
 use DOMElement;
@@ -355,6 +356,8 @@ final class Document extends DOMDocument {
 			$this->head->insertBefore( $charset, $this->head->firstChild );
 
 			// Do some further clean-up.
+			$this->deduplicate_tag( self::TAG_HEAD );
+			$this->deduplicate_tag( self::TAG_BODY );
 			$this->move_invalid_head_nodes_to_body();
 		}
 
@@ -1016,6 +1019,63 @@ final class Document extends DOMDocument {
 		}
 
 		return preg_replace( self::HTML_RESTORE_DOCTYPE_PATTERN, '\1!\3\4>', $html, 1 );
+	}
+
+	/**
+	 * Deduplicate a given tag.
+	 *
+	 * This keeps the first tag as the main tag and moves over all child nodes and attribute nodes from any subsequent
+	 * same tags over to remove them.
+	 *
+	 * @param string $tag_name Name of the tag to deduplicate.
+	 */
+	public function deduplicate_tag( $tag_name ) {
+		$tags = $this->getElementsByTagName( $tag_name );
+
+		/**
+		 * Main tag to keep.
+		 *
+		 * @var DOMElement $main_tag
+		 */
+		$main_tag = $tags->item( 0 );
+
+		if ( null === $main_tag ) {
+			return;
+		}
+
+		while ( $tags->length > 1 ) {
+			/**
+			 * Tag to remove.
+			 *
+			 * @var DOMElement $tag_to_remove
+			 */
+			$tag_to_remove = $tags->item( 1 );
+
+			foreach ( $tag_to_remove->childNodes as $child_node ) {
+				$main_tag->appendChild( $child_node->parentNode->removeChild( $child_node ) );
+			}
+
+			while ( $tag_to_remove->hasAttributes() ) {
+				/**
+				 * Attribute node to move over to the main tag.
+				 *
+				 * @var DOMAttr $attribute
+				 */
+				$attribute = $tag_to_remove->attributes->item( 0 );
+				$tag_to_remove->removeAttributeNode( $attribute );
+
+				// @TODO This doesn't deal properly with attributes present on both tags. Maybe overkill to add?
+				// We could move over the copy_attributes from AMP_DOM_Utils to do this.
+				$main_tag->setAttributeNode( $attribute );
+			}
+
+			$tag_to_remove->parentNode->removeChild( $tag_to_remove );
+		}
+
+		// Avoid doing the above query again if possible.
+		if ( in_array( $tag_name, [ self::TAG_HEAD, self::TAG_BODY ], true ) ) {
+			$this->$tag_name = $main_tag;
+		}
 	}
 
 	/**
