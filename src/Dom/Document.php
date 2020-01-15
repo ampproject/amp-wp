@@ -108,7 +108,7 @@ final class Document extends DOMDocument {
 
 	// Regex patterns and values used for adding and removing http-equiv charsets for compatibility.
 	const HTML_GET_HEAD_OPENING_TAG_PATTERN     = '/<head(?:\s+[^>]*)?>/i';
-	const HTML_GET_HEAD_OPENING_TAG_REPLACEMENT = '$1<meta http-equiv="content-type" content="text/html; charset=utf-8">';
+	const HTML_GET_HEAD_OPENING_TAG_REPLACEMENT = '$0<meta http-equiv="content-type" content="text/html; charset=utf-8">';
 	const HTML_GET_HTTP_EQUIV_TAG_PATTERN       = '#<meta http-equiv=([\'"])content-type\1 content=([\'"])text/html; charset=utf-8\2>#i';
 	const HTML_HTTP_EQUIV_VALUE                 = 'content-type';
 	const HTML_HTTP_EQUIV_CONTENT_VALUE         = 'text/html; charset=utf-8';
@@ -542,10 +542,10 @@ final class Document extends DOMDocument {
 		static $regex_pattern = null;
 
 		if ( null === $regex_pattern ) {
-			$regex_pattern = '#<(' . implode( '|', self::$self_closing_tags ) . ')[^>]*>(?!</\1>)#';
+			$regex_pattern = '#<(' . implode( '|', self::$self_closing_tags ) . ')([^>]*?)(?:\s*\/)?>(?!</\1>)#';
 		}
 
-		return preg_replace( $regex_pattern, '$0</$1>', $html );
+		return preg_replace( $regex_pattern, '<$1$2></$1>', $html );
 	}
 
 	/**
