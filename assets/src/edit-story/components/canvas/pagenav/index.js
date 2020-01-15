@@ -32,6 +32,7 @@ const NavButton = styled.button`
 	border: none;
 	width: 40px;
 	height: 40px;
+	visibility: ${ ( { displayNav } ) => displayNav ? 'visible' : 'hidden' };
 	&:focus {
 		outline: 1px dotted -webkit-focus-ring-color
 	}
@@ -78,12 +79,9 @@ function PageNav( { isNext } ) {
 	return (
 		<Wrapper>
 			<Space isNext={ isNext } />
-			{ displayNav && (
-				<NavButton aria-label={ isNext ? 'Next Page' : 'Previous Page' } onClick={ handleClick }>
-					{ isNext && ( <IconNext /> ) }
-					{ ! isNext && ( <IconPrev /> ) }
-				</NavButton>
-			) }
+			<NavButton disabled={ ! displayNav } displayNav={ displayNav } aria-label={ isNext ? 'Next Page' : 'Previous Page' } onClick={ handleClick }>
+				{ isNext ? <IconNext /> : <IconPrev /> }
+			</NavButton>
 		</Wrapper>
 	);
 }
