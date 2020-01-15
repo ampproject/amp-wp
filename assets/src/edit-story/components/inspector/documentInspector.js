@@ -23,7 +23,7 @@ const ButtonCSS = css`
 	width: 100%;
 	padding: 15px;
 	background: none;
-	margin: 0px 0px 5px;
+	margin: 5px 0px;
 `;
 const Img = styled.img`
 	width: 100%;
@@ -48,7 +48,7 @@ function DocumentInspector() {
 	} = useInspector();
 
 	const {
-		state: { meta: { isSaving }, story: { author, status, slug, date, excerpt, featuredMediaUrl }, capabilities },
+		state: { meta: { isSaving }, story: { author, status, slug, date, excerpt, featuredMediaUrl, password }, capabilities },
 		actions: { updateStory, deleteStory },
 	} = useStory();
 
@@ -71,6 +71,11 @@ function DocumentInspector() {
 
 	const handleChangeAuthor = useCallback(
 		( evt ) => updateStory( { properties: { author: evt.target.value } } ),
+		[ updateStory ],
+	);
+
+	const handleChangePassword = useCallback(
+		( value, evt ) => updateStory( { properties: { password: evt.target.value } } ),
 		[ updateStory ],
 	);
 
@@ -122,6 +127,14 @@ function DocumentInspector() {
 				value={ status }
 				onChange={ handleChangeStatus }
 			/> }
+			{ capabilities && capabilities.hasPublishAction && status !== 'private' && <InputGroup
+				label={ 'Password' }
+				type={ 'password' }
+				value={ password }
+				disabled={ isSaving }
+				onChange={ handleChangePassword }
+			/> }
+
 			<RemoveButton onClick={ handleRemoveStory } dangerouslySetInnerHTML={ { __html: 'Move to trash' } } />
 			<InputGroup
 				label={ 'Published date' }

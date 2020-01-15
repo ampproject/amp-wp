@@ -25,7 +25,7 @@ const Group = styled.label`
 	color: ${ ( { theme } ) => theme.colors.mg.v1 };
 	display: block;
 	align-items: center;
-	margin-bottom: 5px;
+	margin-bottom: 10px;
 	opacity: ${ ( { disabled } ) => disabled ? 0.7 : 1 };
 `;
 

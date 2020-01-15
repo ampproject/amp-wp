@@ -42,6 +42,7 @@ function useLoadStory( {
 					story_data: storyData,
 					featured_media: featuredMedia,
 					featured_media_url: featuredMediaUrl,
+					password,
 				} = post;
 
 				const statusFormat = ( status === 'auto-draft' ) ? 'draft' : status;
@@ -61,6 +62,7 @@ function useLoadStory( {
 					link,
 					featuredMedia,
 					featuredMediaUrl,
+					password,
 				};
 
 				// If there are no pages, create empty page.
