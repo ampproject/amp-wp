@@ -92,6 +92,8 @@ final class Document extends DOMDocument {
 	const HTML_SECURE_DOCTYPE_IF_NOT_FIRST_PATTERN = '/(^[^<]*(?:\s*<!--[^>]*>\s*)+<)(!)(doctype)(\s+[^>]+?)(>)/i';
 	const HTML_RESTORE_DOCTYPE_PATTERN             = '/(^[^<]*(?:\s*<!--[^>]*>\s*)+<)(!--amp-)(doctype)(\s+[^>]+?)(-->)/i';
 
+	// Regex pattern used for removing Internet Explorer conditional comments.
+	const HTML_IE_CONDITIONAL_COMMENTS_PATTERN = '/<!--(?:\[if\s|<!\[endif)(?:[^>]+(?<!--)>)*(?:[^>]+(?<=--)>)/i';
 	/**
 	 * Xpath query to fetch the attributes that are being URL-encoded by saveHTML().
 	 *
@@ -455,6 +457,9 @@ final class Document extends DOMDocument {
 		$matches    = [];
 		$doctype    = '<!DOCTYPE html>';
 		$html_start = '<html>';
+
+		// Strip IE conditional comments, which are supported by IE 5-9 only (which AMP doesn't support).
+		$content = preg_replace( self::HTML_IE_CONDITIONAL_COMMENTS_PATTERN, '', $content );
 
 		// Detect and strip <!doctype> tags.
 		if ( preg_match( self::HTML_STRUCTURE_DOCTYPE_PATTERN, $content, $matches ) ) {
