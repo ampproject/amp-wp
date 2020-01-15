@@ -6,17 +6,21 @@ import styled from 'styled-components';
 /**
  * Internal dependencies
  */
-import { useStory } from '../../../app';
-import Switch from '../../switch';
+import { useStory } from '../../app';
+import { createPage } from '../../elements';
+import Switch from '../switch';
 import Delete from './delete.svg';
 import Duplicate from './duplicate.svg';
+import AddPage from './addpage.svg';
 
 const Box = styled.div`
+	background-color: ${ ( { theme } ) => theme.colors.bg.v1 };
 	display: flex;
 	align-items: flex-end;
 	justify-content: space-between;
 	height: 100%;
 	padding-bottom: 1em;
+	padding-right: 0.5em;
 `;
 
 const PageCount = styled.div`
@@ -50,7 +54,7 @@ const Icon = styled.a`
 `;
 
 function Canvas() {
-	const { state: { currentPageNumber, currentPageId }, actions: { deletePage } } = useStory();
+	const { state: { currentPageNumber, currentPageId }, actions: { addPage, deletePage } } = useStory();
 
 	return (
 		<Box>
@@ -68,6 +72,10 @@ function Canvas() {
 				<Space />
 				<Icon>
 					<Duplicate />
+				</Icon>
+				<Space />
+				<Icon onClick={ () => addPage( { page: createPage() } ) }>
+					<AddPage />
 				</Icon>
 			</Options>
 		</Box>

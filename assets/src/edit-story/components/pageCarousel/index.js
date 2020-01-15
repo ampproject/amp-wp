@@ -6,9 +6,10 @@ import styled from 'styled-components';
 /**
  * Internal dependencies
  */
-import { useStory } from '../../../app';
+import { useStory } from '../../app';
 
 const List = styled.nav`
+	background-color: ${ ( { theme } ) => theme.colors.bg.v1 };
 	display: flex;
 	flex-direction: row;
 	align-items: flex-start;
@@ -29,7 +30,7 @@ const Page = styled.a`
 	}
 `;
 
-function Canvas() {
+function PageCarousel() {
 	const { state: { pages, currentPageIndex }, actions: { setCurrentPage } } = useStory();
 	const handleClickPage = ( page ) => () => setCurrentPage( { pageId: page.id } );
 	return (
@@ -41,4 +42,4 @@ function Canvas() {
 	);
 }
 
-export default Canvas;
+export default PageCarousel;
