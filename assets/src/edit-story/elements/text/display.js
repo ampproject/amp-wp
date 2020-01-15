@@ -13,23 +13,19 @@ import { useRef, useEffect, useCallback, useState } from '@wordpress/element';
  * Internal dependencies
  */
 import getCaretCharacterOffsetWithin from '../../utils/getCaretCharacterOffsetWithin';
-import useCombinedRefs from '../../utils/useCombinedRefs';
-import { useStory } from '../../app';
+import { useStory, useFont } from '../../app';
 import { useCanvas } from '../../components/canvas';
 import {
-	ElementWithPosition,
-	ElementWithSize,
-	ElementWithRotation,
+	ElementFillContent,
 	ElementWithFont,
 	ElementWithBackgroundColor,
 	ElementWithFontColor,
 } from '../shared';
+import { generateFontFamily } from './util';
 
 const Element = styled.p`
 	margin: 0;
-	${ ElementWithPosition }
-	${ ElementWithSize }
-	${ ElementWithRotation }
+	${ ElementFillContent }
 	${ ElementWithFont }
 	${ ElementWithBackgroundColor }
 	${ ElementWithFontColor }
@@ -41,24 +37,25 @@ const Element = styled.p`
 	}
 `;
 
-function TextDisplay( { id, content, color, backgroundColor, width, height, x, y, fontFamily, fontSize, fontWeight, fontStyle, rotationAngle, forwardedRef, onPointerDown } ) {
+function TextDisplay( { id, content, color, backgroundColor, width, height, fontFamily, fontFallback, fontSize, fontWeight, fontStyle } ) {
 	const props = {
 		color,
 		backgroundColor,
-		fontFamily,
+		fontFamily: generateFontFamily( fontFamily, fontFallback ),
+		fontFallback,
 		fontStyle,
 		fontSize,
 		fontWeight,
 		width,
 		height,
-		x,
-		y,
-		rotationAngle,
-		onPointerDown,
 	};
 	const {
 		state: { selectedElementIds },
 	} = useStory();
+	const {
+		actions: { maybeEnqueueFontStyle },
+	} = useFont();
+
 	const {
 		actions: { setEditingElement, setEditingElementWithState },
 	} = useCanvas();
@@ -77,6 +74,11 @@ function TextDisplay( { id, content, color, backgroundColor, width, height, x, y
 		setHasFocus( false );
 		return undefined;
 	}, [ isElementOnlySelection ] );
+
+	useEffect( () => {
+		maybeEnqueueFontStyle( fontFamily );
+	}, [ fontFamily, maybeEnqueueFontStyle ] );
+
 	const clickTime = useRef();
 	const handleMouseDown = useCallback( () => {
 		clickTime.current = window.performance.now();
@@ -122,16 +124,16 @@ function TextDisplay( { id, content, color, backgroundColor, width, height, x, y
 	}
 
 	const element = useRef();
-	const setRef = useCombinedRefs( element, forwardedRef );
 	useEffect( () => {
 		if ( isElementOnlySelection && element.current ) {
 			element.current.focus();
 		}
 	}, [ isElementOnlySelection ] );
+
 	return (
 		<Element
 			canSelect={ hasFocus }
-			ref={ setRef }
+			ref={ element }
 			dangerouslySetInnerHTML={ { __html: content } }
 			{ ...props }
 		/>
@@ -144,20 +146,13 @@ TextDisplay.propTypes = {
 	color: PropTypes.string,
 	backgroundColor: PropTypes.string,
 	fontFamily: PropTypes.string,
-	fontSize: PropTypes.string,
-	fontWeight: PropTypes.string,
+	fontFallback: PropTypes.array,
+	fontSize: PropTypes.number,
+	fontWeight: PropTypes.number,
 	fontStyle: PropTypes.string,
 	width: PropTypes.number.isRequired,
 	height: PropTypes.number.isRequired,
-	rotationAngle: PropTypes.number.isRequired,
-	x: PropTypes.number.isRequired,
-	y: PropTypes.number.isRequired,
 	setClickHandler: PropTypes.func,
-	forwardedRef: PropTypes.oneOfType( [
-		PropTypes.object,
-		PropTypes.func,
-	] ),
-	onPointerDown: PropTypes.func,
 };
 
 export default TextDisplay;

@@ -7,11 +7,10 @@ import styled from 'styled-components';
  * Internal dependencies
  */
 import { CENTRAL_RIGHT_PADDING, PAGE_WIDTH, PAGE_HEIGHT } from '../../constants';
-import useCanvas from './useCanvas';
 import Page from './page';
 import Meta from './meta';
 import Carrousel from './carrousel';
-import AddPage from './addpage';
+import SelectionCanvas from './selectionCanvas';
 
 const Background = styled.div`
 	background-color: ${ ( { theme } ) => theme.colors.bg.v1 };
@@ -23,8 +22,9 @@ const Background = styled.div`
 
 	display: grid;
 	grid:
-    "meta  meta       meta     ." 1fr
-    ".     page       addpage  ." ${ PAGE_HEIGHT }px
+    ".     .          .        ." 1fr
+    ".     page       .        ." ${ PAGE_HEIGHT }px
+    ".     meta       .        ." 48px
     ".     carrousel  .        ." 1fr
     / 1fr ${ PAGE_WIDTH }px 1fr ${ CENTRAL_RIGHT_PADDING }px;
 `;
@@ -36,22 +36,20 @@ const Area = styled.div`
 `;
 
 function CanvasLayout() {
-	const { state: { backgroundClickHandler } } = useCanvas();
 	return (
-		<Background onClick={ backgroundClickHandler }>
-			<Area area="page">
-				<Page />
-			</Area>
-			<Area area="meta">
-				<Meta />
-			</Area>
-			<Area area="carrousel">
-				<Carrousel />
-			</Area>
-			<Area area="addpage">
-				<AddPage />
-			</Area>
-		</Background>
+		<SelectionCanvas>
+			<Background>
+				<Area area="page">
+					<Page />
+				</Area>
+				<Area area="meta">
+					<Meta />
+				</Area>
+				<Area area="carrousel">
+					<Carrousel />
+				</Area>
+			</Background>
+		</SelectionCanvas>
 	);
 }
 

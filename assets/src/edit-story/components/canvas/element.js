@@ -13,68 +13,71 @@ import { useLayoutEffect, useRef } from '@wordpress/element';
  * Internal dependencies
  */
 import { getDefinitionForType } from '../../elements';
+import { useStory } from '../../app';
+import { ElementWithPosition, ElementWithSize, ElementWithRotation, getBox } from '../../elements/shared';
+import useCanvas from './useCanvas';
 
-const Wrapper = styled.div``;
+const Wrapper = styled.div`
+	${ ElementWithPosition }
+	${ ElementWithSize }
+	${ ElementWithRotation }
+`;
 
 function Element( {
-	isEditing,
-	isSelected,
-	setNodeForElement,
-	handleSelectElement,
-	forwardedRef,
 	element: {
 		id,
 		type,
+		x,
+		y,
+		width,
+		height,
+		rotationAngle,
+		isFullbleed,
 		...rest
 	},
 } ) {
 	const { Display, Edit } = getDefinitionForType( type );
 	const element = useRef();
-	const props = { ...rest, id };
+
+	const {
+		state: { editingElement },
+		actions: { setNodeForElement, handleSelectElement },
+	} = useCanvas();
+
+	const {
+		state: { selectedElements },
+	} = useStory();
 
 	useLayoutEffect( () => {
 		setNodeForElement( id, element.current );
 	}, [ id, setNodeForElement ] );
 
-	// Are we editing this element, display this as Edit component.
-	if ( isEditing ) {
-		return (
-			<Wrapper
-				ref={ element }
-			>
-				<Edit { ...props } />
-			</Wrapper>
-		);
-	}
+	const isEditing = ( editingElement === id );
+	const isSelected = selectedElements.includes( id );
+
+	const box = getBox( { x, y, width, height, rotationAngle, isFullbleed } );
+	const props = { ...box, ...rest, id };
 
 	return (
 		<Wrapper
-			onClick={ ( evt ) => handleSelectElement( id, evt ) }
 			ref={ element }
+			{ ...box }
+			onMouseDown={ ( evt ) => {
+				if ( ! isSelected ) {
+					handleSelectElement( id, evt );
+				}
+				evt.stopPropagation();
+			} }
 		>
-			<Display
-				{ ...props }
-				onPointerDown={ ( evt ) => {
-					if ( ! isSelected ) {
-						handleSelectElement( id, evt );
-					}
-				} }
-				forwardedRef={ forwardedRef }
-			/>
+			{ isEditing ?
+				( <Edit { ...props } /> ) :
+				( <Display { ...props } /> ) }
 		</Wrapper>
 	);
 }
 
 Element.propTypes = {
-	isEditing: PropTypes.bool.isRequired,
-	isSelected: PropTypes.bool.isRequired,
-	setNodeForElement: PropTypes.func.isRequired,
-	handleSelectElement: PropTypes.func.isRequired,
 	element: PropTypes.object.isRequired,
-	forwardedRef: PropTypes.oneOfType( [
-		PropTypes.object,
-		PropTypes.func,
-	] ),
 };
 
 export default Element;

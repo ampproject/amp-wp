@@ -14,13 +14,11 @@ import { useCallback } from '@wordpress/element';
  */
 import { useCanvas } from '../../components/canvas';
 import useDoubleClick from '../../utils/useDoubleClick';
-import { ElementWithPosition, ElementWithSize, ElementWithRotation, getBox } from '../shared';
+import { ElementFillContent } from '../shared';
 import { getImgProps, ImageWithScale } from './util';
 
 const Element = styled.div`
-	${ ElementWithPosition }
-	${ ElementWithSize }
-	${ ElementWithRotation }
+	${ ElementFillContent }
 	overflow: hidden;
 `;
 
@@ -29,13 +27,8 @@ const Img = styled.img`
 	${ ImageWithScale }
 `;
 
-function ImageDisplay( { id, src, origRatio, width, height, x, y, scale, focalX, focalY, rotationAngle, isFullbleed, forwardedRef, onPointerDown } ) {
-	const elementProps = {
-		...getBox( { x, y, width, height, rotationAngle, isFullbleed } ),
-		ref: forwardedRef,
-		onPointerDown,
-	};
-	const imgProps = getImgProps( elementProps.width, elementProps.height, scale, focalX, focalY, origRatio );
+function ImageDisplay( { id, src, origRatio, width, height, scale, focalX, focalY } ) {
+	const imgProps = getImgProps( width, height, scale, focalX, focalY, origRatio );
 	const {
 		actions: { setEditingElement },
 	} = useCanvas();
@@ -43,7 +36,7 @@ function ImageDisplay( { id, src, origRatio, width, height, x, y, scale, focalX,
 	const handleDoubleClick = useCallback( () => setEditingElement( id ), [ id, setEditingElement ] );
 	const getHandleClick = useDoubleClick( handleSingleClick, handleDoubleClick );
 	return (
-		<Element { ...elementProps } onClick={ getHandleClick( id ) }>
+		<Element onClick={ getHandleClick( id ) }>
 			<Img draggable={ false } src={ src } { ...imgProps } />
 		</Element>
 	);
@@ -55,18 +48,9 @@ ImageDisplay.propTypes = {
 	origRatio: PropTypes.number.isRequired,
 	width: PropTypes.number.isRequired,
 	height: PropTypes.number.isRequired,
-	x: PropTypes.number.isRequired,
-	y: PropTypes.number.isRequired,
 	scale: PropTypes.number,
-	rotationAngle: PropTypes.number.isRequired,
-	isFullbleed: PropTypes.bool,
 	focalX: PropTypes.number,
 	focalY: PropTypes.number,
-	forwardedRef: PropTypes.oneOfType( [
-		PropTypes.object,
-		PropTypes.func,
-	] ),
-	onPointerDown: PropTypes.func,
 };
 
 ImageDisplay.defaultProps = {

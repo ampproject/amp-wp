@@ -44,3 +44,12 @@ export const getHandleKeyCommand = ( setEditorState ) => ( command, currentEdito
 	}
 	return 'not-handled';
 };
+
+export const generateFontFamily = ( fontFamily, fontFallback ) => {
+	let fontFamilyDisplay = fontFamily ? `${ fontFamily }` : null;
+	if ( fontFallback && fontFallback.length ) {
+		fontFamilyDisplay += fontFamily ? `,` : ``;
+		fontFamilyDisplay += `${ fontFallback.join( `,` ) }`;
+	}
+	return fontFamilyDisplay;
+};
