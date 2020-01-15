@@ -89,7 +89,7 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 				'
 					<amp-iframe src="https://example.com/video/132886713" height="123" width="auto" layout="fixed-height" sandbox="allow-scripts allow-same-origin">
 						<noscript>
-							<iframe src="https://example.com/video/132886713" height="123" width="100%"></iframe>
+							<iframe src="https://example.com/video/132886713" height="123" style="width:100%"></iframe>
 						</noscript>
 					</amp-iframe>
 				',
@@ -100,7 +100,7 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 				'
 					<amp-iframe src="https://example.com/video/132886713" layout="fill" sandbox="allow-scripts allow-same-origin">
 						<noscript>
-							<iframe src="https://example.com/video/132886713" width="100%" height="100%"></iframe>
+							<iframe src="https://example.com/video/132886713" style="width:100%;height:100%"></iframe>
 						</noscript>
 					</amp-iframe>
 				',

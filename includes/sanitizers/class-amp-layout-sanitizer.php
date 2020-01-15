@@ -20,6 +20,52 @@ class AMP_Layout_Sanitizer extends AMP_Base_Sanitizer {
 	public function sanitize() {
 		$xpath = new DOMXPath( $this->dom );
 
+		/*
+		 * Convert all percentage-based width or height values into style properties.
+		 *
+		 * The following query could be made simpler by using the `ends-with` function, but it is not a valid function in
+		 * XPath 1.0, which the `DOMXPath` class uses.
+		 */
+		$nodes = $xpath->query( '//*[ "%" = substring( @width, string-length( @width ) ) or "%" = substring( @height, string-length( @height ) ) ]' );
+
+		foreach ( $nodes as $node ) {
+			$width  = $node->getAttribute( 'width' );
+			$height = $node->getAttribute( 'height' );
+			$style  = $node->getAttribute( 'style' );
+
+			$styles         = $this->is_empty_attribute_value( $style ) ? [] : $this->parse_style_string( $style );
+			$attr_converted = false;
+
+			// Convert the percentage-based width attribute to a style property.
+			if ( ! isset( $styles['width'] ) && '%' === substr( $width, -1 ) ) {
+				// Ignore if its an AMP component and the width is `100%`.
+				if ( '100%' === $width && strpos( $node->tagName, 'amp-' ) === 0 ) {
+					continue;
+				}
+
+				$styles['width'] = $width;
+				$attr_converted  = true;
+				$node->removeAttribute( 'width' );
+			}
+
+			// Convert the percentage-based height attribute to a style property.
+			if ( ! isset( $styles['height'] ) && '%' === substr( $height, -1 ) ) {
+				// Ignore if its an AMP component and the height is `100%`.
+				if ( '100%' === $height && strpos( $node->tagName, 'amp-' ) === 0 ) {
+					continue;
+				}
+
+				$styles['height'] = $height;
+				$attr_converted   = true;
+				$node->removeAttribute( 'height' );
+			}
+
+			// If either dimension was converted, update the style property with it.
+			if ( $attr_converted ) {
+				$node->setAttribute( 'style', $this->reassemble_style_string( $styles ) );
+			}
+		}
+
 		/**
 		 * Sanitize AMP nodes to be AMP compatible. Elements with the `layout` attribute will be validated by
 		 * `AMP_Tag_And_Attribute_Sanitizer`.
