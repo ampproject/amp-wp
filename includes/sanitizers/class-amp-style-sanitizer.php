@@ -29,6 +29,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 	const STYLE_AMP_CUSTOM_SPEC_NAME    = 'style amp-custom';
 	const STYLE_AMP_KEYFRAMES_SPEC_NAME = 'style[amp-keyframes]';
+	const ORIGINAL_STYLE_ATTRIBUTE_NAME = 'data-amp-original-style';
 
 	const STYLE_AMP_CUSTOM_GROUP_INDEX    = 0;
 	const STYLE_AMP_KEYFRAMES_GROUP_INDEX = 1;
@@ -1406,7 +1407,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private function process_stylesheet( $stylesheet, $options = [] ) {
 		$parsed      = null;
 		$cache_key   = null;
-		$cache_group = 'amp-parsed-stylesheet-v22'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
+		$cache_group = 'amp-parsed-stylesheet-v23'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
 
 		$cache_impacting_options = array_merge(
 			wp_array_slice_assoc(
@@ -2461,8 +2462,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * Collects the CSS styles from within the HTML contained in this instance's Dom\Document.
 	 *
-	 * @see Retrieve array of styles using $this->get_styles() after calling this method.
-	 *
 	 * @since 0.4
 	 * @since 0.7 Modified to use element passed by XPath query.
 	 *
@@ -2476,7 +2475,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		$class = 'amp-wp-' . substr( md5( $style_attribute->nodeValue ), 0, 7 );
+		$value = $style_attribute->nodeValue;
+		$class = 'amp-wp-' . substr( md5( $value ), 0, 7 );
 		$root  = ':root' . str_repeat( ':not(#_)', self::INLINE_SPECIFICITY_MULTIPLIER );
 		$rule  = sprintf( '%s .%s { %s }', $root, $class, $style_attribute->nodeValue );
 
@@ -2492,6 +2492,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		);
 
 		$element->removeAttribute( 'style' );
+		$element->setAttribute( self::ORIGINAL_STYLE_ATTRIBUTE_NAME, $value );
 
 		if ( $processed['stylesheet'] ) {
 			$this->pending_stylesheets[] = [
@@ -2901,6 +2902,18 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				if ( $count > 0 ) {
 					$has_changed_selectors = true;
 				}
+			}
+
+			// Replace the somewhat-meta [style] attribute selectors with attribute selector using the data attribute the original styles are copied into.
+			$selector = preg_replace(
+				'/(?<=\[)style(?=([*$~]?=.*?)?])/is',
+				self::ORIGINAL_STYLE_ATTRIBUTE_NAME,
+				$selector,
+				-1,
+				$count
+			);
+			if ( $count > 0 ) {
+				$has_changed_selectors = true;
 			}
 
 			/*
