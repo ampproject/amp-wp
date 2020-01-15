@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import PropTypes from 'prop-types';
 
 /**
@@ -14,6 +14,7 @@ import { useCallback } from '@wordpress/element';
  */
 import { PAGE_NAV_BUTTON_WIDTH, PAGE_NAV_PADDING } from '../../../constants';
 import { useStory } from '../../../app';
+import { LeftArrow, RightArrow } from '../../button';
 
 const Wrapper = styled.div`
 	display: flex;
@@ -27,43 +28,6 @@ const Space = styled.div`
 	flex: 0 1 ${ ( { isNext } ) => isNext ? PAGE_NAV_PADDING : 0 }px;
 `;
 
-const NavButton = styled.button`
-	display: block;
-	background: transparent;
-	border: none;
-	width: ${ PAGE_NAV_BUTTON_WIDTH }px;
-	height: 40px;
-	visibility: ${ ( { displayNav } ) => displayNav ? 'visible' : 'hidden' };
-`;
-
-const IconStyle = css`
-	border: solid ${ ( { theme } ) => theme.colors.fg.v1 };
-	border-width: 0 1px 1px 0;
-	display: inline-block;
-	padding: 3px;
-	cursor: pointer;
-	opacity: .25;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	height: 25px;
-	width: 25px;
-	&:hover {
-		color: inherit;
-		opacity: 1;
-	}
-`;
-
-const IconNext = styled.i`
-	${ IconStyle }
-	transform: rotate(-45deg);
-`;
-
-const IconPrev = styled.i`
-	${ IconStyle }
-	transform: rotate(135deg);
-`;
-
 function PageNav( { isNext } ) {
 	const { state: { pages, currentPageIndex }, actions: { setCurrentPage } } = useStory();
 	const handleClick = useCallback( () => {
@@ -73,12 +37,18 @@ function PageNav( { isNext } ) {
 		}
 	}, [ setCurrentPage, currentPageIndex, isNext, pages ] );
 	const displayNav = ( isNext && currentPageIndex < pages.length - 1 ) || ( ! isNext && currentPageIndex > 0 );
+	const buttonProps = {
+		isDisabled: ! displayNav,
+		isHidden: ! displayNav,
+		'aria-label': isNext ? 'Next Page' : 'Previous Page',
+		onClick: handleClick,
+		width: PAGE_NAV_BUTTON_WIDTH,
+		height: 40,
+	};
 	return (
 		<Wrapper>
 			<Space isNext={ isNext } />
-			<NavButton disabled={ ! displayNav } displayNav={ displayNav } aria-label={ isNext ? 'Next Page' : 'Previous Page' } onClick={ handleClick }>
-				{ isNext ? <IconNext /> : <IconPrev /> }
-			</NavButton>
+			{ isNext ? <RightArrow { ...buttonProps } /> : <LeftArrow { ...buttonProps } /> }
 		</Wrapper>
 	);
 }
