@@ -36,6 +36,7 @@ const Area = styled.div`
 `;
 
 function CanvasLayout() {
+	// @todo SelectionCanvas should not be there, will be addressed separately.
 	return (
 		<Background>
 			<Area area="page">
