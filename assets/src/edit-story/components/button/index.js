@@ -44,6 +44,7 @@ const StyledButton = styled( Base )`
 	padding: 0;
 	width: ${ ( { width } ) => width }px;
 	height: ${ ( { height } ) => height }px;
+	min-width: initial;
 	visibility: ${ ( { isHidden } ) => isHidden ? 'hidden' : 'visible' };
 	opacity: .25;
 	color: ${ ( { theme } ) => theme.colors.fg.v1 };
