@@ -2,11 +2,12 @@
  * External dependencies
  */
 import styled from 'styled-components';
+import ResizeObserver from 'resize-observer-polyfill';
 
 /**
  * WordPress dependencies
  */
-import { useEffect, useRef, useState, createRef, useCallback } from '@wordpress/element';
+import { useLayoutEffect, useRef, useState, useCallback } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -41,7 +42,7 @@ const Area = styled.div`
 const List = styled( Area )`
 	flex-direction: row;
 	align-items: flex-start;
-	justify-content: ${ ( { hasHorizontalOverflow } ) => hasHorizontalOverflow ? 'space-between' : 'center' };
+	justify-content: ${ ( { hasHorizontalOverflow } ) => hasHorizontalOverflow ? 'flex-start' : 'center' };
 	height: 100%;
 	padding: 16px 0 24px;
 	overflow-x: ${ ( { hasHorizontalOverflow } ) => hasHorizontalOverflow ? 'scroll' : 'hidden' };
@@ -80,15 +81,9 @@ function Carousel() {
 	const { state: { pages, currentPageIndex, currentPageId }, actions: { setCurrentPage } } = useStory();
 	const [ hasHorizontalOverflow, setHasHorizontalOverflow ] = useState( false );
 	const listRef = useRef();
+	const pageRefs = useRef( [] );
 
-	const pageRefs = pages.reduce( ( acc, page ) => {
-		acc[ page.id ] = createRef();
-		return acc;
-	}, {} );
-
-	useEffect( () => {
-		const { ResizeObserver } = window;
-
+	useLayoutEffect( () => {
 		const observer = new ResizeObserver( ( entries ) => {
 			for ( const entry of entries ) {
 				const offsetWidth = entry.contentBoxSize ? entry.contentBoxSize.inlineSize : entry.contentRect.width;
@@ -96,38 +91,32 @@ function Carousel() {
 			}
 		} );
 
-		if ( listRef.current ) {
-			observer.observe( listRef.current );
-		}
+		observer.observe( listRef.current );
 
 		return () => {
 			observer.disconnect();
 		};
-	} );
+	}, [ pages.length ] );
 
-	useEffect( () => {
+	useLayoutEffect( () => {
 		if ( hasHorizontalOverflow ) {
-			const currentPageRef = pageRefs[ currentPageId ];
+			const currentPageRef = pageRefs.current[ currentPageId ];
 
-			if ( currentPageRef.current ) {
-				// TODO: Don't actually scroll vertically.
-				currentPageRef.current.scrollIntoView( {
-					inline: 'center',
-					behavior: 'smooth',
-				} );
-			}
+			// TODO: Don't actually scroll vertically / change focus.
+			currentPageRef.scrollIntoView( {
+				inline: 'center',
+				behavior: 'smooth',
+			} );
 		}
 	}, [ currentPageId, hasHorizontalOverflow, pageRefs ] );
 
 	const handleClickPage = ( page ) => () => setCurrentPage( { pageId: page.id } );
 
 	const scrollBy = useCallback( ( offset ) => {
-		if ( listRef.current ) {
-			listRef.current.scrollBy( {
-				left: offset,
-				behavior: 'smooth',
-			} );
-		}
+		listRef.current.scrollBy( {
+			left: offset,
+			behavior: 'smooth',
+		} );
 	}, [ listRef ] );
 
 	return (
@@ -145,7 +134,9 @@ function Carousel() {
 						key={ index }
 						onClick={ handleClickPage( page ) }
 						isActive={ index === currentPageIndex }
-						ref={ pageRefs[ page.id ] }
+						ref={ ( el ) => {
+							pageRefs.current[ page.id ] = el;
+						} }
 					/>
 				) ) }
 			</List>
