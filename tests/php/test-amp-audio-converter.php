@@ -169,11 +169,11 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 					</figure>
 
 					<!--[if lt IE 9]><script>document.createElement(\'audio\');</script><![endif]-->
-					<amp-audio class="wp-audio-shortcode amp-wp-199b6f0" id="audio-87-1" preload="none" controls="controls" width="auto">
+					<amp-audio class="wp-audio-shortcode amp-wp-199b6f0" id="audio-87-1" preload="none" controls="controls" width="auto" data-amp-original-style="width: 100%;">
 						<source type="audio/mpeg" src="https://wordpressdev.lndo.site/content/uploads/2019/02/do-you-know-I-am-batman.mp3?_=1">
 						<a href="https://wordpressdev.lndo.site/content/uploads/2019/02/do-you-know-I-am-batman.mp3" fallback="">https://wordpressdev.lndo.site/content/uploads/2019/02/do-you-know-I-am-batman.mp3</a>
 						<noscript>
-							<audio class="wp-audio-shortcode amp-wp-199b6f0" id="audio-87-1" preload="none" controls="controls">
+							<audio class="wp-audio-shortcode amp-wp-199b6f0" id="audio-87-1" preload="none" controls="controls" data-amp-original-style="width: 100%;">
 								<source type="audio/mpeg" src="https://wordpressdev.lndo.site/content/uploads/2019/02/do-you-know-I-am-batman.mp3?_=1">
 							</audio>
 						</noscript>

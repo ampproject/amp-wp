@@ -22,7 +22,7 @@ describe( 'Featured Image Notice', () => {
 	beforeEach( async () => {
 		await createNewPost( { postType: 'post' } );
 		await clickButton( 'Document' );
-		await clickButton( 'Featured Image' );
+		await clickButton( 'Featured image' );
 		await clickButton( 'Set featured image' );
 	} );
 
