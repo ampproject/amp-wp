@@ -17,7 +17,6 @@ function DropzoneProvider( { children } ) {
 	const [ dropZones, setDropZones ] = useState( [] );
 	const [ hoveredDropZone, setHoveredDropZone ] = useState( null );
 
-	// @todo Use callback.
 	const addDropZone = useCallback(
 		( dropZone ) => {
 			setDropZones( ( oldDropZones ) => ( [ ...oldDropZones, dropZone ] ) );
@@ -31,6 +30,10 @@ function DropzoneProvider( { children } ) {
 		return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
 	};
 
+	const resetHoverState = () => {
+		setHoveredDropZone( null );
+	};
+
 	const onDragOver = ( evt ) => {
 		evt.preventDefault();
 		// Get the hovered dropzone. // @todo Consider dropzone inside dropzone, will we need this?
@@ -38,7 +41,7 @@ function DropzoneProvider( { children } ) {
 
 		// If there was a dropzone before and nothing was found now, reset.
 		if ( hoveredDropZone && ! foundDropZones.length ) {
-			setHoveredDropZone( null );
+			resetHoverState();
 			return;
 		}
 		const foundDropZone = foundDropZones[ 0 ];
@@ -62,9 +65,11 @@ function DropzoneProvider( { children } ) {
 	const state = {
 		state: {
 			hoveredDropZone,
+			dropZones,
 		},
 		actions: {
 			addDropZone,
+			resetHoverState,
 		},
 	};
 	return (

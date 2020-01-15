@@ -14,25 +14,25 @@ import { useRef, useLayoutEffect } from '@wordpress/element';
  */
 import useDropZone from './useDropZone';
 
+// @todo Adjust the style, currently adding extra 4px.
 const DropZoneComponent = styled.div`
 	display: inherit;
+	${ ( { borderPosition, theme } ) => borderPosition && `
+		border-${ borderPosition }: 4px solid ${ theme.colors.action };
+	` }
 `;
 
 function DropZone( { children, onDrop } ) {
 	const dropZoneElement = useRef( null );
-	const { actions: { addDropZone }, state: { hoveredDropZone } } = useDropZone();
-
-	const isDropZoneActive = () => {
-		return dropZoneElement.current && hoveredDropZone && hoveredDropZone.ref === dropZoneElement.current;
-	};
+	const { actions: { addDropZone, resetHoverState }, state: { hoveredDropZone, dropZones } } = useDropZone();
 
 	useLayoutEffect( () => {
-		// @todo add only if already exists.
-		addDropZone( {
-			ref: dropZoneElement.current,
-		} );
-		// @todo Remove when doesn't exist anymore!
-	}, [] );
+		if ( ! dropZones.some( ( { ref } ) => ref === dropZoneElement.current ) ) {
+			addDropZone( {
+				ref: dropZoneElement.current,
+			} );
+		}
+	}, [ addDropZone, dropZones ] );
 
 	const getDragType = ( { dataTransfer } ) => {
 		if ( dataTransfer ) {
@@ -57,6 +57,7 @@ function DropZone( { children, onDrop } ) {
 	};
 
 	const onDropHandler = ( evt ) => {
+		resetHoverState();
 		if ( dropZoneElement.current ) {
 			const rect = dropZoneElement.current.getBoundingClientRect();
 			// Get the relative position of the dropping point based on the dropzone.
@@ -72,9 +73,10 @@ function DropZone( { children, onDrop } ) {
 		evt.preventDefault();
 	};
 
+	const isDropZoneActive = dropZoneElement.current && hoveredDropZone && hoveredDropZone.ref === dropZoneElement.current;
 	// @todo Add border/outline for active dropzone.
 	return (
-		<DropZoneComponent ref={ dropZoneElement } onDrop={ onDropHandler }>
+		<DropZoneComponent borderPosition={ isDropZoneActive ? hoveredDropZone.position.x : null } ref={ dropZoneElement } onDrop={ onDropHandler }>
 			{ children }
 		</DropZoneComponent>
 	);
