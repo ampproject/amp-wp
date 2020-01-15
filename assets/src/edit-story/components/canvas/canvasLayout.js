@@ -8,7 +8,7 @@ import styled from 'styled-components';
  */
 import { CENTRAL_RIGHT_PADDING, PAGE_WIDTH, PAGE_HEIGHT } from '../../constants';
 import Page from './page';
-import Meta from './meta';
+import PageMenu from './pagemenu';
 import Carrousel from './carrousel';
 import SelectionCanvas from './selectionCanvas';
 
@@ -24,7 +24,7 @@ const Background = styled.div`
 	grid:
     ".     .          .        ." 1fr
     ".     page       .        ." ${ PAGE_HEIGHT }px
-    ".     meta       .        ." 48px
+    ".     menu       .        ." 48px
     ".     carrousel  .        ." 1fr
     / 1fr ${ PAGE_WIDTH }px 1fr ${ CENTRAL_RIGHT_PADDING }px;
 `;
@@ -42,8 +42,8 @@ function CanvasLayout() {
 				<Area area="page">
 					<Page />
 				</Area>
-				<Area area="meta">
-					<Meta />
+				<Area area="menu">
+					<PageMenu />
 				</Area>
 				<Area area="carrousel">
 					<Carrousel />

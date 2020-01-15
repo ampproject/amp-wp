@@ -83,7 +83,7 @@ const Icon = styled.button`
 	}
 `;
 
-function Canvas() {
+function PageMenu() {
 	const { state: { canUndo, canRedo }, actions: { undo, redo } } = useHistory();
 	const { state: { currentPageNumber, currentPage }, actions: { deleteCurrentPage, addPage } } = useStory();
 
@@ -134,12 +134,12 @@ function Canvas() {
 					<Space />
 					<Divider />
 					<Space />
-					<Icon disabled={ ! canRedo } onClick={ handleRedo }>
-						<Redo />
-					</Icon>
-					<Space />
 					<Icon disabled={ ! canUndo } onClick={ handleUndo }>
 						<Undo />
+					</Icon>
+					<Space />
+					<Icon disabled={ ! canRedo } onClick={ handleRedo }>
+						<Redo />
 					</Icon>
 				</Options>
 				<Options>
@@ -156,4 +156,4 @@ function Canvas() {
 	);
 }
 
-export default Canvas;
+export default PageMenu;
