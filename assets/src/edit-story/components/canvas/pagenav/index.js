@@ -12,6 +12,7 @@ import { useCallback } from '@wordpress/element';
 /**
  * Internal dependencies
  */
+import { PAGE_NAV_BUTTON_WIDTH, PAGE_NAV_PADDING } from '../../../constants';
 import { useStory } from '../../../app';
 
 const Wrapper = styled.div`
@@ -23,14 +24,14 @@ const Wrapper = styled.div`
 `;
 
 const Space = styled.div`
-	flex: 0 1 ${ ( { isNext } ) => isNext ? 60 : 115 }px;
+	flex: 0 1 ${ ( { isNext } ) => isNext ? PAGE_NAV_PADDING : 0 }px;
 `;
 
 const NavButton = styled.button`
 	display: block;
 	background: transparent;
 	border: none;
-	width: 40px;
+	width: ${ PAGE_NAV_BUTTON_WIDTH }px;
 	height: 40px;
 	visibility: ${ ( { displayNav } ) => displayNav ? 'visible' : 'hidden' };
 `;
