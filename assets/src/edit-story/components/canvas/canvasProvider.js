@@ -13,6 +13,7 @@ import { useCallback, useEffect, useState } from '@wordpress/element';
  */
 import { useStory } from '../../app';
 import useEditingElement from './useEditingElement';
+import useCanvasSelectionCopyPaste from './useCanvasSelectionCopyPaste';
 import Context from './context';
 
 function CanvasProvider( { children } ) {
@@ -76,6 +77,8 @@ function CanvasProvider( { children } ) {
 			clearEditing();
 		}
 	}, [ editingElement, selectedElementIds, clearEditing ] );
+
+	useCanvasSelectionCopyPaste( pageContainer );
 
 	const state = {
 		state: {
