@@ -33,9 +33,6 @@ const NavButton = styled.button`
 	width: 40px;
 	height: 40px;
 	visibility: ${ ( { displayNav } ) => displayNav ? 'visible' : 'hidden' };
-	&:focus {
-		outline: 1px dotted -webkit-focus-ring-color
-	}
 `;
 
 const IconStyle = css`
@@ -48,7 +45,6 @@ const IconStyle = css`
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	color: inherit;
 	height: 25px;
 	width: 25px;
 	&:hover {
