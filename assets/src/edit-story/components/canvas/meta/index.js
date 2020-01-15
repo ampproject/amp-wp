@@ -13,7 +13,6 @@ import { useCallback } from '@wordpress/element';
  */
 import { useStory, useHistory } from '../../../app';
 import { createPage } from '../../../elements';
-import Switch from '../../switch';
 import Delete from './delete_icon.svg';
 import Duplicate from './duplicate_icon.svg';
 import Undo from './undo_icon.svg';
@@ -41,8 +40,10 @@ const Box = styled.div`
 
 const PageCount = styled.div`
 	color: ${ ( { theme } ) => theme.colors.fg.v1 };
-	width: 55px;
-	font-size: 15px;
+	width: 62px;
+	font-family: Roboto;
+	font-size: 16px;
+	line-height: 24px;
 `;
 
 const Options = styled.div`
@@ -59,7 +60,7 @@ const Divider = styled.span`
 `;
 
 const Space = styled.div`
-	width: 10px;
+	width: ${ ( { isDouble } ) => isDouble ? 20 : 10 }px;
 `;
 
 const Icon = styled.button`
@@ -145,7 +146,7 @@ function Canvas() {
 					<Icon disabled>
 						<Layout />
 					</Icon>
-					<Space />
+					<Space isDouble />
 					<Icon disabled>
 						<Text />
 					</Icon>
