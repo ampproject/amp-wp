@@ -49,9 +49,9 @@ function Title() {
 
 	// TODO Make sure that Auto Draft checks translations.
 	const titleFormatted = useCallback(
-		() => {
-			return ( [ 'auto-draft', 'draft', 'pending' ].includes( status ) && title === 'Auto Draft' ) ? '' : title;
-		}, [ status, title ],
+		( rawTitle ) => {
+			return ( rawTitle === 'Auto Draft' ) ? '' : rawTitle;
+		}, [],
 	);
 
 	if ( typeof title !== 'string' ) {
@@ -60,7 +60,7 @@ function Title() {
 
 	return (
 		<Input
-			value={ titleFormatted() }
+			value={ titleFormatted( title ) }
 			type={ 'text' }
 			onBlur={ handleBlur }
 			onChange={ handleChange }
