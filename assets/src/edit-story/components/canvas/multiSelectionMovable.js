@@ -72,6 +72,32 @@ function MultiSelectionMovable( { selectedElements, nodesById } ) {
 		}
 	};
 
+	const onGroupEventStart = ( { events, isDrag, isRotate } ) => {
+		events.forEach( ( ev, i ) => {
+			const sFrame = frames[ i ];
+			if ( isDrag ) {
+				ev.set( sFrame.translate );
+			} else if ( isRotate ) {
+				ev.set( sFrame.rotate );
+			}
+		} );
+	};
+
+	// Update elements once the event has ended.
+	const onGroupEventEnd = ( { targets, isRotate } ) => {
+		targets.forEach( ( target, i ) => {
+			const properties = {
+				x: targetList[ i ].x + frames[ i ].translate[ 0 ],
+				y: targetList[ i ].y + frames[ i ].translate[ 1 ],
+			};
+			if ( isRotate ) {
+				properties.rotationAngle = frames[ i ].rotate;
+			}
+			updateElementsById( { elementIds: [ targetList[ i ].id ], properties } );
+		} );
+		resetMoveable();
+	};
+
 	return (
 		<Movable
 			ref={ moveable }
@@ -91,24 +117,14 @@ function MultiSelectionMovable( { selectedElements, nodesById } ) {
 				} );
 			} }
 			onDragGroupStart={ ( { events } ) => {
-				events.forEach( ( ev, i ) => {
-					const sFrame = frames[ i ];
-					ev.set( sFrame.translate );
-				} );
+				onGroupEventStart( { events, isDrag: true } );
 			} }
 			onDragGroupEnd={ ( { targets } ) => {
-				targets.forEach( ( target, i ) => {
-					const properties = { x: targetList[ i ].x + frames[ i ].translate[ 0 ], y: targetList[ i ].y + frames[ i ].translate[ 1 ] };
-					updateElementsById( { elementIds: [ targetList[ i ].id ], properties } );
-				} );
-				resetMoveable();
+				onGroupEventEnd( { targets } );
 			} }
 
 			onRotateGroupStart={ ( { events } ) => {
-				events.forEach( ( ev, i ) => {
-					const sFrame = frames[ i ];
-					ev.set( sFrame.rotate );
-				} );
+				onGroupEventStart( { events, isRotate: true } );
 			} }
 			onRotateGroup={ ( { events } ) => {
 				events.forEach( ( { target, beforeRotate, drag }, i ) => {
@@ -119,16 +135,7 @@ function MultiSelectionMovable( { selectedElements, nodesById } ) {
 				} );
 			} }
 			onRotateGroupEnd={ ( { targets } ) => {
-				// Set together updated elements.
-				targets.forEach( ( target, i ) => {
-					const properties = {
-						x: targetList[ i ].x + frames[ i ].translate[ 0 ],
-						y: targetList[ i ].y + frames[ i ].translate[ 1 ],
-						rotationAngle: frames[ i ].rotate,
-					};
-					updateElementsById( { elementIds: [ targetList[ i ].id ], properties } );
-				} );
-				resetMoveable();
+				onGroupEventEnd( { targets, isRotate: true } );
 			} }
 		/>
 	);
