@@ -14,11 +14,19 @@ import { useRef, useLayoutEffect } from '@wordpress/element';
  */
 import useDropZone from './useDropZone';
 
-// @todo Adjust the style, currently adding extra 4px.
 const DropZoneComponent = styled.div`
 	display: inherit;
-	${ ( { borderPosition, theme } ) => borderPosition && `
-		border-${ borderPosition }: 4px solid ${ theme.colors.action };
+	position: relative;
+	${ ( { borderPosition, theme, highlightWidth } ) => borderPosition && `
+		:after {
+			height: 100%;
+			display: block;
+			position: absolute;
+			width: ${ highlightWidth }px;
+			background: ${ theme.colors.action };
+			content: '';
+			${ borderPosition }: -${ highlightWidth / 2 }px;
+		}
 	` }
 `;
 
@@ -74,9 +82,10 @@ function DropZone( { children, onDrop } ) {
 	};
 
 	const isDropZoneActive = dropZoneElement.current && hoveredDropZone && hoveredDropZone.ref === dropZoneElement.current;
-	// @todo Add border/outline for active dropzone.
+	// @todo Currently static, can be adjusted for other use cases.
+	const highlightWidth = 4;
 	return (
-		<DropZoneComponent borderPosition={ isDropZoneActive ? hoveredDropZone.position.x : null } ref={ dropZoneElement } onDrop={ onDropHandler }>
+		<DropZoneComponent highlightWidth={ highlightWidth } borderPosition={ isDropZoneActive ? hoveredDropZone.position.x : null } ref={ dropZoneElement } onDrop={ onDropHandler }>
 			{ children }
 		</DropZoneComponent>
 	);
