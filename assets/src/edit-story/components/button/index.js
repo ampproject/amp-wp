@@ -46,7 +46,7 @@ const StyledButton = styled( Base )`
 	height: ${ ( { height } ) => height }px;
 	min-width: initial;
 	visibility: ${ ( { isHidden } ) => isHidden ? 'hidden' : 'visible' };
-	opacity: .25;
+	opacity: .3;
 	color: ${ ( { theme } ) => theme.colors.fg.v1 };
 	&:focus, &:active, &:hover {
 		opacity: 1;
