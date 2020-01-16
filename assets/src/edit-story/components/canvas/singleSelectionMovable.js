@@ -13,6 +13,7 @@ import { useRef, useEffect, useState } from '@wordpress/element';
  */
 import { useStory } from '../../app';
 import Movable from '../movable';
+import { calculateFitTextFontSize } from '../../utils/calculateFitTextFontSize';
 
 const ALL_HANDLES = [ 'n', 's', 'e', 'w', 'nw', 'ne', 'sw', 'se' ];
 
@@ -129,6 +130,10 @@ function SingleSelectionMovable( {
 					x: selectedElement.x + frame.translate[ 0 ],
 					y: selectedElement.y + frame.translate[ 1 ],
 				};
+				// If it's a Text block and was resized from corners, update the font size, too.
+				if ( 'text' === selectedElement.type && selectedElement.content.length ) {
+					properties.fontSize = calculateFitTextFontSize( target.firstChild, properties.height, properties.width, 72, 16 );
+				}
 				updateSelectedElements( { properties } );
 				resetMoveable( target );
 			} }
