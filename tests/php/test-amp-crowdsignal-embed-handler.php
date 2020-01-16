@@ -117,7 +117,7 @@ class AMP_Crowdsignal_Embed_Handler_Test extends WP_UnitTestCase {
 	private function adapt_iframe_title( $html ) {
 		// Prior to 5.2, there was no 'title' attribute on an iframe.
 		if ( version_compare( get_bloginfo( 'version' ), '5.2', '<' ) ) {
-			$html = preg_replace( '/(<iframe.+)(\stitle=".+?")/', '${1}', $html );
+			$html = preg_replace( '/(<iframe.*)(\stitle=".+?")/', '${1}', $html );
 		}
 
 		return $html;
