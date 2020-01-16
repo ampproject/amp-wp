@@ -17,6 +17,7 @@ const theme = {
 			v3: '#242A3B',
 			v4: '#2F3449',
 			v5: '#575D65',
+			v6: '#1D222F',
 		},
 		mg: {
 			v1: '#616877',
@@ -35,8 +36,8 @@ const theme = {
 	fonts: {
 		display: {
 			family: 'Roboto',
-		}
-	}
+		},
+	},
 };
 
 export default theme;

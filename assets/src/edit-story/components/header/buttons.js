@@ -13,14 +13,19 @@ import { Spinner } from '@wordpress/components';
 /**
  * Internal dependencies
  */
-import { useHistory, useStory } from '../../app';
-import { Outline, Primary, Undo, Redo } from '../button';
+import { useStory } from '../../app';
+import { Outline, Primary } from '../button';
 
 const ButtonList = styled.nav`
 	display: flex;
+<<<<<<< HEAD
 	justify-content: space-between;
 	padding-top: 20px;
 	padding-right: 31px;
+=======
+	justify-content: flex-end;
+	padding: 1em;
+>>>>>>> 33d5bf55b0cec0d954337dd2874c5790d5ee1c3d
 	height: 100%;
 `;
 
@@ -31,20 +36,6 @@ const List = styled.div`
 const Space = styled.div`
 	width: 6px;
 `;
-
-function Undoer() {
-	const { state: { canUndo }, actions: { undo } } = useHistory();
-	return (
-		<Undo onClick={ undo } isDisabled={ ! canUndo } />
-	);
-}
-
-function Redoer() {
-	const { state: { canRedo }, actions: { redo } } = useHistory();
-	return (
-		<Redo onClick={ redo } isDisabled={ ! canRedo } />
-	);
-}
 
 function PreviewButton() {
 	const {
@@ -91,11 +82,6 @@ function Loading() {
 function Buttons() {
 	return (
 		<ButtonList>
-			<List>
-				<Undoer />
-				<Space />
-				<Redoer />
-			</List>
 			<List>
 				<Loading />
 				<PreviewButton />
