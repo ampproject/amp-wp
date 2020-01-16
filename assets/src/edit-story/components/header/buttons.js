@@ -17,10 +17,10 @@ import { useHistory, useStory } from '../../app';
 import { Outline, Primary, Undo, Redo } from '../button';
 
 const ButtonList = styled.nav`
-	background-color: ${ ( { theme } ) => theme.colors.bg.v3 };
 	display: flex;
 	justify-content: space-between;
-	padding: 1em;
+	padding-top: 20px;
+	padding-right: 31px;
 	height: 100%;
 `;
 
@@ -29,7 +29,7 @@ const List = styled.div`
 `;
 
 const Space = styled.div`
-	width: 1em;
+	width: 6px;
 `;
 
 function Undoer() {

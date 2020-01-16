@@ -32,6 +32,11 @@ const theme = {
 		danger: '#FF0000',
 		selection: '#44aaff',
 	},
+	fonts: {
+		display: {
+			family: 'Roboto',
+		}
+	}
 };
 
 export default theme;

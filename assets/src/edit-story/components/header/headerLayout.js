@@ -6,16 +6,14 @@ import styled from 'styled-components';
 /**
  * Internal dependencies
  */
-import { CENTRAL_RIGHT_PADDING, INSPECTOR_WIDTH } from '../../constants';
 import Buttons from './buttons';
 import Title from './title';
 
 const Background = styled.div`
-	background-color: ${ ( { theme } ) => theme.colors.bg.v3 };
 	display: grid;
 	grid:
     "header . buttons" 1fr
-    / 1fr ${ CENTRAL_RIGHT_PADDING }px ${ INSPECTOR_WIDTH }px;
+	/ 1fr;
 `;
 
 const Head = styled.header`
