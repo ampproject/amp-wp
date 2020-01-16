@@ -27,7 +27,7 @@ const Input = styled.input`
 
 function Title() {
 	const {
-		state: { story: { title, status, slug } },
+		state: { story: { title, slug } },
 		actions: { updateStory },
 	} = useStory();
 

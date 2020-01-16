@@ -31,21 +31,22 @@ function APIProvider( { children } ) {
 		/**
 		 * Fire REST API call to save story.
 		 *
-		 * @param {number}   storyId Story post id.
-		 * @param {string}   title Story title.
-		 * @param {string}   status Post status, draft or published.
-		 * @param {Array}    pages Array of all pages.
-		 * @param {number}   author User ID of story author.
-		 * @param {string}   slug   The slug of the story.
-		 * @param {string}   date   The publish date of the story.
-		 * @param {string}   modified   The modified date of the story.
-		 * @param {string}   content AMP HTML content.
-		 * @param {string}   excerpt Short description.
-		 * @param {number}   featuredMedia Featured image id.
-		 * @param {string}   password Password
+		 * @param {Object} 	 story - A story object.
+		 * @param {number}   story.storyId Story post id.
+		 * @param {string}   story.title Story title.
+		 * @param {string}   story.status Post status, draft or published.
+		 * @param {Array}    story.pages Array of all pages.
+		 * @param {number}   story.author User ID of story author.
+		 * @param {string}   story.slug   The slug of the story.
+		 * @param {string}   story.date   The publish date of the story.
+		 * @param {string}   story.modified   The modified date of the story.
+		 * @param {string}   story.content AMP HTML content.
+		 * @param {string}   story.excerpt Short description.
+		 * @param {number}   story.featuredMedia Featured image id.
+		 * @param {string}   story.password Password
 		 * @return {Promise} Return apiFetch promise.
 		 */
-		( { storyId, title, status, pages, author, slug, date, modified, content, excerpt, featuredMedia, password }) => {
+		( { storyId, title, status, pages, author, slug, date, modified, content, excerpt, featuredMedia, password } ) => {
 			return apiFetch( {
 				path: `${ stories }/${ storyId }`,
 				data: {
