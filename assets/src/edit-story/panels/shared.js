@@ -86,7 +86,7 @@ InputGroup.defaultProps = {
 	disabled: false,
 };
 
-function SelectMenu( { label, options, value, onChange, postfix, disabled } ) {
+function SelectMenu( { label, options, value, isMultiple, onChange, postfix, disabled } ) {
 	return (
 		<Group disabled={ disabled }>
 			<Label>
@@ -98,11 +98,10 @@ function SelectMenu( { label, options, value, onChange, postfix, disabled } ) {
 				onChange={ ( evt ) => onChange( evt.target.value, evt ) }
 				onBlur={ ( evt ) => evt.target.form.dispatchEvent( new window.Event( 'submit' ) ) }
 			>
-				{ options && options.map( ( { name, slug, thisValue } ) => (
-					<option key={ slug } value={ thisValue }>
-						{ name }
-					</option>
-				) ) }
+				{ isMultiple ? ( <option dangerouslySetInnerHTML={ { __html: '( multiple )' } } /> ) :
+					options && options.map( ( { name, slug, thisValue } ) => (
+						<option key={ slug } value={ thisValue } dangerouslySetInnerHTML={ { __html: name } } />
+					) ) }
 			</Select>
 			{ postfix }
 		</Group>
@@ -112,6 +111,7 @@ function SelectMenu( { label, options, value, onChange, postfix, disabled } ) {
 SelectMenu.propTypes = {
 	label: PropTypes.string.isRequired,
 	value: PropTypes.any.isRequired,
+	isMultiple: PropTypes.bool,
 	options: PropTypes.array.isRequired,
 	onChange: PropTypes.func.isRequired,
 	postfix: PropTypes.string,
@@ -121,6 +121,7 @@ SelectMenu.propTypes = {
 SelectMenu.defaultProps = {
 	postfix: '',
 	disabled: false,
+	isMultiple: false,
 };
 
 function getCommonValue( list, property ) {
