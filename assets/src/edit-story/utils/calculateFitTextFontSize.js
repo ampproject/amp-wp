@@ -1,4 +1,9 @@
 /**
+ * Internal dependencies
+ */
+import { MIN_FONT_SIZE, MAX_FONT_SIZE } from '../constants';
+
+/**
  * Calculates font size that fits to the text element based on the element's size.
  * Replicates amp-fit-text's logic in the editor.
  *
@@ -7,12 +12,13 @@
  * @param {Object} measurer       HTML element.
  * @param {number} expectedHeight Maximum height.
  * @param {number} expectedWidth  Maximum width.
- * @param {number} maxFontSize    Maximum font size.
- * @param {number} minFontSize    Minimum font size.
  *
  * @return {number|boolean} Calculated font size. False if calculation wasn't possible.
  */
-export const calculateFitTextFontSize = ( measurer, expectedHeight, expectedWidth, maxFontSize, minFontSize ) => {
+export const calculateFitTextFontSize = ( measurer, expectedHeight, expectedWidth ) => {
+	let maxFontSize = MAX_FONT_SIZE;
+	let minFontSize = MIN_FONT_SIZE;
+
 	// Return false if calculation is not possible due to width and height missing, e.g. in disabled preview.
 	if ( ! measurer.offsetHeight || ! measurer.offsetWidth ) {
 		return false;

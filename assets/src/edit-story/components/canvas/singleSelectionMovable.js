@@ -124,8 +124,7 @@ function SingleSelectionMovable( {
 				target.style.height = `${ height }px`;
 				frame.translate = drag.beforeTranslate;
 				if ( shouldAdjustFontSize ) {
-					// @todo Use correct max-min font sizes.
-					target.style.fontSize = calculateFitTextFontSize( target.firstChild, height, width, 72, 16 );
+					target.style.fontSize = calculateFitTextFontSize( target.firstChild, height, width );
 				}
 				setTransformStyle( target );
 			} }
@@ -137,8 +136,7 @@ function SingleSelectionMovable( {
 					y: selectedElement.y + frame.translate[ 1 ],
 				};
 				if ( shouldAdjustFontSize ) {
-					// @todo Use correct max-min font sizes.
-					properties.fontSize = calculateFitTextFontSize( target.firstChild, properties.height, properties.width, 72, 16 );
+					properties.fontSize = calculateFitTextFontSize( target.firstChild, properties.height, properties.width );
 				}
 				updateSelectedElements( { properties } );
 				resetMoveable( target );
