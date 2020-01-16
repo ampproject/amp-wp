@@ -80,6 +80,8 @@ function SingleSelectionMovable( {
 		}
 	};
 
+	const shouldAdjustFontSize = 'text' === selectedElement.type && selectedElement.content.length && keepRatioMode;
+
 	return (
 		<Movable
 			zIndex={ 0 }
@@ -121,6 +123,10 @@ function SingleSelectionMovable( {
 				target.style.width = `${ width }px`;
 				target.style.height = `${ height }px`;
 				frame.translate = drag.beforeTranslate;
+				if ( shouldAdjustFontSize ) {
+					// @todo Use correct max-min font sizes.
+					target.style.fontSize = calculateFitTextFontSize( target.firstChild, height, width, 72, 16 );
+				}
 				setTransformStyle( target );
 			} }
 			onResizeEnd={ ( { target } ) => {
@@ -130,8 +136,8 @@ function SingleSelectionMovable( {
 					x: selectedElement.x + frame.translate[ 0 ],
 					y: selectedElement.y + frame.translate[ 1 ],
 				};
-				// If it's a Text block and was resized from corners, update the font size, too.
-				if ( 'text' === selectedElement.type && selectedElement.content.length ) {
+				if ( shouldAdjustFontSize ) {
+					// @todo Use correct max-min font sizes.
 					properties.fontSize = calculateFitTextFontSize( target.firstChild, properties.height, properties.width, 72, 16 );
 				}
 				updateSelectedElements( { properties } );

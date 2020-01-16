@@ -17,12 +17,13 @@ export const calculateFitTextFontSize = ( measurer, expectedHeight, expectedWidt
 	if ( ! measurer.offsetHeight || ! measurer.offsetWidth ) {
 		return false;
 	}
+	// @todo Alternatively we could assign a class add CSS for that class.
+	// @todo Use isMeasuring state perhaps instead which could influence the CSS directly in the Text block's display.
 	// Add necessary styles for measuring:
 	measurer.style.display = 'inline-block';
 	measurer.style.height = 'initial';
 	measurer.style.width = 'initial';
 	measurer.style.position = 'absolute';
-	//measurer.classList.toggle( 'is-measuring' );
 
 	maxFontSize++;
 
@@ -41,12 +42,11 @@ export const calculateFitTextFontSize = ( measurer, expectedHeight, expectedWidt
 
 	// Let's restore the correct font size, too.
 	measurer.style.fontSize = minFontSize + 'px';
+	// Restore style values. @todo Get style from the original element instead of just emptying.
 	measurer.style.display = '';
 	measurer.style.height = '';
 	measurer.style.width = '';
 	measurer.style.position = '';
-
-	//measurer.classList.toggle( 'is-measuring' );
 
 	return minFontSize;
 };
