@@ -26,6 +26,7 @@ function TextSave( { id, content, color, backgroundColor, width, height, x, y, f
 		fontWeight: fontWeight ? fontWeight : null,
 		background: backgroundColor,
 		color,
+		lineHeight: 1.3,
 	};
 
 	return (
