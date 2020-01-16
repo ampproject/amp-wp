@@ -18,7 +18,7 @@ function restore( state, { pages, current, selection, story, capabilities } ) {
 	}
 
 	const newStory = typeof story === 'object' ? story : {};
-	const newCapabilities = typeof story === 'object' ? capabilities : {};
+	const newCapabilities = typeof capabilities === 'object' ? capabilities : {};
 	const newCurrent = pages.some( ( { id } ) => id === current ) ? current : pages[ 0 ].id;
 	const newSelection = Array.isArray( selection ) ? [ ...new Set( selection ) ] : [];
 
