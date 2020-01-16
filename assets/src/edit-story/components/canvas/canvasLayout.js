@@ -6,9 +6,10 @@ import styled from 'styled-components';
 /**
  * Internal dependencies
  */
-import { CENTRAL_RIGHT_PADDING, PAGE_WIDTH, PAGE_HEIGHT } from '../../constants';
+import { CENTRAL_RIGHT_PADDING, LEFT_NAV_WIDTH, PAGE_WIDTH, PAGE_HEIGHT, PAGE_NAV_PADDING } from '../../constants';
 import Page from './page';
 import Meta from './meta';
+import PageNav from './pagenav';
 import Carrousel from './carrousel';
 import AddPage from './addpage';
 import SelectionCanvas from './selectionCanvas';
@@ -23,10 +24,10 @@ const Background = styled.div`
 
 	display: grid;
 	grid:
-    ".   meta       .        ." 1fr
-    ".   page       addpage  ." ${ PAGE_HEIGHT }px
-    ".   carrousel  .        ." 1fr
-    / 1fr ${ PAGE_WIDTH }px 1fr ${ CENTRAL_RIGHT_PADDING }px;
+    ".    .      meta       . .        ." 1fr
+    ".    prev   page       . next     ." ${ PAGE_HEIGHT }px
+    ".    .      carrousel  . addpage  ." 1fr
+    / 1fr ${ LEFT_NAV_WIDTH }px ${ PAGE_WIDTH }px ${ PAGE_NAV_PADDING }px 1fr ${ CENTRAL_RIGHT_PADDING }px;
 `;
 
 const Area = styled.div`
@@ -41,6 +42,12 @@ function CanvasLayout() {
 			<Background>
 				<Area area="page">
 					<Page />
+				</Area>
+				<Area area="prev">
+					<PageNav isNext={ false } />
+				</Area>
+				<Area area="next">
+					<PageNav />
 				</Area>
 				<Area area="meta">
 					<Meta />
