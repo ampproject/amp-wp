@@ -48,6 +48,9 @@ export const calculateFitTextFontSize = ( measurer, expectedHeight, expectedWidt
 	// Add necessary styles for measuring:
 	setStyle( measuringStyle );
 
+	// Add 1px extra room for font size for preventing flickering.
+	// @todo Is there a better way?
+	expectedWidth++;
 	maxFontSize++;
 
 	// Binomial search for the best font size.
