@@ -49,6 +49,7 @@ function FontPanel( { selectedElements, onSetProperties } ) {
 				label="Font family"
 				options={ fonts }
 				value={ state.fontFamily }
+				isMultiple={ fontFamily === '' }
 				onChange={ ( value ) => {
 					const currentFontWeights = getFontWeight( value );
 					const currentFontFallback = getFontFallback( value );
@@ -60,6 +61,7 @@ function FontPanel( { selectedElements, onSetProperties } ) {
 			<SelectMenu
 				label="Font style"
 				options={ fontStyles }
+				isMultiple={ fontStyle === '' }
 				value={ state.fontStyle }
 				onChange={ ( value ) => setState( { ...state, fontStyle: value } ) }
 			/>
@@ -67,6 +69,7 @@ function FontPanel( { selectedElements, onSetProperties } ) {
 				label="Font weight"
 				options={ state.fontWeights }
 				value={ state.fontWeight }
+				isMultiple={ fontWeight === '' }
 				onChange={ ( value ) => setState( { ...state, fontWeight: parseInt( value ) } ) }
 			/> }
 			<InputGroup
