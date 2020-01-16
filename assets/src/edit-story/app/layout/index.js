@@ -11,7 +11,7 @@ import Header from '../../components/header';
 import Inspector from '../../components/inspector';
 import Library from '../../components/library';
 import Canvas from '../../components/canvas';
-import DropzoneProvider from '../../components/dropzone/dropzoneProvider';
+import DropZoneProvider from '../../components/dropzone/dropZoneProvider';
 import { LIBRARY_WIDTH, INSPECTOR_WIDTH, HEADER_HEIGHT } from '../../constants';
 
 const Editor = styled.div`
@@ -45,9 +45,9 @@ function Layout() {
 				<Library />
 			</Area>
 			<Area area="canv">
-				<DropzoneProvider>
+				<DropZoneProvider>
 					<Canvas />
-				</DropzoneProvider>
+				</DropZoneProvider>
 			</Area>
 			<Area area="insp">
 				<Inspector />

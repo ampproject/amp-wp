@@ -13,7 +13,7 @@ import { useCallback, useState } from '@wordpress/element';
  */
 import Context from './context';
 
-function DropzoneProvider( { children } ) {
+function DropZoneProvider( { children } ) {
 	const [ dropZones, setDropZones ] = useState( [] );
 	const [ hoveredDropZone, setHoveredDropZone ] = useState( null );
 
@@ -81,11 +81,11 @@ function DropzoneProvider( { children } ) {
 	);
 }
 
-DropzoneProvider.propTypes = {
+DropZoneProvider.propTypes = {
 	children: PropTypes.oneOfType( [
 		PropTypes.arrayOf( PropTypes.node ),
 		PropTypes.node,
 	] ).isRequired,
 };
 
-export default DropzoneProvider;
+export default DropZoneProvider;
