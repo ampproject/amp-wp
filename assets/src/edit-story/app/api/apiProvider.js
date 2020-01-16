@@ -45,7 +45,7 @@ function APIProvider( { children } ) {
 		 * @param {string}   password Password
 		 * @return {Promise} Return apiFetch promise.
 		 */
-		( storyId, title, status, pages, author, slug, date, modified, content, excerpt, featuredMedia, password ) => {
+		( { storyId, title, status, pages, author, slug, date, modified, content, excerpt, featuredMedia, password }) => {
 			return apiFetch( {
 				path: `${ stories }/${ storyId }`,
 				data: {
