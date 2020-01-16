@@ -6,9 +6,11 @@
  */
 
 /**
- * Class AMP_Gfycat_Embed_Test
+ * Class AMP_Gfycat_Embed_Handler_Test
+ *
+ * @covers AMP_Gfycat_Embed_Handler
  */
-class AMP_Gfycat_Embed_Test extends WP_UnitTestCase {
+class AMP_Gfycat_Embed_Handler_Test extends WP_UnitTestCase {
 
 	/**
 	 * Set up.
@@ -23,10 +25,14 @@ class AMP_Gfycat_Embed_Test extends WP_UnitTestCase {
 		add_filter(
 			'pre_oembed_result',
 			static function( $pre, $url ) {
+				if ( in_array( 'external-http', $_SERVER['argv'], true ) ) {
+					return $pre;
+				}
+
 				if ( false === strpos( $url, 'tautwhoppingcougar' ) ) {
 					return $pre;
 				}
-				return '<iframe src=\'https://gfycat.com/ifr/tautwhoppingcougar\' frameborder=\'0\' scrolling=\'no\' width=\'500\' height=\'281.25\'  allowfullscreen></iframe>';
+				return '<iframe src=\'https://gfycat.com/ifr/tautwhoppingcougar\' frameborder=\'0\' scrolling=\'no\' width=\'100\' height=\'100\'  allowfullscreen></iframe>';
 			},
 			10,
 			2
@@ -57,17 +63,17 @@ class AMP_Gfycat_Embed_Test extends WP_UnitTestCase {
 
 			'url_simple'      => [
 				'https://gfycat.com/tautwhoppingcougar' . PHP_EOL,
-				'<p><amp-gfycat width="500" height="281" data-gfyid="tautwhoppingcougar"></amp-gfycat></p>' . PHP_EOL,
+				'<p><amp-gfycat width="100" height="100" data-gfyid="tautwhoppingcougar"></amp-gfycat></p>' . PHP_EOL,
 			],
 
 			'url_with_detail' => [
 				'https://gfycat.com/gifs/detail/tautwhoppingcougar' . PHP_EOL,
-				'<p><amp-gfycat width="500" height="281" data-gfyid="tautwhoppingcougar"></amp-gfycat></p>' . PHP_EOL,
+				'<p><amp-gfycat width="100" height="100" data-gfyid="tautwhoppingcougar"></amp-gfycat></p>' . PHP_EOL,
 			],
 
 			'url_with_params' => [
 				'https://gfycat.com/gifs/detail/tautwhoppingcougar?foo=bar' . PHP_EOL,
-				'<p><amp-gfycat width="500" height="281" data-gfyid="tautwhoppingcougar"></amp-gfycat></p>' . PHP_EOL,
+				'<p><amp-gfycat width="100" height="100" data-gfyid="tautwhoppingcougar"></amp-gfycat></p>' . PHP_EOL,
 			],
 
 		];

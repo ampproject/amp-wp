@@ -6,9 +6,9 @@
  */
 
 /**
- * Class AMP_Imgur_Embed_Test
+ * Class AMP_Imgur_Embed_Handler_Test
  */
-class AMP_Imgur_Embed_Test extends WP_UnitTestCase {
+class AMP_Imgur_Embed_Handler_Test extends WP_UnitTestCase {
 
 	/**
 	 * Set up.
@@ -23,11 +23,20 @@ class AMP_Imgur_Embed_Test extends WP_UnitTestCase {
 		add_filter(
 			'pre_http_request',
 			static function( $pre, $r, $url ) {
-				if ( false === strpos( $url, 'f462IUj' ) ) {
+				if ( in_array( 'external-http', $_SERVER['argv'], true ) ) {
 					return $pre;
 				}
+
+				if ( true === strpos( $url, 'fmHGADZ' ) ) {
+					$body = '<blockquote class="imgur-embed-pub" lang="en" data-id="fmHGADZ"><a href="https://imgur.com/fmHGADZ">View post on imgur.com</a></blockquote><script async src="//s.imgur.com/min/embed.js" charset="utf-8"></script>'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+				} elseif ( true === strpos( $url, '1ApvcWB' ) ) {
+					$body = '<blockquote class="imgur-embed-pub" lang="en" data-id="a/1ApvcWB"><a href="https://imgur.com/a/1ApvcWB">Oops, all baby yoda</a></blockquote><script async src="//s.imgur.com/min/embed.js" charset="utf-8"></script>'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+				} else {
+					return $pre;
+				}
+
 				return [
-					'body'     => '{"version":"1.0","type":"rich","provider_name":"Imgur","provider_url":"https:\\/\\/imgur.com","width":500,"height":750,"html":"<blockquote class=\\"imgur-embed-pub\\" lang=\\"en\\" data-id=\\"f462IUj\\"><a href=\\"https:\\/\\/imgur.com\\/f462IUj\\">Getting that beach body ready<\\/a><\\/blockquote><script async src=\\"\\/\\/s.imgur.com\\/min\\/embed.js\\" charset=\\"utf-8\\"><\\/script>"}', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine
+					'body'     => $body,
 					'response' => [
 						'code'    => 200,
 						'message' => 'OK',
@@ -69,18 +78,18 @@ class AMP_Imgur_Embed_Test extends WP_UnitTestCase {
 			],
 
 			'url_simple'      => [
-				'https://imgur.com/f462IUj' . PHP_EOL,
-				'<p><amp-imgur width="' . $width . '" height="' . $height . '" data-imgur-id="f462IUj"></amp-imgur></p>' . PHP_EOL,
+				'https://imgur.com/fmHGADZ' . PHP_EOL,
+				'<p><amp-imgur width="' . $width . '" height="' . $height . '" data-imgur-id="fmHGADZ"></amp-imgur></p>' . PHP_EOL,
 			],
 
 			'url_with_detail' => [
-				'https://imgur.com/gallery/f462IUj' . PHP_EOL,
-				'<p><amp-imgur width="' . $width . '" height="' . $height . '" data-imgur-id="f462IUj"></amp-imgur></p>' . PHP_EOL,
+				'https://imgur.com/gallery/1ApvcWB' . PHP_EOL,
+				'<p><amp-imgur width="' . $width . '" height="' . $height . '" data-imgur-id="1ApvcWB"></amp-imgur></p>' . PHP_EOL,
 			],
 
 			'url_with_params' => [
-				'https://imgur.com/gallery/f462IUj?foo=bar' . PHP_EOL,
-				'<p><amp-imgur width="' . $width . '" height="' . $height . '" data-imgur-id="f462IUj"></amp-imgur></p>' . PHP_EOL,
+				'https://imgur.com/gallery/1ApvcWB?foo=bar' . PHP_EOL,
+				'<p><amp-imgur width="' . $width . '" height="' . $height . '" data-imgur-id="1ApvcWB"></amp-imgur></p>' . PHP_EOL,
 			],
 
 		];
@@ -113,7 +122,7 @@ class AMP_Imgur_Embed_Test extends WP_UnitTestCase {
 				[],
 			],
 			'converted'     => [
-				'https://www.imgur.com/gallery/f462IUj' . PHP_EOL,
+				'https://www.imgur.com/gallery/1ApvcWB' . PHP_EOL,
 				[ 'amp-imgur' => true ],
 			],
 		];

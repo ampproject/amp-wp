@@ -6,11 +6,11 @@
  */
 
 /**
- * Class AMP_SoundCloud_Embed_Test
+ * Class AMP_SoundCloud_Embed_Handler_Test
  *
  * @covers AMP_SoundCloud_Embed_Handler
  */
-class AMP_SoundCloud_Embed_Test extends WP_UnitTestCase {
+class AMP_SoundCloud_Embed_Handler_Test extends WP_UnitTestCase {
 
 	/**
 	 * Track URL.
@@ -81,6 +81,10 @@ class AMP_SoundCloud_Embed_Test extends WP_UnitTestCase {
 	 * @return array Response data.
 	 */
 	public function mock_http_request( $preempt, $r, $url ) {
+		if ( in_array( 'external-http', $_SERVER['argv'], true ) ) {
+			return $preempt;
+		}
+
 		if ( false === strpos( $url, 'soundcloud.com' ) ) {
 			return $preempt;
 		}
