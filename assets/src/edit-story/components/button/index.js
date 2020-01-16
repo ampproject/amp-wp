@@ -8,6 +8,8 @@ import styled from 'styled-components';
  */
 import UndoIcon from './icon_undo.svg';
 import RedoIcon from './icon_redo.svg';
+import LeftArrowIcon from './icon_left_arrow.svg';
+import RightArrowIcon from './icon_right_arrow.svg';
 
 const Base = styled.button.attrs(
 	( { isDisabled } ) => ( { disabled: isDisabled } ),
@@ -37,6 +39,24 @@ const Base = styled.button.attrs(
 	` }
 `;
 
+const StyledButton = styled( Base )`
+	border: none;
+	padding: 0;
+	width: ${ ( { width } ) => width }px;
+	height: ${ ( { height } ) => height }px;
+	min-width: initial;
+	visibility: ${ ( { isHidden } ) => isHidden ? 'hidden' : 'visible' };
+	opacity: .3;
+	color: ${ ( { theme } ) => theme.colors.fg.v1 };
+	&:focus, &:active, &:hover {
+		opacity: 1;
+	}
+	svg {
+		width: ${ ( { width } ) => width }px;
+		height: ${ ( { height } ) => height }px;
+	}
+`;
+
 export const Primary = styled( Base )`
 	border-color: ${ ( { theme } ) => theme.colors.action };
 	background-color: ${ ( { theme } ) => theme.colors.action };
@@ -53,6 +73,18 @@ export const Outline = styled( Base )`
 	border-color: ${ ( { theme } ) => theme.colors.fg.v2 };
 	color: ${ ( { theme } ) => theme.colors.fg.v1 };
 `;
+
+export const LeftArrow = ( props ) => (
+	<StyledButton { ...props }>
+		<LeftArrowIcon />
+	</StyledButton>
+);
+
+export const RightArrow = ( props ) => (
+	<StyledButton { ...props }>
+		<RightArrowIcon />
+	</StyledButton>
+);
 
 export const Undo = ( props ) => (
 	<Outline isIcon { ...props }>
