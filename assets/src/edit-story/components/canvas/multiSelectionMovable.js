@@ -30,7 +30,7 @@ function MultiSelectionMovable( { selectedElements, nodesById } ) {
 	// Create targets list including nodes and also necessary attributes.
 	const targetList = selectedElements.map( ( element ) => {
 		return {
-			ref: nodesById[ element.id ],
+			node: nodesById[ element.id ],
 			id: element.id,
 			x: element.x,
 			y: element.y,
@@ -38,7 +38,7 @@ function MultiSelectionMovable( { selectedElements, nodesById } ) {
 		};
 	} );
 	// Not all targets have been defined yet.
-	if ( targetList.some( ( { ref } ) => ref === undefined ) ) {
+	if ( targetList.some( ( { node } ) => node === undefined ) ) {
 		return null;
 	}
 
@@ -61,11 +61,11 @@ function MultiSelectionMovable( { selectedElements, nodesById } ) {
 	 * Resets Movable once the action is done, sets the initial values.
 	 */
 	const resetMoveable = () => {
-		targetList.forEach( ( { ref }, i ) => {
+		targetList.forEach( ( { node }, i ) => {
 			frames[ i ].translate = [ 0, 0 ];
-			ref.style.transform = '';
-			ref.style.width = '';
-			ref.style.height = '';
+			node.style.transform = '';
+			node.style.width = '';
+			node.style.height = '';
 		} );
 		if ( moveable.current ) {
 			moveable.current.updateRect();
@@ -102,7 +102,7 @@ function MultiSelectionMovable( { selectedElements, nodesById } ) {
 		<Movable
 			ref={ moveable }
 			zIndex={ 0 }
-			target={ targetList.map( ( { ref } ) => ref ) }
+			target={ targetList.map( ( { node } ) => node ) }
 
 			// @todo: implement group resizing.
 			draggable={ true }
