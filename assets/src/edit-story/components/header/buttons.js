@@ -79,7 +79,7 @@ function Publish() {
 			text = __( 'Update' );
 			break;
 		case 'future':
-			text = __( 'Sceduled' );
+			text = __( 'Scheduled' );
 			break;
 		default:
 			text = __( 'Save draft' );
@@ -120,4 +120,3 @@ function Buttons() {
 	);
 }
 export default Buttons;
-
