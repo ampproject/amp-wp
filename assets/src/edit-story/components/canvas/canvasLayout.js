@@ -6,7 +6,7 @@ import styled from 'styled-components';
 /**
  * Internal dependencies
  */
-import { PAGE_NAV_WIDTH, PAGE_WIDTH, PAGE_HEIGHT, PAGE_NAV_PADDING } from '../../constants';
+import { PAGE_NAV_WIDTH, PAGE_WIDTH, PAGE_HEIGHT } from '../../constants';
 import Page from './page';
 import Meta from './meta';
 import PageNav from './pagenav';
