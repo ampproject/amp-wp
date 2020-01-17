@@ -26,7 +26,7 @@ const Background = styled.div`
     ".         .         .         .         .       " 1fr
     ".         prev      page      next      .       " ${ PAGE_HEIGHT }px
     ".         .         menu      .         .       " 48px
-    ".         .         .      .         .       " 1fr
+    ".         .         .         .         .       " 1fr
     "carousel  carousel  carousel  carousel  carousel" auto
     / 1fr ${ PAGE_NAV_WIDTH }px ${ PAGE_WIDTH }px ${ PAGE_NAV_WIDTH }px 1fr;
 `;
