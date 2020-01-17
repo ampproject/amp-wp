@@ -2118,11 +2118,21 @@ class AMP_Validated_URL_Post_Type {
 				}
 
 				$origin_html = '<' . $stylesheet['element']['name'];
-				if ( 'style_attribute' === $stylesheet['origin'] ) {
-					$origin_html .= ' style="&hellip;"';
-				}
 				if ( ! empty( $stylesheet['element']['attributes'] ) ) {
-					$origin_html .= ' ' . AMP_HTML_Utils::build_attributes_string( $stylesheet['element']['attributes'] );
+					$attributes = $stylesheet['element']['attributes'];
+					if ( ! empty( $attributes['class'] ) ) {
+						$attributes['class'] = trim( preg_replace( '/(^|\s)amp-wp-\w+(\s|$)/', ' ', $attributes['class'] ) );
+						if ( empty( $attributes['class'] ) ) {
+							unset( $attributes['class'] );
+						}
+					}
+					if ( isset( $attributes[ AMP_Style_Sanitizer::ORIGINAL_STYLE_ATTRIBUTE_NAME ] ) ) {
+						$attributes['style'] = $attributes[ AMP_Style_Sanitizer::ORIGINAL_STYLE_ATTRIBUTE_NAME ];
+						unset( $attributes[ AMP_Style_Sanitizer::ORIGINAL_STYLE_ATTRIBUTE_NAME ] );
+					}
+					if ( ! empty( $attributes ) ) {
+						$origin_html .= ' ' . AMP_HTML_Utils::build_attributes_string( $attributes );
+					}
 				}
 				$origin_html .= '>';
 
