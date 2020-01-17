@@ -14,6 +14,13 @@ import { useEffect } from '@wordpress/element';
 import { useAPI, useHistory } from '../../';
 import { createPage } from '../../../elements';
 
+/**
+ * Get the permission by checking for fields in the REST API.
+ *
+ * @param post Current post object
+ * @param field Requested field.
+ * @return {boolean} If user has capability, defaults to false.
+ */
 const getPerm = ( post, field ) => {
 	return Boolean( get( post, [ '_links', field ], false ) );
 };
