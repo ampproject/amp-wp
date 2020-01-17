@@ -64,33 +64,8 @@ function DocumentInspector() {
 		setDisabledStatuses( states );
 	}, [ status, setDisabledStatuses ] );
 
-	const handleChangeStatus = useCallback(
-		( evt ) => 	updateStory( { properties: { status: evt.target.value } } ),
-		[ updateStory ],
-	);
-
-	const handleChangeAuthor = useCallback(
-		( evt ) => updateStory( { properties: { author: evt.target.value } } ),
-		[ updateStory ],
-	);
-
-	const handleChangePassword = useCallback(
-		( value, evt ) => updateStory( { properties: { password: evt.target.value } } ),
-		[ updateStory ],
-	);
-
-	const handleChangeDate = useCallback(
-		( value, evt ) => updateStory( { properties: { date: evt.target.value } } ),
-		[ updateStory ],
-	);
-
-	const handleChangeExcerpt = useCallback(
-		( value, evt ) => updateStory( { properties: { excerpt: evt.target.value } } ),
-		[ updateStory ],
-	);
-
-	const handleChangeSlug = useCallback(
-		( value, evt ) => updateStory( { properties: { slug: evt.target.value } } ),
+	const handleChangeValue = useCallback(
+		( prop ) => ( value, evt ) => updateStory( { properties: { [ prop ]: evt.target.value } } ),
 		[ updateStory ],
 	);
 
@@ -125,14 +100,14 @@ function DocumentInspector() {
 				disabled={ isSaving }
 				disabledOptions={ disabledStatuses }
 				value={ status }
-				onChange={ handleChangeStatus }
+				onChange={ handleChangeValue( 'status' ) }
 			/> }
 			{ capabilities && capabilities.hasPublishAction && status !== 'private' && <InputGroup
 				label={ 'Password' }
 				type={ 'password' }
 				value={ password }
 				disabled={ isSaving }
-				onChange={ handleChangePassword }
+				onChange={ handleChangeValue( 'password' ) }
 			/> }
 
 			<RemoveButton onClick={ handleRemoveStory } dangerouslySetInnerHTML={ { __html: 'Move to trash' } } />
@@ -141,7 +116,7 @@ function DocumentInspector() {
 				type={ 'datetime-local' }
 				value={ date }
 				disabled={ isSaving }
-				onChange={ handleChangeDate }
+				onChange={ handleChangeValue( 'date' ) }
 			/>
 			{ capabilities && capabilities.hasAssignAuthorAction && users && <SelectMenu
 				label="Author"
@@ -149,7 +124,7 @@ function DocumentInspector() {
 				options={ users }
 				value={ author }
 				disabled={ isSaving }
-				onChange={ handleChangeAuthor }
+				onChange={ handleChangeValue( 'author' ) }
 			/> }
 
 			<InputGroup
@@ -157,7 +132,7 @@ function DocumentInspector() {
 				type={ 'text' }
 				value={ excerpt }
 				disabled={ isSaving }
-				onChange={ handleChangeExcerpt }
+				onChange={ handleChangeValue( 'excerpt' ) }
 			/>
 
 			<InputGroup
@@ -165,7 +140,7 @@ function DocumentInspector() {
 				type={ 'text' }
 				value={ slug }
 				disabled={ isSaving }
-				onChange={ handleChangeSlug }
+				onChange={ handleChangeValue( 'slug' ) }
 			/>
 			<Group>
 				{ featuredMediaUrl && <Img src={ featuredMediaUrl } /> }
