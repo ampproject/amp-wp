@@ -412,12 +412,13 @@ class AMP_Story_Post_Type {
 		if ( $post_story_data ) {
 			foreach ( $post_story_data as $page ) {
 				foreach ( $page['elements'] as $element ) {
-					if ( isset( $element['fontFamily'] ) ) {
-						$font = AMP_Fonts::get_font( $element['fontFamily'] );
-						if ( $font && ! in_array( $font['slug'], $font_slugs, true ) ) {
-							$fonts[]      = $font;
-							$font_slugs[] = $font['slug'];
-						}
+					if ( ! isset( $element['fontFamily'] ) ) {
+						continue;
+					}
+					$font = AMP_Fonts::get_font( $element['fontFamily'] );
+					if ( $font && ! in_array( $font['slug'], $font_slugs, true ) ) {
+						$fonts[]      = $font;
+						$font_slugs[] = $font['slug'];
 					}
 				}
 			}
