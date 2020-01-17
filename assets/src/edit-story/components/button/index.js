@@ -6,11 +6,11 @@ import styled from 'styled-components';
 /**
  * Internal dependencies
  */
-import UndoIcon from './icon_undo.svg';
-import RedoIcon from './icon_redo.svg';
-import LeftArrowIcon from './icon_left_arrow.svg';
-import RightArrowIcon from './icon_right_arrow.svg';
-import GridViewIcon from './icon_grid_view.svg';
+import UndoIcon from './icons/undo.svg';
+import RedoIcon from './icons/redo.svg';
+import LeftArrowIcon from './icons/arrow_left.svg';
+import RightArrowIcon from './icons/arrow_right.svg';
+import GridViewIcon from './icons/grid_view.svg';
 
 const Base = styled.button.attrs(
 	( { isDisabled } ) => ( { disabled: isDisabled } ),
