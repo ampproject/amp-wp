@@ -17,7 +17,6 @@ import { useStory } from '../../app';
 import { Outline, Primary } from '../button';
 
 const ButtonList = styled.nav`
-	background-color: ${ ( { theme } ) => theme.colors.bg.v3 };
 	display: flex;
 	justify-content: flex-end;
 	padding: 1em;
@@ -29,7 +28,7 @@ const List = styled.div`
 `;
 
 const Space = styled.div`
-	width: 1em;
+	width: 6px;
 `;
 
 function PreviewButton() {

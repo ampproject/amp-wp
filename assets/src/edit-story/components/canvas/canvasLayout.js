@@ -6,7 +6,7 @@ import styled from 'styled-components';
 /**
  * Internal dependencies
  */
-import { CENTRAL_RIGHT_PADDING, LEFT_NAV_WIDTH, PAGE_WIDTH, PAGE_HEIGHT, PAGE_NAV_PADDING } from '../../constants';
+import { LEFT_NAV_WIDTH, PAGE_WIDTH, PAGE_HEIGHT, PAGE_NAV_PADDING } from '../../constants';
 import Page from './page';
 import PageMenu from './pagemenu';
 import PageNav from './pagenav';
@@ -27,7 +27,7 @@ const Background = styled.div`
     ".    prev   page       . next     ." ${ PAGE_HEIGHT }px
     ".    .      menu       . .        ." 48px
     ".    .      carrousel  . .        ." 1fr
-    / 1fr ${ LEFT_NAV_WIDTH }px ${ PAGE_WIDTH }px ${ PAGE_NAV_PADDING }px 1fr ${ CENTRAL_RIGHT_PADDING }px;
+    / 1fr ${ LEFT_NAV_WIDTH }px ${ PAGE_WIDTH }px ${ PAGE_NAV_PADDING }px 1fr 1fr;
 `;
 
 const Area = styled.div`

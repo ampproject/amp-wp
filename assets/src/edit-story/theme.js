@@ -34,6 +34,20 @@ const theme = {
 		danger: '#FF0000',
 		selection: '#44aaff',
 	},
+	fonts: {
+		body1: {
+			family: 'Roboto',
+			size: '16px',
+			lineHeight: '24px',
+			letterSpacing: '0.00625em',
+		},
+		body2: {
+			family: 'Roboto',
+			size: '14px',
+			lineHeight: '20px',
+			letterSpacing: '0.0142em',
+		},
+	},
 };
 
 export default theme;
