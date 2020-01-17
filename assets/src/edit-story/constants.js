@@ -15,3 +15,8 @@ export const LAYER_DIRECTIONS = {
 	FORWARD: 'FORWARD',
 	BACKWARD: 'BACKWARD',
 };
+
+export const Z_INDEX_CANVAS = {
+	MOVABLE: 10,
+	FLOAT_PANEL: 11,
+};
