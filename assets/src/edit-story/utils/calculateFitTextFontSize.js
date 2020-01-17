@@ -15,7 +15,7 @@ import { MIN_FONT_SIZE, MAX_FONT_SIZE } from '../constants';
  *
  * @return {number|boolean} Calculated font size. False if calculation wasn't possible.
  */
-export const calculateFitTextFontSize = ( measurer, expectedHeight, expectedWidth ) => {
+function calculateFitTextFontSize( measurer, expectedHeight, expectedWidth ) {
 	let maxFontSize = MAX_FONT_SIZE;
 	let minFontSize = MIN_FONT_SIZE;
 
@@ -72,4 +72,6 @@ export const calculateFitTextFontSize = ( measurer, expectedHeight, expectedWidt
 	setStyle( originalStyle );
 
 	return minFontSize;
-};
+}
+
+export default calculateFitTextFontSize;

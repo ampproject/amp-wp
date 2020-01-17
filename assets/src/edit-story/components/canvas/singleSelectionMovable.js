@@ -13,7 +13,8 @@ import { useRef, useEffect, useState } from '@wordpress/element';
  */
 import { useStory } from '../../app';
 import Movable from '../movable';
-import { calculateFitTextFontSize } from '../../utils/calculateFitTextFontSize';
+import calculateFitTextFontSize from '../../utils/calculateFitTextFontSize';
+import getAdjustedElementDimensions from '../../utils/getAdjustedElementDimensions';
 
 const ALL_HANDLES = [ 'n', 's', 'e', 'w', 'nw', 'ne', 'sw', 'se' ];
 
@@ -80,7 +81,8 @@ function SingleSelectionMovable( {
 		}
 	};
 
-	const shouldAdjustFontSize = 'text' === selectedElement.type && selectedElement.content.length && keepRatioMode;
+	const isTextElement = 'text' === selectedElement.type;
+	const shouldAdjustFontSize = isTextElement && selectedElement.content.length && keepRatioMode;
 
 	return (
 		<Movable
@@ -119,9 +121,24 @@ function SingleSelectionMovable( {
 					setKeepRatioMode( newKeepRatioMode );
 				}
 			} }
-			onResize={ ( { target, width, height, drag } ) => {
-				target.style.width = `${ width }px`;
-				target.style.height = `${ height }px`;
+			onResize={ ( { target, width, height, drag, direction } ) => {
+				const isResizingWidth = direction[ 0 ] !== 0 && direction[ 1 ] === 0;
+				const isResizingHeight = direction[ 0 ] === 0 && direction[ 1 ] !== 0;
+				let newHeight = height;
+				let newWidth = width;
+				if ( isResizingWidth || isResizingHeight ) {
+					const adjustedDimensions = getAdjustedElementDimensions( {
+						element: target,
+						content: selectedElement.content,
+						width,
+						height,
+						fixedMeasure: isResizingWidth ? 'width' : 'height',
+					} );
+					newWidth = adjustedDimensions.width;
+					newHeight = adjustedDimensions.height;
+				}
+				target.style.width = `${ newWidth }px`;
+				target.style.height = `${ newHeight }px`;
 				frame.translate = drag.beforeTranslate;
 				if ( shouldAdjustFontSize ) {
 					target.style.fontSize = calculateFitTextFontSize( target.firstChild, height, width );
