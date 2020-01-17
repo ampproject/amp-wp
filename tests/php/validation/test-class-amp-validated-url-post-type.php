@@ -765,8 +765,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		// The action isn't correct, so the callback should return the URL unchanged.
 		$this->assertEquals( $initial_redirect, AMP_Validated_URL_Post_Type::handle_bulk_action( $initial_redirect, 'trash', $items ) );
 
-		$that   = $this;
-		$filter = static function() use ( $that ) {
+		$filter = function() {
 			return [
 				'body' => wp_json_encode(
 					[
@@ -777,7 +776,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 									[ 'sanitized' => false ]
 								);
 							},
-							$that->get_mock_errors()
+							$this->get_mock_errors()
 						),
 					]
 				),
@@ -887,8 +886,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 			2
 		);
 
-		$that   = $this;
-		$filter = static function() use ( $that ) {
+		$filter = function() {
 			return [
 				'body' => wp_json_encode(
 					[
@@ -899,7 +897,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 									[ 'sanitized' => false ]
 								);
 							},
-							$that->get_mock_errors()
+							$this->get_mock_errors()
 						),
 					]
 				),

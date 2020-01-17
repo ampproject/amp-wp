@@ -10,7 +10,7 @@
  *
  * @covers AMP_Twitter_Embed_Handler
  */
-class AMP_Twitter_Embed_Test extends WP_UnitTestCase {
+class AMP_Twitter_Embed_Handler_Test extends WP_UnitTestCase {
 
 	/**
 	 * oEmbed response for the tweet ID 987437752164737025.
@@ -51,6 +51,10 @@ class AMP_Twitter_Embed_Test extends WP_UnitTestCase {
 	 * @return array Response data.
 	 */
 	public function mock_http_request( $preempt, $r, $url ) {
+		if ( in_array( 'external-http', $_SERVER['argv'], true ) ) {
+			return $preempt;
+		}
+
 		$host = wp_parse_url( $url, PHP_URL_HOST );
 
 		if ( 'publish.twitter.com' !== $host ) {

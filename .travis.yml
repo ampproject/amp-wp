@@ -48,9 +48,9 @@ script:
   - npm run build:css
   - source "$DEV_LIB_PATH/travis.script.sh"
   - |
-    if [[ ! -z "$PHPUNIT_EXTRA_GROUP" ]]; then
-      echo "Running phpunit group $PHPUNIT_EXTRA_GROUP"
-      phpunit --group $PHPUNIT_EXTRA_GROUP
+    if [[ ! -z "$PHPUNIT_EXTRA_SUITE" ]]; then
+      echo "Running phpunit testsuite $PHPUNIT_EXTRA_SUITE"
+      phpunit --testsuite $PHPUNIT_EXTRA_SUITE
     fi
 
 after_script:
@@ -108,7 +108,7 @@ jobs:
 
     - name: PHP unit tests w/ external-http (7.3, WordPress latest)
       php: "7.3"
-      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit                                INSTALL_PWA_PLUGIN=1 PHPUNIT_EXTRA_GROUP=external-http
+      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit                                INSTALL_PWA_PLUGIN=1 PHPUNIT_EXTRA_SUITE=external-http
 
     - name: PHP unit tests (7.2, WordPress latest)
       php: "7.2"
@@ -136,7 +136,7 @@ jobs:
 
     - name: PHP unit tests w/ external-http (5.6, WordPress 4.9)
       php: "5.6"
-      env: WP_VERSION=4.9    DEV_LIB_ONLY=phpunit,phpsyntax                     PHPUNIT_EXTRA_GROUP=external-http
+      env: WP_VERSION=4.9    DEV_LIB_ONLY=phpunit,phpsyntax                     PHPUNIT_EXTRA_SUITE=external-http
 
     - name: PHP unit tests (7.3, WordPress trunk)
       php: "7.3"
