@@ -37,6 +37,7 @@ const Area = styled.div`
 	align-items: center;
 	justify-content: center;
 	flex-direction: column;
+	padding: 16px 0 24px;
 `;
 
 const List = styled( Area )`
@@ -44,7 +45,6 @@ const List = styled( Area )`
 	align-items: flex-start;
 	justify-content: ${ ( { hasHorizontalOverflow } ) => hasHorizontalOverflow ? 'flex-start' : 'center' };
 	height: 100%;
-	padding: 16px 0 24px;
 	overflow-x: ${ ( { hasHorizontalOverflow } ) => hasHorizontalOverflow ? 'scroll' : 'hidden' };
 `;
 
