@@ -3,4 +3,4 @@
  */
 import { createContext } from '@wordpress/element';
 
-export default createContext( { api: {}, statuses: {} } );
+export default createContext( { api: {} } );
