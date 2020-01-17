@@ -79,6 +79,10 @@ function Carousel() {
 		if ( hasHorizontalOverflow ) {
 			const currentPageRef = pageRefs.current[ currentPageId ];
 
+			if ( ! currentPageRef.scrollIntoView ) {
+				return;
+			}
+
 			currentPageRef.scrollIntoView( {
 				inline: 'center',
 				behavior: 'smooth',
