@@ -93,9 +93,7 @@ function Carousel() {
 
 		observer.observe( listRef.current );
 
-		return () => {
-			observer.disconnect();
-		};
+		return () => observer.disconnect();
 	}, [ pages.length ] );
 
 	useLayoutEffect( () => {
