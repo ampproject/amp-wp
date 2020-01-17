@@ -10,18 +10,13 @@ import Buttons from './buttons';
 import Title from './title';
 
 const Background = styled.div`
-	display: grid;
-	grid:
-    "header . buttons" 1fr
-	/ 1fr;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
 `;
 
 const Head = styled.header`
-	grid-area: header;
-	height: 100%;
-	display: flex;
-	justify-content: center;
-	align-items: center;
+	flex: 1 1 auto;
 `;
 
 const ButtonCell = styled.header`
