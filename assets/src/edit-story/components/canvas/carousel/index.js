@@ -60,7 +60,7 @@ const Page = styled.button`
 
 const IconButton = styled.button`
 	width: 53px;
-	height: 28px;
+	height: 53px;
 	padding: 0;
 	margin: 0;
 	border: none;
@@ -75,6 +75,7 @@ const IconButton = styled.button`
 const GridViewButton = styled( IconButton )`
 	position: absolute;
 	bottom: 24px;
+	height: 26px;
 `;
 
 function Carousel() {
@@ -100,7 +101,6 @@ function Carousel() {
 		if ( hasHorizontalOverflow ) {
 			const currentPageRef = pageRefs.current[ currentPageId ];
 
-			// TODO: Don't actually scroll vertically / change focus.
 			currentPageRef.scrollIntoView( {
 				inline: 'center',
 				behavior: 'smooth',
