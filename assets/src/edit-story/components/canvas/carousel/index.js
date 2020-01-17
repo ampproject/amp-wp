@@ -22,15 +22,11 @@ const Wrapper = styled.div`
 	position: relative;
 	display: grid;
 	grid: "left-navigation carousel right-navigation" auto / 53px 1fr 53px;
-	height: 100%;
-	width: 100%;
 	color:  ${ ( { theme } ) => theme.colors.fg.v1 };
 `;
 
 const Area = styled.div`
 	grid-area: ${ ( { area } ) => area };
-	height: 100%;
-	width: 100%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -42,7 +38,6 @@ const List = styled( Area )`
 	flex-direction: row;
 	align-items: flex-start;
 	justify-content: ${ ( { hasHorizontalOverflow } ) => hasHorizontalOverflow ? 'flex-start' : 'center' };
-	height: 100%;
 	overflow-x: ${ ( { hasHorizontalOverflow } ) => hasHorizontalOverflow ? 'scroll' : 'hidden' };
 `;
 
