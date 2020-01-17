@@ -90,7 +90,7 @@ function StoryProvider( { storyId, children } ) {
 	useLoadStory( { restore, shouldLoad, storyId } );
 
 	// These effects send updates to and restores state from history.
-	useHistoryEntry( { pages, current, selection, story } );
+	useHistoryEntry( { pages, current, selection, story, capabilities } );
 	useHistoryReplay( { restore } );
 
 	// This action allows the user to save the story
