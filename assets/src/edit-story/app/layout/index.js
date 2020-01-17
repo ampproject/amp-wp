@@ -14,7 +14,10 @@ import Canvas from '../../components/canvas';
 import { LIBRARY_MIN_WIDTH, LIBRARY_MAX_WIDTH, INSPECTOR_MIN_WIDTH, INSPECTOR_MAX_WIDTH, HEADER_HEIGHT } from '../../constants';
 
 const Editor = styled.div`
-	font-family: ${ ( { theme } ) => theme.fonts.display.family };
+	font-family: ${ ( { theme } ) => theme.fonts.body1.family };
+	font-size: ${ ( { theme } ) => theme.fonts.body1.size };
+	line-height: ${ ( { theme } ) => theme.fonts.body1.lineHeight };
+	letter-spacing: ${ ( { theme } ) => theme.fonts.body1.letterSpacing };
 	background-color: ${ ( { theme } ) => theme.colors.bg.v1 };
 	position: absolute;
 	left: -20px;
