@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { useCallback, useEffect } from '@wordpress/element';
+import { useCallback, useEffect, useMemo } from '@wordpress/element';
 
 /**
  * External dependencies
@@ -43,8 +43,8 @@ const RemoveButton = styled.button`
 
 function DocumentInspector() {
 	const {
-		actions: { loadStatuses, loadUsers, setDisabledStatuses },
-		state: { users, statuses, disabledStatuses },
+		actions: { loadStatuses, loadUsers },
+		state: { users, statuses },
 	} = useInspector();
 
 	const {
@@ -59,10 +59,7 @@ function DocumentInspector() {
 		loadUsers();
 	} );
 
-	useEffect( () => {
-		const states = ( status === 'future' ) ? [ 'pending' ] : [ 'future', 'pending' ];
-		setDisabledStatuses( states );
-	}, [ status, setDisabledStatuses ] );
+	const disabledStatuses = useMemo( () => ( status === 'future' ) ? [ 'pending' ] : [ 'future', 'pending' ], [ status ] );
 
 	const handleChangeValue = useCallback(
 		( prop ) => ( value, evt ) => updateStory( { properties: { [ prop ]: evt.target.value } } ),

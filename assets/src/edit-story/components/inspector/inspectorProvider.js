@@ -26,7 +26,6 @@ function InspectorProvider( { children } ) {
 
 	const [ isUsersLoading, setIsUsersLoading ] = useState( false );
 	const [ isStatusesLoading, setIsStatusesLoading ] = useState( false );
-	const [ disabledStatuses, setDisabledStatuses ] = useState( [] );
 
 	const loadStatuses = useCallback( () => {
 		if ( ! isStatusesLoading && statuses.length === 0 ) {
@@ -70,13 +69,11 @@ function InspectorProvider( { children } ) {
 			tab,
 			users,
 			statuses,
-			disabledStatuses,
 		},
 		actions: {
 			setTab,
 			loadStatuses,
 			loadUsers,
-			setDisabledStatuses,
 		},
 		data: {
 			tabs: {
