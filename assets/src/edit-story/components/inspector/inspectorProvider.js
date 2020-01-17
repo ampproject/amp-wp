@@ -33,8 +33,7 @@ function InspectorProvider( { children } ) {
 			setIsStatusesLoading( true );
 			getAllStatuses().then( ( data ) => {
 				data = Object.values( data );
-				// eslint-disable-next-line camelcase
-				data = data.filter( ( { show_in_list } ) => show_in_list );
+				data = data.filter( ( { show_in_list: isShown } ) => isShown );
 				const saveData = data.map( ( {
 					slug,
 					name,
