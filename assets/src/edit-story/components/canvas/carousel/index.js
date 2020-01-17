@@ -93,6 +93,11 @@ function Carousel() {
 	const handleClickPage = ( page ) => () => setCurrentPage( { pageId: page.id } );
 
 	const scrollBy = useCallback( ( offset ) => {
+		if ( ! listRef.current.scrollBy ) {
+			listRef.current.scrollLeft += offset;
+			return;
+		}
+
 		listRef.current.scrollBy( {
 			left: offset,
 			behavior: 'smooth',
