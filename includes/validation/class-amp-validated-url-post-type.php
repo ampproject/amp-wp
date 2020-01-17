@@ -2256,10 +2256,36 @@ class AMP_Validated_URL_Post_Type {
 										$selector_count = count( $shaken_token[1] );
 										foreach ( array_keys( $shaken_token[1] ) as $i => $selector ) {
 											$included = $shaken_token[1][ $selector ];
-
 											echo $included ? '<ins class="selector">' : '<del class="selector">';
 											echo str_repeat( "\t", $open_parens ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-											echo esc_html( $selector );
+
+											$selector_html = preg_replace(
+												'/(:root|html)(:not\(#_\))+/',
+												sprintf(
+													'<abbr title="%s">$0</abbr>',
+													esc_attr(
+														'style_attribute' === $stylesheet['origin']
+															?
+															__( 'Selector generated to increase specificity so the cascade is preserved for properties moved from style attribute to CSS rule in style[amp-custom].', 'amp' )
+															:
+															__( 'Selector generated to increase specificity for important properties so that the CSS cascade is preserved. AMP does not allow important properties.', 'amp' )
+													)
+												),
+												esc_html( $selector )
+											);
+											if ( 'style_attribute' === $stylesheet['origin'] ) {
+												$selector_html = preg_replace(
+													'/\.amp-wp-\w+/',
+													sprintf(
+														'<abbr title="%s">$0</abbr>',
+														esc_attr__( 'Class name generated during extraction of inline style to style[amp-custom].', 'amp' )
+													),
+													$selector_html
+												);
+											}
+
+											echo $selector_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+
 											if ( $i + 1 < $selector_count ) {
 												echo ',';
 											}
