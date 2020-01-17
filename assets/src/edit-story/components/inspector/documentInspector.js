@@ -59,7 +59,10 @@ function DocumentInspector() {
 		loadUsers();
 	} );
 
-	const disabledStatuses = useMemo( () => ( status === 'future' ) ? [ 'pending' ] : [ 'future', 'pending' ], [ status ] );
+	const allStatuses = useMemo( () => {
+		const disabledStatuses = ( status === 'future' ) ? [ 'pending' ] : [ 'future', 'pending' ];
+		return statuses.filter( ( { value } ) => ! disabledStatuses.includes( value ) );
+	}, [ status, statuses ] );
 
 	const handleChangeValue = useCallback(
 		( prop ) => ( value ) => updateStory( { properties: { [ prop ]: value } } ),
@@ -93,9 +96,8 @@ function DocumentInspector() {
 			{ capabilities && capabilities.hasPublishAction && statuses && <SelectMenu
 				label="Status"
 				name="status"
-				options={ statuses }
+				options={ allStatuses }
 				disabled={ isSaving }
-				disabledOptions={ disabledStatuses }
 				value={ status }
 				onChange={ handleChangeValue( 'status' ) }
 			/> }

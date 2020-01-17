@@ -42,7 +42,7 @@ const Input = styled.input`
 	width: 100%;
 `;
 
-function SelectMenu( { label, name, options, value, onChange, postfix, disabled, disabledOptions } ) {
+function SelectMenu( { label, name, options, value, onChange, postfix, disabled } ) {
 	return (
 		<Group disabled={ disabled }>
 			<Label>
@@ -54,9 +54,9 @@ function SelectMenu( { label, name, options, value, onChange, postfix, disabled,
 				onChange={ ( evt ) => onChange( evt.target.value ) }
 				onBlur={ ( evt ) => evt.target.form.dispatchEvent( new window.Event( 'submit' ) ) }
 			>
-				{ options && options.map( ( { name: optionName, value: optionValue } ) => {
-					return ( ! disabledOptions.includes( optionValue ) ) ? <option key={ `${ name }-${ optionValue }` } value={ optionValue } dangerouslySetInnerHTML={ { __html: optionName } } /> : null;
-				} ) }
+				{ options && options.map( ( { name: optionName, value: optionValue } ) => (
+					<option key={ `${ name }-${ optionValue }` } value={ optionValue } dangerouslySetInnerHTML={ { __html: optionName } } />
+				) ) }
 			</Select>
 			{ postfix }
 		</Group>
@@ -71,14 +71,12 @@ SelectMenu.propTypes = {
 	onChange: PropTypes.func.isRequired,
 	postfix: PropTypes.string,
 	disabled: PropTypes.bool,
-	disabledOptions: PropTypes.array,
 };
 
 SelectMenu.defaultProps = {
 	postfix: '',
 	formName: '',
 	disabled: false,
-	disabledOptions: [],
 };
 
 function InputGroup( { type, label, value, isMultiple, onChange, postfix, disabled } ) {
