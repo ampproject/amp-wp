@@ -18,14 +18,8 @@ import { Outline, Primary } from '../button';
 
 const ButtonList = styled.nav`
 	display: flex;
-<<<<<<< HEAD
-	justify-content: space-between;
-	padding-top: 20px;
-	padding-right: 31px;
-=======
 	justify-content: flex-end;
 	padding: 1em;
->>>>>>> 33d5bf55b0cec0d954337dd2874c5790d5ee1c3d
 	height: 100%;
 `;
 
