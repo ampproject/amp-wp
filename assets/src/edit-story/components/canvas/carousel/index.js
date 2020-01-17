@@ -13,9 +13,7 @@ import { useLayoutEffect, useRef, useState, useCallback } from '@wordpress/eleme
  * Internal dependencies
  */
 import { useStory } from '../../../app';
-import LeftArrowIcon from './leftArrow.svg';
-import RightArrowIcon from './rightArrow.svg';
-import GridViewIcon from './gridView.svg';
+import { LeftArrow, RightArrow, GridView } from '../../button';
 
 const PAGE_WIDTH = 72;
 const PAGE_HEIGHT = 128;
@@ -58,24 +56,9 @@ const Page = styled.button`
 	flex: none;
 `;
 
-const IconButton = styled.button`
-	width: 53px;
-	height: 53px;
-	padding: 0;
-	margin: 0;
-	border: none;
-	color: ${ ( { theme } ) => theme.colors.fg.v1 };
-	background: transparent;
-	svg {
-		width: 2em;
-		height: 2em;
-	}
-`;
-
-const GridViewButton = styled( IconButton )`
+const GridViewButton = styled( GridView )`
 	position: absolute;
 	bottom: 24px;
-	height: 26px;
 `;
 
 function Carousel() {
@@ -120,11 +103,13 @@ function Carousel() {
 	return (
 		<Wrapper>
 			<Area area="left-navigation">
-				{ hasHorizontalOverflow && (
-					<IconButton onClick={ () => scrollBy( -( 2 * PAGE_WIDTH ) ) }>
-						<LeftArrowIcon />
-					</IconButton>
-				) }
+				<LeftArrow
+					isHidden={ ! hasHorizontalOverflow }
+					onClick={ () => scrollBy( -( 2 * PAGE_WIDTH ) ) }
+					width="24"
+					height="24"
+					aria-label="Scroll Left"
+				/>
 			</Area>
 			<List area="carousel" ref={ listRef } hasHorizontalOverflow={ hasHorizontalOverflow }>
 				{ pages.map( ( page, index ) => (
@@ -139,14 +124,19 @@ function Carousel() {
 				) ) }
 			</List>
 			<Area area="right-navigation">
-				{ hasHorizontalOverflow && (
-					<IconButton onClick={ () => scrollBy( ( 2 * PAGE_WIDTH ) ) }>
-						<RightArrowIcon />
-					</IconButton>
-				) }
-				<GridViewButton disabled>
-					<GridViewIcon />
-				</GridViewButton>
+				<RightArrow
+					isHidden={ ! hasHorizontalOverflow }
+					onClick={ () => scrollBy( ( 2 * PAGE_WIDTH ) ) }
+					width="24"
+					height="24"
+					aria-label="Scroll Right"
+				/>
+				<GridViewButton
+					isDisabled
+					width="24"
+					height="24"
+					aria-label="Grid View"
+				/>
 			</Area>
 		</Wrapper>
 	);
