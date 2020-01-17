@@ -928,6 +928,7 @@ class AMP_Validated_URL_Post_Type {
 				),
 				AMP_Validation_Error_Taxonomy::FOUND_ELEMENTS_AND_ATTRIBUTES => esc_html__( 'Invalid Markup', 'amp' ),
 				AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT => esc_html__( 'Sources', 'amp' ),
+				'css_usage' => esc_html__( 'CSS Usage', 'amp' ),
 			]
 		);
 
@@ -1045,6 +1046,37 @@ class AMP_Validated_URL_Post_Type {
 					echo sprintf( '<div>%s</div>', $imploded_items ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				} else {
 					esc_html_e( '--', 'amp' );
+				}
+				break;
+			case 'css_usage':
+				$style_custom_cdata_spec = null;
+				foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( 'style' ) as $spec_rule ) {
+					if ( isset( $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) && AMP_Style_Sanitizer::STYLE_AMP_CUSTOM_SPEC_NAME === $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) {
+						$style_custom_cdata_spec = $spec_rule[ AMP_Rule_Spec::CDATA ];
+					}
+				}
+				$stylesheets = json_decode( get_post_meta( $post->ID, '_amp_stylesheets', true ), true );
+				if ( ! is_array( $stylesheets ) || ! $style_custom_cdata_spec ) {
+					echo '?';
+				} else {
+					$total_size = 0;
+					foreach ( $stylesheets as $stylesheet ) {
+						$total_size += $stylesheet['final_size'];
+					}
+
+					$css_usage_percentage = ( $total_size / $style_custom_cdata_spec['max_bytes'] ) * 100;
+					if ( $css_usage_percentage > 100 ) {
+						$color = '#a00'; // Red.
+					} elseif ( $css_usage_percentage >= AMP_Style_Sanitizer::CSS_BUDGET_WARNING_PERCENTAGE ) {
+						$color = '#d98500'; // Orange.
+					} else {
+						$color = '#006505'; // Green.
+					}
+					printf(
+						'<span style="color:%s">%s%%</span>',
+						esc_attr( $color ),
+						esc_html( number_format_i18n( ceil( $css_usage_percentage ) ) )
+					);
 				}
 				break;
 			case AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT:

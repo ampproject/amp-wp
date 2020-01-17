@@ -560,6 +560,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 						AMP_Validation_Error_Taxonomy::ERROR_STATUS => 'Status',
 						AMP_Validation_Error_Taxonomy::FOUND_ELEMENTS_AND_ATTRIBUTES => 'Invalid',
 						AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT => 'Sources',
+						'css_usage' => 'CSS Usage',
 					]
 				)
 			),

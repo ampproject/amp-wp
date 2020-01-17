@@ -2819,18 +2819,16 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		$css_usage_percentage = ceil( ( $total_size / $this->style_custom_cdata_spec['max_bytes'] ) * 100 );
-		$meter_text_overlay   = sprintf(
-			/* translators: %d is percentage of CSS budget used */
-			__( 'CSS Usage: %d%%', 'amp' ),
-			$css_usage_percentage
-		);
+		$menu_item_text       = __( 'CSS Usage', 'amp' ) . ': ';
+		$menu_item_text      .= $css_usage_percentage . '%';
 
 		if ( $css_usage_percentage > 100 ) {
-			$meter_text_overlay .= ' 🚫';
+			$menu_item_text .= ' 🚫';
 		} elseif ( $css_usage_percentage >= self::CSS_BUDGET_WARNING_PERCENTAGE ) {
-			$meter_text_overlay .= ' ⚠️';
+			$menu_item_text .= ' ⚠️';
 		}
-		$stylesheets_a_element->appendChild( $this->dom->createTextNode( $meter_text_overlay ) );
+
+		$stylesheets_a_element->appendChild( $this->dom->createTextNode( $menu_item_text ) );
 
 		$validity_li_element->parentNode->insertBefore( $stylesheets_li_element, $validity_li_element->nextSibling );
 	}
