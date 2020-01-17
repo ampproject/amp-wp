@@ -62,7 +62,7 @@ function DocumentInspector() {
 	const disabledStatuses = useMemo( () => ( status === 'future' ) ? [ 'pending' ] : [ 'future', 'pending' ], [ status ] );
 
 	const handleChangeValue = useCallback(
-		( prop ) => ( evt ) => updateStory( { properties: { [ prop ]: evt.target.value } } ),
+		( prop ) => ( value ) => updateStory( { properties: { [ prop ]: value } } ),
 		[ updateStory ],
 	);
 

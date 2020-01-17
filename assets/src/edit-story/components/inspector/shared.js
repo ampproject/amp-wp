@@ -51,7 +51,7 @@ function SelectMenu( { label, name, options, value, onChange, postfix, disabled,
 			<Select
 				disabled={ disabled }
 				value={ value }
-				onChange={ ( evt ) => onChange( evt ) }
+				onChange={ ( evt ) => onChange( evt.target.value ) }
 				onBlur={ ( evt ) => evt.target.form.dispatchEvent( new window.Event( 'submit' ) ) }
 			>
 				{ options && options.map( ( { name: optionName, value: optionValue } ) => {
@@ -92,7 +92,7 @@ function InputGroup( { type, label, value, isMultiple, onChange, postfix, disabl
 			<Input
 				type={ type || 'number' }
 				disabled={ disabled }
-				onChange={ ( evt ) => onChange( evt ) }
+				onChange={ ( evt ) => onChange( isCheckbox ? evt.target.checked : evt.target.value ) }
 				onBlur={ ( evt ) => evt.target.form.dispatchEvent( new window.Event( 'submit' ) ) }
 				placeholder={ placeholder }
 				value={ isCheckbox ? '' : value }
