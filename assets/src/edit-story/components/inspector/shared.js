@@ -92,7 +92,7 @@ function InputGroup( { type, label, value, isMultiple, onChange, postfix, disabl
 			<Input
 				type={ type || 'number' }
 				disabled={ disabled }
-				onChange={ ( evt ) => onChange( isCheckbox ? evt.target.checked : evt.target.value, evt ) }
+				onChange={ ( evt ) => onChange( evt ) }
 				onBlur={ ( evt ) => evt.target.form.dispatchEvent( new window.Event( 'submit' ) ) }
 				placeholder={ placeholder }
 				value={ isCheckbox ? '' : value }
