@@ -13,6 +13,7 @@ import { useRef, useEffect } from '@wordpress/element';
  */
 import Movable from '../movable';
 import { useStory } from '../../app/story';
+import useCanvas from './useCanvas';
 import calculateFitTextFontSize from '../../utils/calculateFitTextFontSize';
 
 const CORNER_HANDLES = [ 'nw', 'ne', 'sw', 'se' ];
@@ -29,6 +30,7 @@ function MultiSelectionMovable( { selectedElements, nodesById } ) {
 	}, [ selectedElements, moveable, nodesById ] );
 
 	const { actions: { updateElementsById } } = useStory();
+	const { actions: { pushTransform } } = useCanvas();
 
 	// Create targets list including nodes and also necessary attributes.
 	const targetList = selectedElements.map( ( element ) => {
@@ -50,27 +52,31 @@ function MultiSelectionMovable( { selectedElements, nodesById } ) {
 	/**
 	 * Set style to the element.
 	 *
+	 * @param {string} id Target element's id.
 	 * @param {Object} target Target element to update.
 	 * @param {Object} frame Properties from the frame for that specific element.
 	 */
-	const setTransformStyle = ( target, frame ) => {
+	const setTransformStyle = ( id, target, frame ) => {
 		target.style.transform = `translate(${ frame.translate[ 0 ] }px, ${ frame.translate[ 1 ] }px) rotate(${ frame.rotate }deg)`;
+		pushTransform( id, frame );
 	};
 
 	const frames = targetList ? targetList.map( ( target ) => ( {
 		translate: [ 0, 0 ],
 		rotate: target.rotationAngle,
+		resize: [ 0, 0 ],
 	} ) ) : [];
 
 	/**
 	 * Resets Movable once the action is done, sets the initial values.
 	 */
 	const resetMoveable = () => {
-		targetList.forEach( ( { node }, i ) => {
+		targetList.forEach( ( { id, node }, i ) => {
 			frames[ i ].translate = [ 0, 0 ];
 			node.style.transform = '';
 			node.style.width = '';
 			node.style.height = '';
+			pushTransform( id, null );
 		} );
 		if ( moveable.current ) {
 			moveable.current.updateRect();
@@ -126,7 +132,7 @@ function MultiSelectionMovable( { selectedElements, nodesById } ) {
 				events.forEach( ( { target, beforeTranslate }, i ) => {
 					const sFrame = frames[ i ];
 					sFrame.translate = beforeTranslate;
-					setTransformStyle( target, sFrame );
+					setTransformStyle( targetList[ i ].id, target, sFrame );
 				} );
 			} }
 			onDragGroupStart={ ( { events } ) => {
@@ -144,7 +150,7 @@ function MultiSelectionMovable( { selectedElements, nodesById } ) {
 					const sFrame = frames[ i ];
 					sFrame.rotate = beforeRotate;
 					sFrame.translate = drag.beforeTranslate;
-					setTransformStyle( target, sFrame );
+					setTransformStyle( targetList[ i ].id, target, sFrame );
 				} );
 			} }
 			onRotateGroupEnd={ ( { targets } ) => {

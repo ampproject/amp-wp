@@ -66,7 +66,7 @@ const ResetButton = styled.button`
 
 function ScalePanel( { setProperties, width, height, x, y, scale } ) {
 	return (
-		<InOverlay zIndex={ Z_INDEX_CANVAS.FLOAT_PANEL }>
+		<InOverlay zIndex={ Z_INDEX_CANVAS.FLOAT_PANEL } pointerEvents={ true } >
 			<Container x={ x } y={ y } width={ width } height={ height } >
 				<Range
 					value={ scale }

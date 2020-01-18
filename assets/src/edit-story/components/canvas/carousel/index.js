@@ -24,6 +24,7 @@ const Wrapper = styled.div`
 	position: relative;
 	display: grid;
 	grid: "left-navigation carousel right-navigation" auto / 53px 1fr 53px;
+	background-color: ${ ( { theme } ) => theme.colors.bg.v1 };
 	color:  ${ ( { theme } ) => theme.colors.fg.v1 };
 `;
 

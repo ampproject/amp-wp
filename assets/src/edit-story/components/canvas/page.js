@@ -1,3 +1,4 @@
+//QQQQ: rename file to `displayLayer.js`
 /**
  * External dependencies
  */
@@ -7,41 +8,40 @@ import styled from 'styled-components';
  * Internal dependencies
  */
 import { useStory } from '../../app';
-import withOverlay from '../overlay/withOverlay';
-import Selection from './selection';
 import useCanvas from './useCanvas';
 import Element from './element';
+import { Layer, PageArea } from './layout';
 
-const Background = withOverlay( styled.div.attrs( { className: 'container' } )`
+const DisplayPageArea = styled( PageArea ).attrs( { className: 'container', overflow: false } )`
 	background-color: ${ ( { theme } ) => theme.colors.fg.v1 };
-	position: relative;
-	width: 100%;
-	height: 100%;
-` );
+`;
 
-function Page() {
+function DisplayLayer() {
 	const {
 		state: { currentPage },
 	} = useStory();
-
 	const {
+		state: { editingElement },
 		actions: { setPageContainer },
 	} = useCanvas();
 
 	return (
-		<Background ref={ setPageContainer }>
-			{ currentPage && currentPage.elements.map( ( { id, ...rest } ) => {
-				return (
-					<Element
-						key={ id }
-						element={ { id, ...rest } }
-					/>
-				);
-			} ) }
-
-			<Selection />
-		</Background>
+		<Layer pointerEvents={ false }>
+			<DisplayPageArea ref={ setPageContainer }>
+				{ currentPage && currentPage.elements.map( ( { id, ...rest } ) => {
+					if ( editingElement === id ) {
+						return null;
+					}
+					return (
+						<Element
+							key={ id }
+							element={ { id, ...rest } }
+						/>
+					);
+				} ) }
+			</DisplayPageArea>
+		</Layer>
 	);
 }
 
-export default Page;
+export default DisplayLayer;

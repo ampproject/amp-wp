@@ -1,3 +1,4 @@
+// QQQ: rename to `elementDisplay.js`
 /**
  * External dependencies
  */
@@ -7,23 +8,23 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { useLayoutEffect, useRef } from '@wordpress/element';
+import { useRef } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { getDefinitionForType } from '../../elements';
-import { useStory } from '../../app';
 import { ElementWithPosition, ElementWithSize, ElementWithRotation, getBox } from '../../elements/shared';
-import useCanvas from './useCanvas';
+import useTransformHandler from './useTransformHandler';
 
 const Wrapper = styled.div`
 	${ ElementWithPosition }
 	${ ElementWithSize }
 	${ ElementWithRotation }
+	contain: layout paint;
 `;
 
-function Element( {
+function ElementDisplay( {
 	element: {
 		id,
 		type,
@@ -36,48 +37,41 @@ function Element( {
 		...rest
 	},
 } ) {
-	const { Display, Edit } = getDefinitionForType( type );
-	const element = useRef();
+	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
+	const { Display } = getDefinitionForType( type );
 
-	const {
-		state: { editingElement },
-		actions: { setNodeForElement, handleSelectElement },
-	} = useCanvas();
-
-	const {
-		state: { selectedElements },
-	} = useStory();
-
-	useLayoutEffect( () => {
-		setNodeForElement( id, element.current );
-	}, [ id, setNodeForElement ] );
-
-	const isEditing = ( editingElement === id );
-	const isSelected = selectedElements.includes( id );
+	const wrapperRef = useRef( null );
 
 	const box = getBox( { x, y, width, height, rotationAngle, isFullbleed } );
+	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
 	const props = { ...box, ...rest, id };
+
+	useTransformHandler( id, ( transform ) => {
+		const target = wrapperRef.current;
+		if ( transform === null ) {
+			target.style.transform = '';
+		} else {
+			const { translate, rotate, resize } = transform;
+			target.style.transform = `translate(${ translate[ 0 ] }px, ${ translate[ 1 ] }px) rotate(${ rotate }deg)`;
+			if ( resize[ 0 ] !== 0 && resize[ 1 ] !== 0 ) {
+				target.style.width = `${ resize[ 0 ] }px`;
+				target.style.height = `${ resize[ 1 ] }px`;
+			}
+		}
+	} );
 
 	return (
 		<Wrapper
-			ref={ element }
+			ref={ wrapperRef }
 			{ ...box }
-			onMouseDown={ ( evt ) => {
-				if ( ! isSelected ) {
-					handleSelectElement( id, evt );
-				}
-				evt.stopPropagation();
-			} }
 		>
-			{ isEditing ?
-				( <Edit { ...props } /> ) :
-				( <Display { ...props } /> ) }
+			<Display { ...props } />
 		</Wrapper>
 	);
 }
 
-Element.propTypes = {
+ElementDisplay.propTypes = {
 	element: PropTypes.object.isRequired,
 };
 
-export default Element;
+export default ElementDisplay;

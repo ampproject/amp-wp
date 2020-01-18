@@ -11,7 +11,9 @@ import { useRef, useEffect, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
+import { getBox } from '../../elements/shared';
 import { useStory } from '../../app';
+import useCanvas from './useCanvas';
 import Movable from '../movable';
 import calculateFitTextFontSize from '../../utils/calculateFitTextFontSize';
 import getAdjustedElementDimensions from '../../utils/getAdjustedElementDimensions';
@@ -26,9 +28,8 @@ function SingleSelectionMovable( {
 	const moveable = useRef();
 	const [ isResizingFromCorner, setIsResizingFromCorner ] = useState( true );
 
-	const {
-		actions: { updateSelectedElements },
-	} = useStory();
+	const { actions: { updateSelectedElements } } = useStory();
+	const { actions: { pushTransform } } = useCanvas();
 
 	const latestEvent = useRef();
 
@@ -54,13 +55,22 @@ function SingleSelectionMovable( {
 		}
 	} );
 
+	const box = getBox( selectedElement );
 	const frame = {
 		translate: [ 0, 0 ],
-		rotate: selectedElement.rotationAngle,
+		rotate: box.rotationAngle,
+		resize: [ 0, 0 ],
 	};
 
 	const setTransformStyle = ( target ) => {
 		target.style.transform = `translate(${ frame.translate[ 0 ] }px, ${ frame.translate[ 1 ] }px) rotate(${ frame.rotate }deg)`;
+		if ( frame.resize[ 0 ] ) {
+			target.style.width = `${ frame.resize[ 0 ] }px`;
+		}
+		if ( frame.resize[ 1 ] ) {
+			target.style.height = `${ frame.resize[ 1 ] }px`;
+		}
+		pushTransform( selectedElement.id, frame );
 	};
 
 	/**
@@ -70,6 +80,8 @@ function SingleSelectionMovable( {
 	 */
 	const resetMoveable = ( target ) => {
 		frame.translate = [ 0, 0 ];
+		frame.resize = [ 0, 0 ];
+		pushTransform( selectedElement.id, null );
 		// Inline start resetting has to be done very carefully here to avoid
 		// conflicts with stylesheets. See #3951.
 		target.style.transform = '';
@@ -139,6 +151,7 @@ function SingleSelectionMovable( {
 				}
 				target.style.width = `${ newWidth }px`;
 				target.style.height = `${ newHeight }px`;
+				frame.resize = [ newWidth, newHeight ];
 				frame.translate = drag.beforeTranslate;
 				if ( shouldAdjustFontSize ) {
 					target.style.fontSize = calculateFitTextFontSize( target.firstChild, height, width );
@@ -146,16 +159,18 @@ function SingleSelectionMovable( {
 				setTransformStyle( target );
 			} }
 			onResizeEnd={ ( { target } ) => {
-				const properties = {
-					width: parseInt( target.style.width ),
-					height: parseInt( target.style.height ),
-					x: selectedElement.x + frame.translate[ 0 ],
-					y: selectedElement.y + frame.translate[ 1 ],
-				};
-				if ( shouldAdjustFontSize ) {
-					properties.fontSize = calculateFitTextFontSize( target.firstChild, properties.height, properties.width );
+				if ( frame.resize[ 0 ] !== 0 && frame.resize[ 1 ] !== 0 ) {
+					const properties = {
+						width: frame.resize[ 0 ],
+						height: frame.resize[ 1 ],
+						x: selectedElement.x + frame.translate[ 0 ],
+						y: selectedElement.y + frame.translate[ 1 ],
+					};
+					if ( shouldAdjustFontSize ) {
+						properties.fontSize = calculateFitTextFontSize( target.firstChild, properties.height, properties.width );
+					}
+					updateSelectedElements( { properties } );
 				}
-				updateSelectedElements( { properties } );
 				resetMoveable( target );
 			} }
 			onRotateStart={ ( { set } ) => {
