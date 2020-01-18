@@ -392,10 +392,12 @@ const setupStylesheetsMetabox = () => {
 	}
 
 	for ( const stylesheetDetailsElements of metabox.querySelectorAll( '.stylesheet-details' ) ) {
-		const showRemovedStylesCheckbox = stylesheetDetailsElements.querySelector( '.show-removed-styles' );
 		const shakenStylesheetContainer = stylesheetDetailsElements.querySelector( '.shaken-stylesheet' );
-		showRemovedStylesCheckbox.addEventListener( 'click', () => {
-			shakenStylesheetContainer.classList.toggle( 'removed-styles-shown', showRemovedStylesCheckbox.checked );
-		} );
+		const showRemovedStylesCheckbox = stylesheetDetailsElements.querySelector( '.show-removed-styles' );
+		if ( showRemovedStylesCheckbox ) {
+			showRemovedStylesCheckbox.addEventListener( 'click', () => {
+				shakenStylesheetContainer.classList.toggle( 'removed-styles-shown', showRemovedStylesCheckbox.checked );
+			} );
+		}
 	}
 };
