@@ -2890,13 +2890,13 @@ class AMP_Validation_Error_Taxonomy {
 		switch ( $validation_error['code'] ) {
 			case AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG:
 				if ( self::is_validation_error_for_js_script_element( $validation_error ) ) {
-					$title = esc_html__( 'Invalid script', 'amp' );
-
 					if ( isset( $validation_error['node_attributes']['src'] ) ) {
-						$title .= sprintf(
+						$title = esc_html__( 'Invalid script', 'amp' ) . sprintf(
 							': <code>%s</code>',
 							esc_html( basename( wp_parse_url( $validation_error['node_attributes']['src'], PHP_URL_PATH ) ) )
 						);
+					} else {
+						$title = esc_html__( 'Invalid inline script', 'amp' );
 					}
 				} else {
 					$title  = esc_html__( 'Invalid element', 'amp' );
