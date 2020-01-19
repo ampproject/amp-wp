@@ -2128,6 +2128,9 @@ class AMP_Validation_Error_Taxonomy {
 				if ( in_array( $key, [ 'code', 'type', 'property_value' ], true ) ) {
 					continue; // Handled above.
 				}
+				if ( 'spec_name' === $key  ) {
+					continue;
+				}
 				?>
 				<dt><?php echo esc_html( self::get_source_key_label( $key, $validation_error ) ); ?></dt>
 				<dd class="detailed">
@@ -2167,6 +2170,15 @@ class AMP_Validation_Error_Taxonomy {
 						</details>
 					<?php elseif ( 'sources' === $key ) : ?>
 						<?php self::render_sources( $value ); ?>
+					<?php elseif ( 'attributes' === $key ) : ?>
+						<ul>
+							<?php foreach ( $value as $attr ) : ?>
+								<?php
+								printf( '<li><code>%s</code></li>', esc_html( $attr ) );
+								?>
+								<br />
+							<?php endforeach; ?>
+						</ul>
 					<?php elseif ( $is_element_attributes ) : ?>
 						<table class="element-attributes">
 							<?php foreach ( $value as $attr_name => $attr_value ) : ?>
@@ -2955,6 +2967,12 @@ class AMP_Validation_Error_Taxonomy {
 				);
 
 				return $title;
+			case AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING:
+				$title = esc_html__( 'Missing required attribute', 'amp' );
+				if ( isset( $validation_error['attributes'][0] ) ) {
+					$title .= sprintf( ': <code>%s</code>', esc_html( $validation_error['attributes'][0] ) );
+				}
+				return $title;
 			default:
 				/* translators: %s error code */
 				return sprintf( __( 'Unknown error (%s)', 'amp' ), $validation_error['code'] );
@@ -3006,6 +3024,8 @@ class AMP_Validation_Error_Taxonomy {
 				}
 			case 'attr_property_value':
 				return __( 'Required value', 'amp' );
+			case 'attributes':
+				return __( 'Missing attributes', 'amp' );
 			default:
 				return $key;
 		}
