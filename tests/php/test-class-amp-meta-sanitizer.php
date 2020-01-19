@@ -41,6 +41,12 @@ class Test_AMP_Meta_Sanitizer extends WP_UnitTestCase {
 				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"></head><body></body></html>',
 			],
 
+			// Remove extra commas.
+			[
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content=",width=device-width,,minimum-scale=1,initial-scale=1,"></head><body></body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"></head><body></body></html>',
+			],
+
 			// Move charset and viewport tags from body to head.
 			[
 				'<!DOCTYPE html><html><head></head><body><meta charset="utf-8"><meta name="viewport" content="width=device-width"></body></html>',

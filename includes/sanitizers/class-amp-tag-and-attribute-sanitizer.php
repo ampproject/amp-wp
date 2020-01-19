@@ -56,6 +56,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	const DISALLOWED_EMPTY_URL                 = 'DISALLOWED_EMPTY_URL';
 	const INVALID_BLACKLISTED_VALUE_REGEX      = 'INVALID_BLACKLISTED_VALUE_REGEX';
 	const DISALLOWED_PROPERTY_IN_ATTR_VALUE    = 'DISALLOWED_PROPERTY_IN_ATTR_VALUE';
+	const MISSING_MANDATORY_PROPERTY           = 'MISSING_MANDATORY_PROPERTY';
+	const MISSING_REQUIRED_PROPERTY_VALUE      = 'MISSING_REQUIRED_PROPERTY_VALUE';
 	const ATTR_REQUIRED_BUT_MISSING            = 'ATTR_REQUIRED_BUT_MISSING';
 	const INVALID_LAYOUT_WIDTH                 = 'INVALID_LAYOUT_WIDTH';
 	const INVALID_LAYOUT_HEIGHT                = 'INVALID_LAYOUT_HEIGHT';
@@ -685,12 +687,39 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				 * @var DOMAttr $attr_node
 				 * @var string  $error_code
 				 */
-				list( $attr_node, $error_code ) = $disallowed_attribute;
-				$validation_error['code']       = $error_code;
+				list( $attr_node, $error_code, $error_data ) = $disallowed_attribute;
+				$validation_error['code']                    = $error_code;
 
-				$attr_spec = isset( $merged_attr_spec_list[ $attr_node->nodeName ] ) ? $merged_attr_spec_list[ $attr_node->nodeName ] : [];
-				if ( $this->remove_invalid_attribute( $node, $attr_node, $validation_error, $attr_spec ) ) {
-					$removed_attributes[] = $attr_node;
+				switch ( $error_code ) {
+					case self::DISALLOWED_PROPERTY_IN_ATTR_VALUE:
+						$properties         = $error_data[ 'original_properties' ];
+						$invalid_properties = $error_data[ 'invalid_properties' ];
+
+						foreach ( $invalid_properties as $invalid_property ) {
+							$validation_error[ 'attr_property_name' ] = $invalid_property;
+							if ( $this->should_sanitize_validation_error( $validation_error, [ 'node' => $attr_node ] ) ) {
+								unset( $properties[ $invalid_property ] );
+							}
+						}
+
+						$valid_properties = array_reduce(
+							array_keys( $properties ),
+							static function ( $attr_value, $property ) use ( $properties ) {
+								if ( ! empty( $attr_value ) ) {
+									$attr_value .= ',';
+								}
+
+								return $attr_value . $property . '=' . $properties[ $property ];
+							}
+						);
+
+						$node->setAttribute( $attr_node->nodeName, $valid_properties );
+						break;
+					default:
+						$attr_spec = isset( $merged_attr_spec_list[ $attr_node->nodeName ] ) ? $merged_attr_spec_list[ $attr_node->nodeName ] : [];
+						if ( $this->remove_invalid_attribute( $node, $attr_node, $validation_error, $attr_spec ) ) {
+							$removed_attributes[] = $attr_node;
+						}
 				}
 			}
 
@@ -1074,10 +1103,11 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @param DOMElement $node           Node.
 	 * @param array[]    $attr_spec_list Attribute spec list.
-	 * @return array Tuples containing attribute to remove and error code.
+	 * @return array Tuples containing attribute to remove, the error code and the error data.
 	 */
 	private function sanitize_disallowed_attribute_values_in_node( DOMElement $node, $attr_spec_list ) {
 		$attrs_to_remove = [];
+		$error_data      = null;
 
 		foreach ( $attr_spec_list as $attr_name => $attr_val ) {
 			if ( isset( $attr_spec_list[ $attr_name ][ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
@@ -1094,7 +1124,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			 * remove in the first loop, then remove them in the second loop.
 			 */
 			if ( ! $this->is_amp_allowed_attribute( $attr_node, $attr_spec_list ) ) {
-				$attrs_to_remove[] = [ $attr_node, self::DISALLOWED_ATTR ];
+				$attrs_to_remove[] = [ $attr_node, self::DISALLOWED_ATTR, $error_data ];
 				continue;
 			}
 
@@ -1152,14 +1182,18 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::BLACKLISTED_VALUE_REGEX ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_blacklisted_value_regex( $node, $attr_name, $attr_spec_rule ) ) {
 				$error_code = self::INVALID_BLACKLISTED_VALUE_REGEX;
-			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_PROPERTIES ] ) &&
-				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_value_properties( $node, $attr_name, $attr_spec_rule ) ) {
-				// @todo Should there be a separate validation error for each invalid property?
-				$error_code = self::DISALLOWED_PROPERTY_IN_ATTR_VALUE; // @todo Which property(s) in particular?
+			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_PROPERTIES ] ) ) {
+				$result = $this->check_attr_spec_rule_value_properties( $node, $attr_name, $attr_spec_rule );
+
+				list( $result_code, $result_data ) = $result;
+
+				if ( AMP_Rule_Spec::FAIL === $result_code ) {
+					list( $error_code, $error_data ) = $result_data;
+				}
 			}
 
 			if ( isset( $error_code ) ) {
-				$attrs_to_remove[] = [ $attr_node, $error_code ];
+				$attrs_to_remove[] = [ $attr_node, $error_code, $error_data ];
 			}
 		}
 
@@ -1876,7 +1910,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string           $attr_name      Attribute name.
 	 * @param array[]|string[] $attr_spec_rule Attribute spec rule.
 	 *
-	 * @return string:
+	 * @return array[] Array where the result code is accompanied by its data in the format [ $result_code, $result_data ]
+	 * 		The result code could be:
 	 *      - AMP_Rule_Spec::PASS - $attr_name has a value that matches the rule.
 	 *      - AMP_Rule_Spec::FAIL - $attr_name has a value that does *not* match rule.
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
@@ -1888,21 +1923,35 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			foreach ( explode( ',', $node->getAttribute( $attr_name ) ) as $pair ) {
 				$pair_parts = explode( '=', $pair, 2 );
 				if ( 2 !== count( $pair_parts ) ) {
-					return 0;
+					// This would occur when there are trailing commas, for example.
+					continue;
 				}
 				$properties[ strtolower( trim( $pair_parts[0] ) ) ] = trim( $pair_parts[1] );
 			}
 
+			$invalid_properties = array_diff( array_keys( $properties ), array_keys( $attr_spec_rule[ AMP_Rule_Spec::VALUE_PROPERTIES ] ) );
+
 			// Fail if there are unrecognized properties.
-			if ( count( array_diff( array_keys( $properties ), array_keys( $attr_spec_rule[ AMP_Rule_Spec::VALUE_PROPERTIES ] ) ) ) > 0 ) {
-				return AMP_Rule_Spec::FAIL;
+			if ( count( $invalid_properties ) > 0 ) {
+				return [
+					AMP_Rule_Spec::FAIL,
+					[
+						self::DISALLOWED_PROPERTY_IN_ATTR_VALUE,
+						[ 'original_properties' => $properties, 'invalid_properties' => $invalid_properties ],
+					]
+				];
 			}
 
 			foreach ( $attr_spec_rule[ AMP_Rule_Spec::VALUE_PROPERTIES ] as $prop_name => $property_spec ) {
-
 				// Mandatory property is missing.
 				if ( ! empty( $property_spec['mandatory'] ) && ! isset( $properties[ $prop_name ] ) ) {
-					return AMP_Rule_Spec::FAIL;
+					return [
+						AMP_Rule_Spec::FAIL,
+						[
+							self::MISSING_MANDATORY_PROPERTY,
+							null,
+						]
+					];
 				}
 
 				if ( ! isset( $properties[ $prop_name ] ) ) {
@@ -1920,12 +1969,18 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					$prop_value     = (float) $prop_value;
 				}
 				if ( isset( $required_value ) && $prop_value !== $required_value ) {
-					return AMP_Rule_Spec::FAIL;
+					return [
+						AMP_Rule_Spec::FAIL,
+						[
+							self::MISSING_REQUIRED_PROPERTY_VALUE,
+							null,
+						]
+					];
 				}
 			}
-			return AMP_Rule_Spec::PASS;
+			return [ AMP_Rule_Spec::PASS, null ];
 		}
-		return AMP_Rule_Spec::NOT_APPLICABLE;
+		return [ AMP_Rule_Spec::NOT_APPLICABLE, null ];
 	}
 
 	/**

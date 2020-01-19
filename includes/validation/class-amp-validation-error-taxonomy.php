@@ -1756,6 +1756,7 @@ class AMP_Validation_Error_Taxonomy {
 			AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR === $validation_error['code'] ||
 			AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG === $validation_error['code'] ||
 			AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROCESSING_INSTRUCTION === $validation_error['code'] ||
+			AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE === $validation_error['code'] ||
 			'duplicate_element' === $validation_error['code']
 		) {
 			$summary_label = sprintf( '<%s>', $validation_error['parent_name'] );
@@ -2932,6 +2933,12 @@ class AMP_Validation_Error_Taxonomy {
 					$title .= sprintf( ': <code>%s</code>', esc_html( $validation_error['property_name'] ) );
 				}
 				return $title;
+			case AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE:
+				$title = esc_html__( 'Invalid property value', 'amp' );
+				if ( isset( $validation_error['attr_property_name'] ) ) {
+					$title .= sprintf( ': <code>%s</code>', esc_html( $validation_error['attr_property_name'] ) );
+				}
+				return $title;
 			default:
 				/* translators: %s error code */
 				return sprintf( __( 'Unknown error (%s)', 'amp' ), $validation_error['code'] );
@@ -2972,6 +2979,13 @@ class AMP_Validation_Error_Taxonomy {
 				return __( 'Type', 'amp' );
 			case 'sources':
 				return __( 'Sources', 'amp' );
+			case 'attr_property_name':
+				switch ( $validation_error['code'] ) {
+					case AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE:
+						return __( 'Invalid property', 'amp' );
+					default:
+						return __( 'Property', 'amp' );
+				}
 			default:
 				return $key;
 		}

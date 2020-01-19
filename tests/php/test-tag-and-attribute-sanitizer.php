@@ -2227,7 +2227,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<html amp><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=9,chrome=1"></head><body></body></html>',
 				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE, AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING ],
+				[ AMP_Tag_And_Attribute_Sanitizer::MISSING_REQUIRED_PROPERTY_VALUE, AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING ],
 			],
 			'bad_meta_charset'                        => [
 				'<html amp><head><meta charset="latin-1"><title>Mojibake?</title></head><body></body></html>',
@@ -2237,7 +2237,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="maximum-scale=1.0"></head><body></body></html>',
 				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE, AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING ],
+				[ AMP_Tag_And_Attribute_Sanitizer::MISSING_MANDATORY_PROPERTY, AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING ],
+			],
+			'invalid_meta_viewport_property'                       => [
+				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,maximum-scale=1.0,foo=bar"></head><body></body></html>',
+				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,maximum-scale=1.0"></head><body></body></html>',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE ],
 			],
 			'edge_meta_ua_compatible'                 => [
 				'<html amp><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"></head><body></body></html>',

@@ -137,10 +137,9 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 		 */
 		$viewport_tag      = $this->meta_tags[ self::TAG_VIEWPORT ][0];
 		$viewport_content  = $viewport_tag->getAttribute( 'content' );
-		$viewport_settings = array_map( 'trim', explode( ',', $viewport_content ) );
+		$viewport_settings = array_filter( array_map( 'trim', explode( ',', $viewport_content ) ) );
 		$width_found       = false;
 
-		// @todo The invalid/missing properties should raise validation errors. See <https://github.com/ampproject/amp-wp/pull/3758/files#r348074703>.
 		foreach ( $viewport_settings as $index => $viewport_setting ) {
 			list( $property, $value ) = array_map( 'trim', explode( '=', $viewport_setting ) );
 			if ( 'width' === $property ) {
