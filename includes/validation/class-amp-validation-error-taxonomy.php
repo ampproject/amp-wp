@@ -1758,6 +1758,7 @@ class AMP_Validation_Error_Taxonomy {
 			AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROCESSING_INSTRUCTION === $validation_error['code'] ||
 			AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE === $validation_error['code'] ||
 			AMP_Tag_And_Attribute_Sanitizer::MISSING_MANDATORY_PROPERTY === $validation_error['code'] ||
+			AMP_Tag_And_Attribute_Sanitizer::MISSING_REQUIRED_PROPERTY_VALUE === $validation_error['code'] ||
 			'duplicate_element' === $validation_error['code']
 		) {
 			$summary_label = sprintf( '<%s>', $validation_error['parent_name'] );
@@ -2946,6 +2947,14 @@ class AMP_Validation_Error_Taxonomy {
 					$title .= sprintf( ': <code>%s</code>', esc_html( $validation_error['attr_property_name'] ) );
 				}
 				return $title;
+			case AMP_Tag_And_Attribute_Sanitizer::MISSING_REQUIRED_PROPERTY_VALUE:
+				$title = sprintf(
+					wp_kses( __( 'Missing required value for <code>%s</code> property: <code>%s</code>', 'amp' ), [ 'code' => '' ] ),
+					esc_html( $validation_error['attr_property_name'] ),
+					esc_html( $validation_error['attr_property_value'] )
+				);
+
+				return $title;
 			default:
 				/* translators: %s error code */
 				return sprintf( __( 'Unknown error (%s)', 'amp' ), $validation_error['code'] );
@@ -2995,6 +3004,8 @@ class AMP_Validation_Error_Taxonomy {
 					default:
 						return __( 'Property', 'amp' );
 				}
+			case 'attr_property_value':
+				return __( 'Required value', 'amp' );
 			default:
 				return $key;
 		}

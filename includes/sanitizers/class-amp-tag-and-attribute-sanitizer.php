@@ -690,38 +690,41 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				list( $attr_node, $error_code, $error_data ) = $disallowed_attribute;
 				$validation_error['code']                    = $error_code;
 
-				switch ( $error_code ) {
-					case self::DISALLOWED_PROPERTY_IN_ATTR_VALUE:
-						$properties         = $error_data[ 'original_properties' ];
-						$invalid_properties = $error_data[ 'invalid_properties' ];
+				if ( self::DISALLOWED_PROPERTY_IN_ATTR_VALUE === $error_code ) {
+					$properties         = $error_data[ 'original_properties' ];
+					$invalid_properties = $error_data[ 'invalid_properties' ];
 
-						foreach ( $invalid_properties as $invalid_property ) {
-							$validation_error[ 'attr_property_name' ] = $invalid_property;
-							if ( $this->should_sanitize_validation_error( $validation_error, [ 'node' => $attr_node ] ) ) {
-								unset( $properties[ $invalid_property ] );
-							}
+					foreach ( $invalid_properties as $invalid_property ) {
+						$validation_error[ 'attr_property_name' ] = $invalid_property;
+						if ( $this->should_sanitize_validation_error( $validation_error, [ 'node' => $attr_node ] ) ) {
+							unset( $properties[ $invalid_property ] );
 						}
+					}
 
-						$valid_properties = array_reduce(
-							array_keys( $properties ),
-							static function ( $attr_value, $property ) use ( $properties ) {
-								if ( ! empty( $attr_value ) ) {
-									$attr_value .= ',';
-								}
-
-								return $attr_value . $property . '=' . $properties[ $property ];
+					$valid_properties = array_reduce(
+						array_keys( $properties ),
+						static function ( $attr_value, $property ) use ( $properties ) {
+							if ( ! empty( $attr_value ) ) {
+								$attr_value .= ',';
 							}
-						);
 
-						$node->setAttribute( $attr_node->nodeName, $valid_properties );
-						break;
-					case self::MISSING_MANDATORY_PROPERTY:
+							return $attr_value . $property . '=' . $properties[ $property ];
+						}
+					);
+
+					$node->setAttribute( $attr_node->nodeName, $valid_properties );
+				} else {
+					if ( self::MISSING_MANDATORY_PROPERTY === $error_code ) {
 						$validation_error[ 'attr_property_name' ] = $error_data['property'];
-					default:
-						$attr_spec = isset( $merged_attr_spec_list[ $attr_node->nodeName ] ) ? $merged_attr_spec_list[ $attr_node->nodeName ] : [];
-						if ( $this->remove_invalid_attribute( $node, $attr_node, $validation_error, $attr_spec ) ) {
-							$removed_attributes[] = $attr_node;
-						}
+					} elseif ( self::MISSING_REQUIRED_PROPERTY_VALUE === $error_code ) {
+						$validation_error[ 'attr_property_name' ] = $error_data['property'];
+						$validation_error[ 'attr_property_value' ] = $error_data['value'];
+					}
+
+					$attr_spec = isset( $merged_attr_spec_list[ $attr_node->nodeName ] ) ? $merged_attr_spec_list[ $attr_node->nodeName ] : [];
+					if ( $this->remove_invalid_attribute( $node, $attr_node, $validation_error, $attr_spec ) ) {
+						$removed_attributes[] = $attr_node;
+					}
 				}
 			}
 
@@ -1975,7 +1978,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 						AMP_Rule_Spec::FAIL,
 						[
 							self::MISSING_REQUIRED_PROPERTY_VALUE,
-							null,
+							[ 'property' => $prop_name, 'value' => $required_value ],
 						]
 					];
 				}
