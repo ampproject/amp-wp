@@ -2507,11 +2507,16 @@ class AMP_Validation_Error_Taxonomy {
 											break;
 										case 'handle':
 											if ( 'script' === $dependency_type ) {
-												esc_html_e( 'Script Handle', 'amp' );
+												esc_html_e( 'Enqueued Script', 'amp' );
 											} elseif ( 'style' === $dependency_type ) {
-												esc_html_e( 'Style Handle', 'amp' );
-											} else {
-												esc_html_e( 'Handle', 'amp' );
+												esc_html_e( 'Enqueued Style', 'amp' );
+											}
+											break;
+										case 'dependency_handle':
+											if ( 'script' === $dependency_type ) {
+												esc_html_e( 'Dependent Script', 'amp' );
+											} elseif ( 'style' === $dependency_type ) {
+												esc_html_e( 'Dependent Style', 'amp' );
 											}
 											break;
 										case 'block_content_index':
@@ -2607,7 +2612,7 @@ class AMP_Validation_Error_Taxonomy {
 										<?php endif; ?>
 									<?php elseif ( 'function' === $key ) : ?>
 										<code><?php echo esc_html( '{closure}' === $value ? $value : $value . '()' ); ?></code>
-									<?php elseif ( 'shortcode' === $key || 'handle' === $key ) : ?>
+									<?php elseif ( 'shortcode' === $key || 'handle' === $key || 'dependency_handle' === $key ) : ?>
 										<code><?php echo esc_html( $value ); ?></code>
 									<?php elseif ( 'block_name' === $key ) : ?>
 										<?php

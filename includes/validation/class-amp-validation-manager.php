@@ -1039,6 +1039,31 @@ class AMP_Validation_Manager {
 	}
 
 	/**
+	 * Recursively determine if a given dependency depends on another.
+	 *
+	 * @since 1.3
+	 *
+	 * @param WP_Dependencies $dependencies      Dependencies.
+	 * @param string          $current_handle    Current handle.
+	 * @param string          $dependency_handle Dependency handle.
+	 * @return bool Whether the current handle is a dependency of the dependency handle.
+	 */
+	protected static function has_dependency( WP_Dependencies $dependencies, $current_handle, $dependency_handle ) {
+		if ( $current_handle === $dependency_handle ) {
+			return true;
+		}
+		if ( ! isset( $dependencies->registered[ $current_handle ] ) ) {
+			return false;
+		}
+		foreach ( $dependencies->registered[ $current_handle ]->deps as $handle ) {
+			if ( self::has_dependency( $dependencies, $handle, $dependency_handle ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Walk back tree to find the open sources.
 	 *
 	 * @todo This method and others for sourcing could be moved to a separate class.
@@ -1076,13 +1101,37 @@ class AMP_Validation_Manager {
 			&&
 			preg_match( '/(?P<handle>.+)-css$/', (string) $node->getAttribute( 'id' ), $matches )
 			&&
-			isset( self::$enqueued_style_sources[ $matches['handle'] ] )
+			wp_styles()->query( $matches['handle'] )
 		);
 		if ( $is_enqueued_link ) {
-			$sources = array_merge(
-				self::$enqueued_style_sources[ $matches['handle'] ],
-				$sources
-			);
+			// Directly enqueued stylesheet.
+			if ( isset( self::$enqueued_style_sources[ $matches['handle'] ] ) ) {
+				$sources = array_merge(
+					self::$enqueued_style_sources[ $matches['handle'] ],
+					$sources
+				);
+			}
+
+			// Stylesheet added as a dependency.
+			foreach ( wp_styles()->done as $style_handle ) {
+				if ( $matches['handle'] !== $style_handle ) {
+					continue;
+				}
+				foreach ( self::$enqueued_style_sources as $enqueued_style_sources_handle => $enqueued_style_sources ) {
+					if ( $enqueued_style_sources_handle !== $style_handle && self::has_dependency( wp_styles(), $enqueued_style_sources_handle, $style_handle ) ) {
+						$sources = array_merge(
+							array_map(
+								static function ( $enqueued_style_source ) use ( $style_handle ) {
+									$enqueued_style_source['dependency_handle'] = $style_handle;
+									return $enqueued_style_source;
+								},
+								$enqueued_style_sources
+							),
+							$sources
+						);
+					}
+				}
+			}
 		}
 
 		/**
@@ -1093,26 +1142,54 @@ class AMP_Validation_Manager {
 		if ( $node instanceof DOMElement && 'script' === $node->nodeName ) {
 			$enqueued_script_handles = array_intersect( wp_scripts()->done, array_keys( self::$enqueued_script_sources ) );
 
+			$is_matching_script = static function ( DOMElement $element, $script_handle ) {
+				if ( ! isset( wp_scripts()->registered[ $script_handle ] ) ) {
+					return false;
+				}
+				$script_dependency = wp_scripts()->registered[ $script_handle ];
+				if ( empty( $script_dependency->src ) ) {
+					return false;
+				}
+
+				// Script attribute is haystack because includes protocol and may include query args (like ver).
+				return false !== strpos(
+					$element->getAttribute( 'src' ),
+					preg_replace( '#^https?:(?=//)#', '', $script_dependency->src )
+				);
+			};
+
 			if ( $node->hasAttribute( 'src' ) ) {
 
-				// External script.
-				$src = $node->getAttribute( 'src' );
+				// External scripts, directly enqueued.
 				foreach ( $enqueued_script_handles as $enqueued_script_handle ) {
-					$script_dependency  = wp_scripts()->registered[ $enqueued_script_handle ];
-					$is_matching_script = (
-						$script_dependency
-						&&
-						$script_dependency->src
-						&&
-						// Script attribute is haystack because includes protocol and may include query args (like ver).
-						false !== strpos( $src, preg_replace( '#^https?:(?=//)#', '', $script_dependency->src ) )
+					if ( ! $is_matching_script( $node, $enqueued_script_handle ) ) {
+						continue;
+					}
+					$sources = array_merge(
+						self::$enqueued_script_sources[ $enqueued_script_handle ],
+						$sources
 					);
-					if ( $is_matching_script ) {
-						$sources = array_merge(
-							self::$enqueued_script_sources[ $enqueued_script_handle ],
-							$sources
-						);
-						break;
+					break;
+				}
+
+				// External scripts, added as a dependency.
+				foreach ( wp_scripts()->done as $style_handle ) {
+					if ( ! $is_matching_script( $node, $style_handle ) ) {
+						continue;
+					}
+					foreach ( self::$enqueued_script_sources as $enqueued_style_sources_handle => $enqueued_style_sources ) {
+						if ( $enqueued_style_sources_handle !== $style_handle && self::has_dependency( wp_scripts(), $enqueued_style_sources_handle, $style_handle ) ) {
+							$sources = array_merge(
+								array_map(
+									static function ( $enqueued_script_source ) use ( $style_handle ) {
+										$enqueued_script_source['dependency_handle'] = $style_handle;
+										return $enqueued_script_source;
+									},
+									$enqueued_style_sources
+								),
+								$sources
+							);
+						}
 					}
 				}
 			} elseif ( $node->firstChild ) {
