@@ -691,11 +691,11 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				$validation_error['code']                    = $error_code;
 
 				if ( self::DISALLOWED_PROPERTY_IN_ATTR_VALUE === $error_code ) {
-					$properties         = $error_data[ 'original_properties' ];
-					$invalid_properties = $error_data[ 'invalid_properties' ];
+					$properties         = $error_data['original_properties'];
+					$invalid_properties = $error_data['invalid_properties'];
 
 					foreach ( $invalid_properties as $invalid_property ) {
-						$validation_error[ 'attr_property_name' ] = $invalid_property;
+						$validation_error['attr_property_name'] = $invalid_property;
 						if ( $this->should_sanitize_validation_error( $validation_error, [ 'node' => $attr_node ] ) ) {
 							unset( $properties[ $invalid_property ] );
 						}
@@ -715,10 +715,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					$node->setAttribute( $attr_node->nodeName, $valid_properties );
 				} else {
 					if ( self::MISSING_MANDATORY_PROPERTY === $error_code ) {
-						$validation_error[ 'attr_property_name' ] = $error_data['property'];
+						$validation_error['attr_property_name'] = $error_data['property'];
 					} elseif ( self::MISSING_REQUIRED_PROPERTY_VALUE === $error_code ) {
-						$validation_error[ 'attr_property_name' ] = $error_data['property'];
-						$validation_error[ 'attr_property_value' ] = $error_data['value'];
+						$validation_error['attr_property_name']  = $error_data['property'];
+						$validation_error['attr_property_value'] = $error_data['value'];
 					}
 
 					$attr_spec = isset( $merged_attr_spec_list[ $attr_node->nodeName ] ) ? $merged_attr_spec_list[ $attr_node->nodeName ] : [];
@@ -1915,12 +1915,11 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string           $attr_name      Attribute name.
 	 * @param array[]|string[] $attr_spec_rule Attribute spec rule.
 	 *
-	 * @return array[] Array where the result code is accompanied by its data in the format [ $result_code, $result_data ]
-	 * 		The result code could be:
-	 *      - AMP_Rule_Spec::PASS - $attr_name has a value that matches the rule.
-	 *      - AMP_Rule_Spec::FAIL - $attr_name has a value that does *not* match rule.
-	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
-	 *                                        is no rule for this attribute.
+	 * @return array[] Array where the result code is accompanied by its data in the format [ $result_code, $result_data ].
+	 * The result code could be:
+	 *   - AMP_Rule_Spec::PASS           - $attr_name has a value that matches the rule.
+	 *   - AMP_Rule_Spec::FAIL           - $attr_name has a value that does *not* match rule.
+	 *   - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there is no rule for this attribute.
 	 */
 	private function check_attr_spec_rule_value_properties( DOMElement $node, $attr_name, $attr_spec_rule ) {
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_PROPERTIES ] ) && $node->hasAttribute( $attr_name ) ) {
@@ -1942,8 +1941,11 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					AMP_Rule_Spec::FAIL,
 					[
 						self::DISALLOWED_PROPERTY_IN_ATTR_VALUE,
-						[ 'original_properties' => $properties, 'invalid_properties' => $invalid_properties ],
-					]
+						[
+							'original_properties' => $properties,
+							'invalid_properties'  => $invalid_properties,
+						],
+					],
 				];
 			}
 
@@ -1955,7 +1957,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 						[
 							self::MISSING_MANDATORY_PROPERTY,
 							[ 'property' => $prop_name ],
-						]
+						],
 					];
 				}
 
@@ -1978,8 +1980,11 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 						AMP_Rule_Spec::FAIL,
 						[
 							self::MISSING_REQUIRED_PROPERTY_VALUE,
-							[ 'property' => $prop_name, 'value' => $required_value ],
-						]
+							[
+								'property' => $prop_name,
+								'value'    => $required_value,
+							],
+						],
 					];
 				}
 			}

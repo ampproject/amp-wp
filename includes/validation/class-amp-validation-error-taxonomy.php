@@ -2128,7 +2128,7 @@ class AMP_Validation_Error_Taxonomy {
 				if ( in_array( $key, [ 'code', 'type', 'property_value' ], true ) ) {
 					continue; // Handled above.
 				}
-				if ( 'spec_name' === $key  ) {
+				if ( 'spec_name' === $key ) {
 					continue;
 				}
 				?>
@@ -2961,7 +2961,8 @@ class AMP_Validation_Error_Taxonomy {
 				return $title;
 			case AMP_Tag_And_Attribute_Sanitizer::MISSING_REQUIRED_PROPERTY_VALUE:
 				$title = sprintf(
-					wp_kses( __( 'Missing required value for <code>%s</code> property: <code>%s</code>', 'amp' ), [ 'code' => '' ] ),
+					/* translators: %1$s is the property name, %2$s is the value for the property */
+					wp_kses( __( 'Missing required value for <code>%1$s</code> property: <code>%2$s</code>', 'amp' ), [ 'code' => '' ] ),
 					esc_html( $validation_error['attr_property_name'] ),
 					esc_html( $validation_error['attr_property_value'] )
 				);
@@ -3014,13 +3015,12 @@ class AMP_Validation_Error_Taxonomy {
 			case 'sources':
 				return __( 'Sources', 'amp' );
 			case 'attr_property_name':
-				switch ( $validation_error['code'] ) {
-					case AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE:
-						return __( 'Invalid property', 'amp' );
-					case AMP_Tag_And_Attribute_Sanitizer::MISSING_MANDATORY_PROPERTY:
-						return __( 'Missing property', 'amp' );
-					default:
-						return __( 'Property', 'amp' );
+				if ( AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE === $validation_error['code'] ) {
+					return __( 'Invalid property', 'amp' );
+				} elseif ( AMP_Tag_And_Attribute_Sanitizer::MISSING_MANDATORY_PROPERTY === $validation_error['code'] ) {
+					return __( 'Missing property', 'amp' );
+				} else {
+					return __( 'Property', 'amp' );
 				}
 			case 'attr_property_value':
 				return __( 'Required value', 'amp' );
