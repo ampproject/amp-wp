@@ -1197,35 +1197,42 @@ class AMP_Validation_Manager {
 
 				// Inline script.
 				foreach ( wp_scripts()->done as $script_handle ) {
-					$inline_scripts = array_filter(
-						array_merge(
-							(array) wp_scripts()->get_data( $script_handle, 'data' ),
-							(array) wp_scripts()->get_data( $script_handle, 'before' ),
-							(array) wp_scripts()->get_data( $script_handle, 'after' )
-						)
+					$inline_script_groups = array_filter(
+						[
+							'data'   => array_filter( (array) wp_scripts()->get_data( $script_handle, 'data' ) ),
+							'before' => array_filter( (array) wp_scripts()->get_data( $script_handle, 'before' ) ),
+							'after'  => array_filter( (array) wp_scripts()->get_data( $script_handle, 'after' ) ),
+						]
 					);
-					foreach ( $inline_scripts as $inline_script ) {
+					foreach ( $inline_script_groups as $inline_type => $inline_scripts ) {
 						/*
 						 * Check to see if the inline script is inside (or the same) as the script in the document.
 						 * Note that WordPress takes the registered inline script and will output it with newlines
 						 * padding it, and sometimes with the script wrapped by CDATA blocks.
 						 */
-						if ( false === strpos( $text, trim( $inline_script ) ) ) {
+						if ( false === strpos( $text, trim( implode( "\n", $inline_scripts ) ) ) ) { // Imploding with "\n" because \WP_Scripts::print_inline_script() does this.
 							continue;
 						}
 
 						if ( isset( self::$enqueued_script_sources[ $script_handle ] ) ) {
 							$sources = array_merge(
 								$sources,
-								self::$enqueued_script_sources[ $script_handle ]
+								array_map(
+									static function( $enqueued_script_source ) use ( $inline_type ) {
+										$enqueued_script_source['inline_script_type'] = $inline_type; // @todo This is wrong. It needs to be part of the one original source.
+										return $enqueued_script_source;
+									},
+									self::$enqueued_script_sources[ $script_handle ]
+								)
 							);
 						} else {
 							foreach ( self::$enqueued_script_sources as $enqueued_script_sources_handle => $enqueued_script_sources ) {
 								if ( $enqueued_script_sources_handle !== $script_handle && self::has_dependency( wp_scripts(), $enqueued_script_sources_handle, $script_handle ) ) {
 									$sources = array_merge(
 										array_map(
-											static function ( $enqueued_script_source ) use ( $script_handle ) {
-												$enqueued_script_source['dependency_handle'] = $script_handle;
+											static function ( $enqueued_script_source ) use ( $inline_type, $script_handle ) {
+												$enqueued_script_source['dependency_handle']  = $script_handle;
+												$enqueued_script_source['inline_script_type'] = $inline_type; // @todo This is wrong. It needs to be part of the one original source.
 												return $enqueued_script_source;
 											},
 											$enqueued_script_sources
