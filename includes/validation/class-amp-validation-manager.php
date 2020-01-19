@@ -1173,19 +1173,19 @@ class AMP_Validation_Manager {
 				}
 
 				// External scripts, added as a dependency.
-				foreach ( wp_scripts()->done as $style_handle ) {
-					if ( ! $is_matching_script( $node, $style_handle ) ) {
+				foreach ( wp_scripts()->done as $script_handle ) {
+					if ( ! $is_matching_script( $node, $script_handle ) ) {
 						continue;
 					}
-					foreach ( self::$enqueued_script_sources as $enqueued_style_sources_handle => $enqueued_style_sources ) {
-						if ( $enqueued_style_sources_handle !== $style_handle && self::has_dependency( wp_scripts(), $enqueued_style_sources_handle, $style_handle ) ) {
+					foreach ( self::$enqueued_script_sources as $enqueued_script_sources_handle => $enqueued_script_sources ) {
+						if ( $enqueued_script_sources_handle !== $script_handle && self::has_dependency( wp_scripts(), $enqueued_script_sources_handle, $script_handle ) ) {
 							$sources = array_merge(
 								array_map(
-									static function ( $enqueued_script_source ) use ( $style_handle ) {
-										$enqueued_script_source['dependency_handle'] = $style_handle;
+									static function ( $enqueued_script_source ) use ( $script_handle ) {
+										$enqueued_script_source['dependency_handle'] = $script_handle;
 										return $enqueued_script_source;
 									},
-									$enqueued_style_sources
+									$enqueued_script_sources
 								),
 								$sources
 							);
@@ -1193,15 +1193,15 @@ class AMP_Validation_Manager {
 					}
 				}
 			} elseif ( $node->firstChild ) {
+				$text = $node->textContent;
 
 				// Inline script.
-				$text = $node->textContent;
-				foreach ( $enqueued_script_handles as $enqueued_script_handle ) {
+				foreach ( wp_scripts()->done as $script_handle ) {
 					$inline_scripts = array_filter(
 						array_merge(
-							(array) wp_scripts()->get_data( $enqueued_script_handle, 'data' ),
-							(array) wp_scripts()->get_data( $enqueued_script_handle, 'before' ),
-							(array) wp_scripts()->get_data( $enqueued_script_handle, 'after' )
+							(array) wp_scripts()->get_data( $script_handle, 'data' ),
+							(array) wp_scripts()->get_data( $script_handle, 'before' ),
+							(array) wp_scripts()->get_data( $script_handle, 'after' )
 						)
 					);
 					foreach ( $inline_scripts as $inline_script ) {
@@ -1210,13 +1210,32 @@ class AMP_Validation_Manager {
 						 * Note that WordPress takes the registered inline script and will output it with newlines
 						 * padding it, and sometimes with the script wrapped by CDATA blocks.
 						 */
-						if ( false !== strpos( $text, trim( $inline_script ) ) ) {
-							$sources = array_merge(
-								self::$enqueued_script_sources[ $enqueued_script_handle ],
-								$sources
-							);
-							break;
+						if ( false === strpos( $text, trim( $inline_script ) ) ) {
+							continue;
 						}
+
+						if ( isset( self::$enqueued_script_sources[ $script_handle ] ) ) {
+							$sources = array_merge(
+								$sources,
+								self::$enqueued_script_sources[ $script_handle ]
+							);
+						} else {
+							foreach ( self::$enqueued_script_sources as $enqueued_script_sources_handle => $enqueued_script_sources ) {
+								if ( $enqueued_script_sources_handle !== $script_handle && self::has_dependency( wp_scripts(), $enqueued_script_sources_handle, $script_handle ) ) {
+									$sources = array_merge(
+										array_map(
+											static function ( $enqueued_script_source ) use ( $script_handle ) {
+												$enqueued_script_source['dependency_handle'] = $script_handle;
+												return $enqueued_script_source;
+											},
+											$enqueued_script_sources
+										),
+										$sources
+									);
+								}
+							}
+						}
+						break;
 					}
 				}
 			}
