@@ -30,7 +30,7 @@ const DropZoneComponent = styled.div`
 	` }
 `;
 
-function DropZone( { children, onDrop } ) {
+function DropZone( { children, onDrop, pageIndex } ) {
 	const dropZoneElement = useRef( null );
 	const [ dropZone, setDropZone ] = useState( null );
 	const { actions: { registerDropZone, unregisterDropZone, resetHoverState }, state: { hoveredDropZone } } = useDropZone();
@@ -80,7 +80,7 @@ function DropZone( { children, onDrop } ) {
 				y: evt.clientY - rect.top < rect.bottom - evt.clientY ? 'top' : 'bottom',
 			};
 			if ( 'default' === getDragType( evt ) ) {
-				onDrop( evt, relativePosition );
+				onDrop( evt, { position: relativePosition, pageIndex } );
 			}
 			// @todo Support for files when it becomes necessary.
 		}
@@ -103,6 +103,7 @@ DropZone.propTypes = {
 		PropTypes.node,
 	] ).isRequired,
 	onDrop: PropTypes.func,
+	pageIndex: PropTypes.number,
 };
 
 export default DropZone;
