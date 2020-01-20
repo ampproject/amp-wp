@@ -68,7 +68,8 @@ function useClipboardHandlers( container, copyCutHandler, pasteHandler ) {
 
 /**
  * @param {?Element} target
- * @return {boolean} If is copy paste target.
+ * @return {boolean} Where the target can be used for copy/paste. This mainly
+ * ignores platform level targets.
  */
 function isCopyPasteTarget( target ) {
 	return ( target && ! BLACKLIST_CLIPBOARD_ELEMENTS.includes( target.tagName ) && ! target.closest( '[contenteditable="true"]' ) );
