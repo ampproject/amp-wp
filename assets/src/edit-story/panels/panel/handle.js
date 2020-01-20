@@ -33,7 +33,7 @@ const Handle = styled.button.attrs( { type: 'button' } )`
 
 const Bar = styled.div`
 	margin-top: 4px;
-	background-color: black;
+	background-color: ${ ( { theme } ) => theme.colors.bg.v0 };
 	width: 32px;
 	height: 4px;
 	border-radius: 2px;

@@ -12,6 +12,7 @@ export const GlobalStyle = createGlobalStyle`
 const theme = {
 	colors: {
 		bg: {
+			v0: '#000000',
 			v1: '#191C28',
 			v2: '#222636',
 			v3: '#242A3B',
