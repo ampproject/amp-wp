@@ -13,8 +13,8 @@ export const defaultAttributes = {
 	fontWeight: 400,
 	fontSize: 14,
 	fontStyle: 'normal',
-	color: 'black',
-	backgroundColor: 'transparent',
+	color: '#000000',
+	backgroundColor: '#ffffff',
 };
 
 export const hasEditMode = true;
