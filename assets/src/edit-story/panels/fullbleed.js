@@ -28,7 +28,7 @@ function FullbleedPanel( { selectedElements, onSetProperties } ) {
 		onSetProperties( newState );
 	};
 	return (
-		<SimplePanel title="Actions">
+		<SimplePanel title="Fullbleed">
 			<ActionButton onClick={ handleClick }>
 				{ state.isFullbleed ? 'Unset as fullbleed' : 'Set as fullbleed' }
 			</ActionButton>

@@ -27,7 +27,7 @@ function PositionPanel( { selectedElements, onSetProperties } ) {
 		evt.preventDefault();
 	};
 	return (
-		<SimplePanel title="Actions" onSubmit={ handleSubmit }>
+		<SimplePanel title="Position" onSubmit={ handleSubmit }>
 			<InputGroup
 				label="X"
 				value={ state.x }

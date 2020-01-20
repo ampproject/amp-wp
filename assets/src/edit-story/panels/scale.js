@@ -31,7 +31,7 @@ function ScalePanel( { selectedElements, onSetProperties } ) {
 		evt.preventDefault();
 	};
 	return (
-		<SimplePanel title="Actions" onSubmit={ handleSubmit }>
+		<SimplePanel title="Scale" onSubmit={ handleSubmit }>
 			<InputGroup
 				label="Scale"
 				value={ typeof state.scale === 'number' ? state.scale : '(auto)' }
