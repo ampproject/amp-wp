@@ -31,11 +31,12 @@ function calculateFitTextFontSize( measurer, expectedHeight, expectedWidth ) {
 		}
 	};
 
+	const { display, height, width, position } = measurer.style;
 	const originalStyle = {
-		display: measurer.style.display,
-		height: measurer.style.height,
-		width: measurer.style.width,
-		position: measurer.style.position,
+		display,
+		height,
+		width,
+		position,
 	};
 
 	const measuringStyle = {
