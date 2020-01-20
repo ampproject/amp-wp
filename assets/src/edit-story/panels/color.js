@@ -29,7 +29,7 @@ function ColorPanel( { selectedElements, onSetProperties } ) {
 				{ 'Color' }
 			</Title>
 			<InputGroup
-				type="text"
+				type="color"
 				label="Color"
 				value={ state.color }
 				isMultiple={ color === '' }
