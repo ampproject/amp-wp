@@ -79,7 +79,7 @@ function Carousel() {
 		if ( hasHorizontalOverflow ) {
 			const currentPageRef = pageRefs.current[ currentPageId ];
 
-			if ( ! currentPageRef.scrollIntoView ) {
+			if ( ! currentPageRef || ! currentPageRef.scrollIntoView ) {
 				return;
 			}
 
