@@ -26,11 +26,11 @@ function RotationPanel( { selectedElements, onSetProperties } ) {
 		evt.preventDefault();
 	};
 	return (
-		<Panel onSubmit={ handleSubmit }>
+		<Panel>
 			<PanelTitle>
 				{ 'Rotation' }
 			</PanelTitle>
-			<PanelContent>
+			<PanelContent onSubmit={ handleSubmit }>
 				<InputGroup
 					label="Rotation angle"
 					value={ state.rotationAngle }

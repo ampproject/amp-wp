@@ -28,7 +28,7 @@ function FullbleedPanel( { selectedElements, onSetProperties } ) {
 		onSetProperties( newState );
 	};
 	return (
-		<Panel onSubmit={ ( event ) => event.preventDefault() }>
+		<Panel>
 			<PanelTitle>
 				{ 'Fullbleed' }
 			</PanelTitle>

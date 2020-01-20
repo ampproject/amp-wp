@@ -25,11 +25,11 @@ function ColorPanel( { selectedElements, onSetProperties } ) {
 		evt.preventDefault();
 	};
 	return (
-		<Panel onSubmit={ handleSubmit }>
+		<Panel>
 			<PanelTitle>
 				{ 'Color' }
 			</PanelTitle>
-			<PanelContent>
+			<PanelContent onSubmit={ handleSubmit }>
 				<InputGroup
 					type="color"
 					label="Color"

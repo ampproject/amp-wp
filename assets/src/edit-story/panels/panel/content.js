@@ -19,7 +19,7 @@ const Form = styled.form`
 	overflow: auto;
 `;
 
-function Content( { children } ) {
+function Content( { children, ...rest } ) {
 	const { state: { isCollapsed, height } } = useContext( panelContext );
 
 	if ( isCollapsed ) {
@@ -31,7 +31,7 @@ function Content( { children } ) {
 	};
 
 	return (
-		<Form style={ formStyle }>
+		<Form style={ formStyle } { ...rest }>
 			{ children }
 		</Form>
 	);
