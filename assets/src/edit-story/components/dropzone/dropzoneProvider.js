@@ -17,10 +17,22 @@ function DropZoneProvider( { children } ) {
 	const [ dropZones, setDropZones ] = useState( [] );
 	const [ hoveredDropZone, setHoveredDropZone ] = useState( null );
 
-	const addDropZone = useCallback(
+	const registerDropZone = useCallback(
 		( dropZone ) => {
-			setDropZones( ( oldDropZones ) => ( [ ...oldDropZones, dropZone ] ) );
-		}, [] );
+			// If dropZone isn't registered yet.
+			if ( dropZone && ! dropZones.some( ( { node } ) => node === dropZone.node ) ) {
+				setDropZones( ( oldDropZones ) => ( [ ...oldDropZones, dropZone ] ) );
+			}
+		}, [ dropZones ] );
+
+	// Unregisters dropzones which node's don't exist.
+	const unregisterDropZone = useCallback(
+		( dropZone ) => {
+			// If dropZone needs unregistering.
+			if ( dropZones.some( ( dz ) => dz === dropZone ) ) {
+				setDropZones( ( oldDropZones ) => oldDropZones.filter( ( dz ) => dz !== dropZone ) );
+			}
+		}, [ dropZones ] );
 
 	const isWithinElementBounds = ( element, x, y ) => {
 		const rect = element.getBoundingClientRect();
@@ -37,7 +49,9 @@ function DropZoneProvider( { children } ) {
 	const onDragOver = ( evt ) => {
 		evt.preventDefault();
 		// Get the hovered dropzone. // @todo Consider dropzone inside dropzone, will we need this?
-		const foundDropZones = dropZones.filter( ( dropZone ) => isWithinElementBounds( dropZone.ref, evt.clientX, evt.clientY ) );
+		const foundDropZones = dropZones.filter( ( dropZone ) => {
+			return isWithinElementBounds( dropZone.node, evt.clientX, evt.clientY );
+		} );
 
 		// If there was a dropzone before and nothing was found now, reset.
 		if ( hoveredDropZone && ! foundDropZones.length ) {
@@ -46,10 +60,10 @@ function DropZoneProvider( { children } ) {
 		}
 		const foundDropZone = foundDropZones[ 0 ];
 		// If dropzone not found, do nothing.
-		if ( ! foundDropZone || ! foundDropZone.ref ) {
+		if ( ! foundDropZone || ! foundDropZone.node ) {
 			return;
 		}
-		const rect = foundDropZone.ref.getBoundingClientRect();
+		const rect = foundDropZone.node.getBoundingClientRect();
 
 		const position = {
 			x: evt.clientX - rect.left < rect.right - evt.clientX ? 'left' : 'right',
@@ -57,7 +71,7 @@ function DropZoneProvider( { children } ) {
 		};
 
 		setHoveredDropZone( {
-			ref: foundDropZone.ref,
+			node: foundDropZone.node,
 			position,
 		} );
 	};
@@ -68,7 +82,8 @@ function DropZoneProvider( { children } ) {
 			dropZones,
 		},
 		actions: {
-			addDropZone,
+			registerDropZone,
+			unregisterDropZone,
 			resetHoverState,
 		},
 	};

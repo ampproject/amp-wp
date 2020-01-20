@@ -7,7 +7,7 @@ import styled from 'styled-components';
 /**
  * WordPress dependencies
  */
-import { useRef, useLayoutEffect } from '@wordpress/element';
+import { useRef, useState, useLayoutEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -32,15 +32,21 @@ const DropZoneComponent = styled.div`
 
 function DropZone( { children, onDrop } ) {
 	const dropZoneElement = useRef( null );
-	const { actions: { addDropZone, resetHoverState }, state: { hoveredDropZone, dropZones } } = useDropZone();
+	const [ dropZone, setDropZone ] = useState( null );
+	const { actions: { registerDropZone, unregisterDropZone, resetHoverState }, state: { hoveredDropZone } } = useDropZone();
 
 	useLayoutEffect( () => {
-		if ( ! dropZones.some( ( { ref } ) => ref === dropZoneElement.current ) ) {
-			addDropZone( {
-				ref: dropZoneElement.current,
-			} );
-		}
-	}, [ addDropZone, dropZones ] );
+		setDropZone( {
+			node: dropZoneElement.current,
+		} );
+	}, [ dropZoneElement ] );
+
+	useLayoutEffect( () => {
+		registerDropZone( dropZone );
+		return () => {
+			unregisterDropZone( dropZone );
+		};
+	}, [ dropZone, registerDropZone, unregisterDropZone ] );
 
 	const getDragType = ( { dataTransfer } ) => {
 		if ( dataTransfer ) {
@@ -81,7 +87,7 @@ function DropZone( { children, onDrop } ) {
 		evt.preventDefault();
 	};
 
-	const isDropZoneActive = dropZoneElement.current && hoveredDropZone && hoveredDropZone.ref === dropZoneElement.current;
+	const isDropZoneActive = dropZoneElement.current && hoveredDropZone && hoveredDropZone.node === dropZoneElement.current;
 	// @todo Currently static, can be adjusted for other use cases.
 	const highlightWidth = 4;
 	return (
