@@ -6,12 +6,12 @@ import { PAGE_WIDTH } from '../constants';
 /**
  * Updates Text element's width and height if it's being resized from edges or there are font changes.
  *
- * @param {Object}  element Element to measure.
- * @param {string}  content Text content.
- * @param {number}  width   Current element width.
- * @param {number}  height  Current element height.
- * @param {boolean} fixedMeasure If one side is locked for changing automatically, can be 'width' or 'height'.
- * @return {Object} Updated width and height.
+ * @param {Object}  params Params.
+ * @param {Object}  params.element Element to measure.
+ * @param {string}  params.content Text content.
+ * @param {number}  params.width   Current element width.
+ * @param {number}  params.height  Current element height.
+ * @param {boolean} params.fixedMeasure If one side is locked for changing automatically, can be 'width' or 'height'.
  */
 function getAdjustedElementDimensions( { element, content, width, height, fixedMeasure } ) {
 	if ( ! element || ! content.length ) {
