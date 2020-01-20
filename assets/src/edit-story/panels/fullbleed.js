@@ -11,7 +11,7 @@ import { useEffect, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { Panel, PanelTitle, PanelContent } from './panel';
+import { SimplePanel } from './panel';
 import { ActionButton, getCommonValue } from './elements';
 
 function FullbleedPanel( { selectedElements, onSetProperties } ) {
@@ -28,16 +28,11 @@ function FullbleedPanel( { selectedElements, onSetProperties } ) {
 		onSetProperties( newState );
 	};
 	return (
-		<Panel>
-			<PanelTitle>
-				{ 'Fullbleed' }
-			</PanelTitle>
-			<PanelContent>
-				<ActionButton onClick={ handleClick }>
-					{ state.isFullbleed ? 'Unset as fullbleed' : 'Set as fullbleed' }
-				</ActionButton>
-			</PanelContent>
-		</Panel>
+		<SimplePanel title="Actions">
+			<ActionButton onClick={ handleClick }>
+				{ state.isFullbleed ? 'Unset as fullbleed' : 'Set as fullbleed' }
+			</ActionButton>
+		</SimplePanel>
 	);
 }
 

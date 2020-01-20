@@ -13,7 +13,7 @@ import { useEffect, useState } from '@wordpress/element';
  */
 import { useFont } from '../app';
 import { MIN_FONT_SIZE, MAX_FONT_SIZE } from '../constants';
-import { Panel, PanelTitle, PanelContent } from './panel';
+import { SimplePanel } from './panel';
 import { InputGroup, SelectMenu, getCommonValue } from './elements';
 
 function FontPanel( { selectedElements, onSetProperties } ) {
@@ -43,50 +43,45 @@ function FontPanel( { selectedElements, onSetProperties } ) {
 	];
 
 	return (
-		<Panel>
-			<PanelTitle>
-				{ 'Font' }
-			</PanelTitle>
-			<PanelContent onSubmit={ handleSubmit }>
-				{ fonts && <SelectMenu
-					label="Font family"
-					options={ fonts }
-					value={ state.fontFamily }
-					isMultiple={ fontFamily === '' }
-					onChange={ ( value ) => {
-						const currentFontWeights = getFontWeight( value );
-						const currentFontFallback = getFontFallback( value );
-						const fontWeightsArr = currentFontWeights.map( ( { thisValue } ) => thisValue );
-						const newFontWeight = ( fontWeightsArr && fontWeightsArr.includes( state.fontWeight ) ) ? state.fontWeight : 400;
-						setState( { ...state, fontFamily: value, fontWeight: parseInt( newFontWeight ), fontWeights: currentFontWeights, fontFallback: currentFontFallback } );
-					} }
-				/> }
-				<SelectMenu
-					label="Font style"
-					options={ fontStyles }
-					isMultiple={ fontStyle === '' }
-					value={ state.fontStyle }
-					onChange={ ( value ) => setState( { ...state, fontStyle: value } ) }
-				/>
-				{ state.fontWeights && <SelectMenu
-					label="Font weight"
-					options={ state.fontWeights }
-					value={ state.fontWeight }
-					isMultiple={ fontWeight === '' }
-					onChange={ ( value ) => setState( { ...state, fontWeight: parseInt( value ) } ) }
-				/> }
-				<InputGroup
-					type="number"
-					label="Font size"
-					value={ state.fontSize }
-					isMultiple={ fontSize === '' }
-					postfix={ 'px' }
-					min={ MIN_FONT_SIZE }
-					max={ MAX_FONT_SIZE }
-					onChange={ ( value ) => setState( { ...state, fontSize: parseInt( value ) } ) }
-				/>
-			</PanelContent>
-		</Panel>
+		<SimplePanel title="Actions" onSubmit={ handleSubmit }>
+			{ fonts && <SelectMenu
+				label="Font family"
+				options={ fonts }
+				value={ state.fontFamily }
+				isMultiple={ fontFamily === '' }
+				onChange={ ( value ) => {
+					const currentFontWeights = getFontWeight( value );
+					const currentFontFallback = getFontFallback( value );
+					const fontWeightsArr = currentFontWeights.map( ( { thisValue } ) => thisValue );
+					const newFontWeight = ( fontWeightsArr && fontWeightsArr.includes( state.fontWeight ) ) ? state.fontWeight : 400;
+					setState( { ...state, fontFamily: value, fontWeight: parseInt( newFontWeight ), fontWeights: currentFontWeights, fontFallback: currentFontFallback } );
+				} }
+			/> }
+			<SelectMenu
+				label="Font style"
+				options={ fontStyles }
+				isMultiple={ fontStyle === '' }
+				value={ state.fontStyle }
+				onChange={ ( value ) => setState( { ...state, fontStyle: value } ) }
+			/>
+			{ state.fontWeights && <SelectMenu
+				label="Font weight"
+				options={ state.fontWeights }
+				value={ state.fontWeight }
+				isMultiple={ fontWeight === '' }
+				onChange={ ( value ) => setState( { ...state, fontWeight: parseInt( value ) } ) }
+			/> }
+			<InputGroup
+				type="number"
+				label="Font size"
+				value={ state.fontSize }
+				isMultiple={ fontSize === '' }
+				postfix={ 'px' }
+				min={ MIN_FONT_SIZE }
+				max={ MAX_FONT_SIZE }
+				onChange={ ( value ) => setState( { ...state, fontSize: parseInt( value ) } ) }
+			/>
+		</SimplePanel>
 	);
 }
 

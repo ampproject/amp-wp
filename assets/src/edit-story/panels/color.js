@@ -11,7 +11,7 @@ import { useEffect, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { Panel, PanelTitle, PanelContent } from './panel';
+import { SimplePanel } from './panel';
 import { InputGroup, getCommonValue } from './elements';
 
 function ColorPanel( { selectedElements, onSetProperties } ) {
@@ -25,20 +25,15 @@ function ColorPanel( { selectedElements, onSetProperties } ) {
 		evt.preventDefault();
 	};
 	return (
-		<Panel>
-			<PanelTitle>
-				{ 'Color' }
-			</PanelTitle>
-			<PanelContent onSubmit={ handleSubmit }>
-				<InputGroup
-					type="color"
-					label="Color"
-					value={ state.color }
-					isMultiple={ color === '' }
-					onChange={ ( value ) => setState( { ...state, color: value } ) }
-				/>
-			</PanelContent>
-		</Panel>
+		<SimplePanel title="Actions" onSubmit={ handleSubmit }>
+			<InputGroup
+				type="color"
+				label="Color"
+				value={ state.color }
+				isMultiple={ color === '' }
+				onChange={ ( value ) => setState( { ...state, color: value } ) }
+			/>
+		</SimplePanel>
 	);
 }
 

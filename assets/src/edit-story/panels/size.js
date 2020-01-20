@@ -11,7 +11,7 @@ import { useEffect, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { Panel, PanelTitle, PanelContent } from './panel';
+import { SimplePanel } from './panel';
 import { InputGroup, getCommonValue } from './elements';
 
 function SizePanel( { selectedElements, onSetProperties } ) {
@@ -28,55 +28,50 @@ function SizePanel( { selectedElements, onSetProperties } ) {
 		evt.preventDefault();
 	};
 	return (
-		<Panel>
-			<PanelTitle>
-				{ 'Size' }
-			</PanelTitle>
-			<PanelContent onSubmit={ handleSubmit }>
-				<InputGroup
-					label="Width"
-					value={ state.width }
-					isMultiple={ width === '' }
-					onChange={ ( value ) => {
-						const ratio = width / height;
-						const newWidth = isNaN( value ) || value === '' ? '' : parseFloat( value );
-						setState( {
-							...state,
-							width: newWidth,
-							height: typeof newWidth === 'number' && lockRatio ? newWidth / ratio : height,
-						} );
-					} }
-					postfix="px"
-					disabled={ isFullbleed }
-				/>
-				<InputGroup
-					label="Height"
-					value={ state.height }
-					isMultiple={ height === '' }
-					onChange={ ( value ) => {
-						const ratio = width / height;
-						const newHeight = isNaN( value ) || value === '' ? '' : parseFloat( value );
-						setState( {
-							...state,
-							height: newHeight,
-							width: typeof newHeight === 'number' && lockRatio ? newHeight * ratio : width,
-						} );
-					} }
-					postfix="px"
-					disabled={ isFullbleed }
-				/>
-				<InputGroup
-					type="checkbox"
-					label="Keep ratio"
-					value={ lockRatio }
-					isMultiple={ false }
-					onChange={ ( value ) => {
-						setLockRatio( value );
-					} }
-					disabled={ isFullbleed }
-				/>
-			</PanelContent>
-		</Panel>
+		<SimplePanel title="Actions" onSubmit={ handleSubmit }>
+			<InputGroup
+				label="Width"
+				value={ state.width }
+				isMultiple={ width === '' }
+				onChange={ ( value ) => {
+					const ratio = width / height;
+					const newWidth = isNaN( value ) || value === '' ? '' : parseFloat( value );
+					setState( {
+						...state,
+						width: newWidth,
+						height: typeof newWidth === 'number' && lockRatio ? newWidth / ratio : height,
+					} );
+				} }
+				postfix="px"
+				disabled={ isFullbleed }
+			/>
+			<InputGroup
+				label="Height"
+				value={ state.height }
+				isMultiple={ height === '' }
+				onChange={ ( value ) => {
+					const ratio = width / height;
+					const newHeight = isNaN( value ) || value === '' ? '' : parseFloat( value );
+					setState( {
+						...state,
+						height: newHeight,
+						width: typeof newHeight === 'number' && lockRatio ? newHeight * ratio : width,
+					} );
+				} }
+				postfix="px"
+				disabled={ isFullbleed }
+			/>
+			<InputGroup
+				type="checkbox"
+				label="Keep ratio"
+				value={ lockRatio }
+				isMultiple={ false }
+				onChange={ ( value ) => {
+					setLockRatio( value );
+				} }
+				disabled={ isFullbleed }
+			/>
+		</SimplePanel>
 	);
 }
 

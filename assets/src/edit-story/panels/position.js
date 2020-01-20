@@ -11,7 +11,7 @@ import { useEffect, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { Panel, PanelTitle, PanelContent } from './panel';
+import { SimplePanel } from './panel';
 import { InputGroup, getCommonValue } from './elements';
 
 function PositionPanel( { selectedElements, onSetProperties } ) {
@@ -27,29 +27,24 @@ function PositionPanel( { selectedElements, onSetProperties } ) {
 		evt.preventDefault();
 	};
 	return (
-		<Panel>
-			<PanelTitle>
-				{ 'Position' }
-			</PanelTitle>
-			<PanelContent onSubmit={ handleSubmit }>
-				<InputGroup
-					label="X"
-					value={ state.x }
-					isMultiple={ x === '' }
-					onChange={ ( value ) => setState( { ...state, x: isNaN( value ) || value === '' ? '' : parseFloat( value ) } ) }
-					postfix="px"
-					disabled={ isFullbleed }
-				/>
-				<InputGroup
-					label="Y"
-					value={ state.y }
-					isMultiple={ y === '' }
-					onChange={ ( value ) => setState( { ...state, y: isNaN( value ) || value === '' ? '' : parseFloat( value ) } ) }
-					postfix="px"
-					disabled={ isFullbleed }
-				/>
-			</PanelContent>
-		</Panel>
+		<SimplePanel title="Actions" onSubmit={ handleSubmit }>
+			<InputGroup
+				label="X"
+				value={ state.x }
+				isMultiple={ x === '' }
+				onChange={ ( value ) => setState( { ...state, x: isNaN( value ) || value === '' ? '' : parseFloat( value ) } ) }
+				postfix="px"
+				disabled={ isFullbleed }
+			/>
+			<InputGroup
+				label="Y"
+				value={ state.y }
+				isMultiple={ y === '' }
+				onChange={ ( value ) => setState( { ...state, y: isNaN( value ) || value === '' ? '' : parseFloat( value ) } ) }
+				postfix="px"
+				disabled={ isFullbleed }
+			/>
+		</SimplePanel>
 	);
 }
 
