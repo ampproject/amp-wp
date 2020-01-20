@@ -49,7 +49,7 @@ const Collapse = styled.button.attrs( { type: 'button' } )`
 	svg {
 		width: 28px;
 		height: 28px;
-		${ ( { isCollapsed } ) => ! isCollapsed && `transform: rotate(.5turn);` }
+		${ ( { isCollapsed } ) => isCollapsed && `transform: rotate(.5turn);` }
 	}
 `;
 
