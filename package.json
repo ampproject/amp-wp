@@ -71,7 +71,7 @@
     "babel-loader": "8.0.6",
     "babel-plugin-inline-react-svg": "1.1.0",
     "babel-plugin-transform-react-remove-prop-types": "0.4.24",
-    "browserslist": "4.8.3",
+    "browserslist": "4.8.4",
     "core-js": "3.6.4",
     "cross-env": "6.0.3",
     "css-loader": "3.4.2",
