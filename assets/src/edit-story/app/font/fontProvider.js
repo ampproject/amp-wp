@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { useCallback, useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -46,15 +47,15 @@ function FontProvider( { children } ) {
 	const getFontWeight = useCallback(
 		( name ) => {
 			const fontWeightNames = {
-				100: 'Hairline',
-				200: 'Thin',
-				300: 'Light',
-				400: 'Normal',
-				500: 'Medium',
-				600: 'Semi bold',
-				700: 'Bold',
-				800: 'Extra bold',
-				900: 'Super bold',
+				100: __( 'Hairline', 'amp' ),
+				200: __( 'Thin', 'amp' ),
+				300: __( 'Light', 'amp' ),
+				400: __( 'Normal', 'amp' ),
+				500: __( 'Medium', 'amp' ),
+				600: __( 'Semi bold', 'amp' ),
+				700: __( 'Bold', 'amp' ),
+				800: __( 'Extra bold', 'amp' ),
+				900: __( 'Super bold', 'amp' ),
 			};
 
 			const defaultFontWeights = [

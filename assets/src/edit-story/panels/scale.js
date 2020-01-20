@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { useEffect, useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -32,7 +33,7 @@ function ScalePanel( { selectedElements, onSetProperties } ) {
 	return (
 		<Panel onSubmit={ handleSubmit }>
 			<Title>
-				{ 'Image actual size' }
+				{ __( 'Image actual size', 'amp' ) }
 			</Title>
 			<InputGroup
 				label="Scale"

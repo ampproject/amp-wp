@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { useEffect, useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -28,22 +29,22 @@ function PositionPanel( { selectedElements, onSetProperties } ) {
 	return (
 		<Panel onSubmit={ handleSubmit }>
 			<Title>
-				{ 'Position' }
+				{ __( 'Position', 'amp' ) }
 			</Title>
 			<InputGroup
-				label="X"
+				label={ __( 'X', 'amp' ) }
 				value={ state.x }
 				isMultiple={ x === '' }
 				onChange={ ( value ) => setState( { ...state, x: isNaN( value ) || value === '' ? '' : parseFloat( value ) } ) }
-				postfix="px"
+				postfix={ __( 'px', 'amp' ) }
 				disabled={ isFullbleed }
 			/>
 			<InputGroup
-				label="Y"
+				label={ __( 'Y', 'amp' ) }
 				value={ state.y }
 				isMultiple={ y === '' }
 				onChange={ ( value ) => setState( { ...state, y: isNaN( value ) || value === '' ? '' : parseFloat( value ) } ) }
-				postfix="px"
+				postfix={ __( 'px', 'amp' ) }
 				disabled={ isFullbleed }
 			/>
 		</Panel>

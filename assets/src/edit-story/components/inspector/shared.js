@@ -1,4 +1,9 @@
 /**
+ * WordPress dependencies
+ */
+import { __ } from '@wordpress/i18n';
+
+/**
  * External dependencies
  */
 import PropTypes from 'prop-types';
@@ -80,7 +85,7 @@ SelectMenu.defaultProps = {
 };
 
 function InputGroup( { type, label, value, isMultiple, onChange, postfix, disabled } ) {
-	const placeholder = isMultiple ? '( multiple )' : '';
+	const placeholder = isMultiple ? __( '( multiple )', 'amp' ) : '';
 	const isCheckbox = type === 'checkbox';
 	return (
 		<Group disabled={ disabled }>

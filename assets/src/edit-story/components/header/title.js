@@ -8,6 +8,7 @@ import styled from 'styled-components';
  */
 import { useCallback } from '@wordpress/element';
 import { cleanForSlug } from '@wordpress/editor';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -52,7 +53,7 @@ function Title() {
 	// TODO Make sure that Auto Draft checks translations.
 	const titleFormatted = useCallback(
 		( rawTitle ) => {
-			return ( rawTitle === 'Auto Draft' ) ? '' : rawTitle;
+			return ( rawTitle === __( 'Auto Draft', 'amp' ) ) ? '' : rawTitle;
 		}, [],
 	);
 
@@ -66,7 +67,7 @@ function Title() {
 			type={ 'text' }
 			onBlur={ handleBlur }
 			onChange={ handleChange }
-			placeholder={ 'Add title' }
+			placeholder={ __( 'Add title', 'amp' ) }
 		/>
 	);
 }

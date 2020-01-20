@@ -9,6 +9,7 @@ import styled, { css } from 'styled-components';
  */
 import { Spinner, Dashicon } from '@wordpress/components';
 import { useEffect } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -119,9 +120,9 @@ const SUPPORTED_VIDEO_TYPES = [
 ];
 
 const FILTERS = [
-	{ filter: '', name: 'All' },
-	{ filter: 'image', name: 'Images' },
-	{ filter: 'video', name: 'Video' },
+	{ filter: '', name: __( 'All', 'amp' ) },
+	{ filter: 'image', name: __( 'Images', 'amp' ) },
+	{ filter: 'video', name: __( 'Video', 'amp' ) },
 ];
 
 const DEFAULT_WIDTH = 150;
@@ -270,7 +271,7 @@ function MediaLibrary( { onInsert } ) {
 		<>
 			<Header>
 				<Title>
-					{ 'Media' }
+					{ __( 'Media', 'amp' ) }
 					{ ( ! isMediaLoaded || isMediaLoading ) &&
 						<Spinner />
 					}
@@ -286,7 +287,7 @@ function MediaLibrary( { onInsert } ) {
 				<Icon icon="search" />
 				<Search
 					value={ searchTerm }
-					placeholder={ 'Search Media' }
+					placeholder={ __( 'Search Media', 'amp' ) }
 					onChange={ onSearch } />
 			</SearchField>
 
@@ -305,7 +306,7 @@ function MediaLibrary( { onInsert } ) {
 
 			{ ( isMediaLoaded && ! media.length ) ? (
 				<Message>
-					{ 'No media found' }
+					{ __( 'No media found', 'amp' ) }
 				</Message>
 			) : (
 				<Container>

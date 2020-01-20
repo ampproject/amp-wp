@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { useEffect, useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -27,10 +28,10 @@ function RotationPanel( { selectedElements, onSetProperties } ) {
 	return (
 		<Panel onSubmit={ handleSubmit }>
 			<Title>
-				{ 'Rotation' }
+				{ __( 'Rotation', 'amp' ) }
 			</Title>
 			<InputGroup
-				label="Rotation angle"
+				label={ __( 'Rotation angle', 'amp' ) }
 				value={ state.rotationAngle }
 				isMultiple={ rotationAngle === '' }
 				onChange={ ( value ) => setState( { ...state, rotationAngle: isNaN( value ) || value === '' ? '' : parseFloat( value ) } ) }

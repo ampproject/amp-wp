@@ -3,6 +3,7 @@
  * WordPress dependencies
  */
 import { useReducer, useCallback } from '@wordpress/element';
+import { __, sprintf } from '@wordpress/i18n';
 
 const ADD_ENTRY = 'add';
 const CLEAR_HISTORY = 'clear';
@@ -53,7 +54,12 @@ const reducer = ( size ) => ( state, { type, payload } ) => {
 			};
 
 		default:
-			throw new Error( `Unknown history reducer action: ${ type }` );
+			const text = sprintf(
+				/* translators: %s: Type of error. */
+				__( 'Unknown history reducer action: %s', 'amp' ),
+				type,
+			);
+			throw new Error( text );
 	}
 };
 

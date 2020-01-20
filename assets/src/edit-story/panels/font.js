@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { useEffect, useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -36,17 +37,17 @@ function FontPanel( { selectedElements, onSetProperties } ) {
 	};
 
 	const fontStyles = [
-		{ name: 'Normal', slug: 'normal', thisValue: 'normal' },
-		{ name: 'Italic', slug: 'italic', thisValue: 'italic' },
+		{ name: __( 'Normal', 'amp' ), slug: 'normal', thisValue: 'normal' },
+		{ name: __( 'Italic', 'amp' ), slug: 'italic', thisValue: 'italic' },
 	];
 
 	return (
 		<Panel onSubmit={ handleSubmit }>
 			<Title>
-				{ 'Font' }
+				{ __( 'Font', 'amp' ) }
 			</Title>
 			{ fonts && <SelectMenu
-				label="Font family"
+				label={ __( 'Font family', 'amp' ) }
 				options={ fonts }
 				value={ state.fontFamily }
 				isMultiple={ fontFamily === '' }
@@ -59,14 +60,14 @@ function FontPanel( { selectedElements, onSetProperties } ) {
 				} }
 			/> }
 			<SelectMenu
-				label="Font style"
+				label={ __( 'Font style', 'amp' ) }
 				options={ fontStyles }
 				isMultiple={ fontStyle === '' }
 				value={ state.fontStyle }
 				onChange={ ( value ) => setState( { ...state, fontStyle: value } ) }
 			/>
 			{ state.fontWeights && <SelectMenu
-				label="Font weight"
+				label={ __( 'Font weight', 'amp' ) }
 				options={ state.fontWeights }
 				value={ state.fontWeight }
 				isMultiple={ fontWeight === '' }
@@ -74,7 +75,7 @@ function FontPanel( { selectedElements, onSetProperties } ) {
 			/> }
 			<InputGroup
 				type="number"
-				label="Font size"
+				label={ __( 'Font size', 'amp' ) }
 				value={ state.fontSize }
 				isMultiple={ fontSize === '' }
 				onChange={ ( value ) => setState( { ...state, fontSize: parseInt( value ) } ) }
