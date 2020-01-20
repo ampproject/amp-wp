@@ -16,6 +16,7 @@ import panelContext from './context';
 
 const Form = styled.form`
 	margin: 10px 20px;
+	overflow: auto;
 `;
 
 function Content( { children } ) {

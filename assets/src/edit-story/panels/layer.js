@@ -5,8 +5,8 @@ import { Panel, PanelTitle, PanelContent } from './panel';
 
 function LayerPanel() {
 	return (
-		<Panel isResizable>
-			<PanelTitle>
+		<Panel initialHeight={ 240 }>
+			<PanelTitle isPrimary isResizable>
 				{ 'Layers' }
 			</PanelTitle>
 			<PanelContent>

@@ -59,6 +59,6 @@ Panel.propTypes = {
 
 Panel.defaultProps = {
 	initialHeight: null,
-}
+};
 
 export default Panel;
