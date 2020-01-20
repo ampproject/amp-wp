@@ -403,7 +403,7 @@ class AMP_Story_Post_Type {
 	public static function load_admin_fonts( $post ) {
 		$post_story_data = json_decode( $post->post_content_filtered, true );
 		$fonts           = [ AMP_Fonts::get_font( 'Roboto' ) ];
-		$font_slugs      = ['roboto'];
+		$font_slugs      = [ 'roboto' ];
 		if ( $post_story_data ) {
 			foreach ( $post_story_data as $page ) {
 				foreach ( $page['elements'] as $element ) {
@@ -414,17 +414,16 @@ class AMP_Story_Post_Type {
 					}
 				}
 			}
-
-			if ( $fonts ) {
-				foreach ( $fonts as $font ) {
-					if ( isset( $font['src'] ) && $font['src'] ) {
-						wp_enqueue_style(
-							$font['handle'],
-							$font['src'],
-							[],
-							AMP__VERSION
-						);
-					}
+		}
+		if ( $fonts ) {
+			foreach ( $fonts as $font ) {
+				if ( isset( $font['src'] ) && $font['src'] ) {
+					wp_enqueue_style(
+						$font['handle'],
+						$font['src'],
+						[],
+						AMP__VERSION
+					);
 				}
 			}
 		}
