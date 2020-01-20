@@ -13,6 +13,8 @@ import { useRef, useEffect, useState } from '@wordpress/element';
  */
 import { useStory } from '../../app';
 import Movable from '../movable';
+import calculateFitTextFontSize from '../../utils/calculateFitTextFontSize';
+import getAdjustedElementDimensions from '../../utils/getAdjustedElementDimensions';
 
 const ALL_HANDLES = [ 'n', 's', 'e', 'w', 'nw', 'ne', 'sw', 'se' ];
 
@@ -22,7 +24,7 @@ function SingleSelectionMovable( {
 	pushEvent,
 } ) {
 	const moveable = useRef();
-	const [ keepRatioMode, setKeepRatioMode ] = useState( true );
+	const [ isResizingFromCorner, setIsResizingFromCorner ] = useState( true );
 
 	const {
 		actions: { updateSelectedElements },
@@ -73,11 +75,14 @@ function SingleSelectionMovable( {
 		target.style.transform = '';
 		target.style.width = '';
 		target.style.height = '';
-		setKeepRatioMode( true );
+		setIsResizingFromCorner( true );
 		if ( moveable.current ) {
 			moveable.current.updateRect();
 		}
 	};
+
+	const isTextElement = 'text' === selectedElement.type;
+	const shouldAdjustFontSize = isTextElement && selectedElement.content.length && isResizingFromCorner;
 
 	return (
 		<Movable
@@ -111,15 +116,33 @@ function SingleSelectionMovable( {
 				// Lock ratio for diagonal directions (nw, ne, sw, se). Both
 				// `direction[]` values for diagonals are either 1 or -1. Non-diagonal
 				// directions have 0s.
-				const newKeepRatioMode = direction[ 0 ] !== 0 && direction[ 1 ] !== 0;
-				if ( keepRatioMode !== newKeepRatioMode ) {
-					setKeepRatioMode( newKeepRatioMode );
+				const newResizingMode = direction[ 0 ] !== 0 && direction[ 1 ] !== 0;
+				if ( isResizingFromCorner !== newResizingMode ) {
+					setIsResizingFromCorner( newResizingMode );
 				}
 			} }
-			onResize={ ( { target, width, height, drag } ) => {
-				target.style.width = `${ width }px`;
-				target.style.height = `${ height }px`;
+			onResize={ ( { target, width, height, drag, direction } ) => {
+				const isResizingWidth = direction[ 0 ] !== 0 && direction[ 1 ] === 0;
+				const isResizingHeight = direction[ 0 ] === 0 && direction[ 1 ] !== 0;
+				let newHeight = height;
+				let newWidth = width;
+				if ( isTextElement && ( isResizingWidth || isResizingHeight ) ) {
+					const adjustedDimensions = getAdjustedElementDimensions( {
+						element: target,
+						content: selectedElement.content,
+						width,
+						height,
+						fixedMeasure: isResizingWidth ? 'width' : 'height',
+					} );
+					newWidth = adjustedDimensions.width;
+					newHeight = adjustedDimensions.height;
+				}
+				target.style.width = `${ newWidth }px`;
+				target.style.height = `${ newHeight }px`;
 				frame.translate = drag.beforeTranslate;
+				if ( shouldAdjustFontSize ) {
+					target.style.fontSize = calculateFitTextFontSize( target.firstChild, height, width );
+				}
 				setTransformStyle( target );
 			} }
 			onResizeEnd={ ( { target } ) => {
@@ -129,6 +152,9 @@ function SingleSelectionMovable( {
 					x: selectedElement.x + frame.translate[ 0 ],
 					y: selectedElement.y + frame.translate[ 1 ],
 				};
+				if ( shouldAdjustFontSize ) {
+					properties.fontSize = calculateFitTextFontSize( target.firstChild, properties.height, properties.width );
+				}
 				updateSelectedElements( { properties } );
 				resetMoveable( target );
 			} }
@@ -146,7 +172,7 @@ function SingleSelectionMovable( {
 			} }
 			origin={ false }
 			pinchable={ true }
-			keepRatio={ 'image' === selectedElement.type && keepRatioMode }
+			keepRatio={ 'image' === selectedElement.type && isResizingFromCorner }
 			renderDirections={ ALL_HANDLES }
 		/>
 	);
