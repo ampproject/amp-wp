@@ -16,12 +16,13 @@ function useHistoryReplay( {
 		if ( ! replayState ) {
 			return;
 		}
-		const { current, pages, selection, story } = replayState;
+		const { current, pages, selection, story, capabilities } = replayState;
 		restore( {
 			pages,
 			current,
 			story,
 			selection,
+			capabilities,
 		} );
 	}, [ restore, replayState ] );
 }

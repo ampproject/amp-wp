@@ -14,6 +14,11 @@ import { getTabId } from './shared';
 const InspectorWrapper = styled.div.attrs( { tabIndex: '0', role: 'tabpanel' } )`
 	height: 100%;
 `;
+const InspectorForm = styled.form`
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+`;
 
 function Inspector() {
 	const {
@@ -29,7 +34,9 @@ function Inspector() {
 
 	return (
 		<InspectorWrapper aria-labelledby={ tab } id={ getTabId( tab ) }>
-			<ContentInspector />
+			<InspectorForm>
+				<ContentInspector />
+			</InspectorForm>
 		</InspectorWrapper>
 	);
 }

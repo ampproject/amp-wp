@@ -56,7 +56,20 @@ function Publish() {
 		actions: { saveStory },
 	} = useStory();
 
-	const text = ( status !== 'publish' ) ? __( 'Publish' ) : __( 'Update' );
+	let text;
+
+	switch ( status ) {
+		case 'publish':
+		case 'private':
+			text = __( 'Update' );
+			break;
+		case 'future':
+			text = __( 'Scheduled' );
+			break;
+		default:
+			text = __( 'Save draft' );
+			break;
+	}
 
 	return (
 		<Primary onClick={ saveStory } isDisabled={ isSaving }>
@@ -87,4 +100,3 @@ function Buttons() {
 	);
 }
 export default Buttons;
-

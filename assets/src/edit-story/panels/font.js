@@ -12,6 +12,7 @@ import { useEffect, useState } from '@wordpress/element';
  * Internal dependencies
  */
 import { useFont } from '../app';
+import { MIN_FONT_SIZE, MAX_FONT_SIZE } from '../constants';
 import { Panel, PanelTitle, PanelContent } from './panel';
 import { InputGroup, SelectMenu, getCommonValue } from './elements';
 
@@ -79,6 +80,9 @@ function FontPanel( { selectedElements, onSetProperties } ) {
 					label="Font size"
 					value={ state.fontSize }
 					isMultiple={ fontSize === '' }
+					postfix={ 'px' }
+					min={ MIN_FONT_SIZE }
+					max={ MAX_FONT_SIZE }
 					onChange={ ( value ) => setState( { ...state, fontSize: parseInt( value ) } ) }
 				/>
 			</PanelContent>
