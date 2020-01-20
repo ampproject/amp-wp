@@ -12,7 +12,7 @@ import { useCallback } from '@wordpress/element';
  * Internal dependencies
  */
 import { useStory } from '../../app';
-import { getPanels, LayerPanel } from '../../panels';
+import { getPanels, LayerPanel, ColorPresetPanel } from '../../panels';
 
 const Wrapper = styled.div`
 	height: 100%;
@@ -54,9 +54,7 @@ function DesignInspector() {
 	return (
 		<Wrapper>
 			<TopPanels>
-				{ panels.map( ( { Panel, type } ) => (
-					<Panel key={ type } deleteSelectedElements={ deleteSelectedElements } selectedElements={ selectedElements } onSetProperties={ handleSetProperties } />
-				) ) }
+				<ColorPresetPanel />
 				{ panels.map( ( { Panel, type } ) => (
 					<Panel key={ type } deleteSelectedElements={ deleteSelectedElements } selectedElements={ selectedElements } onSetProperties={ handleSetProperties } />
 				) ) }

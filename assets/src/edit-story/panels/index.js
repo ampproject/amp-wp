@@ -13,6 +13,7 @@ import PositionPanel from './position';
 import ScalePanel from './scale';
 import TextPanel from './text';
 export { default as LayerPanel } from './layer';
+export { default as ColorPresetPanel } from './colorPreset';
 
 const ACTIONS = 'actions';
 const COLOR = 'color';
