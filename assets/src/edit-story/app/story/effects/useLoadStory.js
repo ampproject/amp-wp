@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { get } from 'lodash';
+
+/**
  * WordPress dependencies
  */
 import { useEffect } from '@wordpress/element';
@@ -9,6 +14,17 @@ import { useEffect } from '@wordpress/element';
 import { useAPI, useHistory } from '../../';
 import { createPage } from '../../../elements';
 
+/**
+ * Get the permission by checking for fields in the REST API.
+ *
+ * @param post Current post object
+ * @param field Requested field.
+ * @return {boolean} If user has capability, defaults to false.
+ */
+const getPerm = ( post, field ) => {
+	return Boolean( get( post, [ '_links', field ], false ) );
+};
+
 // When ID is set, load story from API.
 function useLoadStory( {
 	storyId,
@@ -17,6 +33,7 @@ function useLoadStory( {
 } ) {
 	const { actions: { getStoryById } } = useAPI();
 	const { actions: { clearHistory } } = useHistory();
+
 	useEffect( () => {
 		if ( storyId && shouldLoad ) {
 			getStoryById( storyId ).then( ( post ) => {
@@ -25,9 +42,17 @@ function useLoadStory( {
 					status,
 					author,
 					slug,
+					date,
+					modified,
+					excerpt: { raw: excerpt },
 					link,
 					story_data: storyData,
+					featured_media: featuredMedia,
+					featured_media_url: featuredMediaUrl,
+					password,
 				} = post;
+
+				const statusFormat = ( status === 'auto-draft' ) ? 'draft' : status;
 
 				// First clear history completely.
 				clearHistory();
@@ -35,21 +60,32 @@ function useLoadStory( {
 				// Set story-global variables.
 				const story = {
 					title,
-					status,
+					status: statusFormat,
 					author,
+					date,
+					modified,
+					excerpt,
 					slug,
 					link,
+					featuredMedia,
+					featuredMediaUrl,
+					password,
 				};
 
 				// If there are no pages, create empty page.
 				const pages = storyData.length === 0 ? [ createPage() ] : storyData;
 
+				const hasPublishAction = getPerm( post, 'wp:action-publish' );
+				const hasAssignAuthorAction = getPerm( post, 'wp:action-assign-author' );
+
+				const capabilities = { hasPublishAction, hasAssignAuthorAction };
 				// TODO read current page and selection from deeplink?
 				restore( {
 					pages,
 					story,
 					selection: [],
 					current: null, // will be set to first page by `restore`
+					capabilities,
 				} );
 			} );
 		}

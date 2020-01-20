@@ -13,13 +13,12 @@ import { Spinner } from '@wordpress/components';
 /**
  * Internal dependencies
  */
-import { useHistory, useStory } from '../../app';
-import { Outline, Primary, Undo, Redo } from '../button';
+import { useStory } from '../../app';
+import { Outline, Primary } from '../button';
 
 const ButtonList = styled.nav`
-	background-color: ${ ( { theme } ) => theme.colors.bg.v3 };
 	display: flex;
-	justify-content: space-between;
+	justify-content: flex-end;
 	padding: 1em;
 	height: 100%;
 `;
@@ -29,22 +28,8 @@ const List = styled.div`
 `;
 
 const Space = styled.div`
-	width: 1em;
+	width: 6px;
 `;
-
-function Undoer() {
-	const { state: { canUndo }, actions: { undo } } = useHistory();
-	return (
-		<Undo onClick={ undo } isDisabled={ ! canUndo } />
-	);
-}
-
-function Redoer() {
-	const { state: { canRedo }, actions: { redo } } = useHistory();
-	return (
-		<Redo onClick={ redo } isDisabled={ ! canRedo } />
-	);
-}
 
 function PreviewButton() {
 	const {
@@ -71,7 +56,20 @@ function Publish() {
 		actions: { saveStory },
 	} = useStory();
 
-	const text = ( status !== 'publish' ) ? __( 'Publish' ) : __( 'Update' );
+	let text;
+
+	switch ( status ) {
+		case 'publish':
+		case 'private':
+			text = __( 'Update' );
+			break;
+		case 'future':
+			text = __( 'Scheduled' );
+			break;
+		default:
+			text = __( 'Save draft' );
+			break;
+	}
 
 	return (
 		<Primary onClick={ saveStory } isDisabled={ isSaving }>
@@ -92,11 +90,6 @@ function Buttons() {
 	return (
 		<ButtonList>
 			<List>
-				<Undoer />
-				<Space />
-				<Redoer />
-			</List>
-			<List>
 				<Loading />
 				<PreviewButton />
 				<Space />
@@ -107,4 +100,3 @@ function Buttons() {
 	);
 }
 export default Buttons;
-

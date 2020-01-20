@@ -8,13 +8,15 @@ import styled from 'styled-components';
  */
 import UndoIcon from './icon_undo.svg';
 import RedoIcon from './icon_redo.svg';
+import LeftArrowIcon from './icon_left_arrow.svg';
+import RightArrowIcon from './icon_right_arrow.svg';
 
 const Base = styled.button.attrs(
 	( { isDisabled } ) => ( { disabled: isDisabled } ),
 )`
 	border-width: 1px;
 	border-style: solid;
-	border-radius: 4px;
+	border-radius: 2px;
 	background: transparent;
 	display: block;
 	min-width: ${ ( { isIcon } ) => isIcon ? 'initial' : '63px' };
@@ -22,6 +24,7 @@ const Base = styled.button.attrs(
 	height: 30px;
 	padding: 0 10px;
 	cursor: pointer;
+	font-size: 14px;
 
 	&:focus, &:active {
 		outline: none;
@@ -37,6 +40,24 @@ const Base = styled.button.attrs(
 	` }
 `;
 
+const StyledButton = styled( Base )`
+	border: none;
+	padding: 0;
+	width: ${ ( { width } ) => width }px;
+	height: ${ ( { height } ) => height }px;
+	min-width: initial;
+	visibility: ${ ( { isHidden } ) => isHidden ? 'hidden' : 'visible' };
+	opacity: .3;
+	color: ${ ( { theme } ) => theme.colors.fg.v1 };
+	&:focus, &:active, &:hover {
+		opacity: 1;
+	}
+	svg {
+		width: ${ ( { width } ) => width }px;
+		height: ${ ( { height } ) => height }px;
+	}
+`;
+
 export const Primary = styled( Base )`
 	border-color: ${ ( { theme } ) => theme.colors.action };
 	background-color: ${ ( { theme } ) => theme.colors.action };
@@ -50,9 +71,21 @@ export const Secondary = styled( Base )`
 `;
 
 export const Outline = styled( Base )`
-	border-color: ${ ( { theme } ) => theme.colors.fg.v2 };
+	border-color: ${ ( { theme } ) => theme.colors.fg.v4 };
 	color: ${ ( { theme } ) => theme.colors.fg.v1 };
 `;
+
+export const LeftArrow = ( props ) => (
+	<StyledButton { ...props }>
+		<LeftArrowIcon />
+	</StyledButton>
+);
+
+export const RightArrow = ( props ) => (
+	<StyledButton { ...props }>
+		<RightArrowIcon />
+	</StyledButton>
+);
 
 export const Undo = ( props ) => (
 	<Outline isIcon { ...props }>

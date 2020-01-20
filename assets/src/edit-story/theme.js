@@ -17,6 +17,8 @@ const theme = {
 			v3: '#242A3B',
 			v4: '#2F3449',
 			v5: '#575D65',
+			v6: '#1D222F',
+			v7: '#07080C',
 		},
 		mg: {
 			v1: '#616877',
@@ -31,6 +33,20 @@ const theme = {
 		action: '#47A0F4',
 		danger: '#FF0000',
 		selection: '#44aaff',
+	},
+	fonts: {
+		body1: {
+			family: 'Roboto',
+			size: '16px',
+			lineHeight: '24px',
+			letterSpacing: '0.00625em',
+		},
+		body2: {
+			family: 'Roboto',
+			size: '14px',
+			lineHeight: '20px',
+			letterSpacing: '0.0142em',
+		},
 	},
 };
 
