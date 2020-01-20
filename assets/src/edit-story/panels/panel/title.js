@@ -28,7 +28,7 @@ const Header = styled.header`
 	position: relative;
 `;
 
-const H = styled.h1`
+const Heading = styled.h1`
 	color: inherit;
 	margin: 0;
 	font-weight: 500;
@@ -64,9 +64,9 @@ function Title( { children, isPrimary, isResizable } ) {
 			{ isResizable && ! isCollapsed && (
 				<DragHandle handleHeightChange={ ( deltaHeight ) => setHeight( height + deltaHeight ) } />
 			) }
-			<H>
+			<Heading>
 				{ children }
-			</H>
+			</Heading>
 			<Collapse isCollapsed={ isCollapsed } onClick={ isCollapsed ? expand : collapse }>
 				<Arrow />
 			</Collapse>
