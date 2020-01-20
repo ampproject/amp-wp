@@ -19,7 +19,7 @@ const Input = styled.input`
 	width: 100px;
 `;
 
-function InputGroup( { type, label, value, isMultiple, onChange, postfix, disabled } ) {
+function InputGroup( { type, label, value, isMultiple, onChange, postfix, disabled, min, max } ) {
 	const placeholder = isMultiple ? '( multiple )' : '';
 	const isCheckbox = type === 'checkbox';
 	return (
@@ -35,6 +35,8 @@ function InputGroup( { type, label, value, isMultiple, onChange, postfix, disabl
 				placeholder={ placeholder }
 				value={ isCheckbox ? '' : value }
 				checked={ isCheckbox ? value : null }
+				min={ min ? min : null }
+				max={ max ? max : null }
 			/>
 			{ postfix }
 		</Group>
@@ -49,12 +51,16 @@ InputGroup.propTypes = {
 	onChange: PropTypes.func.isRequired,
 	postfix: PropTypes.string,
 	disabled: PropTypes.bool,
+	min: PropTypes.any,
+	max: PropTypes.any,
 };
 
 InputGroup.defaultProps = {
 	type: 'number',
 	postfix: '',
 	disabled: false,
+	min: null,
+	max: null,
 };
 
 export default InputGroup;
