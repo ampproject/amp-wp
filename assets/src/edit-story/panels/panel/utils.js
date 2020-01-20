@@ -4,17 +4,6 @@
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 
-export const Panel = styled.form`
-	display: flex;
-	flex-direction: column;
-`;
-
-export const Title = styled.h2`
-	color: ${ ( { theme } ) => theme.colors.bg.v2 };
-	font-size: 13px;
-	line-height: 19px;
-`;
-
 const Label = styled.span`
 	color: ${ ( { theme } ) => theme.colors.mg.v1 };
 	font-size: 11px;
@@ -43,7 +32,7 @@ const Select = styled.select`
 	width: 100px;
 `;
 
-export const ActionButton = styled.button`
+const ActionButton = styled.button`
 	color: ${ ( { theme } ) => theme.colors.mg.v1 };
 	font-size: 11px;
 `;
@@ -131,6 +120,7 @@ function getCommonValue( list, property ) {
 }
 
 export {
+	ActionButton,
 	InputGroup,
 	getCommonValue,
 	SelectMenu,

@@ -11,7 +11,7 @@ import { useEffect, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { Panel, Title, InputGroup, getCommonValue } from './shared';
+import { Panel, PanelTitle, PanelContent, InputGroup, getCommonValue } from './panel';
 
 function RotationPanel( { selectedElements, onSetProperties } ) {
 	const rotationAngle = getCommonValue( selectedElements, 'rotationAngle' );
@@ -26,17 +26,19 @@ function RotationPanel( { selectedElements, onSetProperties } ) {
 	};
 	return (
 		<Panel onSubmit={ handleSubmit }>
-			<Title>
+			<PanelTitle>
 				{ 'Rotation' }
-			</Title>
-			<InputGroup
-				label="Rotation angle"
-				value={ state.rotationAngle }
-				isMultiple={ rotationAngle === '' }
-				onChange={ ( value ) => setState( { ...state, rotationAngle: isNaN( value ) || value === '' ? '' : parseFloat( value ) } ) }
-				postfix="deg"
-				disabled={ isFullbleed }
-			/>
+			</PanelTitle>
+			<PanelContent>
+				<InputGroup
+					label="Rotation angle"
+					value={ state.rotationAngle }
+					isMultiple={ rotationAngle === '' }
+					onChange={ ( value ) => setState( { ...state, rotationAngle: isNaN( value ) || value === '' ? '' : parseFloat( value ) } ) }
+					postfix="deg"
+					disabled={ isFullbleed }
+				/>
+			</PanelContent>
 		</Panel>
 	);
 }

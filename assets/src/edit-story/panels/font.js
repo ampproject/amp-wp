@@ -12,7 +12,7 @@ import { useEffect, useState } from '@wordpress/element';
  * Internal dependencies
  */
 import { useFont } from '../app';
-import { Panel, Title, InputGroup, getCommonValue, SelectMenu } from './shared';
+import { Panel, PanelTitle, PanelContent, InputGroup, getCommonValue, SelectMenu } from './panel';
 
 function FontPanel( { selectedElements, onSetProperties } ) {
 	const fontFamily = getCommonValue( selectedElements, 'fontFamily' );
@@ -42,43 +42,45 @@ function FontPanel( { selectedElements, onSetProperties } ) {
 
 	return (
 		<Panel onSubmit={ handleSubmit }>
-			<Title>
+			<PanelTitle>
 				{ 'Font' }
-			</Title>
-			{ fonts && <SelectMenu
-				label="Font family"
-				options={ fonts }
-				value={ state.fontFamily }
-				isMultiple={ fontFamily === '' }
-				onChange={ ( value ) => {
-					const currentFontWeights = getFontWeight( value );
-					const currentFontFallback = getFontFallback( value );
-					const fontWeightsArr = currentFontWeights.map( ( { thisValue } ) => thisValue );
-					const newFontWeight = ( fontWeightsArr && fontWeightsArr.includes( state.fontWeight ) ) ? state.fontWeight : 400;
-					setState( { ...state, fontFamily: value, fontWeight: parseInt( newFontWeight ), fontWeights: currentFontWeights, fontFallback: currentFontFallback } );
-				} }
-			/> }
-			<SelectMenu
-				label="Font style"
-				options={ fontStyles }
-				isMultiple={ fontStyle === '' }
-				value={ state.fontStyle }
-				onChange={ ( value ) => setState( { ...state, fontStyle: value } ) }
-			/>
-			{ state.fontWeights && <SelectMenu
-				label="Font weight"
-				options={ state.fontWeights }
-				value={ state.fontWeight }
-				isMultiple={ fontWeight === '' }
-				onChange={ ( value ) => setState( { ...state, fontWeight: parseInt( value ) } ) }
-			/> }
-			<InputGroup
-				type="number"
-				label="Font size"
-				value={ state.fontSize }
-				isMultiple={ fontSize === '' }
-				onChange={ ( value ) => setState( { ...state, fontSize: parseInt( value ) } ) }
-			/>
+			</PanelTitle>
+			<PanelContent>
+				{ fonts && <SelectMenu
+					label="Font family"
+					options={ fonts }
+					value={ state.fontFamily }
+					isMultiple={ fontFamily === '' }
+					onChange={ ( value ) => {
+						const currentFontWeights = getFontWeight( value );
+						const currentFontFallback = getFontFallback( value );
+						const fontWeightsArr = currentFontWeights.map( ( { thisValue } ) => thisValue );
+						const newFontWeight = ( fontWeightsArr && fontWeightsArr.includes( state.fontWeight ) ) ? state.fontWeight : 400;
+						setState( { ...state, fontFamily: value, fontWeight: parseInt( newFontWeight ), fontWeights: currentFontWeights, fontFallback: currentFontFallback } );
+					} }
+				/> }
+				<SelectMenu
+					label="Font style"
+					options={ fontStyles }
+					isMultiple={ fontStyle === '' }
+					value={ state.fontStyle }
+					onChange={ ( value ) => setState( { ...state, fontStyle: value } ) }
+				/>
+				{ state.fontWeights && <SelectMenu
+					label="Font weight"
+					options={ state.fontWeights }
+					value={ state.fontWeight }
+					isMultiple={ fontWeight === '' }
+					onChange={ ( value ) => setState( { ...state, fontWeight: parseInt( value ) } ) }
+				/> }
+				<InputGroup
+					type="number"
+					label="Font size"
+					value={ state.fontSize }
+					isMultiple={ fontSize === '' }
+					onChange={ ( value ) => setState( { ...state, fontSize: parseInt( value ) } ) }
+				/>
+			</PanelContent>
 		</Panel>
 	);
 }

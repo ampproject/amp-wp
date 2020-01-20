@@ -12,10 +12,22 @@ import { useCallback } from '@wordpress/element';
  * Internal dependencies
  */
 import { useStory } from '../../app';
-import { getPanels } from '../../panels';
+import { getPanels, LayerPanel } from '../../panels';
 
 const Wrapper = styled.div`
-	min-height: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+`;
+
+const TopPanels = styled.div`
+	flex: 1 1;
+	overflow: auto;
+`;
+
+const BottomPanels = styled.div`
+	flex: 0 0;
 `;
 
 function DesignInspector() {
@@ -40,11 +52,18 @@ function DesignInspector() {
 		updateSelectedElements( { properties: actualProperties } );
 	}, [ updateSelectedElements ] );
 	return (
-
 		<Wrapper>
-			{ panels.map( ( { Panel, type } ) => (
-				<Panel key={ type } deleteSelectedElements={ deleteSelectedElements } selectedElements={ selectedElements } onSetProperties={ handleSetProperties } />
-			) ) }
+			<TopPanels>
+				{ panels.map( ( { Panel, type } ) => (
+					<Panel key={ type } deleteSelectedElements={ deleteSelectedElements } selectedElements={ selectedElements } onSetProperties={ handleSetProperties } />
+				) ) }
+				{ panels.map( ( { Panel, type } ) => (
+					<Panel key={ type } deleteSelectedElements={ deleteSelectedElements } selectedElements={ selectedElements } onSetProperties={ handleSetProperties } />
+				) ) }
+			</TopPanels>
+			<BottomPanels>
+				<LayerPanel />
+			</BottomPanels>
 		</Wrapper>
 	);
 }

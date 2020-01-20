@@ -11,7 +11,9 @@ import DocumentInspector from './documentInspector';
 import PrepublishInspector from './prepublishInspector';
 import { getTabId } from './shared';
 
-const InspectorWrapper = styled.div.attrs( { tabIndex: '0', role: 'tabpanel' } )``;
+const InspectorWrapper = styled.div.attrs( { tabIndex: '0', role: 'tabpanel' } )`
+	height: 100%;
+`;
 
 function Inspector() {
 	const {

@@ -11,7 +11,7 @@ import { useEffect, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { Panel, Title, InputGroup, getCommonValue } from './shared';
+import { Panel, PanelTitle, PanelContent, InputGroup, getCommonValue } from './panel';
 
 function BackgroundColorPanel( { selectedElements, onSetProperties } ) {
 	const backgroundColor = getCommonValue( selectedElements, 'backgroundColor' );
@@ -25,16 +25,18 @@ function BackgroundColorPanel( { selectedElements, onSetProperties } ) {
 	};
 	return (
 		<Panel onSubmit={ handleSubmit }>
-			<Title>
+			<PanelTitle>
 				{ 'Background color' }
-			</Title>
-			<InputGroup
-				type="text"
-				label="Background color"
-				value={ state.backgroundColor }
-				isMultiple={ backgroundColor === '' }
-				onChange={ ( value ) => setState( { ...state, backgroundColor: value } ) }
-			/>
+			</PanelTitle>
+			<PanelContent>
+				<InputGroup
+					type="text"
+					label="Background color"
+					value={ state.backgroundColor }
+					isMultiple={ backgroundColor === '' }
+					onChange={ ( value ) => setState( { ...state, backgroundColor: value } ) }
+				/>
+			</PanelContent>
 		</Panel>
 	);
 }

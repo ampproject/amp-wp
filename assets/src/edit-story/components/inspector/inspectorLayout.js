@@ -26,7 +26,7 @@ const InspectorBackground = styled.div`
 	grid-area: inspector;
 	background-color: ${ ( { theme } ) => theme.colors.fg.v1 };
 	height: 100%;
-	padding: 0 1em;
+	padding: 0;
 	color: ${ ( { theme } ) => theme.colors.bg.v4 };
 	overflow: auto;
 `;

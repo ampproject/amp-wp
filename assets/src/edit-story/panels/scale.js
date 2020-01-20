@@ -11,7 +11,7 @@ import { useEffect, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { Panel, Title, InputGroup, getCommonValue } from './shared';
+import { Panel, PanelTitle, PanelContent, InputGroup, getCommonValue } from './panel';
 
 function ScalePanel( { selectedElements, onSetProperties } ) {
 	const scale = getCommonValue( selectedElements, 'scale' );
@@ -31,30 +31,32 @@ function ScalePanel( { selectedElements, onSetProperties } ) {
 	};
 	return (
 		<Panel onSubmit={ handleSubmit }>
-			<Title>
+			<PanelTitle>
 				{ 'Image actual size' }
-			</Title>
-			<InputGroup
-				label="Scale"
-				value={ typeof state.scale === 'number' ? state.scale : '(auto)' }
-				isMultiple={ scale === '' }
-				onChange={ ( value ) => setState( { ...state, scale: isNaN( value ) || value === '' ? '(auto)' : parseFloat( value ) } ) }
-				postfix="%"
-			/>
-			<InputGroup
-				label="Focal X"
-				value={ typeof state.focalX === 'number' ? state.focalX : '(auto)' }
-				isMultiple={ focalX === '' }
-				onChange={ ( value ) => setState( { ...state, focalX: isNaN( value ) || value === '' ? '(auto)' : parseFloat( value ) } ) }
-				postfix="%"
-			/>
-			<InputGroup
-				label="Focal Y"
-				value={ typeof state.focalY === 'number' ? state.focalY : '(auto)' }
-				isMultiple={ focalY === '' }
-				onChange={ ( value ) => setState( { ...state, focalY: isNaN( value ) || value === '' ? '(auto)' : parseFloat( value ) } ) }
-				postfix="%"
-			/>
+			</PanelTitle>
+			<PanelContent>
+				<InputGroup
+					label="Scale"
+					value={ typeof state.scale === 'number' ? state.scale : '(auto)' }
+					isMultiple={ scale === '' }
+					onChange={ ( value ) => setState( { ...state, scale: isNaN( value ) || value === '' ? '(auto)' : parseFloat( value ) } ) }
+					postfix="%"
+				/>
+				<InputGroup
+					label="Focal X"
+					value={ typeof state.focalX === 'number' ? state.focalX : '(auto)' }
+					isMultiple={ focalX === '' }
+					onChange={ ( value ) => setState( { ...state, focalX: isNaN( value ) || value === '' ? '(auto)' : parseFloat( value ) } ) }
+					postfix="%"
+				/>
+				<InputGroup
+					label="Focal Y"
+					value={ typeof state.focalY === 'number' ? state.focalY : '(auto)' }
+					isMultiple={ focalY === '' }
+					onChange={ ( value ) => setState( { ...state, focalY: isNaN( value ) || value === '' ? '(auto)' : parseFloat( value ) } ) }
+					postfix="%"
+				/>
+			</PanelContent>
 		</Panel>
 	);
 }

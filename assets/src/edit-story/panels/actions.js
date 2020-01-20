@@ -13,7 +13,7 @@ import styled from 'styled-components';
 /**
  * Internal dependencies
  */
-import { Panel, Title } from './shared';
+import { Panel, PanelTitle, PanelContent } from './panel';
 
 const Delete = styled.a`
 	cursor: pointer;
@@ -27,12 +27,14 @@ const Delete = styled.a`
 function ActionsPanel( { deleteSelectedElements } ) {
 	return (
 		<Panel>
-			<Title>
+			<PanelTitle>
 				{ 'Actions' }
-			</Title>
-			<Delete onClick={ deleteSelectedElements } >
-				{ 'Remove element' }
-			</Delete>
+			</PanelTitle>
+			<PanelContent>
+				<Delete onClick={ deleteSelectedElements } >
+					{ 'Remove element' }
+				</Delete>
+			</PanelContent>
 		</Panel>
 	);
 }

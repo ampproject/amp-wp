@@ -12,6 +12,7 @@ import SizePanel from './size';
 import PositionPanel from './position';
 import ScalePanel from './scale';
 import TextPanel from './text';
+export { default as LayerPanel } from './layer';
 
 const ACTIONS = 'actions';
 const COLOR = 'color';

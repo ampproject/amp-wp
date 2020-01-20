@@ -11,7 +11,7 @@ import { useEffect, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { Panel, Title, InputGroup, getCommonValue } from './shared';
+import { Panel, PanelTitle, PanelContent, InputGroup, getCommonValue } from './panel';
 
 function TextPanel( { selectedElements, onSetProperties } ) {
 	const content = getCommonValue( selectedElements, 'content' );
@@ -25,16 +25,18 @@ function TextPanel( { selectedElements, onSetProperties } ) {
 	};
 	return (
 		<Panel onSubmit={ handleSubmit }>
-			<Title>
+			<PanelTitle>
 				{ 'Text' }
-			</Title>
-			<InputGroup
-				type="text"
-				label="Text content"
-				value={ state.content }
-				isMultiple={ content === '' }
-				onChange={ ( value ) => setState( { ...state, content: value } ) }
-			/>
+			</PanelTitle>
+			<PanelContent>
+				<InputGroup
+					type="text"
+					label="Text content"
+					value={ state.content }
+					isMultiple={ content === '' }
+					onChange={ ( value ) => setState( { ...state, content: value } ) }
+				/>
+			</PanelContent>
 		</Panel>
 	);
 }
