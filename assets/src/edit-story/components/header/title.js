@@ -16,8 +16,10 @@ import { useStory } from '../../app/story';
 const Input = styled.input`
 	color: ${ ( { theme } ) => `${ theme.colors.fg.v1 } !important` };
 	margin: 0;
-	font-size: 19px;
-	line-height: 20px;
+	font-family: ${ ( { theme } ) => theme.fonts.body1.family };
+	font-size: ${ ( { theme } ) => theme.fonts.body1.size };
+	line-height: ${ ( { theme } ) => theme.fonts.body1.lineHeight };
+	letter-spacing: ${ ( { theme } ) => theme.fonts.body1.letterSpacing };
 	background: none !important;
 	border: 0px none !important;
 	text-align: center;
