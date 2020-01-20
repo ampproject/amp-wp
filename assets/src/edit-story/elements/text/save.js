@@ -21,7 +21,7 @@ function TextSave( { id, content, color, backgroundColor, width, height, x, y, f
 		fontWeight: fontWeight ? fontWeight : null,
 		background: backgroundColor,
 		color,
-		lineHeight: 1.3,
+		lineHeight: 1.3, // @todo This will be user-editable in the future.
 	};
 
 	return (
