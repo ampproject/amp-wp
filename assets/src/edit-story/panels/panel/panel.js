@@ -4,19 +4,47 @@
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 
-const Wrapper = styled.section``;
+/**
+ * WordPress dependencies
+ */
+import { useState, useCallback } from '@wordpress/element';
 
-const Form = styled.form`
+/**
+ * Internal dependencies
+ */
+import panelContext from './context';
+
+const Wrapper = styled.section`
 	display: flex;
 	flex-direction: column;
 `;
 
-function Panel( { children } ) {
+function Panel( { initialHeight, children } ) {
+	const [ isCollapsed, setIsCollapsed ] = useState( false );
+	const [ height, setHeight ] = useState( initialHeight );
+
+	const collapse = useCallback( () => setIsCollapsed( true ), [] );
+	const expand = useCallback( () => setIsCollapsed( false ), [] );
+
+	const contextValue = {
+		state: {
+			height,
+			isCollapsed,
+		},
+		actions: {
+			setHeight,
+			collapse,
+			expand,
+		},
+	};
+
+	const ContextProvider = panelContext.Provider;
+
 	return (
 		<Wrapper>
-			<Form>
+			<ContextProvider value={ contextValue }>
 				{ children }
-			</Form>
+			</ContextProvider>
 		</Wrapper>
 	);
 }
@@ -26,6 +54,11 @@ Panel.propTypes = {
 		PropTypes.arrayOf( PropTypes.node ),
 		PropTypes.node,
 	] ).isRequired,
+	initialHeight: PropTypes.number,
 };
+
+Panel.defaultProps = {
+	initialHeight: null,
+}
 
 export default Panel;

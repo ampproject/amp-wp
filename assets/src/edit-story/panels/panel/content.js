@@ -2,9 +2,45 @@
  * External dependencies
  */
 import styled from 'styled-components';
+import PropTypes from 'prop-types';
 
-const Content = styled.div`
+/**
+ * WordPress dependencies
+ */
+import { useContext } from '@wordpress/element';
+
+/**
+ * Internal dependencies
+ */
+import panelContext from './context';
+
+const Form = styled.form`
 	margin: 10px 20px;
 `;
+
+function Content( { children } ) {
+	const { state: { isCollapsed, height } } = useContext( panelContext );
+
+	if ( isCollapsed ) {
+		return null;
+	}
+
+	const formStyle = {
+		height: height === null ? 'auto' : `${ height }px`,
+	};
+
+	return (
+		<Form style={ formStyle }>
+			{ children }
+		</Form>
+	);
+}
+
+Content.propTypes = {
+	children: PropTypes.oneOfType( [
+		PropTypes.arrayOf( PropTypes.node ),
+		PropTypes.node,
+	] ).isRequired,
+};
 
 export default Content;

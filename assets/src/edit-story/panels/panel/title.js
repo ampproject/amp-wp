@@ -5,8 +5,14 @@ import styled from 'styled-components';
 import PropTypes from 'prop-types';
 
 /**
+ * WordPress dependencies
+ */
+import { useContext } from '@wordpress/element';
+
+/**
  * Internal dependencies
  */
+import panelContext from './context';
 import Arrow from './arrow.svg';
 
 const Header = styled.header`
@@ -43,12 +49,17 @@ const Collapse = styled.button.attrs( { type: 'button' } )`
 `;
 
 function Title( { children } ) {
+	const {
+		state: { isCollapsed },
+		actions: { collapse, expand },
+	} = useContext( panelContext );
+
 	return (
 		<Header>
 			<H>
 				{ children }
 			</H>
-			<Collapse>
+			<Collapse isCollapsed={ isCollapsed } onClick={ isCollapsed ? expand : collapse }>
 				<Arrow />
 			</Collapse>
 		</Header>
