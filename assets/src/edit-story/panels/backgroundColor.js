@@ -29,7 +29,7 @@ function BackgroundColorPanel( { selectedElements, onSetProperties } ) {
 				{ 'Background color' }
 			</Title>
 			<InputGroup
-				type="text"
+				type="color"
 				label="Background color"
 				value={ state.backgroundColor }
 				isMultiple={ backgroundColor === '' }
