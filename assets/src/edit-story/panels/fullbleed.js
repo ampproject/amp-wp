@@ -11,7 +11,8 @@ import { useEffect, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { ActionButton, Panel, PanelTitle, PanelContent, getCommonValue } from './panel';
+import { Panel, PanelTitle, PanelContent } from './panel';
+import { ActionButton, getCommonValue } from './elements';
 
 function FullbleedPanel( { selectedElements, onSetProperties } ) {
 	// The x/y/w/h/r are kept unchanged so that toggling fullbleed will return

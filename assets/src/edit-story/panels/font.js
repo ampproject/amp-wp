@@ -12,7 +12,8 @@ import { useEffect, useState } from '@wordpress/element';
  * Internal dependencies
  */
 import { useFont } from '../app';
-import { Panel, PanelTitle, PanelContent, InputGroup, getCommonValue, SelectMenu } from './panel';
+import { Panel, PanelTitle, PanelContent } from './panel';
+import { InputGroup, SelectMenu, getCommonValue } from './elements';
 
 function FontPanel( { selectedElements, onSetProperties } ) {
 	const fontFamily = getCommonValue( selectedElements, 'fontFamily' );

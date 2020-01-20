@@ -11,7 +11,8 @@ import { useEffect, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { Panel, PanelTitle, PanelContent, InputGroup, getCommonValue } from './panel';
+import { Panel, PanelTitle, PanelContent } from './panel';
+import { InputGroup, getCommonValue } from './elements';
 
 function PositionPanel( { selectedElements, onSetProperties } ) {
 	const x = getCommonValue( selectedElements, 'x' );
