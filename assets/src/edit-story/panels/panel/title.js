@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { useContext } from '@wordpress/element';
+import { useContext, useCallback } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -55,14 +55,19 @@ const Collapse = styled.button.attrs( { type: 'button' } )`
 
 function Title( { children, isPrimary, isResizable } ) {
 	const {
-		state: { isCollapsed, height },
+		state: { isCollapsed },
 		actions: { collapse, expand, setHeight },
 	} = useContext( panelContext );
+
+	const handleHeightChange = useCallback(
+		( deltaHeight ) => setHeight( ( height ) => height + deltaHeight ),
+		[ setHeight ],
+	);
 
 	return (
 		<Header isPrimary={ isPrimary }>
 			{ isResizable && ! isCollapsed && (
-				<DragHandle handleHeightChange={ ( deltaHeight ) => setHeight( height + deltaHeight ) } />
+				<DragHandle handleHeightChange={ handleHeightChange } />
 			) }
 			<Heading>
 				{ children }
