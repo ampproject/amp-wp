@@ -90,10 +90,10 @@ class AMP_Story_Post_Type {
 					'title', // Used for amp-story[title].
 					'author', // Used for the amp/amp-story-post-author block.
 					'editor',
+					'excerpt',
 					'thumbnail', // Used for poster images.
 					'amp',
 					'revisions', // Without this, the REST API will return 404 for an autosave request.
-					'custom-fields', // Used for global stories settings.
 				],
 				'rewrite'               => [
 					'slug' => self::REWRITE_SLUG,
@@ -314,6 +314,7 @@ class AMP_Story_Post_Type {
 		$story_id         = ( $post ) ? $post->ID : null;
 		$post_type_object = get_post_type_object( self::POST_TYPE_SLUG );
 		$rest_base        = ! empty( $post_type_object->rest_base ) ? $post_type_object->rest_base : $post_type_object->name;
+		$post_thumbnails  = get_theme_support( 'post-thumbnails' );
 
 		self::load_admin_fonts( $post );
 
@@ -325,12 +326,16 @@ class AMP_Story_Post_Type {
 				'config' => [
 					'allowedVideoMimeTypes'          => $allowed_video_mime_types,
 					'allowedPageAttachmentPostTypes' => $post_types,
+					'postType'                       => self::POST_TYPE_SLUG,
+					'postThumbnails'                 => $post_thumbnails,
 					'storyId'                        => $story_id,
 					'previewLink'                    => get_preview_post_link( $story_id ),
 					'api'                            => [
-						'stories' => sprintf( '/wp/v2/%s', $rest_base ),
-						'media'   => '/wp/v2/media',
-						'fonts'   => '/amp/v1/fonts',
+						'stories'  => sprintf( '/wp/v2/%s', $rest_base ),
+						'media'    => '/wp/v2/media',
+						'users'    => '/wp/v2/users',
+						'statuses' => '/wp/v2/statuses',
+						'fonts'    => '/amp/v1/fonts',
 					],
 				],
 			]
@@ -407,6 +412,9 @@ class AMP_Story_Post_Type {
 		if ( $post_story_data ) {
 			foreach ( $post_story_data as $page ) {
 				foreach ( $page['elements'] as $element ) {
+					if ( ! isset( $element['fontFamily'] ) ) {
+						continue;
+					}
 					$font = AMP_Fonts::get_font( $element['fontFamily'] );
 					if ( $font && ! in_array( $font['slug'], $font_slugs, true ) ) {
 						$fonts[]      = $font;
