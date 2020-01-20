@@ -6,24 +6,18 @@ import styled from 'styled-components';
 /**
  * Internal dependencies
  */
-import { CENTRAL_RIGHT_PADDING, INSPECTOR_WIDTH } from '../../constants';
 import Buttons from './buttons';
 import Title from './title';
 
 const Background = styled.div`
-	background-color: ${ ( { theme } ) => theme.colors.bg.v3 };
-	display: grid;
-	grid:
-    "header . buttons" 1fr
-    / 1fr ${ CENTRAL_RIGHT_PADDING }px ${ INSPECTOR_WIDTH }px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	background-color: ${ ( { theme } ) => theme.colors.bg.v1 };
 `;
 
 const Head = styled.header`
-	grid-area: header;
-	height: 100%;
-	display: flex;
-	justify-content: center;
-	align-items: center;
+	flex: 1 1 auto;
 `;
 
 const ButtonCell = styled.header`
