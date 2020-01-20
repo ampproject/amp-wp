@@ -96,6 +96,17 @@ const Icon = styled( Dashicon )`
 	fill: ${ ( { theme } ) => theme.colors.mg.v2 };
 `;
 
+const ButtonCSS = css`
+	 background: none;
+	 color: ${ ( { theme } ) => theme.colors.fg.v1 };
+	 padding: 5px;
+	 font-weight: bold;
+	 flex: 1 0 0;
+	 text-align: center;
+	 border: 1px solid ${ ( { theme } ) => theme.colors.mg.v1 };
+	 border-radius: 3px;
+`;
+
 const SUPPORTED_IMAGE_TYPES = [
 	'image/png',
 	'image/jpeg',
@@ -267,6 +278,7 @@ function MediaLibrary( { onInsert } ) {
 				<UploadButton
 					onClose={ onClose }
 					onSelect={ onSelect }
+					buttonCSS={ ButtonCSS }
 				/>
 			</Header>
 
