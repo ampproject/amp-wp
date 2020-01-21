@@ -12,6 +12,7 @@ import { __, _x } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
+import PrefixInput from '../components/PrefixInput';
 import { Panel, Title, InputGroup, getCommonValue } from './shared';
 
 function SizePanel( { selectedElements, onSetProperties } ) {
@@ -32,6 +33,36 @@ function SizePanel( { selectedElements, onSetProperties } ) {
 			<Title>
 				{ __( 'Size', 'amp' ) }
 			</Title>
+			<PrefixInput
+				label={ __( 'W', 'amp' ) }
+				value={ state.width }
+				isMultiple={ width === '' }
+				onChange={ ( value ) => {
+					const ratio = width / height;
+					const newWidth = isNaN( value ) || value === '' ? '' : parseFloat( value );
+					setState( {
+						...state,
+						width: newWidth,
+						height: typeof newWidth === 'number' && lockRatio ? newWidth / ratio : height,
+					} );
+				} }
+				disabled={ isFullbleed }
+			/>
+			<PrefixInput
+				label={ __( 'H', 'amp' ) }
+				value={ state.height }
+				isMultiple={ height === '' }
+				onChange={ ( value ) => {
+					const ratio = width / height;
+					const newHeight = isNaN( value ) || value === '' ? '' : parseFloat( value );
+					setState( {
+						...state,
+						height: newHeight,
+						width: typeof newHeight === 'number' && lockRatio ? newHeight * ratio : width,
+					} );
+				} }
+				disabled={ isFullbleed }
+			/>
 			<InputGroup
 				label={ __( 'Width', 'amp' ) }
 				value={ state.width }

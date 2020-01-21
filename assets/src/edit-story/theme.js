@@ -30,6 +30,8 @@ const theme = {
 			v2: '#E5E5E5',
 			v3: '#D4D3D4',
 			v4: '#B3B3B3',
+			v5: '#80868B',
+			v6: '#3C4043',
 		},
 		action: '#47A0F4',
 		danger: '#FF0000',

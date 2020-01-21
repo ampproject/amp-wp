@@ -12,7 +12,7 @@ Official AMP plugin, supported by the AMP team. Formerly Accelerated Mobile Page
 **License:** [GPLv2 or later](http://www.gnu.org/licenses/gpl-2.0.html)  
 **Requires PHP:** 5.4  
 
-[![Build Status](https://travis-ci.org/ampproject/amp-wp.svg?branch=develop)](https://travis-ci.org/ampproject/amp-wp) [![Coverage Status](https://img.shields.io/codecov/c/github/ampproject/amp-wp/develop.svg)](https://codecov.io/gh/ampproject/amp-wp) [![Built with Grunt](https://gruntjs.com/cdn/builtwith.svg)](http://gruntjs.com) 
+[![Build Status](https://travis-ci.org/ndev1991/amp-wp.svg?branch=develop)](https://travis-ci.org/ndev1991/amp-wp) [![Coverage Status](https://img.shields.io/codecov/c/github/ndev1991/amp-wp/develop.svg)](https://codecov.io/gh/ndev1991/amp-wp) [![Built with Grunt](https://gruntjs.com/cdn/builtwith.svg)](http://gruntjs.com) 
 
 ## Description ##
 
