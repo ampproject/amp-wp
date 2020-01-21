@@ -12,12 +12,13 @@ import { ADMIN_TOOLBAR_HEIGHT } from '../../constants';
 
 const PADDING_TOP = 70;
 const PADDING_LEFT = 170;
+const ADMIN_MENU_WIDTH = 160;
+const ADMIN_MENU_FOLDED_WIDTH = 36;
 
-// TODO: Do not overlay admin menu.
 export const GlobalStyle = createGlobalStyle`
 	.WebStories_ReactModal__Content {
 		position: absolute;
-		top: ${ ADMIN_TOOLBAR_HEIGHT + PADDING_TOP }px;
+		top: ${ PADDING_TOP }px;
 		right: ${ PADDING_LEFT }px;
 		bottom: ${ PADDING_TOP }px;
 		left: ${ PADDING_LEFT }px;
@@ -28,12 +29,16 @@ export const GlobalStyle = createGlobalStyle`
 
 	.WebStories_ReactModal__Overlay {
 		position: fixed;
-		top: 0;
-		left: 0;
+		top: ${ ADMIN_TOOLBAR_HEIGHT }px;
+		left: ${ ADMIN_MENU_WIDTH }px;
 		right: 0;
 		bottom: 0;
 		background-color: ${ ( { theme } ) => theme.colors.bg.v1 };
-		z-index: 10000;
+		z-index: 10;
+	}
+
+	body.folded .WebStories_ReactModal__Overlay {
+		left: ${ ADMIN_MENU_FOLDED_WIDTH }px;
 	}
 `;
 
