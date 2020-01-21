@@ -46,7 +46,7 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @var string
 	 */
-	const REL_VALUE_NON_AMP_TO_AMP = 'not-amphtml';
+	const REL_VALUE_NON_AMP_TO_AMP = 'noamphtml';
 
 	/**
 	 * Placeholder for default arguments, to be set in child classes.
