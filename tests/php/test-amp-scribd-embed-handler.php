@@ -20,14 +20,6 @@ class AMP_Scribd_Embed_Handler_Test extends WP_UnitTestCase {
 	protected $scribd_doc_url = 'https://www.scribd.com/doc/110799637/Synthesis-of-Knowledge-Effects-of-Fire-and-Thinning-Treatments-on-Understory-Vegetation-in-Dry-U-S-Forests';
 
 	/**
-	 * Hypothetical Scribd document URL that would return an oEmbed response with a 'sandbox'
-	 * attribute already set on the iframe.
-	 *
-	 * @var string
-	 */
-	protected $scribd_doc_with_sandbox_attr_url = 'https://www.scribd.com/doc/NaN/Hypothetical-Book';
-
-	/**
 	 * Set up.
 	 *
 	 * @global WP_Post $post
@@ -66,15 +58,15 @@ class AMP_Scribd_Embed_Handler_Test extends WP_UnitTestCase {
 	 * @return array Response data.
 	 */
 	public function mock_http_request( $preempt, $r, $url ) {
+		if ( in_array( 'external-http', $_SERVER['argv'], true ) ) {
+			return $preempt;
+		}
+
 		if ( false === strpos( $url, 'scribd.com' ) ) {
 			return $preempt;
 		}
 
-		$body = '{"type":"rich","version":"1.0","provider_name":"Scribd","provider_url":"https://www.scribd.com/","cache_age":604800,"title":"Synthesis of Knowledge: Effects of Fire and Thinning Treatments on Understory Vegetation in Dry U.S. Forests","author_name":"Joint Fire Science Program","author_url":"https://www.scribd.com/user/151878975/Joint-Fire-Science-Program","thumbnail_url":"https://imgv2-1-f.scribdassets.com/img/document/110799637/111x142/9fc8621525/1570598026?v=1","thumbnail_width":164,"thumbnail_height":212,"html":"\u003ciframe class=\"scribd_iframe_embed\" src=\"https://www.scribd.com/embeds/110799637/content\" data-aspect-ratio=\"1.2941176470588236\" scrolling=\"no\" id=\"110799637\" width=\"100%\" height=\"500\" frameborder=\"0\"\u003e\u003c/iframe\u003e\u003cscript type=\"text/javascript\"\u003e\n          (function() { var scribd = document.createElement(\"script\"); scribd.type = \"text/javascript\"; scribd.async = true; scribd.src = \"https://www.scribd.com/javascripts/embed_code/inject.js\"; var s = document.getElementsByTagName(\"script\")[0]; s.parentNode.insertBefore(scribd, s); })()\n        \u003c/script\u003e"}';
-
-		if ( false !== strpos( $url, 'Hypothetical-Book' ) ) {
-			$body = '{"type":"rich","version":"1.0","provider_name":"Scribd","provider_url":"https://www.scribd.com/","cache_age":604800,"title":"Hypothetical Book","author_name":"John Doe","author_url":"https://www.scribd.com/user/NaN/Hypothetical-Book","thumbnail_url":"https://imgv2-1-f.scribdassets.com/img/document/NaN/111x142/123/123?v=1","thumbnail_width":164,"thumbnail_height":212,"html":"\u003ciframe class=\"scribd_iframe_embed\" sandbox=\"allow-forms allow-scripts\" src=\"https://www.scribd.com/embeds/NaN/content\" data-aspect-ratio=\"1.2941176470588236\" scrolling=\"no\" id=\"NaN\" width=\"100%\" height=\"500\" frameborder=\"0\"\u003e\u003c/iframe\u003e\u003cscript type=\"text/javascript\"\u003e\n          (function() { var scribd = document.createElement(\"script\"); scribd.type = \"text/javascript\"; scribd.async = true; scribd.src = \"https://www.scribd.com/javascripts/embed_code/inject.js\"; var s = document.getElementsByTagName(\"script\")[0]; s.parentNode.insertBefore(scribd, s); })()\n        \u003c/script\u003e"}';
-		}
+		$body = '{"type":"rich","version":"1.0","provider_name":"Scribd","provider_url":"https://www.scribd.com/","cache_age":604800,"title":"Synthesis of Knowledge: Effects of Fire and Thinning Treatments on Understory Vegetation in Dry U.S. Forests","author_name":"Joint Fire Science Program","author_url":"https://www.scribd.com/user/151878975/Joint-Fire-Science-Program","thumbnail_url":"https://imgv2-1-f.scribdassets.com/img/document/110799637/111x142/9fc8621525/1570598026?v=1","thumbnail_width":164,"thumbnail_height":212,"html":"\u003ciframe class=\"scribd_iframe_embed\" src=\"https://www.scribd.com/embeds/110799637/content\" data-aspect-ratio=\"1.2941176470588236\" scrolling=\"no\" id=\"110799637\" width=\"500\" height=\"750\" frameborder=\"0\"\u003e\u003c/iframe\u003e\u003cscript type=\"text/javascript\"\u003e\n          (function() { var scribd = document.createElement(\"script\"); scribd.type = \"text/javascript\"; scribd.async = true; scribd.src = \"https://www.scribd.com/javascripts/embed_code/inject.js\"; var s = document.getElementsByTagName(\"script\")[0]; s.parentNode.insertBefore(scribd, s); })()\n        \u003c/script\u003e"}';
 
 		return [
 			'body'     => $body,
@@ -92,18 +84,14 @@ class AMP_Scribd_Embed_Handler_Test extends WP_UnitTestCase {
 	 */
 	public function get_conversion_data() {
 		$data = [
-			'no_embed'                         => [
+			'no_embed'       => [
 				'<p>Hello world.</p>',
 				'<p>Hello world.</p>' . PHP_EOL,
 			],
-			'document_embed'                   => [
-				$this->scribd_doc_url . PHP_EOL,
-				'<p><iframe title="Synthesis of Knowledge: Effects of Fire and Thinning Treatments on Understory Vegetation in Dry U.S. Forests" class="scribd_iframe_embed" src="https://www.scribd.com/embeds/110799637/content" data-aspect-ratio="1.2941176470588236" scrolling="no" id="110799637" width="100%" height="500" frameborder="0" sandbox="allow-popups allow-scripts"></iframe></p>' . PHP_EOL,
-			],
 
-			'document_embed_with_sandbox_attr' => [
-				$this->scribd_doc_with_sandbox_attr_url . PHP_EOL,
-				'<p><iframe title="Hypothetical Book" class="scribd_iframe_embed" sandbox="allow-popups allow-scripts allow-forms allow-scripts" src="https://www.scribd.com/embeds/NaN/content" data-aspect-ratio="1.2941176470588236" scrolling="no" id="NaN" width="100%" height="500" frameborder="0"></iframe></p>' . PHP_EOL,
+			'document_embed' => [
+				$this->scribd_doc_url . PHP_EOL,
+				'<p><iframe title="Synthesis of Knowledge: Effects of Fire and Thinning Treatments on Understory Vegetation in Dry U.S. Forests" class="scribd_iframe_embed" src="https://www.scribd.com/embeds/110799637/content" data-aspect-ratio="1.2941176470588236" scrolling="no" id="110799637" width="500" height="750" frameborder="0" sandbox="allow-popups allow-scripts"></iframe></p>' . PHP_EOL,
 			],
 		];
 
@@ -111,12 +99,7 @@ class AMP_Scribd_Embed_Handler_Test extends WP_UnitTestCase {
 		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.2', '<' ) ) {
 			$data['document_embed'] = [
 				$this->scribd_doc_url . PHP_EOL,
-				'<p><iframe class="scribd_iframe_embed" src="https://www.scribd.com/embeds/110799637/content" data-aspect-ratio="1.2941176470588236" scrolling="no" id="110799637" width="100%" height="500" frameborder="0" sandbox="allow-popups allow-scripts"></iframe></p>' . PHP_EOL,
-			];
-
-			$data['document_embed_with_sandbox_attr'] = [
-				$this->scribd_doc_with_sandbox_attr_url . PHP_EOL,
-				'<p><iframe class="scribd_iframe_embed" sandbox="allow-popups allow-scripts allow-forms allow-scripts" src="https://www.scribd.com/embeds/NaN/content" data-aspect-ratio="1.2941176470588236" scrolling="no" id="NaN" width="100%" height="500" frameborder="0"></iframe></p>' . PHP_EOL,
+				'<p><iframe class="scribd_iframe_embed" src="https://www.scribd.com/embeds/110799637/content" data-aspect-ratio="1.2941176470588236" scrolling="no" id="110799637" width="500" height="750" frameborder="0" sandbox="allow-popups allow-scripts"></iframe></p>' . PHP_EOL,
 			];
 		}
 
@@ -127,8 +110,7 @@ class AMP_Scribd_Embed_Handler_Test extends WP_UnitTestCase {
 	 * Test conversion.
 	 *
 	 * @covers AMP_Scribd_Embed_Handler::filter_embed_oembed_html()
-	 * @covers AMP_Scribd_Embed_Handler::remove_script()
-	 * @covers AMP_Scribd_Embed_Handler::inject_sandbox_permissions()
+	 * @covers AMP_Scribd_Embed_Handler::sanitize_iframe()
 	 * @dataProvider get_conversion_data
 	 *
 	 * @param $source

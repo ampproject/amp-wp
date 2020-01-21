@@ -24,7 +24,7 @@ prc.stdout.on( 'data', ( data ) => {
 
 	const testsToIgnore = [];
 
-	if ( semver.gte( '5.3.0', semver.coerce( wpVersion ) ) ) {
+	if ( semver.gte( semver.clean( wpVersion ), '5.3.0' ) ) {
 		// Ignore tests that are not to be run in WP >= 5.3.0.
 		testsToIgnore.push( 'AMP Settings Screen should not allow AMP Stories to be enabled when Gutenberg is not active' );
 	}

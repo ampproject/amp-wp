@@ -241,7 +241,7 @@ class AMP_Validation_Manager {
 			add_action( 'admin_bar_menu', [ __CLASS__, 'add_admin_bar_menu_items' ], 101 );
 		}
 
-		self::override_validation_error_statuses();
+		add_action( 'wp', [ __CLASS__, 'override_validation_error_statuses' ] );
 
 		if ( self::$is_validate_request ) {
 			self::add_validation_error_sourcing();
@@ -548,6 +548,8 @@ class AMP_Validation_Manager {
 	 */
 	public static function override_validation_error_statuses() {
 		$override_validation_error_statuses = (
+			isset( $_REQUEST['preview'] )
+			&&
 			isset( $_REQUEST[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			&&
 			is_array( $_REQUEST[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended

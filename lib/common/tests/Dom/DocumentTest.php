@@ -39,15 +39,35 @@ class DocumentTest extends TestCase
                 '<!DOCTYPE html><html amp lang="en">' . $head . '<body class="some-class"><p>Text</p></body></html>',
                 '<!DOCTYPE html><html amp lang="en">' . $head . '<body class="some-class"><p>Text</p></body></html>',
             ],
+            'html_attributes'                          => [
+                'utf-8',
+                '<!DOCTYPE html><html lang="en-US" class="no-js">' . $head . '<body></body></html>',
+                '<!DOCTYPE html><html lang="en-US" class="no-js">' . $head . '<body></body></html>',
+            ],
+            'head_attributes'                          => [
+                'utf-8',
+                '<!DOCTYPE html><html><head itemscope itemtype="http://schema.org/WebSite"></head><body></body></html>',
+                '<!DOCTYPE html><html><head itemscope itemtype="http://schema.org/WebSite"><meta charset="utf-8"></head><body></body></html>',
+            ],
             'missing_head'                             => [
                 'utf-8',
                 '<!DOCTYPE html><html amp lang="en"><body class="some-class"><p>Text</p></body></html>',
                 '<!DOCTYPE html><html amp lang="en">' . $head . '<body class="some-class"><p>Text</p></body></html>',
             ],
+            'multiple_heads'                           => [
+                'utf-8',
+                '<!DOCTYPE html><html amp lang="en"><head itemscope itemtype="http://schema.org/WebSite"><meta name="first" content="something"></head><head data-something="else"><meta name="second" content="something-else"></head><body class="some-class"><p>Text</p></body></html>',
+                '<!DOCTYPE html><html amp lang="en"><head itemscope itemtype="http://schema.org/WebSite" data-something="else"><meta charset="utf-8"><meta name="first" content="something"><meta name="second" content="something-else"></head><body class="some-class"><p>Text</p></body></html>',
+            ],
             'missing_body'                             => [
                 'utf-8',
                 '<!DOCTYPE html><html amp lang="en">' . $head . '<p>Text</p></html>',
                 '<!DOCTYPE html><html amp lang="en">' . $head . '<body><p>Text</p></body></html>',
+            ],
+            'multiple_bodies'                          => [
+                'utf-8',
+                '<!DOCTYPE html><html amp lang="en">' . $head . '<body class="no-js"><p>Text</p></body><body data-some-attribute="to keep"><p>Yet another Text</p></body></html>',
+                '<!DOCTYPE html><html amp lang="en">' . $head . '<body class="no-js" data-some-attribute="to keep"><p>Text</p><p>Yet another Text</p></body></html>',
             ],
             'missing_head_and_body'                    => [
                 'utf-8',
@@ -73,6 +93,11 @@ class DocumentTest extends TestCase
                 'utf-8',
                 '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><html amp lang="en">' . $head . '<body class="some-class"><p>Text</p></body></html>',
                 '<!DOCTYPE html><html amp lang="en">' . $head . '<body class="some-class"><p>Text</p></body></html>',
+            ],
+            'slashes_on_closing_tags'                  => [
+                'utf-8',
+                '<!DOCTYPE html><html amp lang="en"><head><meta charset="utf-8" /></head><body class="some-class"><p>Text</p></body></html>',
+                '<!DOCTYPE html><html amp lang="en"><head><meta charset="utf-8"></head><body class="some-class"><p>Text</p></body></html>',
             ],
             'lots_of_whitespace'                       => [
                 'utf-8',
@@ -134,6 +159,16 @@ class DocumentTest extends TestCase
                 '',
                 mb_convert_encoding('€', 'ISO-8859-15', 'UTF-8'),
                 '<!DOCTYPE html><html>' . $head . '<body>€</body></html>',
+            ],
+            'comments_around_main_elements'            => [
+                'utf-8',
+                ' <!-- comment 1 --> <!doctype html> <!-- comment 2 --> <html> <!-- comment 3 --> <head></head> <!-- comment 4 --> <body></body> <!-- comment 5 --></html>',
+                ' <!-- comment 1 --> <!doctype html> <!-- comment 2 --> <html> <!-- comment 3 --> ' . $head . ' <!-- comment 4 --> <body></body> <!-- comment 5 --></html>',
+            ],
+            'ie_conditional_comments'                  => [
+                'utf-8',
+                '<!--[if lt IE 7]> <html class="lt-ie9 lt-ie8 lt-ie7"> <![endif]--><!--[if IE 7]> <html class="lt-ie9 lt-ie8"> <![endif]--><!--[if IE 8]> <html class="lt-ie9"> <![endif]--><!--[if gt IE 8]><!--> <html class=""> <!--<![endif]--></html>',
+                '<!DOCTYPE html><html class="">' . $head . '<body></body></html>',
             ],
         ];
     }
@@ -233,17 +268,17 @@ class DocumentTest extends TestCase
 
         for ($i = 0; $i < $iterations; $i++) {
             $html .= '
-				<tr>
-				<td class="rank" style="width:2%;">1453</td>
-				<td class="text" style="width:10%;">1947</td>
-				<td class="text">Pittsburgh Ironmen</td>
-				<td class="boolean" style="width:10%;text-align:center;"></td>
-				<td class="number" style="width:10%;">1242</td>
-				<td class="number">1192</td>
-				<td class="number">1111</td>
-				<td class="number highlight">1182</td>
-				</tr>
-			';
+                <tr>
+                <td class="rank" style="width:2%;">1453</td>
+                <td class="text" style="width:10%;">1947</td>
+                <td class="text">Pittsburgh Ironmen</td>
+                <td class="boolean" style="width:10%;text-align:center;"></td>
+                <td class="number" style="width:10%;">1242</td>
+                <td class="number">1192</td>
+                <td class="number">1111</td>
+                <td class="number highlight">1182</td>
+                </tr>
+            ';
         }
 
         $html .= '</table></body></html>';

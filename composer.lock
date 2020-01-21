@@ -4,6 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
+    "content-hash": "355392fd502b76be8d5feb094ef45dda",
     "content-hash": "b6afaacc449006926c217f8fe4a86305",
     "packages": [
         {
@@ -256,11 +257,6 @@
                 "phpunit/phpunit": "~4.8"
             },
             "type": "library",
-            "extra": {
-                "patches_applied": {
-                    "PHP-CSS-Parser: Fix parsing CSS selectors which contain commas <https://github.com/sabberworm/PHP-CSS-Parser/pull/138>": "https://github.com/sabberworm/PHP-CSS-Parser/commit/fa139f65c5b098ae652c970b25e6eb03fc495eb4.diff"
-                }
-            },
             "autoload": {
                 "psr-0": {
                     "Sabberworm\\CSS": "lib/"
@@ -335,16 +331,16 @@
     "packages-dev": [
         {
             "name": "dealerdirect/phpcodesniffer-composer-installer",
-            "version": "v0.5.0",
+            "version": "v0.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Dealerdirect/phpcodesniffer-composer-installer.git",
-                "reference": "e749410375ff6fb7a040a68878c656c2e610b132"
+                "reference": "6589501ebe29091bd46f4c29ca72dce25cca2984"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Dealerdirect/phpcodesniffer-composer-installer/zipball/e749410375ff6fb7a040a68878c656c2e610b132",
-                "reference": "e749410375ff6fb7a040a68878c656c2e610b132",
+                "url": "https://api.github.com/repos/Dealerdirect/phpcodesniffer-composer-installer/zipball/6589501ebe29091bd46f4c29ca72dce25cca2984",
+                "reference": "6589501ebe29091bd46f4c29ca72dce25cca2984",
                 "shasum": ""
             },
             "require": {
@@ -397,7 +393,7 @@
                 "stylecheck",
                 "tests"
             ],
-            "time": "2018-10-26T13:21:45+00:00"
+            "time": "2020-01-19T15:35:03+00:00"
         },
         {
             "name": "mikey179/vfsstream",
@@ -1280,16 +1276,16 @@
         },
         {
             "name": "xwp/wp-dev-lib",
-            "version": "1.3.0",
+            "version": "1.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/xwp/wp-dev-lib.git",
-                "reference": "e0205d733c2cabccfd05ec281ae43872fc42c221"
+                "reference": "86cc5e69b072804c066d10e9008d1576e26aa3cf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/xwp/wp-dev-lib/zipball/e0205d733c2cabccfd05ec281ae43872fc42c221",
-                "reference": "e0205d733c2cabccfd05ec281ae43872fc42c221",
+                "url": "https://api.github.com/repos/xwp/wp-dev-lib/zipball/86cc5e69b072804c066d10e9008d1576e26aa3cf",
+                "reference": "86cc5e69b072804c066d10e9008d1576e26aa3cf",
                 "shasum": ""
             },
             "type": "library",
@@ -1314,7 +1310,7 @@
             "keywords": [
                 "wordpress"
             ],
-            "time": "2019-10-22T09:03:59+00:00"
+            "time": "2020-01-09T12:33:32+00:00"
         }
     ],
     "aliases": [],

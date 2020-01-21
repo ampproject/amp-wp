@@ -236,7 +236,7 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 			}
 			$image = AMP_DOM_Utils::create_node(
 				$dom,
-				'amp-img',
+				'img',
 				$image_atts
 			);
 

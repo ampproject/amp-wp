@@ -8,6 +8,7 @@
 
 namespace Amp\Dom;
 
+use DOMAttr;
 use DOMComment;
 use DOMDocument;
 use DOMElement;
@@ -80,24 +81,25 @@ final class Document extends DOMDocument
      */
     const CHARSET_META_TAG_PATTERN = '/<meta [^>]*?\s*charset=[^>]*?>[^<]*(?:<\/meta>)?/i';
 
-    /**
-     * Regular expression pattern to match the main HTML structural tags.
-     *
-     * @var string
-     */
-    const HTML_STRUCTURE_PATTERN = '/(?:.*?(?<doctype><!doctype(?:\s+[^>]*)?>))?(?:(?<pre_html>.*?)(?<html_start><html(?:\s+[^>]*)?>))?(?:.*?(?<head><head(?:\s+[^>]*)?>.*?<\/head\s*>))?(?:.*?(?<body><body(?:\s+[^>]*)?>.*?<\/body\s*>))?.*?(?:(?:.*(?<html_end><\/html\s*>)|.*)(?<post_html>.*))/is';
-
     /*
      * Regular expressions to fetch the individual structural tags.
      * These patterns were optimized to avoid extreme backtracking on large documents.
      */
-    const HTML_STRUCTURE_DOCTYPE_PATTERN = '/^[^<]*<!doctype(?:\s+[^>]+)?>/i';
-    const HTML_STRUCTURE_HTML_START_TAG  = '/^[^<]*(?<html_start><html(?:\s+[^>]*)?>)/i';
+    const HTML_STRUCTURE_DOCTYPE_PATTERN = '/^(?<doctype>[^<]*(?:\s*<!--[^>]*>\s*)*<!doctype(?:\s+[^>]+)?>)/i';
+    const HTML_STRUCTURE_HTML_START_TAG  = '/^(?<html_start>[^<]*(?:\s*<!--[^>]*>\s*)*<html(?:\s+[^>]*)?>)/i';
     const HTML_STRUCTURE_HTML_END_TAG    = '/(?:<\/html(?:\s+[^>]*)?>)[^<>]*$/i';
-    const HTML_STRUCTURE_HEAD_START_TAG  = '/^[^<]*(?:<head(?:\s+[^>]*)?>)/i';
-    const HTML_STRUCTURE_BODY_START_TAG  = '/^[^<]*(?:<body(?:\s+[^>]*)?>)/i';
+    const HTML_STRUCTURE_HEAD_START_TAG  = '/^[^<]*(?:\s*<!--[^>]*>\s*)*(?:<head(?:\s+[^>]*)?>)/i';
+    const HTML_STRUCTURE_BODY_START_TAG  = '/^[^<]*(?:\s*<!--[^>]*>\s*)*(?:<body(?:\s+[^>]*)?>)/i';
     const HTML_STRUCTURE_BODY_END_TAG    = '/(?:<\/body(?:\s+[^>]*)?>)[^<>]*$/i';
     const HTML_STRUCTURE_HEAD_TAG        = '/^(?:[^<]*(?:<head(?:\s+[^>]*)?>).*?<\/head(?:\s+[^>]*)?>)/is';
+    const HTML_DOCTYPE_HTML_4_SUFFIX     = ' PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"';
+
+    // Regex patterns used for securing and restoring the doctype node.
+    const HTML_SECURE_DOCTYPE_IF_NOT_FIRST_PATTERN = '/(^[^<]*(?:\s*<!--[^>]*>\s*)+<)(!)(doctype)(\s+[^>]+?)(>)/i';
+    const HTML_RESTORE_DOCTYPE_PATTERN             = '/(^[^<]*(?:\s*<!--[^>]*>\s*)+<)(!--amp-)(doctype)(\s+[^>]+?)(-->)/i';
+
+    // Regex pattern used for removing Internet Explorer conditional comments.
+    const HTML_IE_CONDITIONAL_COMMENTS_PATTERN = '/<!--(?:\[if\s|<!\[endif)(?:[^>]+(?<!--)>)*(?:[^>]+(?<=--)>)/i';
 
     /**
      * Xpath query to fetch the attributes that are being URL-encoded by saveHTML().
@@ -115,7 +117,7 @@ final class Document extends DOMDocument
 
     // Regex patterns and values used for adding and removing http-equiv charsets for compatibility.
     const HTML_GET_HEAD_OPENING_TAG_PATTERN     = '/(<head(?:\s+[^>]*)?>)/i';
-    const HTML_GET_HEAD_OPENING_TAG_REPLACEMENT = '$1<meta http-equiv="content-type" content="text/html; charset=utf-8">';
+    const HTML_GET_HEAD_OPENING_TAG_REPLACEMENT = '$0<meta http-equiv="content-type" content="text/html; charset=utf-8">';
     const HTML_GET_HTTP_EQUIV_TAG_PATTERN       = '#<meta http-equiv=([\'"])content-type\1 content=([\'"])text/html; charset=utf-8\2>#i';
     const HTML_HTTP_EQUIV_VALUE                 = 'content-type';
     const HTML_HTTP_EQUIV_CONTENT_VALUE         = 'text/html; charset=utf-8';
@@ -229,6 +231,15 @@ final class Document extends DOMDocument
     private $mustacheTagsReplaced = false;
 
     /**
+     * Whether we had secured a doctype that needs restoring or not.
+     *
+     * This is an int as it receives the $count from the preg_replace().
+     *
+     * @var int
+     */
+    private $securedDoctype = 0;
+
+    /**
      * Creates a new Amp\Dom\Document object
      *
      * @link  https://php.net/manual/domdocument.construct.php
@@ -324,6 +335,7 @@ final class Document extends DOMDocument
         $source = $this->replaceSelfClosingTags($source);
         $source = $this->normalizeDocumentStructure($source);
         $source = $this->maybeReplaceNoscriptElements($source);
+        $source = $this->secureDoctypeNode($source);
         $source = $this->convertAmpEmojiAttribute($source);
 
         list($source, $this->originalEncoding) = $this->detectAndStripEncoding($source);
@@ -338,7 +350,7 @@ final class Document extends DOMDocument
 
         $libxml_previous_state = libxml_use_internal_errors(true);
 
-        $success = parent::loadHTML($source, $options);
+        $success = parent::loadHTML($source, $options | LIBXML_COMPACT | LIBXML_HTML_NODEFDTD);
 
         libxml_clear_errors();
         libxml_use_internal_errors($libxml_previous_state);
@@ -353,15 +365,17 @@ final class Document extends DOMDocument
             ) {
                 $this->head->removeChild($meta);
             }
+
+            // Add the required utf-8 meta charset tag.
+            $charset = $this->createElement('meta');
+            $charset->setAttribute('charset', self::AMP_ENCODING);
+            $this->head->insertBefore($charset, $this->head->firstChild);
+
+            // Do some further clean-up.
+            $this->deduplicateTag(self::TAG_HEAD);
+            $this->deduplicateTag(self::TAG_BODY);
+            $this->moveInvalidHeadNodesToBody();
         }
-
-        // Add the required utf-8 meta charset tag.
-        $charset = $this->createElement('meta');
-        $charset->setAttribute('charset', self::AMP_ENCODING);
-        $this->head->insertBefore($charset, $this->head->firstChild);
-
-        // Do some further clean-up.
-        $this->moveInvalidHeadNodesToBody();
 
         return $success;
     }
@@ -394,6 +408,7 @@ final class Document extends DOMDocument
         // Remove http-equiv charset again.
         $html = preg_replace(self::HTML_GET_HTTP_EQUIV_TAG_PATTERN, '', $html, 1);
 
+        $html = $this->restoreDoctypeNode($html);
         $html = $this->restoreMustacheTemplateTokens($html);
         $html = $this->maybeRestoreNoscriptElements($html);
         $html = $this->restoreSelfClosingTags($html);
@@ -447,7 +462,7 @@ final class Document extends DOMDocument
      *
      * This makes sure the document adheres to the general structure that AMP requires:
      *   ```
-     *   <!doctype html>
+     *   <!DOCTYPE html>
      *   <html>
      *     <head>
      *       <meta charset="utf-8">
@@ -463,10 +478,17 @@ final class Document extends DOMDocument
     private function normalizeDocumentStructure($content)
     {
         $matches   = [];
+        $doctype   = '<!DOCTYPE html>';
         $htmlStart = '<html>';
 
-        // Strip <!doctype> for now.
-        $content = preg_replace(self::HTML_STRUCTURE_DOCTYPE_PATTERN, '', $content, 1);
+        // Strip IE conditional comments, which are supported by IE 5-9 only (which AMP doesn't support).
+        $content = preg_replace( self::HTML_IE_CONDITIONAL_COMMENTS_PATTERN, '', $content );
+
+        // Detect and strip <!doctype> tags.
+        if ( preg_match( self::HTML_STRUCTURE_DOCTYPE_PATTERN, $content, $matches ) ) {
+            $doctype = $matches['doctype'];
+            $content = preg_replace( self::HTML_STRUCTURE_DOCTYPE_PATTERN, '', $content, 1 );
+        }
 
         // Detect and strip <html> tags.
         if (preg_match(self::HTML_STRUCTURE_HTML_START_TAG, $content, $matches)) {
@@ -484,19 +506,18 @@ final class Document extends DOMDocument
                 // Only <head> missing.
                 $content = "<head></head>{$content}";
             }
-        } else {
-            if (! preg_match(self::HTML_STRUCTURE_BODY_END_TAG, $content, $matches)) {
-                // Only <body> missing.
-                // @todo This is an expensive regex operation, look into further optimization.
-                $content = preg_replace(self::HTML_STRUCTURE_HEAD_TAG, '$0<body>', $content, 1);
-                $content .= '</body>';
-            }
+        } elseif ( ! preg_match( self::HTML_STRUCTURE_BODY_END_TAG, $content, $matches ) ) {
+            // Only <body> missing.
+            // @todo This is an expensive regex operation, look into further optimization.
+            $content  = preg_replace( self::HTML_STRUCTURE_HEAD_TAG, '$0<body>', $content, 1 );
+            $content .= '</body>';
         }
 
         $content = "{$htmlStart}{$content}</html>";
 
-        // Reinsert a standard doctype.
-        $content = "<!DOCTYPE html>{$content}";
+        // Reinsert a standard doctype (while preserving any potentially leading comments).
+        $doctype = str_ireplace( self::HTML_DOCTYPE_HTML_4_SUFFIX, '', $doctype );
+        $content = "{$doctype}{$content}";
 
         return $content;
     }
@@ -552,10 +573,10 @@ final class Document extends DOMDocument
         static $regexPattern = null;
 
         if (null === $regexPattern) {
-            $regexPattern = '#<(' . implode('|', self::$selfClosingTags) . ')[^>]*>(?!</\1>)#';
+            $regexPattern = '#<(' . implode('|', self::$selfClosingTags) . ')([^>]*?)(?:\s*\/)?>(?!</\1>)#';
         }
 
-        return preg_replace($regexPattern, '$0</$1>', $html);
+        return preg_replace($regexPattern, '<$1$2></$1>', $html);
     }
 
     /**
@@ -1044,6 +1065,98 @@ final class Document extends DOMDocument
         }
 
         return rand($min, $max);
+    }
+
+    /**
+     * Secure the original doctype node.
+     *
+     * We need to keep elements around that were prepended to the doctype, like comment node used for source-tracking.
+     * As DOM_Document prepends a new doctype node and removes the old one if the first element is not the doctype, we
+     * need to ensure the original one is not stripped (by changing its node type) and restore it later on.
+     *
+     * @see restoreDoctypeNode() Reciprocal function.
+     *
+     * @param string $html HTML string to adapt.
+     * @return string Adapted HTML string.
+     */
+    private function secureDoctypeNode($html)
+    {
+        return preg_replace(self::HTML_SECURE_DOCTYPE_IF_NOT_FIRST_PATTERN, '\1!--amp-\3\4-->', $html, 1, $this->securedDoctype);
+    }
+
+    /**
+     * Restore the original doctype node.
+     *
+     * @see secureDoctypeNode() Reciprocal function.
+     *
+     * @param string $html HTML string to adapt.
+     * @return string Adapted HTML string.
+     */
+    private function restoreDoctypeNode($html)
+    {
+        if (! $this->securedDoctype) {
+            return $html;
+        }
+
+        return preg_replace(self::HTML_RESTORE_DOCTYPE_PATTERN, '\1!\3\4>', $html, 1);
+    }
+
+    /**
+     * Deduplicate a given tag.
+     *
+     * This keeps the first tag as the main tag and moves over all child nodes and attribute nodes from any subsequent
+     * same tags over to remove them.
+     *
+     * @param string $tagName Name of the tag to deduplicate.
+     */
+    public function deduplicateTag($tagName)
+    {
+        $tags = $this->getElementsByTagName($tagName);
+
+        /**
+         * Main tag to keep.
+         *
+         * @var DOMElement $mainTag
+         */
+        $mainTag = $tags->item(0);
+
+        if (null === $mainTag) {
+            return;
+        }
+
+        while ($tags->length > 1) {
+            /**
+             * Tag to remove.
+             *
+             * @var DOMElement $tagToRemove
+             */
+            $tagToRemove = $tags->item(1);
+
+            foreach ($tagToRemove->childNodes as $childNode) {
+                $mainTag->appendChild($childNode->parentNode->removeChild($childNode));
+            }
+
+            while ($tagToRemove->hasAttributes()) {
+                /**
+                 * Attribute node to move over to the main tag.
+                 *
+                 * @var DOMAttr $attribute
+                 */
+                $attribute = $tagToRemove->attributes->item(0);
+                $tagToRemove->removeAttributeNode($attribute);
+
+                // @TODO This doesn't deal properly with attributes present on both tags. Maybe overkill to add?
+                // We could move over the copy_attributes from AMP_DOM_Utils to do this.
+                $mainTag->setAttributeNode($attribute);
+            }
+
+            $tagToRemove->parentNode->removeChild($tagToRemove);
+        }
+
+        // Avoid doing the above query again if possible.
+        if (in_array($tagName, [self::TAG_HEAD, self::TAG_BODY], true)) {
+            $this->$tagName = $mainTag;
+        }
     }
 
     /**

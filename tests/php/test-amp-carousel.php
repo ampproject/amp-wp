@@ -40,12 +40,12 @@ class Test_Carousel extends \WP_UnitTestCase {
 			'image_without_caption' => [
 				( new ElementList() )->add( $image, '' ),
 				$dom,
-				'<amp-carousel width="' . $width . '" height="' . $height . '" type="slides" layout="responsive"><div class="slide"><amp-img src="' . $src . '" width="' . $width . '" height="' . $height . '" layout="fill" object-fit="cover"></amp-img></div></amp-carousel>',
+				'<amp-carousel width="' . $width . '" height="' . $height . '" type="slides" layout="responsive"><span class="slide"><amp-img src="' . $src . '" width="' . $width . '" height="' . $height . '" layout="fill" object-fit="cover"></amp-img></span></amp-carousel>',
 			],
 			'image_with_caption'    => [
 				( new ElementList() )->add( $image, $caption ),
 				$dom,
-				'<amp-carousel width="' . $width . '" height="' . $height . '" type="slides" layout="responsive"><div class="slide"><amp-img src="' . $src . '" width="' . $width . '" height="' . $height . '" layout="fill" object-fit="cover"></amp-img><div class="amp-wp-gallery-caption"><span>' . $caption . '</span></div></div></amp-carousel>',
+				'<amp-carousel width="' . $width . '" height="' . $height . '" type="slides" layout="responsive"><span class="slide"><amp-img src="' . $src . '" width="' . $width . '" height="' . $height . '" layout="fill" object-fit="cover"></amp-img><span class="amp-wp-gallery-caption"><span>' . $caption . '</span></span></span></amp-carousel>',
 			],
 		];
 	}

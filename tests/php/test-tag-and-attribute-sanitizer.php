@@ -2603,7 +2603,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				],
 			],
 
-			'nested_valid_and_invalud' => [
+			'nested_valid_and_invalid' => [
 				'
 					<div class="parent">
 						<p>Nesting valid and invalid elements.</p>
@@ -2614,7 +2614,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'
 					<div class="parent">
 						<p>Nesting valid and invalid elements.</p>
-						Is an invalid "invalid" tagIs an invalid "foo" tag <p>This should pass.</p>
+						Is an invalid "invalid" tag Is an invalid "foo" tag <p>This should pass.</p>
 					</div>
 				',
 				[
@@ -2642,7 +2642,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						<lili>world</lili>
 					</ul>
 				',
-				'<ul><li>hello</li> world</ul>',
+				'<ul><li>hello</li> world </ul>',
 				[
 					[
 						'node_name'       => 'lili',

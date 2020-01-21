@@ -1907,6 +1907,7 @@ class AMP_Validated_URL_Post_Type {
 			postId = <?php echo wp_json_encode( $post->ID ); ?>;
 			$( '#preview_validation_errors' ).on( 'click', function() {
 				var params = {}, validatePreviewUrl = validateUrl;
+				params.preview = '1';
 				$( '.amp-validation-error-status' ).each( function() {
 					if ( this.value && ! this.options[ this.selectedIndex ].defaultSelected ) {
 						params[ this.name ] = this.value;
