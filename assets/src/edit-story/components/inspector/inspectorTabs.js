@@ -28,14 +28,18 @@ const Tab = styled.button.attrs( { role: 'tab' } )`
 	border: 0px none;
 	background: none;
 	text-transform: uppercase;
-	color: ${ ( { theme } ) => theme.colors.bg.v4 };
-	font-weight: ${ ( { isActive } ) => isActive ? 'bold' : 'normal;' };
+	color: ${ ( { theme } ) => theme.colors.fg.v0 };
+	font-family: ${ ( { theme } ) => theme.fonts.tab.family };
+	font-size: ${ ( { theme } ) => theme.fonts.tab.size };
+	line-height: ${ ( { theme } ) => theme.fonts.tab.lineHeight };
 	word-break: break-word;
+
 	&:focus, &:active {
 		outline: none;
 	}
+
 	${ ( { isActive } ) => ! isActive && `
-		opacity: .4;
+		opacity: .3;
 		&:hover { opacity: 1; }
 	` }
 `;
