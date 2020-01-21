@@ -56,7 +56,7 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 	protected $DEFAULT_ARGS = [ // phpcs:ignore WordPress.NamingConventions.ValidVariableName.PropertyNotSnakeCase
 		'paired'             => false, // Only set to true when in a paired mode (will be false when amp_is_canonical()). Controls whether query var is added.
 		'meta_content'       => self::DEFAULT_META_CONTENT,
-		'excluded_amp_links' => [], // URLs in this won't have AMP-to-AMP links in paired mode.
+		'excluded_amp_links' => [], // URLs in this won't have AMP-to-AMP links in a paired mode.
 	];
 
 	/**
@@ -156,14 +156,10 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 			if ( $is_rel_non_amp ) {
 				// This value is to opt-out of AMP-to-AMP links, so strip it and ensure the link is to non-AMP.
 				$element->removeAttribute( 'rel' );
-			}
-
-			if (
+			} elseif (
 				$this->is_frontend_url( $href )
 				&&
 				'#' !== substr( $href, 0, 1 )
-				&&
-				! $is_rel_non_amp
 				&&
 				! in_array( $href, $this->args['excluded_amp_links'], true )
 			) {
