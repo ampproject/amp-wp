@@ -104,6 +104,8 @@ class AMP_Story_Media {
 		add_action( 'pre_get_posts', [ __CLASS__, 'filter_poster_attachments' ] );
 
 		add_action( 'rest_api_init', [ __CLASS__, 'rest_api_init' ] );
+
+		add_filter( 'wp_prepare_attachment_for_js', [ __CLASS__, 'wp_prepare_attachment_for_js' ], 10, 2 );
 	}
 
 	/**
@@ -394,6 +396,27 @@ class AMP_Story_Media {
 				],
 			]
 		);
+	}
+
+	/**
+	 * Filters the attachment data prepared for JavaScript.
+	 *
+	 * @param  array   $response   Array of prepared attachment data.
+	 * @param  WP_Post $attachment Attachment object.
+	 * @return array $response;
+	 */
+	public static function wp_prepare_attachment_for_js( $response, $attachment ) {
+
+		if ( 'video' === $response['type'] ) {
+			$id    = get_post_thumbnail_id( $attachment );
+			$image = '';
+			if ( $id ) {
+				$image = wp_get_attachment_image_url( $id, 'medium' );
+			}
+			$response['featured_media']     = $id;
+			$response['featured_media_src'] = $image;
+		}
+		return $response;
 	}
 }
 
