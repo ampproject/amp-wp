@@ -15,7 +15,7 @@ import { __ } from '@wordpress/i18n';
 import { Panel, Title, InputGroup, getCommonValue, SelectMenu } from './shared';
 
 function StylePanel( { selectedElements, onSetProperties } ) {
-	const textAlign = getCommonValue( selectedElements, 'align' );
+	const textAlign = getCommonValue( selectedElements, 'textAlign' );
 	const letterSpacing = getCommonValue( selectedElements, 'letterSpacing' );
 	const lineHeight = getCommonValue( selectedElements, 'lineHeight' );
 	const [ state, setState ] = useState( { textAlign, letterSpacing, lineHeight } );
@@ -44,7 +44,7 @@ function StylePanel( { selectedElements, onSetProperties } ) {
 				label={ __( 'Alignment', 'amp' ) }
 				options={ alignmentOptions }
 				isMultiple={ '' === textAlign }
-				value={ state.textAlign ? state.textAlign : 'default' }
+				value={ state.textAlign }
 				onChange={ ( value ) => setState( { ...state, textAlign: value } ) }
 			/>
 			<InputGroup
