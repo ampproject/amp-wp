@@ -8,7 +8,7 @@ import ResizeObserver from 'resize-observer-polyfill';
  * WordPress dependencies
  */
 import { useLayoutEffect, useRef, useState, useCallback } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -117,16 +117,20 @@ function Carousel() {
 				/>
 			</Area>
 			<List area="carousel" ref={ listRef } hasHorizontalOverflow={ hasHorizontalOverflow }>
-				{ pages.map( ( page, index ) => (
-					<Page
-						key={ index }
-						onClick={ handleClickPage( page ) }
-						isActive={ index === currentPageIndex }
-						ref={ ( el ) => {
-							pageRefs.current[ page.id ] = el;
-						} }
-					/>
-				) ) }
+				{ pages.map( ( page, index ) => {
+					const isCurrentPage = index === currentPageIndex;
+					return (
+						<Page
+							key={ index }
+							onClick={ handleClickPage( page ) }
+							isActive={ isCurrentPage }
+							ref={ ( el ) => {
+								pageRefs.current[ page.id ] = el;
+							} }
+							aria-label={ isCurrentPage ? sprintf( __( 'Page %s (current page)', 'amp' ), index + 1 ) : sprintf( __( 'Go to page %s', 'amp' ), index + 1 ) }
+						/>
+					);
+				} ) }
 			</List>
 			<Area area="right-navigation">
 				<RightArrow
