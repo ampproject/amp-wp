@@ -150,11 +150,16 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			$href = $element->getAttribute( 'href' );
-			$rel  = $element->hasAttribute( 'rel' ) ? trim( $element->getAttribute( 'rel' ) ) : '';
-
-			if ( self::REL_VALUE_NON_AMP_TO_AMP === $rel ) {
-				// This value is to opt-out of AMP-to-AMP links, so strip it and ensure the link is to non-AMP.
-				$element->removeAttribute( 'rel' );
+			$rel  = $element->hasAttribute( 'rel' ) ? array_filter( preg_split( '/\s+/', $element->getAttribute( 'rel' ) ) ) : [];
+			$pos  = array_search( self::REL_VALUE_NON_AMP_TO_AMP, $rel );
+			if ( false !== $pos ) {
+				// The rel has a value to opt-out of AMP-to-AMP links, so strip it and ensure the link is to non-AMP.
+				unset( $rel[ $pos ] );
+				if ( empty( $rel ) ) {
+					$element->removeAttribute( 'rel' );
+				} else {
+					$element->setAttribute( 'rel', implode( ' ', $rel ) );
+				}
 			} elseif (
 				$this->is_frontend_url( $href )
 				&&
@@ -163,8 +168,8 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 				! in_array( $href, $this->args['excluded_amp_links'], true )
 			) {
 				// Always add the amphtml link relation when linking enabled.
-				$rel = empty( $rel ) ? self::REL_VALUE_AMP : $rel . ' ' . self::REL_VALUE_AMP;
-				$element->setAttribute( 'rel', $rel );
+				array_push( $rel, self::REL_VALUE_AMP );
+				$element->setAttribute( 'rel', implode( ' ', $rel ) );
 
 				// Only add the AMP query var when requested (in Transitional or Reader mode).
 				if ( ! empty( $this->args['paired'] ) ) {

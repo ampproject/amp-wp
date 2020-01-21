@@ -67,6 +67,18 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 				'rel'          => 'not-amphtml',
 				'expected_rel' => null,
 			],
+			'two_rel'             => [
+				'href'         => $post_link,
+				'expected_amp' => false,
+				'rel'          => 'help not-amphtml',
+				'expected_rel' => 'help',
+			],
+			'multiple_rel'        => [
+				'href'         => $post_link,
+				'expected_amp' => false,
+				'rel'          => 'not-amphtml nofollow help',
+				'expected_rel' => 'nofollow help',
+			],
 			'rel_trailing_space'  => [
 				'href'         => $post_link,
 				'expected_amp' => false,
