@@ -2,40 +2,35 @@
  * WordPress dependencies
  */
 import { useEffect } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
-const Button = styled.button`
-	 background: none;
-	 color: ${ ( { theme } ) => theme.colors.fg.v1 };
-	 padding: 5px;
-	 font-weight: bold;
-	 flex: 1 0 0;
-	 text-align: center;
-	 border: 1px solid ${ ( { theme } ) => theme.colors.mg.v1 };
-	 border-radius: 3px;
-`;
-
 function UploadButton( {
 	title,
 	buttonText,
+	buttonCSS,
 	buttonInsertText,
 	multiple,
 	onSelect,
 	onClose,
+	type,
 } ) {
 	useEffect( () => {
 		// Work around that forces default tab as upload tab.
 		wp.media.controller.Library.prototype.defaults.contentUserSetting = false;
 	} );
 
-	const mediaPicker = () => {
+	const mediaPicker = ( evt ) => {
 		// Create the media frame.
 		const fileFrame = wp.media( {
 			title,
+			library: {
+				type,
+			},
 			button: {
 				text: buttonInsertText,
 			},
@@ -49,11 +44,19 @@ function UploadButton( {
 			onSelect( attachment );
 		} );
 
-		fileFrame.on( 'close', onClose );
+		if ( onClose ) {
+			fileFrame.on( 'close', onClose );
+		}
 
 		// Finally, open the modal
 		fileFrame.open();
+
+		evt.preventDefault();
 	};
+
+	const Button = styled.button`
+		${ buttonCSS }
+	`;
 
 	return (
 		<Button onClick={ mediaPicker }>
@@ -65,17 +68,20 @@ function UploadButton( {
 UploadButton.propTypes = {
 	title: PropTypes.string,
 	buttonInsertText: PropTypes.string,
-	buttonText: PropTypes.string,
 	multiple: PropTypes.bool,
 	onSelect: PropTypes.func.isRequired,
-	onClose: PropTypes.func.isRequired,
+	onClose: PropTypes.func,
+	type: PropTypes.string,
+	buttonCSS: PropTypes.array,
+	buttonText: PropTypes.string.isRequired,
 };
 
 UploadButton.defaultProps = {
-	title: 'Upload to Story',
-	buttonText: 'Upload',
-	buttonInsertText: 'Insert into page',
+	title: __( 'Upload to Story', 'amp' ),
+	buttonText: __( 'Upload', 'amp' ),
+	buttonInsertText: __( 'Insert into page', 'amp' ),
 	multiple: false,
+	type: '',
 };
 
 export default UploadButton;

@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { useEffect, useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -26,11 +27,11 @@ function BackgroundColorPanel( { selectedElements, onSetProperties } ) {
 	return (
 		<Panel onSubmit={ handleSubmit }>
 			<Title>
-				{ 'Background color' }
+				{ __( 'Background color', 'amp' ) }
 			</Title>
 			<InputGroup
-				type="text"
-				label="Background color"
+				type="color"
+				label={ __( 'Background color', 'amp' ) }
 				value={ state.backgroundColor }
 				isMultiple={ backgroundColor === '' }
 				onChange={ ( value ) => setState( { ...state, backgroundColor: value } ) }

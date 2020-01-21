@@ -6,7 +6,7 @@ export { default as Display } from './display';
 export { default as Save } from './save';
 
 export const defaultAttributes = {
-	backgroundColor: 'hotpink',
+	backgroundColor: '#ffffff',
 };
 
 export const hasEditMode = false;

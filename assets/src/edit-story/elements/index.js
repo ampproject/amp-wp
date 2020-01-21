@@ -2,7 +2,10 @@
  * External dependencies
  */
 import uuid from 'uuid/v4';
-
+/**
+ * WordPress dependencies
+ */
+import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
@@ -25,11 +28,11 @@ export const createNewElement = ( type, attributes = {} ) => {
 export const createPage = ( attributes ) => createNewElement( 'page', attributes );
 
 export const elementTypes = [
-	{ type: 'page', defaultAttributes: { elements: [] }, name: 'Page' },
-	{ type: 'text', name: 'Text', ...textElement },
-	{ type: 'image', name: 'Image', ...imageElement },
-	{ type: 'square', name: 'Square', ...squareElement },
-	{ type: 'video', name: 'Video', ...videoElement },
+	{ type: 'page', defaultAttributes: { elements: [] }, name: __( 'Page', 'amp' ) },
+	{ type: 'text', name: __( 'Text', 'amp' ), ...textElement },
+	{ type: 'image', name: __( 'Image', 'amp' ), ...imageElement },
+	{ type: 'square', name: __( 'Square', 'amp' ), ...squareElement },
+	{ type: 'video', name: __( 'Video', 'amp' ), ...videoElement },
 ];
 
 export const getDefinitionForType =

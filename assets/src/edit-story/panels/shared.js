@@ -4,6 +4,11 @@
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 
+/**
+ * WordPress dependencies
+ */
+import { __ } from '@wordpress/i18n';
+
 export const Panel = styled.form`
 	display: flex;
 	flex-direction: column;
@@ -48,7 +53,7 @@ export const ActionButton = styled.button`
 	font-size: 11px;
 `;
 
-function InputGroup( { type, label, value, isMultiple, onChange, postfix, disabled } ) {
+function InputGroup( { type, label, value, isMultiple, onChange, postfix, disabled, min, max } ) {
 	const placeholder = isMultiple ? '( multiple )' : '';
 	const isCheckbox = type === 'checkbox';
 	return (
@@ -64,6 +69,8 @@ function InputGroup( { type, label, value, isMultiple, onChange, postfix, disabl
 				placeholder={ placeholder }
 				value={ isCheckbox ? '' : value }
 				checked={ isCheckbox ? value : null }
+				min={ min ? min : null }
+				max={ max ? max : null }
 			/>
 			{ postfix }
 		</Group>
@@ -78,12 +85,16 @@ InputGroup.propTypes = {
 	onChange: PropTypes.func.isRequired,
 	postfix: PropTypes.string,
 	disabled: PropTypes.bool,
+	min: PropTypes.any,
+	max: PropTypes.any,
 };
 
 InputGroup.defaultProps = {
 	type: 'number',
 	postfix: '',
 	disabled: false,
+	min: null,
+	max: null,
 };
 
 function SelectMenu( { label, options, value, isMultiple, onChange, postfix, disabled } ) {
@@ -98,7 +109,7 @@ function SelectMenu( { label, options, value, isMultiple, onChange, postfix, dis
 				onChange={ ( evt ) => onChange( evt.target.value, evt ) }
 				onBlur={ ( evt ) => evt.target.form.dispatchEvent( new window.Event( 'submit' ) ) }
 			>
-				{ isMultiple ? ( <option dangerouslySetInnerHTML={ { __html: '( multiple )' } } /> ) :
+				{ isMultiple ? ( <option dangerouslySetInnerHTML={ { __html: __( '( multiple )', 'amp' ) } } /> ) :
 					options && options.map( ( { name, slug, thisValue } ) => (
 						<option key={ slug } value={ thisValue } dangerouslySetInnerHTML={ { __html: name } } />
 					) ) }

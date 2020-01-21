@@ -17,7 +17,7 @@ import { useConfig } from '../';
 import Context from './context';
 
 function APIProvider( { children } ) {
-	const { api: { stories, media, fonts } } = useConfig();
+	const { api: { stories, media, fonts, users, statuses } } = useConfig();
 
 	const getStoryById = useCallback(
 		( storyId ) => {
@@ -31,27 +31,54 @@ function APIProvider( { children } ) {
 		/**
 		 * Fire REST API call to save story.
 		 *
-		 * @param {number}   storyId Story post id.
-		 * @param {string}   title Story title.
-		 * @param {string}   status Post status, draft or published.
-		 * @param {Array}    pages Array of all pages.
-		 * @param {number}   author User ID of story author.
-		 * @param {string}   slug   The slug of the story.
-		 * @param {string}  content AMP HTML content.
+		 * @param {Object} 	 story - A story object.
+		 * @param {number}   story.storyId Story post id.
+		 * @param {string}   story.title Story title.
+		 * @param {string}   story.status Post status, draft or published.
+		 * @param {Array}    story.pages Array of all pages.
+		 * @param {number}   story.author User ID of story author.
+		 * @param {string}   story.slug   The slug of the story.
+		 * @param {string}   story.date   The publish date of the story.
+		 * @param {string}   story.modified   The modified date of the story.
+		 * @param {string}   story.content AMP HTML content.
+		 * @param {string}   story.excerpt Short description.
+		 * @param {number}   story.featuredMedia Featured image id.
+		 * @param {string}   story.password Password
 		 * @return {Promise} Return apiFetch promise.
 		 */
-		( storyId, title, status, pages, author, slug, content ) => {
+		( { storyId, title, status, pages, author, slug, date, modified, content, excerpt, featuredMedia, password } ) => {
 			return apiFetch( {
 				path: `${ stories }/${ storyId }`,
 				data: {
 					title,
 					status,
 					author,
+					password,
 					slug,
+					date,
+					modified,
 					content,
+					excerpt,
 					story_data: pages,
+					featured_media: featuredMedia,
 				},
 				method: 'POST',
+			} );
+		},
+		[ stories ],
+	);
+
+	const deleteStoryById = useCallback(
+		/**
+		 * Fire REST API call to delete story.
+		 *
+		 * @param {number}   storyId Story post id.
+		 * @return {Promise} Return apiFetch promise.
+		 */
+		( storyId ) => {
+			return apiFetch( {
+				path: `${ stories }/${ storyId }`,
+				method: 'DELETE',
 			} );
 		},
 		[ stories ],
@@ -99,12 +126,28 @@ function APIProvider( { children } ) {
 		}, [ fonts ],
 	);
 
+	const getAllStatuses = useCallback(
+		() => {
+			const path = addQueryArgs( statuses, { context: `edit` } );
+			return apiFetch( { path } );
+		}, [ statuses ],
+	);
+
+	const getAllUsers = useCallback(
+		() => {
+			return apiFetch( { path: users } );
+		}, [ users ],
+	);
+
 	const state = {
 		actions: {
 			getStoryById,
 			getMedia,
 			saveStoryById,
+			deleteStoryById,
 			getAllFonts,
+			getAllStatuses,
+			getAllUsers,
 		},
 	};
 

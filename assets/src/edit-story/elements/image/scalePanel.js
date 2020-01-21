@@ -1,4 +1,9 @@
 /**
+ * WordPress dependencies
+ */
+import { __ } from '@wordpress/i18n';
+
+/**
  * External dependencies
  */
 import PropTypes from 'prop-types';
@@ -69,7 +74,7 @@ function ScalePanel( { setProperties, width, height, x, y, scale } ) {
 				/>
 				<ResetButton
 					onClick={ () => setProperties( { scale: 100 } ) }>
-					{ 'Reset' }
+					{ __( 'Reset', 'amp' ) }
 				</ResetButton>
 			</Container>
 		</InOverlay>

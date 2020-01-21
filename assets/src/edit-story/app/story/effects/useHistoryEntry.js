@@ -14,6 +14,7 @@ function useHistoryEntry( {
 	current,
 	pages,
 	selection,
+	capabilities,
 } ) {
 	const { actions: { appendToHistory } } = useHistory();
 	useEffect( () => {
@@ -22,8 +23,9 @@ function useHistoryEntry( {
 			current,
 			pages,
 			selection,
+			capabilities,
 		} );
-	}, [ appendToHistory, story, current, pages, selection ] );
+	}, [ appendToHistory, story, current, pages, selection, capabilities ] );
 }
 
 export default useHistoryEntry;

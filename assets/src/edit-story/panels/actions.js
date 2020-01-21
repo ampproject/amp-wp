@@ -13,7 +13,15 @@ import styled from 'styled-components';
 /**
  * Internal dependencies
  */
+/**
+ * WordPress dependencies
+ */
+import { __ } from '@wordpress/i18n';
 import { Panel, Title } from './shared';
+
+/**
+ * WordPress dependencies
+ */
 
 const Delete = styled.a`
 	cursor: pointer;
@@ -28,10 +36,10 @@ function ActionsPanel( { deleteSelectedElements } ) {
 	return (
 		<Panel>
 			<Title>
-				{ 'Actions' }
+				{ __( 'Actions', 'amp' ) }
 			</Title>
 			<Delete onClick={ deleteSelectedElements } >
-				{ 'Remove element' }
+				{ __( 'Remove element', 'amp' ) }
 			</Delete>
 		</Panel>
 	);

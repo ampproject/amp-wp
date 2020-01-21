@@ -9,6 +9,7 @@ import styled, { css } from 'styled-components';
  */
 import { Spinner, Dashicon } from '@wordpress/components';
 import { useEffect } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -96,6 +97,17 @@ const Icon = styled( Dashicon )`
 	fill: ${ ( { theme } ) => theme.colors.mg.v2 };
 `;
 
+const ButtonCSS = css`
+	 background: none;
+	 color: ${ ( { theme } ) => theme.colors.fg.v1 };
+	 padding: 5px;
+	 font-weight: bold;
+	 flex: 1 0 0;
+	 text-align: center;
+	 border: 1px solid ${ ( { theme } ) => theme.colors.mg.v1 };
+	 border-radius: 3px;
+`;
+
 const SUPPORTED_IMAGE_TYPES = [
 	'image/png',
 	'image/jpeg',
@@ -108,9 +120,9 @@ const SUPPORTED_VIDEO_TYPES = [
 ];
 
 const FILTERS = [
-	{ filter: '', name: 'All' },
-	{ filter: 'image', name: 'Images' },
-	{ filter: 'video', name: 'Video' },
+	{ filter: '', name: __( 'All', 'amp' ) },
+	{ filter: 'image', name: __( 'Images', 'amp' ) },
+	{ filter: 'video', name: __( 'Video', 'amp' ) },
 ];
 
 const DEFAULT_WIDTH = 150;
@@ -259,7 +271,7 @@ function MediaLibrary( { onInsert } ) {
 		<>
 			<Header>
 				<Title>
-					{ 'Media' }
+					{ __( 'Media', 'amp' ) }
 					{ ( ! isMediaLoaded || isMediaLoading ) &&
 						<Spinner />
 					}
@@ -267,6 +279,7 @@ function MediaLibrary( { onInsert } ) {
 				<UploadButton
 					onClose={ onClose }
 					onSelect={ onSelect }
+					buttonCSS={ ButtonCSS }
 				/>
 			</Header>
 
@@ -274,7 +287,7 @@ function MediaLibrary( { onInsert } ) {
 				<Icon icon="search" />
 				<Search
 					value={ searchTerm }
-					placeholder={ 'Search Media' }
+					placeholder={ __( 'Search Media', 'amp' ) }
 					onChange={ onSearch } />
 			</SearchField>
 
@@ -293,7 +306,7 @@ function MediaLibrary( { onInsert } ) {
 
 			{ ( isMediaLoaded && ! media.length ) ? (
 				<Message>
-					{ 'No media found' }
+					{ __( 'No media found', 'amp' ) }
 				</Message>
 			) : (
 				<Container>
