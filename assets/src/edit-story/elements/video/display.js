@@ -24,15 +24,16 @@ function VideoDisplay( props ) {
 		src,
 		videoId,
 		featuredMedia,
+		id,
 	} = props;
 
-	const { uploadVideoFrame } = useUploadVideoFrame( videoId, src );
+	const { uploadVideoFrame } = useUploadVideoFrame( videoId, src, id );
 	useEffect( () => {
-		if ( ! featuredMedia ) {
+		if ( videoId && ! featuredMedia ) {
 			uploadVideoFrame();
 		}
 	},
-	[ featuredMedia, uploadVideoFrame ],
+	[ videoId, featuredMedia, uploadVideoFrame ],
 	);
 
 	return (
@@ -50,6 +51,7 @@ VideoDisplay.propTypes = {
 	src: PropTypes.string.isRequired,
 	videoId: PropTypes.number,
 	featuredMedia: PropTypes.number,
+	id: PropTypes.string,
 };
 
 export default VideoDisplay;

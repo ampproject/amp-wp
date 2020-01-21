@@ -180,8 +180,8 @@ function MediaLibrary( { onInsert } ) {
 	 * @param {Object} attachment Attachment object from backbone media picker.
 	 */
 	const onSelect = ( attachment ) => {
-		const { url: src, mime: mimeType, width: oWidth, height: oHeight } = attachment;
-		const mediaEl = { src, mimeType, oWidth, oHeight };
+		const { url: src, mime: mimeType, width: oWidth, height: oHeight, id, featured_media: featuredMedia, featured_media_src: featuredMediaSrc } = attachment;
+		const mediaEl = { src, mimeType, oWidth, oHeight, id, featuredMedia, featuredMediaSrc };
 		insertMediaElement( mediaEl, DEFAULT_WIDTH );
 	};
 
@@ -193,7 +193,8 @@ function MediaLibrary( { onInsert } ) {
 	 * @return {null|*}          Return onInsert or null.
 	 */
 	const insertMediaElement = ( attachment, width ) => {
-		const { src, mimeType, oWidth, oHeight, id, featuredMedia, featuredMediaSrc } = attachment;
+		const { src, mimeType, oWidth, oHeight, id, featuredMediaSrc } = attachment;
+
 		const origRatio = oWidth / oHeight;
 		const height = width / origRatio;
 		if ( SUPPORTED_IMAGE_TYPES.includes( mimeType ) ) {
@@ -209,6 +210,7 @@ function MediaLibrary( { onInsert } ) {
 				origHeight: oHeight,
 			} );
 		} else if ( SUPPORTED_VIDEO_TYPES.includes( mimeType ) ) {
+			const featuredMedia = parseInt( attachment.featuredMedia );
 			return onInsert( 'video', {
 				src,
 				width,

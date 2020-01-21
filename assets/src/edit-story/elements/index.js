@@ -17,9 +17,7 @@ import * as videoElement from './video';
 export const createNewElement = ( type, attributes = {} ) => {
 	const element = elementTypes.find( ( el ) => el.type === type );
 	const defaultAttributes = element ? element.defaultAttributes : {};
-	if (element.Create) {
-		element.Create( attributes );
-	}
+
 	return {
 		...defaultAttributes,
 		...attributes,

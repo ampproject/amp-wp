@@ -14,7 +14,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import UploadButton from '../components/uploadButton';
-import { Panel, Title, ActionButton, getCommonValue } from './shared';
+import { Panel, Title, getCommonValue } from './shared';
 
 const ButtonCSS = css`
 	color: ${ ( { theme } ) => theme.colors.mg.v1 };
@@ -32,15 +32,9 @@ function VideoPanel( { selectedElements, onSetProperties } ) {
 	useEffect( () => {
 		setState( { featuredMedia, featuredMediaSrc } );
 	}, [ featuredMedia, featuredMediaSrc ] );
+
 	const handleSubmit = ( evt ) => {
 		onSetProperties( state );
-		evt.preventDefault();
-	};
-
-	const handleRemoveImage = ( evt ) => {
-		const newState = { featuredMedia: 0, featuredMediaSrc: '' };
-		setState( { ...state, ...newState } );
-		onSetProperties( newState );
 		evt.preventDefault();
 	};
 
@@ -57,7 +51,6 @@ function VideoPanel( { selectedElements, onSetProperties } ) {
 			</Title>
 			<div>
 				{ state.featuredMediaSrc && <Img src={ state.featuredMediaSrc } /> }
-				{ state.featuredMediaSrc && <ActionButton onClick={ handleRemoveImage } dangerouslySetInnerHTML={ { __html: 'Remove poster image' } } /> }
 
 				<UploadButton
 					onSelect={ handleChangeImage }

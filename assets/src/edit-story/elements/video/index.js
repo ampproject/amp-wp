@@ -4,7 +4,6 @@
 import { PanelTypes } from '../../panels';
 export { default as Display } from './display';
 export { default as Save } from './save';
-export { default as Create } from './create';
 
 export const defaultAttributes = {
 	controls: false,
