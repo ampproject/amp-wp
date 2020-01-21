@@ -45,6 +45,7 @@ function DropZone( { children, onDrop, pageIndex } ) {
 		registerDropZone( dropZone );
 		return () => {
 			unregisterDropZone( dropZone );
+			setDropZone( null );
 		};
 	}, [ dropZone, registerDropZone, unregisterDropZone ] );
 
