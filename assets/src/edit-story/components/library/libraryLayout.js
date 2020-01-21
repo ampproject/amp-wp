@@ -6,12 +6,12 @@ import styled from 'styled-components';
 /**
  * Internal dependencies
  */
-import { ADMIN_TOOLBAR_HEIGHT, HEADER_HEIGHT } from '../../constants';
+import { HEADER_HEIGHT } from '../../constants';
 import LibraryContent from './libraryContent';
 import LibraryTabs from './libraryTabs';
 
 const Layout = styled.div`
-	height: calc(100vh - ${ ADMIN_TOOLBAR_HEIGHT }px);
+	height: 100%;
 	display: grid;
 	grid:
 		"tabs   " ${ HEADER_HEIGHT }px
