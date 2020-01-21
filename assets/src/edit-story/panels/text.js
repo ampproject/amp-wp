@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { useEffect, useState } from '@wordpress/element';
-
+import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
@@ -26,11 +26,11 @@ function TextPanel( { selectedElements, onSetProperties } ) {
 	return (
 		<Panel onSubmit={ handleSubmit }>
 			<Title>
-				{ 'Text' }
+				{ __( 'Text', 'amp' ) }
 			</Title>
 			<InputGroup
 				type="text"
-				label="Text content"
+				label={ __( 'Text content', 'amp' ) }
 				value={ state.content }
 				isMultiple={ content === '' }
 				onChange={ ( value ) => setState( { ...state, content: value } ) }

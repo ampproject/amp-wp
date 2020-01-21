@@ -2,6 +2,7 @@
  * WordPress dependencies
  */
 import { useEffect } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
@@ -76,9 +77,9 @@ UploadButton.propTypes = {
 };
 
 UploadButton.defaultProps = {
-	title: 'Upload to Story',
-	buttonText: 'Upload',
-	buttonInsertText: 'Insert into page',
+	title: __( 'Upload to Story', 'amp' ),
+	buttonText: __( 'Upload', 'amp' ),
+	buttonInsertText: __( 'Insert into page', 'amp' ),
 	multiple: false,
 	type: '',
 };

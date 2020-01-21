@@ -4,6 +4,11 @@
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 
+/**
+ * WordPress dependencies
+ */
+import { __ } from '@wordpress/i18n';
+
 export const Panel = styled.form`
 	display: flex;
 	flex-direction: column;
@@ -104,7 +109,7 @@ function SelectMenu( { label, options, value, isMultiple, onChange, postfix, dis
 				onChange={ ( evt ) => onChange( evt.target.value, evt ) }
 				onBlur={ ( evt ) => evt.target.form.dispatchEvent( new window.Event( 'submit' ) ) }
 			>
-				{ isMultiple ? ( <option dangerouslySetInnerHTML={ { __html: '( multiple )' } } /> ) :
+				{ isMultiple ? ( <option dangerouslySetInnerHTML={ { __html: __( '( multiple )', 'amp' ) } } /> ) :
 					options && options.map( ( { name, slug, thisValue } ) => (
 						<option key={ slug } value={ thisValue } dangerouslySetInnerHTML={ { __html: name } } />
 					) ) }

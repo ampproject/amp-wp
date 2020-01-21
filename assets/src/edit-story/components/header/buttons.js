@@ -45,7 +45,7 @@ function PreviewButton() {
 	};
 	return (
 		<Outline onClick={ openPreviewLink } isDisabled={ isSaving }>
-			{ __( 'Preview' ) }
+			{ __( 'Preview', 'amp' ) }
 		</Outline>
 	);
 }
@@ -61,13 +61,13 @@ function Publish() {
 	switch ( status ) {
 		case 'publish':
 		case 'private':
-			text = __( 'Update' );
+			text = __( 'Update', 'amp' );
 			break;
 		case 'future':
-			text = __( 'Scheduled' );
+			text = __( 'Scheduled', 'amp' );
 			break;
 		default:
-			text = __( 'Save draft' );
+			text = __( 'Save draft', 'amp' );
 			break;
 	}
 

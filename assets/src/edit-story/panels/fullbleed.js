@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { useEffect, useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -29,10 +30,10 @@ function FullbleedPanel( { selectedElements, onSetProperties } ) {
 	return (
 		<Panel onSubmit={ ( event ) => event.preventDefault() }>
 			<Title>
-				{ 'Fullbleed' }
+				{ __( 'Fullbleed', 'amp' ) }
 			</Title>
 			<ActionButton onClick={ handleClick }>
-				{ state.isFullbleed ? 'Unset as fullbleed' : 'Set as fullbleed' }
+				{ state.isFullbleed ? __( 'Unset as fullbleed', 'amp' ) : __( 'Set as fullbleed', 'amp' ) }
 			</ActionButton>
 		</Panel>
 	);

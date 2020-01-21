@@ -1,8 +1,12 @@
+/**
+ * WordPress dependencies
+ */
+import { __ } from '@wordpress/i18n';
 
 function PrepublishInspector() {
 	return (
 		<h2>
-			{ 'Prepublish' }
+			{ __( 'Prepublish', 'amp' ) }
 		</h2>
 	);
 }

@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { useEffect, useState } from '@wordpress/element';
+import { __, _x } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -29,10 +30,10 @@ function SizePanel( { selectedElements, onSetProperties } ) {
 	return (
 		<Panel onSubmit={ handleSubmit }>
 			<Title>
-				{ 'Size' }
+				{ __( 'Size', 'amp' ) }
 			</Title>
 			<InputGroup
-				label="Width"
+				label={ __( 'Width', 'amp' ) }
 				value={ state.width }
 				isMultiple={ width === '' }
 				onChange={ ( value ) => {
@@ -44,7 +45,7 @@ function SizePanel( { selectedElements, onSetProperties } ) {
 						height: typeof newWidth === 'number' && lockRatio ? newWidth / ratio : height,
 					} );
 				} }
-				postfix="px"
+				postfix={ _x( 'px', 'pixels, the measurement of size', 'amp' ) }
 				disabled={ isFullbleed }
 			/>
 			<InputGroup
@@ -60,12 +61,12 @@ function SizePanel( { selectedElements, onSetProperties } ) {
 						width: typeof newHeight === 'number' && lockRatio ? newHeight * ratio : width,
 					} );
 				} }
-				postfix="px"
+				postfix={ _x( 'px', 'pixels, the measurement of size', 'amp' ) }
 				disabled={ isFullbleed }
 			/>
 			<InputGroup
 				type="checkbox"
-				label="Keep ratio"
+				label={ __( 'Keep ratio', 'amp' ) }
 				value={ lockRatio }
 				isMultiple={ false }
 				onChange={ ( value ) => {
