@@ -13,6 +13,8 @@ import PageNav from './pagenav';
 import Carousel from './carousel';
 import SelectionCanvas from './selectionCanvas';
 
+const PAGE_PADDING = 30;
+
 const Background = styled.div`
 	background-color: ${ ( { theme } ) => theme.colors.bg.v1 };
 	display: flex;
@@ -23,10 +25,10 @@ const Background = styled.div`
 
 	display: grid;
 	grid:
-    ".         .         .         .         .       " 1fr
+    ".         .         .         .         .       " minmax(${ PAGE_PADDING }px, 1fr)
     ".         prev      page      next      .       " ${ PAGE_HEIGHT }px
     ".         .         menu      .         .       " 48px
-    ".         .         .         .         .       " 1fr
+    ".         .         .         .         .       " minmax(${ PAGE_PADDING }px, 1fr)
     "carousel  carousel  carousel  carousel  carousel" auto
     / 1fr ${ PAGE_NAV_WIDTH }px ${ PAGE_WIDTH }px ${ PAGE_NAV_WIDTH }px 1fr;
 `;

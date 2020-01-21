@@ -26,6 +26,7 @@ const Tab = styled.button.attrs( { role: 'tab' } )`
 	text-transform: uppercase;
 	color: ${ ( { theme } ) => theme.colors.bg.v4 };
 	font-weight: ${ ( { isActive } ) => isActive ? 'bold' : 'normal;' };
+	word-break: break-word;
 	&:focus, &:active {
 		outline: none;
 	}
@@ -33,7 +34,6 @@ const Tab = styled.button.attrs( { role: 'tab' } )`
 		opacity: .4;
 		&:hover { opacity: 1; }
 	` }
-
 `;
 
 function InspectorTabs() {
