@@ -12,6 +12,7 @@ import Inspector from '../../components/inspector';
 import Library from '../../components/library';
 import Canvas from '../../components/canvas';
 import { ADMIN_TOOLBAR_HEIGHT, LIBRARY_MIN_WIDTH, LIBRARY_MAX_WIDTH, INSPECTOR_MIN_WIDTH, INSPECTOR_MAX_WIDTH, HEADER_HEIGHT } from '../../constants';
+import DropZoneProvider from '../../components/dropzone/dropZoneProvider';
 
 const Editor = styled.div`
 	font-family: ${ ( { theme } ) => theme.fonts.body1.family };
@@ -48,7 +49,9 @@ function Layout() {
 				<Library />
 			</Area>
 			<Area area="canv">
-				<Canvas />
+				<DropZoneProvider>
+					<Canvas />
+				</DropZoneProvider>
 			</Area>
 			<Area area="insp">
 				<Inspector />
