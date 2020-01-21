@@ -34,10 +34,10 @@ export const PanelTypes = {
 	BACKGROUND_COLOR,
 	COLOR,
 	FONT,
+	STYLE,
 	TEXT,
 	ROTATION_ANGLE,
 	FULLBLEED,
-	STYLE,
 };
 
 const ALL = Object.values( PanelTypes );
