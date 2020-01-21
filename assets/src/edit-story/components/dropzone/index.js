@@ -89,7 +89,7 @@ function DropZone( { children, onDrop, pageIndex } ) {
 
 	const isDropZoneActive = dropZoneElement.current && hoveredDropZone && hoveredDropZone.node === dropZoneElement.current;
 	// @todo Currently static, can be adjusted for other use cases.
-	const highlightWidth = 4;
+	const highlightWidth = 5;
 	return (
 		<DropZoneComponent highlightWidth={ highlightWidth } borderPosition={ isDropZoneActive ? hoveredDropZone.position.x : null } ref={ dropZoneElement } onDrop={ onDropHandler }>
 			{ children }
