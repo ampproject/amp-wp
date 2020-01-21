@@ -14,8 +14,10 @@ import { __, sprintf } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { useStory } from '../../../app';
-import { LeftArrow, RightArrow, GridView } from '../../button';
+import { Primary, LeftArrow, RightArrow, GridView as GridViewButton } from '../../button';
 import DropZone from '../../dropzone';
+import Modal from '../../modal';
+import GridView from '../gridview';
 
 const PAGE_WIDTH = 72;
 const PAGE_HEIGHT = 128;
@@ -53,7 +55,7 @@ const Page = styled.button`
 	flex: none;
 `;
 
-const GridViewButton = styled( GridView )`
+const StyledGridViewButton = styled( GridViewButton )`
 	position: absolute;
 	bottom: 24px;
 `;
@@ -61,8 +63,12 @@ const GridViewButton = styled( GridView )`
 function Carousel() {
 	const { state: { pages, currentPageIndex, currentPageId }, actions: { setCurrentPage, arrangePage } } = useStory();
 	const [ hasHorizontalOverflow, setHasHorizontalOverflow ] = useState( false );
+	const [ isGridViewOpen, setIsGridViewOpen ] = useState( false );
 	const listRef = useRef();
 	const pageRefs = useRef( [] );
+
+	const openModal = useCallback( () => setIsGridViewOpen( true ), [ setIsGridViewOpen ] );
+	const closeModal = useCallback( () => setIsGridViewOpen( false ), [ setIsGridViewOpen ] );
 
 	useLayoutEffect( () => {
 		const observer = new ResizeObserver( ( entries ) => {
@@ -139,52 +145,64 @@ function Carousel() {
 	};
 
 	return (
-		<Wrapper>
-			<Area area="left-navigation">
-				<LeftArrow
-					isHidden={ ! hasHorizontalOverflow }
-					onClick={ () => scrollBy( -( 2 * PAGE_WIDTH ) ) }
-					width="24"
-					height="24"
-					aria-label={ __( 'Scroll Left', 'amp' ) }
-				/>
-			</Area>
-			<List area="carousel" ref={ listRef } hasHorizontalOverflow={ hasHorizontalOverflow }>
-				{ pages.map( ( page, index ) => {
-					const isCurrentPage = index === currentPageIndex;
-					return (
-						<DropZone key={ index } onDrop={ onDrop } pageIndex={ index } >
-							<Page
-								key={ index }
-								draggable="true"
-								onClick={ handleClickPage( page ) }
-								onDragStart={ onDragStart( index ) }
-								isActive={ isCurrentPage }
-								ref={ ( el ) => {
-									pageRefs.current[ page.id ] = el;
-								} }
-								aria-label={ isCurrentPage ? sprintf( __( 'Page %s (current page)', 'amp' ), index + 1 ) : sprintf( __( 'Go to page %s', 'amp' ), index + 1 ) }
-							/>
-						</DropZone>
-					);
-				} ) }
-			</List>
-			<Area area="right-navigation">
-				<RightArrow
-					isHidden={ ! hasHorizontalOverflow }
-					onClick={ () => scrollBy( ( 2 * PAGE_WIDTH ) ) }
-					width="24"
-					height="24"
-					aria-label={ __( 'Scroll Right', 'amp' ) }
-				/>
-				<GridViewButton
-					isDisabled
-					width="24"
-					height="24"
-					aria-label={ __( 'Grid View', 'amp' ) }
-				/>
-			</Area>
-		</Wrapper>
+		<>
+			<Wrapper>
+				<Area area="left-navigation">
+					<LeftArrow
+						isHidden={ ! hasHorizontalOverflow }
+						onClick={ () => scrollBy( -( 2 * PAGE_WIDTH ) ) }
+						width="24"
+						height="24"
+						aria-label={ __( 'Scroll Left', 'amp' ) }
+					/>
+				</Area>
+				<List area="carousel" ref={ listRef } hasHorizontalOverflow={ hasHorizontalOverflow }>
+					{ pages.map( ( page, index ) => {
+						const isCurrentPage = index === currentPageIndex;
+						return (
+							<DropZone key={ index } onDrop={ onDrop } pageIndex={ index } >
+								<Page
+									key={ index }
+									draggable="true"
+									onClick={ handleClickPage( page ) }
+									onDragStart={ onDragStart( index ) }
+									isActive={ isCurrentPage }
+									ref={ ( el ) => {
+										pageRefs.current[ page.id ] = el;
+									} }
+									aria-label={ isCurrentPage ? sprintf( __( 'Page %s (current page)', 'amp' ), index + 1 ) : sprintf( __( 'Go to page %s', 'amp' ), index + 1 ) }
+								/>
+							</DropZone>
+						);
+					} ) }
+				</List>
+				<Area area="right-navigation">
+					<RightArrow
+						isHidden={ ! hasHorizontalOverflow }
+						onClick={ () => scrollBy( ( 2 * PAGE_WIDTH ) ) }
+						width="24"
+						height="24"
+						aria-label={ __( 'Scroll Right', 'amp' ) }
+					/>
+					<StyledGridViewButton
+						width="24"
+						height="24"
+						onClick={ openModal }
+						aria-label={ __( 'Grid View', 'amp' ) }
+					/>
+				</Area>
+			</Wrapper>
+			<Modal
+				isOpen={ isGridViewOpen }
+				onRequestClose={ closeModal }
+				contentLabel={ __( 'Grid View', 'amp' ) }
+			>
+				<Primary onClick={ closeModal }>
+					{ __( 'Back', 'amp' ) }
+				</Primary>
+				<GridView />
+			</Modal>
+		</>
 	);
 }
 

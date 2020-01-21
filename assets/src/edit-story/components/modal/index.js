@@ -4,15 +4,23 @@
 import Modal from 'react-modal';
 import PropTypes from 'prop-types';
 import { createGlobalStyle } from 'styled-components';
+
+/**
+ * Internal dependencies
+ */
 import { ADMIN_TOOLBAR_HEIGHT } from '../../constants';
 
+const PADDING_TOP = 70;
+const PADDING_LEFT = 170;
+
+// TODO: Do not overlay admin menu.
 export const GlobalStyle = createGlobalStyle`
 	.WebStories_ReactModal__Content {
 		position: absolute;
-		top: ${ ADMIN_TOOLBAR_HEIGHT }px;
-		right: 0;
-		bottom: 0;
-		left: 0;
+		top: ${ ADMIN_TOOLBAR_HEIGHT + PADDING_TOP }px;
+		right: ${ PADDING_LEFT }px;
+		bottom: ${ PADDING_TOP }px;
+		left: ${ PADDING_LEFT }px;
 		overflow: auto;
 		outline: none;
 		background-color: ${ ( { theme } ) => theme.colors.bg.v1 };
