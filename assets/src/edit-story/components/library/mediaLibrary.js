@@ -193,7 +193,7 @@ function MediaLibrary( { onInsert } ) {
 	 * @return {null|*}          Return onInsert or null.
 	 */
 	const insertMediaElement = ( attachment, width ) => {
-		const { src, mimeType, oWidth, oHeight } = attachment;
+		const { src, mimeType, oWidth, oHeight, id, featuredMedia, featuredMediaSrc } = attachment;
 		const origRatio = oWidth / oHeight;
 		const height = width / origRatio;
 		if ( SUPPORTED_IMAGE_TYPES.includes( mimeType ) ) {
@@ -220,6 +220,9 @@ function MediaLibrary( { onInsert } ) {
 				origWidth: oWidth,
 				origHeight: oHeight,
 				mimeType,
+				videoId: id,
+				featuredMedia,
+				featuredMediaSrc,
 			} );
 		}
 		return null;

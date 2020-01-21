@@ -372,5 +372,28 @@ class AMP_Story_Media {
 				],
 			]
 		);
+		register_rest_field(
+			'attachment',
+			'featured_media_src',
+			[
+				'get_callback' => function ( $prepared, $field_name, $request ) {
+
+					$id    = $prepared['featured_media'];
+					$image = '';
+					if ( $id ) {
+						$image = wp_get_attachment_image_url( $id, 'medium' );
+					}
+
+					return $image;
+				},
+				'schema'       => [
+					'description' => __( 'URL', 'amp' ),
+					'type'        => 'string',
+					'format'      => 'uri',
+					'context'     => [ 'view', 'edit', 'embed' ],
+				],
+			]
+		);
 	}
 }
+

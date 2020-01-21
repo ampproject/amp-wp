@@ -12,6 +12,7 @@ import SizePanel from './size';
 import PositionPanel from './position';
 import ScalePanel from './scale';
 import TextPanel from './text';
+import VideoPanel from './video';
 
 const ACTIONS = 'actions';
 const COLOR = 'color';
@@ -23,6 +24,7 @@ const SIZE = 'size';
 const POSITION = 'position';
 const FULLBLEED = 'fullbleed';
 const BACKGROUND_COLOR = 'backgroundColor';
+const VIDEO = 'video';
 
 export const PanelTypes = {
 	ACTIONS,
@@ -35,6 +37,7 @@ export const PanelTypes = {
 	TEXT,
 	ROTATION_ANGLE,
 	FULLBLEED,
+	VIDEO,
 };
 
 const ALL = Object.values( PanelTypes );
@@ -67,6 +70,7 @@ export function getPanels( elements ) {
 				case COLOR: return { type, Panel: ColorPanel };
 				case FONT: return { type, Panel: FontPanel };
 				case TEXT: return { type, Panel: TextPanel };
+				case VIDEO: return { type, Panel: VideoPanel };
 				default: throw new Error( `Unknown panel: ${ type }` );
 			}
 		} );

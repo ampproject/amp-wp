@@ -181,6 +181,8 @@ class AMP_Story_Post_Type {
 		add_action( 'amp_story_head', 'wp_shortlink_wp_head', 10, 0 );
 		add_action( 'amp_story_head', 'wp_site_icon', 99 );
 		add_action( 'amp_story_head', 'wp_oembed_add_discovery_links' );
+
+		AMP_Story_Media::init();
 	}
 
 	/**

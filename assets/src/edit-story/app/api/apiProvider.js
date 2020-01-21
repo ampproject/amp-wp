@@ -101,10 +101,16 @@ function APIProvider( { children } ) {
 			return apiFetch( { path: apiPath } )
 				.then( ( data ) => data.map(
 					( {
+						id,
 						guid: { rendered: src },
 						media_details: { width: oWidth, height: oHeight },
 						mime_type: mimeType,
+						featured_media: featuredMedia,
+						featured_media_src: featuredMediaSrc,
 					} ) => ( {
+						id,
+						featuredMedia,
+						featuredMediaSrc,
 						src,
 						oWidth,
 						oHeight,
@@ -112,6 +118,36 @@ function APIProvider( { children } ) {
 					} ),
 				) );
 		},	[ media ],
+	);
+
+	/**
+	 * @param {File}    file           Media File to Save.
+	 * @param {?Object} additionalData Additional data to include in the request.
+	 *
+	 * @return {Promise} Media Object Promise.
+	 */
+	const uploadMedia = useCallback(
+		( file ) => {
+			// Create upload payload
+			const data = new window.FormData();
+			data.append( 'file', file, file.name || file.type.replace( '/', '.' ) );
+			return apiFetch( {
+				path: media,
+				body: data,
+				method: 'POST',
+			} );
+		}, [ media ],
+	);
+
+	const saveMedia = useCallback(
+		( mediaId, data ) => {
+			return apiFetch( {
+				path: `${ media }/${ mediaId }`,
+				data,
+				method: 'POST',
+			} );
+		},
+		[ media ],
 	);
 
 	const getAllFonts = useCallback(
@@ -148,6 +184,8 @@ function APIProvider( { children } ) {
 			getAllFonts,
 			getAllStatuses,
 			getAllUsers,
+			uploadMedia,
+			saveMedia,
 		},
 	};
 
