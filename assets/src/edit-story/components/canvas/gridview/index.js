@@ -19,16 +19,11 @@ import RectangleIcon from './rectangle.svg';
 
 const PAGE_WIDTH = 90;
 const PAGE_HEIGHT = 160;
-const NUMBER_OF_COLUMNS = {
-	1: 16,
-	2: 8,
-	3: 4,
-};
 
 const Wrapper = styled.div`
 	position: relative;
 	display: grid;
-	grid-template-columns: ${ ( { scale } ) => `repeat(${ NUMBER_OF_COLUMNS[ scale ] }, ${ scale * PAGE_WIDTH }px)` };
+	grid-template-columns: ${ ( { scale } ) => `repeat(auto-fit, minmax(${ scale * PAGE_WIDTH }px, max-content))` };
 	grid-gap: 20px;
 	justify-content: center;
 	justify-items: center;
@@ -37,7 +32,7 @@ const Wrapper = styled.div`
 
 const Page = styled.button`
 	padding: 0;
-	margin: 0 5px;
+	margin: 0;
 	border: 3px solid ${ ( { isActive, theme } ) => isActive ? theme.colors.selection : theme.colors.bg.v1 };
 	height: ${ ( { scale } ) => `${ scale * PAGE_HEIGHT }px` };
 	width: ${ ( { scale } ) => `${ scale * PAGE_WIDTH }px` };
@@ -49,9 +44,6 @@ const RangeInputWrapper = styled.div`
 	display: flex;
 	width: 400px;
 	margin: 0 auto;
-
-	svg {
-	}
 `;
 
 const RangeInput = styled.input.attrs( () => ( {
