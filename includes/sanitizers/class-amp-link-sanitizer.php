@@ -149,11 +149,10 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			$href           = $element->getAttribute( 'href' );
-			$rel            = $element->hasAttribute( 'rel' ) ? trim( $element->getAttribute( 'rel' ) ) : '';
-			$is_rel_non_amp = self::REL_VALUE_NON_AMP_TO_AMP === $rel;
+			$href = $element->getAttribute( 'href' );
+			$rel  = $element->hasAttribute( 'rel' ) ? trim( $element->getAttribute( 'rel' ) ) : '';
 
-			if ( $is_rel_non_amp ) {
+			if ( self::REL_VALUE_NON_AMP_TO_AMP === $rel ) {
 				// This value is to opt-out of AMP-to-AMP links, so strip it and ensure the link is to non-AMP.
 				$element->removeAttribute( 'rel' );
 			} elseif (
