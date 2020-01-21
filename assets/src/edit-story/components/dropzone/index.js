@@ -15,11 +15,11 @@ import { useRef, useState, useLayoutEffect } from '@wordpress/element';
 import useDropZone from './useDropZone';
 
 const DropZoneComponent = styled.div`
-	display: inherit;
 	position: relative;
 	${ ( { borderPosition, theme, highlightWidth } ) => borderPosition && `
 		:after {
 			height: 100%;
+			top: 0;
 			display: block;
 			position: absolute;
 			width: ${ highlightWidth }px;
