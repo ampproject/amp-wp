@@ -49,7 +49,7 @@ function SizePanel( { selectedElements, onSetProperties } ) {
 				disabled={ isFullbleed }
 			/>
 			<InputGroup
-				label="Height"
+				label={ __( 'Height', 'amp' ) }
 				value={ state.height }
 				isMultiple={ height === '' }
 				onChange={ ( value ) => {
