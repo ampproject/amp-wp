@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { useEffect, useState } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, _x } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -32,19 +32,19 @@ function PositionPanel( { selectedElements, onSetProperties } ) {
 				{ __( 'Position', 'amp' ) }
 			</Title>
 			<InputGroup
-				label={ __( 'X', 'amp' ) }
+				label={ _x( 'X', 'The X axis', 'amp' ) }
 				value={ state.x }
 				isMultiple={ x === '' }
 				onChange={ ( value ) => setState( { ...state, x: isNaN( value ) || value === '' ? '' : parseFloat( value ) } ) }
-				postfix={ __( 'px', 'amp' ) }
+				postfix={ _x( 'px', 'pixels, the measurement of size', 'amp' ) }
 				disabled={ isFullbleed }
 			/>
 			<InputGroup
-				label={ __( 'Y', 'amp' ) }
+				label={ _x( 'Y', 'The Y axis', 'amp' ) }
 				value={ state.y }
 				isMultiple={ y === '' }
 				onChange={ ( value ) => setState( { ...state, y: isNaN( value ) || value === '' ? '' : parseFloat( value ) } ) }
-				postfix={ __( 'px', 'amp' ) }
+				postfix={ _x( 'px', 'pixels, the measurement of size', 'amp' ) }
 				disabled={ isFullbleed }
 			/>
 		</Panel>

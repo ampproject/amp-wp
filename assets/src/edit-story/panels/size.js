@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { useEffect, useState } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, _x } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -45,7 +45,7 @@ function SizePanel( { selectedElements, onSetProperties } ) {
 						height: typeof newWidth === 'number' && lockRatio ? newWidth / ratio : height,
 					} );
 				} }
-				postfix={ __( 'px', 'amp' ) }
+				postfix={ _x( 'px', 'pixels, the measurement of size', 'amp' ) }
 				disabled={ isFullbleed }
 			/>
 			<InputGroup
@@ -61,7 +61,7 @@ function SizePanel( { selectedElements, onSetProperties } ) {
 						width: typeof newHeight === 'number' && lockRatio ? newHeight * ratio : width,
 					} );
 				} }
-				postfix={ __( 'px', 'amp' ) }
+				postfix={ _x( 'px', 'pixels, the measurement of size', 'amp' ) }
 				disabled={ isFullbleed }
 			/>
 			<InputGroup
