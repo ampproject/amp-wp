@@ -67,7 +67,7 @@ function Carousel() {
 		const observer = new ResizeObserver( ( entries ) => {
 			for ( const entry of entries ) {
 				const offsetWidth = entry.contentBoxSize ? entry.contentBoxSize.inlineSize : entry.contentRect.width;
-				setHasHorizontalOverflow( listRef.current.scrollWidth > offsetWidth );
+				setHasHorizontalOverflow( Math.ceil( listRef.current.scrollWidth ) > Math.ceil( offsetWidth ) );
 			}
 		} );
 
