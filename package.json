@@ -28,7 +28,8 @@
     "memize": "1.0.5",
     "prop-types": "15.7.2",
     "redux-multi": "0.1.12",
-    "refx": "3.1.1"
+    "refx": "3.1.1",
+    "resize-observer-polyfill": "1.5.1"
   },
   "devDependencies": {
     "@babel/cli": "7.6.4",

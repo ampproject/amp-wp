@@ -1,4 +1,8 @@
 /**
+ * WordPress dependencies
+ */
+import { __ } from '@wordpress/i18n';
+/**
  * External dependencies
  */
 import styled from 'styled-components';
@@ -24,16 +28,20 @@ const Tab = styled.button.attrs( { role: 'tab' } )`
 	border: 0px none;
 	background: none;
 	text-transform: uppercase;
-	color: ${ ( { theme } ) => theme.colors.bg.v4 };
-	font-weight: ${ ( { isActive } ) => isActive ? 'bold' : 'normal;' };
+	color: ${ ( { theme } ) => theme.colors.fg.v0 };
+	font-family: ${ ( { theme } ) => theme.fonts.tab.family };
+	font-size: ${ ( { theme } ) => theme.fonts.tab.size };
+	line-height: ${ ( { theme } ) => theme.fonts.tab.lineHeight };
+	word-break: break-word;
+
 	&:focus, &:active {
 		outline: none;
 	}
+
 	${ ( { isActive } ) => ! isActive && `
-		opacity: .4;
+		opacity: .3;
 		&:hover { opacity: 1; }
 	` }
-
 `;
 
 function InspectorTabs() {
@@ -43,9 +51,9 @@ function InspectorTabs() {
 		data: { tabs: { DESIGN, DOCUMENT, PREPUBLISH } },
 	} = useInspector();
 	const tabs = [
-		[ DESIGN, 'Design' ],
-		[ DOCUMENT, 'Document' ],
-		[ PREPUBLISH, 'Prepublish' ],
+		[ DESIGN, __( 'Design', 'amp' ) ],
+		[ DOCUMENT, __( 'Document', 'amp' ) ],
+		[ PREPUBLISH, __( 'Prepublish', 'amp' ) ],
 	];
 	return (
 		<Tabs>

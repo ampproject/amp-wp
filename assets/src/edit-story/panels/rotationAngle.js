@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { useEffect, useState } from '@wordpress/element';
+import { __, _x } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -26,13 +27,13 @@ function RotationPanel( { selectedElements, onSetProperties } ) {
 		evt.preventDefault();
 	};
 	return (
-		<SimplePanel title="Rotation angle" onSubmit={ handleSubmit }>
+		<SimplePanel title={ __( 'Rotation', 'amp' ) } onSubmit={ handleSubmit }>
 			<InputGroup
-				label="Rotation angle"
+				label={ __( 'Rotation angle', 'amp' ) }
 				value={ state.rotationAngle }
 				isMultiple={ rotationAngle === '' }
 				onChange={ ( value ) => setState( { ...state, rotationAngle: isNaN( value ) || value === '' ? '' : parseFloat( value ) } ) }
-				postfix="deg"
+				postfix={ _x( 'deg', 'Degrees, 0 - 360. ', 'amp' ) }
 				disabled={ isFullbleed }
 			/>
 		</SimplePanel>

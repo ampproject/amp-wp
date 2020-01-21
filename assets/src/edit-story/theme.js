@@ -26,6 +26,7 @@ const theme = {
 			v2: '#DADADA',
 		},
 		fg: {
+			v0: '#000000',
 			v1: '#FFFFFF',
 			v2: '#E5E5E5',
 			v3: '#D4D3D4',
@@ -47,6 +48,11 @@ const theme = {
 			size: '14px',
 			lineHeight: '20px',
 			letterSpacing: '0.0142em',
+		},
+		tab: {
+			family: 'Roboto',
+			size: '12px',
+			lineHeight: '1.2',
 		},
 	},
 };

@@ -1,4 +1,9 @@
 /**
+ * WordPress dependencies
+ */
+import { __ } from '@wordpress/i18n';
+
+/**
  * Internal dependencies
  */
 import { Panel, PanelTitle, PanelContent } from './panel';
@@ -7,10 +12,12 @@ function ColorPresetPanel() {
 	return (
 		<Panel>
 			<PanelTitle isPrimary>
-				{ 'Color presets' }
+				{ __( 'Color presets', 'amp' ) }
 			</PanelTitle>
 			<PanelContent>
-				<p>Color presets go here</p>
+				<p>
+					{ __( 'Color presets go here', 'amp' ) }
+				</p>
 			</PanelContent>
 		</Panel>
 	);

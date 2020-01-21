@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { useEffect, useState } from '@wordpress/element';
+import { __, _x } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -31,27 +32,27 @@ function ScalePanel( { selectedElements, onSetProperties } ) {
 		evt.preventDefault();
 	};
 	return (
-		<SimplePanel title="Scale" onSubmit={ handleSubmit }>
+		<SimplePanel title={ __( 'Image actual size', 'amp' ) } onSubmit={ handleSubmit }>
 			<InputGroup
-				label="Scale"
+				label={ __( 'Scale', 'amp' ) }
 				value={ typeof state.scale === 'number' ? state.scale : '(auto)' }
 				isMultiple={ scale === '' }
 				onChange={ ( value ) => setState( { ...state, scale: isNaN( value ) || value === '' ? '(auto)' : parseFloat( value ) } ) }
-				postfix="%"
+				postfix={ _x( '%', 'Percentage', 'amp' ) }
 			/>
 			<InputGroup
-				label="Focal X"
+				label={ __( 'Focal X', 'amp' ) }
 				value={ typeof state.focalX === 'number' ? state.focalX : '(auto)' }
 				isMultiple={ focalX === '' }
 				onChange={ ( value ) => setState( { ...state, focalX: isNaN( value ) || value === '' ? '(auto)' : parseFloat( value ) } ) }
-				postfix="%"
+				postfix={ _x( '%', 'Percentage', 'amp' ) }
 			/>
 			<InputGroup
-				label="Focal Y"
+				label={ __( 'Focal Y', 'amp' ) }
 				value={ typeof state.focalY === 'number' ? state.focalY : '(auto)' }
 				isMultiple={ focalY === '' }
 				onChange={ ( value ) => setState( { ...state, focalY: isNaN( value ) || value === '' ? '(auto)' : parseFloat( value ) } ) }
-				postfix="%"
+				postfix={ _x( '%', 'Percentage', 'amp' ) }
 			/>
 		</SimplePanel>
 	);

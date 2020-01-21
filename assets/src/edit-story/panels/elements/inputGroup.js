@@ -5,6 +5,11 @@ import styled from 'styled-components';
 import PropTypes from 'prop-types';
 
 /**
+ * WordPress dependencies
+ */
+import { __ } from '@wordpress/i18n';
+
+/**
  * Internal dependencies
  */
 import Label from './label';
@@ -20,7 +25,7 @@ const Input = styled.input`
 `;
 
 function InputGroup( { type, label, value, isMultiple, onChange, postfix, disabled, min, max } ) {
-	const placeholder = isMultiple ? '( multiple )' : '';
+	const placeholder = isMultiple ? __( '( multiple )', 'amp' ) : '';
 	const isCheckbox = type === 'checkbox';
 	return (
 		<Group disabled={ disabled }>

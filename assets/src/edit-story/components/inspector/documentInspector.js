@@ -2,6 +2,7 @@
  * WordPress dependencies
  */
 import { useCallback, useEffect, useMemo } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 
 /**
  * External dependencies
@@ -91,10 +92,10 @@ function DocumentInspector() {
 	return (
 		<>
 			<h2>
-				{ 'Document' }
+				{ __( 'Document', 'amp' ) }
 			</h2>
 			{ capabilities && capabilities.hasPublishAction && statuses && <SelectMenu
-				label="Status"
+				label={ __( 'Status', 'amp' ) }
 				name="status"
 				options={ allStatuses }
 				disabled={ isSaving }
@@ -102,7 +103,7 @@ function DocumentInspector() {
 				onChange={ handleChangeValue( 'status' ) }
 			/> }
 			{ capabilities && capabilities.hasPublishAction && status !== 'private' && <InputGroup
-				label={ 'Password' }
+				label={ __( 'Password', 'amp' ) }
 				type={ 'password' }
 				value={ password }
 				disabled={ isSaving }
@@ -111,14 +112,14 @@ function DocumentInspector() {
 
 			<RemoveButton onClick={ handleRemoveStory } dangerouslySetInnerHTML={ { __html: 'Move to trash' } } />
 			<InputGroup
-				label={ 'Published date' }
+				label={ __( 'Published date', 'amp' ) }
 				type={ 'datetime-local' }
 				value={ date }
 				disabled={ isSaving }
 				onChange={ handleChangeValue( 'date' ) }
 			/>
 			{ capabilities && capabilities.hasAssignAuthorAction && users && <SelectMenu
-				label="Author"
+				label={ __( 'Author', 'amp' ) }
 				name="user"
 				options={ users }
 				value={ author }
@@ -127,7 +128,7 @@ function DocumentInspector() {
 			/> }
 
 			<InputGroup
-				label={ 'Excerpt' }
+				label={ __( 'Excerpt', 'amp' ) }
 				type={ 'text' }
 				value={ excerpt }
 				disabled={ isSaving }
@@ -135,7 +136,7 @@ function DocumentInspector() {
 			/>
 
 			<InputGroup
-				label={ 'Slug' }
+				label={ __( 'Slug', 'amp' ) }
 				type={ 'text' }
 				value={ slug }
 				disabled={ isSaving }
@@ -147,10 +148,10 @@ function DocumentInspector() {
 
 				{ postThumbnails && <UploadButton
 					onSelect={ handleChangeImage }
-					title={ 'Select as featured image' }
+					title={ __( 'Select as featured image', 'amp' ) }
 					type={ 'image' }
-					buttonInsertText={ 'Set as featured image' }
-					buttonText={ featuredMediaUrl ? 'Replace image' : 'Set featured image' }
+					buttonInsertText={ __( 'Set as featured image', 'amp' ) }
+					buttonText={ featuredMediaUrl ? __( 'Replace image', 'amp' ) : __( 'Set featured image', 'amp' ) }
 					buttonCSS={ ButtonCSS }
 				/> }
 			</Group>

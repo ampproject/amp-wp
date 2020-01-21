@@ -8,6 +8,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { useCallback } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -19,7 +20,7 @@ import { LeftArrow, RightArrow } from '../../button';
 const Wrapper = styled.div`
 	display: flex;
 	align-items: center;
-	justify-content: flex-start;
+	justify-content: ${ ( { isNext } ) => isNext ? 'flex-end' : 'flex-start' };
 	height: 100%;
 	color:  ${ ( { theme } ) => theme.colors.fg.v1 };
 `;
@@ -36,13 +37,13 @@ function PageNav( { isNext } ) {
 	const buttonProps = {
 		isDisabled: ! displayNav,
 		isHidden: ! displayNav,
-		'aria-label': isNext ? 'Next Page' : 'Previous Page',
+		'aria-label': isNext ? __( 'Next Page', 'amp' ) : __( 'Previous Page', 'amp' ),
 		onClick: handleClick,
 		width: PAGE_NAV_BUTTON_WIDTH,
 		height: 40,
 	};
 	return (
-		<Wrapper>
+		<Wrapper isNext={ isNext }>
 			{ isNext ? <RightArrow { ...buttonProps } /> : <LeftArrow { ...buttonProps } /> }
 		</Wrapper>
 	);

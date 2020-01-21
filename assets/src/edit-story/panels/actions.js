@@ -11,9 +11,18 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 /**
+ * WordPress dependencies
+ */
+import { __ } from '@wordpress/i18n';
+
+/**
  * Internal dependencies
  */
 import { SimplePanel } from './panel';
+
+/**
+ * WordPress dependencies
+ */
 
 const Delete = styled.a`
 	cursor: pointer;
@@ -26,9 +35,9 @@ const Delete = styled.a`
 
 function ActionsPanel( { deleteSelectedElements } ) {
 	return (
-		<SimplePanel title="Actions">
+		<SimplePanel title={ __( 'Actions', 'amp' ) }>
 			<Delete onClick={ deleteSelectedElements } >
-				{ 'Remove element' }
+				{ __( 'Remove element', 'amp' ) }
 			</Delete>
 		</SimplePanel>
 	);

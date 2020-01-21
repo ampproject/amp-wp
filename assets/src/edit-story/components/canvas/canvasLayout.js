@@ -6,12 +6,14 @@ import styled from 'styled-components';
 /**
  * Internal dependencies
  */
-import { LEFT_NAV_WIDTH, PAGE_WIDTH, PAGE_HEIGHT, PAGE_NAV_PADDING } from '../../constants';
+import { PAGE_NAV_WIDTH, PAGE_WIDTH, PAGE_HEIGHT } from '../../constants';
 import Page from './page';
 import PageMenu from './pagemenu';
 import PageNav from './pagenav';
-import Carrousel from './carrousel';
+import Carousel from './carousel';
 import SelectionCanvas from './selectionCanvas';
+
+const PAGE_PADDING = 30;
 
 const Background = styled.div`
 	background-color: ${ ( { theme } ) => theme.colors.bg.v1 };
@@ -23,11 +25,12 @@ const Background = styled.div`
 
 	display: grid;
 	grid:
-    ".    .      .          . .        ." 1fr
-    ".    prev   page       . next     ." ${ PAGE_HEIGHT }px
-    ".    .      menu       . .        ." 48px
-    ".    .      carrousel  . .        ." 1fr
-    / 1fr ${ LEFT_NAV_WIDTH }px ${ PAGE_WIDTH }px ${ PAGE_NAV_PADDING }px 1fr 1fr;
+    ".         .         .         .         .       " minmax(${ PAGE_PADDING }px, 1fr)
+    ".         prev      page      next      .       " ${ PAGE_HEIGHT }px
+    ".         .         menu      .         .       " 48px
+    ".         .         .         .         .       " minmax(${ PAGE_PADDING }px, 1fr)
+    "carousel  carousel  carousel  carousel  carousel" auto
+    / 1fr ${ PAGE_NAV_WIDTH }px ${ PAGE_WIDTH }px ${ PAGE_NAV_WIDTH }px 1fr;
 `;
 
 const Area = styled.div`
@@ -52,8 +55,8 @@ function CanvasLayout() {
 				<Area area="next">
 					<PageNav />
 				</Area>
-				<Area area="carrousel">
-					<Carrousel />
+				<Area area="carousel">
+					<Carousel />
 				</Area>
 			</Background>
 		</SelectionCanvas>
