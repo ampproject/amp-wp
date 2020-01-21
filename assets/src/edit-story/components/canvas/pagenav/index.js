@@ -20,7 +20,7 @@ import { LeftArrow, RightArrow } from '../../button';
 const Wrapper = styled.div`
 	display: flex;
 	align-items: center;
-	justify-content: flex-start;
+	justify-content: ${ ( { isNext } ) => isNext ? 'flex-end' : 'flex-start' };
 	height: 100%;
 	color:  ${ ( { theme } ) => theme.colors.fg.v1 };
 `;
@@ -43,7 +43,7 @@ function PageNav( { isNext } ) {
 		height: 40,
 	};
 	return (
-		<Wrapper>
+		<Wrapper isNext={ isNext }>
 			{ isNext ? <RightArrow { ...buttonProps } /> : <LeftArrow { ...buttonProps } /> }
 		</Wrapper>
 	);

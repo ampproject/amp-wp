@@ -26,7 +26,6 @@ const TabsArea = styled.div`
 const LibraryBackground = styled.div`
 	grid-area: library;
 	background-color: ${ ( { theme } ) => theme.colors.bg.v4 };
-	height: 100%;
 	padding: 1em;
 	color: ${ ( { theme } ) => theme.colors.fg.v1 };
 	overflow: auto;

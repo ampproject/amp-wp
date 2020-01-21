@@ -11,7 +11,7 @@ import Header from '../../components/header';
 import Inspector from '../../components/inspector';
 import Library from '../../components/library';
 import Canvas from '../../components/canvas';
-import { LIBRARY_MIN_WIDTH, LIBRARY_MAX_WIDTH, INSPECTOR_MIN_WIDTH, INSPECTOR_MAX_WIDTH, HEADER_HEIGHT } from '../../constants';
+import { ADMIN_TOOLBAR_HEIGHT, LIBRARY_MIN_WIDTH, LIBRARY_MAX_WIDTH, INSPECTOR_MIN_WIDTH, INSPECTOR_MAX_WIDTH, HEADER_HEIGHT } from '../../constants';
 import DropZoneProvider from '../../components/dropzone/dropZoneProvider';
 
 const Editor = styled.div`
@@ -25,7 +25,7 @@ const Editor = styled.div`
 	top: 0;
 	right: 0;
 	bottom: 0;
-	min-height: calc(100vh - 32px);
+	height: calc(100vh - ${ ADMIN_TOOLBAR_HEIGHT }px);
 
 	display: grid;
 	grid:
