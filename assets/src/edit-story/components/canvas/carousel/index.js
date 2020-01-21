@@ -8,6 +8,7 @@ import ResizeObserver from 'resize-observer-polyfill';
  * WordPress dependencies
  */
 import { useLayoutEffect, useRef, useState, useCallback } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -112,7 +113,7 @@ function Carousel() {
 					onClick={ () => scrollBy( -( 2 * PAGE_WIDTH ) ) }
 					width="24"
 					height="24"
-					aria-label="Scroll Left"
+					aria-label={ __( 'Scroll Left', 'amp' ) }
 				/>
 			</Area>
 			<List area="carousel" ref={ listRef } hasHorizontalOverflow={ hasHorizontalOverflow }>
@@ -133,13 +134,13 @@ function Carousel() {
 					onClick={ () => scrollBy( ( 2 * PAGE_WIDTH ) ) }
 					width="24"
 					height="24"
-					aria-label="Scroll Right"
+					aria-label={ __( 'Scroll Right', 'amp' ) }
 				/>
 				<GridViewButton
 					isDisabled
 					width="24"
 					height="24"
-					aria-label="Grid View"
+					aria-label={ __( 'Grid View', 'amp' ) }
 				/>
 			</Area>
 		</Wrapper>
