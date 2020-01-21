@@ -14,10 +14,6 @@ import * as imageElement from './image';
 import * as squareElement from './square';
 import * as videoElement from './video';
 
-/**
- * WordPress dependencies
- */
-
 export const createNewElement = ( type, attributes = {} ) => {
 	const element = elementTypes.find( ( el ) => el.type === type );
 	const defaultAttributes = element ? element.defaultAttributes : {};
