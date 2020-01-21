@@ -13,6 +13,9 @@ import { useRef, useEffect } from '@wordpress/element';
  */
 import Movable from '../movable';
 import { useStory } from '../../app/story';
+import calculateFitTextFontSize from '../../utils/calculateFitTextFontSize';
+
+const CORNER_HANDLES = [ 'nw', 'ne', 'sw', 'se' ];
 
 function MultiSelectionMovable( { selectedElements, nodesById } ) {
 	const moveable = useRef();
@@ -35,6 +38,8 @@ function MultiSelectionMovable( { selectedElements, nodesById } ) {
 			x: element.x,
 			y: element.y,
 			rotationAngle: element.rotationAngle,
+			type: element.type,
+			content: element.content,
 		};
 	} );
 	// Not all targets have been defined yet.
@@ -84,7 +89,7 @@ function MultiSelectionMovable( { selectedElements, nodesById } ) {
 	};
 
 	// Update elements once the event has ended.
-	const onGroupEventEnd = ( { targets, isRotate } ) => {
+	const onGroupEventEnd = ( { targets, isRotate, isResize } ) => {
 		targets.forEach( ( target, i ) => {
 			const properties = {
 				x: targetList[ i ].x + frames[ i ].translate[ 0 ],
@@ -92,6 +97,10 @@ function MultiSelectionMovable( { selectedElements, nodesById } ) {
 			};
 			if ( isRotate ) {
 				properties.rotationAngle = frames[ i ].rotate;
+			}
+			if ( isResize ) {
+				properties.width = parseInt( target.style.width );
+				properties.height = parseInt( target.style.height );
 			}
 			updateElementsById( { elementIds: [ targetList[ i ].id ], properties } );
 		} );
@@ -104,9 +113,8 @@ function MultiSelectionMovable( { selectedElements, nodesById } ) {
 			zIndex={ 0 }
 			target={ targetList.map( ( { node } ) => node ) }
 
-			// @todo: implement group resizing.
 			draggable={ true }
-			resizable={ false }
+			resizable={ true }
 			rotatable={ true }
 
 			onDragGroup={ ( { events } ) => {
@@ -137,6 +145,35 @@ function MultiSelectionMovable( { selectedElements, nodesById } ) {
 			onRotateGroupEnd={ ( { targets } ) => {
 				onGroupEventEnd( { targets, isRotate: true } );
 			} }
+
+			onResizeGroupStart={ ( { events } ) => {
+				events.forEach( ( ev, i ) => {
+					const frame = frames[ i ];
+					ev.setOrigin( [ '%', '%' ] );
+					if ( ev.dragStart ) {
+						ev.dragStart.set( frame.translate );
+					}
+				} );
+			} }
+			onResizeGroup={ ( { events } ) => {
+				events.forEach( ( { target, width, height, drag }, i ) => {
+					const sFrame = frames[ i ];
+					const isText = 'text' === targetList[ i ].type;
+					target.style.width = `${ width }px`;
+					target.style.height = `${ height }px`;
+					if ( isText ) {
+						// For text: update font size, too.
+						target.style.fontSize = calculateFitTextFontSize( target.firstChild, height, width );
+					}
+					sFrame.translate = drag.beforeTranslate;
+					setTransformStyle( target, sFrame );
+				} );
+			} }
+			onResizeGroupEnd={ ( { targets } ) => {
+				onGroupEventEnd( { targets, isResize: true } );
+			} }
+
+			renderDirections={ CORNER_HANDLES }
 		/>
 	);
 }
