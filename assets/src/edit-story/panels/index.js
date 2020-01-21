@@ -1,8 +1,4 @@
 /**
- * WordPress dependencies
- */
-import { __, sprintf } from '@wordpress/i18n';
-/**
  * Internal dependencies
  */
 import { elementTypes } from '../elements';
@@ -71,11 +67,7 @@ export function getPanels( elements ) {
 				case COLOR: return { type, Panel: ColorPanel };
 				case FONT: return { type, Panel: FontPanel };
 				case TEXT: return { type, Panel: TextPanel };
-				default: throw new Error( sprintf(
-					/* translators: %s: Type of panel. */
-					__( 'Unknown panel: %s', 'amp' ),
-					type,
-				) );
+				default: throw new Error( `Unknown panel: ${ type }` );
 			}
 		} );
 	return [
