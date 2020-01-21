@@ -22,6 +22,7 @@ import {
 	ElementWithFont,
 	ElementWithBackgroundColor,
 	ElementWithFontColor,
+	ElementWithStyle,
 } from '../shared';
 import { getFilteredState, getHandleKeyCommand } from './util';
 
@@ -29,6 +30,7 @@ const Element = styled.div`
 	margin: 0;
 	${ ElementFillContent }
 	${ ElementWithFont }
+	${ ElementWithStyle }
 	${ ElementWithBackgroundColor }
 	${ ElementWithFontColor }
 
@@ -45,7 +47,22 @@ const Element = styled.div`
 	}
 `;
 
-function TextEdit( { id, content, color, backgroundColor, width, height, fontFamily, fontFallback, fontSize, fontWeight, fontStyle } ) {
+function TextEdit( {
+	id,
+	content,
+	color,
+	backgroundColor,
+	width,
+	height,
+	fontFamily,
+	fontFallback,
+	fontSize,
+	fontWeight,
+	fontStyle,
+	letterSpacing,
+	lineHeight,
+	textAlign,
+} ) {
 	const props = {
 		color,
 		backgroundColor,
@@ -54,6 +71,9 @@ function TextEdit( { id, content, color, backgroundColor, width, height, fontFam
 		fontStyle,
 		fontSize,
 		fontWeight,
+		textAlign,
+		letterSpacing,
+		lineHeight,
 		width,
 		height,
 	};
@@ -152,8 +172,14 @@ TextEdit.propTypes = {
 	fontSize: PropTypes.number,
 	fontWeight: PropTypes.number,
 	fontStyle: PropTypes.string,
+	letterSpacing: PropTypes.oneOfType( [
+		PropTypes.string,
+		PropTypes.number,
+	] ),
+	lineHeight: PropTypes.number,
 	width: PropTypes.number.isRequired,
 	height: PropTypes.number.isRequired,
+	textAlign: PropTypes.string,
 };
 
 export default TextEdit;

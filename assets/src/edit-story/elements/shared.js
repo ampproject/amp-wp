@@ -51,8 +51,8 @@ export const ElementWithFont = css`
 
 export const ElementWithStyle = css`
 	line-height: ${ ( { lineHeight } ) => lineHeight };
-	letter-spacing: ${ ( { letterSpacing } ) => letterSpacing };
-	text-align: ${ ( { align } ) => align };
+	letter-spacing: ${ ( { letterSpacing } ) => letterSpacing ? letterSpacing + 'em' : null };
+	text-align: ${ ( { textAlign } ) => textAlign };
 `;
 
 /**

@@ -15,42 +15,26 @@ import { __ } from '@wordpress/i18n';
 import { Panel, Title, InputGroup, getCommonValue, SelectMenu } from './shared';
 
 function StylePanel( { selectedElements, onSetProperties } ) {
-	const align = getCommonValue( selectedElements, 'align' );
+	const textAlign = getCommonValue( selectedElements, 'align' );
 	const letterSpacing = getCommonValue( selectedElements, 'letterSpacing' );
 	const lineHeight = getCommonValue( selectedElements, 'lineHeight' );
-	const [ state, setState ] = useState( { align, letterSpacing, lineHeight } );
+	const [ state, setState ] = useState( { textAlign, letterSpacing, lineHeight } );
 	useEffect( () => {
-		setState( { align, letterSpacing, lineHeight } );
-	}, [ align, letterSpacing, lineHeight ] );
+		setState( { textAlign, letterSpacing, lineHeight } );
+	}, [ textAlign, letterSpacing, lineHeight ] );
 	const handleSubmit = ( evt ) => {
 		onSetProperties( state );
 		evt.preventDefault();
 	};
 
 	const alignmentOptions = [
-		{
-			name: __( 'Default', 'amp' ),
-			slug: 'default',
-		},
-		{
-			name: __( 'Left', 'amp' ),
-			slug: 'left',
-		},
-		{
-			name: __( 'Right', 'amp' ),
-			slug: 'right',
-		},
-		{
-			name: __( 'Center', 'amp' ),
-			slug: 'center',
-		},
-		{
-			name: __( 'Justify', 'amp' ),
-			slug: 'justify',
-		},
+		{ name: __( 'Default', 'amp' ), slug: '', thisValue: '' },
+		{ name: __( 'Left', 'amp' ), slug: 'left', thisValue: 'left' },
+		{ name: __( 'Right', 'amp' ), slug: 'right', thisValue: 'right' },
+		{ name: __( 'Center', 'amp' ), slug: 'center', thisValue: 'center' },
+		{ name: __( 'Justify', 'amp' ), slug: 'justify', thisValue: 'justify' },
 	];
 
-	console.log( state );
 	return (
 		<Panel onSubmit={ handleSubmit }>
 			<Title>
@@ -59,22 +43,24 @@ function StylePanel( { selectedElements, onSetProperties } ) {
 			<SelectMenu
 				label={ __( 'Alignment', 'amp' ) }
 				options={ alignmentOptions }
-				isMultiple={ '' === align }
-				value={ state.align ? state.align : 'default' }
-				onChange={ ( value ) => setState( { ...state, align: value } ) }
+				isMultiple={ '' === textAlign }
+				value={ state.textAlign ? state.textAlign : 'default' }
+				onChange={ ( value ) => setState( { ...state, textAlign: value } ) }
 			/>
 			<InputGroup
 				label={ __( 'Line height', 'amp' ) }
-				value={ typeof state.lineHeight === 'number' ? state.lineHeight : '(auto)' }
+				value={ state.lineHeight }
 				isMultiple={ '' === lineHeight }
-				onChange={ ( value ) => setState( { ...state, lineHeight: isNaN( value ) || value === '' ? '(auto)' : parseFloat( value ) } ) }
+				onChange={ ( value ) => setState( { ...state, lineHeight: isNaN( value ) || value === '' ? '' : parseFloat( value ) } ) }
+				step="0.1"
 			/>
 			<InputGroup
 				label={ __( 'Letter-spacing', 'amp' ) }
-				value={ typeof state.letterSpacing === 'number' ? state.letterSpacing : '(auto)' }
+				value={ state.letterSpacing }
 				isMultiple={ '' === letterSpacing }
-				onChange={ ( value ) => setState( { ...state, letterSpacing: isNaN( value ) || value === '' ? '(auto)' : value } ) }
+				onChange={ ( value ) => setState( { ...state, letterSpacing: isNaN( value ) || value === '' ? '' : value } ) }
 				postfix="em"
+				step="0.1"
 			/>
 		</Panel>
 	);
