@@ -814,6 +814,45 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test AMP-to-AMP linking.
+	 *
+	 * @covers ::amp_get_content_sanitizers()
+	 */
+	public function test_amp_get_content_sanitizers_amp_to_amp() {
+		$link_sanitizer_class_name = 'AMP_Link_Sanitizer';
+		add_filter( 'amp_to_amp_linking_enabled', '__return_false' );
+		$sanitizers = amp_get_content_sanitizers();
+		$this->assertArrayNotHasKey( $link_sanitizer_class_name, $sanitizers );
+
+		add_filter( 'amp_to_amp_linking_enabled', '__return_true' );
+		$sanitizers = amp_get_content_sanitizers();
+		$this->assertEquals(
+			[
+				'paired'             => true,
+				'excluded_amp_links' => [],
+			],
+			$sanitizers[ $link_sanitizer_class_name ]
+		);
+
+		$excluded_urls = [ 'https://baz.com', 'https://example.com/one' ];
+		add_filter(
+			'excluded_links_from_amp_to_amp',
+			static function() use ( $excluded_urls ) {
+				return $excluded_urls;
+			}
+		);
+
+		$sanitizers = amp_get_content_sanitizers();
+		$this->assertEquals(
+			[
+				'paired'             => true,
+				'excluded_amp_links' => $excluded_urls,
+			],
+			$sanitizers[ $link_sanitizer_class_name ]
+		);
+	}
+
+	/**
 	 * Test post_supports_amp().
 	 *
 	 * @covers ::post_supports_amp()

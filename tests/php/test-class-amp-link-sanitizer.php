@@ -38,13 +38,17 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 		$wp_rewrite->init();
 		$wp_rewrite->flush_rules();
 
-		$post_to_link_to = self::factory()->post->create(
-			[
-				'post_name'   => 'link-target-post',
-				'post_status' => 'publish',
-				'post_type'   => 'post',
-			]
+		$post_link          = get_permalink(
+			self::factory()->post->create(
+				[
+					'post_name'   => 'link-target-post',
+					'post_status' => 'publish',
+					'post_type'   => 'post',
+				]
+			)
 		);
+		$excluded_amp_link  = get_permalink( self::factory()->post->create() );
+		$excluded_amp_links = [ $excluded_amp_link ];
 
 		$links = [
 			'home-link'           => [
@@ -53,20 +57,25 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 				'expected_rel' => 'amphtml',
 			],
 			'internal-link'       => [
-				'href'         => get_permalink( $post_to_link_to ),
+				'href'         => $post_link,
 				'expected_amp' => true,
 				'expected_rel' => 'amphtml',
 			],
 			'non_amp_to_amp_rel'  => [
-				'href'         => get_permalink( $post_to_link_to ),
+				'href'         => $post_link,
 				'expected_amp' => false,
 				'rel'          => 'not-amphtml',
 				'expected_rel' => null,
 			],
 			'rel_trailing_space'  => [
-				'href'         => get_permalink( $post_to_link_to ),
+				'href'         => $post_link,
 				'expected_amp' => false,
 				'rel'          => 'not-amphtml ',
+				'expected_rel' => null,
+			],
+			'excluded_amp_link'   => [
+				'href'         => $excluded_amp_link,
+				'expected_amp' => false,
 				'expected_rel' => null,
 			],
 			'ugc-link'            => [
@@ -81,7 +90,7 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 				'expected_rel' => null,
 			],
 			'other-page-anchor'   => [
-				'href'         => get_permalink( $post_to_link_to ) . '#top',
+				'href'         => $post_link . '#top',
 				'expected_amp' => true,
 				'expected_rel' => 'amphtml',
 			],
@@ -134,7 +143,7 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $html );
 
-		$sanitizer = new AMP_Link_Sanitizer( $dom, compact( 'paired' ) );
+		$sanitizer = new AMP_Link_Sanitizer( $dom, compact( 'paired', 'excluded_amp_links' ) );
 		$sanitizer->sanitize();
 
 		// Confirm admin bar is unchanged.

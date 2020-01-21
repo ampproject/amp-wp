@@ -41,7 +41,7 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * The rel attribute value that will force non-AMP links.
 	 *
-	 * Normally, in Paired mode, links to the same origin will be for AMP.
+	 * Normally, in a paired mode, links to the same origin will be for AMP.
 	 * But by adding this rel value, the link will be to non-AMP.
 	 *
 	 * @var string
@@ -54,8 +54,9 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	protected $DEFAULT_ARGS = [ // phpcs:ignore WordPress.NamingConventions.ValidVariableName.PropertyNotSnakeCase
-		'paired'       => false, // Only set to true when in a paired mode (will be false when amp_is_canonical()). Controls whether query var is added.
-		'meta_content' => self::DEFAULT_META_CONTENT,
+		'paired'             => false, // Only set to true when in a paired mode (will be false when amp_is_canonical()). Controls whether query var is added.
+		'meta_content'       => self::DEFAULT_META_CONTENT,
+		'excluded_amp_links' => [], // URLs in this won't have AMP-to-AMP links in paired mode.
 	];
 
 	/**
@@ -157,7 +158,15 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 				$element->removeAttribute( 'rel' );
 			}
 
-			if ( $this->is_frontend_url( $href ) && '#' !== substr( $href, 0, 1 ) && ! $is_rel_non_amp ) {
+			if (
+				$this->is_frontend_url( $href )
+				&&
+				'#' !== substr( $href, 0, 1 )
+				&&
+				! $is_rel_non_amp
+				&&
+				! in_array( $href, $this->args['excluded_amp_links'], true )
+			) {
 				// Always add the amphtml link relation when linking enabled.
 				$rel = empty( $rel ) ? self::REL_VALUE_AMP : $rel . ' ' . self::REL_VALUE_AMP;
 				$element->setAttribute( 'rel', $rel );

@@ -929,9 +929,20 @@ function amp_get_content_sanitizers( $post = null ) {
 	}
 
 	if ( $amp_to_amp_linking_enabled ) {
-		$sanitizers['AMP_Link_Sanitizer'] = [
-			'paired' => ! amp_is_canonical(),
-		];
+
+		/**
+		 * Normally, when in a paired mode, links to the same origin will be to AMP.
+		 *
+		 * This allows passing URLs to exclude from having AMP-to-AMP links.
+		 *
+		 * @param string[] The URLs to exclude from having AMP-to-AMP links.
+		 */
+		$excluded_amp_links = apply_filters( 'excluded_links_from_amp_to_amp', [] );
+
+		$sanitizers['AMP_Link_Sanitizer'] = array_merge(
+			[ 'paired' => ! amp_is_canonical() ],
+			compact( 'excluded_amp_links' )
+		);
 	}
 
 	/**
