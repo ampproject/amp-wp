@@ -50,9 +50,9 @@ VideoDisplay.propTypes = {
 	loop: PropTypes.bool,
 	mimeType: PropTypes.string.isRequired,
 	src: PropTypes.string.isRequired,
-	videoId: PropTypes.number,
+	videoId: PropTypes.number.isRequired,
 	featuredMedia: PropTypes.number,
-	id: PropTypes.string,
+	id: PropTypes.string.isRequired,
 };
 
 export default VideoDisplay;

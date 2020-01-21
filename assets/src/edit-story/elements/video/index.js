@@ -11,6 +11,7 @@ export const defaultAttributes = {
 	autoPlay: true,
 	featuredMedia: 0,
 	featuredMediaSrc: '',
+	videoId: 0,
 };
 
 export const hasEditMode = false;

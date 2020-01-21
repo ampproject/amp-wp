@@ -145,6 +145,5 @@ export {
 	InputGroup,
 	getCommonValue,
 	SelectMenu,
-	Group,
 };
 
