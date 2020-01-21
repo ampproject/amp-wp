@@ -32,6 +32,23 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 	const DEFAULT_META_CONTENT = 'AMP-Redirect-To; AMP.navigateTo';
 
 	/**
+	 * The rel attribute value for AMP links.
+	 *
+	 * @var string
+	 */
+	const REL_VALUE_AMP = 'amphtml';
+
+	/**
+	 * The rel attribute value that will force non-AMP links.
+	 *
+	 * Normally, in Paired mode, links to the same origin will be for AMP.
+	 * But by adding this rel value, the link will be to non-AMP.
+	 *
+	 * @var string
+	 */
+	const REL_VALUE_NON_AMP_TO_AMP = 'not-amphtml';
+
+	/**
 	 * Placeholder for default arguments, to be set in child classes.
 	 *
 	 * @var array
@@ -131,12 +148,18 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			$href = $element->getAttribute( 'href' );
+			$href           = $element->getAttribute( 'href' );
+			$rel            = $element->hasAttribute( 'rel' ) ? trim( $element->getAttribute( 'rel' ) ) : '';
+			$is_rel_non_amp = self::REL_VALUE_NON_AMP_TO_AMP === $rel;
 
-			if ( $this->is_frontend_url( $href ) && '#' !== substr( $href, 0, 1 ) ) {
+			if ( $is_rel_non_amp ) {
+				// This value is to opt-out of AMP-to-AMP links, so strip it and ensure the link is to non-AMP.
+				$element->removeAttribute( 'rel' );
+			}
+
+			if ( $this->is_frontend_url( $href ) && '#' !== substr( $href, 0, 1 ) && ! $is_rel_non_amp ) {
 				// Always add the amphtml link relation when linking enabled.
-				$rel  = $element->hasAttribute( 'rel' ) ? $element->getAttribute( 'rel' ) . ' ' : '';
-				$rel .= 'amphtml';
+				$rel = empty( $rel ) ? self::REL_VALUE_AMP : $rel . ' ' . self::REL_VALUE_AMP;
 				$element->setAttribute( 'rel', $rel );
 
 				// Only add the AMP query var when requested (in Transitional or Reader mode).

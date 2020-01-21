@@ -47,53 +47,71 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 		);
 
 		$links = [
-			'home-link'         => [
+			'home-link'           => [
 				'href'         => home_url( '/' ),
 				'expected_amp' => true,
 				'expected_rel' => 'amphtml',
 			],
-			'internal-link'     => [
+			'internal-link'       => [
 				'href'         => get_permalink( $post_to_link_to ),
 				'expected_amp' => true,
 				'expected_rel' => 'amphtml',
 			],
-			'ugc-link'          => [
+			'non_amp_to_amp_rel'  => [
+				'href'         => get_permalink( $post_to_link_to ),
+				'expected_amp' => false,
+				'rel'          => 'not-amphtml',
+				'expected_rel' => null,
+			],
+			'rel_trailing_space'  => [
+				'href'         => get_permalink( $post_to_link_to ),
+				'expected_amp' => false,
+				'rel'          => 'not-amphtml ',
+				'expected_rel' => null,
+			],
+			'ugc-link'            => [
 				'rel'          => 'ugc',
 				'href'         => home_url( '/some/user/generated/data/' ),
 				'expected_amp' => true,
 				'expected_rel' => 'ugc amphtml',
 			],
-			'page-anchor'       => [
+			'page-anchor'         => [
 				'href'         => '#top',
 				'expected_amp' => false,
 				'expected_rel' => null,
 			],
-			'other-page-anchor' => [
+			'other-page-anchor'   => [
 				'href'         => get_permalink( $post_to_link_to ) . '#top',
 				'expected_amp' => true,
 				'expected_rel' => 'amphtml',
 			],
-			'external-link'     => [
+			'external-link'       => [
 				'href'         => 'https://external.example.com/',
 				'expected_amp' => false,
 				'expected_rel' => null,
 			],
-			'php-file-link'     => [
+			'non_amp_rel_removed' => [
+				'href'         => 'https://external.example.com/',
+				'expected_amp' => false,
+				'rel'          => 'not-amphtml',
+				'expected_rel' => null,
+			],
+			'php-file-link'       => [
 				'href'         => site_url( '/wp-login.php' ),
 				'expected_amp' => false,
 				'expected_rel' => null,
 			],
-			'feed-link'         => [
+			'feed-link'           => [
 				'href'         => get_feed_link(),
 				'expected_amp' => false,
 				'expected_rel' => null,
 			],
-			'admin-link'        => [
+			'admin-link'          => [
 				'href'         => admin_url( 'options-general.php?page=some-plugin' ),
 				'expected_amp' => false,
 				'expected_rel' => null,
 			],
-			'image-link'        => [
+			'image-link'          => [
 				'href'         => content_url( '/some-image.jpg' ),
 				'expected_amp' => false,
 				'expected_rel' => null,
