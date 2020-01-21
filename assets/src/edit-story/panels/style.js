@@ -18,10 +18,11 @@ function StylePanel( { selectedElements, onSetProperties } ) {
 	const textAlign = getCommonValue( selectedElements, 'textAlign' );
 	const letterSpacing = getCommonValue( selectedElements, 'letterSpacing' );
 	const lineHeight = getCommonValue( selectedElements, 'lineHeight' );
-	const [ state, setState ] = useState( { textAlign, letterSpacing, lineHeight } );
+	const padding = getCommonValue( selectedElements, 'padding' );
+	const [ state, setState ] = useState( { textAlign, letterSpacing, lineHeight, padding } );
 	useEffect( () => {
-		setState( { textAlign, letterSpacing, lineHeight } );
-	}, [ textAlign, letterSpacing, lineHeight ] );
+		setState( { textAlign, letterSpacing, lineHeight, padding } );
+	}, [ textAlign, letterSpacing, lineHeight, padding ] );
 	const handleSubmit = ( evt ) => {
 		onSetProperties( state );
 		evt.preventDefault();
@@ -51,16 +52,23 @@ function StylePanel( { selectedElements, onSetProperties } ) {
 				label={ __( 'Line height', 'amp' ) }
 				value={ state.lineHeight }
 				isMultiple={ '' === lineHeight }
-				onChange={ ( value ) => setState( { ...state, lineHeight: isNaN( value ) || value === '' ? '' : parseFloat( value ) } ) }
+				onChange={ ( value ) => setState( { ...state, lineHeight: isNaN( value ) ? '' : parseFloat( value ) } ) }
 				step="0.1"
 			/>
 			<InputGroup
 				label={ __( 'Letter-spacing', 'amp' ) }
 				value={ state.letterSpacing }
 				isMultiple={ '' === letterSpacing }
-				onChange={ ( value ) => setState( { ...state, letterSpacing: isNaN( value ) || value === '' ? '' : value } ) }
+				onChange={ ( value ) => setState( { ...state, letterSpacing: isNaN( value ) ? '' : value } ) }
 				postfix="em"
 				step="0.1"
+			/>
+			<InputGroup
+				label={ __( 'Padding', 'amp' ) }
+				value={ state.padding }
+				isMultiple={ '' === padding }
+				onChange={ ( value ) => setState( { ...state, padding: isNaN( value ) ? '' : value } ) }
+				postfix="%"
 			/>
 		</Panel>
 	);

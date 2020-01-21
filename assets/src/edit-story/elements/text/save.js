@@ -28,6 +28,7 @@ function TextSave( {
 	fontStyle,
 	letterSpacing,
 	lineHeight,
+	padding,
 	rotationAngle,
 	textAlign,
 } ) {
@@ -41,6 +42,7 @@ function TextSave( {
 		color,
 		lineHeight,
 		letterSpacing: letterSpacing ? letterSpacing + 'em' : null,
+		padding: padding ? padding + '%' : null,
 		textAlign: textAlign ? textAlign : null,
 	};
 
@@ -66,6 +68,7 @@ TextSave.propTypes = {
 	lineHeight: PropTypes.number,
 	width: PropTypes.number.isRequired,
 	height: PropTypes.number.isRequired,
+	padding: PropTypes.number,
 	rotationAngle: PropTypes.number.isRequired,
 	textAlign: PropTypes.string,
 	x: PropTypes.number.isRequired,

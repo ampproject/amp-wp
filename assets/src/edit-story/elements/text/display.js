@@ -53,6 +53,7 @@ function TextDisplay( {
 	fontStyle,
 	letterSpacing,
 	lineHeight,
+	padding,
 	textAlign,
 } ) {
 	const props = {
@@ -65,6 +66,7 @@ function TextDisplay( {
 		fontWeight,
 		letterSpacing,
 		lineHeight,
+		padding,
 		width,
 		height,
 		textAlign,
@@ -175,6 +177,7 @@ TextDisplay.propTypes = {
 		PropTypes.number,
 	] ),
 	lineHeight: PropTypes.number,
+	padding: PropTypes.number,
 	width: PropTypes.number.isRequired,
 	height: PropTypes.number.isRequired,
 	setClickHandler: PropTypes.func,

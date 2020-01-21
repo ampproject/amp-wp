@@ -50,6 +50,7 @@ export const ElementWithFont = css`
 `;
 
 export const ElementWithStyle = css`
+	padding: ${ ( { padding } ) => padding ? padding : '0' }%;
 	line-height: ${ ( { lineHeight } ) => lineHeight };
 	letter-spacing: ${ ( { letterSpacing } ) => letterSpacing ? letterSpacing + 'em' : null };
 	text-align: ${ ( { textAlign } ) => textAlign };

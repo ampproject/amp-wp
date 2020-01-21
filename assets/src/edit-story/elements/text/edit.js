@@ -61,6 +61,7 @@ function TextEdit( {
 	fontStyle,
 	letterSpacing,
 	lineHeight,
+	padding,
 	textAlign,
 } ) {
 	const props = {
@@ -74,6 +75,7 @@ function TextEdit( {
 		textAlign,
 		letterSpacing,
 		lineHeight,
+		padding,
 		width,
 		height,
 	};
@@ -177,6 +179,7 @@ TextEdit.propTypes = {
 		PropTypes.number,
 	] ),
 	lineHeight: PropTypes.number,
+	padding: PropTypes.number,
 	width: PropTypes.number.isRequired,
 	height: PropTypes.number.isRequired,
 	textAlign: PropTypes.string,
