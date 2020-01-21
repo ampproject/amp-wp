@@ -5,12 +5,13 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 /**
- * Internal dependencies
- */
-/**
  * WordPress dependencies
  */
 import { useEffect } from '@wordpress/element';
+
+/**
+ * Internal dependencies
+ */
 import { ElementFillContent } from '../shared';
 import useUploadVideoFrame from '../../utils/useUploadVideoFrame';
 
