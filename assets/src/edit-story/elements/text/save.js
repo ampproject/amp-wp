@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import { getCommonAttributes } from '../shared';
-import { generateFontFamily } from './util';
+import { generateFontFamily, getResponsiveFontSize } from './util';
 
 /**
  * Returns AMP HTML for saving into post content for displaying in the FE.
@@ -15,12 +15,13 @@ import { generateFontFamily } from './util';
 function TextSave( { id, content, color, backgroundColor, width, height, x, y, fontFamily, fontFallback, fontSize, fontWeight, fontStyle, rotationAngle } ) {
 	const style = {
 		...getCommonAttributes( { width, height, x, y, rotationAngle } ),
-		fontSize: `${ fontSize }px`,
+		fontSize: getResponsiveFontSize( fontSize ),
 		fontStyle: fontStyle ? fontStyle : null,
 		fontFamily: generateFontFamily( fontFamily, fontFallback ),
 		fontWeight: fontWeight ? fontWeight : null,
 		background: backgroundColor,
 		color,
+		lineHeight: 1.3, // @todo This will be user-editable in the future.
 	};
 
 	return (

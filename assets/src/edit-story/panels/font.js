@@ -13,6 +13,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { useFont } from '../app';
+import { MIN_FONT_SIZE, MAX_FONT_SIZE } from '../constants';
 import { Panel, Title, InputGroup, getCommonValue, SelectMenu } from './shared';
 
 function FontPanel( { selectedElements, onSetProperties } ) {
@@ -78,6 +79,9 @@ function FontPanel( { selectedElements, onSetProperties } ) {
 				label={ __( 'Font size', 'amp' ) }
 				value={ state.fontSize }
 				isMultiple={ fontSize === '' }
+				postfix={ 'px' }
+				min={ MIN_FONT_SIZE }
+				max={ MAX_FONT_SIZE }
 				onChange={ ( value ) => setState( { ...state, fontSize: parseInt( value ) } ) }
 			/>
 		</Panel>

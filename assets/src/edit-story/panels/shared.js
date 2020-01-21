@@ -53,8 +53,8 @@ export const ActionButton = styled.button`
 	font-size: 11px;
 `;
 
-function InputGroup( { type, label, value, isMultiple, onChange, postfix, disabled } ) {
-	const placeholder = isMultiple ? __( '( multiple )', 'amp' ) : '';
+function InputGroup( { type, label, value, isMultiple, onChange, postfix, disabled, min, max } ) {
+	const placeholder = isMultiple ? '( multiple )' : '';
 	const isCheckbox = type === 'checkbox';
 	return (
 		<Group disabled={ disabled }>
@@ -69,6 +69,8 @@ function InputGroup( { type, label, value, isMultiple, onChange, postfix, disabl
 				placeholder={ placeholder }
 				value={ isCheckbox ? '' : value }
 				checked={ isCheckbox ? value : null }
+				min={ min ? min : null }
+				max={ max ? max : null }
 			/>
 			{ postfix }
 		</Group>
@@ -83,12 +85,16 @@ InputGroup.propTypes = {
 	onChange: PropTypes.func.isRequired,
 	postfix: PropTypes.string,
 	disabled: PropTypes.bool,
+	min: PropTypes.any,
+	max: PropTypes.any,
 };
 
 InputGroup.defaultProps = {
 	type: 'number',
 	postfix: '',
 	disabled: false,
+	min: null,
+	max: null,
 };
 
 function SelectMenu( { label, options, value, isMultiple, onChange, postfix, disabled } ) {
