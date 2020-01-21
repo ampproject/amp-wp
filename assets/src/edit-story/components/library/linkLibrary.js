@@ -1,7 +1,12 @@
+/**
+ * WordPress dependencies
+ */
+import { __ } from '@wordpress/i18n';
+
 function LinkLibrary( { } ) {
 	return (
 		<p>
-			{ 'Still empty' }
+			{ __( 'Still empty', 'amp' ) }
 		</p>
 	);
 }

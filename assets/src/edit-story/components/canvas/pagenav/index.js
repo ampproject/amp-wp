@@ -8,6 +8,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { useCallback } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -36,7 +37,7 @@ function PageNav( { isNext } ) {
 	const buttonProps = {
 		isDisabled: ! displayNav,
 		isHidden: ! displayNav,
-		'aria-label': isNext ? 'Next Page' : 'Previous Page',
+		'aria-label': isNext ? __( 'Next Page', 'amp' ) : __( 'Previous Page', 'amp' ),
 		onClick: handleClick,
 		width: PAGE_NAV_BUTTON_WIDTH,
 		height: 40,

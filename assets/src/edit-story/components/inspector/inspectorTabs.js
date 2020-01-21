@@ -1,4 +1,8 @@
 /**
+ * WordPress dependencies
+ */
+import { __ } from '@wordpress/i18n';
+/**
  * External dependencies
  */
 import styled from 'styled-components';
@@ -43,9 +47,9 @@ function InspectorTabs() {
 		data: { tabs: { DESIGN, DOCUMENT, PREPUBLISH } },
 	} = useInspector();
 	const tabs = [
-		[ DESIGN, 'Design' ],
-		[ DOCUMENT, 'Document' ],
-		[ PREPUBLISH, 'Prepublish' ],
+		[ DESIGN, __( 'Design', 'amp' ) ],
+		[ DOCUMENT, __( 'Document', 'amp' ) ],
+		[ PREPUBLISH, __( 'Prepublish', 'amp' ) ],
 	];
 	return (
 		<Tabs>
