@@ -2,6 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
 
 /**
  * WordPress dependencies
@@ -12,6 +13,10 @@ import { useCallback, useState } from '@wordpress/element';
  * Internal dependencies
  */
 import Context from './context';
+
+const DropZoneWrapper = styled.div`
+	height: 100%;
+`;
 
 function DropZoneProvider( { children } ) {
 	const [ dropZones, setDropZones ] = useState( [] );
@@ -88,11 +93,11 @@ function DropZoneProvider( { children } ) {
 		},
 	};
 	return (
-		<div onDragOver={ onDragOver }>
+		<DropZoneWrapper onDragOver={ onDragOver }>
 			<Context.Provider value={ state }>
 				{ children }
 			</Context.Provider>
-		</div>
+		</DropZoneWrapper>
 	);
 }
 
