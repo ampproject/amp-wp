@@ -20,6 +20,7 @@ import {
 	ElementWithFont,
 	ElementWithBackgroundColor,
 	ElementWithFontColor,
+	ElementWithStyle,
 } from '../shared';
 import { generateFontFamily } from './util';
 
@@ -29,6 +30,7 @@ const Element = styled.p`
 	${ ElementWithFont }
 	${ ElementWithBackgroundColor }
 	${ ElementWithFontColor }
+	${ ElementWithStyle }
 
 	user-select: ${ ( { canSelect } ) => canSelect ? 'initial' : 'none' };
 
@@ -37,7 +39,23 @@ const Element = styled.p`
 	}
 `;
 
-function TextDisplay( { id, content, color, backgroundColor, width, height, fontFamily, fontFallback, fontSize, fontWeight, fontStyle } ) {
+function TextDisplay( {
+	id,
+	content,
+	color,
+	backgroundColor,
+	width,
+	height,
+	fontFamily,
+	fontFallback,
+	fontSize,
+	fontWeight,
+	fontStyle,
+	letterSpacing,
+	lineHeight,
+	padding,
+	textAlign,
+} ) {
 	const props = {
 		color,
 		backgroundColor,
@@ -46,8 +64,12 @@ function TextDisplay( { id, content, color, backgroundColor, width, height, font
 		fontStyle,
 		fontSize,
 		fontWeight,
+		letterSpacing,
+		lineHeight,
+		padding,
 		width,
 		height,
+		textAlign,
 	};
 	const {
 		state: { selectedElementIds },
@@ -150,9 +172,16 @@ TextDisplay.propTypes = {
 	fontSize: PropTypes.number,
 	fontWeight: PropTypes.number,
 	fontStyle: PropTypes.string,
+	letterSpacing: PropTypes.oneOfType( [
+		PropTypes.string,
+		PropTypes.number,
+	] ),
+	lineHeight: PropTypes.number,
+	padding: PropTypes.number,
 	width: PropTypes.number.isRequired,
 	height: PropTypes.number.isRequired,
 	setClickHandler: PropTypes.func,
+	textAlign: PropTypes.string,
 };
 
 export default TextDisplay;

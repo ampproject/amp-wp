@@ -53,7 +53,7 @@ export const ActionButton = styled.button`
 	font-size: 11px;
 `;
 
-function InputGroup( { type, label, value, isMultiple, onChange, postfix, disabled, min, max } ) {
+function InputGroup( { type, label, value, isMultiple, onChange, postfix, disabled, min, max, step } ) {
 	const placeholder = isMultiple ? '( multiple )' : '';
 	const isCheckbox = type === 'checkbox';
 	return (
@@ -71,6 +71,7 @@ function InputGroup( { type, label, value, isMultiple, onChange, postfix, disabl
 				checked={ isCheckbox ? value : null }
 				min={ min ? min : null }
 				max={ max ? max : null }
+				step={ step ? step : '1' }
 			/>
 			{ postfix }
 		</Group>
@@ -87,6 +88,7 @@ InputGroup.propTypes = {
 	disabled: PropTypes.bool,
 	min: PropTypes.any,
 	max: PropTypes.any,
+	step: PropTypes.string,
 };
 
 InputGroup.defaultProps = {
