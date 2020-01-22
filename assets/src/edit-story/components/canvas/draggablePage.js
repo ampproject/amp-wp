@@ -20,7 +20,7 @@ const Page = styled.button`
 	border: 3px solid ${ ( { isActive, theme } ) => isActive ? theme.colors.selection : theme.colors.bg.v1 };
 	height: ${ ( { height } ) => height }px;
 	width: ${ ( { width } ) => width }px;
-	background-color: ${ ( { isActive, theme } ) => isActive ? theme.colors.fg.v1 : theme.colors.mg.v1 };
+	background-color: ${ ( { theme } ) => theme.colors.mg.v1 };
 	flex: none;
 	transition: width .2s ease, height .2s ease;
 `;
