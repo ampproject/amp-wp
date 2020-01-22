@@ -15,9 +15,9 @@ import { __, sprintf } from '@wordpress/i18n';
  */
 import { useStory } from '../../../app';
 import { LeftArrow, RightArrow, GridView as GridViewButton } from '../../button';
-import DropZone from '../../dropzone';
 import Modal from '../../modal';
 import GridView from '../gridview';
+import DraggablePage from '../draggablePage';
 
 const PAGE_WIDTH = 72;
 const PAGE_HEIGHT = 128;
@@ -45,23 +45,13 @@ const List = styled( Area )`
 	overflow-x: ${ ( { hasHorizontalOverflow } ) => hasHorizontalOverflow ? 'scroll' : 'hidden' };
 `;
 
-const Page = styled.button`
-	padding: 0;
-	margin: 0 5px;
-	border: 3px solid ${ ( { isActive, theme } ) => isActive ? theme.colors.selection : theme.colors.bg.v1 };
-	height: ${ PAGE_HEIGHT }px;
-	width: ${ PAGE_WIDTH }px;
-	background-color: ${ ( { isActive, theme } ) => isActive ? theme.colors.fg.v1 : theme.colors.mg.v1 };
-	flex: none;
-`;
-
 const StyledGridViewButton = styled( GridViewButton )`
 	position: absolute;
 	bottom: 24px;
 `;
 
 function Carousel() {
-	const { state: { pages, currentPageIndex, currentPageId }, actions: { setCurrentPage, arrangePage } } = useStory();
+	const { state: { pages, currentPageIndex, currentPageId }, actions: { setCurrentPage } } = useStory();
 	const [ hasHorizontalOverflow, setHasHorizontalOverflow ] = useState( false );
 	const [ isGridViewOpen, setIsGridViewOpen ] = useState( false );
 	const listRef = useRef();
@@ -112,38 +102,6 @@ function Carousel() {
 		} );
 	}, [ listRef ] );
 
-	const getArrangeIndex = ( sourceIndex, dstIndex, position ) => {
-		// If the dropped element is before the dropzone index then we have to deduct
-		// that from the index to make up for the "lost" element in the row.
-		const indexAdjustment = sourceIndex < dstIndex ? -1 : 0;
-		if ( 'left' === position.x ) {
-			return dstIndex + indexAdjustment;
-		}
-		return dstIndex + 1 + indexAdjustment;
-	};
-
-	const onDragStart = useCallback( ( index ) => ( evt ) => {
-		const pageData = {
-			type: 'page',
-			index,
-		};
-		evt.dataTransfer.setData( 'text', JSON.stringify( pageData ) );
-	}, [] );
-
-	const onDrop = ( evt, { position, pageIndex } ) => {
-		const droppedEl = JSON.parse( evt.dataTransfer.getData( 'text' ) );
-		if ( ! droppedEl || 'page' !== droppedEl.type ) {
-			return;
-		}
-		const arrangedIndex = getArrangeIndex( droppedEl.index, pageIndex, position );
-		// Do nothing if the index didn't change.
-		if ( droppedEl.index !== arrangedIndex ) {
-			const pageId = pages[ droppedEl.index ].id;
-			arrangePage( { pageId, position: arrangedIndex } );
-			setCurrentPage( { pageId } );
-		}
-	};
-
 	return (
 		<>
 			<Wrapper>
@@ -159,20 +117,23 @@ function Carousel() {
 				<List area="carousel" ref={ listRef } hasHorizontalOverflow={ hasHorizontalOverflow }>
 					{ pages.map( ( page, index ) => {
 						const isCurrentPage = index === currentPageIndex;
+
 						return (
-							<DropZone key={ index } onDrop={ onDrop } pageIndex={ index } >
-								<Page
-									key={ index }
-									draggable="true"
-									onClick={ handleClickPage( page ) }
-									onDragStart={ onDragStart( index ) }
-									isActive={ isCurrentPage }
-									ref={ ( el ) => {
-										pageRefs.current[ page.id ] = el;
-									} }
-									aria-label={ isCurrentPage ? sprintf( __( 'Page %s (current page)', 'amp' ), index + 1 ) : sprintf( __( 'Go to page %s', 'amp' ), index + 1 ) }
-								/>
-							</DropZone>
+							<DraggablePage
+								key={ index }
+								onClick={ handleClickPage( page ) }
+								ariaLabel={ isCurrentPage ?
+									sprintf( __( 'Page %s (current page)', 'amp' ), index + 1 ) :
+									sprintf( __( 'Go to page %s', 'amp' ), index + 1 )
+								}
+								isActive={ isCurrentPage }
+								pageIndex={ index }
+								ref={ ( el ) => {
+									pageRefs.current[ page.id ] = el;
+								} }
+								width={ PAGE_WIDTH }
+								height={ PAGE_HEIGHT }
+							/>
 						);
 					} ) }
 				</List>

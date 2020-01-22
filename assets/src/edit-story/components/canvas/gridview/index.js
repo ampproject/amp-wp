@@ -7,14 +7,14 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { useCallback, useState } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
 import { useStory } from '../../../app/story';
-import DropZone from '../../dropzone';
+import DraggablePage from '../draggablePage';
 import Rectangle from './rectangle.svg';
 
 const PAGE_WIDTH = 90;
@@ -28,16 +28,6 @@ const Wrapper = styled.div`
 	justify-content: center;
 	justify-items: center;
     align-items: center;
-`;
-
-const Page = styled.button`
-	padding: 0;
-	margin: 0;
-	border: 3px solid ${ ( { isActive, theme } ) => isActive ? theme.colors.selection : theme.colors.bg.v1 };
-	height: ${ ( { scale } ) => `${ scale * PAGE_HEIGHT }px` };
-	width: ${ ( { scale } ) => `${ scale * PAGE_WIDTH }px` };
-	background-color: ${ ( { isActive, theme } ) => isActive ? theme.colors.fg.v1 : theme.colors.mg.v1 };
-	transition: width .2s ease, height .2s ease;
 `;
 
 const RangeInputWrapper = styled.div`
@@ -98,16 +88,21 @@ const RangeInput = styled.input.attrs( () => ( {
 	}
 `;
 
-const RectangleIcon = styled( Rectangle )`
-	width: ${ ( { isLarge } ) => isLarge ? '20px' : '12px' };
-	height: ${ ( { isLarge } ) => isLarge ? '32px' : '20px' };
+const RectangleIcon = styled.div`
 	margin-top: ${ ( { isLarge } ) => isLarge ? '0' : '6px' };
+
+	svg {
+		width: ${ ( { isLarge } ) => isLarge ? '20px' : '12px' };
+		height: ${ ( { isLarge } ) => isLarge ? '32px' : '20px' };
+	}
 `;
 
 function RangeControl( { value, onChange } ) {
 	return (
 		<RangeInputWrapper>
-			<RectangleIcon />
+			<RectangleIcon>
+				<Rectangle />
+			</RectangleIcon>
 			<RangeInput
 				min="1"
 				max="3"
@@ -115,7 +110,9 @@ function RangeControl( { value, onChange } ) {
 				value={ value }
 				onChange={ ( evt ) => onChange( Number( evt.target.value ) ) }
 			/>
-			<RectangleIcon isLarge />
+			<RectangleIcon isLarge>
+				<Rectangle />
+			</RectangleIcon>
 		</RangeInputWrapper>
 	);
 }
@@ -127,40 +124,8 @@ RangeControl.propTypes = {
 
 // TODO: Make drag & drop part DRY.
 function GridView() {
-	const { state: { pages, currentPageIndex }, actions: { setCurrentPage, arrangePage } } = useStory();
+	const { state: { pages, currentPageIndex } } = useStory();
 	const [ zoomLevel, setZoomLevel ] = useState( 2 );
-
-	const getArrangeIndex = ( sourceIndex, dstIndex, position ) => {
-		// If the dropped element is before the dropzone index then we have to deduct
-		// that from the index to make up for the "lost" element in the row.
-		const indexAdjustment = sourceIndex < dstIndex ? -1 : 0;
-		if ( 'left' === position.x ) {
-			return dstIndex + indexAdjustment;
-		}
-		return dstIndex + 1 + indexAdjustment;
-	};
-
-	const onDragStart = useCallback( ( index ) => ( evt ) => {
-		const pageData = {
-			type: 'page',
-			index,
-		};
-		evt.dataTransfer.setData( 'text', JSON.stringify( pageData ) );
-	}, [] );
-
-	const onDrop = ( evt, { position, pageIndex } ) => {
-		const droppedEl = JSON.parse( evt.dataTransfer.getData( 'text' ) );
-		if ( ! droppedEl || 'page' !== droppedEl.type ) {
-			return;
-		}
-		const arrangedIndex = getArrangeIndex( droppedEl.index, pageIndex, position );
-		// Do nothing if the index didn't change.
-		if ( droppedEl.index !== arrangedIndex ) {
-			const pageId = pages[ droppedEl.index ].id;
-			arrangePage( { pageId, position: arrangedIndex } );
-			setCurrentPage( { pageId } );
-		}
-	};
 
 	return (
 		<>
@@ -171,17 +136,19 @@ function GridView() {
 			<Wrapper scale={ zoomLevel }>
 				{ pages.map( ( page, index ) => {
 					const isCurrentPage = index === currentPageIndex;
+
 					return (
-						<DropZone key={ index } onDrop={ onDrop } pageIndex={ index } >
-							<Page
-								key={ index }
-								draggable="true"
-								onDragStart={ onDragStart( index ) }
-								isActive={ isCurrentPage }
-								scale={ zoomLevel }
-								aria-label={ isCurrentPage ? sprintf( __( 'Page %s (current page)', 'amp' ), index + 1 ) : sprintf( __( 'Go to page %s', 'amp' ), index + 1 ) }
-							/>
-						</DropZone>
+						<DraggablePage
+							key={ index }
+							ariaLabel={ isCurrentPage ?
+								sprintf( __( 'Page %s (current page)', 'amp' ), index + 1 ) :
+								sprintf( __( 'Go to page %s', 'amp' ), index + 1 )
+							}
+							isActive={ isCurrentPage }
+							pageIndex={ index }
+							width={ zoomLevel * PAGE_WIDTH }
+							height={ zoomLevel * PAGE_HEIGHT }
+						/>
 					);
 				} ) }
 			</Wrapper>
