@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { useEffect, useState } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, _x } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -60,7 +60,7 @@ function StylePanel( { selectedElements, onSetProperties } ) {
 				value={ state.letterSpacing }
 				isMultiple={ '' === letterSpacing }
 				onChange={ ( value ) => setState( { ...state, letterSpacing: isNaN( value ) ? '' : value } ) }
-				postfix="em"
+				postfix={ _x( 'em', 'em, the measurement of size', 'amp' ) }
 				step="0.1"
 			/>
 			<InputGroup
@@ -68,7 +68,7 @@ function StylePanel( { selectedElements, onSetProperties } ) {
 				value={ state.padding }
 				isMultiple={ '' === padding }
 				onChange={ ( value ) => setState( { ...state, padding: isNaN( value ) ? '' : value } ) }
-				postfix="%"
+				postfix={ _x( '%', 'Percentage', 'amp' ) }
 			/>
 		</Panel>
 	);
