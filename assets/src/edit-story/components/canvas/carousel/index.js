@@ -61,6 +61,7 @@ const GridViewButton = styled( GridView )`
 function Carousel() {
 	const { state: { pages, currentPageIndex, currentPageId }, actions: { setCurrentPage, arrangePage } } = useStory();
 	const [ hasHorizontalOverflow, setHasHorizontalOverflow ] = useState( false );
+	const [ scrollPercentage, setScrollPercentage ] = useState( 0 );
 	const listRef = useRef();
 	const pageRefs = useRef( [] );
 
@@ -69,6 +70,9 @@ function Carousel() {
 			for ( const entry of entries ) {
 				const offsetWidth = entry.contentBoxSize ? entry.contentBoxSize.inlineSize : entry.contentRect.width;
 				setHasHorizontalOverflow( Math.ceil( listRef.current.scrollWidth ) > Math.ceil( offsetWidth ) );
+
+				const max = listRef.current.scrollWidth - offsetWidth;
+				setScrollPercentage( listRef.current.scrollLeft / max );
 			}
 		} );
 
@@ -91,6 +95,21 @@ function Carousel() {
 			} );
 		}
 	}, [ currentPageId, hasHorizontalOverflow, pageRefs ] );
+
+	useLayoutEffect( () => {
+		const listElement = listRef.current;
+
+		const handleScroll = () => {
+			const max = listElement.scrollWidth - listElement.offsetWidth;
+			setScrollPercentage( listElement.scrollLeft / max );
+		};
+
+		listElement.addEventListener( 'scroll', handleScroll, { passive: true } );
+
+		return () => {
+			listElement.removeEventListener( 'scroll', handleScroll );
+		};
+	}, [ hasHorizontalOverflow ] );
 
 	const handleClickPage = ( page ) => () => setCurrentPage( { pageId: page.id } );
 
@@ -138,11 +157,14 @@ function Carousel() {
 		}
 	};
 
+	const isAtBeginningOfList = 0 === scrollPercentage;
+	const isAtEndOfList = 1 === scrollPercentage;
+
 	return (
 		<Wrapper>
 			<Area area="left-navigation">
 				<LeftArrow
-					isHidden={ ! hasHorizontalOverflow }
+					isHidden={ ! hasHorizontalOverflow || isAtBeginningOfList }
 					onClick={ () => scrollBy( -( 2 * PAGE_WIDTH ) ) }
 					width="24"
 					height="24"
@@ -171,7 +193,7 @@ function Carousel() {
 			</List>
 			<Area area="right-navigation">
 				<RightArrow
-					isHidden={ ! hasHorizontalOverflow }
+					isHidden={ ! hasHorizontalOverflow || isAtEndOfList }
 					onClick={ () => scrollBy( ( 2 * PAGE_WIDTH ) ) }
 					width="24"
 					height="24"
