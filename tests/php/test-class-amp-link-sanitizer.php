@@ -64,25 +64,25 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 			'non_amp_to_amp_rel'  => [
 				'href'         => $post_link,
 				'expected_amp' => false,
-				'rel'          => 'not-amphtml',
+				'rel'          => 'noamphtml',
 				'expected_rel' => null,
 			],
 			'two_rel'             => [
 				'href'         => $post_link,
 				'expected_amp' => false,
-				'rel'          => 'help not-amphtml',
+				'rel'          => 'help noamphtml',
 				'expected_rel' => 'help',
 			],
 			'multiple_rel'        => [
 				'href'         => $post_link,
 				'expected_amp' => false,
-				'rel'          => 'not-amphtml nofollow help',
+				'rel'          => 'noamphtml nofollow help',
 				'expected_rel' => 'nofollow help',
 			],
 			'rel_trailing_space'  => [
 				'href'         => $post_link,
 				'expected_amp' => false,
-				'rel'          => 'not-amphtml ',
+				'rel'          => 'noamphtml ',
 				'expected_rel' => null,
 			],
 			'excluded_amp_link'   => [
@@ -114,7 +114,7 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 			'non_amp_rel_removed' => [
 				'href'         => 'https://external.example.com/',
 				'expected_amp' => false,
-				'rel'          => 'not-amphtml',
+				'rel'          => 'noamphtml',
 				'expected_rel' => null,
 			],
 			'php-file-link'       => [
