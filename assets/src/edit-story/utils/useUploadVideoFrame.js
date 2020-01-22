@@ -60,6 +60,9 @@ function useUploadVideoFrame( videoId, src, id ) {
 				.then( ( { id: posterId, source_url: url } ) => {
 					saveMedia( videoId, {
 						featured_media: posterId,
+						meta: {
+							amp_is_poster: true,
+						},
 					} ).then( () => {
 						const newState = { featuredMedia: posterId, featuredMediaSrc: url };
 						setProperties( newState );
