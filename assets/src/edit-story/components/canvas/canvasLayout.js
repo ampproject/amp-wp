@@ -40,26 +40,27 @@ const Area = styled.div`
 `;
 
 function CanvasLayout() {
+	// @todo SelectionCanvas should not be there, will be addressed separately.
 	return (
-		<SelectionCanvas>
-			<Background>
-				<Area area="page">
+		<Background>
+			<Area area="page">
+				<SelectionCanvas>
 					<Page />
-				</Area>
-				<Area area="menu">
-					<PageMenu />
-				</Area>
-				<Area area="prev">
-					<PageNav isNext={ false } />
-				</Area>
-				<Area area="next">
-					<PageNav />
-				</Area>
-				<Area area="carousel">
-					<Carousel />
-				</Area>
-			</Background>
-		</SelectionCanvas>
+				</SelectionCanvas>
+			</Area>
+			<Area area="menu">
+				<PageMenu />
+			</Area>
+			<Area area="prev">
+				<PageNav isNext={ false } />
+			</Area>
+			<Area area="next">
+				<PageNav />
+			</Area>
+			<Area area="carousel">
+				<Carousel />
+			</Area>
+		</Background>
 	);
 }
 

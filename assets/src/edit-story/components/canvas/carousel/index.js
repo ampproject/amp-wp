@@ -15,6 +15,7 @@ import { __, sprintf } from '@wordpress/i18n';
  */
 import { useStory } from '../../../app';
 import { LeftArrow, RightArrow, GridView } from '../../button';
+import DropZone from '../../dropzone';
 
 const PAGE_WIDTH = 72;
 const PAGE_HEIGHT = 128;
@@ -58,7 +59,7 @@ const GridViewButton = styled( GridView )`
 `;
 
 function Carousel() {
-	const { state: { pages, currentPageIndex, currentPageId }, actions: { setCurrentPage } } = useStory();
+	const { state: { pages, currentPageIndex, currentPageId }, actions: { setCurrentPage, arrangePage } } = useStory();
 	const [ hasHorizontalOverflow, setHasHorizontalOverflow ] = useState( false );
 	const [ scrollPercentage, setScrollPercentage ] = useState( 0 );
 	const listRef = useRef();
@@ -124,6 +125,38 @@ function Carousel() {
 		} );
 	}, [ listRef ] );
 
+	const getArrangeIndex = ( sourceIndex, dstIndex, position ) => {
+		// If the dropped element is before the dropzone index then we have to deduct
+		// that from the index to make up for the "lost" element in the row.
+		const indexAdjustment = sourceIndex < dstIndex ? -1 : 0;
+		if ( 'left' === position.x ) {
+			return dstIndex + indexAdjustment;
+		}
+		return dstIndex + 1 + indexAdjustment;
+	};
+
+	const onDragStart = useCallback( ( index ) => ( evt ) => {
+		const pageData = {
+			type: 'page',
+			index,
+		};
+		evt.dataTransfer.setData( 'text', JSON.stringify( pageData ) );
+	}, [] );
+
+	const onDrop = ( evt, { position, pageIndex } ) => {
+		const droppedEl = JSON.parse( evt.dataTransfer.getData( 'text' ) );
+		if ( ! droppedEl || 'page' !== droppedEl.type ) {
+			return;
+		}
+		const arrangedIndex = getArrangeIndex( droppedEl.index, pageIndex, position );
+		// Do nothing if the index didn't change.
+		if ( droppedEl.index !== arrangedIndex ) {
+			const pageId = pages[ droppedEl.index ].id;
+			arrangePage( { pageId, position: arrangedIndex } );
+			setCurrentPage( { pageId } );
+		}
+	};
+
 	return (
 		<Wrapper>
 			<Area area="left-navigation">
@@ -139,15 +172,19 @@ function Carousel() {
 				{ pages.map( ( page, index ) => {
 					const isCurrentPage = index === currentPageIndex;
 					return (
-						<Page
-							key={ index }
-							onClick={ handleClickPage( page ) }
-							isActive={ isCurrentPage }
-							ref={ ( el ) => {
-								pageRefs.current[ page.id ] = el;
-							} }
-							aria-label={ isCurrentPage ? sprintf( __( 'Page %s (current page)', 'amp' ), index + 1 ) : sprintf( __( 'Go to page %s', 'amp' ), index + 1 ) }
-						/>
+						<DropZone key={ index } onDrop={ onDrop } pageIndex={ index } >
+							<Page
+								key={ index }
+								draggable="true"
+								onClick={ handleClickPage( page ) }
+								onDragStart={ onDragStart( index ) }
+								isActive={ isCurrentPage }
+								ref={ ( el ) => {
+									pageRefs.current[ page.id ] = el;
+								} }
+								aria-label={ isCurrentPage ? sprintf( __( 'Page %s (current page)', 'amp' ), index + 1 ) : sprintf( __( 'Go to page %s', 'amp' ), index + 1 ) }
+							/>
+						</DropZone>
 					);
 				} ) }
 			</List>
