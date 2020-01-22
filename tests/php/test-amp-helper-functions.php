@@ -784,7 +784,10 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		// Check that AMP_Dev_Mode_Sanitizer is registered once in dev mode, and now also with admin bar showing.
 		add_filter( 'amp_dev_mode_enabled', '__return_true' );
 		add_filter( 'show_admin_bar', '__return_true' );
-		$sanitizers = amp_get_content_sanitizers();
+		wp_localize_script( 'admin-bar', 'myAdminBarStrings', [ 'hello' => 'world' ] );
+		wp_scripts()->done[] = 'admin-bar';
+		wp_styles()->done[]  = 'admin-bar';
+		$sanitizers          = amp_get_content_sanitizers();
 		$this->assertTrue( is_admin_bar_showing() );
 		$this->assertTrue( amp_is_dev_mode() );
 		$this->assertArrayHasKey( 'AMP_Dev_Mode_Sanitizer', $sanitizers );
@@ -794,6 +797,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 				[
 					'//*[ @id = "wpadminbar" ]',
 					'//*[ @id = "wpadminbar" ]//*',
+					'//script[ not( @src ) ][ contains( text(), "var myAdminBarStrings =" ) ]',
 					'//style[ @id = "admin-bar-inline-css" ]',
 				]
 			),

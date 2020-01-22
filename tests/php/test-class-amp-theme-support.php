@@ -996,6 +996,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::add_hooks()
 	 */
 	public function test_add_hooks() {
+		add_theme_support( 'amp' );
+		$this->go_to( '/' );
 		AMP_Theme_Support::add_hooks();
 		$this->assertFalse( has_action( 'wp_head', 'wp_post_preview_js' ) );
 		$this->assertFalse( has_action( 'wp_head', 'wp_oembed_add_host_js' ) );
@@ -1016,6 +1018,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'customize_partial_render', [ self::TESTED_CLASS, 'filter_customize_partial_render' ] ) );
 		$this->assertEquals( 10, has_action( 'wp_footer', 'amp_print_analytics' ) );
 		$this->assertEquals( 10, has_action( 'admin_bar_init', [ self::TESTED_CLASS, 'init_admin_bar' ] ) );
+		$this->assertEquals( 10, has_filter( 'style_loader_tag', [ 'AMP_Theme_Support', 'filter_style_loader_tag_for_dev_mode' ] ) );
+		$this->assertEquals( 10, has_filter( 'script_loader_tag', [ 'AMP_Theme_Support', 'filter_script_loader_tag_for_dev_mode' ] ) );
 		$priority = defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX; // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
 		$this->assertEquals( $priority, has_action( 'template_redirect', [ self::TESTED_CLASS, 'start_output_buffering' ] ) );
 
@@ -1237,8 +1241,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * Test init_admin_bar.
 	 *
 	 * @covers \AMP_Theme_Support::init_admin_bar()
-	 * @covers \AMP_Theme_Support::filter_admin_bar_style_loader_tag()
-	 * @covers \AMP_Theme_Support::filter_admin_bar_script_loader_tag()
+	 * @covers \AMP_Theme_Support::filter_style_loader_tag_for_dev_mode()
+	 * @covers \AMP_Theme_Support::filter_script_loader_tag_for_dev_mode()
 	 */
 	public function test_init_admin_bar() {
 		require_once ABSPATH . WPINC . '/class-wp-admin-bar.php';
@@ -1269,8 +1273,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'wp_head', $callback ) );
 
 		AMP_Theme_Support::init_admin_bar();
-		$this->assertEquals( 10, has_filter( 'style_loader_tag', [ 'AMP_Theme_Support', 'filter_admin_bar_style_loader_tag' ] ) );
-		$this->assertEquals( 10, has_filter( 'script_loader_tag', [ 'AMP_Theme_Support', 'filter_admin_bar_script_loader_tag' ] ) );
+		AMP_Theme_Support::add_hooks();
 		$this->assertFalse( has_action( 'wp_head', $callback ) );
 		ob_start();
 		wp_print_styles();
@@ -1309,8 +1312,15 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 */
 	public function assert_dev_mode_is_on_queried_element( DOMXPath $xpath, $query ) {
 		$element = $xpath->query( $query )->item( 0 );
-		$this->assertInstanceOf( 'DOMElement', $element, 'Expected element for query: ' . $query );
-		$this->assertTrue( $element->hasAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE ), 'Expected dev mode to be enabled on element for query: ' . $query );
+		$this->assertInstanceOf(
+			'DOMElement',
+			$element,
+			'Expected element for query: ' . $query . "\nDocument: " . $xpath->document->saveHTML()
+		);
+		$this->assertTrue(
+			$element->hasAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE ),
+			'Expected dev mode to be enabled on element for query: ' . $query . "\nDocument: " . $xpath->document->saveHTML()
+		);
 	}
 
 	/**
@@ -1321,12 +1331,19 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 */
 	public function assert_dev_mode_is_not_on_queried_element( DOMXPath $xpath, $query ) {
 		$element = $xpath->query( $query )->item( 0 );
-		$this->assertInstanceOf( 'DOMElement', $element, 'Expected element for query: ' . $query );
-		$this->assertFalse( $element->hasAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE ), 'Expected dev mode to not be enabled on element for query: ' . $query );
+		$this->assertInstanceOf(
+			'DOMElement',
+			$element,
+			'Expected element for query: ' . $query . "\nDocument: " . $xpath->document->saveHTML()
+		);
+		$this->assertFalse(
+			$element->hasAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE ),
+			'Expected dev mode to not be enabled on element for query: ' . $query . "\nDocument: " . $xpath->document->saveHTML()
+		);
 	}
 
 	/**
-	 * Get data to test AMP_Theme_Support::filter_admin_bar_style_loader_tag().
+	 * Get data to test AMP_Theme_Support::filter_style_loader_tag_for_dev_mode().
 	 *
 	 * @return array
 	 */
@@ -1335,10 +1352,12 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			'admin_bar_exclusively_dependent'             => [
 				static function () {
 					wp_enqueue_style( 'example-admin-bar', 'https://example.com/example-admin-bar.css', [ 'admin-bar' ], '0.1' );
+					wp_add_inline_style( 'example-admin-bar', '#wpadminbar:after { content: "Hey admin!" }' );
 				},
 				function ( DOMXPath $xpath ) {
 					$this->assert_dev_mode_is_on_queried_element( $xpath, '//link[ @id = "example-admin-bar-css" ]' );
 					$this->assert_dev_mode_is_on_queried_element( $xpath, '//link[ @id = "dashicons-css" ]' );
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//style[ @id = "example-admin-bar-inline-css" ]' );
 				},
 			],
 
@@ -1392,14 +1411,30 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 					$this->assert_dev_mode_is_on_queried_element( $xpath, '//link[ @id = "dashicons-css" ]' );
 				},
 			],
+
+			'styles_have_dev_mode_when_flagged'           => [
+				static function () {
+					wp_enqueue_style( 'custom-style', 'https://example.com/custom-style.css', [], '1.0', false );
+					wp_add_inline_style( 'custom-style', '/* inline-custom-style */' );
+					wp_style_add_data( 'custom-style', 'ampdevmode', true );
+
+					wp_enqueue_style( 'excluded-style', 'https://example.com/excluded-style.js', [], '1.0', false );
+				},
+				function ( DOMXPath $xpath ) {
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//link[ contains( @href, "/custom-style" ) ]' );
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//style[ @id = "custom-style-inline-css" ]' );
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//style[ contains( text(), "inline-custom-style" ) ]' );
+					$this->assert_dev_mode_is_not_on_queried_element( $xpath, '//link[ contains( @href, "/excluded-style" ) ]' );
+				},
+			],
 		];
 	}
 
 	/**
-	 * Test filter_admin_bar_style_loader_tag.
+	 * Test filter_style_loader_tag_for_dev_mode.
 	 *
 	 * @dataProvider get_data_to_test_filtering_admin_bar_style_loader_tag_data
-	 * @covers \AMP_Theme_Support::filter_admin_bar_style_loader_tag()
+	 * @covers \AMP_Theme_Support::filter_style_loader_tag_for_dev_mode()
 	 * @covers \AMP_Theme_Support::is_exclusively_dependent()
 	 *
 	 * @param callable $setup_callback  Setup callback.
@@ -1409,7 +1444,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		add_theme_support( 'amp' );
 		$this->go_to( '/' );
 		add_filter( 'amp_dev_mode_enabled', '__return_true' );
-		add_filter( 'style_loader_tag', [ 'AMP_Theme_Support', 'filter_admin_bar_style_loader_tag' ], 10, 2 );
+		add_filter( 'style_loader_tag', [ 'AMP_Theme_Support', 'filter_style_loader_tag_for_dev_mode' ], 10, 2 );
 		$setup_callback();
 		ob_start();
 		echo '<html><head>';
@@ -1417,14 +1452,20 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		echo '</head><body></body></html>';
 		$output = ob_get_clean();
 
-		$dom = new DOMDocument();
+		$dom = new Document();
 		$dom->loadHTML( $output );
+
+		AMP_Content_Sanitizer::sanitize_document(
+			$dom,
+			wp_array_slice_assoc( amp_get_content_sanitizers(), [ 'AMP_Dev_Mode_Sanitizer' ] ),
+			[ 'use_document_element' => true ]
+		);
 
 		$assert_callback( new DOMXPath( $dom ) );
 	}
 
 	/**
-	 * Get data to test AMP_Theme_Support::filter_admin_bar_script_loader_tag().
+	 * Get data to test AMP_Theme_Support::filter_script_loader_tag_for_dev_mode().
 	 *
 	 * @return array
 	 */
@@ -1434,10 +1475,16 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 				static function () {
 					wp_enqueue_script( 'admin-bar' );
 					wp_enqueue_script( 'example-admin-bar', 'https://example.com/example-admin-bar.js', [ 'admin-bar' ], '0.1', false );
+					wp_add_inline_script( 'example-admin-bar', '/* inline-example-admin-bar-before */', 'before' );
+					wp_add_inline_script( 'example-admin-bar', '/* inline-example-admin-bar-after */', 'after' );
+					wp_localize_script( 'example-admin-bar', 'exampleAdminBar', [ 'hello' => 'world' ] );
 				},
 				function ( DOMXPath $xpath ) {
 					$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/example-admin-bar" ) ]' );
 					$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/admin-bar" ) ]' );
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( text(), "inline-example-admin-bar-before" ) ]' );
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( text(), "inline-example-admin-bar-after" ) ]' );
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( text(), "exampleAdminBar" ) ]' );
 					if ( wp_script_is( 'hoverintent-js', 'registered' ) ) {
 						$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/hoverintent-js" ) ]' );
 					}
@@ -1492,14 +1539,33 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 					$this->assert_dev_mode_is_not_on_queried_element( $xpath, '//script[ contains( @src, "/hoverintent-js" ) ]' );
 				},
 			],
+
+			'scripts_have_dev_mode_when_flagged'     => [
+				static function () {
+					wp_enqueue_script( 'custom-script', 'https://example.com/custom-script.js', [], '1.0', false );
+					wp_add_inline_script( 'custom-script', '/* inline-custom-script-before */', 'before' );
+					wp_add_inline_script( 'custom-script', '/* inline-custom-script-after */', 'after' );
+					wp_localize_script( 'custom-script', 'customScript', [ 'hello' => 'world' ] );
+					wp_script_add_data( 'custom-script', 'ampdevmode', true );
+
+					wp_enqueue_script( 'excluded-script', 'https://example.com/excluded-script.js', [], '1.0', false );
+				},
+				function ( DOMXPath $xpath ) {
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/custom-script" ) ]' );
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( text(), "inline-custom-script-before" ) ]' );
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( text(), "inline-custom-script-after" ) ]' );
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( text(), "customScript" ) ]' );
+					$this->assert_dev_mode_is_not_on_queried_element( $xpath, '//script[ contains( @src, "/excluded-script" ) ]' );
+				},
+			],
 		];
 	}
 
 	/**
-	 * Test filter_admin_bar_script_loader_tag.
+	 * Test filter_script_loader_tag_for_dev_mode.
 	 *
 	 * @dataProvider get_data_to_test_filtering_admin_bar_script_loader_tag_data
-	 * @covers \AMP_Theme_Support::filter_admin_bar_script_loader_tag()
+	 * @covers \AMP_Theme_Support::filter_script_loader_tag_for_dev_mode()
 	 * @covers \AMP_Theme_Support::is_exclusively_dependent()
 	 *
 	 * @param callable $setup_callback  Setup callback.
@@ -1509,7 +1575,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		add_theme_support( 'amp' );
 		$this->go_to( '/' );
 		add_filter( 'amp_dev_mode_enabled', '__return_true' );
-		add_filter( 'script_loader_tag', [ 'AMP_Theme_Support', 'filter_admin_bar_script_loader_tag' ], 10, 2 );
+		add_filter( 'script_loader_tag', [ 'AMP_Theme_Support', 'filter_script_loader_tag_for_dev_mode' ], 10, 2 );
 		$setup_callback();
 		ob_start();
 		echo '<html><head>';
@@ -1519,8 +1585,14 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		echo '</body></html>';
 		$output = ob_get_clean();
 
-		$dom = new DOMDocument();
-		@$dom->loadHTML( $output ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+		$dom = new Document();
+		$dom->loadHTML( $output );
+
+		AMP_Content_Sanitizer::sanitize_document(
+			$dom,
+			wp_array_slice_assoc( amp_get_content_sanitizers(), [ 'AMP_Dev_Mode_Sanitizer' ] ),
+			[ 'use_document_element' => true ]
+		);
 
 		$assert_callback( new DOMXPath( $dom ) );
 	}
@@ -1529,15 +1601,18 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * Test init_admin_bar to ensure dashicons are not added to dev mode when directly enqueued.
 	 *
 	 * @covers \AMP_Theme_Support::init_admin_bar()
-	 * @covers \AMP_Theme_Support::filter_admin_bar_style_loader_tag()
+	 * @covers \AMP_Theme_Support::filter_style_loader_tag_for_dev_mode()
 	 */
 	public function test_init_admin_bar_for_directly_enqueued_dashicons() {
+		add_theme_support( 'amp' );
+		$this->go_to( '/' );
 		require_once ABSPATH . WPINC . '/class-wp-admin-bar.php';
 
 		global $wp_admin_bar;
 		$wp_admin_bar = new WP_Admin_Bar();
 		$wp_admin_bar->initialize();
 		AMP_Theme_Support::init_admin_bar();
+		AMP_Theme_Support::add_hooks();
 
 		// Enqueued directly.
 		wp_enqueue_style( 'dashicons' );
@@ -1555,15 +1630,18 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * Test init_admin_bar to ensure dashicons are not added to dev mode when indirectly enqueued.
 	 *
 	 * @covers \AMP_Theme_Support::init_admin_bar()
-	 * @covers \AMP_Theme_Support::filter_admin_bar_style_loader_tag()
+	 * @covers \AMP_Theme_Support::filter_style_loader_tag_for_dev_mode()
 	 */
 	public function test_init_admin_bar_for_indirectly_enqueued_dashicons() {
+		add_theme_support( 'amp' );
+		$this->go_to( '/' );
 		require_once ABSPATH . WPINC . '/class-wp-admin-bar.php';
 
 		global $wp_admin_bar;
 		$wp_admin_bar = new WP_Admin_Bar();
 		$wp_admin_bar->initialize();
 		AMP_Theme_Support::init_admin_bar();
+		AMP_Theme_Support::add_hooks();
 
 		// Enqueued indirectly.
 		wp_enqueue_style( 'my-font-pack', 'https://example.com/fonts', [ 'dashicons' ], '0.1' );
