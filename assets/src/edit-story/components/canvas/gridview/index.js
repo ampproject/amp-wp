@@ -15,7 +15,7 @@ import { __, sprintf } from '@wordpress/i18n';
  */
 import { useStory } from '../../../app/story';
 import DraggablePage from '../draggablePage';
-import Rectangle from './rectangle.svg';
+import RectangleIcon from './rectangle.svg';
 
 const PAGE_WIDTH = 90;
 const PAGE_HEIGHT = 160;
@@ -27,13 +27,14 @@ const Wrapper = styled.div`
 	grid-gap: 20px;
 	justify-content: center;
 	justify-items: center;
-    align-items: center;
+	align-items: center;
 `;
 
 const RangeInputWrapper = styled.div`
 	display: flex;
-	width: 440px;
-	margin: 0 auto 75px;
+	justify-content: center;
+	width: 100%;
+	margin-bottom: 75px;
 `;
 
 const rangeThumb = css`
@@ -59,7 +60,7 @@ const RangeInput = styled.input.attrs( () => ( {
 	background: transparent;
 	display: block;
 	width: 360px;
-	margin: 0 auto;
+	margin: 0 20px;
 
 	&::-webkit-slider-thumb {
 		${ rangeThumb }
@@ -88,21 +89,26 @@ const RangeInput = styled.input.attrs( () => ( {
 	}
 `;
 
-const RectangleIcon = styled.div`
-	margin-top: ${ ( { isLarge } ) => isLarge ? '0' : '6px' };
+const Rectangle = styled.div`
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-size: 32px;
+	color: ${ ( { theme } ) => theme.colors.fg.v1 };
 
 	svg {
 		width: ${ ( { isLarge } ) => isLarge ? '20px' : '12px' };
-		height: ${ ( { isLarge } ) => isLarge ? '32px' : '20px' };
+		height: auto;
+		shape-rendering:crispEdges; /* prevents issues with anti-aliasing */
 	}
 `;
 
 function RangeControl( { value, onChange } ) {
 	return (
 		<RangeInputWrapper>
-			<RectangleIcon>
-				<Rectangle />
-			</RectangleIcon>
+			<Rectangle>
+				<RectangleIcon />
+			</Rectangle>
 			<RangeInput
 				min="1"
 				max="3"
@@ -110,9 +116,9 @@ function RangeControl( { value, onChange } ) {
 				value={ value }
 				onChange={ ( evt ) => onChange( Number( evt.target.value ) ) }
 			/>
-			<RectangleIcon isLarge>
-				<Rectangle />
-			</RectangleIcon>
+			<Rectangle isLarge>
+				<RectangleIcon />
+			</Rectangle>
 		</RangeInputWrapper>
 	);
 }
