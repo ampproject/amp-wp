@@ -17,12 +17,13 @@ use DOMElement;
  * This is ported from the NodeJS optimizer while verifying against the Go version.
  *
  * NodeJS:
+ *
  * @version c92d6023ea4c9edadff593742a992da2b400a75d
- * @link https://github.com/ampproject/amp-toolbox/blob/c92d6023ea4c9edadff593742a992da2b400a75d/packages/optimizer/lib/transformers/ServerSideRendering.js
+ * @link    https://github.com/ampproject/amp-toolbox/blob/c92d6023ea4c9edadff593742a992da2b400a75d/packages/optimizer/lib/transformers/ServerSideRendering.js
  *
  * Go:
  * @version ea0959046c179953de43077eafaeb720f9b20bdf
- * @link https://github.com/ampproject/amppackager/blob/ea0959046c179953de43077eafaeb720f9b20bdf/transformer/transformers/transformedidentifier.go
+ * @link    https://github.com/ampproject/amppackager/blob/ea0959046c179953de43077eafaeb720f9b20bdf/transformer/transformers/transformedidentifier.go
  *
  * @package Amp\Optimizer
  */
@@ -114,7 +115,9 @@ final class ServerSideRendering implements Transformer
         $document->head->insertBefore($ampRuntimeMarker, $document->head->hasChildNodes() ? $document->head->firstChild : null);
 
         foreach ($document->xpath->query('.//script[ @custom-element ]', $document->head) as $customElementScript) {
-            if (Extension::isRenderDelayingExtension($customElementScript)) {
+            // amp-experiment is a render delaying extension iff the tag is used in the doc, which we checked for above.
+            if ($customElementScript->getAttribute(Extension::CUSTOM_ELEMENT) !== Extension::EXPERIMENT
+                && Extension::isRenderDelayingExtension($customElementScript)) {
                 $errors->add(Error\CannotRemoveBoilerplate::fromRenderDelayingScript($customElementScript));
                 $canRemoveBoilerplate = false;
             }
@@ -165,7 +168,6 @@ final class ServerSideRendering implements Transformer
 
         return false;
     }
-
 
     /**
      * Apply the adequate layout to a custom element.

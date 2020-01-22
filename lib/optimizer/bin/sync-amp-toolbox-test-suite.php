@@ -42,26 +42,6 @@ function ensureDirExists($directory)
     }
 }
 
-function filterSpecFile($targetName, $contents) {
-    if ( substr( $targetName, -5 ) !== '.html' ) {
-        return $contents;
-    }
-
-    switch( basename( $targetName ) ) {
-        case 'input.html':
-            break;
-        case 'expected_output.html':
-            // Don't use empty value for some tags.
-            $contents = preg_replace( '/(⚡|async|amp-boilerplate)=""/', '\1', $contents );
-            // DOMDocument always adds double quotes around attributes.
-            $contents = preg_replace( '/(\s+[a-zA-Z-_]+)=(?!")([a-zA-Z-_.]+)/', '\1="\2"', $contents );
-            break;
-        default:
-    }
-
-    return $contents;
-}
-
 ensureDirExists($targetFolder);
 
 $tmpFile = fopen($tmpFilePath, 'wb');
@@ -111,8 +91,6 @@ for ($index = 0; $index < $zip->numFiles; $index++) {
     while (! feof($targetFile)) {
         $contents .= fread($targetFile, 2);
     }
-
-    $contents = filterSpecFile($targetName, $contents);
 
     fclose($targetFile);
     file_put_contents($targetPath, $contents);

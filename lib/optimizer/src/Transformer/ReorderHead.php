@@ -2,7 +2,6 @@
 
 namespace Amp\Optimizer\Transformer;
 
-use Amp\Amp;
 use Amp\Dom\Document;
 use Amp\Extension;
 use Amp\Optimizer\ErrorCollection;
@@ -74,8 +73,9 @@ final class ReorderHead implements Transformer
             return;
         }
 
-        foreach ($nodes as $node) {
-            $this->registerNode($document->head->removeChild($node));
+        while ($document->head->hasChildNodes()) {
+            $node = $document->head->removeChild($document->head->firstChild);
+            $this->registerNode($node);
         }
 
         $this->deduplicateAndSortCustomNodes();
@@ -90,6 +90,12 @@ final class ReorderHead implements Transformer
     private function registerNode(DOMNode $node)
     {
         if (! $node instanceof DOMElement) {
+            if ($node->nodeType === XML_TEXT_NODE) {
+                $nodeContent = trim($node->textContent);
+                if (empty($nodeContent)) {
+                    return;
+                }
+            }
             $this->others[] = $node;
             return;
         }
@@ -145,7 +151,7 @@ final class ReorderHead implements Transformer
             return;
         }
 
-        if ($node->hasAttribute(Amp::CUSTOM_ELEMENT)) {
+        if ($node->hasAttribute(Extension::CUSTOM_ELEMENT)) {
             if (Extension::isRenderDelayingExtension($node)) {
                 $this->scriptRenderDelayingExtensions[] = $node;
                 return;
@@ -154,7 +160,7 @@ final class ReorderHead implements Transformer
             return;
         }
 
-        if ($node->hasAttribute(Amp::CUSTOM_TEMPLATE)) {
+        if ($node->hasAttribute(Extension::CUSTOM_TEMPLATE)) {
             $this->scriptNonRenderDelayingExtensions[] = $node;
             return;
         }
@@ -200,27 +206,28 @@ final class ReorderHead implements Transformer
                 $href = $node->getAttribute('href');
                 if ($href && substr($href, -7) === '/v0.css') {
                     $this->linkStyleAmpRuntime = $node;
-                    break;
+                    return;
                 }
                 if (! $this->styleAmpCustom) {
                     // We haven't seen amp-custom yet.
                     $this->linkStylesheetsBeforeAmpCustom[] = $node;
+                    return;
                 }
                 break;
             case 'icon':
             case 'shortcut icon':
             case 'icon shortcut':
                 $this->linkIcons[] = $node;
-                break;
+                return;
             case 'preload':
             case 'prefetch':
             case 'dns-prefetch':
             case 'preconnect':
                 $this->resourceHintLinks[] = $node;
-                break;
-            default:
-                $this->others[] = $node;
+                return;
         }
+
+        $this->others[] = $node;
     }
 
     /**
@@ -231,12 +238,12 @@ final class ReorderHead implements Transformer
      */
     private function getName(DOMElement $node)
     {
-        if ($node->hasAttribute(Amp::CUSTOM_ELEMENT)) {
-            return $node->getAttribute(Amp::CUSTOM_ELEMENT);
+        if ($node->hasAttribute(Extension::CUSTOM_ELEMENT)) {
+            return $node->getAttribute(Extension::CUSTOM_ELEMENT);
         }
 
-        if ($node->hasAttribute(Amp::CUSTOM_TEMPLATE)) {
-            return $node->getAttribute(Amp::CUSTOM_TEMPLATE);
+        if ($node->hasAttribute(Extension::CUSTOM_TEMPLATE)) {
+            return $node->getAttribute(Extension::CUSTOM_TEMPLATE);
         }
 
         return '';
@@ -271,8 +278,12 @@ final class ReorderHead implements Transformer
                 continue;
             }
 
-            foreach ((array)$this->$category as $node) {
-                $head->appendChild($node);
+            if ($this->$category instanceof DOMNode) {
+                $head->appendChild($this->$category);
+            } elseif (is_array($this->$category)) {
+                foreach ($this->$category as $node) {
+                    $head->appendChild($node);
+                }
             }
         }
     }

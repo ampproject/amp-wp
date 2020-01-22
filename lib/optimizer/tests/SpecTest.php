@@ -59,6 +59,6 @@ final class SpecTest extends TestCase
 
         $transformer->transform($document, $errors);
 
-        $this->assertEqualMarkup($expected, $document->saveHTMLFragment());
+        $this->assertSimilarMarkup($expected, $document->saveHTMLFragment());
     }
 }
