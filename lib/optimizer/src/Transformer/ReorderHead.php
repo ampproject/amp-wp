@@ -2,6 +2,7 @@
 
 namespace Amp\Optimizer\Transformer;
 
+use Amp\Amp;
 use Amp\Dom\Document;
 use Amp\Extension;
 use Amp\Optimizer\ErrorCollection;
@@ -138,13 +139,13 @@ final class ReorderHead implements Transformer
     {
         // Currently there are two amp engine tags: v0.js and amp4ads-v0.js.
         // According to validation rules they are the only script tags with a src attribute and do not have attributes
-        // custom-node or custom-template. Record the amp engine tag so it can be emitted first among script tags.
+        // custom-element or custom-template. Record the amp engine tag so it can be emitted first among script tags.
         if ($node->hasAttribute('src') && ! $this->getName($node)) {
             $this->scriptAmpEngine = $node;
             return;
         }
 
-        if ($node->hasAttribute('custom-node')) {
+        if ($node->hasAttribute(Amp::CUSTOM_ELEMENT)) {
             if (Extension::isRenderDelayingExtension($node)) {
                 $this->scriptRenderDelayingExtensions[] = $node;
                 return;
@@ -153,7 +154,7 @@ final class ReorderHead implements Transformer
             return;
         }
 
-        if ($node->hasAttribute('custom-template')) {
+        if ($node->hasAttribute(Amp::CUSTOM_TEMPLATE)) {
             $this->scriptNonRenderDelayingExtensions[] = $node;
             return;
         }
@@ -230,12 +231,12 @@ final class ReorderHead implements Transformer
      */
     private function getName(DOMElement $node)
     {
-        if ($node->hasAttribute('custom-node')) {
-            return $node->getAttribute('custom-node');
+        if ($node->hasAttribute(Amp::CUSTOM_ELEMENT)) {
+            return $node->getAttribute(Amp::CUSTOM_ELEMENT);
         }
 
-        if ($node->hasAttribute('custom-template')) {
-            return $node->getAttribute('custom-template');
+        if ($node->hasAttribute(Amp::CUSTOM_TEMPLATE)) {
+            return $node->getAttribute(Amp::CUSTOM_TEMPLATE);
         }
 
         return '';

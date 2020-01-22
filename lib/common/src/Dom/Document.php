@@ -181,8 +181,8 @@ final class Document extends DOMDocument
         'img',
         'input',
         'keygen',
-        'link',
-        'meta',
+        Tag::LINK,
+        Tag::META,
         'param',
         'source',
         'track',
@@ -200,11 +200,11 @@ final class Document extends DOMDocument
     const ELEMENTS_ALLOWED_IN_HEAD = [
         'title',
         'base',
-        'link',
-        'meta',
-        'style',
+        Tag::LINK,
+        Tag::META,
+        Tag::STYLE,
         'noscript',
-        'script',
+        Tag::SCRIPT,
     ];
 
     /**
@@ -414,7 +414,7 @@ final class Document extends DOMDocument
             // Remove http-equiv charset again.
             $meta = $this->head->firstChild;
             if (
-                'meta' === $meta->tagName
+                Tag::META === $meta->tagName
                 && self::HTML_HTTP_EQUIV_VALUE === $meta->getAttribute('http-equiv')
                 && (self::HTML_HTTP_EQUIV_CONTENT_VALUE) === $meta->getAttribute('content')
             ) {
@@ -450,7 +450,7 @@ final class Document extends DOMDocument
 
         // Force-add http-equiv charset to make DOMDocument behave as it should.
         // See: http://php.net/manual/en/domdocument.loadhtml.php#78243.
-        $charset = $this->createElement('meta');
+        $charset = $this->createElement(Tag::META);
         $charset->setAttribute('http-equiv', self::HTML_HTTP_EQUIV_VALUE);
         $charset->setAttribute('content', self::HTML_HTTP_EQUIV_CONTENT_VALUE);
         $this->head->insertBefore($charset, $this->head->firstChild);
@@ -488,7 +488,7 @@ final class Document extends DOMDocument
             return;
         }
 
-        $charset = $this->createElement('meta');
+        $charset = $this->createElement(Tag::META);
         $charset->setAttribute('charset', self::AMP_ENCODING);
         $this->head->insertBefore($charset, $this->head->firstChild);
     }
@@ -850,7 +850,7 @@ final class Document extends DOMDocument
         $encoding = self::UNKNOWN_ENCODING;
 
         // Check for HTML 4 http-equiv meta tags.
-        foreach ($this->findTags($content, 'meta', 'http-equiv') as $potentialHttpEquivTag) {
+        foreach ($this->findTags($content, Tag::META, 'http-equiv') as $potentialHttpEquivTag) {
             $encoding = $this->extractValue($potentialHttpEquivTag, 'charset');
             if (false !== $encoding) {
                 $httpEquivTag = $potentialHttpEquivTag;
@@ -863,7 +863,7 @@ final class Document extends DOMDocument
         }
 
         // Check for HTML 5 charset meta tag. This overrides the HTML 4 charset.
-        $charsetTag = $this->findTag($content, 'meta', 'charset');
+        $charsetTag = $this->findTag($content, Tag::META, 'charset');
         if ($charsetTag) {
             $encoding = $this->extractValue($charsetTag, 'charset');
 

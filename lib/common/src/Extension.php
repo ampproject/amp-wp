@@ -51,11 +51,11 @@ final class Extension
             return false;
         }
 
-        if (! $element->hasAttribute(self::CUSTOM_ELEMENT_TAG_NAME)) {
+        if (! $element->hasAttribute(Amp::CUSTOM_ELEMENT)) {
             return false;
         }
 
-        $customElement = $element->getAttribute(self::CUSTOM_ELEMENT_TAG_NAME);
+        $customElement = $element->getAttribute(AMP::CUSTOM_ELEMENT);
 
         return in_array($customElement, self::RENDER_DELAYING_EXTENSIONS, true);
     }
