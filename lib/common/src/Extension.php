@@ -15,18 +15,15 @@ final class Extension
      */
     const PREFIX = 'amp-';
 
-    /**
-     * Tag name for custom elements.
-     *
-     * @var string
-     */
-    const CUSTOM_ELEMENT_TAG_NAME = 'custom-element';
-
     // List of Amp extensions.
     const DYNAMIC_CSS_CLASSES = 'amp-dynamic-css-classes';
     const EXPERIMENT          = 'amp-experiment';
     const GEO                 = 'amp-geo';
     const STORY               = 'amp-story';
+
+    // Custom element/template attributes.
+    const CUSTOM_ELEMENT  = 'custom-element';
+    const CUSTOM_TEMPLATE = 'custom-template';
 
     /**
      * Array of custom element names that delay rendering.
@@ -37,6 +34,20 @@ final class Extension
         Extension::DYNAMIC_CSS_CLASSES,
         Extension::EXPERIMENT,
         Extension::STORY,
+    ];
+
+    /**
+     * List of dynamic components
+     *
+     * This list should be kept in sync with the list of dynamic components at:
+     *
+     * @see https://github.com/ampproject/amphtml/blob/master/spec/amp-cache-guidelines.md#guidelines-adding-a-new-cache-to-the-amp-ecosystem
+     *
+     * @var array[]
+     */
+    const DYNAMIC_COMPONENTS = [
+        Extension::CUSTOM_ELEMENT  => [Extension::GEO],
+        Extension::CUSTOM_TEMPLATE => [],
     ];
 
     /**
@@ -51,11 +62,11 @@ final class Extension
             return false;
         }
 
-        if (! $element->hasAttribute(Amp::CUSTOM_ELEMENT)) {
+        if (! $element->hasAttribute(self::CUSTOM_ELEMENT)) {
             return false;
         }
 
-        $customElement = $element->getAttribute(AMP::CUSTOM_ELEMENT);
+        $customElement = $element->getAttribute(self::CUSTOM_ELEMENT);
 
         return in_array($customElement, self::RENDER_DELAYING_EXTENSIONS, true);
     }

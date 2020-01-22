@@ -19,23 +19,6 @@ final class Amp
      */
     const CACHE_HOST = 'https://cdn.ampproject.org';
 
-    const CUSTOM_ELEMENT  = 'custom-element';
-    const CUSTOM_TEMPLATE = 'custom-template';
-
-    /**
-     * List of dynamic components
-     *
-     * This list should be kept in sync with the list of dynamic components at:
-     *
-     * @see https://github.com/ampproject/amphtml/blob/master/spec/amp-cache-guidelines.md#guidelines-adding-a-new-cache-to-the-amp-ecosystem
-     *
-     * @var array[]
-     */
-    const DYNAMIC_COMPONENTS = [
-        self::CUSTOM_ELEMENT  => [Extension::GEO],
-        self::CUSTOM_TEMPLATE => [],
-    ];
-
     /**
      * List of valid Amp formats.
      *
