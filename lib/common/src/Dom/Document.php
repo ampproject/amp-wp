@@ -371,6 +371,11 @@ final class Document extends DOMDocument
 
         if ($success) {
             $this->insertMissingCharset();
+
+            // Do some further clean-up.
+            $this->deduplicateTag(Tag::HEAD);
+            $this->deduplicateTag(Tag::BODY);
+            $this->moveInvalidHeadNodesToBody();
         }
 
         return $success;
