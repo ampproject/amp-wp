@@ -157,11 +157,14 @@ function Carousel() {
 		}
 	};
 
+	const isAtBeginningOfList = 0 === scrollPercentage;
+	const isAtEndOfList = 1 === scrollPercentage;
+
 	return (
 		<Wrapper>
 			<Area area="left-navigation">
 				<LeftArrow
-					isHidden={ ! hasHorizontalOverflow || 0 === scrollPercentage }
+					isHidden={ ! hasHorizontalOverflow || isAtBeginningOfList }
 					onClick={ () => scrollBy( -( 2 * PAGE_WIDTH ) ) }
 					width="24"
 					height="24"
@@ -190,7 +193,7 @@ function Carousel() {
 			</List>
 			<Area area="right-navigation">
 				<RightArrow
-					isHidden={ ! hasHorizontalOverflow || 1 === scrollPercentage }
+					isHidden={ ! hasHorizontalOverflow || isAtEndOfList }
 					onClick={ () => scrollBy( ( 2 * PAGE_WIDTH ) ) }
 					width="24"
 					height="24"
