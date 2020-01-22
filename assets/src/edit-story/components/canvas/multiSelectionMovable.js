@@ -91,6 +91,7 @@ function MultiSelectionMovable( { selectedElements, nodesById } ) {
 	// Update elements once the event has ended.
 	const onGroupEventEnd = ( { targets, isRotate, isResize } ) => {
 		targets.forEach( ( target, i ) => {
+			// Update position in all cases.
 			const properties = {
 				x: targetList[ i ].x + frames[ i ].translate[ 0 ],
 				y: targetList[ i ].y + frames[ i ].translate[ 1 ],
@@ -101,6 +102,10 @@ function MultiSelectionMovable( { selectedElements, nodesById } ) {
 			if ( isResize ) {
 				properties.width = parseInt( target.style.width );
 				properties.height = parseInt( target.style.height );
+				const isText = 'text' === targetList[ i ].type;
+				if ( isText ) {
+					properties.fontSize = calculateFitTextFontSize( target.firstChild, properties.height, properties.width );
+				}
 			}
 			updateElementsById( { elementIds: [ targetList[ i ].id ], properties } );
 		} );
