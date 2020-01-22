@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import PropTypes from 'prop-types';
 
 /**
@@ -15,7 +15,7 @@ import { __, sprintf } from '@wordpress/i18n';
  */
 import { useStory } from '../../../app/story';
 import DropZone from '../../dropzone';
-import RectangleIcon from './rectangle.svg';
+import Rectangle from './rectangle.svg';
 
 const PAGE_WIDTH = 90;
 const PAGE_HEIGHT = 160;
@@ -42,16 +42,66 @@ const Page = styled.button`
 
 const RangeInputWrapper = styled.div`
 	display: flex;
-	width: 400px;
-	margin: 0 auto;
+	width: 440px;
+	margin: 0 auto 75px;
 `;
 
+const rangeThumb = css`
+	width: 28px;
+	height: 28px;
+	border-radius: 100%;
+	background: ${ ( { theme } ) => theme.colors.fg.v1 };
+`;
+
+const rangeTrack = css`
+	background: rgba(255, 255, 255, 0.2);
+	border-color: transparent;
+	color: transparent;
+	width: 100%;
+	height: 4px;
+`;
+
+// Lots of repetition to avoid browsers dropping unknown selectors.
 const RangeInput = styled.input.attrs( () => ( {
 	type: 'range',
 } ) )`
+	-webkit-appearance: none;
+	background: transparent;
 	display: block;
 	width: 360px;
 	margin: 0 auto;
+
+	&::-webkit-slider-thumb {
+		${ rangeThumb }
+		-webkit-appearance: none;
+		margin-top: -12px;
+	}
+
+	&::-moz-range-thumb {
+		${ rangeThumb }
+	}
+
+	&::-ms-thumb {
+		${ rangeThumb }
+	}
+
+	&::-webkit-slider-runnable-track {
+		${ rangeTrack }
+	}
+
+	&::-moz-range-track {
+		${ rangeTrack }
+	}
+
+	&::-ms-track {
+		${ rangeTrack }
+	}
+`;
+
+const RectangleIcon = styled( Rectangle )`
+	width: ${ ( { isLarge } ) => isLarge ? '20px' : '12px' };
+	height: ${ ( { isLarge } ) => isLarge ? '32px' : '20px' };
+	margin-top: ${ ( { isLarge } ) => isLarge ? '0' : '6px' };
 `;
 
 function RangeControl( { value, onChange } ) {
@@ -65,7 +115,7 @@ function RangeControl( { value, onChange } ) {
 				value={ value }
 				onChange={ ( evt ) => onChange( Number( evt.target.value ) ) }
 			/>
-			<RectangleIcon />
+			<RectangleIcon isLarge />
 		</RangeInputWrapper>
 	);
 }

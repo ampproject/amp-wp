@@ -3,7 +3,7 @@
  */
 import Modal from 'react-modal';
 import PropTypes from 'prop-types';
-import { createGlobalStyle } from 'styled-components';
+import styled, { createGlobalStyle } from 'styled-components';
 
 /**
  * Internal dependencies
@@ -42,19 +42,44 @@ export const GlobalStyle = createGlobalStyle`
 	}
 `;
 
-function StyledModal( { children, ...props } ) {
+const CloseButton = styled.button`
+	position: absolute;
+	top: 0;
+	left: 0;
+	display: block;
+	background: transparent;
+	border: none;
+	padding: 0 10px;
+	cursor: pointer;
+	color: ${ ( { theme } ) => theme.colors.fg.v1 };
+	font-family: ${ ( { theme } ) => theme.fonts.body1.family };
+	font-size: ${ ( { theme } ) => theme.fonts.body1.size };
+	line-height: ${ ( { theme } ) => theme.fonts.body1.lineHeight };
+	letter-spacing: ${ ( { theme } ) => theme.fonts.body1.letterSpacing };
+	height: 32px;
+`;
+
+function StyledModal( { children, closeButtonLabel, ...props } ) {
+	// Also needs to be passed to the Modal itself.
+	const { onRequestClose } = props;
+
 	return (
 		<Modal
 			{ ...props }
 			className="WebStories_ReactModal__Content"
 			overlayClassName="WebStories_ReactModal__Overlay"
 		>
+			<CloseButton onClick={ onRequestClose }>
+				{ closeButtonLabel }
+			</CloseButton>
 			{ children }
 		</Modal>
 	);
 }
 
 StyledModal.propTypes = {
+	closeButtonLabel: PropTypes.string.isRequired,
+	onRequestClose: PropTypes.func.isRequired,
 	children: PropTypes.oneOfType( [
 		PropTypes.arrayOf( PropTypes.node ),
 		PropTypes.node,

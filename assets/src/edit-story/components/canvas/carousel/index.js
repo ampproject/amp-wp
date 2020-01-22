@@ -14,7 +14,7 @@ import { __, sprintf } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { useStory } from '../../../app';
-import { Primary, LeftArrow, RightArrow, GridView as GridViewButton } from '../../button';
+import { LeftArrow, RightArrow, GridView as GridViewButton } from '../../button';
 import DropZone from '../../dropzone';
 import Modal from '../../modal';
 import GridView from '../gridview';
@@ -196,10 +196,8 @@ function Carousel() {
 				isOpen={ isGridViewOpen }
 				onRequestClose={ closeModal }
 				contentLabel={ __( 'Grid View', 'amp' ) }
+				closeButtonLabel={ __( 'Back', 'amp' ) }
 			>
-				<Primary onClick={ closeModal }>
-					{ __( 'Back', 'amp' ) }
-				</Primary>
 				<GridView />
 			</Modal>
 		</>
