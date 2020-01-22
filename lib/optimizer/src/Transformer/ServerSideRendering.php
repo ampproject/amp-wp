@@ -4,6 +4,7 @@ namespace Amp\Optimizer\Transformer;
 
 use Amp\Dom\Document;
 use Amp\CssLength;
+use Amp\Extension;
 use Amp\Layout;
 use Amp\Optimizer\Error;
 use Amp\Optimizer\ErrorCollection;
@@ -33,12 +34,6 @@ final class ServerSideRendering implements Transformer
     const LAYOUT_CLASS_PREFIX       = 'i-amphtml-layout-';
     const LAYOUT_SIZE_DEFINED_CLASS = 'i-amphtml-layout-size-defined';
     const SIZER_ELEMENT             = 'i-amphtml-sizer';
-
-    const RENDER_DELAYING_EXTENSIONS = [
-        'amp-dynamic-css-classes',
-        'amp-experiment',
-        'amp-story',
-    ];
 
     const SUPPORTED_LAYOUTS = [
         '',
@@ -113,8 +108,13 @@ final class ServerSideRendering implements Transformer
             }
         }
 
+        // Emit the amp-runtime marker to indicate that we're applying server side rendering in the document.
+        $ampRuntimeMarker = $document->createElement('style');
+        $ampRuntimeMarker->setAttribute('amp-runtime', '');
+        $document->head->insertBefore($ampRuntimeMarker, $document->head->hasChildNodes() ? $document->head->firstChild : null);
+
         foreach ($document->xpath->query('.//script[ @custom-element ]', $document->head) as $customElementScript) {
-            if ($this->isRenderDelayingExtension($customElementScript)) {
+            if (Extension::isRenderDelayingExtension($customElementScript)) {
                 $errors->add(Error\CannotRemoveBoilerplate::fromRenderDelayingScript($customElementScript));
                 $canRemoveBoilerplate = false;
             }
@@ -166,26 +166,6 @@ final class ServerSideRendering implements Transformer
         return false;
     }
 
-    /**
-     * Check whether a given element is a script for a render-delaying extension.
-     *
-     * @param DOMElement $element Element to check.
-     * @return bool Whether the element is a script for a render-delaying extension.
-     */
-    private function isRenderDelayingExtension(DOMElement $element)
-    {
-        if ($element->tagName !== 'script') {
-            return false;
-        }
-
-        if (! $element->hasAttribute('custom-element')) {
-            return false;
-        }
-
-        $customElement = $element->getAttribute('custom-element');
-
-        return in_array($customElement, self::RENDER_DELAYING_EXTENSIONS, true);
-    }
 
     /**
      * Apply the adequate layout to a custom element.
@@ -462,6 +442,15 @@ final class ServerSideRendering implements Transformer
         return in_array($layout, Layout::SIZE_DEFINED_LAYOUTS, true);
     }
 
+    /**
+     * Insert a sizer element if one is required.
+     *
+     * @param Document   $document DOM document to add a sizer to.
+     * @param DOMElement $element  Element to add a sizer to.
+     * @param string     $layout   Calculated layout of the element.
+     * @param CssLength  $width    Calculated width of the element.
+     * @param CssLength  $height   Calculated height of the element.
+     */
     private function maybeAddSizerInto(
         Document $document,
         DOMElement $element,

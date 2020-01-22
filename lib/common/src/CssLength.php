@@ -22,6 +22,10 @@ namespace Amp;
 class CssLength
 {
 
+    // Special attribute values.
+    const AUTO  = 'auto';
+    const FLUID = 'fluid';
+
     /**
      * Whether the value or unit is invalid. Note that passing an empty value as `$attr_value` is considered valid.
      *
@@ -96,13 +100,13 @@ class CssLength
      */
     public function validate($allowAuto, $allowFluid)
     {
-        if ('auto' === $this->attrValue) {
+        if (self::AUTO === $this->attrValue) {
             $this->isAuto  = true;
             $this->isValid = $allowAuto;
             return;
         }
 
-        if ('fluid' === $this->attrValue) {
+        if (self::FLUID === $this->attrValue) {
             $this->isFluid = true;
             $this->isValid = $allowFluid;
         }

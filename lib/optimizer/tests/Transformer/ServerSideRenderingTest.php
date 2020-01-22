@@ -35,7 +35,7 @@ final class ServerSideRenderingTest extends TestCase
 
         $expectWithoutBoilerplate = static function ($body, $extraHead = '') {
             return TestMarkup::DOCTYPE . '<html ⚡ i-amphtml-layout="" i-amphtml-no-boilerplate=""><head>'
-                   . TestMarkup::META_CHARSET . TestMarkup::META_VIEWPORT . TestMarkup::SCRIPT_AMPRUNTIME
+                   . TestMarkup::STYLE_AMPRUNTIME . TestMarkup::META_CHARSET . TestMarkup::META_VIEWPORT . TestMarkup::SCRIPT_AMPRUNTIME
                    . $extraHead
                    . TestMarkup::LINK_FAVICON . TestMarkup::LINK_CANONICAL
                    . '</head><body>'
@@ -45,7 +45,7 @@ final class ServerSideRenderingTest extends TestCase
 
         $expectWithBoilerplate = static function ($body, $extraHead = '') {
             return TestMarkup::DOCTYPE . '<html ⚡ i-amphtml-layout=""><head>'
-                   . TestMarkup::META_CHARSET . TestMarkup::META_VIEWPORT . TestMarkup::SCRIPT_AMPRUNTIME
+                   . TestMarkup::STYLE_AMPRUNTIME . TestMarkup::META_CHARSET . TestMarkup::META_VIEWPORT . TestMarkup::SCRIPT_AMPRUNTIME
                    . $extraHead
                    . TestMarkup::LINK_FAVICON . TestMarkup::LINK_CANONICAL . TestMarkup::STYLE_AMPBOILERPLATE . TestMarkup::NOSCRIPT_AMPBOILERPLATE
                    . '</head><body>'
@@ -86,7 +86,7 @@ final class ServerSideRenderingTest extends TestCase
                 . '</body></html>',
 
                 TestMarkup::DOCTYPE . '<html ⚡4email i-amphtml-layout="" i-amphtml-no-boilerplate=""><head>'
-                . TestMarkup::META_CHARSET . TestMarkup::SCRIPT_AMPRUNTIME
+                . TestMarkup::STYLE_AMPRUNTIME . TestMarkup::META_CHARSET . TestMarkup::SCRIPT_AMPRUNTIME
                 . '</head><body>'
                 . '<amp-img layout="container" class="i-amphtml-layout-container" i-amphtml-layout="container"></amp-img>'
                 . '</body></html>',
@@ -100,7 +100,7 @@ final class ServerSideRenderingTest extends TestCase
                 . '</body></html>',
 
                 TestMarkup::DOCTYPE . '<html ⚡4ads i-amphtml-layout="" i-amphtml-no-boilerplate=""><head>'
-                . TestMarkup::META_CHARSET . TestMarkup::META_VIEWPORT . TestMarkup::SCRIPT_AMPRUNTIME
+                . TestMarkup::STYLE_AMPRUNTIME . TestMarkup::META_CHARSET . TestMarkup::META_VIEWPORT . TestMarkup::SCRIPT_AMPRUNTIME
                 . '</head><body>'
                 . '<amp-img layout="container" class="i-amphtml-layout-container" i-amphtml-layout="container"></amp-img>'
                 . '</body></html>',

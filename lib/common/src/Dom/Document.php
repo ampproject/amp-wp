@@ -8,6 +8,7 @@
 
 namespace Amp\Dom;
 
+use Amp\Tag;
 use DOMAttr;
 use DOMComment;
 use DOMDocument;
@@ -66,6 +67,27 @@ final class Document extends DOMDocument
      * @var string
      */
     const AMP_BIND_DATA_ATTR_PREFIX = 'data-amp-bind-';
+
+    /**
+     * Pattern for HTML attribute accounting for binding attr name, boolean attribute, single/double-quoted attribute
+     * value, and unquoted attribute values.
+     *
+     * @var string
+     */
+    const AMP_BIND_ATTR_PATTERN = '#^\s+(?P<name>\[?[a-zA-Z0-9_\-]+\]?)(?P<value>=(?:"[^"]*+"|\'[^\']*+\'|[^\'"\s]+))?#';
+
+    /**
+     * Match all start tags that contain a binding attribute.
+     *
+     * @var string
+     */
+    const AMP_BIND_START_TAGS_PATTERN = '#<'
+                                        . '(?P<name>[a-zA-Z0-9_\-]+)'               // Tag name.
+                                        . '(?P<attrs>\s'                            // Attributes.
+                                        . '(?:[^>"\'\[\]]+|"[^"]*+"|\'[^\']*+\')*+' // Non-binding attributes tokens.
+                                        . '\[[a-zA-Z0-9_\-]+\]'                     // One binding attribute key.
+                                        . '(?:[^>"\']+|"[^"]*+"|\'[^\']*+\')*+'     // Any attribute tokens, including binding ones.
+                                        . ')>#s';
 
     /**
      * Regular expression pattern to match the http-equiv meta tag.
@@ -127,38 +149,15 @@ final class Document extends DOMDocument
     const HTML_FIND_TAG_WITH_ATTRIBUTE_PATTERN    = '/<%1$s [^>]*?\s*%2$s=[^>]*?>[^<]*(?:<\/%1$s>)?/i';
     const HTML_EXTRACT_ATTRIBUTE_VALUE_PATTERN    = '/%s=(?:([\'"])(?<full>.*)?\1|(?<partial>[^ \'";]+))/';
 
-    // Tags constants used throughout.
-    const TAG_HTML     = 'html';
-    const TAG_HEAD     = 'head';
-    const TAG_BODY     = 'body';
-    const TAG_TEMPLATE = 'template';
-
-    // Attribute to use as a placeholder to move the emoji AMP symbol (⚡) over to DOM.
-    const EMOJI_AMP_ATTRIBUTE = 'emoji-amp';
-
     /**
-     * The original encoding of how the Amp\Dom\Document was created.
-     *
-     * This is stored to do an automatic conversion to UTF-8, which is
-     * a requirement for AMP.
+     * Pattern to match an Amp emoji together with its variant (amp4ads, amp4email, ...).
      *
      * @var string
      */
-    private $originalEncoding;
+    const AMP_EMOJI_ATTRIBUTE_PATTERN = '/(<html [^>]*?)⚡([^\s^>]*)/i';
 
-    /**
-     * Associative array of encoding mappings.
-     *
-     * Translates HTML charsets into encodings PHP can understand.
-     *
-     * @todo Turn into const array once PHP minimum is bumped to 5.6+.
-     *
-     * @var string[]
-     */
-    private static $encodingMap = [
-        // Assume ISO-8859-1 for some charsets.
-        'latin-1' => 'ISO-8859-1',
-    ];
+    // Attribute to use as a placeholder to move the emoji AMP symbol (⚡) over to DOM.
+    const EMOJI_AMP_ATTRIBUTE = 'emoji-amp';
 
     /**
      * HTML elements that are self-closing.
@@ -167,11 +166,9 @@ final class Document extends DOMDocument
      *
      * @link https://www.w3.org/TR/html5/syntax.html#serializing-html-fragments
      *
-     * @todo Turn into const array once PHP minimum is bumped to 5.6+.
-     *
      * @var string[]
      */
-    private static $selfClosingTags = [
+    const SELF_CLOSING_TAGS = [
         'area',
         'base',
         'basefont',
@@ -198,11 +195,9 @@ final class Document extends DOMDocument
      * @link https://github.com/ampproject/amphtml/blob/445d6e3be8a5063e2738c6f90fdcd57f2b6208be/validator/engine/htmlparser.js#L83-L100
      * @link https://www.w3.org/TR/html5/document-metadata.html
      *
-     * @todo Turn into const array once PHP minimum is bumped to 5.6+.
-     *
      * @var string[]
      */
-    private static $elementsAllowedInHead = [
+    const ELEMENTS_ALLOWED_IN_HEAD = [
         'title',
         'base',
         'link',
@@ -211,6 +206,28 @@ final class Document extends DOMDocument
         'noscript',
         'script',
     ];
+
+    /**
+     * Associative array of encoding mappings.
+     *
+     * Translates HTML charsets into encodings PHP can understand.
+     *
+     * @var string[]
+     */
+    const ENCODING_MAP = [
+        // Assume ISO-8859-1 for some charsets.
+        'latin-1' => 'ISO-8859-1',
+    ];
+
+    /**
+     * The original encoding of how the Amp\Dom\Document was created.
+     *
+     * This is stored to do an automatic conversion to UTF-8, which is
+     * a requirement for AMP.
+     *
+     * @var string
+     */
+    private $originalEncoding;
 
     /**
      * Store the placeholder comments that were generated to replace <noscript> elements.
@@ -265,6 +282,26 @@ final class Document extends DOMDocument
         $dom = new self('', $encoding);
 
         if (! $dom->loadHTML($html)) {
+            return false;
+        }
+
+        return $dom;
+    }
+
+    /**
+     * Named constructor to provide convenient way of transforming a HTML fragment into DOM.
+     *
+     * The difference to Document::fromHtml() is that fragments are not normalized as to their structure.
+     *
+     * @param string $html     HTML to turn into a DOM.
+     * @param string $encoding Optional. Encoding of the provided HTML string.
+     * @return Document|false DOM generated from provided HTML, or false if the transformation failed.
+     */
+    public static function fromHtmlFragment($html, $encoding = null)
+    {
+        $dom = new self('', $encoding);
+
+        if (! $dom->loadHTMLFragment($html)) {
             return false;
         }
 
@@ -329,11 +366,29 @@ final class Document extends DOMDocument
      */
     public function loadHTML($source, $options = 0)
     {
+        $source  = $this->normalizeDocumentStructure($source);
+        $success = $this->loadHTMLFragment($source, $options);
+
+        if ($success) {
+            $this->insertMissingCharset();
+        }
+
+        return $success;
+    }
+
+    /**
+     * Load a HTML fragment from a string.
+     *
+     * @param string     $source  The HTML fragment string.
+     * @param int|string $options Optional. Specify additional Libxml parameters.
+     * @return bool true on success or false on failure.
+     */
+    public function loadHTMLFragment($source, $options = 0)
+    {
         $this->reset();
 
         $source = $this->convertAmpBindAttributes($source);
         $source = $this->replaceSelfClosingTags($source);
-        $source = $this->normalizeDocumentStructure($source);
         $source = $this->maybeReplaceNoscriptElements($source);
         $source = $this->secureDoctypeNode($source);
         $source = $this->convertAmpEmojiAttribute($source);
@@ -365,16 +420,6 @@ final class Document extends DOMDocument
             ) {
                 $this->head->removeChild($meta);
             }
-
-            // Add the required utf-8 meta charset tag.
-            $charset = $this->createElement('meta');
-            $charset->setAttribute('charset', self::AMP_ENCODING);
-            $this->head->insertBefore($charset, $this->head->firstChild);
-
-            // Do some further clean-up.
-            $this->deduplicateTag(self::TAG_HEAD);
-            $this->deduplicateTag(self::TAG_BODY);
-            $this->moveInvalidHeadNodesToBody();
         }
 
         return $success;
@@ -389,6 +434,17 @@ final class Document extends DOMDocument
      * @return string The HTML, or false if an error occurred.
      */
     public function saveHTML(DOMNode $node = null)
+    {
+        return $this->saveHTMLFragment($node);
+    }
+
+    /**
+     * Dumps the internal document fragment into a string using HTML formatting.
+     *
+     * @param DOMNode $node Optional. Parameter to output a subset of the document.
+     * @return string The HTML fragment, or false if an error occurred.
+     */
+    public function saveHTMLFragment(DOMNode $node = null)
     {
         $this->replaceMustacheTemplateTokens();
 
@@ -420,6 +476,21 @@ final class Document extends DOMDocument
         }
 
         return $html;
+    }
+
+    /**
+     * Add the required utf-8 meta charset tag if it is still missing.
+     */
+    private function insertMissingCharset()
+    {
+        // Bail if a charset tag is already present.
+        if ($this->xpath->query('.//meta[ @charset ]', $this->head)->item(0)) {
+            return;
+        }
+
+        $charset = $this->createElement('meta');
+        $charset->setAttribute('charset', self::AMP_ENCODING);
+        $this->head->insertBefore($charset, $this->head->firstChild);
     }
 
     /**
@@ -482,12 +553,12 @@ final class Document extends DOMDocument
         $htmlStart = '<html>';
 
         // Strip IE conditional comments, which are supported by IE 5-9 only (which AMP doesn't support).
-        $content = preg_replace( self::HTML_IE_CONDITIONAL_COMMENTS_PATTERN, '', $content );
+        $content = preg_replace(self::HTML_IE_CONDITIONAL_COMMENTS_PATTERN, '', $content);
 
         // Detect and strip <!doctype> tags.
-        if ( preg_match( self::HTML_STRUCTURE_DOCTYPE_PATTERN, $content, $matches ) ) {
+        if (preg_match(self::HTML_STRUCTURE_DOCTYPE_PATTERN, $content, $matches)) {
             $doctype = $matches['doctype'];
-            $content = preg_replace( self::HTML_STRUCTURE_DOCTYPE_PATTERN, '', $content, 1 );
+            $content = preg_replace(self::HTML_STRUCTURE_DOCTYPE_PATTERN, '', $content, 1);
         }
 
         // Detect and strip <html> tags.
@@ -506,17 +577,17 @@ final class Document extends DOMDocument
                 // Only <head> missing.
                 $content = "<head></head>{$content}";
             }
-        } elseif ( ! preg_match( self::HTML_STRUCTURE_BODY_END_TAG, $content, $matches ) ) {
+        } elseif (! preg_match(self::HTML_STRUCTURE_BODY_END_TAG, $content, $matches)) {
             // Only <body> missing.
             // @todo This is an expensive regex operation, look into further optimization.
-            $content  = preg_replace( self::HTML_STRUCTURE_HEAD_TAG, '$0<body>', $content, 1 );
+            $content = preg_replace(self::HTML_STRUCTURE_HEAD_TAG, '$0<body>', $content, 1);
             $content .= '</body>';
         }
 
         $content = "{$htmlStart}{$content}</html>";
 
         // Reinsert a standard doctype (while preserving any potentially leading comments).
-        $doctype = str_ireplace( self::HTML_DOCTYPE_HTML_4_SUFFIX, '', $doctype );
+        $doctype = str_ireplace(self::HTML_DOCTYPE_HTML_4_SUFFIX, '', $doctype);
         $content = "{$doctype}{$content}";
 
         return $content;
@@ -527,15 +598,15 @@ final class Document extends DOMDocument
      */
     public function normalizeDomStructure()
     {
-        $head = $this->getElementsByTagName(self::TAG_HEAD)->item(0);
+        $head = $this->getElementsByTagName(Tag::HEAD)->item(0);
         if (! $head) {
-            $this->head = $this->createElement(self::TAG_HEAD);
+            $this->head = $this->createElement(Tag::HEAD);
             $this->insertBefore($this->head, $this->firstChild);
         }
 
-        $body = $this->getElementsByTagName(self::TAG_BODY)->item(0);
+        $body = $this->getElementsByTagName(Tag::BODY)->item(0);
         if (! $body) {
-            $this->body = $this->createElement(self::TAG_BODY);
+            $this->body = $this->createElement(Tag::BODY);
             $this->appendChild($this->body);
         }
 
@@ -573,7 +644,7 @@ final class Document extends DOMDocument
         static $regexPattern = null;
 
         if (null === $regexPattern) {
-            $regexPattern = '#<(' . implode('|', self::$selfClosingTags) . ')([^>]*?)(?:\s*\/)?>(?!</\1>)#';
+            $regexPattern = '#<(' . implode('|', self::SELF_CLOSING_TAGS) . ')([^>]*?)(?:\s*\/)?>(?!</\1>)#';
         }
 
         return preg_replace($regexPattern, '<$1$2></$1>', $html);
@@ -592,7 +663,7 @@ final class Document extends DOMDocument
         static $regexPattern = null;
 
         if (null === $regexPattern) {
-            $regexPattern = '#</(' . implode('|', self::$selfClosingTags) . ')>#i';
+            $regexPattern = '#</(' . implode('|', self::SELF_CLOSING_TAGS) . ')>#i';
         }
 
         return preg_replace($regexPattern, '', $html);
@@ -681,24 +752,20 @@ final class Document extends DOMDocument
      */
     private function convertAmpBindAttributes($html)
     {
-
-        // Pattern for HTML attribute accounting for binding attr name, boolean attribute, single/double-quoted attribute value, and unquoted attribute values.
-        $attrRegex = '#^\s+(?P<name>\[?[a-zA-Z0-9_\-]+\]?)(?P<value>=(?:"[^"]*+"|\'[^\']*+\'|[^\'"\s]+))?#';
-
         /**
          * Replace callback.
          *
          * @param array $tagMatches Tag matches.
          * @return string Replacement.
          */
-        $replaceCallback = static function ($tagMatches) use ($attrRegex) {
+        $replaceCallback = static function ($tagMatches) {
 
             // Strip the self-closing slash as long as it is not an attribute value, like for the href attribute (<a href=/>).
             $oldAttrs = rtrim(preg_replace('#(?<!=)/$#', '', $tagMatches['attrs']));
 
             $newAttrs = '';
             $offset   = 0;
-            while (preg_match($attrRegex, substr($oldAttrs, $offset), $attrMatches)) {
+            while (preg_match(self::AMP_BIND_ATTR_PATTERN, substr($oldAttrs, $offset), $attrMatches)) {
                 $offset += strlen($attrMatches[0]);
 
                 if ('[' === $attrMatches['name'][0]) {
@@ -719,21 +786,8 @@ final class Document extends DOMDocument
             return '<' . $tagMatches['name'] . $newAttrs . '>';
         };
 
-        // Match all start tags that contain a binding attribute.
-        $pattern   = implode(
-            '',
-            [
-                '#<',
-                '(?P<name>[a-zA-Z0-9_\-]+)',               // Tag name.
-                '(?P<attrs>\s',                            // Attributes.
-                '(?:[^>"\'\[\]]+|"[^"]*+"|\'[^\']*+\')*+', // Non-binding attributes tokens.
-                '\[[a-zA-Z0-9_\-]+\]',                     // One binding attribute key.
-                '(?:[^>"\']+|"[^"]*+"|\'[^\']*+\')*+',     // Any attribute tokens, including binding ones.
-                ')>#s',
-            ]
-        );
         $converted = preg_replace_callback(
-            $pattern,
+            self::AMP_BIND_START_TAGS_PATTERN,
             $replaceCallback,
             $html
         );
@@ -803,19 +857,20 @@ final class Document extends DOMDocument
             }
         }
 
-        // Check for HTML 5 charset meta tag. This overrides the HTML 4 charset.
-        $charsetTag = $this->findTag($content, 'meta', 'charset');
-        if ($charsetTag) {
-            $encoding = $this->extractValue($charsetTag, 'charset');
-        }
-
         // Strip all charset tags.
         if (isset($httpEquivTag)) {
             $content = str_replace($httpEquivTag, '', $content);
         }
 
+        // Check for HTML 5 charset meta tag. This overrides the HTML 4 charset.
+        $charsetTag = $this->findTag($content, 'meta', 'charset');
         if ($charsetTag) {
-            $content = str_replace($charsetTag, '', $content);
+            $encoding = $this->extractValue($charsetTag, 'charset');
+
+            // Strip the encoding if it is not the required one.
+            if ( strtolower( $encoding ) !== self::AMP_ENCODING ) {
+                $content = str_replace($charsetTag, '', $content);
+            }
         }
 
         return [$content, $encoding];
@@ -918,8 +973,8 @@ final class Document extends DOMDocument
 
         $lcEncoding = strtolower($encoding);
 
-        if (isset(self::$encodingMap[$lcEncoding])) {
-            $encoding = self::$encodingMap[$lcEncoding];
+        if (isset((self::ENCODING_MAP)[$lcEncoding])) {
+            $encoding = (self::ENCODING_MAP)[$lcEncoding];
         }
 
         if (! in_array($lcEncoding, $knownEncodings, true)) {
@@ -944,7 +999,7 @@ final class Document extends DOMDocument
      */
     private function replaceMustacheTemplateTokens()
     {
-        $templates = $this->getElementsByTagName(self::TAG_TEMPLATE);
+        $templates = $this->getElementsByTagName(Tag::TEMPLATE);
 
         if (! $templates || 0 === count($templates)) {
             return;
@@ -1035,7 +1090,7 @@ final class Document extends DOMDocument
      */
     private function convertAmpEmojiAttribute($source)
     {
-        return preg_replace('/(<html [^>]*?)⚡([^\s^>]*)/i', '\1' . self::EMOJI_AMP_ATTRIBUTE . '="\2"', $source, 1);
+        return preg_replace(self::AMP_EMOJI_ATTRIBUTE_PATTERN, '\1' . self::EMOJI_AMP_ATTRIBUTE . '="\2"', $source, 1);
     }
 
     /**
@@ -1074,10 +1129,10 @@ final class Document extends DOMDocument
      * As DOM_Document prepends a new doctype node and removes the old one if the first element is not the doctype, we
      * need to ensure the original one is not stripped (by changing its node type) and restore it later on.
      *
-     * @see restoreDoctypeNode() Reciprocal function.
-     *
      * @param string $html HTML string to adapt.
      * @return string Adapted HTML string.
+     * @see restoreDoctypeNode() Reciprocal function.
+     *
      */
     private function secureDoctypeNode($html)
     {
@@ -1087,10 +1142,10 @@ final class Document extends DOMDocument
     /**
      * Restore the original doctype node.
      *
-     * @see secureDoctypeNode() Reciprocal function.
-     *
      * @param string $html HTML string to adapt.
      * @return string Adapted HTML string.
+     * @see secureDoctypeNode() Reciprocal function.
+     *
      */
     private function restoreDoctypeNode($html)
     {
@@ -1154,7 +1209,7 @@ final class Document extends DOMDocument
         }
 
         // Avoid doing the above query again if possible.
-        if (in_array($tagName, [self::TAG_HEAD, self::TAG_BODY], true)) {
+        if (in_array($tagName, [Tag::HEAD, Tag::BODY], true)) {
             $this->$tagName = $mainTag;
         }
     }
@@ -1171,7 +1226,7 @@ final class Document extends DOMDocument
     public function isValidHeadNode(DOMNode $node)
     {
         return (
-            ($node instanceof DOMElement && in_array($node->nodeName, self::$elementsAllowedInHead, true))
+            ($node instanceof DOMElement && in_array($node->nodeName, self::ELEMENTS_ALLOWED_IN_HEAD, true))
             ||
             ($node instanceof DOMText && preg_match('/^\s*$/', $node->nodeValue)) // Whitespace text nodes are OK.
             ||
@@ -1191,28 +1246,28 @@ final class Document extends DOMDocument
             case 'xpath':
                 $this->xpath = new DOMXPath($this);
                 return $this->xpath;
-            case self::TAG_HTML:
-                $this->html = $this->getElementsByTagName(self::TAG_HTML)->item(0);
+            case Tag::HTML:
+                $this->html = $this->getElementsByTagName(Tag::HTML)->item(0);
                 if (null === $this->html) {
                     // Document was assembled manually and bypassed normalisation.
                     $this->normalizeDomStructure();
-                    $this->html = $this->getElementsByTagName(self::TAG_HTML)->item(0);
+                    $this->html = $this->getElementsByTagName(Tag::HTML)->item(0);
                 }
                 return $this->html;
-            case self::TAG_HEAD:
-                $this->head = $this->getElementsByTagName(self::TAG_HEAD)->item(0);
+            case Tag::HEAD:
+                $this->head = $this->getElementsByTagName(Tag::HEAD)->item(0);
                 if (null === $this->head) {
                     // Document was assembled manually and bypassed normalisation.
                     $this->normalizeDomStructure();
-                    $this->head = $this->getElementsByTagName(self::TAG_HEAD)->item(0);
+                    $this->head = $this->getElementsByTagName(Tag::HEAD)->item(0);
                 }
                 return $this->head;
-            case self::TAG_BODY:
-                $this->body = $this->getElementsByTagName(self::TAG_BODY)->item(0);
+            case Tag::BODY:
+                $this->body = $this->getElementsByTagName(Tag::BODY)->item(0);
                 if (null === $this->body) {
                     // Document was assembled manually and bypassed normalisation.
                     $this->normalizeDomStructure();
-                    $this->body = $this->getElementsByTagName(self::TAG_BODY)->item(0);
+                    $this->body = $this->getElementsByTagName(Tag::BODY)->item(0);
                 }
                 return $this->body;
             case 'ampElements':

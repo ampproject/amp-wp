@@ -93,7 +93,7 @@ final class TestMarkup
     const STYLE_AMPCUSTOM = '<style amp-custom>#lemur { color: #adaaad }</style>';
 
     // StyleAMPRuntime is an injected tag from server-side rendering.
-    const STYLE_AMPRUNTIME = '<style amp-runtime></style>';
+    const STYLE_AMPRUNTIME = '<style amp-runtime=""></style>';
 
     // Title is a title tag for an AMP document.
     const TITLE = '<title>Hello AMP</title>';

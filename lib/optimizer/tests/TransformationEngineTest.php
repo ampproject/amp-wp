@@ -13,7 +13,7 @@ final class TransformationEngineTest extends TestCase
     use MarkupComparison;
 
     const MINIMAL_HTML_MARKUP           = '<html></html>';
-    const MINIMAL_OPTIMIZED_HTML_MARKUP = TestMarkup::DOCTYPE . '<html transformed="self;v=1" i-amphtml-layout="" i-amphtml-no-boilerplate=""><head>' . TestMarkup::META_CHARSET . '</head><body></body></html>';
+    const MINIMAL_OPTIMIZED_HTML_MARKUP = TestMarkup::DOCTYPE . '<html transformed="self;v=1" i-amphtml-layout="" i-amphtml-no-boilerplate=""><head>' . TestMarkup::META_CHARSET . TestMarkup::STYLE_AMPRUNTIME . '</head><body></body></html>';
 
     /**
      * Provide data to test optimizing a string of HTML.

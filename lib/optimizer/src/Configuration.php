@@ -4,6 +4,7 @@ namespace Amp\Optimizer;
 
 use Amp\Optimizer\Exception\InvalidConfigurationValue;
 use Amp\Optimizer\Exception\UnknownConfigurationKey;
+use Amp\Optimizer\Transformer\ReorderHead;
 use Amp\Optimizer\Transformer\ServerSideRendering;
 use Amp\Optimizer\Transformer\TransformedIdentifier;
 
@@ -29,6 +30,7 @@ final class Configuration
     const DEFAULT_TRANSFORMERS = [
         TransformedIdentifier::class,
         ServerSideRendering::class,
+        ReorderHead::class,
     ];
 
     /**
