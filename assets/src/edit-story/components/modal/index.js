@@ -18,10 +18,11 @@ const ADMIN_MENU_FOLDED_WIDTH = 36;
 export const GlobalStyle = createGlobalStyle`
 	.WebStories_ReactModal__Content {
 		position: absolute;
-		top: ${ PADDING_TOP }px;
-		right: ${ PADDING_LEFT }px;
-		bottom: ${ PADDING_TOP }px;
-		left: ${ PADDING_LEFT }px;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		padding: ${ PADDING_TOP }px ${ PADDING_LEFT }px ${ PADDING_TOP }px ${ PADDING_LEFT }px;
 		overflow: auto;
 		outline: none;
 		background-color: ${ ( { theme } ) => theme.colors.bg.v1 };
@@ -59,6 +60,10 @@ const CloseButton = styled.button`
 	height: 32px;
 `;
 
+const ModalContent = styled.div`
+	position: relative;
+`;
+
 function StyledModal( { children, closeButtonLabel, ...props } ) {
 	// Also needs to be passed to the Modal itself.
 	const { onRequestClose } = props;
@@ -69,10 +74,12 @@ function StyledModal( { children, closeButtonLabel, ...props } ) {
 			className="WebStories_ReactModal__Content"
 			overlayClassName="WebStories_ReactModal__Overlay"
 		>
-			<CloseButton onClick={ onRequestClose }>
-				{ closeButtonLabel }
-			</CloseButton>
-			{ children }
+			<ModalContent>
+				<CloseButton onClick={ onRequestClose }>
+					{ closeButtonLabel }
+				</CloseButton>
+				{ children }
+			</ModalContent>
 		</Modal>
 	);
 }
