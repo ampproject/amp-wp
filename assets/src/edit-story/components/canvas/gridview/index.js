@@ -141,7 +141,7 @@ function GridView() {
 							key={ index }
 							ariaLabel={ isCurrentPage ?
 								sprintf( __( 'Page %s (current page)', 'amp' ), index + 1 ) :
-								sprintf( __( 'Go to page %s', 'amp' ), index + 1 )
+								sprintf( __( 'Page %s', 'amp' ), index + 1 )
 							}
 							isActive={ isCurrentPage }
 							pageIndex={ index }
