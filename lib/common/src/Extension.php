@@ -22,8 +22,10 @@ final class Extension
      */
     const CUSTOM_ELEMENT_TAG_NAME = 'custom-element';
 
+    // List of Amp extensions.
     const DYNAMIC_CSS_CLASSES = 'amp-dynamic-css-classes';
     const EXPERIMENT          = 'amp-experiment';
+    const GEO                 = 'amp-geo';
     const STORY               = 'amp-story';
 
     /**
