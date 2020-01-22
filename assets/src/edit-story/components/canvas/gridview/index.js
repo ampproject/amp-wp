@@ -122,7 +122,6 @@ RangeControl.propTypes = {
 	onChange: PropTypes.func.isRequired,
 };
 
-// TODO: Make drag & drop part DRY.
 function GridView() {
 	const { state: { pages, currentPageIndex } } = useStory();
 	const [ zoomLevel, setZoomLevel ] = useState( 2 );
