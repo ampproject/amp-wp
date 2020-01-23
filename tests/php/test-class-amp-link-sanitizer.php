@@ -48,7 +48,7 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 			)
 		);
 		$excluded_amp_link  = get_permalink( self::factory()->post->create() );
-		$excluded_amp_links = [ $excluded_amp_link ];
+		$excluded_urls      = [ $excluded_amp_link ];
 
 		$links = [
 			'home-link'           => [
@@ -155,7 +155,7 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $html );
 
-		$sanitizer = new AMP_Link_Sanitizer( $dom, compact( 'paired', 'excluded_amp_links' ) );
+		$sanitizer = new AMP_Link_Sanitizer( $dom, compact( 'paired', 'excluded_urls' ) );
 		$sanitizer->sanitize();
 
 		// Confirm admin bar is unchanged.
