@@ -11,16 +11,15 @@ import useStory from '../../../app/story/useStory';
 import { getDefinitionForType } from '../../../elements';
 import { PAGE_WIDTH } from '../../../constants';
 
-const PAGE_WIDTH_MARGIN = 5;
-const PAGE_BORDER_WIDTH = 3;
+const PAGE_THUMB_OUTLINE = 2;
 
 const Page = styled.button`
 	padding: 0;
 	margin: 0;
 	border: none;
-	outline: 2px solid ${ ( { isActive, theme } ) => isActive ? theme.colors.selection : theme.colors.bg.v1 };
+	outline: ${ PAGE_THUMB_OUTLINE }px solid ${ ( { isActive, theme } ) => isActive ? theme.colors.selection : theme.colors.bg.v1 };
 	&:focus, &:hover {
-		outline: 2px solid ${ ( { theme } ) => theme.colors.selection };
+		outline: ${ PAGE_THUMB_OUTLINE }px solid ${ ( { theme } ) => theme.colors.selection };
 	}
 	height: ${ ( { height } ) => height }px;
 	width: ${ ( { width } ) => width }px;
@@ -39,8 +38,8 @@ function PagePreview( { index, forwardedRef, ...props } ) {
 	const { state: { pages } } = useStory();
 	const page = pages[ index ];
 	const { width } = props;
-	// Deduct the margin and page border for more accurate calculation based on the inner element.
-	const sizeMultiplier = ( width - PAGE_WIDTH_MARGIN - PAGE_BORDER_WIDTH ) / PAGE_WIDTH;
+	// This is used for font size only, the rest is responsive.
+	const sizeMultiplier = ( width - PAGE_THUMB_OUTLINE ) / PAGE_WIDTH;
 	return (
 		<Page { ...props } ref={ forwardedRef } >
 			<PreviewWrapper>
