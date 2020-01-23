@@ -7,7 +7,11 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import { getCommonAttributes } from '../shared';
+import { PAGE_WIDTH } from '../../constants';
 import { generateFontFamily, getResponsiveFontSize } from './util';
+
+const THUMB_INNER_WIDTH = 66;
+const PAGE_NAV_THUMB_MULTIPLIER = THUMB_INNER_WIDTH / PAGE_WIDTH;
 
 /**
  * Returns AMP HTML for saving into post content for displaying in the FE.
@@ -15,13 +19,14 @@ import { generateFontFamily, getResponsiveFontSize } from './util';
 function TextSave( { isPreview, id, content, color, backgroundColor, width, height, x, y, fontFamily, fontFallback, fontSize, fontWeight, fontStyle, rotationAngle } ) {
 	const style = {
 		...getCommonAttributes( { width, height, x, y, rotationAngle } ),
-		fontSize: isPreview ? fontSize / 5.72 : getResponsiveFontSize( fontSize ),
+		fontSize: isPreview ? fontSize * PAGE_NAV_THUMB_MULTIPLIER : getResponsiveFontSize( fontSize ),
 		fontStyle: fontStyle ? fontStyle : null,
 		fontFamily: generateFontFamily( fontFamily, fontFallback ),
 		fontWeight: fontWeight ? fontWeight : null,
 		background: backgroundColor,
+		margin: 0,
 		color,
-		lineHeight: isPreview ? 1.3 / 1.77 : 1.3, // @todo This will be user-editable in the future.
+		lineHeight: 1.3, // @todo This will be user-editable in the future.
 	};
 
 	return (

@@ -18,9 +18,7 @@ import { LeftArrow, RightArrow, GridView as GridViewButton } from '../../button'
 import Modal from '../../modal';
 import GridView from '../gridview';
 import DraggablePage from '../draggablePage';
-
-const PAGE_WIDTH = 72;
-const PAGE_HEIGHT = 128;
+import { PAGE_NAV_THUMB_HEIGHT, PAGE_NAV_THUMB_WIDTH } from '../../../constants';
 
 const Wrapper = styled.div`
 	position: relative;
@@ -130,7 +128,7 @@ function Carousel() {
 				<Area area="left-navigation">
 					<LeftArrow
 						isHidden={ ! hasHorizontalOverflow || isAtBeginningOfList }
-						onClick={ () => scrollBy( -( 2 * PAGE_WIDTH ) ) }
+						onClick={ () => scrollBy( -( 2 * PAGE_NAV_THUMB_WIDTH ) ) }
 						width="24"
 						height="24"
 						aria-label={ __( 'Scroll Left', 'amp' ) }
@@ -153,8 +151,8 @@ function Carousel() {
 								ref={ ( el ) => {
 									pageRefs.current[ page.id ] = el;
 								} }
-								width={ PAGE_WIDTH }
-								height={ PAGE_HEIGHT }
+								width={ PAGE_NAV_THUMB_WIDTH }
+								height={ PAGE_NAV_THUMB_HEIGHT }
 							/>
 						);
 					} ) }
@@ -162,7 +160,7 @@ function Carousel() {
 				<Area area="right-navigation">
 					<RightArrow
 						isHidden={ ! hasHorizontalOverflow || isAtEndOfList }
-						onClick={ () => scrollBy( ( 2 * PAGE_WIDTH ) ) }
+						onClick={ () => scrollBy( ( 2 * PAGE_NAV_THUMB_WIDTH ) ) }
 						width="24"
 						height="24"
 						aria-label={ __( 'Scroll Right', 'amp' ) }
