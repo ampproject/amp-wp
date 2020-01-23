@@ -40,7 +40,7 @@ function ImageOutput( { id, src, width, height, x, y, rotationAngle, isFullbleed
 
 	return (
 		<div style={ { ...style } } { ...wrapperProps }>
-			{ isPreview ? <img alt={ __( 'Page preview', 'amp' ) } { ...props } /> : <amp-img className={ isFullbleed ? 'full-bleed' : '' } { ...props } /> }
+			{ isPreview ? <img draggable="false" alt={ __( 'Page preview', 'amp' ) } { ...props } /> : <amp-img className={ isFullbleed ? 'full-bleed' : '' } { ...props } /> }
 		</div>
 	);
 }
