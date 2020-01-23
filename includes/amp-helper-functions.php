@@ -928,7 +928,7 @@ function amp_get_content_sanitizers( $post = null ) {
 		$sanitizers['AMP_Nav_Menu_Dropdown_Sanitizer'] = $theme_support_args['nav_menu_dropdown'];
 	}
 
-	if ( $amp_to_amp_linking_enabled ) {
+	if ( $amp_to_amp_linking_enabled && AMP_Theme_Support::STANDARD_MODE_SLUG !== AMP_Theme_Support::get_support_mode() ) {
 
 		/**
 		 * Filters the list of URLs which are excluded from being included in AMP-to-AMP linking.
