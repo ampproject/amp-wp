@@ -938,6 +938,8 @@ function amp_get_content_sanitizers( $post = null ) {
 		 * when in Reader mode. This does not apply in Standard mode.
 		 * Only frontend URLs on the frontend need be excluded, as all other URLs are never made into AMP links.
 		 *
+		 * @since 1.5.0
+		 *
 		 * @param string[] The URLs to exclude from having AMP-to-AMP links.
 		 */
 		$excluded_urls = apply_filters( 'amp_to_amp_excluded_urls', [] );
