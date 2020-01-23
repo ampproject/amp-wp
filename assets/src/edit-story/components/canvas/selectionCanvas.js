@@ -13,9 +13,10 @@ import { useEffect, useRef } from '@wordpress/element';
  * Internal dependencies
  */
 import { useStory } from '../../app';
-import useCanvas from '../canvas/useCanvas';
 import withOverlay from '../overlay/withOverlay';
 import InOverlay from '../overlay';
+import { useUnits } from '../../units';
+import useCanvas from './useCanvas';
 
 const LassoMode = {
 	OFF: 0,
@@ -42,13 +43,9 @@ const Lasso = styled.div`
 `;
 
 function SelectionCanvas( { children } ) {
-	const {
-		actions: { clearSelection },
-	} = useStory();
-	const {
-		state: { pageContainer },
-		actions: { clearEditing, selectIntersection },
-	} = useCanvas();
+	const { actions: { clearSelection } } = useStory();
+	const { state: { pageContainer }, actions: { clearEditing, selectIntersection } } = useCanvas();
+	const { actions: { editorToDataX, editorToDataY } } = useUnits();
 
 	const overlayRef = useRef( null );
 	const lassoRef = useRef( null );
@@ -116,9 +113,11 @@ function SelectionCanvas( { children } ) {
 
 	const onMouseUp = ( ) => {
 		if ( lassoModeRef.current === LassoMode.ON ) {
-			const [ ox, oy, width, height ] = getLassoBox();
-			const x = ox - pageContainer.offsetLeft;
-			const y = oy - pageContainer.offsetTop;
+			const [ lx, ly, lwidth, lheight ] = getLassoBox();
+			const x = editorToDataX( lx - pageContainer.offsetLeft );
+			const y = editorToDataY( ly - pageContainer.offsetTop );
+			const width = editorToDataX( lwidth );
+			const height = editorToDataY( lheight );
 			clearSelection();
 			clearEditing();
 			selectIntersection( { x, y, width, height } );

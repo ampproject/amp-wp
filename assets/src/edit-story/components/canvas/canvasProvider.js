@@ -12,6 +12,8 @@ import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
  * Internal dependencies
  */
 import { useStory } from '../../app';
+import { PAGE_WIDTH, PAGE_HEIGHT } from '../../constants';
+import UnitsProvider from '../../units/unitsProvider';
 import useEditingElement from './useEditingElement';
 import useCanvasSelectionCopyPaste from './useCanvasSelectionCopyPaste';
 import Context from './context';
@@ -19,9 +21,7 @@ import Context from './context';
 function CanvasProvider( { children } ) {
 	const [ lastSelectionEvent, setLastSelectionEvent ] = useState( null );
 
-	// @todo: most likely can be simplified/redone once we deal with changing
-	// page size and offsets. We can simply pass the page's boundaries here
-	// instead of the whole element.
+	const [ pageSize, setPageSize ] = useState( { width: PAGE_WIDTH, height: PAGE_HEIGHT } );
 	const [ pageContainer, setPageContainer ] = useState( null );
 
 	const {
@@ -107,6 +107,7 @@ function CanvasProvider( { children } ) {
 			editingElementState,
 			isEditing: Boolean( editingElement ),
 			lastSelectionEvent,
+			pageSize,
 		},
 		actions: {
 			setPageContainer,
@@ -118,12 +119,15 @@ function CanvasProvider( { children } ) {
 			selectIntersection,
 			registerTransformHandler,
 			pushTransform,
+			setPageSize,
 		},
 	};
 
 	return (
 		<Context.Provider value={ state }>
-			{ children }
+			<UnitsProvider pageSize={ pageSize }>
+				{ children }
+			</UnitsProvider>
 		</Context.Provider>
 	);
 }

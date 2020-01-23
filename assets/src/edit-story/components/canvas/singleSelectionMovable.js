@@ -11,11 +11,11 @@ import { useRef, useEffect, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { getBox } from '../../elements/shared';
 import { useStory } from '../../app';
 import Movable from '../movable';
 import calculateFitTextFontSize from '../../utils/calculateFitTextFontSize';
 import getAdjustedElementDimensions from '../../utils/getAdjustedElementDimensions';
+import { useUnits } from '../../units';
 import useCanvas from './useCanvas';
 
 const ALL_HANDLES = [ 'n', 's', 'e', 'w', 'nw', 'ne', 'sw', 'se' ];
@@ -30,6 +30,7 @@ function SingleSelectionMovable( {
 
 	const { actions: { updateSelectedElements } } = useStory();
 	const { actions: { pushTransform } } = useCanvas();
+	const { actions: { getBox, editorToDataX, editorToDataY } } = useUnits();
 
 	const latestEvent = useRef();
 
@@ -115,7 +116,10 @@ function SingleSelectionMovable( {
 			onDragEnd={ ( { target } ) => {
 				// When dragging finishes, set the new properties based on the original + what moved meanwhile.
 				if ( frame.translate[ 0 ] !== 0 && frame.translate[ 1 ] !== 0 ) {
-					const properties = { x: selectedElement.x + frame.translate[ 0 ], y: selectedElement.y + frame.translate[ 1 ] };
+					const properties = {
+						x: selectedElement.x + editorToDataX( frame.translate[ 0 ] ),
+						y: selectedElement.y + editorToDataY( frame.translate[ 1 ] ),
+					};
 					updateSelectedElements( { properties } );
 				}
 				resetMoveable( target );
@@ -161,10 +165,10 @@ function SingleSelectionMovable( {
 			onResizeEnd={ ( { target } ) => {
 				if ( frame.resize[ 0 ] !== 0 && frame.resize[ 1 ] !== 0 ) {
 					const properties = {
-						width: frame.resize[ 0 ],
-						height: frame.resize[ 1 ],
-						x: selectedElement.x + frame.translate[ 0 ],
-						y: selectedElement.y + frame.translate[ 1 ],
+						width: editorToDataX( frame.resize[ 0 ] ),
+						height: editorToDataY( frame.resize[ 1 ] ),
+						x: selectedElement.x + editorToDataX( frame.translate[ 0 ] ),
+						y: selectedElement.y + editorToDataY( frame.translate[ 1 ] ),
 					};
 					if ( shouldAdjustFontSize ) {
 						properties.fontSize = calculateFitTextFontSize( target.firstChild, properties.height, properties.width );
@@ -181,7 +185,7 @@ function SingleSelectionMovable( {
 				setTransformStyle( target );
 			} }
 			onRotateEnd={ ( { target } ) => {
-				const properties = { rotationAngle: frame.rotate };
+				const properties = { rotationAngle: Math.round( frame.rotate ) };
 				updateSelectedElements( { properties } );
 				resetMoveable( target );
 			} }

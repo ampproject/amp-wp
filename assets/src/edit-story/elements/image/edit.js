@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 /**
@@ -14,6 +13,7 @@ import { useCallback, useState } from '@wordpress/element';
  */
 import { ElementFillContent } from '../shared';
 import { useStory } from '../../app';
+import StoryPropTypes from '../../types';
 import { getImgProps, ImageWithScale } from './util';
 import EditPanMovable from './editPanMovable';
 import EditCropMovable from './editCropMovable';
@@ -54,7 +54,10 @@ const CropImg = styled.img`
 	${ ImageWithScale }
 `;
 
-function ImageEdit( { id, src, origRatio, width, height, x, y, scale, focalX, focalY, rotationAngle, isFullbleed } ) {
+function ImageEdit( {
+	element: { id, src, origRatio, scale, focalX, focalY, isFullbleed },
+	box: { x, y, width, height, rotationAngle },
+} ) {
 	const [ fullImage, setFullImage ] = useState( null );
 	const [ croppedImage, setCroppedImage ] = useState( null );
 	const [ cropBox, setCropBox ] = useState( null );
@@ -116,24 +119,8 @@ function ImageEdit( { id, src, origRatio, width, height, x, y, scale, focalX, fo
 }
 
 ImageEdit.propTypes = {
-	id: PropTypes.string.isRequired,
-	src: PropTypes.string.isRequired,
-	origRatio: PropTypes.number.isRequired,
-	width: PropTypes.number.isRequired,
-	height: PropTypes.number.isRequired,
-	x: PropTypes.number.isRequired,
-	y: PropTypes.number.isRequired,
-	rotationAngle: PropTypes.number.isRequired,
-	isFullbleed: PropTypes.bool,
-	scale: PropTypes.number,
-	focalX: PropTypes.number,
-	focalY: PropTypes.number,
-};
-
-ImageEdit.defaultProps = {
-	scale: null,
-	focalX: null,
-	focalY: null,
+	element: StoryPropTypes.elements.image.isRequired,
+	box: StoryPropTypes.box.isRequired,
 };
 
 export default ImageEdit;

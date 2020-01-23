@@ -66,6 +66,7 @@ function Carousel() {
 	const openModal = useCallback( () => setIsGridViewOpen( true ), [ setIsGridViewOpen ] );
 	const closeModal = useCallback( () => setIsGridViewOpen( false ), [ setIsGridViewOpen ] );
 
+	// QQQQ: useResizeObserver
 	useLayoutEffect( () => {
 		const observer = new ResizeObserver( ( entries ) => {
 			for ( const entry of entries ) {
