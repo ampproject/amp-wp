@@ -940,7 +940,7 @@ function amp_get_content_sanitizers( $post = null ) {
 		 *
 		 * @param string[] The URLs to exclude from having AMP-to-AMP links.
 		 */
-		$excluded_amp_links = apply_filters( 'amp_to_amp_excluded_links', [] );
+		$excluded_amp_links = apply_filters( 'amp_to_amp_excluded_urls', [] );
 
 		$sanitizers['AMP_Link_Sanitizer'] = array_merge(
 			[ 'paired' => ! amp_is_canonical() ],

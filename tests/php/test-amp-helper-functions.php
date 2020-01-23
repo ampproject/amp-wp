@@ -839,7 +839,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 
 		$excluded_urls = [ 'https://baz.com', 'https://example.com/one' ];
 		add_filter(
-			'amp_to_amp_excluded_links',
+			'amp_to_amp_excluded_urls',
 			static function() use ( $excluded_urls ) {
 				return $excluded_urls;
 			}
