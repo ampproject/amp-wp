@@ -21,7 +21,7 @@ function ImageOutput( { id, src, width, height, x, y, rotationAngle, isFullbleed
 		layout: 'fill',
 		src,
 		style: isPreview ? {
-			objectFit: 'cover',
+			objectFit: isFullbleed ? 'cover' : null,
 			width: '100%',
 			height: '100%',
 		} : null,
