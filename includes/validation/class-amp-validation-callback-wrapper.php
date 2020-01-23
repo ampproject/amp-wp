@@ -47,12 +47,16 @@ class AMP_Validation_Callback_Wrapper implements ArrayAccess {
 		$args          = func_get_args();
 
 		$before_styles_enqueued = [];
+		$before_styles_extras   = [];
 		if ( isset( $wp_styles, $wp_styles->queue ) ) {
 			$before_styles_enqueued = $wp_styles->queue;
+			$before_styles_extras   = wp_list_pluck( $wp_styles->registered, 'extra' );
 		}
 		$before_scripts_enqueued = [];
+		$before_scripts_extras   = [];
 		if ( isset( $wp_scripts, $wp_scripts->queue ) ) {
 			$before_scripts_enqueued = $wp_scripts->queue;
+			$before_scripts_extras   = wp_list_pluck( $wp_scripts->registered, 'extra' );
 		}
 
 		$is_filter = isset( $this->callback['source']['hook'] ) && ! did_action( $this->callback['source']['hook'] );
@@ -69,8 +73,9 @@ class AMP_Validation_Callback_Wrapper implements ArrayAccess {
 		}
 		array_pop( AMP_Validation_Manager::$hook_source_stack );
 
-		// Keep track of which source enqueued the styles.
 		if ( isset( $wp_styles, $wp_styles->queue ) ) {
+
+			// Keep track of which source enqueued the styles.
 			foreach ( array_diff( $wp_styles->queue, $before_styles_enqueued ) as $handle ) {
 				AMP_Validation_Manager::$enqueued_style_sources[ $handle ][] = array_merge(
 					$this->callback['source'],
@@ -78,10 +83,35 @@ class AMP_Validation_Callback_Wrapper implements ArrayAccess {
 					compact( 'handle' )
 				);
 			}
+
+			// Keep track of which source added an inline style.
+			foreach ( $wp_styles->registered as $handle => $dependency ) {
+				if ( empty( $dependency->extra['after'] ) ) {
+					continue;
+				}
+
+				$additions = array_diff(
+					array_filter( $dependency->extra['after'] ),
+					array_filter( isset( $before_styles_extras[ $handle ]['after'] ) ? (array) $before_styles_extras[ $handle ]['after'] : [] )
+				);
+				foreach ( $additions as $addition ) {
+					AMP_Validation_Manager::$extra_style_sources[ $handle ][ $addition ][] = array_merge(
+						$this->callback['source'],
+						[
+							'dependency_type' => 'style',
+							'extra_key'       => 'after',
+							'text'            => $addition,
+						],
+						compact( 'handle' )
+					);
+				}
+			}
 		}
 
-		// Keep track of which source enqueued the scripts, and immediately report validity.
 		if ( isset( $wp_scripts, $wp_scripts->queue ) ) {
+
+			// Keep track of which source enqueued the scripts.
+			// Note: Only the first time a script is enqueued will be detected.
 			foreach ( array_diff( $wp_scripts->queue, $before_scripts_enqueued ) as $queued_handle ) {
 				$handles = [ $queued_handle ];
 
@@ -96,6 +126,33 @@ class AMP_Validation_Callback_Wrapper implements ArrayAccess {
 						[ 'dependency_type' => 'script' ],
 						compact( 'handle' )
 					);
+				}
+			}
+
+			// Keep track of which source added inline scripts.
+			foreach ( $wp_scripts->registered as $handle => $dependency ) {
+				if ( empty( $dependency->extra ) ) {
+					continue;
+				}
+				foreach ( [ 'data', 'before', 'after' ] as $key ) {
+					if ( empty( $dependency->extra[ $key ] ) ) {
+						continue;
+					}
+					$additions = array_diff(
+						array_filter( isset( $dependency->extra[ $key ] ) ? (array) $dependency->extra[ $key ] : [] ),
+						array_filter( isset( $before_scripts_extras[ $handle ][ $key ] ) ? (array) $before_scripts_extras[ $handle ][ $key ] : [] )
+					);
+					foreach ( $additions as $addition ) {
+						AMP_Validation_Manager::$extra_script_sources[ $addition ][] = array_merge(
+							$this->callback['source'],
+							[
+								'dependency_type' => 'script',
+								'extra_key'       => $key,
+								'text'            => $addition,
+							],
+							compact( 'handle' )
+						);
+					}
 				}
 			}
 		}

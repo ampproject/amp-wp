@@ -82,11 +82,31 @@ class AMP_Validation_Manager {
 	public static $enqueued_script_sources = [];
 
 	/**
+	 * Sources for script extras that are attached to each dependency.
+	 *
+	 * The keys are the values of the extras being added; the values are an array of the source(s) that caused the extra
+	 * to be added.
+	 *
+	 * @var array[]
+	 */
+	public static $extra_script_sources = [];
+
+	/**
 	 * Sources that enqueue each style.
 	 *
 	 * @var array
 	 */
 	public static $enqueued_style_sources = [];
+
+	/**
+	 * Sources for style extras that are attached to each dependency.
+	 *
+	 * The keys are the values of the extras being added; the values are an array of the source(s) that caused the extra
+	 * to be added.
+	 *
+	 * @var array[]
+	 */
+	public static $extra_style_sources = [];
 
 	/**
 	 * Post IDs for posts that have been updated which need to be re-validated.
@@ -898,6 +918,8 @@ class AMP_Validation_Manager {
 		self::$validation_results      = [];
 		self::$enqueued_style_sources  = [];
 		self::$enqueued_script_sources = [];
+		self::$extra_script_sources    = [];
+		self::$extra_style_sources     = [];
 	}
 
 	/**
@@ -1134,6 +1156,33 @@ class AMP_Validation_Manager {
 			}
 		}
 
+		$is_inline_style = (
+			$node instanceof DOMElement
+			&&
+			'style' === $node->nodeName
+			&&
+			$node->firstChild instanceof DOMText
+			&&
+			$node->hasAttribute( 'id' )
+			&&
+			preg_match( '/^(?P<handle>.+)-inline-css$/', $node->getAttribute( 'id' ), $matches )
+			&&
+			wp_styles()->query( $matches['handle'] )
+			&&
+			isset( self::$extra_style_sources[ $matches['handle'] ] )
+		);
+		if ( $is_inline_style ) {
+			$text = $node->textContent;
+			foreach ( self::$extra_style_sources[ $matches['handle'] ] as $css => $extra_sources ) {
+				if ( false !== strpos( $text, $css ) ) {
+					$sources = array_merge(
+						$sources,
+						$extra_sources
+					);
+				}
+			}
+		}
+
 		/**
 		 * Script dependency.
 		 *
@@ -1192,57 +1241,16 @@ class AMP_Validation_Manager {
 						}
 					}
 				}
-			} elseif ( $node->firstChild ) {
+			} elseif ( $node->firstChild instanceof DOMText ) {
 				$text = $node->textContent;
 
-				// Inline script.
-				foreach ( wp_scripts()->done as $script_handle ) {
-					$inline_script_groups = array_filter(
-						[
-							'data'   => array_filter( (array) wp_scripts()->get_data( $script_handle, 'data' ) ),
-							'before' => array_filter( (array) wp_scripts()->get_data( $script_handle, 'before' ) ),
-							'after'  => array_filter( (array) wp_scripts()->get_data( $script_handle, 'after' ) ),
-						]
-					);
-					foreach ( $inline_script_groups as $inline_type => $inline_scripts ) {
-						/*
-						 * Check to see if the inline script is inside (or the same) as the script in the document.
-						 * Note that WordPress takes the registered inline script and will output it with newlines
-						 * padding it, and sometimes with the script wrapped by CDATA blocks.
-						 */
-						if ( false === strpos( $text, trim( implode( "\n", $inline_scripts ) ) ) ) { // Imploding with "\n" because \WP_Scripts::print_inline_script() does this.
-							continue;
-						}
-
-						if ( isset( self::$enqueued_script_sources[ $script_handle ] ) ) {
-							$sources = array_merge(
-								$sources,
-								array_map(
-									static function( $enqueued_script_source ) use ( $inline_type ) {
-										$enqueued_script_source['inline_script_type'] = $inline_type; // @todo This is wrong. It needs to be part of the one original source.
-										return $enqueued_script_source;
-									},
-									self::$enqueued_script_sources[ $script_handle ]
-								)
-							);
-						} else {
-							foreach ( self::$enqueued_script_sources as $enqueued_script_sources_handle => $enqueued_script_sources ) {
-								if ( $enqueued_script_sources_handle !== $script_handle && self::has_dependency( wp_scripts(), $enqueued_script_sources_handle, $script_handle ) ) {
-									$sources = array_merge(
-										array_map(
-											static function ( $enqueued_script_source ) use ( $inline_type, $script_handle ) {
-												$enqueued_script_source['dependency_handle']  = $script_handle;
-												$enqueued_script_source['inline_script_type'] = $inline_type; // @todo This is wrong. It needs to be part of the one original source.
-												return $enqueued_script_source;
-											},
-											$enqueued_script_sources
-										),
-										$sources
-									);
-								}
-							}
-						}
-						break;
+				// Identify the inline script sources.
+				foreach ( self::$extra_script_sources as $extra_data => $extra_sources ) {
+					if ( false !== strpos( $text, $extra_data ) ) {
+						$sources = array_merge(
+							$sources,
+							$extra_sources
+						);
 					}
 				}
 			}
