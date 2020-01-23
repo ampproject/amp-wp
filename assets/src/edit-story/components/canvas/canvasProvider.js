@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { useCallback, useEffect, useState } from '@wordpress/element';
+import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -80,6 +80,25 @@ function CanvasProvider( { children } ) {
 
 	useCanvasSelectionCopyPaste( pageContainer );
 
+	const transformHandlersRef = useRef( {} );
+
+	const registerTransformHandler = useCallback( ( id, handler ) => {
+		const handlerListMap = transformHandlersRef.current;
+		const handlerList = ( handlerListMap[ id ] || ( handlerListMap[ id ] = [] ) );
+		handlerList.push( handler );
+		return () => {
+			handlerList.splice( handlerList.indexOf( handler ), 1 );
+		};
+	}, [ ] );
+
+	const pushTransform = useCallback( ( id, transform ) => {
+		const handlerListMap = transformHandlersRef.current;
+		const handlerList = handlerListMap[ id ];
+		if ( handlerList ) {
+			handlerList.forEach( ( handler ) => handler( transform ) );
+		}
+	}, [ ] );
+
 	const state = {
 		state: {
 			pageContainer,
@@ -97,6 +116,8 @@ function CanvasProvider( { children } ) {
 			clearEditing,
 			handleSelectElement,
 			selectIntersection,
+			registerTransformHandler,
+			pushTransform,
 		},
 	};
 
