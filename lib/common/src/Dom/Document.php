@@ -977,9 +977,10 @@ final class Document extends DOMDocument
         }
 
         $lcEncoding = strtolower($encoding);
+        $encodings  = self::ENCODING_MAP;
 
-        if (isset((self::ENCODING_MAP)[$lcEncoding])) {
-            $encoding = (self::ENCODING_MAP)[$lcEncoding];
+        if (isset($encodings[$lcEncoding])) {
+            $encoding = $encodings[$lcEncoding];
         }
 
         if (! in_array($lcEncoding, $knownEncodings, true)) {
