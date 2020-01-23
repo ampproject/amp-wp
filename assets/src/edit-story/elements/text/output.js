@@ -12,7 +12,7 @@ import { generateFontFamily, getResponsiveFontSize } from './util';
 /**
  * Returns AMP HTML for saving into post content for displaying in the FE.
  */
-function TextSave( { id, content, color, backgroundColor, width, height, x, y, fontFamily, fontFallback, fontSize, fontWeight, fontStyle, rotationAngle, isPreview, previewSizeMultiplier } ) {
+function TextOutput( { id, content, color, backgroundColor, width, height, x, y, fontFamily, fontFallback, fontSize, fontWeight, fontStyle, rotationAngle, isPreview, previewSizeMultiplier } ) {
 	const style = {
 		...getCommonAttributes( { width, height, x, y, rotationAngle } ),
 		fontSize: isPreview ? Math.ceil( fontSize * previewSizeMultiplier ) : getResponsiveFontSize( fontSize ),
@@ -30,7 +30,7 @@ function TextSave( { id, content, color, backgroundColor, width, height, x, y, f
 	);
 }
 
-TextSave.propTypes = {
+TextOutput.propTypes = {
 	id: PropTypes.string.isRequired,
 	content: PropTypes.string,
 	color: PropTypes.string,
@@ -49,4 +49,4 @@ TextSave.propTypes = {
 	previewSizeMultiplier: PropTypes.number,
 };
 
-export default TextSave;
+export default TextOutput;

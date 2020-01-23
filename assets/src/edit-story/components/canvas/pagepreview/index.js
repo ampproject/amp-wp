@@ -43,8 +43,8 @@ function PagePreview( { index, forwardedRef, ...props } ) {
 				{ page.elements.map( ( { type, ...rest } ) => {
 					const { id: elId } = rest;
 					// eslint-disable-next-line @wordpress/no-unused-vars-before-return
-					const { Save } = getDefinitionForType( type );
-					return <Save previewSizeMultiplier={ sizeMultiplier } isPreview={ true } key={ 'element-' + elId } { ...rest } />;
+					const { Output } = getDefinitionForType( type );
+					return <Output previewSizeMultiplier={ sizeMultiplier } isPreview={ true } key={ 'element-' + elId } { ...rest } />;
 				} ) }
 			</PreviewWrapper>
 		</Page>

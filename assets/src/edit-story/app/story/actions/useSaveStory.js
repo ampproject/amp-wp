@@ -25,8 +25,8 @@ const getStoryMarkupFromPages = ( pages ) => {
 					{ page.elements.map( ( { type, ...rest } ) => {
 						const { id: elId } = rest;
 						// eslint-disable-next-line @wordpress/no-unused-vars-before-return
-						const { Save } = getDefinitionForType( type );
-						return <Save key={ 'element-' + elId } { ...rest } />;
+						const { Output } = getDefinitionForType( type );
+						return <Output key={ 'element-' + elId } { ...rest } />;
 					} ) }
 				</amp-story-grid-layer>
 			</amp-story-page>,

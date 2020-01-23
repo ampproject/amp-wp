@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
  */
 import { getCommonAttributes } from '../shared';
 
-function VideoSave( { autoPlay, id, mimeType, src, width, height, x, y, rotationAngle, isPreview } ) {
+function VideoOutput( { autoPlay, id, mimeType, src, width, height, x, y, rotationAngle, isPreview } ) {
 	const sourceProps = {
 		type: mimeType,
 		src,
@@ -37,7 +37,7 @@ function VideoSave( { autoPlay, id, mimeType, src, width, height, x, y, rotation
 	);
 }
 
-VideoSave.propTypes = {
+VideoOutput.propTypes = {
 	rotationAngle: PropTypes.number.isRequired,
 	controls: PropTypes.bool,
 	autoPlay: PropTypes.bool,
@@ -52,4 +52,4 @@ VideoSave.propTypes = {
 	isPreview: PropTypes.bool,
 };
 
-export default VideoSave;
+export default VideoOutput;

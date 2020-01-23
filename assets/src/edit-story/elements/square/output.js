@@ -11,7 +11,7 @@ import { getCommonAttributes } from '../shared';
 /**
  * Returns AMP HTML for saving into post content for displaying in the FE.
  */
-function SquareSave( { id, backgroundColor, width, height, x, y, rotationAngle } ) {
+function SquareOutput( { id, backgroundColor, width, height, x, y, rotationAngle } ) {
 	const style = {
 		...getCommonAttributes( { width, height, x, y, rotationAngle } ),
 		background: backgroundColor,
@@ -21,7 +21,7 @@ function SquareSave( { id, backgroundColor, width, height, x, y, rotationAngle }
 	);
 }
 
-SquareSave.propTypes = {
+SquareOutput.propTypes = {
 	rotationAngle: PropTypes.number.isRequired,
 	backgroundColor: PropTypes.string,
 	width: PropTypes.number.isRequired,
@@ -31,4 +31,4 @@ SquareSave.propTypes = {
 	id: PropTypes.string.isRequired,
 };
 
-export default SquareSave;
+export default SquareOutput;

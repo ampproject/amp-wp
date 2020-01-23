@@ -11,7 +11,7 @@ import { getCommonAttributes } from '../shared';
 /**
  * Returns AMP HTML for saving into post content for displaying in the FE.
  */
-function ImageSave( { id, src, width, height, x, y, rotationAngle, isPreview } ) {
+function ImageOutput( { id, src, width, height, x, y, rotationAngle, isPreview } ) {
 	const props = {
 		layout: 'fill',
 		src,
@@ -28,7 +28,7 @@ function ImageSave( { id, src, width, height, x, y, rotationAngle, isPreview } )
 	);
 }
 
-ImageSave.propTypes = {
+ImageOutput.propTypes = {
 	id: PropTypes.string.isRequired,
 	src: PropTypes.string.isRequired,
 	width: PropTypes.number.isRequired,
@@ -39,4 +39,4 @@ ImageSave.propTypes = {
 	isPreview: PropTypes.bool,
 };
 
-export default ImageSave;
+export default ImageOutput;
