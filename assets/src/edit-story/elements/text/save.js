@@ -7,19 +7,15 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import { getCommonAttributes } from '../shared';
-import { PAGE_WIDTH } from '../../constants';
 import { generateFontFamily, getResponsiveFontSize } from './util';
-
-const THUMB_INNER_WIDTH = 66;
-const PAGE_NAV_THUMB_MULTIPLIER = THUMB_INNER_WIDTH / PAGE_WIDTH;
 
 /**
  * Returns AMP HTML for saving into post content for displaying in the FE.
  */
-function TextSave( { isPreview, id, content, color, backgroundColor, width, height, x, y, fontFamily, fontFallback, fontSize, fontWeight, fontStyle, rotationAngle } ) {
+function TextSave( { id, content, color, backgroundColor, width, height, x, y, fontFamily, fontFallback, fontSize, fontWeight, fontStyle, rotationAngle, isPreview, previewSizeMultiplier } ) {
 	const style = {
 		...getCommonAttributes( { width, height, x, y, rotationAngle } ),
-		fontSize: isPreview ? fontSize * PAGE_NAV_THUMB_MULTIPLIER : getResponsiveFontSize( fontSize ),
+		fontSize: isPreview ? fontSize * previewSizeMultiplier : getResponsiveFontSize( fontSize ),
 		fontStyle: fontStyle ? fontStyle : null,
 		fontFamily: generateFontFamily( fontFamily, fontFallback ),
 		fontWeight: fontWeight ? fontWeight : null,
@@ -49,6 +45,8 @@ TextSave.propTypes = {
 	rotationAngle: PropTypes.number.isRequired,
 	x: PropTypes.number.isRequired,
 	y: PropTypes.number.isRequired,
+	isPreview: PropTypes.bool,
+	previewSizeMultiplier: PropTypes.number,
 };
 
 export default TextSave;
