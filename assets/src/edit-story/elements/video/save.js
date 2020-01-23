@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
  */
 import { getCommonAttributes } from '../shared';
 
-function VideoSave( { autoPlay, id, mimeType, src, width, height, x, y, rotationAngle } ) {
+function VideoSave( { autoPlay, id, mimeType, src, width, height, x, y, rotationAngle, isPreview } ) {
 	const sourceProps = {
 		type: mimeType,
 		src,
@@ -26,9 +26,13 @@ function VideoSave( { autoPlay, id, mimeType, src, width, height, x, y, rotation
 	const style = getCommonAttributes( { width, height, x, y, rotationAngle } );
 	return (
 		<div style={ { ...style } } { ...wrapperProps } >
-			<amp-video { ...props }>
-				<source { ...sourceProps } />
-			</amp-video>
+			{ isPreview ? (
+				<video { ...sourceProps } />
+			) : (
+				<amp-video { ...props }>
+					<source { ...sourceProps } />
+				</amp-video>
+			) }
 		</div>
 	);
 }
@@ -45,6 +49,7 @@ VideoSave.propTypes = {
 	x: PropTypes.number.isRequired,
 	y: PropTypes.number.isRequired,
 	id: PropTypes.string.isRequired,
+	isPreview: PropTypes.bool,
 };
 
 export default VideoSave;
