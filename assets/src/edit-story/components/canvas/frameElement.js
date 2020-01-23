@@ -18,12 +18,17 @@ import { ElementWithPosition, ElementWithSize, ElementWithRotation, getBox } fro
 import useCanvas from './useCanvas';
 
 const Wrapper = styled.div`
-	${ ElementWithPosition }
-	${ ElementWithSize }
-	${ ElementWithRotation }
+  ${ ElementWithPosition }
+  ${ ElementWithSize }
+  ${ ElementWithRotation }
+  pointer-events: initial;
+
+  &:focus, &:active, &:hover {
+    outline: 1px solid ${ ( { theme } ) => theme.colors.selection };
+  }
 `;
 
-function Element( {
+function FrameElement( {
 	element: {
 		id,
 		type,
@@ -36,11 +41,10 @@ function Element( {
 		...rest
 	},
 } ) {
-	const { Display, Edit } = getDefinitionForType( type );
+	const { Frame } = getDefinitionForType( type );
 	const element = useRef();
 
 	const {
-		state: { editingElement },
 		actions: { setNodeForElement, handleSelectElement },
 	} = useCanvas();
 
@@ -52,7 +56,6 @@ function Element( {
 		setNodeForElement( id, element.current );
 	}, [ id, setNodeForElement ] );
 
-	const isEditing = ( editingElement === id );
 	const isSelected = selectedElements.includes( id );
 
 	const box = getBox( { x, y, width, height, rotationAngle, isFullbleed } );
@@ -69,15 +72,15 @@ function Element( {
 				evt.stopPropagation();
 			} }
 		>
-			{ isEditing ?
-				( <Edit { ...props } /> ) :
-				( <Display { ...props } /> ) }
+			{ Frame && (
+				<Frame { ...props } />
+			) }
 		</Wrapper>
 	);
 }
 
-Element.propTypes = {
+FrameElement.propTypes = {
 	element: PropTypes.object.isRequired,
 };
 
-export default Element;
+export default FrameElement;

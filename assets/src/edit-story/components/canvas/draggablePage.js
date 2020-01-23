@@ -17,7 +17,11 @@ import { useStory } from '../../app/story';
 const Page = styled.button`
 	padding: 0;
 	margin: 0;
-	border: 3px solid ${ ( { isActive, theme } ) => isActive ? theme.colors.selection : theme.colors.bg.v1 };
+	border: none;
+	outline: 2px solid ${ ( { isActive, theme } ) => isActive ? theme.colors.selection : theme.colors.bg.v1 };
+	&:focus, &:hover {
+		outline: 2px solid ${ ( { theme } ) => theme.colors.selection };
+	}
 	height: ${ ( { height } ) => height }px;
 	width: ${ ( { width } ) => width }px;
 	background-color: ${ ( { theme } ) => theme.colors.mg.v1 };

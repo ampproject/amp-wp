@@ -24,23 +24,27 @@ const LassoMode = {
 };
 
 const Container = withOverlay( styled.div`
-  width: 100%;
-  height: 100%;
-  user-select: none;
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	width: 100%;
+	height: 100%;
+	user-select: none;
 ` );
 
 const Lasso = styled.div`
-  display: none;
-  position: absolute;
-  border: 1px dotted ${ ( { theme } ) => theme.colors.selection };
-  z-index: 1;
+	display: none;
+	position: absolute;
+	border: 1px dotted ${ ( { theme } ) => theme.colors.selection };
+	z-index: 1;
 `;
 
 function SelectionCanvas( { children } ) {
 	const {
 		actions: { clearSelection },
 	} = useStory();
-
 	const {
 		state: { pageContainer },
 		actions: { clearEditing, selectIntersection },
