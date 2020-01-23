@@ -21,8 +21,12 @@ const Wrapper = styled.div`
 	display: flex;
 	align-items: center;
 	justify-content: ${ ( { isNext } ) => isNext ? 'flex-end' : 'flex-start' };
-	height: 100%;
 	color:  ${ ( { theme } ) => theme.colors.fg.v1 };
+	width: ${ PAGE_NAV_BUTTON_WIDTH }px;
+	height: ${ PAGE_NAV_BUTTON_WIDTH }px;
+	& > * {
+		pointer-events: initial;
+	}
 `;
 
 function PageNav( { isNext } ) {
@@ -40,7 +44,7 @@ function PageNav( { isNext } ) {
 		'aria-label': isNext ? __( 'Next Page', 'amp' ) : __( 'Previous Page', 'amp' ),
 		onClick: handleClick,
 		width: PAGE_NAV_BUTTON_WIDTH,
-		height: 40,
+		height: PAGE_NAV_BUTTON_WIDTH,
 	};
 	return (
 		<Wrapper isNext={ isNext }>

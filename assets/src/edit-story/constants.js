@@ -11,12 +11,6 @@ export const PAGE_NAV_WIDTH = PAGE_NAV_PADDING + PAGE_NAV_BUTTON_WIDTH;
 export const PAGE_WIDTH = 412;
 export const PAGE_HEIGHT = 732;
 
-export const PAGE_NAV_THUMB_WIDTH = 72;
-export const PAGE_NAV_THUMB_HEIGHT = 128;
-
-export const PAGE_GRID_THUMB_WIDTH = 90;
-export const PAGE_GRID_THUMB_HEIGHT = 160;
-
 // @todo Confirm real min-max font sizes.
 export const MIN_FONT_SIZE = 12;
 export const MAX_FONT_SIZE = 72;

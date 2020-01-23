@@ -16,11 +16,15 @@ const PAGE_BORDER_WIDTH = 3;
 
 const Page = styled.button`
 	padding: 0;
-	margin: 0 ${ PAGE_WIDTH_MARGIN }px;
-	border: ${ PAGE_BORDER_WIDTH } px solid ${ ( { isActive, theme } ) => isActive ? theme.colors.selection : theme.colors.bg.v1 };
+	margin: 0;
+	border: none;
+	outline: 2px solid ${ ( { isActive, theme } ) => isActive ? theme.colors.selection : theme.colors.bg.v1 };
+	&:focus, &:hover {
+		outline: 2px solid ${ ( { theme } ) => theme.colors.selection };
+	}
 	height: ${ ( { height } ) => height }px;
 	width: ${ ( { width } ) => width }px;
-	background-color: ${ ( { theme } ) => theme.colors.fg.v1 };
+	background-color: ${ ( { theme } ) => theme.colors.mg.v1 };
 	flex: none;
 	transition: width .2s ease, height .2s ease;
 `;

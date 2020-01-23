@@ -15,13 +15,15 @@ import { __, sprintf } from '@wordpress/i18n';
  */
 import { useStory } from '../../../app/story';
 import DraggablePage from '../draggablePage';
-import { PAGE_GRID_THUMB_WIDTH, PAGE_GRID_THUMB_HEIGHT } from '../../../constants';
 import RectangleIcon from './rectangle.svg';
+
+const PAGE_WIDTH = 90;
+const PAGE_HEIGHT = 160;
 
 const Wrapper = styled.div`
 	position: relative;
 	display: grid;
-	grid-template-columns: ${ ( { scale } ) => `repeat(auto-fit, minmax(${ scale * PAGE_GRID_THUMB_WIDTH }px, max-content))` };
+	grid-template-columns: ${ ( { scale } ) => `repeat(auto-fit, minmax(${ scale * PAGE_WIDTH }px, max-content))` };
 	grid-gap: 20px;
 	justify-content: center;
 	justify-items: center;
@@ -149,8 +151,8 @@ function GridView() {
 							}
 							isActive={ isCurrentPage }
 							pageIndex={ index }
-							width={ zoomLevel * PAGE_GRID_THUMB_WIDTH }
-							height={ zoomLevel * PAGE_GRID_THUMB_HEIGHT }
+							width={ zoomLevel * PAGE_WIDTH }
+							height={ zoomLevel * PAGE_HEIGHT }
 						/>
 					);
 				} ) }

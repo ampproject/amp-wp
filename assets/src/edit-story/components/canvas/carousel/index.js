@@ -18,13 +18,20 @@ import { LeftArrow, RightArrow, GridView as GridViewButton } from '../../button'
 import Modal from '../../modal';
 import GridView from '../gridview';
 import DraggablePage from '../draggablePage';
-import { PAGE_NAV_THUMB_HEIGHT, PAGE_NAV_THUMB_WIDTH } from '../../../constants';
+
+// @todo: Make responsive. Blocked on the header reimplementation and
+// responsive "page" size.
+const PAGE_HEIGHT = 50;
+const PAGE_WIDTH = PAGE_HEIGHT * 9 / 16;
 
 const Wrapper = styled.div`
 	position: relative;
 	display: grid;
 	grid: "left-navigation carousel right-navigation" auto / 53px 1fr 53px;
+	background-color: ${ ( { theme } ) => theme.colors.bg.v1 };
 	color:  ${ ( { theme } ) => theme.colors.fg.v1 };
+	width: 100%;
+	height: 100%;
 `;
 
 const Area = styled.div`
@@ -128,7 +135,7 @@ function Carousel() {
 				<Area area="left-navigation">
 					<LeftArrow
 						isHidden={ ! hasHorizontalOverflow || isAtBeginningOfList }
-						onClick={ () => scrollBy( -( 2 * PAGE_NAV_THUMB_WIDTH ) ) }
+						onClick={ () => scrollBy( -( 2 * PAGE_WIDTH ) ) }
 						width="24"
 						height="24"
 						aria-label={ __( 'Scroll Left', 'amp' ) }
@@ -151,8 +158,8 @@ function Carousel() {
 								ref={ ( el ) => {
 									pageRefs.current[ page.id ] = el;
 								} }
-								width={ PAGE_NAV_THUMB_WIDTH }
-								height={ PAGE_NAV_THUMB_HEIGHT }
+								width={ PAGE_WIDTH }
+								height={ PAGE_HEIGHT }
 							/>
 						);
 					} ) }
@@ -160,7 +167,7 @@ function Carousel() {
 				<Area area="right-navigation">
 					<RightArrow
 						isHidden={ ! hasHorizontalOverflow || isAtEndOfList }
-						onClick={ () => scrollBy( ( 2 * PAGE_NAV_THUMB_WIDTH ) ) }
+						onClick={ () => scrollBy( ( 2 * PAGE_WIDTH ) ) }
 						width="24"
 						height="24"
 						aria-label={ __( 'Scroll Right', 'amp' ) }

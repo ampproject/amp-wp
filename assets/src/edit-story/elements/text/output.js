@@ -12,7 +12,28 @@ import { generateFontFamily, getResponsiveFontSize } from './util';
 /**
  * Returns AMP HTML for saving into post content for displaying in the FE.
  */
-function TextOutput( { id, content, color, backgroundColor, width, height, x, y, fontFamily, fontFallback, fontSize, fontWeight, fontStyle, rotationAngle, isPreview, previewSizeMultiplier } ) {
+function TextOutput( {
+	id,
+	content,
+	color,
+	backgroundColor,
+	width,
+	height,
+	x,
+	y,
+	fontFamily,
+	fontFallback,
+	fontSize,
+	fontWeight,
+	fontStyle,
+	letterSpacing,
+	lineHeight,
+	padding,
+	rotationAngle,
+	textAlign,
+	isPreview,
+	previewSizeMultiplier,
+} ) {
 	const style = {
 		...getCommonAttributes( { width, height, x, y, rotationAngle } ),
 		fontSize: isPreview ? Math.ceil( fontSize * previewSizeMultiplier ) : getResponsiveFontSize( fontSize ),
@@ -22,7 +43,10 @@ function TextOutput( { id, content, color, backgroundColor, width, height, x, y,
 		background: backgroundColor,
 		margin: 0,
 		color,
-		lineHeight: 1.3, // @todo This will be user-editable in the future.
+		lineHeight,
+		letterSpacing: letterSpacing ? letterSpacing + 'em' : null,
+		padding: padding ? padding + '%' : null,
+		textAlign: textAlign ? textAlign : null,
 	};
 
 	return (
@@ -40,9 +64,16 @@ TextOutput.propTypes = {
 	fontSize: PropTypes.number,
 	fontWeight: PropTypes.number,
 	fontStyle: PropTypes.string,
+	letterSpacing: PropTypes.oneOfType( [
+		PropTypes.string,
+		PropTypes.number,
+	] ),
+	lineHeight: PropTypes.number,
 	width: PropTypes.number.isRequired,
 	height: PropTypes.number.isRequired,
+	padding: PropTypes.number,
 	rotationAngle: PropTypes.number.isRequired,
+	textAlign: PropTypes.string,
 	x: PropTypes.number.isRequired,
 	y: PropTypes.number.isRequired,
 	isPreview: PropTypes.bool,

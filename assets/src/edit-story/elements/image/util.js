@@ -10,6 +10,12 @@ export const ImageWithScale = css`
 	top: ${ ( { offsetY } ) => `${ -offsetY }px` };
 `;
 
+export function getImageWithScaleCss( { width, height, offsetX, offsetY } ) {
+	// todo@: This is a complete duplication of `ImageWithScale` above. But
+	// no other apparent way to execute interpolate `ImageWithScale` dynamically.
+	return `width:${ width }px; height:${ height }px; left:${ -offsetX }px; top:${ -offsetY }px;`;
+}
+
 export function getImgProps( width, height, scale, focalX, focalY, imgRatio ) {
 	const ratio = width / height;
 	scale = Math.max( scale || 100, 100 );

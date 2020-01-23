@@ -30,6 +30,7 @@ const Wrapper = styled.div`
 `;
 
 const Box = styled.div`
+	background-color: ${ ( { theme } ) => theme.colors.bg.v1 };
 	display: flex;
 	flex-direction: row;
 	align-items: center;
