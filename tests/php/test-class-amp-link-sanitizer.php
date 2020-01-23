@@ -90,6 +90,11 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 				'expected_amp' => false,
 				'expected_rel' => null,
 			],
+			'fragment_identifier' => [
+				'href'         => $excluded_amp_link . '#heading',
+				'expected_amp' => false,
+				'expected_rel' => null,
+			],
 			'ugc-link'            => [
 				'rel'          => 'ugc',
 				'href'         => home_url( '/some/user/generated/data/' ),

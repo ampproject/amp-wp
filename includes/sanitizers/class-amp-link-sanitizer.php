@@ -165,7 +165,7 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 				&&
 				'#' !== substr( $href, 0, 1 )
 				&&
-				! in_array( $href, $this->args['excluded_urls'], true )
+				! in_array( strtok( $href, '#' ), $this->args['excluded_urls'], true )
 			) {
 				// Always add the amphtml link relation when linking enabled.
 				array_push( $rel, self::REL_VALUE_AMP );
