@@ -16,7 +16,7 @@ import { useStory } from '../../app/story';
 
 const Page = styled.button`
 	padding: 0;
-	margin: 0 5px;
+	margin: 0;
 	border: 3px solid ${ ( { isActive, theme } ) => isActive ? theme.colors.selection : theme.colors.bg.v1 };
 	height: ${ ( { height } ) => height }px;
 	width: ${ ( { width } ) => width }px;
