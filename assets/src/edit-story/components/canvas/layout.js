@@ -36,15 +36,6 @@ const Layer = styled.div`
     "carousel  carousel  carousel  carousel  carousel" 65px
     / 1fr ${ PAGE_NAV_WIDTH }px ${ PAGE_WIDTH }px ${ PAGE_NAV_WIDTH }px 1fr;
 `;
-/* QQQQQ
-  --qqqq-grid:
-    ".    .      . .          . .        ." 1fr
-    ".    prev   . page       . next     ." ${ PAGE_HEIGHT }px
-    ".    .      . menu       . .        ." 48px
-    ".    .      . .          . .        ." 1fr
-    ".    carousel      carousel carousel  carousel carousel        ." 60px
-    / 1fr ${ LEFT_NAV_WIDTH }px ${ PAGE_NAV_BUTTON_WIDTH }px ${ PAGE_WIDTH }px ${ PAGE_NAV_BUTTON_WIDTH }px ${ LEFT_NAV_WIDTH }px 1fr;
-*/
 
 const Area = styled.div`
   ${ PointerEventsCss }

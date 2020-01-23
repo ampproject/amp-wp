@@ -9,7 +9,7 @@ import styled from 'styled-components';
 import { useStory } from '../../app';
 import withOverlay from '../overlay/withOverlay';
 import { Layer, PageArea } from './layout';
-import ElementFrame from './elementFrame';
+import FrameElement from './frameElement';
 import Selection from './selection';
 
 const FramesPageArea = withOverlay( styled( PageArea ).attrs( { className: 'container', pointerEvents: true } )`
@@ -24,7 +24,7 @@ function FramesLayer() {
 			<FramesPageArea>
 				{ currentPage && currentPage.elements.map( ( { id, ...rest } ) => {
 					return (
-						<ElementFrame
+						<FrameElement
 							key={ id }
 							element={ { id, ...rest } }
 						/>

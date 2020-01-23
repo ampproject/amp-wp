@@ -9,7 +9,7 @@ import styled from 'styled-components';
 import { getDefinitionForType } from '../../elements';
 import { useStory } from '../../app';
 import withOverlay from '../overlay/withOverlay';
-import ElementEdit from './elementEdit';
+import EditElement from './editElement';
 import { Layer, PageArea } from './layout';
 import useCanvas from './useCanvas';
 
@@ -41,7 +41,7 @@ function EditLayer( {} ) {
 	return (
 		<LayerWithGrayout grayout={ editModeGrayout } pointerEvents={ false }>
 			<EditPageArea>
-				<ElementEdit element={ editingElement } />
+				<EditElement element={ editingElement } />
 			</EditPageArea>
 		</LayerWithGrayout>
 	);

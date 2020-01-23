@@ -20,7 +20,7 @@ const Wrapper = styled.div`
 	background-color: ${ ( { theme } ) => theme.colors.whiteout };
 `;
 
-function ElementEdit( {
+function EditElement( {
 	element: {
 		id,
 		type,
@@ -50,8 +50,8 @@ function ElementEdit( {
 	);
 }
 
-ElementEdit.propTypes = {
+EditElement.propTypes = {
 	element: PropTypes.object.isRequired,
 };
 
-export default ElementEdit;
+export default EditElement;

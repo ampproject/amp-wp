@@ -1,4 +1,3 @@
-// QQQ: rename to `elementDisplay.js`
 /**
  * External dependencies
  */
@@ -24,7 +23,7 @@ const Wrapper = styled.div`
 	contain: layout paint;
 `;
 
-function ElementDisplay( {
+function DisplayElement( {
 	element: {
 		id,
 		type,
@@ -70,8 +69,8 @@ function ElementDisplay( {
 	);
 }
 
-ElementDisplay.propTypes = {
+DisplayElement.propTypes = {
 	element: PropTypes.object.isRequired,
 };
 
-export default ElementDisplay;
+export default DisplayElement;

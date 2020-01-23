@@ -7,7 +7,7 @@ import styled from 'styled-components';
  * Internal dependencies
  */
 import EditLayer from './editLayer';
-import DisplayLayer from './page';
+import DisplayLayer from './displayLayer';
 import FramesLayer from './framesLayer';
 import NavLayer from './navLayer';
 import SelectionCanvas from './selectionCanvas';

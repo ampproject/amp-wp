@@ -1,4 +1,3 @@
-//QQQQ: rename file to `displayLayer.js`
 /**
  * External dependencies
  */
@@ -9,7 +8,7 @@ import styled from 'styled-components';
  */
 import { useStory } from '../../app';
 import useCanvas from './useCanvas';
-import Element from './element';
+import DisplayElement from './displayElement';
 import { Layer, PageArea } from './layout';
 
 const DisplayPageArea = styled( PageArea ).attrs( { className: 'container', overflow: false } )`
@@ -33,7 +32,7 @@ function DisplayLayer() {
 						return null;
 					}
 					return (
-						<Element
+						<DisplayElement
 							key={ id }
 							element={ { id, ...rest } }
 						/>

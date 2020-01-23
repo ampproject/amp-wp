@@ -28,7 +28,7 @@ const Wrapper = styled.div`
   }
 `;
 
-function ElementFrame( {
+function FrameElement( {
 	element: {
 		id,
 		type,
@@ -79,8 +79,8 @@ function ElementFrame( {
 	);
 }
 
-ElementFrame.propTypes = {
+FrameElement.propTypes = {
 	element: PropTypes.object.isRequired,
 };
 
-export default ElementFrame;
+export default FrameElement;
