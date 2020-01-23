@@ -148,13 +148,46 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertEquals( 101, has_action( 'admin_bar_menu', [ self::TESTED_CLASS, 'add_admin_bar_menu_items' ] ) );
 
 		$this->assertFalse( has_action( 'wp', [ self::TESTED_CLASS, 'wrap_widget_callbacks' ] ) );
+	}
 
-		// Make sure should_locate_sources arg is recognized.
-		remove_all_filters( 'amp_validation_error_sanitized' );
-		$this->accept_sanitization_by_default( false );
-		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = AMP_Validation_Manager::get_amp_validate_nonce();
-		AMP_Validation_Manager::init();
-		$this->assertEquals( 10, has_action( 'wp', [ self::TESTED_CLASS, 'wrap_widget_callbacks' ] ) );
+	/**
+	 * Test init_validate_request without error.
+	 *
+	 * @covers AMP_Validation_Manager::init_validate_request()
+	 */
+	public function test_init_validate_request_without_error() {
+		$this->assertFalse( AMP_Validation_Manager::should_validate_response() );
+		AMP_Validation_Manager::init_validate_request();
+		$this->assertFalse( AMP_Validation_Manager::$is_validate_request );
+
+		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = wp_slash( AMP_Validation_Manager::get_amp_validate_nonce() ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$this->assertTrue( AMP_Validation_Manager::should_validate_response() );
+		AMP_Validation_Manager::init_validate_request();
+		$this->assertTrue( AMP_Validation_Manager::$is_validate_request );
+	}
+
+	/**
+	 * Test init_validate_request without error.
+	 *
+	 * @covers AMP_Validation_Manager::init_validate_request()
+	 */
+	public function test_init_validate_request_with_error() {
+		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = 'bad';
+		$this->assertInstanceOf( 'WP_Error', AMP_Validation_Manager::should_validate_response() );
+		add_filter( 'wp_doing_ajax', '__return_true' );
+		ob_start();
+		$died = false;
+		add_filter(
+			'wp_die_ajax_handler',
+			function() use ( &$died ) {
+				return function() use ( &$died ) {
+					$died = true;
+				};
+			}
+		);
+		AMP_Validation_Manager::init_validate_request();
+		ob_end_clean();
+		$this->assertTrue( $died );
 	}
 
 	/**
@@ -414,6 +447,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 */
 	public function test_add_validation_error_sourcing() {
 		AMP_Validation_Manager::add_validation_error_sourcing();
+		$this->assertEquals( ~PHP_INT_MAX, has_filter( 'setup_theme', [ self::TESTED_CLASS, 'set_theme_variables' ] ) );
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'the_content', [ self::TESTED_CLASS, 'decorate_filter_source' ] ) );
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'the_excerpt', [ self::TESTED_CLASS, 'decorate_filter_source' ] ) );
 		$this->assertEquals( PHP_INT_MAX, has_action( 'do_shortcode_tag', [ self::TESTED_CLASS, 'decorate_shortcode_source' ] ) );

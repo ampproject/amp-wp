@@ -307,6 +307,9 @@ function amp_deactivate() {
 	flush_rewrite_rules( false );
 }
 
+// The plugins_loaded action is the earliest we can run this since that is when pluggable.php has been required and wp_hash() is available.
+add_action( 'plugins_loaded', [ 'AMP_Validation_Manager', 'init_validate_request' ], ~PHP_INT_MAX );
+
 /*
  * Register AMP scripts regardless of whether AMP is enabled or it is the AMP endpoint
  * for the sake of being able to use AMP components on non-AMP documents ("dirty AMP").

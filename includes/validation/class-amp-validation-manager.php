@@ -207,21 +207,6 @@ class AMP_Validation_Manager {
 	 * @return void
 	 */
 	public static function init() {
-		$should_validate_response = self::should_validate_response();
-
-		// Short-circuit validation requests that are unauthorized.
-		if ( $should_validate_response instanceof WP_Error ) {
-			wp_send_json(
-				[
-					'code'    => $should_validate_response->get_error_code(),
-					'message' => $should_validate_response->get_error_message(),
-				],
-				401
-			);
-		}
-
-		self::$is_validate_request = $should_validate_response;
-
 		AMP_Validated_URL_Post_Type::register();
 		AMP_Validation_Error_Taxonomy::register();
 
@@ -262,10 +247,6 @@ class AMP_Validation_Manager {
 		}
 
 		add_action( 'wp', [ __CLASS__, 'override_validation_error_statuses' ] );
-
-		if ( self::$is_validate_request ) {
-			self::add_validation_error_sourcing();
-		}
 	}
 
 	/**
@@ -599,13 +580,45 @@ class AMP_Validation_Manager {
 	}
 
 	/**
+	 * Initialize a validate request.
+	 *
+	 * This function is called as early as possible, at the plugins_loaded action, to see if the current request is to
+	 * validate the response. If the validate query arg is absent, then this does nothing. If the query arg is present,
+	 * but the value is not a valid auth key, then wp_send_json() is invoked to short-circuit with a failure. Otherwise,
+	 * the static $is_validate_request variable is set to true.
+	 *
+	 * @since 1.5
+	 */
+	public static function init_validate_request() {
+		$should_validate_response = self::should_validate_response();
+
+		if ( true === $should_validate_response ) {
+			self::add_validation_error_sourcing();
+			self::$is_validate_request = true;
+		} else {
+			self::$is_validate_request = false;
+
+			// Short-circuit validation requests that are unauthorized.
+			if ( $should_validate_response instanceof WP_Error ) {
+				wp_send_json(
+					[
+						'code'    => $should_validate_response->get_error_code(),
+						'message' => $should_validate_response->get_error_message(),
+					],
+					401
+				);
+			}
+		}
+	}
+
+	/**
 	 * Add hooks for doing determining sources for validation errors during preprocessing/sanitizing.
 	 */
 	public static function add_validation_error_sourcing() {
-		self::$template_directory   = wp_normalize_path( get_template_directory() );
-		self::$template_slug        = get_template();
-		self::$stylesheet_directory = wp_normalize_path( get_stylesheet_directory() );
-		self::$stylesheet_slug      = get_stylesheet();
+		self::set_theme_variables();
+
+		// Call again at setup_theme in case a plugin has dynamically changed the theme.
+		add_action( 'setup_theme', [ __CLASS__, 'set_theme_variables' ], ~PHP_INT_MAX );
 
 		add_action( 'wp', [ __CLASS__, 'wrap_widget_callbacks' ] );
 
@@ -617,16 +630,17 @@ class AMP_Validation_Manager {
 
 		add_filter( 'do_shortcode_tag', [ __CLASS__, 'decorate_shortcode_source' ], PHP_INT_MAX, 2 );
 		add_filter( 'embed_oembed_html', [ __CLASS__, 'decorate_embed_source' ], PHP_INT_MAX, 3 );
+		add_filter( 'the_content', [ __CLASS__, 'add_block_source_comments' ], 8 ); // The do_blocks() function runs at priority 9.
+	}
 
-		$do_blocks_priority  = has_filter( 'the_content', 'do_blocks' );
-		$is_gutenberg_active = (
-			false !== $do_blocks_priority
-			&&
-			class_exists( 'WP_Block_Type_Registry' )
-		);
-		if ( $is_gutenberg_active ) {
-			add_filter( 'the_content', [ __CLASS__, 'add_block_source_comments' ], $do_blocks_priority - 1 );
-		}
+	/**
+	 * Set theme variables.
+	 */
+	public static function set_theme_variables() {
+		self::$template_directory   = wp_normalize_path( get_template_directory() );
+		self::$template_slug        = get_template();
+		self::$stylesheet_directory = wp_normalize_path( get_stylesheet_directory() );
+		self::$stylesheet_slug      = get_stylesheet();
 	}
 
 	/**
