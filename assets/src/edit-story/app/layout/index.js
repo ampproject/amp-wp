@@ -12,6 +12,7 @@ import Inspector from '../../components/inspector';
 import Library from '../../components/library';
 import Canvas from '../../components/canvas';
 import { ADMIN_TOOLBAR_HEIGHT, LIBRARY_MIN_WIDTH, LIBRARY_MAX_WIDTH, INSPECTOR_MIN_WIDTH, INSPECTOR_MAX_WIDTH, HEADER_HEIGHT } from '../../constants';
+import DropZoneProvider from '../../components/dropzone/dropZoneProvider';
 
 const Editor = styled.div`
 	font-family: ${ ( { theme } ) => theme.fonts.body1.family };
@@ -33,9 +34,11 @@ const Editor = styled.div`
 		/ minmax(${ LIBRARY_MIN_WIDTH }px, ${ LIBRARY_MAX_WIDTH }px) 1fr minmax(${ INSPECTOR_MIN_WIDTH }px, ${ INSPECTOR_MAX_WIDTH }px);
 `;
 
+// @todo: set `overflow: hidden;` once page size is responsive.
 const Area = styled.div`
   grid-area: ${ ( { area } ) => area };
   position: relative;
+  z-index: ${ ( { area } ) => area === 'canv' ? 1 : 2 };
 `;
 
 function Layout() {
@@ -48,7 +51,9 @@ function Layout() {
 				<Library />
 			</Area>
 			<Area area="canv">
-				<Canvas />
+				<DropZoneProvider>
+					<Canvas />
+				</DropZoneProvider>
 			</Area>
 			<Area area="insp">
 				<Inspector />

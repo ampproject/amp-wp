@@ -24,7 +24,7 @@ const Input = styled.input`
 	width: 100px;
 `;
 
-function InputGroup( { type, label, value, isMultiple, onChange, postfix, disabled, min, max } ) {
+function InputGroup( { type, label, value, isMultiple, onChange, postfix, disabled, ...rest } ) {
 	const placeholder = isMultiple ? __( '( multiple )', 'amp' ) : '';
 	const isCheckbox = type === 'checkbox';
 	return (
@@ -33,15 +33,14 @@ function InputGroup( { type, label, value, isMultiple, onChange, postfix, disabl
 				{ label }
 			</Label>
 			<Input
-				type={ type || 'number' }
+				type={ type }
 				disabled={ disabled }
 				onChange={ ( evt ) => onChange( isCheckbox ? evt.target.checked : evt.target.value, evt ) }
 				onBlur={ ( evt ) => evt.target.form.dispatchEvent( new window.Event( 'submit' ) ) }
 				placeholder={ placeholder }
-				value={ isCheckbox ? '' : value }
+				value={ isCheckbox ? 'on' : value }
 				checked={ isCheckbox ? value : null }
-				min={ min ? min : null }
-				max={ max ? max : null }
+				{ ...rest }
 			/>
 			{ postfix }
 		</Group>
@@ -56,16 +55,12 @@ InputGroup.propTypes = {
 	onChange: PropTypes.func.isRequired,
 	postfix: PropTypes.string,
 	disabled: PropTypes.bool,
-	min: PropTypes.any,
-	max: PropTypes.any,
 };
 
 InputGroup.defaultProps = {
 	type: 'number',
 	postfix: '',
 	disabled: false,
-	min: null,
-	max: null,
 };
 
 export default InputGroup;

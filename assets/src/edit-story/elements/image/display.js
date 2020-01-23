@@ -7,15 +7,14 @@ import styled from 'styled-components';
 /**
  * WordPress dependencies
  */
-import { useCallback } from '@wordpress/element';
+import { useRef } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import { useCanvas } from '../../components/canvas';
-import useDoubleClick from '../../utils/useDoubleClick';
 import { ElementFillContent } from '../shared';
-import { getImgProps, ImageWithScale } from './util';
+import { useTransformHandler } from '../../components/canvas';
+import { ImageWithScale, getImgProps, getImageWithScaleCss } from './util';
 
 const Element = styled.div`
 	${ ElementFillContent }
@@ -28,16 +27,27 @@ const Img = styled.img`
 `;
 
 function ImageDisplay( { id, src, origRatio, width, height, scale, focalX, focalY } ) {
+	const imageRef = useRef( null );
+
+	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
 	const imgProps = getImgProps( width, height, scale, focalX, focalY, origRatio );
-	const {
-		actions: { setEditingElement },
-	} = useCanvas();
-	const handleSingleClick = useCallback( () => {}, [] );
-	const handleDoubleClick = useCallback( () => setEditingElement( id ), [ id, setEditingElement ] );
-	const getHandleClick = useDoubleClick( handleSingleClick, handleDoubleClick );
+
+	useTransformHandler( id, ( transform ) => {
+		const target = imageRef.current;
+		if ( transform === null ) {
+			target.style.transform = '';
+		} else {
+			const { resize } = transform;
+			if ( resize[ 0 ] !== 0 && resize[ 1 ] !== 0 ) {
+				const newImgProps = getImgProps( resize[ 0 ], resize[ 1 ], scale, focalX, focalY, origRatio );
+				target.style.cssText = getImageWithScaleCss( newImgProps );
+			}
+		}
+	} );
+
 	return (
-		<Element onClick={ getHandleClick( id ) }>
-			<Img draggable={ false } src={ src } { ...imgProps } />
+		<Element>
+			<Img ref={ imageRef } draggable={ false } src={ src } { ...imgProps } />
 		</Element>
 	);
 }
