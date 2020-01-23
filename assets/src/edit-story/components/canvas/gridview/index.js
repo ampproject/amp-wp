@@ -110,7 +110,7 @@ function RangeControl( { value, onChange } ) {
 			<RangeInput
 				min="1"
 				max="3"
-				steps="1"
+				step="1"
 				value={ value }
 				onChange={ ( evt ) => onChange( Number( evt.target.value ) ) }
 			/>
