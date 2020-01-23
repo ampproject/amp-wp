@@ -1638,10 +1638,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 				'https://example.com',
 				'https',
 			],
-			'leading_space'     => [
-				'  https://foo',
-				'https',
-			],
 			'trailing_space'    => [
 				'https://foo.com ',
 				'https',
