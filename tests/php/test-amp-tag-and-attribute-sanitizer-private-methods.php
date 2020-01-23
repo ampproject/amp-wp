@@ -1620,6 +1620,61 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 	}
 
 	/**
+	 * Gets the test data for test_parse_protocol().
+	 *
+	 * @return array The test data.
+	 */
+	public function get_parse_protocol_data() {
+		return [
+			'empty_string'      => [
+				'',
+				false,
+			],
+			'only_space'        => [
+				'  ',
+				false,
+			],
+			'traditional_https' => [
+				'https://example.com',
+				'https',
+			],
+			'leading_space'     => [
+				'  https://foo',
+				'https',
+			],
+			'trailing_space'    => [
+				'https://foo.com ',
+				'https',
+			],
+			'no_colon'          => [
+				'//image.png ',
+				false,
+			],
+		];
+	}
+
+	/**
+	 * Tests parse_protocol.
+	 *
+	 * @dataProvider get_parse_protocol_data
+	 * @group allowed-tags-private-methods
+	 * @covers AMP_Tag_And_Attribute_Sanitizer::parse_protocol()
+	 *
+	 * @param array  $url      The URL to parse.
+	 * @param string $expected The expected return value.
+	 * @throws ReflectionException If it's not possible to create a reflection to call the private method.
+	 */
+	public function test_parse_protocol( $url, $expected ) {
+		$dom       = AMP_DOM_Utils::get_dom_from_content( '' );
+		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+
+		$this->assertEquals(
+			$expected,
+			$this->call_private_method( $sanitizer, 'parse_protocol', [ $url ] )
+		);
+	}
+
+	/**
 	 * @dataProvider get_check_attr_spec_rule_allowed_protocol
 	 * @group allowed-tags-private-methods
 	 */
