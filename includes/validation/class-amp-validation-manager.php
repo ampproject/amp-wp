@@ -1140,7 +1140,13 @@ class AMP_Validation_Manager {
 					continue;
 				}
 				foreach ( self::$enqueued_style_sources as $enqueued_style_sources_handle => $enqueued_style_sources ) {
-					if ( $enqueued_style_sources_handle !== $style_handle && self::has_dependency( wp_styles(), $enqueued_style_sources_handle, $style_handle ) ) {
+					if (
+						$enqueued_style_sources_handle !== $style_handle
+						&&
+						wp_styles()->query( $enqueued_style_sources_handle, 'done' )
+						&&
+						self::has_dependency( wp_styles(), $enqueued_style_sources_handle, $style_handle )
+					) {
 						$sources = array_merge(
 							array_map(
 								static function ( $enqueued_style_source ) use ( $style_handle ) {
@@ -1227,7 +1233,13 @@ class AMP_Validation_Manager {
 						continue;
 					}
 					foreach ( self::$enqueued_script_sources as $enqueued_script_sources_handle => $enqueued_script_sources ) {
-						if ( $enqueued_script_sources_handle !== $script_handle && self::has_dependency( wp_scripts(), $enqueued_script_sources_handle, $script_handle ) ) {
+						if (
+							$enqueued_script_sources_handle !== $script_handle
+							&&
+							wp_scripts()->query( $enqueued_script_sources_handle, 'done' )
+							&&
+							self::has_dependency( wp_scripts(), $enqueued_script_sources_handle, $script_handle )
+						) {
 							$sources = array_merge(
 								array_map(
 									static function ( $enqueued_script_source ) use ( $script_handle ) {
