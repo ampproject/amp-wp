@@ -38,7 +38,7 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 		$wp_rewrite->init();
 		$wp_rewrite->flush_rules();
 
-		$post_link          = get_permalink(
+		$post_link         = get_permalink(
 			self::factory()->post->create(
 				[
 					'post_name'   => 'link-target-post',
@@ -47,8 +47,8 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 				]
 			)
 		);
-		$excluded_amp_link  = get_permalink( self::factory()->post->create() );
-		$excluded_urls      = [ $excluded_amp_link ];
+		$excluded_amp_link = get_permalink( self::factory()->post->create() );
+		$excluded_urls     = [ $excluded_amp_link ];
 
 		$links = [
 			'home-link'           => [

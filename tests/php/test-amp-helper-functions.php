@@ -831,7 +831,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$sanitizers = amp_get_content_sanitizers();
 		$this->assertEquals(
 			[
-				'paired'             => true,
+				'paired'        => true,
 				'excluded_urls' => [],
 			],
 			$sanitizers[ $link_sanitizer_class_name ]
@@ -849,7 +849,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$sanitizers = amp_get_content_sanitizers();
 		$this->assertEquals(
 			[
-				'paired'             => true,
+				'paired'        => true,
 				'excluded_urls' => $excluded_urls,
 			],
 			$sanitizers[ $link_sanitizer_class_name ]
