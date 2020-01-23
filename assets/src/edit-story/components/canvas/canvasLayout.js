@@ -47,8 +47,7 @@ function CanvasLayout() {
     	setPageSize({width: 412, height: 732});
     } else {
     	console.log('QQQQ: setPageSize: ', {width: 268, height: 476});
-    	//QQQQ
-    	// setPageSize({width: 268, height: 476});
+    	setPageSize({width: 268, height: 476});
     }
 	});
 
