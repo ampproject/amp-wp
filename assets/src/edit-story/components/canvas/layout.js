@@ -29,12 +29,14 @@ const Layer = styled.div`
 
   display: grid;
   grid:
-    ".         .         .         .         .       " minmax(${ PAGE_PADDING }px, 1fr)
+    ".         .         .         .         .       " 1fr
     ".         prev      page      next      .       " ${ PAGE_HEIGHT }px
     ".         .         menu      .         .       " 48px
-    ".         .         .         .         .       " minmax(${ PAGE_PADDING }px, 1fr)
-    "carousel  carousel  carousel  carousel  carousel" auto
+    ".         .         .         .         .       " 1fr
+    "carousel  carousel  carousel  carousel  carousel" 65px
     / 1fr ${ PAGE_NAV_WIDTH }px ${ PAGE_WIDTH }px ${ PAGE_NAV_WIDTH }px 1fr;
+`;
+/* QQQQQ
   --qqqq-grid:
     ".    .      . .          . .        ." 1fr
     ".    prev   . page       . next     ." ${ PAGE_HEIGHT }px
@@ -42,7 +44,7 @@ const Layer = styled.div`
     ".    .      . .          . .        ." 1fr
     ".    carousel      carousel carousel  carousel carousel        ." 60px
     / 1fr ${ LEFT_NAV_WIDTH }px ${ PAGE_NAV_BUTTON_WIDTH }px ${ PAGE_WIDTH }px ${ PAGE_NAV_BUTTON_WIDTH }px ${ LEFT_NAV_WIDTH }px 1fr;
-`;
+*/
 
 const Area = styled.div`
   ${ PointerEventsCss }

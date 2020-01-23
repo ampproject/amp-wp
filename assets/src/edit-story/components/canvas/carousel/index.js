@@ -17,8 +17,10 @@ import { useStory } from '../../../app';
 import { LeftArrow, RightArrow, GridView } from '../../button';
 import DropZone from '../../dropzone';
 
-const PAGE_WIDTH = 72;
-const PAGE_HEIGHT = 128;
+// @todo: Make responsive. Blocked on the header reimplementation and
+// responsive "page" size.
+const PAGE_HEIGHT = 50;
+const PAGE_WIDTH = PAGE_HEIGHT * 9 / 16;
 
 const Wrapper = styled.div`
 	position: relative;
@@ -26,6 +28,8 @@ const Wrapper = styled.div`
 	grid: "left-navigation carousel right-navigation" auto / 53px 1fr 53px;
 	background-color: ${ ( { theme } ) => theme.colors.bg.v1 };
 	color:  ${ ( { theme } ) => theme.colors.fg.v1 };
+	width: 100%;
+	height: 100%;
 `;
 
 const Area = styled.div`
@@ -47,11 +51,15 @@ const List = styled( Area )`
 const Page = styled.button`
 	padding: 0;
 	margin: 0 5px;
-	border: 3px solid ${ ( { isActive, theme } ) => isActive ? theme.colors.selection : theme.colors.bg.v1 };
 	height: ${ PAGE_HEIGHT }px;
 	width: ${ PAGE_WIDTH }px;
 	background-color: ${ ( { isActive, theme } ) => isActive ? theme.colors.fg.v1 : theme.colors.mg.v1 };
 	flex: none;
+
+	outline: 2px solid ${ ( { isActive, theme } ) => isActive ? theme.colors.selection : theme.colors.bg.v1 };
+	&:focus, &:hover {
+		outline: 2px solid ${ ( { theme } ) => theme.colors.selection };
+	}
 `;
 
 const GridViewButton = styled( GridView )`

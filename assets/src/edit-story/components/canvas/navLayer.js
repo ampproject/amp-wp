@@ -3,7 +3,7 @@
  */
 import PageMenu from './pagemenu';
 import PageNav from './pagenav';
-import Carrousel from './carrousel';
+import Carousel from './carousel';
 import {
 	Layer,
 	MenuArea,
@@ -25,7 +25,7 @@ function NavLayer() {
 				<PageNav />
 			</NavNextArea>
 			<CarouselArea pointerEvents={ true }>
-				<Carrousel />
+				<Carousel />
 			</CarouselArea>
 		</Layer>
 	);
