@@ -54,8 +54,8 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	protected $DEFAULT_ARGS = [ // phpcs:ignore WordPress.NamingConventions.ValidVariableName.PropertyNotSnakeCase
-		'paired'             => false, // Only set to true when in a paired mode (will be false when amp_is_canonical()). Controls whether query var is added.
-		'meta_content'       => self::DEFAULT_META_CONTENT,
+		'paired'        => false, // Only set to true when in a paired mode (will be false when amp_is_canonical()). Controls whether query var is added.
+		'meta_content'  => self::DEFAULT_META_CONTENT,
 		'excluded_urls' => [], // URLs in this won't have AMP-to-AMP links in a paired mode.
 	];
 
