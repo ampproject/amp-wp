@@ -15,6 +15,7 @@ import { useRef } from '@wordpress/element';
 import { getDefinitionForType } from '../../elements';
 import { ElementWithPosition, ElementWithSize, ElementWithRotation, getBox } from '../../elements/shared';
 import useTransformHandler from './useTransformHandler';
+import useCanvas from './useCanvas';
 
 const Wrapper = styled.div`
 	${ ElementWithPosition }
@@ -36,12 +37,23 @@ function DisplayElement( {
 		...rest
 	},
 } ) {
+	const {
+		actions: { dataToEditorX, dataToEditorY },
+	} = useCanvas();
+
 	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
 	const { Display } = getDefinitionForType( type );
 
 	const wrapperRef = useRef( null );
 
-	const box = getBox( { x, y, width, height, rotationAngle, isFullbleed } );
+	const box1 = getBox( { x, y, width, height, rotationAngle, isFullbleed } );
+	const box = {
+		x: dataToEditorX(box1.x),
+		y: dataToEditorY(box1.y),
+		width: dataToEditorX(box1.width),
+		height: dataToEditorY(box1.height),
+		rotationAngle: box1.rotationAngle,
+	};
 	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
 	const props = { ...box, ...rest, id };
 

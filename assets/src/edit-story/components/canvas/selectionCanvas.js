@@ -47,7 +47,7 @@ function SelectionCanvas( { children } ) {
 	} = useStory();
 	const {
 		state: { pageContainer },
-		actions: { clearEditing, selectIntersection },
+		actions: { clearEditing, selectIntersection, editorToDataX, editorToDataY },
 	} = useCanvas();
 
 	const overlayRef = useRef( null );
@@ -116,9 +116,11 @@ function SelectionCanvas( { children } ) {
 
 	const onMouseUp = ( ) => {
 		if ( lassoModeRef.current === LassoMode.ON ) {
-			const [ ox, oy, width, height ] = getLassoBox();
-			const x = ox - pageContainer.offsetLeft;
-			const y = oy - pageContainer.offsetTop;
+			const [ lx, ly, lwidth, lheight ] = getLassoBox();
+			const x = editorToDataX(lx - pageContainer.offsetLeft);
+			const y = editorToDataY(ly - pageContainer.offsetTop);
+			const width = editorToDataX(lwidth);
+			const height = editorToDataY(lheight);
 			clearSelection();
 			clearEditing();
 			selectIntersection( { x, y, width, height } );

@@ -28,11 +28,11 @@ const Layer = styled.div`
   display: grid;
   grid:
     ".         .         .         .         .       " 1fr
-    ".         prev      page      next      .       " ${ PAGE_HEIGHT }px
+    ".         prev      page      next      .       " var(--page-height-px)
     ".         .         menu      .         .       " 48px
     ".         .         .         .         .       " 1fr
     "carousel  carousel  carousel  carousel  carousel" 65px
-    / 1fr ${ PAGE_NAV_WIDTH }px ${ PAGE_WIDTH }px ${ PAGE_NAV_WIDTH }px 1fr;
+    / 1fr ${ PAGE_NAV_WIDTH }px var(--page-width-px) ${ PAGE_NAV_WIDTH }px 1fr;
 `;
 
 const Area = styled.div`

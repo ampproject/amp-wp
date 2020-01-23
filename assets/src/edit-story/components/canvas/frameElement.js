@@ -45,7 +45,7 @@ function FrameElement( {
 	const element = useRef();
 
 	const {
-		actions: { setNodeForElement, handleSelectElement },
+		actions: { setNodeForElement, handleSelectElement, dataToEditorX, dataToEditorY },
 	} = useCanvas();
 
 	const {
@@ -58,7 +58,14 @@ function FrameElement( {
 
 	const isSelected = selectedElements.includes( id );
 
-	const box = getBox( { x, y, width, height, rotationAngle, isFullbleed } );
+	const box1 = getBox( { x, y, width, height, rotationAngle, isFullbleed } );
+	const box = {
+		x: dataToEditorX(box1.x),
+		y: dataToEditorY(box1.y),
+		width: dataToEditorX(box1.width),
+		height: dataToEditorY(box1.height),
+		rotationAngle: box1.rotationAngle,
+	};
 	const props = { ...box, ...rest, id };
 
 	return (

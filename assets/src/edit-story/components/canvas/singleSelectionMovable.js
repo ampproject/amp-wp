@@ -29,7 +29,7 @@ function SingleSelectionMovable( {
 	const [ isResizingFromCorner, setIsResizingFromCorner ] = useState( true );
 
 	const { actions: { updateSelectedElements } } = useStory();
-	const { actions: { pushTransform } } = useCanvas();
+	const { actions: { pushTransform, editorToDataX, editorToDataY } } = useCanvas();
 
 	const latestEvent = useRef();
 
@@ -115,7 +115,10 @@ function SingleSelectionMovable( {
 			onDragEnd={ ( { target } ) => {
 				// When dragging finishes, set the new properties based on the original + what moved meanwhile.
 				if ( frame.translate[ 0 ] !== 0 && frame.translate[ 1 ] !== 0 ) {
-					const properties = { x: selectedElement.x + frame.translate[ 0 ], y: selectedElement.y + frame.translate[ 1 ] };
+					const properties = {
+						x: selectedElement.x + editorToDataX(frame.translate[ 0 ]),
+						y: selectedElement.y + editorToDataY(frame.translate[ 1 ]),
+					};
 					updateSelectedElements( { properties } );
 				}
 				resetMoveable( target );
@@ -161,10 +164,10 @@ function SingleSelectionMovable( {
 			onResizeEnd={ ( { target } ) => {
 				if ( frame.resize[ 0 ] !== 0 && frame.resize[ 1 ] !== 0 ) {
 					const properties = {
-						width: frame.resize[ 0 ],
-						height: frame.resize[ 1 ],
-						x: selectedElement.x + frame.translate[ 0 ],
-						y: selectedElement.y + frame.translate[ 1 ],
+						width: editorToDataX(frame.resize[ 0 ]),
+						height: editorToDataY(frame.resize[ 1 ]),
+						x: selectedElement.x + editorToDataX(frame.translate[ 0 ]),
+						y: selectedElement.y + editorToDataY(frame.translate[ 1 ]),
 					};
 					if ( shouldAdjustFontSize ) {
 						properties.fontSize = calculateFitTextFontSize( target.firstChild, properties.height, properties.width );

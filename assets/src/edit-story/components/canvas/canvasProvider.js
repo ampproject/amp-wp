@@ -15,13 +15,12 @@ import { useStory } from '../../app';
 import useEditingElement from './useEditingElement';
 import useCanvasSelectionCopyPaste from './useCanvasSelectionCopyPaste';
 import Context from './context';
+import { PAGE_WIDTH, PAGE_HEIGHT } from '../../constants';
 
 function CanvasProvider( { children } ) {
 	const [ lastSelectionEvent, setLastSelectionEvent ] = useState( null );
 
-	// @todo: most likely can be simplified/redone once we deal with changing
-	// page size and offsets. We can simply pass the page's boundaries here
-	// instead of the whole element.
+	const [ pageSize, setPageSize ] = useState( {width: PAGE_WIDTH, height: PAGE_HEIGHT} );
 	const [ pageContainer, setPageContainer ] = useState( null );
 
 	const {
@@ -99,6 +98,19 @@ function CanvasProvider( { children } ) {
 		}
 	}, [ ] );
 
+	const dataToEditorX = useCallback(
+		( x ) => x * pageSize.width / PAGE_WIDTH,
+		[ pageSize.width ] );
+	const dataToEditorY = useCallback(
+		( y ) => y * pageSize.height / PAGE_HEIGHT,
+		[ pageSize.height ] );
+	const editorToDataX = useCallback(
+		( x ) => x * PAGE_WIDTH / pageSize.width,
+		[ pageSize.width ] );
+	const editorToDataY = useCallback(
+		( y ) => y * PAGE_HEIGHT / pageSize.height,
+		[ pageSize.height ] );
+
 	const state = {
 		state: {
 			pageContainer,
@@ -107,6 +119,7 @@ function CanvasProvider( { children } ) {
 			editingElementState,
 			isEditing: Boolean( editingElement ),
 			lastSelectionEvent,
+			pageSize,
 		},
 		actions: {
 			setPageContainer,
@@ -118,6 +131,11 @@ function CanvasProvider( { children } ) {
 			selectIntersection,
 			registerTransformHandler,
 			pushTransform,
+			setPageSize,
+			dataToEditorX,
+			dataToEditorY,
+			editorToDataX,
+			editorToDataY,
 		},
 	};
 
