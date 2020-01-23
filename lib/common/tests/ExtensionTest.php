@@ -47,7 +47,7 @@ class ExtensionTest extends TestCase
     {
         $dom     = new Document();
         $element = $dom->createElement(Tag::SCRIPT);
-        $element->setAttribute(Extension::CUSTOM_ELEMENT_TAG_NAME, $extensionName);
+        $element->setAttribute(Extension::CUSTOM_ELEMENT, $extensionName);
         $this->assertEquals($expected, Extension::isRenderDelayingExtension($element));
     }
 
