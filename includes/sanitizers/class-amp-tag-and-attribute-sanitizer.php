@@ -1666,7 +1666,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return string|null Protocol without colon if matched. Otherwise null.
 	 */
 	private function parse_protocol( $url ) {
-		if ( preg_match( '#^\s*([^/]+)(?=:)#', $url, $matches ) ) {
+		if ( preg_match( '#^\s*([^/]+):#', $url, $matches ) ) {
 			return $matches[1];
 		}
 		return null;

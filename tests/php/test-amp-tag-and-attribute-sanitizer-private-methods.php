@@ -1650,6 +1650,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 				'//image.png ',
 				false,
 			],
+			'two_colons'        => [
+				'foo:baz://image.png ',
+				'foo:baz',
+			],
 		];
 	}
 
