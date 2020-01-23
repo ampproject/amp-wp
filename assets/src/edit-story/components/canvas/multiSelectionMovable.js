@@ -73,6 +73,7 @@ function MultiSelectionMovable( { selectedElements, nodesById } ) {
 	const resetMoveable = () => {
 		targetList.forEach( ( { id, node }, i ) => {
 			frames[ i ].translate = [ 0, 0 ];
+			frames[ i ].resize = [ 0, 0 ];
 			node.style.transform = '';
 			node.style.width = '';
 			node.style.height = '';
@@ -106,8 +107,8 @@ function MultiSelectionMovable( { selectedElements, nodesById } ) {
 				properties.rotationAngle = frames[ i ].rotate;
 			}
 			if ( isResize ) {
-				properties.width = parseInt( target.style.width );
-				properties.height = parseInt( target.style.height );
+				properties.width = frames[ i ].resize.width;
+				properties.height = frames[ i ].resize.height;
 				const isText = 'text' === targetList[ i ].type;
 				if ( isText ) {
 					properties.fontSize = calculateFitTextFontSize( target.firstChild, properties.height, properties.width );
@@ -177,7 +178,8 @@ function MultiSelectionMovable( { selectedElements, nodesById } ) {
 						target.style.fontSize = calculateFitTextFontSize( target.firstChild, height, width );
 					}
 					sFrame.translate = drag.beforeTranslate;
-					setTransformStyle( target, sFrame );
+					sFrame.resize = [ width, height ];
+					setTransformStyle( targetList[ i ].id, target, sFrame );
 				} );
 			} }
 			onResizeGroupEnd={ ( { targets } ) => {
