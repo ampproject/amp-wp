@@ -161,8 +161,8 @@ jobs:
         - composer --working-dir=lib/common test
         - composer --working-dir=lib/optimizer test
 
-    - name: Libraries that are meant to be externalized (7.4)
-      php: "7.4"
+    - name: Libraries that are meant to be externalized (7.3)
+      php: "7.3"
       install:
         - composer --working-dir=lib/common install
         - composer --working-dir=lib/optimizer install
