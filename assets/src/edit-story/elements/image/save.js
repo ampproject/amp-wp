@@ -11,7 +11,7 @@ import { getCommonAttributes } from '../shared';
 /**
  * Returns AMP HTML for saving into post content for displaying in the FE.
  */
-function ImageSave( { id, src, width, height, x, y, rotationAngle } ) {
+function ImageSave( { isPreview, id, src, width, height, x, y, rotationAngle } ) {
 	const props = {
 		layout: 'fill',
 		src,
@@ -23,7 +23,7 @@ function ImageSave( { id, src, width, height, x, y, rotationAngle } ) {
 
 	return (
 		<div style={ { ...style } } { ...wrapperProps }>
-			<amp-img { ...props } />
+			{ isPreview ? <img alt="Preview" width="100%" { ...props } /> : <amp-img { ...props } /> }
 		</div>
 	);
 }

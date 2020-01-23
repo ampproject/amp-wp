@@ -12,16 +12,16 @@ import { generateFontFamily, getResponsiveFontSize } from './util';
 /**
  * Returns AMP HTML for saving into post content for displaying in the FE.
  */
-function TextSave( { id, content, color, backgroundColor, width, height, x, y, fontFamily, fontFallback, fontSize, fontWeight, fontStyle, rotationAngle } ) {
+function TextSave( { isPreview, id, content, color, backgroundColor, width, height, x, y, fontFamily, fontFallback, fontSize, fontWeight, fontStyle, rotationAngle } ) {
 	const style = {
 		...getCommonAttributes( { width, height, x, y, rotationAngle } ),
-		fontSize: getResponsiveFontSize( fontSize ),
+		fontSize: isPreview ? fontSize / 5.72 : getResponsiveFontSize( fontSize ),
 		fontStyle: fontStyle ? fontStyle : null,
 		fontFamily: generateFontFamily( fontFamily, fontFallback ),
 		fontWeight: fontWeight ? fontWeight : null,
 		background: backgroundColor,
 		color,
-		lineHeight: 1.3, // @todo This will be user-editable in the future.
+		lineHeight: isPreview ? 1.3 / 1.77 : 1.3, // @todo This will be user-editable in the future.
 	};
 
 	return (
