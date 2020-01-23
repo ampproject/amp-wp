@@ -15,7 +15,7 @@ import { generateFontFamily, getResponsiveFontSize } from './util';
 function TextSave( { id, content, color, backgroundColor, width, height, x, y, fontFamily, fontFallback, fontSize, fontWeight, fontStyle, rotationAngle, isPreview, previewSizeMultiplier } ) {
 	const style = {
 		...getCommonAttributes( { width, height, x, y, rotationAngle } ),
-		fontSize: isPreview ? fontSize * previewSizeMultiplier : getResponsiveFontSize( fontSize ),
+		fontSize: isPreview ? Math.ceil( fontSize * previewSizeMultiplier ) : getResponsiveFontSize( fontSize ),
 		fontStyle: fontStyle ? fontStyle : null,
 		fontFamily: generateFontFamily( fontFamily, fontFallback ),
 		fontWeight: fontWeight ? fontWeight : null,
