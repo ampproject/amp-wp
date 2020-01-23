@@ -13,8 +13,8 @@ import { useRef, useEffect } from '@wordpress/element';
  */
 import Movable from '../movable';
 import { useStory } from '../../app/story';
-import useCanvas from './useCanvas';
 import calculateFitTextFontSize from '../../utils/calculateFitTextFontSize';
+import useCanvas from './useCanvas';
 
 const CORNER_HANDLES = [ 'nw', 'ne', 'sw', 'se' ];
 

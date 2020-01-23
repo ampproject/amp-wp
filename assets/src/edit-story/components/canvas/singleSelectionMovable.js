@@ -13,10 +13,10 @@ import { useRef, useEffect, useState } from '@wordpress/element';
  */
 import { getBox } from '../../elements/shared';
 import { useStory } from '../../app';
-import useCanvas from './useCanvas';
 import Movable from '../movable';
 import calculateFitTextFontSize from '../../utils/calculateFitTextFontSize';
 import getAdjustedElementDimensions from '../../utils/getAdjustedElementDimensions';
+import useCanvas from './useCanvas';
 
 const ALL_HANDLES = [ 'n', 's', 'e', 'w', 'nw', 'ne', 'sw', 'se' ];
 
