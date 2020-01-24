@@ -25,7 +25,7 @@ const Input = styled.input`
 	letter-spacing: ${ ( { theme } ) => theme.fonts.body1.letterSpacing };
 	background: none !important;
 	border: 0px none !important;
-	text-align: center;
+	text-align: start;
 `;
 
 function Title() {
