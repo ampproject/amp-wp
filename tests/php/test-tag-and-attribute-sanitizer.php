@@ -1256,7 +1256,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_URL_PROTOCOL ],
 			],
 
-			'a_with_space_in_url'                          => [
+			'a_with_wrong_host'                            => [
 				'<a class="foo" href="http://foo bar">value</a>',
 				'<a class="foo">value</a>',
 				[],
@@ -1266,8 +1266,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<a class="foo" href="http://%65%78%61%6d%70%6c%65%2e%63%6f%6d/foo/">value</a>',
 				null,
 			],
-			'a_with_schemaless_host'                       => [
-				'<a class="foo" href="//domain.om/foo">value</a>',
+			'a_with_wrong_schemeless_host'                 => [
+				'<a class="foo" href="//bad domain with a space.com/foo">value</a>',
+				'<a class="foo">value</a>',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_URL ],
 			],
 			'a_with_mail_host'                             => [
 				'<a class="foo" href="mail to:foo@bar.com">value</a>',
