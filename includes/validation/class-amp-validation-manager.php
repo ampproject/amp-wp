@@ -1283,6 +1283,8 @@ class AMP_Validation_Manager {
 			}
 		}
 
+		$sources = array_unique( $sources, SORT_REGULAR );
+
 		return $sources;
 	}
 
