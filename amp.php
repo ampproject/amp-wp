@@ -28,7 +28,7 @@ global $_amp_load_errors;
 
 $_amp_load_errors = new WP_Error();
 
-if ( version_compare( phpversion(), '5.4', '<' ) ) {
+if ( version_compare( phpversion(), '5.6', '<' ) ) {
 	$_amp_load_errors->add(
 		'insufficient_php_version',
 		sprintf(
