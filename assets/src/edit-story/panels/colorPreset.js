@@ -10,7 +10,7 @@ import { Panel, PanelTitle, PanelContent } from './panel';
 
 function ColorPresetPanel() {
 	return (
-		<Panel>
+		<Panel name="colorpreset">
 			<PanelTitle isPrimary>
 				{ __( 'Color presets', 'amp' ) }
 			</PanelTitle>

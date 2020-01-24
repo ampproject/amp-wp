@@ -30,7 +30,7 @@ function SizePanel( { selectedElements, onSetProperties } ) {
 		evt.preventDefault();
 	};
 	return (
-		<SimplePanel title={ __( 'Size', 'amp' ) } onSubmit={ handleSubmit }>
+		<SimplePanel name="size" title={ __( 'Size', 'amp' ) } onSubmit={ handleSubmit }>
 			<InputGroup
 				label={ __( 'Width', 'amp' ) }
 				value={ state.width }

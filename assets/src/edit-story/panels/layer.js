@@ -10,7 +10,7 @@ import { Panel, PanelTitle, PanelContent } from './panel';
 
 function LayerPanel() {
 	return (
-		<Panel initialHeight={ 240 }>
+		<Panel name="layers" initialHeight={ 240 }>
 			<PanelTitle isPrimary isResizable>
 				{ __( 'Layers', 'amp' ) }
 			</PanelTitle>

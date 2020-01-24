@@ -39,7 +39,7 @@ function StylePanel( { selectedElements, onSetProperties } ) {
 	];
 
 	return (
-		<SimplePanel title={ __( 'Style', 'amp' ) } onSubmit={ handleSubmit }>
+		<SimplePanel name="style" title={ __( 'Style', 'amp' ) } onSubmit={ handleSubmit }>
 			<SelectMenu
 				label={ __( 'Alignment', 'amp' ) }
 				options={ alignmentOptions }

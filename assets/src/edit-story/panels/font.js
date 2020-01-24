@@ -45,7 +45,7 @@ function FontPanel( { selectedElements, onSetProperties } ) {
 	];
 
 	return (
-		<SimplePanel title={ __( 'Font', 'amp' ) } onSubmit={ handleSubmit }>
+		<SimplePanel name="font" title={ __( 'Font', 'amp' ) } onSubmit={ handleSubmit }>
 			{ fonts && <SelectMenu
 				label={ __( 'Font family', 'amp' ) }
 				options={ fonts }

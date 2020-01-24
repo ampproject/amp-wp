@@ -33,7 +33,7 @@ function ScalePanel( { selectedElements, onSetProperties } ) {
 		evt.preventDefault();
 	};
 	return (
-		<SimplePanel title={ __( 'Image actual size', 'amp' ) } onSubmit={ handleSubmit }>
+		<SimplePanel name="scale" title={ __( 'Image actual size', 'amp' ) } onSubmit={ handleSubmit }>
 			<InputGroup
 				label={ __( 'Scale', 'amp' ) }
 				value={ typeof state.scale === 'number' ? state.scale : '(auto)' }

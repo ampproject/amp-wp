@@ -26,7 +26,7 @@ function TextPanel( { selectedElements, onSetProperties } ) {
 		evt.preventDefault();
 	};
 	return (
-		<SimplePanel title={ __( 'Text', 'amp' ) } onSubmit={ handleSubmit }>
+		<SimplePanel name="text" title={ __( 'Text', 'amp' ) } onSubmit={ handleSubmit }>
 			<InputGroup
 				type="text"
 				label={ __( 'Text content', 'amp' ) }

@@ -30,7 +30,7 @@ function FullbleedPanel( { selectedElements, onSetProperties } ) {
 		onSetProperties( newState );
 	};
 	return (
-		<SimplePanel title={ __( 'Fullbleed', 'amp' ) }>
+		<SimplePanel name="fullbleed" title={ __( 'Fullbleed', 'amp' ) }>
 			<ActionButton onClick={ handleClick }>
 				{ state.isFullbleed ? __( 'Unset as fullbleed', 'amp' ) : __( 'Set as fullbleed', 'amp' ) }
 			</ActionButton>

@@ -27,7 +27,7 @@ function ColorPanel( { selectedElements, onSetProperties } ) {
 		evt.preventDefault();
 	};
 	return (
-		<SimplePanel title={ __( 'Color', 'amp' ) } onSubmit={ handleSubmit }>
+		<SimplePanel name="color" title={ __( 'Color', 'amp' ) } onSubmit={ handleSubmit }>
 			<InputGroup
 				type="color"
 				label={ __( 'Color', 'amp' ) }

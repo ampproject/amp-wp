@@ -10,9 +10,9 @@ import Panel from './panel';
 import PanelTitle from './title';
 import PanelContent from './content';
 
-function SimplePanel( { children, title, onSubmit } ) {
+function SimplePanel( { children, name, title, onSubmit } ) {
 	return (
-		<Panel>
+		<Panel name={ name }>
 			<PanelTitle>
 				{ title }
 			</PanelTitle>
@@ -28,6 +28,7 @@ SimplePanel.propTypes = {
 		PropTypes.arrayOf( PropTypes.node ),
 		PropTypes.node,
 	] ).isRequired,
+	name: PropTypes.string.isRequired,
 	title: PropTypes.string.isRequired,
 	onSubmit: PropTypes.func,
 };

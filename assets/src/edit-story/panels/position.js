@@ -29,7 +29,7 @@ function PositionPanel( { selectedElements, onSetProperties } ) {
 		evt.preventDefault();
 	};
 	return (
-		<SimplePanel title={ __( 'Position', 'amp' ) } onSubmit={ handleSubmit }>
+		<SimplePanel name="position" title={ __( 'Position', 'amp' ) } onSubmit={ handleSubmit }>
 			<InputGroup
 				label={ _x( 'X', 'The X axis', 'amp' ) }
 				value={ state.x }

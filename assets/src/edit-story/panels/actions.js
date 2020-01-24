@@ -35,7 +35,7 @@ const Delete = styled.a`
 
 function ActionsPanel( { deleteSelectedElements } ) {
 	return (
-		<SimplePanel title={ __( 'Actions', 'amp' ) }>
+		<SimplePanel name="actions" title={ __( 'Actions', 'amp' ) }>
 			<Delete onClick={ deleteSelectedElements } >
 				{ __( 'Remove element', 'amp' ) }
 			</Delete>

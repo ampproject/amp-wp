@@ -27,7 +27,7 @@ function BackgroundColorPanel( { selectedElements, onSetProperties } ) {
 		evt.preventDefault();
 	};
 	return (
-		<SimplePanel title={ __( 'Background color', 'amp' ) } onSubmit={ handleSubmit }>
+		<SimplePanel name="bgcolor" title={ __( 'Background color', 'amp' ) } onSubmit={ handleSubmit }>
 			<InputGroup
 				type="color"
 				label={ __( 'Background color', 'amp' ) }
