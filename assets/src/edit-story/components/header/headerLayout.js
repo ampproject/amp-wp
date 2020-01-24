@@ -18,6 +18,7 @@ const Background = styled.div`
 
 const Head = styled.header`
 	flex: 1 1 auto;
+	padding: 1em;
 `;
 
 const ButtonCell = styled.header`

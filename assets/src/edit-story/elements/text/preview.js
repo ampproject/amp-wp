@@ -7,12 +7,12 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import { getCommonAttributes } from '../shared';
-import { generateFontFamily, getResponsiveFontSize } from './util';
+import { generateFontFamily } from './util';
 
 /**
  * Returns AMP HTML for saving into post content for displaying in the FE.
  */
-function TextSave( {
+function TextPreview( {
 	id,
 	content,
 	color,
@@ -31,10 +31,11 @@ function TextSave( {
 	padding,
 	rotationAngle,
 	textAlign,
+	previewSizeMultiplier,
 } ) {
 	const style = {
 		...getCommonAttributes( { width, height, x, y, rotationAngle } ),
-		fontSize: getResponsiveFontSize( fontSize ),
+		fontSize: Math.ceil( fontSize * previewSizeMultiplier ),
 		fontStyle: fontStyle ? fontStyle : null,
 		fontFamily: generateFontFamily( fontFamily, fontFallback ),
 		fontWeight: fontWeight ? fontWeight : null,
@@ -52,7 +53,7 @@ function TextSave( {
 	);
 }
 
-TextSave.propTypes = {
+TextPreview.propTypes = {
 	id: PropTypes.string.isRequired,
 	content: PropTypes.string,
 	color: PropTypes.string,
@@ -74,6 +75,7 @@ TextSave.propTypes = {
 	textAlign: PropTypes.string,
 	x: PropTypes.number.isRequired,
 	y: PropTypes.number.isRequired,
+	previewSizeMultiplier: PropTypes.number,
 };
 
-export default TextSave;
+export default TextPreview;

@@ -6,7 +6,7 @@ import styled from 'styled-components';
 /**
  * Internal dependencies
  */
-import { PAGE_NAV_WIDTH, PAGE_WIDTH, PAGE_HEIGHT } from '../../constants';
+import { PAGE_NAV_WIDTH, PAGE_WIDTH, PAGE_HEIGHT, HEADER_HEIGHT } from '../../constants';
 import PointerEventsCss from '../../utils/pointerEventsCss';
 
 /**
@@ -27,6 +27,7 @@ const Layer = styled.div`
 
   display: grid;
   grid:
+    "head      head      head      head      head    " ${ HEADER_HEIGHT }px
     ".         .         .         .         .       " 1fr
     ".         prev      page      next      .       " ${ PAGE_HEIGHT }px
     ".         .         menu      .         .       " 48px
@@ -49,6 +50,8 @@ const Area = styled.div`
 // mechanisms.
 const PageArea = styled( Area ).attrs( { area: 'page', overflow: true } )``;
 
+const HeadArea = styled( Area ).attrs( { area: 'head', overflow: false } )``;
+
 const MenuArea = styled( Area ).attrs( { area: 'menu', overflow: false } )``;
 
 const NavArea = styled( Area ).attrs( { overflow: false } )`
@@ -66,6 +69,7 @@ const CarouselArea = styled( Area ).attrs( { area: 'carousel', overflow: false }
 export {
 	Layer,
 	PageArea,
+	HeadArea,
 	MenuArea,
 	NavPrevArea,
 	NavNextArea,

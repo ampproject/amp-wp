@@ -27,6 +27,7 @@
     "draftjs-filters": "2.2.4",
     "memize": "1.0.5",
     "prop-types": "15.7.2",
+    "react-modal": "3.11.1",
     "redux-multi": "0.1.12",
     "refx": "3.1.1",
     "resize-observer-polyfill": "1.5.1"
@@ -111,7 +112,7 @@
     "postcss-preset-env": "6.7.0",
     "react": "16.9.0",
     "react-dom": "16.9.0",
-    "react-moveable": "0.16.2",
+    "react-moveable": "0.16.6",
     "rtlcss": "2.4.0",
     "rtlcss-webpack-plugin": "4.0.3",
     "semver": "6.3.0",
