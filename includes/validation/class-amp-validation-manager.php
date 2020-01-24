@@ -75,7 +75,7 @@ class AMP_Validation_Manager {
 	public static $validation_results = [];
 
 	/**
-	 * Sources that enqueue each script.
+	 * Sources that enqueue (or register) each script.
 	 *
 	 * @var array
 	 */
@@ -87,12 +87,13 @@ class AMP_Validation_Manager {
 	 * The keys are the values of the extras being added; the values are an array of the source(s) that caused the extra
 	 * to be added.
 	 *
+	 * @since 1.5
 	 * @var array[]
 	 */
 	public static $extra_script_sources = [];
 
 	/**
-	 * Sources that enqueue each style.
+	 * Sources that enqueue (or register) each style.
 	 *
 	 * @var array
 	 */
@@ -101,9 +102,9 @@ class AMP_Validation_Manager {
 	/**
 	 * Sources for style extras that are attached to each dependency.
 	 *
-	 * The keys are the values of the extras being added; the values are an array of the source(s) that caused the extra
-	 * to be added.
+	 * The keys are the style handles, and the values are mappings of the inline CSS to the array of sources.
 	 *
+	 * @since 1.5
 	 * @var array[]
 	 */
 	public static $extra_style_sources = [];
@@ -1432,12 +1433,12 @@ class AMP_Validation_Manager {
 				self::$current_hook_source_stack[ $hook ][] = $source;
 
 				/*
-				 * A current limitation with wrapping callbacks is that the wrapped function cannot have
-				 * any parameters passed by reference. Without this the result is:
-				 *
-				 * > PHP Warning:  Parameter 1 to wp_default_styles() expected to be a reference, value given.
+				 * Wrapped callbacks cause PHP warnings when the wrapped function has arguments passed by reference.
+				 * We have a special case to support functions that have the first argument passed by reference, namely
+				 * wp_default_scripts() and wp_default_styles(). But other configurations are bypassed.
 				 */
-				if ( self::has_parameters_passed_by_reference( $reflection ) ) {
+				$passed_by_ref = self::has_parameters_passed_by_reference( $reflection );
+				if ( $passed_by_ref > 1 ) {
 					continue;
 				}
 
@@ -1451,10 +1452,17 @@ class AMP_Validation_Manager {
 					)
 				);
 
-				$callback['function'] = function() use ( &$callback, $wrapped_callback, $original_function ) {
-					$callback['function'] = $original_function; // Restore original.
-					return call_user_func_array( $wrapped_callback, func_get_args() );
-				};
+				if ( 1 === $passed_by_ref ) {
+					$callback['function'] = function( &$first, ...$other_args ) use ( &$callback, $wrapped_callback, $original_function ) {
+						$callback['function'] = $original_function; // Restore original.
+						return $wrapped_callback->invoke_with_first_ref_arg( $first, ...$other_args );
+					};
+				} else {
+					$callback['function'] = function( ...$args ) use ( &$callback, $wrapped_callback, $original_function ) {
+						$callback['function'] = $original_function; // Restore original.
+						return $wrapped_callback( ...$args );
+					};
+				}
 			}
 		}
 	}
@@ -1464,15 +1472,21 @@ class AMP_Validation_Manager {
 	 *
 	 * @since 0.7
 	 * @param ReflectionFunction|ReflectionMethod $reflection Reflection.
-	 * @return bool Whether there are parameters passed by reference.
+	 * @return int Whether there are parameters passed by reference, where 0 means none were passed, 1 means the first was passed, and 2 means some other configuration.
 	 */
 	protected static function has_parameters_passed_by_reference( $reflection ) {
-		foreach ( $reflection->getParameters() as $parameter ) {
+		$status = 0;
+		foreach ( $reflection->getParameters() as $i => $parameter ) {
 			if ( $parameter->isPassedByReference() ) {
-				return true;
+				if ( 0 === $i ) {
+					$status = 1;
+				} else {
+					$status = 2;
+					break;
+				}
 			}
 		}
-		return false;
+		return $status;
 	}
 
 	/**
