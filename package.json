@@ -111,7 +111,7 @@
     "postcss-preset-env": "6.7.0",
     "react": "16.9.0",
     "react-dom": "16.9.0",
-    "react-moveable": "0.16.2",
+    "react-moveable": "0.16.6",
     "rtlcss": "2.4.0",
     "rtlcss-webpack-plugin": "4.0.3",
     "semver": "6.3.0",
