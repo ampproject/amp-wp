@@ -2125,7 +2125,7 @@ class AMP_Validation_Error_Taxonomy {
 				if ( $is_element_attributes && empty( $value ) ) {
 					continue;
 				}
-				if ( in_array( $key, [ 'code', 'type', 'property_value' ], true ) ) {
+				if ( in_array( $key, [ 'code', 'type', 'css_property_value' ], true ) ) {
 					continue; // Handled above.
 				}
 				if ( 'spec_name' === $key ) {
@@ -2136,13 +2136,13 @@ class AMP_Validation_Error_Taxonomy {
 				<dd class="detailed">
 					<?php if ( in_array( $key, [ 'node_name', 'parent_name' ], true ) ) : ?>
 						<code><?php echo esc_html( $value ); ?></code>
-					<?php elseif ( 'property_name' === $key ) : ?>
+					<?php elseif ( 'css_property_name' === $key ) : ?>
 						<?php
-						if ( isset( $validation_error['property_value'] ) && is_scalar( $validation_error['property_value'] ) ) {
+						if ( isset( $validation_error['css_property_value'] ) && is_scalar( $validation_error['css_property_value'] ) ) {
 							printf(
 								'<code>%s: %s</code>',
 								esc_html( $value ),
-								esc_html( $validation_error['property_value'] )
+								esc_html( $validation_error['css_property_value'] )
 							);
 						} else {
 							printf( '<code>%s</code>', esc_html( $value ) );
@@ -2931,8 +2931,8 @@ class AMP_Validation_Error_Taxonomy {
 			case AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_PROPERTY:
 			case AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_PROPERTY_NOLIST:
 				$title = esc_html__( 'Illegal CSS property', 'amp' );
-				if ( isset( $validation_error['property_name'] ) ) {
-					$title .= sprintf( ': <code>%s</code>', esc_html( $validation_error['property_name'] ) );
+				if ( isset( $validation_error['css_property_name'] ) ) {
+					$title .= sprintf( ': <code>%s</code>', esc_html( $validation_error['css_property_name'] ) );
 				}
 				return $title;
 			case AMP_Tag_And_Attribute_Sanitizer::CDATA_TOO_LONG:
@@ -2943,28 +2943,28 @@ class AMP_Validation_Error_Taxonomy {
 				return esc_html__( 'Illegal text content', 'amp' );
 			case AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_IMPORTANT:
 				$title = esc_html__( 'Illegal CSS !important property', 'amp' );
-				if ( isset( $validation_error['property_name'] ) ) {
-					$title .= sprintf( ': <code>%s</code>', esc_html( $validation_error['property_name'] ) );
+				if ( isset( $validation_error['css_property_name'] ) ) {
+					$title .= sprintf( ': <code>%s</code>', esc_html( $validation_error['css_property_name'] ) );
 				}
 				return $title;
 			case AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE:
 				$title = esc_html__( 'Invalid property', 'amp' );
-				if ( isset( $validation_error['attr_property_name'] ) ) {
-					$title .= sprintf( ': <code>%s</code>', esc_html( $validation_error['attr_property_name'] ) );
+				if ( isset( $validation_error['property_name'] ) ) {
+					$title .= sprintf( ': <code>%s</code>', esc_html( $validation_error['property_name'] ) );
 				}
 				return $title;
 			case AMP_Tag_And_Attribute_Sanitizer::MISSING_MANDATORY_PROPERTY:
 				$title = esc_html__( 'Missing required property', 'amp' );
-				if ( isset( $validation_error['attr_property_name'] ) ) {
-					$title .= sprintf( ': <code>%s</code>', esc_html( $validation_error['attr_property_name'] ) );
+				if ( isset( $validation_error['property_name'] ) ) {
+					$title .= sprintf( ': <code>%s</code>', esc_html( $validation_error['property_name'] ) );
 				}
 				return $title;
 			case AMP_Tag_And_Attribute_Sanitizer::MISSING_REQUIRED_PROPERTY_VALUE:
 				$title = sprintf(
 					/* translators: %1$s is the property name, %2$s is the value for the property */
 					wp_kses( __( 'Missing required value for <code>%1$s</code> property: <code>%2$s</code>', 'amp' ), [ 'code' => '' ] ),
-					esc_html( $validation_error['attr_property_name'] ),
-					esc_html( $validation_error['attr_property_value'] )
+					esc_html( $validation_error['property_name'] ),
+					esc_html( $validation_error['property_value'] )
 				);
 
 				return $title;
@@ -3006,7 +3006,7 @@ class AMP_Validation_Error_Taxonomy {
 				}
 			case 'parent_name':
 				return __( 'Parent element', 'amp' );
-			case 'property_name':
+			case 'css_property_name':
 				return __( 'CSS property', 'amp' );
 			case 'text':
 				return __( 'Text content', 'amp' );
@@ -3014,7 +3014,7 @@ class AMP_Validation_Error_Taxonomy {
 				return __( 'Type', 'amp' );
 			case 'sources':
 				return __( 'Sources', 'amp' );
-			case 'attr_property_name':
+			case 'property_name':
 				if ( AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE === $validation_error['code'] ) {
 					return __( 'Invalid property', 'amp' );
 				} elseif ( AMP_Tag_And_Attribute_Sanitizer::MISSING_MANDATORY_PROPERTY === $validation_error['code'] ) {
@@ -3022,11 +3022,11 @@ class AMP_Validation_Error_Taxonomy {
 				}
 
 				return __( 'Property name', 'amp' );
-			case 'attr_property_value':
+			case 'property_value':
 				if ( AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE === $validation_error['code'] ) {
 					return __( 'Invalid property value', 'amp' );
 				} elseif ( AMP_Tag_And_Attribute_Sanitizer::MISSING_REQUIRED_PROPERTY_VALUE === $validation_error['code'] ) {
-					return __('Required property value', 'amp');
+					return __( 'Required property value', 'amp' );
 				}
 
 				return __( 'Property value', 'amp' );
