@@ -1099,14 +1099,14 @@ class AMP_Story_Legacy_Post_Type {
 		}
 
 		wp_enqueue_style(
-			'amp-stories-frontend',
-			amp_get_asset_url( 'css/amp-stories-frontend.css' ),
+			'amp-legacy-stories-frontend',
+			amp_get_asset_url( 'css/amp-legacy-stories-frontend.css' ),
 			[ self::AMP_STORIES_STYLE_HANDLE ],
 			AMP__VERSION,
 			false
 		);
 
-		wp_styles()->add_data( 'amp-stories-frontend', 'rtl', 'replace' );
+		wp_styles()->add_data( 'amp-legacy-stories-frontend', 'rtl', 'replace' );
 		wp_styles()->add_data( self::STORY_CARD_CSS_SLUG, 'rtl', 'replace' );
 
 		// Also enqueue this since it's possible to embed another story into a story.

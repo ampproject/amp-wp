@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import styled from 'styled-components';
-
-/**
  * WordPress dependencies
  */
 import { forwardRef, useCallback } from '@wordpress/element';
@@ -13,21 +8,7 @@ import { forwardRef, useCallback } from '@wordpress/element';
  */
 import DropZone from '../dropzone';
 import { useStory } from '../../app/story';
-
-const Page = styled.button`
-	padding: 0;
-	margin: 0;
-	border: none;
-	outline: 2px solid ${ ( { isActive, theme } ) => isActive ? theme.colors.selection : theme.colors.bg.v1 };
-	&:focus, &:hover {
-		outline: 2px solid ${ ( { theme } ) => theme.colors.selection };
-	}
-	height: ${ ( { height } ) => height }px;
-	width: ${ ( { width } ) => width }px;
-	background-color: ${ ( { theme } ) => theme.colors.mg.v1 };
-	flex: none;
-	transition: width .2s ease, height .2s ease;
-`;
+import PagePreview from './pagepreview';
 
 // Disable reason: forwardRef render functions do not support propTypes
 //eslint-disable-next-line react/prop-types
@@ -68,7 +49,8 @@ function DraggablePageWithRef( { pageIndex, onClick, isActive, ariaLabel, width,
 
 	return (
 		<DropZone onDrop={ onDrop } pageIndex={ pageIndex } dragIndicatorOffset={ dragIndicatorOffset }>
-			<Page
+			<PagePreview
+				index={ pageIndex }
 				draggable="true"
 				onClick={ onClick }
 				onDragStart={ onDragStart }
@@ -76,7 +58,7 @@ function DraggablePageWithRef( { pageIndex, onClick, isActive, ariaLabel, width,
 				aria-label={ ariaLabel }
 				width={ width }
 				height={ height }
-				ref={ ref }
+				forwardedRef={ ref }
 			/>
 		</DropZone>
 	);
