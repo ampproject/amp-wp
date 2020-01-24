@@ -13,7 +13,8 @@ import { __, _x } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { SimplePanel } from './panel';
-import { InputGroup, getCommonValue } from './elements';
+import { InputGroup } from './components';
+import getCommonValue from './utils/getCommonValue';
 
 function PositionPanel( { selectedElements, onSetProperties } ) {
 	const x = getCommonValue( selectedElements, 'x' );

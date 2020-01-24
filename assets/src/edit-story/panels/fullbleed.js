@@ -13,7 +13,8 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { SimplePanel } from './panel';
-import { ActionButton, getCommonValue } from './elements';
+import { ActionButton } from './components';
+import getCommonValue from './utils/getCommonValue';
 
 function FullbleedPanel( { selectedElements, onSetProperties } ) {
 	// The x/y/w/h/r are kept unchanged so that toggling fullbleed will return

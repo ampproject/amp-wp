@@ -13,7 +13,8 @@ import { __, _x } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { SimplePanel } from './panel';
-import { SelectMenu, InputGroup, getCommonValue } from './elements';
+import { SelectMenu, InputGroup } from './components';
+import getCommonValue from './utils/getCommonValue';
 
 function StylePanel( { selectedElements, onSetProperties } ) {
 	const textAlign = getCommonValue( selectedElements, 'textAlign' );

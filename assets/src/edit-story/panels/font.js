@@ -15,7 +15,8 @@ import { __ } from '@wordpress/i18n';
 import { useFont } from '../app';
 import { MIN_FONT_SIZE, MAX_FONT_SIZE } from '../constants';
 import { SimplePanel } from './panel';
-import { InputGroup, SelectMenu, getCommonValue } from './elements';
+import { InputGroup, SelectMenu } from './components';
+import getCommonValue from './utils/getCommonValue';
 
 function FontPanel( { selectedElements, onSetProperties } ) {
 	const fontFamily = getCommonValue( selectedElements, 'fontFamily' );

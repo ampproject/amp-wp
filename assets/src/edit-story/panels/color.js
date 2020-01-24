@@ -13,7 +13,8 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { SimplePanel } from './panel';
-import { InputGroup, getCommonValue } from './elements';
+import { InputGroup } from './components';
+import getCommonValue from './utils/getCommonValue';
 
 function ColorPanel( { selectedElements, onSetProperties } ) {
 	const color = getCommonValue( selectedElements, 'color' );
