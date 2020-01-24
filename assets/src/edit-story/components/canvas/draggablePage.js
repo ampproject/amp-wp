@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import styled from 'styled-components';
+
+/**
  * WordPress dependencies
  */
 import { forwardRef, useCallback } from '@wordpress/element';
@@ -12,7 +17,7 @@ import PagePreview from './pagepreview';
 
 // Disable reason: forwardRef render functions do not support propTypes
 //eslint-disable-next-line react/prop-types
-function DraggablePageWithRef( { pageIndex, onClick, isActive, ariaLabel, width, height }, ref ) {
+function DraggablePageWithRef( { pageIndex, onClick, isActive, ariaLabel, width, height, dragIndicatorOffset }, ref ) {
 	const { state: { pages }, actions: { setCurrentPage, arrangePage } } = useStory();
 
 	const getArrangeIndex = ( sourceIndex, dstIndex, position ) => {
@@ -48,7 +53,7 @@ function DraggablePageWithRef( { pageIndex, onClick, isActive, ariaLabel, width,
 	};
 
 	return (
-		<DropZone onDrop={ onDrop } pageIndex={ pageIndex } >
+		<DropZone onDrop={ onDrop } pageIndex={ pageIndex } dragIndicatorOffset={ dragIndicatorOffset }>
 			<PagePreview
 				index={ pageIndex }
 				draggable="true"

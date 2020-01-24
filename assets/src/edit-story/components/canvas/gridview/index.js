@@ -20,11 +20,13 @@ import RectangleIcon from './rectangle.svg';
 const PAGE_WIDTH = 90;
 const PAGE_HEIGHT = 160;
 
+const GRID_GAP = 20;
+
 const Wrapper = styled.div`
 	position: relative;
 	display: grid;
 	grid-template-columns: ${ ( { scale } ) => `repeat(auto-fit, minmax(${ scale * PAGE_WIDTH }px, max-content))` };
-	grid-gap: 20px;
+	grid-gap: ${ GRID_GAP }px;
 	justify-content: center;
 	justify-items: center;
 	align-items: center;
@@ -153,6 +155,7 @@ function GridView() {
 							pageIndex={ index }
 							width={ zoomLevel * PAGE_WIDTH }
 							height={ zoomLevel * PAGE_HEIGHT }
+							dragIndicatorOffset={ GRID_GAP / 2 }
 						/>
 					);
 				} ) }
