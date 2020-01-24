@@ -30,8 +30,8 @@ const Page = styled.button`
 
 const PreviewWrapper = styled.div`
 	height: 100%;
-    position: relative;
-    overflow: hidden;
+	position: relative;
+	overflow: hidden;
 `;
 
 function PagePreview( { index, forwardedRef, ...props } ) {
