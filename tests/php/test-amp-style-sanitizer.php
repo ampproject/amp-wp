@@ -472,7 +472,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				],
 				[],
 			],
-			'dynamic_classes_and_attributes_preserved_conditionally' => [
+			'dynamic_nodes_preserved_conditionally' => [
 				'
 					<html amp><head>
 					<style> .amp-viewer { color: blue; } </style>
@@ -493,6 +493,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					<style> .amp-iso-country-us { color: oldlace; } </style>
 					<style> .amp-video-eq { display: none; } </style>
 					<style> #accord section[expanded] { outline: solid 1px blue; } </style>
+					<style> #amp-lightbox-gallery { outline: solid 1px yellow; } </style>
+					<style> amp-lightbox-gallery { outline: solid 1px purple; } </style>
 					<style> .non-existent { color: black; } </style>
 					</head>
 					<body>
@@ -508,6 +510,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 						<amp-video dock width="720" height="305" layout="responsive" src="https://yourhost.com/videos/myvideo.mp4" poster="https://yourhost.com/posters/poster.png" artwork="https://yourhost.com/artworks/artwork.png" title="Awesome video" artist="Awesome artist" album="Amazing album"></amp-video>
 						<amp-geo layout="nodisplay"><script type="application/json">{"ISOCountryGroups": {"foo":["us"]}}</script></amp-geo>
 						<amp-accordion id="accord" disable-session-states><section><h2>Section 1</h2><p>Content in section 1.</p></section><section><h2>Section 2</h2><div>Content in section 2.</div></section></amp-accordion>
+						<amp-img lightbox src="https://example.com/static/samples/img/road-1.jpg" width="300" height="200" layout="responsive"></amp-img>
 					</body>
 					</html>
 				',
@@ -530,6 +533,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'.amp-iso-country-us{color:oldlace}',
 					'.amp-video-eq{display:none}',
 					'#accord section[expanded]{outline:solid 1px blue}',
+					'#amp-lightbox-gallery{outline:solid 1px yellow}',
+					'amp-lightbox-gallery{outline:solid 1px purple}',
 					'', // Because no non-existent.
 				],
 				[],
