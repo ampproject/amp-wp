@@ -34,7 +34,7 @@
 		<?php $canonical_link_url = $this->get( 'post_canonical_link_url' ); ?>
 		<?php if ( $canonical_link_url ) : ?>
 			<?php $canonical_link_text = $this->get( 'post_canonical_link_text' ); ?>
-			<a class="amp-wp-canonical-link" href="<?php echo esc_url( $canonical_link_url ); ?>">
+			<a class="amp-wp-canonical-link" rel="noamphtml" href="<?php echo esc_url( $canonical_link_url ); ?>">
 				<?php echo esc_html( $canonical_link_text ); ?>
 			</a>
 		<?php endif; ?>

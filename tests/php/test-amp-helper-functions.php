@@ -814,6 +814,49 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test AMP-to-AMP linking.
+	 *
+	 * @covers ::amp_get_content_sanitizers()
+	 */
+	public function test_amp_get_content_sanitizers_amp_to_amp() {
+		$link_sanitizer_class_name = 'AMP_Link_Sanitizer';
+
+		// If AMP-to-AMP linking isn't enabled, this sanitizer shouldn't be present.
+		add_filter( 'amp_to_amp_linking_enabled', '__return_false' );
+		$sanitizers = amp_get_content_sanitizers();
+		$this->assertArrayNotHasKey( $link_sanitizer_class_name, $sanitizers );
+
+		// Now that AMP-to-AMP linking is enabled, this sanitizer should be present.
+		add_filter( 'amp_to_amp_linking_enabled', '__return_true' );
+		$sanitizers = amp_get_content_sanitizers();
+		$this->assertEquals(
+			[
+				'paired'        => true,
+				'excluded_urls' => [],
+			],
+			$sanitizers[ $link_sanitizer_class_name ]
+		);
+
+		$excluded_urls = [ 'https://baz.com', 'https://example.com/one' ];
+		add_filter(
+			'amp_to_amp_excluded_urls',
+			static function() use ( $excluded_urls ) {
+				return $excluded_urls;
+			}
+		);
+
+		// The excluded URLs passed to the filter should be present in the sanitizer.
+		$sanitizers = amp_get_content_sanitizers();
+		$this->assertEquals(
+			[
+				'paired'        => true,
+				'excluded_urls' => $excluded_urls,
+			],
+			$sanitizers[ $link_sanitizer_class_name ]
+		);
+	}
+
+	/**
 	 * Test post_supports_amp().
 	 *
 	 * @covers ::post_supports_amp()

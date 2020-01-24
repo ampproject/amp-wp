@@ -928,10 +928,26 @@ function amp_get_content_sanitizers( $post = null ) {
 		$sanitizers['AMP_Nav_Menu_Dropdown_Sanitizer'] = $theme_support_args['nav_menu_dropdown'];
 	}
 
-	if ( $amp_to_amp_linking_enabled ) {
-		$sanitizers['AMP_Link_Sanitizer'] = [
-			'paired' => ! amp_is_canonical(),
-		];
+	if ( $amp_to_amp_linking_enabled && AMP_Theme_Support::STANDARD_MODE_SLUG !== AMP_Theme_Support::get_support_mode() ) {
+
+		/**
+		 * Filters the list of URLs which are excluded from being included in AMP-to-AMP linking.
+		 *
+		 * This only applies when the amp_to_amp_linking_enabled filter returns true,
+		 * which it does by default in Transitional mode. This filter can be used to opt-in
+		 * when in Reader mode. This does not apply in Standard mode.
+		 * Only frontend URLs on the frontend need be excluded, as all other URLs are never made into AMP links.
+		 *
+		 * @since 1.5.0
+		 *
+		 * @param string[] The URLs to exclude from having AMP-to-AMP links.
+		 */
+		$excluded_urls = apply_filters( 'amp_to_amp_excluded_urls', [] );
+
+		$sanitizers['AMP_Link_Sanitizer'] = array_merge(
+			[ 'paired' => ! amp_is_canonical() ],
+			compact( 'excluded_urls' )
+		);
 	}
 
 	/**
