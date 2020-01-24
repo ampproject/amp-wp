@@ -397,7 +397,6 @@ body.taxonomy-amp_validation_error .wp-list-table .new th.check-column input {
 .shaken-stylesheet {
 	display: block;
 	white-space: pre-wrap;
-	overflow-x: scroll;
 	tab-size: 4;
 	background: none;
 	padding: 0;

@@ -2007,7 +2007,7 @@ class AMP_Validated_URL_Post_Type {
 		$pending_stylesheet_indices = array_keys( $stylesheets );
 		usort(
 			$pending_stylesheet_indices,
-			function ( $a, $b ) use ( $stylesheets ) {
+			static function ( $a, $b ) use ( $stylesheets ) {
 				return $stylesheets[ $a ]['priority'] - $stylesheets[ $b ]['priority'];
 			}
 		);

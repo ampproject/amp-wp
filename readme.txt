@@ -26,6 +26,10 @@ The plugin can be configured to follow one of three different template modes: St
 
 With the official AMP plugin for WordPress, the WordPress ecosystem is provided with the capabilities and tools it needs to build world-class AMP experiences without deviating from its standard, flexible, and well-known content creation workflow.
 
+== Frequently Asked Questions ==
+
+Please see the [FAQs on amp-wp.org](https://amp-wp.org/documentation/frequently-asked-questions/). Don't see an answer to your question? Please [search the support forum](https://wordpress.org/support/plugin/amp/) to see if someone has asked your question. Otherwise, please [open a new support topic](https://wordpress.org/support/plugin/amp/#new-post).
+
 == Installation ==
 
 1. Upload the folder to the `/wp-content/plugins/` directory.

@@ -2479,14 +2479,13 @@ class AMP_Theme_Support {
 			true
 		);
 
-		// Whitelist enqueued script for AMP dev mdoe so that it is not removed.
+		// Whitelist enqueued script for AMP dev mode so that it is not removed.
 		// @todo Revisit with <https://github.com/google/site-kit-wp/pull/505#discussion_r348683617>.
 		add_filter(
 			'script_loader_tag',
 			static function( $tag, $handle ) {
 				if ( is_amp_endpoint() && self::has_dependency( wp_scripts(), 'amp-paired-browsing-client', $handle ) ) {
-					$attrs = [ AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, 'async' ];
-					$tag   = preg_replace( '/(?<=<script)(?=\s|>)/i', ' ' . implode( ' ', $attrs ), $tag );
+					$tag = preg_replace( '/(?<=<script)(?=\s|>)/i', ' ' . AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, $tag );
 				}
 				return $tag;
 			},
