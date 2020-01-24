@@ -2,8 +2,7 @@
 	color: #767676;
 }
 
-.column-sources .dashicons,
-.column-sources_with_invalid_output .dashicons {
+.source > .dashicons {
 	margin-right: 5px;
 }
 
@@ -17,7 +16,6 @@
 	color: #ebb04f;
 }
 
-.column-source,
 .dashicons-wordpress-alt,
 .column-sources_with_invalid_output .dashicons-wordpress-alt {
 	color: #92b371;
@@ -58,8 +56,12 @@ td.column-found_elements_and_attributes div {
 
 .column-sources .source,
 .column-sources_with_invalid_output .source {
-	margin-bottom: 10px;
 	display: block;
+}
+
+.column-sources .source + .source,
+.column-sources_with_invalid_output .source + .source {
+	margin-top: 8px;
 }
 
 .wrap .wp-heading-inline + .page-title-action {

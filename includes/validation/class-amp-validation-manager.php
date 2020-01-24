@@ -696,7 +696,7 @@ class AMP_Validation_Manager {
 						[
 							'invalid_url_post' => $invalid_url_post_id,
 						],
-						wp_array_slice_assoc( $validity, [ 'queried_object' ] )
+						wp_array_slice_assoc( $validity, [ 'queried_object', 'stylesheets' ] )
 					)
 				);
 
@@ -1650,11 +1650,22 @@ class AMP_Validation_Manager {
 	/**
 	 * Get response data for a validate request.
 	 *
+	 * @see AMP_Content_Sanitizer::sanitize_document()
+	 *
+	 * @param array $sanitization_results {
+	 *     Results of sanitizing a document, as returned by AMP_Content_Sanitizer::sanitize_document().
+	 *
+	 *     @type array                $scripts     Scripts.
+	 *     @type array                $stylesheets Stylesheets.
+	 *     @type AMP_Base_Sanitizer[] $sanitizers  Sanitizers.
+	 * }
 	 * @return array Validate response data.
 	 */
-	public static function get_validate_response_data() {
+	public static function get_validate_response_data( $sanitization_results ) {
 		$data = [
-			'results' => self::$validation_results,
+			'results'        => self::$validation_results,
+			'queried_object' => null,
+			'url'            => amp_get_current_url(),
 		];
 
 		$queried_object = get_queried_object();
@@ -1674,6 +1685,28 @@ class AMP_Validation_Manager {
 				$data['queried_object']['type'] = 'post_type';
 			}
 		}
+
+		/**
+		 * Sanitizers
+		 *
+		 * @var AMP_Base_Sanitizer[] $sanitizers
+		 */
+		$sanitizers = $sanitization_results['sanitizers'];
+		foreach ( $sanitizers as $class_name => $sanitizer ) {
+			$sanitizer_data = $sanitizer->get_validate_response_data();
+
+			$conflicting_keys = array_intersect( array_keys( $sanitizer_data ), array_keys( $data ) );
+			if ( ! empty( $conflicting_keys ) ) {
+				_doing_it_wrong(
+					esc_html( "$class_name::get_validate_response_data" ),
+					esc_html( 'Method is returning array with conflicting keys: ' . implode( ', ', $conflicting_keys ) ),
+					'1.5'
+				);
+			} else {
+				$data = array_merge( $data, $sanitizer_data );
+			}
+		}
+
 		return $data;
 	}
 
@@ -1793,7 +1826,7 @@ class AMP_Validation_Manager {
 			AMP_Validated_URL_Post_Type::store_validation_errors(
 				$validation_errors,
 				$validity['url'],
-				wp_array_slice_assoc( $validity, [ 'queried_object_id', 'queried_object_type' ] )
+				wp_array_slice_assoc( $validity, [ 'queried_object', 'stylesheets' ] )
 			);
 			set_transient( self::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY, $validation_errors, 60 );
 		} else {
@@ -1812,10 +1845,10 @@ class AMP_Validation_Manager {
 	 * @return WP_Error|array {
 	 *     Response.
 	 *
-	 *     @type array  $results             Validation results, where each nested array contains an error key and sanitized key.
-	 *     @type string $url                 Final URL that was checked or redirected to.
-	 *     @type int    $queried_object_id   Queried object ID.
-	 *     @type string $queried_object_type Queried object type.
+	 *     @type array  $results          Validation results, where each nested array contains an error key and sanitized key.
+	 *     @type string $url              Final URL that was checked or redirected to.
+	 *     @type array  $queried_object   Queried object, including keys for 'type' and 'id'.
+	 *     @type array  $stylesheets      Stylesheet data.
 	 * }
 	 */
 	public static function validate_url( $url ) {

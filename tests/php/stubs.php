@@ -7,20 +7,3 @@ class AMP_Test_Stub_Sanitizer extends AMP_Base_Sanitizer {
 		return $this->dom;
 	}
 }
-
-class AMP_Test_World_Sanitizer extends AMP_Base_Sanitizer {
-	public function sanitize() {
-		$node = $this->dom->createElement( 'em' );
-		$text = $this->dom->createTextNode( 'World' );
-		$node->appendChild( $text );
-		$this->dom->body->appendChild( $node );
-	}
-
-	public function get_scripts() {
-		return [ 'scripts' ];
-	}
-
-	public function get_styles() {
-		return [ 'styles' ];
-	}
-}

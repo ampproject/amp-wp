@@ -693,6 +693,7 @@ class AMP_Validated_URL_Post_Type {
 	 *
 	 *     @type int|WP_Post $invalid_url_post Post to update. Optional. If empty, then post is looked up by URL.
 	 *     @type array       $queried_object   Queried object, including keys for type and id. May be empty.
+	 *     @type array       $stylesheets      Stylesheet data. May be empty.
 	 * }
 	 * @return int|WP_Error $post_id The post ID of the custom post type used, or WP_Error on failure.
 	 * @global WP $wp
@@ -837,6 +838,10 @@ class AMP_Validated_URL_Post_Type {
 		if ( isset( $args['queried_object'] ) ) {
 			update_post_meta( $post_id, '_amp_queried_object', $args['queried_object'] );
 		}
+		if ( isset( $args['stylesheets'] ) ) {
+			// Note that json_encode() is being used here because wp_slash() will coerce scalar values to strings.
+			update_post_meta( $post_id, '_amp_stylesheets', wp_slash( wp_json_encode( $args['stylesheets'] ) ) );
+		}
 
 		delete_transient( static::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT );
 
@@ -923,6 +928,7 @@ class AMP_Validated_URL_Post_Type {
 				),
 				AMP_Validation_Error_Taxonomy::FOUND_ELEMENTS_AND_ATTRIBUTES => esc_html__( 'Invalid Markup', 'amp' ),
 				AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT => esc_html__( 'Sources', 'amp' ),
+				'css_usage' => esc_html__( 'CSS Usage', 'amp' ),
 			]
 		);
 
@@ -1042,8 +1048,43 @@ class AMP_Validated_URL_Post_Type {
 					esc_html_e( '--', 'amp' );
 				}
 				break;
+			case 'css_usage':
+				$style_custom_cdata_spec = null;
+				foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( 'style' ) as $spec_rule ) {
+					if ( isset( $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) && AMP_Style_Sanitizer::STYLE_AMP_CUSTOM_SPEC_NAME === $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) {
+						$style_custom_cdata_spec = $spec_rule[ AMP_Rule_Spec::CDATA ];
+					}
+				}
+				$stylesheets = json_decode( get_post_meta( $post->ID, '_amp_stylesheets', true ), true );
+				if ( ! is_array( $stylesheets ) || ! $style_custom_cdata_spec ) {
+					echo '?';
+				} else {
+					$total_size = 0;
+					foreach ( $stylesheets as $stylesheet ) {
+						$total_size += $stylesheet['final_size'];
+					}
+
+					$css_usage_percentage = ( $total_size / $style_custom_cdata_spec['max_bytes'] ) * 100;
+					if ( $css_usage_percentage > 100 ) {
+						$color = '#a00'; // Red.
+					} elseif ( $css_usage_percentage >= AMP_Style_Sanitizer::CSS_BUDGET_WARNING_PERCENTAGE ) {
+						$color = '#d98500'; // Orange.
+					} else {
+						$color = '#006505'; // Green.
+					}
+					printf(
+						'<span style="color:%s">%s%%</span>',
+						esc_attr( $color ),
+						esc_html( number_format_i18n( ceil( $css_usage_percentage ) ) )
+					);
+				}
+				break;
 			case AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT:
-				self::render_sources_column( $error_summary, $post_id );
+				if ( 0 === count( array_filter( $error_summary ) ) || empty( $error_summary[ AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT ] ) ) {
+					esc_html_e( '--', 'amp' );
+				} else {
+					self::render_sources_column( $error_summary[ AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT ], $post_id );
+				}
 				break;
 		}
 	}
@@ -1051,28 +1092,17 @@ class AMP_Validated_URL_Post_Type {
 	/**
 	 * Renders the sources column on the the single error URL page and the 'AMP Validated URLs' page.
 	 *
-	 * @param array $error_summary The summary of errors.
-	 * @param int   $post_id       The ID of the amp_validated_url post.
+	 * @param array $sources The summary of errors.
+	 * @param int   $post_id The ID of the amp_validated_url post.
 	 */
-	public static function render_sources_column( $error_summary, $post_id ) {
-		if ( ! isset( $error_summary[ AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT ] ) ) {
-			return;
-		}
-
-		// Show nothing if there are no validation errors.
-		if ( 0 === count( array_filter( $error_summary ) ) ) {
-			esc_html_e( '--', 'amp' );
-			return;
-		}
-
+	public static function render_sources_column( $sources, $post_id ) {
 		$active_theme          = null;
 		$validated_environment = get_post_meta( $post_id, '_amp_validated_environment', true );
 		if ( isset( $validated_environment['theme'] ) ) {
 			$active_theme = $validated_environment['theme'];
 		}
 
-		$sources = $error_summary[ AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT ];
-		$output  = [];
+		$output = [];
 		foreach ( wp_array_slice_assoc( $sources, [ 'plugin', 'mu-plugin' ] ) as $type => $slugs ) {
 			$plugin_names = [];
 			$plugin_slugs = array_unique( $slugs );
@@ -1252,7 +1282,7 @@ class AMP_Validated_URL_Post_Type {
 			self::store_validation_errors(
 				$validation_errors,
 				$validity['url'],
-				wp_array_slice_assoc( $validity, [ 'queried_object' ] )
+				wp_array_slice_assoc( $validity, [ 'queried_object', 'stylesheets' ] )
 			);
 			$unaccepted_error_count = count(
 				array_filter(
@@ -1520,7 +1550,7 @@ class AMP_Validated_URL_Post_Type {
 					[
 						'invalid_url_post' => $post,
 					],
-					wp_array_slice_assoc( $validity, [ 'queried_object' ] )
+					wp_array_slice_assoc( $validity, [ 'queried_object', 'stylesheets' ] )
 				)
 			);
 			if ( is_wp_error( $stored ) ) {
@@ -1594,7 +1624,7 @@ class AMP_Validated_URL_Post_Type {
 				[
 					'invalid_url_post' => $post,
 				],
-				wp_array_slice_assoc( $validity, [ 'queried_object' ] )
+				wp_array_slice_assoc( $validity, [ 'queried_object', 'stylesheets' ] )
 			)
 		);
 		foreach ( $validation_errors  as $error ) {
@@ -1753,6 +1783,15 @@ class AMP_Validated_URL_Post_Type {
 			[ __CLASS__, 'print_status_meta_box' ],
 			self::POST_TYPE_SLUG,
 			'side',
+			'default',
+			[ '__back_compat_meta_box' => true ]
+		);
+		add_meta_box(
+			'amp_stylesheets',
+			__( 'Stylesheets', 'amp' ),
+			[ __CLASS__, 'print_stylesheets_meta_box' ],
+			self::POST_TYPE_SLUG,
+			'normal',
 			'default',
 			[ '__back_compat_meta_box' => true ]
 		);
@@ -1919,6 +1958,427 @@ class AMP_Validated_URL_Post_Type {
 			} );
 		} );
 		</script>
+		<?php
+	}
+
+	/**
+	 * Renders stylesheet info for the validated URL.
+	 *
+	 * @param WP_Post $post The post for the meta box.
+	 * @return void
+	 */
+	public static function print_stylesheets_meta_box( $post ) {
+		$stylesheets = get_post_meta( $post->ID, '_amp_stylesheets', true );
+		if ( empty( $stylesheets ) ) {
+			printf(
+				'<p><em>%s</em></p>',
+				esc_html__( 'No stylesheet data available. Please try re-checking this URL.', 'amp' )
+			);
+			return;
+		}
+		$stylesheets = json_decode( $stylesheets, true );
+		if ( ! is_array( $stylesheets ) ) {
+			printf(
+				'<p><em>%s</em></p>',
+				esc_html__( 'Unable to retrieve data for stylesheets.', 'amp' )
+			);
+			return;
+		}
+
+		$style_custom_cdata_spec = null;
+		foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( 'style' ) as $spec_rule ) {
+			if ( isset( $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) && AMP_Style_Sanitizer::STYLE_AMP_CUSTOM_SPEC_NAME === $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) {
+				$style_custom_cdata_spec = $spec_rule[ AMP_Rule_Spec::CDATA ];
+			}
+		}
+
+		$included_final_size    = 0;
+		$included_original_size = 0;
+		$excluded_final_size    = 0;
+		$excluded_original_size = 0;
+		$excluded_stylesheets   = 0;
+		$max_final_size         = 0;
+
+		$included_status  = 1;
+		$excessive_status = 2;
+		$excluded_status  = 3;
+
+		// Determine which stylesheets are included based on their priorities.
+		$pending_stylesheet_indices = array_keys( $stylesheets );
+		usort(
+			$pending_stylesheet_indices,
+			static function ( $a, $b ) use ( $stylesheets ) {
+				return $stylesheets[ $a ]['priority'] - $stylesheets[ $b ]['priority'];
+			}
+		);
+		foreach ( $pending_stylesheet_indices as $i ) {
+			// @todo Add information about amp-keyframes as well.
+			if ( ! isset( $stylesheets[ $i ]['group'] ) || 'amp-custom' !== $stylesheets[ $i ]['group'] || ! empty( $stylesheets[ $i ]['duplicate'] ) ) {
+				continue;
+			}
+			$max_final_size = max( $max_final_size, $stylesheets[ $i ]['final_size'] );
+			if ( $stylesheets[ $i ]['included'] ) {
+				$included_final_size    += $stylesheets[ $i ]['final_size'];
+				$included_original_size += $stylesheets[ $i ]['original_size'];
+
+				if ( $included_final_size >= $style_custom_cdata_spec['max_bytes'] ) {
+					$stylesheets[ $i ]['status'] = $excessive_status;
+				} else {
+					$stylesheets[ $i ]['status'] = $included_status;
+				}
+			} else {
+				$excluded_final_size    += $stylesheets[ $i ]['final_size'];
+				$excluded_original_size += $stylesheets[ $i ]['original_size'];
+				$excluded_stylesheets++;
+				$stylesheets[ $i ]['status'] = $excluded_status;
+			}
+		}
+
+		?>
+
+		<?php if ( ! AMP_Style_Sanitizer::has_required_php_css_parser() ) : ?>
+			<div class="notice notice-alt notice-warning inline">
+				<p>
+					<?php esc_html_e( 'AMP CSS processing is limited because a conflicting version of PHP-CSS-Parser has been loaded by another plugin or theme. Tree shaking is not available.', 'amp' ); ?>
+				</p>
+			</div>
+		<?php endif; ?>
+
+		<table class="amp-stylesheet-summary">
+			<tr>
+				<th>
+					<?php esc_html_e( 'Total CSS size prior to minification:', 'amp' ); ?>
+				</th>
+				<td>
+					<?php echo esc_html( number_format_i18n( $included_original_size + $excluded_original_size ) ); ?><small>B</small>
+				</td>
+			</tr>
+			<tr>
+				<th>
+					<?php esc_html_e( 'Total CSS size after minification:', 'amp' ); ?>
+				</th>
+				<td>
+					<?php echo esc_html( number_format_i18n( $included_final_size + $excluded_final_size ) ); ?><small>B</small>
+				</td>
+			</tr>
+			<tr>
+				<th>
+					<?php
+					echo esc_html(
+						sprintf(
+							/* translators: %s is max kilobytes */
+							__( 'Percentage of used CSS budget (%sKB):', 'amp' ),
+							number_format_i18n( $style_custom_cdata_spec['max_bytes'] / 1000 )
+						)
+					);
+					?>
+				</th>
+				<td>
+					<?php
+					$percentage_budget_used = ( ( $included_final_size + $excluded_final_size ) / $style_custom_cdata_spec['max_bytes'] ) * 100;
+
+					printf( '%.1f%% ', $percentage_budget_used ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					if ( $percentage_budget_used > 100 ) {
+						echo '🚫';
+					} elseif ( $percentage_budget_used >= AMP_Style_Sanitizer::CSS_BUDGET_WARNING_PERCENTAGE ) {
+						echo '⚠️';
+					} else {
+						echo '✅';
+					}
+					?>
+				</td>
+			</tr>
+			<tr>
+				<th>
+					<?php
+					echo esc_html(
+						sprintf(
+							/* translators: %s is the number of stylesheets excluded */
+							_n( 'Excluded minified CSS (%s stylesheet):', 'Excluded minified CSS size (%s stylesheets):', $excluded_stylesheets, 'amp' ),
+							number_format_i18n( $excluded_stylesheets )
+						)
+					);
+					?>
+				</th>
+				<td>
+					<?php echo esc_html( number_format_i18n( $excluded_final_size ) ); ?><small>B</small>
+				</td>
+			</tr>
+		</table>
+
+		<?php if ( $percentage_budget_used > 100 ) : ?>
+			<div class="notice notice-alt notice-error inline">
+				<p>
+					<?php if ( 0 === $excluded_stylesheets ) : ?>
+						<?php esc_html_e( 'You have exceeded the CSS budget. Because of this, the page will not be served as a valid AMP page.', 'amp' ); ?>
+					<?php else : ?>
+						<?php esc_html_e( 'You have exceeded the CSS budget. Because of this, stylesheets deemed of lesser priority have been excluded from the page.', 'amp' ); ?>
+					<?php endif; ?>
+					<?php esc_html_e( 'Please review the flagged stylesheets below and determine if the current theme or a particular plugin is including excessive CSS.', 'amp' ); ?>
+				</p>
+			</div>
+		<?php elseif ( $percentage_budget_used >= AMP_Style_Sanitizer::CSS_BUDGET_WARNING_PERCENTAGE ) : ?>
+			<div class="notice notice-alt notice-warning inline">
+				<p>
+					<?php esc_html_e( 'You are nearing the limit of the CSS budget. Once reaching this limit, stylesheets deemed of lesser priority will be excluded from the page. Please review the stylesheets below and determine if the current theme or a particular plugin is including excessive CSS.', 'amp' ); ?>
+				</p>
+			</div>
+		<?php endif; ?>
+
+		<table class="amp-stylesheet-list wp-list-table widefat fixed striped">
+			<thead>
+			<tr>
+				<th class="column-stylesheet_expand"></th>
+				<th class="column-stylesheet_order"><?php esc_html_e( 'Order', 'amp' ); ?></th>
+				<th class="column-original_size"><?php esc_html_e( 'Original Size', 'amp' ); ?></th>
+				<th class="column-minified"><?php esc_html_e( 'Minified', 'amp' ); ?></th>
+				<th class="column-final_size"><?php esc_html_e( 'Final Size', 'amp' ); ?></th>
+				<th class="column-percentage"><?php esc_html_e( 'Percentage', 'amp' ); ?></th>
+				<th class="column-priority"><?php esc_html_e( 'Priority', 'amp' ); ?></th>
+				<th class="column-stylesheet_status"><?php esc_html_e( 'Status', 'amp' ); ?></th>
+				<th class="column-markup"><?php esc_html_e( 'Markup', 'amp' ); ?></th>
+				<th class="column-sources_with_invalid_output"><?php esc_html_e( 'Sources', 'amp' ); ?></th>
+			</tr>
+			</thead>
+			<tbody>
+			<?php $row = 1; ?>
+			<?php foreach ( $stylesheets as $stylesheet ) : ?>
+				<?php
+				// @todo Add information about amp-keyframes as well.
+				if ( ! isset( $stylesheet['group'] ) || 'amp-custom' !== $stylesheet['group'] || ! empty( $stylesheet['duplicate'] ) ) {
+					continue;
+				}
+
+				$origin_html = '<' . $stylesheet['element']['name'];
+				if ( ! empty( $stylesheet['element']['attributes'] ) ) {
+					$attributes = $stylesheet['element']['attributes'];
+					if ( ! empty( $attributes['class'] ) ) {
+						$attributes['class'] = trim( preg_replace( '/(^|\s)amp-wp-\w+(\s|$)/', ' ', $attributes['class'] ) );
+						if ( empty( $attributes['class'] ) ) {
+							unset( $attributes['class'] );
+						}
+					}
+					if ( isset( $attributes[ AMP_Style_Sanitizer::ORIGINAL_STYLE_ATTRIBUTE_NAME ] ) ) {
+						$attributes['style'] = $attributes[ AMP_Style_Sanitizer::ORIGINAL_STYLE_ATTRIBUTE_NAME ];
+						unset( $attributes[ AMP_Style_Sanitizer::ORIGINAL_STYLE_ATTRIBUTE_NAME ] );
+					}
+					if ( ! empty( $attributes ) ) {
+						$origin_html .= ' ' . AMP_HTML_Utils::build_attributes_string( $attributes );
+					}
+				}
+				$origin_html .= '>';
+
+				$ratio = $stylesheet['final_size'] / $stylesheet['original_size'];
+				?>
+				<tr class="<?php echo esc_attr( sprintf( 'stylesheet level-0 %s', 0 === $row % 2 ? 'even' : 'odd' ) ); ?>">
+					<td class="column-stylesheet_expand">
+						<button class="toggle-stylesheet-details" type="button">
+							<span class="screen-reader-text"><?php esc_html_e( 'Expand/collapse', 'amp' ); ?></span>
+						</button>
+					</td>
+					<td class="column-stylesheet_order">
+						<?php echo (int) $row; ?>
+					</td>
+					<td class="column-original_size">
+						<?php
+						echo esc_html( number_format_i18n( $stylesheet['original_size'] ) );
+						echo '<small>B</small>';
+						?>
+					</td>
+					<td class="column-minified">
+						<?php
+						if ( $ratio <= 1 ) {
+							echo esc_html( sprintf( '-%.1f%%', ( 1.0 - $ratio ) * 100 ) );
+						} else {
+							echo esc_html( sprintf( '+%.1f%%', -1 * ( 1.0 - $ratio ) * 100 ) );
+						}
+						?>
+					</td>
+					<td class="column-final_size">
+						<?php
+						echo esc_html( number_format_i18n( $stylesheet['final_size'] ) );
+						echo '<small>B</small>';
+						?>
+					</td>
+					<td class="column-percentage">
+						<?php
+						$percentage = $stylesheet['final_size'] / ( $included_final_size + $excluded_final_size );
+						?>
+						<meter value="<?php echo esc_attr( $stylesheet['final_size'] ); ?>" min="0" max="<?php echo esc_attr( $included_final_size + $excluded_final_size ); ?>" title="<?php esc_attr_e( 'Stylesheet bytes of total CSS added to page', 'amp' ); ?>">
+							<?php echo esc_html( round( ( $percentage ) * 100 ) ) . '%'; ?>
+						</meter>
+					</td>
+					<td class="column-priority">
+						<?php echo esc_html( $stylesheet['priority'] ); ?>
+					</td>
+					<td class="column-stylesheet_status">
+						<?php
+						switch ( $stylesheet['status'] ) {
+							case $included_status:
+								printf( '<span title="%s">✅</span>', esc_attr__( 'Stylesheet included', 'amp' ) );
+								break;
+							case $excessive_status:
+								printf( '<span title="%s">⚠️</span>', esc_attr__( 'Stylesheet overruns CSS budget yet it is still included on page', 'amp' ) );
+								break;
+							case $excluded_status:
+								printf( '<span title="%s">🚫</span>', esc_attr__( 'Stylesheet excluded due to exceeding CSS budget', 'amp' ) );
+								break;
+						}
+						?>
+					</td>
+					<td class="column-markup">
+						<?php
+						$origin_abbr_text = '?';
+						if ( 'link_element' === $stylesheet['origin'] ) {
+							$origin_abbr_text = '<link&nbsp;&hellip;>'; // @todo Consider adding the basename of the CSS file.
+						} elseif ( 'style_element' === $stylesheet['origin'] ) {
+							$origin_abbr_text = '<style>';
+						} elseif ( 'style_attribute' === $stylesheet['origin'] ) {
+							$origin_abbr_text = 'style="&hellip;"';
+						}
+						$needs_abbr = $origin_abbr_text !== $origin_html;
+						if ( $needs_abbr ) {
+							printf( '<abbr title="%s">', esc_attr( $origin_html ) );
+						}
+						printf( '<code>%s</code>', esc_html( $origin_abbr_text ) );
+						if ( $needs_abbr ) {
+							echo '</abbr>';
+						}
+						echo '</code>';
+						?>
+					</td>
+					<td class="column-sources_with_invalid_output">
+						<?php
+						if ( empty( $stylesheet['sources'] ) ) {
+							esc_html_e( '--', 'amp' );
+						} else {
+							self::render_sources_column( AMP_Validation_Error_Taxonomy::summarize_sources( $stylesheet['sources'] ), $post->ID );
+						}
+						?>
+					</td>
+				</tr>
+				<tr class="<?php echo esc_attr( sprintf( 'stylesheet-details level-0 %s', 0 === $row % 2 ? 'even' : 'odd' ) ); ?>">
+					<td colspan="10">
+						<dl class="detailed">
+							<dt><?php esc_html_e( 'Original Markup', 'amp' ); ?></dt>
+							<dd><code class="stylesheet-origin-markup"><?php echo esc_html( $origin_html ); ?></code></dd>
+
+							<dt><?php esc_html_e( 'Sources', 'amp' ); ?></dt>
+							<dd>
+								<?php AMP_Validation_Error_Taxonomy::render_sources( $stylesheet['sources'] ); ?>
+							</dd>
+
+							<dt><?php esc_html_e( 'CSS Code', 'amp' ); ?></dt>
+							<dd>
+								<?php
+								ob_start();
+								echo '<code class="shaken-stylesheet">';
+								$open_parens = 0;
+								$ins_count   = 0;
+								$del_count   = 0;
+								foreach ( $stylesheet['shaken_tokens'] as $shaken_token ) {
+									if ( $shaken_token[0] ) {
+										$ins_count++;
+									} else {
+										$del_count++;
+									}
+
+									if ( is_array( $shaken_token[1] ) ) {
+										echo '<span class="declaration-block">';
+										$selector_count = count( $shaken_token[1] );
+										foreach ( array_keys( $shaken_token[1] ) as $i => $selector ) {
+											$included = $shaken_token[1][ $selector ];
+											echo $included ? '<ins class="selector">' : '<del class="selector">';
+											echo str_repeat( "\t", $open_parens ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+
+											$selector_html = preg_replace(
+												'/(:root|html)(:not\(#_\))+/',
+												sprintf(
+													'<abbr title="%s">$0</abbr>',
+													esc_attr(
+														'style_attribute' === $stylesheet['origin']
+															?
+															__( 'Selector generated to increase specificity so the cascade is preserved for properties moved from style attribute to CSS rule in style[amp-custom].', 'amp' )
+															:
+															__( 'Selector generated to increase specificity for important properties so that the CSS cascade is preserved. AMP does not allow important properties.', 'amp' )
+													)
+												),
+												esc_html( $selector )
+											);
+											if ( 'style_attribute' === $stylesheet['origin'] ) {
+												$selector_html = preg_replace(
+													'/\.amp-wp-\w+/',
+													sprintf(
+														'<abbr title="%s">$0</abbr>',
+														esc_attr__( 'Class name generated during extraction of inline style to style[amp-custom].', 'amp' )
+													),
+													$selector_html
+												);
+											}
+
+											echo $selector_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+
+											if ( $i + 1 < $selector_count ) {
+												echo ',';
+											}
+											echo $included ? '</ins>' : '</del>';
+										}
+
+										echo $shaken_token[0] ? '<ins>' : '<del>';
+										echo str_repeat( "\t", $open_parens + 1 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+										echo '{ ' . esc_html( implode( '; ', $shaken_token[2] ) ) . '; }';
+										echo $shaken_token[0] ? '</ins>' : '</del>';
+
+										echo '</span>';
+									} elseif ( is_string( $shaken_token[1] ) ) {
+										echo $shaken_token[0] ? '<ins class="">' : '<del class="">';
+
+										$parent_count_diff = substr_count( $shaken_token[1], '{' ) - substr_count( $shaken_token[1], '}' );
+										if ( $parent_count_diff >= 0 ) {
+											echo str_repeat( "\t", $open_parens ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+										} else {
+											echo str_repeat( "\t", $open_parens + $parent_count_diff ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+										}
+										$open_parens += $parent_count_diff;
+
+										echo esc_html( $shaken_token[1] );
+
+										echo $shaken_token[0] ? '</ins>' : '</del>';
+									}
+								}
+								echo '</code>';
+								$html = trim( ob_get_clean() );
+
+								if ( 0 === $ins_count && 0 === $del_count ) {
+									printf(
+										'<p><em>%s</em></p>',
+										esc_html__( 'The stylesheet was empty after minification (removal of comments and whitespace).', 'amp' )
+									);
+								} elseif ( 0 === $ins_count ) {
+									printf(
+										'<p><em>%s</em></p>',
+										esc_html__( 'All of the stylesheet was removed during tree-shaking.', 'amp' )
+									);
+								}
+
+								if ( 0 !== $ins_count || 0 !== $del_count ) {
+									if ( $del_count > 0 ) {
+										printf(
+											'<p><label><input type="checkbox" class="show-removed-styles"> %s</label></p>',
+											esc_html__( 'Show styles removed during tree-shaking', 'amp' )
+										);
+									}
+									echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+								}
+								?>
+							</dd>
+						</dl>
+					</td>
+				</tr>
+				<?php $row++; ?>
+			<?php endforeach; ?>
+			</tbody>
+		</table>
 		<?php
 	}
 
