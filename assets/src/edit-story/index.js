@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import Modal from 'react-modal';
+
+/**
  * WordPress dependencies
  */
 import { render } from '@wordpress/element';
@@ -17,11 +22,16 @@ import './style.css'; // This way the general editor styles are loaded before al
  * @param {Object} config   Story editor settings.
  */
 const initialize = ( id, config ) => {
+	const appElement = document.getElementById( id );
+
+	// see http://reactcommunity.org/react-modal/accessibility/
+	Modal.setAppElement( appElement );
+
 	render(
 		<App
 			config={ config }
 		/>,
-		document.getElementById( id ),
+		appElement,
 	);
 };
 

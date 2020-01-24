@@ -63,7 +63,9 @@ function DropZoneProvider( { children } ) {
 			resetHoverState();
 			return;
 		}
+
 		const foundDropZone = foundDropZones[ 0 ];
+
 		// If dropzone not found, do nothing.
 		if ( ! foundDropZone || ! foundDropZone.node ) {
 			return;
@@ -75,10 +77,17 @@ function DropZoneProvider( { children } ) {
 			y: evt.clientY - rect.top < rect.bottom - evt.clientY ? 'top' : 'bottom',
 		};
 
-		setHoveredDropZone( {
-			node: foundDropZone.node,
-			position,
-		} );
+		if (
+			! hoveredDropZone ||
+			hoveredDropZone.node !== foundDropZone.node ||
+			position.x !== hoveredDropZone.position.x ||
+			position.y !== hoveredDropZone.position.y
+		) {
+			setHoveredDropZone( {
+				node: foundDropZone.node,
+				position,
+			} );
+		}
 	};
 
 	const state = {
