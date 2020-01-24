@@ -14,6 +14,7 @@ import styled, { css } from 'styled-components';
  */
 import { useStory } from '../../app/story';
 import { useConfig } from '../../app/config';
+import { SimplePanel } from '../../panels/panel';
 import UploadButton from '../uploadButton';
 import useInspector from './useInspector';
 import { SelectMenu, InputGroup } from './shared';
@@ -90,10 +91,7 @@ function DocumentInspector() {
 	);
 
 	return (
-		<>
-			<h2>
-				{ __( 'Document', 'amp' ) }
-			</h2>
+		<SimplePanel title={ __( 'Document', 'amp' ) }>
 			{ capabilities && capabilities.hasPublishAction && statuses && <SelectMenu
 				label={ __( 'Status', 'amp' ) }
 				name="status"
@@ -155,8 +153,7 @@ function DocumentInspector() {
 					buttonCSS={ ButtonCSS }
 				/> }
 			</Group>
-
-		</>
+		</SimplePanel>
 	);
 }
 

@@ -28,14 +28,14 @@ const Label = styled.span`
 
 const Group = styled.label`
 	color: ${ ( { theme } ) => theme.colors.mg.v1 };
-	display: block;
-	align-items: center;
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
 	margin-bottom: 10px;
 	opacity: ${ ( { disabled } ) => disabled ? 0.7 : 1 };
 `;
 
 const Select = styled.select`
-	width: 100%;
 `;
 
 const Input = styled.input`
@@ -44,7 +44,6 @@ const Input = styled.input`
 	border-radius: 4px;
 	font-size: 11px;
 	line-height: 16px;
-	width: 100%;
 `;
 
 function SelectMenu( { label, name, options, value, onChange, postfix, disabled } ) {
