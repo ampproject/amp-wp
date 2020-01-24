@@ -14,6 +14,8 @@ interface Extension
     const DYNAMIC_CSS_CLASSES = 'amp-dynamic-css-classes';
     const EXPERIMENT          = 'amp-experiment';
     const GEO                 = 'amp-geo';
+    const MUSTACHE            = 'amp-mustache';
+
     /**
      * Prefix of an Amp extension.
      *
