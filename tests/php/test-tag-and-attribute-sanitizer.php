@@ -1256,27 +1256,23 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_URL_PROTOCOL ],
 			],
 
-			'a_with_wrong_host'                            => [
+			'a_with_space_in_url'                          => [
 				'<a class="foo" href="http://foo bar">value</a>',
-				'<a class="foo">value</a>',
-				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_URL ],
+				'<a class="foo" href="http://foo%20bar">value</a>',
 			],
 			'a_with_encoded_host'                          => [
 				'<a class="foo" href="http://%65%78%61%6d%70%6c%65%2e%63%6f%6d/foo/">value</a>',
 				null,
 			],
-			'a_with_wrong_schemeless_host'                 => [
-				'<a class="foo" href="//bad domain with a space.com/foo">value</a>',
-				'<a class="foo">value</a>',
-				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_URL ],
+			'a_with_spaces_inside'                         => [
+				'<a class="foo" href="//domain with space.com/foo">value</a>',
+				'<a class="foo" href="//domain%20with%20space.com/foo">value</a>',
+			],
+			'a_with_schemaless_host'                       => [
+				'<a class="foo" href="//domain.om/foo">value</a>',
 			],
 			'a_with_mail_host'                             => [
-				'<a class="foo" href="mail to:foo@bar.com">value</a>',
-				'<a class="foo">value</a>',
-				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_URL_PROTOCOL ],
+				'<a class="foo" href="mailto:foo@bar.com">value</a>',
 			],
 
 			// font is removed so we should check that other elements are checked as well.

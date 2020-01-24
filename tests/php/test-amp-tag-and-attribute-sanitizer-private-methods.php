@@ -1675,6 +1675,87 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 	}
 
 	/**
+	 * Gets the test data for test_normalize_url_from_attribute_value().
+	 *
+	 * @return array The test data.
+	 */
+	public function get_normalize_url_data() {
+		$normalized_url = 'https://example.com';
+
+		return [
+			'nothing_to_remove'             => [
+				'https://example.com',
+			],
+			'empty_string'                  => [
+				'',
+			],
+			'only_space'                    => [
+				'  ',
+				'',
+			],
+			'leading_space'                 => [
+				'  https://example.com',
+				$normalized_url,
+			],
+			'leading_tab'                   => [
+				"\thttps://example.com",
+				$normalized_url,
+			],
+			'trailing_linefeed'             => [
+				"https://example.com \n",
+				$normalized_url,
+			],
+			'trailing_space'                => [
+				'https://example.com  ',
+				$normalized_url,
+			],
+			'enclosed_in_spaces'            => [
+				' https://example.com ',
+				$normalized_url,
+			],
+			'space_inside'                  => [
+				' https: //exam ple.com ',
+				$normalized_url,
+			],
+			'tabs_inside'                   => [
+				"https:\t//exam\tple.com ",
+				$normalized_url,
+			],
+			'leading_slashes'               => [
+				'//example.com',
+			],
+			'url_encoded_space_not_removed' => [
+				'https://example.com?foo=++baz',
+			],
+		];
+	}
+
+	/**
+	 * Tests normalize_url_from_attribute_value.
+	 *
+	 * @dataProvider get_normalize_url_data
+	 * @group allowed-tags-private-methods
+	 * @covers AMP_Tag_And_Attribute_Sanitizer::normalize_url_from_attribute_value()
+	 *
+	 * @param array       $url      The URL to normalize.
+	 * @param string|null $expected The expected return value.
+	 * @throws ReflectionException If it's not possible to create a reflection to call the private method.
+	 */
+	public function test_normalize_url_from_attribute_value( $url, $expected = null ) {
+		if ( null === $expected ) {
+			$expected = $url;
+		}
+
+		$dom       = AMP_DOM_Utils::get_dom_from_content( '' );
+		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+
+		$this->assertEquals(
+			$expected,
+			$this->call_private_method( $sanitizer, 'normalize_url_from_attribute_value', [ $url ] )
+		);
+	}
+
+	/**
 	 * @dataProvider get_check_attr_spec_rule_allowed_protocol
 	 * @group allowed-tags-private-methods
 	 */
