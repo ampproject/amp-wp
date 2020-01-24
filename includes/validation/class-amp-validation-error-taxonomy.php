@@ -2948,7 +2948,7 @@ class AMP_Validation_Error_Taxonomy {
 				}
 				return $title;
 			case AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE:
-				$title = esc_html__( 'Invalid property value', 'amp' );
+				$title = esc_html__( 'Invalid property', 'amp' );
 				if ( isset( $validation_error['attr_property_name'] ) ) {
 					$title .= sprintf( ': <code>%s</code>', esc_html( $validation_error['attr_property_name'] ) );
 				}
@@ -3019,11 +3019,17 @@ class AMP_Validation_Error_Taxonomy {
 					return __( 'Invalid property', 'amp' );
 				} elseif ( AMP_Tag_And_Attribute_Sanitizer::MISSING_MANDATORY_PROPERTY === $validation_error['code'] ) {
 					return __( 'Missing property', 'amp' );
-				} else {
-					return __( 'Property', 'amp' );
 				}
+
+				return __( 'Property name', 'amp' );
 			case 'attr_property_value':
-				return __( 'Required value', 'amp' );
+				if ( AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE === $validation_error['code'] ) {
+					return __( 'Invalid property value', 'amp' );
+				} elseif ( AMP_Tag_And_Attribute_Sanitizer::MISSING_REQUIRED_PROPERTY_VALUE === $validation_error['code'] ) {
+					return __('Required property value', 'amp');
+				}
+
+				return __( 'Property value', 'amp' );
 			case 'attributes':
 				return __( 'Missing attributes', 'amp' );
 			default:

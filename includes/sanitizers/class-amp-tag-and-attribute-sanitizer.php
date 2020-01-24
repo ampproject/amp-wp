@@ -693,11 +693,18 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				if ( self::DISALLOWED_PROPERTY_IN_ATTR_VALUE === $error_code ) {
 					$properties         = $error_data['original_properties'];
 					$invalid_properties = $error_data['invalid_properties'];
+					$removed_property   = false;
 
 					foreach ( $invalid_properties as $invalid_property ) {
 						$validation_error['attr_property_name'] = $invalid_property;
+
+						if ( ! $this->is_empty_attribute_value( $properties[ $invalid_property ] ) ) {
+							$validation_error['attr_property_value'] = $properties[ $invalid_property ];
+						}
+
 						if ( $this->should_sanitize_validation_error( $validation_error, [ 'node' => $attr_node ] ) ) {
 							unset( $properties[ $invalid_property ] );
+							$removed_property = true;
 						}
 					}
 
@@ -712,12 +719,14 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 						}
 					);
 
-					$node->setAttribute( $attr_node->nodeName, $valid_properties );
+					if ( $removed_property ) {
+						$node->setAttribute( $attr_node->nodeName, $valid_properties );
+					}
 				} else {
 					if ( self::MISSING_MANDATORY_PROPERTY === $error_code ) {
 						$validation_error['attr_property_name'] = $error_data['property'];
 					} elseif ( self::MISSING_REQUIRED_PROPERTY_VALUE === $error_code ) {
-						$validation_error['attr_property_name']  = $error_data['property'];
+						$validation_error['attr_property_name']  = $error_data['name'];
 						$validation_error['attr_property_value'] = $error_data['value'];
 					}
 
@@ -1981,7 +1990,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 						[
 							self::MISSING_REQUIRED_PROPERTY_VALUE,
 							[
-								'property' => $prop_name,
+								'name' => $prop_name,
 								'value'    => $required_value,
 							],
 						],
