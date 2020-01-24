@@ -14,16 +14,11 @@ import {
 	useLayoutEffect,
 } from '@wordpress/element';
 
-const Handle = styled.button.attrs( { type: 'button' } )`
+const Handle = styled.button.attrs( { type: 'button', role: 'separator' } )`
 	background: transparent;
 	border: 0;
 	padding: 0;
-	position: absolute;
-	top: 0;
-	left: 50%;
-	margin-left: -60px;
-	width: 120px;
-	height: 20px;
+	height: 10px;
 	display: flex;
 	flex-direction: column;
 	justify-content: flex-start;
