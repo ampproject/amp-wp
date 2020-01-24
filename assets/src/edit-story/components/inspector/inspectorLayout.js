@@ -6,6 +6,7 @@ import styled from 'styled-components';
 /**
  * Internal dependencies
  */
+import useInspector from './useInspector';
 import InspectorTabs from './inspectorTabs';
 import InspectorContent from './inspectorContent';
 
@@ -32,12 +33,13 @@ const InspectorBackground = styled.div`
 `;
 
 function InspectorLayout() {
+	const { actions: { setInspectorContentNode } } = useInspector();
 	return (
 		<Layout>
 			<TabsArea>
 				<InspectorTabs />
 			</TabsArea>
-			<InspectorBackground>
+			<InspectorBackground ref={ setInspectorContentNode }>
 				<InspectorContent />
 			</InspectorBackground>
 		</Layout>

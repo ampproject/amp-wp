@@ -12,6 +12,7 @@ import { useContext, useCallback } from '@wordpress/element';
 /**
  * Internal dependencies
  */
+import useInspector from '../../components/inspector/useInspector';
 import panelContext from './context';
 import DragHandle from './handle';
 import Arrow from './arrow.svg';
@@ -58,10 +59,14 @@ function Title( { children, isPrimary, isResizable } ) {
 		state: { isCollapsed },
 		actions: { collapse, expand, setHeight },
 	} = useContext( panelContext );
+	const { state: { inspectorContentHeight } } = useInspector();
+
+	// Max panel height is set to 70% of full available height.
+	const maxHeight = Math.round( inspectorContentHeight * 0.7 );
 
 	const handleHeightChange = useCallback(
-		( deltaHeight ) => setHeight( ( height ) => height + deltaHeight ),
-		[ setHeight ],
+		( deltaHeight ) => setHeight( ( height ) => Math.max( 0, Math.min( maxHeight, height + deltaHeight ) ) ),
+		[ setHeight, maxHeight ],
 	);
 
 	return (

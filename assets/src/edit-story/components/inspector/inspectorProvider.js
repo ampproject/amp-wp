@@ -23,9 +23,15 @@ function InspectorProvider( { children } ) {
 	const [ tab, setTab ] = useState( DESIGN );
 	const [ users, setUsers ] = useState( [] );
 	const [ statuses, setStatuses ] = useState( [] );
+	const [ inspectorContentHeight, setInspectorContentHeight ] = useState( null );
 
 	const [ isUsersLoading, setIsUsersLoading ] = useState( false );
 	const [ isStatusesLoading, setIsStatusesLoading ] = useState( false );
+
+	// TODO Implement `useResizeObserver` once either branch is merged
+	const setInspectorContentNode = useCallback( ( node ) => {
+		setInspectorContentHeight( node.clientHeight );
+	}, [] );
 
 	const loadStatuses = useCallback( () => {
 		if ( ! isStatusesLoading && statuses.length === 0 ) {
@@ -69,11 +75,13 @@ function InspectorProvider( { children } ) {
 			tab,
 			users,
 			statuses,
+			inspectorContentHeight,
 		},
 		actions: {
 			setTab,
 			loadStatuses,
 			loadUsers,
+			setInspectorContentNode,
 		},
 		data: {
 			tabs: {
