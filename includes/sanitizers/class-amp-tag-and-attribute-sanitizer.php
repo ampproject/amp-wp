@@ -1679,7 +1679,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return string The normalized URL.
 	 */
 	private function normalize_url_from_attribute_value( $url ) {
-		return preg_replace( '/\s/', '', $url );
+		return preg_replace( '/[\t\r\n]/', '', trim( $url ) );
 	}
 
 	/**

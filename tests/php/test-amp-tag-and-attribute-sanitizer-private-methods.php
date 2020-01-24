@@ -1715,7 +1715,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 			],
 			'space_inside'                  => [
 				' https: //exam ple.com ',
-				$normalized_url,
+				'https: //exam ple.com',
 			],
 			'tabs_inside'                   => [
 				"https:\t//exam\tple.com ",
