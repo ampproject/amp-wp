@@ -93,11 +93,11 @@ class AMP_Validation_Callback_Wrapper implements ArrayAccess {
 		}
 
 		return compact(
-			'scripts',
 			'styles',
 			'before_styles_registered',
 			'before_styles_enqueued',
 			'before_styles_extras',
+			'scripts',
 			'before_scripts_registered',
 			'before_scripts_enqueued',
 			'before_scripts_extras',
@@ -153,25 +153,41 @@ class AMP_Validation_Callback_Wrapper implements ArrayAccess {
 	 * @since 1.5
 	 *
 	 * @param array $preparation Preparation data.
+	 *
+	 * @global WP_Scripts|null $wp_scripts
+	 * @global WP_Styles|null  $wp_styles
 	 */
 	protected function finalize( array $preparation ) {
+		// If a script/style was registered or enqueued in the callback, these should now be defined if not defined already.
+		global $wp_scripts, $wp_styles;
+
 		if ( $preparation['has_buffer_started'] ) {
 			ob_end_flush();
 		}
 		array_pop( AMP_Validation_Manager::$hook_source_stack );
 
-		if ( $preparation['styles'] instanceof WP_Styles ) {
+		if ( isset( $wp_styles ) && $wp_styles instanceof WP_Styles ) {
+			$styles = $wp_styles;
+		} elseif ( isset( $preparation['styles'] ) && $preparation['styles'] instanceof WP_Styles ) {
+			$styles = $preparation['styles'];
+		}
+		if ( isset( $styles ) ) {
 			$this->finalize_styles(
-				$preparation['styles'],
+				$styles,
 				$preparation['before_styles_registered'],
 				$preparation['before_styles_enqueued'],
 				$preparation['before_styles_extras']
 			);
 		}
 
-		if ( $preparation['scripts'] instanceof WP_Scripts ) {
+		if ( isset( $wp_scripts ) && $wp_scripts instanceof WP_Scripts ) {
+			$scripts = $wp_scripts;
+		} elseif ( isset( $preparation['scripts'] ) && $preparation['scripts'] instanceof WP_Scripts ) {
+			$scripts = $preparation['scripts'];
+		}
+		if ( isset( $scripts ) ) {
 			$this->finalize_scripts(
-				$preparation['scripts'],
+				$scripts,
 				$preparation['before_scripts_registered'],
 				$preparation['before_scripts_enqueued'],
 				$preparation['before_scripts_extras']
