@@ -3,6 +3,7 @@
  */
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
+import uuid from 'uuid/v4';
 
 /**
  * WordPress dependencies
@@ -19,17 +20,20 @@ const Wrapper = styled.section`
 	flex-direction: column;
 `;
 
-function Panel( { initialHeight, children } ) {
+function Panel( { initialHeight, name, children } ) {
 	const [ isCollapsed, setIsCollapsed ] = useState( false );
 	const [ height, setHeight ] = useState( initialHeight );
 
 	const collapse = useCallback( () => setIsCollapsed( true ), [] );
 	const expand = useCallback( () => setIsCollapsed( false ), [] );
 
+	const panelContentId = `panel-${ name }-${ uuid() }`;
+
 	const contextValue = {
 		state: {
 			height,
 			isCollapsed,
+			panelContentId,
 		},
 		actions: {
 			setHeight,
@@ -54,6 +58,7 @@ Panel.propTypes = {
 		PropTypes.arrayOf( PropTypes.node ),
 		PropTypes.node,
 	] ).isRequired,
+	name: PropTypes.string.isRequired,
 	initialHeight: PropTypes.number,
 };
 

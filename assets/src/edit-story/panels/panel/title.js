@@ -8,6 +8,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { useContext, useCallback } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -23,7 +24,7 @@ const Header = styled.h2`
 	border-top-width: ${ ( { isPrimary } ) => isPrimary ? 0 : '1px' };
 	color: ${ ( { theme } ) => theme.colors.bg.v2 };
 	padding: 10px 20px;
-	${ ( { isResizable } ) => isResizable && 'padding-top: 0;' };
+	${ ( { hasResizeHandle } ) => hasResizeHandle && 'padding-top: 0;' };
 	margin: 0;
 	position: relative;
 	display: flex;
@@ -66,7 +67,7 @@ const Collapse = styled.span`
 
 function Title( { children, isPrimary, isResizable } ) {
 	const {
-		state: { isCollapsed },
+		state: { isCollapsed, height, panelContentId },
 		actions: { collapse, expand, setHeight },
 	} = useContext( panelContext );
 	const { state: { inspectorContentHeight } } = useInspector();
@@ -75,16 +76,26 @@ function Title( { children, isPrimary, isResizable } ) {
 	const maxHeight = Math.round( inspectorContentHeight * 0.7 );
 
 	const handleHeightChange = useCallback(
-		( deltaHeight ) => setHeight( ( height ) => Math.max( 0, Math.min( maxHeight, height + deltaHeight ) ) ),
+		( deltaHeight ) => setHeight( ( value ) => Math.max( 0, Math.min( maxHeight, value + deltaHeight ) ) ),
 		[ setHeight, maxHeight ],
 	);
 
 	return (
-		<Header isPrimary={ isPrimary } isResizable={ isResizable }>
+		<Header isPrimary={ isPrimary } hasResizeHandle={ isResizable && ! isCollapsed }>
 			{ isResizable && ! isCollapsed && (
-				<DragHandle handleHeightChange={ handleHeightChange } />
+				<DragHandle
+					height={ height }
+					minHeight={ 0 }
+					maxHeight={ maxHeight }
+					handleHeightChange={ handleHeightChange }
+				/>
 			) }
-			<HeaderButton onClick={ isCollapsed ? expand : collapse }>
+			<HeaderButton
+				onClick={ isCollapsed ? expand : collapse }
+				aria-label={ __( 'Collapse/expand panel', 'amp' ) }
+				aria-expanded={ ! isCollapsed }
+				aria-controls={ panelContentId }
+			>
 				<Heading>
 					{ children }
 				</Heading>
