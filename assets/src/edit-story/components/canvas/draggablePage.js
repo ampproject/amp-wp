@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import styled from 'styled-components';
-
-/**
  * WordPress dependencies
  */
 import { forwardRef, useCallback } from '@wordpress/element';

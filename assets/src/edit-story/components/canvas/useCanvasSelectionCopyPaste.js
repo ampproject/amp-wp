@@ -60,8 +60,8 @@ function useCanvasSelectionCopyPaste( container ) {
 			const htmlContent = selectedElements
 				.map( ( { type, ...rest } ) => {
 					// eslint-disable-next-line @wordpress/no-unused-vars-before-return
-					const { Output } = getDefinitionForType( type );
-					return renderToString( <Output { ...rest } /> );
+					const { Save } = getDefinitionForType( type );
+					return renderToString( <Save { ...rest } /> );
 				} )
 				.join( '\n' );
 

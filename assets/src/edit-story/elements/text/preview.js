@@ -7,12 +7,12 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import { getCommonAttributes } from '../shared';
-import { generateFontFamily, getResponsiveFontSize } from './util';
+import { generateFontFamily } from './util';
 
 /**
  * Returns AMP HTML for saving into post content for displaying in the FE.
  */
-function TextOutput( {
+function TextPreview( {
 	id,
 	content,
 	color,
@@ -31,12 +31,11 @@ function TextOutput( {
 	padding,
 	rotationAngle,
 	textAlign,
-	isPreview,
 	previewSizeMultiplier,
 } ) {
 	const style = {
 		...getCommonAttributes( { width, height, x, y, rotationAngle } ),
-		fontSize: isPreview ? Math.ceil( fontSize * previewSizeMultiplier ) : getResponsiveFontSize( fontSize ),
+		fontSize: Math.ceil( fontSize * previewSizeMultiplier ),
 		fontStyle: fontStyle ? fontStyle : null,
 		fontFamily: generateFontFamily( fontFamily, fontFallback ),
 		fontWeight: fontWeight ? fontWeight : null,
@@ -54,7 +53,7 @@ function TextOutput( {
 	);
 }
 
-TextOutput.propTypes = {
+TextPreview.propTypes = {
 	id: PropTypes.string.isRequired,
 	content: PropTypes.string,
 	color: PropTypes.string,
@@ -76,8 +75,7 @@ TextOutput.propTypes = {
 	textAlign: PropTypes.string,
 	x: PropTypes.number.isRequired,
 	y: PropTypes.number.isRequired,
-	isPreview: PropTypes.bool,
 	previewSizeMultiplier: PropTypes.number,
 };
 
-export default TextOutput;
+export default TextPreview;

@@ -16,15 +16,15 @@ import { getCommonAttributes } from '../shared';
 /**
  * Returns AMP HTML for saving into post content for displaying in the FE.
  */
-function ImageOutput( { id, src, width, height, x, y, rotationAngle, isFullbleed, isPreview } ) {
+function ImagePreview( { id, src, width, height, x, y, rotationAngle, isFullbleed } ) {
 	const props = {
 		layout: 'fill',
 		src,
-		style: isPreview ? {
+		style: {
 			objectFit: isFullbleed ? 'cover' : null,
 			width: '100%',
 			height: '100%',
-		} : null,
+		},
 	};
 	const wrapperProps = {
 		id: 'el-' + id,
@@ -40,12 +40,12 @@ function ImageOutput( { id, src, width, height, x, y, rotationAngle, isFullbleed
 
 	return (
 		<div style={ { ...style } } { ...wrapperProps }>
-			{ isPreview ? <img draggable="false" alt={ __( 'Page preview', 'amp' ) } { ...props } /> : <amp-img className={ isFullbleed ? 'full-bleed' : '' } { ...props } /> }
+			<img draggable="false" alt={ __( 'Page preview', 'amp' ) } { ...props } />
 		</div>
 	);
 }
 
-ImageOutput.propTypes = {
+ImagePreview.propTypes = {
 	id: PropTypes.string.isRequired,
 	src: PropTypes.string.isRequired,
 	width: PropTypes.number.isRequired,
@@ -54,7 +54,6 @@ ImageOutput.propTypes = {
 	y: PropTypes.number.isRequired,
 	rotationAngle: PropTypes.number.isRequired,
 	isFullbleed: PropTypes.bool,
-	isPreview: PropTypes.bool,
 };
 
-export default ImageOutput;
+export default ImagePreview;
