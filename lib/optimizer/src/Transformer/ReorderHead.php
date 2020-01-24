@@ -209,7 +209,7 @@ final class ReorderHead implements Transformer
      */
     private function registerLink(DOMElement $node)
     {
-        switch ($node->getAttribute('rel')) {
+        switch (strtolower($node->getAttribute('rel'))) {
             case 'stylesheet':
                 $href = $node->getAttribute('href');
                 if ($href && substr($href, -7) === '/v0.css') {
