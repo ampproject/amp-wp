@@ -31,7 +31,7 @@ const Page = styled.button`
 
 // Disable reason: forwardRef render functions do not support propTypes
 //eslint-disable-next-line react/prop-types
-function DraggablePageWithRef( { pageIndex, onClick, isActive, ariaLabel, width, height }, ref ) {
+function DraggablePageWithRef( { pageIndex, onClick, isActive, ariaLabel, width, height, dragIndicatorOffset }, ref ) {
 	const { state: { pages }, actions: { setCurrentPage, arrangePage } } = useStory();
 
 	const getArrangeIndex = ( sourceIndex, dstIndex, position ) => {
@@ -67,7 +67,7 @@ function DraggablePageWithRef( { pageIndex, onClick, isActive, ariaLabel, width,
 	};
 
 	return (
-		<DropZone onDrop={ onDrop } pageIndex={ pageIndex } >
+		<DropZone onDrop={ onDrop } pageIndex={ pageIndex } dragIndicatorOffset={ dragIndicatorOffset }>
 			<Page
 				draggable="true"
 				onClick={ onClick }

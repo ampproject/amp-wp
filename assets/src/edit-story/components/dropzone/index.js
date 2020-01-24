@@ -16,7 +16,7 @@ import useDropZone from './useDropZone';
 
 const DropZoneComponent = styled.div`
 	position: relative;
-	${ ( { borderPosition, theme, highlightWidth } ) => borderPosition && `
+	${ ( { borderPosition, theme, highlightWidth, dragIndicatorOffset } ) => borderPosition && `
 		:after {
 			height: 100%;
 			top: 0;
@@ -25,12 +25,12 @@ const DropZoneComponent = styled.div`
 			width: ${ highlightWidth }px;
 			background: ${ theme.colors.action };
 			content: '';
-			${ borderPosition }: -${ highlightWidth / 2 }px;
+			${ borderPosition }: -${ ( highlightWidth / 2 ) + dragIndicatorOffset }px;
 		}
 	` }
 `;
 
-function DropZone( { children, onDrop, pageIndex } ) {
+function DropZone( { children, onDrop, pageIndex, dragIndicatorOffset } ) {
 	const dropZoneElement = useRef( null );
 	const [ dropZone, setDropZone ] = useState( null );
 	const { actions: { registerDropZone, unregisterDropZone, resetHoverState }, state: { hoveredDropZone } } = useDropZone();
@@ -92,7 +92,13 @@ function DropZone( { children, onDrop, pageIndex } ) {
 	// @todo Currently static, can be adjusted for other use cases.
 	const highlightWidth = 5;
 	return (
-		<DropZoneComponent highlightWidth={ highlightWidth } borderPosition={ isDropZoneActive ? hoveredDropZone.position.x : null } ref={ dropZoneElement } onDrop={ onDropHandler }>
+		<DropZoneComponent
+			highlightWidth={ highlightWidth }
+			borderPosition={ isDropZoneActive ? hoveredDropZone.position.x : null }
+			ref={ dropZoneElement }
+			dragIndicatorOffset={ dragIndicatorOffset || 0 }
+			onDrop={ onDropHandler }
+		>
 			{ children }
 		</DropZoneComponent>
 	);
@@ -105,6 +111,7 @@ DropZone.propTypes = {
 	] ).isRequired,
 	onDrop: PropTypes.func,
 	pageIndex: PropTypes.number,
+	dragIndicatorOffset: PropTypes.number,
 };
 
 export default DropZone;
