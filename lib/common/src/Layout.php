@@ -2,6 +2,11 @@
 
 namespace Amp;
 
+/**
+ * Interface with constants for the different layouts.
+ *
+ * @package amp/common
+ */
 interface Layout
 {
 

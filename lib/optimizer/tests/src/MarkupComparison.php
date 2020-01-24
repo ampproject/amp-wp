@@ -32,8 +32,10 @@ trait MarkupComparison
      */
     protected function assertSimilarMarkup($expected, $actual)
     {
-        $actual   = str_replace('=""', '', $actual);
-        $expected = str_replace('=""', '', $expected);
+        $actual   = preg_replace('/=([\'"]){2}/', '', $actual);
+        $expected = preg_replace('/=([\'"]){2}/', '', $expected);
+        $actual   = preg_replace('/<!doctype/i', '<!DOCTYPE', $actual);
+        $expected = preg_replace('/<!doctype/i', '<!DOCTYPE', $expected);
         $actual   = preg_replace('/(\s+[a-zA-Z-_]+)=(?!")([a-zA-Z-_.]+)/', '\1="\2"', $actual);
         $expected = preg_replace('/(\s+[a-zA-Z-_]+)=(?!")([a-zA-Z-_.]+)/', '\1="\2"', $expected);
 

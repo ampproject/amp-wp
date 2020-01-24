@@ -2,8 +2,9 @@
 
 namespace Amp\Optimizer\Transformer;
 
+use Amp\Amp;
+use Amp\Attribute;
 use Amp\Dom\Document;
-use Amp\Extension;
 use Amp\Optimizer\ErrorCollection;
 use Amp\Optimizer\Transformer;
 use DOMElement;
@@ -12,17 +13,21 @@ use DOMNode;
 /**
  * Transformer applying the head reordering transformations to the HTML input.
  *
- * This transformer will reorder the tags within the <head> node like so:
- * (0) meta charset, then remaining meta tags.
- * (1) <style amp-runtime> (inserted by ServerSideRenderingTransformer)
- * (2) AMP runtime .js <script> tag
- * (3) <script> tags for render delaying extensions
- * (4) <script> tags for remaining extensions
- * (5) <link> tag for favicon
- * (6) <link rel=stylesheet> tags before <style amp-custom>
- * (7) <style amp-custom>
- * (8) any other tags allowed in <head>
- * (9) amp boilerplate (first style amp-boilerplate, then noscript).
+ * ReorderHead reorders the children of <head>. Specifically, it
+ * orders the <head> like so:
+ * (0) <meta charset> tag
+ * (1) <style amp-runtime> (inserted by ampruntimecss.go)
+ * (2) remaining <meta> tags (those other than <meta charset>)
+ * (3) AMP runtime .js <script> tag
+ * (4) AMP viewer runtime .js <script>
+ * (5) <script> tags that are render delaying
+ * (6) <script> tags for remaining extensions
+ * (7) <link> tag for favicons
+ * (8) <link> tag for resource hints
+ * (9) <link rel=stylesheet> tags before <style amp-custom>
+ * (10) <style amp-custom>
+ * (11) any other tags allowed in <head>
+ * (12) AMP boilerplate (first style amp-boilerplate, then noscript)
  *
  * This is ported from the NodeJS optimizer while verifying against the Go version.
  *
@@ -43,20 +48,21 @@ final class ReorderHead implements Transformer
     /*
      * Different categories of <head> tags to track and reorder.
      */
-    private $styleAmpRuntime                   = null;
-    private $linkStyleAmpRuntime               = null;
-    private $metaCharset                       = null;
-    private $scriptAmpEngine                   = null;
-    private $metaOther                         = [];
-    private $scriptRenderDelayingExtensions    = [];
-    private $scriptNonRenderDelayingExtensions = [];
-    private $resourceHintLinks                 = [];
     private $linkIcons                         = [];
-    private $styleAmpCustom                    = null;
+    private $linkStyleAmpRuntime               = null;
     private $linkStylesheetsBeforeAmpCustom    = [];
-    private $others                            = [];
-    private $styleAmpBoilerplate               = null;
+    private $metaCharset                       = null;
+    private $metaOther                         = [];
     private $noscript                          = null;
+    private $others                            = [];
+    private $resourceHintLinks                 = [];
+    private $scriptAmpRuntime                  = null;
+    private $scriptAmpViewer                   = null;
+    private $scriptNonRenderDelayingExtensions = [];
+    private $scriptRenderDelayingExtensions    = [];
+    private $styleAmpBoilerplate               = null;
+    private $styleAmpCustom                    = null;
+    private $styleAmpRuntime                   = null;
 
     /**
      * Apply transformations to the provided DOM document.
@@ -143,16 +149,18 @@ final class ReorderHead implements Transformer
      */
     private function registerScript(DOMElement $node)
     {
-        // Currently there are two amp engine tags: v0.js and amp4ads-v0.js.
-        // According to validation rules they are the only script tags with a src attribute and do not have attributes
-        // custom-element or custom-template. Record the amp engine tag so it can be emitted first among script tags.
-        if ($node->hasAttribute('src') && ! $this->getName($node)) {
-            $this->scriptAmpEngine = $node;
+        if ( Amp::isRuntimeScript( $node ) ) {
+            $this->scriptAmpRuntime = $node;
             return;
         }
 
-        if ($node->hasAttribute(Extension::CUSTOM_ELEMENT)) {
-            if (Extension::isRenderDelayingExtension($node)) {
+        if ( Amp::isViewerScript( $node ) ) {
+            $this->scriptAmpViewer = $node;
+            return;
+        }
+
+        if ($node->hasAttribute(Attribute::CUSTOM_ELEMENT)) {
+            if (Amp::isRenderDelayingExtension($node)) {
                 $this->scriptRenderDelayingExtensions[] = $node;
                 return;
             }
@@ -160,7 +168,7 @@ final class ReorderHead implements Transformer
             return;
         }
 
-        if ($node->hasAttribute(Extension::CUSTOM_TEMPLATE)) {
+        if ($node->hasAttribute(Attribute::CUSTOM_TEMPLATE)) {
             $this->scriptNonRenderDelayingExtensions[] = $node;
             return;
         }
@@ -238,12 +246,12 @@ final class ReorderHead implements Transformer
      */
     private function getName(DOMElement $node)
     {
-        if ($node->hasAttribute(Extension::CUSTOM_ELEMENT)) {
-            return $node->getAttribute(Extension::CUSTOM_ELEMENT);
+        if ($node->hasAttribute(Attribute::CUSTOM_ELEMENT)) {
+            return $node->getAttribute(Attribute::CUSTOM_ELEMENT);
         }
 
-        if ($node->hasAttribute(Extension::CUSTOM_TEMPLATE)) {
-            return $node->getAttribute(Extension::CUSTOM_TEMPLATE);
+        if ($node->hasAttribute(Attribute::CUSTOM_TEMPLATE)) {
+            return $node->getAttribute(Attribute::CUSTOM_TEMPLATE);
         }
 
         return '';
@@ -258,14 +266,15 @@ final class ReorderHead implements Transformer
     {
         $categories = [
             'metaCharset',
-            'styleAmpRuntime',
             'linkStyleAmpRuntime',
-            'resourceHintLinks',
+            'styleAmpRuntime',
             'metaOther',
-            'scriptAmpEngine',
+            'scriptAmpRuntime',
+            'scriptAmpViewer',
             'scriptRenderDelayingExtensions',
             'scriptNonRenderDelayingExtensions',
             'linkIcons',
+            'resourceHintLinks',
             'linkStylesheetsBeforeAmpCustom',
             'styleAmpCustom',
             'others',

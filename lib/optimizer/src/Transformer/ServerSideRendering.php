@@ -2,6 +2,8 @@
 
 namespace Amp\Optimizer\Transformer;
 
+use Amp\Amp;
+use Amp\Attribute;
 use Amp\Dom\Document;
 use Amp\CssLength;
 use Amp\Extension;
@@ -116,8 +118,8 @@ final class ServerSideRendering implements Transformer
 
         foreach ($document->xpath->query('.//script[ @custom-element ]', $document->head) as $customElementScript) {
             // amp-experiment is a render delaying extension iff the tag is used in the doc, which we checked for above.
-            if ($customElementScript->getAttribute(Extension::CUSTOM_ELEMENT) !== Extension::EXPERIMENT
-                && Extension::isRenderDelayingExtension($customElementScript)) {
+            if ($customElementScript->getAttribute(Attribute::CUSTOM_ELEMENT) !== Extension::EXPERIMENT
+                && Amp::isRenderDelayingExtension($customElementScript)) {
                 $errors->add(Error\CannotRemoveBoilerplate::fromRenderDelayingScript($customElementScript));
                 $canRemoveBoilerplate = false;
             }
