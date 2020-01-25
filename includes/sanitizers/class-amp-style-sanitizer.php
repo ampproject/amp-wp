@@ -118,6 +118,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *      @type string   $parsed_cache_variant       Additional value by which to vary parsed cache.
 	 *      @type string[] $focus_within_classes       Class names in selectors that should be replaced with :focus-within pseudo classes.
 	 *      @type string[] $low_priority_plugins       Plugin slugs of the plugins to deprioritize when hitting the CSS limit.
+	 *      @type bool     $allow_transient_caching    Whether to allow caching parsed CSS in transients. This may need to be disabled when there is highly-variable CSS content.
 	 * }
 	 */
 	protected $args;
@@ -139,6 +140,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		'parsed_cache_variant'      => null,
 		'focus_within_classes'      => [ 'focus' ],
 		'low_priority_plugins'      => [ 'query-monitor' ],
+		'allow_transient_caching'   => true,
 	];
 
 	/**
@@ -1478,6 +1480,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$cache_key   = null;
 		$cached      = true;
 		$cache_group = 'amp-parsed-stylesheet-v27'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
+		$use_cache   = wp_using_ext_object_cache() || ! $this->args['allow_transient_caching'];
 
 		$cache_impacting_options = array_merge(
 			wp_array_slice_assoc(
@@ -1495,7 +1498,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$cache_key = md5( $stylesheet . wp_json_encode( $cache_impacting_options ) );
 
-		if ( wp_using_ext_object_cache() ) {
+		if ( $use_cache ) {
 			$parsed = wp_cache_get( $cache_key, $cache_group );
 		} else {
 			$parsed = get_transient( $cache_group . '-' . $cache_key );
@@ -1524,7 +1527,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			 * getting filled infinitely. On the other hand, if an external object cache is available then we don't
 			 * set an expiration because it should implement LRU cache expulsion policy.
 			 */
-			if ( wp_using_ext_object_cache() ) {
+			if ( $use_cache ) {
 				wp_cache_set( $cache_key, $parsed, $cache_group );
 			} else {
 				// The expiration is to ensure transient doesn't stick around forever since no LRU flushing like with external object cache.

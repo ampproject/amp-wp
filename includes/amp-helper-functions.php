@@ -973,6 +973,17 @@ function amp_get_content_sanitizers( $post = null ) {
 		);
 	}
 
+	/**
+	 * Filters whether parsed CSS is allowed to be cached in transients.
+	 *
+	 * When this is filtered to be false, parsed CSS will not be stored in transients. This is important when there is
+	 * highly-variable CSS content in order to prevent filling up the wp_options table with an endless number of entries.
+	 *
+	 * @since 1.5.0
+	 * @param bool $transient_caching_allowed Transient caching allowed.
+	 */
+	$sanitizers['AMP_Style_Sanitizer']['allow_transient_caching'] = apply_filters( 'amp_parsed_css_transient_caching_allowed', true );
+
 	// Force style sanitizer and whitelist sanitizer to be at end.
 	foreach ( [ 'AMP_Style_Sanitizer', 'AMP_Meta_Sanitizer', 'AMP_Tag_And_Attribute_Sanitizer' ] as $class_name ) {
 		if ( isset( $sanitizers[ $class_name ] ) ) {
