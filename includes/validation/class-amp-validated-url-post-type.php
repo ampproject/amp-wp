@@ -2130,10 +2130,10 @@ class AMP_Validated_URL_Post_Type {
 			<tr>
 				<th class="column-stylesheet_expand"></th>
 				<th class="column-stylesheet_order"><?php esc_html_e( 'Order', 'amp' ); ?></th>
-				<th class="column-original_size"><?php esc_html_e( 'Original Size', 'amp' ); ?></th>
+				<th class="column-original_size"><?php esc_html_e( 'Original', 'amp' ); ?></th>
 				<th class="column-minified"><?php esc_html_e( 'Minified', 'amp' ); ?></th>
-				<th class="column-final_size"><?php esc_html_e( 'Final Size', 'amp' ); ?></th>
-				<th class="column-percentage"><?php esc_html_e( 'Percentage', 'amp' ); ?></th>
+				<th class="column-final_size"><?php esc_html_e( 'Final', 'amp' ); ?></th>
+				<th class="column-percentage"><?php esc_html_e( 'Percent', 'amp' ); ?></th>
 				<th class="column-priority"><?php esc_html_e( 'Priority', 'amp' ); ?></th>
 				<th class="column-stylesheet_status"><?php esc_html_e( 'Status', 'amp' ); ?></th>
 				<th class="column-markup"><?php esc_html_e( 'Markup', 'amp' ); ?></th>
