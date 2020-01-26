@@ -142,6 +142,11 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 				'expected_amp' => false,
 				'expected_rel' => null,
 			],
+			'mailto-link'         => [
+				'href'         => 'mailto:nobody@example.com',
+				'expected_amp' => false,
+				'expected_rel' => null,
+			],
 		];
 
 		$admin_bar_link_href = home_url( '/?do_something' );
