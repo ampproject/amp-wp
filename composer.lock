@@ -318,16 +318,16 @@
         },
         {
             "name": "mustache/mustache",
-            "version": "v2.13.0",
+            "version": "v2.12.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/bobthecow/mustache.php.git",
-                "reference": "e95c5a008c23d3151d59ea72484d4f72049ab7f4"
+                "reference": "fe8fe72e9d580591854de404cc59a1b83ca4d19e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bobthecow/mustache.php/zipball/e95c5a008c23d3151d59ea72484d4f72049ab7f4",
-                "reference": "e95c5a008c23d3151d59ea72484d4f72049ab7f4",
+                "url": "https://api.github.com/repos/bobthecow/mustache.php/zipball/fe8fe72e9d580591854de404cc59a1b83ca4d19e",
+                "reference": "fe8fe72e9d580591854de404cc59a1b83ca4d19e",
                 "shasum": ""
             },
             "require": {
@@ -360,7 +360,7 @@
                 "mustache",
                 "templating"
             ],
-            "time": "2019-11-23T21:40:31+00:00"
+            "time": "2017-07-11T12:54:05+00:00"
         },
         {
             "name": "phpcompatibility/php-compatibility",
