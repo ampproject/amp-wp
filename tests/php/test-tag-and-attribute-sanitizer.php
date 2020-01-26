@@ -2239,6 +2239,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE, AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING ],
 			],
+			'parse_malformed_meta_charset_tag'        => [
+				'<html amp><head><meta charset = "utf-8"></head><body></body></html>',
+				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
+				[],
+				[],
+			],
 			'edge_meta_ua_compatible'                 => [
 				'<html amp><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"></head><body></body></html>',
 				null, // No change.
