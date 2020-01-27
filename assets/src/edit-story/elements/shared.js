@@ -42,12 +42,18 @@ export const ElementWithFontColor = css`
 `;
 
 export const ElementWithFont = css`
-	line-height: 1.3;
 	white-space: pre-wrap;
 	font-family: ${ ( { fontFamily } ) => fontFamily };
 	font-style: ${ ( { fontStyle } ) => fontStyle };
 	font-size: ${ ( { fontSize } ) => fontSize }px;
 	font-weight: ${ ( { fontWeight } ) => fontWeight };
+`;
+
+export const ElementWithStyle = css`
+	padding: ${ ( { padding } ) => padding ? padding : '0' }%;
+	line-height: ${ ( { lineHeight } ) => lineHeight };
+	letter-spacing: ${ ( { letterSpacing } ) => letterSpacing ? letterSpacing + 'em' : null };
+	text-align: ${ ( { textAlign } ) => textAlign };
 `;
 
 /**

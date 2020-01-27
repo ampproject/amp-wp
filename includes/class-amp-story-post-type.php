@@ -228,6 +228,7 @@ class AMP_Story_Post_Type {
 		if ( is_singular( self::POST_TYPE_SLUG ) ) {
 			$post = get_post();
 			self::load_fonts( $post );
+			self::add_stories_frontend_style();
 		}
 	}
 
@@ -400,6 +401,23 @@ class AMP_Story_Post_Type {
 
 			}
 		}
+	}
+
+	/**
+	 * Add CSS to Stories' frontend.
+	 *
+	 * @see /assets/css/amp-stories-frontend.css
+	 */
+	protected static function add_stories_frontend_style() {
+		// @todo This is temporary and will need to be moved to `amp-custom` style directly once the plugin is moved away from AMP.
+		wp_enqueue_style(
+			'amp-stories-frontend',
+			amp_get_asset_url( 'css/amp-stories-frontend.css' ),
+			[],
+			AMP__VERSION
+		);
+
+		wp_styles()->add_data( 'amp-stories-frontend', 'rtl', 'replace' );
 	}
 
 	/**

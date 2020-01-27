@@ -14,16 +14,24 @@ import { __, sprintf } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { useStory } from '../../../app';
-import { LeftArrow, RightArrow, GridView } from '../../button';
+import { LeftArrow, RightArrow, GridView as GridViewButton } from '../../button';
+import Modal from '../../modal';
+import GridView from '../gridview';
+import DraggablePage from '../draggablePage';
 
-const PAGE_WIDTH = 72;
-const PAGE_HEIGHT = 128;
+// @todo: Make responsive. Blocked on the header reimplementation and
+// responsive "page" size.
+const PAGE_HEIGHT = 50;
+const PAGE_WIDTH = PAGE_HEIGHT * 9 / 16;
 
 const Wrapper = styled.div`
 	position: relative;
 	display: grid;
 	grid: "left-navigation carousel right-navigation" auto / 53px 1fr 53px;
+	background-color: ${ ( { theme } ) => theme.colors.bg.v1 };
 	color:  ${ ( { theme } ) => theme.colors.fg.v1 };
+	width: 100%;
+	height: 100%;
 `;
 
 const Area = styled.div`
@@ -42,17 +50,7 @@ const List = styled( Area )`
 	overflow-x: ${ ( { hasHorizontalOverflow } ) => hasHorizontalOverflow ? 'scroll' : 'hidden' };
 `;
 
-const Page = styled.button`
-	padding: 0;
-	margin: 0 5px;
-	border: 3px solid ${ ( { isActive, theme } ) => isActive ? theme.colors.selection : theme.colors.bg.v1 };
-	height: ${ PAGE_HEIGHT }px;
-	width: ${ PAGE_WIDTH }px;
-	background-color: ${ ( { isActive, theme } ) => isActive ? theme.colors.fg.v1 : theme.colors.mg.v1 };
-	flex: none;
-`;
-
-const GridViewButton = styled( GridView )`
+const StyledGridViewButton = styled( GridViewButton )`
 	position: absolute;
 	bottom: 24px;
 `;
@@ -60,14 +58,22 @@ const GridViewButton = styled( GridView )`
 function Carousel() {
 	const { state: { pages, currentPageIndex, currentPageId }, actions: { setCurrentPage } } = useStory();
 	const [ hasHorizontalOverflow, setHasHorizontalOverflow ] = useState( false );
+	const [ scrollPercentage, setScrollPercentage ] = useState( 0 );
+	const [ isGridViewOpen, setIsGridViewOpen ] = useState( false );
 	const listRef = useRef();
 	const pageRefs = useRef( [] );
+
+	const openModal = useCallback( () => setIsGridViewOpen( true ), [ setIsGridViewOpen ] );
+	const closeModal = useCallback( () => setIsGridViewOpen( false ), [ setIsGridViewOpen ] );
 
 	useLayoutEffect( () => {
 		const observer = new ResizeObserver( ( entries ) => {
 			for ( const entry of entries ) {
 				const offsetWidth = entry.contentBoxSize ? entry.contentBoxSize.inlineSize : entry.contentRect.width;
 				setHasHorizontalOverflow( Math.ceil( listRef.current.scrollWidth ) > Math.ceil( offsetWidth ) );
+
+				const max = listRef.current.scrollWidth - offsetWidth;
+				setScrollPercentage( listRef.current.scrollLeft / max );
 			}
 		} );
 
@@ -91,6 +97,21 @@ function Carousel() {
 		}
 	}, [ currentPageId, hasHorizontalOverflow, pageRefs ] );
 
+	useLayoutEffect( () => {
+		const listElement = listRef.current;
+
+		const handleScroll = () => {
+			const max = listElement.scrollWidth - listElement.offsetWidth;
+			setScrollPercentage( listElement.scrollLeft / max );
+		};
+
+		listElement.addEventListener( 'scroll', handleScroll, { passive: true } );
+
+		return () => {
+			listElement.removeEventListener( 'scroll', handleScroll );
+		};
+	}, [ hasHorizontalOverflow ] );
+
 	const handleClickPage = ( page ) => () => setCurrentPage( { pageId: page.id } );
 
 	const scrollBy = useCallback( ( offset ) => {
@@ -105,49 +126,69 @@ function Carousel() {
 		} );
 	}, [ listRef ] );
 
+	const isAtBeginningOfList = 0 === scrollPercentage;
+	const isAtEndOfList = 1 === scrollPercentage;
+
 	return (
-		<Wrapper>
-			<Area area="left-navigation">
-				<LeftArrow
-					isHidden={ ! hasHorizontalOverflow }
-					onClick={ () => scrollBy( -( 2 * PAGE_WIDTH ) ) }
-					width="24"
-					height="24"
-					aria-label={ __( 'Scroll Left', 'amp' ) }
-				/>
-			</Area>
-			<List area="carousel" ref={ listRef } hasHorizontalOverflow={ hasHorizontalOverflow }>
-				{ pages.map( ( page, index ) => {
-					const isCurrentPage = index === currentPageIndex;
-					return (
-						<Page
-							key={ index }
-							onClick={ handleClickPage( page ) }
-							isActive={ isCurrentPage }
-							ref={ ( el ) => {
-								pageRefs.current[ page.id ] = el;
-							} }
-							aria-label={ isCurrentPage ? sprintf( __( 'Page %s (current page)', 'amp' ), index + 1 ) : sprintf( __( 'Go to page %s', 'amp' ), index + 1 ) }
-						/>
-					);
-				} ) }
-			</List>
-			<Area area="right-navigation">
-				<RightArrow
-					isHidden={ ! hasHorizontalOverflow }
-					onClick={ () => scrollBy( ( 2 * PAGE_WIDTH ) ) }
-					width="24"
-					height="24"
-					aria-label={ __( 'Scroll Right', 'amp' ) }
-				/>
-				<GridViewButton
-					isDisabled
-					width="24"
-					height="24"
-					aria-label={ __( 'Grid View', 'amp' ) }
-				/>
-			</Area>
-		</Wrapper>
+		<>
+			<Wrapper>
+				<Area area="left-navigation">
+					<LeftArrow
+						isHidden={ ! hasHorizontalOverflow || isAtBeginningOfList }
+						onClick={ () => scrollBy( -( 2 * PAGE_WIDTH ) ) }
+						width="24"
+						height="24"
+						aria-label={ __( 'Scroll Left', 'amp' ) }
+					/>
+				</Area>
+				<List area="carousel" ref={ listRef } hasHorizontalOverflow={ hasHorizontalOverflow }>
+					{ pages.map( ( page, index ) => {
+						const isCurrentPage = index === currentPageIndex;
+
+						return (
+							<DraggablePage
+								key={ index }
+								onClick={ handleClickPage( page ) }
+								ariaLabel={ isCurrentPage ?
+									sprintf( __( 'Page %s (current page)', 'amp' ), index + 1 ) :
+									sprintf( __( 'Go to page %s', 'amp' ), index + 1 )
+								}
+								isActive={ isCurrentPage }
+								pageIndex={ index }
+								ref={ ( el ) => {
+									pageRefs.current[ page.id ] = el;
+								} }
+								width={ PAGE_WIDTH }
+								height={ PAGE_HEIGHT }
+							/>
+						);
+					} ) }
+				</List>
+				<Area area="right-navigation">
+					<RightArrow
+						isHidden={ ! hasHorizontalOverflow || isAtEndOfList }
+						onClick={ () => scrollBy( ( 2 * PAGE_WIDTH ) ) }
+						width="24"
+						height="24"
+						aria-label={ __( 'Scroll Right', 'amp' ) }
+					/>
+					<StyledGridViewButton
+						width="24"
+						height="24"
+						onClick={ openModal }
+						aria-label={ __( 'Grid View', 'amp' ) }
+					/>
+				</Area>
+			</Wrapper>
+			<Modal
+				isOpen={ isGridViewOpen }
+				onRequestClose={ closeModal }
+				contentLabel={ __( 'Grid View', 'amp' ) }
+				closeButtonLabel={ __( 'Back', 'amp' ) }
+			>
+				<GridView />
+			</Modal>
+		</>
 	);
 }
 
