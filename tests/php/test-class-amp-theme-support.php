@@ -44,6 +44,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		delete_option( AMP_Options_Manager::OPTION_NAME ); // Make sure default reader mode option does not override theme support being added.
 		remove_theme_support( AMP_Theme_Support::SLUG );
 		AMP_Theme_Support::read_theme_support();
+		add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
 	}
 
 	/**
@@ -328,19 +329,18 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::finish_init()
 	 */
 	public function test_finish_init_when_accessing_non_singular_amp_page_in_reader_mode() {
-		$category     = current( get_categories( [ 'hide_empty' => true ] ) );
-		$category_url = get_category_link( $category );
+		$requested_url = home_url( '/?s=hello' );
 		$this->assertEquals( AMP_Theme_Support::READER_MODE_SLUG, AMP_Theme_Support::get_support_mode() );
 		$redirected = false;
 		add_filter(
 			'wp_redirect',
-			function ( $url ) use ( $category_url, &$redirected ) {
-				$this->assertEquals( $category_url, $url );
+			function ( $url ) use ( $requested_url, &$redirected ) {
+				$this->assertEquals( $requested_url, $url );
 				$redirected = true;
 				return null;
 			}
 		);
-		$this->go_to( add_query_arg( amp_get_slug(), '', $category_url ) );
+		$this->go_to( add_query_arg( amp_get_slug(), '', $requested_url ) );
 		$this->assertTrue( $redirected );
 	}
 
@@ -2408,13 +2408,14 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	public function test_prepare_response_redirect() {
 		add_filter( 'amp_validation_error_sanitized', '__return_false', 100 );
 
-		$this->go_to( home_url( '/?amp' ) );
 		add_theme_support(
 			AMP_Theme_Support::SLUG,
 			[
 				AMP_Theme_Support::PAIRED_FLAG => true,
 			]
 		);
+		AMP_Theme_Support::read_theme_support();
+		$this->go_to( home_url( '/?amp' ) );
 		add_filter(
 			'amp_content_sanitizers',
 			static function( $sanitizers ) {

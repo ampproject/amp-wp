@@ -410,7 +410,12 @@ class AMP_Theme_Support {
 			add_filter( 'template_include', [ __CLASS__, 'serve_paired_browsing_experience' ] );
 		}
 
-		if ( ! is_amp_endpoint() ) {
+		if ( self::READER_MODE_SLUG === self::get_support_mode() && ! is_singular() && false !== get_query_var( amp_get_slug(), false ) ) {
+			// Reader mode only supports the singular template (for now) so redirect non-singular queries in reader mode to non-AMP version.
+			// A temporary redirect is used for admin users to allow them to see changes between reader mode and transitional modes.
+			wp_safe_redirect( amp_remove_endpoint( amp_get_current_url() ), current_user_can( 'manage_options' ) ? 302 : 301 );
+			return;
+		} elseif ( ! is_amp_endpoint() ) {
 			/*
 			 * Redirect to AMP-less variable if AMP is not available for this URL and yet the query var is present.
 			 * Temporary redirect is used for admin users because implied transitional mode and template support can be
@@ -422,11 +427,6 @@ class AMP_Theme_Support {
 			}
 
 			amp_add_frontend_actions();
-			return;
-		} elseif ( self::READER_MODE_SLUG === self::get_support_mode() && ! is_singular() ) {
-			// Reader mode only supports the singular template (for now) so redirect non-singular queries in reader mode to non-AMP version.
-			// A temporary redirect is used for admin users to allow them to see changes between reader mode and transitional modes.
-			wp_safe_redirect( amp_remove_endpoint( amp_get_current_url() ), current_user_can( 'manage_options' ) ? 302 : 301 );
 			return;
 		}
 
