@@ -11,6 +11,7 @@ import RotationPanel from './rotationAngle';
 import SizePanel from './size';
 import PositionPanel from './position';
 import ScalePanel from './scale';
+import StylePanel from './style';
 import TextPanel from './text';
 import VideoPosterPanel from './videoPoster';
 
@@ -24,6 +25,7 @@ const SIZE = 'size';
 const POSITION = 'position';
 const FULLBLEED = 'fullbleed';
 const BACKGROUND_COLOR = 'backgroundColor';
+const STYLE = 'style';
 const VIDEO_POSTER = 'videoPoster';
 
 export const PanelTypes = {
@@ -34,6 +36,7 @@ export const PanelTypes = {
 	BACKGROUND_COLOR,
 	COLOR,
 	FONT,
+	STYLE,
 	TEXT,
 	ROTATION_ANGLE,
 	FULLBLEED,
@@ -70,6 +73,7 @@ export function getPanels( elements ) {
 				case BACKGROUND_COLOR: return { type, Panel: BackgroundColorPanel };
 				case COLOR: return { type, Panel: ColorPanel };
 				case FONT: return { type, Panel: FontPanel };
+				case STYLE: return { type, Panel: StylePanel };
 				case TEXT: return { type, Panel: TextPanel };
 				case VIDEO_POSTER: return { type, Panel: VideoPosterPanel };
 				default: throw new Error( `Unknown panel: ${ type }` );
