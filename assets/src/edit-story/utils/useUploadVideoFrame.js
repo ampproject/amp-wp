@@ -47,28 +47,30 @@ function useUploadVideoFrame( videoId, src, id ) {
 		} );
 	}, [ src ] );
 
+	const processData = async () => {
+		try {
+			const obj = await getFirstFrameOfVideo();
+			const { id: featuredMedia, source_url: featuredMediaSrc } = await uploadMedia( obj );
+			await saveMedia( featuredMedia, {
+				meta: {
+					amp_is_poster: true,
+				},
+			} );
+			await saveMedia( videoId, {
+				featured_media: featuredMedia,
+			} );
+			const newState = { featuredMedia, featuredMediaSrc };
+			setProperties( newState );
+		} catch ( err ) {
+			// TODO Display error message to user as video poster upload has as failed.
+		}
+	};
+
 	/**
 	 * Uploads the video's first frame as an attachment.
 	 *
-	 * @param {Object} media Media object.
-	 * @param {number} media.id  Video ID.
-	 * @param {string} media.src Video URL.
 	 */
-	const uploadVideoFrame = useCallback( () => {
-		return getFirstFrameOfVideo( src )
-			.then( ( obj ) => uploadMedia( obj )
-				.then( ( { id: posterId, source_url: url } ) => {
-					saveMedia( videoId, {
-						featured_media: posterId,
-						meta: {
-							amp_is_poster: true,
-						},
-					} ).then( () => {
-						const newState = { featuredMedia: posterId, featuredMediaSrc: url };
-						setProperties( newState );
-					} );
-				} ) );
-	}, [ getFirstFrameOfVideo, src, uploadMedia, saveMedia, videoId, setProperties ] );
+	const uploadVideoFrame = useCallback( processData, [ getFirstFrameOfVideo, src, uploadMedia, saveMedia, videoId, setProperties ] );
 
 	return {
 		uploadVideoFrame,
