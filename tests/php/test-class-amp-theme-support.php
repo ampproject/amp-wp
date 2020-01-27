@@ -323,6 +323,28 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that attempting to access an AMP page in Reader Mode for a non-singular query will redirect to the non-AMP version.
+	 *
+	 * @covers AMP_Theme_Support::finish_init()
+	 */
+	public function test_finish_init_when_accessing_non_singular_amp_page_in_reader_mode() {
+		$category     = current( get_categories( [ 'hide_empty' => true ] ) );
+		$category_url = get_category_link( $category );
+		$this->assertEquals( AMP_Theme_Support::READER_MODE_SLUG, AMP_Theme_Support::get_support_mode() );
+		$redirected = false;
+		add_filter(
+			'wp_redirect',
+			function ( $url ) use ( $category_url, &$redirected ) {
+				$this->assertEquals( $category_url, $url );
+				$redirected = true;
+				return null;
+			}
+		);
+		$this->go_to( add_query_arg( amp_get_slug(), '', $category_url ) );
+		$this->assertTrue( $redirected );
+	}
+
+	/**
 	 * Test ensure_proper_amp_location for canonical.
 	 *
 	 * @covers AMP_Theme_Support::ensure_proper_amp_location()

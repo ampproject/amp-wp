@@ -423,6 +423,11 @@ class AMP_Theme_Support {
 
 			amp_add_frontend_actions();
 			return;
+		} elseif ( self::READER_MODE_SLUG === self::get_support_mode() && ! is_singular() ) {
+			// Reader mode only supports the singular template (for now) so redirect non-singular queries in reader mode to non-AMP version.
+			// A temporary redirect is used for admin users to allow them to see changes between reader mode and transitional modes.
+			wp_safe_redirect( amp_remove_endpoint( amp_get_current_url() ), current_user_can( 'manage_options' ) ? 302 : 301 );
+			return;
 		}
 
 		self::ensure_proper_amp_location();
