@@ -25,7 +25,7 @@ const Img = styled.img`
 	max-height: 300px
 `;
 
-function VideoPanel( { selectedElements, onSetProperties } ) {
+function VideoPosterPanel( { selectedElements, onSetProperties } ) {
 	const featuredMedia = getCommonValue( selectedElements, 'featuredMedia' );
 	const featuredMediaSrc = getCommonValue( selectedElements, 'featuredMediaSrc' );
 	const [ state, setState ] = useState( { featuredMedia, featuredMediaSrc } );
@@ -65,9 +65,9 @@ function VideoPanel( { selectedElements, onSetProperties } ) {
 	);
 }
 
-VideoPanel.propTypes = {
+VideoPosterPanel.propTypes = {
 	selectedElements: PropTypes.array.isRequired,
 	onSetProperties: PropTypes.func.isRequired,
 };
 
-export default VideoPanel;
+export default VideoPosterPanel;

@@ -12,7 +12,7 @@ import SizePanel from './size';
 import PositionPanel from './position';
 import ScalePanel from './scale';
 import TextPanel from './text';
-import VideoPanel from './video';
+import VideoPosterPanel from './videoPoster';
 
 const ACTIONS = 'actions';
 const COLOR = 'color';
@@ -24,7 +24,7 @@ const SIZE = 'size';
 const POSITION = 'position';
 const FULLBLEED = 'fullbleed';
 const BACKGROUND_COLOR = 'backgroundColor';
-const VIDEO = 'video';
+const VIDEO_POSTER = 'videoPoster';
 
 export const PanelTypes = {
 	ACTIONS,
@@ -37,10 +37,11 @@ export const PanelTypes = {
 	TEXT,
 	ROTATION_ANGLE,
 	FULLBLEED,
-	VIDEO,
+	VIDEO_POSTER,
 };
 
 const ALL = Object.values( PanelTypes );
+
 
 function intersect( a, b ) {
 	return a.filter( ( v ) => b.includes( v ) );
@@ -55,6 +56,7 @@ export function getPanels( elements ) {
 	const sharedPanels = [
 		{ type: ACTIONS, Panel: ActionsPanel },
 	];
+
 	// Find which panels all the selected elements have in common
 	const selectionPanels = elements
 		.map( ( { type } ) => elementTypes.find( ( elType ) => elType.type === type ).panels )
@@ -70,7 +72,7 @@ export function getPanels( elements ) {
 				case COLOR: return { type, Panel: ColorPanel };
 				case FONT: return { type, Panel: FontPanel };
 				case TEXT: return { type, Panel: TextPanel };
-				case VIDEO: return { type, Panel: VideoPanel };
+				case VIDEO_POSTER: return { type, Panel: VideoPosterPanel };
 				default: throw new Error( `Unknown panel: ${ type }` );
 			}
 		} );

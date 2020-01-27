@@ -17,9 +17,9 @@ export const defaultAttributes = {
 export const hasEditMode = false;
 
 export const panels = [
-	PanelTypes.VIDEO,
 	PanelTypes.SIZE,
 	PanelTypes.POSITION,
 	PanelTypes.SCALE,
 	PanelTypes.ROTATION_ANGLE,
+	PanelTypes.VIDEO_POSTER,
 ];
