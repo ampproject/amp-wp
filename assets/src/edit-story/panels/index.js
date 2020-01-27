@@ -42,7 +42,6 @@ export const PanelTypes = {
 
 const ALL = Object.values( PanelTypes );
 
-
 function intersect( a, b ) {
 	return a.filter( ( v ) => b.includes( v ) );
 }
