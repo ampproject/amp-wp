@@ -244,6 +244,15 @@ class AMP_Validation_Manager {
 		add_action( 'wp', [ __CLASS__, 'override_validation_error_statuses' ] );
 
 		if ( self::$is_validate_request ) {
+			/*
+			 * Always suppress the admin bar from being shown when performing a validation request. This ensures that
+			 * user-initiated validation requests perform the same as validation requests initiated by the WP-CLI
+			 * command `wp amp validate-site`, which does so as an unauthenticated user. Unauthenticated users should
+			 * not be shown the admin bar, and normal site visitors who read AMP content (such as via an AMP Cache) are
+			 * not authenticated, so it doesn't make sense to include the admin bar when doing validation.
+			 */
+			add_filter( 'show_admin_bar', '__return_false', PHP_INT_MAX );
+
 			self::add_validation_error_sourcing();
 		}
 	}
