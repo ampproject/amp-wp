@@ -2221,7 +2221,7 @@ class AMP_Theme_Support {
 		 * Note that the meta charset is supposed to appear within the first 1024 bytes.
 		 * See <https://www.w3.org/International/questions/qa-html-encoding-declarations>.
 		 */
-		if ( ! preg_match( '#<meta[^>]+charset=#i', substr( $response, 0, 1024 ) ) ) {
+		if ( ! preg_match( '#<meta[^>]+charset\s*=#i', substr( $response, 0, 1024 ) ) ) {
 			$meta_charset = sprintf( '<meta charset="%s">', esc_attr( get_bloginfo( 'charset' ) ) );
 
 			$response = preg_replace(
