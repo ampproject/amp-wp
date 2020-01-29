@@ -164,6 +164,16 @@ class Test_AMP_DOM_Document extends WP_UnitTestCase {
 				'<!--[if lt IE 7]> <html class="lt-ie9 lt-ie8 lt-ie7"> <![endif]--><!--[if IE 7]> <html class="lt-ie9 lt-ie8"> <![endif]--><!--[if IE 8]> <html class="lt-ie9"> <![endif]--><!--[if gt IE 8]><!--> <html class=""> <!--<![endif]--></html>',
 				'<!DOCTYPE html><html class="">' . $head . '<body></body></html>',
 			],
+			'profile_attribute_in_head_moved_to_link'  => [
+				'utf-8',
+				'<!DOCTYPE html><html><head profile="https://example.com"></head><body></body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="profile" href="https://example.com"></head><body></body></html>',
+			],
+			'profile_attribute_in_head_empty_string'   => [
+				'utf-8',
+				'<!DOCTYPE html><html><head profile=""></head><body></body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"></head><body></body></html>',
+			],
 		];
 	}
 
