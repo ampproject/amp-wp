@@ -1034,9 +1034,8 @@ final class Document extends DOMDocument {
 			return;
 		}
 
-		$xmlns                = $html->attributes->getNamedItem( 'xmlns' );
-		$xmlns_value_to_strip = 'http://www.w3.org/1999/xhtml';
-		if ( $xmlns && $xmlns_value_to_strip === $xmlns->nodeValue ) {
+		$xmlns = $html->attributes->getNamedItem( 'xmlns' );
+		if ( $xmlns && 'http://www.w3.org/1999/xhtml' === $xmlns->nodeValue ) {
 			$html->removeAttributeNode( $xmlns );
 		}
 
