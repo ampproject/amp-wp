@@ -1030,7 +1030,7 @@ final class Document extends DOMDocument {
 	 */
 	private function normalize_html_attributes() {
 		$html = $this->documentElement;
-		if ( ! $html->hasAttributes()  ) {
+		if ( ! $html->hasAttributes() ) {
 			return;
 		}
 
