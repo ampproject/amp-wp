@@ -1029,7 +1029,7 @@ final class Document extends DOMDocument {
 	 * Conditionally removes html[xmlns], and converts html[xml:lang] to html[lang].
 	 */
 	private function normalize_html_attributes() {
-		$html = $this->getElementsByTagName( 'html' )->item( 0 );
+		$html = $this->documentElement;
 		if ( ! $html->hasAttributes()  ) {
 			return;
 		}
