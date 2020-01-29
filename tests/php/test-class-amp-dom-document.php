@@ -169,6 +169,11 @@ class Test_AMP_DOM_Document extends WP_UnitTestCase {
 				'<!DOCTYPE html><html><head profile="https://example.com"></head><body></body></html>',
 				'<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="profile" href="https://example.com"></head><body></body></html>',
 			],
+			'link_rel_profile_already_exists'          => [
+				'utf-8',
+				'<!DOCTYPE html><html><head profile="https://example.com"><link rel="profile" href="https://foo.com"></head><body></body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="profile" href="https://foo.com"></head><body></body></html>',
+			],
 		];
 	}
 

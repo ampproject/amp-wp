@@ -541,17 +541,29 @@ final class Document extends DOMDocument {
 	 * Converts a possible head[profile] attribute to link[rel=profile].
 	 *
 	 * The head[profile] attribute is only valid in HTML4, not HTML5.
-	 * So if it exists, add it to the <head> as a link[rel=profile] and strip the attribute.
+	 * So if it exists and there's no link[rel=profile], add it to the <head> as a link[rel=profile].
 	 */
 	private function convert_head_profile_to_link() {
 		$profile = $this->head->getAttribute( 'profile' );
-		if ( $profile ) {
-			$link = $this->createElement( 'link' );
-			$link->setAttribute( 'rel', 'profile' );
-			$link->setAttribute( 'href', $profile );
-			$this->head->appendChild( $link );
-			$this->head->removeAttribute( 'profile' );
+		if ( ! $profile ) {
+			return;
 		}
+
+		// If there's already a head > link[rel=profile], don't create another.
+		$links = $this->head->getElementsByTagName( 'link' );
+		foreach( $links as $link ) {
+			if ( 'profile' === $link->getAttribute( 'rel' ) ) {
+				$this->head->removeAttribute( 'profile' );
+				return;
+			}
+		}
+
+		// Create a <link> and append it to <head>.
+		$new_link = $this->createElement( 'link' );
+		$new_link->setAttribute( 'rel', 'profile' );
+		$new_link->setAttribute( 'href', $profile );
+		$this->head->appendChild( $new_link );
+		$this->head->removeAttribute( 'profile' );
 	}
 
 	/**
