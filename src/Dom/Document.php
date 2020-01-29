@@ -359,6 +359,7 @@ final class Document extends DOMDocument {
 			$this->deduplicate_tag( self::TAG_HEAD );
 			$this->deduplicate_tag( self::TAG_BODY );
 			$this->move_invalid_head_nodes_to_body();
+			$this->convert_head_profile_to_link();
 		}
 
 		return $success;
@@ -533,6 +534,23 @@ final class Document extends DOMDocument {
 				$this->body->insertBefore( $this->head->removeChild( $node ), $this->body->firstChild );
 			}
 			$node = $next_sibling;
+		}
+	}
+
+	/**
+	 * Converts a possible head[profile] attribute to link[rel=profile].
+	 *
+	 * The head[profile] attribute is only valid in HTML4, not HTML5.
+	 * So if it exists, add it to the <head> as a link[rel=profile] and strip the attribute.
+	 */
+	private function convert_head_profile_to_link() {
+		$profile = $this->head->getAttribute( 'profile' );
+		if ( $profile ) {
+			$link = $this->createElement( 'link' );
+			$link->setAttribute( 'rel', 'profile' );
+			$link->setAttribute( 'href', $profile );
+			$this->head->appendChild( $link );
+			$this->head->removeAttribute( 'profile' );
 		}
 	}
 
