@@ -108,6 +108,11 @@ class Test_AMP_DOM_Document extends WP_UnitTestCase {
 				'<!DOCTYPE html><html xml:lang="">' . $head . '<body></body></html>',
 				'<!DOCTYPE html><html>' . $head . '<body></body></html>',
 			],
+			'html_with_empty_lang'                     => [
+				'utf-8',
+				'<!DOCTYPE html><html lang="" xml:lang="es">' . $head . '<body></body></html>',
+				'<!DOCTYPE html><html lang="es">' . $head . '<body></body></html>',
+			],
 			'slashes_on_closing_tags'                  => [
 				'utf-8',
 				'<!DOCTYPE html><html amp lang="en"><head><meta charset="utf-8" /></head><body class="some-class"><p>Text</p></body></html>',

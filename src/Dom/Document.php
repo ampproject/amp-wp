@@ -1042,7 +1042,8 @@ final class Document extends DOMDocument {
 
 		$xml_lang = $html->attributes->getNamedItem( 'xml:lang' );
 		if ( $xml_lang ) {
-			if ( ! $html->attributes->getNamedItem( 'lang' ) && $xml_lang->nodeValue ) {
+			$lang_node = $html->attributes->getNamedItem( 'lang' );
+			if ( ( ! $lang_node || ! $lang_node->nodeValue ) && $xml_lang->nodeValue ) {
 				// Move the html[xml:lang] value to html[lang].
 				$html->setAttribute( 'lang', $xml_lang->nodeValue );
 			}
