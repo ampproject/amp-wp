@@ -551,7 +551,7 @@ final class Document extends DOMDocument {
 
 		// If there's already a head > link[rel=profile], don't create another.
 		$links = $this->head->getElementsByTagName( 'link' );
-		foreach( $links as $link ) {
+		foreach ( $links as $link ) {
 			if ( 'profile' === $link->getAttribute( 'rel' ) ) {
 				$this->head->removeAttribute( 'profile' );
 				return;
