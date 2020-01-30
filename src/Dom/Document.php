@@ -340,6 +340,8 @@ final class Document extends DOMDocument {
 		libxml_use_internal_errors( $libxml_previous_state );
 
 		if ( $success ) {
+			$this->normalize_html_attributes();
+
 			// Remove http-equiv charset again.
 			$meta = $this->head->firstChild;
 			if (
@@ -1042,6 +1044,33 @@ final class Document extends DOMDocument {
 		}
 
 		return preg_replace( self::HTML_RESTORE_DOCTYPE_PATTERN, '\1!\3\4>', $html, 1 );
+	}
+
+	/**
+	 * Normalizes HTML attributes to be HTML5 compatible.
+	 *
+	 * Conditionally removes html[xmlns], and converts html[xml:lang] to html[lang].
+	 */
+	private function normalize_html_attributes() {
+		$html = $this->documentElement;
+		if ( ! $html->hasAttributes() ) {
+			return;
+		}
+
+		$xmlns = $html->attributes->getNamedItem( 'xmlns' );
+		if ( $xmlns && 'http://www.w3.org/1999/xhtml' === $xmlns->nodeValue ) {
+			$html->removeAttributeNode( $xmlns );
+		}
+
+		$xml_lang = $html->attributes->getNamedItem( 'xml:lang' );
+		if ( $xml_lang ) {
+			$lang_node = $html->attributes->getNamedItem( 'lang' );
+			if ( ( ! $lang_node || ! $lang_node->nodeValue ) && $xml_lang->nodeValue ) {
+				// Move the html[xml:lang] value to html[lang].
+				$html->setAttribute( 'lang', $xml_lang->nodeValue );
+			}
+			$html->removeAttributeNode( $xml_lang );
+		}
 	}
 
 	/**
