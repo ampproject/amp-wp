@@ -38,6 +38,9 @@ trait MarkupComparison
         $expected = preg_replace('/<!doctype/i', '<!DOCTYPE', $expected);
         $actual   = preg_replace('/(\s+[a-zA-Z-_]+)=(?!")([a-zA-Z-_.]+)/', '\1="\2"', $actual);
         $expected = preg_replace('/(\s+[a-zA-Z-_]+)=(?!")([a-zA-Z-_.]+)/', '\1="\2"', $expected);
+        $actual   = preg_replace('/(\s+[a-zA-Z-_]+)=(?!")([a-zA-Z-_.]+)/', '\1="\2"', $actual);
+        $expected = preg_replace('/>\s*{\s*}\s*</', '>{}<', $expected);
+        $actual   = preg_replace('/>\s*{\s*}\s*</', '>{}<', $actual);
 
         $this->assertEqualMarkup($expected, $actual);
     }

@@ -28,7 +28,7 @@ final class SpecTest extends TestCase
             list($transformerClass, $specFileFolder) = $suite;
 
             foreach (new DirectoryIterator($specFileFolder) as $subFolder) {
-                if ($subFolder->isDot()) {
+                if ($subFolder->isFile() || $subFolder->isDot()) {
                     continue;
                 }
 

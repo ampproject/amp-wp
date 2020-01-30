@@ -514,7 +514,9 @@ final class ServerSideRendering implements Transformer
         $child  = $element->firstChild;
 
         while ($child) {
-            if ($child->tagName === Tag::SCRIPT && strtolower($child->getAttribute(Attribute::TYPE)) === Attribute::TYPE_JSON) {
+            if ($child instanceof DOMElement
+                && $child->tagName === Tag::SCRIPT
+                && strtolower($child->getAttribute(Attribute::TYPE)) === Attribute::TYPE_JSON) {
                 $script = $child;
                 break;
             }

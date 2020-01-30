@@ -150,12 +150,12 @@ final class ReorderHead implements Transformer
      */
     private function registerScript(DOMElement $node)
     {
-        if ( Amp::isRuntimeScript( $node ) ) {
+        if (Amp::isRuntimeScript($node)) {
             $this->scriptAmpRuntime = $node;
             return;
         }
 
-        if ( Amp::isViewerScript( $node ) ) {
+        if (Amp::isViewerScript($node)) {
             $this->scriptAmpViewer = $node;
             return;
         }
@@ -210,30 +210,32 @@ final class ReorderHead implements Transformer
      */
     private function registerLink(DOMElement $node)
     {
-        switch (strtolower($node->getAttribute(Attribute::REL))) {
-            case 'stylesheet':
-                $href = $node->getAttribute(Attribute::HREF);
-                if ($href && substr($href, -7) === '/v0.css') {
-                    $this->linkStyleAmpRuntime = $node;
-                    return;
-                }
-                if (! $this->styleAmpCustom) {
-                    // We haven't seen amp-custom yet.
-                    $this->linkStylesheetsBeforeAmpCustom[] = $node;
-                    return;
-                }
-                break;
-            case 'icon':
-            case 'shortcut icon':
-            case 'icon shortcut':
-                $this->linkIcons[] = $node;
+        $rel = $node->getAttribute(Attribute::REL);
+
+        if ($this->containsWord($rel, 'stylesheet')) {
+            $href = $node->getAttribute(Attribute::HREF);
+            if ($href && substr($href, -7) === '/v0.css') {
+                $this->linkStyleAmpRuntime = $node;
                 return;
-            case 'preload':
-            case 'prefetch':
-            case 'dns-prefetch':
-            case 'preconnect':
-                $this->resourceHintLinks[] = $node;
+            }
+            if (! $this->styleAmpCustom) {
+                // We haven't seen amp-custom yet.
+                $this->linkStylesheetsBeforeAmpCustom[] = $node;
                 return;
+            }
+        }
+
+        if ($this->containsWord($rel, 'icon')) {
+            $this->linkIcons[] = $node;
+            return;
+        }
+
+        if ($this->containsWord($rel, 'preload')
+            || $this->containsWord($rel, 'prefetch')
+            || $this->containsWord($rel, 'dns-prefetch')
+            || $this->containsWord($rel, 'preconnect')) {
+            $this->resourceHintLinks[] = $node;
+            return;
         }
 
         $this->others[] = $node;
@@ -311,5 +313,21 @@ final class ReorderHead implements Transformer
             ksort($sortedNodes);
             $this->$set = array_values($sortedNodes);
         }
+    }
+
+    /**
+     * Check if a given string contains another string, respecting word boundaries..
+     *
+     * @param string $haystack Haystack string to look in.
+     * @param string $needle   Needle string to search for.
+     * @return bool Whether the needle was found in the haystack.
+     */
+    private function containsWord($haystack, $needle)
+    {
+        if (empty($haystack) || empty($needle)) {
+            return false;
+        }
+
+        return preg_match('/\b' . preg_quote($needle, '/') . '\b/i', $haystack);
     }
 }
