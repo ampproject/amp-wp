@@ -1939,7 +1939,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					// This would occur when there are trailing commas, for example.
 					continue;
 				}
-				$properties[ strtolower( trim( $pair_parts[0] ) ) ] = trim( $pair_parts[1] );
+				$properties[ strtolower( trim( $pair_parts[0] ) ) ] = $pair_parts[1];
 			}
 
 			$invalid_properties = array_diff( array_keys( $properties ), array_keys( $attr_spec_rule[ AMP_Rule_Spec::VALUE_PROPERTIES ] ) );

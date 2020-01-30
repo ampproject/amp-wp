@@ -141,8 +141,8 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 		$width_found       = false;
 
 		foreach ( $viewport_settings as $index => $viewport_setting ) {
-			list( $property, $value ) = array_map( 'trim', explode( '=', $viewport_setting ) );
-			if ( 'width' === $property ) {
+			list( $property, $value ) = explode( '=', $viewport_setting );
+			if ( 'width' === trim( $property ) ) {
 				if ( 'device-width' !== $value ) {
 					$viewport_settings[ $index ] = 'width=device-width';
 				}
