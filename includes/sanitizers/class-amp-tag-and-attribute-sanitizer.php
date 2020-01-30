@@ -728,19 +728,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					} elseif ( self::MISSING_REQUIRED_PROPERTY_VALUE === $error_code ) {
 						$validation_error['property_name']  = $error_data['name'];
 						$validation_error['property_value'] = $error_data['value'];
-
-						/**
-						 * If the trimmed value of the property is the same as the required value, then replace the
-						 * property with its trimmed value and not raise a validation error. This should be a temporary
-						 * solution until <https://github.com/ampproject/amphtml/issues/26496> is resolved.
-						 */
-						if ( $error_data['required_value'] === trim( $error_data['value'] ) ) {
-							$pattern = sprintf( '/%s/', preg_quote( esc_attr( $error_data['value'] ), '/' ) );
-							$attr_value = preg_replace( $pattern, $error_data['required_value'], $attr_node->nodeValue, 1 );
-							$node->setAttribute( $attr_node->nodeName, $attr_value );
-
-							continue;
-						}
 					}
 
 					$attr_spec = isset( $merged_attr_spec_list[ $attr_node->nodeName ] ) ? $merged_attr_spec_list[ $attr_node->nodeName ] : [];
@@ -1952,7 +1939,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					// This would occur when there are trailing commas, for example.
 					continue;
 				}
-				$properties[ strtolower( trim( $pair_parts[0] ) ) ] = $pair_parts[1];
+				$properties[ strtolower( trim( $pair_parts[0] ) ) ] = trim( $pair_parts[1] );
 			}
 
 			$invalid_properties = array_diff( array_keys( $properties ), array_keys( $attr_spec_rule[ AMP_Rule_Spec::VALUE_PROPERTIES ] ) );
@@ -2003,9 +1990,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 						[
 							self::MISSING_REQUIRED_PROPERTY_VALUE,
 							[
-								'name'           => $prop_name,
-								'value'          => $prop_value,
-								'required_value' => $required_value,
+								'name'  => $prop_name,
+								'value' => $required_value,
 							],
 						],
 					];
