@@ -7,6 +7,7 @@ use Amp\Attribute;
 use Amp\Dom\Document;
 use Amp\Optimizer\ErrorCollection;
 use Amp\Optimizer\Transformer;
+use Amp\Tag;
 use DOMElement;
 use DOMNode;
 
@@ -107,19 +108,19 @@ final class ReorderHead implements Transformer
         }
 
         switch ($node->tagName) {
-            case 'meta':
+            case Tag::META:
                 $this->registerMeta($node);
                 break;
-            case 'script':
+            case Tag::SCRIPT:
                 $this->registerScript($node);
                 break;
-            case 'style':
+            case Tag::STYLE:
                 $this->registerStyle($node);
                 break;
-            case 'link':
+            case Tag::LINK:
                 $this->registerLink($node);
                 break;
-            case 'noscript':
+            case Tag::NOSCRIPT:
                 $this->noscript = $node;
                 break;
             default:
@@ -134,7 +135,7 @@ final class ReorderHead implements Transformer
      */
     private function registerMeta(DOMElement $node)
     {
-        if ($node->hasAttribute('charset')) {
+        if ($node->hasAttribute(Attribute::CHARSET)) {
             $this->metaCharset = $node;
             return;
         }
@@ -183,18 +184,18 @@ final class ReorderHead implements Transformer
      */
     private function registerStyle(DOMElement $node)
     {
-        if ($node->hasAttribute('amp-runtime')) {
+        if ($node->hasAttribute(Attribute::AMP_RUNTIME)) {
             $this->styleAmpRuntime = $node;
             return;
         }
 
-        if ($node->hasAttribute('amp-custom')) {
+        if ($node->hasAttribute(Attribute::AMP_CUSTOM)) {
             $this->styleAmpCustom = $node;
             return;
         }
 
-        if ($node->hasAttribute('amp-boilerplate')
-            || $node->hasAttribute('amp4ads-boilerplate')) {
+        if ($node->hasAttribute(Attribute::AMP_BOILERPLATE)
+            || $node->hasAttribute(Attribute::AMP4ADS_BOILERPLATE)) {
             $this->styleAmpBoilerplate = $node;
             return;
         }
@@ -209,9 +210,9 @@ final class ReorderHead implements Transformer
      */
     private function registerLink(DOMElement $node)
     {
-        switch (strtolower($node->getAttribute('rel'))) {
+        switch (strtolower($node->getAttribute(Attribute::REL))) {
             case 'stylesheet':
-                $href = $node->getAttribute('href');
+                $href = $node->getAttribute(Attribute::HREF);
                 if ($href && substr($href, -7) === '/v0.css') {
                     $this->linkStyleAmpRuntime = $node;
                     return;

@@ -11,6 +11,7 @@ use Amp\Layout;
 use Amp\Optimizer\Error;
 use Amp\Optimizer\ErrorCollection;
 use Amp\Optimizer\Transformer;
+use Amp\Tag;
 use DOMElement;
 
 /**
@@ -69,7 +70,7 @@ final class ServerSideRendering implements Transformer
         $canRemoveBoilerplate = true;
         foreach ($document->ampElements as $amp_element) {
             // Skip tags inside a template tag.
-            if ($this->hasAncestorWithTag($amp_element, 'template')) {
+            if ($this->hasAncestorWithTag($amp_element, Tag::TEMPLATE)) {
                 continue;
             }
 
@@ -77,7 +78,7 @@ final class ServerSideRendering implements Transformer
              * If these attributes are used on any AMP custom element tags within the document, we can't remove the
              * boilerplate - they require the boilerplate.
              */
-            if ($amp_element->hasAttribute('heights') || $amp_element->hasAttribute('media') || $amp_element->hasAttribute('sizes')) {
+            if ($amp_element->hasAttribute(Attribute::HEIGHTS) || $amp_element->hasAttribute(Attribute::MEDIA) || $amp_element->hasAttribute(Attribute::SIZES)) {
                 $errors->add(Error\CannotRemoveBoilerplate::fromAttributesRequiringBoilerplate($amp_element));
                 $canRemoveBoilerplate = false;
             }
@@ -86,7 +87,7 @@ final class ServerSideRendering implements Transformer
              * amp-experiment is a render delaying extension iff the tag is used in the doc. We check for that here
              * rather than checking for the existence of the amp-experiment script in IsRenderDelayingExtension below.
              */
-            if ($amp_element->tagName === 'amp-experiment' && $this->isAmpExperimentUsed($amp_element)) {
+            if ($amp_element->tagName === Extension::EXPERIMENT && $this->isAmpExperimentUsed($amp_element)) {
                 $errors->add(Error\CannotRemoveBoilerplate::fromAmpExperiment($amp_element));
                 $canRemoveBoilerplate = false;
             }
@@ -95,7 +96,7 @@ final class ServerSideRendering implements Transformer
              * amp-audio requires knowing the dimensions of the browser. Do not remove the boilerplate or apply layout
              * if amp-audio is present in the document.
              */
-            if ($amp_element->tagName === 'amp-audio') {
+            if ($amp_element->tagName === Extension::AUDIO) {
                 $errors->add(Error\CannotRemoveBoilerplate::fromAmpAudio($amp_element));
                 $canRemoveBoilerplate = false;
                 continue;
@@ -112,8 +113,8 @@ final class ServerSideRendering implements Transformer
         }
 
         // Emit the amp-runtime marker to indicate that we're applying server side rendering in the document.
-        $ampRuntimeMarker = $document->createElement('style');
-        $ampRuntimeMarker->setAttribute('amp-runtime', '');
+        $ampRuntimeMarker = $document->createElement(Tag::STYLE);
+        $ampRuntimeMarker->setAttribute(Attribute::AMP_RUNTIME, '');
         $document->head->insertBefore($ampRuntimeMarker, $document->head->hasChildNodes() ? $document->head->firstChild : null);
 
         foreach ($document->xpath->query('.//script[ @custom-element ]', $document->head) as $customElementScript) {
@@ -182,16 +183,16 @@ final class ServerSideRendering implements Transformer
     private function applyLayout(Document $document, DOMElement $element, ErrorCollection $errors)
     {
         // @todo Remove dependency on plugin's CssLength objects here.
-        $ampLayout = $this->parseLayout($element->getAttribute('layout'));
+        $ampLayout = $this->parseLayout($element->getAttribute(Attribute::LAYOUT));
 
-        $inputWidth = new CssLength($element->getAttribute('width'));
+        $inputWidth = new CssLength($element->getAttribute(Attribute::WIDTH));
         $inputWidth->validate(/* $allowAuto */ true, /* $allowFluid */ false);
         if (! $inputWidth->isValid()) {
             $errors->add(Error\CannotPerformServerSideRendering::fromInvalidInputWidth($element));
             return false;
         }
 
-        $inputHeight = new CssLength($element->getAttribute('height'));
+        $inputHeight = new CssLength($element->getAttribute(Attribute::HEIGHT));
         $inputHeight->validate(/* $allowAuto */ true, /* $allowFluid */ $ampLayout === Layout::FLUID);
         if (! $inputHeight->isValid()) {
             $errors->add(Error\CannotPerformServerSideRendering::fromInvalidInputHeight($element));
@@ -201,7 +202,7 @@ final class ServerSideRendering implements Transformer
         // Calculate effective width, height and layout.
         $width  = $this->calculateWidth($ampLayout, $inputWidth, $element->tagName);
         $height = $this->calculateHeight($ampLayout, $inputHeight, $element->tagName);
-        $layout = $this->calculateLayout($ampLayout, $width, $height, $element->getAttribute('sizes'), $element->getAttribute('heights'));
+        $layout = $this->calculateLayout($ampLayout, $width, $height, $element->getAttribute(Attribute::SIZES), $element->getAttribute(Attribute::HEIGHTS));
 
         if (! $this->isSupportedLayout($layout)) {
             $errors->add(Error\CannotPerformServerSideRendering::fromUnsupportedLayout($element, $layout));
@@ -249,16 +250,16 @@ final class ServerSideRendering implements Transformer
             // These values come from AMP's runtime and can be found in
             // https://github.com/ampproject/amphtml/blob/master/src/layout.js#L70
             switch ($tagName) {
-                case 'amp-analytics':
-                case 'amp-pixel':
+                case Extension::ANALYTICS:
+                case Extension::PIXEL:
                     $width = new CssLength('1px');
                     $width->validate(/* $allowAuto */ false, /* $allowFluid */ false);
                     return $width;
-                case 'amp-audio':
-                    $width = new CssLength('auto');
+                case Extension::AUDIO:
+                    $width = new CssLength(CssLength::AUTO);
                     $width->validate(/* $allowAuto */ true, /* $allowFluid */ false);
                     return $width;
-                case 'amp-social-share':
+                case Extension::SOCIAL_SHARE:
                     $width = new CssLength('60px');
                     $width->validate(/* $allowAuto */ false, /* $allowFluid */ false);
                     return $width;
@@ -282,16 +283,16 @@ final class ServerSideRendering implements Transformer
             // These values come from AMP's runtime and can be found in
             // https://github.com/ampproject/amphtml/blob/master/src/layout.js#L70
             switch ($tagName) {
-                case 'amp-analytics':
-                case 'amp-pixel':
+                case Extension::ANALYTICS:
+                case Extension::PIXEL:
                     $height = new CssLength('1px');
                     $height->validate(/* $allowAuto */ false, /* $allowFluid */ false);
                     return $height;
-                case 'amp-audio':
-                    $height = new CssLength('auto');
+                case Extension::AUDIO:
+                    $height = new CssLength(CssLength::AUTO);
                     $height->validate(/* $allowAuto */ true, /* $allowFluid */ false);
                     return $height;
-                case 'amp-social-share':
+                case Extension::SOCIAL_SHARE:
                     $height = new CssLength('44px');
                     $height->validate(/* $allowAuto */ false, /* $allowFluid */ false);
                     return $height;
@@ -367,7 +368,7 @@ final class ServerSideRendering implements Transformer
         $styles = '';
         switch ($layout) {
             case Layout::NODISPLAY:
-                $element->setAttribute('hidden', 'hidden');
+                $element->setAttribute(Attribute::HIDDEN, Attribute::HIDDEN);
                 break;
             case Layout::FIXED:
                 $styles = "width:{$width->getNumeral()}{$width->getUnit()};height:{$height->getNumeral()}{$height->getUnit()};";
@@ -393,11 +394,11 @@ final class ServerSideRendering implements Transformer
         }
 
         // We prepend just in case an existing value (which shouldn't be there for valid docs) doesn't end with ';'.
-        if ($element->hasAttribute('style')) {
-            $styles .= $element->getAttribute('style');
+        if ($element->hasAttribute(Tag::STYLE)) {
+            $styles .= $element->getAttribute(Tag::STYLE);
         }
         if (! empty($styles)) {
-            $element->setAttribute('style', $styles);
+            $element->setAttribute(Tag::STYLE, $styles);
         }
 
         $element->setAttribute(self::LAYOUT_ATTRIBUTE, $layout);
@@ -428,11 +429,11 @@ final class ServerSideRendering implements Transformer
      */
     private function addClass(DOMElement $element, $class)
     {
-        if ($element->hasAttribute('class') && ! empty($element->getAttribute('class'))) {
-            $class = "{$element->getAttribute('class')} {$class}";
+        if ($element->hasAttribute(Attribute::CLASS_) && ! empty($element->getAttribute(Attribute::CLASS_))) {
+            $class = "{$element->getAttribute(Attribute::CLASS_)} {$class}";
         }
 
-        $element->setAttribute('class', $class);
+        $element->setAttribute(Attribute::CLASS_, $class);
     }
 
     /**
@@ -474,7 +475,7 @@ final class ServerSideRendering implements Transformer
 
         $padding = $height->getNumeral() / $width->getNumeral() * 100;
         $sizer   = $document->createElement(self::SIZER_ELEMENT);
-        $sizer->setAttribute('style', sprintf('display:block;padding-top:%1.4F%%;', $padding));
+        $sizer->setAttribute(Tag::STYLE, sprintf('display:block;padding-top:%1.4F%%;', $padding));
         $element->insertBefore($sizer, $element->firstChild);
     }
 
@@ -513,7 +514,7 @@ final class ServerSideRendering implements Transformer
         $child  = $element->firstChild;
 
         while ($child) {
-            if ($child->tagName === 'script' && strtolower($child->getAttribute('type')) === 'application/json') {
+            if ($child->tagName === Tag::SCRIPT && strtolower($child->getAttribute(Attribute::TYPE)) === Attribute::TYPE_JSON) {
                 $script = $child;
                 break;
             }

@@ -8,6 +8,7 @@
 
 namespace Amp\Dom;
 
+use Amp\Attribute;
 use Amp\Tag;
 use DOMAttr;
 use DOMComment;
@@ -49,6 +50,13 @@ final class Document extends DOMDocument
      * @var string
      */
     const UNKNOWN_ENCODING = 'auto';
+
+    /**
+     * Default document type to use.
+     *
+     * @var string
+     */
+    const DEFAULT_DOCTYPE = '<!DOCTYPE html>';
 
     /**
      * Encoding detection order in case we have to guess.
@@ -148,6 +156,7 @@ final class Document extends DOMDocument
     const HTML_FIND_TAG_WITHOUT_ATTRIBUTE_PATTERN = '/<%1$s[^>]*?>[^<]*(?:<\/%1$s>)?/i';
     const HTML_FIND_TAG_WITH_ATTRIBUTE_PATTERN    = '/<%1$s [^>]*?\s*%2$s=[^>]*?>[^<]*(?:<\/%1$s>)?/i';
     const HTML_EXTRACT_ATTRIBUTE_VALUE_PATTERN    = '/%s=(?:([\'"])(?<full>.*)?\1|(?<partial>[^ \'";]+))/';
+    const HTML_FIND_TAG_DELIMITER                 = '/';
 
     /**
      * Pattern to match an Amp emoji together with its variant (amp4ads, amp4email, ...).
@@ -158,54 +167,6 @@ final class Document extends DOMDocument
 
     // Attribute to use as a placeholder to move the emoji AMP symbol (⚡) over to DOM.
     const EMOJI_AMP_ATTRIBUTE = 'emoji-amp';
-
-    /**
-     * HTML elements that are self-closing.
-     *
-     * Not all are valid AMP, but we include them for completeness.
-     *
-     * @link https://www.w3.org/TR/html5/syntax.html#serializing-html-fragments
-     *
-     * @var string[]
-     */
-    const SELF_CLOSING_TAGS = [
-        'area',
-        'base',
-        'basefont',
-        'bgsound',
-        'br',
-        'col',
-        'embed',
-        'frame',
-        'hr',
-        'img',
-        'input',
-        'keygen',
-        Tag::LINK,
-        Tag::META,
-        'param',
-        'source',
-        'track',
-        'wbr',
-    ];
-
-    /**
-     * List of elements allowed in head.
-     *
-     * @link https://github.com/ampproject/amphtml/blob/445d6e3be8a5063e2738c6f90fdcd57f2b6208be/validator/engine/htmlparser.js#L83-L100
-     * @link https://www.w3.org/TR/html5/document-metadata.html
-     *
-     * @var string[]
-     */
-    const ELEMENTS_ALLOWED_IN_HEAD = [
-        'title',
-        'base',
-        Tag::LINK,
-        Tag::META,
-        Tag::STYLE,
-        'noscript',
-        Tag::SCRIPT,
-    ];
 
     /**
      * Associative array of encoding mappings.
@@ -420,8 +381,8 @@ final class Document extends DOMDocument
             $meta = $this->head->firstChild;
             if (
                 Tag::META === $meta->tagName
-                && self::HTML_HTTP_EQUIV_VALUE === $meta->getAttribute('http-equiv')
-                && (self::HTML_HTTP_EQUIV_CONTENT_VALUE) === $meta->getAttribute('content')
+                && self::HTML_HTTP_EQUIV_VALUE === $meta->getAttribute(Attribute::HTTP_EQUIV)
+                && (self::HTML_HTTP_EQUIV_CONTENT_VALUE) === $meta->getAttribute(Attribute::CONTENT)
             ) {
                 $this->head->removeChild($meta);
             }
@@ -456,8 +417,8 @@ final class Document extends DOMDocument
         // Force-add http-equiv charset to make DOMDocument behave as it should.
         // See: http://php.net/manual/en/domdocument.loadhtml.php#78243.
         $charset = $this->createElement(Tag::META);
-        $charset->setAttribute('http-equiv', self::HTML_HTTP_EQUIV_VALUE);
-        $charset->setAttribute('content', self::HTML_HTTP_EQUIV_CONTENT_VALUE);
+        $charset->setAttribute(Attribute::HTTP_EQUIV, self::HTML_HTTP_EQUIV_VALUE);
+        $charset->setAttribute(Attribute::CONTENT, self::HTML_HTTP_EQUIV_CONTENT_VALUE);
         $this->head->insertBefore($charset, $this->head->firstChild);
 
         if (null === $node || PHP_VERSION_ID >= 70300) {
@@ -494,7 +455,7 @@ final class Document extends DOMDocument
         }
 
         $charset = $this->createElement(Tag::META);
-        $charset->setAttribute('charset', self::AMP_ENCODING);
+        $charset->setAttribute(Attribute::CHARSET, self::AMP_ENCODING);
         $this->head->insertBefore($charset, $this->head->firstChild);
     }
 
@@ -554,7 +515,7 @@ final class Document extends DOMDocument
     private function normalizeDocumentStructure($content)
     {
         $matches   = [];
-        $doctype   = '<!DOCTYPE html>';
+        $doctype   = self::DEFAULT_DOCTYPE;
         $htmlStart = '<html>';
 
         // Strip IE conditional comments, which are supported by IE 5-9 only (which AMP doesn't support).
@@ -649,7 +610,7 @@ final class Document extends DOMDocument
         static $regexPattern = null;
 
         if (null === $regexPattern) {
-            $regexPattern = '#<(' . implode('|', self::SELF_CLOSING_TAGS) . ')([^>]*?)(?:\s*\/)?>(?!</\1>)#';
+            $regexPattern = '#<(' . implode('|', Tag::SELF_CLOSING_TAGS) . ')([^>]*?)(?:\s*\/)?>(?!</\1>)#';
         }
 
         return preg_replace($regexPattern, '<$1$2></$1>', $html);
@@ -668,7 +629,7 @@ final class Document extends DOMDocument
         static $regexPattern = null;
 
         if (null === $regexPattern) {
-            $regexPattern = '#</(' . implode('|', self::SELF_CLOSING_TAGS) . ')>#i';
+            $regexPattern = '#</(' . implode('|', Tag::SELF_CLOSING_TAGS) . ')>#i';
         }
 
         return preg_replace($regexPattern, '', $html);
@@ -855,8 +816,8 @@ final class Document extends DOMDocument
         $encoding = self::UNKNOWN_ENCODING;
 
         // Check for HTML 4 http-equiv meta tags.
-        foreach ($this->findTags($content, Tag::META, 'http-equiv') as $potentialHttpEquivTag) {
-            $encoding = $this->extractValue($potentialHttpEquivTag, 'charset');
+        foreach ($this->findTags($content, Tag::META, Attribute::HTTP_EQUIV) as $potentialHttpEquivTag) {
+            $encoding = $this->extractValue($potentialHttpEquivTag, Attribute::CHARSET);
             if (false !== $encoding) {
                 $httpEquivTag = $potentialHttpEquivTag;
             }
@@ -868,9 +829,9 @@ final class Document extends DOMDocument
         }
 
         // Check for HTML 5 charset meta tag. This overrides the HTML 4 charset.
-        $charsetTag = $this->findTag($content, Tag::META, 'charset');
+        $charsetTag = $this->findTag($content, Tag::META, Attribute::CHARSET);
         if ($charsetTag) {
-            $encoding = $this->extractValue($charsetTag, 'charset');
+            $encoding = $this->extractValue($charsetTag, Attribute::CHARSET);
 
             // Strip the encoding if it is not the required one.
             if ( strtolower( $encoding ) !== self::AMP_ENCODING ) {
@@ -897,12 +858,12 @@ final class Document extends DOMDocument
         $pattern = empty($attribute)
             ? sprintf(
                 self::HTML_FIND_TAG_WITHOUT_ATTRIBUTE_PATTERN,
-                preg_quote($element, '/')
+                preg_quote($element, self::HTML_FIND_TAG_DELIMITER)
             )
             : sprintf(
                 self::HTML_FIND_TAG_WITH_ATTRIBUTE_PATTERN,
-                preg_quote($element, '/'),
-                preg_quote($attribute, '/')
+                preg_quote($element, self::HTML_FIND_TAG_DELIMITER),
+                preg_quote($attribute, self::HTML_FIND_TAG_DELIMITER)
             );
 
         if (preg_match($pattern, $content, $matches)) {
@@ -945,7 +906,7 @@ final class Document extends DOMDocument
         $matches = [];
         $pattern = sprintf(
             self::HTML_EXTRACT_ATTRIBUTE_VALUE_PATTERN,
-            preg_quote($attribute, '/')
+            preg_quote($attribute, self::HTML_FIND_TAG_DELIMITER)
         );
 
         if (preg_match($pattern, $tag, $matches)) {
@@ -1232,7 +1193,7 @@ final class Document extends DOMDocument
     public function isValidHeadNode(DOMNode $node)
     {
         return (
-            ($node instanceof DOMElement && in_array($node->nodeName, self::ELEMENTS_ALLOWED_IN_HEAD, true))
+            ($node instanceof DOMElement && in_array($node->nodeName, Tag::ELEMENTS_ALLOWED_IN_HEAD, true))
             ||
             ($node instanceof DOMText && preg_match('/^\s*$/', $node->nodeValue)) // Whitespace text nodes are OK.
             ||
