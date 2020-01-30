@@ -24,6 +24,10 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1">
 	<?php
+	// Note: The following two <style> tags are combined into <style amp-custom> via AMP_Style_Sanitizer.
+	// Splitting up the styles into two stylesheets allows for plugin-supplied styles via the amp_post_template_css action
+	// to be excluded from the styles in the style template part, which are more important given they style the overall page.
+
 	/**
 	 * Fires when rendering <head> in Reader mode templates.
 	 *
@@ -33,8 +37,10 @@
 	 */
 	do_action( 'amp_post_template_head', $this );
 	?>
-	<style amp-custom>
+	<style class="style-template-part">
 		<?php $this->load_parts( [ 'style' ] ); ?>
+	</style>
+	<style class="amp-post-template-css-action">
 		<?php
 		/**
 		 * Fires when printing CSS styles in Reader mode templates.
