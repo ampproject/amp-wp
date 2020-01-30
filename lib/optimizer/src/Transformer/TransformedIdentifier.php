@@ -3,6 +3,7 @@
 namespace Amp\Optimizer\Transformer;
 
 use Amp\Dom\Document;
+use Amp\Optimizer\Configurable;
 use Amp\Optimizer\ErrorCollection;
 use Amp\Optimizer\Transformer;
 
@@ -21,7 +22,7 @@ use Amp\Optimizer\Transformer;
  *
  * @package Amp\Optimizer
  */
-final class TransformedIdentifier implements Transformer
+final class TransformedIdentifier implements Transformer, Configurable
 {
 
     const TRANSFORMED_KEY    = 'transformed';
