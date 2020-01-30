@@ -36,7 +36,6 @@
   <amp-analytics>
       <script type="application/json">
         {
-          ... // existing amp-analytics configuration
           "linkers" : {
             "linker1": {
               "ids": {
@@ -59,12 +58,12 @@
             "enabled": true,
             "linker1": {
               "ids": {
-                "_a": "CLIENT_ID(_a)",
+                "_a": "CLIENT_ID(_a)"
               }
             },
             "linker2": {
               "ids": {
-                "b": "CLIENT_ID(b)",
+                "b": "CLIENT_ID(b)"
               }
             }
           }
@@ -79,12 +78,13 @@
         {
           "linkers" : {
             "enabled": true,
-            "destinationDomains": ['example.com'],
+            "destinationDomains": ["example.com"],
             "linker1": {
               "ids": {
                 "_foo": "CLIENT_ID(_foo)"
               }
             }
+          }
         }
       </script>
   </amp-analytics>
