@@ -1233,13 +1233,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			'imported_font_urls' => $parsed['imported_font_urls'],
 		];
 
-		if ( $element->hasAttribute( 'amp-custom' ) && ! $this->amp_custom_style_element ) {
-			$this->amp_custom_style_element = $element;
-		} else {
-
-			// Remove from DOM since we'll be adding it to amp-custom.
-			$element->parentNode->removeChild( $element );
-		}
+		// Remove from DOM since we'll be adding it to a newly-created style[amp-custom] element later.
+		$element->parentNode->removeChild( $element );
 
 		$this->set_current_node( null );
 	}
@@ -2624,14 +2619,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Add style[amp-custom] to document.
 		if ( $stylesheet_groups[ self::STYLE_AMP_CUSTOM_GROUP_INDEX ]['included_count'] > 0 ) {
-
-			// Ensure style[amp-custom] is present in the document.
-			if ( ! $this->amp_custom_style_element ) {
-				$this->amp_custom_style_element = $this->dom->createElement( 'style' );
-				$this->amp_custom_style_element->setAttribute( 'amp-custom', '' );
-				$this->dom->head->appendChild( $this->amp_custom_style_element );
-			}
-
 			/*
 			 * On AMP-first themes when there are new/rejected validation errors present, a parsed stylesheet may include
 			 * @import rules. These must be moved to the beginning to be honored.
@@ -2641,16 +2628,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$css .= implode( '', $this->get_stylesheets() );
 			$css .= $stylesheet_groups[ self::STYLE_AMP_CUSTOM_GROUP_INDEX ]['source_map_comment'];
 
-			/*
-			 * Let the style[amp-custom] be populated with the concatenated CSS.
-			 * !important: Updating the contents of this style element by setting textContent is not
-			 * reliable across PHP/libxml versions, so this is why the children are removed and the
-			 * text node is then explicitly added containing the CSS.
-			 */
-			while ( $this->amp_custom_style_element->firstChild ) {
-				$this->amp_custom_style_element->removeChild( $this->amp_custom_style_element->firstChild );
-			}
+			// Create the style[amp-custom] element and add it to the <head>.
+			$this->amp_custom_style_element = $this->dom->createElement( 'style' );
+			$this->amp_custom_style_element->setAttribute( 'amp-custom', '' );
 			$this->amp_custom_style_element->appendChild( $this->dom->createTextNode( $css ) );
+			$this->dom->head->appendChild( $this->amp_custom_style_element );
 		}
 
 		/*
