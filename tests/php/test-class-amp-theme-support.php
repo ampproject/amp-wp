@@ -1446,6 +1446,18 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test filter_admin_bar_style_loader_tag when ->deps is not an array.
+	 *
+	 * @covers \AMP_Theme_Support::filter_admin_bar_style_loader_tag()
+	 */
+	public function test_filter_admin_bar_style_loader_tag_non_array() {
+		wp_enqueue_style( 'admin-bar' );
+		$GLOBALS['wp_styles']->registered['admin-bar']->deps = null;
+		$tag = 'foo';
+		$this->assertEquals( $tag, AMP_Theme_Support::filter_admin_bar_style_loader_tag( $tag, 'baz' ) );
+	}
+
+	/**
 	 * Get data to test AMP_Theme_Support::filter_admin_bar_script_loader_tag().
 	 *
 	 * @return array
@@ -1545,6 +1557,18 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		@$dom->loadHTML( $output ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 
 		$assert_callback( new DOMXPath( $dom ) );
+	}
+
+	/**
+	 * Test filter_admin_bar_script_loader_tag when ->deps is not an array.
+	 *
+	 * @covers \AMP_Theme_Support::filter_admin_bar_script_loader_tag()
+	 */
+	public function test_filter_admin_bar_script_loader_tag_non_array() {
+		wp_enqueue_script( 'admin-bar' );
+		$GLOBALS['wp_scripts']->registered['admin-bar']->deps = null;
+		$tag = 'example-tag';
+		$this->assertEquals( $tag, AMP_Theme_Support::filter_admin_bar_script_loader_tag( $tag, 'example' ) );
 	}
 
 	/**
