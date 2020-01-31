@@ -1566,7 +1566,7 @@ class AMP_Theme_Support {
 	 */
 	public static function filter_admin_bar_style_loader_tag( $tag, $handle ) {
 		if (
-			in_array( $handle, wp_styles()->registered['admin-bar']->deps, true ) ?
+			is_array( wp_styles()->registered['admin-bar']->deps ) && in_array( $handle, wp_styles()->registered['admin-bar']->deps, true ) ?
 				self::is_exclusively_dependent( wp_styles(), $handle, 'admin-bar' ) :
 				self::has_dependency( wp_styles(), $handle, 'admin-bar' )
 		) {
@@ -1586,7 +1586,7 @@ class AMP_Theme_Support {
 	 */
 	public static function filter_admin_bar_script_loader_tag( $tag, $handle ) {
 		if (
-			in_array( $handle, wp_scripts()->registered['admin-bar']->deps, true ) ?
+			is_array( wp_scripts()->registered['admin-bar']->deps ) && in_array( $handle, wp_scripts()->registered['admin-bar']->deps, true ) ?
 				self::is_exclusively_dependent( wp_scripts(), $handle, 'admin-bar' ) :
 				self::has_dependency( wp_scripts(), $handle, 'admin-bar' )
 		) {
