@@ -13,21 +13,38 @@ use Amp\Optimizer\Transformer;
  * This is ported from the NodeJS optimizer while verifying against the Go version.
  *
  * NodeJS:
+ *
  * @version 2ca65a94b77130c91ac11fcc32c94b93cbd2b7a0
- * @link https://github.com/ampproject/amp-toolbox/blob/2ca65a94b77130c91ac11fcc32c94b93cbd2b7a0/packages/optimizer/lib/transformers/AddTransformedFlag.js
+ * @link    https://github.com/ampproject/amp-toolbox/blob/2ca65a94b77130c91ac11fcc32c94b93cbd2b7a0/packages/optimizer/lib/transformers/AddTransformedFlag.js
  *
  * Go:
  * @version b26a35142e0ed1458158435b252a0fcd659f93c4
- * @link https://github.com/ampproject/amppackager/blob/b26a35142e0ed1458158435b252a0fcd659f93c4/transformer/transformers/serversiderendering.go
+ * @link    https://github.com/ampproject/amppackager/blob/b26a35142e0ed1458158435b252a0fcd659f93c4/transformer/transformers/serversiderendering.go
  *
  * @package Amp\Optimizer
  */
 final class TransformedIdentifier implements Transformer, Configurable
 {
 
-    const TRANSFORMED_KEY    = 'transformed';
+    /**
+     * Attribute name of the "transformed" identifier.
+     *
+     * @var string
+     */
+    const TRANSFORMED_ATTRIBUTE = 'transformed';
+
+    /**
+     * Origin to use for the "transformed" identifier.
+     *
+     * @var string
+     */
     const TRANSFORMED_ORIGIN = 'self';
 
+    /**
+     * Configuration key that holds the version number to use.
+     *
+     * @var string
+     */
     const CONFIG_KEY_VERSION = 'version';
 
     /**
@@ -56,7 +73,7 @@ final class TransformedIdentifier implements Transformer, Configurable
      */
     public function transform(Document $document, ErrorCollection $errors)
     {
-        $document->html->setAttribute(self::TRANSFORMED_KEY, $this->getOrigin());
+        $document->html->setAttribute(self::TRANSFORMED_ATTRIBUTE, $this->getOrigin());
     }
 
     /**
