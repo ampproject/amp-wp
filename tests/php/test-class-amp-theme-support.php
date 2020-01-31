@@ -1453,7 +1453,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	public function test_filter_admin_bar_style_loader_tag_non_array() {
 		wp_enqueue_style( 'admin-bar' );
 		$GLOBALS['wp_styles']->registered['admin-bar']->deps = null;
-		$tag = 'foo';
+		$tag = '<link rel="stylesheet" id="dashicons-css" href="https://example.com/wp-includes/css/dashicons.css?ver=5.3.2" media="all" />';
 		$this->assertEquals( $tag, AMP_Theme_Support::filter_admin_bar_style_loader_tag( $tag, 'baz' ) );
 	}
 
@@ -1567,7 +1567,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	public function test_filter_admin_bar_script_loader_tag_non_array() {
 		wp_enqueue_script( 'admin-bar' );
 		$GLOBALS['wp_scripts']->registered['admin-bar']->deps = null;
-		$tag = 'example-tag';
+		$tag = '<script src="https://example.com/wp-includes/js/admin-bar.js?ver=5.3.2"></script>';
 		$this->assertEquals( $tag, AMP_Theme_Support::filter_admin_bar_script_loader_tag( $tag, 'example' ) );
 	}
 
