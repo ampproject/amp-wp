@@ -56,6 +56,16 @@ class AMP_HTTP {
 	public static $purged_amp_query_vars = [];
 
 	/**
+	 * Init.
+	 */
+	public static function init() {
+		self::purge_amp_query_vars();
+		self::send_cors_headers();
+		self::handle_xhr_request();
+		add_filter( 'allowed_redirect_hosts', [ __CLASS__, 'filter_allowed_redirect_hosts' ] );
+	}
+
+	/**
 	 * Send an HTTP response header.
 	 *
 	 * This largely exists to facilitate unit testing but it also provides a better interface for sending headers.

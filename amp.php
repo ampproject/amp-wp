@@ -359,10 +359,7 @@ function amp_init() {
 	 */
 	do_action( 'amp_init' );
 
-	add_filter( 'allowed_redirect_hosts', array( 'AMP_HTTP', 'filter_allowed_redirect_hosts' ) );
-	AMP_HTTP::purge_amp_query_vars();
-	AMP_HTTP::send_cors_headers();
-	AMP_HTTP::handle_xhr_request();
+	AMP_HTTP::init();
 	AMP_Theme_Support::init();
 	AMP_Validation_Manager::init();
 	AMP_Service_Worker::init();
