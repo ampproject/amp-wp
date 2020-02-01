@@ -350,8 +350,6 @@ class AMP_Story_Post_Type {
 					$slug = sanitize_title( $post->post_title, $post->ID );
 
 					$sanitizers['AMP_Story_Export_Sanitizer'] = self::get_export_args( $slug );
-
-					$sanitizers['AMP_Style_Sanitizer']['include_manifest_comment'] = 'never';
 				}
 				return $sanitizers;
 			},

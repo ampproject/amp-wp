@@ -19,6 +19,11 @@ class AMP_Layout_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function get_body_data() {
 		return [
+			'non_amp_component'                           => [
+				'<svg height="10%" width="10%"></svg>',
+				'<svg height="10%" width="10%"></svg>',
+			],
+
 			'no_width_or_height'                          => [
 				'<amp-img src="foo.jpg" data-amp-layout="fill"></amp-img>',
 				'<amp-img src="foo.jpg" layout="fill"></amp-img>',

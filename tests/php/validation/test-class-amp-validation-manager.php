@@ -1584,6 +1584,44 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test get_validate_response_data.
+	 *
+	 * @covers AMP_Validation_Manager::get_validate_response_data()
+	 */
+	public function test_get_validate_response_data() {
+		$post = $this->factory()->post->create_and_get();
+
+		$this->go_to( get_permalink( $post ) );
+		$source_html = '<style>amp-fit-text { color:red }</style><script>document.write("bad")</script><amp-fit-text width="300" height="200" layout="responsive">Lorem ipsum</amp-fit-text>';
+
+		$sanitizer_classes = amp_get_content_sanitizers();
+		$sanitizer_classes = AMP_Validation_Manager::filter_sanitizer_args( $sanitizer_classes );
+		$sanitize_results  = AMP_Content_Sanitizer::sanitize_document(
+			AMP_DOM_Utils::get_dom_from_content( $source_html ),
+			$sanitizer_classes,
+			[]
+		);
+
+		$data = AMP_Validation_Manager::get_validate_response_data( $sanitize_results );
+		$this->assertArrayHasKey( 'url', $data );
+		$this->assertArrayHasKey( 'results', $data );
+		$this->assertArrayHasKey( 'queried_object', $data );
+
+		$this->assertEquals( amp_get_current_url(), $data['url'] );
+
+		$this->assertCount( 1, AMP_Validation_Manager::$validation_results );
+		$this->assertEquals( AMP_Validation_Manager::$validation_results, $data['results'] );
+
+		$this->assertEquals(
+			[
+				'id'   => $post->ID,
+				'type' => $post->post_type,
+			],
+			$data['queried_object']
+		);
+	}
+
+	/**
 	 * Test finalize_validation.
 	 *
 	 * @covers \AMP_Validation_Manager::finalize_validation()

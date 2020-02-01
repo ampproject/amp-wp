@@ -665,7 +665,7 @@ class AMP_Validation_Error_Taxonomy {
 		$removed_elements   = [];
 		$removed_attributes = [];
 		$removed_pis        = [];
-		$invalid_sources    = [];
+		$sources            = [];
 		foreach ( $validation_errors as $validation_error ) {
 			$code = isset( $validation_error['code'] ) ? $validation_error['code'] : null;
 
@@ -687,30 +687,13 @@ class AMP_Validation_Error_Taxonomy {
 			}
 
 			if ( ! empty( $validation_error['sources'] ) ) {
-				foreach ( $validation_error['sources'] as $source ) {
-					if ( isset( $source['hook'] ) ) {
-						$invalid_sources['hook'] = $source['hook'];
-					}
-					if ( isset( $source['type'], $source['name'] ) ) {
-						$invalid_sources[ $source['type'] ][] = $source['name'];
-					} elseif ( isset( $source['embed'] ) ) {
-						$invalid_sources['embed'] = true;
-					}
-					if ( isset( $source['block_name'] ) ) {
-						$invalid_sources['blocks'][] = $source['block_name'];
-					}
-				}
-
-				// Remove core if there is a plugin or theme.
-				if ( isset( $invalid_sources['core'] ) && ( isset( $invalid_sources['theme'] ) || isset( $invalid_sources['plugin'] ) ) ) {
-					unset( $invalid_sources['core'] );
-				}
+				$sources = array_merge( $sources, $validation_error['sources'] );
 			}
 		}
 
 		$results = array_merge(
 			[
-				self::SOURCES_INVALID_OUTPUT => $invalid_sources,
+				self::SOURCES_INVALID_OUTPUT => self::summarize_sources( $sources ),
 			],
 			compact(
 				'removed_elements',
@@ -721,6 +704,35 @@ class AMP_Validation_Error_Taxonomy {
 		);
 
 		return $results;
+	}
+
+	/**
+	 * Summarize sources.
+	 *
+	 * @param array $sources Sources.
+	 * @return array Summarized (de-duped) sources.
+	 */
+	public static function summarize_sources( $sources ) {
+		$summarized_sources = [];
+		foreach ( $sources as $source ) {
+			if ( isset( $source['hook'] ) ) {
+				$summarized_sources['hook'] = $source['hook'];
+			}
+			if ( isset( $source['type'], $source['name'] ) ) {
+				$summarized_sources[ $source['type'] ][] = $source['name'];
+			} elseif ( isset( $source['embed'] ) ) {
+				$summarized_sources['embed'] = true;
+			}
+			if ( isset( $source['block_name'] ) ) {
+				$summarized_sources['blocks'][] = $source['block_name'];
+			}
+		}
+
+		// Remove core if there is a plugin or theme.
+		if ( isset( $summarized_sources['core'] ) && ( isset( $summarized_sources['theme'] ) || isset( $summarized_sources['plugin'] ) ) ) {
+			unset( $summarized_sources['core'] );
+		}
+		return $summarized_sources;
 	}
 
 	/**
@@ -1970,8 +1982,15 @@ class AMP_Validation_Error_Taxonomy {
 					}
 				);
 				$error_summary     = self::summarize_validation_errors( wp_list_pluck( $validation_errors, 'data' ) );
-				AMP_Validated_URL_Post_Type::render_sources_column( $error_summary, $url_post_id );
 
+				if ( empty( $error_summary[ self::SOURCES_INVALID_OUTPUT ] ) ) {
+					esc_html_e( '--', 'amp' );
+				} else {
+					AMP_Validated_URL_Post_Type::render_sources_column(
+						$error_summary[ self::SOURCES_INVALID_OUTPUT ],
+						$url_post_id
+					);
+				}
 				break;
 			case 'error_type':
 				if ( isset( $validation_error['type'] ) ) {
@@ -2429,7 +2448,7 @@ class AMP_Validation_Error_Taxonomy {
 	 *
 	 * @param array $sources Sources.
 	 */
-	private static function render_sources( $sources ) {
+	public static function render_sources( $sources ) {
 		?>
 		<details>
 			<summary>

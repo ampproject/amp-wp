@@ -20,8 +20,11 @@ class AMP_Layout_Sanitizer extends AMP_Base_Sanitizer {
 	public function sanitize() {
 		$xpath = new DOMXPath( $this->dom );
 
-		// Elements with the `layout` attribute will be validated by `AMP_Tag_And_Attribute_Sanitizer`.
-		$nodes = $xpath->query( '//*[ not( @layout ) and ( @data-amp-layout or @width or @height or @style ) ]' );
+		/**
+		 * Sanitize AMP nodes to be AMP compatible. Elements with the `layout` attribute will be validated by
+		 * `AMP_Tag_And_Attribute_Sanitizer`.
+		 */
+		$nodes = $xpath->query( '//*[ starts-with( name(), "amp-" ) and not( @layout ) and ( @data-amp-layout or @width or @height or @style ) ]' );
 
 		foreach ( $nodes as $node ) {
 			/**

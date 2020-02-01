@@ -18,14 +18,7 @@ class Test_AMP_WordPress_TV_Embed_Handler extends WP_UnitTestCase {
 	 * Set up.
 	 */
 	public function setUp() {
-		if ( ! function_exists( 'register_block_type' ) ) {
-			$this->markTestIncomplete( 'Files needed for testing missing.' );
-		}
-		if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
-			$this->markTestSkipped( 'Missing required render_block filter.' );
-		}
 		parent::setUp();
-
 		add_filter( 'pre_http_request', [ $this, 'mock_http_request' ], 10, 3 );
 	}
 
@@ -61,7 +54,7 @@ class Test_AMP_WordPress_TV_Embed_Handler extends WP_UnitTestCase {
 	/**
 	 * Test that the script tag that VideoPress adds is removed by the sanitizer.
 	 *
-	 * @covers AMP_WordPress_TV_Embed_Handler::filter_rendered_block()
+	 * @covers AMP_WordPress_TV_Embed_Handler::filter_oembed_html()
 	 */
 	public function test_script_removal() {
 		$handler = new AMP_WordPress_TV_Embed_Handler();
@@ -82,5 +75,76 @@ class Test_AMP_WordPress_TV_Embed_Handler extends WP_UnitTestCase {
 		$this->assertContains( '<iframe', $rendered );
 		$this->assertContains( 'videopress.com/embed', $rendered );
 		$this->assertNotContains( '<script', $rendered );
+	}
+
+	/**
+	 * Gets the test data for test_filter_oembed_html().
+	 *
+	 * @return array The test data.
+	 */
+	public function get_filter_oembed_data() {
+		$embed_without_script = '<p>Example Embed</p>';
+		$embed_with_script    = $embed_without_script . '<script>doThis();</script>';
+
+		return [
+			'wrong_embed_url_domain'                => [
+				$embed_without_script,
+				'https://incorrect.com',
+				null,
+			],
+			'wrong_embed_url_wordpress_com'         => [
+				$embed_without_script,
+				'https://wordpress.com/123',
+				null,
+			],
+			'wrong_embed_url_no_protocol'           => [
+				$embed_without_script,
+				'//wordpress.tv/',
+				null,
+			],
+			'correct_embed_url_http'                => [
+				$embed_with_script,
+				'https://wordpress.tv/123',
+				$embed_without_script,
+			],
+			'correct_embed_url_https'               => [
+				$embed_with_script,
+				'https://wordpress.tv/123',
+				$embed_without_script,
+			],
+			'correct_embed_url_no_script'           => [
+				$embed_without_script,
+				'https://wordpress.tv/123',
+				null,
+			],
+			'correct_embed_url_text_script_not_tag' => [
+				'This is the script for the play',
+				'https://wordpress.tv/123',
+				null,
+			],
+		];
+	}
+
+	/**
+	 * Test filter_oembed_html
+	 *
+	 * @dataProvider get_filter_oembed_data
+	 * @covers AMP_WordPress_TV_Embed_Handler::filter_oembed_html()
+	 *
+	 * @param mixed  $cache    The cached markup.
+	 * @param string $url      The URL of the embed.
+	 * @param string $expected The expected return value.
+	 */
+	public function test_filter_oembed_html( $cache, $url, $expected ) {
+		if ( null === $expected ) {
+			$expected = $cache;
+		}
+
+		$handler = new AMP_WordPress_TV_Embed_Handler();
+		$this->assertEquals(
+			$expected,
+			$handler->filter_oembed_html( $cache, $url )
+		);
+
 	}
 }

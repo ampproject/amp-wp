@@ -1674,7 +1674,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	private function check_attr_spec_rule_valid_url( DOMElement $node, $attr_name, $attr_spec_rule ) {
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ] ) && $node->hasAttribute( $attr_name ) ) {
 			foreach ( $this->extract_attribute_urls( $node->getAttributeNode( $attr_name ) ) as $url ) {
-				$url = urldecode( $url );
+				$url = $this->normalize_url_from_attribute_value( $url );
 
 				// Check whether the URL is parsable.
 				$parts = wp_parse_url( $url );
@@ -1692,7 +1692,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				}
 
 				// Check if the host contains invalid chars (hostCharIsValid: https://github.com/ampproject/amphtml/blob/af1e3a550feeafd732226202b8d1f26dcefefa18/validator/engine/parse-url.js#L62-L103).
-				$host = wp_parse_url( $url, PHP_URL_HOST );
+				$host = wp_parse_url( urldecode( $url ), PHP_URL_HOST );
 				if ( $host && preg_match( '/[!"#$%&\'()*+,\/:;<=>?@[\]^`{|}~\s]/', $host ) ) {
 					return AMP_Rule_Spec::FAIL;
 				}
@@ -1721,6 +1721,16 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Normalize a URL that appeared as a tag attribute.
+	 *
+	 * @param string $url The URL to normalize.
+	 * @return string The normalized URL.
+	 */
+	private function normalize_url_from_attribute_value( $url ) {
+		return preg_replace( '/[\t\r\n]/', '', trim( $url ) );
+	}
+
+	/**
 	 * Check if attribute has a protocol value rule determine if it matches.
 	 *
 	 * @param DOMElement       $node           Node.
@@ -1737,7 +1747,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOWED_PROTOCOL ] ) ) {
 			if ( $node->hasAttribute( $attr_name ) ) {
 				foreach ( $this->extract_attribute_urls( $node->getAttributeNode( $attr_name ) ) as $url ) {
-					$url_scheme = $this->parse_protocol( $url );
+					$url_scheme = $this->parse_protocol( $this->normalize_url_from_attribute_value( $url ) );
 					if ( isset( $url_scheme ) && ! in_array( strtolower( $url_scheme ), $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOWED_PROTOCOL ], true ) ) {
 						return AMP_Rule_Spec::FAIL;
 					}
@@ -1749,7 +1759,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				foreach ( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] as $alternative_name ) {
 					if ( $node->hasAttribute( $alternative_name ) ) {
 						foreach ( $this->extract_attribute_urls( $node->getAttributeNode( $alternative_name ), $attr_name ) as $url ) {
-							$url_scheme = $this->parse_protocol( $url );
+							$url_scheme = $this->parse_protocol( $this->normalize_url_from_attribute_value( $url ) );
 							if ( isset( $url_scheme ) && ! in_array( strtolower( $url_scheme ), $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOWED_PROTOCOL ], true ) ) {
 								return AMP_Rule_Spec::FAIL;
 							}

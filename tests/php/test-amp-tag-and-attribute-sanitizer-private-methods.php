@@ -1414,6 +1414,66 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 	}
 
 	/**
+	 * Gets the test data for test_check_attr_spec_rule_valid_url().
+	 *
+	 * @return array The test data.
+	 */
+	public function get_check_attr_spec_rule_valid_url() {
+		return [
+			'no_attribute'              => [
+				'<a></a>',
+				AMP_Rule_Spec::NOT_APPLICABLE,
+			],
+			'correct_url'               => [
+				'<a baz="https://wp.org"></a>',
+				AMP_Rule_Spec::PASS,
+			],
+			'correct_url_leading_space' => [
+				'<a baz=" https://wp.org"></a>',
+				AMP_Rule_Spec::PASS,
+			],
+			'non_parseable_url'         => [
+				'<a baz="//"></a>',
+				AMP_Rule_Spec::FAIL,
+			],
+			'wrong_protocol'            => [
+				'<a baz="@:wp.org"></a>',
+				AMP_Rule_Spec::FAIL,
+			],
+			'wrong_host'                => [
+				'<a baz="https://wp$camp.org"></a>',
+				AMP_Rule_Spec::FAIL,
+			],
+		];
+	}
+
+	/**
+	 * Tests check_attr_spec_rule_valid_url.
+	 *
+	 * @dataProvider get_check_attr_spec_rule_valid_url
+	 * @group allowed-tags-private-methods
+	 * @covers AMP_Tag_And_Attribute_Sanitizer::check_attr_spec_rule_valid_url()
+	 *
+	 * @param array  $source   The HTML source to test.
+	 * @param string $expected The expected return value.
+	 * @throws ReflectionException If it's not possible to create a reflection to call the private method.
+	 */
+	public function test_check_attr_spec_rule_valid_url( $source, $expected ) {
+		$node_tag_name  = 'a';
+		$dom            = AMP_DOM_Utils::get_dom_from_content( $source );
+		$sanitizer      = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$node           = $dom->getElementsByTagName( $node_tag_name )->item( 0 );
+		$attr_name      = 'baz';
+		$attr_spec_rule = [ 'value_url' => [] ];
+
+		$this->assertEquals(
+			$expected,
+			$this->call_private_method( $sanitizer, 'check_attr_spec_rule_valid_url', [ $node, $attr_name, $attr_spec_rule ] ),
+			sprintf( 'using source: %s', $source )
+		);
+	}
+
+	/**
 	 * @dataProvider get_check_attr_spec_rule_blacklisted_value_regex
 	 * @group allowed-tags-private-methods
 	 */
@@ -1429,7 +1489,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 	public function get_check_attr_spec_rule_allowed_protocol() {
 		return [
-			'no_attributes'             => [
+			'no_attributes'               => [
 				[
 					'source'         => '<div></div>',
 					'node_tag_name'  => 'div',
@@ -1438,7 +1498,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 				],
 				AMP_Rule_Spec::NOT_APPLICABLE,
 			],
-			'protocol_pass'             => [
+			'protocol_pass'               => [
 				[
 					'source'         => '<div attribute1="http://example.com"></div>',
 					'node_tag_name'  => 'div',
@@ -1454,7 +1514,23 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 				],
 				AMP_Rule_Spec::PASS,
 			],
-			'protocol_multiple_pass'    => [
+			'protocol_pass_leading_space' => [
+				[
+					'source'         => '<div attribute1=" http://example.com"></div>',
+					'node_tag_name'  => 'div',
+					'attr_name'      => 'attribute1',
+					'attr_spec_rule' => [
+						'value_url' => [
+							'protocol' => [
+								'http',
+								'https',
+							],
+						],
+					],
+				],
+				AMP_Rule_Spec::PASS,
+			],
+			'protocol_multiple_pass'      => [
 				[
 					'source'         => '<div attribute1="http://example.com, https://domain.com"></div>',
 					'node_tag_name'  => 'div',
@@ -1470,7 +1546,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 				],
 				AMP_Rule_Spec::PASS,
 			],
-			'protocol_fail'             => [
+			'protocol_fail'               => [
 				[
 					'source'         => '<div attribute1="data://example.com"></div>',
 					'node_tag_name'  => 'div',
@@ -1486,7 +1562,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 				],
 				AMP_Rule_Spec::FAIL,
 			],
-			'protocol_multiple_fail'    => [
+			'protocol_multiple_fail'      => [
 				[
 					'source'         => '<img srcset="http://example.com, data://domain.com">',
 					'node_tag_name'  => 'img',
@@ -1502,7 +1578,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 				],
 				AMP_Rule_Spec::FAIL,
 			],
-			'protocol_alternative_pass' => [
+			'protocol_alternative_pass'   => [
 				[
 					'source'         => '<div attribute1_alternative1="http://example.com"></div>',
 					'node_tag_name'  => 'div',
@@ -1521,7 +1597,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 				],
 				AMP_Rule_Spec::PASS,
 			],
-			'protocol_alternative_fail' => [
+			'protocol_alternative_fail'   => [
 				[
 					'source'         => '<div attribute1_alternative1="data://example.com"></div>',
 					'node_tag_name'  => 'div',
@@ -1541,6 +1617,142 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 				AMP_Rule_Spec::FAIL,
 			],
 		];
+	}
+
+	/**
+	 * Gets the test data for test_parse_protocol().
+	 *
+	 * @return array The test data.
+	 */
+	public function get_parse_protocol_data() {
+		return [
+			'empty_string'      => [
+				'',
+				false,
+			],
+			'only_space'        => [
+				'  ',
+				false,
+			],
+			'traditional_https' => [
+				'https://example.com',
+				'https',
+			],
+			'trailing_space'    => [
+				'https://foo.com ',
+				'https',
+			],
+			'no_colon'          => [
+				'//image.png ',
+				false,
+			],
+			'two_colons'        => [
+				'foo:baz://image.png ',
+				'foo:baz',
+			],
+		];
+	}
+
+	/**
+	 * Tests parse_protocol.
+	 *
+	 * @dataProvider get_parse_protocol_data
+	 * @group allowed-tags-private-methods
+	 * @covers AMP_Tag_And_Attribute_Sanitizer::parse_protocol()
+	 *
+	 * @param array  $url      The URL to parse.
+	 * @param string $expected The expected return value.
+	 * @throws ReflectionException If it's not possible to create a reflection to call the private method.
+	 */
+	public function test_parse_protocol( $url, $expected ) {
+		$dom       = AMP_DOM_Utils::get_dom_from_content( '' );
+		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+
+		$this->assertEquals(
+			$expected,
+			$this->call_private_method( $sanitizer, 'parse_protocol', [ $url ] )
+		);
+	}
+
+	/**
+	 * Gets the test data for test_normalize_url_from_attribute_value().
+	 *
+	 * @return array The test data.
+	 */
+	public function get_normalize_url_data() {
+		$normalized_url = 'https://example.com';
+
+		return [
+			'nothing_to_remove'             => [
+				'https://example.com',
+			],
+			'empty_string'                  => [
+				'',
+			],
+			'only_space'                    => [
+				'  ',
+				'',
+			],
+			'leading_space'                 => [
+				'  https://example.com',
+				$normalized_url,
+			],
+			'leading_tab'                   => [
+				"\thttps://example.com",
+				$normalized_url,
+			],
+			'trailing_linefeed'             => [
+				"https://example.com \n",
+				$normalized_url,
+			],
+			'trailing_space'                => [
+				'https://example.com  ',
+				$normalized_url,
+			],
+			'enclosed_in_spaces'            => [
+				' https://example.com ',
+				$normalized_url,
+			],
+			'space_inside'                  => [
+				' https: //exam ple.com ',
+				'https: //exam ple.com',
+			],
+			'tabs_inside'                   => [
+				"https:\t//exam\tple.com ",
+				$normalized_url,
+			],
+			'leading_slashes'               => [
+				'//example.com',
+			],
+			'url_encoded_space_not_removed' => [
+				'https://example.com?foo=++baz',
+			],
+		];
+	}
+
+	/**
+	 * Tests normalize_url_from_attribute_value.
+	 *
+	 * @dataProvider get_normalize_url_data
+	 * @group allowed-tags-private-methods
+	 * @covers AMP_Tag_And_Attribute_Sanitizer::normalize_url_from_attribute_value()
+	 *
+	 * @param array       $url      The URL to normalize.
+	 * @param string|null $expected The expected return value.
+	 * @throws ReflectionException If it's not possible to create a reflection to call the private method.
+	 */
+	public function test_normalize_url_from_attribute_value( $url, $expected = null ) {
+		if ( null === $expected ) {
+			$expected = $url;
+		}
+
+		$dom       = AMP_DOM_Utils::get_dom_from_content( '' );
+		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+
+		$this->assertEquals(
+			$expected,
+			$this->call_private_method( $sanitizer, 'normalize_url_from_attribute_value', [ $url ] )
+		);
 	}
 
 	/**
