@@ -5,6 +5,11 @@ namespace Amp;
 use DOMElement;
 use DOMNode;
 
+/**
+ * Central helper functionality for all Amp-related PHP code.
+ *
+ * @package amp/common
+ */
 final class Amp
 {
 

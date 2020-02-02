@@ -1,9 +1,4 @@
 <?php
-/**
- * Tests for Amp\Dom\Document.
- *
- * @package amp/common
- */
 
 use Amp\Dom\Document;
 use Amp\Tests\AssertContainsCompatibility;
@@ -13,6 +8,7 @@ use PHPUnit\Framework\TestCase;
  * Tests for Amp\Dom\Document.
  *
  * @covers Document
+ * @package amp/common
  */
 class DocumentTest extends TestCase
 {

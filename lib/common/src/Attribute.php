@@ -26,6 +26,7 @@ interface Attribute
     const HOST_SERVICE        = 'host-service';
     const HREF                = 'href';
     const HTTP_EQUIV          = 'http-equiv';
+    const I_AMPHTML_VERSION   = 'i-amphtml-version';
     const LAYOUT              = 'layout';
     const MEDIA               = 'media';
     const REL                 = 'rel';

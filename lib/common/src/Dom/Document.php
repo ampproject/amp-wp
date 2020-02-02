@@ -1,11 +1,5 @@
 <?php
 
-/**
- * Class Amp\Dom\Document.
- *
- * @package amp/common
- */
-
 namespace Amp\Dom;
 
 use Amp\Attribute;
@@ -21,7 +15,7 @@ use DOMXPath;
 /**
  * Class Amp\Dom\Document.
  *
- * @since 1.5
+ * Abstract away some of the difficulties of working with PHP's DOMDocument.
  *
  * @property DOMXPath     $xpath       XPath query object for this document.
  * @property DOMElement   $html        The document's <html> element.
@@ -30,7 +24,7 @@ use DOMXPath;
  * @property DOMElement[] $ampElements The document's <amp-*> elements. Technically, this returns a DOMNodeList, but
  *                                     we're hinting directly to elements, not nodes, for convenience.
  *
- * Abstract away some of the difficulties of working with PHP's DOMDocument.
+ * @package amp/common
  */
 final class Document extends DOMDocument
 {

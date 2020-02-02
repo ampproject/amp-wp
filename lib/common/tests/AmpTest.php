@@ -1,9 +1,4 @@
 <?php
-/**
- * Tests for Amp\Amp.
- *
- * @package amp/common
- */
 
 use Amp\Amp;
 use Amp\Attribute;
@@ -16,6 +11,7 @@ use PHPUnit\Framework\TestCase;
  * Tests for Amp\Amp.
  *
  * @covers Amp
+ * @package amp/common
  */
 class AmpTest extends TestCase
 {

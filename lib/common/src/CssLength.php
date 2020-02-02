@@ -1,15 +1,9 @@
 <?php
 
-/**
- * Class CssLength.
- *
- * @package amp/common
- */
-
 namespace Amp;
 
 /**
- * Class CssLength.
+ * Flexible unit of measure for CSS dimensions.
  *
  * Adapted from the `amp.validator.CssLength` class found in `validator.js` from the `ampproject/amphtml` project on
  * GitHub.
@@ -17,9 +11,9 @@ namespace Amp;
  * @version 1911070201440
  * @link    https://github.com/ampproject/amphtml/blob/1911070201440/validator/engine/validator.js#L3351
  *
- * @since   1.5
+ * @package amp/common
  */
-class CssLength
+final class CssLength
 {
 
     // Special attribute values.
