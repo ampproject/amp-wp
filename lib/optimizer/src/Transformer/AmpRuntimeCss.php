@@ -171,7 +171,6 @@ final class AmpRuntimeCss implements Transformer, Configurable, MakesRemoteReque
      */
     private function linkCss(DOMElement $ampRuntimeStyle)
     {
-
     }
 
     /**

@@ -128,16 +128,20 @@ final class AmpBoilerplate implements Transformer
         $css         = Amp::BOILERPLATE_CSS;
 
         foreach (Attribute::ALL_AMP4ADS as $attribute) {
-            if ($htmlElement->hasAttribute($attribute)
-                || ($htmlElement->getAttribute(Document::EMOJI_AMP_ATTRIBUTE) === str_replace('⚡', '', $attribute))) {
+            if (
+                $htmlElement->hasAttribute($attribute)
+                || ($htmlElement->getAttribute(Document::EMOJI_AMP_ATTRIBUTE) === str_replace('⚡', '', $attribute))
+            ) {
                 $boilerplate = Attribute::AMP4ADS_BOILERPLATE;
                 $css         = Amp::AMP4ADS_AND_AMP4EMAIL_BOILERPLATE_CSS;
             }
         }
 
         foreach (Attribute::ALL_AMP4EMAIL as $attribute) {
-            if ($htmlElement->hasAttribute($attribute)
-                || ($htmlElement->getAttribute(Document::EMOJI_AMP_ATTRIBUTE) === str_replace('⚡', '', $attribute))) {
+            if (
+                $htmlElement->hasAttribute($attribute)
+                || ($htmlElement->getAttribute(Document::EMOJI_AMP_ATTRIBUTE) === str_replace('⚡', '', $attribute))
+            ) {
                 $boilerplate = Attribute::AMP4EMAIL_BOILERPLATE;
                 $css         = Amp::AMP4ADS_AND_AMP4EMAIL_BOILERPLATE_CSS;
             }

@@ -828,7 +828,7 @@ final class Document extends DOMDocument
             $encoding = $this->extractValue($charsetTag, Attribute::CHARSET);
 
             // Strip the encoding if it is not the required one.
-            if ( strtolower( $encoding ) !== self::AMP_ENCODING ) {
+            if (strtolower($encoding) !== self::AMP_ENCODING) {
                 $content = str_replace($charsetTag, '', $content);
             }
         }

@@ -93,6 +93,7 @@ final class Amp
     const LAYOUT_CLASS_PREFIX       = 'i-amphtml-layout-';
     const LAYOUT_SIZE_DEFINED_CLASS = 'i-amphtml-layout-size-defined';
     const SIZER_ELEMENT             = 'i-amphtml-sizer';
+    const INTRINSIC_SIZER_ELEMENT   = 'i-amphtml-intrinsic-sizer';
 
     /**
      * Check if a given node is the Amp runtime script.
@@ -104,8 +105,10 @@ final class Amp
      */
     public static function isRuntimeScript(DOMNode $node)
     {
-        if (! self::isAsyncScript($node)
-            || self::isExtension($node)) {
+        if (
+            ! self::isAsyncScript($node)
+            || self::isExtension($node)
+        ) {
             return false;
         }
 
@@ -115,8 +118,10 @@ final class Amp
             return false;
         }
 
-        if (substr($src, -6) !== '/v0.js'
-            && substr($src, -14) !== '/amp4ads-v0.js') {
+        if (
+            substr($src, -6) !== '/v0.js'
+            && substr($src, -14) !== '/amp4ads-v0.js'
+        ) {
             return false;
         }
 
@@ -134,8 +139,10 @@ final class Amp
      */
     public static function isViewerScript(DOMNode $node)
     {
-        if (! self::isAsyncScript($node)
-            || self::isExtension($node)) {
+        if (
+            ! self::isAsyncScript($node)
+            || self::isExtension($node)
+        ) {
             return false;
         }
 
@@ -228,13 +235,17 @@ final class Amp
      */
     private static function isAsyncScript(DOMNode $node)
     {
-        if (! $node instanceof DOMElement
-            || $node->tagName !== Tag::SCRIPT) {
+        if (
+            ! $node instanceof DOMElement
+            || $node->tagName !== Tag::SCRIPT
+        ) {
             return false;
         }
 
-        if (! $node->hasAttribute(Attribute::SRC)
-            || ! $node->hasAttribute(Attribute::ASYNC)) {
+        if (
+            ! $node->hasAttribute(Attribute::SRC)
+            || ! $node->hasAttribute(Attribute::ASYNC)
+        ) {
             return false;
         }
 

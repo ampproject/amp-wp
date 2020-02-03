@@ -8,7 +8,6 @@ use Exception;
 
 final class CannotInlineRuntimeCss implements Error
 {
-
     use ErrorProperties;
 
     const EXCEPTION_STRING                 = 'Cannot inline the amp-runtime CSS in %3$s into %2$s: %1$s.';

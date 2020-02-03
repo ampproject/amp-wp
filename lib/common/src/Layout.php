@@ -38,5 +38,6 @@ interface Layout
         self::RESPONSIVE,
         self::FILL,
         self::FLEX_ITEM,
+        self::INTRINSIC,
     ];
 }

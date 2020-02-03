@@ -42,6 +42,7 @@ final class ServerSideRendering implements Transformer
         Layout::CONTAINER,
         Layout::FILL,
         Layout::FLEX_ITEM,
+        Layout::INTRINSIC,
     ];
 
     /**
@@ -113,8 +114,10 @@ final class ServerSideRendering implements Transformer
 
         foreach ($document->xpath->query('.//script[ @custom-element ]', $document->head) as $customElementScript) {
             // amp-experiment is a render delaying extension iff the tag is used in the doc, which we checked for above.
-            if ($customElementScript->getAttribute(Attribute::CUSTOM_ELEMENT) !== Extension::EXPERIMENT
-                && Amp::isRenderDelayingExtension($customElementScript)) {
+            if (
+                $customElementScript->getAttribute(Attribute::CUSTOM_ELEMENT) !== Extension::EXPERIMENT
+                && Amp::isRenderDelayingExtension($customElementScript)
+            ) {
                 $errors->add(Error\CannotRemoveBoilerplate::fromRenderDelayingScript($customElementScript));
                 $canRemoveBoilerplate = false;
             }
@@ -371,6 +374,7 @@ final class ServerSideRendering implements Transformer
                 $styles = "height:{$height->getNumeral()}{$height->getUnit()};";
                 break;
             case Layout::RESPONSIVE:
+            case Layout::INTRINSIC:
                 // Do nothing here but emit <i-amphtml-sizer> later.
                 break;
             case Layout::FILL:
@@ -458,18 +462,69 @@ final class ServerSideRendering implements Transformer
         CssLength $height
     ) {
         if (
-            $layout !== Layout::RESPONSIVE
-            || ! $width->isDefined()
+            ! $width->isDefined()
             || $width->getNumeral() === 0
             || ! $height->isDefined()
             || $width->getUnit() !== $height->getUnit()
         ) {
             return;
         }
+        $sizer = null;
+
+        if ($layout === Layout::RESPONSIVE) {
+            $sizer = $this->createResponsiveSizer($document, $width, $height);
+        } elseif ($layout === Layout::INTRINSIC) {
+            $sizer = $this->createIntrinsicSizer($document, $width, $height);
+        }
+
+        if ($sizer) {
+            $element->insertBefore($sizer, $element->firstChild);
+        }
+    }
+
+    /**
+     * Create a sizer element for a responsive layout.
+     *
+     * @param Document  $document DOM document to create the sizer for.
+     * @param CssLength $width    Calculated width of the element.
+     * @param CssLength $height   Calculated height of the element.
+     * @return DOMElement
+     */
+    private function createResponsiveSizer(Document $document, CssLength $width, CssLength $height)
+    {
         $padding = $height->getNumeral() / $width->getNumeral() * 100;
         $sizer   = $document->createElement(Amp::SIZER_ELEMENT);
         $sizer->setAttribute(Tag::STYLE, sprintf('display:block;padding-top:%1.4F%%;', $padding));
-        $element->insertBefore($sizer, $element->firstChild);
+
+        return $sizer;
+    }
+
+    /**
+     * Create a sizer element for an intrinsic layout.
+     *
+     * Intrinsic uses an svg inside the sizer element rather than the padding trick.
+     * Note: a naked svg won't work because other things expect the i-amphtml-sizer element.
+     *
+     * @param Document  $document DOM document to create the sizer for.
+     * @param CssLength $width    Calculated width of the element.
+     * @param CssLength $height   Calculated height of the element.
+     * @return DOMElement
+     */
+    private function createIntrinsicSizer(Document $document, CssLength $width, CssLength $height)
+    {
+        $sizer = $document->createElement(Amp::SIZER_ELEMENT);
+        $sizer->setAttribute(Attribute::CLASS_, Amp::SIZER_ELEMENT);
+
+        $sizer_img = $document->createElement(Tag::IMG);
+        $sizer_img->setAttribute(Attribute::ALT, '');
+        $sizer_img->setAttribute(Attribute::ARIA_HIDDEN, 'true');
+        $sizer_img->setAttribute(Attribute::CLASS_, Amp::INTRINSIC_SIZER_ELEMENT);
+        $sizer_img->setAttribute(Attribute::ROLE, 'presentation');
+        $sizer_img->setAttribute(Attribute::SRC, "data:image/svg+xml;charset=utf-8,<svg height=\"{$height->getNumeral()}\" width=\"{$width->getNumeral()}\" xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\"/>");
+
+        $sizer->appendChild($sizer_img);
+
+        return $sizer;
     }
 
     /**
@@ -507,9 +562,11 @@ final class ServerSideRendering implements Transformer
         $child  = $element->firstChild;
 
         while ($child) {
-            if ($child instanceof DOMElement
+            if (
+                $child instanceof DOMElement
                 && $child->tagName === Tag::SCRIPT
-                && strtolower($child->getAttribute(Attribute::TYPE)) === Attribute::TYPE_JSON) {
+                && strtolower($child->getAttribute(Attribute::TYPE)) === Attribute::TYPE_JSON
+            ) {
                 $script = $child;
                 break;
             }

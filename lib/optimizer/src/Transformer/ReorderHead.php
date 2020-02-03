@@ -199,8 +199,10 @@ final class ReorderHead implements Transformer
             return;
         }
 
-        if ($node->hasAttribute(Attribute::AMP_BOILERPLATE)
-            || $node->hasAttribute(Attribute::AMP4ADS_BOILERPLATE)) {
+        if (
+            $node->hasAttribute(Attribute::AMP_BOILERPLATE)
+            || $node->hasAttribute(Attribute::AMP4ADS_BOILERPLATE)
+        ) {
             $this->styleAmpBoilerplate = $node;
             return;
         }
@@ -235,10 +237,12 @@ final class ReorderHead implements Transformer
             return;
         }
 
-        if ($this->containsWord($rel, 'preload')
+        if (
+            $this->containsWord($rel, 'preload')
             || $this->containsWord($rel, 'prefetch')
             || $this->containsWord($rel, 'dns-prefetch')
-            || $this->containsWord($rel, 'preconnect')) {
+            || $this->containsWord($rel, 'preconnect')
+        ) {
             $this->resourceHintLinks[] = $node;
             return;
         }
@@ -282,7 +286,7 @@ final class ReorderHead implements Transformer
             'scriptRenderDelayingExtensions',
             'scriptNonRenderDelayingExtensions',
             'linkIcons',
-            'resourceHintLinks',
+            'resourceHintLinks', // This should probably be higher, but both the Go and NodeJS optimizers have it here.
             'linkStylesheetsBeforeAmpCustom',
             'styleAmpCustom',
             'others',

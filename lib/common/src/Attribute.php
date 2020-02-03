@@ -10,6 +10,7 @@ namespace Amp;
 interface Attribute
 {
 
+    const ALT                   = 'alt';
     const AMP                   = 'amp';
     const AMP4ADS               = 'amp4ads';
     const AMP4ADS_BOILERPLATE   = 'amp4ads-boilerplate';
@@ -21,6 +22,7 @@ interface Attribute
     const AMP_CUSTOM            = 'amp-custom';
     const AMP_EMOJI             = '⚡';
     const AMP_RUNTIME           = 'amp-runtime';
+    const ARIA_HIDDEN           = 'aria-hidden';
     const ASYNC                 = 'async';
     const CHARSET               = 'charset';
     const CLASS_                = 'class'; // Underscore needed because 'class' is a PHP keyword.
@@ -37,6 +39,7 @@ interface Attribute
     const LAYOUT                = 'layout';
     const MEDIA                 = 'media';
     const REL                   = 'rel';
+    const ROLE                  = 'role';
     const SIZES                 = 'sizes';
     const SRC                   = 'src';
     const TYPE                  = 'type';
