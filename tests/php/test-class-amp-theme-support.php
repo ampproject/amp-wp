@@ -324,7 +324,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that attempting to access an AMP a post in Reader mode that does not support AMP.
+	 * Test that attempting to access an AMP post in Reader mode that does not support AMP.
 	 *
 	 * @covers AMP_Theme_Support::finish_init()
 	 */
