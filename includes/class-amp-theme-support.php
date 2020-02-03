@@ -404,6 +404,12 @@ class AMP_Theme_Support {
 	 * @since 0.7
 	 */
 	public static function finish_init() {
+
+		// Short-circuit if it is a POST request and will not be an AMP response. This is handled by AMP_HTTP::handle_xhr_request().
+		if ( AMP_HTTP::is_converted_xhr_post_request() ) {
+			return;
+		}
+
 		if ( self::is_paired_available() ) {
 			self::setup_paired_browsing_client();
 			add_action( 'template_redirect', [ __CLASS__, 'sanitize_url_for_paired_browsing' ] );
@@ -2012,37 +2018,6 @@ class AMP_Theme_Support {
 		if ( isset( $args['validation_error_callback'] ) ) {
 			_doing_it_wrong( __METHOD__, 'Do not supply validation_error_callback arg.', '1.0' );
 			unset( $args['validation_error_callback'] );
-		}
-
-		$status_code = http_response_code();
-
-		/*
-		 * Send a JSON response when the site is failing to handle AMP form submissions with a JSON response as required
-		 * or an AMP-Redirect-To response header was not sent. This is a common scenario for plugins that handle form
-		 * submissions and show the success page via the POST request's response body instead of invoking wp_redirect(),
-		 * in which case AMP_HTTP::intercept_post_request_redirect() will automatically send the AMP-Redirect-To header.
-		 * If the POST response is an HTML document then the form submission will appear to not have worked since there
-		 * is no success or failure message shown. By catching the case where HTML is sent in the response, we can
-		 * automatically send a generic success message when a 200 status is returned or a failure message when a 400+
-		 * response code is sent.
-		 */
-		$is_form_submission = (
-			isset( AMP_HTTP::$purged_amp_query_vars[ AMP_HTTP::ACTION_XHR_CONVERTED_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			&&
-			isset( $_SERVER['REQUEST_METHOD'] )
-			&&
-			'POST' === $_SERVER['REQUEST_METHOD']
-		);
-		if ( $is_form_submission && null === json_decode( $response ) && json_last_error() && ( is_bool( $status_code ) || ( $status_code >= 200 && $status_code < 300 ) || $status_code >= 400 ) ) {
-			if ( is_bool( $status_code ) ) {
-				$status_code = 200; // Not a web server environment.
-			}
-			return wp_json_encode(
-				[
-					'status_code' => $status_code,
-					'status_text' => get_status_header_desc( $status_code ),
-				]
-			);
 		}
 
 		/*

@@ -311,23 +311,32 @@ class AMP_HTTP {
 	}
 
 	/**
+	 * Is XHR POST request.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @return bool Whether it is a converted XHR POST request.
+	 */
+	public static function is_converted_xhr_post_request() {
+		return (
+			! empty( self::$purged_amp_query_vars[ self::ACTION_XHR_CONVERTED_QUERY_VAR ] )
+			&&
+			( ! empty( $_SERVER['REQUEST_METHOD'] ) && 'POST' === $_SERVER['REQUEST_METHOD'] )
+		);
+	}
+
+	/**
 	 * Hook into a POST form submissions, such as the comment form or some other form submission.
 	 *
 	 * @since 0.7.0
 	 * @since 1.0 Moved to AMP_HTTP class. Extracted some logic to send_cors_headers method.
 	 */
 	public static function handle_xhr_request() {
-		$is_amp_xhr = (
-			! empty( self::$purged_amp_query_vars[ self::ACTION_XHR_CONVERTED_QUERY_VAR ] )
-			&&
-			( ! empty( $_SERVER['REQUEST_METHOD'] ) && 'POST' === $_SERVER['REQUEST_METHOD'] )
-		);
-		if ( ! $is_amp_xhr ) {
+		if ( ! self::is_converted_xhr_post_request() ) {
 			return;
 		}
 
-		// Intercept POST requests which redirect.
-		add_filter( 'wp_redirect', [ __CLASS__, 'intercept_post_request_redirect' ], PHP_INT_MAX );
+		ob_start( [ __CLASS__, 'finalize_xhr_response' ] );
 
 		// Add special handling for redirecting after comment submission.
 		add_filter( 'comment_post_redirect', [ __CLASS__, 'filter_comment_post_redirect' ], PHP_INT_MAX, 2 );
@@ -341,6 +350,60 @@ class AMP_HTTP {
 	}
 
 	/**
+	 * Finalize the response for XHR requests.
+	 *
+	 * This method is the output buffer callback. It is used to inspect whether any Location headers were sent, and if so,
+	 * rewrite them to use AMP-Redirect-To instead. Otherwise, if no redirection is performed and the response is not JSON,
+	 * then a fallback JSON response is served which is derived from the status code.
+	 *
+	 * @since 1.5
+	 *
+	 * @param string $response Response.
+	 * @return string Response.
+	 */
+	public static function finalize_xhr_response( $response ) {
+		$headers = [];
+		foreach ( headers_list() as $sent_header ) {
+			if ( preg_match( '#^([^:]+):\s*(.+)$#i', $sent_header, $matches ) ) {
+				$headers[ strtolower( $matches[1] ) ] = $matches[2];
+			}
+		}
+
+		if ( isset( $headers['location'] ) ) {
+			header_remove( 'location' );
+			status_header( 200 ); // Override redirect status.
+			return self::intercept_post_request_redirect( $headers['location'] );
+		}
+
+		// Pass through JSON responses as-is since amp-form is expecting this.
+		if ( isset( $headers['content-type'] ) && 0 === strpos( $headers['content-type'], 'application/json' ) ) {
+			return $response;
+		}
+
+		$status_code = http_response_code();
+		if ( is_bool( $status_code ) ) {
+			$status_code = 200; // Not a web server environment.
+		}
+
+		/*
+		 * Send a JSON response when the site is failing to handle AMP form submissions with a JSON response as required
+		 * or an AMP-Redirect-To response header was not sent. This is a common scenario for plugins that handle form
+		 * submissions and show the success page via the POST request's response body instead of invoking wp_redirect(),
+		 * in which case AMP_HTTP::intercept_post_request_redirect() will automatically send the AMP-Redirect-To header.
+		 * If the POST response is an HTML document then the form submission will appear to not have worked since there
+		 * is no success or failure message shown. By catching the case where HTML is sent in the response, we can
+		 * automatically send a generic success message when a 200 status is returned or a failure message when a 400+
+		 * response code is sent.
+		 */
+		return wp_json_encode(
+			[
+				'status_code' => $status_code,
+				'status_text' => get_status_header_desc( $status_code ),
+			]
+		);
+	}
+
+	/**
 	 * Intercept the response to a POST request.
 	 *
 	 * @since 0.7.0
@@ -348,6 +411,7 @@ class AMP_HTTP {
 	 * @see wp_redirect()
 	 *
 	 * @param string $location The location to redirect to.
+	 * @return string JSON response data.
 	 */
 	public static function intercept_post_request_redirect( $location ) {
 
@@ -379,18 +443,17 @@ class AMP_HTTP {
 
 		self::send_header( 'AMP-Redirect-To', $absolute_location );
 		self::send_header( 'Access-Control-Expose-Headers', 'AMP-Redirect-To', [ 'replace' => false ] );
-
-		wp_send_json(
+		self::send_header( 'Content-Type', 'application/json' );
+		return wp_json_encode(
 			[
 				'message'     => __( 'Redirecting…', 'amp' ),
 				'redirecting' => true, // Make sure that the submit-success doesn't get styled as success since redirection _could_ be to error page.
-			],
-			200
+			]
 		);
 	}
 
 	/**
-	 * New error handler for AMP form submission.
+	 * Map wp_die() calls to JSON responses for AMP.
 	 *
 	 * @since 0.7.0
 	 * @since 1.0 Moved to AMP_HTTP class.
