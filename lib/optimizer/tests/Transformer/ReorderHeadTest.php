@@ -28,21 +28,6 @@ final class ReorderHeadTest extends TestCase
      */
     public function dataTransform()
     {
-        /*
-         * (0) <meta charset> tag
-         * (1) <style amp-runtime> (inserted by ampruntimecss.go)
-         * (2) remaining <meta> tags (those other than <meta charset>)
-         * (3) AMP runtime .js <script> tag
-         * (4) AMP viewer runtime .js <script>
-         * (5) <script> tags that are render delaying
-         * (6) <script> tags for remaining extensions
-         * (7) <link> tag for favicons
-         * (8) <link> tag for resource hints
-         * (9) <link rel=stylesheet> tags before <style amp-custom>
-         * (10) <style amp-custom>
-         * (11) any other tags allowed in <head>
-         * (12) AMP boilerplate (first style amp-boilerplate, then noscript)
-         */
         return [
             'reorders head children for amp document'                    => [
                 TestMarkup::DOCTYPE . '<html ⚡><head>' .
