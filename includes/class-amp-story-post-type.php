@@ -32,7 +32,14 @@ class AMP_Story_Post_Type {
 	 *
 	 * @var string
 	 */
-	const REQUIRED_GUTENBERG_VERSION = '6.6';
+	const MIN_REQUIRED_GUTENBERG_VERSION = '6.6.0';
+
+	/**
+	 * Minimum required version of Gutenberg required.
+	 *
+	 * @var string
+	 */
+	const MAX_REQUIRED_GUTENBERG_VERSION = '7.1.0';
 
 	/**
 	 * The slug of the story card CSS file.
@@ -93,20 +100,22 @@ class AMP_Story_Post_Type {
 	/**
 	 * Check if the required version of block capabilities available.
 	 *
-	 * Requires either Gutenberg 6.6+ or WordPress 5.3+ (which includes Gutenberg 6.6)
-	 *
-	 * @todo Eventually the Gutenberg requirement should be removed.
-	 *
 	 * @return bool Whether capabilities are available.
 	 */
 	public static function has_required_block_capabilities() {
-		return (
-			( defined( 'GUTENBERG_DEVELOPMENT_MODE' ) && GUTENBERG_DEVELOPMENT_MODE )
-			||
-			( defined( 'GUTENBERG_VERSION' ) && version_compare( GUTENBERG_VERSION, self::REQUIRED_GUTENBERG_VERSION, '>=' ) )
-			||
-			version_compare( get_bloginfo( 'version' ), '5.3-RC2', '>=' )
-		);
+		if ( defined( 'GUTENBERG_DEVELOPMENT_MODE' ) ) {
+			return (bool) GUTENBERG_DEVELOPMENT_MODE;
+		}
+
+		// If Gutenberg is installed only versions 6.6.0 - 7.1.0 are supported.
+		if ( defined( 'GUTENBERG_VERSION' ) ) {
+			return version_compare( GUTENBERG_VERSION, self::MIN_REQUIRED_GUTENBERG_VERSION, '>=' ) &&
+				version_compare( GUTENBERG_VERSION, self::MAX_REQUIRED_GUTENBERG_VERSION, '<=' );
+		}
+
+		// Only WordPress version 5.3 is supported (which includes Gutenberg 6.6.0).
+		return version_compare( get_bloginfo( 'version' ), '5.3-RC2', '>=' ) &&
+			version_compare( get_bloginfo( 'version' ), '5.4', '<' );
 	}
 
 	/**
