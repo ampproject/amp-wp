@@ -58,32 +58,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 				$node->setAttribute( 'method', $method );
 			}
 
-			/*
-			 * In HTML, the default action is just the current URL that the page is served from.
-			 * The action "specifies a server endpoint to handle the form input. The value must be an
-			 * https URL and must not be a link to a CDN".
-			 */
-			if ( ! $node->getAttribute( 'action' ) ) {
-				$action_url = esc_url_raw( '//' . $_SERVER['HTTP_HOST'] . wp_unslash( $_SERVER['REQUEST_URI'] ) );
-			} else {
-				$action_url = $node->getAttribute( 'action' );
-
-				// Handle relative URLs.
-				if ( ! preg_match( '#^(https?:)?//#', $action_url ) ) {
-					$schemeless_host = '//' . $_SERVER['HTTP_HOST'];
-					if ( '?' === $action_url[0] || '#' === $action_url[0] ) {
-						// For actions consisting of only a query or URL fragment, include the schemeless-host and the REQUEST URI of the current page.
-						$action_url = $schemeless_host . wp_unslash( $_SERVER['REQUEST_URI'] ) . $action_url;
-					} elseif ( '.' === $action_url[0] ) {
-						// For actions consisting of relative paths (e.g. '../'), prepend the schemeless-host and a trailing-slashed REQUEST URI.
-						$action_url = $schemeless_host . trailingslashit( wp_unslash( $_SERVER['REQUEST_URI'] ) ) . $action_url;
-					} else {
-						// Otherwise, when the action URL includes an absolute path, just append it to the schemeless-host.
-						$action_url = $schemeless_host . $action_url;
-					}
-					$action_url = esc_url_raw( $action_url );
-				}
-			}
+			$action_url = $this->get_action_url( $node );
 			$xhr_action = $node->getAttribute( 'action-xhr' );
 
 			// Make HTTP URLs protocol-less, since HTTPS is required for forms.
@@ -131,6 +106,49 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Get the action URL for the form element.
+	 *
+	 * @param DOMElement $form Form element.
+	 *
+	 * @return string Action URL.
+	 */
+	protected function get_action_url( DOMElement $form ) {
+		/*
+		 * In HTML, the default action is just the current URL that the page is served from.
+		 * The action "specifies a server endpoint to handle the form input. The value must be an
+		 * https URL and must not be a link to a CDN".
+		 */
+		if ( ! $form->getAttribute( 'action' ) ) {
+			return esc_url_raw( '//' . $_SERVER['HTTP_HOST'] . wp_unslash( $_SERVER['REQUEST_URI'] ) );
+		}
+
+		$action_url = $form->getAttribute( 'action' );
+
+		// Handle relative URLs.
+		if ( ! preg_match( '#^(https?:)?//#', $action_url ) ) {
+			$schemeless_host = '//' . $_SERVER['HTTP_HOST'];
+			if ( '?' === $action_url[0] || '#' === $action_url[0] ) {
+				// For actions consisting of only a query or URL fragment, include the schemeless-host and the REQUEST URI of the current page.
+				$action_url = $schemeless_host . wp_unslash( $_SERVER['REQUEST_URI'] ) . $action_url;
+			} elseif ( '.' === $action_url[0] ) {
+				// For actions consisting of relative paths (e.g. '../'), prepend the schemeless-host and a trailing-slashed REQUEST URI.
+				$action_url = $schemeless_host . trailingslashit( wp_unslash( $_SERVER['REQUEST_URI'] ) ) . $action_url;
+			} else {
+				// Otherwise, when the action URL includes an absolute path, just append it to the schemeless-host.
+				$action_url = $schemeless_host . $action_url;
+			}
+			return esc_url_raw( $action_url );
+		}
+
+		// Handle external URLs by use of a proxy.
+		if ( wp_parse_url( home_url(), PHP_URL_HOST ) !== wp_parse_url( $action_url, PHP_URL_HOST ) ) {
+			// @todo There needs to be some endpoint registered which serves as the proxy.
+		}
+
+		return $action_url;
 	}
 
 	/**
