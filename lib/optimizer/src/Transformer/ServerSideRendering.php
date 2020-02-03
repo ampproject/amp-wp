@@ -28,16 +28,10 @@ use DOMElement;
  * @version ea0959046c179953de43077eafaeb720f9b20bdf
  * @link    https://github.com/ampproject/amppackager/blob/ea0959046c179953de43077eafaeb720f9b20bdf/transformer/transformers/transformedidentifier.go
  *
- * @package Amp\Optimizer
+ * @package amp/optimizer
  */
 final class ServerSideRendering implements Transformer
 {
-
-    const LAYOUT_ATTRIBUTE          = 'i-amphtml-layout';
-    const NO_BOILERPLATE_ATTRIBUTE  = 'i-amphtml-no-boilerplate';
-    const LAYOUT_CLASS_PREFIX       = 'i-amphtml-layout-';
-    const LAYOUT_SIZE_DEFINED_CLASS = 'i-amphtml-layout-size-defined';
-    const SIZER_ELEMENT             = 'i-amphtml-sizer';
 
     const SUPPORTED_LAYOUTS = [
         '',
@@ -135,7 +129,7 @@ final class ServerSideRendering implements Transformer
         }
 
         // The boilerplate can be removed, note it on the <html> tag.
-        $document->html->setAttribute(self::NO_BOILERPLATE_ATTRIBUTE, '');
+        $document->html->setAttribute(Amp::NO_BOILERPLATE_ATTRIBUTE, '');
 
         /*
          * Find the boilerplate and remove it.
@@ -162,12 +156,12 @@ final class ServerSideRendering implements Transformer
      */
     private function isAlreadyTransformed(Document $document)
     {
-        if ($document->html->hasAttribute(self::LAYOUT_ATTRIBUTE)) {
+        if ($document->html->hasAttribute(Amp::LAYOUT_ATTRIBUTE)) {
             return true;
         }
 
         // Mark the document as "already transformed".
-        $document->html->setAttribute(self::LAYOUT_ATTRIBUTE, '');
+        $document->html->setAttribute(Amp::LAYOUT_ATTRIBUTE, '');
 
         return false;
     }
@@ -362,7 +356,7 @@ final class ServerSideRendering implements Transformer
         $this->addClass($element, $this->getLayoutClass($layout));
 
         if ($this->isLayoutSizeDefined($layout)) {
-            $this->addClass($element, self::LAYOUT_SIZE_DEFINED_CLASS);
+            $this->addClass($element, Amp::LAYOUT_SIZE_DEFINED_CLASS);
         }
 
         $styles = '';
@@ -401,7 +395,7 @@ final class ServerSideRendering implements Transformer
             $element->setAttribute(Tag::STYLE, $styles);
         }
 
-        $element->setAttribute(self::LAYOUT_ATTRIBUTE, $layout);
+        $element->setAttribute(Amp::LAYOUT_ATTRIBUTE, $layout);
     }
 
     /**
@@ -416,7 +410,7 @@ final class ServerSideRendering implements Transformer
             return '';
         }
 
-        return self::LAYOUT_CLASS_PREFIX . $layout;
+        return Amp::LAYOUT_CLASS_PREFIX . $layout;
     }
 
     /**
@@ -472,9 +466,8 @@ final class ServerSideRendering implements Transformer
         ) {
             return;
         }
-
         $padding = $height->getNumeral() / $width->getNumeral() * 100;
-        $sizer   = $document->createElement(self::SIZER_ELEMENT);
+        $sizer   = $document->createElement(Amp::SIZER_ELEMENT);
         $sizer->setAttribute(Tag::STYLE, sprintf('display:block;padding-top:%1.4F%%;', $padding));
         $element->insertBefore($sizer, $element->firstChild);
     }

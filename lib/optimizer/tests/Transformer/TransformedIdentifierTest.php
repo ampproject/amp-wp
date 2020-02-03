@@ -3,11 +3,17 @@
 namespace Amp\Optimizer\Transformer;
 
 use Amp\Dom\Document;
+use Amp\Optimizer\Configuration\TransformedIdentifierConfiguration;
 use Amp\Optimizer\ErrorCollection;
 use Amp\Optimizer\Tests\MarkupComparison;
 use Amp\Optimizer\Tests\TestMarkup;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * Test the TransformedIdentifier transformer.
+ *
+ * @package amp/optimizer
+ */
 final class TransformedIdentifierTest extends TestCase
 {
 
@@ -57,7 +63,7 @@ final class TransformedIdentifierTest extends TestCase
     /**
      * Test the transform() method.
      *
-     * @covers       \Amp\Optimizer\Transformer\TransformedIdentifier::transform()
+     * @covers       TransformedIdentifier::transform()
      * @dataProvider dataTransform()
      *
      * @param string   $source       String of source HTML.
@@ -67,11 +73,11 @@ final class TransformedIdentifierTest extends TestCase
     public function testTransform($source, $expectedHtml, $version = null)
     {
         $document = Document::fromHtml($source);
-        $config   = null;
+        $config   = [];
         if ($version !== null) {
-            $config = [TransformedIdentifier::CONFIG_KEY_VERSION => $version];
+            $config = [TransformedIdentifierConfiguration::VERSION => $version];
         }
-        $transformer = new TransformedIdentifier($config);
+        $transformer = new TransformedIdentifier(new TransformedIdentifierConfiguration($config));
         $errors      = new ErrorCollection();
 
         $transformer->transform($document, $errors);

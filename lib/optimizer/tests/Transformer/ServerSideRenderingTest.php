@@ -10,6 +10,11 @@ use Amp\Optimizer\Tests\MarkupComparison;
 use Amp\Optimizer\Tests\TestMarkup;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * Test the ServerSideRendering transformer.
+ *
+ * @package amp/optimizer
+ */
 final class ServerSideRenderingTest extends TestCase
 {
 
@@ -164,7 +169,7 @@ final class ServerSideRenderingTest extends TestCase
     /**
      * Test the transform() method.
      *
-     * @covers       \Amp\Optimizer\Transformer\ServerSideRendering::transform()
+     * @covers       ServerSideRendering::transform()
      * @dataProvider dataTransform()
      *
      * @param string                  $source         String of source HTML.

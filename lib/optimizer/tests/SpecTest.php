@@ -4,11 +4,19 @@ namespace Amp\Optimizer;
 
 use Amp\Dom\Document;
 use Amp\Optimizer\Tests\MarkupComparison;
+use Amp\Optimizer\Tests\TestMarkup;
+use Amp\Optimizer\Transformer\AmpRuntimeCss;
 use Amp\Optimizer\Transformer\ReorderHead;
 use Amp\Optimizer\Transformer\ServerSideRendering;
+use Amp\RemoteRequest\StubbedRemoteRequest;
 use DirectoryIterator;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * Test the individual transformers against the NodeJS spec test suite.
+ *
+ * @package amp/optimizer
+ */
 final class SpecTest extends TestCase
 {
 
@@ -22,11 +30,13 @@ final class SpecTest extends TestCase
         $suites    = [
             'ReorderHead'         => [ReorderHead::class, self::TRANSFORMER_SPEC_PATH . '/ReorderHeadTransformer'],
             'ServerSideRendering' => [ServerSideRendering::class, self::TRANSFORMER_SPEC_PATH . '/ServerSideRendering'],
+            'AmpRuntimeCss'       => [
+                AmpRuntimeCss::class,
+                self::TRANSFORMER_SPEC_PATH . '/AmpBoilerplateTransformer',
+            ],
         ];
 
-        foreach ($suites as $key => $suite) {
-            list($transformerClass, $specFileFolder) = $suite;
-
+        foreach ($suites as $key => list($transformerClass, $specFileFolder)) {
             foreach (new DirectoryIterator($specFileFolder) as $subFolder) {
                 if ($subFolder->isFile() || $subFolder->isDot()) {
                     continue;
@@ -48,17 +58,39 @@ final class SpecTest extends TestCase
      *
      * @dataProvider dataTransformerSpecFiles
      *
-     * @param string $source   Source file to transform.
-     * @param string $expected Expected transformed result.
+     * @param string $transformerClass Class of the transformer to test.
+     * @param string $source           Source file to transform.
+     * @param string $expected         Expected transformed result.
      */
     public function testTransformerSpecFiles($transformerClass, $source, $expected)
     {
         $document    = Document::fromHtmlFragment($source);
-        $transformer = new $transformerClass();
+        $transformer = $this->getTransformer($transformerClass);
         $errors      = new ErrorCollection();
 
         $transformer->transform($document, $errors);
 
         $this->assertSimilarMarkup($expected, $document->saveHTMLFragment());
+    }
+
+    /**
+     * Get the transformer to test.
+     *
+     * @param string $transformerClass Class of the transformer to get.
+     * @return Transformer Instantiated transformer object.
+     */
+    private function getTransformer($transformerClass)
+    {
+        $arguments = [];
+
+        if (is_a($transformerClass, MakesRemoteRequests::class, true)) {
+            $arguments[] = new StubbedRemoteRequest(TestMarkup::STUBBED_REMOTE_REQUESTS);
+        }
+
+        if (is_a($transformerClass, Configurable::class, true)) {
+            $arguments[] = (new Configuration())->getTransformerConfiguration($transformerClass);
+        }
+
+        return new $transformerClass(...$arguments);
     }
 }

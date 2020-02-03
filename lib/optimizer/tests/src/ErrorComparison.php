@@ -5,6 +5,11 @@ namespace Amp\Optimizer\Tests;
 use Amp\Optimizer\Error;
 use Amp\Optimizer\ErrorCollection;
 
+/**
+ * Compare produced errors while disregarding their specific representation.
+ *
+ * @package amp/optimizer
+ */
 trait ErrorComparison
 {
 

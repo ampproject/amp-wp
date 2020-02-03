@@ -5,6 +5,11 @@ namespace Amp\Optimizer;
 use Amp\Optimizer\Error\UnknownError;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * Test the error collection container.
+ *
+ * @package amp/optimizer
+ */
 final class ErrorCollectionTest extends TestCase
 {
 

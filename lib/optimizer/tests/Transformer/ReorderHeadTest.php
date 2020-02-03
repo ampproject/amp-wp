@@ -10,6 +10,11 @@ use Amp\Optimizer\Tests\MarkupComparison;
 use Amp\Optimizer\Tests\TestMarkup;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * Test the ReorderHead transformer.
+ *
+ * @package amp/optimizer
+ */
 final class ReorderHeadTest extends TestCase
 {
 
@@ -23,8 +28,23 @@ final class ReorderHeadTest extends TestCase
      */
     public function dataTransform()
     {
+        /*
+         * (0) <meta charset> tag
+         * (1) <style amp-runtime> (inserted by ampruntimecss.go)
+         * (2) remaining <meta> tags (those other than <meta charset>)
+         * (3) AMP runtime .js <script> tag
+         * (4) AMP viewer runtime .js <script>
+         * (5) <script> tags that are render delaying
+         * (6) <script> tags for remaining extensions
+         * (7) <link> tag for favicons
+         * (8) <link> tag for resource hints
+         * (9) <link rel=stylesheet> tags before <style amp-custom>
+         * (10) <style amp-custom>
+         * (11) any other tags allowed in <head>
+         * (12) AMP boilerplate (first style amp-boilerplate, then noscript)
+         */
         return [
-            'Reorders head children for AMP document'                    => [
+            'reorders head children for amp document'                    => [
                 TestMarkup::DOCTYPE . '<html ⚡><head>' .
                 TestMarkup::TITLE . TestMarkup::STYLE_AMPBOILERPLATE .
                 TestMarkup::SCRIPT_AMPEXPERIMENT . TestMarkup::SCRIPT_AMPAUDIO .
@@ -50,8 +70,8 @@ final class ReorderHeadTest extends TestCase
                 // (5) <script> tags that are render delaying
                 TestMarkup::SCRIPT_AMPEXPERIMENT .
                 // (6) <script> tags for remaining extensions
-                TestMarkup::SCRIPT_AMPAUDIO .
                 TestMarkup::SCRIPT_AMPMRAID .
+                TestMarkup::SCRIPT_AMPAUDIO .
                 TestMarkup::SCRIPT_AMPMUSTACHE .
                 // (7) <link> tag for favicons
                 TestMarkup::LINK_FAVICON .
@@ -68,7 +88,7 @@ final class ReorderHeadTest extends TestCase
                 TestMarkup::STYLE_AMPBOILERPLATE . TestMarkup::NOSCRIPT_AMPBOILERPLATE .
                 '</head><body></body></html>',
             ],
-            'Reorders head children for AMP4ADS document'                => [
+            'reorders head children for amp4ads document'                => [
                 TestMarkup::DOCTYPE . '<html ⚡4ads><head>' .
                 TestMarkup::TITLE . TestMarkup::STYLE_AMP_4_ADS_BOILERPLATE . TestMarkup::SCRIPT_AMPAUDIO .
                 TestMarkup::SCRIPT_AMP_4_ADS_RUNTIME . TestMarkup::LINK_STYLESHEET_GOOGLE_FONT .
@@ -104,7 +124,7 @@ final class ReorderHeadTest extends TestCase
                 TestMarkup::STYLE_AMP_4_ADS_BOILERPLATE .
                 '</head><body></body></html>',
             ],
-            'Preserves style sheet ordering'                             => [
+            'preserves style sheet ordering'                             => [
                 TestMarkup::DOCTYPE . '<html ⚡><head>' .
                 TestMarkup::META_CHARSET . TestMarkup::META_VIEWPORT . TestMarkup::SCRIPT_AMPRUNTIME .
                 TestMarkup::LINK_FAVICON . TestMarkup::LINK_STYLESHEET_GOOGLE_FONT . TestMarkup::STYLE_AMPCUSTOM .
@@ -119,7 +139,7 @@ final class ReorderHeadTest extends TestCase
                 TestMarkup::LINK_CANONICAL . TestMarkup::STYLE_AMPBOILERPLATE . TestMarkup::NOSCRIPT_AMPBOILERPLATE .
                 '</head><body></body></html>',
             ],
-            'AMP Runtime script is reordered as first script'            => [
+            'amp runtime script is reordered as first script'            => [
                 TestMarkup::DOCTYPE . '<html ⚡><head>' .
                 TestMarkup::META_CHARSET . TestMarkup::META_VIEWPORT .
                 TestMarkup::SCRIPT_AMPAUDIO . TestMarkup::SCRIPT_AMPRUNTIME .
@@ -134,7 +154,7 @@ final class ReorderHeadTest extends TestCase
                 TestMarkup::STYLE_AMPBOILERPLATE . TestMarkup::NOSCRIPT_AMPBOILERPLATE .
                 '</head><body></body></html>',
             ],
-            'Render delaying scripts before non-render delaying scripts' => [
+            'render delaying scripts before non-render delaying scripts' => [
                 TestMarkup::DOCTYPE . '<html ⚡><head>' .
                 TestMarkup::META_CHARSET . TestMarkup::META_VIEWPORT .
                 TestMarkup::SCRIPT_AMPRUNTIME . TestMarkup::SCRIPT_AMPAUDIO . TestMarkup::SCRIPT_AMPEXPERIMENT .
@@ -149,7 +169,7 @@ final class ReorderHeadTest extends TestCase
                 TestMarkup::STYLE_AMPBOILERPLATE . TestMarkup::NOSCRIPT_AMPBOILERPLATE .
                 '</head><body></body></html>',
             ],
-            'Removes duplicate custom element script'                    => [
+            'removes duplicate custom element script'                    => [
                 TestMarkup::DOCTYPE . '<html ⚡><head>' .
                 TestMarkup::META_CHARSET . TestMarkup::META_VIEWPORT .
                 TestMarkup::SCRIPT_AMPRUNTIME . TestMarkup::SCRIPT_AMPAUDIO . TestMarkup::SCRIPT_AMPAUDIO .
@@ -164,7 +184,7 @@ final class ReorderHeadTest extends TestCase
                 TestMarkup::STYLE_AMPBOILERPLATE . TestMarkup::NOSCRIPT_AMPBOILERPLATE .
                 '</head><body></body></html>',
             ],
-            'Sorts custom element scripts'                               => [
+            'sorts custom element scripts'                               => [
                 TestMarkup::DOCTYPE . '<html ⚡><head>' .
                 TestMarkup::META_CHARSET . TestMarkup::META_VIEWPORT .
                 TestMarkup::SCRIPT_AMPRUNTIME . TestMarkup::SCRIPT_AMPEXPERIMENT . TestMarkup::SCRIPT_AMPDYNAMIC_CSSCLASSES .
@@ -179,7 +199,7 @@ final class ReorderHeadTest extends TestCase
                 TestMarkup::STYLE_AMPBOILERPLATE . TestMarkup::NOSCRIPT_AMPBOILERPLATE .
                 '</head><body></body></html>',
             ],
-            'Removes duplicate custom template script'                   => [
+            'removes duplicate custom template script'                   => [
                 TestMarkup::DOCTYPE . '<html ⚡><head>' .
                 TestMarkup::META_CHARSET . TestMarkup::META_VIEWPORT .
                 TestMarkup::SCRIPT_AMPRUNTIME . TestMarkup::SCRIPT_AMPMUSTACHE . TestMarkup::SCRIPT_AMPMUSTACHE .
@@ -194,7 +214,7 @@ final class ReorderHeadTest extends TestCase
                 TestMarkup::STYLE_AMPBOILERPLATE . TestMarkup::NOSCRIPT_AMPBOILERPLATE .
                 '</head><body></body></html>',
             ],
-            'Preserves multiple favicons'                                => [
+            'preserves multiple favicons'                                => [
                 TestMarkup::DOCTYPE . '<html ⚡><head>' .
                 TestMarkup::META_CHARSET . TestMarkup::META_VIEWPORT .
                 TestMarkup::SCRIPT_AMPRUNTIME . TestMarkup::SCRIPT_AMPAUDIO .
@@ -209,7 +229,7 @@ final class ReorderHeadTest extends TestCase
                 TestMarkup::STYLE_AMPBOILERPLATE . TestMarkup::NOSCRIPT_AMPBOILERPLATE .
                 '</head><body></body></html>',
             ],
-            'Case insensitive rel value'                                 => [
+            'case insensitive rel value'                                 => [
                 TestMarkup::DOCTYPE . '<html ⚡><head>' .
                 TestMarkup::META_CHARSET . TestMarkup::META_VIEWPORT .
                 TestMarkup::SCRIPT_AMPRUNTIME . TestMarkup::SCRIPT_AMPAUDIO . TestMarkup::LINK_CANONICAL .
@@ -230,7 +250,7 @@ final class ReorderHeadTest extends TestCase
     /**
      * Test the transform() method.
      *
-     * @covers       \Amp\Optimizer\Transformer\ReorderHead::transform()
+     * @covers       ReorderHead::transform()
      * @dataProvider dataTransform()
      *
      * @param string                  $source         String of source HTML.

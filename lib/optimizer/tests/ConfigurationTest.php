@@ -6,6 +6,11 @@ use Amp\Optimizer\Exception\InvalidConfigurationValue;
 use Amp\Optimizer\Exception\UnknownConfigurationKey;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * Test the configuration storage and validation.
+ *
+ * @package amp/optimizer
+ */
 final class ConfigurationTest extends TestCase
 {
 

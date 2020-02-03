@@ -67,6 +67,34 @@ final class Amp
     ];
 
     /**
+     * Standard boilerplate CSS stylesheet.
+     *
+     * @var string
+     */
+    const BOILERPLATE_CSS = 'body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}';
+
+    /**
+     * Boilerplate CSS stylesheet for the <noscript> tag.
+     *
+     * @var string
+     */
+    const BOILERPLATE_NOSCRIPT_CSS = 'body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}';
+
+    /**
+     * Boilerplate CSS stylesheet for Amp4Ads & Amp4Email.
+     *
+     * @var string
+     */
+    const AMP4ADS_AND_AMP4EMAIL_BOILERPLATE_CSS = 'body{visibility:hidden}';
+
+    // Amp classes reserved for internal use.
+    const LAYOUT_ATTRIBUTE          = 'i-amphtml-layout';
+    const NO_BOILERPLATE_ATTRIBUTE  = 'i-amphtml-no-boilerplate';
+    const LAYOUT_CLASS_PREFIX       = 'i-amphtml-layout-';
+    const LAYOUT_SIZE_DEFINED_CLASS = 'i-amphtml-layout-size-defined';
+    const SIZER_ELEMENT             = 'i-amphtml-sizer';
+
+    /**
      * Check if a given node is the Amp runtime script.
      *
      * The Amp runtime script node is of the form '<script async src="https://cdn.ampproject.org...v0.js"></script>'.

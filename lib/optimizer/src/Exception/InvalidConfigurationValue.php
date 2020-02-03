@@ -4,6 +4,11 @@ namespace Amp\Optimizer\Exception;
 
 use InvalidArgumentException;
 
+/**
+ * Exception thrown when an invalid configuration value was provided.
+ *
+ * @package amp/optimizer
+ */
 final class InvalidConfigurationValue extends InvalidArgumentException implements AmpOptimizerException
 {
 

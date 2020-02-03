@@ -21,7 +21,9 @@ class RuntimeVersionTest extends TestCase
     protected $runtimeVersion;
 
     /**
-     * Stubbed remote requests
+     * Associative array of mapping data for stubbing remote requests.
+     *
+     * @var array
      */
     const STUBBED_REMOTE_REQUESTS = [
         'https://cdn.ampproject.org/rtv/metadata'               => '{"ampRuntimeVersion":"012345678900000","ampCssUrl":"https://cdn.ampproject.org/rtv/012345678900000/v0.css","canaryPercentage":"0.1","diversions":["023456789000000","034567890100000","045678901200000"]}',

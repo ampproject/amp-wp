@@ -2,6 +2,11 @@
 
 namespace Amp\Optimizer;
 
+/**
+ * Error object to transport optimization errors.
+ *
+ * @package amp/optimizer
+ */
 interface Error
 {
 

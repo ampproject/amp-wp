@@ -2,15 +2,30 @@
 
 namespace Amp\Optimizer;
 
+use Amp\Optimizer\Configuration\AmpRuntimeCssConfiguration;
+use Amp\Optimizer\Configuration\TransformedIdentifierConfiguration;
 use Amp\Optimizer\Exception\InvalidConfigurationValue;
+use Amp\Optimizer\Exception\UnknownConfigurationClass;
 use Amp\Optimizer\Exception\UnknownConfigurationKey;
+use Amp\Optimizer\Transformer\AmpBoilerplate;
+use Amp\Optimizer\Transformer\AmpRuntimeCss;
 use Amp\Optimizer\Transformer\ReorderHead;
 use Amp\Optimizer\Transformer\ServerSideRendering;
 use Amp\Optimizer\Transformer\TransformedIdentifier;
 
+/**
+ * Configuration object that validates and stores configuration settings.
+ *
+ * @package amp/optimizer
+ */
 final class Configuration
 {
 
+    /**
+     * Key to use for managing the array of active transformers.
+     *
+     * @var string
+     */
     const KEY_TRANSFORMERS = 'transformers';
 
     /**
@@ -28,8 +43,10 @@ final class Configuration
      * @var string[]
      */
     const DEFAULT_TRANSFORMERS = [
-        TransformedIdentifier::class,
+        AmpBoilerplate::class,
         ServerSideRendering::class,
+        AmpRuntimeCss::class,
+        TransformedIdentifier::class,
         ReorderHead::class,
     ];
 
@@ -39,6 +56,20 @@ final class Configuration
      * @var array
      */
     private $configuration;
+
+    /**
+     * Associative array mapping the transformer classes to their configuration classes.
+     *
+     * This can be extended by third-parties via:
+     *
+     * @see registerConfigurationClass()
+     *
+     * @var array
+     */
+    private $transformerConfigurationClasses = [
+        AmpRuntimeCss::class         => AmpRuntimeCssConfiguration::class,
+        TransformedIdentifier::class => TransformedIdentifierConfiguration::class,
+    ];
 
     /**
      * Instantiate a Configuration object.
@@ -55,6 +86,17 @@ final class Configuration
     }
 
     /**
+     * Register a new configuration class to use for a given transformer.
+     *
+     * @param string $transformerClass   FQCN of the transformer to register a configuration class for.
+     * @param string $configurationClass FQCN of the configuration to use.
+     */
+    public function registerConfigurationClass($transformerClass, $configurationClass)
+    {
+        $this->transformerConfigurationClasses[$transformerClass] = $configurationClass;
+    }
+
+    /**
      * Validate an array of configuration settings.
      *
      * @param array $configurationData Associative array of configuration data to validate.
@@ -63,7 +105,7 @@ final class Configuration
     private function validateConfigurationKeys($configurationData)
     {
         foreach ($configurationData as $key => $value) {
-            $configurationData[$key] = $this->validateConfigurationKey($key, $value);
+            $configurationData[$key] = $this->validate($key, $value);
         }
 
         return $configurationData;
@@ -77,7 +119,7 @@ final class Configuration
      * @return mixed Validated value for the provided configuration setting.
      * @throws InvalidConfigurationValue If the configuration value could not be validated.
      */
-    private function validateConfigurationKey($key, $value)
+    private function validate($key, $value)
     {
         switch ($key) {
             case self::KEY_TRANSFORMERS:
@@ -120,5 +162,23 @@ final class Configuration
         }
 
         return $this->configuration[$key];
+    }
+
+    /**
+     * Get the transformer-specific configuration for the requested transformer.
+     *
+     * @param string $transformer FQCN of the transformer to get the configuration for.
+     * @return TransformerConfiguration Transformer-specific configuration.
+     */
+    public function getTransformerConfiguration($transformer)
+    {
+        if (! array_key_exists($transformer, $this->transformerConfigurationClasses)) {
+            throw UnknownConfigurationClass::fromTransformerClass($transformer);
+        }
+
+        $configuration      = $this->has($transformer) ? $this->get($transformer) : [];
+        $configurationClass = $this->transformerConfigurationClasses[$transformer];
+
+        return new $configurationClass($configuration);
     }
 }

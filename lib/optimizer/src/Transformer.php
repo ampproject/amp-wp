@@ -4,6 +4,11 @@ namespace Amp\Optimizer;
 
 use Amp\Dom\Document;
 
+/**
+ * A singular transformer that is part of the transformation engine.
+ *
+ * @package amp/optimizer
+ */
 interface Transformer
 {
 

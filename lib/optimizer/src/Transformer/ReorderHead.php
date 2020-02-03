@@ -41,7 +41,7 @@ use DOMNode;
  * @version ea0959046c179953de43077eafaeb720f9b20bdf
  * @link    https://github.com/ampproject/amppackager/blob/ea0959046c179953de43077eafaeb720f9b20bdf/transformer/transformers/transformedidentifier.go
  *
- * @package Amp\Optimizer
+ * @package amp/optimizer
  */
 final class ReorderHead implements Transformer
 {
@@ -174,6 +174,11 @@ final class ReorderHead implements Transformer
             return;
         }
 
+        if ($node->hasAttribute(Attribute::HOST_SERVICE)) {
+            $this->scriptNonRenderDelayingExtensions[] = $node;
+            return;
+        }
+
         $this->others[] = $node;
     }
 
@@ -293,6 +298,7 @@ final class ReorderHead implements Transformer
             if ($this->$category instanceof DOMNode) {
                 $head->appendChild($this->$category);
             } elseif (is_array($this->$category)) {
+                // @todo Maybe sort by attribute-name, attribute-value?
                 foreach ($this->$category as $node) {
                     $head->appendChild($node);
                 }

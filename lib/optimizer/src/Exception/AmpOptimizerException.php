@@ -2,12 +2,14 @@
 
 namespace Amp\Optimizer\Exception;
 
+use Amp\Exception\AmpException;
+
 /**
  * Marker interface to enable consumers to catch all exceptions for this particular library.
  *
- * @package Amp\Optimizer
+ * @package amp/optimizer
  */
-interface AmpOptimizerException
+interface AmpOptimizerException extends AmpException
 {
 
 }

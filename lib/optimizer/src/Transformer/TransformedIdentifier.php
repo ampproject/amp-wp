@@ -4,11 +4,13 @@ namespace Amp\Optimizer\Transformer;
 
 use Amp\Dom\Document;
 use Amp\Optimizer\Configurable;
+use Amp\Optimizer\Configuration\TransformedIdentifierConfiguration;
 use Amp\Optimizer\ErrorCollection;
 use Amp\Optimizer\Transformer;
+use Amp\Optimizer\TransformerConfiguration;
 
 /**
- * Transformer applying the server-side rendering transformations to the HTML input.
+ * Transformer applying the transformed identifier transformations to the HTML input.
  *
  * This is ported from the NodeJS optimizer while verifying against the Go version.
  *
@@ -19,9 +21,9 @@ use Amp\Optimizer\Transformer;
  *
  * Go:
  * @version b26a35142e0ed1458158435b252a0fcd659f93c4
- * @link    https://github.com/ampproject/amppackager/blob/b26a35142e0ed1458158435b252a0fcd659f93c4/transformer/transformers/serversiderendering.go
+ * @link    https://github.com/ampproject/amppackager/blob/b26a35142e0ed1458158435b252a0fcd659f93c4/transformer/transformers/transformedidentifier.go
  *
- * @package Amp\Optimizer
+ * @package amp/optimizer
  */
 final class TransformedIdentifier implements Transformer, Configurable
 {
@@ -41,13 +43,6 @@ final class TransformedIdentifier implements Transformer, Configurable
     const TRANSFORMED_ORIGIN = 'self';
 
     /**
-     * Configuration key that holds the version number to use.
-     *
-     * @var string
-     */
-    const CONFIG_KEY_VERSION = 'version';
-
-    /**
      * Associative array of configuration values.
      *
      * @var array
@@ -57,9 +52,9 @@ final class TransformedIdentifier implements Transformer, Configurable
     /**
      * Instantiate a TransformedIdentifier object.
      *
-     * @param array $configuration Optional. Associative array of configuration values.
+     * @param TransformerConfiguration $configuration Configuration store to use.
      */
-    public function __construct($configuration = [])
+    public function __construct(TransformerConfiguration $configuration)
     {
         $this->configuration = $configuration;
     }
@@ -83,7 +78,7 @@ final class TransformedIdentifier implements Transformer, Configurable
      */
     private function getOrigin()
     {
-        $version = isset($this->configuration[self::CONFIG_KEY_VERSION]) ? (int)$this->configuration[self::CONFIG_KEY_VERSION] : 1;
+        $version = $this->configuration->get(TransformedIdentifierConfiguration::VERSION);
         $origin  = self::TRANSFORMED_ORIGIN;
 
         if ($version > 0) {
