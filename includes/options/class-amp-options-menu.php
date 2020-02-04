@@ -112,27 +112,29 @@ class AMP_Options_Menu {
 			]
 		);
 
-		add_settings_field(
-			'stories_export',
-			__( 'Stories Export', 'amp' ),
-			[ $this, 'render_stories_export' ],
-			AMP_Options_Manager::OPTION_NAME,
-			'general',
-			[
-				'class' => 'amp-stories-export-field',
-			]
-		);
+		if ( AMP_Options_Manager::is_stories_experience_enabled() ) {
+			add_settings_field(
+				'stories_export',
+				__( 'Stories Export', 'amp' ),
+				[ $this, 'render_stories_export' ],
+				AMP_Options_Manager::OPTION_NAME,
+				'general',
+				[
+					'class' => 'amp-stories-export-field',
+				]
+			);
 
-		add_settings_field(
-			'stories_settings',
-			__( 'Stories Settings', 'amp' ),
-			[ $this, 'render_stories_settings' ],
-			AMP_Options_Manager::OPTION_NAME,
-			'general',
-			[
-				'class' => 'amp-stories-settings-field',
-			]
-		);
+			add_settings_field(
+				'stories_settings',
+				__( 'Stories Settings', 'amp' ),
+				[ $this, 'render_stories_settings' ],
+				AMP_Options_Manager::OPTION_NAME,
+				'general',
+				[
+					'class' => 'amp-stories-settings-field',
+				]
+			);
+		}
 
 		add_action(
 			'admin_print_styles',
@@ -218,44 +220,46 @@ class AMP_Options_Menu {
 					);
 					?>
 				</dd>
-				<dt>
-					<input type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[experiences][]' ); ?>" id="stories_experience" value="<?php echo esc_attr( AMP_Options_Manager::STORIES_EXPERIENCE ); ?>" <?php disabled( ! $has_required_block_capabilities ); ?> <?php checked( in_array( AMP_Options_Manager::STORIES_EXPERIENCE, $experiences, true ) ); ?>>
-					<label for="stories_experience">
-						<strong><?php echo wp_kses_post( __( 'Stories <span>Beta</span>', 'amp' ) ); ?></strong>
-					</label>
-				</dt>
-				<dd>
-					<?php if ( ! $has_required_block_capabilities ) : ?>
-						<div class="notice notice-info notice-alt inline">
-							<p>
-								<?php
-								$gutenberg = 'Gutenberg';
-								// Link to Gutenberg plugin installation if eligible.
-								if ( current_user_can( 'install_plugins' ) ) {
-									$gutenberg = '<a href="' . esc_url( add_query_arg( 'tab', 'featured', admin_url( 'plugin-install.php' ) ) ) . '">' . $gutenberg . '</a>';
-								}
-								printf(
-									/* translators: 1: WordPress version number. 2: Gutenberg plugin name,  */
-									esc_html__( 'To use Stories, you must be running WordPress %1$s, or have a version between %2$s and %3$s of the %4$s plugin activated.', 'amp' ),
-									'5.3',
-									'6.6.0',
-									'7.1.0',
-									$gutenberg // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-								);
-								?>
-							</p>
-						</div>
-					<?php endif; ?>
-					<?php
-					echo wp_kses_post(
-						sprintf(
-							/* translators: %s: Stories documentation URL. */
-							__( 'Stories is a visual storytelling format for the open web which immerses your readers in fast-loading, full-screen, and visually rich experiences. Stories can be a great addition to your overall content strategy. Read more about <a href="%s" target="_blank">AMP Stories</a>.', 'amp' ),
-							esc_url( 'https://amp.dev/about/stories' )
-						)
-					);
-					?>
-				</dd>
+				<?php if ( AMP_Options_Manager::is_stories_experience_enabled() ) : ?>
+					<dt>
+						<input type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[experiences][]' ); ?>" id="stories_experience" value="<?php echo esc_attr( AMP_Options_Manager::STORIES_EXPERIENCE ); ?>" <?php disabled( ! $has_required_block_capabilities ); ?> <?php checked( in_array( AMP_Options_Manager::STORIES_EXPERIENCE, $experiences, true ) ); ?>>
+						<label for="stories_experience">
+							<strong><?php echo wp_kses_post( __( 'Stories <span>Beta</span>', 'amp' ) ); ?></strong>
+						</label>
+					</dt>
+					<dd>
+						<?php if ( ! $has_required_block_capabilities ) : ?>
+							<div class="notice notice-info notice-alt inline">
+								<p>
+									<?php
+									$gutenberg = 'Gutenberg';
+									// Link to Gutenberg plugin installation if eligible.
+									if ( current_user_can( 'install_plugins' ) ) {
+										$gutenberg = '<a href="' . esc_url( add_query_arg( 'tab', 'featured', admin_url( 'plugin-install.php' ) ) ) . '">' . $gutenberg . '</a>';
+									}
+									printf(
+										/* translators: 1: WordPress version number. 2: Gutenberg plugin name,  */
+										esc_html__( 'To use Stories, you must be running WordPress %1$s, or have a version between %2$s and %3$s of the %4$s plugin activated.', 'amp' ),
+										'5.3',
+										'6.6.0',
+										'7.1.0',
+										$gutenberg // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+									);
+									?>
+								</p>
+							</div>
+						<?php endif; ?>
+						<?php
+						echo wp_kses_post(
+							sprintf(
+								/* translators: %s: Stories documentation URL. */
+								__( 'Stories is a visual storytelling format for the open web which immerses your readers in fast-loading, full-screen, and visually rich experiences. Stories can be a great addition to your overall content strategy. Read more about <a href="%s" target="_blank">AMP Stories</a>.', 'amp' ),
+								esc_url( 'https://amp.dev/about/stories' )
+							)
+						);
+						?>
+					</dd>
+				<?php endif; ?>
 			</dl>
 			<script>
 				/*

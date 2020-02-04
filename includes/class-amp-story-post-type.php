@@ -124,7 +124,7 @@ class AMP_Story_Post_Type {
 	 * @return void
 	 */
 	public static function register() {
-		if ( ! AMP_Options_Manager::is_stories_experience_enabled() || ! self::has_required_block_capabilities() ) {
+		if ( ! AMP_Options_Manager::is_stories_experience_enabled( false ) || ! self::has_required_block_capabilities() ) {
 			return;
 		}
 

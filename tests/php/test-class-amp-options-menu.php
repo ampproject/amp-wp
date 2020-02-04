@@ -82,7 +82,6 @@ class Test_AMP_Options_Menu extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'amp-options', $wp_settings_fields );
 		$this->assertArrayHasKey( 'general', $wp_settings_fields['amp-options'] );
 		$this->assertArrayHasKey( 'supported_templates', $wp_settings_fields['amp-options']['general'] );
-		$this->assertArrayHasKey( 'stories_settings', $wp_settings_fields['amp-options']['general'] );
 	}
 
 	/**

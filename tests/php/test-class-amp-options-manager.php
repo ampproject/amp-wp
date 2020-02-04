@@ -264,7 +264,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		if ( AMP_Story_Post_Type::has_required_block_capabilities() ) {
 			AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::STORIES_EXPERIENCE ] );
 			$this->assertFalse( AMP_Options_Manager::is_website_experience_enabled() );
-			$this->assertTrue( AMP_Options_Manager::is_stories_experience_enabled() );
+			$this->assertTrue( AMP_Options_Manager::is_stories_experience_enabled( false ) );
 		}
 	}
 

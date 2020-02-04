@@ -199,12 +199,22 @@ class AMP_Options_Manager {
 	 *
 	 * @since 1.2
 	 *
+	 * @param bool $include_posts_check Include check to see if any `amp_story` posts exists.
 	 * @return bool Enabled.
 	 */
-	public static function is_stories_experience_enabled() {
+	public static function is_stories_experience_enabled( $include_posts_check = true ) {
+		$has_stories_posts = true;
+
+		// Note: A post count cannot be done until the post type is registered (see AMP_Story_Post_Type::register).
+		if ( $include_posts_check ) {
+			$story_posts_count       = (array) wp_count_posts( AMP_Story_Post_Type::POST_TYPE_SLUG );
+			$total_story_posts_count = array_sum( array_values( $story_posts_count ) );
+			$has_stories_posts       = 0 < $total_story_posts_count;
+		}
+
 		return (
-			AMP_Story_Post_Type::has_required_block_capabilities()
-			&&
+			$has_stories_posts &&
+			AMP_Story_Post_Type::has_required_block_capabilities() &&
 			in_array( self::STORIES_EXPERIENCE, self::get_option( 'experiences' ), true )
 		);
 	}
