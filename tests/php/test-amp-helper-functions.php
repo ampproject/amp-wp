@@ -273,44 +273,87 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 *
 	 * @return array
 	 */
-	public function get_amphtml_urls() {
-		$post_id = self::factory()->post->create();
-		return [
-			'is_home' => [
-				home_url( '/' ),
-				add_query_arg( amp_get_slug(), '', home_url( '/' ) ),
-			],
-			'is_404'  => [
-				home_url( '/no-existe/' ),
-				add_query_arg( amp_get_slug(), '', home_url( '/no-existe/' ) ),
-			],
-			'is_post' => [
-				get_permalink( $post_id ),
-				amp_get_permalink( $post_id ),
-			],
+	public function get_reader_mode_amphtml_urls() {
+		$providers = [
+			'is_home'         => static function () {
+				return [
+					home_url( '/' ),
+					add_query_arg( amp_get_slug(), '', home_url( '/' ) ),
+					false,
+				];
+			},
+			'is_404'          => static function () {
+				return [
+					home_url( '/no-existe/' ),
+					add_query_arg( amp_get_slug(), '', home_url( '/no-existe/' ) ),
+					false,
+				];
+			},
+			'is_post'         => function() {
+				$post_id = $this->factory()->post->create();
+				return [
+					get_permalink( $post_id ),
+					amp_get_permalink( $post_id ),
+					true,
+				];
+			},
+			'is_skipped_post' => function() {
+				$skipped_post_id = self::factory()->post->create();
+				add_filter(
+					'amp_skip_post',
+					static function ( $skip, $current_post ) use ( $skipped_post_id ) {
+						if ( $current_post === $skipped_post_id ) {
+							$skip = true;
+						}
+						return $skip;
+					},
+					10,
+					2
+				);
+				return [
+					get_permalink( $skipped_post_id ),
+					amp_get_permalink( $skipped_post_id ),
+					false,
+				];
+			},
 		];
+		return array_map(
+			function( $provider ) {
+				return [ $provider ];
+			},
+			$providers
+		);
 	}
 
 	/**
 	 * Adding link when theme support is not present.
 	 *
-	 * @dataProvider get_amphtml_urls
+	 * @dataProvider get_reader_mode_amphtml_urls
 	 * @covers ::amp_add_amphtml_link()
-	 * @param string $canonical_url Canonical URL.
-	 * @param string $amphtml_url   The amphtml URL.
+	 *
+	 * @param callable $data_provider Provider.
 	 */
-	public function test_amp_add_amphtml_link_reader_mode( $canonical_url, $amphtml_url ) {
+	public function test_amp_add_amphtml_link_reader_mode( $data_provider ) {
+		list( $canonical_url, $amphtml_url, $available ) = $data_provider();
 		$this->assertFalse( current_theme_supports( AMP_Theme_Support::SLUG ) );
 		$this->assertFalse( amp_is_canonical() );
 		$get_amp_html_link = static function() {
 			return get_echo( 'amp_add_amphtml_link' );
 		};
 
-		$assert_amphtml_link_present = function() use ( $amphtml_url, $get_amp_html_link ) {
-			$this->assertEquals(
-				sprintf( '<link rel="amphtml" href="%s">', esc_url( $amphtml_url ) ),
-				$get_amp_html_link()
-			);
+		$assert_amphtml_link_present = function() use ( $amphtml_url, $get_amp_html_link, $available ) {
+			if ( $available ) {
+				$this->assertEquals(
+					sprintf( '<link rel="amphtml" href="%s">', esc_url( $amphtml_url ) ),
+					$get_amp_html_link()
+				);
+			} else {
+				$this->assertNotEquals(
+					sprintf( '<link rel="amphtml" href="%s">', esc_url( $amphtml_url ) ),
+					$get_amp_html_link()
+				);
+				$this->assertStringStartsWith( '<!--', $get_amp_html_link() );
+			}
 		};
 
 		$this->go_to( $canonical_url );
@@ -324,14 +367,72 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	}
 
 	/**
+	 * URLs to test amphtml link.
+	 *
+	 * @return array
+	 */
+	public function get_transitional_mode_amphtml_urls() {
+		$providers = [
+			'is_home'         => static function () {
+				return [
+					home_url( '/' ),
+					add_query_arg( amp_get_slug(), '', home_url( '/' ) ),
+					true,
+				];
+			},
+			'is_404'          => static function () {
+				return [
+					home_url( '/no-existe/' ),
+					add_query_arg( amp_get_slug(), '', home_url( '/no-existe/' ) ),
+					true,
+				];
+			},
+			'is_post'         => function() {
+				$post_id = $this->factory()->post->create();
+				return [
+					get_permalink( $post_id ),
+					amp_get_permalink( $post_id ),
+					true,
+				];
+			},
+			'is_skipped_post' => function() {
+				$skipped_post_id = self::factory()->post->create();
+				add_filter(
+					'amp_skip_post',
+					static function ( $skip, $current_post ) use ( $skipped_post_id ) {
+						if ( $current_post === $skipped_post_id ) {
+							$skip = true;
+						}
+						return $skip;
+					},
+					10,
+					2
+				);
+				return [
+					get_permalink( $skipped_post_id ),
+					amp_get_permalink( $skipped_post_id ),
+					false,
+				];
+			},
+		];
+		return array_map(
+			function( $provider ) {
+				return [ $provider ];
+			},
+			$providers
+		);
+	}
+
+	/**
 	 * Adding link when theme support in transitional mode.
 	 *
-	 * @dataProvider get_amphtml_urls
+	 * @dataProvider get_transitional_mode_amphtml_urls
 	 * @covers ::amp_add_amphtml_link()
-	 * @param string $canonical_url Canonical URL.
-	 * @param string $amphtml_url   The amphtml URL.
+	 *
+	 * @param callable $data_provider Provider.
 	 */
-	public function test_amp_add_amphtml_link_transitional_mode( $canonical_url, $amphtml_url ) {
+	public function test_amp_add_amphtml_link_transitional_mode( $data_provider ) {
+		list( $canonical_url, $amphtml_url, $available ) = $data_provider();
 		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		$this->accept_sanitization_by_default( false );
 		AMP_Theme_Support::read_theme_support();
@@ -343,11 +444,19 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			return get_echo( 'amp_add_amphtml_link' );
 		};
 
-		$assert_amphtml_link_present = function() use ( $amphtml_url, $get_amp_html_link ) {
-			$this->assertEquals(
-				sprintf( '<link rel="amphtml" href="%s">', esc_url( $amphtml_url ) ),
-				$get_amp_html_link()
-			);
+		$assert_amphtml_link_present = function() use ( $amphtml_url, $get_amp_html_link, $available ) {
+			if ( $available ) {
+				$this->assertEquals(
+					sprintf( '<link rel="amphtml" href="%s">', esc_url( $amphtml_url ) ),
+					$get_amp_html_link()
+				);
+			} else {
+				$this->assertStringStartsWith( '<!--', $get_amp_html_link() );
+				$this->assertNotEquals(
+					sprintf( '<link rel="amphtml" href="%s">', esc_url( $amphtml_url ) ),
+					$get_amp_html_link()
+				);
+			}
 		};
 
 		$this->go_to( $canonical_url );
@@ -358,22 +467,24 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertEmpty( $get_amp_html_link() );
 		remove_filter( 'amp_frontend_show_canonical', '__return_false' );
 		$assert_amphtml_link_present();
+		$this->assertEquals( $available, AMP_Theme_Support::is_paired_available() );
 
-		// Make sure that the link is not provided when there are validation errors associated with the URL.
-		$invalid_url_post_id = AMP_Validated_URL_Post_Type::store_validation_errors(
-			[
-				[ 'code' => 'foo' ],
-			],
-			$canonical_url
-		);
-		$this->assertNotInstanceOf( 'WP_Error', $invalid_url_post_id );
-		$this->assertContains( '<!--', $get_amp_html_link() );
-		$this->assertTrue( AMP_Theme_Support::is_paired_available() );
+		if ( $available ) {
+			// Make sure that the link is not provided when there are validation errors associated with the URL.
+			$invalid_url_post_id = AMP_Validated_URL_Post_Type::store_validation_errors(
+				[
+					[ 'code' => 'foo' ],
+				],
+				$canonical_url
+			);
+			$this->assertNotInstanceOf( 'WP_Error', $invalid_url_post_id );
+			$this->assertContains( '<!--', $get_amp_html_link() );
 
-		// Allow the URL when the errors are forcibly sanitized.
-		add_filter( 'amp_validation_error_sanitized', '__return_true' );
-		$this->assertTrue( AMP_Theme_Support::is_paired_available() );
-		$assert_amphtml_link_present();
+			// Allow the URL when the errors are forcibly sanitized.
+			add_filter( 'amp_validation_error_sanitized', '__return_true' );
+			$this->assertTrue( AMP_Theme_Support::is_paired_available() );
+			$assert_amphtml_link_present();
+		}
 	}
 
 	/**
