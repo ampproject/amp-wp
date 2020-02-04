@@ -35,7 +35,7 @@ class AMP_Story_Post_Type {
 	const MIN_REQUIRED_GUTENBERG_VERSION = '6.6.0';
 
 	/**
-	 * Minimum required version of Gutenberg required.
+	 * Maximum allowed version of Gutenberg.
 	 *
 	 * @var string
 	 */
