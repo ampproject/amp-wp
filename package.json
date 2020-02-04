@@ -57,7 +57,7 @@
     "@wordpress/is-shallow-equal": "1.7.0",
     "@wordpress/jest-puppeteer-axe": "1.5.0",
     "@wordpress/keycodes": "2.8.0",
-    "@wordpress/nux": "3.10.0",
+    "@wordpress/nux": "3.11.0",
     "@wordpress/plugins": "2.10.0",
     "@wordpress/postcss-themes": "2.2.0",
     "@wordpress/rich-text": "3.10.0",
