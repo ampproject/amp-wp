@@ -2217,22 +2217,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test prepare_response when submitting form.
-	 *
-	 * @covers AMP_Theme_Support::prepare_response()
-	 */
-	public function test_prepare_response_for_submitted_form() {
-		AMP_HTTP::$purged_amp_query_vars[ AMP_HTTP::ACTION_XHR_CONVERTED_QUERY_VAR ] = true;
-		$_SERVER['REQUEST_METHOD'] = 'POST';
-
-		$response = AMP_Theme_Support::prepare_response( '<p>¡Tienes éxito!</p>' );
-		$this->assertEquals( '{"status_code":200,"status_text":"OK"}', $response );
-
-		unset( AMP_HTTP::$purged_amp_query_vars[ AMP_HTTP::ACTION_XHR_CONVERTED_QUERY_VAR ] );
-		unset( $_SERVER['REQUEST_METHOD'] );
-	}
-
-	/**
 	 * Test post-processor cache effectiveness in AMP_Theme_Support::prepare_response().
 	 */
 	public function test_post_processor_cache_effectiveness() {

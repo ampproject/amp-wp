@@ -20,6 +20,24 @@ class AMP_HTTP {
 	const ACTION_XHR_CONVERTED_QUERY_VAR = '_wp_amp_action_xhr_converted';
 
 	/**
+	 * Namespace for REST API endpoint.
+	 *
+	 * @see AMP_HTTP::register_form_submission_proxy_endpoint()
+	 * @see AMP_Form_Sanitizer::sanitize()
+	 * @var string
+	 */
+	const EXTERNAL_FORM_SUBMISSION_PROXY_NAMESPACE = 'amp/v1';
+
+	/**
+	 * Route for the external form submission proxy.
+	 *
+	 * @see AMP_HTTP::register_form_submission_proxy_endpoint()
+	 * @see AMP_Form_Sanitizer::sanitize()
+	 * @var string
+	 */
+	const EXTERNAL_FORM_SUBMISSION_PROXY_ROUTE = 'external-form-submission-proxy';
+
+	/**
 	 * Headers sent (or attempted to be sent).
 	 *
 	 * This is used primarily for the benefit of unit testing. Otherwise, `headers_list()` should be used.
@@ -63,6 +81,7 @@ class AMP_HTTP {
 		self::send_cors_headers();
 		self::handle_xhr_request();
 		add_filter( 'allowed_redirect_hosts', [ __CLASS__, 'filter_allowed_redirect_hosts' ] );
+		add_action( 'rest_api_init', [ __CLASS__, 'register_form_submission_proxy_endpoint' ] );
 	}
 
 	/**
@@ -372,7 +391,11 @@ class AMP_HTTP {
 		if ( isset( $headers['location'] ) ) {
 			header_remove( 'location' );
 			status_header( 200 ); // Override redirect status.
-			return self::intercept_post_request_redirect( $headers['location'] );
+			$response_data = self::intercept_post_request_redirect( $headers['location'] );
+			foreach ( $response_data['headers'] as $name => $value ) {
+				self::send_header( $name, $value );
+			}
+			return wp_json_encode( $response_data['body'] );
 		}
 
 		// Pass through JSON responses as-is since amp-form is expecting this.
@@ -404,6 +427,118 @@ class AMP_HTTP {
 	}
 
 	/**
+	 * Register endpoint to proxy converted XHR form submissions for external locations.
+	 *
+	 * @since 1.5
+	 */
+	public static function register_form_submission_proxy_endpoint() {
+		register_rest_route(
+			self::EXTERNAL_FORM_SUBMISSION_PROXY_NAMESPACE,
+			self::EXTERNAL_FORM_SUBMISSION_PROXY_ROUTE,
+			[
+				'methods'  => 'POST',
+				'args'     => [
+					'url' => [
+						'type'     => 'string',
+						'format'   => 'uri',
+						'required' => true,
+					],
+					'key' => [
+						'type'              => 'string',
+						'required'          => true,
+						'validate_callback' => static function ( $value, WP_REST_Request $request ) {
+							return hash_equals(
+								wp_hash( $request->get_param( 'url' ), 'nonce' ),
+								$value
+							);
+						},
+					],
+				],
+				'callback' => function ( WP_REST_Request $request ) {
+					$url = $request->get_param( 'url' );
+
+					$content_type = strtok( $request->get_header( 'content-type' ), ';' );
+					if ( 'multipart/form-data' !== $content_type ) {
+						return new WP_Error(
+							'rest_invalid_content_type',
+							__( 'Form submission must be of type multipart/form-data.', 'amp' ),
+							[ 'status' => 400 ]
+						);
+					}
+
+					$forwarded_header_names = [
+						'user_agent',
+						'accept_language',
+						'referer',
+						'origin',
+					];
+
+					$raw_headers = wp_array_slice_assoc( $request->get_headers(), $forwarded_header_names );
+
+					$headers = [
+						'accept' => 'application/json, text/html',
+					];
+					foreach ( $raw_headers as $name => $values ) {
+						$headers[ str_replace( '_', '-', $name ) ] = implode( ', ', $values );
+					}
+
+					$r = wp_remote_post(
+						$url,
+						[
+							'headers'     => $headers,
+							'body'        => $request->get_body_params(),
+							'redirection' => 0,
+						]
+					);
+
+					if ( is_wp_error( $r ) ) {
+						return $r;
+					}
+
+					$status_code = wp_remote_retrieve_response_code( $r );
+					$location    = wp_remote_retrieve_header( $r, 'location' );
+
+					// Handle redirects.
+					if ( $location && $status_code >= 300 && $status_code < 400 ) {
+						$response_data = self::intercept_post_request_redirect( $location );
+						return new WP_REST_Response(
+							$response_data['body'],
+							200,
+							$response_data['headers']
+						);
+					}
+
+					// Pass through JSON.
+					if ( 'application/json' === strtok( wp_remote_retrieve_header( $r, 'content-type' ), ';' ) ) {
+						$body = json_decode( wp_remote_retrieve_body( $r ), true );
+						if ( ! is_array( $body ) ) {
+							return new WP_Error(
+								'rest_json_parse_error',
+								__( 'JSON parse error in response.', 'amp' ),
+								[ 'status' => 500 ]
+							);
+						} else {
+							return new WP_REST_Response(
+								$body,
+								$status_code
+							);
+						}
+					}
+
+					// Fallback is to pass through the status code and status text which will display in form message.
+					return new WP_REST_Response(
+						[
+							'status_code' => $status_code,
+							'status_text' => wp_remote_retrieve_response_message( $r ),
+						],
+						$status_code
+					);
+				},
+			]
+		);
+	}
+
+	/**
 	 * Intercept the response to a POST request.
 	 *
 	 * @since 0.7.0
@@ -411,7 +546,12 @@ class AMP_HTTP {
 	 * @see wp_redirect()
 	 *
 	 * @param string $location The location to redirect to.
-	 * @return string JSON response data.
+	 * @return array {
+	 *     Response data.
+	 *
+	 *     @type array $body    Body.
+	 *     @type array $headers Headers.
+	 * }
 	 */
 	public static function intercept_post_request_redirect( $location ) {
 
@@ -441,15 +581,17 @@ class AMP_HTTP {
 			$absolute_location .= '#' . $parsed_location['fragment'];
 		}
 
-		self::send_header( 'AMP-Redirect-To', $absolute_location );
-		self::send_header( 'Access-Control-Expose-Headers', 'AMP-Redirect-To', [ 'replace' => false ] );
-		self::send_header( 'Content-Type', 'application/json' );
-		return wp_json_encode(
-			[
+		return [
+			'body'    => [
 				'message'     => __( 'Redirecting…', 'amp' ),
 				'redirecting' => true, // Make sure that the submit-success doesn't get styled as success since redirection _could_ be to error page.
-			]
-		);
+			],
+			'headers' => [
+				'AMP-Redirect-To'               => $absolute_location,
+				'Access-Control-Expose-Headers' => 'AMP-Redirect-To',
+				'Content-Type'                  => 'application/json; charset=utf-8',
+			],
+		];
 	}
 
 	/**

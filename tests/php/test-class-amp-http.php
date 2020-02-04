@@ -371,17 +371,38 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 	 *
 	 * @covers AMP_HTTP::handle_xhr_request()
 	 */
-	public function test_handle_xhr_request() {
+	public function test_handle_xhr_request_without_converted_param() {
+		AMP_HTTP::handle_xhr_request();
+		$this->assertFalse( has_filter( 'comment_post_redirect', [ 'AMP_HTTP', 'filter_comment_post_redirect' ] ) );
+	}
+
+	/**
+	 * Test handle_xhr_request().
+	 *
+	 * @covers AMP_HTTP::handle_xhr_request()
+	 */
+	public function test_handle_xhr_request_with_converted_param() {
 		$_GET[ AMP_HTTP::ACTION_XHR_CONVERTED_QUERY_VAR ] = 1;
 		$_SERVER['REQUEST_METHOD']                        = 'POST';
+		$initial_ob_level                                 = ob_get_level();
 		AMP_HTTP::purge_amp_query_vars();
 		AMP_HTTP::handle_xhr_request();
-		$this->assertEquals( PHP_INT_MAX, has_filter( 'wp_redirect', [ 'AMP_HTTP', 'intercept_post_request_redirect' ] ) );
+		$this->assertEquals( $initial_ob_level + 1, ob_get_level() );
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'comment_post_redirect', [ 'AMP_HTTP', 'filter_comment_post_redirect' ] ) );
 		$this->assertEquals(
 			[ 'AMP_HTTP', 'handle_wp_die' ],
 			apply_filters( 'wp_die_handler', '__return_true' )
 		);
+		ob_end_clean();
+	}
+
+	/**
+	 * Test finalize_xhr_response().
+	 *
+	 * @covers AMP_HTTP::finalize_xhr_response()
+	 */
+	public function test_finalize_xhr_response() {
+		$this->markTestIncomplete();
 	}
 
 	/**
@@ -402,106 +423,66 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 			}
 		);
 
-		$redirecting_json = wp_json_encode(
-			[
-				'message'     => __( 'Redirecting…', 'amp' ),
-				'redirecting' => true,
-			]
-		);
+		$redirecting_response = [
+			'message'     => __( 'Redirecting…', 'amp' ),
+			'redirecting' => true,
+		];
 
 		// Test redirecting to full URL with HTTPS protocol.
-		AMP_HTTP::$headers_sent = [];
-		ob_start();
-		AMP_HTTP::intercept_post_request_redirect( $url );
-		$this->assertEquals( $redirecting_json, ob_get_clean() );
-		$this->assertContains(
+		$response_data = AMP_HTTP::intercept_post_request_redirect( $url );
+		$this->assertEquals( $redirecting_response, $response_data['body'] );
+		$this->assertArraySubset(
 			[
-				'name'        => 'AMP-Redirect-To',
-				'value'       => $url,
-				'replace'     => true,
-				'status_code' => null,
+				'AMP-Redirect-To'               => $url,
+				'Access-Control-Expose-Headers' => 'AMP-Redirect-To',
 			],
-			AMP_HTTP::$headers_sent
-		);
-		$this->assertContains(
-			[
-				'name'        => 'Access-Control-Expose-Headers',
-				'value'       => 'AMP-Redirect-To',
-				'replace'     => false,
-				'status_code' => null,
-			],
-			AMP_HTTP::$headers_sent
+			$response_data['headers']
 		);
 
 		// Test redirecting to non-HTTPS URL.
-		AMP_HTTP::$headers_sent = [];
-		ob_start();
-		$url = home_url( '/', 'http' );
-		AMP_HTTP::intercept_post_request_redirect( $url );
-		$this->assertEquals( $redirecting_json, ob_get_clean() );
-		$this->assertContains(
+		$url           = home_url( '/', 'http' );
+		$response_data = AMP_HTTP::intercept_post_request_redirect( $url );
+		$this->assertEquals( $redirecting_response, $response_data['body'] );
+		$this->assertArraySubset(
 			[
-				'name'        => 'AMP-Redirect-To',
-				'value'       => preg_replace( '#^\w+:#', '', $url ),
-				'replace'     => true,
-				'status_code' => null,
+				'AMP-Redirect-To'               => preg_replace( '#^\w+:#', '', $url ),
+				'Access-Control-Expose-Headers' => 'AMP-Redirect-To',
 			],
-			AMP_HTTP::$headers_sent
-		);
-		$this->assertContains(
-			[
-				'name'        => 'Access-Control-Expose-Headers',
-				'value'       => 'AMP-Redirect-To',
-				'replace'     => false,
-				'status_code' => null,
-			],
-			AMP_HTTP::$headers_sent
+			$response_data['headers']
 		);
 
 		// Test redirecting to host-less location.
-		AMP_HTTP::$headers_sent = [];
-		ob_start();
-		AMP_HTTP::intercept_post_request_redirect( '/new-location/' );
-		$this->assertEquals( $redirecting_json, ob_get_clean() );
-		$this->assertContains(
+		$response_data = AMP_HTTP::intercept_post_request_redirect( '/new-location/' );
+		$this->assertEquals( $redirecting_response, $response_data['body'] );
+		$this->assertArraySubset(
 			[
-				'name'        => 'AMP-Redirect-To',
-				'value'       => set_url_scheme( home_url( '/new-location/' ), 'https' ),
-				'replace'     => true,
-				'status_code' => null,
+				'AMP-Redirect-To'               => set_url_scheme( home_url( '/new-location/' ), 'https' ),
+				'Access-Control-Expose-Headers' => 'AMP-Redirect-To',
 			],
-			AMP_HTTP::$headers_sent
+			$response_data['headers']
 		);
 
 		// Test redirecting to scheme-less location.
-		AMP_HTTP::$headers_sent = [];
-		ob_start();
-		$url = home_url( '/new-location/' );
-		AMP_HTTP::intercept_post_request_redirect( substr( $url, strpos( $url, ':' ) + 1 ) );
-		$this->assertEquals( $redirecting_json, ob_get_clean() );
-		$this->assertContains(
+		$url           = home_url( '/new-location/' );
+		$response_data = AMP_HTTP::intercept_post_request_redirect( substr( $url, strpos( $url, ':' ) + 1 ) );
+		$this->assertEquals( $redirecting_response, $response_data['body'] );
+		$this->assertArraySubset(
 			[
-				'name'        => 'AMP-Redirect-To',
-				'value'       => set_url_scheme( home_url( '/new-location/' ), 'https' ),
-				'replace'     => true,
-				'status_code' => null,
+				'AMP-Redirect-To'               => set_url_scheme( home_url( '/new-location/' ), 'https' ),
+				'Access-Control-Expose-Headers' => 'AMP-Redirect-To',
 			],
-			AMP_HTTP::$headers_sent
+			$response_data['headers']
 		);
 
 		// Test redirecting to empty location.
-		AMP_HTTP::$headers_sent = [];
-		ob_start();
-		AMP_HTTP::intercept_post_request_redirect( '' );
-		$this->assertEquals( $redirecting_json, ob_get_clean() );
-		$this->assertContains(
+		$response_data = AMP_HTTP::intercept_post_request_redirect( '' );
+		$this->assertEquals( $redirecting_response, $response_data['body'] );
+		$this->assertArraySubset(
 			[
-				'name'        => 'AMP-Redirect-To',
-				'value'       => set_url_scheme( home_url(), 'https' ),
-				'replace'     => true,
-				'status_code' => null,
+				'AMP-Redirect-To'               => set_url_scheme( home_url(), 'https' ),
+				'Access-Control-Expose-Headers' => 'AMP-Redirect-To',
 			],
-			AMP_HTTP::$headers_sent
+			$response_data['headers']
 		);
 	}
 

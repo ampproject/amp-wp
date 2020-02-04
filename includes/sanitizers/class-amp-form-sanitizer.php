@@ -58,13 +58,8 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 				$node->setAttribute( 'method', $method );
 			}
 
-			$action_url = $this->get_action_url( $node );
+			$action_url = $this->get_action_url( $node->getAttribute( 'action' ) );
 			$xhr_action = $node->getAttribute( 'action-xhr' );
-
-			// Make HTTP URLs protocol-less, since HTTPS is required for forms.
-			if ( 'http://' === strtolower( substr( $action_url, 0, 7 ) ) ) {
-				$action_url = substr( $action_url, 5 );
-			}
 
 			/*
 			 * According to the AMP spec:
@@ -79,12 +74,26 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 			} elseif ( 'post' === $method ) {
 				$node->removeAttribute( 'action' );
 				if ( ! $xhr_action ) {
-					// Record that action was converted to action-xhr.
-					$action_url = add_query_arg( AMP_HTTP::ACTION_XHR_CONVERTED_QUERY_VAR, 1, $action_url );
-					if ( ! amp_is_canonical() ) {
-						$action_url = add_query_arg( amp_get_slug(), '', $action_url );
+
+					if ( wp_parse_url( home_url(), PHP_URL_HOST ) !== wp_parse_url( $action_url, PHP_URL_HOST ) ) {
+						// Handle external URLs by use of a proxy.
+						$action_url = add_query_arg(
+							[
+								'url' => rawurlencode( $action_url ),
+								'key' => rawurlencode( wp_hash( $action_url, 'nonce' ) ),
+							],
+							set_url_scheme( rest_url( AMP_HTTP::EXTERNAL_FORM_SUBMISSION_PROXY_NAMESPACE . '/' . AMP_HTTP::EXTERNAL_FORM_SUBMISSION_PROXY_ROUTE ), 'https' )
+						);
+					} else {
+						// Record that action was converted to action-xhr.
+						$action_url = add_query_arg( AMP_HTTP::ACTION_XHR_CONVERTED_QUERY_VAR, 1, $action_url );
+						if ( ! amp_is_canonical() ) {
+							$action_url = add_query_arg( amp_get_slug(), '', $action_url );
+						}
 					}
+
 					$node->setAttribute( 'action-xhr', $action_url );
+
 					// Append success/error handlers if not found.
 					$this->ensure_response_message_elements( $node );
 				} elseif ( 'http://' === substr( $xhr_action, 0, 7 ) ) {
@@ -111,24 +120,19 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Get the action URL for the form element.
 	 *
-	 * @param DOMElement $form Form element.
-	 *
+	 * @param string $action_url Action URL.
 	 * @return string Action URL.
 	 */
-	protected function get_action_url( DOMElement $form ) {
+	protected function get_action_url( $action_url ) {
 		/*
 		 * In HTML, the default action is just the current URL that the page is served from.
 		 * The action "specifies a server endpoint to handle the form input. The value must be an
 		 * https URL and must not be a link to a CDN".
 		 */
-		if ( ! $form->getAttribute( 'action' ) ) {
-			return esc_url_raw( '//' . $_SERVER['HTTP_HOST'] . wp_unslash( $_SERVER['REQUEST_URI'] ) );
-		}
-
-		$action_url = $form->getAttribute( 'action' );
-
-		// Handle relative URLs.
-		if ( ! preg_match( '#^(https?:)?//#', $action_url ) ) {
+		if ( ! $action_url ) {
+			$action_url = esc_url_raw( '//' . $_SERVER['HTTP_HOST'] . wp_unslash( $_SERVER['REQUEST_URI'] ) );
+		} elseif ( ! preg_match( '#^(https?:)?//#', $action_url ) ) {
+			// Handle relative URLs.
 			$schemeless_host = '//' . $_SERVER['HTTP_HOST'];
 			if ( '?' === $action_url[0] || '#' === $action_url[0] ) {
 				// For actions consisting of only a query or URL fragment, include the schemeless-host and the REQUEST URI of the current page.
@@ -140,12 +144,11 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 				// Otherwise, when the action URL includes an absolute path, just append it to the schemeless-host.
 				$action_url = $schemeless_host . $action_url;
 			}
-			return esc_url_raw( $action_url );
 		}
 
-		// Handle external URLs by use of a proxy.
-		if ( wp_parse_url( home_url(), PHP_URL_HOST ) !== wp_parse_url( $action_url, PHP_URL_HOST ) ) {
-			// @todo There needs to be some endpoint registered which serves as the proxy.
+		// Make HTTP URLs protocol-less, since HTTPS is required for forms.
+		if ( 'http://' === strtolower( substr( $action_url, 0, 7 ) ) ) {
+			$action_url = substr( $action_url, 5 );
 		}
 
 		return $action_url;
@@ -197,12 +200,13 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 				$p->setAttribute( 'class', '{{#redirecting}}amp-wp-form-redirecting{{/redirecting}}' );
 				$p->appendChild( $this->dom->createTextNode( '{{#message}}{{{message}}}{{/message}}' ) );
 
+				// @todo The following paragraph should be eliminated!
 				// Show generic message for HTTP success/failure.
 				$p->appendChild( $this->dom->createTextNode( '{{^message}}' ) );
 				if ( 'submit-error' === $attribute ) {
 					$p->appendChild( $this->dom->createTextNode( __( 'Your submission failed.', 'amp' ) ) );
 					/* translators: %1$s: HTTP status text, %2$s: HTTP status code */
-					$reason = sprintf( __( 'The server responded with %1$s (code %2$s).', 'amp' ), '{{status_text}}', '{{status_code}}' );
+					$reason = sprintf( __( 'The server responded with %1$s (code %2$s).', 'amp' ), '{{status_text}}', '{{status_code}}' ); // @todo Never populated?
 				} else {
 					$p->appendChild( $this->dom->createTextNode( __( 'It appears your submission was successful.', 'amp' ) ) );
 					$reason = __( 'Even though the server responded OK, it is possible the submission was not processed.', 'amp' );
