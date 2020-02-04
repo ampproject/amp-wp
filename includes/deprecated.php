@@ -203,13 +203,46 @@ function amp_post_template_add_scripts( $amp_template ) {
 /**
  * Print boilerplate CSS.
  *
- * @deprecated Boilerplate is now automatically added.
+ * @deprecated Boilerplate is now automatically added via the amp/optimizer library.
  * @since 0.3
  * @see amp_get_boilerplate_code()
  */
 function amp_post_template_add_boilerplate_css() {
 	_deprecated_function( __FUNCTION__, '1.5' );
 	echo amp_get_boilerplate_code(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+}
+
+
+/**
+ * Get AMP boilerplate code.
+ *
+ * @deprecated Boilerplate is now added via the amp/optimizer library.
+ * @since 0.7
+ * @link https://www.ampproject.org/docs/reference/spec#boilerplate
+ *
+ * @return string Boilerplate code.
+ */
+function amp_get_boilerplate_code() {
+	_deprecated_function( __FUNCTION__, '1.5' );
+	$stylesheets = amp_get_boilerplate_stylesheets();
+	return sprintf( '<style amp-boilerplate>%s</style><noscript><style amp-boilerplate>%s</style></noscript>', $stylesheets[0], $stylesheets[1] );
+}
+
+/**
+ * Get AMP boilerplate stylesheets.
+ *
+ * @deprecated Boilerplate is now added via the amp/optimizer library.
+ * @since 1.3
+ * @link https://www.ampproject.org/docs/reference/spec#boilerplate
+ *
+ * @return string[] Stylesheets, where first is contained in style[amp-boilerplate] and the second in noscript>style[amp-boilerplate].
+ */
+function amp_get_boilerplate_stylesheets() {
+	_deprecated_function( __FUNCTION__, '1.5' );
+	return [
+		'body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}',
+		'body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}',
+	];
 }
 
 /**

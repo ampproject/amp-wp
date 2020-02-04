@@ -5,7 +5,10 @@
  * @package AMP
  */
 
+use Amp\AmpWP\CachedRemoteRequest;
 use Amp\Dom\Document;
+use Amp\Optimizer;
+use Amp\RemoteRequest\CurlRemoteRequest;
 
 /**
  * Class AMP_Theme_Support
@@ -1831,55 +1834,6 @@ class AMP_Theme_Support {
 			$previous_node = $ordered_script;
 		}
 
-		/*
-		 * "8. Specify any custom styles by using the <style amp-custom> tag."
-		 */
-		$style = $dom->xpath->query( './style[ @amp-custom ]', $dom->head )->item( 0 );
-		if ( $style ) {
-			// Ensure the CSS manifest comment remains before style[amp-custom].
-			if ( $style->previousSibling instanceof DOMComment ) {
-				$comment = $style->previousSibling;
-				$comment->parentNode->removeChild( $comment );
-				$dom->head->insertBefore( $comment, $previous_node->nextSibling );
-				$previous_node = $comment;
-			}
-
-			$style->parentNode->removeChild( $style );
-			$dom->head->insertBefore( $style, $previous_node->nextSibling );
-			$previous_node = $style;
-		}
-
-		/*
-		 * "9. Add any other tags allowed in the <head> section. In particular, any external fonts should go last since
-		 * they block rendering."
-		 */
-
-		/*
-		 * "10. Finally, specify the AMP boilerplate code. By putting the boilerplate code last, it prevents custom styles
-		 * from accidentally overriding the boilerplate css rules."
-		 */
-		$style = $dom->xpath->query( './style[ @amp-boilerplate ]', $dom->head )->item( 0 );
-		if ( ! $style ) {
-			$style = $dom->createElement( 'style' );
-			$style->setAttribute( 'amp-boilerplate', '' );
-			$style->appendChild( $dom->createTextNode( amp_get_boilerplate_stylesheets()[0] ) );
-		} else {
-			$style->parentNode->removeChild( $style ); // So we can move it.
-		}
-		$dom->head->appendChild( $style );
-
-		$noscript = $dom->xpath->query( './noscript[ style[ @amp-boilerplate ] ]', $dom->head )->item( 0 );
-		if ( ! $noscript ) {
-			$noscript = $dom->createElement( 'noscript' );
-			$style    = $dom->createElement( 'style' );
-			$style->setAttribute( 'amp-boilerplate', '' );
-			$style->appendChild( $dom->createTextNode( amp_get_boilerplate_stylesheets()[1] ) );
-			$noscript->appendChild( $style );
-		} else {
-			$noscript->parentNode->removeChild( $noscript ); // So we can move it.
-		}
-		$dom->head->appendChild( $noscript );
-
 		unset( $previous_node );
 	}
 
@@ -2211,23 +2165,6 @@ class AMP_Theme_Support {
 
 		$dom_parse_start = microtime( true );
 
-		/*
-		 * Make sure that <meta charset> is present in output prior to parsing.
-		 * Note that the meta charset is supposed to appear within the first 1024 bytes.
-		 * See <https://www.w3.org/International/questions/qa-html-encoding-declarations>.
-		 */
-		if ( ! preg_match( '#<meta[^>]+charset=#i', substr( $response, 0, 1024 ) ) ) {
-			$meta_charset = sprintf( '<meta charset="%s">', esc_attr( get_bloginfo( 'charset' ) ) );
-
-			$response = preg_replace(
-				'/(<head\b.*?>)/is',
-				'$1' . $meta_charset,
-				$response,
-				1,
-				$count
-			);
-		}
-
 		$dom = Document::fromHtml( $response );
 
 		// Move anything after </html>, such as Query Monitor output added at shutdown, to be moved before </body>.
@@ -2342,8 +2279,11 @@ class AMP_Theme_Support {
 
 		AMP_Validation_Manager::finalize_validation( $dom );
 
-		$response  = "<!DOCTYPE html>\n";
-		$response .= $dom->saveHTML( $dom->documentElement );
+		$errors = new Optimizer\ErrorCollection();
+		self::get_optimizer()->optimizeDom( $dom, $errors );
+		// @todo Deal with $errors.
+
+		$response = $dom->saveHTML();
 
 		AMP_HTTP::send_server_timing( 'amp_dom_serialize', -$dom_serialize_start, 'AMP DOM Serialize' );
 
@@ -2353,6 +2293,50 @@ class AMP_Theme_Support {
 		}
 
 		return $response;
+	}
+
+	/**
+	 * Optimizer instance to use.
+	 *
+	 * @return Optimizer\TransformationEngine Optimizer transformation engine to use.
+	 */
+	private static function get_optimizer() {
+		$configuration = self::get_optimizer_configuration();
+
+		// @todo Replace CurlRemoteRequest with a Requests version?
+		$remote_request = new CachedRemoteRequest( new CurlRemoteRequest() );
+
+		return new Optimizer\TransformationEngine(
+			$configuration,
+			$remote_request
+		);
+	}
+
+	/**
+	 * Get the Amp\Optimizer configuration object to use.
+	 *
+	 * @return Optimizer\Configuration Optimizer configuration to use.
+	 */
+	private static function get_optimizer_configuration() {
+		$transformers = Optimizer\Configuration::DEFAULT_TRANSFORMERS;
+
+		// In debugging mode, we don't use server-side rendering, as it further obfuscates the HTML markup.
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			$transformers = array_diff(
+				$transformers,
+				[
+					Optimizer\Transformer\ServerSideRendering::class,
+					Optimizer\Transformer\TransformedIdentifier::class,
+				]
+			);
+		}
+
+		$configuration = apply_filters(
+			'amp_optimizer_config',
+			[ Optimizer\Configuration::KEY_TRANSFORMERS => $transformers ]
+		);
+
+		return new Optimizer\Configuration( $configuration );
 	}
 
 	/**
