@@ -135,27 +135,18 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 		 *
 		 * @var DOMElement $viewport_tag
 		 */
-		$viewport_tag      = $this->meta_tags[ self::TAG_VIEWPORT ][0];
-		$viewport_content  = $viewport_tag->getAttribute( 'content' );
-		$viewport_settings = array_filter( array_map( 'trim', explode( ',', $viewport_content ) ) );
-		$width_found       = false;
+		$viewport_tag     = $this->meta_tags[ self::TAG_VIEWPORT ][0];
+		$viewport_content = $viewport_tag->getAttribute( 'content' );
 
-		foreach ( $viewport_settings as $index => $viewport_setting ) {
-			list( $property, $value ) = explode( '=', $viewport_setting );
-			if ( 'width' === trim( $property ) ) {
-				if ( 'device-width' !== $value ) {
-					$viewport_settings[ $index ] = 'width=device-width';
-				}
-				$width_found = true;
-				break;
-			}
-		}
+		// Remove any whitespace and random delimiters (commas).
+		$viewport_settings = preg_replace( '/^,|,(?=[^A-Za-z0-9 ])|,$|\s+/', '', $viewport_content );
+		$width_found       = false !== strpos( $viewport_settings, 'width=' );
 
 		if ( ! $width_found ) {
-			array_unshift( $viewport_settings, 'width=device-width' );
+			$viewport_settings .= 'width=device-width';
 		}
 
-		$viewport_tag->setAttribute( 'content', implode( ',', $viewport_settings ) );
+		$viewport_tag->setAttribute( 'content', $viewport_settings );
 	}
 
 	/**

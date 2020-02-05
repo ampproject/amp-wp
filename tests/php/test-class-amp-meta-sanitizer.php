@@ -41,9 +41,9 @@ class Test_AMP_Meta_Sanitizer extends WP_UnitTestCase {
 				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"></head><body></body></html>',
 			],
 
-			// Set required viewport property value.
+			// Trim whitespace between the properties and their values.
 			[
-				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=  device-width  ,minimum-scale=1,initial-scale=1"></head><body></body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width = device-width, minimum-scale = 1, initial-scale = 1"></head><body></body></html>',
 				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"></head><body></body></html>',
 			],
 
@@ -63,6 +63,12 @@ class Test_AMP_Meta_Sanitizer extends WP_UnitTestCase {
 			[
 				'<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width"></head><body></body></html>',
 				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
+			],
+
+			// Does not override width property.
+			[
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=600"></head><body></body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=600"></head><body></body></html>',
 			],
 
 			// Add default viewport tag if none is present.
