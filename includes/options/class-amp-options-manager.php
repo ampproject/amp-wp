@@ -571,7 +571,8 @@ class AMP_Options_Manager {
 	 * Render the Stories deprecation admin notice.
 	 */
 	public static function render_stories_deprecation_notice() {
-		if ( 'toplevel_page_' . self::OPTION_NAME !== get_current_screen()->id ) {
+		// If the user has `amp_story` posts, always show the notice. Otherwise, only show it on the AMP options page.
+		if ( ! self::is_stories_experience_enabled() && 'toplevel_page_' . self::OPTION_NAME !== get_current_screen()->id ) {
 			return;
 		}
 
