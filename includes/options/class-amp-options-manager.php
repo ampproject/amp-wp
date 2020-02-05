@@ -582,8 +582,8 @@ class AMP_Options_Manager {
 		}
 
 		printf(
-			'<div class="notice notice-error"><p>%s</p></div>',
-			esc_html__( 'AMP Stories has been deprecated and will no longer be supported. A separate plugin will soon be available for testing.', 'amp' )
+			'<div class="notice notice-warning"><p>%s</p></div>',
+			esc_html__( 'The Stories experience in the AMP plugin has been deprecated and will no longer be supported. A separate plugin for Stories be available soon for testing. Please backup or export your existing Stories as they will not be available in the next version of the AMP plugin.', 'amp' )
 		);
 	}
 
