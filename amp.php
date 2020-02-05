@@ -383,9 +383,7 @@ function amp_init() {
 		add_filter( 'old_slug_redirect_url', 'amp_redirect_old_slug_to_new_url' );
 	}
 
-	if ( AMP_Options_Manager::is_stories_experience_enabled() ) {
-		AMP_Story_Post_Type::register();
-	}
+	AMP_Story_Post_Type::register();
 
 	// Does its own is_stories_experience_enabled() check.
 	add_action( 'wp_loaded', 'amp_story_templates' );

@@ -124,7 +124,10 @@ class AMP_Story_Post_Type {
 	 * @return void
 	 */
 	public static function register() {
-		if ( ! AMP_Options_Manager::is_stories_experience_enabled( false ) || ! self::has_required_block_capabilities() ) {
+		if (
+			! self::has_required_block_capabilities() ||
+			! in_array( AMP_Options_Manager::STORIES_EXPERIENCE, AMP_Options_Manager::get_option( 'experiences' ), true )
+		) {
 			return;
 		}
 
@@ -2360,5 +2363,19 @@ class AMP_Story_Post_Type {
 			$sanitized_value = call_user_func( $meta_definitions[ $option_key ]['meta_args']['sanitize_callback'], $value );
 			add_post_meta( $post_id, self::STORY_SETTINGS_META_PREFIX . $option_key, $sanitized_value, true );
 		}
+	}
+
+	/**
+	 * Returns total number of Story posts.
+	 *
+	 * @return int
+	 */
+	public static function get_posts_count() {
+		if ( post_type_exists( self::POST_TYPE_SLUG ) ) {
+			$story_posts_count = (array) wp_count_posts( self::POST_TYPE_SLUG );
+			return array_sum( array_values( $story_posts_count ) );
+		}
+
+		return 0;
 	}
 }
