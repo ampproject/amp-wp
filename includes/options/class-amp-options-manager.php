@@ -602,11 +602,11 @@ class AMP_Options_Manager {
 			"( function( wp ) {
 						wp.data.dispatch( 'core/notices' ).createNotice(
 							'warning',
-							'%s',
+							%s,
 							{ isDismissible: false }
 						);
 					} )( window.wp );",
-			esc_html__( 'The Stories experience is being extracted from the AMP plugin into a separate standalone plugin which will be available soon. Please backup or export your existing Stories as they will not be available in the next version of the AMP plugin.', 'amp' )
+			wp_json_encode( __( 'The Stories experience is being extracted from the AMP plugin into a separate standalone plugin which will be available soon. Please backup or export your existing Stories as they will not be available in the next version of the AMP plugin.', 'amp' ) )
 		);
 
 		wp_add_inline_script( AMP_Story_Post_Type::AMP_STORIES_SCRIPT_HANDLE, $script );
