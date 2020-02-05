@@ -571,15 +571,17 @@ class AMP_Options_Manager {
 	 * Render the Stories deprecation admin notice.
 	 */
 	public static function render_stories_deprecation_notice() {
-		// If the user has `amp_story` posts, always show the notice. Otherwise, only show it on the AMP options page.
-		if ( ! self::is_stories_experience_enabled() && 'toplevel_page_' . self::OPTION_NAME !== get_current_screen()->id ) {
-			return;
+		if ( self::is_stories_experience_enabled() ) {
+			printf(
+				'<div class="notice notice-warning"><p>%s</p></div>',
+				esc_html__( 'The Stories experience in the AMP plugin has been deprecated and will no longer be supported. A separate plugin for Stories be available soon for testing. Please backup or export your existing Stories as they will not be available in the next version of the AMP plugin.', 'amp' )
+			);
+		} elseif ( 'toplevel_page_' . self::OPTION_NAME === get_current_screen()->id ) {
+			printf(
+				'<div class="notice notice-info"><p>%s</p></div>',
+				esc_html__( 'The Stories experience has been removed from the AMP plugin. This beta feature is being split into a separate standalone plugin which will be available for installation soon.', 'amp' )
+			);
 		}
-
-		printf(
-			'<div class="notice notice-warning"><p>%s</p></div>',
-			esc_html__( 'The Stories experience in the AMP plugin has been deprecated and will no longer be supported. A separate plugin for Stories be available soon for testing. Please backup or export your existing Stories as they will not be available in the next version of the AMP plugin.', 'amp' )
-		);
 	}
 
 	/**
