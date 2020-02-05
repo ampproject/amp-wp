@@ -71,6 +71,10 @@ class AMP_Options_Manager {
 		add_action( 'admin_notices', [ __CLASS__, 'render_cache_miss_notice' ] );
 		add_action( 'admin_notices', [ __CLASS__, 'render_php_css_parser_conflict_notice' ] );
 		add_action( 'admin_notices', [ __CLASS__, 'insecure_connection_notice' ] );
+
+		if ( self::is_stories_experience_enabled() ) {
+			add_action( 'enqueue_block_editor_assets', [ __CLASS__, 'render_stories_deprecation_editor_notice' ] );
+		}
 	}
 
 	/**
@@ -588,6 +592,24 @@ class AMP_Options_Manager {
 				esc_html__( 'The Stories experience has been removed from the AMP plugin. This beta feature is being split into a separate standalone plugin which will be available for installation soon.', 'amp' )
 			);
 		}
+	}
+
+	/**
+	 * Render the Stories deprecation notice in the Story editor.
+	 */
+	public static function render_stories_deprecation_editor_notice() {
+		$script = sprintf(
+			"( function( wp ) {
+						wp.data.dispatch( 'core/notices' ).createNotice(
+							'warning',
+							'%s',
+							{ isDismissible: false }
+						);
+					} )( window.wp );",
+			esc_html__( 'The Stories experience in the AMP plugin has been deprecated and will no longer be supported. A separate plugin for Stories be available soon for testing. Please backup or export your existing Stories as they will not be available in the next version of the AMP plugin.', 'amp' )
+		);
+
+		wp_add_inline_script( AMP_Story_Post_Type::AMP_STORIES_SCRIPT_HANDLE, $script );
 	}
 
 	/**
