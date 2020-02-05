@@ -79,16 +79,18 @@ class AMP_Options_Menu {
 			AMP_Options_Manager::OPTION_NAME
 		);
 
-		add_settings_field(
-			'experiences',
-			__( 'Experiences', 'amp' ),
-			[ $this, 'render_experiences' ],
-			AMP_Options_Manager::OPTION_NAME,
-			'general',
-			[
-				'class' => 'experiences',
-			]
-		);
+		if ( AMP_Options_Manager::is_stories_experience_enabled() ) {
+			add_settings_field(
+				'experiences',
+				__( 'Experiences', 'amp' ),
+				[ $this, 'render_experiences' ],
+				AMP_Options_Manager::OPTION_NAME,
+				'general',
+				[
+					'class' => 'experiences',
+				]
+			);
+		}
 
 		add_settings_field(
 			'theme_support',
@@ -138,7 +140,10 @@ class AMP_Options_Menu {
 
 		add_action(
 			'admin_print_styles',
-			function() {
+			static function() {
+				if ( ! AMP_Options_Manager::is_stories_experience_enabled() ) {
+					return;
+				}
 				?>
 				<style>
 					body:not(.amp-experience-website) .amp-website-mode,
