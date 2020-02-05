@@ -584,7 +584,7 @@ class AMP_Options_Manager {
 		) {
 			printf(
 				'<div class="notice notice-warning"><p>%s</p></div>',
-				esc_html__( 'The Stories experience in the AMP plugin has been deprecated and will no longer be supported. A separate plugin for Stories be available soon for testing. Please backup or export your existing Stories as they will not be available in the next version of the AMP plugin.', 'amp' )
+				esc_html__( 'The Stories experience is being extracted from the AMP plugin into a separate standalone plugin which will be available soon. Please backup or export your existing Stories as they will not be available in the next version of the AMP plugin.', 'amp' )
 			);
 		} elseif ( ! self::is_stories_experience_enabled() && 'toplevel_page_' . self::OPTION_NAME === get_current_screen()->id ) {
 			printf(
@@ -606,7 +606,7 @@ class AMP_Options_Manager {
 							{ isDismissible: false }
 						);
 					} )( window.wp );",
-			esc_html__( 'The Stories experience in the AMP plugin has been deprecated and will no longer be supported. A separate plugin for Stories be available soon for testing. Please backup or export your existing Stories as they will not be available in the next version of the AMP plugin.', 'amp' )
+			esc_html__( 'The Stories experience is being extracted from the AMP plugin into a separate standalone plugin which will be available soon. Please backup or export your existing Stories as they will not be available in the next version of the AMP plugin.', 'amp' )
 		);
 
 		wp_add_inline_script( AMP_Story_Post_Type::AMP_STORIES_SCRIPT_HANDLE, $script );
