@@ -41,7 +41,7 @@
     "@wordpress/browserslist-config": "2.6.0",
     "@wordpress/components": "9.1.0",
     "@wordpress/compose": "3.11.0",
-    "@wordpress/core-data": "2.10.0",
+    "@wordpress/core-data": "2.11.0",
     "@wordpress/data": "4.13.0",
     "@wordpress/date": "3.8.0",
     "@wordpress/dom": "2.8.0",
