@@ -91,7 +91,7 @@
     "grunt-http": "2.3.3",
     "grunt-shell": "3.0.1",
     "grunt-wp-deploy": "2.0.0",
-    "jest-silent-reporter": "0.1.2",
+    "jest-silent-reporter": "0.2.1",
     "lodash": "4.17.15",
     "mini-css-extract-plugin": "0.9.0",
     "moment": "2.24.0",
