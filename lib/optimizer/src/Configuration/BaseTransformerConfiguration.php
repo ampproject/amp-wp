@@ -27,9 +27,9 @@ abstract class BaseTransformerConfiguration implements TransformerConfiguration
     /**
      * Instantiate an AmpRuntimeCssConfiguration object.
      *
-     * @param array $configuration Associative array of configuration data.
+     * @param array $configuration Optional. Associative array of configuration data. Defaults to an empty array.
      */
-    public function __construct($configuration)
+    public function __construct($configuration = [])
     {
         $this->allowedKeys = $this->getAllowedKeys();
         $configuration     = array_merge($this->allowedKeys, $configuration);

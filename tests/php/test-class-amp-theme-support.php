@@ -1578,50 +1578,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Data provider for test_ensure_required_markup.
-	 *
-	 * @return array
-	 */
-	public function get_schema_script_data() {
-		return [
-			'schema_org_not_present'        => [
-				'',
-				1,
-			],
-			'schema_org_present'            => [
-				wp_json_encode( [ '@context' => 'http://schema.org' ] ),
-				1,
-			],
-			'schema_org_output_not_escaped' => [
-				'{"@context":"http://schema.org"',
-				1,
-			],
-			'schema_org_another_key'        => [
-				wp_json_encode( [ '@anothercontext' => 'https://schema.org' ] ),
-				1,
-			],
-		];
-	}
-
-	/**
-	 * Test ensure_required_markup().
-	 *
-	 * @todo Test needs to be moved into separate transformer test.
-	 *
-	 * @dataProvider get_schema_script_data
-	 * @covers AMP_Theme_Support::ensure_required_markup()
-	 * @param string  $script The value of the script.
-	 * @param boolean $expected The expected result.
-	 */
-	public function test_ensure_required_markup_schemaorg( $script, $expected ) {
-		$page = '<html><head><script type="application/ld+json">%s</script></head><body>Test</body></html>';
-		$dom  = new Document();
-		$dom->loadHTML( sprintf( $page, $script ) );
-		AMP_Theme_Support::ensure_required_markup( $dom );
-		$this->assertEquals( $expected, substr_count( $dom->saveHTML(), 'schema.org' ) );
-	}
-
-	/**
 	 * Test moving AMP scripts from body to head.
 	 *
 	 * @covers AMP_Theme_Support::prepare_response()
