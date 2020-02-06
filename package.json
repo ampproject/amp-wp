@@ -54,7 +54,7 @@
     "@wordpress/hooks": "2.7.0",
     "@wordpress/html-entities": "2.5.0",
     "@wordpress/i18n": "3.8.0",
-    "@wordpress/is-shallow-equal": "1.7.0",
+    "@wordpress/is-shallow-equal": "1.8.0",
     "@wordpress/jest-puppeteer-axe": "1.5.0",
     "@wordpress/keycodes": "2.8.0",
     "@wordpress/nux": "3.11.0",
