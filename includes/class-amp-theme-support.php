@@ -6,6 +6,7 @@
  */
 
 use Amp\AmpWP\CachedRemoteRequest;
+use Amp\AmpWP\Transformer;
 use Amp\Dom\Document;
 use Amp\Optimizer;
 use Amp\RemoteRequest\CurlRemoteRequest;
@@ -1619,16 +1620,6 @@ class AMP_Theme_Support {
 		 * @var DOMElement $noscript
 		 */
 
-		// Ensure there is a schema.org script in the document.
-		// @todo Consider applying the amp_schemaorg_metadata filter on the contents when a script is already present.
-		$schema_org_meta_script = $dom->xpath->query( '//script[ @type = "application/ld+json" ][ contains( ./text(), "schema.org" ) ]' )->item( 0 );
-		if ( ! $schema_org_meta_script ) {
-			$script = $dom->createElement( 'script' );
-			$script->setAttribute( 'type', 'application/ld+json' );
-			$script->appendChild( $dom->createTextNode( wp_json_encode( amp_get_schemaorg_metadata(), JSON_UNESCAPED_UNICODE ) ) );
-			$dom->head->appendChild( $script );
-		}
-
 		// Gather all links.
 		$links         = [
 			'preconnect' => [
@@ -2331,12 +2322,20 @@ class AMP_Theme_Support {
 			);
 		}
 
+		array_unshift( $transformers, Transformer\AmpSchemaOrgMetadata::class );
+
 		$configuration = apply_filters(
 			'amp_optimizer_config',
 			[ Optimizer\Configuration::KEY_TRANSFORMERS => $transformers ]
 		);
 
-		return new Optimizer\Configuration( $configuration );
+		$config = new Optimizer\Configuration( $configuration );
+		$config->registerConfigurationClass(
+			Transformer\AmpSchemaOrgMetadata::class,
+			Transformer\AmpSchemaOrgMetadataConfiguration::class
+		);
+
+		return $config;
 	}
 
 	/**

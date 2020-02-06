@@ -1,4 +1,9 @@
 <?php
+/**
+ * Class CachedRemoteRequest.
+ *
+ * @package Amp\AmpWP
+ */
 
 namespace Amp\AmpWP;
 

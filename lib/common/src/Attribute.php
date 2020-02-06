@@ -49,5 +49,6 @@ interface Attribute
     const ALL_AMP4ADS   = [self::AMP4ADS, self::AMP4ADS_EMOJI];
     const ALL_AMP4EMAIL = [self::AMP4EMAIL, self::AMP4EMAIL_EMOJI];
 
-    const TYPE_JSON = 'application/json';
+    const TYPE_JSON    = 'application/json';
+    const TYPE_LD_JSON = 'application/ld+json';
 }

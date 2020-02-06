@@ -1606,6 +1606,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	/**
 	 * Test ensure_required_markup().
 	 *
+	 * @todo Test needs to be moved into separate transformer test.
+	 *
 	 * @dataProvider get_schema_script_data
 	 * @covers AMP_Theme_Support::ensure_required_markup()
 	 * @param string  $script The value of the script.
