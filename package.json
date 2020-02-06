@@ -53,7 +53,7 @@
     "@wordpress/eslint-plugin": "3.4.1",
     "@wordpress/hooks": "2.7.0",
     "@wordpress/html-entities": "2.6.0",
-    "@wordpress/i18n": "3.8.0",
+    "@wordpress/i18n": "3.9.0",
     "@wordpress/is-shallow-equal": "1.8.0",
     "@wordpress/jest-puppeteer-axe": "1.5.0",
     "@wordpress/keycodes": "2.9.0",
