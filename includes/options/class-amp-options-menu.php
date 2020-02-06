@@ -94,7 +94,7 @@ class AMP_Options_Menu {
 
 		add_settings_field(
 			'theme_support',
-			__( 'Website Mode', 'amp' ),
+			__( 'Template mode', 'amp' ),
 			[ $this, 'render_theme_support' ],
 			AMP_Options_Manager::OPTION_NAME,
 			'general',
