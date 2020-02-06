@@ -8,7 +8,7 @@ use Amp\Optimizer\Transformer\TransformedIdentifier;
 /**
  * Configuration for the TransformedIdentifier transformer.
  *
- * @property string $version Version string to use. Defaults to an empty string.
+ * @property int $version Version number to use. Defaults to 0.
  *
  * @package amp/optimizer
  */
@@ -18,7 +18,7 @@ final class TransformedIdentifierConfiguration extends BaseTransformerConfigurat
     /**
      * Configuration key that holds the version number to use.
      *
-     * @var int
+     * @var string
      */
     const VERSION = 'version';
 
