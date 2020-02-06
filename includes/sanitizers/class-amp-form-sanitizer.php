@@ -67,23 +67,41 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 				$action_url = esc_url_raw( '//' . $_SERVER['HTTP_HOST'] . wp_unslash( $_SERVER['REQUEST_URI'] ) );
 			} else {
 				$action_url = $node->getAttribute( 'action' );
+				$parsed_url = wp_parse_url( $action_url );
 
-				// Handle relative URLs.
-				if ( ! preg_match( '#^(https?:)?//#', $action_url ) ) {
-					$schemeless_host = '//' . $_SERVER['HTTP_HOST'];
-					if ( '?' === $action_url[0] || '#' === $action_url[0] ) {
-						// For actions consisting of only a query or URL fragment, include the schemeless-host and the REQUEST URI of the current page.
-						$action_url = $schemeless_host . wp_unslash( $_SERVER['REQUEST_URI'] ) . $action_url;
-					} elseif ( '.' === $action_url[0] ) {
-						// For actions consisting of relative paths (e.g. '../'), prepend the schemeless-host and a trailing-slashed REQUEST URI.
-						$action_url = $schemeless_host . trailingslashit( wp_unslash( $_SERVER['REQUEST_URI'] ) ) . $action_url;
-					} else {
-						// Otherwise, when the action URL includes an absolute path, just append it to the schemeless-host.
-						$action_url = $schemeless_host . $action_url;
+				// Ignore a malformed URL - it will be later sanitized.
+				if ( false !== $parsed_url ) {
+					// Handle relative URLs.
+					if ( ! isset( $parsed_url['scheme'] ) || 'https' !== $parsed_url['scheme'] ) {
+						$parsed_url['scheme'] = '//';
+
+						if ( ! isset( $parsed_url['host'] ) ) {
+							$parsed_url['host'] = $_SERVER['HTTP_HOST'];
+						}
+
+						if ( ! isset( $parsed_url['path'] ) ) {
+							// If there is action URL path, use the one from the request.
+							$parsed_url['path'] = trailingslashit( wp_unslash( $_SERVER['REQUEST_URI'] ) );
+						} elseif ( '' !== $parsed_url['path'] && '/' !== $parsed_url['path'][0] ) {
+							// If the path is relative, append it to the current request path.
+							$parsed_url['path'] = trailingslashit( wp_unslash( $_SERVER['REQUEST_URI'] ) ) . trailingslashit( $parsed_url['path'] );
+						}
+
+						// Rebuild the URL.
+						$action_url  = $parsed_url['scheme'];
+						$action_url .= isset( $parsed_url['user'] ) ? $parsed_url['user'] : '';
+						$action_url .= isset( $parsed_url['user'] ) && ! isset( $parsed_url['pass'] ) ? '@' : '';
+						$action_url .= isset( $parsed_url['pass'] ) ? ':' . $parsed_url['pass'] . '@' : '';
+						$action_url .= $parsed_url['host'];
+						$action_url .= isset( $parsed_url['port'] ) ? ':' . $parsed_url['port'] : '';
+						$action_url .= $parsed_url['path'];
+						$action_url .= isset( $parsed_url['query'] ) ? '?' . $parsed_url['query'] : '';
+						$action_url .= isset( $parsed_url['fragment'] ) ? '#' . $parsed_url['fragment'] : '';
 					}
-					$action_url = esc_url_raw( $action_url );
 				}
 			}
+
+			$action_url = esc_url_raw( $action_url );
 			$xhr_action = $node->getAttribute( 'action-xhr' );
 
 			// Make HTTP URLs protocol-less, since HTTPS is required for forms.
