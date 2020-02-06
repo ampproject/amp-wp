@@ -156,7 +156,7 @@ final class AmpRuntimeCss implements Transformer, Configurable, MakesRemoteReque
             $v0CssUrl = $this->appendRuntimeVersion(Amp::CACHE_HOST, $version) . '/' . self::V0_CSS;
         } else {
             $v0CssUrl = self::V0_CSS_URL;
-            $options  = ['canary' => $this->configuration->get(AmpRuntimeCssConfiguration::CANARY)];
+            $options  = [RuntimeVersion::OPTION_CANARY => $this->configuration->get(AmpRuntimeCssConfiguration::CANARY)];
             $version  = (new RuntimeVersion($this->remoteRequest))->currentVersion($options);
         }
 

@@ -37,6 +37,13 @@ final class RuntimeVersion
 {
 
     /**
+     * Option to retrieve the latest canary version data instead of the production version data.
+     *
+     * @var string
+     */
+    const OPTION_CANARY = 'canary';
+
+    /**
      * Endpoint to query for retrieving the runtime version data.
      */
     const RUNTIME_METADATA_ENDPOINT = 'https://cdn.ampproject.org/rtv/metadata';

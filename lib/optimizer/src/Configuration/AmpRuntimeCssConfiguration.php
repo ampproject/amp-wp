@@ -4,6 +4,7 @@ namespace Amp\Optimizer\Configuration;
 
 use Amp\Optimizer\Exception\InvalidConfigurationValue;
 use Amp\Optimizer\Transformer\AmpRuntimeCss;
+use Amp\RuntimeVersion;
 
 /**
  * Configuration for the AmpRuntimeCss transformer.
@@ -28,7 +29,7 @@ final class AmpRuntimeCssConfiguration extends BaseTransformerConfiguration
      *
      * @var string
      */
-    const CANARY = 'canary';
+    const CANARY = RuntimeVersion::OPTION_CANARY;
 
     /**
      * Get the associative array of allowed keys and their respective default values.
