@@ -24,6 +24,13 @@ final class SpecTest extends TestCase
 
     const TRANSFORMER_SPEC_PATH = __DIR__ . '/spec/transformers/valid';
 
+    const TESTS_TO_SKIP = [
+        'ReorderHead - reorders_head_a4a'     => 'see https://github.com/ampproject/amp-toolbox/issues/583',
+        'ReorderHead - reorders_head_amphtml' => 'see https://github.com/ampproject/amp-toolbox/issues/583',
+    ];
+
+    const CLASS_SKIP_TEST = '__SKIP__';
+
     public function dataTransformerSpecFiles()
     {
         $scenarios = [];
@@ -42,7 +49,19 @@ final class SpecTest extends TestCase
                     continue;
                 }
 
-                $scenarios["{$key} - {$subFolder}"] = [
+                $scenario = "{$key} - {$subFolder}";
+
+                if (array_key_exists($scenario, self::TESTS_TO_SKIP)) {
+                    $scenarios[$scenario] = [
+                        self::CLASS_SKIP_TEST,
+                        $scenario,
+                        self::TESTS_TO_SKIP[$scenario],
+                    ];
+
+                    continue;
+                }
+
+                $scenarios[$scenario] = [
                     $transformerClass,
                     file_get_contents("{$subFolder->getPathname()}/input.html"),
                     file_get_contents("{$subFolder->getPathname()}/expected_output.html"),
@@ -64,7 +83,13 @@ final class SpecTest extends TestCase
      */
     public function testTransformerSpecFiles($transformerClass, $source, $expected)
     {
-        $document    = Document::fromHtmlFragment($source);
+        if ($transformerClass === self::CLASS_SKIP_TEST) {
+            // $source contains the scenario name, $expected the reason.
+            $this->markTestSkipped("Skipping {$source}, {$expected}");
+        }
+
+        $document = Document::fromHtmlFragment($source);
+
         $transformer = $this->getTransformer($transformerClass);
         $errors      = new ErrorCollection();
 
