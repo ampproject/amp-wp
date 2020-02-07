@@ -88,15 +88,25 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 						}
 
 						// Rebuild the URL.
-						$action_url  = $parsed_url['scheme'];
-						$action_url .= isset( $parsed_url['user'] ) ? $parsed_url['user'] : '';
-						$action_url .= isset( $parsed_url['user'] ) && ! isset( $parsed_url['pass'] ) ? '@' : '';
-						$action_url .= isset( $parsed_url['pass'] ) ? ':' . $parsed_url['pass'] . '@' : '';
+						$action_url = $parsed_url['scheme'];
+						if ( isset( $parsed_url['user'] ) ) {
+							$action_url .= $parsed_url['user'];
+							if ( isset( $parsed_url['pass'] ) ) {
+								$action_url .= ':' . $parsed_url['pass'];
+							}
+							$action_url .= '@';
+						}
 						$action_url .= $parsed_url['host'];
-						$action_url .= isset( $parsed_url['port'] ) ? ':' . $parsed_url['port'] : '';
+						if ( isset( $parsed_url['port'] ) ) {
+							$action_url .= ':' . $parsed_url['port'];
+						}
 						$action_url .= $parsed_url['path'];
-						$action_url .= isset( $parsed_url['query'] ) ? '?' . $parsed_url['query'] : '';
-						$action_url .= isset( $parsed_url['fragment'] ) ? '#' . $parsed_url['fragment'] : '';
+						if ( isset( $parsed_url['query'] ) ) {
+							$action_url .= '?' . $parsed_url['query'];
+						}
+						if ( isset( $parsed_url['fragment'] ) ) {
+							$action_url .= '#' . $parsed_url['fragment'];
+						}
 					}
 				}
 			}
