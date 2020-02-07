@@ -86,7 +86,7 @@ final class ReorderHead implements Transformer
         }
 
         $this->deduplicateAndSortCustomNodes();
-        $this->appendToHead($document->head);
+        $this->appendToHead($document);
     }
 
     /**
@@ -272,9 +272,9 @@ final class ReorderHead implements Transformer
     /**
      * Append all registered nodes to the <head> node.
      *
-     * @param DOMElement $head Head element to append the registered nodes to.
+     * @param Document $document Document to append the nodes to.
      */
-    private function appendToHead(DOMElement $head)
+    private function appendToHead(Document $document)
     {
         $categories = [
             'metaCharset',
@@ -300,11 +300,13 @@ final class ReorderHead implements Transformer
             }
 
             if ($this->$category instanceof DOMNode) {
-                $head->appendChild($this->$category);
+                $node = $document->importNode($this->$category);
+                $document->head->appendChild($node);
             } elseif (is_array($this->$category)) {
                 // @todo Maybe sort by attribute-name, attribute-value?
                 foreach ($this->$category as $node) {
-                    $head->appendChild($node);
+                    $node = $document->importNode($node);
+                    $document->head->appendChild($node);
                 }
             }
         }

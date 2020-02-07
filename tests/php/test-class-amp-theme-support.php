@@ -1465,7 +1465,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		echo '</head><body></body></html>';
 		$output = ob_get_clean();
 
-		$dom = new DOMDocument();
+		$dom = new Document();
 		$dom->loadHTML( $output );
 
 		$assert_callback( new DOMXPath( $dom ) );
@@ -1579,8 +1579,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		echo '</body></html>';
 		$output = ob_get_clean();
 
-		$dom = new DOMDocument();
-		@$dom->loadHTML( $output ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+		$dom = new Document();
+		$dom->loadHTML( $output ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 
 		$assert_callback( new DOMXPath( $dom ) );
 	}
