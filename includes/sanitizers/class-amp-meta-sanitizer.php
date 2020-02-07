@@ -5,6 +5,10 @@
  * @package AMP
  */
 
+use Amp\Attribute;
+use Amp\Dom\Document;
+use Amp\Tag;
+
 /**
  * Class AMP_Meta_Sanitizer.
  *
@@ -51,13 +55,6 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	];
 
 	/**
-	 * Charset to use for AMP markup.
-	 *
-	 * @var string
-	 */
-	const AMP_CHARSET = 'utf-8';
-
-	/**
 	 * Viewport settings to use for AMP markup.
 	 *
 	 * @var string
@@ -84,16 +81,18 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 			 *
 			 * @var DOMElement $element
 			 */
-			if ( $element->hasAttribute( 'charset' ) ) {
+			if ( $element->hasAttribute( Attribute::CHARSET ) ) {
 				$this->meta_tags[ self::TAG_CHARSET ][] = $element;
-			} elseif ( 'viewport' === $element->getAttribute( 'name' ) ) {
+			} elseif ( 'viewport' === $element->getAttribute( Attribute::NAME ) ) {
 				$this->meta_tags[ self::TAG_VIEWPORT ][] = $element;
-			} elseif ( 'amp-script-src' === $element->getAttribute( 'name' ) ) {
+			} elseif ( 'amp-script-src' === $element->getAttribute( Attribute::NAME ) ) {
 				$this->meta_tags[ self::TAG_AMP_SCRIPT_SRC ][] = $element;
 			} else {
 				$this->meta_tags[ self::TAG_OTHER ][] = $element;
 			}
 		}
+
+		$this->deduplicate_nodes();
 
 		$this->ensure_charset_is_present();
 
@@ -102,6 +101,17 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 		$this->process_amp_script_meta_tags();
 
 		$this->re_add_meta_tags_in_optimized_order();
+	}
+
+	/**
+	 * Deduplicate the nodes of the tags that should be unique.
+	 */
+	protected function deduplicate_nodes() {
+		foreach ( [ self::TAG_CHARSET, self::TAG_VIEWPORT ] as $tag ) {
+			if ( count( $this->meta_tags[ $tag ] ) > 1 ) {
+				$this->meta_tags[ $tag ] = (array) $this->meta_tags[ $tag ][0];
+			}
+		}
 	}
 
 
@@ -136,7 +146,7 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 		 * @var DOMElement $viewport_tag
 		 */
 		$viewport_tag      = $this->meta_tags[ self::TAG_VIEWPORT ][0];
-		$viewport_content  = $viewport_tag->getAttribute( 'content' );
+		$viewport_content  = $viewport_tag->getAttribute( Attribute::CONTENT );
 		$viewport_settings = array_map( 'trim', explode( ',', $viewport_content ) );
 		$width_found       = false;
 
@@ -156,7 +166,7 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 			array_unshift( $viewport_settings, 'width=device-width' );
 		}
 
-		$viewport_tag->setAttribute( 'content', implode( ',', $viewport_settings ) );
+		$viewport_tag->setAttribute( Attribute::CONTENT, implode( ',', $viewport_settings ) );
 	}
 
 	/**
@@ -168,15 +178,15 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		$first_meta_amp_script_src = array_shift( $this->meta_tags[ self::TAG_AMP_SCRIPT_SRC ] );
-		$content_values            = [ $first_meta_amp_script_src->getAttribute( 'content' ) ];
+		$content_values            = [ $first_meta_amp_script_src->getAttribute( Attribute::CONTENT ) ];
 
 		// Merge (and remove) any subsequent meta amp-script-src elements.
 		while ( ! empty( $this->meta_tags[ self::TAG_AMP_SCRIPT_SRC ] ) ) {
 			$meta_amp_script_src = array_shift( $this->meta_tags[ self::TAG_AMP_SCRIPT_SRC ] );
-			$content_values[]    = $meta_amp_script_src->getAttribute( 'content' );
+			$content_values[]    = $meta_amp_script_src->getAttribute( Attribute::CONTENT );
 		}
 
-		$first_meta_amp_script_src->setAttribute( 'content', implode( ' ', $content_values ) );
+		$first_meta_amp_script_src->setAttribute( Attribute::CONTENT, implode( ' ', $content_values ) );
 
 		$this->meta_tags[ self::TAG_AMP_SCRIPT_SRC ][] = $first_meta_amp_script_src;
 	}
@@ -189,9 +199,9 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	protected function create_charset_element() {
 		return AMP_DOM_Utils::create_node(
 			$this->dom,
-			'meta',
+			Tag::META,
 			[
-				'charset' => self::AMP_CHARSET,
+				Attribute::CHARSET => Document::AMP_ENCODING,
 			]
 		);
 	}
@@ -205,10 +215,10 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	protected function create_viewport_element( $viewport ) {
 		return AMP_DOM_Utils::create_node(
 			$this->dom,
-			'meta',
+			Tag::META,
 			[
-				'name'    => 'viewport',
-				'content' => $viewport,
+				Attribute::NAME    => 'viewport',
+				Attribute::CONTENT => $viewport,
 			]
 		);
 	}

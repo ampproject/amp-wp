@@ -38,6 +38,7 @@ interface Attribute
     const I_AMPHTML_VERSION     = 'i-amphtml-version';
     const LAYOUT                = 'layout';
     const MEDIA                 = 'media';
+    const NAME                  = 'name';
     const REL                   = 'rel';
     const ROLE                  = 'role';
     const SIZES                 = 'sizes';
