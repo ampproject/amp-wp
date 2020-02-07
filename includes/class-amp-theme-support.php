@@ -2242,6 +2242,10 @@ class AMP_Theme_Support {
 			}
 		}
 
+		$errors = new Optimizer\ErrorCollection();
+		self::get_optimizer()->optimizeDom( $dom, $errors );
+		// @todo Deal with $errors.
+
 		self::ensure_required_markup( $dom, array_keys( $amp_scripts ) );
 
 		if ( $blocking_error_count > 0 && empty( AMP_Validation_Manager::$validation_error_status_overrides ) ) {
@@ -2289,10 +2293,6 @@ class AMP_Theme_Support {
 		}
 
 		AMP_Validation_Manager::finalize_validation( $dom );
-
-		$errors = new Optimizer\ErrorCollection();
-		self::get_optimizer()->optimizeDom( $dom, $errors );
-		// @todo Deal with $errors.
 
 		$response = $dom->saveHTML();
 
