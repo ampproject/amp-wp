@@ -2268,7 +2268,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 			'head_with_duplicate_charset'             => [
 				'<html amp><head><meta charset="UTF-8"><meta charset="utf-8"><body><p>Content</p></body></html>',
-				'<html amp><head><meta charset="utf-8"></head><body><p>Content</p></body></html>',
+				'<html amp><head><meta charset="UTF-8"></head><body><p>Content</p></body></html>',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::DUPLICATE_UNIQUE_TAG ],
 			],
