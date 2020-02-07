@@ -14,6 +14,7 @@ use Amp\Optimizer\TransformerConfiguration;
 use Amp\RemoteRequest;
 use Amp\Optimizer\Transformer;
 use Amp\RuntimeVersion;
+use Amp\Tag;
 use DOMElement;
 use Exception;
 
@@ -100,7 +101,7 @@ final class AmpRuntimeCss implements Transformer, Configurable, MakesRemoteReque
             return;
         }
 
-        $this->addStaticCss($ampRuntimeStyle, $errors);
+        $this->addStaticCss($document, $ampRuntimeStyle, $errors);
     }
 
     /**
@@ -127,10 +128,11 @@ final class AmpRuntimeCss implements Transformer, Configurable, MakesRemoteReque
     /**
      * Add the static boilerplate CSS to the <style amp-runtime> element.
      *
+     * @param Document        $document        Document to add the static CSS to.
      * @param DOMElement      $ampRuntimeStyle DOM element for the <style amp-runtime> tag to add the static CSS to.
      * @param ErrorCollection $errors          Error collection to add errors to.
      */
-    private function addStaticCss(DOMElement $ampRuntimeStyle, ErrorCollection $errors)
+    private function addStaticCss(Document $document, DOMElement $ampRuntimeStyle, ErrorCollection $errors)
     {
         $version = $this->configuration->get(AmpRuntimeCssConfiguration::VERSION);
 
@@ -139,7 +141,7 @@ final class AmpRuntimeCss implements Transformer, Configurable, MakesRemoteReque
             $this->inlineCss($ampRuntimeStyle, $version);
         } catch (Exception $exception) {
             $errors->add(Error\CannotInlineRuntimeCss::fromException($exception, $ampRuntimeStyle, $version));
-            $this->linkCss($ampRuntimeStyle);
+            $this->linkCss($document, $ampRuntimeStyle);
         }
     }
 
@@ -167,10 +169,16 @@ final class AmpRuntimeCss implements Transformer, Configurable, MakesRemoteReque
     /**
      * Insert the boilerplate style as inline CSS.
      *
+     * @param Document   $document        Document to link the CSS in.
      * @param DOMElement $ampRuntimeStyle DOM element for the <style amp-runtime> tag to inline the CSS into.
      */
-    private function linkCss(DOMElement $ampRuntimeStyle)
+    private function linkCss(Document $document, DOMElement $ampRuntimeStyle)
     {
+        $cssStyleNode = $document->createElement(Tag::LINK);
+        $cssStyleNode->setAttribute(Attribute::REL, Attribute::REL_STYLESHEET);
+        $cssStyleNode->setAttribute(Attribute::HREF, self::V0_CSS_URL);
+
+        $ampRuntimeStyle->parentNode->insertBefore($cssStyleNode, $ampRuntimeStyle);
     }
 
     /**

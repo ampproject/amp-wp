@@ -219,7 +219,7 @@ final class ReorderHead implements Transformer
     {
         $rel = $node->getAttribute(Attribute::REL);
 
-        if ($this->containsWord($rel, 'stylesheet')) {
+        if ($this->containsWord($rel, Attribute::REL_STYLESHEET)) {
             $href = $node->getAttribute(Attribute::HREF);
             if ($href && substr($href, -7) === '/v0.css') {
                 $this->linkStyleAmpRuntime = $node;
@@ -232,16 +232,16 @@ final class ReorderHead implements Transformer
             }
         }
 
-        if ($this->containsWord($rel, 'icon')) {
+        if ($this->containsWord($rel, Attribute::REL_ICON)) {
             $this->linkIcons[] = $node;
             return;
         }
 
         if (
-            $this->containsWord($rel, 'preload')
-            || $this->containsWord($rel, 'prefetch')
-            || $this->containsWord($rel, 'dns-prefetch')
-            || $this->containsWord($rel, 'preconnect')
+            $this->containsWord($rel, Attribute::REL_PRELOAD)
+            || $this->containsWord($rel, Attribute::REL_PREFETCH)
+            || $this->containsWord($rel, Attribute::REL_DNS_PREFETCH)
+            || $this->containsWord($rel, Attribute::REL_PRECONNECT)
         ) {
             $this->resourceHintLinks[] = $node;
             return;

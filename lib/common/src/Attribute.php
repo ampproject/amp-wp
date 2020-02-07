@@ -51,4 +51,11 @@ interface Attribute
 
     const TYPE_JSON    = 'application/json';
     const TYPE_LD_JSON = 'application/ld+json';
+
+    const REL_DNS_PREFETCH = 'dns-prefetch';
+    const REL_ICON         = 'icon';
+    const REL_PRECONNECT   = 'preconnect';
+    const REL_PREFETCH     = 'prefetch';
+    const REL_PRELOAD      = 'preload';
+    const REL_STYLESHEET   = 'stylesheet';
 }
