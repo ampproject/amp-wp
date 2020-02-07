@@ -1272,11 +1272,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_URL ],
 			],
-			'a_with_mail_host'                             => [
-				'<a class="foo" href="mail to:foo@bar.com">value</a>',
-				'<a class="foo">value</a>',
-				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_URL_PROTOCOL ],
+			'a_with_valid_mail_host'                       => [
+				'<a class="foo" href="mailto:foo@bar.com&amp;body=https://example.org/">value</a>',
+				null,
 			],
 
 			// font is removed so we should check that other elements are checked as well.
