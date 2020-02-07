@@ -129,9 +129,14 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Ignore a malformed URL - it will be later sanitized.
 		if ( false !== $parsed_url ) {
-			// Handle relative URLs.
+			// If there is no URL scheme or the scheme is not 'https', make it a schemeless URL.
 			if ( ! isset( $parsed_url['scheme'] ) || 'https' !== $parsed_url['scheme'] ) {
 				$parsed_url['scheme'] = '//';
+
+				// Set an empty path if none is defined but there is a host.
+				if ( ! isset( $parsed_url['path'] ) && isset( $parsed_url['host'] ) ) {
+					$parsed_url['path'] = '';
+				}
 
 				if ( ! isset( $parsed_url['host'] ) ) {
 					$parsed_url['host'] = $_SERVER['HTTP_HOST'];
