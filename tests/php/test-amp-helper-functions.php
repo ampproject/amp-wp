@@ -644,6 +644,8 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * @covers ::amp_get_boilerplate_code()
 	 */
 	public function test_amp_get_boilerplate_code() {
+	    $this->setExpectedDeprecated('amp_get_boilerplate_code');
+	    $this->setExpectedDeprecated('amp_get_boilerplate_stylesheets');
 		$boilerplate_code = amp_get_boilerplate_code();
 		$this->assertStringStartsWith( '<style amp-boilerplate>', $boilerplate_code );
 		$this->assertContains( '<noscript><style amp-boilerplate>', $boilerplate_code );
@@ -655,6 +657,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * @covers ::amp_get_boilerplate_stylesheets()
 	 */
 	public function test_amp_get_boilerplate_stylesheets() {
+	    $this->setExpectedDeprecated('amp_get_boilerplate_stylesheets');
 		$stylesheets = amp_get_boilerplate_stylesheets();
 		$this->assertInternalType( 'array', $stylesheets );
 		$this->assertCount( 2, $stylesheets );
