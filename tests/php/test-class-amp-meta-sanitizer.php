@@ -29,44 +29,37 @@ class Test_AMP_Meta_Sanitizer extends WP_UnitTestCase {
 		$script4_hash = amp_generate_script_hash( $script4 );
 
 		return [
-			// Don't break the correct charset tag.
-			[
+			'Do not break the correct charset tag'        => [
 				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
 				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
 			],
 
-			// Don't break the correct viewport tag.
-			[
+			'Do not break the correct viewport tag'       => [
 				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"></head><body></body></html>',
 				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"></head><body></body></html>',
 			],
 
-			// Move charset and viewport tags from body to head.
-			[
+			'Move charset and viewport tags from body to head' => [
 				'<!DOCTYPE html><html><head></head><body><meta charset="utf-8"><meta name="viewport" content="width=device-width"></body></html>',
 				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
 			],
 
-			// Add default charset tag if none is present.
-			[
+			'Add default charset tag if none is present'  => [
 				'<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width"></head><body></body></html>',
 				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
 			],
 
-			// Add default viewport tag if none is present.
-			[
+			'Add default viewport tag if none is present' => [
 				'<!DOCTYPE html><html><head><meta charset="utf-8"></head><body></body></html>',
 				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
 			],
 
-			// Make sure charset is the first meta tag.
-			[
+			'Make sure charset is the first meta tag'     => [
 				'<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width"><meta charset="utf-8"></head><body></body></html>',
 				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
 			],
 
-			// Concatenate and reposition script hashes.
-			[
+			'Concatenate and reposition script hashes'    => [
 				'<!DOCTYPE html><html><head><meta name="amp-script-src" content="' . esc_attr( $script1_hash ) . '"><meta charset="utf-8"><meta name="amp-script-src" content="' . esc_attr( $script2_hash ) . '"><meta name="viewport" content="width=device-width"><meta name="amp-script-src" content="' . esc_attr( $script3_hash ) . '"></head><body><meta name="amp-script-src" content="' . esc_attr( $script4_hash ) . '"></body></html>',
 				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><meta name="amp-script-src" content="' . esc_attr( $script1_hash ) . ' ' . esc_attr( $script2_hash ) . ' ' . esc_attr( $script3_hash ) . ' ' . esc_attr( $script4_hash ) . '"></head><body></body></html>',
 			],
