@@ -32,13 +32,31 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 	const DEFAULT_META_CONTENT = 'AMP-Redirect-To; AMP.navigateTo';
 
 	/**
+	 * The rel attribute value for AMP links.
+	 *
+	 * @var string
+	 */
+	const REL_VALUE_AMP = 'amphtml';
+
+	/**
+	 * The rel attribute value that will force non-AMP links.
+	 *
+	 * Normally, in a paired mode, links to the same origin will be for AMP.
+	 * But by adding this rel value, the link will be to non-AMP.
+	 *
+	 * @var string
+	 */
+	const REL_VALUE_NON_AMP_TO_AMP = 'noamphtml';
+
+	/**
 	 * Placeholder for default arguments, to be set in child classes.
 	 *
 	 * @var array
 	 */
 	protected $DEFAULT_ARGS = [ // phpcs:ignore WordPress.NamingConventions.ValidVariableName.PropertyNotSnakeCase
-		'paired'       => false, // Only set to true when in a paired mode (will be false when amp_is_canonical()). Controls whether query var is added.
-		'meta_content' => self::DEFAULT_META_CONTENT,
+		'paired'        => false, // Only set to true when in a paired mode (will be false when amp_is_canonical()). Controls whether query var is added.
+		'meta_content'  => self::DEFAULT_META_CONTENT,
+		'excluded_urls' => [], // URLs in this won't have AMP-to-AMP links in a paired mode.
 	];
 
 	/**
@@ -132,12 +150,26 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			$href = $element->getAttribute( 'href' );
-
-			if ( $this->is_frontend_url( $href ) && '#' !== substr( $href, 0, 1 ) ) {
+			$rel  = $element->hasAttribute( 'rel' ) ? array_filter( preg_split( '/\s+/', $element->getAttribute( 'rel' ) ) ) : [];
+			$pos  = array_search( self::REL_VALUE_NON_AMP_TO_AMP, $rel, true );
+			if ( false !== $pos ) {
+				// The rel has a value to opt-out of AMP-to-AMP links, so strip it and ensure the link is to non-AMP.
+				unset( $rel[ $pos ] );
+				if ( empty( $rel ) ) {
+					$element->removeAttribute( 'rel' );
+				} else {
+					$element->setAttribute( 'rel', implode( ' ', $rel ) );
+				}
+			} elseif (
+				$this->is_frontend_url( $href )
+				&&
+				'#' !== substr( $href, 0, 1 )
+				&&
+				! in_array( strtok( $href, '#' ), $this->args['excluded_urls'], true )
+			) {
 				// Always add the amphtml link relation when linking enabled.
-				$rel  = $element->hasAttribute( 'rel' ) ? $element->getAttribute( 'rel' ) . ' ' : '';
-				$rel .= 'amphtml';
-				$element->setAttribute( 'rel', $rel );
+				array_push( $rel, self::REL_VALUE_AMP );
+				$element->setAttribute( 'rel', implode( ' ', $rel ) );
 
 				// Only add the AMP query var when requested (in Transitional or Reader mode).
 				if ( ! empty( $this->args['paired'] ) ) {
@@ -171,6 +203,10 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public function is_frontend_url( $url ) {
 		$parsed_url = wp_parse_url( $url );
+
+		if ( ! empty( $parsed_url['scheme'] ) && ! in_array( strtolower( $parsed_url['scheme'] ), [ 'http', 'https' ], true ) ) {
+			return false;
+		}
 
 		// Skip adding query var to links on other URLs.
 		if ( ! empty( $parsed_url['host'] ) && $this->home_host !== $parsed_url['host'] ) {

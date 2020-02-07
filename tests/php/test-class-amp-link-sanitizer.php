@@ -38,63 +38,112 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 		$wp_rewrite->init();
 		$wp_rewrite->flush_rules();
 
-		$post_to_link_to = self::factory()->post->create(
-			[
-				'post_name'   => 'link-target-post',
-				'post_status' => 'publish',
-				'post_type'   => 'post',
-			]
+		$post_link         = get_permalink(
+			self::factory()->post->create(
+				[
+					'post_name'   => 'link-target-post',
+					'post_status' => 'publish',
+					'post_type'   => 'post',
+				]
+			)
 		);
+		$excluded_amp_link = get_permalink( self::factory()->post->create() );
+		$excluded_urls     = [ $excluded_amp_link ];
 
 		$links = [
-			'home-link'         => [
+			'home-link'           => [
 				'href'         => home_url( '/' ),
 				'expected_amp' => true,
 				'expected_rel' => 'amphtml',
 			],
-			'internal-link'     => [
-				'href'         => get_permalink( $post_to_link_to ),
+			'internal-link'       => [
+				'href'         => $post_link,
 				'expected_amp' => true,
 				'expected_rel' => 'amphtml',
 			],
-			'ugc-link'          => [
+			'non_amp_to_amp_rel'  => [
+				'href'         => $post_link,
+				'expected_amp' => false,
+				'rel'          => 'noamphtml',
+				'expected_rel' => null,
+			],
+			'two_rel'             => [
+				'href'         => $post_link,
+				'expected_amp' => false,
+				'rel'          => 'help noamphtml',
+				'expected_rel' => 'help',
+			],
+			'multiple_rel'        => [
+				'href'         => $post_link,
+				'expected_amp' => false,
+				'rel'          => 'noamphtml nofollow help',
+				'expected_rel' => 'nofollow help',
+			],
+			'rel_trailing_space'  => [
+				'href'         => $post_link,
+				'expected_amp' => false,
+				'rel'          => 'noamphtml ',
+				'expected_rel' => null,
+			],
+			'excluded_amp_link'   => [
+				'href'         => $excluded_amp_link,
+				'expected_amp' => false,
+				'expected_rel' => null,
+			],
+			'fragment_identifier' => [
+				'href'         => $excluded_amp_link . '#heading',
+				'expected_amp' => false,
+				'expected_rel' => null,
+			],
+			'ugc-link'            => [
 				'rel'          => 'ugc',
 				'href'         => home_url( '/some/user/generated/data/' ),
 				'expected_amp' => true,
 				'expected_rel' => 'ugc amphtml',
 			],
-			'page-anchor'       => [
+			'page-anchor'         => [
 				'href'         => '#top',
 				'expected_amp' => false,
 				'expected_rel' => null,
 			],
-			'other-page-anchor' => [
-				'href'         => get_permalink( $post_to_link_to ) . '#top',
+			'other-page-anchor'   => [
+				'href'         => $post_link . '#top',
 				'expected_amp' => true,
 				'expected_rel' => 'amphtml',
 			],
-			'external-link'     => [
+			'external-link'       => [
 				'href'         => 'https://external.example.com/',
 				'expected_amp' => false,
 				'expected_rel' => null,
 			],
-			'php-file-link'     => [
+			'non_amp_rel_removed' => [
+				'href'         => 'https://external.example.com/',
+				'expected_amp' => false,
+				'rel'          => 'noamphtml',
+				'expected_rel' => null,
+			],
+			'php-file-link'       => [
 				'href'         => site_url( '/wp-login.php' ),
 				'expected_amp' => false,
 				'expected_rel' => null,
 			],
-			'feed-link'         => [
+			'feed-link'           => [
 				'href'         => get_feed_link(),
 				'expected_amp' => false,
 				'expected_rel' => null,
 			],
-			'admin-link'        => [
+			'admin-link'          => [
 				'href'         => admin_url( 'options-general.php?page=some-plugin' ),
 				'expected_amp' => false,
 				'expected_rel' => null,
 			],
-			'image-link'        => [
+			'image-link'          => [
 				'href'         => content_url( '/some-image.jpg' ),
+				'expected_amp' => false,
+				'expected_rel' => null,
+			],
+			'mailto-link'         => [
+				'href'         => 'mailto:nobody@example.com',
 				'expected_amp' => false,
 				'expected_rel' => null,
 			],
@@ -116,7 +165,7 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $html );
 
-		$sanitizer = new AMP_Link_Sanitizer( $dom, compact( 'paired' ) );
+		$sanitizer = new AMP_Link_Sanitizer( $dom, compact( 'paired', 'excluded_urls' ) );
 		$sanitizer->sanitize();
 
 		// Confirm admin bar is unchanged.

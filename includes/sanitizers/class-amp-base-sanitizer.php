@@ -765,4 +765,16 @@ abstract class AMP_Base_Sanitizer {
 			''
 		);
 	}
+
+	/**
+	 * Get data that is returned in validate responses.
+	 *
+	 * The array returned is merged with the overall validate response data.
+	 *
+	 * @see \AMP_Validation_Manager::get_validate_response_data()
+	 * @return array Validate response data.
+	 */
+	public function get_validate_response_data() {
+		return [];
+	}
 }

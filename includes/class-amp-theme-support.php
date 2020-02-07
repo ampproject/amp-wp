@@ -414,14 +414,32 @@ class AMP_Theme_Support {
 			add_filter( 'template_include', [ __CLASS__, 'serve_paired_browsing_experience' ] );
 		}
 
-		if ( ! is_amp_endpoint() ) {
+		$has_query_var  = (
+			isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			||
+			false !== get_query_var( amp_get_slug(), false )
+		);
+		$is_reader_mode = self::READER_MODE_SLUG === self::get_support_mode();
+		if (
+			$is_reader_mode
+			&&
+			$has_query_var
+			&&
+			( ! is_singular() || ! post_supports_amp( get_post( get_queried_object_id() ) ) )
+		) {
+			// Reader mode only supports the singular template (for now) so redirect non-singular queries in reader mode to non-AMP version.
+			// Also ensure redirecting to non-AMP version when accessing a post which does not support AMP.
+			// A temporary redirect is used for admin users to allow them to see changes between reader mode and transitional modes.
+			wp_safe_redirect( amp_remove_endpoint( amp_get_current_url() ), current_user_can( 'manage_options' ) ? 302 : 301 );
+			return;
+		} elseif ( ! is_amp_endpoint() ) {
 			/*
-			 * Redirect to AMP-less variable if AMP is not available for this URL and yet the query var is present.
+			 * Redirect to AMP-less URL if AMP is not available for this URL and yet the query var is present.
 			 * Temporary redirect is used for admin users because implied transitional mode and template support can be
 			 * enabled by user ay any time, so they will be able to make AMP available for this URL and see the change
 			 * without wrestling with the redirect cache.
 			 */
-			if ( isset( $_GET[ amp_get_slug() ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			if ( $has_query_var ) {
 				self::redirect_non_amp_url( current_user_can( 'manage_options' ) ? 302 : 301, true );
 			}
 
@@ -431,11 +449,10 @@ class AMP_Theme_Support {
 
 		self::ensure_proper_amp_location();
 
-		$is_reader_mode = self::READER_MODE_SLUG === self::get_support_mode();
-		$theme_support  = self::get_theme_support_args();
+		$theme_support = self::get_theme_support_args();
 		if ( ! empty( $theme_support['template_dir'] ) ) {
 			self::add_amp_template_filters();
-		} elseif ( $is_reader_mode ) {
+		} elseif ( $is_reader_mode && ! is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
 			add_filter(
 				'template_include',
 				static function() {
@@ -447,7 +464,7 @@ class AMP_Theme_Support {
 
 		self::add_hooks();
 		self::$sanitizer_classes = amp_get_content_sanitizers();
-		if ( ! $is_reader_mode ) {
+		if ( ! $is_reader_mode || is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
 			self::$sanitizer_classes = AMP_Validation_Manager::filter_sanitizer_args( self::$sanitizer_classes );
 		}
 		self::$embed_handlers = self::register_content_embed_handlers();
@@ -1565,7 +1582,7 @@ class AMP_Theme_Support {
 	 */
 	public static function filter_admin_bar_style_loader_tag( $tag, $handle ) {
 		if (
-			in_array( $handle, wp_styles()->registered['admin-bar']->deps, true ) ?
+			is_array( wp_styles()->registered['admin-bar']->deps ) && in_array( $handle, wp_styles()->registered['admin-bar']->deps, true ) ?
 				self::is_exclusively_dependent( wp_styles(), $handle, 'admin-bar' ) :
 				self::has_dependency( wp_styles(), $handle, 'admin-bar' )
 		) {
@@ -1585,7 +1602,7 @@ class AMP_Theme_Support {
 	 */
 	public static function filter_admin_bar_script_loader_tag( $tag, $handle ) {
 		if (
-			in_array( $handle, wp_scripts()->registered['admin-bar']->deps, true ) ?
+			is_array( wp_scripts()->registered['admin-bar']->deps ) && in_array( $handle, wp_scripts()->registered['admin-bar']->deps, true ) ?
 				self::is_exclusively_dependent( wp_scripts(), $handle, 'admin-bar' ) :
 				self::has_dependency( wp_scripts(), $handle, 'admin-bar' )
 		) {
@@ -2183,12 +2200,15 @@ class AMP_Theme_Support {
 			$dom->documentElement->setAttribute( 'amp', '' );
 		}
 
-		$assets = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
+		$sanitization_results = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
 
 		// Respond early with results if performing a validate request.
 		if ( AMP_Validation_Manager::$is_validate_request ) {
 			header( 'Content-Type: application/json; charset=utf-8' );
-			return wp_json_encode( AMP_Validation_Manager::get_validate_response_data(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
+			return wp_json_encode(
+				AMP_Validation_Manager::get_validate_response_data( $sanitization_results ),
+				JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
+			);
 		}
 
 		// Determine what the validation errors are.
@@ -2205,7 +2225,7 @@ class AMP_Theme_Support {
 		$dom_serialize_start = microtime( true );
 
 		// Gather all component scripts that are used in the document and then render any not already printed.
-		$amp_scripts = $assets['scripts'];
+		$amp_scripts = $sanitization_results['scripts'];
 		foreach ( self::$embed_handlers as $embed_handler ) {
 			$amp_scripts = array_merge(
 				$amp_scripts,
@@ -2459,14 +2479,13 @@ class AMP_Theme_Support {
 			true
 		);
 
-		// Whitelist enqueued script for AMP dev mdoe so that it is not removed.
+		// Whitelist enqueued script for AMP dev mode so that it is not removed.
 		// @todo Revisit with <https://github.com/google/site-kit-wp/pull/505#discussion_r348683617>.
 		add_filter(
 			'script_loader_tag',
 			static function( $tag, $handle ) {
 				if ( is_amp_endpoint() && self::has_dependency( wp_scripts(), 'amp-paired-browsing-client', $handle ) ) {
-					$attrs = [ AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, 'async' ];
-					$tag   = preg_replace( '/(?<=<script)(?=\s|>)/i', ' ' . implode( ' ', $attrs ), $tag );
+					$tag = preg_replace( '/(?<=<script)(?=\s|>)/i', ' ' . AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, $tag );
 				}
 				return $tag;
 			},

@@ -44,6 +44,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		delete_option( AMP_Options_Manager::OPTION_NAME ); // Make sure default reader mode option does not override theme support being added.
 		remove_theme_support( AMP_Theme_Support::SLUG );
 		AMP_Theme_Support::read_theme_support();
+		add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
 	}
 
 	/**
@@ -320,6 +321,53 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertFalse( has_action( 'wp_head', 'amp_add_amphtml_link' ) );
 		$this->assertEquals( 10, has_filter( 'index_template_hierarchy', [ 'AMP_Theme_Support', 'filter_amp_template_hierarchy' ] ), 'Expected add_amp_template_filters to have been called since template_dir is not empty' );
 		$this->assertEquals( 20, has_action( 'wp_head', 'amp_add_generator_metadata' ), 'Expected add_hooks to have been called' );
+	}
+
+	/**
+	 * Test that attempting to access an AMP post in Reader mode that does not support AMP.
+	 *
+	 * @covers AMP_Theme_Support::finish_init()
+	 */
+	public function test_finish_init_when_accessing_singular_post_that_does_not_support_amp() {
+		$post          = $this->factory()->post->create();
+		$requested_url = get_permalink( $post );
+		$this->assertEquals( AMP_Theme_Support::READER_MODE_SLUG, AMP_Theme_Support::get_support_mode() );
+		$this->assertTrue( post_supports_amp( $post ) );
+		add_filter( 'amp_skip_post', '__return_true' );
+		$this->assertFalse( post_supports_amp( $post ) );
+
+		$redirected = false;
+		add_filter(
+			'wp_redirect',
+			function ( $url ) use ( $requested_url, &$redirected ) {
+				$this->assertEquals( $requested_url, $url );
+				$redirected = true;
+				return null;
+			}
+		);
+		$this->go_to( amp_get_permalink( $post ) );
+		$this->assertTrue( $redirected );
+	}
+
+	/**
+	 * Test that attempting to access an AMP page in Reader Mode for a non-singular query will redirect to the non-AMP version.
+	 *
+	 * @covers AMP_Theme_Support::finish_init()
+	 */
+	public function test_finish_init_when_accessing_non_singular_amp_page_in_reader_mode() {
+		$requested_url = home_url( '/?s=hello' );
+		$this->assertEquals( AMP_Theme_Support::READER_MODE_SLUG, AMP_Theme_Support::get_support_mode() );
+		$redirected = false;
+		add_filter(
+			'wp_redirect',
+			function ( $url ) use ( $requested_url, &$redirected ) {
+				$this->assertEquals( $requested_url, $url );
+				$redirected = true;
+				return null;
+			}
+		);
+		$this->go_to( add_query_arg( amp_get_slug(), '', $requested_url ) );
+		$this->assertTrue( $redirected );
 	}
 
 	/**
@@ -1424,6 +1472,18 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test filter_admin_bar_style_loader_tag when ->deps is not an array.
+	 *
+	 * @covers \AMP_Theme_Support::filter_admin_bar_style_loader_tag()
+	 */
+	public function test_filter_admin_bar_style_loader_tag_non_array() {
+		wp_enqueue_style( 'admin-bar' );
+		$GLOBALS['wp_styles']->registered['admin-bar']->deps = null;
+		$tag = '<link rel="stylesheet" id="dashicons-css" href="https://example.com/wp-includes/css/dashicons.css?ver=5.3.2" media="all" />'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$this->assertEquals( $tag, AMP_Theme_Support::filter_admin_bar_style_loader_tag( $tag, 'baz' ) );
+	}
+
+	/**
 	 * Get data to test AMP_Theme_Support::filter_admin_bar_script_loader_tag().
 	 *
 	 * @return array
@@ -1523,6 +1583,18 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		@$dom->loadHTML( $output ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 
 		$assert_callback( new DOMXPath( $dom ) );
+	}
+
+	/**
+	 * Test filter_admin_bar_script_loader_tag when ->deps is not an array.
+	 *
+	 * @covers \AMP_Theme_Support::filter_admin_bar_script_loader_tag()
+	 */
+	public function test_filter_admin_bar_script_loader_tag_non_array() {
+		wp_enqueue_script( 'admin-bar' );
+		$GLOBALS['wp_scripts']->registered['admin-bar']->deps = null;
+		$tag = '<script src="https://example.com/wp-includes/js/admin-bar.js?ver=5.3.2"></script>'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertEquals( $tag, AMP_Theme_Support::filter_admin_bar_script_loader_tag( $tag, 'example' ) );
 	}
 
 	/**
@@ -2344,13 +2416,14 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	public function test_prepare_response_redirect() {
 		add_filter( 'amp_validation_error_sanitized', '__return_false', 100 );
 
-		$this->go_to( home_url( '/?amp' ) );
 		add_theme_support(
 			AMP_Theme_Support::SLUG,
 			[
 				AMP_Theme_Support::PAIRED_FLAG => true,
 			]
 		);
+		AMP_Theme_Support::read_theme_support();
+		$this->go_to( home_url( '/?amp' ) );
 		add_filter(
 			'amp_content_sanitizers',
 			static function( $sanitizers ) {
@@ -2427,6 +2500,89 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		wp_dequeue_style( $style_slug );
 		AMP_Theme_Support::enqueue_assets();
 		$this->assertContains( $style_slug, wp_styles()->queue );
+	}
+
+	/**
+	 * Test the enqueuing in setup_paired_browsing_client().
+	 *
+	 * @covers AMP_Theme_Support::setup_paired_browsing_client()
+	 */
+	public function test_setup_paired_browsing_client_enqueuing() {
+		$handle = 'amp-paired-browsing-client';
+
+		// The conditions aren't met, so this should not enqueue the script.
+		$_GET[ AMP_Theme_Support::PAIRED_BROWSING_QUERY_VAR ] = '1';
+		AMP_Theme_Support::setup_paired_browsing_client();
+		$this->assertFalse( wp_script_is( $handle ) );
+
+		// Only one condition is met, so this should still not enqueue the script.
+		unset( $_GET[ AMP_Theme_Support::PAIRED_BROWSING_QUERY_VAR ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		AMP_Theme_Support::setup_paired_browsing_client();
+		$this->assertFalse( wp_script_is( $handle ) );
+
+		// Both of the conditions to enqueue are met.
+		add_filter( 'amp_dev_mode_enabled', '__return_true' );
+		AMP_Theme_Support::setup_paired_browsing_client();
+		$this->assertTrue( wp_script_is( $handle ) );
+	}
+
+	/**
+	 * Gets the test data for test_setup_paired_browsing_client_filter().
+	 *
+	 * @return array The test data.
+	 */
+	public function get_setup_paired_browsing_data() {
+		$original_script_tag      = '<script src="foo"></script>'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$script_tag_with_dev_mode = '<script data-ampdevmode src="foo"></script>'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+
+		return [
+			'no_parent_of_dependency'      => [
+				'',
+				$original_script_tag,
+				null,
+			],
+			'wrong_parent_of_dependency'   => [
+				'different-handle-completely',
+				$original_script_tag,
+				null,
+			],
+			'correct_parent_of_dependency' => [
+				'amp-paired-browsing-client',
+				$original_script_tag,
+				$script_tag_with_dev_mode,
+			],
+		];
+	}
+
+	/**
+	 * Test the filter in setup_paired_browsing_client().
+	 *
+	 * @dataProvider get_setup_paired_browsing_data
+	 * @covers AMP_Theme_Support::setup_paired_browsing_client()
+	 *
+	 * @param string $parent_of_dependency The script that has a dependency on the dependency handle.
+	 * @param string $original_script_tag  The <script> tag passed to the filter.
+	 * @param string $expected             The expected return value.
+	 */
+	public function test_setup_paired_browsing_client_filter( $parent_of_dependency, $original_script_tag, $expected ) {
+		if ( null === $expected ) {
+			$expected = $original_script_tag;
+		}
+
+		add_theme_support( AMP_Theme_Support::SLUG );
+		$this->go_to( get_permalink( self::factory()->post->create() ) );
+		add_filter( 'amp_dev_mode_enabled', '__return_true' );
+		$src               = 'https://example.com/script.js';
+		$dependency_handle = 'foo-handle';
+
+		wp_enqueue_script( $dependency_handle, $src, [], '0.1.0', true );
+		wp_enqueue_script( $parent_of_dependency, $src, [ $dependency_handle ], '0.1', true );
+		AMP_Theme_Support::setup_paired_browsing_client();
+
+		$this->assertEquals(
+			$expected,
+			apply_filters( 'script_loader_tag', $original_script_tag, $dependency_handle, '' )
+		);
 	}
 
 	/**

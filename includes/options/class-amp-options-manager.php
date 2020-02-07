@@ -733,7 +733,11 @@ class AMP_Options_Manager {
 					}
 				}
 
-				$invalid_url_post_id    = AMP_Validated_URL_Post_Type::store_validation_errors( $errors, $url );
+				$invalid_url_post_id    = AMP_Validated_URL_Post_Type::store_validation_errors(
+					$errors,
+					$url,
+					wp_array_slice_assoc( $validation, [ 'queried_object', 'stylesheets' ] )
+				);
 				$invalid_url_screen_url = ! is_wp_error( $invalid_url_post_id ) ? get_edit_post_link( $invalid_url_post_id, 'raw' ) : null;
 
 				if ( $rejected_errors > 0 ) {

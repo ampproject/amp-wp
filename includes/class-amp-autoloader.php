@@ -117,7 +117,6 @@ class AMP_Autoloader {
 		'AMP_Story_Sanitizer'                => 'includes/sanitizers/class-amp-story-sanitizer',
 		'AMP_Story_Export_Sanitizer'         => 'includes/sanitizers/class-amp-story-export-sanitizer',
 		'AMP_Test_Stub_Sanitizer'            => 'tests/php/stubs',
-		'AMP_Test_World_Sanitizer'           => 'tests/php/stubs',
 		'AMP_Test_HandleValidation'          => 'tests/php/validation/trait-handle-validation',
 	];
 

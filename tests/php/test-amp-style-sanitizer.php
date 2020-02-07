@@ -356,7 +356,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				[
 					'form [submit-success] b{color:green}', // The [submit-failure] selector is removed because there is no div[submit-failure].
 					'amp-live-list li .highlighted{background:yellow}',
-					'',
 					'body amp-list .portland{color:blue}',
 					'amp-script .loaded{color:brown}',
 				],
@@ -468,7 +467,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'.amp-mode-mouse{color:bisque}',
 					'.amp-mode-keyboard-active{color:burlywood}',
 					'.amp-referrer-www-google-com{color:red}',
-					'', // Because there is no <form>, <amp-carousel>, and no non-existent.
 				],
 				[],
 			],
@@ -530,7 +528,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'.amp-iso-country-us{color:oldlace}',
 					'.amp-video-eq{display:none}',
 					'#accord section[expanded]{outline:solid 1px blue}',
-					'', // Because no non-existent.
 				],
 				[],
 			],
@@ -591,7 +588,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$whitelist_sanitizer->sanitize();
 
 		$sanitized_html     = $dom->saveHTML( $dom->documentElement );
-		$actual_stylesheets = array_values( $sanitizer->get_stylesheets() );
+		$actual_stylesheets = array_values( array_filter( $sanitizer->get_stylesheets() ) );
 		$this->assertEquals( $expected_errors, $error_codes );
 		$this->assertCount( count( $expected_stylesheets ), $actual_stylesheets );
 		foreach ( $expected_stylesheets as $i => $expected_stylesheet ) {
@@ -1307,128 +1304,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			[ AMP_Style_Sanitizer::STYLESHEET_TOO_LONG ],
 			$error_codes
 		);
-	}
-
-	/**
-	 * Make sure that the manifest contains the expected values.
-	 *
-	 * @covers AMP_Style_Sanitizer::finalize_styles()
-	 */
-	public function test_css_manifest() {
-		$get_sanitized_dom = static function ( $sanitizer_args, $add_excessive_css = false ) {
-			ob_start();
-			?>
-			<html amp>
-			<head>
-				<meta charset="utf-8">
-				<style class="body">body{color:red}</style>
-				<style class="foo1">.foo{color:green}</style>
-				<style class="foo2">.foo{color:green}</style>
-				<style class="foo3">.foo{color:green}</style>
-				<style class="bard">.bard{color:blue}</style>
-				<?php
-				if ( $add_excessive_css ) {
-					$custom_max_size = null;
-					foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( 'style' ) as $spec_rule ) {
-						if ( isset( $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) && 'style amp-custom' === $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) {
-							$custom_max_size = $spec_rule[ AMP_Rule_Spec::CDATA ]['max_bytes'];
-							break;
-						}
-					}
-					if ( ! $custom_max_size ) {
-						throw new Exception( 'Could not find amp-custom max_bytes' );
-					}
-					echo '<style class="excessive">';
-					printf( 'body::after{content:"%s"}', str_repeat( 'a', $custom_max_size + 1 ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-					echo '</style>';
-				}
-				?>
-			</head>
-			<body><p class="foo">Hi</p></body>
-			</html>
-			<?php
-			$html = ob_get_clean();
-
-			$error_codes = [];
-			$dom         = Document::fromHtml( $html );
-			$sanitizer   = new AMP_Style_Sanitizer(
-				$dom,
-				array_merge(
-					[
-						'use_document_element'      => true,
-						'validation_error_callback' => static function( $error ) use ( &$error_codes ) {
-							$error_codes[] = $error['code'];
-						},
-					],
-					$sanitizer_args
-				)
-			);
-			$sanitizer->sanitize();
-			$style = $dom->xpath->query( '//style[ @amp-custom ]' )->item( 0 );
-
-			return [ $style, $error_codes ];
-		};
-
-		// Test that it contains the comment with duplicate styles removed without tree shaking.
-		list( $style, $error_codes ) = $get_sanitized_dom(
-			[
-				'include_manifest_comment' => 'never',
-			],
-			false
-		);
-		$this->assertEmpty( $error_codes );
-		$this->assertNotInstanceOf( 'DOMComment', $style->previousSibling );
-
-		// Test that it contains the comment with duplicate styles removed without tree shaking.
-		list( $style, $error_codes ) = $get_sanitized_dom(
-			[
-				'include_manifest_comment' => 'never',
-			],
-			false
-		);
-		$this->assertEmpty( $error_codes );
-		$this->assertNotInstanceOf( 'DOMComment', $style->previousSibling );
-
-		// Test that it contains the comment with duplicate styles removed with tree shaking.
-		list( $style, $error_codes ) = $get_sanitized_dom(
-			[
-				'include_manifest_comment' => 'always',
-			],
-			false
-		);
-		$this->assertEmpty( $error_codes );
-		$this->assertInstanceOf( 'DOMComment', $style->previousSibling, 'Expected manifest comment to be present because excessive.' );
-		$comment = $style->previousSibling;
-		$this->assertContains( 'The style[amp-custom] element is populated with', $comment->nodeValue );
-		$this->assertNotContains( 'The following stylesheets are too large to be included', $comment->nodeValue );
-		$this->assertRegExp( '/15 B\s*:\s*style.body/', $comment->nodeValue );
-		$this->assertNotRegExp( '/17 B\s*:\s*style.foo1/', $comment->nodeValue );
-		$this->assertRegExp( '/0 B\s*:\s*style.bard/', $comment->nodeValue );
-		$this->assertNotContains( 'style.foo2', $comment->nodeValue );
-		$this->assertContains( 'style.foo3', $comment->nodeValue );
-		$this->assertContains( 'Total included size: 32 bytes (72% of 44 total after tree shaking)', $comment->nodeValue );
-
-		// Test that it contains the comment with duplicate styles removed with excessive CSS.
-		list( $style, $error_codes ) = $get_sanitized_dom(
-			[
-				'include_manifest_comment' => 'when_excessive',
-			],
-			true
-		);
-		$this->assertEquals( [ AMP_Style_Sanitizer::STYLESHEET_TOO_LONG ], $error_codes );
-		$this->assertInstanceOf( 'DOMComment', $style->previousSibling, 'Expected manifest comment to be present because excessive.' );
-		$comment = $style->previousSibling;
-		$this->assertContains( 'The style[amp-custom] element is populated with', $comment->nodeValue );
-		$this->assertContains( 'The following stylesheets are too large to be included', $comment->nodeValue );
-		$this->assertRegExp( '/15 B\s*:\s*style.body/', $comment->nodeValue );
-		$this->assertNotRegExp( '/17 B\s*:\s*style.foo1/', $comment->nodeValue );
-		$this->assertRegExp( '/0 B\s*:\s*style.bard/', $comment->nodeValue );
-		$this->assertNotContains( 'style.foo2', $comment->nodeValue );
-		$this->assertContains( 'style.foo3', $comment->nodeValue );
-		$this->assertContains( 'Total included size: 32 bytes (72% of 44 total after tree shaking)', $comment->nodeValue );
-		$this->assertRegExp( '/50024 B\s*:\s*style.excessive/', $comment->nodeValue );
-		$this->assertContains( 'Total excluded size: 50,024 bytes (100% of 50,024 total after tree shaking)', $comment->nodeValue );
-		$this->assertContains( 'Total combined size: 50,056 bytes (99% of 50,068 total after tree shaking)', $comment->nodeValue );
 	}
 
 	/**
@@ -2241,7 +2116,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Test style element with old-school XHTML CDATA.
 	 *
-	 * @covers \AMP_Style_Sanitizer::prepare_stylesheet()
+	 * @covers \AMP_Style_Sanitizer::parse_stylesheet()
 	 */
 	public function test_style_element_cdata() {
 		$html  = '<!DOCTYPE html><html amp><head><meta charset="utf-8">';

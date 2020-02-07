@@ -53,9 +53,10 @@ class AMP_Content_Sanitizer {
 	 * @return array {
 	 *     Scripts and stylesheets needed by sanitizers.
 	 *
-	 *     @type array $scripts     Scripts.
-	 *     @type array $stylesheets Stylesheets. If $args['return_styles'] is empty.
-	 *     @type array $styles      Styles. If $args['return_styles'] is not empty. For legacy purposes.
+	 *     @type array                $scripts     Scripts.
+	 *     @type array                $stylesheets Stylesheets. If $args['return_styles'] is empty.
+	 *     @type array                $styles      Styles. If $args['return_styles'] is not empty. For legacy purposes.
+	 *     @type AMP_Base_Sanitizer[] $sanitizers  Sanitizers.
 	 * }
 	 */
 	public static function sanitize_document( Document $dom, $sanitizer_classes, $args ) {
@@ -128,7 +129,7 @@ class AMP_Content_Sanitizer {
 			AMP_HTTP::send_server_timing( 'amp_sanitize', -$sanitize_class_start, $sanitizer_class );
 		}
 
-		return compact( 'scripts', 'styles', 'stylesheets' );
+		return compact( 'scripts', 'styles', 'stylesheets', 'sanitizers' );
 	}
 }
 
