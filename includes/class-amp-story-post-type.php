@@ -104,7 +104,7 @@ class AMP_Story_Post_Type {
 	 */
 	public static function has_required_block_capabilities() {
 		if ( defined( 'GUTENBERG_DEVELOPMENT_MODE' ) ) {
-			return (bool) GUTENBERG_DEVELOPMENT_MODE;
+			return false;
 		}
 
 		// If Gutenberg is installed only versions 6.6.0 - 7.1.0 are supported.
