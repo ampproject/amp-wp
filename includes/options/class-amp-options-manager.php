@@ -616,7 +616,7 @@ class AMP_Options_Manager {
 						  		actions: [
 									{
 										url: 'https://amp-wp.org/documentation/amp-stories/exporting-stories/',
-										label: 'View how to export your Stories',
+										label: <?php echo wp_json_encode( __( 'View how to export your Stories', 'amp' ) ) ?>,
 									},
 								],
 						    }
