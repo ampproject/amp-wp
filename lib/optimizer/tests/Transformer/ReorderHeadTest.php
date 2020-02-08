@@ -229,6 +229,30 @@ final class ReorderHeadTest extends TestCase
                 TestMarkup::LINK_CANONICAL . TestMarkup::STYLE_AMPBOILERPLATE . TestMarkup::NOSCRIPT_AMPBOILERPLATE .
                 '</head><body></body></html>',
             ],
+            'pulls up resource hints for amp resources' => [
+                TestMarkup::DOCTYPE . '<html ⚡><head>' .
+                TestMarkup::META_CHARSET . TestMarkup::META_VIEWPORT .
+                TestMarkup::SCRIPT_AMPRUNTIME . TestMarkup::SCRIPT_AMPAUDIO . TestMarkup::LINK_CANONICAL .
+                TestMarkup::STYLE_AMPBOILERPLATE . TestMarkup::NOSCRIPT_AMPBOILERPLATE .
+                '<link rel="preconnect" href="https://cdn.ampproject.org">' .
+                '<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">' .
+                '<link rel="dns-prefetch" href="//cdn.ampproject.org">' .
+                '<link rel="preload" as="script" href="cdn.ampproject.org">' .
+                '<link rel="preload" as="script" href="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js">' .
+                '</head><body></body></html>',
+
+                TestMarkup::DOCTYPE . '<html ⚡><head>' .
+                TestMarkup::META_CHARSET .
+                '<link rel="preconnect" href="https://cdn.ampproject.org">' .
+                '<link rel="dns-prefetch" href="//cdn.ampproject.org">' .
+                '<link rel="preload" as="script" href="cdn.ampproject.org">' .
+                '<link rel="preload" as="script" href="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js">' .
+                TestMarkup::META_VIEWPORT .
+                TestMarkup::SCRIPT_AMPRUNTIME . TestMarkup::SCRIPT_AMPAUDIO .
+                '<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">' .
+                TestMarkup::LINK_CANONICAL . TestMarkup::STYLE_AMPBOILERPLATE . TestMarkup::NOSCRIPT_AMPBOILERPLATE .
+                '</head><body></body></html>',
+            ]
         ];
     }
 

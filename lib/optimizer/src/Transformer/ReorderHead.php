@@ -46,9 +46,15 @@ use DOMNode;
 final class ReorderHead implements Transformer
 {
 
+    /**
+     * Regular expression pattern to match resource hints pointing to an Amp resource.
+     */
+    const AMP_RESOURCE_HINT_SRC_PATTERN = '#(^|[\b/])cdn\.ampproject\.org($|[\b/])#i';
+
     /*
      * Different categories of <head> tags to track and reorder.
      */
+    private $ampResourceHints                  = [];
     private $linkIcons                         = [];
     private $linkStyleAmpRuntime               = null;
     private $linkStylesheetsBeforeAmpCustom    = [];
@@ -243,7 +249,11 @@ final class ReorderHead implements Transformer
             || $this->containsWord($rel, Attribute::REL_DNS_PREFETCH)
             || $this->containsWord($rel, Attribute::REL_PRECONNECT)
         ) {
-            $this->resourceHintLinks[] = $node;
+            if ($this->isHintForAmp($node)) {
+                $this->ampResourceHints[] = $node;
+            } else {
+                $this->resourceHintLinks[] = $node;
+            }
             return;
         }
 
@@ -278,6 +288,7 @@ final class ReorderHead implements Transformer
     {
         $categories = [
             'metaCharset',
+            'ampResourceHints',
             'linkStyleAmpRuntime',
             'styleAmpRuntime',
             'metaOther',
@@ -341,5 +352,21 @@ final class ReorderHead implements Transformer
         }
 
         return preg_match('/\b' . preg_quote($needle, '/') . '\b/i', $haystack);
+    }
+
+    /**
+     * Check whether a given resource hint link element is pointing to an Amp resource.
+     *
+     * @param DOMElement $node Link element to check.
+     * @return bool Whether the link element is pointing to an Amp resource.
+     */
+    private function isHintForAmp(DOMElement $node)
+    {
+        $href = $node->getAttribute(Attribute::HREF);
+        if (empty($href)) {
+            return false;
+        }
+
+        return (bool)preg_match(self::AMP_RESOURCE_HINT_SRC_PATTERN, $href);
     }
 }
