@@ -232,12 +232,14 @@ class AMP_Options_Menu {
 								$gutenberg = 'Gutenberg';
 								// Link to Gutenberg plugin installation if eligible.
 								if ( current_user_can( 'install_plugins' ) ) {
-									$gutenberg = '<a href="' . esc_url( add_query_arg( 'tab', 'beta', admin_url( 'plugin-install.php' ) ) ) . '">' . $gutenberg . '</a>';
+									$gutenberg = '<a href="' . esc_url( add_query_arg( 'tab', 'featured', admin_url( 'plugin-install.php' ) ) ) . '">' . $gutenberg . '</a>';
 								}
 								printf(
-									/* translators: 1: WordPress version number. 2: Gutenberg plugin name */
-									esc_html__( 'To use stories, you must be running WordPress %1$s or higher, or have the latest version of the %2$s plugin activated.', 'amp' ),
+									/* translators: 1: WordPress version number. 2: Gutenberg plugin name,  */
+									esc_html__( 'To use Stories, you must be running WordPress %1$s, or have a version between %2$s and %3$s of the %4$s plugin activated.', 'amp' ),
 									'5.3',
+									'6.6.0',
+									'7.1.0',
 									$gutenberg // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 								);
 								?>
