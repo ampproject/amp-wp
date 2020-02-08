@@ -127,50 +127,58 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 
 		$parsed_url = wp_parse_url( $action_url );
 
-		// Ignore a malformed URL - it will be later sanitized.
-		if ( false !== $parsed_url ) {
-			// If there is no URL scheme or the scheme is not 'https', make it a schemeless URL.
-			if ( ! isset( $parsed_url['scheme'] ) || 'https' !== $parsed_url['scheme'] ) {
-				$parsed_url['scheme'] = '//';
+		if (
+			// Ignore a malformed URL - it will be later sanitized.
+			false === $parsed_url
+			||
+			// Ignore HTTPS URLs, because there is nothing left to do.
+			( isset( $parsed_url['scheme'] ) && 'https' === $parsed_url['scheme'] )
+			||
+			// Ignore protocol-relative URLs, because there is also nothing left to do.
+			( ! isset( $parsed_url['scheme'] ) && isset( $parsed_url['host'] ) )
+		) {
+			return $action_url;
+		}
 
-				// Set an empty path if none is defined but there is a host.
-				if ( ! isset( $parsed_url['path'] ) && isset( $parsed_url['host'] ) ) {
-					$parsed_url['path'] = '';
-				}
+		// Make URL protocol relative.
+		$parsed_url['scheme'] = '//';
 
-				if ( ! isset( $parsed_url['host'] ) ) {
-					$parsed_url['host'] = $_SERVER['HTTP_HOST'];
-				}
+		// Set an empty path if none is defined but there is a host.
+		if ( ! isset( $parsed_url['path'] ) && isset( $parsed_url['host'] ) ) {
+			$parsed_url['path'] = '';
+		}
 
-				if ( ! isset( $parsed_url['path'] ) ) {
-					// If there is action URL path, use the one from the request.
-					$parsed_url['path'] = trailingslashit( wp_unslash( $_SERVER['REQUEST_URI'] ) );
-				} elseif ( '' !== $parsed_url['path'] && '/' !== $parsed_url['path'][0] ) {
-					// If the path is relative, append it to the current request path.
-					$parsed_url['path'] = trailingslashit( wp_unslash( $_SERVER['REQUEST_URI'] ) ) . trailingslashit( $parsed_url['path'] );
-				}
+		if ( ! isset( $parsed_url['host'] ) ) {
+			$parsed_url['host'] = $_SERVER['HTTP_HOST'];
+		}
 
-				// Rebuild the URL.
-				$action_url = $parsed_url['scheme'];
-				if ( isset( $parsed_url['user'] ) ) {
-					$action_url .= $parsed_url['user'];
-					if ( isset( $parsed_url['pass'] ) ) {
-						$action_url .= ':' . $parsed_url['pass'];
-					}
-					$action_url .= '@';
-				}
-				$action_url .= $parsed_url['host'];
-				if ( isset( $parsed_url['port'] ) ) {
-					$action_url .= ':' . $parsed_url['port'];
-				}
-				$action_url .= $parsed_url['path'];
-				if ( isset( $parsed_url['query'] ) ) {
-					$action_url .= '?' . $parsed_url['query'];
-				}
-				if ( isset( $parsed_url['fragment'] ) ) {
-					$action_url .= '#' . $parsed_url['fragment'];
-				}
+		if ( ! isset( $parsed_url['path'] ) ) {
+			// If there is action URL path, use the one from the request.
+			$parsed_url['path'] = trailingslashit( wp_unslash( $_SERVER['REQUEST_URI'] ) );
+		} elseif ( '' !== $parsed_url['path'] && '/' !== $parsed_url['path'][0] ) {
+			// If the path is relative, append it to the current request path.
+			$parsed_url['path'] = trailingslashit( wp_unslash( $_SERVER['REQUEST_URI'] ) ) . trailingslashit( $parsed_url['path'] );
+		}
+
+		// Rebuild the URL.
+		$action_url = $parsed_url['scheme'];
+		if ( isset( $parsed_url['user'] ) ) {
+			$action_url .= $parsed_url['user'];
+			if ( isset( $parsed_url['pass'] ) ) {
+				$action_url .= ':' . $parsed_url['pass'];
 			}
+			$action_url .= '@';
+		}
+		$action_url .= $parsed_url['host'];
+		if ( isset( $parsed_url['port'] ) ) {
+			$action_url .= ':' . $parsed_url['port'];
+		}
+		$action_url .= $parsed_url['path'];
+		if ( isset( $parsed_url['query'] ) ) {
+			$action_url .= '?' . $parsed_url['query'];
+		}
+		if ( isset( $parsed_url['fragment'] ) ) {
+			$action_url .= '#' . $parsed_url['fragment'];
 		}
 
 		return esc_url_raw( $action_url );
