@@ -2241,17 +2241,17 @@ class AMP_Theme_Support {
 			}
 		}
 
-        $enable_optimizer = array_key_exists(ConfigurationArgument::ENABLE_OPTIMIZER, $args)
-            ? $args[ConfigurationArgument::ENABLE_OPTIMIZER]
-            : true;
+		$enable_optimizer = array_key_exists( ConfigurationArgument::ENABLE_OPTIMIZER, $args )
+			? $args[ ConfigurationArgument::ENABLE_OPTIMIZER ]
+			: true;
 
-        $enable_optimizer = apply_filters(Filter::ENABLE_OPTIMIZER, $enable_optimizer);
+		$enable_optimizer = apply_filters( Filter::ENABLE_OPTIMIZER, $enable_optimizer );
 
 		if ( $enable_optimizer ) {
-            $errors = new Optimizer\ErrorCollection();
-            self::get_optimizer( $args )->optimizeDom( $dom, $errors );
-            // @todo Deal with $errors.
-        }
+			$errors = new Optimizer\ErrorCollection();
+			self::get_optimizer( $args )->optimizeDom( $dom, $errors );
+			// @todo Deal with $errors.
+		}
 
 		self::ensure_required_markup( $dom, array_keys( $amp_scripts ) );
 
@@ -2316,7 +2316,7 @@ class AMP_Theme_Support {
 	/**
 	 * Optimizer instance to use.
 	 *
-     * @param array $args Associative array of arguments to pass into the transformation engine.
+	 * @param array $args Associative array of arguments to pass into the transformation engine.
 	 * @return Optimizer\TransformationEngine Optimizer transformation engine to use.
 	 */
 	private static function get_optimizer( $args ) {
@@ -2334,15 +2334,15 @@ class AMP_Theme_Support {
 	/**
 	 * Get the Amp\Optimizer configuration object to use.
 	 *
-     * @param array $args Associative array of arguments to pass into the transformation engine.
+	 * @param array $args Associative array of arguments to pass into the transformation engine.
 	 * @return Optimizer\Configuration Optimizer configuration to use.
 	 */
 	private static function get_optimizer_configuration( $args ) {
 		$transformers = Optimizer\Configuration::DEFAULT_TRANSFORMERS;
 
 		$enable_ssr = array_key_exists( ConfigurationArgument::ENABLE_SSR, $args )
-            ? $args[ ConfigurationArgument::ENABLE_SSR ]
-            : ( defined( 'WP_DEBUG' ) && WP_DEBUG );
+			? $args[ ConfigurationArgument::ENABLE_SSR ]
+			: ( defined( 'WP_DEBUG' ) && WP_DEBUG );
 
 		$enable_ssr = apply_filters( Filter::ENABLE_SSR, $enable_ssr );
 
@@ -2362,9 +2362,9 @@ class AMP_Theme_Support {
 		$configuration = apply_filters(
 			Filter::OPTIMIZER_CONFIG,
 			array_merge(
-			    [ Optimizer\Configuration::KEY_TRANSFORMERS => $transformers ],
-			    $args
-            )
+				[ Optimizer\Configuration::KEY_TRANSFORMERS => $transformers ],
+				$args
+			)
 		);
 
 		$config = new Optimizer\Configuration( $configuration );

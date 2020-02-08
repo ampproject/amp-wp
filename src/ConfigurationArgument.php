@@ -12,9 +12,9 @@ namespace Amp\AmpWP;
  *
  * @package Amp\AmpWP
  */
-interface ConfigurationArgument
-{
+interface ConfigurationArgument {
 
-    const ENABLE_OPTIMIZER = 'enable_optimizer';
-    const ENABLE_SSR       = 'enable_ssr';
+
+	const ENABLE_OPTIMIZER = 'enable_optimizer';
+	const ENABLE_SSR       = 'enable_ssr';
 }
