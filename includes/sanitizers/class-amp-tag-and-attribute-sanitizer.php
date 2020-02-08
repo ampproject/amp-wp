@@ -686,6 +686,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				 *
 				 * @var DOMAttr $attr_node
 				 * @var string  $error_code
+				 * @var array   $error_data
 				 */
 				list( $attr_node, $error_code, $error_data ) = $disallowed_attribute;
 				$validation_error['code']                    = $error_code;
@@ -722,12 +723,28 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					if ( $removed_property ) {
 						$node->setAttribute( $attr_node->nodeName, $valid_properties );
 					}
+				} elseif ( self::MISSING_REQUIRED_PROPERTY_VALUE === $error_code ) {
+					$validation_error['meta_property_name'] = $error_data['name'];
+					$validation_error['property_value']     = $error_data['required_value'];
+
+					$is_mandatory_property = isset( $merged_attr_spec_list[ $attr_node->nodeName ]['value_properties'][ $error_data['name'] ]['mandatory'] ) &&
+										  true === $merged_attr_spec_list[ $attr_node->nodeName ]['value_properties'][ $error_data['name'] ]['mandatory'];
+
+					if ( $is_mandatory_property && $this->should_sanitize_validation_error( $validation_error, [ 'node' => $attr_node ] ) ) {
+						// Replace invalid property value with required one.
+						$pattern     = preg_quote( $error_data['name'] . '=' . $error_data['value'], '/' );
+						$replacement = $error_data['name'] . '=' . $error_data['required_value'];
+						$attr_value  = preg_replace( "/$pattern/", $replacement, $node->getAttribute( $attr_node->nodeName ) );
+						$node->setAttribute( $attr_node->nodeName, $attr_value );
+					} elseif ( ! $is_mandatory_property ) {
+						$attr_spec = isset( $merged_attr_spec_list[ $attr_node->nodeName ] ) ? $merged_attr_spec_list[ $attr_node->nodeName ] : [];
+						if ( $this->remove_invalid_attribute( $node, $attr_node, $validation_error, $attr_spec ) ) {
+							$removed_attributes[] = $attr_node;
+						}
+					}
 				} else {
 					if ( self::MISSING_MANDATORY_PROPERTY === $error_code ) {
 						$validation_error['meta_property_name'] = $error_data['property'];
-					} elseif ( self::MISSING_REQUIRED_PROPERTY_VALUE === $error_code ) {
-						$validation_error['meta_property_name'] = $error_data['name'];
-						$validation_error['property_value']     = $error_data['value'];
 					}
 
 					$attr_spec = isset( $merged_attr_spec_list[ $attr_node->nodeName ] ) ? $merged_attr_spec_list[ $attr_node->nodeName ] : [];
@@ -2000,8 +2017,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 						[
 							self::MISSING_REQUIRED_PROPERTY_VALUE,
 							[
-								'name'  => $prop_name,
-								'value' => $required_value,
+								'name'           => $prop_name,
+								'value'          => $prop_value,
+								'required_value' => $required_value,
 							],
 						],
 					];
