@@ -1835,6 +1835,7 @@ class AMP_Theme_Support {
 		 * "7. Specify the <script> tags for remaining extensions (e.g., amp-bind ...). These extensions are not render-delaying
 		 * and therefore should not be preloaded as they might take away important bandwidth for the initial render."
 		 */
+		ksort( $amp_scripts );
 		$ordered_scripts = array_merge( $ordered_scripts, $amp_scripts );
 		foreach ( $ordered_scripts as $ordered_script ) {
 			$dom->head->insertBefore( $ordered_script, $previous_node->nextSibling );
