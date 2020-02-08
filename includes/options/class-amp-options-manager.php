@@ -582,18 +582,15 @@ class AMP_Options_Manager {
 				'toplevel_page_' . self::OPTION_NAME === get_current_screen()->id
 			)
 		) {
-			echo '<div class="notice notice-warning"><p>';
 			printf(
-				'%s %s %s',
-				esc_html__( 'The Stories experience is being extracted from the AMP plugin into a separate standalone plugin which will be available soon. Please backup or', 'amp' ),
+				'<div class="notice notice-warning"><p>%s %s</p></div>',
+				esc_html__( 'The Stories experience is being extracted from the AMP plugin into a separate standalone plugin which will be available soon. Please backup or export your existing Stories as they will not be available in the next version of the AMP plugin.', 'amp' ),
 				sprintf(
 					'<a href="%s">%s</a>',
 					esc_url( 'https://amp-wp.org/documentation/amp-stories/exporting-stories/' ),
-					esc_html__( 'export your existing Stories', 'amp' )
-				),
-				esc_html__( 'as they will not be available in the next version of the AMP plugin.', 'amp' )
+					esc_html__( 'View how to export your Stories', 'amp' )
+				)
 			);
-			echo '</p></div>';
 		} elseif ( ! self::is_stories_experience_enabled() && 'toplevel_page_' . self::OPTION_NAME === get_current_screen()->id ) {
 			printf(
 				'<div class="notice notice-info"><p>%s</p></div>',
@@ -616,13 +613,14 @@ class AMP_Options_Manager {
 						  		actions: [
 									{
 										url: 'https://amp-wp.org/documentation/amp-stories/exporting-stories/',
-										label: <?php echo wp_json_encode( __( 'View how to export your Stories', 'amp' ) ) ?>,
+										label: %s,
 									},
 								],
 						    }
 						);
 					} )( window.wp );",
-			wp_json_encode( __( 'The Stories experience is being extracted from the AMP plugin into a separate standalone plugin which will be available soon. Please backup or export your existing Stories as they will not be available in the next version of the AMP plugin.', 'amp' ) )
+			wp_json_encode( __( 'The Stories experience is being extracted from the AMP plugin into a separate standalone plugin which will be available soon. Please backup or export your existing Stories as they will not be available in the next version of the AMP plugin.', 'amp' ) ),
+			wp_json_encode( __( 'View how to export your Stories', 'amp' ) )
 		);
 
 		wp_add_inline_script( AMP_Story_Post_Type::AMP_STORIES_SCRIPT_HANDLE, $script );
