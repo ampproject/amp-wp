@@ -2114,8 +2114,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertNotEmpty( $this->get_etag_header_value( AMP_HTTP::$headers_sent ) );
 		unset( $_SERVER['HTTP_IF_NONE_MATCH'] );
 
-		$prepare_response_args['enable_response_caching'] = true;
-		$prepare_response_args[ConfigurationArgument::ENABLE_OPTIMIZER] = false;
+		$prepare_response_args['enable_response_caching']                 = true;
+		$prepare_response_args[ ConfigurationArgument::ENABLE_OPTIMIZER ] = false;
 
 		// Test that first response isn't cached.
 		$first_response                = $call_prepare_response();
