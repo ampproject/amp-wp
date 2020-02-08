@@ -19,6 +19,9 @@ interface Extension
     const MUSTACHE            = 'amp-mustache';
     const PIXEL               = 'amp-pixel';
     const SOCIAL_SHARE        = 'amp-social-share';
+    const STORY               = 'amp-story';
+    const VIDEO               = 'amp-video';
+    const YOUTUBE             = 'amp-youtube';
 
     /**
      * Prefix of an Amp extension.
@@ -26,5 +29,4 @@ interface Extension
      * @var string.
      */
     const PREFIX = 'amp-';
-    const STORY  = 'amp-story';
 }

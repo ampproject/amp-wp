@@ -24,6 +24,7 @@ interface Attribute
     const AMP_RUNTIME           = 'amp-runtime';
     const ARIA_HIDDEN           = 'aria-hidden';
     const ASYNC                 = 'async';
+    const AUTOPLAY              = 'autoplay';
     const CHARSET               = 'charset';
     const CLASS_                = 'class'; // Underscore needed because 'class' is a PHP keyword.
     const CONTENT               = 'content';
@@ -36,7 +37,9 @@ interface Attribute
     const HREF                  = 'href';
     const HTTP_EQUIV            = 'http-equiv';
     const I_AMPHTML_VERSION     = 'i-amphtml-version';
+    const ID                    = 'id';
     const LAYOUT                = 'layout';
+    const LOOP                  = 'loop';
     const MEDIA                 = 'media';
     const NAME                  = 'name';
     const REL                   = 'rel';
@@ -50,13 +53,16 @@ interface Attribute
     const ALL_AMP4ADS   = [self::AMP4ADS, self::AMP4ADS_EMOJI];
     const ALL_AMP4EMAIL = [self::AMP4EMAIL, self::AMP4EMAIL_EMOJI];
 
+    const TYPE_HTML    = 'text/html';
     const TYPE_JSON    = 'application/json';
     const TYPE_LD_JSON = 'application/ld+json';
 
+    const REL_CANONICAL    = 'canonical';
     const REL_DNS_PREFETCH = 'dns-prefetch';
     const REL_ICON         = 'icon';
     const REL_PRECONNECT   = 'preconnect';
     const REL_PREFETCH     = 'prefetch';
     const REL_PRELOAD      = 'preload';
+    const REL_PRERENDER    = 'prerender';
     const REL_STYLESHEET   = 'stylesheet';
 }

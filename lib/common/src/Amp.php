@@ -87,6 +87,13 @@ final class Amp
      */
     const AMP4ADS_AND_AMP4EMAIL_BOILERPLATE_CSS = 'body{visibility:hidden}';
 
+    /**
+     * Amp runtime tag name.
+     *
+     * @var string
+     */
+    const RUNTIME = 'runtime';
+
     // Amp classes reserved for internal use.
     const LAYOUT_ATTRIBUTE          = 'i-amphtml-layout';
     const NO_BOILERPLATE_ATTRIBUTE  = 'i-amphtml-no-boilerplate';
