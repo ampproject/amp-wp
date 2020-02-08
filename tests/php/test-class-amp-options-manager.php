@@ -266,8 +266,9 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 			$this->assertFalse( AMP_Options_Manager::is_website_experience_enabled() );
 
 			// Test that Stories experience is enabled if at least one post exists.
-			AMP_Story_Post_Type::register();
+			wp_cache_delete( 'count-' . AMP_Story_Post_Type::POST_TYPE_SLUG );
 			$this->factory()->post->create( [ 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ] );
+			AMP_Story_Post_Type::register();
 			$this->assertTrue( AMP_Options_Manager::is_stories_experience_enabled() );
 		}
 	}

@@ -179,6 +179,10 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		if ( ! AMP_Story_Post_Type::has_required_block_capabilities() ) {
 			$this->markTestSkipped( 'Environment does not support Stories.' );
 		}
+
+		// Create dummy post to keep Stories experience enabled.
+		self::factory()->post->create( [ 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ] );
+
 		AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::STORIES_EXPERIENCE ] );
 		AMP_Story_Post_Type::register();
 		// Create dummy post to keep Stories experience enabled.
@@ -1909,10 +1913,10 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		AMP_Validation_Manager::enqueue_block_validation();
 		$this->assertNotContains( $slug, wp_scripts()->queue );
 
-		AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::WEBSITE_EXPERIENCE, AMP_Options_Manager::STORIES_EXPERIENCE ] );
-		AMP_Story_Post_Type::register();
 		// Create dummy post to keep Stories experience enabled.
 		self::factory()->post->create( [ 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ] );
+		AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::WEBSITE_EXPERIENCE, AMP_Options_Manager::STORIES_EXPERIENCE ] );
+		AMP_Story_Post_Type::register();
 		$this->assertTrue( AMP_Options_Manager::is_website_experience_enabled() );
 		$this->assertTrue( AMP_Options_Manager::is_stories_experience_enabled() );
 		if ( post_type_exists( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {

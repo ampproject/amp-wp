@@ -79,7 +79,7 @@ class AMP_Options_Menu {
 			AMP_Options_Manager::OPTION_NAME
 		);
 
-		if ( AMP_Options_Manager::is_stories_experience_enabled() ) {
+		if ( AMP_Story_Post_Type::has_posts() ) {
 			add_settings_field(
 				'experiences',
 				__( 'Experiences', 'amp' ),
@@ -114,7 +114,7 @@ class AMP_Options_Menu {
 			]
 		);
 
-		if ( AMP_Options_Manager::is_stories_experience_enabled() ) {
+		if ( AMP_Story_Post_Type::has_posts() ) {
 			add_settings_field(
 				'stories_export',
 				__( 'Stories Export', 'amp' ),
@@ -141,7 +141,7 @@ class AMP_Options_Menu {
 		add_action(
 			'admin_print_styles',
 			static function() {
-				if ( ! AMP_Options_Manager::is_stories_experience_enabled() ) {
+				if ( ! AMP_Story_Post_Type::has_posts() ) {
 					return;
 				}
 				?>
@@ -225,7 +225,7 @@ class AMP_Options_Menu {
 					);
 					?>
 				</dd>
-				<?php if ( AMP_Options_Manager::is_stories_experience_enabled() ) : ?>
+				<?php if ( AMP_Story_Post_Type::has_posts() ) : ?>
 					<dt>
 						<input type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[experiences][]' ); ?>" id="stories_experience" value="<?php echo esc_attr( AMP_Options_Manager::STORIES_EXPERIENCE ); ?>" <?php disabled( ! $has_required_block_capabilities ); ?> <?php checked( in_array( AMP_Options_Manager::STORIES_EXPERIENCE, $experiences, true ) ); ?>>
 						<label for="stories_experience">

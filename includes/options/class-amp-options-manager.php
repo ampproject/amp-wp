@@ -207,15 +207,16 @@ class AMP_Options_Manager {
 	 * @return bool Enabled.
 	 */
 	public static function is_stories_experience_enabled() {
-		if ( 0 === AMP_Story_Post_Type::get_posts_count() ) {
-			unregister_post_type( AMP_Story_Post_Type::POST_TYPE_SLUG );
+		$stories_enabled = in_array( self::STORIES_EXPERIENCE, self::get_option( 'experiences' ), true );
+
+		if ( $stories_enabled && ! AMP_Story_Post_Type::has_posts() ) {
+			if ( post_type_exists( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
+				unregister_post_type( AMP_Story_Post_Type::POST_TYPE_SLUG );
+			}
 			return false;
 		}
 
-		return (
-			AMP_Story_Post_Type::has_required_block_capabilities() &&
-			in_array( self::STORIES_EXPERIENCE, self::get_option( 'experiences' ), true )
-		);
+		return AMP_Story_Post_Type::has_required_block_capabilities() && $stories_enabled;
 	}
 
 	/**
@@ -429,6 +430,10 @@ class AMP_Options_Manager {
 	 * @return bool Whether update succeeded.
 	 */
 	public static function update_option( $option, $value ) {
+		if ( 'experiences' === $option && in_array( self::STORIES_EXPERIENCE, $value, true ) ) {
+			wp_cache_delete( 'count-' . AMP_Story_Post_Type::POST_TYPE_SLUG );
+		}
+
 		$amp_options = self::get_options();
 
 		$amp_options[ $option ] = $value;
@@ -576,7 +581,7 @@ class AMP_Options_Manager {
 	 */
 	public static function render_stories_deprecation_notice() {
 		if (
-			self::is_stories_experience_enabled() &&
+			AMP_Story_Post_Type::has_posts() &&
 			(
 				'edit-amp_story' === get_current_screen()->id ||
 				'toplevel_page_' . self::OPTION_NAME === get_current_screen()->id

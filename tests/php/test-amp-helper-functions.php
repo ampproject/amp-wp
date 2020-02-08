@@ -1257,6 +1257,10 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			$this->markTestSkipped( 'Lacking required block capabilities.' );
 		}
 		AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::WEBSITE_EXPERIENCE, AMP_Options_Manager::STORIES_EXPERIENCE ] );
+
+		// Create dummy post to keep Stories experience enabled.
+		self::factory()->post->create( [ 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ] );
+
 		AMP_Story_Post_Type::register();
 
 		$site_icon_attachment_id   = $this->insert_site_icon_attachment( DIR_TESTDATA . '/images/33772.jpg' );
