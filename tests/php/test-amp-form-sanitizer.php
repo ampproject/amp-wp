@@ -109,6 +109,10 @@ class AMP_Form_Sanitizer_Test extends WP_UnitTestCase {
 				'<form method="post" action="../"></form>',
 				'#' . preg_quote( '<form method="post" action-xhr="//example.org/current-page/../?_wp_amp_action_xhr_converted=1" target="_top">', '#' ) . $form_template_pattern . '</form>#s',
 			],
+			'form_with_another_relative_path_action_url' => [
+				'<form method="post" action="foo/"></form>',
+				'#' . preg_quote( '<form method="post" action-xhr="//example.org/current-page/foo/?_wp_amp_action_xhr_converted=1" target="_top">', '#' ) . $form_template_pattern . '</form>#s',
+			],
 			'form_with_relative_query_action_url' => [
 				'<form method="post" action="?foo=bar"></form>',
 				'#' . preg_quote( '<form method="post" action-xhr="//example.org/current-page/?foo=bar&amp;_wp_amp_action_xhr_converted=1" target="_top">', '#' ) . $form_template_pattern . '</form>#s',
