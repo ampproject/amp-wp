@@ -10,7 +10,7 @@ CHECK_SCOPE=all
 function after_wp_install {
 	if [[ "$WP_VERSION" != "4.9" ]]; then
 		echo -n "Installing Gutenberg 7.1.0..."
-		gutenberg_plugin_svn_url=http://plugins.svn.wordpress.org/gutenberg/tags/7.1.0/
+		gutenberg_plugin_svn_url=https://plugins.svn.wordpress.org/gutenberg/tags/7.1.0/
 		svn export -q "$gutenberg_plugin_svn_url" "$WP_CORE_DIR/src/wp-content/plugins/gutenberg"
 		echo "done"
 	fi
