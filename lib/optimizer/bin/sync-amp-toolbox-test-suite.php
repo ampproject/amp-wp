@@ -37,6 +37,12 @@ function abort($message, $status = 1)
 
 function ensureDirExists($directory)
 {
+    $parent = dirname($directory);
+
+    if (! empty($parent) && ! is_dir($parent)) {
+        ensureDirExists($parent);
+    }
+
     if (! is_dir($directory) && ! mkdir($directory) && ! is_dir($directory)) {
         abort("Couldn't create directory '{$directory}'.");
     }
@@ -62,6 +68,10 @@ if ($res !== true) {
 for ($index = 0; $index < $zip->numFiles; $index++) {
     $archivedPath = $zip->statIndex($index)['name'];
 
+    if (substr($archivedPath, -5) !== '.html') {
+        continue;
+    }
+
     if (strpos($archivedPath, $targetSubFolder) !== 0) {
         continue;
     }
@@ -74,12 +84,7 @@ for ($index = 0; $index < $zip->numFiles; $index++) {
 
     $targetPath = "{$targetFolder}/{$targetName}";
 
-    if (substr($targetPath, -1) === DIRECTORY_SEPARATOR) {
-        echo "Creating folder '{$targetName}' ... ";
-        ensureDirExists($targetPath);
-        echo "OK.\n";
-        continue;
-    }
+    ensureDirExists(dirname($targetPath));
 
     echo "Extracting '{$targetName}' ... ";
     $targetFile = $zip->getStream($archivedPath);
