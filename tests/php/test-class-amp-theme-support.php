@@ -6,9 +6,11 @@
  * @since 0.7
  */
 
-use Amp\Dom\Document;
-use org\bovigo\vfs;
+use Amp\AmpWP\ConfigurationArgument;
 use Amp\AmpWP\Tests\PrivateAccess;
+use Amp\Dom\Document;
+use Amp\Optimizer;
+use org\bovigo\vfs;
 
 /**
  * Tests for Theme Support.
@@ -1985,6 +1987,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		);
 
 		wp();
+
 		$prepare_response_args = [
 			'enable_response_caching' => false,
 		];
@@ -2007,8 +2010,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertEquals( 2, substr_count( $sanitized_html, '<!-- wp_print_scripts -->' ) );
 
 		$ordered_contains = [
-			'<html amp="">',
-			'<meta charset="' . strtolower( get_bloginfo( 'charset' ) ) . '">',
+			'<html amp=""',
+			'<meta charset="' . Document::AMP_ENCODING . '">',
 			'<meta name="viewport" content="width=device-width">',
 			'<meta name="generator" content="AMP Plugin',
 			'<title>',
@@ -2016,11 +2019,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			'<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">',
 			'<link rel="dns-prefetch" href="//cdn.ampproject.org">',
 			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0.js">',
-			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0/amp-experiment-1.0.js">',
 			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js">',
+			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0/amp-experiment-1.0.js">',
 			'<script type="text/javascript" src="https://cdn.ampproject.org/v0.js" async></script>',
-			'<script src="https://cdn.ampproject.org/v0/amp-experiment-1.0.js" async="" custom-element="amp-experiment"></script>',
 			'<script async custom-element="amp-dynamic-css-classes" src="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js"></script>',
+			'<script src="https://cdn.ampproject.org/v0/amp-experiment-1.0.js" async="" custom-element="amp-experiment"></script>',
 			'<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-list-0.1.js" async custom-element="amp-list"></script>',
 			'<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-mathml-0.1.js" async custom-element="amp-mathml"></script>',
 
@@ -2167,7 +2170,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$original_html = $this->get_original_html();
 		add_filter( 'amp_validation_error_sanitized', '__return_false' ); // For testing purpose only. This should not normally be done.
 
-		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
+		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html, [ ConfigurationArgument::ENABLE_OPTIMIZER => false ] );
 
 		$this->assertContains( '<html>', $sanitized_html, 'The AMP attribute is removed from the HTML element' );
 		$this->assertContains( '<button onclick="alert', $sanitized_html, 'Invalid AMP is present in the response.' );

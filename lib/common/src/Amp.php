@@ -92,7 +92,7 @@ final class Amp
      *
      * @var string
      */
-    const RUNTIME = 'runtime';
+    const RUNTIME = 'amp-runtime';
 
     // Amp classes reserved for internal use.
     const LAYOUT_ATTRIBUTE          = 'i-amphtml-layout';

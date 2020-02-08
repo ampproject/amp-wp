@@ -7,6 +7,8 @@
 
 use Amp\Amp;
 use Amp\AmpWP\CachedRemoteRequest;
+use Amp\AmpWP\ConfigurationArgument;
+use Amp\AmpWP\Filter;
 use Amp\AmpWP\Transformer;
 use Amp\Attribute;
 use Amp\Dom\Document;
@@ -1943,7 +1945,7 @@ class AMP_Theme_Support {
 	 * @since 0.7
 	 *
 	 * @param string $response HTML document response. By default it expects a complete document.
-	 * @param array  $args     Args to send to the preprocessor/sanitizer.
+	 * @param array  $args     Args to send to the preprocessor/sanitizer/optimizer.
 	 * @return string AMP document response.
 	 * @global int $content_width
 	 */
@@ -2239,9 +2241,17 @@ class AMP_Theme_Support {
 			}
 		}
 
-		$errors = new Optimizer\ErrorCollection();
-		self::get_optimizer()->optimizeDom( $dom, $errors );
-		// @todo Deal with $errors.
+        $enable_optimizer = array_key_exists(ConfigurationArgument::ENABLE_OPTIMIZER, $args)
+            ? $args[ConfigurationArgument::ENABLE_OPTIMIZER]
+            : true;
+
+        $enable_optimizer = apply_filters(Filter::ENABLE_OPTIMIZER, $enable_optimizer);
+
+		if ( $enable_optimizer ) {
+            $errors = new Optimizer\ErrorCollection();
+            self::get_optimizer( $args )->optimizeDom( $dom, $errors );
+            // @todo Deal with $errors.
+        }
 
 		self::ensure_required_markup( $dom, array_keys( $amp_scripts ) );
 
@@ -2306,10 +2316,11 @@ class AMP_Theme_Support {
 	/**
 	 * Optimizer instance to use.
 	 *
+     * @param array $args Associative array of arguments to pass into the transformation engine.
 	 * @return Optimizer\TransformationEngine Optimizer transformation engine to use.
 	 */
-	private static function get_optimizer() {
-		$configuration = self::get_optimizer_configuration();
+	private static function get_optimizer( $args ) {
+		$configuration = self::get_optimizer_configuration( $args );
 
 		// @todo Replace CurlRemoteRequest with a Requests version?
 		$remote_request = new CachedRemoteRequest( new CurlRemoteRequest() );
@@ -2323,13 +2334,20 @@ class AMP_Theme_Support {
 	/**
 	 * Get the Amp\Optimizer configuration object to use.
 	 *
+     * @param array $args Associative array of arguments to pass into the transformation engine.
 	 * @return Optimizer\Configuration Optimizer configuration to use.
 	 */
-	private static function get_optimizer_configuration() {
+	private static function get_optimizer_configuration( $args ) {
 		$transformers = Optimizer\Configuration::DEFAULT_TRANSFORMERS;
 
+		$enable_ssr = array_key_exists( ConfigurationArgument::ENABLE_SSR, $args )
+            ? $args[ ConfigurationArgument::ENABLE_SSR ]
+            : ( defined( 'WP_DEBUG' ) && WP_DEBUG );
+
+		$enable_ssr = apply_filters( Filter::ENABLE_SSR, $enable_ssr );
+
 		// In debugging mode, we don't use server-side rendering, as it further obfuscates the HTML markup.
-		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+		if ( ! $enable_ssr ) {
 			$transformers = array_diff(
 				$transformers,
 				[
@@ -2342,8 +2360,11 @@ class AMP_Theme_Support {
 		array_unshift( $transformers, Transformer\AmpSchemaOrgMetadata::class );
 
 		$configuration = apply_filters(
-			'amp_optimizer_config',
-			[ Optimizer\Configuration::KEY_TRANSFORMERS => $transformers ]
+			Filter::OPTIMIZER_CONFIG,
+			array_merge(
+			    [ Optimizer\Configuration::KEY_TRANSFORMERS => $transformers ],
+			    $args
+            )
 		);
 
 		$config = new Optimizer\Configuration( $configuration );
