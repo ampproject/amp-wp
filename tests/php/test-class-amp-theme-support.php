@@ -1786,7 +1786,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		<?php
 		// phpcs:enable WordPress.WP.EnqueuedResources.NonEnqueuedScript
 		$html = ob_get_clean();
-		$html = AMP_Theme_Support::prepare_response( $html );
+		$html = AMP_Theme_Support::prepare_response( $html, [ ConfigurationArgument::ENABLE_OPTIMIZER => false ] );
 
 		$dom = Document::fromHtml( $html );
 
@@ -2031,16 +2031,17 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			'<script src="https://cdn.ampproject.org/v0/amp-audio-0.1.js" async="" custom-element="amp-audio"></script>',
 			'<script src="https://cdn.ampproject.org/v0/amp-ad-0.1.js" async="" custom-element="amp-ad"></script>',
 
-			'#<style amp-custom(="")?>.*?body\s*{\s*background:\s*black;?\s*}.*?</style>#s',
-
-			'<link crossorigin="anonymous" rel="stylesheet" id="my-font-css" href="https://fonts.googleapis.com/css?family=Tangerine" type="text/css" media="all">',
 			'<link rel="icon" href="https://example.org/favicon.png" sizes="32x32">',
 			'<link rel="icon" href="https://example.org/favicon.png" sizes="192x192">',
+			'<link crossorigin="anonymous" rel="stylesheet" id="my-font-css" href="https://fonts.googleapis.com/css?family=Tangerine" type="text/css" media="all">',
+
+			'#<style amp-custom(="")?>.*?body\s*{\s*background:\s*black;?\s*}.*?</style>#s',
+
 			'<script type="application/ld+json">{"@context"',
-			'<link rel="canonical" href="',
 
 			'#<style amp-boilerplate(="")?>#',
 			'#<noscript><style amp-boilerplate(="")?>#',
+			'<link rel="canonical" href="',
 			'</head>',
 		];
 
@@ -2114,6 +2115,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		unset( $_SERVER['HTTP_IF_NONE_MATCH'] );
 
 		$prepare_response_args['enable_response_caching'] = true;
+		$prepare_response_args[ConfigurationArgument::ENABLE_OPTIMIZER] = false;
 
 		// Test that first response isn't cached.
 		$first_response                = $call_prepare_response();
