@@ -593,7 +593,7 @@ class AMP_Options_Manager {
 		) {
 			printf(
 				'<div class="notice notice-warning"><p>%s %s</p></div>',
-				esc_html__( 'The Stories experience is being extracted from the AMP plugin into a separate standalone plugin which will be available soon. Please backup or export your existing Stories as they will not be available in the next version of the AMP plugin.', 'amp' ),
+				esc_html__( 'The Stories experience is being extracted from the AMP plugin into a separate standalone plugin which will be available soon. Please back up or export your existing Stories as they will not be available in the next version of the AMP plugin.', 'amp' ),
 				sprintf(
 					'<a href="%s">%s</a>',
 					esc_url( 'https://amp-wp.org/documentation/amp-stories/exporting-stories/' ),
@@ -628,7 +628,7 @@ class AMP_Options_Manager {
 						    }
 						);
 					} )( window.wp );",
-			wp_json_encode( __( 'The Stories experience is being extracted from the AMP plugin into a separate standalone plugin which will be available soon. Please backup or export your existing Stories as they will not be available in the next version of the AMP plugin.', 'amp' ) ),
+			wp_json_encode( __( 'The Stories experience is being extracted from the AMP plugin into a separate standalone plugin which will be available soon. Please back up or export your existing Stories as they will not be available in the next version of the AMP plugin.', 'amp' ) ),
 			wp_json_encode( __( 'View how to export your Stories', 'amp' ) )
 		);
 
