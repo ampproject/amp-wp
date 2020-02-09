@@ -261,15 +261,15 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$this->assertEquals( 'http://example.org/test-post', get_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, null ) );
 
 		if ( AMP_Story_Post_Type::has_required_block_capabilities() ) {
+			// Create dummy post to keep Stories experience enabled.
+			self::factory()->post->create( [ 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ] );
+
 			// Test that enabling Stories experience will not work if posts do not exist.
 			AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::STORIES_EXPERIENCE ] );
 			// Website experience is considered enabled if there are no Story posts and the experience is disabled.
-			$this->assertTrue( AMP_Options_Manager::is_website_experience_enabled() );
+			$this->assertFalse( AMP_Options_Manager::is_website_experience_enabled() );
 
 			// Test that Stories experience is enabled if at least one post exists.
-			wp_cache_delete( 'count-' . AMP_Story_Post_Type::POST_TYPE_SLUG );
-			$this->factory()->post->create( [ 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ] );
-			AMP_Story_Post_Type::register();
 			$this->assertTrue( AMP_Options_Manager::is_stories_experience_enabled() );
 		}
 	}
