@@ -234,7 +234,7 @@ class AMP_Options_Manager {
 
 		// Experiences.
 		if ( ! isset( $new_options['experiences'][ self::STORIES_EXPERIENCE ] ) && ! AMP_Story_Post_Type::has_posts() ) {
-			// If there are no Story posts and the experience is disabled, only the Website experience is considered enabled.
+			// If there are no Story posts and the Story experience is disabled, only the Website experience is considered enabled.
 			$options['experiences'] = [ self::WEBSITE_EXPERIENCE ];
 		} elseif ( isset( $new_options['experiences'] ) && is_array( $new_options['experiences'] ) ) {
 			// Validate the selected experiences.

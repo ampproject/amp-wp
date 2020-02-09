@@ -263,7 +263,8 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		if ( AMP_Story_Post_Type::has_required_block_capabilities() ) {
 			// Test that enabling Stories experience will not work if posts do not exist.
 			AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::STORIES_EXPERIENCE ] );
-			$this->assertFalse( AMP_Options_Manager::is_website_experience_enabled() );
+			// Website experience is considered enabled if there are no Story posts and the experience is disabled.
+			$this->assertTrue( AMP_Options_Manager::is_website_experience_enabled() );
 
 			// Test that Stories experience is enabled if at least one post exists.
 			wp_cache_delete( 'count-' . AMP_Story_Post_Type::POST_TYPE_SLUG );
