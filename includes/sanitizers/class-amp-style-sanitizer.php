@@ -41,7 +41,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	const CSS_SYNTAX_INVALID_IMPORTANT       = 'CSS_SYNTAX_INVALID_IMPORTANT';
 	const CSS_SYNTAX_PARSE_ERROR             = 'CSS_SYNTAX_PARSE_ERROR';
 	const STYLESHEET_TOO_LONG                = 'STYLESHEET_TOO_LONG';
-	const STYLESHEET_INVALID_FILE_URL        = 'STYLESHEET_INVALID_FILE_URL';
+	const STYLESHEET_FETCH_ERROR             = 'STYLESHEET_FETCH_ERROR';
 
 	// These are internal to the sanitizer and not exposed as validation error codes.
 	const STYLESHEET_DISALLOWED_FILE_EXT   = 'STYLESHEET_DISALLOWED_FILE_EXT';
@@ -344,7 +344,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			self::CSS_SYNTAX_INVALID_PROPERTY,
 			self::CSS_SYNTAX_INVALID_PROPERTY_NOLIST,
 			self::CSS_SYNTAX_PARSE_ERROR,
-			self::STYLESHEET_INVALID_FILE_URL,
+			self::STYLESHEET_FETCH_ERROR,
 			self::STYLESHEET_TOO_LONG,
 		];
 	}
@@ -1286,10 +1286,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$this->remove_invalid_child(
 				$element,
 				[
-					// @todo Also include details about the error.
-					'code' => self::STYLESHEET_INVALID_FILE_URL,
-					'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
-					'url'  => $normalized_url,
+					'code'    => self::STYLESHEET_FETCH_ERROR,
+					'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+					'url'     => $normalized_url,
+					'message' => $stylesheet->get_error_message(),
 				]
 			);
 			return;
@@ -1366,12 +1366,20 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return string|WP_Error Stylesheet contents or WP_Error.
 	 */
 	private function fetch_external_stylesheet( $url ) {
+
+		// Prepend schemeless stylesheet URL with the same URL scheme as the current site.
+		if ( '//' === substr( $url, 0, 2 ) ) {
+			$url = wp_parse_url( home_url(), PHP_URL_SCHEME ) . ':' . $url;
+		}
+
 		$cache_key = md5( $url );
 		$contents  = get_transient( $cache_key );
 		if ( false === $contents ) {
 			$r    = wp_remote_get( $url );
 			$code = wp_remote_retrieve_response_code( $r );
-			if ( $code < 200 || $code >= 300 ) {
+			if ( is_wp_error( $r ) ) {
+				$contents = $r;
+			} elseif ( $code < 200 || $code >= 300 ) {
 				$message = wp_remote_retrieve_response_message( $r );
 				if ( ! $code ) {
 					$code = 'http_error';
@@ -1547,10 +1555,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$stylesheet = $this->get_stylesheet_from_url( $import_stylesheet_url );
 		if ( $stylesheet instanceof WP_Error ) {
 			$error     = [
-				// @todo Also include details about the error.
-				'code' => self::STYLESHEET_INVALID_FILE_URL,
-				'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
-				'url'  => $import_stylesheet_url,
+				'code'    => self::STYLESHEET_FETCH_ERROR,
+				'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+				'url'     => $import_stylesheet_url,
+				'message' => $stylesheet->get_error_message(),
 			];
 			$sanitized = $this->should_sanitize_validation_error( $error );
 			if ( $sanitized ) {
