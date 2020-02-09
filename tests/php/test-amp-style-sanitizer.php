@@ -1364,7 +1364,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				home_url( '/this.is.not.css' ),
 				'image/jpeg',
 				'JPEG...',
-				[ AMP_Style_Sanitizer::STYLESHEET_INVALID_FILE_URL ],
+				[ AMP_Style_Sanitizer::STYLESHEET_FETCH_ERROR ],
 			],
 		];
 	}
