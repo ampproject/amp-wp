@@ -233,8 +233,10 @@ class AMP_Options_Manager {
 		}
 
 		// Experiences.
-		if ( isset( $new_options['experiences'] ) && is_array( $new_options['experiences'] ) ) {
-
+		if ( ! isset( $new_options['experiences'][ self::STORIES_EXPERIENCE ] ) && ! AMP_Story_Post_Type::has_posts() ) {
+			// If there are no Story posts and the experience is disabled, only the Website experience is considered enabled.
+			$options['experiences'] = [ self::WEBSITE_EXPERIENCE ];
+		} elseif ( isset( $new_options['experiences'] ) && is_array( $new_options['experiences'] ) ) {
 			// Validate the selected experiences.
 			$options['experiences'] = array_intersect(
 				$new_options['experiences'],
@@ -353,16 +355,18 @@ class AMP_Options_Manager {
 			AMP_Theme_Support::reset_cache_miss_url_option();
 		}
 
-		// Handle the base URL for exported stories.
-		$options['story_export_base_url'] = isset( $new_options['story_export_base_url'] ) ? esc_url_raw( $new_options['story_export_base_url'], [ 'https' ] ) : '';
+		if ( isset( $new_options['experiences'] ) && in_array( self::STORIES_EXPERIENCE, $new_options['experiences'], true ) ) {
+			// Handle the base URL for exported stories.
+			$options['story_export_base_url'] = isset( $new_options['story_export_base_url'] ) ? esc_url_raw( $new_options['story_export_base_url'], [ 'https' ] ) : '';
 
-		// AMP stories settings definitions.
-		$definitions = AMP_Story_Post_Type::get_stories_settings_definitions();
+			// AMP stories settings definitions.
+			$definitions = AMP_Story_Post_Type::get_stories_settings_definitions();
 
-		// Handle the AMP stories settings sanitization.
-		foreach ( $definitions as $option_name => $definition ) {
-			$value = $new_options[ AMP_Story_Post_Type::STORY_SETTINGS_OPTION ][ $option_name ];
-			$options[ AMP_Story_Post_Type::STORY_SETTINGS_OPTION ][ $option_name ] = call_user_func( $definition['meta_args']['sanitize_callback'], $value );
+			// Handle the AMP stories settings sanitization.
+			foreach ( $definitions as $option_name => $definition ) {
+				$value = $new_options[ AMP_Story_Post_Type::STORY_SETTINGS_OPTION ][ $option_name ];
+				$options[ AMP_Story_Post_Type::STORY_SETTINGS_OPTION ][ $option_name ] = call_user_func( $definition['meta_args']['sanitize_callback'], $value );
+			}
 		}
 
 		return $options;
