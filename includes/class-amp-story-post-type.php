@@ -124,7 +124,7 @@ class AMP_Story_Post_Type {
 	 * @return void
 	 */
 	public static function register() {
-		if ( ! AMP_Options_Manager::is_stories_experience_enabled() || ! self::has_required_block_capabilities() ) {
+		if ( ! AMP_Options_Manager::is_stories_experience_enabled() ) {
 			return;
 		}
 
@@ -2360,5 +2360,38 @@ class AMP_Story_Post_Type {
 			$sanitized_value = call_user_func( $meta_definitions[ $option_key ]['meta_args']['sanitize_callback'], $value );
 			add_post_meta( $post_id, self::STORY_SETTINGS_META_PREFIX . $option_key, $sanitized_value, true );
 		}
+	}
+
+	/**
+	 * Returns total number of Story posts.
+	 *
+	 * @return int
+	 */
+	public static function get_posts_count() {
+		global $wpdb;
+
+		$cache_key = 'count-' . self::POST_TYPE_SLUG;
+		$count     = wp_cache_get( $cache_key );
+		if ( false !== $count ) {
+			return $count;
+		}
+
+		// WPCS complains if the query isn't prepared directly inside $wpdb->get_col(); see <https://github.com/WordPress/WordPress-Coding-Standards/issues/1331>.
+		$result = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT( * ) FROM {$wpdb->posts} WHERE post_type = %s", self::POST_TYPE_SLUG ) );
+
+		$count = isset( $result ) ? (int) $result : 0;
+
+		wp_cache_set( $cache_key, $count );
+
+		return $count;
+	}
+
+	/**
+	 * Check if there are any Story posts.
+	 *
+	 * @return bool
+	 */
+	public static function has_posts() {
+		return 0 < self::get_posts_count();
 	}
 }

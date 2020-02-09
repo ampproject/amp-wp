@@ -82,6 +82,8 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		AMP_Story_Post_Type::register();
 		$this->assertFalse( post_type_exists( AMP_Story_Post_Type::POST_TYPE_SLUG ) );
 
+		// Create dummy post to keep Stories experience enabled.
+		self::factory()->post->create( [ 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ] );
 		AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::STORIES_EXPERIENCE ] );
 		AMP_Story_Post_Type::register();
 		$this->assertTrue( post_type_exists( AMP_Story_Post_Type::POST_TYPE_SLUG ) );
@@ -163,6 +165,8 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	 * @covers AMP_Story_Post_Type::enqueue_embed_styling()
 	 */
 	public function test_enqueue_embed_styling() {
+		// Create dummy post to keep Stories experience enabled.
+		self::factory()->post->create( [ 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ] );
 		AMP_Story_Post_Type::register();
 
 		// None of the conditional is satisfied, so this should not enqueue the stylesheet.
@@ -188,6 +192,8 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	public function test_override_story_embed_callback() {
 		global $wp_rewrite;
 
+		// Create dummy post to keep Stories experience enabled.
+		self::factory()->post->create( [ 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ] );
 		AMP_Story_Post_Type::register();
 
 		/*
@@ -294,6 +300,9 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	 * @covers \AMP_Story_Post_Type::render_block_latest_stories()
 	 */
 	public function test_render_block_latest_stories() {
+		// Create dummy post to keep Stories experience enabled.
+		self::factory()->post->create( [ 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ] );
+
 		AMP_Story_Post_Type::register();
 
 		$attributes = [
@@ -449,6 +458,9 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	 * @covers AMP_Story_Post_Type::filter_rest_request_for_kses
 	 */
 	public function test_filter_rest_request_for_kses() {
+		// Create dummy post to keep Stories experience enabled.
+		self::factory()->post->create( [ 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ] );
+
 		AMP_Story_Post_Type::register();
 
 		$author_id = self::factory()->user->create( [ 'role' => 'author' ] );
