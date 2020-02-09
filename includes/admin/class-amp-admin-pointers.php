@@ -84,7 +84,7 @@ class AMP_Admin_Pointers {
 						[
 							esc_html__( 'The Stories experience is being extracted from the AMP plugin into a separate standalone plugin which will be available soon. Please back up or export your existing Stories as they will not be available in the next version of the AMP plugin.', 'amp' ),
 							sprintf(
-								'<a href="%s">%s</a>',
+								'<a href="%s" target="_blank">%s</a>',
 								esc_url( 'https://amp-wp.org/documentation/amp-stories/exporting-stories/' ),
 								esc_html__( 'View how to export your Stories', 'amp' )
 							),
