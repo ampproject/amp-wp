@@ -1366,6 +1366,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return string|WP_Error Stylesheet contents or WP_Error.
 	 */
 	private function fetch_external_stylesheet( $url ) {
+
+		// Prepend schemeless stylesheet URL with the same URL scheme as the current site.
+		if ( '//' === substr( $url, 0, 2 ) ) {
+			$url = wp_parse_url( home_url(), PHP_URL_SCHEME ) . ':' . $url;
+		}
+
 		$cache_key = md5( $url );
 		$contents  = get_transient( $cache_key );
 		if ( false === $contents ) {
