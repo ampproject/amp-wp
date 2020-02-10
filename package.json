@@ -60,7 +60,7 @@
     "@wordpress/nux": "3.11.0",
     "@wordpress/plugins": "2.11.0",
     "@wordpress/postcss-themes": "2.3.0",
-    "@wordpress/rich-text": "3.11.0",
+    "@wordpress/rich-text": "3.12.0",
     "@wordpress/scripts": "5.1.0",
     "@wordpress/server-side-render": "1.7.0",
     "@wordpress/url": "2.9.0",
