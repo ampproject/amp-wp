@@ -175,7 +175,7 @@
 				 * https://www.ampproject.org/latest/blog/streaming-in-the-shadow-reader/
 				 * https://github.com/ampproject/amphtml/blob/master/spec/amp-shadow-doc.md#fetching-and-attaching-shadow-docs
 				 */
-				currentShadowDoc = AMP.attachShadowDocAsStream( newContainer, url, {} );
+				currentShadowDoc = AMP.attachShadowDocAsStream( newContainer, String( url ), {} );
 
 				// @todo If it is not an AMP document, then the loaded document needs to break out of the app shell. This should be done in readChunk() below.
 				currentShadowDoc.ampdoc.whenReady().then( () => {
