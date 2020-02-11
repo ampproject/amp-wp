@@ -112,6 +112,8 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Get the action URL for the form element.
 	 *
+	 * @todo De-duplicate with AMP_Style_Sanitizer::normalize_stylesheet_url().
+	 *
 	 * @param string $action_url Action URL.
 	 * @return string Action URL.
 	 */
@@ -140,28 +142,25 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 			return $action_url;
 		}
 
-		// Make URL protocol relative.
-		$parsed_url['scheme'] = '//';
-
 		// Set an empty path if none is defined but there is a host.
 		if ( ! isset( $parsed_url['path'] ) && isset( $parsed_url['host'] ) ) {
 			$parsed_url['path'] = '';
 		}
 
 		if ( ! isset( $parsed_url['host'] ) ) {
-			$parsed_url['host'] = $_SERVER['HTTP_HOST'];
+			$parsed_url['host'] = $_SERVER['HTTP_HOST']; // @todo Use home_url() instead?
 		}
 
 		if ( ! isset( $parsed_url['path'] ) ) {
 			// If there is action URL path, use the one from the request.
-			$parsed_url['path'] = trailingslashit( wp_unslash( $_SERVER['REQUEST_URI'] ) );
+			$parsed_url['path'] = trailingslashit( wp_unslash( $_SERVER['REQUEST_URI'] ) ); // @todo This is wrong because it includes the path.
 		} elseif ( '' !== $parsed_url['path'] && '/' !== $parsed_url['path'][0] ) {
 			// If the path is relative, append it to the current request path.
-			$parsed_url['path'] = trailingslashit( wp_unslash( $_SERVER['REQUEST_URI'] ) ) . trailingslashit( $parsed_url['path'] );
+			$parsed_url['path'] = trailingslashit( wp_unslash( $_SERVER['REQUEST_URI'] ) ) . trailingslashit( $parsed_url['path'] ); // @todo This is wrong because it includes the path.
 		}
 
 		// Rebuild the URL.
-		$action_url = $parsed_url['scheme'];
+		$action_url = '//';
 		if ( isset( $parsed_url['user'] ) ) {
 			$action_url .= $parsed_url['user'];
 			if ( isset( $parsed_url['pass'] ) ) {

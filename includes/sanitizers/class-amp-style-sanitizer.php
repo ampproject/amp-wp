@@ -1359,6 +1359,75 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Get the action URL for the form element.
+	 *
+	 * @todo De-duplicate with \AMP_Form_Sanitizer::get_action_url().
+	 *
+	 * @param string $stylesheet_url Stylesheet URL.
+	 * @return string|WP_Error Stylesheet URL.
+	 */
+	protected function normalize_stylesheet_url( $stylesheet_url ) {
+		if ( ! $stylesheet_url ) {
+			return new WP_Error( 'empty_stylesheet_url', __( 'Empty stylesheet URL', 'amp' ) );
+		}
+
+		$parsed_url = wp_parse_url( $stylesheet_url );
+		if ( ! $parsed_url ) {
+			return new WP_Error( 'stylesheet_url_parse_error', __( 'Stylesheet URL parse error', 'amp' ) );
+		}
+
+		// If a scheme was provided, there's nothing to do.
+		if ( ! empty( $parsed_url['scheme'] ) ) {
+			return $stylesheet_url;
+		}
+
+		$parsed_home_url = wp_parse_url( home_url() );
+
+		// Supply the same scheme as the site.
+		$parsed_url['scheme'] = $parsed_home_url['scheme'];
+
+		// Set an empty path if none is defined but there is a host.
+		if ( ! isset( $parsed_url['path'] ) && isset( $parsed_url['host'] ) ) {
+			$parsed_url['path'] = '';
+		}
+
+		if ( ! isset( $parsed_url['host'] ) ) {
+			$parsed_url['host'] = $parsed_home_url['host'];
+		}
+
+		if ( ! isset( $parsed_url['path'] ) ) {
+			// If there is action URL path, use the one from the request.
+			$parsed_url['path'] = trailingslashit( wp_unslash( $_SERVER['REQUEST_URI'] ) ); // @todo This is wrong because it includes the path.
+		} elseif ( '' !== $parsed_url['path'] && '/' !== $parsed_url['path'][0] ) {
+			// If the path is relative, append it to the current request path.
+			$parsed_url['path'] = trailingslashit( wp_unslash( $_SERVER['REQUEST_URI'] ) ) . trailingslashit( $parsed_url['path'] ); // @todo This is wrong because it includes the path.
+		}
+
+		// Rebuild the URL.
+		$stylesheet_url = $parsed_url['scheme'] . '://';
+		if ( isset( $parsed_url['user'] ) ) {
+			$stylesheet_url .= $parsed_url['user'];
+			if ( isset( $parsed_url['pass'] ) ) {
+				$stylesheet_url .= ':' . $parsed_url['pass'];
+			}
+			$stylesheet_url .= '@';
+		}
+		$stylesheet_url .= $parsed_url['host'];
+		if ( isset( $parsed_url['port'] ) ) {
+			$stylesheet_url .= ':' . $parsed_url['port'];
+		}
+		$stylesheet_url .= $parsed_url['path'];
+		if ( isset( $parsed_url['query'] ) ) {
+			$stylesheet_url .= '?' . $parsed_url['query'];
+		}
+		if ( isset( $parsed_url['fragment'] ) ) {
+			$stylesheet_url .= '#' . $parsed_url['fragment'];
+		}
+
+		return esc_url_raw( $stylesheet_url );
+	}
+
+	/**
 	 * Fetch external stylesheet.
 	 *
 	 * @todo Use Cache-Control max-age for transient.
@@ -1368,9 +1437,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function fetch_external_stylesheet( $url ) {
 
-		// Prepend schemeless stylesheet URL with the same URL scheme as the current site.
-		if ( '//' === substr( $url, 0, 2 ) ) {
-			$url = wp_parse_url( home_url(), PHP_URL_SCHEME ) . ':' . $url;
+		$url = $this->normalize_stylesheet_url( $url );
+		if ( is_wp_error( $url ) ) {
+			return $url;
 		}
 
 		$cache_key = md5( $url );
