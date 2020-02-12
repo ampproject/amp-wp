@@ -1061,6 +1061,9 @@ class AMP_Validated_URL_Post_Type {
 				} else {
 					$total_size = 0;
 					foreach ( $stylesheets as $stylesheet ) {
+						if ( ! isset( $stylesheet['group'] ) || 'amp-custom' !== $stylesheet['group'] || ! empty( $stylesheet['duplicate'] ) ) {
+							continue;
+						}
 						$total_size += $stylesheet['final_size'];
 					}
 
