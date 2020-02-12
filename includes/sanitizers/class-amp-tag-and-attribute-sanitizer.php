@@ -1462,9 +1462,14 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - there is no mandatory_oneof
 	 */
 	private function check_attr_spec_rule_mandatory_oneof( DOMElement $node, $attr_spec ) {
+		$checked_oneof_constraints = [];
 		foreach ( $attr_spec as $attr_name => $attr_spec_rule_value ) {
-			if ( ! empty( $attr_spec_rule_value[ AMP_Rule_Spec::MANDATORY_ONEOF ] ) ) {
-				$attribute_count = count(
+			if ( ! empty( $attr_spec_rule_value[ AMP_Rule_Spec::MANDATORY_ONEOF ] ) &&
+				! in_array( $attr_spec_rule_value[ AMP_Rule_Spec::MANDATORY_ONEOF ], $checked_oneof_constraints, true ) ) {
+
+				// Store this as checked so it's not checked again.
+				$checked_oneof_constraints[] = $attr_spec_rule_value[ AMP_Rule_Spec::MANDATORY_ONEOF ];
+				$matched_attribute_count     = count(
 					array_filter(
 						$attr_spec_rule_value[ AMP_Rule_Spec::MANDATORY_ONEOF ],
 						static function( $attribute ) use ( $node ) {
@@ -1473,7 +1478,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					)
 				);
 
-				if ( 1 !== $attribute_count ) {
+				if ( 1 !== $matched_attribute_count ) {
 					return AMP_Rule_Spec::FAIL;
 				}
 
