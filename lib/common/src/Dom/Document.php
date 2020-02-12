@@ -212,6 +212,15 @@ final class Document extends DOMDocument
     private $securedDoctype = 0;
 
     /**
+     * Whether the self-closing tags were transformed and need to be restored.
+     *
+     * This avoids duplicating this effort (maybe corrupting the DOM) on multiple calls to saveHTML().
+     *
+     * @var bool
+     */
+    private $selfClosingTagsTransformed = false;
+
+    /**
      * Creates a new Amp\Dom\Document object
      *
      * @link  https://php.net/manual/domdocument.construct.php
@@ -424,6 +433,8 @@ final class Document extends DOMDocument
         }
 
         // Remove http-equiv charset again.
+        // It is also removed from the DOM again in case saveHTML() is used multiple times.
+        $this->head->removeChild($charset);
         $html = preg_replace(self::HTML_GET_HTTP_EQUIV_TAG_PATTERN, '', $html, 1);
 
         $html = $this->restoreDoctypeNode($html);
@@ -637,6 +648,8 @@ final class Document extends DOMDocument
             $regexPattern = '#<(' . implode('|', Tag::SELF_CLOSING_TAGS) . ')([^>]*?)(?:\s*\/)?>(?!</\1>)#';
         }
 
+        $this->selfClosingTagsTransformed = true;
+
         return preg_replace($regexPattern, '<$1$2></$1>', $html);
     }
 
@@ -652,9 +665,15 @@ final class Document extends DOMDocument
     {
         static $regexPattern = null;
 
+        if (! $this->selfClosingTagsTransformed) {
+            return $html;
+        }
+
         if (null === $regexPattern) {
             $regexPattern = '#</(' . implode('|', Tag::SELF_CLOSING_TAGS) . ')>#i';
         }
+
+        $this->selfClosingTagsTransformed = false;
 
         return preg_replace($regexPattern, '', $html);
     }
@@ -717,7 +736,7 @@ final class Document extends DOMDocument
      */
     private function maybeRestoreNoscriptElements($html)
     {
-        if (! version_compare(LIBXML_DOTTED_VERSION, '2.8', '<')) {
+        if (empty($this->noscriptPlaceholderComments)) {
             return $html;
         }
 
@@ -1092,7 +1111,7 @@ final class Document extends DOMDocument
      */
     private function restoreAmpEmojiAttribute($html)
     {
-        return preg_replace('/(<html [^>]*?)' . preg_quote(self::EMOJI_AMP_ATTRIBUTE_PLACEHOLDER, '/') . '="([^"]*)"/i', '\1⚡\2', $html, 1);
+        return preg_replace('/(<html [^>]*?)' . preg_quote(self::EMOJI_AMP_ATTRIBUTE_PLACEHOLDER, '/') . '="([^"]*)"/i', '\1' . Attribute::AMP_EMOJI . '\2', $html, 1);
     }
 
     /**
