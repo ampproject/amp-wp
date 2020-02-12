@@ -1457,9 +1457,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param array[]    $attr_spec The full attribute spec.
 	 *
 	 * @return string:
-	 *      - AMP_Rule_Spec::PASS - $attr_name is mandatory and it exists
-	 *      - AMP_Rule_Spec::FAIL - $attr_name is mandatory, but doesn't exist
-	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name is not mandatory
+	 *      - AMP_Rule_Spec::PASS - there is a mandatory_onoeof, and exactly one of the attributes is present
+	 *      - AMP_Rule_Spec::FAIL - there is a mandatory_onoeof, and either 0 or more than 1 attributes are present
+	 *      - AMP_Rule_Spec::NOT_APPLICABLE - there is no mandatory_oneof
 	 */
 	private function check_attr_spec_rule_mandatory_oneof( DOMElement $node, $attr_spec ) {
 		foreach ( $attr_spec as $attr_name => $attr_spec_rule_value ) {
