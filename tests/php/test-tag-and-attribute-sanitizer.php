@@ -1983,16 +1983,14 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-truncate-text' ],
 			],
 
-			// Removed from spec: https://github.com/ampproject/amphtml/pull/25639.
 			'amp-user-location'                            => [
 				'
 					<button on="tap: location.request()">Use my location</button>
 					<amp-user-location id="location" on="approve:AMP.setState({located: true})" layout="nodisplay">
 					</amp-user-location>
 				',
-				'<button on="tap: location.request()">Use my location</button>',
-				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ],
+				null,
+				[ 'amp-user-location' ],
 			],
 
 			'amp-megaphone'                                => [
