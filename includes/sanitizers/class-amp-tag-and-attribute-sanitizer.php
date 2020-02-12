@@ -57,6 +57,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	const INVALID_BLACKLISTED_VALUE_REGEX      = 'INVALID_BLACKLISTED_VALUE_REGEX';
 	const DISALLOWED_PROPERTY_IN_ATTR_VALUE    = 'DISALLOWED_PROPERTY_IN_ATTR_VALUE';
 	const ATTR_REQUIRED_BUT_MISSING            = 'ATTR_REQUIRED_BUT_MISSING';
+	const MANDATORY_ONEOF_ATTR_MISSING         = 'MANDATORY_ONEOF_ATTR_MISSING';
 	const INVALID_LAYOUT_WIDTH                 = 'INVALID_LAYOUT_WIDTH';
 	const INVALID_LAYOUT_HEIGHT                = 'INVALID_LAYOUT_HEIGHT';
 	const INVALID_LAYOUT_AUTO_HEIGHT           = 'INVALID_LAYOUT_AUTO_HEIGHT';
@@ -729,6 +730,18 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return null;
 		}
 
+		// If there is a mandatory_oneof and exactly one of the required attributes isn't present, remove the element.
+		if ( AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_mandatory_oneof( $node, $merged_attr_spec_list ) ) {
+			$this->remove_invalid_child(
+				$node,
+				[
+					'code'      => self::MANDATORY_ONEOF_ATTR_MISSING,
+					'spec_name' => $this->get_spec_name( $node, $tag_spec ),
+				]
+			);
+			return null;
+		}
+
 		// Add required AMP component scripts.
 		$script_components = [];
 		if ( ! empty( $tag_spec['requires_extension'] ) ) {
@@ -1030,6 +1043,18 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				} elseif ( AMP_Rule_Spec::FAIL === $result ) {
 					return 0;
 				}
+			}
+		}
+
+		// If a mandatory_oneof constraint exists and is satisfied, increment score.
+		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::MANDATORY_ONEOF ] ) ) {
+			$mandatory_count++;
+
+			$result = $this->check_attr_spec_rule_mandatory_oneof( $node, $attr_spec_list );
+			if ( AMP_Rule_Spec::PASS === $result ) {
+				$score += 2;
+			} elseif ( AMP_Rule_Spec::FAIL === $result ) {
+				return 0;
 			}
 		}
 
@@ -1420,6 +1445,38 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			}
 			return AMP_Rule_Spec::FAIL;
 		}
+		return AMP_Rule_Spec::NOT_APPLICABLE;
+	}
+
+	/**
+	 * Gets whether the mandatory_oneof constraint exists and is satisfied.
+	 *
+	 * If it exists, there must be exactly one of the attributes present.
+	 *
+	 * @param DOMElement $node      The node to examine.
+	 * @param array[]    $attr_spec The full attribute spec.
+	 *
+	 * @return string:
+	 *      - AMP_Rule_Spec::PASS - $attr_name is mandatory and it exists
+	 *      - AMP_Rule_Spec::FAIL - $attr_name is mandatory, but doesn't exist
+	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name is not mandatory
+	 */
+	private function check_attr_spec_rule_mandatory_oneof( DOMElement $node, $attr_spec ) {
+		foreach ( $attr_spec as $attr_name => $attr_spec_rule_value ) {
+			if ( ! empty( $attr_spec_rule_value[ AMP_Rule_Spec::MANDATORY_ONEOF ] ) ) {
+				$attribute_count = count(
+					array_filter(
+						$attr_spec_rule_value[ AMP_Rule_Spec::MANDATORY_ONEOF ],
+						static function( $attribute ) use ( $node ) {
+							return $node->hasAttribute( $attribute );
+						}
+					)
+				);
+
+				return 1 === $attribute_count ? AMP_Rule_Spec::PASS : AMP_Rule_Spec::FAIL;
+			}
+		}
+
 		return AMP_Rule_Spec::NOT_APPLICABLE;
 	}
 

@@ -246,9 +246,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'amp-iframe_incorrect_protocol'                => [
 				'<amp-iframe width="600" height="200" sandbox="allow-scripts allow-same-origin" layout="responsive" frameborder="0" src="masterprotocol://www.example.com"></amp-iframe>',
-				'<amp-iframe width="600" height="200" sandbox="allow-scripts allow-same-origin" layout="responsive" frameborder="0"></amp-iframe>',
-				[ 'amp-iframe' ],
-				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_URL_PROTOCOL ],
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_URL_PROTOCOL, AMP_Tag_And_Attribute_Sanitizer::MANDATORY_ONEOF_ATTR_MISSING ],
 			],
 
 			'amp-ima-video'                                => [
@@ -333,8 +333,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'amp-playbuzz_no_src'                          => [
 				'<amp-playbuzz height="500" data-item-info="true"></amp-playbuzz>',
-				null, // @todo This actually should be stripped because .
-				[ 'amp-playbuzz' ],
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::MANDATORY_ONEOF_ATTR_MISSING ],
 			],
 
 			'invalid_element_stripped'                     => [
@@ -890,6 +891,20 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ],
+			],
+
+			'remove_node_no_mandatory_oneof_attribute'     => [
+				'<amp-iframe width="200" height="100"></amp-iframe>',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::MANDATORY_ONEOF_ATTR_MISSING ],
+			],
+
+			'remove_node_two_mandatory_oneof_attributes'   => [
+				'<amp-iframe src="https://example.com" srcdoc="https://foo.com" width="200" height="100"></amp-iframe>',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::MANDATORY_ONEOF_ATTR_MISSING ],
 			],
 
 			'remove_script_with_async_attribute'           => [
@@ -1968,14 +1983,16 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-truncate-text' ],
 			],
 
+			// Removed from spec: https://github.com/ampproject/amphtml/pull/25639.
 			'amp-user-location'                            => [
 				'
 					<button on="tap: location.request()">Use my location</button>
 					<amp-user-location id="location" on="approve:AMP.setState({located: true})" layout="nodisplay">
 					</amp-user-location>
 				',
-				null,
-				[ 'amp-user-location' ],
+				'<button on="tap: location.request()">Use my location</button>',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ],
 			],
 
 			'amp-megaphone'                                => [

@@ -708,6 +708,10 @@ def GetValues(attr_spec):
 	if attr_spec.HasField('mandatory'):
 		value_dict['mandatory'] = attr_spec.mandatory
 
+	if attr_spec.HasField('mandatory_oneof'):
+		mandatory_oneof = attr_spec.mandatory_oneof.lstrip('[').rstrip(']').split(', ')
+		value_dict['mandatory_oneof'] = [oneof.strip("'") for oneof in mandatory_oneof]
+
 	# Add allowed value
 	if attr_spec.value:
 		value_dict['value'] = list( attr_spec.value )
