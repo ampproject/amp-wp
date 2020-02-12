@@ -2196,7 +2196,9 @@ class AMP_Theme_Support {
 		}
 
 		// Ensure the mandatory amp attribute is present on the html element.
-		if ( ! $dom->documentElement->hasAttribute( Attribute::AMP ) && ! $dom->documentElement->hasAttribute( Attribute::AMP_EMOJI ) ) {
+		if ( ! $dom->documentElement->hasAttribute( Attribute::AMP )
+			 && ! $dom->documentElement->hasAttribute( Attribute::AMP_EMOJI )
+			 && ! $dom->documentElement->hasAttribute( Attribute::AMP_EMOJI_ALT ) ) {
 			$dom->documentElement->setAttribute( Attribute::AMP, '' );
 		}
 
@@ -2265,6 +2267,7 @@ class AMP_Theme_Support {
 			if ( amp_is_canonical() || is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
 				$dom->documentElement->removeAttribute( Attribute::AMP );
 				$dom->documentElement->removeAttribute( Attribute::AMP_EMOJI );
+				$dom->documentElement->removeAttribute( Attribute::AMP_EMOJI_ALT );
 
 				/*
 				 * Make sure that document.write() is disabled to prevent dynamically-added content (such as added

@@ -14,13 +14,16 @@ interface Attribute
     const AMP                   = 'amp';
     const AMP4ADS               = 'amp4ads';
     const AMP4ADS_BOILERPLATE   = 'amp4ads-boilerplate';
-    const AMP4ADS_EMOJI         = '⚡4ads';
+    const AMP4ADS_EMOJI         = self::AMP_EMOJI . '4ads';
+    const AMP4ADS_EMOJI_ALT     = self::AMP_EMOJI_ALT . '4ads';
     const AMP4EMAIL             = 'amp4email';
     const AMP4EMAIL_BOILERPLATE = 'amp4email-boilerplate';
-    const AMP4EMAIL_EMOJI       = '⚡4email';
+    const AMP4EMAIL_EMOJI       = self::AMP_EMOJI . '4email';
+    const AMP4EMAIL_EMOJI_ALT   = self::AMP_EMOJI_ALT . '4email';
     const AMP_BOILERPLATE       = 'amp-boilerplate';
     const AMP_CUSTOM            = 'amp-custom';
-    const AMP_EMOJI             = '⚡';
+    const AMP_EMOJI             = "\xE2\x9A\xA1";
+    const AMP_EMOJI_ALT         = "\xE2\x9A\xA1\xEF\xB8\x8F"; // See https://github.com/ampproject/amphtml/issues/25990.
     const AMP_RUNTIME           = 'amp-runtime';
     const ARIA_HIDDEN           = 'aria-hidden';
     const ASYNC                 = 'async';
@@ -49,9 +52,9 @@ interface Attribute
     const TYPE                  = 'type';
     const WIDTH                 = 'width';
 
-    const ALL_AMP       = [self::AMP, self::AMP_EMOJI];
-    const ALL_AMP4ADS   = [self::AMP4ADS, self::AMP4ADS_EMOJI];
-    const ALL_AMP4EMAIL = [self::AMP4EMAIL, self::AMP4EMAIL_EMOJI];
+    const ALL_AMP       = [self::AMP, self::AMP_EMOJI, self::AMP_EMOJI_ALT];
+    const ALL_AMP4ADS   = [self::AMP4ADS, self::AMP4ADS_EMOJI, self::AMP4ADS_EMOJI_ALT];
+    const ALL_AMP4EMAIL = [self::AMP4EMAIL, self::AMP4EMAIL_EMOJI, self::AMP4EMAIL_EMOJI_ALT];
 
     const TYPE_HTML    = 'text/html';
     const TYPE_JSON    = 'application/json';

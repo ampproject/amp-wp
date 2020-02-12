@@ -16,9 +16,22 @@ final class Amp
     /**
      * List of Amp attribute tags that can be appended to the <html> element.
      *
+     * The *_ALT version represent a Unicode variation of the lightning emoji.
+     * @see https://github.com/ampproject/amphtml/issues/25990
+     *
      * @var string[]
      */
-    const TAGS = ['amp', '⚡', '⚡4ads', 'amp4ads', '⚡4email', 'amp4email'];
+    const TAGS = [
+        Attribute::AMP,
+        Attribute::AMP_EMOJI,
+        Attribute::AMP_EMOJI_ALT,
+        Attribute::AMP4ADS,
+        Attribute::AMP4ADS_EMOJI,
+        Attribute::AMP4ADS_EMOJI_ALT,
+        Attribute::AMP4EMAIL,
+        Attribute::AMP4EMAIL_EMOJI,
+        Attribute::AMP4EMAIL_EMOJI_ALT,
+    ];
 
     /**
      * Host and scheme of the Amp cache.

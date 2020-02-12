@@ -160,7 +160,7 @@ final class Document extends DOMDocument
     const AMP_EMOJI_ATTRIBUTE_PATTERN = '/(<html [^>]*?)⚡([^\s^>]*)/i';
 
     // Attribute to use as a placeholder to move the emoji AMP symbol (⚡) over to DOM.
-    const EMOJI_AMP_ATTRIBUTE = 'emoji-amp';
+    const EMOJI_AMP_ATTRIBUTE_PLACEHOLDER = 'emoji-amp';
 
     /**
      * Associative array of encoding mappings.
@@ -1081,7 +1081,7 @@ final class Document extends DOMDocument
      */
     private function convertAmpEmojiAttribute($source)
     {
-        return preg_replace(self::AMP_EMOJI_ATTRIBUTE_PATTERN, '\1' . self::EMOJI_AMP_ATTRIBUTE . '="\2"', $source, 1);
+        return preg_replace(self::AMP_EMOJI_ATTRIBUTE_PATTERN, '\1' . self::EMOJI_AMP_ATTRIBUTE_PLACEHOLDER . '="\2"', $source, 1);
     }
 
     /**
@@ -1092,7 +1092,7 @@ final class Document extends DOMDocument
      */
     private function restoreAmpEmojiAttribute($html)
     {
-        return preg_replace('/(<html [^>]*?)' . preg_quote(self::EMOJI_AMP_ATTRIBUTE, '/') . '="([^"]*)"/i', '\1⚡\2', $html, 1);
+        return preg_replace('/(<html [^>]*?)' . preg_quote(self::EMOJI_AMP_ATTRIBUTE_PLACEHOLDER, '/') . '="([^"]*)"/i', '\1⚡\2', $html, 1);
     }
 
     /**
