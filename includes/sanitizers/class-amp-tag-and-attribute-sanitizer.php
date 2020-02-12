@@ -1473,11 +1473,15 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					)
 				);
 
-				return 1 === $attribute_count ? AMP_Rule_Spec::PASS : AMP_Rule_Spec::FAIL;
+				if ( 1 !== $attribute_count ) {
+					return AMP_Rule_Spec::FAIL;
+				}
+
+				$validity = AMP_Rule_Spec::PASS;
 			}
 		}
 
-		return AMP_Rule_Spec::NOT_APPLICABLE;
+		return isset( $validity ) ? $validity : AMP_Rule_Spec::NOT_APPLICABLE;
 	}
 
 	/**
