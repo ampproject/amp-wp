@@ -13,7 +13,7 @@
  */
 class AMP_Allowed_Tags_Generated {
 
-	private static $spec_file_revision = 997;
+	private static $spec_file_revision = 999;
 	private static $minimum_validator_revision_required = 375;
 
 	private static $descendant_tag_lists = array(
@@ -50,12 +50,14 @@ class AMP_Allowed_Tags_Generated {
 			'ol',
 			'option',
 			'p',
+			'path',
 			'section',
 			'span',
 			'strike',
 			'strong',
 			'sub',
 			'sup',
+			'svg',
 			'table',
 			'tbody',
 			'td',
@@ -3959,7 +3961,13 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'credentials' => array(),
 					'data-amp-bind-is-layout-container' => array(),
-					'data-amp-bind-src' => array(),
+					'data-amp-bind-src' => array(
+						'mandatory_anyof' => array(
+							'src',
+							'[src]',
+							'data-amp-bind-src',
+						),
+					),
 					'diffable' => array(
 						'value' => array(
 							'',
@@ -3990,6 +3998,11 @@ class AMP_Allowed_Tags_Generated {
 					'single-item' => array(),
 					'src' => array(
 						'blacklisted_value_regex' => '__amp_source_origin',
+						'mandatory_anyof' => array(
+							'src',
+							'[src]',
+							'data-amp-bind-src',
+						),
 						'value_url' => array(
 							'allow_relative' => true,
 							'protocol' => array(
@@ -16625,7 +16638,7 @@ class AMP_Allowed_Tags_Generated {
 						),
 						'validate_keyframes' => false,
 					),
-					'max_bytes' => 50000,
+					'max_bytes' => 75000,
 					'max_bytes_spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#maximum-size',
 				),
 				'tag_spec' => array(
@@ -18545,8 +18558,18 @@ class AMP_Allowed_Tags_Generated {
 		),
 		'AMP-MEGA-MENU > AMP-LIST' => array(
 			'attr_spec_list' => array(
-				'data-amp-bind-src' => array(),
-				'src' => array(),
+				'data-amp-bind-src' => array(
+					'mandatory_anyof' => array(
+						'src',
+						'[src]',
+					),
+				),
+				'src' => array(
+					'mandatory_anyof' => array(
+						'src',
+						'[src]',
+					),
+				),
 			),
 			'tag_spec' => array(
 				'child_tags' => array(
