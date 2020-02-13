@@ -2197,8 +2197,8 @@ class AMP_Theme_Support {
 
 		// Ensure the mandatory amp attribute is present on the html element.
 		if ( ! $dom->documentElement->hasAttribute( Attribute::AMP )
-			 && ! $dom->documentElement->hasAttribute( Attribute::AMP_EMOJI )
-			 && ! $dom->documentElement->hasAttribute( Attribute::AMP_EMOJI_ALT ) ) {
+			&& ! $dom->documentElement->hasAttribute( Attribute::AMP_EMOJI )
+			&& ! $dom->documentElement->hasAttribute( Attribute::AMP_EMOJI_ALT ) ) {
 			$dom->documentElement->setAttribute( Attribute::AMP, '' );
 		}
 

@@ -1,5 +1,6 @@
 <?php
 
+use Amp\Attribute;
 use Amp\Dom\Document;
 use Amp\Tests\AssertContainsCompatibility;
 use PHPUnit\Framework\TestCase;
@@ -34,6 +35,39 @@ class DocumentTest extends TestCase
                 'utf-8',
                 '<!DOCTYPE html><html amp lang="en">' . $head . '<body class="some-class"><p>Text</p></body></html>',
                 '<!DOCTYPE html><html amp lang="en">' . $head . '<body class="some-class"><p>Text</p></body></html>',
+            ],
+            'emoji_amp_attribute'                      => [
+                'utf-8',
+                '<!DOCTYPE html><html ' . Attribute::AMP_EMOJI . '>' . $head . '<body></body></html>',
+                '<!DOCTYPE html><html ' . Attribute::AMP_EMOJI . '>' . $head . '<body></body></html>',
+            ],
+            // The next one is different, see https://github.com/ampproject/amphtml/issues/25990.
+            'alt_emoji_amp_attribute'                  => [
+                'utf-8',
+                '<!DOCTYPE html><html ' . Attribute::AMP_EMOJI_ALT . '>' . $head . '<body></body></html>',
+                '<!DOCTYPE html><html ' . Attribute::AMP_EMOJI_ALT . '>' . $head . '<body></body></html>',
+            ],
+            'emoji_amp4ads_attribute'                      => [
+                'utf-8',
+                '<!DOCTYPE html><html ' . Attribute::AMP4ADS_EMOJI . '>' . $head . '<body></body></html>',
+                '<!DOCTYPE html><html ' . Attribute::AMP4ADS_EMOJI . '>' . $head . '<body></body></html>',
+            ],
+            // The next one is different, see https://github.com/ampproject/amphtml/issues/25990.
+            'alt_emoji_amp4ads_attribute'                  => [
+                'utf-8',
+                '<!DOCTYPE html><html ' . Attribute::AMP4ADS_EMOJI_ALT . '>' . $head . '<body></body></html>',
+                '<!DOCTYPE html><html ' . Attribute::AMP4ADS_EMOJI_ALT . '>' . $head . '<body></body></html>',
+            ],
+            'emoji_amp4email_attribute'                      => [
+                'utf-8',
+                '<!DOCTYPE html><html ' . Attribute::AMP4EMAIL_EMOJI . '>' . $head . '<body></body></html>',
+                '<!DOCTYPE html><html ' . Attribute::AMP4EMAIL_EMOJI . '>' . $head . '<body></body></html>',
+            ],
+            // The next one is different, see https://github.com/ampproject/amphtml/issues/25990.
+            'alt_emoji_amp4email_attribute'                  => [
+                'utf-8',
+                '<!DOCTYPE html><html ' . Attribute::AMP4EMAIL_EMOJI_ALT . '>' . $head . '<body></body></html>',
+                '<!DOCTYPE html><html ' . Attribute::AMP4EMAIL_EMOJI_ALT . '>' . $head . '<body></body></html>',
             ],
             'html_attributes'                          => [
                 'utf-8',

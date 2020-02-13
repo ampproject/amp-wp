@@ -157,7 +157,7 @@ final class Document extends DOMDocument
      *
      * @var string
      */
-    const AMP_EMOJI_ATTRIBUTE_PATTERN = '/(<html [^>]*?)⚡([^\s^>]*)/i';
+    const AMP_EMOJI_ATTRIBUTE_PATTERN = '/(<html [^>]*?)(' . Attribute::AMP_EMOJI_ALT . '|' . Attribute::AMP_EMOJI . ')([^\s^>]*)/iu';
 
     // Attribute to use as a placeholder to move the emoji AMP symbol (⚡) over to DOM.
     const EMOJI_AMP_ATTRIBUTE_PLACEHOLDER = 'emoji-amp';
@@ -219,6 +219,16 @@ final class Document extends DOMDocument
      * @var bool
      */
     private $selfClosingTagsTransformed = false;
+
+    /**
+     * Store the emoji that was used to represent the AMP attribute.
+     *
+     * There are a few variations, so we want to keep track of this.
+     * @see https://github.com/ampproject/amphtml/issues/25990
+     *
+     * @var string
+     */
+    private $usedAmpEmoji;
 
     /**
      * Creates a new Amp\Dom\Document object
@@ -1100,7 +1110,16 @@ final class Document extends DOMDocument
      */
     private function convertAmpEmojiAttribute($source)
     {
-        return preg_replace(self::AMP_EMOJI_ATTRIBUTE_PATTERN, '\1' . self::EMOJI_AMP_ATTRIBUTE_PLACEHOLDER . '="\2"', $source, 1);
+        $matches            = [];
+        $this->usedAmpEmoji = '';
+
+        if (!preg_match(self::AMP_EMOJI_ATTRIBUTE_PATTERN, $source, $matches)) {
+            return $source;
+        }
+
+        $this->usedAmpEmoji = $matches[2];
+
+        return preg_replace(self::AMP_EMOJI_ATTRIBUTE_PATTERN, '\1' . self::EMOJI_AMP_ATTRIBUTE_PLACEHOLDER . '="\3"', $source, 1);
     }
 
     /**
@@ -1111,7 +1130,11 @@ final class Document extends DOMDocument
      */
     private function restoreAmpEmojiAttribute($html)
     {
-        return preg_replace('/(<html [^>]*?)' . preg_quote(self::EMOJI_AMP_ATTRIBUTE_PLACEHOLDER, '/') . '="([^"]*)"/i', '\1' . Attribute::AMP_EMOJI . '\2', $html, 1);
+        if (empty($this->usedAmpEmoji)) {
+            return $html;
+        }
+
+        return preg_replace('/(<html [^>]*?)' . preg_quote(self::EMOJI_AMP_ATTRIBUTE_PLACEHOLDER, '/') . '="([^"]*)"/i', '\1' . $this->usedAmpEmoji . '\2', $html, 1);
     }
 
     /**
