@@ -319,6 +319,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-bind' ],
 			],
 
+			'amp-list-load-more_no_mandatory_anyof'        => [
+				'<amp-list src="https://foo.com" width="400" height="800"><amp-list-load-more></amp-list-load-more></amp-list>',
+				'<amp-list src="https://foo.com" width="400" height="800"></amp-list>',
+				[ 'amp-list' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::MANDATORY_ONEOF_ATTR_MISSING ],
+			],
+
 			'amp-nexxtv-player'                            => [
 				'<amp-nexxtv-player data-mediaid="123ABC" data-client="4321"></amp-nexxtv-player>',
 				null, // No change.

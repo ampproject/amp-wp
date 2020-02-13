@@ -731,13 +731,11 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return null;
 		}
 
-		$mandatory_anyof_result = $this->check_attr_spec_rule_mandatory_number_of( $node, $merged_attr_spec_list, AMP_Rule_Spec::MANDATORY_ANYOF );
-		$mandatory_oneof_result = $this->check_attr_spec_rule_mandatory_number_of( $node, $merged_attr_spec_list, AMP_Rule_Spec::MANDATORY_ONEOF );
-		if ( AMP_Rule_Spec::FAIL === $mandatory_anyof_result ) {
+		if ( AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_mandatory_number_of( $node, $merged_attr_spec_list, AMP_Rule_Spec::MANDATORY_ANYOF ) ) {
 			$anyof_code = self::MANDATORY_ANYOF_ATTR_MISSING;
 		}
 
-		if ( AMP_Rule_Spec::FAIL === $mandatory_oneof_result ) {
+		if ( AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_mandatory_number_of( $node, $merged_attr_spec_list, AMP_Rule_Spec::MANDATORY_ONEOF ) ) {
 			$anyof_code = self::MANDATORY_ONEOF_ATTR_MISSING;
 		}
 
@@ -1517,7 +1515,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Gets whether the matched attribute count is valid, for the the type of constraint.
 	 *
-	 * @param int    $count              The count of matched attributes.
+	 * @param int    $count           The count of matched attributes.
 	 * @param string $constraint_type The type of constraint, like 'mandatory_oneof'.
 	 * @return bool Whether the count is acceptable for the constraint type.
 	 */
