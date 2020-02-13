@@ -22,8 +22,6 @@ use Amp\AmpWP\Dom\Document;
  *     - `ChildTagSpec`       - Places restrictions on the number and type of child tags.
  *     - `if_value_regex`     - if one attribute value matches, this places a restriction
  *                              on another attribute/value.
- *     - `mandatory_oneof`    - Within the context of the tag, exactly one of the attributes
- *                              must be present.
  */
 class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
