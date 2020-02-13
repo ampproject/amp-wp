@@ -2930,8 +2930,8 @@ class AMP_Validation_Error_Taxonomy {
 				return esc_html__( 'Unrecognized CSS', 'amp' );
 			case AMP_Style_Sanitizer::CSS_SYNTAX_PARSE_ERROR:
 				return esc_html__( 'CSS parse error', 'amp' );
-			case AMP_Style_Sanitizer::STYLESHEET_INVALID_FILE_URL:
-				return esc_html__( 'Missing stylesheet file', 'amp' );
+			case AMP_Style_Sanitizer::STYLESHEET_FETCH_ERROR:
+				return esc_html__( 'Stylesheet fetch error', 'amp' );
 			case AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_PROPERTY:
 			case AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_PROPERTY_NOLIST:
 				$title = esc_html__( 'Illegal CSS property', 'amp' );

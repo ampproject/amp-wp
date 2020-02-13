@@ -32,6 +32,9 @@ class AMP_Story_Media_Test extends WP_UnitTestCase {
 		$wp_styles = null;
 		AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::STORIES_EXPERIENCE ] );
 
+		// Create dummy post to keep Stories experience enabled.
+		self::factory()->post->create( [ 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ] );
+
 		AMP_Story_Post_Type::register(); // This calls AMP_Story_Media::init().
 	}
 

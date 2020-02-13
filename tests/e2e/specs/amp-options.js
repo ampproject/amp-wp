@@ -27,32 +27,6 @@ describe( 'AMP Settings Screen', () => {
 		await expect( page ).toMatchElement( '.notice-success p', { text: 'Your active theme is known to work well in standard or transitional mode.' } );
 	} );
 
-	it( 'should toggle Website Mode section', async () => {
-		await visitAdminPage( 'admin.php', 'page=amp-options' );
-
-		await page.evaluate( () => {
-			document.querySelector( 'tr.amp-website-mode' ).scrollIntoView();
-		} );
-
-		const websiteModeSection = await page.$( 'tr.amp-website-mode' );
-
-		expect( await websiteModeSection.isIntersectingViewport() ).toBe( true );
-
-		await page.click( '#website_experience' );
-
-		expect( await websiteModeSection.isIntersectingViewport() ).toBe( false );
-	} );
-
-	it( 'requires at least one AMP experience to be selected', async () => {
-		await visitAdminPage( 'admin.php', 'page=amp-options' );
-
-		expect( await page.$eval( '#amp-settings', ( el ) => el.matches( ':invalid' ) ) ).toBe( false );
-
-		await page.click( '#website_experience' );
-
-		expect( await page.$eval( '#amp-settings', ( el ) => el.matches( ':invalid' ) ) ).toBe( true );
-	} );
-
 	it( 'should not allow AMP Stories to be enabled when Gutenberg is not active', async () => {
 		await deactivatePlugin( 'gutenberg' );
 
@@ -63,11 +37,5 @@ describe( 'AMP Settings Screen', () => {
 		await expect( page ).toMatchElement( '.notice-info p', { text: 'To use stories, you must be running WordPress' } );
 
 		await activatePlugin( 'gutenberg' );
-	} );
-
-	it( 'should allow AMP Stories to be enabled when Gutenberg is active', async () => {
-		await visitAdminPage( 'admin.php', 'page=amp-options' );
-
-		expect( await page.$eval( '#stories_experience', ( el ) => el.matches( ':disabled' ) ) ).toBe( false );
 	} );
 } );
