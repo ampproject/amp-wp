@@ -1480,9 +1480,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string     $constraint_type The type of constraint, like 'mandatory_oneof'.
 	 *
 	 * @return string:
-	 *      - AMP_Rule_Spec::PASS - there is a mandatory_*of, and exactly one of the attributes is present
-	 *      - AMP_Rule_Spec::FAIL - there is a mandatory_*eof, and either 0 or more than 1 attributes are present
-	 *      - AMP_Rule_Spec::NOT_APPLICABLE - there is no mandatory_*of
+	 *      - AMP_Rule_Spec::PASS - the constraint type is present in the spec, and the proper number of attributes is present
+	 *      - AMP_Rule_Spec::FAIL - the constraint type is present but the proper number of attributes is not present
+	 *      - AMP_Rule_Spec::NOT_APPLICABLE - the constraint type is not present, so there was nothing to check
 	 */
 	private function check_attr_spec_rule_mandatory_number_of( DOMElement $node, $attr_spec, $constraint_type ) {
 		$checked_oneof_constraints = [];

@@ -319,7 +319,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-bind' ],
 			],
 
-			'amp-list-load-more_no_mandatory_anyof'        => [
+			'amp-list-load-more_no_mandatory_oneof'        => [
 				'<amp-list src="https://foo.com" width="400" height="800"><amp-list-load-more></amp-list-load-more></amp-list>',
 				'<amp-list src="https://foo.com" width="400" height="800"></amp-list>',
 				[ 'amp-list' ],
