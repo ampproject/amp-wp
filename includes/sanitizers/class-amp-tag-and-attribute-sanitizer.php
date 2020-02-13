@@ -1501,7 +1501,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * If it exists, this gets a mandatory_*of spec rule that is unsatisfied.
 	 *
-	 * For example, if the $constraint_type is 'mandatory_anyof' and one of the attributes wasn't present,
+	 * For example, if the $constraint_type is mandatory_anyof and one of the attributes isn't present,
 	 * this will return the attributes in the spec rule.
 	 *
 	 * @param DOMElement $node            The node to examine.
