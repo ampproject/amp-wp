@@ -9,14 +9,9 @@ CHECK_SCOPE=all
 
 function after_wp_install {
 	if [[ "$WP_VERSION" != "4.9" ]]; then
-		echo -n "Installing Gutenberg..."
-		gutenberg_plugin_svn_url=https://plugins.svn.wordpress.org/gutenberg/trunk/
+		echo -n "Installing Gutenberg 7.1.0..."
+		gutenberg_plugin_svn_url=https://plugins.svn.wordpress.org/gutenberg/tags/7.1.0/
 		svn export -q "$gutenberg_plugin_svn_url" "$WP_CORE_DIR/src/wp-content/plugins/gutenberg"
-
-		if [ ! -s "$WP_CORE_DIR/src/wp-includes/css/dist/block-library/style.css" ]; then
-			svn export -q --force https://plugins.svn.wordpress.org/gutenberg/trunk/build/block-library/ "$WP_CORE_DIR/src/wp-includes/css/dist/block-library"
-		fi
-
 		echo "done"
 	fi
 

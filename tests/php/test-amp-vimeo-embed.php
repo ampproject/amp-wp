@@ -49,6 +49,10 @@ class AMP_Vimeo_Embed_Test extends WP_UnitTestCase {
 				'<amp-vimeo data-videoid="172355597" layout="responsive" width="600" height="338"></amp-vimeo>' . PHP_EOL,
 			],
 
+			'url_player'                    => [
+				'https://player.vimeo.com/video/172355597' . PHP_EOL,
+				'<p><amp-vimeo data-videoid="172355597" layout="responsive" width="600" height="338"></amp-vimeo></p>' . PHP_EOL,
+			],
 		];
 	}
 

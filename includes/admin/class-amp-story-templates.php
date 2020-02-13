@@ -32,6 +32,10 @@ class AMP_Story_Templates {
 	 * Init.
 	 */
 	public function init() {
+		if ( ! AMP_Options_Manager::is_stories_experience_enabled() ) {
+			return;
+		}
+
 		// Always hide the story templates.
 		add_filter( 'pre_get_posts', [ $this, 'filter_pre_get_posts' ] );
 
@@ -40,10 +44,6 @@ class AMP_Story_Templates {
 
 		// We need to register the taxonomy even if AMP Stories is disabled for tax_query.
 		$this->register_taxonomy();
-
-		if ( ! AMP_Options_Manager::is_stories_experience_enabled() ) {
-			return;
-		}
 
 		add_action( 'save_post_wp_block', [ $this, 'flag_template_as_modified' ] );
 

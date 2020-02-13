@@ -12,7 +12,7 @@
  */
 class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	const SHORT_URL_HOST = 'instagr.am';
-	const URL_PATTERN    = '#http(s?)://(www\.)?instagr(\.am|am\.com)/p/([^/?]+)#i';
+	const URL_PATTERN    = '#https?:\/\/(www\.)?instagr(\.am|am\.com)\/(p|tv)\/([A-Za-z0-9-_]+)#i';
 
 	/**
 	 * Default width.
