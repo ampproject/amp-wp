@@ -109,7 +109,7 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	protected function deduplicate_nodes() {
 		foreach ( [ self::TAG_CHARSET, self::TAG_VIEWPORT ] as $tag ) {
 			if ( count( $this->meta_tags[ $tag ] ) > 1 ) {
-				$this->meta_tags[ $tag ] = (array) $this->meta_tags[ $tag ][0];
+				$this->meta_tags[ $tag ] = (array) ( $this->meta_tags[ $tag ][0] );
 			}
 		}
 	}
