@@ -1987,7 +1987,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * Test CSS imports.
 	 *
 	 * @dataProvider get_import_test_data
-	 * @covers AMP_Style_Sanitizer::parse_import_stylesheet()
+	 * @covers AMP_Style_Sanitizer::splice_imported_stylesheet()
 	 *
 	 * @param array|string $stylesheet_urls             Stylesheet URLs.
 	 * @param string       $style_element               HTML markup for the stylesheet URL.
@@ -2062,7 +2062,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * Test that @import'ing a font URL gets converted into a link.
 	 *
 	 * @expectedIncorrectUsage wp_enqueue_style
-	 * @covers AMP_Style_Sanitizer::parse_import_stylesheet()
+	 * @covers AMP_Style_Sanitizer::splice_imported_stylesheet()
 	 */
 	public function test_css_import_font() {
 		$stylesheet_url = 'http://fonts.googleapis.com/css?family=Merriweather:300|PT+Serif:400i|Open+Sans:800|Zilla+Slab:300,400,500|Montserrat:800|Muli:400&subset=cyrillic-ext,latin-ext,cyrillic,greek,greek-ext,vietnamese';
