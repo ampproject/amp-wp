@@ -242,7 +242,6 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 		$previous_meta_tag = null;
 		foreach ( $this->meta_tags as $meta_tag_group ) {
 			foreach ( $meta_tag_group as $meta_tag ) {
-				$meta_tag = $this->dom->importNode( $meta_tag );
 				if ( $previous_meta_tag ) {
 					$previous_meta_tag = $this->dom->head->insertBefore( $meta_tag, $previous_meta_tag->nextSibling );
 				} else {
