@@ -28,6 +28,7 @@ import json
 import google
 from collections import defaultdict
 import imp
+import re
 
 seen_spec_names = set()
 
@@ -787,9 +788,26 @@ def AddMandatoryOf( spec_dict, attribute_spec, constraint ):
 	"""
 	if attribute_spec.HasField(constraint):
 		mandatory_of = getattr(attribute_spec, constraint).lstrip('[').rstrip(']').split(',')
-		spec_dict[constraint] = [oneof.strip(' ').strip("'").replace('[', 'data-amp-bind-').rstrip(']') for oneof in mandatory_of]
+		spec_dict[constraint] = [GetMandatoryOfAttr( oneof ) for oneof in mandatory_of]
 
 	return spec_dict
+
+def GetMandatoryOfAttr( attribute ):
+	"""Gets mandatory_*of attribute value to add to the generated file.
+
+	Args:
+		attribute: A string mandatory_*of attribute value, as parsed from the spec file.
+	Returns:
+		The attribute to pass to the generated PHP file.
+	"""
+	parsed_attribute = attribute.strip(' ').strip("'")
+
+	# Convert something like [src] to data-amp-bind-src.
+	return re.sub(
+		"^\[(\S+)\]$",
+		r"data-amp-bind-\1",
+		parsed_attribute
+	)
 
 def Phpize(data, indent=0):
 	"""Helper function to convert JSON-serializable data into PHP literals.
