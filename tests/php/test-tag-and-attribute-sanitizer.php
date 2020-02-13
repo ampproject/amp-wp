@@ -893,6 +893,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ],
 			],
 
+			'remove_node_no_mandatory_anyof_attribute'     => [
+				'<amp-list width="400" height="400"></amp-list>',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::MANDATORY_ANYOF_ATTR_MISSING ],
+			],
+
 			'remove_node_no_mandatory_oneof_attribute'     => [
 				'<amp-iframe width="200" height="100"></amp-iframe>',
 				'',

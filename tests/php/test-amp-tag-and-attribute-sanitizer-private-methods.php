@@ -931,6 +931,30 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 				],
 				2,
 			],
+			'attributes_mandatory_anyof_valid' => [
+				[
+					'source' => '<div attribute1 attribute2></div>',
+					'node_tag_name' => 'div',
+					'attr_spec_list' => [
+						'attribute1' => [
+							'mandatory_anyof' => [ 'attribute1', 'attribute2', 'attribute3' ],
+						],
+					],
+				],
+				4,
+			],
+			'attributes_mandatory_anyof_invalid' => [
+				[
+					'source' => '<div attribute9></div>',
+					'node_tag_name' => 'div',
+					'attr_spec_list' => [
+						'attribute1' => [
+							'mandatory_anyof' => [ 'attribute1', 'attribute2' ],
+						],
+					],
+				],
+				0,
+			],
 			'attributes_mandatory_oneof_valid' => [
 				[
 					'source' => '<div attribute2></div>',

@@ -57,6 +57,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	const INVALID_BLACKLISTED_VALUE_REGEX      = 'INVALID_BLACKLISTED_VALUE_REGEX';
 	const DISALLOWED_PROPERTY_IN_ATTR_VALUE    = 'DISALLOWED_PROPERTY_IN_ATTR_VALUE';
 	const ATTR_REQUIRED_BUT_MISSING            = 'ATTR_REQUIRED_BUT_MISSING';
+	const MANDATORY_ANYOF_ATTR_MISSING         = 'MANDATORY_ANYOF_ATTR_MISSING';
 	const MANDATORY_ONEOF_ATTR_MISSING         = 'MANDATORY_ONEOF_ATTR_MISSING';
 	const INVALID_LAYOUT_WIDTH                 = 'INVALID_LAYOUT_WIDTH';
 	const INVALID_LAYOUT_HEIGHT                = 'INVALID_LAYOUT_HEIGHT';
@@ -730,12 +731,22 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return null;
 		}
 
-		// If there is a mandatory_oneof and exactly one of the required attributes isn't present, remove the element.
-		if ( AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_mandatory_oneof( $node, $merged_attr_spec_list ) ) {
+		$mandatory_anyof_result = $this->check_attr_spec_rule_mandatory_number_of( $node, $merged_attr_spec_list, AMP_Rule_Spec::MANDATORY_ANYOF );
+		$mandatory_oneof_result = $this->check_attr_spec_rule_mandatory_number_of( $node, $merged_attr_spec_list, AMP_Rule_Spec::MANDATORY_ONEOF );
+		if ( AMP_Rule_Spec::FAIL === $mandatory_anyof_result ) {
+			$anyof_code = self::MANDATORY_ANYOF_ATTR_MISSING;
+		}
+
+		if ( AMP_Rule_Spec::FAIL === $mandatory_oneof_result ) {
+			$anyof_code = self::MANDATORY_ONEOF_ATTR_MISSING;
+		}
+
+		// If this node did not pass mandatory_*of attribute validation, remove the node.
+		if ( isset( $anyof_code ) ) {
 			$this->remove_invalid_child(
 				$node,
 				[
-					'code'      => self::MANDATORY_ONEOF_ATTR_MISSING,
+					'code'      => $anyof_code,
 					'spec_name' => $this->get_spec_name( $node, $tag_spec ),
 				]
 			);
@@ -1046,11 +1057,23 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		// If a mandatory_oneof constraint exists and is satisfied, increment score.
+		// If a mandatory_anyof constraint exists, change the score accordingly.
+		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::MANDATORY_ANYOF ] ) ) {
+			$mandatory_count++;
+
+			$result = $this->check_attr_spec_rule_mandatory_number_of( $node, $attr_spec_list, AMP_Rule_Spec::MANDATORY_ANYOF );
+			if ( AMP_Rule_Spec::PASS === $result ) {
+				$score += 2;
+			} elseif ( AMP_Rule_Spec::FAIL === $result ) {
+				return 0;
+			}
+		}
+
+		// If a mandatory_oneof constraint exists, update the score.
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::MANDATORY_ONEOF ] ) ) {
 			$mandatory_count++;
 
-			$result = $this->check_attr_spec_rule_mandatory_oneof( $node, $attr_spec_list );
+			$result = $this->check_attr_spec_rule_mandatory_number_of( $node, $attr_spec_list, AMP_Rule_Spec::MANDATORY_ONEOF );
 			if ( AMP_Rule_Spec::PASS === $result ) {
 				$score += 2;
 			} elseif ( AMP_Rule_Spec::FAIL === $result ) {
@@ -1449,36 +1472,38 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Gets whether the mandatory_oneof constraint exists and is satisfied.
+	 * Gets whether a mandatory_*of constraint exists and is satisfied.
 	 *
-	 * If it exists, there must be exactly one of the attributes present.
+	 * If it exists, there must be the proper number of attributes present.
+	 * This number varies by the type of constraint.
 	 *
-	 * @param DOMElement $node      The node to examine.
-	 * @param array[]    $attr_spec The full attribute spec.
+	 * @param DOMElement $node            The node to examine.
+	 * @param array[]    $attr_spec       The full attribute spec.
+	 * @param string     $constraint_type The type of constraint, like 'mandatory_oneof'.
 	 *
 	 * @return string:
-	 *      - AMP_Rule_Spec::PASS - there is a mandatory_onoeof, and exactly one of the attributes is present
-	 *      - AMP_Rule_Spec::FAIL - there is a mandatory_onoeof, and either 0 or more than 1 attributes are present
-	 *      - AMP_Rule_Spec::NOT_APPLICABLE - there is no mandatory_oneof
+	 *      - AMP_Rule_Spec::PASS - there is a mandatory_*of, and exactly one of the attributes is present
+	 *      - AMP_Rule_Spec::FAIL - there is a mandatory_*eof, and either 0 or more than 1 attributes are present
+	 *      - AMP_Rule_Spec::NOT_APPLICABLE - there is no mandatory_*of
 	 */
-	private function check_attr_spec_rule_mandatory_oneof( DOMElement $node, $attr_spec ) {
+	private function check_attr_spec_rule_mandatory_number_of( DOMElement $node, $attr_spec, $constraint_type ) {
 		$checked_oneof_constraints = [];
 		foreach ( $attr_spec as $attr_name => $attr_spec_rule_value ) {
-			if ( ! empty( $attr_spec_rule_value[ AMP_Rule_Spec::MANDATORY_ONEOF ] ) &&
-				! in_array( $attr_spec_rule_value[ AMP_Rule_Spec::MANDATORY_ONEOF ], $checked_oneof_constraints, true ) ) {
+			if ( ! empty( $attr_spec_rule_value[ $constraint_type ] ) &&
+				! in_array( $attr_spec_rule_value[ $constraint_type ], $checked_oneof_constraints, true ) ) {
 
 				// Store this as checked so it's not checked again.
-				$checked_oneof_constraints[] = $attr_spec_rule_value[ AMP_Rule_Spec::MANDATORY_ONEOF ];
+				$checked_oneof_constraints[] = $attr_spec_rule_value[ $constraint_type ];
 				$matched_attribute_count     = count(
 					array_filter(
-						$attr_spec_rule_value[ AMP_Rule_Spec::MANDATORY_ONEOF ],
+						$attr_spec_rule_value[ $constraint_type ],
 						static function( $attribute ) use ( $node ) {
 							return $node->hasAttribute( $attribute );
 						}
 					)
 				);
 
-				if ( 1 !== $matched_attribute_count ) {
+				if ( ! $this->is_matched_attribute_count_acceptable( $matched_attribute_count, $constraint_type ) ) {
 					return AMP_Rule_Spec::FAIL;
 				}
 
@@ -1487,6 +1512,24 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		return isset( $validity ) ? $validity : AMP_Rule_Spec::NOT_APPLICABLE;
+	}
+
+	/**
+	 * Gets whether the matched attribute count is valid, for the the type of constraint.
+	 *
+	 * @param int    $count              The count of matched attributes.
+	 * @param string $constraint_type The type of constraint, like 'mandatory_oneof'.
+	 * @return bool Whether the count is acceptable for the constraint type.
+	 */
+	private function is_matched_attribute_count_acceptable( $count, $constraint_type ) {
+		if ( AMP_Rule_Spec::MANDATORY_ONEOF === $constraint_type ) {
+			return 1 === $count;
+		}
+		if ( AMP_Rule_Spec::MANDATORY_ANYOF === $constraint_type ) {
+			return ! empty( $count );
+		}
+
+		return false;
 	}
 
 	/**
