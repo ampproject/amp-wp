@@ -3843,7 +3843,7 @@ class AMP_Allowed_Tags_Generated {
 					'data-amp-bind-src' => array(
 						'mandatory_anyof' => array(
 							'src',
-							'[src]',
+							'data-amp-bind-src',
 						),
 					),
 					'data-amp-bind-state' => array(),
@@ -3879,7 +3879,7 @@ class AMP_Allowed_Tags_Generated {
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'mandatory_anyof' => array(
 							'src',
-							'[src]',
+							'data-amp-bind-src',
 						),
 						'value_url' => array(
 							'allow_relative' => true,

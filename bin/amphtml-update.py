@@ -787,7 +787,7 @@ def AddMandatoryOf( spec_dict, attribute_spec, constraint ):
 	"""
 	if attribute_spec.HasField(constraint):
 		mandatory_of = getattr(attribute_spec, constraint).lstrip('[').rstrip(']').split(',')
-		spec_dict[constraint] = [oneof.strip(' ').strip("'") for oneof in mandatory_of]
+		spec_dict[constraint] = [oneof.strip(' ').strip("'").replace('[', 'data-amp-bind-').rstrip(']') for oneof in mandatory_of]
 
 	return spec_dict
 
