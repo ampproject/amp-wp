@@ -799,6 +799,7 @@ def GetMandatoryOf( attr, constraint ):
 				)
 			)
 
+	attributes.sort()
 	return attributes
 
 def Phpize(data, indent=0):

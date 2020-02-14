@@ -3836,8 +3836,8 @@ class AMP_Allowed_Tags_Generated {
 						),
 					),
 					'mandatory_anyof' => array(
-						'src',
 						'data-amp-bind-src',
+						'src',
 					),
 					'requires_extension' => array(
 						'amp-list',
@@ -3872,9 +3872,9 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_oneof' => array(
 						'load-more-button',
+						'load-more-end',
 						'load-more-failed',
 						'load-more-loading',
-						'load-more-end',
 					),
 					'mandatory_parent' => 'amp-list',
 					'requires_extension' => array(
