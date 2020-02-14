@@ -907,7 +907,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ AMP_Tag_And_Attribute_Sanitizer::MANDATORY_ANYOF_ATTR_MISSING ],
 			],
 
-			'allow_amp_list_two_mandatory_anyof_attribute' => [
+			'allow_amp_list_two_mandatory_anyof_attrs'     => [
 				'<amp-list src="https://foo.com" data-amp-bind-src="https://baz.com" width="400" height="400"></amp-list>',
 				null,
 				[ 'amp-bind', 'amp-list' ],

@@ -729,7 +729,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return null;
 		}
 
-		$unsatisfied_mandatory_anyof_attributes = $this->get_unsatisfied_attr_spec_rule( $node, $tag_spec, AMP_Rule_Spec::MANDATORY_ANYOF );
+		$unsatisfied_mandatory_anyof_attributes = $this->get_unsatisfied_number_of_rule( $node, $tag_spec, AMP_Rule_Spec::MANDATORY_ANYOF );
 		if ( ! empty( $unsatisfied_mandatory_anyof_attributes ) ) {
 			$this->remove_invalid_child(
 				$node,
@@ -742,7 +742,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return null;
 		}
 
-		$unsatisfied_mandatory_oneof_attributes = $this->get_unsatisfied_attr_spec_rule( $node, $tag_spec, AMP_Rule_Spec::MANDATORY_ONEOF );
+		$unsatisfied_mandatory_oneof_attributes = $this->get_unsatisfied_number_of_rule( $node, $tag_spec, AMP_Rule_Spec::MANDATORY_ONEOF );
 		if ( ! empty( $unsatisfied_mandatory_oneof_attributes ) ) {
 			$this->remove_invalid_child(
 				$node,
@@ -1452,16 +1452,16 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * If it exists, this gets a mandatory_*of spec rule that is unsatisfied.
 	 *
-	 * For example, if the $constraint_type is mandatory_anyof and one of the attributes isn't present,
+	 * For example, if the $constraint_type is 'mandatory_anyof' and one of the attributes isn't present,
 	 * this will return the attributes in the spec rule.
 	 *
 	 * @param DOMElement $node            The node to examine.
 	 * @param array[]    $tag_spec        The spec for the tag.
 	 * @param string     $constraint_type The type of constraint, like 'mandatory_oneof'.
 	 *
-	 * @return array|null The attribute spec rule that isn't satisfied, like a rule for mandatory_oneof, or null.
+	 * @return string[]|null The mandatory_*of rule that isn't satisfied, like a rule for 'mandatory_oneof', or null.
 	 */
-	private function get_unsatisfied_attr_spec_rule( DOMElement $node, $tag_spec, $constraint_type ) {
+	private function get_unsatisfied_number_of_rule( DOMElement $node, $tag_spec, $constraint_type ) {
 		if ( ! empty( $tag_spec[ $constraint_type ] ) ) {
 			$matched_attribute_count = count(
 				array_filter(
