@@ -946,12 +946,7 @@ class AMP_Allowed_Tags_Generated {
 		'amp-addthis' => array(
 			array(
 				'attr_spec_list' => array(
-					'data-product-code' => array(
-						'mandatory_oneof' => array(
-							'data-product-code',
-							'data-widget-id',
-						),
-					),
+					'data-product-code' => array(),
 					'data-share-media' => array(
 						'value_url' => array(
 							'allow_empty' => true,
@@ -970,12 +965,7 @@ class AMP_Allowed_Tags_Generated {
 							),
 						),
 					),
-					'data-widget-id' => array(
-						'mandatory_oneof' => array(
-							'data-product-code',
-							'data-widget-id',
-						),
-					),
+					'data-widget-id' => array(),
 					'media' => array(),
 					'noloading' => array(
 						'value' => array(
@@ -993,6 +983,10 @@ class AMP_Allowed_Tags_Generated {
 							1,
 							4,
 						),
+					),
+					'mandatory_oneof' => array(
+						'data-product-code',
+						'data-widget-id',
 					),
 					'requires_extension' => array(
 						'amp-addthis',
@@ -1107,17 +1101,9 @@ class AMP_Allowed_Tags_Generated {
 			array(
 				'attr_spec_list' => array(
 					'data-apester-channel-token' => array(
-						'mandatory_oneof' => array(
-							'data-apester-media-id',
-							'data-apester-channel-token',
-						),
 						'value_regex' => '[0-9a-zA-Z]+',
 					),
 					'data-apester-media-id' => array(
-						'mandatory_oneof' => array(
-							'data-apester-media-id',
-							'data-apester-channel-token',
-						),
 						'value_regex' => '[0-9a-zA-Z]+',
 					),
 					'media' => array(),
@@ -1137,6 +1123,10 @@ class AMP_Allowed_Tags_Generated {
 							1,
 							4,
 						),
+					),
+					'mandatory_oneof' => array(
+						'data-apester-media-id',
+						'data-apester-channel-token',
 					),
 					'requires_extension' => array(
 						'amp-apester-media',
@@ -1681,11 +1671,6 @@ class AMP_Allowed_Tags_Generated {
 						'value_regex' => '[a-z]+',
 					),
 					'data-outstream' => array(
-						'mandatory_oneof' => array(
-							'data-outstream',
-							'data-playlist',
-							'data-video',
-						),
 						'value_regex' => '[0-9]+',
 					),
 					'data-partner' => array(
@@ -1697,19 +1682,9 @@ class AMP_Allowed_Tags_Generated {
 						'value_regex' => '[0-9]+',
 					),
 					'data-playlist' => array(
-						'mandatory_oneof' => array(
-							'data-outstream',
-							'data-playlist',
-							'data-video',
-						),
 						'value_regex' => '.+',
 					),
 					'data-video' => array(
-						'mandatory_oneof' => array(
-							'data-outstream',
-							'data-playlist',
-							'data-video',
-						),
 						'value_regex' => '[0-9]+',
 					),
 					'media' => array(),
@@ -1729,6 +1704,11 @@ class AMP_Allowed_Tags_Generated {
 							1,
 							4,
 						),
+					),
+					'mandatory_oneof' => array(
+						'data-outstream',
+						'data-playlist',
+						'data-video',
 					),
 					'requires_extension' => array(
 						'amp-brid-player',
@@ -2162,12 +2142,6 @@ class AMP_Allowed_Tags_Generated {
 						),
 					),
 					'end-date' => array(
-						'mandatory_oneof' => array(
-							'end-date',
-							'timeleft-ms',
-							'timestamp-ms',
-							'timestamp-seconds',
-						),
 						'value_regex' => '\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d(:[0-5]\\d(\\.\\d+)?)?(Z|[+-][0-1][0-9]:[0-5][0-9])',
 					),
 					'locale' => array(
@@ -2201,30 +2175,12 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'template' => array(),
 					'timeleft-ms' => array(
-						'mandatory_oneof' => array(
-							'end-date',
-							'timeleft-ms',
-							'timestamp-ms',
-							'timestamp-seconds',
-						),
 						'value_regex' => '\\d+',
 					),
 					'timestamp-ms' => array(
-						'mandatory_oneof' => array(
-							'end-date',
-							'timeleft-ms',
-							'timestamp-ms',
-							'timestamp-seconds',
-						),
 						'value_regex' => '\\d{13}',
 					),
 					'timestamp-seconds' => array(
-						'mandatory_oneof' => array(
-							'end-date',
-							'timeleft-ms',
-							'timestamp-ms',
-							'timestamp-seconds',
-						),
 						'value_regex' => '\\d{10}',
 					),
 					'when-ended' => array(
@@ -2245,6 +2201,12 @@ class AMP_Allowed_Tags_Generated {
 							4,
 						),
 					),
+					'mandatory_oneof' => array(
+						'end-date',
+						'timeleft-ms',
+						'timestamp-ms',
+						'timestamp-seconds',
+					),
 					'requires_extension' => array(
 						'amp-date-countdown',
 					),
@@ -2255,11 +2217,6 @@ class AMP_Allowed_Tags_Generated {
 			array(
 				'attr_spec_list' => array(
 					'datetime' => array(
-						'mandatory_oneof' => array(
-							'datetime',
-							'timestamp-ms',
-							'timestamp-seconds',
-						),
 						'value_regex' => 'now|(\\d{4}-[01]\\d-[0-3]\\d(T[0-2]\\d:[0-5]\\d(:[0-6]\\d(\\.\\d\\d?\\d?)?)?(Z|[+-][0-1]\\d:[0-5]\\d)?)?)',
 					),
 					'display-in' => array(
@@ -2279,19 +2236,9 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'template' => array(),
 					'timestamp-ms' => array(
-						'mandatory_oneof' => array(
-							'datetime',
-							'timestamp-ms',
-							'timestamp-seconds',
-						),
 						'value_regex' => '\\d+',
 					),
 					'timestamp-seconds' => array(
-						'mandatory_oneof' => array(
-							'datetime',
-							'timestamp-ms',
-							'timestamp-seconds',
-						),
 						'value_regex' => '\\d+',
 					),
 				),
@@ -2305,6 +2252,11 @@ class AMP_Allowed_Tags_Generated {
 							1,
 							4,
 						),
+					),
+					'mandatory_oneof' => array(
+						'datetime',
+						'timestamp-ms',
+						'timestamp-seconds',
 					),
 					'requires_extension' => array(
 						'amp-date-display',
@@ -3330,10 +3282,6 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'src' => array(
 						'blacklisted_value_regex' => '__amp_source_origin',
-						'mandatory_oneof' => array(
-							'src',
-							'srcdoc',
-						),
 						'value_url' => array(
 							'allow_relative' => true,
 							'protocol' => array(
@@ -3342,12 +3290,7 @@ class AMP_Allowed_Tags_Generated {
 							),
 						),
 					),
-					'srcdoc' => array(
-						'mandatory_oneof' => array(
-							'src',
-							'srcdoc',
-						),
-					),
+					'srcdoc' => array(),
 					'tabindex' => array(
 						'value_regex' => '-?\\d+',
 					),
@@ -3363,6 +3306,10 @@ class AMP_Allowed_Tags_Generated {
 							1,
 							4,
 						),
+					),
+					'mandatory_oneof' => array(
+						'src',
+						'srcdoc',
 					),
 					'requires_extension' => array(
 						'amp-iframe',
@@ -3676,10 +3623,6 @@ class AMP_Allowed_Tags_Generated {
 			array(
 				'attr_spec_list' => array(
 					'data-media-id' => array(
-						'mandatory_oneof' => array(
-							'data-media-id',
-							'data-playlist-id',
-						),
 						'value_regex_casei' => '[0-9a-z]{8}',
 					),
 					'data-player-id' => array(
@@ -3687,10 +3630,6 @@ class AMP_Allowed_Tags_Generated {
 						'value_regex_casei' => '[0-9a-z]{8}',
 					),
 					'data-playlist-id' => array(
-						'mandatory_oneof' => array(
-							'data-media-id',
-							'data-playlist-id',
-						),
 						'value_regex_casei' => '[0-9a-z]{8}',
 					),
 				),
@@ -3704,6 +3643,10 @@ class AMP_Allowed_Tags_Generated {
 							1,
 							4,
 						),
+					),
+					'mandatory_oneof' => array(
+						'data-media-id',
+						'data-playlist-id',
 					),
 					'requires_extension' => array(
 						'amp-jwplayer',
@@ -3840,12 +3783,7 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'credentials' => array(),
 					'data-amp-bind-is-layout-container' => array(),
-					'data-amp-bind-src' => array(
-						'mandatory_anyof' => array(
-							'src',
-							'data-amp-bind-src',
-						),
-					),
+					'data-amp-bind-src' => array(),
 					'data-amp-bind-state' => array(),
 					'diffable' => array(
 						'value' => array(
@@ -3877,10 +3815,6 @@ class AMP_Allowed_Tags_Generated {
 					'single-item' => array(),
 					'src' => array(
 						'blacklisted_value_regex' => '__amp_source_origin',
-						'mandatory_anyof' => array(
-							'src',
-							'data-amp-bind-src',
-						),
 						'value_url' => array(
 							'allow_relative' => true,
 							'protocol' => array(
@@ -3901,6 +3835,10 @@ class AMP_Allowed_Tags_Generated {
 							4,
 						),
 					),
+					'mandatory_anyof' => array(
+						'src',
+						'data-amp-bind-src',
+					),
 					'requires_extension' => array(
 						'amp-list',
 					),
@@ -3911,51 +3849,33 @@ class AMP_Allowed_Tags_Generated {
 			array(
 				'attr_spec_list' => array(
 					'load-more-button' => array(
-						'mandatory_oneof' => array(
-							'load-more-button',
-							'load-more-failed',
-							'load-more-end',
-							'load-more-loading',
-						),
 						'value' => array(
 							'',
 						),
 					),
 					'load-more-end' => array(
-						'mandatory_oneof' => array(
-							'load-more-button',
-							'load-more-failed',
-							'load-more-end',
-							'load-more-loading',
-						),
 						'value' => array(
 							'',
 						),
 					),
 					'load-more-failed' => array(
-						'mandatory_oneof' => array(
-							'load-more-button',
-							'load-more-failed',
-							'load-more-end',
-							'load-more-loading',
-						),
 						'value' => array(
 							'',
 						),
 					),
 					'load-more-loading' => array(
-						'mandatory_oneof' => array(
-							'load-more-button',
-							'load-more-failed',
-							'load-more-end',
-							'load-more-loading',
-						),
 						'value' => array(
 							'',
 						),
 					),
 				),
 				'tag_spec' => array(
+					'mandatory_oneof' => array(
+						'load-more-button',
+						'load-more-failed',
+						'load-more-end',
+						'load-more-loading',
+					),
 					'mandatory_parent' => 'amp-list',
 					'requires_extension' => array(
 						'amp-list',
@@ -4581,12 +4501,7 @@ class AMP_Allowed_Tags_Generated {
 							'true',
 						),
 					),
-					'data-item' => array(
-						'mandatory_oneof' => array(
-							'data-item',
-							'src',
-						),
-					),
+					'data-item' => array(),
 					'data-item-info' => array(
 						'value_casei' => array(
 							'false',
@@ -4605,12 +4520,7 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
-					'src' => array(
-						'mandatory_oneof' => array(
-							'data-item',
-							'src',
-						),
-					),
+					'src' => array(),
 				),
 				'tag_spec' => array(
 					'amp_layout' => array(
@@ -4618,6 +4528,10 @@ class AMP_Allowed_Tags_Generated {
 							4,
 							3,
 						),
+					),
+					'mandatory_oneof' => array(
+						'data-item',
+						'src',
 					),
 					'requires_extension' => array(
 						'amp-playbuzz',
@@ -4672,17 +4586,8 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value_regex' => '[0-9a-zA-Z-]+',
 					),
-					'data-terms' => array(
-						'mandatory_oneof' => array(
-							'data-video',
-							'data-terms',
-						),
-					),
+					'data-terms' => array(),
 					'data-video' => array(
-						'mandatory_oneof' => array(
-							'data-video',
-							'data-terms',
-						),
 						'value_regex' => '[0-9a-zA-Z-]+',
 					),
 					'media' => array(),
@@ -4702,6 +4607,10 @@ class AMP_Allowed_Tags_Generated {
 							1,
 							4,
 						),
+					),
+					'mandatory_oneof' => array(
+						'data-video',
+						'data-terms',
 					),
 					'requires_extension' => array(
 						'amp-powr-player',
@@ -4857,18 +4766,9 @@ class AMP_Allowed_Tags_Generated {
 						),
 					),
 					'sandbox' => array(),
-					'script' => array(
-						'mandatory_oneof' => array(
-							'script',
-							'src',
-						),
-					),
+					'script' => array(),
 					'src' => array(
 						'blacklisted_value_regex' => '__amp_source_origin',
-						'mandatory_oneof' => array(
-							'script',
-							'src',
-						),
 						'value_url' => array(
 							'allow_relative' => false,
 							'protocol' => array(
@@ -4891,6 +4791,10 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'disallowed_ancestor' => array(
 						'amp-script',
+					),
+					'mandatory_oneof' => array(
+						'script',
+						'src',
 					),
 					'requires_extension' => array(
 						'amp-script',
@@ -5148,20 +5052,12 @@ class AMP_Allowed_Tags_Generated {
 						'value_regex_casei' => '([0-9a-f]{3}){1,2}',
 					),
 					'data-playlistid' => array(
-						'mandatory_oneof' => array(
-							'data-trackid',
-							'data-playlistid',
-						),
 						'value_regex' => '[0-9]+',
 					),
 					'data-secret-token' => array(
 						'value_regex' => '[A-Za-z0-9_-]+',
 					),
 					'data-trackid' => array(
-						'mandatory_oneof' => array(
-							'data-trackid',
-							'data-playlistid',
-						),
 						'value_regex' => '[0-9]+',
 					),
 					'data-visual' => array(
@@ -5188,6 +5084,10 @@ class AMP_Allowed_Tags_Generated {
 							1,
 							4,
 						),
+					),
+					'mandatory_oneof' => array(
+						'data-trackid',
+						'data-playlistid',
 					),
 					'requires_extension' => array(
 						'amp-soundcloud',
@@ -5679,11 +5579,6 @@ class AMP_Allowed_Tags_Generated {
 					'data-conversation' => array(),
 					'data-limit' => array(),
 					'data-momentid' => array(
-						'mandatory_oneof' => array(
-							'data-momentid',
-							'data-timeline-source-type',
-							'data-tweetid',
-						),
 						'value_regex' => '\\d+',
 					),
 					'data-timeline-id' => array(
@@ -5692,13 +5587,7 @@ class AMP_Allowed_Tags_Generated {
 					'data-timeline-owner-screen-name' => array(),
 					'data-timeline-screen-name' => array(),
 					'data-timeline-slug' => array(),
-					'data-timeline-source-type' => array(
-						'mandatory_oneof' => array(
-							'data-momentid',
-							'data-timeline-source-type',
-							'data-tweetid',
-						),
-					),
+					'data-timeline-source-type' => array(),
 					'data-timeline-url' => array(
 						'value_url' => array(
 							'allow_relative' => false,
@@ -5711,13 +5600,7 @@ class AMP_Allowed_Tags_Generated {
 					'data-timeline-user-id' => array(
 						'value_regex' => '\\d+',
 					),
-					'data-tweetid' => array(
-						'mandatory_oneof' => array(
-							'data-momentid',
-							'data-timeline-source-type',
-							'data-tweetid',
-						),
-					),
+					'data-tweetid' => array(),
 					'media' => array(),
 					'noloading' => array(
 						'value' => array(
@@ -5736,6 +5619,11 @@ class AMP_Allowed_Tags_Generated {
 							1,
 							4,
 						),
+					),
+					'mandatory_oneof' => array(
+						'data-momentid',
+						'data-timeline-source-type',
+						'data-tweetid',
 					),
 					'requires_extension' => array(
 						'amp-twitter',
@@ -6619,17 +6507,9 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'data-amp-bind-data-videoid' => array(),
 					'data-live-channelid' => array(
-						'mandatory_oneof' => array(
-							'data-live-channelid',
-							'data-videoid',
-						),
 						'value_regex' => '[^=/?:]+',
 					),
 					'data-videoid' => array(
-						'mandatory_oneof' => array(
-							'data-live-channelid',
-							'data-videoid',
-						),
 						'value_regex' => '[^=/?:]+',
 					),
 					'dock' => array(
@@ -6659,6 +6539,10 @@ class AMP_Allowed_Tags_Generated {
 							1,
 							4,
 						),
+					),
+					'mandatory_oneof' => array(
+						'data-live-channelid',
+						'data-videoid',
 					),
 					'requires_extension' => array(
 						'amp-youtube',
@@ -8716,10 +8600,6 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'src' => array(
 						'blacklisted_value_regex' => '__amp_source_origin',
-						'mandatory_oneof' => array(
-							'src',
-							'srcdoc',
-						),
 						'value_url' => array(
 							'allow_relative' => false,
 							'protocol' => array(
@@ -8728,17 +8608,16 @@ class AMP_Allowed_Tags_Generated {
 							),
 						),
 					),
-					'srcdoc' => array(
-						'mandatory_oneof' => array(
-							'src',
-							'srcdoc',
-						),
-					),
+					'srcdoc' => array(),
 					'width' => array(),
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'noscript',
 					'mandatory_ancestor_suggested_alternative' => 'amp-iframe',
+					'mandatory_oneof' => array(
+						'src',
+						'srcdoc',
+					),
 					'spec_url' => 'https://amp.dev/documentation/components/amp-iframe',
 				),
 			),

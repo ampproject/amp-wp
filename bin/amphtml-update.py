@@ -655,6 +655,14 @@ def GetTagRules(tag_spec):
 				amp_layout[ field[0].name ] = field[1]
 		tag_rules['amp_layout'] = amp_layout
 
+	mandatory_anyof = GetMandatoryOf(tag_spec.attrs, 'mandatory_anyof')
+	if mandatory_anyof:
+		tag_rules.update( mandatory_anyof )
+
+	mandatory_oneof = GetMandatoryOf(tag_spec.attrs, 'mandatory_oneof')
+	if mandatory_oneof:
+		tag_rules.update( mandatory_oneof )
+
 	logging.info('... done')
 	return tag_rules
 
@@ -708,9 +716,6 @@ def GetValues(attr_spec):
 	# mandatory is a boolean
 	if attr_spec.HasField('mandatory'):
 		value_dict['mandatory'] = attr_spec.mandatory
-
-	value_dict = AddMandatoryOf( value_dict, attr_spec, 'mandatory_anyof' )
-	value_dict = AddMandatoryOf( value_dict, attr_spec, 'mandatory_oneof' )
 
 	# Add allowed value
 	if attr_spec.value:
@@ -776,21 +781,21 @@ def UnicodeEscape(string):
 	"""
 	return ('' + string).encode('unicode-escape')
 
-def AddMandatoryOf( spec_dict, attribute_spec, constraint ):
+def GetMandatoryOf( attr, constraint ):
 	"""Gets the spec dictionary, with mandatory_*of constraints possibly added.
 
 	Args:
-		spec_dict: A dictionary of the attr_spec values to possibly add the constraint to.
-		attribute_spec: The attribute spec in which to look for the mandatory_*of constraint.
+		attr: The attributes in which to look for the mandatory_*of constraint.
 		constraint: A string of the mandatory_*of constraint, like 'mandatory_anyof'.
 	Returns:
-		The spec_dict, with the constraint possibly added.
+		A spec_dict with the constraint added, or null.
 	"""
-	if attribute_spec.HasField(constraint):
-		mandatory_of = getattr(attribute_spec, constraint).lstrip('[').rstrip(']').split(',')
-		spec_dict[constraint] = [GetMandatoryOfAttr( oneof ) for oneof in mandatory_of]
-
-	return spec_dict
+	for attr_spec in attr:
+		if attr_spec.HasField(constraint):
+			spec_dict = {}
+			mandatory_of = getattr(attr_spec, constraint).lstrip('[').rstrip(']').split(',')
+			spec_dict[constraint] = [GetMandatoryOfAttr(oneof) for oneof in mandatory_of]
+			return spec_dict
 
 def GetMandatoryOfAttr( attribute ):
 	"""Gets mandatory_*of attribute value to add to the generated file.
