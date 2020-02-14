@@ -62,4 +62,17 @@ trait PrivateAccess {
 		$property->setAccessible( true );
 		return $property->getValue( $object );
 	}
+
+	/**
+	 * Get a static private property as if it was public.
+	 *
+	 * @param string $class         Class string to get the property of.
+	 * @param string $property_name Name of the property to get.
+	 * @return mixed Return value of the property.
+	 * @throws ReflectionException If the class could not be reflected upon.
+	 */
+	private function get_static_private_property( $class, $property_name ) {
+		$properties = ( new ReflectionClass( $class ) )->getStaticProperties();
+		return array_key_exists( $property_name, $properties ) ? $properties[ $property_name ] : null;
+	}
 }

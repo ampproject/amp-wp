@@ -103,4 +103,138 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 		$actual    = $this->call_private_method( $sanitizer, 'get_closest_submenu', [ $element ] );
 		$this->assertEquals( $expected, $actual );
 	}
+
+	/**
+	 * Test get_supported_themes().
+	 *
+	 * @covers AMP_Core_Theme_Sanitizer::get_supported_themes()
+	 */
+	public function test_get_supported_themes() {
+		$supported_themes = [
+			'twentytwenty',
+			'twentynineteen',
+			'twentyseventeen',
+			'twentysixteen',
+			'twentyfifteen',
+			'twentyfourteen',
+			'twentythirteen',
+			'twentytwelve',
+			'twentyeleven',
+			'twentyten',
+		];
+
+		$this->assertEquals( $supported_themes, AMP_Core_Theme_Sanitizer::get_supported_themes() );
+	}
+
+	public function get_templates() {
+		$not_supported = [ 'foo', 'bar' ];
+
+		$templates = array_merge( $not_supported, AMP_Core_Theme_Sanitizer::get_supported_themes() );
+
+		return array_map(
+			static function ( $template ) use ( $not_supported ) {
+				if ( in_array( $template, $not_supported, true ) ) {
+					$acceptable_errors = [];
+				} else {
+					$acceptable_errors = [
+						AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE => [
+							[
+								'at_rule' => 'viewport',
+							],
+							[
+								'at_rule' => '-ms-viewport',
+							],
+						],
+					];
+				}
+
+				return [ $template, $acceptable_errors ];
+			},
+			$templates
+		);
+	}
+
+	/**
+	 * Test get_acceptable_errors().
+	 *
+	 * @covers AMP_Core_Theme_Sanitizer::get_acceptable_errors()
+	 *
+	 * @dataProvider get_templates
+	 *
+	 * @param string $template Template name.
+	 * @param array $expected Expected acceptable errors.
+	 */
+	public function test_get_acceptable_errors( $template, $expected ) {
+		$actual = AMP_Core_Theme_Sanitizer::get_acceptable_errors( $template );
+		$this->assertEquals( $expected, $actual );
+	}
+
+	/**
+	 * Test add_has_header_video_body_class().
+	 *
+	 * @covers AMP_Core_Theme_Sanitizer::add_has_header_video_body_class()
+	 */
+	public function test_add_has_header_video_body_class() {
+		$args = [ 'foo' ];
+
+		// Without has_header_video().
+		AMP_Core_Theme_Sanitizer::add_has_header_video_body_class( $args );
+
+		$expected = [ 'foo' ];
+		$actual   = apply_filters( 'body_class', $args );
+		$this->assertEquals( $expected, $actual );
+
+		// With has_header_video().
+		remove_all_filters( 'body_class' );
+
+		add_filter(
+			'get_header_video_url',
+			static function () {
+				return 'https://example.com';
+			}
+		);
+
+		AMP_Core_Theme_Sanitizer::add_has_header_video_body_class( $args );
+		$expected = [ 'foo', 'has-header-video' ];
+		$actual   = apply_filters( 'body_class', $args );
+		$this->assertEquals( $expected, $actual );
+	}
+
+	public function get_modals() {
+		$dom         = new Document();
+		$modal_roles = $this->get_static_private_property( 'AMP_Core_Theme_Sanitizer', 'modal_roles' );
+
+		$a = array_map(
+			static function ( $rule ) use ( $dom ) {
+				return [ AMP_DOM_Utils::create_node( $dom, 'div', [ 'class' => $rule ] ), $rule ];
+			},
+			$modal_roles
+		);
+
+		return array_merge(
+			$a,
+			[
+				[ AMP_DOM_Utils::create_node( $dom, 'div', [ 'foo' => 'bar' ] ), 'dialog' ],
+				[ AMP_DOM_Utils::create_node( $dom, 'div', [ 'class' => 'foo' ] ), 'dialog' ],
+				[ AMP_DOM_Utils::create_node( $dom, 'div', [ 'class' => 'top_navigation' ] ), 'dialog' ],
+			]
+		);
+	}
+
+	/**
+	 * Test guess_modal_role().
+	 *
+	 * @dataProvider get_modals
+	 * @covers       AMP_Core_Theme_Sanitizer::guess_modal_role()
+	 *
+	 * @param DOMElement $dom_element Document.
+	 * @param string     $expected    Expected.
+	 * @throws ReflectionException
+	 */
+	public function test_guess_modal_role( DOMElement $dom_element, $expected ) {
+		$sanitizer = new AMP_Core_Theme_Sanitizer( new Document() );
+		$actual    = $this->call_private_method( $sanitizer, 'guess_modal_role', [ $dom_element ] );
+
+		$this->assertEquals( $expected, $actual );
+	}
 }

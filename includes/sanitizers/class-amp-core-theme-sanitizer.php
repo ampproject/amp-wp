@@ -49,6 +49,23 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	];
 
 	/**
+	 * Known modal roles.
+	 *
+	 * @var array
+	 */
+	protected static $modal_roles = [
+		'navigation',
+		'menu',
+		'search',
+		'alert',
+		'figure',
+		'form',
+		'img',
+		'toolbar',
+		'tooltip',
+	];
+
+	/**
 	 * Retrieve the config for features needed by a theme.
 	 *
 	 * @since 1.0
@@ -1909,10 +1926,10 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			return 'dialog';
 		}
 
-		$classes = $modal->getAttribute( 'class' );
+		$classes = explode( ' ', $modal->getAttribute( 'class' ) );
 
-		foreach ( [ 'navigation', 'menu', 'search', 'alert', 'figure', 'form', 'img', 'toolbar', 'tooltip' ] as $role ) {
-			if ( false !== strpos( $classes, $role ) ) {
+		foreach ( self::$modal_roles as $role ) {
+			if ( in_array( $role, $classes, true ) ) {
 				return $role;
 			}
 		}
