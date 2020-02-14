@@ -2534,4 +2534,34 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		remove_filter( 'stylesheet', $child_theme_filter );
 		remove_filter( 'template', $parent_theme_filter );
 	}
+
+	/**
+	 * Test get_css_parser_validation_error_codes.
+	 *
+	 * @covers AMP_Style_Sanitizer::get_css_parser_validation_error_codes()
+	 */
+	public function test_get_css_parser_validation_error_codes() {
+		$expected = [
+			AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE,
+			AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_DECLARATION,
+			AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_IMPORTANT,
+			AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_PROPERTY,
+			AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_PROPERTY_NOLIST,
+			AMP_Style_Sanitizer::CSS_SYNTAX_PARSE_ERROR,
+			AMP_Style_Sanitizer::STYLESHEET_FETCH_ERROR,
+			AMP_Style_Sanitizer::STYLESHEET_TOO_LONG,
+		];
+
+		$this->assertEquals( $expected, AMP_Style_Sanitizer::get_css_parser_validation_error_codes() );
+	}
+
+	/**
+	 * Test get_styles.
+	 *
+	 * @covers AMP_Style_Sanitizer::get_styles()
+	 */
+	public function test_get_styles() {
+		$sanitizer = new AMP_Style_Sanitizer( new Document() );
+		$this->assertEquals( [], $sanitizer->get_styles() );
+	}
 }
