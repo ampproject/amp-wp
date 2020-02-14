@@ -900,25 +900,37 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ],
 			],
 
-			'remove_node_no_mandatory_anyof_attribute'     => [
+			'remove_amp_list_no_mandatory_anyof_attribute' => [
 				'<amp-list width="400" height="400"></amp-list>',
 				'',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::MANDATORY_ANYOF_ATTR_MISSING ],
 			],
 
-			'remove_node_no_mandatory_oneof_attribute'     => [
+			'allow_amp_list_two_mandatory_anyof_attribute' => [
+				'<amp-list src="https://foo.com" data-amp-bind-src="https://baz.com" width="400" height="400"></amp-list>',
+				null,
+				[ 'amp-bind', 'amp-list' ],
+			],
+
+			'remove_amp_iframe_no_mandatory_oneof_attr'    => [
 				'<amp-iframe width="200" height="100"></amp-iframe>',
 				'',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::MANDATORY_ONEOF_ATTR_MISSING ],
 			],
 
-			'remove_node_two_mandatory_oneof_attributes'   => [
+			'remove_amp_iframe_two_mandatory_oneof_attrs'  => [
 				'<amp-iframe src="https://example.com" srcdoc="https://foo.com" width="200" height="100"></amp-iframe>',
 				'',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::MANDATORY_ONEOF_ATTR_MISSING ],
+			],
+
+			'allow_amp_iframe_one_mandatory_oneof_attr'    => [
+				'<amp-iframe srcdoc="https://foo.com" width="200" height="100"></amp-iframe>',
+				null,
+				[ 'amp-iframe' ],
 			],
 
 			'remove_script_with_async_attribute'           => [

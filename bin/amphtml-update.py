@@ -782,18 +782,18 @@ def UnicodeEscape(string):
 	return ('' + string).encode('unicode-escape')
 
 def GetMandatoryOf( attr, constraint ):
-	"""Gets the spec dictionary, with mandatory_*of constraints possibly added.
+	"""Gets the mandatory_*of value, if it exists.
 
 	Args:
 		attr: The attributes in which to look for the mandatory_*of constraint.
 		constraint: A string of the mandatory_*of constraint, like 'mandatory_anyof'.
 	Returns:
-		A spec_dict with the constraint added, or null.
+		A dictionary with the constraint name mapped to its value.
 	"""
 	for attr_spec in attr:
 		if attr_spec.HasField(constraint):
 			spec_dict = {}
-			mandatory_of = getattr(attr_spec, constraint).lstrip('[').rstrip(']').split(',')
+			mandatory_of = getattr(attr_spec, constraint).strip('[]').split(',')
 			spec_dict[constraint] = [GetMandatoryOfAttr(oneof) for oneof in mandatory_of]
 			return spec_dict
 
