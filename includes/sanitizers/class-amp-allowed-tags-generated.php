@@ -1125,8 +1125,8 @@ class AMP_Allowed_Tags_Generated {
 						),
 					),
 					'mandatory_oneof' => array(
-						'data-apester-media-id',
 						'data-apester-channel-token',
+						'data-apester-media-id',
 					),
 					'requires_extension' => array(
 						'amp-apester-media',
@@ -3873,8 +3873,8 @@ class AMP_Allowed_Tags_Generated {
 					'mandatory_oneof' => array(
 						'load-more-button',
 						'load-more-failed',
-						'load-more-end',
 						'load-more-loading',
+						'load-more-end',
 					),
 					'mandatory_parent' => 'amp-list',
 					'requires_extension' => array(
@@ -4609,8 +4609,8 @@ class AMP_Allowed_Tags_Generated {
 						),
 					),
 					'mandatory_oneof' => array(
-						'data-video',
 						'data-terms',
+						'data-video',
 					),
 					'requires_extension' => array(
 						'amp-powr-player',
@@ -5086,8 +5086,8 @@ class AMP_Allowed_Tags_Generated {
 						),
 					),
 					'mandatory_oneof' => array(
-						'data-trackid',
 						'data-playlistid',
+						'data-trackid',
 					),
 					'requires_extension' => array(
 						'amp-soundcloud',
