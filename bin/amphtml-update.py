@@ -657,11 +657,11 @@ def GetTagRules(tag_spec):
 
 	mandatory_anyof = GetMandatoryOf(tag_spec.attrs, 'mandatory_anyof')
 	if mandatory_anyof:
-		tag_rules.update( mandatory_anyof )
+		tag_rules.update(mandatory_anyof)
 
 	mandatory_oneof = GetMandatoryOf(tag_spec.attrs, 'mandatory_oneof')
 	if mandatory_oneof:
-		tag_rules.update( mandatory_oneof )
+		tag_rules.update(mandatory_oneof)
 
 	logging.info('... done')
 	return tag_rules
