@@ -1,7 +1,7 @@
 From d42b64793f2edaffeb663c63e9de79069cdc0831 Mon Sep 17 00:00:00 2001
 From: Pierre Gordon <pierregordon@protonmail.com>
 Date: Wed, 22 Jan 2020 01:00:18 -0500
-Subject: [PATCH 1/4] Validate name-start code points for identifier
+Subject: [PATCH 1/5] Validate name-start code points for identifier
 
 ---
  lib/Sabberworm/CSS/Parsing/ParserState.php | 40 +++++++++++++++++-----
@@ -164,7 +164,7 @@ index 0000000..da00caf
 From e031394fe3fc4448ed7e625e0c2b4ab334ad4ba2 Mon Sep 17 00:00:00 2001
 From: Pierre Gordon <pierregordon@protonmail.com>
 Date: Sun, 26 Jan 2020 00:56:31 -0500
-Subject: [PATCH 2/4] Make validation of identifier more strict
+Subject: [PATCH 2/5] Make validation of identifier more strict
 
 ---
  lib/Sabberworm/CSS/Parsing/ParserState.php |  8 +++----
@@ -250,7 +250,7 @@ index da00caf..0000000
 From 8fbd0fe82aa08ad2650def1b44f2f77154211e30 Mon Sep 17 00:00:00 2001
 From: Pierre Gordon <pierregordon@protonmail.com>
 Date: Sun, 26 Jan 2020 01:08:21 -0500
-Subject: [PATCH 3/4] Refactor `testInvalidIdentifier` test
+Subject: [PATCH 3/5] Refactor `testInvalidIdentifier` test
 
 ---
  tests/Sabberworm/CSS/ParserTest.php | 27 ++++++++++-----------------
@@ -303,7 +303,7 @@ index 921209e..68284ce 100644
 From 586c684a990458d70af55b47f584b619ad5c3a41 Mon Sep 17 00:00:00 2001
 From: Pierre Gordon <pierregordon@protonmail.com>
 Date: Fri, 31 Jan 2020 15:55:54 -0500
-Subject: [PATCH 4/4] Recover from invalid identifier if in lenient mode
+Subject: [PATCH 4/5] Recover from invalid identifier if in lenient mode
 
 ---
  lib/Sabberworm/CSS/Parsing/ParserState.php | 2 +-
@@ -338,3 +338,27 @@ index 68284ce..ff8c5c9 100644
          );
  	}
  
+
+From 113df5d55e94e21c6402021dfa959924941d4c29 Mon Sep 17 00:00:00 2001
+From: Pierre Gordon <pierregordon@protonmail.com>
+Date: Fri, 14 Feb 2020 04:20:16 -0500
+Subject: [PATCH 5/5] Remove check of lenient parsing
+
+The thrown exception will be caught when in lenient mode
+---
+ lib/Sabberworm/CSS/Parsing/ParserState.php | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/lib/Sabberworm/CSS/Parsing/ParserState.php b/lib/Sabberworm/CSS/Parsing/ParserState.php
+index 7ab8e01..2271d03 100644
+--- a/lib/Sabberworm/CSS/Parsing/ParserState.php
++++ b/lib/Sabberworm/CSS/Parsing/ParserState.php
+@@ -72,7 +72,7 @@ public function parseIdentifier($bIgnoreCase = true, $bNameStartCodePoint = true
+             $sResult = $this->parseCharacter(true);
+         }
+ 
+-		if (!$this->oParserSettings->bLenientParsing && $sResult === null) {
++		if ($sResult === null) {
+ 			throw new UnexpectedTokenException($sResult, $this->peek(5), 'identifier', $this->iLineNo);
+ 		}
+ 		$sCharacter = null;
