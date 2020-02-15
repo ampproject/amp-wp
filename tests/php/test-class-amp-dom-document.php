@@ -199,6 +199,11 @@ class Test_AMP_DOM_Document extends WP_UnitTestCase {
 				'<!DOCTYPE html><html><head profile=""></head><body></body></html>',
 				'<!DOCTYPE html><html><head><meta charset="utf-8"></head><body></body></html>',
 			],
+			'comment_after_html'                       => [
+				'utf-8',
+				'<!DOCTYPE html><html>' . $head . '<body class="something" data-something="something"></body></html><!-- some comment -->',
+				'<!DOCTYPE html><html>' . $head . '<body class="something" data-something="something"></body></html><!-- some comment -->',
+			],
 		];
 	}
 

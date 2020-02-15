@@ -82,7 +82,7 @@ final class Document extends DOMDocument {
 	 */
 	const HTML_STRUCTURE_DOCTYPE_PATTERN = '/^(?<doctype>[^<]*(?:\s*<!--[^>]*>\s*)*<!doctype(?:\s+[^>]+)?>)/i';
 	const HTML_STRUCTURE_HTML_START_TAG  = '/^(?<html_start>[^<]*(?:\s*<!--[^>]*>\s*)*<html(?:\s+[^>]*)?>)/i';
-	const HTML_STRUCTURE_HTML_END_TAG    = '/(?:<\/html(?:\s+[^>]*)?>)[^<>]*$/i';
+	const HTML_STRUCTURE_HTML_END_TAG    = '/(?<html_end><\/html(?:\s+[^>]*)?>.*)$/is';
 	const HTML_STRUCTURE_HEAD_START_TAG  = '/^[^<]*(?:\s*<!--[^>]*>\s*)*(?:<head(?:\s+[^>]*)?>)/i';
 	const HTML_STRUCTURE_BODY_START_TAG  = '/^[^<]*(?:\s*<!--[^>]*>\s*)*(?:<body(?:\s+[^>]*)?>)/i';
 	const HTML_STRUCTURE_BODY_END_TAG    = '/(?:<\/body(?:\s+[^>]*)?>)[^<>]*$/i';
@@ -463,6 +463,7 @@ final class Document extends DOMDocument {
 		$matches    = [];
 		$doctype    = '<!DOCTYPE html>';
 		$html_start = '<html>';
+		$html_end   = '</html>';
 
 		// Strip IE conditional comments, which are supported by IE 5-9 only (which AMP doesn't support).
 		$content = preg_replace( self::HTML_IE_CONDITIONAL_COMMENTS_PATTERN, '', $content );
@@ -477,7 +478,10 @@ final class Document extends DOMDocument {
 		if ( preg_match( self::HTML_STRUCTURE_HTML_START_TAG, $content, $matches ) ) {
 			$html_start = $matches['html_start'];
 			$content    = preg_replace( self::HTML_STRUCTURE_HTML_START_TAG, '', $content, 1 );
-			$content    = preg_replace( self::HTML_STRUCTURE_HTML_END_TAG, '', $content, 1 );
+
+			preg_match( self::HTML_STRUCTURE_HTML_END_TAG, $content, $matches );
+			$html_end = $matches['html_end'];
+			$content  = preg_replace( self::HTML_STRUCTURE_HTML_END_TAG, '', $content, 1 );
 		}
 
 		// Detect <head> and <body> tags and add as needed.
@@ -496,7 +500,7 @@ final class Document extends DOMDocument {
 			$content .= '</body>';
 		}
 
-		$content = "{$html_start}{$content}</html>";
+		$content = "{$html_start}{$content}{$html_end}";
 
 		// Reinsert a standard doctype (while preserving any potentially leading comments).
 		$doctype = str_ireplace( self::HTML_DOCTYPE_HTML_4_SUFFIX, '', $doctype );
