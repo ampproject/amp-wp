@@ -724,7 +724,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 						$node->setAttribute( $attr_node->nodeName, $valid_properties );
 					}
 				} elseif ( self::MISSING_REQUIRED_PROPERTY_VALUE === $error_code ) {
-					$validation_error['meta_property_name'] = $error_data['name'];
+					$validation_error['meta_property_name']  = $error_data['name'];
 					$validation_error['meta_property_value'] = $error_data['required_value'];
 
 					$is_mandatory_property = isset( $merged_attr_spec_list[ $attr_node->nodeName ]['value_properties'][ $error_data['name'] ]['mandatory'] ) &&
