@@ -50,7 +50,7 @@ script:
   - |
     if [[ ! -z "$PHPUNIT_EXTRA_GROUP" ]]; then
       echo "Running phpunit group $PHPUNIT_EXTRA_GROUP"
-      phpunit --group $PHPUNIT_EXTRA_GROUP
+      travis_retry phpunit --group $PHPUNIT_EXTRA_GROUP
     fi
 
 after_script:
