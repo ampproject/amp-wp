@@ -146,6 +146,15 @@ jobs:
     - name: PHP unit tests w/ external-http (5.6, WordPress 4.9)
       php: "5.6"
       env: WP_VERSION=4.9    DEV_LIB_ONLY=phpunit,phpsyntax                     PHPUNIT_EXTRA_SUITE=external-http
+      script:
+        - npm run build:js
+        - npm run build:css
+        - source "$DEV_LIB_PATH/travis.script.sh"
+        - |
+          if [[ ! -z "$PHPUNIT_EXTRA_SUITE" ]]; then
+            echo "Running phpunit testsuite $PHPUNIT_EXTRA_SUITE"
+            travis_retry phpunit --testsuite $PHPUNIT_EXTRA_SUITE
+          fi
 
     - name: PHP unit tests (7.3, WordPress trunk)
       php: "7.3"
