@@ -2951,6 +2951,48 @@ class AMP_Validation_Error_Taxonomy {
 					$title .= sprintf( ': <code>%s</code>', esc_html( $validation_error['property_name'] ) );
 				}
 				return $title;
+			case AMP_Tag_And_Attribute_Sanitizer::DUPLICATE_ONEOF_ATTRS:
+				$title = __( 'Mutually exclusive attributes encountered', 'amp' );
+				if ( ! empty( $validation_error['duplicate_oneof_attrs'] ) ) {
+					$title .= ': ';
+					$title .= implode(
+						', ',
+						array_map(
+							static function ( $attribute_name ) {
+								return sprintf( '<code>%s</code>', $attribute_name );
+							},
+							$validation_error['duplicate_oneof_attrs']
+						)
+					);
+					return $title;
+				}
+				break;
+			case AMP_Tag_And_Attribute_Sanitizer::MANDATORY_ONEOF_ATTR_MISSING:
+			case AMP_Tag_And_Attribute_Sanitizer::MANDATORY_ANYOF_ATTR_MISSING:
+				$attributes_key = null;
+				if ( AMP_Tag_And_Attribute_Sanitizer::MANDATORY_ONEOF_ATTR_MISSING === $validation_error['code'] ) {
+					$title          = __( 'Missing exclusive mandatory attribute', 'amp' );
+					$attributes_key = 'mandatory_oneof_attrs';
+				} else {
+					$title          = __( 'Missing at least one mandatory attribute', 'amp' );
+					$attributes_key = 'mandatory_anyof_attrs';
+				}
+
+				// @todo This should not be needed because we can look it up from the spec. See https://github.com/ampproject/amp-wp/pull/3817.
+				if ( ! empty( $validation_error[ $attributes_key ] ) ) {
+					$title .= ': ';
+					$title .= implode(
+						', ',
+						array_map(
+							static function ( $attribute_name ) {
+								return sprintf( '<code>%s</code>', $attribute_name );
+							},
+							$validation_error[ $attributes_key ]
+						)
+					);
+				}
+				return $title;
+
 			default:
 				/* translators: %s error code */
 				return sprintf( __( 'Unknown error (%s)', 'amp' ), $validation_error['code'] );

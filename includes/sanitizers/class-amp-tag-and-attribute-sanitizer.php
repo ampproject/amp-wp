@@ -57,6 +57,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	const ATTR_REQUIRED_BUT_MISSING            = 'ATTR_REQUIRED_BUT_MISSING';
 	const MANDATORY_ANYOF_ATTR_MISSING         = 'MANDATORY_ANYOF_ATTR_MISSING';
 	const MANDATORY_ONEOF_ATTR_MISSING         = 'MANDATORY_ONEOF_ATTR_MISSING';
+	const DUPLICATE_ONEOF_ATTRS                = 'DUPLICATE_ONEOF_ATTRS';
 	const INVALID_LAYOUT_WIDTH                 = 'INVALID_LAYOUT_WIDTH';
 	const INVALID_LAYOUT_HEIGHT                = 'INVALID_LAYOUT_HEIGHT';
 	const INVALID_LAYOUT_AUTO_HEIGHT           = 'INVALID_LAYOUT_AUTO_HEIGHT';
@@ -729,30 +730,44 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return null;
 		}
 
-		$unsatisfied_mandatory_anyof_attributes = $this->get_unsatisfied_number_of_rule( $node, $tag_spec, AMP_Rule_Spec::MANDATORY_ANYOF );
-		if ( ! empty( $unsatisfied_mandatory_anyof_attributes ) ) {
-			$this->remove_invalid_child(
-				$node,
-				[
-					'code'       => self::MANDATORY_ANYOF_ATTR_MISSING,
-					'attributes' => $unsatisfied_mandatory_anyof_attributes,
-					'spec_name'  => $this->get_spec_name( $node, $tag_spec ),
-				]
-			);
-			return null;
+		if ( ! empty( $tag_spec[ AMP_Rule_Spec::MANDATORY_ANYOF ] ) ) {
+			$anyof_attributes = $this->get_element_attribute_intersection( $node, $tag_spec[ AMP_Rule_Spec::MANDATORY_ANYOF ] );
+			if ( 0 === count( $anyof_attributes ) ) {
+				$this->remove_invalid_child(
+					$node,
+					[
+						'code'                  => self::MANDATORY_ANYOF_ATTR_MISSING,
+						'mandatory_anyof_attrs' => $tag_spec[ AMP_Rule_Spec::MANDATORY_ANYOF ], // @todo Temporary as value can be looked up via spec name. See https://github.com/ampproject/amp-wp/pull/3817.
+						'spec_name'             => $this->get_spec_name( $node, $tag_spec ),
+					]
+				);
+				return null;
+			}
 		}
 
-		$unsatisfied_mandatory_oneof_attributes = $this->get_unsatisfied_number_of_rule( $node, $tag_spec, AMP_Rule_Spec::MANDATORY_ONEOF );
-		if ( ! empty( $unsatisfied_mandatory_oneof_attributes ) ) {
-			$this->remove_invalid_child(
-				$node,
-				[
-					'code'       => self::MANDATORY_ONEOF_ATTR_MISSING,
-					'attributes' => $unsatisfied_mandatory_oneof_attributes,
-					'spec_name'  => $this->get_spec_name( $node, $tag_spec ),
-				]
-			);
-			return null;
+		if ( ! empty( $tag_spec[ AMP_Rule_Spec::MANDATORY_ONEOF ] ) ) {
+			$oneof_attributes = $this->get_element_attribute_intersection( $node, $tag_spec[ AMP_Rule_Spec::MANDATORY_ONEOF ] );
+			if ( 0 === count( $oneof_attributes ) ) {
+				$this->remove_invalid_child(
+					$node,
+					[
+						'code'                  => self::MANDATORY_ONEOF_ATTR_MISSING,
+						'mandatory_oneof_attrs' => $tag_spec[ AMP_Rule_Spec::MANDATORY_ONEOF ], // @todo Temporary as value can be looked up via spec name. See https://github.com/ampproject/amp-wp/pull/3817.
+						'spec_name'             => $this->get_spec_name( $node, $tag_spec ),
+					]
+				);
+				return null;
+			} elseif ( count( $oneof_attributes ) > 1 ) {
+				$this->remove_invalid_child(
+					$node,
+					[
+						'code'                  => self::DUPLICATE_ONEOF_ATTRS,
+						'duplicate_oneof_attrs' => $oneof_attributes,
+						'spec_name'             => $this->get_spec_name( $node, $tag_spec ),
+					]
+				);
+				return null;
+			}
 		}
 
 		// Add required AMP component scripts.
@@ -1450,50 +1465,20 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * If it exists, this gets a mandatory_*of spec rule that is unsatisfied.
+	 * Get the intersection of the element attributes with the supplied attributes.
 	 *
-	 * For example, if the $constraint_type is 'mandatory_anyof' and one of the attributes isn't present,
-	 * this will return the attributes in the spec rule.
-	 *
-	 * @param DOMElement $node            The node to examine.
-	 * @param array[]    $tag_spec        The spec for the tag.
-	 * @param string     $constraint_type The type of constraint, like 'mandatory_oneof'.
-	 *
-	 * @return string[]|null The mandatory_*of rule that isn't satisfied, like a rule for 'mandatory_oneof', or null.
+	 * @param DOMElement $element         The element.
+	 * @param string[]   $attribute_names The attribute names.
+	 * @return string[] The attributes that matched.
 	 */
-	private function get_unsatisfied_number_of_rule( DOMElement $node, $tag_spec, $constraint_type ) {
-		if ( ! empty( $tag_spec[ $constraint_type ] ) ) {
-			$matched_attribute_count = count(
-				array_filter(
-					$tag_spec[ $constraint_type ],
-					static function( $attribute ) use ( $node ) {
-						return $node->hasAttribute( $attribute );
-					}
-				)
-			);
-
-			if ( ! $this->is_matched_attribute_count_acceptable( $matched_attribute_count, $constraint_type ) ) {
-				return $tag_spec[ $constraint_type ];
+	private function get_element_attribute_intersection( DOMElement $element, $attribute_names ) {
+		$attributes = [];
+		foreach ( $attribute_names as $attribute_name ) {
+			if ( $element->hasAttribute( $attribute_name ) ) {
+				$attributes[] = $attribute_name;
 			}
 		}
-	}
-
-	/**
-	 * Gets whether the matched attribute count is valid, for the the type of constraint.
-	 *
-	 * @param int    $count           The count of matched attributes.
-	 * @param string $constraint_type The type of constraint, like 'mandatory_oneof'.
-	 * @return bool Whether the count is acceptable for the constraint type.
-	 */
-	private function is_matched_attribute_count_acceptable( $count, $constraint_type ) {
-		if ( AMP_Rule_Spec::MANDATORY_ONEOF === $constraint_type ) {
-			return 1 === $count;
-		}
-		if ( AMP_Rule_Spec::MANDATORY_ANYOF === $constraint_type ) {
-			return ! empty( $count );
-		}
-
-		return false;
+		return $attributes;
 	}
 
 	/**
