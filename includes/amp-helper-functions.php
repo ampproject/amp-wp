@@ -181,10 +181,8 @@ function amp_add_amphtml_link() {
 		if ( AMP_Theme_Support::is_paired_available() ) {
 			$amp_url = add_query_arg( amp_get_slug(), '', $current_url );
 		}
-	} elseif ( is_singular() ) {
+	} elseif ( is_singular() && post_supports_amp( get_post( get_queried_object_id() ) ) ) {
 		$amp_url = amp_get_permalink( get_queried_object_id() );
-	} else {
-		$amp_url = add_query_arg( amp_get_slug(), '', $current_url );
 	}
 
 	if ( ! $amp_url ) {

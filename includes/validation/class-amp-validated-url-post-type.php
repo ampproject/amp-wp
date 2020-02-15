@@ -1061,6 +1061,9 @@ class AMP_Validated_URL_Post_Type {
 				} else {
 					$total_size = 0;
 					foreach ( $stylesheets as $stylesheet ) {
+						if ( ! isset( $stylesheet['group'] ) || 'amp-custom' !== $stylesheet['group'] || ! empty( $stylesheet['duplicate'] ) ) {
+							continue;
+						}
 						$total_size += $stylesheet['final_size'];
 					}
 
@@ -2168,7 +2171,11 @@ class AMP_Validated_URL_Post_Type {
 				}
 				$origin_html .= '>';
 
-				$ratio = $stylesheet['final_size'] / $stylesheet['original_size'];
+				if ( 0 === $stylesheet['original_size'] ) {
+					$ratio = 1;
+				} else {
+					$ratio = $stylesheet['final_size'] / $stylesheet['original_size'];
+				}
 				?>
 				<tr class="<?php echo esc_attr( sprintf( 'stylesheet level-0 %s', 0 === $row % 2 ? 'even' : 'odd' ) ); ?>">
 					<td class="column-stylesheet_expand">

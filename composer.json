@@ -23,8 +23,8 @@
     "roave/security-advisories": "dev-master",
     "sirbrillig/phpcs-variable-analysis": "2.6.2",
     "wp-cli/wp-cli": "2.4.0",
-    "wp-coding-standards/wpcs": "2.2.0",
-    "xwp/wp-dev-lib": "1.4.0"
+    "wp-coding-standards/wpcs": "2.2.1",
+    "xwp/wp-dev-lib": "1.5.0"
   },
   "suggest": {
     "ext-intl": "Enables use of idn_to_utf8() to convert punycode domains to UTF-8 for use with an AMP Cache.",

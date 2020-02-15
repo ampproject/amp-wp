@@ -324,6 +324,32 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that attempting to access an AMP post in Reader mode that does not support AMP.
+	 *
+	 * @covers AMP_Theme_Support::finish_init()
+	 */
+	public function test_finish_init_when_accessing_singular_post_that_does_not_support_amp() {
+		$post          = $this->factory()->post->create();
+		$requested_url = get_permalink( $post );
+		$this->assertEquals( AMP_Theme_Support::READER_MODE_SLUG, AMP_Theme_Support::get_support_mode() );
+		$this->assertTrue( post_supports_amp( $post ) );
+		add_filter( 'amp_skip_post', '__return_true' );
+		$this->assertFalse( post_supports_amp( $post ) );
+
+		$redirected = false;
+		add_filter(
+			'wp_redirect',
+			function ( $url ) use ( $requested_url, &$redirected ) {
+				$this->assertEquals( $requested_url, $url );
+				$redirected = true;
+				return null;
+			}
+		);
+		$this->go_to( amp_get_permalink( $post ) );
+		$this->assertTrue( $redirected );
+	}
+
+	/**
 	 * Test that attempting to access an AMP page in Reader Mode for a non-singular query will redirect to the non-AMP version.
 	 *
 	 * @covers AMP_Theme_Support::finish_init()
