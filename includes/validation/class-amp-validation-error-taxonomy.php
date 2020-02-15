@@ -2983,7 +2983,7 @@ class AMP_Validation_Error_Taxonomy {
 					/* translators: %1$s is the property name, %2$s is the value for the property */
 					wp_kses( __( 'Missing required value for <code>%1$s</code> property: <code>%2$s</code>', 'amp' ), [ 'code' => '' ] ),
 					esc_html( $validation_error['meta_property_name'] ),
-					esc_html( $validation_error['property_value'] )
+					esc_html( $validation_error['meta_property_value'] )
 				);
 
 				return $title;
