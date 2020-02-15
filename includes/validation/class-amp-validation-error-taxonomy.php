@@ -2141,7 +2141,7 @@ class AMP_Validation_Error_Taxonomy {
 				if ( $is_element_attributes && empty( $value ) ) {
 					continue;
 				}
-				if ( in_array( $key, [ 'code', 'type', 'property_value' ], true ) ) {
+				if ( in_array( $key, [ 'code', 'type', 'property_value', 'mandatory_anyof_attrs', 'mandatory_oneof_attrs' ], true ) ) {
 					continue; // Handled above.
 				}
 				?>
@@ -2215,13 +2215,24 @@ class AMP_Validation_Error_Taxonomy {
 								</tr>
 							<?php endforeach; ?>
 						</table>
+					<?php elseif ( 'duplicate_oneof_attrs' === $key ) : ?>
+						<ul>
+						<?php foreach ( $value as $attr ) : ?>
+							<li><code><?php echo esc_html( $attr ); ?></code></li>
+						<?php endforeach; ?>
+						</ul>
 					<?php elseif ( is_array( $value ) ) : ?>
 						<?php foreach ( $value as $value_key => $attr ) : ?>
 							<?php
-							printf( '<strong>%s</strong>', esc_html( $value_key ) );
-							if ( ! empty( $attr ) ) :
-								printf( ': %s', esc_html( $attr ) );
-							endif;
+							if ( is_int( $value_key ) ) {
+								echo esc_html( $attr );
+							} else {
+								printf( '<strong>%s</strong>', esc_html( $value_key ) );
+								if ( ! empty( $attr ) ) {
+									echo ': ';
+									echo esc_html( $attr );
+								}
+							}
 							?>
 							<br />
 						<?php endforeach; ?>
@@ -3027,6 +3038,8 @@ class AMP_Validation_Error_Taxonomy {
 				return __( 'Parent element', 'amp' );
 			case 'property_name':
 				return __( 'CSS property', 'amp' );
+			case 'duplicate_oneof_attrs':
+				return __( 'Mutually exclusive attributes', 'amp' );
 			case 'text':
 				return __( 'Text content', 'amp' );
 			case 'type':
