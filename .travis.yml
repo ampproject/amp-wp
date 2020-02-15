@@ -50,7 +50,7 @@ script:
   - |
     if [[ ! -z "$PHPUNIT_EXTRA_SUITE" ]]; then
       echo "Running phpunit testsuite $PHPUNIT_EXTRA_SUITE"
-      phpunit --testsuite $PHPUNIT_EXTRA_SUITE
+      travis_retry phpunit --testsuite $PHPUNIT_EXTRA_SUITE
     fi
 
 after_script:
