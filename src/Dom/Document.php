@@ -480,7 +480,7 @@ final class Document extends DOMDocument {
 			$content    = preg_replace( self::HTML_STRUCTURE_HTML_START_TAG, '', $content, 1 );
 
 			preg_match( self::HTML_STRUCTURE_HTML_END_TAG, $content, $matches );
-			$html_end = $matches['html_end'];
+			$html_end = isset( $matches['html_end'] ) ? $matches['html_end'] : $html_end;
 			$content  = preg_replace( self::HTML_STRUCTURE_HTML_END_TAG, '', $content, 1 );
 		}
 
