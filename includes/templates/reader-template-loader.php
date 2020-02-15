@@ -32,16 +32,5 @@ do_action( 'pre_amp_render_post', get_queried_object_id() );
 require_once AMP__DIR__ . '/includes/amp-post-template-functions.php';
 amp_post_template_init_hooks();
 
-// Support and load Core block styles.
-current_theme_supports( 'wp-block-styles' );
-add_action(
-	'amp_post_template_head',
-	static function () {
-		global $wp_styles;
-		wp_common_block_scripts_and_styles();
-		$wp_styles->do_items();
-	}
-);
-
 $amp_post_template = new AMP_Post_Template( get_queried_object_id() );
 $amp_post_template->load();
