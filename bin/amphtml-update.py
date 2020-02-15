@@ -28,6 +28,7 @@ import json
 import google
 from collections import defaultdict
 import imp
+import re
 
 seen_spec_names = set()
 
@@ -654,6 +655,11 @@ def GetTagRules(tag_spec):
 				amp_layout[ field[0].name ] = field[1]
 		tag_rules['amp_layout'] = amp_layout
 
+	for mandatory_of_constraint in ['mandatory_anyof', 'mandatory_oneof']:
+		mandatory_of_spec = GetMandatoryOf(tag_spec.attrs, mandatory_of_constraint)
+		if mandatory_of_spec:
+			tag_rules[ mandatory_of_constraint ] = mandatory_of_spec
+
 	logging.info('... done')
 	return tag_rules
 
@@ -771,6 +777,30 @@ def UnicodeEscape(string):
 		An escaped string.
 	"""
 	return ('' + string).encode('unicode-escape')
+
+def GetMandatoryOf( attr, constraint ):
+	"""Gets the attributes with the passed mandatory_*of constraint, if there are any.
+
+	Args:
+		attr: The attributes in which to look for the mandatory_*of constraint.
+		constraint: A string of the mandatory_*of constraint, like 'mandatory_anyof'.
+	Returns:
+		A list of attributes that have that constraint name.
+	"""
+	attributes = []
+	for attr_spec in attr:
+		if attr_spec.HasField(constraint):
+			attributes.append(
+				# Convert something like [src] to data-amp-bind-src.
+				re.sub(
+					"^\[(\S+)\]$",
+					r"data-amp-bind-\1",
+					attr_spec.name
+				)
+			)
+
+	attributes.sort()
+	return attributes
 
 def Phpize(data, indent=0):
 	"""Helper function to convert JSON-serializable data into PHP literals.
