@@ -3296,10 +3296,6 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'tag_spec' => array(
-					'mandatory_oneof' => array(
-						'src',
-						'srcdoc',
-					),
 					'amp_layout' => array(
 						'supported_layouts' => array(
 							6,
