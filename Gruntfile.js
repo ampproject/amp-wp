@@ -28,6 +28,7 @@ module.exports = function( grunt ) {
 	const productionVendorExcludedFilePatterns = [
 		'composer.*',
 		'lib/*',
+		'patches',
 		'vendor/*/*/.editorconfig',
 		'vendor/*/*/.gitignore',
 		'vendor/*/*/composer.*',
@@ -151,6 +152,7 @@ module.exports = function( grunt ) {
 			paths.push( 'assets/js/*.js' ); // @todo Also include *.map files?
 			paths.push( 'assets/js/*.asset.php' );
 			paths.push( 'assets/css/*.css' );
+			paths.push( 'patches/*.patch' );
 
 			grunt.config.set( 'copy', {
 				build: {

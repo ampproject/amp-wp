@@ -1055,6 +1055,12 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			[
 				'.selector:not([attr*=\'\']) {}',
 			],
+			[
+				'body { -0-transition: all .3s ease-in-out; }',
+			],
+			[
+				'body { 4-o-transition: all .3s ease-in-out; }',
+			],
 		];
 	}
 
