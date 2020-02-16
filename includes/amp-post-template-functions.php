@@ -62,7 +62,9 @@ function amp_post_template_add_fonts( $amp_template ) {
  */
 function amp_post_template_add_block_styles() {
 	add_theme_support( 'wp-block-styles' );
-	wp_common_block_scripts_and_styles();
+	if ( function_exists( 'wp_common_block_scripts_and_styles' ) ) {
+		wp_common_block_scripts_and_styles();
+	}
 	wp_styles()->do_items();
 }
 
