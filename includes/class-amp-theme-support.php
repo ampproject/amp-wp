@@ -2054,7 +2054,9 @@ class AMP_Theme_Support {
 		}
 
 		// Enforce UTF-8 encoding as it is a requirement for AMP.
-		header( 'Content-Type: text/html; charset=utf-8' );
+		if ( ! headers_sent() ) {
+			header( 'Content-Type: text/html; charset=utf-8' );
+		}
 
 		/**
 		 * Filters whether response (post-processor) caching is enabled.
