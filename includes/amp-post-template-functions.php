@@ -61,12 +61,11 @@ function amp_post_template_add_fonts( $amp_template ) {
  * @param AMP_Post_Template $amp_template Template.
  */
 function amp_post_template_add_block_styles( $amp_template ) {
-	global $wp_styles;
 
 	current_theme_supports( 'wp-block-styles' );
 
 	wp_common_block_scripts_and_styles();
-	$wp_styles->do_items();
+	wp_styles()->do_items();
 }
 
 /**
