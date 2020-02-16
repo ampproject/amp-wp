@@ -2276,6 +2276,19 @@ class AMP_Validated_URL_Post_Type {
 							<dt><?php esc_html_e( 'Original Markup', 'amp' ); ?></dt>
 							<dd><code class="stylesheet-origin-markup"><?php echo esc_html( $origin_html ); ?></code></dd>
 
+							<?php if ( isset( $stylesheet['element']['attributes']['href'] ) ) : ?>
+								<dt><?php esc_html_e( 'Stylesheet URL', 'amp' ); ?></dt>
+								<dd>
+									<?php
+									printf(
+										'<a href="%s" target="_blank">%s</a>',
+										esc_url( $stylesheet['element']['attributes']['href'] ),
+										esc_html( $stylesheet['element']['attributes']['href'] )
+									);
+									?>
+								</dd>
+							<?php endif; ?>
+
 							<dt><?php esc_html_e( 'Sources', 'amp' ); ?></dt>
 							<dd>
 								<?php AMP_Validation_Error_Taxonomy::render_sources( $stylesheet['sources'] ); ?>
