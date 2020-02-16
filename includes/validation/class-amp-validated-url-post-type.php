@@ -2166,7 +2166,13 @@ class AMP_Validated_URL_Post_Type {
 						unset( $attributes[ AMP_Style_Sanitizer::ORIGINAL_STYLE_ATTRIBUTE_NAME ] );
 					}
 					if ( ! empty( $attributes ) ) {
-						$origin_html .= ' ' . AMP_HTML_Utils::build_attributes_string( $attributes );
+						foreach ( $attributes as $name => $value ) {
+							if ( '' === $value ) {
+								$origin_html .= ' ' . sprintf( '%s', esc_html( $name ) );
+							} else {
+								$origin_html .= ' ' . sprintf( '%s="%s"', esc_html( $name ), esc_attr( $value ) );
+							}
+						}
 					}
 				}
 				$origin_html .= '>';
