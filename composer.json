@@ -4,6 +4,13 @@
   "description": "WordPress plugin for adding AMP support.",
   "homepage": "https://github.com/ampproject/amp-wp",
   "license": "GPL-2.0-or-later",
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/sabberworm/PHP-CSS-Parser.git",
+      "no-api" : true
+    }
+  ],
   "require": {
     "php": "^5.4 || ^7.0",
     "ext-curl": "*",
@@ -14,7 +21,7 @@
     "ext-spl": "*",
     "cweagans/composer-patches": "1.6.7",
     "fasterimage/fasterimage": "1.5.0",
-    "sabberworm/php-css-parser": "8.3.0"
+    "sabberworm/php-css-parser": "dev-master#134f4e6"
   },
   "require-dev": {
     "dealerdirect/phpcodesniffer-composer-installer": "0.6.2",

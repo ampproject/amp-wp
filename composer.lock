@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ca77d6e7a7cce0354fb41b77ef552f86",
+    "content-hash": "830543e571a7b5b79e4a0fa246a7b81d",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -107,16 +107,16 @@
         },
         {
             "name": "sabberworm/php-css-parser",
-            "version": "8.3.0",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sabberworm/PHP-CSS-Parser.git",
-                "reference": "91bcc3e3fdb7386c9a2e0e0aa09ca75cc43f121f"
+                "reference": "134f4e6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sabberworm/PHP-CSS-Parser/zipball/91bcc3e3fdb7386c9a2e0e0aa09ca75cc43f121f",
-                "reference": "91bcc3e3fdb7386c9a2e0e0aa09ca75cc43f121f",
+                "url": "https://api.github.com/repos/sabberworm/PHP-CSS-Parser/zipball/134f4e6",
+                "reference": "134f4e6",
                 "shasum": ""
             },
             "require": {
@@ -127,12 +127,17 @@
                 "phpunit/phpunit": "~4.8"
             },
             "type": "library",
-            "autoload": {
-                "psr-0": {
-                    "Sabberworm\\CSS": "lib/"
+            "extra": {
+                "patches_applied": {
+                    "Fix parsing CSS selectors which contain commas <https://github.com/sabberworm/PHP-CSS-Parser/pull/138>": "https://github.com/sabberworm/PHP-CSS-Parser/commit/fa139f65c5b098ae652c970b25e6eb03fc495eb4.diff",
+                    "Validate name-start code points for identifier <https://github.com/sabberworm/PHP-CSS-Parser/pull/185>": "patches/php-css-parser-pull-185.patch"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
+            "autoload": {
+                "psr-0": {
+                    "Sabberworm\\CSS\\": "lib/"
+                }
+            },
             "license": [
                 "MIT"
             ],
@@ -148,7 +153,7 @@
                 "parser",
                 "stylesheet"
             ],
-            "time": "2019-02-22T07:42:52+00:00"
+            "time": "2019-05-08T15:55:45+00:00"
         },
         {
             "name": "willwashburn/stream",
@@ -333,6 +338,11 @@
                 "phpunit/phpunit": "~3.7|~4.0|~5.0"
             },
             "type": "library",
+            "extra": {
+                "patches_applied": {
+                    "Avoid notices on PHP 7.4+": "https://patch-diff.githubusercontent.com/raw/bobthecow/mustache.php/pull/349.patch"
+                }
+            },
             "autoload": {
                 "psr-0": {
                     "Mustache": "src/"
@@ -1192,6 +1202,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
+        "sabberworm/php-css-parser": 20,
         "roave/security-advisories": 20
     },
     "prefer-stable": false,
