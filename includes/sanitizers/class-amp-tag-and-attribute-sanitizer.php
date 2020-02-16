@@ -673,11 +673,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			 * Capture all element attributes up front so that differing validation errors result when
 			 * one invalid attribute is accepted but the others are still rejected.
 			 */
-			$validation_error = [
-				'element_attributes' => [],
-			];
+			$element_attributes = [];
 			foreach ( $node->attributes as $attribute ) {
-				$validation_error['element_attributes'][ $attribute->nodeName ] = $attribute->nodeValue;
+				$element_attributes[ $attribute->nodeName ] = $attribute->nodeValue;
 			}
 			$removed_attributes = [];
 
@@ -690,64 +688,48 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				 * @var array   $error_data
 				 */
 				list( $attr_node, $error_code, $error_data ) = $disallowed_attribute;
-				$validation_error['code']                    = $error_code;
+
+				$validation_error = [
+					'code'               => $error_code,
+					'element_attributes' => $element_attributes,
+				];
 
 				if ( self::DISALLOWED_PROPERTY_IN_ATTR_VALUE === $error_code ) {
-					$properties         = $error_data['original_properties'];
-					$invalid_properties = $error_data['invalid_properties'];
-					$removed_property   = false;
+					$properties = $this->parse_properties_attribute( $attr_node->nodeValue );
 
-					foreach ( $invalid_properties as $invalid_property ) {
-						$validation_error['meta_property_name'] = $invalid_property;
-
-						if ( ! $this->is_empty_attribute_value( $properties[ $invalid_property ] ) ) {
-							$validation_error['meta_property_value'] = $properties[ $invalid_property ];
-						}
-
-						if ( $this->should_sanitize_validation_error( $validation_error, [ 'node' => $attr_node ] ) ) {
-							unset( $properties[ $invalid_property ] );
-							$removed_property = true;
-						}
+					$validation_error['meta_property_name'] = $error_data['name'];
+					if ( ! $this->is_empty_attribute_value( $properties[ $error_data['name'] ] ) ) {
+						$validation_error['meta_property_value'] = $properties[ $error_data['name'] ];
 					}
 
-					if ( $removed_property ) {
-						$node->setAttribute(
-							$attr_node->nodeName,
-							implode(
-								',',
-								array_map(
-									static function ( $property_name ) use ( $properties ) {
-										return $property_name . '=' . $properties[ $property_name ];
-									},
-									array_keys( $properties )
-								)
-							)
-						);
+					if ( $this->should_sanitize_validation_error( $validation_error, [ 'node' => $attr_node ] ) ) {
+						unset( $properties[ $error_data['name'] ] );
+						$node->setAttribute( $attr_node->nodeName, $this->serialize_properties_attribute( $properties ) );
 					}
 				} elseif ( self::MISSING_REQUIRED_PROPERTY_VALUE === $error_code ) {
-					$validation_error['meta_property_name']  = $error_data['name'];
-					$validation_error['meta_property_value'] = $error_data['required_value'];
+					$validation_error['meta_property_name']           = $error_data['name'];
+					$validation_error['meta_property_value']          = $error_data['value'];
+					$validation_error['meta_property_required_value'] = $error_data['required_value'];
 
-					$is_mandatory_property = isset( $merged_attr_spec_list[ $attr_node->nodeName ]['value_properties'][ $error_data['name'] ]['mandatory'] ) &&
-						true === $merged_attr_spec_list[ $attr_node->nodeName ]['value_properties'][ $error_data['name'] ]['mandatory'];
-
-					if ( $is_mandatory_property && $this->should_sanitize_validation_error( $validation_error, [ 'node' => $attr_node ] ) ) {
-						// Replace invalid property value with required one.
-						$pattern     = preg_quote( $error_data['name'] . '=' . $error_data['value'], '/' );
-						$replacement = $error_data['name'] . '=' . $error_data['required_value'];
-						$attr_value  = preg_replace( "/$pattern/", $replacement, $node->getAttribute( $attr_node->nodeName ) );
-						$node->setAttribute( $attr_node->nodeName, $attr_value );
-					} elseif ( ! $is_mandatory_property ) {
-						$attr_spec = isset( $merged_attr_spec_list[ $attr_node->nodeName ] ) ? $merged_attr_spec_list[ $attr_node->nodeName ] : [];
-						if ( $this->remove_invalid_attribute( $node, $attr_node, $validation_error, $attr_spec ) ) {
-							$removed_attributes[] = $attr_node;
+					if ( $this->should_sanitize_validation_error( $validation_error, [ 'node' => $attr_node ] ) ) {
+						$properties = $this->parse_properties_attribute( $attr_node->nodeValue );
+						if ( ! empty( $merged_attr_spec_list[ $attr_node->nodeName ]['value_properties'][ $error_data['name'] ]['mandatory'] ) ) {
+							$properties[ $error_data['name'] ] = $error_data['required_value'];
+						} else {
+							unset( $properties[ $error_data['name'] ] );
 						}
+						$node->setAttribute( $attr_node->nodeName, $this->serialize_properties_attribute( $properties ) );
+					}
+				} elseif ( self::MISSING_MANDATORY_PROPERTY === $error_code ) {
+					$validation_error['meta_property_name'] = $error_data['name'];
+					if ( $this->should_sanitize_validation_error( $validation_error, [ 'node' => $attr_node ] ) ) {
+						$properties = array_merge(
+							$this->parse_properties_attribute( $attr_node->nodeValue ),
+							[ $error_data['name'] => $error_data['required_value'] ]
+						);
+						$node->setAttribute( $attr_node->nodeName, $this->serialize_properties_attribute( $properties ) );
 					}
 				} else {
-					if ( self::MISSING_MANDATORY_PROPERTY === $error_code ) {
-						$validation_error['meta_property_name'] = $error_data['property'];
-					}
-
 					$attr_spec = isset( $merged_attr_spec_list[ $attr_node->nodeName ] ) ? $merged_attr_spec_list[ $attr_node->nodeName ] : [];
 					if ( $this->remove_invalid_attribute( $node, $attr_node, $validation_error, $attr_spec ) ) {
 						$removed_attributes[] = $attr_node;
@@ -1995,6 +1977,44 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Parse properties attribute (e.g. meta viewport).
+	 *
+	 * @param string $value Attribute value.
+	 * @return array Properties.
+	 */
+	private function parse_properties_attribute( $value ) {
+		$properties = [];
+		foreach ( explode( ',', $value ) as $pair ) {
+			$pair_parts = explode( '=', $pair, 2 );
+			if ( 2 !== count( $pair_parts ) ) {
+				// This would occur when there are trailing commas, for example.
+				continue;
+			}
+			$properties[ strtolower( trim( $pair_parts[0] ) ) ] = $pair_parts[1];
+		}
+		return $properties;
+	}
+
+	/**
+	 * Serialize properties attribute (e.g. meta viewport).
+	 *
+	 * @param array $properties Properties.
+	 * @return string Serialized properties.
+	 */
+	private function serialize_properties_attribute( $properties ) {
+		return implode(
+			',',
+			array_map(
+				static function ( $property_name ) use ( $properties ) {
+					return $property_name . '=' . $properties[ $property_name ];
+				},
+				array_keys( $properties )
+			)
+		);
+	}
+
+
+	/**
 	 * Check if attribute has valid properties.
 	 *
 	 * @since 0.7
@@ -2019,26 +2039,17 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function check_attr_spec_rule_value_properties( DOMElement $node, $attr_name, $attr_spec_rule ) {
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_PROPERTIES ] ) && $node->hasAttribute( $attr_name ) ) {
-			$property_errors = [];
-			$properties      = [];
-			foreach ( explode( ',', $node->getAttribute( $attr_name ) ) as $pair ) {
-				$pair_parts = explode( '=', $pair, 2 );
-				if ( 2 !== count( $pair_parts ) ) {
-					// This would occur when there are trailing commas, for example.
-					continue;
-				}
-				$properties[ strtolower( trim( $pair_parts[0] ) ) ] = $pair_parts[1];
-			}
-
+			$property_errors    = [];
+			$properties         = $this->parse_properties_attribute( $node->getAttribute( $attr_name ) );
 			$invalid_properties = array_diff( array_keys( $properties ), array_keys( $attr_spec_rule[ AMP_Rule_Spec::VALUE_PROPERTIES ] ) );
 
 			// Fail if there are unrecognized properties.
-			if ( count( $invalid_properties ) > 0 ) {
+			foreach ( $invalid_properties as $invalid_property ) {
 				$property_errors[] = [
 					self::DISALLOWED_PROPERTY_IN_ATTR_VALUE,
 					[
-						'original_properties' => $properties,
-						'invalid_properties'  => $invalid_properties,
+						'name'  => $invalid_property,
+						'value' => $properties[ $invalid_property ],
 					],
 				];
 			}
@@ -2046,9 +2057,18 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			foreach ( $attr_spec_rule[ AMP_Rule_Spec::VALUE_PROPERTIES ] as $prop_name => $property_spec ) {
 				// Mandatory property is missing.
 				if ( ! empty( $property_spec['mandatory'] ) && ! isset( $properties[ $prop_name ] ) ) {
+					$required_value = null;
+					if ( isset( $property_spec['value'] ) ) {
+						$required_value = $property_spec['value'];
+					} elseif ( isset( $property_spec['value_double'] ) ) {
+						$required_value = $property_spec['value_double'];
+					}
 					$property_errors[] = [
 						self::MISSING_MANDATORY_PROPERTY,
-						[ 'property' => $prop_name ],
+						[
+							'name'           => $prop_name,
+							'required_value' => $required_value,
+						],
 					];
 					continue;
 				}
@@ -2065,7 +2085,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					$required_value = $property_spec['value'];
 				} elseif ( isset( $property_spec['value_double'] ) ) {
 					$required_value = $property_spec['value_double'];
-					$prop_value     = (float) $prop_value;
 				}
 				if ( isset( $required_value ) && $prop_value !== $required_value ) {
 					$property_errors[] = [

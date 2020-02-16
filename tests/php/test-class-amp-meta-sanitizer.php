@@ -44,13 +44,7 @@ class Test_AMP_Meta_Sanitizer extends WP_UnitTestCase {
 			// Trim whitespace between the properties and their values.
 			[
 				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width = device-width, minimum-scale = 1, initial-scale = 1"></head><body></body></html>',
-				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"></head><body></body></html>',
-			],
-
-			// Remove extra commas.
-			[
-				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content=",width=device-width,,minimum-scale=1,initial-scale=1,"></head><body></body></html>',
-				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"></head><body></body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1"></head><body></body></html>',
 			],
 
 			// Move charset and viewport tags from body to head.
@@ -103,6 +97,9 @@ class Test_AMP_Meta_Sanitizer extends WP_UnitTestCase {
 	public function test_sanitize( $source_content, $expected_content ) {
 		$dom       = Document::from_html( $source_content );
 		$sanitizer = new AMP_Meta_Sanitizer( $dom );
+		$sanitizer->sanitize();
+
+		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 		$sanitizer->sanitize();
 
 		$this->assertEqualMarkup( $expected_content, $dom->saveHTML() );

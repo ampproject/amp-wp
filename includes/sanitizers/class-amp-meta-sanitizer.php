@@ -79,6 +79,15 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 		);
 
 		foreach ( $elements as $element ) {
+
+			// Strip whitespace around equal signs. Won't be needed after <https://github.com/ampproject/amphtml/issues/26496> is resolved.
+			if ( $element->hasAttribute( 'content' ) ) {
+				$element->setAttribute(
+					'content',
+					preg_replace( '/\s*=\s*/', '=', $element->getAttribute( 'content' ) )
+				);
+			}
+
 			/**
 			 * Meta tag to process.
 			 *
@@ -126,33 +135,7 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	protected function ensure_viewport_is_present() {
 		if ( empty( $this->meta_tags[ self::TAG_VIEWPORT ] ) ) {
 			$this->meta_tags[ self::TAG_VIEWPORT ][] = $this->create_viewport_element( static::AMP_VIEWPORT );
-			return;
 		}
-
-		/**
-		 * Ensure the `width` property has the value `device-width` if it does not exist. Whitespace between properties
-		 * and their values will also be stripped.
-		 *
-		 * @var DOMElement $viewport_tag Viewport tag.
-		 */
-		$viewport_tag      = $this->meta_tags[ self::TAG_VIEWPORT ][0];
-		$viewport_content  = $viewport_tag->getAttribute( 'content' );
-		$viewport_settings = array_filter( array_map( 'trim', explode( ',', $viewport_content ) ) );
-		$width_found       = false;
-
-		foreach ( $viewport_settings as $index => $viewport_setting ) {
-			list( $property, $value ) = array_map( 'trim', explode( '=', $viewport_setting ) );
-			if ( 'width' === $property ) {
-				$width_found = true;
-			}
-			$viewport_settings[ $index ] = implode( '=', [ $property, $value ] );
-		}
-
-		if ( ! $width_found ) {
-			array_unshift( $viewport_settings, 'width=device-width' );
-		}
-
-		$viewport_tag->setAttribute( 'content', implode( ',', $viewport_settings ) );
 	}
 
 	/**
