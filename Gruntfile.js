@@ -27,6 +27,7 @@ module.exports = function( grunt ) {
 	// ⚠️ Warning: These paths are passed straight to rm command in the shell, without any escaping.
 	const productionVendorExcludedFilePatterns = [
 		'composer.*',
+		'patches',
 		'vendor/*/*/.editorconfig',
 		'vendor/*/*/.gitignore',
 		'vendor/*/*/composer.*',
@@ -150,6 +151,7 @@ module.exports = function( grunt ) {
 			paths.push( 'assets/js/*.js' ); // @todo Also include *.map files?
 			paths.push( 'assets/js/*.asset.php' );
 			paths.push( 'assets/css/*.css' );
+			paths.push( 'patches/*.patch' );
 
 			grunt.config.set( 'copy', {
 				build: {
