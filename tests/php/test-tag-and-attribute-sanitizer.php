@@ -2340,6 +2340,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::MISSING_REQUIRED_PROPERTY_VALUE ],
 			],
+			'bad_meta_width_and_unknown_property'     => [
+				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="width=600, initial-scale=1.0, bad=yes"></head><body></body></html>',
+				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head><body></body></html>',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE, AMP_Tag_And_Attribute_Sanitizer::MISSING_REQUIRED_PROPERTY_VALUE ],
+			],
 			'bad_meta_charset'                        => [
 				'<html amp><head><meta charset="latin-1"><title>Mojibake?</title></head><body></body></html>',
 				'<html amp><head><meta charset="utf-8"><title>Mojibake?</title></head><body></body></html>', // Note the charset attribute is removed because it violates the attribute spec, but the entire element is not removed because charset is not mandatory.

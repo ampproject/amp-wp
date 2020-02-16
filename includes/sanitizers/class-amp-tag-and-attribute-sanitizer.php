@@ -1211,7 +1211,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			$error_code     = null;
 			$attr_spec_rule = $attr_spec_list[ $attr_name ];
 
 			/*
@@ -1229,43 +1228,38 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			 */
 			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_value( $node, $attr_name, $attr_spec_rule ) ) {
-				$error_code = self::INVALID_ATTR_VALUE;
+				$attrs_to_remove[] = [ $attr_node, self::INVALID_ATTR_VALUE, null ];
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_CASEI ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_value_casei( $node, $attr_name, $attr_spec_rule ) ) {
-				$error_code = self::INVALID_ATTR_VALUE_CASEI;
+				$attrs_to_remove[] = [ $attr_node, self::INVALID_ATTR_VALUE_CASEI, null ];
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_REGEX ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_value_regex( $node, $attr_name, $attr_spec_rule ) ) {
-				$error_code = self::INVALID_ATTR_VALUE_REGEX;
+				$attrs_to_remove[] = [ $attr_node, self::INVALID_ATTR_VALUE_REGEX, null ];
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_REGEX_CASEI ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_value_regex_casei( $node, $attr_name, $attr_spec_rule ) ) {
-				$error_code = self::INVALID_ATTR_VALUE_REGEX_CASEI;
+				$attrs_to_remove[] = [ $attr_node, self::INVALID_ATTR_VALUE_REGEX_CASEI, null ];
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOWED_PROTOCOL ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_allowed_protocol( $node, $attr_name, $attr_spec_rule ) ) {
-				$error_code = self::INVALID_URL_PROTOCOL; // @todo A javascript: protocol could be treated differently. It should have a JS error type.
+				$attrs_to_remove[] = [ $attr_node, self::INVALID_URL_PROTOCOL, null ]; // @todo A javascript: protocol could be treated differently. It should have a JS error type.
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_valid_url( $node, $attr_name, $attr_spec_rule ) ) {
-				$error_code = self::INVALID_URL;
+				$attrs_to_remove[] = [ $attr_node, self::INVALID_URL, null ];
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_disallowed_empty( $node, $attr_name, $attr_spec_rule ) ) {
-				$error_code = self::DISALLOWED_EMPTY_URL;
+				$attrs_to_remove[] = [ $attr_node, self::DISALLOWED_EMPTY_URL, null ];
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_RELATIVE ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_disallowed_relative( $node, $attr_name, $attr_spec_rule ) ) {
-				$error_code = self::DISALLOWED_RELATIVE_URL;
+				$attrs_to_remove[] = [ $attr_node, self::DISALLOWED_RELATIVE_URL, null ];
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::BLACKLISTED_VALUE_REGEX ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_blacklisted_value_regex( $node, $attr_name, $attr_spec_rule ) ) {
-				$error_code = self::INVALID_BLACKLISTED_VALUE_REGEX;
+				$attrs_to_remove[] = [ $attr_node, self::INVALID_BLACKLISTED_VALUE_REGEX, null ];
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_PROPERTIES ] ) ) {
 				$result = $this->check_attr_spec_rule_value_properties( $node, $attr_name, $attr_spec_rule );
-
-				list( $result_code, $result_data ) = $result;
-
-				if ( AMP_Rule_Spec::FAIL === $result_code ) {
-					list( $error_code, $error_data ) = $result_data;
+				if ( AMP_Rule_Spec::FAIL === $result[0] ) {
+					foreach ( $result[1] as $property_error ) {
+						$attrs_to_remove[] = [ $attr_node, $property_error[0], $property_error[1] ];
+					}
 				}
-			}
-
-			if ( isset( $error_code ) ) {
-				$attrs_to_remove[] = [ $attr_node, $error_code, $error_data ];
 			}
 		}
 
@@ -2009,15 +2003,24 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string           $attr_name      Attribute name.
 	 * @param array[]|string[] $attr_spec_rule Attribute spec rule.
 	 *
-	 * @return array[] Array where the result code is accompanied by its data in the format [ $result_code, $result_data ].
-	 * The result code could be:
-	 *   - AMP_Rule_Spec::PASS           - $attr_name has a value that matches the rule.
-	 *   - AMP_Rule_Spec::FAIL           - $attr_name has a value that does *not* match rule.
-	 *   - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there is no rule for this attribute.
+	 * @return array {
+	 *     Results.
+	 *
+	 *     @type int     $result_code The result code. It can either be.
+	 *                                 - AMP_Rule_Spec::PASS           - $attr_name has a value that matches the rule.
+	 *                                 - AMP_Rule_Spec::FAIL           - $attr_name has a value that does *not* match rule.
+	 *                                 - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there is no rule for this attribute.
+	 *     @type array[] $errors      Property errors.
+	 * }
+	 *
+	 * Array where the result code is accompanied by its data in the format [ $result_code, $result_data ].
+	 *               The result code could be:
+	 *               The $result_data null if PASS or NOT_APPLICABLE, and if FAIL it is an array of errors.
 	 */
 	private function check_attr_spec_rule_value_properties( DOMElement $node, $attr_name, $attr_spec_rule ) {
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_PROPERTIES ] ) && $node->hasAttribute( $attr_name ) ) {
-			$properties = [];
+			$property_errors = [];
+			$properties      = [];
 			foreach ( explode( ',', $node->getAttribute( $attr_name ) ) as $pair ) {
 				$pair_parts = explode( '=', $pair, 2 );
 				if ( 2 !== count( $pair_parts ) ) {
@@ -2031,14 +2034,11 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 			// Fail if there are unrecognized properties.
 			if ( count( $invalid_properties ) > 0 ) {
-				return [
-					AMP_Rule_Spec::FAIL,
+				$property_errors[] = [
+					self::DISALLOWED_PROPERTY_IN_ATTR_VALUE,
 					[
-						self::DISALLOWED_PROPERTY_IN_ATTR_VALUE,
-						[
-							'original_properties' => $properties,
-							'invalid_properties'  => $invalid_properties,
-						],
+						'original_properties' => $properties,
+						'invalid_properties'  => $invalid_properties,
 					],
 				];
 			}
@@ -2046,13 +2046,11 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			foreach ( $attr_spec_rule[ AMP_Rule_Spec::VALUE_PROPERTIES ] as $prop_name => $property_spec ) {
 				// Mandatory property is missing.
 				if ( ! empty( $property_spec['mandatory'] ) && ! isset( $properties[ $prop_name ] ) ) {
-					return [
-						AMP_Rule_Spec::FAIL,
-						[
-							self::MISSING_MANDATORY_PROPERTY,
-							[ 'property' => $prop_name ],
-						],
+					$property_errors[] = [
+						self::MISSING_MANDATORY_PROPERTY,
+						[ 'property' => $prop_name ],
 					];
+					continue;
 				}
 
 				if ( ! isset( $properties[ $prop_name ] ) ) {
@@ -2070,22 +2068,27 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					$prop_value     = (float) $prop_value;
 				}
 				if ( isset( $required_value ) && $prop_value !== $required_value ) {
-					return [
-						AMP_Rule_Spec::FAIL,
+					$property_errors[] = [
+						self::MISSING_REQUIRED_PROPERTY_VALUE,
 						[
-							self::MISSING_REQUIRED_PROPERTY_VALUE,
-							[
-								'name'           => $prop_name,
-								'value'          => $prop_value,
-								'required_value' => $required_value,
-							],
+							'name'           => $prop_name,
+							'value'          => $prop_value,
+							'required_value' => $required_value,
 						],
 					];
 				}
 			}
-			return [ AMP_Rule_Spec::PASS, null ];
+
+			if ( empty( $property_errors ) ) {
+				return [ AMP_Rule_Spec::PASS, [] ];
+			} else {
+				return [
+					AMP_Rule_Spec::FAIL,
+					$property_errors,
+				];
+			}
 		}
-		return [ AMP_Rule_Spec::NOT_APPLICABLE, null ];
+		return [ AMP_Rule_Spec::NOT_APPLICABLE, [] ];
 	}
 
 	/**
