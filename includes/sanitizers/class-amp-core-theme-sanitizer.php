@@ -418,6 +418,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * Get theme config.
 	 *
 	 * @since 1.0
+	 * @codeCoverageIgnore
 	 * @deprecated 1.1
 	 *
 	 * @param string $theme Theme slug.
