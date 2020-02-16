@@ -57,6 +57,8 @@ function amp_post_template_add_fonts( $amp_template ) {
 
 /**
  * Add block styles for core blocks and third-party blocks.
+ *
+ * @since 1.5.0
  */
 function amp_post_template_add_block_styles() {
 	add_theme_support( 'wp-block-styles' );
