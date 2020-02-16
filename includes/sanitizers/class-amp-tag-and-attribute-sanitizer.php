@@ -710,19 +710,19 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 						}
 					}
 
-					$valid_properties = array_reduce(
-						array_keys( $properties ),
-						static function ( $attr_value, $property ) use ( $properties ) {
-							if ( ! empty( $attr_value ) ) {
-								$attr_value .= ',';
-							}
-
-							return $attr_value . $property . '=' . $properties[ $property ];
-						}
-					);
-
 					if ( $removed_property ) {
-						$node->setAttribute( $attr_node->nodeName, $valid_properties );
+						$node->setAttribute(
+							$attr_node->nodeName,
+							implode(
+								',',
+								array_map(
+									static function ( $property_name ) use ( $properties ) {
+										return $property_name . '=' . $properties[ $property_name ];
+									},
+									array_keys( $properties )
+								)
+							)
+						);
 					}
 				} elseif ( self::MISSING_REQUIRED_PROPERTY_VALUE === $error_code ) {
 					$validation_error['meta_property_name']  = $error_data['name'];
