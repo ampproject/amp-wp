@@ -53,6 +53,18 @@ class AMP_Form_Sanitizer_Test extends WP_UnitTestCase {
 				'<form method="get" action="http://example.org/example-page/"></form>',
 				'<form method="get" action="//example.org/example-page/" target="_top"></form>',
 			],
+			'form_with_http_action_and_port' => [
+				'<form method="get" action="http://example.org:8080/example-page/"></form>',
+				'<form method="get" action="//example.org:8080/example-page/" target="_top"></form>',
+			],
+			'form_with_http_action_and_user' => [
+				'<form method="get" action="http://user@example.org:8080/example-page/"></form>',
+				'<form method="get" action="//user@example.org:8080/example-page/" target="_top"></form>',
+			],
+			'form_with_http_action_and_user_pass' => [
+				'<form method="get" action="http://user:pass@example.org:8080/example-page/"></form>',
+				'<form method="get" action="//user:pass@example.org:8080/example-page/" target="_top"></form>',
+			],
 			'form_with_implicit_method_http_action_and_no_action_or_target' => [
 				'<form></form>',
 				sprintf( '<form method="get" action="%s" target="_top"></form>', preg_replace( '#^https?:#', '', home_url( '/current-page/' ) ) ),
@@ -97,13 +109,29 @@ class AMP_Form_Sanitizer_Test extends WP_UnitTestCase {
 				'<form method="post" action="../"></form>',
 				'#' . preg_quote( '<form method="post" action-xhr="//example.org/current-page/../?_wp_amp_action_xhr_converted=1" target="_top">', '#' ) . $form_template_pattern . '</form>#s',
 			],
+			'form_with_another_relative_path_action_url' => [
+				'<form method="post" action="foo/"></form>',
+				'#' . preg_quote( '<form method="post" action-xhr="//example.org/current-page/foo/?_wp_amp_action_xhr_converted=1" target="_top">', '#' ) . $form_template_pattern . '</form>#s',
+			],
 			'form_with_relative_query_action_url' => [
 				'<form method="post" action="?foo=bar"></form>',
 				'#' . preg_quote( '<form method="post" action-xhr="//example.org/current-page/?foo=bar&amp;_wp_amp_action_xhr_converted=1" target="_top">', '#' ) . $form_template_pattern . '</form>#s',
 			],
+			'form_with_multiple_relative_queries_action_url' => [
+				'<form method="post" action="?foo=bar&baz=buzz"></form>',
+				'#' . preg_quote( '<form method="post" action-xhr="//example.org/current-page/?foo=bar&amp;baz=buzz&amp;_wp_amp_action_xhr_converted=1" target="_top">', '#' ) . $form_template_pattern . '</form>#s',
+			],
 			'form_with_relative_fragment_action_url' => [
 				'<form method="post" action="#foo"></form>',
 				'#' . preg_quote( '<form method="post" action-xhr="//example.org/current-page/?_wp_amp_action_xhr_converted=1#foo" target="_top">', '#' ) . $form_template_pattern . '</form>#s',
+			],
+			'form_with_relative_query_and_fragment_action_url' => [
+				'<form method="post" action="?foo=bar#baz"></form>',
+				'#' . preg_quote( '<form method="post" action-xhr="//example.org/current-page/?foo=bar&amp;_wp_amp_action_xhr_converted=1#baz" target="_top">', '#' ) . $form_template_pattern . '</form>#s',
+			],
+			'form_with_pathless_url' => [
+				'<form method="post" action="//example.com"></form>',
+				'#' . preg_quote( '<form method="post" action-xhr="//example.com?_wp_amp_action_xhr_converted=1" target="_top">', '#' ) . $form_template_pattern . '</form>#s',
 			],
 			'test_with_dev_mode' => [
 				'<form data-ampdevmode="" action="javascript:"></form>',

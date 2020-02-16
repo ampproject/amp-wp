@@ -1616,6 +1616,22 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 				],
 				AMP_Rule_Spec::FAIL,
 			],
+			'protocol_mailto_pass'        => [
+				[
+					'source'         => '<a href="mailto:foo@example.com?&#038;subject=Example&#038;body=https://example.com/"></a>',
+					'node_tag_name'  => 'a',
+					'attr_name'      => 'href',
+					'attr_spec_rule' => [
+						'value_url' => [
+							'protocol' => [
+								'mailto',
+								'https',
+							],
+						],
+					],
+				],
+				AMP_Rule_Spec::PASS,
+			],
 		];
 	}
 
@@ -1646,9 +1662,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 				'//image.png ',
 				false,
 			],
-			'two_colons'        => [
-				'foo:baz://image.png ',
-				'foo:baz',
+			'mailto'            => [
+				'mailto:?&#038;subject=Foo&#038;body=https://example.com/',
+				'mailto',
 			],
 		];
 	}

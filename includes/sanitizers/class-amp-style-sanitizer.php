@@ -41,7 +41,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	const CSS_SYNTAX_INVALID_IMPORTANT       = 'CSS_SYNTAX_INVALID_IMPORTANT';
 	const CSS_SYNTAX_PARSE_ERROR             = 'CSS_SYNTAX_PARSE_ERROR';
 	const STYLESHEET_TOO_LONG                = 'STYLESHEET_TOO_LONG';
-	const STYLESHEET_INVALID_FILE_URL        = 'STYLESHEET_INVALID_FILE_URL';
+	const STYLESHEET_FETCH_ERROR             = 'STYLESHEET_FETCH_ERROR';
 
 	// These are internal to the sanitizer and not exposed as validation error codes.
 	const STYLESHEET_DISALLOWED_FILE_EXT   = 'STYLESHEET_DISALLOWED_FILE_EXT';
@@ -344,7 +344,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			self::CSS_SYNTAX_INVALID_PROPERTY,
 			self::CSS_SYNTAX_INVALID_PROPERTY_NOLIST,
 			self::CSS_SYNTAX_PARSE_ERROR,
-			self::STYLESHEET_INVALID_FILE_URL,
+			self::STYLESHEET_FETCH_ERROR,
 			self::STYLESHEET_TOO_LONG,
 		];
 	}
@@ -1233,13 +1233,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			'imported_font_urls' => $parsed['imported_font_urls'],
 		];
 
-		if ( $element->hasAttribute( 'amp-custom' ) && ! $this->amp_custom_style_element ) {
-			$this->amp_custom_style_element = $element;
-		} else {
-
-			// Remove from DOM since we'll be adding it to amp-custom.
-			$element->parentNode->removeChild( $element );
-		}
+		// Remove from DOM since we'll be adding it to a newly-created style[amp-custom] element later.
+		$element->parentNode->removeChild( $element );
 
 		$this->set_current_node( null );
 	}
@@ -1291,10 +1286,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$this->remove_invalid_child(
 				$element,
 				[
-					// @todo Also include details about the error.
-					'code' => self::STYLESHEET_INVALID_FILE_URL,
-					'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
-					'url'  => $normalized_url,
+					'code'    => self::STYLESHEET_FETCH_ERROR,
+					'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+					'url'     => $normalized_url,
+					'message' => $stylesheet->get_error_message(),
 				]
 			);
 			return;
@@ -1371,12 +1366,20 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return string|WP_Error Stylesheet contents or WP_Error.
 	 */
 	private function fetch_external_stylesheet( $url ) {
+
+		// Prepend schemeless stylesheet URL with the same URL scheme as the current site.
+		if ( '//' === substr( $url, 0, 2 ) ) {
+			$url = wp_parse_url( home_url(), PHP_URL_SCHEME ) . ':' . $url;
+		}
+
 		$cache_key = md5( $url );
 		$contents  = get_transient( $cache_key );
 		if ( false === $contents ) {
 			$r    = wp_remote_get( $url );
 			$code = wp_remote_retrieve_response_code( $r );
-			if ( $code < 200 || $code >= 300 ) {
+			if ( is_wp_error( $r ) ) {
+				$contents = $r;
+			} elseif ( $code < 200 || $code >= 300 ) {
 				$message = wp_remote_retrieve_response_message( $r );
 				if ( ! $code ) {
 					$code = 'http_error';
@@ -1438,7 +1441,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$parsed      = null;
 		$cache_key   = null;
 		$cached      = true;
-		$cache_group = 'amp-parsed-stylesheet-v24'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
+		$cache_group = 'amp-parsed-stylesheet-v25'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
 
 		$cache_impacting_options = array_merge(
 			wp_array_slice_assoc(
@@ -1552,10 +1555,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$stylesheet = $this->get_stylesheet_from_url( $import_stylesheet_url );
 		if ( $stylesheet instanceof WP_Error ) {
 			$error     = [
-				// @todo Also include details about the error.
-				'code' => self::STYLESHEET_INVALID_FILE_URL,
-				'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
-				'url'  => $import_stylesheet_url,
+				'code'    => self::STYLESHEET_FETCH_ERROR,
+				'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+				'url'     => $import_stylesheet_url,
+				'message' => $stylesheet->get_error_message(),
 			];
 			$sanitized = $this->should_sanitize_validation_error( $error );
 			if ( $sanitized ) {
@@ -2624,14 +2627,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Add style[amp-custom] to document.
 		if ( $stylesheet_groups[ self::STYLE_AMP_CUSTOM_GROUP_INDEX ]['included_count'] > 0 ) {
-
-			// Ensure style[amp-custom] is present in the document.
-			if ( ! $this->amp_custom_style_element ) {
-				$this->amp_custom_style_element = $this->dom->createElement( 'style' );
-				$this->amp_custom_style_element->setAttribute( 'amp-custom', '' );
-				$this->dom->head->appendChild( $this->amp_custom_style_element );
-			}
-
 			/*
 			 * On AMP-first themes when there are new/rejected validation errors present, a parsed stylesheet may include
 			 * @import rules. These must be moved to the beginning to be honored.
@@ -2641,16 +2636,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$css .= implode( '', $this->get_stylesheets() );
 			$css .= $stylesheet_groups[ self::STYLE_AMP_CUSTOM_GROUP_INDEX ]['source_map_comment'];
 
-			/*
-			 * Let the style[amp-custom] be populated with the concatenated CSS.
-			 * !important: Updating the contents of this style element by setting textContent is not
-			 * reliable across PHP/libxml versions, so this is why the children are removed and the
-			 * text node is then explicitly added containing the CSS.
-			 */
-			while ( $this->amp_custom_style_element->firstChild ) {
-				$this->amp_custom_style_element->removeChild( $this->amp_custom_style_element->firstChild );
-			}
+			// Create the style[amp-custom] element and add it to the <head>.
+			$this->amp_custom_style_element = $this->dom->createElement( 'style' );
+			$this->amp_custom_style_element->setAttribute( 'amp-custom', '' );
 			$this->amp_custom_style_element->appendChild( $this->dom->createTextNode( $css ) );
+			$this->dom->head->appendChild( $this->amp_custom_style_element );
 		}
 
 		/*

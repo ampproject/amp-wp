@@ -45,6 +45,8 @@ abstract class AMP_Rule_Spec {
 	const ALTERNATIVE_NAMES       = 'alternative_names';
 	const BLACKLISTED_VALUE_REGEX = 'blacklisted_value_regex';
 	const MANDATORY               = 'mandatory';
+	const MANDATORY_ANYOF         = 'mandatory_anyof';
+	const MANDATORY_ONEOF         = 'mandatory_oneof';
 	const VALUE                   = 'value';
 	const VALUE_CASEI             = 'value_casei';
 	const VALUE_REGEX             = 'value_regex';

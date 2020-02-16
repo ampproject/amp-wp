@@ -22,8 +22,6 @@ use Amp\AmpWP\Dom\Document;
  *     - `ChildTagSpec`       - Places restrictions on the number and type of child tags.
  *     - `if_value_regex`     - if one attribute value matches, this places a restriction
  *                              on another attribute/value.
- *     - `mandatory_oneof`    - Within the context of the tag, exactly one of the attributes
- *                              must be present.
  */
 class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
@@ -57,6 +55,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	const INVALID_BLACKLISTED_VALUE_REGEX      = 'INVALID_BLACKLISTED_VALUE_REGEX';
 	const DISALLOWED_PROPERTY_IN_ATTR_VALUE    = 'DISALLOWED_PROPERTY_IN_ATTR_VALUE';
 	const ATTR_REQUIRED_BUT_MISSING            = 'ATTR_REQUIRED_BUT_MISSING';
+	const MANDATORY_ANYOF_ATTR_MISSING         = 'MANDATORY_ANYOF_ATTR_MISSING';
+	const MANDATORY_ONEOF_ATTR_MISSING         = 'MANDATORY_ONEOF_ATTR_MISSING';
+	const DUPLICATE_ONEOF_ATTRS                = 'DUPLICATE_ONEOF_ATTRS';
 	const INVALID_LAYOUT_WIDTH                 = 'INVALID_LAYOUT_WIDTH';
 	const INVALID_LAYOUT_HEIGHT                = 'INVALID_LAYOUT_HEIGHT';
 	const INVALID_LAYOUT_AUTO_HEIGHT           = 'INVALID_LAYOUT_AUTO_HEIGHT';
@@ -727,6 +728,46 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				]
 			);
 			return null;
+		}
+
+		if ( ! empty( $tag_spec[ AMP_Rule_Spec::MANDATORY_ANYOF ] ) ) {
+			$anyof_attributes = $this->get_element_attribute_intersection( $node, $tag_spec[ AMP_Rule_Spec::MANDATORY_ANYOF ] );
+			if ( 0 === count( $anyof_attributes ) ) {
+				$this->remove_invalid_child(
+					$node,
+					[
+						'code'                  => self::MANDATORY_ANYOF_ATTR_MISSING,
+						'mandatory_anyof_attrs' => $tag_spec[ AMP_Rule_Spec::MANDATORY_ANYOF ], // @todo Temporary as value can be looked up via spec name. See https://github.com/ampproject/amp-wp/pull/3817.
+						'spec_name'             => $this->get_spec_name( $node, $tag_spec ),
+					]
+				);
+				return null;
+			}
+		}
+
+		if ( ! empty( $tag_spec[ AMP_Rule_Spec::MANDATORY_ONEOF ] ) ) {
+			$oneof_attributes = $this->get_element_attribute_intersection( $node, $tag_spec[ AMP_Rule_Spec::MANDATORY_ONEOF ] );
+			if ( 0 === count( $oneof_attributes ) ) {
+				$this->remove_invalid_child(
+					$node,
+					[
+						'code'                  => self::MANDATORY_ONEOF_ATTR_MISSING,
+						'mandatory_oneof_attrs' => $tag_spec[ AMP_Rule_Spec::MANDATORY_ONEOF ], // @todo Temporary as value can be looked up via spec name. See https://github.com/ampproject/amp-wp/pull/3817.
+						'spec_name'             => $this->get_spec_name( $node, $tag_spec ),
+					]
+				);
+				return null;
+			} elseif ( count( $oneof_attributes ) > 1 ) {
+				$this->remove_invalid_child(
+					$node,
+					[
+						'code'                  => self::DUPLICATE_ONEOF_ATTRS,
+						'duplicate_oneof_attrs' => $oneof_attributes,
+						'spec_name'             => $this->get_spec_name( $node, $tag_spec ),
+					]
+				);
+				return null;
+			}
 		}
 
 		// Add required AMP component scripts.
@@ -1424,6 +1465,23 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Get the intersection of the element attributes with the supplied attributes.
+	 *
+	 * @param DOMElement $element         The element.
+	 * @param string[]   $attribute_names The attribute names.
+	 * @return string[] The attributes that matched.
+	 */
+	private function get_element_attribute_intersection( DOMElement $element, $attribute_names ) {
+		$attributes = [];
+		foreach ( $attribute_names as $attribute_name ) {
+			if ( $element->hasAttribute( $attribute_name ) ) {
+				$attributes[] = $attribute_name;
+			}
+		}
+		return $attributes;
+	}
+
+	/**
 	 * Check if attribute has a value rule determine if its value is valid.
 	 *
 	 * Checks for value validity by matches against valid values.
@@ -1666,7 +1724,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return string|null Protocol without colon if matched. Otherwise null.
 	 */
 	private function parse_protocol( $url ) {
-		if ( preg_match( '#^[^/]+(?=:)#', $url, $matches ) ) {
+		if ( preg_match( '#^[^/]+?(?=:)#', $url, $matches ) ) {
 			return $matches[0];
 		}
 		return null;

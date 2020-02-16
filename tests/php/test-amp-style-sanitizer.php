@@ -1055,6 +1055,12 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			[
 				'.selector:not([attr*=\'\']) {}',
 			],
+			[
+				'body { -0-transition: all .3s ease-in-out; }',
+			],
+			[
+				'body { 4-o-transition: all .3s ease-in-out; }',
+			],
 		];
 	}
 
@@ -1342,6 +1348,12 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'html{background-color:lightblue}',
 				[],
 			],
+			'external_file_schemeless' => [
+				'//stylesheets.example.com/style.css',
+				'text/css',
+				'html{background-color:lightblue}',
+				[],
+			],
 			'dynamic_file' => [
 				set_url_scheme( add_query_arg( 'action', 'kirki-styles', home_url() ), 'http' ),
 				'text/css',
@@ -1358,7 +1370,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				home_url( '/this.is.not.css' ),
 				'image/jpeg',
 				'JPEG...',
-				[ AMP_Style_Sanitizer::STYLESHEET_INVALID_FILE_URL ],
+				[ AMP_Style_Sanitizer::STYLESHEET_FETCH_ERROR ],
 			],
 		];
 	}
@@ -1378,7 +1390,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$request_count = 0;
 		add_filter(
 			'pre_http_request',
-			static function( $preempt, $request, $url ) use ( $href, &$request_count, $content_type, $response_body ) {
+			function( $preempt, $request, $url ) use ( $href, &$request_count, $content_type, $response_body ) {
+				$this->assertRegExp( '#^https?://#', $url );
 				if ( set_url_scheme( $url, 'https' ) === set_url_scheme( $href, 'https' ) ) {
 					$request_count++;
 					$preempt = [

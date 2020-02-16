@@ -17,14 +17,14 @@
     "sabberworm/php-css-parser": "8.3.0"
   },
   "require-dev": {
-    "dealerdirect/phpcodesniffer-composer-installer": "0.6.0",
+    "dealerdirect/phpcodesniffer-composer-installer": "0.6.2",
     "mikey179/vfsstream": "1.6.8",
     "phpcompatibility/phpcompatibility-wp": "2.1.0",
     "roave/security-advisories": "dev-master",
     "sirbrillig/phpcs-variable-analysis": "2.6.2",
     "wp-cli/wp-cli": "2.4.0",
-    "wp-coding-standards/wpcs": "2.2.0",
-    "xwp/wp-dev-lib": "1.4.0"
+    "wp-coding-standards/wpcs": "2.2.1",
+    "xwp/wp-dev-lib": "1.5.0"
   },
   "suggest": {
     "ext-intl": "Enables use of idn_to_utf8() to convert punycode domains to UTF-8 for use with an AMP Cache.",
@@ -41,7 +41,8 @@
   "extra": {
     "patches": {
       "sabberworm/php-css-parser": {
-        "PHP-CSS-Parser: Fix parsing CSS selectors which contain commas <https://github.com/sabberworm/PHP-CSS-Parser/pull/138>": "https://github.com/sabberworm/PHP-CSS-Parser/commit/fa139f65c5b098ae652c970b25e6eb03fc495eb4.diff"
+        "Fix parsing CSS selectors which contain commas <https://github.com/sabberworm/PHP-CSS-Parser/pull/138>": "https://github.com/sabberworm/PHP-CSS-Parser/commit/fa139f65c5b098ae652c970b25e6eb03fc495eb4.diff",
+        "Validate name-start code points for identifier <https://github.com/sabberworm/PHP-CSS-Parser/pull/185>": "patches/php-css-parser-pull-185.patch"
       }
     }
   },

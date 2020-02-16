@@ -88,6 +88,31 @@ class Test_AMP_DOM_Document extends WP_UnitTestCase {
 				'<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><html amp lang="en">' . $head . '<body class="some-class"><p>Text</p></body></html>',
 				'<!DOCTYPE html><html amp lang="en">' . $head . '<body class="some-class"><p>Text</p></body></html>',
 			],
+			'html_with_xmlns_and_xml_lang'             => [
+				'utf-8',
+				'<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="es">' . $head . '<body></body></html>',
+				'<!DOCTYPE html><html lang="es">' . $head . '<body></body></html>',
+			],
+			'html_with_xmlns_value_that_should_remain' => [
+				'utf-8',
+				'<!DOCTYPE html><html xmlns="http://www.w3.org/TR/html4/">' . $head . '<body></body></html>',
+				'<!DOCTYPE html><html xmlns="http://www.w3.org/TR/html4/">' . $head . '<body></body></html>',
+			],
+			'html_with_lang_and_xml_lang'              => [
+				'utf-8',
+				'<!DOCTYPE html><html lang="es" xml:lang="fr">' . $head . '<body></body></html>',
+				'<!DOCTYPE html><html lang="es">' . $head . '<body></body></html>',
+			],
+			'html_with_empty_xml_lang'                 => [
+				'utf-8',
+				'<!DOCTYPE html><html xml:lang="">' . $head . '<body></body></html>',
+				'<!DOCTYPE html><html>' . $head . '<body></body></html>',
+			],
+			'html_with_empty_lang'                     => [
+				'utf-8',
+				'<!DOCTYPE html><html lang="" xml:lang="es">' . $head . '<body></body></html>',
+				'<!DOCTYPE html><html lang="es">' . $head . '<body></body></html>',
+			],
 			'slashes_on_closing_tags'                  => [
 				'utf-8',
 				'<!DOCTYPE html><html amp lang="en"><head><meta charset="utf-8" /></head><body class="some-class"><p>Text</p></body></html>',
@@ -163,6 +188,16 @@ class Test_AMP_DOM_Document extends WP_UnitTestCase {
 				'utf-8',
 				'<!--[if lt IE 7]> <html class="lt-ie9 lt-ie8 lt-ie7"> <![endif]--><!--[if IE 7]> <html class="lt-ie9 lt-ie8"> <![endif]--><!--[if IE 8]> <html class="lt-ie9"> <![endif]--><!--[if gt IE 8]><!--> <html class=""> <!--<![endif]--></html>',
 				'<!DOCTYPE html><html class="">' . $head . '<body></body></html>',
+			],
+			'profile_attribute_in_head_moved_to_link'  => [
+				'utf-8',
+				'<!DOCTYPE html><html><head profile="https://example.com"></head><body></body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="profile" href="https://example.com"></head><body></body></html>',
+			],
+			'profile_attribute_in_head_empty_string'   => [
+				'utf-8',
+				'<!DOCTYPE html><html><head profile=""></head><body></body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"></head><body></body></html>',
 			],
 		];
 	}

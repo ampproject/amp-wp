@@ -204,6 +204,10 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 	public function is_frontend_url( $url ) {
 		$parsed_url = wp_parse_url( $url );
 
+		if ( ! empty( $parsed_url['scheme'] ) && ! in_array( strtolower( $parsed_url['scheme'] ), [ 'http', 'https' ], true ) ) {
+			return false;
+		}
+
 		// Skip adding query var to links on other URLs.
 		if ( ! empty( $parsed_url['host'] ) && $this->home_host !== $parsed_url['host'] ) {
 			return false;
