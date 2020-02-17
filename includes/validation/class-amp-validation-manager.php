@@ -1101,6 +1101,29 @@ class AMP_Validation_Manager {
 	}
 
 	/**
+	 * Determine if a script element matches a given script handle.
+	 *
+	 * @param DOMElement $element       Element.
+	 * @param string     $script_handle Script handle.
+	 * @return bool
+	 */
+	protected static function is_matching_script( DOMElement $element, $script_handle ) {
+		if ( ! isset( wp_scripts()->registered[ $script_handle ] ) ) {
+			return false;
+		}
+		$script_dependency = wp_scripts()->registered[ $script_handle ];
+		if ( empty( $script_dependency->src ) ) {
+			return false;
+		}
+
+		// Script src attribute is haystack because includes protocol and may include query args (like ver).
+		return false !== strpos(
+			$element->getAttribute( 'src' ),
+			preg_replace( '#^https?:(?=//)#', '', $script_dependency->src )
+		);
+	}
+
+	/**
 	 * Walk back tree to find the open sources.
 	 *
 	 * @todo This method and others for sourcing could be moved to a separate class.
@@ -1212,27 +1235,11 @@ class AMP_Validation_Manager {
 		if ( $node instanceof DOMElement && 'script' === $node->nodeName ) {
 			$enqueued_script_handles = array_intersect( wp_scripts()->done, array_keys( self::$enqueued_script_sources ) );
 
-			$is_matching_script = static function ( DOMElement $element, $script_handle ) {
-				if ( ! isset( wp_scripts()->registered[ $script_handle ] ) ) {
-					return false;
-				}
-				$script_dependency = wp_scripts()->registered[ $script_handle ];
-				if ( empty( $script_dependency->src ) ) {
-					return false;
-				}
-
-				// Script attribute is haystack because includes protocol and may include query args (like ver).
-				return false !== strpos(
-					$element->getAttribute( 'src' ),
-					preg_replace( '#^https?:(?=//)#', '', $script_dependency->src )
-				);
-			};
-
 			if ( $node->hasAttribute( 'src' ) ) {
 
 				// External scripts, directly enqueued.
 				foreach ( $enqueued_script_handles as $enqueued_script_handle ) {
-					if ( ! $is_matching_script( $node, $enqueued_script_handle ) ) {
+					if ( ! self::is_matching_script( $node, $enqueued_script_handle ) ) {
 						continue;
 					}
 					$sources = array_merge(
@@ -1244,7 +1251,7 @@ class AMP_Validation_Manager {
 
 				// External scripts, added as a dependency.
 				foreach ( wp_scripts()->done as $script_handle ) {
-					if ( ! $is_matching_script( $node, $script_handle ) ) {
+					if ( ! self::is_matching_script( $node, $script_handle ) ) {
 						continue;
 					}
 					foreach ( self::$enqueued_script_sources as $enqueued_script_sources_handle => $enqueued_script_sources ) {
