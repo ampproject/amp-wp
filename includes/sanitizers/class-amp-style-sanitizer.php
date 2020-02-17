@@ -2131,11 +2131,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$vendorless_property_name = preg_replace( '/^-\w+-/', '', $property->getRule() );
 				if ( ! in_array( $vendorless_property_name, $options['property_whitelist'], true ) ) {
 					$error     = [
-						'code'           => self::CSS_SYNTAX_INVALID_PROPERTY,
-						'property_name'  => $property->getRule(),
-						'property_value' => $property->getValue(),
-						'type'           => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
-						'spec_name'      => $options['spec_name'],
+						'code'               => self::CSS_SYNTAX_INVALID_PROPERTY,
+						'css_property_name'  => $property->getRule(),
+						'css_property_value' => $property->getValue(),
+						'type'               => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+						'spec_name'          => $options['spec_name'],
 					];
 					$sanitized = $this->should_sanitize_validation_error( $error );
 					if ( $sanitized ) {
@@ -2149,11 +2149,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$properties = $ruleset->getRules( $illegal_property_name );
 				foreach ( $properties as $property ) {
 					$error     = [
-						'code'           => self::CSS_SYNTAX_INVALID_PROPERTY_NOLIST,
-						'property_name'  => $property->getRule(),
-						'property_value' => (string) $property->getValue(),
-						'type'           => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
-						'spec_name'      => $options['spec_name'],
+						'code'               => self::CSS_SYNTAX_INVALID_PROPERTY_NOLIST,
+						'css_property_name'  => $property->getRule(),
+						'css_property_value' => (string) $property->getValue(),
+						'type'               => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+						'spec_name'          => $options['spec_name'],
 					];
 					$sanitized = $this->should_sanitize_validation_error( $error );
 					if ( $sanitized ) {
@@ -2397,11 +2397,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$vendorless_property_name = preg_replace( '/^-\w+-/', '', $property->getRule() );
 					if ( ! in_array( $vendorless_property_name, $options['property_whitelist'], true ) ) {
 						$error     = [
-							'code'           => self::CSS_SYNTAX_INVALID_PROPERTY,
-							'property_name'  => $property->getRule(),
-							'property_value' => (string) $property->getValue(),
-							'type'           => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
-							'spec_name'      => $options['spec_name'],
+							'code'               => self::CSS_SYNTAX_INVALID_PROPERTY,
+							'css_property_name'  => $property->getRule(),
+							'css_property_value' => (string) $property->getValue(),
+							'type'               => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+							'spec_name'          => $options['spec_name'],
 						];
 						$sanitized = $this->should_sanitize_validation_error( $error );
 						if ( $sanitized ) {
@@ -2447,11 +2447,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$ruleset->removeRule( $property->getRule() );
 				} else {
 					$error     = [
-						'code'           => self::CSS_SYNTAX_INVALID_IMPORTANT,
-						'type'           => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
-						'property_name'  => $property->getRule(),
-						'property_value' => $property->getValue(),
-						'spec_name'      => $options['spec_name'],
+						'code'               => self::CSS_SYNTAX_INVALID_IMPORTANT,
+						'type'               => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+						'css_property_name'  => $property->getRule(),
+						'css_property_value' => $property->getValue(),
+						'spec_name'          => $options['spec_name'],
 					];
 					$sanitized = $this->should_sanitize_validation_error( $error );
 					if ( $sanitized ) {
