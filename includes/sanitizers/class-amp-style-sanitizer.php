@@ -428,6 +428,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * Get list of CSS styles in HTML content of Dom\Document ($this->dom).
 	 *
 	 * @since 0.4
+	 * @codeCoverageIgnore
 	 * @deprecated As of 1.0, use get_stylesheets().
 	 *
 	 * @return array[] Mapping CSS selectors to array of properties, or mapping of keys starting with 'stylesheet:' with value being the stylesheet.

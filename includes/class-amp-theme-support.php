@@ -216,6 +216,7 @@ class AMP_Theme_Support {
 	 * @since 1.0
 	 * @see AMP_Theme_Support::read_theme_support()
 	 * @see AMP_Theme_Support::get_support_mode()
+	 * @codeCoverageIgnore
 	 * @deprecated Use AMP_Theme_Support::get_support_mode_added_via_option().
 	 *
 	 * @return bool Support added via option.
@@ -1233,6 +1234,7 @@ class AMP_Theme_Support {
 	/**
 	 * Add the comments template placeholder marker
 	 *
+	 * @codeCoverageIgnore
 	 * @deprecated 1.1.0 This functionality was moved to AMP_Comments_Sanitizer
 	 *
 	 * @param array $args the args for the comments list.
