@@ -1927,7 +1927,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			return 'dialog';
 		}
 
-		$classes = explode( ' ', $modal->getAttribute( 'class' ) );
+		$classes = preg_split( '/\s+/', trim( $modal->getAttribute( 'class' ) ) );
 
 		foreach ( self::$modal_roles as $role ) {
 			if ( in_array( $role, $classes, true ) ) {
