@@ -2103,7 +2103,7 @@ class AMP_Validation_Error_Taxonomy {
 			</dd>
 
 			<dt><?php esc_html_e( 'Error code', 'amp' ); ?></dt>
-			<dd><code><?php esc_html_e( $validation_error['code'] ); ?></code></dd>
+			<dd><code><?php echo esc_html( $validation_error['code'] ); ?></code></dd>
 
 			<?php if ( AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG === $validation_error['code'] && isset( $validation_error['node_attributes'] ) ) : ?>
 				<dt><?php esc_html_e( 'Invalid markup', 'amp' ); ?></dt>
