@@ -232,6 +232,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 				[ AMP_DOM_Utils::create_node( $dom, 'div', [ 'foo' => 'bar' ] ), 'dialog' ],
 				[ AMP_DOM_Utils::create_node( $dom, 'div', [ 'class' => 'foo' ] ), 'dialog' ],
 				[ AMP_DOM_Utils::create_node( $dom, 'div', [ 'class' => 'top_navigation' ] ), 'dialog' ],
+				[ AMP_DOM_Utils::create_node( $dom, 'div', [ 'class' => ' a	search  c ' ] ), 'search' ],
 			]
 		);
 	}
