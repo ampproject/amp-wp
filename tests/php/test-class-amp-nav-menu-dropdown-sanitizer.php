@@ -22,14 +22,12 @@ class Test_AMP_Nav_Menu_Dropdown_Sanitizer extends WP_UnitTestCase {
 	 * @covers AMP_Nav_Menu_Dropdown_Sanitizer::add_buffering_hooks
 	 */
 	public function test_add_buffering_hooks() {
-		global $wp_filter;
-
 		$filter = 'walker_nav_menu_start_el';
 		remove_all_filters( $filter );
 
 		// The filter should not be added if certain args are not passed.
 		AMP_Nav_Menu_Dropdown_Sanitizer::add_buffering_hooks( [] );
-		$this->assertEquals( false, isset( $wp_filter[ $filter ] ) );
+		$this->assertEquals( false, has_filter( $filter ) );
 
 		/**
 		 * Expected output.
