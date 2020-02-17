@@ -264,15 +264,18 @@ blockquote p:last-child {
 	max-width: 100%;
 }
 
-.amp-wp-article-content amp-img {
+.amp-wp-article-content amp-img,
+.amp-wp-article-content .wp-block-cover {
 	margin: 0 auto;
 }
 
-.amp-wp-article-content amp-img.alignright {
+.amp-wp-article-content amp-img.alignright,
+.amp-wp-article-content .wp-block-cover.alignright {
 	margin: 0 0 1em 16px;
 }
 
-.amp-wp-article-content amp-img.alignleft {
+.amp-wp-article-content amp-img.alignleft,
+.amp-wp-article-content .wp-block-cover.alignleft {
 	margin: 0 16px 1em 0;
 }
 
