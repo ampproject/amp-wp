@@ -79,6 +79,15 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 		);
 
 		foreach ( $elements as $element ) {
+
+			// Strip whitespace around equal signs. Won't be needed after <https://github.com/ampproject/amphtml/issues/26496> is resolved.
+			if ( $element->hasAttribute( 'content' ) ) {
+				$element->setAttribute(
+					'content',
+					preg_replace( '/\s*=\s*/', '=', $element->getAttribute( 'content' ) )
+				);
+			}
+
 			/**
 			 * Meta tag to process.
 			 *
@@ -126,37 +135,7 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	protected function ensure_viewport_is_present() {
 		if ( empty( $this->meta_tags[ self::TAG_VIEWPORT ] ) ) {
 			$this->meta_tags[ self::TAG_VIEWPORT ][] = $this->create_viewport_element( static::AMP_VIEWPORT );
-			return;
 		}
-
-		// Ensure we have the 'width=device-width' setting included.
-		/**
-		 * Viewport tag.
-		 *
-		 * @var DOMElement $viewport_tag
-		 */
-		$viewport_tag      = $this->meta_tags[ self::TAG_VIEWPORT ][0];
-		$viewport_content  = $viewport_tag->getAttribute( 'content' );
-		$viewport_settings = array_map( 'trim', explode( ',', $viewport_content ) );
-		$width_found       = false;
-
-		// @todo The invalid/missing properties should raise validation errors. See <https://github.com/ampproject/amp-wp/pull/3758/files#r348074703>.
-		foreach ( $viewport_settings as $index => $viewport_setting ) {
-			list( $property, $value ) = array_map( 'trim', explode( '=', $viewport_setting ) );
-			if ( 'width' === $property ) {
-				if ( 'device-width' !== $value ) {
-					$viewport_settings[ $index ] = 'width=device-width';
-				}
-				$width_found = true;
-				break;
-			}
-		}
-
-		if ( ! $width_found ) {
-			array_unshift( $viewport_settings, 'width=device-width' );
-		}
-
-		$viewport_tag->setAttribute( 'content', implode( ',', $viewport_settings ) );
 	}
 
 	/**

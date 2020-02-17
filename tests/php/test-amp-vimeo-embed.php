@@ -144,7 +144,7 @@ class AMP_Vimeo_Embed_Test extends WP_UnitTestCase {
 	 * Test video_override().
 	 *
 	 * @dataProvider get_video_override_data
-	 * @covers AMP_Vimeo_Embed_Handler::test_video_override()
+	 * @covers AMP_Vimeo_Embed_Handler::video_override()
 	 *
 	 * @param string $html     The initial HTML.
 	 * @param array  $attr     The attributes of the shortcode.

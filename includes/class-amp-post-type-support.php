@@ -22,6 +22,7 @@ class AMP_Post_Type_Support {
 	 * Get post types that plugin supports out of the box (which cannot be disabled).
 	 *
 	 * @deprecated
+	 * @codeCoverageIgnore
 	 * @return string[] Post types.
 	 */
 	public static function get_builtin_supported_post_types() {

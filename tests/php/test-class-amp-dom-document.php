@@ -10,7 +10,7 @@ use Amp\AmpWP\Dom\Document;
 /**
  * Tests for Amp\AmpWP\Dom\Document.
  *
- * @covers Document
+ * @covers Amp\AmpWP\Dom\Document
  */
 class Test_AMP_DOM_Document extends WP_UnitTestCase {
 
@@ -210,8 +210,8 @@ class Test_AMP_DOM_Document extends WP_UnitTestCase {
 	 * @param string $expected Expected target content.
 	 *
 	 * @dataProvider data_dom_document
-	 * @covers Document::loadHTML()
-	 * @covers Document::saveHTML()
+	 * @covers Amp\AmpWP\Dom\Document::loadHTML()
+	 * @covers Amp\AmpWP\Dom\Document::saveHTML()
 	 */
 	public function test_dom_document( $charset, $source, $expected ) {
 		$document = Document::from_html( $source, $charset );
@@ -239,7 +239,7 @@ class Test_AMP_DOM_Document extends WP_UnitTestCase {
 	/**
 	 * Test convert_amp_bind_attributes.
 	 *
-	 * @covers Document::convert_amp_bind_attributes()
+	 * @covers Amp\AmpWP\Dom\Document::convert_amp_bind_attributes()
 	 */
 	public function test_amp_bind_conversion() {
 		$original  = '<amp-img width=300 height="200" data-foo="bar" selected src="/img/dog.jpg" [src]="myAnimals[currentAnimal].imageUrl"></amp-img>';
@@ -327,7 +327,7 @@ class Test_AMP_DOM_Document extends WP_UnitTestCase {
 	/**
 	 * Test that HEAD and BODY elements are always present.
 	 *
-	 * @covers Document::normalize_document_structure()
+	 * @covers Amp\AmpWP\Dom\Document::normalize_document_structure()
 	 */
 	public function test_ensuring_head_body() {
 		// The meta charset tag that is automatically added needs to always be taken into account.
@@ -367,7 +367,7 @@ class Test_AMP_DOM_Document extends WP_UnitTestCase {
 	/**
 	 * Test that invalid head nodes are moved to body.
 	 *
-	 * @covers Document::move_invalid_head_nodes_to_body()
+	 * @covers Amp\AmpWP\Dom\Document::move_invalid_head_nodes_to_body()
 	 */
 	public function test_invalid_head_nodes() {
 		// The meta charset tag that is automatically added needs to always be taken into account.
@@ -507,7 +507,7 @@ class Test_AMP_DOM_Document extends WP_UnitTestCase {
 	 * Test is_valid_head_node().
 	 *
 	 * @dataProvider get_head_node_data
-	 * @covers       Document::is_valid_head_node()
+	 * @covers       Amp\AmpWP\Dom\Document::is_valid_head_node()
 	 *
 	 * @param Document $dom   DOM document to use.
 	 * @param DOMNode  $node  Node.

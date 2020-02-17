@@ -2,6 +2,7 @@
 /**
  * Callbacks for adding AMP-related things to the main theme.
  *
+ * @codeCoverageIgnore
  * @deprecated Function in this file has been moved to amp-helper-functions.php.
  * @package AMP
  */
