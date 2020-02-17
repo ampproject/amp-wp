@@ -2179,7 +2179,7 @@ class AMP_Validation_Error_Taxonomy {
 						if ( isset( $validation_error['meta_property_required_value'] ) ) {
 							printf(
 								' (%s: <code>%s</code>)',
-								esc_html__( 'required', 'amp' ),
+								esc_html__( 'required value', 'amp' ),
 								esc_html( $validation_error['meta_property_required_value'] )
 							);
 						}
@@ -3106,7 +3106,10 @@ class AMP_Validation_Error_Taxonomy {
 			case 'sources':
 				return __( 'Sources', 'amp' );
 			case 'meta_property_name':
-				if ( AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE === $validation_error['code'] ) {
+				if (
+					AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE === $validation_error['code'] ||
+					AMP_Tag_And_Attribute_Sanitizer::MISSING_REQUIRED_PROPERTY_VALUE === $validation_error['code']
+				) {
 					return __( 'Invalid property', 'amp' );
 				} elseif ( AMP_Tag_And_Attribute_Sanitizer::MISSING_MANDATORY_PROPERTY === $validation_error['code'] ) {
 					return __( 'Missing property', 'amp' );
