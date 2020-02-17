@@ -2055,6 +2055,11 @@ class AMP_Theme_Support {
 			return $response;
 		}
 
+		// Enforce UTF-8 encoding as it is a requirement for AMP.
+		if ( ! headers_sent() ) {
+			header( 'Content-Type: text/html; charset=utf-8' );
+		}
+
 		/**
 		 * Filters whether response (post-processor) caching is enabled.
 		 *
@@ -2354,12 +2359,6 @@ class AMP_Theme_Support {
 				wp_safe_redirect( $non_amp_url, 302 );
 				return $response;
 			}
-		}
-
-		// @todo If 'utf-8' is not the blog charset, then we'll need to do some character encoding conversation or "entityification".
-		if ( 'utf-8' !== strtolower( get_bloginfo( 'charset' ) ) ) {
-			/* translators: %s: the charset of the current site. */
-			trigger_error( esc_html( sprintf( __( 'The database has the %s encoding when it needs to be utf-8 to work with AMP.', 'amp' ), get_bloginfo( 'charset' ) ) ), E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 		}
 
 		AMP_Validation_Manager::finalize_validation( $dom );
