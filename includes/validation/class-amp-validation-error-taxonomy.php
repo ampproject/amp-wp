@@ -2102,6 +2102,9 @@ class AMP_Validation_Error_Taxonomy {
 				</p>
 			</dd>
 
+			<dt><?php esc_html_e( 'Error code', 'amp' ); ?></dt>
+			<dd><code><?php echo esc_html( $validation_error['code'] ); ?></code></dd>
+
 			<?php if ( AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG === $validation_error['code'] && isset( $validation_error['node_attributes'] ) ) : ?>
 				<dt><?php esc_html_e( 'Invalid markup', 'amp' ); ?></dt>
 				<dd class="detailed">
@@ -2144,7 +2147,7 @@ class AMP_Validation_Error_Taxonomy {
 				if ( $is_element_attributes && empty( $value ) ) {
 					continue;
 				}
-				if ( in_array( $key, [ 'code', 'type', 'css_property_value', 'mandatory_anyof_attrs', 'mandatory_oneof_attrs' ], true ) ) {
+				if ( in_array( $key, [ 'code', 'type', 'css_property_value', 'mandatory_anyof_attrs', 'meta_property_value', 'meta_property_required_value', 'mandatory_oneof_attrs' ], true ) ) {
 					continue; // Handled above.
 				}
 				if ( 'spec_name' === $key ) {
@@ -2165,6 +2168,20 @@ class AMP_Validation_Error_Taxonomy {
 							);
 						} else {
 							printf( '<code>%s</code>', esc_html( $value ) );
+						}
+						?>
+					<?php elseif ( 'meta_property_name' === $key ) : ?>
+						<?php
+						printf( '<code>%s</code>', esc_html( $value ) );
+						if ( isset( $validation_error['meta_property_value'] ) ) {
+							printf( ': <code>%s</code>', esc_html( $validation_error['meta_property_value'] ) );
+						}
+						if ( isset( $validation_error['meta_property_required_value'] ) ) {
+							printf(
+								' (%s: <code>%s</code>)',
+								esc_html__( 'required', 'amp' ),
+								esc_html( $validation_error['meta_property_required_value'] )
+							);
 						}
 						?>
 					<?php elseif ( 'text' === $key ) : ?>
@@ -2992,7 +3009,7 @@ class AMP_Validation_Error_Taxonomy {
 			case AMP_Tag_And_Attribute_Sanitizer::MISSING_REQUIRED_PROPERTY_VALUE:
 				$title = sprintf(
 					/* translators: %1$s is the property name, %2$s is the value for the property */
-					wp_kses( __( 'Missing required value for <code>%1$s</code> property: <code>%2$s</code>', 'amp' ), [ 'code' => '' ] ),
+					wp_kses( __( 'Invalid value for <code>%1$s</code> property: <code>%2$s</code>', 'amp' ), [ 'code' => '' ] ),
 					esc_html( $validation_error['meta_property_name'] ),
 					esc_html( $validation_error['meta_property_value'] )
 				);

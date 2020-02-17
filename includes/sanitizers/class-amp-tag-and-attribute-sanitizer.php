@@ -721,7 +721,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 						$node->setAttribute( $attr_node->nodeName, $this->serialize_properties_attribute( $properties ) );
 					}
 				} elseif ( self::MISSING_MANDATORY_PROPERTY === $error_code ) {
-					$validation_error['meta_property_name'] = $error_data['name'];
+					$validation_error['meta_property_name']           = $error_data['name'];
+					$validation_error['meta_property_required_value'] = $error_data['required_value'];
 					if ( $this->should_sanitize_validation_error( $validation_error, [ 'node' => $attr_node ] ) ) {
 						$properties = array_merge(
 							$this->parse_properties_attribute( $attr_node->nodeValue ),
