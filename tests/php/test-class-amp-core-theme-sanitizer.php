@@ -15,6 +15,11 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 
 	use PrivateAccess;
 
+	/**
+	 * Data for testing the conversion of a CSS selector to a XPath.
+	 *
+	 * @return array
+	 */
 	public function get_xpath_from_css_selector_data() {
 		return [
 			// Single element.
@@ -126,6 +131,11 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertEquals( $supported_themes, AMP_Core_Theme_Sanitizer::get_supported_themes() );
 	}
 
+	/**
+	 * Data for testing acceptable errors for supported themes.
+	 *
+	 * @return array
+	 */
 	public function get_templates() {
 		$not_supported = [ 'foo', 'bar' ];
 
@@ -200,6 +210,11 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertEquals( $expected, $actual );
 	}
 
+	/**
+	 * Data for testing guessing of modal roles.
+	 *
+	 * @return array
+	 */
 	public function get_modals() {
 		$dom         = new Document();
 		$modal_roles = $this->get_static_private_property( 'AMP_Core_Theme_Sanitizer', 'modal_roles' );
