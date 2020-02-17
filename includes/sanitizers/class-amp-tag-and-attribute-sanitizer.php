@@ -2033,10 +2033,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *                                 - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there is no rule for this attribute.
 	 *     @type array[] $errors      Property errors.
 	 * }
-	 *
-	 * Array where the result code is accompanied by its data in the format [ $result_code, $result_data ].
-	 *               The result code could be:
-	 *               The $result_data null if PASS or NOT_APPLICABLE, and if FAIL it is an array of errors.
 	 */
 	private function check_attr_spec_rule_value_properties( DOMElement $node, $attr_name, $attr_spec_rule ) {
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_PROPERTIES ] ) && $node->hasAttribute( $attr_name ) ) {
