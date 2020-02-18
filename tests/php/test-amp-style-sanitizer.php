@@ -2220,7 +2220,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					add_action(
 						'wp_head',
 						static function() {
-							printf( '<style media=print id="early-print-style">html:after { content:"earlyprintstyle %s"; }</style>', esc_html( str_repeat( 'a', 49990 ) ) );
+							printf( '<style media=print id="early-print-style">html:after { content:"earlyprintstyle %s"; }</style>', esc_html( str_repeat( 'a', 75000 - 10 ) ) );
 						},
 						-1000
 					);
