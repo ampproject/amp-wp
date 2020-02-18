@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "108b4546f51212f3e7fec70453489616",
+    "content-hash": "73bfaf035d1afe37ea35baef33546570",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -127,6 +127,12 @@
                 "phpunit/phpunit": "~4.8"
             },
             "type": "library",
+            "extra": {
+                "patches_applied": {
+                    "Fix parsing CSS selectors which contain commas <https://github.com/sabberworm/PHP-CSS-Parser/pull/138>": "https://github.com/sabberworm/PHP-CSS-Parser/commit/fa139f65c5b098ae652c970b25e6eb03fc495eb4.diff",
+                    "Validate name-start code points for identifier <https://github.com/sabberworm/PHP-CSS-Parser/pull/185>": "patches/php-css-parser-pull-185.patch"
+                }
+            },
             "autoload": {
                 "psr-0": {
                     "Sabberworm\\CSS": "lib/"
@@ -569,6 +575,17 @@
         {
             "name": "roave/security-advisories",
             "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Roave/SecurityAdvisories.git",
+                "reference": "0365bf26eddd4a8be9980d7dabf05ceb2aba2f02"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/0365bf26eddd4a8be9980d7dabf05ceb2aba2f02",
+                "reference": "0365bf26eddd4a8be9980d7dabf05ceb2aba2f02",
+                "shasum": ""
+            },
             "conflict": {
                 "3f/pygmentize": "<1.2",
                 "adodb/adodb-php": "<5.20.12",
@@ -1061,22 +1078,21 @@
         },
         {
             "name": "wp-cli/wp-cli",
-            "version": "v2.4.0",
+            "version": "v2.4.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wp-cli/wp-cli.git",
-                "reference": "74c949c74708e3a88ad0add70f3236c8675dfd85"
+                "reference": "ceb18598e79befa9b2a37a51efbb34910628988b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wp-cli/wp-cli/zipball/74c949c74708e3a88ad0add70f3236c8675dfd85",
-                "reference": "74c949c74708e3a88ad0add70f3236c8675dfd85",
+                "url": "https://api.github.com/repos/wp-cli/wp-cli/zipball/ceb18598e79befa9b2a37a51efbb34910628988b",
+                "reference": "ceb18598e79befa9b2a37a51efbb34910628988b",
                 "shasum": ""
             },
             "require": {
-                "cweagans/composer-patches": "^1.6",
                 "ext-curl": "*",
-                "mustache/mustache": "~2.4",
+                "mustache/mustache": "~2.13",
                 "php": "^5.4 || ^7.0",
                 "rmccue/requests": "~1.6",
                 "symfony/finder": ">2.7",
@@ -1103,11 +1119,6 @@
             "extra": {
                 "branch-alias": {
                     "dev-master": "2.4.x-dev"
-                },
-                "patches": {
-                    "mustache/mustache": {
-                        "Avoid notices on PHP 7.4+": "https://patch-diff.githubusercontent.com/raw/bobthecow/mustache.php/pull/349.patch"
-                    }
                 }
             },
             "autoload": {
@@ -1125,7 +1136,7 @@
                 "cli",
                 "wordpress"
             ],
-            "time": "2019-11-12T15:26:05+00:00"
+            "time": "2020-02-18T08:15:37+00:00"
         },
         {
             "name": "wp-coding-standards/wpcs",
