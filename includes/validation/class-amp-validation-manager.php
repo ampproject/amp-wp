@@ -1462,12 +1462,12 @@ class AMP_Validation_Manager {
 				);
 
 				if ( 1 === $passed_by_ref ) {
-					$callback['function'] = function( &$first, ...$other_args ) use ( &$callback, $wrapped_callback, $original_function ) {
+					$callback['function'] = static function( &$first, ...$other_args ) use ( &$callback, $wrapped_callback, $original_function ) {
 						$callback['function'] = $original_function; // Restore original.
 						return $wrapped_callback->invoke_with_first_ref_arg( $first, ...$other_args );
 					};
 				} else {
-					$callback['function'] = function( ...$args ) use ( &$callback, $wrapped_callback, $original_function ) {
+					$callback['function'] = static function( ...$args ) use ( &$callback, $wrapped_callback, $original_function ) {
 						$callback['function'] = $original_function; // Restore original.
 						return $wrapped_callback( ...$args );
 					};
