@@ -293,9 +293,28 @@ class AMP_Validation_Callback_Wrapper implements ArrayAccess {
 				if ( empty( $dependency->extra[ $key ] ) ) {
 					continue;
 				}
+
+				if ( empty( $before_extras[ $handle ][ $key ] ) ) {
+					$before = [];
+				} elseif ( 'data' === $key ) {
+					// Undo concatenation done by \WP_Scripts::localize().
+					$before = explode( "\n", $before_extras[ $handle ][ $key ] );
+				} else {
+					$before = $before_extras[ $handle ][ $key ];
+				}
+
+				if ( empty( $dependency->extra[ $key ] ) ) {
+					$after = [];
+				} elseif ( 'data' === $key ) {
+					// Undo concatenation done by \WP_Scripts::localize().
+					$after = explode( "\n", $dependency->extra[ $key ] );
+				} else {
+					$after = $dependency->extra[ $key ];
+				}
+
 				$additions = array_diff(
-					array_filter( isset( $dependency->extra[ $key ] ) ? (array) $dependency->extra[ $key ] : [] ),
-					array_filter( isset( $before_extras[ $handle ][ $key ] ) ? (array) $before_extras[ $handle ][ $key ] : [] )
+					array_filter( $after ),
+					array_filter( $before )
 				);
 				foreach ( $additions as $addition ) {
 					AMP_Validation_Manager::$extra_script_sources[ $addition ][] = array_merge(
