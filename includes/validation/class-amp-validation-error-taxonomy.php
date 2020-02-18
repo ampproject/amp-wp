@@ -2964,10 +2964,11 @@ class AMP_Validation_Error_Taxonomy {
 			case AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG:
 				if ( self::is_validation_error_for_js_script_element( $validation_error ) ) {
 					if ( isset( $validation_error['node_attributes']['src'] ) ) {
-						$title = esc_html__( 'Invalid script', 'amp' ) . sprintf(
-							': <code>%s</code>',
-							esc_html( basename( wp_parse_url( $validation_error['node_attributes']['src'], PHP_URL_PATH ) ) )
-						);
+						$title    = esc_html__( 'Invalid script', 'amp' );
+						$basename = basename( wp_parse_url( $validation_error['node_attributes']['src'], PHP_URL_PATH ) );
+						if ( $basename ) {
+							$title .= sprintf( ': <code>%s</code>', esc_html( $basename ) );
+						}
 					} else {
 						$title = esc_html__( 'Invalid inline script', 'amp' );
 					}
