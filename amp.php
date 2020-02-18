@@ -28,7 +28,7 @@ global $_amp_load_errors;
 
 $_amp_load_errors = new WP_Error();
 
-if ( version_compare( phpversion(), '5.4', '<' ) ) {
+if ( version_compare( phpversion(), '5.6', '<' ) ) {
 	$_amp_load_errors->add(
 		'insufficient_php_version',
 		sprintf(
@@ -306,6 +306,9 @@ function amp_deactivate() {
 
 	flush_rewrite_rules( false );
 }
+
+// The plugins_loaded action is the earliest we can run this since that is when pluggable.php has been required and wp_hash() is available.
+add_action( 'plugins_loaded', [ 'AMP_Validation_Manager', 'init_validate_request' ], ~PHP_INT_MAX );
 
 /*
  * Register AMP scripts regardless of whether AMP is enabled or it is the AMP endpoint

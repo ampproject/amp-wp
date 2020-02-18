@@ -2185,25 +2185,7 @@ class AMP_Validation_Error_Taxonomy {
 						}
 						?>
 					<?php elseif ( 'text' === $key ) : ?>
-						<details>
-							<summary>
-								<?php
-								echo esc_html(
-									sprintf(
-										/* translators: %s is the byte count */
-										_n(
-											'%s byte',
-											'%s bytes',
-											strlen( $value ),
-											'amp'
-										),
-										number_format_i18n( strlen( $value ) )
-									)
-								);
-								?>
-							</summary>
-							<pre><?php echo esc_html( $value ); ?></pre>
-						</details>
+						<?php self::render_code_details( $value ); ?>
 					<?php elseif ( 'sources' === $key ) : ?>
 						<?php self::render_sources( $value ); ?>
 					<?php elseif ( 'attributes' === $key ) : ?>
@@ -2550,12 +2532,23 @@ class AMP_Validation_Error_Taxonomy {
 											break;
 										case 'handle':
 											if ( 'script' === $dependency_type ) {
-												esc_html_e( 'Script Handle', 'amp' );
+												esc_html_e( 'Enqueued Script', 'amp' );
 											} elseif ( 'style' === $dependency_type ) {
-												esc_html_e( 'Style Handle', 'amp' );
-											} else {
-												esc_html_e( 'Handle', 'amp' );
+												esc_html_e( 'Enqueued Style', 'amp' );
 											}
+											break;
+										case 'dependency_handle':
+											if ( 'script' === $dependency_type ) {
+												esc_html_e( 'Dependent Script', 'amp' );
+											} elseif ( 'style' === $dependency_type ) {
+												esc_html_e( 'Dependent Style', 'amp' );
+											}
+											break;
+										case 'extra_key':
+											esc_html_e( 'Inline Type', 'amp' );
+											break;
+										case 'text':
+											esc_html_e( 'Inline Text', 'amp' );
 											break;
 										case 'block_content_index':
 											esc_html_e( 'Block Index', 'amp' );
@@ -2619,6 +2612,16 @@ class AMP_Validation_Error_Taxonomy {
 										?>
 									<?php elseif ( 'name' === $key && isset( $source['type'] ) ) : ?>
 										<?php self::render_source_name( $value, $source['type'] ); ?>
+									<?php elseif ( 'extra_key' === $key ) : ?>
+										<?php if ( 'style' === $dependency_type ) : ?>
+											<code>wp_add_inline_style( <?php echo esc_html( wp_json_encode( $source['handle'] ) ); ?>, &hellip; )</code>
+										<?php elseif ( 'data' === $value ) : ?>
+											<code>wp_localize_script( <?php echo esc_html( wp_json_encode( $source['handle'] ) ); ?>, &hellip; )</code>
+										<?php elseif ( 'before' === $value ) : ?>
+											<code>wp_add_inline_script( <?php echo esc_html( wp_json_encode( $source['handle'] ) ); ?>, &hellip;, 'before' )</code>
+										<?php elseif ( 'after' === $value ) : ?>
+											<code>wp_add_inline_script( <?php echo esc_html( wp_json_encode( $source['handle'] ) ); ?>, &hellip;, 'after' )</code>
+										<?php endif; ?>
 									<?php elseif ( 'hook' === $key ) : ?>
 										<code><?php echo esc_html( (string) $value ); ?></code>
 										<?php
@@ -2650,7 +2653,7 @@ class AMP_Validation_Error_Taxonomy {
 										<?php endif; ?>
 									<?php elseif ( 'function' === $key ) : ?>
 										<code><?php echo esc_html( '{closure}' === $value ? $value : $value . '()' ); ?></code>
-									<?php elseif ( 'shortcode' === $key || 'handle' === $key ) : ?>
+									<?php elseif ( 'shortcode' === $key || 'handle' === $key || 'dependency_handle' === $key ) : ?>
 										<code><?php echo esc_html( $value ); ?></code>
 									<?php elseif ( 'block_name' === $key ) : ?>
 										<?php
@@ -2671,6 +2674,8 @@ class AMP_Validation_Error_Taxonomy {
 											printf( '<code>%s</code>', esc_html( $value ) );
 										}
 										?>
+									<?php elseif ( 'text' === $key ) : ?>
+										<?php self::render_code_details( $value ); ?>
 									<?php elseif ( is_scalar( $value ) ) : ?>
 										<?php echo esc_html( (string) $value ); ?>
 									<?php else : ?>
@@ -2683,6 +2688,36 @@ class AMP_Validation_Error_Taxonomy {
 				<?php endforeach; ?>
 				</tbody>
 			</table>
+		</details>
+		<?php
+	}
+
+	/**
+	 * Render code details.
+	 *
+	 * @param string $text Text.
+	 */
+	private static function render_code_details( $text ) {
+		$length = strlen( $text );
+		?>
+		<details>
+			<summary>
+				<?php
+				echo esc_html(
+					sprintf(
+						/* translators: %s is the byte count */
+						_n(
+							'%s byte',
+							'%s bytes',
+							$length,
+							'amp'
+						),
+						number_format_i18n( $length )
+					)
+				);
+				?>
+			</summary>
+			<pre><?php echo esc_html( $text ); ?></pre>
 		</details>
 		<?php
 	}
@@ -2928,13 +2963,14 @@ class AMP_Validation_Error_Taxonomy {
 		switch ( $validation_error['code'] ) {
 			case AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG:
 				if ( self::is_validation_error_for_js_script_element( $validation_error ) ) {
-					$title = esc_html__( 'Invalid script', 'amp' );
-
 					if ( isset( $validation_error['node_attributes']['src'] ) ) {
-						$title .= sprintf(
-							': <code>%s</code>',
-							esc_html( basename( wp_parse_url( $validation_error['node_attributes']['src'], PHP_URL_PATH ) ) )
-						);
+						$title    = esc_html__( 'Invalid script', 'amp' );
+						$basename = basename( wp_parse_url( $validation_error['node_attributes']['src'], PHP_URL_PATH ) );
+						if ( $basename ) {
+							$title .= sprintf( ': <code>%s</code>', esc_html( $basename ) );
+						}
+					} else {
+						$title = esc_html__( 'Invalid inline script', 'amp' );
 					}
 				} else {
 					$title  = esc_html__( 'Invalid element', 'amp' );

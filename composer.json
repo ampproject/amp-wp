@@ -5,7 +5,7 @@
   "homepage": "https://github.com/ampproject/amp-wp",
   "license": "GPL-2.0-or-later",
   "require": {
-    "php": "^5.4 || ^7.0",
+    "php": "^5.6 || ^7.0",
     "ext-curl": "*",
     "ext-date": "*",
     "ext-dom": "*",
@@ -34,7 +34,7 @@
   },
   "config": {
     "platform": {
-      "php": "5.4"
+      "php": "5.6"
     },
     "sort-packages": true
   },

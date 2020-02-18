@@ -2133,10 +2133,10 @@ class AMP_Validated_URL_Post_Type {
 			<tr>
 				<th class="column-stylesheet_expand"></th>
 				<th class="column-stylesheet_order"><?php esc_html_e( 'Order', 'amp' ); ?></th>
-				<th class="column-original_size"><?php esc_html_e( 'Original Size', 'amp' ); ?></th>
+				<th class="column-original_size"><?php esc_html_e( 'Original', 'amp' ); ?></th>
 				<th class="column-minified"><?php esc_html_e( 'Minified', 'amp' ); ?></th>
-				<th class="column-final_size"><?php esc_html_e( 'Final Size', 'amp' ); ?></th>
-				<th class="column-percentage"><?php esc_html_e( 'Percentage', 'amp' ); ?></th>
+				<th class="column-final_size"><?php esc_html_e( 'Final', 'amp' ); ?></th>
+				<th class="column-percentage"><?php esc_html_e( 'Percent', 'amp' ); ?></th>
 				<th class="column-priority"><?php esc_html_e( 'Priority', 'amp' ); ?></th>
 				<th class="column-stylesheet_status"><?php esc_html_e( 'Status', 'amp' ); ?></th>
 				<th class="column-markup"><?php esc_html_e( 'Markup', 'amp' ); ?></th>
@@ -2166,7 +2166,13 @@ class AMP_Validated_URL_Post_Type {
 						unset( $attributes[ AMP_Style_Sanitizer::ORIGINAL_STYLE_ATTRIBUTE_NAME ] );
 					}
 					if ( ! empty( $attributes ) ) {
-						$origin_html .= ' ' . AMP_HTML_Utils::build_attributes_string( $attributes );
+						foreach ( $attributes as $name => $value ) {
+							if ( '' === $value ) {
+								$origin_html .= ' ' . sprintf( '%s', esc_html( $name ) );
+							} else {
+								$origin_html .= ' ' . sprintf( '%s="%s"', esc_html( $name ), esc_attr( $value ) );
+							}
+						}
 					}
 				}
 				$origin_html .= '>';
@@ -2269,6 +2275,19 @@ class AMP_Validated_URL_Post_Type {
 						<dl class="detailed">
 							<dt><?php esc_html_e( 'Original Markup', 'amp' ); ?></dt>
 							<dd><code class="stylesheet-origin-markup"><?php echo esc_html( $origin_html ); ?></code></dd>
+
+							<?php if ( isset( $stylesheet['element']['attributes']['href'] ) ) : ?>
+								<dt><?php esc_html_e( 'Stylesheet URL', 'amp' ); ?></dt>
+								<dd>
+									<?php
+									printf(
+										'<a href="%s" target="_blank">%s</a>',
+										esc_url( $stylesheet['element']['attributes']['href'] ),
+										esc_html( $stylesheet['element']['attributes']['href'] )
+									);
+									?>
+								</dd>
+							<?php endif; ?>
 
 							<dt><?php esc_html_e( 'Sources', 'amp' ); ?></dt>
 							<dd>
