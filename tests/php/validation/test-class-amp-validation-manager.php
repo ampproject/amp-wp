@@ -8,6 +8,7 @@
 // phpcs:disable Generic.Formatting.MultipleStatementAlignment.NotSameWarning
 
 use Amp\AmpWP\Dom\Document;
+use Amp\AmpWP\Tests\PrivateAccess;
 
 /**
  * Tests for AMP_Validation_Manager class.
@@ -18,6 +19,7 @@ use Amp\AmpWP\Dom\Document;
 class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 
 	use AMP_Test_HandleValidation;
+	use PrivateAccess;
 
 	/**
 	 * The name of the tested class.
@@ -888,6 +890,360 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$parsed_comment = AMP_Validation_Manager::parse_source_comment( $comments[2] );
 		$this->assertEquals( $source2, $parsed_comment['source'] );
 		$this->assertTrue( $parsed_comment['closing'] );
+	}
+
+	/**
+	 * Get data for testing locate_sources.
+	 *
+	 * @return array
+	 */
+	public function get_locate_sources_data() {
+		return [
+			'directly_enqueued_link'                     => [
+				static function () {
+					add_action(
+						'wp_enqueue_scripts',
+						static function () {
+							wp_enqueue_style(
+								'foo',
+								'https://example.com/foo.css',
+								[],
+								'0.1'
+							);
+						}
+					);
+				},
+				'//link[ contains( @href, "foo.css" ) ]',
+				function ( $sources ) {
+					$this->assertArraySubset(
+						[
+							'type'            => 'plugin',
+							'name'            => 'amp',
+							'function'        => '{closure}',
+							'hook'            => 'wp_enqueue_scripts',
+							'priority'        => 10,
+							'dependency_type' => 'style',
+							'handle'          => 'foo',
+						],
+						$sources[0]
+					);
+				},
+			],
+
+			'stylesheet_added_as_dependency'             => [
+				static function () {
+					add_action(
+						'wp_enqueue_scripts',
+						static function () {
+							wp_enqueue_style(
+								'bar',
+								'https://example.com/bar.css',
+								[ 'wp-codemirror' ],
+								'0.1'
+							);
+						}
+					);
+				},
+				'//link[ contains( @href, "codemirror" ) ]',
+				function ( $sources ) {
+					$this->assertArraySubset(
+						[
+							'type'              => 'plugin',
+							'name'              => 'amp',
+							'function'          => '{closure}',
+							'hook'              => 'wp_enqueue_scripts',
+							'priority'          => 10,
+							'dependency_type'   => 'style',
+							'handle'            => 'bar',
+							'dependency_handle' => 'wp-codemirror',
+						],
+						$sources[0]
+					);
+				},
+			],
+
+			'inline_style_for_directly_enqueued_stylesheet' => [
+				static function () {
+					add_action(
+						'wp_enqueue_scripts',
+						static function () {
+							wp_enqueue_style(
+								'baz',
+								'https://example.com/baz.css',
+								[],
+								'0.1'
+							);
+							wp_add_inline_style( 'baz', '/*Hello Baz!*/' );
+						}
+					);
+				},
+				'//style[ contains( text(), "Hello Baz" ) ]',
+				function ( $sources ) {
+					$this->assertArraySubset(
+						[
+							'type'            => 'plugin',
+							'name'            => 'amp',
+							'function'        => '{closure}',
+							'hook'            => 'wp_enqueue_scripts',
+							'priority'        => 10,
+							'dependency_type' => 'style',
+							'extra_key'       => 'after',
+							'text'            => '/*Hello Baz!*/',
+							'handle'          => 'baz',
+						],
+						$sources[1]
+					);
+				},
+			],
+
+			'external_script_directly_enqueued'          => [
+				static function () {
+					add_action(
+						'wp_enqueue_scripts',
+						static function () {
+							wp_enqueue_script(
+								'foo',
+								'https://example.com/foo.js',
+								[],
+								'0.1',
+								true
+							);
+						}
+					);
+				},
+				'//script[ contains( @src, "foo.js" ) ]',
+				function ( $sources ) {
+					$this->assertArraySubset(
+						[
+							'type'            => 'plugin',
+							'name'            => 'amp',
+							'function'        => '{closure}',
+							'hook'            => 'wp_enqueue_scripts',
+							'priority'        => 10,
+							'dependency_type' => 'script',
+							'handle'          => 'foo',
+						],
+						$sources[0]
+					);
+				},
+			],
+
+			'external_script_indirectly_enqueued'        => [
+				static function () {
+					add_action(
+						'wp_enqueue_scripts',
+						static function () {
+							wp_enqueue_script(
+								'bar',
+								'https://example.com/bar.js',
+								[ 'wp-codemirror' ],
+								'0.1',
+								true
+							);
+						}
+					);
+				},
+				'//script[ contains( @src, "codemirror" ) ]',
+				function ( $sources ) {
+					$this->assertArraySubset(
+						[
+							'type'              => 'plugin',
+							'name'              => 'amp',
+							'function'          => '{closure}',
+							'hook'              => 'wp_enqueue_scripts',
+							'priority'          => 10,
+							'dependency_type'   => 'script',
+							'handle'            => 'bar',
+							'dependency_handle' => 'wp-codemirror',
+						],
+						$sources[0]
+					);
+				},
+			],
+
+			'inline_script_added_via_wp_localize_script' => [
+				static function () {
+					add_action(
+						'wp_enqueue_scripts',
+						static function () {
+							wp_enqueue_script(
+								'baz',
+								'https://example.com/baz.js',
+								[],
+								'0.1',
+								true
+							);
+							wp_localize_script( 'baz', 'Baz', [ 'greeting' => 'Hello Baz!' ] );
+						}
+					);
+				},
+				'//script[ contains( text(), "Hello Baz!" ) ]',
+				function ( $sources ) {
+					$this->assertArraySubset(
+						[
+							'type'            => 'plugin',
+							'name'            => 'amp',
+							'function'        => '{closure}',
+							'hook'            => 'wp_enqueue_scripts',
+							'priority'        => 10,
+							'dependency_type' => 'script',
+							'extra_key'       => 'data',
+							'text'            => 'var Baz = {"greeting":"Hello Baz!"};',
+							'handle'          => 'baz',
+						],
+						$sources[2]
+					);
+				},
+			],
+
+			'inline_script_added_via_add_inline_script_before' => [
+				static function () {
+					add_action(
+						'wp_enqueue_scripts',
+						static function () {
+							wp_enqueue_script(
+								'baz',
+								'https://example.com/baz.js',
+								[],
+								'0.1',
+								true
+							);
+							wp_add_inline_script( 'baz', '/*Hello before Baz!*/', 'before' );
+						}
+					);
+				},
+				'//script[ contains( text(), "Hello before Baz!" ) ]',
+				function ( $sources ) {
+					$this->assertArraySubset(
+						[
+							'type'            => 'plugin',
+							'name'            => 'amp',
+							'function'        => '{closure}',
+							'hook'            => 'wp_enqueue_scripts',
+							'priority'        => 10,
+							'dependency_type' => 'script',
+							'extra_key'       => 'before',
+							'text'            => '/*Hello before Baz!*/',
+							'handle'          => 'baz',
+						],
+						$sources[2]
+					);
+				},
+			],
+
+			'inline_script_added_via_add_inline_script_after' => [
+				static function () {
+					add_action(
+						'wp_enqueue_scripts',
+						static function () {
+							wp_enqueue_script(
+								'baz',
+								'https://example.com/baz.js',
+								[],
+								'0.1',
+								true
+							);
+							wp_add_inline_script( 'baz', '/*Hello after Baz!*/', 'after' );
+						}
+					);
+				},
+				'//script[ contains( text(), "Hello after Baz!" ) ]',
+				function ( $sources ) {
+					$this->assertArraySubset(
+						[
+							'type'            => 'plugin',
+							'name'            => 'amp',
+							'function'        => '{closure}',
+							'hook'            => 'wp_enqueue_scripts',
+							'priority'        => 10,
+							'dependency_type' => 'script',
+							'extra_key'       => 'after',
+							'text'            => '/*Hello after Baz!*/',
+							'handle'          => 'baz',
+						],
+						$sources[2]
+					);
+				},
+			],
+
+			'style_enqueued_at_wp_default_styles'        => [
+				static function () {
+					add_action(
+						'wp_default_styles',
+						static function ( WP_Styles $styles ) {
+							$styles->add(
+								'foo',
+								'https://example.com/foo.css',
+								[],
+								'0.1'
+							);
+						}
+					);
+					add_action(
+						'wp_enqueue_scripts',
+						static function () {
+							wp_enqueue_style( 'foo' );
+						}
+					);
+				},
+				'//link[ contains( @href, "foo.css" ) ]',
+				function ( $sources ) {
+					$this->assertArraySubset(
+						[
+							'type'            => 'plugin',
+							'name'            => 'amp',
+							'function'        => '{closure}',
+							'hook'            => 'wp_default_styles',
+							'priority'        => 10,
+							'dependency_type' => 'style',
+							'handle'          => 'foo',
+						],
+						$sources[0]
+					);
+				},
+			],
+		];
+	}
+
+	/**
+	 * Test locate sources.
+	 *
+	 * @dataProvider get_locate_sources_data
+	 * @covers AMP_Validation_Manager::locate_sources()
+	 * @covers AMP_Validation_Callback_Wrapper
+	 *
+	 * @param callable $callback Callback set up (add actions).
+	 * @param string   $xpath    Expression to find the target element to get sources for.
+	 * @param callable $assert   Function to assert the expected sources.
+	 */
+	public function test_locate_sources_e2e( $callback, $xpath, $assert ) {
+		add_theme_support( 'amp' );
+		AMP_Validation_Manager::add_validation_error_sourcing();
+		$callback();
+		$this->set_private_property( 'AMP_Theme_Support', 'is_output_buffering', true );
+		$this->go_to( home_url() );
+
+		ob_start();
+		?>
+		<!DOCTYPE html>
+		<html>
+			<head>
+				<?php wp_head(); ?>
+			</head>
+			<body>
+				<?php wp_footer(); ?>
+			</body>
+		</html>
+		<?php
+		$html = ob_get_clean();
+
+		$dom = Document::from_html( $html );
+
+		$element = $dom->xpath->query( $xpath )->item( 0 );
+		$this->assertInstanceOf( 'DOMElement', $element );
+		$sources = AMP_Validation_Manager::locate_sources( $element );
+		$this->assertNotEmpty( $sources );
+		$assert( $sources );
 	}
 
 	/**
