@@ -216,6 +216,7 @@ class AMP_Theme_Support {
 	 * @since 1.0
 	 * @see AMP_Theme_Support::read_theme_support()
 	 * @see AMP_Theme_Support::get_support_mode()
+	 * @codeCoverageIgnore
 	 * @deprecated Use AMP_Theme_Support::get_support_mode_added_via_option().
 	 *
 	 * @return bool Support added via option.
@@ -1233,6 +1234,7 @@ class AMP_Theme_Support {
 	/**
 	 * Add the comments template placeholder marker
 	 *
+	 * @codeCoverageIgnore
 	 * @deprecated 1.1.0 This functionality was moved to AMP_Comments_Sanitizer
 	 *
 	 * @param array $args the args for the comments list.
@@ -2053,6 +2055,11 @@ class AMP_Theme_Support {
 			return $response;
 		}
 
+		// Enforce UTF-8 encoding as it is a requirement for AMP.
+		if ( ! headers_sent() ) {
+			header( 'Content-Type: text/html; charset=utf-8' );
+		}
+
 		/**
 		 * Filters whether response (post-processor) caching is enabled.
 		 *
@@ -2352,12 +2359,6 @@ class AMP_Theme_Support {
 				wp_safe_redirect( $non_amp_url, 302 );
 				return $response;
 			}
-		}
-
-		// @todo If 'utf-8' is not the blog charset, then we'll need to do some character encoding conversation or "entityification".
-		if ( 'utf-8' !== strtolower( get_bloginfo( 'charset' ) ) ) {
-			/* translators: %s: the charset of the current site. */
-			trigger_error( esc_html( sprintf( __( 'The database has the %s encoding when it needs to be utf-8 to work with AMP.', 'amp' ), get_bloginfo( 'charset' ) ) ), E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 		}
 
 		AMP_Validation_Manager::finalize_validation( $dom );

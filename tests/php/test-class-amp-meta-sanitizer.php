@@ -41,6 +41,12 @@ class Test_AMP_Meta_Sanitizer extends WP_UnitTestCase {
 				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"></head><body></body></html>',
 			],
 
+			// Trim whitespace between the properties and their values.
+			[
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width = device-width, minimum-scale = 1, initial-scale = 1"></head><body></body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1"></head><body></body></html>',
+			],
+
 			// Move charset and viewport tags from body to head.
 			[
 				'<!DOCTYPE html><html><head></head><body><meta charset="utf-8"><meta name="viewport" content="width=device-width"></body></html>',
@@ -51,6 +57,12 @@ class Test_AMP_Meta_Sanitizer extends WP_UnitTestCase {
 			[
 				'<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width"></head><body></body></html>',
 				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
+			],
+
+			// Does not override width property.
+			[
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=600"></head><body></body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=600"></head><body></body></html>',
 			],
 
 			// Add default viewport tag if none is present.
@@ -85,6 +97,9 @@ class Test_AMP_Meta_Sanitizer extends WP_UnitTestCase {
 	public function test_sanitize( $source_content, $expected_content ) {
 		$dom       = Document::from_html( $source_content );
 		$sanitizer = new AMP_Meta_Sanitizer( $dom );
+		$sanitizer->sanitize();
+
+		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 		$sanitizer->sanitize();
 
 		$this->assertEqualMarkup( $expected_content, $dom->saveHTML() );

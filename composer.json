@@ -5,7 +5,7 @@
   "homepage": "https://github.com/ampproject/amp-wp",
   "license": "GPL-2.0-or-later",
   "require": {
-    "php": "^5.4 || ^7.0",
+    "php": "^5.6 || ^7.0",
     "ext-curl": "*",
     "ext-date": "*",
     "ext-dom": "*",
@@ -21,8 +21,8 @@
     "mikey179/vfsstream": "1.6.8",
     "phpcompatibility/phpcompatibility-wp": "2.1.0",
     "roave/security-advisories": "dev-master",
-    "sirbrillig/phpcs-variable-analysis": "2.6.2",
-    "wp-cli/wp-cli": "2.4.0",
+    "sirbrillig/phpcs-variable-analysis": "2.8.1",
+    "wp-cli/wp-cli": "2.4.1",
     "wp-coding-standards/wpcs": "2.2.1",
     "xwp/wp-dev-lib": "1.5.0"
   },
@@ -34,7 +34,7 @@
   },
   "config": {
     "platform": {
-      "php": "5.4"
+      "php": "5.6"
     },
     "sort-packages": true
   },

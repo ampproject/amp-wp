@@ -8,6 +8,7 @@
 // phpcs:disable Generic.Formatting.MultipleStatementAlignment.NotSameWarning
 
 use Amp\AmpWP\Dom\Document;
+use Amp\AmpWP\Tests\PrivateAccess;
 
 /**
  * Tests for AMP_Validation_Manager class.
@@ -18,6 +19,7 @@ use Amp\AmpWP\Dom\Document;
 class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 
 	use AMP_Test_HandleValidation;
+	use PrivateAccess;
 
 	/**
 	 * The name of the tested class.
@@ -148,13 +150,46 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertEquals( 101, has_action( 'admin_bar_menu', [ self::TESTED_CLASS, 'add_admin_bar_menu_items' ] ) );
 
 		$this->assertFalse( has_action( 'wp', [ self::TESTED_CLASS, 'wrap_widget_callbacks' ] ) );
+	}
 
-		// Make sure should_locate_sources arg is recognized.
-		remove_all_filters( 'amp_validation_error_sanitized' );
-		$this->accept_sanitization_by_default( false );
-		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = AMP_Validation_Manager::get_amp_validate_nonce();
-		AMP_Validation_Manager::init();
-		$this->assertEquals( 10, has_action( 'wp', [ self::TESTED_CLASS, 'wrap_widget_callbacks' ] ) );
+	/**
+	 * Test init_validate_request without error.
+	 *
+	 * @covers AMP_Validation_Manager::init_validate_request()
+	 */
+	public function test_init_validate_request_without_error() {
+		$this->assertFalse( AMP_Validation_Manager::should_validate_response() );
+		AMP_Validation_Manager::init_validate_request();
+		$this->assertFalse( AMP_Validation_Manager::$is_validate_request );
+
+		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = wp_slash( AMP_Validation_Manager::get_amp_validate_nonce() ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$this->assertTrue( AMP_Validation_Manager::should_validate_response() );
+		AMP_Validation_Manager::init_validate_request();
+		$this->assertTrue( AMP_Validation_Manager::$is_validate_request );
+	}
+
+	/**
+	 * Test init_validate_request without error.
+	 *
+	 * @covers AMP_Validation_Manager::init_validate_request()
+	 */
+	public function test_init_validate_request_with_error() {
+		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = 'bad';
+		$this->assertInstanceOf( 'WP_Error', AMP_Validation_Manager::should_validate_response() );
+		add_filter( 'wp_doing_ajax', '__return_true' );
+		ob_start();
+		$died = false;
+		add_filter(
+			'wp_die_ajax_handler',
+			function() use ( &$died ) {
+				return function() use ( &$died ) {
+					$died = true;
+				};
+			}
+		);
+		AMP_Validation_Manager::init_validate_request();
+		ob_end_clean();
+		$this->assertTrue( $died );
 	}
 
 	/**
@@ -421,9 +456,13 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 */
 	public function test_add_validation_error_sourcing() {
 		AMP_Validation_Manager::add_validation_error_sourcing();
+		$this->assertEquals( ~PHP_INT_MAX, has_filter( 'setup_theme', [ self::TESTED_CLASS, 'set_theme_variables' ] ) );
+		$this->assertEquals( 10, has_action( 'wp', [ self::TESTED_CLASS, 'wrap_widget_callbacks' ] ) );
+		$this->assertEquals( 10, has_action( 'all', [ self::TESTED_CLASS, 'wrap_hook_callbacks' ] ) );
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'the_content', [ self::TESTED_CLASS, 'decorate_filter_source' ] ) );
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'the_excerpt', [ self::TESTED_CLASS, 'decorate_filter_source' ] ) );
 		$this->assertEquals( PHP_INT_MAX, has_action( 'do_shortcode_tag', [ self::TESTED_CLASS, 'decorate_shortcode_source' ] ) );
+		$this->assertEquals( 8, has_action( 'the_content', [ self::TESTED_CLASS, 'add_block_source_comments' ] ) );
 	}
 
 	/**
@@ -854,6 +893,360 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Get data for testing locate_sources.
+	 *
+	 * @return array
+	 */
+	public function get_locate_sources_data() {
+		return [
+			'directly_enqueued_link'                     => [
+				static function () {
+					add_action(
+						'wp_enqueue_scripts',
+						static function () {
+							wp_enqueue_style(
+								'foo',
+								'https://example.com/foo.css',
+								[],
+								'0.1'
+							);
+						}
+					);
+				},
+				'//link[ contains( @href, "foo.css" ) ]',
+				function ( $sources ) {
+					$this->assertArraySubset(
+						[
+							'type'            => 'plugin',
+							'name'            => 'amp',
+							'function'        => '{closure}',
+							'hook'            => 'wp_enqueue_scripts',
+							'priority'        => 10,
+							'dependency_type' => 'style',
+							'handle'          => 'foo',
+						],
+						$sources[0]
+					);
+				},
+			],
+
+			'stylesheet_added_as_dependency'             => [
+				static function () {
+					add_action(
+						'wp_enqueue_scripts',
+						static function () {
+							wp_enqueue_style(
+								'bar',
+								'https://example.com/bar.css',
+								[ 'wp-codemirror' ],
+								'0.1'
+							);
+						}
+					);
+				},
+				'//link[ contains( @href, "codemirror" ) ]',
+				function ( $sources ) {
+					$this->assertArraySubset(
+						[
+							'type'              => 'plugin',
+							'name'              => 'amp',
+							'function'          => '{closure}',
+							'hook'              => 'wp_enqueue_scripts',
+							'priority'          => 10,
+							'dependency_type'   => 'style',
+							'handle'            => 'bar',
+							'dependency_handle' => 'wp-codemirror',
+						],
+						$sources[0]
+					);
+				},
+			],
+
+			'inline_style_for_directly_enqueued_stylesheet' => [
+				static function () {
+					add_action(
+						'wp_enqueue_scripts',
+						static function () {
+							wp_enqueue_style(
+								'baz',
+								'https://example.com/baz.css',
+								[],
+								'0.1'
+							);
+							wp_add_inline_style( 'baz', '/*Hello Baz!*/' );
+						}
+					);
+				},
+				'//style[ contains( text(), "Hello Baz" ) ]',
+				function ( $sources ) {
+					$this->assertArraySubset(
+						[
+							'type'            => 'plugin',
+							'name'            => 'amp',
+							'function'        => '{closure}',
+							'hook'            => 'wp_enqueue_scripts',
+							'priority'        => 10,
+							'dependency_type' => 'style',
+							'extra_key'       => 'after',
+							'text'            => '/*Hello Baz!*/',
+							'handle'          => 'baz',
+						],
+						$sources[1]
+					);
+				},
+			],
+
+			'external_script_directly_enqueued'          => [
+				static function () {
+					add_action(
+						'wp_enqueue_scripts',
+						static function () {
+							wp_enqueue_script(
+								'foo',
+								'https://example.com/foo.js',
+								[],
+								'0.1',
+								true
+							);
+						}
+					);
+				},
+				'//script[ contains( @src, "foo.js" ) ]',
+				function ( $sources ) {
+					$this->assertArraySubset(
+						[
+							'type'            => 'plugin',
+							'name'            => 'amp',
+							'function'        => '{closure}',
+							'hook'            => 'wp_enqueue_scripts',
+							'priority'        => 10,
+							'dependency_type' => 'script',
+							'handle'          => 'foo',
+						],
+						$sources[0]
+					);
+				},
+			],
+
+			'external_script_indirectly_enqueued'        => [
+				static function () {
+					add_action(
+						'wp_enqueue_scripts',
+						static function () {
+							wp_enqueue_script(
+								'bar',
+								'https://example.com/bar.js',
+								[ 'wp-codemirror' ],
+								'0.1',
+								true
+							);
+						}
+					);
+				},
+				'//script[ contains( @src, "codemirror" ) ]',
+				function ( $sources ) {
+					$this->assertArraySubset(
+						[
+							'type'              => 'plugin',
+							'name'              => 'amp',
+							'function'          => '{closure}',
+							'hook'              => 'wp_enqueue_scripts',
+							'priority'          => 10,
+							'dependency_type'   => 'script',
+							'handle'            => 'bar',
+							'dependency_handle' => 'wp-codemirror',
+						],
+						$sources[0]
+					);
+				},
+			],
+
+			'inline_script_added_via_wp_localize_script' => [
+				static function () {
+					add_action(
+						'wp_enqueue_scripts',
+						static function () {
+							wp_enqueue_script(
+								'baz',
+								'https://example.com/baz.js',
+								[],
+								'0.1',
+								true
+							);
+							wp_localize_script( 'baz', 'Baz', [ 'greeting' => 'Hello Baz!' ] );
+						}
+					);
+				},
+				'//script[ contains( text(), "Hello Baz!" ) ]',
+				function ( $sources ) {
+					$this->assertArraySubset(
+						[
+							'type'            => 'plugin',
+							'name'            => 'amp',
+							'function'        => '{closure}',
+							'hook'            => 'wp_enqueue_scripts',
+							'priority'        => 10,
+							'dependency_type' => 'script',
+							'extra_key'       => 'data',
+							'text'            => 'var Baz = {"greeting":"Hello Baz!"};',
+							'handle'          => 'baz',
+						],
+						$sources[2]
+					);
+				},
+			],
+
+			'inline_script_added_via_add_inline_script_before' => [
+				static function () {
+					add_action(
+						'wp_enqueue_scripts',
+						static function () {
+							wp_enqueue_script(
+								'baz',
+								'https://example.com/baz.js',
+								[],
+								'0.1',
+								true
+							);
+							wp_add_inline_script( 'baz', '/*Hello before Baz!*/', 'before' );
+						}
+					);
+				},
+				'//script[ contains( text(), "Hello before Baz!" ) ]',
+				function ( $sources ) {
+					$this->assertArraySubset(
+						[
+							'type'            => 'plugin',
+							'name'            => 'amp',
+							'function'        => '{closure}',
+							'hook'            => 'wp_enqueue_scripts',
+							'priority'        => 10,
+							'dependency_type' => 'script',
+							'extra_key'       => 'before',
+							'text'            => '/*Hello before Baz!*/',
+							'handle'          => 'baz',
+						],
+						$sources[2]
+					);
+				},
+			],
+
+			'inline_script_added_via_add_inline_script_after' => [
+				static function () {
+					add_action(
+						'wp_enqueue_scripts',
+						static function () {
+							wp_enqueue_script(
+								'baz',
+								'https://example.com/baz.js',
+								[],
+								'0.1',
+								true
+							);
+							wp_add_inline_script( 'baz', '/*Hello after Baz!*/', 'after' );
+						}
+					);
+				},
+				'//script[ contains( text(), "Hello after Baz!" ) ]',
+				function ( $sources ) {
+					$this->assertArraySubset(
+						[
+							'type'            => 'plugin',
+							'name'            => 'amp',
+							'function'        => '{closure}',
+							'hook'            => 'wp_enqueue_scripts',
+							'priority'        => 10,
+							'dependency_type' => 'script',
+							'extra_key'       => 'after',
+							'text'            => '/*Hello after Baz!*/',
+							'handle'          => 'baz',
+						],
+						$sources[2]
+					);
+				},
+			],
+
+			'style_enqueued_at_wp_default_styles'        => [
+				static function () {
+					add_action(
+						'wp_default_styles',
+						static function ( WP_Styles $styles ) {
+							$styles->add(
+								'foo',
+								'https://example.com/foo.css',
+								[],
+								'0.1'
+							);
+						}
+					);
+					add_action(
+						'wp_enqueue_scripts',
+						static function () {
+							wp_enqueue_style( 'foo' );
+						}
+					);
+				},
+				'//link[ contains( @href, "foo.css" ) ]',
+				function ( $sources ) {
+					$this->assertArraySubset(
+						[
+							'type'            => 'plugin',
+							'name'            => 'amp',
+							'function'        => '{closure}',
+							'hook'            => 'wp_default_styles',
+							'priority'        => 10,
+							'dependency_type' => 'style',
+							'handle'          => 'foo',
+						],
+						$sources[0]
+					);
+				},
+			],
+		];
+	}
+
+	/**
+	 * Test locate sources.
+	 *
+	 * @dataProvider get_locate_sources_data
+	 * @covers AMP_Validation_Manager::locate_sources()
+	 * @covers AMP_Validation_Callback_Wrapper
+	 *
+	 * @param callable $callback Callback set up (add actions).
+	 * @param string   $xpath    Expression to find the target element to get sources for.
+	 * @param callable $assert   Function to assert the expected sources.
+	 */
+	public function test_locate_sources_e2e( $callback, $xpath, $assert ) {
+		add_theme_support( 'amp' );
+		AMP_Validation_Manager::add_validation_error_sourcing();
+		$callback();
+		$this->set_private_property( 'AMP_Theme_Support', 'is_output_buffering', true );
+		$this->go_to( home_url() );
+
+		ob_start();
+		?>
+		<!DOCTYPE html>
+		<html>
+			<head>
+				<?php wp_head(); ?>
+			</head>
+			<body>
+				<?php wp_footer(); ?>
+			</body>
+		</html>
+		<?php
+		$html = ob_get_clean();
+
+		$dom = Document::from_html( $html );
+
+		$element = $dom->xpath->query( $xpath )->item( 0 );
+		$this->assertInstanceOf( 'DOMElement', $element );
+		$sources = AMP_Validation_Manager::locate_sources( $element );
+		$this->assertNotEmpty( $sources );
+		$assert( $sources );
+	}
+
+	/**
 	 * Get block data.
 	 *
 	 * @see Test_AMP_Validation_Utils::test_add_block_source_comments()
@@ -1178,11 +1571,13 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	public function test_has_parameters_passed_by_reference() {
 		$tested_method = new ReflectionMethod( 'AMP_Validation_Manager', 'has_parameters_passed_by_reference' );
 		$tested_method->setAccessible( true );
-		$reflection_by_reference = new ReflectionFunction( 'wp_default_styles' );
-		$reflection_by_value     = new ReflectionFunction( 'get_bloginfo' );
+		$reflection_by_value          = new ReflectionFunction( 'get_bloginfo' );
+		$reflection_by_ref_first_arg  = new ReflectionFunction( 'wp_default_styles' );
+		$reflection_by_ref_second_arg = new ReflectionFunction( 'wp_parse_str' );
 
-		$this->assertTrue( $tested_method->invoke( null, $reflection_by_reference ) );
-		$this->assertFalse( $tested_method->invoke( null, $reflection_by_value ) );
+		$this->assertEquals( 0, $tested_method->invoke( null, $reflection_by_value ) );
+		$this->assertEquals( 1, $tested_method->invoke( null, $reflection_by_ref_first_arg ) );
+		$this->assertEquals( 2, $tested_method->invoke( null, $reflection_by_ref_second_arg ) );
 	}
 
 	/**

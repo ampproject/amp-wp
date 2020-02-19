@@ -325,6 +325,7 @@ class AMP_Template_Customizer {
 	/**
 	 * Whether the Customizer is AMP. This is always true since the AMP Customizer has been merged with the main Customizer.
 	 *
+	 * @codeCoverageIgnore
 	 * @deprecated 0.6
 	 * @return bool
 	 */
