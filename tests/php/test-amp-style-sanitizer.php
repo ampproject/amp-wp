@@ -240,6 +240,13 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'.lg\:w-full{width:100%}',
 				],
 			],
+			'semicolon_outside_of_rule_in_media_query'      => [
+				'<style>@media (max-width: 450px) { .sidebar { padding: 0; }; } .sidebar { margin: 0 auto; }</style><div class="sidebar"></div>',
+				'<div class="sidebar"></div>',
+				[
+					'@media (max-width: 450px){.sidebar{padding:0}}.sidebar{margin:0 auto}',
+				],
+			],
 		];
 	}
 

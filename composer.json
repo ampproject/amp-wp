@@ -14,7 +14,7 @@
     "ext-spl": "*",
     "cweagans/composer-patches": "1.6.7",
     "fasterimage/fasterimage": "1.5.0",
-    "sabberworm/php-css-parser": "8.3.0"
+    "sabberworm/php-css-parser": "dev-master#134f4e6"
   },
   "require-dev": {
     "dealerdirect/phpcodesniffer-composer-installer": "0.6.2",
@@ -42,6 +42,7 @@
     "patches": {
       "sabberworm/php-css-parser": {
         "Fix parsing CSS selectors which contain commas <https://github.com/sabberworm/PHP-CSS-Parser/pull/138>": "https://github.com/sabberworm/PHP-CSS-Parser/commit/fa139f65c5b098ae652c970b25e6eb03fc495eb4.diff",
+        "Fix validation of selectors": "patches/php-css-parser-138-extended.patch",
         "Validate name-start code points for identifier <https://github.com/sabberworm/PHP-CSS-Parser/pull/185>": "patches/php-css-parser-pull-185.patch"
       }
     }
@@ -55,5 +56,12 @@
     "psr-4": {
       "Amp\\AmpWP\\Tests\\": "tests/php/src/"
     }
-  }
+  },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/sabberworm/PHP-CSS-Parser.git",
+      "no-api": true
+    }
+  ]
 }
