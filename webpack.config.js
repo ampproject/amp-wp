@@ -178,7 +178,6 @@ const wpPolyfills = {
 					case '@wordpress/dom-ready':
 					case '@wordpress/i18n':
 					case '@wordpress/polyfill':
-					case '@wordpress/server-side-render':
 					case '@wordpress/url':
 						return undefined;
 
@@ -191,7 +190,6 @@ const wpPolyfills = {
 					case '@wordpress/dom-ready':
 					case '@wordpress/i18n':
 					case '@wordpress/polyfill':
-					case '@wordpress/server-side-render':
 					case '@wordpress/url':
 						return undefined;
 
@@ -209,7 +207,6 @@ const wpPolyfills = {
 		'wp-i18n': './assets/src/polyfills/wp-i18n.js',
 		'wp-dom-ready': './assets/src/polyfills/wp-dom-ready.js',
 		'wp-polyfill': './assets/src/polyfills/wp-polyfill.js',
-		'wp-server-side-render': './assets/src/polyfills/wp-server-side-render.js',
 		'wp-url': './assets/src/polyfills/wp-url.js',
 	},
 };
