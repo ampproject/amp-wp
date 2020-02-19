@@ -149,7 +149,6 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 				'wp-nux',
 				'wp-plugins',
 				'wp-polyfill',
-				'wp-server-side-render',
 				'wp-url',
 			],
 			$block_script->deps
