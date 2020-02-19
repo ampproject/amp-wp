@@ -245,32 +245,6 @@ export const filterBlocksSave = ( element, blockType, attributes ) => { // eslin
 			fitTextProps.height = attributes.height;
 		}
 
-		/*
-         * This is a workaround for AMP Stories since AMP Story CSS is overriding the amp-fit-text CSS.
-         * Note that amp-fit-text should support containing elements as well:
-         * "The expected content for amp-fit-text is text or other inline content, but it can also contain non-inline content."
-         */
-		if ( 'core/paragraph' === blockType.name ) {
-			let ampFitTextContent = '<amp-fit-text';
-
-			for ( const att in fitTextProps ) {
-				if ( fitTextProps.hasOwnProperty( att ) ) {
-					const value = fitTextProps[ att ];
-					ampFitTextContent += ' ' + att + '="' + value + '"';
-				}
-			}
-
-			ampFitTextContent += '>' + getAmpFitTextContent( attributes.content ) + '</amp-fit-text>';
-
-			return cloneElement(
-				element,
-				{
-					key: 'new',
-					value: ampFitTextContent,
-				},
-			);
-		}
-
 		fitTextProps.children = element;
 
 		return <amp-fit-text { ...fitTextProps } />;
@@ -924,20 +898,11 @@ export const isGalleryShortcode = ( attributes ) => {
  * For regular posts, this is based on the AMP toggle control and also
  * the default status based on the template mode.
  *
- * For AMP stories, this always returns true.
- *
  * @return {boolean} Whether AMP is enabled.
  */
 export const isAMPEnabled = () => {
 	const { getDefaultStatus, getPossibleStatuses } = select( 'amp/block-editor' );
 	const { getEditedPostAttribute } = select( 'core/editor' );
-
-	const type = getEditedPostAttribute( 'type' );
-
-	if ( 'amp_story' === type ) {
-		return true;
-	}
-
 	const meta = getEditedPostAttribute( 'meta' );
 
 	if ( meta && meta.amp_status && getPossibleStatuses().includes( meta.amp_status ) ) {

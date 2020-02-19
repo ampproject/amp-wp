@@ -18,11 +18,8 @@ import './store';
 
 const {
 	isWebsiteEnabled,
-	isStoriesEnabled,
 	isStandardMode,
 } = select( 'amp/block-editor' );
-
-const { ampLatestStoriesBlockData } = window;
 
 // Add filters if AMP for Website experience is enabled.
 if ( isWebsiteEnabled() ) {
@@ -44,7 +41,6 @@ if ( isWebsiteEnabled() ) {
 
 /*
  * If there's no theme support, unregister blocks that are only meant for AMP.
- * The Latest Stories block is meant for AMP and non-AMP, so don't unregister it here.
  */
 const AMP_DEPENDENT_BLOCKS = [
 	'amp/amp-brid-player',
@@ -63,16 +59,7 @@ const blocks = require.context( './blocks', true, /(?<!test\/)index\.js$/ );
 blocks.keys().forEach( ( modulePath ) => {
 	const { name, settings } = blocks( modulePath );
 
-	const isLatestStoriesBlock = 'amp/amp-latest-stories' === name;
-
-	const shouldRegister = (
-		(
-			isWebsiteEnabled() && isStandardMode() && AMP_DEPENDENT_BLOCKS.includes( name )
-		) ||
-		(
-			isStoriesEnabled() && isLatestStoriesBlock && typeof ampLatestStoriesBlockData !== 'undefined'
-		)
-	);
+	const shouldRegister = isWebsiteEnabled() && isStandardMode() && AMP_DEPENDENT_BLOCKS.includes( name );
 
 	if ( shouldRegister ) {
 		registerBlockType( name, settings );

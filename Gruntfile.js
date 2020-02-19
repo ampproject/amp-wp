@@ -20,7 +20,6 @@ module.exports = function( grunt ) {
 	// These patterns paths will be excluded from among the above directory.
 	const productionExcludedPathPatterns = [
 		/.*\/src\/.*/,
-		/.*images\/stories-editor\/.*\.svg/,
 	];
 
 	// These will be removed from the vendor directory after installing but prior to creating a ZIP.

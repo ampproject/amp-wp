@@ -20,17 +20,12 @@ import {
 	VIDEO_ALLOWED_MEGABYTES_PER_SECOND,
 } from '../constants';
 
-// @todo This is is not guaranteed to exist.
-const { ampStoriesEditorSettings = {} } = window;
-const { allowedVideoMimeTypes = [ 'video/mp4' ] } = ampStoriesEditorSettings;
+const allowedVideoMimeTypes = [ 'video/mp4' ];
 
 /**
  * Determines whether whether the image has the minimum required dimensions.
  *
  * The image should have a width of at least 1200 pixels to satisfy the requirements of Google Search for Schema.org metadata.
- *
- * For AMP Stories, the featured image will be used for the poster-portrait-src.
- * For this, it should have a width of at least 696px and a height of at least 928px.
  *
  * @param {Object} media             A media object with width and height values.
  * @param {number} media.width       Media width in pixels.
@@ -69,19 +64,6 @@ export const getMinimumFeaturedImageDimensions = () => {
 	const width = MINIMUM_FEATURED_IMAGE_WIDTH;
 
 	const height = width * ( 9 / 16 );
-
-	return { width, height };
-};
-
-/**
- * Get minimum dimensions for a portrait featured image, but not for an AMP Story.
- *
- * @return {Object} Minimum dimensions including width and height.
- */
-export const getMinimumPortraitFeaturedImageDimensions = () => {
-	const width = MINIMUM_FEATURED_IMAGE_WIDTH;
-
-	const height = Math.floor( width * ( 16 / 9 ) );
 
 	return { width, height };
 };
@@ -192,27 +174,6 @@ export const getBackgroundColorWithOpacity = ( colors, backgroundColor, customBa
 	}
 
 	return undefined;
-};
-
-/**
- * Gets The aspect ratio type, either 'landscape', 'portrait', or 'square'.
- *
- * @param {number} width  The image width.
- * @param {number} height The image height.
- * @return {string|null} The aspect ratio type: 'landscape', 'portrait', or 'square'.
- */
-export const getAspectRatioType = ( width, height ) => {
-	if ( ! width || ! height ) {
-		return null;
-	}
-
-	if ( width > height ) {
-		return 'landscape';
-	} else if ( height > width ) {
-		return 'portrait';
-	}
-
-	return 'square';
 };
 
 /**
@@ -334,22 +295,6 @@ export const enforceFileSize = function( attachment, SelectionError ) {
  */
 export const mediaLibraryHasTwoNotices = function() {
 	return Boolean( this.secondary.get( FILE_TYPE_ERROR_VIEW ) ) && Boolean( this.secondary.get( FILE_SIZE_ERROR_VIEW ) );
-};
-
-/**
- * Gets the number of megabytes per second for the video.
- *
- * @param {Object} media The media object of the video.
- * @return {?number} Number of megabytes per second, or null if media details unavailable.
- */
-export const getVideoBytesPerSecond = ( media ) => {
-	if ( has( media, [ 'media_details', 'filesize' ] ) && has( media, [ 'media_details', 'length' ] ) ) {
-		return media.media_details.filesize / media.media_details.length;
-	} else if ( has( media, [ 'attributes', 'filesizeInBytes' ] ) && has( media, [ 'attributes', 'fileLength' ] ) ) {
-		return media.attributes.filesizeInBytes / getSecondsFromTime( media.attributes.fileLength );
-	}
-
-	return null;
 };
 
 /**

@@ -18,11 +18,6 @@ describe( 'isFileTypeAllowed', () => {
 		expect( isFileTypeAllowed( attachment, videoAllowedTypes ) ).toBe( false );
 	} );
 
-	it( 'should return true when the file type is video but the mime type is video/webm', () => {
-		attachment.set( { type: 'video', mime: 'video/webm' } );
-		expect( isFileTypeAllowed( attachment, videoAllowedTypes ) ).toBe( true );
-	} );
-
 	it( 'should return true when the file type is video and the mime type is correct', () => {
 		attachment.set( { type: 'video', mime: 'video/mp4' } );
 		expect( isFileTypeAllowed( attachment, videoAllowedTypes ) ).toBe( true );
