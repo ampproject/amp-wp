@@ -8,7 +8,7 @@ Official AMP plugin, supported by the AMP team. Formerly Accelerated Mobile Page
 **Tags:** [amp](https://wordpress.org/plugins/tags/amp), [mobile](https://wordpress.org/plugins/tags/mobile), [optimization](https://wordpress.org/plugins/tags/optimization), [accelerated mobile pages](https://wordpress.org/plugins/tags/accelerated-mobile-pages), [framework](https://wordpress.org/plugins/tags/framework), [components](https://wordpress.org/plugins/tags/components), [blocks](https://wordpress.org/plugins/tags/blocks), [performance](https://wordpress.org/plugins/tags/performance), [ux](https://wordpress.org/plugins/tags/ux), [seo](https://wordpress.org/plugins/tags/seo), [official](https://wordpress.org/plugins/tags/official)  
 **Requires at least:** 4.9  
 **Tested up to:** 5.3.2  
-**Stable tag:** 1.4.2  
+**Stable tag:** 1.4.4  
 **License:** [GPLv2 or later](http://www.gnu.org/licenses/gpl-2.0.html)  
 **Requires PHP:** 5.4  
 
@@ -23,7 +23,7 @@ Features and capabilities provided by the plugin include:
 - **AMP-first Experiences**: enabling [full-site AMP experiences](https://amp.dev/about/websites) without sacrificing the flexibility of the platform or the fidelity of content.
 - **Core Theme Support**: enabling AMP compatibility for all core themes, from Twenty Ten all the way through Twenty Twenty.
 - **Compatibility Tool**: when automatic conversion of markup to AMP is not possible, debug AMP validation errors with detailed information including the invalid markup and the specific components responsible on site (e.g theme, plugin, embed); validation errors are shown contextually with their respective blocks in the editor.
-- **CSS Tree Shaking**: automatically remove the majority of unused CSS to bring the total under AMP's 50KB limit; when the total after tree shaking is still over this limit, prioritization is used so that the all-important theme stylesheet important is retained, leaving less important ones to be excluded (e.g. print styles).
+- **CSS Tree Shaking**: automatically remove the majority of unused CSS to bring the total under AMP's 75KB limit; when the total after tree shaking is still over this limit, prioritization is used so that the all-important theme stylesheet important is retained, leaving less important ones to be excluded (e.g. print styles).
 
 Please note that the [Stories](https://amp.dev/about/stories) experience is being removed from the AMP plugin in favor of the feature being released as a standalone plugin. It will be available soon!
 
@@ -93,9 +93,9 @@ If you are a developer, we encourage you to [follow along](https://github.com/am
 
 ![Each validation error provides a stack trace to identify which code is responsible for the invalid markup, whether a theme, plugin, embed, content block, and so on.](wp-assets/screenshot-11.png)
 
-### Styles added by themes and plugins are automatically concatenated, minified, and tree-shaken to try to keep the total under 50KB of inline CSS.
+### Styles added by themes and plugins are automatically concatenated, minified, and tree-shaken to try to keep the total under 75KB of inline CSS.
 
-![Styles added by themes and plugins are automatically concatenated, minified, and tree-shaken to try to keep the total under 50KB of inline CSS.](wp-assets/screenshot-12.png)
+![Styles added by themes and plugins are automatically concatenated, minified, and tree-shaken to try to keep the total under 75KB of inline CSS.](wp-assets/screenshot-12.png)
 
 ### A WP-CLI command is provided to check the URLs on a site for AMP validity. Results are available in the admin for inspection.
 

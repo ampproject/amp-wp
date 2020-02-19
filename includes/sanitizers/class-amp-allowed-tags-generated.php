@@ -15479,7 +15479,7 @@ class AMP_Allowed_Tags_Generated {
 						),
 						'validate_keyframes' => false,
 					),
-					'max_bytes' => 50000,
+					'max_bytes' => 75000,
 					'max_bytes_spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#maximum-size',
 				),
 				'tag_spec' => array(

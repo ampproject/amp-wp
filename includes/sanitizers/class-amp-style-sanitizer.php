@@ -884,7 +884,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * As with hooks, lower priorities mean they should be included first.
 	 * The higher the priority value, the more likely it will be that the
 	 * stylesheet will be among those excluded due to 'excessive_css' when
-	 * concatenated CSS reaches 50KB.
+	 * concatenated CSS reaches 75KB.
 	 *
 	 * @todo This will eventually need to be abstracted to not be CMS-specific, allowing for the prioritization scheme to be defined by configuration.
 	 *
