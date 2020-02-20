@@ -86,7 +86,7 @@ final class Keyframes {
 	 * But the style[amp-keyframes] has fewer allowed style properties, so this only removes @keyframes that would be valid.
 	 */
 	public function remove_eligible_keyframes() {
-		while( preg_match( '/@keyframes[^{]+({)/', substr( $this->stylesheet, $this->pointer ), $matches, PREG_OFFSET_CAPTURE ) ) {
+		while ( preg_match( '/@keyframes[^{]+({)/', substr( $this->stylesheet, $this->pointer ), $matches, PREG_OFFSET_CAPTURE ) ) {
 			$keyframes_position     = $matches[0][1];
 			$first_bracket_position = $matches[1][1];
 			$this->possibly_remove_keyframes_at_index( $keyframes_position, $first_bracket_position );
