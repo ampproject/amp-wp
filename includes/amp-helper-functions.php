@@ -1052,7 +1052,7 @@ function amp_get_post_image_metadata( $post = null ) {
 /**
  * Get the publisher logo.
  *
- * "The following guidelines apply to logos used for general AMP pages.
+ * The following guidelines apply to logos used for general AMP pages.
  *
  * "The logo should be a rectangle, not a square. The logo should fit in a 60x600px rectangle.,
  * and either be exactly 60px high (preferred), or exactly 600px wide. For example, 450x45px
