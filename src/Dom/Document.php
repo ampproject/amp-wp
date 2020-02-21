@@ -83,8 +83,8 @@ final class Document extends DOMDocument {
 	const HTML_STRUCTURE_DOCTYPE_PATTERN = '/^(?<doctype>[^<]*(?>\s*<!--.*?-->\s*)*<!doctype(?>\s+[^>]+)?>)/is';
 	const HTML_STRUCTURE_HTML_START_TAG  = '/^(?<html_start>[^<]*(?>\s*<!--.*?-->\s*)*<html(?>\s+[^>]*)?>)/is';
 	const HTML_STRUCTURE_HTML_END_TAG    = '/(?<html_end><\/html(?>\s+[^>]*)?>.*)$/is';
-	const HTML_STRUCTURE_HEAD_START_TAG  = '/^[^<]*(?>\s*<!--.*?-->\s*)*(?><head(?>\s+[^>]*)?>)/is';
-	const HTML_STRUCTURE_BODY_START_TAG  = '/^[^<]*(?>\s*<!--.*-->\s*)*(?><body(?>\s+[^>]*)?>)/is';
+	const HTML_STRUCTURE_HEAD_START_TAG  = '/^[^<]*(?><!--.*?-->\s*)*(?><head(?>\s+[^>]*)?>)/is';
+	const HTML_STRUCTURE_BODY_START_TAG  = '/^[^<]*(?><!--.*-->\s*)*(?><body(?>\s+[^>]*)?>)/is';
 	const HTML_STRUCTURE_BODY_END_TAG    = '/(?><\/body(?>\s+[^>]*)?>.*)$/is';
 	const HTML_STRUCTURE_HEAD_TAG        = '/^(?>[^<]*(?><head(?>\s+[^>]*)?>).*?<\/head(?>\s+[^>]*)?>)/is';
 	const HTML_DOCTYPE_HTML_4_SUFFIX     = ' PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"';
@@ -110,7 +110,7 @@ final class Document extends DOMDocument {
 	const PROPERTY_GETTER_ERROR_MESSAGE = 'Undefined property: Amp\\AmpWP\\Dom\\Document::';
 
 	// Regex patterns and values used for adding and removing http-equiv charsets for compatibility.
-	const HTML_GET_HEAD_OPENING_TAG_PATTERN     = '/(?><!--.*?-->)*<head(?>\s+[^>]*)?>/i'; // This pattern contains a comment to make sure we don't match a <head> tag within a comment.
+	const HTML_GET_HEAD_OPENING_TAG_PATTERN     = '/(?><!--.*?-->\s*)*<head(?>\s+[^>]*)?>/is'; // This pattern contains a comment to make sure we don't match a <head> tag within a comment.
 	const HTML_GET_HEAD_OPENING_TAG_REPLACEMENT = '$0<meta http-equiv="content-type" content="text/html; charset=utf-8">';
 	const HTML_GET_HTTP_EQUIV_TAG_PATTERN       = '#<meta http-equiv=([\'"])content-type\1 content=([\'"])text/html; charset=utf-8\2>#i';
 	const HTML_HTTP_EQUIV_VALUE                 = 'content-type';

@@ -201,8 +201,8 @@ class Test_AMP_DOM_Document extends WP_UnitTestCase {
 			],
 			'comments_preserve_position'               => [
 				'utf-8',
-				'<!DOCTYPE html><!-- before <html> --><html><!-- before <head> --><head><meta charset="utf-8"><!-- within <head> --></head><!-- before <body> --><body class="something" data-something="something"><!-- within <body> --></body><!-- after </body> --></html><!-- after </html> -->',
-				'<!DOCTYPE html><!-- before <html> --><html><!-- before <head> --><head><meta charset="utf-8"><!-- within <head> --></head><!-- before <body> --><body class="something" data-something="something"><!-- within <body> --></body><!-- after </body> --></html><!-- after </html> -->',
+				"<!DOCTYPE html> \n <!-- before \n <html> --> \n <html> \n <!-- before \n <head> ----> \n <head><meta charset=\"utf-8\"> \n <!-- within \n <head> ----> \n </head> \n <!-- before \n <body> ----> \n <body class=\"something\" data-something=\"something\"> \n <!-- within \n <body> ----> \n </body> \n <!-- after \n </body> ----> \n </html> \n <!-- after \n </html> --> \n",
+				"<!DOCTYPE html> \n <!-- before \n <html> --> \n <html> \n <!-- before \n <head> ----> \n <head><meta charset=\"utf-8\"> \n <!-- within \n <head> ----> \n </head> \n <!-- before \n <body> ----> \n <body class=\"something\" data-something=\"something\"> \n <!-- within \n <body> ----> \n </body> \n <!-- after \n </body> ----> \n </html> \n <!-- after \n </html> --> \n",
 			],
 		];
 	}
