@@ -48,7 +48,6 @@
 	</rule>
 	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
 		<exclude-pattern>src/*</exclude-pattern>
-		<exclude-pattern>includes/templates/single-amp_story.php</exclude-pattern>
 	</rule>
 	<rule ref="WordPress.NamingConventions.ValidVariableName">
 		<properties>

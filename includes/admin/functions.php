@@ -194,13 +194,3 @@ function amp_bootstrap_admin() {
 	$site_health = new SiteHealth();
 	$site_health->init();
 }
-
-/**
- * Bootstrap the Story Templates needed in editor.
- *
- * @since 1.?
- */
-function amp_story_templates() {
-	$story_templates = new AMP_Story_Templates();
-	$story_templates->init();
-}

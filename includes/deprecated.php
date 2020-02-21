@@ -42,10 +42,6 @@ function amp_maybe_add_actions() {
 		return;
 	}
 
-	if ( is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
-		return;
-	}
-
 	$is_amp_endpoint = is_amp_endpoint();
 
 	/**

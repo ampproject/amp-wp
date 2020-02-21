@@ -23,13 +23,6 @@ class AMP_Options_Manager {
 	const WEBSITE_EXPERIENCE = 'website';
 
 	/**
-	 * Slug for stories experience.
-	 *
-	 * @var
-	 */
-	const STORIES_EXPERIENCE = 'stories';
-
-	/**
 	 * Default option values.
 	 *
 	 * @var array
@@ -43,12 +36,6 @@ class AMP_Options_Manager {
 		'supported_templates'     => [ 'is_singular' ],
 		'enable_response_caching' => true,
 		'version'                 => AMP__VERSION,
-		'story_templates_version' => false,
-		'story_export_base_url'   => '',
-		'story_settings'          => [
-			'auto_advance_after'          => '',
-			'auto_advance_after_duration' => 0,
-		],
 	];
 
 	/**
@@ -66,15 +53,10 @@ class AMP_Options_Manager {
 
 		add_action( 'update_option_' . self::OPTION_NAME, [ __CLASS__, 'maybe_flush_rewrite_rules' ], 10, 2 );
 		add_action( 'admin_notices', [ __CLASS__, 'render_welcome_notice' ] );
-		add_action( 'admin_notices', [ __CLASS__, 'render_stories_deprecation_notice' ] );
 		add_action( 'admin_notices', [ __CLASS__, 'persistent_object_caching_notice' ] );
 		add_action( 'admin_notices', [ __CLASS__, 'render_cache_miss_notice' ] );
 		add_action( 'admin_notices', [ __CLASS__, 'render_php_css_parser_conflict_notice' ] );
 		add_action( 'admin_notices', [ __CLASS__, 'insecure_connection_notice' ] );
-
-		if ( self::is_stories_experience_enabled() ) {
-			add_action( 'enqueue_block_editor_assets', [ __CLASS__, 'render_stories_deprecation_editor_notice' ] );
-		}
 	}
 
 	/**
@@ -95,16 +77,6 @@ class AMP_Options_Manager {
 		sort( $old_experiences );
 		sort( $new_experiences );
 		if ( $old_post_types !== $new_post_types || $old_experiences !== $new_experiences ) {
-
-			// Ensure story post type registration is up to date prior to flushing rewrite rules.
-			$story_post_type = get_post_type_object( AMP_Story_Post_Type::POST_TYPE_SLUG );
-			if ( self::is_stories_experience_enabled() && ! $story_post_type ) {
-				AMP_Story_Post_Type::register();
-			} elseif ( ! self::is_stories_experience_enabled() && $story_post_type ) {
-				$story_post_type->remove_rewrite_rules();
-				unregister_post_type( AMP_Story_Post_Type::POST_TYPE_SLUG );
-			}
-
 			// Flush rewrite rules, with ensuring up to date for website experience.
 			if ( self::is_website_experience_enabled() ) {
 				add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
@@ -135,12 +107,6 @@ class AMP_Options_Manager {
 		}
 
 		$options = array_merge( $defaults, $options );
-
-		// Migrate stories option from 1.2-beta.
-		if ( ! empty( $options['enable_amp_stories'] ) ) {
-			$options['experiences'][] = self::STORIES_EXPERIENCE;
-			unset( $options['enable_amp_stories'] );
-		}
 
 		// Migrate theme support slugs.
 		if ( 'native' === $options['theme_support'] ) {
@@ -200,26 +166,6 @@ class AMP_Options_Manager {
 	}
 
 	/**
-	 * Determine whether stories experience is enabled.
-	 *
-	 * @since 1.2
-	 *
-	 * @return bool Enabled.
-	 */
-	public static function is_stories_experience_enabled() {
-		$stories_enabled = in_array( self::STORIES_EXPERIENCE, self::get_option( 'experiences' ), true );
-
-		if ( $stories_enabled && ! AMP_Story_Post_Type::has_posts() ) {
-			if ( post_type_exists( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
-				unregister_post_type( AMP_Story_Post_Type::POST_TYPE_SLUG );
-			}
-			return false;
-		}
-
-		return AMP_Story_Post_Type::has_required_block_capabilities() && $stories_enabled;
-	}
-
-	/**
 	 * Validate options.
 	 *
 	 * @param array $new_options Plugin options.
@@ -232,25 +178,8 @@ class AMP_Options_Manager {
 			return $options;
 		}
 
-		// Experiences.
-		if ( ! isset( $new_options['experiences'][ self::STORIES_EXPERIENCE ] ) && ! AMP_Story_Post_Type::has_posts() ) {
-			// If there are no Story posts and the Story experience is disabled, only the Website experience is considered enabled.
-			$options['experiences'] = [ self::WEBSITE_EXPERIENCE ];
-		} elseif ( isset( $new_options['experiences'] ) && is_array( $new_options['experiences'] ) ) {
-			// Validate the selected experiences.
-			$options['experiences'] = array_intersect(
-				$new_options['experiences'],
-				[
-					self::WEBSITE_EXPERIENCE,
-					self::STORIES_EXPERIENCE,
-				]
-			);
-
-			// At least one experience must be selected.
-			if ( empty( $options['experiences'] ) ) {
-				$options['experiences'] = [ self::WEBSITE_EXPERIENCE ];
-			}
-		}
+		// Website experience is the only option.
+		$options['experiences'] = [ self::WEBSITE_EXPERIENCE ];
 
 		// Theme support.
 		$recognized_theme_supports = [
@@ -355,20 +284,6 @@ class AMP_Options_Manager {
 			AMP_Theme_Support::reset_cache_miss_url_option();
 		}
 
-		if ( isset( $new_options['experiences'] ) && in_array( self::STORIES_EXPERIENCE, $new_options['experiences'], true ) ) {
-			// Handle the base URL for exported stories.
-			$options['story_export_base_url'] = isset( $new_options['story_export_base_url'] ) ? esc_url_raw( $new_options['story_export_base_url'], [ 'https' ] ) : '';
-
-			// AMP stories settings definitions.
-			$definitions = AMP_Story_Post_Type::get_stories_settings_definitions();
-
-			// Handle the AMP stories settings sanitization.
-			foreach ( $definitions as $option_name => $definition ) {
-				$value = $new_options[ AMP_Story_Post_Type::STORY_SETTINGS_OPTION ][ $option_name ];
-				$options[ AMP_Story_Post_Type::STORY_SETTINGS_OPTION ][ $option_name ] = call_user_func( $definition['meta_args']['sanitize_callback'], $value );
-			}
-		}
-
 		return $options;
 	}
 
@@ -434,10 +349,6 @@ class AMP_Options_Manager {
 	 * @return bool Whether update succeeded.
 	 */
 	public static function update_option( $option, $value ) {
-		if ( 'experiences' === $option && in_array( self::STORIES_EXPERIENCE, $value, true ) ) {
-			wp_cache_delete( 'count-' . AMP_Story_Post_Type::POST_TYPE_SLUG );
-		}
-
 		$amp_options = self::get_options();
 
 		$amp_options[ $option ] = $value;
@@ -578,61 +489,6 @@ class AMP_Options_Manager {
 			);
 			echo '</p></div>';
 		}
-	}
-
-	/**
-	 * Render the Stories deprecation admin notice.
-	 */
-	public static function render_stories_deprecation_notice() {
-		if (
-			AMP_Story_Post_Type::has_posts() &&
-			(
-				'edit-amp_story' === get_current_screen()->id ||
-				'toplevel_page_' . self::OPTION_NAME === get_current_screen()->id
-			)
-		) {
-			printf(
-				'<div class="notice notice-warning"><p>%s %s</p></div>',
-				esc_html__( 'The Stories experience is being extracted from the AMP plugin into a separate standalone plugin which will be available soon. Please back up or export your existing Stories as they will not be available in the next version of the AMP plugin.', 'amp' ),
-				sprintf(
-					'<a href="%s" target="_blank">%s</a>',
-					esc_url( 'https://amp-wp.org/documentation/amp-stories/exporting-stories/' ),
-					esc_html__( 'View how to export your Stories', 'amp' )
-				)
-			);
-		} elseif ( ! self::is_stories_experience_enabled() && 'toplevel_page_' . self::OPTION_NAME === get_current_screen()->id ) {
-			printf(
-				'<div class="notice notice-info"><p>%s</p></div>',
-				esc_html__( 'The Stories experience has been removed from the AMP plugin. This beta feature is being split into a separate standalone plugin which will be available for installation soon.', 'amp' )
-			);
-		}
-	}
-
-	/**
-	 * Render the Stories deprecation notice in the Story editor.
-	 */
-	public static function render_stories_deprecation_editor_notice() {
-		$script = sprintf(
-			"( function( wp ) {
-						wp.data.dispatch( 'core/notices' ).createNotice(
-							'warning',
-							%s,
-							{
-								isDismissible: false,
-								actions: [
-									{
-										url: 'https://amp-wp.org/documentation/amp-stories/exporting-stories/',
-										label: %s,
-									},
-								],
-						    }
-						);
-					} )( window.wp );",
-			wp_json_encode( __( 'The Stories experience is being extracted from the AMP plugin into a separate standalone plugin which will be available soon. Please back up or export your existing Stories as they will not be available in the next version of the AMP plugin.', 'amp' ) ),
-			wp_json_encode( __( 'View how to export your Stories', 'amp' ) )
-		);
-
-		wp_add_inline_script( AMP_Story_Post_Type::AMP_STORIES_SCRIPT_HANDLE, $script );
 	}
 
 	/**

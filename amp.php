@@ -14,7 +14,7 @@
  */
 
 define( 'AMP__FILE__', __FILE__ );
-define( 'AMP__DIR__', dirname( __FILE__ ) );
+define( 'AMP__DIR__', __DIR__ );
 define( 'AMP__VERSION', '1.5.0-alpha' );
 
 /**
@@ -385,11 +385,6 @@ function amp_init() {
 		// Redirect the old url of amp page to the updated url.
 		add_filter( 'old_slug_redirect_url', 'amp_redirect_old_slug_to_new_url' );
 	}
-
-	AMP_Story_Post_Type::register();
-
-	// Does its own is_stories_experience_enabled() check.
-	add_action( 'wp_loaded', 'amp_story_templates' );
 
 	if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		if ( class_exists( 'WP_CLI\Dispatcher\CommandNamespace' ) ) {

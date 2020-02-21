@@ -70,7 +70,7 @@ function amp_get_permalink( $post_id ) {
 	// When theme support is present, the plain query var should always be used.
 	if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 		$permalink = get_permalink( $post_id );
-		if ( ! amp_is_canonical() && AMP_Story_Post_Type::POST_TYPE_SLUG !== get_post_type( $post_id ) ) {
+		if ( ! amp_is_canonical() ) {
 			$permalink = add_query_arg( amp_get_slug(), '', $permalink );
 		}
 		return $permalink;
@@ -283,11 +283,6 @@ function is_amp_endpoint() {
 			),
 			'1.1'
 		);
-	}
-
-	// AMP Stories are always an AMP endpoint.
-	if ( $wp_query instanceof WP_Query && $wp_query->is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
-		return true;
 	}
 
 	/*
@@ -688,7 +683,7 @@ function amp_print_analytics( $analytics ) {
 	 * This is useful for printing additional `amp-analytics` tags to the page without having to refactor any existing
 	 * markup generation logic to use the data structure mutated by the `amp_analytics_entries` filter. For such cases,
 	 * this action should be used for printing `amp-analytics` tags as opposed to using the `wp_footer` and
-	 * `amp_post_template_footer` actions; this will ensure analytics will also be included on AMP Stories.
+	 * `amp_post_template_footer` actions.
 	 *
 	 * @since 1.3
 	 * @param array $analytics_entries Analytics entries, already potentially modified by the amp_analytics_entries filter.
@@ -1057,50 +1052,39 @@ function amp_get_post_image_metadata( $post = null ) {
 /**
  * Get the publisher logo.
  *
- * "The following guidelines apply to logos used for general AMP pages, not AMP stories. There
- * are different logo requirements for AMP stories."
+ * "The following guidelines apply to logos used for general AMP pages.
  *
  * "The logo should be a rectangle, not a square. The logo should fit in a 60x600px rectangle.,
  * and either be exactly 60px high (preferred), or exactly 600px wide. For example, 450x45px
  * would not be acceptable, even though it fits in the 600x60px rectangle."
  *
- * For AMP Stories: "The logo shape should be a square, not a rectangle. … The logo should be at least 96x96 pixels."
- *
  * @since 1.2.1
  * @link https://developers.google.com/search/docs/data-types/article#logo-guidelines
- * @link https://amp.dev/documentation/components/amp-story/#publisher-logo-src-guidelines
  *
  * @return string Publisher logo image URL. WordPress logo if no site icon or custom logo defined, and no logo provided via 'amp_site_icon_url' filter.
  */
 function amp_get_publisher_logo() {
 	$logo_image_url = null;
 
-	$is_amp_story = is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG );
-	if ( $is_amp_story ) {
-		// This should be square, at least 96px in width/height. The 512 is used because the site icon would have this size generated.
-		$logo_width  = 512;
-		$logo_height = 512;
-	} else {
-		/*
-		 * This should be 60x600px rectangle. It *can* be larger than this, contrary to the current documentation.
-		 * Only minimum size and ratio matters. So height should be at least 60px and width a minimum of 200px.
-		 * An aspect ratio between 200/60 (10/3) and 600:60 (10/1) should be used. A square image still be used,
-		 * but it is not preferred; a landscape logo should be provided if possible.
-		 */
-		$logo_width  = 600;
-		$logo_height = 60;
-	}
+	/*
+	 * This should be 60x600px rectangle. It *can* be larger than this, contrary to the current documentation.
+	 * Only minimum size and ratio matters. So height should be at least 60px and width a minimum of 200px.
+	 * An aspect ratio between 200/60 (10/3) and 600:60 (10/1) should be used. A square image still be used,
+	 * but it is not preferred; a landscape logo should be provided if possible.
+	 */
+	$logo_width  = 600;
+	$logo_height = 60;
 
-	// Use the Custom Logo if set, but only for Stories if it is square.
+	// Use the Custom Logo if set.
 	$custom_logo_id = get_theme_mod( 'custom_logo' );
 	if ( has_custom_logo() && $custom_logo_id ) {
 		$custom_logo_img = wp_get_attachment_image_src( $custom_logo_id, [ $logo_width, $logo_height ], false );
-		if ( $custom_logo_img && ( ! $is_amp_story || $custom_logo_img[2] === $custom_logo_img[1] ) ) {
+		if ( ! empty( $custom_logo_img[0] ) ) {
 			$logo_image_url = $custom_logo_img[0];
 		}
 	}
 
-	// Try Site Icon, though it is not ideal for non-Story because it should be square.
+	// Try Site Icon if a custom logo is not set.
 	$site_icon_id = get_option( 'site_icon' );
 	if ( empty( $logo_image_url ) && $site_icon_id ) {
 		$site_icon_src = wp_get_attachment_image_src( $site_icon_id, [ $logo_width, $logo_height ], false );
@@ -1123,11 +1107,7 @@ function amp_get_publisher_logo() {
 
 	// Fallback to serving the WordPress logo.
 	if ( empty( $logo_image_url ) ) {
-		if ( $is_amp_story ) {
-			$logo_image_url = amp_get_asset_url( 'images/stories-editor/amp-story-fallback-wordpress-publisher-logo.png' );
-		} else {
-			$logo_image_url = amp_get_asset_url( 'images/amp-page-fallback-wordpress-publisher-logo.png' );
-		}
+		$logo_image_url = amp_get_asset_url( 'images/amp-page-fallback-wordpress-publisher-logo.png' );
 	}
 
 	return $logo_image_url;
@@ -1298,37 +1278,6 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 	];
 
 	$wp_admin_bar->add_node( $parent );
-}
-
-/**
- * Prints AMP Stories auto ads.
- *
- * @since 1.2
- */
-function amp_print_story_auto_ads() {
-	/**
-	 * Filters the configuration data for <amp-story-auto-ads>.
-	 *
-	 * This allows Dynamically inserting ads into a story.
-	 *
-	 * @param array   $data Story ads configuration data.
-	 * @param WP_Post $post The current story's post object.
-	 */
-	$data = apply_filters( 'amp_story_auto_ads_configuration', [], get_post() );
-
-	if ( empty( $data ) ) {
-		return;
-	}
-
-	$script_element = AMP_HTML_Utils::build_tag(
-		'script',
-		[
-			'type' => 'application/json',
-		],
-		wp_json_encode( $data )
-	);
-
-	echo AMP_HTML_Utils::build_tag( 'amp-story-auto-ads', [], $script_element ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 }
 
 /**

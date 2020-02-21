@@ -134,8 +134,7 @@ class AMP_Post_Meta_Box {
 			isset( $screen->base ) &&
 			'post' === $screen->base &&
 			( ! isset( $screen->is_block_editor ) || ! $screen->is_block_editor ) &&
-			is_post_type_viewable( $post->post_type ) &&
-			AMP_Story_Post_Type::POST_TYPE_SLUG !== $post->post_type
+			is_post_type_viewable( $post->post_type )
 		);
 
 		if ( ! $validate ) {
@@ -199,7 +198,7 @@ class AMP_Post_Meta_Box {
 	 */
 	public function enqueue_block_assets() {
 		$post = get_post();
-		if ( ! is_post_type_viewable( $post->post_type ) || AMP_Story_Post_Type::POST_TYPE_SLUG === $post->post_type ) {
+		if ( ! is_post_type_viewable( $post->post_type ) ) {
 			return;
 		}
 
@@ -235,7 +234,6 @@ class AMP_Post_Meta_Box {
 			'defaultStatus'    => $enabled_status,
 			'errorMessages'    => $error_messages,
 			'isWebsiteEnabled' => AMP_Options_Manager::is_website_experience_enabled(),
-			'isStoriesEnabled' => AMP_Options_Manager::is_stories_experience_enabled(),
 			'hasThemeSupport'  => current_theme_supports( AMP_Theme_Support::SLUG ),
 			'isStandardMode'   => amp_is_canonical(),
 		];

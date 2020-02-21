@@ -165,14 +165,6 @@ class Test_Site_Health extends WP_UnitTestCase {
 				[ AMP_Options_Manager::WEBSITE_EXPERIENCE ],
 				'website',
 			],
-			'only_stories'          => [
-				[ AMP_Options_Manager::STORIES_EXPERIENCE ],
-				'stories',
-			],
-			'website_and_stories'   => [
-				[ AMP_Options_Manager::WEBSITE_EXPERIENCE, AMP_Options_Manager::STORIES_EXPERIENCE ],
-				'website, stories',
-			],
 		];
 	}
 

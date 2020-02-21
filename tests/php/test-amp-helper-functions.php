@@ -689,15 +689,10 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertContains( 'mode=standard', $output );
 		$this->assertContains( 'v' . AMP__VERSION, $output );
 
-		AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::STORIES_EXPERIENCE ] );
-		$output = $get_generator_tag();
-		$this->assertContains( 'mode=none', $output );
-		$this->assertContains( 'experiences=stories', $output );
-
-		AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::WEBSITE_EXPERIENCE, AMP_Options_Manager::STORIES_EXPERIENCE ] );
+		AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::WEBSITE_EXPERIENCE ] );
 		$output = $get_generator_tag();
 		$this->assertContains( 'mode=standard', $output );
-		$this->assertContains( 'experiences=website,stories', $output );
+		$this->assertContains( 'experiences=website', $output );
 	}
 
 	/**
@@ -1107,12 +1102,12 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test amp_get_schemaorg_metadata() for non-story.
+	 * Test amp_get_schemaorg_metadata().
 	 *
 	 * @covers ::amp_get_schemaorg_metadata()
 	 * @covers ::amp_get_publisher_logo()
 	 */
-	public function test_amp_get_schemaorg_metadata_non_story() {
+	public function test_amp_get_schemaorg_metadata() {
 		update_option( 'blogname', 'Foo' );
 		$publisher_type     = 'Organization';
 		$expected_publisher = [
@@ -1244,71 +1239,6 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'did_amp_schemaorg_metadata', $metadata );
 		$this->assertEquals( 'George', $metadata['author']['name'] );
 		$this->assertEquals( $metadata['publisher']['logo'], amp_get_publisher_logo() );
-	}
-
-	/**
-	 * Test amp_get_schemaorg_metadata() for a story.
-	 *
-	 * @covers ::amp_get_schemaorg_metadata()
-	 * @covers ::amp_get_publisher_logo()
-	 */
-	public function test_amp_get_schemaorg_metadata_story() {
-		if ( ! AMP_Story_Post_Type::has_required_block_capabilities() ) {
-			$this->markTestSkipped( 'Lacking required block capabilities.' );
-		}
-		AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::WEBSITE_EXPERIENCE, AMP_Options_Manager::STORIES_EXPERIENCE ] );
-
-		// Create dummy post to keep Stories experience enabled.
-		self::factory()->post->create( [ 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ] );
-
-		AMP_Story_Post_Type::register();
-
-		$site_icon_attachment_id   = $this->insert_site_icon_attachment( DIR_TESTDATA . '/images/33772.jpg' );
-		$custom_logo_attachment_id = self::factory()->attachment->create_upload_object( DIR_TESTDATA . '/images/canola.jpg', null );
-		$fallback_publisher_logo   = amp_get_asset_url( 'images/stories-editor/amp-story-fallback-wordpress-publisher-logo.png' );
-
-		$post_id = self::factory()->post->create(
-			[
-				'post_type'  => AMP_Story_Post_Type::POST_TYPE_SLUG,
-				'post_title' => 'Example Story',
-			]
-		);
-		$this->go_to( get_permalink( $post_id ) );
-		$this->assertTrue( is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) );
-
-		// Test default fallback icon.
-		$metadata = amp_get_schemaorg_metadata();
-		$this->assertEquals( $fallback_publisher_logo, $metadata['publisher']['logo'] );
-		$this->assertEquals( $fallback_publisher_logo, amp_get_publisher_logo() );
-
-		// Set site icon which now should get used instead of default for publisher logo, since it is square.
-		update_option( 'site_icon', $site_icon_attachment_id );
-		$metadata = amp_get_schemaorg_metadata();
-		$this->assertEquals(
-			wp_get_attachment_image_url( $site_icon_attachment_id, 'full', false ),
-			$metadata['publisher']['logo']
-		);
-		$this->assertEquals( wp_get_attachment_image_url( $site_icon_attachment_id, 'full', false ), amp_get_publisher_logo() );
-
-		// Set custom logo which still shouldn't affect the icon since it is not square.
-		set_theme_mod( 'custom_logo', $custom_logo_attachment_id );
-		$this->assertEquals( wp_get_attachment_image_url( $site_icon_attachment_id, 'full', false ), amp_get_publisher_logo() );
-		delete_option( 'site_icon' );
-		$this->assertEquals( $fallback_publisher_logo, amp_get_publisher_logo() );
-
-		// Set the custom logo to be the site icon, which will allow it to be used since it is square.
-		set_theme_mod( 'custom_logo', $site_icon_attachment_id );
-		$this->assertEquals( wp_get_attachment_image_url( $site_icon_attachment_id, 'full', false ), amp_get_publisher_logo() );
-
-		// Check other meta.
-		$metadata = amp_get_schemaorg_metadata();
-		$this->assertEquals( 'http://schema.org', $metadata['@context'] );
-		$this->assertEquals( get_option( 'blogname' ), $metadata['publisher']['name'] );
-		$this->assertEquals( 'BlogPosting', $metadata['@type'] );
-		$this->assertEquals( get_permalink( $post_id ), $metadata['mainEntityOfPage'] );
-		$this->assertEquals( get_the_title( $post_id ), $metadata['headline'] );
-		$this->assertArrayHasKey( 'datePublished', $metadata );
-		$this->assertArrayHasKey( 'dateModified', $metadata );
 	}
 
 	/**
