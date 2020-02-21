@@ -67,34 +67,34 @@ final class Document extends DOMDocument {
 	 *
 	 * @var string
 	 */
-	const HTTP_EQUIV_META_TAG_PATTERN = '/<meta [^>]*?\s*http-equiv=[^>]*?>[^<]*(?:<\/meta>)?/i';
+	const HTTP_EQUIV_META_TAG_PATTERN = '/<meta [^>]*?\s*http-equiv=[^>]*?>[^<]*(?><\/meta>)?/i';
 
 	/**
 	 * Regular expression pattern to match the charset meta tag.
 	 *
 	 * @var string
 	 */
-	const CHARSET_META_TAG_PATTERN = '/<meta [^>]*?\s*charset=[^>]*?>[^<]*(?:<\/meta>)?/i';
+	const CHARSET_META_TAG_PATTERN = '/<meta [^>]*?\s*charset=[^>]*?>[^<]*(?><\/meta>)?/i';
 
 	/*
 	 * Regular expressions to fetch the individual structural tags.
 	 * These patterns were optimized to avoid extreme backtracking on large documents.
 	 */
-	const HTML_STRUCTURE_DOCTYPE_PATTERN = '/^(?<doctype>[^<]*(?:\s*<!--[^>]*>\s*)*<!doctype(?:\s+[^>]+)?>)/i';
-	const HTML_STRUCTURE_HTML_START_TAG  = '/^(?<html_start>[^<]*(?:\s*<!--[^>]*>\s*)*<html(?:\s+[^>]*)?>)/i';
-	const HTML_STRUCTURE_HTML_END_TAG    = '/(?<html_end><\/html(?:\s+[^>]*)?>.*)$/is';
-	const HTML_STRUCTURE_HEAD_START_TAG  = '/^[^<]*(?:\s*<!--[^>]*>\s*)*(?:<head(?:\s+[^>]*)?>)/i';
-	const HTML_STRUCTURE_BODY_START_TAG  = '/^[^<]*(?:\s*<!--[^>]*>\s*)*(?:<body(?:\s+[^>]*)?>)/i';
-	const HTML_STRUCTURE_BODY_END_TAG    = '/(?:<\/body(?:\s+[^>]*)?>)[^<>]*$/i';
-	const HTML_STRUCTURE_HEAD_TAG        = '/^(?:[^<]*(?:<head(?:\s+[^>]*)?>).*?<\/head(?:\s+[^>]*)?>)/is';
+	const HTML_STRUCTURE_DOCTYPE_PATTERN = '/^(?<doctype>[^<]*(?>\s*<!--.*?-->\s*)*<!doctype(?>\s+[^>]+)?>)/is';
+	const HTML_STRUCTURE_HTML_START_TAG  = '/^(?<html_start>[^<]*(?>\s*<!--.*?-->\s*)*<html(?>\s+[^>]*)?>)/is';
+	const HTML_STRUCTURE_HTML_END_TAG    = '/(?<html_end><\/html(?>\s+[^>]*)?>.*)$/is';
+	const HTML_STRUCTURE_HEAD_START_TAG  = '/^[^<]*(?>\s*<!--.*?-->\s*)*(?><head(?>\s+[^>]*)?>)/is';
+	const HTML_STRUCTURE_BODY_START_TAG  = '/^[^<]*(?>\s*<!--.*-->\s*)*(?><body(?>\s+[^>]*)?>)/is';
+	const HTML_STRUCTURE_BODY_END_TAG    = '/(?><\/body(?>\s+[^>]*)?>.*)$/is';
+	const HTML_STRUCTURE_HEAD_TAG        = '/^(?>[^<]*(?><head(?>\s+[^>]*)?>).*?<\/head(?>\s+[^>]*)?>)/is';
 	const HTML_DOCTYPE_HTML_4_SUFFIX     = ' PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"';
 
 	// Regex patterns used for securing and restoring the doctype node.
-	const HTML_SECURE_DOCTYPE_IF_NOT_FIRST_PATTERN = '/(^[^<]*(?:\s*<!--[^>]*>\s*)+<)(!)(doctype)(\s+[^>]+?)(>)/i';
-	const HTML_RESTORE_DOCTYPE_PATTERN             = '/(^[^<]*(?:\s*<!--[^>]*>\s*)+<)(!--amp-)(doctype)(\s+[^>]+?)(-->)/i';
+	const HTML_SECURE_DOCTYPE_IF_NOT_FIRST_PATTERN = '/(^[^<]*(?>\s*<!--[^>]*>\s*)+<)(!)(doctype)(\s+[^>]+?)(>)/i';
+	const HTML_RESTORE_DOCTYPE_PATTERN             = '/(^[^<]*(?>\s*<!--[^>]*>\s*)+<)(!--amp-)(doctype)(\s+[^>]+?)(-->)/i';
 
 	// Regex pattern used for removing Internet Explorer conditional comments.
-	const HTML_IE_CONDITIONAL_COMMENTS_PATTERN = '/<!--(?:\[if\s|<!\[endif)(?:[^>]+(?<!--)>)*(?:[^>]+(?<=--)>)/i';
+	const HTML_IE_CONDITIONAL_COMMENTS_PATTERN = '/<!--(?>\[if\s|<!\[endif)(?>[^>]+(?<!--)>)*(?>[^>]+(?<=--)>)/i';
 	/**
 	 * Xpath query to fetch the attributes that are being URL-encoded by saveHTML().
 	 *
@@ -110,16 +110,16 @@ final class Document extends DOMDocument {
 	const PROPERTY_GETTER_ERROR_MESSAGE = 'Undefined property: Amp\\AmpWP\\Dom\\Document::';
 
 	// Regex patterns and values used for adding and removing http-equiv charsets for compatibility.
-	const HTML_GET_HEAD_OPENING_TAG_PATTERN     = '/<head(?:\s+[^>]*)?>/i';
+	const HTML_GET_HEAD_OPENING_TAG_PATTERN     = '/(?><!--.*?-->)*<head(?>\s+[^>]*)?>/i'; // This pattern contains a comment to make sure we don't match a <head> tag within a comment.
 	const HTML_GET_HEAD_OPENING_TAG_REPLACEMENT = '$0<meta http-equiv="content-type" content="text/html; charset=utf-8">';
 	const HTML_GET_HTTP_EQUIV_TAG_PATTERN       = '#<meta http-equiv=([\'"])content-type\1 content=([\'"])text/html; charset=utf-8\2>#i';
 	const HTML_HTTP_EQUIV_VALUE                 = 'content-type';
 	const HTML_HTTP_EQUIV_CONTENT_VALUE         = 'text/html; charset=utf-8';
 
 	// Regex patterns used for finding tags or extracting attribute values in an HTML string.
-	const HTML_FIND_TAG_WITHOUT_ATTRIBUTE_PATTERN = '/<%1$s[^>]*?>[^<]*(?:<\/%1$s>)?/i';
-	const HTML_FIND_TAG_WITH_ATTRIBUTE_PATTERN    = '/<%1$s [^>]*?\s*%2$s\s*=[^>]*?>[^<]*(?:<\/%1$s>)?/i';
-	const HTML_EXTRACT_ATTRIBUTE_VALUE_PATTERN    = '/%s=(?:([\'"])(?<full>.*)?\1|(?<partial>[^ \'";]+))/';
+	const HTML_FIND_TAG_WITHOUT_ATTRIBUTE_PATTERN = '/<%1$s[^>]*?>[^<]*(?><\/%1$s>)?/i';
+	const HTML_FIND_TAG_WITH_ATTRIBUTE_PATTERN    = '/<%1$s [^>]*?\s*%2$s\s*=[^>]*?>[^<]*(?><\/%1$s>)?/i';
+	const HTML_EXTRACT_ATTRIBUTE_VALUE_PATTERN    = '/%s=(?>([\'"])(?<full>.*)?\1|(?<partial>[^ \'";]+))/';
 
 	// Tags constants used throughout.
 	const TAG_HEAD     = 'head';
@@ -344,8 +344,13 @@ final class Document extends DOMDocument {
 
 			// Remove http-equiv charset again.
 			$meta = $this->head->firstChild;
+			// We might have leading comments we need to preserve here.
+			while ( $meta instanceof DOMComment ) {
+				$meta = $meta->nextSibling;
+			}
 			if (
-				'meta' === $meta->tagName
+				$meta instanceof DOMElement
+				&& 'meta' === $meta->tagName
 				&& self::HTML_HTTP_EQUIV_VALUE === $meta->getAttribute( 'http-equiv' )
 				&& ( self::HTML_HTTP_EQUIV_CONTENT_VALUE ) === $meta->getAttribute( 'content' )
 			) {
@@ -579,7 +584,7 @@ final class Document extends DOMDocument {
 		static $regex_pattern = null;
 
 		if ( null === $regex_pattern ) {
-			$regex_pattern = '#<(' . implode( '|', self::$self_closing_tags ) . ')([^>]*?)(?:\s*\/)?>(?!</\1>)#';
+			$regex_pattern = '#<(' . implode( '|', self::$self_closing_tags ) . ')([^>]*?)(?>\s*\/)?>(?!</\1>)#';
 		}
 
 		return preg_replace( $regex_pattern, '<$1$2></$1>', $html );
@@ -685,7 +690,7 @@ final class Document extends DOMDocument {
 	private function convert_amp_bind_attributes( $html ) {
 
 		// Pattern for HTML attribute accounting for binding attr name, boolean attribute, single/double-quoted attribute value, and unquoted attribute values.
-		$attr_regex = '#^\s+(?P<name>\[?[a-zA-Z0-9_\-]+\]?)(?P<value>=(?:"[^"]*+"|\'[^\']*+\'|[^\'"\s]+))?#';
+		$attr_regex = '#^\s+(?P<name>\[?[a-zA-Z0-9_\-]+\]?)(?P<value>=(?>"[^"]*+"|\'[^\']*+\'|[^\'"\s]+))?#';
 
 		/**
 		 * Replace callback.
@@ -728,9 +733,9 @@ final class Document extends DOMDocument {
 				'#<',
 				'(?P<name>[a-zA-Z0-9_\-]+)',               // Tag name.
 				'(?P<attrs>\s',                            // Attributes.
-				'(?:[^>"\'\[\]]+|"[^"]*+"|\'[^\']*+\')*+', // Non-binding attributes tokens.
+				'(?>[^>"\'\[\]]+|"[^"]*+"|\'[^\']*+\')*+', // Non-binding attributes tokens.
 				'\[[a-zA-Z0-9_\-]+\]',                     // One binding attribute key.
-				'(?:[^>"\']+|"[^"]*+"|\'[^\']*+\')*+',     // Any attribute tokens, including binding ones.
+				'(?>[^>"\']+|"[^"]*+"|\'[^\']*+\')*+',     // Any attribute tokens, including binding ones.
 				')>#s',
 			]
 		);

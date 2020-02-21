@@ -199,10 +199,10 @@ class Test_AMP_DOM_Document extends WP_UnitTestCase {
 				'<!DOCTYPE html><html><head profile=""></head><body></body></html>',
 				'<!DOCTYPE html><html><head><meta charset="utf-8"></head><body></body></html>',
 			],
-			'comment_after_html'                       => [
+			'comments_preserve_position'               => [
 				'utf-8',
-				'<!DOCTYPE html><html>' . $head . '<body class="something" data-something="something"></body></html><!-- some comment -->',
-				'<!DOCTYPE html><html>' . $head . '<body class="something" data-something="something"></body></html><!-- some comment -->',
+				'<!DOCTYPE html><!-- before <html> --><html><!-- before <head> --><head><meta charset="utf-8"><!-- within <head> --></head><!-- before <body> --><body class="something" data-something="something"><!-- within <body> --></body><!-- after </body> --></html><!-- after </html> -->',
+				'<!DOCTYPE html><!-- before <html> --><html><!-- before <head> --><head><meta charset="utf-8"><!-- within <head> --></head><!-- before <body> --><body class="something" data-something="something"><!-- within <body> --></body><!-- after </body> --></html><!-- after </html> -->',
 			],
 		];
 	}
@@ -236,8 +236,8 @@ class Test_AMP_DOM_Document extends WP_UnitTestCase {
 		$expected = preg_replace( '/(?<=>)\s+(?=<)/', '', trim( $expected ) );
 
 		$this->assertEquals(
-			array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $expected, -1, PREG_SPLIT_DELIM_CAPTURE ) ),
-			array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $actual, -1, PREG_SPLIT_DELIM_CAPTURE ) )
+			array_filter( preg_split( '#(<!--.*?-->|<[^>]+>|[^<>]+)#', $expected, -1, PREG_SPLIT_DELIM_CAPTURE ) ),
+			array_filter( preg_split( '#(<!--.*?-->|<[^>]+>|[^<>]+)#', $actual, -1, PREG_SPLIT_DELIM_CAPTURE ) )
 		);
 	}
 
