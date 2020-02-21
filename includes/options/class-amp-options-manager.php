@@ -162,7 +162,7 @@ class AMP_Options_Manager {
 		if ( 'toplevel_page_' . self::OPTION_NAME === get_current_screen()->id ) {
 			printf(
 				'<div class="notice notice-info"><p>%s</p></div>',
-				esc_html__( 'The Stories experience is being extracted into a standalone plugin which will be available soon.', 'amp' )
+				esc_html__( 'The Stories experience has been extracted into a standalone plugin which will be available soon.', 'amp' )
 			);
 		}
 	}
