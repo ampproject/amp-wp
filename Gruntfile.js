@@ -27,6 +27,7 @@ module.exports = function( grunt ) {
 	// ⚠️ Warning: These paths are passed straight to rm command in the shell, without any escaping.
 	const productionVendorExcludedFilePatterns = [
 		'composer.*',
+
 		'patches',
 		'lib/*',
 		'vendor/*/*/.editorconfig',
