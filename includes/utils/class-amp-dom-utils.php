@@ -52,6 +52,7 @@ class AMP_DOM_Utils {
 	 *
 	 * @since 0.7
 	 * @see AMP_DOM_Utils::get_content_from_dom_node()
+	 * @codeCoverageIgnore
 	 * @deprecated Use Amp\Dom\Document::fromHtml( $html, $encoding ) instead.
 	 *
 	 * @param string $document Valid HTML document to be represented by a Dom\Document.
@@ -68,6 +69,7 @@ class AMP_DOM_Utils {
 	 *
 	 * @link https://github.com/ampproject/amphtml/blob/445d6e3be8a5063e2738c6f90fdcd57f2b6208be/validator/engine/htmlparser.js#L83-L100
 	 * @link https://www.w3.org/TR/html5/document-metadata.html
+	 * @codeCoverageIgnore
 	 * @deprecated Use Amp\Dom\Document->isValidHeadNode() instead.
 	 *
 	 * @param DOMNode $node Node.
@@ -87,6 +89,7 @@ class AMP_DOM_Utils {
 	 * @since 0.7
 	 * @see \AMP_DOM_Utils::convert_amp_bind_attributes()
 	 * @see \AMP_DOM_Utils::restore_amp_bind_attributes()
+	 * @codeCoverageIgnore
 	 * @deprecated Use Amp\Dom\Document::AMP_BIND_DATA_ATTR_PREFIX instead.
 	 * @link https://www.ampproject.org/docs/reference/components/amp-bind
 	 *
@@ -106,6 +109,7 @@ class AMP_DOM_Utils {
 	 * This is a reciprocal function of AMP_DOM_Utils::restore_amp_bind_attributes().
 	 *
 	 * @since 0.7
+	 * @codeCoverageIgnore
 	 * @deprecated This is handled automatically via Amp\Dom\Document.
 	 * @see \AMP_DOM_Utils::convert_amp_bind_attributes()
 	 * @link https://www.ampproject.org/docs/reference/components/amp-bind
@@ -125,6 +129,7 @@ class AMP_DOM_Utils {
 	 *
 	 * @since 0.7
 	 * @see \AMP_DOM_Utils::convert_amp_bind_attributes()
+	 * @codeCoverageIgnore
 	 * @deprecated This is handled automatically via Amp\Dom\Document.
 	 * @link https://www.ampproject.org/docs/reference/components/amp-bind
 	 *
@@ -188,6 +193,7 @@ class AMP_DOM_Utils {
 	 * @since 0.6
 	 * @see AMP_DOM_Utils::get_dom() Where the operations in this method are mirrored.
 	 * @see AMP_DOM_Utils::get_content_from_dom() Reciprocal function.
+	 * @codeCoverageIgnore
 	 * @deprecated Use Dom\Document->saveHtml( $node ) instead.
 	 *
 	 * @param Document   $dom  Represents an HTML document.
@@ -281,6 +287,7 @@ class AMP_DOM_Utils {
 	 * Forces HTML element closing tags given a Dom\Document and optional DOMElement
 	 *
 	 * @since 0.2
+	 * @codeCoverageIgnore
 	 * @deprecated
 	 *
 	 * @param Document   $dom  Represents HTML document on which to force closing tags.

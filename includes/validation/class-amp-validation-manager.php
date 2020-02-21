@@ -75,18 +75,39 @@ class AMP_Validation_Manager {
 	public static $validation_results = [];
 
 	/**
-	 * Sources that enqueue each script.
+	 * Sources that enqueue (or register) each script.
 	 *
 	 * @var array
 	 */
 	public static $enqueued_script_sources = [];
 
 	/**
-	 * Sources that enqueue each style.
+	 * Sources for script extras that are attached to each dependency.
+	 *
+	 * The keys are the values of the extras being added; the values are an array of the source(s) that caused the extra
+	 * to be added.
+	 *
+	 * @since 1.5
+	 * @var array[]
+	 */
+	public static $extra_script_sources = [];
+
+	/**
+	 * Sources that enqueue (or register) each style.
 	 *
 	 * @var array
 	 */
 	public static $enqueued_style_sources = [];
+
+	/**
+	 * Sources for style extras that are attached to each dependency.
+	 *
+	 * The keys are the style handles, and the values are mappings of the inline CSS to the array of sources.
+	 *
+	 * @since 1.5
+	 * @var array[]
+	 */
+	public static $extra_style_sources = [];
 
 	/**
 	 * Post IDs for posts that have been updated which need to be re-validated.
@@ -187,21 +208,6 @@ class AMP_Validation_Manager {
 	 * @return void
 	 */
 	public static function init() {
-		$should_validate_response = self::should_validate_response();
-
-		// Short-circuit validation requests that are unauthorized.
-		if ( $should_validate_response instanceof WP_Error ) {
-			wp_send_json(
-				[
-					'code'    => $should_validate_response->get_error_code(),
-					'message' => $should_validate_response->get_error_message(),
-				],
-				401
-			);
-		}
-
-		self::$is_validate_request = $should_validate_response;
-
 		AMP_Validated_URL_Post_Type::register();
 		AMP_Validation_Error_Taxonomy::register();
 
@@ -242,10 +248,6 @@ class AMP_Validation_Manager {
 		}
 
 		add_action( 'wp', [ __CLASS__, 'override_validation_error_statuses' ] );
-
-		if ( self::$is_validate_request ) {
-			self::add_validation_error_sourcing();
-		}
 	}
 
 	/**
@@ -579,13 +581,45 @@ class AMP_Validation_Manager {
 	}
 
 	/**
+	 * Initialize a validate request.
+	 *
+	 * This function is called as early as possible, at the plugins_loaded action, to see if the current request is to
+	 * validate the response. If the validate query arg is absent, then this does nothing. If the query arg is present,
+	 * but the value is not a valid auth key, then wp_send_json() is invoked to short-circuit with a failure. Otherwise,
+	 * the static $is_validate_request variable is set to true.
+	 *
+	 * @since 1.5
+	 */
+	public static function init_validate_request() {
+		$should_validate_response = self::should_validate_response();
+
+		if ( true === $should_validate_response ) {
+			self::add_validation_error_sourcing();
+			self::$is_validate_request = true;
+		} else {
+			self::$is_validate_request = false;
+
+			// Short-circuit validation requests that are unauthorized.
+			if ( $should_validate_response instanceof WP_Error ) {
+				wp_send_json(
+					[
+						'code'    => $should_validate_response->get_error_code(),
+						'message' => $should_validate_response->get_error_message(),
+					],
+					401
+				);
+			}
+		}
+	}
+
+	/**
 	 * Add hooks for doing determining sources for validation errors during preprocessing/sanitizing.
 	 */
 	public static function add_validation_error_sourcing() {
-		self::$template_directory   = wp_normalize_path( get_template_directory() );
-		self::$template_slug        = get_template();
-		self::$stylesheet_directory = wp_normalize_path( get_stylesheet_directory() );
-		self::$stylesheet_slug      = get_stylesheet();
+		self::set_theme_variables();
+
+		// Call again at setup_theme in case a plugin has dynamically changed the theme.
+		add_action( 'setup_theme', [ __CLASS__, 'set_theme_variables' ], ~PHP_INT_MAX );
 
 		add_action( 'wp', [ __CLASS__, 'wrap_widget_callbacks' ] );
 
@@ -597,16 +631,17 @@ class AMP_Validation_Manager {
 
 		add_filter( 'do_shortcode_tag', [ __CLASS__, 'decorate_shortcode_source' ], PHP_INT_MAX, 2 );
 		add_filter( 'embed_oembed_html', [ __CLASS__, 'decorate_embed_source' ], PHP_INT_MAX, 3 );
+		add_filter( 'the_content', [ __CLASS__, 'add_block_source_comments' ], 8 ); // The do_blocks() function runs at priority 9.
+	}
 
-		$do_blocks_priority  = has_filter( 'the_content', 'do_blocks' );
-		$is_gutenberg_active = (
-			false !== $do_blocks_priority
-			&&
-			class_exists( 'WP_Block_Type_Registry' )
-		);
-		if ( $is_gutenberg_active ) {
-			add_filter( 'the_content', [ __CLASS__, 'add_block_source_comments' ], $do_blocks_priority - 1 );
-		}
+	/**
+	 * Set theme variables.
+	 */
+	public static function set_theme_variables() {
+		self::$template_directory   = wp_normalize_path( get_template_directory() );
+		self::$template_slug        = get_template();
+		self::$stylesheet_directory = wp_normalize_path( get_stylesheet_directory() );
+		self::$stylesheet_slug      = get_stylesheet();
 	}
 
 	/**
@@ -898,6 +933,8 @@ class AMP_Validation_Manager {
 		self::$validation_results      = [];
 		self::$enqueued_style_sources  = [];
 		self::$enqueued_script_sources = [];
+		self::$extra_script_sources    = [];
+		self::$extra_style_sources     = [];
 	}
 
 	/**
@@ -1039,6 +1076,54 @@ class AMP_Validation_Manager {
 	}
 
 	/**
+	 * Recursively determine if a given dependency depends on another.
+	 *
+	 * @since 1.3
+	 *
+	 * @param WP_Dependencies $dependencies      Dependencies.
+	 * @param string          $current_handle    Current handle.
+	 * @param string          $dependency_handle Dependency handle.
+	 * @return bool Whether the current handle is a dependency of the dependency handle.
+	 */
+	protected static function has_dependency( WP_Dependencies $dependencies, $current_handle, $dependency_handle ) {
+		if ( $current_handle === $dependency_handle ) {
+			return true;
+		}
+		if ( ! isset( $dependencies->registered[ $current_handle ] ) ) {
+			return false;
+		}
+		foreach ( $dependencies->registered[ $current_handle ]->deps as $handle ) {
+			if ( self::has_dependency( $dependencies, $handle, $dependency_handle ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Determine if a script element matches a given script handle.
+	 *
+	 * @param DOMElement $element       Element.
+	 * @param string     $script_handle Script handle.
+	 * @return bool
+	 */
+	protected static function is_matching_script( DOMElement $element, $script_handle ) {
+		if ( ! isset( wp_scripts()->registered[ $script_handle ] ) ) {
+			return false;
+		}
+		$script_dependency = wp_scripts()->registered[ $script_handle ];
+		if ( empty( $script_dependency->src ) ) {
+			return false;
+		}
+
+		// Script src attribute is haystack because includes protocol and may include query args (like ver).
+		return false !== strpos(
+			$element->getAttribute( 'src' ),
+			preg_replace( '#^https?:(?=//)#', '', $script_dependency->src )
+		);
+	}
+
+	/**
 	 * Walk back tree to find the open sources.
 	 *
 	 * @todo This method and others for sourcing could be moved to a separate class.
@@ -1076,13 +1161,70 @@ class AMP_Validation_Manager {
 			&&
 			preg_match( '/(?P<handle>.+)-css$/', (string) $node->getAttribute( 'id' ), $matches )
 			&&
-			isset( self::$enqueued_style_sources[ $matches['handle'] ] )
+			wp_styles()->query( $matches['handle'] )
 		);
 		if ( $is_enqueued_link ) {
-			$sources = array_merge(
-				self::$enqueued_style_sources[ $matches['handle'] ],
-				$sources
-			);
+			// Directly enqueued stylesheet.
+			if ( isset( self::$enqueued_style_sources[ $matches['handle'] ] ) ) {
+				$sources = array_merge(
+					self::$enqueued_style_sources[ $matches['handle'] ],
+					$sources
+				);
+			}
+
+			// Stylesheet added as a dependency.
+			foreach ( wp_styles()->done as $style_handle ) {
+				if ( $matches['handle'] !== $style_handle ) {
+					continue;
+				}
+				foreach ( self::$enqueued_style_sources as $enqueued_style_sources_handle => $enqueued_style_sources ) {
+					if (
+						$enqueued_style_sources_handle !== $style_handle
+						&&
+						wp_styles()->query( $enqueued_style_sources_handle, 'done' )
+						&&
+						self::has_dependency( wp_styles(), $enqueued_style_sources_handle, $style_handle )
+					) {
+						$sources = array_merge(
+							array_map(
+								static function ( $enqueued_style_source ) use ( $style_handle ) {
+									$enqueued_style_source['dependency_handle'] = $style_handle;
+									return $enqueued_style_source;
+								},
+								$enqueued_style_sources
+							),
+							$sources
+						);
+					}
+				}
+			}
+		}
+
+		$is_inline_style = (
+			$node instanceof DOMElement
+			&&
+			'style' === $node->nodeName
+			&&
+			$node->firstChild instanceof DOMText
+			&&
+			$node->hasAttribute( 'id' )
+			&&
+			preg_match( '/^(?P<handle>.+)-inline-css$/', $node->getAttribute( 'id' ), $matches )
+			&&
+			wp_styles()->query( $matches['handle'] )
+			&&
+			isset( self::$extra_style_sources[ $matches['handle'] ] )
+		);
+		if ( $is_inline_style ) {
+			$text = $node->textContent;
+			foreach ( self::$extra_style_sources[ $matches['handle'] ] as $css => $extra_sources ) {
+				if ( false !== strpos( $text, $css ) ) {
+					$sources = array_merge(
+						$sources,
+						$extra_sources
+					);
+				}
+			}
 		}
 
 		/**
@@ -1095,55 +1237,60 @@ class AMP_Validation_Manager {
 
 			if ( $node->hasAttribute( 'src' ) ) {
 
-				// External script.
-				$src = $node->getAttribute( 'src' );
+				// External scripts, directly enqueued.
 				foreach ( $enqueued_script_handles as $enqueued_script_handle ) {
-					$script_dependency  = wp_scripts()->registered[ $enqueued_script_handle ];
-					$is_matching_script = (
-						$script_dependency
-						&&
-						$script_dependency->src
-						&&
-						// Script attribute is haystack because includes protocol and may include query args (like ver).
-						false !== strpos( $src, preg_replace( '#^https?:(?=//)#', '', $script_dependency->src ) )
-					);
-					if ( $is_matching_script ) {
-						$sources = array_merge(
-							self::$enqueued_script_sources[ $enqueued_script_handle ],
-							$sources
-						);
-						break;
+					if ( ! self::is_matching_script( $node, $enqueued_script_handle ) ) {
+						continue;
 					}
-				}
-			} elseif ( $node->firstChild ) {
-
-				// Inline script.
-				$text = $node->textContent;
-				foreach ( $enqueued_script_handles as $enqueued_script_handle ) {
-					$inline_scripts = array_filter(
-						array_merge(
-							(array) wp_scripts()->get_data( $enqueued_script_handle, 'data' ),
-							(array) wp_scripts()->get_data( $enqueued_script_handle, 'before' ),
-							(array) wp_scripts()->get_data( $enqueued_script_handle, 'after' )
-						)
+					$sources = array_merge(
+						self::$enqueued_script_sources[ $enqueued_script_handle ],
+						$sources
 					);
-					foreach ( $inline_scripts as $inline_script ) {
-						/*
-						 * Check to see if the inline script is inside (or the same) as the script in the document.
-						 * Note that WordPress takes the registered inline script and will output it with newlines
-						 * padding it, and sometimes with the script wrapped by CDATA blocks.
-						 */
-						if ( false !== strpos( $text, trim( $inline_script ) ) ) {
+					break;
+				}
+
+				// External scripts, added as a dependency.
+				foreach ( wp_scripts()->done as $script_handle ) {
+					if ( ! self::is_matching_script( $node, $script_handle ) ) {
+						continue;
+					}
+					foreach ( self::$enqueued_script_sources as $enqueued_script_sources_handle => $enqueued_script_sources ) {
+						if (
+							$enqueued_script_sources_handle !== $script_handle
+							&&
+							wp_scripts()->query( $enqueued_script_sources_handle, 'done' )
+							&&
+							self::has_dependency( wp_scripts(), $enqueued_script_sources_handle, $script_handle )
+						) {
 							$sources = array_merge(
-								self::$enqueued_script_sources[ $enqueued_script_handle ],
+								array_map(
+									static function ( $enqueued_script_source ) use ( $script_handle ) {
+										$enqueued_script_source['dependency_handle'] = $script_handle;
+										return $enqueued_script_source;
+									},
+									$enqueued_script_sources
+								),
 								$sources
 							);
-							break;
 						}
+					}
+				}
+			} elseif ( $node->firstChild instanceof DOMText ) {
+				$text = $node->textContent;
+
+				// Identify the inline script sources.
+				foreach ( self::$extra_script_sources as $extra_data => $extra_sources ) {
+					if ( false !== strpos( $text, $extra_data ) ) {
+						$sources = array_merge(
+							$sources,
+							$extra_sources
+						);
 					}
 				}
 			}
 		}
+
+		$sources = array_unique( $sources, SORT_REGULAR );
 
 		return $sources;
 	}
@@ -1295,12 +1442,12 @@ class AMP_Validation_Manager {
 				self::$current_hook_source_stack[ $hook ][] = $source;
 
 				/*
-				 * A current limitation with wrapping callbacks is that the wrapped function cannot have
-				 * any parameters passed by reference. Without this the result is:
-				 *
-				 * > PHP Warning:  Parameter 1 to wp_default_styles() expected to be a reference, value given.
+				 * Wrapped callbacks cause PHP warnings when the wrapped function has arguments passed by reference.
+				 * We have a special case to support functions that have the first argument passed by reference, namely
+				 * wp_default_scripts() and wp_default_styles(). But other configurations are bypassed.
 				 */
-				if ( self::has_parameters_passed_by_reference( $reflection ) ) {
+				$passed_by_ref = self::has_parameters_passed_by_reference( $reflection );
+				if ( $passed_by_ref > 1 ) {
 					continue;
 				}
 
@@ -1314,10 +1461,17 @@ class AMP_Validation_Manager {
 					)
 				);
 
-				$callback['function'] = function() use ( &$callback, $wrapped_callback, $original_function ) {
-					$callback['function'] = $original_function; // Restore original.
-					return call_user_func_array( $wrapped_callback, func_get_args() );
-				};
+				if ( 1 === $passed_by_ref ) {
+					$callback['function'] = static function( &$first, ...$other_args ) use ( &$callback, $wrapped_callback, $original_function ) {
+						$callback['function'] = $original_function; // Restore original.
+						return $wrapped_callback->invoke_with_first_ref_arg( $first, ...$other_args );
+					};
+				} else {
+					$callback['function'] = static function( ...$args ) use ( &$callback, $wrapped_callback, $original_function ) {
+						$callback['function'] = $original_function; // Restore original.
+						return $wrapped_callback( ...$args );
+					};
+				}
 			}
 		}
 	}
@@ -1327,15 +1481,21 @@ class AMP_Validation_Manager {
 	 *
 	 * @since 0.7
 	 * @param ReflectionFunction|ReflectionMethod $reflection Reflection.
-	 * @return bool Whether there are parameters passed by reference.
+	 * @return int Whether there are parameters passed by reference, where 0 means none were passed, 1 means the first was passed, and 2 means some other configuration.
 	 */
 	protected static function has_parameters_passed_by_reference( $reflection ) {
-		foreach ( $reflection->getParameters() as $parameter ) {
+		$status = 0;
+		foreach ( $reflection->getParameters() as $i => $parameter ) {
 			if ( $parameter->isPassedByReference() ) {
-				return true;
+				if ( 0 === $i ) {
+					$status = 1;
+				} else {
+					$status = 2;
+					break;
+				}
 			}
 		}
-		return false;
+		return $status;
 	}
 
 	/**

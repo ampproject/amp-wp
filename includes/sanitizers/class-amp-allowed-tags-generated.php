@@ -984,6 +984,10 @@ class AMP_Allowed_Tags_Generated {
 							4,
 						),
 					),
+					'mandatory_oneof' => array(
+						'data-product-code',
+						'data-widget-id',
+					),
 					'requires_extension' => array(
 						'amp-addthis',
 					),
@@ -1119,6 +1123,10 @@ class AMP_Allowed_Tags_Generated {
 							1,
 							4,
 						),
+					),
+					'mandatory_oneof' => array(
+						'data-apester-channel-token',
+						'data-apester-media-id',
 					),
 					'requires_extension' => array(
 						'amp-apester-media',
@@ -1697,6 +1705,11 @@ class AMP_Allowed_Tags_Generated {
 							4,
 						),
 					),
+					'mandatory_oneof' => array(
+						'data-outstream',
+						'data-playlist',
+						'data-video',
+					),
 					'requires_extension' => array(
 						'amp-brid-player',
 					),
@@ -2188,6 +2201,12 @@ class AMP_Allowed_Tags_Generated {
 							4,
 						),
 					),
+					'mandatory_oneof' => array(
+						'end-date',
+						'timeleft-ms',
+						'timestamp-ms',
+						'timestamp-seconds',
+					),
 					'requires_extension' => array(
 						'amp-date-countdown',
 					),
@@ -2233,6 +2252,11 @@ class AMP_Allowed_Tags_Generated {
 							1,
 							4,
 						),
+					),
+					'mandatory_oneof' => array(
+						'datetime',
+						'timestamp-ms',
+						'timestamp-seconds',
 					),
 					'requires_extension' => array(
 						'amp-date-display',
@@ -3283,6 +3307,10 @@ class AMP_Allowed_Tags_Generated {
 							4,
 						),
 					),
+					'mandatory_oneof' => array(
+						'src',
+						'srcdoc',
+					),
 					'requires_extension' => array(
 						'amp-iframe',
 					),
@@ -3616,6 +3644,10 @@ class AMP_Allowed_Tags_Generated {
 							4,
 						),
 					),
+					'mandatory_oneof' => array(
+						'data-media-id',
+						'data-playlist-id',
+					),
 					'requires_extension' => array(
 						'amp-jwplayer',
 					),
@@ -3803,6 +3835,10 @@ class AMP_Allowed_Tags_Generated {
 							4,
 						),
 					),
+					'mandatory_anyof' => array(
+						'data-amp-bind-src',
+						'src',
+					),
 					'requires_extension' => array(
 						'amp-list',
 					),
@@ -3834,6 +3870,12 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'tag_spec' => array(
+					'mandatory_oneof' => array(
+						'load-more-button',
+						'load-more-end',
+						'load-more-failed',
+						'load-more-loading',
+					),
 					'mandatory_parent' => 'amp-list',
 					'requires_extension' => array(
 						'amp-list',
@@ -4487,6 +4529,10 @@ class AMP_Allowed_Tags_Generated {
 							3,
 						),
 					),
+					'mandatory_oneof' => array(
+						'data-item',
+						'src',
+					),
 					'requires_extension' => array(
 						'amp-playbuzz',
 					),
@@ -4561,6 +4607,10 @@ class AMP_Allowed_Tags_Generated {
 							1,
 							4,
 						),
+					),
+					'mandatory_oneof' => array(
+						'data-terms',
+						'data-video',
 					),
 					'requires_extension' => array(
 						'amp-powr-player',
@@ -4741,6 +4791,10 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'disallowed_ancestor' => array(
 						'amp-script',
+					),
+					'mandatory_oneof' => array(
+						'script',
+						'src',
 					),
 					'requires_extension' => array(
 						'amp-script',
@@ -5030,6 +5084,10 @@ class AMP_Allowed_Tags_Generated {
 							1,
 							4,
 						),
+					),
+					'mandatory_oneof' => array(
+						'data-playlistid',
+						'data-trackid',
 					),
 					'requires_extension' => array(
 						'amp-soundcloud',
@@ -5561,6 +5619,11 @@ class AMP_Allowed_Tags_Generated {
 							1,
 							4,
 						),
+					),
+					'mandatory_oneof' => array(
+						'data-momentid',
+						'data-timeline-source-type',
+						'data-tweetid',
 					),
 					'requires_extension' => array(
 						'amp-twitter',
@@ -6476,6 +6539,10 @@ class AMP_Allowed_Tags_Generated {
 							1,
 							4,
 						),
+					),
+					'mandatory_oneof' => array(
+						'data-live-channelid',
+						'data-videoid',
 					),
 					'requires_extension' => array(
 						'amp-youtube',
@@ -8547,6 +8614,10 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'noscript',
 					'mandatory_ancestor_suggested_alternative' => 'amp-iframe',
+					'mandatory_oneof' => array(
+						'src',
+						'srcdoc',
+					),
 					'spec_url' => 'https://amp.dev/documentation/components/amp-iframe',
 				),
 			),
@@ -15357,7 +15428,7 @@ class AMP_Allowed_Tags_Generated {
 						),
 						'validate_keyframes' => false,
 					),
-					'max_bytes' => 50000,
+					'max_bytes' => 75000,
 					'max_bytes_spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#maximum-size',
 				),
 				'tag_spec' => array(

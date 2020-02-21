@@ -94,4 +94,11 @@ class Test_AMP extends WP_UnitTestCase {
 		$this->assertSame( $expected_mode, AMP_Theme_Support::get_support_mode_added_via_theme() );
 		$this->assertSame( $is_canonical, amp_is_canonical() );
 	}
+
+	/**
+	 * Test that init_validate_request will be called super early.
+	 */
+	public function test_init_validate_request_added_to_plugins_loaded_action() {
+		$this->assertSame( ~PHP_INT_MAX, has_action( 'plugins_loaded', [ 'AMP_Validation_Manager', 'init_validate_request' ] ) );
+	}
 }

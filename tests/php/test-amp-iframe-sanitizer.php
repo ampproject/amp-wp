@@ -461,6 +461,77 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 						</noscript>
 					</amp-iframe>',
 			],
+
+			'iframe_with_resizable' => [
+				'<iframe resizable src="https://example.com" width="320" height="640"></iframe>',
+				'
+					<amp-iframe resizable="" src="https://example.com" width="320" height="640" sandbox="allow-scripts allow-same-origin" layout="intrinsic" class="amp-wp-enforced-sizes">
+						<span placeholder="" class="amp-wp-iframe-placeholder"></span>
+						<button overflow="">Show all</button>
+						<noscript>
+							<iframe resizable src="https://example.com" width="320" height="640"></iframe>
+						</noscript>
+					</amp-iframe>
+				',
+				[
+					'add_placeholder' => true,
+				],
+			],
+
+			'iframe_with_resizable_and_custom_overflow' => [
+				'<iframe data-amp-resizable data-amp-overflow-text="Expand me" src="https://example.com" width="320" height="640"></iframe>',
+				'
+					<amp-iframe resizable="" src="https://example.com" width="320" height="640" sandbox="allow-scripts allow-same-origin" layout="intrinsic" class="amp-wp-enforced-sizes">
+						<span placeholder="" class="amp-wp-iframe-placeholder"></span>
+						<button overflow="">Expand me</button>
+						<noscript>
+							<iframe src="https://example.com" width="320" height="640"></iframe>
+						</noscript>
+					</amp-iframe>
+				',
+				[
+					'add_placeholder' => true,
+				],
+			],
+
+			'iframe_with_custom_placeholder' => [
+				'
+					<iframe src="https://example.com" width="320" height="640">
+						<a placeholder href="https://example.com">Loading example site...</a>
+					</iframe>
+				',
+				'
+					<amp-iframe src="https://example.com" width="320" height="640" sandbox="allow-scripts allow-same-origin" layout="intrinsic" class="amp-wp-enforced-sizes">
+						<a placeholder href="https://example.com">Loading example site...</a>
+						<noscript>
+							<iframe src="https://example.com" width="320" height="640"></iframe>
+						</noscript>
+					</amp-iframe>
+				',
+				[
+					'add_placeholder' => true,
+				],
+			],
+
+			'iframe_with_custom_overflow' => [
+				'
+					<iframe resizable src="https://example.com" width="320" height="640">
+						<button overflow>See more</button>
+					</iframe>
+				',
+				'
+					<amp-iframe resizable="" src="https://example.com" width="320" height="640" sandbox="allow-scripts allow-same-origin" layout="intrinsic" class="amp-wp-enforced-sizes">
+						<span placeholder="" class="amp-wp-iframe-placeholder"></span>
+						<button overflow>See more</button>
+						<noscript>
+							<iframe resizable src="https://example.com" width="320" height="640"></iframe>
+						</noscript>
+					</amp-iframe>
+				',
+				[
+					'add_placeholder' => true,
+				],
+			],
 		];
 	}
 

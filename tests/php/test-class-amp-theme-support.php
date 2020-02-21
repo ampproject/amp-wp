@@ -622,7 +622,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertNotContains( '<meta name="viewport" content="maximum-scale=1.0">', $sanitized_html );
 
 		// Viewport tag was modified to include all requirements.
-		$this->assertContains( '<meta name="viewport" content="width=device-width,maximum-scale=1.0">', $sanitized_html );
+		$this->assertContains( '<meta name="viewport" content="maximum-scale=1.0,width=device-width">', $sanitized_html );
 
 		// MathML script was added.
 		$this->assertContains( '<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-mathml-0.1.js" async custom-element="amp-mathml"></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript

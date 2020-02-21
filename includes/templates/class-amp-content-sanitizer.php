@@ -19,6 +19,7 @@ class AMP_Content_Sanitizer {
 	 *
 	 * @since 0.4.1
 	 * @since 0.7 Passing return_styles=false in $global_args causes stylesheets to be returned instead of styles.
+	 * @codeCoverageIgnore
 	 * @deprecated Since 1.0
 	 *
 	 * @param string   $content HTML content string or DOM document.

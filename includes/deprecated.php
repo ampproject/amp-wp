@@ -9,6 +9,7 @@
  * Load classes.
  *
  * @since 0.2
+ * @codeCoverageIgnore
  * @deprecated As of 0.6 since autoloading is now employed.
  */
 function amp_load_classes() {
@@ -21,6 +22,7 @@ function amp_load_classes() {
  * If the request is for an AMP page and this is in 'canonical mode,' redirect to the non-AMP page.
  * It won't need this plugin's template system, nor the frontend actions like the 'rel' link.
  *
+ * @codeCoverageIgnore
  * @deprecated This function is not used when 'amp' theme support is added.
  * @global WP_Query $wp_query
  * @since 0.2
@@ -85,6 +87,7 @@ function amp_maybe_add_actions() {
  * Add post template actions.
  *
  * @since 0.2
+ * @codeCoverageIgnore
  * @deprecated This function is not used when 'amp' theme support is added.
  */
 function amp_add_post_template_actions() {
@@ -98,6 +101,7 @@ function amp_add_post_template_actions() {
  *
  * @since 0.2
  * @since 1.0 The amp_render() function is called at template_redirect action priority 11 instead of priority 10.
+ * @codeCoverageIgnore
  * @deprecated This function is not used when 'amp' theme support is added.
  */
 function amp_prepare_render() {
@@ -109,6 +113,7 @@ function amp_prepare_render() {
  * Render AMP for queried post.
  *
  * @since 0.1
+ * @codeCoverageIgnore
  * @deprecated This function is not used when 'amp' theme support is added.
  */
 function amp_render() {
@@ -126,6 +131,7 @@ function amp_render() {
  * Render AMP post template.
  *
  * @since 0.5
+ * @codeCoverageIgnore
  * @deprecated Rendering a post is now handled by AMP_Theme_Support.
  *
  * @param WP_Post|int $post Post.
@@ -181,6 +187,7 @@ function amp_render_post( $post ) {
 /**
  * Print scripts.
  *
+ * @codeCoverageIgnore
  * @deprecated Scripts are now automatically added.
  * @see amp_register_default_scripts()
  * @see amp_filter_script_loader_tag()
@@ -203,6 +210,7 @@ function amp_post_template_add_scripts( $amp_template ) {
 /**
  * Print boilerplate CSS.
  *
+ * @codeCoverageIgnore
  * @deprecated Boilerplate is now automatically added via the amp/optimizer library.
  * @since 0.3
  * @see amp_get_boilerplate_code()
@@ -248,6 +256,7 @@ function amp_get_boilerplate_stylesheets() {
 /**
  * Print Schema.org metadata.
  *
+ * @codeCoverageIgnore
  * @deprecated Since 0.7
  */
 function amp_post_template_add_schemaorg_metadata() {
@@ -261,6 +270,7 @@ function amp_post_template_add_schemaorg_metadata() {
  * This function must be invoked only once through the 'wp_loaded' action.
  *
  * @since 0.6
+ * @codeCoverageIgnore
  * @deprecated Since 1.5.0, as admin class bootstrapping is moved to amp_bootstrap_admin().
  */
 function amp_post_meta_box() {
@@ -271,6 +281,7 @@ function amp_post_meta_box() {
  * Bootstrap the AMP admin pointer class.
  *
  * @since 1.0
+ * @codeCoverageIgnore
  * @deprecated Since 1.5.0, as admin class bootstrapping is moved to amp_bootstrap_admin().
  */
 function amp_admin_pointer() {

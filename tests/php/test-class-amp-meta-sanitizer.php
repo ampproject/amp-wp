@@ -80,6 +80,9 @@ class Test_AMP_Meta_Sanitizer extends WP_UnitTestCase {
 		$sanitizer = new AMP_Meta_Sanitizer( $dom );
 		$sanitizer->sanitize();
 
+		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$sanitizer->sanitize();
+
 		$this->assertEqualMarkup( $expected_content, $dom->saveHTML() );
 	}
 

@@ -36,6 +36,21 @@ trait PrivateAccess {
 	}
 
 	/**
+	 * Call a private static method as if it was public.
+	 *
+	 * @param string $class       Class string to call the method of.
+	 * @param string $method_name Name of the method to call.
+	 * @param array  $args        Optional. Array of arguments to pass to the method.
+	 * @return mixed Return value of the method call.
+	 * @throws ReflectionException If the class could not be reflected upon.
+	 */
+	private function call_private_static_method( $class, $method_name, $args = [] ) {
+		$method = ( new ReflectionClass( $class ) )->getMethod( $method_name );
+		$method->setAccessible( true );
+		return $method->invokeArgs( null, $args );
+	}
+
+	/**
 	 * Set a private property as if it was public.
 	 *
 	 * @param object|string $object        Object instance or class string to set the property of.
@@ -61,5 +76,18 @@ trait PrivateAccess {
 		$property = ( new ReflectionClass( $object ) )->getProperty( $property_name );
 		$property->setAccessible( true );
 		return $property->getValue( $object );
+	}
+
+	/**
+	 * Get a static private property as if it was public.
+	 *
+	 * @param string $class         Class string to get the property of.
+	 * @param string $property_name Name of the property to get.
+	 * @return mixed Return value of the property.
+	 * @throws ReflectionException If the class could not be reflected upon.
+	 */
+	private function get_static_private_property( $class, $property_name ) {
+		$properties = ( new ReflectionClass( $class ) )->getStaticProperties();
+		return array_key_exists( $property_name, $properties ) ? $properties[ $property_name ] : null;
 	}
 }

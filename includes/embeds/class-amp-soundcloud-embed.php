@@ -38,6 +38,7 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 	 *
 	 * @see \WP_Embed::shortcode()
 	 *
+	 * @codeCoverageIgnore
 	 * @deprecated Core's oEmbed handler is now used instead, with embed_oembed_html filter used to convert to AMP.
 	 * @param array  $matches URL pattern matches.
 	 * @param array  $attr    Shortcode attributes.

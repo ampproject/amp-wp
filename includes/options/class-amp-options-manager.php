@@ -593,7 +593,7 @@ class AMP_Options_Manager {
 		) {
 			printf(
 				'<div class="notice notice-warning"><p>%s %s</p></div>',
-				esc_html__( 'The Stories experience is being extracted from the AMP plugin into a separate standalone plugin which will be available soon. Please back up or export your existing Stories as they will not be available in the next version of the AMP plugin.', 'amp' ),
+				esc_html__( 'The Stories experience is being extracted into a standalone plugin which will be available soon. Please back up or export your existing Stories as they will not be available in the next version of the AMP plugin.', 'amp' ),
 				sprintf(
 					'<a href="%s" target="_blank">%s</a>',
 					esc_url( 'https://amp-wp.org/documentation/amp-stories/exporting-stories/' ),
@@ -603,7 +603,7 @@ class AMP_Options_Manager {
 		} elseif ( ! self::is_stories_experience_enabled() && 'toplevel_page_' . self::OPTION_NAME === get_current_screen()->id ) {
 			printf(
 				'<div class="notice notice-info"><p>%s</p></div>',
-				esc_html__( 'The Stories experience has been removed from the AMP plugin. This beta feature is being split into a separate standalone plugin which will be available for installation soon.', 'amp' )
+				esc_html__( 'The Stories experience is being extracted into a standalone plugin which will be available soon.', 'amp' )
 			);
 		}
 	}
@@ -628,7 +628,7 @@ class AMP_Options_Manager {
 						    }
 						);
 					} )( window.wp );",
-			wp_json_encode( __( 'The Stories experience is being extracted from the AMP plugin into a separate standalone plugin which will be available soon. Please back up or export your existing Stories as they will not be available in the next version of the AMP plugin.', 'amp' ) ),
+			wp_json_encode( __( 'The Stories experience is being extracted into a standalone plugin which will be available soon. Please back up or export your existing Stories as they will not be available in the next version of the AMP plugin.', 'amp' ) ),
 			wp_json_encode( __( 'View how to export your Stories', 'amp' ) )
 		);
 

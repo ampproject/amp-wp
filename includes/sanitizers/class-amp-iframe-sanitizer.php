@@ -142,9 +142,41 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 
 			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-iframe', $normalized_attributes );
 
-			if ( true === $this->args['add_placeholder'] ) {
-				$placeholder_node = $this->build_placeholder( $normalized_attributes );
+			// Find existing placeholder/overflow.
+			$placeholder_node = null;
+			$overflow_node    = null;
+			foreach ( iterator_to_array( $node->childNodes ) as $child ) {
+				if ( ! ( $child instanceof DOMElement ) ) {
+					continue;
+				}
+				if ( $child->hasAttribute( 'placeholder' ) ) {
+					$placeholder_node = $node->removeChild( $child );
+				} elseif ( $child->hasAttribute( 'overflow' ) ) {
+					$overflow_node = $node->removeChild( $child );
+				}
+			}
+
+			// Add placeholder.
+			if ( $placeholder_node || true === $this->args['add_placeholder'] ) {
+				if ( ! $placeholder_node ) {
+					$placeholder_node = $this->build_placeholder( $normalized_attributes ); // @todo Can a better placeholder default be devised?
+				}
 				$new_node->appendChild( $placeholder_node );
+			}
+
+			// Add overflow.
+			if ( $new_node->hasAttribute( 'resizable' ) && ! $overflow_node ) {
+				$overflow_node = $this->dom->createElement( 'button' );
+				$overflow_node->setAttribute( 'overflow', '' );
+				if ( $node->hasAttribute( 'data-amp-overflow-text' ) ) {
+					$overflow_text = $node->getAttribute( 'data-amp-overflow-text' );
+				} else {
+					$overflow_text = __( 'Show all', 'amp' );
+				}
+				$overflow_node->appendChild( $this->dom->createTextNode( $overflow_text ) );
+			}
+			if ( $overflow_node ) {
+				$new_node->appendChild( $overflow_node );
 			}
 
 			$node->parentNode->replaceChild( $new_node, $node );
@@ -252,6 +284,14 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 					if ( '0' !== $value ) {
 						$out[ $name ] = $value;
 					}
+					break;
+
+				case 'data-amp-resizable':
+					$out['resizable'] = '';
+					break;
+
+				case 'data-amp-overflow-text':
+					// No need to copy.
 					break;
 
 				default:
