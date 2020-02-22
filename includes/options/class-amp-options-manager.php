@@ -53,7 +53,6 @@ class AMP_Options_Manager {
 
 		add_action( 'update_option_' . self::OPTION_NAME, [ __CLASS__, 'maybe_flush_rewrite_rules' ], 10, 2 );
 		add_action( 'admin_notices', [ __CLASS__, 'render_welcome_notice' ] );
-		add_action( 'admin_notices', [ __CLASS__, 'render_stories_deprecation_notice' ] );
 		add_action( 'admin_notices', [ __CLASS__, 'persistent_object_caching_notice' ] );
 		add_action( 'admin_notices', [ __CLASS__, 'render_cache_miss_notice' ] );
 		add_action( 'admin_notices', [ __CLASS__, 'render_php_css_parser_conflict_notice' ] );
@@ -153,18 +152,6 @@ class AMP_Options_Manager {
 		}
 
 		return $amp_options[ $option ];
-	}
-
-	/**
-	 * Render the Stories deprecation admin notice.
-	 */
-	public static function render_stories_deprecation_notice() {
-		if ( 'toplevel_page_' . self::OPTION_NAME === get_current_screen()->id ) {
-			printf(
-				'<div class="notice notice-info"><p>%s</p></div>',
-				esc_html__( 'The Stories experience has been extracted into a standalone plugin which will be available soon.', 'amp' )
-			);
-		}
 	}
 
 	/**
