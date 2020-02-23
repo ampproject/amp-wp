@@ -128,10 +128,24 @@ class AMP_Options_Manager {
 			$options['theme_support'] = $defaults['theme_support'];
 		}
 
-		// Remove 'auto_accept_sanitization' option as of 1.4.
-		if ( isset( $options['auto_accept_sanitization'] ) ) {
-			unset( $options['auto_accept_sanitization'] );
-		}
+		unset(
+			/**
+			 * Remove 'auto_accept_sanitization' option.
+			 *
+			 * @since 1.4.0
+			 */
+			$options['auto_accept_sanitization'],
+			/**
+			 * Remove Story related options.
+			 *
+			 * @since 1.5.0
+			 */
+			$options['story_templates_version'],
+			$options['story_export_base_url'],
+			$options['story_settings'],
+			// Remove option to enable Stories. This was added in 1.2-beta and was migrated into the `experiences` option.
+			$options['enable_amp_stories']
+		);
 
 		return $options;
 	}
