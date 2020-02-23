@@ -194,3 +194,37 @@ function amp_bootstrap_admin() {
 	$site_health = new SiteHealth();
 	$site_health->init();
 }
+
+/**
+ * Remove Story templates.
+ */
+function remove_amp_story_templates() {
+	$template_term     = 'story-template';
+	$template_taxonomy = 'amp_template';
+
+	if ( post_type_exists( 'wp_block' ) ) {
+		$posts = get_posts(
+			[
+				'no_found_rows' => true,
+				'post_type'     => 'wp_block',
+				'tax_query'     => [
+					'taxonomy' => $template_taxonomy,
+					'field'    => 'slug',
+					'terms'    => [ $template_term ],
+				],
+			]
+		);
+
+		if ( 0 < count( $posts ) ) {
+			foreach ( $posts as $post ) {
+				wp_delete_post( $post->ID, true );
+			}
+		}
+	}
+
+	$term_id = term_exists( $template_term );
+	if ( ! empty( $term_id ) && is_string( $term_id ) ) {
+		// The actual taxonomy name can't be used since its not registered.
+		wp_delete_term( (int) $term_id, '' );
+	}
+}

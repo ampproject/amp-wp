@@ -386,6 +386,8 @@ function amp_init() {
 		add_filter( 'old_slug_redirect_url', 'amp_redirect_old_slug_to_new_url' );
 	}
 
+	add_action( 'wp_loaded', 'remove_amp_story_templates' );
+
 	if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		if ( class_exists( 'WP_CLI\Dispatcher\CommandNamespace' ) ) {
 			WP_CLI::add_command( 'amp', 'AMP_CLI_Namespace' );
