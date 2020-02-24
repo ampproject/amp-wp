@@ -1522,7 +1522,7 @@ class AMP_Validated_URL_Post_Type {
 					throw new Exception( 'invalid_post' );
 				}
 				if ( ! current_user_can( 'edit_post', $post->ID ) ) {
-					throw new Exception( 'unauthorized' );
+					throw new Exception( __( 'Unable to access validated URL screen.', 'amp' ) );
 				}
 				$url = self::get_url_from_post( $post );
 			} elseif ( isset( $_GET['url'] ) ) {
@@ -1531,8 +1531,8 @@ class AMP_Validated_URL_Post_Type {
 					throw new Exception( 'illegal_url' );
 				}
 				// Don't let non-admins create new amp_validated_url posts.
-				if ( ! current_user_can( 'manage_options' ) ) {
-					throw new Exception( 'unauthorized' );
+				if ( ! current_user_can( get_post_type_object( self::POST_TYPE_SLUG )->cap->edit_posts ) ) {
+					throw new Exception( __( 'Unable to access validated URL screen.', 'amp' ) );
 				}
 			}
 
@@ -1560,6 +1560,9 @@ class AMP_Validated_URL_Post_Type {
 				throw new Exception( AMP_Validation_Manager::get_validate_url_error_message( $stored->get_error_code(), $stored->get_error_message() ) );
 			}
 			$redirect = get_edit_post_link( $stored, 'raw' );
+			if ( empty( $redirect ) ) {
+				throw new Exception( __( 'Unable to access validated URL screen.', 'amp' ) );
+			}
 
 			$error_count = count(
 				array_filter(

@@ -840,7 +840,7 @@ class AMP_Validation_Manager {
 	 * @return boolean $has_cap Whether the current user has the capability.
 	 */
 	public static function has_cap() {
-		return current_user_can( 'edit_posts' );
+		return current_user_can( get_post_type_object( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG )->cap->edit_posts );
 	}
 
 	/**
