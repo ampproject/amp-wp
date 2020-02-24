@@ -143,7 +143,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 		$debug_info = $this->instance->add_debug_information( [] );
 		$this->assertArrayHasKey( 'amp_wp', $debug_info );
 		$this->assertArrayHasKey( 'fields', $debug_info['amp_wp'] );
-		$keys = [ 'amp_mode_enabled', 'amp_experiences_enabled', 'amp_templates_enabled', 'amp_serve_all_templates' ];
+		$keys = [ 'amp_mode_enabled', 'amp_templates_enabled', 'amp_serve_all_templates' ];
 		foreach ( $keys as $key ) {
 			$this->assertArrayHasKey( $key, $debug_info['amp_wp']['fields'], "Expected key: $key" );
 			$this->assertFalse( $debug_info['amp_wp']['fields'][ $key ]['private'], "Expected private for key: $key" );
