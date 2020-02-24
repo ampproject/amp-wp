@@ -203,10 +203,12 @@ function remove_amp_story_templates() {
 	$template_taxonomy = 'amp_template';
 
 	if ( post_type_exists( 'wp_block' ) ) {
-		$posts = get_posts(
+		$query = new WP_Query(
 			[
+				'fields'        => 'ids',
 				'no_found_rows' => true,
 				'post_type'     => 'wp_block',
+				'post_per_page' => -1,
 				'tax_query'     => [
 					'taxonomy' => $template_taxonomy,
 					'field'    => 'slug',
@@ -215,16 +217,20 @@ function remove_amp_story_templates() {
 			]
 		);
 
-		if ( 0 < count( $posts ) ) {
-			foreach ( $posts as $post ) {
-				wp_delete_post( $post->ID, true );
+		$post_ids = $query->get_posts();
+
+		if ( 0 < count( $post_ids ) ) {
+			foreach ( $post_ids as $post_id ) {
+				wp_delete_post( $post_id, true );
 			}
 		}
 	}
 
-	$term_id = term_exists( $template_term );
-	if ( ! empty( $term_id ) && is_string( $term_id ) ) {
-		// The actual taxonomy name can't be used since its not registered.
-		wp_delete_term( (int) $term_id, '' );
+	$term = term_exists( $template_term, $template_taxonomy );
+	if ( ! empty( $term['term_id'] ) ) {
+		// Temporarily register the taxonomy so that the term can be deleted.
+		register_taxonomy( $template_taxonomy, '', [] );
+		wp_delete_term( $term['term_id'], $template_taxonomy );
+		unregister_taxonomy( $template_taxonomy );
 	}
 }

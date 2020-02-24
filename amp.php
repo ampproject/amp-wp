@@ -379,12 +379,11 @@ function amp_init() {
 	add_action( 'parse_query', 'amp_correct_query_when_is_front_page' );
 	add_action( 'admin_bar_menu', 'amp_add_admin_bar_view_link', 100 );
 	add_action( 'wp_loaded', 'amp_editor_core_blocks' );
+	add_action( 'amp_plugin_update', 'remove_amp_story_templates' );
 	add_filter( 'request', 'amp_force_query_var_value' );
 
 	// Redirect the old url of amp page to the updated url.
 	add_filter( 'old_slug_redirect_url', 'amp_redirect_old_slug_to_new_url' );
-
-	add_action( 'wp_loaded', 'remove_amp_story_templates' );
 
 	if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		if ( class_exists( 'WP_CLI\Dispatcher\CommandNamespace' ) ) {
