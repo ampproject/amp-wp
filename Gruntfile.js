@@ -29,6 +29,7 @@ module.exports = function( grunt ) {
 		'composer.*',
 		'patches',
 		'vendor/*/*/.editorconfig',
+		'vendor/*/*/.git',
 		'vendor/*/*/.gitignore',
 		'vendor/*/*/composer.*',
 		'vendor/*/*/Doxyfile',
