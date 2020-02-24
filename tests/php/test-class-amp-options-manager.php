@@ -97,7 +97,6 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	 *
 	 * @covers AMP_Options_Manager::get_options()
 	 * @covers AMP_Options_Manager::get_option()
-	 * @covers AMP_Options_Manager::is_website_experience_enabled()
 	 * @covers AMP_Options_Manager::update_option()
 	 * @covers AMP_Options_Manager::validate_options()
 	 * @covers AMP_Theme_Support::reset_cache_miss_url_option()
@@ -111,7 +110,6 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		delete_option( AMP_Options_Manager::OPTION_NAME );
 		$this->assertEquals(
 			[
-				'experiences'             => [ AMP_Options_Manager::WEBSITE_EXPERIENCE ],
 				'theme_support'           => AMP_Theme_Support::READER_MODE_SLUG,
 				'supported_post_types'    => [ 'post' ],
 				'analytics'               => [],
@@ -122,7 +120,6 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 			],
 			AMP_Options_Manager::get_options()
 		);
-		$this->assertTrue( AMP_Options_Manager::is_website_experience_enabled() );
 		$this->assertSame( false, AMP_Options_Manager::get_option( 'foo' ) );
 		$this->assertSame( 'default', AMP_Options_Manager::get_option( 'foo', 'default' ) );
 

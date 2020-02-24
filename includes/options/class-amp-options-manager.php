@@ -18,17 +18,11 @@ class AMP_Options_Manager {
 	const OPTION_NAME = 'amp-options';
 
 	/**
-	 * Slug for website experience.
-	 */
-	const WEBSITE_EXPERIENCE = 'website';
-
-	/**
 	 * Default option values.
 	 *
 	 * @var array
 	 */
 	protected static $defaults = [
-		'experiences'             => [ self::WEBSITE_EXPERIENCE ],
 		'theme_support'           => AMP_Theme_Support::READER_MODE_SLUG,
 		'supported_post_types'    => [ 'post' ],
 		'analytics'               => [],
@@ -60,7 +54,7 @@ class AMP_Options_Manager {
 	}
 
 	/**
-	 * Flush rewrite rules if the supported_post_types or experiences have changed.
+	 * Flush rewrite rules if the supported_post_types have changed.
 	 *
 	 * @since 0.6.2
 	 *
@@ -72,18 +66,10 @@ class AMP_Options_Manager {
 		$new_post_types = isset( $new_options['supported_post_types'] ) ? $new_options['supported_post_types'] : [];
 		sort( $old_post_types );
 		sort( $new_post_types );
-		$old_experiences = isset( $old_options['experiences'] ) ? $old_options['experiences'] : [];
-		$new_experiences = isset( $new_options['experiences'] ) ? $new_options['experiences'] : [];
-		sort( $old_experiences );
-		sort( $new_experiences );
-		if ( $old_post_types !== $new_post_types || $old_experiences !== $new_experiences ) {
-			// Flush rewrite rules, with ensuring up to date for website experience.
-			if ( self::is_website_experience_enabled() ) {
-				add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
-				flush_rewrite_rules( false );
-			} else {
-				amp_deactivate(); // This will call flush_rewrite_rules( false ).
-			}
+		if ( $old_post_types !== $new_post_types ) {
+			// Flush rewrite rules.
+			add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
+			flush_rewrite_rules( false );
 		}
 	}
 
@@ -143,8 +129,13 @@ class AMP_Options_Manager {
 			$options['story_templates_version'],
 			$options['story_export_base_url'],
 			$options['story_settings'],
-			// Remove option to enable Stories. This was added in 1.2-beta and was migrated into the `experiences` option.
-			$options['enable_amp_stories']
+			$options['enable_amp_stories'], // This was added in 1.2-beta and later migrated into the `experiences` option.
+			/**
+			 * Remove 'experiences' option.
+			 *
+			 * @since 1.5.0
+			 */
+			$options['experiences']
 		);
 
 		return $options;
@@ -169,17 +160,6 @@ class AMP_Options_Manager {
 	}
 
 	/**
-	 * Determine whether website experience is enabled.
-	 *
-	 * @since 1.2
-	 *
-	 * @return bool Enabled.
-	 */
-	public static function is_website_experience_enabled() {
-		return in_array( self::WEBSITE_EXPERIENCE, self::get_option( 'experiences' ), true );
-	}
-
-	/**
 	 * Validate options.
 	 *
 	 * @param array $new_options Plugin options.
@@ -191,9 +171,6 @@ class AMP_Options_Manager {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return $options;
 		}
-
-		// Website experience is the only option.
-		$options['experiences'] = [ self::WEBSITE_EXPERIENCE ];
 
 		// Theme support.
 		$recognized_theme_supports = [
@@ -211,15 +188,14 @@ class AMP_Options_Manager {
 		}
 
 		// Validate post type support.
-		if ( in_array( self::WEBSITE_EXPERIENCE, $options['experiences'], true ) || isset( $new_options['supported_post_types'] ) ) {
+		if ( isset( $new_options['supported_post_types'] ) ) {
 			$options['supported_post_types'] = [];
-			if ( isset( $new_options['supported_post_types'] ) ) {
-				foreach ( $new_options['supported_post_types'] as $post_type ) {
-					if ( ! post_type_exists( $post_type ) ) {
-						add_settings_error( self::OPTION_NAME, 'unknown_post_type', __( 'Unrecognized post type.', 'amp' ) );
-					} else {
-						$options['supported_post_types'][] = $post_type;
-					}
+
+			foreach ( $new_options['supported_post_types'] as $post_type ) {
+				if ( ! post_type_exists( $post_type ) ) {
+					add_settings_error( self::OPTION_NAME, 'unknown_post_type', __( 'Unrecognized post type.', 'amp' ) );
+				} else {
+					$options['supported_post_types'][] = $post_type;
 				}
 			}
 		}
@@ -308,10 +284,6 @@ class AMP_Options_Manager {
 	 * @see add_settings_error()
 	 */
 	public static function check_supported_post_type_update_errors() {
-		if ( ! self::is_website_experience_enabled() ) {
-			return;
-		}
-
 		// If all templates are supported then skip check since all post types are also supported. This option only applies with standard/transitional theme support.
 		if ( self::get_option( 'all_templates_supported', false ) && AMP_Theme_Support::READER_MODE_SLUG !== self::get_option( 'theme_support' ) ) {
 			return;

@@ -159,7 +159,6 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 			'possibleStatuses',
 			'defaultStatus',
 			'errorMessages',
-			'isWebsiteEnabled',
 			'hasThemeSupport',
 			'isStandardMode',
 		];

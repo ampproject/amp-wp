@@ -233,7 +233,6 @@ class AMP_Post_Meta_Box {
 			'possibleStatuses' => [ self::ENABLED_STATUS, self::DISABLED_STATUS ],
 			'defaultStatus'    => $enabled_status,
 			'errorMessages'    => $error_messages,
-			'isWebsiteEnabled' => AMP_Options_Manager::is_website_experience_enabled(),
 			'hasThemeSupport'  => current_theme_supports( AMP_Theme_Support::SLUG ),
 			'isStandardMode'   => amp_is_canonical(),
 		];

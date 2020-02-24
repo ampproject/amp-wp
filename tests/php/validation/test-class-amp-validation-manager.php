@@ -198,7 +198,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::init()
 	 */
 	public function test_init_without_theme_support() {
-		AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::WEBSITE_EXPERIENCE ] );
 		remove_theme_support( AMP_Theme_Support::SLUG );
 		AMP_Validation_Manager::init();
 
@@ -2265,7 +2264,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 			$this->markTestSkipped( 'The block editor is not available.' );
 		}
 
-		$this->assertTrue( AMP_Options_Manager::is_website_experience_enabled() );
 		remove_theme_support( AMP_Theme_Support::SLUG );
 		global $post;
 		$post = $this->factory()->post->create_and_get();

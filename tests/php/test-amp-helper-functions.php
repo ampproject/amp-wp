@@ -677,7 +677,6 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$output = $get_generator_tag();
 		$this->assertContains( 'mode=reader', $output );
 		$this->assertContains( 'v' . AMP__VERSION, $output );
-		$this->assertContains( 'experiences=website', $output );
 
 		add_theme_support( AMP_Theme_Support::SLUG, [ AMP_Theme_Support::PAIRED_FLAG => true ] );
 		$output = $get_generator_tag();
@@ -689,10 +688,8 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertContains( 'mode=standard', $output );
 		$this->assertContains( 'v' . AMP__VERSION, $output );
 
-		AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::WEBSITE_EXPERIENCE ] );
 		$output = $get_generator_tag();
 		$this->assertContains( 'mode=standard', $output );
-		$this->assertContains( 'experiences=website', $output );
 	}
 
 	/**

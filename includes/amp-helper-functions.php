@@ -382,9 +382,7 @@ function amp_get_boilerplate_stylesheets() {
 function amp_add_generator_metadata() {
 	$content = sprintf( 'AMP Plugin v%s', AMP__VERSION );
 
-	if ( ! AMP_Options_Manager::is_website_experience_enabled() ) {
-		$mode = 'none';
-	} elseif ( amp_is_canonical() ) {
+	if ( amp_is_canonical() ) {
 		$mode = 'standard';
 	} elseif ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 		$mode = 'transitional';
@@ -392,8 +390,6 @@ function amp_add_generator_metadata() {
 		$mode = 'reader';
 	}
 	$content .= sprintf( '; mode=%s', $mode );
-
-	$content .= sprintf( '; experiences=%s', implode( ',', AMP_Options_Manager::get_option( 'experiences' ) ) );
 
 	printf( '<meta name="generator" content="%s">', esc_attr( $content ) );
 }
@@ -862,19 +858,16 @@ function amp_get_content_sanitizers( $post = null ) {
 		$current_origin .= ':' . $parsed_home_url['port'];
 	}
 
-	$amp_to_amp_linking_enabled = false;
-	if ( AMP_Options_Manager::is_website_experience_enabled() ) {
-		/**
-		 * Filters whether AMP-to-AMP linking should be enabled.
-		 *
-		 * @since 1.4.0
-		 * @param bool $amp_to_amp_linking_enabled Whether AMP-to-AMP linking should be enabled.
-		 */
-		$amp_to_amp_linking_enabled = (bool) apply_filters(
-			'amp_to_amp_linking_enabled',
-			AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Theme_Support::get_support_mode()
-		);
-	}
+	/**
+	 * Filters whether AMP-to-AMP linking should be enabled.
+	 *
+	 * @since 1.4.0
+	 * @param bool $amp_to_amp_linking_enabled Whether AMP-to-AMP linking should be enabled.
+	 */
+	$amp_to_amp_linking_enabled = (bool) apply_filters(
+		'amp_to_amp_linking_enabled',
+		AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Theme_Support::get_support_mode()
+	);
 
 	$sanitizers = [
 		'AMP_Core_Theme_Sanitizer'        => [

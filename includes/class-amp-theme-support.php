@@ -183,21 +183,19 @@ class AMP_Theme_Support {
 
 		self::$init_start_time = microtime( true );
 
-		if ( AMP_Options_Manager::is_website_experience_enabled() ) {
-			if ( self::READER_MODE_SLUG !== self::get_support_mode() ) {
-				// Ensure extra theme support for core themes is in place.
-				AMP_Core_Theme_Sanitizer::extend_theme_support();
-			}
-
-			add_action( 'widgets_init', [ __CLASS__, 'register_widgets' ] );
-
-			/*
-			 * Note that wp action is use instead of template_redirect because some themes/plugins output
-			 * the response at this action and then short-circuit with exit. So this is why the the preceding
-			 * action to template_redirect--the wp action--is used instead.
-			 */
-			add_action( 'wp', [ __CLASS__, 'finish_init' ], PHP_INT_MAX );
+		if ( self::READER_MODE_SLUG !== self::get_support_mode() ) {
+			// Ensure extra theme support for core themes is in place.
+			AMP_Core_Theme_Sanitizer::extend_theme_support();
 		}
+
+		add_action( 'widgets_init', [ __CLASS__, 'register_widgets' ] );
+
+		/*
+		 * Note that wp action is use instead of template_redirect because some themes/plugins output
+		 * the response at this action and then short-circuit with exit. So this is why the the preceding
+		 * action to template_redirect--the wp action--is used instead.
+		 */
+		add_action( 'wp', [ __CLASS__, 'finish_init' ], PHP_INT_MAX );
 	}
 
 	/**

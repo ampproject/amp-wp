@@ -297,7 +297,7 @@ class AMP_Options_Menu {
 				$checked = (
 					post_type_supports( $post_type->name, AMP_Post_Type_Support::SLUG )
 					||
-					( ! AMP_Options_Manager::is_website_experience_enabled() && in_array( $post_type->name, $supported_post_types, true ) )
+					in_array( $post_type->name, $supported_post_types, true )
 				);
 				?>
 				<li>

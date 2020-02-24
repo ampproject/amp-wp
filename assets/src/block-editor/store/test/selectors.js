@@ -4,7 +4,6 @@
 import {
 	hasThemeSupport,
 	isStandardMode,
-	isWebsiteEnabled,
 	getDefaultStatus,
 	getPossibleStatuses,
 	getErrorMessages,
@@ -25,14 +24,6 @@ describe( 'selectors', () => {
 			const state = { isStandardMode: true };
 
 			expect( isStandardMode( state ) ).toBe( true );
-		} );
-	} );
-
-	describe( 'isWebsiteEnabled', () => {
-		it( 'should return whether the website format is enabled', () => {
-			const state = { isWebsiteEnabled: false };
-
-			expect( isWebsiteEnabled( state ) ).toBe( false );
 		} );
 	} );
 

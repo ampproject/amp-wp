@@ -222,7 +222,7 @@ class AMP_Validation_Manager {
 		add_action( 'rest_api_init', [ __CLASS__, 'add_rest_api_fields' ] );
 
 		// Add actions for checking theme support is present to determine plugin compatibility and show validation links in the admin bar.
-		if ( AMP_Options_Manager::is_website_experience_enabled() && current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+		if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 			// Actions and filters involved in validation.
 			add_action(
 				'activate_plugin',
@@ -280,8 +280,8 @@ class AMP_Validation_Manager {
 			return false;
 		}
 
-		// Prevent doing post validation in Reader mode or if the Website experience is not enabled.
-		if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) || ! AMP_Options_Manager::is_website_experience_enabled() ) {
+		// Prevent doing post validation in Reader mode.
+		if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 			return false;
 		}
 
@@ -2320,7 +2320,7 @@ class AMP_Validation_Manager {
 		$should_enqueue_block_validation = (
 			self::has_cap()
 			&&
-			AMP_Options_Manager::is_website_experience_enabled() && current_theme_supports( AMP_Theme_Support::SLUG )
+			current_theme_supports( AMP_Theme_Support::SLUG )
 		);
 		if ( ! $should_enqueue_block_validation ) {
 			return;

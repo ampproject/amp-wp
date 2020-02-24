@@ -373,18 +373,16 @@ function amp_init() {
 	add_action( 'wp_loaded', 'amp_add_options_menu' );
 	add_action( 'wp_loaded', 'amp_bootstrap_admin' );
 
-	if ( AMP_Options_Manager::is_website_experience_enabled() ) {
-		add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
-		AMP_Post_Type_Support::add_post_type_support();
-		add_action( 'init', array( 'AMP_Post_Type_Support', 'add_post_type_support' ), 1000 ); // After post types have been defined.
-		add_action( 'parse_query', 'amp_correct_query_when_is_front_page' );
-		add_action( 'admin_bar_menu', 'amp_add_admin_bar_view_link', 100 );
-		add_action( 'wp_loaded', 'amp_editor_core_blocks' );
-		add_filter( 'request', 'amp_force_query_var_value' );
+	add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
+	AMP_Post_Type_Support::add_post_type_support();
+	add_action( 'init', array( 'AMP_Post_Type_Support', 'add_post_type_support' ), 1000 ); // After post types have been defined.
+	add_action( 'parse_query', 'amp_correct_query_when_is_front_page' );
+	add_action( 'admin_bar_menu', 'amp_add_admin_bar_view_link', 100 );
+	add_action( 'wp_loaded', 'amp_editor_core_blocks' );
+	add_filter( 'request', 'amp_force_query_var_value' );
 
-		// Redirect the old url of amp page to the updated url.
-		add_filter( 'old_slug_redirect_url', 'amp_redirect_old_slug_to_new_url' );
-	}
+	// Redirect the old url of amp page to the updated url.
+	add_filter( 'old_slug_redirect_url', 'amp_redirect_old_slug_to_new_url' );
 
 	add_action( 'wp_loaded', 'remove_amp_story_templates' );
 

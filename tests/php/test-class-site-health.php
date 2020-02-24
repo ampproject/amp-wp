@@ -151,38 +151,6 @@ class Test_Site_Health extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Gets the test data for test_get_experiences_enabled().
-	 *
-	 * @return array The test data.
-	 */
-	public function get_experiences_enabled_data() {
-		return [
-			'no_experience_enabled' => [
-				[],
-				'No experience enabled',
-			],
-			'only_website'          => [
-				[ AMP_Options_Manager::WEBSITE_EXPERIENCE ],
-				'website',
-			],
-		];
-	}
-
-	/**
-	 * Test add_debug_information.
-	 *
-	 * @dataProvider get_experiences_enabled_data
-	 * @covers \Amp\AmpWP\Admin\SiteHealth::add_debug_information()
-	 *
-	 * @param array  $experiences_enabled The AMP experiences that are enabled, if any.
-	 * @param string $expected            The expected return value.
-	 */
-	public function test_get_experiences_enabled( $experiences_enabled, $expected ) {
-		AMP_Options_Manager::update_option( 'experiences', $experiences_enabled );
-		$this->assertEquals( $expected, $this->instance->get_experiences_enabled() );
-	}
-
-	/**
 	 * Gets the test data for test_get_supported_templates().
 	 *
 	 * @return array The test data.
@@ -193,13 +161,13 @@ class Test_Site_Health extends WP_UnitTestCase {
 				[],
 				[],
 				'standard',
-				'No template supported',
+				'post',
 			],
 			'only_singular'               => [
 				[],
 				[ 'is_singular' ],
 				'transitional',
-				'is_singular',
+				'post, is_singular',
 			],
 			'only_post'                   => [
 				[ 'post' ],
