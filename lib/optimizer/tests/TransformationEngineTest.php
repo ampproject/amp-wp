@@ -43,7 +43,7 @@ final class TransformationEngineTest extends TestCase
     /**
      * Test optimizing a string of HTML.
      *
-     * @covers       TransformationEngine::optimizeHtml()
+     * @covers       \Amp\Optimizer\TransformationEngine::optimizeHtml()
      * @dataProvider dataOptimizeHtml
      *
      * @param string $source   Source HTML string to optimize.

@@ -51,7 +51,7 @@ final class AmpRuntimeCssTest extends TestCase
     /**
      * Test the transform() method.
      *
-     * @covers       AmpRuntimeCss::transform()
+     * @covers       \Amp\Optimizer\Transformer\AmpRuntimeCss::transform()
      * @dataProvider dataTransform()
      *
      * @param string     $source       String of source HTML.

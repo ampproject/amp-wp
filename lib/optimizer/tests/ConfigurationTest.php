@@ -71,7 +71,6 @@ final class ConfigurationTest extends TestCase
     /**
      * Test whether invalid keys throw an exception.
      *
-     * @covers \Amp\Optimizer\Configuration::validateConfigurationKey()
      * @covers \Amp\Optimizer\Configuration::validateConfigurationKeys()
      */
     public function testInvalidTransformersTypeThrowsException()
@@ -84,7 +83,6 @@ final class ConfigurationTest extends TestCase
     /**
      * Test whether invalid sub-keys throw an exception.
      *
-     * @covers \Amp\Optimizer\Configuration::validateConfigurationKey()
      * @covers \Amp\Optimizer\Configuration::validateConfigurationKeys()
      */
     public function testInvalidTransformersSubTypeThrowsException()
