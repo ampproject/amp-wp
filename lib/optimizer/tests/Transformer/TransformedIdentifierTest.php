@@ -63,7 +63,7 @@ final class TransformedIdentifierTest extends TestCase
     /**
      * Test the transform() method.
      *
-     * @covers       TransformedIdentifier::transform()
+     * @covers       \Amp\Optimizer\Transformer\TransformedIdentifier::transform()
      * @dataProvider dataTransform()
      *
      * @param string   $source       String of source HTML.

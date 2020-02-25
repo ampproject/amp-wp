@@ -169,7 +169,7 @@ final class ServerSideRenderingTest extends TestCase
     /**
      * Test the transform() method.
      *
-     * @covers       ServerSideRendering::transform()
+     * @covers       \Amp\Optimizer\Transformer\ServerSideRendering::transform()
      * @dataProvider dataTransform()
      *
      * @param string                  $source         String of source HTML.

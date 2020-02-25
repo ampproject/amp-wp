@@ -113,7 +113,7 @@ final class AmpBoilerplateTest extends TestCase
     /**
      * Test the transform() method.
      *
-     * @covers       AmpBoilerplate::transform()
+     * @covers       \Amp\Optimizer\Transformer\AmpBoilerplate::transform()
      * @dataProvider dataTransform()
      *
      * @param string $source       String of source HTML.
