@@ -320,6 +320,7 @@ final class Document extends DOMDocument {
 		$source = $this->replace_self_closing_tags( $source );
 		$source = $this->normalize_document_structure( $source );
 		$source = $this->maybe_replace_noscript_elements( $source );
+		$source = $this->replace_mustache_templates( $source );
 		$source = $this->secure_doctype_node( $source );
 
 		list( $source, $this->original_encoding ) = $this->detect_and_strip_encoding( $source );
@@ -341,6 +342,7 @@ final class Document extends DOMDocument {
 
 		if ( $success ) {
 			$this->normalize_html_attributes();
+			$this->restore_mustache_templates();
 
 			// Remove http-equiv charset again.
 			$meta = $this->head->firstChild;
@@ -664,6 +666,45 @@ final class Document extends DOMDocument {
 			$this->noscript_placeholder_comments,
 			$html
 		);
+	}
+
+	/**
+	 * Replaces the tag name of script[template="amp-mustache"], as a workaround to a parsing issue.
+	 *
+	 * This script can have closing tags of its children table and td stripped.
+	 * So this changes its name from script to tmp-script to avoid this.
+	 *
+	 * @link https://github.com/ampproject/amp-wp/issues/4254
+	 * @see restore_mustache_templates() Reciprocal function.
+	 *
+	 * @param string $html To replace the tag name of the mustache templates in.
+	 * @return string The HTML, with the tag name of the mustache templates replaced.
+	 */
+	private function replace_mustache_templates( $html ) {
+		return preg_replace(
+			'#<script(\s[^>]*template="amp-mustache"[^>]*)>(.*?)</script>#s',
+			'<tmp-script$1>$2</tmp-script>',
+			$html
+		);
+	}
+
+	/**
+	 * Restores the tag names of script[template="amp-mustache"] elements that were replaced earlier.
+	 *
+	 * @see replace_mustache_templates() Reciprocal function.
+	 */
+	private function restore_mustache_templates() {
+		$tmp_script_elements = iterator_to_array( $this->getElementsByTagName( 'tmp-script' ) );
+		foreach ( $tmp_script_elements as $tmp_script_element ) {
+			$script = $this->createElement( 'script' );
+			foreach ( $tmp_script_element->attributes as $attr ) {
+				$script->setAttribute( $attr->nodeName, $attr->nodeValue );
+			}
+			while ( $tmp_script_element->firstChild ) {
+				$script->appendChild( $tmp_script_element->firstChild );
+			}
+			$tmp_script_element->parentNode->replaceChild( $script, $tmp_script_element );
+		}
 	}
 
 	/**
