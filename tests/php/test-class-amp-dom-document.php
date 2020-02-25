@@ -209,6 +209,11 @@ class Test_AMP_DOM_Document extends WP_UnitTestCase {
 				'<!DOCTYPE html><html>' . $head . '<body><script id="baz" type="text/plain" template="amp-mustache"><table><tr>{{#example}}<td></td>{{/example}}</tr></table></script></body></html>',
 				'<!DOCTYPE html><html>' . $head . '<body><script id="baz" type="text/plain" template="amp-mustache"><table><tr>{{#example}}<td></td>{{/example}}</tr></table></script></body></html>',
 			],
+			'amp_mustache_template_single_quotes'      => [
+				'utf-8',
+				'<!DOCTYPE html><html>' . $head . '<body><script type=\'text/plain\' template=\'amp-mustache\'><table><tr>{{#example}}<td></td>{{/example}}</tr></table></script></body></html>',
+				'<!DOCTYPE html><html>' . $head . '<body><script type="text/plain" template="amp-mustache"><table><tr>{{#example}}<td></td>{{/example}}</tr></table></script></body></html>',
+			],
 			'amp_mustache_script_multiple_children'    => [
 				'utf-8',
 				'<!DOCTYPE html><html>' . $head . '<body><script type="text/plain" template="amp-mustache"><h1>{{heading}}</h1><p>{{content}}</p><table><tr>{{#example}}<td></td>{{/example}}</tr></table></script></body></html>',
