@@ -259,7 +259,7 @@ final class ReorderHeadTest extends TestCase
     /**
      * Test the transform() method.
      *
-     * @covers       ReorderHead::transform()
+     * @covers       \Amp\Optimizer\Transformer\ReorderHead::transform()
      * @dataProvider dataTransform()
      *
      * @param string                  $source         String of source HTML.
