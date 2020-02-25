@@ -51,5 +51,8 @@
       "@cs"
     ],
     "unit": "phpunit --colors=always"
+  },
+  "suggest": {
+    "ext-mbstring": "Used by Dom\\Document to convert encoding to UTF-8 if needed."
   }
 }
