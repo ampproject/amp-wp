@@ -91,20 +91,6 @@ final class Document extends DOMDocument
                                         . '(?:[^>"\']+|"[^"]*+"|\'[^\']*+\')*+'     // Any attribute tokens, including binding ones.
                                         . ')>#s';
 
-    /**
-     * Regular expression pattern to match the http-equiv meta tag.
-     *
-     * @var string
-     */
-    const HTTP_EQUIV_META_TAG_PATTERN = '/<meta [^>]*?\s*http-equiv=[^>]*?>[^<]*(?:<\/meta>)?/i';
-
-    /**
-     * Regular expression pattern to match the charset meta tag.
-     *
-     * @var string
-     */
-    const CHARSET_META_TAG_PATTERN = '/<meta [^>]*?\s*charset=[^>]*?>[^<]*(?:<\/meta>)?/i';
-
     /*
      * Regular expressions to fetch the individual structural tags.
      * These patterns were optimized to avoid extreme backtracking on large documents.
