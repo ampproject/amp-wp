@@ -62,11 +62,17 @@
   "repositories": [
     {
       "type": "path",
-      "url": "lib/common"
+      "url": "lib/common",
+      "options": {
+        "symlink": false
+      }
     },
     {
       "type": "path",
-      "url": "lib/optimizer"
+      "url": "lib/optimizer",
+      "options": {
+        "symlink": false
+      }
     },
     {
       "type": "vcs",
