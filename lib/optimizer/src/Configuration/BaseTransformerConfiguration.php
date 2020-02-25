@@ -22,7 +22,7 @@ abstract class BaseTransformerConfiguration implements TransformerConfiguration
      *
      * @var array
      */
-    private $allowedKeys = [];
+    private $allowedKeys;
 
     /**
      * Instantiate an AmpRuntimeCssConfiguration object.
