@@ -784,10 +784,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			'SingleDatePicker',
 		];
 
-		foreach ( $class_prefixes as $prefix ) {
-			if ( 0 === strpos( $class, $prefix ) ) {
-				return true;
-			}
+		if ( preg_match( '#^(' . implode( '|', $class_prefixes ) . ')[a-zA-Z_]+#', $class ) ) {
+			return true;
 		}
 
 		$allowed_exact_classes = [
