@@ -286,8 +286,10 @@ class AMP_Story_Templates {
 				'meta_box_cb'           => false,
 			]
 		);
+		
+		$located_term = get_term( self::TEMPLATES_TERM, self::TEMPLATES_TAXONOMY );
 
-		if ( ! term_exists( self::TEMPLATES_TERM, self::TEMPLATES_TAXONOMY ) ) {
+		if ( null === $located_term || is_wp_error( $located_term ) ) {
 			wp_insert_term(
 				__( 'Story Template', 'amp' ),
 				self::TEMPLATES_TAXONOMY,
