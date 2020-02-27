@@ -774,8 +774,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return bool Whether the class is allowed as a child of <amp-date-picker>.
 	 */
 	private function is_class_allowed_in_amp_date_picker( $class ) {
-		// Some prefixes, some full class names.
-		$allowed_class_beginnings = [
+		$class_prefixes = [
 			'CalendarDay',
 			'CalendarMonth',
 			'DateInput',
@@ -783,12 +782,21 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			'DayPicker',
 			'KeyboardShortcutRow',
 			'SingleDatePicker',
+		];
+
+		foreach ( $class_prefixes as $prefix ) {
+			if ( 0 === strpos( $class, $prefix ) ) {
+				return true;
+			}
+		}
+
+		$allowed_exact_classes = [
 			'amp-date-picker-calendar-container',
 			'amp-date-picker-resize-bug',
 		];
 
-		foreach ( $allowed_class_beginnings as $allowed_class ) {
-			if ( 0 === strpos( $class, $allowed_class ) ) {
+		foreach ( $allowed_exact_classes as $exact_class ) {
+			if ( $exact_class === $class ) {
 				return true;
 			}
 		}
