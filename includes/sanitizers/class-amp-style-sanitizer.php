@@ -662,6 +662,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 
+			// If the document has an amp-date-picker tag, check if this class is an allowed child of it.
+			// That component's child classes won't be present yet in the document, so prevent tree-shaking valid classes.
+			if ( $this->has_used_tag_names( [ 'amp-date-picker' ] ) && $this->is_class_allowed_in_amp_date_picker( $class_name ) ) {
+				continue;
+			}
+
 			if ( ! isset( $this->used_class_names[ $class_name ] ) ) {
 				return false;
 			}
@@ -753,6 +759,41 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Whether a given class is allowed to be styled in <amp-date-picker>.
+	 *
+	 * That component has child classes that won't be present in the document yet.
+	 * So get whether a class is an allowed child.
+	 *
+	 * @since 1.5.0
+	 * @link https://github.com/airbnb/react-dates/tree/05356/src/components
+	 *
+	 * @param string $class The name of the class to evaluate.
+	 * @return bool Whether the class is allowed as a child of <amp-date-picker>.
+	 */
+	private function is_class_allowed_in_amp_date_picker( $class ) {
+		// Some prefixes, some full class names.
+		$allowed_class_beginnings = [
+			'CalendarDay',
+			'CalendarMonth',
+			'DateInput',
+			'DateRangePicker',
+			'DayPicker',
+			'KeyboardShortcutRow',
+			'SingleDatePicker',
+			'amp-date-picker-calendar-container',
+			'amp-date-picker-resize-bug',
+		];
+
+		foreach ( $allowed_class_beginnings as $allowed_class ) {
+			if ( 0 === strpos( $class, $allowed_class ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
