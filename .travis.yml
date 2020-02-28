@@ -29,6 +29,10 @@ branches:
     - develop
     - /^\d+\.\d+$/
 
+env:
+  global:
+    - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+
 install:
   - nvm install
   - composer install
@@ -90,7 +94,7 @@ jobs:
 
     - name: E2E tests
       php: "7.3"
-      env: WP_VERSION=latest DEV_LIB_SKIP=phpcs,eslint,xmllint,phpsyntax,phpunit
+      env: WP_VERSION=latest DEV_LIB_SKIP=phpcs,eslint,xmllint,phpsyntax,phpunit PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=
       install:
         - nvm install
         - composer install
