@@ -7,6 +7,8 @@
 
 use Amp\AmpWP\Dom\Document;
 
+// phpcs:disable WordPress.WP.EnqueuedResources
+
 /**
  * Test AMP_Tag_And_Attribute_Sanitizer
  *
@@ -974,7 +976,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'remove_script_with_async_attribute'           => [
-				'<script async src="//cdn.someecards.com/assets/embed/embed-v1.07.min.js" charset="utf-8"></script>', // phpcs:ignore
+				'<script async src="//cdn.someecards.com/assets/embed/embed-v1.07.min.js" charset="utf-8"></script>',
 				'',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ],
@@ -988,7 +990,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'allow_node_with_valid_mandatory_attribute'    => [
-				'<amp-analytics><script type="application/json"></script></amp-analytics>',
+				'<amp-analytics><script type="application/json">{"vars": {"apid": "XXXX"}}</script></amp-analytics>',
 				null, // No change.
 				[ 'amp-analytics' ],
 			],
@@ -2268,10 +2270,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 	public function get_html_data() {
 		$data = [
 			'meta_charset_and_viewport_and_canonical' => [
-				'<html amp lang="ar" dir="rtl"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width, minimum-scale=1"><base target="_blank"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Tangerine"><link rel="canonical" href="self.html"><title>marhabaan bialealim!</title></head><body></body></html>', // phpcs:ignore
+				'<html amp lang="ar" dir="rtl"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width, minimum-scale=1"><base target="_blank"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Tangerine"><link rel="canonical" href="self.html"><title>marhabaan bialealim!</title></head><body></body></html>',
 			],
 			'script_tag_externals'                    => [
-				'<html amp><head><meta charset="utf-8"><script async type="text/javascript" src="illegal.js"></script><script async src="illegal.js"></script><script src="illegal.js"></script><script type="text/javascript" src="illegal.js"></script></head><body></body></html>', // phpcs:ignore
+				'<html amp><head><meta charset="utf-8"><script async type="text/javascript" src="illegal.js"></script><script async src="illegal.js"></script><script src="illegal.js"></script><script type="text/javascript" src="illegal.js"></script></head><body></body></html>',
 				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
 				[],
 				array_fill(
@@ -2295,7 +2297,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				],
 			],
 			'style_external'                          => [
-				'<html amp><head><meta charset="utf-8"><link rel="stylesheet" href="https://example.com/test.css"></head><body></body></html>', // phpcs:ignore
+				'<html amp><head><meta charset="utf-8"><link rel="stylesheet" href="https://example.com/test.css"></head><body></body></html>',
 				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
 				[],
 				[
@@ -2323,7 +2325,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				),
 			],
 			'bad_external_font'                       => [
-				'<html amp><head><meta charset="utf-8"><link rel="stylesheet" href="https://fonts.example.com/css?family=Bad"></head><body></body></html>', // phpcs:ignore
+				'<html amp><head><meta charset="utf-8"><link rel="stylesheet" href="https://fonts.example.com/css?family=Bad"></head><body></body></html>',
 				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE_REGEX, AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING ],
@@ -2463,8 +2465,32 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_HTML_COMMENTS ],
 			],
+			'cdata_malformed_json'                    => [
+				'<html><head><meta charset="utf-8"><script type="application/ld+json">{"example": </script></head><body></body></html>',
+				'<html><head><meta charset="utf-8"></head><body></body></html>',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_JSON_CDATA ],
+			],
+			'cdata_malformed_json_with_emojis'        => [
+				'<html><head><meta charset="utf-8"><script type="application/ld+json">{"wrong": 🚧 🚧 }</script></head><body></body></html>',
+				'<html><head><meta charset="utf-8"></head><body></body></html>',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_JSON_CDATA ],
+			],
+			'cdata_empty_json_considered_invalid'     => [
+				'<html><head><meta charset="utf-8"><script type="application/ld+json"></script></head><body></body></html>',
+				'<html><head><meta charset="utf-8"></head><body></body></html>',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_JSON_CDATA ],
+			],
+			'analytics_empty_json_considered_invalid' => [
+				'<html><head><meta charset="utf-8"></head><body><amp-analytics><script type="application/json"></script></amp-analytics></body></html>',
+				'<html><head><meta charset="utf-8"></head><body><amp-analytics></amp-analytics></body></html>',
+				[ 'amp-analytics' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_JSON_CDATA ],
+			],
 			'script_cdata_contents_bad'               => [
-				'<html><head><meta charset="utf-8"><script async src="https://cdn.ampproject.org/v0.js">document.write("bad");</script></head><body></body></html>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+				'<html><head><meta charset="utf-8"><script async src="https://cdn.ampproject.org/v0.js">document.write("bad");</script></head><body></body></html>',
 				'<html><head><meta charset="utf-8"></head><body></body></html>',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_CONTENTS ],

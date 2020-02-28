@@ -3024,6 +3024,8 @@ class AMP_Validation_Error_Taxonomy {
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_CSS_IMPORTANT:
 			case AMP_Tag_And_Attribute_Sanitizer::CDATA_VIOLATES_BLACKLIST:
 				return esc_html__( 'Illegal text content', 'amp' );
+			case AMP_Tag_And_Attribute_Sanitizer::INVALID_JSON_CDATA:
+				return esc_html__( 'The script tag contains invalid JSON that cannot be parsed.', 'amp' );
 			case AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_IMPORTANT:
 				$title = esc_html__( 'Illegal CSS !important property', 'amp' );
 				if ( isset( $validation_error['css_property_name'] ) ) {

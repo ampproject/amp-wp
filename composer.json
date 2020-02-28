@@ -10,6 +10,7 @@
     "ext-date": "*",
     "ext-dom": "*",
     "ext-iconv": "*",
+    "ext-json": "*",
     "ext-libxml": "*",
     "ext-spl": "*",
     "cweagans/composer-patches": "1.6.7",

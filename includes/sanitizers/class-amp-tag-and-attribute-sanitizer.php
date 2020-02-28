@@ -44,6 +44,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	const INVALID_CDATA_CSS_IMPORTANT          = 'INVALID_CDATA_CSS_IMPORTANT';
 	const INVALID_CDATA_CONTENTS               = 'INVALID_CDATA_CONTENTS';
 	const INVALID_CDATA_HTML_COMMENTS          = 'INVALID_CDATA_HTML_COMMENTS';
+	const INVALID_JSON_CDATA                   = 'INVALID_JSON_CDATA';
 	const INVALID_ATTR_VALUE                   = 'INVALID_ATTR_VALUE';
 	const INVALID_ATTR_VALUE_CASEI             = 'INVALID_ATTR_VALUE_CASEI';
 	const INVALID_ATTR_VALUE_REGEX             = 'INVALID_ATTR_VALUE_REGEX';
@@ -922,6 +923,15 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				return [ 'code' => self::MANDATORY_CDATA_MISSING_OR_INCORRECT ];
 			}
 		}
+
+		// When the CDATA is expected to be JSON, ensure it's valid JSON.
+		if ( 'script' === $element->tagName &&
+			in_array( $element->getAttribute( 'type' ), [ 'application/json', 'application/ld+json' ], true ) &&
+			! AMP_HTML_Utils::is_valid_json( $element->textContent )
+		) {
+			return [ 'code' => self::INVALID_JSON_CDATA ];
+		}
+
 		return true;
 	}
 
