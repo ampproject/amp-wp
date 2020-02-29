@@ -926,11 +926,18 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		// When the CDATA is expected to be JSON, ensure it's valid JSON.
 		if ( 'script' === $element->tagName && in_array( $element->getAttribute( 'type' ), [ 'application/json', 'application/ld+json' ], true ) ) {
+			if ( empty( $element->textContent ) ) {
+				return [
+					'code'    => self::INVALID_JSON_CDATA,
+					'message' => esc_html__( 'Expected JSON, got an empty value', 'amp' ),
+				];
+			}
+
 			json_decode( $element->textContent );
 			if ( JSON_ERROR_NONE !== json_last_error() ) {
 				return [
 					'code'    => self::INVALID_JSON_CDATA,
-					'message' => json_last_error_msg(),
+					'message' => esc_html( json_last_error_msg() ),
 				];
 			}
 		}
