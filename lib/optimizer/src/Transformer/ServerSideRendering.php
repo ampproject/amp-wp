@@ -11,6 +11,7 @@ use Amp\Layout;
 use Amp\Optimizer\Error;
 use Amp\Optimizer\ErrorCollection;
 use Amp\Optimizer\Transformer;
+use Amp\Optimizer\Tweak\SvgSourceAttributeEncodingFix;
 use Amp\Tag;
 use DOMElement;
 
@@ -475,6 +476,7 @@ final class ServerSideRendering implements Transformer
             $sizer = $this->createResponsiveSizer($document, $width, $height);
         } elseif ($layout === Layout::INTRINSIC) {
             $sizer = $this->createIntrinsicSizer($document, $width, $height);
+            $this->maybeAddSvgSourceAttributeEncodingFixTweak($document);
         }
 
         if ($sizer) {
@@ -520,11 +522,28 @@ final class ServerSideRendering implements Transformer
         $sizer_img->setAttribute(Attribute::ARIA_HIDDEN, 'true');
         $sizer_img->setAttribute(Attribute::CLASS_, Amp::INTRINSIC_SIZER_ELEMENT);
         $sizer_img->setAttribute(Attribute::ROLE, 'presentation');
-        $sizer_img->setAttribute(Attribute::SRC, "data:image/svg+xml;charset=utf-8,<svg height=\"{$height->getNumeral()}\" width=\"{$width->getNumeral()}\" xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\"/>");
+        $sizer_img->setAttribute(Attribute::SRC, "data:image/svg+xml;charset=utf-8,<svg height=&quot;{$height->getNumeral()}&quot; width=&quot;{$width->getNumeral()}&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; version=&quot;1.1&quot;/>");
 
         $sizer->appendChild($sizer_img);
 
         return $sizer;
+    }
+
+    /**
+     * Maybe add a tweak to the document to fix the SVG source attribute encoding behavior.
+     *
+     * @param Document $document Document instance to add the tweak to.
+     */
+    private function maybeAddSvgSourceAttributeEncodingFixTweak(Document $document)
+    {
+        static $addedSvgSourceAttributeEncodingFixTweak = false;
+
+        if ($addedSvgSourceAttributeEncodingFixTweak) {
+            return;
+        }
+
+        $addedSvgSourceAttributeEncodingFixTweak = true;
+        $document->addTweak(new SvgSourceAttributeEncodingFix());
     }
 
     /**
