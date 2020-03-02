@@ -27,9 +27,8 @@ module.exports = function( grunt ) {
 	// ⚠️ Warning: These paths are passed straight to rm command in the shell, without any escaping.
 	const productionVendorExcludedFilePatterns = [
 		'composer.*',
-
 		'patches',
-		'lib/*',
+		'lib',
 		'vendor/*/*/.editorconfig',
 		'vendor/*/*/.gitignore',
 		'vendor/*/*/composer.*',
@@ -41,6 +40,7 @@ module.exports = function( grunt ) {
 		'vendor/*/*/*.yml',
 		'vendor/*/*/.*.yml',
 		'vendor/*/*/tests',
+		'vendor/*/*/.git',
 	];
 
 	grunt.initConfig( {
@@ -150,6 +150,7 @@ module.exports = function( grunt ) {
 			} );
 
 			paths.push( 'composer.*' ); // Copy in order to be able to do run composer_install.
+			paths.push( 'lib/**' );
 			paths.push( 'assets/js/*.js' ); // @todo Also include *.map files?
 			paths.push( 'assets/js/*.asset.php' );
 			paths.push( 'assets/css/*.css' );
