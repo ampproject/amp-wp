@@ -30,6 +30,7 @@ module.exports = function( grunt ) {
 		'patches',
 		'lib',
 		'vendor/*/*/.editorconfig',
+		'vendor/*/*/.git',
 		'vendor/*/*/.gitignore',
 		'vendor/*/*/composer.*',
 		'vendor/*/*/Doxyfile',
@@ -40,7 +41,7 @@ module.exports = function( grunt ) {
 		'vendor/*/*/*.yml',
 		'vendor/*/*/.*.yml',
 		'vendor/*/*/tests',
-		'vendor/*/*/.git',
+		'vendor/bin',
 	];
 
 	grunt.initConfig( {
