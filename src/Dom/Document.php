@@ -682,8 +682,8 @@ final class Document extends DOMDocument {
 	 */
 	private function replace_mustache_templates( $html ) {
 		return preg_replace(
-			'#<script(\s[^>]*template=["\']?amp-mustache["\']?[^>]*)>(.*?)</script>#s',
-			'<tmp-script$1>$2</tmp-script>',
+			'#<script(\s[^>]*?template=(["\']?)amp-mustache\2[^>]*)>(.*?)</script\s*?>#i',
+			'<tmp-script$1>$3</tmp-script>',
 			$html
 		);
 	}
