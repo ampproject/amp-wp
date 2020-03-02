@@ -2347,7 +2347,7 @@ class AMP_Theme_Support {
 
 		$enable_ssr = array_key_exists( ConfigurationArgument::ENABLE_SSR, $args )
 			? $args[ ConfigurationArgument::ENABLE_SSR ]
-			: ( defined( 'WP_DEBUG' ) && WP_DEBUG );
+			: ! ( defined( 'WP_DEBUG' ) && WP_DEBUG );
 
 		$enable_ssr = apply_filters( Filter::ENABLE_SSR, $enable_ssr );
 
