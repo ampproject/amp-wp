@@ -18,10 +18,12 @@
   },
   "require-dev": {
     "dealerdirect/phpcodesniffer-composer-installer": "0.6.2",
+    "giacocorsiglia/wordpress-stubs": "^5.1",
     "mikey179/vfsstream": "1.6.8",
     "phpcompatibility/phpcompatibility-wp": "2.1.0",
     "roave/security-advisories": "dev-master",
     "sirbrillig/phpcs-variable-analysis": "2.8.1",
+    "tm/composer-tool-installer-plugin": "^0.1.0",
     "wp-cli/wp-cli": "2.4.1",
     "wp-coding-standards/wpcs": "2.2.1",
     "xwp/wp-dev-lib": "1.5.0"

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a7d11c02c60a938ce4e321ec4cfdb84f",
+    "content-hash": "792478dd0f170afeb40f4eddb6636a3b",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -270,6 +270,45 @@
                 "tests"
             ],
             "time": "2020-01-29T20:22:20+00:00"
+        },
+        {
+            "name": "giacocorsiglia/wordpress-stubs",
+            "version": "v5.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/GiacoCorsiglia/wordpress-stubs.git",
+                "reference": "1c6f011f5c241bab7293315d7fb7fca27fe79473"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/GiacoCorsiglia/wordpress-stubs/zipball/1c6f011f5c241bab7293315d7fb7fca27fe79473",
+                "reference": "1c6f011f5c241bab7293315d7fb7fca27fe79473",
+                "shasum": ""
+            },
+            "require-dev": {
+                "ext-gettext": "*",
+                "giacocorsiglia/stubs-generator": "^0.5.0",
+                "johnpbloch/wordpress": "5.1.1",
+                "php": "^7.1"
+            },
+            "type": "library",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0+"
+            ],
+            "authors": [
+                {
+                    "name": "Giaco Corsiglia",
+                    "email": "GiacoCorsiglia@gmail.com"
+                }
+            ],
+            "description": "WordPress function, class, and global variable declaration stubs for easier static analysis.",
+            "homepage": "https://github.com/GiacoCorsiglia/wordpress-stubs",
+            "keywords": [
+                "static analysis",
+                "wordpress"
+            ],
+            "time": "2019-03-13T21:16:05+00:00"
         },
         {
             "name": "mikey179/vfsstream",
@@ -977,6 +1016,90 @@
             "description": "Symfony Finder Component",
             "homepage": "https://symfony.com",
             "time": "2020-01-01T11:03:25+00:00"
+        },
+        {
+            "name": "tm/composer-tool-installer-plugin",
+            "version": "0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/tommy-muehle/composer-tool-installer-plugin.git",
+                "reference": "a7f7bdeec3546449baeedc3ef06eb558aab7e9da"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/tommy-muehle/composer-tool-installer-plugin/zipball/a7f7bdeec3546449baeedc3ef06eb558aab7e9da",
+                "reference": "a7f7bdeec3546449baeedc3ef06eb558aab7e9da",
+                "shasum": ""
+            },
+            "require": {
+                "composer-plugin-api": "^1.0",
+                "php": ">=5.6.0"
+            },
+            "require-dev": {
+                "composer/composer": "^1.0",
+                "mikey179/vfsstream": "^1.6",
+                "php-mock/php-mock-phpunit": "^1.0",
+                "tm/gpg-verifier": "^1.0"
+            },
+            "suggest": {
+                "tm/gpg-verifier": "Allows verification over GPG for tools."
+            },
+            "type": "composer-plugin",
+            "extra": {
+                "class": "ToolInstaller\\Composer\\Plugin",
+                "tools": {
+                    "phpunit": {
+                        "url": "https://phar.phpunit.de/phpunit-5.5.0.phar"
+                    },
+                    "phpcpd": {
+                        "url": "https://phar.phpunit.de/phpcpd-2.0.4.phar"
+                    },
+                    "phpcs": {
+                        "url": "https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar",
+                        "force-replace": true
+                    },
+                    "phpmd": {
+                        "url": "http://static.phpmd.org/php/latest/phpmd.phar",
+                        "force-replace": true
+                    },
+                    "security-checker": {
+                        "url": "http://get.sensiolabs.org/security-checker.phar",
+                        "force-replace": true
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "ToolInstaller\\Composer\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Tommy Muehle",
+                    "email": "tommy.muehle@gmail.com",
+                    "homepage": "https://tommy-muehle.io"
+                }
+            ],
+            "description": "composer plugin to manage needed tools, such as PHPUnit or PhantomJS.",
+            "homepage": "https://github.com/tommy-muehle/composer-tool-installer-plugin",
+            "keywords": [
+                "composer",
+                "composer-installer",
+                "composer-phar",
+                "composer-plugin",
+                "gpg-verification",
+                "installer",
+                "phar",
+                "phar-handling",
+                "phar-management",
+                "tool-handling",
+                "tool-management"
+            ],
+            "time": "2016-11-07T20:16:25+00:00"
         },
         {
             "name": "wp-cli/mustangostang-spyc",
