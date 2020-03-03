@@ -16,7 +16,9 @@ use Amp\Tweak;
 final class SvgSourceAttributeEncodingFix implements Tweak
 {
 
-    const REGEX_PATTERN = '/(?<before_src><i-amphtml-sizer\s+[^>]*>\s*<img\s+[^>]*?\s+src=([\'"]))(?<src>.*?)(?<after_src>\2><\/i-amphtml-sizer>)/i';
+    const I_AMPHTML_SIZER_REGEX_PATTERN = '/(?<before_src><i-amphtml-sizer\s+[^>]*>\s*<img\s+[^>]*?\s+src=([\'"]))(?<src>.*?)(?<after_src>\2><\/i-amphtml-sizer>)/i';
+
+    const SRC_SVG_REGEX_PATTERN = '/^\s*(?<type>[^<]+)(?<value><svg[^>]+>)\s*$/i';
 
     /**
      * Process the HTML output string and tweak it as needed.
@@ -26,17 +28,31 @@ final class SvgSourceAttributeEncodingFix implements Tweak
      */
     public function process($html)
     {
-        return preg_replace_callback(self::REGEX_PATTERN, [$this, 'adaptSource'], $html);
+        return preg_replace_callback(self::I_AMPHTML_SIZER_REGEX_PATTERN, [$this, 'adaptSizer'], $html);
     }
 
     /**
-     * Adapt the src attribute so that it validates against the AMP spec.
+     * Adapt the sizer element so that it validates against the AMP spec.
      *
      * @param array $matches Matches that the regular expression collected.
      * @return string Adapted string to use as replacement.
      */
-    private function adaptSource($matches)
+    private function adaptSizer($matches)
     {
-        return $matches['before_src'] . urldecode(htmlspecialchars_decode($matches['src'], ENT_NOQUOTES)) . $matches['after_src'];
+        $src = $matches['src'];
+        $src = htmlspecialchars_decode($src, ENT_NOQUOTES);
+        $src = preg_replace_callback(self::SRC_SVG_REGEX_PATTERN, [$this, 'adaptSvg'], $src);
+        return $matches['before_src'] . $src . $matches['after_src'];
+    }
+
+    /**
+     * Adapt the SVG syntax within the sizer element so that it validates against the AMP spec.
+     *
+     * @param array $matches Matches that the regular expression collected.
+     * @return string Adapted string to use as replacement.
+     */
+    private function adaptSvg($matches)
+    {
+        return $matches['type'] . urldecode($matches['value']);
     }
 }
