@@ -788,18 +788,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			return true;
 		}
 
-		$allowed_exact_classes = [
-			'amp-date-picker-calendar-container',
-			'amp-date-picker-resize-bug',
-		];
-
-		foreach ( $allowed_exact_classes as $exact_class ) {
-			if ( $exact_class === $class ) {
-				return true;
-			}
-		}
-
-		return false;
+		return in_array( $class, [ 'amp-date-picker-calendar-container', 'amp-date-picker-resize-bug' ], true );
 	}
 
 	/**
