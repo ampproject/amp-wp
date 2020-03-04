@@ -2472,7 +2472,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_JSON_CDATA ],
 			],
 			'cdata_malformed_json_with_emojis'        => [
-				'<html><head><meta charset="utf-8"><script type="application/ld+json">{"wrong": 🚧 🚧 }</script></head><body></body></html>',
+				'<html><head><meta charset="utf-8"><script type="application/ld+json">{"wrong": "<?php echo wp_staticize_emoji( "🚧 🚧" ); ?>"}</script></head><body></body></html>',
 				'<html><head><meta charset="utf-8"></head><body></body></html>',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_JSON_CDATA ],
