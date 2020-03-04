@@ -1833,8 +1833,52 @@ class AMP_Validation_Error_Taxonomy {
 					$content .= '</p>';
 				}
 
-				if ( isset( $validation_error['message'] ) ) {
-					$content .= sprintf( '<p>%s</p>', esc_html( $validation_error['message'] ) );
+				$message = null;
+				switch ( $validation_error['code'] ) {
+					case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_EMPTY:
+						$message = __( 'Expected JSON, got an empty value', 'amp' );
+						break;
+					case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_DEPTH:
+						$message = __( 'The maximum stack depth has been exceeded', 'amp' );
+						break;
+					case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_STATE_MISMATCH:
+						$message = __( 'Invalid or malformed JSON', 'amp' );
+						break;
+					case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_CTRL_CHAR:
+						$message = __( 'Control character error, possibly incorrectly encoded', 'amp' );
+						break;
+					case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_SYNTAX:
+						$message = __( 'Syntax error', 'amp' );
+						break;
+					case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_UTF8:
+						/* translators: %s: UTF-8, a charset */
+						$message = sprintf( __( 'Malformed %s characters, possibly incorrectly encoded', 'amp' ), 'UTF-8' );
+						break;
+					case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_RECURSION:
+						$message = __( 'One or more recursive references in the value to be encoded', 'amp' );
+						break;
+					case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_INF_OR_NAN:
+						/* translators: %1$s: NAN, not a number, %2$s: INF, infinite */
+						$message = sprintf( __( 'One or more %1$s or %2$s values in the value to be encoded', 'amp' ), 'NAN', 'INF' );
+						break;
+					case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_UNSUPPORTED_TYPE:
+						$message = __( 'A value of a type that cannot be encoded was given', 'amp' );
+						break;
+					case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_INVALID_PROPERTY_NAME:
+						$message = __( 'A property name that cannot be encoded was given', 'amp' );
+						break;
+					case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_UTF16:
+						/* translators: %s: UTF-16, a charset */
+						$message = sprintf( __( 'Malformed %s characters, possibly incorrectly encoded', 'amp' ), 'UTF-16' );
+						break;
+					default:
+						if ( isset( $validation_error['message'] ) ) {
+							$message = $validation_error['message'];
+						}
+				}
+
+				if ( $message ) {
+					$content .= sprintf( '<p>%s</p>', esc_html( $message ) );
 				}
 
 				break;
@@ -3024,8 +3068,18 @@ class AMP_Validation_Error_Taxonomy {
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_CSS_IMPORTANT:
 			case AMP_Tag_And_Attribute_Sanitizer::CDATA_VIOLATES_BLACKLIST:
 				return esc_html__( 'Illegal text content', 'amp' );
-			case AMP_Tag_And_Attribute_Sanitizer::INVALID_JSON_CDATA:
-				return esc_html__( 'The script tag contains invalid JSON that cannot be parsed.', 'amp' );
+			case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_EMPTY:
+			case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_DEPTH:
+			case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_STATE_MISMATCH:
+			case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_CTRL_CHAR:
+			case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_SYNTAX:
+			case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_UTF8:
+			case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_RECURSION:
+			case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_INF_OR_NAN:
+			case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_UNSUPPORTED_TYPE:
+			case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_INVALID_PROPERTY_NAME:
+			case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_UTF16:
+				return esc_html__( 'Invalid JSON', 'amp' );
 			case AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_IMPORTANT:
 				$title = esc_html__( 'Illegal CSS !important property', 'amp' );
 				if ( isset( $validation_error['css_property_name'] ) ) {
