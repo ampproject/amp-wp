@@ -20,7 +20,6 @@ use Amp\Optimizer\Transformer\TransformedIdentifier;
  */
 final class AmpSchemaOrgMetadataConfiguration extends BaseTransformerConfiguration {
 
-
 	/**
 	 * Configuration key that holds the version number to use.
 	 *

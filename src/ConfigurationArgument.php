@@ -14,7 +14,6 @@ namespace Amp\AmpWP;
  */
 interface ConfigurationArgument {
 
-
 	const ENABLE_OPTIMIZER = 'enable_optimizer';
 	const ENABLE_SSR       = 'enable_ssr';
 }

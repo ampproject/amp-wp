@@ -19,7 +19,6 @@ use Amp\RemoteRequest;
  */
 final class CachedRemoteRequest implements RemoteRequest {
 
-
 	/**
 	 * Remote request object to decorate with caching.
 	 *

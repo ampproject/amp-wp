@@ -22,7 +22,6 @@ use Amp\Tag;
  */
 final class AmpSchemaOrgMetadata implements Transformer, Configurable {
 
-
 	/**
 	 * XPath query to use for fetching the schema.org meta script.
 	 *
