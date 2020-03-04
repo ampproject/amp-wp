@@ -351,7 +351,7 @@ final class ReorderHead implements Transformer
             return false;
         }
 
-        return preg_match('/\b' . preg_quote($needle, '/') . '\b/i', $haystack);
+        return preg_match('/(^|\s)' . preg_quote($needle, '/') . '(\s|$)/i', $haystack);
     }
 
     /**
