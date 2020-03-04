@@ -1572,7 +1572,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$tested_method = new ReflectionMethod( 'AMP_Validation_Manager', 'has_parameters_passed_by_reference' );
 		$tested_method->setAccessible( true );
 		$reflection_by_value          = new ReflectionFunction( 'get_bloginfo' );
-		$reflection_by_ref_first_arg  = new ReflectionFunction( 'wp_default_styles' );
+		$reflection_by_ref_first_arg  = new ReflectionFunction( 'wp_handle_upload' );
 		$reflection_by_ref_second_arg = new ReflectionFunction( 'wp_parse_str' );
 
 		$this->assertEquals( 0, $tested_method->invoke( null, $reflection_by_value ) );
