@@ -10,11 +10,11 @@ use RuntimeException;
  *
  * @package amp/common
  */
-final class FailedToFetchFromRemoteUrl extends RuntimeException implements AmpException
+final class FailedToGetFromRemoteUrl extends RuntimeException implements AmpException
 {
 
     /**
-     * Instantiate a FailedToFetchFromRemoteUrl exception for a URL if an HTTP status code is available.
+     * Instantiate a FailedToGetFromRemoteUrl exception for a URL if an HTTP status code is available.
      *
      * @param string $url    URL that failed to be fetched.
      * @param string $status HTTP Status that was returned.
@@ -28,7 +28,7 @@ final class FailedToFetchFromRemoteUrl extends RuntimeException implements AmpEx
     }
 
     /**
-     * Instantiate a FailedToFetchFromRemoteUrl exception for a URL if an HTTP status code is not available.
+     * Instantiate a FailedToGetFromRemoteUrl exception for a URL if an HTTP status code is not available.
      *
      * @param string $url URL that failed to be fetched.
      * @return self
@@ -41,7 +41,7 @@ final class FailedToFetchFromRemoteUrl extends RuntimeException implements AmpEx
     }
 
     /**
-     * Instantiate a FailedToFetchFromRemoteUrl exception for a URL if an exception was thrown.
+     * Instantiate a FailedToGetFromRemoteUrl exception for a URL if an exception was thrown.
      *
      * @param string    $url       URL that failed to be fetched.
      * @param Exception $exception Exception that was thrown.

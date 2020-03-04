@@ -1,6 +1,6 @@
 <?php
 
-use Amp\RemoteRequest\StubbedRemoteRequest;
+use Amp\RemoteRequest\StubbedRemoteGetRequest;
 use Amp\RuntimeVersion;
 use PHPUnit\Framework\TestCase;
 
@@ -33,7 +33,7 @@ class RuntimeVersionTest extends TestCase
 
     public function __construct(...$args)
     {
-        $this->runtimeVersion = new RuntimeVersion(new StubbedRemoteRequest(self::STUBBED_REMOTE_REQUESTS));
+        $this->runtimeVersion = new RuntimeVersion(new StubbedRemoteGetRequest(self::STUBBED_REMOTE_REQUESTS));
         parent::__construct(...$args);
     }
 

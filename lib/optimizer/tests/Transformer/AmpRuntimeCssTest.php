@@ -7,7 +7,7 @@ use Amp\Optimizer\Configuration\AmpRuntimeCssConfiguration;
 use Amp\Optimizer\ErrorCollection;
 use Amp\Optimizer\Tests\MarkupComparison;
 use Amp\Optimizer\Tests\TestMarkup;
-use Amp\RemoteRequest\StubbedRemoteRequest;
+use Amp\RemoteRequest\StubbedRemoteGetRequest;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -61,7 +61,7 @@ final class AmpRuntimeCssTest extends TestCase
     public function testTransform($source, $expectedHtml, $config = [])
     {
         $document      = Document::fromHtml($source);
-        $remoteRequest = new StubbedRemoteRequest(TestMarkup::STUBBED_REMOTE_REQUESTS);
+        $remoteRequest = new StubbedRemoteGetRequest(TestMarkup::STUBBED_REMOTE_REQUESTS);
         $transformer   = new AmpRuntimeCss($remoteRequest, new AmpRuntimeCssConfiguration($config));
         $errors        = new ErrorCollection();
 

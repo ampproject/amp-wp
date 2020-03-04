@@ -2,8 +2,8 @@
 
 namespace Amp\RemoteRequest;
 
-use Amp\Exception\FailedToFetchFromRemoteUrl;
-use Amp\RemoteRequest;
+use Amp\Exception\FailedToGetFromRemoteUrl;
+use Amp\RemoteGetRequest;
 use Exception;
 
 /**
@@ -11,7 +11,7 @@ use Exception;
  *
  * @package amp/common
  */
-final class CurlRemoteRequest implements RemoteRequest
+final class CurlRemoteGetRequest implements RemoteGetRequest
 {
 
     /**
@@ -36,7 +36,7 @@ final class CurlRemoteRequest implements RemoteRequest
     private $timeout;
 
     /**
-     * Instantiate a CurlRemoteRequest object.
+     * Instantiate a CurlRemoteGetRequest object.
      *
      * @param bool $sslVerify Whether to verify SSL certificates.
      * @param int  $timeout   Timeout value to use in seconds.
@@ -48,13 +48,13 @@ final class CurlRemoteRequest implements RemoteRequest
     }
 
     /**
-     * Fetch the contents of a remote request.
+     * Do a GET request to retrieve the contents of a remote URL.
      *
-     * @param string $url URL to fetch.
+     * @param string $url URL to get.
      * @return string Contents retrieved from the remote URL.
-     * @throws FailedToFetchFromRemoteUrl If fetching the contents from the URL failed.
+     * @throws FailedToGetFromRemoteUrl If retrieving the contents from the URL failed.
      */
-    public function fetch($url)
+    public function get($url)
     {
         $curlHandle = curl_init();
 
@@ -74,10 +74,10 @@ final class CurlRemoteRequest implements RemoteRequest
             $status = curl_getinfo($curlHandle, CURLINFO_HTTP_CODE);
 
             if (!empty($status)) {
-                throw FailedToFetchFromRemoteUrl::withHttpStatus($url, $status);
+                throw FailedToGetFromRemoteUrl::withHttpStatus($url, $status);
             }
 
-            throw FailedToFetchFromRemoteUrl::withoutHttpStatus($url);
+            throw FailedToGetFromRemoteUrl::withoutHttpStatus($url);
         }
 
         return $response;

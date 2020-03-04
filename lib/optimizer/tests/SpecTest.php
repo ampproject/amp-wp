@@ -8,7 +8,7 @@ use Amp\Optimizer\Tests\TestMarkup;
 use Amp\Optimizer\Transformer\AmpRuntimeCss;
 use Amp\Optimizer\Transformer\ReorderHead;
 use Amp\Optimizer\Transformer\ServerSideRendering;
-use Amp\RemoteRequest\StubbedRemoteRequest;
+use Amp\RemoteRequest\StubbedRemoteGetRequest;
 use DirectoryIterator;
 use PHPUnit\Framework\TestCase;
 
@@ -110,7 +110,7 @@ final class SpecTest extends TestCase
         $arguments = [];
 
         if (is_a($transformerClass, MakesRemoteRequests::class, true)) {
-            $arguments[] = new StubbedRemoteRequest(TestMarkup::STUBBED_REMOTE_REQUESTS);
+            $arguments[] = new StubbedRemoteGetRequest(TestMarkup::STUBBED_REMOTE_REQUESTS);
         }
 
         if (is_a($transformerClass, Configurable::class, true)) {

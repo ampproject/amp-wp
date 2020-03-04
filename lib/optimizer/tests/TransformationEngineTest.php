@@ -5,7 +5,7 @@ namespace Amp\Optimizer;
 use Amp\Dom\Document;
 use Amp\Optimizer\Tests\MarkupComparison;
 use Amp\Optimizer\Tests\TestMarkup;
-use Amp\RemoteRequest\StubbedRemoteRequest;
+use Amp\RemoteRequest\StubbedRemoteGetRequest;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -89,7 +89,7 @@ final class TransformationEngineTest extends TestCase
     {
         return new TransformationEngine(
             new Configuration(),
-            new StubbedRemoteRequest(TestMarkup::STUBBED_REMOTE_REQUESTS)
+            new StubbedRemoteGetRequest(TestMarkup::STUBBED_REMOTE_REQUESTS)
         );
     }
 }

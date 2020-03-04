@@ -2,8 +2,8 @@
 
 namespace Amp\RemoteRequest;
 
-use Amp\Exception\FailedToFetchFromRemoteUrl;
-use Amp\RemoteRequest;
+use Amp\Exception\FailedToGetFromRemoteUrl;
+use Amp\RemoteGetRequest;
 use LogicException;
 
 /**
@@ -11,7 +11,7 @@ use LogicException;
  *
  * @package amp/common
  */
-final class StubbedRemoteRequest implements RemoteRequest
+final class StubbedRemoteGetRequest implements RemoteGetRequest
 {
 
     /**
@@ -22,7 +22,7 @@ final class StubbedRemoteRequest implements RemoteRequest
     private $argumentMap;
 
     /**
-     * Instantiate a StubbedRemoteRequest object.
+     * Instantiate a StubbedRemoteGetRequest object.
      *
      * @param array $argumentMap Associative array of data for mapping between arguments and returned results.
      */
@@ -32,13 +32,13 @@ final class StubbedRemoteRequest implements RemoteRequest
     }
 
     /**
-     * Fetch the contents of a remote request.
+     * Do a GET request to retrieve the contents of a remote URL.
      *
-     * @param string $url URL to fetch.
+     * @param string $url URL to get.
      * @return string Contents retrieved from the remote URL.
-     * @throws FailedToFetchFromRemoteUrl If fetching the contents from the URL failed.
+     * @throws FailedToGetFromRemoteUrl If retrieving the contents from the URL failed.
      */
-    public function fetch($url)
+    public function get($url)
     {
         if (! array_key_exists($url, $this->argumentMap)) {
             throw new LogicException("Trying to stub a remote request for an unknown URL: {$url}.");

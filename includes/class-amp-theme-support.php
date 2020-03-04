@@ -6,7 +6,7 @@
  */
 
 use Amp\Amp;
-use Amp\AmpWP\CachedRemoteRequest;
+use Amp\AmpWP\CachedRemoteGetRequest;
 use Amp\AmpWP\ConfigurationArgument;
 use Amp\AmpWP\Filter;
 use Amp\AmpWP\Transformer;
@@ -14,7 +14,7 @@ use Amp\Attribute;
 use Amp\Dom\Document;
 use Amp\Extension;
 use Amp\Optimizer;
-use Amp\RemoteRequest\CurlRemoteRequest;
+use Amp\RemoteRequest\CurlRemoteGetRequest;
 use Amp\Tag;
 
 /**
@@ -2335,8 +2335,8 @@ class AMP_Theme_Support {
 	private static function get_optimizer( $args ) {
 		$configuration = self::get_optimizer_configuration( $args );
 
-		// @todo Replace CurlRemoteRequest with a Requests version?
-		$remote_request = new CachedRemoteRequest( new CurlRemoteRequest() );
+		// @todo Replace CurlRemoteGetRequest with a Requests version?
+		$remote_request = new CachedRemoteGetRequest( new CurlRemoteGetRequest() );
 
 		return new Optimizer\TransformationEngine(
 			$configuration,

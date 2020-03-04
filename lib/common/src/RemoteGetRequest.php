@@ -2,7 +2,7 @@
 
 namespace Amp;
 
-use Amp\Exception\FailedToFetchFromRemoteUrl;
+use Amp\Exception\FailedToGetFromRemoteUrl;
 
 /**
  * Interface for abstracting away the transport that is being used for making remote requests.
@@ -11,15 +11,15 @@ use Amp\Exception\FailedToFetchFromRemoteUrl;
  *
  * @package amp/common
  */
-interface RemoteRequest
+interface RemoteGetRequest
 {
 
     /**
-     * Fetch the contents of a remote request.
+     * Do a GET request to retrieve the contents of a remote URL.
      *
-     * @param string $url URL to fetch.
+     * @param string $url URL to get.
      * @return string Contents retrieved from the remote URL.
-     * @throws FailedToFetchFromRemoteUrl If fetching the contents from the URL failed.
+     * @throws FailedToGetFromRemoteUrl If retrieving the contents from the URL failed.
      */
-    public function fetch($url);
+    public function get($url);
 }

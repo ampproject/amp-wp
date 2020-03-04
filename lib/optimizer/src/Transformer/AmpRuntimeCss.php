@@ -11,7 +11,7 @@ use Amp\Optimizer\Error;
 use Amp\Optimizer\ErrorCollection;
 use Amp\Optimizer\MakesRemoteRequests;
 use Amp\Optimizer\TransformerConfiguration;
-use Amp\RemoteRequest;
+use Amp\RemoteGetRequest;
 use Amp\Optimizer\Transformer;
 use Amp\RuntimeVersion;
 use Amp\Tag;
@@ -63,7 +63,7 @@ final class AmpRuntimeCss implements Transformer, Configurable, MakesRemoteReque
     /**
      * Transport to use for remote requests.
      *
-     * @var RemoteRequest
+     * @var RemoteGetRequest
      */
     private $remoteRequest;
 
@@ -77,10 +77,10 @@ final class AmpRuntimeCss implements Transformer, Configurable, MakesRemoteReque
     /**
      * Instantiate an AmpRuntimeCss object.
      *
-     * @param RemoteRequest            $remoteRequest Transport to use for remote requests.
+     * @param RemoteGetRequest         $remoteRequest Transport to use for remote requests.
      * @param TransformerConfiguration $configuration Configuration store to use.
      */
-    public function __construct(RemoteRequest $remoteRequest, TransformerConfiguration $configuration)
+    public function __construct(RemoteGetRequest $remoteRequest, TransformerConfiguration $configuration)
     {
         $this->remoteRequest = $remoteRequest;
         $this->configuration = $configuration;
@@ -163,7 +163,7 @@ final class AmpRuntimeCss implements Transformer, Configurable, MakesRemoteReque
         }
 
         $ampRuntimeStyle->setAttribute(Attribute::I_AMPHTML_VERSION, $version);
-        $ampRuntimeStyle->textContent = $this->remoteRequest->fetch($v0CssUrl);
+        $ampRuntimeStyle->textContent = $this->remoteRequest->get($v0CssUrl);
     }
 
     /**

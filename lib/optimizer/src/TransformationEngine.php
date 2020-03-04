@@ -3,8 +3,8 @@
 namespace Amp\Optimizer;
 
 use Amp\Dom\Document;
-use Amp\RemoteRequest;
-use Amp\RemoteRequest\CurlRemoteRequest;
+use Amp\RemoteGetRequest;
+use Amp\RemoteRequest\CurlRemoteGetRequest;
 
 /**
  * Transformation engine that accepts HTML and returns optimized HTML.
@@ -24,21 +24,21 @@ final class TransformationEngine
     /**
      * Transport to use for remote requests.
      *
-     * @var RemoteRequest
+     * @var RemoteGetRequest
      */
     private $remoteRequest;
 
     /**
      * Instantiate a TransformationEngine object.
      *
-     * @param Configuration $configuration Configuration data to use for setting up the transformers.
-     * @param RemoteRequest $remoteRequest Optional. Transport to use for remote requests. Defaults to the
-     *                                     CurlRemoteRequest implementation shipped with the library.
+     * @param Configuration    $configuration Configuration data to use for setting up the transformers.
+     * @param RemoteGetRequest $remoteRequest Optional. Transport to use for remote requests. Defaults to the
+     *                                     CurlRemoteGetRequest implementation shipped with the library.
      */
-    public function __construct(Configuration $configuration, RemoteRequest $remoteRequest = null)
+    public function __construct(Configuration $configuration, RemoteGetRequest $remoteRequest = null)
     {
         $this->configuration = $configuration;
-        $this->remoteRequest = isset($remoteRequest) ? $remoteRequest : new CurlRemoteRequest();
+        $this->remoteRequest = isset($remoteRequest) ? $remoteRequest : new CurlRemoteGetRequest();
     }
 
     /**

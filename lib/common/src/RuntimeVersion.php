@@ -51,16 +51,16 @@ final class RuntimeVersion
     /**
      * Transport to use for remote requests.
      *
-     * @var RemoteRequest
+     * @var RemoteGetRequest
      */
     private $remoteRequest;
 
     /**
      * Instantiate a RuntimeVersion object.
      *
-     * @param RemoteRequest $remoteRequest Transport to use for remote requests.
+     * @param RemoteGetRequest $remoteRequest Transport to use for remote requests.
      */
-    public function __construct(RemoteRequest $remoteRequest)
+    public function __construct(RemoteGetRequest $remoteRequest)
     {
         $this->remoteRequest = $remoteRequest;
     }
@@ -75,7 +75,7 @@ final class RuntimeVersion
      */
     public function currentVersion($options = [])
     {
-        $response = $this->remoteRequest->fetch(self::RUNTIME_METADATA_ENDPOINT);
+        $response = $this->remoteRequest->get(self::RUNTIME_METADATA_ENDPOINT);
         $metadata = json_decode($response);
 
         $version = (! empty($options['canary']))
