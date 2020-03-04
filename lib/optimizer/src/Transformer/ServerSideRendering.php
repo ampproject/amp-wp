@@ -47,6 +47,13 @@ final class ServerSideRendering implements Transformer
     ];
 
     /**
+     * Whether the SVG source attribute encoding fix was already added to the document instance.
+     *
+     * @var bool
+     */
+    private $addedSvgSourceAttributeEncodingFixTweak = false;
+
+    /**
      * Apply transformations to the provided DOM document.
      *
      * @param Document        $document DOM document to apply the transformations to.
@@ -536,13 +543,11 @@ final class ServerSideRendering implements Transformer
      */
     private function maybeAddSvgSourceAttributeEncodingFixTweak(Document $document)
     {
-        static $addedSvgSourceAttributeEncodingFixTweak = false;
-
-        if ($addedSvgSourceAttributeEncodingFixTweak) {
+        if (! $this->addedSvgSourceAttributeEncodingFixTweak) {
             return;
         }
 
-        $addedSvgSourceAttributeEncodingFixTweak = true;
+        $this->addedSvgSourceAttributeEncodingFixTweak = true;
         $document->addTweak(new SvgSourceAttributeEncodingFix());
     }
 
