@@ -17,7 +17,7 @@ final class FailedToFetchFromRemoteUrl extends RuntimeException implements AmpEx
      * Instantiate a FailedToFetchFromRemoteUrl exception for a URL if an HTTP status code is available.
      *
      * @param string $url    URL that failed to be fetched.
-     * @param int    $status HTTP Status that was returned.
+     * @param string $status HTTP Status that was returned.
      * @return self
      */
     public static function withHttpStatus($url, $status)

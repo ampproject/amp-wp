@@ -56,29 +56,27 @@ final class CurlRemoteRequest implements RemoteRequest
      */
     public function fetch($url)
     {
-        try {
-            $curlHandle = curl_init();
+        $curlHandle = curl_init();
 
-            curl_setopt($curlHandle, CURLOPT_URL, $url);
-            curl_setopt($curlHandle, CURLOPT_HEADER, 0);
-            curl_setopt($curlHandle, CURLOPT_FOLLOWLOCATION, true);
-            curl_setopt($curlHandle, CURLOPT_SSL_VERIFYPEER, $this->sslVerify ? 1 : 0);
-            curl_setopt($curlHandle, CURLOPT_SSL_VERIFYHOST, $this->sslVerify ? 2 : 0);
-            curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($curlHandle, CURLOPT_CONNECTTIMEOUT, $this->timeout);
-            curl_setopt($curlHandle, CURLOPT_TIMEOUT, $this->timeout);
+        curl_setopt($curlHandle, CURLOPT_URL, $url);
+        curl_setopt($curlHandle, CURLOPT_HEADER, 0);
+        curl_setopt($curlHandle, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($curlHandle, CURLOPT_SSL_VERIFYPEER, $this->sslVerify ? 1 : 0);
+        curl_setopt($curlHandle, CURLOPT_SSL_VERIFYHOST, $this->sslVerify ? 2 : 0);
+        curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curlHandle, CURLOPT_CONNECTTIMEOUT, $this->timeout);
+        curl_setopt($curlHandle, CURLOPT_TIMEOUT, $this->timeout);
 
-            $response = curl_exec($curlHandle);
-            $status   = curl_getinfo($curlHandle, CURLINFO_HTTP_CODE);
-            curl_close($curlHandle);
-        } catch (Exception $exception) {
-            throw FailedToFetchFromRemoteUrl::withException($url, $exception);
-        }
+        $response = curl_exec($curlHandle);
+        curl_close($curlHandle);
 
         if ($response === false) {
-            if (isset($status)) {
+            $status = curl_getinfo($curlHandle, CURLINFO_HTTP_CODE);
+
+            if (!empty($status)) {
                 throw FailedToFetchFromRemoteUrl::withHttpStatus($url, $status);
             }
+
             throw FailedToFetchFromRemoteUrl::withoutHttpStatus($url);
         }
 
