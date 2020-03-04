@@ -2255,6 +2255,14 @@ class AMP_Theme_Support {
 			? $args[ ConfigurationArgument::ENABLE_OPTIMIZER ]
 			: true;
 
+		/**
+		 * Filter whether the generated HTML output should be run through the AMP Optimizer or not.
+		 *
+		 * @since 1.5.0
+		 *
+		 * @param bool $enable_optimizer Whether the generated HTML output should be run through the AMP Optimizer or not.
+		 * @return bool Filtered value of whether the generated HTML output should be run through the AMP Optimizer or not.
+		 */
 		$enable_optimizer = apply_filters( Filter::ENABLE_OPTIMIZER, $enable_optimizer );
 
 		if ( $enable_optimizer ) {
@@ -2349,6 +2357,14 @@ class AMP_Theme_Support {
 			? $args[ ConfigurationArgument::ENABLE_SSR ]
 			: ! ( defined( 'WP_DEBUG' ) && WP_DEBUG );
 
+		/**
+		 * Filter whether the AMP Optimizer should use server-side rendering or not.
+		 *
+		 * @since 1.5.0
+		 *
+		 * @param bool $enable_ssr Whether the AMP Optimizer should use server-side rendering or not.
+		 * @return bool Filtered value of whether the AMP Optimizer should use server-side rendering or not.
+		 */
 		$enable_ssr = apply_filters( Filter::ENABLE_SSR, $enable_ssr );
 
 		// In debugging mode, we don't use server-side rendering, as it further obfuscates the HTML markup.
@@ -2364,6 +2380,14 @@ class AMP_Theme_Support {
 
 		array_unshift( $transformers, Transformer\AmpSchemaOrgMetadata::class );
 
+		/**
+		 * Filter the configuration to be used for the AMP Optimizer.
+		 *
+		 * @since 1.5.0
+		 *
+		 * @param array $configuration Associative array of configuration data.
+		 * @return array Filtered associative array of configuration data.
+		 */
 		$configuration = apply_filters(
 			Filter::OPTIMIZER_CONFIG,
 			array_merge(
