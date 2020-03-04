@@ -543,7 +543,7 @@ final class ServerSideRendering implements Transformer
      */
     private function maybeAddSvgSourceAttributeEncodingFixTweak(Document $document)
     {
-        if (! $this->addedSvgSourceAttributeEncodingFixTweak) {
+        if ($this->addedSvgSourceAttributeEncodingFixTweak) {
             return;
         }
 
