@@ -226,7 +226,7 @@ final class Document extends DOMDocument
      *
      * @var Tweak[]
      */
-    private $tweaks;
+    private $tweaks = [];
 
     /**
      * Creates a new Amp\Dom\Document object
