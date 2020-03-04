@@ -27,7 +27,7 @@ final class CachedRemoteRequest implements RemoteRequest {
 	private $remote_request;
 
 	/**
-	 * Cache expiration time in hours.
+	 * Cache expiration time in seconds.
 	 *
 	 * @var int
 	 */
@@ -39,9 +39,9 @@ final class CachedRemoteRequest implements RemoteRequest {
 	 * This is a decorator that can wrap around an existing remote request object to add a caching layer.
 	 *
 	 * @param RemoteRequest $remote_request Remote request object to decorate with caching.
-	 * @param int           $expiry         Optional. Cache expiry in hours. Defaults to 24 hours.
+	 * @param int           $expiry         Optional. Cache expiry in seconds. Defaults to 24 hours.
 	 */
-	public function __construct( RemoteRequest $remote_request, $expiry = 24 ) {
+	public function __construct( RemoteRequest $remote_request, $expiry = 24 * HOUR_IN_SECONDS ) {
 		$this->remote_request = $remote_request;
 		$this->expiry         = $expiry;
 	}
@@ -59,7 +59,7 @@ final class CachedRemoteRequest implements RemoteRequest {
 
 		if ( false === $result ) {
 			$result = $this->remote_request->fetch( $url );
-			set_transient( $cache_key, $result, $this->expiry * HOUR_IN_SECONDS );
+			set_transient( $cache_key, $result, $this->expiry );
 		}
 
 		return $result;
