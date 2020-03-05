@@ -41,6 +41,7 @@ module.exports = function( grunt ) {
 		'vendor/*/*/*.yml',
 		'vendor/*/*/.*.yml',
 		'vendor/*/*/tests',
+		'vendor/amp/optimizer/bin',
 		'vendor/bin',
 	];
 
