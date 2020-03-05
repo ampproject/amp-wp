@@ -32,7 +32,7 @@ class AMP_Tiktok_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @param Document $dom DOM.
 	 */
 	public function sanitize_raw_embeds( Document $dom ) {
-		$nodes = $dom->xpath->query( '//blockquote[ @class="tiktok-embed" ]' );
+		$nodes = $dom->xpath->query( '//blockquote[ contains( @class, "tiktok-embed" ) ]' );
 
 		foreach ( $nodes as $node ) {
 			if ( ! $this->is_raw_embed( $node ) ) {
@@ -56,59 +56,31 @@ class AMP_Tiktok_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Make Tiktok embed AMP compatible.
 	 *
-	 * @param DOMElement $node The DOMNode to make AMP compatible.
+	 * @param DOMElement $blockquote_node The <blockquote> node to make AMP compatible.
 	 */
-	protected function make_embed_amp_compatible( DOMElement $node ) {
-		$dom       = $node->ownerDocument;
-		$embed_url = $node->getAttribute( 'cite' );
-		$video_id  = $node->getAttribute( 'data-video-id' );
+	protected function make_embed_amp_compatible( DOMElement $blockquote_node ) {
+		$dom      = $blockquote_node->ownerDocument;
+		$video_id = $blockquote_node->getAttribute( 'data-video-id' );
 
-		$this->remove_embed_script( $node );
-
-		// Create fallback node.
-		$fallback_node = AMP_DOM_Utils::create_node(
-			$dom,
-			'a',
-			[
-				'href'  => esc_url_raw( $embed_url ),
-				'class' => 'amp-wp-embed-fallback',
-			]
-		);
-		$fallback_node->appendChild( new DOMText( esc_html( $embed_url ) ) );
-
-		// If there is no video ID, replace the blockquote with the fallback and return.
+		// If there is no video ID, stop here as its needed for the iframe `src` attribute.
 		if ( empty( $video_id ) ) {
-			$node->parentNode->replaceChild( $fallback_node, $node );
 			return;
 		}
 
-		// Find existing <section> node to use as the placeholder.
-		$placeholder_node = null;
-		foreach ( iterator_to_array( $node->childNodes ) as $child ) {
-			if ( ! ( $child instanceof DOMElement ) ) {
-				continue;
-			}
-
-			if ( 'section' === $child->nodeName ) {
-				$placeholder_node = $node->removeChild( $child );
-				break;
-			}
-		}
-
-		// If the placeholder was not found, use the fallback instead.
-		if ( ! $placeholder_node ) {
-			$placeholder_node = $fallback_node;
-		}
-
-		$placeholder_node->setAttribute( 'placeholder', '' );
+		$this->remove_embed_script( $blockquote_node );
 
 		$amp_iframe_node = AMP_DOM_Utils::create_node(
 			$dom,
 			'amp-iframe',
 			[
 				'layout'  => 'responsive',
-				'width'   => $this->DEFAULT_WIDTH,
-				'height'  => $this->DEFAULT_HEIGHT,
+
+				/*
+				 * The iframe dimensions cannot be derived from the embed, so we default to a dimension that should
+				 * allow the embed to be fully shown.
+				 */
+				'width'   => 600,
+				'height'  => 900,
 
 				/*
 				 * A `lang` query parameter is added to the URL via JS. This can't be determined here so it is not
@@ -118,10 +90,24 @@ class AMP_Tiktok_Embed_Handler extends AMP_Base_Embed_Handler {
 				'sandbox' => 'allow-scripts allow-same-origin',
 			]
 		);
-		$amp_iframe_node->appendChild( $placeholder_node );
+
+		// Find existing <section> node to use as the placeholder.
+		foreach ( iterator_to_array( $blockquote_node->childNodes ) as $child ) {
+			if ( ! ( $child instanceof DOMElement ) ) {
+				continue;
+			}
+
+			// Append the placeholder if it was found.
+			if ( 'section' === $child->nodeName ) {
+				$placeholder_node = $blockquote_node->removeChild( $child );
+				$placeholder_node->setAttribute( 'placeholder', '' );
+				$amp_iframe_node->appendChild( $placeholder_node );
+				break;
+			}
+		}
 
 		// On the non-amp page the embed is wrapped with a <blockquote>, so the same is done here.
-		$node->appendChild( $amp_iframe_node );
+		$blockquote_node->appendChild( $amp_iframe_node );
 	}
 
 	/**
