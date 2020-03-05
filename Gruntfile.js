@@ -71,7 +71,7 @@ module.exports = function( grunt ) {
 				command: 'php bin/verify-version-consistency.php',
 			},
 			composer_install: {
-				command: 'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi; cd build; composer install --no-dev -o && composer remove cweagans/composer-patches --update-no-dev -o && rm -r ' + productionVendorExcludedFilePatterns.join( ' ' ),
+				command: 'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi; cd build; composer install --no-dev -o; for symlink in $(find vendor/amp -type l); do symlinkpath=$(readlink "$symlink") && rm "$symlink" && mkdir "$symlink" && rsync -avz "$(dirname "$symlink")/$symlinkpath/" "$symlink/"; done && composer remove cweagans/composer-patches --update-no-dev -o && rm -r ' + productionVendorExcludedFilePatterns.join( ' ' ),
 			},
 			create_build_zip: {
 				command: 'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi; if [ -e amp.zip ]; then rm amp.zip; fi; cd build; zip -r ../amp.zip .; cd ..; echo; echo "ZIP of build: $(pwd)/amp.zip"',
