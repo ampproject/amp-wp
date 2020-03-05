@@ -75,7 +75,7 @@ module.exports = function( grunt ) {
 					'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi',
 					'cd build',
 					'composer install --no-dev -o',
-					'for symlink in $(find vendor/amp -type l); do symlinkpath=$(readlink "$symlink") && rm "$symlink" && mkdir "$symlink" && rsync -a "$(dirname "$symlink")/$symlinkpath/" "$symlink/"; done',
+					'for symlinksource in $(find vendor/amp -type l); do symlinktarget=$(readlink "$symlinksource") && rm "$symlinksource" && cp -r "vendor/amp/$symlinktarget" "$symlinksource"; done',
 					'composer remove cweagans/composer-patches --update-no-dev -o',
 					'rm -r ' + productionVendorExcludedFilePatterns.join( ' ' )
 				].join( ' && ' ),
