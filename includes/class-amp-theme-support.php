@@ -15,6 +15,8 @@ use Amp\Dom\Document;
 use Amp\Extension;
 use Amp\Optimizer;
 use Amp\RemoteRequest\CurlRemoteGetRequest;
+use Amp\RemoteRequest\FallbackRemoteGetRequest;
+use Amp\RemoteRequest\FilesystemRemoteGetRequest;
 use Amp\Tag;
 
 /**
@@ -2335,12 +2337,16 @@ class AMP_Theme_Support {
 	private static function get_optimizer( $args ) {
 		$configuration = self::get_optimizer_configuration( $args );
 
-		// @todo Replace CurlRemoteGetRequest with a Requests version?
-		$remote_request = new CachedRemoteGetRequest( new CurlRemoteGetRequest() );
+		$fallback_remote_request_pipeline = new FallbackRemoteGetRequest(
+		    new CurlRemoteGetRequest(),
+            new FilesystemRemoteGetRequest( Optimizer\LocalFallback::getMappings() )
+        );
+
+		$cached_remote_request = new CachedRemoteGetRequest( $fallback_remote_request_pipeline );
 
 		return new Optimizer\TransformationEngine(
 			$configuration,
-			$remote_request
+			$cached_remote_request
 		);
 	}
 

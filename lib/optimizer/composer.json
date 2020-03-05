@@ -54,7 +54,10 @@
     "cbf": "phpcbf --standard=PSR12 -n src",
     "cs": "phpcs --standard=PSR12 -n src",
     "lint": "parallel-lint -j 10 --colors --exclude vendor .",
-    "post-update-cmd": "rm -rf tests/spec && bin/sync-amp-toolbox-test-suite.php",
+    "post-update-cmd": [
+      "rm -rf tests/spec && bin/sync-amp-toolbox-test-suite.php",
+      "bin/sync-amp-runtime-local-fallback-resources.php"
+    ],
     "test": [
       "@lint",
       "@unit",

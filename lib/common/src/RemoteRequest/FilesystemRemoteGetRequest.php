@@ -4,14 +4,17 @@ namespace Amp\RemoteRequest;
 
 use Amp\Exception\FailedToGetFromRemoteUrl;
 use Amp\RemoteGetRequest;
+use Exception;
 use LogicException;
 
 /**
- * Stub for simulating remote requests.
+ * Fetch the response for a remote request from the local filesystem instead.
+ *
+ * This can be used to provide offline fallbacks.
  *
  * @package amp/common
  */
-final class StubbedRemoteGetRequest implements RemoteGetRequest
+final class FilesystemRemoteGetRequest implements RemoteGetRequest
 {
 
     /**
@@ -41,9 +44,17 @@ final class StubbedRemoteGetRequest implements RemoteGetRequest
     public function get($url)
     {
         if (! array_key_exists($url, $this->argumentMap)) {
-            throw new LogicException("Trying to stub a remote request for an unknown URL: {$url}.");
+            throw new LogicException("Trying to get a remote request from the filesystem for an unknown URL: {$url}.");
         }
 
-        return $this->argumentMap[$url];
+        if (! file_exists($this->argumentMap[$url]) || ! is_readable($this->argumentMap[$url])) {
+            throw new LogicException("Trying to get a remote request from the filesystem for a file that is not accessible: {$url} => {$this->argumentMap[$url]}.");
+        }
+
+        try {
+            return file_get_contents($this->argumentMap[$url]);
+        } catch (Exception $exception) {
+            throw FailedToGetFromRemoteUrl::withException($url, $exception);
+        }
     }
 }

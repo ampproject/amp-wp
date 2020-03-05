@@ -84,14 +84,13 @@ final class CurlRemoteGetRequest implements RemoteGetRequest
         $this->sslVerify = $sslVerify;
         $this->timeout   = $timeout;
         $this->retries   = $retries;
-
     }
 
     /**
      * Do a GET request to retrieve the contents of a remote URL.
      *
      * @param string $url URL to get.
-     * @return string Contents retrieved from the remote URL.
+     * @return string|false Contents retrieved from the remote URL, or false if the request failed.
      * @throws FailedToGetFromRemoteUrl If retrieving the contents from the URL failed.
      */
     public function get($url)
