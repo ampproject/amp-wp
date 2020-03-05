@@ -1196,7 +1196,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		$filtered_content   = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'error_code', $term_id );
 
 		$this->assertStringStartsWith( $initial_content . '<button type="button" aria-label="Toggle error details"', $filtered_content );
-		$this->assertStringContainsString( $expected_error_message, $filtered_content );
+		$this->assertContains( $expected_error_message, $filtered_content );
 	}
 
 	/**
