@@ -1171,9 +1171,9 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 	 * @dataProvider get_filter_manage_custom_columns_data
 	 * @covers \AMP_Validation_Error_Taxonomy::filter_manage_custom_columns()
 	 *
-	 * @param string $error_code             The error code in the validation error.
-	 * @param string $error_message          The error message in the validation error, if any.
-	 * @param string $expected_error_message The error message that should appear in the custom column.
+	 * @param string      $error_code             The error code in the validation error.
+	 * @param string|null $error_message          The error message in the validation error, if any.
+	 * @param string      $expected_error_message The error message that should appear in the custom column.
 	 */
 	public function test_filter_manage_custom_columns_error_appears( $error_code, $error_message, $expected_error_message ) {
 		$this->accept_sanitization_by_default( false );
