@@ -774,7 +774,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return bool Whether the class is allowed as a child of <amp-date-picker>.
 	 */
 	private function is_class_allowed_in_amp_date_picker( $class ) {
-		$class_prefixes = [
+		static $class_prefixes = [
 			'CalendarDay',
 			'CalendarMonth',
 			'CalendarMonthGrid',
