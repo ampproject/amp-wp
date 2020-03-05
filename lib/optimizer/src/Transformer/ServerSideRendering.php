@@ -483,7 +483,6 @@ final class ServerSideRendering implements Transformer
             $sizer = $this->createResponsiveSizer($document, $width, $height);
         } elseif ($layout === Layout::INTRINSIC) {
             $sizer = $this->createIntrinsicSizer($document, $width, $height);
-            $this->maybeAddSvgSourceAttributeEncodingFixTweak($document);
         }
 
         if ($sizer) {
@@ -534,21 +533,6 @@ final class ServerSideRendering implements Transformer
         $sizer->appendChild($sizer_img);
 
         return $sizer;
-    }
-
-    /**
-     * Maybe add a tweak to the document to fix the SVG source attribute encoding behavior.
-     *
-     * @param Document $document Document instance to add the tweak to.
-     */
-    private function maybeAddSvgSourceAttributeEncodingFixTweak(Document $document)
-    {
-        if ($this->addedSvgSourceAttributeEncodingFixTweak) {
-            return;
-        }
-
-        $this->addedSvgSourceAttributeEncodingFixTweak = true;
-        $document->addTweak(new SvgSourceAttributeEncodingFix());
     }
 
     /**
