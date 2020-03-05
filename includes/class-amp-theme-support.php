@@ -2265,7 +2265,7 @@ class AMP_Theme_Support {
 		 * @param bool $enable_optimizer Whether the generated HTML output should be run through the AMP Optimizer or not.
 		 * @return bool Filtered value of whether the generated HTML output should be run through the AMP Optimizer or not.
 		 */
-		$enable_optimizer = apply_filters( Filter::ENABLE_OPTIMIZER, $enable_optimizer );
+		$enable_optimizer = apply_filters( 'amp_enable_optimizer', $enable_optimizer );
 
 		if ( $enable_optimizer ) {
 			$errors = new Optimizer\ErrorCollection();
@@ -2371,7 +2371,7 @@ class AMP_Theme_Support {
 		 * @param bool $enable_ssr Whether the AMP Optimizer should use server-side rendering or not.
 		 * @return bool Filtered value of whether the AMP Optimizer should use server-side rendering or not.
 		 */
-		$enable_ssr = apply_filters( Filter::ENABLE_SSR, $enable_ssr );
+		$enable_ssr = apply_filters( 'amp_enable_ssr', $enable_ssr );
 
 		// In debugging mode, we don't use server-side rendering, as it further obfuscates the HTML markup.
 		if ( ! $enable_ssr ) {
@@ -2395,7 +2395,7 @@ class AMP_Theme_Support {
 		 * @return array Filtered associative array of configuration data.
 		 */
 		$configuration = apply_filters(
-			Filter::OPTIMIZER_CONFIG,
+			'amp_optimizer_config',
 			array_merge(
 				[ Optimizer\Configuration::KEY_TRANSFORMERS => $transformers ],
 				$args
