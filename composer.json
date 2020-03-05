@@ -64,14 +64,14 @@
       "type": "path",
       "url": "lib/common",
       "options": {
-        "symlink": false
+        "symlink": true
       }
     },
     {
       "type": "path",
       "url": "lib/optimizer",
       "options": {
-        "symlink": false
+        "symlink": true
       }
     },
     {
