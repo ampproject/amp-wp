@@ -25,6 +25,7 @@ interface Attribute
     const AMP_EMOJI             = "\xE2\x9A\xA1";
     const AMP_EMOJI_ALT         = "\xE2\x9A\xA1\xEF\xB8\x8F"; // See https://github.com/ampproject/amphtml/issues/25990.
     const AMP_RUNTIME           = 'amp-runtime';
+    const AMP_SCRIPT_SRC        = 'amp-script-src';
     const ARIA_HIDDEN           = 'aria-hidden';
     const ASYNC                 = 'async';
     const AUTOPLAY              = 'autoplay';
@@ -50,6 +51,7 @@ interface Attribute
     const SIZES                 = 'sizes';
     const SRC                   = 'src';
     const TYPE                  = 'type';
+    const VIEWPORT              = 'viewport';
     const WIDTH                 = 'width';
 
     const ALL_AMP       = [self::AMP, self::AMP_EMOJI, self::AMP_EMOJI_ALT];
