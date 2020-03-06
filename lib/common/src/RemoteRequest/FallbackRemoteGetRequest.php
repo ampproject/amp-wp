@@ -4,6 +4,7 @@ namespace Amp\RemoteRequest;
 
 use Amp\Exception\FailedToGetFromRemoteUrl;
 use Amp\RemoteGetRequest;
+use Amp\Response;
 use Exception;
 
 /**
@@ -53,15 +54,17 @@ final class FallbackRemoteGetRequest implements RemoteGetRequest
      * Do a GET request to retrieve the contents of a remote URL.
      *
      * @param string $url URL to get.
-     * @return string|false Contents retrieved from the remote URL, or false if the request failed.
+     * @return Response Response for the executed request.
      * @throws FailedToGetFromRemoteUrl If retrieving the contents from the URL failed.
      */
     public function get($url)
     {
         foreach ($this->pipeline as $remoteGetRequest) {
             try {
-                $response = $remoteGetRequest->get($url);
-                if ($response !== false) {
+                $response   = $remoteGetRequest->get($url);
+                $statusCode = $response->getStatusCode();
+
+                if ( 200 <= $statusCode && $statusCode < 300 ) {
                     return $response;
                 }
             } catch (Exception $exception) {
@@ -69,6 +72,7 @@ final class FallbackRemoteGetRequest implements RemoteGetRequest
             }
         }
 
-        return false;
+        // @todo Not sure what status code to use here. "503 Service Unavailable" is a temporary server-side error.
+        return new RemoteGetRequestResponse('', [], 503);
     }
 }

@@ -4,6 +4,7 @@ namespace Amp\RemoteRequest;
 
 use Amp\Exception\FailedToGetFromRemoteUrl;
 use Amp\RemoteGetRequest;
+use Amp\Response;
 use LogicException;
 
 /**
@@ -35,7 +36,7 @@ final class StubbedRemoteGetRequest implements RemoteGetRequest
      * Do a GET request to retrieve the contents of a remote URL.
      *
      * @param string $url URL to get.
-     * @return string|false Contents retrieved from the remote URL, or false if the request failed.
+     * @return Response Response for the executed request.
      * @throws FailedToGetFromRemoteUrl If retrieving the contents from the URL failed.
      */
     public function get($url)
@@ -44,6 +45,6 @@ final class StubbedRemoteGetRequest implements RemoteGetRequest
             throw new LogicException("Trying to stub a remote request for an unknown URL: {$url}.");
         }
 
-        return $this->argumentMap[$url];
+        return new RemoteGetRequestResponse($this->argumentMap[$url]);
     }
 }

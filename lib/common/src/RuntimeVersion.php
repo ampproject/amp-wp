@@ -76,7 +76,13 @@ final class RuntimeVersion
     public function currentVersion($options = [])
     {
         $response = $this->remoteRequest->get(self::RUNTIME_METADATA_ENDPOINT);
-        $metadata = json_decode($response);
+        $statusCode = $response->getStatusCode();
+
+        if ( 200 < $statusCode || $statusCode >= 300 ) {
+            return '0';
+        }
+
+        $metadata = json_decode($response->getBody());
 
         $version = (! empty($options['canary']))
             ? $metadata->diversions[0]

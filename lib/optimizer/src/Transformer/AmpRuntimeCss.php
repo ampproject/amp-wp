@@ -163,7 +163,14 @@ final class AmpRuntimeCss implements Transformer, Configurable, MakesRemoteReque
         }
 
         $ampRuntimeStyle->setAttribute(Attribute::I_AMPHTML_VERSION, $version);
-        $ampRuntimeStyle->textContent = $this->remoteRequest->get($v0CssUrl);
+        $response   = $this->remoteRequest->get($v0CssUrl);
+        $statusCode = $response->getStatusCode();
+
+        if ( 200 < $statusCode || $statusCode >= 300 ) {
+            return '';
+        }
+
+        $ampRuntimeStyle->textContent = $response->getBody();
     }
 
     /**

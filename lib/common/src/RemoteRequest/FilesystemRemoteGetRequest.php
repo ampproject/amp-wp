@@ -4,6 +4,7 @@ namespace Amp\RemoteRequest;
 
 use Amp\Exception\FailedToGetFromRemoteUrl;
 use Amp\RemoteGetRequest;
+use Amp\Response;
 use Exception;
 use LogicException;
 
@@ -38,7 +39,7 @@ final class FilesystemRemoteGetRequest implements RemoteGetRequest
      * Do a GET request to retrieve the contents of a remote URL.
      *
      * @param string $url URL to get.
-     * @return string|false Contents retrieved from the remote URL, or false if the request failed.
+     * @return Response Response for the executed request.
      * @throws FailedToGetFromRemoteUrl If retrieving the contents from the URL failed.
      */
     public function get($url)
@@ -52,7 +53,7 @@ final class FilesystemRemoteGetRequest implements RemoteGetRequest
         }
 
         try {
-            return file_get_contents($this->argumentMap[$url]);
+            return new RemoteGetRequestResponse(file_get_contents($this->argumentMap[$url]));
         } catch (Exception $exception) {
             throw FailedToGetFromRemoteUrl::withException($url, $exception);
         }

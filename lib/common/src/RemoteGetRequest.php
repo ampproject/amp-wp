@@ -18,7 +18,7 @@ interface RemoteGetRequest
      * Do a GET request to retrieve the contents of a remote URL.
      *
      * @param string $url URL to get.
-     * @return string|false Contents retrieved from the remote URL, or false if the request failed.
+     * @return Response Response for the executed request.
      * @throws FailedToGetFromRemoteUrl If retrieving the contents from the URL failed.
      */
     public function get($url);

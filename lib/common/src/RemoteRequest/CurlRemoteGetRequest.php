@@ -4,6 +4,7 @@ namespace Amp\RemoteRequest;
 
 use Amp\Exception\FailedToGetFromRemoteUrl;
 use Amp\RemoteGetRequest;
+use Amp\Response;
 
 /**
  * Remote request transport using cURL.
@@ -90,7 +91,7 @@ final class CurlRemoteGetRequest implements RemoteGetRequest
      * Do a GET request to retrieve the contents of a remote URL.
      *
      * @param string $url URL to get.
-     * @return string|false Contents retrieved from the remote URL, or false if the request failed.
+     * @return Response Response for the executed request.
      * @throws FailedToGetFromRemoteUrl If retrieving the contents from the URL failed.
      */
     public function get($url)
@@ -98,6 +99,7 @@ final class CurlRemoteGetRequest implements RemoteGetRequest
         $retriesLeft = $this->retries;
         do {
             $curlHandle = curl_init();
+            $headers    = [];
 
             curl_setopt($curlHandle, CURLOPT_URL, $url);
             curl_setopt($curlHandle, CURLOPT_HEADER, 0);
@@ -108,15 +110,30 @@ final class CurlRemoteGetRequest implements RemoteGetRequest
             curl_setopt($curlHandle, CURLOPT_CONNECTTIMEOUT, $this->timeout);
             curl_setopt($curlHandle, CURLOPT_TIMEOUT, $this->timeout);
 
-            $response = curl_exec($curlHandle);
+            curl_setopt($curlHandle, CURLOPT_HEADERFUNCTION,
+                static function ($curl, $header) use (&$headers) {
+                    $length = strlen($header);
+                    $header = explode(':', $header, 2);
+
+                    // Only store valid headers, discard invalid ones that choke on the explode.
+                    if (count($header) === 2)
+                    {
+                        $headers[strtolower(trim($header[0]))][] = trim($header[1]);
+                    }
+
+                    return $length;
+                }
+            );
+
+            $body   = curl_exec($curlHandle);
+            $status = curl_getinfo($curlHandle, CURLINFO_HTTP_CODE);
+
             curl_close($curlHandle);
 
-            if ($response === false) {
+            if ($body === false) {
                 $curlErrno = curl_errno($curlHandle);
 
                 if (! $retriesLeft || in_array($curlErrno, self::RETRYABLE_ERROR_CODES, true) === false) {
-                    $status = curl_getinfo($curlHandle, CURLINFO_HTTP_CODE);
-
                     if (! empty($status)) {
                         throw FailedToGetFromRemoteUrl::withHttpStatus($url, $status);
                     }
@@ -127,7 +144,8 @@ final class CurlRemoteGetRequest implements RemoteGetRequest
                 continue;
             }
 
-            return $response;
+
+            return new RemoteGetRequestResponse($body, $headers, (int) $status);
         } while ($retriesLeft--);
     }
 }
