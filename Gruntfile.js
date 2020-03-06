@@ -43,6 +43,8 @@ module.exports = function( grunt ) {
 		'vendor/*/*/tests',
 		'vendor/amp/optimizer/bin',
 		'vendor/bin',
+		'vendor/amp/common/vendor',
+		'vendor/amp/optimizer/vendor',
 	];
 
 	grunt.initConfig( {
