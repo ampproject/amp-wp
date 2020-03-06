@@ -41,7 +41,10 @@ module.exports = function( grunt ) {
 		'vendor/*/*/*.yml',
 		'vendor/*/*/.*.yml',
 		'vendor/*/*/tests',
+		'vendor/amp/optimizer/bin',
 		'vendor/bin',
+		'vendor/amp/common/vendor',
+		'vendor/amp/optimizer/vendor',
 	];
 
 	grunt.initConfig( {
@@ -71,7 +74,14 @@ module.exports = function( grunt ) {
 				command: 'php bin/verify-version-consistency.php',
 			},
 			composer_install: {
-				command: 'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi; cd build; composer install --no-dev -o && composer remove cweagans/composer-patches --update-no-dev -o && rm -r ' + productionVendorExcludedFilePatterns.join( ' ' ),
+				command: [
+					'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi',
+					'cd build',
+					'composer install --no-dev -o',
+					'for symlinksource in $(find vendor/amp -type l); do symlinktarget=$(readlink "$symlinksource") && rm "$symlinksource" && cp -r "vendor/amp/$symlinktarget" "$symlinksource"; done',
+					'composer remove cweagans/composer-patches --update-no-dev -o',
+					'rm -r ' + productionVendorExcludedFilePatterns.join( ' ' )
+				].join( ' && ' ),
 			},
 			create_build_zip: {
 				command: 'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi; if [ -e amp.zip ]; then rm amp.zip; fi; cd build; zip -r ../amp.zip .; cd ..; echo; echo "ZIP of build: $(pwd)/amp.zip"',

@@ -11,7 +11,6 @@ use Amp\Layout;
 use Amp\Optimizer\Error;
 use Amp\Optimizer\ErrorCollection;
 use Amp\Optimizer\Transformer;
-use Amp\Optimizer\Tweak\SvgSourceAttributeEncodingFix;
 use Amp\Tag;
 use DOMElement;
 
@@ -45,13 +44,6 @@ final class ServerSideRendering implements Transformer
         Layout::FLEX_ITEM,
         Layout::INTRINSIC,
     ];
-
-    /**
-     * Whether the SVG source attribute encoding fix was already added to the document instance.
-     *
-     * @var bool
-     */
-    private $addedSvgSourceAttributeEncodingFixTweak = false;
 
     /**
      * Apply transformations to the provided DOM document.
@@ -121,6 +113,7 @@ final class ServerSideRendering implements Transformer
         $document->head->insertBefore($ampRuntimeMarker, $document->head->hasChildNodes() ? $document->head->firstChild : null);
 
         foreach ($document->xpath->query('.//script[ @custom-element ]', $document->head) as $customElementScript) {
+            /** @var DOMElement $customElementScript */
             // amp-experiment is a render delaying extension iff the tag is used in the doc, which we checked for above.
             if (
                 $customElementScript->getAttribute(Attribute::CUSTOM_ELEMENT) !== Extension::EXPERIMENT

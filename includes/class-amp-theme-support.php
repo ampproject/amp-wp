@@ -2338,9 +2338,9 @@ class AMP_Theme_Support {
 		$configuration = self::get_optimizer_configuration( $args );
 
 		$fallback_remote_request_pipeline = new FallbackRemoteGetRequest(
-		    new CurlRemoteGetRequest(),
-            new FilesystemRemoteGetRequest( Optimizer\LocalFallback::getMappings() )
-        );
+			new CurlRemoteGetRequest(),
+			new FilesystemRemoteGetRequest( Optimizer\LocalFallback::getMappings() )
+		);
 
 		$cached_remote_request = new CachedRemoteGetRequest( $fallback_remote_request_pipeline );
 
