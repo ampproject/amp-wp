@@ -37,7 +37,7 @@ class AmpTest extends TestCase
     }
 
     /**
-     * Test the check for an Amp runtime method.
+     * Test the check for an AMP runtime method.
      *
      * @dataProvider dataIsRuntimeScript
      * @covers       Amp::isRuntimeScript()
@@ -69,7 +69,7 @@ class AmpTest extends TestCase
     }
 
     /**
-     * Test the check for an Amp runtime method.
+     * Test the check for an AMP runtime method.
      *
      * @dataProvider dataIsViewerScript
      * @covers       Amp::isViewerScript()
@@ -134,7 +134,7 @@ class AmpTest extends TestCase
     }
 
     /**
-     * Test the check whether a given node is an Amp custom element.
+     * Test the check whether a given node is an AMP custom element.
      *
      * @dataProvider dataIsCustomElement
      * @covers       Amp::isCustomElement()
@@ -202,11 +202,11 @@ class AmpTest extends TestCase
     }
 
     /**
-     * Create an Amp CDN script to a given URL.
+     * Create an AMP CDN script to a given URL.
      *
      * @param Document $dom DOM document object to use.
      * @param string   $src Source URL to use.
-     * @return DOMElement Amp CDN script element
+     * @return DOMElement AMP CDN script element
      */
     protected function createAmpCDNScript(Document $dom, $src)
     {

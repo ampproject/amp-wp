@@ -3,7 +3,7 @@
 namespace Amp;
 
 /**
- * Interface with constants for Amp extensions.
+ * Interface with constants for AMP extensions.
  *
  * @package amp/common
  */
@@ -24,7 +24,7 @@ interface Extension
     const YOUTUBE             = 'amp-youtube';
 
     /**
-     * Prefix of an Amp extension.
+     * Prefix of an AMP extension.
      *
      * @var string.
      */

@@ -54,7 +54,7 @@ final class AmpBoilerplate implements Transformer
             return;
         }
 
-        // Regular Amp boilerplate also includes a <noscript> element.
+        // Regular AMP boilerplate also includes a <noscript> element.
         $noscriptNode = $document->createElement(Tag::NOSCRIPT);
         $document->head->appendChild($noscriptNode);
 

@@ -14,7 +14,7 @@ final class Amp
 {
 
     /**
-     * List of Amp attribute tags that can be appended to the <html> element.
+     * List of AMP attribute tags that can be appended to the <html> element.
      *
      * The *_ALT version represent a Unicode variation of the lightning emoji.
      * @see https://github.com/ampproject/amphtml/issues/25990
@@ -34,21 +34,21 @@ final class Amp
     ];
 
     /**
-     * Host and scheme of the Amp cache.
+     * Host and scheme of the AMP cache.
      *
      * @var string
      */
     const CACHE_HOST = 'https://cdn.ampproject.org';
 
     /**
-     * URL of the Amp cache.
+     * URL of the AMP cache.
      *
      * @var string
      */
     const CACHE_ROOT_URL = self::CACHE_HOST . '/';
 
     /**
-     * List of valid Amp formats.
+     * List of valid AMP formats.
      *
      * @var string[]
      */
@@ -101,13 +101,13 @@ final class Amp
     const AMP4ADS_AND_AMP4EMAIL_BOILERPLATE_CSS = 'body{visibility:hidden}';
 
     /**
-     * Amp runtime tag name.
+     * AMP runtime tag name.
      *
      * @var string
      */
     const RUNTIME = 'amp-runtime';
 
-    // Amp classes reserved for internal use.
+    // AMP classes reserved for internal use.
     const LAYOUT_ATTRIBUTE          = 'i-amphtml-layout';
     const NO_BOILERPLATE_ATTRIBUTE  = 'i-amphtml-no-boilerplate';
     const LAYOUT_CLASS_PREFIX       = 'i-amphtml-layout-';
@@ -116,12 +116,12 @@ final class Amp
     const INTRINSIC_SIZER_ELEMENT   = 'i-amphtml-intrinsic-sizer';
 
     /**
-     * Check if a given node is the Amp runtime script.
+     * Check if a given node is the AMP runtime script.
      *
-     * The Amp runtime script node is of the form '<script async src="https://cdn.ampproject.org...v0.js"></script>'.
+     * The AMP runtime script node is of the form '<script async src="https://cdn.ampproject.org...v0.js"></script>'.
      *
      * @param DOMNode $node Node to check.
-     * @return bool Whether the given node is the Amp runtime script.
+     * @return bool Whether the given node is the AMP runtime script.
      */
     public static function isRuntimeScript(DOMNode $node)
     {
@@ -149,13 +149,13 @@ final class Amp
     }
 
     /**
-     * Check if a given node is the Amp viewer script.
+     * Check if a given node is the AMP viewer script.
      *
-     * The Amp viewer script node is of the form '<script async
+     * The AMP viewer script node is of the form '<script async
      * src="https://cdn.ampproject.org/v0/amp-viewer-integration-...js>"</script>'.
      *
      * @param DOMNode $node Node to check.
-     * @return bool Whether the given node is the Amp runtime script.
+     * @return bool Whether the given node is the AMP runtime script.
      */
     public static function isViewerScript(DOMNode $node)
     {
@@ -180,10 +180,10 @@ final class Amp
     }
 
     /**
-     * Check if a given node is an Amp extension.
+     * Check if a given node is an AMP extension.
      *
      * @param DOMNode $node Node to check.
-     * @return bool Whether the given node is the Amp runtime script.
+     * @return bool Whether the given node is the AMP runtime script.
      */
     public static function isExtension(DOMNode $node)
     {
@@ -237,10 +237,10 @@ final class Amp
     }
 
     /**
-     * Check whether a given DOM node is an Amp custom element.
+     * Check whether a given DOM node is an AMP custom element.
      *
      * @param DOMNode $node DOM node to check.
-     * @return bool Whether the checked DOM node is an Amp custom element.
+     * @return bool Whether the checked DOM node is an AMP custom element.
      */
     public static function isCustomElement(DOMNode $node)
     {

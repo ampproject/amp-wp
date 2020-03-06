@@ -139,7 +139,7 @@ final class Document extends DOMDocument
     const HTML_FIND_TAG_DELIMITER                 = '/';
 
     /**
-     * Pattern to match an Amp emoji together with its variant (amp4ads, amp4email, ...).
+     * Pattern to match an AMP emoji together with its variant (amp4ads, amp4email, ...).
      *
      * @var string
      */

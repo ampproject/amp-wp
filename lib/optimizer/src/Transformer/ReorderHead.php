@@ -47,7 +47,7 @@ final class ReorderHead implements Transformer
 {
 
     /**
-     * Regular expression pattern to match resource hints pointing to an Amp resource.
+     * Regular expression pattern to match resource hints pointing to an AMP resource.
      */
     const AMP_RESOURCE_HINT_SRC_PATTERN = '#(^|[\b/])cdn\.ampproject\.org($|[\b/])#i';
 
@@ -355,10 +355,10 @@ final class ReorderHead implements Transformer
     }
 
     /**
-     * Check whether a given resource hint link element is pointing to an Amp resource.
+     * Check whether a given resource hint link element is pointing to an AMP resource.
      *
      * @param DOMElement $node Link element to check.
-     * @return bool Whether the link element is pointing to an Amp resource.
+     * @return bool Whether the link element is pointing to an AMP resource.
      */
     private function isHintForAmp(DOMElement $node)
     {

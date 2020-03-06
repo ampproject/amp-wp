@@ -46,7 +46,7 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	 *     @type DOMElement[] $viewport        Viewport meta tag(s).
 	 *     @type DOMElement[] $amp_script_src  <amp-script> source meta tags.
 	 *     @type DOMElement[] $other           Remaining meta tags.
-	 *     @type DOMElement[] $amp_boilerplate Amp boilerplate style tag.
+	 *     @type DOMElement[] $amp_boilerplate AMP boilerplate style tag.
 	 * }
 	 */
 	protected $meta_tags = [

@@ -5,7 +5,7 @@ namespace Amp\Optimizer\Tests;
 /**
  * Constants that provide the test markup to use.
  *
- * These are taken from the canonical Amp Package (Go) project, with some adaptations:
+ * These are taken from the canonical AMP Package (Go) project, with some adaptations:
  * - all attribute values are enclosed in double quotes;
  * - DOCTYPE is uppercase.
  *

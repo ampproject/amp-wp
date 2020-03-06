@@ -66,12 +66,12 @@ final class RuntimeVersion
     }
 
     /**
-     * Returns the version of the current Amp runtime release.
+     * Returns the version of the current AMP runtime release.
      *
      * Pass [ canary => true ] to get the latest canary version.
      *
      * @param array $options Optional. Associative array of options.
-     * @return string Version string of the Amp runtime.
+     * @return string Version string of the AMP runtime.
      */
     public function currentVersion($options = [])
     {
