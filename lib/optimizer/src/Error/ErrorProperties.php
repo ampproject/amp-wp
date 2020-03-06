@@ -34,7 +34,7 @@ trait ErrorProperties
      */
     public function getCode()
     {
-        return basename(get_class($this));
+        return preg_replace('/^.+\\\\/', '', get_class($this));
     }
 
     /**
