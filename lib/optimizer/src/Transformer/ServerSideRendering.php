@@ -113,6 +113,7 @@ final class ServerSideRendering implements Transformer
         $document->head->insertBefore($ampRuntimeMarker, $document->head->hasChildNodes() ? $document->head->firstChild : null);
 
         foreach ($document->xpath->query('.//script[ @custom-element ]', $document->head) as $customElementScript) {
+            /** @var DOMElement $customElementScript */
             // amp-experiment is a render delaying extension iff the tag is used in the doc, which we checked for above.
             if (
                 $customElementScript->getAttribute(Attribute::CUSTOM_ELEMENT) !== Extension::EXPERIMENT
