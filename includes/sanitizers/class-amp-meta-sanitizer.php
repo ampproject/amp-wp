@@ -118,26 +118,12 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		$this->deduplicate_nodes();
-
 		$this->ensure_charset_is_present();
-
 		$this->ensure_viewport_is_present();
 
 		$this->process_amp_script_meta_tags();
 
 		$this->re_add_meta_tags_in_optimized_order();
-	}
-
-	/**
-	 * Deduplicate the nodes of the tags that should be unique.
-	 */
-	protected function deduplicate_nodes() {
-		foreach ( [ self::TAG_CHARSET, self::TAG_VIEWPORT ] as $tag ) {
-			if ( count( $this->meta_tags[ $tag ] ) > 1 ) {
-				$this->meta_tags[ $tag ] = (array) ( $this->meta_tags[ $tag ][0] );
-			}
-		}
 	}
 
 	/**
