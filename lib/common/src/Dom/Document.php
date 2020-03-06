@@ -459,7 +459,7 @@ final class Document extends DOMDocument
     private function insertMissingCharset()
     {
         // Bail if a charset tag is already present.
-        if ($this->xpath->query('.//meta[ @charset ]', $this->head)->item(0)) {
+        if ($this->xpath->query('.//meta[ @charset ]')->item(0)) {
             return;
         }
 
