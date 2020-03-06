@@ -110,15 +110,16 @@ final class CurlRemoteGetRequest implements RemoteGetRequest
             curl_setopt($curlHandle, CURLOPT_CONNECTTIMEOUT, $this->timeout);
             curl_setopt($curlHandle, CURLOPT_TIMEOUT, $this->timeout);
 
-            curl_setopt($curlHandle, CURLOPT_HEADERFUNCTION,
+            curl_setopt(
+                $curlHandle,
+                CURLOPT_HEADERFUNCTION,
                 static function ($curl, $header) use (&$headers) {
                     $length = strlen($header);
-                    $header = explode(':', $header, 2);
+                    $header = array_map('trim', explode(':', $header, 2));
 
                     // Only store valid headers, discard invalid ones that choke on the explode.
-                    if (count($header) === 2)
-                    {
-                        $headers[strtolower(trim($header[0]))][] = trim($header[1]);
+                    if (count($header) === 2) {
+                        $headers[$header[0]][] = $header[1];
                     }
 
                     return $length;

@@ -64,7 +64,7 @@ final class FallbackRemoteGetRequest implements RemoteGetRequest
                 $response   = $remoteGetRequest->get($url);
                 $statusCode = $response->getStatusCode();
 
-                if ( 200 <= $statusCode && $statusCode < 300 ) {
+                if (200 <= $statusCode && $statusCode < 300) {
                     return $response;
                 }
             } catch (Exception $exception) {

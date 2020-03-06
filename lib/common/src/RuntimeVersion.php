@@ -78,7 +78,7 @@ final class RuntimeVersion
         $response = $this->remoteRequest->get(self::RUNTIME_METADATA_ENDPOINT);
         $statusCode = $response->getStatusCode();
 
-        if ( 200 < $statusCode || $statusCode >= 300 ) {
+        if (200 < $statusCode || $statusCode >= 300) {
             return '0';
         }
 
