@@ -351,6 +351,34 @@ function amp_get_asset_url( $file ) {
 }
 
 /**
+ * Get AMP boilerplate code.
+ *
+ * @since 0.7
+ * @link https://www.ampproject.org/docs/reference/spec#boilerplate
+ *
+ * @return string Boilerplate code.
+ */
+function amp_get_boilerplate_code() {
+	$stylesheets = amp_get_boilerplate_stylesheets();
+	return sprintf( '<style amp-boilerplate>%s</style><noscript><style amp-boilerplate>%s</style></noscript>', $stylesheets[0], $stylesheets[1] );
+}
+
+/**
+ * Get AMP boilerplate stylesheets.
+ *
+ * @since 1.3
+ * @link https://www.ampproject.org/docs/reference/spec#boilerplate
+ *
+ * @return string[] Stylesheets, where first is contained in style[amp-boilerplate] and the second in noscript>style[amp-boilerplate].
+ */
+function amp_get_boilerplate_stylesheets() {
+	return [
+		'body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}',
+		'body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}',
+	];
+}
+
+/**
  * Add generator metadata.
  *
  * @since 6.0
