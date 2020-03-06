@@ -11,7 +11,6 @@ use Amp\Layout;
 use Amp\Optimizer\Error;
 use Amp\Optimizer\ErrorCollection;
 use Amp\Optimizer\Transformer;
-use Amp\Optimizer\Tweak\SvgSourceAttributeEncodingFix;
 use Amp\Tag;
 use DOMElement;
 
@@ -45,13 +44,6 @@ final class ServerSideRendering implements Transformer
         Layout::FLEX_ITEM,
         Layout::INTRINSIC,
     ];
-
-    /**
-     * Whether the SVG source attribute encoding fix was already added to the document instance.
-     *
-     * @var bool
-     */
-    private $addedSvgSourceAttributeEncodingFixTweak = false;
 
     /**
      * Apply transformations to the provided DOM document.

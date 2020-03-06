@@ -3,9 +3,7 @@
 namespace Amp\Dom;
 
 use Amp\Attribute;
-use Amp\Exception\InvalidTweak;
 use Amp\Tag;
-use Amp\Tweak;
 use DOMAttr;
 use DOMComment;
 use DOMDocument;
