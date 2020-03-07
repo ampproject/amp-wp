@@ -68,7 +68,7 @@ final class CachedRemoteGetRequest implements RemoteGetRequest {
 	 * @param bool             $use_cache_control Optional. Use Cache-Control headers for expiry if available. Defaults
 	 *                                            to true.
 	 */
-	public function __construct( RemoteGetRequest $remote_request, $expiry = 24 * HOUR_IN_SECONDS, $use_cache_control = true ) {
+	public function __construct( RemoteGetRequest $remote_request, $expiry = 86400, $use_cache_control = true ) {
 		$this->remote_request    = $remote_request;
 		$this->expiry            = $expiry;
 		$this->use_cache_control = $use_cache_control;
