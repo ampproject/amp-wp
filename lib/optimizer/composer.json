@@ -1,5 +1,5 @@
 {
-  "name": "amp/optimizer",
+  "name": "ampproject/optimizer",
   "type": "library",
   "description": "PHP library for optimizing AMP pages.",
   "license": "MIT",
@@ -8,7 +8,7 @@
     "ext-dom": "*",
     "ext-iconv": "*",
     "ext-libxml": "*",
-    "amp/common": "^1"
+    "ampproject/common": "^1"
   },
   "require-dev": {
     "ext-zip": "*",
@@ -34,12 +34,12 @@
   },
   "autoload": {
     "psr-4": {
-      "Amp\\Optimizer\\": "src/"
+      "AmpProject\\Optimizer\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Amp\\Optimizer\\Tests\\": "tests/src/"
+      "AmpProject\\Optimizer\\Tests\\": "tests/src/"
     }
   },
   "repositories": [

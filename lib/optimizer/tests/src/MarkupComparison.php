@@ -1,11 +1,11 @@
 <?php
 
-namespace Amp\Optimizer\Tests;
+namespace AmpProject\Optimizer\Tests;
 
 /**
  * Compare HTML markup without failing on whitespace or alignment.
  *
- * @package amp/optimizer
+ * @package ampproject/optimizer
  */
 trait MarkupComparison
 {

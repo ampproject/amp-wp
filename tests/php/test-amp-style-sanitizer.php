@@ -7,8 +7,8 @@
 
 // phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
 
-use Amp\Dom\Document;
-use Amp\AmpWP\Tests\PrivateAccess;
+use AmpProject\Dom\Document;
+use AmpProject\AmpWP\Tests\PrivateAccess;
 
 /**
  * Test AMP_Style_Sanitizer.

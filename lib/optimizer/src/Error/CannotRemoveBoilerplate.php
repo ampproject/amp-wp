@@ -1,8 +1,8 @@
 <?php
 
-namespace Amp\Optimizer\Error;
+namespace AmpProject\Optimizer\Error;
 
-use Amp\Optimizer\Error;
+use AmpProject\Optimizer\Error;
 use DOMElement;
 
 final class CannotRemoveBoilerplate implements Error

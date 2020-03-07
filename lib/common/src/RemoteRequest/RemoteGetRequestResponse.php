@@ -1,13 +1,13 @@
 <?php
 
-namespace Amp\RemoteRequest;
+namespace AmpProject\RemoteRequest;
 
-use Amp\Response;
+use AmpProject\Response;
 
 /**
  * Stub for simulating remote requests.
  *
- * @package amp/common
+ * @package ampproject/common
  */
 final class RemoteGetRequestResponse implements Response
 {

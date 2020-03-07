@@ -1,13 +1,13 @@
 <?php
 
-namespace Amp\Optimizer\Transformer;
+namespace AmpProject\Optimizer\Transformer;
 
-use Amp\Amp;
-use Amp\Attribute;
-use Amp\Dom\Document;
-use Amp\Optimizer\ErrorCollection;
-use Amp\Optimizer\Transformer;
-use Amp\Tag;
+use AmpProject\Amp;
+use AmpProject\Attribute;
+use AmpProject\Dom\Document;
+use AmpProject\Optimizer\ErrorCollection;
+use AmpProject\Optimizer\Transformer;
+use AmpProject\Tag;
 use DOMElement;
 
 /**
@@ -21,7 +21,7 @@ use DOMElement;
  * @version c9993b8ac4d17d1f05d3a1289956dadf3f9c370a
  * @link    https://github.com/ampproject/amppackager/blob/c9993b8ac4d17d1f05d3a1289956dadf3f9c370a/transformer/transformers/ampboilerplate.go
  *
- * @package amp/optimizer
+ * @package ampproject/optimizer
  */
 final class AmpBoilerplate implements Transformer
 {

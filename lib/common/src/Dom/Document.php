@@ -1,9 +1,9 @@
 <?php
 
-namespace Amp\Dom;
+namespace AmpProject\Dom;
 
-use Amp\Attribute;
-use Amp\Tag;
+use AmpProject\Attribute;
+use AmpProject\Tag;
 use DOMAttr;
 use DOMComment;
 use DOMDocument;
@@ -13,7 +13,7 @@ use DOMText;
 use DOMXPath;
 
 /**
- * Class Amp\Dom\Document.
+ * Class AmpProject\Dom\Document.
  *
  * Abstract away some of the difficulties of working with PHP's DOMDocument.
  *
@@ -24,7 +24,7 @@ use DOMXPath;
  * @property DOMElement[] $ampElements The document's <amp-*> elements. Technically, this returns a DOMNodeList, but
  *                                     we're hinting directly to elements, not nodes, for convenience.
  *
- * @package amp/common
+ * @package ampproject/common
  */
 final class Document extends DOMDocument
 {
@@ -123,7 +123,7 @@ final class Document extends DOMDocument
      *
      * @var string
      */
-    const PROPERTY_GETTER_ERROR_MESSAGE = 'Undefined property: Amp\\Dom\\Document::';
+    const PROPERTY_GETTER_ERROR_MESSAGE = 'Undefined property: AmpProject\\Dom\\Document::';
 
     // Regex patterns and values used for adding and removing http-equiv charsets for compatibility.
     const HTML_GET_HEAD_OPENING_TAG_PATTERN     = '/(<head(?:\s+[^>]*)?>)/i';
@@ -165,7 +165,7 @@ final class Document extends DOMDocument
     ];
 
     /**
-     * The original encoding of how the Amp\Dom\Document was created.
+     * The original encoding of how the AmpProject\Dom\Document was created.
      *
      * This is stored to do an automatic conversion to UTF-8, which is
      * a requirement for AMP.
@@ -222,7 +222,7 @@ final class Document extends DOMDocument
     private $usedAmpEmoji;
 
     /**
-     * Creates a new Amp\Dom\Document object
+     * Creates a new AmpProject\Dom\Document object
      *
      * @link  https://php.net/manual/domdocument.construct.php
      *

@@ -1,11 +1,11 @@
 <?php
 
-namespace Amp\Tests;
+namespace AmpProject\Tests;
 
 /**
  * Compatibility trait for assertStringContainsString support.
  *
- * @package amp/common
+ * @package ampproject/common
  */
 
 trait AssertContainsCompatibility

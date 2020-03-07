@@ -1,15 +1,15 @@
 <?php
 
-namespace Amp\Optimizer\Tests;
+namespace AmpProject\Optimizer\Tests;
 
-use Amp\Optimizer\Error;
-use Amp\Optimizer\ErrorCollection;
+use AmpProject\Optimizer\Error;
+use AmpProject\Optimizer\ErrorCollection;
 use ReflectionClass;
 
 /**
  * Compare produced errors while disregarding their specific representation.
  *
- * @package amp/optimizer
+ * @package ampproject/optimizer
  */
 trait ErrorComparison
 {

@@ -1,15 +1,15 @@
 <?php
 
-namespace Amp\Optimizer;
+namespace AmpProject\Optimizer;
 
-use Amp\Dom\Document;
-use Amp\RemoteGetRequest;
-use Amp\RemoteRequest\CurlRemoteGetRequest;
+use AmpProject\Dom\Document;
+use AmpProject\RemoteGetRequest;
+use AmpProject\RemoteRequest\CurlRemoteGetRequest;
 
 /**
  * Transformation engine that accepts HTML and returns optimized HTML.
  *
- * @package amp/optimizer
+ * @package ampproject/optimizer
  */
 final class TransformationEngine
 {
