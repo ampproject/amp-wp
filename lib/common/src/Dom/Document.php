@@ -601,12 +601,12 @@ final class Document extends DOMDocument
         }
 
         $xmlns = $html->attributes->getNamedItem('xmlns');
-        if ($xmlns && 'http://www.w3.org/1999/xhtml' === $xmlns->nodeValue) {
+        if ($xmlns instanceof DOMAttr && 'http://www.w3.org/1999/xhtml' === $xmlns->nodeValue) {
             $html->removeAttributeNode($xmlns);
         }
 
         $xml_lang = $html->attributes->getNamedItem('xml:lang');
-        if ($xml_lang) {
+        if ($xml_lang instanceof DOMAttr) {
             $lang_node = $html->attributes->getNamedItem('lang');
             if ((! $lang_node || ! $lang_node->nodeValue) && $xml_lang->nodeValue) {
                 // Move the html[xml:lang] value to html[lang].
