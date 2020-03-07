@@ -2270,7 +2270,19 @@ class AMP_Theme_Support {
 		if ( $enable_optimizer ) {
 			$errors = new Optimizer\ErrorCollection();
 			self::get_optimizer( $args )->optimizeDom( $dom, $errors );
-			// @todo Deal with $errors.
+
+			if ( count( $errors ) > 0 ) {
+				$error_messages = array_map(
+					static function( Optimizer\Error $error ) {
+						return ' - ' . $error->getCode() . ': ' . $error->getMessage();
+					},
+					iterator_to_array( $errors )
+				);
+				$dom->head->appendChild(
+					$dom->createComment( "\n" . __( 'AMP optimization could not be completed due to the following:', 'amp' ) . "\n" . implode( "\n", $error_messages ) . "\n" )
+				);
+				// @todo Include errors elsewhere than HTML comment?
+			}
 		}
 
 		self::ensure_required_markup( $dom, array_keys( $amp_scripts ) );
