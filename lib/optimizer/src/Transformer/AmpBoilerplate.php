@@ -73,29 +73,23 @@ final class AmpBoilerplate implements Transformer
      */
     private function removeStyleAndNoscriptTags(Document $document)
     {
-        $nodesToRemove = [];
-        $headNode      = $document->head->firstChild;
-
+        $headNode = $document->head->firstChild;
         while ($headNode) {
+            $nextSibling = $headNode->nextSibling;
             if ($headNode instanceof DOMElement) {
                 switch ($headNode->tagName) {
                     case Tag::STYLE:
                         if (! $headNode->hasAttribute(Attribute::AMP_CUSTOM)) {
-                            $nodesToRemove[] = $headNode;
+                            $document->head->removeChild($headNode);
                         }
                         break;
                     case Tag::NOSCRIPT:
-                        $nodesToRemove[] = $headNode;
+                        $document->head->removeChild($headNode);
                         break;
                 }
             }
 
-            $headNode = $headNode->nextSibling;
-        }
-
-        while (! empty($nodesToRemove)) {
-            $nodeToRemove = array_pop($nodesToRemove);
-            $document->head->removeChild($nodeToRemove);
+            $headNode = $nextSibling;
         }
     }
 
