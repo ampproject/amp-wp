@@ -114,6 +114,36 @@ class DocumentTest extends TestCase
                 '<p>Text</p>',
                 '<!DOCTYPE html><html>' . $head . '<body><p>Text</p></body></html>',
             ],
+            'empty_document' => [
+                'utf-8',
+                '',
+                '<!DOCTYPE html><html><head><meta charset="utf-8"></head><body></body></html>',
+            ],
+            'paragraph_document_fragment' => [
+                'utf-8',
+                '<p>Lorem ipsum</p>',
+                '<!DOCTYPE html><html><head><meta charset="utf-8"></head><body><p>Lorem ipsum</p></body></html>',
+            ],
+            'document_without_html_element' => [
+                'utf-8',
+                '<head><title>Foo</title></head><body><p>Bar</p></body>',
+                '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Foo</title></head><body><p>Bar</p></body></html>',
+            ],
+            'document_fragment_with_head_and_paragraph' => [
+                'utf-8',
+                '<head><title>Foo</title></head><p>Bar</p>',
+                '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Foo</title></head><body><p>Bar</p></body></html>',
+            ],
+            'document_fragment_with_body_and_paragraph' => [
+                'utf-8',
+                '<body><p>Bar</p></body>',
+                '<!DOCTYPE html><html><head><meta charset="utf-8"></head><body><p>Bar</p></body></html>',
+            ],
+            'document_fragment_with_body_and_paragraph_and_after_body' => [
+                'utf-8',
+                '<body><p>Bar</p></body><p>Baz</p>',
+                '<!DOCTYPE html><html><head><meta charset="utf-8"></head><body><p>Bar</p><p>Baz</p></body></html>',
+            ],
             'missing_doctype'                          => [
                 'utf-8',
                 '<html amp lang="en">' . $head . '<body class="some-class"><p>Text</p></body></html>',

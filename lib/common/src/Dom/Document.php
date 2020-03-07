@@ -586,16 +586,50 @@ final class Document extends DOMDocument
      */
     public function normalizeDomStructure()
     {
-        $head = $this->getElementsByTagName(Tag::HEAD)->item(0);
-        if (! $head) {
-            $this->head = $this->createElement(Tag::HEAD);
-            $this->insertBefore($this->head, $this->firstChild);
-        }
 
-        $body = $this->getElementsByTagName(Tag::BODY)->item(0);
-        if (! $body) {
-            $this->body = $this->createElement(Tag::BODY);
-            $this->appendChild($this->body);
+        if (! $this->documentElement) {
+            $this->appendChild($this->createElement(Tag::HTML));
+        } elseif (Tag::HTML !== $this->documentElement->nodeName) {
+            $nextSibling = $this->documentElement->nextSibling;
+            $oldDocumentElement = $this->removeChild($this->documentElement);
+            $html = $this->createElement(Tag::HTML);
+            $this->insertBefore($html, $nextSibling);
+
+            if (Tag::HEAD == $oldDocumentElement->nodeName) {
+                $this->head = $oldDocumentElement;
+            } else {
+                $this->head = $this->getElementsByTagName(Tag::HEAD)->item(0);
+                if (! $this->head) {
+                    $this->head = $this->createElement(Tag::HEAD);
+                }
+            }
+            $html->appendChild($this->head);
+
+            if (Tag::BODY == $oldDocumentElement->nodeName) {
+                $this->body = $oldDocumentElement;
+            } else {
+                $this->body = $this->getElementsByTagName(Tag::BODY)->item(0);
+                if (! $this->body) {
+                    $this->body = $this->createElement(Tag::BODY);
+                }
+            }
+            $html->appendChild($this->body);
+
+            if ($oldDocumentElement !== $this->body && $oldDocumentElement !== $this->head) {
+                $this->body->appendChild($oldDocumentElement);
+            }
+        } else {
+            $head = $this->getElementsByTagName(Tag::HEAD)->item(0);
+            if (! $head) {
+                $this->head = $this->createElement(Tag::HEAD);
+                $this->documentElement->insertBefore($this->head, $this->documentElement->firstChild);
+            }
+
+            $body = $this->getElementsByTagName(Tag::BODY)->item(0);
+            if (! $body) {
+                $this->body = $this->createElement(Tag::BODY);
+                $this->documentElement->appendChild($this->body);
+            }
         }
 
         $this->moveInvalidHeadNodesToBody();
