@@ -7,7 +7,7 @@
 
 // phpcs:disable Generic.Formatting.MultipleStatementAlignment.NotSameWarning
 
-use Amp\AmpWP\Dom\Document;
+use Amp\Dom\Document;
 use Amp\AmpWP\Tests\PrivateAccess;
 
 /**
@@ -1237,7 +1237,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		<?php
 		$html = ob_get_clean();
 
-		$dom = Document::from_html( $html );
+		$dom = Document::fromHtml( $html );
 
 		$element = $dom->xpath->query( $xpath )->item( 0 );
 		$this->assertInstanceOf( 'DOMElement', $element );
