@@ -8,7 +8,6 @@
 use Amp\Amp;
 use Amp\AmpWP\CachedRemoteGetRequest;
 use Amp\AmpWP\ConfigurationArgument;
-use Amp\AmpWP\Filter;
 use Amp\AmpWP\Transformer;
 use Amp\Attribute;
 use Amp\Dom\Document;
