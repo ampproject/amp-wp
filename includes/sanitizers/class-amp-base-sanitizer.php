@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use Amp\AmpWP\Dom\Document;
+use Amp\Dom\Document;
 
 /**
  * Class AMP_Base_Sanitizer
@@ -174,6 +174,7 @@ abstract class AMP_Base_Sanitizer {
 	 * Return array of values that would be valid as an HTML `style` attribute.
 	 *
 	 * @since 0.4
+	 * @codeCoverageIgnore
 	 * @deprecated As of 1.0, use get_stylesheets().
 	 *
 	 * @return array[][] Mapping of CSS selectors to arrays of properties.
@@ -203,6 +204,7 @@ abstract class AMP_Base_Sanitizer {
 	/**
 	 * Get HTML body as DOMElement from Dom\Document received by the constructor.
 	 *
+	 * @codeCoverageIgnore
 	 * @deprecated Use $this->dom->body instead.
 	 * @return DOMElement The body element.
 	 */

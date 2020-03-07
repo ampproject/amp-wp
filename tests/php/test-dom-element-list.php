@@ -5,14 +5,15 @@
  * @package AMP
  */
 
-use Amp\AmpWP\Dom\Document;
+use Amp\Dom\Document;
 use Amp\AmpWP\Dom\ElementList;
 use Amp\AmpWP\Component\CaptionedSlide;
 
 /**
  * Tests for AMP carousel and slide classes.
  *
- * @covers Amp\AmpWP\Dom\ElementList, Amp\AmpWP\Component\CaptionedSlide
+ * @covers Amp\AmpWP\Dom\ElementList
+ * @covers Amp\AmpWP\Component\CaptionedSlide
  */
 class Test_DOM_Element_List extends \WP_UnitTestCase {
 

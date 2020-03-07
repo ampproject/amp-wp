@@ -12,6 +12,7 @@
  *     https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#html-tags
  *
  * @since 0.5 This has been replaced by AMP_Tag_And_Attribute_Sanitizer but is kept around for back-compat.
+ * @codeCoverageIgnore
  * @deprecated
  */
 class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {

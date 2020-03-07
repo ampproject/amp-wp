@@ -6,7 +6,7 @@
  * @since 1.0
  */
 
-use Amp\AmpWP\Dom\Document;
+use Amp\Dom\Document;
 
 /**
  * Class AMP_Core_Theme_Sanitizer
@@ -46,6 +46,23 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		'twentytwelve',
 		'twentyeleven',
 		'twentyten',
+	];
+
+	/**
+	 * Known modal roles.
+	 *
+	 * @var array
+	 */
+	protected static $modal_roles = [
+		'navigation',
+		'menu',
+		'search',
+		'alert',
+		'figure',
+		'form',
+		'img',
+		'toolbar',
+		'tooltip',
 	];
 
 	/**
@@ -401,6 +418,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * Get theme config.
 	 *
 	 * @since 1.0
+	 * @codeCoverageIgnore
 	 * @deprecated 1.1
 	 *
 	 * @param string $theme Theme slug.
@@ -1909,10 +1927,10 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			return 'dialog';
 		}
 
-		$classes = $modal->getAttribute( 'class' );
+		$classes = preg_split( '/\s+/', trim( $modal->getAttribute( 'class' ) ) );
 
-		foreach ( [ 'navigation', 'menu', 'search', 'alert', 'figure', 'form', 'img', 'toolbar', 'tooltip' ] as $role ) {
-			if ( false !== strpos( $classes, $role ) ) {
+		foreach ( self::$modal_roles as $role ) {
+			if ( in_array( $role, $classes, true ) ) {
 				return $role;
 			}
 		}

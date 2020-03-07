@@ -27,7 +27,10 @@ module.exports = function( grunt ) {
 	// ⚠️ Warning: These paths are passed straight to rm command in the shell, without any escaping.
 	const productionVendorExcludedFilePatterns = [
 		'composer.*',
+		'patches',
+		'lib',
 		'vendor/*/*/.editorconfig',
+		'vendor/*/*/.git',
 		'vendor/*/*/.gitignore',
 		'vendor/*/*/composer.*',
 		'vendor/*/*/Doxyfile',
@@ -38,6 +41,10 @@ module.exports = function( grunt ) {
 		'vendor/*/*/*.yml',
 		'vendor/*/*/.*.yml',
 		'vendor/*/*/tests',
+		'vendor/amp/optimizer/bin',
+		'vendor/bin',
+		'vendor/amp/common/vendor',
+		'vendor/amp/optimizer/vendor',
 	];
 
 	grunt.initConfig( {
@@ -67,7 +74,14 @@ module.exports = function( grunt ) {
 				command: 'php bin/verify-version-consistency.php',
 			},
 			composer_install: {
-				command: 'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi; cd build; composer install --no-dev -o && composer remove cweagans/composer-patches --update-no-dev -o && rm -r ' + productionVendorExcludedFilePatterns.join( ' ' ),
+				command: [
+					'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi',
+					'cd build',
+					'composer install --no-dev -o',
+					'for symlinksource in $(find vendor/amp -type l); do symlinktarget=$(readlink "$symlinksource") && rm "$symlinksource" && cp -r "vendor/amp/$symlinktarget" "$symlinksource"; done',
+					'composer remove cweagans/composer-patches --update-no-dev -o',
+					'rm -r ' + productionVendorExcludedFilePatterns.join( ' ' )
+				].join( ' && ' ),
 			},
 			create_build_zip: {
 				command: 'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi; if [ -e amp.zip ]; then rm amp.zip; fi; cd build; zip -r ../amp.zip .; cd ..; echo; echo "ZIP of build: $(pwd)/amp.zip"',
@@ -147,9 +161,11 @@ module.exports = function( grunt ) {
 			} );
 
 			paths.push( 'composer.*' ); // Copy in order to be able to do run composer_install.
+			paths.push( 'lib/**' );
 			paths.push( 'assets/js/*.js' ); // @todo Also include *.map files?
 			paths.push( 'assets/js/*.asset.php' );
 			paths.push( 'assets/css/*.css' );
+			paths.push( 'patches/*.patch' );
 
 			grunt.config.set( 'copy', {
 				build: {

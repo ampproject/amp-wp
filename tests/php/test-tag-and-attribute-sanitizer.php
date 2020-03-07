@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use Amp\AmpWP\Dom\Document;
+use Amp\Dom\Document;
 
 /**
  * Test AMP_Tag_And_Attribute_Sanitizer
@@ -246,9 +246,15 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'amp-iframe_incorrect_protocol'                => [
 				'<amp-iframe width="600" height="200" sandbox="allow-scripts allow-same-origin" layout="responsive" frameborder="0" src="masterprotocol://www.example.com"></amp-iframe>',
-				'<amp-iframe width="600" height="200" sandbox="allow-scripts allow-same-origin" layout="responsive" frameborder="0"></amp-iframe>',
-				[ 'amp-iframe' ],
-				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_URL_PROTOCOL ],
+				'',
+				[],
+				[
+					AMP_Tag_And_Attribute_Sanitizer::INVALID_URL_PROTOCOL,
+					[
+						'code'                  => AMP_Tag_And_Attribute_Sanitizer::MANDATORY_ONEOF_ATTR_MISSING,
+						'mandatory_oneof_attrs' => [ 'src', 'srcdoc' ],
+					],
+				],
 			],
 
 			'amp-ima-video'                                => [
@@ -319,6 +325,23 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-bind' ],
 			],
 
+			'amp-list-load-more_no_mandatory_oneof'        => [
+				'<amp-list src="https://foo.com" width="400" height="800"><amp-list-load-more></amp-list-load-more></amp-list>',
+				'<amp-list src="https://foo.com" width="400" height="800"></amp-list>',
+				[ 'amp-list' ],
+				[
+					[
+						'code'                  => AMP_Tag_And_Attribute_Sanitizer::MANDATORY_ONEOF_ATTR_MISSING,
+						'mandatory_oneof_attrs' => [
+							'load-more-button',
+							'load-more-end',
+							'load-more-failed',
+							'load-more-loading',
+						],
+					],
+				],
+			],
+
 			'amp-nexxtv-player'                            => [
 				'<amp-nexxtv-player data-mediaid="123ABC" data-client="4321"></amp-nexxtv-player>',
 				null, // No change.
@@ -333,8 +356,17 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'amp-playbuzz_no_src'                          => [
 				'<amp-playbuzz height="500" data-item-info="true"></amp-playbuzz>',
-				null, // @todo This actually should be stripped because .
-				[ 'amp-playbuzz' ],
+				'',
+				[],
+				[
+					[
+						'code'                  => AMP_Tag_And_Attribute_Sanitizer::MANDATORY_ONEOF_ATTR_MISSING,
+						'mandatory_oneof_attrs' => [
+							'data-item',
+							'src',
+						],
+					],
+				],
 			],
 
 			'invalid_element_stripped'                     => [
@@ -890,6 +922,55 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ],
+			],
+
+			'remove_amp_list_no_mandatory_anyof_attribute' => [
+				'<amp-list width="400" height="400"></amp-list>',
+				'',
+				[],
+				[
+					[
+						'code'                  => AMP_Tag_And_Attribute_Sanitizer::MANDATORY_ANYOF_ATTR_MISSING,
+						'mandatory_anyof_attrs' => [
+							'data-amp-bind-src',
+							'src',
+						],
+					],
+				],
+			],
+
+			'allow_amp_list_two_mandatory_anyof_attrs'     => [
+				'<amp-list src="https://foo.com" data-amp-bind-src="https://baz.com" width="400" height="400"></amp-list>',
+				null,
+				[ 'amp-bind', 'amp-list' ],
+			],
+
+			'remove_amp_iframe_no_mandatory_oneof_attr'    => [
+				'<amp-iframe width="200" height="100"></amp-iframe>',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::MANDATORY_ONEOF_ATTR_MISSING ],
+			],
+
+			'remove_amp_iframe_two_mandatory_oneof_attrs'  => [
+				'<amp-iframe src="https://example.com" srcdoc="https://foo.com" width="200" height="100"></amp-iframe>',
+				'',
+				[],
+				[
+					[
+						'code'                  => AMP_Tag_And_Attribute_Sanitizer::DUPLICATE_ONEOF_ATTRS,
+						'duplicate_oneof_attrs' => [
+							'src',
+							'srcdoc',
+						],
+					],
+				],
+			],
+
+			'allow_amp_iframe_one_mandatory_oneof_attr'    => [
+				'<amp-iframe srcdoc="https://foo.com" width="200" height="100"></amp-iframe>',
+				null,
+				[ 'amp-iframe' ],
 			],
 
 			'remove_script_with_async_attribute'           => [
@@ -1799,6 +1880,32 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-list', 'amp-mustache' ],
 			],
 
+			'amp-list-load-more-bad-buttons'               => [
+				'
+					<amp-list load-more="auto" src="https://www.load.more.example.com/" width="400" height="800">
+						<amp-list-load-more load-more-button load-more-end load-more-failed load-more-loading>
+							<template type="amp-mustache">
+								Showing {{#count}} out of {{#total}} items
+								<button>Click here to see more!</button>
+							</template>
+						</amp-list-load-more>
+					</amp-list>
+				',
+				'<amp-list load-more="auto" src="https://www.load.more.example.com/" width="400" height="800"></amp-list>',
+				[ 'amp-list' ],
+				[
+					[
+						'code'                  => AMP_Tag_And_Attribute_Sanitizer::DUPLICATE_ONEOF_ATTRS,
+						'duplicate_oneof_attrs' => [
+							'load-more-button',
+							'load-more-end',
+							'load-more-failed',
+							'load-more-loading',
+						],
+					],
+				],
+			],
+
 			'amp-recaptcha-input'                          => [
 				'<form action-xhr="/" target="_top" method="post"><amp-recaptcha-input layout="nodisplay" name="reCAPTCHA_body_key" data-sitekey="reCAPTCHA_site_key" data-action="reCAPTCHA_example_action"></amp-recaptcha-input></form>',
 				null,
@@ -2222,10 +2329,51 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE_REGEX, AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING ],
 			],
 			'bad_meta_ua_compatible'                  => [
-				'<html amp><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=9,chrome=1"></head><body></body></html>',
-				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
+				'<html amp><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=6,chrome=1,netscape=4"></head><body></body></html>',
+				'<html amp><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="chrome=1"></head><body></body></html>',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE, AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING ],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE, AMP_Tag_And_Attribute_Sanitizer::MISSING_REQUIRED_PROPERTY_VALUE ],
+			],
+			'bad_meta_width_property'                 => [
+				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="width=600, initial-scale=1.0"></head><body></body></html>',
+				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head><body></body></html>',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::MISSING_REQUIRED_PROPERTY_VALUE ],
+			],
+			'bad_meta_width_and_unknown_property'     => [
+				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="width=600, initial-scale=1.0, bad=yes"></head><body></body></html>',
+				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head><body></body></html>',
+				[],
+				[
+					[
+						'code'                => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE,
+						'meta_property_name'  => 'bad',
+						'meta_property_value' => 'yes',
+					],
+					[
+						'code'                         => AMP_Tag_And_Attribute_Sanitizer::MISSING_REQUIRED_PROPERTY_VALUE,
+						'meta_property_name'           => 'width',
+						'meta_property_value'          => '600',
+						'meta_property_required_value' => 'device-width',
+					],
+				],
+			],
+			'missing_meta_width_and_unknown_property' => [
+				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="initial-scale=1.0, bad=yes"></head><body></body></html>',
+				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="initial-scale=1.0,width=device-width"></head><body></body></html>',
+				[],
+				[
+					[
+						'code'                => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE,
+						'meta_property_name'  => 'bad',
+						'meta_property_value' => 'yes',
+					],
+					[
+						'code'                         => AMP_Tag_And_Attribute_Sanitizer::MISSING_MANDATORY_PROPERTY,
+						'meta_property_name'           => 'width',
+						'meta_property_required_value' => 'device-width',
+					],
+				],
 			],
 			'bad_meta_charset'                        => [
 				'<html amp><head><meta charset="latin-1"><title>Mojibake?</title></head><body></body></html>',
@@ -2233,9 +2381,15 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 			'bad_meta_viewport'                       => [
 				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="maximum-scale=1.0"></head><body></body></html>',
-				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
+				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="maximum-scale=1.0,width=device-width"></head><body></body></html>',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE, AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING ],
+				[ AMP_Tag_And_Attribute_Sanitizer::MISSING_MANDATORY_PROPERTY ],
+			],
+			'invalid_meta_viewport_property'          => [
+				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,maximum-scale=1.0,foo=bar"></head><body></body></html>',
+				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,maximum-scale=1.0"></head><body></body></html>',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE ],
 			],
 			'parse_malformed_meta_charset_tag'        => [
 				'<html amp><head><meta charset = "utf-8"></head><body></body></html>',
@@ -2268,7 +2422,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 			'head_with_duplicate_charset'             => [
 				'<html amp><head><meta charset="UTF-8"><meta charset="utf-8"><body><p>Content</p></body></html>',
-				'<html amp><head><meta charset="utf-8"></head><body><p>Content</p></body></html>',
+				'<html amp><head><meta charset="UTF-8"></head><body><p>Content</p></body></html>',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::DUPLICATE_UNIQUE_TAG ],
 			],
@@ -2432,7 +2586,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function test_sanitize( $source, $expected = null, $expected_scripts = [], $expected_errors = [] ) {
 		$expected      = isset( $expected ) ? $expected : $source;
-		$dom           = Document::from_html( $source );
+		$dom           = Document::fromHtml( $source );
 		$actual_errors = [];
 		$sanitizer     = new AMP_Tag_And_Attribute_Sanitizer(
 			$dom,
@@ -2462,7 +2616,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 		);
 		$this->assertEquals( wp_list_pluck( $expected_errors, 'code' ), wp_list_pluck( $actual_errors, 'code' ) );
 		foreach ( $expected_errors as $i => $expected_error ) {
-			$this->assertArraySubset( $expected_error, $actual_errors[ $i ] );
+			foreach ( array_keys( $expected_error ) as $key ) {
+				$this->assertArrayHasKey( $key, $actual_errors[ $i ] );
+				$this->assertEquals( $expected_error[ $key ], $actual_errors[ $i ][ $key ], "For key: $key" );
+			}
 		}
 	}
 
@@ -2475,7 +2632,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 		$source   = '<b>Hello</b><script>document.write("hi");</script><amp-sidebar></amp-sidebar>';
 		$expected = '<b>Hello</b><amp-sidebar></amp-sidebar>';
 
-		$dom           = Document::from_html( $source );
+		$dom           = Document::fromHtml( $source );
 		$actual_errors = [];
 		$sanitizer     = new AMP_Tag_And_Attribute_Sanitizer(
 			$dom,
