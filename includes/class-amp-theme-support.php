@@ -2378,6 +2378,7 @@ class AMP_Theme_Support {
 			$transformers = array_diff(
 				$transformers,
 				[
+					Optimizer\Transformer\AmpRuntimeCss::class,
 					Optimizer\Transformer\ServerSideRendering::class,
 					Optimizer\Transformer\TransformedIdentifier::class,
 				]
