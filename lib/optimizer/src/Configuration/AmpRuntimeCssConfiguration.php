@@ -1,10 +1,10 @@
 <?php
 
-namespace Amp\Optimizer\Configuration;
+namespace AmpProject\Optimizer\Configuration;
 
-use Amp\Optimizer\Exception\InvalidConfigurationValue;
-use Amp\Optimizer\Transformer\AmpRuntimeCss;
-use Amp\RuntimeVersion;
+use AmpProject\Optimizer\Exception\InvalidConfigurationValue;
+use AmpProject\Optimizer\Transformer\AmpRuntimeCss;
+use AmpProject\RuntimeVersion;
 
 /**
  * Configuration for the AmpRuntimeCss transformer.
@@ -12,7 +12,7 @@ use Amp\RuntimeVersion;
  * @property string  $version Version string to use. Defaults to an empty string.
  * @property boolean $canary  Whether to use the canary version or not. Defaults to false.
  *
- * @package amp/optimizer
+ * @package ampproject/optimizer
  */
 final class AmpRuntimeCssConfiguration extends BaseTransformerConfiguration
 {

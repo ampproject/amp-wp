@@ -1,6 +1,6 @@
 <?php
 
-namespace Amp\Exception;
+namespace AmpProject\Exception;
 
 use Exception;
 use RuntimeException;
@@ -8,7 +8,7 @@ use RuntimeException;
 /**
  * Exception thrown when a remote request failed.
  *
- * @package amp/common
+ * @package ampproject/common
  */
 final class FailedToGetFromRemoteUrl extends RuntimeException implements AmpException
 {

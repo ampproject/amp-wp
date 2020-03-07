@@ -1,15 +1,15 @@
 <?php
 
-namespace Amp\Optimizer;
+namespace AmpProject\Optimizer;
 
-use Amp\Optimizer\Error\UnknownError;
+use AmpProject\Optimizer\Error\UnknownError;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 
 /**
  * Test the error collection container.
  *
- * @package amp/optimizer
+ * @package ampproject/optimizer
  */
 final class ErrorCollectionTest extends TestCase
 {
@@ -17,7 +17,7 @@ final class ErrorCollectionTest extends TestCase
     /**
      * Test whether we can add errors to the collection.
      *
-     * @covers \Amp\Optimizer\ErrorCollection::add()
+     * @covers \AmpProject\Optimizer\ErrorCollection::add()
      */
     public function testAddingErrors()
     {
@@ -31,8 +31,8 @@ final class ErrorCollectionTest extends TestCase
     /**
      * Test whether we can check for errors within the collection.
      *
-     * @covers \Amp\Optimizer\ErrorCollection::add()
-     * @covers \Amp\Optimizer\ErrorCollection::has()
+     * @covers \AmpProject\Optimizer\ErrorCollection::add()
+     * @covers \AmpProject\Optimizer\ErrorCollection::has()
      */
     public function testCheckingForErrors()
     {
@@ -46,8 +46,8 @@ final class ErrorCollectionTest extends TestCase
     /**
      * Test whether we can iterate over errors in the collection.
      *
-     * @covers \Amp\Optimizer\ErrorCollection::add()
-     * @covers \Amp\Optimizer\ErrorCollection::getIterator()
+     * @covers \AmpProject\Optimizer\ErrorCollection::add()
+     * @covers \AmpProject\Optimizer\ErrorCollection::getIterator()
      */
     public function testIteratingOverErrors()
     {

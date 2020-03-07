@@ -1,13 +1,13 @@
 <?php
 
-namespace Amp\Optimizer;
+namespace AmpProject\Optimizer;
 
-use Amp\Optimizer\Exception\UnknownConfigurationKey;
+use AmpProject\Optimizer\Exception\UnknownConfigurationKey;
 
 /**
  * Interface for a configuration that validates and stores configuration settings for an individual transformer.
  *
- * @package amp/optimizer
+ * @package ampproject/optimizer
  */
 interface TransformerConfiguration
 {

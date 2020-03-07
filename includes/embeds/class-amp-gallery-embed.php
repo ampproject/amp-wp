@@ -5,9 +5,9 @@
  * @package AMP
  */
 
-use Amp\Dom\Document;
-use Amp\AmpWP\Dom\ElementList;
-use Amp\AmpWP\Component\Carousel;
+use AmpProject\Dom\Document;
+use AmpProject\AmpWP\Dom\ElementList;
+use AmpProject\AmpWP\Component\Carousel;
 
 /**
  * Class AMP_Gallery_Embed_Handler

@@ -1,15 +1,15 @@
 <?php
 
-namespace Amp\Optimizer;
+namespace AmpProject\Optimizer;
 
-use Amp\Optimizer\Exception\InvalidConfigurationValue;
-use Amp\Optimizer\Exception\UnknownConfigurationKey;
+use AmpProject\Optimizer\Exception\InvalidConfigurationValue;
+use AmpProject\Optimizer\Exception\UnknownConfigurationKey;
 use PHPUnit\Framework\TestCase;
 
 /**
  * Test the configuration storage and validation.
  *
- * @package amp/optimizer
+ * @package ampproject/optimizer
  */
 final class ConfigurationTest extends TestCase
 {
@@ -17,8 +17,8 @@ final class ConfigurationTest extends TestCase
     /**
      * Test whether we can retrieve the default configuration.
      *
-     * @covers \Amp\Optimizer\Configuration::has()
-     * @covers \Amp\Optimizer\Configuration::get()
+     * @covers \AmpProject\Optimizer\Configuration::has()
+     * @covers \AmpProject\Optimizer\Configuration::get()
      */
     public function testDefaultConfiguration()
     {
@@ -31,8 +31,8 @@ final class ConfigurationTest extends TestCase
     /**
      * Test whether we can add to the default configuration.
      *
-     * @covers \Amp\Optimizer\Configuration::has()
-     * @covers \Amp\Optimizer\Configuration::get()
+     * @covers \AmpProject\Optimizer\Configuration::has()
+     * @covers \AmpProject\Optimizer\Configuration::get()
      */
     public function testUserProvidedConfigurationCanAddKeys()
     {
@@ -46,8 +46,8 @@ final class ConfigurationTest extends TestCase
     /**
      * Test whether we can override the default configuration.
      *
-     * @covers \Amp\Optimizer\Configuration::has()
-     * @covers \Amp\Optimizer\Configuration::get()
+     * @covers \AmpProject\Optimizer\Configuration::has()
+     * @covers \AmpProject\Optimizer\Configuration::get()
      */
     public function testUserProvidedConfigurationCanOverrideKeys()
     {
@@ -59,7 +59,7 @@ final class ConfigurationTest extends TestCase
     /**
      * Test whether unknown keys throw an exception.
      *
-     * @covers \Amp\Optimizer\Configuration::get()
+     * @covers \AmpProject\Optimizer\Configuration::get()
      */
     public function testUnknownKeyThrowsException()
     {
@@ -71,7 +71,7 @@ final class ConfigurationTest extends TestCase
     /**
      * Test whether invalid keys throw an exception.
      *
-     * @covers \Amp\Optimizer\Configuration::validateConfigurationKeys()
+     * @covers \AmpProject\Optimizer\Configuration::validateConfigurationKeys()
      */
     public function testInvalidTransformersTypeThrowsException()
     {
@@ -83,7 +83,7 @@ final class ConfigurationTest extends TestCase
     /**
      * Test whether invalid sub-keys throw an exception.
      *
-     * @covers \Amp\Optimizer\Configuration::validateConfigurationKeys()
+     * @covers \AmpProject\Optimizer\Configuration::validateConfigurationKeys()
      */
     public function testInvalidTransformersSubTypeThrowsException()
     {

@@ -1,5 +1,5 @@
 {
-  "name": "amp/common",
+  "name": "ampproject/common",
   "type": "library",
   "description": "PHP library with common base functionality for AMP integrations.",
   "license": "MIT",
@@ -33,12 +33,12 @@
   },
   "autoload": {
     "psr-4": {
-      "Amp\\": "src/"
+      "AmpProject\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Amp\\Tests\\": "tests/src/"
+      "AmpProject\\Tests\\": "tests/src/"
     }
   },
   "scripts": {

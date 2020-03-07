@@ -1,11 +1,11 @@
 <?php
 
-namespace Amp;
+namespace AmpProject;
 
 /**
  * Interface with constants for AMP extensions.
  *
- * @package amp/common
+ * @package ampproject/common
  */
 interface Extension
 {

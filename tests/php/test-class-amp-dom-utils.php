@@ -1,6 +1,6 @@
 <?php
 
-use Amp\Dom\Document;
+use AmpProject\Dom\Document;
 
 /**
  * Class AMP_DOM_Utils_Test
@@ -163,7 +163,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	/**
 	 * Test handling of empty elements.
 	 *
-	 * @covers \Amp\Dom\Document::fromHtml()
+	 * @covers \AmpProject\Dom\Document::fromHtml()
 	 * @covers \AMP_DOM_Utils::get_content_from_dom_node()
 	 */
 	public function test_html5_empty_elements() {
@@ -191,7 +191,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	/**
 	 * Test parsing DOM with Mustache or Mustache-like templates.
 	 *
-	 * @covers \Amp\Dom\Document::fromHtml()
+	 * @covers \AmpProject\Dom\Document::fromHtml()
 	 * @covers \AMP_DOM_Utils::get_content_from_dom_node()
 	 */
 	public function test_mustache_replacements() {
@@ -264,7 +264,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	/**
 	 * Test encoding.
 	 *
-	 * @covers \Amp\Dom\Document::fromHtml()
+	 * @covers \AmpProject\Dom\Document::fromHtml()
 	 */
 	public function test_get_dom_encoding() {
 		$html  = '<!DOCTYPE html><html><head><title>مرحبا بالعالم! Check out ‘this’ and “that” and—other things.</title><meta charset="utf-8"></head><body>';

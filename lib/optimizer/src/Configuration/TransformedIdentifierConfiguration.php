@@ -1,16 +1,16 @@
 <?php
 
-namespace Amp\Optimizer\Configuration;
+namespace AmpProject\Optimizer\Configuration;
 
-use Amp\Optimizer\Exception\InvalidConfigurationValue;
-use Amp\Optimizer\Transformer\TransformedIdentifier;
+use AmpProject\Optimizer\Exception\InvalidConfigurationValue;
+use AmpProject\Optimizer\Transformer\TransformedIdentifier;
 
 /**
  * Configuration for the TransformedIdentifier transformer.
  *
  * @property int $version Version number to use. Defaults to 0.
  *
- * @package amp/optimizer
+ * @package ampproject/optimizer
  */
 final class TransformedIdentifierConfiguration extends BaseTransformerConfiguration
 {

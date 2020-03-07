@@ -5,8 +5,8 @@
  * @package AMP
  */
 
-use Amp\Dom\Document;
-use Amp\AmpWP\Tests\PrivateAccess;
+use AmpProject\Dom\Document;
+use AmpProject\AmpWP\Tests\PrivateAccess;
 
 /**
  * Class AMP_Core_Theme_Sanitizer_Test

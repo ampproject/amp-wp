@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use Amp\AmpWP\Tests\PrivateAccess;
+use AmpProject\AmpWP\Tests\PrivateAccess;
 
 /**
  * Class Test_AMP_Nav_Menu_Dropdown_Sanitizer

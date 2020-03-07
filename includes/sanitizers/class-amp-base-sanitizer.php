@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use Amp\Dom\Document;
+use AmpProject\Dom\Document;
 
 /**
  * Class AMP_Base_Sanitizer
@@ -33,7 +33,7 @@ abstract class AMP_Base_Sanitizer {
 	/**
 	 * DOM.
 	 *
-	 * @var Document An Amp\Document representation of an HTML document.
+	 * @var Document An AmpProject\Document representation of an HTML document.
 	 *
 	 * @since 0.2
 	 */

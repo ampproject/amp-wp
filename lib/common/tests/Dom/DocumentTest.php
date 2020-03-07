@@ -1,15 +1,15 @@
 <?php
 
-use Amp\Attribute;
-use Amp\Dom\Document;
-use Amp\Tests\AssertContainsCompatibility;
+use AmpProject\Attribute;
+use AmpProject\Dom\Document;
+use AmpProject\Tests\AssertContainsCompatibility;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Tests for Amp\Dom\Document.
+ * Tests for AmpProject\Dom\Document.
  *
  * @covers Document
- * @package amp/common
+ * @package ampproject/common
  */
 class DocumentTest extends TestCase
 {
@@ -17,7 +17,7 @@ class DocumentTest extends TestCase
     use AssertContainsCompatibility;
 
     /**
-     * Data for Amp\Dom\Document test.
+     * Data for AmpProject\Dom\Document test.
      *
      * @return array Data.
      */
@@ -229,7 +229,7 @@ class DocumentTest extends TestCase
     }
 
     /**
-     * Tests loading and saving the content via Amp\Dom\Document.
+     * Tests loading and saving the content via AmpProject\Dom\Document.
      *
      * @param string $charset  Charset to use.
      * @param string $source   Source content.

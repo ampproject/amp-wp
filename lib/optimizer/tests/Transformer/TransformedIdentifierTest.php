@@ -1,18 +1,18 @@
 <?php
 
-namespace Amp\Optimizer\Transformer;
+namespace AmpProject\Optimizer\Transformer;
 
-use Amp\Dom\Document;
-use Amp\Optimizer\Configuration\TransformedIdentifierConfiguration;
-use Amp\Optimizer\ErrorCollection;
-use Amp\Optimizer\Tests\MarkupComparison;
-use Amp\Optimizer\Tests\TestMarkup;
+use AmpProject\Dom\Document;
+use AmpProject\Optimizer\Configuration\TransformedIdentifierConfiguration;
+use AmpProject\Optimizer\ErrorCollection;
+use AmpProject\Optimizer\Tests\MarkupComparison;
+use AmpProject\Optimizer\Tests\TestMarkup;
 use PHPUnit\Framework\TestCase;
 
 /**
  * Test the TransformedIdentifier transformer.
  *
- * @package amp/optimizer
+ * @package ampproject/optimizer
  */
 final class TransformedIdentifierTest extends TestCase
 {
@@ -63,7 +63,7 @@ final class TransformedIdentifierTest extends TestCase
     /**
      * Test the transform() method.
      *
-     * @covers       \Amp\Optimizer\Transformer\TransformedIdentifier::transform()
+     * @covers       \AmpProject\Optimizer\Transformer\TransformedIdentifier::transform()
      * @dataProvider dataTransform()
      *
      * @param string   $source       String of source HTML.
