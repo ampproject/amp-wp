@@ -70,7 +70,7 @@ class AMP_TikTok_Embed_Handler extends AMP_Base_Embed_Handler {
 		$this->remove_embed_script( $blockquote_node );
 
 		$amp_iframe_node = AMP_DOM_Utils::create_node(
-			$dom,
+			Document::fromNode( $dom ),
 			'amp-iframe',
 			[
 				'layout'  => 'responsive',
