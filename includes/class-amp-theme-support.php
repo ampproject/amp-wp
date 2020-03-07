@@ -5,7 +5,18 @@
  * @package AMP
  */
 
-use Amp\AmpWP\Dom\Document;
+use Amp\Amp;
+use Amp\AmpWP\CachedRemoteGetRequest;
+use Amp\AmpWP\ConfigurationArgument;
+use Amp\AmpWP\Transformer;
+use Amp\Attribute;
+use Amp\Dom\Document;
+use Amp\Extension;
+use Amp\Optimizer;
+use Amp\RemoteRequest\CurlRemoteGetRequest;
+use Amp\RemoteRequest\FallbackRemoteGetRequest;
+use Amp\RemoteRequest\FilesystemRemoteGetRequest;
+use Amp\Tag;
 
 /**
  * Class AMP_Theme_Support
@@ -1635,34 +1646,24 @@ class AMP_Theme_Support {
 		 * @var DOMElement $noscript
 		 */
 
-		// Ensure there is a schema.org script in the document.
-		// @todo Consider applying the amp_schemaorg_metadata filter on the contents when a script is already present.
-		$schema_org_meta_script = $dom->xpath->query( '//script[ @type = "application/ld+json" ][ contains( ./text(), "schema.org" ) ]' )->item( 0 );
-		if ( ! $schema_org_meta_script ) {
-			$script = $dom->createElement( 'script' );
-			$script->setAttribute( 'type', 'application/ld+json' );
-			$script->appendChild( $dom->createTextNode( wp_json_encode( amp_get_schemaorg_metadata(), JSON_UNESCAPED_UNICODE ) ) );
-			$dom->head->appendChild( $script );
-		}
-
 		// Gather all links.
 		$links         = [
-			'preconnect' => [
+			Attribute::REL_PRECONNECT => [
 				// Include preconnect link for AMP CDN for browsers that don't support preload.
 				AMP_DOM_Utils::create_node(
 					$dom,
-					'link',
+					Tag::LINK,
 					[
-						'rel'  => 'preconnect',
-						'href' => 'https://cdn.ampproject.org',
+						Attribute::REL  => Attribute::REL_PRECONNECT,
+						Attribute::HREF => 'https://cdn.ampproject.org',
 					]
 				),
 			],
 		];
-		$link_elements = $dom->head->getElementsByTagName( 'link' );
+		$link_elements = $dom->head->getElementsByTagName( Tag::LINK );
 		foreach ( $link_elements as $link ) {
-			if ( $link->hasAttribute( 'rel' ) ) {
-				$links[ $link->getAttribute( 'rel' ) ][] = $link;
+			if ( $link->hasAttribute( Attribute::REL ) ) {
+				$links[ $link->getAttribute( Attribute::REL ) ][] = $link;
 			}
 		}
 
@@ -1671,53 +1672,46 @@ class AMP_Theme_Support {
 		if ( empty( $links['canonical'] ) ) {
 			$rel_canonical = AMP_DOM_Utils::create_node(
 				$dom,
-				'link',
+				Tag::LINK,
 				[
-					'rel'  => 'canonical',
-					'href' => self::get_current_canonical_url(),
+					Attribute::REL  => Attribute::REL_CANONICAL,
+					Attribute::HREF => self::get_current_canonical_url(),
 				]
 			);
 			$dom->head->appendChild( $rel_canonical );
 		}
 
 		// Store the last meta tag as the previous node to append to.
-		$meta_tags     = $dom->head->getElementsByTagName( 'meta' );
+		$meta_tags     = $dom->head->getElementsByTagName( Tag::META );
 		$previous_node = $meta_tags->length > 0 ? $meta_tags->item( $meta_tags->length - 1 ) : $dom->head->firstChild;
 
 		// Handle the title.
-		$title = $dom->head->getElementsByTagName( 'title' )->item( 0 );
+		$title = $dom->head->getElementsByTagName( Tag::TITLE )->item( 0 );
 		if ( $title ) {
 			$title->parentNode->removeChild( $title ); // So we can move it.
 			$dom->head->insertBefore( $title, $previous_node->nextSibling );
 			$previous_node = $title;
 		}
 
-		// @see https://github.com/ampproject/amphtml/blob/2fd30ca984bceac05905bd5b17f9e0010629d719/src/render-delaying-services.js#L39-L43 AMPHTML Render Delaying Services SERVICES definition.
-		$render_delaying_extensions = [
-			'amp-experiment',
-			'amp-dynamic-css-classes',
-			'amp-story',
-		];
-
 		// Obtain the existing AMP scripts.
 		$amp_scripts     = [];
 		$ordered_scripts = [];
 		$head_scripts    = [];
-		$runtime_src     = wp_scripts()->registered['amp-runtime']->src;
-		foreach ( $dom->head->getElementsByTagName( 'script' ) as $script ) { // Note that prepare_response() already moved body scripts to head.
+		$runtime_src     = wp_scripts()->registered[ Amp::RUNTIME ]->src;
+		foreach ( $dom->head->getElementsByTagName( Tag::SCRIPT ) as $script ) { // Note that prepare_response() already moved body scripts to head.
 			$head_scripts[] = $script;
 		}
 		foreach ( $head_scripts as $script ) {
-			$src = $script->getAttribute( 'src' );
+			$src = $script->getAttribute( Attribute::SRC );
 			if ( ! $src || 'https://cdn.ampproject.org/' !== substr( $src, 0, 27 ) ) {
 				continue;
 			}
 			if ( $runtime_src === $src ) {
-				$amp_scripts['amp-runtime'] = $script;
-			} elseif ( $script->hasAttribute( 'custom-element' ) ) {
-				$amp_scripts[ $script->getAttribute( 'custom-element' ) ] = $script;
-			} elseif ( $script->hasAttribute( 'custom-template' ) ) {
-				$amp_scripts[ $script->getAttribute( 'custom-template' ) ] = $script;
+				$amp_scripts[ Amp::RUNTIME ] = $script;
+			} elseif ( $script->hasAttribute( Attribute::CUSTOM_ELEMENT ) ) {
+				$amp_scripts[ $script->getAttribute( Attribute::CUSTOM_ELEMENT ) ] = $script;
+			} elseif ( $script->hasAttribute( Attribute::CUSTOM_TEMPLATE ) ) {
+				$amp_scripts[ $script->getAttribute( Attribute::CUSTOM_TEMPLATE ) ] = $script;
 			} else {
 				continue;
 			}
@@ -1730,23 +1724,23 @@ class AMP_Theme_Support {
 				continue;
 			}
 			$attrs = [
-				'src'   => wp_scripts()->registered[ $missing_script_handle ]->src,
-				'async' => '',
+				Attribute::SRC   => wp_scripts()->registered[ $missing_script_handle ]->src,
+				Attribute::ASYNC => '',
 			];
-			if ( 'amp-mustache' === $missing_script_handle ) {
-				$attrs['custom-template'] = $missing_script_handle;
+			if ( Extension::MUSTACHE === $missing_script_handle ) {
+				$attrs[ Attribute::CUSTOM_TEMPLATE ] = $missing_script_handle;
 			} else {
-				$attrs['custom-element'] = $missing_script_handle;
+				$attrs[ Attribute::CUSTOM_ELEMENT ] = $missing_script_handle;
 			}
 
-			$amp_scripts[ $missing_script_handle ] = AMP_DOM_Utils::create_node( $dom, 'script', $attrs );
+			$amp_scripts[ $missing_script_handle ] = AMP_DOM_Utils::create_node( $dom, Tag::SCRIPT, $attrs );
 		}
 
 		// Remove scripts that had already been added but couldn't be detected from output buffering.
 		$extension_specs            = AMP_Allowed_Tags_Generated::get_extension_specs();
 		$superfluous_script_handles = array_diff(
 			array_keys( $amp_scripts ),
-			array_merge( $script_handles, [ 'amp-runtime' ] )
+			array_merge( $script_handles, [ Amp::RUNTIME ] )
 		);
 		foreach ( $superfluous_script_handles as $superfluous_script_handle ) {
 			if ( ! empty( $extension_specs[ $superfluous_script_handle ]['requires_usage'] ) ) {
@@ -1762,17 +1756,17 @@ class AMP_Theme_Support {
 		 * {@link https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/optimize_amp/ Optimize the AMP Runtime loading}
 		 */
 		$prioritized_preloads = [];
-		if ( ! isset( $links['preload'] ) ) {
-			$links['preload'] = [];
+		if ( ! isset( $links[ Attribute::REL_PRELOAD ] ) ) {
+			$links[ Attribute::REL_PRELOAD ] = [];
 		}
 
 		$prioritized_preloads[] = AMP_DOM_Utils::create_node(
 			$dom,
-			'link',
+			Tag::LINK,
 			[
-				'rel'  => 'preload',
-				'as'   => 'script',
-				'href' => $runtime_src,
+				Attribute::REL  => Attribute::REL_PRELOAD,
+				'as'            => Tag::SCRIPT,
+				Attribute::HREF => $runtime_src,
 			]
 		);
 
@@ -1781,21 +1775,21 @@ class AMP_Theme_Support {
 		 * preload those extensions as they're required by the AMP runtime for rendering the page."
 		 */
 		$amp_script_handles = array_keys( $amp_scripts );
-		foreach ( array_intersect( $render_delaying_extensions, $amp_script_handles ) as $script_handle ) {
-			if ( ! in_array( $script_handle, $render_delaying_extensions, true ) ) {
+		foreach ( array_intersect( Amp::RENDER_DELAYING_EXTENSIONS, $amp_script_handles ) as $script_handle ) {
+			if ( ! in_array( $script_handle, Amp::RENDER_DELAYING_EXTENSIONS, true ) ) {
 				continue;
 			}
 			$prioritized_preloads[] = AMP_DOM_Utils::create_node(
 				$dom,
-				'link',
+				Tag::LINK,
 				[
-					'rel'  => 'preload',
-					'as'   => 'script',
-					'href' => $amp_scripts[ $script_handle ]->getAttribute( 'src' ),
+					Attribute::REL  => Attribute::REL_PRELOAD,
+					'as'            => Tag::SCRIPT,
+					Attribute::HREF => $amp_scripts[ $script_handle ]->getAttribute( Attribute::SRC ),
 				]
 			);
 		}
-		$links['preload'] = array_merge( $prioritized_preloads, $links['preload'] );
+		$links[ Attribute::REL_PRELOAD ] = array_merge( $prioritized_preloads, $links[ Attribute::REL_PRELOAD ] );
 
 		/*
 		 * "4. Use preconnect to speedup the connection to other origin where the full resource URL is not known ahead of time,
@@ -1803,7 +1797,7 @@ class AMP_Theme_Support {
 		 *
 		 * Note that \AMP_Style_Sanitizer::process_link_element() will ensure preconnect links for Google Fonts are present.
 		 */
-		$link_relations = [ 'preconnect', 'dns-prefetch', 'preload', 'prerender', 'prefetch' ];
+		$link_relations = [ Attribute::REL_PRECONNECT, Attribute::REL_DNS_PREFETCH, Attribute::REL_PRELOAD, Attribute::REL_PRERENDER, Attribute::REL_PREFETCH ];
 		foreach ( $link_relations as $rel ) {
 			if ( ! isset( $links[ $rel ] ) ) {
 				continue;
@@ -1818,14 +1812,14 @@ class AMP_Theme_Support {
 		}
 
 		// "5. Load the AMP runtime."
-		if ( isset( $amp_scripts['amp-runtime'] ) ) {
-			$ordered_scripts['amp-runtime'] = $amp_scripts['amp-runtime'];
-			unset( $amp_scripts['amp-runtime'] );
+		if ( isset( $amp_scripts[ Amp::RUNTIME ] ) ) {
+			$ordered_scripts[ Amp::RUNTIME ] = $amp_scripts[ Amp::RUNTIME ];
+			unset( $amp_scripts[ Amp::RUNTIME ] );
 		} else {
-			$script = $dom->createElement( 'script' );
-			$script->setAttribute( 'async', '' );
-			$script->setAttribute( 'src', $runtime_src );
-			$ordered_scripts['amp-runtime'] = $script;
+			$script = $dom->createElement( Tag::SCRIPT );
+			$script->setAttribute( Attribute::ASYNC, '' );
+			$script->setAttribute( Attribute::SRC, $runtime_src );
+			$ordered_scripts[ Amp::RUNTIME ] = $script;
 		}
 
 		/*
@@ -1833,7 +1827,7 @@ class AMP_Theme_Support {
 		 *
 		 * {@link https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/optimize_amp/ AMP Hosting Guide}
 		 */
-		foreach ( $render_delaying_extensions as $extension ) {
+		foreach ( Amp::RENDER_DELAYING_EXTENSIONS as $extension ) {
 			if ( isset( $amp_scripts[ $extension ] ) ) {
 				$ordered_scripts[ $extension ] = $amp_scripts[ $extension ];
 				unset( $amp_scripts[ $extension ] );
@@ -1844,60 +1838,12 @@ class AMP_Theme_Support {
 		 * "7. Specify the <script> tags for remaining extensions (e.g., amp-bind ...). These extensions are not render-delaying
 		 * and therefore should not be preloaded as they might take away important bandwidth for the initial render."
 		 */
+		ksort( $amp_scripts );
 		$ordered_scripts = array_merge( $ordered_scripts, $amp_scripts );
 		foreach ( $ordered_scripts as $ordered_script ) {
 			$dom->head->insertBefore( $ordered_script, $previous_node->nextSibling );
 			$previous_node = $ordered_script;
 		}
-
-		/*
-		 * "8. Specify any custom styles by using the <style amp-custom> tag."
-		 */
-		$style = $dom->xpath->query( './style[ @amp-custom ]', $dom->head )->item( 0 );
-		if ( $style ) {
-			// Ensure the CSS manifest comment remains before style[amp-custom].
-			if ( $style->previousSibling instanceof DOMComment ) {
-				$comment = $style->previousSibling;
-				$comment->parentNode->removeChild( $comment );
-				$dom->head->insertBefore( $comment, $previous_node->nextSibling );
-				$previous_node = $comment;
-			}
-
-			$style->parentNode->removeChild( $style );
-			$dom->head->insertBefore( $style, $previous_node->nextSibling );
-			$previous_node = $style;
-		}
-
-		/*
-		 * "9. Add any other tags allowed in the <head> section. In particular, any external fonts should go last since
-		 * they block rendering."
-		 */
-
-		/*
-		 * "10. Finally, specify the AMP boilerplate code. By putting the boilerplate code last, it prevents custom styles
-		 * from accidentally overriding the boilerplate css rules."
-		 */
-		$style = $dom->xpath->query( './style[ @amp-boilerplate ]', $dom->head )->item( 0 );
-		if ( ! $style ) {
-			$style = $dom->createElement( 'style' );
-			$style->setAttribute( 'amp-boilerplate', '' );
-			$style->appendChild( $dom->createTextNode( amp_get_boilerplate_stylesheets()[0] ) );
-		} else {
-			$style->parentNode->removeChild( $style ); // So we can move it.
-		}
-		$dom->head->appendChild( $style );
-
-		$noscript = $dom->xpath->query( './noscript[ style[ @amp-boilerplate ] ]', $dom->head )->item( 0 );
-		if ( ! $noscript ) {
-			$noscript = $dom->createElement( 'noscript' );
-			$style    = $dom->createElement( 'style' );
-			$style->setAttribute( 'amp-boilerplate', '' );
-			$style->appendChild( $dom->createTextNode( amp_get_boilerplate_stylesheets()[1] ) );
-			$noscript->appendChild( $style );
-		} else {
-			$noscript->parentNode->removeChild( $noscript ); // So we can move it.
-		}
-		$dom->head->appendChild( $noscript );
 
 		unset( $previous_node );
 	}
@@ -2003,7 +1949,7 @@ class AMP_Theme_Support {
 	 * @since 0.7
 	 *
 	 * @param string $response HTML document response. By default it expects a complete document.
-	 * @param array  $args     Args to send to the preprocessor/sanitizer.
+	 * @param array  $args     Args to send to the preprocessor/sanitizer/optimizer.
 	 * @return string AMP document response.
 	 * @global int $content_width
 	 */
@@ -2051,7 +1997,7 @@ class AMP_Theme_Support {
 		 * Abort if the response was not HTML. To be post-processed as an AMP page, the output-buffered document must
 		 * have the HTML mime type and it must start with <html> followed by <head> tag (with whitespace, doctype, and comments optionally interspersed).
 		 */
-		if ( 'text/html' !== substr( AMP_HTTP::get_response_content_type(), 0, 9 ) || ! preg_match( '#^(?:<!.*?>|\s+)*<html.*?>(?:<!.*?>|\s+)*<head\b(.*?)>#is', $response ) ) {
+		if ( Attribute::TYPE_HTML !== substr( AMP_HTTP::get_response_content_type(), 0, 9 ) || ! preg_match( '#^(?:<!.*?>|\s+)*<html.*?>(?:<!.*?>|\s+)*<head\b(.*?)>#is', $response ) ) {
 			return $response;
 		}
 
@@ -2235,24 +2181,7 @@ class AMP_Theme_Support {
 
 		$dom_parse_start = microtime( true );
 
-		/*
-		 * Make sure that <meta charset> is present in output prior to parsing.
-		 * Note that the meta charset is supposed to appear within the first 1024 bytes.
-		 * See <https://www.w3.org/International/questions/qa-html-encoding-declarations>.
-		 */
-		if ( ! preg_match( '#<meta[^>]+charset\s*=#i', substr( $response, 0, 1024 ) ) ) {
-			$meta_charset = sprintf( '<meta charset="%s">', esc_attr( get_bloginfo( 'charset' ) ) );
-
-			$response = preg_replace(
-				'/(<head\b.*?>)/is',
-				'$1' . $meta_charset,
-				$response,
-				1,
-				$count
-			);
-		}
-
-		$dom = Document::from_html( $response );
+		$dom = Document::fromHtml( $response );
 
 		// Move anything after </html>, such as Query Monitor output added at shutdown, to be moved before </body>.
 		while ( $dom->documentElement->nextSibling ) {
@@ -2275,8 +2204,10 @@ class AMP_Theme_Support {
 		}
 
 		// Ensure the mandatory amp attribute is present on the html element.
-		if ( ! $dom->documentElement->hasAttribute( 'amp' ) && ! $dom->documentElement->hasAttribute( '⚡️' ) ) {
-			$dom->documentElement->setAttribute( 'amp', '' );
+		if ( ! $dom->documentElement->hasAttribute( Attribute::AMP )
+			&& ! $dom->documentElement->hasAttribute( Attribute::AMP_EMOJI )
+			&& ! $dom->documentElement->hasAttribute( Attribute::AMP_EMOJI_ALT ) ) {
+			$dom->documentElement->setAttribute( Attribute::AMP, '' );
 		}
 
 		$sanitization_results = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
@@ -2321,6 +2252,38 @@ class AMP_Theme_Support {
 			}
 		}
 
+		$enable_optimizer = array_key_exists( ConfigurationArgument::ENABLE_OPTIMIZER, $args )
+			? $args[ ConfigurationArgument::ENABLE_OPTIMIZER ]
+			: true;
+
+		/**
+		 * Filter whether the generated HTML output should be run through the AMP Optimizer or not.
+		 *
+		 * @since 1.5.0
+		 *
+		 * @param bool $enable_optimizer Whether the generated HTML output should be run through the AMP Optimizer or not.
+		 * @return bool Filtered value of whether the generated HTML output should be run through the AMP Optimizer or not.
+		 */
+		$enable_optimizer = apply_filters( 'amp_enable_optimizer', $enable_optimizer );
+
+		if ( $enable_optimizer ) {
+			$errors = new Optimizer\ErrorCollection();
+			self::get_optimizer( $args )->optimizeDom( $dom, $errors );
+
+			if ( count( $errors ) > 0 ) {
+				$error_messages = array_map(
+					static function( Optimizer\Error $error ) {
+						return ' - ' . $error->getCode() . ': ' . $error->getMessage();
+					},
+					iterator_to_array( $errors )
+				);
+				$dom->head->appendChild(
+					$dom->createComment( "\n" . __( 'AMP optimization could not be completed due to the following:', 'amp' ) . "\n" . implode( "\n", $error_messages ) . "\n" )
+				);
+				// @todo Include errors elsewhere than HTML comment?
+			}
+		}
+
 		self::ensure_required_markup( $dom, array_keys( $amp_scripts ) );
 
 		if ( $blocking_error_count > 0 && empty( AMP_Validation_Manager::$validation_error_status_overrides ) ) {
@@ -2330,14 +2293,15 @@ class AMP_Theme_Support {
 			 * non-AMP document (intentionally not valid AMP) that contains the AMP runtime and AMP components.
 			 */
 			if ( amp_is_canonical() || is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
-				$dom->documentElement->removeAttribute( 'amp' );
-				$dom->documentElement->removeAttribute( '⚡️' );
+				$dom->documentElement->removeAttribute( Attribute::AMP );
+				$dom->documentElement->removeAttribute( Attribute::AMP_EMOJI );
+				$dom->documentElement->removeAttribute( Attribute::AMP_EMOJI_ALT );
 
 				/*
 				 * Make sure that document.write() is disabled to prevent dynamically-added content (such as added
 				 * via amp-live-list) from wiping out the page by introducing any scripts that call this function.
 				 */
-				$script = $dom->createElement( 'script' );
+				$script = $dom->createElement( Tag::SCRIPT );
 				$script->appendChild( $dom->createTextNode( 'document.addEventListener( "DOMContentLoaded", function() { document.write = function( text ) { throw new Error( "[AMP-WP] Prevented document.write() call with: "  + text ); }; } );' ) );
 				$dom->head->appendChild( $script );
 			} elseif ( ! self::is_customize_preview_iframe() ) {
@@ -2363,8 +2327,7 @@ class AMP_Theme_Support {
 
 		AMP_Validation_Manager::finalize_validation( $dom );
 
-		$response  = "<!DOCTYPE html>\n";
-		$response .= $dom->saveHTML( $dom->documentElement );
+		$response = $dom->saveHTML();
 
 		AMP_HTTP::send_server_timing( 'amp_dom_serialize', -$dom_serialize_start, 'AMP DOM Serialize' );
 
@@ -2374,6 +2337,90 @@ class AMP_Theme_Support {
 		}
 
 		return $response;
+	}
+
+	/**
+	 * Optimizer instance to use.
+	 *
+	 * @param array $args Associative array of arguments to pass into the transformation engine.
+	 * @return Optimizer\TransformationEngine Optimizer transformation engine to use.
+	 */
+	private static function get_optimizer( $args ) {
+		$configuration = self::get_optimizer_configuration( $args );
+
+		$fallback_remote_request_pipeline = new FallbackRemoteGetRequest(
+			new CurlRemoteGetRequest(),
+			new FilesystemRemoteGetRequest( Optimizer\LocalFallback::getMappings() )
+		);
+
+		$cached_remote_request = new CachedRemoteGetRequest( $fallback_remote_request_pipeline );
+
+		return new Optimizer\TransformationEngine(
+			$configuration,
+			$cached_remote_request
+		);
+	}
+
+	/**
+	 * Get the Amp\Optimizer configuration object to use.
+	 *
+	 * @param array $args Associative array of arguments to pass into the transformation engine.
+	 * @return Optimizer\Configuration Optimizer configuration to use.
+	 */
+	private static function get_optimizer_configuration( $args ) {
+		$transformers = Optimizer\Configuration::DEFAULT_TRANSFORMERS;
+
+		$enable_ssr = array_key_exists( ConfigurationArgument::ENABLE_SSR, $args )
+			? $args[ ConfigurationArgument::ENABLE_SSR ]
+			: ! ( defined( 'WP_DEBUG' ) && WP_DEBUG );
+
+		/**
+		 * Filter whether the AMP Optimizer should use server-side rendering or not.
+		 *
+		 * @since 1.5.0
+		 *
+		 * @param bool $enable_ssr Whether the AMP Optimizer should use server-side rendering or not.
+		 * @return bool Filtered value of whether the AMP Optimizer should use server-side rendering or not.
+		 */
+		$enable_ssr = apply_filters( 'amp_enable_ssr', $enable_ssr );
+
+		// In debugging mode, we don't use server-side rendering, as it further obfuscates the HTML markup.
+		if ( ! $enable_ssr ) {
+			$transformers = array_diff(
+				$transformers,
+				[
+					Optimizer\Transformer\AmpRuntimeCss::class,
+					Optimizer\Transformer\ServerSideRendering::class,
+					Optimizer\Transformer\TransformedIdentifier::class,
+				]
+			);
+		}
+
+		array_unshift( $transformers, Transformer\AmpSchemaOrgMetadata::class );
+
+		/**
+		 * Filter the configuration to be used for the AMP Optimizer.
+		 *
+		 * @since 1.5.0
+		 *
+		 * @param array $configuration Associative array of configuration data.
+		 * @return array Filtered associative array of configuration data.
+		 */
+		$configuration = apply_filters(
+			'amp_optimizer_config',
+			array_merge(
+				[ Optimizer\Configuration::KEY_TRANSFORMERS => $transformers ],
+				$args
+			)
+		);
+
+		$config = new Optimizer\Configuration( $configuration );
+		$config->registerConfigurationClass(
+			Transformer\AmpSchemaOrgMetadata::class,
+			Transformer\AmpSchemaOrgMetadataConfiguration::class
+		);
+
+		return $config;
 	}
 
 	/**
@@ -2446,8 +2493,8 @@ class AMP_Theme_Support {
 	 * @return array $context Filtered allowed tags and attributes.
 	 */
 	public static function whitelist_layout_in_wp_kses_allowed_html( $context ) {
-		if ( ! empty( $context['img']['width'] ) && ! empty( $context['img']['height'] ) ) {
-			$context['img']['data-amp-layout'] = true;
+		if ( ! empty( $context[ Tag::IMG ][ Attribute::WIDTH ] ) && ! empty( $context[ Tag::IMG ][ Attribute::HEIGHT ] ) ) {
+			$context[ Tag::IMG ]['data-amp-layout'] = true;
 		}
 
 		return $context;
@@ -2665,13 +2712,13 @@ class AMP_Theme_Support {
 		$parsed_url       = wp_parse_url( $video_settings['videoUrl'] );
 		$query            = isset( $parsed_url['query'] ) ? wp_parse_args( $parsed_url['query'] ) : [];
 		$video_attributes = [
-			'media'    => '(min-width: ' . $video_settings['minWidth'] . 'px)',
-			'width'    => $video_settings['width'],
-			'height'   => $video_settings['height'],
-			'layout'   => 'responsive',
-			'autoplay' => '',
-			'loop'     => '',
-			'id'       => 'wp-custom-header-video',
+			Attribute::MEDIA    => '(min-width: ' . $video_settings['minWidth'] . 'px)',
+			Attribute::WIDTH    => $video_settings[ Attribute::WIDTH ],
+			Attribute::HEIGHT   => $video_settings[ Attribute::HEIGHT ],
+			Attribute::LAYOUT   => 'responsive',
+			Attribute::AUTOPLAY => '',
+			Attribute::LOOP     => '',
+			Attribute::ID       => 'wp-custom-header-video',
 		];
 
 		$youtube_id = null;
@@ -2686,7 +2733,7 @@ class AMP_Theme_Support {
 		// If the video URL is for YouTube, return an <amp-youtube> element.
 		if ( ! empty( $youtube_id ) ) {
 			$video_markup = AMP_HTML_Utils::build_tag(
-				'amp-youtube',
+				Extension::YOUTUBE,
 				array_merge(
 					$video_attributes,
 					[
@@ -2709,11 +2756,11 @@ class AMP_Theme_Support {
 			$video_markup .= '<style>#wp-custom-header-video .amp-video-eq { display:none; }</style>';
 		} else {
 			$video_markup = AMP_HTML_Utils::build_tag(
-				'amp-video',
+				Extension::VIDEO,
 				array_merge(
 					$video_attributes,
 					[
-						'src' => $video_settings['videoUrl'],
+						Attribute::SRC => $video_settings['videoUrl'],
 					]
 				)
 			);

@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use Amp\AmpWP\Dom\Document;
+use Amp\Dom\Document;
 
 /**
  * Test AMP_Base_Sanitizer_Test

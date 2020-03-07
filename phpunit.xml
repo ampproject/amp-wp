@@ -13,7 +13,7 @@
 	<testsuites>
 		<!-- Default test suite to run all tests -->
 		<testsuite name="default">
-			<directory prefix="test-" suffix=".php">./tests/</directory>
+			<directory prefix="test-" suffix=".php">./tests/php/</directory>
 			<exclude>tests/php/test-amp-image-dimension-extract-download.php</exclude>
 		</testsuite>
 		<testsuite name="external-http">
