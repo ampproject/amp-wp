@@ -20,6 +20,7 @@ final class ElementDump
      * @var DOMElement
      */
     private $element;
+
     /**
      *
      *

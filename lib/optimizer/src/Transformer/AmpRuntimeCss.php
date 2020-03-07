@@ -109,7 +109,7 @@ final class AmpRuntimeCss implements Transformer, Configurable, MakesRemoteReque
      *
      * @param Document        $document Document to find the element in.
      * @param ErrorCollection $errors   Collection of errors that are collected during transformation.
-     * @return DOMElement|false DOM element for the <style amp-runtime> tag, or false if not found.
+     * @return DOMElement|null DOM element for the <style amp-runtime> tag, or false if not found.
      */
     private function findAmpRuntimeStyle(Document $document, ErrorCollection $errors)
     {
@@ -167,7 +167,7 @@ final class AmpRuntimeCss implements Transformer, Configurable, MakesRemoteReque
         $statusCode = $response->getStatusCode();
 
         if (200 < $statusCode || $statusCode >= 300) {
-            return '';
+            return;
         }
 
         $ampRuntimeStyle->textContent = $response->getBody();

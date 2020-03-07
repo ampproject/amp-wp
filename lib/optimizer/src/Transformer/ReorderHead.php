@@ -35,11 +35,11 @@ use DOMNode;
  * NodeJS:
  *
  * @version c92d6023ea4c9edadff593742a992da2b400a75d
- * @link    https://github.com/ampproject/amp-toolbox/blob/c92d6023ea4c9edadff593742a992da2b400a75d/packages/optimizer/lib/transformers/ServerSideRendering.js
+ * @link    https://github.com/ampproject/amp-toolbox/blob/c92d6023ea4c9edadff593742a992da2b400a75d/packages/optimizer/lib/transformers/ReorderHeadTransformer.js
  *
  * Go:
  * @version ea0959046c179953de43077eafaeb720f9b20bdf
- * @link    https://github.com/ampproject/amppackager/blob/ea0959046c179953de43077eafaeb720f9b20bdf/transformer/transformers/transformedidentifier.go
+ * @link    https://github.com/ampproject/amppackager/blob/ea0959046c179953de43077eafaeb720f9b20bdf/transformer/transformers/reorderhead.go
  *
  * @package amp/optimizer
  */
