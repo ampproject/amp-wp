@@ -17,7 +17,6 @@ use PHPUnit\Framework\TestCase;
  */
 final class AmpRuntimeCssTest extends TestCase
 {
-
     use MarkupComparison;
 
     /**

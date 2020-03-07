@@ -16,7 +16,6 @@ use PHPUnit\Framework\TestCase;
  */
 final class TransformedIdentifierTest extends TestCase
 {
-
     use MarkupComparison;
 
     /**

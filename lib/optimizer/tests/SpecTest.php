@@ -19,7 +19,6 @@ use PHPUnit\Framework\TestCase;
  */
 final class SpecTest extends TestCase
 {
-
     use MarkupComparison;
 
     const TRANSFORMER_SPEC_PATH = __DIR__ . '/spec/transformers/valid';

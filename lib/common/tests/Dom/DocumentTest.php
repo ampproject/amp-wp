@@ -1,8 +1,11 @@
 <?php
 
+namespace AmpProject\Common;
+
 use AmpProject\Attribute;
 use AmpProject\Dom\Document;
 use AmpProject\Tests\AssertContainsCompatibility;
+use DOMNode;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -13,7 +16,6 @@ use PHPUnit\Framework\TestCase;
  */
 class DocumentTest extends TestCase
 {
-
     use AssertContainsCompatibility;
 
     /**
@@ -113,6 +115,36 @@ class DocumentTest extends TestCase
                 'utf-8',
                 '<p>Text</p>',
                 '<!DOCTYPE html><html>' . $head . '<body><p>Text</p></body></html>',
+            ],
+            'empty_document' => [
+                'utf-8',
+                '',
+                '<!DOCTYPE html><html><head><meta charset="utf-8"></head><body></body></html>',
+            ],
+            'paragraph_document_fragment' => [
+                'utf-8',
+                '<p>Lorem ipsum</p>',
+                '<!DOCTYPE html><html><head><meta charset="utf-8"></head><body><p>Lorem ipsum</p></body></html>',
+            ],
+            'document_without_html_element' => [
+                'utf-8',
+                '<head><title>Foo</title></head><body><p>Bar</p></body>',
+                '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Foo</title></head><body><p>Bar</p></body></html>',
+            ],
+            'document_fragment_with_head_and_paragraph' => [
+                'utf-8',
+                '<head><title>Foo</title></head><p>Bar</p>',
+                '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Foo</title></head><body><p>Bar</p></body></html>',
+            ],
+            'document_fragment_with_body_and_paragraph' => [
+                'utf-8',
+                '<body><p>Bar</p></body>',
+                '<!DOCTYPE html><html><head><meta charset="utf-8"></head><body><p>Bar</p></body></html>',
+            ],
+            'document_fragment_with_body_and_paragraph_and_after_body' => [
+                'utf-8',
+                '<body><p>Bar</p></body><p>Baz</p>',
+                '<!DOCTYPE html><html><head><meta charset="utf-8"></head><body><p>Bar</p><p>Baz</p></body></html>',
             ],
             'missing_doctype'                          => [
                 'utf-8',
@@ -215,15 +247,30 @@ class DocumentTest extends TestCase
                 mb_convert_encoding('€', 'ISO-8859-15', 'UTF-8'),
                 '<!DOCTYPE html><html>' . $head . '<body>€</body></html>',
             ],
-            'comments_around_main_elements'            => [
+            'nodes_around_main_elements'            => [
                 'utf-8',
-                ' <!-- comment 1 --> <!doctype html> <!-- comment 2 --> <html> <!-- comment 3 --> <head></head> <!-- comment 4 --> <body></body> <!-- comment 5 --></html>',
-                ' <!-- comment 1 --> <!doctype html> <!-- comment 2 --> <html> <!-- comment 3 --> ' . $head . ' <!-- comment 4 --> <body></body> <!-- comment 5 --></html>',
+                ' <!-- comment 1 --> <!doctype html> <!-- comment 2 --> <html> <!-- comment 3 --> <head></head> <!-- comment 4 --> <body></body> <!-- comment after body --></html><!-- start --><div>Query Monitor</div><!-- end -->',
+                ' <!-- comment 1 --> <!doctype html> <!-- comment 2 --> <html> <!-- comment 3 --> ' . $head . ' <!-- comment 4 --> <body> <!-- comment after body --><!-- start --><div>Query Monitor</div><!-- end --></body></html>',
             ],
             'ie_conditional_comments'                  => [
                 'utf-8',
                 '<!--[if lt IE 7]> <html class="lt-ie9 lt-ie8 lt-ie7"> <![endif]--><!--[if IE 7]> <html class="lt-ie9 lt-ie8"> <![endif]--><!--[if IE 8]> <html class="lt-ie9"> <![endif]--><!--[if gt IE 8]><!--> <html class=""> <!--<![endif]--></html>',
                 '<!DOCTYPE html><html class="">' . $head . '<body></body></html>',
+            ],
+            'comments_preserve_position'               => [
+                'utf-8',
+                "<!DOCTYPE html> \n <!-- before \n <html> --> \n <html> \n <!-- before \n <head> ----> \n <head><meta charset=\"utf-8\"> \n <!-- within \n <head> ----> \n </head> \n <!-- before \n <body> ----> \n <body class=\"something\" data-something=\"something\"> \n <!-- within \n <body> ----> \n </body> \n <!-- after \n </body> ----> \n </html> \n <!-- after \n </html> --> \n",
+                "<!DOCTYPE html> \n <!-- before \n <html> --> \n <html> \n <!-- before \n <head> ----> \n <head><meta charset=\"utf-8\"> \n <!-- within \n <head> ----> \n </head> \n <!-- before \n <body> ----> \n <body class=\"something\" data-something=\"something\"> \n <!-- within \n <body> ----> \n  \n <!-- after \n </body> ----> \n  \n <!-- after \n </html> --> \n</body></html>",
+            ],
+            'profile_attribute_in_head_moved_to_link'  => [
+                'utf-8',
+                '<!DOCTYPE html><html><head profile="https://example.com"></head><body></body></html>',
+                '<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="profile" href="https://example.com"></head><body></body></html>',
+            ],
+            'profile_attribute_in_head_empty_string'   => [
+                'utf-8',
+                '<!DOCTYPE html><html><head profile=""></head><body></body></html>',
+                '<!DOCTYPE html><html><head><meta charset="utf-8"></head><body></body></html>',
             ],
         ];
     }
@@ -259,8 +306,8 @@ class DocumentTest extends TestCase
         $expected = preg_replace('/(?<=>)\s+(?=<)/', '', trim($expected));
 
         $this->assertEquals(
-            array_filter(preg_split('#(<[^>]+>|[^<>]+)#', $expected, -1, PREG_SPLIT_DELIM_CAPTURE)),
-            array_filter(preg_split('#(<[^>]+>|[^<>]+)#', $actual, -1, PREG_SPLIT_DELIM_CAPTURE))
+            array_filter(preg_split('#(<!--.*?-->|<[^>]+>|[^<>]+)#', $expected, -1, PREG_SPLIT_DELIM_CAPTURE)),
+            array_filter(preg_split('#(<!--.*?-->|<[^>]+>|[^<>]+)#', $actual, -1, PREG_SPLIT_DELIM_CAPTURE))
         );
     }
 

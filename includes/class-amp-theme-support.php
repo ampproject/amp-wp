@@ -2183,19 +2183,6 @@ class AMP_Theme_Support {
 
 		$dom = Document::fromHtml( $response );
 
-		// Move anything after </html>, such as Query Monitor output added at shutdown, to be moved before </body>.
-		while ( $dom->documentElement->nextSibling ) {
-			// Trailing elements after </html> will get wrapped in additional <html> elements.
-			if ( 'html' === $dom->documentElement->nextSibling->nodeName ) {
-				while ( $dom->documentElement->nextSibling->firstChild ) {
-					$dom->body->appendChild( $dom->documentElement->nextSibling->firstChild );
-				}
-				$dom->removeChild( $dom->documentElement->nextSibling );
-			} else {
-				$dom->body->appendChild( $dom->documentElement->nextSibling );
-			}
-		}
-
 		AMP_HTTP::send_server_timing( 'amp_dom_parse', -$dom_parse_start, 'AMP DOM Parse' );
 
 		// Make sure scripts from the body get moved to the head.

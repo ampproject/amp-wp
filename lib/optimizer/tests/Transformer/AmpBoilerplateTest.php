@@ -17,7 +17,6 @@ use PHPUnit\Framework\TestCase;
  */
 final class AmpBoilerplateTest extends TestCase
 {
-
     use MarkupComparison;
 
     /**
