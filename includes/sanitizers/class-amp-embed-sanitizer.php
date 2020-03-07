@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use Amp\AmpWP\Dom\Document;
+use Amp\Dom\Document;
 
 /**
  * Class AMP_Embed_Sanitizer

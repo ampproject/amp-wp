@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use Amp\AmpWP\Dom\Document;
+use Amp\Dom\Document;
 
 /**
  * Test AMP_Tag_And_Attribute_Sanitizer
@@ -2422,7 +2422,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 			'head_with_duplicate_charset'             => [
 				'<html amp><head><meta charset="UTF-8"><meta charset="utf-8"><body><p>Content</p></body></html>',
-				'<html amp><head><meta charset="utf-8"></head><body><p>Content</p></body></html>',
+				'<html amp><head><meta charset="UTF-8"></head><body><p>Content</p></body></html>',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::DUPLICATE_UNIQUE_TAG ],
 			],
@@ -2586,7 +2586,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function test_sanitize( $source, $expected = null, $expected_scripts = [], $expected_errors = [] ) {
 		$expected      = isset( $expected ) ? $expected : $source;
-		$dom           = Document::from_html( $source );
+		$dom           = Document::fromHtml( $source );
 		$actual_errors = [];
 		$sanitizer     = new AMP_Tag_And_Attribute_Sanitizer(
 			$dom,
@@ -2632,7 +2632,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 		$source   = '<b>Hello</b><script>document.write("hi");</script><amp-sidebar></amp-sidebar>';
 		$expected = '<b>Hello</b><amp-sidebar></amp-sidebar>';
 
-		$dom           = Document::from_html( $source );
+		$dom           = Document::fromHtml( $source );
 		$actual_errors = [];
 		$sanitizer     = new AMP_Tag_And_Attribute_Sanitizer(
 			$dom,
