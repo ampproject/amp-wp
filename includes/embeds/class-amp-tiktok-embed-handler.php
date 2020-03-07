@@ -1,6 +1,6 @@
 <?php
 /**
- * Class AMP_Tiktok_Embed_Handler
+ * Class AMP_TikTok_Embed_Handler
  *
  * @package AMP
  */
@@ -8,9 +8,9 @@
 use AmpProject\Dom\Document;
 
 /**
- * Class AMP_Tiktok_Embed_Handler
+ * Class AMP_TikTok_Embed_Handler
  */
-class AMP_Tiktok_Embed_Handler extends AMP_Base_Embed_Handler {
+class AMP_TikTok_Embed_Handler extends AMP_Base_Embed_Handler {
 
 	/**
 	 * Registers embed.
@@ -27,7 +27,7 @@ class AMP_Tiktok_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
-	 * Sanitize Tiktok embeds to be AMP compatible.
+	 * Sanitize TikTok embeds to be AMP compatible.
 	 *
 	 * @param Document $dom DOM.
 	 */
@@ -54,7 +54,7 @@ class AMP_Tiktok_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
-	 * Make Tiktok embed AMP compatible.
+	 * Make TikTok embed AMP compatible.
 	 *
 	 * @param DOMElement $blockquote_node The <blockquote> node to make AMP compatible.
 	 */
@@ -111,7 +111,7 @@ class AMP_Tiktok_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
-	 * Remove Tiktok's embed script if it exists.
+	 * Remove TikTok's embed script if it exists.
 	 *
 	 * @param DOMElement $node The DOMNode to make AMP compatible.
 	 */
