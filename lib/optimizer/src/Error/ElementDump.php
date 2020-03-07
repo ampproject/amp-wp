@@ -54,7 +54,7 @@ final class ElementDump
 
         if ($dump === null) {
             $dump = sprintf(
-                '%s%s',
+                '<%s%s',
                 $this->element->tagName,
                 array_reduce(
                     iterator_to_array($this->element->attributes, true),
@@ -68,6 +68,7 @@ final class ElementDump
             if (mb_strlen($dump) > $this->truncate) {
                 $dump = mb_substr($dump, 0, $this->truncate - 1) . '…';
             }
+            $dump .= '>';
         }
 
         return (string)$dump;
