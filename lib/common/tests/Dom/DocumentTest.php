@@ -215,10 +215,10 @@ class DocumentTest extends TestCase
                 mb_convert_encoding('€', 'ISO-8859-15', 'UTF-8'),
                 '<!DOCTYPE html><html>' . $head . '<body>€</body></html>',
             ],
-            'comments_around_main_elements'            => [
+            'nodes_around_main_elements'            => [
                 'utf-8',
-                ' <!-- comment 1 --> <!doctype html> <!-- comment 2 --> <html> <!-- comment 3 --> <head></head> <!-- comment 4 --> <body></body> <!-- comment 5 --></html>',
-                ' <!-- comment 1 --> <!doctype html> <!-- comment 2 --> <html> <!-- comment 3 --> ' . $head . ' <!-- comment 4 --> <body></body> <!-- comment 5 --></html>',
+                ' <!-- comment 1 --> <!doctype html> <!-- comment 2 --> <html> <!-- comment 3 --> <head></head> <!-- comment 4 --> <body></body> <!-- comment after body --></html><!-- start --><div>Query Monitor</div><!-- end -->',
+                ' <!-- comment 1 --> <!doctype html> <!-- comment 2 --> <html> <!-- comment 3 --> ' . $head . ' <!-- comment 4 --> <body> <!-- comment after body --><!-- start --><div>Query Monitor</div><!-- end --></body></html>',
             ],
             'ie_conditional_comments'                  => [
                 'utf-8',
@@ -228,7 +228,7 @@ class DocumentTest extends TestCase
 			'comments_preserve_position'               => [
 				'utf-8',
 				"<!DOCTYPE html> \n <!-- before \n <html> --> \n <html> \n <!-- before \n <head> ----> \n <head><meta charset=\"utf-8\"> \n <!-- within \n <head> ----> \n </head> \n <!-- before \n <body> ----> \n <body class=\"something\" data-something=\"something\"> \n <!-- within \n <body> ----> \n </body> \n <!-- after \n </body> ----> \n </html> \n <!-- after \n </html> --> \n",
-				"<!DOCTYPE html> \n <!-- before \n <html> --> \n <html> \n <!-- before \n <head> ----> \n <head><meta charset=\"utf-8\"> \n <!-- within \n <head> ----> \n </head> \n <!-- before \n <body> ----> \n <body class=\"something\" data-something=\"something\"> \n <!-- within \n <body> ----> \n </body> \n <!-- after \n </body> ----> \n </html> \n <!-- after \n </html> --> \n",
+				"<!DOCTYPE html> \n <!-- before \n <html> --> \n <html> \n <!-- before \n <head> ----> \n <head><meta charset=\"utf-8\"> \n <!-- within \n <head> ----> \n </head> \n <!-- before \n <body> ----> \n <body class=\"something\" data-something=\"something\"> \n <!-- within \n <body> ----> \n  \n <!-- after \n </body> ----> \n  \n <!-- after \n </html> --> \n</body></html>",
 			],
 			'profile_attribute_in_head_moved_to_link'  => [
 				'utf-8',

@@ -341,6 +341,7 @@ final class Document extends DOMDocument
             $this->deduplicateTag(Tag::HEAD);
             $this->deduplicateTag(Tag::BODY);
             $this->moveInvalidHeadNodesToBody();
+            $this->movePostBodyNodesToBody();
             $this->convertHeadProfileToLink();
         }
 
@@ -598,6 +599,7 @@ final class Document extends DOMDocument
         }
 
         $this->moveInvalidHeadNodesToBody();
+        $this->movePostBodyNodesToBody();
     }
 
     /**
@@ -665,6 +667,36 @@ final class Document extends DOMDocument
         }
 
         $this->head->removeAttribute(Attribute::PROFILE);
+    }
+
+    /**
+     * Move any nodes appearing after </body> or </html> to be appended to the <body>.
+     *
+     * This accounts for markup that is output at shutdown, such markup from Query Monitor. Not only is elements after
+     * the </body> not valid in AMP, but trailing elements after </html> will get wrapped in additional <html> elements.
+     * While comment nodes would be allowed in AMP, everything is moved regardless so that source stack comments will
+     * retain their relative position with the element nodes they annotate.
+     */
+    private function movePostBodyNodesToBody()
+    {
+        // Move nodes (likely comments) from after the </body>.
+        while ($this->body->nextSibling) {
+            $this->body->appendChild($this->body->nextSibling);
+        }
+
+        // Move nodes from after the </html>.
+        while ($this->documentElement->nextSibling) {
+            $nextSibling = $this->documentElement->nextSibling;
+            if ($nextSibling instanceof DOMElement && Tag::HTML === $nextSibling->nodeName) {
+                // Handle trailing elements getting wrapped in implicit duplicate <html>.
+                while ($nextSibling->firstChild) {
+                    $this->body->appendChild($nextSibling->firstChild);
+                }
+                $nextSibling->parentNode->removeChild($nextSibling); // Discard now-empty implicit <html>.
+            } else {
+                $this->body->appendChild($this->documentElement->nextSibling);
+            }
+        }
     }
 
     /**
