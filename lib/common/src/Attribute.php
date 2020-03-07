@@ -46,6 +46,7 @@ interface Attribute
     const LOOP                  = 'loop';
     const MEDIA                 = 'media';
     const NAME                  = 'name';
+    const PROFILE               = 'profile';
     const REL                   = 'rel';
     const ROLE                  = 'role';
     const SIZES                 = 'sizes';

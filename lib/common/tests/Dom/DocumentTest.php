@@ -230,6 +230,16 @@ class DocumentTest extends TestCase
 				"<!DOCTYPE html> \n <!-- before \n <html> --> \n <html> \n <!-- before \n <head> ----> \n <head><meta charset=\"utf-8\"> \n <!-- within \n <head> ----> \n </head> \n <!-- before \n <body> ----> \n <body class=\"something\" data-something=\"something\"> \n <!-- within \n <body> ----> \n </body> \n <!-- after \n </body> ----> \n </html> \n <!-- after \n </html> --> \n",
 				"<!DOCTYPE html> \n <!-- before \n <html> --> \n <html> \n <!-- before \n <head> ----> \n <head><meta charset=\"utf-8\"> \n <!-- within \n <head> ----> \n </head> \n <!-- before \n <body> ----> \n <body class=\"something\" data-something=\"something\"> \n <!-- within \n <body> ----> \n </body> \n <!-- after \n </body> ----> \n </html> \n <!-- after \n </html> --> \n",
 			],
+			'profile_attribute_in_head_moved_to_link'  => [
+				'utf-8',
+				'<!DOCTYPE html><html><head profile="https://example.com"></head><body></body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="profile" href="https://example.com"></head><body></body></html>',
+			],
+			'profile_attribute_in_head_empty_string'   => [
+				'utf-8',
+				'<!DOCTYPE html><html><head profile=""></head><body></body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"></head><body></body></html>',
+			],
         ];
     }
 
