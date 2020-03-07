@@ -13,6 +13,8 @@
     "ext-json": "*",
     "ext-libxml": "*",
     "ext-spl": "*",
+    "amp/common": "^1",
+    "amp/optimizer": "^1",
     "cweagans/composer-patches": "1.6.7",
     "fasterimage/fasterimage": "1.5.0",
     "sabberworm/php-css-parser": "dev-master#134f4e6"
@@ -60,9 +62,25 @@
   },
   "repositories": [
     {
+      "type": "path",
+      "url": "lib/common",
+      "options": {
+        "symlink": true
+      }
+    },
+    {
+      "type": "path",
+      "url": "lib/optimizer",
+      "options": {
+        "symlink": true
+      }
+    },
+    {
       "type": "vcs",
       "url": "https://github.com/sabberworm/PHP-CSS-Parser.git",
       "no-api": true
     }
-  ]
+  ],
+  "minimum-stability": "dev",
+  "prefer-stable": true
 }

@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use Amp\AmpWP\Dom\Document;
+use Amp\Dom\Document;
 
 /**
  * Trait AMP_Noscript_Fallback
