@@ -17,7 +17,6 @@ use PHPUnit\Framework\TestCase;
  */
 final class ReorderHeadTest extends TestCase
 {
-
     use ErrorComparison;
     use MarkupComparison;
 

@@ -17,7 +17,6 @@ use PHPUnit\Framework\TestCase;
  */
 final class ServerSideRenderingTest extends TestCase
 {
-
     use ErrorComparison;
     use MarkupComparison;
 

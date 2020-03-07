@@ -51,8 +51,8 @@
   "minimum-stability": "dev",
   "prefer-stable": true,
   "scripts": {
-    "cbf": "phpcbf --standard=PSR12 -n src",
-    "cs": "phpcs --standard=PSR12 -n src",
+    "cbf": "phpcbf --standard=PSR12 -n src tests",
+    "cs": "phpcs --standard=PSR12 -n src tests",
     "lint": "parallel-lint -j 10 --colors --exclude vendor .",
     "post-update-cmd": [
       "rm -rf tests/spec && bin/sync-amp-toolbox-test-suite.php",

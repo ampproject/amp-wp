@@ -15,7 +15,6 @@ use PHPUnit\Framework\TestCase;
  */
 final class TransformationEngineTest extends TestCase
 {
-
     use MarkupComparison;
 
     const MINIMAL_HTML_MARKUP           = '<html></html>';
