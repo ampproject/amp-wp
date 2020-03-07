@@ -1,8 +1,11 @@
 <?php
 
+namespace AmpProject\Common;
+
 use AmpProject\Attribute;
 use AmpProject\Dom\Document;
 use AmpProject\Tests\AssertContainsCompatibility;
+use DOMNode;
 use PHPUnit\Framework\TestCase;
 
 /**

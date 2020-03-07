@@ -1,5 +1,7 @@
 <?php
 
+namespace AmpProject\Common;
+
 use AmpProject\RemoteRequest\StubbedRemoteGetRequest;
 use AmpProject\RuntimeVersion;
 use PHPUnit\Framework\TestCase;

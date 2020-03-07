@@ -43,7 +43,7 @@
   },
   "scripts": {
     "cbf": "phpcbf --standard=PSR12 -n src tests",
-    "cs": "phpcs --standard=PSR12 -n src tests",
+    "cs": "phpcs --standard=PSR12 -s -n src tests",
     "lint": "parallel-lint -j 10 --colors --exclude vendor .",
     "test": [
       "@lint",

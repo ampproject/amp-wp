@@ -1,10 +1,14 @@
 <?php
 
+namespace AmpProject\Common;
+
 use AmpProject\Amp;
 use AmpProject\Attribute;
 use AmpProject\Dom\Document;
 use AmpProject\Extension;
 use AmpProject\Tag;
+use DOMElement;
+use DOMNode;
 use PHPUnit\Framework\TestCase;
 
 /**

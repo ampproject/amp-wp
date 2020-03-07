@@ -1,5 +1,7 @@
 <?php
 
+namespace AmpProject\Common;
+
 use AmpProject\CssLength;
 use PHPUnit\Framework\TestCase;
 
