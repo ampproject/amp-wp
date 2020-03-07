@@ -1,11 +1,11 @@
 <?php
 
-namespace Amp\Optimizer;
+namespace AmpProject\Optimizer;
 
 /**
  * Marker interface to denote a transformer that accepts configuration settings.
  *
- * @package amp/optimizer
+ * @package ampproject/optimizer
  */
 interface Configurable
 {

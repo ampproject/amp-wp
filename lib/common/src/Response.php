@@ -1,6 +1,6 @@
 <?php
 
-namespace Amp;
+namespace AmpProject;
 
 /**
  * Response that was returned from a RemoteRequest execution.
@@ -10,7 +10,7 @@ namespace Amp;
  *
  * @todo Consider using PSR-7 directly (both interfaces and a library that implements them).
  *
- * @package amp/common
+ * @package ampproject/common
  */
 interface Response
 {

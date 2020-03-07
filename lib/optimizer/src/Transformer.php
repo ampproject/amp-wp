@@ -1,13 +1,13 @@
 <?php
 
-namespace Amp\Optimizer;
+namespace AmpProject\Optimizer;
 
-use Amp\Dom\Document;
+use AmpProject\Dom\Document;
 
 /**
  * A singular transformer that is part of the transformation engine.
  *
- * @package amp/optimizer
+ * @package ampproject/optimizer
  */
 interface Transformer
 {

@@ -1,10 +1,10 @@
 <?php
 
-namespace Amp\Optimizer\Configuration;
+namespace AmpProject\Optimizer\Configuration;
 
-use Amp\Optimizer\Exception\InvalidConfigurationKey;
-use Amp\Optimizer\Exception\UnknownConfigurationKey;
-use Amp\Optimizer\TransformerConfiguration;
+use AmpProject\Optimizer\Exception\InvalidConfigurationKey;
+use AmpProject\Optimizer\Exception\UnknownConfigurationKey;
+use AmpProject\Optimizer\TransformerConfiguration;
 
 /**
  * Configuration for the AmpRuntimeCss transformer.
@@ -12,7 +12,7 @@ use Amp\Optimizer\TransformerConfiguration;
  * @property string  $version Version string to use. Defaults to an empty string.
  * @property boolean $canary  Whether to use the canary version or not. Defaults to false.
  *
- * @package amp/optimizer
+ * @package ampproject/optimizer
  */
 abstract class BaseTransformerConfiguration implements TransformerConfiguration
 {

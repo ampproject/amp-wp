@@ -2,15 +2,15 @@
 /**
  * Class CachedRemoteGetRequest.
  *
- * @package Amp\AmpWP
+ * @package AmpProject\AmpWP
  */
 
-namespace Amp\AmpWP;
+namespace AmpProject\AmpWP;
 
-use Amp\Exception\FailedToGetFromRemoteUrl;
-use Amp\RemoteGetRequest;
-use Amp\RemoteRequest\RemoteGetRequestResponse;
-use Amp\Response;
+use AmpProject\Exception\FailedToGetFromRemoteUrl;
+use AmpProject\RemoteGetRequest;
+use AmpProject\RemoteRequest\RemoteGetRequestResponse;
+use AmpProject\Response;
 use DateTimeImmutable;
 use DateTimeInterface;
 
@@ -19,7 +19,7 @@ use DateTimeInterface;
  *
  * Caching uses WordPress transients.
  *
- * @package Amp\AmpWP
+ * @package AmpProject\AmpWP
  */
 final class CachedRemoteGetRequest implements RemoteGetRequest {
 

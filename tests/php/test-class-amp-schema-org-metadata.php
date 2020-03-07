@@ -2,13 +2,13 @@
 /**
  * Test Site_Health.
  *
- * @package Amp\AmpWP
+ * @package AmpProject\AmpWP
  */
 
-use Amp\AmpWP\Transformer\AmpSchemaOrgMetadata;
-use Amp\AmpWP\Transformer\AmpSchemaOrgMetadataConfiguration;
-use Amp\Dom\Document;
-use Amp\Optimizer\ErrorCollection;
+use AmpProject\AmpWP\Transformer\AmpSchemaOrgMetadata;
+use AmpProject\AmpWP\Transformer\AmpSchemaOrgMetadataConfiguration;
+use AmpProject\Dom\Document;
+use AmpProject\Optimizer\ErrorCollection;
 
 /**
  * Test Site_Health.

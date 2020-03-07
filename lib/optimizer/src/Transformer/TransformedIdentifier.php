@@ -1,13 +1,13 @@
 <?php
 
-namespace Amp\Optimizer\Transformer;
+namespace AmpProject\Optimizer\Transformer;
 
-use Amp\Dom\Document;
-use Amp\Optimizer\Configurable;
-use Amp\Optimizer\Configuration\TransformedIdentifierConfiguration;
-use Amp\Optimizer\ErrorCollection;
-use Amp\Optimizer\Transformer;
-use Amp\Optimizer\TransformerConfiguration;
+use AmpProject\Dom\Document;
+use AmpProject\Optimizer\Configurable;
+use AmpProject\Optimizer\Configuration\TransformedIdentifierConfiguration;
+use AmpProject\Optimizer\ErrorCollection;
+use AmpProject\Optimizer\Transformer;
+use AmpProject\Optimizer\TransformerConfiguration;
 
 /**
  * Transformer applying the transformed identifier transformations to the HTML input.
@@ -23,7 +23,7 @@ use Amp\Optimizer\TransformerConfiguration;
  * @version b26a35142e0ed1458158435b252a0fcd659f93c4
  * @link    https://github.com/ampproject/amppackager/blob/b26a35142e0ed1458158435b252a0fcd659f93c4/transformer/transformers/transformedidentifier.go
  *
- * @package amp/optimizer
+ * @package ampproject/optimizer
  */
 final class TransformedIdentifier implements Transformer, Configurable
 {

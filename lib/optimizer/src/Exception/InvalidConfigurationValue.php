@@ -1,13 +1,13 @@
 <?php
 
-namespace Amp\Optimizer\Exception;
+namespace AmpProject\Optimizer\Exception;
 
 use InvalidArgumentException;
 
 /**
  * Exception thrown when an invalid configuration value was provided.
  *
- * @package amp/optimizer
+ * @package ampproject/optimizer
  */
 final class InvalidConfigurationValue extends InvalidArgumentException implements AmpOptimizerException
 {

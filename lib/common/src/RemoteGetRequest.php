@@ -1,15 +1,15 @@
 <?php
 
-namespace Amp;
+namespace AmpProject;
 
-use Amp\Exception\FailedToGetFromRemoteUrl;
+use AmpProject\Exception\FailedToGetFromRemoteUrl;
 
 /**
  * Interface for abstracting away the transport that is being used for making remote requests.
  *
  * This allows external code to replace the transport and tests to mock it.
  *
- * @package amp/common
+ * @package ampproject/common
  */
 interface RemoteGetRequest
 {

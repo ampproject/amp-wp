@@ -1,14 +1,16 @@
 <?php
 
-use Amp\RemoteRequest\StubbedRemoteGetRequest;
-use Amp\RuntimeVersion;
+namespace AmpProject\Common;
+
+use AmpProject\RemoteRequest\StubbedRemoteGetRequest;
+use AmpProject\RuntimeVersion;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Tests for Amp\RuntimeVersion.
+ * Tests for AmpProject\RuntimeVersion.
  *
  * @covers  RuntimeVersion
- * @package amp/common
+ * @package ampproject/common
  */
 class RuntimeVersionTest extends TestCase
 {

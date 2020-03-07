@@ -5,8 +5,8 @@
  * @package AMP
  */
 
-use Amp\CssLength;
-use Amp\Dom\Document;
+use AmpProject\CssLength;
+use AmpProject\Dom\Document;
 
 /**
  * Strips the tags and attributes from the content that are not allowed by the AMP spec.

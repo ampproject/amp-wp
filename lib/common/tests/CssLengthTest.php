@@ -1,15 +1,17 @@
 <?php
 
-use Amp\CssLength;
+namespace AmpProject\Common;
+
+use AmpProject\CssLength;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Tests for Amp\CssLength.
+ * Tests for AmpProject\CssLength.
  *
  * @todo   This is only a stub and basic smoke test, more tests need to be added here, as the plugin didn't have any.
  *
  * @covers CssLength
- * @package amp/common
+ * @package ampproject/common
  */
 class CssLengthTest extends TestCase
 {
