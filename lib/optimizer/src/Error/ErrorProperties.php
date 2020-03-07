@@ -2,6 +2,8 @@
 
 namespace Amp\Optimizer\Error;
 
+use ReflectionClass;
+
 /**
  * Default set of properties and methods to use for errors.
  *
@@ -34,7 +36,7 @@ trait ErrorProperties
      */
     public function getCode()
     {
-        return preg_replace('/^.+\\\\/', '', get_class($this));
+        return (new ReflectionClass($this))->getShortName();
     }
 
     /**

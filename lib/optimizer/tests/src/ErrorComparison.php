@@ -4,6 +4,7 @@ namespace Amp\Optimizer\Tests;
 
 use Amp\Optimizer\Error;
 use Amp\Optimizer\ErrorCollection;
+use ReflectionClass;
 
 /**
  * Compare produced errors while disregarding their specific representation.
@@ -37,7 +38,7 @@ trait ErrorComparison
             if ( is_string( $expectedError ) ) {
                 // If strings were passed, assume the error code is used.
                 $this->assertInstanceOf($expectedError, $actualError, 'Unexpected error instance type');
-                $this->assertEquals(basename($expectedError), $actualError->getCode(), 'Unexpected error code');
+                $this->assertEquals((new ReflectionClass( $actualError ))->getShortName(), $actualError->getCode(), 'Unexpected error code');
             } else {
                 $this->assertInstanceOf(get_class($expectedError), $actualError, 'Unexpected error type');
                 $this->assertEquals($expectedError->getCode(), $actualError->getCode(), 'Unexpected error code');

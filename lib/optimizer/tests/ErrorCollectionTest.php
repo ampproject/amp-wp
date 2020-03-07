@@ -4,6 +4,7 @@ namespace Amp\Optimizer;
 
 use Amp\Optimizer\Error\UnknownError;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 
 /**
  * Test the error collection container.
@@ -38,7 +39,7 @@ final class ErrorCollectionTest extends TestCase
         $errorCollection = new ErrorCollection();
         $errorCollection->add(new UnknownError('first error'));
         $errorCollection->add(new UnknownError('second error'));
-        $this->assertTrue($errorCollection->has(UnknownError::class));
+        $this->assertTrue($errorCollection->has((new ReflectionClass(UnknownError::class))->getShortName()));
         $this->assertFalse($errorCollection->has('BAD_CODE'));
     }
 
@@ -55,7 +56,7 @@ final class ErrorCollectionTest extends TestCase
         $errorCollection->add(new UnknownError('second error'));
         foreach ($errorCollection as $error) {
             $this->assertInstanceOf(Error::class, $error);
-            $this->assertEquals(UnknownError::class, $error->getCode());
+            $this->assertEquals((new ReflectionClass(UnknownError::class))->getShortName(), $error->getCode());
         }
         $errors = iterator_to_array($errorCollection, false);
         $this->assertEquals('first error', $errors[0]->getMessage());
