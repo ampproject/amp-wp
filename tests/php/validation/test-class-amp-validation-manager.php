@@ -7,8 +7,8 @@
 
 // phpcs:disable Generic.Formatting.MultipleStatementAlignment.NotSameWarning
 
-use Amp\Dom\Document;
-use Amp\AmpWP\Tests\PrivateAccess;
+use AmpProject\Dom\Document;
+use AmpProject\AmpWP\Tests\PrivateAccess;
 
 /**
  * Tests for AMP_Validation_Manager class.

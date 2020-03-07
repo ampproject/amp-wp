@@ -12,8 +12,8 @@
     "ext-iconv": "*",
     "ext-libxml": "*",
     "ext-spl": "*",
-    "amp/common": "^1",
-    "amp/optimizer": "^1",
+    "ampproject/common": "^1",
+    "ampproject/optimizer": "^1",
     "cweagans/composer-patches": "1.6.7",
     "fasterimage/fasterimage": "1.5.0",
     "sabberworm/php-css-parser": "dev-master#134f4e6"
@@ -51,12 +51,12 @@
   },
   "autoload": {
     "psr-4": {
-      "Amp\\AmpWP\\": "src/"
+      "AmpProject\\AmpWP\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Amp\\AmpWP\\Tests\\": "tests/php/src/"
+      "AmpProject\\AmpWP\\Tests\\": "tests/php/src/"
     }
   },
   "repositories": [

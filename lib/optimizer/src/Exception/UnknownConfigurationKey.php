@@ -1,13 +1,13 @@
 <?php
 
-namespace Amp\Optimizer\Exception;
+namespace AmpProject\Optimizer\Exception;
 
 use InvalidArgumentException;
 
 /**
  * Exception thrown when an unknown configuration key was requested.
  *
- * @package amp/optimizer
+ * @package ampproject/optimizer
  */
 final class UnknownConfigurationKey extends InvalidArgumentException implements AmpOptimizerException
 {

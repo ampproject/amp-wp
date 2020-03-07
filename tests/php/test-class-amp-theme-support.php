@@ -6,9 +6,9 @@
  * @since 0.7
  */
 
-use Amp\AmpWP\ConfigurationArgument;
-use Amp\AmpWP\Tests\PrivateAccess;
-use Amp\Dom\Document;
+use AmpProject\AmpWP\ConfigurationArgument;
+use AmpProject\AmpWP\Tests\PrivateAccess;
+use AmpProject\Dom\Document;
 use org\bovigo\vfs;
 
 /**

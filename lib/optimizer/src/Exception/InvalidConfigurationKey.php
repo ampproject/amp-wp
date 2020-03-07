@@ -1,13 +1,13 @@
 <?php
 
-namespace Amp\Optimizer\Exception;
+namespace AmpProject\Optimizer\Exception;
 
 use OutOfBoundsException;
 
 /**
  * Exception thrown when an invalid configuration key was provided.
  *
- * @package amp/optimizer
+ * @package ampproject/optimizer
  */
 final class InvalidConfigurationKey extends OutOfBoundsException implements AmpOptimizerException
 {

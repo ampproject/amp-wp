@@ -2,21 +2,21 @@
 /**
  * Class AmpSchemaOrgMetadataConfiguration.
  *
- * @package Amp\AmpWP
+ * @package AmpProject\AmpWP
  */
 
-namespace Amp\AmpWP\Transformer;
+namespace AmpProject\AmpWP\Transformer;
 
-use Amp\Optimizer\Configuration\BaseTransformerConfiguration;
-use Amp\Optimizer\Exception\InvalidConfigurationValue;
-use Amp\Optimizer\Transformer\TransformedIdentifier;
+use AmpProject\Optimizer\Configuration\BaseTransformerConfiguration;
+use AmpProject\Optimizer\Exception\InvalidConfigurationValue;
+use AmpProject\Optimizer\Transformer\TransformedIdentifier;
 
 /**
  * Configuration for the AmpSchemaOrgMetadata transformer.
  *
  * @property array $metadata Associative array of metadata.
  *
- * @package amp/optimizer
+ * @package ampproject/optimizer
  */
 final class AmpSchemaOrgMetadataConfiguration extends BaseTransformerConfiguration {
 

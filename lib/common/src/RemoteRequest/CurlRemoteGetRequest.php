@@ -1,15 +1,15 @@
 <?php
 
-namespace Amp\RemoteRequest;
+namespace AmpProject\RemoteRequest;
 
-use Amp\Exception\FailedToGetFromRemoteUrl;
-use Amp\RemoteGetRequest;
-use Amp\Response;
+use AmpProject\Exception\FailedToGetFromRemoteUrl;
+use AmpProject\RemoteGetRequest;
+use AmpProject\Response;
 
 /**
  * Remote request transport using cURL.
  *
- * @package amp/common
+ * @package ampproject/common
  */
 final class CurlRemoteGetRequest implements RemoteGetRequest
 {

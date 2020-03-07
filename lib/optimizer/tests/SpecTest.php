@@ -1,21 +1,21 @@
 <?php
 
-namespace Amp\Optimizer;
+namespace AmpProject\Optimizer;
 
-use Amp\Dom\Document;
-use Amp\Optimizer\Tests\MarkupComparison;
-use Amp\Optimizer\Tests\TestMarkup;
-use Amp\Optimizer\Transformer\AmpRuntimeCss;
-use Amp\Optimizer\Transformer\ReorderHead;
-use Amp\Optimizer\Transformer\ServerSideRendering;
-use Amp\RemoteRequest\StubbedRemoteGetRequest;
+use AmpProject\Dom\Document;
+use AmpProject\Optimizer\Tests\MarkupComparison;
+use AmpProject\Optimizer\Tests\TestMarkup;
+use AmpProject\Optimizer\Transformer\AmpRuntimeCss;
+use AmpProject\Optimizer\Transformer\ReorderHead;
+use AmpProject\Optimizer\Transformer\ServerSideRendering;
+use AmpProject\RemoteRequest\StubbedRemoteGetRequest;
 use DirectoryIterator;
 use PHPUnit\Framework\TestCase;
 
 /**
  * Test the individual transformers against the NodeJS spec test suite.
  *
- * @package amp/optimizer
+ * @package ampproject/optimizer
  */
 final class SpecTest extends TestCase
 {

@@ -2,13 +2,13 @@
 /**
  * Class Carousel.
  *
- * @package Amp\AmpWP
+ * @package AmpProject\AmpWP
  */
 
-namespace Amp\AmpWP\Component;
+namespace AmpProject\AmpWP\Component;
 
-use Amp\Dom\Document;
-use Amp\AmpWP\Dom\ElementList;
+use AmpProject\Dom\Document;
+use AmpProject\AmpWP\Dom\ElementList;
 use DOMElement;
 use AMP_DOM_Utils;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Amp\Optimizer\Tests;
+namespace AmpProject\Optimizer\Tests;
 
 /**
  * Constants that provide the test markup to use.
@@ -11,7 +11,7 @@ namespace Amp\Optimizer\Tests;
  *
  * @see     https://github.com/ampproject/amppackager/blob/releases/transformer/internal/testing/testing.go
  *
- * @package amp/optimizer
+ * @package ampproject/optimizer
  */
 final class TestMarkup
 {

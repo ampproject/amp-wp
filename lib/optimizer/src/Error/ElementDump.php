@@ -1,6 +1,6 @@
 <?php
 
-namespace Amp\Optimizer\Error;
+namespace AmpProject\Optimizer\Error;
 
 use DOMAttr;
 use DOMElement;

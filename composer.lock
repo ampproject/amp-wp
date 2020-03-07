@@ -4,15 +4,15 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "601e70f4b87843b13c1e309e64816f1b",
+    "content-hash": "044cb86ba62d1901fc5f267077a9cd63",
     "packages": [
         {
-            "name": "amp/common",
-            "version": "dev-add/958-amp-optimizer",
+            "name": "ampproject/common",
+            "version": "dev-develop",
             "dist": {
                 "type": "path",
                 "url": "lib/common",
-                "reference": "e406d361075a59a960da444b57327b7e4aab7766"
+                "reference": "aa73cae03e9c8b105c1c8cb5251ef7281f5c793d"
             },
             "require": {
                 "ext-dom": "*",
@@ -39,12 +39,12 @@
             },
             "autoload": {
                 "psr-4": {
-                    "Amp\\": "src/"
+                    "AmpProject\\": "src/"
                 }
             },
             "autoload-dev": {
                 "psr-4": {
-                    "Amp\\Tests\\": "tests/src/"
+                    "AmpProject\\Tests\\": "tests/src/"
                 }
             },
             "scripts": {
@@ -75,15 +75,15 @@
             }
         },
         {
-            "name": "amp/optimizer",
-            "version": "dev-add/958-amp-optimizer",
+            "name": "ampproject/optimizer",
+            "version": "dev-develop",
             "dist": {
                 "type": "path",
                 "url": "lib/optimizer",
-                "reference": "1bd75c0c9e11c70ec2d1df67187fb4ce8015945f"
+                "reference": "f555cfdbc3087d69f5eb493360afd9da95168fe2"
             },
             "require": {
-                "amp/common": "^1",
+                "ampproject/common": "^1",
                 "ext-dom": "*",
                 "ext-iconv": "*",
                 "ext-libxml": "*",
@@ -108,12 +108,12 @@
             },
             "autoload": {
                 "psr-4": {
-                    "Amp\\Optimizer\\": "src/"
+                    "AmpProject\\Optimizer\\": "src/"
                 }
             },
             "autoload-dev": {
                 "psr-4": {
-                    "Amp\\Optimizer\\Tests\\": "tests/src/"
+                    "AmpProject\\Optimizer\\Tests\\": "tests/src/"
                 }
             },
             "scripts": {

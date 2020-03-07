@@ -1,6 +1,6 @@
 <?php
 
-namespace Amp;
+namespace AmpProject;
 
 /**
  * Queries https://cdn.ampproject.org/rtv/metadata for the latest AMP runtime version. Uses a stale-while-revalidate
@@ -31,7 +31,7 @@ namespace Amp;
  *    against, since prod's immutable caching would affect metrics.</li>
  *  </ul>
  *
- * @package amp/common
+ * @package ampproject/common
  */
 final class RuntimeVersion
 {

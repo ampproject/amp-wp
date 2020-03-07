@@ -2,10 +2,10 @@
 /**
  * Interface HasCaption
  *
- * @package Amp\AmpWP
+ * @package AmpProject\AmpWP
  */
 
-namespace Amp\AmpWP\Component;
+namespace AmpProject\AmpWP\Component;
 
 /**
  * Interface HasCaption

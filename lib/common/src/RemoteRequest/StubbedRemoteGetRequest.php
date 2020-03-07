@@ -1,16 +1,16 @@
 <?php
 
-namespace Amp\RemoteRequest;
+namespace AmpProject\RemoteRequest;
 
-use Amp\Exception\FailedToGetFromRemoteUrl;
-use Amp\RemoteGetRequest;
-use Amp\Response;
+use AmpProject\Exception\FailedToGetFromRemoteUrl;
+use AmpProject\RemoteGetRequest;
+use AmpProject\Response;
 use LogicException;
 
 /**
  * Stub for simulating remote requests.
  *
- * @package amp/common
+ * @package ampproject/common
  */
 final class StubbedRemoteGetRequest implements RemoteGetRequest
 {

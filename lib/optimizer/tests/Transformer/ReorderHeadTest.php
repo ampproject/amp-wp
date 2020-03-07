@@ -1,19 +1,19 @@
 <?php
 
-namespace Amp\Optimizer\Transformer;
+namespace AmpProject\Optimizer\Transformer;
 
-use Amp\Dom\Document;
-use Amp\Optimizer\Error;
-use Amp\Optimizer\ErrorCollection;
-use Amp\Optimizer\Tests\ErrorComparison;
-use Amp\Optimizer\Tests\MarkupComparison;
-use Amp\Optimizer\Tests\TestMarkup;
+use AmpProject\Dom\Document;
+use AmpProject\Optimizer\Error;
+use AmpProject\Optimizer\ErrorCollection;
+use AmpProject\Optimizer\Tests\ErrorComparison;
+use AmpProject\Optimizer\Tests\MarkupComparison;
+use AmpProject\Optimizer\Tests\TestMarkup;
 use PHPUnit\Framework\TestCase;
 
 /**
  * Test the ReorderHead transformer.
  *
- * @package amp/optimizer
+ * @package ampproject/optimizer
  */
 final class ReorderHeadTest extends TestCase
 {
@@ -259,7 +259,7 @@ final class ReorderHeadTest extends TestCase
     /**
      * Test the transform() method.
      *
-     * @covers       \Amp\Optimizer\Transformer\ReorderHead::transform()
+     * @covers       \AmpProject\Optimizer\Transformer\ReorderHead::transform()
      * @dataProvider dataTransform()
      *
      * @param string                  $source         String of source HTML.

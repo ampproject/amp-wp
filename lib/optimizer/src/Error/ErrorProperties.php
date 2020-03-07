@@ -1,13 +1,13 @@
 <?php
 
-namespace Amp\Optimizer\Error;
+namespace AmpProject\Optimizer\Error;
 
 use ReflectionClass;
 
 /**
  * Default set of properties and methods to use for errors.
  *
- * @package Amp\Optimizer
+ * @package AmpProject\Optimizer
  */
 trait ErrorProperties
 {

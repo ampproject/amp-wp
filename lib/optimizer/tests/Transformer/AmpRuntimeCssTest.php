@@ -1,19 +1,19 @@
 <?php
 
-namespace Amp\Optimizer\Transformer;
+namespace AmpProject\Optimizer\Transformer;
 
-use Amp\Dom\Document;
-use Amp\Optimizer\Configuration\AmpRuntimeCssConfiguration;
-use Amp\Optimizer\ErrorCollection;
-use Amp\Optimizer\Tests\MarkupComparison;
-use Amp\Optimizer\Tests\TestMarkup;
-use Amp\RemoteRequest\StubbedRemoteGetRequest;
+use AmpProject\Dom\Document;
+use AmpProject\Optimizer\Configuration\AmpRuntimeCssConfiguration;
+use AmpProject\Optimizer\ErrorCollection;
+use AmpProject\Optimizer\Tests\MarkupComparison;
+use AmpProject\Optimizer\Tests\TestMarkup;
+use AmpProject\RemoteRequest\StubbedRemoteGetRequest;
 use PHPUnit\Framework\TestCase;
 
 /**
  * Test the AmpRuntimeCss transformer.
  *
- * @package amp/optimizer
+ * @package ampproject/optimizer
  */
 final class AmpRuntimeCssTest extends TestCase
 {
@@ -51,7 +51,7 @@ final class AmpRuntimeCssTest extends TestCase
     /**
      * Test the transform() method.
      *
-     * @covers       \Amp\Optimizer\Transformer\AmpRuntimeCss::transform()
+     * @covers       \AmpProject\Optimizer\Transformer\AmpRuntimeCss::transform()
      * @dataProvider dataTransform()
      *
      * @param string     $source       String of source HTML.

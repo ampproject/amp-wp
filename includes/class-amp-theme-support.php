@@ -5,18 +5,18 @@
  * @package AMP
  */
 
-use Amp\Amp;
-use Amp\AmpWP\CachedRemoteGetRequest;
-use Amp\AmpWP\ConfigurationArgument;
-use Amp\AmpWP\Transformer;
-use Amp\Attribute;
-use Amp\Dom\Document;
-use Amp\Extension;
-use Amp\Optimizer;
-use Amp\RemoteRequest\CurlRemoteGetRequest;
-use Amp\RemoteRequest\FallbackRemoteGetRequest;
-use Amp\RemoteRequest\FilesystemRemoteGetRequest;
-use Amp\Tag;
+use AmpProject\Amp;
+use AmpProject\AmpWP\CachedRemoteGetRequest;
+use AmpProject\AmpWP\ConfigurationArgument;
+use AmpProject\AmpWP\Transformer;
+use AmpProject\Attribute;
+use AmpProject\Dom\Document;
+use AmpProject\Extension;
+use AmpProject\Optimizer;
+use AmpProject\RemoteRequest\CurlRemoteGetRequest;
+use AmpProject\RemoteRequest\FallbackRemoteGetRequest;
+use AmpProject\RemoteRequest\FilesystemRemoteGetRequest;
+use AmpProject\Tag;
 
 /**
  * Class AMP_Theme_Support
@@ -2362,7 +2362,7 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Get the Amp\Optimizer configuration object to use.
+	 * Get the AmpProject\Optimizer configuration object to use.
 	 *
 	 * @param array $args Associative array of arguments to pass into the transformation engine.
 	 * @return Optimizer\Configuration Optimizer configuration to use.
