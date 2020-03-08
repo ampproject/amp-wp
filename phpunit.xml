@@ -14,11 +14,9 @@
 		<!-- Default test suite to run all tests -->
 		<testsuite name="default">
 			<directory prefix="test-" suffix=".php">./tests/php/</directory>
-			<exclude>tests/php/test-amp-image-dimension-extract-download.php</exclude>
 		</testsuite>
 		<testsuite name="external-http">
 			<directory prefix="test-" suffix="embed-handler.php">tests/</directory>
-			<file>tests/php/test-amp-image-dimension-extract-download.php</file>
 		</testsuite>
 	</testsuites>
 	<groups>
