@@ -34,7 +34,7 @@ class AMP_Image_Dimension_Extract_Download_Test extends WP_UnitTestCase {
 		$url = wp_parse_url( self::get_server_url() );
 
 		if ( ! isset( $url['host'], $url['port'] ) ) {
-			throw new \Error( 'A host and port needs to be set to start the PHP server' );
+			throw new \Exception( 'A host and port needs to be set to start the PHP server' );
 		}
 
 		$host      = $url['host'];
@@ -57,7 +57,7 @@ class AMP_Image_Dimension_Extract_Download_Test extends WP_UnitTestCase {
 		}
 
 		if ( ! $started ) {
-			throw new \Error( 'Failed to start the PHP server' );
+			throw new \Exception( 'Failed to start the PHP server' );
 		}
 	}
 
