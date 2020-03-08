@@ -2,10 +2,10 @@
 /**
  * Trait PrivateAccess.
  *
- * @package Amp\AmpWP
+ * @package AmpProject\AmpWP
  */
 
-namespace Amp\AmpWP\Tests;
+namespace AmpProject\AmpWP\Tests;
 
 use ReflectionClass;
 use ReflectionException;

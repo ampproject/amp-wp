@@ -1,13 +1,13 @@
 <?php
 
-namespace Amp\Optimizer\Exception;
+namespace AmpProject\Optimizer\Exception;
 
-use Amp\Exception\AmpException;
+use AmpProject\Exception\AmpException;
 
 /**
  * Marker interface to enable consumers to catch all exceptions for this particular library.
  *
- * @package amp/optimizer
+ * @package ampproject/optimizer
  */
 interface AmpOptimizerException extends AmpException
 {

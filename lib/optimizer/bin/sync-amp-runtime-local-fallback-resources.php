@@ -1,7 +1,7 @@
 #!/usr/bin/env php
 <?php
 
-use Amp\Optimizer\LocalFallback;
+use AmpProject\Optimizer\LocalFallback;
 
 $autoloader = __DIR__ . '/../vendor/autoload.php';
 if (file_exists($autoloader)) {

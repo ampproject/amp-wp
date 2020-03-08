@@ -2,10 +2,10 @@
 /**
  * Class SiteHealth.
  *
- * @package Amp\AmpWP
+ * @package AmpProject\AmpWP
  */
 
-namespace Amp\AmpWP\Admin;
+namespace AmpProject\AmpWP\Admin;
 
 use AMP_Options_Manager;
 use AMP_Theme_Support;

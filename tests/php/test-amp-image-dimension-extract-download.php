@@ -5,20 +5,114 @@
  * @package AMP
  */
 
-define( 'AMP_IMG_DIMENSION_TEST_INVALID_FILE', __DIR__ . '/assets/not-exists.png' );
-
-// Not ideal to use remote URLs; mocking would be better for performance, but FasterImage doesn't provide means to do this.
-define( 'IMG_350', 'http://amp-wp.org/wp-content/plugin-test-files/350x150.png' );
-define( 'IMG_1024', 'http://amp-wp.org/wp-content/plugin-test-files/1024x768.png' );
-define( 'IMG_SVG', 'https://amp-wp.org/wp-content/plugin-test-files/amp.svg' ); // @todo For some reason, FasterImage times out on this if the XML PI is absent.
-define( 'IMG_SVG_VIEWPORT', 'https://gist.githubusercontent.com/kienstra/7aef6fcd42067174fcdc78f5f6110197/raw/a7875528d90db3a427823727ef3ecd4cfe00880e/google.svg' );
-
 /**
  * Tests for AMP_Image_Dimension_Extractor.
  *
  * @covers AMP_Image_Dimension_Extractor
  */
 class AMP_Image_Dimension_Extract_Download_Test extends WP_UnitTestCase {
+
+	/**
+	 * Path to non-existing PNG file.
+	 *
+	 * @var string
+	 */
+	const AMP_IMG_DIMENSION_TEST_INVALID_FILE = __DIR__ . '/assets/not-exists.png';
+
+	/**
+	 * Process ID for PHP server.
+	 *
+	 * @var int
+	 */
+	private static $pid;
+
+	/**
+	 * Set up before class, starting PHP server.
+	 */
+	public static function setUpBeforeClass() {
+		parent::setUpBeforeClass();
+		self::start_server();
+	}
+
+	/**
+	 * Tear down after class, stopping PHP server.
+	 */
+	public static function tearDownAfterClass() {
+		parent::tearDownAfterClass();
+		self::stop_server();
+	}
+
+	/**
+	 * Start PHP built-in server to host images to test.
+	 */
+	private static function start_server() {
+		// Not ideal to use remote URLs; mocking would be better for performance, but FasterImage doesn't provide means to do this.
+		$url = wp_parse_url( self::get_server_host_port() );
+
+		if ( ! isset( $url['host'], $url['port'] ) ) {
+			throw new Exception( 'A host and port needs to be set to start the PHP server' );
+		}
+
+		$host      = $url['host'];
+		$port      = $url['port'];
+		$host_root = self::get_server_root();
+
+		self::$pid = exec( sprintf( 'php -S %s -t %s >/dev/null 2>&1 & echo $!', escapeshellarg( "$host:$port" ), escapeshellarg( $host_root ) ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.system_calls_exec
+
+		// Wait up to 3 seconds for the server to start.
+		$started = false;
+		for ( $i = 0; $i < 3; $i++ ) {
+			$response = wp_remote_get( "http://$host:$port" );
+
+			if ( ! $response instanceof WP_Error ) {
+				$started = true;
+				break;
+			}
+
+			sleep( 1 );
+		}
+
+		if ( ! $started ) {
+			throw new Exception( 'Failed to start the PHP server' );
+		}
+	}
+
+	/**
+	 * Stop PHP server.
+	 */
+	private static function stop_server() {
+		if ( ! empty( self::$pid ) ) {
+			exec( 'kill ' . (int) self::$pid ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.system_calls_exec
+		}
+	}
+
+	/**
+	 * Get host with port for PHP server.
+	 *
+	 * @return string Host and port.
+	 */
+	private static function get_server_host_port() {
+		return getenv( 'AMP_TEST_HOST_PORT' ) ?: '127.0.0.1:8891';
+	}
+
+	/**
+	 * Get root path for PHP server.
+	 *
+	 * @return string Public filesystem root for PHP server.
+	 */
+	private static function get_server_root() {
+		return getenv( 'AMP_TEST_HOST_ROOT' ) ?: __DIR__ . '/data/images';
+	}
+
+	/**
+	 * Get image URL for specified image file.
+	 *
+	 * @param string $file Image name.
+	 * @return string URL.
+	 */
+	private static function get_image_url( $file ) {
+		return self::get_server_host_port() . "/{$file}";
+	}
 
 	/**
 	 * Test a valid image file.
@@ -28,10 +122,10 @@ class AMP_Image_Dimension_Extract_Download_Test extends WP_UnitTestCase {
 	 */
 	public function test__valid_image_file() {
 		$sources  = [
-			IMG_350 => false,
+			self::get_image_url( '350x150.png' ) => false,
 		];
 		$expected = [
-			IMG_350 => [
+			self::get_image_url( '350x150.png' ) => [
 				'width'  => 350,
 				'height' => 150,
 			],
@@ -47,25 +141,25 @@ class AMP_Image_Dimension_Extract_Download_Test extends WP_UnitTestCase {
 	 */
 	public function test__multiple_valid_image_files() {
 		$sources  = [
-			IMG_350          => false,
-			IMG_1024         => false,
-			IMG_SVG          => false,
-			IMG_SVG_VIEWPORT => false,
+			self::get_image_url( '350x150.png' )  => false,
+			self::get_image_url( '1024x768.png' ) => false,
+			self::get_image_url( 'amp.svg' )      => false,
+			self::get_image_url( 'google.svg' )   => false,
 		];
 		$expected = [
-			IMG_350          => [
+			self::get_image_url( '350x150.png' )  => [
 				'width'  => 350,
 				'height' => 150,
 			],
-			IMG_1024         => [
+			self::get_image_url( '1024x768.png' ) => [
 				'width'  => 1024,
 				'height' => 768,
 			],
-			IMG_SVG          => [
+			self::get_image_url( 'amp.svg' )      => [
 				'width'  => 175,
 				'height' => 60,
 			],
-			IMG_SVG_VIEWPORT => [
+			self::get_image_url( 'google.svg' )   => [
 				'width'  => 251,
 				'height' => 80,
 			],
@@ -81,10 +175,10 @@ class AMP_Image_Dimension_Extract_Download_Test extends WP_UnitTestCase {
 	 */
 	public function test__invalid_image_file() {
 		$sources  = [
-			AMP_IMG_DIMENSION_TEST_INVALID_FILE => false,
+			self::AMP_IMG_DIMENSION_TEST_INVALID_FILE => false,
 		];
 		$expected = [
-			AMP_IMG_DIMENSION_TEST_INVALID_FILE => false,
+			self::AMP_IMG_DIMENSION_TEST_INVALID_FILE => false,
 		];
 
 		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources );
@@ -97,20 +191,20 @@ class AMP_Image_Dimension_Extract_Download_Test extends WP_UnitTestCase {
 	 */
 	public function test__mix_of_valid_and_invalid_image_file() {
 		$sources  = [
-			IMG_350                             => false,
-			AMP_IMG_DIMENSION_TEST_INVALID_FILE => false,
-			IMG_1024                            => false,
+			self::get_image_url( '350x150.png' )      => false,
+			self::get_image_url( '1024x768.png' )     => false,
+			self::AMP_IMG_DIMENSION_TEST_INVALID_FILE => false,
 		];
 		$expected = [
-			IMG_350                             => [
+			self::get_image_url( '350x150.png' )      => [
 				'width'  => 350,
 				'height' => 150,
 			],
-			AMP_IMG_DIMENSION_TEST_INVALID_FILE => false,
-			IMG_1024                            => [
+			self::get_image_url( '1024x768.png' )     => [
 				'width'  => 1024,
 				'height' => 768,
 			],
+			self::AMP_IMG_DIMENSION_TEST_INVALID_FILE => false,
 		];
 
 		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources );

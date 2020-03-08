@@ -1,11 +1,11 @@
 <?php
 
-namespace Amp;
+namespace AmpProject;
 
 /**
  * Interface with constants for the different types of attributes.
  *
- * @package amp/common
+ * @package ampproject/common
  */
 interface Attribute
 {
@@ -46,6 +46,7 @@ interface Attribute
     const LOOP                  = 'loop';
     const MEDIA                 = 'media';
     const NAME                  = 'name';
+    const PROFILE               = 'profile';
     const REL                   = 'rel';
     const ROLE                  = 'role';
     const SIZES                 = 'sizes';

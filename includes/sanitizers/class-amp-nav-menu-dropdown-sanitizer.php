@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use Amp\Dom\Document;
+use AmpProject\Dom\Document;
 
 /**
  * Class AMP_Nav_Menu_Dropdown_Sanitizer

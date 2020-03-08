@@ -1,6 +1,6 @@
 <?php
 
-namespace Amp;
+namespace AmpProject;
 
 /**
  * Flexible unit of measure for CSS dimensions.
@@ -11,7 +11,7 @@ namespace Amp;
  * @version 1911070201440
  * @link    https://github.com/ampproject/amphtml/blob/1911070201440/validator/engine/validator.js#L3351
  *
- * @package amp/common
+ * @package ampproject/common
  */
 final class CssLength
 {

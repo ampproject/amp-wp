@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use Amp\AmpWP\Admin\SiteHealth;
+use AmpProject\AmpWP\Admin\SiteHealth;
 
 /**
  * Obsolete constant for flagging when Customizer is opened for AMP.

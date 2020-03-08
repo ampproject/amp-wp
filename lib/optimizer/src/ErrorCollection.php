@@ -1,6 +1,6 @@
 <?php
 
-namespace Amp\Optimizer;
+namespace AmpProject\Optimizer;
 
 use ArrayIterator;
 use Countable;
@@ -9,7 +9,7 @@ use IteratorAggregate;
 /**
  * Collection of error objects to pass around the transformation engine.
  *
- * @package amp/optimizer
+ * @package ampproject/optimizer
  */
 final class ErrorCollection implements Countable, IteratorAggregate
 {

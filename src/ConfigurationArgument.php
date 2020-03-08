@@ -2,15 +2,15 @@
 /**
  * Interface Option.
  *
- * @package Amp\AmpWP
+ * @package AmpProject\AmpWP
  */
 
-namespace Amp\AmpWP;
+namespace AmpProject\AmpWP;
 
 /**
  * Constants for the options that the AmpWP plugin supports.
  *
- * @package Amp\AmpWP
+ * @package AmpProject\AmpWP
  */
 interface ConfigurationArgument {
 

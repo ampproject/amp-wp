@@ -1,21 +1,20 @@
 <?php
 
-namespace Amp\Optimizer;
+namespace AmpProject\Optimizer;
 
-use Amp\Dom\Document;
-use Amp\Optimizer\Tests\MarkupComparison;
-use Amp\Optimizer\Tests\TestMarkup;
-use Amp\RemoteRequest\StubbedRemoteGetRequest;
+use AmpProject\Dom\Document;
+use AmpProject\Optimizer\Tests\MarkupComparison;
+use AmpProject\Optimizer\Tests\TestMarkup;
+use AmpProject\RemoteRequest\StubbedRemoteGetRequest;
 use PHPUnit\Framework\TestCase;
 
 /**
  * Test the transformation engine as a whole.
  *
- * @package amp/optimizer
+ * @package ampproject/optimizer
  */
 final class TransformationEngineTest extends TestCase
 {
-
     use MarkupComparison;
 
     const MINIMAL_HTML_MARKUP           = '<html></html>';
@@ -43,7 +42,7 @@ final class TransformationEngineTest extends TestCase
     /**
      * Test optimizing a string of HTML.
      *
-     * @covers       \Amp\Optimizer\TransformationEngine::optimizeHtml()
+     * @covers       \AmpProject\Optimizer\TransformationEngine::optimizeHtml()
      * @dataProvider dataOptimizeHtml
      *
      * @param string $source   Source HTML string to optimize.
