@@ -12,15 +12,31 @@
  */
 class AMP_Image_Dimension_Extract_Download_Test extends WP_UnitTestCase {
 
-	private static $pid;
-
+	/**
+	 * Path to non-existing PNG file.
+	 *
+	 * @var string
+	 */
 	const AMP_IMG_DIMENSION_TEST_INVALID_FILE = __DIR__ . '/assets/not-exists.png';
 
+	/**
+	 * Process ID for PHP server.
+	 *
+	 * @var int
+	 */
+	private static $pid;
+
+	/**
+	 * Set up before class, starting PHP server.
+	 */
 	public static function setUpBeforeClass() {
 		parent::setUpBeforeClass();
 		self::start_server();
 	}
 
+	/**
+	 * Tear down after class, stopping PHP server.
+	 */
 	public static function tearDownAfterClass() {
 		parent::tearDownAfterClass();
 		self::stop_server();
@@ -31,10 +47,10 @@ class AMP_Image_Dimension_Extract_Download_Test extends WP_UnitTestCase {
 	 */
 	private static function start_server() {
 		// Not ideal to use remote URLs; mocking would be better for performance, but FasterImage doesn't provide means to do this.
-		$url = wp_parse_url( self::get_server_url() );
+		$url = wp_parse_url( self::get_server_host_port() );
 
 		if ( ! isset( $url['host'], $url['port'] ) ) {
-			throw new \Exception( 'A host and port needs to be set to start the PHP server' );
+			throw new Exception( 'A host and port needs to be set to start the PHP server' );
 		}
 
 		$host      = $url['host'];
@@ -57,7 +73,7 @@ class AMP_Image_Dimension_Extract_Download_Test extends WP_UnitTestCase {
 		}
 
 		if ( ! $started ) {
-			throw new \Exception( 'Failed to start the PHP server' );
+			throw new Exception( 'Failed to start the PHP server' );
 		}
 	}
 
@@ -71,18 +87,18 @@ class AMP_Image_Dimension_Extract_Download_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Get host for PHP server.
+	 * Get host with port for PHP server.
 	 *
-	 * @return string
+	 * @return string Host and port.
 	 */
-	private static function get_server_url() {
-		return getenv( 'AMP_TEST_HOST_URL' ) ?: '127.0.0.1:8891';
+	private static function get_server_host_port() {
+		return getenv( 'AMP_TEST_HOST_PORT' ) ?: '127.0.0.1:8891';
 	}
 
 	/**
 	 * Get root path for PHP server.
 	 *
-	 * @return string
+	 * @return string Public filesystem root for PHP server.
 	 */
 	private static function get_server_root() {
 		return getenv( 'AMP_TEST_HOST_ROOT' ) ?: __DIR__ . '/data/images';
@@ -95,7 +111,7 @@ class AMP_Image_Dimension_Extract_Download_Test extends WP_UnitTestCase {
 	 * @return string URL.
 	 */
 	private static function get_image_url( $file ) {
-		return self::get_server_url() . "/{$file}";
+		return self::get_server_host_port() . "/{$file}";
 	}
 
 	/**
