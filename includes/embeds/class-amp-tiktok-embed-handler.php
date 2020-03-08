@@ -73,13 +73,12 @@ class AMP_TikTok_Embed_Handler extends AMP_Base_Embed_Handler {
 			Document::fromNode( $dom ),
 			'amp-iframe',
 			[
-				'layout'  => 'responsive',
+				'layout'  => 'fixed-height',
 
 				/*
 				 * The iframe dimensions cannot be derived from the embed, so we default to a dimension that should
 				 * allow the embed to be fully shown.
 				 */
-				'width'   => 600,
 				'height'  => 900,
 
 				/*
