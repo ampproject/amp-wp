@@ -76,7 +76,7 @@ class Test_AMP_TikTok_Embed_Handler extends WP_UnitTestCase {
 				'https://www.tiktok.com/@scout2015/video/6718335390845095173' . PHP_EOL,
 
 				'<blockquote class="tiktok-embed" cite="https://www.tiktok.com/@scout2015/video/6718335390845095173" data-video-id="6718335390845095173" style="max-width: 605px;min-width: 325px;">' . PHP_EOL . PHP_EOL .
-				'<amp-iframe layout="responsive" width="600" height="900" src="https://www.tiktok.com/embed/v2/6718335390845095173" sandbox="allow-scripts allow-same-origin"><section placeholder=""> <a target="_blank" title="@scout2015" href="https://www.tiktok.com/@scout2015">@scout2015</a> ' . PHP_EOL .
+				'<amp-iframe layout="responsive" width="600" height="900" src="https://www.tiktok.com/embed/v2/6718335390845095173" sandbox="allow-scripts allow-same-origin allow-popups"><section placeholder=""> <a target="_blank" title="@scout2015" href="https://www.tiktok.com/@scout2015">@scout2015</a> ' . PHP_EOL .
 				'<p>Scramble up ur name &amp; I’ll try to guess it😍❤️ <a title="foryoupage" target="_blank" href="https://www.tiktok.com/tag/foryoupage">#foryoupage</a> <a title="petsoftiktok" target="_blank" href="https://www.tiktok.com/tag/petsoftiktok">#petsoftiktok</a> <a title="aesthetic" target="_blank" href="https://www.tiktok.com/tag/aesthetic">#aesthetic</a></p>' . PHP_EOL .
 				'<p> <a target="_blank" title="♬ original sound - 𝐇𝐚𝐰𝐚𝐢𝐢𓆉" href="https://www.tiktok.com/music/original-sound-6689804660171082501">♬ original sound – 𝐇𝐚𝐰𝐚𝐢𝐢𓆉</a> </p></section></amp-iframe></blockquote>' . PHP_EOL . PHP_EOL,
 			],

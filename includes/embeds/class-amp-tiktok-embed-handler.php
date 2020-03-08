@@ -87,7 +87,7 @@ class AMP_TikTok_Embed_Handler extends AMP_Base_Embed_Handler {
 				 * added. Whether it alters the embed in any way or not has not been determined.
 				 */
 				'src'     => 'https://www.tiktok.com/embed/v2/' . $video_id,
-				'sandbox' => 'allow-scripts allow-same-origin',
+				'sandbox' => 'allow-scripts allow-same-origin allow-popups',
 			]
 		);
 
