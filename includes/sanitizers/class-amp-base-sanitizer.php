@@ -463,7 +463,7 @@ abstract class AMP_Base_Sanitizer {
 	 * @return bool Whether the node should have been removed, that is, that the node was sanitized for validity.
 	 */
 	public function remove_invalid_child( $node, $validation_error = [] ) {
-		if ( $this->is_exempt_from_validation( $node ) ) {
+		if ( DevMode::isExemptFromValidation( $node ) ) {
 			return false;
 		}
 
@@ -496,7 +496,7 @@ abstract class AMP_Base_Sanitizer {
 	 * @return bool Whether the node should have been removed, that is, that the node was sanitized for validity.
 	 */
 	public function remove_invalid_attribute( $element, $attribute, $validation_error = [], $attr_spec = [] ) {
-		if ( $this->is_exempt_from_validation( $element ) ) {
+		if ( DevMode::isExemptFromValidation( $element ) ) {
 			return false;
 		}
 
