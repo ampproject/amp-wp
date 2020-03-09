@@ -43,9 +43,9 @@ final class TransformedIdentifier implements Transformer, Configurable
     const TRANSFORMED_ORIGIN = 'self';
 
     /**
-     * Associative array of configuration values.
+     * Configuration store to use.
      *
-     * @var array
+     * @var TransformerConfiguration
      */
     private $configuration;
 

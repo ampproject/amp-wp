@@ -64,6 +64,11 @@ final class ServerSideRendering implements Transformer
          */
         $canRemoveBoilerplate = true;
         foreach ($document->ampElements as $amp_element) {
+            // Make sure we only deal with valid elements.
+            if (!$amp_element instanceof DOMElement) {
+                continue;
+            }
+
             // Skip tags inside a template tag.
             if ($this->hasAncestorWithTag($amp_element, Tag::TEMPLATE)) {
                 continue;
