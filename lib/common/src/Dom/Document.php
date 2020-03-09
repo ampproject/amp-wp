@@ -864,7 +864,8 @@ final class Document extends DOMDocument
      * @param string $html To replace the tag name of the mustache templates in.
      * @return string The HTML, with the tag name of the mustache templates replaced.
      */
-    private function replaceMustacheTemplates($html) {
+    private function replaceMustacheTemplates($html)
+    {
         return preg_replace(
             '#<script(\s[^>]*?template=(["\']?)amp-mustache\2[^>]*)>(.*?)</script\s*?>#i',
             '<tmp-script$1>$3</tmp-script>',
@@ -877,7 +878,8 @@ final class Document extends DOMDocument
      *
      * @see replaceMustacheTemplates() Reciprocal function.
      */
-    private function restoreMustacheTemplates() {
+    private function restoreMustacheTemplates()
+    {
         $tmp_script_elements = iterator_to_array($this->getElementsByTagName('tmp-script'));
         foreach ($tmp_script_elements as $tmp_script_element) {
             $script = $this->createElement(Tag::SCRIPT);
