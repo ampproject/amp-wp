@@ -112,11 +112,6 @@ class AMP_Autoloader {
 		'AMP_Widget_Archives'                => 'includes/widgets/class-amp-widget-archives',
 		'AMP_Widget_Categories'              => 'includes/widgets/class-amp-widget-categories',
 		'AMP_Widget_Text'                    => 'includes/widgets/class-amp-widget-text',
-		'AMP_Story_Post_Type'                => 'includes/class-amp-story-post-type',
-		'AMP_Story_Media'                    => 'includes/class-amp-story-media',
-		'AMP_Story_Templates'                => 'includes/admin/class-amp-story-templates',
-		'AMP_Story_Sanitizer'                => 'includes/sanitizers/class-amp-story-sanitizer',
-		'AMP_Story_Export_Sanitizer'         => 'includes/sanitizers/class-amp-story-export-sanitizer',
 		'AMP_Test_Stub_Sanitizer'            => 'tests/php/stubs',
 		'AMP_Test_HandleValidation'          => 'tests/php/validation/trait-handle-validation',
 	];

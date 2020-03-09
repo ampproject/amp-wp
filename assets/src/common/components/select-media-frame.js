@@ -11,7 +11,7 @@ import { __, sprintf } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { enforceFileSize, enforceFileType, getNoticeTemplate, mediaLibraryHasTwoNotices } from '../helpers';
+import { enforceFileType, getNoticeTemplate } from '../helpers';
 
 const { wp } = window;
 
@@ -159,13 +159,6 @@ export const EnforcedFileToolbarSelect = wp.media.view.Toolbar.Select.extend( {
 		const attachment = selection.models[ 0 ];
 
 		enforceFileType.call( this, attachment, SelectionFileTypeError );
-		enforceFileSize.call( this, attachment, SelectionFileSizeError );
-
-		// If there are two notices, like for wrong size and type, prevent the notices from covering the media.
-		const mediaFrame = this.$el.parents( '.media-frame' );
-		if ( mediaFrame ) {
-			mediaFrame.toggleClass( 'has-two-notices', mediaLibraryHasTwoNotices.call( this ) );
-		}
 	},
 } );
 

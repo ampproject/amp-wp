@@ -23,7 +23,7 @@ define( 'AMP_CUSTOMIZER_QUERY_VAR', 'customize_amp' );
  * And this does not need to toggle between the AMP and normal display.
  */
 function amp_init_customizer() {
-	if ( ! AMP_Options_Manager::is_website_experience_enabled() || AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( 'theme_support' ) ) {
+	if ( AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( 'theme_support' ) ) {
 		return;
 	}
 
@@ -196,11 +196,41 @@ function amp_bootstrap_admin() {
 }
 
 /**
- * Bootstrap the Story Templates needed in editor.
- *
- * @since 1.?
+ * Remove Story templates.
  */
-function amp_story_templates() {
-	$story_templates = new AMP_Story_Templates();
-	$story_templates->init();
+function remove_amp_story_templates() {
+	$template_term     = 'story-template';
+	$template_taxonomy = 'amp_template';
+
+	if ( post_type_exists( 'wp_block' ) ) {
+		$query = new WP_Query(
+			[
+				'fields'        => 'ids',
+				'no_found_rows' => true,
+				'post_type'     => 'wp_block',
+				'post_per_page' => -1,
+				'tax_query'     => [
+					'taxonomy' => $template_taxonomy,
+					'field'    => 'slug',
+					'terms'    => [ $template_term ],
+				],
+			]
+		);
+
+		$post_ids = $query->get_posts();
+
+		if ( 0 < count( $post_ids ) ) {
+			foreach ( $post_ids as $post_id ) {
+				wp_delete_post( $post_id, true );
+			}
+		}
+	}
+
+	$term = term_exists( $template_term, $template_taxonomy );
+	if ( ! empty( $term['term_id'] ) ) {
+		// Temporarily register the taxonomy so that the term can be deleted.
+		register_taxonomy( $template_taxonomy, '', [] );
+		wp_delete_term( $term['term_id'], $template_taxonomy );
+		unregister_taxonomy( $template_taxonomy );
+	}
 }

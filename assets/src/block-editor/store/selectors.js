@@ -21,28 +21,6 @@ export function isStandardMode( state ) {
 }
 
 /**
- * Returns whether the website experience is enabled.
- *
- * @param {Object} state Editor state.
- *
- * @return {boolean} Whether website experienced enabled.
- */
-export function isWebsiteEnabled( state ) {
-	return Boolean( state.isWebsiteEnabled );
-}
-
-/**
- * Returns whether the stories experience is enabled.
- *
- * @param {Object} state Editor state.
- *
- * @return {boolean} Whether stories experienced enabled.
- */
-export function isStoriesEnabled( state ) {
-	return Boolean( state.isStoriesEnabled );
-}
-
-/**
  * Returns the default AMP status.
  *
  * @param {Object} state Editor state.
