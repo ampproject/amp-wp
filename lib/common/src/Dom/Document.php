@@ -859,12 +859,12 @@ final class Document extends DOMDocument
      * So this changes its name from script to tmp-script to avoid this.
      *
      * @link https://github.com/ampproject/amp-wp/issues/4254
-     * @see restore_mustache_templates() Reciprocal function.
+     * @see restoreMustacheTemplates() Reciprocal function.
      *
      * @param string $html To replace the tag name of the mustache templates in.
      * @return string The HTML, with the tag name of the mustache templates replaced.
      */
-    private function replaceMustacheTemplates( $html ) {
+    private function replaceMustacheTemplates($html) {
         return preg_replace(
             '#<script(\s[^>]*?template=(["\']?)amp-mustache\2[^>]*)>(.*?)</script\s*?>#i',
             '<tmp-script$1>$3</tmp-script>',
@@ -875,19 +875,19 @@ final class Document extends DOMDocument
     /**
      * Restores the tag names of script[template="amp-mustache"] elements that were replaced earlier.
      *
-     * @see replace_mustache_templates() Reciprocal function.
+     * @see replaceMustacheTemplates() Reciprocal function.
      */
     private function restoreMustacheTemplates() {
-        $tmp_script_elements = iterator_to_array( $this->getElementsByTagName( 'tmp-script' ) );
-        foreach ( $tmp_script_elements as $tmp_script_element ) {
-            $script = $this->createElement( 'script' );
-            foreach ( $tmp_script_element->attributes as $attr ) {
-                $script->setAttribute( $attr->nodeName, $attr->nodeValue );
+        $tmp_script_elements = iterator_to_array($this->getElementsByTagName('tmp-script'));
+        foreach ($tmp_script_elements as $tmp_script_element) {
+            $script = $this->createElement(Tag::SCRIPT);
+            foreach ($tmp_script_element->attributes as $attr) {
+                $script->setAttribute($attr->nodeName, $attr->nodeValue);
             }
-            while ( $tmp_script_element->firstChild ) {
-                $script->appendChild( $tmp_script_element->firstChild );
+            while ($tmp_script_element->firstChild) {
+                $script->appendChild($tmp_script_element->firstChild);
             }
-            $tmp_script_element->parentNode->replaceChild( $script, $tmp_script_element );
+            $tmp_script_element->parentNode->replaceChild($script, $tmp_script_element);
         }
     }
 
