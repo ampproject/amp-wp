@@ -5,15 +5,15 @@
  * @package AMP
  */
 
-use Amp\AmpWP\Component\Carousel;
-use Amp\AmpWP\Dom\Document;
-use Amp\AmpWP\Dom\ElementList;
-use Amp\AmpWP\Tests\PrivateAccess;
+use AmpProject\AmpWP\Component\Carousel;
+use AmpProject\Dom\Document;
+use AmpProject\AmpWP\Dom\ElementList;
+use AmpProject\AmpWP\Tests\PrivateAccess;
 
 /**
  * Tests for Carousel class.
  *
- * @covers \Amp\AmpWP\Component\Carousel
+ * @covers \AmpProject\AmpWP\Component\Carousel
  */
 class Test_Carousel extends \WP_UnitTestCase {
 
@@ -54,7 +54,7 @@ class Test_Carousel extends \WP_UnitTestCase {
 	 * Test getting the amp-carousel.
 	 *
 	 * @dataProvider get_carousel_data
-	 * @covers \Amp\AmpWP\Component\Carousel::get_dom_element()
+	 * @covers \AmpProject\AmpWP\Component\Carousel::get_dom_element()
 	 *
 	 * @param ElementList $slides   An array of arrays, with images and their captions (if any).
 	 * @param Document    $dom      The representation of the DOM.
@@ -147,7 +147,7 @@ class Test_Carousel extends \WP_UnitTestCase {
 	 * Test get_dimensions.
 	 *
 	 * @dataProvider get_data_carousel_dimensions
-	 * @covers \Amp\AmpWP\Component\Carousel::get_dimensions()
+	 * @covers \AmpProject\AmpWP\Component\Carousel::get_dimensions()
 	 *
 	 * @param ElementList $slides   The slides to get the dimensions from.
 	 * @param array       $expected The expected return value of the tested function.
