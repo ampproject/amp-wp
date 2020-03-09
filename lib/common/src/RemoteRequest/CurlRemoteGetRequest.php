@@ -145,8 +145,11 @@ final class CurlRemoteGetRequest implements RemoteGetRequest
                 continue;
             }
 
-
             return new RemoteGetRequestResponse($body, $headers, (int) $status);
         } while ($retriesLeft--);
+
+        // This should never be triggered, but we want to ensure we always have a typed return value,
+        // to make PHPStan happy.
+        return new RemoteGetRequestResponse('', [], 500);
     }
 }

@@ -281,6 +281,11 @@ final class Document extends DOMDocument
      */
     public static function fromNode(DOMNode &$node)
     {
+        /**
+         * Document of the node.
+         *
+         * @var DOMDocument
+         */
         $root = $node->ownerDocument;
 
         // If the node is the document itself, ownerDocument returns null.
@@ -288,7 +293,7 @@ final class Document extends DOMDocument
             $root = $node;
         }
 
-        if ($root instanceof Document) {
+        if ($root instanceof self) {
             return $root;
         }
 
