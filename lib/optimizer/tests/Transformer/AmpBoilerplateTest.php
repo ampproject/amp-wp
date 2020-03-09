@@ -106,6 +106,16 @@ final class AmpBoilerplateTest extends TestCase
                 $inputWithoutBoilerplate('<html ⚡4email>'),
                 $expected('<html ⚡4email>', $amp4EmailBoilerplate),
             ],
+
+            'keeps devmode nodes when in devmode' => [
+                $inputWithBoilerplate('<html ⚡ data-ampdevmode>', '<style data-ampdevmode>h1: red;</style>' . $ampBoilerplate),
+                $expected('<html ⚡ data-ampdevmode>', '<style data-ampdevmode>h1: red;</style>' . $ampBoilerplate),
+            ],
+
+            'removes devmode nodes when not in devmode' => [
+                $inputWithBoilerplate('<html ⚡>', '<style data-ampdevmode>h1: red;</style>' . $ampBoilerplate),
+                $expected('<html ⚡>', $ampBoilerplate),
+            ],
         ];
     }
 
