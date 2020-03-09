@@ -6,6 +6,8 @@
  * @since 0.7
  */
 
+use AmpProject\DevMode;
+
 /**
  * Class AMP_Form_Sanitizer
  *
@@ -46,7 +48,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
 			$node = $nodes->item( $i );
-			if ( ! $node instanceof DOMElement || $this->has_dev_mode_exemption( $node ) ) {
+			if ( ! $node instanceof DOMElement || DevMode::hasExemptionForNode( $node ) ) {
 				continue;
 			}
 
