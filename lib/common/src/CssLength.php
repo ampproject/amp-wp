@@ -73,7 +73,7 @@ final class CssLength
     /**
      * AMP_CSS_Length constructor.
      *
-     * @param string $attrValue Attribute value to be parsed.
+     * @param string|null $attrValue Attribute value to be parsed.
      */
     public function __construct($attrValue)
     {

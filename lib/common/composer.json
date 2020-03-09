@@ -59,7 +59,7 @@
       "@cs",
       "@analyse"
     ],
-    "analyse": "phpstan analyse src --ansi",
+    "analyse": "phpstan analyse src -l1 --ansi",
 
     "unit": "phpunit --colors=always"
   }
