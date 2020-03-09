@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\DevMode;
 use AmpProject\Dom\Document;
 
 /**
@@ -412,12 +413,13 @@ abstract class AMP_Base_Sanitizer {
 	 *
 	 * @since 1.3
 	 *
+	 * @deprecated Use AmpProject\DevMode::isActiveForDocument( $document ) instead.
+	 *
 	 * @return bool Whether the document is in dev mode.
 	 */
 	protected function is_document_in_dev_mode() {
-		return $this->dom->documentElement->hasAttribute(
-			AMP_Rule_Spec::DEV_MODE_ATTRIBUTE
-		);
+		_deprecated_function( 'AMP_Base_Sanitizer::is_document_in_dev_mode', '1.5', 'AmpProject\DevMode::isActiveForDocument' );
+		return DevMode::isActiveForDocument( $this->dom );
 	}
 
 	/**
@@ -425,25 +427,27 @@ abstract class AMP_Base_Sanitizer {
 	 *
 	 * @since 1.3
 	 *
+	 * @deprecated Use AmpProject\DevMode::hasExemptionForNode( $node ) instead.
+	 *
 	 * @param DOMNode $node Node to check.
 	 * @return bool Whether the node should be exempt during dev mode.
 	 */
 	protected function has_dev_mode_exemption( DOMNode $node ) {
-		if ( ! $node instanceof DOMElement ) {
-			return false;
-		}
-
-		return $node->hasAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE );
+		_deprecated_function( 'AMP_Base_Sanitizer::has_dev_mode_exemption', '1.5', 'AmpProject\DevMode::hasExemptionForNode' );
+		return DevMode::hasExemptionForNode( $node );
 	}
 
 	/**
 	 * Check whether a certain node should be exempt from validation.
 	 *
+	 * @deprecated Use AmpProject\DevMode::isExemptFromValidation( $node ) instead.
+	 *
 	 * @param DOMNode $node Node to check.
 	 * @return bool Whether the node should be exempt from validation.
 	 */
 	protected function is_exempt_from_validation( DOMNode $node ) {
-		return $this->is_document_in_dev_mode() && $this->has_dev_mode_exemption( $node );
+		_deprecated_function( 'AMP_Base_Sanitizer::is_exempt_from_validation', '1.5', 'AmpProject\DevMode::isExemptFromValidation' );
+		return DevMode::isExemptFromValidation( $node );
 	}
 
 	/**
