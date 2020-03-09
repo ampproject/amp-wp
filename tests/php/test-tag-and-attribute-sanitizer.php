@@ -2490,10 +2490,16 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_EMPTY ],
 			],
 			'analytics_empty_json_considered_invalid' => [
-				'<html><head><meta charset="utf-8"></head><body><amp-analytics><script type="application/json"></script></amp-analytics></body></html>',
+				'<html><head><meta charset="utf-8"></head><body><amp-analytics><script type="application/json"> </script></amp-analytics></body></html>',
 				'<html><head><meta charset="utf-8"></head><body><amp-analytics></amp-analytics></body></html>',
 				[ 'amp-analytics' ],
 				[ AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_EMPTY ],
+			],
+			'analytics_state_mismatch_json_error'     => [
+				'<html><head><meta charset="utf-8"></head><body><amp-analytics><script type="application/json">{"foo": 1 ] }</script></amp-analytics></body></html>',
+				'<html><head><meta charset="utf-8"></head><body><amp-analytics></amp-analytics></body></html>',
+				[ 'amp-analytics' ],
+				[ version_compare( phpversion(), '7.0', '>=' ) ? AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_STATE_MISMATCH : AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_SYNTAX ],
 			],
 			'script_cdata_contents_bad'               => [
 				'<html><head><meta charset="utf-8"><script async src="https://cdn.ampproject.org/v0.js">document.write("bad");</script></head><body></body></html>',

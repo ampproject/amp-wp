@@ -45,17 +45,12 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	const INVALID_CDATA_CSS_IMPORTANT          = 'INVALID_CDATA_CSS_IMPORTANT';
 	const INVALID_CDATA_CONTENTS               = 'INVALID_CDATA_CONTENTS';
 	const INVALID_CDATA_HTML_COMMENTS          = 'INVALID_CDATA_HTML_COMMENTS';
-	const JSON_ERROR_EMPTY                     = 'JSON_ERROR_EMPTY';
-	const JSON_ERROR_DEPTH                     = 'JSON_ERROR_DEPTH';
-	const JSON_ERROR_STATE_MISMATCH            = 'JSON_ERROR_STATE_MISMATCH';
 	const JSON_ERROR_CTRL_CHAR                 = 'JSON_ERROR_CTRL_CHAR';
+	const JSON_ERROR_DEPTH                     = 'JSON_ERROR_DEPTH';
+	const JSON_ERROR_EMPTY                     = 'JSON_ERROR_EMPTY';
+	const JSON_ERROR_STATE_MISMATCH            = 'JSON_ERROR_STATE_MISMATCH';
 	const JSON_ERROR_SYNTAX                    = 'JSON_ERROR_SYNTAX';
 	const JSON_ERROR_UTF8                      = 'JSON_ERROR_UTF8';
-	const JSON_ERROR_RECURSION                 = 'JSON_ERROR_RECURSION';
-	const JSON_ERROR_INF_OR_NAN                = 'JSON_ERROR_INF_OR_NAN';
-	const JSON_ERROR_UNSUPPORTED_TYPE          = 'JSON_ERROR_UNSUPPORTED_TYPE';
-	const JSON_ERROR_INVALID_PROPERTY_NAME     = 'JSON_ERROR_INVALID_PROPERTY_NAME';
-	const JSON_ERROR_UTF16                     = 'JSON_ERROR_UTF16';
 	const INVALID_ATTR_VALUE                   = 'INVALID_ATTR_VALUE';
 	const INVALID_ATTR_VALUE_CASEI             = 'INVALID_ATTR_VALUE_CASEI';
 	const INVALID_ATTR_VALUE_REGEX             = 'INVALID_ATTR_VALUE_REGEX';
@@ -962,16 +957,11 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function get_json_error_code( $json_last_error ) {
 		static $possible_json_errors = [
+			'JSON_ERROR_CTRL_CHAR',
 			'JSON_ERROR_DEPTH',
 			'JSON_ERROR_STATE_MISMATCH',
-			'JSON_ERROR_CTRL_CHAR',
 			'JSON_ERROR_SYNTAX',
 			'JSON_ERROR_UTF8',
-			'JSON_ERROR_RECURSION',
-			'JSON_ERROR_INF_OR_NAN',
-			'JSON_ERROR_UNSUPPORTED_TYPE',
-			'JSON_ERROR_INVALID_PROPERTY_NAME',
-			'JSON_ERROR_UTF16',
 		];
 
 		foreach ( $possible_json_errors as $possible_error ) {

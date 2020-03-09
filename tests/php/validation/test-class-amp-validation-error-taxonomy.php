@@ -1147,11 +1147,6 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 				null,
 				'Malformed UTF-8 characters, possibly incorrectly encoded',
 			],
-			'json_error_inf_or_nan'          => [
-				AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_INF_OR_NAN,
-				null,
-				'One or more NAN or INF values in the value to be encoded',
-			],
 			'json_error_empty'               => [
 				AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_EMPTY,
 				null,
