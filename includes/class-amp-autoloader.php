@@ -55,6 +55,7 @@ class AMP_Autoloader {
 		'AMP_Playlist_Embed_Handler'         => 'includes/embeds/class-amp-playlist-embed-handler',
 		'AMP_Reddit_Embed_Handler'           => 'includes/embeds/class-amp-reddit-embed-handler',
 		'AMP_SoundCloud_Embed_Handler'       => 'includes/embeds/class-amp-soundcloud-embed',
+		'AMP_TikTok_Embed_Handler'           => 'includes/embeds/class-amp-tiktok-embed-handler',
 		'AMP_Tumblr_Embed_Handler'           => 'includes/embeds/class-amp-tumblr-embed-handler',
 		'AMP_Twitter_Embed_Handler'          => 'includes/embeds/class-amp-twitter-embed-handler',
 		'AMP_Vimeo_Embed_Handler'            => 'includes/embeds/class-amp-vimeo-embed',
