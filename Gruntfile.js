@@ -41,8 +41,6 @@ module.exports = function( grunt ) {
 		'vendor/*/*/tests',
 		'vendor/ampproject/optimizer/bin',
 		'vendor/bin',
-		'vendor/ampproject/common/vendor',
-		'vendor/ampproject/optimizer/vendor',
 	];
 
 	grunt.initConfig( {
@@ -75,6 +73,8 @@ module.exports = function( grunt ) {
 				command: [
 					'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi',
 					'cd build',
+					'if [ -d vendor/ampproject/common/vendor ]; then rm -r vendor/ampproject/common/vendor; fi',
+					'if [ -d vendor/ampproject/optimizer/vendor ]; then rm -r vendor/ampproject/optimizer/vendor; fi',
 					'composer install --no-dev -o',
 					'for symlinksource in $(find vendor/ampproject -type l); do symlinktarget=$(readlink "$symlinksource") && rm "$symlinksource" && cp -r "vendor/ampproject/$symlinktarget" "$symlinksource"; done',
 					'composer remove cweagans/composer-patches --update-no-dev -o',
