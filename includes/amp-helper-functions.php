@@ -787,7 +787,6 @@ function amp_get_content_embed_handlers( $post = null ) {
 			'AMP_Pinterest_Embed_Handler'    => [],
 			'AMP_Playlist_Embed_Handler'     => [],
 			'AMP_Reddit_Embed_Handler'       => [],
-			'AMP_TikTok_Embed_Handler'       => [],
 			'AMP_Tumblr_Embed_Handler'       => [],
 			'AMP_Gallery_Embed_Handler'      => [],
 			'AMP_Gfycat_Embed_Handler'       => [],

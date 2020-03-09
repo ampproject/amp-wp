@@ -6,10 +6,9 @@
  * @since 0.7
  */
 
-use AmpProject\AmpWP\ConfigurationArgument;
-use AmpProject\AmpWP\Tests\PrivateAccess;
-use AmpProject\Dom\Document;
+use Amp\AmpWP\Dom\Document;
 use org\bovigo\vfs;
+use Amp\AmpWP\Tests\PrivateAccess;
 
 /**
  * Tests for Theme Support.
@@ -1466,7 +1465,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		echo '</head><body></body></html>';
 		$output = ob_get_clean();
 
-		$dom = new Document();
+		$dom = new DOMDocument();
 		$dom->loadHTML( $output );
 
 		$assert_callback( new DOMXPath( $dom ) );
@@ -1580,8 +1579,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		echo '</body></html>';
 		$output = ob_get_clean();
 
-		$dom = new Document();
-		$dom->loadHTML( $output ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+		$dom = new DOMDocument();
+		@$dom->loadHTML( $output ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 
 		$assert_callback( new DOMXPath( $dom ) );
 	}
@@ -1651,6 +1650,48 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Data provider for test_ensure_required_markup.
+	 *
+	 * @return array
+	 */
+	public function get_schema_script_data() {
+		return [
+			'schema_org_not_present'        => [
+				'',
+				1,
+			],
+			'schema_org_present'            => [
+				wp_json_encode( [ '@context' => 'http://schema.org' ] ),
+				1,
+			],
+			'schema_org_output_not_escaped' => [
+				'{"@context":"http://schema.org"',
+				1,
+			],
+			'schema_org_another_key'        => [
+				wp_json_encode( [ '@anothercontext' => 'https://schema.org' ] ),
+				1,
+			],
+		];
+	}
+
+	/**
+	 * Test ensure_required_markup().
+	 *
+	 * @dataProvider get_schema_script_data
+	 * @covers AMP_Theme_Support::ensure_required_markup()
+	 * @param string  $script The value of the script.
+	 * @param boolean $expected The expected result.
+	 */
+	public function test_ensure_required_markup_schemaorg( $script, $expected ) {
+		$page = '<html><head><script type="application/ld+json">%s</script></head><body>Test</body></html>';
+		$dom  = new Document();
+		$dom->loadHTML( sprintf( $page, $script ) );
+		AMP_Theme_Support::ensure_required_markup( $dom );
+		$this->assertEquals( $expected, substr_count( $dom->saveHTML(), 'schema.org' ) );
+	}
+
+	/**
 	 * Test moving AMP scripts from body to head.
 	 *
 	 * @covers AMP_Theme_Support::prepare_response()
@@ -1676,7 +1717,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$html = ob_get_clean();
 		$html = AMP_Theme_Support::prepare_response( $html );
 
-		$dom = Document::fromHtml( $html );
+		$dom = Document::from_html( $html );
 
 		$scripts = $dom->xpath->query( '//script[ not( @type ) or @type = "text/javascript" ]' );
 		$this->assertSame( 3, $scripts->length );
@@ -1735,7 +1776,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$html = ob_get_clean();
 		$html = AMP_Theme_Support::prepare_response( $html );
 
-		$dom = Document::fromHtml( $html );
+		$dom = Document::from_html( $html );
 
 		/** @var DOMElement $script Script. */
 		$actual_script_srcs = [];
@@ -1785,9 +1826,9 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		<?php
 		// phpcs:enable WordPress.WP.EnqueuedResources.NonEnqueuedScript
 		$html = ob_get_clean();
-		$html = AMP_Theme_Support::prepare_response( $html, [ ConfigurationArgument::ENABLE_OPTIMIZER => false ] );
+		$html = AMP_Theme_Support::prepare_response( $html );
 
-		$dom = Document::fromHtml( $html );
+		$dom = Document::from_html( $html );
 
 		$script_srcs = [];
 		/**
@@ -1986,7 +2027,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		);
 
 		wp();
-
 		$prepare_response_args = [
 			'enable_response_caching' => false,
 		];
@@ -2009,8 +2049,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertEquals( 2, substr_count( $sanitized_html, '<!-- wp_print_scripts -->' ) );
 
 		$ordered_contains = [
-			'<html amp=""',
-			'<meta charset="' . Document::AMP_ENCODING . '">',
+			'<html amp="">',
+			'<meta charset="' . strtolower( get_bloginfo( 'charset' ) ) . '">',
 			'<meta name="viewport" content="width=device-width">',
 			'<meta name="generator" content="AMP Plugin',
 			'<title>',
@@ -2018,30 +2058,28 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			'<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">',
 			'<link rel="dns-prefetch" href="//cdn.ampproject.org">',
 			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0.js">',
-			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js">',
 			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0/amp-experiment-1.0.js">',
+			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js">',
 			'<script type="text/javascript" src="https://cdn.ampproject.org/v0.js" async></script>',
-
-			'<script async custom-element="amp-dynamic-css-classes" src="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js"></script>',
 			'<script src="https://cdn.ampproject.org/v0/amp-experiment-1.0.js" async="" custom-element="amp-experiment"></script>',
-
-			'#<script( type=[\'"]text/javascript[\'"])? src=[\'"]https\://cdn\.ampproject\.org/v0/amp-ad-0\.1\.js[\'"] async(=[\'"][\'"])? custom-element=[\'"]amp-ad[\'"]>\s*</script>#s',
-			'#<script src=[\'"]https\://cdn\.ampproject\.org/v0/amp-audio-0\.1\.js[\'"] async(=[\'"][\'"])? custom-element=[\'"]amp-audio[\'"]>\s*</script>#s',
+			'<script async custom-element="amp-dynamic-css-classes" src="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js"></script>',
 			'<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-list-0.1.js" async custom-element="amp-list"></script>',
 			'<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-mathml-0.1.js" async custom-element="amp-mathml"></script>',
 
-			'<link rel="icon" href="https://example.org/favicon.png" sizes="32x32">',
-			'<link rel="icon" href="https://example.org/favicon.png" sizes="192x192">',
+			// Note these are single-quoted because they are injected after the DOM has been re-serialized, so the type and src attributes come from WP_Scripts::do_item().
+			'<script src="https://cdn.ampproject.org/v0/amp-audio-0.1.js" async="" custom-element="amp-audio"></script>',
+			'<script src="https://cdn.ampproject.org/v0/amp-ad-0.1.js" async="" custom-element="amp-ad"></script>',
 
 			'#<style amp-custom(="")?>.*?body\s*{\s*background:\s*black;?\s*}.*?</style>#s',
 
 			'<link crossorigin="anonymous" rel="stylesheet" id="my-font-css" href="https://fonts.googleapis.com/css?family=Tangerine" type="text/css" media="all">',
-
+			'<link rel="icon" href="https://example.org/favicon.png" sizes="32x32">',
+			'<link rel="icon" href="https://example.org/favicon.png" sizes="192x192">',
 			'<script type="application/ld+json">{"@context"',
+			'<link rel="canonical" href="',
 
 			'#<style amp-boilerplate(="")?>#',
 			'#<noscript><style amp-boilerplate(="")?>#',
-			'<link rel="canonical" href="',
 			'</head>',
 		];
 
@@ -2114,8 +2152,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertNotEmpty( $this->get_etag_header_value( AMP_HTTP::$headers_sent ) );
 		unset( $_SERVER['HTTP_IF_NONE_MATCH'] );
 
-		$prepare_response_args['enable_response_caching']                 = true;
-		$prepare_response_args[ ConfigurationArgument::ENABLE_OPTIMIZER ] = false;
+		$prepare_response_args['enable_response_caching'] = true;
 
 		// Test that first response isn't cached.
 		$first_response                = $call_prepare_response();
@@ -2172,7 +2209,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$original_html = $this->get_original_html();
 		add_filter( 'amp_validation_error_sanitized', '__return_false' ); // For testing purpose only. This should not normally be done.
 
-		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html, [ ConfigurationArgument::ENABLE_OPTIMIZER => false ] );
+		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
 
 		$this->assertContains( '<html>', $sanitized_html, 'The AMP attribute is removed from the HTML element' );
 		$this->assertContains( '<button onclick="alert', $sanitized_html, 'Invalid AMP is present in the response.' );

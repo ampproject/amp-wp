@@ -2,10 +2,10 @@
 /**
  * Test Site_Health.
  *
- * @package AmpProject\AmpWP
+ * @package Amp\AmpWP
  */
 
-use AmpProject\AmpWP\Admin\SiteHealth;
+use Amp\AmpWP\Admin\SiteHealth;
 
 /**
  * Test Site_Health.
@@ -42,7 +42,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 	/**
 	 * Test init.
 	 *
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::init()
+	 * @covers \Amp\AmpWP\Admin\SiteHealth::init()
 	 */
 	public function test_init() {
 		$this->instance->init();
@@ -54,7 +54,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 	/**
 	 * Test add_tests.
 	 *
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::add_tests()
+	 * @covers \Amp\AmpWP\Admin\SiteHealth::add_tests()
 	 */
 	public function test_add_tests() {
 		$tests = $this->instance->add_tests( [] );
@@ -67,7 +67,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 	/**
 	 * Test persistent_object_cache.
 	 *
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::persistent_object_cache()
+	 * @covers \Amp\AmpWP\Admin\SiteHealth::persistent_object_cache()
 	 */
 	public function test_persistent_object_cache() {
 		$data = [
@@ -109,7 +109,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 	/**
 	 * Test curl_multi_functions.
 	 *
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::curl_multi_functions()
+	 * @covers \Amp\AmpWP\Admin\SiteHealth::curl_multi_functions()
 	 */
 	public function test_curl_multi_functions() {
 		$this->assertArraySubset(
@@ -123,7 +123,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 	/**
 	 * Test icu_version.
 	 *
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::icu_version()
+	 * @covers \Amp\AmpWP\Admin\SiteHealth::icu_version()
 	 */
 	public function test_icu_version() {
 		$this->assertArraySubset(
@@ -137,7 +137,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 	/**
 	 * Test add_debug_information.
 	 *
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::add_debug_information()
+	 * @covers \Amp\AmpWP\Admin\SiteHealth::add_debug_information()
 	 */
 	public function test_add_debug_information() {
 		$debug_info = $this->instance->add_debug_information( [] );
@@ -180,7 +180,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 	 * Test add_debug_information.
 	 *
 	 * @dataProvider get_experiences_enabled_data
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::add_debug_information()
+	 * @covers \Amp\AmpWP\Admin\SiteHealth::add_debug_information()
 	 *
 	 * @param array  $experiences_enabled The AMP experiences that are enabled, if any.
 	 * @param string $expected            The expected return value.
@@ -246,7 +246,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 	 * Test add_debug_information.
 	 *
 	 * @dataProvider get_supported_templates_data
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::get_supported_templates()
+	 * @covers \Amp\AmpWP\Admin\SiteHealth::get_supported_templates()
 	 *
 	 * @param array  $supported_content_types The supported content types, like 'post'.
 	 * @param array  $supported_templates     The supported templates, like 'is_author'.
@@ -315,7 +315,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 	 * Test get_serve_all_templates.
 	 *
 	 * @dataProvider get_serve_all_templates_data
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::get_serve_all_templates()
+	 * @covers \Amp\AmpWP\Admin\SiteHealth::get_serve_all_templates()
 	 *
 	 * @param string $theme_support          The template mode, like 'standard'.
 	 * @param bool   $do_serve_all_templates Whether the option to serve all templates is true.
@@ -332,7 +332,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 	/**
 	 * Test add_extensions.
 	 *
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::add_extensions()
+	 * @covers \Amp\AmpWP\Admin\SiteHealth::add_extensions()
 	 */
 	public function test_add_extensions() {
 		$this->assertEquals(

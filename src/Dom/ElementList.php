@@ -2,12 +2,12 @@
 /**
  * Class ElementList
  *
- * @package AmpProject\AmpWP
+ * @package Amp\AmpWP
  */
 
-namespace AmpProject\AmpWP\Dom;
+namespace Amp\AmpWP\Dom;
 
-use AmpProject\AmpWP\Component\CaptionedSlide;
+use Amp\AmpWP\Component\CaptionedSlide;
 use IteratorAggregate;
 use Countable;
 use DOMElement;

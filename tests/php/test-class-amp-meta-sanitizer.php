@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use AmpProject\Dom\Document;
+use Amp\AmpWP\Dom\Document;
 
 /**
  * Tests for AMP_Meta_Sanitizer.
@@ -28,42 +28,59 @@ class Test_AMP_Meta_Sanitizer extends WP_UnitTestCase {
 		$script3_hash = amp_generate_script_hash( $script3 );
 		$script4_hash = amp_generate_script_hash( $script4 );
 
-		$amp_boilerplate = amp_get_boilerplate_code();
-
 		return [
-			'Do not break the correct charset tag'        => [
-				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">' . $amp_boilerplate . '</head><body></body></html>',
-				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">' . $amp_boilerplate . '</head><body></body></html>',
+			// Don't break the correct charset tag.
+			[
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
 			],
 
-			'Do not break the correct viewport tag'       => [
-				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">' . $amp_boilerplate . '</head><body></body></html>',
-				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">' . $amp_boilerplate . '</head><body></body></html>',
+			// Don't break the correct viewport tag.
+			[
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"></head><body></body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"></head><body></body></html>',
 			],
 
-			'Move charset and viewport tags from body to head' => [
-				'<!DOCTYPE html><html><head>' . $amp_boilerplate . '</head><body><meta charset="utf-8"><meta name="viewport" content="width=device-width"></body></html>',
-				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">' . $amp_boilerplate . '</head><body></body></html>',
+			// Trim whitespace between the properties and their values.
+			[
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width = device-width, minimum-scale = 1, initial-scale = 1"></head><body></body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1"></head><body></body></html>',
 			],
 
-			'Add default charset tag if none is present'  => [
-				'<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width">' . $amp_boilerplate . '</head><body></body></html>',
-				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">' . $amp_boilerplate . '</head><body></body></html>',
+			// Move charset and viewport tags from body to head.
+			[
+				'<!DOCTYPE html><html><head></head><body><meta charset="utf-8"><meta name="viewport" content="width=device-width"></body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
 			],
 
-			'Add default viewport tag if none is present' => [
-				'<!DOCTYPE html><html><head><meta charset="utf-8">' . $amp_boilerplate . '</head><body></body></html>',
-				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">' . $amp_boilerplate . '</head><body></body></html>',
+			// Add default charset tag if none is present.
+			[
+				'<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width"></head><body></body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
 			],
 
-			'Make sure charset is the first meta tag'     => [
-				'<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width"><meta charset="utf-8">' . $amp_boilerplate . '</head><body></body></html>',
-				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">' . $amp_boilerplate . '</head><body></body></html>',
+			// Does not override width property.
+			[
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=600"></head><body></body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=600"></head><body></body></html>',
 			],
 
-			'Concatenate and reposition script hashes'    => [
-				'<!DOCTYPE html><html><head><meta name="amp-script-src" content="' . esc_attr( $script1_hash ) . '"><meta charset="utf-8"><meta name="amp-script-src" content="' . esc_attr( $script2_hash ) . '"><meta name="viewport" content="width=device-width"><meta name="amp-script-src" content="' . esc_attr( $script3_hash ) . '">' . $amp_boilerplate . '</head><body><meta name="amp-script-src" content="' . esc_attr( $script4_hash ) . '"></body></html>',
-				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><meta name="amp-script-src" content="' . esc_attr( $script1_hash ) . ' ' . esc_attr( $script2_hash ) . ' ' . esc_attr( $script3_hash ) . ' ' . esc_attr( $script4_hash ) . '">' . $amp_boilerplate . '</head><body></body></html>',
+			// Add default viewport tag if none is present.
+			[
+				'<!DOCTYPE html><html><head><meta charset="utf-8"></head><body></body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
+			],
+
+			// Make sure charset is the first meta tag.
+			[
+				'<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width"><meta charset="utf-8"></head><body></body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
+			],
+
+			// Concatenate and reposition script hashes.
+			[
+				'<!DOCTYPE html><html><head><meta name="amp-script-src" content="' . esc_attr( $script1_hash ) . '"><meta charset="utf-8"><meta name="amp-script-src" content="' . esc_attr( $script2_hash ) . '"><meta name="viewport" content="width=device-width"><meta name="amp-script-src" content="' . esc_attr( $script3_hash ) . '"></head><body><meta name="amp-script-src" content="' . esc_attr( $script4_hash ) . '"></body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><meta name="amp-script-src" content="' . esc_attr( $script1_hash ) . ' ' . esc_attr( $script2_hash ) . ' ' . esc_attr( $script3_hash ) . ' ' . esc_attr( $script4_hash ) . '"></head><body></body></html>',
 			],
 		];
 	}
@@ -78,7 +95,7 @@ class Test_AMP_Meta_Sanitizer extends WP_UnitTestCase {
 	 * @param string  $expected_content Expected content after sanitization.
 	 */
 	public function test_sanitize( $source_content, $expected_content ) {
-		$dom       = Document::fromHtml( $source_content );
+		$dom       = Document::from_html( $source_content );
 		$sanitizer = new AMP_Meta_Sanitizer( $dom );
 		$sanitizer->sanitize();
 

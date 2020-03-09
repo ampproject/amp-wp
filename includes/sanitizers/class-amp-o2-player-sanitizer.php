@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use AmpProject\Dom\Document;
+use Amp\AmpWP\Dom\Document;
 
 /**
  * Class AMP_O2_Player_Sanitizer
@@ -32,7 +32,7 @@ class AMP_O2_Player_Sanitizer extends AMP_Base_Sanitizer {
 	private static $amp_tag = 'amp-o2-player';
 
 	/**
-	 * AMP O2 Player class.
+	 * Amp O2 Player class.
 	 *
 	 * @since 1.0
 	 * @var string CSS class to identify O2 Player <div> to replace with AMP version.

@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\Tests\PrivateAccess;
+use Amp\AmpWP\Tests\PrivateAccess;
 
 /**
  * Class AMP_Img_Sanitizer_Test

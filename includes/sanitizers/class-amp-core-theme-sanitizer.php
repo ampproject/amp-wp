@@ -6,7 +6,7 @@
  * @since 1.0
  */
 
-use AmpProject\Dom\Document;
+use Amp\AmpWP\Dom\Document;
 
 /**
  * Class AMP_Core_Theme_Sanitizer

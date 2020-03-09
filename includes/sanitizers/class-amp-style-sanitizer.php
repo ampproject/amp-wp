@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use AmpProject\Dom\Document;
+use Amp\AmpWP\Dom\Document;
 use Sabberworm\CSS\RuleSet\DeclarationBlock;
 use Sabberworm\CSS\CSSList\CSSList;
 use Sabberworm\CSS\Property\Selector;

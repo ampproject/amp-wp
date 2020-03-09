@@ -7,8 +7,8 @@
 
 // phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
 
-use AmpProject\Dom\Document;
-use AmpProject\AmpWP\Tests\PrivateAccess;
+use Amp\AmpWP\Dom\Document;
+use Amp\AmpWP\Tests\PrivateAccess;
 
 /**
  * Test AMP_Style_Sanitizer.
@@ -578,7 +578,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			10,
 			3
 		);
-		$dom = Document::fromHtml( $source );
+		$dom = Document::from_html( $source );
 
 		$error_codes = [];
 		$args        = [
@@ -734,7 +734,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function test_amp_selector_conversion( $markup, $input, $output ) {
 		$html = "<html amp><head><meta charset=utf-8><style amp-custom>$input</style></head><body>$markup</body></html>";
-		$dom  = Document::fromHtml( $html );
+		$dom  = Document::from_html( $html );
 
 		$sanitizer_classes = amp_get_content_sanitizers();
 		$sanitized         = AMP_Content_Sanitizer::sanitize_document(
@@ -880,7 +880,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		);
 
 		$html = "<html amp><head><meta charset=utf-8><style amp-custom>$style</style></head><body>$markup</body></html>";
-		$dom  = Document::fromHtml( $html );
+		$dom  = Document::from_html( $html );
 
 		$sanitizer_classes = amp_get_content_sanitizers();
 
@@ -1079,7 +1079,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function test_browser_css_hacks( $input ) {
 		$html = "<html amp><head><meta charset=utf-8><style amp-custom>$input</style></head><body></body></html>";
-		$dom  = Document::fromHtml( $html );
+		$dom  = Document::from_html( $html );
 
 		$error_codes = [];
 		$sanitizer   = new AMP_Style_Sanitizer(
@@ -1109,7 +1109,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$html .= '</head><body><span class="b dashicons dashicons-admin-appearance"></span></body></html>';
 
 		// Test with tree-shaking.
-		$dom         = Document::fromHtml( $html );
+		$dom         = Document::from_html( $html );
 		$error_codes = [];
 		$sanitizer   = new AMP_Style_Sanitizer(
 			$dom,
@@ -1152,7 +1152,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$html .= '<style>@font-face { font-family: "Custom"; src: url("data:application/x-font-woff;charset=utf-8;base64,d09GRgABAAA") format("woff"); }</style>';
 		$html .= '</head><body></body></html>';
 
-		$dom         = Document::fromHtml( $html );
+		$dom         = Document::from_html( $html );
 		$error_codes = [];
 		$sanitizer   = new AMP_Style_Sanitizer(
 			$dom,
@@ -1219,7 +1219,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			</body>
 		</html>
 		<?php
-		$dom = Document::fromHtml( ob_get_clean() );
+		$dom = Document::from_html( ob_get_clean() );
 
 		$error_codes = [];
 		$sanitizer   = new AMP_Style_Sanitizer(
@@ -1287,7 +1287,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			</style>
 		';
 		$html .= '</head><body><span class="b" data-value="">...</span><span id="exists"></span></body></html>';
-		$dom   = Document::fromHtml( $html );
+		$dom   = Document::from_html( $html );
 
 		$error_codes = [];
 		$sanitizer   = new AMP_Style_Sanitizer(
@@ -1326,7 +1326,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function test_relative_background_url_handling() {
 		$html = '<html amp><head><meta charset="utf-8"><link rel="stylesheet" href="' . esc_url( admin_url( 'css/common.css' ) ) . '"></head><body><span class="spinner"></span></body></html>'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-		$dom  = Document::fromHtml( $html );
+		$dom  = Document::from_html( $html );
 
 		$sanitizer = new AMP_Style_Sanitizer(
 			$dom,
@@ -1419,7 +1419,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 		$sanitize_and_get_stylesheets = static function() use ( $href ) {
 			$html = sprintf( '<html amp><head><meta charset="utf-8"><link rel="stylesheet" href="%s"></head><body></body></html>', esc_url( $href ) ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-			$dom  = Document::fromHtml( $html );
+			$dom  = Document::from_html( $html );
 
 			$found_error_codes = [];
 
@@ -1648,7 +1648,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * @param string      $error_code Error code. Optional.
 	 */
 	public function test_get_validated_url_file_path( $source, $expected, $error_code = null ) {
-		$dom = Document::fromHtml( '<html></html>' );
+		$dom = Document::from_html( '<html></html>' );
 
 		$sanitizer = new AMP_Style_Sanitizer( $dom );
 		$actual    = $sanitizer->get_validated_url_file_path( $source, [ 'css' ] );
@@ -1709,7 +1709,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$html .= $source;
 		$html .= '</style></head</html>';
 
-		$dom = Document::fromHtml( $html );
+		$dom = Document::from_html( $html );
 
 		$sanitizer = new AMP_Style_Sanitizer( $dom );
 		$sanitizer->sanitize();
@@ -1765,7 +1765,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$tag = sprintf( '<link rel="stylesheet" href="%s">', esc_url( $url ) ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 		$tag = amp_filter_font_style_loader_tag_with_crossorigin_anonymous( $tag, 'font', $url );
 
-		$dom = Document::fromHtml( sprintf( '<html><head>%s</head></html>', $tag ) );
+		$dom = Document::from_html( sprintf( '<html><head>%s</head></html>', $tag ) );
 
 		$validation_errors = [];
 
@@ -1806,7 +1806,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		// Test supplying crossorigin attribute.
 		$url       = 'https://fonts.googleapis.com/css?family=Tangerine';
 		$link      = amp_filter_font_style_loader_tag_with_crossorigin_anonymous( "<link rel='stylesheet' href='$url'>", 'font', $url ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-		$document  = Document::fromHtml( "<html><head>$link</head></html>" );
+		$document  = Document::from_html( "<html><head>$link</head></html>" );
 		$sanitizer = new AMP_Style_Sanitizer( $document, [ 'use_document_element' => true ] );
 		$sanitizer->sanitize();
 		$link = $document->getElementsByTagName( 'link' )->item( 0 );
@@ -1815,7 +1815,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 		// Test that existing crossorigin attribute is not overridden.
 		$link      = amp_filter_font_style_loader_tag_with_crossorigin_anonymous( "<link crossorigin='use-credentials' rel='stylesheet' href='$url'>", 'font', $url ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-		$document  = Document::fromHtml( "<html><head>$link</head></html>" ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$document  = Document::from_html( "<html><head>$link</head></html>" ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 		$sanitizer = new AMP_Style_Sanitizer( $document, [ 'use_document_element' => true ] );
 		$sanitizer->sanitize();
 		$link = $document->getElementsByTagName( 'link' )->item( 0 );
@@ -2050,7 +2050,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			3
 		);
 
-		$dom = Document::fromHtml( $markup );
+		$dom = Document::from_html( $markup );
 
 		if ( ! empty( $options['auto_reject'] ) ) {
 			add_filter( 'amp_validation_error_sanitized', '__return_false' );
@@ -2084,7 +2084,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$markup .= sprintf( '<style>@import "%s"; body{color:red}</style>', $stylesheet_url );
 		$markup .= '</head><body>hello</body></html>';
 
-		$dom       = Document::fromHtml( $markup );
+		$dom       = Document::from_html( $markup );
 		$sanitizer = new AMP_Style_Sanitizer(
 			$dom,
 			[
@@ -2145,7 +2145,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$html .= '<style><!--/*--><![CDATA[/*><!--*/ body { color:blue } /*]]>*/--></style>';
 		$html .= '</head><body><p>Hello World</p></body></html>';
 
-		$dom       = Document::fromHtml( $html );
+		$dom       = Document::from_html( $html );
 		$sanitizer = new AMP_Style_Sanitizer(
 			$dom,
 			[
@@ -2169,7 +2169,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function test_body_font_stylesheet_moved_to_head() {
 		$html = '<!DOCTYPE html><html amp><head><meta charset="utf-8"></head><body><link rel="stylesheet" id="the-font" href="https://fonts.googleapis.com/css?family=Merriweather%3A400%2C700" type="text/css" media="all"></body></html>'; // phpcs:ignore
-		$dom  = Document::fromHtml( $html );
+		$dom  = Document::from_html( $html );
 
 		$link = $dom->getElementById( 'the-font' );
 		$this->assertInstanceOf( 'DOMElement', $link );
@@ -2305,7 +2305,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$this->go_to( home_url() );
 		$html = $html_generator();
 
-		$original_dom = Document::fromHtml( $html );
+		$original_dom = Document::from_html( $html );
 		$amphtml_dom  = clone( $original_dom );
 
 		$error_codes = [];

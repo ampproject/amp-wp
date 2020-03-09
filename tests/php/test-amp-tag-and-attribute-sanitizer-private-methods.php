@@ -3,7 +3,7 @@
 // phpcs:disable WordPress.PHP.DevelopmentFunctions.error_log_var_dump
 // phpcs:disable WordPress.XSS.EscapeOutput.OutputNotEscaped
 
-use AmpProject\AmpWP\Tests\PrivateAccess;
+use Amp\AmpWP\Tests\PrivateAccess;
 
 class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCase {
 

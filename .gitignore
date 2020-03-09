@@ -14,5 +14,3 @@ built
 /amphtml
 .env
 .idea/
-/lib/*/vendor/
-/lib/*/composer.lock

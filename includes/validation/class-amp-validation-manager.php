@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use AmpProject\Dom\Document;
+use Amp\AmpWP\Dom\Document;
 
 /**
  * Class AMP_Validation_Manager
@@ -1137,7 +1137,7 @@ class AMP_Validation_Manager {
 	 * }
 	 */
 	public static function locate_sources( DOMNode $node ) {
-		$dom      = Document::fromNode( $node );
+		$dom      = Document::from_node( $node );
 		$comments = $dom->xpath->query( 'preceding::comment()[ starts-with( ., "amp-source-stack" ) or starts-with( ., "/amp-source-stack" ) ]', $node );
 		$sources  = [];
 		$matches  = [];

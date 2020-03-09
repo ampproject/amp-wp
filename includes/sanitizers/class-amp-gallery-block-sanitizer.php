@@ -5,8 +5,8 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\Dom\ElementList;
-use AmpProject\AmpWP\Component\Carousel;
+use Amp\AmpWP\Dom\ElementList;
+use Amp\AmpWP\Component\Carousel;
 
 /**
  * Class AMP_Gallery_Block_Sanitizer

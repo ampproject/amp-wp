@@ -2,10 +2,10 @@
 /**
  * Class CaptionedSlide
  *
- * @package AmpProject\AmpWP
+ * @package Amp\AmpWP
  */
 
-namespace AmpProject\AmpWP\Component;
+namespace Amp\AmpWP\Component;
 
 use DOMNode;
 

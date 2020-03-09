@@ -1,6 +1,6 @@
 <?php
 
-use AmpProject\Dom\Document;
+use Amp\AmpWP\Dom\Document;
 
 class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 
