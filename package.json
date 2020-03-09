@@ -104,7 +104,7 @@
     "postcss-loader": "3.0.0",
     "postcss-nested": "4.2.1",
     "postcss-preset-env": "6.7.0",
-    "react": "16.9.0",
+    "react": "16.13.0",
     "react-dom": "16.13.0",
     "rtlcss": "2.5.0",
     "rtlcss-webpack-plugin": "4.0.3",
