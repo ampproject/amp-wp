@@ -11,6 +11,7 @@
     "ext-libxml": "*"
   },
   "require-dev": {
+    "civicrm/composer-downloads-plugin": "^2.1",
     "jakub-onderka/php-parallel-lint": "^1.0",
     "roave/security-advisories": "dev-master",
     "squizlabs/php_codesniffer": "^3"
@@ -29,6 +30,13 @@
       "dev-master": "1.0.x-dev",
       "dev-develop": "1.0.x-dev",
       "dev-add/958-amp-optimizer": "1.0.x-dev"
+    },
+    "downloads": {
+      "phpstan": {
+        "url": "https://github.com/phpstan/phpstan/releases/download/0.12.14/phpstan.phar",
+        "path": "vendor/bin/phpstan",
+        "type": "phar"
+      }
     }
   },
   "autoload": {
@@ -48,8 +56,11 @@
     "test": [
       "@lint",
       "@unit",
-      "@cs"
+      "@cs",
+      "@analyse"
     ],
+    "analyse": "phpstan analyse src --ansi",
+
     "unit": "phpunit --colors=always"
   }
 }
