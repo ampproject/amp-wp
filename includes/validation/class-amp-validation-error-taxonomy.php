@@ -1833,8 +1833,35 @@ class AMP_Validation_Error_Taxonomy {
 					$content .= '</p>';
 				}
 
-				if ( isset( $validation_error['message'] ) ) {
-					$content .= sprintf( '<p>%s</p>', esc_html( $validation_error['message'] ) );
+				$message = null;
+				switch ( $validation_error['code'] ) {
+					case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_EMPTY:
+						$message = __( 'Expected JSON, got an empty value', 'amp' );
+						break;
+					case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_DEPTH:
+						$message = __( 'The maximum stack depth has been exceeded', 'amp' );
+						break;
+					case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_STATE_MISMATCH:
+						$message = __( 'Invalid or malformed JSON', 'amp' );
+						break;
+					case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_CTRL_CHAR:
+						$message = __( 'Control character error, possibly incorrectly encoded', 'amp' );
+						break;
+					case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_SYNTAX:
+						$message = __( 'Syntax error', 'amp' );
+						break;
+					case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_UTF8:
+						/* translators: %s: UTF-8, a charset */
+						$message = sprintf( __( 'Malformed %s characters, possibly incorrectly encoded', 'amp' ), 'UTF-8' );
+						break;
+					default:
+						if ( isset( $validation_error['message'] ) ) {
+							$message = $validation_error['message'];
+						}
+				}
+
+				if ( $message ) {
+					$content .= sprintf( '<p>%s</p>', esc_html( $message ) );
 				}
 
 				break;
@@ -3024,6 +3051,13 @@ class AMP_Validation_Error_Taxonomy {
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_CSS_IMPORTANT:
 			case AMP_Tag_And_Attribute_Sanitizer::CDATA_VIOLATES_BLACKLIST:
 				return esc_html__( 'Illegal text content', 'amp' );
+			case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_CTRL_CHAR:
+			case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_DEPTH:
+			case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_EMPTY:
+			case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_STATE_MISMATCH:
+			case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_SYNTAX:
+			case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_UTF8:
+				return esc_html__( 'Invalid JSON', 'amp' );
 			case AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_IMPORTANT:
 				$title = esc_html__( 'Illegal CSS !important property', 'amp' );
 				if ( isset( $validation_error['css_property_name'] ) ) {

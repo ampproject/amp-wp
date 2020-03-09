@@ -10,6 +10,7 @@
     "ext-date": "*",
     "ext-dom": "*",
     "ext-iconv": "*",
+    "ext-json": "*",
     "ext-libxml": "*",
     "ext-spl": "*",
     "ampproject/common": "^1",

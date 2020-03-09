@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "044cb86ba62d1901fc5f267077a9cd63",
+    "content-hash": "f57591425d609cebaa96db09db235e64",
     "packages": [
         {
             "name": "ampproject/common",
@@ -12,7 +12,7 @@
             "dist": {
                 "type": "path",
                 "url": "lib/common",
-                "reference": "aa73cae03e9c8b105c1c8cb5251ef7281f5c793d"
+                "reference": "e4952a6237c1baa926ec249f452e3660c3dff02d"
             },
             "require": {
                 "ext-dom": "*",
@@ -33,8 +33,7 @@
             "extra": {
                 "branch-alias": {
                     "dev-master": "1.0.x-dev",
-                    "dev-develop": "1.0.x-dev",
-                    "dev-add/958-amp-optimizer": "1.0.x-dev"
+                    "dev-develop": "1.0.x-dev"
                 }
             },
             "autoload": {
@@ -49,10 +48,10 @@
             },
             "scripts": {
                 "cbf": [
-                    "phpcbf --standard=PSR12 -n src"
+                    "phpcbf --standard=PSR12 -n src tests"
                 ],
                 "cs": [
-                    "phpcs --standard=PSR12 -n src"
+                    "phpcs --standard=PSR12 -s -n src tests"
                 ],
                 "lint": [
                     "parallel-lint -j 10 --colors --exclude vendor ."
@@ -80,7 +79,7 @@
             "dist": {
                 "type": "path",
                 "url": "lib/optimizer",
-                "reference": "f555cfdbc3087d69f5eb493360afd9da95168fe2"
+                "reference": "5a80263339fa591cc710be27eeb97a9e7c36dba9"
             },
             "require": {
                 "ampproject/common": "^1",
@@ -102,8 +101,7 @@
             "extra": {
                 "branch-alias": {
                     "dev-master": "1.0.x-dev",
-                    "dev-develop": "1.0.x-dev",
-                    "dev-add/958-amp-optimizer": "1.0.x-dev"
+                    "dev-develop": "1.0.x-dev"
                 }
             },
             "autoload": {
@@ -118,10 +116,10 @@
             },
             "scripts": {
                 "cbf": [
-                    "phpcbf --standard=PSR12 -n src"
+                    "phpcbf --standard=PSR12 -n src tests"
                 ],
                 "cs": [
-                    "phpcs --standard=PSR12 -n src"
+                    "phpcs --standard=PSR12 -s -n src tests"
                 ],
                 "lint": [
                     "parallel-lint -j 10 --colors --exclude vendor ."
@@ -1379,6 +1377,7 @@
         "ext-date": "*",
         "ext-dom": "*",
         "ext-iconv": "*",
+        "ext-json": "*",
         "ext-libxml": "*",
         "ext-spl": "*"
     },
