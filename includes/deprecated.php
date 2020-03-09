@@ -211,7 +211,7 @@ function amp_post_template_add_scripts( $amp_template ) {
  * Print boilerplate CSS.
  *
  * @codeCoverageIgnore
- * @deprecated Boilerplate is now automatically added.
+ * @deprecated Boilerplate is now automatically added via the ampproject/optimizer library.
  * @since 0.3
  * @see amp_get_boilerplate_code()
  */

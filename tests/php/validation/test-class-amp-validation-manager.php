@@ -7,8 +7,8 @@
 
 // phpcs:disable Generic.Formatting.MultipleStatementAlignment.NotSameWarning
 
-use Amp\AmpWP\Dom\Document;
-use Amp\AmpWP\Tests\PrivateAccess;
+use AmpProject\Dom\Document;
+use AmpProject\AmpWP\Tests\PrivateAccess;
 
 /**
  * Tests for AMP_Validation_Manager class.
@@ -1237,7 +1237,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		<?php
 		$html = ob_get_clean();
 
-		$dom = Document::from_html( $html );
+		$dom = Document::fromHtml( $html );
 
 		$element = $dom->xpath->query( $xpath )->item( 0 );
 		$this->assertInstanceOf( 'DOMElement', $element );
@@ -1572,7 +1572,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$tested_method = new ReflectionMethod( 'AMP_Validation_Manager', 'has_parameters_passed_by_reference' );
 		$tested_method->setAccessible( true );
 		$reflection_by_value          = new ReflectionFunction( 'get_bloginfo' );
-		$reflection_by_ref_first_arg  = new ReflectionFunction( 'wp_default_styles' );
+		$reflection_by_ref_first_arg  = new ReflectionFunction( 'wp_handle_upload' );
 		$reflection_by_ref_second_arg = new ReflectionFunction( 'wp_parse_str' );
 
 		$this->assertEquals( 0, $tested_method->invoke( null, $reflection_by_value ) );
