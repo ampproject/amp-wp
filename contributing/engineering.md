@@ -152,18 +152,6 @@ To verify your code meets the requirements, you can run `npm run lint`.
 
 You can also install a `pre-commit` hook by running `bash vendor/xwp/wp-dev-lib/scripts/install-pre-commit-hook.sh`. This way, your code will be checked automatically before committing any changes.
 
-### Updating Google fonts list
-
-**Note:** A [Google Fonts API key](https://developers.google.com/fonts/docs/developer_api) is required to update the list of Google Fonts that is included in the plugin. Details of how to get an API key can be found on in the [Google fonts docs](https://developers.google.com/fonts/docs/developer_api).
-
-Once obtained, follow these steps to configure the project appropriately:
-
-1. Copy `example.env` to `.env`.
-1. Replace `replacemewithrealkey` with API key.
-1. Run `npm run download-fonts`
-
-The fonts will then be downloaded to `includes/data/fonts.json`.
-
 ### Tests
 
 #### PHP Unit Tests

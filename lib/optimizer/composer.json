@@ -1,0 +1,67 @@
+{
+  "name": "ampproject/optimizer",
+  "type": "library",
+  "description": "PHP library for optimizing AMP pages.",
+  "license": "MIT",
+  "require": {
+    "php": "^5.6 || ^7.0",
+    "ext-dom": "*",
+    "ext-iconv": "*",
+    "ext-libxml": "*",
+    "ampproject/common": "^1"
+  },
+  "require-dev": {
+    "ext-zip": "*",
+    "jakub-onderka/php-parallel-lint": "^1.0",
+    "roave/security-advisories": "dev-master",
+    "squizlabs/php_codesniffer": "^3"
+  },
+  "suggest": {
+    "ext-json": "Provides native implementation of json_encode()/json_decode()."
+  },
+  "config": {
+    "platform": {
+      "php": "5.6"
+    },
+    "sort-packages": true
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "1.0.x-dev",
+      "dev-develop": "1.0.x-dev"
+    }
+  },
+  "autoload": {
+    "psr-4": {
+      "AmpProject\\Optimizer\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "AmpProject\\Optimizer\\Tests\\": "tests/src/"
+    }
+  },
+  "repositories": [
+    {
+      "type": "path",
+      "url": "../common"
+    }
+  ],
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "scripts": {
+    "cbf": "phpcbf --standard=PSR12 -n src tests",
+    "cs": "phpcs --standard=PSR12 -s -n src tests",
+    "lint": "parallel-lint -j 10 --colors --exclude vendor .",
+    "post-update-cmd": [
+      "rm -rf tests/spec && bin/sync-amp-toolbox-test-suite.php",
+      "bin/sync-amp-runtime-local-fallback-resources.php"
+    ],
+    "test": [
+      "@lint",
+      "@unit",
+      "@cs"
+    ],
+    "unit": "phpunit --colors=always"
+  }
+}

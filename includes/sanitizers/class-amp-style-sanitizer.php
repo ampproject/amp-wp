@@ -5,7 +5,8 @@
  * @package AMP
  */
 
-use Amp\AmpWP\Dom\Document;
+use AmpProject\DevMode;
+use AmpProject\Dom\Document;
 use Sabberworm\CSS\RuleSet\DeclarationBlock;
 use Sabberworm\CSS\CSSList\CSSList;
 use Sabberworm\CSS\Property\Selector;
@@ -811,7 +812,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		 */
 
 		$dev_mode_predicate = '';
-		if ( $this->is_document_in_dev_mode() ) {
+		if ( DevMode::isActiveForDocument( $this->dom ) ) {
 			$dev_mode_predicate = sprintf( ' and not ( @%s )', AMP_Rule_Spec::DEV_MODE_ATTRIBUTE );
 		}
 

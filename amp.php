@@ -14,7 +14,7 @@
  */
 
 define( 'AMP__FILE__', __FILE__ );
-define( 'AMP__DIR__', dirname( __FILE__ ) );
+define( 'AMP__DIR__', __DIR__ );
 define( 'AMP__VERSION', '1.5.0-alpha' );
 
 /**
@@ -45,8 +45,10 @@ $_amp_required_extensions = array(
 	'curl'   => array(
 		'functions' => array(
 			'curl_close',
+			'curl_errno',
 			'curl_error',
 			'curl_exec',
+			'curl_getinfo',
 			'curl_init',
 			'curl_setopt',
 		),
@@ -373,23 +375,17 @@ function amp_init() {
 	add_action( 'wp_loaded', 'amp_add_options_menu' );
 	add_action( 'wp_loaded', 'amp_bootstrap_admin' );
 
-	if ( AMP_Options_Manager::is_website_experience_enabled() ) {
-		add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
-		AMP_Post_Type_Support::add_post_type_support();
-		add_action( 'init', array( 'AMP_Post_Type_Support', 'add_post_type_support' ), 1000 ); // After post types have been defined.
-		add_action( 'parse_query', 'amp_correct_query_when_is_front_page' );
-		add_action( 'admin_bar_menu', 'amp_add_admin_bar_view_link', 100 );
-		add_action( 'wp_loaded', 'amp_editor_core_blocks' );
-		add_filter( 'request', 'amp_force_query_var_value' );
+	add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
+	AMP_Post_Type_Support::add_post_type_support();
+	add_action( 'init', array( 'AMP_Post_Type_Support', 'add_post_type_support' ), 1000 ); // After post types have been defined.
+	add_action( 'parse_query', 'amp_correct_query_when_is_front_page' );
+	add_action( 'admin_bar_menu', 'amp_add_admin_bar_view_link', 100 );
+	add_action( 'wp_loaded', 'amp_editor_core_blocks' );
+	add_action( 'amp_plugin_update', 'remove_amp_story_templates' );
+	add_filter( 'request', 'amp_force_query_var_value' );
 
-		// Redirect the old url of amp page to the updated url.
-		add_filter( 'old_slug_redirect_url', 'amp_redirect_old_slug_to_new_url' );
-	}
-
-	AMP_Story_Post_Type::register();
-
-	// Does its own is_stories_experience_enabled() check.
-	add_action( 'wp_loaded', 'amp_story_templates' );
+	// Redirect the old url of amp page to the updated url.
+	add_filter( 'old_slug_redirect_url', 'amp_redirect_old_slug_to_new_url' );
 
 	if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		if ( class_exists( 'WP_CLI\Dispatcher\CommandNamespace' ) ) {

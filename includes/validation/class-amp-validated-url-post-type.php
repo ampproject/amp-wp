@@ -176,7 +176,7 @@ class AMP_Validated_URL_Post_Type {
 	public static function add_admin_hooks() {
 		add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_post_list_screen_scripts' ] );
 
-		if ( AMP_Options_Manager::is_website_experience_enabled() && current_user_can( 'manage_options' ) ) {
+		if ( current_user_can( 'manage_options' ) ) {
 			add_filter( 'dashboard_glance_items', [ __CLASS__, 'filter_dashboard_glance_items' ] );
 			add_action( 'rightnow_end', [ __CLASS__, 'print_dashboard_glance_styles' ] );
 		}
@@ -614,11 +614,8 @@ class AMP_Validated_URL_Post_Type {
 		}
 		$url = $post->post_title;
 
-		$queried_object = get_post_meta( $post->ID, '_amp_queried_object', true );
-		$is_amp_story   = isset( $queried_object['id'], $queried_object['type'] ) && 'post' === $queried_object['type'] && AMP_Story_Post_Type::POST_TYPE_SLUG === get_post_type( $queried_object['id'] );
-
 		// Add AMP query var if in transitional mode.
-		if ( ! amp_is_canonical() && ! $is_amp_story ) {
+		if ( ! amp_is_canonical() ) {
 			$url = add_query_arg( amp_get_slug(), '', $url );
 		}
 
