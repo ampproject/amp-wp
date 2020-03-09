@@ -1,6 +1,6 @@
 <?php
 
-namespace Amp;
+namespace AmpProject;
 
 use DOMElement;
 use DOMNode;
@@ -8,7 +8,7 @@ use DOMNode;
 /**
  * Central helper functionality for all Amp-related PHP code.
  *
- * @package amp/common
+ * @package ampproject/common
  */
 final class Amp
 {

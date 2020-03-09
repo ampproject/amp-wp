@@ -2,23 +2,23 @@
 /**
  * Class AmpSchemaOrgMetadata.
  *
- * @package Amp\AmpWP
+ * @package AmpProject\AmpWP
  */
 
-namespace Amp\AmpWP\Transformer;
+namespace AmpProject\AmpWP\Transformer;
 
-use Amp\Attribute;
-use Amp\Dom\Document;
-use Amp\Optimizer\Configurable;
-use Amp\Optimizer\ErrorCollection;
-use Amp\Optimizer\Transformer;
-use Amp\Optimizer\TransformerConfiguration;
-use Amp\Tag;
+use AmpProject\Attribute;
+use AmpProject\Dom\Document;
+use AmpProject\Optimizer\Configurable;
+use AmpProject\Optimizer\ErrorCollection;
+use AmpProject\Optimizer\Transformer;
+use AmpProject\Optimizer\TransformerConfiguration;
+use AmpProject\Tag;
 
 /**
  * Ensure there is a schema.org script in the document.
  *
- * @package Amp\AmpWP
+ * @package AmpProject\AmpWP
  */
 final class AmpSchemaOrgMetadata implements Transformer, Configurable {
 

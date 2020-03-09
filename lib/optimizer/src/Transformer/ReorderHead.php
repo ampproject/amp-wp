@@ -1,13 +1,13 @@
 <?php
 
-namespace Amp\Optimizer\Transformer;
+namespace AmpProject\Optimizer\Transformer;
 
-use Amp\Amp;
-use Amp\Attribute;
-use Amp\Dom\Document;
-use Amp\Optimizer\ErrorCollection;
-use Amp\Optimizer\Transformer;
-use Amp\Tag;
+use AmpProject\Amp;
+use AmpProject\Attribute;
+use AmpProject\Dom\Document;
+use AmpProject\Optimizer\ErrorCollection;
+use AmpProject\Optimizer\Transformer;
+use AmpProject\Tag;
 use DOMElement;
 use DOMNode;
 
@@ -41,7 +41,7 @@ use DOMNode;
  * @version ea0959046c179953de43077eafaeb720f9b20bdf
  * @link    https://github.com/ampproject/amppackager/blob/ea0959046c179953de43077eafaeb720f9b20bdf/transformer/transformers/reorderhead.go
  *
- * @package amp/optimizer
+ * @package ampproject/optimizer
  */
 final class ReorderHead implements Transformer
 {

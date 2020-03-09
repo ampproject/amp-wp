@@ -1,20 +1,20 @@
 <?php
 
-namespace Amp\Optimizer\Transformer;
+namespace AmpProject\Optimizer\Transformer;
 
-use Amp\Amp;
-use Amp\Attribute;
-use Amp\Dom\Document;
-use Amp\Optimizer\Configurable;
-use Amp\Optimizer\Configuration\AmpRuntimeCssConfiguration;
-use Amp\Optimizer\Error;
-use Amp\Optimizer\ErrorCollection;
-use Amp\Optimizer\MakesRemoteRequests;
-use Amp\Optimizer\TransformerConfiguration;
-use Amp\RemoteGetRequest;
-use Amp\Optimizer\Transformer;
-use Amp\RuntimeVersion;
-use Amp\Tag;
+use AmpProject\Amp;
+use AmpProject\Attribute;
+use AmpProject\Dom\Document;
+use AmpProject\Optimizer\Configurable;
+use AmpProject\Optimizer\Configuration\AmpRuntimeCssConfiguration;
+use AmpProject\Optimizer\Error;
+use AmpProject\Optimizer\ErrorCollection;
+use AmpProject\Optimizer\MakesRemoteRequests;
+use AmpProject\Optimizer\TransformerConfiguration;
+use AmpProject\RemoteGetRequest;
+use AmpProject\Optimizer\Transformer;
+use AmpProject\RuntimeVersion;
+use AmpProject\Tag;
 use DOMElement;
 use Exception;
 
@@ -34,7 +34,7 @@ use Exception;
  * @version c9993b8ac4d17d1f05d3a1289956dadf3f9c370a
  * @link    https://github.com/ampproject/amppackager/blob/c9993b8ac4d17d1f05d3a1289956dadf3f9c370a/transformer/transformers/ampruntimecss.go
  *
- * @package amp/optimizer
+ * @package ampproject/optimizer
  */
 final class AmpRuntimeCss implements Transformer, Configurable, MakesRemoteRequests
 {

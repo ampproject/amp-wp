@@ -2,10 +2,10 @@
 /**
  * Class CachedData.
  *
- * @package Amp\AmpWP
+ * @package AmpProject\AmpWP
  */
 
-namespace Amp\AmpWP;
+namespace AmpProject\AmpWP;
 
 use DateTimeImmutable;
 use DateTimeInterface;
@@ -13,7 +13,7 @@ use DateTimeInterface;
 /**
  * Serializable object that represents cached data together with its expiry time.
  *
- * @package Amp\AmpWP
+ * @package AmpProject\AmpWP
  */
 final class CachedData {
 

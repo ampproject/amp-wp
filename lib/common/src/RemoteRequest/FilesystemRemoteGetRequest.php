@@ -1,10 +1,10 @@
 <?php
 
-namespace Amp\RemoteRequest;
+namespace AmpProject\RemoteRequest;
 
-use Amp\Exception\FailedToGetFromRemoteUrl;
-use Amp\RemoteGetRequest;
-use Amp\Response;
+use AmpProject\Exception\FailedToGetFromRemoteUrl;
+use AmpProject\RemoteGetRequest;
+use AmpProject\Response;
 use Exception;
 use LogicException;
 
@@ -13,7 +13,7 @@ use LogicException;
  *
  * This can be used to provide offline fallbacks.
  *
- * @package amp/common
+ * @package ampproject/common
  */
 final class FilesystemRemoteGetRequest implements RemoteGetRequest
 {

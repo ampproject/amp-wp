@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use Amp\AmpWP\Tests\PrivateAccess;
+use AmpProject\AmpWP\Tests\PrivateAccess;
 
 /**
  * Tests for Test_AMP_CLI_Validation_Command class.

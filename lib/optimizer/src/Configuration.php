@@ -1,22 +1,22 @@
 <?php
 
-namespace Amp\Optimizer;
+namespace AmpProject\Optimizer;
 
-use Amp\Optimizer\Configuration\AmpRuntimeCssConfiguration;
-use Amp\Optimizer\Configuration\TransformedIdentifierConfiguration;
-use Amp\Optimizer\Exception\InvalidConfigurationValue;
-use Amp\Optimizer\Exception\UnknownConfigurationClass;
-use Amp\Optimizer\Exception\UnknownConfigurationKey;
-use Amp\Optimizer\Transformer\AmpBoilerplate;
-use Amp\Optimizer\Transformer\AmpRuntimeCss;
-use Amp\Optimizer\Transformer\ReorderHead;
-use Amp\Optimizer\Transformer\ServerSideRendering;
-use Amp\Optimizer\Transformer\TransformedIdentifier;
+use AmpProject\Optimizer\Configuration\AmpRuntimeCssConfiguration;
+use AmpProject\Optimizer\Configuration\TransformedIdentifierConfiguration;
+use AmpProject\Optimizer\Exception\InvalidConfigurationValue;
+use AmpProject\Optimizer\Exception\UnknownConfigurationClass;
+use AmpProject\Optimizer\Exception\UnknownConfigurationKey;
+use AmpProject\Optimizer\Transformer\AmpBoilerplate;
+use AmpProject\Optimizer\Transformer\AmpRuntimeCss;
+use AmpProject\Optimizer\Transformer\ReorderHead;
+use AmpProject\Optimizer\Transformer\ServerSideRendering;
+use AmpProject\Optimizer\Transformer\TransformedIdentifier;
 
 /**
  * Configuration object that validates and stores configuration settings.
  *
- * @package amp/optimizer
+ * @package ampproject/optimizer
  */
 final class Configuration
 {

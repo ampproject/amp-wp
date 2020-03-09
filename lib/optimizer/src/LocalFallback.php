@@ -1,8 +1,8 @@
 <?php
 
-namespace Amp\Optimizer;
+namespace AmpProject\Optimizer;
 
-use Amp\Amp;
+use AmpProject\Amp;
 
 final class LocalFallback
 {

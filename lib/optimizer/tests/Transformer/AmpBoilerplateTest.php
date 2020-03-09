@@ -1,23 +1,22 @@
 <?php
 
-namespace Amp\Optimizer\Transformer;
+namespace AmpProject\Optimizer\Transformer;
 
-use Amp\Amp;
-use Amp\Attribute;
-use Amp\Dom\Document;
-use Amp\Optimizer\ErrorCollection;
-use Amp\Optimizer\Tests\MarkupComparison;
-use Amp\Optimizer\Tests\TestMarkup;
+use AmpProject\Amp;
+use AmpProject\Attribute;
+use AmpProject\Dom\Document;
+use AmpProject\Optimizer\ErrorCollection;
+use AmpProject\Optimizer\Tests\MarkupComparison;
+use AmpProject\Optimizer\Tests\TestMarkup;
 use PHPUnit\Framework\TestCase;
 
 /**
  * Test the AmpBoilerplate transformer.
  *
- * @package amp/optimizer
+ * @package ampproject/optimizer
  */
 final class AmpBoilerplateTest extends TestCase
 {
-
     use MarkupComparison;
 
     /**
@@ -113,7 +112,7 @@ final class AmpBoilerplateTest extends TestCase
     /**
      * Test the transform() method.
      *
-     * @covers       \Amp\Optimizer\Transformer\AmpBoilerplate::transform()
+     * @covers       \AmpProject\Optimizer\Transformer\AmpBoilerplate::transform()
      * @dataProvider dataTransform()
      *
      * @param string $source       String of source HTML.

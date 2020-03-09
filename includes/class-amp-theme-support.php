@@ -5,18 +5,18 @@
  * @package AMP
  */
 
-use Amp\Amp;
-use Amp\AmpWP\CachedRemoteGetRequest;
-use Amp\AmpWP\ConfigurationArgument;
-use Amp\AmpWP\Transformer;
-use Amp\Attribute;
-use Amp\Dom\Document;
-use Amp\Extension;
-use Amp\Optimizer;
-use Amp\RemoteRequest\CurlRemoteGetRequest;
-use Amp\RemoteRequest\FallbackRemoteGetRequest;
-use Amp\RemoteRequest\FilesystemRemoteGetRequest;
-use Amp\Tag;
+use AmpProject\Amp;
+use AmpProject\AmpWP\CachedRemoteGetRequest;
+use AmpProject\AmpWP\ConfigurationArgument;
+use AmpProject\AmpWP\Transformer;
+use AmpProject\Attribute;
+use AmpProject\Dom\Document;
+use AmpProject\Extension;
+use AmpProject\Optimizer;
+use AmpProject\RemoteRequest\CurlRemoteGetRequest;
+use AmpProject\RemoteRequest\FallbackRemoteGetRequest;
+use AmpProject\RemoteRequest\FilesystemRemoteGetRequest;
+use AmpProject\Tag;
 
 /**
  * Class AMP_Theme_Support
@@ -194,31 +194,19 @@ class AMP_Theme_Support {
 
 		self::$init_start_time = microtime( true );
 
-		if ( AMP_Options_Manager::is_website_experience_enabled() ) {
-			if ( self::READER_MODE_SLUG !== self::get_support_mode() ) {
-				// Ensure extra theme support for core themes is in place.
-				AMP_Core_Theme_Sanitizer::extend_theme_support();
-			}
-
-			add_action( 'widgets_init', [ __CLASS__, 'register_widgets' ] );
-
-			/*
-			 * Note that wp action is use instead of template_redirect because some themes/plugins output
-			 * the response at this action and then short-circuit with exit. So this is why the the preceding
-			 * action to template_redirect--the wp action--is used instead.
-			 */
-			add_action( 'wp', [ __CLASS__, 'finish_init' ], PHP_INT_MAX );
-		} elseif ( AMP_Options_Manager::is_stories_experience_enabled() ) {
-			add_action(
-				'wp',
-				static function () {
-					if ( is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
-						self::finish_init();
-					}
-				},
-				PHP_INT_MAX
-			);
+		if ( self::READER_MODE_SLUG !== self::get_support_mode() ) {
+			// Ensure extra theme support for core themes is in place.
+			AMP_Core_Theme_Sanitizer::extend_theme_support();
 		}
+
+		add_action( 'widgets_init', [ __CLASS__, 'register_widgets' ] );
+
+		/*
+		 * Note that wp action is use instead of template_redirect because some themes/plugins output
+		 * the response at this action and then short-circuit with exit. So this is why the the preceding
+		 * action to template_redirect--the wp action--is used instead.
+		 */
+		add_action( 'wp', [ __CLASS__, 'finish_init' ], PHP_INT_MAX );
 	}
 
 	/**
@@ -460,7 +448,7 @@ class AMP_Theme_Support {
 		$theme_support = self::get_theme_support_args();
 		if ( ! empty( $theme_support['template_dir'] ) ) {
 			self::add_amp_template_filters();
-		} elseif ( $is_reader_mode && ! is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
+		} elseif ( $is_reader_mode ) {
 			add_filter(
 				'template_include',
 				static function() {
@@ -472,7 +460,7 @@ class AMP_Theme_Support {
 
 		self::add_hooks();
 		self::$sanitizer_classes = amp_get_content_sanitizers();
-		if ( ! $is_reader_mode || is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
+		if ( ! $is_reader_mode ) {
 			self::$sanitizer_classes = AMP_Validation_Manager::filter_sanitizer_args( self::$sanitizer_classes );
 		}
 		self::$embed_handlers = self::register_content_embed_handlers();
@@ -497,7 +485,7 @@ class AMP_Theme_Support {
 		$has_query_var = false !== get_query_var( amp_get_slug(), false ); // May come from URL param or endpoint slug.
 		$has_url_param = isset( $_GET[ amp_get_slug() ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
-		if ( amp_is_canonical() || is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
+		if ( amp_is_canonical() ) {
 			/*
 			 * When AMP-first/canonical, then when there is an /amp/ endpoint or ?amp URL param,
 			 * then a redirect needs to be done to the URL without any AMP indicator in the URL.
@@ -2141,7 +2129,7 @@ class AMP_Theme_Support {
 				AMP_HTTP::send_server_timing( 'amp_processor_cache_hit', -$prepare_response_start );
 
 				// Redirect to non-AMP version.
-				if ( ! amp_is_canonical() && ! is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) && $blocking_error_count > 0 ) {
+				if ( ! amp_is_canonical() && $blocking_error_count > 0 ) {
 					if ( AMP_Validation_Manager::has_cap() ) {
 						$non_amp_url = add_query_arg( AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR, $blocking_error_count, $non_amp_url );
 					}
@@ -2182,19 +2170,6 @@ class AMP_Theme_Support {
 		$dom_parse_start = microtime( true );
 
 		$dom = Document::fromHtml( $response );
-
-		// Move anything after </html>, such as Query Monitor output added at shutdown, to be moved before </body>.
-		while ( $dom->documentElement->nextSibling ) {
-			// Trailing elements after </html> will get wrapped in additional <html> elements.
-			if ( 'html' === $dom->documentElement->nextSibling->nodeName ) {
-				while ( $dom->documentElement->nextSibling->firstChild ) {
-					$dom->body->appendChild( $dom->documentElement->nextSibling->firstChild );
-				}
-				$dom->removeChild( $dom->documentElement->nextSibling );
-			} else {
-				$dom->body->appendChild( $dom->documentElement->nextSibling );
-			}
-		}
 
 		AMP_HTTP::send_server_timing( 'amp_dom_parse', -$dom_parse_start, 'AMP DOM Parse' );
 
@@ -2292,7 +2267,7 @@ class AMP_Theme_Support {
 			 * already surfaced inside of WordPress. This is intended to not serve dirty AMP, but rather a
 			 * non-AMP document (intentionally not valid AMP) that contains the AMP runtime and AMP components.
 			 */
-			if ( amp_is_canonical() || is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
+			if ( amp_is_canonical() ) {
 				$dom->documentElement->removeAttribute( Attribute::AMP );
 				$dom->documentElement->removeAttribute( Attribute::AMP_EMOJI );
 				$dom->documentElement->removeAttribute( Attribute::AMP_EMOJI_ALT );
@@ -2362,7 +2337,7 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Get the Amp\Optimizer configuration object to use.
+	 * Get the AmpProject\Optimizer configuration object to use.
 	 *
 	 * @param array $args Associative array of arguments to pass into the transformation engine.
 	 * @return Optimizer\Configuration Optimizer configuration to use.

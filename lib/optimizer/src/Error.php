@@ -1,11 +1,11 @@
 <?php
 
-namespace Amp\Optimizer;
+namespace AmpProject\Optimizer;
 
 /**
  * Error object to transport optimization errors.
  *
- * @package amp/optimizer
+ * @package ampproject/optimizer
  */
 interface Error
 {

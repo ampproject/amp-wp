@@ -1,11 +1,11 @@
 <?php
 
-namespace Amp;
+namespace AmpProject;
 
 /**
  * Interface with constants for the different layouts.
  *
- * @package amp/common
+ * @package ampproject/common
  */
 interface Layout
 {

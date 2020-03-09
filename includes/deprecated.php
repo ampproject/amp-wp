@@ -42,10 +42,6 @@ function amp_maybe_add_actions() {
 		return;
 	}
 
-	if ( is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
-		return;
-	}
-
 	$is_amp_endpoint = is_amp_endpoint();
 
 	/**
@@ -211,7 +207,7 @@ function amp_post_template_add_scripts( $amp_template ) {
  * Print boilerplate CSS.
  *
  * @codeCoverageIgnore
- * @deprecated Boilerplate is now automatically added via the amp/optimizer library.
+ * @deprecated Boilerplate is now automatically added via the ampproject/optimizer library.
  * @since 0.3
  * @see amp_get_boilerplate_code()
  */

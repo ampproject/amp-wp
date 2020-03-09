@@ -39,62 +39,6 @@ const sharedConfig = {
 	},
 };
 
-const ampStories = {
-	...defaultConfig,
-	...sharedConfig,
-	entry: {
-		'amp-stories-editor': './assets/src/stories-editor/index.js',
-	},
-	output: {
-		path: path.resolve( process.cwd(), 'assets', 'js' ),
-		filename: '[name].js',
-	},
-	module: {
-		...defaultConfig.module,
-		rules: [
-			...defaultConfig.module.rules,
-			{
-				test: /\.svg$/,
-				loader: 'svg-inline-loader',
-			},
-			{
-				test: /\.css$/,
-				use: [
-					MiniCssExtractPlugin.loader,
-					'css-loader',
-					'postcss-loader',
-				],
-			},
-		],
-	},
-	plugins: [
-		...defaultConfig.plugins,
-		new MiniCssExtractPlugin( {
-			filename: '../css/[name]-compiled.css',
-		} ),
-		new RtlCssPlugin( {
-			filename: '../css/[name]-compiled-rtl.css',
-		} ),
-		new WebpackBar( {
-			name: 'AMP Stories',
-			color: '#fddb33',
-		} ),
-	],
-	optimization: {
-		...sharedConfig.optimization,
-		splitChunks: {
-			cacheGroups: {
-				stories: {
-					name: 'amp-stories-editor',
-					test: /\.css$/,
-					chunks: 'all',
-					enforce: true,
-				},
-			},
-		},
-	},
-};
-
 const ampValidation = {
 	...defaultConfig,
 	...sharedConfig,
@@ -234,7 +178,6 @@ const wpPolyfills = {
 					case '@wordpress/dom-ready':
 					case '@wordpress/i18n':
 					case '@wordpress/polyfill':
-					case '@wordpress/server-side-render':
 					case '@wordpress/url':
 						return undefined;
 
@@ -247,7 +190,6 @@ const wpPolyfills = {
 					case '@wordpress/dom-ready':
 					case '@wordpress/i18n':
 					case '@wordpress/polyfill':
-					case '@wordpress/server-side-render':
 					case '@wordpress/url':
 						return undefined;
 
@@ -265,13 +207,11 @@ const wpPolyfills = {
 		'wp-i18n': './assets/src/polyfills/wp-i18n.js',
 		'wp-dom-ready': './assets/src/polyfills/wp-dom-ready.js',
 		'wp-polyfill': './assets/src/polyfills/wp-polyfill.js',
-		'wp-server-side-render': './assets/src/polyfills/wp-server-side-render.js',
 		'wp-url': './assets/src/polyfills/wp-url.js',
 	},
 };
 
 module.exports = [
-	ampStories,
 	ampValidation,
 	blockEditor,
 	classicEditor,

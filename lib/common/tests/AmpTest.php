@@ -1,17 +1,21 @@
 <?php
 
-use Amp\Amp;
-use Amp\Attribute;
-use Amp\Dom\Document;
-use Amp\Extension;
-use Amp\Tag;
+namespace AmpProject\Common;
+
+use AmpProject\Amp;
+use AmpProject\Attribute;
+use AmpProject\Dom\Document;
+use AmpProject\Extension;
+use AmpProject\Tag;
+use DOMElement;
+use DOMNode;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Tests for Amp\Amp.
+ * Tests for AmpProject\Amp.
  *
  * @covers Amp
- * @package amp/common
+ * @package ampproject/common
  */
 class AmpTest extends TestCase
 {

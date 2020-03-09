@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use Amp\Dom\Document;
+use AmpProject\Dom\Document;
 
 /**
  * Tests for AMP_Meta_Sanitizer.
