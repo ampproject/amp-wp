@@ -2,7 +2,6 @@
 
 module.exports = function( grunt ) {
 	'use strict';
-	require( 'dotenv' ).config();
 
 	// Root paths to include in the plugin build ZIP when running `npm run build`.
 	const productionIncludedRootFiles = [
