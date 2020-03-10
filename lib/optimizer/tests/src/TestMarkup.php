@@ -78,7 +78,7 @@ final class TestMarkup
     const SCRIPT_AMPMRAID = '<script async host-service="amp-mraid" src="https://cdn.ampproject.org/v0/amp-mraid-0.1.js"></script>';
 
     // ScriptAMPMustache is the script for amp-mustache.
-    const SCRIPT_AMPMUSTACHE = '<script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>';
+    const SCRIPT_AMPMUSTACHE = '<script async="" custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>';
 
     // ScriptAMPRuntime is the AMP script tag.
     const SCRIPT_AMPRUNTIME = '<script async src="https://cdn.ampproject.org/v0.js"></script>';
