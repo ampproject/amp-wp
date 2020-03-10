@@ -853,7 +853,7 @@ final class Document extends DOMDocument
     }
 
     /**
-     * Secures instances of script[template="amp-mustache"] be renaming element to tmp-script, as a workaround to a libxml parsing issue.
+     * Secures instances of script[template="amp-mustache"] by renaming element to tmp-script, as a workaround to a libxml parsing issue.
      *
      * This script can have closing tags of its children table and td stripped.
      * So this changes its name from script to tmp-script to avoid this.
@@ -861,7 +861,7 @@ final class Document extends DOMDocument
      * @link https://github.com/ampproject/amp-wp/issues/4254
      * @see restoreMustacheScriptTemplates() Reciprocal function.
      *
-     * @param string $html To replace the tag name of the mustache templates in.
+     * @param string $html To replace the tag name that contains the mustache templates.
      * @return string The HTML, with the tag name of the mustache templates replaced.
      */
     private function secureMustacheScriptTemplates($html)
