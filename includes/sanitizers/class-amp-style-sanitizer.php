@@ -2527,11 +2527,23 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function collect_inline_styles( $element ) {
 		$style_attribute = $element->getAttributeNode( 'style' );
-		if ( ! $style_attribute || ! trim( $style_attribute->nodeValue ) ) {
+		if ( empty( $style_attribute ) ) {
 			return;
 		}
 
-		$value = $style_attribute->nodeValue;
+		$value = trim( $style_attribute->nodeValue );
+		if ( empty( $value ) ) {
+			return;
+		}
+
+		// Skip processing stylesheets that contain mustache template variables if the element is inside of a mustache template.
+		if (
+			preg_match( '/{{[^}]+?}}/', $value ) &&
+			0 !== $this->dom->xpath->query( '//template[ @type="amp-mustache" ]//.', $element )->length
+		) {
+			return;
+		}
+
 		$class = 'amp-wp-' . substr( md5( $value ), 0, 7 );
 		$root  = ':root' . str_repeat( ':not(#_)', self::INLINE_SPECIFICITY_MULTIPLIER );
 		$rule  = sprintf( '%s .%s { %s }', $root, $class, $style_attribute->nodeValue );
