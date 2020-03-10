@@ -362,7 +362,7 @@ final class Document extends DOMDocument
         $source = $this->convertAmpBindAttributes($source);
         $source = $this->replaceSelfClosingTags($source);
         $source = $this->maybeReplaceNoscriptElements($source);
-        $source = $this->replaceMustacheTemplates($source);
+        $source = $this->secureMustacheScriptTemplates($source);
         $source = $this->secureDoctypeNode($source);
         $source = $this->convertAmpEmojiAttribute($source);
 
@@ -385,7 +385,7 @@ final class Document extends DOMDocument
 
         if ($success) {
             $this->normalizeHtmlAttributes();
-            $this->restoreMustacheTemplates();
+            $this->restoreMustacheScriptTemplates();
 
             // Remove http-equiv charset again.
             $meta = $this->head->firstChild;
@@ -853,18 +853,18 @@ final class Document extends DOMDocument
     }
 
     /**
-     * Replaces the tag name of script[template="amp-mustache"], as a workaround to a parsing issue.
+     * Secures instances of script[template="amp-mustache"] be renaming element to tmp-script, as a workaround to a libxml parsing issue.
      *
      * This script can have closing tags of its children table and td stripped.
      * So this changes its name from script to tmp-script to avoid this.
      *
      * @link https://github.com/ampproject/amp-wp/issues/4254
-     * @see restoreMustacheTemplates() Reciprocal function.
+     * @see restoreMustacheScriptTemplates() Reciprocal function.
      *
      * @param string $html To replace the tag name of the mustache templates in.
      * @return string The HTML, with the tag name of the mustache templates replaced.
      */
-    private function replaceMustacheTemplates($html)
+    private function secureMustacheScriptTemplates($html)
     {
         return preg_replace(
             '#<script(\s[^>]*?template=(["\']?)amp-mustache\2[^>]*)>(.*?)</script\s*?>#i',
@@ -876,9 +876,9 @@ final class Document extends DOMDocument
     /**
      * Restores the tag names of script[template="amp-mustache"] elements that were replaced earlier.
      *
-     * @see replaceMustacheTemplates() Reciprocal function.
+     * @see secureMustacheScriptTemplates() Reciprocal function.
      */
-    private function restoreMustacheTemplates()
+    private function restoreMustacheScriptTemplates()
     {
         $tmp_script_elements = iterator_to_array($this->getElementsByTagName('tmp-script'));
         foreach ($tmp_script_elements as $tmp_script_element) {
