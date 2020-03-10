@@ -19,14 +19,13 @@
     "sabberworm/php-css-parser": "dev-master#134f4e6"
   },
   "require-dev": {
+    "civicrm/composer-downloads-plugin": "^2.1",
     "dealerdirect/phpcodesniffer-composer-installer": "0.6.2",
-    "giacocorsiglia/wordpress-stubs": "^5.1",
+    "php-stubs/wordpress-stubs": "^5.3.2",
     "mikey179/vfsstream": "1.6.8",
     "phpcompatibility/phpcompatibility-wp": "2.1.0",
     "roave/security-advisories": "dev-master",
     "sirbrillig/phpcs-variable-analysis": "2.8.1",
-    "tm/composer-tool-installer-plugin": "^0.1.0",
-    "wp-cli/wp-cli": "2.4.1",
     "wp-coding-standards/wpcs": "2.2.1",
     "xwp/wp-dev-lib": "1.5.0"
   },
@@ -49,12 +48,26 @@
         "Fix validation of selectors": "patches/php-css-parser-138-extended.patch",
         "Validate name-start code points for identifier <https://github.com/sabberworm/PHP-CSS-Parser/pull/185>": "patches/php-css-parser-pull-185.patch"
       }
+    },
+    "downloads": {
+      "phpstan": {
+        "url": "https://github.com/phpstan/phpstan/releases/download/0.12.14/phpstan.phar",
+        "path": "vendor/bin/phpstan",
+        "type": "phar"
+      }
     }
   },
   "autoload": {
+    "classmap": [ "includes/" ],
     "psr-4": {
       "AmpProject\\AmpWP\\": "src/"
-    }
+    },
+    "files": [
+      "back-compat/back-compat.php",
+      "includes/amp-helper-functions.php",
+      "includes/admin/functions.php",
+      "includes/deprecated.php"
+    ]
   },
   "autoload-dev": {
     "psr-4": {
@@ -83,5 +96,8 @@
     }
   ],
   "minimum-stability": "dev",
-  "prefer-stable": true
+  "prefer-stable": true,
+  "scripts": {
+    "analyse": "phpstan analyse src includes -l0 --ansi"
+  }
 }
