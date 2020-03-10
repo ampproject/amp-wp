@@ -255,7 +255,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				<form id="myform" role="search" class="search-form" method="get" action="https://example.com/" target="_top" style="color: blue">
 					<amp-autocomplete filter="substring" items="." filter-value="title" max-entries="6" min-characters="2" submit-on-enter="" src="https://example.com/autocomplete/">
 						<template type="amp-mustache" id="amp-template-custom">
-							<div class="city-item" data-value="{{city}}, {{state}}">
+							<div class="city-item" data-value="{{city}}, {{state}}" style="outline: solid 1px black;">
 								<div style="color: {{regionColor}}">{{city}}, {{state}}</div>
 								<div class="custom-population">Population: {{population}}</div>
 							</div>
@@ -267,7 +267,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				<form id="myform" role="search" class="search-form amp-wp-f2a1aff" method="get" action="https://example.com/" target="_top" data-amp-original-style="color: blue">
 					<amp-autocomplete filter="substring" items="." filter-value="title" max-entries="6" min-characters="2" submit-on-enter="" src="https://example.com/autocomplete/">
 						<template type="amp-mustache" id="amp-template-custom">
-							<div class="city-item" data-value="{{city}}, {{state}}">
+							<div class="city-item amp-wp-d4ea4c7" data-value="{{city}}, {{state}}" data-amp-original-style="outline: solid 1px black;">
 								<div style="color: {{regionColor}}">{{city}}, {{state}}</div>
 								<div class="custom-population">Population: {{population}}</div>
 							</div>
@@ -278,6 +278,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				[
 					'.custom-population{color:red}',
 					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-f2a1aff{color:blue}',
+					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-d4ea4c7{outline:solid 1px black}',
 				],
 			],
 		];
