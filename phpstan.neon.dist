@@ -2,7 +2,7 @@ includes:
 	# @see https://github.com/phpstan/phpstan-src/blob/master/conf/bleedingEdge.neon
 	- phar://phpstan.phar/conf/bleedingEdge.neon
 parameters:
-	level: 0
+	level: 1
 	inferPrivatePropertyTypeFromConstructor: true
 	paths:
 		- %currentWorkingDirectory%/includes/
@@ -22,3 +22,6 @@ parameters:
 	excludes_analyse:
 		# PHPStan cannot yet deal with view templates. See https://github.com/phpstan/phpstan/issues/351
 		- %currentWorkingDirectory%/includes/templates/amp-enabled-classic-editor-toggle.php
+	ignoreErrors:
+		# Uses func_get_args()
+		- '#^Function apply_filters(_ref_array)? invoked with [34567] parameters, 2 required\.$#'

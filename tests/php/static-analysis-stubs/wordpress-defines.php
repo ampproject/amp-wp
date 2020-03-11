@@ -7,7 +7,14 @@ define( 'ABSPATH', './' );
 define( 'WP_DEBUG', true );
 define( 'WP_DEBUG_LOG', true );
 define( 'WPMU_PLUGIN_DIR', './' );
+define( 'WP_CONTENT_DIR', 'some_string' );
+define( 'WP_CONTENT_URL', 'some_string' );
+define( 'WP_PLUGIN_DIR', 'some_string' );
+define( 'WP_PLUGIN_URL', 'some_string' );
+define( 'WPMU_PLUGIN_URL', 'some_string' );
+define( 'WPINC', 'some_string' );
 define( 'EMPTY_TRASH_DAYS', 30 * 86400 );
+define( 'EP_PERMALINK', 1 );
 
 // Constants for expressing human-readable intervals.
 define( 'MINUTE_IN_SECONDS', 60 );
