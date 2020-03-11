@@ -166,7 +166,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				[
 					'@page{margin:1cm}body{color:black}',
 				],
-				[ AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE, AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE, AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE ],
+				[ AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE, AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE ],
 			],
 
 			'allowed_at_rules_retained' => [
