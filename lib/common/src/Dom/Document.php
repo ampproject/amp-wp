@@ -364,6 +364,7 @@ final class Document extends DOMDocument
         $source = $this->convertAmpBindAttributes($source);
         $source = $this->replaceSelfClosingTags($source);
         $source = $this->maybeReplaceNoscriptElements($source);
+        $source = $this->secureMustacheScriptTemplates($source);
         $source = $this->secureDoctypeNode($source);
         $source = $this->convertAmpEmojiAttribute($source);
 
@@ -386,6 +387,7 @@ final class Document extends DOMDocument
 
         if ($success) {
             $this->normalizeHtmlAttributes();
+            $this->restoreMustacheScriptTemplates();
 
             // Remove http-equiv charset again.
             $meta = $this->head->firstChild;
@@ -855,6 +857,47 @@ final class Document extends DOMDocument
             $this->noscriptPlaceholderComments,
             $html
         );
+    }
+
+    /**
+     * Secures instances of script[template="amp-mustache"] by renaming element to tmp-script, as a workaround to a libxml parsing issue.
+     *
+     * This script can have closing tags of its children table and td stripped.
+     * So this changes its name from script to tmp-script to avoid this.
+     *
+     * @link https://github.com/ampproject/amp-wp/issues/4254
+     * @see restoreMustacheScriptTemplates() Reciprocal function.
+     *
+     * @param string $html To replace the tag name that contains the mustache templates.
+     * @return string The HTML, with the tag name of the mustache templates replaced.
+     */
+    private function secureMustacheScriptTemplates($html)
+    {
+        return preg_replace(
+            '#<script(\s[^>]*?template=(["\']?)amp-mustache\2[^>]*)>(.*?)</script\s*?>#i',
+            '<tmp-script$1>$3</tmp-script>',
+            $html
+        );
+    }
+
+    /**
+     * Restores the tag names of script[template="amp-mustache"] elements that were replaced earlier.
+     *
+     * @see secureMustacheScriptTemplates() Reciprocal function.
+     */
+    private function restoreMustacheScriptTemplates()
+    {
+        $tmp_script_elements = iterator_to_array($this->getElementsByTagName('tmp-script'));
+        foreach ($tmp_script_elements as $tmp_script_element) {
+            $script = $this->createElement(Tag::SCRIPT);
+            foreach ($tmp_script_element->attributes as $attr) {
+                $script->setAttribute($attr->nodeName, $attr->nodeValue);
+            }
+            while ($tmp_script_element->firstChild) {
+                $script->appendChild($tmp_script_element->firstChild);
+            }
+            $tmp_script_element->parentNode->replaceChild($script, $tmp_script_element);
+        }
     }
 
     /**

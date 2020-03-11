@@ -45,6 +45,12 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	const INVALID_CDATA_CSS_IMPORTANT          = 'INVALID_CDATA_CSS_IMPORTANT';
 	const INVALID_CDATA_CONTENTS               = 'INVALID_CDATA_CONTENTS';
 	const INVALID_CDATA_HTML_COMMENTS          = 'INVALID_CDATA_HTML_COMMENTS';
+	const JSON_ERROR_CTRL_CHAR                 = 'JSON_ERROR_CTRL_CHAR';
+	const JSON_ERROR_DEPTH                     = 'JSON_ERROR_DEPTH';
+	const JSON_ERROR_EMPTY                     = 'JSON_ERROR_EMPTY';
+	const JSON_ERROR_STATE_MISMATCH            = 'JSON_ERROR_STATE_MISMATCH';
+	const JSON_ERROR_SYNTAX                    = 'JSON_ERROR_SYNTAX';
+	const JSON_ERROR_UTF8                      = 'JSON_ERROR_UTF8';
 	const INVALID_ATTR_VALUE                   = 'INVALID_ATTR_VALUE';
 	const INVALID_ATTR_VALUE_CASEI             = 'INVALID_ATTR_VALUE_CASEI';
 	const INVALID_ATTR_VALUE_REGEX             = 'INVALID_ATTR_VALUE_REGEX';
@@ -923,7 +929,48 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				return [ 'code' => self::MANDATORY_CDATA_MISSING_OR_INCORRECT ];
 			}
 		}
+
+		// When the CDATA is expected to be JSON, ensure it's valid JSON.
+		if ( 'script' === $element->nodeName && in_array( $element->getAttribute( 'type' ), [ 'application/json', 'application/ld+json' ], true ) ) {
+			if ( '' === trim( $element->textContent ) ) {
+				return [ 'code' => self::JSON_ERROR_EMPTY ];
+			}
+
+			json_decode( $element->textContent );
+			$json_last_error = json_last_error();
+
+			if ( JSON_ERROR_NONE !== $json_last_error ) {
+				return [ 'code' => $this->get_json_error_code( $json_last_error ) ];
+			}
+		}
+
 		return true;
+	}
+
+	/**
+	 * Gets the JSON error code for the last error.
+	 *
+	 * @link https://www.php.net/manual/en/function.json-last-error.php#refsect1-function.json-last-error-returnvalues
+	 *
+	 * @param int $json_last_error The last JSON error code.
+	 * @return string The error code for the last JSON error.
+	 */
+	private function get_json_error_code( $json_last_error ) {
+		static $possible_json_errors = [
+			'JSON_ERROR_CTRL_CHAR',
+			'JSON_ERROR_DEPTH',
+			'JSON_ERROR_STATE_MISMATCH',
+			'JSON_ERROR_SYNTAX',
+			'JSON_ERROR_UTF8',
+		];
+
+		foreach ( $possible_json_errors as $possible_error ) {
+			if ( constant( $possible_error ) === $json_last_error ) {
+				return $possible_error;
+			}
+		}
+
+		return 'JSON_ERROR_SYNTAX';
 	}
 
 	/**
@@ -1191,7 +1238,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 			// Check the context to see if we are currently within a template tag.
 			// If this is the case and the attribute value contains a template placeholder, we skip sanitization.
-			if ( ! empty( $this->open_elements['template'] ) && preg_match( '/{{.*?}}/', $attr_node->nodeValue ) ) {
+			if ( ! empty( $this->open_elements['template'] ) && preg_match( '/{{[^}]+?}}/', $attr_node->nodeValue ) ) {
 				continue;
 			}
 

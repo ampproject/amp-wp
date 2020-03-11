@@ -272,6 +272,41 @@ class DocumentTest extends TestCase
                 '<!DOCTYPE html><html><head profile=""></head><body></body></html>',
                 '<!DOCTYPE html><html><head><meta charset="utf-8"></head><body></body></html>',
             ],
+            'amp_mustache_template_with_table'         => [
+                'utf-8',
+                '<!DOCTYPE html><html>' . $head . '<body><template type="amp-mustache"><table><tr>{{#example}}<td></td>{{/example}}</tr></table></template></body></html>',
+                '<!DOCTYPE html><html>' . $head . '<body><template type="amp-mustache"><table><tr>{{#example}}<td></td>{{/example}}</tr></table></template></body></html>',
+            ],
+            'amp_mustache_template_script_with_table'  => [
+                'utf-8',
+                '<!DOCTYPE html><html>' . $head . '<body><script id="baz" type="text/plain" template="amp-mustache"><table><tr>{{#example}}<td></td>{{/example}}</tr></table></script></body></html>',
+                '<!DOCTYPE html><html>' . $head . '<body><script id="baz" type="text/plain" template="amp-mustache"><table><tr>{{#example}}<td></td>{{/example}}</tr></table></script></body></html>',
+            ],
+            'amp_mustache_spaces_in_closing_script'    => [
+                'utf-8',
+                '<!DOCTYPE html><html>' . $head . '<body><script id="baz" type="text/plain" template="amp-mustache"><table><tr>{{#example}}<td></td>{{/example}}</tr></table></script  ></body></html>',
+                '<!DOCTYPE html><html>' . $head . '<body><script id="baz" type="text/plain" template="amp-mustache"><table><tr>{{#example}}<td></td>{{/example}}</tr></table></script></body></html>',
+            ],
+            'amp_mustache_template_single_quotes'      => [
+                'utf-8',
+                '<!DOCTYPE html><html>' . $head . '<body><script type=\'text/plain\' template=\'amp-mustache\'><table><tr>{{#example}}<td></td>{{/example}}</tr></table></script></body></html>',
+                '<!DOCTYPE html><html>' . $head . '<body><script type="text/plain" template="amp-mustache"><table><tr>{{#example}}<td></td>{{/example}}</tr></table></script></body></html>',
+            ],
+            'amp_mustache_no_quote'                    => [
+                'utf-8',
+                '<!DOCTYPE html><html>' . $head . '<body><script type=\'text/plain\' template=amp-mustache><table><tr>{{#example}}<td></td>{{/example}}</tr></table></script></body></html>',
+                '<!DOCTYPE html><html>' . $head . '<body><script type="text/plain" template="amp-mustache"><table><tr>{{#example}}<td></td>{{/example}}</tr></table></script></body></html>',
+            ],
+            'amp_mustache_script_multiple_children'    => [
+                'utf-8',
+                '<!DOCTYPE html><html>' . $head . '<body><script type="text/plain" template="amp-mustache"><h1>{{heading}}</h1><p>{{content}}</p><table><tr>{{#example}}<td></td>{{/example}}</tr></table></script></body></html>',
+                '<!DOCTYPE html><html>' . $head . '<body><script type="text/plain" template="amp-mustache"><h1>{{heading}}</h1><p>{{content}}</p><table><tr>{{#example}}<td></td>{{/example}}</tr></table></script></body></html>',
+            ],
+            'multiple_mustache_templates_still_appear' => [
+                'utf-8',
+                '<!DOCTYPE html><html>' . $head . '<body><script template="amp-mustache" type="text/plain" id="foo"><table><tr>{{#example}}<td></td>{{/example}}</tr></table></script><script type="text/plain" template="amp-mustache" id="example"><p>{{#baz}}This is inside a template{{/baz}}</p></script></body></html>',
+                '<!DOCTYPE html><html>' . $head . '<body><script template="amp-mustache" type="text/plain" id="foo"><table><tr>{{#example}}<td></td>{{/example}}</tr></table></script><script type="text/plain" template="amp-mustache" id="example"><p>{{#baz}}This is inside a template{{/baz}}</p></script></body></html>',
+            ],
         ];
     }
 

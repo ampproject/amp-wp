@@ -2,7 +2,6 @@
 
 module.exports = function( grunt ) {
 	'use strict';
-	require( 'dotenv' ).config();
 
 	// Root paths to include in the plugin build ZIP when running `npm run build`.
 	const productionIncludedRootFiles = [
@@ -20,7 +19,6 @@ module.exports = function( grunt ) {
 	// These patterns paths will be excluded from among the above directory.
 	const productionExcludedPathPatterns = [
 		/.*\/src\/.*/,
-		/.*images\/stories-editor\/.*\.svg/,
 	];
 
 	// These will be removed from the vendor directory after installing but prior to creating a ZIP.
@@ -43,8 +41,6 @@ module.exports = function( grunt ) {
 		'vendor/*/*/tests',
 		'vendor/ampproject/optimizer/bin',
 		'vendor/bin',
-		'vendor/ampproject/common/vendor',
-		'vendor/ampproject/optimizer/vendor',
 	];
 
 	grunt.initConfig( {
@@ -80,7 +76,9 @@ module.exports = function( grunt ) {
 					'composer install --no-dev -o',
 					'for symlinksource in $(find vendor/ampproject -type l); do symlinktarget=$(readlink "$symlinksource") && rm "$symlinksource" && cp -r "vendor/ampproject/$symlinktarget" "$symlinksource"; done',
 					'composer remove cweagans/composer-patches --update-no-dev -o',
-					'rm -r ' + productionVendorExcludedFilePatterns.join( ' ' )
+					'rm -r ' + productionVendorExcludedFilePatterns.join( ' ' ),
+					'if [ -d vendor/ampproject/common/vendor ]; then rm -r vendor/ampproject/common/vendor; fi',
+					'if [ -d vendor/ampproject/optimizer/vendor ]; then rm -r vendor/ampproject/optimizer/vendor; fi'
 				].join( ' && ' ),
 			},
 			create_build_zip: {
@@ -98,14 +96,6 @@ module.exports = function( grunt ) {
 				},
 			},
 		},
-		http: {
-			google_fonts: {
-				options: {
-					url: 'https://www.googleapis.com/webfonts/v1/webfonts?fields=items&prettyPrint=false&key=' + process.env.GOOGLE_FONTS_API_KEY,
-				},
-				dest: 'includes/data/fonts.json',
-			},
-		},
 	} );
 
 	// Load tasks.
@@ -113,7 +103,6 @@ module.exports = function( grunt ) {
 	grunt.loadNpmTasks( 'grunt-contrib-copy' );
 	grunt.loadNpmTasks( 'grunt-shell' );
 	grunt.loadNpmTasks( 'grunt-wp-deploy' );
-	grunt.loadNpmTasks( 'grunt-http' );
 
 	// Register tasks.
 	grunt.registerTask( 'default', [
@@ -223,28 +212,6 @@ module.exports = function( grunt ) {
 
 		doNext();
 	} );
-
-	grunt.registerTask( 'process-fonts', function() {
-		const fileName = 'includes/data/fonts.json';
-		let map = grunt.file.readJSON( fileName );
-		map = JSON.stringify( map );
-		map = JSON.parse( map );
-		if ( map ) {
-			const stripped = map.items.map( ( font ) => {
-				return {
-					family: font.family,
-					variants: font.variants,
-					category: font.category,
-				};
-			} );
-			grunt.file.write( fileName, JSON.stringify( stripped ) );
-		}
-	} );
-
-	grunt.registerTask( 'download-fonts', [
-		'http',
-		'process-fonts',
-	] );
 
 	grunt.registerTask( 'create-build-zip', [
 		'shell:create_build_zip',

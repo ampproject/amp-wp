@@ -34,15 +34,7 @@
             "extra": {
                 "branch-alias": {
                     "dev-master": "1.0.x-dev",
-                    "dev-develop": "1.0.x-dev",
-                    "dev-add/958-amp-optimizer": "1.0.x-dev"
-                },
-                "downloads": {
-                    "phpstan": {
-                        "url": "https://github.com/phpstan/phpstan/releases/download/0.12.14/phpstan.phar",
-                        "path": "vendor/bin/phpstan",
-                        "type": "phar"
-                    }
+
                 }
             },
             "autoload": {
@@ -115,8 +107,7 @@
             "extra": {
                 "branch-alias": {
                     "dev-master": "1.0.x-dev",
-                    "dev-develop": "1.0.x-dev",
-                    "dev-add/958-amp-optimizer": "1.0.x-dev"
+                    "dev-develop": "1.0.x-dev"
                 },
                 "downloads": {
                     "phpstan": {
@@ -1223,6 +1214,7 @@
         "ext-date": "*",
         "ext-dom": "*",
         "ext-iconv": "*",
+        "ext-json": "*",
         "ext-libxml": "*",
         "ext-spl": "*"
     },

@@ -143,51 +143,11 @@ class Test_Site_Health extends WP_UnitTestCase {
 		$debug_info = $this->instance->add_debug_information( [] );
 		$this->assertArrayHasKey( 'amp_wp', $debug_info );
 		$this->assertArrayHasKey( 'fields', $debug_info['amp_wp'] );
-		$keys = [ 'amp_mode_enabled', 'amp_experiences_enabled', 'amp_templates_enabled', 'amp_serve_all_templates' ];
+		$keys = [ 'amp_mode_enabled', 'amp_templates_enabled', 'amp_serve_all_templates' ];
 		foreach ( $keys as $key ) {
 			$this->assertArrayHasKey( $key, $debug_info['amp_wp']['fields'], "Expected key: $key" );
 			$this->assertFalse( $debug_info['amp_wp']['fields'][ $key ]['private'], "Expected private for key: $key" );
 		}
-	}
-
-	/**
-	 * Gets the test data for test_get_experiences_enabled().
-	 *
-	 * @return array The test data.
-	 */
-	public function get_experiences_enabled_data() {
-		return [
-			'no_experience_enabled' => [
-				[],
-				'No experience enabled',
-			],
-			'only_website'          => [
-				[ AMP_Options_Manager::WEBSITE_EXPERIENCE ],
-				'website',
-			],
-			'only_stories'          => [
-				[ AMP_Options_Manager::STORIES_EXPERIENCE ],
-				'stories',
-			],
-			'website_and_stories'   => [
-				[ AMP_Options_Manager::WEBSITE_EXPERIENCE, AMP_Options_Manager::STORIES_EXPERIENCE ],
-				'website, stories',
-			],
-		];
-	}
-
-	/**
-	 * Test add_debug_information.
-	 *
-	 * @dataProvider get_experiences_enabled_data
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::add_debug_information()
-	 *
-	 * @param array  $experiences_enabled The AMP experiences that are enabled, if any.
-	 * @param string $expected            The expected return value.
-	 */
-	public function test_get_experiences_enabled( $experiences_enabled, $expected ) {
-		AMP_Options_Manager::update_option( 'experiences', $experiences_enabled );
-		$this->assertEquals( $expected, $this->instance->get_experiences_enabled() );
 	}
 
 	/**
@@ -201,13 +161,13 @@ class Test_Site_Health extends WP_UnitTestCase {
 				[],
 				[],
 				'standard',
-				'No template supported',
+				'post',
 			],
 			'only_singular'               => [
 				[],
 				[ 'is_singular' ],
 				'transitional',
-				'is_singular',
+				'post, is_singular',
 			],
 			'only_post'                   => [
 				[ 'post' ],

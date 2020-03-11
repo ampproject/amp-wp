@@ -3,22 +3,6 @@
 	display: none;
 }
 
-/* Latest Stories block */
-.amp-block-latest-stories > .latest-stories-carousel {
-	display: flex;
-	flex-wrap: nowrap;
-	-webkit-overflow-scrolling: touch;
-	-ms-overflow-style: -ms-autohiding-scrollbar;
-	overflow-y: hidden;
-	margin: 0;
-	padding: 0;
-}
-
-.latest-stories-carousel .latest-stories__slide {
-	flex: 0 0 auto;
-	margin-right: 1rem;
-}
-
 /* AMP preview button wrapper */
 .wp-core-ui #amp-wrapper-post-preview {
 	margin-left: -6px;

@@ -1133,6 +1133,70 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Gets the test data for test_filter_manage_custom_columns_error_appears().
+	 *
+	 * @return array An associative array of the test data.
+	 */
+	public function get_filter_manage_custom_columns_data() {
+		return [
+			'json_error_syntax'              => [
+				AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_SYNTAX,
+				null,
+				'Syntax error',
+			],
+			'json_error_utf8'                => [
+				AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_UTF8,
+				null,
+				'Malformed UTF-8 characters, possibly incorrectly encoded',
+			],
+			'json_error_empty'               => [
+				AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_EMPTY,
+				null,
+				'Expected JSON, got an empty value',
+			],
+			'error_message_present_in_error' => [
+				AMP_Style_Sanitizer::STYLESHEET_FETCH_ERROR,
+				'The stylesheet could not be found',
+				'The stylesheet could not be found',
+			],
+		];
+	}
+
+	/**
+	 * Test the error message behavior of filter_manage_custom_columns.
+	 *
+	 * @dataProvider get_filter_manage_custom_columns_data
+	 * @covers \AMP_Validation_Error_Taxonomy::filter_manage_custom_columns()
+	 *
+	 * @param string      $error_code             The error code in the validation error.
+	 * @param string|null $error_message          The error message in the validation error, if any.
+	 * @param string      $expected_error_message The error message that should appear in the custom column.
+	 */
+	public function test_filter_manage_custom_columns_error_appears( $error_code, $error_message, $expected_error_message ) {
+		$this->accept_sanitization_by_default( false );
+		AMP_Validation_Error_Taxonomy::register();
+		$validation_error = [ 'code' => $error_code ];
+
+		if ( $error_message ) {
+			$validation_error['message'] = $error_message;
+		}
+
+		$initial_content = 'here is the initial content';
+		$term_id         = self::factory()->term->create(
+			[
+				'taxonomy'    => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
+				'description' => wp_json_encode( $validation_error ),
+			]
+		);
+
+		$GLOBALS['pagenow'] = 'post.php';
+		$filtered_content   = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'error_code', $term_id );
+
+		$this->assertStringStartsWith( $initial_content . '<button type="button" aria-label="Toggle error details"', $filtered_content );
+		$this->assertContains( $expected_error_message, $filtered_content );
+	}
+
+	/**
 	 * Test for add_single_post_sortable_columns()
 	 *
 	 * @covers AMP_Validation_Error_Taxonomy::add_single_post_sortable_columns()

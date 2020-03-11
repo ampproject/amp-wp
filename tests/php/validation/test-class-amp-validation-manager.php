@@ -194,40 +194,15 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test init when theme support and stories support are not present.
+	 * Test init when theme support is not present.
 	 *
 	 * @covers AMP_Validation_Manager::init()
 	 */
-	public function test_init_without_theme_or_stories_support() {
-		AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::WEBSITE_EXPERIENCE ] );
+	public function test_init_without_theme_support() {
 		remove_theme_support( AMP_Theme_Support::SLUG );
 		AMP_Validation_Manager::init();
 
 		$this->assertFalse( has_action( 'save_post', [ 'AMP_Validation_Manager', 'handle_save_post_prompting_validation' ] ) );
-	}
-
-	/**
-	 * Test init when theme support is absent but stories support is.
-	 *
-	 * @covers AMP_Validation_Manager::init()
-	 */
-	public function test_init_with_stories_and_without_theme_support() {
-		if ( ! AMP_Story_Post_Type::has_required_block_capabilities() ) {
-			$this->markTestSkipped( 'Environment does not support Stories.' );
-		}
-
-		// Create dummy post to keep Stories experience enabled.
-		self::factory()->post->create( [ 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ] );
-
-		AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::STORIES_EXPERIENCE ] );
-		AMP_Story_Post_Type::register();
-		// Create dummy post to keep Stories experience enabled.
-		self::factory()->post->create( [ 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ] );
-		remove_theme_support( AMP_Theme_Support::SLUG );
-		AMP_Validation_Manager::init();
-
-		$this->assertSame( 10, has_action( 'save_post', [ 'AMP_Validation_Manager', 'handle_save_post_prompting_validation' ] ) );
-		$this->assertFalse( has_action( 'admin_bar_menu', [ self::TESTED_CLASS, 'add_admin_bar_menu_items' ] ) );
 	}
 
 	/**
@@ -237,16 +212,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 */
 	public function test_post_supports_validation() {
 
-		// Ensure that story posts can be validated even when theme support is absent.
-		remove_theme_support( AMP_Theme_Support::SLUG );
-		AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::WEBSITE_EXPERIENCE, AMP_Options_Manager::STORIES_EXPERIENCE ] );
-		AMP_Story_Post_Type::register();
-		if ( post_type_exists( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
-			$post = $this->factory()->post->create( [ 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ] );
-			$this->assertTrue( AMP_Validation_Manager::post_supports_validation( $post ) );
-		}
-
-		// Support absent if theme support is absent for regular posts.
+		// Ensure that posts can be validated even when theme support is absent.
 		remove_theme_support( AMP_Theme_Support::SLUG );
 		$this->assertFalse( AMP_Validation_Manager::post_supports_validation( $this->factory()->post->create() ) );
 
@@ -2299,8 +2265,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 			$this->markTestSkipped( 'The block editor is not available.' );
 		}
 
-		$this->assertTrue( AMP_Options_Manager::is_website_experience_enabled() );
-		$this->assertFalse( AMP_Options_Manager::is_stories_experience_enabled() );
 		remove_theme_support( AMP_Theme_Support::SLUG );
 		global $post;
 		$post = $this->factory()->post->create_and_get();
@@ -2308,18 +2272,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->set_capability();
 		AMP_Validation_Manager::enqueue_block_validation();
 		$this->assertNotContains( $slug, wp_scripts()->queue );
-
-		// Create dummy post to keep Stories experience enabled.
-		self::factory()->post->create( [ 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ] );
-		AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::WEBSITE_EXPERIENCE, AMP_Options_Manager::STORIES_EXPERIENCE ] );
-		AMP_Story_Post_Type::register();
-		$this->assertTrue( AMP_Options_Manager::is_website_experience_enabled() );
-		$this->assertTrue( AMP_Options_Manager::is_stories_experience_enabled() );
-		if ( post_type_exists( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
-			$post = $this->factory()->post->create_and_get( [ 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ] );
-			AMP_Validation_Manager::enqueue_block_validation();
-			$this->assertContains( $slug, wp_scripts()->queue );
-		}
 	}
 
 	/**

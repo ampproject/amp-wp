@@ -4,6 +4,7 @@ namespace AmpProject\Optimizer\Transformer;
 
 use AmpProject\Amp;
 use AmpProject\Attribute;
+use AmpProject\DevMode;
 use AmpProject\Dom\Document;
 use AmpProject\Optimizer\ErrorCollection;
 use AmpProject\Optimizer\Transformer;
@@ -74,9 +75,10 @@ final class AmpBoilerplate implements Transformer
     private function removeStyleAndNoscriptTags(Document $document)
     {
         $headNode = $document->head->firstChild;
+        $devMode = DevMode::isActiveForDocument($document);
         while ($headNode) {
             $nextSibling = $headNode->nextSibling;
-            if ($headNode instanceof DOMElement) {
+            if ($headNode instanceof DOMElement && (! $devMode || ! DevMode::hasExemptionForNode($headNode))) {
                 switch ($headNode->tagName) {
                     case Tag::STYLE:
                         if (! $headNode->hasAttribute(Attribute::AMP_CUSTOM)) {

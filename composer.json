@@ -10,6 +10,7 @@
     "ext-date": "*",
     "ext-dom": "*",
     "ext-iconv": "*",
+    "ext-json": "*",
     "ext-libxml": "*",
     "ext-spl": "*",
     "ampproject/common": "^1",
@@ -32,8 +33,7 @@
   "suggest": {
     "ext-intl": "Enables use of idn_to_utf8() to convert punycode domains to UTF-8 for use with an AMP Cache.",
     "ext-json": "Provides native implementation of json_encode()/json_decode().",
-    "ext-mbstring": "Used by PHP-CSS-Parser when working with stylesheets.",
-    "ext-zip": "Enables the use of ZipArchive to export AMP Stories."
+    "ext-mbstring": "Used by PHP-CSS-Parser when working with stylesheets."
   },
   "config": {
     "platform": {

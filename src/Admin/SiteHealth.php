@@ -257,11 +257,6 @@ final class SiteHealth {
 							'value'   => AMP_Theme_Support::get_support_mode(),
 							'private' => false,
 						],
-						'amp_experiences_enabled' => [
-							'label'   => esc_html__( 'AMP experiences enabled', 'amp' ),
-							'value'   => $this->get_experiences_enabled(),
-							'private' => false,
-						],
 						'amp_templates_enabled'   => [
 							'label'   => esc_html__( 'Templates enabled', 'amp' ),
 							'value'   => $this->get_supported_templates(),
@@ -276,20 +271,6 @@ final class SiteHealth {
 				],
 			]
 		);
-	}
-
-	/**
-	 * Gets the AMP experiences that are enabled.
-	 *
-	 * @return string The experiences, in a comma-separated string.
-	 */
-	public function get_experiences_enabled() {
-		$experiences = AMP_Options_Manager::get_option( 'experiences' );
-		if ( empty( $experiences ) ) {
-			return esc_html__( 'No experience enabled', 'amp' );
-		}
-
-		return implode( ', ', $experiences );
 	}
 
 	/**
@@ -308,7 +289,7 @@ final class SiteHealth {
 				return (
 					post_type_supports( $post_type->name, AMP_Post_Type_Support::SLUG )
 					||
-					( ! AMP_Options_Manager::is_website_experience_enabled() && in_array( $post_type->name, $possible_post_types, true ) )
+					in_array( $post_type->name, $possible_post_types, true )
 				);
 			}
 		);
