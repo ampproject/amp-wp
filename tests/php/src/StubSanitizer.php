@@ -2,6 +2,8 @@
 
 namespace AmpProject\AmpWP\Tests;
 
+use AMP_Base_Sanitizer;
+
 /**
  * Class StubSanitizer.
  *

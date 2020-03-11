@@ -6,6 +6,7 @@
  */
 
 use AmpProject\Dom\Document;
+use AmpProject\AmpWP\Tests\StubSanitizer;
 
 /**
  * Test AMP_Base_Sanitizer_Test
