@@ -48,7 +48,6 @@ script:
       echo "Running phpunit testsuite $PHPUNIT_EXTRA_SUITE"
       travis_retry phpunit --testsuite $PHPUNIT_EXTRA_SUITE
     fi
-  - composer analyse
 
 after_script:
   - source "$DEV_LIB_PATH/travis.after_script.sh"
