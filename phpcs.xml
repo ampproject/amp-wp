@@ -4,6 +4,9 @@
 	<!-- Exclude libraries that are meant to be externalized -->
 	<exclude-pattern>lib/*</exclude-pattern>
 
+	<!-- Exclude stub files as they are auto-generated -->
+	<exclude-pattern>tests/php/static-analysis-stubs/*</exclude-pattern>
+
 	<rule ref="WordPress-Core">
 		<exclude name="Generic.Arrays.DisallowShortArraySyntax" />
 		<exclude name="WordPress.PHP.DisallowShortTernary" />

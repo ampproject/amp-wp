@@ -34,10 +34,12 @@ class AMP_Autoloader {
 	/**
 	 * Allows an extensions plugin to register a class and its file for autoloading
 	 *
+	 * phpcs:disable VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+	 *
 	 * @since 0.6
 	 *
-     * @deprecated Autoloading works via Composer. Extensions need to use their own mechanism.
-     *
+	 * @deprecated Autoloading works via Composer. Extensions need to use their own mechanism.
+	 *
 	 * @param string $class_name Full classname (include namespace if applicable).
 	 * @param string $filepath   Absolute filepath to class file, including .php extension.
 	 */
