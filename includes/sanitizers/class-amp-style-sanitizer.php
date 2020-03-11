@@ -290,15 +290,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private $processed_imported_stylesheet_urls = [];
 
 	/**
-	 * List of font stylesheets that were @import'ed which should have been <link>'ed to instead.
-	 *
-	 * These font URLs will be cached with the parsed CSS and then converted into stylesheet links.
-	 *
-	 * @var array
-	 */
-	private $imported_font_urls = [];
-
-	/**
 	 * Mapping of HTML element selectors to AMP selector elements.
 	 *
 	 * @var array
@@ -1333,6 +1324,26 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			]
 		);
 
+		if ( ! empty( $parsed['viewport_rules'] ) ) {
+			$viewport_meta = $this->dom->createElement( 'meta' );
+			$viewport_meta->setAttribute( 'name', 'viewport' );
+			$viewport_meta->setAttribute(
+				'content',
+				implode(
+					',',
+					array_map(
+						static function ( $property_name ) use ( $parsed ) {
+							return $property_name . '=' . $parsed['viewport_rules'][ $property_name ];
+						},
+						array_keys( $parsed['viewport_rules'] )
+					)
+				)
+			);
+
+			// Inject aa potential duplicate meta viewport element, to later be merged in AMP_Meta_Sanitizer.
+			$element->parentNode->insertBefore( $viewport_meta, $element );
+		}
+
 		$this->pending_stylesheets[] = [
 			'group'              => self::STYLE_AMP_CUSTOM_GROUP_INDEX,
 			'original_size'      => strlen( $stylesheet ),
@@ -1634,13 +1645,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *    @type array       $validation_results Validation results, array containing arrays with error and sanitized keys.
 	 *    @type string      $stylesheet_url     Stylesheet URL, if available.
 	 *    @type string      $spec_name          Spec name.
+	 *    @type array       $viewport_rules     Extracted viewport rules.
 	 * }
 	 */
 	private function create_validated_css_document( $stylesheet_string, $options ) {
 		$validation_results = [];
+		$imported_font_urls = [];
+		$viewport_rules     = [];
 		$css_document       = null;
 
-		$this->imported_font_urls = [];
 		try {
 			// Remove spaces from data URLs, which cause errors and PHP-CSS-Parser can't handle them.
 			$stylesheet_string = $this->remove_spaces_from_url_values( $stylesheet_string );
@@ -1661,9 +1674,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				);
 			}
 
+			$processed_css_list = $this->process_css_list( $css_document, $options );
+
 			$validation_results = array_merge(
 				$validation_results,
-				$this->process_css_list( $css_document, $options )
+				$processed_css_list['validation_results']
+			);
+			$viewport_rules     = array_merge(
+				$viewport_rules,
+				$processed_css_list['viewport_rules']
 			);
 		} catch ( Exception $exception ) {
 			$error = [
@@ -1681,12 +1700,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 			$validation_results[] = compact( 'error', 'sanitized' );
 		}
-		return array_merge(
-			compact( 'validation_results', 'css_document' ),
-			[
-				'imported_font_urls' => $this->imported_font_urls,
-			]
-		);
+		return compact( 'validation_results', 'css_document', 'imported_font_urls', 'viewport_rules' );
 	}
 
 	/**
@@ -1893,6 +1907,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				'imported_font_urls' => $parsed_stylesheet['imported_font_urls'],
 				'hash'               => md5( wp_json_encode( $tokens ) ),
 				'parse_time'         => ( microtime( true ) - $start_time ),
+				'viewport_rules'     => $parsed_stylesheet['viewport_rules'],
 			]
 		);
 	}
@@ -1970,7 +1985,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @param CSSList $css_list CSS List.
 	 * @param array   $options Options.
-	 * @return array Validation errors.
+	 * @return array {
+	 *     Processed CSS list.
+	 *
+	 *     @type array $validation_errors  Validation errors.
+	 *     @type array $viewport_rules     Viewport rules.
+	 *     @type array $imported_font_urls Imported font URLs.
+	 * }
 	 */
 	private function process_css_list( CSSList $css_list, $options ) {
 		$results = [];
@@ -1996,10 +2017,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				if ( ! $sanitized ) {
 					$results = array_merge(
 						$results,
-						$this->process_css_list( $css_item, $options )
+						$this->process_css_list( $css_item, $options ) // @todo Change this to handle returning not just $validation_errors, but array including 'viewport_urls'.
 					);
 				}
 			} elseif ( $css_item instanceof Import ) {
+				// @todo Change the return value of splice_imported_stylesheet from just $validation_errors to [ 'validation_errors' => ..., 'imported_font_urls' => ... ].
 				$results = array_merge(
 					$results,
 					$this->splice_imported_stylesheet( $css_item, $css_list, $options )
