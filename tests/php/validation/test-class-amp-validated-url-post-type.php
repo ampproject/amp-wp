@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\HandleValidation;
+
 // phpcs:disable WordPress.Variables.GlobalVariables.OverrideProhibited
 
 /**
@@ -14,7 +16,7 @@
  */
 class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 
-	use AMP_Test_HandleValidation;
+	use HandleValidation;
 
 	const TESTED_CLASS = 'AMP_Validated_URL_Post_Type';
 

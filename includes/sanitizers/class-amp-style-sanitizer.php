@@ -3172,7 +3172,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$this->pending_stylesheets[ $previously_seen_stylesheet_index[ $pending_stylesheet['hash'] ] ]['duplicate'] = true;
 			}
 			$previously_seen_stylesheet_index[ $pending_stylesheet['hash'] ] = $pending_stylesheet_index;
-			unset( $shaken_tokens );
+			$pending_stylesheet['shaken_tokens'];
 
 			$pending_stylesheet['shake_time'] = microtime( true ) - $start_time;
 		} // End foreach pending_stylesheets.
