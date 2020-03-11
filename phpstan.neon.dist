@@ -22,10 +22,3 @@ parameters:
 	excludes_analyse:
 		# PHPStan cannot yet deal with view templates. See https://github.com/phpstan/phpstan/issues/351
 		- %currentWorkingDirectory%/includes/templates/amp-enabled-classic-editor-toggle.php
-	ignoreErrors:
-		# Uses func_get_args()
-		# - '#^Function apply_filters(_ref_array)? invoked with [34567] parameters, 2 required\.$#'
-		# https://core.trac.wordpress.org/ticket/43304
-		# - '/^Parameter #2 \$deprecated of function load_plugin_textdomain expects string, false given\.$/'
-		# WP-CLI accepts a class as callable
-		# - '/^Parameter #2 \$callable of static method WP_CLI::add_command\(\) expects callable\(\): mixed, \S+ given\.$/'
