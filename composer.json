@@ -42,18 +42,18 @@
     "sort-packages": true
   },
   "extra": {
-    "patches": {
-      "sabberworm/php-css-parser": {
-        "Fix parsing CSS selectors which contain commas <https://github.com/sabberworm/PHP-CSS-Parser/pull/138>": "https://github.com/sabberworm/PHP-CSS-Parser/commit/fa139f65c5b098ae652c970b25e6eb03fc495eb4.diff",
-        "Fix validation of selectors": "patches/php-css-parser-138-extended.patch",
-        "Validate name-start code points for identifier <https://github.com/sabberworm/PHP-CSS-Parser/pull/185>": "patches/php-css-parser-pull-185.patch"
-      }
-    },
     "downloads": {
       "phpstan": {
         "url": "https://github.com/phpstan/phpstan/releases/download/0.12.14/phpstan.phar",
         "path": "vendor/bin/phpstan",
         "type": "phar"
+      }
+    },
+    "patches": {
+      "sabberworm/php-css-parser": {
+        "Fix parsing CSS selectors which contain commas <https://github.com/sabberworm/PHP-CSS-Parser/pull/138>": "https://github.com/sabberworm/PHP-CSS-Parser/commit/fa139f65c5b098ae652c970b25e6eb03fc495eb4.diff",
+        "Fix validation of selectors": "patches/php-css-parser-138-extended.patch",
+        "Validate name-start code points for identifier <https://github.com/sabberworm/PHP-CSS-Parser/pull/185>": "patches/php-css-parser-pull-185.patch"
       }
     }
   },
