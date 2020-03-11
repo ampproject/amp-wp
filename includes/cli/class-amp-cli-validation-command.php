@@ -116,7 +116,7 @@ final class AMP_CLI_Validation_Command {
 	/**
 	 * The validation counts by type, like template or post type.
 	 *
-	 * @var array[][] {
+	 * @var int[] {
 	 *     Validity by type.
 	 *
 	 *     @type int $valid The number of valid URLs for this type.

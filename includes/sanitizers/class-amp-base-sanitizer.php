@@ -657,7 +657,7 @@ abstract class AMP_Base_Sanitizer {
 
 		// Editor blocks add 'figure' as the parent node for images. If this node has data-amp-layout then we should add this as the layout attribute.
 		$parent_node = $node->parentNode;
-		if ( 'figure' === $parent_node->tagName ) {
+		if ( $parent_node instanceof DOMELement && 'figure' === $parent_node->tagName ) {
 			$parent_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $parent_node );
 			if ( isset( $parent_attributes['data-amp-layout'] ) ) {
 				$attributes['layout'] = $parent_attributes['data-amp-layout'];
@@ -698,7 +698,7 @@ abstract class AMP_Base_Sanitizer {
 	public function filter_attachment_layout_attributes( $node, $new_attributes, $layout ) {
 
 		// The width has to be unset / auto in case of fixed-height.
-		if ( 'fixed-height' === $layout ) {
+		if ( 'fixed-height' === $layout && $node->parentNode instanceof DOMElement ) {
 			if ( ! isset( $new_attributes['height'] ) ) {
 				$new_attributes['height'] = self::FALLBACK_HEIGHT;
 			}
@@ -706,13 +706,13 @@ abstract class AMP_Base_Sanitizer {
 			$node->parentNode->setAttribute( 'style', 'height: ' . $new_attributes['height'] . 'px; width: auto;' );
 
 			// The parent element should have width/height set and position set in case of 'fill'.
-		} elseif ( 'fill' === $layout ) {
+		} elseif ( 'fill' === $layout && $node->parentNode instanceof DOMElement ) {
 			if ( ! isset( $new_attributes['height'] ) ) {
 				$new_attributes['height'] = self::FALLBACK_HEIGHT;
 			}
 			$node->parentNode->setAttribute( 'style', 'position:relative; width: 100%; height: ' . $new_attributes['height'] . 'px;' );
 			unset( $new_attributes['width'], $new_attributes['height'] );
-		} elseif ( 'responsive' === $layout ) {
+		} elseif ( 'responsive' === $layout && $node->parentNode instanceof DOMElement ) {
 			$node->parentNode->setAttribute( 'style', 'position:relative; width: 100%; height: auto' );
 		} elseif ( 'fixed' === $layout ) {
 			if ( ! isset( $new_attributes['height'] ) ) {

@@ -4673,7 +4673,7 @@ namespace WP_CLI\Utils {
      * @param string  $message  Text to display before the progress bar.
      * @param integer $count    Total number of ticks to be performed.
      * @param int     $interval Optional. The interval in milliseconds between updates. Default 100.
-     * @return cli\progress\Bar|WP_CLI\NoOp
+     * @return \cli\progress\Bar|\WP_CLI\NoOp
      */
     function make_progress_bar($message, $count, $interval = 100)
     {

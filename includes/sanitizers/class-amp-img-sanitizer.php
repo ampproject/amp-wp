@@ -82,7 +82,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		/**
 		 * Node list.
 		 *
-		 * @var DOMNodeList $node
+		 * @var DOMNodeList $nodes
 		 */
 		$nodes           = $this->dom->getElementsByTagName( self::$tag );
 		$need_dimensions = [];
@@ -318,7 +318,12 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		$this->add_or_append_attribute( $new_attributes, 'class', 'amp-wp-enforced-sizes' );
 		if ( empty( $new_attributes['layout'] ) && ! empty( $new_attributes['height'] ) && ! empty( $new_attributes['width'] ) ) {
 			// Use responsive images when a theme supports wide and full-bleed images.
-			if ( ! empty( $this->args['align_wide_support'] ) && $node->parentNode && 'figure' === $node->parentNode->nodeName && preg_match( '/(^|\s)(alignwide|alignfull)(\s|$)/', $node->parentNode->getAttribute( 'class' ) ) ) {
+			if (
+				! empty( $this->args['align_wide_support'] )
+				&& $node->parentNode instanceof DOMElement
+				&& 'figure' === $node->parentNode->nodeName
+				&& preg_match( '/(^|\s)(alignwide|alignfull)(\s|$)/', $node->parentNode->getAttribute( 'class' ) )
+			) {
 				$new_attributes['layout'] = 'responsive';
 			} else {
 				$new_attributes['layout'] = 'intrinsic';

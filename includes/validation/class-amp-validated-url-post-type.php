@@ -604,7 +604,7 @@ class AMP_Validated_URL_Post_Type {
 	 * The URL will be returned with the amp query var added to it if the site is not canonical. The post_title
 	 * is always stored using the canonical AMP-less URL.
 	 *
-	 * @param int|WP_post $post Post.
+	 * @param int|WP_Post $post Post.
 	 * @return string|null The URL stored for the post or null if post does not exist or it is not the right type.
 	 */
 	public static function get_url_from_post( $post ) {
@@ -2878,7 +2878,7 @@ class AMP_Validated_URL_Post_Type {
 	 *
 	 * @param array $validation_errors Validation errors.
 	 *
-	 * @return array
+	 * @return int[]
 	 */
 	protected static function count_invalid_url_validation_errors( $validation_errors ) {
 		$counts = array_fill_keys(

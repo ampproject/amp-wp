@@ -11,7 +11,6 @@ use AmpProject\AmpWP\Admin\SiteHealth;
  * Obsolete constant for flagging when Customizer is opened for AMP.
  *
  * @deprecated
- * @var string
  */
 define( 'AMP_CUSTOMIZER_QUERY_VAR', 'customize_amp' );
 

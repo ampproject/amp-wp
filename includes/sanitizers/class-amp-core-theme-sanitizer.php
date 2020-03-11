@@ -932,28 +932,40 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public function add_twentyseventeen_sticky_nav_menu() {
 		/**
-		 * Elements.
+		 * Top navigation element.
 		 *
-		 * @var DOMElement $link
-		 * @var DOMElement $element
 		 * @var DOMElement $navigation_top
-		 * @var DOMElement $navigation_top_fixed
 		 */
 		$navigation_top = $this->dom->xpath->query( '//header[ @id = "masthead" ]//div[ contains( @class, "navigation-top" ) ]' )->item( 0 );
 		if ( ! $navigation_top ) {
 			return;
 		}
 
+		/**
+		 * Cloned top navigation element to put in fixed position.
+		 *
+		 * @var DOMElement $navigation_top_fixed
+		 */
 		$navigation_top_fixed = $navigation_top->cloneNode( true );
 		$navigation_top_fixed->setAttribute( 'class', $navigation_top_fixed->getAttribute( 'class' ) . ' site-navigation-fixed' );
 
 		$navigation_top_fixed->setAttribute( 'aria-hidden', 'true' );
 		foreach ( $navigation_top_fixed->getElementsByTagName( 'a' ) as $link ) {
+			/**
+			 * Navigation link to add a tab index to.
+			 *
+			 * @var DOMElement $link
+			 */
 			$link->setAttribute( 'tabindex', '-1' );
 		}
 
 		$navigation_top->parentNode->insertBefore( $navigation_top_fixed, $navigation_top->nextSibling );
 		foreach ( $this->dom->xpath->query( './/*[ @id ]', $navigation_top_fixed ) as $element ) {
+			/**
+			 * Navigation element in the fixed navigation bar.
+			 *
+			 * @var DOMElement $element
+			 */
 			$element->setAttribute( 'id', $element->getAttribute( 'id' ) . '-fixed' );
 		}
 
@@ -1489,7 +1501,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$search_toggle_div  = $this->dom->xpath->query( '//div[ contains( @class, "search-toggle" ) ]' )->item( 0 );
 		$search_toggle_link = $this->dom->xpath->query( './a', $search_toggle_div )->item( 0 );
 		$search_container   = $this->dom->getElementById( 'search-container' );
-		if ( ! $search_toggle_div || ! $search_toggle_link || ! $search_container ) {
+		if (
+			! $search_toggle_div instanceof DOMElement
+			|| ! $search_toggle_link instanceof DOMElement
+			|| ! $search_container instanceof DOMElement
+		) {
 			return;
 		}
 
@@ -1509,7 +1525,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$search_input_el = $this->dom->xpath->query( './/input[ @name = "s" ]', $search_container )->item( 0 );
 		$search_toggle_link->removeAttribute( 'href' );
 		$on = "tap:AMP.setState( { $hidden_state_id: ! $hidden_state_id } )";
-		if ( $search_input_el ) {
+		if ( $search_input_el instanceof DOMElement ) {
 			$search_input_el->setAttribute( 'id', $search_input_id );
 			$on .= ",$search_input_id.focus()";
 		}
@@ -1597,6 +1613,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 		$amp_lightbox_inner_content = $this->dom->xpath->query( ".//*[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' modal-inner ' ) ]", $modal_content_node )->item( 0 );
 		foreach ( [ $amp_lightbox, $amp_lightbox_inner_content ] as $event_element ) {
+			/**
+			 * Event element to add accessibility attributes to.
+			 *
+			 * @var DOMElement $event_element
+			 */
 			$event_element->setAttribute( 'role', $this->guess_modal_role( $modal_content_node ) );
 			// Setting tabindex to -1 (not reachable) as keyboard focus is handled through toggles.
 			$event_element->setAttribute( 'tabindex', -1 );
@@ -1663,7 +1684,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				/**
 				 * Toggle element to transform.
 				 *
-				 * @var $toggle DOMElement
+				 * @var DOMElement $toggle
 				 */
 
 				$within_modal = false;
@@ -1721,13 +1742,12 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
+		/**
+		 * Toggle to transform.
+		 *
+		 * @var DOMElement $toggle
+		 */
 		foreach ( $toggles as $toggle ) {
-			/**
-			 * Toggle element to transform.
-			 *
-			 * @var $toggle DOMElement
-			 */
-
 			$toggle_target = $toggle->getAttribute( 'data-toggle-target' );
 			$toggle_id     = AMP_DOM_Utils::get_element_id( $toggle );
 
@@ -1746,7 +1766,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				$target_node = $target_nodes->item( 0 );
 			}
 
-			if ( ! $target_node ) {
+			if ( ! $target_node instanceof DOMElement ) {
 				continue;
 			}
 

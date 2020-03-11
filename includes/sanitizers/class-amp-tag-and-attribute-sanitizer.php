@@ -2436,15 +2436,13 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return null;
 		}
 
-		while ( $node && $node->parentNode ) {
+		while ( $node->parentNode instanceof DOMElement ) {
 			$node = $node->parentNode;
 			if ( $node->nodeName === $parsed_spec_name['tag_name'] ) {
 
 				// Ensure attributes match; if not move up to the next node.
 				foreach ( $parsed_spec_name['attributes'] as $attr_name => $attr_value ) {
 					$match = (
-						$node instanceof DOMElement
-						&&
 						true === $attr_value ? $node->hasAttribute( $attr_name ) : strtolower( $node->getAttribute( $attr_name ) ) === $attr_value
 					);
 					if ( ! $match ) {
