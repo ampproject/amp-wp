@@ -2628,4 +2628,62 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $actual, -1, PREG_SPLIT_DELIM_CAPTURE ) )
 		);
 	}
+
+	/*
+	 * Gets the test data for test_viewport_rules_added_to_meta_viewport().
+	 *
+	 * @return array
+	 */
+	public function get_viewport_data() {
+		$amp_boilerplate = '<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>';
+
+		return [
+			'existing_meta_viewport_remains' => [
+				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">' . $amp_boilerplate . '</head><body>Hello world</body></html>',
+			],
+			'width_other_than_1_not_moved' => [
+				'<html amp><head><meta charset="utf-8"><style amp-custom>@viewport{ width: 80vw; }</style>' . $amp_boilerplate . '</head><body></body></html>',
+				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">' . $amp_boilerplate . '</head><body></body></html>',
+			],
+			'valid_initial_scale_moved' => [
+				'<html amp><head><meta charset="utf-8"><style amp-custom>@viewport{ initial-scale: .9; }</style>' . $amp_boilerplate . '</head><body></body></html>',
+				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="initial-scale=.9, width=device-width">' . $amp_boilerplate . '</head><body></body></html>',
+			],
+			'single_valid_viewport_rule_moved' => [
+				'<html amp><head><meta charset="utf-8"><style amp-custom>@viewport{ viewport-fit: auto; }</style>' . $amp_boilerplate . '</head><body></body></html>',
+				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="viewport-fit=auto, width=device-width">' . $amp_boilerplate . '</head><body></body></html>',
+			],
+		];
+	}
+
+	/**
+	 * Test sanitization of tags and attributes for the entire document, including the HEAD.
+	 *
+	 * @dataProvider get_viewport_data
+	 * @covers AMP_Style_Sanitizer::sanitize()
+	 *
+	 * @param string $markup   The markup to sanitize.
+	 * @param string $expected The expected result.
+	 * @throws ReflectionException For a non-accessible property.
+	 */
+	public function test_viewport_rules_added_to_meta_viewport( $markup, $expected = null ) {
+		if ( null === $expected ) {
+			$expected = $markup;
+		}
+
+		$dom             = Document::fromHtml( $markup );
+		$style_sanitizer = new AMP_Style_Sanitizer( $dom );
+		$style_sanitizer->sanitize();
+		$meta_sanitizer = new AMP_Meta_Sanitizer( $dom );
+		$meta_sanitizer->sanitize();
+
+		$content = $dom->saveHTML( $dom->documentElement );
+		$this->assertEquals( $expected, $content );
+
+		// Reset the static property.
+		$reflection = new \ReflectionObject( $style_sanitizer );
+		$property   = $reflection->getProperty( 'extracted_viewport_rules' );
+		$property->setAccessible( true );
+		$property->setValue( [] );
+	}
 }

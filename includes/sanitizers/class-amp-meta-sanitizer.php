@@ -135,9 +135,58 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	 * The viewport defaults to 'width=device-width', which is the bare minimum that AMP requires.
 	 */
 	protected function ensure_viewport_is_present() {
+		$viewport_rules = $this->get_valid_viewport_rules( AMP_Style_Sanitizer::get_extracted_viewport_rules() );
+
 		if ( empty( $this->meta_tags[ self::TAG_VIEWPORT ] ) ) {
-			$this->meta_tags[ self::TAG_VIEWPORT ][] = $this->create_viewport_element( static::AMP_VIEWPORT );
+			$this->meta_tags[ self::TAG_VIEWPORT ][] = $this->create_viewport_element( $viewport_rules );
 		}
+		// @todo: In an else block, add $viewport rules to the existing meta[name="viewport"], prioritizing the existing ones.
+	}
+
+	/**
+	 * Gets the viewport rules that would be valid in meta[name="viewport"].
+	 *
+	 * @link https://github.com/ampproject/amphtml/blob/5f75efe35b734a4fcf0884d373315d
+	 *
+	 * @param array $rules The rules to evaluate.
+	 * @return string The rules of those that are valid.
+	 */
+	protected function get_valid_viewport_rules( $rules ) {
+		$allowed_meta_spec = AMP_Allowed_Tags_Generated::get_allowed_tag( 'meta' );
+		foreach ( $allowed_meta_spec as $spec ) {
+			if ( isset( $spec['tag_spec']['spec_name'], $spec['attr_spec_list']['content']['value_properties'] ) && 'meta name=viewport' === $spec['tag_spec']['spec_name'] ) {
+				$allowed_meta_spec = $spec['attr_spec_list']['content']['value_properties'];
+				break;
+			}
+		}
+
+		if ( ! $allowed_meta_spec ) {
+			return '';
+		}
+
+		$valid_rules = [];
+		foreach ( $rules as $rule ) {
+			foreach ( $rule as $rule_name => $rule_value ) {
+				if ( ! isset( $allowed_meta_spec[ $rule_name ] ) ) {
+					continue;
+				}
+
+				// If the spec for the attribute has a mandatory value, like width="device-width", ensure it has that value.
+				if ( isset( $allowed_meta_spec[ $rule_name ]['value'] ) && $rule_value !== $allowed_meta_spec[ $rule_name ]['value'] ) {
+					continue;
+				}
+
+				$valid_rules[ $rule_name ] = $rule_value;
+			}
+		}
+
+		$valid_rules['width'] = 'device-width';
+		$allowed_rules        = [];
+		foreach ( $valid_rules as $valid_rule_name => $valid_rule_value ) {
+			$allowed_rules[] = $valid_rule_name . '=' . $valid_rule_value;
+		}
+
+		return implode( ', ', $allowed_rules );
 	}
 
 	/**

@@ -15,10 +15,12 @@ use Sabberworm\CSS\Property\AtRule;
 use Sabberworm\CSS\Rule\Rule;
 use Sabberworm\CSS\CSSList\KeyFrame;
 use Sabberworm\CSS\RuleSet\AtRuleSet;
+use Sabberworm\CSS\OutputFormat;
 use Sabberworm\CSS\Property\Import;
 use Sabberworm\CSS\CSSList\AtRuleBlockList;
 use Sabberworm\CSS\Value\RuleValueList;
 use Sabberworm\CSS\Value\URL;
+use Sabberworm\CSS\Value\Value;
 use Sabberworm\CSS\CSSList\Document as CSSDocument;
 
 /**
@@ -302,6 +304,22 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	private $selector_mappings = [];
+
+	/**
+	 * The allowed viewport rules that can be extracted and moved to meta[name="viewport"].
+	 *
+	 * @var array
+	 */
+	private $allowed_viewport_rules = [ 'viewport', '-ms-viewport', '-o-viewport' ];
+
+	/**
+	 * The viewport rules that were extracted from stylesheets.
+	 *
+	 * These aren't valid in CSS, but were extracted so they can be moved to the meta[name="viewport"],
+	 *
+	 * @var array
+	 */
+	private static $extracted_viewport_rules = [];
 
 	/**
 	 * Elements in extensions which use the video-manager, and thus the video-autoplay.css.
@@ -1987,7 +2005,18 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$this->splice_imported_stylesheet( $css_item, $css_list, $options )
 				);
 			} elseif ( $css_item instanceof AtRuleSet ) {
-				if ( ! in_array( $css_item->atRuleName(), $options['allowed_at_rules'], true ) ) {
+				if ( in_array( $css_item->atRuleName(), $this->allowed_viewport_rules, true ) ) {
+					$output_format = new OutputFormat();
+					foreach ( $css_item->getRules() as $rule ) {
+						$rule_value = $rule->getValue();
+						if ( $rule_value instanceof Value ) {
+							$rule_value = $rule_value->render( $output_format );
+						}
+
+						self::$extracted_viewport_rules[] = [ $rule->getRule() => $rule_value ];
+					}
+					$css_list->remove( $css_item );
+				} elseif ( ! in_array( $css_item->atRuleName(), $options['allowed_at_rules'], true ) ) {
 					$error     = [
 						'code'      => self::CSS_SYNTAX_INVALID_AT_RULE,
 						'at_rule'   => $css_item->atRuleName(),
@@ -3240,5 +3269,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		return $included_count;
+	}
+
+	/**
+	 * Gets the @viewport CSS rules that were extracted from stylesheet, and vendor-prefixed rules like @-ms-viewport.
+	 *
+	 * @return array The rules that were extracted.
+	 */
+	public static function get_extracted_viewport_rules() {
+		return self::$extracted_viewport_rules;
 	}
 }
