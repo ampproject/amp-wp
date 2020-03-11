@@ -82,7 +82,7 @@ function amp_admin_get_preview_permalink() {
 	);
 
 	if ( empty( $post_ids ) ) {
-		return false;
+		return null;
 	}
 
 	$post_id = $post_ids[0];
