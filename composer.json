@@ -22,8 +22,8 @@
   "require-dev": {
     "civicrm/composer-downloads-plugin": "^2.1",
     "dealerdirect/phpcodesniffer-composer-installer": "0.6.2",
-    "php-stubs/wordpress-stubs": "^5.3.2",
     "mikey179/vfsstream": "1.6.8",
+    "php-stubs/wordpress-stubs": "^5.3.2",
     "phpcompatibility/phpcompatibility-wp": "2.1.0",
     "roave/security-advisories": "dev-master",
     "sirbrillig/phpcs-variable-analysis": "2.8.1",
@@ -58,10 +58,12 @@
     }
   },
   "autoload": {
-    "classmap": [ "includes/" ],
     "psr-4": {
       "AmpProject\\AmpWP\\": "src/"
     },
+    "classmap": [
+      "includes/"
+    ],
     "files": [
       "back-compat/back-compat.php",
       "includes/amp-helper-functions.php",
@@ -70,10 +72,12 @@
     ]
   },
   "autoload-dev": {
-    "classmap": [ "tests/php/validation/" ],
     "psr-4": {
       "AmpProject\\AmpWP\\Tests\\": "tests/php/src/"
-    }
+    },
+    "classmap": [
+      "tests/php/validation/"
+    ]
   },
   "repositories": [
     {

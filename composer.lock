@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "29d2c3e8d31e5788f30e6cf5cff56bc0",
+    "content-hash": "b4e9296391e6ffe28d61cb4952a56111",
     "packages": [
         {
             "name": "ampproject/common",
