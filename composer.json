@@ -70,7 +70,7 @@
     ]
   },
   "autoload-dev": {
-    "classmap": [ "tests/validation/" ],
+    "classmap": [ "tests/php/validation/" ],
     "psr-4": {
       "AmpProject\\AmpWP\\Tests\\": "tests/php/src/"
     }
