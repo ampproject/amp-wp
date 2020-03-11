@@ -52,6 +52,7 @@ script:
       echo "Running phpunit testsuite $PHPUNIT_EXTRA_SUITE"
       travis_retry phpunit --testsuite $PHPUNIT_EXTRA_SUITE
     fi
+  - composer analyse
 
 after_script:
   - source "$DEV_LIB_PATH/travis.after_script.sh"
@@ -83,6 +84,14 @@ jobs:
         - npm run build:js
       after_success:
         - npx sizereport --config
+
+    - stage: analyse
+      name: Static analysis (PHP)
+      php: "7.3"
+      install:
+        - composer install
+      script:
+        - composer analyse
 
     - stage: test
       name: JavaScript unit tests
@@ -154,6 +163,7 @@ jobs:
 
     - name: Libraries that are meant to be externalized (5.6)
       php: "5.6"
+      env: TEST_SKIP_PHPSTAN=1
       install:
         - composer --working-dir=lib/common install
         - composer --working-dir=lib/optimizer install

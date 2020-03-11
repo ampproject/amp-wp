@@ -60,8 +60,8 @@
   "prefer-stable": true,
   "scripts": {
     "cbf": "phpcbf --standard=PSR12 -n src tests",
-    "cs": "phpcs --standard=PSR12 -s -n src tests",
-    "lint": "parallel-lint -j 10 --colors --exclude vendor .",
+    "cs": "if [ -z TEST_SKIP_PHPCS ]; then phpcs --standard=PSR12 -s -n src tests; fi",
+    "lint": "if [ -z TEST_SKIP_LINTING ]; then parallel-lint -j 10 --colors --exclude vendor .; fi",
     "post-update-cmd": [
       "rm -rf tests/spec && bin/sync-amp-toolbox-test-suite.php",
       "bin/sync-amp-runtime-local-fallback-resources.php"
@@ -72,7 +72,7 @@
       "@cs",
       "@analyse"
     ],
-    "analyse": "phpstan analyse src -l3 --ansi",
-    "unit": "phpunit --colors=always"
+    "analyse": "if [ -z TEST_SKIP_PHPSTAN ]; then phpstan analyse src -l3 --ansi; fi",
+    "unit": "if [ -z TEST_SKIP_PHPUNIT ]; then phpunit --colors=always; fi"
   }
 }

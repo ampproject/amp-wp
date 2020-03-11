@@ -99,6 +99,6 @@
   "minimum-stability": "dev",
   "prefer-stable": true,
   "scripts": {
-    "analyse": "phpstan analyse src includes -l0 --ansi"
+    "analyse": "if [ -z TEST_SKIP_PHPSTAN ]; then phpstan analyse src -l0 --ansi; fi"
   }
 }
