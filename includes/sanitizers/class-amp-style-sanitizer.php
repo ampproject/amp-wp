@@ -2523,18 +2523,30 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @note Uses recursion to traverse down the tree of Dom\Document nodes.
 	 *
-	 * @param DOMElement $element Node.
+	 * @param DOMElement $element Element with a style attribute.
 	 */
-	private function collect_inline_styles( $element ) {
-		$style_attribute = $element->getAttributeNode( 'style' );
-		if ( ! $style_attribute || ! trim( $style_attribute->nodeValue ) ) {
+	private function collect_inline_styles( DOMElement $element ) {
+		$attr_node = $element->getAttributeNode( 'style' );
+		if ( ! $attr_node ) {
 			return;
 		}
 
-		$value = $style_attribute->nodeValue;
+		$value = trim( $attr_node->nodeValue );
+		if ( empty( $value ) ) {
+			return;
+		}
+
+		// Skip processing stylesheets that contain mustache template variables if the element is inside of a mustache template.
+		if (
+			preg_match( '/{{[^}]+?}}/', $value ) &&
+			0 !== $this->dom->xpath->query( '//template[ @type="amp-mustache" ]//.', $element )->length
+		) {
+			return;
+		}
+
 		$class = 'amp-wp-' . substr( md5( $value ), 0, 7 );
 		$root  = ':root' . str_repeat( ':not(#_)', self::INLINE_SPECIFICITY_MULTIPLIER );
-		$rule  = sprintf( '%s .%s { %s }', $root, $class, $style_attribute->nodeValue );
+		$rule  = sprintf( '%s .%s { %s }', $root, $class, $value );
 
 		$this->set_current_node( $element ); // And sources when needing to be located.
 
@@ -2558,7 +2570,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				'element'       => $element,
 				'origin'        => 'style_attribute',
 				'sources'       => $this->current_sources,
-				'priority'      => $this->get_stylesheet_priority( $style_attribute ),
+				'priority'      => $this->get_stylesheet_priority( $attr_node ),
 				'tokens'        => $parsed['tokens'],
 				'hash'          => $parsed['hash'],
 				'parse_time'    => $parsed['parse_time'],
