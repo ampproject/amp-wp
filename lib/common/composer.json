@@ -56,9 +56,9 @@
       "@lint",
       "@unit",
       "@cs",
-      "@analyse"
+      "@analyze"
     ],
-    "analyse": "if [ -z $TEST_SKIP_PHPSTAN ]; then phpstan analyse src -l3 --ansi; fi",
+    "analyze": "if [ -z $TEST_SKIP_PHPSTAN ]; then phpstan analyze src -l3 --ansi; fi",
     "unit": "if [ -z $TEST_SKIP_PHPUNIT ]; then phpunit --colors=always; fi"
   }
 }

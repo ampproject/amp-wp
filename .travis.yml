@@ -80,13 +80,13 @@ jobs:
       after_success:
         - npx sizereport --config
 
-    - stage: analyse
+    - stage: analyze
       name: Static analysis (PHP)
       php: "7.3"
       install:
         - composer install
       script:
-        - composer analyse
+        - composer analyze
 
     - stage: test
       name: JavaScript unit tests
