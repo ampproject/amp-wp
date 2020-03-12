@@ -1868,15 +1868,15 @@ class AMP_Validation_Error_Taxonomy {
 			case 'status':
 				// Output whether the validation error has been seen via hidden field since we can't set the 'new' class on the <tr> directly.
 				// This will get read via amp-validated-url-post-edit-screen.js.
-				$is_new   = ! ( $term->term_group & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK );
+				$is_new   = ! ( (int) $term->term_group & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK );
 				$content .= sprintf( '<input class="amp-validation-error-new" type="hidden" value="%d">', (int) $is_new );
 
-				$is_removed = (bool) ( $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
+				$is_removed = (bool) ( (int) $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
 
 				if ( 'post.php' === $pagenow ) {
 					$status_select_name = sprintf( '%s[%s]', AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR, $term->slug );
 
-					if ( $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK ) {
+					if ( (int) $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK ) {
 						$img_src = 'amp-logo-green';
 					} else {
 						$img_src = 'amp-logo-red';
@@ -3104,9 +3104,8 @@ class AMP_Validation_Error_Taxonomy {
 							$validation_error['duplicate_oneof_attrs']
 						)
 					);
-					return $title;
 				}
-				break;
+				return $title;
 			case AMP_Tag_And_Attribute_Sanitizer::MANDATORY_ONEOF_ATTR_MISSING:
 			case AMP_Tag_And_Attribute_Sanitizer::MANDATORY_ANYOF_ATTR_MISSING:
 				$attributes_key = null;

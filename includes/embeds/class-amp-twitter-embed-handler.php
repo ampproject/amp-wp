@@ -177,6 +177,11 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 			$attributes
 		);
 
+		/**
+		 * Placeholder element to append to the new node.
+		 *
+		 * @var DOMElement $placeholder
+		 */
 		$placeholder = $node->cloneNode( true );
 		$placeholder->setAttribute( 'placeholder', '' );
 
@@ -206,7 +211,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 		/**
 		 * Anchor.
 		 *
-		 * @type DOMElement $anchor
+		 * @var DOMElement $anchor
 		 */
 		foreach ( $anchors as $anchor ) {
 			$found = preg_match( self::URL_PATTERN, $anchor->getAttribute( 'href' ), $matches );
@@ -242,7 +247,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		// Handle case where script is immediately following.
 		$is_embed_script = (
-			$next_element_sibling
+			$next_element_sibling instanceof DOMElement
 			&&
 			'script' === strtolower( $next_element_sibling->nodeName )
 			&&

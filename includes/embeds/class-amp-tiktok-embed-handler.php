@@ -98,6 +98,11 @@ class AMP_TikTok_Embed_Handler extends AMP_Base_Embed_Handler {
 
 			// Append the placeholder if it was found.
 			if ( 'section' === $child->nodeName ) {
+				/**
+				 * Placeholder to append to the iframe.
+				 *
+				 * @var DOMElement $placeholder_node
+				 */
 				$placeholder_node = $blockquote_node->removeChild( $child );
 				$placeholder_node->setAttribute( 'placeholder', '' );
 				$amp_iframe_node->appendChild( $placeholder_node );
@@ -133,7 +138,7 @@ class AMP_TikTok_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		// Handle case where script is immediately following.
 		$is_embed_script = (
-			$next_element_sibling
+			$next_element_sibling instanceof DOMElement
 			&&
 			'script' === strtolower( $next_element_sibling->nodeName )
 			&&

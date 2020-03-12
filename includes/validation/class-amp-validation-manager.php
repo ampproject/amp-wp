@@ -1220,11 +1220,6 @@ class AMP_Validation_Manager {
 			}
 		}
 
-		/**
-		 * Script dependency.
-		 *
-		 * @var _WP_Dependency $script_dependency
-		 */
 		if ( $node instanceof DOMElement && 'script' === $node->nodeName ) {
 			$enqueued_script_handles = array_intersect( wp_scripts()->done, array_keys( self::$enqueued_script_sources ) );
 

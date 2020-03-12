@@ -6,6 +6,7 @@
  */
 
 use AmpProject\Dom\Document;
+use AmpProject\Tag;
 
 /**
  * Class AMP_DOM_Utils
@@ -337,7 +338,7 @@ class AMP_DOM_Utils {
 	 * @return bool Returns true if a valid self-closing tag, false if not.
 	 */
 	private static function is_self_closing_tag( $tag ) {
-		return in_array( strtolower( $tag ), self::$self_closing_tags, true );
+		return in_array( strtolower( $tag ), Tag::SELF_CLOSING_TAGS, true );
 	}
 
 	/**

@@ -5,12 +5,14 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\HandleValidation;
+
 /**
  * Class Test_AMP_Helper_Functions
  */
 class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 
-	use AMP_Test_HandleValidation;
+	use HandleValidation;
 
 	/**
 	 * The mock Site Icon value to use in a filter.

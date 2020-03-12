@@ -2269,12 +2269,17 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			/**
-			 * Source URL lists.
+			 * Source file URL list.
 			 *
 			 * @var string[] $source_file_urls
+			 */
+			$source_file_urls = [];
+
+			/**
+			 * Source data URL collection.
+			 *
 			 * @var URL[]    $source_data_url_objects
 			 */
-			$source_file_urls        = [];
 			$source_data_url_objects = [];
 			foreach ( $sources as $i => $source ) {
 				if ( $source[0] instanceof URL ) {
@@ -2462,10 +2467,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 		}
-		if ( ! $allow_transformation || empty( $importants ) ) {
+		if ( ! $ruleset instanceof DeclarationBlock || ! $allow_transformation || empty( $importants ) ) {
 			return $results;
 		}
 
+		/**
+		 * Ruleset covering !important styles.
+		 *
+		 * @var DeclarationBlock $important_ruleset
+		 */
 		$important_ruleset = clone $ruleset;
 		$important_ruleset->setSelectors(
 			array_map(
@@ -2797,10 +2807,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 		$validity_li_element = $this->dom->getElementById( 'wp-admin-bar-amp-validity' );
-		if ( ! $validity_li_element ) {
+		if ( ! $validity_li_element instanceof DOMElement ) {
 			return;
 		}
 
+		/**
+		 * Cloned <li> element that we can modify to include stylesheet information.
+		 *
+		 * @var DOMElement $stylesheets_li_element
+		 */
 		$stylesheets_li_element = $validity_li_element->cloneNode( true );
 		$stylesheets_a_element  = $stylesheets_li_element->getElementsByTagName( 'a' )->item( 0 );
 		if ( ! ( $stylesheets_a_element instanceof DOMElement ) ) {
@@ -3185,7 +3200,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$this->pending_stylesheets[ $previously_seen_stylesheet_index[ $pending_stylesheet['hash'] ] ]['duplicate'] = true;
 			}
 			$previously_seen_stylesheet_index[ $pending_stylesheet['hash'] ] = $pending_stylesheet_index;
-			unset( $shaken_tokens );
 
 			$pending_stylesheet['shake_time'] = microtime( true ) - $start_time;
 		} // End foreach pending_stylesheets.

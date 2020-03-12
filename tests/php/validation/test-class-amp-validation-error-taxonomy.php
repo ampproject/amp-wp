@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\HandleValidation;
+
 /**
  * Tests for AMP_Validation_Error_Taxonomy class.
  *
@@ -12,7 +14,7 @@
  */
 class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 
-	use AMP_Test_HandleValidation;
+	use HandleValidation;
 
 	/**
 	 * The tested class.

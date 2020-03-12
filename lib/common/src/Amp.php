@@ -126,7 +126,8 @@ final class Amp
     public static function isRuntimeScript(DOMNode $node)
     {
         if (
-            ! self::isAsyncScript($node)
+            ! $node instanceof DOMElement
+            || ! self::isAsyncScript($node)
             || self::isExtension($node)
         ) {
             return false;
@@ -160,7 +161,8 @@ final class Amp
     public static function isViewerScript(DOMNode $node)
     {
         if (
-            ! self::isAsyncScript($node)
+            ! $node instanceof DOMElement
+            || ! self::isAsyncScript($node)
             || self::isExtension($node)
         ) {
             return false;

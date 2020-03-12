@@ -7,8 +7,9 @@
 
 // phpcs:disable Generic.Formatting.MultipleStatementAlignment.NotSameWarning
 
-use AmpProject\Dom\Document;
+use AmpProject\AmpWP\Tests\HandleValidation;
 use AmpProject\AmpWP\Tests\PrivateAccess;
+use AmpProject\Dom\Document;
 
 /**
  * Tests for AMP_Validation_Manager class.
@@ -18,7 +19,7 @@ use AmpProject\AmpWP\Tests\PrivateAccess;
  */
 class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 
-	use AMP_Test_HandleValidation;
+	use HandleValidation;
 	use PrivateAccess;
 
 	/**
