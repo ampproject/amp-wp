@@ -11,7 +11,6 @@ use AmpProject\AmpWP\Admin\SiteHealth;
  * Obsolete constant for flagging when Customizer is opened for AMP.
  *
  * @deprecated
- * @var string
  */
 define( 'AMP_CUSTOMIZER_QUERY_VAR', 'customize_amp' );
 
@@ -83,7 +82,7 @@ function amp_admin_get_preview_permalink() {
 	);
 
 	if ( empty( $post_ids ) ) {
-		return false;
+		return null;
 	}
 
 	$post_id = $post_ids[0];

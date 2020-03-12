@@ -5,10 +5,12 @@
  * @package AMP
  */
 
+namespace AmpProject\AmpWP\Tests;
+
 /**
  * Helper trait for validation
  */
-trait AMP_Test_HandleValidation {
+trait HandleValidation {
 
 	/**
 	 * Whether or not to enable acceptance of sanitization by default.

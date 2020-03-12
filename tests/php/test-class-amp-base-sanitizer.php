@@ -6,6 +6,7 @@
  */
 
 use AmpProject\Dom\Document;
+use AmpProject\AmpWP\Tests\StubSanitizer;
 
 /**
  * Test AMP_Base_Sanitizer_Test
@@ -199,7 +200,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	 * @covers AMP_Base_Sanitizer::set_layout()
 	 */
 	public function test_set_layout( $source_attributes, $expected_attributes, $args = [] ) {
-		$sanitizer           = new AMP_Test_Stub_Sanitizer( new Document(), $args );
+		$sanitizer           = new StubSanitizer( new Document(), $args );
 		$returned_attributes = $sanitizer->set_layout( $source_attributes );
 		$this->assertEquals( $expected_attributes, $returned_attributes );
 	}
@@ -275,7 +276,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	 * @covers AMP_Base_Sanitizer::sanitize_dimension()
 	 */
 	public function test_sanitize_dimension( $source_params, $expected_value, $args = [] ) {
-		$sanitizer                 = new AMP_Test_Stub_Sanitizer( new Document(), $args );
+		$sanitizer                 = new StubSanitizer( new Document(), $args );
 		list( $value, $dimension ) = $source_params;
 
 		$actual_value = $sanitizer->sanitize_dimension( $value, $dimension );
@@ -513,7 +514,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 		$figure->setAttribute( 'data-amp-noloading', 'true' );
 		$figure->setAttribute( 'data-amp-layout', 'fixed' );
 
-		$sanitizer = new AMP_Test_Stub_Sanitizer( new Document(), [] );
+		$sanitizer = new StubSanitizer( new Document(), [] );
 		$amp_args  = $sanitizer->get_data_amp_attributes( $amp_img );
 
 		$expected_args = [
@@ -537,7 +538,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 		$attributes = [
 			'width' => 100,
 		];
-		$sanitizer  = new AMP_Test_Stub_Sanitizer( new Document(), [] );
+		$sanitizer  = new StubSanitizer( new Document(), [] );
 		$attributes = $sanitizer->filter_data_amp_attributes( $attributes, $amp_data );
 
 		$expected = [
@@ -553,7 +554,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	 * @covers AMP_Base_Sanitizer::filter_attachment_layout_attributes()
 	 */
 	public function test_filter_attachment_layout_attributes() {
-		$sanitizer    = new AMP_Test_Stub_Sanitizer( new Document(), [] );
+		$sanitizer    = new StubSanitizer( new Document(), [] );
 		$tag          = 'figure';
 		$dom_document = new Document( '1.0', 'utf-8' );
 		$figure       = $dom_document->createElement( $tag );

@@ -1296,7 +1296,7 @@ class AMP_Theme_Support {
 		}
 
 		// For non-singular queries, make use of the request URI and public query vars to determine canonical URL.
-		if ( empty( $url ) ) {
+		if ( empty( $url ) && $wp instanceof WP && $wp_rewrite instanceof WP_Rewrite ) {
 			$added_query_vars = $wp->query_vars;
 			if ( ! $wp_rewrite->permalink_structure || empty( $wp->request ) ) {
 				$url = home_url( '/' );

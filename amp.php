@@ -266,13 +266,7 @@ if ( extension_loaded( 'xdebug' ) ) {
 	add_action( 'admin_notices', '_amp_xdebug_admin_notice' );
 }
 
-require_once AMP__DIR__ . '/includes/class-amp-autoloader.php';
-AMP_Autoloader::register();
-
-require_once AMP__DIR__ . '/back-compat/back-compat.php';
-require_once AMP__DIR__ . '/includes/amp-helper-functions.php';
-require_once AMP__DIR__ . '/includes/admin/functions.php';
-require_once AMP__DIR__ . '/includes/deprecated.php';
+require_once AMP__DIR__ . '/vendor/autoload.php';
 
 register_activation_hook( __FILE__, 'amp_activate' );
 

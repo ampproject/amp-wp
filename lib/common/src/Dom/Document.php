@@ -9,6 +9,7 @@ use DOMComment;
 use DOMDocument;
 use DOMElement;
 use DOMNode;
+use DOMNodeList;
 use DOMText;
 use DOMXPath;
 
@@ -17,12 +18,11 @@ use DOMXPath;
  *
  * Abstract away some of the difficulties of working with PHP's DOMDocument.
  *
- * @property DOMXPath     $xpath       XPath query object for this document.
- * @property DOMElement   $html        The document's <html> element.
- * @property DOMElement   $head        The document's <head> element.
- * @property DOMElement   $body        The document's <body> element.
- * @property DOMElement[] $ampElements The document's <amp-*> elements. Technically, this returns a DOMNodeList, but
- *                                     we're hinting directly to elements, not nodes, for convenience.
+ * @property DOMXPath    $xpath       XPath query object for this document.
+ * @property DOMElement  $html        The document's <html> element.
+ * @property DOMElement  $head        The document's <head> element.
+ * @property DOMElement  $body        The document's <body> element.
+ * @property DOMNodeList $ampElements The document's <amp-*> elements.
  *
  * @package ampproject/common
  */
@@ -281,14 +281,16 @@ final class Document extends DOMDocument
      */
     public static function fromNode(DOMNode &$node)
     {
-        $root = $node->ownerDocument;
+        /**
+         * Document of the node.
+         *
+         * If the node->ownerDocument returns null, the node is the document.
+         *
+         * @var DOMDocument
+         */
+        $root = $node->ownerDocument === null ? $node : $node->ownerDocument;
 
-        // If the node is the document itself, ownerDocument returns null.
-        if (null === $root) {
-            $root = $node;
-        }
-
-        if ($root instanceof Document) {
+        if ($root instanceof self) {
             return $root;
         }
 
@@ -593,11 +595,16 @@ final class Document extends DOMDocument
             $this->appendChild($this->createElement(Tag::HTML));
         } elseif (Tag::HTML !== $this->documentElement->nodeName) {
             $nextSibling = $this->documentElement->nextSibling;
+            /**
+             * The old document element that we need to remove and replace as we cannot just move it around.
+             *
+             * @var DOMElement
+             */
             $oldDocumentElement = $this->removeChild($this->documentElement);
             $html = $this->createElement(Tag::HTML);
             $this->insertBefore($html, $nextSibling);
 
-            if (Tag::HEAD == $oldDocumentElement->nodeName) {
+            if ($oldDocumentElement->nodeName === Tag::HEAD) {
                 $this->head = $oldDocumentElement;
             } else {
                 $this->head = $this->getElementsByTagName(Tag::HEAD)->item(0);
@@ -607,7 +614,7 @@ final class Document extends DOMDocument
             }
             $html->appendChild($this->head);
 
-            if (Tag::BODY == $oldDocumentElement->nodeName) {
+            if ($oldDocumentElement->nodeName === Tag::BODY) {
                 $this->body = $oldDocumentElement;
             } else {
                 $this->body = $this->getElementsByTagName(Tag::BODY)->item(0);
@@ -1476,7 +1483,7 @@ final class Document extends DOMDocument
                 }
                 return $this->body;
             case 'ampElements':
-                $this->ampElements = $this->xpath->query(".//*[ starts-with( name(), 'amp-' ) ]", $this->body);
+                $this->ampElements = $this->xpath->query(".//*[ starts-with( name(), 'amp-' ) ]", $this->body) ?: new DOMNodeList();
 
                 return $this->ampElements;
         }

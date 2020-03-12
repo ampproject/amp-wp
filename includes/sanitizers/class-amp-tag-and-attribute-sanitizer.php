@@ -2432,19 +2432,17 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Do quick check to see if the the ancestor element is even open.
 		// Note first isset check is for the sake of \AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test::test_get_ancestor_with_matching_spec_name().
-		if ( isset( $this->open_element['html'] ) && empty( $this->open_elements[ $parsed_spec_name['tag_name'] ] ) ) {
+		if ( isset( $this->open_elements['html'] ) && empty( $this->open_elements[ $parsed_spec_name['tag_name'] ] ) ) {
 			return null;
 		}
 
-		while ( $node && $node->parentNode ) {
+		while ( $node->parentNode instanceof DOMElement ) {
 			$node = $node->parentNode;
 			if ( $node->nodeName === $parsed_spec_name['tag_name'] ) {
 
 				// Ensure attributes match; if not move up to the next node.
 				foreach ( $parsed_spec_name['attributes'] as $attr_name => $attr_value ) {
 					$match = (
-						$node instanceof DOMElement
-						&&
 						true === $attr_value ? $node->hasAttribute( $attr_name ) : strtolower( $node->getAttribute( $attr_name ) ) === $attr_value
 					);
 					if ( ! $match ) {

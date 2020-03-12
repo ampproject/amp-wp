@@ -925,7 +925,7 @@ function amp_get_content_sanitizers( $post = null ) {
 		 *
 		 * @since 1.5.0
 		 *
-		 * @param string[] The URLs to exclude from having AMP-to-AMP links.
+		 * @param string[] $excluded_urls The URLs to exclude from having AMP-to-AMP links.
 		 */
 		$excluded_urls = apply_filters( 'amp_to_amp_excluded_urls', [] );
 
@@ -955,7 +955,7 @@ function amp_get_content_sanitizers( $post = null ) {
 		 * elements prior to running any of the sanitizers.
 		 *
 		 * @since 1.3
-		 * @param string[] XPath element queries. Context is the root element.
+		 * @param string[] $element_xpaths XPath element queries. Context is the root element.
 		 */
 		$dev_mode_xpaths = (array) apply_filters( 'amp_dev_mode_element_xpaths', [] );
 		if ( is_admin_bar_showing() ) {
@@ -1333,7 +1333,7 @@ if ( ! function_exists( 'array_column' ) ) {
 	 *                          of the column, or it may be the string key name.
 	 * @return array|bool
 	 */
-	function array_column( $input = null, $column_key = null, $index_key = null ) {
+	function array_column( $input = [], $column_key = null, $index_key = null ) {
 		// Using func_get_args() in order to check for proper number of
 		// parameters and trigger errors exactly as the built-in array_column()
 		// does in PHP 5.5.
