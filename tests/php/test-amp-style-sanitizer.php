@@ -162,7 +162,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 			'illegal_at_rules_removed' => [
 				'<style>@charset "utf-8"; @namespace svg url(http://www.w3.org/2000/svg); @page { margin: 1cm; } @viewport { width: device-width; } @counter-style thumbs { system: cyclic; symbols: "\1F44D"; suffix: " "; } body { color: black; }</style>',
-				'',
+				'<meta name="viewport" content="width=device-width">',
 				[
 					'@page{margin:1cm}body{color:black}',
 				],
@@ -2647,11 +2647,11 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			],
 			'valid_initial_scale_moved' => [
 				'<html amp><head><meta charset="utf-8"><style amp-custom>@viewport{ initial-scale: .9; }</style>' . $amp_boilerplate . '</head><body></body></html>',
-				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="initial-scale=.9, width=device-width">' . $amp_boilerplate . '</head><body></body></html>',
+				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="initial-scale=.9,width=device-width">' . $amp_boilerplate . '</head><body></body></html>',
 			],
 			'single_valid_viewport_rule_moved' => [
 				'<html amp><head><meta charset="utf-8"><style amp-custom>@viewport{ viewport-fit: auto; }</style>' . $amp_boilerplate . '</head><body></body></html>',
-				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="viewport-fit=auto, width=device-width">' . $amp_boilerplate . '</head><body></body></html>',
+				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="viewport-fit=auto,width=device-width">' . $amp_boilerplate . '</head><body></body></html>',
 			],
 		];
 	}

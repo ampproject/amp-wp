@@ -1219,6 +1219,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			]
 		);
 
+		$this->maybe_create_meta_viewport( $element, $parsed['viewport_rules'] );
+
 		$this->pending_stylesheets[] = [
 			'group'              => $is_keyframes ? self::STYLE_AMP_KEYFRAMES_GROUP_INDEX : self::STYLE_AMP_CUSTOM_GROUP_INDEX,
 			'original_size'      => (int) strlen( $stylesheet ),
@@ -1315,25 +1317,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			]
 		);
 
-		if ( ! empty( $parsed['viewport_rules'] ) ) {
-			$viewport_meta = $this->dom->createElement( 'meta' );
-			$viewport_meta->setAttribute( 'name', 'viewport' );
-			$viewport_meta->setAttribute(
-				'content',
-				implode(
-					',',
-					array_map(
-						static function ( $property_name ) use ( $parsed ) {
-							return $property_name . '=' . $parsed['viewport_rules'][ $property_name ];
-						},
-						array_keys( $parsed['viewport_rules'] )
-					)
-				)
-			);
-
-			// Inject a potential duplicate meta viewport element, to later be merged in AMP_Meta_Sanitizer.
-			$element->parentNode->insertBefore( $viewport_meta, $element );
-		}
+		$this->maybe_create_meta_viewport( $element, $parsed['viewport_rules'] );
 
 		$this->pending_stylesheets[] = [
 			'group'              => self::STYLE_AMP_CUSTOM_GROUP_INDEX,
@@ -1577,7 +1561,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				),
 				'1.0'
 			);
-			return [];
+			return compact( 'imported_font_urls' );
 		}
 
 		$stylesheet = $this->get_stylesheet_from_url( $import_stylesheet_url );
@@ -1593,7 +1577,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$css_list->remove( $item );
 			}
 			$results[] = compact( 'error', 'sanitized' );
-			return $results;
+			return [ 'validation_errors' => $results ];
 		}
 
 		if ( $media_query ) {
@@ -3313,5 +3297,35 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		return $included_count;
+	}
+
+	/**
+	 * Creates a meta[name="viewport"] tag if there are viewport rules.
+	 *
+	 * These rules are added to the content attribute of that tag.
+	 *
+	 * @param DOMElement $element        An element.
+	 * @param array      $viewport_rules An associative array of $rule_name => $rule_value.
+	 */
+	private function maybe_create_meta_viewport( $element, $viewport_rules ) {
+		if ( ! empty( $viewport_rules ) ) {
+			$viewport_meta = $this->dom->createElement( 'meta' );
+			$viewport_meta->setAttribute( 'name', 'viewport' );
+			$viewport_meta->setAttribute(
+				'content',
+				implode(
+					',',
+					array_map(
+						static function ( $property_name ) use ( $viewport_rules ) {
+							return $property_name . '=' . $viewport_rules[ $property_name ];
+						},
+						array_keys( $viewport_rules )
+					)
+				)
+			);
+
+			// Inject a potential duplicate meta viewport element, to later be merged in AMP_Meta_Sanitizer.
+			$element->parentNode->insertBefore( $viewport_meta, $element );
+		}
 	}
 }

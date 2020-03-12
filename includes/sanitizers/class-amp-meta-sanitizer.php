@@ -137,8 +137,19 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	protected function ensure_viewport_is_present() {
 		if ( empty( $this->meta_tags[ self::TAG_VIEWPORT ] ) ) {
 			$this->meta_tags[ self::TAG_VIEWPORT ][] = $this->create_viewport_element( static::AMP_VIEWPORT );
+		} else {
+			$parsed_rules = [];
+			foreach ( $this->meta_tags[ self::TAG_VIEWPORT ] as $meta_viewport ) {
+				$viewport_content = explode( ',', $meta_viewport->getAttribute( 'content' ) );
+				foreach ( $viewport_content as $rule ) {
+					list( $name, $value )          = explode( '=', $rule, 2 );
+					$parsed_rules[ trim( $name ) ] = trim( $value );
+				}
+			}
+
+			$valid_rules                           = $this->get_valid_viewport_rules( $parsed_rules );
+			$this->meta_tags[ self::TAG_VIEWPORT ] = [ $this->create_viewport_element( $valid_rules ) ];
 		}
-		// @todo: In an else block, add $viewport rules to the existing meta[name="viewport"], prioritizing the existing ones.
 	}
 
 	/**
@@ -146,7 +157,7 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @link https://github.com/ampproject/amphtml/blob/5f75efe35b734a4fcf0884d373315d
 	 *
-	 * @param array $rules The rules to evaluate.
+	 * @param array $rules The rules to evaluate, an associative array of $rule_name => $rule_value.
 	 * @return string The rules of those that are valid.
 	 */
 	protected function get_valid_viewport_rules( $rules ) {
@@ -163,28 +174,30 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		$valid_rules = [];
-		foreach ( $rules as $rule ) {
-			foreach ( $rule as $rule_name => $rule_value ) {
-				if ( ! isset( $allowed_meta_spec[ $rule_name ] ) ) {
-					continue;
-				}
-
-				// If the spec for the attribute has a mandatory value, like width="device-width", ensure it has that value.
-				if ( isset( $allowed_meta_spec[ $rule_name ]['value'] ) && $rule_value !== $allowed_meta_spec[ $rule_name ]['value'] ) {
-					continue;
-				}
-
-				$valid_rules[ $rule_name ] = $rule_value;
+		foreach ( $rules as $rule_name => $rule_value ) {
+			if ( ! isset( $allowed_meta_spec[ $rule_name ] ) ) {
+				continue;
 			}
+
+			// If the spec for the attribute has a mandatory value, like width="device-width", ensure it has that value.
+			if ( isset( $allowed_meta_spec[ $rule_name ]['value'] ) && $rule_value !== $allowed_meta_spec[ $rule_name ]['value'] ) {
+				continue;
+			}
+
+			$valid_rules[ $rule_name ] = $rule_value;
 		}
 
 		$valid_rules['width'] = 'device-width';
-		$allowed_rules        = [];
-		foreach ( $valid_rules as $valid_rule_name => $valid_rule_value ) {
-			$allowed_rules[] = $valid_rule_name . '=' . $valid_rule_value;
-		}
 
-		return implode( ', ', $allowed_rules );
+		return implode(
+			',',
+			array_map(
+				static function ( $rule_name ) use ( $valid_rules ) {
+					return $rule_name . '=' . $valid_rules[ $rule_name ];
+				},
+				array_keys( $valid_rules )
+			)
+		);
 	}
 
 	/**
