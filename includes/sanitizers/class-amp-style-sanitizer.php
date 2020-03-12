@@ -1519,13 +1519,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array {
 	 *     Validation results.
 	 *
-	 *     @type array $imported_font_urls
 	 *     @type array $validation_errors
+	 *     @type array $imported_font_urls
 	 * }
 	 */
 	private function splice_imported_stylesheet( Import $item, CSSList $css_list, $options ) {
-		$imported_font_urls = [];
 		$validation_errors  = [];
+		$imported_font_urls = [];
 		$at_rule_args       = $item->atRuleArgs();
 		$location           = array_shift( $at_rule_args );
 		$media_query        = array_shift( $at_rule_args );
@@ -1972,9 +1972,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array {
 	 *     Processed CSS list.
 	 *
-	 *     @type array $validation_errors  Validation errors.
-	 *     @type array $viewport_rules     Viewport rules.
-	 *     @type array $imported_font_urls Imported font URLs.
+	 *     @type array $validation_errors
+	 *     @type array $viewport_rules
+	 *     @type array $imported_font_urls
 	 * }
 	 */
 	private function process_css_list( CSSList $css_list, $options ) {
@@ -2013,9 +2013,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			} elseif ( $css_item instanceof Import ) {
 				$imported_stylesheet = $this->splice_imported_stylesheet( $css_item, $css_list, $options );
-
-				$imported_font_urls = array_merge( $imported_font_urls, $imported_stylesheet['imported_font_urls'] );
-				$validation_errors  = array_merge( $validation_errors, $imported_stylesheet['validation_errors'] );
+				$imported_font_urls  = array_merge( $imported_font_urls, $imported_stylesheet['imported_font_urls'] );
+				$validation_errors   = array_merge( $validation_errors, $imported_stylesheet['validation_errors'] );
 			} elseif ( $css_item instanceof AtRuleSet ) {
 				if ( in_array( $css_item->atRuleName(), $this->allowed_viewport_rules, true ) ) {
 					$output_format = new OutputFormat();
@@ -3285,32 +3284,36 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Creates a meta[name="viewport"] tag if there are viewport rules.
+	 * Creates and inserts a meta[name="viewport"] tag if there are @viewport style rules.
 	 *
-	 * These rules are added to the content attribute of that tag.
+	 * These rules aren't valid in CSS, but they might be valid in that meta tag.
+	 * So this adds them to the content attribute of a new meta tag.
+	 * These are later processed, to merge the content values into a single meta tag.
 	 *
 	 * @param DOMElement $element        An element.
 	 * @param array      $viewport_rules An associative array of $rule_name => $rule_value.
 	 */
 	private function maybe_create_meta_viewport( $element, $viewport_rules ) {
-		if ( ! empty( $viewport_rules ) ) {
-			$viewport_meta = $this->dom->createElement( 'meta' );
-			$viewport_meta->setAttribute( 'name', 'viewport' );
-			$viewport_meta->setAttribute(
-				'content',
-				implode(
-					',',
-					array_map(
-						static function ( $property_name ) use ( $viewport_rules ) {
-							return $property_name . '=' . $viewport_rules[ $property_name ];
-						},
-						array_keys( $viewport_rules )
-					)
-				)
-			);
-
-			// Inject a potential duplicate meta viewport element, to later be merged in AMP_Meta_Sanitizer.
-			$element->parentNode->insertBefore( $viewport_meta, $element );
+		if ( empty( $viewport_rules ) ) {
+			return;
 		}
+
+		$viewport_meta = $this->dom->createElement( 'meta' );
+		$viewport_meta->setAttribute( 'name', 'viewport' );
+		$viewport_meta->setAttribute(
+			'content',
+			implode(
+				',',
+				array_map(
+					static function ( $property_name ) use ( $viewport_rules ) {
+						return $property_name . '=' . $viewport_rules[ $property_name ];
+					},
+					array_keys( $viewport_rules )
+				)
+			)
+		);
+
+		// Inject a potential duplicate meta viewport element, to later be merged in AMP_Meta_Sanitizer.
+		$element->parentNode->insertBefore( $viewport_meta, $element );
 	}
 }

@@ -180,7 +180,7 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		if ( ! isset( $allowed_meta_spec ) ) {
-			return '';
+			return static::AMP_VIEWPORT;
 		}
 
 		$valid_rules = [];

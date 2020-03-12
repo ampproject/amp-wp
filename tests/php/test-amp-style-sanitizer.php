@@ -2691,6 +2691,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 *
 	 * @dataProvider get_viewport_data
 	 * @covers AMP_Style_Sanitizer::sanitize()
+	 * @covers AMP_Meta_Sanitizer::sanitize()
 	 *
 	 * @param string $markup   The markup to sanitize.
 	 * @param string $expected The expected result after sanitizing.
