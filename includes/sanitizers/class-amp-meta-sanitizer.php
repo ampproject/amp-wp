@@ -133,6 +133,9 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	 * Always ensure we have a viewport tag.
 	 *
 	 * The viewport defaults to 'width=device-width', which is the bare minimum that AMP requires.
+	 * If there are @viewport style rules, these will have been moved into the content attribute of their own meta[name="viewport"] tags.
+	 * So this iterates over all of those tags, gets the content value,
+	 * and merges all of the valid values into a single meta tag.
 	 */
 	protected function ensure_viewport_is_present() {
 		if ( empty( $this->meta_tags[ self::TAG_VIEWPORT ] ) ) {
@@ -140,7 +143,7 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 		} else {
 			$parsed_rules = [];
 
-			// Reverse the meta[name="viewport"] tags, so original meta[name="viewport"] tags have precedence @viewport style rules.
+			// Reverse the meta[name="viewport"] tags, so original meta[name="viewport"] tags have precedence over @viewport style rules.
 			foreach ( array_reverse( $this->meta_tags[ self::TAG_VIEWPORT ] ) as $meta_viewport ) {
 				$viewport_content = explode( ',', $meta_viewport->getAttribute( 'content' ) );
 				foreach ( $viewport_content as $rule ) {
@@ -155,23 +158,23 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Gets the viewport rules that would be valid in meta[name="viewport"].
+	 * Gets the rules that would be valid in the content attribute of meta[name="viewport"].
 	 *
 	 * @link https://github.com/ampproject/amphtml/blob/6b439aec75c1d9b52ba19435f6730b27a457bf42/validator/validator-main.protoascii#L436-L445
 	 *
 	 * @param array $rules The rules to evaluate, an associative array of $rule_name => $rule_value.
-	 * @return string The rules of those that are valid.
+	 * @return string The rules of those that are valid, as a comma-separated string.
 	 */
 	protected function get_valid_viewport_rules( $rules ) {
-		$allowed_meta_spec = AMP_Allowed_Tags_Generated::get_allowed_tag( 'meta' );
-		foreach ( $allowed_meta_spec as $spec ) {
+		$meta_specs = AMP_Allowed_Tags_Generated::get_allowed_tag( 'meta' );
+		foreach ( $meta_specs as $spec ) {
 			if ( isset( $spec['tag_spec']['spec_name'], $spec['attr_spec_list']['content']['value_properties'] ) && 'meta name=viewport' === $spec['tag_spec']['spec_name'] ) {
 				$allowed_meta_spec = $spec['attr_spec_list']['content']['value_properties'];
 				break;
 			}
 		}
 
-		if ( ! $allowed_meta_spec ) {
+		if ( ! isset( $allowed_meta_spec ) ) {
 			return '';
 		}
 
@@ -189,7 +192,7 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 			$valid_rules[ $rule_name ] = $rule_value;
 		}
 
-		$valid_rules['width'] = 'device-width';
+		$valid_rules['width'] = isset( $allowed_meta_spec['width']['value'] ) ? $allowed_meta_spec['width']['value'] : 'device-width';
 
 		return implode(
 			',',

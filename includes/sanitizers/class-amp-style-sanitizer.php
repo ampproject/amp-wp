@@ -1525,7 +1525,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function splice_imported_stylesheet( Import $item, CSSList $css_list, $options ) {
 		$imported_font_urls = [];
-		$results            = [];
+		$validation_errors  = [];
 		$at_rule_args       = $item->atRuleArgs();
 		$location           = array_shift( $at_rule_args );
 		$media_query        = array_shift( $at_rule_args );
@@ -1561,7 +1561,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				),
 				'1.0'
 			);
-			return compact( 'imported_font_urls' );
+
+			return compact( 'validation_errors', 'imported_font_urls' );
 		}
 
 		$stylesheet = $this->get_stylesheet_from_url( $import_stylesheet_url );
@@ -1576,8 +1577,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			if ( $sanitized ) {
 				$css_list->remove( $item );
 			}
-			$results[] = compact( 'error', 'sanitized' );
-			return [ 'validation_errors' => $results ];
+			$validation_errors[] = compact( 'error', 'sanitized' );
+
+			return compact( 'validation_errors', 'imported_font_urls' );
 		}
 
 		if ( $media_query ) {
@@ -1588,8 +1590,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$parsed_stylesheet = $this->create_validated_css_document( $stylesheet, $options );
 
-		$results = array_merge(
-			$results,
+		$validation_errors = array_merge(
+			$validation_errors,
 			$parsed_stylesheet['validation_results']
 		);
 
@@ -1609,10 +1611,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$css_list->remove( $item );
 		}
 
-		return array_merge(
-			compact( 'imported_font_urls' ),
-			[ 'validation_errors' => $results ]
-		);
+		return compact( 'validation_errors', 'imported_font_urls' );
 	}
 
 	/**
@@ -2015,19 +2014,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			} elseif ( $css_item instanceof Import ) {
 				$imported_stylesheet = $this->splice_imported_stylesheet( $css_item, $css_list, $options );
 
-				if ( isset( $imported_stylesheet['imported_font_urls'] ) ) {
-					$imported_font_urls = array_merge(
-						$imported_font_urls,
-						$imported_stylesheet['imported_font_urls']
-					);
-				}
+				$imported_font_urls = array_merge(
+					$imported_font_urls,
+					$imported_stylesheet['imported_font_urls']
+				);
 
-				if ( isset( $imported_stylesheet['validation_errors'] ) ) {
-					$results = array_merge(
-						$results,
-						$imported_stylesheet['validation_errors']
-					);
-				}
+				$results = array_merge(
+					$results,
+					$imported_stylesheet['validation_errors']
+				);
 			} elseif ( $css_item instanceof AtRuleSet ) {
 				if ( in_array( $css_item->atRuleName(), $this->allowed_viewport_rules, true ) ) {
 					$output_format = new OutputFormat();

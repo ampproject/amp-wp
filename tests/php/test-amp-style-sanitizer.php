@@ -2663,6 +2663,18 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'<style amp-custom>@viewport{ viewport-fit: auto; height: 10em }</style>',
 				'<meta name="viewport" content="viewport-fit=auto,height=10em,width=device-width">',
 			],
+			'ms_vendor_prefix_recognized' => [
+				'<style amp-custom>@-ms-viewport{ initial-scale: .8 }</style>',
+				'<meta name="viewport" content="initial-scale=.8,width=device-width">',
+			],
+			'o_vendor_prefix_recognized' => [
+				'<style amp-custom>@-o-viewport{ height: 80% }</style>',
+				'<meta name="viewport" content="height=80%,width=device-width">',
+			],
+			'invalid_vendor_prefix_not_recognized' => [
+				'<style amp-custom>@-baz-viewport{ height: 400px }</style>',
+				'<meta name="viewport" content="width=device-width">',
+			],
 			'initial_meta_tag_has_precendence_over_viewport_style_rule' => [
 				'<meta name="viewport" content="height=20em"><style amp-custom>@viewport{ height: 30em }</style>',
 				'<meta name="viewport" content="height=20em,width=device-width">',
