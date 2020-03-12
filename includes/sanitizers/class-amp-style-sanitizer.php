@@ -1539,7 +1539,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		// Prevent importing something that has already been imported, and avoid infinite recursion.
 		if ( isset( $this->processed_imported_stylesheet_urls[ $import_stylesheet_url ] ) ) {
 			$css_list->remove( $item );
-			return [];
+			return compact( 'validation_errors', 'imported_font_urls' );
 		}
 		$this->processed_imported_stylesheet_urls[ $import_stylesheet_url ] = true;
 
@@ -2014,15 +2014,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			} elseif ( $css_item instanceof Import ) {
 				$imported_stylesheet = $this->splice_imported_stylesheet( $css_item, $css_list, $options );
 
-				$imported_font_urls = array_merge(
-					$imported_font_urls,
-					$imported_stylesheet['imported_font_urls']
-				);
-
-				$results = array_merge(
-					$results,
-					$imported_stylesheet['validation_errors']
-				);
+				$imported_font_urls = array_merge( $imported_font_urls, $imported_stylesheet['imported_font_urls'] );
+				$results            = array_merge( $results, $imported_stylesheet['validation_errors'] );
 			} elseif ( $css_item instanceof AtRuleSet ) {
 				if ( in_array( $css_item->atRuleName(), $this->allowed_viewport_rules, true ) ) {
 					$output_format = new OutputFormat();

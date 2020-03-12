@@ -147,7 +147,12 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 			foreach ( array_reverse( $this->meta_tags[ self::TAG_VIEWPORT ] ) as $meta_viewport ) {
 				$viewport_content = explode( ',', $meta_viewport->getAttribute( 'content' ) );
 				foreach ( $viewport_content as $rule ) {
-					list( $name, $value )          = explode( '=', $rule, 2 );
+					$exploded_rules = explode( '=', $rule, 2 );
+					if ( ! isset( $exploded_rules[1] ) ) {
+						continue;
+					}
+
+					list( $name, $value )          = $exploded_rules;
 					$parsed_rules[ trim( $name ) ] = trim( $value );
 				}
 			}

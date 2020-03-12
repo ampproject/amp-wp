@@ -2679,6 +2679,10 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'<meta name="viewport" content="height=20em"><style amp-custom>@viewport{ height: 30em }</style>',
 				'<meta name="viewport" content="height=20em,width=device-width">',
 			],
+			'meta_tag_with_no_content_gets_width_added' => [
+				'<meta name="viewport">',
+				'<meta name="viewport" content="width=device-width">',
+			],
 		];
 	}
 
