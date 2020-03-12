@@ -1661,7 +1661,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 			$validation_results = array_merge(
 				$validation_results,
-				$processed_css_list['validation_results']
+				$processed_css_list['validation_errors']
 			);
 			$viewport_rules     = array_merge(
 				$viewport_rules,
@@ -1972,33 +1972,33 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array {
 	 *     Processed CSS list.
 	 *
-	 *     @type array $validation_results Validation errors.
+	 *     @type array $validation_errors  Validation errors.
 	 *     @type array $viewport_rules     Viewport rules.
 	 *     @type array $imported_font_urls Imported font URLs.
 	 * }
 	 */
 	private function process_css_list( CSSList $css_list, $options ) {
-		$results            = [];
+		$validation_errors  = [];
 		$viewport_rules     = [];
 		$imported_font_urls = [];
 
 		foreach ( $css_list->getContents() as $css_item ) {
 			$sanitized = false;
 			if ( $css_item instanceof DeclarationBlock && empty( $options['validate_keyframes'] ) ) {
-				$results = array_merge(
-					$results,
+				$validation_errors = array_merge(
+					$validation_errors,
 					$this->process_css_declaration_block( $css_item, $css_list, $options )
 				);
 			} elseif ( $css_item instanceof AtRuleBlockList ) {
 				if ( ! in_array( $css_item->atRuleName(), $options['allowed_at_rules'], true ) ) {
-					$error     = [
+					$error               = [
 						'code'      => self::CSS_SYNTAX_INVALID_AT_RULE,
 						'at_rule'   => $css_item->atRuleName(),
 						'type'      => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 						'spec_name' => $options['spec_name'],
 					];
-					$sanitized = $this->should_sanitize_validation_error( $error );
-					$results[] = compact( 'error', 'sanitized' );
+					$sanitized           = $this->should_sanitize_validation_error( $error );
+					$validation_errors[] = compact( 'error', 'sanitized' );
 				}
 				if ( ! $sanitized ) {
 					$at_rule_processed_list = $this->process_css_list( $css_item, $options );
@@ -2006,16 +2006,16 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						$viewport_rules[] = $at_rule_processed_list['viewport_rules'];
 					}
 
-					$results = array_merge(
-						$results,
-						$at_rule_processed_list['validation_results']
+					$validation_errors = array_merge(
+						$validation_errors,
+						$at_rule_processed_list['validation_errors']
 					);
 				}
 			} elseif ( $css_item instanceof Import ) {
 				$imported_stylesheet = $this->splice_imported_stylesheet( $css_item, $css_list, $options );
 
 				$imported_font_urls = array_merge( $imported_font_urls, $imported_stylesheet['imported_font_urls'] );
-				$results            = array_merge( $results, $imported_stylesheet['validation_errors'] );
+				$validation_errors  = array_merge( $validation_errors, $imported_stylesheet['validation_errors'] );
 			} elseif ( $css_item instanceof AtRuleSet ) {
 				if ( in_array( $css_item->atRuleName(), $this->allowed_viewport_rules, true ) ) {
 					$output_format = new OutputFormat();
@@ -2029,37 +2029,37 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					}
 					$css_list->remove( $css_item );
 				} elseif ( ! in_array( $css_item->atRuleName(), $options['allowed_at_rules'], true ) ) {
-					$error     = [
+					$error               = [
 						'code'      => self::CSS_SYNTAX_INVALID_AT_RULE,
 						'at_rule'   => $css_item->atRuleName(),
 						'type'      => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 						'spec_name' => $options['spec_name'],
 					];
-					$sanitized = $this->should_sanitize_validation_error( $error );
-					$results[] = compact( 'error', 'sanitized' );
+					$sanitized           = $this->should_sanitize_validation_error( $error );
+					$validation_errors[] = compact( 'error', 'sanitized' );
 				}
 
 				if ( ! $sanitized ) {
-					$results = array_merge(
-						$results,
+					$validation_errors = array_merge(
+						$validation_errors,
 						$this->process_css_declaration_block( $css_item, $css_list, $options )
 					);
 				}
 			} elseif ( $css_item instanceof KeyFrame ) {
 				if ( ! in_array( 'keyframes', $options['allowed_at_rules'], true ) ) {
-					$error     = [
+					$error               = [
 						'code'      => self::CSS_SYNTAX_INVALID_AT_RULE,
 						'at_rule'   => $css_item->atRuleName(),
 						'type'      => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 						'spec_name' => $options['spec_name'],
 					];
-					$sanitized = $this->should_sanitize_validation_error( $error );
-					$results[] = compact( 'error', 'sanitized' );
+					$sanitized           = $this->should_sanitize_validation_error( $error );
+					$validation_errors[] = compact( 'error', 'sanitized' );
 				}
 
 				if ( ! $sanitized ) {
-					$results = array_merge(
-						$results,
+					$validation_errors = array_merge(
+						$validation_errors,
 						$this->process_css_keyframes( $css_item, $options )
 					);
 				}
@@ -2073,24 +2073,24 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					 */
 					$sanitized = true;
 				} else {
-					$error     = [
+					$error               = [
 						'code'      => self::CSS_SYNTAX_INVALID_AT_RULE,
 						'at_rule'   => $css_item->atRuleName(),
 						'type'      => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 						'spec_name' => $options['spec_name'],
 					];
-					$sanitized = $this->should_sanitize_validation_error( $error );
-					$results[] = compact( 'error', 'sanitized' );
+					$sanitized           = $this->should_sanitize_validation_error( $error );
+					$validation_errors[] = compact( 'error', 'sanitized' );
 				}
 			} else {
-				$error     = [
+				$error               = [
 					'code'      => self::CSS_SYNTAX_INVALID_DECLARATION,
 					'item'      => get_class( $css_item ),
 					'type'      => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 					'spec_name' => $options['spec_name'],
 				];
-				$sanitized = $this->should_sanitize_validation_error( $error );
-				$results[] = compact( 'error', 'sanitized' );
+				$sanitized           = $this->should_sanitize_validation_error( $error );
+				$validation_errors[] = compact( 'error', 'sanitized' );
 			}
 
 			if ( $sanitized ) {
@@ -2098,10 +2098,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		return array_merge(
-			compact( 'imported_font_urls', 'viewport_rules' ),
-			[ 'validation_results' => $results ]
-		);
+		return compact( 'validation_errors', 'imported_font_urls', 'viewport_rules' );
 	}
 
 	/**
