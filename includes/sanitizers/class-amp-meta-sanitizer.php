@@ -147,12 +147,12 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 			foreach ( array_reverse( $this->meta_tags[ self::TAG_VIEWPORT ] ) as $meta_viewport ) {
 				$viewport_content = explode( ',', $meta_viewport->getAttribute( 'content' ) );
 				foreach ( $viewport_content as $rule ) {
-					$exploded_rules = explode( '=', $rule, 2 );
-					if ( ! isset( $exploded_rules[1] ) ) {
+					$exploded_rule = explode( '=', $rule, 2 );
+					if ( ! isset( $exploded_rule[1] ) ) {
 						continue;
 					}
 
-					list( $name, $value )          = $exploded_rules;
+					list( $name, $value )          = $exploded_rule;
 					$parsed_rules[ trim( $name ) ] = trim( $value );
 				}
 			}
@@ -189,7 +189,7 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			// If the spec for the attribute has a mandatory value, like width="device-width", ensure it has that value.
+			// If the spec for the attribute has a mandatory value, like width="device-width", ensure it has the right value.
 			if ( isset( $allowed_meta_spec[ $rule_name ]['value'] ) && $rule_value !== $allowed_meta_spec[ $rule_name ]['value'] ) {
 				continue;
 			}
