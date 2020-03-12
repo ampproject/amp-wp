@@ -139,7 +139,9 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 			$this->meta_tags[ self::TAG_VIEWPORT ][] = $this->create_viewport_element( static::AMP_VIEWPORT );
 		} else {
 			$parsed_rules = [];
-			foreach ( $this->meta_tags[ self::TAG_VIEWPORT ] as $meta_viewport ) {
+
+			// Reverse the meta[name="viewport"] tags, so original meta[name="viewport"] tags have precedence @viewport style rules.
+			foreach ( array_reverse( $this->meta_tags[ self::TAG_VIEWPORT ] ) as $meta_viewport ) {
 				$viewport_content = explode( ',', $meta_viewport->getAttribute( 'content' ) );
 				foreach ( $viewport_content as $rule ) {
 					list( $name, $value )          = explode( '=', $rule, 2 );
@@ -155,7 +157,7 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Gets the viewport rules that would be valid in meta[name="viewport"].
 	 *
-	 * @link https://github.com/ampproject/amphtml/blob/5f75efe35b734a4fcf0884d373315d
+	 * @link https://github.com/ampproject/amphtml/blob/6b439aec75c1d9b52ba19435f6730b27a457bf42/validator/validator-main.protoascii#L436-L445
 	 *
 	 * @param array $rules The rules to evaluate, an associative array of $rule_name => $rule_value.
 	 * @return string The rules of those that are valid.

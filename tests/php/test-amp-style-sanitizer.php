@@ -2632,26 +2632,40 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	/*
 	 * Gets the test data for test_viewport_rules_added_to_meta_viewport().
 	 *
-	 * @return array
+	 * @return array The test data.
 	 */
 	public function get_viewport_data() {
-		$amp_boilerplate = '<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>';
-
 		return [
-			'existing_meta_viewport_remains' => [
-				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">' . $amp_boilerplate . '</head><body>Hello world</body></html>',
+			'existing_meta_viewport_remains_when_no_style_rule' => [
+				'<meta name="viewport" content="width=device-width">',
 			],
 			'width_other_than_1_not_moved' => [
-				'<html amp><head><meta charset="utf-8"><style amp-custom>@viewport{ width: 80vw; }</style>' . $amp_boilerplate . '</head><body></body></html>',
-				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">' . $amp_boilerplate . '</head><body></body></html>',
+				'<style amp-custom>@viewport{ width: 80vw; }</style>',
+				'<meta name="viewport" content="width=device-width">',
+			],
+			'invalid_zoom_rule_not_moved' => [
+				'<style amp-custom>@viewport{ zoom: 1.2 }</style>',
+				'<meta name="viewport" content="width=device-width">',
+			],
+			'invalid_rule_not_moved_and_valid_rule_moved' => [
+				'<style amp-custom>@viewport{ zoom: auto; viewport-fit: contain }</style>',
+				'<meta name="viewport" content="viewport-fit=contain,width=device-width">',
 			],
 			'valid_initial_scale_moved' => [
-				'<html amp><head><meta charset="utf-8"><style amp-custom>@viewport{ initial-scale: .9; }</style>' . $amp_boilerplate . '</head><body></body></html>',
-				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="initial-scale=.9,width=device-width">' . $amp_boilerplate . '</head><body></body></html>',
+				'<style amp-custom>@viewport{ initial-scale: .9; }</style>',
+				'<meta name="viewport" content="initial-scale=.9,width=device-width">',
 			],
 			'single_valid_viewport_rule_moved' => [
-				'<html amp><head><meta charset="utf-8"><style amp-custom>@viewport{ viewport-fit: auto; }</style>' . $amp_boilerplate . '</head><body></body></html>',
-				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="viewport-fit=auto,width=device-width">' . $amp_boilerplate . '</head><body></body></html>',
+				'<style amp-custom>@viewport{ viewport-fit: auto; }</style>',
+				'<meta name="viewport" content="viewport-fit=auto,width=device-width">',
+			],
+			'two_valid_viewport_rules_moved' => [
+				'<style amp-custom>@viewport{ viewport-fit: auto; height: 10em }</style>',
+				'<meta name="viewport" content="viewport-fit=auto,height=10em,width=device-width">',
+			],
+			'initial_meta_tag_has_precendence_over_viewport_style_rule' => [
+				'<meta name="viewport" content="height=20em"><style amp-custom>@viewport{ height: 30em }</style>',
+				'<meta name="viewport" content="height=20em,width=device-width">',
 			],
 		];
 	}
@@ -2663,12 +2677,17 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * @covers AMP_Style_Sanitizer::sanitize()
 	 *
 	 * @param string $markup   The markup to sanitize.
-	 * @param string $expected The expected result.
-	 * @throws ReflectionException For a non-accessible property.
+	 * @param string $expected The expected result after sanitizing.
 	 */
 	public function test_viewport_rules_added_to_meta_viewport( $markup, $expected = null ) {
+		$opening_markup = '<html amp><head><meta charset="utf-8">';
+		$closing_markup = '<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript></head><body></body></html>';
+		$markup         = $opening_markup . $markup . $closing_markup;
+
 		if ( null === $expected ) {
 			$expected = $markup;
+		} else {
+			$expected = $opening_markup . $expected . $closing_markup;
 		}
 
 		$dom             = Document::fromHtml( $markup );
