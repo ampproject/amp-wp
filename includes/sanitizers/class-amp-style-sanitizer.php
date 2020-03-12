@@ -1541,13 +1541,19 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 *     @type string $stylesheet_url Original URL for stylesheet when originating via link or @import.
 	 * }
-	 * @return array Validation results.
+	 * @return array {
+	 *     Validation results.
+	 *
+	 *     @type array $imported_font_urls
+	 *     @type array $validation_errors
+	 * }
 	 */
 	private function splice_imported_stylesheet( Import $item, CSSList $css_list, $options ) {
-		$results      = [];
-		$at_rule_args = $item->atRuleArgs();
-		$location     = array_shift( $at_rule_args );
-		$media_query  = array_shift( $at_rule_args );
+		$imported_font_urls = [];
+		$results            = [];
+		$at_rule_args       = $item->atRuleArgs();
+		$location           = array_shift( $at_rule_args );
+		$media_query        = array_shift( $at_rule_args );
 
 		if ( isset( $options['stylesheet_url'] ) ) {
 			$this->real_path_urls( [ $location ], $options['stylesheet_url'] );
@@ -1565,7 +1571,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		// Prevent importing font stylesheets from allowed font CDNs. These will get added to the document as links instead.
 		$https_import_stylesheet_url = preg_replace( '#^(http:)?(?=//)#', 'https:', $import_stylesheet_url );
 		if ( $this->allowed_font_src_regex && preg_match( $this->allowed_font_src_regex, $https_import_stylesheet_url ) ) {
-			$this->imported_font_urls[] = $https_import_stylesheet_url;
+			$imported_font_urls[] = $https_import_stylesheet_url;
 			$css_list->remove( $item );
 			_doing_it_wrong(
 				'wp_enqueue_style',
@@ -1628,7 +1634,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$css_list->remove( $item );
 		}
 
-		return $results;
+		return array_merge(
+			compact( 'imported_font_urls' ),
+			[ 'validation_errors' => $results ]
+		);
 	}
 
 	/**
@@ -1988,13 +1997,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array {
 	 *     Processed CSS list.
 	 *
-	 *     @type array $validation_errors  Validation errors.
+	 *     @type array $validation_results Validation errors.
 	 *     @type array $viewport_rules     Viewport rules.
 	 *     @type array $imported_font_urls Imported font URLs.
 	 * }
 	 */
 	private function process_css_list( CSSList $css_list, $options ) {
-		$results = [];
+		$results            = [];
+		$viewport_rules     = [];
+		$imported_font_urls = [];
 
 		foreach ( $css_list->getContents() as $css_item ) {
 			$sanitized = false;
@@ -2015,16 +2026,22 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$results[] = compact( 'error', 'sanitized' );
 				}
 				if ( ! $sanitized ) {
+					$at_rule_processed_list = $this->process_css_list( $css_item, $options );
+					if ( ! empty( $at_rule_processed_list['viewport_rules'] ) ) {
+						$viewport_rules[] = $at_rule_processed_list['viewport_rules'];
+					}
+
 					$results = array_merge(
 						$results,
-						$this->process_css_list( $css_item, $options ) // @todo Change this to handle returning not just $validation_errors, but array including 'viewport_urls'.
+						$at_rule_processed_list['validation_results']
 					);
 				}
 			} elseif ( $css_item instanceof Import ) {
-				// @todo Change the return value of splice_imported_stylesheet from just $validation_errors to [ 'validation_errors' => ..., 'imported_font_urls' => ... ].
-				$results = array_merge(
+				$imported_stylesheet  = $this->splice_imported_stylesheet( $css_item, $css_list, $options );
+				$imported_font_urls[] = $imported_stylesheet['imported_font_urls'];
+				$results              = array_merge(
 					$results,
-					$this->splice_imported_stylesheet( $css_item, $css_list, $options )
+					$imported_stylesheet['validation_errors']
 				);
 			} elseif ( $css_item instanceof AtRuleSet ) {
 				if ( in_array( $css_item->atRuleName(), $this->allowed_viewport_rules, true ) ) {
@@ -2035,7 +2052,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 							$rule_value = $rule_value->render( $output_format );
 						}
 
-						self::$extracted_viewport_rules[] = [ $rule->getRule() => $rule_value ];
+						$viewport_rules[ $rule->getRule() ] = $rule_value;
 					}
 					$css_list->remove( $css_item );
 				} elseif ( ! in_array( $css_item->atRuleName(), $options['allowed_at_rules'], true ) ) {
@@ -2107,7 +2124,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$css_list->remove( $css_item );
 			}
 		}
-		return $results;
+
+		return array_merge(
+			compact( 'imported_font_urls', 'viewport_rules' ),
+			[ 'validation_results' => $results ]
+		);
 	}
 
 	/**
