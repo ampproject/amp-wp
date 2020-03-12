@@ -135,10 +135,8 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	 * The viewport defaults to 'width=device-width', which is the bare minimum that AMP requires.
 	 */
 	protected function ensure_viewport_is_present() {
-		$viewport_rules = $this->get_valid_viewport_rules( AMP_Style_Sanitizer::get_extracted_viewport_rules() );
-
 		if ( empty( $this->meta_tags[ self::TAG_VIEWPORT ] ) ) {
-			$this->meta_tags[ self::TAG_VIEWPORT ][] = $this->create_viewport_element( $viewport_rules );
+			$this->meta_tags[ self::TAG_VIEWPORT ][] = $this->create_viewport_element( static::AMP_VIEWPORT );
 		}
 		// @todo: In an else block, add $viewport rules to the existing meta[name="viewport"], prioritizing the existing ones.
 	}

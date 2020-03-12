@@ -304,15 +304,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private $allowed_viewport_rules = [ 'viewport', '-ms-viewport', '-o-viewport' ];
 
 	/**
-	 * The viewport rules that were extracted from stylesheets.
-	 *
-	 * These aren't valid in CSS, but were extracted so they can be moved to the meta[name="viewport"],
-	 *
-	 * @var array
-	 */
-	private static $extracted_viewport_rules = [];
-
-	/**
 	 * Elements in extensions which use the video-manager, and thus the video-autoplay.css.
 	 *
 	 * @var array
@@ -1340,7 +1331,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				)
 			);
 
-			// Inject aa potential duplicate meta viewport element, to later be merged in AMP_Meta_Sanitizer.
+			// Inject a potential duplicate meta viewport element, to later be merged in AMP_Meta_Sanitizer.
 			$element->parentNode->insertBefore( $viewport_meta, $element );
 		}
 
@@ -1693,6 +1684,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$viewport_rules,
 				$processed_css_list['viewport_rules']
 			);
+			$imported_font_urls = $processed_css_list['imported_font_urls'];
 		} catch ( Exception $exception ) {
 			$error = [
 				'code'      => self::CSS_SYNTAX_PARSE_ERROR,
@@ -2037,9 +2029,16 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					);
 				}
 			} elseif ( $css_item instanceof Import ) {
-				$imported_stylesheet  = $this->splice_imported_stylesheet( $css_item, $css_list, $options );
-				$imported_font_urls[] = $imported_stylesheet['imported_font_urls'];
-				$results              = array_merge(
+				$imported_stylesheet = $this->splice_imported_stylesheet( $css_item, $css_list, $options );
+
+				if ( ! empty( $imported_stylesheet['imported_font_urls'] ) ) {
+					$imported_font_urls = array_merge(
+						$imported_font_urls,
+						$imported_stylesheet['imported_font_urls']
+					);
+				}
+
+				$results = array_merge(
 					$results,
 					$imported_stylesheet['validation_errors']
 				);
@@ -3312,14 +3311,5 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		return $included_count;
-	}
-
-	/**
-	 * Gets the @viewport CSS rules that were extracted from stylesheet, and vendor-prefixed rules like @-ms-viewport.
-	 *
-	 * @return array The rules that were extracted.
-	 */
-	public static function get_extracted_viewport_rules() {
-		return self::$extracted_viewport_rules;
 	}
 }

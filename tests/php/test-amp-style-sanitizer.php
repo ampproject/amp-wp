@@ -2679,11 +2679,5 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 		$content = $dom->saveHTML( $dom->documentElement );
 		$this->assertEquals( $expected, $content );
-
-		// Reset the static property.
-		$reflection = new \ReflectionObject( $style_sanitizer );
-		$property   = $reflection->getProperty( 'extracted_viewport_rules' );
-		$property->setAccessible( true );
-		$property->setValue( [] );
 	}
 }
