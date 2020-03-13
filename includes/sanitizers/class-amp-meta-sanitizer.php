@@ -133,81 +133,45 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	 * Always ensure we have a viewport tag.
 	 *
 	 * The viewport defaults to 'width=device-width', which is the bare minimum that AMP requires.
-	 * If there are @viewport style rules, these will have been moved into the content attribute of their own meta[name="viewport"] tags.
-	 * So this iterates over all of those tags, gets the content value,
-	 * and merges all of the valid values into a single meta tag.
+	 * If there are `@viewport` style rules, these will have been moved into the content attribute of their own meta[name=viewport]
+	 * tags by the style sanitizer. When there are multiple such meta tags, this method extracts the viewport properties of each
+	 * and then merges them into a single meta[name=viewport] tag. Any invalid properties will get removed by the
+	 * tag-and-attribute sanitizer.
 	 */
 	protected function ensure_viewport_is_present() {
 		if ( empty( $this->meta_tags[ self::TAG_VIEWPORT ] ) ) {
 			$this->meta_tags[ self::TAG_VIEWPORT ][] = $this->create_viewport_element( static::AMP_VIEWPORT );
 		} else {
+			// Merge one or more meta[name=viewport] tags into one.
 			$parsed_rules = [];
 
-			// Reverse the meta[name="viewport"] tags, so original meta[name="viewport"] tags have precedence over @viewport style rules.
-			foreach ( array_reverse( $this->meta_tags[ self::TAG_VIEWPORT ] ) as $meta_viewport ) {
-				$viewport_content = explode( ',', $meta_viewport->getAttribute( 'content' ) );
-				foreach ( $viewport_content as $rule ) {
-					$exploded_rule = explode( '=', $rule, 2 );
-					if ( ! isset( $exploded_rule[1] ) ) {
-						continue;
+			/**
+			 * Meta viewport element.
+			 *
+			 * @var DOMElement $meta_viewport
+			 */
+			foreach ( $this->meta_tags[ self::TAG_VIEWPORT ] as $meta_viewport ) {
+				$property_pairs = explode( ',', $meta_viewport->getAttribute( 'content' ) );
+				foreach ( $property_pairs as $property_pair ) {
+					$exploded_pair = explode( '=', $property_pair, 2 );
+					if ( isset( $exploded_pair[1] ) ) {
+						$parsed_rules[ trim( $exploded_pair[0] ) ] = trim( $exploded_pair[1] );
 					}
-
-					list( $name, $value )          = $exploded_rule;
-					$parsed_rules[ trim( $name ) ] = trim( $value );
 				}
 			}
 
-			$valid_rules                           = $this->get_valid_viewport_rules( $parsed_rules );
-			$this->meta_tags[ self::TAG_VIEWPORT ] = [ $this->create_viewport_element( $valid_rules ) ];
+			$viewport_value = implode(
+				',',
+				array_map(
+					static function ( $rule_name ) use ( $parsed_rules ) {
+						return $rule_name . '=' . $parsed_rules[ $rule_name ];
+					},
+					array_keys( $parsed_rules )
+				)
+			);
+
+			$this->meta_tags[ self::TAG_VIEWPORT ] = [ $this->create_viewport_element( $viewport_value ) ];
 		}
-	}
-
-	/**
-	 * Gets the rules that would be valid in the content attribute of meta[name="viewport"].
-	 *
-	 * @link https://github.com/ampproject/amphtml/blob/6b439aec75c1d9b52ba19435f6730b27a457bf42/validator/validator-main.protoascii#L436-L445
-	 *
-	 * @param array $rules The rules to evaluate, an associative array of $rule_name => $rule_value.
-	 * @return string The rules of those that are valid, as a comma-separated string.
-	 */
-	protected function get_valid_viewport_rules( $rules ) {
-		$meta_specs = AMP_Allowed_Tags_Generated::get_allowed_tag( 'meta' );
-		foreach ( $meta_specs as $spec ) {
-			if ( isset( $spec['tag_spec']['spec_name'], $spec['attr_spec_list']['content']['value_properties'] ) && 'meta name=viewport' === $spec['tag_spec']['spec_name'] ) {
-				$allowed_meta_spec = $spec['attr_spec_list']['content']['value_properties'];
-				break;
-			}
-		}
-
-		if ( ! isset( $allowed_meta_spec ) ) {
-			return static::AMP_VIEWPORT;
-		}
-
-		$valid_rules = [];
-		foreach ( $rules as $rule_name => $rule_value ) {
-			if ( ! isset( $allowed_meta_spec[ $rule_name ] ) ) {
-				continue;
-			}
-
-			// If the spec for the attribute has a mandatory value, like width="device-width", ensure it has the right value.
-			if ( isset( $allowed_meta_spec[ $rule_name ]['value'] ) && $rule_value !== $allowed_meta_spec[ $rule_name ]['value'] ) {
-				continue;
-			}
-
-			$valid_rules[ $rule_name ] = $rule_value;
-		}
-
-		$valid_rules['width'] = isset( $allowed_meta_spec['width']['value'] ) ? $allowed_meta_spec['width']['value'] : 'device-width';
-
-		return implode(
-			',',
-			array_map(
-				static function ( $rule_name ) use ( $valid_rules ) {
-					return $rule_name . '=' . $valid_rules[ $rule_name ];
-				},
-				array_keys( $valid_rules )
-			)
-		);
 	}
 
 	/**

@@ -165,21 +165,6 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test get_acceptable_errors().
-	 *
-	 * @covers AMP_Core_Theme_Sanitizer::get_acceptable_errors()
-	 *
-	 * @dataProvider get_templates
-	 *
-	 * @param string $template Template name.
-	 * @param array $expected Expected acceptable errors.
-	 */
-	public function test_get_acceptable_errors( $template, $expected ) {
-		$actual = AMP_Core_Theme_Sanitizer::get_acceptable_errors( $template );
-		$this->assertEquals( $expected, $actual );
-	}
-
-	/**
 	 * Test add_has_header_video_body_class().
 	 *
 	 * @covers AMP_Core_Theme_Sanitizer::add_has_header_video_body_class()

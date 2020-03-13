@@ -2639,49 +2639,17 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			'existing_meta_viewport_remains_when_no_style_rule' => [
 				'<meta name="viewport" content="width=device-width">',
 			],
-			'width_other_than_1_not_moved' => [
-				'<style amp-custom>@viewport{ width: 80vw; }</style>',
+			'viewport_rule_converted_to_meta_viewport' => [
+				'<style>@viewport{ width: device-width; }</style>',
 				'<meta name="viewport" content="width=device-width">',
 			],
-			'invalid_zoom_rule_not_moved' => [
-				'<style amp-custom>@viewport{ zoom: 1.2 }</style>',
+			'vendor_prefixed_viewport_rule_converted_to_meta_viewport' => [
+				'<style>@-moz-viewport{ width: device-width; }</style>',
 				'<meta name="viewport" content="width=device-width">',
 			],
-			'invalid_rule_not_moved_and_valid_rule_moved' => [
-				'<style amp-custom>@viewport{ zoom: auto; viewport-fit: contain }</style>',
-				'<meta name="viewport" content="viewport-fit=contain,width=device-width">',
-			],
-			'valid_initial_scale_moved' => [
-				'<style amp-custom>@viewport{ initial-scale: .9; }</style>',
-				'<meta name="viewport" content="initial-scale=.9,width=device-width">',
-			],
-			'single_valid_viewport_rule_moved' => [
-				'<style amp-custom>@viewport{ viewport-fit: auto; }</style>',
-				'<meta name="viewport" content="viewport-fit=auto,width=device-width">',
-			],
-			'two_valid_viewport_rules_moved' => [
-				'<style amp-custom>@viewport{ viewport-fit: auto; height: 10em }</style>',
-				'<meta name="viewport" content="viewport-fit=auto,height=10em,width=device-width">',
-			],
-			'ms_vendor_prefix_recognized' => [
-				'<style amp-custom>@-ms-viewport{ initial-scale: .8 }</style>',
-				'<meta name="viewport" content="initial-scale=.8,width=device-width">',
-			],
-			'o_vendor_prefix_recognized' => [
-				'<style amp-custom>@-o-viewport{ height: 80% }</style>',
-				'<meta name="viewport" content="height=80%,width=device-width">',
-			],
-			'invalid_vendor_prefix_not_recognized' => [
-				'<style amp-custom>@-baz-viewport{ height: 400px }</style>',
-				'<meta name="viewport" content="width=device-width">',
-			],
-			'initial_meta_tag_has_precendence_over_viewport_style_rule' => [
-				'<meta name="viewport" content="height=20em"><style amp-custom>@viewport{ height: 30em }</style>',
-				'<meta name="viewport" content="height=20em,width=device-width">',
-			],
-			'meta_tag_with_no_content_gets_width_added' => [
-				'<meta name="viewport">',
-				'<meta name="viewport" content="width=device-width">',
+			'viewport_merged_rules' => [
+				'<meta name="viewport" content="width=device-width,user-scalable=no"><style>@viewport{ initial-scale: 1; }</style><style>@-moz-viewport{ user-scalable: yes; }</style><style>@-o-viewport { minimum-scale: 0.5; }</style><style>@-baz-viewport { unrecognized: 1; }</style>',
+				'<meta name="viewport" content="width=device-width,user-scalable=yes,initial-scale=1,minimum-scale=.5,unrecognized=1">',
 			],
 		];
 	}
@@ -2692,6 +2660,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * @dataProvider get_viewport_data
 	 * @covers AMP_Style_Sanitizer::sanitize()
 	 * @covers AMP_Meta_Sanitizer::sanitize()
+	 * @covers AMP_Meta_Sanitizer::ensure_viewport_is_present()
 	 *
 	 * @param string $markup   The markup to sanitize.
 	 * @param string $expected The expected result after sanitizing.

@@ -261,23 +261,12 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * Get the acceptable validation errors.
 	 *
 	 * @since 1.0
+	 * @deprecated Now unused.
 	 *
-	 * @param string $template Template.
 	 * @return array Acceptable errors.
 	 */
-	public static function get_acceptable_errors( $template ) {
-		if ( in_array( $template, self::$supported_themes, true ) ) {
-			return [
-				AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE => [
-					[
-						'at_rule' => 'viewport',
-					],
-					[
-						'at_rule' => '-ms-viewport',
-					],
-				],
-			];
-		}
+	public static function get_acceptable_errors() {
+		_deprecated_function( __METHOD__, '1.5' );
 		return [];
 	}
 
