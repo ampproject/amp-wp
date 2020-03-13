@@ -3,6 +3,7 @@
 namespace AmpProject\Common;
 
 use AmpProject\Fonts;
+use AmpProject\Tests\AssertContainsCompatibility;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -13,16 +14,17 @@ use PHPUnit\Framework\TestCase;
  */
 class FontsTest extends TestCase
 {
+    use AssertContainsCompatibility;
 
     /**
      * Test the check for an AMP runtime method.
      *
-     * @covers       Fonts::getEmojiFontFamilyValue()
+     * @covers Fonts::getEmojiFontFamilyValue()
      */
     public function testGetEmojiFontFamilyValue()
     {
         $value = Fonts::getEmojiFontFamilyValue();
-        $this->assertContains('Apple Color Emoji', $value);
-        $this->assertContains(',', $value);
+        $this->assertStringContains('Apple Color Emoji', $value);
+        $this->assertStringContains(',', $value);
     }
 }
