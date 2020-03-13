@@ -1671,7 +1671,7 @@ class AMP_Validated_URL_Post_Type {
 			}
 			$term_group = AMP_Validation_Error_Taxonomy::sanitize_term_status( $status );
 
-			$status_changed = ( $term->term_group | AMP_Validation_Error_Taxonomy::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK ) !== $term_group;
+			$status_changed = ( (int) $term->term_group | AMP_Validation_Error_Taxonomy::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK ) !== $term_group;
 
 			if ( null !== $term_group && $status_changed && $term_group !== $term->term_group ) {
 				$updated_count++;
