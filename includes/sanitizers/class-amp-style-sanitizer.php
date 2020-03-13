@@ -1444,7 +1444,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$parsed      = null;
 		$cache_key   = null;
 		$cached      = true;
-		$cache_group = 'amp-parsed-stylesheet-v26'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
+		$cache_group = 'amp-parsed-stylesheet-v27'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
 
 		$cache_impacting_options = array_merge(
 			wp_array_slice_assoc(
@@ -3309,6 +3309,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param array      $viewport_rules An associative array of $rule_name => $rule_value.
 	 */
 	private function create_meta_viewport( DOMElement $element, $viewport_rules ) {
+		if ( empty( $viewport_rules ) ) {
+			return;
+		}
 		$viewport_meta = $this->dom->createElement( 'meta' );
 		$viewport_meta->setAttribute( 'name', 'viewport' );
 		$viewport_meta->setAttribute(

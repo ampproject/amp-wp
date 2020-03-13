@@ -261,7 +261,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * Get the acceptable validation errors.
 	 *
 	 * @since 1.0
-	 * @deprecated Now unused.
+	 * @deprecated Now unused because viewport CSS at-rules are extracted from stylesheets into meta[name=viewport] tags.
 	 *
 	 * @return array Acceptable errors.
 	 */
