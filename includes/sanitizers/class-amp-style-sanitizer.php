@@ -1212,7 +1212,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			]
 		);
 
-		$this->maybe_create_meta_viewport( $element, $parsed['viewport_rules'] );
+		if ( $parsed['viewport_rules'] ) {
+			$this->create_meta_viewport( $element, $parsed['viewport_rules'] );
+		}
 
 		$this->pending_stylesheets[] = [
 			'group'              => $is_keyframes ? self::STYLE_AMP_KEYFRAMES_GROUP_INDEX : self::STYLE_AMP_CUSTOM_GROUP_INDEX,
@@ -1310,7 +1312,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			]
 		);
 
-		$this->maybe_create_meta_viewport( $element, $parsed['viewport_rules'] );
+		if ( $parsed['viewport_rules'] ) {
+			$this->create_meta_viewport( $element, $parsed['viewport_rules'] );
+		}
 
 		$this->pending_stylesheets[] = [
 			'group'              => self::STYLE_AMP_CUSTOM_GROUP_INDEX,
@@ -3300,11 +3304,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param DOMElement $element        An element.
 	 * @param array      $viewport_rules An associative array of $rule_name => $rule_value.
 	 */
-	private function maybe_create_meta_viewport( $element, $viewport_rules ) {
-		if ( empty( $viewport_rules ) ) {
-			return;
-		}
-
+	private function create_meta_viewport( DOMElement $element, $viewport_rules ) {
 		$viewport_meta = $this->dom->createElement( 'meta' );
 		$viewport_meta->setAttribute( 'name', 'viewport' );
 		$viewport_meta->setAttribute(
