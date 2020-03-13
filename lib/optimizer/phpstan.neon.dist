@@ -1,0 +1,10 @@
+includes:
+	# @see https://github.com/phpstan/phpstan-src/blob/master/conf/bleedingEdge.neon
+	- phar://phpstan.phar/conf/bleedingEdge.neon
+parameters:
+	level: 3
+	inferPrivatePropertyTypeFromConstructor: true
+	paths:
+		- %currentWorkingDirectory%/src/
+	autoload_files:
+		- %currentWorkingDirectory%/vendor/autoload.php
