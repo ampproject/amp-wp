@@ -297,13 +297,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private $selector_mappings = [];
 
 	/**
-	 * The allowed viewport rules that can be extracted and moved to meta[name="viewport"].
-	 *
-	 * @var array
-	 */
-	private $allowed_viewport_rules = [ 'viewport', '-ms-viewport', '-o-viewport' ];
-
-	/**
 	 * Elements in extensions which use the video-manager, and thus the video-autoplay.css.
 	 *
 	 * @var array
@@ -2016,7 +2009,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$imported_font_urls  = array_merge( $imported_font_urls, $imported_stylesheet['imported_font_urls'] );
 				$validation_errors   = array_merge( $validation_errors, $imported_stylesheet['validation_errors'] );
 			} elseif ( $css_item instanceof AtRuleSet ) {
-				if ( in_array( $css_item->atRuleName(), $this->allowed_viewport_rules, true ) ) {
+				if ( preg_match( '/^(-.+-)?viewport$/', $css_item->atRuleName() ) ) {
 					$output_format = new OutputFormat();
 					foreach ( $css_item->getRules() as $rule ) {
 						$rule_value = $rule->getValue();
