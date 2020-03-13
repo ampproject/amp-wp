@@ -735,51 +735,48 @@ class AMP_Validated_URL_Post_Type {
 			$term_data = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( $data );
 			$term_slug = $term_data['slug'];
 
-			if ( ! isset( $terms[ $term_slug ] ) ) {
-
-				// Not using WP_Term_Query since more likely individual terms are cached and wp_insert_term() will itself look at this cache anyway.
-				$term = AMP_Validation_Error_Taxonomy::get_term( $term_slug );
-				if ( ! ( $term instanceof WP_Term ) ) {
-					/*
-					 * The default term_group is 0 so that is AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS.
-					 * If sanitization auto-acceptance is enabled, then the term_group will be updated below.
-					 */
-					$r = wp_insert_term( $term_slug, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, wp_slash( $term_data ) );
-					if ( is_wp_error( $r ) ) {
-						continue;
-					}
-					$term_id = $r['term_id'];
-					update_term_meta( $term_id, 'created_date_gmt', current_time( 'mysql', true ) );
-
-					/*
-					 * When sanitization is forced by filter, make sure the term is created with the filtered status.
-					 * For some reason, the wp_insert_term() function doesn't work with the term_group being passed in.
-					 */
-					$sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $data );
-					if ( 'with_filter' === $sanitization['forced'] ) {
-						$term_data['term_group'] = $sanitization['status'];
-						wp_update_term(
-							$term_id,
-							AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
-							[
-								'term_group' => $sanitization['status'],
-							]
-						);
-					} elseif ( AMP_Validation_Manager::is_sanitization_auto_accepted( $data ) ) {
-						$term_data['term_group'] = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS;
-						wp_update_term(
-							$term_id,
-							AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
-							[
-								'term_group' => $term_data['term_group'],
-							]
-						);
-					}
-
-					$term = get_term( $term_id );
+			// Not using WP_Term_Query since more likely individual terms are cached and wp_insert_term() will itself look at this cache anyway.
+			$term = AMP_Validation_Error_Taxonomy::get_term( $term_slug );
+			if ( ! ( $term instanceof WP_Term ) ) {
+				/*
+				 * The default term_group is 0 so that is AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS.
+				 * If sanitization auto-acceptance is enabled, then the term_group will be updated below.
+				 */
+				$r = wp_insert_term( $term_slug, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, wp_slash( $term_data ) );
+				if ( is_wp_error( $r ) ) {
+					continue;
 				}
-				$terms[ $term_slug ] = $term;
+				$term_id = $r['term_id'];
+				update_term_meta( $term_id, 'created_date_gmt', current_time( 'mysql', true ) );
+
+				/*
+				 * When sanitization is forced by filter, make sure the term is created with the filtered status.
+				 * For some reason, the wp_insert_term() function doesn't work with the term_group being passed in.
+				 */
+				$sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $data );
+				if ( 'with_filter' === $sanitization['forced'] ) {
+					$term_data['term_group'] = $sanitization['status'];
+					wp_update_term(
+						$term_id,
+						AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
+						[
+							'term_group' => $sanitization['status'],
+						]
+					);
+				} elseif ( AMP_Validation_Manager::is_sanitization_auto_accepted( $data ) ) {
+					$term_data['term_group'] = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS;
+					wp_update_term(
+						$term_id,
+						AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
+						[
+							'term_group' => $term_data['term_group'],
+						]
+					);
+				}
+
+				$term = get_term( $term_id );
 			}
+			$terms[ $term_slug ] = $term;
 
 			$stored_validation_errors[] = compact( 'term_slug', 'data' );
 		}
@@ -1673,7 +1670,10 @@ class AMP_Validated_URL_Post_Type {
 				continue;
 			}
 			$term_group = AMP_Validation_Error_Taxonomy::sanitize_term_status( $status );
-			if ( null !== $term_group && $term_group !== $term->term_group ) {
+
+			$status_changed = ( $term->term_group | AMP_Validation_Error_Taxonomy::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK ) !== $term_group;
+
+			if ( null !== $term_group && $status_changed && $term_group !== $term->term_group ) {
 				$updated_count++;
 				wp_update_term( $term->term_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, compact( 'term_group' ) );
 			}
@@ -1690,7 +1690,6 @@ class AMP_Validated_URL_Post_Type {
 		// Re-check the post after the validation status change.
 		if ( $updated_count > 0 ) {
 			$validation_results = self::recheck_post( $post->ID );
-			// @todo For WP_Error case, see <https://github.com/ampproject/amp-wp/issues/1166>.
 			if ( ! is_wp_error( $validation_results ) ) {
 				$args[ self::REMAINING_ERRORS ] = count(
 					array_filter(

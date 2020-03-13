@@ -1068,22 +1068,39 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$_REQUEST[ AMP_Validated_URL_Post_Type::UPDATE_POST_TERM_STATUS_ACTION . '_nonce' ] = wp_create_nonce( AMP_Validated_URL_Post_Type::UPDATE_POST_TERM_STATUS_ACTION );
 		AMP_Validated_URL_Post_Type::handle_validation_error_status_update(); // No-op since no post.
 
-		$error = [ 'code' => 'foo' ];
+		$errors = [
+			[ 'code' => 'foo' ],
+			[ 'code' => 'bar' ],
+		];
+
+		// Mark error with code 'bar' as being accepted.
+		add_filter(
+			'amp_validation_error_sanitized',
+			static function ( $sanitized, $error ) {
+				return isset( $error['code'] ) && 'bar' === $error['code'] ? true : null;
+			},
+			10,
+			2
+		);
 
 		$invalid_url_post_id = AMP_Validated_URL_Post_Type::store_validation_errors(
-			[ $error ],
+			$errors,
 			home_url( '/' )
 		);
 		add_filter(
 			'pre_http_request',
-			static function() use ( $error ) {
+			static function() use ( $errors ) {
 				return [
 					'body' => wp_json_encode(
 						[
 							'results' => [
 								[
 									'sanitized' => false,
-									'error'     => $error,
+									'error'     => $errors[0],
+								],
+								[
+									'sanitized' => true,
+									'error'     => $errors[1],
 								],
 							],
 						]
@@ -1094,10 +1111,11 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 
 		$post = get_post( $invalid_url_post_id );
 
-		$errors = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $invalid_url_post_id );
+		$validation_errors = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $invalid_url_post_id );
 
 		$_POST[ AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] = [
-			$errors[0]['term']->slug => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+			$validation_errors[0]['term']->slug => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+			$validation_errors[1]['term']->slug => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
 		];
 
 		add_filter(
@@ -1116,7 +1134,8 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		}
 		$this->assertInstanceOf( 'Exception', $exception );
 		$this->assertEquals( 302, $exception->getCode() );
-		$this->assertStringEndsWith( 'action=edit&amp_taxonomy_terms_updated=1&amp_remaining_errors=0', $exception->getMessage() );
+		// No validation error statuses should be updated.
+		$this->assertStringEndsWith( 'action=edit&amp_taxonomy_terms_updated=0', $exception->getMessage() );
 	}
 
 	/**
