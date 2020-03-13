@@ -1516,13 +1516,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array {
 	 *     Validation results.
 	 *
-	 *     @type array $validation_errors
-	 *     @type array $imported_font_urls
+	 *     @type array $validation_errors  Validation errors.
+	 *     @type array $imported_font_urls Imported font URLs.
+	 *     @type array $viewport_rules     Extracted viewport rules.
 	 * }
 	 */
 	private function splice_imported_stylesheet( Import $item, CSSList $css_list, $options ) {
 		$validation_errors  = [];
 		$imported_font_urls = [];
+		$viewport_rules     = [];
 		$at_rule_args       = $item->atRuleArgs();
 		$location           = array_shift( $at_rule_args );
 		$media_query        = array_shift( $at_rule_args );
@@ -1536,7 +1538,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		// Prevent importing something that has already been imported, and avoid infinite recursion.
 		if ( isset( $this->processed_imported_stylesheet_urls[ $import_stylesheet_url ] ) ) {
 			$css_list->remove( $item );
-			return compact( 'validation_errors', 'imported_font_urls' );
+			return compact( 'validation_errors', 'imported_font_urls', 'viewport_rules' );
 		}
 		$this->processed_imported_stylesheet_urls[ $import_stylesheet_url ] = true;
 
@@ -1559,7 +1561,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				'1.0'
 			);
 
-			return compact( 'validation_errors', 'imported_font_urls' );
+			return compact( 'validation_errors', 'imported_font_urls', 'viewport_rules' );
 		}
 
 		$stylesheet = $this->get_stylesheet_from_url( $import_stylesheet_url );
@@ -1576,7 +1578,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 			$validation_errors[] = compact( 'error', 'sanitized' );
 
-			return compact( 'validation_errors', 'imported_font_urls' );
+			return compact( 'validation_errors', 'imported_font_urls', 'viewport_rules' );
 		}
 
 		if ( $media_query ) {
@@ -1591,6 +1593,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$validation_errors,
 			$parsed_stylesheet['validation_results']
 		);
+		$viewport_rules    = $parsed_stylesheet['viewport_rules'];
 
 		if ( ! empty( $parsed_stylesheet['css_document'] ) && method_exists( $css_list, 'replace' ) ) {
 			/**
@@ -1608,7 +1611,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$css_list->remove( $item );
 		}
 
-		return compact( 'validation_errors', 'imported_font_urls' );
+		return compact( 'validation_errors', 'imported_font_urls', 'viewport_rules' );
 	}
 
 	/**
@@ -2012,6 +2015,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$imported_stylesheet = $this->splice_imported_stylesheet( $css_item, $css_list, $options );
 				$imported_font_urls  = array_merge( $imported_font_urls, $imported_stylesheet['imported_font_urls'] );
 				$validation_errors   = array_merge( $validation_errors, $imported_stylesheet['validation_errors'] );
+				$viewport_rules      = array_merge( $viewport_rules, $imported_stylesheet['viewport_rules'] );
 			} elseif ( $css_item instanceof AtRuleSet ) {
 				if ( preg_match( '/^(-.+-)?viewport$/', $css_item->atRuleName() ) ) {
 					$output_format = new OutputFormat();
