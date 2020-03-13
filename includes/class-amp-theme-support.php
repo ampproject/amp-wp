@@ -12,6 +12,7 @@ use AmpProject\AmpWP\Transformer;
 use AmpProject\Attribute;
 use AmpProject\Dom\Document;
 use AmpProject\Extension;
+use AmpProject\Fonts;
 use AmpProject\Optimizer;
 use AmpProject\RemoteRequest\CurlRemoteGetRequest;
 use AmpProject\RemoteRequest\FallbackRemoteGetRequest;
@@ -1450,6 +1451,8 @@ class AMP_Theme_Support {
 			if ( amp_is_dev_mode() ) {
 				$data .= 'html:not(#_) > body { position:unset !important; }';
 			}
+
+			$data .= sprintf( '#amp-admin-bar-item-status-icon { font-family: %s; }', Fonts::getEmojiFontFamilyValue() );
 
 			wp_add_inline_style( 'admin-bar', $data );
 		}
