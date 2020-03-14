@@ -29,10 +29,6 @@ branches:
     - develop
     - /^\d+\.\d+$/
 
-env:
-  global:
-    - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-
 install:
   - nvm install
   - composer install
@@ -84,6 +80,14 @@ jobs:
       after_success:
         - npx sizereport --config
 
+    - stage: analyze
+      name: Static analysis (PHP)
+      php: "7.3"
+      install:
+        - composer install
+      script:
+        - composer analyze
+
     - stage: test
       name: JavaScript unit tests
       php: "7.3"
@@ -94,7 +98,7 @@ jobs:
 
     - name: E2E tests
       php: "7.3"
-      env: WP_VERSION=latest DEV_LIB_SKIP=phpcs,eslint,xmllint,phpsyntax,phpunit PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=
+      env: WP_VERSION=latest DEV_LIB_SKIP=phpcs,eslint,xmllint,phpsyntax,phpunit
       install:
         - nvm install
         - composer install
@@ -151,3 +155,22 @@ jobs:
         - bash <(curl -s https://codecov.io/bash) -cF php -f /tmp/wordpress/src/wp-content/plugins/amp/build/logs/clover.xml
         - npm run test:js -- --collectCoverage
         - bash <(curl -s https://codecov.io/bash) -cF javascript -f build/logs/lcov.info
+
+    - name: Libraries that are meant to be externalized (5.6)
+      php: "5.6"
+      env: TEST_SKIP_PHPSTAN=1
+      install:
+        - composer --working-dir=lib/common install
+        - composer --working-dir=lib/optimizer install
+      script:
+        - composer --working-dir=lib/common test
+        - composer --working-dir=lib/optimizer test
+
+    - name: Libraries that are meant to be externalized (7.3)
+      php: "7.3"
+      install:
+        - composer --working-dir=lib/common install
+        - composer --working-dir=lib/optimizer install
+      script:
+        - composer --working-dir=lib/common test
+        - composer --working-dir=lib/optimizer test

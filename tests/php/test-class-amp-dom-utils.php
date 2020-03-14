@@ -1,6 +1,6 @@
 <?php
 
-use Amp\AmpWP\Dom\Document;
+use AmpProject\Dom\Document;
 
 /**
  * Class AMP_DOM_Utils_Test
@@ -163,7 +163,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	/**
 	 * Test handling of empty elements.
 	 *
-	 * @covers \Amp\AmpWP\Dom\Document::from_html()
+	 * @covers \AmpProject\Dom\Document::fromHtml()
 	 * @covers \AMP_DOM_Utils::get_content_from_dom_node()
 	 */
 	public function test_html5_empty_elements() {
@@ -191,7 +191,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	/**
 	 * Test parsing DOM with Mustache or Mustache-like templates.
 	 *
-	 * @covers \Amp\AmpWP\Dom\Document::from_html()
+	 * @covers \AmpProject\Dom\Document::fromHtml()
 	 * @covers \AMP_DOM_Utils::get_content_from_dom_node()
 	 */
 	public function test_mustache_replacements() {
@@ -264,7 +264,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	/**
 	 * Test encoding.
 	 *
-	 * @covers \Amp\AmpWP\Dom\Document::from_html()
+	 * @covers \AmpProject\Dom\Document::fromHtml()
 	 */
 	public function test_get_dom_encoding() {
 		$html  = '<!DOCTYPE html><html><head><title>مرحبا بالعالم! Check out ‘this’ and “that” and—other things.</title><meta charset="utf-8"></head><body>';
@@ -273,7 +273,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$html .= '<p>&#x645;&#x631;&#x62D;&#x628;&#x627; &#x628;&#x627;&#x644;&#x639;&#x627;&#x644;&#x645;! Check out &lsquo;this&rsquo; and &ldquo;that&rdquo; and&mdash;other things.</p>';
 		$html .= '</body></html>';
 
-		$document = Document::from_html( $html );
+		$document = Document::fromHtml( $html );
 
 		$this->assertEquals( 'utf-8', $document->encoding );
 		$paragraphs = $document->getElementsByTagName( 'p' );
@@ -294,7 +294,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$body = " start <ul><li>First</li><li>Second</li></ul><style>pre::before { content:'⚡️'; }</style><script type=\"application/json\">\"⚡️\"</script><pre>\t* one\n\t* two\n\t* three</pre> end ";
 		$html = "<html><head><meta charset=\"utf-8\"></head><body data-foo=\"&gt;\">$body</body></html>";
 
-		$dom = Document::from_html( "<!DOCTYPE html>$html" );
+		$dom = Document::fromHtml( "<!DOCTYPE html>$html" );
 
 		$output = $dom->saveHTML( $dom->documentElement );
 		$this->assertEquals( $html, $output );

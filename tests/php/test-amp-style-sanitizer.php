@@ -7,8 +7,8 @@
 
 // phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
 
-use Amp\AmpWP\Dom\Document;
-use Amp\AmpWP\Tests\PrivateAccess;
+use AmpProject\Dom\Document;
+use AmpProject\AmpWP\Tests\PrivateAccess;
 
 /**
  * Test AMP_Style_Sanitizer.
@@ -68,10 +68,10 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'span_two_styles_reversed' => [
-				'<span style="color: #00ff00; background-color: #000; ">This is green.</span>',
-				'<span data-amp-original-style="color: #00ff00; background-color: #000; " class="amp-wp-c71affe">This is green.</span>',
+				'<span style="color: #00ff00; background-color: #000;">This is green.</span>',
+				'<span data-amp-original-style="color: #00ff00; background-color: #000;" class="amp-wp-be0c539">This is green.</span>',
 				[
-					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-c71affe{color:#0f0;background-color:#000}',
+					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-be0c539{color:#0f0;background-color:#000}',
 				],
 			],
 
@@ -247,6 +247,40 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'@media (max-width: 450px){.sidebar{padding:0}}.sidebar{margin:0 auto}',
 				],
 			],
+			'with_mustache_template' => [
+				'
+				<style>
+				.custom-population { color: red; }
+				</style>
+				<form id="myform" role="search" class="search-form" method="get" action="https://example.com/" target="_top" style="color: blue">
+					<amp-autocomplete filter="substring" items="." filter-value="title" max-entries="6" min-characters="2" submit-on-enter="" src="https://example.com/autocomplete/">
+						<template type="amp-mustache" id="amp-template-custom">
+							<div class="city-item" data-value="{{city}}, {{state}}" style="outline: solid 1px black;">
+								<div style="color: {{regionColor}}">{{city}}, {{state}}</div>
+								<div class="custom-population">Population: {{population}}</div>
+							</div>
+						</template>
+					</amp-autocomplete>
+				</form>
+				',
+				'
+				<form id="myform" role="search" class="search-form amp-wp-f2a1aff" method="get" action="https://example.com/" target="_top" data-amp-original-style="color: blue">
+					<amp-autocomplete filter="substring" items="." filter-value="title" max-entries="6" min-characters="2" submit-on-enter="" src="https://example.com/autocomplete/">
+						<template type="amp-mustache" id="amp-template-custom">
+							<div class="city-item amp-wp-d4ea4c7" data-value="{{city}}, {{state}}" data-amp-original-style="outline: solid 1px black;">
+								<div style="color: {{regionColor}}">{{city}}, {{state}}</div>
+								<div class="custom-population">Population: {{population}}</div>
+							</div>
+						</template>
+					</amp-autocomplete>
+				</form>
+				',
+				[
+					'.custom-population{color:red}',
+					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-f2a1aff{color:blue}',
+					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-d4ea4c7{outline:solid 1px black}',
+				],
+			],
 		];
 	}
 
@@ -274,8 +308,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 		// Test content.
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
-		$content = preg_replace( '/(?<=>)\s+(?=<)/', '', $content );
-		$this->assertEquals( $expected_content, $content );
+		$this->assertEqualMarkup( $expected_content, $content );
 
 		// Test stylesheet.
 		$this->assertEquals( $expected_stylesheets, array_values( $sanitizer->get_stylesheets() ) );
@@ -578,7 +611,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			10,
 			3
 		);
-		$dom = Document::from_html( $source );
+		$dom = Document::fromHtml( $source );
 
 		$error_codes = [];
 		$args        = [
@@ -774,7 +807,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function test_amp_selector_conversion( $markup, $input, $output ) {
 		$html = "<html amp><head><meta charset=utf-8><style amp-custom>$input</style></head><body>$markup</body></html>";
-		$dom  = Document::from_html( $html );
+		$dom  = Document::fromHtml( $html );
 
 		$sanitizer_classes = amp_get_content_sanitizers();
 		$sanitized         = AMP_Content_Sanitizer::sanitize_document(
@@ -920,7 +953,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		);
 
 		$html = "<html amp><head><meta charset=utf-8><style amp-custom>$style</style></head><body>$markup</body></html>";
-		$dom  = Document::from_html( $html );
+		$dom  = Document::fromHtml( $html );
 
 		$sanitizer_classes = amp_get_content_sanitizers();
 
@@ -1119,7 +1152,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function test_browser_css_hacks( $input ) {
 		$html = "<html amp><head><meta charset=utf-8><style amp-custom>$input</style></head><body></body></html>";
-		$dom  = Document::from_html( $html );
+		$dom  = Document::fromHtml( $html );
 
 		$error_codes = [];
 		$sanitizer   = new AMP_Style_Sanitizer(
@@ -1149,7 +1182,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$html .= '</head><body><span class="b dashicons dashicons-admin-appearance"></span></body></html>';
 
 		// Test with tree-shaking.
-		$dom         = Document::from_html( $html );
+		$dom         = Document::fromHtml( $html );
 		$error_codes = [];
 		$sanitizer   = new AMP_Style_Sanitizer(
 			$dom,
@@ -1192,7 +1225,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$html .= '<style>@font-face { font-family: "Custom"; src: url("data:application/x-font-woff;charset=utf-8;base64,d09GRgABAAA") format("woff"); }</style>';
 		$html .= '</head><body></body></html>';
 
-		$dom         = Document::from_html( $html );
+		$dom         = Document::fromHtml( $html );
 		$error_codes = [];
 		$sanitizer   = new AMP_Style_Sanitizer(
 			$dom,
@@ -1259,7 +1292,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			</body>
 		</html>
 		<?php
-		$dom = Document::from_html( ob_get_clean() );
+		$dom = Document::fromHtml( ob_get_clean() );
 
 		$error_codes = [];
 		$sanitizer   = new AMP_Style_Sanitizer(
@@ -1327,7 +1360,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			</style>
 		';
 		$html .= '</head><body><span class="b" data-value="">...</span><span id="exists"></span></body></html>';
-		$dom   = Document::from_html( $html );
+		$dom   = Document::fromHtml( $html );
 
 		$error_codes = [];
 		$sanitizer   = new AMP_Style_Sanitizer(
@@ -1366,7 +1399,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function test_relative_background_url_handling() {
 		$html = '<html amp><head><meta charset="utf-8"><link rel="stylesheet" href="' . esc_url( admin_url( 'css/common.css' ) ) . '"></head><body><span class="spinner"></span></body></html>'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-		$dom  = Document::from_html( $html );
+		$dom  = Document::fromHtml( $html );
 
 		$sanitizer = new AMP_Style_Sanitizer(
 			$dom,
@@ -1459,7 +1492,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 		$sanitize_and_get_stylesheets = static function() use ( $href ) {
 			$html = sprintf( '<html amp><head><meta charset="utf-8"><link rel="stylesheet" href="%s"></head><body></body></html>', esc_url( $href ) ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-			$dom  = Document::from_html( $html );
+			$dom  = Document::fromHtml( $html );
 
 			$found_error_codes = [];
 
@@ -1688,7 +1721,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * @param string      $error_code Error code. Optional.
 	 */
 	public function test_get_validated_url_file_path( $source, $expected, $error_code = null ) {
-		$dom = Document::from_html( '<html></html>' );
+		$dom = Document::fromHtml( '<html></html>' );
 
 		$sanitizer = new AMP_Style_Sanitizer( $dom );
 		$actual    = $sanitizer->get_validated_url_file_path( $source, [ 'css' ] );
@@ -1749,7 +1782,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$html .= $source;
 		$html .= '</style></head</html>';
 
-		$dom = Document::from_html( $html );
+		$dom = Document::fromHtml( $html );
 
 		$sanitizer = new AMP_Style_Sanitizer( $dom );
 		$sanitizer->sanitize();
@@ -1805,7 +1838,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$tag = sprintf( '<link rel="stylesheet" href="%s">', esc_url( $url ) ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 		$tag = amp_filter_font_style_loader_tag_with_crossorigin_anonymous( $tag, 'font', $url );
 
-		$dom = Document::from_html( sprintf( '<html><head>%s</head></html>', $tag ) );
+		$dom = Document::fromHtml( sprintf( '<html><head>%s</head></html>', $tag ) );
 
 		$validation_errors = [];
 
@@ -1846,7 +1879,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		// Test supplying crossorigin attribute.
 		$url       = 'https://fonts.googleapis.com/css?family=Tangerine';
 		$link      = amp_filter_font_style_loader_tag_with_crossorigin_anonymous( "<link rel='stylesheet' href='$url'>", 'font', $url ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-		$document  = Document::from_html( "<html><head>$link</head></html>" );
+		$document  = Document::fromHtml( "<html><head>$link</head></html>" );
 		$sanitizer = new AMP_Style_Sanitizer( $document, [ 'use_document_element' => true ] );
 		$sanitizer->sanitize();
 		$link = $document->getElementsByTagName( 'link' )->item( 0 );
@@ -1855,7 +1888,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 		// Test that existing crossorigin attribute is not overridden.
 		$link      = amp_filter_font_style_loader_tag_with_crossorigin_anonymous( "<link crossorigin='use-credentials' rel='stylesheet' href='$url'>", 'font', $url ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-		$document  = Document::from_html( "<html><head>$link</head></html>" ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$document  = Document::fromHtml( "<html><head>$link</head></html>" ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 		$sanitizer = new AMP_Style_Sanitizer( $document, [ 'use_document_element' => true ] );
 		$sanitizer->sanitize();
 		$link = $document->getElementsByTagName( 'link' )->item( 0 );
@@ -2090,7 +2123,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			3
 		);
 
-		$dom = Document::from_html( $markup );
+		$dom = Document::fromHtml( $markup );
 
 		if ( ! empty( $options['auto_reject'] ) ) {
 			add_filter( 'amp_validation_error_sanitized', '__return_false' );
@@ -2124,7 +2157,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$markup .= sprintf( '<style>@import "%s"; body{color:red}</style>', $stylesheet_url );
 		$markup .= '</head><body>hello</body></html>';
 
-		$dom       = Document::from_html( $markup );
+		$dom       = Document::fromHtml( $markup );
 		$sanitizer = new AMP_Style_Sanitizer(
 			$dom,
 			[
@@ -2185,7 +2218,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$html .= '<style><!--/*--><![CDATA[/*><!--*/ body { color:blue } /*]]>*/--></style>';
 		$html .= '</head><body><p>Hello World</p></body></html>';
 
-		$dom       = Document::from_html( $html );
+		$dom       = Document::fromHtml( $html );
 		$sanitizer = new AMP_Style_Sanitizer(
 			$dom,
 			[
@@ -2209,7 +2242,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function test_body_font_stylesheet_moved_to_head() {
 		$html = '<!DOCTYPE html><html amp><head><meta charset="utf-8"></head><body><link rel="stylesheet" id="the-font" href="https://fonts.googleapis.com/css?family=Merriweather%3A400%2C700" type="text/css" media="all"></body></html>'; // phpcs:ignore
-		$dom  = Document::from_html( $html );
+		$dom  = Document::fromHtml( $html );
 
 		$link = $dom->getElementById( 'the-font' );
 		$this->assertInstanceOf( 'DOMElement', $link );
@@ -2345,7 +2378,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$this->go_to( home_url() );
 		$html = $html_generator();
 
-		$original_dom = Document::from_html( $html );
+		$original_dom = Document::fromHtml( $html );
 		$amphtml_dom  = clone( $original_dom );
 
 		$error_codes = [];
@@ -2616,5 +2649,23 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	public function test_get_styles() {
 		$sanitizer = new AMP_Style_Sanitizer( new Document() );
 		$this->assertEquals( [], $sanitizer->get_styles() );
+	}
+
+	/**
+	 * Assert markup is equal.
+	 *
+	 * @param string $expected Expected markup.
+	 * @param string $actual   Actual markup.
+	 */
+	public function assertEqualMarkup( $expected, $actual ) {
+		$actual   = preg_replace( '/\s+/', ' ', $actual );
+		$expected = preg_replace( '/\s+/', ' ', $expected );
+		$actual   = preg_replace( '/(?<=>)\s+(?=<)/', '', trim( $actual ) );
+		$expected = preg_replace( '/(?<=>)\s+(?=<)/', '', trim( $expected ) );
+
+		$this->assertEquals(
+			array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $expected, -1, PREG_SPLIT_DELIM_CAPTURE ) ),
+			array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $actual, -1, PREG_SPLIT_DELIM_CAPTURE ) )
+		);
 	}
 }

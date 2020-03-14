@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use Amp\AmpWP\Dom\Document;
+use AmpProject\Dom\Document;
 
 /**
  * Class AMP_Validation_Manager
@@ -212,7 +212,7 @@ class AMP_Validation_Manager {
 		AMP_Validation_Error_Taxonomy::register();
 
 		// Short-circuit if AMP is not supported as only the post types should be available.
-		if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) && ! AMP_Options_Manager::is_stories_experience_enabled() ) {
+		if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 			return;
 		}
 
@@ -222,7 +222,7 @@ class AMP_Validation_Manager {
 		add_action( 'rest_api_init', [ __CLASS__, 'add_rest_api_fields' ] );
 
 		// Add actions for checking theme support is present to determine plugin compatibility and show validation links in the admin bar.
-		if ( AMP_Options_Manager::is_website_experience_enabled() && current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+		if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 			// Actions and filters involved in validation.
 			add_action(
 				'activate_plugin',
@@ -280,13 +280,8 @@ class AMP_Validation_Manager {
 			return false;
 		}
 
-		// Story post type always supports validation.
-		if ( AMP_Story_Post_Type::POST_TYPE_SLUG === $post->post_type ) {
-			return AMP_Options_Manager::is_stories_experience_enabled();
-		}
-
-		// Prevent doing post validation in Reader mode or if the Website experience is not enabled.
-		if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) || ! AMP_Options_Manager::is_website_experience_enabled() ) {
+		// Prevent doing post validation in Reader mode.
+		if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 			return false;
 		}
 
@@ -751,9 +746,7 @@ class AMP_Validation_Manager {
 	 * @return void
 	 */
 	public static function add_rest_api_fields() {
-		if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-			$object_types = [ AMP_Story_Post_Type::POST_TYPE_SLUG ]; // Eventually validation should be done in Reader mode as well, but for now, limit to stories.
-		} elseif ( amp_is_canonical() ) {
+		if ( amp_is_canonical() ) {
 			$object_types = get_post_types_by_support( 'editor' ); // @todo Shouldn't this actually only be those with 'amp' support, or if if all_templates_supported?
 		} else {
 			$object_types = array_intersect(
@@ -1137,7 +1130,7 @@ class AMP_Validation_Manager {
 	 * }
 	 */
 	public static function locate_sources( DOMNode $node ) {
-		$dom      = Document::from_node( $node );
+		$dom      = Document::fromNode( $node );
 		$comments = $dom->xpath->query( 'preceding::comment()[ starts-with( ., "amp-source-stack" ) or starts-with( ., "/amp-source-stack" ) ]', $node );
 		$sources  = [];
 		$matches  = [];
@@ -1227,11 +1220,6 @@ class AMP_Validation_Manager {
 			}
 		}
 
-		/**
-		 * Script dependency.
-		 *
-		 * @var _WP_Dependency $script_dependency
-		 */
 		if ( $node instanceof DOMElement && 'script' === $node->nodeName ) {
 			$enqueued_script_handles = array_intersect( wp_scripts()->done, array_keys( self::$enqueued_script_sources ) );
 
@@ -2327,11 +2315,7 @@ class AMP_Validation_Manager {
 		$should_enqueue_block_validation = (
 			self::has_cap()
 			&&
-			(
-				( AMP_Options_Manager::is_website_experience_enabled() && current_theme_supports( AMP_Theme_Support::SLUG ) )
-				||
-				( AMP_Options_Manager::is_stories_experience_enabled() && AMP_Story_Post_Type::POST_TYPE_SLUG === get_post_type() )
-			)
+			current_theme_supports( AMP_Theme_Support::SLUG )
 		);
 		if ( ! $should_enqueue_block_validation ) {
 			return;

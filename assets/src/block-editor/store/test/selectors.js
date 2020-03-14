@@ -4,8 +4,6 @@
 import {
 	hasThemeSupport,
 	isStandardMode,
-	isWebsiteEnabled,
-	isStoriesEnabled,
 	getDefaultStatus,
 	getPossibleStatuses,
 	getErrorMessages,
@@ -26,22 +24,6 @@ describe( 'selectors', () => {
 			const state = { isStandardMode: true };
 
 			expect( isStandardMode( state ) ).toBe( true );
-		} );
-	} );
-
-	describe( 'isWebsiteEnabled', () => {
-		it( 'should return whether the website format is enabled', () => {
-			const state = { isWebsiteEnabled: false };
-
-			expect( isWebsiteEnabled( state ) ).toBe( false );
-		} );
-	} );
-
-	describe( 'isStoriesEnabled', () => {
-		it( 'should return whether the stories format is enabled', () => {
-			const state = { isStoriesEnabled: false };
-
-			expect( isStoriesEnabled( state ) ).toBe( false );
 		} );
 	} );
 

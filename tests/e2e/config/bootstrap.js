@@ -123,52 +123,12 @@ function observeConsoleLogging() {
 }
 
 /**
- * Runs Axe tests when the story editor is found on the current page.
- *
- * @return {?Promise} Promise resolving once Axe texts are finished.
- */
-async function runAxeTestsForStoriesEditor() {
-	if ( ! await page.$( '#amp-story-editor' ) ) {
-		return;
-	}
-
-	await expect( page ).toPassAxeTests( {
-		/**
-		 * Rules are disabled, as there are still accessibility issues within gutenberg.
-		 *
-		 * See: https://github.com/WordPress/gutenberg/pull/15018 & https://github.com/WordPress/gutenberg/issues/15452
-		 */
-		disabledRules: [
-			'aria-allowed-role',
-			'aria-hidden-focus',
-			'button-name',
-			'color-contrast',
-			'duplicate-id',
-			'region',
-		],
-		exclude: [
-			// Ignores elements created by metaboxes.
-			'.edit-post-layout__metaboxes',
-			// Ignores elements created by TinyMCE.
-			'.mce-container',
-			// Ignore attachment close button.
-			'.amp-story-page-attachment-close-button',
-		],
-	} );
-}
-
-/**
  * Runs Axe tests when the block editor is found on the current page.
  *
  * @return {?Promise} Promise resolving once Axe texts are finished.
  */
 async function runAxeTestsForBlockEditor() {
 	if ( ! await page.$( '.block-editor' ) ) {
-		return;
-	}
-
-	// If amp story editor is found, don't run tests.
-	if ( await page.$( '#amp-story-editor' ) ) {
 		return;
 	}
 
@@ -217,7 +177,6 @@ beforeAll( async () => {
 // eslint-disable-next-line jest/require-top-level-describe
 afterEach( async () => {
 	await clearLocalStorage();
-	await runAxeTestsForStoriesEditor();
 	await runAxeTestsForBlockEditor();
 	await setBrowserViewport( 'large' );
 } );

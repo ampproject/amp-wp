@@ -1,6 +1,12 @@
 <?xml version="1.0"?>
 <ruleset name="WordPress Coding Standards for AMP">
 
+	<!-- Exclude libraries that are meant to be externalized -->
+	<exclude-pattern>lib/*</exclude-pattern>
+
+	<!-- Exclude stub files as they are auto-generated -->
+	<exclude-pattern>tests/php/static-analysis-stubs/*</exclude-pattern>
+
 	<rule ref="WordPress-Core">
 		<exclude name="Generic.Arrays.DisallowShortArraySyntax" />
 		<exclude name="WordPress.PHP.DisallowShortTernary" />
@@ -48,7 +54,6 @@
 	</rule>
 	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
 		<exclude-pattern>src/*</exclude-pattern>
-		<exclude-pattern>includes/templates/single-amp_story.php</exclude-pattern>
 	</rule>
 	<rule ref="WordPress.NamingConventions.ValidVariableName">
 		<properties>

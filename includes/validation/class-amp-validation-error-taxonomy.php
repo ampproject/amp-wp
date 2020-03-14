@@ -1833,23 +1833,50 @@ class AMP_Validation_Error_Taxonomy {
 					$content .= '</p>';
 				}
 
-				if ( isset( $validation_error['message'] ) ) {
-					$content .= sprintf( '<p>%s</p>', esc_html( $validation_error['message'] ) );
+				$message = null;
+				switch ( $validation_error['code'] ) {
+					case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_EMPTY:
+						$message = __( 'Expected JSON, got an empty value', 'amp' );
+						break;
+					case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_DEPTH:
+						$message = __( 'The maximum stack depth has been exceeded', 'amp' );
+						break;
+					case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_STATE_MISMATCH:
+						$message = __( 'Invalid or malformed JSON', 'amp' );
+						break;
+					case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_CTRL_CHAR:
+						$message = __( 'Control character error, possibly incorrectly encoded', 'amp' );
+						break;
+					case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_SYNTAX:
+						$message = __( 'Syntax error', 'amp' );
+						break;
+					case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_UTF8:
+						/* translators: %s: UTF-8, a charset */
+						$message = sprintf( __( 'Malformed %s characters, possibly incorrectly encoded', 'amp' ), 'UTF-8' );
+						break;
+					default:
+						if ( isset( $validation_error['message'] ) ) {
+							$message = $validation_error['message'];
+						}
+				}
+
+				if ( $message ) {
+					$content .= sprintf( '<p>%s</p>', esc_html( $message ) );
 				}
 
 				break;
 			case 'status':
 				// Output whether the validation error has been seen via hidden field since we can't set the 'new' class on the <tr> directly.
 				// This will get read via amp-validated-url-post-edit-screen.js.
-				$is_new   = ! ( $term->term_group & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK );
+				$is_new   = ! ( (int) $term->term_group & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK );
 				$content .= sprintf( '<input class="amp-validation-error-new" type="hidden" value="%d">', (int) $is_new );
 
-				$is_removed = (bool) ( $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
+				$is_removed = (bool) ( (int) $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
 
 				if ( 'post.php' === $pagenow ) {
 					$status_select_name = sprintf( '%s[%s]', AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR, $term->slug );
 
-					if ( $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK ) {
+					if ( (int) $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK ) {
 						$img_src = 'amp-logo-green';
 					} else {
 						$img_src = 'amp-logo-red';
@@ -3024,6 +3051,13 @@ class AMP_Validation_Error_Taxonomy {
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_CSS_IMPORTANT:
 			case AMP_Tag_And_Attribute_Sanitizer::CDATA_VIOLATES_BLACKLIST:
 				return esc_html__( 'Illegal text content', 'amp' );
+			case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_CTRL_CHAR:
+			case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_DEPTH:
+			case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_EMPTY:
+			case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_STATE_MISMATCH:
+			case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_SYNTAX:
+			case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_UTF8:
+				return esc_html__( 'Invalid JSON', 'amp' );
 			case AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_IMPORTANT:
 				$title = esc_html__( 'Illegal CSS !important property', 'amp' );
 				if ( isset( $validation_error['css_property_name'] ) ) {
@@ -3070,9 +3104,8 @@ class AMP_Validation_Error_Taxonomy {
 							$validation_error['duplicate_oneof_attrs']
 						)
 					);
-					return $title;
 				}
-				break;
+				return $title;
 			case AMP_Tag_And_Attribute_Sanitizer::MANDATORY_ONEOF_ATTR_MISSING:
 			case AMP_Tag_And_Attribute_Sanitizer::MANDATORY_ANYOF_ATTR_MISSING:
 				$attributes_key = null;

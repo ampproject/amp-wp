@@ -5,7 +5,8 @@
  * @package AMP
  */
 
-use Amp\AmpWP\Dom\Document;
+use AmpProject\DevMode;
+use AmpProject\Dom\Document;
 use Sabberworm\CSS\RuleSet\DeclarationBlock;
 use Sabberworm\CSS\CSSList\CSSList;
 use Sabberworm\CSS\Property\Selector;
@@ -847,7 +848,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		 */
 
 		$dev_mode_predicate = '';
-		if ( $this->is_document_in_dev_mode() ) {
+		if ( DevMode::isActiveForDocument( $this->dom ) ) {
 			$dev_mode_predicate = sprintf( ' and not ( @%s )', AMP_Rule_Spec::DEV_MODE_ATTRIBUTE );
 		}
 
@@ -2304,12 +2305,17 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			/**
-			 * Source URL lists.
+			 * Source file URL list.
 			 *
 			 * @var string[] $source_file_urls
+			 */
+			$source_file_urls = [];
+
+			/**
+			 * Source data URL collection.
+			 *
 			 * @var URL[]    $source_data_url_objects
 			 */
-			$source_file_urls        = [];
 			$source_data_url_objects = [];
 			foreach ( $sources as $i => $source ) {
 				if ( $source[0] instanceof URL ) {
@@ -2497,10 +2503,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 		}
-		if ( ! $allow_transformation || empty( $importants ) ) {
+		if ( ! $ruleset instanceof DeclarationBlock || ! $allow_transformation || empty( $importants ) ) {
 			return $results;
 		}
 
+		/**
+		 * Ruleset covering !important styles.
+		 *
+		 * @var DeclarationBlock $important_ruleset
+		 */
 		$important_ruleset = clone $ruleset;
 		$important_ruleset->setSelectors(
 			array_map(
@@ -2558,18 +2569,30 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @note Uses recursion to traverse down the tree of Dom\Document nodes.
 	 *
-	 * @param DOMElement $element Node.
+	 * @param DOMElement $element Element with a style attribute.
 	 */
-	private function collect_inline_styles( $element ) {
-		$style_attribute = $element->getAttributeNode( 'style' );
-		if ( ! $style_attribute || ! trim( $style_attribute->nodeValue ) ) {
+	private function collect_inline_styles( DOMElement $element ) {
+		$attr_node = $element->getAttributeNode( 'style' );
+		if ( ! $attr_node ) {
 			return;
 		}
 
-		$value = $style_attribute->nodeValue;
+		$value = trim( $attr_node->nodeValue );
+		if ( empty( $value ) ) {
+			return;
+		}
+
+		// Skip processing stylesheets that contain mustache template variables if the element is inside of a mustache template.
+		if (
+			preg_match( '/{{[^}]+?}}/', $value ) &&
+			0 !== $this->dom->xpath->query( '//template[ @type="amp-mustache" ]//.', $element )->length
+		) {
+			return;
+		}
+
 		$class = 'amp-wp-' . substr( md5( $value ), 0, 7 );
 		$root  = ':root' . str_repeat( ':not(#_)', self::INLINE_SPECIFICITY_MULTIPLIER );
-		$rule  = sprintf( '%s .%s { %s }', $root, $class, $style_attribute->nodeValue );
+		$rule  = sprintf( '%s .%s { %s }', $root, $class, $value );
 
 		$this->set_current_node( $element ); // And sources when needing to be located.
 
@@ -2593,7 +2616,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				'element'       => $element,
 				'origin'        => 'style_attribute',
 				'sources'       => $this->current_sources,
-				'priority'      => $this->get_stylesheet_priority( $style_attribute ),
+				'priority'      => $this->get_stylesheet_priority( $attr_node ),
 				'tokens'        => $parsed['tokens'],
 				'hash'          => $parsed['hash'],
 				'parse_time'    => $parsed['parse_time'],
@@ -2820,10 +2843,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 		$validity_li_element = $this->dom->getElementById( 'wp-admin-bar-amp-validity' );
-		if ( ! $validity_li_element ) {
+		if ( ! $validity_li_element instanceof DOMElement ) {
 			return;
 		}
 
+		/**
+		 * Cloned <li> element that we can modify to include stylesheet information.
+		 *
+		 * @var DOMElement $stylesheets_li_element
+		 */
 		$stylesheets_li_element = $validity_li_element->cloneNode( true );
 		$stylesheets_a_element  = $stylesheets_li_element->getElementsByTagName( 'a' )->item( 0 );
 		if ( ! ( $stylesheets_a_element instanceof DOMElement ) ) {
@@ -3208,7 +3236,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$this->pending_stylesheets[ $previously_seen_stylesheet_index[ $pending_stylesheet['hash'] ] ]['duplicate'] = true;
 			}
 			$previously_seen_stylesheet_index[ $pending_stylesheet['hash'] ] = $pending_stylesheet_index;
-			unset( $shaken_tokens );
 
 			$pending_stylesheet['shake_time'] = microtime( true ) - $start_time;
 		} // End foreach pending_stylesheets.

@@ -5,7 +5,8 @@
  * @package AMP
  */
 
-use Amp\AmpWP\Dom\Document;
+use AmpProject\CssLength;
+use AmpProject\Dom\Document;
 
 /**
  * Strips the tags and attributes from the content that are not allowed by the AMP spec.
@@ -44,6 +45,12 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	const INVALID_CDATA_CSS_IMPORTANT          = 'INVALID_CDATA_CSS_IMPORTANT';
 	const INVALID_CDATA_CONTENTS               = 'INVALID_CDATA_CONTENTS';
 	const INVALID_CDATA_HTML_COMMENTS          = 'INVALID_CDATA_HTML_COMMENTS';
+	const JSON_ERROR_CTRL_CHAR                 = 'JSON_ERROR_CTRL_CHAR';
+	const JSON_ERROR_DEPTH                     = 'JSON_ERROR_DEPTH';
+	const JSON_ERROR_EMPTY                     = 'JSON_ERROR_EMPTY';
+	const JSON_ERROR_STATE_MISMATCH            = 'JSON_ERROR_STATE_MISMATCH';
+	const JSON_ERROR_SYNTAX                    = 'JSON_ERROR_SYNTAX';
+	const JSON_ERROR_UTF8                      = 'JSON_ERROR_UTF8';
 	const INVALID_ATTR_VALUE                   = 'INVALID_ATTR_VALUE';
 	const INVALID_ATTR_VALUE_CASEI             = 'INVALID_ATTR_VALUE_CASEI';
 	const INVALID_ATTR_VALUE_REGEX             = 'INVALID_ATTR_VALUE_REGEX';
@@ -922,7 +929,48 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				return [ 'code' => self::MANDATORY_CDATA_MISSING_OR_INCORRECT ];
 			}
 		}
+
+		// When the CDATA is expected to be JSON, ensure it's valid JSON.
+		if ( 'script' === $element->nodeName && in_array( $element->getAttribute( 'type' ), [ 'application/json', 'application/ld+json' ], true ) ) {
+			if ( '' === trim( $element->textContent ) ) {
+				return [ 'code' => self::JSON_ERROR_EMPTY ];
+			}
+
+			json_decode( $element->textContent );
+			$json_last_error = json_last_error();
+
+			if ( JSON_ERROR_NONE !== $json_last_error ) {
+				return [ 'code' => $this->get_json_error_code( $json_last_error ) ];
+			}
+		}
+
 		return true;
+	}
+
+	/**
+	 * Gets the JSON error code for the last error.
+	 *
+	 * @link https://www.php.net/manual/en/function.json-last-error.php#refsect1-function.json-last-error-returnvalues
+	 *
+	 * @param int $json_last_error The last JSON error code.
+	 * @return string The error code for the last JSON error.
+	 */
+	private function get_json_error_code( $json_last_error ) {
+		static $possible_json_errors = [
+			'JSON_ERROR_CTRL_CHAR',
+			'JSON_ERROR_DEPTH',
+			'JSON_ERROR_STATE_MISMATCH',
+			'JSON_ERROR_SYNTAX',
+			'JSON_ERROR_UTF8',
+		];
+
+		foreach ( $possible_json_errors as $possible_error ) {
+			if ( constant( $possible_error ) === $json_last_error ) {
+				return $possible_error;
+			}
+		}
+
+		return 'JSON_ERROR_SYNTAX';
 	}
 
 	/**
@@ -1190,7 +1238,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 			// Check the context to see if we are currently within a template tag.
 			// If this is the case and the attribute value contains a template placeholder, we skip sanitization.
-			if ( ! empty( $this->open_elements['template'] ) && preg_match( '/{{.*?}}/', $attr_node->nodeValue ) ) {
+			if ( ! empty( $this->open_elements['template'] ) && preg_match( '/{{[^}]+?}}/', $attr_node->nodeValue ) ) {
 				continue;
 			}
 
@@ -1279,17 +1327,17 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		$allow_fluid = AMP_Rule_Spec::LAYOUT_FLUID === $layout_attr;
 		$allow_auto  = true;
 
-		$input_width  = new AMP_CSS_Length( $node->getAttribute( 'width' ) );
-		$input_height = new AMP_CSS_Length( $node->getAttribute( 'height' ) );
+		$input_width  = new CssLength( $node->getAttribute( 'width' ) );
+		$input_height = new CssLength( $node->getAttribute( 'height' ) );
 
 		$input_width->validate( $allow_auto, $allow_fluid );
 		$input_height->validate( $allow_auto, $allow_fluid );
 
-		if ( ! $input_width->is_valid() ) {
+		if ( ! $input_width->isValid() ) {
 			return [ 'code' => self::INVALID_LAYOUT_WIDTH ];
 		}
 
-		if ( ! $input_height->is_valid() ) {
+		if ( ! $input_height->isValid() ) {
 			return [ 'code' => self::INVALID_LAYOUT_HEIGHT ];
 		}
 
@@ -1307,7 +1355,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		$layout = $this->calculate_layout( $layout_attr, $width, $height, $sizes_attr, $heights_attr );
 
 		// Only FLEX_ITEM allows for height to be set to auto.
-		if ( $height->is_auto() && AMP_Rule_Spec::LAYOUT_FLEX_ITEM !== $layout ) {
+		if ( $height->isAuto() && AMP_Rule_Spec::LAYOUT_FLEX_ITEM !== $layout ) {
 			return [ 'code' => self::INVALID_LAYOUT_AUTO_HEIGHT ];
 		}
 
@@ -1319,13 +1367,13 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				AMP_Rule_Spec::LAYOUT_INTRINSIC === $layout ||
 				AMP_Rule_Spec::LAYOUT_RESPONSIVE === $layout
 			) &&
-			! $height->is_set()
+			! $height->isDefined()
 		) {
 			return [ 'code' => self::INVALID_LAYOUT_NO_HEIGHT ];
 		}
 
 		// For FIXED_HEIGHT if width is set it must be auto.
-		if ( AMP_Rule_Spec::LAYOUT_FIXED_HEIGHT === $layout && $width->is_set() && ! $width->is_auto() ) {
+		if ( AMP_Rule_Spec::LAYOUT_FIXED_HEIGHT === $layout && $width->isDefined() && ! $width->isAuto() ) {
 			return [ 'code' => self::INVALID_LAYOUT_FIXED_HEIGHT ];
 		}
 
@@ -1335,7 +1383,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			AMP_Rule_Spec::LAYOUT_INTRINSIC === $layout ||
 			AMP_Rule_Spec::LAYOUT_RESPONSIVE === $layout
 		) {
-			if ( ! $width->is_set() || $width->is_auto() ) {
+			if ( ! $width->isDefined() || $width->isAuto() ) {
 				return [ 'code' => self::INVALID_LAYOUT_AUTO_WIDTH ];
 			}
 		}
@@ -1346,7 +1394,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				AMP_Rule_Spec::LAYOUT_INTRINSIC === $layout ||
 				AMP_Rule_Spec::LAYOUT_RESPONSIVE === $layout
 			) &&
-			$width->get_unit() !== $height->get_unit()
+			$width->getUnit() !== $height->getUnit()
 		) {
 			return [ 'code' => self::INVALID_LAYOUT_UNIT_DIMENSIONS ];
 		}
@@ -1372,18 +1420,18 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @version 1911070201440
 	 * @link https://github.com/ampproject/amphtml/blob/1911070201440/validator/engine/validator.js#L3451
 	 *
-	 * @param array          $amp_layout_spec AMP layout specifications for tag.
-	 * @param string         $input_layout    Layout for tag.
-	 * @param AMP_CSS_Length $input_width     Parsed width.
-	 * @return AMP_CSS_Length
+	 * @param array     $amp_layout_spec AMP layout specifications for tag.
+	 * @param string    $input_layout    Layout for tag.
+	 * @param CssLength $input_width     Parsed width.
+	 * @return CssLength
 	 */
-	private function calculate_width( $amp_layout_spec, $input_layout, AMP_CSS_Length $input_width ) {
+	private function calculate_width( $amp_layout_spec, $input_layout, CssLength $input_width ) {
 		if (
 			( ! $this->is_empty_attribute_value( $input_layout ) || AMP_Rule_Spec::LAYOUT_FIXED === $input_layout ) &&
-			! $input_width->is_set() &&
+			! $input_width->isDefined() &&
 			isset( $amp_layout_spec['defines_default_width'] )
 		) {
-			$css_length = new AMP_CSS_Length( '1px' );
+			$css_length = new CssLength( '1px' );
 			$css_length->validate( false, false );
 			return $css_length;
 		}
@@ -1400,22 +1448,22 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @version 1911070201440
 	 * @link https://github.com/ampproject/amphtml/blob/1911070201440/validator/engine/validator.js#L3493
 	 *
-	 * @param array          $amp_layout_spec AMP layout specifications for tag.
-	 * @param string         $input_layout    Layout for tag.
-	 * @param AMP_CSS_Length $input_height    Parsed height.
-	 * @return AMP_CSS_Length
+	 * @param array     $amp_layout_spec AMP layout specifications for tag.
+	 * @param string    $input_layout    Layout for tag.
+	 * @param CssLength $input_height    Parsed height.
+	 * @return CssLength
 	 */
-	private function calculate_height( $amp_layout_spec, $input_layout, AMP_CSS_Length $input_height ) {
+	private function calculate_height( $amp_layout_spec, $input_layout, CssLength $input_height ) {
 		if (
 			(
 				! $this->is_empty_attribute_value( $input_layout ) ||
 				AMP_Rule_Spec::LAYOUT_FIXED === $input_layout ||
 				AMP_Rule_Spec::LAYOUT_FIXED_HEIGHT === $input_layout
 			) &&
-			! $input_height->is_set() &&
+			! $input_height->isDefined() &&
 			isset( $amp_layout_spec['defines_default_width'] )
 		) {
-			$css_length = new AMP_CSS_Length( '1px' );
+			$css_length = new CssLength( '1px' );
 			$css_length->validate( false, false );
 			return $css_length;
 		}
@@ -1437,31 +1485,31 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @version 1911070201440
 	 * @link https://github.com/ampproject/amphtml/blob/1911070201440/validator/engine/validator.js#L3516
 	 *
-	 * @param string         $layout_attr  Layout attribute.
-	 * @param AMP_CSS_Length $width        Parsed width.
-	 * @param AMP_CSS_Length $height       Parsed height.
-	 * @param string         $sizes_attr   Sizes attribute.
-	 * @param string         $heights_attr Heights attribute.
+	 * @param string    $layout_attr  Layout attribute.
+	 * @param CssLength $width        Parsed width.
+	 * @param CssLength $height       Parsed height.
+	 * @param string    $sizes_attr   Sizes attribute.
+	 * @param string    $heights_attr Heights attribute.
 	 * @return string Layout type.
 	 */
-	private function calculate_layout( $layout_attr, AMP_CSS_Length $width, AMP_CSS_Length $height, $sizes_attr, $heights_attr ) {
+	private function calculate_layout( $layout_attr, CssLength $width, CssLength $height, $sizes_attr, $heights_attr ) {
 		if ( ! $this->is_empty_attribute_value( $layout_attr ) ) {
 			return $layout_attr;
-		} elseif ( ! $width->is_set() && ! $height->is_set() ) {
+		} elseif ( ! $width->isDefined() && ! $height->isDefined() ) {
 			return AMP_Rule_Spec::LAYOUT_CONTAINER;
 		} elseif (
-			( $height->is_set() && $height->is_fluid() ) ||
-			( $width->is_set() && $width->is_fluid() )
+			( $height->isDefined() && $height->isFluid() ) ||
+			( $width->isDefined() && $width->isFluid() )
 		) {
 			return AMP_Rule_Spec::LAYOUT_FLUID;
 		} elseif (
-			$height->is_set() &&
-			( ! $width->is_set() || $width->is_auto() )
+			$height->isDefined() &&
+			( ! $width->isDefined() || $width->isAuto() )
 		) {
 			return AMP_Rule_Spec::LAYOUT_FIXED_HEIGHT;
 		} elseif (
-			$height->is_set() &&
-			$width->is_set() &&
+			$height->isDefined() &&
+			$width->isDefined() &&
 			(
 				! $this->is_empty_attribute_value( $sizes_attr ) ||
 				! $this->is_empty_attribute_value( $heights_attr )
@@ -2384,19 +2432,17 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Do quick check to see if the the ancestor element is even open.
 		// Note first isset check is for the sake of \AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test::test_get_ancestor_with_matching_spec_name().
-		if ( isset( $this->open_element['html'] ) && empty( $this->open_elements[ $parsed_spec_name['tag_name'] ] ) ) {
+		if ( isset( $this->open_elements['html'] ) && empty( $this->open_elements[ $parsed_spec_name['tag_name'] ] ) ) {
 			return null;
 		}
 
-		while ( $node && $node->parentNode ) {
+		while ( $node->parentNode instanceof DOMElement ) {
 			$node = $node->parentNode;
 			if ( $node->nodeName === $parsed_spec_name['tag_name'] ) {
 
 				// Ensure attributes match; if not move up to the next node.
 				foreach ( $parsed_spec_name['attributes'] as $attr_name => $attr_value ) {
 					$match = (
-						$node instanceof DOMElement
-						&&
 						true === $attr_value ? $node->hasAttribute( $attr_name ) : strtolower( $node->getAttribute( $attr_name ) ) === $attr_value
 					);
 					if ( ! $match ) {
