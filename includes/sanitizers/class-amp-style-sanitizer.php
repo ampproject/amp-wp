@@ -665,7 +665,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 			// If the document has an amp-date-picker tag, check if this class is an allowed child of it.
 			// That component's child classes won't be present yet in the document, so prevent tree-shaking valid classes.
-			if ( $this->has_used_tag_names( [ 'amp-date-picker' ] ) && $this->is_class_allowed_in_amp_date_picker( $class_name ) ) {
+			// The ctype_upper() check is an optimization since we know up front that all class names in React Dates are
+			// in CamelCase form, thus we can short-circut if the first character of the class name is not upper-case.
+			if ( ctype_upper( $class_name[0] ) && $this->has_used_tag_names( [ 'amp-date-picker' ] ) && $this->is_class_allowed_in_amp_date_picker( $class_name ) ) {
 				continue;
 			}
 
@@ -785,11 +787,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			'KeyboardShortcutRow',
 		];
 
-		if ( in_array( strtok( $class, '_' ), $class_prefixes, true ) ) {
-			return true;
-		}
-
-		return 'amp-date-picker-' === substr( $class, 0, 16 );
+		return in_array( strtok( $class, '_' ), $class_prefixes, true );
 	}
 
 	/**
