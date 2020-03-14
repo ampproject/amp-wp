@@ -413,7 +413,7 @@ class AMP_Options_Manager {
 			<h2><?php esc_html_e( 'Welcome to AMP for WordPress', 'amp' ); ?></h2>
 			<h3><?php esc_html_e( 'Bring the speed and features of the open source AMP project to your site, complete with the tools to support content authoring and website development.', 'amp' ); ?></h3>
 			<h3><?php esc_html_e( 'From granular controls that help you create AMP content, to Core Gutenberg support, to a sanitizer that only shows visitors error-free pages, to a full error workflow for developers, this release enables rich, performant experiences for your WordPress site.', 'amp' ); ?></h3>
-			<a href="https://amp-wp.org/getting-started/" target="_blank" class="button button-primary"><?php esc_html_e( 'Learn More', 'amp' ); ?></a>
+			<a href="https://amp-wp.org/getting-started/" target="_blank" rel="noopener noreferrer" class="button button-primary"><?php esc_html_e( 'Learn More', 'amp' ); ?></a>
 		</div>
 
 		<script>
