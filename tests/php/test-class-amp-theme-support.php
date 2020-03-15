@@ -1068,7 +1068,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$priority = defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX; // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
 		$this->assertEquals( $priority, has_action( 'template_redirect', [ self::TESTED_CLASS, 'start_output_buffering' ] ) );
 
-		$this->assertEquals( 10, has_filter( 'comment_form_defaults', [ self::TESTED_CLASS, 'filter_comment_form_defaults' ] ) );
+		$this->assertEquals( PHP_INT_MAX, has_filter( 'comment_form_defaults', [ self::TESTED_CLASS, 'filter_comment_form_defaults' ] ) );
 		$this->assertEquals( 10, has_filter( 'comment_reply_link', [ self::TESTED_CLASS, 'filter_comment_reply_link' ] ) );
 		$this->assertEquals( 10, has_filter( 'cancel_comment_reply_link', [ self::TESTED_CLASS, 'filter_cancel_comment_reply_link' ] ) );
 		$this->assertEquals( 100, has_action( 'comment_form', [ self::TESTED_CLASS, 'amend_comment_form' ] ) );
