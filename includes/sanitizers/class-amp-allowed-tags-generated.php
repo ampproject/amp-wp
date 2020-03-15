@@ -4089,7 +4089,6 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'mandatory_anyof' => array(
 						'data-amp-bind-src',
-						'data-amp-bind-src',
 						'src',
 					),
 					'requires_extension' => array(
