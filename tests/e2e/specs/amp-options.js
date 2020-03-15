@@ -10,12 +10,6 @@ describe( 'AMP Settings Screen', () => {
 		await expect( page ).toMatchElement( '.amp-welcome-notice h2', { text: 'Welcome to AMP for WordPress' } );
 	} );
 
-	it( 'should display a warning about missing object cache', async () => {
-		await visitAdminPage( 'admin.php', 'page=amp-options' );
-
-		await expect( page ).toMatchElement( '.notice-warning p', { text: 'The AMP plugin performs at its best when persistent object cache is enabled' } );
-	} );
-
 	it( 'should display a message about theme compatibility', async () => {
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 
