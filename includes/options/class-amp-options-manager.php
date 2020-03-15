@@ -28,7 +28,6 @@ class AMP_Options_Manager {
 		'analytics'               => [],
 		'all_templates_supported' => true,
 		'supported_templates'     => [ 'is_singular' ],
-		'enable_response_caching' => true,
 		'version'                 => AMP__VERSION,
 	];
 
@@ -47,8 +46,6 @@ class AMP_Options_Manager {
 
 		add_action( 'update_option_' . self::OPTION_NAME, [ __CLASS__, 'maybe_flush_rewrite_rules' ], 10, 2 );
 		add_action( 'admin_notices', [ __CLASS__, 'render_welcome_notice' ] );
-		add_action( 'admin_notices', [ __CLASS__, 'persistent_object_caching_notice' ] );
-		add_action( 'admin_notices', [ __CLASS__, 'render_cache_miss_notice' ] );
 		add_action( 'admin_notices', [ __CLASS__, 'render_php_css_parser_conflict_notice' ] );
 		add_action( 'admin_notices', [ __CLASS__, 'insecure_connection_notice' ] );
 	}
@@ -85,8 +82,6 @@ class AMP_Options_Manager {
 		}
 
 		$defaults = self::$defaults;
-
-		$defaults['enable_response_caching'] = wp_using_ext_object_cache();
 
 		if ( current_theme_supports( 'amp' ) ) {
 			$defaults['theme_support'] = amp_is_canonical() ? AMP_Theme_Support::STANDARD_MODE_SLUG : AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
@@ -135,7 +130,13 @@ class AMP_Options_Manager {
 			 *
 			 * @since 1.5.0
 			 */
-			$options['experiences']
+			$options['experiences'],
+			/**
+			 * Remove 'enable_response_caching' option.
+			 *
+			 * @since 1.5.0
+			 */
+			$options['enable_response_caching']
 		);
 
 		return $options;
@@ -263,16 +264,6 @@ class AMP_Options_Manager {
 
 		// Store the current version with the options so we know the format.
 		$options['version'] = AMP__VERSION;
-
-		// Handle the caching option.
-		$options['enable_response_caching'] = (
-			wp_using_ext_object_cache()
-			&&
-			! empty( $new_options['enable_response_caching'] )
-		);
-		if ( $options['enable_response_caching'] ) {
-			AMP_Theme_Support::reset_cache_miss_url_option();
-		}
 
 		return $options;
 	}
@@ -459,50 +450,6 @@ class AMP_Options_Manager {
 	}
 
 	/**
-	 * Outputs an admin notice if persistent object cache is not present.
-	 *
-	 * @return void
-	 */
-	public static function persistent_object_caching_notice() {
-		if ( ! wp_using_ext_object_cache() && 'toplevel_page_' . self::OPTION_NAME === get_current_screen()->id ) {
-			echo '<div class="notice notice-warning"><p>';
-			esc_html_e( 'The AMP plugin performs at its best when persistent object cache is enabled. Object caching is used to more effectively store image dimensions and parsed CSS. It also allows for post-processor caching to be used.', 'amp' );
-			echo ' ';
-			printf(
-				'<a href="%s">%s</a>',
-				esc_url( __( 'https://codex.wordpress.org/Class_Reference/WP_Object_Cache#Persistent_Caching', 'amp' ) ),
-				esc_html__( 'More details', 'amp' )
-			);
-			echo '</p></div>';
-		}
-	}
-
-	/**
-	 * Render the cache miss admin notice.
-	 *
-	 * @return void
-	 */
-	public static function render_cache_miss_notice() {
-		if ( 'toplevel_page_' . self::OPTION_NAME !== get_current_screen()->id ) {
-			return;
-		}
-
-		if ( ! self::show_response_cache_disabled_notice() ) {
-			return;
-		}
-
-		echo '<div class="notice notice-warning is-dismissible"><p>';
-		esc_html_e( 'The AMP plugin&lsquo;s post-processor cache was disabled due to the detection of highly-variable content.', 'amp' );
-		echo ' ';
-		printf(
-			'<a href="%s">%s</a>',
-			esc_url( __( 'https://github.com/ampproject/amp-wp/wiki/Post-Processor-Cache', 'amp' ) ),
-			esc_html__( 'More details', 'amp' )
-		);
-		echo '</p></div>';
-	}
-
-	/**
 	 * Render PHP-CSS-Parser conflict notice.
 	 *
 	 * @return void
@@ -542,24 +489,6 @@ class AMP_Options_Manager {
 			);
 		}
 	}
-
-	/**
-	 * Show the response cache disabled notice.
-	 *
-	 * @since 1.0
-	 *
-	 * @return bool
-	 */
-	public static function show_response_cache_disabled_notice() {
-		return (
-			wp_using_ext_object_cache()
-			&&
-			! self::get_option( 'enable_response_caching' )
-			&&
-			AMP_Theme_Support::exceeded_cache_miss_threshold()
-		);
-	}
-
 
 	/**
 	 * Outputs an admin notice if the site is not served over HTTPS.

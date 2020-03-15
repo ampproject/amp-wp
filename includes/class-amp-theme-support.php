@@ -33,41 +33,6 @@ class AMP_Theme_Support {
 	const SLUG = 'amp';
 
 	/**
-	 * Response cache group name.
-	 *
-	 * @var string
-	 */
-	const RESPONSE_CACHE_GROUP = 'amp-response';
-
-	/**
-	 * Post-processor cache effectiveness group name.
-	 *
-	 * @var string
-	 */
-	const POST_PROCESSOR_CACHE_EFFECTIVENESS_GROUP = 'post_processor_cache_effectiveness_group';
-
-	/**
-	 * Post-processor cache effectiveness key name.
-	 *
-	 * @var string
-	 */
-	const POST_PROCESSOR_CACHE_EFFECTIVENESS_KEY = 'post_processor_cache_effectiveness';
-
-	/**
-	 * Cache miss threshold for determining when to disable post-processor cache.
-	 *
-	 * @var int
-	 */
-	const CACHE_MISS_THRESHOLD = 20;
-
-	/**
-	 * Cache miss URL option name.
-	 *
-	 * @var string
-	 */
-	const CACHE_MISS_URL_OPTION = 'amp_cache_miss_url';
-
-	/**
 	 * Slug identifying standard website mode.
 	 *
 	 * @since 1.2
@@ -1943,7 +1908,6 @@ class AMP_Theme_Support {
 	 */
 	public static function prepare_response( $response, $args = [] ) {
 		global $content_width;
-		$prepare_response_start = microtime( true );
 
 		if ( isset( $args['validation_error_callback'] ) ) {
 			_doing_it_wrong( __METHOD__, 'Do not supply validation_error_callback arg.', '1.0' );
@@ -1994,36 +1958,6 @@ class AMP_Theme_Support {
 			header( 'Content-Type: text/html; charset=utf-8' );
 		}
 
-		/**
-		 * Filters whether response (post-processor) caching is enabled.
-		 *
-		 * When enabled and when an external object cache is present, the output of the post-processor phase is stored in
-		 * in the object cache. When another request is made that generates the same HTML output, the previously-cached
-		 * post-processor output will then be served immediately and bypass needlessly re-running the sanitizers.
-		 * This does not apply when:
-		 *
-		 * - AMP validation is being performed.
-		 * - The response is in the Customizer preview.
-		 * - Response caching is disabled due to a high-rate of cache misses.
-		 *
-		 * @param bool $enable_response_caching Whether response caching is enabled.
-		 */
-		$enable_response_caching = apply_filters( 'amp_response_caching_enabled', ! ( defined( 'WP_DEBUG' ) && WP_DEBUG ) || ! empty( $args['enable_response_caching'] ) );
-		$enable_response_caching = (
-			$enable_response_caching
-			&&
-			! AMP_Validation_Manager::$is_validate_request
-			&&
-			! is_customize_preview()
-		);
-
-		// When response caching is enabled, determine if it should be turned off for cache misses.
-		$caches_for_url = null;
-		if ( $enable_response_caching ) {
-			list( $disable_response_caching, $caches_for_url ) = self::check_for_cache_misses();
-			$enable_response_caching                           = ! $disable_response_caching;
-		}
-
 		// @todo Both allow_dirty_styles and allow_dirty_scripts should eventually use AMP dev mode instead.
 		$args = array_merge(
 			[
@@ -2033,137 +1967,11 @@ class AMP_Theme_Support {
 				'allow_dirty_scripts'  => is_customize_preview(), // Scripts are always needed to inject changeset UUID.
 				'user_can_validate'    => AMP_Validation_Manager::has_cap(),
 			],
-			$args,
-			compact( 'enable_response_caching' )
+			$args
 		);
 
 		$current_url = amp_get_current_url();
 		$non_amp_url = amp_remove_endpoint( $current_url );
-
-		/*
-		 * Set response cache hash, the data values dictates whether a new hash key should be generated or not.
-		 * This is also used as the ETag.
-		 */
-		$response_cache_key = md5(
-			wp_json_encode(
-				[
-					$args,
-					$response,
-					self::$sanitizer_classes,
-					self::$embed_handlers,
-					AMP__VERSION,
-				]
-			)
-		);
-
-		/*
-		 * Per rfc7232:
-		 * "The server generating a 304 response MUST generate any of the
-		 * following header fields that would have been sent in a 200 (OK)
-		 * response to the same request: Cache-Control, Content-Location, Date,
-		 * ETag, Expires, and Vary." The only one of these headers which would
-		 * not have been set yet during the WordPress template generation is
-		 * the ETag. The AMP plugin sends a Vary header at amp_init.
-		 */
-		AMP_HTTP::send_header( 'ETag', '"' . $response_cache_key . '"' );
-
-		/*
-		 * Handle responses that are cached by the browser, returning 304 response if the response cache key
-		 * matches any ETags mentioned in If-None-Match request header. Note that if the client request indicates a
-		 * weak validator (prefixed by W/) then this will be ignored. The MD5 strings will be extracted from the
-		 * If-None-Match request header and if any of them match the $response_cache_key then a 304 Not Modified
-		 * response is returned.
-		 *
-		 * Such 304 Not Modified responses are only enabled when using a stable release. This is not enabled for
-		 * non-stable releases (like 1.2-beta2) because the plugin would be under active development and such caching
-		 * would make it more difficult to see changes applied to the sanitizers. (A browser's cache would have to be
-		 * disabled or the developer would have to always do hard reloads.)
-		 */
-		$has_matching_etag = (
-			false === strpos( AMP__VERSION, '-' )
-			&&
-			isset( $_SERVER['HTTP_IF_NONE_MATCH'] )
-			&&
-			preg_match_all( '#\b[0-9a-f]{32}\b#', wp_unslash( $_SERVER['HTTP_IF_NONE_MATCH'] ), $etag_match_candidates )
-			&&
-			in_array( $response_cache_key, $etag_match_candidates[0], true )
-		);
-		if ( $has_matching_etag ) {
-			status_header( 304 );
-			return '';
-		}
-
-		// Return cache if enabled and found.
-		$cache_response = null;
-		if ( true === $args['enable_response_caching'] ) {
-			$response_cache = wp_cache_get( $response_cache_key, self::RESPONSE_CACHE_GROUP );
-
-			// Make sure that all of the validation errors should be sanitized in the same way; if not, then the cached body should be discarded.
-			$blocking_error_count = 0;
-			if ( isset( $response_cache['validation_results'] ) ) {
-				foreach ( $response_cache['validation_results'] as $validation_result ) {
-					if ( ! $validation_result['sanitized'] ) {
-						$blocking_error_count++;
-					}
-					$should_sanitize = AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $validation_result['error'] );
-					if ( $should_sanitize !== $validation_result['sanitized'] ) {
-						unset( $response_cache['body'] );
-						break;
-					}
-				}
-			}
-
-			// Short-circuit response with cached body.
-			if ( isset( $response_cache['body'] ) ) {
-
-				// Re-send the headers that were sent before when the response was first cached.
-				if ( isset( $response_cache['headers'] ) ) {
-					foreach ( $response_cache['headers'] as $header ) {
-						if ( in_array( $header, AMP_HTTP::$headers_sent, true ) ) {
-							continue; // Skip sending headers that were already sent prior to post-processing.
-						}
-						AMP_HTTP::send_header( $header['name'], $header['value'], wp_array_slice_assoc( $header, [ 'replace', 'status_code' ] ) );
-					}
-				}
-
-				AMP_HTTP::send_server_timing( 'amp_processor_cache_hit', -$prepare_response_start );
-
-				// Redirect to non-AMP version.
-				if ( ! amp_is_canonical() && $blocking_error_count > 0 ) {
-					if ( AMP_Validation_Manager::has_cap() ) {
-						$non_amp_url = add_query_arg( AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR, $blocking_error_count, $non_amp_url );
-					}
-
-					/*
-					 * Temporary redirect because AMP page may return with blocking validation errors when auto-accepting sanitization
-					 * is not enabled. A 302 will allow the errors to be fixed without needing to bust any redirect caches.
-					 */
-					wp_safe_redirect( $non_amp_url, 302 );
-				}
-				return $response_cache['body'];
-			}
-
-			$cache_response = static function( $body, $validation_results ) use ( $response_cache_key, $caches_for_url ) {
-				$caches_for_url[] = $response_cache_key;
-				wp_cache_set(
-					AMP_Theme_Support::POST_PROCESSOR_CACHE_EFFECTIVENESS_KEY,
-					$caches_for_url,
-					AMP_Theme_Support::POST_PROCESSOR_CACHE_EFFECTIVENESS_GROUP,
-					600 // 10 minute cache.
-				);
-
-				return wp_cache_set(
-					$response_cache_key,
-					[
-						'headers'            => AMP_HTTP::$headers_sent,
-						'body'               => $body,
-						'validation_results' => $validation_results,
-					],
-					AMP_Theme_Support::RESPONSE_CACHE_GROUP,
-					MONTH_IN_SECONDS
-				);
-			};
-		}
 
 		AMP_HTTP::send_server_timing( 'amp_output_buffer', -self::$init_start_time, 'AMP Output Buffer' );
 
@@ -2282,10 +2090,6 @@ class AMP_Theme_Support {
 			} elseif ( ! self::is_customize_preview_iframe() ) {
 				$response = esc_html__( 'Redirecting to non-AMP version.', 'amp' );
 
-				if ( $cache_response ) {
-					$cache_response( $response, $validation_results );
-				}
-
 				// Indicate the number of validation errors detected at runtime in a query var on the non-AMP page for display in the admin bar.
 				if ( AMP_Validation_Manager::has_cap() ) {
 					$non_amp_url = add_query_arg( AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR, $blocking_error_count, $non_amp_url );
@@ -2305,11 +2109,6 @@ class AMP_Theme_Support {
 		$response = $dom->saveHTML();
 
 		AMP_HTTP::send_server_timing( 'amp_dom_serialize', -$dom_serialize_start, 'AMP DOM Serialize' );
-
-		// Cache response if enabled.
-		if ( $cache_response ) {
-			$cache_response( $response, $validation_results );
-		}
 
 		return $response;
 	}
@@ -2396,67 +2195,6 @@ class AMP_Theme_Support {
 		);
 
 		return $config;
-	}
-
-	/**
-	 * Check for cache misses. When found, store in an option to retain the URL.
-	 *
-	 * @since 1.0
-	 *
-	 * @return array {
-	 *     State.
-	 *
-	 *     @type bool       Flag indicating if the threshold has been exceeded.
-	 *     @type string[]   Collection of URLs.
-	 * }
-	 */
-	private static function check_for_cache_misses() {
-		// If the cache miss threshold is exceeded, return true.
-		if ( self::exceeded_cache_miss_threshold() ) {
-			return [ true, null ];
-		}
-
-		// Get the cache miss URLs.
-		$cache_miss_urls = wp_cache_get( self::POST_PROCESSOR_CACHE_EFFECTIVENESS_KEY, self::POST_PROCESSOR_CACHE_EFFECTIVENESS_GROUP );
-		$cache_miss_urls = is_array( $cache_miss_urls ) ? $cache_miss_urls : [];
-
-		$exceeded_threshold = (
-			! empty( $cache_miss_urls )
-			&&
-			count( $cache_miss_urls ) >= self::CACHE_MISS_THRESHOLD
-		);
-
-		if ( ! $exceeded_threshold ) {
-			return [ $exceeded_threshold, $cache_miss_urls ];
-		}
-
-		// When the threshold is exceeded, store the URL for cache miss and turn off response caching.
-		update_option( self::CACHE_MISS_URL_OPTION, amp_get_current_url() );
-		AMP_Options_Manager::update_option( 'enable_response_caching', false );
-		return [ true, null ];
-	}
-
-	/**
-	 * Reset the cache miss URL option.
-	 *
-	 * @since 1.0
-	 */
-	public static function reset_cache_miss_url_option() {
-		if ( get_option( self::CACHE_MISS_URL_OPTION ) ) {
-			delete_option( self::CACHE_MISS_URL_OPTION );
-		}
-	}
-
-	/**
-	 * Checks if cache miss threshold has been exceeded.
-	 *
-	 * @since 1.0
-	 *
-	 * @return bool
-	 */
-	public static function exceeded_cache_miss_threshold() {
-		$url = get_option( self::CACHE_MISS_URL_OPTION, false );
-		return ! empty( $url );
 	}
 
 	/**

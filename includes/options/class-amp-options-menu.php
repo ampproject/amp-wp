@@ -101,19 +101,6 @@ class AMP_Options_Menu {
 			]
 		);
 
-		if ( wp_using_ext_object_cache() ) {
-			add_settings_field(
-				'caching',
-				__( 'Caching', 'amp' ),
-				[ $this, 'render_caching' ],
-				AMP_Options_Manager::OPTION_NAME,
-				'general',
-				[
-					'class' => 'amp-caching-field',
-				]
-			);
-		}
-
 		$submenus = [
 			new AMP_Analytics_Options_Submenu( AMP_Options_Manager::OPTION_NAME ),
 		];
@@ -371,34 +358,6 @@ class AMP_Options_Menu {
 				})( jQuery );
 			</script>
 		<?php endif; ?>
-		<?php
-	}
-
-	/**
-	 * Render the caching settings section.
-	 *
-	 * @since 1.0
-	 *
-	 * @todo Change the messaging and description to be user-friendly and helpful.
-	 */
-	public function render_caching() {
-		?>
-		<fieldset>
-			<?php if ( AMP_Options_Manager::show_response_cache_disabled_notice() ) : ?>
-				<div class="notice notice-info notice-alt inline">
-					<p><?php esc_html_e( 'The post-processor cache was disabled due to detecting randomly generated content found on', 'amp' ); ?> <a href="<?php echo esc_url( get_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, '' ) ); ?>"><?php esc_html_e( 'on this web page.', 'amp' ); ?></a></p>
-					<p><?php esc_html_e( 'Randomly generated content was detected on this web page.  To avoid filling up the cache with unusable content, the AMP plugin\'s post-processor cache was automatically disabled.', 'amp' ); ?>
-						<a href="<?php echo esc_url( 'https://github.com/ampproject/amp-wp/wiki/Post-Processor-Cache' ); ?>"><?php esc_html_e( 'Read more', 'amp' ); ?></a>.</p>
-				</div>
-			<?php endif; ?>
-			<p>
-				<label for="enable_response_caching">
-					<input id="enable_response_caching" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[enable_response_caching]' ); ?>" <?php checked( AMP_Options_Manager::get_option( 'enable_response_caching' ) ); ?>>
-					<?php esc_html_e( 'Enable post-processor caching.', 'amp' ); ?>
-				</label>
-			</p>
-			<p class="description"><?php esc_html_e( 'This will enable post-processor caching to speed up processing an AMP response after WordPress renders a template.', 'amp' ); ?></p>
-		</fieldset>
 		<?php
 	}
 
