@@ -1941,32 +1941,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test exceeded_cache_miss_threshold
-	 *
-	 * @covers AMP_Theme_Support::exceeded_cache_miss_threshold()
-	 */
-	public function test_exceeded_cache_miss_threshold() {
-		$this->assertFalse( AMP_Theme_Support::exceeded_cache_miss_threshold() );
-		add_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, site_url() );
-		$this->assertTrue( AMP_Theme_Support::exceeded_cache_miss_threshold() );
-	}
-
-	/**
-	 * Get the ETag header value from the list of sent headers.
-	 *
-	 * @param array $headers Headers sent.
-	 * @return string|null The ETag if found.
-	 */
-	protected function get_etag_header_value( $headers ) {
-		foreach ( $headers as $header_sent ) {
-			if ( 'ETag' === $header_sent['name'] ) {
-				return $header_sent['value'];
-			}
-		}
-		return null;
-	}
-
-	/**
 	 * Test prepare_response.
 	 *
 	 * @global WP_Widget_Factory $wp_widget_factory
@@ -1987,23 +1961,16 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		wp();
 
-		$prepare_response_args = [
-			'enable_response_caching' => false,
-		];
-
 		// phpcs:disable WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 		$original_html = $this->get_original_html();
 
-		$call_prepare_response = static function() use ( $original_html, &$prepare_response_args ) {
+		$call_prepare_response = static function() use ( $original_html ) {
 			AMP_HTTP::$headers_sent                     = [];
 			AMP_Validation_Manager::$validation_results = [];
-			return AMP_Theme_Support::prepare_response( $original_html, $prepare_response_args );
+			return AMP_Theme_Support::prepare_response( $original_html );
 		};
 
 		$sanitized_html = $call_prepare_response();
-
-		$etag = $this->get_etag_header_value( AMP_HTTP::$headers_sent );
-		$this->assertNotEmpty( $etag );
 
 		$this->assertNotContains( 'handle=', $sanitized_html );
 		$this->assertEquals( 2, substr_count( $sanitized_html, '<!-- wp_print_scripts -->' ) );
@@ -2092,73 +2059,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		// Make sure trailing content after </html> gets moved.
 		$this->assertRegExp( '#<!--comment-after-html-->\s*<div id="after-html"></div>\s*<!--comment-end-html-->\s*</body>\s*</html>\s*$#s', $sanitized_html );
 
-		// Test that ETag allows response to short-circuit via If-None-Match request header.
-		$_SERVER['HTTP_IF_NONE_MATCH'] = $etag;
-		$this->assertEmpty( '', $call_prepare_response() );
-
-		$_SERVER['HTTP_IF_NONE_MATCH'] = sprintf( '"%s"', $etag );
-		$this->assertEmpty( '', $call_prepare_response() );
-
-		$_SERVER['HTTP_IF_NONE_MATCH'] = sprintf( 'W/"%s"', $etag );
-		$this->assertEmpty( '', $call_prepare_response() );
-
-		$_SERVER['HTTP_IF_NONE_MATCH'] = sprintf( '"%s", W/"%s"', md5( 'foo' ), $etag );
-		$this->assertEmpty( '', $call_prepare_response() );
-
-		$_SERVER['HTTP_IF_NONE_MATCH'] = sprintf( '"%s", "%s"', $etag, md5( 'bar' ) );
-		$this->assertEmpty( '', $call_prepare_response() );
-
-		// Test not match.
-		$_SERVER['HTTP_IF_NONE_MATCH'] = strrev( $etag );
-		$this->assertNotEmpty( $call_prepare_response() );
-		$this->assertNotEmpty( $this->get_etag_header_value( AMP_HTTP::$headers_sent ) );
-		unset( $_SERVER['HTTP_IF_NONE_MATCH'] );
-
-		$prepare_response_args['enable_response_caching']                 = true;
-		$prepare_response_args[ ConfigurationArgument::ENABLE_OPTIMIZER ] = false;
-
-		// Test that first response isn't cached.
-		$first_response                = $call_prepare_response();
-		$initial_server_timing_headers = $this->get_server_timing_headers();
-		$this->assertGreaterThan( 0, count( $initial_server_timing_headers ) );
-		$this->assertContains( '<html amp="">', $first_response ); // Note: AMP because sanitized validation errors.
-		$this->reset_post_processor_cache_effectiveness();
-
-		// Test that response cache is return upon second call.
-		$this->assertEquals( $first_response, $call_prepare_response() );
-		$server_timing_headers = $this->get_server_timing_headers();
-		$this->assertCount( count( $server_timing_headers ), $this->get_server_timing_headers() );
-		$this->reset_post_processor_cache_effectiveness();
-
-		// Test new cache upon argument change.
-		$prepare_response_args['test_reset_by_arg'] = true;
-		$call_prepare_response();
-		$server_timing_headers = $this->get_server_timing_headers();
-		$this->assertCount( count( $server_timing_headers ), $this->get_server_timing_headers() );
-		$this->reset_post_processor_cache_effectiveness();
-
-		// Test response is cached.
-		$call_prepare_response();
-		$server_timing_headers = $this->get_server_timing_headers();
-		$this->assertCount( count( $server_timing_headers ), $this->get_server_timing_headers() );
-		$this->reset_post_processor_cache_effectiveness();
-
-		// Test that response is no longer cached due to a change whether validation errors are sanitized.
-		remove_filter( 'amp_validation_error_sanitized', '__return_true' );
-		add_filter( 'amp_validation_error_sanitized', '__return_false' );
-		$prepared_html         = $call_prepare_response();
-		$server_timing_headers = $this->get_server_timing_headers();
-		$this->assertCount( count( $server_timing_headers ), $this->get_server_timing_headers() );
-		$this->assertContains( '<html>', $prepared_html ); // Note: no AMP because unsanitized validation error.
-		$this->reset_post_processor_cache_effectiveness();
-
-		// And test response is cached.
-		$call_prepare_response();
-		$server_timing_headers     = $this->get_server_timing_headers();
-		$last_server_timing_header = array_pop( $server_timing_headers );
-		$this->assertStringStartsWith( 'amp_processor_cache_hit;', $last_server_timing_header['value'] );
-		$this->assertCount( count( $server_timing_headers ), $initial_server_timing_headers );
-
 		// phpcs:enable WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 	}
 
@@ -2193,49 +2093,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		unset( AMP_HTTP::$purged_amp_query_vars[ AMP_HTTP::ACTION_XHR_CONVERTED_QUERY_VAR ] );
 		unset( $_SERVER['REQUEST_METHOD'] );
-	}
-
-	/**
-	 * Test post-processor cache effectiveness in AMP_Theme_Support::prepare_response().
-	 */
-	public function test_post_processor_cache_effectiveness() {
-		wp();
-		$original_html = $this->get_original_html();
-		$args          = [ 'enable_response_caching' => true ];
-		wp_using_ext_object_cache( true ); // turn on external object cache flag.
-		$this->reset_post_processor_cache_effectiveness();
-		AMP_Options_Manager::update_option( 'enable_response_caching', true );
-
-		// Test the response is not cached after exceeding the cache miss threshold.
-		for ( $num_calls = 1, $max = AMP_Theme_Support::CACHE_MISS_THRESHOLD + 2; $num_calls <= $max; $num_calls++ ) {
-			// Simulate dynamic changes in the content.
-			$original_html = str_replace( 'dynamic-id-', "dynamic-id-{$num_calls}-", $original_html );
-
-			AMP_HTTP::$headers_sent                     = [];
-			AMP_Validation_Manager::$validation_results = [];
-			AMP_Theme_Support::prepare_response( $original_html, $args );
-
-			$caches_for_url = wp_cache_get( AMP_Theme_Support::POST_PROCESSOR_CACHE_EFFECTIVENESS_KEY, AMP_Theme_Support::POST_PROCESSOR_CACHE_EFFECTIVENESS_GROUP );
-			$cache_miss_url = get_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, false );
-
-			// When we've met the threshold, check that caching did not happen.
-			if ( $num_calls > AMP_Theme_Support::CACHE_MISS_THRESHOLD ) {
-				$this->assertCount( AMP_Theme_Support::CACHE_MISS_THRESHOLD, $caches_for_url );
-				$this->assertEquals( amp_get_current_url(), $cache_miss_url );
-
-				// Check that response caching was automatically disabled.
-				$this->assertFalse( AMP_Options_Manager::get_option( 'enable_response_caching' ) );
-			} else {
-				$this->assertCount( $num_calls, $caches_for_url );
-				$this->assertFalse( $cache_miss_url );
-				$this->assertTrue( AMP_Options_Manager::get_option( 'enable_response_caching' ) );
-			}
-
-			$this->assertGreaterThan( 0, count( $this->get_server_timing_headers() ) );
-		}
-
-		// Reset.
-		wp_using_ext_object_cache( false );
 	}
 
 	/**
@@ -2365,14 +2222,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Reset cached URLs in post-processor cache effectiveness.
-	 */
-	private function reset_post_processor_cache_effectiveness() {
-		wp_cache_delete( AMP_Theme_Support::POST_PROCESSOR_CACHE_EFFECTIVENESS_KEY, AMP_Theme_Support::POST_PROCESSOR_CACHE_EFFECTIVENESS_GROUP );
-		delete_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION );
-	}
-
-	/**
 	 * Test prepare_response for responses that may or may not be valid HTML.
 	 *
 	 * @covers AMP_Theme_Support::prepare_response()
@@ -2463,36 +2312,35 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		AMP_Theme_Support_Sanitizer_Counter::$count = 0;
 		AMP_Validation_Manager::reset_validation_results();
-		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html, [ 'enable_response_caching' => true ] );
+		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
 		$this->assertStringStartsWith( 'Redirecting to non-AMP version', $sanitized_html );
 		$this->assertCount( 1, $redirects );
 		$this->assertEquals( home_url( '/' ), $redirects[0] );
 		$this->assertEquals( 1, AMP_Theme_Support_Sanitizer_Counter::$count );
 
 		AMP_Validation_Manager::reset_validation_results();
-		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html, [ 'enable_response_caching' => true ] );
+		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
 		$this->assertStringStartsWith( 'Redirecting to non-AMP version', $sanitized_html );
 		$this->assertCount( 2, $redirects );
 		$this->assertEquals( home_url( '/' ), $redirects[0] );
-		$this->assertEquals( 1, AMP_Theme_Support_Sanitizer_Counter::$count, 'Expected sanitizer to not be invoked.' );
+		$this->assertEquals( 2, AMP_Theme_Support_Sanitizer_Counter::$count, 'Expected sanitizer to be invoked again.' );
 
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		AMP_Validation_Manager::add_validation_error_sourcing();
 
 		AMP_Validation_Manager::reset_validation_results();
-		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html, [ 'enable_response_caching' => true ] );
+		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
 		$this->assertStringStartsWith( 'Redirecting to non-AMP version', $sanitized_html );
 		$this->assertCount( 3, $redirects );
 		$this->assertEquals( home_url( '/?amp_validation_errors=1' ), $redirects[0] );
-		$this->assertEquals( 2, AMP_Theme_Support_Sanitizer_Counter::$count, 'Expected sanitizer be invoked after validation changed.' );
+		$this->assertEquals( 3, AMP_Theme_Support_Sanitizer_Counter::$count, 'Expected sanitizer be invoked after validation changed.' );
 
 		AMP_Validation_Manager::reset_validation_results();
-		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html, [ 'enable_response_caching' => true ] );
+		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
 		$this->assertStringStartsWith( 'Redirecting to non-AMP version', $sanitized_html );
 		$this->assertCount( 4, $redirects );
 		$this->assertEquals( home_url( '/?amp_validation_errors=1' ), $redirects[0] );
-		$this->assertEquals( 2, AMP_Theme_Support_Sanitizer_Counter::$count, 'Expected sanitizer to not now be invoked since previous validation results now cached.' );
-
+		$this->assertEquals( 4, AMP_Theme_Support_Sanitizer_Counter::$count, 'Expected sanitizer to not be invoked again since although validation results are cached.' );
 	}
 
 	/**
