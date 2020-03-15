@@ -64,7 +64,7 @@ final class SiteHealth {
 				'label' => esc_html__( 'AMP', 'amp' ),
 				'color' => $is_using_object_cache ? 'green' : 'orange',
 			],
-			'description' => esc_html__( 'The AMP plugin performs at its best when persistent object cache is enabled. Object caching is used to more effectively store image dimensions and parsed CSS. It also allows for post-processor caching to be used.', 'amp' ),
+			'description' => esc_html__( 'The AMP plugin performs at its best when persistent object cache is enabled. Object caching is used to more effectively store image dimensions and parsed CSS.', 'amp' ),
 			'actions'     => sprintf(
 				'<p><a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s <span class="screen-reader-text">%3$s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
 				'https://codex.wordpress.org/Class_Reference/WP_Object_Cache#Persistent_Caching',
