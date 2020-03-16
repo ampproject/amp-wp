@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { Component, createRef, renderToString } from '@wordpress/element';
-import { Icon, IconButton } from '@wordpress/components';
+import { Button, Icon } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { withSelect, withDispatch } from '@wordpress/data';
 import { DotTip } from '@wordpress/nux';
@@ -237,17 +237,16 @@ class AMPPreview extends Component {
 
 		return (
 			isEnabled && ! errorMessages.length && ! isStandardMode && (
-				<IconButton
-					icon={ ampFilledIcon( { viewBox: '0 0 62 62' } ) }
-					isLarge
+				<Button
 					className="amp-editor-post-preview"
 					href={ href }
 					label={ __( 'Preview AMP', 'amp' ) }
-					target={ this.getWindowTarget() }
+					isSecondary
 					disabled={ ! isSaveable }
 					onClick={ this.openPreviewWindow }
 					ref={ this.buttonRef }
 				>
+					{ ampFilledIcon( { viewBox: '0 0 62 62', width: 18, height: 18 } ) }
 					<span className="screen-reader-text">
 						{
 							/* translators: accessibility text */
@@ -257,7 +256,7 @@ class AMPPreview extends Component {
 					<DotTip tipId="amp/editor.preview">
 						{ __( 'Click “Preview” to load a preview of this page in AMP, so you can make sure you are happy with your blocks.', 'amp' ) }
 					</DotTip>
-				</IconButton>
+				</Button>
 			)
 		);
 	}
