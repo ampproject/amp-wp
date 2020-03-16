@@ -219,6 +219,11 @@ class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
 				'',
 			],
 
+			'remove_multiple_fb_root'       => [
+				str_repeat( '<div id="fb-root"></div>', 5 ) . str_repeat( '<script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v3.2"></script>', 5 ), // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+				'',
+			],
+
 			'remove_empty_p_tag'            => [
 				'<p><script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v3.2"></script></p><div id="fb-root"></div>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 				'',

@@ -94,7 +94,12 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 					$parent_node->parentNode->removeChild( $parent_node );
 				}
 			}
-			$fb_root->parentNode->removeChild( $fb_root );
+
+			// Remove other instances of <div id="fb-root">.
+			$fb_root_query = $dom->xpath->query( '//div[ @id = "fb-root" ]' );
+			foreach ( $fb_root_query as $fb_root ) {
+				$fb_root->parentNode->removeChild( $fb_root );
+			}
 		}
 	}
 
