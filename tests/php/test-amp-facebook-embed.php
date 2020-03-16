@@ -63,17 +63,17 @@ class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
 	 */
 	public function get_raw_embed_dataset() {
 		return [
-			'no_embed_blockquote'        => [
+			'no_embed_blockquote'           => [
 				'<p>Hello world.</p>',
 				'<p>Hello world.</p>',
 			],
 
-			'div_without_facebook_embed' => [
+			'div_without_facebook_embed'    => [
 				'<div>lorem ipsum</div>',
 				'<div>lorem ipsum</div>',
 			],
 
-			'simple_url_https'           => [
+			'simple_url_https'              => [
 				'https://www.facebook.com/zuck/posts/10102593740125791' . PHP_EOL,
 				'
 					<amp-facebook width="500" height="400" data-href="https://www.facebook.com/zuck/posts/10102593740125791" data-embed-as="post" layout="responsive">
@@ -86,7 +86,7 @@ class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
 				' . PHP_EOL,
 			],
 
-			'notes_url'                  => [
+			'notes_url'                     => [
 				'https://www.facebook.com/notes/facebook-engineering/under-the-hood-the-javascript-sdk-truly-asynchronous-loading/10151176218703920/' . PHP_EOL,
 				'
 					<amp-facebook width="500" height="400" data-href="https://www.facebook.com/notes/facebook-engineering/under-the-hood-the-javascript-sdk-truly-asynchronous-loading/10151176218703920/" data-embed-as="post" layout="responsive">
@@ -97,7 +97,7 @@ class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
 				' . PHP_EOL,
 			],
 
-			'photo_url'                  => [
+			'photo_url'                     => [
 				'https://www.facebook.com/photo.php?fbid=10102533316889441&set=a.529237706231.2034669.4&type=3&theater' . PHP_EOL,
 				'
 					<amp-facebook width="500" height="400" data-href="https://www.facebook.com/photo.php?fbid=10102533316889441&amp;set=a.529237706231.2034669.4&amp;type=3&amp;theater" data-embed-as="post" layout="responsive">
@@ -109,7 +109,7 @@ class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
 				' . PHP_EOL,
 			],
 
-			'video_url'                  => [
+			'video_url'                     => [
 				'https://www.facebook.com/zuck/videos/10102509264909801/' . PHP_EOL,
 				'
 					<amp-facebook width="500" height="400" data-href="https://www.facebook.com/zuck/videos/10102509264909801/" data-embed-as="video" layout="responsive">
@@ -130,12 +130,12 @@ class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
 				' . PHP_EOL,
 			],
 
-			'post_embed'                 => [
+			'post_embed'                    => [
 				'<div class="fb-post" data-href="https://www.facebook.com/notes/facebook-engineering/under-the-hood-the-javascript-sdk-truly-asynchronous-loading/10151176218703920/"></div>',
 				'<amp-facebook width="600" height="400" data-href="https://www.facebook.com/notes/facebook-engineering/under-the-hood-the-javascript-sdk-truly-asynchronous-loading/10151176218703920/" data-embed-as="post" layout="responsive"></amp-facebook>',
 			],
 
-			'post_with_fallbacks'        => [
+			'post_with_fallbacks'           => [
 				'
 					<div class="fb-post" data-href="https://www.facebook.com/20531316728/posts/10154009990506729/" data-width="500" data-show-text="true">
 						<blockquote cite="https://developers.facebook.com/20531316728/posts/10154009990506729/" class="fb-xfbml-parse-ignore">
@@ -152,12 +152,12 @@ class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
 				',
 			],
 
-			'video_embed'                => [
+			'video_embed'                   => [
 				'<div class="fb-video" data-href="https://www.facebook.com/amanda.orr.56/videos/10212156330049017/" data-show-text="false"></div>',
 				'<amp-facebook width="600" height="400" data-href="https://www.facebook.com/amanda.orr.56/videos/10212156330049017/" data-show-text="false" data-embed-as="video" layout="responsive"></amp-facebook>',
 			],
 
-			'page_embed'                 => [
+			'page_embed'                    => [
 				'
 					<div class="fb-page" data-href="https://www.facebook.com/xwp.co/" data-width="340" data-height="432" data-hide-cover="true" data-show-facepile="true" data-show-posts="false">
 						<div class="fb-xfbml-parse-ignore">
@@ -176,7 +176,7 @@ class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
 				',
 			],
 
-			'like'                       => [
+			'like'                          => [
 				'
 					<div class="fb-like" data-href="https://developers.facebook.com/docs/plugins/" data-width="400" data-layout="standard" data-action="like" data-size="small" data-show-faces="true" data-share="true"></div>
 				',
@@ -186,37 +186,47 @@ class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
 				',
 			],
 
-			'comments'                   => [
+			'comments'                      => [
 				'
 					<div class="fb-comments" data-href="https://developers.facebook.com/docs/plugins/comments#configurator" data-numposts="5"></div>
 				',
 				'<amp-facebook-comments width="600" height="400" data-href="https://developers.facebook.com/docs/plugins/comments#configurator" data-numposts="5" layout="responsive"></amp-facebook-comments>',
 			],
 
-			'comments_full_width'        => [
+			'comments_full_width'           => [
 				'
 					<div class="fb-comments" data-href="https://developers.facebook.com/docs/plugins/comments#configurator" data-width="100%" data-numposts="5"></div>
 				',
 				'<amp-facebook-comments width="auto" height="400" data-href="https://developers.facebook.com/docs/plugins/comments#configurator" data-numposts="5" layout="fixed-height"></amp-facebook-comments>',
 			],
 
-			'comments_full_width_2'      => [
+			'comments_full_width_2'         => [
 				'
 					<div class="fb-comments" data-href="https://developers.facebook.com/docs/plugins/comments#configurator" data-height="123" data-width="100%" data-numposts="5"></div>
 				',
 				'<amp-facebook-comments width="auto" height="123" data-href="https://developers.facebook.com/docs/plugins/comments#configurator" data-numposts="5" layout="fixed-height"></amp-facebook-comments>',
 			],
 
-			'comment_embed'              => [
+			'comment_embed'                 => [
 				'
 					<div class="fb-comment-embed" data-href="https://www.facebook.com/zuck/posts/10102735452532991?comment_id=1070233703036185" data-width="500"></div>
 				',
 				'<amp-facebook width="500" height="400" data-href="https://www.facebook.com/zuck/posts/10102735452532991?comment_id=1070233703036185" data-embed-as="comment" layout="responsive"></amp-facebook>',
 			],
 
-			'remove_fb_root'             => [
+			'remove_fb_root'                => [
 				'<div id="fb-root"></div>' . str_repeat( '<script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v3.2"></script>', 5 ), // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 				'',
+			],
+
+			'remove_empty_p_tag'            => [
+				'<p><script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v3.2"></script></p><div id="fb-root"></div>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+				'',
+			],
+
+			'keep_p_tag_if_it_has_children' => [
+				'<p><span id="foo-bar"></span><script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v3.2"></script></p><div id="fb-root"></div>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+				'<p><span id="foo-bar"></span></p>',
 			],
 		];
 	}
