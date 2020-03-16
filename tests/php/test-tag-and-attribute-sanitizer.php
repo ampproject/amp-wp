@@ -2248,6 +2248,42 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-img src="/img1.png" layout="fill"></amp-img>',
 				null,
 			],
+
+			'amp-inline-gallery'                           => [
+				'
+				<amp-inline-gallery layout="container">
+					<amp-base-carousel
+							class="gallery"
+							layout="responsive"
+							width="3.6"
+							height="2"
+							snap-align="center"
+							loop="true"
+							visible-count="1.2"
+							lightbox>
+						<amp-img
+								src="/static/inline-examples/images/image1.jpg"
+								layout="responsive"
+								width="450"
+								height="300"></amp-img>
+						<amp-img
+								src="/static/inline-examples/images/image2.jpg"
+								layout="responsive"
+								width="450"
+								height="300"></amp-img>
+						<amp-img
+								src="/static/inline-examples/images/image3.jpg"
+								layout="responsive"
+								width="450"
+								height="300"></amp-img>
+					</amp-base-carousel>
+					<amp-inline-gallery-pagination layout="nodisplay" inset>
+					</amp-inline-gallery-pagination>
+				</amp-inline-gallery>
+				',
+				null,
+				[ 'amp-base-carousel', 'amp-inline-gallery', 'amp-lightbox-gallery' ],
+			],
 		];
 	}
 
