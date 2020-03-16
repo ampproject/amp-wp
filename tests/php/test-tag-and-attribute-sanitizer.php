@@ -71,6 +71,16 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG_ANCESTOR ],
 			],
 
+			'amp-script-intrinsic'                         => [
+				'
+				<amp-script src="https://example.com/hello-world.js" layout="intrinsic" width="200" height="123">
+					<button>Hello amp-script!</button>
+				</amp-script>
+				',
+				null,
+				[ 'amp-script' ],
+			],
+
 			'bad-svg-stop'                                 => [
 				'<stop offset="5%" stop-color="gold" />',
 				'',
@@ -399,11 +409,56 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				],
 			],
 
-			// AMP-NEXT-PAGE > [separator].
-			'reference-point-amp-next-page-separator'      => [
-				'<amp-next-page src="https://example.com/config.json"><div separator><h1>Keep reading</h1></div></amp-next-page>',
+			'amp-next-page-example'                        => [
+				'
+				<amp-next-page deep-parsing="false" max-pages="5">
+				 <script type="application/json">
+				   [
+				     {
+				       "image": "https://example.com/image1.jpg",
+				       "title": "This article shows first",
+				       "url": "https://example.com/article1.amp.html"
+				     }
+				   ]
+				 </script>
+				</amp-next-page>
+				',
 				null,
 				[ 'amp-next-page' ],
+			],
+
+			// AMP-NEXT-PAGE > [separator].
+			'reference-point-amp-next-page-separator'      => [
+				'<amp-next-page src="https://example.com/config.json" xssi-prefix=")]}"><div separator><h1>Keep reading</h1></div></amp-next-page>',
+				null,
+				[ 'amp-next-page' ],
+			],
+
+			// AMP-NEXT-PAGE > [footer].
+			'reference-point-amp-next-page-footer'         => [
+				'<amp-next-page src="https://example.com/config.json"><div footer>The footer</div></amp-next-page>',
+				null,
+				[ 'amp-next-page' ],
+			],
+
+			// AMP-NEXT-PAGE > [recommendation-box].
+			'reference-point-amp-next-page-recommendation' => [
+				'
+				<amp-next-page src="https://example.com/config.json">
+				  <div recommendation-box class="my-custom-recommendation-box">
+				    Here are a few more articles:
+				    <template type="amp-mustache">
+				      <div class="recommendation-box-content">
+				{{#pages}}        <span class="title">{{title}}</span>
+				        <span class="url">{{url}}</span>
+				        <span class="image">{{image}}</span>
+				{{/pages}}      </div>
+				    </template>
+				  </div>
+				</amp-next-page>
+				',
+				null,
+				[ 'amp-next-page', 'amp-mustache' ],
 			],
 
 			// amp-next-page extension .json configuration.
@@ -1489,7 +1544,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'amp_date_picker'                              => [
-				'<amp-date-picker id="simple-date-picker" type="single" mode="overlay" layout="container" on="select:AMP.setState({date1: event.date, dateType1: event.id})" format="Y-MM-DD" open-after-select input-selector="[name=date1]" class="mr1 ml1 flex picker"><div class="ampstart-input inline-block mt1"><input class="border-none p0" name="date1" placeholder="Pick a date"></div><button class="ampstart-btn m1 caps" on="tap: simple-date-picker.clear">Clear</button></amp-date-picker>',
+				'<amp-date-picker id="simple-date-picker" type="single" mode="overlay" layout="container" on="select:AMP.setState({date1: event.date, dateType1: event.id})" format="Y-MM-DD" open-after-select input-selector="[name=date1]" class="mr1 ml1 flex picker" hide-keyboard-shortcuts-panel><div class="ampstart-input inline-block mt1"><input class="border-none p0" name="date1" placeholder="Pick a date"></div><button class="ampstart-btn m1 caps" on="tap: simple-date-picker.clear">Clear</button></amp-date-picker>',
 				null, // No change.
 				[ 'amp-date-picker' ],
 			],
@@ -1845,7 +1900,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 					[ "\n", "\t" ],
 					'',
 					'
-						<amp-list load-more="auto" src="https://www.load.more.example.com/" width="400" height="800">
+						<amp-list load-more="auto" src="https://www.load.more.example.com/" width="400" height="800" xssi-prefix=")]}\'">
 							<amp-list-load-more load-more-button>
 								<template type="amp-mustache">
 									Showing {{#count}} out of {{#total}} items
@@ -2363,6 +2418,20 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				',
 				null,
 				[ 'amp-sidebar' ],
+			],
+
+			'amp-redbull-player'                           => [
+				'
+				<amp-redbull-player
+				  id="rbvideo"
+				  data-param-videoid="rrn:content:videos:3965a26c-052e-575f-a28b-ded6bee23ee1:en-INT"
+				  data-param-skinid="com"
+				  data-param-locale="en"
+				  height="360"
+				  width="640"></amp-redbull-player>
+				',
+				null,
+				[ 'amp-redbull-player' ],
 			],
 		];
 	}
