@@ -88,7 +88,7 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 				$parent_node->removeChild( $script );
 
 				// Remove parent node if it is an empty <p> tag.
-				if ( 'p' === $parent_node->tagName && null === $parent_node->firstChild ) {
+				if ( 'p' === $parent_node->nodeName && null === $parent_node->firstChild ) {
 					$parent_node->parentNode->removeChild( $parent_node );
 				}
 			}
