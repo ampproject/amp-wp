@@ -570,9 +570,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'brid-player'                                  => [
-				'<amp-brid-player data-dynamic="abc" data-partner="264" data-player="4144" data-video="13663" layout="responsive" width="480" height="270"></amp-brid-player>',
+				'<amp-brid-player data-dynamic="abc" data-partner="264" data-player="4144" data-video="13663" layout="responsive" width="480" height="270" dock></amp-brid-player>',
 				null,
-				[ 'amp-brid-player' ],
+				[ 'amp-brid-player', 'amp-video-docking' ],
 			],
 
 			'brightcove'                                   => [
@@ -718,6 +718,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						'<a href="webcal:foo">Click me.</a>',
 						'<a href="whatsapp:foo">Click me.</a>',
 						'<a href="web+mastodon:follow/@handle@instance">Click me.</a>',
+						'<a href="feed://blog.amp.dev/feed/" type="application/rss+xml">Click me.</a>',
 					]
 				),
 			],
@@ -2039,7 +2040,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			'amp-autocomplete'                             => [
 				'
 					<form method="post" action-xhr="/form/echo-json/post" target="_blank" on="submit-success:AMP.setState({result: event.response})">
-						<amp-autocomplete id="autocomplete" filter="substring" min-characters="0">
+						<amp-autocomplete id="autocomplete" filter="substring" min-characters="0" inline="@">
 							<input type="text" id="input">
 							<script type="application/json" id="script">
 							{ "items" : ["apple", "banana", "orange"] }
@@ -2051,6 +2052,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						<script type="application/json" id="script">
 						{ "items" : ["red", "green", "blue"] }
 						</script>
+					</amp-autocomplete>
+					<amp-autocomplete
+						filter="prefix"
+						src="https://example.com/articles.json?ref=CANONICAL_URL"
+						query="q">
+						<input>
 					</amp-autocomplete>
 				',
 				null,
@@ -2283,6 +2290,79 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				',
 				null,
 				[ 'amp-base-carousel', 'amp-inline-gallery', 'amp-lightbox-gallery' ],
+			],
+
+			'amp-mega-menu'                                => [
+				'
+				<amp-mega-menu height="30" layout="fixed-height">
+					<nav>
+						<ul>
+							<li>
+								<span role="button">Image</span>
+								<div role="dialog">
+									<amp-img
+											src="/static/inline-examples/images/image1.jpg"
+											width="300"
+											height="200"></amp-img>
+								</div>
+							</li>
+							<li>
+								<span role="button">List</span>
+								<div role="dialog">
+									<ol>
+										<li>item 1</li>
+										<li>item 2</li>
+										<li>item 3</li>
+									</ol>
+								</div>
+							</li>
+							<li>
+								<a href="https://amp.dev/">Link</a>
+							</li>
+						</ul>
+					</nav>
+				</amp-mega-menu>
+				',
+				null,
+				[ 'amp-mega-menu' ],
+			],
+
+			'amp-nested-menu'                              => [
+				'
+				<button on="tap:sidebar1">Open Sidebar</button>
+				<amp-sidebar id="sidebar1" layout="nodisplay" style="width:300px">
+					<amp-nested-menu layout="fill">
+						<ul>
+							<li>
+								<h4 amp-nested-submenu-open>Open Sub-Menu</h4>
+								<div amp-nested-submenu>
+									<ul>
+										<li>
+											<h4 amp-nested-submenu-close>go back</h4>
+										</li>
+										<li>
+											<h4 amp-nested-submenu-open>Open Another Sub-Menu</h4>
+											<div amp-nested-submenu>
+												<h4 amp-nested-submenu-close>go back</h4>
+												<amp-img
+														src="/static/inline-examples/images/image1.jpg"
+														layout="responsive"
+														width="450"
+														height="300"></amp-img>
+											</div>
+										</li>
+									</ul>
+								</div>
+							</li>
+							<li>
+								<a href="https://amp.dev/">Link</a>
+							</li>
+						</ul>
+					</amp-nested-menu>
+				</amp-sidebar>
+				',
+				null,
+				[ 'amp-sidebar' ],
 			],
 		];
 	}
