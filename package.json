@@ -41,7 +41,7 @@
     "@wordpress/hooks": "2.7.0",
     "@wordpress/i18n": "3.9.0",
     "@wordpress/jest-puppeteer-axe": "1.6.0",
-    "@wordpress/nux": "3.12.3",
+    "@wordpress/nux": "3.12.4",
     "@wordpress/plugins": "2.12.0",
     "@wordpress/scripts": "5.1.0",
     "@wordpress/url": "2.9.0",
