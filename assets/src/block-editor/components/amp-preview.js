@@ -11,7 +11,6 @@ import { Component, createRef, renderToString } from '@wordpress/element';
 import { Button, Icon } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { withSelect, withDispatch } from '@wordpress/data';
-import { DotTip } from '@wordpress/nux';
 import { compose } from '@wordpress/compose';
 import { addQueryArgs } from '@wordpress/url';
 
