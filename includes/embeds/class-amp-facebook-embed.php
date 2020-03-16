@@ -82,7 +82,7 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 			/**
 			 * Script.
 			 *
-			 * @var DOMElement $script
+			 * @var DOMElement $script_query
 			 */
 			$script_query = $dom->xpath->query( '//script[ starts-with( @src, "https://connect.facebook.net" ) and contains( @src, "sdk.js" ) ]' );
 			foreach ( $script_query as $script ) {
