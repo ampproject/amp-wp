@@ -2075,16 +2075,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-truncate-text' ],
 			],
 
-			'amp-user-location'                            => [
-				'
-					<button on="tap: location.request()">Use my location</button>
-					<amp-user-location id="location" on="approve:AMP.setState({located: true})" layout="nodisplay">
-					</amp-user-location>
-				',
-				null,
-				[ 'amp-user-location' ],
-			],
-
 			'amp-megaphone'                                => [
 				'<amp-megaphone height="166" layout="fixed-height" data-episode="OSC7749686951" data-light></amp-megaphone>',
 				null,
