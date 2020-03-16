@@ -657,6 +657,46 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function get_amp_selector_data() {
 		return [
+			'amp-date-picker-allowed-child-class-not-tree-shaken' => [
+				'<div><amp-date-picker id="baz" type="single" mode="overlay" layout="container" format="YYYY-MM-DD" src="/example.json" input-selector="#src-input"></amp-date-picker></div>',
+				'amp-date-picker .CalendarMonth_caption{border-bottom: 10px} div amp-date-picker .amp-date-picker-selecting{margin-right:10px}',
+				'amp-date-picker .CalendarMonth_caption{border-bottom:10px}div amp-date-picker .amp-date-picker-selecting{margin-right:10px}', // This class is an allowed child, so it shouldn't be removed.
+			],
+			'amp-date-picker-single-allowed-child-class-not-tree-shaken' => [
+				'<div><amp-date-picker id="baz" type="single" mode="overlay" layout="container" format="YYYY-MM-DD" src="/example.json" input-selector="#src-input"></amp-date-picker></div>',
+				'.DayPicker_weekHeaders {border-bottom: 10px}',
+				'.DayPicker_weekHeaders{border-bottom:10px}',
+			],
+			'amp-date-picker-allowed-container-child-class-not-tree-shaken' => [
+				'<div><amp-date-picker id="baz" type="single" mode="overlay" layout="container" format="YYYY-MM-DD" src="/example.json" input-selector="#src-input"></amp-date-picker></div>',
+				'amp-date-picker .amp-date-picker-calendar-container{border-bottom: 10px} div amp-date-picker .amp-date-picker-selecting{margin-right:10px}',
+				'amp-date-picker .amp-date-picker-calendar-container{border-bottom:10px}div amp-date-picker .amp-date-picker-selecting{margin-right:10px}',
+			],
+			'valid-class-wrapping-amp-date-picker-not-tree-shaken' => [
+				'<div class="foo-baz"><amp-date-picker id="baz" type="single" mode="overlay" layout="container" format="YYYY-MM-DD" src="/example.json" input-selector="#src-input"></amp-date-picker></div>',
+				'.foo-baz amp-date-picker .CalendarMonth_caption{border-bottom: 10px} div amp-date-picker .amp-date-picker-selecting{margin-right:10px}',
+				'.foo-baz amp-date-picker .CalendarMonth_caption{border-bottom:10px}div amp-date-picker .amp-date-picker-selecting{margin-right:10px}',
+			],
+			'amp-date-picker-valid-child-tree-shaken-if-component-not-in-document' => [
+				'<div><span>AMP Date Picker Not Present</span></div>',
+				'amp-date-picker .CalendarMonth_caption{border-bottom: 10px}',
+				'',
+			],
+			'amp-date-picker-similar-disallowed-child-class-tree-shaken' => [
+				'<div><amp-date-picker id="baz" type="single" mode="overlay" layout="container" format="YYYY-MM-DD" src="/example.json" input-selector="#src-input"></amp-date-picker></div>',
+				'amp-date-picker .CalendarFoo {border-bottom: 10px}',
+				'',
+			],
+			'amp-date-picker-disallowed-child-class-tree-shaken' => [
+				'<div><amp-date-picker id="baz" type="single" mode="overlay" layout="container" format="YYYY-MM-DD" src="/example.json" input-selector="#src-input"></amp-date-picker></div>',
+				'amp-date-picker .random-class{border-bottom: 10px}',
+				'',
+			],
+			'amp-date-picker-non-children-tree-shaken' => [
+				'<div><amp-date-picker id="example" type="single" mode="static" layout="fixed-height" height="150" format="YYYY-MM-DD"></amp-date-picker></div>',
+				'amp-date-picker .CalendarMonth_caption{border-bottom: 10px} .unrelated{color:#fff}',
+				'amp-date-picker .CalendarMonth_caption{border-bottom:10px}', // Non-children of the amp-date-picker should still be tree-shaken if they're not in the DOM.
+			],
 			'img' => [
 				sprintf( '<div><img class="logo" src="%s" width="200" height="100"></div>', admin_url( 'images/wordpress-logo.png' ) ),
 				'div img.logo{border:solid 1px red}',
