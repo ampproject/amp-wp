@@ -79,11 +79,13 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 		 */
 		$fb_root = $dom->getElementById( 'fb-root' );
 		if ( $fb_root ) {
-			$scripts = [];
-			foreach ( $dom->xpath->query( '//script[ starts-with( @src, "https://connect.facebook.net" ) and contains( @src, "sdk.js" ) ]' ) as $script ) {
-				$scripts[] = $script;
-			}
-			foreach ( $scripts as $script ) {
+			/**
+			 * Script.
+			 *
+			 * @var DOMElement $script
+			 */
+			$script_query = $dom->xpath->query( '//script[ starts-with( @src, "https://connect.facebook.net" ) and contains( @src, "sdk.js" ) ]' );
+			foreach ( $script_query as $script ) {
 				$parent_node = $script->parentNode;
 				$parent_node->removeChild( $script );
 

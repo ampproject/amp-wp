@@ -215,7 +215,7 @@ class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
 			],
 
 			'remove_fb_root'             => [
-				'<div id="fb-root"></div><script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v3.2"></script>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+				'<div id="fb-root"></div>' . str_repeat( '<script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v3.2"></script>', 5 ), // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 				'',
 			],
 		];
