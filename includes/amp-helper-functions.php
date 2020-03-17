@@ -421,11 +421,26 @@ function amp_register_default_scripts( $wp_scripts ) {
 		}
 	}
 
+	/**
+	 * Filters whether to use the LTS release channel.
+	 *
+	 * @since 1.5
+	 *
+	 * @param bool $use_lts Whether to use the LTS release channel. Defaults to false (so the stable channel is used).
+	 */
+	$lts_release_channel = apply_filters( 'amp_lts_release_channel', false );
+
+	if ( $lts_release_channel ) {
+		$base_url = 'https://cdn.ampproject.org/lts';
+	} else {
+		$base_url = 'https://cdn.ampproject.org';
+	}
+
 	// AMP Runtime.
 	$handle = 'amp-runtime';
 	$wp_scripts->add(
 		$handle,
-		'https://cdn.ampproject.org/v0.js',
+		$base_url . '/v0.js',
 		[],
 		null
 	);
@@ -441,7 +456,7 @@ function amp_register_default_scripts( $wp_scripts ) {
 	$handle = 'amp-shadow';
 	$wp_scripts->add(
 		$handle,
-		'https://cdn.ampproject.org/shadow-v0.js',
+		$base_url . '/shadow-v0.js',
 		[],
 		null
 	);
@@ -456,7 +471,8 @@ function amp_register_default_scripts( $wp_scripts ) {
 	// Register all AMP components as defined in the spec.
 	foreach ( AMP_Allowed_Tags_Generated::get_extension_specs() as $extension_name => $extension_spec ) {
 		$src = sprintf(
-			'https://cdn.ampproject.org/v0/%s-%s.js',
+			'%s/v0/%s-%s.js',
+			$base_url,
 			$extension_name,
 			end( $extension_spec['version'] )
 		);

@@ -2382,6 +2382,7 @@ class AMP_Theme_Support {
 				'ampPairedBrowsingQueryVar'   => self::PAIRED_BROWSING_QUERY_VAR,
 				'ampValidationErrorsQueryVar' => AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR,
 				'documentTitlePrefix'         => __( 'AMP Paired Browsing:', 'amp' ),
+				'ampRuntimeScriptSrc'         => wp_scripts()->registered['amp-runtime']->src,
 			]
 		);
 

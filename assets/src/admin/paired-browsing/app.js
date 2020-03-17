@@ -8,7 +8,7 @@ import { addQueryArgs, hasQueryArg, removeQueryArgs } from '@wordpress/url';
 import './app.css';
 
 const { app, history } = window;
-const { ampSlug, ampPairedBrowsingQueryVar, ampValidationErrorsQueryVar, documentTitlePrefix } = app;
+const { ampSlug, ampRuntimeScriptSrc, ampPairedBrowsingQueryVar, ampValidationErrorsQueryVar, documentTitlePrefix } = app;
 
 class PairedBrowsingApp {
 	/**
@@ -119,7 +119,7 @@ class PairedBrowsingApp {
 	 * @return {boolean} True if AMP compatible, false if not.
 	 */
 	documentIsAmp( doc ) {
-		return doc.querySelector( 'head > script[src="https://cdn.ampproject.org/v0.js"]' );
+		return doc.querySelector( `head > script[src="${ampRuntimeScriptSrc}"]` );
 	}
 
 	/**
