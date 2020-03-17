@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { Component, createRef, renderToString } from '@wordpress/element';
-import { Button, Icon } from '@wordpress/components';
+import { Button, Icon, Tooltip } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { withSelect, withDispatch } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
@@ -236,23 +236,25 @@ class AMPPreview extends Component {
 
 		return (
 			isEnabled && ! errorMessages.length && ! isStandardMode && (
-				<Button
-					className="amp-editor-post-preview"
-					href={ href }
-					label={ __( 'Preview AMP', 'amp' ) }
-					isSecondary
-					disabled={ ! isSaveable }
-					onClick={ this.openPreviewWindow }
-					ref={ this.buttonRef }
-				>
-					{ ampFilledIcon( { viewBox: '0 0 62 62', width: 18, height: 18 } ) }
-					<span className="screen-reader-text">
-						{
-							/* translators: accessibility text */
-							__( '(opens in a new tab)', 'amp' )
-						}
-					</span>
-				</Button>
+				<Tooltip text={ __( 'Preview AMP', 'amp' ) } >
+					<Button
+						className="amp-editor-post-preview"
+						href={ href }
+						label={ __( 'Preview AMP', 'amp' ) }
+						isSecondary
+						disabled={ ! isSaveable }
+						onClick={ this.openPreviewWindow }
+						ref={ this.buttonRef }
+					>
+						{ ampFilledIcon( { viewBox: '0 0 62 62', width: 18, height: 18 } ) }
+						<span className="screen-reader-text">
+							{
+								/* translators: accessibility text */
+								__( '(opens in a new tab)', 'amp' )
+							}
+						</span>
+					</Button>
+				</Tooltip>
 			)
 		);
 	}
