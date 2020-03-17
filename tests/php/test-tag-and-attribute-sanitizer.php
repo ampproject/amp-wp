@@ -499,7 +499,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						'',
 						'
 						<amp-story standalone live-story-disabled supports-landscape title="My Story" publisher="The AMP Team" publisher-logo-src="https://example.com/logo/1x1.png" poster-portrait-src="https://example.com/my-story/poster/3x4.jpg" poster-square-src="https://example.com/my-story/poster/1x1.jpg" poster-landscape-src="https://example.com/my-story/poster/4x3.jpg" background-audio="my.mp3">
-							<amp-story-page id="my-first-page">
+							<amp-story-page id="my-first-page" next-page-no-ad>
 								<amp-story-grid-layer template="fill">
 									<amp-img id="object1" animate-in="rotate-in-left" src="https://example.ampproject.org/helloworld/bg1.jpg" width="900" height="1600">
 									</amp-img>
@@ -716,8 +716,8 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'form'                                         => [
-				'<form method="get" action="/form/search-html/get" target="_blank"><fieldset><label><span>Search for</span><input type="search" placeholder="test" name="term" required></label><input type="submit" value="Search"></fieldset></form>',
-				'<form method="get" action="/form/search-html/get" target="_blank"><fieldset><label><span>Search for</span><input type="search" placeholder="test" name="term" required></label><input type="submit" value="Search"></fieldset></form>',
+				'<form method="get" action="/form/search-html/get" target="_blank"><fieldset><label><span>Search for</span><input type="search" placeholder="test" name="term" required></label><input type="submit" value="Search"><input type="button" value="Open Lightbox" on="tap:lb1.open"></fieldset></form>',
+				null,
 				[ 'amp-form' ],
 			],
 
@@ -2687,6 +2687,16 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<html><head><meta charset="utf-8"></head><body></body></html>',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::MANDATORY_CDATA_MISSING_OR_INCORRECT ],
+			],
+			'amp_runtime'                             => [
+				'<html><head><meta charset="utf-8"><script async src="https://cdn.ampproject.org/v0.js" crossorigin="anonymous"></script></head><body></body></html>',
+				null,
+				[],
+			],
+			'amp_runtime_lts'                         => [
+				'<html><head><meta charset="utf-8"><script async src="https://cdn.ampproject.org/lts/v0.js" crossorigin="anonymous"></script></head><body></body></html>',
+				null,
+				[],
 			],
 		];
 
