@@ -604,6 +604,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 				static function ( $error ) {
 					return [
 						'sanitized'   => false,
+						'title'       => 'Unknown error (test)',
 						'error'       => $error,
 						'status'      => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
 						'term_status' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,

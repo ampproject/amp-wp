@@ -71,6 +71,7 @@ export const updateValidationErrors = () => {
 	/**
 	 * @param {Object}  result             Validation error result.
 	 * @param {Object}  result.error       Error object.
+	 * @param {string}  result.title       Error title.
 	 * @param {boolean} result.forced      Whether sanitization was forced.
 	 * @param {boolean} result.sanitized   Whether the error has been sanitized or not.
 	 * @param {number}  result.status      Validation error status.
@@ -78,7 +79,7 @@ export const updateValidationErrors = () => {
 	 */
 	const validationErrors = ampValidity.results.filter( ( result ) => {
 		return result.term_status !== VALIDATION_ERROR_ACK_ACCEPTED_STATUS; // If not accepted by the user.
-	} ).map( ( { error, status } ) => ( { ...error, status } ) ); // Merge status into error since needed in maybeDisplayNotice.
+	} ).map( ( { error, status, title } ) => ( { ...error, status, title } ) ); // Merge status into error since needed in maybeDisplayNotice.
 
 	if ( isEqual( validationErrors, previousValidationErrors ) ) {
 		return;

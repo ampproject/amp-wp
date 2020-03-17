@@ -814,6 +814,7 @@ class AMP_Validation_Manager {
 			foreach ( AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $validation_status_post ) as $result ) {
 				$field['results'][] = [
 					'sanitized'   => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS === $result['status'],
+					'title'       => AMP_Validation_Error_Taxonomy::get_error_title_from_code( $result['data'] ),
 					'error'       => $result['data'],
 					'status'      => $result['status'],
 					'term_status' => $result['term_status'],
