@@ -257,8 +257,6 @@ class AMP_Validation_Error_Taxonomy {
 		if ( is_admin() ) {
 			self::add_admin_hooks();
 		}
-
-		self::accept_validation_errors( AMP_Core_Theme_Sanitizer::get_acceptable_errors( get_template() ) );
 	}
 
 	/**
@@ -488,7 +486,6 @@ class AMP_Validation_Error_Taxonomy {
 	 * Automatically (forcibly) accept validation errors that arise (that is, remove the invalid markup causing the validation errors).
 	 *
 	 * @since 1.0
-	 * @see AMP_Core_Theme_Sanitizer::get_acceptable_errors()
 	 *
 	 * @param array|true $acceptable_errors Acceptable validation errors, where keys are codes and values are either `true` or sparse array to check as subset. If just true, then all validation errors are accepted.
 	 */

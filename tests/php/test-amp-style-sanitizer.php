@@ -162,11 +162,11 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 			'illegal_at_rules_removed' => [
 				'<style>@charset "utf-8"; @namespace svg url(http://www.w3.org/2000/svg); @page { margin: 1cm; } @viewport { width: device-width; } @counter-style thumbs { system: cyclic; symbols: "\1F44D"; suffix: " "; } body { color: black; }</style>',
-				'',
+				'<meta name="viewport" content="width=device-width">',
 				[
 					'@page{margin:1cm}body{color:black}',
 				],
-				[ AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE, AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE, AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE ],
+				[ AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE, AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE ],
 			],
 
 			'allowed_at_rules_retained' => [
@@ -2667,5 +2667,62 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $expected, -1, PREG_SPLIT_DELIM_CAPTURE ) ),
 			array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $actual, -1, PREG_SPLIT_DELIM_CAPTURE ) )
 		);
+	}
+
+	/*
+	 * Gets the test data for test_viewport_rules_added_to_meta_viewport().
+	 *
+	 * @return array The test data.
+	 */
+	public function get_viewport_data() {
+		return [
+			'existing_meta_viewport_remains_when_no_style_rule' => [
+				'<meta name="viewport" content="width=device-width">',
+			],
+			'viewport_rule_converted_to_meta_viewport' => [
+				'<style>@viewport{ width: device-width; }</style>',
+				'<meta name="viewport" content="width=device-width">',
+			],
+			'vendor_prefixed_viewport_rule_converted_to_meta_viewport' => [
+				'<style>@-moz-viewport{ width: device-width; }</style>',
+				'<meta name="viewport" content="width=device-width">',
+			],
+			'viewport_merged_rules' => [
+				'<meta name="viewport" content="width=device-width,user-scalable=no"><style>@viewport{ initial-scale: 1; }</style><style>@-moz-viewport{ user-scalable: yes; }</style><style>@-o-viewport { minimum-scale: 0.5; }</style><style>@-baz-viewport { unrecognized: 1; }</style>',
+				'<meta name="viewport" content="width=device-width,user-scalable=yes,initial-scale=1,minimum-scale=.5,unrecognized=1">',
+			],
+		];
+	}
+
+	/**
+	 * Test sanitization of tags and attributes for the entire document, including the HEAD.
+	 *
+	 * @dataProvider get_viewport_data
+	 * @covers AMP_Style_Sanitizer::sanitize()
+	 * @covers AMP_Meta_Sanitizer::sanitize()
+	 * @covers AMP_Meta_Sanitizer::ensure_viewport_is_present()
+	 *
+	 * @param string $markup   The markup to sanitize.
+	 * @param string $expected The expected result after sanitizing.
+	 */
+	public function test_viewport_rules_added_to_meta_viewport( $markup, $expected = null ) {
+		$opening_markup = '<html amp><head><meta charset="utf-8">';
+		$closing_markup = '<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript></head><body></body></html>';
+		$markup         = $opening_markup . $markup . $closing_markup;
+
+		if ( null === $expected ) {
+			$expected = $markup;
+		} else {
+			$expected = $opening_markup . $expected . $closing_markup;
+		}
+
+		$dom             = Document::fromHtml( $markup );
+		$style_sanitizer = new AMP_Style_Sanitizer( $dom );
+		$style_sanitizer->sanitize();
+		$meta_sanitizer = new AMP_Meta_Sanitizer( $dom );
+		$meta_sanitizer->sanitize();
+
+		$content = $dom->saveHTML( $dom->documentElement );
+		$this->assertEquals( $expected, $content );
 	}
 }

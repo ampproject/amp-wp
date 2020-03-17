@@ -133,10 +133,44 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	 * Always ensure we have a viewport tag.
 	 *
 	 * The viewport defaults to 'width=device-width', which is the bare minimum that AMP requires.
+	 * If there are `@viewport` style rules, these will have been moved into the content attribute of their own meta[name=viewport]
+	 * tags by the style sanitizer. When there are multiple such meta tags, this method extracts the viewport properties of each
+	 * and then merges them into a single meta[name=viewport] tag. Any invalid properties will get removed by the
+	 * tag-and-attribute sanitizer.
 	 */
 	protected function ensure_viewport_is_present() {
 		if ( empty( $this->meta_tags[ self::TAG_VIEWPORT ] ) ) {
 			$this->meta_tags[ self::TAG_VIEWPORT ][] = $this->create_viewport_element( static::AMP_VIEWPORT );
+		} else {
+			// Merge one or more meta[name=viewport] tags into one.
+			$parsed_rules = [];
+
+			/**
+			 * Meta viewport element.
+			 *
+			 * @var DOMElement $meta_viewport
+			 */
+			foreach ( $this->meta_tags[ self::TAG_VIEWPORT ] as $meta_viewport ) {
+				$property_pairs = explode( ',', $meta_viewport->getAttribute( 'content' ) );
+				foreach ( $property_pairs as $property_pair ) {
+					$exploded_pair = explode( '=', $property_pair, 2 );
+					if ( isset( $exploded_pair[1] ) ) {
+						$parsed_rules[ trim( $exploded_pair[0] ) ] = trim( $exploded_pair[1] );
+					}
+				}
+			}
+
+			$viewport_value = implode(
+				',',
+				array_map(
+					static function ( $rule_name ) use ( $parsed_rules ) {
+						return $rule_name . '=' . $parsed_rules[ $rule_name ];
+					},
+					array_keys( $parsed_rules )
+				)
+			);
+
+			$this->meta_tags[ self::TAG_VIEWPORT ] = [ $this->create_viewport_element( $viewport_value ) ];
 		}
 	}
 
