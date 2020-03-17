@@ -427,6 +427,19 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-next-page' ],
 			],
 
+			'amp-next-page-hide-and-replace'               => [
+				'
+				<header class="my-header" next-page-hide>
+					<h2>Text here.</h2>
+				</header>
+				<div class="sticky" next-page-replace="sticky-123">
+					<h2>The second sticky will replace me once you scroll past my page</h2>
+				</div>
+				',
+				null,
+				[ 'amp-next-page' ],
+			],
+
 			// AMP-NEXT-PAGE > [separator].
 			'reference-point-amp-next-page-separator'      => [
 				'<amp-next-page src="https://example.com/config.json" xssi-prefix=")]}"><div separator><h1>Keep reading</h1></div></amp-next-page>',
@@ -717,6 +730,48 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'form'                                         => [
 				'<form method="get" action="/form/search-html/get" target="_blank"><fieldset><label><span>Search for</span><input type="search" placeholder="test" name="term" required></label><input type="submit" value="Search"><input type="button" value="Open Lightbox" on="tap:lb1.open"></fieldset></form>',
+				null,
+				[ 'amp-form' ],
+			],
+
+			'form-visible-when-invalid'                    => [
+				'
+				<form method="post"
+				    action-xhr="https://example.com/subscribe"
+				    custom-validation-reporting="show-all-on-submit" target="_blank">
+				    <fieldset>
+				      <label>
+				        <span>Name:</span>
+				        <input type="text"
+				          name="name"
+				          id="name5"
+				          required
+				          pattern="\w+\s\w+">
+				        <span visible-when-invalid="valueMissing"
+				          validation-for="name5"></span>
+				        <span visible-when-invalid="patternMismatch"
+				          validation-for="name5">
+				          Please enter your first and last name separated by a space (e.g. Jane Miller)
+				        </span>
+				      </label>
+				      <br>
+				      <label>
+				        <span>Email:</span>
+				        <input type="email"
+				          name="email"
+				          id="email5"
+				          required>
+				        <span visible-when-invalid="valueMissing"
+				          validation-for="email5"></span>
+				        <span visible-when-invalid="typeMismatch"
+				          validation-for="email5"></span>
+				      </label>
+				      <br>
+				      <input type="submit"
+				        value="Subscribe">
+				    </fieldset>
+				  </form>
+				',
 				null,
 				[ 'amp-form' ],
 			],
