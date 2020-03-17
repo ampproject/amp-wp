@@ -1095,7 +1095,7 @@ class AMP_Theme_Support {
 		add_action( 'template_redirect', [ __CLASS__, 'start_output_buffering' ], $priority );
 
 		// Commenting hooks.
-		add_filter( 'comment_form_defaults', [ __CLASS__, 'filter_comment_form_defaults' ] );
+		add_filter( 'comment_form_defaults', [ __CLASS__, 'filter_comment_form_defaults' ], PHP_INT_MAX );
 		add_filter( 'comment_reply_link', [ __CLASS__, 'filter_comment_reply_link' ], 10, 4 );
 		add_filter( 'cancel_comment_reply_link', [ __CLASS__, 'filter_cancel_comment_reply_link' ], 10, 3 );
 		add_action( 'comment_form', [ __CLASS__, 'amend_comment_form' ], 100 );
@@ -1303,29 +1303,48 @@ class AMP_Theme_Support {
 	 * @since 0.7
 	 * @see comment_form()
 	 *
-	 * @param array $args Comment form args.
+	 * @param array $default_args Comment form arg defaults.
 	 * @return array Filtered comment form args.
 	 */
-	public static function filter_comment_form_defaults( $args ) {
-		$state_id = self::get_comment_form_state_id( get_the_ID() );
+	public static function filter_comment_form_defaults( $default_args ) {
 
+		// Obtain the actual args provided to the comment_form() function since it is not available in the filter.
+		$args      = [];
+		$backtrace = debug_backtrace(); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace -- Due to limitation in WordPress core.
+		foreach ( $backtrace as $call ) {
+			if ( 'comment_form' === $call['function'] ) {
+				$args = isset( $call['args'][0] ) ? $call['args'][0] : [];
+				break;
+			}
+		}
+
+		// Abort if the comment_form() was called with arguments which we cannot override the defaults for.
+		// @todo This and the debug_backtrace() call above would be unnecessary if WordPress had a comment_form_args filter.
+		$overridden_keys = [ 'cancel_reply_before', 'title_reply', 'title_reply_before', 'title_reply_to' ];
+		foreach ( $overridden_keys as $key ) {
+			if ( array_key_exists( $key, $args ) && array_key_exists( $key, $default_args ) && $default_args[ $key ] !== $args[ $key ] ) {
+				return $default_args;
+			}
+		}
+
+		$state_id     = self::get_comment_form_state_id( get_the_ID() );
 		$text_binding = sprintf(
 			'%s.replyToName ? %s : %s',
 			$state_id,
 			str_replace(
 				'%s',
 				sprintf( '" + %s.replyToName + "', $state_id ),
-				wp_json_encode( $args['title_reply_to'], JSON_UNESCAPED_UNICODE )
+				wp_json_encode( $default_args['title_reply_to'], JSON_UNESCAPED_UNICODE )
 			),
-			wp_json_encode( $args['title_reply'], JSON_UNESCAPED_UNICODE )
+			wp_json_encode( $default_args['title_reply'], JSON_UNESCAPED_UNICODE )
 		);
 
-		$args['title_reply_before'] .= sprintf(
+		$default_args['title_reply_before'] .= sprintf(
 			'<span [text]="%s">',
 			esc_attr( $text_binding )
 		);
-		$args['cancel_reply_before'] = '</span>' . $args['cancel_reply_before'];
-		return $args;
+		$default_args['cancel_reply_before'] = '</span>' . $default_args['cancel_reply_before'];
+		return $default_args;
 	}
 
 	/**
