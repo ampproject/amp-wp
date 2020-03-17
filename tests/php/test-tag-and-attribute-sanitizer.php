@@ -2753,6 +2753,25 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				null,
 				[],
 			],
+			'amp-subscriptions'                       => [
+				// @todo The <script ciphertext type="application/octet-stream">...</script> but it is not yet supported. Support depends on todo in \AMP_Tag_And_Attribute_Sanitizer::has_parent().
+				'
+					<html>
+						<head>
+							<meta charset="utf-8">
+							<script cryptokeys sha-256-hash type="application/json">{}</script>
+						</head>
+						<body>
+							<section subscriptions-section="content" encrypted swg_amp_cache_nonce="NONCE">
+								...
+							</section>
+							<span swg_amp_cache_nonce="NONCE"></span>
+						</body>
+					</html>
+				',
+				null,
+				[ 'amp-subscriptions' ],
+			],
 		];
 
 		$bad_dev_mode_document = sprintf(
