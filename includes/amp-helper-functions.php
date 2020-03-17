@@ -448,7 +448,8 @@ function amp_register_default_scripts( $wp_scripts ) {
 		$handle,
 		'amp_script_attributes',
 		[
-			'async' => true,
+			'async'       => true,
+			'crossorigin' => 'anonymous',
 		]
 	);
 
@@ -464,7 +465,8 @@ function amp_register_default_scripts( $wp_scripts ) {
 		$handle,
 		'amp_script_attributes',
 		[
-			'async' => true,
+			'async'       => true,
+			'crossorigin' => 'anonymous',
 		]
 	);
 
@@ -553,9 +555,11 @@ function amp_filter_script_loader_tag( $tag, $handle ) {
 	/*
 	 * All scripts from AMP CDN should be loaded async.
 	 * See <https://www.ampproject.org/docs/integration/pwa-amp/amp-in-pwa#include-"shadow-amp"-in-your-progressive-web-app>.
+	 * For crossorigin=anonymous, see <https://github.com/ampproject/amphtml/issues/24731>.
 	 */
 	$attributes = [
-		'async' => true,
+		'async'       => true,
+		'crossorigin' => 'anonymous',
 	];
 
 	// Add custom-template and custom-element attributes. All component scripts look like https://cdn.ampproject.org/v0/:name-:version.js.

@@ -1626,8 +1626,9 @@ class AMP_Theme_Support {
 					$dom,
 					Tag::LINK,
 					[
-						Attribute::REL  => Attribute::REL_PRECONNECT,
-						Attribute::HREF => 'https://cdn.ampproject.org',
+						Attribute::REL         => Attribute::REL_PRECONNECT,
+						Attribute::HREF        => 'https://cdn.ampproject.org',
+						Attribute::CROSSORIGIN => Attribute::CROSSORIGIN_ANONYMOUS,
 					]
 				),
 			],
@@ -1696,8 +1697,9 @@ class AMP_Theme_Support {
 				continue;
 			}
 			$attrs = [
-				Attribute::SRC   => wp_scripts()->registered[ $missing_script_handle ]->src,
-				Attribute::ASYNC => '',
+				Attribute::SRC         => wp_scripts()->registered[ $missing_script_handle ]->src,
+				Attribute::ASYNC       => '',
+				Attribute::CROSSORIGIN => Attribute::CROSSORIGIN_ANONYMOUS,
 			];
 			if ( Extension::MUSTACHE === $missing_script_handle ) {
 				$attrs[ Attribute::CUSTOM_TEMPLATE ] = $missing_script_handle;
@@ -1736,9 +1738,10 @@ class AMP_Theme_Support {
 			$dom,
 			Tag::LINK,
 			[
-				Attribute::REL  => Attribute::REL_PRELOAD,
-				'as'            => Tag::SCRIPT,
-				Attribute::HREF => $runtime_src,
+				Attribute::REL         => Attribute::REL_PRELOAD,
+				Attribute::AS          => Tag::SCRIPT,
+				Attribute::HREF        => $runtime_src,
+				Attribute::CROSSORIGIN => Attribute::CROSSORIGIN_ANONYMOUS,
 			]
 		);
 
@@ -1755,9 +1758,10 @@ class AMP_Theme_Support {
 				$dom,
 				Tag::LINK,
 				[
-					Attribute::REL  => Attribute::REL_PRELOAD,
-					'as'            => Tag::SCRIPT,
-					Attribute::HREF => $amp_scripts[ $script_handle ]->getAttribute( Attribute::SRC ),
+					Attribute::REL         => Attribute::REL_PRELOAD,
+					Attribute::AS          => Tag::SCRIPT,
+					Attribute::HREF        => $amp_scripts[ $script_handle ]->getAttribute( Attribute::SRC ),
+					Attribute::CROSSORIGIN => Attribute::CROSSORIGIN_ANONYMOUS,
 				]
 			);
 		}
@@ -1791,6 +1795,7 @@ class AMP_Theme_Support {
 			$script = $dom->createElement( Tag::SCRIPT );
 			$script->setAttribute( Attribute::ASYNC, '' );
 			$script->setAttribute( Attribute::SRC, $runtime_src );
+			$script->setAttribute( Attribute::CROSSORIGIN, Attribute::CROSSORIGIN_ANONYMOUS );
 			$ordered_scripts[ Amp::RUNTIME ] = $script;
 		}
 

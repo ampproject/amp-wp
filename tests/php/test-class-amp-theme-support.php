@@ -625,7 +625,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertContains( '<meta name="viewport" content="maximum-scale=1.0,width=device-width">', $sanitized_html );
 
 		// MathML script was added.
-		$this->assertContains( '<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-mathml-0.1.js" async custom-element="amp-mathml"></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertContains( '<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-mathml-0.1.js" async crossorigin="anonymous" custom-element="amp-mathml"></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 	}
 
 	/**
@@ -1981,21 +1981,21 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			'<meta name="viewport" content="width=device-width">',
 			'<meta name="generator" content="AMP Plugin',
 			'<title>',
-			'<link rel="preconnect" href="https://cdn.ampproject.org">',
-			'<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">',
+			'<link rel="preconnect" href="https://cdn.ampproject.org" crossorigin="anonymous">',
+			'<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="anonymous">',
 			'<link rel="dns-prefetch" href="//cdn.ampproject.org">',
-			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0.js">',
-			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js">',
-			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0/amp-experiment-1.0.js">',
-			'<script type="text/javascript" src="https://cdn.ampproject.org/v0.js" async></script>',
+			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0.js" crossorigin="anonymous">',
+			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js" crossorigin="anonymous">',
+			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0/amp-experiment-1.0.js" crossorigin="anonymous">',
+			'<script type="text/javascript" src="https://cdn.ampproject.org/v0.js" async crossorigin="anonymous"></script>',
 
 			'<script async custom-element="amp-dynamic-css-classes" src="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js"></script>',
-			'<script src="https://cdn.ampproject.org/v0/amp-experiment-1.0.js" async="" custom-element="amp-experiment"></script>',
+			'<script src="https://cdn.ampproject.org/v0/amp-experiment-1.0.js" async="" crossorigin="anonymous" custom-element="amp-experiment"></script>',
 
-			'#<script( type=[\'"]text/javascript[\'"])? src=[\'"]https\://cdn\.ampproject\.org/v0/amp-ad-0\.1\.js[\'"] async(=[\'"][\'"])? custom-element=[\'"]amp-ad[\'"]>\s*</script>#s',
-			'#<script src=[\'"]https\://cdn\.ampproject\.org/v0/amp-audio-0\.1\.js[\'"] async(=[\'"][\'"])? custom-element=[\'"]amp-audio[\'"]>\s*</script>#s',
-			'<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-list-0.1.js" async custom-element="amp-list"></script>',
-			'<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-mathml-0.1.js" async custom-element="amp-mathml"></script>',
+			'#<script( type=[\'"]text/javascript[\'"])? src=[\'"]https\://cdn\.ampproject\.org/v0/amp-ad-0\.1\.js[\'"] async(=[\'"][\'"])? crossorigin=[\'"]anonymous[\'"] custom-element=[\'"]amp-ad[\'"]>\s*</script>#s',
+			'#<script src=[\'"]https\://cdn\.ampproject\.org/v0/amp-audio-0\.1\.js[\'"] async(=[\'"][\'"])? crossorigin=[\'"]anonymous[\'"] custom-element=[\'"]amp-audio[\'"]>\s*</script>#s',
+			'<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-list-0.1.js" async crossorigin="anonymous" custom-element="amp-list"></script>',
+			'<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-mathml-0.1.js" async crossorigin="anonymous" custom-element="amp-mathml"></script>',
 
 			'<link rel="icon" href="https://example.org/favicon.png" sizes="32x32">',
 			'<link rel="icon" href="https://example.org/favicon.png" sizes="192x192">',

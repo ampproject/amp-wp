@@ -27,11 +27,13 @@ interface Attribute
     const AMP_RUNTIME           = 'amp-runtime';
     const AMP_SCRIPT_SRC        = 'amp-script-src';
     const ARIA_HIDDEN           = 'aria-hidden';
+    const AS                    = 'as';
     const ASYNC                 = 'async';
     const AUTOPLAY              = 'autoplay';
     const CHARSET               = 'charset';
     const CLASS_                = 'class'; // Underscore needed because 'class' is a PHP keyword.
     const CONTENT               = 'content';
+    const CROSSORIGIN           = 'crossorigin';
     const CUSTOM_ELEMENT        = 'custom-element';
     const CUSTOM_TEMPLATE       = 'custom-template';
     const HEIGHT                = 'height';
@@ -71,4 +73,6 @@ interface Attribute
     const REL_PRELOAD      = 'preload';
     const REL_PRERENDER    = 'prerender';
     const REL_STYLESHEET   = 'stylesheet';
+
+    const CROSSORIGIN_ANONYMOUS = 'anonymous';
 }
