@@ -5,7 +5,7 @@
  * @package AmpProject\AmpWP
  */
 
-namespace AmpProject\AmpWP;
+namespace AmpProject\AmpWP\RemoteRequest;
 
 use DateTimeImmutable;
 use DateTimeInterface;

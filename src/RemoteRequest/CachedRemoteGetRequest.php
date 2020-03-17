@@ -5,8 +5,9 @@
  * @package AmpProject\AmpWP
  */
 
-namespace AmpProject\AmpWP;
+namespace AmpProject\AmpWP\RemoteRequest;
 
+use AmpProject\AmpWP\RemoteRequest\CachedData;
 use AmpProject\Exception\FailedToGetFromRemoteUrl;
 use AmpProject\RemoteGetRequest;
 use AmpProject\RemoteRequest\RemoteGetRequestResponse;

@@ -6,7 +6,7 @@
  */
 
 use AmpProject\Amp;
-use AmpProject\AmpWP\CachedRemoteGetRequest;
+use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\ConfigurationArgument;
 use AmpProject\AmpWP\Transformer;
 use AmpProject\Attribute;
