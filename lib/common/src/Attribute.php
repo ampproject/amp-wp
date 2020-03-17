@@ -27,7 +27,6 @@ interface Attribute
     const AMP_RUNTIME           = 'amp-runtime';
     const AMP_SCRIPT_SRC        = 'amp-script-src';
     const ARIA_HIDDEN           = 'aria-hidden';
-    const AS                    = 'as';
     const ASYNC                 = 'async';
     const AUTOPLAY              = 'autoplay';
     const CHARSET               = 'charset';

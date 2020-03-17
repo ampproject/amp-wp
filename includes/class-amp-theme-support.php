@@ -1739,7 +1739,7 @@ class AMP_Theme_Support {
 			Tag::LINK,
 			[
 				Attribute::REL         => Attribute::REL_PRELOAD,
-				Attribute::AS          => Tag::SCRIPT,
+				'as'                   => Tag::SCRIPT,
 				Attribute::HREF        => $runtime_src,
 				Attribute::CROSSORIGIN => Attribute::CROSSORIGIN_ANONYMOUS,
 			]
@@ -1759,7 +1759,7 @@ class AMP_Theme_Support {
 				Tag::LINK,
 				[
 					Attribute::REL         => Attribute::REL_PRELOAD,
-					Attribute::AS          => Tag::SCRIPT,
+					'as'                   => Tag::SCRIPT,
 					Attribute::HREF        => $amp_scripts[ $script_handle ]->getAttribute( Attribute::SRC ),
 					Attribute::CROSSORIGIN => Attribute::CROSSORIGIN_ANONYMOUS,
 				]
