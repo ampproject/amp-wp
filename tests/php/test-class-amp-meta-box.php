@@ -143,7 +143,6 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 				'wp-element',
 				'wp-hooks',
 				'wp-i18n',
-				'wp-nux',
 				'wp-plugins',
 				'wp-polyfill',
 				'wp-url',
