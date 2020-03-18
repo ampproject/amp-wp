@@ -14,17 +14,29 @@ final class FailedToGetFromRemoteUrl extends RuntimeException implements AmpExce
 {
 
     /**
+     * Status code of the failed request.
+     *
+     * This is not always set.
+     *
+     * @var int
+     */
+    private $statusCode;
+
+    /**
      * Instantiate a FailedToGetFromRemoteUrl exception for a URL if an HTTP status code is available.
      *
      * @param string $url    URL that failed to be fetched.
-     * @param string $status HTTP Status that was returned.
+     * @param int    $status HTTP Status that was returned.
      * @return self
      */
     public static function withHttpStatus($url, $status)
     {
         $message = "Failed to fetch the contents from the URL '{$url}' as it returned HTTP status {$status}.";
 
-        return new self($message);
+        $exception = new self($message);
+        $exception->statusCode = $status;
+
+        return $exception;
     }
 
     /**
@@ -52,5 +64,27 @@ final class FailedToGetFromRemoteUrl extends RuntimeException implements AmpExce
         $message = "Failed to fetch the contents from the URL '{$url}': {$exception->getMessage()}.";
 
         return new self($message, null, $exception);
+    }
+
+    /**
+     * Check whether the status code is set for this exception.
+     *
+     * @return bool
+     */
+    public function hasStatusCode()
+    {
+        return isset($this->statusCode);
+    }
+
+    /**
+     * Get the HTTP status code associated with this exception.
+     *
+     * Returns -1 if no status code was provided.
+     *
+     * @return int
+     */
+    public function getStatusCode()
+    {
+        return $this->hasStatusCode() ? $this->statusCode : -1;
     }
 }

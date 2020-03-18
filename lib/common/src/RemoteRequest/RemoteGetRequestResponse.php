@@ -111,6 +111,7 @@ final class RemoteGetRequestResponse implements Response
      */
     public function getHeader($name)
     {
+        $this->maybeInitHeadersIndex();
         $key = strtolower($name);
 
         if (! array_key_exists($key, $this->headersIndex)) {
