@@ -7,7 +7,6 @@
 
 namespace AmpProject\AmpWP\RemoteRequest;
 
-use AmpProject\AmpWP\RemoteRequest\CachedData;
 use AmpProject\Exception\FailedToGetFromRemoteUrl;
 use AmpProject\RemoteGetRequest;
 use AmpProject\RemoteRequest\RemoteGetRequestResponse;
@@ -87,6 +86,8 @@ final class CachedRemoteGetRequest implements RemoteGetRequest {
 	public function get( $url ) {
 		$cache_key   = self::TRANSIENT_PREFIX . md5( __CLASS__ . $url );
 		$cached_data = get_transient( $cache_key );
+		$headers     = [];
+		$status      = null;
 
 		if ( false !== $cached_data ) {
 			if ( PHP_MAJOR_VERSION >= 7 ) {
@@ -101,10 +102,16 @@ final class CachedRemoteGetRequest implements RemoteGetRequest {
 			$response    = $this->remote_request->get( $url );
 			$expiry      = $this->get_expiry_time( $response );
 			$cached_data = new CachedData( $response->getBody(), $expiry );
-			set_transient( $cache_key, serialize( $cached_data ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
+			$headers     = $response->getHeaders();
+
+			// Only store response if it was successful.
+			$status = $response->getStatusCode();
+			if ( $status >= 200 && $status < 300 ) {
+				set_transient( $cache_key, serialize( $cached_data ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
+			}
 		}
 
-		return new RemoteGetRequestResponse( $cached_data->get_value() );
+		return new RemoteGetRequestResponse( $cached_data->get_value(), $headers, $status );
 	}
 
 	/**
@@ -118,15 +125,7 @@ final class CachedRemoteGetRequest implements RemoteGetRequest {
 	 */
 	private function get_expiry_time( Response $response ) {
 		if ( $this->use_cache_control && $response->hasHeader( self::CACHE_CONTROL ) ) {
-			$max_age              = 0;
-			$cache_control_string = $response->getHeader( self::CACHE_CONTROL );
-			$cache_control_parts  = array_map( 'trim', explode( ',', $cache_control_string ) );
-
-			foreach ( $cache_control_parts as $cache_control_part ) {
-				if ( 'max-age=' === substr( $cache_control_part, 0, 8 ) ) {
-					$max_age = absint( substr( $cache_control_part, 8 ) );
-				}
-			}
+			$max_age = $this->get_max_age( $response->getHeader( self::CACHE_CONTROL ) );
 
 			if ( $max_age > 0 ) {
 				return new DateTimeImmutable( "+ {$max_age} seconds" );
@@ -134,5 +133,33 @@ final class CachedRemoteGetRequest implements RemoteGetRequest {
 		}
 
 		return new DateTimeImmutable( "+ {$this->expiry} seconds" );
+	}
+
+	/**
+	 * Get the max age setting from one or more cache-control header strings.
+	 *
+	 * @param array|string $cache_control_strings One or more cache control header strings.
+	 * @return int Value of the max-age cache directive. 0 if not found.
+	 */
+	private function get_max_age( $cache_control_strings ) {
+		$max_age = 0;
+
+		foreach ( (array) $cache_control_strings as $cache_control_string ) {
+			$cache_control_parts = array_map( 'trim', explode( ',', $cache_control_string ) );
+
+			foreach ( $cache_control_parts as $cache_control_part ) {
+				$cache_control_setting_parts = array_map( 'trim', explode( '=', $cache_control_part ) );
+
+				if ( count( $cache_control_setting_parts ) !== 2 ) {
+					continue;
+				}
+
+				if ( 'max-age' === $cache_control_setting_parts[0] ) {
+					$max_age = absint( $cache_control_setting_parts[1] );
+				}
+			}
+		}
+
+		return $max_age;
 	}
 }
