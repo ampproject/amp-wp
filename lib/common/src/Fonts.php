@@ -33,14 +33,20 @@ final class Fonts
      */
     public static function getEmojiFontFamilyValue()
     {
-        return implode(
-            ', ',
-            array_map(
-                static function ($font) {
-                    return '"' . $font . '"';
-                },
-                self::EMOJI_FONT_STACK
-            )
-        );
+        static $fontFamilyValue = null;
+
+        if ($fontFamilyValue === null) {
+            $fontFamilyValue = implode(
+                ', ',
+                array_map(
+                    static function ($font) {
+                        return '"' . $font . '"';
+                    },
+                    self::EMOJI_FONT_STACK
+                )
+            );
+        }
+
+        return $fontFamilyValue;
     }
 }
