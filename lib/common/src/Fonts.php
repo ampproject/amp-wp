@@ -10,6 +10,11 @@ namespace AmpProject;
 final class Fonts
 {
 
+    /**
+     * Font stack to cycle through for displaying emojis reliably.
+     *
+     * @var string[]
+     */
     const EMOJI_FONT_STACK = [
         'Apple Color Emoji',
         'Android Emoji',

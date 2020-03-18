@@ -17,7 +17,7 @@ class FontsTest extends TestCase
     use AssertContainsCompatibility;
 
     /**
-     * Test the check for an AMP runtime method.
+     * Test retrieval of the emoji-specific font-family stack.
      *
      * @covers Fonts::getEmojiFontFamilyValue()
      */
