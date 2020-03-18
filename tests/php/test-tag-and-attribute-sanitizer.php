@@ -2402,6 +2402,65 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-base-carousel', 'amp-inline-gallery', 'amp-lightbox-gallery' ],
 			],
 
+			'amp-inline-gallery-with-thumbs'               => [
+				'
+				<amp-inline-gallery layout="container">
+				  <!--
+				    The amp-layout with layout="container" is used to display the pagination on
+				    top of the carousel instead of the thumbnails. You can also use a div with
+				    `position: relative;`
+				  -->
+				  <amp-layout layout="container">
+				    <amp-base-carousel
+				      class="gallery"
+				      layout="responsive"
+				      width="3"
+				      height="2"
+				      snap-align="center"
+				      loop="true">
+				      <amp-img
+				        class="slide"
+				        layout="flex-item"
+				        src="https://picsum.photos/id/779/600/400"
+				        srcset="https://picsum.photos/id/779/150/100 150w,
+				                https://picsum.photos/id/779/600/400 600w,
+				                https://picsum.photos/id/779/1200/800 1200w">
+				      </amp-img>
+				      <amp-img
+				        class="slide"
+				        layout="flex-item"
+				        src="https://picsum.photos/id/1048/600/400"
+				        srcset="https://picsum.photos/id/1048/150/100 150w,
+				                https://picsum.photos/id/1048/600/400 600w,
+				                https://picsum.photos/id/1048/1200/800 1200w">
+				      </amp-img>
+				      <amp-img
+				        class="slide"
+				        layout="flex-item"
+				        src="https://picsum.photos/id/108/600/400"
+				        srcset="https://picsum.photos/id/108/150/100 150w,
+				                https://picsum.photos/id/108/600/400 600w,
+				                https://picsum.photos/id/108/1200/800 1200w">
+				      </amp-img>
+				    </amp-base-carousel>
+				    <!--
+				        If using fewer than 8 slides, consider adding something
+				        like media="(max-width: 799px)".
+				      -->
+				    <amp-inline-gallery-pagination layout="nodisplay" inset>
+				    </amp-inline-gallery-pagination>
+				  </amp-layout>
+				  <amp-inline-gallery-thumbnails
+				    media="(min-width: 800px)"
+				    layout="fixed-height"
+				    height="96">
+				  </amp-inline-gallery-thumbnails>
+				</amp-inline-gallery>
+				',
+				null,
+				[ 'amp-base-carousel', 'amp-inline-gallery' ],
+			],
+
 			'amp-mega-menu'                                => [
 				'
 				<amp-mega-menu height="30" layout="fixed-height">
