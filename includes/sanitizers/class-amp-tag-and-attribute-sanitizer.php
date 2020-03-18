@@ -2224,7 +2224,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 0.5
 	 *
-	 * @todo It would be more robust if the the actual tag spec were looked up and then matched against the parent, but this is currently overkill.
+	 * @todo It would be more robust if the the actual tag spec were looked up (see https://github.com/ampproject/amp-wp/pull/3817) and then matched against the parent. This is needed to support the spec 'subscriptions script ciphertext'.
 	 *
 	 * @param DOMElement $node             Node.
 	 * @param string     $parent_spec_name Parent spec name, for example 'body' or 'form [method=post]'.
