@@ -7,6 +7,8 @@
 
 // phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
 
+use AmpProject\AmpWP\RemoteRequest\CachedData;
+use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\Dom\Document;
 use AmpProject\AmpWP\Tests\PrivateAccess;
 
@@ -1522,6 +1524,89 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			$this->assertEquals( $expected_error_codes, $found_error_codes );
 			$this->assertCount( 0, $actual_stylesheets );
 		}
+
+		$sanitize_and_get_stylesheets();
+		$this->assertEquals( 1, $request_count, 'Expected HTTP request to be cached.' );
+	}
+
+	/**
+	 * Test cache-control support when retrieving external stylesheets.
+	 *
+	 * @covers AMP_Style_Sanitizer::process_link_element()
+	 */
+	public function test_external_stylesheet_cache_control() {
+		$request_count = 0;
+		$href          = 'https://www.example.com/styles.css';
+		$response_body = 'body{color:red}';
+
+		add_filter(
+			'pre_http_request',
+			function( $preempt, $request, $url ) use ( $href, &$request_count, $response_body ) {
+				$this->assertRegExp( '#^https?://#', $url );
+				if ( set_url_scheme( $url, 'https' ) === set_url_scheme( $href, 'https' ) ) {
+					$request_count++;
+					$preempt = [
+						'response' => [
+							'code'    => 200,
+						],
+						'headers' => [
+							'content-type' => 'text/css',
+							'cache-control' => 'max-age=' . ( YEAR_IN_SECONDS + MONTH_IN_SECONDS ),
+						],
+						'body' => $response_body,
+					];
+				}
+				return $preempt;
+			},
+			10,
+			3
+		);
+
+		$sanitize_and_get_stylesheets = static function() use ( $href ) {
+			$html = sprintf( '<html amp><head><meta charset="utf-8"><link rel="stylesheet" href="%s"></head><body></body></html>', esc_url( $href ) ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+			$dom  = Document::fromHtml( $html );
+
+			$found_error_codes = [];
+
+			$sanitizer = new AMP_Style_Sanitizer(
+				$dom,
+				[
+					'use_document_element'      => true,
+					'validation_error_callback' => static function( $error ) use ( &$found_error_codes ) {
+						$found_error_codes[] = $error['code'];
+					},
+				]
+			);
+			$sanitizer->sanitize();
+			$dom->saveHTML( $dom->documentElement );
+			return [ $found_error_codes, array_values( $sanitizer->get_stylesheets() ) ];
+		};
+
+		$this->assertEquals( 0, $request_count );
+
+		list( $found_error_codes, $actual_stylesheets ) = $sanitize_and_get_stylesheets();
+		$this->assertEmpty( $found_error_codes );
+		$this->assertEquals( 1, $request_count, 'Expected HTTP request.' );
+
+		$this->assertCount( 1, $actual_stylesheets );
+		$this->assertEquals( $response_body, $actual_stylesheets[0] );
+
+		$cache_key = CachedRemoteGetRequest::TRANSIENT_PREFIX . md5( CachedRemoteGetRequest::class . $href );
+		$transient = get_transient( $cache_key );
+		$this->assertNotFalse( $transient );
+
+		/**
+		 * Cached data.
+		 *
+		 * @var CachedData
+		 */
+		$cached_data = unserialize( $transient ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize
+		$this->assertInstanceOf( CachedData::class, $cached_data );
+
+		$this->assertEquals( $response_body, $cached_data->get_value() );
+
+		$expiry = $cached_data->get_expiry();
+		$this->assertGreaterThan( ( new DateTimeImmutable( '+ 1 year' ) )->getTimestamp(), $expiry->getTimestamp() );
 
 		$sanitize_and_get_stylesheets();
 		$this->assertEquals( 1, $request_count, 'Expected HTTP request to be cached.' );
