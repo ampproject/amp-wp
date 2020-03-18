@@ -131,16 +131,12 @@ class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
 			'post_with_fallbacks'   => [
 				'
 					<div class="fb-post" data-href="https://www.facebook.com/20531316728/posts/10154009990506729/" data-width="500" data-show-text="true">
-						<blockquote cite="https://developers.facebook.com/20531316728/posts/10154009990506729/" class="fb-xfbml-parse-ignore">
-							Posted by <a href="https://www.facebook.com/facebook/">Facebook</a> on <a href="https://developers.facebook.com/20531316728/posts/10154009990506729/">Thursday, August 27, 2015</a>
-						</blockquote>
+						<blockquote cite="https://developers.facebook.com/20531316728/posts/10154009990506729/" class="fb-xfbml-parse-ignore"><!--blockquote_contents--></blockquote>
 					</div>
 				',
 				'
 					<amp-facebook width="500" height="400" data-href="https://www.facebook.com/20531316728/posts/10154009990506729/"  data-show-text="true" data-embed-as="post" layout="responsive">
-						<blockquote cite="https://developers.facebook.com/20531316728/posts/10154009990506729/" class="fb-xfbml-parse-ignore" fallback="">
-							Posted by <a href="https://www.facebook.com/facebook/">Facebook</a> on <a href="https://developers.facebook.com/20531316728/posts/10154009990506729/">Thursday, August 27, 2015</a>
-						</blockquote>
+						<blockquote cite="https://developers.facebook.com/20531316728/posts/10154009990506729/" class="fb-xfbml-parse-ignore" fallback=""><!--blockquote_contents--></blockquote>
 					</amp-facebook>
 				',
 			],
@@ -154,14 +150,14 @@ class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
 				'
 					<div class="fb-page" data-href="https://www.facebook.com/xwp.co/" data-width="340" data-height="432" data-hide-cover="true" data-show-facepile="true" data-show-posts="false">
 						<div class="fb-xfbml-parse-ignore">
-							<blockquote cite="https://www.facebook.com/xwp.co/"><a href="https://www.facebook.com/xwp.co/">Like Us</a></blockquote>
+							<blockquote cite="https://www.facebook.com/xwp.co/"><!--blockquote_contents--></blockquote>
 						</div>
 					</div>
 				',
 				'
 					<amp-facebook-page width="340" height="432" data-href="https://www.facebook.com/xwp.co/" data-hide-cover="true" data-show-facepile="true" data-show-posts="false" layout="responsive">
 						<div class="fb-xfbml-parse-ignore" fallback="">
-							<blockquote cite="https://www.facebook.com/xwp.co/"><a href="https://www.facebook.com/xwp.co/">Like Us</a></blockquote>
+							<blockquote cite="https://www.facebook.com/xwp.co/"><!--blockquote_contents--></blockquote>
 						</div>
 					</amp-facebook-page>
 				',
@@ -230,6 +226,9 @@ class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
 		$layout_sanitizer->sanitize();
 
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+
+		// Normalize blockquote contents to account for editing of published posts or variability of localized datetime strings.
+		$content = preg_replace( '#(<blockquote.*?>).+?(</blockquote>)#s', '$1<!--blockquote_contents-->$2', $content );
 
 		$this->assertEqualMarkup( $expected, $content );
 	}
