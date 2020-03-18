@@ -2554,6 +2554,39 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-sidebar' ],
 			],
 
+			'amp-nested-menu-with-amp-list'                => [
+				'
+				<button on="tap:sidebar2">Open Sidebar</button>
+				<amp-sidebar id="sidebar2" layout="nodisplay" style="width:300px">
+				  <amp-list
+				    layout="fill"
+				    src="/static/inline-examples/data/amp-list-data.json"
+				    items="."
+				    single-item>
+				    <template type="amp-mustache">
+				      <amp-nested-menu layout="fill">
+				        <ul>
+				{{#items}}          <li>
+				            <h3 amp-nested-submenu-open>{{title}}</h3>
+				            <div amp-nested-submenu>
+				              <button amp-nested-submenu-close>close</button>
+				              <amp-img
+				                src="{{imageUrl}}"
+				                layout="responsive"
+				                width="400"
+				                height="300"></amp-img>
+				            </div>
+				          </li>
+				{{/items}}        </ul>
+				      </amp-nested-menu>
+				    </template>
+				  </amp-list>
+				</amp-sidebar>
+				',
+				null,
+				[ 'amp-sidebar', 'amp-list', 'amp-mustache' ],
+			],
+
 			'amp-redbull-player'                           => [
 				'
 				<amp-redbull-player
