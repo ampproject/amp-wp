@@ -143,7 +143,7 @@ final class WpHttpRemoteGetRequest implements RemoteGetRequest {
 				continue;
 			}
 
-			return new RemoteGetRequestResponse( $response['body'], $response['headers'], (int) $status );
+			return new RemoteGetRequestResponse( $response['body'], (array) $response['headers'], (int) $status );
 		} while ( $retries_left-- );
 
 		// This should never be triggered, but we want to ensure we always have a typed return value,
