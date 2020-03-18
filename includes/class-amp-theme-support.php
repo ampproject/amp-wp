@@ -13,9 +13,9 @@ use AmpProject\Attribute;
 use AmpProject\Dom\Document;
 use AmpProject\Extension;
 use AmpProject\Optimizer;
-use AmpProject\RemoteRequest\CurlRemoteGetRequest;
 use AmpProject\RemoteRequest\FallbackRemoteGetRequest;
 use AmpProject\RemoteRequest\FilesystemRemoteGetRequest;
+use AmpProject\AmpWP\RemoteRequest\WpHttpRemoteGetRequest;
 use AmpProject\Tag;
 
 /**
@@ -2142,7 +2142,7 @@ class AMP_Theme_Support {
 		$configuration = self::get_optimizer_configuration( $args );
 
 		$fallback_remote_request_pipeline = new FallbackRemoteGetRequest(
-			new CurlRemoteGetRequest(),
+			new WpHttpRemoteGetRequest(),
 			new FilesystemRemoteGetRequest( Optimizer\LocalFallback::getMappings() )
 		);
 
