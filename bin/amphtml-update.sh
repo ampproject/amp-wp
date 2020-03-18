@@ -52,7 +52,9 @@ else
 fi
 
 # Run script.
-python "$BIN_PATH/amphtml-update.py" "$AMPHTML_LOCATION" > "$PROJECT_PATH/includes/sanitizers/class-amp-allowed-tags-generated.php"
+python "$BIN_PATH/amphtml-update.py" "$AMPHTML_LOCATION"
+mv "$BIN_PATH/class-amp-allowed-tags-generated.php" "$PROJECT_PATH/includes/sanitizers/class-amp-allowed-tags-generated.php"
+mv "$BIN_PATH/class-amp-error-codes-generated.php" "$PROJECT_PATH/includes/validation/class-amp-error-codes-generated.php"
 
 if [[ $CLEANUP == 1 ]]; then
 	rm -r "$AMPHTML_LOCATION"
