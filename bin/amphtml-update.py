@@ -787,10 +787,10 @@ def GetMandatoryOf( attr, constraint ):
 	Returns:
 		A list of attributes that have that constraint name.
 	"""
-	attributes = []
+	attributes = set()
 	for attr_spec in attr:
 		if attr_spec.HasField(constraint):
-			attributes.append(
+			attributes.add(
 				# Convert something like [src] to data-amp-bind-src.
 				re.sub(
 					"^\[(\S+)\]$",
@@ -799,8 +799,7 @@ def GetMandatoryOf( attr, constraint ):
 				)
 			)
 
-	attributes.sort()
-	return attributes
+	return sorted(attributes)
 
 def Phpize(data, indent=0):
 	"""Helper function to convert JSON-serializable data into PHP literals.
