@@ -2516,6 +2516,65 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_CHILD_TAG ],
 			],
 
+			'amp-mega-menu-invalid-grandchild'             => [
+				'
+				<amp-mega-menu height="30" layout="fixed-height">
+				  <nav>
+				    <div>
+				      Not allowed
+				    </div>
+				  </nav>
+				</amp-mega-menu>
+				',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_CHILD_TAG ],
+			],
+
+			'amp-mega-menu-missing-grandchild'             => [
+				'
+				<amp-mega-menu height="30" layout="fixed-height">
+				  <nav></nav>
+				</amp-mega-menu>
+				',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_CHILD_TAG ],
+			],
+
+			'amp-mega-menu-missing-great-grandchild'       => [
+				'
+				<amp-mega-menu height="30" layout="fixed-height">
+				  <nav><ul></ul></nav>
+				</amp-mega-menu>
+				',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_CHILD_TAG ],
+			],
+
+			'amp-mega-menu-missing-great-great-grandchild' => [
+				'
+				<amp-mega-menu height="30" layout="fixed-height">
+				  <nav><ul><li></li></ul></nav>
+				</amp-mega-menu>
+				',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_CHILD_TAG ],
+			],
+
+			'amp-mega-menu-invalid-great-great-grandchild' => [
+				'
+				<amp-mega-menu height="30" layout="fixed-height">
+				  <nav><ul><li><section></section></li></ul></nav>
+				</amp-mega-menu>
+				',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_CHILD_TAG ],
+			],
+
 			'amp-nested-menu'                              => [
 				'
 				<button on="tap:sidebar1">Open Sidebar</button>
