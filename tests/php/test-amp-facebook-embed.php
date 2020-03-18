@@ -77,11 +77,7 @@ class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
 				'https://www.facebook.com/zuck/posts/10102593740125791' . PHP_EOL,
 				'
 					<amp-facebook width="500" height="400" data-href="https://www.facebook.com/zuck/posts/10102593740125791" data-embed-as="post" layout="responsive">
-						<blockquote cite="https://www.facebook.com/zuck/posts/10102593740125791" class="fb-xfbml-parse-ignore" fallback="">
-							<p>February 4 is Facebook’s 12th birthday!</p>
-							<p>Our anniversary has a lot of meaning to me as an opportunity to reflect on how…</p>
-							<p>Posted by <a href="https://www.facebook.com/zuck">Mark Zuckerberg</a> on <a href="https://www.facebook.com/zuck/posts/10102593740125791">Tuesday, January 12, 2016</a></p>
-						</blockquote>
+						<blockquote cite="https://www.facebook.com/zuck/posts/10102593740125791" class="fb-xfbml-parse-ignore" fallback=""><!--blockquote_contents--></blockquote>
 					</amp-facebook>
 				' . PHP_EOL,
 			],
@@ -90,9 +86,7 @@ class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
 				'https://www.facebook.com/notes/facebook-engineering/under-the-hood-the-javascript-sdk-truly-asynchronous-loading/10151176218703920/' . PHP_EOL,
 				'
 					<amp-facebook width="500" height="400" data-href="https://www.facebook.com/notes/facebook-engineering/under-the-hood-the-javascript-sdk-truly-asynchronous-loading/10151176218703920/" data-embed-as="post" layout="responsive">
-						<blockquote cite="https://www.facebook.com/notes/facebook-engineering/under-the-hood-the-javascript-sdk-truly-asynchronous-loading/10151176218703920/" class="fb-xfbml-parse-ignore" fallback="">
-							<p>Posted by <a href="https://www.facebook.com/Engineering/">Facebook Engineering</a> on <a href="https://www.facebook.com/notes/facebook-engineering/under-the-hood-the-javascript-sdk-truly-asynchronous-loading/10151176218703920/">Saturday, December 8, 2012</a></p>
-						</blockquote>
+						<blockquote cite="https://www.facebook.com/notes/facebook-engineering/under-the-hood-the-javascript-sdk-truly-asynchronous-loading/10151176218703920/" class="fb-xfbml-parse-ignore" fallback=""><!--blockquote_contents--></blockquote>
 					</amp-facebook>
 				' . PHP_EOL,
 			],
@@ -101,10 +95,7 @@ class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
 				'https://www.facebook.com/photo.php?fbid=10102533316889441&set=a.529237706231.2034669.4&type=3&theater' . PHP_EOL,
 				'
 					<amp-facebook width="500" height="400" data-href="https://www.facebook.com/photo.php?fbid=10102533316889441&amp;set=a.529237706231.2034669.4&amp;type=3&amp;theater" data-embed-as="post" layout="responsive">
-						<blockquote cite="https://www.facebook.com/photo.php?fbid=10102533316889441&amp;set=a.529237706231&amp;type=3" class="fb-xfbml-parse-ignore" fallback="">
-							<p>Meanwhile, Beast turned to the dark side.</p>
-							<p>Posted by <a href="https://www.facebook.com/zuck">Mark Zuckerberg</a> on <a href="https://www.facebook.com/photo.php?fbid=10102533316889441&amp;set=a.529237706231&amp;type=3">Friday, December 18, 2015</a></p>
-						</blockquote>
+						<blockquote cite="https://www.facebook.com/photo.php?fbid=10102533316889441&amp;set=a.529237706231&amp;type=3" class="fb-xfbml-parse-ignore" fallback=""><!--blockquote_contents--></blockquote>
 					</amp-facebook>
 				' . PHP_EOL,
 			],
@@ -113,19 +104,7 @@ class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
 				'https://www.facebook.com/zuck/videos/10102509264909801/' . PHP_EOL,
 				'
 					<amp-facebook width="500" height="400" data-href="https://www.facebook.com/zuck/videos/10102509264909801/" data-embed-as="video" layout="responsive">
-						<blockquote cite="https://www.facebook.com/zuck/videos/10102509264909801/" class="fb-xfbml-parse-ignore" fallback="">
-							<p><a href="https://www.facebook.com/zuck/videos/10102509264909801/"></a></p>
-							<p>I want to share a few more thoughts on the Chan Zuckerberg Initiative before I just start posting photos of me and Max for a while 🙂</p>
-							<p>I hope one idea comes through: that we as a society should make investments now to ensure this world is much better for the next generation.</p>
-							<p>I don\'t think we do enough of this right now. </p>
-							<p>Sure, there are many areas where investment now will solve problems for today and also improve the world for the future. We do muster the will to solve some of those.</p>
-							<p>But for the problems that will truly take decades of investment before we see any major return, we are dramatically underinvested.</p>
-							<p>One example is basic science research to cure disease. Another is developing clean energy to protect the world for the future. Another is the slow and steady improvement to modernize schools. Others are systematic issues around poverty and justice. There is a long list of these opportunities.</p>
-							<p>The role of philanthropy is to invest in important areas that companies and governments aren\'t funding — either because they may not be profitable for companies or because they are too long term for people to want to invest now.</p>
-							<p>In the case of disease, basic research often needs to be funded before biotech or pharma companies can create drugs to help people. If we invest more in science, we can make faster progress towards curing disease.</p>
-							<p>Our investment in the Chan Zuckerberg Initiative is small compared to what the world can invest in solving these great challenges. My hope is that our work inspires more people to invest in these longer term issues. If we can do that, then we can all really make a difference together.</p>
-							<p>Posted by <a href="https://www.facebook.com/zuck">Mark Zuckerberg</a> on Friday, December 4, 2015</p>
-						</blockquote>
+						<blockquote cite="https://www.facebook.com/zuck/videos/10102509264909801/" class="fb-xfbml-parse-ignore" fallback=""><!--blockquote_contents--></blockquote>
 					</amp-facebook>
 				' . PHP_EOL,
 			],
@@ -138,16 +117,12 @@ class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
 			'post_with_fallbacks'           => [
 				'
 					<div class="fb-post" data-href="https://www.facebook.com/20531316728/posts/10154009990506729/" data-width="500" data-show-text="true">
-						<blockquote cite="https://developers.facebook.com/20531316728/posts/10154009990506729/" class="fb-xfbml-parse-ignore">
-							Posted by <a href="https://www.facebook.com/facebook/">Facebook</a> on <a href="https://developers.facebook.com/20531316728/posts/10154009990506729/">Thursday, August 27, 2015</a>
-						</blockquote>
+						<blockquote cite="https://developers.facebook.com/20531316728/posts/10154009990506729/" class="fb-xfbml-parse-ignore"><!--blockquote_contents--></blockquote>
 					</div>
 				',
 				'
 					<amp-facebook width="500" height="400" data-href="https://www.facebook.com/20531316728/posts/10154009990506729/"  data-show-text="true" data-embed-as="post" layout="responsive">
-						<blockquote cite="https://developers.facebook.com/20531316728/posts/10154009990506729/" class="fb-xfbml-parse-ignore" fallback="">
-							<p> Posted by <a href="https://www.facebook.com/facebook/">Facebook</a> on <a href="https://developers.facebook.com/20531316728/posts/10154009990506729/">Thursday, August 27, 2015</a></p>
-						</blockquote>
+						<blockquote cite="https://developers.facebook.com/20531316728/posts/10154009990506729/" class="fb-xfbml-parse-ignore" fallback=""><!--blockquote_contents--></blockquote>
 					</amp-facebook>
 				',
 			],
@@ -161,16 +136,14 @@ class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
 				'
 					<div class="fb-page" data-href="https://www.facebook.com/xwp.co/" data-width="340" data-height="432" data-hide-cover="true" data-show-facepile="true" data-show-posts="false">
 						<div class="fb-xfbml-parse-ignore">
-							<blockquote cite="https://www.facebook.com/xwp.co/"><a href="https://www.facebook.com/xwp.co/">Like Us</a></blockquote>
+							<blockquote cite="https://www.facebook.com/xwp.co/"><!--blockquote_contents--></blockquote>
 						</div>
 					</div>
 				',
 				'
 					<amp-facebook-page width="340" height="432" data-href="https://www.facebook.com/xwp.co/" data-hide-cover="true" data-show-facepile="true" data-show-posts="false" layout="responsive">
 						<div class="fb-xfbml-parse-ignore" fallback="">
-							<blockquote cite="https://www.facebook.com/xwp.co/">
-								<p><a href="https://www.facebook.com/xwp.co/">Like Us</a></p>
-							</blockquote>
+							<blockquote cite="https://www.facebook.com/xwp.co/"><!--blockquote_contents--></blockquote>
 						</div>
 					</amp-facebook-page>
 				',
@@ -256,6 +229,9 @@ class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
 		$layout_sanitizer->sanitize();
 
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+
+		// Normalize blockquote contents to account for editing of published posts or variability of localized datetime strings.
+		$content = preg_replace( '#(<blockquote.*?>).+?(</blockquote>)#s', '$1<!--blockquote_contents-->$2', $content );
 
 		$this->assertEqualMarkup( $expected, $content );
 	}
