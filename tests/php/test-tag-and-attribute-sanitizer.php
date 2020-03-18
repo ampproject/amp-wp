@@ -2437,6 +2437,85 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-mega-menu' ],
 			],
 
+			'amp-mega-menu-with-template'                  => [
+				'
+				<amp-mega-menu height="60" layout="fixed-height">
+				  <amp-list
+				    height="350"
+				    layout="fixed-height"
+				    src="/static/samples/json/product-single-item.json"
+				    single-item>
+				    <template type="amp-mustache">
+				      <nav>
+				        <ul>
+				{{#values}}          <li>
+				            <h4 role="button">{{name}}</h4>
+				            <div role="dialog">
+				              <amp-img
+				                src="{{img}}"
+				                width="320"
+				                height="213"></amp-img>
+				              <p>Price: $<b>{{price}}</b></p>
+				            </div>
+				          </li>
+				{{/values}}        </ul>
+				      </nav>
+				    </template>
+				  </amp-list>
+				</amp-mega-menu>
+				',
+				null,
+				[ 'amp-mega-menu', 'amp-list', 'amp-mustache' ],
+			],
+
+			'amp-mega-menu-disallowed-descendants'         => [
+				'
+				<amp-mega-menu height="30" layout="fixed-height">
+					<nav>
+						<ul>
+							<li>
+								<span role="button">List</span>
+								<div role="dialog">
+									<details><summary>Not</summary> allowed</details>
+								</div>
+							</li>
+							<li>
+								<a href="https://amp.dev/">Link</a>
+							</li>
+						</ul>
+					</nav>
+				</amp-mega-menu>
+				',
+				'
+				<amp-mega-menu height="30" layout="fixed-height">
+					<nav>
+						<ul>
+							<li>
+								<span role="button">List</span>
+								<div role="dialog"></div>
+							</li>
+							<li>
+								<a href="https://amp.dev/">Link</a>
+							</li>
+						</ul>
+					</nav>
+				</amp-mega-menu>
+				',
+				[ 'amp-mega-menu' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_DESCENDANT_TAG ],
+			],
+
+			'amp-mega-menu-invalid-child'                  => [
+				'
+				<amp-mega-menu height="30" layout="fixed-height">
+					<div>Not allowed</div>
+				</amp-mega-menu>
+				',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_CHILD_TAG ],
+			],
+
 			'amp-nested-menu'                              => [
 				'
 				<button on="tap:sidebar1">Open Sidebar</button>
