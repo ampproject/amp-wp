@@ -1,0 +1,128 @@
+<?php
+/**
+ * Class Test_Monitor_CSS_Transient_Caching.
+ *
+ * @package AmpProject\AmpWP
+ */
+
+use AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching;
+use AmpProject\AmpWP\Option;
+
+/**
+ * Test MonitorCssTransientCaching.
+ */
+class Test_Monitor_CSS_Transient_Caching extends WP_UnitTestCase {
+
+	/**
+	 * Set up the tests by clearing the list of scheduled events.
+	 */
+	public function setUp() {
+		parent::setUp();
+		_set_cron_array( [] );
+	}
+
+	/**
+	 * Tear down the tests by clearing the list of scheduled events.
+	 */
+	public function tearDown() {
+		parent::tearDown();
+		_set_cron_array( [] );
+	}
+
+	/**
+	 * Test whether an event is actually scheduled when the monitor is registered.
+	 *
+	 * @covers MonitorCssTransientCaching::register()
+	 */
+	public function test_event_gets_scheduled() {
+		$this->assertFalse( wp_next_scheduled( MonitorCssTransientCaching::EVENT_NAME ) );
+
+		$monitor = new MonitorCssTransientCaching();
+		$monitor->register();
+
+		$timestamp = wp_next_scheduled( MonitorCssTransientCaching::EVENT_NAME );
+
+		$this->assertNotFalse( $timestamp );
+		$this->assertIsInt( $timestamp );
+		$this->assertGreaterThan( 0, $timestamp );
+	}
+
+	/**
+	 * Test whether time series are calculated and stored when the monitor is processing.
+	 *
+	 * @covers MonitorCssTransientCaching::process()
+	 */
+	public function test_event_can_be_processed() {
+		delete_option( MonitorCssTransientCaching::TIME_SERIES_OPTION_KEY );
+
+		$monitor = new MonitorCssTransientCaching();
+		$monitor->process();
+
+		$this->assertNotFalse( get_option( MonitorCssTransientCaching::TIME_SERIES_OPTION_KEY ) );
+	}
+
+	/**
+	 * Test whether transient caching is disabled once it hits the treshold.
+	 *
+	 * @covers MonitorCssTransientCaching::process()
+	 */
+	public function test_transient_caching_is_disabled() {
+		delete_option( MonitorCssTransientCaching::TIME_SERIES_OPTION_KEY );
+		AMP_Options_Manager::update_option( Option::DISABLE_CSS_TRANSIENT_CACHING, false );
+
+		add_filter(
+			'amp_css_transient_monitoring_threshold',
+			static function () {
+				return 10;
+			}
+		);
+		add_filter(
+			'amp_css_transient_monitoring_sampling_range',
+			static function () {
+				return 3;
+			}
+		);
+
+		$monitor = new MonitorCssTransientCaching();
+
+		// Moving average should be 0.
+		$monitor->process( new DateTime( '2000-01-01' ), 5 );
+		$this->assertEquals( [ '20000101' => 5 ], get_option( MonitorCssTransientCaching::TIME_SERIES_OPTION_KEY ) );
+		$this->assertFalse( AMP_Options_Manager::get_option( Option::DISABLE_CSS_TRANSIENT_CACHING ) );
+
+		// Moving average should be 5.
+		$monitor->process( new DateTime( '2000-01-02' ), 10 );
+		$this->assertEquals(
+			[
+				'20000101' => 5,
+				'20000102' => 10,
+			],
+			get_option( MonitorCssTransientCaching::TIME_SERIES_OPTION_KEY )
+		);
+		$this->assertFalse( AMP_Options_Manager::get_option( Option::DISABLE_CSS_TRANSIENT_CACHING ) );
+
+		// Moving average should be 7.5.
+		$monitor->process( new DateTime( '2000-01-03' ), 12 );
+		$this->assertEquals(
+			[
+				'20000101' => 5,
+				'20000102' => 10,
+				'20000103' => 12,
+			],
+			get_option( MonitorCssTransientCaching::TIME_SERIES_OPTION_KEY )
+		);
+		$this->assertFalse( AMP_Options_Manager::get_option( Option::DISABLE_CSS_TRANSIENT_CACHING ) );
+
+		// Moving average should be 11.
+		$monitor->process( new DateTime( '2000-01-04' ), 12 );
+		$this->assertEquals(
+			[
+				'20000102' => 10,
+				'20000103' => 12,
+				'20000104' => 12,
+			],
+			get_option( MonitorCssTransientCaching::TIME_SERIES_OPTION_KEY )
+		);
+		$this->assertTrue( AMP_Options_Manager::get_option( Option::DISABLE_CSS_TRANSIENT_CACHING ) );
+	}
+}

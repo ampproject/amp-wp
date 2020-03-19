@@ -10,6 +10,7 @@ namespace AmpProject\AmpWP\BackgroundTask;
 use AMP_Options_Manager;
 use AmpProject\AmpWP\Option;
 use DateTimeImmutable;
+use DateTimeInterface;
 use Exception;
 
 /**
@@ -78,24 +79,37 @@ final class MonitorCssTransientCaching extends CronBasedBackgroundTask {
 	/**
 	 * Process a single cron tick.
 	 *
+	 * @todo This has arbitrary arguments to allow for testing, as we don't have dependency injection for services.
+	 *       With dependency injection, we could for example inject a Clock object and mock it for testing.
+	 *
+	 * @param DateTimeInterface $date            Optional. Date to use for timestamping the processing (for testing).
+	 * @param int               $transient_count Optional. Count of transients to use for the processing (for testing).
 	 * @return void
 	 * @throws Exception If a date could not be instantiated.
 	 */
-	public function process() {
+	public function process( DateTimeInterface $date = null, $transient_count = null ) {
 		if ( $this->is_css_transient_caching_disabled() ) {
 			return;
 		}
 
-		$count = $this->query_css_transient_count();
-		$date  = ( new DateTimeImmutable() )->format( 'Ymd' );
+		if ( null === $date ) {
+			$date = new DateTimeImmutable();
+		}
 
+		if ( null === $transient_count ) {
+			$transient_count = $this->query_css_transient_count();
+		}
+
+		$date_string = $date->format( 'Ymd' );
 		$time_series = $this->get_time_series();
 
-		$time_series[ $date ] = $count;
+		$time_series[ $date_string ] = $transient_count;
 		ksort( $time_series );
 
 		$sampling_range = $this->get_sampling_range();
-		$time_series    = array_slice( $time_series, - $sampling_range );
+		$time_series    = array_slice( $time_series, - $sampling_range, null, true );
+
+		$this->persist_time_series( $time_series );
 
 		$moving_average = $this->calculate_average( $time_series );
 
@@ -140,6 +154,16 @@ final class MonitorCssTransientCaching extends CronBasedBackgroundTask {
 	 */
 	private function get_time_series() {
 		return (array) get_option( self::TIME_SERIES_OPTION_KEY, [] );
+	}
+
+	/**
+	 * Persist the time series in the database.
+	 *
+	 * @param int[] $time_series Associative array of integers with the key being a date string and the value the count
+	 *                           of transients.
+	 */
+	private function persist_time_series( $time_series ) {
+		update_option( self::TIME_SERIES_OPTION_KEY, $time_series, false );
 	}
 
 	/**
