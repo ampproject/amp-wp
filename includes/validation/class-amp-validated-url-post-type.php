@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use AmpProject\Fonts;
+
 /**
  * Class AMP_Validated_URL_Post_Type
  *
@@ -2078,6 +2080,9 @@ class AMP_Validated_URL_Post_Type {
 					$percentage_budget_used = ( ( $included_final_size + $excluded_final_size ) / $style_custom_cdata_spec['max_bytes'] ) * 100;
 
 					printf( '%.1f%% ', $percentage_budget_used ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					?>
+					<span style="font-family: <?php echo esc_attr( Fonts::getEmojiFontFamilyValue() ); ?>">
+					<?php
 					if ( $percentage_budget_used > 100 ) {
 						echo '🚫';
 					} elseif ( $percentage_budget_used >= AMP_Style_Sanitizer::CSS_BUDGET_WARNING_PERCENTAGE ) {
@@ -2086,6 +2091,7 @@ class AMP_Validated_URL_Post_Type {
 						echo '✅';
 					}
 					?>
+					</span>
 				</td>
 			</tr>
 			<tr>
@@ -2223,15 +2229,16 @@ class AMP_Validated_URL_Post_Type {
 					</td>
 					<td class="column-stylesheet_status">
 						<?php
+						$emoji_style = sprintf( 'font-family: %s;', Fonts::getEmojiFontFamilyValue() );
 						switch ( $stylesheet['status'] ) {
 							case $included_status:
-								printf( '<span title="%s">✅</span>', esc_attr__( 'Stylesheet included', 'amp' ) );
+								printf( '<span title="%s" style="%s">✅</span>', esc_attr__( 'Stylesheet included', 'amp' ), esc_attr( $emoji_style ) );
 								break;
 							case $excessive_status:
-								printf( '<span title="%s">⚠️</span>', esc_attr__( 'Stylesheet overruns CSS budget yet it is still included on page', 'amp' ) );
+								printf( '<span title="%s" style="%s">⚠️</span>', esc_attr__( 'Stylesheet overruns CSS budget yet it is still included on page', 'amp' ), esc_attr( $emoji_style ) );
 								break;
 							case $excluded_status:
-								printf( '<span title="%s">🚫</span>', esc_attr__( 'Stylesheet excluded due to exceeding CSS budget', 'amp' ) );
+								printf( '<span title="%s" style="%s">🚫</span>', esc_attr__( 'Stylesheet excluded due to exceeding CSS budget', 'amp' ), esc_attr( $emoji_style ) );
 								break;
 						}
 						?>

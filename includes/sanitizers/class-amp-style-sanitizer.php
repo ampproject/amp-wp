@@ -10,6 +10,7 @@ use AmpProject\AmpWP\RemoteRequest\WpHttpRemoteGetRequest;
 use AmpProject\DevMode;
 use AmpProject\Dom\Document;
 use AmpProject\Exception\FailedToGetFromRemoteUrl;
+use AmpProject\Fonts;
 use AmpProject\RemoteGetRequest;
 use Sabberworm\CSS\RuleSet\DeclarationBlock;
 use Sabberworm\CSS\CSSList\CSSList;
@@ -2924,14 +2925,20 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$css_usage_percentage = ceil( ( $total_size / $this->style_custom_cdata_spec['max_bytes'] ) * 100 );
 		$menu_item_text       = __( 'CSS Usage', 'amp' ) . ': ';
 		$menu_item_text      .= $css_usage_percentage . '%';
+		$stylesheets_a_element->appendChild( $this->dom->createTextNode( $menu_item_text ) );
 
 		if ( $css_usage_percentage > 100 ) {
-			$menu_item_text .= ' 🚫';
+			$emoji = '🚫';
 		} elseif ( $css_usage_percentage >= self::CSS_BUDGET_WARNING_PERCENTAGE ) {
-			$menu_item_text .= ' ⚠️';
+			$emoji = '⚠️';
 		}
-
-		$stylesheets_a_element->appendChild( $this->dom->createTextNode( $menu_item_text ) );
+		if ( isset( $emoji ) ) {
+			$stylesheets_a_element->appendChild( $this->dom->createTextNode( ' ' ) );
+			$span = $this->dom->createElement( 'span' );
+			$span->setAttribute( 'style', sprintf( 'font-family: %s;', Fonts::getEmojiFontFamilyValue() ) );
+			$span->appendChild( $this->dom->createTextNode( $emoji ) );
+			$stylesheets_a_element->appendChild( $span );
+		}
 
 		$validity_li_element->parentNode->insertBefore( $stylesheets_li_element, $validity_li_element->nextSibling );
 	}
