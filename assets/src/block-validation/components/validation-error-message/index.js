@@ -25,7 +25,7 @@ const ValidationErrorMessage = ( { title, message, code } ) => {
 	}
 
 	if ( title ) {
-		return <span dangerouslySetInnerHTML={ { __html: title } } />
+		return <span dangerouslySetInnerHTML={ { __html: title } } />;
 	}
 
 	return (

@@ -80,7 +80,7 @@ module.exports = function( grunt ) {
 					'composer remove cweagans/composer-patches --update-no-dev -o',
 					'rm -r ' + productionVendorExcludedFilePatterns.join( ' ' ),
 					'if [ -d vendor/ampproject/common/vendor ]; then rm -r vendor/ampproject/common/vendor; fi',
-					'if [ -d vendor/ampproject/optimizer/vendor ]; then rm -r vendor/ampproject/optimizer/vendor; fi'
+					'if [ -d vendor/ampproject/optimizer/vendor ]; then rm -r vendor/ampproject/optimizer/vendor; fi',
 				].join( ' && ' ),
 			},
 			create_build_zip: {

@@ -37,13 +37,13 @@
     "@wordpress/e2e-test-utils": "4.3.1",
     "@wordpress/edit-post": "3.13.6",
     "@wordpress/element": "2.11.0",
-    "@wordpress/eslint-plugin": "3.4.1",
+    "@wordpress/eslint-plugin": "4.0.0",
     "@wordpress/hooks": "2.7.0",
     "@wordpress/i18n": "3.9.0",
     "@wordpress/jest-puppeteer-axe": "1.6.0",
     "@wordpress/plugins": "2.12.0",
-    "@wordpress/scripts": "5.1.0",
-    "@wordpress/url": "2.9.0",
+    "@wordpress/scripts": "7.1.3",
+    "@wordpress/url": "2.11.0",
     "autoprefixer": "9.7.4",
     "babel-eslint": "10.1.0",
     "babel-jest": "25.1.0",
@@ -128,7 +128,7 @@
     "test:php": "phpunit",
     "test:php:help": "npm run test:php -- --help"
   },
-  "npmPackageJsonLintConfig": {
+  "npmpackagejsonlint": {
     "extends": "@wordpress/npm-package-json-lint-config",
     "rules": {
       "require-version": "off"
