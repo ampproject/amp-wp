@@ -825,6 +825,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		add_theme_support( AMP_Theme_Support::SLUG );
 		$handlers = amp_get_content_sanitizers();
 		$this->assertArrayHasKey( 'AMP_Style_Sanitizer', $handlers );
+		unset( $handlers['AMP_Style_Sanitizer']['allow_transient_caching'] ); // Remove item added after filter applied.
 		$this->assertEquals( 'amp_content_sanitizers', $this->last_filter_call['current_filter'] );
 		$this->assertEquals( $handlers, $this->last_filter_call['args'][0] );
 		$handler_classes = array_keys( $handlers );
@@ -834,6 +835,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->last_filter_call = null;
 		remove_theme_support( AMP_Theme_Support::SLUG );
 		$handlers = amp_get_content_sanitizers( $post );
+		unset( $handlers['AMP_Style_Sanitizer']['allow_transient_caching'] ); // Remove item added after filter applied.
 		$this->assertArrayHasKey( 'AMP_Style_Sanitizer', $handlers );
 		$this->assertEquals( 'amp_content_sanitizers', $this->last_filter_call['current_filter'] );
 		$this->assertEquals( $handlers, $this->last_filter_call['args'][0] );
