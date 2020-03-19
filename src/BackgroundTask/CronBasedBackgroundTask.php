@@ -36,7 +36,6 @@ abstract class CronBasedBackgroundTask {
 	 * Register the background task with the system.
 	 *
 	 * @return void
-	 * @throws InvalidInterval If the interval was neither an existing interval name nor a valid duration.
 	 * @throws FailedToRegisterBackgroundTask If the background task could not be registered with WordPress.
 	 */
 	public function register() {
@@ -68,8 +67,8 @@ abstract class CronBasedBackgroundTask {
 		$interval_name = $this->get_interval_name();
 
 		// The interval is a duration, so we add a new cron_schedule for this duration.
-		add_filter( // phpcs:ignore WordPress.WP.CronInterval.ChangeDetected
-			'cron_schedules',
+		add_filter(
+			'cron_schedules', // phpcs:ignore WordPress.WP.CronInterval.ChangeDetected
 			function ( $schedules ) use ( $interval_name, $interval ) {
 				$schedules[ $interval_name ] = [
 					'interval' => $interval,
