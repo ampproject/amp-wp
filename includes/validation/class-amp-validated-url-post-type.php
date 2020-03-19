@@ -2052,7 +2052,8 @@ class AMP_Validated_URL_Post_Type {
 					<?php esc_html_e( 'Total CSS size prior to minification:', 'amp' ); ?>
 				</th>
 				<td>
-					<?php echo esc_html( number_format_i18n( $included_original_size + $excluded_original_size ) ); ?><small>B</small>
+					<?php echo esc_html( number_format_i18n( $included_original_size + $excluded_original_size ) ); ?>
+					<abbr title="<?php esc_attr_e( 'bytes', 'amp' ); ?>"><?php echo esc_attr_x( 'B', 'abbreviation for bytes', 'amp' ); ?></abbr>
 				</td>
 			</tr>
 			<tr>
@@ -2060,7 +2061,8 @@ class AMP_Validated_URL_Post_Type {
 					<?php esc_html_e( 'Total CSS size after minification:', 'amp' ); ?>
 				</th>
 				<td>
-					<?php echo esc_html( number_format_i18n( $included_final_size + $excluded_final_size ) ); ?><small>B</small>
+					<?php echo esc_html( number_format_i18n( $included_final_size + $excluded_final_size ) ); ?>
+					<abbr title="<?php esc_attr_e( 'bytes', 'amp' ); ?>"><?php echo esc_attr_x( 'B', 'abbreviation for bytes', 'amp' ); ?></abbr>
 				</td>
 			</tr>
 			<tr>
@@ -2107,7 +2109,8 @@ class AMP_Validated_URL_Post_Type {
 					?>
 				</th>
 				<td>
-					<?php echo esc_html( number_format_i18n( $excluded_final_size ) ); ?><small>B</small>
+					<?php echo esc_html( number_format_i18n( $excluded_final_size ) ); ?>
+					<abbr title="<?php esc_attr_e( 'bytes', 'amp' ); ?>"><?php echo esc_attr_x( 'B', 'abbreviation for bytes', 'amp' ); ?></abbr>
 				</td>
 			</tr>
 		</table>
