@@ -993,14 +993,16 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		if ( ! empty( $tag_spec[ AMP_Rule_Spec::MANDATORY_PARENT ] ) && ! $this->has_parent( $node, $tag_spec[ AMP_Rule_Spec::MANDATORY_PARENT ] ) ) {
 			return [
-				'code' => self::WRONG_PARENT_TAG,
+				'code'                 => self::WRONG_PARENT_TAG,
+				'required_parent_name' => $tag_spec[ AMP_Rule_Spec::MANDATORY_PARENT ],
 			];
 		}
 
 		// Extension scripts must be in the head. Note this currently never fails because all AMP scripts are moved to the head before sanitization.
 		if ( isset( $tag_spec['extension_spec'] ) && ! $this->has_parent( $node, 'head' ) ) {
 			return [
-				'code' => self::WRONG_PARENT_TAG,
+				'code'                 => self::WRONG_PARENT_TAG,
+				'required_parent_name' => 'head',
 			];
 		}
 
@@ -1017,7 +1019,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		if ( ! empty( $tag_spec[ AMP_Rule_Spec::MANDATORY_ANCESTOR ] ) && ! $this->has_ancestor( $node, $tag_spec[ AMP_Rule_Spec::MANDATORY_ANCESTOR ] ) ) {
 			return [
-				'code' => self::MANDATORY_TAG_ANCESTOR,
+				'code'                   => self::MANDATORY_TAG_ANCESTOR,
+				'required_ancestor_name' => $tag_spec[ AMP_Rule_Spec::MANDATORY_ANCESTOR ],
 			];
 		}
 
@@ -2397,6 +2400,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				return [
 					'code'           => self::INCORRECT_NUM_CHILD_TAGS,
 					'children_count' => $child_element_count,
+					'required_child_count' => $child_tags['mandatory_num_child_tags'],
 				];
 			}
 		}
@@ -2410,6 +2414,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				return [
 					'code'           => self::INCORRECT_MIN_NUM_CHILD_TAGS,
 					'children_count' => $child_element_count,
+					'required_min_child_count' => $child_tags['mandatory_min_num_child_tags'],
 				];
 			}
 		}
