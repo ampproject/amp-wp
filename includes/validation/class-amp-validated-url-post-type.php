@@ -2136,12 +2136,12 @@ class AMP_Validated_URL_Post_Type {
 			<tr>
 				<th class="column-stylesheet_expand"></th>
 				<th class="column-stylesheet_order"><?php esc_html_e( 'Order', 'amp' ); ?></th>
-				<th class="column-original_size"><?php esc_html_e( 'Original', 'amp' ); ?></th>
+				<th class="column-original_size"><?php esc_html_e( 'Original(B)', 'amp' ); ?></th>
 				<th class="column-minified"><?php esc_html_e( 'Minified', 'amp' ); ?></th>
-				<th class="column-final_size"><?php esc_html_e( 'Final', 'amp' ); ?></th>
+				<th class="column-final_size"><?php esc_html_e( 'Final(B)', 'amp' ); ?></th>
 				<th class="column-percentage"><?php esc_html_e( 'Percent', 'amp' ); ?></th>
 				<th class="column-priority"><?php esc_html_e( 'Priority', 'amp' ); ?></th>
-				<th class="column-stylesheet_status"><?php esc_html_e( 'Status', 'amp' ); ?></th>
+				<th class="column-stylesheet_included"><?php esc_html_e( 'Included', 'amp' ); ?></th>
 				<th class="column-markup"><?php esc_html_e( 'Markup', 'amp' ); ?></th>
 				<th class="column-sources_with_invalid_output"><?php esc_html_e( 'Sources', 'amp' ); ?></th>
 			</tr>
@@ -2198,7 +2198,6 @@ class AMP_Validated_URL_Post_Type {
 					<td class="column-original_size">
 						<?php
 						echo esc_html( number_format_i18n( $stylesheet['original_size'] ) );
-						echo '<small>B</small>';
 						?>
 					</td>
 					<td class="column-minified">
@@ -2213,7 +2212,6 @@ class AMP_Validated_URL_Post_Type {
 					<td class="column-final_size">
 						<?php
 						echo esc_html( number_format_i18n( $stylesheet['final_size'] ) );
-						echo '<small>B</small>';
 						?>
 					</td>
 					<td class="column-percentage">
@@ -2227,7 +2225,7 @@ class AMP_Validated_URL_Post_Type {
 					<td class="column-priority">
 						<?php echo esc_html( $stylesheet['priority'] ); ?>
 					</td>
-					<td class="column-stylesheet_status">
+					<td class="column-stylesheet_included">
 						<?php
 						$emoji_style = sprintf( 'font-family: %s;', Fonts::getEmojiFontFamilyValue() );
 						switch ( $stylesheet['status'] ) {
