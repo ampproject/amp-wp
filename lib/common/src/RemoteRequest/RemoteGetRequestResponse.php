@@ -118,7 +118,7 @@ final class RemoteGetRequestResponse implements Response
             return [];
         }
 
-        return $this->headers[$this->headersIndex[$key]];
+        return (array) $this->headers[$this->headersIndex[$key]];
     }
 
     /**
@@ -174,9 +174,11 @@ final class RemoteGetRequestResponse implements Response
      */
     private function maybeInitHeadersIndex()
     {
-        if ($this->headersIndex === null) {
-            $this->headersIndex = array_combine(array_keys($this->headers), array_keys($this->headers));
-            $this->headersIndex = array_change_key_case($this->headersIndex, CASE_LOWER);
+        if ($this->headersIndex !== null) {
+            return;
         }
+
+        $this->headersIndex = array_combine(array_keys($this->headers), array_keys($this->headers));
+        $this->headersIndex = array_change_key_case($this->headersIndex, CASE_LOWER);
     }
 }

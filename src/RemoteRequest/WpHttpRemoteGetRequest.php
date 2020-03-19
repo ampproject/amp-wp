@@ -11,6 +11,7 @@ use AmpProject\Exception\FailedToGetFromRemoteUrl;
 use AmpProject\RemoteGetRequest;
 use AmpProject\RemoteRequest\RemoteGetRequestResponse;
 use AmpProject\Response;
+use Traversable;
 use WP_Error;
 use WP_Http;
 
@@ -143,7 +144,17 @@ final class WpHttpRemoteGetRequest implements RemoteGetRequest {
 				continue;
 			}
 
-			return new RemoteGetRequestResponse( $response['body'], iterator_to_array( $response['headers'] ), (int) $status );
+			$headers = $response['headers'];
+
+			if ( $headers instanceof Traversable ) {
+				$headers = iterator_to_array( $headers );
+			}
+
+			if ( ! is_array( $headers ) ) {
+				$headers = [];
+			}
+
+			return new RemoteGetRequestResponse( $response['body'], $headers, (int) $status );
 		} while ( $retries_left-- );
 
 		// This should never be triggered, but we want to ensure we always have a typed return value,
