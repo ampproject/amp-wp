@@ -303,6 +303,24 @@ function amp_deactivate() {
 	flush_rewrite_rules( false );
 }
 
+// @todo Quick fix for now, no centralized flow yet to register services.
+foreach ( [
+	'AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching',
+] as $background_task ) {
+	try {
+		( new $background_task() )->register();
+	} catch ( Exception $exception ) {
+		// @todo No logger yet, dump to error log?
+		$exception_class = get_class( $exception );
+		$error_message   = "Exception '{$exception_class}' thrown in background task '{$background_task}': {$exception->getMessage()}";
+		if ( class_exists( 'WP_CLI' ) ) {
+			WP_CLI::warning( $error_message );
+		} else {
+			error_log( $error_message ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+		}
+	}
+}
+
 // The plugins_loaded action is the earliest we can run this since that is when pluggable.php has been required and wp_hash() is available.
 add_action( 'plugins_loaded', [ 'AMP_Validation_Manager', 'init_validate_request' ], ~PHP_INT_MAX );
 

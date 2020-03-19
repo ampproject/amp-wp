@@ -1,6 +1,6 @@
 <?php
 /**
- * Interface Option.
+ * Interface ConfigurationArgument.
  *
  * @package AmpProject\AmpWP
  */
