@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching;
+use AmpProject\AmpWP\Option;
 use AmpProject\DevMode;
 use AmpProject\Dom\Document;
 use AmpProject\Fonts;
@@ -1476,11 +1478,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * }
 	 */
 	private function get_parsed_stylesheet( $stylesheet, $options = [] ) {
-		$parsed           = null;
-		$cache_key        = null;
-		$cached           = true;
-		$cache_group      = 'amp-parsed-stylesheet-v27'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
-		$use_object_cache = wp_using_ext_object_cache() || ! $this->args['allow_transient_caching'];
+		$parsed         = null;
+		$cache_key      = null;
+		$cached         = true;
+		$cache_group    = 'amp-parsed-stylesheet-v27'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
+		$use_transients = $this->should_use_transient_caching();
 
 		$cache_impacting_options = array_merge(
 			wp_array_slice_assoc(
@@ -1498,10 +1500,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$cache_key = md5( $stylesheet . wp_json_encode( $cache_impacting_options ) );
 
-		if ( $use_object_cache ) {
-			$parsed = wp_cache_get( $cache_key, $cache_group );
-		} else {
+		if ( $use_transients ) {
 			$parsed = get_transient( $cache_group . '-' . $cache_key );
+		} else {
+			$parsed = wp_cache_get( $cache_key, $cache_group );
 		}
 
 		/*
@@ -1527,16 +1529,37 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			 * getting filled infinitely. On the other hand, if an external object cache is available then we don't
 			 * set an expiration because it should implement LRU cache expulsion policy.
 			 */
-			if ( $use_object_cache ) {
-				wp_cache_set( $cache_key, $parsed, $cache_group );
-			} else {
+			if ( $use_transients ) {
 				// The expiration is to ensure transient doesn't stick around forever since no LRU flushing like with external object cache.
 				set_transient( $cache_group . '-' . $cache_key, $parsed, MONTH_IN_SECONDS );
+			} else {
+				wp_cache_set( $cache_key, $parsed, $cache_group );
 			}
 		}
 
 		$parsed['cached'] = $cached;
 		return $parsed;
+	}
+
+	/**
+	 * Check whether transient caching for stylesheets should be used.
+	 *
+	 * @return bool Whether transient caching should be used.
+	 */
+	private function should_use_transient_caching() {
+		if ( wp_using_ext_object_cache() ) {
+			return false;
+		}
+
+		if ( ! $this->args['allow_transient_caching'] ) {
+			return false;
+		}
+
+		if ( AMP_Options_Manager::get_option( Option::DISABLE_CSS_TRANSIENT_CACHING, false ) ) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**

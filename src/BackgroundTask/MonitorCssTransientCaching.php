@@ -7,6 +7,8 @@
 
 namespace AmpProject\AmpWP\BackgroundTask;
 
+use AMP_Options_Manager;
+use AmpProject\AmpWP\Option;
 use DateTimeImmutable;
 use Exception;
 
@@ -25,14 +27,6 @@ final class MonitorCssTransientCaching extends CronBasedBackgroundTask {
 	 * @var string
 	 */
 	const EVENT_NAME = 'amp_monitor_css_transient_caching';
-
-	/**
-	 * Key into the WordPress options table to use for persisting the fact that the transient caching of stylesheets
-	 * needs to be disabled.
-	 *
-	 * @var string
-	 */
-	const DISABLE_CSS_TRANSIENT_CACHING_OPTION_KEY = 'amp_css_transient_monitor_disable_caching';
 
 	/**
 	 * Key to use to persist the time series in the WordPress options table.
@@ -116,14 +110,14 @@ final class MonitorCssTransientCaching extends CronBasedBackgroundTask {
 	 * @return bool Whether transient caching of stylesheets is disabled.
 	 */
 	private function is_css_transient_caching_disabled() {
-		return get_option( self::DISABLE_CSS_TRANSIENT_CACHING_OPTION_KEY, false );
+		return AMP_Options_Manager::get_option( Option::DISABLE_CSS_TRANSIENT_CACHING, false );
 	}
 
 	/**
 	 * Disable transient caching of stylesheets.
 	 */
 	private function disable_css_transient_caching() {
-		update_option( self::DISABLE_CSS_TRANSIENT_CACHING_OPTION_KEY, true, false );
+		AMP_Options_Manager::update_option( Option::DISABLE_CSS_TRANSIENT_CACHING, true );
 	}
 
 	/**
