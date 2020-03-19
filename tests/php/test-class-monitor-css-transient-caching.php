@@ -43,7 +43,7 @@ class Test_Monitor_CSS_Transient_Caching extends WP_UnitTestCase {
 		$timestamp = wp_next_scheduled( MonitorCssTransientCaching::EVENT_NAME );
 
 		$this->assertNotFalse( $timestamp );
-		$this->assertIsInt( $timestamp );
+		$this->assertInternalType( 'int', $timestamp );
 		$this->assertGreaterThan( 0, $timestamp );
 	}
 
