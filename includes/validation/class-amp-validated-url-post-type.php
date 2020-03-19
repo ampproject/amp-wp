@@ -2136,9 +2136,15 @@ class AMP_Validated_URL_Post_Type {
 			<tr>
 				<th class="column-stylesheet_expand"></th>
 				<th class="column-stylesheet_order"><?php esc_html_e( 'Order', 'amp' ); ?></th>
-				<th class="column-original_size"><?php esc_html_e( 'Original(B)', 'amp' ); ?></th>
+				<th class="column-original_size">
+					<?php esc_html_e( 'Original', 'amp' ); ?>
+					(<abbr title="<?php esc_attr_e( 'bytes', 'amp' ); ?>"><?php echo esc_attr_x( 'B', 'abbreviation for bytes', 'amp' ); ?></abbr>)
+				</th>
 				<th class="column-minified"><?php esc_html_e( 'Minified', 'amp' ); ?></th>
-				<th class="column-final_size"><?php esc_html_e( 'Final(B)', 'amp' ); ?></th>
+				<th class="column-final_size">
+					<?php esc_html_e( 'Final', 'amp' ); ?>
+					(<abbr title="<?php esc_attr_e( 'bytes', 'amp' ); ?>"><?php echo esc_attr_x( 'B', 'abbreviation for bytes', 'amp' ); ?></abbr>)
+				</th>
 				<th class="column-percentage"><?php esc_html_e( 'Percent', 'amp' ); ?></th>
 				<th class="column-priority"><?php esc_html_e( 'Priority', 'amp' ); ?></th>
 				<th class="column-stylesheet_included"><?php esc_html_e( 'Included', 'amp' ); ?></th>
