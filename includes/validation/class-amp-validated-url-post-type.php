@@ -2052,7 +2052,8 @@ class AMP_Validated_URL_Post_Type {
 					<?php esc_html_e( 'Total CSS size prior to minification:', 'amp' ); ?>
 				</th>
 				<td>
-					<?php echo esc_html( number_format_i18n( $included_original_size + $excluded_original_size ) ); ?><small>B</small>
+					<?php echo esc_html( number_format_i18n( $included_original_size + $excluded_original_size ) ); ?>
+					<abbr title="<?php esc_attr_e( 'bytes', 'amp' ); ?>"><?php echo esc_attr_x( 'B', 'abbreviation for bytes', 'amp' ); ?></abbr>
 				</td>
 			</tr>
 			<tr>
@@ -2060,7 +2061,8 @@ class AMP_Validated_URL_Post_Type {
 					<?php esc_html_e( 'Total CSS size after minification:', 'amp' ); ?>
 				</th>
 				<td>
-					<?php echo esc_html( number_format_i18n( $included_final_size + $excluded_final_size ) ); ?><small>B</small>
+					<?php echo esc_html( number_format_i18n( $included_final_size + $excluded_final_size ) ); ?>
+					<abbr title="<?php esc_attr_e( 'bytes', 'amp' ); ?>"><?php echo esc_attr_x( 'B', 'abbreviation for bytes', 'amp' ); ?></abbr>
 				</td>
 			</tr>
 			<tr>
@@ -2107,7 +2109,8 @@ class AMP_Validated_URL_Post_Type {
 					?>
 				</th>
 				<td>
-					<?php echo esc_html( number_format_i18n( $excluded_final_size ) ); ?><small>B</small>
+					<?php echo esc_html( number_format_i18n( $excluded_final_size ) ); ?>
+					<abbr title="<?php esc_attr_e( 'bytes', 'amp' ); ?>"><?php echo esc_attr_x( 'B', 'abbreviation for bytes', 'amp' ); ?></abbr>
 				</td>
 			</tr>
 		</table>
@@ -2136,12 +2139,18 @@ class AMP_Validated_URL_Post_Type {
 			<tr>
 				<th class="column-stylesheet_expand"></th>
 				<th class="column-stylesheet_order"><?php esc_html_e( 'Order', 'amp' ); ?></th>
-				<th class="column-original_size"><?php esc_html_e( 'Original', 'amp' ); ?></th>
+				<th class="column-original_size">
+					<?php esc_html_e( 'Original', 'amp' ); ?>
+					(<abbr title="<?php esc_attr_e( 'bytes', 'amp' ); ?>"><?php echo esc_attr_x( 'B', 'abbreviation for bytes', 'amp' ); ?></abbr>)
+				</th>
 				<th class="column-minified"><?php esc_html_e( 'Minified', 'amp' ); ?></th>
-				<th class="column-final_size"><?php esc_html_e( 'Final', 'amp' ); ?></th>
+				<th class="column-final_size">
+					<?php esc_html_e( 'Final', 'amp' ); ?>
+					(<abbr title="<?php esc_attr_e( 'bytes', 'amp' ); ?>"><?php echo esc_attr_x( 'B', 'abbreviation for bytes', 'amp' ); ?></abbr>)
+				</th>
 				<th class="column-percentage"><?php esc_html_e( 'Percent', 'amp' ); ?></th>
 				<th class="column-priority"><?php esc_html_e( 'Priority', 'amp' ); ?></th>
-				<th class="column-stylesheet_status"><?php esc_html_e( 'Status', 'amp' ); ?></th>
+				<th class="column-stylesheet_included"><?php esc_html_e( 'Included', 'amp' ); ?></th>
 				<th class="column-markup"><?php esc_html_e( 'Markup', 'amp' ); ?></th>
 				<th class="column-sources_with_invalid_output"><?php esc_html_e( 'Sources', 'amp' ); ?></th>
 			</tr>
@@ -2198,7 +2207,6 @@ class AMP_Validated_URL_Post_Type {
 					<td class="column-original_size">
 						<?php
 						echo esc_html( number_format_i18n( $stylesheet['original_size'] ) );
-						echo '<small>B</small>';
 						?>
 					</td>
 					<td class="column-minified">
@@ -2213,7 +2221,6 @@ class AMP_Validated_URL_Post_Type {
 					<td class="column-final_size">
 						<?php
 						echo esc_html( number_format_i18n( $stylesheet['final_size'] ) );
-						echo '<small>B</small>';
 						?>
 					</td>
 					<td class="column-percentage">
@@ -2227,7 +2234,7 @@ class AMP_Validated_URL_Post_Type {
 					<td class="column-priority">
 						<?php echo esc_html( $stylesheet['priority'] ); ?>
 					</td>
-					<td class="column-stylesheet_status">
+					<td class="column-stylesheet_included">
 						<?php
 						$emoji_style = sprintf( 'font-family: %s;', Fonts::getEmojiFontFamilyValue() );
 						switch ( $stylesheet['status'] ) {
