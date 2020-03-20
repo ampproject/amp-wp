@@ -2174,7 +2174,7 @@ class AMP_Validation_Error_Taxonomy {
 				if ( in_array( $key, [ 'code', 'type', 'css_property_value', 'mandatory_anyof_attrs', 'meta_property_value', 'meta_property_required_value', 'mandatory_oneof_attrs' ], true ) ) {
 					continue; // Handled above.
 				}
-				if ( in_array( $key, [ 'spec_name', 'tag_spec', 'spec_names' ] ) ) {
+				if ( in_array( $key, [ 'spec_name', 'tag_spec', 'spec_names' ], true ) ) {
 					continue;
 				}
 				?>
@@ -3227,8 +3227,8 @@ class AMP_Validation_Error_Taxonomy {
 				);
 
 			case AMP_Tag_And_Attribute_Sanitizer::MISSING_URL:
-				/* translators: %1$s is attribute name */
 				return sprintf(
+					/* translators: %1$s is attribute name */
 					__( "Missing URL for attribute '%s'", 'amp' ),
 					esc_html( $validation_error['node_name'] )
 				);
