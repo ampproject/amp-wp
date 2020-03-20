@@ -39,6 +39,7 @@ abstract class CronBasedBackgroundTask implements Service, HasDeactivation {
 	 * @return void
 	 */
 	public function register() {
+		add_action( 'admin_init', [ $this, 'schedule_event' ] );
 		add_action( $this->get_event_name(), [ $this, 'process' ] );
 	}
 
@@ -50,6 +51,10 @@ abstract class CronBasedBackgroundTask implements Service, HasDeactivation {
 	 * @return void
 	 */
 	public function schedule_event() {
+		if ( ! current_user_can( 'administrator' ) ) {
+			return;
+		}
+
 		$event_name = $this->get_event_name();
 		$timestamp  = wp_next_scheduled( $event_name );
 
