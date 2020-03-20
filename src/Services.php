@@ -38,9 +38,7 @@ final class Services {
 	 * @return void
 	 */
 	public static function register() {
-		self::maybe_instantiate();
-
-		foreach ( self::$instances as $service ) {
+		foreach ( self::instances() as $service ) {
 			$service->register();
 		}
 	}
@@ -53,9 +51,7 @@ final class Services {
 	 * @return void
 	 */
 	public static function activate() {
-		self::maybe_instantiate();
-
-		foreach ( self::$instances as $service ) {
+		foreach ( self::instances() as $service ) {
 			if ( ! $service instanceof HasActivation ) {
 				continue;
 			}
@@ -72,9 +68,7 @@ final class Services {
 	 * @return void
 	 */
 	public static function deactivate() {
-		self::maybe_instantiate();
-
-		foreach ( self::$instances as $service ) {
+		foreach ( self::instances() as $service ) {
 			if ( ! $service instanceof HasDeactivation ) {
 				continue;
 			}
@@ -84,17 +78,16 @@ final class Services {
 	}
 
 	/**
-	 * Instantiate the service objects if that has not been done yet.
+	 * Get the services.
 	 *
-	 * @return void
+	 * @return Service[] Services.
 	 */
-	private static function maybe_instantiate() {
-		if ( ! empty( self::$instances ) ) {
-			return;
+	private static function instances() {
+		if ( empty( self::$instances ) ) {
+			foreach ( self::ALL as $service_class ) {
+				self::$instances[ $service_class ] = new $service_class();
+			}
 		}
-
-		foreach ( self::ALL as $service_class ) {
-			self::$instances[ $service_class ] = new $service_class();
-		}
+		return self::$instances;
 	}
 }
