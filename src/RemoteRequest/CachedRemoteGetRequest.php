@@ -147,11 +147,8 @@ final class CachedRemoteGetRequest implements RemoteGetRequest {
 	 */
 	private function get_expiry_time( Response $response ) {
 		if ( $this->use_cache_control && $response->hasHeader( self::CACHE_CONTROL ) ) {
-			$max_age = $this->get_max_age( $response->getHeader( self::CACHE_CONTROL ) );
-
-			if ( $max_age >= $this->min_expiry ) {
-				return new DateTimeImmutable( "+ {$max_age} seconds" );
-			}
+			$expiry = max( $this->min_expiry, $this->get_max_age( $response->getHeader( self::CACHE_CONTROL ) ) );
+			return new DateTimeImmutable( "+ {$expiry} seconds" );
 		}
 
 		return new DateTimeImmutable( "+ {$this->expiry} seconds" );
