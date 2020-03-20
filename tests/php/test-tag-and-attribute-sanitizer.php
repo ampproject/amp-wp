@@ -94,7 +94,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 					[
 						'code'                 => AMP_Tag_And_Attribute_Sanitizer::WRONG_PARENT_TAG,
 						'spec_name'            => 'noscript enclosure for boilerplate',
-						'required_parent_name' => 'head'
+						'required_parent_name' => 'head',
 					],
 					[
 						'code'                => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG_ANCESTOR,
@@ -2766,7 +2766,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						'node_attributes'        => [ 'class' => 'a-invalid' ],
 						'type'                   => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
 						'spec_name'              => 'amp-story-grid-layer',
-						'required_ancestor_name' => 'amp-story-page'
+						'required_ancestor_name' => 'amp-story-page',
 					],
 				],
 			],

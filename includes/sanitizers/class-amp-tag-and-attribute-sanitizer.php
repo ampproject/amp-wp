@@ -506,7 +506,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 							static function ( $validation_error ) {
 								unset(
 									$validation_error['spec_name'],
-									// Remove other keys that may not not make the error unique.
+									// Remove other keys that may make the error unique.
 									$validation_error['required_parent_name'],
 									$validation_error['required_ancestor_name'],
 									$validation_error['required_child_count'],
