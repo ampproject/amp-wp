@@ -2149,7 +2149,7 @@ class AMP_Theme_Support {
 			new FilesystemRemoteGetRequest( Optimizer\LocalFallback::getMappings() )
 		);
 
-		$cached_remote_request = new CachedRemoteGetRequest( $fallback_remote_request_pipeline );
+		$cached_remote_request = new CachedRemoteGetRequest( $fallback_remote_request_pipeline, WEEK_IN_SECONDS );
 
 		return new Optimizer\TransformationEngine(
 			$configuration,
