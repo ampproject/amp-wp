@@ -84,7 +84,7 @@ final class MonitorCssTransientCaching extends CronBasedBackgroundTask {
 	 * @throws Exception If a date could not be instantiated.
 	 */
 	public function process( DateTimeInterface $date = null, $transient_count = null ) {
-		if ( $this->is_css_transient_caching_disabled() ) {
+		if ( wp_using_ext_object_cache() || $this->is_css_transient_caching_disabled() ) {
 			return;
 		}
 
