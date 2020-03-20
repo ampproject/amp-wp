@@ -53,11 +53,7 @@ final class MonitorCssTransientCaching extends CronBasedBackgroundTask {
 	/**
 	 * Get the interval to use for the event.
 	 *
-	 * If the passed-in interval is a string that matches an existing interval, that interval is used as-is.
-	 *
-	 * If the passed-in interval is an integer, that value is used as a duration in seconds to create a new interval.
-	 *
-	 * @return string|int Either an existing interval name, or a new interval duration in seconds.
+	 * @return string An existing interval name. Valid values are 'hourly', 'twicedaily' or 'daily'.
 	 */
 	protected function get_interval() {
 		return self::DEFAULT_INTERVAL_DAILY;

@@ -32,19 +32,24 @@ class Test_Monitor_CSS_Transient_Caching extends WP_UnitTestCase {
 	/**
 	 * Test whether an event is actually scheduled when the monitor is registered.
 	 *
-	 * @covers MonitorCssTransientCaching::register()
+	 * @covers MonitorCssTransientCaching::activate()
+	 * @covers MonitorCssTransientCaching::deactivate()
 	 */
-	public function test_event_gets_scheduled() {
+	public function test_event_gets_scheduled_and_unscheduled() {
 		$this->assertFalse( wp_next_scheduled( MonitorCssTransientCaching::EVENT_NAME ) );
 
 		$monitor = new MonitorCssTransientCaching();
-		$monitor->register();
+		$monitor->activate();
 
 		$timestamp = wp_next_scheduled( MonitorCssTransientCaching::EVENT_NAME );
 
 		$this->assertNotFalse( $timestamp );
 		$this->assertInternalType( 'int', $timestamp );
 		$this->assertGreaterThan( 0, $timestamp );
+
+		$monitor->deactivate();
+
+		$this->assertFalse( wp_next_scheduled( MonitorCssTransientCaching::EVENT_NAME ) );
 	}
 
 	/**
