@@ -46,7 +46,9 @@ final class Services {
 	/**
 	 * Run activation logic.
 	 *
-	 * This should be hooked up to the WordPress deactivation hook.
+	 * This should be hooked up to the WordPress activation hook.
+     *
+     * @todo Iterate over blogs on multisite to activate on all subsites by default here?
 	 *
 	 * @return void
 	 */
@@ -65,6 +67,8 @@ final class Services {
 	 *
 	 * This should be hooked up to the WordPress deactivation hook.
 	 *
+     * @todo Iterate over blogs on multisite to deactivate on all subsites by default here?
+     *
 	 * @return void
 	 */
 	public static function deactivate() {
