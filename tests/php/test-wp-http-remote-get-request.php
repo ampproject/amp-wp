@@ -14,7 +14,6 @@ use AmpProject\AmpWP\RemoteRequest\WpHttpRemoteGetRequest;
  */
 class Test_WP_Http_Remote_Get_Request extends \WP_UnitTestCase {
 
-
 	/**
 	 * Provide the data to test the processing of headers.
 	 *

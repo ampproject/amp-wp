@@ -77,7 +77,7 @@ final class WpHttpRemoteGetRequest implements RemoteGetRequest {
 	 * @param bool $ssl_verify Optional. Whether to verify SSL certificates. Defaults to true.
 	 * @param int  $timeout    Optional. Timeout value to use in seconds. Defaults to 10.
 	 * @param int  $retries    Optional. Number of retry attempts to do if a status code was thrown that is worth
-	 *                        retrying. Defaults to 2.
+	 *                         retrying. Defaults to 2.
 	 */
 	public function __construct( $ssl_verify = true, $timeout = self::DEFAULT_TIMEOUT, $retries = self::DEFAULT_RETRIES ) {
 		if ( ! is_int( $timeout ) || $timeout < 0 ) {

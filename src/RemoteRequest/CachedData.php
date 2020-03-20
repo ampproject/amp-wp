@@ -17,7 +17,6 @@ use DateTimeInterface;
  */
 final class CachedData {
 
-
 	/**
 	 * Cached value.
 	 *

@@ -119,16 +119,19 @@ final class CachedRemoteGetRequest implements RemoteGetRequest {
 		}
 
 		if ( false === $cached_data || $cached_data->is_expired() ) {
-			$response = $this->remote_request->get( $url );
-			$status   = $response->getStatusCode();
-			$success  = $status >= 200 && $status < 300;
+			try {
+				$response = $this->remote_request->get( $url );
+				$status   = $response->getStatusCode();
+				$expiry   = $this->get_expiry_time( $response );
+				$headers  = $response->getHeaders();
+				$body     = $response->getBody();
+			} catch ( FailedToGetFromRemoteUrl $exception ) {
+				$status = $exception->getStatusCode();
+				$expiry = new DateTimeImmutable( "+ {$this->min_expiry} seconds" );
+				$body   = $exception->getMessage();
+			}
 
-			$expiry = $success
-				? $this->get_expiry_time( $response )
-				: new DateTimeImmutable( "+ {$this->min_expiry} seconds" );
-
-			$cached_data = new CachedData( $response->getBody(), $expiry );
-			$headers     = $response->getHeaders();
+			$cached_data = new CachedData( $body, $expiry );
 
 			set_transient( $cache_key, serialize( $cached_data ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
 		}
