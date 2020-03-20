@@ -19,7 +19,8 @@ interface HasActivation {
 	 *
 	 * This should be hooked up to the WordPress activation hook.
 	 *
+	 * @param bool $network_wide Whether the activation was done network-wide.
 	 * @return void
 	 */
-	public function activate();
+	public function activate( $network_wide );
 }

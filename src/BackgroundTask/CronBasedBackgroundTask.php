@@ -16,7 +16,7 @@ use AmpProject\AmpWP\Service;
  *
  * @package AmpProject\AmpWP
  */
-abstract class CronBasedBackgroundTask implements Service, HasActivation, HasDeactivation {
+abstract class CronBasedBackgroundTask implements Service, HasDeactivation {
 
 	const DEFAULT_INTERVAL_HOURLY      = 'hourly';
 	const DEFAULT_INTERVAL_TWICE_DAILY = 'twicedaily';
@@ -43,13 +43,13 @@ abstract class CronBasedBackgroundTask implements Service, HasActivation, HasDea
 	}
 
 	/**
-	 * Run activation logic.
+	 * Schedule the event.
 	 *
-	 * This should be hooked up to the WordPress activation hook.
+	 * This does nothing if the event is already scheduled.
 	 *
 	 * @return void
 	 */
-	public function activate() {
+	public function schedule_event() {
 		$event_name = $this->get_event_name();
 		$timestamp  = wp_next_scheduled( $event_name );
 
@@ -65,9 +65,10 @@ abstract class CronBasedBackgroundTask implements Service, HasActivation, HasDea
 	 *
 	 * This should be hooked up to the WordPress deactivation hook.
 	 *
+	 * @param bool $network_wide Whether the deactivation was done network-wide.
 	 * @return void
 	 */
-	public function deactivate() {
+	public function deactivate( $network_wide ) {
 		wp_clear_scheduled_hook( $this->get_event_name() );
 	}
 

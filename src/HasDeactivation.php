@@ -19,7 +19,8 @@ interface HasDeactivation {
 	 *
 	 * This should be hooked up to the WordPress deactivation hook.
 	 *
+	 * @param bool $network_wide Whether the deactivation was done network-wide.
 	 * @return void
 	 */
-	public function deactivate();
+	public function deactivate( $network_wide );
 }

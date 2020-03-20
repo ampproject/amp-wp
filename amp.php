@@ -278,9 +278,11 @@ register_activation_hook( __FILE__, 'amp_activate' );
  * Handle activation of plugin.
  *
  * @since 0.2
+ *
+ * @param bool $network_wide Whether the activation was done network-wide.
  */
-function amp_activate() {
-	Services::activate();
+function amp_activate( $network_wide = false ) {
+	Services::activate( $network_wide );
 	amp_after_setup_theme();
 	if ( ! did_action( 'amp_init' ) ) {
 		amp_init();
@@ -294,9 +296,11 @@ register_deactivation_hook( __FILE__, 'amp_deactivate' );
  * Handle deactivation of plugin.
  *
  * @since 0.2
+ *
+ * @param bool $network_wide Whether the activation was done network-wide.
  */
-function amp_deactivate() {
-	Services::deactivate();
+function amp_deactivate( $network_wide = false ) {
+	Services::deactivate( $network_wide );
 	// We need to manually remove the amp endpoint.
 	global $wp_rewrite;
 	foreach ( $wp_rewrite->endpoints as $index => $endpoint ) {

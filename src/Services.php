@@ -47,18 +47,19 @@ final class Services {
 	 * Run activation logic.
 	 *
 	 * This should be hooked up to the WordPress activation hook.
-     *
-     * @todo Iterate over blogs on multisite to activate on all subsites by default here?
 	 *
+	 * @todo Iterate over blogs on multisite to activate on all subsites by default here?
+	 *
+	 * @param bool $network_wide Whether the activation was done network-wide.
 	 * @return void
 	 */
-	public static function activate() {
+	public static function activate( $network_wide ) {
 		foreach ( self::instances() as $service ) {
 			if ( ! $service instanceof HasActivation ) {
 				continue;
 			}
 
-			$service->activate();
+			$service->activate( $network_wide );
 		}
 	}
 
@@ -67,17 +68,18 @@ final class Services {
 	 *
 	 * This should be hooked up to the WordPress deactivation hook.
 	 *
-     * @todo Iterate over blogs on multisite to deactivate on all subsites by default here?
-     *
+	 * @todo Iterate over blogs on multisite to deactivate on all subsites by default here?
+	 *
+	 * @param bool $network_wide Whether the deactivation was done network-wide.
 	 * @return void
 	 */
-	public static function deactivate() {
+	public static function deactivate( $network_wide ) {
 		foreach ( self::instances() as $service ) {
 			if ( ! $service instanceof HasDeactivation ) {
 				continue;
 			}
 
-			$service->deactivate();
+			$service->deactivate( $network_wide );
 		}
 	}
 
