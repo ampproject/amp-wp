@@ -13,6 +13,8 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Services;
+
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', __DIR__ );
 define( 'AMP__VERSION', '1.5.0-alpha' );
@@ -268,6 +270,8 @@ if ( extension_loaded( 'xdebug' ) ) {
 
 require_once AMP__DIR__ . '/vendor/autoload.php';
 
+Services::register();
+
 register_activation_hook( __FILE__, 'amp_activate' );
 
 /**
@@ -276,6 +280,7 @@ register_activation_hook( __FILE__, 'amp_activate' );
  * @since 0.2
  */
 function amp_activate() {
+	Services::activate();
 	amp_after_setup_theme();
 	if ( ! did_action( 'amp_init' ) ) {
 		amp_init();
@@ -291,6 +296,7 @@ register_deactivation_hook( __FILE__, 'amp_deactivate' );
  * @since 0.2
  */
 function amp_deactivate() {
+	Services::deactivate();
 	// We need to manually remove the amp endpoint.
 	global $wp_rewrite;
 	foreach ( $wp_rewrite->endpoints as $index => $endpoint ) {
@@ -301,24 +307,6 @@ function amp_deactivate() {
 	}
 
 	flush_rewrite_rules( false );
-}
-
-// @todo Quick fix for now, no centralized flow yet to register services.
-foreach ( [
-	'AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching',
-] as $background_task ) {
-	try {
-		( new $background_task() )->register();
-	} catch ( Exception $exception ) {
-		// @todo No logger yet, dump to error log?
-		$exception_class = get_class( $exception );
-		$error_message   = "Exception '{$exception_class}' thrown in background task '{$background_task}': {$exception->getMessage()}";
-		if ( class_exists( 'WP_CLI' ) ) {
-			WP_CLI::warning( $error_message );
-		} else {
-			error_log( $error_message ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-		}
-	}
 }
 
 // The plugins_loaded action is the earliest we can run this since that is when pluggable.php has been required and wp_hash() is available.

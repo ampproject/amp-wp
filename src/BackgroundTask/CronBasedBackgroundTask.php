@@ -7,15 +7,16 @@
 
 namespace AmpProject\AmpWP\BackgroundTask;
 
-use AmpProject\AmpWP\Exception\FailedToRegisterBackgroundTask;
-use AmpProject\AmpWP\Exception\InvalidInterval;
+use AmpProject\AmpWP\HasActivation;
+use AmpProject\AmpWP\HasDeactivation;
+use AmpProject\AmpWP\Service;
 
 /**
  * Abstract base class for using cron to execute a background task.
  *
  * @package AmpProject\AmpWP
  */
-abstract class CronBasedBackgroundTask {
+abstract class CronBasedBackgroundTask implements Service, HasActivation, HasDeactivation {
 
 	const DEFAULT_INTERVAL_HOURLY      = 'hourly';
 	const DEFAULT_INTERVAL_TWICE_DAILY = 'twicedaily';
@@ -33,7 +34,7 @@ abstract class CronBasedBackgroundTask {
 	];
 
 	/**
-	 * Register the background task with the system.
+	 * Register the service with the system.
 	 *
 	 * @return void
 	 */
@@ -44,10 +45,9 @@ abstract class CronBasedBackgroundTask {
 	/**
 	 * Run activation logic.
 	 *
-	 * This should be hooked up to the WordPress deactivation hook.
+	 * This should be hooked up to the WordPress activation hook.
 	 *
 	 * @return void
-	 * @throws FailedToRegisterBackgroundTask If the background task could not be registered with WordPress.
 	 */
 	public function activate() {
 		$event_name = $this->get_event_name();
