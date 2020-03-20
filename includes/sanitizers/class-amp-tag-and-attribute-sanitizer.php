@@ -58,7 +58,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	const INVALID_URL_PROTOCOL                 = 'INVALID_URL_PROTOCOL';
 	const INVALID_URL                          = 'INVALID_URL';
 	const DISALLOWED_RELATIVE_URL              = 'DISALLOWED_RELATIVE_URL';
-	const DISALLOWED_EMPTY_URL                 = 'DISALLOWED_EMPTY_URL';
+	const MISSING_URL                          = 'MISSING_URL';
 	const INVALID_BLACKLISTED_VALUE_REGEX      = 'INVALID_BLACKLISTED_VALUE_REGEX';
 	const DISALLOWED_PROPERTY_IN_ATTR_VALUE    = 'DISALLOWED_PROPERTY_IN_ATTR_VALUE';
 	const MISSING_MANDATORY_PROPERTY           = 'MISSING_MANDATORY_PROPERTY';
@@ -1280,7 +1280,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				$attrs_to_remove[] = [ $attr_node, self::INVALID_URL, null ];
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_disallowed_empty( $node, $attr_name, $attr_spec_rule ) ) {
-				$attrs_to_remove[] = [ $attr_node, self::DISALLOWED_EMPTY_URL, null ];
+				$attrs_to_remove[] = [ $attr_node, self::MISSING_URL, null ];
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_RELATIVE ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_disallowed_relative( $node, $attr_name, $attr_spec_rule ) ) {
 				$attrs_to_remove[] = [ $attr_node, self::DISALLOWED_RELATIVE_URL, null ];
@@ -1337,11 +1337,17 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		$input_height->validate( $allow_auto, $allow_fluid );
 
 		if ( ! $input_width->isValid() ) {
-			return [ 'code' => self::INVALID_LAYOUT_WIDTH ];
+			return [
+				'code'      => self::INVALID_LAYOUT_WIDTH,
+				'attribute' => 'width',
+			];
 		}
 
 		if ( ! $input_height->isValid() ) {
-			return [ 'code' => self::INVALID_LAYOUT_HEIGHT ];
+			return [
+				'code'      => self::INVALID_LAYOUT_HEIGHT,
+				'attribute' => 'height',
+			];
 		}
 
 		// No need to go further if there is no layout attribute.
@@ -1359,7 +1365,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Only FLEX_ITEM allows for height to be set to auto.
 		if ( $height->isAuto() && AMP_Rule_Spec::LAYOUT_FLEX_ITEM !== $layout ) {
-			return [ 'code' => self::INVALID_LAYOUT_AUTO_HEIGHT ];
+			return [
+				'code'      => self::INVALID_LAYOUT_AUTO_HEIGHT,
+				'attribute' => 'height',
+			];
 		}
 
 		// FIXED, FIXED_HEIGHT, INTRINSIC, RESPONSIVE must have height set.
@@ -1372,12 +1381,19 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			) &&
 			! $height->isDefined()
 		) {
-			return [ 'code' => self::INVALID_LAYOUT_NO_HEIGHT ];
+			return [
+				'code'      => self::INVALID_LAYOUT_NO_HEIGHT,
+				'attribute' => 'height',
+			];
 		}
 
 		// For FIXED_HEIGHT if width is set it must be auto.
 		if ( AMP_Rule_Spec::LAYOUT_FIXED_HEIGHT === $layout && $width->isDefined() && ! $width->isAuto() ) {
-			return [ 'code' => self::INVALID_LAYOUT_FIXED_HEIGHT ];
+			return [
+				'code'                => self::INVALID_LAYOUT_FIXED_HEIGHT,
+				'attribute'           => 'width',
+				'required_attr_value' => 'auto',
+			];
 		}
 
 		// FIXED, INTRINSIC, RESPONSIVE must have width set and not be auto.
@@ -1387,7 +1403,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			AMP_Rule_Spec::LAYOUT_RESPONSIVE === $layout
 		) {
 			if ( ! $width->isDefined() || $width->isAuto() ) {
-				return [ 'code' => self::INVALID_LAYOUT_AUTO_WIDTH ];
+				return [
+					'code'      => self::INVALID_LAYOUT_AUTO_WIDTH,
+					'attribute' => 'width',
+				];
 			}
 		}
 
@@ -1404,7 +1423,11 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Heights attribute is only allowed for RESPONSIVE layout.
 		if ( ! $this->is_empty_attribute_value( $heights_attr ) && AMP_Rule_Spec::LAYOUT_RESPONSIVE !== $layout ) {
-			return [ 'code' => self::INVALID_LAYOUT_HEIGHTS ];
+			return [
+				'code'                => self::INVALID_LAYOUT_HEIGHTS,
+				'attribute'           => 'layout',
+				'required_attr_value' => 'responsive',
+			];
 		}
 
 		return true;
@@ -2339,6 +2362,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					[
 						'code'                => self::DISALLOWED_DESCENDANT_TAG,
 						'allowed_descendants' => $allowed_descendants,
+						'disallowed_ancestor' => $node->parentNode->nodeName,
 						'spec_name'           => $spec_name,
 					]
 				);
@@ -2398,8 +2422,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				return true;
 			} else {
 				return [
-					'code'           => self::INCORRECT_NUM_CHILD_TAGS,
-					'children_count' => $child_element_count,
+					'code'                 => self::INCORRECT_NUM_CHILD_TAGS,
+					'children_count'       => $child_element_count,
 					'required_child_count' => $child_tags['mandatory_num_child_tags'],
 				];
 			}
@@ -2412,8 +2436,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				return true;
 			} else {
 				return [
-					'code'           => self::INCORRECT_MIN_NUM_CHILD_TAGS,
-					'children_count' => $child_element_count,
+					'code'                     => self::INCORRECT_MIN_NUM_CHILD_TAGS,
+					'children_count'           => $child_element_count,
 					'required_min_child_count' => $child_tags['mandatory_min_num_child_tags'],
 				];
 			}

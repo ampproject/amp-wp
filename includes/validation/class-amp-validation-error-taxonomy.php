@@ -2180,7 +2180,7 @@ class AMP_Validation_Error_Taxonomy {
 				?>
 				<dt><?php echo esc_html( self::get_source_key_label( $key, $validation_error ) ); ?></dt>
 				<dd class="detailed">
-					<?php if ( in_array( $key, [ 'node_name', 'parent_name', 'required_parent_name' ], true ) ) : ?>
+					<?php if ( in_array( $key, [ 'node_name', 'parent_name', 'required_parent_name', 'required_attr_value' ], true ) ) : ?>
 						<code><?php echo esc_html( $value ); ?></code>
 					<?php elseif ( 'css_property_name' === $key ) : ?>
 						<?php
@@ -3046,6 +3046,7 @@ class AMP_Validation_Error_Taxonomy {
 			case AMP_Tag_And_Attribute_Sanitizer::MANDATORY_CDATA_MISSING_OR_INCORRECT:
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_HTML_COMMENTS:
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_CSS_IMPORTANT:
+			case AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_CONTENTS:
 			case AMP_Tag_And_Attribute_Sanitizer::CDATA_VIOLATES_BLACKLIST:
 				return esc_html__( 'Illegal text content', 'amp' );
 			case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_CTRL_CHAR:
@@ -3170,6 +3171,7 @@ class AMP_Validation_Error_Taxonomy {
 				);
 
 			case AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG_ANCESTOR:
+			case AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_DESCENDANT_TAG:
 				/* translators: %1$s is the node name, %2$s is the disallowed ancestor tag name */
 				return sprintf(
 					__( "The tag '%1\$s' may not appear as a descendant of tag '%2\$s'", 'amp' ),
@@ -3186,43 +3188,67 @@ class AMP_Validation_Error_Taxonomy {
 				);
 
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE:
-				/* translators: %1$s is the attribute name, %2$s is the element name, %3$s is the invalid attribute value */
+			case AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE_CASEI:
+			case AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE_REGEX:
+			case AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE_REGEX_CASEI:
+			case AMP_Tag_And_Attribute_Sanitizer::INVALID_BLACKLISTED_VALUE_REGEX:
+				/* translators: %1$s is the attribute name, %2$s is the invalid attribute value */
 				return sprintf(
-					__( "The attribute '%1\$s' in tag '%2\$s' is set to the invalid value '%3\$s'", 'amp' ),
+					__( "The attribute '%1\$s'is set to the invalid value '%2\$s'", 'amp' ),
 					esc_html( $validation_error['node_name'] ),
-					esc_html( $validation_error['parent_name'] ),
 					esc_html( $validation_error['element_attributes'][ $validation_error['node_name'] ] )
 				);
 
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_URL_PROTOCOL:
-				$parsed_url = wp_parse_url( $validation_error['element_attributes'][ $validation_error['node_name'] ] );
+				$parsed_url       = wp_parse_url( $validation_error['element_attributes'][ $validation_error['node_name'] ] );
 				$invalid_protocol = isset( $parsed_url['scheme'] ) ? $parsed_url['scheme'] : '';
 
-				/* translators: %1$s is the invalid protocol, %2$s is attribute name, %3$s is the element name */
+				/* translators: %1$s is the invalid protocol, %2$s is attribute name */
 				return sprintf(
-					__( "Invalid URL protocol '%1\$s:' for attribute '%2\$s' in tag '%3\$s'", 'amp' ),
+					__( "Invalid URL protocol '%1\$s:' for attribute '%2\$s'", 'amp' ),
 					$invalid_protocol,
-					esc_html( $validation_error['node_name'] ),
-					esc_html( $validation_error['parent_name'] )
+					esc_html( $validation_error['node_name'] )
 				);
 
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_URL:
-				/* translators: %1$s is the invalid URL, %2$s is attribute name, %3$s is the element name */
+				/* translators: %1$s is the invalid URL, %2$s is attribute name */
 				return sprintf(
-					__( "Malformed URL '%1\$s' for attribute '%2\$s' in tag '%3\$s'", 'amp' ),
+					__( "Malformed URL '%1\$s' for attribute '%2\$s'", 'amp' ),
 					esc_html( $validation_error['element_attributes'][ $validation_error['node_name'] ] ),
-					esc_html( $validation_error['node_name'] ),
-					esc_html( $validation_error['parent_name'] )
+					esc_html( $validation_error['node_name'] )
 				);
 
 			case AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_RELATIVE_URL:
-				/* translators: %1$s is the relative URL, %2$s is attribute name, %3$s is the element name */
+				/* translators: %1$s is the relative URL, %2$s is attribute name */
 				return sprintf(
-					__( "The relative URL '%1\$s' for attribute '%2\$s' in tag '%3\$s' is disallowed", 'amp' ),
+					__( "The relative URL '%1\$s' for attribute '%2\$s' is disallowed", 'amp' ),
 					esc_html( $validation_error['element_attributes'][ $validation_error['node_name'] ] ),
-					esc_html( $validation_error['node_name'] ),
-					esc_html( $validation_error['parent_name'] )
+					esc_html( $validation_error['node_name'] )
 				);
+
+			case AMP_Tag_And_Attribute_Sanitizer::MISSING_URL:
+				/* translators: %1$s is attribute name */
+				return sprintf(
+					__( "Missing URL for attribute '%s'", 'amp' ),
+					esc_html( $validation_error['node_name'] )
+				);
+
+			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_WIDTH:
+			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_HEIGHT:
+			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_AUTO_HEIGHT:
+			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_NO_HEIGHT:
+			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_FIXED_HEIGHT:
+			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_AUTO_WIDTH:
+			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_HEIGHTS:
+				/* translators: %1$s is the invalid attribute value, %2$s is the attribute name */
+				return sprintf(
+					__( "Invalid value '%1\$s' for attribute '%2\$s'", 'amp' ),
+					esc_html( $validation_error['node_attributes'][ $validation_error['attribute'] ] ),
+					esc_html( $validation_error['attribute'] )
+				);
+
+			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_UNIT_DIMENSIONS:
+				return __( 'Inconsistent units for width and height', 'amp' );
 
 			default:
 				/* translators: %s error code */
@@ -3303,6 +3329,10 @@ class AMP_Validation_Error_Taxonomy {
 				return __( 'Disallowed ancestor element', 'amp' );
 			case 'required_ancestor_name':
 				return __( 'Required ancestor element', 'amp' );
+			case 'attribute':
+				return __( 'Invalid attribute', 'amp' );
+			case 'required_attr_value':
+				return __( 'Required attribute value', 'amp' );
 			default:
 				return $key;
 		}

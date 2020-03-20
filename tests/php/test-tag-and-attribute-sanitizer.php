@@ -1040,7 +1040,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-user-notification data-dismiss-href></amp-user-notification>',
 				'<amp-user-notification></amp-user-notification>',
 				[ 'amp-user-notification' ],
-				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_EMPTY_URL ],
+				[ AMP_Tag_And_Attribute_Sanitizer::MISSING_URL ],
 			],
 
 			'allowed_empty_attr'                           => [
