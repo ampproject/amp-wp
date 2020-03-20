@@ -93,7 +93,7 @@ final class MonitorCssTransientCaching extends CronBasedBackgroundTask {
 		}
 
 		if ( null === $transient_count ) {
-			$transient_count = $this->query_css_transient_count();
+			$transient_count = self::query_css_transient_count();
 		}
 
 		$date_string = $date->format( 'Ymd' );
@@ -135,7 +135,7 @@ final class MonitorCssTransientCaching extends CronBasedBackgroundTask {
 	 *
 	 * @return int Count of transients caching stylesheets.
 	 */
-	private function query_css_transient_count() {
+	public static function query_css_transient_count() {
 		global $wpdb;
 
 		return (int) $wpdb->get_var(
