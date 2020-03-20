@@ -72,13 +72,6 @@ final class WpHttpRemoteGetRequest implements RemoteGetRequest {
 	private $retries;
 
 	/**
-	 * Instance of the WordPress HTTP abstraction object.
-	 *
-	 * @var WP_Http
-	 */
-	private $wp_http;
-
-	/**
 	 * Instantiate a WpHttpRemoteGetRequest object.
 	 *
 	 * @param bool $ssl_verify Optional. Whether to verify SSL certificates. Defaults to true.
@@ -98,8 +91,6 @@ final class WpHttpRemoteGetRequest implements RemoteGetRequest {
 		$this->ssl_verify = $ssl_verify;
 		$this->timeout    = $timeout;
 		$this->retries    = $retries;
-
-		$this->wp_http = _wp_http_get_object();
 	}
 
 	/**
@@ -118,7 +109,7 @@ final class WpHttpRemoteGetRequest implements RemoteGetRequest {
 				'sslverify' => $this->ssl_verify,
 			];
 
-			$response = $this->wp_http->get( $url, $args );
+			$response = wp_remote_get( $url, $args );
 
 			if ( $response instanceof WP_Error ) {
 				return new RemoteGetRequestResponse( $response->get_error_message(), [], 500 );
