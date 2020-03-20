@@ -196,6 +196,14 @@ final class MonitorCssTransientCaching extends CronBasedBackgroundTask {
 	 * @return float Threshold to use.
 	 */
 	private function get_threshold() {
+
+		/**
+		 * Filters the threshold to use for disabling transient caching of stylesheets.
+		 *
+		 * @since 1.5.0
+		 *
+		 * @param int $threshold Maximum average number of transients per day.
+		 */
 		$threshold = (float) apply_filters( 'amp_css_transient_monitoring_threshold', self::DEFAULT_THRESHOLD );
 
 		return $threshold > 0.0 ? $threshold : self::DEFAULT_THRESHOLD;
@@ -209,6 +217,14 @@ final class MonitorCssTransientCaching extends CronBasedBackgroundTask {
 	 * @return int Sampling range to use.
 	 */
 	private function get_sampling_range() {
+
+		/**
+		 * Filters the sampling range to use for monitoring the transient caching of stylesheets.
+		 *
+		 * @since 1.5.0
+		 *
+		 * @param int $sampling_rage Sampling range in number of days.
+		 */
 		$sampling_range = (int) apply_filters( 'amp_css_transient_monitoring_sampling_range', self::DEFAULT_SAMPLING_RANGE );
 
 		return $sampling_range > 0 ? $sampling_range : self::DEFAULT_SAMPLING_RANGE;
