@@ -27,7 +27,6 @@ use AmpProject\Dom\Document;
 class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 	const DISALLOWED_TAG                       = 'DISALLOWED_TAG';
-	const DISALLOWED_TAG_MULTIPLE_CHOICES      = 'DISALLOWED_TAG_MULTIPLE_CHOICES';
 	const DISALLOWED_CHILD_TAG                 = 'DISALLOWED_CHILD_TAG';
 	const DISALLOWED_FIRST_CHILD_TAG           = 'DISALLOWED_FIRST_CHILD_TAG';
 	const INCORRECT_NUM_CHILD_TAGS             = 'INCORRECT_NUM_CHILD_TAGS';
@@ -505,7 +504,15 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					array_unique(
 						array_map(
 							static function ( $validation_error ) {
-								unset( $validation_error['spec_name'] );
+								unset(
+									$validation_error['spec_name'],
+									// Remove other keys that may not not make the error unique.
+									$validation_error['required_parent_name'],
+									$validation_error['required_ancestor_name'],
+									$validation_error['required_child_count'],
+									$validation_error['required_min_child_count'],
+									$validation_error['required_attr_value']
+								);
 								return $validation_error;
 							},
 							$validation_errors
@@ -527,13 +534,12 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					);
 				} else {
 					// Otherwise, we have a rare condition where multiple tag specs fail for different reasons.
-					$this->remove_invalid_child(
-						$node,
-						[
-							'code'   => self::DISALLOWED_TAG_MULTIPLE_CHOICES,
-							'errors' => $validation_errors,
-						]
-					);
+					foreach ( $validation_errors as $validation_error ) {
+						$this->remove_invalid_child(
+							$node,
+							$validation_error
+						);
+					}
 				}
 			}
 			return null;

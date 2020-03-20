@@ -92,19 +92,14 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[],
 				[
 					[
-						'code'   => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG_MULTIPLE_CHOICES,
-						'errors' => [
-							[
-								'code'                 => AMP_Tag_And_Attribute_Sanitizer::WRONG_PARENT_TAG,
-								'spec_name'            => 'noscript enclosure for boilerplate',
-								'required_parent_name' => 'head'
-							],
-							[
-								'code'                => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG_ANCESTOR,
-								'disallowed_ancestor' => 'noscript',
-								'spec_name'           => 'noscript',
-							],
-						],
+						'code'                 => AMP_Tag_And_Attribute_Sanitizer::WRONG_PARENT_TAG,
+						'spec_name'            => 'noscript enclosure for boilerplate',
+						'required_parent_name' => 'head'
+					],
+					[
+						'code'                => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG_ANCESTOR,
+						'disallowed_ancestor' => 'noscript',
+						'spec_name'           => 'noscript',
 					],
 				],
 			],
