@@ -3151,14 +3151,14 @@ class AMP_Validation_Error_Taxonomy {
 					esc_html(
 						/* translators: %1$s is the node name, %2$s is required child count */
 						_n(
-							'Tag %1$s must have %2$d child tag',
-							'Tag %1$s must have %2$d child tags',
+							'Tag %1$s must have %2$s child tag',
+							'Tag %1$s must have %2$s child tags',
 							(int) $validation_error['required_child_count'],
 							'amp'
 						)
 					),
 					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>',
-					'<code>' . esc_html( $validation_error['required_child_count'] ) . '</code>'
+					esc_html( number_format_i18n( (int) $validation_error['required_child_count'] ) )
 				);
 
 			case AMP_Tag_And_Attribute_Sanitizer::INCORRECT_MIN_NUM_CHILD_TAGS:
@@ -3166,14 +3166,14 @@ class AMP_Validation_Error_Taxonomy {
 					esc_html(
 						/* translators: %1$s is the node name, %2$s is required child count */
 						_n(
-							'Tag %1$s must have a minimum of %2$d child tag',
-							'Tag %1$s must have a minimum of %2$d child tags',
+							'Tag %1$s must have a minimum of %2$s child tag',
+							'Tag %1$s must have a minimum of %2$s child tags',
 							(int) $validation_error['required_min_child_count'],
 							'amp'
 						)
 					),
 					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>',
-					'<code>' . esc_html( $validation_error['required_min_child_count'] ) . '</code>'
+					esc_html( number_format_i18n( (int) $validation_error['required_min_child_count'] ) )
 				);
 
 			case AMP_Tag_And_Attribute_Sanitizer::WRONG_PARENT_TAG:
