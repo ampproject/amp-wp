@@ -5,7 +5,7 @@
  * @package AmpProject\AmpWP
  */
 
-namespace AmpProject\AmpWP;
+namespace AmpProject\AmpWP\RemoteRequest;
 
 use DateTimeImmutable;
 use DateTimeInterface;
@@ -16,7 +16,6 @@ use DateTimeInterface;
  * @package AmpProject\AmpWP
  */
 final class CachedData {
-
 
 	/**
 	 * Cached value.

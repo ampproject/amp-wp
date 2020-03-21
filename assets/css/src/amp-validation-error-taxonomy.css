@@ -27,7 +27,7 @@ td.column-error_code .error-code {
 	font-family: Consolas, Monaco, monospace;
 }
 
-th.column-status {
+th.column-included {
 	width: 15%;
 }
 
@@ -467,7 +467,7 @@ body.taxonomy-amp_validation_error .wp-list-table .new th.check-column input {
 	text-align: right;
 }
 
-#amp_stylesheets .column-stylesheet_status {
+#amp_stylesheets .column-stylesheet_included {
 	width: 5%;
 	white-space: nowrap;
 	text-align: center;

@@ -71,6 +71,16 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG_ANCESTOR ],
 			],
 
+			'amp-script-intrinsic'                         => [
+				'
+				<amp-script src="https://example.com/hello-world.js" layout="intrinsic" width="200" height="123">
+					<button>Hello amp-script!</button>
+				</amp-script>
+				',
+				null,
+				[ 'amp-script' ],
+			],
+
 			'bad-svg-stop'                                 => [
 				'<stop offset="5%" stop-color="gold" />',
 				'',
@@ -390,11 +400,69 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				],
 			],
 
-			// AMP-NEXT-PAGE > [separator].
-			'reference-point-amp-next-page-separator'      => [
-				'<amp-next-page src="https://example.com/config.json"><div separator><h1>Keep reading</h1></div></amp-next-page>',
+			'amp-next-page-example'                        => [
+				'
+				<amp-next-page deep-parsing="false" max-pages="5">
+				 <script type="application/json">
+				   [
+				     {
+				       "image": "https://example.com/image1.jpg",
+				       "title": "This article shows first",
+				       "url": "https://example.com/article1.amp.html"
+				     }
+				   ]
+				 </script>
+				</amp-next-page>
+				',
 				null,
 				[ 'amp-next-page' ],
+			],
+
+			'amp-next-page-hide-and-replace'               => [
+				'
+				<header class="my-header" next-page-hide>
+					<h2>Text here.</h2>
+				</header>
+				<div class="sticky" next-page-replace="sticky-123">
+					<h2>The second sticky will replace me once you scroll past my page</h2>
+				</div>
+				',
+				null,
+				[ 'amp-next-page' ],
+			],
+
+			// AMP-NEXT-PAGE > [separator].
+			'reference-point-amp-next-page-separator'      => [
+				'<amp-next-page src="https://example.com/config.json" xssi-prefix=")]}"><div separator><h1>Keep reading</h1></div></amp-next-page>',
+				null,
+				[ 'amp-next-page' ],
+			],
+
+			// AMP-NEXT-PAGE > [footer].
+			'reference-point-amp-next-page-footer'         => [
+				'<amp-next-page src="https://example.com/config.json"><div footer>The footer</div></amp-next-page>',
+				null,
+				[ 'amp-next-page' ],
+			],
+
+			// AMP-NEXT-PAGE > [recommendation-box].
+			'reference-point-amp-next-page-recommendation' => [
+				'
+				<amp-next-page src="https://example.com/config.json">
+				  <div recommendation-box class="my-custom-recommendation-box">
+				    Here are a few more articles:
+				    <template type="amp-mustache">
+				      <div class="recommendation-box-content">
+				{{#pages}}        <span class="title">{{title}}</span>
+				        <span class="url">{{url}}</span>
+				        <span class="image">{{image}}</span>
+				{{/pages}}      </div>
+				    </template>
+				  </div>
+				</amp-next-page>
+				',
+				null,
+				[ 'amp-next-page', 'amp-mustache' ],
 			],
 
 			// amp-next-page extension .json configuration.
@@ -435,7 +503,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						'',
 						'
 						<amp-story standalone live-story-disabled supports-landscape title="My Story" publisher="The AMP Team" publisher-logo-src="https://example.com/logo/1x1.png" poster-portrait-src="https://example.com/my-story/poster/3x4.jpg" poster-square-src="https://example.com/my-story/poster/1x1.jpg" poster-landscape-src="https://example.com/my-story/poster/4x3.jpg" background-audio="my.mp3">
-							<amp-story-page id="my-first-page">
+							<amp-story-page id="my-first-page" next-page-no-ad>
 								<amp-story-grid-layer template="fill">
 									<amp-img id="object1" animate-in="rotate-in-left" src="https://example.ampproject.org/helloworld/bg1.jpg" width="900" height="1600">
 									</amp-img>
@@ -568,9 +636,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'brid-player'                                  => [
-				'<amp-brid-player data-dynamic="abc" data-partner="264" data-player="4144" data-video="13663" layout="responsive" width="480" height="270"></amp-brid-player>',
+				'<amp-brid-player data-dynamic="abc" data-partner="264" data-player="4144" data-video="13663" layout="responsive" width="480" height="270" dock></amp-brid-player>',
 				null,
-				[ 'amp-brid-player' ],
+				[ 'amp-brid-player', 'amp-video-docking' ],
 			],
 
 			'brightcove'                                   => [
@@ -659,8 +727,50 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'form'                                         => [
-				'<form method="get" action="/form/search-html/get" target="_blank"><fieldset><label><span>Search for</span><input type="search" placeholder="test" name="term" required></label><input type="submit" value="Search"></fieldset></form>',
-				'<form method="get" action="/form/search-html/get" target="_blank"><fieldset><label><span>Search for</span><input type="search" placeholder="test" name="term" required></label><input type="submit" value="Search"></fieldset></form>',
+				'<form method="get" action="/form/search-html/get" target="_blank"><fieldset><label><span>Search for</span><input type="search" placeholder="test" name="term" required></label><input type="submit" value="Search"><input type="button" value="Open Lightbox" on="tap:lb1.open"></fieldset></form>',
+				null,
+				[ 'amp-form' ],
+			],
+
+			'form-visible-when-invalid'                    => [
+				'
+				<form method="post"
+				    action-xhr="https://example.com/subscribe"
+				    custom-validation-reporting="show-all-on-submit" target="_blank">
+				    <fieldset>
+				      <label>
+				        <span>Name:</span>
+				        <input type="text"
+				          name="name"
+				          id="name5"
+				          required
+				          pattern="\w+\s\w+">
+				        <span visible-when-invalid="valueMissing"
+				          validation-for="name5"></span>
+				        <span visible-when-invalid="patternMismatch"
+				          validation-for="name5">
+				          Please enter your first and last name separated by a space (e.g. Jane Miller)
+				        </span>
+				      </label>
+				      <br>
+				      <label>
+				        <span>Email:</span>
+				        <input type="email"
+				          name="email"
+				          id="email5"
+				          required>
+				        <span visible-when-invalid="valueMissing"
+				          validation-for="email5"></span>
+				        <span visible-when-invalid="typeMismatch"
+				          validation-for="email5"></span>
+				      </label>
+				      <br>
+				      <input type="submit"
+				        value="Subscribe">
+				    </fieldset>
+				  </form>
+				',
+				null,
 				[ 'amp-form' ],
 			],
 
@@ -716,6 +826,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						'<a href="webcal:foo">Click me.</a>',
 						'<a href="whatsapp:foo">Click me.</a>',
 						'<a href="web+mastodon:follow/@handle@instance">Click me.</a>',
+						'<a href="feed://blog.amp.dev/feed/" type="application/rss+xml">Click me.</a>',
 					]
 				),
 			],
@@ -1486,7 +1597,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'amp_date_picker'                              => [
-				'<amp-date-picker id="simple-date-picker" type="single" mode="overlay" layout="container" on="select:AMP.setState({date1: event.date, dateType1: event.id})" format="Y-MM-DD" open-after-select input-selector="[name=date1]" class="mr1 ml1 flex picker"><div class="ampstart-input inline-block mt1"><input class="border-none p0" name="date1" placeholder="Pick a date"></div><button class="ampstart-btn m1 caps" on="tap: simple-date-picker.clear">Clear</button></amp-date-picker>',
+				'<amp-date-picker id="simple-date-picker" type="single" mode="overlay" layout="container" on="select:AMP.setState({date1: event.date, dateType1: event.id})" format="Y-MM-DD" open-after-select input-selector="[name=date1]" class="mr1 ml1 flex picker" hide-keyboard-shortcuts-panel><div class="ampstart-input inline-block mt1"><input class="border-none p0" name="date1" placeholder="Pick a date"></div><button class="ampstart-btn m1 caps" on="tap: simple-date-picker.clear">Clear</button></amp-date-picker>',
 				null, // No change.
 				[ 'amp-date-picker' ],
 			],
@@ -1842,7 +1953,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 					[ "\n", "\t" ],
 					'',
 					'
-						<amp-list load-more="auto" src="https://www.load.more.example.com/" width="400" height="800">
+						<amp-list load-more="auto" src="https://www.load.more.example.com/" width="400" height="800" xssi-prefix=")]}\'">
 							<amp-list-load-more load-more-button>
 								<template type="amp-mustache">
 									Showing {{#count}} out of {{#total}} items
@@ -2065,7 +2176,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			'amp-autocomplete'                             => [
 				'
 					<form method="post" action-xhr="/form/echo-json/post" target="_blank" on="submit-success:AMP.setState({result: event.response})">
-						<amp-autocomplete id="autocomplete" filter="substring" min-characters="0">
+						<amp-autocomplete id="autocomplete" filter="substring" min-characters="0" inline="@">
 							<input type="text" id="input">
 							<script type="application/json" id="script">
 							{ "items" : ["apple", "banana", "orange"] }
@@ -2077,6 +2188,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						<script type="application/json" id="script">
 						{ "items" : ["red", "green", "blue"] }
 						</script>
+					</amp-autocomplete>
+					<amp-autocomplete
+						filter="prefix"
+						src="https://example.com/articles.json?ref=CANONICAL_URL"
+						query="q">
+						<input>
 					</amp-autocomplete>
 				',
 				null,
@@ -2099,16 +2216,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				',
 				null,
 				[ 'amp-truncate-text' ],
-			],
-
-			'amp-user-location'                            => [
-				'
-					<button on="tap: location.request()">Use my location</button>
-					<amp-user-location id="location" on="approve:AMP.setState({located: true})" layout="nodisplay">
-					</amp-user-location>
-				',
-				null,
-				[ 'amp-user-location' ],
 			],
 
 			'amp-megaphone'                                => [
@@ -2283,6 +2390,300 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			'fill_layout_no_dimensions'                    => [
 				'<amp-img src="/img1.png" layout="fill"></amp-img>',
 				null,
+			],
+
+			'amp-inline-gallery'                           => [
+				'
+				<amp-inline-gallery layout="container">
+					<amp-base-carousel
+							class="gallery"
+							layout="responsive"
+							width="3.6"
+							height="2"
+							snap-align="center"
+							loop="true"
+							visible-count="1.2"
+							lightbox>
+						<amp-img
+								src="/static/inline-examples/images/image1.jpg"
+								layout="responsive"
+								width="450"
+								height="300"></amp-img>
+						<amp-img
+								src="/static/inline-examples/images/image2.jpg"
+								layout="responsive"
+								width="450"
+								height="300"></amp-img>
+						<amp-img
+								src="/static/inline-examples/images/image3.jpg"
+								layout="responsive"
+								width="450"
+								height="300"></amp-img>
+					</amp-base-carousel>
+					<amp-inline-gallery-pagination layout="nodisplay" inset>
+					</amp-inline-gallery-pagination>
+				</amp-inline-gallery>
+				',
+				null,
+				[ 'amp-base-carousel', 'amp-inline-gallery', 'amp-lightbox-gallery' ],
+			],
+
+			'amp-inline-gallery-with-thumbs'               => [
+				'
+				<amp-inline-gallery layout="container">
+				  <!--
+				    The amp-layout with layout="container" is used to display the pagination on
+				    top of the carousel instead of the thumbnails. You can also use a div with
+				    `position: relative;`
+				  -->
+				  <amp-layout layout="container">
+				    <amp-base-carousel
+				      class="gallery"
+				      layout="responsive"
+				      width="3"
+				      height="2"
+				      snap-align="center"
+				      loop="true">
+				      <amp-img
+				        class="slide"
+				        layout="flex-item"
+				        src="https://picsum.photos/id/779/600/400"
+				        srcset="https://picsum.photos/id/779/150/100 150w,
+				                https://picsum.photos/id/779/600/400 600w,
+				                https://picsum.photos/id/779/1200/800 1200w">
+				      </amp-img>
+				      <amp-img
+				        class="slide"
+				        layout="flex-item"
+				        src="https://picsum.photos/id/1048/600/400"
+				        srcset="https://picsum.photos/id/1048/150/100 150w,
+				                https://picsum.photos/id/1048/600/400 600w,
+				                https://picsum.photos/id/1048/1200/800 1200w">
+				      </amp-img>
+				      <amp-img
+				        class="slide"
+				        layout="flex-item"
+				        src="https://picsum.photos/id/108/600/400"
+				        srcset="https://picsum.photos/id/108/150/100 150w,
+				                https://picsum.photos/id/108/600/400 600w,
+				                https://picsum.photos/id/108/1200/800 1200w">
+				      </amp-img>
+				    </amp-base-carousel>
+				    <!--
+				        If using fewer than 8 slides, consider adding something
+				        like media="(max-width: 799px)".
+				      -->
+				    <amp-inline-gallery-pagination layout="nodisplay" inset>
+				    </amp-inline-gallery-pagination>
+				  </amp-layout>
+				  <amp-inline-gallery-thumbnails
+				    media="(min-width: 800px)"
+				    layout="fixed-height"
+				    height="96">
+				  </amp-inline-gallery-thumbnails>
+				</amp-inline-gallery>
+				',
+				null,
+				[ 'amp-base-carousel', 'amp-inline-gallery' ],
+			],
+
+			'amp-mega-menu'                                => [
+				'
+				<amp-mega-menu height="30" layout="fixed-height">
+					<nav>
+						<ul>
+							<li>
+								<span role="button">Image</span>
+								<div role="dialog">
+									<amp-img
+											src="/static/inline-examples/images/image1.jpg"
+											width="300"
+											height="200"></amp-img>
+								</div>
+							</li>
+							<li>
+								<span role="button">List</span>
+								<div role="dialog">
+									<ol>
+										<li>item 1</li>
+										<li>item 2</li>
+										<li>item 3</li>
+									</ol>
+								</div>
+							</li>
+							<li>
+								<a href="https://amp.dev/">Link</a>
+							</li>
+						</ul>
+					</nav>
+				</amp-mega-menu>
+				',
+				null,
+				[ 'amp-mega-menu' ],
+			],
+
+			'amp-mega-menu-with-template'                  => [
+				'
+				<amp-mega-menu height="60" layout="fixed-height">
+				  <amp-list
+				    height="350"
+				    layout="fixed-height"
+				    src="/static/samples/json/product-single-item.json"
+				    single-item>
+				    <template type="amp-mustache">
+				      <nav>
+				        <ul>
+				{{#values}}          <li>
+				            <h4 role="button">{{name}}</h4>
+				            <div role="dialog">
+				              <amp-img
+				                src="{{img}}"
+				                width="320"
+				                height="213"></amp-img>
+				              <p>Price: $<b>{{price}}</b></p>
+				            </div>
+				          </li>
+				{{/values}}        </ul>
+				      </nav>
+				    </template>
+				  </amp-list>
+				</amp-mega-menu>
+				',
+				null,
+				[ 'amp-mega-menu', 'amp-list', 'amp-mustache' ],
+			],
+
+			'amp-mega-menu-disallowed-descendants'         => [
+				'
+				<amp-mega-menu height="30" layout="fixed-height">
+					<nav>
+						<ul>
+							<li>
+								<span role="button">List</span>
+								<div role="dialog">
+									<details><summary>Not</summary> allowed</details>
+								</div>
+							</li>
+							<li>
+								<a href="https://amp.dev/">Link</a>
+							</li>
+						</ul>
+					</nav>
+				</amp-mega-menu>
+				',
+				'
+				<amp-mega-menu height="30" layout="fixed-height">
+					<nav>
+						<ul>
+							<li>
+								<span role="button">List</span>
+								<div role="dialog"></div>
+							</li>
+							<li>
+								<a href="https://amp.dev/">Link</a>
+							</li>
+						</ul>
+					</nav>
+				</amp-mega-menu>
+				',
+				[ 'amp-mega-menu' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_DESCENDANT_TAG ],
+			],
+
+			'amp-mega-menu-invalid-child'                  => [
+				'
+				<amp-mega-menu height="30" layout="fixed-height">
+					<div>Not allowed</div>
+				</amp-mega-menu>
+				',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_CHILD_TAG ],
+			],
+
+			'amp-nested-menu'                              => [
+				'
+				<button on="tap:sidebar1">Open Sidebar</button>
+				<amp-sidebar id="sidebar1" layout="nodisplay" style="width:300px">
+					<amp-nested-menu layout="fill">
+						<ul>
+							<li>
+								<h4 amp-nested-submenu-open>Open Sub-Menu</h4>
+								<div amp-nested-submenu>
+									<ul>
+										<li>
+											<h4 amp-nested-submenu-close>go back</h4>
+										</li>
+										<li>
+											<h4 amp-nested-submenu-open>Open Another Sub-Menu</h4>
+											<div amp-nested-submenu>
+												<h4 amp-nested-submenu-close>go back</h4>
+												<amp-img
+														src="/static/inline-examples/images/image1.jpg"
+														layout="responsive"
+														width="450"
+														height="300"></amp-img>
+											</div>
+										</li>
+									</ul>
+								</div>
+							</li>
+							<li>
+								<a href="https://amp.dev/">Link</a>
+							</li>
+						</ul>
+					</amp-nested-menu>
+				</amp-sidebar>
+				',
+				null,
+				[ 'amp-sidebar' ],
+			],
+
+			'amp-nested-menu-with-amp-list'                => [
+				'
+				<button on="tap:sidebar2">Open Sidebar</button>
+				<amp-sidebar id="sidebar2" layout="nodisplay" style="width:300px">
+				  <amp-list
+				    layout="fill"
+				    src="/static/inline-examples/data/amp-list-data.json"
+				    items="."
+				    single-item>
+				    <template type="amp-mustache">
+				      <amp-nested-menu layout="fill">
+				        <ul>
+				{{#items}}          <li>
+				            <h3 amp-nested-submenu-open>{{title}}</h3>
+				            <div amp-nested-submenu>
+				              <button amp-nested-submenu-close>close</button>
+				              <amp-img
+				                src="{{imageUrl}}"
+				                layout="responsive"
+				                width="400"
+				                height="300"></amp-img>
+				            </div>
+				          </li>
+				{{/items}}        </ul>
+				      </amp-nested-menu>
+				    </template>
+				  </amp-list>
+				</amp-sidebar>
+				',
+				null,
+				[ 'amp-sidebar', 'amp-list', 'amp-mustache' ],
+			],
+
+			'amp-redbull-player'                           => [
+				'
+				<amp-redbull-player
+				  id="rbvideo"
+				  data-param-videoid="rrn:content:videos:3965a26c-052e-575f-a28b-ded6bee23ee1:en-INT"
+				  data-param-skinid="com"
+				  data-param-locale="en"
+				  height="360"
+				  width="640"></amp-redbull-player>
+				',
+				null,
+				[ 'amp-redbull-player' ],
 			],
 		];
 	}
@@ -2538,6 +2939,35 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<html><head><meta charset="utf-8"></head><body></body></html>',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::MANDATORY_CDATA_MISSING_OR_INCORRECT ],
+			],
+			'amp_runtime'                             => [
+				'<html><head><meta charset="utf-8"><script async src="https://cdn.ampproject.org/v0.js" crossorigin="anonymous"></script></head><body></body></html>',
+				null,
+				[],
+			],
+			'amp_runtime_lts'                         => [
+				'<html><head><meta charset="utf-8"><script async src="https://cdn.ampproject.org/lts/v0.js" crossorigin="anonymous"></script></head><body></body></html>',
+				null,
+				[],
+			],
+			'amp-subscriptions'                       => [
+				// @todo The <script ciphertext type="application/octet-stream">...</script> but it is not yet supported. Support depends on todo in \AMP_Tag_And_Attribute_Sanitizer::has_parent().
+				'
+					<html>
+						<head>
+							<meta charset="utf-8">
+							<script cryptokeys sha-256-hash type="application/json">{}</script>
+						</head>
+						<body>
+							<section subscriptions-section="content" encrypted swg_amp_cache_nonce="NONCE">
+								...
+							</section>
+							<span swg_amp_cache_nonce="NONCE"></span>
+						</body>
+					</html>
+				',
+				null,
+				[ 'amp-subscriptions' ],
 			],
 		];
 

@@ -5,8 +5,13 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
+use AmpProject\AmpWP\RemoteRequest\WpHttpRemoteGetRequest;
 use AmpProject\DevMode;
 use AmpProject\Dom\Document;
+use AmpProject\Exception\FailedToGetFromRemoteUrl;
+use AmpProject\Fonts;
+use AmpProject\RemoteGetRequest;
 use Sabberworm\CSS\RuleSet\DeclarationBlock;
 use Sabberworm\CSS\CSSList\CSSList;
 use Sabberworm\CSS\Property\Selector;
@@ -323,6 +328,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	];
 
 	/**
+	 * Remote request instance.
+	 *
+	 * @var RemoteGetRequest
+	 */
+	private $remote_request;
+
+	/**
 	 * Get error codes that can be raised during parsing of CSS.
 	 *
 	 * This is used to determine which validation errors should be taken into account
@@ -416,6 +428,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 		$this->base_url    = untrailingslashit( $guessurl );
 		$this->content_url = WP_CONTENT_URL;
+
+		$this->remote_request = new CachedRemoteGetRequest( new WpHttpRemoteGetRequest() );
 	}
 
 	/**
@@ -1407,36 +1421,33 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$url = wp_parse_url( home_url(), PHP_URL_SCHEME ) . ':' . $url;
 		}
 
-		$cache_key = md5( $url );
-		$contents  = get_transient( $cache_key );
-		if ( false === $contents ) {
-			$r    = wp_remote_get( $url );
-			$code = wp_remote_retrieve_response_code( $r );
-			if ( is_wp_error( $r ) ) {
-				$contents = $r;
-			} elseif ( $code < 200 || $code >= 300 ) {
-				$message = wp_remote_retrieve_response_message( $r );
-				if ( ! $code ) {
-					$code = 'http_error';
-				} else {
-					$code = "http_{$code}";
-				}
-				if ( ! $message ) {
-					/* translators: %s: the fetched URL */
-					$message = sprintf( __( 'Failed to fetch: %s', 'amp' ), $url );
-				}
-				$contents = new WP_Error( $code, $message );
-			} elseif ( ! preg_match( '#^text/css#', wp_remote_retrieve_header( $r, 'content-type' ) ) ) {
-				$contents = new WP_Error(
-					'no_css_content_type',
-					__( 'Response did not contain the expected text/css content type.', 'amp' )
-				);
-			} else {
-				$contents = wp_remote_retrieve_body( $r );
+		try {
+			$response = $this->remote_request->get( $url );
+		} catch ( Exception $exception ) {
+			if ( $exception instanceof FailedToGetFromRemoteUrl && $exception->hasStatusCode() ) {
+				return new WP_Error( "http_{$exception->getStatusCode()}", $exception->getMessage() );
 			}
-			set_transient( $cache_key, $contents, MONTH_IN_SECONDS );
+			/* translators: %1$s: the fetched URL, %2$s the error message that was returned */
+			return new WP_Error( 'http_error', sprintf( __( 'Failed to fetch: %1$s (%2$s)', 'amp' ), $url, $exception->getMessage() ) );
 		}
-		return $contents;
+
+		$status = $response->getStatusCode();
+
+		if ( $status < 200 || $status >= 300 ) {
+			/* translators: %s: the fetched URL */
+			return new WP_Error( "http_{$status}", sprintf( __( 'Failed to fetch: %s', 'amp' ), $url ) );
+		}
+
+		$content_type = (array) $response->getHeader( 'content-type' );
+
+		if ( ! empty( $content_type ) && ! preg_match( '#^text/css#', $content_type[0] ) ) {
+			return new WP_Error(
+				'no_css_content_type',
+				__( 'Response did not contain the expected text/css content type.', 'amp' )
+			);
+		}
+
+		return $response->getBody();
 	}
 
 	/**
@@ -2914,14 +2925,20 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$css_usage_percentage = ceil( ( $total_size / $this->style_custom_cdata_spec['max_bytes'] ) * 100 );
 		$menu_item_text       = __( 'CSS Usage', 'amp' ) . ': ';
 		$menu_item_text      .= $css_usage_percentage . '%';
+		$stylesheets_a_element->appendChild( $this->dom->createTextNode( $menu_item_text ) );
 
 		if ( $css_usage_percentage > 100 ) {
-			$menu_item_text .= ' 🚫';
+			$emoji = '🚫';
 		} elseif ( $css_usage_percentage >= self::CSS_BUDGET_WARNING_PERCENTAGE ) {
-			$menu_item_text .= ' ⚠️';
+			$emoji = '⚠️';
 		}
-
-		$stylesheets_a_element->appendChild( $this->dom->createTextNode( $menu_item_text ) );
+		if ( isset( $emoji ) ) {
+			$stylesheets_a_element->appendChild( $this->dom->createTextNode( ' ' ) );
+			$span = $this->dom->createElement( 'span' );
+			$span->setAttribute( 'style', sprintf( 'font-family: %s;', Fonts::getEmojiFontFamilyValue() ) );
+			$span->appendChild( $this->dom->createTextNode( $emoji ) );
+			$stylesheets_a_element->appendChild( $span );
+		}
 
 		$validity_li_element->parentNode->insertBefore( $stylesheets_li_element, $validity_li_element->nextSibling );
 	}
