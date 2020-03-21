@@ -5,7 +5,7 @@
  * @package AmpProject\AmpWP
  */
 
-namespace AmpProject\AmpWP;
+namespace AmpProject\AmpWP\RemoteRequest;
 
 use AmpProject\Exception\FailedToGetFromRemoteUrl;
 use AmpProject\RemoteGetRequest;
@@ -47,9 +47,21 @@ final class CachedRemoteGetRequest implements RemoteGetRequest {
 	/**
 	 * Cache expiration time in seconds.
 	 *
+	 * This will be used by default for successful requests when the 'cache-control: max-age' was not provided.
+	 *
 	 * @var int
 	 */
 	private $expiry;
+
+	/**
+	 * Minimum cache expiration time in seconds.
+	 *
+	 * This will be used for failed requests, or for successful requests when the 'cache-control: max-age' is inferior.
+	 * Caching will never expire quicker than this minimum.
+	 *
+	 * @var int
+	 */
+	private $min_expiry;
 
 	/**
 	 * Whether to use Cache-Control headers to decide on expiry times if available.
@@ -64,14 +76,22 @@ final class CachedRemoteGetRequest implements RemoteGetRequest {
 	 * This is a decorator that can wrap around an existing remote request object to add a caching layer.
 	 *
 	 * @param RemoteGetRequest $remote_request    Remote request object to decorate with caching.
-	 * @param int              $expiry            Optional. Default cache expiry in seconds. Defaults to 24 hours.
+	 * @param int|float        $expiry            Optional. Default cache expiry in seconds. Defaults to 30 days.
+	 * @param int|float        $min_expiry        Optional. Default enforced minimum cache expiry in seconds. Defaults
+	 *                                            to 24 hours.
 	 * @param bool             $use_cache_control Optional. Use Cache-Control headers for expiry if available. Defaults
 	 *                                            to true.
 	 */
-	public function __construct( RemoteGetRequest $remote_request, $expiry = 86400, $use_cache_control = true ) {
+	public function __construct(
+		RemoteGetRequest $remote_request,
+		$expiry = MONTH_IN_SECONDS,
+		$min_expiry = DAY_IN_SECONDS,
+		$use_cache_control = true
+	) {
 		$this->remote_request    = $remote_request;
-		$this->expiry            = $expiry;
-		$this->use_cache_control = $use_cache_control;
+		$this->expiry            = (int) $expiry;
+		$this->min_expiry        = (int) $min_expiry;
+		$this->use_cache_control = (bool) $use_cache_control;
 	}
 
 	/**
@@ -86,6 +106,8 @@ final class CachedRemoteGetRequest implements RemoteGetRequest {
 	public function get( $url ) {
 		$cache_key   = self::TRANSIENT_PREFIX . md5( __CLASS__ . $url );
 		$cached_data = get_transient( $cache_key );
+		$headers     = [];
+		$status      = null;
 
 		if ( false !== $cached_data ) {
 			if ( PHP_MAJOR_VERSION >= 7 ) {
@@ -97,13 +119,24 @@ final class CachedRemoteGetRequest implements RemoteGetRequest {
 		}
 
 		if ( false === $cached_data || $cached_data->is_expired() ) {
-			$response    = $this->remote_request->get( $url );
-			$expiry      = $this->get_expiry_time( $response );
-			$cached_data = new CachedData( $response->getBody(), $expiry );
+			try {
+				$response = $this->remote_request->get( $url );
+				$status   = $response->getStatusCode();
+				$expiry   = $this->get_expiry_time( $response );
+				$headers  = $response->getHeaders();
+				$body     = $response->getBody();
+			} catch ( FailedToGetFromRemoteUrl $exception ) {
+				$status = $exception->getStatusCode();
+				$expiry = new DateTimeImmutable( "+ {$this->min_expiry} seconds" );
+				$body   = $exception->getMessage();
+			}
+
+			$cached_data = new CachedData( $body, $expiry );
+
 			set_transient( $cache_key, serialize( $cached_data ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
 		}
 
-		return new RemoteGetRequestResponse( $cached_data->get_value() );
+		return new RemoteGetRequestResponse( $cached_data->get_value(), $headers, $status );
 	}
 
 	/**
@@ -117,21 +150,38 @@ final class CachedRemoteGetRequest implements RemoteGetRequest {
 	 */
 	private function get_expiry_time( Response $response ) {
 		if ( $this->use_cache_control && $response->hasHeader( self::CACHE_CONTROL ) ) {
-			$max_age              = 0;
-			$cache_control_string = $response->getHeader( self::CACHE_CONTROL );
-			$cache_control_parts  = array_map( 'trim', explode( ',', $cache_control_string ) );
-
-			foreach ( $cache_control_parts as $cache_control_part ) {
-				if ( 'max-age=' === substr( $cache_control_part, 0, 8 ) ) {
-					$max_age = absint( substr( $cache_control_part, 8 ) );
-				}
-			}
-
-			if ( $max_age > 0 ) {
-				return new DateTimeImmutable( "+ {$max_age} seconds" );
-			}
+			$expiry = max( $this->min_expiry, $this->get_max_age( $response->getHeader( self::CACHE_CONTROL ) ) );
+			return new DateTimeImmutable( "+ {$expiry} seconds" );
 		}
 
 		return new DateTimeImmutable( "+ {$this->expiry} seconds" );
+	}
+
+	/**
+	 * Get the max age setting from one or more cache-control header strings.
+	 *
+	 * @param array|string $cache_control_strings One or more cache control header strings.
+	 * @return int Value of the max-age cache directive. 0 if not found.
+	 */
+	private function get_max_age( $cache_control_strings ) {
+		$max_age = 0;
+
+		foreach ( (array) $cache_control_strings as $cache_control_string ) {
+			$cache_control_parts = array_map( 'trim', explode( ',', $cache_control_string ) );
+
+			foreach ( $cache_control_parts as $cache_control_part ) {
+				$cache_control_setting_parts = array_map( 'trim', explode( '=', $cache_control_part ) );
+
+				if ( count( $cache_control_setting_parts ) !== 2 ) {
+					continue;
+				}
+
+				if ( 'max-age' === $cache_control_setting_parts[0] ) {
+					$max_age = absint( $cache_control_setting_parts[1] );
+				}
+			}
+		}
+
+		return $max_age;
 	}
 }

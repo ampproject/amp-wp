@@ -36,7 +36,7 @@ if ( version_compare( phpversion(), '5.6', '<' ) ) {
 		sprintf(
 			/* translators: %s: required PHP version */
 			__( 'The AMP plugin requires PHP %s. Please contact your host to update your PHP version.', 'amp' ),
-			'5.4+'
+			'5.6+'
 		)
 	);
 }

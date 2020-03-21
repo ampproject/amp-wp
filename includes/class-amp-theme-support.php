@@ -6,7 +6,7 @@
  */
 
 use AmpProject\Amp;
-use AmpProject\AmpWP\CachedRemoteGetRequest;
+use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\ConfigurationArgument;
 use AmpProject\AmpWP\Transformer;
 use AmpProject\Attribute;
@@ -14,9 +14,9 @@ use AmpProject\Dom\Document;
 use AmpProject\Extension;
 use AmpProject\Fonts;
 use AmpProject\Optimizer;
-use AmpProject\RemoteRequest\CurlRemoteGetRequest;
 use AmpProject\RemoteRequest\FallbackRemoteGetRequest;
 use AmpProject\RemoteRequest\FilesystemRemoteGetRequest;
+use AmpProject\AmpWP\RemoteRequest\WpHttpRemoteGetRequest;
 use AmpProject\Tag;
 
 /**
@@ -2145,11 +2145,11 @@ class AMP_Theme_Support {
 		$configuration = self::get_optimizer_configuration( $args );
 
 		$fallback_remote_request_pipeline = new FallbackRemoteGetRequest(
-			new CurlRemoteGetRequest(),
+			new WpHttpRemoteGetRequest(),
 			new FilesystemRemoteGetRequest( Optimizer\LocalFallback::getMappings() )
 		);
 
-		$cached_remote_request = new CachedRemoteGetRequest( $fallback_remote_request_pipeline );
+		$cached_remote_request = new CachedRemoteGetRequest( $fallback_remote_request_pipeline, WEEK_IN_SECONDS );
 
 		return new Optimizer\TransformationEngine(
 			$configuration,
