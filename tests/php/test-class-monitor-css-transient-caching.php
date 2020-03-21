@@ -14,11 +14,20 @@ use AmpProject\AmpWP\Option;
 class Test_Monitor_CSS_Transient_Caching extends WP_UnitTestCase {
 
 	/**
+	 * Whether external object cache is being used.
+	 *
+	 * @var bool
+	 */
+	private $was_wp_using_ext_object_cache;
+
+	/**
 	 * Set up the tests by clearing the list of scheduled events.
 	 */
 	public function setUp() {
 		parent::setUp();
 		_set_cron_array( [] );
+		$this->was_wp_using_ext_object_cache = wp_using_ext_object_cache();
+		wp_using_ext_object_cache( false );
 	}
 
 	/**
@@ -27,6 +36,7 @@ class Test_Monitor_CSS_Transient_Caching extends WP_UnitTestCase {
 	public function tearDown() {
 		parent::tearDown();
 		_set_cron_array( [] );
+		wp_using_ext_object_cache( $this->was_wp_using_ext_object_cache );
 	}
 
 	/**
@@ -36,10 +46,11 @@ class Test_Monitor_CSS_Transient_Caching extends WP_UnitTestCase {
 	 * @covers MonitorCssTransientCaching::deactivate()
 	 */
 	public function test_event_gets_scheduled_and_unscheduled() {
+		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
 		$this->assertFalse( wp_next_scheduled( MonitorCssTransientCaching::EVENT_NAME ) );
 
 		$monitor = new MonitorCssTransientCaching();
-		$monitor->activate();
+		$monitor->schedule_event();
 
 		$timestamp = wp_next_scheduled( MonitorCssTransientCaching::EVENT_NAME );
 
@@ -47,7 +58,7 @@ class Test_Monitor_CSS_Transient_Caching extends WP_UnitTestCase {
 		$this->assertInternalType( 'int', $timestamp );
 		$this->assertGreaterThan( 0, $timestamp );
 
-		$monitor->deactivate();
+		$monitor->deactivate( false );
 
 		$this->assertFalse( wp_next_scheduled( MonitorCssTransientCaching::EVENT_NAME ) );
 	}
