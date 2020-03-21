@@ -535,10 +535,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				} else {
 					// Otherwise, we have a rare condition where multiple tag specs fail for different reasons.
 					foreach ( $validation_errors as $validation_error ) {
-						$this->remove_invalid_child(
-							$node,
-							$validation_error
-						);
+						if ( true === $this->remove_invalid_child( $node, $validation_error ) ) {
+							break; // Once removed, ignore remaining errors.
+						}
 					}
 				}
 			}

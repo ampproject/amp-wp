@@ -96,11 +96,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						'spec_name'            => 'noscript enclosure for boilerplate',
 						'required_parent_name' => 'head',
 					],
-					[
-						'code'                => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG_ANCESTOR,
-						'disallowed_ancestor' => 'noscript',
-						'spec_name'           => 'noscript',
-					],
 				],
 			],
 
