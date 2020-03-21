@@ -7,10 +7,8 @@
 
 namespace AmpProject\AmpWP\BackgroundTask;
 
-use AmpProject\AmpWP\HasActivation;
 use AmpProject\AmpWP\HasDeactivation;
 use AmpProject\AmpWP\Service;
-use function WP_CLI\Utils\get_plugin_name;
 
 /**
  * Abstract base class for using cron to execute a background task.
