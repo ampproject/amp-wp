@@ -102,18 +102,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[],
 				[
 					[
-						'code'   => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG_MULTIPLE_CHOICES,
-						'errors' => [
-							[
-								'code'      => AMP_Tag_And_Attribute_Sanitizer::WRONG_PARENT_TAG,
-								'spec_name' => 'noscript enclosure for boilerplate',
-							],
-							[
-								'code'                => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG_ANCESTOR,
-								'disallowed_ancestor' => 'noscript',
-								'spec_name'           => 'noscript',
-							],
-						],
+						'code'                 => AMP_Tag_And_Attribute_Sanitizer::WRONG_PARENT_TAG,
+						'spec_name'            => 'noscript enclosure for boilerplate',
+						'required_parent_name' => 'head',
 					],
 				],
 			],
@@ -600,6 +591,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-user-notification layout="nodisplay" id="amp-user-notification1" data-show-if-href="https://example.com/api/show?timestamp=TIMESTAMP" data-dismiss-href="https://example.com/api/echo/post">This site uses cookies to personalize content.<a class="btn" on="tap:amp-user-notification1.dismiss">I accept</a></amp-user-notification>',
 				'<amp-user-notification layout="nodisplay" id="amp-user-notification1" data-show-if-href="https://example.com/api/show?timestamp=TIMESTAMP" data-dismiss-href="https://example.com/api/echo/post">This site uses cookies to personalize content.<a class="btn" on="tap:amp-user-notification1.dismiss">I accept</a></amp-user-notification>',
 				[ 'amp-user-notification' ],
+			],
+
+			'amp-user-notification-empty-dismiss-href'     => [
+				'<amp-user-notification layout="nodisplay" id="amp-user-notification1" data-show-if-href="" data-dismiss-href="">This site uses cookies to personalize content.<a class="btn" on="tap:amp-user-notification1.dismiss">I accept</a></amp-user-notification>',
+				'<amp-user-notification layout="nodisplay" id="amp-user-notification1">This site uses cookies to personalize content.<a class="btn" on="tap:amp-user-notification1.dismiss">I accept</a></amp-user-notification>',
+				[ 'amp-user-notification' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::MISSING_URL, AMP_Tag_And_Attribute_Sanitizer::MISSING_URL ],
 			],
 
 			'amp-video'                                    => [
@@ -1151,7 +1149,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-user-notification data-dismiss-href></amp-user-notification>',
 				'<amp-user-notification></amp-user-notification>',
 				[ 'amp-user-notification' ],
-				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_EMPTY_URL ],
+				[ AMP_Tag_And_Attribute_Sanitizer::MISSING_URL ],
 			],
 
 			'allowed_empty_attr'                           => [
@@ -2132,6 +2130,34 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-img src="http://placehold.it/400x500" width="300" height="300" object-fit="none" object-position="right top" layout="intrinsic"></amp-img>',
 				null,
 				[],
+			],
+
+			'amp_img_missing_url'                          => [
+				'<amp-img src="" height="100" width="200"></amp-img>',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::MISSING_URL, AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING ],
+			],
+
+			'amp_img_missing_url'                          => [
+				'<amp-img src="" height="100" width="200"></amp-img>',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::MISSING_URL, AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING ],
+			],
+
+			'amp_pixel_blank_src'                          => [
+				'<amp-pixel src="" layout="nodisplay"></amp-pixel>',
+				null,
+				[],
+				[],
+			],
+
+			'amp_pixel_missing_src'                        => [
+				'<amp-pixel layout="nodisplay"></amp-pixel>',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING ],
 			],
 
 			'amp_link_rewriter'                            => [
@@ -3194,12 +3220,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'',
 				[
 					[
-						'node_name'       => 'amp-story-grid-layer',
-						'parent_name'     => 'body',
-						'code'            => AMP_Tag_And_Attribute_Sanitizer::MANDATORY_TAG_ANCESTOR,
-						'node_attributes' => [ 'class' => 'a-invalid' ],
-						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
-						'spec_name'       => 'amp-story-grid-layer',
+						'node_name'              => 'amp-story-grid-layer',
+						'parent_name'            => 'body',
+						'code'                   => AMP_Tag_And_Attribute_Sanitizer::MANDATORY_TAG_ANCESTOR,
+						'node_attributes'        => [ 'class' => 'a-invalid' ],
+						'type'                   => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+						'spec_name'              => 'amp-story-grid-layer',
+						'required_ancestor_name' => 'amp-story-page',
 					],
 				],
 			],
