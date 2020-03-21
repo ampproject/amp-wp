@@ -9,6 +9,7 @@ namespace AmpProject\AmpWP\BackgroundTask;
 
 use AmpProject\AmpWP\HasDeactivation;
 use AmpProject\AmpWP\Service;
+use AmpProject\Fonts;
 
 /**
  * Abstract base class for using cron to execute a background task.
@@ -53,6 +54,22 @@ abstract class CronBasedBackgroundTask implements Service, HasDeactivation {
 		$this->plugin_file = plugin_basename( dirname( dirname( __DIR__ ) ) . '/amp.php' );
 		add_action( "network_admin_plugin_action_links_{$this->plugin_file}", [ $this, 'add_warning_sign_to_network_deactivate_action' ], 10, 1 );
 		add_action( 'plugin_row_meta', [ $this, 'add_warning_to_plugin_meta' ], 10, 2 );
+	}
+
+	/**
+	 * Get warning icon markup.
+	 *
+	 * @return string Warning icon markup.
+	 */
+	private function get_warning_icon() {
+		static $icon = null;
+		if ( null === $icon ) {
+			$icon = sprintf(
+				'<span style="font-family:%s">⚠️</span>',
+				esc_attr( Fonts::getEmojiFontFamilyValue() )
+			);
+		}
+		return $icon;
 	}
 
 	/**
@@ -120,7 +137,7 @@ abstract class CronBasedBackgroundTask implements Service, HasDeactivation {
 			return $actions;
 		}
 
-		$actions['deactivate'] = preg_replace( '#^(<a [^>]*>.*)(</a>)$#i', '$1 ⚠️️️︎️$2', $actions['deactivate'] );
+		$actions['deactivate'] = preg_replace( '#(?=</a>)#i', ' ' . self::get_warning_icon(), $actions['deactivate'] );
 
 		return $actions;
 	}
@@ -142,7 +159,7 @@ abstract class CronBasedBackgroundTask implements Service, HasDeactivation {
 			return $plugin_meta;
 		}
 
-		$plugin_meta[] = '⚠️ Large site detected. Deactivation will leave orphaned scheduled events behind. ⚠️';
+		$plugin_meta[] = self::get_warning_icon() . ' ' . esc_html__( 'Large site detected. Deactivation will leave orphaned scheduled events behind.', 'amp' ) . ' ' . self::get_warning_icon();
 
 		return $plugin_meta;
 	}
