@@ -75,9 +75,12 @@ abstract class CronBasedBackgroundTask implements Service, HasDeactivation {
 	 */
 	public function deactivate( $network_wide ) {
 		if ( $network_wide && is_multisite() && ! wp_is_large_network( 'sites' ) ) {
-			global $wpdb;
-
-			foreach ( $wpdb->get_col( "SELECT blog_id FROM {$wpdb->blogs}" ) as $blog_id ) {
+			foreach ( get_sites(
+				[
+					'fields' => 'ids',
+					'number' => 0,
+				]
+			) as $blog_id ) {
 				switch_to_blog( $blog_id );
 				wp_clear_scheduled_hook( $this->get_event_name() );
 				restore_current_blog();
