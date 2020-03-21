@@ -3077,9 +3077,9 @@ class AMP_Validation_Error_Taxonomy {
 			case AMP_Tag_And_Attribute_Sanitizer::MISSING_REQUIRED_PROPERTY_VALUE:
 				$title = sprintf(
 					/* translators: %1$s is the property name, %2$s is the value for the property */
-					wp_kses( __( 'Invalid value for <code>%1$s</code> property: <code>%2$s</code>', 'amp' ), [ 'code' => '' ] ),
-					esc_html( $validation_error['meta_property_name'] ),
-					esc_html( $validation_error['meta_property_value'] )
+					esc_html__( 'Invalid value for %1$s property: %2$s', 'amp' ),
+					'<code>' . esc_html( $validation_error['meta_property_name'] ) . '</<code>',
+					'<code>' . esc_html( $validation_error['meta_property_value'] ) . '</code>'
 				);
 
 				return $title;
@@ -3090,7 +3090,7 @@ class AMP_Validation_Error_Taxonomy {
 				}
 				return $title;
 			case AMP_Tag_And_Attribute_Sanitizer::DUPLICATE_ONEOF_ATTRS:
-				$title = __( 'Mutually exclusive attributes encountered', 'amp' );
+				$title = esc_html__( 'Mutually exclusive attributes encountered', 'amp' );
 				if ( ! empty( $validation_error['duplicate_oneof_attrs'] ) ) {
 					$title .= ': ';
 					$title .= implode(
@@ -3108,10 +3108,10 @@ class AMP_Validation_Error_Taxonomy {
 			case AMP_Tag_And_Attribute_Sanitizer::MANDATORY_ANYOF_ATTR_MISSING:
 				$attributes_key = null;
 				if ( AMP_Tag_And_Attribute_Sanitizer::MANDATORY_ONEOF_ATTR_MISSING === $validation_error['code'] ) {
-					$title          = __( 'Missing exclusive mandatory attribute', 'amp' );
+					$title          = esc_html__( 'Missing exclusive mandatory attribute', 'amp' );
 					$attributes_key = 'mandatory_oneof_attrs';
 				} else {
-					$title          = __( 'Missing at least one mandatory attribute', 'amp' );
+					$title          = esc_html__( 'Missing at least one mandatory attribute', 'amp' );
 					$attributes_key = 'mandatory_anyof_attrs';
 				}
 
@@ -3215,7 +3215,7 @@ class AMP_Validation_Error_Taxonomy {
 
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_URL_PROTOCOL:
 				$parsed_url       = wp_parse_url( $validation_error['element_attributes'][ $validation_error['node_name'] ] );
-				$invalid_protocol = isset( $parsed_url['scheme'] ) ? $parsed_url['scheme'] . ':' : '(failure)';
+				$invalid_protocol = isset( $parsed_url['scheme'] ) ? $parsed_url['scheme'] . ':' : '(null)';
 
 				return sprintf(
 					/* translators: %1$s is the invalid protocol, %2$s is attribute name */
@@ -3243,7 +3243,7 @@ class AMP_Validation_Error_Taxonomy {
 			case AMP_Tag_And_Attribute_Sanitizer::MISSING_URL:
 				return sprintf(
 					/* translators: %1$s is attribute name */
-					esc_html__( "Missing URL for attribute '%s'", 'amp' ),
+					esc_html__( 'Missing URL for attribute %s', 'amp' ),
 					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>'
 				);
 
