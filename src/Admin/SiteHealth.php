@@ -236,30 +236,30 @@ final class SiteHealth {
 	 * @return array The test data.
 	 */
 	public function css_transient_caching() {
-		$is_disabled = AMP_Options_Manager::get_option( Option::DISABLE_CSS_TRANSIENT_CACHING, false )
-			&& ! wp_using_ext_object_cache();
+		if ( wp_using_ext_object_cache() ) {
+			$status = 'good';
+			$color  = 'blue';
+			$label  = __( 'Transient caching of parsed stylesheets is not used due to external object cache', 'amp' );
+		} elseif ( AMP_Options_Manager::get_option( Option::DISABLE_CSS_TRANSIENT_CACHING, false ) ) {
+			$status = 'recommended';
+			$color  = 'orange';
+			$label  = __( 'Transient caching of parsed stylesheets is disabled', 'amp' );
+		} else {
+			$status = 'good';
+			$color  = 'green';
+			$label  = __( 'Transient caching of parsed stylesheets is enabled', 'amp' );
+		}
 
-		$data = [
+		return [
 			'badge'       => [
 				'label' => esc_html__( 'AMP', 'amp' ),
-				'color' => $is_disabled ? 'orange' : 'green',
+				'color' => $color,
 			],
-			'description' => esc_html__( 'On sites which have highly variable CSS and are not using a persistent object cache, the transient caching of stylesheets may be automatically disabled in order to prevent a site from filling up its wp_options table with too many transients.', 'amp' ),
+			'description' => esc_html__( 'On sites which have highly variable CSS and are not using a persistent object cache, the transient caching of parsed stylesheets may be automatically disabled in order to prevent a site from filling up its wp_options table with too many transients.', 'amp' ),
 			'test'        => 'amp_css_transient_caching',
+			'status'      => $status,
+			'label'       => esc_html( $label ),
 		];
-
-		$status = $is_disabled ? 'recommended' : 'good';
-		$label  = $is_disabled
-			? __( 'Transient caching of stylesheets is disabled', 'amp' )
-			: __( 'Transient caching of stylesheets is not disabled or not being used', 'amp' );
-
-		return array_merge(
-			$data,
-			[
-				'status' => $status,
-				'label'  => esc_html( $label ),
-			]
-		);
 	}
 
 	/**
@@ -384,6 +384,10 @@ final class SiteHealth {
 	 * @return string Whether the transient caching of stylesheets was disabled.
 	 */
 	private function get_css_transient_caching_disabled() {
+		if ( wp_using_ext_object_cache() ) {
+			return 'n/a';
+		}
+
 		$disabled = AMP_Options_Manager::get_option( Option::DISABLE_CSS_TRANSIENT_CACHING, false );
 
 		return $disabled ? 'true' : 'false';
