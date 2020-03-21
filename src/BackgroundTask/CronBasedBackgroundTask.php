@@ -51,7 +51,7 @@ abstract class CronBasedBackgroundTask implements Service, HasDeactivation {
 	 * @return void
 	 */
 	public function schedule_event() {
-		if ( ! current_user_can( 'administrator' ) ) {
+		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
 
