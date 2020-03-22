@@ -159,7 +159,7 @@ abstract class CronBasedBackgroundTask implements Service, HasDeactivation {
 			return $plugin_meta;
 		}
 
-		$plugin_meta[] = self::get_warning_icon() . ' ' . esc_html__( 'Large site detected. Deactivation will leave orphaned scheduled events behind.', 'amp' ) . ' ' . self::get_warning_icon();
+		$plugin_meta[] = $this->get_warning_icon() . ' ' . esc_html__( 'Large site detected. Deactivation will leave orphaned scheduled events behind.', 'amp' ) . ' ' . $this->get_warning_icon();
 
 		return $plugin_meta;
 	}
