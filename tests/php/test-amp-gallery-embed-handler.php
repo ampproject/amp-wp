@@ -6,9 +6,9 @@
  */
 
 /**
- * Class AMP_Gallery_Embed_Test
+ * Class AMP_Gallery_Embed_Handler_Test
  */
-class AMP_Gallery_Embed_Test extends WP_UnitTestCase {
+class AMP_Gallery_Embed_Handler_Test extends WP_UnitTestCase {
 
 	/**
 	 * Tear down.

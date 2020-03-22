@@ -6,11 +6,11 @@
  */
 
 /**
- * Test AMP_Facebook_Embed_Test
+ * Test AMP_Facebook_Embed_Handler_Test
  *
  * @covers AMP_Facebook_Embed_Handler
  */
-class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
+class AMP_Facebook_Embed_Handler_Test extends WP_UnitTestCase {
 
 	/**
 	 * Get scripts data.

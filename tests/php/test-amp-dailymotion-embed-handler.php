@@ -1,16 +1,22 @@
 <?php
 
-class AMP_Vine_Embed_Test extends WP_UnitTestCase {
+class AMP_DailyMotion_Embed_Handler_Test extends WP_UnitTestCase {
 
 	public function get_conversion_data() {
 		return [
-			'no_embed'   => [
+			'no_embed'       => [
 				'<p>Hello world.</p>',
 				'<p>Hello world.</p>' . PHP_EOL,
 			],
-			'simple_url' => [
-				'https://vine.co/v/MdKjXez002d' . PHP_EOL,
-				'<p><amp-vine data-vineid="MdKjXez002d" layout="responsive" width="400" height="400"></amp-vine></p>' . PHP_EOL,
+
+			'url_simple'     => [
+				'https://www.dailymotion.com/video/x5awwth' . PHP_EOL,
+				'<p><amp-dailymotion data-videoid="x5awwth" layout="responsive" width="600" height="338"></amp-dailymotion></p>' . PHP_EOL,
+			],
+
+			'url_with_title' => [
+				'http://www.dailymotion.com/video/x5awwth_snatched-official-trailer-2-hd_shortfilms' . PHP_EOL,
+				'<p><amp-dailymotion data-videoid="x5awwth" layout="responsive" width="600" height="338"></amp-dailymotion></p>' . PHP_EOL,
 			],
 		];
 	}
@@ -19,7 +25,7 @@ class AMP_Vine_Embed_Test extends WP_UnitTestCase {
 	 * @dataProvider get_conversion_data
 	 */
 	public function test__conversion( $source, $expected ) {
-		$embed = new AMP_Vine_Embed_Handler();
+		$embed = new AMP_DailyMotion_Embed_Handler();
 		$embed->register_embed();
 		$filtered_content = apply_filters( 'the_content', $source );
 
@@ -33,8 +39,8 @@ class AMP_Vine_Embed_Test extends WP_UnitTestCase {
 				[],
 			],
 			'converted'     => [
-				'https://vine.co/v/MdKjXez002d' . PHP_EOL,
-				[ 'amp-vine' => true ],
+				'https://www.dailymotion.com/video/x5awwth' . PHP_EOL,
+				[ 'amp-dailymotion' => true ],
 			],
 		];
 	}
@@ -43,7 +49,7 @@ class AMP_Vine_Embed_Test extends WP_UnitTestCase {
 	 * @dataProvider get_scripts_data
 	 */
 	public function test__get_scripts( $source, $expected ) {
-		$embed = new AMP_Vine_Embed_Handler();
+		$embed = new AMP_DailyMotion_Embed_Handler();
 		$embed->register_embed();
 		$source = apply_filters( 'the_content', $source );
 
