@@ -137,7 +137,7 @@ abstract class CronBasedBackgroundTask implements Service, HasDeactivation {
 			return $actions;
 		}
 
-		$actions['deactivate'] = preg_replace( '#(?=</a>)#i', ' ' . self::get_warning_icon(), $actions['deactivate'] );
+		$actions['deactivate'] = preg_replace( '#(?=</a>)#i', ' ' . $this->get_warning_icon(), $actions['deactivate'] );
 
 		return $actions;
 	}
