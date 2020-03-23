@@ -724,7 +724,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * Add style rule with a selector of higher specificity than just `img` to make `amp-img` have `display:block` rather than `display:inline-block`.
 	 *
 	 * This is needed to override the AMP core stylesheet which has a more specific selector `.i-amphtml-layout-intrinsic` which
-	 * is given a `display: line-block`; this display value prevents margins from collapsing with surrounding block elements,
+	 * is given a `display: inline-block`; this display value prevents margins from collapsing with surrounding block elements,
 	 * resulting in larger margins in AMP than expected.
 	 *
 	 * @since 1.5
