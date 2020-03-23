@@ -32,7 +32,7 @@
     "@wordpress/browserslist-config": "2.6.0",
     "@wordpress/components": "9.2.4",
     "@wordpress/compose": "3.11.0",
-    "@wordpress/data": "4.14.1",
+    "@wordpress/data": "4.14.2",
     "@wordpress/dom-ready": "2.7.0",
     "@wordpress/e2e-test-utils": "4.3.1",
     "@wordpress/edit-post": "3.13.6",
