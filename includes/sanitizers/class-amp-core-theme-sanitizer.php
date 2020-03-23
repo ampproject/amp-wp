@@ -94,7 +94,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					'add_twentytwenty_toggles'         => [],
 					'add_nav_menu_styles'              => [],
 					'add_twentytwenty_masthead_styles' => [],
-					'add_img_display_block_fix' => [],
+					'add_img_display_block_fix'        => [],
 					'add_twentytwenty_current_page_awareness' => [],
 				];
 
@@ -730,16 +730,17 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 1.5
 	 */
 	public static function add_img_display_block_fix() {
+		// Note that wp_add_inline_style() is not used because this stylesheet needs to be added _before_ style.css so
+		// that any subsequent style rules for images will continue to override.
 		add_action(
-			'wp_enqueue_scripts',
+			'wp_print_styles',
 			static function() {
-				wp_add_inline_style(
-					get_template() . '-style',
+				printf(
+					'<style data-src="AMP_Core_Theme_Sanitizer::add_img_display_block_fix">%s</style>',
 					// The selector is targeting an attribute that can never appear. It is purely present to increase specificity.
 					'amp-img:not([_]) { display: block }'
 				);
-			},
-			11
+			}
 		);
 	}
 
