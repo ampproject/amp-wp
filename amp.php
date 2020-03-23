@@ -14,7 +14,7 @@
  */
 
 define( 'AMP__FILE__', __FILE__ );
-define( 'AMP__DIR__', __DIR__ ); // phpcs:ignore PHPCompatibility.Keywords.NewKeywords.t_dirFound
+define( 'AMP__DIR__', dirname( __FILE__ ) );
 define( 'AMP__VERSION', '1.5.0-alpha' );
 
 /**
