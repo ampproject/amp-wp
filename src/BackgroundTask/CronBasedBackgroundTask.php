@@ -23,17 +23,6 @@ abstract class CronBasedBackgroundTask implements Service, HasDeactivation {
 	const DEFAULT_INTERVAL_DAILY       = 'daily';
 
 	/**
-	 * List of default interval names that are shipped with WordPress.
-	 *
-	 * @var string[]
-	 */
-	const DEFAULT_INTERVAL_NAMES = [
-		self::DEFAULT_INTERVAL_HOURLY,
-		self::DEFAULT_INTERVAL_TWICE_DAILY,
-		self::DEFAULT_INTERVAL_DAILY,
-	];
-
-	/**
 	 * Name of the plugin as WordPress is expecting it.
 	 *
 	 * This should usually have the form "amp/amp.php".
