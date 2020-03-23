@@ -94,6 +94,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					'add_twentytwenty_toggles'         => [],
 					'add_nav_menu_styles'              => [],
 					'add_twentytwenty_masthead_styles' => [],
+					'add_img_display_block_fix'        => [],
 					'add_twentytwenty_current_page_awareness' => [],
 				];
 
@@ -716,6 +717,30 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				wp_add_inline_style( get_template() . '-style', $styles );
 			},
 			11
+		);
+	}
+
+	/**
+	 * Add style rule with a selector of higher specificity than just `img` to make `amp-img` have `display:block` rather than `display:inline-block`.
+	 *
+	 * This is needed to override the AMP core stylesheet which has a more specific selector `.i-amphtml-layout-intrinsic` which
+	 * is given a `display: inline-block`; this display value prevents margins from collapsing with surrounding block elements,
+	 * resulting in larger margins in AMP than expected.
+	 *
+	 * @since 1.5
+	 */
+	public static function add_img_display_block_fix() {
+		// Note that wp_add_inline_style() is not used because this stylesheet needs to be added _before_ style.css so
+		// that any subsequent style rules for images will continue to override.
+		add_action(
+			'wp_print_styles',
+			static function() {
+				printf(
+					'<style data-src="AMP_Core_Theme_Sanitizer::add_img_display_block_fix">%s</style>',
+					// The selector is targeting an attribute that can never appear. It is purely present to increase specificity.
+					'amp-img:not([_]) { display: block }'
+				);
+			}
 		);
 	}
 

@@ -238,4 +238,17 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 
 		$this->assertEquals( $expected, $actual );
 	}
+
+	/**
+	 * Tests add_img_display_block_fix.
+	 *
+	 * @covers AMP_Core_Theme_Sanitizer::add_img_display_block_fix()
+	 */
+	public function test_add_img_display_block_fix() {
+		AMP_Core_Theme_Sanitizer::add_img_display_block_fix();
+		ob_start();
+		wp_print_styles();
+		$output = ob_get_clean();
+		$this->assertRegExp( '/amp-img.+display.+block/s', $output );
+	}
 }
