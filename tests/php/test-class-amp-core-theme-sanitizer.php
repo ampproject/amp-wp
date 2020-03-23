@@ -251,4 +251,30 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 		$output = ob_get_clean();
 		$this->assertRegExp( '/amp-img.+display.+block/s', $output );
 	}
+
+	/**
+	 * Tests add_twentytwenty_custom_logo_fix.
+	 *
+	 * @covers AMP_Core_Theme_Sanitizer::add_twentytwenty_custom_logo_fix()
+	 */
+	public function test_add_twentytwenty_custom_logo_fix() {
+		add_filter(
+			'get_custom_logo',
+			static function () {
+				return '<img src="https://example.com/logo.jpg" width="100" height="200">';
+			}
+		);
+
+		AMP_Core_Theme_Sanitizer::add_twentytwenty_custom_logo_fix();
+		$logo = get_custom_logo();
+
+		$needle = '.site-logo amp-img { width: 3.000000rem; } @media (min-width: 700px) { .site-logo amp-img { width: 4.500000rem; } }';
+
+		// @todo Make use of AssertContainsCompatibility trait.
+		if ( method_exists( $this, 'assertStringContainsString' ) ) {
+			$this->assertStringContainsString( $needle, $logo );
+		} else {
+			$this->assertContains( $needle, $logo );
+		}
+	}
 }
