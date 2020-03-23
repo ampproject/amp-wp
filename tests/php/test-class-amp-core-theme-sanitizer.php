@@ -238,4 +238,19 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 
 		$this->assertEquals( $expected, $actual );
 	}
+
+	/**
+	 * Tests add_img_display_block_fix.
+	 *
+	 * @covers AMP_Core_Theme_Sanitizer::add_img_display_block_fix()
+	 */
+	public function test_add_img_display_block_fix() {
+		$handle = get_template() . '-style';
+		wp_register_style( $handle, get_stylesheet_uri(), [], '0.1' );
+
+		$this->assertEmpty( wp_styles()->print_inline_style( $handle, false ) );
+		AMP_Core_Theme_Sanitizer::add_img_display_block_fix();
+		wp_enqueue_scripts();
+		$this->assertRegExp( '/amp-img.+display.+block/s', wp_styles()->print_inline_style( $handle, false ) );
+	}
 }
