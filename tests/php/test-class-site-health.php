@@ -6,11 +6,15 @@
  */
 
 use AmpProject\AmpWP\Admin\SiteHealth;
+use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Tests\PrivateAccess;
 
 /**
  * Test Site_Health.
  */
 class Test_Site_Health extends WP_UnitTestCase {
+
+	use PrivateAccess;
 
 	/**
 	 * The tested instance.
@@ -135,6 +139,49 @@ class Test_Site_Health extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test css_transient_caching.
+	 *
+	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::css_transient_caching()
+	 */
+	public function test_css_transient_caching() {
+		$data = [
+			'test' => 'amp_css_transient_caching',
+		];
+
+		AMP_Options_Manager::update_option( Option::DISABLE_CSS_TRANSIENT_CACHING, false );
+
+		$this->assertArraySubset(
+			array_merge(
+				$data,
+				[
+					'status' => 'good',
+					'badge'  => [
+						'label' => 'AMP',
+						'color' => 'green',
+					],
+				]
+			),
+			$this->instance->css_transient_caching()
+		);
+
+		AMP_Options_Manager::update_option( Option::DISABLE_CSS_TRANSIENT_CACHING, true );
+
+		$this->assertArraySubset(
+			array_merge(
+				$data,
+				[
+					'status' => 'recommended',
+					'badge'  => [
+						'label' => 'AMP',
+						'color' => 'orange',
+					],
+				]
+			),
+			$this->instance->css_transient_caching()
+		);
+	}
+
+	/**
 	 * Test add_debug_information.
 	 *
 	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::add_debug_information()
@@ -143,7 +190,15 @@ class Test_Site_Health extends WP_UnitTestCase {
 		$debug_info = $this->instance->add_debug_information( [] );
 		$this->assertArrayHasKey( 'amp_wp', $debug_info );
 		$this->assertArrayHasKey( 'fields', $debug_info['amp_wp'] );
-		$keys = [ 'amp_mode_enabled', 'amp_templates_enabled', 'amp_serve_all_templates' ];
+		$keys = [
+			'amp_mode_enabled',
+			'amp_templates_enabled',
+			'amp_serve_all_templates',
+			'amp_css_transient_caching_disabled',
+			'amp_css_transient_caching_threshold',
+			'amp_css_transient_caching_sampling_range',
+			'amp_css_transient_caching_transient_count',
+		];
 		foreach ( $keys as $key ) {
 			$this->assertArrayHasKey( $key, $debug_info['amp_wp']['fields'], "Expected key: $key" );
 			$this->assertFalse( $debug_info['amp_wp']['fields'][ $key ]['private'], "Expected private for key: $key" );
@@ -228,7 +283,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 			add_post_type_support( $post_type, AMP_Theme_Support::SLUG );
 		}
 
-		$this->assertEquals( $expected, $this->instance->get_supported_templates() );
+		$this->assertEquals( $expected, $this->call_private_method( $this->instance, 'get_supported_templates' ) );
 	}
 
 	/**
@@ -286,7 +341,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( 'all_templates_supported', $do_serve_all_templates );
 		AMP_Theme_Support::read_theme_support();
 
-		$this->assertEquals( $expected, $this->instance->get_serve_all_templates() );
+		$this->assertEquals( $expected, $this->call_private_method( $this->instance, 'get_serve_all_templates' ) );
 	}
 
 	/**
