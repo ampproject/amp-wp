@@ -270,7 +270,7 @@ final class SiteHealth {
 	 * Gets the test result data for whether the Xdebug extension is loaded.
 	 *
 	 * @since 1.5
-	 * 
+	 *
 	 * @return array The test data.
 	 */
 	public function xdebug_extension() {
