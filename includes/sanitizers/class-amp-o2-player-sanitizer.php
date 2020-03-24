@@ -133,5 +133,4 @@ class AMP_O2_Player_Sanitizer extends AMP_Base_Sanitizer {
 		}
 		return [];
 	}
-
 }

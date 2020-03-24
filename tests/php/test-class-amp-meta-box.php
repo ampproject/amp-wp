@@ -42,7 +42,6 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		parent::tearDown();
 	}
 
-
 	/**
 	 * Test init.
 	 *
@@ -377,5 +376,4 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		$_POST['amp-preview'] = 'do-preview';
 		$this->assertEquals( 'https://foo.bar?' . amp_get_slug() . '=1', $this->instance->preview_post_link( $link ) );
 	}
-
 }

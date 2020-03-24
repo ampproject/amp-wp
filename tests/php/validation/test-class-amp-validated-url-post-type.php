@@ -1634,7 +1634,6 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$this->assertEquals( '%s validated URLs unforgotten.', $filtered_messages['post']['untrashed'] );
 	}
 
-
 	/**
 	 * Gets mock errors for tests.
 	 *

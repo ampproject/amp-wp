@@ -61,5 +61,4 @@ class Test_AMP_Widget_Text extends WP_UnitTestCase {
 		$this->assertEquals( $video_only_width, $this->widget->inject_video_max_width_style( [ $video_only_width ] ) );
 		$this->assertEquals( '', $this->widget->inject_video_max_width_style( [ '' ] ) );
 	}
-
 }
