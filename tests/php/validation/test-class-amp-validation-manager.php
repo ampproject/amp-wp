@@ -7,6 +7,7 @@
 
 // phpcs:disable Generic.Formatting.MultipleStatementAlignment.NotSameWarning
 
+use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\HandleValidation;
 use AmpProject\AmpWP\Tests\PrivateAccess;
 use AmpProject\Dom\Document;
@@ -19,6 +20,7 @@ use AmpProject\Dom\Document;
  */
 class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 
+	use AssertContainsCompatibility;
 	use HandleValidation;
 	use PrivateAccess;
 
@@ -320,7 +322,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
 		$node = $admin_bar->get_node( 'amp' );
 		$this->assertInternalType( 'object', $node );
-		$this->assertContains( 'action=amp_validate', $node->href );
+		$this->assertStringContains( 'action=amp_validate', $node->href );
 		$this->assertNull( $admin_bar->get_node( 'amp-view' ) );
 		$this->assertInternalType( 'object', $admin_bar->get_node( 'amp-validity' ) );
 
@@ -361,7 +363,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
 		$node = $admin_bar->get_node( 'amp' );
 		$this->assertInternalType( 'object', $node );
-		$this->assertContains( 'action=amp_validate', $node->href );
+		$this->assertStringContains( 'action=amp_validate', $node->href );
 		$this->assertNull( $admin_bar->get_node( 'amp-view' ) );
 		$this->assertInternalType( 'object', $admin_bar->get_node( 'amp-validity' ) );
 	}
@@ -749,7 +751,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$post   = self::factory()->post->create_and_get();
 		$output = get_echo( [ 'AMP_Validation_Manager', 'print_edit_form_validation_status' ], [ $post ] );
 
-		$this->assertNotContains( 'notice notice-warning', $output );
+		$this->assertStringNotContains( 'notice notice-warning', $output );
 
 		$validation_errors = [
 			[
@@ -772,14 +774,14 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		// When sanitization is accepted by default.
 		$this->accept_sanitization_by_default( true );
 		$expected_notice_non_accepted_errors = 'There is content which fails AMP validation. You will have to remove the invalid markup (or allow the plugin to remove it) to serve AMP.';
-		$this->assertContains( 'notice notice-warning', $output );
-		$this->assertContains( '<code>script</code>', $output );
-		$this->assertContains( $expected_notice_non_accepted_errors, $output );
+		$this->assertStringContains( 'notice notice-warning', $output );
+		$this->assertStringContains( '<code>script</code>', $output );
+		$this->assertStringContains( $expected_notice_non_accepted_errors, $output );
 
 		// When auto-accepting validation errors, if there are unaccepted validation errors, there should be a notice because this will block serving an AMP document.
 		add_theme_support( AMP_Theme_Support::SLUG );
 		$output = get_echo( [ 'AMP_Validation_Manager', 'print_edit_form_validation_status' ], [ $post ] );
-		$this->assertContains( 'There is content which fails AMP validation. You will have to remove the invalid markup (or allow the plugin to remove it) to serve AMP.', $output );
+		$this->assertStringContains( 'There is content which fails AMP validation. You will have to remove the invalid markup (or allow the plugin to remove it) to serve AMP.', $output );
 
 		/*
 		 * When there are 'Rejected' or 'New Rejected' errors, there should be a message that explains that this will serve a non-AMP URL.
@@ -791,7 +793,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		AMP_Validated_URL_Post_Type::store_validation_errors( $validation_errors, get_permalink( $post->ID ) );
 		$this->accept_sanitization_by_default( false );
 		$output = get_echo( [ 'AMP_Validation_Manager', 'print_edit_form_validation_status' ], [ $post ] );
-		$this->assertContains( $expected_notice_non_accepted_errors, $output );
+		$this->assertStringContains( $expected_notice_non_accepted_errors, $output );
 	}
 
 	/**
@@ -1444,24 +1446,24 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		AMP_Theme_Support::start_output_buffering();
 		do_action( $action_function_callback );
 		$output = ob_get_clean();
-		$this->assertContains( '<div class="notice notice-error">', $output );
-		$this->assertContains( '<!--amp-source-stack {"type":"plugin","name":"amp"', $output );
-		$this->assertContains( '<!--/amp-source-stack {"type":"plugin","name":"amp"', $output );
+		$this->assertStringContains( '<div class="notice notice-error">', $output );
+		$this->assertStringContains( '<!--amp-source-stack {"type":"plugin","name":"amp"', $output );
+		$this->assertStringContains( '<!--/amp-source-stack {"type":"plugin","name":"amp"', $output );
 
 		AMP_Theme_Support::start_output_buffering();
 		do_action( $action_no_argument );
 		$output = ob_get_clean();
-		$this->assertContains( '<div></div>', $output );
-		$this->assertContains( '<!--amp-source-stack {"type":"plugin","name":"amp"', $output );
-		$this->assertContains( '<!--/amp-source-stack {"type":"plugin","name":"amp"', $output );
+		$this->assertStringContains( '<div></div>', $output );
+		$this->assertStringContains( '<!--amp-source-stack {"type":"plugin","name":"amp"', $output );
+		$this->assertStringContains( '<!--/amp-source-stack {"type":"plugin","name":"amp"', $output );
 
 		AMP_Theme_Support::start_output_buffering();
 		do_action( $action_one_argument, $notice );
 		$output = ob_get_clean();
-		$this->assertContains( $notice, $output );
-		$this->assertContains( sprintf( '<div class="notice notice-warning"><p>%s</p></div>', $notice ), $output );
-		$this->assertContains( '<!--amp-source-stack {"type":"plugin","name":"amp"', $output );
-		$this->assertContains( '<!--/amp-source-stack {"type":"plugin","name":"amp"', $output );
+		$this->assertStringContains( $notice, $output );
+		$this->assertStringContains( sprintf( '<div class="notice notice-warning"><p>%s</p></div>', $notice ), $output );
+		$this->assertStringContains( '<!--amp-source-stack {"type":"plugin","name":"amp"', $output );
+		$this->assertStringContains( '<!--/amp-source-stack {"type":"plugin","name":"amp"', $output );
 
 		AMP_Theme_Support::start_output_buffering();
 		do_action( $action_two_arguments, $notice, get_the_ID() );
@@ -1469,30 +1471,30 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		AMP_Theme_Support::start_output_buffering();
 		self::output_message( $notice, get_the_ID() );
 		$expected_output = ob_get_clean();
-		$this->assertContains( $expected_output, $output );
-		$this->assertContains( '<!--amp-source-stack {"type":"plugin","name":"amp"', $output );
-		$this->assertContains( '<!--/amp-source-stack {"type":"plugin","name":"amp"', $output );
+		$this->assertStringContains( $expected_output, $output );
+		$this->assertStringContains( '<!--amp-source-stack {"type":"plugin","name":"amp"', $output );
+		$this->assertStringContains( '<!--/amp-source-stack {"type":"plugin","name":"amp"', $output );
 
 		// This action's callback doesn't output any HTML tags, so no HTML should be present.
 		AMP_Theme_Support::start_output_buffering();
 		do_action( $action_no_tag_output );
 		$output = ob_get_clean();
-		$this->assertNotContains( '<!--amp-source-stack ', $output );
-		$this->assertNotContains( '<!--/amp-source-stack ', $output );
+		$this->assertStringNotContains( '<!--amp-source-stack ', $output );
+		$this->assertStringNotContains( '<!--/amp-source-stack ', $output );
 
 		// This action's callback comes from core.
 		AMP_Theme_Support::start_output_buffering();
 		do_action( $action_core_output );
 		$output = ob_get_clean();
-		$this->assertContains( '<!--amp-source-stack {"type":"core","name":"wp-includes"', $output );
-		$this->assertContains( '<!--/amp-source-stack {"type":"core","name":"wp-includes"', $output );
+		$this->assertStringContains( '<!--amp-source-stack {"type":"core","name":"wp-includes"', $output );
+		$this->assertStringContains( '<!--/amp-source-stack {"type":"core","name":"wp-includes"', $output );
 
 		// This action's callback doesn't echo any markup, so it shouldn't be wrapped in comments.
 		AMP_Theme_Support::start_output_buffering();
 		do_action( $action_no_output );
 		$output = ob_get_clean();
-		$this->assertNotContains( '<!--amp-source-stack ', $output );
-		$this->assertNotContains( '<!--/amp-source-stack ', $output );
+		$this->assertStringNotContains( '<!--amp-source-stack ', $output );
+		$this->assertStringNotContains( '<!--/amp-source-stack ', $output );
 
 		$handle_inner_action = null;
 		$handle_outer_action = null;
@@ -1874,9 +1876,9 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$output = ob_get_clean();
 
 		$this->assertInstanceOf( '\\AMP_Validation_Callback_Wrapper', $wrapped_callback );
-		$this->assertContains( $test_string, $output );
-		$this->assertContains( '<!--amp-source-stack {"type":"plugin","name":"amp","hook":"bar"}', $output );
-		$this->assertContains( '<!--/amp-source-stack {"type":"plugin","name":"amp","hook":"bar"}', $output );
+		$this->assertStringContains( $test_string, $output );
+		$this->assertStringContains( '<!--amp-source-stack {"type":"plugin","name":"amp","hook":"bar"}', $output );
+		$this->assertStringContains( '<!--/amp-source-stack {"type":"plugin","name":"amp","hook":"bar"}', $output );
 
 		$action_callback = [
 			'function'      => [ $this, 'get_string' ],
@@ -1916,11 +1918,11 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		AMP_Validation_Manager::$hook_source_stack[] = $latest_source;
 
 		$wrapped_content = AMP_Validation_Manager::wrap_buffer_with_source_comments( $initial_content );
-		$this->assertContains( $initial_content, $wrapped_content );
-		$this->assertContains( '<!--amp-source-stack', $wrapped_content );
-		$this->assertContains( '<!--/amp-source-stack', $wrapped_content );
-		$this->assertContains( wp_json_encode( $latest_source ), $wrapped_content );
-		$this->assertNotContains( wp_json_encode( $earliest_source ), $wrapped_content );
+		$this->assertStringContains( $initial_content, $wrapped_content );
+		$this->assertStringContains( '<!--amp-source-stack', $wrapped_content );
+		$this->assertStringContains( '<!--/amp-source-stack', $wrapped_content );
+		$this->assertStringContains( wp_json_encode( $latest_source ), $wrapped_content );
+		$this->assertStringNotContains( wp_json_encode( $earliest_source ), $wrapped_content );
 	}
 
 	/**
@@ -2013,7 +2015,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 
 		AMP_Validation_Manager::remove_illegal_source_stack_comments( $dom );
 
-		$this->assertNotContains( 'amp-source-stack', $dom->saveHTML() );
+		$this->assertStringNotContains( 'amp-source-stack', $dom->saveHTML() );
 		$this->assertEquals( '{"foo":"bar <b>foo<\/b>"}', $dom->getElementById( 'first' )->textContent );
 		$this->assertEquals( 'body { color: blue; }body { color: red; }body { color: white; }', $dom->getElementById( 'second' )->textContent );
 		$this->assertEquals( '/* start custom scripts! */document.write("hello!")/* end custom scripts! */', $dom->getElementById( 'third' )->textContent );
@@ -2233,10 +2235,10 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 			]
 		);
 		$output = get_echo( [ 'AMP_Validation_Manager', 'print_plugin_notice' ] );
-		$this->assertContains( 'Warning: The following plugin may be incompatible with AMP', $output );
-		$this->assertContains( 'Foo Bar', $output );
-		$this->assertContains( 'More details', $output );
-		$this->assertContains( admin_url( 'edit.php' ), $output );
+		$this->assertStringContains( 'Warning: The following plugin may be incompatible with AMP', $output );
+		$this->assertStringContains( 'Foo Bar', $output );
+		$this->assertStringContains( 'More details', $output );
+		$this->assertStringContains( admin_url( 'edit.php' ), $output );
 
 		if ( $cache_plugins_backup ) {
 			wp_cache_set( 'plugins', $cache_plugins_backup, 'plugins' );
@@ -2274,12 +2276,12 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 			'wp-polyfill',
 		];
 
-		$this->assertContains( 'js/amp-block-validation.js', $script->src );
+		$this->assertStringContains( 'js/amp-block-validation.js', $script->src );
 		$this->assertEqualSets( $expected_dependencies, $script->deps );
 		$this->assertContains( $slug, wp_scripts()->queue );
 
 		$style = wp_styles()->registered[ $slug ];
-		$this->assertContains( 'css/amp-block-validation-compiled.css', $style->src );
+		$this->assertStringContains( 'css/amp-block-validation-compiled.css', $style->src );
 		$this->assertEquals( AMP__VERSION, $style->ver );
 		$this->assertContains( $slug, wp_styles()->queue );
 	}

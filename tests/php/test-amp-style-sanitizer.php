@@ -9,6 +9,7 @@
 
 use AmpProject\AmpWP\RemoteRequest\CachedData;
 use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
+use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 use AmpProject\Dom\Document;
 use AmpProject\AmpWP\Tests\PrivateAccess;
 use AmpProject\Exception\FailedToGetFromRemoteUrl;
@@ -18,6 +19,7 @@ use AmpProject\Exception\FailedToGetFromRemoteUrl;
  */
 class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
+	use AssertContainsCompatibility;
 	use PrivateAccess;
 
 	/**
@@ -641,15 +643,15 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			}
 
 			if ( false === strpos( $expected_stylesheet, '{' ) ) {
-				$this->assertContains( $expected_stylesheet, $actual_stylesheets[ $i ] );
+				$this->assertStringContains( $expected_stylesheet, $actual_stylesheets[ $i ] );
 			} else {
 				$this->assertEquals( $expected_stylesheet, $actual_stylesheets[ $i ] );
 			}
-			$this->assertContains( $expected_stylesheet, $sanitized_html );
+			$this->assertStringContains( $expected_stylesheet, $sanitized_html );
 		}
 
 		if ( $actual_stylesheets ) {
-			$this->assertContains( "\n\n/*# sourceURL=amp-custom.css */", $sanitized_html );
+			$this->assertStringContains( "\n\n/*# sourceURL=amp-custom.css */", $sanitized_html );
 		}
 	}
 
@@ -1200,11 +1202,11 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertEquals( [], $error_codes );
 		$actual_stylesheets = array_values( $sanitizer->get_stylesheets() );
 		$this->assertCount( 1, $actual_stylesheets );
-		$this->assertContains( 'dashicons.woff") format("woff")', $actual_stylesheets[0] );
-		$this->assertNotContains( 'data:application/font-woff;', $actual_stylesheets[0] );
-		$this->assertContains( '.dashicons{', $actual_stylesheets[0] );
-		$this->assertContains( '.dashicons-admin-appearance:before{', $actual_stylesheets[0] );
-		$this->assertNotContains( '.dashicons-format-chat:before', $actual_stylesheets[0] );
+		$this->assertStringContains( 'dashicons.woff") format("woff")', $actual_stylesheets[0] );
+		$this->assertStringNotContains( 'data:application/font-woff;', $actual_stylesheets[0] );
+		$this->assertStringContains( '.dashicons{', $actual_stylesheets[0] );
+		$this->assertStringContains( '.dashicons-admin-appearance:before{', $actual_stylesheets[0] );
+		$this->assertStringNotContains( '.dashicons-format-chat:before', $actual_stylesheets[0] );
 	}
 
 	/**
@@ -1242,26 +1244,26 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertCount( 3, $actual_stylesheets );
 
 		// Check font included in theme.
-		$this->assertContains( '@font-face{font-family:"NonBreakingSpaceOverride";', $actual_stylesheets[0] );
-		$this->assertContains( 'format("woff2")', $actual_stylesheets[0] );
-		$this->assertContains( 'format("woff")', $actual_stylesheets[0] );
-		$this->assertNotContains( 'data:', $actual_stylesheets[0] );
-		$this->assertContains( 'fonts/NonBreakingSpaceOverride.woff2', $actual_stylesheets[0] );
-		$this->assertContains( 'fonts/NonBreakingSpaceOverride.woff', $actual_stylesheets[0] );
-		$this->assertContains( 'font-display:swap', $actual_stylesheets[0] );
+		$this->assertStringContains( '@font-face{font-family:"NonBreakingSpaceOverride";', $actual_stylesheets[0] );
+		$this->assertStringContains( 'format("woff2")', $actual_stylesheets[0] );
+		$this->assertStringContains( 'format("woff")', $actual_stylesheets[0] );
+		$this->assertStringNotContains( 'data:', $actual_stylesheets[0] );
+		$this->assertStringContains( 'fonts/NonBreakingSpaceOverride.woff2', $actual_stylesheets[0] );
+		$this->assertStringContains( 'fonts/NonBreakingSpaceOverride.woff', $actual_stylesheets[0] );
+		$this->assertStringContains( 'font-display:swap', $actual_stylesheets[0] );
 
 		// Check font not included in theme, but included in plugin.
-		$this->assertContains( '@font-face{font-family:"Genericons";', $actual_stylesheets[1] );
-		$this->assertContains( 'format("woff")', $actual_stylesheets[1] );
-		$this->assertNotContains( 'data:', $actual_stylesheets[1] );
-		$this->assertContains( 'assets/fonts/genericons.woff', $actual_stylesheets[1] );
-		$this->assertContains( 'font-display:swap', $actual_stylesheets[1] );
+		$this->assertStringContains( '@font-face{font-family:"Genericons";', $actual_stylesheets[1] );
+		$this->assertStringContains( 'format("woff")', $actual_stylesheets[1] );
+		$this->assertStringNotContains( 'data:', $actual_stylesheets[1] );
+		$this->assertStringContains( 'assets/fonts/genericons.woff', $actual_stylesheets[1] );
+		$this->assertStringContains( 'font-display:swap', $actual_stylesheets[1] );
 
 		// Check font not included anywhere, so must remain inline.
-		$this->assertContains( '@font-face{font-family:"Custom";', $actual_stylesheets[2] );
-		$this->assertContains( 'url("data:application/x-font-woff;charset=utf-8;base64,d09GRgABAAA")', $actual_stylesheets[2] );
-		$this->assertContains( 'format("woff")', $actual_stylesheets[2] );
-		$this->assertNotContains( 'font-display:swap', $actual_stylesheets[2] );
+		$this->assertStringContains( '@font-face{font-family:"Custom";', $actual_stylesheets[2] );
+		$this->assertStringContains( 'url("data:application/x-font-woff;charset=utf-8;base64,d09GRgABAAA")', $actual_stylesheets[2] );
+		$this->assertStringContains( 'format("woff")', $actual_stylesheets[2] );
+		$this->assertStringNotContains( 'font-display:swap', $actual_stylesheets[2] );
 	}
 
 	/**
@@ -1416,8 +1418,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertCount( 1, $actual_stylesheets );
 		$stylesheet = $actual_stylesheets[0];
 
-		$this->assertNotContains( '../images/spinner', $stylesheet );
-		$this->assertContains( sprintf( '.spinner{background-image:url("%s")', admin_url( 'images/spinner-2x.gif' ) ), $stylesheet );
+		$this->assertStringNotContains( '../images/spinner', $stylesheet );
+		$this->assertStringContains( sprintf( '.spinner{background-image:url("%s")', admin_url( 'images/spinner-2x.gif' ) ), $stylesheet );
 	}
 
 	/**
@@ -1958,7 +1960,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 		$stylesheets = array_values( $sanitizer->get_stylesheets() );
 
-		$this->assertContains( $expected, $stylesheets[0] );
+		$this->assertStringContains( $expected, $stylesheets[0] );
 	}
 
 	/**
@@ -2122,7 +2124,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 					$previous = -1;
 					foreach ( $expected_order as $i => $expected ) {
-						$test->assertContains( $expected, $stylesheet, "Did not see $expected at position $i." );
+						$test->assertStringContains( $expected, $stylesheet, "Did not see $expected at position $i." );
 						$position = strpos( $stylesheet, $expected );
 						$test->assertGreaterThan( $previous, $position, "Expected $expected to be after previous (at position $i)." );
 						$previous = $position;
@@ -2156,7 +2158,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 						'remote-finally-does-not-exist.css',
 					];
 					foreach ( $expected_absent as $expected ) {
-						$test->assertNotContains( $expected, $stylesheet, "Expected to not see $expected." );
+						$test->assertStringNotContains( $expected, $stylesheet, "Expected to not see $expected." );
 					}
 
 					$expected_order = [
@@ -2168,7 +2170,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 					$previous = -1;
 					foreach ( $expected_order as $i => $expected ) {
-						$test->assertContains( $expected, $stylesheet, "Did not see $expected at position $i." );
+						$test->assertStringContains( $expected, $stylesheet, "Did not see $expected at position $i." );
 						$position = strpos( $stylesheet, $expected );
 						$test->assertGreaterThan( $previous, $position, "Expected $expected to be after previous (at position $i)." );
 						$previous = $position;
@@ -2371,8 +2373,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$original_html  = trim( ob_get_clean() );
 		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
 
-		$this->assertContains( ".dashicons-admin-customizer:before{content:\"\xEF\x95\x80\"}", $sanitized_html );
-		$this->assertContains( 'span::after{content:"⚡️"}', $sanitized_html );
+		$this->assertStringContains( ".dashicons-admin-customizer:before{content:\"\xEF\x95\x80\"}", $sanitized_html );
+		$this->assertStringContains( 'span::after{content:"⚡️"}', $sanitized_html );
 	}
 
 	/**
@@ -2501,15 +2503,15 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					 */
 					$this->assertInstanceOf( 'DOMElement', $original_dom->getElementById( 'wpadminbar' ), 'Expected admin bar element to be present originally.' );
 					$this->assertInstanceOf( 'DOMElement', $original_dom->getElementById( 'admin-bar-css' ), 'Expected admin bar CSS to be present originally.' );
-					$this->assertContains( 'admin-bar', $original_dom->body->getAttribute( 'class' ) );
-					$this->assertContains( 'earlyprintstyle', $original_source, 'Expected early print style to not be present.' );
+					$this->assertStringContains( 'admin-bar', $original_dom->body->getAttribute( 'class' ) );
+					$this->assertStringContains( 'earlyprintstyle', $original_source, 'Expected early print style to not be present.' );
 
-					$this->assertContains( '.is-style-outline .wp-block-button__link', $amphtml_source, 'Expected block-library/style.css' );
-					$this->assertContains( '[class^="wp-block-"]:not(.wp-block-gallery) figcaption', $amphtml_source, 'Expected twentyten/blocks.css' );
-					$this->assertContains( 'amp-img.amp-wp-enforced-sizes', $amphtml_source, 'Expected amp-default.css' );
-					$this->assertContains( 'ab-empty-item', $amphtml_source, 'Expected admin-bar.css to still be present.' );
-					$this->assertNotContains( 'earlyprintstyle', $amphtml_source, 'Expected early print style to not be present.' );
-					$this->assertContains( 'admin-bar', $amphtml_dom->body->getAttribute( 'class' ) );
+					$this->assertStringContains( '.is-style-outline .wp-block-button__link', $amphtml_source, 'Expected block-library/style.css' );
+					$this->assertStringContains( '[class^="wp-block-"]:not(.wp-block-gallery) figcaption', $amphtml_source, 'Expected twentyten/blocks.css' );
+					$this->assertStringContains( 'amp-img.amp-wp-enforced-sizes', $amphtml_source, 'Expected amp-default.css' );
+					$this->assertStringContains( 'ab-empty-item', $amphtml_source, 'Expected admin-bar.css to still be present.' );
+					$this->assertStringNotContains( 'earlyprintstyle', $amphtml_source, 'Expected early print style to not be present.' );
+					$this->assertStringContains( 'admin-bar', $amphtml_dom->body->getAttribute( 'class' ) );
 					$this->assertInstanceOf( 'DOMElement', $amphtml_dom->getElementById( 'wpadminbar' ) );
 				},
 			],

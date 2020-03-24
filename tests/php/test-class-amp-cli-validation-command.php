@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\PrivateAccess;
 
 /**
@@ -14,6 +15,7 @@ use AmpProject\AmpWP\Tests\PrivateAccess;
  */
 class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 
+	use AssertContainsCompatibility;
 	use PrivateAccess;
 
 	/**
@@ -374,7 +376,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 		$year = gmdate( 'Y' );
 
 		// Normally, this should return the date page, unless the user has opted out of that template.
-		$this->assertContains( $year, $this->call_private_method( $this->validation, 'get_date_page' ) );
+		$this->assertStringContains( $year, $this->call_private_method( $this->validation, 'get_date_page' ) );
 
 		// If $include_conditionals is set and does not have is_date, this should not return a URL.
 		$this->validation->include_conditionals = [ 'is_search' ];
@@ -383,7 +385,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 		// If $include_conditionals has is_date, this should return a URL.
 		$this->validation->include_conditionals = [ 'is_date' ];
 		$parsed_page_url                        = wp_parse_url( $this->call_private_method( $this->validation, 'get_date_page' ) );
-		$this->assertContains( $year, $parsed_page_url['query'] );
+		$this->assertStringContains( $year, $parsed_page_url['query'] );
 		$this->validation->include_conditionals = [];
 	}
 
