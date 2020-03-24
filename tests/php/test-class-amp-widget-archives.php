@@ -5,12 +5,16 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+
 /**
  * Tests for class AMP_Widget_Archives.
  *
  * @package AMP
  */
 class Test_AMP_Widget_Archives extends WP_UnitTestCase {
+
+	use AssertContainsCompatibility;
 
 	/**
 	 * Instance of the widget.
@@ -77,8 +81,8 @@ class Test_AMP_Widget_Archives extends WP_UnitTestCase {
 		];
 		$output    = get_echo( [ $this->widget, 'widget' ], [ $arguments, $instance ] );
 
-		$this->assertContains( 'on="change:AMP.navigateTo(url=event.value)"', $output );
-		$this->assertNotContains( 'onchange=', $output );
+		$this->assertStringContains( 'on="change:AMP.navigateTo(url=event.value)"', $output );
+		$this->assertStringNotContains( 'onchange=', $output );
 	}
 
 }

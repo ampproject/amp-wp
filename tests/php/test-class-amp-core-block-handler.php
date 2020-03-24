@@ -6,6 +6,8 @@
  * @since 1.0
  */
 
+use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+
 /**
  * Tests for AMP_Core_Block_Handler.
  *
@@ -13,6 +15,8 @@
  * @covers AMP_Core_Block_Handler
  */
 class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
+
+	use AssertContainsCompatibility;
 
 	/**
 	 * Set up.
@@ -71,26 +75,26 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 
 		$handler->register_embed();
 		$rendered = do_blocks( $categories_block );
-		$this->assertContains( '<select', $rendered );
-		$this->assertNotContains( 'onchange', $rendered );
-		$this->assertContains( 'on="change', $rendered );
+		$this->assertStringContains( '<select', $rendered );
+		$this->assertStringNotContains( 'onchange', $rendered );
+		$this->assertStringContains( 'on="change', $rendered );
 		if ( WP_Block_Type_Registry::get_instance()->is_registered( 'core/archives' ) ) {
 			$rendered = do_blocks( $archives_block );
-			$this->assertContains( '<select', $rendered );
-			$this->assertNotContains( 'onchange', $rendered );
-			$this->assertContains( 'on="change', $rendered );
+			$this->assertStringContains( '<select', $rendered );
+			$this->assertStringNotContains( 'onchange', $rendered );
+			$this->assertStringContains( 'on="change', $rendered );
 		}
 
 		$handler->unregister_embed();
 		$rendered = do_blocks( $categories_block );
-		$this->assertContains( '<select', $rendered );
-		$this->assertContains( 'onchange', $rendered );
-		$this->assertNotContains( 'on="change', $rendered );
+		$this->assertStringContains( '<select', $rendered );
+		$this->assertStringContains( 'onchange', $rendered );
+		$this->assertStringNotContains( 'on="change', $rendered );
 		if ( WP_Block_Type_Registry::get_instance()->is_registered( 'core/archives' ) ) {
 			$rendered = do_blocks( $archives_block );
-			$this->assertContains( '<select', $rendered );
-			$this->assertContains( 'onchange', $rendered );
-			$this->assertNotContains( 'on="change', $rendered );
+			$this->assertStringContains( '<select', $rendered );
+			$this->assertStringContains( 'onchange', $rendered );
+			$this->assertStringNotContains( 'on="change', $rendered );
 		}
 	}
 
@@ -140,7 +144,7 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 
 		$content = apply_filters( 'the_content', get_post( $post_id )->post_content );
 
-		$this->assertContains( '<video width="560" height="320" ', $content );
+		$this->assertStringContains( '<video width="560" height="320" ', $content );
 	}
 
 	/**
@@ -169,8 +173,8 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 
 		$content = apply_filters( 'the_content', get_post( $post_id )->post_content );
 
-		$this->assertContains( '<video layout="fill" object-fit="cover"', $content );
-		$this->assertNotContains( 'width=', $content );
-		$this->assertNotContains( 'height=', $content );
+		$this->assertStringContains( '<video layout="fill" object-fit="cover"', $content );
+		$this->assertStringNotContains( 'width=', $content );
+		$this->assertStringNotContains( 'height=', $content );
 	}
 }

@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 use AmpProject\Dom\Document;
 use AmpProject\AmpWP\Tests\PrivateAccess;
 
@@ -13,6 +14,7 @@ use AmpProject\AmpWP\Tests\PrivateAccess;
  */
 class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 
+	use AssertContainsCompatibility;
 	use PrivateAccess;
 
 	/**
@@ -270,11 +272,6 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 
 		$needle = '.site-logo amp-img { width: 3.000000rem; } @media (min-width: 700px) { .site-logo amp-img { width: 4.500000rem; } }';
 
-		// @todo Make use of AssertContainsCompatibility trait.
-		if ( method_exists( $this, 'assertStringContainsString' ) ) {
-			$this->assertStringContainsString( $needle, $logo );
-		} else {
-			$this->assertContains( $needle, $logo );
-		}
+		$this->assertStringContains( $needle, $logo );
 	}
 }

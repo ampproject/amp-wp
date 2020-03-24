@@ -1,5 +1,6 @@
 <?php
 
+use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 use AmpProject\Dom\Document;
 
 /**
@@ -12,6 +13,8 @@ use AmpProject\Dom\Document;
  * @method void assertFalse( bool $expectsFalse, string $errorMessage=null )
  */
 class AMP_DOM_Utils_Test extends WP_UnitTestCase {
+
+	use AssertContainsCompatibility;
 
 	/**
 	 * Test UTF-8 content.
@@ -255,10 +258,10 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 
 		$serialized_html = $dom->saveHTML( $dom->documentElement );
 
-		$this->assertContains( '<a href="{{href}}" title="Hello {{name}}">', $serialized_html );
-		$this->assertContains( '<img src="{{src}}">', $serialized_html );
-		$this->assertContains( '<blockquote cite="{{cite}}">', $serialized_html );
-		$this->assertContains( '"block_attrs":{"layout":"column-1"}}', $serialized_html );
+		$this->assertStringContains( '<a href="{{href}}" title="Hello {{name}}">', $serialized_html );
+		$this->assertStringContains( '<img src="{{src}}">', $serialized_html );
+		$this->assertStringContains( '<blockquote cite="{{cite}}">', $serialized_html );
+		$this->assertStringContains( '"block_attrs":{"layout":"column-1"}}', $serialized_html );
 	}
 
 	/**

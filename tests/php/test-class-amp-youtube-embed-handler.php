@@ -6,12 +6,16 @@
  * @since 0.7
  */
 
+use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+
 /**
  * Tests for AMP_YouTube_Embed_Handler.
  *
  * @covers AMP_YouTube_Embed_Handler
  */
 class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
+
+	use AssertContainsCompatibility;
 
 	protected $youtube_video_id = 'kfVsfOSbJY0';
 
@@ -105,8 +109,8 @@ class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
 		];
 
 		$youtube_shortcode = $this->handler->video_override( '', $attr_youtube );
-		$this->assertContains( '<amp-youtube', $youtube_shortcode );
-		$this->assertContains( $youtube_id, $youtube_shortcode );
+		$this->assertStringContains( '<amp-youtube', $youtube_shortcode );
+		$this->assertStringContains( $youtube_id, $youtube_shortcode );
 
 		$vimeo_id        = '64086087';
 		$vimeo_src       = 'https://vimeo.com/' . $vimeo_id;

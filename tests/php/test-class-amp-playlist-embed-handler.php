@@ -6,6 +6,8 @@
  * @since 0.7
  */
 
+use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+
 /**
  * Tests for AMP_Playlist_Embed_Handler.
  *
@@ -13,6 +15,8 @@
  * @covers AMP_Playlist_Embed_Handler
  */
 class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
+
+	use AssertContainsCompatibility;
 
 	/**
 	 * Instance of the tested class.
@@ -116,10 +120,10 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 	public function test_shortcode() {
 		$attr     = $this->get_attributes( 'video' );
 		$playlist = $this->instance->shortcode( $attr );
-		$this->assertContains( '<amp-video', $playlist );
-		$this->assertContains( '<amp-state', $playlist );
-		$this->assertContains( $this->file_1, $playlist );
-		$this->assertContains( $this->file_2, $playlist );
+		$this->assertStringContains( '<amp-video', $playlist );
+		$this->assertStringContains( '<amp-state', $playlist );
+		$this->assertStringContains( $this->file_1, $playlist );
+		$this->assertStringContains( $this->file_2, $playlist );
 	}
 
 	/**
@@ -131,12 +135,12 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 		$attr     = $this->get_attributes( 'video' );
 		$data     = $this->instance->get_data( $attr );
 		$playlist = $this->instance->video_playlist( $data );
-		$this->assertContains( '<amp-video', $playlist );
-		$this->assertContains( '<amp-state', $playlist );
-		$this->assertContains( $this->file_1, $playlist );
-		$this->assertContains( $this->file_2, $playlist );
-		$this->assertContains( '[src]="wpPlaylist1[wpPlaylist1.selectedIndex].videoUrl"', $playlist );
-		$this->assertContains( 'on="tap:AMP.setState({&quot;wpPlaylist1&quot;:{&quot;selectedIndex&quot;:0}})"', $playlist );
+		$this->assertStringContains( '<amp-video', $playlist );
+		$this->assertStringContains( '<amp-state', $playlist );
+		$this->assertStringContains( $this->file_1, $playlist );
+		$this->assertStringContains( $this->file_2, $playlist );
+		$this->assertStringContains( '[src]="wpPlaylist1[wpPlaylist1.selectedIndex].videoUrl"', $playlist );
+		$this->assertStringContains( 'on="tap:AMP.setState({&quot;wpPlaylist1&quot;:{&quot;selectedIndex&quot;:0}})"', $playlist );
 	}
 
 	/**
@@ -212,11 +216,11 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 
 		$data     = $this->instance->get_data( $attr );
 		$playlist = $this->instance->audio_playlist( $data );
-		$this->assertContains( '<amp-carousel', $playlist );
-		$this->assertContains( '<amp-audio', $playlist );
-		$this->assertContains( $this->file_1, $playlist );
-		$this->assertContains( $this->file_2, $playlist );
-		$this->assertContains( 'tap:AMP.setState({&quot;wpPlaylist1&quot;:{&quot;selectedIndex&quot;:0}})"', $playlist );
+		$this->assertStringContains( '<amp-carousel', $playlist );
+		$this->assertStringContains( '<amp-audio', $playlist );
+		$this->assertStringContains( $this->file_1, $playlist );
+		$this->assertStringContains( $this->file_2, $playlist );
+		$this->assertStringContains( 'tap:AMP.setState({&quot;wpPlaylist1&quot;:{&quot;selectedIndex&quot;:0}})"', $playlist );
 	}
 
 	/**
@@ -232,16 +236,16 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 		$expected_on = 'tap:AMP.setState({&quot;' . $state_id . '&quot;:{&quot;selectedIndex&quot;:0}})';
 
 		$tracks = get_echo( [ $this->instance, 'print_tracks' ], [ $state_id, $data['tracks'] ] );
-		$this->assertContains( '<div class="wp-playlist-tracks">', $tracks );
-		$this->assertContains( $state_id, $tracks );
-		$this->assertContains( $expected_on, $tracks );
+		$this->assertStringContains( '<div class="wp-playlist-tracks">', $tracks );
+		$this->assertStringContains( $state_id, $tracks );
+		$this->assertStringContains( $expected_on, $tracks );
 
 		$attr        = $this->get_attributes( $type );
 		$data        = $this->instance->get_data( $attr );
 		$expected_on = 'tap:AMP.setState({&quot;' . $state_id . '&quot;:{&quot;selectedIndex&quot;:0}})';
 
 		$tracks = get_echo( [ $this->instance, 'print_tracks' ], [ $state_id, $data['tracks'] ] );
-		$this->assertContains( $expected_on, $tracks );
+		$this->assertStringContains( $expected_on, $tracks );
 	}
 
 	/**
@@ -253,8 +257,8 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 		$type = 'audio';
 		$data = $this->instance->get_data( $this->get_attributes( $type ) );
 		$this->assertEquals( $type, $data['type'] );
-		$this->assertContains( $this->file_1, $data['tracks'][0]['src'] );
-		$this->assertContains( $this->file_2, $data['tracks'][1]['src'] );
+		$this->assertStringContains( $this->file_1, $data['tracks'][0]['src'] );
+		$this->assertStringContains( $this->file_2, $data['tracks'][1]['src'] );
 	}
 
 	/**
