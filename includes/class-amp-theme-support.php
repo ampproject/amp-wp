@@ -2001,6 +2001,10 @@ class AMP_Theme_Support {
 
 		$dom = Document::fromHtml( $response );
 
+		if ( AMP_Validation_Manager::$is_validate_request ) {
+			AMP_Validation_Manager::remove_illegal_source_stack_comments( $dom );
+		}
+
 		AMP_HTTP::send_server_timing( 'amp_dom_parse', -$dom_parse_start, 'AMP DOM Parse' );
 
 		// Make sure scripts from the body get moved to the head.
