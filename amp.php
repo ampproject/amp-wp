@@ -246,11 +246,11 @@ if ( 'amp' !== basename( AMP__DIR__ ) ) {
  * Print admin notice if the Xdebug extension is loaded.
  *
  * @since 1.3
- * @deprecated 1.5.1 Warning moved to Site Health.
+ * @deprecated 1.5.0 Warning moved to Site Health.
  * @see \AmpProject\AmpWP\Admin\SiteHealth::xdebug_extension()
  */
 function _amp_xdebug_admin_notice() {
-	_deprecated_function( __FUNCTION__, '1.5.1' );
+	_deprecated_function( __FUNCTION__, '1.5.0' );
 
 	?>
 	<div class="notice notice-warning">
