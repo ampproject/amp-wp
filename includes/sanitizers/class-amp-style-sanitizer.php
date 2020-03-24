@@ -766,6 +766,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
+			// Attributes for amp-experiment begin with 'amp-x-', see <https://amp.dev/documentation/examples/components/amp-experiment/>.
+			if ( 'amp-x-' === substr( $attribute_name, 0, 6 ) ) {
+				if ( ! $this->has_used_tag_names( [ 'amp-experiment' ] ) ) {
+					return false;
+				}
+				continue;
+			}
+
 			if ( ! $this->used_attributes[ $attribute_name ] ) {
 				return false;
 			}

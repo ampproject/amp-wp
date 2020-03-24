@@ -581,6 +581,52 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				[],
 				[],
 			],
+			'amp_experiment' => [
+				'
+					<html amp>
+					<head>
+						<style>
+							body[amp-x-button-color-experiment="0"] .button-color-experiment {
+								color: red;
+							}
+						</style>
+						<style>
+							body[amp-x-button-color-experiment="1"] .button-color-experiment {
+								color: green;
+							}
+						</style>
+						<style>
+							body[amp-x-button-color-experiment="2"] .button-color-experiment {
+								color: blue;
+							}
+						</style>
+					</head>
+					<body>
+						<amp-experiment>
+							<script type="application/json">
+								{
+									"button-color-experiment": {
+										"variants": {
+											"0": 30,
+											"1": 30,
+											"2": 30
+										}
+									}
+								}
+							</script>
+						</amp-experiment>
+
+						<button class="button-color-experiment">Click here</button>
+					</body>
+					</html>
+				',
+				[
+					'body[amp-x-button-color-experiment="0"] .button-color-experiment{color:red}',
+					'body[amp-x-button-color-experiment="1"] .button-color-experiment{color:green}',
+					'body[amp-x-button-color-experiment="2"] .button-color-experiment{color:blue}',
+				],
+				[],
+			],
 		];
 	}
 
