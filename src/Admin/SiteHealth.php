@@ -274,20 +274,21 @@ final class SiteHealth {
 	public function xdebug_extension() {
 		$status      = 'good';
 		$color       = 'green';
-		$description = esc_html__( 'When this is loaded, it can cause some of the AMP plugin\'s processes to timeout depending on your system resources and configuration.', 'amp' );
+		$description = esc_html__( 'The Xdebug extension can cause some of the AMP plugin&#8217;s processes to time out depending on your system resources and configuration. It should not be enabled on a live site (production environment).', 'amp' );
 
 		if ( extension_loaded( 'xdebug' ) ) {
-			$label = esc_html__( 'Your server currently has the Xdebug PHP extension loaded.', 'amp' );
+			$label = esc_html__( 'Your server currently has the Xdebug PHP extension loaded', 'amp' );
 			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-				/* translators: %1$s: the WP_DEBUG constant, %2$s: true */
-				$description .= ' ' . sprintf( esc_html__( 'Though %1$s is %2$s, suggesting this is not a production environment, and not a concern.', 'amp' ), 'WP_DEBUG', 'true' );
+				/* translators: %s: the WP_DEBUG constant */
+				$description .= ' ' . sprintf( esc_html__( 'Nevertheless, %s is enabled which suggests that this site is currently under development or is undergoing debugging.', 'amp' ), '<code>WP_DEBUG</code>' );
 			} else {
-				$status       = 'recommended';
-				$color        = 'orange';
-				$description .= ' ' . esc_html__( 'Please deactivate Xdebug for the best experience.', 'amp' );
+				$status = 'recommended';
+				$color  = 'orange';
+				/* translators: %s: the WP_DEBUG constant */
+				$description .= ' ' . sprintf( esc_html__( 'Please deactivate Xdebug to improve performance. Otherwise, you may enable %s to indicate that this site is currently under development or is undergoing debugging.', 'amp' ), '<code>WP_DEBUG</code>' );
 			}
 		} else {
-			$label = esc_html__( 'Your server currently does not have the Xdebug PHP extension loaded.', 'amp' );
+			$label = esc_html__( 'Your server currently does not have the Xdebug PHP extension loaded', 'amp' );
 		}
 
 		return array_merge(
