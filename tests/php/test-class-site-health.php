@@ -7,6 +7,7 @@
 
 use AmpProject\AmpWP\Admin\SiteHealth;
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\PrivateAccess;
 
 /**
@@ -14,6 +15,7 @@ use AmpProject\AmpWP\Tests\PrivateAccess;
  */
 class Test_Site_Health extends WP_UnitTestCase {
 
+	use AssertContainsCompatibility;
 	use PrivateAccess;
 
 	/**
@@ -66,6 +68,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'amp_persistent_object_cache', $tests['direct'] );
 		$this->assertArrayHasKey( 'amp_curl_multi_functions', $tests['direct'] );
 		$this->assertArrayHasKey( 'amp_icu_version', $tests['direct'] );
+		$this->assertArrayHasKey( 'amp_xdebug_extension', $tests['direct'] );
 	}
 
 	/**
@@ -178,6 +181,21 @@ class Test_Site_Health extends WP_UnitTestCase {
 				]
 			),
 			$this->instance->css_transient_caching()
+		);
+	}
+
+	/**
+	 * Test xdebug_extension.
+	 *
+	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::xdebug_extension()
+	 */
+	public function test_xdebug_extension() {
+		$actual = $this->instance->xdebug_extension();
+		$this->assertEquals( 'amp_xdebug_extension', $actual['test'] );
+
+		$this->assertStringContains(
+			esc_html( 'The Xdebug extension can cause some of the AMP plugin&#8217;s processes to time out depending on your system resources and configuration. It should not be enabled on a live site (production environment).' ),
+			$actual['description']
 		);
 	}
 

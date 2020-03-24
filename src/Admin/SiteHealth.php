@@ -54,6 +54,10 @@ final class SiteHealth {
 			'label' => esc_html__( 'Transient caching of stylesheets', 'amp' ),
 			'test'  => [ $this, 'css_transient_caching' ],
 		];
+		$tests['direct']['amp_xdebug_extension']        = [
+			'label' => esc_html__( 'Xdebug extension', 'amp' ),
+			'test'  => [ $this, 'xdebug_extension' ],
+		];
 
 		return $tests;
 	}
@@ -260,6 +264,45 @@ final class SiteHealth {
 			'status'      => $status,
 			'label'       => esc_html( $label ),
 		];
+	}
+
+	/**
+	 * Gets the test result data for whether the Xdebug extension is loaded.
+	 *
+	 * @since 1.5
+	 *
+	 * @return array The test data.
+	 */
+	public function xdebug_extension() {
+		$status      = 'good';
+		$color       = 'green';
+		$description = esc_html__( 'The Xdebug extension can cause some of the AMP plugin&#8217;s processes to time out depending on your system resources and configuration. It should not be enabled on a live site (production environment).', 'amp' );
+
+		if ( extension_loaded( 'xdebug' ) ) {
+			$label = esc_html__( 'Your server currently has the Xdebug PHP extension loaded', 'amp' );
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				/* translators: %s: the WP_DEBUG constant */
+				$description .= ' ' . sprintf( esc_html__( 'Nevertheless, %s is enabled which suggests that this site is currently under development or is undergoing debugging.', 'amp' ), '<code>WP_DEBUG</code>' );
+			} else {
+				$status = 'recommended';
+				$color  = 'orange';
+				/* translators: %s: the WP_DEBUG constant */
+				$description .= ' ' . sprintf( esc_html__( 'Please deactivate Xdebug to improve performance. Otherwise, you may enable %s to indicate that this site is currently under development or is undergoing debugging.', 'amp' ), '<code>WP_DEBUG</code>' );
+			}
+		} else {
+			$label = esc_html__( 'Your server currently does not have the Xdebug PHP extension loaded', 'amp' );
+		}
+
+		return array_merge(
+			compact( 'status', 'label', 'description' ),
+			[
+				'badge' => [
+					'label' => esc_html__( 'AMP', 'amp' ),
+					'color' => $color,
+				],
+				'test'  => 'amp_xdebug_extension',
+			]
+		);
 	}
 
 	/**
