@@ -339,5 +339,4 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 		}
 		return $ids;
 	}
-
 }

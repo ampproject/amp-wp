@@ -422,5 +422,4 @@ class AMP_Post_Meta_Box {
 
 		return $link;
 	}
-
 }

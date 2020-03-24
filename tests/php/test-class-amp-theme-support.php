@@ -1852,6 +1852,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	public function test_start_output_buffering() {
 		wp();
 		if ( ! function_exists( 'newrelic_disable_autorum ' ) ) {
+
 			/**
 			 * Define newrelic_disable_autorum to allow passing line.
 			 */

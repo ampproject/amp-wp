@@ -260,7 +260,6 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertEquals( 'https://example.com/foo/?blaz', amp_remove_endpoint( 'https://example.com/foo/amp/?blaz' ) );
 	}
 
-
 	/**
 	 * Test that hook is added.
 	 *

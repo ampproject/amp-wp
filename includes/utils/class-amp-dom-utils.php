@@ -187,7 +187,6 @@ class AMP_DOM_Utils {
 		);
 	}
 
-
 	/**
 	 * Return valid HTML content extracted from the DOMNode passed as a parameter.
 	 *

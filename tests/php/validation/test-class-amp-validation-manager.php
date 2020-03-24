@@ -2368,7 +2368,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		AMP_Validation_Manager::reset_validation_results();
 	}
 
-
 	/**
 	 * Add a nonce to the $_REQUEST, so that is_authorized() returns true.
 	 *

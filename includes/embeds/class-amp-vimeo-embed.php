@@ -175,5 +175,4 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		return $this->render( compact( 'video_id' ) );
 	}
-
 }

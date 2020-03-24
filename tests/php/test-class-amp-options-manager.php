@@ -241,7 +241,6 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$this->assertArrayNotHasKey( $id, $entries );
 	}
 
-
 	public function get_test_get_options_defaults_data() {
 		return [
 			'reader'                               => [

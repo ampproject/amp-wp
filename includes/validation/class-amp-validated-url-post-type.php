@@ -259,6 +259,7 @@ class AMP_Validated_URL_Post_Type {
 			}
 		);
 	}
+
 	/**
 	 * Enqueue style.
 	 */
@@ -2826,7 +2827,6 @@ class AMP_Validated_URL_Post_Type {
 
 		return $views;
 	}
-
 
 	/**
 	 * Filters messages displayed after bulk updates.

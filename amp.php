@@ -238,6 +238,7 @@ function _amp_incorrect_plugin_slug_admin_notice() {
 	</div>
 	<?php
 }
+
 if ( 'amp' !== basename( AMP__DIR__ ) ) {
 	add_action( 'admin_notices', '_amp_incorrect_plugin_slug_admin_notice' );
 }
@@ -261,6 +262,7 @@ function _amp_xdebug_admin_notice() {
 	</div>
 	<?php
 }
+
 if ( extension_loaded( 'xdebug' ) ) {
 	add_action( 'admin_notices', '_amp_xdebug_admin_notice' );
 }

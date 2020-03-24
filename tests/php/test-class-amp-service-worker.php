@@ -252,5 +252,4 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 		// Go back home to clean up 🤷!
 		$this->go_to( home_url() );
 	}
-
 }

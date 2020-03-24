@@ -433,7 +433,6 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$this->assertEquals( $expected, $element->getAttribute( 'on' ) );
 	}
 
-
 	public function get_merge_amp_actions_data() {
 		return [
 			// Both empty.
