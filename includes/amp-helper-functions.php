@@ -1646,6 +1646,7 @@ function amp_generate_script_hash( $script ) {
  * @license   http://opensource.org/licenses/MIT MIT
  */
 if ( ! function_exists( 'array_column' ) ) {
+
 	/**
 	 * Returns the values from a single column of the input array, identified by
 	 * the $columnKey.

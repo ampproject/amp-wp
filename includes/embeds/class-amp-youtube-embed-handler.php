@@ -206,5 +206,4 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		return $this->render( compact( 'video_id' ), $url );
 	}
-
 }

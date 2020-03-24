@@ -1,6 +1,7 @@
 <?php
 
 class AMP_Render_Post_Test extends WP_UnitTestCase {
+
 	/**
 	 * @expectedDeprecated amp_render_post
 	 */

@@ -63,7 +63,6 @@ class AMP_Playbuzz_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertEquals( $expected, $content );
 	}
 
-
 	public function test_get_scripts__data_item_or_data_game_required() {
 		$source   = '<div class="pb_feed"></div>';
 		$expected = [];

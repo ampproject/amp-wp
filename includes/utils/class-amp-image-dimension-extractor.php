@@ -273,7 +273,6 @@ class AMP_Image_Dimension_Extractor {
 		}
 	}
 
-
 	/**
 	 * Get default user agent
 	 *

@@ -80,5 +80,4 @@ class Test_AMP_Widget_Categories extends WP_UnitTestCase {
 		$this->assertContains( 'on="change:', $output );
 		$this->assertNotContains( '<script type=', $output );
 	}
-
 }
