@@ -66,6 +66,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'amp_persistent_object_cache', $tests['direct'] );
 		$this->assertArrayHasKey( 'amp_curl_multi_functions', $tests['direct'] );
 		$this->assertArrayHasKey( 'amp_icu_version', $tests['direct'] );
+		$this->assertArrayHasKey( 'amp_xdebug_extension', $tests['direct'] );
 	}
 
 	/**
@@ -178,6 +179,21 @@ class Test_Site_Health extends WP_UnitTestCase {
 				]
 			),
 			$this->instance->css_transient_caching()
+		);
+	}
+
+	/**
+	 * Test xdebug_extension.
+	 *
+	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::xdebug_extension()
+	 */
+	public function test_xdebug_extension() {
+		$actual = $this->instance->xdebug_extension();
+		$this->assertEquals( 'amp_xdebug_extension', $actual['test'] );
+
+		$this->assertContains(
+			esc_html( 'When this is loaded, it can cause some of the AMP plugin\'s processes to timeout depending on your system resources and configuration.' ),
+			$actual['description']
 		);
 	}
 

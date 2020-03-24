@@ -54,6 +54,10 @@ final class SiteHealth {
 			'label' => esc_html__( 'Transient caching of stylesheets', 'amp' ),
 			'test'  => [ $this, 'css_transient_caching' ],
 		];
+		$tests['direct']['amp_xdebug_extension']        = [
+			'label' => esc_html__( 'Xdebug extension', 'amp' ),
+			'test'  => [ $this, 'xdebug_extension' ],
+		];
 
 		return $tests;
 	}
@@ -260,6 +264,42 @@ final class SiteHealth {
 			'status'      => $status,
 			'label'       => esc_html( $label ),
 		];
+	}
+
+	/**
+	 * Gets the test result data for whether the Xdebug extension is loaded.
+	 *
+	 * @return array The test data.
+	 */
+	public function xdebug_extension() {
+		$status      = 'good';
+		$color       = 'green';
+		$description = esc_html__( 'When this is loaded, it can cause some of the AMP plugin\'s processes to timeout depending on your system resources and configuration.', 'amp' );
+
+		if ( extension_loaded( 'xdebug' ) ) {
+			$label = esc_html__( 'Your server currently has the Xdebug PHP extension loaded.', 'amp' );
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				/* translators: %1$s: the WP_DEBUG constant, %2$s: true */
+				$description .= ' ' . sprintf( esc_html__( 'Though %1$s is %2$s, suggesting this is not a production environment, and not a concern.', 'amp' ), 'WP_DEBUG', 'true' );
+			} else {
+				$status       = 'recommended';
+				$color        = 'orange';
+				$description .= ' ' . esc_html__( 'Please deactivate Xdebug for the best experience.', 'amp' );
+			}
+		} else {
+			$label = esc_html__( 'Your server currently does not have the Xdebug PHP extension loaded.', 'amp' );
+		}
+
+		return array_merge(
+			compact( 'status', 'label', 'description' ),
+			[
+				'badge' => [
+					'label' => esc_html__( 'AMP', 'amp' ),
+					'color' => $color,
+				],
+				'test'  => 'amp_xdebug_extension',
+			]
+		);
 	}
 
 	/**

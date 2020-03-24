@@ -246,8 +246,12 @@ if ( 'amp' !== basename( AMP__DIR__ ) ) {
  * Print admin notice if the Xdebug extension is loaded.
  *
  * @since 1.3
+ * @deprecated 1.5.1 Warning moved to Site Health.
+ * @see \AmpProject\AmpWP\Admin\SiteHealth::xdebug_extension()
  */
 function _amp_xdebug_admin_notice() {
+	_deprecated_function( __FUNCTION__, '1.5.1' );
+
 	?>
 	<div class="notice notice-warning">
 		<p>
@@ -260,9 +264,6 @@ function _amp_xdebug_admin_notice() {
 		</p>
 	</div>
 	<?php
-}
-if ( extension_loaded( 'xdebug' ) ) {
-	add_action( 'admin_notices', '_amp_xdebug_admin_notice' );
 }
 
 require_once AMP__DIR__ . '/vendor/autoload.php';
