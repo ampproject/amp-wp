@@ -250,3 +250,27 @@ function amp_post_meta_box() {
 function amp_admin_pointer() {
 	_deprecated_function( __FUNCTION__, '1.5.0' );
 }
+
+/**
+ * Print admin notice if the Xdebug extension is loaded.
+ *
+ * @since 1.3
+ * @deprecated 1.5.0 Warning moved to Site Health.
+ * @see AmpProject\AmpWP\Admin\SiteHealth::xdebug_extension()
+ */
+function _amp_xdebug_admin_notice() {
+	_deprecated_function( __FUNCTION__, '1.5.0' );
+
+	?>
+	<div class="notice notice-warning">
+		<p>
+			<?php
+			esc_html_e(
+				'Your server currently has the Xdebug PHP extension loaded. This can cause some of the AMP plugin\'s processes to timeout depending on your system resources and configuration. Please deactivate Xdebug for the best experience.',
+				'amp'
+			);
+			?>
+		</p>
+	</div>
+	<?php
+}
