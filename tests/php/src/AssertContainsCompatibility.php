@@ -27,7 +27,7 @@ trait AssertContainsCompatibility {
 	 * @param string $haystack Haystack to search through.
 	 * @param string $message  Message to show in case the assert fails.
 	 */
-	public function assertStringContains( $needle, $haystack, $message = '' ) {
+	public function assertStringContains( $needle, $haystack, $message = '' ) { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName
 		if ( method_exists( $this, 'assertStringContainsString' ) ) {
 			$this->assertStringContainsString( $needle, $haystack, $message );
 		} else {
@@ -47,7 +47,7 @@ trait AssertContainsCompatibility {
 	 * @param string $haystack Haystack to search through.
 	 * @param string $message  Message to show in case the assert fails.
 	 */
-	public function assertStringNotContains( $needle, $haystack, $message = '' ) {
+	public function assertStringNotContains( $needle, $haystack, $message = '' ) { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName
 		if ( method_exists( $this, 'assertStringNotContainsString' ) ) {
 			$this->assertStringNotContainsString( $needle, $haystack, $message );
 		} else {
