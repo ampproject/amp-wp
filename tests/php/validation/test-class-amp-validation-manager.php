@@ -1992,6 +1992,34 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test remove_illegal_source_stack_comments.
+	 *
+	 * @covers \AMP_Validation_Manager::remove_illegal_source_stack_comments()
+	 */
+	public function test_remove_illegal_source_stack_comments() {
+		$html = '
+			<html>
+				<head>
+					<script id="first" type="application/ld+json"><!--amp-source-stack {"type":"plugin","name":"add-scripts-and-styles-with-source-stacks.php","file":"add-scripts-and-styles-with-source-stacks.php","line":18,"function":"{closure}","hook":"my_print_json","priority":10}-->{"foo":"bar <b>foo<\/b>"}<!--/amp-source-stack {"type":"plugin","name":"add-scripts-and-styles-with-source-stacks.php","file":"add-scripts-and-styles-with-source-stacks.php","line":18,"function":"{closure}","hook":"my_print_json","priority":10}--></script>
+					<style id="second">body { color: blue; }<!--amp-source-stack {"type":"plugin","name":"add-scripts-and-styles-with-source-stacks.php","file":"add-scripts-and-styles-with-source-stacks.php","line":18,"function":"{closure}","hook":"my_print_style","priority":10}-->body { color: red; }<!--/amp-source-stack {"type":"plugin","name":"add-scripts-and-styles-with-source-stacks.php","file":"add-scripts-and-styles-with-source-stacks.php","line":18,"function":"{closure}","hook":"my_print_style","priority":10}-->body { color: white; }</style>
+				</head>
+				<body>
+					<script id="third" type="text/javascript">/* start custom scripts! */<!--amp-source-stack {"type":"plugin","name":"add-scripts-and-styles-with-source-stacks.php","file":"add-scripts-and-styles-with-source-stacks.php","line":18,"function":"{closure}","hook":"my_print_script","priority":10}-->document.write("hello!")<!--/amp-source-stack {"type":"plugin","name":"add-scripts-and-styles-with-source-stacks.php","file":"add-scripts-and-styles-with-source-stacks.php","line":18,"function":"{closure}","hook":"my_print_script","priority":10}-->/* end custom scripts! */</script>
+				</body>
+			</html>
+		';
+
+		$dom = Document::fromHtml( $html );
+
+		AMP_Validation_Manager::remove_illegal_source_stack_comments( $dom );
+
+		$this->assertNotContains( 'amp-source-stack', $dom->saveHTML() );
+		$this->assertEquals( '{"foo":"bar <b>foo<\/b>"}', $dom->getElementById( 'first' )->textContent );
+		$this->assertEquals( 'body { color: blue; }body { color: red; }body { color: white; }', $dom->getElementById( 'second' )->textContent );
+		$this->assertEquals( '/* start custom scripts! */document.write("hello!")/* end custom scripts! */', $dom->getElementById( 'third' )->textContent );
+	}
+
+	/**
 	 * Test finalize_validation.
 	 *
 	 * @covers \AMP_Validation_Manager::finalize_validation()
