@@ -936,7 +936,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// When the CDATA is expected to be JSON, ensure it's valid JSON.
-		if ( 'script' === $element->nodeName && in_array( $element->getAttribute( 'type' ), [ 'application/json', 'application/ld+json' ], true ) ) {
+		if ( 'script' === $element->nodeName && 'application/json' === $element->getAttribute( 'type' ) ) {
 			if ( '' === trim( $element->textContent ) ) {
 				return [ 'code' => self::JSON_ERROR_EMPTY ];
 			}
