@@ -1322,7 +1322,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					[
 						'rel'         => 'preconnect',
 						'href'        => 'https://fonts.gstatic.com/',
-						'crossorigin' => '',
+						'crossorigin' => 'anonymous',
 					]
 				);
 				$this->dom->head->insertBefore( $link ); // Note that \AMP_Theme_Support::ensure_required_markup() will put this in the optimal order.

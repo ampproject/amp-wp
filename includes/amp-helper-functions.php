@@ -740,11 +740,26 @@ function amp_register_default_scripts( $wp_scripts ) {
 		}
 	}
 
+	/**
+	 * Filters whether to use the LTS release channel.
+	 *
+	 * @since 1.5
+	 *
+	 * @param bool $use_lts Whether to use the LTS release channel. Defaults to false (so the stable channel is used).
+	 */
+	$lts_release_channel = apply_filters( 'amp_lts_release_channel', false );
+
+	if ( $lts_release_channel ) {
+		$base_url = 'https://cdn.ampproject.org/lts';
+	} else {
+		$base_url = 'https://cdn.ampproject.org';
+	}
+
 	// AMP Runtime.
 	$handle = 'amp-runtime';
 	$wp_scripts->add(
 		$handle,
-		'https://cdn.ampproject.org/v0.js',
+		$base_url . '/v0.js',
 		[],
 		null
 	);
@@ -752,7 +767,8 @@ function amp_register_default_scripts( $wp_scripts ) {
 		$handle,
 		'amp_script_attributes',
 		[
-			'async' => true,
+			'async'       => true,
+			'crossorigin' => 'anonymous',
 		]
 	);
 
@@ -760,7 +776,7 @@ function amp_register_default_scripts( $wp_scripts ) {
 	$handle = 'amp-shadow';
 	$wp_scripts->add(
 		$handle,
-		'https://cdn.ampproject.org/shadow-v0.js',
+		$base_url . '/shadow-v0.js',
 		[],
 		null
 	);
@@ -768,14 +784,16 @@ function amp_register_default_scripts( $wp_scripts ) {
 		$handle,
 		'amp_script_attributes',
 		[
-			'async' => true,
+			'async'       => true,
+			'crossorigin' => 'anonymous',
 		]
 	);
 
 	// Register all AMP components as defined in the spec.
 	foreach ( AMP_Allowed_Tags_Generated::get_extension_specs() as $extension_name => $extension_spec ) {
 		$src = sprintf(
-			'https://cdn.ampproject.org/v0/%s-%s.js',
+			'%s/v0/%s-%s.js',
+			$base_url,
 			$extension_name,
 			end( $extension_spec['version'] )
 		);
@@ -856,9 +874,11 @@ function amp_filter_script_loader_tag( $tag, $handle ) {
 	/*
 	 * All scripts from AMP CDN should be loaded async.
 	 * See <https://www.ampproject.org/docs/integration/pwa-amp/amp-in-pwa#include-"shadow-amp"-in-your-progressive-web-app>.
+	 * For crossorigin=anonymous, see <https://github.com/ampproject/amphtml/issues/24731>.
 	 */
 	$attributes = [
-		'async' => true,
+		'async'       => true,
+		'crossorigin' => 'anonymous',
 	];
 
 	// Add custom-template and custom-element attributes. All component scripts look like https://cdn.ampproject.org/v0/:name-:version.js.

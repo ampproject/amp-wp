@@ -32,6 +32,7 @@ interface Attribute
     const CHARSET               = 'charset';
     const CLASS_                = 'class'; // Underscore needed because 'class' is a PHP keyword.
     const CONTENT               = 'content';
+    const CROSSORIGIN           = 'crossorigin';
     const CUSTOM_ELEMENT        = 'custom-element';
     const CUSTOM_TEMPLATE       = 'custom-template';
     const HEIGHT                = 'height';
@@ -71,4 +72,6 @@ interface Attribute
     const REL_PRELOAD      = 'preload';
     const REL_PRERENDER    = 'prerender';
     const REL_STYLESHEET   = 'stylesheet';
+
+    const CROSSORIGIN_ANONYMOUS = 'anonymous';
 }
