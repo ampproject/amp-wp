@@ -47,7 +47,7 @@ If you are a developer, we encourage you to [follow along](https://github.com/am
 
 1. In the website experience, theme support enables you to reuse the active theme's templates and stylesheets; all WordPress features (menus, widgets, comments) are available in AMP.
 2. All core themes are supported, and many themes can be served as AMP with minimal changes, Otherwise, behavior is often as if JavaScript is turned off in the browser since scripts are removed.
-3. Reader mode templates are still available, but they are differ from the active theme.
+3. Reader mode templates are still available, but they differ from the active theme.
 4. Switch from Reader mode to Transitional or Standard mode in AMP settings screen.
 5. Standard mode: Using AMP as the framework for your site, not having to maintain an AMP and non-AMP version. Mobile and desktop users get same experience.
 6. Transitional mode: A path to making your site fully AMP-compatible, with tools to assist with debugging validation issues along the way.

@@ -57,9 +57,9 @@ If you are a developer, we encourage you to [follow along](https://github.com/am
 
 ![All core themes are supported, and many themes can be served as AMP with minimal changes, Otherwise, behavior is often as if JavaScript is turned off in the browser since scripts are removed.](wp-assets/screenshot-2.png)
 
-### Reader mode templates are still available, but they are differ from the active theme.
+### Reader mode templates are still available, but they differ from the active theme.
 
-![Reader mode templates are still available, but they are differ from the active theme.](wp-assets/screenshot-3.png)
+![Reader mode templates are still available, but they differ from the active theme.](wp-assets/screenshot-3.png)
 
 ### Switch from Reader mode to Transitional or Standard mode in AMP settings screen.
 
