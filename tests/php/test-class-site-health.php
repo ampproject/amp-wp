@@ -192,7 +192,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 		$this->assertEquals( 'amp_xdebug_extension', $actual['test'] );
 
 		$this->assertContains(
-			esc_html( 'When this is loaded, it can cause some of the AMP plugin\'s processes to timeout depending on your system resources and configuration.' ),
+			esc_html( 'The Xdebug extension can cause some of the AMP plugin&#8217;s processes to time out depending on your system resources and configuration. It should not be enabled on a live site (production environment).' ),
 			$actual['description']
 		);
 	}
