@@ -294,5 +294,4 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		$this->assertStringStartsWith( '<amp-analytics', $output );
 		$this->assertContains( 'type="googleanalytics"><script type="application/json">{"requests":{"event":', $output );
 	}
-
 }

@@ -15,7 +15,6 @@ use AmpProject\Optimizer\ErrorCollection;
  */
 class AmpSchemaOrgMetadataTest extends WP_UnitTestCase {
 
-
 	/**
 	 * Data provider for test_transform.
 	 *

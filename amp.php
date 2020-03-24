@@ -5,7 +5,7 @@
  * Plugin URI: https://amp-wp.org
  * Author: AMP Project Contributors
  * Author URI: https://github.com/ampproject/amp-wp/graphs/contributors
- * Version: 1.5.0-alpha
+ * Version: 1.5.0-RC1
  * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
@@ -15,7 +15,7 @@
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
-define( 'AMP__VERSION', '1.5.0-alpha' );
+define( 'AMP__VERSION', '1.5.0-RC1' );
 
 /**
  * Errors encountered while loading the plugin.
@@ -238,6 +238,7 @@ function _amp_incorrect_plugin_slug_admin_notice() {
 	</div>
 	<?php
 }
+
 if ( 'amp' !== basename( AMP__DIR__ ) ) {
 	add_action( 'admin_notices', '_amp_incorrect_plugin_slug_admin_notice' );
 }

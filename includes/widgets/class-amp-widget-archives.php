@@ -107,5 +107,4 @@ class AMP_Widget_Archives extends WP_Widget_Archives {
 		endif;
 		echo wp_kses_post( $args['after_widget'] );
 	}
-
 }

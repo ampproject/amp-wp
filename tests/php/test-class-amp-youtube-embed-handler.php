@@ -214,5 +214,4 @@ class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
 
 		$this->assertEquals( $expected, $scripts );
 	}
-
 }

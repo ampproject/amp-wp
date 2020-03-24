@@ -14,6 +14,7 @@ namespace AmpProject\AmpWP\Component;
  * @since 1.5.0
  */
 interface HasCaption {
+
 	/**
 	 * Gets the caption.
 	 *
