@@ -5,10 +5,14 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+
 /**
  * Tests for AMP_Options_Menu.
  */
 class Test_AMP_Options_Menu extends WP_UnitTestCase {
+
+	use AssertContainsCompatibility;
 
 	/**
 	 * Instance of AMP_Options_Menu
@@ -101,6 +105,6 @@ class Test_AMP_Options_Menu extends WP_UnitTestCase {
 
 		ob_start();
 		$this->instance->render_screen();
-		$this->assertContains( '<div class="wrap">', ob_get_clean() );
+		$this->assertStringContains( '<div class="wrap">', ob_get_clean() );
 	}
 }

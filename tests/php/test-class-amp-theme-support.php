@@ -7,6 +7,7 @@
  */
 
 use AmpProject\AmpWP\ConfigurationArgument;
+use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\PrivateAccess;
 use AmpProject\Dom\Document;
 use org\bovigo\vfs;
@@ -18,6 +19,7 @@ use org\bovigo\vfs;
  */
 class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
+	use AssertContainsCompatibility;
 	use PrivateAccess;
 
 	/**
@@ -393,7 +395,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			$e = $exception;
 		}
 		$this->assertTrue( isset( $e ) ); // wp_safe_redirect() modifies the headers, and causes an error.
-		$this->assertContains( 'headers already sent', $e->getMessage() );
+		$this->assertStringContains( 'headers already sent', $e->getMessage() );
 		$e = null;
 
 		// Endpoint.
@@ -405,7 +407,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		} catch ( Exception $exception ) {
 			$e = $exception;
 		}
-		$this->assertContains( 'headers already sent', $e->getMessage() );
+		$this->assertStringContains( 'headers already sent', $e->getMessage() );
 		$e = null;
 	}
 
@@ -437,7 +439,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		} catch ( Exception $exception ) {
 			$e = $exception;
 		}
-		$this->assertContains( 'headers already sent', $e->getMessage() );
+		$this->assertStringContains( 'headers already sent', $e->getMessage() );
 	}
 
 	/**
@@ -467,7 +469,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			$e = $exception;
 		}
 		$this->assertTrue( isset( $e ) );
-		$this->assertContains( 'headers already sent', $e->getMessage() );
+		$this->assertStringContains( 'headers already sent', $e->getMessage() );
 		$this->assertSame( 302, $redirect_status_code );
 		$e = null;
 
@@ -480,7 +482,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			$e = $exception;
 		}
 		$this->assertTrue( isset( $e ) ); // wp_safe_redirect() modifies the headers, and causes an error.
-		$this->assertContains( 'headers already sent', $e->getMessage() );
+		$this->assertStringContains( 'headers already sent', $e->getMessage() );
 		$this->assertSame( 301, $redirect_status_code );
 		$e = null;
 
@@ -619,13 +621,13 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
 
 		// Insufficient viewport tag was not left in.
-		$this->assertNotContains( '<meta name="viewport" content="maximum-scale=1.0">', $sanitized_html );
+		$this->assertStringNotContains( '<meta name="viewport" content="maximum-scale=1.0">', $sanitized_html );
 
 		// Viewport tag was modified to include all requirements.
-		$this->assertContains( '<meta name="viewport" content="maximum-scale=1.0,width=device-width">', $sanitized_html );
+		$this->assertStringContains( '<meta name="viewport" content="maximum-scale=1.0,width=device-width">', $sanitized_html );
 
 		// MathML script was added.
-		$this->assertContains( '<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-mathml-0.1.js" async custom-element="amp-mathml"></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertStringContains( '<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-mathml-0.1.js" async custom-element="amp-mathml"></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 	}
 
 	/**
@@ -1124,7 +1126,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		add_theme_support( AMP_Theme_Support::SLUG );
 		$this->assertTrue( amp_is_canonical() );
 		$output = get_echo( [ 'AMP_Theme_Support', 'amend_comment_form' ] );
-		$this->assertNotContains( '<input type="hidden" name="redirect_to"', $output );
+		$this->assertStringNotContains( '<input type="hidden" name="redirect_to"', $output );
 
 		// Test transitional AMP.
 		add_theme_support(
@@ -1135,7 +1137,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		);
 		$this->assertFalse( amp_is_canonical() );
 		$output = get_echo( [ 'AMP_Theme_Support', 'amend_comment_form' ] );
-		$this->assertContains( '<input type="hidden" name="redirect_to"', $output );
+		$this->assertStringContains( '<input type="hidden" name="redirect_to"', $output );
 	}
 
 	/**
@@ -1217,9 +1219,9 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 				'title_reply_before'  => '',
 			]
 		);
-		$this->assertContains( AMP_Theme_Support::get_comment_form_state_id( get_the_ID() ), $defaults['title_reply_before'] );
-		$this->assertContains( 'replyToName ?', $defaults['title_reply_before'] );
-		$this->assertContains( '</span>', $defaults['cancel_reply_before'] );
+		$this->assertStringContains( AMP_Theme_Support::get_comment_form_state_id( get_the_ID() ), $defaults['title_reply_before'] );
+		$this->assertStringContains( 'replyToName ?', $defaults['title_reply_before'] );
+		$this->assertStringContains( '</span>', $defaults['cancel_reply_before'] );
 	}
 
 	/**
@@ -1248,13 +1250,13 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$filtered_link = AMP_Theme_Support::filter_comment_reply_link( $link, $args, $comment );
 		$this->assertStringStartsWith( $before, $filtered_link );
 		$this->assertStringEndsWith( $after, $filtered_link );
-		$this->assertContains( AMP_Theme_Support::get_comment_form_state_id( get_the_ID() ), $filtered_link );
-		$this->assertContains( $comment->comment_author, $filtered_link );
-		$this->assertContains( $comment->comment_ID, $filtered_link );
-		$this->assertContains( 'tap:AMP.setState', $filtered_link );
-		$this->assertContains( $reply_text, $filtered_link );
-		$this->assertContains( $reply_to_text, $filtered_link );
-		$this->assertContains( $respond_id, $filtered_link );
+		$this->assertStringContains( AMP_Theme_Support::get_comment_form_state_id( get_the_ID() ), $filtered_link );
+		$this->assertStringContains( $comment->comment_author, $filtered_link );
+		$this->assertStringContains( $comment->comment_ID, $filtered_link );
+		$this->assertStringContains( 'tap:AMP.setState', $filtered_link );
+		$this->assertStringContains( $reply_text, $filtered_link );
+		$this->assertStringContains( $reply_to_text, $filtered_link );
+		$this->assertStringContains( $respond_id, $filtered_link );
 	}
 
 	/**
@@ -1272,14 +1274,14 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$link           = remove_query_arg( 'replytocom' );
 		$text           = 'Cancel your reply';
 		$filtered_link  = AMP_Theme_Support::filter_cancel_comment_reply_link( $formatted_link, $link, $text );
-		$this->assertContains( $url, $filtered_link );
-		$this->assertContains( $text, $filtered_link );
-		$this->assertContains( '<a id="cancel-comment-reply-link"', $filtered_link );
-		$this->assertContains( '.values.comment_parent ==', $filtered_link );
-		$this->assertContains( 'tap:AMP.setState(', $filtered_link );
+		$this->assertStringContains( $url, $filtered_link );
+		$this->assertStringContains( $text, $filtered_link );
+		$this->assertStringContains( '<a id="cancel-comment-reply-link"', $filtered_link );
+		$this->assertStringContains( '.values.comment_parent ==', $filtered_link );
+		$this->assertStringContains( 'tap:AMP.setState(', $filtered_link );
 
 		$filtered_link_no_text_passed = AMP_Theme_Support::filter_cancel_comment_reply_link( $formatted_link, $link, '' );
-		$this->assertContains( 'Click here to cancel reply.', $filtered_link_no_text_passed );
+		$this->assertStringContains( 'Click here to cancel reply.', $filtered_link_no_text_passed );
 	}
 
 	/**
@@ -1325,12 +1327,12 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		wp_print_styles();
 		wp_print_scripts();
 		$output = ob_get_clean();
-		$this->assertContains( '<style id=\'admin-bar-inline-css\' type=\'text/css\'>', $output ); // Note: data-ampdevmode attribute will be added by AMP_Dev_Mode_Sanitizer.
-		$this->assertNotContains( '<link rel=\'stylesheet\' id=\'dashicons-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-		$this->assertContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'dashicons-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-		$this->assertContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'admin-bar-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-		$this->assertContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'example-admin-bar-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-		$this->assertContains( 'html { margin-top: 64px !important; }', $output );
+		$this->assertStringContains( '<style id=\'admin-bar-inline-css\' type=\'text/css\'>', $output ); // Note: data-ampdevmode attribute will be added by AMP_Dev_Mode_Sanitizer.
+		$this->assertStringNotContains( '<link rel=\'stylesheet\' id=\'dashicons-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$this->assertStringContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'dashicons-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$this->assertStringContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'admin-bar-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$this->assertStringContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'example-admin-bar-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$this->assertStringContains( 'html { margin-top: 64px !important; }', $output );
 		$this->assertRegExp( '/' . implode( '', [ '<script ', 'data-ampdevmode [^>]+admin-bar\.js' ] ) . '/', $output );
 		$this->assertRegExp( '/' . implode( '', [ '<script ', 'data-ampdevmode [^>]+example-admin-bar\.js' ] ) . '/', $output );
 
@@ -1619,9 +1621,9 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		wp_print_styles();
 		$output = ob_get_clean();
 
-		$this->assertContains( '<link rel=\'stylesheet\' id=\'dashicons-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-		$this->assertNotContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'dashicons-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-		$this->assertContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'admin-bar-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$this->assertStringContains( '<link rel=\'stylesheet\' id=\'dashicons-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$this->assertStringNotContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'dashicons-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$this->assertStringContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'admin-bar-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 	}
 
 	/**
@@ -1645,9 +1647,9 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		wp_print_styles();
 		$output = ob_get_clean();
 
-		$this->assertContains( '<link rel=\'stylesheet\' id=\'dashicons-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-		$this->assertNotContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'dashicons-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-		$this->assertContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'admin-bar-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$this->assertStringContains( '<link rel=\'stylesheet\' id=\'dashicons-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$this->assertStringNotContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'dashicons-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$this->assertStringContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'admin-bar-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 	}
 
 	/**
@@ -1914,11 +1916,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$output = ob_get_clean();
 		$this->assertEquals( 1, ob_get_level() );
 
-		$this->assertContains( '<html amp', $output );
-		$this->assertContains( 'foo', $output );
-		$this->assertContains( 'BAR', $output );
-		$this->assertContains( '<amp-img src="test.png"', $output );
-		$this->assertNotContains( '<script data-test', $output );
+		$this->assertStringContains( '<html amp', $output );
+		$this->assertStringContains( 'foo', $output );
+		$this->assertStringContains( 'BAR', $output );
+		$this->assertStringContains( '<amp-img src="test.png"', $output );
+		$this->assertStringNotContains( '<script data-test', $output );
 
 	}
 
@@ -1936,9 +1938,9 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		$partial = '<img src="test.png"><script data-head>document.write(\'Illegal\');</script>';
 		$output  = AMP_Theme_Support::filter_customize_partial_render( $partial );
-		$this->assertContains( '<amp-img src="test.png"', $output );
-		$this->assertNotContains( '<script', $output );
-		$this->assertNotContains( '<html', $output );
+		$this->assertStringContains( '<amp-img src="test.png"', $output );
+		$this->assertStringNotContains( '<script', $output );
+		$this->assertStringNotContains( '<html', $output );
 	}
 
 	/**
@@ -1973,7 +1975,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		$sanitized_html = $call_prepare_response();
 
-		$this->assertNotContains( 'handle=', $sanitized_html );
+		$this->assertStringNotContains( 'handle=', $sanitized_html );
 		$this->assertEquals( 2, substr_count( $sanitized_html, '<!-- wp_print_scripts -->' ) );
 
 		$ordered_contains = [
@@ -2029,11 +2031,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			$prev_ordered_contain = $ordered_contain;
 		}
 
-		$this->assertContains( '<noscript><img', $sanitized_html );
-		$this->assertContains( '<amp-img', $sanitized_html );
+		$this->assertStringContains( '<noscript><img', $sanitized_html );
+		$this->assertStringContains( '<amp-img', $sanitized_html );
 
-		$this->assertContains( '<noscript><audio', $sanitized_html );
-		$this->assertContains( '<amp-audio', $sanitized_html );
+		$this->assertStringContains( '<noscript><audio', $sanitized_html );
+		$this->assertStringContains( '<amp-audio', $sanitized_html );
 
 		$removed_nodes = [];
 		foreach ( AMP_Validation_Manager::$validation_results as $result ) {
@@ -2046,7 +2048,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			}
 		}
 
-		$this->assertContains( '<button>no-onclick</button>', $sanitized_html );
+		$this->assertStringContains( '<button>no-onclick</button>', $sanitized_html );
 		$this->assertCount( 5, AMP_Validation_Manager::$validation_results );
 		$this->assertEquals(
 			[
@@ -2075,9 +2077,9 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html, [ ConfigurationArgument::ENABLE_OPTIMIZER => false ] );
 
-		$this->assertContains( '<html>', $sanitized_html, 'The AMP attribute is removed from the HTML element' );
-		$this->assertContains( '<button onclick="alert', $sanitized_html, 'Invalid AMP is present in the response.' );
-		$this->assertContains( 'document.write = function', $sanitized_html, 'Override of document.write() is present.' );
+		$this->assertStringContains( '<html>', $sanitized_html, 'The AMP attribute is removed from the HTML element' );
+		$this->assertStringContains( '<button onclick="alert', $sanitized_html, 'Invalid AMP is present in the response.' );
+		$this->assertStringContains( 'document.write = function', $sanitized_html, 'Override of document.write() is present.' );
 	}
 
 	/**
@@ -2253,14 +2255,14 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		// HTML, but very stripped down.
 		$input  = '<html><head></head>Hello</html>';
 		$output = AMP_Theme_Support::prepare_response( $input );
-		$this->assertContains( '<html amp', $output );
-		$this->assertContains( '<meta charset="utf-8">', $output );
+		$this->assertStringContains( '<html amp', $output );
+		$this->assertStringContains( '<meta charset="utf-8">', $output );
 
 		// HTML with doctype, comments, and whitespace before head.
 		$input  = "   <!--\nHello world!\n-->\n\n<!DOCTYPE html>  <html\n\n>\n<head profile='http://www.acme.com/profiles/core'></head><body>Hello</body></html>";
 		$output = AMP_Theme_Support::prepare_response( $input );
-		$this->assertContains( '<html amp', $output );
-		$this->assertContains( '<meta charset="utf-8">', $output );
+		$this->assertStringContains( '<html amp', $output );
+		$this->assertStringContains( '<meta charset="utf-8">', $output );
 	}
 
 	/**
