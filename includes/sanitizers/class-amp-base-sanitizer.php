@@ -446,7 +446,9 @@ abstract class AMP_Base_Sanitizer {
 	 * @return bool Whether the node should be exempt from validation.
 	 */
 	protected function is_exempt_from_validation( DOMNode $node ) {
-		return DevMode::isExemptFromValidation( $node ) && '_amp_exempt' !== $node->getAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE );
+		return DevMode::isExemptFromValidation( $node )
+			&& $node instanceof DOMElement
+			&& '_amp_exempt' !== $node->getAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE );
 	}
 
 	/**
