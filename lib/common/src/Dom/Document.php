@@ -310,6 +310,8 @@ final class Document extends DOMDocument
         $node = $dom->importNode($root->documentElement ?: $root, true);
         $dom->appendChild($node);
 
+        $dom->hasInitialAmpDevMode = $dom->documentElement->hasAttribute(DevMode::DEV_MODE_ATTRIBUTE);
+
         return $dom;
     }
 

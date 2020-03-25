@@ -34,7 +34,7 @@ class DevModeTest extends TestCase
     {
         return [
             [ '<html><body id="node_to_test"><div data-ampdevmode></div></body></html>', false ],
-            [ '<html><body><div id="node_to_test" data-ampdevmode></div></body></html>', true ],
+            [ '<html data-ampdevmode><body><div id="node_to_test" data-ampdevmode></div></body></html>', true ],
         ];
     }
 

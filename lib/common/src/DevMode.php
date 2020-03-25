@@ -62,12 +62,14 @@ final class DevMode
      */
     public static function isExemptFromValidation(DOMNode $node)
     {
-        $document = $node instanceof Document ? $node : $node->ownerDocument;
-
-        if (! $document) {
-            return false;
+        $document = $node->ownerDocument;
+        if (! $node->ownerDocument instanceof Document) {
+            $document = Document::fromNode($node);
         }
 
+        /**
+         * @var Document $document
+         */
         if ($node === $document->documentElement && ! $document->hasInitialAmpDevMode()) {
             return false;
         }
