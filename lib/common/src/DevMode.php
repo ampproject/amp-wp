@@ -36,7 +36,7 @@ final class DevMode
             $document = Document::fromNode($document);
         }
 
-        return $document->ampDevModeActive;
+        return $document->documentElement->hasAttribute( self::DEV_MODE_ATTRIBUTE );
     }
 
     /**
@@ -47,7 +47,7 @@ final class DevMode
      */
     public static function hasExemptionForNode(DOMNode $node)
     {
-        if (! $node instanceof DOMElement || ! self::isActiveForDocument( $node->ownerDocument )) {
+        if (! $node instanceof DOMElement) {
             return false;
         }
 
@@ -65,6 +65,10 @@ final class DevMode
         $document = $node instanceof Document ? $node : $node->ownerDocument;
 
         if (! $document) {
+            return false;
+        }
+
+        if ($node === $document->documentElement && ! $document->hasInitialAmpDevMode()) {
             return false;
         }
 

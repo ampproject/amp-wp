@@ -235,7 +235,6 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 		}
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
 		if ( ! empty( $args['add_dev_mode'] ) ) {
-			$dom->ampDevModeActive = true; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 			$dom->documentElement->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
 		}
 

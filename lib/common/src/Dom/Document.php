@@ -166,11 +166,11 @@ final class Document extends DOMDocument
     ];
 
     /**
-     * Whether the document element has the `data-ampdevmode` attribute set.
+     * Whether `data-ampdevmode` was initially set on the the document element.
      *
      * @var bool
      */
-    public $ampDevModeActive = false;
+    private $hasInitialAmpDevMode = false;
 
     /**
      * The original encoding of how the AmpProject\Dom\Document was created.
@@ -414,7 +414,7 @@ final class Document extends DOMDocument
                 $this->head->removeChild($meta);
             }
 
-            $this->ampDevModeActive = $this->documentElement->hasAttribute(DevMode::DEV_MODE_ATTRIBUTE);
+            $this->hasInitialAmpDevMode = $this->documentElement->hasAttribute(DevMode::DEV_MODE_ATTRIBUTE);
         }
 
         return $success;
@@ -1454,6 +1454,16 @@ final class Document extends DOMDocument
             ||
             $node instanceof DOMComment
         );
+    }
+
+    /**
+     * Determine whether `data-ampdevmode` was initially set on the document element.
+     *
+     * @return bool
+     */
+    public function hasInitialAmpDevMode()
+    {
+        return $this->hasInitialAmpDevMode;
     }
 
     /**
