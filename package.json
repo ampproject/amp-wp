@@ -66,6 +66,7 @@
     "grunt-contrib-copy": "1.0.0",
     "grunt-shell": "3.0.1",
     "grunt-wp-deploy": "2.0.0",
+    "husky": "4.2.3",
     "jest-silent-reporter": "0.2.1",
     "lodash": "4.17.15",
     "mini-css-extract-plugin": "0.9.0",
@@ -108,13 +109,13 @@
     "env:stop": "./bin/local-env/stop.sh",
     "env:reset-site": "./bin/local-env/install-wordpress.sh --reset-site",
     "lint": "npm-run-all --parallel lint:*",
-    "lint:css": "wp-scripts lint-style",
+    "lint:css": "wp-scripts lint-style $(git diff develop --diff-filter=d --name-only | grep -E 'css$')",
     "lint:css:fix": "npm run lint:css -- --fix",
-    "lint:js": "wp-scripts lint-js",
+    "lint:js": "wp-scripts lint-js $(git diff develop --diff-filter=d --name-only | grep -E '\\.js$')",
     "lint:js:fix": "npm run lint:js -- --fix",
-    "lint:php": "vendor/bin/phpcs",
+    "lint:php": "vendor/bin/phpcs $(git diff develop --diff-filter=d --name-only | grep -E '\\.php$')",
     "lint:plugin-bootstrap": "vendor/bin/phpcs --runtime-set testVersion 5.2- amp.php",
-    "lint:php:fix": "./bin/phpcbf.sh",
+    "lint:php:fix": "./bin/phpcbf.sh $(git diff develop --diff-filter=d --name-only | grep -E '\\.php$')",
     "lint:pkg-json": "wp-scripts lint-pkg-json --ignorePath .gitignore",
     "start": "wp-scripts start",
     "test": "npm-run-all --parallel test:*",
@@ -128,6 +129,11 @@
     "test:js:watch": "npm run test:js -- --watch",
     "test:php": "phpunit",
     "test:php:help": "npm run test:php -- --help"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint"
+    }
   },
   "npmPackageJsonLintConfig": {
     "extends": "@wordpress/npm-package-json-lint-config",
