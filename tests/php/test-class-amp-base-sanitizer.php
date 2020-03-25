@@ -367,7 +367,8 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 		$html = sprintf( '<div id="%s"></div>', esc_attr( $id ) );
 
 		// Ensure element is not removed when it and document are in dev mode.
-		$dom = AMP_DOM_Utils::get_dom_from_content( $html );
+		$dom                   = AMP_DOM_Utils::get_dom_from_content( $html );
+		$dom->ampDevModeActive = true; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		$dom->documentElement->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
 		$element = $dom->getElementById( $id );
 		$element->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
@@ -384,7 +385,8 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertEmpty( $element->parentNode );
 
 		// Ensure element is removed when document is in dev mode but the element lacks the attribute.
-		$dom = AMP_DOM_Utils::get_dom_from_content( $html );
+		$dom                   = AMP_DOM_Utils::get_dom_from_content( $html );
+		$dom->ampDevModeActive = true; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		$dom->documentElement->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
 		$element   = $dom->getElementById( $id );
 		$sanitizer = new AMP_Audio_Sanitizer( $dom );
@@ -475,7 +477,8 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 		$html = sprintf( '<div id="%s" data-bad="%s"></div>', esc_attr( $id ), esc_attr( $attr ) );
 
 		// Ensure element is not removed when it and document are in dev mode.
-		$dom = AMP_DOM_Utils::get_dom_from_content( $html );
+		$dom                   = AMP_DOM_Utils::get_dom_from_content( $html );
+		$dom->ampDevModeActive = true; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		$dom->documentElement->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
 		$element = $dom->getElementById( $id );
 		$element->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
@@ -492,7 +495,8 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertFalse( $element->hasAttribute( $attr ) );
 
 		// Ensure element is removed when document is in dev mode but the element lacks the attribute.
-		$dom = AMP_DOM_Utils::get_dom_from_content( $html );
+		$dom                   = AMP_DOM_Utils::get_dom_from_content( $html );
+		$dom->ampDevModeActive = true; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		$dom->documentElement->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
 		$element   = $dom->getElementById( $id );
 		$sanitizer = new AMP_Audio_Sanitizer( $dom );

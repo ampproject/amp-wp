@@ -3,6 +3,7 @@
 namespace AmpProject\Dom;
 
 use AmpProject\Attribute;
+use AmpProject\DevMode;
 use AmpProject\Tag;
 use DOMAttr;
 use DOMComment;
@@ -163,6 +164,13 @@ final class Document extends DOMDocument
         // Assume ISO-8859-1 for some charsets.
         'latin-1' => 'ISO-8859-1',
     ];
+
+    /**
+     * Whether the document element has the `data-ampdevmode` attribute set.
+     *
+     * @var bool
+     */
+    public $ampDevModeActive = false;
 
     /**
      * The original encoding of how the AmpProject\Dom\Document was created.
@@ -405,6 +413,8 @@ final class Document extends DOMDocument
             ) {
                 $this->head->removeChild($meta);
             }
+
+            $this->ampDevModeActive = $this->documentElement->hasAttribute(DevMode::DEV_MODE_ATTRIBUTE);
         }
 
         return $success;

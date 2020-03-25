@@ -440,15 +440,14 @@ abstract class AMP_Base_Sanitizer {
 	/**
 	 * Check whether a certain node should be exempt from validation.
 	 *
-	 * @since 1.5 Exempts DOMNode if the 'data-ampdevmode' attribute has the value '_amp_exempt'.
+	 * @deprecated Use AmpProject\DevMode::isExemptFromValidation( $node ) instead.
 	 *
 	 * @param DOMNode $node Node to check.
 	 * @return bool Whether the node should be exempt from validation.
 	 */
 	protected function is_exempt_from_validation( DOMNode $node ) {
-		return DevMode::isExemptFromValidation( $node )
-			&& $node instanceof DOMElement
-			&& '_amp_exempt' !== $node->getAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE );
+		_deprecated_function( 'AMP_Base_Sanitizer::is_exempt_from_validation', '1.5', 'AmpProject\DevMode::isExemptFromValidation' );
+		return DevMode::isExemptFromValidation( $node );
 	}
 
 	/**
@@ -464,7 +463,7 @@ abstract class AMP_Base_Sanitizer {
 	 * @return bool Whether the node should have been removed, that is, that the node was sanitized for validity.
 	 */
 	public function remove_invalid_child( $node, $validation_error = [] ) {
-		if ( $this->is_exempt_from_validation( $node ) ) {
+		if ( DevMode::isExemptFromValidation( $node ) ) {
 			return false;
 		}
 
@@ -502,7 +501,7 @@ abstract class AMP_Base_Sanitizer {
 	 * @return bool Whether the node should have been removed, that is, that the node was sanitized for validity.
 	 */
 	public function remove_invalid_attribute( $element, $attribute, $validation_error = [], $attr_spec = [] ) {
-		if ( $this->is_exempt_from_validation( $element ) ) {
+		if ( DevMode::isExemptFromValidation( $element ) ) {
 			return false;
 		}
 

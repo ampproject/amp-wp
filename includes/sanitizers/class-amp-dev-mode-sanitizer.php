@@ -32,17 +32,16 @@ final class AMP_Dev_Mode_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 1.3
 	 */
 	public function sanitize() {
-		$document_element = $this->dom->documentElement;
-
-		if ( ! DevMode::hasExemptionForNode( $document_element ) ) {
-			$document_element->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '_amp_exempt' );
+		if ( ! DevMode::isActiveForDocument( $this->dom ) ) {
+			$this->dom->ampDevModeActive = true;
+			$this->dom->documentElement->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
 		}
 
 		$element_xpaths = ! empty( $this->args['element_xpaths'] ) ? $this->args['element_xpaths'] : [];
 		foreach ( $element_xpaths as $element_xpath ) {
 			foreach ( $this->dom->xpath->query( $element_xpath ) as $node ) {
 				if ( ! DevMode::hasExemptionForNode( $node ) ) {
-					$node->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '_amp_exempt' );
+					$node->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
 				}
 			}
 		}
