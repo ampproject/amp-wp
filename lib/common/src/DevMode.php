@@ -36,7 +36,7 @@ final class DevMode
             $document = Document::fromNode($document);
         }
 
-        return $document->documentElement->hasAttribute( self::DEV_MODE_ATTRIBUTE );
+        return $document->documentElement->hasAttribute(self::DEV_MODE_ATTRIBUTE);
     }
 
     /**

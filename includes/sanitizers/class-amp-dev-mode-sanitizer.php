@@ -8,8 +8,6 @@
  * @package AMP
  */
 
-use AmpProject\DevMode;
-
 /**
  * Class AMP_Dev_Mode_Sanitizer
  *
