@@ -623,6 +623,10 @@ abstract class AMP_Base_Sanitizer {
 			$error['text'] = trim( $node->data, '?' );
 		}
 
+		if ( ! isset( $error['node_type'] ) ) {
+			$error['node_type'] = $node->nodeType;
+		}
+
 		return $error;
 	}
 
