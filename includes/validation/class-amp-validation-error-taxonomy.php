@@ -1761,9 +1761,12 @@ class AMP_Validation_Error_Taxonomy {
 	 * @return string The label.
 	 */
 	public static function get_details_summary_label( $validation_error ) {
-		$node_type = isset( $validation_error['node_type'] ) ? $validation_error['node_type'] : null;
+		$error_type = isset( $validation_error['type'] ) ? $validation_error['type'] : null;
+		$node_type  = isset( $validation_error['node_type'] ) ? $validation_error['node_type'] : null;
 
-		if ( isset( $validation_error['parent_name'] ) ) {
+		if ( self::CSS_ERROR_TYPE === $error_type ) {
+			$summary_label = sprintf( '<%s>', $validation_error['node_name'] );
+		} elseif ( isset( $validation_error['parent_name'] ) ) {
 			$summary_label = sprintf( '<%s>', $validation_error['parent_name'] );
 		} elseif ( isset( $validation_error['node_name'] ) && XML_ELEMENT_NODE === $node_type ) {
 			$summary_label = sprintf( '<%s>', $validation_error['node_name'] );
