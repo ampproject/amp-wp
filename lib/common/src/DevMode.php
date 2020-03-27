@@ -51,6 +51,12 @@ final class DevMode
             return false;
         }
 
+        $document = self::getDocument($node);
+
+        if ($node === $document->documentElement) {
+            return $document->hasInitialAmpDevMode();
+        }
+
         return $node->hasAttribute(self::DEV_MODE_ATTRIBUTE);
     }
 
@@ -62,18 +68,23 @@ final class DevMode
      */
     public static function isExemptFromValidation(DOMNode $node)
     {
+        $document = self::getDocument($node);
+        return self::isActiveForDocument($document) && self::hasExemptionForNode($node);
+    }
+
+    /**
+     * Get the document from the specified node.
+     *
+     * @param DOMNode $node
+     * @return Document|DOMDocument|null
+     */
+    private static function getDocument(DOMNode $node)
+    {
         $document = $node->ownerDocument;
         if (! $node->ownerDocument instanceof Document) {
             $document = Document::fromNode($node);
         }
 
-        /**
-         * @var Document $document
-         */
-        if ($node === $document->documentElement && ! $document->hasInitialAmpDevMode()) {
-            return false;
-        }
-
-        return self::isActiveForDocument($document) && self::hasExemptionForNode($node);
+        return $document;
     }
 }

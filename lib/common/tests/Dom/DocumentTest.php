@@ -622,4 +622,44 @@ class DocumentTest extends TestCase
             $this->assertEquals('correct-element', $element->getAttribute('data-test'));
         }
     }
+
+    /**
+     * Ge initial AMP dev mode data.
+     *
+     * @return array Test data.
+     */
+    public function getInitialAmpDevModeData()
+    {
+        $tesData = [
+            'with_dev_mode'    => [
+                Document::fromHtml('<!doctype html><html data-ampdevmode><head></head><body></body></html>'),
+                true,
+            ],
+            'without_dev_mode' => [
+                Document::fromHtml('<!doctype html><html><head></head><body></body></html>'),
+                false,
+            ],
+        ];
+
+        $domWithoutDevModeOnRoot = Document::fromHtml('<!doctype html><html><head></head><body></body></html>');
+        $domWithoutDevModeOnRoot->documentElement->setAttribute( 'data-ampdevmode', '' );
+        $tesData['dev_mode_added_after'] = [
+            $domWithoutDevModeOnRoot, false
+        ];
+
+        return $tesData;
+    }
+
+    /**
+     * Test that AMP dev mode on the root DOM element is initially set.
+     *
+     * @dataProvider getInitialAmpDevModeData
+     *
+     * @param Document $document          Document.
+     * @param boolean  $hasInitialDevMode Whether $document should have dev mode initially or not.
+     */
+    public function testHasInitialAmpDevMode($document, $hasInitialDevMode)
+    {
+        $this->assertEquals($hasInitialDevMode, $document->hasInitialAmpDevMode());
+    }
 }
