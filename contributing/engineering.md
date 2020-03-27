@@ -306,7 +306,7 @@ This will create an `amp.zip` in the plugin directory which you can install. The
     1. Make sure “Pre-release” is checked.
 1. Publish GitHub release.
 1. Create built release tag (from the just-created `build` directory):
-    1. do `git fetch --tags && ./bin/tag-built.sh`
+    1. Do `git fetch origin --tags && ./bin/tag-built.sh`
     1. Add link from release notes.
 1. Make announcements on Twitter and the #amp-wp channel on AMP Slack, linking to release post or GitHub release.
 1. Bump version in release branch, e.g. `…-alpha` to `…-beta1` and `…-beta2` to `…-RC1`
@@ -334,7 +334,7 @@ Contributors who want to make a new release, follow these steps:
 1. Run `npm run deploy` to commit the plugin to WordPress.org.
 1. Confirm the release is available on WordPress.org; try installing it on a WordPress install and confirm it works.
 1. Create built release tag (from the just-created `build` directory):
-    1. do `git fetch --tags && ./bin/tag-built.sh`
+    1. Do `git fetch origin --tags && ./bin/tag-built.sh`
     1. Add link from release notes.
 1. For new major releases, create a release branch from the tag. Patch versions are made from the release branch.
 1. For minor releases, bump `Stable tag` in the `readme.txt`/`readme.md` in `develop`. Cherry-pick other changes as necessary.
