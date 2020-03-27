@@ -39,7 +39,7 @@ class DevModeTest extends TestCase
         ];
 
         $domWithoutDevModeOnRoot = Document::fromHtml('<html id="node_to_test"><body><div data-ampdevmode></div></body></html>');
-        $domWithoutDevModeOnRoot->documentElement->setAttribute( 'data-ampdevmode', '' );
+        $domWithoutDevModeOnRoot->documentElement->setAttribute('data-ampdevmode', '');
         $testData[] = [$domWithoutDevModeOnRoot, false ];
 
         return $testData;
