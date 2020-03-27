@@ -51,6 +51,9 @@ final class DevMode
             return false;
         }
 
+        /**
+         * @var Document $document
+         */
         $document = self::getDocument($node);
 
         if ($node === $document->documentElement) {
