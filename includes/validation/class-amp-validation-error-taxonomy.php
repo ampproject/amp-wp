@@ -1761,17 +1761,14 @@ class AMP_Validation_Error_Taxonomy {
 	 * @return string The label.
 	 */
 	public static function get_details_summary_label( $validation_error ) {
-		if (
-			AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR === $validation_error['code'] ||
-			AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG === $validation_error['code'] ||
-			AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROCESSING_INSTRUCTION === $validation_error['code'] ||
-			AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE === $validation_error['code'] ||
-			AMP_Tag_And_Attribute_Sanitizer::MISSING_MANDATORY_PROPERTY === $validation_error['code'] ||
-			AMP_Tag_And_Attribute_Sanitizer::MISSING_REQUIRED_PROPERTY_VALUE === $validation_error['code'] ||
-			'duplicate_element' === $validation_error['code']
-		) {
+		$error_type = isset( $validation_error['type'] ) ? $validation_error['type'] : null;
+		$node_type  = isset( $validation_error['node_type'] ) ? $validation_error['node_type'] : null;
+
+		if ( self::CSS_ERROR_TYPE === $error_type ) {
+			$summary_label = sprintf( '<%s>', $validation_error['node_name'] );
+		} elseif ( isset( $validation_error['parent_name'] ) ) {
 			$summary_label = sprintf( '<%s>', $validation_error['parent_name'] );
-		} elseif ( isset( $validation_error['node_name'] ) ) {
+		} elseif ( isset( $validation_error['node_name'] ) && XML_ELEMENT_NODE === $node_type ) {
 			$summary_label = sprintf( '<%s>', $validation_error['node_name'] );
 		} else {
 			$summary_label = '&hellip;';
