@@ -57,24 +57,57 @@ export default ( InitialMediaUpload, minImageDimensions ) => {
 		 */
 		initFeaturedImage() {
 			const FeaturedImageSelectMediaFrame = getSelectMediaFrame( FeaturedImageToolbarSelect );
+			const wpLibrary = wp.media.controller.Library;
+
+			const Library = wpLibrary.extend( {
+				defaults: {
+					...wpLibrary.prototype.defaults,
+					title: __( 'Choose image', 'amp' ),
+					library: wp.media.query( { type: 'image' } ),
+					multiple: false,
+					date: false,
+					priority: 20,
+					// Note: These suggestions are shown in the media library image browser.
+					suggestedWidth: EXPECTED_WIDTH,
+					suggestedHeight: EXPECTED_HEIGHT,
+				},
+
+				activate() {
+					this.updateSelection();
+					this.frame.on( 'open', this.updateSelection, this );
+
+					// eslint-disable-next-line prefer-rest-params
+					wpLibrary.prototype.activate.apply( this, arguments );
+				},
+
+				deactivate() {
+					this.frame.off( 'open', this.updateSelection, this );
+
+					// eslint-disable-next-line prefer-rest-params
+					wpLibrary.prototype.deactivate.apply( this, arguments );
+				},
+
+				updateSelection() {
+					const selection = this.get('selection'),
+						id = wp.media.view.settings.post.featuredImageId;
+					let attachment;
+
+					if ( '' !== id && -1 !== id ) {
+						attachment = wp.media.model.Attachment.get( id );
+						attachment.fetch();
+					}
+
+					selection.reset( attachment ? [ attachment ] : [] );
+				}
+			} );
+
 			this.frame = new FeaturedImageSelectMediaFrame( {
 				allowedTypes: this.props.allowedTypes,
 				button: {
 					text: __( 'Select', 'amp' ),
 					close: false,
 				},
-				states: [
-					new wp.media.controller.Library( {
-						title: __( 'Choose image', 'amp' ),
-						library: wp.media.query( { type: 'image' } ),
-						multiple: false,
-						date: false,
-						priority: 20,
-						// Note: These suggestions are shown in the media library image browser.
-						suggestedWidth: EXPECTED_WIDTH,
-						suggestedHeight: EXPECTED_HEIGHT,
-					} ),
-				],
+				states: [ new Library() ],
 			} );
 
 			// See wp.media() for this.
@@ -97,6 +130,13 @@ export default ( InitialMediaUpload, minImageDimensions ) => {
 			const { onSelect } = this.props;
 			const { url, id, width, height } = attachment;
 			setImageFromURL( { url, id, width, height, onSelect, dispatchImage } );
+
+			if ( ! wp.media.view.settings.post.featuredImageId ) {
+				return;
+			}
+
+			wp.media.featuredImage.set( attachment ? attachment.id : -1 );
+
 			this.frame.close();
 		}
 	};
