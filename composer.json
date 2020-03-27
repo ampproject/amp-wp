@@ -32,7 +32,6 @@
   },
   "suggest": {
     "ext-intl": "Enables use of idn_to_utf8() to convert punycode domains to UTF-8 for use with an AMP Cache.",
-    "ext-json": "Provides native implementation of json_encode()/json_decode().",
     "ext-mbstring": "Used by PHP-CSS-Parser when working with stylesheets."
   },
   "config": {
