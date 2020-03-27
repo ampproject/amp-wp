@@ -92,7 +92,7 @@ export default ( InitialMediaUpload, minImageDimensions ) => {
 						id = wp.media.view.settings.post.featuredImageId;
 					let attachment;
 
-					if ( '' !== id && -1 !== id ) {
+					if ( undefined !== id && '' !== id && -1 !== id ) {
 						attachment = wp.media.model.Attachment.get( id );
 						attachment.fetch();
 					}
