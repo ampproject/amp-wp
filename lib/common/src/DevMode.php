@@ -51,9 +51,6 @@ final class DevMode
             return false;
         }
 
-        /**
-         * @var Document $document
-         */
         $document = self::getDocument($node);
 
         if ($node === $document->documentElement) {
@@ -84,7 +81,7 @@ final class DevMode
     private static function getDocument(DOMNode $node)
     {
         $document = $node->ownerDocument;
-        if (! $node->ownerDocument instanceof Document) {
+        if (! $document instanceof Document) {
             $document = Document::fromNode($node);
         }
 
