@@ -79,7 +79,7 @@ final class DevMode
      * Get the document from the specified node.
      *
      * @param DOMNode $node
-     * @return Document|DOMDocument|null
+     * @return Document
      */
     private static function getDocument(DOMNode $node)
     {
