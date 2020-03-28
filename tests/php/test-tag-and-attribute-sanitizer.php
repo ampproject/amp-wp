@@ -2979,6 +2979,49 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 		$bad_dev_mode_document = sprintf(
 			'
+				<html amp>
+					<head>
+						<meta charset="utf-8">
+						<style data-ampdevmode>%s</style>
+					</head>
+					<body>
+						<amp-state id="something">
+							<script type="application/json" data-ampdevmode>%s</script>
+						</amp-state>
+						<button data-ampdevmode onclick="alert(\'Hello!\')"></button>
+						<script data-ampdevmode>document.write("Hello World!")</script>
+					</body>
+				</html>
+				',
+			'button::before { content:"' . str_repeat( 'a', 75001 ) . '";"}',
+			'{"foo":"' . str_repeat( 'b', 100001 ) . '"}'
+		);
+
+		$data['dev_mode_not_set_on_html_element'] = [
+			$bad_dev_mode_document,
+			'
+			<html amp>
+				<head>
+					<meta charset="utf-8">
+				</head>
+				<body>
+					<amp-state id="something">
+					</amp-state>
+					<button data-ampdevmode></button>
+				</body>
+			</html>
+			',
+			[ 'amp-bind' ],
+			[
+				AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
+				AMP_Tag_And_Attribute_Sanitizer::CDATA_TOO_LONG,
+				AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
+				AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
+			],
+		];
+
+		$bad_dev_mode_document = sprintf(
+			'
 				<html amp data-ampdevmode>
 					<head>
 						<meta charset="utf-8">
@@ -2993,11 +3036,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 					</body>
 				</html>
 				',
-			'button::before { content:"' . str_repeat( 'a', 50001 ) . '";"}',
+			'button::before { content:"' . str_repeat( 'a', 75001 ) . '";"}',
 			'{"foo":"' . str_repeat( 'b', 100001 ) . '"}'
 		);
 
-		$data['dev_mode_test'] = [
+		$data['dev_mode_set_on_html_element'] = [
 			$bad_dev_mode_document,
 			null,
 			[ 'amp-bind' ],
