@@ -30,7 +30,7 @@ mkdir built
 git clone . built/
 cd built
 git checkout $tag
-git rm -r $(git ls-files)
+git rm -r $(git ls-files | sed 's:/.*::' | sort | uniq)
 rsync -avz ../build/ ./
 git add -A .
 git commit -m "Build $tag" --no-verify

@@ -482,7 +482,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		$this->assertStringContains( strval( $error_status ), $filtered_where );
 
 		// Now that there is a query var for error type, that should also appear in the filtered WHERE clause.
-		$error_type         = 'js_error';
+		$error_type         = AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE;
 		$escaped_error_type = 'js\\\\_error';
 		$wp_query->set( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_TYPE_QUERY_VAR, $error_type );
 		$filtered_where = AMP_Validation_Error_Taxonomy::filter_posts_where_for_validation_error_status( $initial_where, $wp_query );
@@ -1071,19 +1071,149 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Get data for testing get_details_summary_label.
+	 *
+	 * @return array Data.
+	 */
+	public function data_get_details_summary_label() {
+		return [
+			'invalid_css_at_rule'                  => [
+				$this->get_mock_error(),
+				'<code>&lt;link&gt;</code>',
+			],
+			'disallowed_attribute'                 => [
+				[
+					'code'               => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
+					'element_attributes' =>
+						[
+							'unrecognized' => '',
+						],
+					'node_name'          => 'unrecognized',
+					'parent_name'        => 'button',
+					'type'               => AMP_Validation_Error_Taxonomy::HTML_ATTRIBUTE_ERROR_TYPE,
+					'node_type'          => XML_ATTRIBUTE_NODE,
+				],
+				'<code>&lt;button&gt;</code>',
+			],
+			'unrecognized_element'                 => [
+				[
+					'node_name'       => 'unrecognized',
+					'parent_name'     => 'div',
+					'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
+					'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+					'node_attributes' =>
+						[],
+					'node_type'       => XML_ELEMENT_NODE,
+				],
+				'<code>&lt;div&gt;</code>',
+			],
+			'disallowed_pi'                        => [
+				[
+					'code'        => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROCESSING_INSTRUCTION,
+					'node_name'   => 'bad',
+					'parent_name' => 'div',
+					'text'        => 'not-good ',
+					'node_type'   => XML_PI_NODE,
+				],
+				'<code>&lt;div&gt;</code>',
+			],
+			'disallowed_property_value'            => [
+				[
+					'code'                => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE,
+					'element_attributes'  =>
+						[
+							'name'    => 'viewport',
+							'content' => 'width=device-width,initial-scale=1.0,foo=bar',
+						],
+					'meta_property_name'  => 'foo',
+					'meta_property_value' => 'bar',
+					'node_name'           => 'content',
+					'parent_name'         => 'meta',
+					'type'                => AMP_Validation_Error_Taxonomy::HTML_ATTRIBUTE_ERROR_TYPE,
+					'node_type'           => XML_ATTRIBUTE_NODE,
+				],
+				'<code>&lt;meta&gt;</code>',
+			],
+			'invalid_onclick_attribute'            => [
+				[
+					'code'               => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
+					'element_attributes' =>
+						[
+							'onclick' => 'alert(\'hello\')',
+						],
+					'node_name'          => 'onclick',
+					'parent_name'        => 'button',
+					'type'               => AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE,
+					'node_type'          => XML_ATTRIBUTE_NODE,
+				],
+				'<code>&lt;button&gt;</code>',
+			],
+			'invalid_script_element'               => [
+				[
+					'node_name'       => 'script',
+					'parent_name'     => 'div',
+					'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
+					'type'            => AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE,
+					'node_attributes' =>
+						[],
+					'text'            => 'alert(\'hi\')',
+					'node_type'       => XML_ELEMENT_NODE,
+				],
+				'<code>&lt;div&gt;</code>',
+			],
+			'invalid_css_property_style_attribute' => [
+				[
+					'code'               => AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_PROPERTY_NOLIST,
+					'css_property_name'  => 'behavior',
+					'css_property_value' => 'url("foo.htc")',
+					'type'               => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+					'spec_name'          => 'style amp-custom',
+					'node_name'          => 'span',
+					'parent_name'        => 'div',
+					'node_attributes'    =>
+						[
+							'style' => 'behavior:url(\'foo.htc\')',
+						],
+					'node_type'          => XML_ELEMENT_NODE,
+				],
+				'<code>&lt;span&gt;</code>',
+			],
+			'invalid_css_property_style_element'   => [
+				[
+					'code'               => AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_PROPERTY_NOLIST,
+					'css_property_name'  => 'behavior',
+					'css_property_value' => 'url("foo")',
+					'type'               => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+					'spec_name'          => 'style amp-custom',
+					'node_name'          => 'style',
+					'parent_name'        => 'div',
+					'node_attributes'    =>
+						[],
+					'text'               => 'body { behavior:url(\'foo\'); }',
+					'node_type'          => XML_ELEMENT_NODE,
+				],
+				'<code>&lt;style&gt;</code>',
+			],
+			'unknown'                              => [
+				[
+					'code' => 'UNKNOWN',
+				],
+				'<code>&hellip;</code>',
+			],
+		];
+	}
+
+	/**
 	 * Test get_details_summary_label.
 	 *
+	 * @dataProvider data_get_details_summary_label
 	 * @covers \AMP_Validation_Error_Taxonomy::get_details_summary_label()
+	 *
+	 * @param array  $validation_error Validation error.
+	 * @param string $expected_label   Expected label.
 	 */
-	public function test_get_details_summary_label() {
-		$validation_error = $this->get_mock_error();
-		$this->assertEquals( '<code>&lt;link&gt;</code>', AMP_Validation_Error_Taxonomy::get_details_summary_label( $validation_error ) );
-		$validation_error['code'] = AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR;
-		$this->assertEquals( '<code>&lt;head&gt;</code>', AMP_Validation_Error_Taxonomy::get_details_summary_label( $validation_error ) );
-		unset( $validation_error['node_name'] );
-		$this->assertEquals( '<code>&lt;head&gt;</code>', AMP_Validation_Error_Taxonomy::get_details_summary_label( $validation_error ) );
-		$validation_error['code'] = 'some_other_code';
-		$this->assertEquals( '<code>&hellip;</code>', AMP_Validation_Error_Taxonomy::get_details_summary_label( $validation_error ) );
+	public function test_get_details_summary_label( $validation_error, $expected_label ) {
+		$this->assertEquals( $expected_label, AMP_Validation_Error_Taxonomy::get_details_summary_label( $validation_error ) );
 	}
 
 	/**
@@ -1305,6 +1435,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		 * Now that the post type is correct, this should update the post accepted status to be 'accepted'.
 		 * There should be a warning because wp_safe_redirect() should be called at the end of the tested method.
 		 */
+		$e = null;
 		try {
 			AMP_Validation_Error_Taxonomy::handle_single_url_page_bulk_and_inline_actions( $correct_post_type );
 		} catch ( Exception $exception ) {
@@ -1407,7 +1538,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 	 */
 	public function get_mock_error() {
 		return [
-			'at_rule'         => '-ms-viewport',
+			'at_rule'         => 'foo',
 			'code'            => AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE,
 			'node_attributes' => [
 				'href'  => 'https://example.com',
@@ -1419,6 +1550,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 			'node_name'       => 'link',
 			'parent_name'     => 'head',
 			'type'            => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+			'node_type'       => XML_ELEMENT_NODE,
 		];
 	}
 }
