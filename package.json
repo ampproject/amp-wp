@@ -109,7 +109,7 @@
     "env:stop": "./bin/local-env/stop.sh",
     "env:reset-site": "./bin/local-env/install-wordpress.sh --reset-site",
     "lint": "npm-run-all --parallel lint:*",
-    "lint:css": "npm run diff-develop | grep -E 'css$' | xargs wp-scripts lint-style",
+    "lint:css": "npm run diff-develop | grep -E '\\.s?css$' | xargs wp-scripts lint-style",
     "lint:css:fix": "npm run lint:css -- --fix",
     "lint:js": "npm run diff-develop | grep -E '\\.js$' | xargs wp-scripts lint-js",
     "lint:js:fix": "npm run lint:js -- --fix",
