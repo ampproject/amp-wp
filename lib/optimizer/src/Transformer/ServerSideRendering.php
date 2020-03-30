@@ -865,6 +865,16 @@ final class ServerSideRendering implements Transformer
      */
     private function extractMediaAttributeCss(Document $document, DOMElement $element, $attributeValue)
     {
-        return '';
+        $attributeValue = trim($attributeValue, self::CSS_TRIM_CHARACTERS);
+
+        if (empty($attributeValue)) {
+            return '';
+        }
+
+        return sprintf(
+            '@media %s{#%s{display:none;}}',
+            $attributeValue,
+            $document->getElementId($element)
+        );
     }
 }
