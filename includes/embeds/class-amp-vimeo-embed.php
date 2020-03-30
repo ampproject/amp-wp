@@ -60,7 +60,6 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function register_embed() {
 		wp_embed_register_handler( 'amp-vimeo', self::URL_PATTERN, [ $this, 'oembed' ], -1 );
-		add_shortcode( 'vimeo', [ $this, 'shortcode' ] );
 		add_filter( 'wp_video_shortcode_override', [ $this, 'video_override' ], 10, 2 );
 	}
 
@@ -69,37 +68,6 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function unregister_embed() {
 		wp_embed_unregister_handler( 'amp-vimeo', -1 );
-		remove_shortcode( 'vimeo' );
-	}
-
-	/**
-	 * Gets AMP-compliant markup for the Vimeo shortcode.
-	 *
-	 * @param array $attr The Vimeo attributes.
-	 * @return string Vimeo shortcode markup.
-	 */
-	public function shortcode( $attr ) {
-		$video_id = false;
-
-		if ( isset( $attr['id'] ) ) {
-			$video_id = $attr['id'];
-		} elseif ( isset( $attr['url'] ) ) {
-			$video_id = $this->get_video_id_from_url( $attr['url'] );
-		} elseif ( isset( $attr[0] ) ) {
-			$video_id = $this->get_video_id_from_url( $attr[0] );
-		} elseif ( function_exists( 'shortcode_new_to_old_params' ) ) {
-			$video_id = shortcode_new_to_old_params( $attr );
-		}
-
-		if ( empty( $video_id ) ) {
-			return '';
-		}
-
-		return $this->render(
-			[
-				'video_id' => $video_id,
-			]
-		);
 	}
 
 	/**
@@ -142,7 +110,7 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 			return AMP_HTML_Utils::build_tag(
 				'a',
 				[
-					'href'  => esc_url( $args['url'] ),
+					'href'  => esc_url_raw( $args['url'] ),
 					'class' => 'amp-wp-embed-fallback',
 				],
 				esc_html( $args['url'] )
@@ -196,10 +164,15 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 		}
 		$src           = $attr['src'];
 		$vimeo_pattern = '#^https?://(.+\.)?vimeo\.com/.*#';
-		if ( 1 === preg_match( $vimeo_pattern, $src ) ) {
-			return $this->shortcode( [ $src ] );
+		if ( 1 !== preg_match( $vimeo_pattern, $src ) ) {
+			return $html;
 		}
-		return $html;
-	}
 
+		$video_id = $this->get_video_id_from_url( $src );
+		if ( empty( $video_id ) ) {
+			return '';
+		}
+
+		return $this->render( compact( 'video_id' ) );
+	}
 }

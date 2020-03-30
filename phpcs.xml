@@ -1,7 +1,17 @@
 <?xml version="1.0"?>
 <ruleset name="WordPress Coding Standards for AMP">
 
-	<rule ref="WordPress-Core" />
+	<!-- Exclude libraries that are meant to be externalized -->
+	<exclude-pattern>lib/*</exclude-pattern>
+
+	<!-- Exclude stub files as they are auto-generated -->
+	<exclude-pattern>tests/php/static-analysis-stubs/*</exclude-pattern>
+
+	<rule ref="WordPress-Core">
+		<exclude name="Generic.Arrays.DisallowShortArraySyntax" />
+		<exclude name="WordPress.PHP.DisallowShortTernary" />
+	</rule>
+
 	<rule ref="WordPress-Docs">
 		<exclude-pattern>tests/*</exclude-pattern>
 	</rule>
@@ -18,6 +28,7 @@
 
 	<rule ref="WordPress.Files.FileName.InvalidClassFileName">
 		<exclude-pattern>tests/*</exclude-pattern>
+		<exclude-pattern>src/*</exclude-pattern>
 		<exclude-pattern>includes/admin/class-amp-customizer.php</exclude-pattern>
 		<exclude-pattern>includes/embeds/class-amp-dailymotion-embed.php</exclude-pattern>
 		<exclude-pattern>includes/embeds/class-amp-facebook-embed.php</exclude-pattern>
@@ -28,7 +39,6 @@
 		<exclude-pattern>includes/embeds/class-amp-twitter-embed.php</exclude-pattern>
 		<exclude-pattern>includes/embeds/class-amp-vimeo-embed.php</exclude-pattern>
 		<exclude-pattern>includes/embeds/class-amp-vine-embed.php</exclude-pattern>
-		<exclude-pattern>includes/embeds/class-amp-youtube-embed.php</exclude-pattern>
 	</rule>
 	<rule ref="WordPress.Arrays.MultipleStatementAlignment.LongIndexSpaceBeforeDoubleArrow">
 		<exclude-pattern>tests/test-tag-and-attribute-sanitizer.php</exclude-pattern>
@@ -43,7 +53,7 @@
 		<exclude-pattern>includes/actions/class-amp-paired-post-actions.php</exclude-pattern>
 	</rule>
 	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
-		<exclude-pattern>includes/templates/single-amp_story.php</exclude-pattern>
+		<exclude-pattern>src/*</exclude-pattern>
 	</rule>
 	<rule ref="WordPress.NamingConventions.ValidVariableName">
 		<properties>
@@ -76,8 +86,22 @@
 		</properties>
 	</rule>
 
+	<!-- Enforce PascalCase file names in src/ only. -->
+	<rule ref="Squiz.Classes.ClassFileName">
+		<include-pattern>src/*</include-pattern>
+	</rule>
+
+	<!-- Limit max. consecutive blank lines to 1 instead of 2. -->
+	<rule ref="Squiz.WhiteSpace.FunctionSpacing">
+		<properties>
+			<property name="spacing" value="1"/>
+			<property name="spacingBeforeFirst" value="1"/>
+			<property name="spacingAfterLast" value="0"/>
+		</properties>
+	</rule>
+
 	<!-- Include sniffs for PHP cross-version compatibility. -->
-	<config name="testVersion" value="5.4-"/>
+	<config name="testVersion" value="5.6-"/>
 	<rule ref="PHPCompatibilityWP">
 		<exclude-pattern>bin/*</exclude-pattern>
 	</rule>

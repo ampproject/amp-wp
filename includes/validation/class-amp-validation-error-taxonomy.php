@@ -121,24 +121,10 @@ class AMP_Validation_Error_Taxonomy {
 	const NO_FILTER_VALUE = '';
 
 	/**
-	 * Validation code for an invalid element.
-	 *
-	 * @var string
-	 */
-	const INVALID_ELEMENT_CODE = 'invalid_element';
-
-	/**
-	 * Validation code for an invalid attribute.
-	 *
-	 * @var string
-	 */
-	const INVALID_ATTRIBUTE_CODE = 'invalid_attribute';
-
-	/**
 	 * The 'type' of error for invalid HTML elements, like <frame>.
 	 *
-	 * These usually have the 'code' of 'invalid_element'.
-	 * Except for 'invalid_element' errors for a <script>, which have the JS_ERROR_TYPE.
+	 * These usually have the 'code' of AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG.
+	 * Except for AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG errors for a <script>, which have the JS_ERROR_TYPE.
 	 * This allows filtering by type in the taxonomy page, like displaying only HTML element errors, or only CSS errors.
 	 *
 	 * @var string
@@ -148,7 +134,6 @@ class AMP_Validation_Error_Taxonomy {
 	/**
 	 * The 'type' of error for invalid HTML attributes.
 	 *
-	 * These usually have the 'code' of 'invalid_attribute'.
 	 * Banned attributes include i-amp-*.
 	 * But on* attributes, like onclick, have the JS_ERROR_TYPE.
 	 *
@@ -157,7 +142,7 @@ class AMP_Validation_Error_Taxonomy {
 	const HTML_ATTRIBUTE_ERROR_TYPE = 'html_attribute_error';
 
 	/**
-	 * The 'type' of error that applies to the error 'code' of 'invalid_element' when the node is a <script>.
+	 * The 'type' of error that applies to the error 'code' of AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG when the node is a <script>.
 	 * This applies both when enqueuing a script, and when a <script> is echoed directly.
 	 *
 	 * @var string
@@ -272,8 +257,6 @@ class AMP_Validation_Error_Taxonomy {
 		if ( is_admin() ) {
 			self::add_admin_hooks();
 		}
-
-		self::accept_validation_errors( AMP_Core_Theme_Sanitizer::get_acceptable_errors( get_template() ) );
 	}
 
 	/**
@@ -503,7 +486,6 @@ class AMP_Validation_Error_Taxonomy {
 	 * Automatically (forcibly) accept validation errors that arise (that is, remove the invalid markup causing the validation errors).
 	 *
 	 * @since 1.0
-	 * @see AMP_Core_Theme_Sanitizer::get_acceptable_errors()
 	 *
 	 * @param array|true $acceptable_errors Acceptable validation errors, where keys are codes and values are either `true` or sparse array to check as subset. If just true, then all validation errors are accepted.
 	 */
@@ -680,21 +662,21 @@ class AMP_Validation_Error_Taxonomy {
 		$removed_elements   = [];
 		$removed_attributes = [];
 		$removed_pis        = [];
-		$invalid_sources    = [];
+		$sources            = [];
 		foreach ( $validation_errors as $validation_error ) {
 			$code = isset( $validation_error['code'] ) ? $validation_error['code'] : null;
 
-			if ( self::INVALID_ELEMENT_CODE === $code ) {
+			if ( AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG === $code ) {
 				if ( ! isset( $removed_elements[ $validation_error['node_name'] ] ) ) {
 					$removed_elements[ $validation_error['node_name'] ] = 0;
 				}
 				++$removed_elements[ $validation_error['node_name'] ];
-			} elseif ( self::INVALID_ATTRIBUTE_CODE === $code ) {
+			} elseif ( AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR === $code ) {
 				if ( ! isset( $removed_attributes[ $validation_error['node_name'] ] ) ) {
 					$removed_attributes[ $validation_error['node_name'] ] = 0;
 				}
 				++$removed_attributes[ $validation_error['node_name'] ];
-			} elseif ( 'invalid_processing_instruction' === $code ) {
+			} elseif ( AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROCESSING_INSTRUCTION === $code ) {
 				if ( ! isset( $removed_pis[ $validation_error['node_name'] ] ) ) {
 					$removed_pis[ $validation_error['node_name'] ] = 0;
 				}
@@ -702,30 +684,13 @@ class AMP_Validation_Error_Taxonomy {
 			}
 
 			if ( ! empty( $validation_error['sources'] ) ) {
-				foreach ( $validation_error['sources'] as $source ) {
-					if ( isset( $source['hook'] ) ) {
-						$invalid_sources['hook'] = $source['hook'];
-					}
-					if ( isset( $source['type'], $source['name'] ) ) {
-						$invalid_sources[ $source['type'] ][] = $source['name'];
-					} elseif ( isset( $source['embed'] ) ) {
-						$invalid_sources['embed'] = true;
-					}
-					if ( isset( $source['block_name'] ) ) {
-						$invalid_sources['blocks'][] = $source['block_name'];
-					}
-				}
-
-				// Remove core if there is a plugin or theme.
-				if ( isset( $invalid_sources['core'] ) && ( isset( $invalid_sources['theme'] ) || isset( $invalid_sources['plugin'] ) ) ) {
-					unset( $invalid_sources['core'] );
-				}
+				$sources = array_merge( $sources, $validation_error['sources'] );
 			}
 		}
 
 		$results = array_merge(
 			[
-				self::SOURCES_INVALID_OUTPUT => $invalid_sources,
+				self::SOURCES_INVALID_OUTPUT => self::summarize_sources( $sources ),
 			],
 			compact(
 				'removed_elements',
@@ -736,6 +701,35 @@ class AMP_Validation_Error_Taxonomy {
 		);
 
 		return $results;
+	}
+
+	/**
+	 * Summarize sources.
+	 *
+	 * @param array $sources Sources.
+	 * @return array Summarized (de-duped) sources.
+	 */
+	public static function summarize_sources( $sources ) {
+		$summarized_sources = [];
+		foreach ( $sources as $source ) {
+			if ( isset( $source['hook'] ) ) {
+				$summarized_sources['hook'] = $source['hook'];
+			}
+			if ( isset( $source['type'], $source['name'] ) ) {
+				$summarized_sources[ $source['type'] ][] = $source['name'];
+			} elseif ( isset( $source['embed'] ) ) {
+				$summarized_sources['embed'] = true;
+			}
+			if ( isset( $source['block_name'] ) ) {
+				$summarized_sources['blocks'][] = $source['block_name'];
+			}
+		}
+
+		// Remove core if there is a plugin or theme.
+		if ( isset( $summarized_sources['core'] ) && ( isset( $summarized_sources['theme'] ) || isset( $summarized_sources['plugin'] ) ) ) {
+			unset( $summarized_sources['core'] );
+		}
+		return $summarized_sources;
 	}
 
 	/**
@@ -1767,14 +1761,14 @@ class AMP_Validation_Error_Taxonomy {
 	 * @return string The label.
 	 */
 	public static function get_details_summary_label( $validation_error ) {
-		if (
-			self::INVALID_ATTRIBUTE_CODE === $validation_error['code'] ||
-			self::INVALID_ELEMENT_CODE === $validation_error['code'] ||
-			'invalid_processing_instruction' === $validation_error['code'] ||
-			'duplicate_element' === $validation_error['code']
-		) {
+		$error_type = isset( $validation_error['type'] ) ? $validation_error['type'] : null;
+		$node_type  = isset( $validation_error['node_type'] ) ? $validation_error['node_type'] : null;
+
+		if ( self::CSS_ERROR_TYPE === $error_type ) {
+			$summary_label = sprintf( '<%s>', $validation_error['node_name'] );
+		} elseif ( isset( $validation_error['parent_name'] ) ) {
 			$summary_label = sprintf( '<%s>', $validation_error['parent_name'] );
-		} elseif ( isset( $validation_error['node_name'] ) ) {
+		} elseif ( isset( $validation_error['node_name'] ) && XML_ELEMENT_NODE === $node_type ) {
 			$summary_label = sprintf( '<%s>', $validation_error['node_name'] );
 		} else {
 			$summary_label = '&hellip;';
@@ -1833,23 +1827,50 @@ class AMP_Validation_Error_Taxonomy {
 					$content .= '</p>';
 				}
 
-				if ( isset( $validation_error['message'] ) ) {
-					$content .= sprintf( '<p>%s</p>', esc_html( $validation_error['message'] ) );
+				$message = null;
+				switch ( $validation_error['code'] ) {
+					case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_EMPTY:
+						$message = __( 'Expected JSON, got an empty value', 'amp' );
+						break;
+					case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_DEPTH:
+						$message = __( 'The maximum stack depth has been exceeded', 'amp' );
+						break;
+					case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_STATE_MISMATCH:
+						$message = __( 'Invalid or malformed JSON', 'amp' );
+						break;
+					case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_CTRL_CHAR:
+						$message = __( 'Control character error, possibly incorrectly encoded', 'amp' );
+						break;
+					case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_SYNTAX:
+						$message = __( 'Syntax error', 'amp' );
+						break;
+					case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_UTF8:
+						/* translators: %s: UTF-8, a charset */
+						$message = sprintf( __( 'Malformed %s characters, possibly incorrectly encoded', 'amp' ), 'UTF-8' );
+						break;
+					default:
+						if ( isset( $validation_error['message'] ) ) {
+							$message = $validation_error['message'];
+						}
+				}
+
+				if ( $message ) {
+					$content .= sprintf( '<p>%s</p>', esc_html( $message ) );
 				}
 
 				break;
 			case 'status':
 				// Output whether the validation error has been seen via hidden field since we can't set the 'new' class on the <tr> directly.
 				// This will get read via amp-validated-url-post-edit-screen.js.
-				$is_new   = ! ( $term->term_group & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK );
+				$is_new   = ! ( (int) $term->term_group & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK );
 				$content .= sprintf( '<input class="amp-validation-error-new" type="hidden" value="%d">', (int) $is_new );
 
-				$is_removed = (bool) ( $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
+				$is_removed = (bool) ( (int) $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
 
 				if ( 'post.php' === $pagenow ) {
 					$status_select_name = sprintf( '%s[%s]', AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR, $term->slug );
 
-					if ( $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK ) {
+					if ( (int) $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK ) {
 						$img_src = 'amp-logo-green';
 					} else {
 						$img_src = 'amp-logo-red';
@@ -1982,8 +2003,15 @@ class AMP_Validation_Error_Taxonomy {
 					}
 				);
 				$error_summary     = self::summarize_validation_errors( wp_list_pluck( $validation_errors, 'data' ) );
-				AMP_Validated_URL_Post_Type::render_sources_column( $error_summary, $url_post_id );
 
+				if ( empty( $error_summary[ self::SOURCES_INVALID_OUTPUT ] ) ) {
+					esc_html_e( '--', 'amp' );
+				} else {
+					AMP_Validated_URL_Post_Type::render_sources_column(
+						$error_summary[ self::SOURCES_INVALID_OUTPUT ],
+						$url_post_id
+					);
+				}
 				break;
 			case 'error_type':
 				if ( isset( $validation_error['type'] ) ) {
@@ -2095,7 +2123,10 @@ class AMP_Validation_Error_Taxonomy {
 				</p>
 			</dd>
 
-			<?php if ( self::INVALID_ELEMENT_CODE === $validation_error['code'] && isset( $validation_error['node_attributes'] ) ) : ?>
+			<dt><?php esc_html_e( 'Error code', 'amp' ); ?></dt>
+			<dd><code><?php echo esc_html( $validation_error['code'] ); ?></code></dd>
+
+			<?php if ( AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG === $validation_error['code'] && isset( $validation_error['node_attributes'] ) ) : ?>
 				<dt><?php esc_html_e( 'Invalid markup', 'amp' ); ?></dt>
 				<dd class="detailed">
 					<code>
@@ -2110,7 +2141,7 @@ class AMP_Validation_Error_Taxonomy {
 						</mark>
 					</code>
 				</dd>
-			<?php elseif ( self::INVALID_ATTRIBUTE_CODE === $validation_error['code'] && isset( $validation_error['element_attributes'] ) ) : ?>
+			<?php elseif ( AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR === $validation_error['code'] && isset( $validation_error['element_attributes'] ) ) : ?>
 				<dt><?php esc_html_e( 'Invalid markup', 'amp' ); ?></dt>
 				<dd class="detailed">
 					<code>
@@ -2137,48 +2168,56 @@ class AMP_Validation_Error_Taxonomy {
 				if ( $is_element_attributes && empty( $value ) ) {
 					continue;
 				}
-				if ( in_array( $key, [ 'code', 'type', 'property_value' ], true ) ) {
+				if ( in_array( $key, [ 'code', 'type', 'css_property_value', 'mandatory_anyof_attrs', 'meta_property_value', 'meta_property_required_value', 'mandatory_oneof_attrs' ], true ) ) {
 					continue; // Handled above.
+				}
+				if ( in_array( $key, [ 'spec_name', 'tag_spec', 'spec_names', 'node_type' ], true ) ) {
+					continue;
 				}
 				?>
 				<dt><?php echo esc_html( self::get_source_key_label( $key, $validation_error ) ); ?></dt>
 				<dd class="detailed">
-					<?php if ( in_array( $key, [ 'node_name', 'parent_name' ], true ) ) : ?>
+					<?php if ( in_array( $key, [ 'node_name', 'parent_name', 'required_parent_name', 'required_attr_value' ], true ) ) : ?>
 						<code><?php echo esc_html( $value ); ?></code>
-					<?php elseif ( 'property_name' === $key ) : ?>
+					<?php elseif ( 'css_property_name' === $key ) : ?>
 						<?php
-						if ( isset( $validation_error['property_value'] ) && is_scalar( $validation_error['property_value'] ) ) {
+						if ( isset( $validation_error['css_property_value'] ) && is_scalar( $validation_error['css_property_value'] ) ) {
 							printf(
 								'<code>%s: %s</code>',
 								esc_html( $value ),
-								esc_html( $validation_error['property_value'] )
+								esc_html( $validation_error['css_property_value'] )
 							);
 						} else {
 							printf( '<code>%s</code>', esc_html( $value ) );
 						}
 						?>
+					<?php elseif ( 'meta_property_name' === $key ) : ?>
+						<?php
+						printf( '<code>%s</code>', esc_html( $value ) );
+						if ( isset( $validation_error['meta_property_value'] ) ) {
+							printf( ': <code>%s</code>', esc_html( $validation_error['meta_property_value'] ) );
+						}
+						if ( isset( $validation_error['meta_property_required_value'] ) ) {
+							printf(
+								' (%s: <code>%s</code>)',
+								esc_html__( 'required value', 'amp' ),
+								esc_html( $validation_error['meta_property_required_value'] )
+							);
+						}
+						?>
 					<?php elseif ( 'text' === $key ) : ?>
-						<details>
-							<summary>
-								<?php
-								echo esc_html(
-									sprintf(
-										/* translators: %s is the byte count */
-										_n(
-											'%s byte',
-											'%s bytes',
-											strlen( $value ),
-											'amp'
-										),
-										number_format_i18n( strlen( $value ) )
-									)
-								);
-								?>
-							</summary>
-							<pre><?php echo esc_html( $value ); ?></pre>
-						</details>
+						<?php self::render_code_details( $value ); ?>
 					<?php elseif ( 'sources' === $key ) : ?>
 						<?php self::render_sources( $value ); ?>
+					<?php elseif ( 'attributes' === $key ) : ?>
+						<ul>
+							<?php foreach ( $value as $attr ) : ?>
+								<?php
+								printf( '<li><code>%s</code></li>', esc_html( $attr ) );
+								?>
+								<br />
+							<?php endforeach; ?>
+						</ul>
 					<?php elseif ( $is_element_attributes ) : ?>
 						<table class="element-attributes">
 							<?php foreach ( $value as $attr_name => $attr_value ) : ?>
@@ -2211,17 +2250,28 @@ class AMP_Validation_Error_Taxonomy {
 								</tr>
 							<?php endforeach; ?>
 						</table>
+					<?php elseif ( 'duplicate_oneof_attrs' === $key ) : ?>
+						<ul>
+						<?php foreach ( $value as $attr ) : ?>
+							<li><code><?php echo esc_html( $attr ); ?></code></li>
+						<?php endforeach; ?>
+						</ul>
 					<?php elseif ( is_array( $value ) ) : ?>
 						<?php foreach ( $value as $value_key => $attr ) : ?>
 							<?php
-							printf( '<strong>%s</strong>', esc_html( $value_key ) );
-							if ( ! empty( $attr ) ) :
-								printf( ': %s', esc_html( $attr ) );
-							endif;
+							if ( is_int( $value_key ) ) {
+								echo esc_html( $attr );
+							} else {
+								printf( '<strong>%s</strong>', esc_html( $value_key ) );
+								if ( ! empty( $attr ) ) {
+									echo ': ';
+									echo esc_html( $attr );
+								}
+							}
 							?>
 							<br />
 						<?php endforeach; ?>
-					<?php elseif ( is_string( $value ) ) : ?>
+					<?php elseif ( is_string( $value ) || is_int( $value ) ) : ?>
 						<?php echo esc_html( $value ); ?>
 					<?php endif; ?>
 				</dd>
@@ -2429,7 +2479,7 @@ class AMP_Validation_Error_Taxonomy {
 	 *
 	 * @param array $sources Sources.
 	 */
-	private static function render_sources( $sources ) {
+	public static function render_sources( $sources ) {
 		?>
 		<details>
 			<summary>
@@ -2503,12 +2553,23 @@ class AMP_Validation_Error_Taxonomy {
 											break;
 										case 'handle':
 											if ( 'script' === $dependency_type ) {
-												esc_html_e( 'Script Handle', 'amp' );
+												esc_html_e( 'Enqueued Script', 'amp' );
 											} elseif ( 'style' === $dependency_type ) {
-												esc_html_e( 'Style Handle', 'amp' );
-											} else {
-												esc_html_e( 'Handle', 'amp' );
+												esc_html_e( 'Enqueued Style', 'amp' );
 											}
+											break;
+										case 'dependency_handle':
+											if ( 'script' === $dependency_type ) {
+												esc_html_e( 'Dependent Script', 'amp' );
+											} elseif ( 'style' === $dependency_type ) {
+												esc_html_e( 'Dependent Style', 'amp' );
+											}
+											break;
+										case 'extra_key':
+											esc_html_e( 'Inline Type', 'amp' );
+											break;
+										case 'text':
+											esc_html_e( 'Inline Text', 'amp' );
 											break;
 										case 'block_content_index':
 											esc_html_e( 'Block Index', 'amp' );
@@ -2572,6 +2633,16 @@ class AMP_Validation_Error_Taxonomy {
 										?>
 									<?php elseif ( 'name' === $key && isset( $source['type'] ) ) : ?>
 										<?php self::render_source_name( $value, $source['type'] ); ?>
+									<?php elseif ( 'extra_key' === $key ) : ?>
+										<?php if ( 'style' === $dependency_type ) : ?>
+											<code>wp_add_inline_style( <?php echo esc_html( wp_json_encode( $source['handle'] ) ); ?>, &hellip; )</code>
+										<?php elseif ( 'data' === $value ) : ?>
+											<code>wp_localize_script( <?php echo esc_html( wp_json_encode( $source['handle'] ) ); ?>, &hellip; )</code>
+										<?php elseif ( 'before' === $value ) : ?>
+											<code>wp_add_inline_script( <?php echo esc_html( wp_json_encode( $source['handle'] ) ); ?>, &hellip;, 'before' )</code>
+										<?php elseif ( 'after' === $value ) : ?>
+											<code>wp_add_inline_script( <?php echo esc_html( wp_json_encode( $source['handle'] ) ); ?>, &hellip;, 'after' )</code>
+										<?php endif; ?>
 									<?php elseif ( 'hook' === $key ) : ?>
 										<code><?php echo esc_html( (string) $value ); ?></code>
 										<?php
@@ -2603,7 +2674,7 @@ class AMP_Validation_Error_Taxonomy {
 										<?php endif; ?>
 									<?php elseif ( 'function' === $key ) : ?>
 										<code><?php echo esc_html( '{closure}' === $value ? $value : $value . '()' ); ?></code>
-									<?php elseif ( 'shortcode' === $key || 'handle' === $key ) : ?>
+									<?php elseif ( 'shortcode' === $key || 'handle' === $key || 'dependency_handle' === $key ) : ?>
 										<code><?php echo esc_html( $value ); ?></code>
 									<?php elseif ( 'block_name' === $key ) : ?>
 										<?php
@@ -2624,6 +2695,8 @@ class AMP_Validation_Error_Taxonomy {
 											printf( '<code>%s</code>', esc_html( $value ) );
 										}
 										?>
+									<?php elseif ( 'text' === $key ) : ?>
+										<?php self::render_code_details( $value ); ?>
 									<?php elseif ( is_scalar( $value ) ) : ?>
 										<?php echo esc_html( (string) $value ); ?>
 									<?php else : ?>
@@ -2636,6 +2709,36 @@ class AMP_Validation_Error_Taxonomy {
 				<?php endforeach; ?>
 				</tbody>
 			</table>
+		</details>
+		<?php
+	}
+
+	/**
+	 * Render code details.
+	 *
+	 * @param string $text Text.
+	 */
+	private static function render_code_details( $text ) {
+		$length = strlen( $text );
+		?>
+		<details>
+			<summary>
+				<?php
+				echo esc_html(
+					sprintf(
+						/* translators: %s is the byte count */
+						_n(
+							'%s byte',
+							'%s bytes',
+							$length,
+							'amp'
+						),
+						number_format_i18n( $length )
+					)
+				);
+				?>
+			</summary>
+			<pre><?php echo esc_html( $text ); ?></pre>
 		</details>
 		<?php
 	}
@@ -2872,33 +2975,36 @@ class AMP_Validation_Error_Taxonomy {
 	/**
 	 * Get Error Title from Code
 	 *
+	 * @todo The message here should be constructed in the sanitizer that emitted the validation error in the first place.
+	 *
 	 * @param array $validation_error Validation error.
 	 * @return string Title with some formatting markup.
 	 */
 	public static function get_error_title_from_code( $validation_error ) {
 		switch ( $validation_error['code'] ) {
-			case self::INVALID_ELEMENT_CODE:
+			case AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG:
 				if ( self::is_validation_error_for_js_script_element( $validation_error ) ) {
-					$title = esc_html__( 'Invalid script', 'amp' );
-
 					if ( isset( $validation_error['node_attributes']['src'] ) ) {
-						$title .= sprintf(
-							': <code>%s</code>',
-							esc_html( basename( wp_parse_url( $validation_error['node_attributes']['src'], PHP_URL_PATH ) ) )
-						);
+						$title    = esc_html__( 'Invalid script', 'amp' );
+						$basename = basename( wp_parse_url( $validation_error['node_attributes']['src'], PHP_URL_PATH ) );
+						if ( $basename ) {
+							$title .= sprintf( ': <code>%s</code>', esc_html( $basename ) );
+						}
+					} else {
+						$title = esc_html__( 'Invalid inline script', 'amp' );
 					}
 				} else {
 					$title  = esc_html__( 'Invalid element', 'amp' );
 					$title .= sprintf( ': <code>&lt;%s&gt;</code>', esc_html( $validation_error['node_name'] ) );
 				}
 				return $title;
-			case self::INVALID_ATTRIBUTE_CODE:
+			case AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR:
 				return sprintf(
 					'%s: <code>%s</code>',
 					esc_html__( 'Invalid attribute', 'amp' ),
 					esc_html( $validation_error['node_name'] )
 				);
-			case 'invalid_processing_instruction':
+			case AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROCESSING_INSTRUCTION:
 				return sprintf(
 					'%s: <code>&lt;%s%s&hellip;%s&gt;</code>',
 					esc_html__( 'Invalid processing instruction', 'amp' ),
@@ -2906,45 +3012,258 @@ class AMP_Validation_Error_Taxonomy {
 					esc_html( $validation_error['node_name'] ),
 					'?'
 				);
-			case 'file_path_not_allowed':
-				return esc_html__( 'Stylesheet file path not allowed', 'amp' );
-			case 'excessive_css':
+			case AMP_Style_Sanitizer::STYLESHEET_TOO_LONG:
 				return esc_html__( 'Excessive CSS', 'amp' );
-			case 'illegal_css_at_rule':
+			case AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE:
 				return sprintf(
 					'%s: <code>@%s</code>',
 					esc_html__( 'Illegal CSS at-rule', 'amp' ),
 					esc_html( $validation_error['at_rule'] )
 				);
-			case 'disallowed_file_extension':
-				return esc_html__( 'Disallowed CSS file extension', 'amp' );
-			case 'duplicate_element':
+			case AMP_Tag_And_Attribute_Sanitizer::DUPLICATE_UNIQUE_TAG:
 				return sprintf(
 					'%s: <code>&lt;%s&gt;</code>',
 					esc_html__( 'Duplicate element', 'amp' ),
 					esc_html( $validation_error['node_name'] )
 				);
-			case 'unrecognized_css':
+			case AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_DECLARATION:
 				return esc_html__( 'Unrecognized CSS', 'amp' );
-			case 'css_parse_error':
+			case AMP_Style_Sanitizer::CSS_SYNTAX_PARSE_ERROR:
 				return esc_html__( 'CSS parse error', 'amp' );
-			case 'stylesheet_file_missing':
-				return esc_html__( 'Missing stylesheet file', 'amp' );
-			case 'illegal_css_property':
+			case AMP_Style_Sanitizer::STYLESHEET_FETCH_ERROR:
+				return esc_html__( 'Stylesheet fetch error', 'amp' );
+			case AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_PROPERTY:
+			case AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_PROPERTY_NOLIST:
 				$title = esc_html__( 'Illegal CSS property', 'amp' );
-				if ( isset( $validation_error['property_name'] ) ) {
-					$title .= sprintf( ': <code>%s</code>', esc_html( $validation_error['property_name'] ) );
+				if ( isset( $validation_error['css_property_name'] ) ) {
+					$title .= sprintf( ': <code>%s</code>', esc_html( $validation_error['css_property_name'] ) );
 				}
 				return $title;
-			case 'illegal_css_important':
+			case AMP_Tag_And_Attribute_Sanitizer::CDATA_TOO_LONG:
+			case AMP_Tag_And_Attribute_Sanitizer::MANDATORY_CDATA_MISSING_OR_INCORRECT:
+			case AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_HTML_COMMENTS:
+			case AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_CSS_IMPORTANT:
+			case AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_CONTENTS:
+			case AMP_Tag_And_Attribute_Sanitizer::CDATA_VIOLATES_BLACKLIST:
+				return esc_html__( 'Illegal text content', 'amp' );
+			case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_CTRL_CHAR:
+			case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_DEPTH:
+			case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_EMPTY:
+			case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_STATE_MISMATCH:
+			case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_SYNTAX:
+			case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_UTF8:
+				return esc_html__( 'Invalid JSON', 'amp' );
+			case AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_IMPORTANT:
 				$title = esc_html__( 'Illegal CSS !important property', 'amp' );
-				if ( isset( $validation_error['property_name'] ) ) {
-					$title .= sprintf( ': <code>%s</code>', esc_html( $validation_error['property_name'] ) );
+				if ( isset( $validation_error['css_property_name'] ) ) {
+					$title .= sprintf( ': <code>%s</code>', esc_html( $validation_error['css_property_name'] ) );
 				}
 				return $title;
+			case AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE:
+				$title = esc_html__( 'Invalid property', 'amp' );
+				if ( isset( $validation_error['meta_property_name'] ) ) {
+					$title .= sprintf( ': <code>%s</code>', esc_html( $validation_error['meta_property_name'] ) );
+				}
+				return $title;
+			case AMP_Tag_And_Attribute_Sanitizer::MISSING_MANDATORY_PROPERTY:
+				$title = esc_html__( 'Missing required property', 'amp' );
+				if ( isset( $validation_error['meta_property_name'] ) ) {
+					$title .= sprintf( ': <code>%s</code>', esc_html( $validation_error['meta_property_name'] ) );
+				}
+				return $title;
+			case AMP_Tag_And_Attribute_Sanitizer::MISSING_REQUIRED_PROPERTY_VALUE:
+				$title = sprintf(
+					/* translators: %1$s is the property name, %2$s is the value for the property */
+					esc_html__( 'Invalid value for %1$s property: %2$s', 'amp' ),
+					'<code>' . esc_html( $validation_error['meta_property_name'] ) . '</<code>',
+					'<code>' . esc_html( $validation_error['meta_property_value'] ) . '</code>'
+				);
+
+				return $title;
+			case AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING:
+				$title = esc_html__( 'Missing required attribute', 'amp' );
+				if ( isset( $validation_error['attributes'][0] ) ) {
+					$title .= sprintf( ': <code>%s</code>', esc_html( $validation_error['attributes'][0] ) );
+				}
+				return $title;
+			case AMP_Tag_And_Attribute_Sanitizer::DUPLICATE_ONEOF_ATTRS:
+				$title = esc_html__( 'Mutually exclusive attributes encountered', 'amp' );
+				if ( ! empty( $validation_error['duplicate_oneof_attrs'] ) ) {
+					$title .= ': ';
+					$title .= implode(
+						', ',
+						array_map(
+							static function ( $attribute_name ) {
+								return sprintf( '<code>%s</code>', $attribute_name );
+							},
+							$validation_error['duplicate_oneof_attrs']
+						)
+					);
+				}
+				return $title;
+			case AMP_Tag_And_Attribute_Sanitizer::MANDATORY_ONEOF_ATTR_MISSING:
+			case AMP_Tag_And_Attribute_Sanitizer::MANDATORY_ANYOF_ATTR_MISSING:
+				$attributes_key = null;
+				if ( AMP_Tag_And_Attribute_Sanitizer::MANDATORY_ONEOF_ATTR_MISSING === $validation_error['code'] ) {
+					$title          = esc_html__( 'Missing exclusive mandatory attribute', 'amp' );
+					$attributes_key = 'mandatory_oneof_attrs';
+				} else {
+					$title          = esc_html__( 'Missing at least one mandatory attribute', 'amp' );
+					$attributes_key = 'mandatory_anyof_attrs';
+				}
+
+				// @todo This should not be needed because we can look it up from the spec. See https://github.com/ampproject/amp-wp/pull/3817.
+				if ( ! empty( $validation_error[ $attributes_key ] ) ) {
+					$title .= ': ';
+					$title .= implode(
+						', ',
+						array_map(
+							static function ( $attribute_name ) {
+								return sprintf( '<code>%s</code>', $attribute_name );
+							},
+							$validation_error[ $attributes_key ]
+						)
+					);
+				}
+				return $title;
+
+			case AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_CHILD_TAG:
+				return sprintf(
+					/* translators: %1$s is the child tag, %2$s is node name */
+					esc_html__( 'Tag %1$s is disallowed as child of tag %2$s', 'amp' ),
+					'<code>' . esc_html( $validation_error['child_tag'] ) . '</code>',
+					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>'
+				);
+
+			case AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_FIRST_CHILD_TAG:
+				return sprintf(
+					/* translators: %1$s is the first child tag, %2$s is node name */
+					esc_html__( 'Tag %1$s is disallowed as first child of tag %2$s', 'amp' ),
+					'<code>' . esc_html( $validation_error['first_child_tag'] ) . '</code>',
+					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>'
+				);
+
+			case AMP_Tag_And_Attribute_Sanitizer::INCORRECT_NUM_CHILD_TAGS:
+				return sprintf(
+					esc_html(
+						/* translators: %1$s is the node name, %2$s is required child count */
+						_n(
+							'Tag %1$s must have %2$s child tag',
+							'Tag %1$s must have %2$s child tags',
+							(int) $validation_error['required_child_count'],
+							'amp'
+						)
+					),
+					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>',
+					esc_html( number_format_i18n( (int) $validation_error['required_child_count'] ) )
+				);
+
+			case AMP_Tag_And_Attribute_Sanitizer::INCORRECT_MIN_NUM_CHILD_TAGS:
+				return sprintf(
+					esc_html(
+						/* translators: %1$s is the node name, %2$s is required child count */
+						_n(
+							'Tag %1$s must have a minimum of %2$s child tag',
+							'Tag %1$s must have a minimum of %2$s child tags',
+							(int) $validation_error['required_min_child_count'],
+							'amp'
+						)
+					),
+					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>',
+					esc_html( number_format_i18n( (int) $validation_error['required_min_child_count'] ) )
+				);
+
+			case AMP_Tag_And_Attribute_Sanitizer::WRONG_PARENT_TAG:
+				return sprintf(
+					/* translators: %1$s is the node name, %2$s is parent name */
+					esc_html__( 'The parent tag of tag %1$s cannot be %2$s', 'amp' ),
+					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>',
+					'<code>' . esc_html( $validation_error['parent_name'] ) . '</code>'
+				);
+
+			case AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG_ANCESTOR:
+			case AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_DESCENDANT_TAG:
+				return sprintf(
+					/* translators: %1$s is the node name, %2$s is the disallowed ancestor tag name */
+					esc_html__( 'The tag %1$s may not appear as a descendant of tag %2$s', 'amp' ),
+					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>',
+					'<code>' . esc_html( $validation_error['disallowed_ancestor'] ) . '</code>'
+				);
+
+			case AMP_Tag_And_Attribute_Sanitizer::MANDATORY_TAG_ANCESTOR:
+				return sprintf(
+					/* translators: %1$s is the node name, %2$s is the required ancestor tag name */
+					esc_html__( 'The tag %1$s may only appear as a descendant of tag %2$s', 'amp' ),
+					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>',
+					'<code>' . esc_html( $validation_error['required_ancestor_name'] ) . '</code>'
+				);
+
+			case AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE:
+			case AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE_CASEI:
+			case AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE_REGEX:
+			case AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE_REGEX_CASEI:
+			case AMP_Tag_And_Attribute_Sanitizer::INVALID_BLACKLISTED_VALUE_REGEX:
+				return sprintf(
+					/* translators: %1$s is the attribute name, %2$s is the invalid attribute value */
+					esc_html__( 'The attribute %1$s is set to the invalid value %2$s', 'amp' ),
+					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>',
+					'<code>' . esc_html( $validation_error['element_attributes'][ $validation_error['node_name'] ] ) . '</code>'
+				);
+
+			case AMP_Tag_And_Attribute_Sanitizer::INVALID_URL_PROTOCOL:
+				$parsed_url       = wp_parse_url( $validation_error['element_attributes'][ $validation_error['node_name'] ] );
+				$invalid_protocol = isset( $parsed_url['scheme'] ) ? $parsed_url['scheme'] . ':' : '(null)';
+
+				return sprintf(
+					/* translators: %1$s is the invalid protocol, %2$s is attribute name */
+					esc_html__( 'Invalid URL protocol %1$s for attribute %2$s', 'amp' ),
+					'<code>' . esc_html( $invalid_protocol ) . '</code>',
+					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>'
+				);
+
+			case AMP_Tag_And_Attribute_Sanitizer::INVALID_URL:
+				return sprintf(
+					/* translators: %1$s is the invalid URL, %2$s is attribute name */
+					esc_html__( 'Malformed URL %1$s for attribute %2$s', 'amp' ),
+					'<code>' . esc_html( $validation_error['element_attributes'][ $validation_error['node_name'] ] ) . '</code>',
+					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>'
+				);
+
+			case AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_RELATIVE_URL:
+				return sprintf(
+					/* translators: %1$s is the relative URL, %2$s is attribute name */
+					esc_html__( 'The relative URL %1$s for attribute %2$s is disallowed', 'amp' ),
+					'<code>' . esc_html( $validation_error['element_attributes'][ $validation_error['node_name'] ] ) . '</code>',
+					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>'
+				);
+
+			case AMP_Tag_And_Attribute_Sanitizer::MISSING_URL:
+				return sprintf(
+					/* translators: %1$s is attribute name */
+					esc_html__( 'Missing URL for attribute %s', 'amp' ),
+					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>'
+				);
+
+			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_WIDTH:
+			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_HEIGHT:
+			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_AUTO_HEIGHT:
+			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_NO_HEIGHT:
+			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_FIXED_HEIGHT:
+			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_AUTO_WIDTH:
+			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_HEIGHTS:
+				return sprintf(
+					/* translators: %1$s is the invalid attribute value, %2$s is the attribute name */
+					esc_html__( 'Invalid value %1$s for attribute %2$s', 'amp' ),
+					'<code>' . esc_html( $validation_error['node_attributes'][ $validation_error['attribute'] ] ) . '</code>',
+					'<code>' . esc_html( $validation_error['attribute'] ) . '</code>'
+				);
+
+			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_UNIT_DIMENSIONS:
+				return esc_html__( 'Inconsistent units for width and height', 'amp' );
+
 			default:
 				/* translators: %s error code */
-				return sprintf( __( 'Unknown error (%s)', 'amp' ), $validation_error['code'] );
+				return sprintf( esc_html__( 'Unknown error (%s)', 'amp' ), $validation_error['code'] );
 		}
 	}
 
@@ -2965,23 +3284,66 @@ class AMP_Validation_Error_Taxonomy {
 			case 'element_attributes':
 				return __( 'Element attributes', 'amp' );
 			case 'node_name':
-				if ( self::INVALID_ATTRIBUTE_CODE === $validation_error['code'] ) {
+				if ( AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR === $validation_error['code'] ) {
 					return __( 'Attribute name', 'amp' );
-				} elseif ( self::INVALID_ELEMENT_CODE === $validation_error['code'] ) {
+				} elseif ( AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG === $validation_error['code'] ) {
 					return __( 'Element name', 'amp' );
 				} else {
 					return __( 'Node name', 'amp' );
 				}
 			case 'parent_name':
 				return __( 'Parent element', 'amp' );
-			case 'property_name':
+			case 'css_property_name':
 				return __( 'CSS property', 'amp' );
+			case 'duplicate_oneof_attrs':
+				return __( 'Mutually exclusive attributes', 'amp' );
 			case 'text':
 				return __( 'Text content', 'amp' );
 			case 'type':
 				return __( 'Type', 'amp' );
 			case 'sources':
 				return __( 'Sources', 'amp' );
+			case 'meta_property_name':
+				if (
+					AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE === $validation_error['code'] ||
+					AMP_Tag_And_Attribute_Sanitizer::MISSING_REQUIRED_PROPERTY_VALUE === $validation_error['code']
+				) {
+					return __( 'Invalid property', 'amp' );
+				} elseif ( AMP_Tag_And_Attribute_Sanitizer::MISSING_MANDATORY_PROPERTY === $validation_error['code'] ) {
+					return __( 'Missing property', 'amp' );
+				}
+
+				return __( 'Property name', 'amp' );
+			case 'property_value':
+				if ( AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE === $validation_error['code'] ) {
+					return __( 'Invalid property value', 'amp' );
+				} elseif ( AMP_Tag_And_Attribute_Sanitizer::MISSING_REQUIRED_PROPERTY_VALUE === $validation_error['code'] ) {
+					return __( 'Required property value', 'amp' );
+				}
+
+				return __( 'Property value', 'amp' );
+			case 'attributes':
+				return __( 'Missing attributes', 'amp' );
+			case 'child_tag':
+				return __( 'Child tag', 'amp' );
+			case 'first_child_tag':
+				return __( 'First child tag', 'amp' );
+			case 'children_count':
+				return __( 'Children count', 'amp' );
+			case 'required_child_count':
+				return __( 'Required child count', 'amp' );
+			case 'required_min_child_count':
+				return __( 'Required minimum child count', 'amp' );
+			case 'required_parent_name':
+				return __( 'Required parent element', 'amp' );
+			case 'disallowed_ancestor':
+				return __( 'Disallowed ancestor element', 'amp' );
+			case 'required_ancestor_name':
+				return __( 'Required ancestor element', 'amp' );
+			case 'attribute':
+				return __( 'Invalid attribute', 'amp' );
+			case 'required_attr_value':
+				return __( 'Required attribute value', 'amp' );
 			default:
 				return $key;
 		}

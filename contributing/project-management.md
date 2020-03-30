@@ -9,7 +9,7 @@ In addition to [Milestones](https://github.com/ampproject/amp-wp/milestones), wh
 
 ### Definition project board
 
-The [Definition](https://github.com/ampproject/amp-wp/projects/14) project board covers the pipeline which issues go through in preparation for execution. The board contains the following columns:
+The [Definition](https://github.com/ampproject/amp-wp/projects/17) project board covers the pipeline which issues go through in preparation for execution. The board contains the following columns:
 
 * Revisit Later
 * Prioritization
@@ -20,7 +20,7 @@ The [Definition](https://github.com/ampproject/amp-wp/projects/14) project board
 
 ### Execution project board
 
-The [Execution](https://github.com/ampproject/amp-wp/projects/15) project board covers the execution pipeline which issues go through for implementation. The board contains the following columns:
+The [Execution](https://github.com/ampproject/amp-wp/projects/16) project board covers the execution pipeline which issues go through for implementation. The board contains the following columns:
 
 * Blocked
 * Backlog
@@ -61,17 +61,17 @@ The [GitHub issues](https://github.com/ampproject/amp-wp/issues) view serves as 
 
 | <br> Step | <br> Task | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br> Role  |
 | :--- | :--- | :--- |
-| 1. | An issue requiring work is added to the [Definition](https://github.com/ampproject/amp-wp/projects/14) project board (automatically added to Prioritization column). | `Product Manager` `Program Manager`
+| 1. | An issue requiring work is added to the [Definition](https://github.com/ampproject/amp-wp/projects/17) project board (automatically added to Prioritization column). | `Product Manager` `Program Manager`
 | 2. | The issue is assigned a “Priority” and moved to the “Acceptance Criteria” column. | `Product Manager` `Program Manager`
 | 3. | “Acceptance Criteria” are added to the issue description, and the issue is moved to the “Implementation Brief” column. | `Product Manager` `Product Owner` `Lead Engineer`
 | 4. | “Implementation Brief” is added to the issue description, and the issue is moved to the “Implementation Brief Review” column. | `Engineer`
 | 5. | The “Implementation Brief” is reviewed and the issue is moved to the “Estimate” column upon approval. The issue is moved back to the “Implementation Brief” column if changes in the “Implementation Brief” description are requested. | `Lead Engineer`
-| 6. | The issue is estimated using T-Shirt sizing and moved to the [Execution](https://github.com/ampproject/amp-wp/projects/15) project board (automatically added to the Backlog). | `Project Manager` `Engineer`
+| 6. | The issue is estimated using T-Shirt sizing and moved to the [Execution](https://github.com/ampproject/amp-wp/projects/16) project board (automatically added to the Backlog). | `Project Manager` `Engineer`
 
 ##### Execution
 | <br> Step | <br> Task | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br> Role  |
 | :--- | :--- | :--- |
-| 1. | An issue requiring work is added to the [Execution](https://github.com/ampproject/amp-wp/projects/15) project board (automatically added to the Backlog) after going through the [Definition](https://github.com/ampproject/amp-wp/projects/14) project board pipeline. | `Product Manager` `Program Manager`
+| 1. | An issue requiring work is added to the [Execution](https://github.com/ampproject/amp-wp/projects/16) project board (automatically added to the Backlog) after going through the [Definition](https://github.com/ampproject/amp-wp/projects/17) project board pipeline. | `Product Manager` `Program Manager`
 | 2. | The issue is assigned a “[Milestone](https://github.com/ampproject/amp-wp/milestones)” and “Sprint” label. | `Product Manager` `Program Manager`
 | 3. | The issue is moved to the “To Do” column if it is assigned to the current sprint. | `Project Manager`
 | 4. | The issue is assigned (or may be self-assigned) to an engineer. | `Project Manager` `Engineer`
@@ -91,15 +91,15 @@ The [GitHub issues](https://github.com/ampproject/amp-wp/issues) view serves as 
 
 | <br> Step | <br> Task | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br> Role  |
 | :--- | :--- | :--- |
-| 1. | An issue requiring work is added to the [Definition](https://github.com/ampproject/amp-wp/projects/14) project board (automatically added to Prioritization column). | `Product Manager` `Program Manager`
+| 1. | An issue requiring work is added to the [Definition](https://github.com/ampproject/amp-wp/projects/17) project board (automatically added to Prioritization column). | `Product Manager` `Program Manager`
 | 2. | The issue is assigned a “Priority” and moved to the “Acceptance Criteria” column. | `Product Manager` `Program Manager`
 | 3. | “Acceptance Criteria” are added to the issue description, and the issue is moved to the “Estimate" column. | `Product Manager` `Product Owner`
-| 4. | The issue is estimated using T-Shirt sizing and moved to the [Execution](https://github.com/ampproject/amp-wp/projects/15) project board (automatically added to the Backlog). | `Task specific`
+| 4. | The issue is estimated using T-Shirt sizing and moved to the [Execution](https://github.com/ampproject/amp-wp/projects/16) project board (automatically added to the Backlog). | `Task specific`
 
 ##### Execution
 | <br> Step | <br> Task | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br> Role  |
 | :--- | :--- | :--- |
-| 1. | An issue requiring work is added to the [Execution](https://github.com/ampproject/amp-wp/projects/15) project board (automatically added to the Backlog) after going through the [Definition](https://github.com/ampproject/amp-wp/projects/14) project board pipeline. | `Product Manager` `Program Manager`
+| 1. | An issue requiring work is added to the [Execution](https://github.com/ampproject/amp-wp/projects/16) project board (automatically added to the Backlog) after going through the [Definition](https://github.com/ampproject/amp-wp/projects/17) project board pipeline. | `Product Manager` `Program Manager`
 | 2. | The issue is assigned a “Sprint” label. | `Product Manager` `Program Manager`
 | 3. | The issue is moved to the “To Do” column if it is assigned to the current sprint. | `Project Manager`
 | 4. | The issue is assigned (or may be self-assigned) | `Project Manager` `Assignee`

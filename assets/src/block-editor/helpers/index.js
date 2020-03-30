@@ -8,7 +8,7 @@ import { ReactElement } from 'react';
  * WordPress dependencies
  */
 import { __, _x } from '@wordpress/i18n';
-import { cloneElement, RawHTML } from '@wordpress/element';
+import { cloneElement, RawHTML, render } from '@wordpress/element';
 import { TextControl, SelectControl, ToggleControl, Notice, PanelBody, FontSizePicker } from '@wordpress/components';
 import { InspectorControls } from '@wordpress/block-editor';
 import { select } from '@wordpress/data';
@@ -16,7 +16,7 @@ import { select } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { TEXT_BLOCKS, MEDIA_BLOCKS, DEFAULT_HEIGHT, DEFAULT_WIDTH } from '../constants';
+import { TEXT_BLOCKS, MEDIA_BLOCKS, DEFAULT_HEIGHT, DEFAULT_WIDTH, POST_PREVIEW_CLASS } from '../constants';
 import { MIN_FONT_SIZE, MAX_FONT_SIZE } from '../../common/constants';
 
 const ampLayoutOptions = [
@@ -243,32 +243,6 @@ export const filterBlocksSave = ( element, blockType, attributes ) => { // eslin
 		}
 		if ( attributes.height ) {
 			fitTextProps.height = attributes.height;
-		}
-
-		/*
-         * This is a workaround for AMP Stories since AMP Story CSS is overriding the amp-fit-text CSS.
-         * Note that amp-fit-text should support containing elements as well:
-         * "The expected content for amp-fit-text is text or other inline content, but it can also contain non-inline content."
-         */
-		if ( 'core/paragraph' === blockType.name ) {
-			let ampFitTextContent = '<amp-fit-text';
-
-			for ( const att in fitTextProps ) {
-				if ( fitTextProps.hasOwnProperty( att ) ) {
-					const value = fitTextProps[ att ];
-					ampFitTextContent += ' ' + att + '="' + value + '"';
-				}
-			}
-
-			ampFitTextContent += '>' + getAmpFitTextContent( attributes.content ) + '</amp-fit-text>';
-
-			return cloneElement(
-				element,
-				{
-					key: 'new',
-					value: ampFitTextContent,
-				},
-			);
 		}
 
 		fitTextProps.children = element;
@@ -924,20 +898,11 @@ export const isGalleryShortcode = ( attributes ) => {
  * For regular posts, this is based on the AMP toggle control and also
  * the default status based on the template mode.
  *
- * For AMP stories, this always returns true.
- *
  * @return {boolean} Whether AMP is enabled.
  */
 export const isAMPEnabled = () => {
 	const { getDefaultStatus, getPossibleStatuses } = select( 'amp/block-editor' );
 	const { getEditedPostAttribute } = select( 'core/editor' );
-
-	const type = getEditedPostAttribute( 'type' );
-
-	if ( 'amp_story' === type ) {
-		return true;
-	}
-
 	const meta = getEditedPostAttribute( 'meta' );
 
 	if ( meta && meta.amp_status && getPossibleStatuses().includes( meta.amp_status ) ) {
@@ -945,4 +910,30 @@ export const isAMPEnabled = () => {
 	}
 
 	return 'enabled' === getDefaultStatus();
+};
+
+/**
+ * Renders the 'Preview AMP' button in the DOM right after the non-AMP 'Preview' button.
+ *
+ * @param {Object} PreviewComponent The 'Preview AMP' component to render into the DOM.
+ */
+export const renderPreviewButton = ( PreviewComponent ) => {
+	const postPreviewButton = document.querySelector( `.${ POST_PREVIEW_CLASS }` );
+	const ampPreviewButtonWrapperId = 'amp-wrapper-post-preview';
+
+	// Exit if the non-AMP 'Preview' button doesn't exist.
+	if ( ! postPreviewButton || ! postPreviewButton.nextSibling ) {
+		return;
+	}
+
+	const buttonWrapper = document.createElement( 'div' );
+	buttonWrapper.id = ampPreviewButtonWrapperId;
+
+	render(
+		<PreviewComponent />,
+		buttonWrapper,
+	);
+
+	// Insert the new AMP preview button after the non-AMP 'Preview' button.
+	postPreviewButton.parentNode.insertBefore( buttonWrapper, postPreviewButton.nextSibling );
 };

@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use AmpProject\DevMode;
+
 /**
  * Class AMP_Video_Sanitizer
  *
@@ -45,7 +47,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Sanitize the <video> elements from the HTML contained in this instance's DOMDocument.
+	 * Sanitize the <video> elements from the HTML contained in this instance's Dom\Document.
 	 *
 	 * @since 0.2
 	 * @since 1.0 Set the filtered child node's src attribute.
@@ -70,7 +72,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			$node = $nodes->item( $i );
 
 			// Skip element if already inside of an AMP element as a noscript fallback, or if the element is in dev mode.
-			if ( $this->is_inside_amp_noscript( $node ) || $this->has_dev_mode_exemption( $node ) ) {
+			if ( $this->is_inside_amp_noscript( $node ) || DevMode::hasExemptionForNode( $node ) ) {
 				continue;
 			}
 
@@ -161,7 +163,14 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			 * See: https://github.com/ampproject/amphtml/issues/2261
 			 */
 			if ( empty( $sources ) ) {
-				$this->remove_invalid_child( $node );
+				$this->remove_invalid_child(
+					$node,
+					[
+						'code'       => AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING,
+						'attributes' => [ 'src' ],
+						'spec_name'  => 'amp-video',
+					]
+				);
 			} else {
 				$node->parentNode->replaceChild( $new_node, $node );
 
@@ -188,29 +197,38 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array Modified attributes.
 	 */
 	protected function filter_video_dimensions( $new_attributes, $src ) {
-		if ( empty( $new_attributes['width'] ) || empty( $new_attributes['height'] ) ) {
 
-			// Get the width and height from the file.
-			$path = wp_parse_url( $src, PHP_URL_PATH );
-			$ext  = pathinfo( $path, PATHINFO_EXTENSION );
-			$name = sanitize_title( wp_basename( $path, ".$ext" ) );
-			$args = [
-				'name'        => $name,
-				'post_type'   => 'attachment',
-				'post_status' => 'inherit',
-				'numberposts' => 1,
-			];
+		// Short-circuit if width and height are already defined.
+		if ( ! empty( $new_attributes['width'] ) && ! empty( $new_attributes['height'] ) ) {
+			return $new_attributes;
+		}
 
-			$attachment = get_posts( $args );
+		// Short-circuit if no width and height are required based on the layout.
+		$layout = isset( $new_attributes['layout'] ) ? $new_attributes['layout'] : null;
+		if ( in_array( $layout, [ 'fill', 'nodisplay', 'flex-item' ], true ) ) {
+			return $new_attributes;
+		}
 
-			if ( ! empty( $attachment ) ) {
-				$meta_data = wp_get_attachment_metadata( $attachment[0]->ID );
-				if ( empty( $new_attributes['width'] ) && ! empty( $meta_data['width'] ) ) {
-					$new_attributes['width'] = $meta_data['width'];
-				}
-				if ( empty( $new_attributes['height'] ) && ! empty( $meta_data['height'] ) ) {
-					$new_attributes['height'] = $meta_data['height'];
-				}
+		// Get the width and height from the file.
+		$path = wp_parse_url( $src, PHP_URL_PATH );
+		$ext  = pathinfo( $path, PATHINFO_EXTENSION );
+		$name = sanitize_title( wp_basename( $path, ".$ext" ) ); // Extension removed by media_handle_upload().
+		$args = [
+			'name'        => $name,
+			'post_type'   => 'attachment',
+			'post_status' => 'inherit',
+			'numberposts' => 1,
+		];
+
+		$attachments = get_posts( $args );
+		if ( ! empty( $attachments ) ) {
+			$attachment = array_shift( $attachments );
+			$meta_data  = wp_get_attachment_metadata( $attachment->ID );
+			if ( empty( $new_attributes['width'] ) && ! empty( $meta_data['width'] ) && 'fixed-height' !== $layout ) {
+				$new_attributes['width'] = $meta_data['width'];
+			}
+			if ( empty( $new_attributes['height'] ) && ! empty( $meta_data['height'] ) ) {
+				$new_attributes['height'] = $meta_data['height'];
 			}
 		}
 

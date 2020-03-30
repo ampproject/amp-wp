@@ -49,7 +49,6 @@ class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function register_embed() {
 		wp_embed_register_handler( 'amp-dailymotion', self::URL_PATTERN, [ $this, 'oembed' ], -1 );
-		add_shortcode( 'dailymotion', [ $this, 'shortcode' ] );
 	}
 
 	/**
@@ -57,35 +56,6 @@ class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function unregister_embed() {
 		wp_embed_unregister_handler( 'amp-dailymotion', -1 );
-		remove_shortcode( 'dailymotion' );
-	}
-
-	/**
-	 * Gets AMP-compliant markup for the Dailymotion shortcode.
-	 *
-	 * @param array $attr The Dailymotion attributes.
-	 * @return string Dailymotion shortcode markup.
-	 */
-	public function shortcode( $attr ) {
-		$video_id = false;
-
-		if ( isset( $attr['id'] ) ) {
-			$video_id = $attr['id'];
-		} elseif ( isset( $attr[0] ) ) {
-			$video_id = $attr[0];
-		} elseif ( function_exists( 'shortcode_new_to_old_params' ) ) {
-			$video_id = shortcode_new_to_old_params( $attr );
-		}
-
-		if ( empty( $video_id ) ) {
-			return '';
-		}
-
-		return $this->render(
-			[
-				'video_id' => $video_id,
-			]
-		);
 	}
 
 	/**
@@ -94,7 +64,7 @@ class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @see \WP_Embed::shortcode()
 	 *
 	 * @param array  $matches URL pattern matches.
-	 * @param array  $attr    Shortcode attribues.
+	 * @param array  $attr    Shortcode attributes.
 	 * @param string $url     URL.
 	 * @param string $rawattr Unmodified shortcode attributes.
 	 * @return string Rendered oEmbed.
@@ -126,7 +96,7 @@ class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 			return AMP_HTML_Utils::build_tag(
 				'a',
 				[
-					'href'  => esc_url( $args['url'] ),
+					'href'  => esc_url_raw( $args['url'] ),
 					'class' => 'amp-wp-embed-fallback',
 				],
 				esc_html( $args['url'] )

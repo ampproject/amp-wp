@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use AmpProject\Dom\Document;
+
 /**
  * Class AMP_Content_Sanitizer
  *
@@ -17,6 +19,7 @@ class AMP_Content_Sanitizer {
 	 *
 	 * @since 0.4.1
 	 * @since 0.7 Passing return_styles=false in $global_args causes stylesheets to be returned instead of styles.
+	 * @codeCoverageIgnore
 	 * @deprecated Since 1.0
 	 *
 	 * @param string   $content HTML content string or DOM document.
@@ -45,18 +48,19 @@ class AMP_Content_Sanitizer {
 	 *
 	 * @since 0.7
 	 *
-	 * @param DOMDocument $dom               HTML document.
-	 * @param string[]    $sanitizer_classes Sanitizer classes.
-	 * @param array       $args              Global args passed into sanitizers.
+	 * @param Document $dom               HTML document.
+	 * @param string[] $sanitizer_classes Sanitizer classes.
+	 * @param array    $args              Global args passed into sanitizers.
 	 * @return array {
 	 *     Scripts and stylesheets needed by sanitizers.
 	 *
-	 *     @type array $scripts     Scripts.
-	 *     @type array $stylesheets Stylesheets. If $args['return_styles'] is empty.
-	 *     @type array $styles      Styles. If $args['return_styles'] is not empty. For legacy purposes.
+	 *     @type array                $scripts     Scripts.
+	 *     @type array                $stylesheets Stylesheets. If $args['return_styles'] is empty.
+	 *     @type array                $styles      Styles. If $args['return_styles'] is not empty. For legacy purposes.
+	 *     @type AMP_Base_Sanitizer[] $sanitizers  Sanitizers.
 	 * }
 	 */
-	public static function sanitize_document( &$dom, $sanitizer_classes, $args ) {
+	public static function sanitize_document( Document $dom, $sanitizer_classes, $args ) {
 		$scripts     = [];
 		$stylesheets = [];
 		$styles      = [];
@@ -126,7 +130,7 @@ class AMP_Content_Sanitizer {
 			AMP_HTTP::send_server_timing( 'amp_sanitize', -$sanitize_class_start, $sanitizer_class );
 		}
 
-		return compact( 'scripts', 'styles', 'stylesheets' );
+		return compact( 'scripts', 'styles', 'stylesheets', 'sanitizers' );
 	}
 }
 

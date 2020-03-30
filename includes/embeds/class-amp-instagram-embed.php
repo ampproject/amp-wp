@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use AmpProject\Dom\Document;
+
 /**
  * Class AMP_Instagram_Embed_Handler
  *
@@ -47,7 +49,6 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function register_embed() {
 		wp_embed_register_handler( $this->amp_tag, self::URL_PATTERN, [ $this, 'oembed' ], -1 );
-		add_shortcode( 'instagram', [ $this, 'shortcode' ] );
 	}
 
 	/**
@@ -55,34 +56,6 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function unregister_embed() {
 		wp_embed_unregister_handler( $this->amp_tag, -1 );
-		remove_shortcode( 'instagram' );
-	}
-
-	/**
-	 * WordPress shortcode rendering callback.
-	 *
-	 * @param array $attr Shortcode attributes.
-	 * @return string HTML markup for rendered embed.
-	 */
-	public function shortcode( $attr ) {
-		$url = false;
-
-		if ( isset( $attr['url'] ) ) {
-			$url = trim( $attr['url'] );
-		}
-
-		if ( empty( $url ) ) {
-			return '';
-		}
-
-		$instagram_id = $this->get_instagram_id_from_url( $url );
-
-		return $this->render(
-			[
-				'url'          => $url,
-				'instagram_id' => $instagram_id,
-			]
-		);
 	}
 
 	/**
@@ -121,7 +94,7 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 			return AMP_HTML_Utils::build_tag(
 				'a',
 				[
-					'href'  => esc_url( $args['url'] ),
+					'href'  => esc_url_raw( $args['url'] ),
 					'class' => 'amp-wp-embed-fallback',
 				],
 				esc_html( $args['url'] )
@@ -161,13 +134,13 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Sanitized <blockquote class="instagram-media"> tags to <amp-instagram>
 	 *
-	 * @param DOMDocument $dom DOM.
+	 * @param Document $dom DOM.
 	 */
-	public function sanitize_raw_embeds( $dom ) {
+	public function sanitize_raw_embeds( Document $dom ) {
 		/**
 		 * Node list.
 		 *
-		 * @var DOMNodeList $node
+		 * @var DOMNodeList $nodes
 		 */
 		$nodes     = $dom->getElementsByTagName( $this->sanitize_tag );
 		$num_nodes = $nodes->length;
@@ -191,8 +164,8 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Make final modifications to DOMNode
 	 *
-	 * @param DOMDocument $dom The HTML Document.
-	 * @param DOMElement  $node The DOMNode to adjust and replace.
+	 * @param Document   $dom The HTML Document.
+	 * @param DOMElement $node The DOMNode to adjust and replace.
 	 */
 	private function create_amp_instagram_and_replace_node( $dom, $node ) {
 		$instagram_id = $this->get_instagram_id_from_url( $node->getAttribute( 'data-instgrm-permalink' ) );
@@ -241,7 +214,7 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		// Handle case where script is immediately following.
 		$is_embed_script = (
-			$next_element_sibling
+			$next_element_sibling instanceof DOMElement
 			&&
 			'script' === strtolower( $next_element_sibling->nodeName )
 			&&

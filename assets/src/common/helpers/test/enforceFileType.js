@@ -55,20 +55,6 @@ describe( 'enforceFileType', () => {
 		expect( selectButton.model.get( 'disabled' ) ).toBe( true );
 	} );
 
-	it( 'should not have an error or disable the button when the mimeType is video/mp4', () => {
-		const mockThis = getMockThis( videoAllowedTypes );
-		const attachment = new Mock();
-		const correctMimeType = 'video/mp4';
-		const selectButton = { model: new AlternateMock() };
-		mockThis.set( { select: selectButton } );
-		attachment.set( { type: 'video', mime: correctMimeType } );
-
-		enforceFileType.call( mockThis, attachment, MockSelectionError );
-
-		expect( mockThis.secondary.get( FILE_TYPE_ERROR_VIEW ) ).toBeUndefined( );
-		expect( selectButton.model.get( 'disabled' ) ).toBe( false );
-	} );
-
 	it( 'should not have an error or disable the button when type is an image and that is allowed', () => {
 		const mockThis = getMockThis( imageAllowedTypes );
 		const attachment = new Mock();

@@ -5,11 +5,12 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Admin\SiteHealth;
+
 /**
  * Obsolete constant for flagging when Customizer is opened for AMP.
  *
  * @deprecated
- * @var string
  */
 define( 'AMP_CUSTOMIZER_QUERY_VAR', 'customize_amp' );
 
@@ -21,7 +22,7 @@ define( 'AMP_CUSTOMIZER_QUERY_VAR', 'customize_amp' );
  * And this does not need to toggle between the AMP and normal display.
  */
 function amp_init_customizer() {
-	if ( ! AMP_Options_Manager::is_website_experience_enabled() || AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( 'theme_support' ) ) {
+	if ( AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( 'theme_support' ) ) {
 		return;
 	}
 
@@ -81,7 +82,7 @@ function amp_admin_get_preview_permalink() {
 	);
 
 	if ( empty( $post_ids ) ) {
-		return false;
+		return null;
 	}
 
 	$post_id = $post_ids[0];
@@ -170,18 +171,6 @@ function amp_add_custom_analytics( $analytics = [] ) {
 }
 
 /**
- * Bootstrap AMP post meta box.
- *
- * This function must be invoked only once through the 'wp_loaded' action.
- *
- * @since 0.6
- */
-function amp_post_meta_box() {
-	$post_meta_box = new AMP_Post_Meta_Box();
-	$post_meta_box->init();
-}
-
-/**
  * Bootstrap AMP Editor core blocks.
  */
 function amp_editor_core_blocks() {
@@ -190,21 +179,57 @@ function amp_editor_core_blocks() {
 }
 
 /**
- * Bootstrap the AMP admin pointer class.
+ * Bootstraps AMP admin classes.
  *
- * @since 1.0
+ * @since 1.5.0
  */
-function amp_admin_pointer() {
+function amp_bootstrap_admin() {
 	$admin_pointers = new AMP_Admin_Pointers();
 	$admin_pointers->init();
+
+	$post_meta_box = new AMP_Post_Meta_Box();
+	$post_meta_box->init();
+
+	$site_health = new SiteHealth();
+	$site_health->init();
 }
 
 /**
- * Bootstrap the Story Templates needed in editor.
- *
- * @since 1.?
+ * Remove Story templates.
  */
-function amp_story_templates() {
-	$story_templates = new AMP_Story_Templates();
-	$story_templates->init();
+function remove_amp_story_templates() {
+	$template_term     = 'story-template';
+	$template_taxonomy = 'amp_template';
+
+	if ( post_type_exists( 'wp_block' ) ) {
+		$query = new WP_Query(
+			[
+				'fields'        => 'ids',
+				'no_found_rows' => true,
+				'post_type'     => 'wp_block',
+				'post_per_page' => -1,
+				'tax_query'     => [
+					'taxonomy' => $template_taxonomy,
+					'field'    => 'slug',
+					'terms'    => [ $template_term ],
+				],
+			]
+		);
+
+		$post_ids = $query->get_posts();
+
+		if ( 0 < count( $post_ids ) ) {
+			foreach ( $post_ids as $post_id ) {
+				wp_delete_post( $post_id, true );
+			}
+		}
+	}
+
+	$term = term_exists( $template_term, $template_taxonomy );
+	if ( ! empty( $term['term_id'] ) ) {
+		// Temporarily register the taxonomy so that the term can be deleted.
+		register_taxonomy( $template_taxonomy, '', [] );
+		wp_delete_term( $term['term_id'], $template_taxonomy );
+		unregister_taxonomy( $template_taxonomy );
+	}
 }

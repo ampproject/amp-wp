@@ -5,12 +5,18 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\PrivateAccess;
+
 /**
  * Tests for Test_AMP_CLI_Validation_Command class.
  *
  * @since 1.0
  */
 class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
+
+	use AssertContainsCompatibility;
+	use PrivateAccess;
 
 	/**
 	 * Store a reference to the validation command object.
@@ -27,32 +33,9 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 		$this->validation = new AMP_CLI_Validation_Command();
-		add_filter( 'pre_http_request', [ $this, 'add_comment' ] );
+		add_filter( 'pre_http_request', [ $this, 'get_validate_response' ] );
 		$this->validation->include_conditionals      = [];
 		$this->validation->limit_type_validate_count = 100;
-	}
-
-	/**
-	 * Call a private method as if it was public.
-	 *
-	 * This is currently being used to test the internals of the validation
-	 * command.
-	 *
-	 * The command should be refactored to rely on abstractions, instead of
-	 * having so much of its own logic. This would then make testing the
-	 * internals unnecessary.
-	 * See: https://github.com/ampproject/amp-wp/issues/3077
-	 *
-	 * @param object $object      Object instance to call the method on.
-	 * @param string $method_name Name of the method to call.
-	 * @param array  $args        Optional. Array of arguments to pass to the method.
-	 * @return mixed Return value of the method call.
-	 * @throws ReflectionException If the object could not be reflected upon.
-	 */
-	private function call_private_method( $object, $method_name, $args = [] ) {
-		$method = ( new ReflectionClass( $object ) )->getMethod( $method_name );
-		$method->setAccessible( true );
-		return $method->invokeArgs( $object, $args );
 	}
 
 	/**
@@ -390,10 +373,10 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 	 * @covers AMP_CLI_Validation_Command::get_date_page()
 	 */
 	public function test_get_date_page() {
-		$year = date( 'Y' );
+		$year = gmdate( 'Y' );
 
 		// Normally, this should return the date page, unless the user has opted out of that template.
-		$this->assertContains( $year, $this->call_private_method( $this->validation, 'get_date_page' ) );
+		$this->assertStringContains( $year, $this->call_private_method( $this->validation, 'get_date_page' ) );
 
 		// If $include_conditionals is set and does not have is_date, this should not return a URL.
 		$this->validation->include_conditionals = [ 'is_search' ];
@@ -402,7 +385,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 		// If $include_conditionals has is_date, this should return a URL.
 		$this->validation->include_conditionals = [ 'is_date' ];
 		$parsed_page_url                        = wp_parse_url( $this->call_private_method( $this->validation, 'get_date_page' ) );
-		$this->assertContains( $year, $parsed_page_url['query'] );
+		$this->assertStringContains( $year, $parsed_page_url['query'] );
 		$this->validation->include_conditionals = [];
 	}
 
@@ -514,11 +497,11 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Adds the AMP_VALIDATION: comment to the <html> body.
+	 * Construct a WP HTTP response for a validation request.
 	 *
-	 * @return array The response, with a comment in the body.
+	 * @return array The response.
 	 */
-	public function add_comment() {
+	public function get_validate_response() {
 		$mock_validation = [
 			'results' => [
 				[
@@ -532,10 +515,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 		];
 
 		return [
-			'body'     => sprintf(
-				'<html amp><head></head><body></body><!--%s--></html>',
-				'AMP_VALIDATION:' . wp_json_encode( $mock_validation )
-			),
+			'body'     => wp_json_encode( $mock_validation ),
 			'response' => [
 				'code'    => 200,
 				'message' => 'ok',

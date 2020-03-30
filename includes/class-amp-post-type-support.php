@@ -22,6 +22,7 @@ class AMP_Post_Type_Support {
 	 * Get post types that plugin supports out of the box (which cannot be disabled).
 	 *
 	 * @deprecated
+	 * @codeCoverageIgnore
 	 * @return string[] Post types.
 	 */
 	public static function get_builtin_supported_post_types() {
@@ -36,18 +37,13 @@ class AMP_Post_Type_Support {
 	 * @return string[] Post types eligible for AMP.
 	 */
 	public static function get_eligible_post_types() {
-		return array_diff(
-			array_values(
-				get_post_types(
-					[
-						'public' => true,
-					],
-					'names'
-				)
-			),
-			[
-				AMP_Story_Post_Type::POST_TYPE_SLUG,
-			]
+		return array_values(
+			get_post_types(
+				[
+					'public' => true,
+				],
+				'names'
+			)
 		);
 	}
 
@@ -86,10 +82,6 @@ class AMP_Post_Type_Support {
 
 		if ( ! post_type_supports( $post->post_type, self::SLUG ) ) {
 			$errors[] = 'post-type-support';
-		}
-
-		if ( post_password_required( $post ) ) {
-			$errors[] = 'password-protected';
 		}
 
 		/**

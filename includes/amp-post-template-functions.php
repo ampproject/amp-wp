@@ -11,12 +11,11 @@
 function amp_post_template_init_hooks() {
 	add_action( 'amp_post_template_head', 'amp_post_template_add_title' );
 	add_action( 'amp_post_template_head', 'amp_post_template_add_canonical' );
-	add_action( 'amp_post_template_head', 'amp_post_template_add_scripts' );
 	add_action( 'amp_post_template_head', 'amp_post_template_add_fonts' );
-	add_action( 'amp_post_template_head', 'amp_post_template_add_boilerplate_css' );
 	add_action( 'amp_post_template_head', 'amp_print_schemaorg_metadata' );
 	add_action( 'amp_post_template_head', 'amp_add_generator_metadata' );
 	add_action( 'amp_post_template_head', 'wp_generator' );
+	add_action( 'amp_post_template_head', 'amp_post_template_add_block_styles' );
 	add_action( 'amp_post_template_css', 'amp_post_template_add_styles', 99 );
 	add_action( 'amp_post_template_data', 'amp_post_template_add_analytics_script' );
 	add_action( 'amp_post_template_footer', 'amp_post_template_add_analytics_data' );
@@ -45,26 +44,6 @@ function amp_post_template_add_canonical( $amp_template ) {
 }
 
 /**
- * Print scripts.
- *
- * @see amp_register_default_scripts()
- * @see amp_filter_script_loader_tag()
- * @param AMP_Post_Template $amp_template Template.
- */
-function amp_post_template_add_scripts( $amp_template ) {
-	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-	echo amp_render_scripts(
-		array_merge(
-			[
-				// Just in case the runtime has been overridden by amp_post_template_data filter.
-				'amp-runtime' => $amp_template->get( 'amp_runtime_script' ),
-			],
-			$amp_template->get( 'amp_component_scripts', [] )
-		)
-	);
-}
-
-/**
  * Print fonts.
  *
  * @param AMP_Post_Template $amp_template Template.
@@ -77,23 +56,16 @@ function amp_post_template_add_fonts( $amp_template ) {
 }
 
 /**
- * Print boilerplate CSS.
+ * Add block styles for core blocks and third-party blocks.
  *
- * @since 0.3
- * @see amp_get_boilerplate_code()
+ * @since 1.5.0
  */
-function amp_post_template_add_boilerplate_css() {
-	echo amp_get_boilerplate_code(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-}
-
-/**
- * Print Schema.org metadata.
- *
- * @deprecated Since 0.7
- */
-function amp_post_template_add_schemaorg_metadata() {
-	_deprecated_function( __FUNCTION__, '0.7', 'amp_print_schemaorg_metadata' );
-	amp_print_schemaorg_metadata();
+function amp_post_template_add_block_styles() {
+	add_theme_support( 'wp-block-styles' );
+	if ( function_exists( 'wp_common_block_scripts_and_styles' ) ) {
+		wp_common_block_scripts_and_styles();
+	}
+	wp_styles()->do_items();
 }
 
 /**

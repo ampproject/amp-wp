@@ -5,6 +5,10 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\PrivateAccess;
+use AmpProject\Dom\Document;
+
 /**
  * Tests for AMP_Comments_Sanitizer class.
  *
@@ -12,10 +16,13 @@
  */
 class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 
+	use AssertContainsCompatibility;
+	use PrivateAccess;
+
 	/**
 	 * Representation of the DOM.
 	 *
-	 * @var DOMDocument
+	 * @var Document
 	 */
 	public $dom;
 
@@ -27,7 +34,7 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 		$GLOBALS['post'] = self::factory()->post->create_and_get();
-		$this->dom       = new DOMDocument();
+		$this->dom       = new Document();
 	}
 
 	/**
@@ -41,10 +48,10 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 		$form = $this->create_form( 'incorrect-action.php' );
 		$instance->sanitize();
 		$on = $form->getAttribute( 'on' );
-		$this->assertNotContains( 'submit:AMP.setState(', $on );
-		$this->assertNotContains( 'submit-error:AMP.setState(', $on );
+		$this->assertStringNotContains( 'submit:AMP.setState(', $on );
+		$this->assertStringNotContains( 'submit-error:AMP.setState(', $on );
 		foreach ( $this->get_form_element_names() as $name ) {
-			$this->assertNotContains( $name, $on );
+			$this->assertStringNotContains( $name, $on );
 		}
 	}
 
@@ -60,10 +67,10 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 		$form = $this->create_form( '/wp-comments-post.php' );
 		$instance->sanitize();
 		$on = $form->getAttribute( 'on' );
-		$this->assertContains( 'submit:AMP.setState(', $on );
-		$this->assertContains( 'submit-error:AMP.setState(', $on );
+		$this->assertStringContains( 'submit:AMP.setState(', $on );
+		$this->assertStringContains( 'submit-error:AMP.setState(', $on );
 		foreach ( $this->get_form_element_names() as $name ) {
-			$this->assertContains( $name, $on );
+			$this->assertStringContains( $name, $on );
 		}
 	}
 
@@ -75,28 +82,31 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 	public function test_process_comment_form() {
 		$instance = new AMP_Comments_Sanitizer( $this->dom );
 
-		$form          = $this->create_form( '/wp-comments-post.php' );
-		$reflection    = new ReflectionObject( $instance );
-		$tested_method = $reflection->getMethod( 'process_comment_form' );
-		$tested_method->setAccessible( true );
-		$tested_method->invoke( $instance, $form );
+		$form = $this->create_form( '/wp-comments-post.php' );
+		$this->call_private_method( $instance, 'process_comment_form', [ $form ] );
+
 		$on        = $form->getAttribute( 'on' );
 		$amp_state = $this->dom->getElementsByTagName( 'amp-state' )->item( 0 );
 
-		$this->assertContains( 'submit:AMP.setState(', $on );
-		$this->assertContains( 'submit-error:AMP.setState(', $on );
-		$this->assertContains( 'submit-success:AMP.setState(', $on );
-		$this->assertContains( strval( $GLOBALS['post']->ID ), $on );
+		$this->assertStringContains( 'submit:AMP.setState(', $on );
+		$this->assertStringContains( 'submit-error:AMP.setState(', $on );
+		$this->assertStringContains( 'submit-success:AMP.setState(', $on );
+		$this->assertStringContains( strval( $GLOBALS['post']->ID ), $on );
 		$this->assertEquals( 'script', $amp_state->firstChild->nodeName );
 
 		foreach ( $this->get_form_element_names() as $name ) {
-			$this->assertContains( $name, $on );
-			$this->assertContains( $name, $amp_state->nodeValue );
+			$this->assertStringContains( $name, $on );
+			$this->assertStringContains( $name, $amp_state->nodeValue );
 		}
 		foreach ( $form->getElementsByTagName( 'input' ) as $input ) {
+			/**
+			 * Input.
+			 *
+			 * @var DOMElement $input
+			 */
 			$on = $input->getAttribute( 'on' );
-			$this->assertContains( 'change:AMP.setState(', $on );
-			$this->assertContains( strval( $GLOBALS['post']->ID ), $on );
+			$this->assertStringContains( 'change:AMP.setState(', $on );
+			$this->assertStringContains( strval( $GLOBALS['post']->ID ), $on );
 		}
 	}
 
@@ -119,8 +129,7 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 		$this->create_comments_list( $comment_objects );
 		$instance->sanitize();
 
-		$xpath    = new DOMXPath( $this->dom );
-		$comments = $xpath->query( '//*[ starts-with( @id, "comment-" ) ]' );
+		$comments = $this->dom->xpath->query( '//*[ starts-with( @id, "comment-" ) ]' );
 
 		foreach ( $comments as $comment ) {
 			/**

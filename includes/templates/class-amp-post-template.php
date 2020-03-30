@@ -8,6 +8,8 @@
 /**
  * Class AMP_Post_Template
  *
+ * @property WP_Post $post
+ *
  * @since 0.2
  */
 class AMP_Post_Template {
@@ -49,14 +51,6 @@ class AMP_Post_Template {
 	const DEFAULT_NAVBAR_COLOR = '#fff';
 
 	/**
-	 * Template directory.
-	 *
-	 * @since 0.2
-	 * @var string
-	 */
-	private $template_dir;
-
-	/**
 	 * Post template data.
 	 *
 	 * @since 0.2
@@ -73,45 +67,46 @@ class AMP_Post_Template {
 	public $ID;
 
 	/**
-	 * Post.
-	 *
-	 * @since 0.2
-	 * @var WP_Post
-	 */
-	public $post;
-
-	/**
 	 * AMP_Post_Template constructor.
 	 *
 	 * @param WP_Post|int $post Post.
 	 */
 	public function __construct( $post ) {
-
-		$this->template_dir = apply_filters( 'amp_post_template_dir', AMP__DIR__ . '/templates' );
-
-		if ( $post instanceof WP_Post ) {
-			$this->post = $post;
-		} else {
-			$this->post = get_post( $post );
+		if ( is_int( $post ) ) {
+			$this->ID = $post;
+		} elseif ( $post instanceof WP_Post ) {
+			$this->ID = $post->ID;
 		}
+	}
 
-		// Make sure we have a post, or bail if not.
-		if ( $this->post instanceof WP_Post ) {
-			$this->ID = $this->post->ID;
-		} else {
-			return;
-		}
-
+	/**
+	 * Set data.
+	 *
+	 * This is called in the get method the first time it is called.
+	 *
+	 * @since 1.5
+	 *
+	 * @see \AMP_Post_Template::get()
+	 */
+	private function set_data() {
 		$content_max_width = self::CONTENT_MAX_WIDTH;
 		if ( isset( $GLOBALS['content_width'] ) && $GLOBALS['content_width'] > 0 ) {
 			$content_max_width = $GLOBALS['content_width'];
 		}
+
+		/**
+		 * Filters the content max width for Reader templates.
+		 *
+		 * @since 0.2
+		 *
+		 * @param int $content_max_width Content max width.
+		 */
 		$content_max_width = apply_filters( 'amp_content_max_width', $content_max_width );
 
 		$this->data = [
 			'content_max_width'     => $content_max_width,
 
-			'document_title'        => function_exists( 'wp_get_document_title' ) ? wp_get_document_title() : wp_title( '', false ), // Back-compat with 4.3.
+			'document_title'        => wp_get_document_title(),
 			'canonical_url'         => get_permalink( $this->ID ),
 			'home_url'              => home_url( '/' ),
 			'blog_name'             => get_bloginfo( 'name' ),
@@ -119,15 +114,16 @@ class AMP_Post_Template {
 			'html_tag_attributes'   => [],
 			'body_class'            => '',
 
-			'site_icon_url'         => apply_filters( 'amp_site_icon_url', function_exists( 'get_site_icon_url' ) ? get_site_icon_url( self::SITE_ICON_SIZE ) : '' ),
+			/** This filter is documented in includes/amp-helper-functions.php */
+			'site_icon_url'         => apply_filters( 'amp_site_icon_url', get_site_icon_url( self::SITE_ICON_SIZE ) ),
 			'placeholder_image_url' => amp_get_asset_url( 'images/placeholder-icon.png' ),
 
 			'featured_image'        => false,
 			'comments_link_url'     => false,
 			'comments_link_text'    => false,
 
-			'amp_runtime_script'    => 'https://cdn.ampproject.org/v0.js',
-			'amp_component_scripts' => [],
+			'amp_runtime_script'    => 'https://cdn.ampproject.org/v0.js', // Deprecated.
+			'amp_component_scripts' => [], // Deprecated.
 
 			'customizer_settings'   => [],
 
@@ -158,12 +154,51 @@ class AMP_Post_Template {
 	/**
 	 * Getter.
 	 *
+	 * @since 1.5
+	 *
+	 * @param string $name Property name.
+	 * @return mixed
+	 */
+	public function __get( $name ) {
+		switch ( $name ) {
+			case 'post':
+				return get_post( $this->ID );
+		}
+		return null;
+	}
+
+	/**
+	 * Get template directory for Reader mode.
+	 *
+	 * @since 0.2
+	 * @return string Template dir.
+	 */
+	private function get_template_dir() {
+		static $template_dir = null;
+		if ( ! isset( $template_dir ) ) {
+			/**
+			 * Filters the Reader template directory.
+			 *
+			 * @since 0.3.3
+			 */
+			$template_dir = apply_filters( 'amp_post_template_dir', AMP__DIR__ . '/templates' );
+		}
+		return $template_dir;
+	}
+
+	/**
+	 * Getter.
+	 *
 	 * @param string $property Property name.
 	 * @param mixed  $default  Default value.
 	 *
 	 * @return mixed Value.
 	 */
 	public function get( $property, $default = null ) {
+		if ( ! isset( $this->data ) ) {
+			$this->set_data();
+		}
+
 		if ( isset( $this->data[ $property ] ) ) {
 			return $this->data[ $property ];
 		}
@@ -218,7 +253,7 @@ class AMP_Post_Template {
 	 * @return string Template path.
 	 */
 	private function get_template_path( $template ) {
-		return sprintf( '%s/%s.php', $this->template_dir, $template );
+		return sprintf( '%s/%s.php', $this->get_template_dir(), $template );
 	}
 
 	/**
@@ -238,20 +273,6 @@ class AMP_Post_Template {
 	 */
 	private function add_data_by_key( $key, $value ) {
 		$this->data[ $key ] = $value;
-	}
-
-	/**
-	 * Merge data for key.
-	 *
-	 * @param string $key   Key.
-	 * @param mixed  $value Value.
-	 */
-	private function merge_data_for_key( $key, $value ) {
-		if ( is_array( $this->data[ $key ] ) ) {
-			$this->data[ $key ] = array_merge( $this->data[ $key ], $value );
-		} else {
-			$this->add_data_by_key( $key, $value );
-		}
 	}
 
 	/**
@@ -289,7 +310,7 @@ class AMP_Post_Template {
 	}
 
 	/**
-	 * Buuild post comments data.
+	 * Build post comments data.
 	 */
 	private function build_post_comments_data() {
 		if ( ! post_type_supports( $this->post->post_type, 'comments' ) ) {
@@ -321,18 +342,10 @@ class AMP_Post_Template {
 	 * Build post content.
 	 */
 	private function build_post_content() {
-		$amp_content = new AMP_Content(
-			$this->post->post_content,
-			amp_get_content_embed_handlers( $this->post ),
-			amp_get_content_sanitizers( $this->post ),
-			[
-				'content_max_width' => $this->get( 'content_max_width' ),
-			]
-		);
+		/** This filter is documented in wp-includes/post-template.php */
+		$content = apply_filters( 'the_content', get_the_content( null, false, $this->post ) );
 
-		$this->add_data_by_key( 'post_amp_content', $amp_content->get_amp_content() );
-		$this->merge_data_for_key( 'amp_component_scripts', $amp_content->get_amp_scripts() );
-		$this->add_data_by_key( 'post_amp_stylesheets', $amp_content->get_amp_stylesheets() );
+		$this->add_data_by_key( 'post_amp_content', $content );
 	}
 
 	/**
@@ -362,32 +375,13 @@ class AMP_Post_Template {
 			return;
 		}
 
-		$dom    = AMP_DOM_Utils::get_dom_from_content( $featured_html );
-		$assets = AMP_Content_Sanitizer::sanitize_document(
-			$dom,
-			amp_get_content_sanitizers( $this->post ),
-			[
-				'content_max_width' => $this->get( 'content_max_width' ),
-			]
-		);
-
-		$sanitized_html = AMP_DOM_Utils::get_content_from_dom( $dom );
-
 		$this->add_data_by_key(
 			'featured_image',
 			[
-				'amp_html' => $sanitized_html,
+				'amp_html' => $featured_html,
 				'caption'  => $featured_image->post_excerpt,
 			]
 		);
-
-		if ( $assets['scripts'] ) {
-			$this->merge_data_for_key( 'amp_component_scripts', $assets['scripts'] );
-		}
-
-		if ( $assets['stylesheets'] ) {
-			$this->merge_data_for_key( 'post_amp_stylesheets', $assets['stylesheets'] );
-		}
 	}
 
 	/**
@@ -443,6 +437,15 @@ class AMP_Post_Template {
 			$file = $located_file;
 		}
 
+		/**
+		 * Filters the template file being loaded for a given template type.
+		 *
+		 * @since 0.2
+		 *
+		 * @param string  $file          Template file.
+		 * @param string  $template_type Template type.
+		 * @param WP_Post $post          Post.
+		 */
 		$file = apply_filters( 'amp_post_template_file', $file, $template_type, $this->post );
 		if ( ! $this->is_valid_template( $file ) ) {
 			/* translators: 1: the template file, 2: WP_CONTENT_DIR. */
@@ -450,7 +453,14 @@ class AMP_Post_Template {
 			return;
 		}
 
-		do_action( 'amp_post_template_include_' . $template_type, $this );
+		/**
+		 * Fires before including a template.
+		 *
+		 * @since 0.4
+		 *
+		 * @param AMP_Post_Template $this Post template.
+		 */
+		do_action( "amp_post_template_include_{$template_type}", $this );
 		include $file;
 	}
 
