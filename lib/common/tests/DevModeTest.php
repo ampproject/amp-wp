@@ -32,16 +32,22 @@ class DevModeTest extends TestCase
 
     public function dataHasExemptionForNode()
     {
-        return [
-            [ '<html><body id="node_to_test"><div data-ampdevmode></div></body></html>', false ],
-            [ '<html><body><div id="node_to_test" data-ampdevmode></div></body></html>', true ],
+        $testData = [
+            [ Document::fromHtml('<html><body id="node_to_test"><div data-ampdevmode></div></body></html>'), false ],
+            [ Document::fromHtml('<html data-ampdevmode><body><div id="node_to_test" data-ampdevmode></div></body></html>'), true ],
+            [ Document::fromHtml('<html id="node_to_test" data-ampdevmode><body><div data-ampdevmode></div></body></html>'), true ],
         ];
+
+        $domWithoutDevModeOnRoot = Document::fromHtml('<html id="node_to_test"><body><div data-ampdevmode></div></body></html>');
+        $domWithoutDevModeOnRoot->documentElement->setAttribute('data-ampdevmode', '');
+        $testData[] = [$domWithoutDevModeOnRoot, false ];
+
+        return $testData;
     }
 
     /** @dataProvider dataHasExemptionForNode */
-    public function testHasExemptionForNode($html, $expected)
+    public function testHasExemptionForNode($document, $expected)
     {
-        $document = Document::fromHtml($html);
         $node = $document->xpath->query('//*[@id="node_to_test"]')->item(0);
         $this->assertEquals($expected, DevMode::hasExemptionForNode($node));
     }

@@ -3,6 +3,7 @@
 namespace AmpProject\Dom;
 
 use AmpProject\Attribute;
+use AmpProject\DevMode;
 use AmpProject\Tag;
 use DOMAttr;
 use DOMComment;
@@ -165,6 +166,13 @@ final class Document extends DOMDocument
     ];
 
     /**
+     * Whether `data-ampdevmode` was initially set on the the document element.
+     *
+     * @var bool
+     */
+    private $hasInitialAmpDevMode = false;
+
+    /**
      * The original encoding of how the AmpProject\Dom\Document was created.
      *
      * This is stored to do an automatic conversion to UTF-8, which is
@@ -311,6 +319,8 @@ final class Document extends DOMDocument
         $node = $dom->importNode($root->documentElement ?: $root, true);
         $dom->appendChild($node);
 
+        $dom->hasInitialAmpDevMode = $dom->documentElement->hasAttribute(DevMode::DEV_MODE_ATTRIBUTE);
+
         return $dom;
     }
 
@@ -414,6 +424,8 @@ final class Document extends DOMDocument
             ) {
                 $this->head->removeChild($meta);
             }
+
+            $this->hasInitialAmpDevMode = $this->documentElement->hasAttribute(DevMode::DEV_MODE_ATTRIBUTE);
         }
 
         return $success;
@@ -1483,6 +1495,16 @@ final class Document extends DOMDocument
         $element->setAttribute('id', $id);
 
         return $id;
+    }
+
+    /**
+     * Determine whether `data-ampdevmode` was initially set on the document element.
+     *
+     * @return bool
+     */
+    public function hasInitialAmpDevMode()
+    {
+        return $this->hasInitialAmpDevMode;
     }
 
     /**

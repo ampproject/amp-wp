@@ -662,11 +662,17 @@ class AMP_Validated_URL_Post_Type {
 		// Remove fragment identifier in the rare case it could be provided. It is irrelevant for validation.
 		$url = strtok( $url, '#' );
 
+		// Query args to be removed from validated URLs.
+		$removable_query_vars = array_merge(
+			wp_removable_query_args(),
+			[ 'preview_id', 'preview_nonce', 'preview' ]
+		);
+
 		// Normalize query args, removing all that are not recognized or which are removable.
 		$url_parts = explode( '?', $url, 2 );
 		if ( 2 === count( $url_parts ) ) {
 			$args = wp_parse_args( $url_parts[1] );
-			foreach ( wp_removable_query_args() as $removable_query_arg ) {
+			foreach ( $removable_query_vars as $removable_query_arg ) {
 				unset( $args[ $removable_query_arg ] );
 			}
 			$url = $url_parts[0];
