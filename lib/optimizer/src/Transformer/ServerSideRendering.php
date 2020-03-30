@@ -56,6 +56,15 @@ final class ServerSideRendering implements Transformer
     ];
 
     /**
+     * List of elements to exclude from rendering their layout at the server.
+     *
+     * @var string[]
+     */
+    const EXCLUDED_ELEMENTS = [
+        'amp-audio',
+    ];
+
+    /**
      * Map of attribute names to extraction methods.
      *
      * @var string[]
@@ -419,6 +428,10 @@ final class ServerSideRendering implements Transformer
      */
     private function applyLayoutAttributes(DOMElement $element, $layout, CssLength $width, CssLength $height)
     {
+        if ($this->isExcludedElement($element)) {
+            return;
+        }
+
         $this->addClass($element, $this->getLayoutClass($layout));
 
         if ($this->isLayoutSizeDefined($layout)) {
@@ -876,5 +889,16 @@ final class ServerSideRendering implements Transformer
             $attributeValue,
             $document->getElementId($element)
         );
+    }
+
+    /**
+     * Check whether a given element should be excluded from applying its layout on the server.
+     *
+     * @param DOMElement $element Element to check.
+     * @return bool Whether to exclude the element or not.
+     */
+    private function isExcludedElement(DOMElement $element)
+    {
+        return in_array($element->tagName, self::EXCLUDED_ELEMENTS, true);
     }
 }
