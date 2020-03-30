@@ -748,14 +748,20 @@ final class ServerSideRendering implements Transformer
     private function addCustomCss(Document $document, $customCss)
     {
         if (empty($this->ampCustomStyleElement)) {
-            $this->ampCustomStyleElement = $document->xpath->query(self::STYLE_AMP_CUSTOM_XPATH, $document->head)->item(0);
-            if ($this->ampCustomStyleElement === null) {
-                $this->ampCustomStyleElement = $document->createElement(Tag::STYLE);
-                $this->ampCustomStyleElement->setAttribute(Attribute::AMP_CUSTOM, null);
-                $document->head->appendChild($this->ampCustomStyleElement);
+            /**
+             * <style amp-custom> element.
+             *
+             * @var DOMElement
+             */
+            $ampCustomStyleElement = $document->xpath->query(self::STYLE_AMP_CUSTOM_XPATH, $document->head)->item(0);
+            if ($ampCustomStyleElement === null) {
+                $ampCustomStyleElement = $document->createElement(Tag::STYLE);
+                $ampCustomStyleElement->setAttribute(Attribute::AMP_CUSTOM, null);
+                $document->head->appendChild($ampCustomStyleElement);
             } else {
                 $this->ampCustomCssByteCount = (new CssByteCountCalculator($document))->calculate();
             }
+            $this->ampCustomStyleElement = $ampCustomStyleElement;
         }
 
         $this->ampCustomStyleElement->textContent .= $customCss;
