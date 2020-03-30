@@ -1636,7 +1636,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		$body_id = AMP_DOM_Utils::get_element_id( $this->dom->body, 'body' );
+		$body_id = $this->dom->getElementId( $this->dom->body, 'body' );
 
 		$open_xpaths  = isset( $args['open_button_xpath'] ) ? $args['open_button_xpath'] : [];
 		$close_xpaths = isset( $args['close_button_xpath'] ) ? $args['close_button_xpath'] : [];
@@ -1774,7 +1774,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 
-			$modal_id = AMP_DOM_Utils::get_element_id( $modal );
+			$modal_id = $this->dom->getElementId( $modal );
 
 			// Add the lightbox itself as a close button xpath as well.
 			// With twentytwenty compat, the lightbox fills the entire screen, and only an inner wrapper will contain
@@ -1806,7 +1806,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public function add_twentytwenty_toggles() {
 		$toggles = $this->dom->xpath->query( '//*[ @data-toggle-target ]' );
-		$body_id = AMP_DOM_Utils::get_element_id( $this->dom->body, 'body' );
+		$body_id = $this->dom->getElementId( $this->dom->body, 'body' );
 
 		if ( false === $toggles || 0 === $toggles->length ) {
 			return;
@@ -1819,7 +1819,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		 */
 		foreach ( $toggles as $toggle ) {
 			$toggle_target = $toggle->getAttribute( 'data-toggle-target' );
-			$toggle_id     = AMP_DOM_Utils::get_element_id( $toggle );
+			$toggle_id     = $this->dom->getElementId( $toggle );
 
 			if ( 'next' === $toggle_target ) {
 				$target_node = $toggle->nextSibling;
@@ -1845,7 +1845,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 			$is_sub_menu     = AMP_DOM_Utils::has_class( $target_node, 'sub-menu' );
 			$new_target_node = $is_sub_menu ? $this->get_closest_submenu( $toggle ) : $target_node;
-			$new_target_id   = AMP_DOM_Utils::get_element_id( $new_target_node );
+			$new_target_id   = $this->dom->getElementId( $new_target_node );
 
 			$state_string = str_replace( '-', '_', $new_target_id );
 
@@ -1867,7 +1867,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						// Skip adding the 'active' class on the "Close" button in the primary nav menu.
 						continue;
 					}
-					$target_toggle_id = AMP_DOM_Utils::get_element_id( $target_toggle );
+					$target_toggle_id = $this->dom->getElementId( $target_toggle );
 					AMP_DOM_Utils::add_amp_action( $toggle, 'tap', "{$target_toggle_id}.toggleClass(class='active')" );
 				}
 			}
@@ -1886,7 +1886,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					$focus_element = $this->dom->xpath->query( $focus_xpath )->item( 0 );
 
 					if ( $focus_element instanceof DOMElement ) {
-						$focus_element_id = AMP_DOM_Utils::get_element_id( $focus_element );
+						$focus_element_id = $this->dom->getElementId( $focus_element );
 						AMP_DOM_Utils::add_amp_action( $toggle, 'tap', "{$focus_element_id}.focus" );
 					}
 				}

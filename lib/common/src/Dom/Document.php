@@ -222,6 +222,15 @@ final class Document extends DOMDocument
     private $usedAmpEmoji;
 
     /**
+     * Store the current index by prefix.
+     *
+     * This is used to generate unique-per-prefix IDs.
+     *
+     * @var int[]
+     */
+    private $indexCounter = [];
+
+    /**
      * Creates a new AmpProject\Dom\Document object
      *
      * @link  https://php.net/manual/domdocument.construct.php
@@ -1444,6 +1453,36 @@ final class Document extends DOMDocument
             ||
             $node instanceof DOMComment
         );
+    }
+
+    /**
+     * Get the ID for an element.
+     *
+     * If the element does not have an ID, create one first.
+     *
+     * @param DOMElement $element Element to get the ID for.
+     * @param string     $prefix  Optional. Defaults to 'i-amp-id'.
+     * @return string ID to use.
+     */
+    public function getElementId(DOMElement $element, $prefix = 'i-amp-id')
+    {
+        if ($element->hasAttribute('id')) {
+            return $element->getAttribute('id');
+        }
+
+        if (! array_key_exists($prefix, $this->indexCounter)) {
+            $this->indexCounter[$prefix] = 2;
+            $element->setAttribute('id', $prefix);
+
+            return $prefix;
+        }
+
+        $id = "{$prefix}-{$this->indexCounter[ $prefix ]}";
+        $this->indexCounter[$prefix]++;
+
+        $element->setAttribute('id', $id);
+
+        return $id;
     }
 
     /**

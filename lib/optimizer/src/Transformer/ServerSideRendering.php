@@ -4,15 +4,20 @@ namespace AmpProject\Optimizer\Transformer;
 
 use AmpProject\Amp;
 use AmpProject\Attribute;
+use AmpProject\Dom\CssByteCountCalculator;
 use AmpProject\Dom\Document;
 use AmpProject\CssLength;
 use AmpProject\Extension;
 use AmpProject\Layout;
 use AmpProject\Optimizer\Error;
 use AmpProject\Optimizer\ErrorCollection;
+use AmpProject\Optimizer\Exception\InvalidHtmlAttribute;
 use AmpProject\Optimizer\Transformer;
 use AmpProject\Tag;
+use DOMAttr;
 use DOMElement;
+use Exception;
+use RuntimeException;
 
 /**
  * Transformer applying the server-side rendering transformations to the HTML input.
@@ -33,6 +38,11 @@ use DOMElement;
 final class ServerSideRendering implements Transformer
 {
 
+    /**
+     * List of layouts that support server-side rendering.
+     *
+     * @var string[]
+     */
     const SUPPORTED_LAYOUTS = [
         '',
         Layout::NODISPLAY,
@@ -44,6 +54,54 @@ final class ServerSideRendering implements Transformer
         Layout::FLEX_ITEM,
         Layout::INTRINSIC,
     ];
+
+    /**
+     * Map of attribute names to extraction methods.
+     *
+     * @var string[]
+     */
+    const EXTRACTION_METHOD_MAP = [
+        Attribute::SIZES   => 'extractSizesAttributeCss',
+        Attribute::HEIGHTS => 'extractHeightsAttributeCss',
+        Attribute::MEDIA   => 'extractMediaAttributeCss',
+    ];
+
+    /**
+     * XPath query to retrieve the <style amp-custom> tag, relative to the <head> node.
+     *
+     * @var string
+     */
+    const STYLE_AMP_CUSTOM_XPATH = './/style[@amp-custom]';
+
+    /**
+     * Regex pattern to match a CSS Dimension with an associated media condition.
+     *
+     * @var string
+     */
+    const CSS_DIMENSION_WITH_MEDIA_CONDITION_REGEX_PATTERN = '/(?<media_condition>.*)\s(?<dimension>.*)/m';
+
+    /**
+     * Characters to use for trimming CSS values.
+     *
+     * @var string
+     */
+    const CSS_TRIM_CHARACTERS = " \t\n\r\0\x0B;";
+
+    /**
+     * The <style amp-custom> element that custom CSS styles need to be added to.
+     *
+     * @var DOMElement
+     */
+    private $ampCustomStyleElement;
+
+    /**
+     * Count of bytes to calculate against the AMP size limit for the custom CSS styling.
+     *
+     * AMP only allows for 75.000 bytes of CSS across <style amp-custom> and inline style attributes.
+     *
+     * @var int
+     */
+    private $ampCustomCssByteCount = 0;
 
     /**
      * Apply transformations to the provided DOM document.
@@ -63,32 +121,23 @@ final class ServerSideRendering implements Transformer
          * we also look for reasons not to remove the boilerplate.
          */
         $canRemoveBoilerplate = true;
-        foreach ($document->ampElements as $amp_element) {
+        foreach ($document->ampElements as $ampElement) {
             // Make sure we only deal with valid elements.
-            if (!$amp_element instanceof DOMElement) {
+            if (! $ampElement instanceof DOMElement) {
                 continue;
             }
 
             // Skip tags inside a template tag.
-            if ($this->hasAncestorWithTag($amp_element, Tag::TEMPLATE)) {
+            if ($this->hasAncestorWithTag($ampElement, Tag::TEMPLATE)) {
                 continue;
-            }
-
-            /*
-             * If these attributes are used on any AMP custom element tags within the document, we can't remove the
-             * boilerplate - they require the boilerplate.
-             */
-            if ($amp_element->hasAttribute(Attribute::HEIGHTS) || $amp_element->hasAttribute(Attribute::MEDIA) || $amp_element->hasAttribute(Attribute::SIZES)) {
-                $errors->add(Error\CannotRemoveBoilerplate::fromAttributesRequiringBoilerplate($amp_element));
-                $canRemoveBoilerplate = false;
             }
 
             /*
              * amp-experiment is a render delaying extension iff the tag is used in the doc. We check for that here
              * rather than checking for the existence of the amp-experiment script in IsRenderDelayingExtension below.
              */
-            if ($amp_element->tagName === Extension::EXPERIMENT && $this->isAmpExperimentUsed($amp_element)) {
-                $errors->add(Error\CannotRemoveBoilerplate::fromAmpExperiment($amp_element));
+            if ($ampElement->tagName === Extension::EXPERIMENT && $this->isAmpExperimentUsed($ampElement)) {
+                $errors->add(Error\CannotRemoveBoilerplate::fromAmpExperiment($ampElement));
                 $canRemoveBoilerplate = false;
             }
 
@@ -96,8 +145,16 @@ final class ServerSideRendering implements Transformer
              * amp-audio requires knowing the dimensions of the browser. Do not remove the boilerplate or apply layout
              * if amp-audio is present in the document.
              */
-            if ($amp_element->tagName === Extension::AUDIO) {
-                $errors->add(Error\CannotRemoveBoilerplate::fromAmpAudio($amp_element));
+            if ($ampElement->tagName === Extension::AUDIO) {
+                $errors->add(Error\CannotRemoveBoilerplate::fromAmpAudio($ampElement));
+                $canRemoveBoilerplate = false;
+            }
+
+            /*
+             * Try to adapt 'sizes', 'heights' and 'media' attribute to turn them from blocking attributes into CSS
+             * styles we add to <style amp-custom>.
+             */
+            if (! $this->adaptBlockingAttributes($document, $ampElement, $errors)) {
                 $canRemoveBoilerplate = false;
                 continue;
             }
@@ -106,8 +163,8 @@ final class ServerSideRendering implements Transformer
              * Now apply the layout to the custom elements. If we encounter any unsupported layout, the applyLayout()
              * method returns false and we can't remove the boilerplate.
              */
-            if (! $this->applyLayout($document, $amp_element, $errors)) {
-                $errors->add(Error\CannotRemoveBoilerplate::fromUnsupportedLayout($amp_element));
+            if (! $this->applyLayout($document, $ampElement, $errors)) {
+                $errors->add(Error\CannotRemoveBoilerplate::fromUnsupportedLayout($ampElement));
                 $canRemoveBoilerplate = false;
             }
         }
@@ -559,7 +616,7 @@ final class ServerSideRendering implements Transformer
      * not empty. The validator ensures that the script/json is parsable but since transformers may be used outside of
      * validation it is checked here as well.
      *
-     * @param DOMElement $element Element to check,
+     * @param DOMElement $element Element to check.
      * @return bool Whether the amp-experiment element is actually used.
      */
     private function isAmpExperimentUsed(DOMElement $element)
@@ -611,5 +668,203 @@ final class ServerSideRendering implements Transformer
 
         // Otherwise, used.
         return true;
+    }
+
+    /**
+     * Adapt blocking attributes so that they allow for boilerplate removal.
+     *
+     * Blocking attributes that need special attention are `sizes`, `heights` and `media`.
+     *
+     * @see https://github.com/ampproject/amp-wp/issues/4439
+     *
+     * @param Document        $document   DOM document to apply the transformations to.
+     * @param DOMElement      $ampElement Element to adapt.
+     * @param ErrorCollection $errors     Collection of errors that are collected during transformation.
+     * @return bool Whether boilerplate can be removed.
+     */
+    private function adaptBlockingAttributes(Document $document, DOMElement $ampElement, ErrorCollection $errors)
+    {
+        $attributes = $ampElement->attributes;
+
+        if ($attributes === null) {
+            return true;
+        }
+
+        $customCss          = '';
+        $attributesToRemove = [];
+
+        foreach ($attributes as $attribute) {
+            /**
+             * Attribute to check.
+             *
+             * @var DOMAttr $attribute
+             */
+            $normalizedAttributeName = strtolower($attribute->name);
+            if (array_key_exists($normalizedAttributeName, self::EXTRACTION_METHOD_MAP)) {
+                $method = self::EXTRACTION_METHOD_MAP[$normalizedAttributeName];
+                try {
+                    $customCss            .= $this->$method($document, $ampElement, $attribute->value);
+                    $attributesToRemove[] = $attribute->name;
+                    $ampElement->removeAttribute($attribute->name);
+                } catch (Exception $exception) {
+                    $errors->add(Error\CannotRemoveBoilerplate::fromAttributesRequiringBoilerplate($ampElement));
+                    return false;
+                }
+            }
+        }
+
+        if (!empty($customCss) && ! $this->addCustomCss($document, $customCss)) {
+            $errors->add(Error\CannotRemoveBoilerplate::fromAttributesRequiringBoilerplate($ampElement));
+            return false;
+        }
+
+        foreach ($attributesToRemove as $attributeToRemove) {
+            $ampElement->removeAttribute($attributeToRemove);
+        }
+
+        return true;
+    }
+
+    /**
+     * Add custom CSS styling to the document.
+     *
+     * @param Document $document  Document to add the custom CSS styling to.
+     * @param string   $customCss Custom CSS styling to add.
+     * @return bool Whether adding the custom CSS styling to the document succeeded.
+     */
+    private function addCustomCss(Document $document, $customCss)
+    {
+        if (empty($this->ampCustomStyleElement)) {
+            $this->ampCustomStyleElement = $document->xpath->query(self::STYLE_AMP_CUSTOM_XPATH, $document->head)->item(0);
+            if ($this->ampCustomStyleElement === null) {
+                $this->ampCustomStyleElement = $document->createElement(Tag::STYLE);
+                $this->ampCustomStyleElement->setAttribute(Attribute::AMP_CUSTOM, null);
+                $document->head->appendChild($this->ampCustomStyleElement);
+            } else {
+                $this->ampCustomCssByteCount = (new CssByteCountCalculator($document))->calculate();
+            }
+        }
+
+        $this->ampCustomStyleElement->textContent .= $customCss;
+        $this->ampCustomCssByteCount              += strlen($customCss);
+
+        return true;
+    }
+
+    /**
+     * Extract the custom CSS styling from a 'sizes' attribute.
+     *
+     * __sizes__
+     * "One or more strings separated by commas, indicating a set of source sizes. Each source size consists of:
+     * - A media condition. This must be omitted for the last item in the list.
+     * - A source size value."
+     *
+     * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#attr-sizes
+     *
+     * @param Document   $document       Document containing the element to adapt.
+     * @param DOMElement $element        Element to adapt.
+     * @param string     $attributeValue Value of the attribute to extract the CSS styling from.
+     * @return string Extract custom CSS styling.
+     */
+    private function extractSizesAttributeCss(Document $document, DOMElement $element, $attributeValue)
+    {
+        return $this->extractAttributeCss(
+            $document,
+            $element,
+            $attributeValue,
+            '#__ID__{width:%s};',
+            '@media %s{#__ID__{width:%s;}}'
+        );
+    }
+
+    /**
+     * Extract the custom CSS styling from a 'heights' attribute.
+     *
+     * __heights__ (AMP-specific)
+     * "The value of this attribute is a sizes expression based on media expressions, similar to the sizes attribute on
+     * img tags but with two key differences:
+     * - The value applies to the height, not the width of the element.
+     * - Percent values are allowed. A percent value indicates the percent of the element's width. For example, a value
+     *   of 80% indicates that the height of the element will be 80% of the element's width."
+     *
+     * @see https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes/#heights
+     *
+     * @param Document   $document       Document containing the element to adapt.
+     * @param DOMElement $element        Element to adapt.
+     * @param string     $attributeValue Value of the attribute to extract the CSS styling from.
+     * @return string Extract custom CSS styling.
+     */
+    private function extractHeightsAttributeCss(Document $document, DOMElement $element, $attributeValue)
+    {
+        return $this->extractAttributeCss(
+            $document,
+            $element,
+            $attributeValue,
+            '#__ID__>i-amphtml-sizer{height:%s};',
+            '@media %s{#__ID__>i-amphtml-sizer{height:%s;}}'
+        );
+    }
+
+    /**
+     * Extract the custom CSS styling from an attribute and turn into a templated CSS style string.
+     *
+     * @param Document   $document        Document containing the element to adapt.
+     * @param DOMElement $element         Element to adapt.
+     * @param string     $attributeValue  Value of the attribute to extract the CSS styling from.
+     * @param string     $mainStyle       CSS template for the main style.
+     * @param string     $mediaQueryStyle CSS template for a media query style.
+     * @return string Extract custom CSS styling.
+     */
+    private function extractAttributeCss(Document $document, DOMElement $element, $attributeValue, $mainStyle, $mediaQueryStyle)
+    {
+        if (empty($attributeValue)) {
+            return '';
+        }
+
+        $sourceSizes = explode(',', $attributeValue);
+        $lastItem    = trim(array_pop($sourceSizes), self::CSS_TRIM_CHARACTERS);
+
+        if (empty($lastItem)) {
+            throw InvalidHtmlAttribute::fromAttribute(Attribute::HEIGHTS, $element);
+        }
+
+        $customCss = sprintf($mainStyle, $lastItem);
+
+        foreach ($sourceSizes as $sourceSize) {
+            $matches = [];
+            if (preg_match(self::CSS_DIMENSION_WITH_MEDIA_CONDITION_REGEX_PATTERN, $sourceSize, $matches)) {
+                $mediaCondition = trim($matches['media_condition'], self::CSS_TRIM_CHARACTERS);
+
+                if (empty($mediaCondition)) {
+                    throw InvalidHtmlAttribute::fromAttribute(Attribute::HEIGHTS, $element);
+                }
+
+                $dimension = trim($matches['dimension'], self::CSS_TRIM_CHARACTERS);
+
+                if (empty($dimension)) {
+                    throw InvalidHtmlAttribute::fromAttribute(Attribute::HEIGHTS, $element);
+                }
+
+                $customCss .= sprintf($mediaQueryStyle, $mediaCondition, $dimension);
+            }
+        }
+
+        $elementId = $document->getElementId($element);
+        $customCss = str_replace('__ID__', $elementId, $customCss);
+
+        return $customCss;
+    }
+
+    /**
+     * Extract the custom CSS styling from a 'media' attribute.
+     *
+     * @param Document   $document       Document containing the element to adapt.
+     * @param DOMElement $element        Element to adapt.
+     * @param string     $attributeValue Value of the attribute to extract the CSS styling from.
+     * @return string Extract custom CSS styling.
+     */
+    private function extractMediaAttributeCss(Document $document, DOMElement $element, $attributeValue)
+    {
+        return '';
     }
 }

@@ -30,8 +30,8 @@ final class ServerSideRenderingTest extends TestCase
         $input = static function ($body, $extraHead = '') {
             return TestMarkup::DOCTYPE . '<html ⚡><head>'
                    . TestMarkup::META_CHARSET . TestMarkup::META_VIEWPORT . TestMarkup::SCRIPT_AMPRUNTIME
-                   . $extraHead
                    . TestMarkup::LINK_FAVICON . TestMarkup::LINK_CANONICAL . TestMarkup::STYLE_AMPBOILERPLATE . TestMarkup::NOSCRIPT_AMPBOILERPLATE
+                   . $extraHead
                    . '</head><body>'
                    . $body
                    . '</body></html>';
@@ -40,8 +40,8 @@ final class ServerSideRenderingTest extends TestCase
         $expectWithoutBoilerplate = static function ($body, $extraHead = '') {
             return TestMarkup::DOCTYPE . '<html ⚡ i-amphtml-layout="" i-amphtml-no-boilerplate=""><head>'
                    . TestMarkup::STYLE_AMPRUNTIME . TestMarkup::META_CHARSET . TestMarkup::META_VIEWPORT . TestMarkup::SCRIPT_AMPRUNTIME
-                   . $extraHead
                    . TestMarkup::LINK_FAVICON . TestMarkup::LINK_CANONICAL
+                   . $extraHead
                    . '</head><body>'
                    . $body
                    . '</body></html>';
@@ -50,8 +50,8 @@ final class ServerSideRenderingTest extends TestCase
         $expectWithBoilerplate = static function ($body, $extraHead = '') {
             return TestMarkup::DOCTYPE . '<html ⚡ i-amphtml-layout=""><head>'
                    . TestMarkup::STYLE_AMPRUNTIME . TestMarkup::META_CHARSET . TestMarkup::META_VIEWPORT . TestMarkup::SCRIPT_AMPRUNTIME
-                   . $extraHead
                    . TestMarkup::LINK_FAVICON . TestMarkup::LINK_CANONICAL . TestMarkup::STYLE_AMPBOILERPLATE . TestMarkup::NOSCRIPT_AMPBOILERPLATE
+                   . $extraHead
                    . '</head><body>'
                    . $body
                    . '</body></html>';
@@ -144,21 +144,64 @@ final class ServerSideRenderingTest extends TestCase
                 [Error\CannotRemoveBoilerplate::class],
             ],
 
-            'heights attribute' => [
-                $input('<amp-img height="256" heights="(min-width:500px) 200px, 80%" layout="responsive" width="320"></amp-img>'),
-                $expectWithBoilerplate('<amp-img height="256" heights="(min-width:500px) 200px, 80%" layout="responsive" width="320" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive"><i-amphtml-sizer style="display:block;padding-top:80.0000%;"></i-amphtml-sizer></amp-img>'),
-                [Error\CannotRemoveBoilerplate::class],
-            ],
-
             'media attribute' => [
                 $input('<amp-img height="355" layout="fixed" media="(min-width: 650px) and handheld" src="wide.jpg" width="466"></amp-img>'),
                 $expectWithBoilerplate('<amp-img height="355" layout="fixed" media="(min-width: 650px) and handheld" src="wide.jpg" width="466" class="i-amphtml-layout-fixed i-amphtml-layout-size-defined" style="width:466px;height:355px;" i-amphtml-layout="fixed"></amp-img>'),
                 [Error\CannotRemoveBoilerplate::class],
             ],
 
-            'sizes attribute' => [
+            'sizes attribute without amp-custom' => [
                 $input('<amp-img height="300" layout="responsive" sizes="(min-width: 320px) 320px, 100vw" src="https://acme.org/image1.png" width="400"></amp-img>'),
-                $expectWithBoilerplate('<amp-img height="300" layout="responsive" sizes="(min-width: 320px) 320px, 100vw" src="https://acme.org/image1.png" width="400" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive"><i-amphtml-sizer style="display:block;padding-top:75.0000%;"></i-amphtml-sizer></amp-img>'),
+                $expectWithoutBoilerplate(
+                    '<amp-img height="300" layout="responsive" src="https://acme.org/image1.png" width="400" id="i-amp-id" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive"><i-amphtml-sizer style="display:block;padding-top:75.0000%;"></i-amphtml-sizer></amp-img>',
+                    '<style amp-custom>#i-amp-id{width:100vw};@media (min-width: 320px){#i-amp-id{width:320px;}}</style>'
+                ),
+                [],
+            ],
+
+            'sizes attribute with amp-custom' => [
+                $input(
+                    '<amp-img height="300" layout="responsive" sizes="(min-width: 320px) 320px, 100vw" src="https://acme.org/image1.png" width="400"></amp-img>',
+                    '<style amp-custom>h1:red;</style>'
+                ),
+                $expectWithoutBoilerplate(
+                    '<amp-img height="300" layout="responsive" src="https://acme.org/image1.png" width="400" id="i-amp-id" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive"><i-amphtml-sizer style="display:block;padding-top:75.0000%;"></i-amphtml-sizer></amp-img>',
+                    '<style amp-custom>h1:red;#i-amp-id{width:100vw};@media (min-width: 320px){#i-amp-id{width:320px;}}</style>'
+                ),
+                [],
+            ],
+
+            'bad sizes attribute' => [
+                $input('<amp-img height="300" layout="responsive" sizes=",,," src="https://acme.org/image1.png" width="400"></amp-img>'),
+                $expectWithBoilerplate('<amp-img height="300" layout="responsive" sizes=",,,"  src="https://acme.org/image1.png" width="400"></amp-img>'),
+                [Error\CannotRemoveBoilerplate::class],
+            ],
+
+            'heights attribute without amp-custom' => [
+                $input('<amp-img height="256" heights="(min-width: 500px) 200px, 80%" layout="responsive" width="320"></amp-img>'),
+                $expectWithoutBoilerplate(
+                    '<amp-img height="256" layout="responsive" width="320" id="i-amp-id" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive"><i-amphtml-sizer style="display:block;padding-top:80.0000%;"></i-amphtml-sizer></amp-img>',
+                    '<style amp-custom>#i-amp-id>i-amphtml-sizer{height:80%};@media (min-width: 500px){#i-amp-id>i-amphtml-sizer{height:200px;}}</style>'
+                ),
+                [],
+            ],
+
+
+            'heights attribute with amp-custom' => [
+                $input(
+                    '<amp-img height="256" heights="(min-width: 500px) 200px, 80%" layout="responsive" width="320"></amp-img>',
+                    '<style amp-custom>h1:red;</style>'
+                ),
+                $expectWithoutBoilerplate(
+                    '<amp-img height="256" layout="responsive" width="320" id="i-amp-id" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive"><i-amphtml-sizer style="display:block;padding-top:80.0000%;"></i-amphtml-sizer></amp-img>',
+                    '<style amp-custom>h1:red;#i-amp-id>i-amphtml-sizer{height:80%};@media (min-width: 500px){#i-amp-id>i-amphtml-sizer{height:200px;}}</style>'
+                ),
+                [],
+            ],
+
+            'bad heights attribute' => [
+                $input('<amp-img height="256" heights=",,," layout="responsive" width="320"></amp-img>'),
+                $expectWithBoilerplate('<amp-img height="256" heights=",,," layout="responsive" width="320"></amp-img>'),
                 [Error\CannotRemoveBoilerplate::class],
             ],
         ];
@@ -182,7 +225,7 @@ final class ServerSideRenderingTest extends TestCase
 
         $transformer->transform($document, $errors);
 
-        $this->assertEqualMarkup($expectedHtml, $document->saveHTML());
+        $this->assertSimilarMarkup($expectedHtml, $document->saveHTML());
         $this->assertSameErrors($expectedErrors, $errors);
     }
 }
