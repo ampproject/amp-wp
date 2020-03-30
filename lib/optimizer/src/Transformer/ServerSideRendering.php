@@ -871,6 +871,11 @@ final class ServerSideRendering implements Transformer
     /**
      * Extract the custom CSS styling from a 'media' attribute.
      *
+     * __media__
+     * "The value of media is a media query. If the query does not match, the element is not rendered and its resources
+     * and potentially its child resources will not be fetched. If the browser window changes size or orientation, the
+     * media queries are re-evaluated and elements are hidden and shown based on the new results."
+     *
      * @param Document   $document       Document containing the element to adapt.
      * @param DOMElement $element        Element to adapt.
      * @param string     $attributeValue Value of the attribute to extract the CSS styling from.
