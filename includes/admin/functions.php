@@ -209,9 +209,11 @@ function remove_amp_story_templates() {
 				'post_type'     => 'wp_block',
 				'post_per_page' => -1,
 				'tax_query'     => [
-					'taxonomy' => $template_taxonomy,
-					'field'    => 'slug',
-					'terms'    => [ $template_term ],
+					[
+						'taxonomy' => $template_taxonomy,
+						'field'    => 'slug',
+						'terms'    => [ $template_term ],
+					],
 				],
 			]
 		);
