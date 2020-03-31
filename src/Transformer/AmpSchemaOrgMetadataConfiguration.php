@@ -52,7 +52,7 @@ final class AmpSchemaOrgMetadataConfiguration extends BaseTransformerConfigurati
 		switch ( $key ) {
 			case self::METADATA:
 				if ( ! is_array( $value ) ) {
-					throw InvalidConfigurationValue::forInvalidSubValueType( TransformedIdentifier::class, self::METADATA, 'array', gettype( $value ) );
+					throw InvalidConfigurationValue::forInvalidSubValueType( self::class, self::METADATA, 'array', gettype( $value ) );
 				}
 				break;
 		}
