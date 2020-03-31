@@ -662,4 +662,88 @@ class DocumentTest extends TestCase
     {
         $this->assertEquals($hasInitialDevMode, $document->hasInitialAmpDevMode());
     }
+
+    /**
+     * Data provider for Dom\Document::getElementId() tests.
+     *
+     * @return array
+     */
+    public function getGetElementIdData()
+    {
+        $elementFactory = static function ($dom, $id = null) {
+            $element = $dom->createElement('div');
+
+            if ($id) {
+                $element->setAttribute('id', $id);
+            }
+
+            $dom->body->appendChild($element);
+
+            return $element;
+        };
+
+        return [
+            'single check with existing ID'         => [
+                [
+                    [ $elementFactory, 'my-id', 'some-prefix', 'my-id' ],
+                ],
+            ],
+
+            'single check without existing ID'      => [
+                [
+                    [ $elementFactory, null, 'some-prefix', 'some-prefix' ],
+                ],
+            ],
+
+            'consecutive checks count upwards'      => [
+                [
+                    [ $elementFactory, null, 'some-prefix', 'some-prefix' ],
+                    [ $elementFactory, null, 'some-prefix', 'some-prefix-2' ],
+                ],
+            ],
+
+            'consecutive checks for same element return same ID' => [
+                [
+                    [ $elementFactory, null, 'some-prefix', 'some-prefix' ],
+                    [ null, null, 'some-prefix', 'some-prefix' ],
+                ],
+            ],
+
+            'mixing prefixes keeps counts separate' => [
+                [
+                    [ $elementFactory, 'my-id', 'some-prefix', 'my-id' ],
+                    [ $elementFactory, null, 'some-prefix', 'some-prefix' ],
+                    [ $elementFactory, null, 'some-prefix', 'some-prefix-2' ],
+                    [ $elementFactory, null, 'other-prefix', 'other-prefix' ],
+                    [ $elementFactory, null, 'other-prefix', 'other-prefix-2' ],
+                    [ $elementFactory, null, 'some-prefix', 'some-prefix-3' ],
+                    [ $elementFactory, 'another-id', 'some-prefix', 'another-id' ],
+                    [ $elementFactory, null, 'some-prefix', 'some-prefix-4' ],
+                    [ null, null, 'some-prefix', 'some-prefix-4' ],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * Test Document::getElementId().
+     *
+     * @dataProvider getGetElementIdData
+     * @covers Document::getElementId()
+     *
+     * @param array $checks Checks to perform. Each check is an array containing an element, a prefix and an expected ID.
+     */
+    public function testGetElementId($checks)
+    {
+        $dom = new Document();
+        foreach ($checks as list($elementFactory, $id, $prefix, $expected)) {
+            // If no element factory was passed, just reuse the previous element.
+            if ($elementFactory) {
+                $element = $elementFactory($dom, $id);
+            }
+
+            $actual = $dom->getElementId($element, $prefix);
+            $this->assertEquals($expected, $actual);
+        }
+    }
 }

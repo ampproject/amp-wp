@@ -370,7 +370,7 @@ class AMP_DOM_Utils {
 	 * @deprecated Use AmpProject\Dom\Document::getElementId() instead.
 	 *
 	 * @param DOMElement $element Element to get the ID for.
-	 * @param string     $prefix  Optional. Defaults to '_amp_wp_id_'.
+	 * @param string     $prefix  Optional. Defaults to 'amp-wp-id'.
 	 * @return string ID to use.
 	 */
 	public static function get_element_id( $element, $prefix = 'amp-wp-id' ) {

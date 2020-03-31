@@ -349,29 +349,58 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	}
 
 	public function get_get_element_id_data() {
-		$dom = new Document();
+		$element_factory = static function ( $dom, $id = null ) {
+			$element = $dom->createElement( 'div' );
 
-		$same_element = AMP_DOM_Utils::create_node( $dom, 'div', [] );
+			if ( $id ) {
+				$element->setAttribute( 'id', $id );
+			}
+
+			$dom->body->appendChild( $element );
+
+			return $element;
+		};
 
 		return [
-			// Element with existing ID
-			[ AMP_DOM_Utils::create_node( $dom, 'div', [ 'id' => 'my-id' ] ), 'some-prefix', 'my-id' ],
-			// Element without ID
-			[ AMP_DOM_Utils::create_node( $dom, 'div', [] ), 'some-prefix', 'some-prefix' ],
-			// Another element without ID with same prefix
-			[ AMP_DOM_Utils::create_node( $dom, 'div', [] ), 'some-prefix', 'some-prefix-2' ],
-			// Another element without ID with different prefix
-			[ AMP_DOM_Utils::create_node( $dom, 'div', [] ), 'other-prefix', 'other-prefix' ],
-			// Another element without ID with different prefix again
-			[ AMP_DOM_Utils::create_node( $dom, 'div', [] ), 'other-prefix', 'other-prefix-2' ],
-			// Another element without ID with first prefix again
-			[ AMP_DOM_Utils::create_node( $dom, 'div', [] ), 'some-prefix', 'some-prefix-3' ],
-			// Element with existing prefix again
-			[ AMP_DOM_Utils::create_node( $dom, 'div', [ 'id' => 'another-id' ] ), 'some-prefix', 'another-id' ],
-			// Same element first time
-			[ $same_element, 'some-prefix', 'some-prefix-4' ],
-			// Same element second time
-			[ $same_element, 'some-prefix', 'some-prefix-4' ],
+			'single check with existing ID'         => [
+				[
+					[ $element_factory, 'my-id', 'some-prefix', 'my-id' ],
+				],
+			],
+
+			'single check without existing ID'      => [
+				[
+					[ $element_factory, null, 'some-prefix', 'some-prefix' ],
+				],
+			],
+
+			'consecutive checks count upwards'      => [
+				[
+					[ $element_factory, null, 'some-prefix', 'some-prefix' ],
+					[ $element_factory, null, 'some-prefix', 'some-prefix-2' ],
+				],
+			],
+
+			'consecutive checks for same element return same ID' => [
+				[
+					[ $element_factory, null, 'some-prefix', 'some-prefix' ],
+					[ null, null, 'some-prefix', 'some-prefix' ],
+				],
+			],
+
+			'mixing prefixes keeps counts separate' => [
+				[
+					[ $element_factory, 'my-id', 'some-prefix', 'my-id' ],
+					[ $element_factory, null, 'some-prefix', 'some-prefix' ],
+					[ $element_factory, null, 'some-prefix', 'some-prefix-2' ],
+					[ $element_factory, null, 'other-prefix', 'other-prefix' ],
+					[ $element_factory, null, 'other-prefix', 'other-prefix-2' ],
+					[ $element_factory, null, 'some-prefix', 'some-prefix-3' ],
+					[ $element_factory, 'another-id', 'some-prefix', 'another-id' ],
+					[ $element_factory, null, 'some-prefix', 'some-prefix-4' ],
+					[ null, null, 'some-prefix', 'some-prefix-4' ],
+				],
+			],
 		];
 	}
 
@@ -381,13 +410,21 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	 * @dataProvider get_get_element_id_data
 	 * @covers \AMP_DOM_Utils::get_element_id()
 	 *
-	 * @param DOMElement $element  Element.
-	 * @param string     $prefix   Prefix.
-	 * @param string     $expected Expected element ID.
+	 * @expectedDeprecated AMP_DOM_Utils::get_element_id
+	 *
+	 * @param array $checks Checks to perform. Each check is an array containing an element, a prefix and an expected ID.
 	 */
-	public function test_get_element_id( DOMElement $element, $prefix, $expected ) {
-		$actual = AMP_DOM_Utils::get_element_id( $element, $prefix );
-		$this->assertEquals( $expected, $actual );
+	public function test_get_element_id( $checks ) {
+		$dom = new Document();
+		foreach ( $checks as list( $element_factory, $id, $prefix, $expected ) ) {
+			// If no element factory was passed, just reuse the previous element.
+			if ( $element_factory ) {
+				$element = $element_factory( $dom, $id );
+			}
+
+			$actual = AMP_DOM_Utils::get_element_id( $element, $prefix );
+			$this->assertEquals( $expected, $actual );
+		}
 	}
 
 	public function get_add_amp_action_data() {
