@@ -390,7 +390,18 @@ final class Document extends DOMDocument
 
         $libxml_previous_state = libxml_use_internal_errors(true);
 
-        $success = parent::loadHTML($source, $options | LIBXML_COMPACT | LIBXML_HTML_NODEFDTD);
+        $options |= LIBXML_COMPACT;
+
+        /*
+         * LIBXML_HTML_NODEFDTD is only available for libxml 2.7.8+.
+         * This should be the case for PHP 5.4+, but some systems seem to compile against a custom libxml version that
+         * is lower than expected.
+         */
+        if (defined('LIBXML_HTML_NODEFDTD')) {
+            $options |= constant('LIBXML_HTML_NODEFDTD');
+        }
+
+        $success = parent::loadHTML($source, $options);
 
         libxml_clear_errors();
         libxml_use_internal_errors($libxml_previous_state);
