@@ -201,6 +201,9 @@ function remove_amp_story_templates() {
 	$template_term     = 'story-template';
 	$template_taxonomy = 'amp_template';
 
+	// Temporarily register the taxonomy so that the term can be queried and deleted.
+	register_taxonomy( $template_taxonomy, 'wp_block', [ 'public' => false ] );
+
 	if ( post_type_exists( 'wp_block' ) ) {
 		$query = new WP_Query(
 			[
@@ -229,9 +232,8 @@ function remove_amp_story_templates() {
 
 	$term = term_exists( $template_term, $template_taxonomy );
 	if ( ! empty( $term['term_id'] ) ) {
-		// Temporarily register the taxonomy so that the term can be deleted.
-		register_taxonomy( $template_taxonomy, '', [] );
 		wp_delete_term( $term['term_id'], $template_taxonomy );
-		unregister_taxonomy( $template_taxonomy );
 	}
+
+	unregister_taxonomy( $template_taxonomy );
 }
