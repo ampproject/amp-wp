@@ -896,7 +896,7 @@ final class ServerSideRendering implements Transformer
         }
 
         return sprintf(
-            '@media %s{#%s{display:none;}}',
+            '@media not all and (%s){#%s{display:none;}}',
             $attributeValue,
             $document->getElementId($element)
         );
