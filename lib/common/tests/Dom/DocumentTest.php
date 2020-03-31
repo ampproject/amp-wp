@@ -746,4 +746,21 @@ class DocumentTest extends TestCase
             $this->assertEquals($expected, $actual);
         }
     }
+
+    /**
+     * Test whether existing element IDs are taken into account, even if the index counter is off.
+     *
+     * @covers Document::getElementId()
+     */
+    public function testGetElementIdOnPreexistingIds()
+    {
+        $dom = Document::fromHtml(
+            '<body><div id="some-prefix"><div id="some-prefix-2"><div id="some-prefix-3"></body>'
+        );
+
+        $element = $dom->createElement('div');
+        $dom->body->appendChild($element);
+
+        $this->assertEquals('some-prefix-4', $dom->getElementId($element, 'some-prefix'));
+    }
 }
