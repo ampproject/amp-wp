@@ -203,7 +203,7 @@ final class ServerSideRenderingTest extends TestCase
                 $input('<amp-img height="355" layout="fixed" media="(min-width: 650px) and handheld" src="wide.jpg" width="466"></amp-img>'),
                 $expectWithoutBoilerplate(
                     '<amp-img height="355" layout="fixed" src="wide.jpg" width="466" id="i-amp-id" class="i-amphtml-layout-fixed i-amphtml-layout-size-defined" style="width:466px;height:355px;" i-amphtml-layout="fixed"></amp-img>',
-                    '<style amp-custom>@media not all and ((min-width: 650px) and handheld){#i-amp-id{display:none;}}</style>'
+                    '<style amp-custom>@media not all and (min-width: 650px) and handheld{#i-amp-id{display:none;}}</style>'
                 ),
                 [],
             ],
@@ -215,7 +215,7 @@ final class ServerSideRenderingTest extends TestCase
                 ),
                 $expectWithoutBoilerplate(
                     '<amp-img height="355" layout="fixed" src="wide.jpg" width="466" id="i-amp-id" class="i-amphtml-layout-fixed i-amphtml-layout-size-defined" style="width:466px;height:355px;" i-amphtml-layout="fixed"></amp-img>',
-                    '<style amp-custom>body{h1:red;}@media not all and ((min-width: 650px) and handheld){#i-amp-id{display:none;}}</style>'
+                    '<style amp-custom>body{h1:red;}@media not all and (min-width: 650px) and handheld{#i-amp-id{display:none;}}</style>'
                 ),
                 [],
             ],
