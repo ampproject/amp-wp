@@ -36,7 +36,7 @@ final class AmpSchemaOrgMetadataConfiguration extends BaseTransformerConfigurati
 	 */
 	protected function getAllowedKeys() {
 		return [
-			self::METADATA => amp_get_schemaorg_metadata(),
+			self::METADATA => (array) amp_get_schemaorg_metadata(),
 		];
 	}
 
