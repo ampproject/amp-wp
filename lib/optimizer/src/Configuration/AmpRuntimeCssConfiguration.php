@@ -58,14 +58,14 @@ final class AmpRuntimeCssConfiguration extends BaseTransformerConfiguration
         switch ($key) {
             case self::VERSION:
                 if (! is_string($value)) {
-                    throw InvalidConfigurationValue::forInvalidSubValueType(AmpRuntimeCss::class, self::VERSION, 'string', gettype($value));
+                    throw InvalidConfigurationValue::forInvalidSubValueType(self::class, self::VERSION, 'string', gettype($value));
                 }
                 $value = trim($value);
                 break;
 
             case self::CANARY:
                 if (! is_bool($value)) {
-                    throw InvalidConfigurationValue::forInvalidSubValueType(AmpRuntimeCss::class, self::CANARY, 'boolean', gettype($value));
+                    throw InvalidConfigurationValue::forInvalidSubValueType(self::class, self::CANARY, 'boolean', gettype($value));
                 }
                 break;
         }
