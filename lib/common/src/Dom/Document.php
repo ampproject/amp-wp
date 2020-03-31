@@ -401,7 +401,7 @@ final class Document extends DOMDocument
             $options |= constant('LIBXML_HTML_NODEFDTD');
         }
 
-        $success = parent::loadHTML($source, $options | LIBXML_COMPACT | LIBXML_HTML_NODEFDTD);
+        $success = parent::loadHTML($source, $options);
 
         libxml_clear_errors();
         libxml_use_internal_errors($libxml_previous_state);
