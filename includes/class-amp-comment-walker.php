@@ -2,6 +2,7 @@
 /**
  * Class AMP_Comment_Walker
  *
+ * @codeCoverageIgnore
  * @deprecated 1.1.0 This functionality was moved to AMP_Comments_Sanitizer
  * @package AMP
  */

@@ -5,8 +5,8 @@
  * @package AMP
  */
 
-use Amp\AmpWP\Component\DOMElementList;
-use Amp\AmpWP\Component\Carousel;
+use AmpProject\AmpWP\Dom\ElementList;
+use AmpProject\AmpWP\Component\Carousel;
 
 /**
  * Class AMP_Gallery_Block_Sanitizer
@@ -58,7 +58,6 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.2
 	 */
 	public function sanitize() {
-		$xpath       = new DOMXPath( $this->dom );
 		$class_query = 'contains( concat( " ", normalize-space( @class ), " " ), " wp-block-gallery " )';
 		$expr        = sprintf(
 			'//ul[ %s ]',
@@ -70,7 +69,7 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 				]
 			)
 		);
-		$query       = $xpath->query( $expr );
+		$query       = $this->dom->xpath->query( $expr );
 
 		$nodes = [];
 		foreach ( $query as $node ) {
@@ -106,7 +105,7 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			$images = new DOMElementList();
+			$images = new ElementList();
 
 			// If it's not AMP lightbox, look for links first.
 			if ( ! $is_amp_lightbox ) {

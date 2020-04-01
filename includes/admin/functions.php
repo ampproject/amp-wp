@@ -5,11 +5,12 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Admin\SiteHealth;
+
 /**
  * Obsolete constant for flagging when Customizer is opened for AMP.
  *
  * @deprecated
- * @var string
  */
 define( 'AMP_CUSTOMIZER_QUERY_VAR', 'customize_amp' );
 
@@ -21,7 +22,7 @@ define( 'AMP_CUSTOMIZER_QUERY_VAR', 'customize_amp' );
  * And this does not need to toggle between the AMP and normal display.
  */
 function amp_init_customizer() {
-	if ( ! AMP_Options_Manager::is_website_experience_enabled() || AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( 'theme_support' ) ) {
+	if ( AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( 'theme_support' ) ) {
 		return;
 	}
 
@@ -81,7 +82,7 @@ function amp_admin_get_preview_permalink() {
 	);
 
 	if ( empty( $post_ids ) ) {
-		return false;
+		return null;
 	}
 
 	$post_id = $post_ids[0];
@@ -170,18 +171,6 @@ function amp_add_custom_analytics( $analytics = [] ) {
 }
 
 /**
- * Bootstrap AMP post meta box.
- *
- * This function must be invoked only once through the 'wp_loaded' action.
- *
- * @since 0.6
- */
-function amp_post_meta_box() {
-	$post_meta_box = new AMP_Post_Meta_Box();
-	$post_meta_box->init();
-}
-
-/**
  * Bootstrap AMP Editor core blocks.
  */
 function amp_editor_core_blocks() {
@@ -190,21 +179,17 @@ function amp_editor_core_blocks() {
 }
 
 /**
- * Bootstrap the AMP admin pointer class.
+ * Bootstraps AMP admin classes.
  *
- * @since 1.0
+ * @since 1.5.0
  */
-function amp_admin_pointer() {
+function amp_bootstrap_admin() {
 	$admin_pointers = new AMP_Admin_Pointers();
 	$admin_pointers->init();
-}
 
-/**
- * Bootstrap the Story Templates needed in editor.
- *
- * @since 1.?
- */
-function amp_story_templates() {
-	$story_templates = new AMP_Story_Templates();
-	$story_templates->init();
+	$post_meta_box = new AMP_Post_Meta_Box();
+	$post_meta_box->init();
+
+	$site_health = new SiteHealth();
+	$site_health->init();
 }

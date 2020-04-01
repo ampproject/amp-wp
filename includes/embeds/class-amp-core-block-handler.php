@@ -21,6 +21,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		'core/categories' => 'ampify_categories_block',
 		'core/archives'   => 'ampify_archives_block',
 		'core/video'      => 'ampify_video_block',
+		'core/cover'      => 'ampify_cover_block',
 	];
 
 	/**
@@ -153,6 +154,28 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 			);
 		}
 
+		return $block_content;
+	}
+
+	/**
+	 * Ampify cover block.
+	 *
+	 * This specifically fixes the layout of the block when a background video is assigned.
+	 *
+	 * @see \AMP_Video_Sanitizer::filter_video_dimensions()
+	 *
+	 * @param string $block_content The block content about to be appended.
+	 * @param array  $block         The full block, including name and attributes.
+	 * @return string Filtered block content.
+	 */
+	public function ampify_cover_block( $block_content, $block ) {
+		if ( isset( $block['attrs']['backgroundType'] ) && 'video' === $block['attrs']['backgroundType'] ) {
+			$block_content = preg_replace(
+				'/(?<=<video\s)/',
+				'layout="fill" object-fit="cover" ',
+				$block_content
+			);
+		}
 		return $block_content;
 	}
 }

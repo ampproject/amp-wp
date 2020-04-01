@@ -6,6 +6,8 @@
  * @package AMP
  */
 
+use AmpProject\DevMode;
+
 /**
  * Class AMP_Script_Sanitizer
  *
@@ -39,7 +41,7 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 			 * Skip noscript elements inside of amp-img or other AMP components for fallbacks.
 			 * See \AMP_Img_Sanitizer::adjust_and_replace_node(). Also skip if the element has dev mode.
 			 */
-			if ( 'amp-' === substr( $noscript->parentNode->nodeName, 0, 4 ) || $this->has_dev_mode_exemption( $noscript ) ) {
+			if ( 'amp-' === substr( $noscript->parentNode->nodeName, 0, 4 ) || DevMode::hasExemptionForNode( $noscript ) ) {
 				continue;
 			}
 
@@ -50,15 +52,14 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 			$fragment->appendChild( $this->dom->createComment( 'noscript' ) );
 			while ( $noscript->firstChild ) {
 				if ( $is_inside_head_el && ! $must_move_to_body ) {
-					$must_move_to_body = ! AMP_DOM_Utils::is_valid_head_node( $noscript->firstChild );
+					$must_move_to_body = ! $this->dom->isValidHeadNode( $noscript->firstChild );
 				}
 				$fragment->appendChild( $noscript->firstChild );
 			}
 			$fragment->appendChild( $this->dom->createComment( '/noscript' ) );
 
 			if ( $must_move_to_body ) {
-				$body = $this->dom->getElementsByTagName( 'body' )->item( 0 );
-				$body->insertBefore( $fragment, $body->firstChild );
+				$this->dom->body->insertBefore( $fragment, $this->dom->body->firstChild );
 				$noscript->parentNode->removeChild( $noscript );
 			} else {
 				$noscript->parentNode->replaceChild( $fragment, $noscript );

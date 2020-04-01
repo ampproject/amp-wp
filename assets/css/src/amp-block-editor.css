@@ -3,39 +3,25 @@
 	display: none;
 }
 
-/* Latest Stories block */
-.amp-block-latest-stories > .latest-stories-carousel {
-	display: flex;
-	flex-wrap: nowrap;
-	-webkit-overflow-scrolling: touch;
-	-ms-overflow-style: -ms-autohiding-scrollbar;
-	overflow-y: hidden;
-	margin: 0;
-	padding: 0;
-}
-
-.latest-stories-carousel .latest-stories__slide {
-	flex: 0 0 auto;
-	margin-right: 1rem;
-}
-
 /* AMP preview button wrapper */
 .wp-core-ui #amp-wrapper-post-preview {
 	margin-left: -6px;
+	margin-right: 6px;
 }
 
 /* AMP preview button */
 .wp-core-ui .amp-editor-post-preview {
 	height: 34px;
-	padding-left: 6px;
-	padding-right: 6px;
+	padding: 6px 12px;
 	border-top-left-radius: 0;
 	border-bottom-left-radius: 0;
+	justify-content: center;
+	align-items: center;
 }
 
 .wp-core-ui .amp-editor-post-preview svg {
-	width: 15px;
-	height: 15px;
+	width: 18px;
+	height: 18px;
 	margin: 0;
 }
 

@@ -9,31 +9,13 @@ Array [
 ]
 `;
 
-exports[`ValidationErrorMessage renders an error for an invalid attribute 1`] = `
-Array [
-  "Invalid attribute: ",
+exports[`ValidationErrorMessage renders an error with a title 1`] = `
+<span>
+  Invalid attribute 
   <code>
-    bar
-  </code>,
-]
-`;
-
-exports[`ValidationErrorMessage renders an error for an invalid attribute with parent node 1`] = `
-Array [
-  "Invalid attribute: ",
-  <code>
-    baz[bar]
-  </code>,
-]
-`;
-
-exports[`ValidationErrorMessage renders an error for an invalid element 1`] = `
-Array [
-  "Invalid element: ",
-  <code>
-    foo
-  </code>,
-]
+    onclick
+  </code>
+</span>
 `;
 
 exports[`ValidationErrorMessage renders an error for an unknown error code 1`] = `

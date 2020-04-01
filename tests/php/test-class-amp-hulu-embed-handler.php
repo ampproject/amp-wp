@@ -6,9 +6,11 @@
  */
 
 /**
- * Class AMP_Hulu_Embed_Test
+ * Class AMP_Hulu_Embed_Handler_Test
+ *
+ * @covers AMP_Hulu_Embed_Handler
  */
-class AMP_Hulu_Embed_Test extends WP_UnitTestCase {
+class AMP_Hulu_Embed_Handler_Test extends WP_UnitTestCase {
 
 	/**
 	 * Set up.
@@ -23,6 +25,10 @@ class AMP_Hulu_Embed_Test extends WP_UnitTestCase {
 		add_filter(
 			'pre_http_request',
 			static function( $pre, $r, $url ) {
+				if ( in_array( 'external-http', $_SERVER['argv'], true ) ) {
+					return $pre;
+				}
+
 				if ( false === strpos( $url, '771496' ) ) {
 					return $pre;
 				}

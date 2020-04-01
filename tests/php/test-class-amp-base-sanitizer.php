@@ -5,6 +5,9 @@
  * @package AMP
  */
 
+use AmpProject\Dom\Document;
+use AmpProject\AmpWP\Tests\StubSanitizer;
+
 /**
  * Test AMP_Base_Sanitizer_Test
  *
@@ -26,7 +29,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	public function tearDown() {
 		parent::tearDown();
 		AMP_Validation_Manager::reset_validation_results();
-		AMP_Validation_Manager::$should_locate_sources = false;
+		AMP_Validation_Manager::$is_validate_request = false;
 	}
 
 	/**
@@ -134,6 +137,18 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 				],
 			],
 
+			'fill_both_dimensions_with_unrelated_style'  => [
+				[
+					'width'  => '100%',
+					'height' => '100%',
+					'style'  => 'position:absolute; color:red',
+				],
+				[
+					'layout' => 'fill',
+					'style'  => 'color:red',
+				],
+			],
+
 			'fill_with_bottom_right_keeps_unrelated_styles' => [
 				[
 					'style' => 'position:absolute;background-color:white;top:0;left:0;right:0;bottom:0;color:red;',
@@ -185,7 +200,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	 * @covers AMP_Base_Sanitizer::set_layout()
 	 */
 	public function test_set_layout( $source_attributes, $expected_attributes, $args = [] ) {
-		$sanitizer           = new AMP_Test_Stub_Sanitizer( new DOMDocument(), $args );
+		$sanitizer           = new StubSanitizer( new Document(), $args );
 		$returned_attributes = $sanitizer->set_layout( $source_attributes );
 		$this->assertEquals( $expected_attributes, $returned_attributes );
 	}
@@ -261,7 +276,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	 * @covers AMP_Base_Sanitizer::sanitize_dimension()
 	 */
 	public function test_sanitize_dimension( $source_params, $expected_value, $args = [] ) {
-		$sanitizer                 = new AMP_Test_Stub_Sanitizer( new DOMDocument(), $args );
+		$sanitizer                 = new StubSanitizer( new Document(), $args );
 		list( $value, $dimension ) = $source_params;
 
 		$actual_value = $sanitizer->sanitize_dimension( $value, $dimension );
@@ -278,7 +293,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function test_remove_invalid_child() {
 		$parent_tag_name = 'div';
-		$dom_document    = new DOMDocument( '1.0', 'utf-8' );
+		$dom_document    = new Document( '1.0', 'utf-8' );
 		$parent          = $dom_document->createElement( $parent_tag_name );
 		$child           = $dom_document->createElement( 'script' );
 		$child->setAttribute( 'id', 'foo' );
@@ -287,7 +302,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 		$parent->appendChild( $child );
 
 		$expected_error = [
-			'code'            => AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE,
+			'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 			'node_name'       => $child->nodeName,
 			'parent_name'     => $parent_tag_name,
 			'node_attributes' => [
@@ -297,6 +312,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 			'foo'             => 'bar',
 			'sources'         => null,
 			'type'            => AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE,
+			'node_type'       => XML_ELEMENT_NODE,
 		];
 
 		// Test forcibly sanitized with filter.
@@ -397,13 +413,14 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 						[
 							'node_name'          => 'onload',
 							'parent_name'        => 'amp-video',
-							'code'               => 'invalid_attribute',
+							'code'               => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
 							'element_attributes' =>
 								[
 									'id'     => 'bar',
 									'onload' => 'someFunc()',
 								],
 							'type'               => AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE,
+							'node_type'          => XML_ATTRIBUTE_NODE,
 						],
 						$error
 					);
@@ -427,13 +444,14 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 						[
 							'node_name'          => 'onload',
 							'parent_name'        => 'amp-video',
-							'code'               => 'invalid_attribute',
+							'code'               => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
 							'element_attributes' =>
 								[
 									'id'     => 'bar',
 									'onload' => 'someFunc()',
 								],
 							'type'               => AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE,
+							'node_type'          => XML_ATTRIBUTE_NODE,
 						],
 						$error
 					);
@@ -492,14 +510,14 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function test_get_data_amp_attributes() {
 		$tag          = 'figure';
-		$dom_document = new DOMDocument( '1.0', 'utf-8' );
+		$dom_document = new Document( '1.0', 'utf-8' );
 		$figure       = $dom_document->createElement( $tag );
 		$amp_img      = $dom_document->createElement( 'amp-img' );
 		$figure->appendChild( $amp_img );
 		$figure->setAttribute( 'data-amp-noloading', 'true' );
 		$figure->setAttribute( 'data-amp-layout', 'fixed' );
 
-		$sanitizer = new AMP_Test_Stub_Sanitizer( new DOMDocument(), [] );
+		$sanitizer = new StubSanitizer( new Document(), [] );
 		$amp_args  = $sanitizer->get_data_amp_attributes( $amp_img );
 
 		$expected_args = [
@@ -523,7 +541,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 		$attributes = [
 			'width' => 100,
 		];
-		$sanitizer  = new AMP_Test_Stub_Sanitizer( new DOMDocument(), [] );
+		$sanitizer  = new StubSanitizer( new Document(), [] );
 		$attributes = $sanitizer->filter_data_amp_attributes( $attributes, $amp_data );
 
 		$expected = [
@@ -539,9 +557,9 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	 * @covers AMP_Base_Sanitizer::filter_attachment_layout_attributes()
 	 */
 	public function test_filter_attachment_layout_attributes() {
-		$sanitizer    = new AMP_Test_Stub_Sanitizer( new DOMDocument(), [] );
+		$sanitizer    = new StubSanitizer( new Document(), [] );
 		$tag          = 'figure';
-		$dom_document = new DOMDocument( '1.0', 'utf-8' );
+		$dom_document = new Document( '1.0', 'utf-8' );
 		$figure       = $dom_document->createElement( $tag );
 		$amp_img      = $dom_document->createElement( 'amp-img' );
 		$layout       = 'fixed-height';

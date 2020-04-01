@@ -6,8 +6,11 @@
  * @since 0.7
  */
 
+use AmpProject\AmpWP\ConfigurationArgument;
+use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\PrivateAccess;
+use AmpProject\Dom\Document;
 use org\bovigo\vfs;
-use Amp\AmpWP\Tests\PrivateAccess;
 
 /**
  * Tests for Theme Support.
@@ -16,6 +19,7 @@ use Amp\AmpWP\Tests\PrivateAccess;
  */
 class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
+	use AssertContainsCompatibility;
 	use PrivateAccess;
 
 	/**
@@ -43,6 +47,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		delete_option( AMP_Options_Manager::OPTION_NAME ); // Make sure default reader mode option does not override theme support being added.
 		remove_theme_support( AMP_Theme_Support::SLUG );
 		AMP_Theme_Support::read_theme_support();
+		add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
 	}
 
 	/**
@@ -322,6 +327,53 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that attempting to access an AMP post in Reader mode that does not support AMP.
+	 *
+	 * @covers AMP_Theme_Support::finish_init()
+	 */
+	public function test_finish_init_when_accessing_singular_post_that_does_not_support_amp() {
+		$post          = $this->factory()->post->create();
+		$requested_url = get_permalink( $post );
+		$this->assertEquals( AMP_Theme_Support::READER_MODE_SLUG, AMP_Theme_Support::get_support_mode() );
+		$this->assertTrue( post_supports_amp( $post ) );
+		add_filter( 'amp_skip_post', '__return_true' );
+		$this->assertFalse( post_supports_amp( $post ) );
+
+		$redirected = false;
+		add_filter(
+			'wp_redirect',
+			function ( $url ) use ( $requested_url, &$redirected ) {
+				$this->assertEquals( $requested_url, $url );
+				$redirected = true;
+				return null;
+			}
+		);
+		$this->go_to( amp_get_permalink( $post ) );
+		$this->assertTrue( $redirected );
+	}
+
+	/**
+	 * Test that attempting to access an AMP page in Reader Mode for a non-singular query will redirect to the non-AMP version.
+	 *
+	 * @covers AMP_Theme_Support::finish_init()
+	 */
+	public function test_finish_init_when_accessing_non_singular_amp_page_in_reader_mode() {
+		$requested_url = home_url( '/?s=hello' );
+		$this->assertEquals( AMP_Theme_Support::READER_MODE_SLUG, AMP_Theme_Support::get_support_mode() );
+		$redirected = false;
+		add_filter(
+			'wp_redirect',
+			function ( $url ) use ( $requested_url, &$redirected ) {
+				$this->assertEquals( $requested_url, $url );
+				$redirected = true;
+				return null;
+			}
+		);
+		$this->go_to( add_query_arg( amp_get_slug(), '', $requested_url ) );
+		$this->assertTrue( $redirected );
+	}
+
+	/**
 	 * Test ensure_proper_amp_location for canonical.
 	 *
 	 * @covers AMP_Theme_Support::ensure_proper_amp_location()
@@ -343,7 +395,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			$e = $exception;
 		}
 		$this->assertTrue( isset( $e ) ); // wp_safe_redirect() modifies the headers, and causes an error.
-		$this->assertContains( 'headers already sent', $e->getMessage() );
+		$this->assertStringContains( 'headers already sent', $e->getMessage() );
 		$e = null;
 
 		// Endpoint.
@@ -355,7 +407,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		} catch ( Exception $exception ) {
 			$e = $exception;
 		}
-		$this->assertContains( 'headers already sent', $e->getMessage() );
+		$this->assertStringContains( 'headers already sent', $e->getMessage() );
 		$e = null;
 	}
 
@@ -387,7 +439,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		} catch ( Exception $exception ) {
 			$e = $exception;
 		}
-		$this->assertContains( 'headers already sent', $e->getMessage() );
+		$this->assertStringContains( 'headers already sent', $e->getMessage() );
 	}
 
 	/**
@@ -417,7 +469,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			$e = $exception;
 		}
 		$this->assertTrue( isset( $e ) );
-		$this->assertContains( 'headers already sent', $e->getMessage() );
+		$this->assertStringContains( 'headers already sent', $e->getMessage() );
 		$this->assertSame( 302, $redirect_status_code );
 		$e = null;
 
@@ -430,7 +482,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			$e = $exception;
 		}
 		$this->assertTrue( isset( $e ) ); // wp_safe_redirect() modifies the headers, and causes an error.
-		$this->assertContains( 'headers already sent', $e->getMessage() );
+		$this->assertStringContains( 'headers already sent', $e->getMessage() );
 		$this->assertSame( 301, $redirect_status_code );
 		$e = null;
 
@@ -555,7 +607,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		<!DOCTYPE html>
 		<html lang="en-US" class="no-js">
 			<head>
-				<meta charset="UTF-8">
+				<meta charset="utf-8">
 				<meta name="viewport" content="maximum-scale=1.0">
 				<?php wp_head(); ?>
 			</head>
@@ -568,14 +620,14 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$original_html  = trim( ob_get_clean() );
 		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
 
-		// Invalid viewport meta tag is not present.
-		$this->assertNotContains( '<meta name="viewport" content="maximum-scale=1.0">', $sanitized_html );
+		// Insufficient viewport tag was not left in.
+		$this->assertStringNotContains( '<meta name="viewport" content="maximum-scale=1.0">', $sanitized_html );
 
-		// Correct viewport meta tag was added.
-		$this->assertContains( '<meta name="viewport" content="width=device-width">', $sanitized_html );
+		// Viewport tag was modified to include all requirements.
+		$this->assertStringContains( '<meta name="viewport" content="maximum-scale=1.0,width=device-width">', $sanitized_html );
 
 		// MathML script was added.
-		$this->assertContains( '<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-mathml-0.1.js" async custom-element="amp-mathml"></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertStringContains( '<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-mathml-0.1.js" async custom-element="amp-mathml"></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 	}
 
 	/**
@@ -1018,7 +1070,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$priority = defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX; // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
 		$this->assertEquals( $priority, has_action( 'template_redirect', [ self::TESTED_CLASS, 'start_output_buffering' ] ) );
 
-		$this->assertEquals( 10, has_filter( 'comment_form_defaults', [ self::TESTED_CLASS, 'filter_comment_form_defaults' ] ) );
+		$this->assertEquals( PHP_INT_MAX, has_filter( 'comment_form_defaults', [ self::TESTED_CLASS, 'filter_comment_form_defaults' ] ) );
 		$this->assertEquals( 10, has_filter( 'comment_reply_link', [ self::TESTED_CLASS, 'filter_comment_reply_link' ] ) );
 		$this->assertEquals( 10, has_filter( 'cancel_comment_reply_link', [ self::TESTED_CLASS, 'filter_cancel_comment_reply_link' ] ) );
 		$this->assertEquals( 100, has_action( 'comment_form', [ self::TESTED_CLASS, 'amend_comment_form' ] ) );
@@ -1074,7 +1126,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		add_theme_support( AMP_Theme_Support::SLUG );
 		$this->assertTrue( amp_is_canonical() );
 		$output = get_echo( [ 'AMP_Theme_Support', 'amend_comment_form' ] );
-		$this->assertNotContains( '<input type="hidden" name="redirect_to"', $output );
+		$this->assertStringNotContains( '<input type="hidden" name="redirect_to"', $output );
 
 		// Test transitional AMP.
 		add_theme_support(
@@ -1085,7 +1137,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		);
 		$this->assertFalse( amp_is_canonical() );
 		$output = get_echo( [ 'AMP_Theme_Support', 'amend_comment_form' ] );
-		$this->assertContains( '<input type="hidden" name="redirect_to"', $output );
+		$this->assertStringContains( '<input type="hidden" name="redirect_to"', $output );
 	}
 
 	/**
@@ -1167,9 +1219,9 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 				'title_reply_before'  => '',
 			]
 		);
-		$this->assertContains( AMP_Theme_Support::get_comment_form_state_id( get_the_ID() ), $defaults['title_reply_before'] );
-		$this->assertContains( 'replyToName ?', $defaults['title_reply_before'] );
-		$this->assertContains( '</span>', $defaults['cancel_reply_before'] );
+		$this->assertStringContains( AMP_Theme_Support::get_comment_form_state_id( get_the_ID() ), $defaults['title_reply_before'] );
+		$this->assertStringContains( 'replyToName ?', $defaults['title_reply_before'] );
+		$this->assertStringContains( '</span>', $defaults['cancel_reply_before'] );
 	}
 
 	/**
@@ -1198,13 +1250,13 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$filtered_link = AMP_Theme_Support::filter_comment_reply_link( $link, $args, $comment );
 		$this->assertStringStartsWith( $before, $filtered_link );
 		$this->assertStringEndsWith( $after, $filtered_link );
-		$this->assertContains( AMP_Theme_Support::get_comment_form_state_id( get_the_ID() ), $filtered_link );
-		$this->assertContains( $comment->comment_author, $filtered_link );
-		$this->assertContains( $comment->comment_ID, $filtered_link );
-		$this->assertContains( 'tap:AMP.setState', $filtered_link );
-		$this->assertContains( $reply_text, $filtered_link );
-		$this->assertContains( $reply_to_text, $filtered_link );
-		$this->assertContains( $respond_id, $filtered_link );
+		$this->assertStringContains( AMP_Theme_Support::get_comment_form_state_id( get_the_ID() ), $filtered_link );
+		$this->assertStringContains( $comment->comment_author, $filtered_link );
+		$this->assertStringContains( $comment->comment_ID, $filtered_link );
+		$this->assertStringContains( 'tap:AMP.setState', $filtered_link );
+		$this->assertStringContains( $reply_text, $filtered_link );
+		$this->assertStringContains( $reply_to_text, $filtered_link );
+		$this->assertStringContains( $respond_id, $filtered_link );
 	}
 
 	/**
@@ -1222,14 +1274,14 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$link           = remove_query_arg( 'replytocom' );
 		$text           = 'Cancel your reply';
 		$filtered_link  = AMP_Theme_Support::filter_cancel_comment_reply_link( $formatted_link, $link, $text );
-		$this->assertContains( $url, $filtered_link );
-		$this->assertContains( $text, $filtered_link );
-		$this->assertContains( '<a id="cancel-comment-reply-link"', $filtered_link );
-		$this->assertContains( '.values.comment_parent ==', $filtered_link );
-		$this->assertContains( 'tap:AMP.setState(', $filtered_link );
+		$this->assertStringContains( $url, $filtered_link );
+		$this->assertStringContains( $text, $filtered_link );
+		$this->assertStringContains( '<a id="cancel-comment-reply-link"', $filtered_link );
+		$this->assertStringContains( '.values.comment_parent ==', $filtered_link );
+		$this->assertStringContains( 'tap:AMP.setState(', $filtered_link );
 
 		$filtered_link_no_text_passed = AMP_Theme_Support::filter_cancel_comment_reply_link( $formatted_link, $link, '' );
-		$this->assertContains( 'Click here to cancel reply.', $filtered_link_no_text_passed );
+		$this->assertStringContains( 'Click here to cancel reply.', $filtered_link_no_text_passed );
 	}
 
 	/**
@@ -1275,18 +1327,277 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		wp_print_styles();
 		wp_print_scripts();
 		$output = ob_get_clean();
-		$this->assertContains( '<style id=\'admin-bar-inline-css\' type=\'text/css\'>', $output ); // Note: data-ampdevmode attribute will be added by AMP_Dev_Mode_Sanitizer.
-		$this->assertNotContains( '<link rel=\'stylesheet\' id=\'dashicons-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-		$this->assertContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'dashicons-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-		$this->assertContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'admin-bar-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-		$this->assertContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'example-admin-bar-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-		$this->assertContains( 'html { margin-top: 64px !important; }', $output );
+		$this->assertStringContains( '<style id=\'admin-bar-inline-css\' type=\'text/css\'>', $output ); // Note: data-ampdevmode attribute will be added by AMP_Dev_Mode_Sanitizer.
+		$this->assertStringNotContains( '<link rel=\'stylesheet\' id=\'dashicons-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$this->assertStringContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'dashicons-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$this->assertStringContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'admin-bar-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$this->assertStringContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'example-admin-bar-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$this->assertStringContains( 'html { margin-top: 64px !important; }', $output );
 		$this->assertRegExp( '/' . implode( '', [ '<script ', 'data-ampdevmode [^>]+admin-bar\.js' ] ) . '/', $output );
 		$this->assertRegExp( '/' . implode( '', [ '<script ', 'data-ampdevmode [^>]+example-admin-bar\.js' ] ) . '/', $output );
 
 		$body_classes = get_body_class();
 		$this->assertContains( 'customize-support', $body_classes );
 		$this->assertNotContains( 'no-customize-support', $body_classes );
+	}
+
+	/**
+	 * Assert that the queried element exists.
+	 *
+	 * @param DOMXPath $xpath XPath.
+	 * @param string   $query Query.
+	 */
+	public function assert_queried_element_exists( DOMXPath $xpath, $query ) {
+		$element = $xpath->query( $query )->item( 0 );
+		$this->assertInstanceOf( 'DOMElement', $element, 'Expected element for query: ' . $query );
+	}
+
+	/**
+	 * Assert that dev mode attribute *is* on the queried element.
+	 *
+	 * @param DOMXPath $xpath XPath.
+	 * @param string   $query Query.
+	 */
+	public function assert_dev_mode_is_on_queried_element( DOMXPath $xpath, $query ) {
+		$element = $xpath->query( $query )->item( 0 );
+		$this->assertInstanceOf( 'DOMElement', $element, 'Expected element for query: ' . $query );
+		$this->assertTrue( $element->hasAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE ), 'Expected dev mode to be enabled on element for query: ' . $query );
+	}
+
+	/**
+	 * Assert that dev mode attribute is *not* on the queried element.
+	 *
+	 * @param DOMXPath $xpath XPath.
+	 * @param string   $query Query.
+	 */
+	public function assert_dev_mode_is_not_on_queried_element( DOMXPath $xpath, $query ) {
+		$element = $xpath->query( $query )->item( 0 );
+		$this->assertInstanceOf( 'DOMElement', $element, 'Expected element for query: ' . $query );
+		$this->assertFalse( $element->hasAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE ), 'Expected dev mode to not be enabled on element for query: ' . $query );
+	}
+
+	/**
+	 * Get data to test AMP_Theme_Support::filter_admin_bar_style_loader_tag().
+	 *
+	 * @return array
+	 */
+	public function get_data_to_test_filtering_admin_bar_style_loader_tag_data() {
+		return [
+			'admin_bar_exclusively_dependent'             => [
+				static function () {
+					wp_enqueue_style( 'example-admin-bar', 'https://example.com/example-admin-bar.css', [ 'admin-bar' ], '0.1' );
+				},
+				function ( DOMXPath $xpath ) {
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//link[ @id = "example-admin-bar-css" ]' );
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//link[ @id = "dashicons-css" ]' );
+				},
+			],
+
+			'dashicons_enqueued_independent_of_admin_bar' => [
+				static function () {
+					wp_enqueue_style( 'dashicons' );
+				},
+				function ( DOMXPath $xpath ) {
+					$this->assert_dev_mode_is_not_on_queried_element( $xpath, '//link[ @id = "dashicons-css" ]' );
+				},
+			],
+
+			'dashicons_enqueued_independent_of_also_enqueued_admin_bar' => [
+				static function () {
+					wp_enqueue_style( 'admin-bar' );
+					wp_enqueue_style( 'dashicons' );
+				},
+				function ( DOMXPath $xpath ) {
+					$this->assert_dev_mode_is_not_on_queried_element( $xpath, '//link[ @id = "dashicons-css" ]' );
+				},
+			],
+
+			'dashicons_not_dev_mode_because_non_admin_bar_dependency' => [
+				static function () {
+					wp_enqueue_style( 'admin-bar' );
+					wp_enqueue_style( 'special-icons', 'https://example.com/special-icons.css', [ 'dashicons' ], '0.1' );
+				},
+				function ( DOMXPath $xpath ) {
+					$this->assert_dev_mode_is_not_on_queried_element( $xpath, '//link[ @id = "dashicons-css" ]' );
+				},
+			],
+
+			'dashicons_in_dev_mode_because_all_dependents_depend_on_admin_bar' => [
+				static function () {
+					wp_enqueue_style( 'admin-bar' );
+					wp_enqueue_style( 'special-icons', 'https://example.com/special-icons.css', [ 'dashicons', 'admin-bar' ], '0.1' );
+				},
+				function ( DOMXPath $xpath ) {
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//link[ @id = "dashicons-css" ]' );
+				},
+			],
+
+			'dashicons_in_dev_mode_because_all_recursive_dependents_depend_on_admin_bar' => [
+				static function () {
+					wp_enqueue_style( 'admin-bar' );
+					wp_register_style( 'special-dashicons', 'https://example.com/special-dashicons.css', [ 'dashicons' ], '0.1' );
+					wp_enqueue_style( 'colorized-admin-bar', 'https://example.com/special-icons.css', [ 'admin-bar' ], '0.1' );
+					wp_enqueue_style( 'special-icons', 'https://example.com/special-icons.css', [ 'special-dashicons', 'colorized-admin-bar' ], '0.1' );
+				},
+				function ( DOMXPath $xpath ) {
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//link[ @id = "dashicons-css" ]' );
+				},
+			],
+		];
+	}
+
+	/**
+	 * Test filter_admin_bar_style_loader_tag.
+	 *
+	 * @dataProvider get_data_to_test_filtering_admin_bar_style_loader_tag_data
+	 * @covers \AMP_Theme_Support::filter_admin_bar_style_loader_tag()
+	 * @covers \AMP_Theme_Support::is_exclusively_dependent()
+	 *
+	 * @param callable $setup_callback  Setup callback.
+	 * @param callable $assert_callback Assert callback.
+	 */
+	public function test_filter_admin_bar_style_loader_tag( $setup_callback, $assert_callback ) {
+		add_theme_support( 'amp' );
+		$this->go_to( '/' );
+		add_filter( 'amp_dev_mode_enabled', '__return_true' );
+		add_filter( 'style_loader_tag', [ 'AMP_Theme_Support', 'filter_admin_bar_style_loader_tag' ], 10, 2 );
+		$setup_callback();
+		ob_start();
+		echo '<html><head>';
+		wp_print_styles();
+		echo '</head><body></body></html>';
+		$output = ob_get_clean();
+
+		$dom = new Document();
+		$dom->loadHTML( $output );
+
+		$assert_callback( new DOMXPath( $dom ) );
+	}
+
+	/**
+	 * Test filter_admin_bar_style_loader_tag when ->deps is not an array.
+	 *
+	 * @covers \AMP_Theme_Support::filter_admin_bar_style_loader_tag()
+	 */
+	public function test_filter_admin_bar_style_loader_tag_non_array() {
+		wp_enqueue_style( 'admin-bar' );
+		$GLOBALS['wp_styles']->registered['admin-bar']->deps = null;
+		$tag = '<link rel="stylesheet" id="dashicons-css" href="https://example.com/wp-includes/css/dashicons.css?ver=5.3.2" media="all" />'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$this->assertEquals( $tag, AMP_Theme_Support::filter_admin_bar_style_loader_tag( $tag, 'baz' ) );
+	}
+
+	/**
+	 * Get data to test AMP_Theme_Support::filter_admin_bar_script_loader_tag().
+	 *
+	 * @return array
+	 */
+	public function get_data_to_test_filtering_admin_bar_script_loader_tag_data() {
+		return [
+			'admin_bar_scripts_have_dev_mode'        => [
+				static function () {
+					wp_enqueue_script( 'admin-bar' );
+					wp_enqueue_script( 'example-admin-bar', 'https://example.com/example-admin-bar.js', [ 'admin-bar' ], '0.1', false );
+				},
+				function ( DOMXPath $xpath ) {
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/example-admin-bar" ) ]' );
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/admin-bar" ) ]' );
+					if ( wp_script_is( 'hoverintent-js', 'registered' ) ) {
+						$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/hoverintent-js" ) ]' );
+					}
+				},
+			],
+
+			'admin_bar_scripts_have_dev_mode_with_paired_browsing_client' => [
+				static function () {
+					AMP_Theme_Support::setup_paired_browsing_client();
+					wp_enqueue_script( 'admin-bar' );
+					wp_enqueue_script( 'example-admin-bar', 'https://example.com/example-admin-bar.js', [ 'admin-bar' ], '0.1', false );
+				},
+				function ( DOMXPath $xpath ) {
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/example-admin-bar" ) ]' );
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/admin-bar" ) ]' );
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/amp-paired-browsing-client" ) ]' );
+					if ( wp_script_is( 'hoverintent-js', 'registered' ) ) {
+						$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/hoverintent-js" ) ]' );
+					}
+				},
+			],
+
+			'admin_bar_scripts_have_dev_mode_with_paired_browsing_app' => [
+				static function () {
+					$_GET[ AMP_Theme_Support::PAIRED_BROWSING_QUERY_VAR ] = 1;
+					AMP_Theme_Support::serve_paired_browsing_experience( 'foo' );
+					unset( $_GET[ AMP_Theme_Support::PAIRED_BROWSING_QUERY_VAR ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+					wp_enqueue_script( 'admin-bar' );
+					wp_enqueue_script( 'example-admin-bar', 'https://example.com/example-admin-bar.js', [ 'admin-bar' ], '0.1', false );
+				},
+				function ( DOMXPath $xpath ) {
+					$this->assert_queried_element_exists( $xpath, '//script[ contains( @src, "/example-admin-bar" ) ]' );
+					$this->assert_queried_element_exists( $xpath, '//script[ contains( @src, "/admin-bar" ) ]' );
+					$this->assert_queried_element_exists( $xpath, '//script[ contains( @src, "/amp-paired-browsing-app" ) ]' );
+					if ( wp_script_is( 'hoverintent-js', 'registered' ) ) {
+						$this->assert_queried_element_exists( $xpath, '//script[ contains( @src, "/hoverintent-js" ) ]' );
+					}
+				},
+			],
+
+			'hoverintent_enqueued_prevents_dev_mode' => [
+				function () {
+					if ( ! wp_script_is( 'hoverintent-js', 'registered' ) ) {
+						$this->markTestSkipped( 'The hoverintent-js script is not registered.' );
+					}
+					wp_enqueue_script( 'admin-bar' );
+					wp_enqueue_script( 'theme-hover', 'https://example.com/theme-hover.js', [ 'hoverintent-js' ], '0.1', false );
+				},
+				function ( DOMXPath $xpath ) {
+					$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/admin-bar" ) ]' );
+					$this->assert_dev_mode_is_not_on_queried_element( $xpath, '//script[ contains( @src, "/theme-hover" ) ]' );
+					$this->assert_dev_mode_is_not_on_queried_element( $xpath, '//script[ contains( @src, "/hoverintent-js" ) ]' );
+				},
+			],
+		];
+	}
+
+	/**
+	 * Test filter_admin_bar_script_loader_tag.
+	 *
+	 * @dataProvider get_data_to_test_filtering_admin_bar_script_loader_tag_data
+	 * @covers \AMP_Theme_Support::filter_admin_bar_script_loader_tag()
+	 * @covers \AMP_Theme_Support::is_exclusively_dependent()
+	 *
+	 * @param callable $setup_callback  Setup callback.
+	 * @param callable $assert_callback Assert callback.
+	 */
+	public function test_filter_admin_bar_script_loader_tag( $setup_callback, $assert_callback ) {
+		add_theme_support( 'amp' );
+		$this->go_to( '/' );
+		add_filter( 'amp_dev_mode_enabled', '__return_true' );
+		add_filter( 'script_loader_tag', [ 'AMP_Theme_Support', 'filter_admin_bar_script_loader_tag' ], 10, 2 );
+		$setup_callback();
+		ob_start();
+		echo '<html><head>';
+		wp_print_scripts();
+		echo '</head><body>';
+		wp_print_footer_scripts();
+		echo '</body></html>';
+		$output = ob_get_clean();
+
+		$dom = new Document();
+		$dom->loadHTML( $output ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+
+		$assert_callback( new DOMXPath( $dom ) );
+	}
+
+	/**
+	 * Test filter_admin_bar_script_loader_tag when ->deps is not an array.
+	 *
+	 * @covers \AMP_Theme_Support::filter_admin_bar_script_loader_tag()
+	 */
+	public function test_filter_admin_bar_script_loader_tag_non_array() {
+		wp_enqueue_script( 'admin-bar' );
+		$GLOBALS['wp_scripts']->registered['admin-bar']->deps = null;
+		$tag = '<script src="https://example.com/wp-includes/js/admin-bar.js?ver=5.3.2"></script>'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertEquals( $tag, AMP_Theme_Support::filter_admin_bar_script_loader_tag( $tag, 'example' ) );
 	}
 
 	/**
@@ -1310,9 +1621,9 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		wp_print_styles();
 		$output = ob_get_clean();
 
-		$this->assertContains( '<link rel=\'stylesheet\' id=\'dashicons-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-		$this->assertNotContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'dashicons-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-		$this->assertContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'admin-bar-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$this->assertStringContains( '<link rel=\'stylesheet\' id=\'dashicons-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$this->assertStringNotContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'dashicons-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$this->assertStringContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'admin-bar-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 	}
 
 	/**
@@ -1336,51 +1647,9 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		wp_print_styles();
 		$output = ob_get_clean();
 
-		$this->assertContains( '<link rel=\'stylesheet\' id=\'dashicons-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-		$this->assertNotContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'dashicons-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-		$this->assertContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'admin-bar-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-	}
-
-	/**
-	 * Data provider for test_ensure_required_markup.
-	 *
-	 * @return array
-	 */
-	public function get_schema_script_data() {
-		return [
-			'schema_org_not_present'        => [
-				'',
-				1,
-			],
-			'schema_org_present'            => [
-				wp_json_encode( [ '@context' => 'http://schema.org' ] ),
-				1,
-			],
-			'schema_org_output_not_escaped' => [
-				'{"@context":"http://schema.org"',
-				1,
-			],
-			'schema_org_another_key'        => [
-				wp_json_encode( [ '@anothercontext' => 'https://schema.org' ] ),
-				1,
-			],
-		];
-	}
-
-	/**
-	 * Test ensure_required_markup().
-	 *
-	 * @dataProvider get_schema_script_data
-	 * @covers AMP_Theme_Support::ensure_required_markup()
-	 * @param string  $script The value of the script.
-	 * @param boolean $expected The expected result.
-	 */
-	public function test_ensure_required_markup_schemaorg( $script, $expected ) {
-		$page = '<html><head><script type="application/ld+json">%s</script></head><body>Test</body></html>';
-		$dom  = new DOMDocument();
-		$dom->loadHTML( sprintf( $page, $script ) );
-		AMP_Theme_Support::ensure_required_markup( $dom );
-		$this->assertEquals( $expected, substr_count( $dom->saveHTML(), 'schema.org' ) );
+		$this->assertStringContains( '<link rel=\'stylesheet\' id=\'dashicons-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$this->assertStringNotContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'dashicons-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$this->assertStringContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'admin-bar-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 	}
 
 	/**
@@ -1409,10 +1678,9 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$html = ob_get_clean();
 		$html = AMP_Theme_Support::prepare_response( $html );
 
-		$dom   = AMP_DOM_Utils::get_dom( $html );
-		$xpath = new DOMXPath( $dom );
+		$dom = Document::fromHtml( $html );
 
-		$scripts = $xpath->query( '//script[ not( @type ) or @type = "text/javascript" ]' );
+		$scripts = $dom->xpath->query( '//script[ not( @type ) or @type = "text/javascript" ]' );
 		$this->assertSame( 3, $scripts->length );
 		foreach ( $scripts as $script ) {
 			$this->assertSame( 'head', $script->parentNode->nodeName );
@@ -1469,12 +1737,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$html = ob_get_clean();
 		$html = AMP_Theme_Support::prepare_response( $html );
 
-		$dom   = AMP_DOM_Utils::get_dom( $html );
-		$xpath = new DOMXPath( $dom );
+		$dom = Document::fromHtml( $html );
 
 		/** @var DOMElement $script Script. */
 		$actual_script_srcs = [];
-		foreach ( $xpath->query( '//script[ not( @type ) or @type = "text/javascript" ]' ) as $script ) {
+		foreach ( $dom->xpath->query( '//script[ not( @type ) or @type = "text/javascript" ]' ) as $script ) {
 			$actual_script_srcs[] = $script->getAttribute( 'src' );
 		}
 
@@ -1520,10 +1787,9 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		<?php
 		// phpcs:enable WordPress.WP.EnqueuedResources.NonEnqueuedScript
 		$html = ob_get_clean();
-		$html = AMP_Theme_Support::prepare_response( $html );
+		$html = AMP_Theme_Support::prepare_response( $html, [ ConfigurationArgument::ENABLE_OPTIMIZER => false ] );
 
-		$dom   = AMP_DOM_Utils::get_dom( $html );
-		$xpath = new DOMXPath( $dom );
+		$dom = Document::fromHtml( $html );
 
 		$script_srcs = [];
 		/**
@@ -1531,7 +1797,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		 *
 		 * @var DOMElement $script
 		 */
-		$scripts = $xpath->query( '//script[ @src ]' );
+		$scripts = $dom->xpath->query( '//script[ @src ]' );
 		foreach ( $scripts as $script ) {
 			$script_srcs[] = $script->getAttribute( 'src' );
 		}
@@ -1586,6 +1852,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	public function test_start_output_buffering() {
 		wp();
 		if ( ! function_exists( 'newrelic_disable_autorum ' ) ) {
+
 			/**
 			 * Define newrelic_disable_autorum to allow passing line.
 			 */
@@ -1649,11 +1916,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$output = ob_get_clean();
 		$this->assertEquals( 1, ob_get_level() );
 
-		$this->assertContains( '<html amp', $output );
-		$this->assertContains( 'foo', $output );
-		$this->assertContains( 'BAR', $output );
-		$this->assertContains( '<amp-img src="test.png"', $output );
-		$this->assertNotContains( '<script data-test', $output );
+		$this->assertStringContains( '<html amp', $output );
+		$this->assertStringContains( 'foo', $output );
+		$this->assertStringContains( 'BAR', $output );
+		$this->assertStringContains( '<amp-img src="test.png"', $output );
+		$this->assertStringNotContains( '<script data-test', $output );
 
 	}
 
@@ -1671,35 +1938,9 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		$partial = '<img src="test.png"><script data-head>document.write(\'Illegal\');</script>';
 		$output  = AMP_Theme_Support::filter_customize_partial_render( $partial );
-		$this->assertContains( '<amp-img src="test.png"', $output );
-		$this->assertNotContains( '<script', $output );
-		$this->assertNotContains( '<html', $output );
-	}
-
-	/**
-	 * Test exceeded_cache_miss_threshold
-	 *
-	 * @covers AMP_Theme_Support::exceeded_cache_miss_threshold()
-	 */
-	public function test_exceeded_cache_miss_threshold() {
-		$this->assertFalse( AMP_Theme_Support::exceeded_cache_miss_threshold() );
-		add_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, site_url() );
-		$this->assertTrue( AMP_Theme_Support::exceeded_cache_miss_threshold() );
-	}
-
-	/**
-	 * Get the ETag header value from the list of sent headers.
-	 *
-	 * @param array $headers Headers sent.
-	 * @return string|null The ETag if found.
-	 */
-	protected function get_etag_header_value( $headers ) {
-		foreach ( $headers as $header_sent ) {
-			if ( 'ETag' === $header_sent['name'] ) {
-				return $header_sent['value'];
-			}
-		}
-		return null;
+		$this->assertStringContains( '<amp-img src="test.png"', $output );
+		$this->assertStringNotContains( '<script', $output );
+		$this->assertStringNotContains( '<html', $output );
 	}
 
 	/**
@@ -1722,30 +1963,24 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		);
 
 		wp();
-		$prepare_response_args = [
-			'enable_response_caching' => false,
-		];
 
 		// phpcs:disable WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 		$original_html = $this->get_original_html();
 
-		$call_prepare_response = static function() use ( $original_html, &$prepare_response_args ) {
+		$call_prepare_response = static function() use ( $original_html ) {
 			AMP_HTTP::$headers_sent                     = [];
 			AMP_Validation_Manager::$validation_results = [];
-			return AMP_Theme_Support::prepare_response( $original_html, $prepare_response_args );
+			return AMP_Theme_Support::prepare_response( $original_html );
 		};
 
 		$sanitized_html = $call_prepare_response();
 
-		$etag = $this->get_etag_header_value( AMP_HTTP::$headers_sent );
-		$this->assertNotEmpty( $etag );
-
-		$this->assertNotContains( 'handle=', $sanitized_html );
+		$this->assertStringNotContains( 'handle=', $sanitized_html );
 		$this->assertEquals( 2, substr_count( $sanitized_html, '<!-- wp_print_scripts -->' ) );
 
 		$ordered_contains = [
-			'<html amp="">',
-			'<meta charset="' . get_bloginfo( 'charset' ) . '">',
+			'<html amp=""',
+			'<meta charset="' . Document::AMP_ENCODING . '">',
 			'<meta name="viewport" content="width=device-width">',
 			'<meta name="generator" content="AMP Plugin',
 			'<title>',
@@ -1753,28 +1988,30 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			'<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">',
 			'<link rel="dns-prefetch" href="//cdn.ampproject.org">',
 			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0.js">',
-			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0/amp-experiment-1.0.js">',
 			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js">',
+			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0/amp-experiment-1.0.js">',
 			'<script type="text/javascript" src="https://cdn.ampproject.org/v0.js" async></script>',
-			'<script src="https://cdn.ampproject.org/v0/amp-experiment-1.0.js" async="" custom-element="amp-experiment"></script>',
+
 			'<script async custom-element="amp-dynamic-css-classes" src="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js"></script>',
+			'<script src="https://cdn.ampproject.org/v0/amp-experiment-1.0.js" async="" custom-element="amp-experiment"></script>',
+
+			'#<script( type=[\'"]text/javascript[\'"])? src=[\'"]https\://cdn\.ampproject\.org/v0/amp-ad-0\.1\.js[\'"] async(=[\'"][\'"])? custom-element=[\'"]amp-ad[\'"]>\s*</script>#s',
+			'#<script src=[\'"]https\://cdn\.ampproject\.org/v0/amp-audio-0\.1\.js[\'"] async(=[\'"][\'"])? custom-element=[\'"]amp-audio[\'"]>\s*</script>#s',
 			'<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-list-0.1.js" async custom-element="amp-list"></script>',
 			'<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-mathml-0.1.js" async custom-element="amp-mathml"></script>',
 
-			// Note these are single-quoted because they are injected after the DOM has been re-serialized, so the type and src attributes come from WP_Scripts::do_item().
-			'<script src="https://cdn.ampproject.org/v0/amp-audio-0.1.js" async="" custom-element="amp-audio"></script>',
-			'<script src="https://cdn.ampproject.org/v0/amp-ad-0.1.js" async="" custom-element="amp-ad"></script>',
+			'<link rel="icon" href="https://example.org/favicon.png" sizes="32x32">',
+			'<link rel="icon" href="https://example.org/favicon.png" sizes="192x192">',
 
 			'#<style amp-custom(="")?>.*?body\s*{\s*background:\s*black;?\s*}.*?</style>#s',
 
 			'<link crossorigin="anonymous" rel="stylesheet" id="my-font-css" href="https://fonts.googleapis.com/css?family=Tangerine" type="text/css" media="all">',
-			'<link rel="icon" href="https://example.org/favicon.png" sizes="32x32">',
-			'<link rel="icon" href="https://example.org/favicon.png" sizes="192x192">',
+
 			'<script type="application/ld+json">{"@context"',
-			'<link rel="canonical" href="',
 
 			'#<style amp-boilerplate(="")?>#',
 			'#<noscript><style amp-boilerplate(="")?>#',
+			'<link rel="canonical" href="',
 			'</head>',
 		];
 
@@ -1794,11 +2031,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			$prev_ordered_contain = $ordered_contain;
 		}
 
-		$this->assertContains( '<noscript><img', $sanitized_html );
-		$this->assertContains( '<amp-img', $sanitized_html );
+		$this->assertStringContains( '<noscript><img', $sanitized_html );
+		$this->assertStringContains( '<amp-img', $sanitized_html );
 
-		$this->assertContains( '<noscript><audio', $sanitized_html );
-		$this->assertContains( '<amp-audio', $sanitized_html );
+		$this->assertStringContains( '<noscript><audio', $sanitized_html );
+		$this->assertStringContains( '<amp-audio', $sanitized_html );
 
 		$removed_nodes = [];
 		foreach ( AMP_Validation_Manager::$validation_results as $result ) {
@@ -1811,7 +2048,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			}
 		}
 
-		$this->assertContains( '<button>no-onclick</button>', $sanitized_html );
+		$this->assertStringContains( '<button>no-onclick</button>', $sanitized_html );
 		$this->assertCount( 5, AMP_Validation_Manager::$validation_results );
 		$this->assertEquals(
 			[
@@ -1824,72 +2061,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		// Make sure trailing content after </html> gets moved.
 		$this->assertRegExp( '#<!--comment-after-html-->\s*<div id="after-html"></div>\s*<!--comment-end-html-->\s*</body>\s*</html>\s*$#s', $sanitized_html );
-
-		// Test that ETag allows response to short-circuit via If-None-Match request header.
-		$_SERVER['HTTP_IF_NONE_MATCH'] = $etag;
-		$this->assertEmpty( '', $call_prepare_response() );
-
-		$_SERVER['HTTP_IF_NONE_MATCH'] = sprintf( '"%s"', $etag );
-		$this->assertEmpty( '', $call_prepare_response() );
-
-		$_SERVER['HTTP_IF_NONE_MATCH'] = sprintf( 'W/"%s"', $etag );
-		$this->assertEmpty( '', $call_prepare_response() );
-
-		$_SERVER['HTTP_IF_NONE_MATCH'] = sprintf( '"%s", W/"%s"', md5( 'foo' ), $etag );
-		$this->assertEmpty( '', $call_prepare_response() );
-
-		$_SERVER['HTTP_IF_NONE_MATCH'] = sprintf( '"%s", "%s"', $etag, md5( 'bar' ) );
-		$this->assertEmpty( '', $call_prepare_response() );
-
-		// Test not match.
-		$_SERVER['HTTP_IF_NONE_MATCH'] = strrev( $etag );
-		$this->assertNotEmpty( $call_prepare_response() );
-		$this->assertNotEmpty( $this->get_etag_header_value( AMP_HTTP::$headers_sent ) );
-		unset( $_SERVER['HTTP_IF_NONE_MATCH'] );
-
-		$prepare_response_args['enable_response_caching'] = true;
-
-		// Test that first response isn't cached.
-		$first_response                = $call_prepare_response();
-		$initial_server_timing_headers = $this->get_server_timing_headers();
-		$this->assertGreaterThan( 0, count( $initial_server_timing_headers ) );
-		$this->assertContains( '<html amp="">', $first_response ); // Note: AMP because sanitized validation errors.
-		$this->reset_post_processor_cache_effectiveness();
-
-		// Test that response cache is return upon second call.
-		$this->assertEquals( $first_response, $call_prepare_response() );
-		$server_timing_headers = $this->get_server_timing_headers();
-		$this->assertCount( count( $server_timing_headers ), $this->get_server_timing_headers() );
-		$this->reset_post_processor_cache_effectiveness();
-
-		// Test new cache upon argument change.
-		$prepare_response_args['test_reset_by_arg'] = true;
-		$call_prepare_response();
-		$server_timing_headers = $this->get_server_timing_headers();
-		$this->assertCount( count( $server_timing_headers ), $this->get_server_timing_headers() );
-		$this->reset_post_processor_cache_effectiveness();
-
-		// Test response is cached.
-		$call_prepare_response();
-		$server_timing_headers = $this->get_server_timing_headers();
-		$this->assertCount( count( $server_timing_headers ), $this->get_server_timing_headers() );
-		$this->reset_post_processor_cache_effectiveness();
-
-		// Test that response is no longer cached due to a change whether validation errors are sanitized.
-		remove_filter( 'amp_validation_error_sanitized', '__return_true' );
-		add_filter( 'amp_validation_error_sanitized', '__return_false' );
-		$prepared_html         = $call_prepare_response();
-		$server_timing_headers = $this->get_server_timing_headers();
-		$this->assertCount( count( $server_timing_headers ), $this->get_server_timing_headers() );
-		$this->assertContains( '<html>', $prepared_html ); // Note: no AMP because unsanitized validation error.
-		$this->reset_post_processor_cache_effectiveness();
-
-		// And test response is cached.
-		$call_prepare_response();
-		$server_timing_headers     = $this->get_server_timing_headers();
-		$last_server_timing_header = array_pop( $server_timing_headers );
-		$this->assertStringStartsWith( 'amp_processor_cache_hit;', $last_server_timing_header['value'] );
-		$this->assertCount( count( $server_timing_headers ), $initial_server_timing_headers );
 
 		// phpcs:enable WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 	}
@@ -1904,11 +2075,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$original_html = $this->get_original_html();
 		add_filter( 'amp_validation_error_sanitized', '__return_false' ); // For testing purpose only. This should not normally be done.
 
-		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
+		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html, [ ConfigurationArgument::ENABLE_OPTIMIZER => false ] );
 
-		$this->assertContains( '<html>', $sanitized_html, 'The AMP attribute is removed from the HTML element' );
-		$this->assertContains( '<button onclick="alert', $sanitized_html, 'Invalid AMP is present in the response.' );
-		$this->assertContains( 'document.write = function', $sanitized_html, 'Override of document.write() is present.' );
+		$this->assertStringContains( '<html>', $sanitized_html, 'The AMP attribute is removed from the HTML element' );
+		$this->assertStringContains( '<button onclick="alert', $sanitized_html, 'Invalid AMP is present in the response.' );
+		$this->assertStringContains( 'document.write = function', $sanitized_html, 'Override of document.write() is present.' );
 	}
 
 	/**
@@ -1925,99 +2096,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		unset( AMP_HTTP::$purged_amp_query_vars[ AMP_HTTP::ACTION_XHR_CONVERTED_QUERY_VAR ] );
 		unset( $_SERVER['REQUEST_METHOD'] );
-	}
-
-	/**
-	 * Test combining amp-script-src meta tags.
-	 *
-	 * @covers \amp_generate_script_hash()
-	 */
-	public function test_prepare_response_for_amp_script() {
-		$script1 = 'document.body.textContent += "First!";';
-		$script2 = 'document.body.textContent += "Second!";';
-		$script3 = 'document.body.textContent += "Third!";';
-		$script4 = 'document.body.textContent += "Fourth! (And forbidden because no amp-script-src meta in head.)";';
-
-		$script1_hash = amp_generate_script_hash( $script1 );
-		$script2_hash = amp_generate_script_hash( $script2 );
-		$script3_hash = amp_generate_script_hash( $script3 );
-		$script4_hash = amp_generate_script_hash( $script4 );
-
-		ob_start();
-		?>
-		<html>
-			<head>
-				<meta name="amp-script-src" content="<?php echo esc_attr( $script1_hash ); ?>">
-				<meta name="amp-script-src" content="<?php echo esc_attr( $script2_hash ); ?>">
-				<style>
-					body { background: black; color:white }
-				</style>
-				<meta name="amp-script-src" content="<?php echo esc_attr( $script3_hash ); ?>">
-			</head>
-			<body>
-				<meta name="amp-script-src" content="<?php echo esc_attr( $script4_hash ); ?>">
-
-				<amp-script script="s1" layout="fixed-height" height="30"></amp-script><script type="text/plain" target="amp-script" id="s1"><?php echo $script1; // phpcs:ignore ?></script>
-				<amp-script script="s2" layout="fixed-height" height="30"></amp-script><script type="text/plain" target="amp-script" id="s2"><?php echo $script2; // phpcs:ignore ?></script>
-				<amp-script script="s3" layout="fixed-height" height="30"></amp-script><script type="text/plain" target="amp-script" id="s3"><?php echo $script3; // phpcs:ignore ?></script>
-				<amp-script script="s4" layout="fixed-height" height="30"></amp-script><script type="text/plain" target="amp-script" id="s4"><?php echo $script4; // phpcs:ignore ?></script>
-			</body>
-		</html>
-		<?php
-		$output = ob_get_clean();
-
-		$processed = AMP_Theme_Support::prepare_response( $output );
-		$dom       = AMP_DOM_Utils::get_dom( $processed );
-		$xpath     = new DOMXPath( $dom );
-
-		$meta_elements = $xpath->query( '/html/head/meta[ @name = "amp-script-src" ]' );
-		$this->assertSame( 1, $meta_elements->length );
-
-		$meta = $meta_elements->item( 0 );
-		$this->assertSame( "$script1_hash $script2_hash $script3_hash", $meta->getAttribute( 'content' ) );
-	}
-
-	/**
-	 * Test post-processor cache effectiveness in AMP_Theme_Support::prepare_response().
-	 */
-	public function test_post_processor_cache_effectiveness() {
-		wp();
-		$original_html = $this->get_original_html();
-		$args          = [ 'enable_response_caching' => true ];
-		wp_using_ext_object_cache( true ); // turn on external object cache flag.
-		$this->reset_post_processor_cache_effectiveness();
-		AMP_Options_Manager::update_option( 'enable_response_caching', true );
-
-		// Test the response is not cached after exceeding the cache miss threshold.
-		for ( $num_calls = 1, $max = AMP_Theme_Support::CACHE_MISS_THRESHOLD + 2; $num_calls <= $max; $num_calls++ ) {
-			// Simulate dynamic changes in the content.
-			$original_html = str_replace( 'dynamic-id-', "dynamic-id-{$num_calls}-", $original_html );
-
-			AMP_HTTP::$headers_sent                     = [];
-			AMP_Validation_Manager::$validation_results = [];
-			AMP_Theme_Support::prepare_response( $original_html, $args );
-
-			$caches_for_url = wp_cache_get( AMP_Theme_Support::POST_PROCESSOR_CACHE_EFFECTIVENESS_KEY, AMP_Theme_Support::POST_PROCESSOR_CACHE_EFFECTIVENESS_GROUP );
-			$cache_miss_url = get_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, false );
-
-			// When we've met the threshold, check that caching did not happen.
-			if ( $num_calls > AMP_Theme_Support::CACHE_MISS_THRESHOLD ) {
-				$this->assertCount( AMP_Theme_Support::CACHE_MISS_THRESHOLD, $caches_for_url );
-				$this->assertEquals( amp_get_current_url(), $cache_miss_url );
-
-				// Check that response caching was automatically disabled.
-				$this->assertFalse( AMP_Options_Manager::get_option( 'enable_response_caching' ) );
-			} else {
-				$this->assertCount( $num_calls, $caches_for_url );
-				$this->assertFalse( $cache_miss_url );
-				$this->assertTrue( AMP_Options_Manager::get_option( 'enable_response_caching' ) );
-			}
-
-			$this->assertGreaterThan( 0, count( $this->get_server_timing_headers() ) );
-		}
-
-		// Reset.
-		wp_using_ext_object_cache( false );
 	}
 
 	/**
@@ -2147,14 +2225,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Reset cached URLs in post-processor cache effectiveness.
-	 */
-	private function reset_post_processor_cache_effectiveness() {
-		wp_cache_delete( AMP_Theme_Support::POST_PROCESSOR_CACHE_EFFECTIVENESS_KEY, AMP_Theme_Support::POST_PROCESSOR_CACHE_EFFECTIVENESS_GROUP );
-		delete_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION );
-	}
-
-	/**
 	 * Test prepare_response for responses that may or may not be valid HTML.
 	 *
 	 * @covers AMP_Theme_Support::prepare_response()
@@ -2185,39 +2255,14 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		// HTML, but very stripped down.
 		$input  = '<html><head></head>Hello</html>';
 		$output = AMP_Theme_Support::prepare_response( $input );
-		$this->assertContains( '<html amp', $output );
-		$this->assertContains( '<meta charset="UTF-8">', $output );
+		$this->assertStringContains( '<html amp', $output );
+		$this->assertStringContains( '<meta charset="utf-8">', $output );
 
 		// HTML with doctype, comments, and whitespace before head.
 		$input  = "   <!--\nHello world!\n-->\n\n<!DOCTYPE html>  <html\n\n>\n<head profile='http://www.acme.com/profiles/core'></head><body>Hello</body></html>";
 		$output = AMP_Theme_Support::prepare_response( $input );
-		$this->assertContains( '<html amp', $output );
-		$this->assertContains( '<meta charset="UTF-8">', $output );
-	}
-
-	/**
-	 * Test prepare_response to inject html[amp] attribute and ensure HTML5 doctype.
-	 *
-	 * @covers AMP_Theme_Support::prepare_response()
-	 */
-	public function test_prepare_response_to_add_html5_doctype_and_amp_attribute() {
-		wp_scripts();
-		wp();
-		add_filter( 'amp_validation_error_sanitized', '__return_true' );
-		add_theme_support( AMP_Theme_Support::SLUG );
-		AMP_Theme_Support::init();
-		AMP_Theme_Support::finish_init();
-		ob_start();
-		?>
-		<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
-		<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><?php wp_head(); ?></head><body><?php wp_footer(); ?></body></html>
-		<?php
-		$original_html  = trim( ob_get_clean() );
-		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
-
-		$this->assertStringStartsWith( '<!DOCTYPE html>', $sanitized_html );
-		$this->assertContains( '<html amp', $sanitized_html );
-		$this->assertContains( '<meta charset="utf-8">', $sanitized_html );
+		$this->assertStringContains( '<html amp', $output );
+		$this->assertStringContains( '<meta charset="utf-8">', $output );
 	}
 
 	/**
@@ -2228,13 +2273,14 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	public function test_prepare_response_redirect() {
 		add_filter( 'amp_validation_error_sanitized', '__return_false', 100 );
 
-		$this->go_to( home_url( '/?amp' ) );
 		add_theme_support(
 			AMP_Theme_Support::SLUG,
 			[
 				AMP_Theme_Support::PAIRED_FLAG => true,
 			]
 		);
+		AMP_Theme_Support::read_theme_support();
+		$this->go_to( home_url( '/?amp' ) );
 		add_filter(
 			'amp_content_sanitizers',
 			static function( $sanitizers ) {
@@ -2269,36 +2315,35 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		AMP_Theme_Support_Sanitizer_Counter::$count = 0;
 		AMP_Validation_Manager::reset_validation_results();
-		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html, [ 'enable_response_caching' => true ] );
+		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
 		$this->assertStringStartsWith( 'Redirecting to non-AMP version', $sanitized_html );
 		$this->assertCount( 1, $redirects );
 		$this->assertEquals( home_url( '/' ), $redirects[0] );
 		$this->assertEquals( 1, AMP_Theme_Support_Sanitizer_Counter::$count );
 
 		AMP_Validation_Manager::reset_validation_results();
-		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html, [ 'enable_response_caching' => true ] );
+		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
 		$this->assertStringStartsWith( 'Redirecting to non-AMP version', $sanitized_html );
 		$this->assertCount( 2, $redirects );
 		$this->assertEquals( home_url( '/' ), $redirects[0] );
-		$this->assertEquals( 1, AMP_Theme_Support_Sanitizer_Counter::$count, 'Expected sanitizer to not be invoked.' );
+		$this->assertEquals( 2, AMP_Theme_Support_Sanitizer_Counter::$count, 'Expected sanitizer to be invoked again.' );
 
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		AMP_Validation_Manager::add_validation_error_sourcing();
 
 		AMP_Validation_Manager::reset_validation_results();
-		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html, [ 'enable_response_caching' => true ] );
+		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
 		$this->assertStringStartsWith( 'Redirecting to non-AMP version', $sanitized_html );
 		$this->assertCount( 3, $redirects );
 		$this->assertEquals( home_url( '/?amp_validation_errors=1' ), $redirects[0] );
-		$this->assertEquals( 2, AMP_Theme_Support_Sanitizer_Counter::$count, 'Expected sanitizer be invoked after validation changed.' );
+		$this->assertEquals( 3, AMP_Theme_Support_Sanitizer_Counter::$count, 'Expected sanitizer be invoked after validation changed.' );
 
 		AMP_Validation_Manager::reset_validation_results();
-		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html, [ 'enable_response_caching' => true ] );
+		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
 		$this->assertStringStartsWith( 'Redirecting to non-AMP version', $sanitized_html );
 		$this->assertCount( 4, $redirects );
 		$this->assertEquals( home_url( '/?amp_validation_errors=1' ), $redirects[0] );
-		$this->assertEquals( 2, AMP_Theme_Support_Sanitizer_Counter::$count, 'Expected sanitizer to not now be invoked since previous validation results now cached.' );
-
+		$this->assertEquals( 4, AMP_Theme_Support_Sanitizer_Counter::$count, 'Expected sanitizer to be invoked again although validation results are cached.' );
 	}
 
 	/**
@@ -2311,6 +2356,89 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		wp_dequeue_style( $style_slug );
 		AMP_Theme_Support::enqueue_assets();
 		$this->assertContains( $style_slug, wp_styles()->queue );
+	}
+
+	/**
+	 * Test the enqueuing in setup_paired_browsing_client().
+	 *
+	 * @covers AMP_Theme_Support::setup_paired_browsing_client()
+	 */
+	public function test_setup_paired_browsing_client_enqueuing() {
+		$handle = 'amp-paired-browsing-client';
+
+		// The conditions aren't met, so this should not enqueue the script.
+		$_GET[ AMP_Theme_Support::PAIRED_BROWSING_QUERY_VAR ] = '1';
+		AMP_Theme_Support::setup_paired_browsing_client();
+		$this->assertFalse( wp_script_is( $handle ) );
+
+		// Only one condition is met, so this should still not enqueue the script.
+		unset( $_GET[ AMP_Theme_Support::PAIRED_BROWSING_QUERY_VAR ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		AMP_Theme_Support::setup_paired_browsing_client();
+		$this->assertFalse( wp_script_is( $handle ) );
+
+		// Both of the conditions to enqueue are met.
+		add_filter( 'amp_dev_mode_enabled', '__return_true' );
+		AMP_Theme_Support::setup_paired_browsing_client();
+		$this->assertTrue( wp_script_is( $handle ) );
+	}
+
+	/**
+	 * Gets the test data for test_setup_paired_browsing_client_filter().
+	 *
+	 * @return array The test data.
+	 */
+	public function get_setup_paired_browsing_data() {
+		$original_script_tag      = '<script src="foo"></script>'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$script_tag_with_dev_mode = '<script data-ampdevmode src="foo"></script>'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+
+		return [
+			'no_parent_of_dependency'      => [
+				'',
+				$original_script_tag,
+				null,
+			],
+			'wrong_parent_of_dependency'   => [
+				'different-handle-completely',
+				$original_script_tag,
+				null,
+			],
+			'correct_parent_of_dependency' => [
+				'amp-paired-browsing-client',
+				$original_script_tag,
+				$script_tag_with_dev_mode,
+			],
+		];
+	}
+
+	/**
+	 * Test the filter in setup_paired_browsing_client().
+	 *
+	 * @dataProvider get_setup_paired_browsing_data
+	 * @covers AMP_Theme_Support::setup_paired_browsing_client()
+	 *
+	 * @param string $parent_of_dependency The script that has a dependency on the dependency handle.
+	 * @param string $original_script_tag  The <script> tag passed to the filter.
+	 * @param string $expected             The expected return value.
+	 */
+	public function test_setup_paired_browsing_client_filter( $parent_of_dependency, $original_script_tag, $expected ) {
+		if ( null === $expected ) {
+			$expected = $original_script_tag;
+		}
+
+		add_theme_support( AMP_Theme_Support::SLUG );
+		$this->go_to( get_permalink( self::factory()->post->create() ) );
+		add_filter( 'amp_dev_mode_enabled', '__return_true' );
+		$src               = 'https://example.com/script.js';
+		$dependency_handle = 'foo-handle';
+
+		wp_enqueue_script( $dependency_handle, $src, [], '0.1.0', true );
+		wp_enqueue_script( $parent_of_dependency, $src, [ $dependency_handle ], '0.1', true );
+		AMP_Theme_Support::setup_paired_browsing_client();
+
+		$this->assertEquals(
+			$expected,
+			apply_filters( 'script_loader_tag', $original_script_tag, $dependency_handle, '' )
+		);
 	}
 
 	/**

@@ -29,10 +29,6 @@ branches:
     - develop
     - /^\d+\.\d+$/
 
-env:
-  global:
-    - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-
 install:
   - nvm install
   - composer install
@@ -48,9 +44,9 @@ script:
   - npm run build:css
   - source "$DEV_LIB_PATH/travis.script.sh"
   - |
-    if [[ ! -z "$PHPUNIT_EXTRA_GROUP" ]]; then
-      echo "Running phpunit group $PHPUNIT_EXTRA_GROUP"
-      phpunit --group $PHPUNIT_EXTRA_GROUP
+    if [[ ! -z "$PHPUNIT_EXTRA_SUITE" ]]; then
+      echo "Running phpunit testsuite $PHPUNIT_EXTRA_SUITE"
+      travis_retry phpunit --testsuite $PHPUNIT_EXTRA_SUITE
     fi
 
 after_script:
@@ -67,8 +63,6 @@ jobs:
     # PHP unit tests (7.4, WordPress trunk)
     - env: WP_VERSION=trunk  DEV_LIB_ONLY=phpunit                               INSTALL_PWA_PLUGIN=1
       php: 7.4snapshot
-    # E2E tests, since flaky.
-    - env: WP_VERSION=latest DEV_LIB_SKIP=phpcs,eslint,xmllint,phpsyntax,phpunit PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=
   include:
     - stage: lint
       name: Lint (PHP, JavaScript, and configuration files)
@@ -86,6 +80,14 @@ jobs:
       after_success:
         - npx sizereport --config
 
+    - stage: analyze
+      name: Static analysis (PHP)
+      php: "7.3"
+      install:
+        - composer install
+      script:
+        - composer analyze
+
     - stage: test
       name: JavaScript unit tests
       php: "7.3"
@@ -96,7 +98,7 @@ jobs:
 
     - name: E2E tests
       php: "7.3"
-      env: WP_VERSION=latest DEV_LIB_SKIP=phpcs,eslint,xmllint,phpsyntax,phpunit PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=
+      env: WP_VERSION=latest DEV_LIB_SKIP=phpcs,eslint,xmllint,phpsyntax,phpunit
       install:
         - nvm install
         - composer install
@@ -110,7 +112,7 @@ jobs:
 
     - name: PHP unit tests w/ external-http (7.3, WordPress latest)
       php: "7.3"
-      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit                                INSTALL_PWA_PLUGIN=1 PHPUNIT_EXTRA_GROUP=external-http
+      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit                                INSTALL_PWA_PLUGIN=1 PHPUNIT_EXTRA_SUITE=external-http
 
     - name: PHP unit tests (7.2, WordPress latest)
       php: "7.2"
@@ -120,25 +122,17 @@ jobs:
       php: "7.1"
       env: WP_VERSION=latest DEV_LIB_ONLY=phpunit,phpsyntax                      INSTALL_PWA_PLUGIN=1
 
-    - name: PHP unit tests (7.0, WordPress latest)
+    - name: PHP unit tests (7.0, WordPress 5.1)
       php: "7.0"
-      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit,phpsyntax                      INSTALL_PWA_PLUGIN=1
+      env: WP_VERSION=5.1    DEV_LIB_ONLY=phpunit,phpsyntax                      INSTALL_PWA_PLUGIN=1
 
-    - name: PHP unit tests (5.6, WordPress latest)
+    - name: PHP unit tests (5.6, WordPress 5.0)
       php: "5.6"
-      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit,phpsyntax                      INSTALL_PWA_PLUGIN=1
+      env: WP_VERSION=5.0    DEV_LIB_ONLY=phpunit,phpsyntax                      INSTALL_PWA_PLUGIN=1
 
-    - name: PHP unit tests (5.6, WordPress 5.1)
+    - name: PHP unit tests w/ external-http (5.6, WordPress 4.9)
       php: "5.6"
-      env: WP_VERSION=5.1    DEV_LIB_ONLY=phpunit
-
-    - name: PHP unit tests (5.5, WordPress 5.0)
-      php: "5.5"
-      env: WP_VERSION=5.0    DEV_LIB_ONLY=phpunit,phpsyntax
-
-    - name: PHP unit tests w/ external-http (5.4, WordPress 4.9)
-      php: "5.4"
-      env: WP_VERSION=4.9    DEV_LIB_ONLY=phpunit,phpsyntax                     PHPUNIT_EXTRA_GROUP=external-http
+      env: WP_VERSION=4.9    DEV_LIB_ONLY=phpunit,phpsyntax                     PHPUNIT_EXTRA_SUITE=external-http
 
     - name: PHP unit tests (7.3, WordPress trunk)
       php: "7.3"
@@ -161,3 +155,22 @@ jobs:
         - bash <(curl -s https://codecov.io/bash) -cF php -f /tmp/wordpress/src/wp-content/plugins/amp/build/logs/clover.xml
         - npm run test:js -- --collectCoverage
         - bash <(curl -s https://codecov.io/bash) -cF javascript -f build/logs/lcov.info
+
+    - name: Libraries that are meant to be externalized (5.6)
+      php: "5.6"
+      env: TEST_SKIP_PHPSTAN=1
+      install:
+        - composer --working-dir=lib/common install
+        - composer --working-dir=lib/optimizer install
+      script:
+        - composer --working-dir=lib/common test
+        - composer --working-dir=lib/optimizer test
+
+    - name: Libraries that are meant to be externalized (7.3)
+      php: "7.3"
+      install:
+        - composer --working-dir=lib/common install
+        - composer --working-dir=lib/optimizer install
+      script:
+        - composer --working-dir=lib/common test
+        - composer --working-dir=lib/optimizer test

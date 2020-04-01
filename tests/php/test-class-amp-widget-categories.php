@@ -5,12 +5,16 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+
 /**
  * Tests for class AMP_Widget_Categories.
  *
  * @package AMP
  */
 class Test_AMP_Widget_Categories extends WP_UnitTestCase {
+
+	use AssertContainsCompatibility;
 
 	/**
 	 * Instance of the widget.
@@ -77,8 +81,7 @@ class Test_AMP_Widget_Categories extends WP_UnitTestCase {
 		];
 		$output    = get_echo( [ $this->widget, 'widget' ], [ $arguments, $instance ] );
 
-		$this->assertContains( 'on="change:', $output );
-		$this->assertNotContains( '<script type=', $output );
+		$this->assertStringContains( 'on="change:', $output );
+		$this->assertStringNotContains( '<script type=', $output );
 	}
-
 }

@@ -6,6 +6,8 @@
  * @since 0.7
  */
 
+use AmpProject\DevMode;
+
 /**
  * Class AMP_Form_Sanitizer
  *
@@ -25,7 +27,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 	public static $tag = 'form';
 
 	/**
-	 * Sanitize the <form> elements from the HTML contained in this instance's DOMDocument.
+	 * Sanitize the <form> elements from the HTML contained in this instance's Dom\Document.
 	 *
 	 * @link https://www.ampproject.org/docs/reference/components/amp-form
 	 * @since 0.7
@@ -35,7 +37,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 		/**
 		 * Node list.
 		 *
-		 * @var DOMNodeList $node
+		 * @var DOMNodeList $nodes
 		 */
 		$nodes     = $this->dom->getElementsByTagName( self::$tag );
 		$num_nodes = $nodes->length;
@@ -46,7 +48,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
 			$node = $nodes->item( $i );
-			if ( ! $node instanceof DOMElement || $this->has_dev_mode_exemption( $node ) ) {
+			if ( ! $node instanceof DOMElement || DevMode::hasExemptionForNode( $node ) ) {
 				continue;
 			}
 
@@ -58,20 +60,8 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 				$node->setAttribute( 'method', $method );
 			}
 
-			/*
-			 * In HTML, the default action is just the current URL that the page is served from.
-			 * The action "specifies a server endpoint to handle the form input. The value must be an
-			 * https URL and must not be a link to a CDN".
-			 */
-			if ( ! $node->getAttribute( 'action' ) ) {
-				$action_url = esc_url_raw( '//' . $_SERVER['HTTP_HOST'] . wp_unslash( $_SERVER['REQUEST_URI'] ) );
-			} else {
-				$action_url = $node->getAttribute( 'action' );
-				// Check if action_url is a relative path and add the host to it.
-				if ( ! preg_match( '#^(https?:)?//#', $action_url ) ) {
-					$action_url = esc_url_raw( '//' . $_SERVER['HTTP_HOST'] . $action_url );
-				}
-			}
+			$action_url = $this->get_action_url( $node->getAttribute( 'action' ) );
+
 			$xhr_action = $node->getAttribute( 'action-xhr' );
 
 			// Make HTTP URLs protocol-less, since HTTPS is required for forms.
@@ -122,6 +112,81 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Get the action URL for the form element.
+	 *
+	 * @param string $action_url Action URL.
+	 * @return string Action URL.
+	 */
+	protected function get_action_url( $action_url ) {
+		/*
+		 * In HTML, the default action is just the current URL that the page is served from.
+		 * The action "specifies a server endpoint to handle the form input. The value must be an
+		 * https URL and must not be a link to a CDN".
+		 */
+		if ( ! $action_url ) {
+			return esc_url_raw( '//' . $_SERVER['HTTP_HOST'] . wp_unslash( $_SERVER['REQUEST_URI'] ) );
+		}
+
+		$parsed_url = wp_parse_url( $action_url );
+
+		if (
+			// Ignore a malformed URL - it will be later sanitized.
+			false === $parsed_url
+			||
+			// Ignore HTTPS URLs, because there is nothing left to do.
+			( isset( $parsed_url['scheme'] ) && 'https' === $parsed_url['scheme'] )
+			||
+			// Ignore protocol-relative URLs, because there is also nothing left to do.
+			( ! isset( $parsed_url['scheme'] ) && isset( $parsed_url['host'] ) )
+		) {
+			return $action_url;
+		}
+
+		// Make URL protocol relative.
+		$parsed_url['scheme'] = '//';
+
+		// Set an empty path if none is defined but there is a host.
+		if ( ! isset( $parsed_url['path'] ) && isset( $parsed_url['host'] ) ) {
+			$parsed_url['path'] = '';
+		}
+
+		if ( ! isset( $parsed_url['host'] ) ) {
+			$parsed_url['host'] = $_SERVER['HTTP_HOST'];
+		}
+
+		if ( ! isset( $parsed_url['path'] ) ) {
+			// If there is action URL path, use the one from the request.
+			$parsed_url['path'] = trailingslashit( wp_unslash( $_SERVER['REQUEST_URI'] ) );
+		} elseif ( '' !== $parsed_url['path'] && '/' !== $parsed_url['path'][0] ) {
+			// If the path is relative, append it to the current request path.
+			$parsed_url['path'] = trailingslashit( wp_unslash( $_SERVER['REQUEST_URI'] ) ) . trailingslashit( $parsed_url['path'] );
+		}
+
+		// Rebuild the URL.
+		$action_url = $parsed_url['scheme'];
+		if ( isset( $parsed_url['user'] ) ) {
+			$action_url .= $parsed_url['user'];
+			if ( isset( $parsed_url['pass'] ) ) {
+				$action_url .= ':' . $parsed_url['pass'];
+			}
+			$action_url .= '@';
+		}
+		$action_url .= $parsed_url['host'];
+		if ( isset( $parsed_url['port'] ) ) {
+			$action_url .= ':' . $parsed_url['port'];
+		}
+		$action_url .= $parsed_url['path'];
+		if ( isset( $parsed_url['query'] ) ) {
+			$action_url .= '?' . $parsed_url['query'];
+		}
+		if ( isset( $parsed_url['fragment'] ) ) {
+			$action_url .= '#' . $parsed_url['fragment'];
+		}
+
+		return esc_url_raw( $action_url );
+	}
+
+	/**
 	 * Ensure that the form has a submit-success and submit-error element templates.
 	 *
 	 * @link https://www.ampproject.org/docs/reference/components/amp-form#success/error-response-rendering
@@ -130,11 +195,6 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param DOMElement $form The form node to check.
 	 */
 	public function ensure_response_message_elements( $form ) {
-		/**
-		 * Parent node.
-		 *
-		 * @var DOMElement $parent
-		 */
 		$elements = [
 			'submit-error'   => null,
 			'submit-success' => null,
@@ -143,6 +203,11 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 
 		$templates = $form->getElementsByTagName( 'template' );
 		for ( $i = $templates->length - 1; $i >= 0; $i-- ) {
+			/**
+			 * Parent node.
+			 *
+			 * @var DOMElement $parent
+			 */
 			$parent = $templates->item( $i )->parentNode;
 			foreach ( array_keys( $elements ) as $attribute ) {
 				if ( $parent->hasAttribute( $attribute ) ) {

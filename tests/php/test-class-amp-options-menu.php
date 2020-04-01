@@ -5,10 +5,14 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+
 /**
  * Tests for AMP_Options_Menu.
  */
 class Test_AMP_Options_Menu extends WP_UnitTestCase {
+
+	use AssertContainsCompatibility;
 
 	/**
 	 * Instance of AMP_Options_Menu
@@ -82,7 +86,7 @@ class Test_AMP_Options_Menu extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'amp-options', $wp_settings_fields );
 		$this->assertArrayHasKey( 'general', $wp_settings_fields['amp-options'] );
 		$this->assertArrayHasKey( 'supported_templates', $wp_settings_fields['amp-options']['general'] );
-		$this->assertArrayHasKey( 'stories_settings', $wp_settings_fields['amp-options']['general'] );
+		$this->assertArrayNotHasKey( 'stories_settings', $wp_settings_fields['amp-options']['general'] );
 	}
 
 	/**
@@ -101,6 +105,6 @@ class Test_AMP_Options_Menu extends WP_UnitTestCase {
 
 		ob_start();
 		$this->instance->render_screen();
-		$this->assertContains( '<div class="wrap">', ob_get_clean() );
+		$this->assertStringContains( '<div class="wrap">', ob_get_clean() );
 	}
 }

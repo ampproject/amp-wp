@@ -18,8 +18,9 @@ class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
 	 */
 	public function tearDown() {
 		parent::tearDown();
-		unregister_post_type( 'book' );
-		unregister_post_type( 'secret' );
+		foreach ( [ 'book', 'poem', 'secret' ] as $post_type ) {
+			unregister_post_type( $post_type );
+		}
 	}
 
 	/**

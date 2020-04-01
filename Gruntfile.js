@@ -2,7 +2,6 @@
 
 module.exports = function( grunt ) {
 	'use strict';
-	require( 'dotenv' ).config();
 
 	// Root paths to include in the plugin build ZIP when running `npm run build`.
 	const productionIncludedRootFiles = [
@@ -13,6 +12,7 @@ module.exports = function( grunt ) {
 		'back-compat',
 		'includes',
 		'readme.txt',
+		'src',
 		'templates',
 		'vendor',
 	];
@@ -20,14 +20,16 @@ module.exports = function( grunt ) {
 	// These patterns paths will be excluded from among the above directory.
 	const productionExcludedPathPatterns = [
 		/.*\/src\/.*/,
-		/.*images\/stories-editor\/.*\.svg/,
 	];
 
 	// These will be removed from the vendor directory after installing but prior to creating a ZIP.
 	// ⚠️ Warning: These paths are passed straight to rm command in the shell, without any escaping.
 	const productionVendorExcludedFilePatterns = [
 		'composer.*',
+		'patches',
+		'lib',
 		'vendor/*/*/.editorconfig',
+		'vendor/*/*/.git',
 		'vendor/*/*/.gitignore',
 		'vendor/*/*/composer.*',
 		'vendor/*/*/Doxyfile',
@@ -38,6 +40,10 @@ module.exports = function( grunt ) {
 		'vendor/*/*/*.yml',
 		'vendor/*/*/.*.yml',
 		'vendor/*/*/tests',
+		'vendor/ampproject/common/phpstan.neon.dist',
+		'vendor/ampproject/optimizer/bin',
+		'vendor/ampproject/optimizer/phpstan.neon.dist',
+		'vendor/bin',
 	];
 
 	grunt.initConfig( {
@@ -67,7 +73,16 @@ module.exports = function( grunt ) {
 				command: 'php bin/verify-version-consistency.php',
 			},
 			composer_install: {
-				command: 'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi; cd build; composer install --no-dev -o && composer remove cweagans/composer-patches --update-no-dev -o && rm -r ' + productionVendorExcludedFilePatterns.join( ' ' ),
+				command: [
+					'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi',
+					'cd build',
+					'composer install --no-dev -o',
+					'for symlinksource in $(find vendor/ampproject -type l); do symlinktarget=$(readlink "$symlinksource") && rm "$symlinksource" && cp -r "vendor/ampproject/$symlinktarget" "$symlinksource"; done',
+					'composer remove cweagans/composer-patches --update-no-dev -o',
+					'rm -r ' + productionVendorExcludedFilePatterns.join( ' ' ),
+					'if [ -d vendor/ampproject/common/vendor ]; then rm -r vendor/ampproject/common/vendor; fi',
+					'if [ -d vendor/ampproject/optimizer/vendor ]; then rm -r vendor/ampproject/optimizer/vendor; fi'
+				].join( ' && ' ),
 			},
 			create_build_zip: {
 				command: 'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi; if [ -e amp.zip ]; then rm amp.zip; fi; cd build; zip -r ../amp.zip .; cd ..; echo; echo "ZIP of build: $(pwd)/amp.zip"',
@@ -84,14 +99,6 @@ module.exports = function( grunt ) {
 				},
 			},
 		},
-		http: {
-			google_fonts: {
-				options: {
-					url: 'https://www.googleapis.com/webfonts/v1/webfonts?fields=items&prettyPrint=false&key=' + process.env.GOOGLE_FONTS_API_KEY,
-				},
-				dest: 'includes/data/fonts.json',
-			},
-		},
 	} );
 
 	// Load tasks.
@@ -99,7 +106,6 @@ module.exports = function( grunt ) {
 	grunt.loadNpmTasks( 'grunt-contrib-copy' );
 	grunt.loadNpmTasks( 'grunt-shell' );
 	grunt.loadNpmTasks( 'grunt-wp-deploy' );
-	grunt.loadNpmTasks( 'grunt-http' );
 
 	// Register tasks.
 	grunt.registerTask( 'default', [
@@ -147,9 +153,11 @@ module.exports = function( grunt ) {
 			} );
 
 			paths.push( 'composer.*' ); // Copy in order to be able to do run composer_install.
+			paths.push( 'lib/**' );
 			paths.push( 'assets/js/*.js' ); // @todo Also include *.map files?
 			paths.push( 'assets/js/*.asset.php' );
 			paths.push( 'assets/css/*.css' );
+			paths.push( 'patches/*.patch' );
 
 			grunt.config.set( 'copy', {
 				build: {
@@ -209,28 +217,6 @@ module.exports = function( grunt ) {
 
 		doNext();
 	} );
-
-	grunt.registerTask( 'process-fonts', function() {
-		const fileName = 'includes/data/fonts.json';
-		let map = grunt.file.readJSON( fileName );
-		map = JSON.stringify( map );
-		map = JSON.parse( map );
-		if ( map ) {
-			const stripped = map.items.map( ( font ) => {
-				return {
-					family: font.family,
-					variants: font.variants,
-					category: font.category,
-				};
-			} );
-			grunt.file.write( fileName, JSON.stringify( stripped ) );
-		}
-	} );
-
-	grunt.registerTask( 'download-fonts', [
-		'http',
-		'process-fonts',
-	] );
 
 	grunt.registerTask( 'create-build-zip', [
 		'shell:create_build_zip',

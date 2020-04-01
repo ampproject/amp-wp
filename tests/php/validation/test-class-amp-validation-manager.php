@@ -7,6 +7,11 @@
 
 // phpcs:disable Generic.Formatting.MultipleStatementAlignment.NotSameWarning
 
+use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\HandleValidation;
+use AmpProject\AmpWP\Tests\PrivateAccess;
+use AmpProject\Dom\Document;
+
 /**
  * Tests for AMP_Validation_Manager class.
  *
@@ -15,7 +20,9 @@
  */
 class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 
-	use AMP_Test_HandleValidation;
+	use AssertContainsCompatibility;
+	use HandleValidation;
+	use PrivateAccess;
 
 	/**
 	 * The name of the tested class.
@@ -89,8 +96,9 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	public function setUp() {
 		unset( $GLOBALS['wp_scripts'], $GLOBALS['wp_styles'] );
 		parent::setUp();
-		$dom_document = new DOMDocument( '1.0', 'utf-8' );
+		$dom_document = new Document( '1.0', 'utf-8' );
 		$this->node   = $dom_document->createElement( self::TAG_NAME );
+		$dom_document->appendChild( $this->node );
 		AMP_Validation_Manager::reset_validation_results();
 		$this->original_wp_registered_widgets = $GLOBALS['wp_registered_widgets'];
 
@@ -111,11 +119,12 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$GLOBALS['wp_registered_widgets'] = $this->original_wp_registered_widgets;
 		remove_theme_support( AMP_Theme_Support::SLUG );
 		AMP_Theme_Support::read_theme_support();
+		AMP_Validation_Manager::$validation_error_status_overrides = [];
 		$_REQUEST = [];
 		unset( $GLOBALS['current_screen'] );
-		AMP_Validation_Manager::$should_locate_sources = false;
-		AMP_Validation_Manager::$hook_source_stack     = [];
-		AMP_Validation_Manager::$validation_results    = [];
+		AMP_Validation_Manager::$is_validate_request = false;
+		AMP_Validation_Manager::$hook_source_stack   = [];
+		AMP_Validation_Manager::$validation_results  = [];
 		AMP_Validation_Manager::reset_validation_results();
 		parent::tearDown();
 	}
@@ -144,46 +153,58 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertEquals( 101, has_action( 'admin_bar_menu', [ self::TESTED_CLASS, 'add_admin_bar_menu_items' ] ) );
 
 		$this->assertFalse( has_action( 'wp', [ self::TESTED_CLASS, 'wrap_widget_callbacks' ] ) );
-
-		// Make sure should_locate_sources arg is recognized.
-		remove_all_filters( 'amp_validation_error_sanitized' );
-		$this->accept_sanitization_by_default( false );
-		AMP_Validation_Manager::init(
-			[
-				'should_locate_sources' => true,
-			]
-		);
-		$this->assertEquals( 10, has_action( 'wp', [ self::TESTED_CLASS, 'wrap_widget_callbacks' ] ) );
 	}
 
 	/**
-	 * Test init when theme support and stories support are not present.
+	 * Test init_validate_request without error.
+	 *
+	 * @covers AMP_Validation_Manager::init_validate_request()
+	 */
+	public function test_init_validate_request_without_error() {
+		$this->assertFalse( AMP_Validation_Manager::should_validate_response() );
+		AMP_Validation_Manager::init_validate_request();
+		$this->assertFalse( AMP_Validation_Manager::$is_validate_request );
+
+		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = wp_slash( AMP_Validation_Manager::get_amp_validate_nonce() ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$this->assertTrue( AMP_Validation_Manager::should_validate_response() );
+		AMP_Validation_Manager::init_validate_request();
+		$this->assertTrue( AMP_Validation_Manager::$is_validate_request );
+	}
+
+	/**
+	 * Test init_validate_request without error.
+	 *
+	 * @covers AMP_Validation_Manager::init_validate_request()
+	 */
+	public function test_init_validate_request_with_error() {
+		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = 'bad';
+		$this->assertInstanceOf( 'WP_Error', AMP_Validation_Manager::should_validate_response() );
+		add_filter( 'wp_doing_ajax', '__return_true' );
+		ob_start();
+		$died = false;
+		add_filter(
+			'wp_die_ajax_handler',
+			function() use ( &$died ) {
+				return function() use ( &$died ) {
+					$died = true;
+				};
+			}
+		);
+		AMP_Validation_Manager::init_validate_request();
+		ob_end_clean();
+		$this->assertTrue( $died );
+	}
+
+	/**
+	 * Test init when theme support is not present.
 	 *
 	 * @covers AMP_Validation_Manager::init()
 	 */
-	public function test_init_without_theme_or_stories_support() {
-		AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::WEBSITE_EXPERIENCE ] );
+	public function test_init_without_theme_support() {
 		remove_theme_support( AMP_Theme_Support::SLUG );
 		AMP_Validation_Manager::init();
 
 		$this->assertFalse( has_action( 'save_post', [ 'AMP_Validation_Manager', 'handle_save_post_prompting_validation' ] ) );
-	}
-
-	/**
-	 * Test init when theme support is absent but stories support is.
-	 *
-	 * @covers AMP_Validation_Manager::init()
-	 */
-	public function test_init_with_stories_and_without_theme_support() {
-		if ( ! AMP_Story_Post_Type::has_required_block_capabilities() ) {
-			$this->markTestSkipped( 'Environment does not support Stories.' );
-		}
-		AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::STORIES_EXPERIENCE ] );
-		remove_theme_support( AMP_Theme_Support::SLUG );
-		AMP_Validation_Manager::init();
-
-		$this->assertSame( 10, has_action( 'save_post', [ 'AMP_Validation_Manager', 'handle_save_post_prompting_validation' ] ) );
-		$this->assertFalse( has_action( 'admin_bar_menu', [ self::TESTED_CLASS, 'add_admin_bar_menu_items' ] ) );
 	}
 
 	/**
@@ -193,16 +214,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 */
 	public function test_post_supports_validation() {
 
-		// Ensure that story posts can be validated even when theme support is absent.
-		remove_theme_support( AMP_Theme_Support::SLUG );
-		AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::WEBSITE_EXPERIENCE, AMP_Options_Manager::STORIES_EXPERIENCE ] );
-		AMP_Story_Post_Type::register();
-		if ( post_type_exists( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
-			$post = $this->factory()->post->create( [ 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ] );
-			$this->assertTrue( AMP_Validation_Manager::post_supports_validation( $post ) );
-		}
-
-		// Support absent if theme support is absent for regular posts.
+		// Ensure that posts can be validated even when theme support is absent.
 		remove_theme_support( AMP_Theme_Support::SLUG );
 		$this->assertFalse( AMP_Validation_Manager::post_supports_validation( $this->factory()->post->create() ) );
 
@@ -235,12 +247,12 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 			'node_name'   => 'href',
 			'parent_name' => 'a',
 			'type'        => 'html_attribute_error',
-			'code'        => 'invalid_attribute',
+			'code'        => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
 		];
 		$excessive_css_error = [
 			'node_name' => 'style',
 			'type'      => 'css',
-			'code'      => 'excessive_css',
+			'code'      => AMP_Style_Sanitizer::STYLESHEET_TOO_LONG,
 		];
 
 		remove_theme_support( AMP_Theme_Support::SLUG );
@@ -310,7 +322,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
 		$node = $admin_bar->get_node( 'amp' );
 		$this->assertInternalType( 'object', $node );
-		$this->assertContains( 'action=amp_validate', $node->href );
+		$this->assertStringContains( 'action=amp_validate', $node->href );
 		$this->assertNull( $admin_bar->get_node( 'amp-view' ) );
 		$this->assertInternalType( 'object', $admin_bar->get_node( 'amp-validity' ) );
 
@@ -351,9 +363,59 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
 		$node = $admin_bar->get_node( 'amp' );
 		$this->assertInternalType( 'object', $node );
-		$this->assertContains( 'action=amp_validate', $node->href );
+		$this->assertStringContains( 'action=amp_validate', $node->href );
 		$this->assertNull( $admin_bar->get_node( 'amp-view' ) );
 		$this->assertInternalType( 'object', $admin_bar->get_node( 'amp-validity' ) );
+	}
+
+	/**
+	 * Test overrides.
+	 *
+	 * @covers AMP_Validation_Manager::override_validation_error_statuses()
+	 */
+	public function test_override_validation_error_statuses_with_good_nonce() {
+		$this->assertEmpty( AMP_Validation_Manager::$validation_error_status_overrides );
+		$validation_error_term_1 = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( [ 'test' => 1 ] );
+		$validation_error_term_2 = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( [ 'test' => 2 ] );
+		$_REQUEST['preview']  = '1';
+		$_REQUEST['_wpnonce'] = wp_create_nonce( AMP_Validation_Manager::MARKUP_STATUS_PREVIEW_ACTION );
+		$_REQUEST[ AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] = [
+			$validation_error_term_1['slug'] => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+			$validation_error_term_2['slug'] => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS,
+		];
+		AMP_Validation_Manager::override_validation_error_statuses();
+		$this->assertCount( 2, AMP_Validation_Manager::$validation_error_status_overrides );
+	}
+
+	/**
+	 * Test validation error overrides for when bad nonce is supplied.
+	 *
+	 * @covers AMP_Validation_Manager::override_validation_error_statuses()
+	 * @expectedException WPDieException
+	 */
+	public function test_override_validation_error_statuses_with_bad_nonce() {
+		$validation_error_term_1 = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( [ 'test' => 1 ] );
+		$_REQUEST['preview']  = '1';
+		$_REQUEST['_wpnonce'] = 'bad';
+		$_REQUEST[ AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] = [
+			$validation_error_term_1['slug'] => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+		];
+		AMP_Validation_Manager::override_validation_error_statuses();
+	}
+
+	/**
+	 * Test validation error overrides for when no nonce is supplied.
+	 *
+	 * @covers AMP_Validation_Manager::override_validation_error_statuses()
+	 * @expectedException WPDieException
+	 */
+	public function test_override_validation_error_statuses_with_no_nonce() {
+		$validation_error_term_1 = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( [ 'test' => 1 ] );
+		$_REQUEST['preview']     = '1';
+		$_REQUEST[ AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] = [
+			$validation_error_term_1['slug'] => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+		];
+		AMP_Validation_Manager::override_validation_error_statuses();
 	}
 
 	/**
@@ -363,21 +425,13 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 */
 	public function test_add_validation_error_sourcing() {
 		AMP_Validation_Manager::add_validation_error_sourcing();
-		$this->assertEmpty( AMP_Validation_Manager::$validation_error_status_overrides );
+		$this->assertEquals( ~PHP_INT_MAX, has_filter( 'setup_theme', [ self::TESTED_CLASS, 'set_theme_variables' ] ) );
+		$this->assertEquals( 10, has_action( 'wp', [ self::TESTED_CLASS, 'wrap_widget_callbacks' ] ) );
+		$this->assertEquals( 10, has_action( 'all', [ self::TESTED_CLASS, 'wrap_hook_callbacks' ] ) );
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'the_content', [ self::TESTED_CLASS, 'decorate_filter_source' ] ) );
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'the_excerpt', [ self::TESTED_CLASS, 'decorate_filter_source' ] ) );
 		$this->assertEquals( PHP_INT_MAX, has_action( 'do_shortcode_tag', [ self::TESTED_CLASS, 'decorate_shortcode_source' ] ) );
-
-		// Test overrides.
-		$validation_error_term_1 = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( [ 'test' => 1 ] );
-		$validation_error_term_2 = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( [ 'test' => 2 ] );
-		$_REQUEST[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = AMP_Validation_Manager::get_amp_validate_nonce();
-		$_REQUEST[ AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] = [
-			$validation_error_term_1['slug'] => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
-			$validation_error_term_2['slug'] => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS,
-		];
-		AMP_Validation_Manager::add_validation_error_sourcing();
-		$this->assertCount( 2, AMP_Validation_Manager::$validation_error_status_overrides );
+		$this->assertEquals( 8, has_action( 'the_content', [ self::TESTED_CLASS, 'add_block_source_comments' ] ) );
 	}
 
 	/**
@@ -552,6 +606,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 				static function ( $error ) {
 					return [
 						'sanitized'   => false,
+						'title'       => 'Unknown error (test)',
 						'error'       => $error,
 						'status'      => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
 						'term_status' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
@@ -567,7 +622,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 			'pre_http_request',
 			static function() {
 				return [
-					'body'     => '<html><body></body><!--AMP_VALIDATION:{"results":[]}--></html>',
+					'body'     => wp_json_encode( [ 'results' => [] ] ),
 					'response' => [
 						'code'    => 200,
 						'message' => 'ok',
@@ -610,7 +665,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::add_validation_error()
 	 */
 	public function test_add_validation_error_track_removed() {
-		AMP_Validation_Manager::$should_locate_sources = true;
+		AMP_Validation_Manager::$is_validate_request = true;
 		$this->assertEmpty( AMP_Validation_Manager::$validation_results );
 
 		$that = $this;
@@ -619,7 +674,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 			'amp_validation_error',
 			static function( $error, $context ) use ( $node, $that ) {
 				$error['filtered'] = true;
-				$that->assertEquals( AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE, $error['code'] );
+				$that->assertEquals( AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG, $error['code'] );
 				$that->assertSame( $node, $context['node'] );
 				return $error;
 			},
@@ -630,7 +685,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		AMP_Validation_Manager::add_validation_error(
 			[
 				'node_name'       => $this->node->nodeName,
-				'code'            => AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE,
+				'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 				'node_attributes' => [],
 			],
 			[
@@ -643,7 +698,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 			[
 				'node_name'       => 'img',
 				'sources'         => [],
-				'code'            => AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE,
+				'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 				'node_attributes' => [],
 				'filtered'        => true,
 			],
@@ -696,11 +751,11 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$post   = self::factory()->post->create_and_get();
 		$output = get_echo( [ 'AMP_Validation_Manager', 'print_edit_form_validation_status' ], [ $post ] );
 
-		$this->assertNotContains( 'notice notice-warning', $output );
+		$this->assertStringNotContains( 'notice notice-warning', $output );
 
 		$validation_errors = [
 			[
-				'code'            => AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE,
+				'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 				'node_name'       => $this->disallowed_tag_name,
 				'parent_name'     => 'div',
 				'node_attributes' => [],
@@ -719,14 +774,14 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		// When sanitization is accepted by default.
 		$this->accept_sanitization_by_default( true );
 		$expected_notice_non_accepted_errors = 'There is content which fails AMP validation. You will have to remove the invalid markup (or allow the plugin to remove it) to serve AMP.';
-		$this->assertContains( 'notice notice-warning', $output );
-		$this->assertContains( '<code>script</code>', $output );
-		$this->assertContains( $expected_notice_non_accepted_errors, $output );
+		$this->assertStringContains( 'notice notice-warning', $output );
+		$this->assertStringContains( '<code>script</code>', $output );
+		$this->assertStringContains( $expected_notice_non_accepted_errors, $output );
 
 		// When auto-accepting validation errors, if there are unaccepted validation errors, there should be a notice because this will block serving an AMP document.
 		add_theme_support( AMP_Theme_Support::SLUG );
 		$output = get_echo( [ 'AMP_Validation_Manager', 'print_edit_form_validation_status' ], [ $post ] );
-		$this->assertContains( 'There is content which fails AMP validation. You will have to remove the invalid markup (or allow the plugin to remove it) to serve AMP.', $output );
+		$this->assertStringContains( 'There is content which fails AMP validation. You will have to remove the invalid markup (or allow the plugin to remove it) to serve AMP.', $output );
 
 		/*
 		 * When there are 'Rejected' or 'New Rejected' errors, there should be a message that explains that this will serve a non-AMP URL.
@@ -738,7 +793,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		AMP_Validated_URL_Post_Type::store_validation_errors( $validation_errors, get_permalink( $post->ID ) );
 		$this->accept_sanitization_by_default( false );
 		$output = get_echo( [ 'AMP_Validation_Manager', 'print_edit_form_validation_status' ], [ $post ] );
-		$this->assertContains( $expected_notice_non_accepted_errors, $output );
+		$this->assertStringContains( $expected_notice_non_accepted_errors, $output );
 	}
 
 	/**
@@ -747,7 +802,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::locate_sources()
 	 * @covers AMP_Validation_Manager::parse_source_comment()
 	 * @covers AMP_Validation_Manager::get_source_comment()
-	 * @covers AMP_Validation_Manager::remove_source_comments()
 	 */
 	public function test_source_comments() {
 		$source1 = [
@@ -782,8 +836,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		 * @var DOMComment[] $comments
 		 */
 		$comments = [];
-		$xpath    = new DOMXPath( $dom );
-		foreach ( $xpath->query( '//comment()' ) as $comment ) {
+		foreach ( $dom->xpath->query( '//comment()' ) as $comment ) {
 			$comments[] = $comment;
 		}
 		$this->assertCount( 4, $comments );
@@ -807,9 +860,360 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$parsed_comment = AMP_Validation_Manager::parse_source_comment( $comments[2] );
 		$this->assertEquals( $source2, $parsed_comment['source'] );
 		$this->assertTrue( $parsed_comment['closing'] );
+	}
 
-		AMP_Validation_Manager::remove_source_comments( $dom );
-		$this->assertEquals( 0, $xpath->query( '//comment()' )->length );
+	/**
+	 * Get data for testing locate_sources.
+	 *
+	 * @return array
+	 */
+	public function get_locate_sources_data() {
+		return [
+			'directly_enqueued_link'                     => [
+				static function () {
+					add_action(
+						'wp_enqueue_scripts',
+						static function () {
+							wp_enqueue_style(
+								'foo',
+								'https://example.com/foo.css',
+								[],
+								'0.1'
+							);
+						}
+					);
+				},
+				'//link[ contains( @href, "foo.css" ) ]',
+				function ( $sources ) {
+					$this->assertArraySubset(
+						[
+							'type'            => 'plugin',
+							'name'            => 'amp',
+							'function'        => '{closure}',
+							'hook'            => 'wp_enqueue_scripts',
+							'priority'        => 10,
+							'dependency_type' => 'style',
+							'handle'          => 'foo',
+						],
+						$sources[0]
+					);
+				},
+			],
+
+			'stylesheet_added_as_dependency'             => [
+				static function () {
+					add_action(
+						'wp_enqueue_scripts',
+						static function () {
+							wp_enqueue_style(
+								'bar',
+								'https://example.com/bar.css',
+								[ 'wp-codemirror' ],
+								'0.1'
+							);
+						}
+					);
+				},
+				'//link[ contains( @href, "codemirror" ) ]',
+				function ( $sources ) {
+					$this->assertArraySubset(
+						[
+							'type'              => 'plugin',
+							'name'              => 'amp',
+							'function'          => '{closure}',
+							'hook'              => 'wp_enqueue_scripts',
+							'priority'          => 10,
+							'dependency_type'   => 'style',
+							'handle'            => 'bar',
+							'dependency_handle' => 'wp-codemirror',
+						],
+						$sources[0]
+					);
+				},
+			],
+
+			'inline_style_for_directly_enqueued_stylesheet' => [
+				static function () {
+					add_action(
+						'wp_enqueue_scripts',
+						static function () {
+							wp_enqueue_style(
+								'baz',
+								'https://example.com/baz.css',
+								[],
+								'0.1'
+							);
+							wp_add_inline_style( 'baz', '/*Hello Baz!*/' );
+						}
+					);
+				},
+				'//style[ contains( text(), "Hello Baz" ) ]',
+				function ( $sources ) {
+					$this->assertArraySubset(
+						[
+							'type'            => 'plugin',
+							'name'            => 'amp',
+							'function'        => '{closure}',
+							'hook'            => 'wp_enqueue_scripts',
+							'priority'        => 10,
+							'dependency_type' => 'style',
+							'extra_key'       => 'after',
+							'text'            => '/*Hello Baz!*/',
+							'handle'          => 'baz',
+						],
+						$sources[1]
+					);
+				},
+			],
+
+			'external_script_directly_enqueued'          => [
+				static function () {
+					add_action(
+						'wp_enqueue_scripts',
+						static function () {
+							wp_enqueue_script(
+								'foo',
+								'https://example.com/foo.js',
+								[],
+								'0.1',
+								true
+							);
+						}
+					);
+				},
+				'//script[ contains( @src, "foo.js" ) ]',
+				function ( $sources ) {
+					$this->assertArraySubset(
+						[
+							'type'            => 'plugin',
+							'name'            => 'amp',
+							'function'        => '{closure}',
+							'hook'            => 'wp_enqueue_scripts',
+							'priority'        => 10,
+							'dependency_type' => 'script',
+							'handle'          => 'foo',
+						],
+						$sources[0]
+					);
+				},
+			],
+
+			'external_script_indirectly_enqueued'        => [
+				static function () {
+					add_action(
+						'wp_enqueue_scripts',
+						static function () {
+							wp_enqueue_script(
+								'bar',
+								'https://example.com/bar.js',
+								[ 'wp-codemirror' ],
+								'0.1',
+								true
+							);
+						}
+					);
+				},
+				'//script[ contains( @src, "codemirror" ) ]',
+				function ( $sources ) {
+					$this->assertArraySubset(
+						[
+							'type'              => 'plugin',
+							'name'              => 'amp',
+							'function'          => '{closure}',
+							'hook'              => 'wp_enqueue_scripts',
+							'priority'          => 10,
+							'dependency_type'   => 'script',
+							'handle'            => 'bar',
+							'dependency_handle' => 'wp-codemirror',
+						],
+						$sources[0]
+					);
+				},
+			],
+
+			'inline_script_added_via_wp_localize_script' => [
+				static function () {
+					add_action(
+						'wp_enqueue_scripts',
+						static function () {
+							wp_enqueue_script(
+								'baz',
+								'https://example.com/baz.js',
+								[],
+								'0.1',
+								true
+							);
+							wp_localize_script( 'baz', 'Baz', [ 'greeting' => 'Hello Baz!' ] );
+						}
+					);
+				},
+				'//script[ contains( text(), "Hello Baz!" ) ]',
+				function ( $sources ) {
+					$this->assertArraySubset(
+						[
+							'type'            => 'plugin',
+							'name'            => 'amp',
+							'function'        => '{closure}',
+							'hook'            => 'wp_enqueue_scripts',
+							'priority'        => 10,
+							'dependency_type' => 'script',
+							'extra_key'       => 'data',
+							'text'            => 'var Baz = {"greeting":"Hello Baz!"};',
+							'handle'          => 'baz',
+						],
+						$sources[2]
+					);
+				},
+			],
+
+			'inline_script_added_via_add_inline_script_before' => [
+				static function () {
+					add_action(
+						'wp_enqueue_scripts',
+						static function () {
+							wp_enqueue_script(
+								'baz',
+								'https://example.com/baz.js',
+								[],
+								'0.1',
+								true
+							);
+							wp_add_inline_script( 'baz', '/*Hello before Baz!*/', 'before' );
+						}
+					);
+				},
+				'//script[ contains( text(), "Hello before Baz!" ) ]',
+				function ( $sources ) {
+					$this->assertArraySubset(
+						[
+							'type'            => 'plugin',
+							'name'            => 'amp',
+							'function'        => '{closure}',
+							'hook'            => 'wp_enqueue_scripts',
+							'priority'        => 10,
+							'dependency_type' => 'script',
+							'extra_key'       => 'before',
+							'text'            => '/*Hello before Baz!*/',
+							'handle'          => 'baz',
+						],
+						$sources[2]
+					);
+				},
+			],
+
+			'inline_script_added_via_add_inline_script_after' => [
+				static function () {
+					add_action(
+						'wp_enqueue_scripts',
+						static function () {
+							wp_enqueue_script(
+								'baz',
+								'https://example.com/baz.js',
+								[],
+								'0.1',
+								true
+							);
+							wp_add_inline_script( 'baz', '/*Hello after Baz!*/', 'after' );
+						}
+					);
+				},
+				'//script[ contains( text(), "Hello after Baz!" ) ]',
+				function ( $sources ) {
+					$this->assertArraySubset(
+						[
+							'type'            => 'plugin',
+							'name'            => 'amp',
+							'function'        => '{closure}',
+							'hook'            => 'wp_enqueue_scripts',
+							'priority'        => 10,
+							'dependency_type' => 'script',
+							'extra_key'       => 'after',
+							'text'            => '/*Hello after Baz!*/',
+							'handle'          => 'baz',
+						],
+						$sources[2]
+					);
+				},
+			],
+
+			'style_enqueued_at_wp_default_styles'        => [
+				static function () {
+					add_action(
+						'wp_default_styles',
+						static function ( WP_Styles $styles ) {
+							$styles->add(
+								'foo',
+								'https://example.com/foo.css',
+								[],
+								'0.1'
+							);
+						}
+					);
+					add_action(
+						'wp_enqueue_scripts',
+						static function () {
+							wp_enqueue_style( 'foo' );
+						}
+					);
+				},
+				'//link[ contains( @href, "foo.css" ) ]',
+				function ( $sources ) {
+					$this->assertArraySubset(
+						[
+							'type'            => 'plugin',
+							'name'            => 'amp',
+							'function'        => '{closure}',
+							'hook'            => 'wp_default_styles',
+							'priority'        => 10,
+							'dependency_type' => 'style',
+							'handle'          => 'foo',
+						],
+						$sources[0]
+					);
+				},
+			],
+		];
+	}
+
+	/**
+	 * Test locate sources.
+	 *
+	 * @dataProvider get_locate_sources_data
+	 * @covers AMP_Validation_Manager::locate_sources()
+	 * @covers AMP_Validation_Callback_Wrapper
+	 *
+	 * @param callable $callback Callback set up (add actions).
+	 * @param string   $xpath    Expression to find the target element to get sources for.
+	 * @param callable $assert   Function to assert the expected sources.
+	 */
+	public function test_locate_sources_e2e( $callback, $xpath, $assert ) {
+		add_theme_support( 'amp' );
+		AMP_Validation_Manager::add_validation_error_sourcing();
+		$callback();
+		$this->set_private_property( 'AMP_Theme_Support', 'is_output_buffering', true );
+		$this->go_to( home_url() );
+
+		ob_start();
+		?>
+		<!DOCTYPE html>
+		<html>
+			<head>
+				<?php wp_head(); ?>
+			</head>
+			<body>
+				<?php wp_footer(); ?>
+			</body>
+		</html>
+		<?php
+		$html = ob_get_clean();
+
+		$dom = Document::fromHtml( $html );
+
+		$element = $dom->xpath->query( $xpath )->item( 0 );
+		$this->assertInstanceOf( 'DOMElement', $element );
+		$sources = AMP_Validation_Manager::locate_sources( $element );
+		$this->assertNotEmpty( $sources );
+		$assert( $sources );
 	}
 
 	/**
@@ -837,9 +1241,9 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 				],
 			],
 			'latest_posts' => [
-				'<!-- wp:latest-posts {"postsToShow":1,"categories":""} /-->',
+				'<!-- wp:latest-posts {"postsToShow":1} /-->',
 				sprintf(
-					'<!--amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_content_index":0,"block_attrs":{"postsToShow":1,"categories":""},"type":"%1$s","name":"%2$s","file":%4$s,"line":%5$s,"function":"%3$s"}--><ul class="wp-block-latest-posts wp-block-latest-posts__list"><li><a href="{{url}}">{{title}}</a></li></ul><!--/amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_attrs":{"postsToShow":1,"categories":""},"type":"%1$s","name":"%2$s","file":%4$s,"line":%5$s,"function":"%3$s"}-->',
+					'<!--amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_content_index":0,"block_attrs":{"postsToShow":1},"type":"%1$s","name":"%2$s","file":%4$s,"line":%5$s,"function":"%3$s"}--><ul class="wp-block-latest-posts wp-block-latest-posts__list"><li><a href="{{url}}">{{title}}</a></li></ul><!--/amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_attrs":{"postsToShow":1},"type":"%1$s","name":"%2$s","file":%4$s,"line":%5$s,"function":"%3$s"}-->',
 					$is_gutenberg ? 'plugin' : 'core',
 					$is_gutenberg ? 'gutenberg' : 'wp-includes',
 					$latest_posts_block->render_callback,
@@ -1042,24 +1446,24 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		AMP_Theme_Support::start_output_buffering();
 		do_action( $action_function_callback );
 		$output = ob_get_clean();
-		$this->assertContains( '<div class="notice notice-error">', $output );
-		$this->assertContains( '<!--amp-source-stack {"type":"plugin","name":"amp"', $output );
-		$this->assertContains( '<!--/amp-source-stack {"type":"plugin","name":"amp"', $output );
+		$this->assertStringContains( '<div class="notice notice-error">', $output );
+		$this->assertStringContains( '<!--amp-source-stack {"type":"plugin","name":"amp"', $output );
+		$this->assertStringContains( '<!--/amp-source-stack {"type":"plugin","name":"amp"', $output );
 
 		AMP_Theme_Support::start_output_buffering();
 		do_action( $action_no_argument );
 		$output = ob_get_clean();
-		$this->assertContains( '<div></div>', $output );
-		$this->assertContains( '<!--amp-source-stack {"type":"plugin","name":"amp"', $output );
-		$this->assertContains( '<!--/amp-source-stack {"type":"plugin","name":"amp"', $output );
+		$this->assertStringContains( '<div></div>', $output );
+		$this->assertStringContains( '<!--amp-source-stack {"type":"plugin","name":"amp"', $output );
+		$this->assertStringContains( '<!--/amp-source-stack {"type":"plugin","name":"amp"', $output );
 
 		AMP_Theme_Support::start_output_buffering();
 		do_action( $action_one_argument, $notice );
 		$output = ob_get_clean();
-		$this->assertContains( $notice, $output );
-		$this->assertContains( sprintf( '<div class="notice notice-warning"><p>%s</p></div>', $notice ), $output );
-		$this->assertContains( '<!--amp-source-stack {"type":"plugin","name":"amp"', $output );
-		$this->assertContains( '<!--/amp-source-stack {"type":"plugin","name":"amp"', $output );
+		$this->assertStringContains( $notice, $output );
+		$this->assertStringContains( sprintf( '<div class="notice notice-warning"><p>%s</p></div>', $notice ), $output );
+		$this->assertStringContains( '<!--amp-source-stack {"type":"plugin","name":"amp"', $output );
+		$this->assertStringContains( '<!--/amp-source-stack {"type":"plugin","name":"amp"', $output );
 
 		AMP_Theme_Support::start_output_buffering();
 		do_action( $action_two_arguments, $notice, get_the_ID() );
@@ -1067,30 +1471,30 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		AMP_Theme_Support::start_output_buffering();
 		self::output_message( $notice, get_the_ID() );
 		$expected_output = ob_get_clean();
-		$this->assertContains( $expected_output, $output );
-		$this->assertContains( '<!--amp-source-stack {"type":"plugin","name":"amp"', $output );
-		$this->assertContains( '<!--/amp-source-stack {"type":"plugin","name":"amp"', $output );
+		$this->assertStringContains( $expected_output, $output );
+		$this->assertStringContains( '<!--amp-source-stack {"type":"plugin","name":"amp"', $output );
+		$this->assertStringContains( '<!--/amp-source-stack {"type":"plugin","name":"amp"', $output );
 
 		// This action's callback doesn't output any HTML tags, so no HTML should be present.
 		AMP_Theme_Support::start_output_buffering();
 		do_action( $action_no_tag_output );
 		$output = ob_get_clean();
-		$this->assertNotContains( '<!--amp-source-stack ', $output );
-		$this->assertNotContains( '<!--/amp-source-stack ', $output );
+		$this->assertStringNotContains( '<!--amp-source-stack ', $output );
+		$this->assertStringNotContains( '<!--/amp-source-stack ', $output );
 
 		// This action's callback comes from core.
 		AMP_Theme_Support::start_output_buffering();
 		do_action( $action_core_output );
 		$output = ob_get_clean();
-		$this->assertContains( '<!--amp-source-stack {"type":"core","name":"wp-includes"', $output );
-		$this->assertContains( '<!--/amp-source-stack {"type":"core","name":"wp-includes"', $output );
+		$this->assertStringContains( '<!--amp-source-stack {"type":"core","name":"wp-includes"', $output );
+		$this->assertStringContains( '<!--/amp-source-stack {"type":"core","name":"wp-includes"', $output );
 
 		// This action's callback doesn't echo any markup, so it shouldn't be wrapped in comments.
 		AMP_Theme_Support::start_output_buffering();
 		do_action( $action_no_output );
 		$output = ob_get_clean();
-		$this->assertNotContains( '<!--amp-source-stack ', $output );
-		$this->assertNotContains( '<!--/amp-source-stack ', $output );
+		$this->assertStringNotContains( '<!--amp-source-stack ', $output );
+		$this->assertStringNotContains( '<!--/amp-source-stack ', $output );
 
 		$handle_inner_action = null;
 		$handle_outer_action = null;
@@ -1137,11 +1541,13 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	public function test_has_parameters_passed_by_reference() {
 		$tested_method = new ReflectionMethod( 'AMP_Validation_Manager', 'has_parameters_passed_by_reference' );
 		$tested_method->setAccessible( true );
-		$reflection_by_reference = new ReflectionFunction( 'wp_default_styles' );
-		$reflection_by_value     = new ReflectionFunction( 'get_bloginfo' );
+		$reflection_by_value          = new ReflectionFunction( 'get_bloginfo' );
+		$reflection_by_ref_first_arg  = new ReflectionFunction( 'wp_handle_upload' );
+		$reflection_by_ref_second_arg = new ReflectionFunction( 'wp_parse_str' );
 
-		$this->assertTrue( $tested_method->invoke( null, $reflection_by_reference ) );
-		$this->assertFalse( $tested_method->invoke( null, $reflection_by_value ) );
+		$this->assertEquals( 0, $tested_method->invoke( null, $reflection_by_value ) );
+		$this->assertEquals( 1, $tested_method->invoke( null, $reflection_by_ref_first_arg ) );
+		$this->assertEquals( 2, $tested_method->invoke( null, $reflection_by_ref_second_arg ) );
 	}
 
 	/**
@@ -1470,9 +1876,9 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$output = ob_get_clean();
 
 		$this->assertInstanceOf( '\\AMP_Validation_Callback_Wrapper', $wrapped_callback );
-		$this->assertContains( $test_string, $output );
-		$this->assertContains( '<!--amp-source-stack {"type":"plugin","name":"amp","hook":"bar"}', $output );
-		$this->assertContains( '<!--/amp-source-stack {"type":"plugin","name":"amp","hook":"bar"}', $output );
+		$this->assertStringContains( $test_string, $output );
+		$this->assertStringContains( '<!--amp-source-stack {"type":"plugin","name":"amp","hook":"bar"}', $output );
+		$this->assertStringContains( '<!--/amp-source-stack {"type":"plugin","name":"amp","hook":"bar"}', $output );
 
 		$action_callback = [
 			'function'      => [ $this, 'get_string' ],
@@ -1512,11 +1918,11 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		AMP_Validation_Manager::$hook_source_stack[] = $latest_source;
 
 		$wrapped_content = AMP_Validation_Manager::wrap_buffer_with_source_comments( $initial_content );
-		$this->assertContains( $initial_content, $wrapped_content );
-		$this->assertContains( '<!--amp-source-stack', $wrapped_content );
-		$this->assertContains( '<!--/amp-source-stack', $wrapped_content );
-		$this->assertContains( wp_json_encode( $latest_source ), $wrapped_content );
-		$this->assertNotContains( wp_json_encode( $earliest_source ), $wrapped_content );
+		$this->assertStringContains( $initial_content, $wrapped_content );
+		$this->assertStringContains( '<!--amp-source-stack', $wrapped_content );
+		$this->assertStringContains( '<!--/amp-source-stack', $wrapped_content );
+		$this->assertStringContains( wp_json_encode( $latest_source ), $wrapped_content );
+		$this->assertStringNotContains( wp_json_encode( $earliest_source ), $wrapped_content );
 	}
 
 	/**
@@ -1527,7 +1933,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	public function test_get_amp_validate_nonce() {
 		$nonce = AMP_Validation_Manager::get_amp_validate_nonce();
 		$this->assertInternalType( 'string', $nonce );
-		$this->assertEquals( 10, strlen( $nonce ) );
+		$this->assertEquals( 32, strlen( $nonce ) );
 	}
 
 	/**
@@ -1536,50 +1942,137 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::should_validate_response()
 	 */
 	public function test_should_validate_response() {
-		global $post;
-		$post = self::factory()->post->create();
 		$this->assertFalse( AMP_Validation_Manager::should_validate_response() );
-		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = 1;
-		$this->assertFalse( AMP_Validation_Manager::should_validate_response() );
-		$this->set_capability();
+
+		// Making a request with an invalid nonce.
+		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = 'invalid';
+		$result = AMP_Validation_Manager::should_validate_response();
+		$this->assertInstanceOf( 'WP_Error', $result );
+		$this->assertEquals( 'http_request_failed', $result->get_error_code() );
+
+		// Making a request with a valid nonce.
+		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = AMP_Validation_Manager::get_amp_validate_nonce();
 		$this->assertTrue( AMP_Validation_Manager::should_validate_response() );
+	}
+
+	/**
+	 * Test get_validate_response_data.
+	 *
+	 * @covers AMP_Validation_Manager::get_validate_response_data()
+	 */
+	public function test_get_validate_response_data() {
+		$post = $this->factory()->post->create_and_get();
+
+		$this->go_to( get_permalink( $post ) );
+		$source_html = '<style>amp-fit-text { color:red }</style><script>document.write("bad")</script><amp-fit-text width="300" height="200" layout="responsive">Lorem ipsum</amp-fit-text>';
+
+		$sanitizer_classes = amp_get_content_sanitizers();
+		$sanitizer_classes = AMP_Validation_Manager::filter_sanitizer_args( $sanitizer_classes );
+		$sanitize_results  = AMP_Content_Sanitizer::sanitize_document(
+			AMP_DOM_Utils::get_dom_from_content( $source_html ),
+			$sanitizer_classes,
+			[]
+		);
+
+		$data = AMP_Validation_Manager::get_validate_response_data( $sanitize_results );
+		$this->assertArrayHasKey( 'url', $data );
+		$this->assertArrayHasKey( 'results', $data );
+		$this->assertArrayHasKey( 'queried_object', $data );
+
+		$this->assertEquals( amp_get_current_url(), $data['url'] );
+
+		$this->assertCount( 1, AMP_Validation_Manager::$validation_results );
+		$this->assertEquals( AMP_Validation_Manager::$validation_results, $data['results'] );
+
+		$this->assertEquals(
+			[
+				'id'   => $post->ID,
+				'type' => $post->post_type,
+			],
+			$data['queried_object']
+		);
+	}
+
+	/**
+	 * Test remove_illegal_source_stack_comments.
+	 *
+	 * @covers \AMP_Validation_Manager::remove_illegal_source_stack_comments()
+	 */
+	public function test_remove_illegal_source_stack_comments() {
+		$html = '
+			<html>
+				<head>
+					<script id="first" type="application/ld+json"><!--amp-source-stack {"type":"plugin","name":"add-scripts-and-styles-with-source-stacks.php","file":"add-scripts-and-styles-with-source-stacks.php","line":18,"function":"{closure}","hook":"my_print_json","priority":10}-->{"foo":"bar <b>foo<\/b>"}<!--/amp-source-stack {"type":"plugin","name":"add-scripts-and-styles-with-source-stacks.php","file":"add-scripts-and-styles-with-source-stacks.php","line":18,"function":"{closure}","hook":"my_print_json","priority":10}--></script>
+					<style id="second">body { color: blue; }<!--amp-source-stack {"type":"plugin","name":"add-scripts-and-styles-with-source-stacks.php","file":"add-scripts-and-styles-with-source-stacks.php","line":18,"function":"{closure}","hook":"my_print_style","priority":10}-->body { color: red; }<!--/amp-source-stack {"type":"plugin","name":"add-scripts-and-styles-with-source-stacks.php","file":"add-scripts-and-styles-with-source-stacks.php","line":18,"function":"{closure}","hook":"my_print_style","priority":10}-->body { color: white; }</style>
+				</head>
+				<body>
+					<script id="third" type="text/javascript">/* start custom scripts! */<!--amp-source-stack {"type":"plugin","name":"add-scripts-and-styles-with-source-stacks.php","file":"add-scripts-and-styles-with-source-stacks.php","line":18,"function":"{closure}","hook":"my_print_script","priority":10}-->document.write("hello!")<!--/amp-source-stack {"type":"plugin","name":"add-scripts-and-styles-with-source-stacks.php","file":"add-scripts-and-styles-with-source-stacks.php","line":18,"function":"{closure}","hook":"my_print_script","priority":10}-->/* end custom scripts! */</script>
+				</body>
+			</html>
+		';
+
+		$dom = Document::fromHtml( $html );
+
+		AMP_Validation_Manager::remove_illegal_source_stack_comments( $dom );
+
+		$this->assertStringNotContains( 'amp-source-stack', $dom->saveHTML() );
+		$this->assertEquals( '{"foo":"bar <b>foo<\/b>"}', $dom->getElementById( 'first' )->textContent );
+		$this->assertEquals( 'body { color: blue; }body { color: red; }body { color: white; }', $dom->getElementById( 'second' )->textContent );
+		$this->assertEquals( '/* start custom scripts! */document.write("hello!")/* end custom scripts! */', $dom->getElementById( 'third' )->textContent );
 	}
 
 	/**
 	 * Test finalize_validation.
 	 *
 	 * @covers \AMP_Validation_Manager::finalize_validation()
+	 * @covers \AMP_Validation_Manager::add_admin_bar_menu_items()
 	 */
 	public function test_finalize_validation() {
-		global $post, $show_admin_bar;
+		self::set_capability();
+		require_once ABSPATH . WPINC . '/class-wp-admin-bar.php';
+		show_admin_bar( true );
+		add_theme_support( 'amp' );
+		$this->go_to( home_url( '/' ) );
 
-		$show_admin_bar = true;
-		$dom            = new DOMDocument( '1.0' );
-		$html           = '<html><body><div id="wp-admin-bar-amp-validity"><a href="#"></a></div><span id="amp-admin-bar-item-status-icon"></span><br></body></html>';
+		$admin_bar = new WP_Admin_Bar();
+		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
+		ob_start();
+
+		?>
+		<html>
+			<head>
+				<meta charset="utf-8">
+			</head>
+			<body>
+				<?php $admin_bar->render(); ?>
+			</body>
+		</html>
+		<?php
+		$html = ob_get_clean();
+
+		$dom = new Document();
 		$dom->loadHTML( $html );
 
-		$validation_results                         = [
+		$this->assertInstanceOf( 'DOMElement', $dom->getElementById( 'wp-admin-bar-amp' ) );
+		$status_icon_element = $dom->getElementById( 'amp-admin-bar-item-status-icon' );
+		$this->assertInstanceOf( 'DOMElement', $status_icon_element );
+		$this->assertEquals( '✅', $status_icon_element->textContent );
+		$validity_link_element = $dom->getElementById( 'wp-admin-bar-amp-validity' );
+		$this->assertInstanceOf( 'DOMElement', $validity_link_element );
+		$this->assertEquals( 'Validate', trim( $validity_link_element->textContent ) );
+
+		AMP_Validation_Manager::$validation_results = [
 			[
-				'error'       => [ 'code' => 'invalid_attribute' ],
+				'error'       => [ 'code' => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR ],
 				'sanitized'   => false,
 				'slug'        => '98765b4',
 				'term_status' => 0,
 			],
 		];
-		AMP_Validation_Manager::$validation_results = $validation_results;
 
-		// should_validate_response() will be false, so finalize_validation() won't append the _RESULTS comment.
 		AMP_Validation_Manager::finalize_validation( $dom );
-		$this->assertNotContains( 'AMP_VALIDATION:{', $dom->documentElement->lastChild->nodeValue );
-
-		// Ensure that should_validate_response() is true, so finalize_validation() will append the AMP_VALIDATION comment.
-		$post = self::factory()->post->create();
-		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = 1;
-		$this->set_capability();
-		AMP_Validation_Manager::finalize_validation( $dom );
-		$this->assertTrue( (bool) preg_match( '#AMP_VALIDATION:({.+})#s', $dom->documentElement->lastChild->nodeValue, $matches ) );
-		$returned_valudation = json_decode( $matches[1], true );
-		$this->assertEquals( $validation_results, $returned_valudation['results'] );
+		$this->assertEquals( 'Review 1 validation issue', trim( $validity_link_element->textContent ) );
+		$this->assertEquals( '⚠️', $status_icon_element->textContent );
 	}
 
 	/**
@@ -1632,10 +2125,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		self::factory()->post->create();
 		$filter = static function() use ( $validation ) {
 			return [
-				'body' => sprintf(
-					'<html amp><head></head><body></body><!--%s--></html>',
-					'AMP_VALIDATION:' . wp_json_encode( $validation )
-				),
+				'body' => wp_json_encode( $validation ),
 			];
 		};
 		add_filter( 'pre_http_request', $filter, 10, 3 );
@@ -1692,10 +2182,10 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 			}
 
 			return [
-				'body' => sprintf(
-					'<html amp><head></head><body></body><!--%s--></html>',
-					'AMP_VALIDATION:' . wp_json_encode( $validation )
-				),
+				'body'    => wp_json_encode( $validation ),
+				'headers' => [
+					'content-type' => 'application/json',
+				],
 			];
 		};
 		add_filter( 'pre_http_request', $filter, 10, 3 );
@@ -1745,10 +2235,10 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 			]
 		);
 		$output = get_echo( [ 'AMP_Validation_Manager', 'print_plugin_notice' ] );
-		$this->assertContains( 'Warning: The following plugin may be incompatible with AMP', $output );
-		$this->assertContains( 'Foo Bar', $output );
-		$this->assertContains( 'More details', $output );
-		$this->assertContains( admin_url( 'edit.php' ), $output );
+		$this->assertStringContains( 'Warning: The following plugin may be incompatible with AMP', $output );
+		$this->assertStringContains( 'Foo Bar', $output );
+		$this->assertStringContains( 'More details', $output );
+		$this->assertStringContains( admin_url( 'edit.php' ), $output );
 
 		if ( $cache_plugins_backup ) {
 			wp_cache_set( 'plugins', $cache_plugins_backup, 'plugins' );
@@ -1786,12 +2276,12 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 			'wp-polyfill',
 		];
 
-		$this->assertContains( 'js/amp-block-validation.js', $script->src );
+		$this->assertStringContains( 'js/amp-block-validation.js', $script->src );
 		$this->assertEqualSets( $expected_dependencies, $script->deps );
 		$this->assertContains( $slug, wp_scripts()->queue );
 
 		$style = wp_styles()->registered[ $slug ];
-		$this->assertContains( 'css/amp-block-validation-compiled.css', $style->src );
+		$this->assertStringContains( 'css/amp-block-validation-compiled.css', $style->src );
 		$this->assertEquals( AMP__VERSION, $style->ver );
 		$this->assertContains( $slug, wp_styles()->queue );
 	}
@@ -1806,8 +2296,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 			$this->markTestSkipped( 'The block editor is not available.' );
 		}
 
-		$this->assertTrue( AMP_Options_Manager::is_website_experience_enabled() );
-		$this->assertFalse( AMP_Options_Manager::is_stories_experience_enabled() );
 		remove_theme_support( AMP_Theme_Support::SLUG );
 		global $post;
 		$post = $this->factory()->post->create_and_get();
@@ -1815,16 +2303,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->set_capability();
 		AMP_Validation_Manager::enqueue_block_validation();
 		$this->assertNotContains( $slug, wp_scripts()->queue );
-
-		AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::WEBSITE_EXPERIENCE, AMP_Options_Manager::STORIES_EXPERIENCE ] );
-		$this->assertTrue( AMP_Options_Manager::is_website_experience_enabled() );
-		$this->assertTrue( AMP_Options_Manager::is_stories_experience_enabled() );
-		AMP_Story_Post_Type::register();
-		if ( post_type_exists( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
-			$post = $this->factory()->post->create_and_get( [ 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ] );
-			AMP_Validation_Manager::enqueue_block_validation();
-			$this->assertContains( $slug, wp_scripts()->queue );
-		}
 	}
 
 	/**
@@ -1889,7 +2367,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertEquals( 'onclick', AMP_Validation_Manager::$validation_results[0]['error']['node_name'] );
 		AMP_Validation_Manager::reset_validation_results();
 	}
-
 
 	/**
 	 * Add a nonce to the $_REQUEST, so that is_authorized() returns true.

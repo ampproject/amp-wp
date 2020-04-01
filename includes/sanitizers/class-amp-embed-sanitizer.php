@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use AmpProject\Dom\Document;
+
 /**
  * Class AMP_Embed_Sanitizer
  *
@@ -22,8 +24,8 @@ class AMP_Embed_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * AMP_Embed_Sanitizer constructor.
 	 *
-	 * @param DOMDocument $dom  DOM.
-	 * @param array       $args Args.
+	 * @param Document $dom  DOM.
+	 * @param array    $args Args.
 	 */
 	public function __construct( $dom, $args = [] ) {
 		parent::__construct( $dom, $args );

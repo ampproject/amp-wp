@@ -71,8 +71,7 @@ class AMP_Block_Sanitizer extends AMP_Base_Sanitizer {
 			// @todo Should we consider just eliminating the .wp-block-embed__wrapper element since unnecessary?
 			// For visual parity with blocks in non-AMP pages, override the oEmbed's natural responsive dimensions with the aspect ratio specified in the wp-embed-aspect-* class name.
 			if ( $responsive_width && $responsive_height ) {
-				$xpath       = new DOMXPath( $this->dom );
-				$amp_element = $xpath->query( './div[ contains( @class, "wp-block-embed__wrapper" ) ]/*[ @layout = "responsive" ]', $node )->item( 0 );
+				$amp_element = $this->dom->xpath->query( './div[ contains( @class, "wp-block-embed__wrapper" ) ]/*[ @layout = "responsive" ]', $node )->item( 0 );
 				if ( $amp_element instanceof DOMElement ) {
 					$amp_element->setAttribute( 'width', $responsive_width );
 					$amp_element->setAttribute( 'height', $responsive_height );
@@ -93,6 +92,9 @@ class AMP_Block_Sanitizer extends AMP_Base_Sanitizer {
 			$amp_el_found = false;
 
 			foreach ( $node->childNodes as $child_node ) {
+				if ( ! $child_node instanceof DOMElement ) {
+					continue;
+				}
 
 				// We are looking for child elements which start with 'amp-'.
 				if ( 0 !== strpos( $child_node->tagName, 'amp-' ) ) {
@@ -113,12 +115,11 @@ class AMP_Block_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Sets necessary attributes to both parent and AMP element node.
 	 *
-	 * @param DOMNode $node AMP element node.
-	 * @param DOMNode $parent_node <figure> node.
-	 * @param array   $attributes Current attributes of the AMP element.
+	 * @param DOMElement $node AMP element node.
+	 * @param DOMElement $parent_node <figure> node.
+	 * @param array      $attributes Current attributes of the AMP element.
 	 */
-	protected function set_attributes( $node, $parent_node, $attributes ) {
-
+	protected function set_attributes( DOMElement $node, DOMElement $parent_node, $attributes ) {
 		if ( isset( $attributes['data-amp-layout'] ) ) {
 			$node->setAttribute( 'layout', $attributes['data-amp-layout'] );
 		}

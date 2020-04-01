@@ -15,6 +15,16 @@
 class AMP_Video_Converter_Test extends WP_UnitTestCase {
 
 	/**
+	 * Tear down.
+	 */
+	public function tearDown() {
+		if ( did_action( 'add_attachment' ) ) {
+			$this->remove_added_uploads();
+		}
+		parent::tearDown();
+	}
+
+	/**
 	 * Get data.
 	 *
 	 * @return array
@@ -45,6 +55,41 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 			'video_without_dimensions' => [
 				'<video src="https://example.com/file.mp4"></video>',
 				'<amp-video src="https://example.com/file.mp4" height="400" layout="fixed-height" width="auto"><a href="https://example.com/file.mp4" fallback="">https://example.com/file.mp4</a><noscript><video src="https://example.com/file.mp4"></video></noscript></amp-video>',
+			],
+
+			'local_video_without_dimensions' => [
+				sprintf( '<video src="%s"></video>', '{{video_url}}' ),
+				sprintf( '<amp-video src="%1$s" width="560" height="320" layout="responsive"><a href="%1$s" fallback="">%1$s</a><noscript><video src="%1$s"></video></noscript></amp-video>', '{{video_url}}' ),
+			],
+
+			'local_video_without_dimensions_and_with_data_layout' => [
+				sprintf( '<video src="%s" data-amp-layout="fixed"></video>', '{{video_url}}' ),
+				sprintf( '<amp-video src="%1$s" layout="fixed" width="560" height="320"><a href="%1$s" fallback="">%1$s</a><noscript><video src="%1$s"></video></noscript></amp-video>', '{{video_url}}' ),
+			],
+
+			'local_video_without_dimensions_and_with_fixed_height_layout' => [
+				sprintf( '<video src="%s" layout="fixed-height"></video>', '{{video_url}}' ),
+				sprintf( '<amp-video src="%1$s" layout="fixed-height" height="320"><a href="%1$s" fallback="">%1$s</a><noscript><video src="%1$s"></video></noscript></amp-video>', '{{video_url}}' ),
+			],
+
+			'layout_fill_video_without_dimensions' => [
+				'<video src="https://example.com/file.mp4" layout="fill"></video>',
+				'<amp-video src="https://example.com/file.mp4" layout="fill"><a href="https://example.com/file.mp4" fallback="">https://example.com/file.mp4</a><noscript><video src="https://example.com/file.mp4"></video></noscript></amp-video>',
+			],
+
+			'data_layout_fill_video_without_dimensions' => [
+				'<video src="https://example.com/file.mp4" data-amp-layout="fill"></video>',
+				'<amp-video src="https://example.com/file.mp4" layout="fill"><a href="https://example.com/file.mp4" fallback="">https://example.com/file.mp4</a><noscript><video src="https://example.com/file.mp4"></video></noscript></amp-video>',
+			],
+
+			'layout_nodisplay_video_without_dimensions' => [
+				'<video src="https://example.com/file.mp4" layout="nodisplay"></video>',
+				'<amp-video src="https://example.com/file.mp4" layout="nodisplay"><a href="https://example.com/file.mp4" fallback="">https://example.com/file.mp4</a><noscript><video src="https://example.com/file.mp4"></video></noscript></amp-video>',
+			],
+
+			'layout_fixed_video_without_dimensions' => [
+				'<video src="https://example.com/file.mp4" layout="nodisplay"></video>',
+				'<amp-video src="https://example.com/file.mp4" layout="nodisplay"><a href="https://example.com/file.mp4" fallback="">https://example.com/file.mp4</a><noscript><video src="https://example.com/file.mp4"></video></noscript></amp-video>',
 			],
 
 			'autoplay_attribute' => [
@@ -194,6 +239,25 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Get video attachment ID.
+	 *
+	 * @return int|WP_Error ID or error.
+	 */
+	protected function get_video_attachment_id() {
+		$temp_file = trailingslashit( get_temp_dir() ) . 'video-converter-test-' . wp_generate_uuid4() . '.mp4';
+		copy( DIR_TESTDATA . '/uploads/small-video.mp4', $temp_file );
+		$attachment_id = self::factory()->attachment->create_upload_object( $temp_file );
+
+		// Remove the file extension from the post_title media_handle_upload().
+		$attachment               = get_post( $attachment_id, ARRAY_A );
+		$attachment['post_title'] = str_replace( '.mp4', '', $attachment['post_title'] );
+		$attachment['post_name']  = str_replace( '-mp4', '', $attachment['post_name'] );
+		wp_update_post( wp_slash( $attachment ) );
+
+		return $attachment_id;
+	}
+
+	/**
 	 * Test converter.
 	 *
 	 * @dataProvider get_data
@@ -205,6 +269,12 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 	public function test_converter( $source, $expected = null, $args = [] ) {
 		if ( null === $expected ) {
 			$expected = $source;
+		}
+
+		if ( false !== strpos( $source, '{{video_url}}' ) ) {
+			$video_url = set_url_scheme( wp_get_attachment_url( $this->get_video_attachment_id() ), 'https' );
+			$source    = str_replace( '{{video_url}}', esc_url( $video_url ), $source );
+			$expected  = str_replace( '{{video_url}}', esc_url( $video_url ), $expected );
 		}
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );

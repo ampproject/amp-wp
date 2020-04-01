@@ -5,10 +5,14 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+
 /**
  * Tests for AMP_Post_Meta_Box.
  */
 class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
+
+	use AssertContainsCompatibility;
 
 	/**
 	 * Instance of AMP_Post_Meta_Box
@@ -39,10 +43,8 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		global $wp_scripts, $wp_styles;
 		$wp_scripts = null;
 		$wp_styles  = null;
-		unregister_post_type( AMP_Story_Post_Type::POST_TYPE_SLUG );
 		parent::tearDown();
 	}
-
 
 	/**
 	 * Test init.
@@ -104,8 +106,6 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	 * Test enqueue_block_assets.
 	 *
 	 * @covers AMP_Post_Meta_Box::enqueue_block_assets()
-	 * @covers AMP_Story_Post_Type::register_story_card_styling()
-	 * @covers AMP_Story_Post_Type::export_latest_stories_block_editor_data()
 	 */
 	public function test_enqueue_block_assets() {
 		if ( ! function_exists( 'register_block_type' ) ) {
@@ -146,10 +146,8 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 				'wp-element',
 				'wp-hooks',
 				'wp-i18n',
-				'wp-nux',
 				'wp-plugins',
 				'wp-polyfill',
-				'wp-server-side-render',
 				'wp-url',
 			],
 			$block_script->deps
@@ -163,8 +161,6 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 			'possibleStatuses',
 			'defaultStatus',
 			'errorMessages',
-			'isWebsiteEnabled',
-			'isStoriesEnabled',
 			'hasThemeSupport',
 			'isStandardMode',
 		];
@@ -172,21 +168,6 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		foreach ( $expected_localized_values as $localized_value ) {
 			$this->assertContains( $localized_value, $block_script->extra['data'] );
 		}
-
-		/*
-		 * Test Stories integration.
-		 * The current screen is the AMP Story editor, so the data for the Latest Stories block should not be present, as it's not needed there.
-		 */
-		register_post_type( AMP_Story_Post_Type::POST_TYPE_SLUG );
-		set_current_screen( AMP_Story_Post_Type::POST_TYPE_SLUG );
-		AMP_Story_Post_Type::register_story_card_styling( wp_styles() );
-		AMP_Story_Post_Type::export_latest_stories_block_editor_data();
-		$this->assertFalse( isset( wp_scripts()->registered[ AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE ]->extra['before'] ) );
-
-		// The current screen is the editor for a normal post, so the data for the Latest Stories block should be present.
-		set_current_screen( 'post.php' );
-		AMP_Story_Post_Type::export_latest_stories_block_editor_data();
-		$this->assertContains( 'ampLatestStoriesBlockData', implode( '', wp_scripts()->registered[ AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE ]->extra['before'] ) );
 	}
 
 	/**
@@ -210,28 +191,28 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		// This is not in AMP 'canonical mode' but rather reader or transitional mode.
 		remove_theme_support( AMP_Theme_Support::SLUG );
 		$output = get_echo( [ $this->instance, 'render_status' ], [ $post ] );
-		$this->assertContains( $amp_status_markup, $output );
-		$this->assertContains( $checkbox_enabled, $output );
+		$this->assertStringContains( $amp_status_markup, $output );
+		$this->assertStringContains( $checkbox_enabled, $output );
 
 		// This is in AMP-first mode with a template that can be rendered.
 		add_theme_support( AMP_Theme_Support::SLUG );
 		$output = get_echo( [ $this->instance, 'render_status' ], [ $post ] );
-		$this->assertContains( $amp_status_markup, $output );
-		$this->assertContains( $checkbox_enabled, $output );
+		$this->assertStringContains( $amp_status_markup, $output );
+		$this->assertStringContains( $checkbox_enabled, $output );
 
 		// Post type no longer supports AMP, so no status input.
 		remove_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
 		$output = get_echo( [ $this->instance, 'render_status' ], [ $post ] );
-		$this->assertContains( 'post type does not support it', $output );
-		$this->assertNotContains( $checkbox_enabled, $output );
+		$this->assertStringContains( 'post type does not support it', $output );
+		$this->assertStringNotContains( $checkbox_enabled, $output );
 		add_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
 
 		// No template is available to render the post.
 		add_filter( 'amp_supportable_templates', '__return_empty_array' );
 		AMP_Options_Manager::update_option( 'all_templates_supported', false );
 		$output = get_echo( [ $this->instance, 'render_status' ], [ $post ] );
-		$this->assertContains( 'no supported templates to display this in AMP.', wp_strip_all_tags( $output ) );
-		$this->assertNotContains( $checkbox_enabled, $output );
+		$this->assertStringContains( 'no supported templates to display this in AMP.', wp_strip_all_tags( $output ) );
+		$this->assertStringNotContains( $checkbox_enabled, $output );
 
 		// User doesn't have the capability to display the metabox.
 		add_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
@@ -312,8 +293,8 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		);
 
 		$messages = $this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, [ 'template_unsupported' ] );
-		$this->assertContains( 'There are no', $messages[0] );
-		$this->assertContains( 'page=amp-options', $messages[0] );
+		$this->assertStringContains( 'There are no', $messages[0] );
+		$this->assertStringContains( 'page=amp-options', $messages[0] );
 
 		$this->assertEquals(
 			[ 'AMP cannot be enabled on password protected posts.' ],
@@ -321,8 +302,8 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		);
 
 		$messages = $this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, [ 'post-type-support' ] );
-		$this->assertContains( 'AMP cannot be enabled because this', $messages[0] );
-		$this->assertContains( 'page=amp-options', $messages[0] );
+		$this->assertStringContains( 'AMP cannot be enabled because this', $messages[0] );
+		$this->assertStringContains( 'page=amp-options', $messages[0] );
 
 		$this->assertEquals(
 			[
@@ -399,5 +380,4 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		$_POST['amp-preview'] = 'do-preview';
 		$this->assertEquals( 'https://foo.bar?' . amp_get_slug() . '=1', $this->instance->preview_post_link( $link ) );
 	}
-
 }

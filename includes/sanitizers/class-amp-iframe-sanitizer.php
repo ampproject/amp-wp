@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use AmpProject\DevMode;
+
 /**
  * Class AMP_Iframe_Sanitizer
  *
@@ -64,7 +66,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Sanitize the <iframe> elements from the HTML contained in this instance's DOMDocument.
+	 * Sanitize the <iframe> elements from the HTML contained in this instance's Dom\Document.
 	 *
 	 * @since 0.2
 	 */
@@ -94,7 +96,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			$node = $nodes->item( $i );
 
 			// Skip element if already inside of an AMP element as a noscript fallback, or if it has a dev mode exemption.
-			if ( $this->is_inside_amp_noscript( $node ) || $this->has_dev_mode_exemption( $node ) ) {
+			if ( $this->is_inside_amp_noscript( $node ) || DevMode::hasExemptionForNode( $node ) ) {
 				continue;
 			}
 
@@ -110,7 +112,14 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			 * @see: https://github.com/ampproject/amphtml/issues/2261
 			 */
 			if ( empty( $normalized_attributes['src'] ) ) {
-				$this->remove_invalid_child( $node );
+				$this->remove_invalid_child(
+					$node,
+					[
+						'code'       => AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING,
+						'attributes' => [ 'src' ],
+						'spec_name'  => 'amp-iframe',
+					]
+				);
 				continue;
 			}
 
@@ -135,9 +144,41 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 
 			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-iframe', $normalized_attributes );
 
-			if ( true === $this->args['add_placeholder'] ) {
-				$placeholder_node = $this->build_placeholder( $normalized_attributes );
+			// Find existing placeholder/overflow.
+			$placeholder_node = null;
+			$overflow_node    = null;
+			foreach ( iterator_to_array( $node->childNodes ) as $child ) {
+				if ( ! ( $child instanceof DOMElement ) ) {
+					continue;
+				}
+				if ( $child->hasAttribute( 'placeholder' ) ) {
+					$placeholder_node = $node->removeChild( $child );
+				} elseif ( $child->hasAttribute( 'overflow' ) ) {
+					$overflow_node = $node->removeChild( $child );
+				}
+			}
+
+			// Add placeholder.
+			if ( $placeholder_node || true === $this->args['add_placeholder'] ) {
+				if ( ! $placeholder_node ) {
+					$placeholder_node = $this->build_placeholder( $normalized_attributes ); // @todo Can a better placeholder default be devised?
+				}
 				$new_node->appendChild( $placeholder_node );
+			}
+
+			// Add overflow.
+			if ( $new_node->hasAttribute( 'resizable' ) && ! $overflow_node ) {
+				$overflow_node = $this->dom->createElement( 'button' );
+				$overflow_node->setAttribute( 'overflow', '' );
+				if ( $node->hasAttribute( 'data-amp-overflow-text' ) ) {
+					$overflow_text = $node->getAttribute( 'data-amp-overflow-text' );
+				} else {
+					$overflow_text = __( 'Show all', 'amp' );
+				}
+				$overflow_node->appendChild( $this->dom->createTextNode( $overflow_text ) );
+			}
+			if ( $overflow_node ) {
+				$new_node->appendChild( $overflow_node );
 			}
 
 			$node->parentNode->replaceChild( $new_node, $node );
@@ -212,7 +253,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 
 				case 'allowfullscreen':
 				case 'allowtransparency':
-					if ( 'false' !== $value ) {
+					if ( 'false' !== strtolower( $value ) ) {
 						$out[ $name ] = '';
 					}
 					break;
@@ -220,6 +261,39 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 				case 'mozallowfullscreen':
 				case 'webkitallowfullscreen':
 					// Omit these since amp-iframe will add them if needed if the `allowfullscreen` attribute is present.
+					break;
+
+				case 'loading':
+					/*
+					 * The `amp-iframe` component already does lazy-loading by default; trigger a validation error only
+					 * if the value is not `lazy`.
+					 */
+					if ( 'lazy' !== strtolower( $value ) ) {
+						$out[ $name ] = $value;
+					}
+					break;
+
+				case 'security':
+					/*
+					 * Omit the `security` attribute as it now been superseded by the `sandbox` attribute. It is
+					 * (apparently) only supported by IE <https://stackoverflow.com/a/20071528>.
+					 */
+					break;
+
+				case 'marginwidth':
+				case 'marginheight':
+					// These attributes have been obsolete since HTML5. If they have the value `0` they can be omitted.
+					if ( '0' !== $value ) {
+						$out[ $name ] = $value;
+					}
+					break;
+
+				case 'data-amp-resizable':
+					$out['resizable'] = '';
+					break;
+
+				case 'data-amp-overflow-text':
+					// No need to copy.
 					break;
 
 				default:

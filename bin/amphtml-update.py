@@ -28,6 +28,9 @@ import json
 import google
 from collections import defaultdict
 import imp
+import re
+
+seen_spec_names = set()
 
 def Die(msg):
 	print >> sys.stderr, msg
@@ -95,6 +98,14 @@ def GeneratePHP(out_dir):
 	logging.info('entering ...')
 
 	allowed_tags, attr_lists, descendant_lists, reference_points, versions = ParseRules(out_dir)
+
+	expected_spec_names = (
+		'style amp-custom',
+		'style[amp-keyframes]',
+	)
+	for expected_spec_name in expected_spec_names:
+		if expected_spec_name not in seen_spec_names:
+			raise Exception( 'Missing spec: %s' % expected_spec_name )
 
 	#Generate the output
 	out = []
@@ -470,7 +481,27 @@ def GetTagSpec(tag_spec, attr_lists):
 
 				cdata_dict['css_spec'] = css_spec
 		if len( cdata_dict ) > 0:
+			if 'blacklisted_cdata_regex' in cdata_dict:
+				if 'error_message' not in cdata_dict['blacklisted_cdata_regex']:
+					raise Exception( 'Missing error_message for blacklisted_cdata_regex.' );
+				if cdata_dict['blacklisted_cdata_regex']['error_message'] not in ( 'CSS !important', 'contents', 'html comments' ):
+					raise Exception( 'Unexpected error_message "%s" for blacklisted_cdata_regex.' % cdata_dict['blacklisted_cdata_regex']['error_message'] );
 			tag_spec_dict['cdata'] = cdata_dict
+
+	if 'spec_name' not in tag_spec_dict['tag_spec']:
+		if 'extension_spec' in tag_spec_dict['tag_spec']:
+			# CUSTOM_ELEMENT=1 (default), CUSTOM_TEMPLATE=2
+			extension_type = tag_spec_dict['tag_spec']['extension_spec'].get('extension_type', 1)
+			spec_name = 'script [%s=%s]' % ( 'custom-element' if 1 == extension_type else 'custom-template', tag_spec_dict['tag_spec']['extension_spec']['name'].lower() )
+		else:
+			spec_name = tag_spec.tag_name.lower()
+	else:
+		spec_name = tag_spec_dict['tag_spec']['spec_name']
+
+	if '$reference_point' != spec_name:
+		if spec_name in seen_spec_names:
+			raise Exception( 'Already seen spec_name: %s' % spec_name )
+		seen_spec_names.add( spec_name )
 
 	return tag_spec_dict
 
@@ -624,6 +655,11 @@ def GetTagRules(tag_spec):
 				amp_layout[ field[0].name ] = field[1]
 		tag_rules['amp_layout'] = amp_layout
 
+	for mandatory_of_constraint in ['mandatory_anyof', 'mandatory_oneof']:
+		mandatory_of_spec = GetMandatoryOf(tag_spec.attrs, mandatory_of_constraint)
+		if mandatory_of_spec:
+			tag_rules[ mandatory_of_constraint ] = mandatory_of_spec
+
 	logging.info('... done')
 	return tag_rules
 
@@ -741,6 +777,29 @@ def UnicodeEscape(string):
 		An escaped string.
 	"""
 	return ('' + string).encode('unicode-escape')
+
+def GetMandatoryOf( attr, constraint ):
+	"""Gets the attributes with the passed mandatory_*of constraint, if there are any.
+
+	Args:
+		attr: The attributes in which to look for the mandatory_*of constraint.
+		constraint: A string of the mandatory_*of constraint, like 'mandatory_anyof'.
+	Returns:
+		A list of attributes that have that constraint name.
+	"""
+	attributes = set()
+	for attr_spec in attr:
+		if attr_spec.HasField(constraint):
+			attributes.add(
+				# Convert something like [src] to data-amp-bind-src.
+				re.sub(
+					"^\[(\S+)\]$",
+					r"data-amp-bind-\1",
+					attr_spec.name
+				)
+			)
+
+	return sorted(attributes)
 
 def Phpize(data, indent=0):
 	"""Helper function to convert JSON-serializable data into PHP literals.

@@ -33,6 +33,11 @@ class AMP_Vimeo_Embed_Test extends WP_UnitTestCase {
 				'https://vimeo.com/172355597/abcdef0123' . PHP_EOL,
 				'<p><amp-vimeo data-videoid="172355597" layout="responsive" width="600" height="338"></amp-vimeo></p>' . PHP_EOL,
 			],
+
+			'url_player'   => [
+				'https://player.vimeo.com/video/172355597' . PHP_EOL,
+				'<p><amp-vimeo data-videoid="172355597" layout="responsive" width="600" height="338"></amp-vimeo></p>' . PHP_EOL,
+			],
 		];
 	}
 
@@ -139,7 +144,7 @@ class AMP_Vimeo_Embed_Test extends WP_UnitTestCase {
 	 * Test video_override().
 	 *
 	 * @dataProvider get_video_override_data
-	 * @covers AMP_Vimeo_Embed_Handler::test_video_override()
+	 * @covers AMP_Vimeo_Embed_Handler::video_override()
 	 *
 	 * @param string $html     The initial HTML.
 	 * @param array  $attr     The attributes of the shortcode.

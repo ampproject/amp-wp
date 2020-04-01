@@ -152,18 +152,6 @@ To verify your code meets the requirements, you can run `npm run lint`.
 
 You can also install a `pre-commit` hook by running `bash vendor/xwp/wp-dev-lib/scripts/install-pre-commit-hook.sh`. This way, your code will be checked automatically before committing any changes.
 
-### Updating Google fonts list
-
-**Note:** A [Google Fonts API key](https://developers.google.com/fonts/docs/developer_api) is required to update the list of Google Fonts that is included in the plugin. Details of how to get an API key can be found on in the [Google fonts docs](https://developers.google.com/fonts/docs/developer_api).
-
-Once obtained, follow these steps to configure the project appropriately:
-
-1. Copy `example.env` to `.env`.
-1. Replace `replacemewithrealkey` with API key.
-1. Run `npm run download-fonts`
-
-The fonts will then be downloaded to `includes/data/fonts.json`.
-
 ### Tests
 
 #### PHP Unit Tests
@@ -312,13 +300,13 @@ This will create an `amp.zip` in the plugin directory which you can install. The
 1. Do `npm run build` and install the `amp.zip` onto a normal WordPress install running a stable release build; do smoke test to ensure it works.
 1. [Draft new release](https://github.com/ampproject/amp-wp/releases/new) on GitHub targeting the required branch (`develop` for major, `x.y` for minor).
     1. Use the new plugin version as the tag (e.g. `1.2-beta3` or `1.2.1-RC1`)
-    1. USe new version as the title, followed by some highlight tagline of the release.
+    1. Use new version as the title, followed by some highlight tagline of the release.
     1. Attach the `amp.zip` build to the release.
     1. Add changelog entry to the release, link to compare view comparing previous release, and link to milestone.
     1. Make sure “Pre-release” is checked.
 1. Publish GitHub release.
 1. Create built release tag (from the just-created `build` directory):
-    1. do `git fetch --tags && ./bin/tag-built.sh`
+    1. Do `git fetch origin --tags && ./bin/tag-built.sh`
     1. Add link from release notes.
 1. Make announcements on Twitter and the #amp-wp channel on AMP Slack, linking to release post or GitHub release.
 1. Bump version in release branch, e.g. `…-alpha` to `…-beta1` and `…-beta2` to `…-RC1`
@@ -329,24 +317,24 @@ Contributors who want to make a new release, follow these steps:
 
 1. Create changelog draft on [Wiki page](https://github.com/ampproject/amp-wp/wiki/Release-Changelog-Draft).
     1. Gather props list of the entire release, including contributors of code, design, testing, project management, etc.
-1. Update readme including the description, contributors, and screenshots.
-1. Draft release post.
+1. Update readme including the description, contributors, and screenshots (as needed).
 1. For major release, draft blog post about the new release.
 1. For minor releases, make sure all merged commits in `develop` have been also merged onto release branch.
 1. Check out the branch intended for release (`develop` for major, `x.y` for minor) and pull latest commits.
 1. Do `npm install && composer selfupdate && composer install -o`.
 1. Bump plugin versions in `amp.php` (×2: the metadata block in the header and also the `AMP__VERSION` constant). Verify via `npx grunt shell:verify_matching_versions`. Ensure patch version number is supplied for major releases, so `1.2-RC1` should bump to `1.2.0`.
+1. Ensure "Tested Up To" is updated to current WordPress version.
 1. Do `npm run build` and install the `amp.zip` onto a normal WordPress install running a stable release build; do smoke test to ensure it works.
 1. Optionally do sanity check by comparing the `build` directory with the previously-deployed plugin on WordPress.org for example: `svn export https://plugins.svn.wordpress.org/amp/trunk /tmp/amp-trunk; diff /tmp/amp-trunk/ ./build/` (instead of straight `diff`, it's best to use a GUI like `idea diff`, `phpstorm diff`, or `opendiff`).
 1. [Draft new release](https://github.com/ampproject/amp-wp/releases/new) on GitHub targeting the required branch (`develop` for major, `x.y` for minor):
     1. Use the new plugin version as the tag (e.g. `1.2.0` or `1.2.1`)
     1. Attach the `amp.zip` build to the release.
     1. Add changelog entry to the release, link to compare view comparing previous release, and link to milestone.
+1. Publish GitHub release.
 1. Run `npm run deploy` to commit the plugin to WordPress.org.
 1. Confirm the release is available on WordPress.org; try installing it on a WordPress install and confirm it works.
-1. Publish GitHub release.
 1. Create built release tag (from the just-created `build` directory):
-    1. do `git fetch --tags && ./bin/tag-built.sh`
+    1. Do `git fetch origin --tags && ./bin/tag-built.sh`
     1. Add link from release notes.
 1. For new major releases, create a release branch from the tag. Patch versions are made from the release branch.
 1. For minor releases, bump `Stable tag` in the `readme.txt`/`readme.md` in `develop`. Cherry-pick other changes as necessary.

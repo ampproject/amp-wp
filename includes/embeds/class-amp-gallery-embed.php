@@ -5,8 +5,9 @@
  * @package AMP
  */
 
-use Amp\AmpWP\Component\DOMElementList;
-use Amp\AmpWP\Component\Carousel;
+use AmpProject\Dom\Document;
+use AmpProject\AmpWP\Dom\ElementList;
+use AmpProject\AmpWP\Component\Carousel;
 
 /**
  * Class AMP_Gallery_Embed_Handler
@@ -203,7 +204,7 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return string Rendered.
 	 */
 	public function render( $args ) {
-		$dom                        = new DOMDocument();
+		$dom                        = new Document();
 		$this->did_convert_elements = true;
 
 		$args = wp_parse_args(
@@ -217,7 +218,7 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 			return '';
 		}
 
-		$images = new DOMElementList();
+		$images = new ElementList();
 		foreach ( $args['images'] as $props ) {
 			$image_atts = [
 				'src'    => $props['url'],
@@ -235,7 +236,7 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 			}
 			$image = AMP_DOM_Utils::create_node(
 				$dom,
-				'amp-img',
+				'img',
 				$image_atts
 			);
 
@@ -261,7 +262,7 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 		// Prevent an error in get_content_from_dom_node() when it calls $node->parentNode->insertBefore().
 		$dom->appendChild( $carousel_node );
 
-		return AMP_DOM_Utils::get_content_from_dom_node( $dom, $carousel_node );
+		return $dom->saveHTML( $carousel_node );
 	}
 
 	/**

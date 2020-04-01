@@ -1,18 +1,27 @@
 <?php
 
 class AMP_Instagram_Embed_Test extends WP_UnitTestCase {
+
 	public function get_conversion_data() {
 		return [
-			'no_embed'   => [
+			'no_embed'      => [
 				'<p>Hello world.</p>',
 				'<p>Hello world.</p>' . PHP_EOL,
 			],
-			'simple_url' => [
+			'simple_url'    => [
 				'https://instagram.com/p/7-l0z_p4A4/' . PHP_EOL,
 				'<p><amp-instagram data-shortcode="7-l0z_p4A4" data-captioned layout="responsive" width="600" height="600"></amp-instagram></p>' . PHP_EOL,
 			],
-			'short_url'  => [
+			'simple_tv_url' => [
+				'https://instagram.com/tv/7-l0z_p4A4/' . PHP_EOL,
+				'<p><amp-instagram data-shortcode="7-l0z_p4A4" data-captioned layout="responsive" width="600" height="600"></amp-instagram></p>' . PHP_EOL,
+			],
+			'short_url'     => [
 				'https://instagr.am/p/7-l0z_p4A4' . PHP_EOL,
+				'<p><amp-instagram data-shortcode="7-l0z_p4A4" data-captioned layout="responsive" width="600" height="600"></amp-instagram></p>' . PHP_EOL,
+			],
+			'short_tv_url'  => [
+				'https://instagr.am/tv/7-l0z_p4A4' . PHP_EOL,
 				'<p><amp-instagram data-shortcode="7-l0z_p4A4" data-captioned layout="responsive" width="600" height="600"></amp-instagram></p>' . PHP_EOL,
 			],
 		];
@@ -92,6 +101,11 @@ class AMP_Instagram_Embed_Test extends WP_UnitTestCase {
 
 			'blockquote_embed'                       => [
 				wpautop( '<blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/BhsgU3jh6xE/"><div style="padding: 8px;">Lorem ipsum</div></blockquote> <script async defer src="//www.instagram.com/embed.js"></script>' ), // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine
+				'<amp-instagram data-shortcode="BhsgU3jh6xE" layout="responsive" width="600" height="600"></amp-instagram>' . "\n\n",
+			],
+
+			'blockquote_tv_embed'                    => [
+				wpautop( '<blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/tv/BhsgU3jh6xE/"><div style="padding: 8px;">Lorem ipsum</div></blockquote> <script async defer src="//www.instagram.com/embed.js"></script>' ), // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine
 				'<amp-instagram data-shortcode="BhsgU3jh6xE" layout="responsive" width="600" height="600"></amp-instagram>' . "\n\n",
 			],
 

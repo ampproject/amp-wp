@@ -1,6 +1,11 @@
 <?php
 
+use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+use AmpProject\Dom\Document;
+
 class AMP_Analytics_Options_Test extends WP_UnitTestCase {
+
+	use AssertContainsCompatibility;
 
 	/**
 	 * Set up.
@@ -139,7 +144,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 
 		$libxml_previous_state = libxml_use_internal_errors( true );
 
-		$dom = new DOMDocument();
+		$dom = new Document();
 		$dom->loadHTML( $amp_rendered );
 
 		$components = $dom->getElementsByTagName( 'amp-analytics' );
@@ -172,7 +177,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 
 		$libxml_previous_state = libxml_use_internal_errors( true );
 
-		$dom = new DOMDocument();
+		$dom = new Document();
 		$dom->loadHTML( $amp_rendered );
 		$components = $dom->getElementsByTagName( 'amp-analytics' );
 
@@ -249,7 +254,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		$this->assertEquals( 1, $trigger_count );
 
 		$this->assertStringStartsWith( '<amp-analytics', $output );
-		$this->assertContains( 'type="googleanalytics"><script type="application/json">{"requests":{"event":', $output );
+		$this->assertStringContains( 'type="googleanalytics"><script type="application/json">{"requests":{"event":', $output );
 
 		remove_action(
 			'amp_print_analytics',
@@ -268,7 +273,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 
 		$output = get_echo( 'amp_print_analytics', [ $analytics ] );
 
-		$this->assertContains( 'data-include="_till_responded"', $output );
+		$this->assertStringContains( 'data-include="_till_responded"', $output );
 	}
 
 	/**
@@ -290,7 +295,6 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		);
 		$output = get_echo( 'amp_print_analytics', [ '' ] );
 		$this->assertStringStartsWith( '<amp-analytics', $output );
-		$this->assertContains( 'type="googleanalytics"><script type="application/json">{"requests":{"event":', $output );
+		$this->assertStringContains( 'type="googleanalytics"><script type="application/json">{"requests":{"event":', $output );
 	}
-
 }
