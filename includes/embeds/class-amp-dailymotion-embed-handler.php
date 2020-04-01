@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use AmpProject\Dom\Document;
+
 /**
  * Class AMP_DailyMotion_Embed_Handler
  *
@@ -12,8 +14,7 @@
  */
 class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 
-	const URL_PATTERN = '#https?:\/\/(www\.)?dailymotion\.com\/video\/.*#i';
-	const RATIO       = 0.5625;
+	const RATIO = 0.5625;
 
 	/**
 	 * Default width.
@@ -48,86 +49,89 @@ class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Register embed.
 	 */
 	public function register_embed() {
-		wp_embed_register_handler( 'amp-dailymotion', self::URL_PATTERN, [ $this, 'oembed' ], -1 );
+		// Not implemented.
 	}
 
 	/**
 	 * Unregister embed.
 	 */
 	public function unregister_embed() {
-		wp_embed_unregister_handler( 'amp-dailymotion', -1 );
+		// Not implemented.
 	}
 
 	/**
-	 * Render oEmbed.
+	 * Sanitize all DailyMotion <iframe> tags to <amp-dailymotion>.
 	 *
-	 * @see \WP_Embed::shortcode()
-	 *
-	 * @param array  $matches URL pattern matches.
-	 * @param array  $attr    Shortcode attributes.
-	 * @param string $url     URL.
-	 * @param string $rawattr Unmodified shortcode attributes.
-	 * @return string Rendered oEmbed.
+	 * @param Document $dom DOM.
 	 */
-	public function oembed( $matches, $attr, $url, $rawattr ) {
-		$video_id = $this->get_video_id_from_url( $url );
-		return $this->render(
-			[
-				'video_id' => $video_id,
-			]
-		);
+	public function sanitize_raw_embeds( Document $dom ) {
+		$nodes = $dom->xpath->query( '//iframe[ starts-with( @src, "https://www.dailymotion.com/embed/video/" ) ]' );
+
+		foreach ( $nodes as $node ) {
+			if ( ! $this->is_raw_embed( $node ) ) {
+				continue;
+			}
+			$this->sanitize_raw_embed( $node );
+		}
 	}
 
 	/**
-	 * Render.
+	 * Determine if the node has already been sanitized.
 	 *
-	 * @param array $args Args.
-	 * @return string Rendered.
+	 * @param DOMElement $node The DOMNode.
+	 * @return bool Whether the node is a raw embed.
 	 */
-	public function render( $args ) {
-		$args = wp_parse_args(
-			$args,
-			[
-				'video_id' => false,
-			]
-		);
+	protected function is_raw_embed( DOMElement $node ) {
+		return $node->parentNode && 'amp-dailymotion' !== $node->parentNode->nodeName;
+	}
 
-		if ( empty( $args['video_id'] ) ) {
-			return AMP_HTML_Utils::build_tag(
-				'a',
+	/**
+	 * Make DailyMotion embed AMP compatible.
+	 *
+	 * @param DOMElement $iframe_node The node to make AMP compatible.
+	 */
+	private function sanitize_raw_embed( DOMElement $iframe_node ) {
+		$iframe_src = $iframe_node->getAttribute( 'src' );
+
+		if ( preg_match( '#video/(?P<video_id>[a-zA-Z0-9]+)#', $iframe_src, $matches ) ) {
+			$video_id = $matches['video_id'];
+
+			$amp_iframe_node = AMP_DOM_Utils::create_node(
+				Document::fromNode( $iframe_node ),
+				'amp-dailymotion',
 				[
-					'href'  => esc_url_raw( $args['url'] ),
-					'class' => 'amp-wp-embed-fallback',
-				],
-				esc_html( $args['url'] )
+					'data-videoid' => $video_id,
+					'layout'       => 'responsive',
+					'width'        => $this->args['width'],
+					'height'       => $this->args['height'],
+				]
 			);
+
+			$this->maybe_unwrap_p_element( $iframe_node );
+
+			$iframe_node->parentNode->replaceChild( $amp_iframe_node, $iframe_node );
 		}
 
-		$this->did_convert_elements = true;
-
-		return AMP_HTML_Utils::build_tag(
-			'amp-dailymotion',
-			[
-				'data-videoid' => $args['video_id'],
-				'layout'       => 'responsive',
-				'width'        => $this->args['width'],
-				'height'       => $this->args['height'],
-			]
-		);
+		// Nothing to be done if the video ID could not be found.
 	}
 
 	/**
-	 * Determine the video ID from the URL.
+	 * Replace the node's parent with itself if the parent is a <p> tag, has no attributes and has no other children.
+	 * This usually happens while `wpautop()` processes the element.
 	 *
-	 * @param string $url URL.
-	 * @return integer Video ID.
+	 * @param DOMElement $node Node.
 	 */
-	private function get_video_id_from_url( $url ) {
-		$parsed_url = wp_parse_url( $url );
-		parse_str( $parsed_url['path'], $path );
-		$tok = explode( '/', $parsed_url['path'] );
-		$tok = explode( '_', $tok[2] );
+	private function maybe_unwrap_p_element( DOMElement $node ) {
+		$parent_node = $node->parentNode;
+		while ( $parent_node && ! ( $parent_node instanceof DOMElement ) ) {
+			$parent_node = $parent_node->parentNode;
+		}
 
-		return $tok[0];
+		if ( 'p' === $parent_node->nodeName && false === $parent_node->hasAttributes() ) {
+			$children = $parent_node->getElementsByTagName( '*' );
+			if ( 1 === $children->length ) {
+				$parent_node->parentNode->replaceChild( $node, $parent_node );
+			}
+		}
 	}
 }
