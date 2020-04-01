@@ -65,6 +65,11 @@ class Test_AMP_Meta_Sanitizer extends WP_UnitTestCase {
 				'<!DOCTYPE html><html><head><meta name="amp-script-src" content="' . esc_attr( $script1_hash ) . '"><meta charset="utf-8"><meta name="amp-script-src" content="' . esc_attr( $script2_hash ) . '"><meta name="viewport" content="width=device-width"><meta name="amp-script-src" content="' . esc_attr( $script3_hash ) . '">' . $amp_boilerplate . '</head><body><meta name="amp-script-src" content="' . esc_attr( $script4_hash ) . '"></body></html>',
 				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><meta name="amp-script-src" content="' . esc_attr( $script1_hash ) . ' ' . esc_attr( $script2_hash ) . ' ' . esc_attr( $script3_hash ) . ' ' . esc_attr( $script4_hash ) . '">' . $amp_boilerplate . '</head><body></body></html>',
 			],
+
+			'Ignore generic meta tags'                    => [
+				'<!DOCTYPE html><html><head>' . $amp_boilerplate . '</head><body><meta itemprop="datePublished" content="2020-03-24T18:05:15+05:30"><meta itemprop="width" content="1280"><meta itemprop="height" content="720"></body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">' . $amp_boilerplate . '</head><body><meta itemprop="datePublished" content="2020-03-24T18:05:15+05:30"><meta itemprop="width" content="1280"><meta itemprop="height" content="720"></body></html>',
+			],
 		];
 	}
 

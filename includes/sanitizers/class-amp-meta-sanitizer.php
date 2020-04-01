@@ -70,15 +70,7 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	 * Sanitize.
 	 */
 	public function sanitize() {
-		$meta_elements = $this->dom->getElementsByTagName( static::$tag );
-
-		// Remove all nodes for easy reordering later on.
-		$meta_elements = array_map(
-			static function ( $element ) {
-				return $element->parentNode->removeChild( $element );
-			},
-			iterator_to_array( $meta_elements, false )
-		);
+		$meta_elements = iterator_to_array( $this->dom->getElementsByTagName( static::$tag ), false );
 
 		foreach ( $meta_elements as $meta_element ) {
 
@@ -97,12 +89,29 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 			 */
 			if ( $meta_element->hasAttribute( Attribute::CHARSET ) ) {
 				$this->meta_tags[ self::TAG_CHARSET ][] = $meta_element;
+				$meta_element->parentNode->removeChild( $meta_element );
 			} elseif ( Attribute::VIEWPORT === $meta_element->getAttribute( Attribute::NAME ) ) {
 				$this->meta_tags[ self::TAG_VIEWPORT ][] = $meta_element;
+				$meta_element->parentNode->removeChild( $meta_element );
 			} elseif ( Attribute::AMP_SCRIPT_SRC === $meta_element->getAttribute( Attribute::NAME ) ) {
 				$this->meta_tags[ self::TAG_AMP_SCRIPT_SRC ][] = $meta_element;
+				$meta_element->parentNode->removeChild( $meta_element );
 			} else {
-				$this->meta_tags[ self::TAG_OTHER ][] = $meta_element;
+				/**
+				 * Prevent processing nodes that should not be reordered. Conditions below are adapted from the generic
+				 * meta tag spec.
+				 *
+				 * @see https://github.com/ampproject/amphtml/blob/286a6302fcd007eab303b105c161e76d9e880322/validator/validator-main.protoascii#L701-L727
+				 */
+				if (
+					$meta_element->hasAttribute( 'name' ) &&
+					preg_match( '/(^|\\s)(amp-.*|amp4ads-.*|apple-itunes-app|content-disposition|revisit-after|viewport)(\\s|$)/', $meta_element->getAttribute( 'name' ) )
+				) {
+					$this->meta_tags[ self::TAG_OTHER ][] = $meta_element;
+					$meta_element->parentNode->removeChild( $meta_element );
+				}
+
+				continue;
 			}
 		}
 
