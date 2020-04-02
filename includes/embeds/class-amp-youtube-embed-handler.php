@@ -187,7 +187,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		if ( isset( $parsed_url['path'] ) ) {
 			$segments = explode( '/', trim( $parsed_url['path'], '/' ) );
-			if ( 1 === count( $segments ) ) {
+			if ( 1 === count( $segments ) && ! in_array( $segments[0], [ 'playlist', 'account' ], true ) ) {
 				return $segments[0]; // e.g. https://youtu.be/XOY3ZUO6P0k.
 			} elseif ( count( $segments ) > 1 ) {
 				if ( in_array( $segments[0], [ 'embed', 'v', 'e', 'vi' ], true ) ) {

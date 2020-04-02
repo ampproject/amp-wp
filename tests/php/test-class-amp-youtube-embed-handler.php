@@ -253,6 +253,18 @@ class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
 				'//www.youtube-nocookie.com/embed/XOY3ZUO6P0k?rel=0',
 				'XOY3ZUO6P0k',
 			],
+			'account_url'                      => [
+				'https://www.youtube.com/account',
+				false,
+			],
+			'account_url_followed_by_segment'  => [
+				'https://www.youtube.com/account/johnsmith',
+				false,
+			],
+			'playlist_url'                     => [
+				'https://www.youtube.com/playlist?list=PLCra4VPr-3frJzAd-lVYo3-34wu0Eax_u',
+				false,
+			],
 			'false_because_no_id'              => [
 				'http://youtube.com/?wrong=XOY3ZUO6P0k',
 				false,
