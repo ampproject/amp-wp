@@ -90,7 +90,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		add_theme_support( AMP_Theme_Support::SLUG );
 		AMP_Theme_Support::init();
-		$this->assertEquals( 10, has_action( 'widgets_init', [ self::TESTED_CLASS, 'register_widgets' ] ) );
+		$this->assertEquals( false, has_action( 'widgets_init', [ self::TESTED_CLASS, 'register_widgets' ] ) );
 		$this->assertEquals( PHP_INT_MAX, has_action( 'wp', [ self::TESTED_CLASS, 'finish_init' ] ) );
 	}
 
@@ -1082,6 +1082,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * Test register_widgets().
 	 *
 	 * @covers AMP_Theme_Support::register_widgets()
+	 * @expectedDeprecated AMP_Theme_Support::register_widgets
 	 * @global WP_Widget_Factory $wp_widget_factory
 	 */
 	public function test_register_widgets() {
