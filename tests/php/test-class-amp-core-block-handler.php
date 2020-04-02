@@ -177,4 +177,169 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 		$this->assertStringNotContains( 'width=', $content );
 		$this->assertStringNotContains( 'height=', $content );
 	}
+
+	/**
+	 * Test data for test_sanitize_raw_embeds().
+	 *
+	 * @return array Test data.
+	 */
+	public function get_raw_embeds() {
+		return [
+			'category_widgets' => [
+				[
+					'1'                      => [
+						'target' => '_top',
+					],
+					'2'                      => [
+						'target' => '_top',
+					],
+					'cat'                    => [
+						'on' => 'change:1.submit',
+					],
+					'categories-dropdown--1' => [
+						'on' => 'change:2.submit',
+					],
+				],
+				'
+			<div class="widget">
+				<div class="widget-title">
+					<h3>Categories</h3>
+				</div>
+				<form action="https://example.com" method="get">
+					<label class="screen-reader-text" for="cat">Categories</label>
+					<select name=\'cat\' id=\'cat\' class=\'postform\' >
+						<option value=\'-1\'>Select Category</option>
+						<option class="level-0" value="1">Uncategorized</option>
+					</select>
+				</form>
+				<script>
+					/* <![CDATA[ */
+					(function() {
+						var dropdown = document.getElementById( "cat" );
+						function onCatChange() {
+							if ( dropdown.options[ dropdown.selectedIndex ].value > 0 ) {
+								dropdown.parentNode.submit();
+							}
+						}
+						dropdown.onchange = onCatChange;
+					})();
+					/* ]]> */
+				</script>
+			</div>
+			<div class="widget">
+				<div class="widget-title">
+					<h3>Another set of Categories</h3>
+				</div>
+				<form action="https://example.com" method="get">
+					<label class="screen-reader-text" for="categories-dropdown--1">Categories</label>
+					<select name=\'cat\' id=\'categories-dropdown--1\' class=\'postform\' >
+						<option value=\'-1\'>Select Category</option>
+						<option class="level-0" value="1">Category 1</option>
+						<option class="level-1" value="2">Category 2</option>
+					</select>
+				</form>
+				<script>
+					/* <![CDATA[ */
+					(function() {
+						var dropdown = document.getElementById( "categories-dropdown--1" );
+						function onCatChange() {
+							if ( dropdown.options[ dropdown.selectedIndex ].value > 0 ) {
+								dropdown.parentNode.submit();
+							}
+						}
+						dropdown.onchange = onCatChange;
+					})();
+					/* ]]> */
+				</script>
+			</div>
+			',
+			],
+
+			'archive_widgets'  => [
+				[
+					'archives-dropdown--1' => [
+						'on' => 'change:AMP.navigateTo(url=event.value)',
+					],
+					'archives-dropdown--2' => [
+						'on' => 'change:AMP.navigateTo(url=event.value)',
+					],
+				],
+				'
+			<div class="widget">
+				<div class="widget-title">
+					<h3>Archive</h3>
+				</div>
+				<label class="screen-reader-text" for="archives-dropdown--1">Archive</label>
+				<select id="archives-dropdown--1" name="archive-dropdown">
+					<option value="">Select Month</option>
+					<option value=\'https://example.com/2020/04/\'> April 2020 </option>
+					<option value=\'https://example.com/2020/03/\'> March 2020 </option>
+				</select>
+			<script>
+				/* <![CDATA[ */
+				(function() {
+					var dropdown = document.getElementById( "archives-dropdown--1" );
+					function onSelectChange() {
+						if ( dropdown.options[ dropdown.selectedIndex ].value !== \'\' ) {
+							document.location.href = this.options[ this.selectedIndex ].value;
+						}
+					}
+					dropdown.onchange = onSelectChange;
+				})();
+				/* ]]> */
+			</script>
+			</div>
+			<div class="widget">
+				<div class="widget-title">
+					<h3>Archive Pt 2</h3>
+				</div>
+				<label class="screen-reader-text" for="archives-dropdown--2">Archive</label>
+				<select id="archives-dropdown--2" name="archive-dropdown">
+					<option value="">Select Month</option>
+					<option value=\'https://example.com/2020/01/\'> January 2020 </option>
+					<option value=\'https://example.com/2020/02/\'> February 2020 </option>
+				</select>
+			<script>
+				/* <![CDATA[ */
+				(function() {
+					var dropdown = document.getElementById( "archives-dropdown--2" );
+					function onSelectChange() {
+						if ( dropdown.options[ dropdown.selectedIndex ].value !== \'\' ) {
+							document.location.href = this.options[ this.selectedIndex ].value;
+						}
+					}
+					dropdown.onchange = onSelectChange;
+				})();
+				/* ]]> */
+			</script>
+			</div>
+			',
+			],
+		];
+	}
+
+	/**
+	 * Test ::sanitize_raw_embeds()
+	 *
+	 * @dataProvider get_raw_embeds
+	 * @covers ::ampify_cover_block()
+	 *
+	 * @param array  $expected_attrs Array defining the expected attributes that should be present on specified elements.
+	 * @param string $content        Content.
+	 */
+	public function test_sanitize_raw_embeds( $expected_attrs, $content ) {
+		$embed = new AMP_Core_Block_Handler();
+		$embed->register_embed();
+
+		$dom = AMP_DOM_Utils::get_dom_from_content( $content );
+		$embed->sanitize_raw_embeds( $dom );
+
+		foreach ( $expected_attrs as $element_id => $attrs ) {
+			$element = $dom->getElementById( $element_id );
+
+			foreach ( $attrs as $attr => $value ) {
+				$this->assertEquals( $value, $element->getAttribute( $attr ) );
+			}
+		}
+	}
 }

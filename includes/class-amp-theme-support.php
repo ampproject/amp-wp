@@ -165,8 +165,6 @@ class AMP_Theme_Support {
 			AMP_Core_Theme_Sanitizer::extend_theme_support();
 		}
 
-		add_action( 'widgets_init', [ __CLASS__, 'register_widgets' ] );
-
 		/*
 		 * Note that wp action is use instead of template_redirect because some themes/plugins output
 		 * the response at this action and then short-circuit with exit. So this is why the the preceding
@@ -1116,17 +1114,17 @@ class AMP_Theme_Support {
 				wp_dequeue_script( 'comment-reply' ); // Handled largely by AMP_Comments_Sanitizer and *reply* methods in this class.
 			}
 		);
-
-		// @todo Add character conversion.
 	}
 
 	/**
 	 * Register/override widgets.
 	 *
+	 * @deprecated
 	 * @global WP_Widget_Factory
 	 * @return void
 	 */
 	public static function register_widgets() {
+		_deprecated_function( __METHOD__, '1.5.2' );
 		global $wp_widget_factory;
 		foreach ( $wp_widget_factory->widgets as $registered_widget ) {
 			$registered_widget_class_name = get_class( $registered_widget );
