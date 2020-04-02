@@ -30,6 +30,36 @@ class Test_AMP_Meta_Sanitizer extends WP_UnitTestCase {
 
 		$amp_boilerplate = amp_get_boilerplate_code();
 
+		$html5_microdata = '
+			<span itemprop="author" itemscope itemtype="https://schema.org/Person">
+				<meta itemprop="name" content="Siva">
+			</span>
+			<meta itemprop="datePublished" content="2020-03-24T18:05:15+05:30">
+			<meta itemprop="dateModified" content="2020-03-24T18:05:15+05:30">
+			<meta itemscope itemprop="mainEntityOfPage" itemtype="https://schema.org/WebPage" itemid="https://example.com/">
+			<span itemprop="publisher" itemscope itemtype="https://schema.org/Organization">
+				<span itemprop="logo" itemscope itemtype="https://schema.org/ImageObject">
+					<meta itemprop="url" content="https://example/logo.png">
+				</span>
+				<meta itemprop="name" content="Example">
+				<meta itemprop="url" content="https://example.com">
+			</span>
+			<meta itemprop="headline " content="This is a test">
+			<span itemprop="image" itemscope itemtype="https://schema.org/ImageObject">
+				<meta itemprop="url" content="https://example.com/foo.jpg">
+				<meta itemprop="width" content="1280"><meta itemprop="height" content="720">
+			</span>
+			<div itemscope id="amanda" itemref="a b"></div>
+			<p id="a">Name: <span itemprop="name">Amanda</span> </p>
+				<div id="b" itemprop="band" itemscope itemref="c"></div>
+			<div id="c">
+				<p>Band: <span itemprop="name">Jazz Band</span> </p>
+				<p>Size: <span itemprop="size">12</span> players</p>
+			</div>
+			<meta id="foo">
+			<meta name="greeting" content="Hello!">
+		';
+
 		return [
 			'Do not break the correct charset tag'        => [
 				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">' . $amp_boilerplate . '</head><body></body></html>',
@@ -67,10 +97,41 @@ class Test_AMP_Meta_Sanitizer extends WP_UnitTestCase {
 			],
 
 			'Ignore generic meta tags'                    => [
-				'<!DOCTYPE html><html><head>' . $amp_boilerplate . '</head><body><meta itemprop="datePublished" content="2020-03-24T18:05:15+05:30"><meta itemprop="width" content="1280"><meta itemprop="height" content="720"></body></html>',
-				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">' . $amp_boilerplate . '</head><body><meta itemprop="datePublished" content="2020-03-24T18:05:15+05:30"><meta itemprop="width" content="1280"><meta itemprop="height" content="720"></body></html>',
+				'<!DOCTYPE html><html><head>' . $amp_boilerplate . '</head><body>' . $html5_microdata . '</body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">' . $amp_boilerplate . '</head><body>' . $html5_microdata . '</body></html>',
 			],
 		];
+	}
+
+	/**
+	 * Test that the expected tag specs exist for the body.
+	 */
+	public function test_expected_meta_tags() {
+		$named_specs = array_filter(
+			AMP_Allowed_Tags_Generated::get_allowed_tag( 'meta' ),
+			static function ( $spec ) {
+				return isset( $spec['tag_spec']['spec_name'] ) && AMP_Meta_Sanitizer::BODY_ANCESTOR_META_TAG_SPEC_NAME === $spec['tag_spec']['spec_name'];
+			}
+		);
+		$this->assertCount( 1, $named_specs );
+
+		$body_ok_specs = array_filter(
+			AMP_Allowed_Tags_Generated::get_allowed_tag( 'meta' ),
+			static function ( $spec ) {
+				$head_required = (
+					( isset( $spec['tag_spec']['mandatory_parent'] ) && 'head' === $spec['tag_spec']['mandatory_parent'] )
+					||
+					( isset( $spec['tag_spec']['mandatory_ancestor'] ) && 'head' === $spec['tag_spec']['mandatory_ancestor'] )
+				);
+				return ! $head_required;
+			}
+		);
+
+		$this->assertEquals( $named_specs, $body_ok_specs );
+
+		$spec = current( $named_specs );
+		$this->assertArrayHasKey( 'name', $spec['attr_spec_list'] );
+		$this->assertEquals( [ 'blacklisted_value_regex' ], array_keys( $spec['attr_spec_list']['name'] ) );
 	}
 
 	/**

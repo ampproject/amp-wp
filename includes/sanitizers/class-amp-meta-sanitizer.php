@@ -67,6 +67,36 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	const AMP_VIEWPORT = 'width=device-width';
 
 	/**
+	 * Spec name for the tag spec for meta elements that are allowed in the body.
+	 *
+	 * @since 1.5.2
+	 * @var string
+	 */
+	const BODY_ANCESTOR_META_TAG_SPEC_NAME = 'meta name= and content=';
+
+	/**
+	 * Get tag spec for meta tags which are allowed in the body.
+	 *
+	 * @since 1.5.2
+	 * @return string Deny pattern.
+	 */
+	private function get_body_meta_tag_name_attribute_deny_pattern() {
+		static $pattern = null;
+		if ( null === $pattern ) {
+			$tag_spec = current(
+				array_filter(
+					AMP_Allowed_Tags_Generated::get_allowed_tag( 'meta' ),
+					static function ( $spec ) {
+						return isset( $spec['tag_spec']['spec_name'] ) && 'meta name= and content=' === $spec['tag_spec']['spec_name'];
+					}
+				)
+			);
+			$pattern  = '/' . $tag_spec['attr_spec_list']['name']['blacklisted_value_regex'] . '/';
+		}
+		return $pattern;
+	}
+
+	/**
 	 * Sanitize.
 	 */
 	public function sanitize() {
@@ -88,30 +118,17 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 			 * @var DOMElement $meta_element
 			 */
 			if ( $meta_element->hasAttribute( Attribute::CHARSET ) ) {
-				$this->meta_tags[ self::TAG_CHARSET ][] = $meta_element;
-				$meta_element->parentNode->removeChild( $meta_element );
+				$this->meta_tags[ self::TAG_CHARSET ][] = $meta_element->parentNode->removeChild( $meta_element );
 			} elseif ( Attribute::VIEWPORT === $meta_element->getAttribute( Attribute::NAME ) ) {
-				$this->meta_tags[ self::TAG_VIEWPORT ][] = $meta_element;
-				$meta_element->parentNode->removeChild( $meta_element );
+				$this->meta_tags[ self::TAG_VIEWPORT ][] = $meta_element->parentNode->removeChild( $meta_element );
 			} elseif ( Attribute::AMP_SCRIPT_SRC === $meta_element->getAttribute( Attribute::NAME ) ) {
-				$this->meta_tags[ self::TAG_AMP_SCRIPT_SRC ][] = $meta_element;
-				$meta_element->parentNode->removeChild( $meta_element );
-			} else {
-				/**
-				 * Prevent processing nodes that should not be reordered. Conditions below are adapted from the generic
-				 * meta tag spec.
-				 *
-				 * @see https://github.com/ampproject/amphtml/blob/286a6302fcd007eab303b105c161e76d9e880322/validator/validator-main.protoascii#L701-L727
-				 */
-				if (
-					$meta_element->hasAttribute( 'name' ) &&
-					preg_match( '/(^|\\s)(amp-.*|amp4ads-.*|apple-itunes-app|content-disposition|revisit-after|viewport)(\\s|$)/', $meta_element->getAttribute( 'name' ) )
-				) {
-					$this->meta_tags[ self::TAG_OTHER ][] = $meta_element;
-					$meta_element->parentNode->removeChild( $meta_element );
-				}
-
-				continue;
+				$this->meta_tags[ self::TAG_AMP_SCRIPT_SRC ][] = $meta_element->parentNode->removeChild( $meta_element );
+			} elseif (
+				$meta_element->hasAttribute( 'name' )
+				&&
+				preg_match( $this->get_body_meta_tag_name_attribute_deny_pattern(), $meta_element->getAttribute( 'name' ) )
+			) {
+				$this->meta_tags[ self::TAG_OTHER ][] = $meta_element->parentNode->removeChild( $meta_element );
 			}
 		}
 
