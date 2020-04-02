@@ -732,6 +732,23 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-form' ],
 			],
 
+			'invalid-amp-form'                             => [
+				'
+				<amp-form>
+					<form method="GET" id="a_string" class="a_string" action="https://example.com" target="_blank">
+						<input type=text value="test" name="hello">
+					</form>
+				</amp-form>
+				',
+				'
+				<form method="GET" id="a_string" class="a_string" action="https://example.com" target="_blank">
+					<input type="text" value="test" name="hello">
+				</form>
+				',
+				[ 'amp-form' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ],
+			],
+
 			'form-visible-when-invalid'                    => [
 				'
 				<form method="post"
