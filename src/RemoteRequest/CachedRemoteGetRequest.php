@@ -7,6 +7,7 @@
 
 namespace AmpProject\AmpWP\RemoteRequest;
 
+use AmpProject\Exception\FailedToGetCachedResponseData;
 use AmpProject\Exception\FailedToGetFromRemoteUrl;
 use AmpProject\RemoteGetRequest;
 use AmpProject\RemoteRequest\RemoteGetRequestResponse;
@@ -101,13 +102,12 @@ final class CachedRemoteGetRequest implements RemoteGetRequest {
 	 *
 	 * @param string $url URL to get.
 	 * @return Response Response for the executed request.
-	 * @throws FailedToGetFromRemoteUrl If retrieving the contents from the URL failed.
+	 * @throws FailedToGetFromRemoteUrl|FailedToGetCachedResponseData If retrieving the contents from the URL failed.
 	 */
 	public function get( $url ) {
 		$cache_key   = self::TRANSIENT_PREFIX . md5( __CLASS__ . $url );
 		$cached_data = get_transient( $cache_key );
 		$headers     = [];
-		$status      = null;
 
 		if ( false !== $cached_data ) {
 			if ( PHP_MAJOR_VERSION >= 7 ) {
@@ -126,17 +126,26 @@ final class CachedRemoteGetRequest implements RemoteGetRequest {
 				$headers  = $response->getHeaders();
 				$body     = $response->getBody();
 			} catch ( FailedToGetFromRemoteUrl $exception ) {
-				$status = $exception->getStatusCode();
-				$expiry = new DateTimeImmutable( "+ {$this->min_expiry} seconds" );
-				$body   = $exception->getMessage();
+				$status   = $exception->getStatusCode();
+				$expiry   = new DateTimeImmutable( "+ {$this->min_expiry} seconds" );
+				$body     = $exception->getMessage();
+				$response = new RemoteGetRequestResponse( $body, $headers, $status );
 			}
 
-			$cached_data = new CachedData( $body, $expiry );
+			$cached_data = new CachedData( compact( 'body', 'status', 'headers' ), $expiry );
 
 			set_transient( $cache_key, serialize( $cached_data ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
+
+			return $response;
 		}
 
-		return new RemoteGetRequestResponse( $cached_data->get_value(), $headers, $status );
+		$cached_value = $cached_data->get_value();
+
+		if ( ! isset( $cached_value['body'], $cached_value['headers'], $cached_value['status'] ) ) {
+			throw new FailedToGetCachedResponseData( $url );
+		}
+
+		return new RemoteGetRequestResponse( $cached_value['body'], $cached_value['headers'], $cached_value['status'] );
 	}
 
 	/**
