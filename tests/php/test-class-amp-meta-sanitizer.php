@@ -98,6 +98,11 @@ class Test_AMP_Meta_Sanitizer extends WP_UnitTestCase {
 				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><meta name="amp-script-src" content="' . esc_attr( $script1_hash ) . ' ' . esc_attr( $script2_hash ) . ' ' . esc_attr( $script3_hash ) . ' ' . esc_attr( $script4_hash ) . '">' . $amp_boilerplate . '</head><body></body></html>',
 			],
 
+			'Make sure http-equiv meta tags are moved'    => [
+				'<!DOCTYPE html><html><head><meta charset="utf-8">' . $amp_boilerplate . '</head><body><meta http-equiv="imagetoolbar" content="false"></body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta http-equiv="imagetoolbar" content="false"><meta name="viewport" content="width=device-width">' . $amp_boilerplate . '</head><body></body></html>',
+			],
+
 			'Ignore generic meta tags'                    => [
 				'<!DOCTYPE html><html><head>' . $amp_boilerplate . '</head><body>' . $html5_microdata . '</body></html>',
 				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">' . $amp_boilerplate . '</head><body>' . $html5_microdata . '</body></html>',

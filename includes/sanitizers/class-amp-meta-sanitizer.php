@@ -34,6 +34,7 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	 * Tags array keys.
 	 */
 	const TAG_CHARSET        = 'charset';
+	const TAG_HTTP_EQUIV     = 'http-equiv';
 	const TAG_VIEWPORT       = 'viewport';
 	const TAG_AMP_SCRIPT_SRC = 'amp_script_src';
 	const TAG_OTHER          = 'other';
@@ -54,6 +55,7 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	protected $meta_tags = [
 		self::TAG_CHARSET        => [],
+		self::TAG_HTTP_EQUIV     => [],
 		self::TAG_VIEWPORT       => [],
 		self::TAG_AMP_SCRIPT_SRC => [],
 		self::TAG_OTHER          => [],
@@ -119,6 +121,8 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 			 */
 			if ( $meta_element->hasAttribute( Attribute::CHARSET ) ) {
 				$this->meta_tags[ self::TAG_CHARSET ][] = $meta_element->parentNode->removeChild( $meta_element );
+			} elseif ( $meta_element->hasAttribute( Attribute::HTTP_EQUIV ) ) {
+				$this->meta_tags[ self::TAG_HTTP_EQUIV ][] = $meta_element->parentNode->removeChild( $meta_element );
 			} elseif ( Attribute::VIEWPORT === $meta_element->getAttribute( Attribute::NAME ) ) {
 				$this->meta_tags[ self::TAG_VIEWPORT ][] = $meta_element->parentNode->removeChild( $meta_element );
 			} elseif ( Attribute::AMP_SCRIPT_SRC === $meta_element->getAttribute( Attribute::NAME ) ) {
