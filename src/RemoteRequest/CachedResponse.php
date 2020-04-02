@@ -49,14 +49,14 @@ final class CachedResponse {
 	 * Instantiate a CachedResponse object.
 	 *
 	 * @param string            $body         Cached body.
-	 * @param array             $headers      Cached headers.
+	 * @param string[]          $headers      Associative array of cached headers.
 	 * @param int               $status_code  Cached status code.
 	 * @param DateTimeInterface $expiry       Expiry of the cached value.
 	 */
-	public function __construct( $body, array $headers, $status_code, DateTimeInterface $expiry ) {
-		$this->body        = $body;
-		$this->headers     = $headers;
-		$this->status_code = $status_code;
+	public function __construct( $body, $headers, $status_code, DateTimeInterface $expiry ) {
+		$this->body        = (string) $body;
+		$this->headers     = (array) $headers;
+		$this->status_code = (int) $status_code;
 		$this->expiry      = $expiry;
 	}
 
@@ -72,7 +72,7 @@ final class CachedResponse {
 	/**
 	 * Get the cached headers.
 	 *
-	 * @return array Cached headers.
+	 * @return string[] Cached headers.
 	 */
 	public function get_headers() {
 		return $this->headers;
@@ -90,11 +90,11 @@ final class CachedResponse {
 	/**
 	 * Determine the validity of the cached response.
 	 *
-	 * @return bool Whether the cached response if valid.
+	 * @return bool Whether the cached response is valid.
 	 */
 	public function is_valid() {
-		// $this->headers is typed so no need for sanity check.
-		return null !== $this->body && is_int( $this->status_code );
+		// Values are already typed, so we just control the status code for validity.
+		return $this->status_code > 100 && $this->status_code <= 599;
 	}
 
 	/**
