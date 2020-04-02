@@ -7,6 +7,7 @@
  */
 
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\PrivateAccess;
 
 /**
  * Tests for AMP_YouTube_Embed_Handler.
@@ -16,6 +17,7 @@ use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
 
 	use AssertContainsCompatibility;
+	use PrivateAccess;
 
 	protected $youtube_video_id = 'kfVsfOSbJY0';
 
@@ -157,30 +159,6 @@ class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
 				'<p><amp-youtube data-videoid="kfVsfOSbJY0" layout="responsive" width="500" height="281"><a placeholder href="http://www.youtube.com/watch?v=kfVsfOSbJY0&amp;hl=en&amp;fs=1&amp;w=425&amp;h=349"><img src="https://i.ytimg.com/vi/kfVsfOSbJY0/hqdefault.jpg" layout="fill" object-fit="cover"></img></a></amp-youtube></p>' . PHP_EOL,
 			],
 
-			'url_with_underscore'              => [
-				'https://www.youtube.com/watch?v=CMrv_D78oxY' . PHP_EOL,
-				'<p><amp-youtube data-videoid="CMrv_D78oxY" layout="responsive" width="500" height="281" title="Rebecca Black - Friday"><a placeholder href="https://www.youtube.com/watch?v=CMrv_D78oxY"><img src="https://i.ytimg.com/vi/CMrv_D78oxY/hqdefault.jpg" layout="fill" object-fit="cover" alt="Rebecca Black - Friday"></img></a></amp-youtube></p>' . PHP_EOL,
-				'<p><amp-youtube data-videoid="CMrv_D78oxY" layout="responsive" width="500" height="281"><a placeholder href="https://www.youtube.com/watch?v=CMrv_D78oxY"><img src="https://i.ytimg.com/vi/CMrv_D78oxY/hqdefault.jpg" layout="fill" object-fit="cover"></img></a></amp-youtube></p>' . PHP_EOL,
-			],
-
-			'short_url_with_underscore'        => [
-				'https://youtu.be/CMrv_D78oxY' . PHP_EOL,
-				'<p><amp-youtube data-videoid="CMrv_D78oxY" layout="responsive" width="500" height="281" title="Rebecca Black - Friday"><a placeholder href="https://youtu.be/CMrv_D78oxY"><img src="https://i.ytimg.com/vi/CMrv_D78oxY/hqdefault.jpg" layout="fill" object-fit="cover" alt="Rebecca Black - Friday"></img></a></amp-youtube></p>' . PHP_EOL,
-				'<p><amp-youtube data-videoid="CMrv_D78oxY" layout="responsive" width="500" height="281"><a placeholder href="https://youtu.be/CMrv_D78oxY"><img src="https://i.ytimg.com/vi/CMrv_D78oxY/hqdefault.jpg" layout="fill" object-fit="cover"></img></a></amp-youtube></p>' . PHP_EOL,
-			],
-
-			'url_with_hyphen'                  => [
-				'https://www.youtube.com/watch?v=xo68-iWaKv8' . PHP_EOL,
-				'<p><amp-youtube data-videoid="xo68-iWaKv8" layout="responsive" width="500" height="281" title="Rebecca Black - Friday"><a placeholder href="https://www.youtube.com/watch?v=xo68-iWaKv8"><img src="https://i.ytimg.com/vi/xo68-iWaKv8/hqdefault.jpg" layout="fill" object-fit="cover" alt="Rebecca Black - Friday"></img></a></amp-youtube></p>' . PHP_EOL,
-				'<p><amp-youtube data-videoid="xo68-iWaKv8" layout="responsive" width="500" height="281"><a placeholder href="https://www.youtube.com/watch?v=xo68-iWaKv8"><img src="https://i.ytimg.com/vi/xo68-iWaKv8/hqdefault.jpg" layout="fill" object-fit="cover"></img></a></amp-youtube></p>' . PHP_EOL,
-			],
-
-			'url_with_hyphen_and_query_string' => [
-				'https://www.youtube.com/watch?v=xo68-iWaKv8&w=800&h=400' . PHP_EOL,
-				'<p><amp-youtube data-videoid="xo68-iWaKv8" layout="responsive" width="500" height="281" title="Rebecca Black - Friday"><a placeholder href="https://www.youtube.com/watch?v=xo68-iWaKv8&amp;w=800&amp;h=400"><img src="https://i.ytimg.com/vi/xo68-iWaKv8/hqdefault.jpg" layout="fill" object-fit="cover" alt="Rebecca Black - Friday"></img></a></amp-youtube></p>' . PHP_EOL,
-				'<p><amp-youtube data-videoid="xo68-iWaKv8" layout="responsive" width="500" height="281"><a placeholder href="https://www.youtube.com/watch?v=xo68-iWaKv8&amp;w=800&amp;h=400"><img src="https://i.ytimg.com/vi/xo68-iWaKv8/hqdefault.jpg" layout="fill" object-fit="cover"></img></a></amp-youtube></p>' . PHP_EOL,
-			],
-
 			// Several reports of invalid URLs that have multiple `?` in the URL.
 			'url_with_querystring_and_extra_?' => [
 				'http://www.youtube.com/watch?v=kfVsfOSbJY0?hl=en&fs=1&w=425&h=349' . PHP_EOL,
@@ -210,6 +188,57 @@ class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
 		} else {
 			$this->assertEquals( $expected, $filtered_content );
 		}
+	}
+
+	/**
+	 * Gets the test data for test_get_video_id_from_url().
+	 *
+	 * @return array The test data.
+	 */
+	public function get_url_id_data() {
+		return [
+			'basic_url'                        => [
+				'https://www.youtube.com/watch?v=XOY3ZUO6P0k',
+				'XOY3ZUO6P0k',
+			],
+			'short_url'                        => [
+				'https://youtu.be/XOY3ZUO6P0k',
+				'XOY3ZUO6P0k',
+			],
+			'url_with_underscore'              => [
+				'https://www.youtube.com/watch?v=CMrv_D78oxY',
+				'CMrv_D78oxY',
+			],
+			'short_url_with_underscore'        => [
+				'https://youtu.be/CMrv_D78oxY',
+				'CMrv_D78oxY',
+			],
+			'url_with_hyphen'                  => [
+				'https://www.youtube.com/watch?v=xo68-iWaKv8' . PHP_EOL,
+				'xo68-iWaKv8',
+			],
+			'url_with_hyphen_and_query_string' => [
+				'https://www.youtube.com/watch?v=xo68-iWaKv8&w=800&h=400' . PHP_EOL,
+				'xo68-iWaKv8',
+			],
+		];
+	}
+
+	/**
+	 * Tests get_video_id_from_url.
+	 *
+	 * @dataProvider get_url_id_data
+	 * @covers AMP_YouTube_Embed_Handler::get_video_id_from_url()
+	 *
+	 * @param string $url The URL to test.
+	 * @param string $expected The expected result.
+	 * @throws ReflectionException If a reflection of the object is not possible.
+	 */
+	public function test_get_video_id_from_url( $url, $expected ) {
+		$this->assertEquals(
+			$expected,
+			$this->call_private_method( $this->handler, 'get_video_id_from_url', [ $url ] )
+		);
 	}
 
 	public function get_scripts_data() {
