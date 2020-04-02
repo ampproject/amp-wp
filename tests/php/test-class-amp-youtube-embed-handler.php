@@ -230,7 +230,7 @@ class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
 	 * @dataProvider get_url_id_data
 	 * @covers AMP_YouTube_Embed_Handler::get_video_id_from_url()
 	 *
-	 * @param string $url The URL to test.
+	 * @param string $url      The URL to test.
 	 * @param string $expected The expected result.
 	 * @throws ReflectionException If a reflection of the object is not possible.
 	 */
