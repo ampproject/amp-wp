@@ -174,7 +174,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return integer|false Video ID, or false if none could be retrieved.
 	 */
 	private function get_video_id_from_url( $url ) {
-		if ( preg_match( '/(?:watch\?v=|embed\/|youtu.be\/)(?P<id>\w*)/', $url, $match ) ) {
+		if ( preg_match( '/(?:watch\?v=|embed\/|youtu.be\/)(?P<id>[\w_-]*)/', $url, $match ) ) {
 			return $match['id'];
 		}
 
