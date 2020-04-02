@@ -39,8 +39,8 @@ final class MonitorCssTransientCaching extends CronBasedBackgroundTask {
 	/**
 	 * Default threshold to use for problem detection in number of transients per day.
 	 *
-     * This is set high to avoid false positives and only trigger on high-traffic sites that exhibit serious problems.
-     *
+	 * This is set high to avoid false positives and only trigger on high-traffic sites that exhibit serious problems.
+	 *
 	 * @var float
 	 */
 	const DEFAULT_THRESHOLD = 5000.0;
@@ -51,6 +51,16 @@ final class MonitorCssTransientCaching extends CronBasedBackgroundTask {
 	 * @var int
 	 */
 	const DEFAULT_SAMPLING_RANGE = 14;
+
+	/**
+	 * Register the service with the system.
+	 *
+	 * @return void
+	 */
+	public function register() {
+		add_action( 'amp_plugin_update', [ $this, 'handle_plugin_update' ] );
+		parent::register();
+	}
 
 	/**
 	 * Get the interval to use for the event.
@@ -143,6 +153,18 @@ final class MonitorCssTransientCaching extends CronBasedBackgroundTask {
 		return (int) $wpdb->get_var(
 			"SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name LIKE '_transient_amp-parsed-stylesheet%'"
 		);
+	}
+
+	/**
+	 * Handle update to plugin.
+	 *
+	 * @param string $old_version Old version.
+	 */
+	public function handle_plugin_update( $old_version ) {
+		// Reset the disabling of the CSS caching subsystem when updating from versions 1.5.0 or 1.5.1.
+		if ( version_compare( $old_version, '1.5.0', '>=' ) || version_compare( $old_version, '1.5.2', '<' ) ) {
+			AMP_Options_Manager::update_option( Option::DISABLE_CSS_TRANSIENT_CACHING, false );
+		}
 	}
 
 	/**
