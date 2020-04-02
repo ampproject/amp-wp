@@ -195,7 +195,7 @@ class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
 	 *
 	 * @return array The test data.
 	 */
-	public function get_url_id_data() {
+	public function get_video_id_data() {
 		return [
 			'basic_url'                        => [
 				'https://www.youtube.com/watch?v=XOY3ZUO6P0k',
@@ -227,7 +227,7 @@ class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
 	/**
 	 * Tests get_video_id_from_url.
 	 *
-	 * @dataProvider get_url_id_data
+	 * @dataProvider get_video_id_data
 	 * @covers AMP_YouTube_Embed_Handler::get_video_id_from_url()
 	 *
 	 * @param string $url      The URL to test.
