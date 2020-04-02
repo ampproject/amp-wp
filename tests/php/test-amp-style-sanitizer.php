@@ -7,7 +7,7 @@
 
 // phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
 
-use AmpProject\AmpWP\RemoteRequest\CachedData;
+use AmpProject\AmpWP\RemoteRequest\CachedResponse;
 use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 use AmpProject\Dom\Document;
@@ -1647,23 +1647,18 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertNotFalse( $transient );
 
 		/**
-		 * Cached data.
+		 * Cached response.
 		 *
-		 * @var CachedData
+		 * @var CachedResponse
 		 */
-		$cached_data = unserialize( $transient ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize
-		$this->assertInstanceOf( CachedData::class, $cached_data );
+		$cached_response = unserialize( $transient ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize
+		$this->assertInstanceOf( CachedResponse::class, $cached_response );
 
-		$this->assertEquals(
-			[
-				'body'    => $response_body,
-				'headers' => $headers,
-				'status'  => $status_code,
-			],
-			$cached_data->get_value()
-		);
+		$this->assertEquals( $response_body, $cached_response->get_body() );
+		$this->assertEquals( $headers, $cached_response->get_headers() );
+		$this->assertEquals( $status_code, $cached_response->get_status_code() );
 
-		$expiry = $cached_data->get_expiry();
+		$expiry = $cached_response->get_expiry();
 		$this->assertGreaterThan( ( new DateTimeImmutable( '+ 1 year' ) )->getTimestamp(), $expiry->getTimestamp() );
 
 		$sanitize_and_get_stylesheets();
@@ -1689,15 +1684,13 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				],
 				'expected_styles' => [ 'body{color:#fff}' ],
 				'expected_errors' => [],
-				'cached_data'    => new CachedData(
+				'cached_data'    => new CachedResponse(
+					'body { color: #fff }',
 					[
-						'body'    => 'body { color: #fff }',
-						'headers' => [
-							'cache-control' => 'max-age=1441',
-							'content-type'  => 'text/css',
-						],
-						'status'     => 200,
+						'cache-control' => 'max-age=1441',
+						'content-type'  => 'text/css',
 					],
+					200,
 					new DateTimeImmutable( '+ 1441 seconds' )
 				),
 			],
@@ -1712,12 +1705,10 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				],
 				'expected_styles' => [],
 				'expected_errors' => [ AMP_Style_Sanitizer::STYLESHEET_FETCH_ERROR ],
-				'cached_data'    => new CachedData(
-					[
-						'body'    => FailedToGetFromRemoteUrl::withHttpStatus( 'https://www.example.com/not-found/styles.css', 404 )->getMessage(),
-						'headers' => [],
-						'status'  => 404,
-					],
+				'cached_data'    => new CachedResponse(
+					FailedToGetFromRemoteUrl::withHttpStatus( 'https://www.example.com/not-found/styles.css', 404 )->getMessage(),
+					[],
+					404,
 					new DateTimeImmutable( '+ ' . DAY_IN_SECONDS . ' seconds' )
 				),
 			],
@@ -1730,13 +1721,13 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * @dataProvider get_external_stylesheet_data
 	 * @covers AMP_Style_Sanitizer::process_link_element()
 	 *
-	 * @param string     $style_url            Stylesheet URL.
-	 * @param array      $http_response        Mocked HTTP response.
-	 * @param array      $expected_styles      Expected minified stylesheets.
-	 * @param array      $expected_errors      Expected error codes.
-	 * @param CachedData $expected_cached_data Expected cache data.
+	 * @param string         $style_url                Stylesheet URL.
+	 * @param array          $http_response            Mocked HTTP response.
+	 * @param array          $expected_styles          Expected minified stylesheets.
+	 * @param array          $expected_errors          Expected error codes.
+	 * @param CachedResponse $expected_cached_response Expected cache response.
 	 */
-	public function test_external_stylesheet( $style_url, $http_response, $expected_styles, $expected_errors, $expected_cached_data ) {
+	public function test_external_stylesheet( $style_url, $http_response, $expected_styles, $expected_errors, $expected_cached_response ) {
 		$request_count = 0;
 
 		add_filter(
@@ -1792,17 +1783,19 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertNotFalse( $transient );
 
 		/**
-		 * Cached data.
+		 * Cached response.
 		 *
-		 * @var CachedData
+		 * @var CachedResponse
 		 */
-		$cached_data = unserialize( $transient ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize
-		$this->assertInstanceOf( CachedData::class, $cached_data );
+		$cached_response = unserialize( $transient ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize
+		$this->assertInstanceOf( CachedResponse::class, $cached_response );
 
-		$this->assertEquals( $expected_cached_data->get_value(), $cached_data->get_value() );
+		$this->assertEquals( $expected_cached_response->get_body(), $cached_response->get_body() );
+		$this->assertEquals( $expected_cached_response->get_headers(), $cached_response->get_headers() );
+		$this->assertEquals( $expected_cached_response->get_status_code(), $cached_response->get_status_code() );
 
-		$expiry = $cached_data->get_expiry();
-		$this->assertEquals( $cached_data->get_expiry()->getTimestamp(), $expiry->getTimestamp() );
+		$expiry = $cached_response->get_expiry();
+		$this->assertEquals( $cached_response->get_expiry()->getTimestamp(), $expiry->getTimestamp() );
 
 		$sanitize_and_get_stylesheets( $style_url );
 		$this->assertEquals( 1, $request_count, 'Expected HTTP request to be cached.' );
