@@ -13,6 +13,37 @@ use AmpProject\Dom\Document;
 class Test_AMP_Meta_Sanitizer extends WP_UnitTestCase {
 
 	/**
+	 * Test that the expected tag specs exist for the body.
+	 */
+	public function test_expected_meta_tags() {
+		$named_specs = array_filter(
+			AMP_Allowed_Tags_Generated::get_allowed_tag( 'meta' ),
+			static function ( $spec ) {
+				return isset( $spec['tag_spec']['spec_name'] ) && AMP_Meta_Sanitizer::BODY_ANCESTOR_META_TAG_SPEC_NAME === $spec['tag_spec']['spec_name'];
+			}
+		);
+		$this->assertCount( 1, $named_specs );
+
+		$body_ok_specs = array_filter(
+			AMP_Allowed_Tags_Generated::get_allowed_tag( 'meta' ),
+			static function ( $spec ) {
+				$head_required = (
+					( isset( $spec['tag_spec']['mandatory_parent'] ) && 'head' === $spec['tag_spec']['mandatory_parent'] )
+					||
+					( isset( $spec['tag_spec']['mandatory_ancestor'] ) && 'head' === $spec['tag_spec']['mandatory_ancestor'] )
+				);
+				return ! $head_required;
+			}
+		);
+
+		$this->assertEquals( $named_specs, $body_ok_specs );
+
+		$spec = current( $named_specs );
+		$this->assertArrayHasKey( 'name', $spec['attr_spec_list'] );
+		$this->assertEquals( [ 'blacklisted_value_regex' ], array_keys( $spec['attr_spec_list']['name'] ) );
+	}
+
+	/**
 	 * Provide data to the test_sanitize method.
 	 *
 	 * @return array[] Array of arrays with test data.
@@ -30,7 +61,10 @@ class Test_AMP_Meta_Sanitizer extends WP_UnitTestCase {
 
 		$amp_boilerplate = amp_get_boilerplate_code();
 
-		$html5_microdata = '
+		$meta_charset  = '<meta charset="utf-8">';
+		$meta_viewport = '<meta name="viewport" content="width=device-width">';
+
+		$meta_tags_allowed_in_body = '
 			<span itemprop="author" itemscope itemtype="https://schema.org/Person">
 				<meta itemprop="name" content="Siva">
 			</span>
@@ -62,7 +96,7 @@ class Test_AMP_Meta_Sanitizer extends WP_UnitTestCase {
 			<meta content="This is a basic text" property="og:title">
 		';
 
-		return [
+		$data = [
 			'Do not break the correct charset tag'        => [
 				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">' . $amp_boilerplate . '</head><body></body></html>',
 				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">' . $amp_boilerplate . '</head><body></body></html>',
@@ -98,47 +132,78 @@ class Test_AMP_Meta_Sanitizer extends WP_UnitTestCase {
 				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><meta name="amp-script-src" content="' . esc_attr( $script1_hash ) . ' ' . esc_attr( $script2_hash ) . ' ' . esc_attr( $script3_hash ) . ' ' . esc_attr( $script4_hash ) . '">' . $amp_boilerplate . '</head><body></body></html>',
 			],
 
-			'Make sure http-equiv meta tags are moved'    => [
-				'<!DOCTYPE html><html><head><meta charset="utf-8">' . $amp_boilerplate . '</head><body><meta http-equiv="imagetoolbar" content="false"></body></html>',
-				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta http-equiv="imagetoolbar" content="false"><meta name="viewport" content="width=device-width">' . $amp_boilerplate . '</head><body></body></html>',
+			'Remove legacy meta http-equiv=Content-Type'  => [
+				'<!DOCTYPE html><html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8">' . $amp_boilerplate . '</head><body></body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">' . $amp_boilerplate . '</head><body></body></html>',
+			],
+
+			'Process invalid meta http-equiv value'       => [
+				// Note the AMP_Tag_And_Attribute_Sanitizer removes the http-equiv attribute because the content is invalid.
+				'<!DOCTYPE html><html><head>' . $amp_boilerplate . '</head><body><meta http-equiv="Content-Type" content="text/vbscript"></body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta content="text/vbscript"><meta name="viewport" content="width=device-width">' . $amp_boilerplate . '</head><body></body></html>',
+			],
+
+			'Disallowed meta=content-deposition'          => [
+				'<!DOCTYPE html><html><head>' . $amp_boilerplate . '<meta name="content-disposition" content="inline; filename=data.csv"></head><body></body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><meta content="inline; filename=data.csv">' . $amp_boilerplate . '</head><body></body></html>',
+			],
+
+			'Disallowed meta=revisit-after'               => [
+				'<!DOCTYPE html><html><head>' . $amp_boilerplate . '<meta name="revisit-after" content="7 days"></head><body></body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><meta content="7 days">' . $amp_boilerplate . '</head><body></body></html>',
+			],
+
+			'Disallowed meta=amp-bogus'                   => [
+				'<!DOCTYPE html><html><head>' . $amp_boilerplate . '<meta name="amp-bogus" content="bad"></head><body></body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><meta content="bad">' . $amp_boilerplate . '</head><body></body></html>',
 			],
 
 			'Ignore generic meta tags'                    => [
-				'<!DOCTYPE html><html><head>' . $amp_boilerplate . '</head><body>' . $html5_microdata . '</body></html>',
-				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">' . $amp_boilerplate . '</head><body>' . $html5_microdata . '</body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8">' . $amp_boilerplate . '</head><body>' . $meta_tags_allowed_in_body . '</body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">' . $amp_boilerplate . '</head><body>' . $meta_tags_allowed_in_body . '</body></html>',
 			],
 		];
-	}
 
-	/**
-	 * Test that the expected tag specs exist for the body.
-	 */
-	public function test_expected_meta_tags() {
-		$named_specs = array_filter(
-			AMP_Allowed_Tags_Generated::get_allowed_tag( 'meta' ),
-			static function ( $spec ) {
-				return isset( $spec['tag_spec']['spec_name'] ) && AMP_Meta_Sanitizer::BODY_ANCESTOR_META_TAG_SPEC_NAME === $spec['tag_spec']['spec_name'];
-			}
-		);
-		$this->assertCount( 1, $named_specs );
+		$http_equiv_specs = [
+			'meta http-equiv=X-UA-Compatible'        => '<meta http-equiv="X-UA-Compatible" content="IE=edge">',
+			'meta http-equiv=content-language'       => '<meta http-equiv="content-language" content="labellist">',
+			'meta http-equiv=pics-label'             => '<meta http-equiv="PICS-Label" content="en-US">',
+			'meta http-equiv=imagetoolbar'           => '<meta http-equiv="imagetoolbar" content="false">',
+			'meta http-equiv=Content-Style-Type'     => '<meta http-equiv="Content-Style-Type" content="text/css">',
+			'meta http-equiv=Content-Script-Type'    => '<meta http-equiv="Content-Script-Type" content="text/javascript">',
+			'meta http-equiv=origin-trial'           => '<meta http-equiv="origin-trial" content="...">',
+			'meta http-equiv=resource-type'          => '<meta http-equiv="resource-type" content="document">',
+			'meta http-equiv=x-dns-prefetch-control' => '<meta http-equiv="x-dns-prefetch-control" content="on">',
+		];
+		foreach ( $http_equiv_specs as $equiv_spec => $tag ) {
+			$data[ "Verify http-equiv moved: $equiv_spec" ] = [
+				"<!DOCTYPE html><html><head>{$meta_charset}{$meta_viewport}{$amp_boilerplate}</head><body>{$tag}</body></html>",
+				"<!DOCTYPE html><html><head>{$meta_charset}{$tag}{$meta_viewport}{$amp_boilerplate}</head><body></body></html>",
+			];
+		}
 
-		$body_ok_specs = array_filter(
-			AMP_Allowed_Tags_Generated::get_allowed_tag( 'meta' ),
-			static function ( $spec ) {
-				$head_required = (
-					( isset( $spec['tag_spec']['mandatory_parent'] ) && 'head' === $spec['tag_spec']['mandatory_parent'] )
-					||
-					( isset( $spec['tag_spec']['mandatory_ancestor'] ) && 'head' === $spec['tag_spec']['mandatory_ancestor'] )
-				);
-				return ! $head_required;
-			}
-		);
+		$named_specs = [
+			'meta name=apple-itunes-app'                 => '<meta name="apple-itunes-app" content="app-id=myAppStoreID, affiliate-data=myAffiliateData, app-argument=myURL">',
+			'meta name=amp-experiments-opt-in'           => '<meta name="amp-experiments-opt-in" content="experiment-a,experiment-b">',
+			'meta name=amp-3p-iframe-src'                => '<meta name="amp-3p-iframe-src" content="https://storage.googleapis.com/amp-testing.appspot.com/public/remote.html">',
+			'meta name=amp-consent-blocking'             => '<meta name="amp-consent-blocking" content="">',
+			'meta name=amp-experiment-token'             => '<meta name="amp-experiment-token" content="{copy your token here}">',
+			'meta name=amp-link-variable-allowed-origin' => '<meta name="amp-link-variable-allowed-origin" content="https://example.com https://example.org">',
+			'meta name=amp-google-clientid-id-api'       => '<meta name="amp-google-client-id-api" content="googleanalytics">',
+			'meta name=amp-ad-doubleclick-sra'           => '<meta name="amp-ad-doubleclick-sra">',
+			'meta name=amp-list-load-more'               => '<meta name="amp-list-load-more" content="">',
+			'meta name=amp-recaptcha-input'              => '<meta name="amp-recaptcha-input" content="">',
+			'meta name=amp-ad-enable-refresh'            => '<meta name="amp-ad-enable-refresh" content="network1=refresh_interval1,network2=refresh_interval2,...">',
+			'meta name=amp-to-amp-navigation'            => '<meta name="amp-to-amp-navigation" content="AMP-Redirect-To; AMP.navigateTo">',
+		];
+		foreach ( $named_specs as $named_spec => $tag ) {
+			$data[ "Verify meta[name] moved: $named_spec" ] = [
+				"<!DOCTYPE html><html><head>{$meta_charset}{$meta_viewport}{$amp_boilerplate}</head><body>{$tag}</body></html>",
+				"<!DOCTYPE html><html><head>{$meta_charset}{$meta_viewport}{$tag}{$amp_boilerplate}</head><body></body></html>",
+			];
+		}
 
-		$this->assertEquals( $named_specs, $body_ok_specs );
-
-		$spec = current( $named_specs );
-		$this->assertArrayHasKey( 'name', $spec['attr_spec_list'] );
-		$this->assertEquals( [ 'blacklisted_value_regex' ], array_keys( $spec['attr_spec_list']['name'] ) );
+		return $data;
 	}
 
 	/**
