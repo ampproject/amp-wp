@@ -58,6 +58,8 @@ class Test_AMP_Meta_Sanitizer extends WP_UnitTestCase {
 			</div>
 			<meta id="foo">
 			<meta name="greeting" content="Hello!">
+			<meta name="keywords" content="Meta Tags, Metadata" scheme="ISBN">
+			<meta content="This is a basic text" property="og:title">
 		';
 
 		return [
