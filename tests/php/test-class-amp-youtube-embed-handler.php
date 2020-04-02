@@ -226,6 +226,10 @@ class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
 				'xo68-iWaKv8',
 			],
 			'embed_url'                        => [
+				'http://www.youtube.com/embed/XOY3ZUO6P0k',
+				'XOY3ZUO6P0k',
+			],
+			'embed_url_ending_in_query_param'  => [
 				'http://www.youtube.com/embed/XOY3ZUO6P0k?rel=0',
 				'XOY3ZUO6P0k',
 			],
