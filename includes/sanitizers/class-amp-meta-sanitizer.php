@@ -87,7 +87,7 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 				array_filter(
 					AMP_Allowed_Tags_Generated::get_allowed_tag( 'meta' ),
 					static function ( $spec ) {
-						return isset( $spec['tag_spec']['spec_name'] ) && 'meta name= and content=' === $spec['tag_spec']['spec_name'];
+						return isset( $spec['tag_spec']['spec_name'] ) && self::BODY_ANCESTOR_META_TAG_SPEC_NAME === $spec['tag_spec']['spec_name'];
 					}
 				)
 			);
