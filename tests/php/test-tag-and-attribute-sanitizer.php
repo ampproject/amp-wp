@@ -2975,6 +2975,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				null,
 				[ 'amp-subscriptions' ],
 			],
+			'bad http-equiv meta tag'                 => [
+				'<html><head><meta charset="utf-8"><meta http-equiv="Content-Script-Type" content="text/vbscript"></head><body></body></html>',
+				'<html><head><meta charset="utf-8"><meta content="text/vbscript"></head><body></body></html>',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR ],
+			],
 		];
 
 		$bad_dev_mode_document = sprintf(
