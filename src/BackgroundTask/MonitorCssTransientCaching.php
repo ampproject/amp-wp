@@ -39,9 +39,11 @@ final class MonitorCssTransientCaching extends CronBasedBackgroundTask {
 	/**
 	 * Default threshold to use for problem detection in number of transients per day.
 	 *
+     * This is set high to avoid false positives and only trigger on high-traffic sites that exhibit serious problems.
+     *
 	 * @var float
 	 */
-	const DEFAULT_THRESHOLD = 50.0;
+	const DEFAULT_THRESHOLD = 5000.0;
 
 	/**
 	 * Sampling range in days to calculate the moving average from.
