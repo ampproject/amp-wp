@@ -174,8 +174,26 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return integer|false Video ID, or false if none could be retrieved.
 	 */
 	private function get_video_id_from_url( $url ) {
-		if ( preg_match( '/(?:watch\?v=|embed\/|youtu.be\/)(?P<id>[\w_-]*)/', $url, $match ) ) {
-			return $match['id'];
+		$parsed_url = wp_parse_url( $url );
+		$query_vars = [];
+		if ( isset( $parsed_url['query'] ) ) {
+			wp_parse_str( $parsed_url['query'], $query_vars );
+			if ( isset( $query_vars['v'] ) ) {
+				return $query_vars['v']; // e.g. https://www.youtube.com/watch?v=CMrv_D78oxY.
+			} elseif ( isset( $query_vars['vi'] ) ) {
+				return $query_vars['vi']; // e.g. http://youtube.com/watch?vi=oTJRivZTMLs&feature=channel.
+			}
+		}
+
+		if ( isset( $parsed_url['path'] ) ) {
+			$segments = explode( '/', trim( $parsed_url['path'], '/' ) );
+			if ( 1 === count( $segments ) ) {
+				return $segments[0]; // e.g. https://youtu.be/XOY3ZUO6P0k.
+			} elseif ( count( $segments ) > 1 ) {
+				if ( in_array( $segments[0], [ 'embed', 'v', 'e', 'vi' ], true ) ) {
+					return $segments[1]; // e.g. http://www.youtube.com/v/-wtIMTCHWuI?version=3&autohide=1.
+				}
+			}
 		}
 
 		return false;

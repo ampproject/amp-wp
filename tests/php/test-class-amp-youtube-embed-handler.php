@@ -214,12 +214,40 @@ class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
 				'CMrv_D78oxY',
 			],
 			'url_with_hyphen'                  => [
-				'https://www.youtube.com/watch?v=xo68-iWaKv8' . PHP_EOL,
+				'https://www.youtube.com/watch?v=xo68-iWaKv8',
 				'xo68-iWaKv8',
 			],
 			'url_with_hyphen_and_query_string' => [
-				'https://www.youtube.com/watch?v=xo68-iWaKv8&w=800&h=400' . PHP_EOL,
+				'https://www.youtube.com/watch?v=xo68-iWaKv8&w=800&h=400',
 				'xo68-iWaKv8',
+			],
+			'url_with_hyphen_and_query_string_dimensions_before_id' => [
+				'https://www.youtube.com/watch?w=800&h=400&v=xo68-iWaKv8',
+				'xo68-iWaKv8',
+			],
+			'embed_url'                        => [
+				'http://www.youtube.com/embed/XOY3ZUO6P0k?rel=0',
+				'XOY3ZUO6P0k',
+			],
+			'v_segment_url'                    => [
+				'http://youtube.com/v/XOY3ZUO6P0k',
+				'XOY3ZUO6P0k',
+			],
+			'e_segment_url'                    => [
+				'http://youtube.com/e/XOY3ZUO6P0k',
+				'XOY3ZUO6P0k',
+			],
+			'vi_segment_url'                   => [
+				'http://youtube.com/vi/XOY3ZUO6P0k',
+				'XOY3ZUO6P0k',
+			],
+			'vi_query_param_url'               => [
+				'http://youtube.com/?vi=XOY3ZUO6P0k',
+				'XOY3ZUO6P0k',
+			],
+			'false_because_no_id'              => [
+				'http://youtube.com/?wrong=XOY3ZUO6P0k',
+				false,
 			],
 		];
 	}
@@ -230,8 +258,8 @@ class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
 	 * @dataProvider get_video_id_data
 	 * @covers AMP_YouTube_Embed_Handler::get_video_id_from_url()
 	 *
-	 * @param string $url      The URL to test.
-	 * @param string $expected The expected result.
+	 * @param string       $url      The URL to test.
+	 * @param string|false $expected The expected result.
 	 * @throws ReflectionException If a reflection of the object is not possible.
 	 */
 	public function test_get_video_id_from_url( $url, $expected ) {
