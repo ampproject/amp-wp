@@ -249,6 +249,10 @@ class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
 				'http://youtube.com/?vi=XOY3ZUO6P0k',
 				'XOY3ZUO6P0k',
 			],
+			'nocookie_url'                     => [
+				'//www.youtube-nocookie.com/embed/XOY3ZUO6P0k?rel=0',
+				'XOY3ZUO6P0k',
+			],
 			'false_because_no_id'              => [
 				'http://youtube.com/?wrong=XOY3ZUO6P0k',
 				false,
