@@ -162,7 +162,7 @@ final class MonitorCssTransientCaching extends CronBasedBackgroundTask {
 	 */
 	public function handle_plugin_update( $old_version ) {
 		// Reset the disabling of the CSS caching subsystem when updating from versions 1.5.0 or 1.5.1.
-		if ( version_compare( $old_version, '1.5.0', '>=' ) || version_compare( $old_version, '1.5.2', '<' ) ) {
+		if ( version_compare( $old_version, '1.5.0', '>=' ) && version_compare( $old_version, '1.5.2', '<' ) ) {
 			AMP_Options_Manager::update_option( Option::DISABLE_CSS_TRANSIENT_CACHING, false );
 		}
 	}
