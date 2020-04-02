@@ -7,7 +7,8 @@
 
 namespace AmpProject\AmpWP\RemoteRequest;
 
-use AmpProject\Exception\FailedToGetCachedResponseData;
+use AmpProject\Exception\FailedRemoteRequest;
+use AmpProject\Exception\FailedToGetCachedResponse;
 use AmpProject\Exception\FailedToGetFromRemoteUrl;
 use AmpProject\RemoteGetRequest;
 use AmpProject\RemoteRequest\RemoteGetRequestResponse;
@@ -102,7 +103,7 @@ final class CachedRemoteGetRequest implements RemoteGetRequest {
 	 *
 	 * @param string $url URL to get.
 	 * @return Response Response for the executed request.
-	 * @throws FailedToGetCachedResponseData If retrieving the contents from the cache failed.
+	 * @throws FailedRemoteRequest If retrieving the contents from the URL failed.
 	 */
 	public function get( $url ) {
 		$cache_key       = self::TRANSIENT_PREFIX . md5( __CLASS__ . $url );
@@ -140,7 +141,7 @@ final class CachedRemoteGetRequest implements RemoteGetRequest {
 		}
 
 		if ( ! $cached_response->is_valid() ) {
-			throw new FailedToGetCachedResponseData( $url );
+			throw new FailedToGetCachedResponse( $url );
 		}
 
 		return new RemoteGetRequestResponse( $cached_response->get_body(), $cached_response->get_headers(), $cached_response->get_status_code() );

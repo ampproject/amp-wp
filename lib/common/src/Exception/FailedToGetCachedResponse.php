@@ -9,7 +9,7 @@ use RuntimeException;
  *
  * @package ampproject/common
  */
-final class FailedToGetCachedResponseData extends RuntimeException implements AmpException
+final class FailedToGetCachedResponse extends RuntimeException implements FailedRemoteRequest
 {
 
     /**
@@ -20,7 +20,7 @@ final class FailedToGetCachedResponseData extends RuntimeException implements Am
      */
     public static function withUrl($url)
     {
-        $message = "Failed to retrieve the cached response data for the URL '{$url}'.";
+        $message = "Failed to retrieve the cached response for the URL '{$url}'.";
 
         return new self($message);
     }

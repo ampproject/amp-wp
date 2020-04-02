@@ -7,6 +7,7 @@
 
 namespace AmpProject\AmpWP\RemoteRequest;
 
+use AmpProject\Exception\FailedRemoteRequest;
 use AmpProject\Exception\FailedToGetFromRemoteUrl;
 use AmpProject\RemoteGetRequest;
 use AmpProject\RemoteRequest\RemoteGetRequestResponse;
@@ -98,7 +99,7 @@ final class WpHttpRemoteGetRequest implements RemoteGetRequest {
 	 *
 	 * @param string $url URL to get.
 	 * @return Response Response for the executed request.
-	 * @throws FailedToGetFromRemoteUrl If retrieving the contents from the URL failed.
+	 * @throws FailedRemoteRequest If retrieving the contents from the URL failed.
 	 */
 	public function get( $url ) {
 		$retries_left = $this->retries;
