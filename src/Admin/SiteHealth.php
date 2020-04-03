@@ -29,6 +29,15 @@ final class SiteHealth {
 		add_filter( 'site_status_tests', [ $this, 'add_tests' ] );
 		add_filter( 'debug_information', [ $this, 'add_debug_information' ] );
 		add_filter( 'site_status_test_php_modules', [ $this, 'add_extensions' ] );
+		add_action( 'admin_print_styles', [ $this, 'add_styles' ] );
+
+		$reenable_css_transient_caching_ajax_action = new AjaxAction(
+			'reenable_css_transient_caching',
+			[ $this, 'reenable_css_transient_caching' ],
+			'a.reenable-css-transient-caching'
+		);
+
+		$reenable_css_transient_caching_ajax_action->register();
 	}
 
 	/**
@@ -240,11 +249,13 @@ final class SiteHealth {
 	 * @return array The test data.
 	 */
 	public function css_transient_caching() {
+		$disabled = AMP_Options_Manager::get_option( Option::DISABLE_CSS_TRANSIENT_CACHING, false );
+
 		if ( wp_using_ext_object_cache() ) {
 			$status = 'good';
 			$color  = 'blue';
 			$label  = __( 'Transient caching of parsed stylesheets is not used due to external object cache', 'amp' );
-		} elseif ( AMP_Options_Manager::get_option( Option::DISABLE_CSS_TRANSIENT_CACHING, false ) ) {
+		} elseif ( $disabled ) {
 			$status = 'recommended';
 			$color  = 'orange';
 			$label  = __( 'Transient caching of parsed stylesheets is disabled', 'amp' );
@@ -254,7 +265,7 @@ final class SiteHealth {
 			$label  = __( 'Transient caching of parsed stylesheets is enabled', 'amp' );
 		}
 
-		return [
+		$data = [
 			'badge'       => [
 				'label' => esc_html__( 'AMP', 'amp' ),
 				'color' => $color,
@@ -264,6 +275,16 @@ final class SiteHealth {
 			'status'      => $status,
 			'label'       => esc_html( $label ),
 		];
+
+		if ( $disabled ) {
+			$data['actions'] = sprintf(
+				'<p><a class="button reenable-css-transient-caching" href="#">%s</a><span class="dashicons dashicons-yes success-icon"></span><span class="dashicons dashicons-no failure-icon"></span><span class="success-text">%s</span></p>',
+				__( 'Re-enable transient caching', 'amp' ),
+				__( 'Reload the page to refresh the diagnostic check', 'amp' )
+			);
+		}
+
+		return $data;
 	}
 
 	/**
@@ -496,5 +517,71 @@ final class SiteHealth {
 				],
 			]
 		);
+	}
+
+	/**
+	 * Re-enable the CSS Transient caching.
+	 *
+	 * This is triggered via an AJAX call from the Site Health panel.
+	 */
+	public function reenable_css_transient_caching() {
+		$result = AMP_Options_Manager::update_option( Option::DISABLE_CSS_TRANSIENT_CACHING, false );
+
+		if ( false === $result ) {
+			wp_send_json_error( (array) $result, 500 );
+		}
+
+		wp_send_json_success( (array) $result, 200 );
+	}
+
+	/**
+	 * Add needed styles for the Site Health integration.
+	 */
+	public function add_styles() {
+		echo '
+            <style>
+                .wp-core-ui .button.reenable-css-transient-caching ~ .success-icon,
+                .wp-core-ui .button.reenable-css-transient-caching ~ .success-text,
+                .wp-core-ui .button.reenable-css-transient-caching ~ .failure-icon {
+                    display: none;
+                }
+
+                .wp-core-ui .button.reenable-css-transient-caching.ajax-success {
+                    border-color: green;
+                }
+    
+                .wp-core-ui .button.reenable-css-transient-caching.ajax-success:focus {
+                    border-color: green;
+                    box-shadow: 0 0 0 1px green;
+                }
+
+                .wp-core-ui .button.reenable-css-transient-caching.ajax-success ~ .success-icon {
+                    display: inline-block;
+                    color: green;
+                    font-size: xx-large;
+                    padding-right: 1rem;
+                }
+
+                .wp-core-ui .button.reenable-css-transient-caching.ajax-success ~ .success-text {
+                    display: inline-block;
+                }
+
+                .wp-core-ui .button.reenable-css-transient-caching.ajax-failure {
+                    border-color: red;
+                }
+                
+                .wp-core-ui .button.reenable-css-transient-caching.ajax-failure:focus {
+                    border-color: red;
+                    box-shadow: 0 0 0 1px red;
+                }
+
+                .wp-core-ui .button.reenable-css-transient-caching.ajax-failure ~ .failure-icon {
+                    display: inline-block;
+                    color: red;
+                    font-size: xx-large;
+                    padding-right: 1rem;
+                }
+            </style>
+        ';
 	}
 }
