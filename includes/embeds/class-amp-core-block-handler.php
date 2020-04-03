@@ -201,26 +201,22 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	private function process_categories_widgets( Document $dom ) {
 		static $count = 0;
 
-		$widget_containers = $dom->xpath->query( '//*[ contains( @class, "widget_categories" ) ]' );
-		foreach ( $widget_containers as $widget_container ) {
-			if ( ! $widget_container instanceof DOMElement ) {
+		$selects = $dom->xpath->query( '//form/select[ @name = "cat" ]' );
+		foreach ( $selects as $select ) {
+			if ( ! $select instanceof DOMElement ) {
 				continue;
 			}
-			$select = $dom->xpath->query( './/select[ @name = "cat" ]', $widget_container )->item( 0 );
-			$form   = $widget_container->getElementsByTagName( 'form' )->item( 0 );
-			if ( ! $select instanceof DOMElement || ! $form instanceof DOMElement ) {
+			$script = $dom->xpath->query( './/script[ contains( text(), "onCatChange" ) ]', $select->parentNode->parentNode )->item( 0 );
+			if ( ! $script instanceof DOMElement ) {
 				continue;
 			}
 
 			$count++;
 			$id = sprintf( 'amp-wp-widget-categories-%d', $count );
-			$form->setAttribute( 'id', $id );
+			$select->parentNode->setAttribute( 'id', $id );
 
-			$select->setAttribute( 'on', sprintf( 'change:%s.submit', $id ) );
-			$script = $dom->xpath->query( './/script[ contains( text(), "onCatChange" ) ]', $widget_container )->item( 0 );
-			if ( $script ) {
-				$script->parentNode->removeChild( $script );
-			}
+			AMP_DOM_Utils::add_amp_action( $select, 'change', sprintf( '%s.submit', $id ) );
+			$script->parentNode->removeChild( $script );
 		}
 	}
 
@@ -233,22 +229,18 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 */
 	private function process_archives_widgets( Document $dom ) {
 
-		$widget_containers = $dom->xpath->query( '//*[ contains( @class, "widget_archive" ) ]' );
-		foreach ( $widget_containers as $widget_container ) {
-			if ( ! $widget_container instanceof DOMElement ) {
+		$selects = $dom->xpath->query( '//select[ @name = "archive-dropdown" and starts-with( @id, "archives-dropdown-" ) ]' );
+		foreach ( $selects as $select ) {
+			if ( ! $select instanceof DOMElement ) {
 				continue;
 			}
-			$select = $dom->xpath->query( './/select[ @name = "archive-dropdown" ]', $widget_container )->item( 0 );
-			if ( ! $select instanceof DOMElement ) {
+			$script = $dom->xpath->query( './/script[ contains( text(), "onSelectChange" ) ]', $select->parentNode )->item( 0 );
+			if ( ! $script instanceof DOMElement ) {
 				continue;
 			}
 
 			AMP_DOM_Utils::add_amp_action( $select, 'change', 'AMP.navigateTo(url=event.value)' );
-
-			$script = $dom->xpath->query( './/script[ contains( text(), "onSelectChange" ) ]', $widget_container )->item( 0 );
-			if ( $script instanceof DOMElement ) {
-				$script->parentNode->removeChild( $script );
-			}
+			$script->parentNode->removeChild( $script );
 		}
 	}
 }

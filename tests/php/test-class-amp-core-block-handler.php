@@ -188,13 +188,19 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 		$instance_count = 2;
 
 		ob_start();
-		for ( $i = 0; $i < $instance_count; $i++ ) {
-			the_widget(
-				'WP_Widget_Categories',
-				[ 'dropdown' => '1' ],
-				[]
-			);
-		}
+		the_widget(
+			'WP_Widget_Categories',
+			[ 'dropdown' => '1' ],
+			[]
+		);
+		the_widget(
+			'WP_Widget_Categories',
+			[ 'dropdown' => '1' ],
+			[
+				'before_widget' => '<section>',
+				'after_widget'  => '</section>',
+			]
+		);
 		$html = ob_get_clean();
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $html );
@@ -255,13 +261,19 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 		$instance_count = 2;
 
 		ob_start();
-		for ( $i = 0; $i < $instance_count; $i++ ) {
-			the_widget(
-				'WP_Widget_Archives',
-				[ 'dropdown' => '1' ],
-				[]
-			);
-		}
+		the_widget(
+			'WP_Widget_Archives',
+			[ 'dropdown' => '1' ],
+			[]
+		);
+		the_widget(
+			'WP_Widget_Archives',
+			[ 'dropdown' => '1' ],
+			[
+				'before_widget' => '<section>',
+				'after_widget'  => '</section>',
+			]
+		);
 		$html = ob_get_clean();
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $html );
