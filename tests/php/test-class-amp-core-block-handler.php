@@ -179,6 +179,73 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test process_categories_widgets.
+	 *
+	 * @covers AMP_Core_Block_Handler::process_categories_widgets()
+	 * @see WP_Widget_Categories
+	 */
+	public function test_process_categories_widgets() {
+		$instance_count = 2;
+
+		ob_start();
+		for ( $i = 0; $i < $instance_count; $i++ ) {
+			the_widget(
+				'WP_Widget_Categories',
+				[ 'dropdown' => '1' ],
+				[]
+			);
+		}
+		$html = ob_get_clean();
+
+		$dom = AMP_DOM_Utils::get_dom_from_content( $html );
+
+		/**
+		 * Elements.
+		 *
+		 * @var DOMElement $select
+		 * @var DOMElement $form
+		 */
+		$selects = $dom->getElementsByTagName( 'select' );
+		$forms   = $dom->getElementsByTagName( 'form' );
+
+		$this->assertEquals( $instance_count, $dom->body->getElementsByTagName( 'script' )->length );
+		$this->assertEquals( $instance_count, $selects->length );
+		$this->assertEquals( $instance_count, $forms->length );
+
+		$embed = new AMP_Core_Block_Handler();
+		$embed->register_embed();
+		$embed->sanitize_raw_embeds( $dom );
+
+		$sanitizer = new AMP_Form_Sanitizer( $dom );
+		$sanitizer->sanitize();
+
+		$error_count = 0;
+		$sanitizer   = new AMP_Tag_And_Attribute_Sanitizer(
+			$dom,
+			[
+				'validation_error_callback' => static function() use ( &$error_count ) {
+					$error_count++;
+					return true;
+				},
+			]
+		);
+		$sanitizer->sanitize();
+		$this->assertEquals( 0, $error_count );
+
+		$this->assertEquals( 0, $dom->body->getElementsByTagName( 'script' )->length );
+		$this->assertEquals( $instance_count, $selects->length );
+		foreach ( $selects as $select ) {
+			$this->assertTrue( $select->hasAttribute( 'on' ) );
+		}
+		$ids = [];
+		foreach ( $forms as $form ) {
+			$this->assertTrue( $form->hasAttribute( 'id' ) );
+			$ids[] = $form->getAttribute( 'id' );
+		}
+		$this->assertCount( $instance_count, array_unique( $ids ) );
+	}
+
+	/**
 	 * Test data for test_sanitize_raw_embeds().
 	 *
 	 * @return array Test data.
