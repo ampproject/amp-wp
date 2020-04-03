@@ -99,7 +99,7 @@ final class WpHttpRemoteGetRequest implements RemoteGetRequest {
 	 *
 	 * @param string $url URL to get.
 	 * @return Response Response for the executed request.
-	 * @throws FailedRemoteRequest If retrieving the contents from the URL failed.
+	 * @throws FailedToGetFromRemoteUrl If retrieving the contents from the URL failed.
 	 */
 	public function get( $url ) {
 		$retries_left = $this->retries;
