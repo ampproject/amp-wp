@@ -201,14 +201,11 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	private function process_categories_widgets( Document $dom ) {
 		static $count = 0;
 
-		/**
-		 * Element.
-		 *
-		 * @var DOMElement $widget_container
-		 */
-
 		$widget_containers = $dom->xpath->query( '//*[ contains( @class, "widget_categories" ) ]' );
 		foreach ( $widget_containers as $widget_container ) {
+			if ( ! $widget_container instanceof DOMElement ) {
+				continue;
+			}
 			$select = $dom->xpath->query( './/select[ @name = "cat" ]', $widget_container )->item( 0 );
 			$form   = $widget_container->getElementsByTagName( 'form' )->item( 0 );
 			if ( ! $select instanceof DOMElement || ! $form instanceof DOMElement ) {
@@ -238,6 +235,9 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 
 		$widget_containers = $dom->xpath->query( '//*[ contains( @class, "widget_archive" ) ]' );
 		foreach ( $widget_containers as $widget_container ) {
+			if ( ! $widget_container instanceof DOMElement ) {
+				continue;
+			}
 			$select = $dom->xpath->query( './/select[ @name = "archive-dropdown" ]', $widget_container )->item( 0 );
 			if ( ! $select instanceof DOMElement ) {
 				continue;
