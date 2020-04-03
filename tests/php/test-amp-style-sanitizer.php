@@ -627,6 +627,30 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				],
 				[],
 			],
+			'classes_in_mustache_template' => [
+				'
+				<html>
+					<head>
+					</head>
+					<body>
+						<style>
+							h2.one { color: green }
+							h2.two { color: red }
+						</style>
+						<template type="amp-mustache">
+							<h2 class="one">One</h2>
+						</template>
+						<script type="text/plain" template="amp-mustache">
+							<h2 class="two">Two</h2>
+						</script>
+					</body>
+				</html>
+				',
+				[
+					'h2.one{color:green}h2.two{color:red}',
+				],
+				[],
+			],
 		];
 	}
 

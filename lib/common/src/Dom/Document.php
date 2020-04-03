@@ -897,7 +897,7 @@ final class Document extends DOMDocument
     private function secureMustacheScriptTemplates($html)
     {
         return preg_replace(
-            '#<script(\s[^>]*?template=(["\']?)amp-mustache\2[^>]*)>(.*?)</script\s*?>#i',
+            '#<script(\s[^>]*?template=(["\']?)amp-mustache\2[^>]*)>(.*?)</script\s*?>#is',
             '<tmp-script$1>$3</tmp-script>',
             $html
         );
