@@ -1119,7 +1119,7 @@ class AMP_Theme_Support {
 	/**
 	 * Register/override widgets.
 	 *
-	 * @deprecated
+	 * @deprecated As of 1.5.2 the AMP_Core_Block_Handler will sanitize the core widgets instead.
 	 * @global WP_Widget_Factory
 	 * @return void
 	 */

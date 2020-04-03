@@ -6,9 +6,12 @@
  * @package AMP
  */
 
+_deprecated_file( __FILE__, '1.5.2' );
+
 /**
  * Class AMP_Widget_Archives
  *
+ * @deprecated As of 1.5.2 the AMP_Core_Block_Handler will sanitize the core widgets instead.
  * @since 0.7.0
  * @package AMP
  */

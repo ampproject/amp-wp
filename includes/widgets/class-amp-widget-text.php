@@ -6,11 +6,14 @@
  * @package AMP
  */
 
+_deprecated_file( __FILE__, '1.5.2' );
+
 if ( class_exists( 'WP_Widget_Text' ) ) {
 	/**
 	 * Class AMP_Widget_Text
 	 *
 	 * @since 0.7.0
+	 * @deprecated As of 1.5.2 the AMP_Core_Block_Handler will sanitize the core widgets instead.
 	 * @package AMP
 	 */
 	class AMP_Widget_Text extends WP_Widget_Text {
