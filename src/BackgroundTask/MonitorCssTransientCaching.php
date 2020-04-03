@@ -109,7 +109,7 @@ final class MonitorCssTransientCaching extends CronBasedBackgroundTask {
 		}
 
 		$date_string = $date->format( 'Ymd' );
-		$time_series = $this->get_time_series();
+		$time_series = self::get_time_series();
 
 		$time_series[ $date_string ] = $transient_count;
 		ksort( $time_series );
@@ -172,7 +172,7 @@ final class MonitorCssTransientCaching extends CronBasedBackgroundTask {
 	 *
 	 * @return int[] Time series with the count of transients per day.
 	 */
-	private function get_time_series() {
+	public static function get_time_series() {
 		return (array) get_option( self::TIME_SERIES_OPTION_KEY, [] );
 	}
 
