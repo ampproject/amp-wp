@@ -223,7 +223,7 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 		$sanitizer   = new AMP_Tag_And_Attribute_Sanitizer(
 			$dom,
 			[
-				'validation_error_callback' => static function() use ( &$error_count ) {
+				'validation_error_callback' => static function () use ( &$error_count ) {
 					$error_count++;
 					return true;
 				},
@@ -284,7 +284,7 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 		$sanitizer   = new AMP_Tag_And_Attribute_Sanitizer(
 			$dom,
 			[
-				'validation_error_callback' => static function() use ( &$error_count ) {
+				'validation_error_callback' => static function () use ( &$error_count ) {
 					$error_count++;
 					return true;
 				},

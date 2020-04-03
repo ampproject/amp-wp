@@ -243,7 +243,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 				continue;
 			}
 
-			$select->setAttribute( 'on', 'change:AMP.navigateTo(url=event.value)' );
+			AMP_DOM_Utils::add_amp_action( $select, 'change', 'AMP.navigateTo(url=event.value)' );
 
 			$script = $dom->xpath->query( './/script[ contains( text(), "onSelectChange" ) ]', $widget_container )->item( 0 );
 			if ( $script instanceof DOMElement ) {
