@@ -183,7 +183,13 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	private function get_video_id_from_url( $url ) {
 		$parsed_url = wp_parse_url( $url );
-		if ( ! isset( $parsed_url['host'] ) || ! in_array( $parsed_url['host'], [ 'youtu.be', 'youtube.com', 'www.youtube.com', 'youtube-nocookie.com', 'www.youtube-nocookie.com' ], true ) ) {
+
+		if ( ! isset( $parsed_url['host'] ) ) {
+			return false;
+		}
+
+		$domain = implode( '.', array_slice( explode( '.', $parsed_url['host'] ), -2 ) );
+		if ( ! in_array( $domain, [ 'youtu.be', 'youtube.com', 'youtube-nocookie.com' ], true ) ) {
 			return false;
 		}
 

@@ -201,6 +201,10 @@ class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
 				'https://www.youtube.com/watch?v=XOY3ZUO6P0k',
 				'XOY3ZUO6P0k',
 			],
+			'mobile_url'                       => [
+				'https://m.youtube.com/watch?v=XOY3ZUO6P0k',
+				'XOY3ZUO6P0k',
+			],
 			'short_url'                        => [
 				'https://youtu.be/XOY3ZUO6P0k',
 				'XOY3ZUO6P0k',
