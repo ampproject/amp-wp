@@ -30,7 +30,7 @@ final class CachedRemoteGetRequest implements RemoteGetRequest {
 	 *
 	 * @var string
 	 */
-	const TRANSIENT_PREFIX = 'amp_remote_request_v2_';
+	const TRANSIENT_PREFIX = 'amp_remote_request_';
 
 	/**
 	 * Cache control header directive name.
@@ -119,7 +119,7 @@ final class CachedRemoteGetRequest implements RemoteGetRequest {
 			}
 		}
 
-		if ( false === $cached_response || $cached_response->is_expired() ) {
+		if ( ! $cached_response instanceof CachedResponse || $cached_response->is_expired() ) {
 			try {
 				$response = $this->remote_request->get( $url );
 				$status   = $response->getStatusCode();
@@ -127,17 +127,14 @@ final class CachedRemoteGetRequest implements RemoteGetRequest {
 				$headers  = $response->getHeaders();
 				$body     = $response->getBody();
 			} catch ( FailedToGetFromRemoteUrl $exception ) {
-				$status   = $exception->getStatusCode();
-				$expiry   = new DateTimeImmutable( "+ {$this->min_expiry} seconds" );
-				$body     = $exception->getMessage();
-				$response = new RemoteGetRequestResponse( $body, $headers, $status );
+				$status = $exception->getStatusCode();
+				$expiry = new DateTimeImmutable( "+ {$this->min_expiry} seconds" );
+				$body   = $exception->getMessage();
 			}
 
 			$cached_response = new CachedResponse( $body, $headers, $status, $expiry );
 
 			set_transient( $cache_key, serialize( $cached_response ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
-
-			return $response;
 		}
 
 		if ( ! $cached_response->is_valid() ) {
