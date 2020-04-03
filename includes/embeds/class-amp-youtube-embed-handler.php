@@ -187,25 +187,41 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 			return false;
 		}
 
+		if ( ! isset( $parsed_url['path'] ) ) {
+			return false;
+		}
+
+		$segments = explode( '/', trim( $parsed_url['path'], '/' ) );
+
 		$query_vars = [];
 		if ( isset( $parsed_url['query'] ) ) {
 			wp_parse_str( $parsed_url['query'], $query_vars );
+
+			// Handle video ID in v query param, e.g. <https://www.youtube.com/watch?v=XOY3ZUO6P0k>.
+			// Support is also included for other query params which don't appear to be supported by YouTube anymore.
 			if ( isset( $query_vars['v'] ) ) {
-				return $query_vars['v']; // e.g. https://www.youtube.com/watch?v=CMrv_D78oxY.
+				return $query_vars['v'];
 			} elseif ( isset( $query_vars['vi'] ) ) {
-				return $query_vars['vi']; // e.g. http://youtube.com/watch?vi=oTJRivZTMLs&feature=channel.
+				return $query_vars['vi'];
 			}
 		}
 
-		if ( isset( $parsed_url['path'] ) ) {
-			$segments = explode( '/', trim( $parsed_url['path'], '/' ) );
-			if ( 1 === count( $segments ) && ! in_array( $segments[0], [ 'playlist', 'account' ], true ) ) {
-				return $segments[0]; // e.g. https://youtu.be/XOY3ZUO6P0k.
-			} elseif ( count( $segments ) > 1 ) {
-				if ( in_array( $segments[0], [ 'embed', 'v', 'e', 'vi' ], true ) ) {
-					return $segments[1]; // e.g. http://www.youtube.com/v/-wtIMTCHWuI?version=3&autohide=1.
-				}
-			}
+		if ( empty( $segments[0] ) ) {
+			return false;
+		}
+
+		// For shortened URLs like <http://youtu.be/XOY3ZUO6P0k>, the slug is the first path segment.
+		if ( 'youtu.be' === $parsed_url['host'] ) {
+			return $segments[0];
+		}
+
+		// For non-shortened URLs, the video ID is in the second path segment. For example:
+		// * https://www.youtube.com/watch/XOY3ZUO6P0k
+		// * https://www.youtube.com/embed/XOY3ZUO6P0k
+		// Other top-level segments indicate non-video URLs. There are examples of URLs having segments including
+		// 'v', 'vi', and 'e' but these do not work anymore. In any case, they are added here for completeness.
+		if ( ! empty( $segments[1] ) && in_array( $segments[0], [ 'embed', 'watch', 'v', 'vi', 'e' ], true ) ) {
+			return $segments[1];
 		}
 
 		return false;
