@@ -7,7 +7,6 @@
 
 namespace AmpProject\AmpWP\RemoteRequest;
 
-use AmpProject\Exception\FailedRemoteRequest;
 use AmpProject\Exception\FailedToGetFromRemoteUrl;
 use AmpProject\RemoteGetRequest;
 use AmpProject\RemoteRequest\RemoteGetRequestResponse;
