@@ -245,7 +245,6 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 		$this->assertCount( $instance_count, array_unique( $ids ) );
 	}
 
-
 	/**
 	 * Test process_archives_widgets.
 	 *
