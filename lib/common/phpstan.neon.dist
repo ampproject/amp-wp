@@ -8,3 +8,5 @@ parameters:
 		- %currentWorkingDirectory%/src/
 	autoload_files:
 		- %currentWorkingDirectory%/vendor/autoload.php
+	ignoreErrors:
+		- '#^PHPDoc tag @throws with type AmpProject\\Exception\\FailedRemoteRequest is not subtype of Throwable$#'

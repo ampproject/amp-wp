@@ -2,7 +2,7 @@
 
 namespace AmpProject\RemoteRequest;
 
-use AmpProject\Exception\FailedToGetFromRemoteUrl;
+use AmpProject\Exception\FailedRemoteRequest;
 use AmpProject\RemoteGetRequest;
 use AmpProject\Response;
 use LogicException;
@@ -37,7 +37,7 @@ final class StubbedRemoteGetRequest implements RemoteGetRequest
      *
      * @param string $url URL to get.
      * @return Response Response for the executed request.
-     * @throws FailedToGetFromRemoteUrl If retrieving the contents from the URL failed.
+     * @throws FailedRemoteRequest If retrieving the contents from the URL failed.
      */
     public function get($url)
     {
