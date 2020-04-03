@@ -184,10 +184,14 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Determine the video ID from the URL.
 	 *
 	 * @param string $url URL.
-	 * @return integer|false Video ID, or false if none could be retrieved.
+	 * @return int|false Video ID, or false if none could be retrieved.
 	 */
 	private function get_video_id_from_url( $url ) {
 		$parsed_url = wp_parse_url( $url );
+		if ( ! isset( $parsed_url['host'] ) || ! in_array( $parsed_url['host'], [ 'youtu.be', 'youtube.com', 'www.youtube.com', 'youtube-nocookie.com', 'www.youtube-nocookie.com' ], true ) ) {
+			return false;
+		}
+
 		$query_vars = [];
 		if ( isset( $parsed_url['query'] ) ) {
 			wp_parse_str( $parsed_url['query'], $query_vars );
@@ -226,15 +230,11 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 		if ( ! isset( $attr['src'] ) ) {
 			return $html;
 		}
-		$src             = $attr['src'];
-		$youtube_pattern = '#^https?://(?:www\.)?(?:youtube\.com/watch|youtu\.be/)#';
-		if ( 1 !== preg_match( $youtube_pattern, $src ) ) {
+		$video_id = $this->get_video_id_from_url( $attr['src'] );
+		if ( ! $video_id ) {
 			return $html;
 		}
 
-		$url      = ltrim( $src, '=' );
-		$video_id = $this->get_video_id_from_url( $url );
-
-		return $this->render( compact( 'video_id' ), $url );
+		return $this->render( compact( 'video_id' ), $attr['src'] );
 	}
 }
