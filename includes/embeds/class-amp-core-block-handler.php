@@ -184,11 +184,12 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Sanitize widgets that are not added via Gutenberg.
 	 *
-	 * @param Document $dom Document.
+	 * @param Document $dom  Document.
+	 * @param array    $args Args passed to sanitizer.
 	 */
-	public function sanitize_raw_embeds( Document $dom ) {
+	public function sanitize_raw_embeds( Document $dom, $args = [] ) {
 		$this->process_categories_widgets( $dom );
-		$this->process_archives_widgets( $dom );
+		$this->process_archives_widgets( $dom, $args );
 	}
 
 	/**
@@ -206,14 +207,19 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 			if ( ! $select instanceof DOMElement ) {
 				continue;
 			}
-			$script = $dom->xpath->query( './/script[ contains( text(), "onCatChange" ) ]', $select->parentNode->parentNode )->item( 0 );
+			$form = $select->parentNode;
+			if ( ! $form instanceof DOMElement || ! $form->parentNode instanceof DOMElement ) {
+				continue;
+			}
+			$script = $dom->xpath->query( './/script[ contains( text(), "onCatChange" ) ]', $form->parentNode )->item( 0 );
 			if ( ! $script instanceof DOMElement ) {
 				continue;
 			}
 
 			$count++;
 			$id = sprintf( 'amp-wp-widget-categories-%d', $count );
-			$select->parentNode->setAttribute( 'id', $id );
+
+			$form->setAttribute( 'id', $id );
 
 			AMP_DOM_Utils::add_amp_action( $select, 'change', sprintf( '%s.submit', $id ) );
 			$script->parentNode->removeChild( $script );
@@ -225,9 +231,10 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 *
 	 * @since 1.5.2
 	 *
-	 * @param Document $dom Select node retrieved from the widget.
+	 * @param Document $dom  Select node retrieved from the widget.
+	 * @param array    $args Args passed to sanitizer.
 	 */
-	private function process_archives_widgets( Document $dom ) {
+	private function process_archives_widgets( Document $dom, $args = [] ) {
 
 		$selects = $dom->xpath->query( '//select[ @name = "archive-dropdown" and starts-with( @id, "archives-dropdown-" ) ]' );
 		foreach ( $selects as $select ) {
@@ -241,6 +248,18 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 
 			AMP_DOM_Utils::add_amp_action( $select, 'change', 'AMP.navigateTo(url=event.value)' );
 			$script->parentNode->removeChild( $script );
+
+			// When AMP-to-AMP linking is enabled, ensure links go to the AMP version.
+			if ( ! empty( $args['amp_to_amp_linking_enabled'] ) ) {
+				foreach ( $dom->xpath->query( '//option[ @value != "" ]', $select ) as $option ) {
+					/**
+					 * Option element.
+					 *
+					 * @var DOMElement $option
+					 */
+					$option->setAttribute( 'value', add_query_arg( amp_get_slug(), '', $option->getAttribute( 'value' ) ) );
+				}
+			}
 		}
 	}
 }

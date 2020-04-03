@@ -259,6 +259,7 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 	 */
 	public function test_process_archives_widgets() {
 		$instance_count = 2;
+		$this->factory()->post->create( [ 'post_date' => '2010-01-01 01:01:01' ] );
 
 		ob_start();
 		the_widget(
@@ -290,7 +291,7 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 
 		$embed = new AMP_Core_Block_Handler();
 		$embed->register_embed();
-		$embed->sanitize_raw_embeds( $dom );
+		$embed->sanitize_raw_embeds( $dom, [ 'amp_to_amp_linking_enabled' => true ] );
 
 		$error_count = 0;
 		$sanitizer   = new AMP_Tag_And_Attribute_Sanitizer(
@@ -310,6 +311,22 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 		foreach ( $selects as $select ) {
 			$this->assertTrue( $select->hasAttribute( 'on' ) );
 			$this->assertEquals( 'change:AMP.navigateTo(url=event.value)', $select->getAttribute( 'on' ) );
+
+			$options = $dom->xpath->query( '//option[ @value != "" ]', $select );
+
+			$this->assertGreaterThan( 0, $options->length );
+			foreach ( $options as $option ) {
+				/**
+				 * Option element.
+				 *
+				 * @var DOMElement $option
+				 */
+				$query = wp_parse_url( $option->getAttribute( 'value' ), PHP_URL_QUERY );
+				$this->assertNotEmpty( $query );
+				$query_vars = [];
+				wp_parse_str( $query, $query_vars );
+				$this->assertArrayHasKey( amp_get_slug(), $query_vars );
+			}
 		}
 	}
 }
