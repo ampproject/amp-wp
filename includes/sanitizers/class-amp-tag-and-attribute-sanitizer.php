@@ -338,6 +338,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		// ancestor nodes in AMP_Tag_And_Attribute_Sanitizer::remove_node().
 		$this_child = $element->firstChild;
 		while ( $this_child && $element->parentNode ) {
+			$prev_child = $this_child->previousSibling;
 			$next_child = $this_child->nextSibling;
 			if ( $this_child instanceof DOMElement ) {
 				$result = $this->sanitize_element( $this_child );
@@ -350,7 +351,13 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			} elseif ( $this_child instanceof DOMProcessingInstruction ) {
 				$this->remove_invalid_child( $this_child, [ 'code' => self::DISALLOWED_PROCESSING_INSTRUCTION ] );
 			}
-			$this_child = $next_child;
+
+			if ( ! $this_child->parentNode ) {
+				// Handle case where this child is replaced with children.
+				$this_child = $prev_child ? $prev_child->nextSibling : $element->firstChild;
+			} else {
+				$this_child = $next_child;
+			}
 		}
 
 		// If the element is still in the tree, process it.
