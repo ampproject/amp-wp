@@ -103,7 +103,7 @@ final class CachedRemoteGetRequest implements RemoteGetRequest {
 	 *
 	 * @param string $url URL to get.
 	 * @return Response Response for the executed request.
-	 * @throws FailedRemoteRequest If retrieving the contents from the URL failed.
+	 * @throws FailedToGetCachedResponse If retrieving the contents from the URL failed.
 	 */
 	public function get( $url ) {
 		$cache_key       = self::TRANSIENT_PREFIX . md5( __CLASS__ . $url );
