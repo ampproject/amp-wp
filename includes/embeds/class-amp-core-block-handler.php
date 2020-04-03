@@ -187,54 +187,68 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 * @param Document $dom Document.
 	 */
 	public function sanitize_raw_embeds( Document $dom ) {
-		// Process widget widgets.
-		$category_widgets = $dom->xpath->query( '//script[ contains( text(), "function onCatChange()" ) ]/preceding-sibling::form' );
+		$this->process_categories_widgets( $dom );
+		$this->process_archives_widgets( $dom );
+	}
 
-		if ( 0 < $category_widgets->length ) {
-			foreach ( $category_widgets as $category_widget ) {
-				$this->process_category_widget( $category_widget );
+	/**
+	 * Process "Categories" widgets.
+	 *
+	 * @since 1.5.2
+	 *
+	 * @param Document $dom Document.
+	 */
+	private function process_categories_widgets( Document $dom ) {
+		static $count = 0;
+
+		/**
+		 * Element.
+		 *
+		 * @var DOMElement $widget_container
+		 */
+
+		$widget_containers = $dom->xpath->query( '//*[ contains( @class, "widget_categories" ) ]' );
+		foreach ( $widget_containers as $widget_container ) {
+			$select = $dom->xpath->query( './/select[ @name = "cat" ]', $widget_container )->item( 0 );
+			$form   = $widget_container->getElementsByTagName( 'form' )->item( 0 );
+			if ( ! $select instanceof DOMElement || ! $form instanceof DOMElement ) {
+				continue;
 			}
-		}
 
-		// Process archive widgets.
-		$archive_widgets = $dom->xpath->query( '//select[ @name="archive-dropdown" ]' );
+			$count++;
+			$id = sprintf( 'amp-wp-widget-categories-%d', $count );
+			$form->setAttribute( 'id', $id );
 
-		if ( 0 < $archive_widgets->length ) {
-			foreach ( $archive_widgets as $archive_widget ) {
-				$this->process_archive_widget( $archive_widget );
+			$select->setAttribute( 'on', sprintf( 'change:%s.submit', $id ) );
+			$script = $dom->xpath->query( './/script[ contains( text(), "onCatChange" ) ]', $widget_container )->item( 0 );
+			if ( $script ) {
+				$script->parentNode->removeChild( $script );
 			}
 		}
 	}
 
 	/**
-	 * Process a category widget.
+	 * Process "Archives" widgets.
 	 *
-	 * @param DOMElement $form_node Form node retrieved from the widget.
+	 * @since 1.5.2
+	 *
+	 * @param Document $dom Select node retrieved from the widget.
 	 */
-	private function process_category_widget( DOMElement $form_node ) {
-		static $id = 0;
+	private function process_archives_widgets( Document $dom ) {
 
-		$select_element = $form_node->getElementsByTagName( 'select' );
+		$widget_containers = $dom->xpath->query( '//*[ contains( @class, "widget_archive" ) ]' );
+		foreach ( $widget_containers as $widget_container ) {
+			$select = $dom->xpath->query( './/select[ @name = "archive-dropdown" ]', $widget_container )->item( 0 );
+			if ( ! $select instanceof DOMElement ) {
+				continue;
+			}
 
-		if ( 1 !== $select_element->length ) {
-			// Nothing to do if there is not a select element.
-			return;
+			$select->setAttribute( 'on', 'change:AMP.navigateTo(url=event.value)' );
+
+			$script = $dom->xpath->query( './/script[ contains( text(), "onSelectChange" ) ]', $widget_container )->item( 0 );
+			if ( $script instanceof DOMElement ) {
+				$script->parentNode->removeChild( $script );
+			}
 		}
-
-		$id++;
-
-		$form_node->setAttribute( 'target', '_top' );
-		$form_node->setAttribute( 'id', $id );
-
-		$select_element[0]->setAttribute( 'on', sprintf( 'change:%s.submit', esc_attr( $id ) ) );
-	}
-
-	/**
-	 * Process an archive widget.
-	 *
-	 * @param DOMElement $select_node Select node retrieved from the widget.
-	 */
-	private function process_archive_widget( DOMElement $select_node ) {
-		$select_node->setAttribute( 'on', 'change:AMP.navigateTo(url=event.value)' );
 	}
 }

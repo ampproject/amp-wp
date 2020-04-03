@@ -201,58 +201,58 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 					],
 				],
 				'
-			<div class="widget">
-				<div class="widget-title">
-					<h3>Categories</h3>
-				</div>
-				<form action="https://example.com" method="get">
-					<label class="screen-reader-text" for="cat">Categories</label>
-					<select name=\'cat\' id=\'cat\' class=\'postform\' >
-						<option value=\'-1\'>Select Category</option>
-						<option class="level-0" value="1">Uncategorized</option>
-					</select>
-				</form>
-				<script>
-					/* <![CDATA[ */
-					(function() {
-						var dropdown = document.getElementById( "cat" );
-						function onCatChange() {
-							if ( dropdown.options[ dropdown.selectedIndex ].value > 0 ) {
-								dropdown.parentNode.submit();
-							}
-						}
-						dropdown.onchange = onCatChange;
-					})();
-					/* ]]> */
-				</script>
-			</div>
-			<div class="widget">
-				<div class="widget-title">
-					<h3>Another set of Categories</h3>
-				</div>
-				<form action="https://example.com" method="get">
-					<label class="screen-reader-text" for="categories-dropdown--1">Categories</label>
-					<select name=\'cat\' id=\'categories-dropdown--1\' class=\'postform\' >
-						<option value=\'-1\'>Select Category</option>
-						<option class="level-0" value="1">Category 1</option>
-						<option class="level-1" value="2">Category 2</option>
-					</select>
-				</form>
-				<script>
-					/* <![CDATA[ */
-					(function() {
-						var dropdown = document.getElementById( "categories-dropdown--1" );
-						function onCatChange() {
-							if ( dropdown.options[ dropdown.selectedIndex ].value > 0 ) {
-								dropdown.parentNode.submit();
-							}
-						}
-						dropdown.onchange = onCatChange;
-					})();
-					/* ]]> */
-				</script>
-			</div>
-			',
+					<div class="widget widget_categories">
+						<div class="widget-title">
+							<h3>Categories</h3>
+						</div>
+						<form action="https://example.com" method="get">
+							<label class="screen-reader-text" for="cat">Categories</label>
+							<select name=\'cat\' id=\'cat\' class=\'postform\' >
+								<option value=\'-1\'>Select Category</option>
+								<option class="level-0" value="1">Uncategorized</option>
+							</select>
+						</form>
+						<script>
+							/* <![CDATA[ */
+							(function() {
+								var dropdown = document.getElementById( "cat" );
+								function onCatChange() {
+									if ( dropdown.options[ dropdown.selectedIndex ].value > 0 ) {
+										dropdown.parentNode.submit();
+									}
+								}
+								dropdown.onchange = onCatChange;
+							})();
+							/* ]]> */
+						</script>
+					</div>
+					<div class="widget widget_categories">
+						<div class="widget-title">
+							<h3>Another set of Categories</h3>
+						</div>
+						<form action="https://example.com" method="get">
+							<label class="screen-reader-text" for="categories-dropdown--1">Categories</label>
+							<select name=\'cat\' id=\'categories-dropdown--1\' class=\'postform\' >
+								<option value=\'-1\'>Select Category</option>
+								<option class="level-0" value="1">Category 1</option>
+								<option class="level-1" value="2">Category 2</option>
+							</select>
+						</form>
+						<script>
+							/* <![CDATA[ */
+							(function() {
+								var dropdown = document.getElementById( "categories-dropdown--1" );
+								function onCatChange() {
+									if ( dropdown.options[ dropdown.selectedIndex ].value > 0 ) {
+										dropdown.parentNode.submit();
+									}
+								}
+								dropdown.onchange = onCatChange;
+							})();
+							/* ]]> */
+						</script>
+					</div>
+				',
 			],
 
 			'archive_widgets'  => [
@@ -265,55 +265,55 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 					],
 				],
 				'
-			<div class="widget">
-				<div class="widget-title">
-					<h3>Archive</h3>
-				</div>
-				<label class="screen-reader-text" for="archives-dropdown--1">Archive</label>
-				<select id="archives-dropdown--1" name="archive-dropdown">
-					<option value="">Select Month</option>
-					<option value=\'https://example.com/2020/04/\'> April 2020 </option>
-					<option value=\'https://example.com/2020/03/\'> March 2020 </option>
-				</select>
-			<script>
-				/* <![CDATA[ */
-				(function() {
-					var dropdown = document.getElementById( "archives-dropdown--1" );
-					function onSelectChange() {
-						if ( dropdown.options[ dropdown.selectedIndex ].value !== \'\' ) {
-							document.location.href = this.options[ this.selectedIndex ].value;
-						}
-					}
-					dropdown.onchange = onSelectChange;
-				})();
-				/* ]]> */
-			</script>
-			</div>
-			<div class="widget">
-				<div class="widget-title">
-					<h3>Archive Pt 2</h3>
-				</div>
-				<label class="screen-reader-text" for="archives-dropdown--2">Archive</label>
-				<select id="archives-dropdown--2" name="archive-dropdown">
-					<option value="">Select Month</option>
-					<option value=\'https://example.com/2020/01/\'> January 2020 </option>
-					<option value=\'https://example.com/2020/02/\'> February 2020 </option>
-				</select>
-			<script>
-				/* <![CDATA[ */
-				(function() {
-					var dropdown = document.getElementById( "archives-dropdown--2" );
-					function onSelectChange() {
-						if ( dropdown.options[ dropdown.selectedIndex ].value !== \'\' ) {
-							document.location.href = this.options[ this.selectedIndex ].value;
-						}
-					}
-					dropdown.onchange = onSelectChange;
-				})();
-				/* ]]> */
-			</script>
-			</div>
-			',
+					<div class="widget widget_archive">
+						<div class="widget-title">
+							<h3>Archive</h3>
+						</div>
+						<label class="screen-reader-text" for="archives-dropdown--1">Archive</label>
+						<select id="archives-dropdown--1" name="archive-dropdown">
+							<option value="">Select Month</option>
+							<option value=\'https://example.com/2020/04/\'> April 2020 </option>
+							<option value=\'https://example.com/2020/03/\'> March 2020 </option>
+						</select>
+					<script>
+						/* <![CDATA[ */
+						(function() {
+							var dropdown = document.getElementById( "archives-dropdown--1" );
+							function onSelectChange() {
+								if ( dropdown.options[ dropdown.selectedIndex ].value !== \'\' ) {
+									document.location.href = this.options[ this.selectedIndex ].value;
+								}
+							}
+							dropdown.onchange = onSelectChange;
+						})();
+						/* ]]> */
+					</script>
+					</div>
+					<div class="widget widget_archive">
+						<div class="widget-title">
+							<h3>Archive Pt 2</h3>
+						</div>
+						<label class="screen-reader-text" for="archives-dropdown--2">Archive</label>
+						<select id="archives-dropdown--2" name="archive-dropdown">
+							<option value="">Select Month</option>
+							<option value=\'https://example.com/2020/01/\'> January 2020 </option>
+							<option value=\'https://example.com/2020/02/\'> February 2020 </option>
+						</select>
+					<script>
+						/* <![CDATA[ */
+						(function() {
+							var dropdown = document.getElementById( "archives-dropdown--2" );
+							function onSelectChange() {
+								if ( dropdown.options[ dropdown.selectedIndex ].value !== \'\' ) {
+									document.location.href = this.options[ this.selectedIndex ].value;
+								}
+							}
+							dropdown.onchange = onSelectChange;
+						})();
+						/* ]]> */
+					</script>
+					</div>
+				',
 			],
 		];
 	}
