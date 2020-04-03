@@ -732,6 +732,33 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-form' ],
 			],
 
+			'scripts-gathered-from-invalid-parents'        => [
+				'
+				<ancestor-unknown>
+					<amp-audio src="https://example.com/foo.mp3" width="100" height="200"></amp-audio>
+					<parent-unknown>
+						<amp-form>
+							<form method="GET" id="a_string" class="a_string" action="https://example.com" target="_blank">
+								<unrecognized>who are you?</unrecognized>
+								<input type=text value="test" name="hello">
+							</form>
+						</amp-form>
+					</parent-unknown>
+					<amp-video src="https://example.com/foo.mp4" width="100" height="200"></amp-video>
+				</ancestor-unknown>
+				',
+				'
+				<amp-audio src="https://example.com/foo.mp3" width="100" height="200"></amp-audio>
+				<form method="GET" id="a_string" class="a_string" action="https://example.com" target="_blank">
+					who are you?
+					<input type="text" value="test" name="hello">
+				</form>
+				<amp-video src="https://example.com/foo.mp4" width="100" height="200"></amp-video>
+				',
+				[ 'amp-audio', 'amp-form', 'amp-video' ],
+				array_fill( 0, 4, AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ),
+			],
+
 			'form-visible-when-invalid'                    => [
 				'
 				<form method="post"
