@@ -83,7 +83,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function filter_embed_oembed_html( $cache, $url ) {
 		$host = wp_parse_url( $url, PHP_URL_HOST );
-		if ( ! in_array( $host, [ 'youtu.be', 'youtube.com', 'www.youtube.com' ], true ) ) {
+		if ( ! in_array( $host, [ 'youtu.be', 'youtube.com', 'www.youtube.com', 'youtube-nocookie.com', 'www.youtube-nocookie.com' ], true ) ) {
 			return $cache;
 		}
 
