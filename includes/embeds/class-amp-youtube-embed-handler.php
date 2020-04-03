@@ -12,9 +12,22 @@
  */
 class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 
-	// Only handling single videos. Playlists are handled elsewhere.
+	/**
+	 * URL pattern to match YouTube videos.
+	 *
+	 * Only handling single videos. Playlists are handled elsewhere.
+	 *
+	 * @deprecated No longer used.
+	 * @var string
+	 */
 	const URL_PATTERN = '#https?://(?:www\.)?(?:youtube.com/(?:v/|e/|embed/|watch[/\#?])|youtu\.be/).*#i';
-	const RATIO       = 0.5625;
+
+	/**
+	 * Ratio for calculating the default height from the content width.
+	 *
+	 * @param float
+	 */
+	const RATIO = 0.5625;
 
 	/**
 	 * Default width.
