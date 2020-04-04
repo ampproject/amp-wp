@@ -278,9 +278,10 @@ final class SiteHealth {
 
 		if ( $disabled ) {
 			$data['actions'] = sprintf(
-				'<p><a class="button reenable-css-transient-caching" href="#">%s</a><span class="dashicons dashicons-yes success-icon"></span><span class="dashicons dashicons-no failure-icon"></span><span class="success-text">%s</span></p>',
+				'<p><a class="button reenable-css-transient-caching" href="#">%s</a><span class="dashicons dashicons-yes success-icon"></span><span class="dashicons dashicons-no failure-icon"></span><span class="success-text">%s</span><span class="failure-text">%s</span></p>',
 				__( 'Re-enable transient caching', 'amp' ),
-				__( 'Reload the page to refresh the diagnostic check', 'amp' )
+				__( 'Reload the page to refresh the diagnostic check.', 'amp' ),
+				__( 'The operation failed, please reload the page and try again.', 'amp' )
 			);
 		}
 
@@ -542,44 +543,30 @@ final class SiteHealth {
             <style>
                 .wp-core-ui .button.reenable-css-transient-caching ~ .success-icon,
                 .wp-core-ui .button.reenable-css-transient-caching ~ .success-text,
-                .wp-core-ui .button.reenable-css-transient-caching ~ .failure-icon {
+                .wp-core-ui .button.reenable-css-transient-caching ~ .failure-icon,
+                .wp-core-ui .button.reenable-css-transient-caching ~ .failure-text {
                     display: none;
                 }
 
-                .wp-core-ui .button.reenable-css-transient-caching.ajax-success {
-                    border-color: green;
+                .wp-core-ui .button.reenable-css-transient-caching ~ .success-icon,
+                .wp-core-ui .button.reenable-css-transient-caching ~ .failure-icon {
+                    font-size: xx-large;
+                    padding-right: 1rem;
                 }
-    
-                .wp-core-ui .button.reenable-css-transient-caching.ajax-success:focus {
-                    border-color: green;
-                    box-shadow: 0 0 0 1px green;
+
+                .wp-core-ui .button.reenable-css-transient-caching.ajax-success ~ .success-icon,
+                .wp-core-ui .button.reenable-css-transient-caching.ajax-success ~ .success-text,
+                .wp-core-ui .button.reenable-css-transient-caching.ajax-failure ~ .failure-icon,
+                .wp-core-ui .button.reenable-css-transient-caching.ajax-failure ~ .failure-text {
+                    display: inline-block;
                 }
 
                 .wp-core-ui .button.reenable-css-transient-caching.ajax-success ~ .success-icon {
-                    display: inline-block;
-                    color: green;
-                    font-size: xx-large;
-                    padding-right: 1rem;
-                }
-
-                .wp-core-ui .button.reenable-css-transient-caching.ajax-success ~ .success-text {
-                    display: inline-block;
-                }
-
-                .wp-core-ui .button.reenable-css-transient-caching.ajax-failure {
-                    border-color: red;
-                }
-                
-                .wp-core-ui .button.reenable-css-transient-caching.ajax-failure:focus {
-                    border-color: red;
-                    box-shadow: 0 0 0 1px red;
+                    color: #46b450;
                 }
 
                 .wp-core-ui .button.reenable-css-transient-caching.ajax-failure ~ .failure-icon {
-                    display: inline-block;
-                    color: red;
-                    font-size: xx-large;
-                    padding-right: 1rem;
+                    color: #dc3232;
                 }
             </style>
         ';
