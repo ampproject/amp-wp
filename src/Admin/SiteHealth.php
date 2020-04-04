@@ -526,13 +526,17 @@ final class SiteHealth {
 	 * This is triggered via an AJAX call from the Site Health panel.
 	 */
 	public function reenable_css_transient_caching() {
+	    if ( ! user_can( get_current_user_id(), 'manage_options' ) ) {
+	        wp_send_json_error( 'Unauthorized.', 401 );
+        }
+
 		$result = AMP_Options_Manager::update_option( Option::DISABLE_CSS_TRANSIENT_CACHING, false );
 
 		if ( false === $result ) {
-			wp_send_json_error( (array) $result, 500 );
+			wp_send_json_error( 'CSS transient caching could not be re-enabled.', 500 );
 		}
 
-		wp_send_json_success( (array) $result, 200 );
+		wp_send_json_success( 'CSS transient caching was re-enabled.', 200 );
 	}
 
 	/**
