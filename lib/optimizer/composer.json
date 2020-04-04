@@ -62,7 +62,7 @@
     "cs": "if [ -z $TEST_SKIP_PHPCS ]; then phpcs --standard=PSR12 -s -n src tests; fi",
     "lint": "if [ -z $TEST_SKIP_LINTING ]; then parallel-lint -j 10 --colors --exclude vendor .; fi",
     "post-update-cmd": [
-      "rm -rf tests/spec && bin/sync-amp-toolbox-test-suite.php",
+      "@update-test-specs",
       "bin/sync-amp-runtime-local-fallback-resources.php"
     ],
     "test": [
@@ -72,6 +72,7 @@
       "@analyze"
     ],
     "analyze": "if [ -z $TEST_SKIP_PHPSTAN ]; then phpstan analyze --ansi; fi",
-    "unit": "if [ -z $TEST_SKIP_PHPUNIT ]; then phpunit --colors=always; fi"
+    "unit": "if [ -z $TEST_SKIP_PHPUNIT ]; then phpunit --colors=always; fi",
+    "update-test-specs":  "rm -rf tests/spec && bin/sync-amp-toolbox-test-suite.php"
   }
 }
