@@ -526,7 +526,7 @@ final class SiteHealth {
 	 * This is triggered via an AJAX call from the Site Health panel.
 	 */
 	public function reenable_css_transient_caching() {
-	    if ( ! user_can( get_current_user_id(), 'manage_options' ) ) {
+	    if ( ! current_user_can( 'manage_options' ) ) {
 	        wp_send_json_error( 'Unauthorized.', 401 );
         }
 
