@@ -526,9 +526,9 @@ final class SiteHealth {
 	 * This is triggered via an AJAX call from the Site Health panel.
 	 */
 	public function reenable_css_transient_caching() {
-	    if ( ! current_user_can( 'manage_options' ) ) {
-	        wp_send_json_error( 'Unauthorized.', 401 );
-        }
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( 'Unauthorized.', 401 );
+		}
 
 		$result = AMP_Options_Manager::update_option( Option::DISABLE_CSS_TRANSIENT_CACHING, false );
 

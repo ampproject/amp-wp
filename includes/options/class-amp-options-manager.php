@@ -265,10 +265,10 @@ class AMP_Options_Manager {
 		}
 
 		if ( true === $new_options[ Option::DISABLE_CSS_TRANSIENT_CACHING ] ) {
-		    $options[ Option::DISABLE_CSS_TRANSIENT_CACHING ] = true;
-        } else {
-		    unset( $options[ Option::DISABLE_CSS_TRANSIENT_CACHING ] );
-        }
+			$options[ Option::DISABLE_CSS_TRANSIENT_CACHING ] = true;
+		} else {
+			unset( $options[ Option::DISABLE_CSS_TRANSIENT_CACHING ] );
+		}
 
 		// Store the current version with the options so we know the format.
 		$options['version'] = AMP__VERSION;
