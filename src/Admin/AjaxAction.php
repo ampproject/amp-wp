@@ -176,7 +176,6 @@ final class AjaxAction {
 			return;
 		}
 
-		// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
 		ob_start();
 
 		?>
@@ -213,7 +212,6 @@ final class AjaxAction {
 		<?php
 
 		$script = ob_get_clean();
-		// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 
 		wp_enqueue_script( 'jquery' );
 		wp_add_inline_script( 'jquery', $script );
