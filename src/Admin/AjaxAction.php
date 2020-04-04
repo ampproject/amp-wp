@@ -176,45 +176,36 @@ final class AjaxAction {
 			return;
 		}
 
-		ob_start();
+		$selector = wp_json_encode( $this->selector );
+		$action   = wp_json_encode( $this->action );
 
-		?>
-		<script>
-			( function ( $ ) {
-				$( function () {
-					var admin_ajax_url = <?php echo wp_json_encode( admin_url( 'admin-ajax.php' ) ); ?>;
-					var selector       = <?php echo wp_json_encode( $this->selector ); ?>;
-					setTimeout( function () {
-						( document.querySelectorAll( selector ) || [] )
-							.forEach( ( element ) => {
-								element.addEventListener( 'click', function ( event ) {
-									event.preventDefault();
-									$.ajax( {
-										type: "post",
-										dataType: "json",
-										url: admin_ajax_url,
-										data: { action: <?php echo wp_json_encode( $this->action ); ?> }
-									}, { action: '<?php echo addslashes( $this->action ); ?>' } )
-										.done( function () {
-											element.classList.remove( 'ajax-failure' );
-											element.classList.add( 'ajax-success' )
-										} )
-										.fail( function () {
-											element.classList.remove( 'ajax-success' );
-											element.classList.add( 'ajax-failure' )
-										} );
-								} );
-							} );
-					}, 1000 );
-				} );
-			} )( jQuery );
-		</script>
-		<?php
+		$script = <<< JS_SCRIPT
+<script>
+( function () {
+    var selector = {$selector};
+    setTimeout( function () {
+        ( document.querySelectorAll( selector ) || [] )
+            .forEach( ( element ) => {
+                element.addEventListener( 'click', function ( event ) {
+                    event.preventDefault();
+                    wp.ajax.post( {$action}, {} )
+                        .done( function () {
+                            element.classList.remove( 'ajax-failure' );
+                            element.classList.add( 'ajax-success' )
+                        } )
+                        .fail( function () {
+                            element.classList.remove( 'ajax-success' );
+                            element.classList.add( 'ajax-failure' )
+                        } );
+                } );
+            } );
+    }, 1000 );
+} )();
+</script>
+JS_SCRIPT;
 
-		$script = ob_get_clean();
-
-		wp_enqueue_script( 'jquery' );
-		wp_add_inline_script( 'jquery', $script );
+		wp_enqueue_script( 'wp-util' );
+		wp_add_inline_script( 'wp-util', $script );
 	}
 
 	/**
