@@ -183,8 +183,8 @@ final class AjaxAction {
 		<script>
 			( function ( $ ) {
 				$( function () {
-					var admin_ajax_url = '<?php echo addslashes( admin_url( 'admin-ajax.php' ) ); ?>';
-					var selector       = '<?php echo addslashes( $this->selector ); ?>';
+					var admin_ajax_url = <?php echo wp_json_encode( admin_url( 'admin-ajax.php' ) ); ?>;
+					var selector       = <?php echo wp_json_encode( $this->selector ); ?>;
 					setTimeout( function () {
 						( document.querySelectorAll( selector ) || [] )
 							.forEach( ( element ) => {
@@ -194,7 +194,7 @@ final class AjaxAction {
 										type: "post",
 										dataType: "json",
 										url: admin_ajax_url,
-										data: { action: '<?php echo addslashes( $this->action ); ?>' }
+										data: { action: <?php echo wp_json_encode( $this->action ); ?> }
 									}, { action: '<?php echo addslashes( $this->action ); ?>' } )
 										.done( function () {
 											element.classList.remove( 'ajax-failure' );
