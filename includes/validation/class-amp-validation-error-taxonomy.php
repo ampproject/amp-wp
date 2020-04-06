@@ -3261,6 +3261,15 @@ class AMP_Validation_Error_Taxonomy {
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_UNIT_DIMENSIONS:
 				return esc_html__( 'Inconsistent units for width and height', 'amp' );
 
+			case AMP_Tag_And_Attribute_Sanitizer::MISSING_LAYOUT_ATTRIBUTES:
+				return sprintf(
+					/* translators: %1$s is the element name, %2$s is the attribute name 'width', %3$s is the attribute name 'height' */
+					esc_html__( 'Incomplete layout attributes specified for tag %1$s. For example, provide attributes %2$s and %3$s', 'amp' ),
+					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>',
+					'<code>width</code>',
+					'<code>height</code>'
+				);
+
 			default:
 				/* translators: %s error code */
 				return sprintf( esc_html__( 'Unknown error (%s)', 'amp' ), $validation_error['code'] );

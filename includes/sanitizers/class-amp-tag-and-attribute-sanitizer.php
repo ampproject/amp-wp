@@ -5,8 +5,10 @@
  * @package AMP
  */
 
+use AmpProject\Attribute;
 use AmpProject\CssLength;
 use AmpProject\Dom\Document;
+use AmpProject\Layout;
 
 /**
  * Strips the tags and attributes from the content that are not allowed by the AMP spec.
@@ -26,54 +28,55 @@ use AmpProject\Dom\Document;
  */
 class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
-	const DISALLOWED_TAG                       = 'DISALLOWED_TAG';
-	const DISALLOWED_CHILD_TAG                 = 'DISALLOWED_CHILD_TAG';
-	const DISALLOWED_FIRST_CHILD_TAG           = 'DISALLOWED_FIRST_CHILD_TAG';
-	const INCORRECT_NUM_CHILD_TAGS             = 'INCORRECT_NUM_CHILD_TAGS';
-	const INCORRECT_MIN_NUM_CHILD_TAGS         = 'INCORRECT_MIN_NUM_CHILD_TAGS';
-	const WRONG_PARENT_TAG                     = 'WRONG_PARENT_TAG';
-	const DISALLOWED_TAG_ANCESTOR              = 'DISALLOWED_TAG_ANCESTOR';
-	const MANDATORY_TAG_ANCESTOR               = 'MANDATORY_TAG_ANCESTOR';
-	const DISALLOWED_DESCENDANT_TAG            = 'DISALLOWED_DESCENDANT_TAG';
-	const DISALLOWED_ATTR                      = 'DISALLOWED_ATTR';
-	const DISALLOWED_PROCESSING_INSTRUCTION    = 'DISALLOWED_PROCESSING_INSTRUCTION';
-	const CDATA_VIOLATES_BLACKLIST             = 'CDATA_VIOLATES_BLACKLIST';
-	const DUPLICATE_UNIQUE_TAG                 = 'DUPLICATE_UNIQUE_TAG';
-	const MANDATORY_CDATA_MISSING_OR_INCORRECT = 'MANDATORY_CDATA_MISSING_OR_INCORRECT';
+	const ATTR_REQUIRED_BUT_MISSING            = 'ATTR_REQUIRED_BUT_MISSING';
 	const CDATA_TOO_LONG                       = 'CDATA_TOO_LONG';
-	const INVALID_CDATA_CSS_IMPORTANT          = 'INVALID_CDATA_CSS_IMPORTANT';
+	const CDATA_VIOLATES_BLACKLIST             = 'CDATA_VIOLATES_BLACKLIST';
+	const DISALLOWED_ATTR                      = 'DISALLOWED_ATTR';
+	const DISALLOWED_CHILD_TAG                 = 'DISALLOWED_CHILD_TAG';
+	const DISALLOWED_DESCENDANT_TAG            = 'DISALLOWED_DESCENDANT_TAG';
+	const DISALLOWED_FIRST_CHILD_TAG           = 'DISALLOWED_FIRST_CHILD_TAG';
+	const DISALLOWED_PROCESSING_INSTRUCTION    = 'DISALLOWED_PROCESSING_INSTRUCTION';
+	const DISALLOWED_PROPERTY_IN_ATTR_VALUE    = 'DISALLOWED_PROPERTY_IN_ATTR_VALUE';
+	const DISALLOWED_RELATIVE_URL              = 'DISALLOWED_RELATIVE_URL';
+	const DISALLOWED_TAG                       = 'DISALLOWED_TAG';
+	const DISALLOWED_TAG_ANCESTOR              = 'DISALLOWED_TAG_ANCESTOR';
+	const DUPLICATE_ONEOF_ATTRS                = 'DUPLICATE_ONEOF_ATTRS';
+	const DUPLICATE_UNIQUE_TAG                 = 'DUPLICATE_UNIQUE_TAG';
+	const INCORRECT_MIN_NUM_CHILD_TAGS         = 'INCORRECT_MIN_NUM_CHILD_TAGS';
+	const INCORRECT_NUM_CHILD_TAGS             = 'INCORRECT_NUM_CHILD_TAGS';
+	const INVALID_ATTR_VALUE                   = 'INVALID_ATTR_VALUE';
+	const INVALID_ATTR_VALUE_CASEI             = 'INVALID_ATTR_VALUE_CASEI';
+	const INVALID_ATTR_VALUE_REGEX             = 'INVALID_ATTR_VALUE_REGEX';
+	const INVALID_ATTR_VALUE_REGEX_CASEI       = 'INVALID_ATTR_VALUE_REGEX_CASEI';
+	const INVALID_BLACKLISTED_VALUE_REGEX      = 'INVALID_BLACKLISTED_VALUE_REGEX';
 	const INVALID_CDATA_CONTENTS               = 'INVALID_CDATA_CONTENTS';
+	const INVALID_CDATA_CSS_IMPORTANT          = 'INVALID_CDATA_CSS_IMPORTANT';
 	const INVALID_CDATA_HTML_COMMENTS          = 'INVALID_CDATA_HTML_COMMENTS';
+	const INVALID_LAYOUT_AUTO_HEIGHT           = 'INVALID_LAYOUT_AUTO_HEIGHT';
+	const INVALID_LAYOUT_AUTO_WIDTH            = 'INVALID_LAYOUT_AUTO_WIDTH';
+	const INVALID_LAYOUT_FIXED_HEIGHT          = 'INVALID_LAYOUT_FIXED_HEIGHT';
+	const INVALID_LAYOUT_HEIGHT                = 'INVALID_LAYOUT_HEIGHT';
+	const INVALID_LAYOUT_HEIGHTS               = 'INVALID_LAYOUT_HEIGHTS';
+	const INVALID_LAYOUT_NO_HEIGHT             = 'INVALID_LAYOUT_NO_HEIGHT';
+	const INVALID_LAYOUT_UNIT_DIMENSIONS       = 'INVALID_LAYOUT_UNIT_DIMENSIONS';
+	const INVALID_LAYOUT_WIDTH                 = 'INVALID_LAYOUT_WIDTH';
+	const INVALID_URL                          = 'INVALID_URL';
+	const INVALID_URL_PROTOCOL                 = 'INVALID_URL_PROTOCOL';
 	const JSON_ERROR_CTRL_CHAR                 = 'JSON_ERROR_CTRL_CHAR';
 	const JSON_ERROR_DEPTH                     = 'JSON_ERROR_DEPTH';
 	const JSON_ERROR_EMPTY                     = 'JSON_ERROR_EMPTY';
 	const JSON_ERROR_STATE_MISMATCH            = 'JSON_ERROR_STATE_MISMATCH';
 	const JSON_ERROR_SYNTAX                    = 'JSON_ERROR_SYNTAX';
 	const JSON_ERROR_UTF8                      = 'JSON_ERROR_UTF8';
-	const INVALID_ATTR_VALUE                   = 'INVALID_ATTR_VALUE';
-	const INVALID_ATTR_VALUE_CASEI             = 'INVALID_ATTR_VALUE_CASEI';
-	const INVALID_ATTR_VALUE_REGEX             = 'INVALID_ATTR_VALUE_REGEX';
-	const INVALID_ATTR_VALUE_REGEX_CASEI       = 'INVALID_ATTR_VALUE_REGEX_CASEI';
-	const INVALID_URL_PROTOCOL                 = 'INVALID_URL_PROTOCOL';
-	const INVALID_URL                          = 'INVALID_URL';
-	const DISALLOWED_RELATIVE_URL              = 'DISALLOWED_RELATIVE_URL';
-	const MISSING_URL                          = 'MISSING_URL';
-	const INVALID_BLACKLISTED_VALUE_REGEX      = 'INVALID_BLACKLISTED_VALUE_REGEX';
-	const DISALLOWED_PROPERTY_IN_ATTR_VALUE    = 'DISALLOWED_PROPERTY_IN_ATTR_VALUE';
+	const MANDATORY_ANYOF_ATTR_MISSING         = 'MANDATORY_ANYOF_ATTR_MISSING';
+	const MANDATORY_CDATA_MISSING_OR_INCORRECT = 'MANDATORY_CDATA_MISSING_OR_INCORRECT';
+	const MANDATORY_ONEOF_ATTR_MISSING         = 'MANDATORY_ONEOF_ATTR_MISSING';
+	const MANDATORY_TAG_ANCESTOR               = 'MANDATORY_TAG_ANCESTOR';
+	const MISSING_LAYOUT_ATTRIBUTES            = 'MISSING_LAYOUT_ATTRIBUTES';
 	const MISSING_MANDATORY_PROPERTY           = 'MISSING_MANDATORY_PROPERTY';
 	const MISSING_REQUIRED_PROPERTY_VALUE      = 'MISSING_REQUIRED_PROPERTY_VALUE';
-	const ATTR_REQUIRED_BUT_MISSING            = 'ATTR_REQUIRED_BUT_MISSING';
-	const MANDATORY_ANYOF_ATTR_MISSING         = 'MANDATORY_ANYOF_ATTR_MISSING';
-	const MANDATORY_ONEOF_ATTR_MISSING         = 'MANDATORY_ONEOF_ATTR_MISSING';
-	const DUPLICATE_ONEOF_ATTRS                = 'DUPLICATE_ONEOF_ATTRS';
-	const INVALID_LAYOUT_WIDTH                 = 'INVALID_LAYOUT_WIDTH';
-	const INVALID_LAYOUT_HEIGHT                = 'INVALID_LAYOUT_HEIGHT';
-	const INVALID_LAYOUT_AUTO_HEIGHT           = 'INVALID_LAYOUT_AUTO_HEIGHT';
-	const INVALID_LAYOUT_NO_HEIGHT             = 'INVALID_LAYOUT_NO_HEIGHT';
-	const INVALID_LAYOUT_FIXED_HEIGHT          = 'INVALID_LAYOUT_FIXED_HEIGHT';
-	const INVALID_LAYOUT_AUTO_WIDTH            = 'INVALID_LAYOUT_AUTO_WIDTH';
-	const INVALID_LAYOUT_UNIT_DIMENSIONS       = 'INVALID_LAYOUT_UNIT_DIMENSIONS';
-	const INVALID_LAYOUT_HEIGHTS               = 'INVALID_LAYOUT_HEIGHTS';
+	const MISSING_URL                          = 'MISSING_URL';
+	const WRONG_PARENT_TAG                     = 'WRONG_PARENT_TAG';
 
 	/**
 	 * Allowed tags.
@@ -1333,17 +1336,40 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return true;
 		}
 
-		// Elements without a width or height don't need to be validated.
-		if ( ! $node->hasAttribute( 'width' ) && ! $node->hasAttribute( 'height' ) ) {
+		$layout_attr = $node->getAttribute( Attribute::LAYOUT );
+
+		if ( ! $node->hasAttribute( Attribute::WIDTH ) && ! $node->hasAttribute( Attribute::HEIGHT ) ) {
+			/*
+			 * Special case. If no layout related attributes were provided, this implies
+			 * the CONTAINER layout. However, telling the user that the implied layout
+			 * is unsupported for this tag is confusing if all they need is to provide
+			 * width and height in, for example, the common case of creating
+			 * an AMP-IMG without specifying dimensions. In this case, we emit a
+			 * less correct, but simpler error message that could be more useful to
+			 * the average user.
+			 *
+			 * See https://github.com/ampproject/amp-wp/issues/4465
+			 */
+			if (
+				empty( $layout_attr )
+				&& isset( $tag_spec['amp_layout']['supported_layouts'] )
+				&& in_array( array_search( Layout::RESPONSIVE, AMP_Rule_Spec::$layout_enum, true ), $tag_spec['amp_layout']['supported_layouts'], true )
+			) {
+				return [
+					'code'      => self::MISSING_LAYOUT_ATTRIBUTES,
+					'node_name' => $node->tagName,
+				];
+			}
+
+			// Elements with a valid layout but no width or height don't need to be validated.
 			return true;
 		}
 
-		$layout_attr = $node->getAttribute( 'layout' );
-		$allow_fluid = AMP_Rule_Spec::LAYOUT_FLUID === $layout_attr;
+		$allow_fluid = Layout::FLUID === $layout_attr;
 		$allow_auto  = true;
 
-		$input_width  = new CssLength( $node->getAttribute( 'width' ) );
-		$input_height = new CssLength( $node->getAttribute( 'height' ) );
+		$input_width  = new CssLength( $node->getAttribute( Attribute::WIDTH ) );
+		$input_height = new CssLength( $node->getAttribute( Attribute::HEIGHT ) );
 
 		$input_width->validate( $allow_auto, $allow_fluid );
 		$input_height->validate( $allow_auto, $allow_fluid );
@@ -1351,24 +1377,24 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		if ( ! $input_width->isValid() ) {
 			return [
 				'code'      => self::INVALID_LAYOUT_WIDTH,
-				'attribute' => 'width',
+				'attribute' => Attribute::WIDTH,
 			];
 		}
 
 		if ( ! $input_height->isValid() ) {
 			return [
 				'code'      => self::INVALID_LAYOUT_HEIGHT,
-				'attribute' => 'height',
+				'attribute' => Attribute::HEIGHT,
 			];
 		}
 
 		// No need to go further if there is no layout attribute.
-		if ( ! $node->hasAttribute( 'layout' ) ) {
+		if ( empty( $layout_attr ) ) {
 			return true;
 		}
 
-		$sizes_attr   = $node->getAttribute( 'sizes' );
-		$heights_attr = $node->getAttribute( 'heights' );
+		$sizes_attr   = $node->getAttribute( Attribute::SIZES );
+		$heights_attr = $node->getAttribute( Attribute::HEIGHTS );
 
 		// Now calculate the effective layout attributes.
 		$width  = $this->calculate_width( $tag_spec['amp_layout'], $layout_attr, $input_width );
@@ -1376,69 +1402,55 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		$layout = $this->calculate_layout( $layout_attr, $width, $height, $sizes_attr, $heights_attr );
 
 		// Only FLEX_ITEM allows for height to be set to auto.
-		if ( $height->isAuto() && AMP_Rule_Spec::LAYOUT_FLEX_ITEM !== $layout ) {
+		if ( $height->isAuto() && Layout::FLEX_ITEM !== $layout ) {
 			return [
 				'code'      => self::INVALID_LAYOUT_AUTO_HEIGHT,
-				'attribute' => 'height',
+				'attribute' => Attribute::HEIGHT,
 			];
 		}
 
 		// FIXED, FIXED_HEIGHT, INTRINSIC, RESPONSIVE must have height set.
-		if (
-			(
-				AMP_Rule_Spec::LAYOUT_FIXED === $layout ||
-				AMP_Rule_Spec::LAYOUT_FIXED_HEIGHT === $layout ||
-				AMP_Rule_Spec::LAYOUT_INTRINSIC === $layout ||
-				AMP_Rule_Spec::LAYOUT_RESPONSIVE === $layout
-			) &&
-			! $height->isDefined()
+		if ( in_array( $layout, [ Layout::FIXED, Layout::FIXED_HEIGHT, Layout::INTRINSIC, Layout::RESPONSIVE ], true )
+			&& ! $height->isDefined()
 		) {
 			return [
 				'code'      => self::INVALID_LAYOUT_NO_HEIGHT,
-				'attribute' => 'height',
+				'attribute' => Attribute::HEIGHT,
 			];
 		}
 
 		// For FIXED_HEIGHT if width is set it must be auto.
-		if ( AMP_Rule_Spec::LAYOUT_FIXED_HEIGHT === $layout && $width->isDefined() && ! $width->isAuto() ) {
+		if ( Layout::FIXED_HEIGHT === $layout && $width->isDefined() && ! $width->isAuto() ) {
 			return [
 				'code'                => self::INVALID_LAYOUT_FIXED_HEIGHT,
-				'attribute'           => 'width',
-				'required_attr_value' => 'auto',
+				'attribute'           => Attribute::WIDTH,
+				'required_attr_value' => CssLength::AUTO,
 			];
 		}
 
 		// FIXED, INTRINSIC, RESPONSIVE must have width set and not be auto.
-		if (
-			AMP_Rule_Spec::LAYOUT_FIXED === $layout ||
-			AMP_Rule_Spec::LAYOUT_INTRINSIC === $layout ||
-			AMP_Rule_Spec::LAYOUT_RESPONSIVE === $layout
-		) {
+		if ( in_array( $layout, [ Layout::FIXED, Layout::INTRINSIC, Layout::RESPONSIVE ], true ) ) {
 			if ( ! $width->isDefined() || $width->isAuto() ) {
 				return [
 					'code'      => self::INVALID_LAYOUT_AUTO_WIDTH,
-					'attribute' => 'width',
+					'attribute' => Attribute::WIDTH,
 				];
 			}
 		}
 
 		// INTRINSIC, RESPONSIVE must have same units for height and width.
-		if (
-			(
-				AMP_Rule_Spec::LAYOUT_INTRINSIC === $layout ||
-				AMP_Rule_Spec::LAYOUT_RESPONSIVE === $layout
-			) &&
-			$width->getUnit() !== $height->getUnit()
+		if ( in_array( $layout, [ Layout::INTRINSIC, Layout::RESPONSIVE ], true )
+			&& $width->getUnit() !== $height->getUnit()
 		) {
 			return [ 'code' => self::INVALID_LAYOUT_UNIT_DIMENSIONS ];
 		}
 
 		// Heights attribute is only allowed for RESPONSIVE layout.
-		if ( ! $this->is_empty_attribute_value( $heights_attr ) && AMP_Rule_Spec::LAYOUT_RESPONSIVE !== $layout ) {
+		if ( ! $this->is_empty_attribute_value( $heights_attr ) && Layout::RESPONSIVE !== $layout ) {
 			return [
 				'code'                => self::INVALID_LAYOUT_HEIGHTS,
-				'attribute'           => 'layout',
-				'required_attr_value' => 'responsive',
+				'attribute'           => Attribute::LAYOUT,
+				'required_attr_value' => Layout::RESPONSIVE,
 			];
 		}
 
@@ -1465,7 +1477,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function calculate_width( $amp_layout_spec, $input_layout, CssLength $input_width ) {
 		if (
-			( ! $this->is_empty_attribute_value( $input_layout ) || AMP_Rule_Spec::LAYOUT_FIXED === $input_layout ) &&
+			( ! $this->is_empty_attribute_value( $input_layout ) || Layout::FIXED === $input_layout ) &&
 			! $input_width->isDefined() &&
 			isset( $amp_layout_spec['defines_default_width'] )
 		) {
@@ -1495,8 +1507,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		if (
 			(
 				! $this->is_empty_attribute_value( $input_layout ) ||
-				AMP_Rule_Spec::LAYOUT_FIXED === $input_layout ||
-				AMP_Rule_Spec::LAYOUT_FIXED_HEIGHT === $input_layout
+				in_array( $input_layout, [ Layout::FIXED, Layout::FIXED_HEIGHT ], true )
 			) &&
 			! $input_height->isDefined() &&
 			isset( $amp_layout_spec['defines_default_width'] )
@@ -1534,17 +1545,17 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		if ( ! $this->is_empty_attribute_value( $layout_attr ) ) {
 			return $layout_attr;
 		} elseif ( ! $width->isDefined() && ! $height->isDefined() ) {
-			return AMP_Rule_Spec::LAYOUT_CONTAINER;
+			return Layout::CONTAINER;
 		} elseif (
 			( $height->isDefined() && $height->isFluid() ) ||
 			( $width->isDefined() && $width->isFluid() )
 		) {
-			return AMP_Rule_Spec::LAYOUT_FLUID;
+			return Layout::FLUID;
 		} elseif (
 			$height->isDefined() &&
 			( ! $width->isDefined() || $width->isAuto() )
 		) {
-			return AMP_Rule_Spec::LAYOUT_FIXED_HEIGHT;
+			return Layout::FIXED_HEIGHT;
 		} elseif (
 			$height->isDefined() &&
 			$width->isDefined() &&
@@ -1553,9 +1564,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				! $this->is_empty_attribute_value( $heights_attr )
 			)
 		) {
-			return AMP_Rule_Spec::LAYOUT_RESPONSIVE;
+			return Layout::RESPONSIVE;
 		} else {
-			return AMP_Rule_Spec::LAYOUT_FIXED;
+			return Layout::FIXED;
 		}
 	}
 

@@ -2712,6 +2712,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				null,
 				[ 'amp-redbull-player' ],
 			],
+
+			'missing-layout-and-width-height'              => [
+				'<amp-img src="https://placeholder.com/350"></amp-img>',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::MISSING_LAYOUT_ATTRIBUTES ],
+			],
 		];
 	}
 
