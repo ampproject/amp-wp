@@ -264,7 +264,7 @@ class AMP_Options_Manager {
 			}
 		}
 
-		if ( true === $new_options[ Option::DISABLE_CSS_TRANSIENT_CACHING ] ) {
+		if ( array_key_exists( Option::DISABLE_CSS_TRANSIENT_CACHING, $new_options ) && true === $new_options[ Option::DISABLE_CSS_TRANSIENT_CACHING ] ) {
 			$options[ Option::DISABLE_CSS_TRANSIENT_CACHING ] = true;
 		} else {
 			unset( $options[ Option::DISABLE_CSS_TRANSIENT_CACHING ] );
