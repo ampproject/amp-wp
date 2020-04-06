@@ -5,12 +5,15 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\MarkupComparison;
 use AmpProject\Dom\Document;
 
 /**
  * Tests for AMP_Meta_Sanitizer.
  */
 class Test_AMP_Meta_Sanitizer extends WP_UnitTestCase {
+
+    use MarkupComparison;
 
 	/**
 	 * Test that the expected tag specs exist for the body.
@@ -227,23 +230,5 @@ class Test_AMP_Meta_Sanitizer extends WP_UnitTestCase {
 		$sanitizer->sanitize();
 
 		$this->assertEqualMarkup( $expected_content, $dom->saveHTML() );
-	}
-
-	/**
-	 * Assert markup is equal.
-	 *
-	 * @param string $expected Expected markup.
-	 * @param string $actual   Actual markup.
-	 */
-	public function assertEqualMarkup( $expected, $actual ) {
-		$actual   = preg_replace( '/\s+/', ' ', $actual );
-		$expected = preg_replace( '/\s+/', ' ', $expected );
-		$actual   = preg_replace( '/(?<=>)\s+(?=<)/', '', trim( $actual ) );
-		$expected = preg_replace( '/(?<=>)\s+(?=<)/', '', trim( $expected ) );
-
-		$this->assertEquals(
-			array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $expected, -1, PREG_SPLIT_DELIM_CAPTURE ) ),
-			array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $actual, -1, PREG_SPLIT_DELIM_CAPTURE ) )
-		);
 	}
 }
