@@ -82,7 +82,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG . '_posts_columns', [ self::TESTED_CLASS, 'add_post_columns' ] ) );
 		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG . '_columns', [ self::TESTED_CLASS, 'add_single_post_columns' ] ) );
 		$this->assertEquals( 10, has_action( 'manage_posts_custom_column', [ self::TESTED_CLASS, 'output_custom_column' ] ) );
-		$this->assertEquals( 10, has_filter( 'post_row_actions', [ self::TESTED_CLASS, 'filter_post_row_actions' ] ) );
+		$this->assertEquals( PHP_INT_MAX, has_filter( 'post_row_actions', [ self::TESTED_CLASS, 'filter_post_row_actions' ] ) );
 		$this->assertEquals( 10, has_filter( 'bulk_actions-edit-' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG, [ self::TESTED_CLASS, 'filter_bulk_actions' ] ) );
 		$this->assertEquals( 10, has_filter( 'bulk_actions-' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG, '__return_false' ) );
 		$this->assertEquals( 10, has_filter( 'handle_bulk_actions-edit-' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG, [ self::TESTED_CLASS, 'handle_bulk_action' ] ) );
@@ -1677,5 +1677,57 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 				],
 			],
 		];
+	}
+
+    /**
+     * Test that the code ensures other plugins won't mess up the validation URL action links in the post list table.
+     */
+	public function test_post_row_actions_filter() {
+		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
+		AMP_Validated_URL_Post_Type::add_admin_hooks();
+
+		$post = self::factory()->post->create_and_get(
+			[
+				'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+				'status'    => 'publish',
+			]
+		);
+
+		add_filter(
+			'post_row_actions',
+			static function ( $actions, $post ) {
+				$actions['edit'] = sprintf(
+					'<a href="%s">%s</a>',
+					esc_url( get_edit_post_link( $post ) ),
+					'Unwanted Edit Action'
+				);
+
+				$actions['other_action'] = sprintf(
+					'<a href="%s">%s</a>',
+					'https://example.com',
+					'Unwanted Other Action'
+				);
+
+				return $actions;
+			},
+			10,
+			2
+		);
+
+		$initial_actions = [
+			'trash' => sprintf( '<a href="%s">Trash</a>', get_delete_post_link( $post->ID ) ),
+		];
+
+		$actions = apply_filters( 'post_row_actions', $initial_actions, $post );
+
+		$this->assertIsArray( $actions );
+		$this->assertArrayHasKey( 'edit', $actions );
+		$this->assertArrayHasKey( 'view', $actions );
+		$this->assertArrayHasKey( 'delete', $actions );
+		$this->assertArrayHasKey( 'amp_validate', $actions );
+		$this->assertArrayNotHasKey( 'other_action', $actions );
+
+		$this->assertStringContains( __( 'Details', 'amp' ), $actions['edit'] );
+		$this->assertStringNotContains( 'Unwanted Edit Action', $actions['edit'] );
 	}
 }
