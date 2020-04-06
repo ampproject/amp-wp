@@ -17,7 +17,7 @@ use AmpProject\Dom\Document;
  */
 class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
-    use MarkupComparison;
+	use MarkupComparison;
 
 	/**
 	 * Get data for testing sanitization in the body.

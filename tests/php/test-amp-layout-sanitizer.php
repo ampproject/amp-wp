@@ -14,7 +14,7 @@ use AmpProject\AmpWP\Tests\MarkupComparison;
  */
 class AMP_Layout_Sanitizer_Test extends WP_UnitTestCase {
 
-    use MarkupComparison;
+	use MarkupComparison;
 
 	/**
 	 * Get body data.

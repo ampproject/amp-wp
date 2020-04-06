@@ -16,7 +16,7 @@ use AmpProject\AmpWP\Tests\MarkupComparison;
  */
 class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 
-    use MarkupComparison;
+	use MarkupComparison;
 
 	/**
 	 * Data provider.

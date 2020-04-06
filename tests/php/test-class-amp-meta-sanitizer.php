@@ -13,7 +13,7 @@ use AmpProject\Dom\Document;
  */
 class Test_AMP_Meta_Sanitizer extends WP_UnitTestCase {
 
-    use MarkupComparison;
+	use MarkupComparison;
 
 	/**
 	 * Test that the expected tag specs exist for the body.

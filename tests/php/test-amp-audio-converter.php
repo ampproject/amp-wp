@@ -16,7 +16,7 @@ use AmpProject\AmpWP\Tests\MarkupComparison;
  */
 class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 
-    use MarkupComparison;
+	use MarkupComparison;
 
 	/**
 	 * Get data.
