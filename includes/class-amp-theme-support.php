@@ -2023,6 +2023,7 @@ class AMP_Theme_Support {
 
 		// Respond early with results if performing a validate request.
 		if ( AMP_Validation_Manager::$is_validate_request ) {
+			status_header( 200 );
 			header( 'Content-Type: application/json; charset=utf-8' );
 			return wp_json_encode(
 				AMP_Validation_Manager::get_validate_response_data( $sanitization_results ),
