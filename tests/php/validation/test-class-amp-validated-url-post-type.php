@@ -1720,7 +1720,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 
 		$actions = apply_filters( 'post_row_actions', $initial_actions, $post );
 
-		$this->assertIsArray( $actions );
+		$this->assertInternalType( 'array', $actions );
 		$this->assertArrayHasKey( 'edit', $actions );
 		$this->assertArrayHasKey( 'view', $actions );
 		$this->assertArrayHasKey( 'delete', $actions );
