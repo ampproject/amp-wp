@@ -1679,9 +1679,9 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		];
 	}
 
-    /**
-     * Test that the code ensures other plugins won't mess up the validation URL action links in the post list table.
-     */
+	/**
+	 * Test that the code ensures other plugins won't mess up the validation URL action links in the post list table.
+	 */
 	public function test_post_row_actions_filter() {
 		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
 		AMP_Validated_URL_Post_Type::add_admin_hooks();
