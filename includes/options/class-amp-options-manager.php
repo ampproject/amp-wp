@@ -348,8 +348,8 @@ class AMP_Options_Manager {
 		// Ensure request is coming from analytics option form.
 		check_admin_referer( 'analytics-options', 'analytics-options' );
 
-		if ( isset( $_POST['amp-options'][ Option::ANALYTICS ] ) ) {
-			self::update_option( Option::ANALYTICS, wp_unslash( $_POST['amp-options'][ Option::ANALYTICS ] ) );
+		if ( isset( $_POST[ self::OPTION_NAME ][ Option::ANALYTICS ] ) ) {
+			self::update_option( Option::ANALYTICS, wp_unslash( $_POST[ self::OPTION_NAME ][ Option::ANALYTICS ] ) );
 
 			$errors = get_settings_errors( self::OPTION_NAME );
 			if ( empty( $errors ) ) {
