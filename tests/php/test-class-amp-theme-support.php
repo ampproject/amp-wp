@@ -2199,7 +2199,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 				{ "aExperiment": {} }
 			</script>
 		</amp-experiment>
-		<amp-list src="https://example.com/list.json?RANDOM"></amp-list>
+		<amp-list src="https://example.com/list.json?RANDOM" width="100" height="100"></amp-list>
 		</body>
 		</html>
 		<!--comment-after-html-->

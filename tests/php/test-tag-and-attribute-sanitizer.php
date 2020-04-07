@@ -1970,7 +1970,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'amp-list'                                     => [
-				'<amp-list credentials="include" src="https://example.com/json/product.json?clientId=CLIENT_ID(myCookieId)"><template type="amp-mustache">Your personal offer: ${{price}}</template></amp-list>',
+				'<amp-list credentials="include" src="https://example.com/json/product.json?clientId=CLIENT_ID(myCookieId)" width="100" height="100"><template type="amp-mustache">Your personal offer: ${{price}}</template></amp-list>',
 				null,
 				[ 'amp-list', 'amp-mustache' ],
 			],
