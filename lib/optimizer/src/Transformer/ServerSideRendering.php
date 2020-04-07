@@ -97,6 +97,15 @@ final class ServerSideRendering implements Transformer
     const CSS_TRIM_CHARACTERS = " \t\n\r\0\x0B;";
 
     /**
+     * Maximum size of the CSS styles in bytes.
+     *
+     * @todo Max size is hard-coded for now until we ported over the generated spec into a reusable package.
+     *
+     * @var int
+     */
+    const MAX_CSS_BYTE_COUNT = 75000;
+
+    /**
      * The <style amp-custom> element that custom CSS styles need to be added to.
      *
      * @var DOMElement
@@ -755,21 +764,26 @@ final class ServerSideRendering implements Transformer
      */
     private function addCustomCss(Document $document, $customCss)
     {
+        $additionalBytes = strlen($customCss);
+
+        if (($this->ampCustomCssByteCount + $additionalBytes) > self::MAX_CSS_BYTE_COUNT) {
+            return false;
+        }
+
         if (empty($this->ampCustomStyleElement)) {
-            /**
-             * <style amp-custom> element.
-             *
-             * @var DOMElement
-             */
             $ampCustomStyleElement = $document->xpath->query(self::STYLE_AMP_CUSTOM_XPATH, $document->head)->item(0);
-            if ($ampCustomStyleElement === null) {
+            if ($ampCustomStyleElement instanceof DOMElement) {
+                $this->ampCustomStyleElement = $ampCustomStyleElement;
+                $this->ampCustomCssByteCount = (new CssByteCountCalculator($document))->calculate();
+                if (($this->ampCustomCssByteCount + $additionalBytes) > self::MAX_CSS_BYTE_COUNT) {
+                    return false;
+                }
+            } else {
                 $ampCustomStyleElement = $document->createElement(Tag::STYLE);
                 $ampCustomStyleElement->setAttribute(Attribute::AMP_CUSTOM, null);
-                $document->head->appendChild($ampCustomStyleElement);
-            } else {
-                $this->ampCustomCssByteCount = (new CssByteCountCalculator($document))->calculate();
+                $this->ampCustomStyleElement = $ampCustomStyleElement;
+                $document->head->appendChild($this->ampCustomStyleElement);
             }
-            $this->ampCustomStyleElement = $ampCustomStyleElement;
         }
 
         $this->ampCustomStyleElement->textContent .= $customCss;
