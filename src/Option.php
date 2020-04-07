@@ -76,4 +76,13 @@ interface Option {
 	 * @var string
 	 */
 	const THEME_SUPPORT = 'theme_support';
+
+	/**
+	 * Version of the AMP plugin for which the options were last saved.
+	 *
+	 * This allows for recognizing updates and triggering update-specific logic.
+	 *
+	 * @var string
+	 */
+	const VERSION = 'version';
 }

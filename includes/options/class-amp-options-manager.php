@@ -30,7 +30,7 @@ class AMP_Options_Manager {
 		Option::ANALYTICS               => [],
 		Option::ALL_TEMPLATES_SUPPORTED => true,
 		Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
-		'version'                       => AMP__VERSION,
+		Option::VERSION                 => AMP__VERSION,
 	];
 
 	/**
@@ -265,7 +265,7 @@ class AMP_Options_Manager {
 		}
 
 		// Store the current version with the options so we know the format.
-		$options['version'] = AMP__VERSION;
+		$options[ Option::VERSION ] = AMP__VERSION;
 
 		return $options;
 	}

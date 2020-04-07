@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Services;
 
 /**
@@ -118,12 +119,12 @@ function amp_init() {
 
 	/*
 	 * Broadcast plugin updates.
-	 * Note that AMP_Options_Manager::get_option( 'version', '0.0' ) cannot be used because
+	 * Note that AMP_Options_Manager::get_option( Option::VERSION, '0.0' ) cannot be used because
 	 * version was new option added, and in that case default would never be used for a site
 	 * upgrading from a version prior to 1.0. So this is why get_option() is currently used.
 	 */
 	$options     = get_option( AMP_Options_Manager::OPTION_NAME, [] );
-	$old_version = isset( $options['version'] ) ? $options['version'] : '0.0';
+	$old_version = isset( $options[ Option::VERSION ] ) ? $options[ Option::VERSION ] : '0.0';
 	if ( AMP__VERSION !== $old_version ) {
 		/**
 		 * Triggers when after amp_init when the plugin version has updated.
@@ -131,7 +132,7 @@ function amp_init() {
 		 * @param string $old_version Old version.
 		 */
 		do_action( 'amp_plugin_update', $old_version );
-		AMP_Options_Manager::update_option( 'version', AMP__VERSION );
+		AMP_Options_Manager::update_option( Option::VERSION, AMP__VERSION );
 	}
 }
 
