@@ -180,8 +180,7 @@ final class AjaxAction {
 		$action   = wp_json_encode( $this->action );
 
 		$script = <<< JS_SCRIPT
-<script>
-( function () {
+;( function () {
     var selector = {$selector};
     setTimeout( function () {
         ( document.querySelectorAll( selector ) || [] )
@@ -201,7 +200,6 @@ final class AjaxAction {
             } );
     }, 1000 );
 } )();
-</script>
 JS_SCRIPT;
 
 		wp_enqueue_script( 'wp-util' );
