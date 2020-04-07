@@ -354,6 +354,11 @@ final class SiteHealth {
 							'value'   => MonitorCssTransientCaching::query_css_transient_count(),
 							'private' => false,
 						],
+						'amp_css_transient_caching_time_series' => [
+							'label'   => esc_html__( 'Calculated time series for monitoring the stylesheet caching', 'amp' ),
+							'value'   => MonitorCssTransientCaching::get_time_series(),
+							'private' => false,
+						],
 					],
 				],
 			]

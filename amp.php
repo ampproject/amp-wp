@@ -5,17 +5,19 @@
  * Plugin URI: https://amp-wp.org
  * Author: AMP Project Contributors
  * Author URI: https://github.com/ampproject/amp-wp/graphs/contributors
- * Version: 1.5.0-RC2
+ * Version: 1.6.0-alpha
  * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
+ * Requires at least: 4.9
+ * Requires PHP: 5.6
  *
  * @package AMP
  */
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
-define( 'AMP__VERSION', '1.5.0-RC2' );
+define( 'AMP__VERSION', '1.6.0-alpha' );
 
 /**
  * Errors encountered while loading the plugin.

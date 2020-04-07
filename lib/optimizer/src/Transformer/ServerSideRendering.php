@@ -596,7 +596,15 @@ final class ServerSideRendering implements Transformer
         $sizer_img->setAttribute(Attribute::ARIA_HIDDEN, 'true');
         $sizer_img->setAttribute(Attribute::CLASS_, Amp::INTRINSIC_SIZER_ELEMENT);
         $sizer_img->setAttribute(Attribute::ROLE, 'presentation');
-        $sizer_img->setAttribute(Attribute::SRC, "data:image/svg+xml;charset=utf-8,<svg height=&quot;{$height->getNumeral()}&quot; width=&quot;{$width->getNumeral()}&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; version=&quot;1.1&quot;/>");
+
+        // Temporarily cast decimal dimensions to integers. Can be reverted when/if the AMP Validator allows decimals.
+        // Note that the floor value is used because two elements with width=99.5 in a container 199px-wide will not fit
+        // on the same line if rounding is used.
+        // @todo Revisit after <https://github.com/ampproject/amphtml/issues/27528>.
+        $height_int = (int) $height->getNumeral();
+        $width_int  = (int) $width->getNumeral();
+
+        $sizer_img->setAttribute(Attribute::SRC, "data:image/svg+xml;charset=utf-8,<svg height=&quot;{$height_int}&quot; width=&quot;{$width_int}&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; version=&quot;1.1&quot;/>");
 
         $sizer->appendChild($sizer_img);
 

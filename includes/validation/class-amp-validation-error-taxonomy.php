@@ -2171,7 +2171,7 @@ class AMP_Validation_Error_Taxonomy {
 				if ( in_array( $key, [ 'code', 'type', 'css_property_value', 'mandatory_anyof_attrs', 'meta_property_value', 'meta_property_required_value', 'mandatory_oneof_attrs' ], true ) ) {
 					continue; // Handled above.
 				}
-				if ( in_array( $key, [ 'spec_name', 'tag_spec', 'spec_names' ], true ) ) {
+				if ( in_array( $key, [ 'spec_name', 'tag_spec', 'spec_names', 'node_type' ], true ) ) {
 					continue;
 				}
 				?>
@@ -3344,6 +3344,10 @@ class AMP_Validation_Error_Taxonomy {
 				return __( 'Invalid attribute', 'amp' );
 			case 'required_attr_value':
 				return __( 'Required attribute value', 'amp' );
+			case 'url':
+				return __( 'URL', 'amp' );
+			case 'message':
+				return __( 'Message', 'amp' );
 			default:
 				return $key;
 		}
