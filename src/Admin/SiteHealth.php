@@ -10,6 +10,8 @@ namespace AmpProject\AmpWP\Admin;
 use AMP_Options_Manager;
 use AMP_Theme_Support;
 use AMP_Post_Type_Support;
+use AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching;
+use AmpProject\AmpWP\Option;
 
 /**
  * Class SiteHealth
@@ -48,6 +50,14 @@ final class SiteHealth {
 			'label' => esc_html__( 'ICU version', 'amp' ),
 			'test'  => [ $this, 'icu_version' ],
 		];
+		$tests['direct']['amp_css_transient_caching']   = [
+			'label' => esc_html__( 'Transient caching of stylesheets', 'amp' ),
+			'test'  => [ $this, 'css_transient_caching' ],
+		];
+		$tests['direct']['amp_xdebug_extension']        = [
+			'label' => esc_html__( 'Xdebug extension', 'amp' ),
+			'test'  => [ $this, 'xdebug_extension' ],
+		];
 
 		return $tests;
 	}
@@ -75,23 +85,18 @@ final class SiteHealth {
 			'test'        => 'amp_persistent_object_cache',
 		];
 
-		if ( $is_using_object_cache ) {
-			return array_merge(
-				$data,
-				[
-					'status' => 'good',
-					'label'  => esc_html__( 'Persistent object caching is enabled', 'amp' ),
-				]
-			);
-		} else {
-			return array_merge(
-				$data,
-				[
-					'status' => 'recommended',
-					'label'  => esc_html__( 'Persistent object caching is not enabled', 'amp' ),
-				]
-			);
-		}
+		$status = $is_using_object_cache ? 'good' : 'recommended';
+		$label  = $is_using_object_cache
+			? __( 'Persistent object caching is enabled', 'amp' )
+			: __( 'Persistent object caching is not enabled', 'amp' );
+
+		return array_merge(
+			$data,
+			[
+				'status' => $status,
+				'label'  => esc_html( $label ),
+			]
+		);
 	}
 
 	/**
@@ -163,15 +168,15 @@ final class SiteHealth {
 					),
 				]
 			);
-		} else {
-			return array_merge(
-				$data,
-				[
-					'status' => 'good',
-					'label'  => esc_html__( 'The cURL multi functions are defined', 'amp' ),
-				]
-			);
 		}
+
+		return array_merge(
+			$data,
+			[
+				'status' => 'good',
+				'label'  => esc_html__( 'The cURL multi functions are defined', 'amp' ),
+			]
+		);
 	}
 
 	/**
@@ -207,33 +212,95 @@ final class SiteHealth {
 		];
 
 		if ( ! defined( 'INTL_ICU_VERSION' ) ) {
-			return array_merge(
-				$data,
-				[
-					'status' => 'recommended',
-					/* translators: %s: the constant for the ICU version */
-					'label'  => esc_html( sprintf( __( 'The ICU version is unknown, as the constant %s is not defined', 'amp' ), 'INTL_ICU_VERSION' ) ),
-				]
-			);
-		}
-
-		if ( ! $is_proper_version ) {
-			return array_merge(
-				$data,
-				[
-					'status' => 'recommended',
-					/* translators: %s: the ICU version */
-					'label'  => esc_html( sprintf( __( 'The version of ICU (v%s) is out of date', 'amp' ), $icu_version ) ),
-				]
-			);
+			$status = 'recommended';
+			/* translators: %s: the constant for the ICU version */
+			$label = sprintf( __( 'The ICU version is unknown, as the constant %s is not defined', 'amp' ), 'INTL_ICU_VERSION' );
+		} elseif ( ! $is_proper_version ) {
+			$status = 'recommended';
+			/* translators: %s: the ICU version */
+			$label = sprintf( __( 'The version of ICU (v%s) is out of date', 'amp' ), $icu_version );
+		} else {
+			$status = 'good';
+			/* translators: %s: the ICU version */
+			$label = sprintf( __( 'The version of ICU (v%s) looks good', 'amp' ), $icu_version );
 		}
 
 		return array_merge(
 			$data,
 			[
-				'status' => 'good',
-				/* translators: %s the ICU version */
-				'label'  => esc_html( sprintf( __( 'The version of ICU (v%s) looks good', 'amp' ), $icu_version ) ),
+				'status' => $status,
+				'label'  => esc_html( $label ),
+			]
+		);
+	}
+
+	/**
+	 * Gets the test result data for whether transient caching for stylesheets was disabled.
+	 *
+	 * @return array The test data.
+	 */
+	public function css_transient_caching() {
+		if ( wp_using_ext_object_cache() ) {
+			$status = 'good';
+			$color  = 'blue';
+			$label  = __( 'Transient caching of parsed stylesheets is not used due to external object cache', 'amp' );
+		} elseif ( AMP_Options_Manager::get_option( Option::DISABLE_CSS_TRANSIENT_CACHING, false ) ) {
+			$status = 'recommended';
+			$color  = 'orange';
+			$label  = __( 'Transient caching of parsed stylesheets is disabled', 'amp' );
+		} else {
+			$status = 'good';
+			$color  = 'green';
+			$label  = __( 'Transient caching of parsed stylesheets is enabled', 'amp' );
+		}
+
+		return [
+			'badge'       => [
+				'label' => esc_html__( 'AMP', 'amp' ),
+				'color' => $color,
+			],
+			'description' => esc_html__( 'On sites which have highly variable CSS and are not using a persistent object cache, the transient caching of parsed stylesheets may be automatically disabled in order to prevent a site from filling up its wp_options table with too many transients.', 'amp' ),
+			'test'        => 'amp_css_transient_caching',
+			'status'      => $status,
+			'label'       => esc_html( $label ),
+		];
+	}
+
+	/**
+	 * Gets the test result data for whether the Xdebug extension is loaded.
+	 *
+	 * @since 1.5
+	 *
+	 * @return array The test data.
+	 */
+	public function xdebug_extension() {
+		$status      = 'good';
+		$color       = 'green';
+		$description = esc_html__( 'The Xdebug extension can cause some of the AMP plugin&#8217;s processes to time out depending on your system resources and configuration. It should not be enabled on a live site (production environment).', 'amp' );
+
+		if ( extension_loaded( 'xdebug' ) ) {
+			$label = esc_html__( 'Your server currently has the Xdebug PHP extension loaded', 'amp' );
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				/* translators: %s: the WP_DEBUG constant */
+				$description .= ' ' . sprintf( esc_html__( 'Nevertheless, %s is enabled which suggests that this site is currently under development or is undergoing debugging.', 'amp' ), '<code>WP_DEBUG</code>' );
+			} else {
+				$status = 'recommended';
+				$color  = 'orange';
+				/* translators: %s: the WP_DEBUG constant */
+				$description .= ' ' . sprintf( esc_html__( 'Please deactivate Xdebug to improve performance. Otherwise, you may enable %s to indicate that this site is currently under development or is undergoing debugging.', 'amp' ), '<code>WP_DEBUG</code>' );
+			}
+		} else {
+			$label = esc_html__( 'Your server currently does not have the Xdebug PHP extension loaded', 'amp' );
+		}
+
+		return array_merge(
+			compact( 'status', 'label', 'description' ),
+			[
+				'badge' => [
+					'label' => esc_html__( 'AMP', 'amp' ),
+					'color' => $color,
+				],
+				'test'  => 'amp_xdebug_extension',
 			]
 		);
 	}
@@ -267,6 +334,31 @@ final class SiteHealth {
 							'value'   => $this->get_serve_all_templates(),
 							'private' => false,
 						],
+						'amp_css_transient_caching_disabled' => [
+							'label'   => esc_html__( 'Transient caching for stylesheets disabled', 'amp' ),
+							'value'   => $this->get_css_transient_caching_disabled(),
+							'private' => false,
+						],
+						'amp_css_transient_caching_threshold' => [
+							'label'   => esc_html__( 'Threshold for monitoring stylesheet caching', 'amp' ),
+							'value'   => $this->get_css_transient_caching_threshold(),
+							'private' => false,
+						],
+						'amp_css_transient_caching_sampling_range' => [
+							'label'   => esc_html__( 'Sampling range for monitoring stylesheet caching', 'amp' ),
+							'value'   => $this->get_css_transient_caching_sampling_range(),
+							'private' => false,
+						],
+						'amp_css_transient_caching_transient_count' => [
+							'label'   => esc_html__( 'Number of stylesheet transient cache entries', 'amp' ),
+							'value'   => MonitorCssTransientCaching::query_css_transient_count(),
+							'private' => false,
+						],
+						'amp_css_transient_caching_time_series' => [
+							'label'   => esc_html__( 'Calculated time series for monitoring the stylesheet caching', 'amp' ),
+							'value'   => MonitorCssTransientCaching::get_time_series(),
+							'private' => false,
+						],
 					],
 				],
 			]
@@ -278,7 +370,7 @@ final class SiteHealth {
 	 *
 	 * @return string The supported template(s), in a comma-separated string.
 	 */
-	public function get_supported_templates() {
+	private function get_supported_templates() {
 		$possible_post_types = AMP_Options_Manager::get_option( 'supported_post_types' );
 
 		// Get the supported content types, like 'post'.
@@ -325,13 +417,58 @@ final class SiteHealth {
 	 *
 	 * @return string The value of the option to serve all templates.
 	 */
-	public function get_serve_all_templates() {
+	private function get_serve_all_templates() {
 		if ( AMP_Theme_Support::READER_MODE_SLUG === AMP_Theme_Support::get_support_mode() ) {
 			return esc_html__( 'This option does not apply to Reader mode.', 'amp' );
 		}
 
 		// Not translated, as this is debugging information, and it could be confusing getting this from different languages.
 		return AMP_Options_Manager::get_option( 'all_templates_supported' ) ? 'true' : 'false';
+	}
+
+	/**
+	 * Gets whether the transient caching of stylesheets was disabled.
+	 *
+	 * @return string Whether the transient caching of stylesheets was disabled.
+	 */
+	private function get_css_transient_caching_disabled() {
+		if ( wp_using_ext_object_cache() ) {
+			return 'n/a';
+		}
+
+		$disabled = AMP_Options_Manager::get_option( Option::DISABLE_CSS_TRANSIENT_CACHING, false );
+
+		return $disabled ? 'true' : 'false';
+	}
+
+	/**
+	 * Gets the threshold being used to when monitoring the transient caching of stylesheets.
+	 *
+	 * @return string Threshold for the transient caching of stylesheets.
+	 */
+	private function get_css_transient_caching_threshold() {
+		/** This filter is documented in src/BackgroundTask/MonitorCssTransientCaching.php */
+		$threshold = (float) apply_filters(
+			'amp_css_transient_monitoring_threshold',
+			MonitorCssTransientCaching::DEFAULT_THRESHOLD
+		);
+
+		return "{$threshold} transients per day";
+	}
+
+	/**
+	 * Gets the sampling range being used to when monitoring the transient caching of stylesheets.
+	 *
+	 * @return string Sampling range for the transient caching of stylesheets.
+	 */
+	private function get_css_transient_caching_sampling_range() {
+		/** This filter is documented in src/BackgroundTask/MonitorCssTransientCaching.php */
+		$sampling_range = (float) apply_filters(
+			'amp_css_transient_monitoring_sampling_range',
+			MonitorCssTransientCaching::DEFAULT_SAMPLING_RANGE
+		);
+
+		return "{$sampling_range} days";
 	}
 
 	/**

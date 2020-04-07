@@ -312,6 +312,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 			'foo'             => 'bar',
 			'sources'         => null,
 			'type'            => AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE,
+			'node_type'       => XML_ELEMENT_NODE,
 		];
 
 		// Test forcibly sanitized with filter.
@@ -419,6 +420,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 									'onload' => 'someFunc()',
 								],
 							'type'               => AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE,
+							'node_type'          => XML_ATTRIBUTE_NODE,
 						],
 						$error
 					);
@@ -449,6 +451,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 									'onload' => 'someFunc()',
 								],
 							'type'               => AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE,
+							'node_type'          => XML_ATTRIBUTE_NODE,
 						],
 						$error
 					);

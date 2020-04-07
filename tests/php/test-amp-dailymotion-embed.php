@@ -1,6 +1,7 @@
 <?php
 
 class AMP_DailyMotion_Embed_Test extends WP_UnitTestCase {
+
 	public function get_conversion_data() {
 		return [
 			'no_embed'       => [

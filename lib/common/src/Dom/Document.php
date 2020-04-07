@@ -3,6 +3,7 @@
 namespace AmpProject\Dom;
 
 use AmpProject\Attribute;
+use AmpProject\DevMode;
 use AmpProject\Tag;
 use DOMAttr;
 use DOMComment;
@@ -165,6 +166,13 @@ final class Document extends DOMDocument
     ];
 
     /**
+     * Whether `data-ampdevmode` was initially set on the the document element.
+     *
+     * @var bool
+     */
+    private $hasInitialAmpDevMode = false;
+
+    /**
      * The original encoding of how the AmpProject\Dom\Document was created.
      *
      * This is stored to do an automatic conversion to UTF-8, which is
@@ -302,6 +310,8 @@ final class Document extends DOMDocument
         $node = $dom->importNode($root->documentElement ?: $root, true);
         $dom->appendChild($node);
 
+        $dom->hasInitialAmpDevMode = $dom->documentElement->hasAttribute(DevMode::DEV_MODE_ATTRIBUTE);
+
         return $dom;
     }
 
@@ -380,7 +390,18 @@ final class Document extends DOMDocument
 
         $libxml_previous_state = libxml_use_internal_errors(true);
 
-        $success = parent::loadHTML($source, $options | LIBXML_COMPACT | LIBXML_HTML_NODEFDTD);
+        $options |= LIBXML_COMPACT;
+
+        /*
+         * LIBXML_HTML_NODEFDTD is only available for libxml 2.7.8+.
+         * This should be the case for PHP 5.4+, but some systems seem to compile against a custom libxml version that
+         * is lower than expected.
+         */
+        if (defined('LIBXML_HTML_NODEFDTD')) {
+            $options |= constant('LIBXML_HTML_NODEFDTD');
+        }
+
+        $success = parent::loadHTML($source, $options);
 
         libxml_clear_errors();
         libxml_use_internal_errors($libxml_previous_state);
@@ -405,6 +426,8 @@ final class Document extends DOMDocument
             ) {
                 $this->head->removeChild($meta);
             }
+
+            $this->hasInitialAmpDevMode = $this->documentElement->hasAttribute(DevMode::DEV_MODE_ATTRIBUTE);
         }
 
         return $success;
@@ -874,7 +897,7 @@ final class Document extends DOMDocument
     private function secureMustacheScriptTemplates($html)
     {
         return preg_replace(
-            '#<script(\s[^>]*?template=(["\']?)amp-mustache\2[^>]*)>(.*?)</script\s*?>#i',
+            '#<script(\s[^>]*?template=(["\']?)amp-mustache\2[^>]*)>(.*?)</script\s*?>#is',
             '<tmp-script$1>$3</tmp-script>',
             $html
         );
@@ -1444,6 +1467,16 @@ final class Document extends DOMDocument
             ||
             $node instanceof DOMComment
         );
+    }
+
+    /**
+     * Determine whether `data-ampdevmode` was initially set on the document element.
+     *
+     * @return bool
+     */
+    public function hasInitialAmpDevMode()
+    {
+        return $this->hasInitialAmpDevMode;
     }
 
     /**

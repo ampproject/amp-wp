@@ -6,12 +6,16 @@
  * @since 1.0
  */
 
+use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+
 /**
  * Tests for AMP_HTTP.
  *
  * @covers AMP_HTTP
  */
 class Test_AMP_HTTP extends WP_UnitTestCase {
+
+	use AssertContainsCompatibility;
 
 	/**
 	 * Set up before class.
@@ -156,8 +160,8 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 		foreach ( $all_query_vars as $key => $value ) {
 			$this->assertArrayHasKey( $key, $_GET ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$this->assertArrayHasKey( $key, $_REQUEST ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$this->assertContains( "$key=$value", $_SERVER['QUERY_STRING'] );
-			$this->assertContains( "$key=$value", $_SERVER['REQUEST_URI'] );
+			$this->assertStringContains( "$key=$value", $_SERVER['QUERY_STRING'] );
+			$this->assertStringContains( "$key=$value", $_SERVER['REQUEST_URI'] );
 		}
 
 		AMP_HTTP::$purged_amp_query_vars = [];
@@ -167,14 +171,14 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 		foreach ( $bad_query_vars as $key => $value ) {
 			$this->assertArrayNotHasKey( $key, $_GET ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$this->assertArrayNotHasKey( $key, $_REQUEST ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$this->assertNotContains( "$key=$value", $_SERVER['QUERY_STRING'] );
-			$this->assertNotContains( "$key=$value", $_SERVER['REQUEST_URI'] );
+			$this->assertStringNotContains( "$key=$value", $_SERVER['QUERY_STRING'] );
+			$this->assertStringNotContains( "$key=$value", $_SERVER['REQUEST_URI'] );
 		}
 		foreach ( $ok_query_vars as $key => $value ) {
 			$this->assertArrayHasKey( $key, $_GET ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$this->assertArrayHasKey( $key, $_REQUEST ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$this->assertContains( "$key=$value", $_SERVER['QUERY_STRING'] );
-			$this->assertContains( "$key=$value", $_SERVER['REQUEST_URI'] );
+			$this->assertStringContains( "$key=$value", $_SERVER['QUERY_STRING'] );
+			$this->assertStringContains( "$key=$value", $_SERVER['REQUEST_URI'] );
 		}
 		// phpcs:enable WordPress.CSRF.NonceVerification.NoNonceVerification
 	}

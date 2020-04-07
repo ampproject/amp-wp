@@ -6,7 +6,7 @@
  */
 
 use AmpProject\Amp;
-use AmpProject\AmpWP\CachedRemoteGetRequest;
+use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\ConfigurationArgument;
 use AmpProject\AmpWP\Transformer;
 use AmpProject\Attribute;
@@ -14,9 +14,9 @@ use AmpProject\Dom\Document;
 use AmpProject\Extension;
 use AmpProject\Fonts;
 use AmpProject\Optimizer;
-use AmpProject\RemoteRequest\CurlRemoteGetRequest;
 use AmpProject\RemoteRequest\FallbackRemoteGetRequest;
 use AmpProject\RemoteRequest\FilesystemRemoteGetRequest;
+use AmpProject\AmpWP\RemoteRequest\WpHttpRemoteGetRequest;
 use AmpProject\Tag;
 
 /**
@@ -2001,6 +2001,10 @@ class AMP_Theme_Support {
 
 		$dom = Document::fromHtml( $response );
 
+		if ( AMP_Validation_Manager::$is_validate_request ) {
+			AMP_Validation_Manager::remove_illegal_source_stack_comments( $dom );
+		}
+
 		AMP_HTTP::send_server_timing( 'amp_dom_parse', -$dom_parse_start, 'AMP DOM Parse' );
 
 		// Make sure scripts from the body get moved to the head.
@@ -2019,6 +2023,7 @@ class AMP_Theme_Support {
 
 		// Respond early with results if performing a validate request.
 		if ( AMP_Validation_Manager::$is_validate_request ) {
+			status_header( 200 );
 			header( 'Content-Type: application/json; charset=utf-8' );
 			return wp_json_encode(
 				AMP_Validation_Manager::get_validate_response_data( $sanitization_results ),
@@ -2145,11 +2150,11 @@ class AMP_Theme_Support {
 		$configuration = self::get_optimizer_configuration( $args );
 
 		$fallback_remote_request_pipeline = new FallbackRemoteGetRequest(
-			new CurlRemoteGetRequest(),
+			new WpHttpRemoteGetRequest(),
 			new FilesystemRemoteGetRequest( Optimizer\LocalFallback::getMappings() )
 		);
 
-		$cached_remote_request = new CachedRemoteGetRequest( $fallback_remote_request_pipeline );
+		$cached_remote_request = new CachedRemoteGetRequest( $fallback_remote_request_pipeline, WEEK_IN_SECONDS );
 
 		return new Optimizer\TransformationEngine(
 			$configuration,

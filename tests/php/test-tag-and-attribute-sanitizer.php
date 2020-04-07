@@ -102,18 +102,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[],
 				[
 					[
-						'code'   => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG_MULTIPLE_CHOICES,
-						'errors' => [
-							[
-								'code'      => AMP_Tag_And_Attribute_Sanitizer::WRONG_PARENT_TAG,
-								'spec_name' => 'noscript enclosure for boilerplate',
-							],
-							[
-								'code'                => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG_ANCESTOR,
-								'disallowed_ancestor' => 'noscript',
-								'spec_name'           => 'noscript',
-							],
-						],
+						'code'                 => AMP_Tag_And_Attribute_Sanitizer::WRONG_PARENT_TAG,
+						'spec_name'            => 'noscript enclosure for boilerplate',
+						'required_parent_name' => 'head',
 					],
 				],
 			],
@@ -602,6 +593,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-user-notification' ],
 			],
 
+			'amp-user-notification-empty-dismiss-href'     => [
+				'<amp-user-notification layout="nodisplay" id="amp-user-notification1" data-show-if-href="" data-dismiss-href="">This site uses cookies to personalize content.<a class="btn" on="tap:amp-user-notification1.dismiss">I accept</a></amp-user-notification>',
+				'<amp-user-notification layout="nodisplay" id="amp-user-notification1">This site uses cookies to personalize content.<a class="btn" on="tap:amp-user-notification1.dismiss">I accept</a></amp-user-notification>',
+				[ 'amp-user-notification' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::MISSING_URL, AMP_Tag_And_Attribute_Sanitizer::MISSING_URL ],
+			],
+
 			'amp-video'                                    => [
 				'<amp-video width="432" height="987" src="/video/location.mp4"></amp-video>',
 				null, // No change.
@@ -732,6 +730,33 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<form method="get" action="/form/search-html/get" target="_blank"><fieldset><label><span>Search for</span><input type="search" placeholder="test" name="term" required></label><input type="submit" value="Search"><input type="button" value="Open Lightbox" on="tap:lb1.open"></fieldset></form>',
 				null,
 				[ 'amp-form' ],
+			],
+
+			'scripts-gathered-from-invalid-parents'        => [
+				'
+				<ancestor-unknown>
+					<amp-audio src="https://example.com/foo.mp3" width="100" height="200"></amp-audio>
+					<parent-unknown>
+						<amp-form>
+							<form method="GET" id="a_string" class="a_string" action="https://example.com" target="_blank">
+								<unrecognized>who are you?</unrecognized>
+								<input type=text value="test" name="hello">
+							</form>
+						</amp-form>
+					</parent-unknown>
+					<amp-video src="https://example.com/foo.mp4" width="100" height="200"></amp-video>
+				</ancestor-unknown>
+				',
+				'
+				<amp-audio src="https://example.com/foo.mp3" width="100" height="200"></amp-audio>
+				<form method="GET" id="a_string" class="a_string" action="https://example.com" target="_blank">
+					who are you?
+					<input type="text" value="test" name="hello">
+				</form>
+				<amp-video src="https://example.com/foo.mp4" width="100" height="200"></amp-video>
+				',
+				[ 'amp-audio', 'amp-form', 'amp-video' ],
+				array_fill( 0, 4, AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ),
 			],
 
 			'form-visible-when-invalid'                    => [
@@ -1151,7 +1176,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-user-notification data-dismiss-href></amp-user-notification>',
 				'<amp-user-notification></amp-user-notification>',
 				[ 'amp-user-notification' ],
-				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_EMPTY_URL ],
+				[ AMP_Tag_And_Attribute_Sanitizer::MISSING_URL ],
 			],
 
 			'allowed_empty_attr'                           => [
@@ -2134,6 +2159,34 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[],
 			],
 
+			'amp_img_missing_url'                          => [
+				'<amp-img src="" height="100" width="200"></amp-img>',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::MISSING_URL, AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING ],
+			],
+
+			'amp_img_missing_url'                          => [
+				'<amp-img src="" height="100" width="200"></amp-img>',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::MISSING_URL, AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING ],
+			],
+
+			'amp_pixel_blank_src'                          => [
+				'<amp-pixel src="" layout="nodisplay"></amp-pixel>',
+				null,
+				[],
+				[],
+			],
+
+			'amp_pixel_missing_src'                        => [
+				'<amp-pixel layout="nodisplay"></amp-pixel>',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING ],
+			],
+
 			'amp_link_rewriter'                            => [
 				'<amp-link-rewriter layout="nodisplay"><script type="application/json">{}</script></amp-link-rewriter>',
 				null,
@@ -2867,28 +2920,34 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_HTML_COMMENTS ],
 			],
 			'cdata_malformed_json'                    => [
-				'<html><head><meta charset="utf-8"><script type="application/ld+json">{"example": </script></head><body></body></html>',
-				'<html><head><meta charset="utf-8"></head><body></body></html>',
-				[],
+				'<html><head><meta charset="utf-8"></head><body><amp-ima-video width="640" height="360" layout="responsive" data-tag="ads.xml"><script type="application/json">{"example": </script></amp-ima-video></body></html>',
+				'<html><head><meta charset="utf-8"></head><body><amp-ima-video width="640" height="360" layout="responsive" data-tag="ads.xml"></amp-ima-video></body></html>',
+				[ 'amp-ima-video' ],
 				[ AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_SYNTAX ],
 			],
 			'cdata_malformed_json_with_emojis'        => [
-				'<html><head><meta charset="utf-8"><script type="application/ld+json">{"wrong": "' . wp_staticize_emoji( '🚧 🚧' ) . '"}</script></head><body></body></html>',
-				'<html><head><meta charset="utf-8"></head><body></body></html>',
-				[],
+				'<html><head><meta charset="utf-8"></head><body><amp-ima-video width="640" height="360" layout="responsive" data-tag="ads.xml"><script type="application/json">{"wrong": "' . wp_staticize_emoji( '🚧 🚧' ) . '"}</script></amp-ima-video></body></html>',
+				'<html><head><meta charset="utf-8"></head><body><amp-ima-video width="640" height="360" layout="responsive" data-tag="ads.xml"></amp-ima-video></body></html>',
+				[ 'amp-ima-video' ],
 				[ AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_SYNTAX ],
 			],
 			'cdata_malformed_utf8_json'               => [
-				sprintf( '<html><head><meta charset="utf-8"><script type="application/ld+json">{"wrong": "%s"}</script></head><body></body></html>', "\xFF" ),
-				'<html><head><meta charset="utf-8"></head><body></body></html>',
-				[],
+				sprintf( '<html><head><meta charset="utf-8"></head><body><amp-ima-video width="640" height="360" layout="responsive" data-tag="ads.xml"><script type="application/json">{"wrong": "%s"}</script></amp-ima-video></body></html>', "\xFF" ),
+				'<html><head><meta charset="utf-8"></head><body><amp-ima-video width="640" height="360" layout="responsive" data-tag="ads.xml"></amp-ima-video></body></html>',
+				[ 'amp-ima-video' ],
 				[ AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_UTF8 ],
 			],
 			'cdata_empty_json_considered_invalid'     => [
-				'<html><head><meta charset="utf-8"><script type="application/ld+json"></script></head><body></body></html>',
-				'<html><head><meta charset="utf-8"></head><body></body></html>',
-				[],
+				'<html><head><meta charset="utf-8"></head><body><amp-ima-video width="640" height="360" layout="responsive" data-tag="ads.xml"><script type="application/json"></script></amp-ima-video></body></html>',
+				'<html><head><meta charset="utf-8"></head><body><amp-ima-video width="640" height="360" layout="responsive" data-tag="ads.xml"></amp-ima-video></body></html>',
+				[ 'amp-ima-video' ],
 				[ AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_EMPTY ],
+			],
+			'cdata_empty_json_not_considered_invalid' => [
+				'<html><head><meta charset="utf-8"><script type="application/ld+json" id="__gaOptOutExtension"></script></head><body></body></html>',
+				null,
+				[],
+				[],
 			],
 			'analytics_empty_json_considered_invalid' => [
 				'<html><head><meta charset="utf-8"></head><body><amp-analytics><script type="application/json"> </script></amp-analytics></body></html>',
@@ -2943,6 +3002,55 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				null,
 				[ 'amp-subscriptions' ],
 			],
+			'bad http-equiv meta tag'                 => [
+				'<html><head><meta charset="utf-8"><meta http-equiv="Content-Script-Type" content="text/vbscript"></head><body></body></html>',
+				'<html><head><meta charset="utf-8"><meta content="text/vbscript"></head><body></body></html>',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR ],
+			],
+		];
+
+		$bad_dev_mode_document = sprintf(
+			'
+				<html amp>
+					<head>
+						<meta charset="utf-8">
+						<style data-ampdevmode>%s</style>
+					</head>
+					<body>
+						<amp-state id="something">
+							<script type="application/json" data-ampdevmode>%s</script>
+						</amp-state>
+						<button data-ampdevmode onclick="alert(\'Hello!\')"></button>
+						<script data-ampdevmode>document.write("Hello World!")</script>
+					</body>
+				</html>
+				',
+			'button::before { content:"' . str_repeat( 'a', 75001 ) . '";"}',
+			'{"foo":"' . str_repeat( 'b', 100001 ) . '"}'
+		);
+
+		$data['dev_mode_not_set_on_html_element'] = [
+			$bad_dev_mode_document,
+			'
+			<html amp>
+				<head>
+					<meta charset="utf-8">
+				</head>
+				<body>
+					<amp-state id="something">
+					</amp-state>
+					<button data-ampdevmode></button>
+				</body>
+			</html>
+			',
+			[ 'amp-bind' ],
+			[
+				AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
+				AMP_Tag_And_Attribute_Sanitizer::CDATA_TOO_LONG,
+				AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
+				AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
+			],
 		];
 
 		$bad_dev_mode_document = sprintf(
@@ -2961,11 +3069,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 					</body>
 				</html>
 				',
-			'button::before { content:"' . str_repeat( 'a', 50001 ) . '";"}',
+			'button::before { content:"' . str_repeat( 'a', 75001 ) . '";"}',
 			'{"foo":"' . str_repeat( 'b', 100001 ) . '"}'
 		);
 
-		$data['dev_mode_test'] = [
+		$data['dev_mode_set_on_html_element'] = [
 			$bad_dev_mode_document,
 			null,
 			[ 'amp-bind' ],
@@ -3171,6 +3279,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 							'alt'    => 'None',
 						],
 						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+						'node_type'       => XML_ELEMENT_NODE,
 					],
 				],
 			],
@@ -3185,6 +3294,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 						'node_attributes' => [ 'class' => 'baz-invalid' ],
 						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+						'node_type'       => XML_ELEMENT_NODE,
 					],
 				],
 			],
@@ -3194,12 +3304,14 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'',
 				[
 					[
-						'node_name'       => 'amp-story-grid-layer',
-						'parent_name'     => 'body',
-						'code'            => AMP_Tag_And_Attribute_Sanitizer::MANDATORY_TAG_ANCESTOR,
-						'node_attributes' => [ 'class' => 'a-invalid' ],
-						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
-						'spec_name'       => 'amp-story-grid-layer',
+						'node_name'              => 'amp-story-grid-layer',
+						'parent_name'            => 'body',
+						'code'                   => AMP_Tag_And_Attribute_Sanitizer::MANDATORY_TAG_ANCESTOR,
+						'node_attributes'        => [ 'class' => 'a-invalid' ],
+						'type'                   => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+						'spec_name'              => 'amp-story-grid-layer',
+						'required_ancestor_name' => 'amp-story-page',
+						'node_type'              => XML_ELEMENT_NODE,
 					],
 				],
 			],
@@ -3214,6 +3326,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 						'node_attributes' => [ 'class' => 'foo-invalid' ],
 						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+						'node_type'       => XML_ELEMENT_NODE,
 					],
 				],
 			],
@@ -3228,6 +3341,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 						'node_attributes' => [],
 						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+						'node_type'       => XML_ELEMENT_NODE,
 					],
 				],
 			],
@@ -3253,6 +3367,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 						'node_attributes' => [ 'id' => 'invalid' ],
 						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+						'node_type'       => XML_ELEMENT_NODE,
 					],
 					[
 						'node_name'       => 'bazfoo',
@@ -3260,6 +3375,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 						'node_attributes' => [],
 						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+						'node_type'       => XML_ELEMENT_NODE,
 					],
 				],
 			],
@@ -3279,6 +3395,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 						'node_attributes' => [],
 						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+						'node_type'       => XML_ELEMENT_NODE,
 					],
 				],
 			],
@@ -3293,6 +3410,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 						'node_attributes' => [],
 						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+						'node_type'       => XML_ELEMENT_NODE,
 					],
 					[
 						'node_name'       => 'divs',
@@ -3300,6 +3418,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 						'node_attributes' => [],
 						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+						'node_type'       => XML_ELEMENT_NODE,
 					],
 				],
 			],

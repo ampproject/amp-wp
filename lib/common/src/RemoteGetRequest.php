@@ -2,7 +2,7 @@
 
 namespace AmpProject;
 
-use AmpProject\Exception\FailedToGetFromRemoteUrl;
+use AmpProject\Exception\FailedRemoteRequest;
 
 /**
  * Interface for abstracting away the transport that is being used for making remote requests.
@@ -19,7 +19,7 @@ interface RemoteGetRequest
      *
      * @param string $url URL to get.
      * @return Response Response for the executed request.
-     * @throws FailedToGetFromRemoteUrl If retrieving the contents from the URL failed.
+     * @throws FailedRemoteRequest If retrieving the contents from the URL failed.
      */
     public function get($url);
 }

@@ -5,9 +5,15 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching;
+use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
+use AmpProject\AmpWP\RemoteRequest\WpHttpRemoteGetRequest;
 use AmpProject\DevMode;
 use AmpProject\Dom\Document;
+use AmpProject\Exception\FailedToGetFromRemoteUrl;
 use AmpProject\Fonts;
+use AmpProject\RemoteGetRequest;
 use Sabberworm\CSS\RuleSet\DeclarationBlock;
 use Sabberworm\CSS\CSSList\CSSList;
 use Sabberworm\CSS\Property\Selector;
@@ -118,6 +124,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *      @type string   $parsed_cache_variant       Additional value by which to vary parsed cache.
 	 *      @type string[] $focus_within_classes       Class names in selectors that should be replaced with :focus-within pseudo classes.
 	 *      @type string[] $low_priority_plugins       Plugin slugs of the plugins to deprioritize when hitting the CSS limit.
+	 *      @type bool     $allow_transient_caching    Whether to allow caching parsed CSS in transients. This may need to be disabled when there is highly-variable CSS content.
 	 * }
 	 */
 	protected $args;
@@ -139,6 +146,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		'parsed_cache_variant'      => null,
 		'focus_within_classes'      => [ 'focus' ],
 		'low_priority_plugins'      => [ 'query-monitor' ],
+		'allow_transient_caching'   => true,
 	];
 
 	/**
@@ -324,6 +332,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	];
 
 	/**
+	 * Remote request instance.
+	 *
+	 * @var RemoteGetRequest
+	 */
+	private $remote_request;
+
+	/**
 	 * Get error codes that can be raised during parsing of CSS.
 	 *
 	 * This is used to determine which validation errors should be taken into account
@@ -417,6 +432,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 		$this->base_url    = untrailingslashit( $guessurl );
 		$this->content_url = WP_CONTENT_URL;
+
+		$this->remote_request = new CachedRemoteGetRequest( new WpHttpRemoteGetRequest() );
 	}
 
 	/**
@@ -744,6 +761,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			// Attributes for amp-live-list, see <https://amp.dev/documentation/components/amp-live-list/#styling>.
 			if ( 'data-tombstone' === $attribute_name ) {
 				if ( ! $this->has_used_tag_names( [ 'amp-live-list' ] ) ) {
+					return false;
+				}
+				continue;
+			}
+
+			// Attributes for amp-experiment begin with 'amp-x-', see <https://amp.dev/documentation/examples/components/amp-experiment/>.
+			if ( 'amp-x-' === substr( $attribute_name, 0, 6 ) ) {
+				if ( ! $this->has_used_tag_names( [ 'amp-experiment' ] ) ) {
 					return false;
 				}
 				continue;
@@ -1408,36 +1433,33 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$url = wp_parse_url( home_url(), PHP_URL_SCHEME ) . ':' . $url;
 		}
 
-		$cache_key = md5( $url );
-		$contents  = get_transient( $cache_key );
-		if ( false === $contents ) {
-			$r    = wp_remote_get( $url );
-			$code = wp_remote_retrieve_response_code( $r );
-			if ( is_wp_error( $r ) ) {
-				$contents = $r;
-			} elseif ( $code < 200 || $code >= 300 ) {
-				$message = wp_remote_retrieve_response_message( $r );
-				if ( ! $code ) {
-					$code = 'http_error';
-				} else {
-					$code = "http_{$code}";
-				}
-				if ( ! $message ) {
-					/* translators: %s: the fetched URL */
-					$message = sprintf( __( 'Failed to fetch: %s', 'amp' ), $url );
-				}
-				$contents = new WP_Error( $code, $message );
-			} elseif ( ! preg_match( '#^text/css#', wp_remote_retrieve_header( $r, 'content-type' ) ) ) {
-				$contents = new WP_Error(
-					'no_css_content_type',
-					__( 'Response did not contain the expected text/css content type.', 'amp' )
-				);
-			} else {
-				$contents = wp_remote_retrieve_body( $r );
+		try {
+			$response = $this->remote_request->get( $url );
+		} catch ( Exception $exception ) {
+			if ( $exception instanceof FailedToGetFromRemoteUrl && $exception->hasStatusCode() ) {
+				return new WP_Error( "http_{$exception->getStatusCode()}", $exception->getMessage() );
 			}
-			set_transient( $cache_key, $contents, MONTH_IN_SECONDS );
+			/* translators: %1$s: the fetched URL, %2$s the error message that was returned */
+			return new WP_Error( 'http_error', sprintf( __( 'Failed to fetch: %1$s (%2$s)', 'amp' ), $url, $exception->getMessage() ) );
 		}
-		return $contents;
+
+		$status = $response->getStatusCode();
+
+		if ( $status < 200 || $status >= 300 ) {
+			/* translators: %s: the fetched URL */
+			return new WP_Error( "http_{$status}", sprintf( __( 'Failed to fetch: %s', 'amp' ), $url ) );
+		}
+
+		$content_type = (array) $response->getHeader( 'content-type' );
+
+		if ( ! empty( $content_type ) && ! preg_match( '#^text/css#', $content_type[0] ) ) {
+			return new WP_Error(
+				'no_css_content_type',
+				__( 'Response did not contain the expected text/css content type.', 'amp' )
+			);
+		}
+
+		return $response->getBody();
 	}
 
 	/**
@@ -1474,10 +1496,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * }
 	 */
 	private function get_parsed_stylesheet( $stylesheet, $options = [] ) {
-		$parsed      = null;
-		$cache_key   = null;
-		$cached      = true;
-		$cache_group = 'amp-parsed-stylesheet-v27'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
+		$parsed         = null;
+		$cache_key      = null;
+		$cached         = true;
+		$cache_group    = 'amp-parsed-stylesheet-v27'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
+		$use_transients = $this->should_use_transient_caching();
 
 		$cache_impacting_options = array_merge(
 			wp_array_slice_assoc(
@@ -1495,10 +1518,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$cache_key = md5( $stylesheet . wp_json_encode( $cache_impacting_options ) );
 
-		if ( wp_using_ext_object_cache() ) {
-			$parsed = wp_cache_get( $cache_key, $cache_group );
-		} else {
+		if ( $use_transients ) {
 			$parsed = get_transient( $cache_group . '-' . $cache_key );
+		} else {
+			$parsed = wp_cache_get( $cache_key, $cache_group );
 		}
 
 		/*
@@ -1524,16 +1547,37 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			 * getting filled infinitely. On the other hand, if an external object cache is available then we don't
 			 * set an expiration because it should implement LRU cache expulsion policy.
 			 */
-			if ( wp_using_ext_object_cache() ) {
-				wp_cache_set( $cache_key, $parsed, $cache_group );
-			} else {
+			if ( $use_transients ) {
 				// The expiration is to ensure transient doesn't stick around forever since no LRU flushing like with external object cache.
 				set_transient( $cache_group . '-' . $cache_key, $parsed, MONTH_IN_SECONDS );
+			} else {
+				wp_cache_set( $cache_key, $parsed, $cache_group );
 			}
 		}
 
 		$parsed['cached'] = $cached;
 		return $parsed;
+	}
+
+	/**
+	 * Check whether transient caching for stylesheets should be used.
+	 *
+	 * @return bool Whether transient caching should be used.
+	 */
+	private function should_use_transient_caching() {
+		if ( wp_using_ext_object_cache() ) {
+			return false;
+		}
+
+		if ( ! $this->args['allow_transient_caching'] ) {
+			return false;
+		}
+
+		if ( AMP_Options_Manager::get_option( Option::DISABLE_CSS_TRANSIENT_CACHING, false ) ) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**

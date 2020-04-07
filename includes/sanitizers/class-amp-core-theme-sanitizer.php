@@ -94,6 +94,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					'add_twentytwenty_toggles'         => [],
 					'add_nav_menu_styles'              => [],
 					'add_twentytwenty_masthead_styles' => [],
+					'add_img_display_block_fix'        => [],
+					'add_twentytwenty_custom_logo_fix' => [],
 					'add_twentytwenty_current_page_awareness' => [],
 				];
 
@@ -716,6 +718,85 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				wp_add_inline_style( get_template() . '-style', $styles );
 			},
 			11
+		);
+	}
+
+	/**
+	 * Fix display of Custom Logo in Twenty Twenty.
+	 *
+	 * This is required because width:auto on the site-logo amp-img does not preserve the proportional width in the same
+	 * way as the same styles applied to an img.
+	 *
+	 * @since 1.5
+	 * @link https://github.com/ampproject/amp-wp/issues/4418
+	 * @link https://codepen.io/westonruter/pen/rNVqadv
+	 */
+	public static function add_twentytwenty_custom_logo_fix() {
+		$method = __METHOD__;
+		add_filter(
+			'get_custom_logo',
+			static function( $html ) use ( $method ) {
+				// Pattern sourced from AMP_Base_Embed_Handler::match_element_attributes().
+				$pattern = sprintf(
+					'/<img%s/',
+					implode(
+						'',
+						array_map(
+							function ( $attr_name ) {
+								return sprintf( '(?=[^>]*?%1$s="(?P<%1$s>\d+)")?', preg_quote( $attr_name, '/' ) );
+							},
+							[ 'width', 'height' ]
+						)
+					)
+				);
+				if ( preg_match( $pattern, $html, $matches ) && isset( $matches['width'] ) && isset( $matches['height'] ) ) {
+					$width  = (int) $matches['width'];
+					$height = (int) $matches['height'];
+
+					$desktop_height = 9; // in rem; see <https://github.com/WordPress/wordpress-develop/blob/ad8d01a7e9e13144d1676b8e6d70c3e81ef703af/src/wp-content/themes/twentytwenty/style.css#L4887>.
+					$mobile_height  = 6; // in rem; see <https://github.com/WordPress/wordpress-develop/blob/ad8d01a7e9e13144d1676b8e6d70c3e81ef703af/src/wp-content/themes/twentytwenty/style.css#L1424>.
+
+					$desktop_width = $desktop_height * ( $width / $height );
+					$mobile_width  = $mobile_height * ( $width / $height );
+
+					$html .= sprintf(
+						'<style data-src="%s">.site-logo amp-img { width: %frem; } @media (min-width: 700px) { .site-logo amp-img { width: %frem; } }</style>',
+						esc_attr( $method ),
+						$mobile_width,
+						$desktop_width
+					);
+
+				}
+				return $html;
+			},
+			PHP_INT_MAX
+		);
+	}
+
+	/**
+	 * Add style rule with a selector of higher specificity than just `img` to make `amp-img` have `display:block` rather than `display:inline-block`.
+	 *
+	 * This is needed to override the AMP core stylesheet which has a more specific selector `.i-amphtml-layout-intrinsic` which
+	 * is given a `display: inline-block`; this display value prevents margins from collapsing with surrounding block elements,
+	 * resulting in larger margins in AMP than expected.
+	 *
+	 * @since 1.5
+	 * @link https://github.com/ampproject/amp-wp/issues/4419
+	 */
+	public static function add_img_display_block_fix() {
+		$method = __METHOD__;
+		// Note that wp_add_inline_style() is not used because this stylesheet needs to be added _before_ style.css so
+		// that any subsequent style rules for images will continue to override.
+		add_action(
+			'wp_print_styles',
+			static function() use ( $method ) {
+				printf(
+					'<style data-src="%s">%s</style>',
+					esc_attr( $method ),
+					// The selector is targeting an attribute that can never appear. It is purely present to increase specificity.
+					'amp-img:not([_]) { display: block }'
+				);
+			}
 		);
 	}
 

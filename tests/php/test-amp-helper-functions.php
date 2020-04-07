@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\HandleValidation;
 
 /**
@@ -12,6 +13,7 @@ use AmpProject\AmpWP\Tests\HandleValidation;
  */
 class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 
+	use AssertContainsCompatibility;
 	use HandleValidation;
 
 	/**
@@ -133,12 +135,12 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		add_filter( 'amp_pre_get_permalink', [ $this, 'return_example_url' ], 10, 2 );
 		add_filter( 'amp_get_permalink', [ $this, 'return_example_url' ], 10, 2 );
 		$url = amp_get_permalink( $published_post );
-		$this->assertContains( 'current_filter=amp_pre_get_permalink', $url );
-		$this->assertContains( 'url=0', $url );
+		$this->assertStringContains( 'current_filter=amp_pre_get_permalink', $url );
+		$this->assertStringContains( 'url=0', $url );
 
 		remove_filter( 'amp_pre_get_permalink', [ $this, 'return_example_url' ], 10 );
 		$url = amp_get_permalink( $published_post );
-		$this->assertContains( 'current_filter=amp_get_permalink', $url );
+		$this->assertStringContains( 'current_filter=amp_get_permalink', $url );
 		remove_filter( 'amp_pre_get_permalink', [ $this, 'return_example_url' ] );
 
 		// Now check with theme support added (in transitional mode).
@@ -147,9 +149,9 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertStringEndsWith( '&amp', amp_get_permalink( $drafted_post ) );
 		$this->assertStringEndsWith( '&amp', amp_get_permalink( $published_page ) );
 		add_filter( 'amp_get_permalink', [ $this, 'return_example_url' ], 10, 2 );
-		$this->assertNotContains( 'current_filter=amp_get_permalink', amp_get_permalink( $published_post ) ); // Filter does not apply.
+		$this->assertStringNotContains( 'current_filter=amp_get_permalink', amp_get_permalink( $published_post ) ); // Filter does not apply.
 		add_filter( 'amp_pre_get_permalink', [ $this, 'return_example_url' ], 10, 2 );
-		$this->assertNotContains( 'current_filter=amp_pre_get_permalink', amp_get_permalink( $published_post ) ); // Filter does not apply.
+		$this->assertStringNotContains( 'current_filter=amp_pre_get_permalink', amp_get_permalink( $published_post ) ); // Filter does not apply.
 	}
 
 	/**
@@ -198,12 +200,12 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		add_filter( 'amp_pre_get_permalink', [ $this, 'return_example_url' ], 10, 2 );
 		add_filter( 'amp_get_permalink', [ $this, 'return_example_url' ], 10, 2 );
 		$url = amp_get_permalink( $published_post );
-		$this->assertContains( 'current_filter=amp_pre_get_permalink', $url );
-		$this->assertContains( 'url=0', $url );
+		$this->assertStringContains( 'current_filter=amp_pre_get_permalink', $url );
+		$this->assertStringContains( 'url=0', $url );
 
 		remove_filter( 'amp_pre_get_permalink', [ $this, 'return_example_url' ], 10 );
 		$url = amp_get_permalink( $published_post );
-		$this->assertContains( 'current_filter=amp_get_permalink', $url );
+		$this->assertStringContains( 'current_filter=amp_get_permalink', $url );
 		remove_filter( 'amp_get_permalink', [ $this, 'return_example_url' ], 10 );
 
 		// Now check with theme support added (in transitional mode).
@@ -212,9 +214,9 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertStringEndsWith( '?amp', amp_get_permalink( $published_post ) );
 		$this->assertStringEndsWith( '?amp', amp_get_permalink( $published_page ) );
 		add_filter( 'amp_get_permalink', [ $this, 'return_example_url' ], 10, 2 );
-		$this->assertNotContains( 'current_filter=amp_get_permalink', amp_get_permalink( $published_post ) ); // Filter does not apply.
+		$this->assertStringNotContains( 'current_filter=amp_get_permalink', amp_get_permalink( $published_post ) ); // Filter does not apply.
 		add_filter( 'amp_pre_get_permalink', [ $this, 'return_example_url' ], 10, 2 );
-		$this->assertNotContains( 'current_filter=amp_pre_get_permalink', amp_get_permalink( $published_post ) ); // Filter does not apply.
+		$this->assertStringNotContains( 'current_filter=amp_pre_get_permalink', amp_get_permalink( $published_post ) ); // Filter does not apply.
 
 		// Make sure that if permalink has anchor that it is persists.
 		add_filter( 'post_link', $add_anchor_fragment );
@@ -257,7 +259,6 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertEquals( 'https://example.com/foo/', amp_remove_endpoint( 'https://example.com/foo/amp/' ) );
 		$this->assertEquals( 'https://example.com/foo/?blaz', amp_remove_endpoint( 'https://example.com/foo/amp/?blaz' ) );
 	}
-
 
 	/**
 	 * Test that hook is added.
@@ -480,7 +481,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 				$canonical_url
 			);
 			$this->assertNotInstanceOf( 'WP_Error', $invalid_url_post_id );
-			$this->assertContains( '<!--', $get_amp_html_link() );
+			$this->assertStringContains( '<!--', $get_amp_html_link() );
 
 			// Allow the URL when the errors are forcibly sanitized.
 			add_filter( 'amp_validation_error_sanitized', '__return_true' );
@@ -648,7 +649,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	public function test_amp_get_boilerplate_code() {
 		$boilerplate_code = amp_get_boilerplate_code();
 		$this->assertStringStartsWith( '<style amp-boilerplate>', $boilerplate_code );
-		$this->assertContains( '<noscript><style amp-boilerplate>', $boilerplate_code );
+		$this->assertStringContains( '<noscript><style amp-boilerplate>', $boilerplate_code );
 	}
 
 	/**
@@ -660,8 +661,8 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$stylesheets = amp_get_boilerplate_stylesheets();
 		$this->assertInternalType( 'array', $stylesheets );
 		$this->assertCount( 2, $stylesheets );
-		$this->assertContains( 'body{-webkit-animation:-amp-start', $stylesheets[0] );
-		$this->assertContains( 'body{-webkit-animation:none', $stylesheets[1] );
+		$this->assertStringContains( 'body{-webkit-animation:-amp-start', $stylesheets[0] );
+		$this->assertStringContains( 'body{-webkit-animation:none', $stylesheets[1] );
 	}
 
 	/**
@@ -677,21 +678,21 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		};
 
 		$output = $get_generator_tag();
-		$this->assertContains( 'mode=reader', $output );
-		$this->assertContains( 'v' . AMP__VERSION, $output );
+		$this->assertStringContains( 'mode=reader', $output );
+		$this->assertStringContains( 'v' . AMP__VERSION, $output );
 
 		add_theme_support( AMP_Theme_Support::SLUG, [ AMP_Theme_Support::PAIRED_FLAG => true ] );
 		$output = $get_generator_tag();
-		$this->assertContains( 'mode=transitional', $output );
-		$this->assertContains( 'v' . AMP__VERSION, $output );
+		$this->assertStringContains( 'mode=transitional', $output );
+		$this->assertStringContains( 'v' . AMP__VERSION, $output );
 
 		add_theme_support( AMP_Theme_Support::SLUG, [ AMP_Theme_Support::PAIRED_FLAG => false ] );
 		$output = $get_generator_tag();
-		$this->assertContains( 'mode=standard', $output );
-		$this->assertContains( 'v' . AMP__VERSION, $output );
+		$this->assertStringContains( 'mode=standard', $output );
+		$this->assertStringContains( 'v' . AMP__VERSION, $output );
 
 		$output = $get_generator_tag();
-		$this->assertContains( 'mode=standard', $output );
+		$this->assertStringContains( 'mode=standard', $output );
 	}
 
 	/**
@@ -723,9 +724,9 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 
 		$output = get_echo( 'wp_print_scripts' );
 
-		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0.js\' async></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
-		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-mathml-0.1.js\' async custom-element="amp-mathml"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
-		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-mustache-latest.js\' async custom-template="amp-mustache"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertStringContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0.js\' async></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertStringContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-mathml-0.1.js\' async custom-element="amp-mathml"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertStringContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-mustache-latest.js\' async custom-template="amp-mustache"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 
 		// Try rendering via amp_render_scripts() instead of amp_render_scripts(), which is how component scripts get added normally.
 		$output = amp_render_scripts(
@@ -735,14 +736,14 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 				'amp-accordion' => true,
 			]
 		);
-		$this->assertNotContains( 'amp-mathml', $output, 'The amp-mathml component was already printed above.' );
-		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-mustache-2.0.js\' async custom-element="amp-carousel"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
-		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-accordion-0.1.js\' async custom-element="amp-accordion"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertStringNotContains( 'amp-mathml', $output, 'The amp-mathml component was already printed above.' );
+		$this->assertStringContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-mustache-2.0.js\' async custom-element="amp-carousel"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertStringContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-accordion-0.1.js\' async custom-element="amp-accordion"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 
 		// Try some experimental component to ensure expected script attributes are added.
 		wp_register_script( 'amp-foo', 'https://cdn.ampproject.org/v0/amp-foo-0.1.js', [ 'amp-runtime' ], null ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.NotInFooter, WordPress.WP.EnqueuedResourceParameters.MissingVersion
 		$output = get_echo( 'wp_print_scripts', [ 'amp-foo' ] );
-		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-foo-0.1.js\' async custom-element="amp-foo"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertStringContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-foo-0.1.js\' async custom-element="amp-foo"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 	}
 
 	/**
@@ -825,6 +826,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		add_theme_support( AMP_Theme_Support::SLUG );
 		$handlers = amp_get_content_sanitizers();
 		$this->assertArrayHasKey( 'AMP_Style_Sanitizer', $handlers );
+		unset( $handlers['AMP_Style_Sanitizer']['allow_transient_caching'] ); // Remove item added after filter applied.
 		$this->assertEquals( 'amp_content_sanitizers', $this->last_filter_call['current_filter'] );
 		$this->assertEquals( $handlers, $this->last_filter_call['args'][0] );
 		$handler_classes = array_keys( $handlers );
@@ -834,6 +836,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->last_filter_call = null;
 		remove_theme_support( AMP_Theme_Support::SLUG );
 		$handlers = amp_get_content_sanitizers( $post );
+		unset( $handlers['AMP_Style_Sanitizer']['allow_transient_caching'] ); // Remove item added after filter applied.
 		$this->assertArrayHasKey( 'AMP_Style_Sanitizer', $handlers );
 		$this->assertEquals( 'amp_content_sanitizers', $this->last_filter_call['current_filter'] );
 		$this->assertEquals( $handlers, $this->last_filter_call['args'][0] );

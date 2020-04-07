@@ -1860,6 +1860,32 @@ class AMP_Validation_Manager {
 	}
 
 	/**
+	 * Remove source stack comments which appear inside of script and style tags.
+	 *
+	 * HTML comments that appear inside of script and style elements get parsed as text content. AMP does not allow
+	 * such HTML comments to appear inside of CDATA, resulting in validation errors to be emitted when validating a
+	 * page that happens to have source stack comments output when generating JSON data (e.g. All in One SEO).
+	 * Additionally, when source stack comments are output inside of style elements the result can either be CSS
+	 * parse errors or incorrect stylesheet sizes being reported due to the presence of the source stack comments.
+	 * So to prevent these issues from occurring, the source stack comments need to be removed from the document prior
+	 * to sanitizing.
+	 *
+	 * @since 1.5
+	 *
+	 * @param Document $dom Document.
+	 */
+	public static function remove_illegal_source_stack_comments( Document $dom ) {
+		/**
+		 * Script element.
+		 *
+		 * @var DOMText $text
+		 */
+		foreach ( $dom->xpath->query( '//text()[ contains( ., "<!--amp-source-stack" ) ][ parent::script or parent::style ]' ) as $text ) {
+			$text->nodeValue = preg_replace( '#<!--/?amp-source-stack.*?-->#s', '', $text->nodeValue );
+		}
+	}
+
+	/**
 	 * Finalize validation.
 	 *
 	 * @see AMP_Validation_Manager::add_admin_bar_menu_items()

@@ -5,12 +5,16 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+
 /**
  * Tests for AMP_Options_Manager.
  *
  * @covers AMP_Options_Manager
  */
 class Test_AMP_Options_Manager extends WP_UnitTestCase {
+
+	use AssertContainsCompatibility;
 
 	/**
 	 * Set up.
@@ -237,7 +241,6 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$this->assertArrayNotHasKey( $id, $entries );
 	}
 
-
 	public function get_test_get_options_defaults_data() {
 		return [
 			'reader'                               => [
@@ -419,9 +422,9 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		// This is the correct page, and the notice has not been dismissed, so it should display.
 		delete_user_meta( get_current_user_id(), 'dismissed_wp_pointers' );
 		$output = get_echo( [ 'AMP_Options_Manager', 'render_welcome_notice' ] );
-		$this->assertContains( 'Welcome to AMP for WordPress', $output );
-		$this->assertContains( 'Bring the speed and features of the open source AMP project to your site, complete with the tools to support content authoring and website development.', $output );
-		$this->assertContains( $id, $output );
+		$this->assertStringContains( 'Welcome to AMP for WordPress', $output );
+		$this->assertStringContains( 'Bring the speed and features of the open source AMP project to your site, complete with the tools to support content authoring and website development.', $output );
+		$this->assertStringContains( $id, $output );
 	}
 
 	/**
@@ -441,7 +444,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$amp_settings_errors = get_settings_errors( AMP_Options_Manager::OPTION_NAME );
 		$new_error           = end( $amp_settings_errors );
 		$this->assertStringStartsWith( 'Reader mode activated!', $new_error['message'] );
-		$this->assertContains( esc_url( amp_get_permalink( $page_id ) ), $new_error['message'], 'Expect amp_admin_get_preview_permalink() to return a page since it is the only post type supported.' );
+		$this->assertStringContains( esc_url( amp_get_permalink( $page_id ) ), $new_error['message'], 'Expect amp_admin_get_preview_permalink() to return a page since it is the only post type supported.' );
 		$this->assertCount( 0, get_posts( [ 'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ] ) );
 	}
 
@@ -477,7 +480,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$amp_settings_errors = get_settings_errors( AMP_Options_Manager::OPTION_NAME );
 		$new_error           = end( $amp_settings_errors );
 		$this->assertStringStartsWith( 'Standard mode activated!', $new_error['message'] );
-		$this->assertContains( esc_url( amp_get_permalink( $post_id ) ), $new_error['message'], 'Expect amp_admin_get_preview_permalink() to return a post since it is the only post type supported.' );
+		$this->assertStringContains( esc_url( amp_get_permalink( $post_id ) ), $new_error['message'], 'Expect amp_admin_get_preview_permalink() to return a post since it is the only post type supported.' );
 		$invalid_url_posts = get_posts(
 			[
 				'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
@@ -486,8 +489,8 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		);
 		$this->assertEquals( 'updated', $new_error['type'] );
 		$this->assertCount( 1, $invalid_url_posts );
-		$this->assertContains( 'review 1 issue', $new_error['message'] );
-		$this->assertContains( esc_url( get_edit_post_link( $invalid_url_posts[0], 'raw' ) ), $new_error['message'], 'Expect edit post link for the invalid URL post to be present.' );
+		$this->assertStringContains( 'review 1 issue', $new_error['message'] );
+		$this->assertStringContains( esc_url( get_edit_post_link( $invalid_url_posts[0], 'raw' ) ), $new_error['message'], 'Expect edit post link for the invalid URL post to be present.' );
 	}
 
 	/**
@@ -561,7 +564,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$amp_settings_errors = get_settings_errors( AMP_Options_Manager::OPTION_NAME );
 		$new_error           = end( $amp_settings_errors );
 		$this->assertStringStartsWith( 'Transitional mode activated!', $new_error['message'] );
-		$this->assertContains( esc_url( amp_get_permalink( $post_id ) ), $new_error['message'], 'Expect amp_admin_get_preview_permalink() to return a post since it is the only post type supported.' );
+		$this->assertStringContains( esc_url( amp_get_permalink( $post_id ) ), $new_error['message'], 'Expect amp_admin_get_preview_permalink() to return a post since it is the only post type supported.' );
 		$invalid_url_posts = get_posts(
 			[
 				'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
@@ -570,7 +573,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		);
 		$this->assertEquals( 'updated', $new_error['type'] );
 		$this->assertCount( 1, $invalid_url_posts );
-		$this->assertContains( 'review 2 issues', $new_error['message'] );
-		$this->assertContains( esc_url( get_edit_post_link( $invalid_url_posts[0], 'raw' ) ), $new_error['message'], 'Expect edit post link for the invalid URL post to be present.' );
+		$this->assertStringContains( 'review 2 issues', $new_error['message'] );
+		$this->assertStringContains( esc_url( get_edit_post_link( $invalid_url_posts[0], 'raw' ) ), $new_error['message'], 'Expect edit post link for the invalid URL post to be present.' );
 	}
 }
