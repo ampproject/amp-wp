@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\HandleValidation;
 
@@ -436,7 +437,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 */
 	public function test_amp_add_amphtml_link_transitional_mode( $data_provider ) {
 		list( $canonical_url, $amphtml_url, $available ) = $data_provider();
-		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		$this->accept_sanitization_by_default( false );
 		AMP_Theme_Support::read_theme_support();
 		AMP_Theme_Support::init();

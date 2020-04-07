@@ -22,4 +22,16 @@ interface Option {
 	 * @var string
 	 */
 	const DISABLE_CSS_TRANSIENT_CACHING = 'amp_css_transient_monitor_disable_caching';
+
+	/**
+	 * The template mode that is being used for AMP support.
+	 *
+	 * Currently valid values are:
+	 * - AMP_Theme_Support::STANDARD_MODE_SLUG
+	 * - AMP_Theme_Support::TRANSITIONAL_MODE_SLUG
+	 * - AMP_Theme_Support::READER_MODE_SLUG
+	 *
+	 * @var string
+	 */
+	const THEME_SUPPORT = 'theme_support';
 }

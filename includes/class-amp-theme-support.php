@@ -6,6 +6,7 @@
  */
 
 use AmpProject\Amp;
+use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\ConfigurationArgument;
 use AmpProject\AmpWP\Transformer;
@@ -253,7 +254,7 @@ class AMP_Theme_Support {
 		self::$support_added_via_theme  = null;
 		self::$support_added_via_option = null;
 
-		$theme_support_option = AMP_Options_Manager::get_option( 'theme_support' );
+		$theme_support_option = AMP_Options_Manager::get_option( Option::THEME_SUPPORT );
 		if ( current_theme_supports( self::SLUG ) ) {
 			$args = self::get_theme_support_args();
 

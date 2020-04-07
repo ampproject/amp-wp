@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Option;
+
 /**
  * AMP_Options_Menu class.
  */
@@ -80,7 +82,7 @@ class AMP_Options_Menu {
 		);
 
 		add_settings_field(
-			'theme_support',
+			Option::THEME_SUPPORT,
 			__( 'Template Mode', 'amp' ),
 			[ $this, 'render_theme_support' ],
 			AMP_Options_Manager::OPTION_NAME,

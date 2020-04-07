@@ -7,6 +7,7 @@
  */
 
 use AmpProject\AmpWP\ConfigurationArgument;
+use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\PrivateAccess;
 use AmpProject\Dom\Document;
@@ -155,7 +156,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			AMP_Theme_Support::SLUG,
 			[ AMP_Theme_Support::PAIRED_FLAG => false ]
 		);
-		$this->assertEquals( AMP_Theme_Support::STANDARD_MODE_SLUG, AMP_Options_Manager::get_option( 'theme_support' ) );
+		$this->assertEquals( AMP_Theme_Support::STANDARD_MODE_SLUG, AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) );
 		AMP_Theme_Support::read_theme_support();
 		$this->assertEquals( AMP_Theme_Support::STANDARD_MODE_SLUG, AMP_Theme_Support::get_support_mode() );
 		add_theme_support(
@@ -167,13 +168,13 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		// Test that reader mode being set via option overrides theme support flag.
 		add_theme_support( AMP_Theme_Support::SLUG );
-		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::READER_MODE_SLUG ); // Will override the theme support flag.
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG ); // Will override the theme support flag.
 		AMP_Theme_Support::read_theme_support();
 		$this->assertSame( AMP_Theme_Support::READER_MODE_SLUG, AMP_Theme_Support::get_support_mode() );
 
 		// Test that Standard mode in theme does not override Transitional mode set via option (user option prevails).
 		add_theme_support( AMP_Theme_Support::SLUG );
-		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		AMP_Theme_Support::read_theme_support();
 		$this->assertSame( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG, AMP_Theme_Support::get_support_mode() );
 
@@ -184,7 +185,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			'comments_live_list'           => true,
 		];
 		add_theme_support( AMP_Theme_Support::SLUG, $args );
-		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::STANDARD_MODE_SLUG ); // Will override the theme support flag.
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG ); // Will override the theme support flag.
 		AMP_Theme_Support::read_theme_support();
 		$this->assertEquals(
 			array_merge(
@@ -202,7 +203,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		// Test that standard via theme does not trump transitional option.
 		add_theme_support( AMP_Theme_Support::SLUG );
-		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::TRANSITIONAL_MODE_SLUG ); // Will be ignored since standard in theme overrides transitional option.
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG ); // Will be ignored since standard in theme overrides transitional option.
 		AMP_Theme_Support::read_theme_support();
 		$this->assertTrue( current_theme_supports( AMP_Theme_Support::SLUG ) );
 		$this->assertSame( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG, AMP_Theme_Support::get_support_mode_added_via_option() );
@@ -212,7 +213,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		// Test that no support via theme can be overridden with option.
 		remove_theme_support( AMP_Theme_Support::SLUG );
-		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::STANDARD_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		AMP_Theme_Support::read_theme_support();
 		$this->assertNull( AMP_Theme_Support::get_support_mode_added_via_theme() );
 		$this->assertSame( AMP_Theme_Support::STANDARD_MODE_SLUG, AMP_Theme_Support::get_support_mode_added_via_option() );
@@ -220,7 +221,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		// Test that no support via theme can be overridden with option.
 		remove_theme_support( AMP_Theme_Support::SLUG );
-		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		AMP_Theme_Support::read_theme_support();
 		$this->assertNull( AMP_Theme_Support::get_support_mode_added_via_theme() );
 		$this->assertSame( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG, AMP_Theme_Support::get_support_mode_added_via_option() );
@@ -1008,7 +1009,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 				'templates_supported' => 'all',
 			]
 		);
-		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::STANDARD_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		AMP_Theme_Support::read_theme_support();
 
 		AMP_Theme_Support::init();

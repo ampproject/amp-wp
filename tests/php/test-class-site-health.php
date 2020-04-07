@@ -289,7 +289,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 	public function test_get_supported_templates( $supported_content_types, $supported_templates, $theme_support, $expected ) {
 		AMP_Options_Manager::update_option( 'all_templates_supported', false );
 		AMP_Options_Manager::update_option( 'supported_templates', $supported_templates );
-		AMP_Options_Manager::update_option( 'theme_support', $theme_support );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, $theme_support );
 		AMP_Theme_Support::read_theme_support();
 
 		$basic_post_types = [ 'post', 'page' ];
@@ -355,7 +355,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 	 * @param string $expected               The expected return value.
 	 */
 	public function test_get_serve_all_templates( $theme_support, $do_serve_all_templates, $expected ) {
-		AMP_Options_Manager::update_option( 'theme_support', $theme_support );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, $theme_support );
 		AMP_Options_Manager::update_option( 'all_templates_supported', $do_serve_all_templates );
 		AMP_Theme_Support::read_theme_support();
 

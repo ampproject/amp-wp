@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Option;
+
 /**
  * Class AMP_Options_Manager
  */
@@ -23,7 +25,7 @@ class AMP_Options_Manager {
 	 * @var array
 	 */
 	protected static $defaults = [
-		'theme_support'           => AMP_Theme_Support::READER_MODE_SLUG,
+		Option::THEME_SUPPORT     => AMP_Theme_Support::READER_MODE_SLUG,
 		'supported_post_types'    => [ 'post' ],
 		'analytics'               => [],
 		'all_templates_supported' => true,
@@ -84,17 +86,17 @@ class AMP_Options_Manager {
 		$defaults = self::$defaults;
 
 		if ( current_theme_supports( 'amp' ) ) {
-			$defaults['theme_support'] = amp_is_canonical() ? AMP_Theme_Support::STANDARD_MODE_SLUG : AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
+			$defaults[ Option::THEME_SUPPORT ] = amp_is_canonical() ? AMP_Theme_Support::STANDARD_MODE_SLUG : AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
 		}
 
 		$options = array_merge( $defaults, $options );
 
 		// Migrate theme support slugs.
-		if ( 'native' === $options['theme_support'] ) {
-			$options['theme_support'] = AMP_Theme_Support::STANDARD_MODE_SLUG;
-		} elseif ( 'paired' === $options['theme_support'] ) {
-			$options['theme_support'] = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
-		} elseif ( 'disabled' === $options['theme_support'] ) {
+		if ( 'native' === $options[ Option::THEME_SUPPORT ] ) {
+			$options[ Option::THEME_SUPPORT ] = AMP_Theme_Support::STANDARD_MODE_SLUG;
+		} elseif ( 'paired' === $options[ Option::THEME_SUPPORT ] ) {
+			$options[ Option::THEME_SUPPORT ] = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
+		} elseif ( 'disabled' === $options[ Option::THEME_SUPPORT ] ) {
 			/*
 			 * Prior to 1.2, the theme support slug for Reader mode was 'disabled'. This would be saved in options for
 			 * themes that had 'amp' theme support defined. Also prior to 1.2, the user could not switch between modes
@@ -106,7 +108,7 @@ class AMP_Options_Manager {
 			 * become 'transitional'. Otherwise, if the theme lacks 'amp' theme support, then this will become the
 			 * default 'reader' mode.
 			 */
-			$options['theme_support'] = $defaults['theme_support'];
+			$options[ Option::THEME_SUPPORT ] = $defaults[ Option::THEME_SUPPORT ];
 		}
 
 		unset(
@@ -179,11 +181,11 @@ class AMP_Options_Manager {
 			AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
 			AMP_Theme_Support::STANDARD_MODE_SLUG,
 		];
-		if ( isset( $new_options['theme_support'] ) && in_array( $new_options['theme_support'], $recognized_theme_supports, true ) ) {
-			$options['theme_support'] = $new_options['theme_support'];
+		if ( isset( $new_options[ Option::THEME_SUPPORT ] ) && in_array( $new_options[ Option::THEME_SUPPORT ], $recognized_theme_supports, true ) ) {
+			$options[ Option::THEME_SUPPORT ] = $new_options[ Option::THEME_SUPPORT ];
 
 			// If this option was changed, display a notice with the new template mode.
-			if ( self::get_option( 'theme_support' ) !== $new_options['theme_support'] ) {
+			if ( self::get_option( Option::THEME_SUPPORT ) !== $new_options[ Option::THEME_SUPPORT ] ) {
 				add_action( 'update_option_' . self::OPTION_NAME, [ __CLASS__, 'handle_updated_theme_support_option' ] );
 			}
 		}
@@ -276,7 +278,7 @@ class AMP_Options_Manager {
 	 */
 	public static function check_supported_post_type_update_errors() {
 		// If all templates are supported then skip check since all post types are also supported. This option only applies with standard/transitional theme support.
-		if ( self::get_option( 'all_templates_supported', false ) && AMP_Theme_Support::READER_MODE_SLUG !== self::get_option( 'theme_support' ) ) {
+		if ( self::get_option( 'all_templates_supported', false ) && AMP_Theme_Support::READER_MODE_SLUG !== self::get_option( Option::THEME_SUPPORT ) ) {
 			return;
 		}
 
@@ -529,7 +531,7 @@ class AMP_Options_Manager {
 	 * Adds a message for an update of the theme support setting.
 	 */
 	public static function handle_updated_theme_support_option() {
-		$template_mode = self::get_option( 'theme_support' );
+		$template_mode = self::get_option( Option::THEME_SUPPORT );
 
 		// Make sure post type support has been added for sake of amp_admin_get_preview_permalink().
 		foreach ( AMP_Post_Type_Support::get_eligible_post_types() as $post_type ) {
