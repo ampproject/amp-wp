@@ -2030,7 +2030,7 @@ class AMP_Theme_Support {
 				'php_fatal_error'  => false,
 			];
 			$last_error = error_get_last();
-			if ( $last_error && in_array( $last_error['type'], [ E_ERROR, E_RECOVERABLE_ERROR, E_CORE_ERROR, E_COMPILE_ERROR ], true ) ) {
+			if ( $last_error && in_array( $last_error['type'], [ E_ERROR, E_RECOVERABLE_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR, E_PARSE ], true ) ) {
 				$data['php_fatal_error'] = $last_error;
 			}
 			$data = array_merge( $data, AMP_Validation_Manager::get_validate_response_data( $sanitization_results ) );
