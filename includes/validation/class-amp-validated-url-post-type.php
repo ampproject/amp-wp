@@ -848,6 +848,14 @@ class AMP_Validated_URL_Post_Type {
 			// Note that json_encode() is being used here because wp_slash() will coerce scalar values to strings.
 			update_post_meta( $post_id, '_amp_stylesheets', wp_slash( wp_json_encode( $args['stylesheets'] ) ) );
 		}
+		if ( isset( $args['php_fatal_error'] ) ) {
+			if ( empty( $args['php_fatal_error'] ) ) {
+				delete_post_meta( $post_id, '_amp_php_fatal_error' );
+			} else {
+				// Note that json_encode() is being used here because wp_slash() will coerce scalar values to strings.
+				update_post_meta( $post_id, '_amp_php_fatal_error', wp_slash( wp_json_encode( $args['php_fatal_error'] ) ) );
+			}
+		}
 
 		delete_transient( static::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT );
 
@@ -1291,7 +1299,7 @@ class AMP_Validated_URL_Post_Type {
 			self::store_validation_errors(
 				$validation_errors,
 				$validity['url'],
-				wp_array_slice_assoc( $validity, [ 'queried_object', 'stylesheets' ] )
+				wp_array_slice_assoc( $validity, [ 'queried_object', 'stylesheets', 'php_fatal_error' ] )
 			);
 			$unaccepted_error_count = count(
 				array_filter(
@@ -1401,6 +1409,11 @@ class AMP_Validated_URL_Post_Type {
 			);
 		}
 
+		// Add notice for PHP fatal error during validation request.
+		if ( 'post' === get_current_screen()->base && self::POST_TYPE_SLUG === get_current_screen()->post_type && get_post() ) {
+			self::render_php_fatal_error_admin_notice( get_post() );
+		}
+
 		/**
 		 * Adds notices to the single error page.
 		 * 1. Notice with detailed error information in an expanding box.
@@ -1503,6 +1516,34 @@ class AMP_Validated_URL_Post_Type {
 	}
 
 	/**
+	 * Render PHP fatal error admin notice.
+	 *
+	 * @param WP_Post $post Post.
+	 */
+	private static function render_php_fatal_error_admin_notice( WP_Post $post ) {
+		$error = get_post_meta( $post->ID, '_amp_php_fatal_error', true );
+		if ( empty( $error ) ) {
+			return;
+		}
+		$error_data = json_decode( $error, true );
+		if ( ! is_array( $error_data ) || ! isset( $error_data['message'], $error_data['file'], $error_data['line'] ) ) {
+			return;
+		}
+		?>
+		<div class="notice notice-error">
+			<p><?php echo AMP_Validation_Manager::get_validate_url_error_message( 'fatal_error_during_validation' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></p>
+			<blockquote>
+				<pre><?php echo esc_html( $error_data['message'] ); ?></pre>
+			</blockquote>
+			<p>
+				<?php esc_html_e( 'Location:', 'amp' ); ?>
+				<code><?php echo esc_html( sprintf( '%s:%d', $error_data['file'], $error_data['line'] ) ); ?></code>
+			</p>
+		</div>
+		<?php
+	}
+
+	/**
 	 * Handles clicking 'recheck' on the inline post actions and in the admin bar on the frontend.
 	 *
 	 * @throws Exception But it is caught. This is here for a PHPCS bug.
@@ -1559,7 +1600,7 @@ class AMP_Validated_URL_Post_Type {
 					[
 						'invalid_url_post' => $post,
 					],
-					wp_array_slice_assoc( $validity, [ 'queried_object', 'stylesheets' ] )
+					wp_array_slice_assoc( $validity, [ 'queried_object', 'stylesheets', 'php_fatal_error' ] )
 				)
 			);
 			if ( is_wp_error( $stored ) ) {
@@ -1633,7 +1674,7 @@ class AMP_Validated_URL_Post_Type {
 				[
 					'invalid_url_post' => $post,
 				],
-				wp_array_slice_assoc( $validity, [ 'queried_object', 'stylesheets' ] )
+				wp_array_slice_assoc( $validity, [ 'queried_object', 'stylesheets', 'php_fatal_error' ] )
 			)
 		);
 		foreach ( $validation_errors  as $error ) {
