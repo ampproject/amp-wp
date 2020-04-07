@@ -283,7 +283,7 @@ class AMP_Theme_Support {
 						/* translators: 1: available_callback. 2: supported_templates */
 						esc_html__( 'The %1$s is deprecated when adding amp theme support in favor of declaratively setting the %2$s.', 'amp' ),
 						'available_callback',
-						Option::SUPPORTED_TEMPLATES
+						Option::SUPPORTED_TEMPLATES // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 					),
 					'1.0'
 				);
