@@ -165,6 +165,22 @@ if ( ! file_exists( AMP__DIR__ . '/vendor/autoload.php' ) || ! file_exists( AMP_
 	);
 }
 
+// DEV_CODE. This block of code is removed during the build process.
+if ( file_exists( AMP__DIR__ . '/amp-beta-tester.php' ) ) {
+	add_filter(
+		'site_transient_update_plugins',
+		static function ( $updates ) {
+			if ( isset( $updates->response ) && is_array( $updates->response ) ) {
+				if ( array_key_exists( 'amp/amp-beta-tester.php', $updates->response ) ) {
+					unset( $updates->response['amp/amp-beta-tester.php'] );
+				}
+			}
+
+			return $updates;
+		}
+	);
+}
+
 /**
  * Displays an admin notice about why the plugin is unable to load.
  *

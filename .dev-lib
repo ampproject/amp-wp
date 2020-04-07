@@ -6,6 +6,7 @@ PROJECT_SLUG=amp
 README_MD_TITLE="AMP Plugin for WordPress"
 DEV_LIB_SKIP="$DEV_LIB_SKIP,jshint"
 CHECK_SCOPE=all
+PLUGIN_FILE="$(pwd)/amp.php"
 
 function after_wp_install {
 	if [[ "$WP_VERSION" != "4.9" ]]; then
