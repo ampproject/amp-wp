@@ -117,28 +117,28 @@ class AMP_Options_Manager {
 			 *
 			 * @since 1.4.0
 			 */
-			$options['auto_accept_sanitization'],
+			$options[ Option::AUTO_ACCEPT_SANITIZATION ],
 			/**
 			 * Remove Story related options.
 			 *
 			 * @since 1.5.0
 			 */
-			$options['story_templates_version'],
-			$options['story_export_base_url'],
-			$options['story_settings'],
-			$options['enable_amp_stories'], // This was added in 1.2-beta and later migrated into the `experiences` option.
+			$options[ Option::STORY_TEMPLATES_VERSION ],
+			$options[ Option::STORY_EXPORT_BASE_URL ],
+			$options[ Option::STORY_SETTINGS ],
+			$options[ Option::ENABLE_AMP_STORIES ], // This was added in 1.2-beta and later migrated into the `experiences` option.
 			/**
 			 * Remove 'experiences' option.
 			 *
 			 * @since 1.5.0
 			 */
-			$options['experiences'],
+			$options[ Option::EXPERIENCES ],
 			/**
 			 * Remove 'enable_response_caching' option.
 			 *
 			 * @since 1.5.0
 			 */
-			$options['enable_response_caching']
+			$options[ Option::ENABLE_RESPONSE_CACHING ]
 		);
 
 		return $options;

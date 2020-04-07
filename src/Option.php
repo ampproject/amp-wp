@@ -85,4 +85,71 @@ interface Option {
 	 * @var string
 	 */
 	const VERSION = 'version';
+
+	// ---------------------- Deprecated options down below ---------------------- //
+
+	/**
+	 * Whether to accept or reject sanitization results by default.
+	 *
+	 * @deprecated Removed with version 1.4.0
+	 *
+	 * @var string
+	 */
+	const AUTO_ACCEPT_SANITIZATION = 'auto_accept_sanitization';
+
+	/**
+	 * Whether the AMP stories experience is enabled.
+	 *
+	 * @deprecated Removed with version 1.5.0
+	 *
+	 * @var string
+	 */
+	const ENABLE_AMP_STORIES = 'enable_amp_stories';
+
+	/**
+	 * Whether responses should be statically cached.
+	 *
+	 * @deprecated Removed with version 1.5.0
+	 *
+	 * @var string
+	 */
+	const ENABLE_RESPONSE_CACHING = 'enable_response_caching';
+
+	/**
+	 * List of AMP experiences that are currently active.
+	 *
+	 * @deprecated Removed with version 1.5.0
+	 *
+	 * @var string
+	 */
+	const EXPERIENCES = 'experiences';
+
+	/**
+	 * Base URL to use when exporting a story to the file system.
+	 *
+	 * @deprecated Removed with version 1.5.0
+	 *
+	 * @var string
+	 */
+	const STORY_EXPORT_BASE_URL = 'story_export_base_url';
+
+	/**
+	 * Settings for the AMP stories experience.
+	 *
+	 * @deprecated Removed with version 1.5.0
+	 *
+	 * @var string
+	 */
+	const STORY_SETTINGS = 'story_settings';
+
+	/**
+	 * Version string at which the story templates were generated and persisted.
+	 *
+	 * This allows for recognizing story template updates and triggering update-specific logic.
+	 *
+	 * @deprecated Removed with version 1.5.0
+	 *
+	 * @var string
+	 */
+	const STORY_TEMPLATES_VERSION = 'story_templates_version';
 }
