@@ -25,12 +25,12 @@ class AMP_Options_Manager {
 	 * @var array
 	 */
 	protected static $defaults = [
-		Option::THEME_SUPPORT        => AMP_Theme_Support::READER_MODE_SLUG,
-		Option::SUPPORTED_POST_TYPES => [ 'post' ],
-		Option::ANALYTICS            => [],
-		'all_templates_supported'    => true,
-		'supported_templates'        => [ 'is_singular' ],
-		'version'                    => AMP__VERSION,
+		Option::THEME_SUPPORT           => AMP_Theme_Support::READER_MODE_SLUG,
+		Option::SUPPORTED_POST_TYPES    => [ 'post' ],
+		Option::ANALYTICS               => [],
+		Option::ALL_TEMPLATES_SUPPORTED => true,
+		'supported_templates'           => [ 'is_singular' ],
+		'version'                       => AMP__VERSION,
 	];
 
 	/**
@@ -207,7 +207,7 @@ class AMP_Options_Manager {
 
 		$is_template_support_required = ( isset( $theme_support_args['templates_supported'] ) && 'all' === $theme_support_args['templates_supported'] );
 		if ( ! $is_template_support_required && ! isset( $theme_support_args['available_callback'] ) ) {
-			$options['all_templates_supported'] = ! empty( $new_options['all_templates_supported'] );
+			$options[ Option::ALL_TEMPLATES_SUPPORTED ] = ! empty( $new_options[ Option::ALL_TEMPLATES_SUPPORTED ] );
 
 			// Validate supported templates.
 			$options['supported_templates'] = [];
@@ -278,7 +278,7 @@ class AMP_Options_Manager {
 	 */
 	public static function check_supported_post_type_update_errors() {
 		// If all templates are supported then skip check since all post types are also supported. This option only applies with standard/transitional theme support.
-		if ( self::get_option( 'all_templates_supported', false ) && AMP_Theme_Support::READER_MODE_SLUG !== self::get_option( Option::THEME_SUPPORT ) ) {
+		if ( self::get_option( Option::ALL_TEMPLATES_SUPPORTED, false ) && AMP_Theme_Support::READER_MODE_SLUG !== self::get_option( Option::THEME_SUPPORT ) ) {
 			return;
 		}
 

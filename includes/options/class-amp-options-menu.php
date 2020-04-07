@@ -248,7 +248,7 @@ class AMP_Options_Menu {
 				<?php else : ?>
 					<p>
 						<label for="all_templates_supported">
-							<input id="all_templates_supported" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[all_templates_supported]' ); ?>" <?php checked( AMP_Options_Manager::get_option( 'all_templates_supported' ) ); ?>>
+							<input id="all_templates_supported" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[all_templates_supported]' ); ?>" <?php checked( AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED ) ); ?>>
 							<?php esc_html_e( 'Serve all templates as AMP regardless of what is being queried.', 'amp' ); ?>
 						</label>
 					</p>

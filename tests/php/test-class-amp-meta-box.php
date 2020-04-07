@@ -209,7 +209,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 
 		// No template is available to render the post.
 		add_filter( 'amp_supportable_templates', '__return_empty_array' );
-		AMP_Options_Manager::update_option( 'all_templates_supported', false );
+		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 		$output = get_echo( [ $this->instance, 'render_status' ], [ $post ] );
 		$this->assertStringContains( 'no supported templates to display this in AMP.', wp_strip_all_tags( $output ) );
 		$this->assertStringNotContains( $checkbox_enabled, $output );
@@ -266,7 +266,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 
 		// There's no template to render this post, so this method should also return AMP as disabled.
 		add_filter( 'amp_supportable_templates', '__return_empty_array' );
-		AMP_Options_Manager::update_option( 'all_templates_supported', false );
+		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 		$this->assertEquals(
 			[
 				'status' => 'disabled',

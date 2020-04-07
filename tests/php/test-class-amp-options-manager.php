@@ -114,12 +114,12 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		delete_option( AMP_Options_Manager::OPTION_NAME );
 		$this->assertEquals(
 			[
-				Option::THEME_SUPPORT        => AMP_Theme_Support::READER_MODE_SLUG,
-				Option::SUPPORTED_POST_TYPES => [ 'post' ],
-				Option::ANALYTICS            => [],
-				'all_templates_supported'    => true,
-				'supported_templates'        => [ 'is_singular' ],
-				'version'                    => AMP__VERSION,
+				Option::THEME_SUPPORT           => AMP_Theme_Support::READER_MODE_SLUG,
+				Option::SUPPORTED_POST_TYPES    => [ 'post' ],
+				Option::ANALYTICS               => [],
+				Option::ALL_TEMPLATES_SUPPORTED => true,
+				'supported_templates'           => [ 'is_singular' ],
+				'version'                       => AMP__VERSION,
 			],
 			AMP_Options_Manager::get_options()
 		);
@@ -348,16 +348,16 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		);
 		AMP_Post_Type_Support::add_post_type_support();
 
-		// Test when 'all_templates_supported' is selected.
+		// Test when Option::ALL_TEMPLATES_SUPPORTED is selected.
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
-		AMP_Options_Manager::update_option( 'all_templates_supported', true );
+		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, true );
 		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, [ 'post' ] );
 		AMP_Options_Manager::check_supported_post_type_update_errors();
 		$this->assertEmpty( get_settings_errors() );
 
-		// Test when 'all_templates_supported' is not selected.
+		// Test when Option::ALL_TEMPLATES_SUPPORTED is not selected.
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
-		AMP_Options_Manager::update_option( 'all_templates_supported', false );
+		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 		foreach ( get_post_types() as $post_type ) {
 			if ( 'foo' !== $post_type ) {
 				remove_post_type_support( $post_type, AMP_Post_Type_Support::SLUG );
@@ -367,10 +367,10 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		AMP_Options_Manager::check_supported_post_type_update_errors();
 		$this->assertEmpty( get_settings_errors() );
 
-		// Test when 'all_templates_supported' is not selected, and theme support is also disabled.
+		// Test when Option::ALL_TEMPLATES_SUPPORTED is not selected, and theme support is also disabled.
 		add_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
-		AMP_Options_Manager::update_option( 'all_templates_supported', false );
+		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, [ 'post' ] );
 		AMP_Options_Manager::check_supported_post_type_update_errors();
 		$settings_errors    = get_settings_errors();

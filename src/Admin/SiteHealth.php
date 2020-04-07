@@ -423,7 +423,7 @@ final class SiteHealth {
 		}
 
 		// Not translated, as this is debugging information, and it could be confusing getting this from different languages.
-		return AMP_Options_Manager::get_option( 'all_templates_supported' ) ? 'true' : 'false';
+		return AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED ) ? 'true' : 'false';
 	}
 
 	/**

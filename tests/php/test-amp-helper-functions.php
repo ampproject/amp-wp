@@ -530,7 +530,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		 * Simulate a user unchecking almost all of the boxes in 'AMP Settings' > 'Supported Templates'.
 		 * The user has chosen not to show them as AMP, so most URLs should not be AMP endpoints.
 		 */
-		AMP_Options_Manager::update_option( 'all_templates_supported', false );
+		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 		AMP_Options_Manager::update_option( 'supported_templates', [ 'is_author' ] );
 
 		// A post shouldn't be an AMP endpoint, as it was unchecked in the UI via the options above.

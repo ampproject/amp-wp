@@ -17,6 +17,15 @@ namespace AmpProject\AmpWP;
 interface Option {
 
 	/**
+	 * Serve all templates as AMP regardless of what is being queried.
+	 *
+	 * Default value: true
+	 *
+	 * @var string
+	 */
+	const ALL_TEMPLATES_SUPPORTED = 'all_templates_supported';
+
+	/**
 	 * List of JSON objects that should be injected into the <amp-analytics> component.
 	 *
 	 * @see https://developers.google.com/analytics/devguides/collection/amp-analytics/

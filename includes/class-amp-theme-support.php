@@ -670,7 +670,7 @@ class AMP_Theme_Support {
 			$all_templates_supported_by_theme_support = 'all' === $theme_support_args['templates_supported'];
 		}
 		$all_templates_supported = (
-			$all_templates_supported_by_theme_support || AMP_Options_Manager::get_option( 'all_templates_supported' )
+			$all_templates_supported_by_theme_support || AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED )
 		);
 
 		// Make sure global $wp_query is set in case of conditionals that unfortunately look at global scope.
@@ -1029,7 +1029,7 @@ class AMP_Theme_Support {
 
 			// Set supported state from user preference.
 			if ( ! $template['immutable'] ) {
-				$template['supported'] = AMP_Options_Manager::get_option( 'all_templates_supported' ) || $template['user_supported'];
+				$template['supported'] = AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED ) || $template['user_supported'];
 			}
 		}
 

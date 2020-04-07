@@ -719,7 +719,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		// Test successful match of singular template.
 		$this->assertTrue( is_singular() );
-		AMP_Options_Manager::update_option( 'all_templates_supported', false );
+		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 		add_theme_support( AMP_Theme_Support::SLUG );
 		$availability = AMP_Theme_Support::get_template_availability();
 		$this->assertEmpty( $availability['errors'] );
@@ -828,7 +828,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::get_template_availability()
 	 */
 	public function test_get_template_availability_with_ambiguity() {
-		AMP_Options_Manager::update_option( 'all_templates_supported', true );
+		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, true );
 		add_theme_support( AMP_Theme_Support::SLUG );
 		$custom_post_type = 'book';
 		register_post_type(
@@ -932,7 +932,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		// Test default case with non-static front page.
 		update_option( 'show_on_front', 'posts' );
-		AMP_Options_Manager::update_option( 'all_templates_supported', true );
+		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, true );
 		$supportable_templates = AMP_Theme_Support::get_supportable_templates();
 		foreach ( $supportable_templates as $id => $supportable_template ) {
 			$this->assertNotInternalType( 'numeric', $id );
@@ -1002,7 +1002,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		remove_all_filters( 'amp_supportable_templates' );
 
 		// Test supporting templates by theme support args: all.
-		AMP_Options_Manager::update_option( 'all_templates_supported', false );
+		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 		add_theme_support(
 			AMP_Theme_Support::SLUG,
 			[
@@ -1020,7 +1020,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		}
 
 		// Test supporting templates by theme support args: selective templates.
-		AMP_Options_Manager::update_option( 'all_templates_supported', false );
+		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 		add_theme_support(
 			AMP_Theme_Support::SLUG,
 			[
