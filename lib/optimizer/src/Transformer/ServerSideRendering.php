@@ -185,7 +185,6 @@ final class ServerSideRendering implements Transformer
      */
     private function applyLayout(Document $document, DOMElement $element, ErrorCollection $errors)
     {
-        // @todo Remove dependency on plugin's CssLength objects here.
         $ampLayout = $this->parseLayout($element->getAttribute(Attribute::LAYOUT));
 
         $inputWidth = new CssLength($element->getAttribute(Attribute::WIDTH));
@@ -232,7 +231,7 @@ final class ServerSideRendering implements Transformer
 
         $layout = strtolower($layout);
 
-        if (in_array($layout, Layout::VALID_LAYOUTS, true)) {
+        if (array_key_exists($layout, Layout::TO_SPEC)) {
             return $layout;
         }
 

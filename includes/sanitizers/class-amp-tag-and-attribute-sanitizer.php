@@ -654,7 +654,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			$merged_attr_spec_list = array_merge( $merged_attr_spec_list, $this->layout_allowed_attributes );
 
 			if ( isset( $tag_spec['amp_layout']['supported_layouts'] ) ) {
-				$layouts = wp_array_slice_assoc( AMP_Rule_Spec::$layout_enum, $tag_spec['amp_layout']['supported_layouts'] );
+				$layouts = wp_array_slice_assoc( Layout::FROM_SPEC, $tag_spec['amp_layout']['supported_layouts'] );
 
 				$merged_attr_spec_list['layout'][ AMP_Rule_Spec::VALUE_REGEX_CASEI ] = '(' . implode( '|', $layouts ) . ')';
 			}
@@ -1336,9 +1336,11 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return true;
 		}
 
-		$layout_attr = $node->getAttribute( Attribute::LAYOUT );
+		$layout_attr  = $node->getAttribute( Attribute::LAYOUT );
+		$input_width  = new CssLength( $node->getAttribute( Attribute::WIDTH ) );
+		$input_height = new CssLength( $node->getAttribute( Attribute::HEIGHT ) );
 
-		if ( ! $node->hasAttribute( Attribute::WIDTH ) && ! $node->hasAttribute( Attribute::HEIGHT ) ) {
+		if ( ! $input_width->isDefined() && ! $input_height->isDefined() ) {
 			/*
 			 * Special case. If no layout related attributes were provided, this implies
 			 * the CONTAINER layout. However, telling the user that the implied layout
@@ -1351,9 +1353,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			 * See https://github.com/ampproject/amp-wp/issues/4465
 			 */
 			if (
-				empty( $layout_attr )
-				&& isset( $tag_spec['amp_layout']['supported_layouts'] )
-				&& in_array( array_search( Layout::RESPONSIVE, AMP_Rule_Spec::$layout_enum, true ), $tag_spec['amp_layout']['supported_layouts'], true )
+				'' === $layout_attr
+				&& ! $this->supports_layout( $tag_spec, Layout::CONTAINER )
+				&& $this->supports_layout( $tag_spec, Layout::RESPONSIVE )
 			) {
 				return [
 					'code'      => self::MISSING_LAYOUT_ATTRIBUTES,
@@ -1367,9 +1369,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		$allow_fluid = Layout::FLUID === $layout_attr;
 		$allow_auto  = true;
-
-		$input_width  = new CssLength( $node->getAttribute( Attribute::WIDTH ) );
-		$input_height = new CssLength( $node->getAttribute( Attribute::HEIGHT ) );
 
 		$input_width->validate( $allow_auto, $allow_fluid );
 		$input_height->validate( $allow_auto, $allow_fluid );
@@ -1389,7 +1388,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// No need to go further if there is no layout attribute.
-		if ( empty( $layout_attr ) ) {
+		if ( '' === $layout_attr ) {
 			return true;
 		}
 
@@ -2589,5 +2588,25 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				$parent->removeChild( $node );
 			}
 		}
+	}
+
+	/**
+	 * Check whether a given tag spec supports a layout.
+	 *
+	 * @param array  $tag_spec Tag spec to check.
+	 * @param string $layout   Layout to check support for. Based on the constants in the Layout interface.
+	 * @param bool   $fallback Value to use for fallback if no explicit support is defined.
+	 * @return bool Whether the given tag spec supports the layout.
+	 */
+	private function supports_layout( $tag_spec, $layout, $fallback = false ) {
+		if ( ! isset( $tag_spec['amp_layout']['supported_layouts'] ) ) {
+			return $fallback;
+		}
+
+		if ( ! array_key_exists( $layout, LAYOUT::TO_SPEC ) ) {
+			return false;
+		}
+
+		return in_array( Layout::TO_SPEC[ $layout ], $tag_spec['amp_layout']['supported_layouts'], true );
 	}
 }
