@@ -531,7 +531,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		 * The user has chosen not to show them as AMP, so most URLs should not be AMP endpoints.
 		 */
 		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
-		AMP_Options_Manager::update_option( 'supported_templates', [ 'is_author' ] );
+		AMP_Options_Manager::update_option( Option::SUPPORTED_TEMPLATES, [ 'is_author' ] );
 
 		// A post shouldn't be an AMP endpoint, as it was unchecked in the UI via the options above.
 		$this->go_to( self::factory()->post->create() );

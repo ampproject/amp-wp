@@ -93,7 +93,7 @@ class AMP_Options_Menu {
 		);
 
 		add_settings_field(
-			'supported_templates',
+			Option::SUPPORTED_TEMPLATES,
 			__( 'Supported Templates', 'amp' ),
 			[ $this, 'render_supported_templates' ],
 			AMP_Options_Manager::OPTION_NAME,

@@ -288,7 +288,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 	 */
 	public function test_get_supported_templates( $supported_content_types, $supported_templates, $theme_support, $expected ) {
 		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
-		AMP_Options_Manager::update_option( 'supported_templates', $supported_templates );
+		AMP_Options_Manager::update_option( Option::SUPPORTED_TEMPLATES, $supported_templates );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, $theme_support );
 		AMP_Theme_Support::read_theme_support();
 

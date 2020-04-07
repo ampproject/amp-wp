@@ -283,7 +283,7 @@ class AMP_Theme_Support {
 						/* translators: 1: available_callback. 2: supported_templates */
 						esc_html__( 'The %1$s is deprecated when adding amp theme support in favor of declaratively setting the %2$s.', 'amp' ),
 						'available_callback',
-						'supported_templates'
+						Option::SUPPORTED_TEMPLATES
 					),
 					'1.0'
 				);
@@ -1009,7 +1009,7 @@ class AMP_Theme_Support {
 			$theme_supported_templates = $theme_support_args['templates_supported'];
 		}
 
-		$supported_templates = AMP_Options_Manager::get_option( 'supported_templates' );
+		$supported_templates = AMP_Options_Manager::get_option( Option::SUPPORTED_TEMPLATES );
 		foreach ( $templates as $id => &$template ) {
 
 			// Capture user-elected support from options. This allows us to preserve the original user selection through programmatic overrides.

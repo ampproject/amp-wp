@@ -55,6 +55,15 @@ interface Option {
 	const SUPPORTED_POST_TYPES = 'supported_post_types';
 
 	/**
+	 * List of WordPress template conditionals to define what templates are supported by AMP.
+	 *
+	 * Default value: [ 'is_singular' ]
+	 *
+	 * @var string
+	 */
+	const SUPPORTED_TEMPLATES = 'supported_templates';
+
+	/**
 	 * The template mode that is being used for AMP support.
 	 *
 	 * Currently valid values are:

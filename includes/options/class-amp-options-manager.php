@@ -29,7 +29,7 @@ class AMP_Options_Manager {
 		Option::SUPPORTED_POST_TYPES    => [ 'post' ],
 		Option::ANALYTICS               => [],
 		Option::ALL_TEMPLATES_SUPPORTED => true,
-		'supported_templates'           => [ 'is_singular' ],
+		Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
 		'version'                       => AMP__VERSION,
 	];
 
@@ -210,10 +210,10 @@ class AMP_Options_Manager {
 			$options[ Option::ALL_TEMPLATES_SUPPORTED ] = ! empty( $new_options[ Option::ALL_TEMPLATES_SUPPORTED ] );
 
 			// Validate supported templates.
-			$options['supported_templates'] = [];
-			if ( isset( $new_options['supported_templates'] ) ) {
-				$options['supported_templates'] = array_intersect(
-					$new_options['supported_templates'],
+			$options[ Option::SUPPORTED_TEMPLATES ] = [];
+			if ( isset( $new_options[ Option::SUPPORTED_TEMPLATES ] ) ) {
+				$options[ Option::SUPPORTED_TEMPLATES ] = array_intersect(
+					$new_options[ Option::SUPPORTED_TEMPLATES ],
 					array_keys( AMP_Theme_Support::get_supportable_templates() )
 				);
 			}

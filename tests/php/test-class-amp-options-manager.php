@@ -118,7 +118,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				Option::SUPPORTED_POST_TYPES    => [ 'post' ],
 				Option::ANALYTICS               => [],
 				Option::ALL_TEMPLATES_SUPPORTED => true,
-				'supported_templates'           => [ 'is_singular' ],
+				Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
 				'version'                       => AMP__VERSION,
 			],
 			AMP_Options_Manager::get_options()

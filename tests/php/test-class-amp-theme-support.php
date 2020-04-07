@@ -739,7 +739,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertNull( $wp_query ); // Make sure it is reset.
 
 		// Test nested hierarchy.
-		AMP_Options_Manager::update_option( 'supported_templates', [ 'is_special', 'is_custom' ] );
+		AMP_Options_Manager::update_option( Option::SUPPORTED_TEMPLATES, [ 'is_special', 'is_custom' ] );
 		add_filter(
 			'amp_supportable_templates',
 			static function( $templates ) {
@@ -870,7 +870,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::get_template_availability()
 	 */
 	public function test_get_template_availability_with_missing_parent() {
-		AMP_Options_Manager::update_option( 'supported_templates', [ 'missing_parent' ] );
+		AMP_Options_Manager::update_option( Option::SUPPORTED_TEMPLATES, [ 'missing_parent' ] );
 		add_theme_support( AMP_Theme_Support::SLUG );
 		add_filter(
 			'amp_supportable_templates',
