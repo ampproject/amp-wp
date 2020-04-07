@@ -24,12 +24,25 @@ interface Option {
 	const DISABLE_CSS_TRANSIENT_CACHING = 'amp_css_transient_monitor_disable_caching';
 
 	/**
+	 * The list of post types that have support for AMP.
+	 *
+	 * The provided value should be an array of WordPress post-type slugs.
+	 *
+	 * Default value: [ 'post' ]
+	 *
+	 * @var string
+	 */
+	const SUPPORTED_POST_TYPES = 'supported_post_types';
+
+	/**
 	 * The template mode that is being used for AMP support.
 	 *
 	 * Currently valid values are:
 	 * - AMP_Theme_Support::STANDARD_MODE_SLUG
 	 * - AMP_Theme_Support::TRANSITIONAL_MODE_SLUG
 	 * - AMP_Theme_Support::READER_MODE_SLUG
+	 *
+	 * Default value: AMP_Theme_Support::READER_MODE_SLUG
 	 *
 	 * @var string
 	 */

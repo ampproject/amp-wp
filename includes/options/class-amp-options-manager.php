@@ -25,12 +25,12 @@ class AMP_Options_Manager {
 	 * @var array
 	 */
 	protected static $defaults = [
-		Option::THEME_SUPPORT     => AMP_Theme_Support::READER_MODE_SLUG,
-		'supported_post_types'    => [ 'post' ],
-		'analytics'               => [],
-		'all_templates_supported' => true,
-		'supported_templates'     => [ 'is_singular' ],
-		'version'                 => AMP__VERSION,
+		Option::THEME_SUPPORT        => AMP_Theme_Support::READER_MODE_SLUG,
+		Option::SUPPORTED_POST_TYPES => [ 'post' ],
+		'analytics'                  => [],
+		'all_templates_supported'    => true,
+		'supported_templates'        => [ 'is_singular' ],
+		'version'                    => AMP__VERSION,
 	];
 
 	/**
@@ -61,8 +61,8 @@ class AMP_Options_Manager {
 	 * @param array $new_options New options.
 	 */
 	public static function maybe_flush_rewrite_rules( $old_options, $new_options ) {
-		$old_post_types = isset( $old_options['supported_post_types'] ) ? $old_options['supported_post_types'] : [];
-		$new_post_types = isset( $new_options['supported_post_types'] ) ? $new_options['supported_post_types'] : [];
+		$old_post_types = isset( $old_options[ Option::SUPPORTED_POST_TYPES ] ) ? $old_options[ Option::SUPPORTED_POST_TYPES ] : [];
+		$new_post_types = isset( $new_options[ Option::SUPPORTED_POST_TYPES ] ) ? $new_options[ Option::SUPPORTED_POST_TYPES ] : [];
 		sort( $old_post_types );
 		sort( $new_post_types );
 		if ( $old_post_types !== $new_post_types ) {
@@ -191,14 +191,14 @@ class AMP_Options_Manager {
 		}
 
 		// Validate post type support.
-		if ( isset( $new_options['supported_post_types'] ) ) {
-			$options['supported_post_types'] = [];
+		if ( isset( $new_options[ Option::SUPPORTED_POST_TYPES ] ) ) {
+			$options[ Option::SUPPORTED_POST_TYPES ] = [];
 
-			foreach ( $new_options['supported_post_types'] as $post_type ) {
+			foreach ( $new_options[ Option::SUPPORTED_POST_TYPES ] as $post_type ) {
 				if ( ! post_type_exists( $post_type ) ) {
 					add_settings_error( self::OPTION_NAME, 'unknown_post_type', __( 'Unrecognized post type.', 'amp' ) );
 				} else {
-					$options['supported_post_types'][] = $post_type;
+					$options[ Option::SUPPORTED_POST_TYPES ][] = $post_type;
 				}
 			}
 		}
@@ -282,7 +282,7 @@ class AMP_Options_Manager {
 			return;
 		}
 
-		$supported_types = self::get_option( 'supported_post_types', [] );
+		$supported_types = self::get_option( Option::SUPPORTED_POST_TYPES, [] );
 		foreach ( AMP_Post_Type_Support::get_eligible_post_types() as $name ) {
 			$post_type = get_post_type_object( $name );
 			if ( empty( $post_type ) ) {

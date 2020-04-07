@@ -274,7 +274,7 @@ class AMP_Options_Menu {
 		<fieldset id="supported_post_types_fieldset">
 			<?php
 			$element_name         = AMP_Options_Manager::OPTION_NAME . '[supported_post_types][]';
-			$supported_post_types = AMP_Options_Manager::get_option( 'supported_post_types' );
+			$supported_post_types = AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES );
 			?>
 			<h4 class="title"><?php esc_html_e( 'Content Types', 'amp' ); ?></h4>
 			<p>
