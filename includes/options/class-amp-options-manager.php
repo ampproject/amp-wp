@@ -27,7 +27,7 @@ class AMP_Options_Manager {
 	protected static $defaults = [
 		Option::THEME_SUPPORT        => AMP_Theme_Support::READER_MODE_SLUG,
 		Option::SUPPORTED_POST_TYPES => [ 'post' ],
-		'analytics'                  => [],
+		Option::ANALYTICS            => [],
 		'all_templates_supported'    => true,
 		'supported_templates'        => [ 'is_singular' ],
 		'version'                    => AMP__VERSION,
@@ -220,8 +220,8 @@ class AMP_Options_Manager {
 		}
 
 		// Validate analytics.
-		if ( isset( $new_options['analytics'] ) ) {
-			foreach ( $new_options['analytics'] as $id => $data ) {
+		if ( isset( $new_options[ Option::ANALYTICS ] ) ) {
+			foreach ( $new_options[ Option::ANALYTICS ] as $id => $data ) {
 
 				// Check save/delete pre-conditions and proceed if correct.
 				if ( empty( $data['type'] ) || empty( $data['config'] ) ) {
@@ -247,16 +247,16 @@ class AMP_Options_Manager {
 					$entry_id = substr( md5( $entry_vendor_type . $entry_config ), 0, 12 );
 
 					// Avoid duplicates.
-					if ( isset( $options['analytics'][ $entry_id ] ) ) {
+					if ( isset( $options[ Option::ANALYTICS ][ $entry_id ] ) ) {
 						add_settings_error( self::OPTION_NAME, 'duplicate_analytics_entry', __( 'Duplicate analytics entry found.', 'amp' ) );
 						continue;
 					}
 				}
 
 				if ( isset( $data['delete'] ) ) {
-					unset( $options['analytics'][ $entry_id ] );
+					unset( $options[ Option::ANALYTICS ][ $entry_id ] );
 				} else {
-					$options['analytics'][ $entry_id ] = [
+					$options[ Option::ANALYTICS ][ $entry_id ] = [
 						'type'   => $entry_vendor_type,
 						'config' => $entry_config,
 					];
@@ -348,8 +348,8 @@ class AMP_Options_Manager {
 		// Ensure request is coming from analytics option form.
 		check_admin_referer( 'analytics-options', 'analytics-options' );
 
-		if ( isset( $_POST['amp-options']['analytics'] ) ) {
-			self::update_option( 'analytics', wp_unslash( $_POST['amp-options']['analytics'] ) );
+		if ( isset( $_POST['amp-options'][ Option::ANALYTICS ] ) ) {
+			self::update_option( Option::ANALYTICS, wp_unslash( $_POST['amp-options'][ Option::ANALYTICS ] ) );
 
 			$errors = get_settings_errors( self::OPTION_NAME );
 			if ( empty( $errors ) ) {
@@ -377,7 +377,7 @@ class AMP_Options_Manager {
 	 */
 	public static function update_analytics_options( $data ) {
 		_deprecated_function( __METHOD__, '0.6', __CLASS__ . '::update_option' );
-		return self::update_option( 'analytics', wp_unslash( $data ) );
+		return self::update_option( Option::ANALYTICS, wp_unslash( $data ) );
 	}
 
 	/**

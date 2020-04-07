@@ -17,6 +17,17 @@ namespace AmpProject\AmpWP;
 interface Option {
 
 	/**
+	 * List of JSON objects that should be injected into the <amp-analytics> component.
+	 *
+	 * @see https://developers.google.com/analytics/devguides/collection/amp-analytics/
+	 *
+	 * Default value: []
+	 *
+	 * @var string
+	 */
+	const ANALYTICS = 'analytics';
+
+	/**
 	 * Persist the fact that the transient caching of stylesheets needs to be disabled.
 	 *
 	 * @var string

@@ -116,7 +116,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 			[
 				Option::THEME_SUPPORT        => AMP_Theme_Support::READER_MODE_SLUG,
 				Option::SUPPORTED_POST_TYPES => [ 'post' ],
-				'analytics'                  => [],
+				Option::ANALYTICS            => [],
 				'all_templates_supported'    => true,
 				'supported_templates'        => [ 'is_singular' ],
 				'version'                    => AMP__VERSION,
@@ -139,7 +139,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 
 		// Test analytics validation with missing fields.
 		AMP_Options_Manager::update_option(
-			'analytics',
+			Option::ANALYTICS,
 			[
 				'bad' => [],
 			]
@@ -150,7 +150,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 
 		// Test analytics validation with bad JSON.
 		AMP_Options_Manager::update_option(
-			'analytics',
+			Option::ANALYTICS,
 			[
 				'__new__' => [
 					'type'   => 'foo',
@@ -164,7 +164,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 
 		// Test analytics validation with good fields.
 		AMP_Options_Manager::update_option(
-			'analytics',
+			Option::ANALYTICS,
 			[
 				'__new__' => [
 					'type'   => 'foo',
@@ -176,7 +176,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 
 		// Test analytics validation with duplicate check.
 		AMP_Options_Manager::update_option(
-			'analytics',
+			Option::ANALYTICS,
 			[
 				'__new__' => [
 					'type'   => 'foo',
@@ -189,7 +189,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$wp_settings_errors = [];
 
 		// Confirm format of entry ID.
-		$entries = AMP_Options_Manager::get_option( 'analytics' );
+		$entries = AMP_Options_Manager::get_option( Option::ANALYTICS );
 		$entry   = current( $entries );
 		$id      = substr( md5( $entry['type'] . $entry['config'] ), 0, 12 );
 		$this->assertArrayHasKey( $id, $entries );
@@ -198,7 +198,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 
 		// Confirm adding another entry works.
 		AMP_Options_Manager::update_option(
-			'analytics',
+			Option::ANALYTICS,
 			[
 				'__new__' => [
 					'type'   => 'bar',
@@ -206,13 +206,13 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				],
 			]
 		);
-		$entries = AMP_Options_Manager::get_option( 'analytics' );
-		$this->assertCount( 2, AMP_Options_Manager::get_option( 'analytics' ) );
+		$entries = AMP_Options_Manager::get_option( Option::ANALYTICS );
+		$this->assertCount( 2, AMP_Options_Manager::get_option( Option::ANALYTICS ) );
 		$this->assertArrayHasKey( $id, $entries );
 
 		// Confirm updating an entry works.
 		AMP_Options_Manager::update_option(
-			'analytics',
+			Option::ANALYTICS,
 			[
 				$id => [
 					'id'     => $id,
@@ -221,13 +221,13 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				],
 			]
 		);
-		$entries = AMP_Options_Manager::get_option( 'analytics' );
+		$entries = AMP_Options_Manager::get_option( Option::ANALYTICS );
 		$this->assertEquals( 'foo', $entries[ $id ]['type'] );
 		$this->assertEquals( '{"very_good":true}', $entries[ $id ]['config'] );
 
 		// Confirm deleting an entry works.
 		AMP_Options_Manager::update_option(
-			'analytics',
+			Option::ANALYTICS,
 			[
 				$id => [
 					'id'     => $id,
@@ -237,7 +237,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				],
 			]
 		);
-		$entries = AMP_Options_Manager::get_option( 'analytics' );
+		$entries = AMP_Options_Manager::get_option( Option::ANALYTICS );
 		$this->assertCount( 1, $entries );
 		$this->assertArrayNotHasKey( $id, $entries );
 	}
