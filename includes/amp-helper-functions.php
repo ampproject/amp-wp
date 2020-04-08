@@ -949,7 +949,7 @@ function amp_filter_font_style_loader_tag_with_crossorigin_anonymous( $tag, $han
  * @return array Analytics.
  */
 function amp_get_analytics( $analytics = [] ) {
-	$analytics_entries = AMP_Options_Manager::get_option( 'analytics', [] );
+	$analytics_entries = AMP_Options_Manager::get_option( Option::ANALYTICS, [] );
 
 	/**
 	 * Add amp-analytics tags.
