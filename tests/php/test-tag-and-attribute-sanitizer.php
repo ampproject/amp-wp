@@ -2907,11 +2907,17 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 					],
 				],
 			],
-			'cdata_css_important'                     => [
-				'<html amp><head><meta charset="utf-8"><style amp-custom>body { outline: solid 1px red !important; }</style></head><body></body></html>',
+			'cdata_css_i_amphtml_name'                => [
+				'<html amp><head><meta charset="utf-8"><style amp-custom>i-amphtml-scroll-container { outline: solid 1px red; }</style></head><body></body></html>',
 				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_CSS_IMPORTANT ],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_CSS_I_AMPHTML_NAME ],
+			],
+			'cdata_css_html_comment'                  => [
+				'<html amp><head><meta charset="utf-8"><style amp-custom>/* <!-- not good --> */</style></head><body></body></html>',
+				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_HTML_COMMENTS ],
 			],
 			'cdata_contents_bad_comment'              => [
 				'<html><head><meta charset="utf-8"><script type="application/ld+json"><!--{"@context":"http:\/\/schema.org"}--></script></head><body></body></html>',

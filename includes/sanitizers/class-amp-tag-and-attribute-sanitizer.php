@@ -41,7 +41,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	const DUPLICATE_UNIQUE_TAG                 = 'DUPLICATE_UNIQUE_TAG';
 	const MANDATORY_CDATA_MISSING_OR_INCORRECT = 'MANDATORY_CDATA_MISSING_OR_INCORRECT';
 	const CDATA_TOO_LONG                       = 'CDATA_TOO_LONG';
-	const INVALID_CDATA_CSS_IMPORTANT          = 'INVALID_CDATA_CSS_IMPORTANT';
+	const INVALID_CDATA_CSS_I_AMPHTML_NAME     = 'INVALID_CDATA_CSS_I_AMPHTML_NAME';
 	const INVALID_CDATA_CONTENTS               = 'INVALID_CDATA_CONTENTS';
 	const INVALID_CDATA_HTML_COMMENTS          = 'INVALID_CDATA_HTML_COMMENTS';
 	const JSON_ERROR_CTRL_CHAR                 = 'JSON_ERROR_CTRL_CHAR';
@@ -919,21 +919,23 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			];
 		}
 		if ( isset( $cdata_spec['blacklisted_cdata_regex'] ) ) {
-			if ( preg_match( '@' . $cdata_spec['blacklisted_cdata_regex']['regex'] . '@u', $element->textContent ) ) {
-				if ( isset( $cdata_spec['blacklisted_cdata_regex']['error_message'] ) ) {
-					// There are only a few error messages, so map them to error codes.
-					switch ( $cdata_spec['blacklisted_cdata_regex']['error_message'] ) {
-						case 'CSS !important':
-							return [ 'code' => self::INVALID_CDATA_CSS_IMPORTANT ];
-						case 'contents':
-							return [ 'code' => self::INVALID_CDATA_CONTENTS ];
-						case 'html comments':
-							return [ 'code' => self::INVALID_CDATA_HTML_COMMENTS ];
+			foreach ( $cdata_spec['blacklisted_cdata_regex'] as $blacklisted_cdata_regex ) {
+				if ( preg_match( '@' . $blacklisted_cdata_regex['regex'] . '@u', $element->textContent ) ) {
+					if ( isset( $blacklisted_cdata_regex['error_message'] ) ) {
+						// There are only a few error messages, so map them to error codes.
+						switch ( $blacklisted_cdata_regex['error_message'] ) {
+							case 'CSS i-amphtml- name prefix':
+								return [ 'code' => self::INVALID_CDATA_CSS_I_AMPHTML_NAME ]; // @todo This really should be done as part of the CSS sanitizer.
+							case 'contents':
+								return [ 'code' => self::INVALID_CDATA_CONTENTS ];
+							case 'html comments':
+								return [ 'code' => self::INVALID_CDATA_HTML_COMMENTS ];
+						}
 					}
-				}
 
-				// Note: This fallback case is not currently reachable because all error messages are accounted for in the switch statement.
-				return [ 'code' => self::CDATA_VIOLATES_BLACKLIST ];
+					// Note: This fallback case is not currently reachable because all error messages are accounted for in the switch statement.
+					return [ 'code' => self::CDATA_VIOLATES_BLACKLIST ];
+				}
 			}
 		} elseif ( isset( $cdata_spec['cdata_regex'] ) ) {
 			$delimiter = false === strpos( $cdata_spec['cdata_regex'], '@' ) ? '@' : '#';

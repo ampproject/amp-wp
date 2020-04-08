@@ -11960,8 +11960,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'contents',
-						'regex' => '.',
+						array(
+							'error_message' => 'contents',
+							'regex' => '.',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -12001,8 +12003,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'contents',
-						'regex' => '.',
+						array(
+							'error_message' => 'contents',
+							'regex' => '.',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -12026,8 +12030,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'html comments',
-						'regex' => '<!--',
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -12053,8 +12059,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'html comments',
-						'regex' => '<!--',
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -12075,8 +12083,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'html comments',
-						'regex' => '<!--',
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -12293,8 +12303,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'html comments',
-						'regex' => '<!--',
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -12501,8 +12513,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'html comments',
-						'regex' => '<!--',
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -12587,8 +12601,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'html comments',
-						'regex' => '<!--',
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -12762,8 +12778,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'html comments',
-						'regex' => '<!--',
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -12877,8 +12895,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'html comments',
-						'regex' => '<!--',
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
 					),
 					'max_bytes' => 100000,
 					'max_bytes_spec_url' => 'https://amp.dev/documentation/components/amp-bind#state',
@@ -13146,8 +13166,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'html comments',
-						'regex' => '<!--',
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -13413,8 +13435,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'html comments',
-						'regex' => '<!--',
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
 					),
 					'max_bytes' => 15000,
 					'max_bytes_spec_url' => 'https://amp.dev/documentation/components/amp-experiment#configuration',
@@ -13738,8 +13762,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'html comments',
-						'regex' => '<!--',
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -14334,8 +14360,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'html comments',
-						'regex' => '<!--',
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -14611,8 +14639,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'html comments',
-						'regex' => '<!--',
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -15183,8 +15213,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'html comments',
-						'regex' => '<!--',
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
 					),
 					'max_bytes' => 10000,
 					'max_bytes_spec_url' => 'https://amp.dev/documentation/components/amp-script#faq',
@@ -15481,8 +15513,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'html comments',
-						'regex' => '<!--',
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -15557,8 +15591,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'html comments',
-						'regex' => '<!--',
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -15584,8 +15620,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'html comments',
-						'regex' => '<!--',
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
 					),
 					'max_bytes' => 15000,
 					'max_bytes_spec_url' => 'https://amp.dev/documentation/components/amp-experiment#configuration',
@@ -15645,8 +15683,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'html comments',
-						'regex' => '<!--',
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -15734,8 +15774,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'html comments',
-						'regex' => '<!--',
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -16626,8 +16668,14 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'CSS i-amphtml- name prefix',
-						'regex' => '(^|\\W)i-amphtml-',
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
+						array(
+							'error_message' => 'CSS i-amphtml- name prefix',
+							'regex' => '(^|\\W)i-amphtml-',
+						),
 					),
 					'css_spec' => array(
 						'allowed_at_rules' => array(

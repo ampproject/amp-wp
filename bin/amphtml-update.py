@@ -448,10 +448,12 @@ def GetTagSpec(tag_spec, attr_lists):
 			if isinstance(field_value, (unicode, str, bool, int)):
 				cdata_dict[ field_descriptor.name ] = field_value
 			elif isinstance( field_value, google.protobuf.pyext._message.RepeatedCompositeContainer ):
-				cdata_dict[ field_descriptor.name ] = {}
+				cdata_dict[ field_descriptor.name ] = []
 				for value in field_value:
+					entry = {}
 					for (key,val) in value.ListFields():
-						cdata_dict[ field_descriptor.name ][ key.name ] = val
+						entry[ key.name ] = val
+					cdata_dict[ field_descriptor.name ].append( entry )
 			elif hasattr( field_value, '_values' ):
 				cdata_dict[ field_descriptor.name ] = {}
 				for _value in field_value._values:
@@ -485,10 +487,11 @@ def GetTagSpec(tag_spec, attr_lists):
 				cdata_dict['css_spec'] = css_spec
 		if len( cdata_dict ) > 0:
 			if 'blacklisted_cdata_regex' in cdata_dict:
-				if 'error_message' not in cdata_dict['blacklisted_cdata_regex']:
-					raise Exception( 'Missing error_message for blacklisted_cdata_regex.' );
-				if cdata_dict['blacklisted_cdata_regex']['error_message'] not in ( 'CSS !important', 'contents', 'html comments', 'CSS i-amphtml- name prefix' ):
-					raise Exception( 'Unexpected error_message "%s" for blacklisted_cdata_regex.' % cdata_dict['blacklisted_cdata_regex']['error_message'] );
+				for entry in cdata_dict['blacklisted_cdata_regex']:
+					if 'error_message' not in entry:
+						raise Exception( 'Missing error_message for blacklisted_cdata_regex.' );
+					if entry['error_message'] not in ( 'contents', 'html comments', 'CSS i-amphtml- name prefix' ):
+						raise Exception( 'Unexpected error_message "%s" for blacklisted_cdata_regex.' % entry['error_message'] );
 			tag_spec_dict['cdata'] = cdata_dict
 
 	if 'spec_name' not in tag_spec_dict['tag_spec']:
