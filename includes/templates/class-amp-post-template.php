@@ -345,9 +345,12 @@ class AMP_Post_Template {
 		if ( post_password_required( $this->post ) ) {
 			$content = get_the_password_form( $this->post );
 		} else {
-			// Note: This is intentionally not using get_the_content() because the legacy behavior of posts in Reader
-			// mode is to display multi-page posts as a single page without any pagination links.
-			/** This filter is documented in wp-includes/post-template.php */
+			/**
+			 * This filter is documented in wp-includes/post-template.php.
+			 * 
+			 * Note: This is intentionally not using get_the_content() because the legacy behavior of posts in
+			 * Reader mode is to display multi-page posts as a single page without any pagination links.
+			 */
 			$content = apply_filters( 'the_content', $this->post->post_content );
 		}
 
