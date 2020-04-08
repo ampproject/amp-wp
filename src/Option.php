@@ -10,8 +10,6 @@ namespace AmpProject\AmpWP;
 /**
  * An interface to share knowledge about options stored in the AMP Options Manager.
  *
- * @todo Other options used throughout the plugin should use constants in this interface as well.
- *
  * @package AmpProject\AmpWP
  */
 interface Option {
