@@ -76,7 +76,10 @@ def GenValidatorProtoascii(validator_directory, out_dir):
 	"""
 	logging.info('entering ...')
 
-	protoascii_segments = [open(os.path.join(validator_directory, 'validator-main.protoascii')).read()]
+	protoascii_segments = [
+		open(os.path.join(validator_directory, 'validator-main.protoascii')).read(),
+		open(os.path.join(validator_directory, 'validator-css.protoascii')).read()
+	]
 	extensions = glob.glob(os.path.join(validator_directory, '../extensions/*/validator-*.protoascii'))
 	extensions.sort()
 	for extension in extensions:
@@ -484,7 +487,7 @@ def GetTagSpec(tag_spec, attr_lists):
 			if 'blacklisted_cdata_regex' in cdata_dict:
 				if 'error_message' not in cdata_dict['blacklisted_cdata_regex']:
 					raise Exception( 'Missing error_message for blacklisted_cdata_regex.' );
-				if cdata_dict['blacklisted_cdata_regex']['error_message'] not in ( 'CSS !important', 'contents', 'html comments' ):
+				if cdata_dict['blacklisted_cdata_regex']['error_message'] not in ( 'CSS !important', 'contents', 'html comments', 'CSS i-amphtml- name prefix' ):
 					raise Exception( 'Unexpected error_message "%s" for blacklisted_cdata_regex.' % cdata_dict['blacklisted_cdata_regex']['error_message'] );
 			tag_spec_dict['cdata'] = cdata_dict
 

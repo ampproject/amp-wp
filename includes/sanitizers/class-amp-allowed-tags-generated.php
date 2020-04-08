@@ -13,7 +13,7 @@
  */
 class AMP_Allowed_Tags_Generated {
 
-	private static $spec_file_revision = 1012;
+	private static $spec_file_revision = 1027;
 	private static $minimum_validator_revision_required = 375;
 
 	private static $descendant_tag_lists = array(
@@ -566,6 +566,7 @@ class AMP_Allowed_Tags_Generated {
 								'bbmi',
 								'chrome',
 								'itms-services',
+								'facetime',
 								'fb-me',
 								'fb-messenger',
 								'feed',
@@ -4070,6 +4071,7 @@ class AMP_Allowed_Tags_Generated {
 							'allow_relative' => true,
 							'protocol' => array(
 								'https',
+								'amp-state',
 							),
 						),
 					),
@@ -4079,6 +4081,7 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'amp_layout' => array(
 						'supported_layouts' => array(
+							5,
 							6,
 							2,
 							3,
@@ -5151,6 +5154,12 @@ class AMP_Allowed_Tags_Generated {
 		'amp-script' => array(
 			array(
 				'attr_spec_list' => array(
+					'data-ampdevmode' => array(
+						'blacklisted_value_regex' => 'false',
+						'value' => array(
+							'false',
+						),
+					),
 					'max-age' => array(
 						'value_regex' => '[0-9]+',
 					),
@@ -5784,6 +5793,9 @@ class AMP_Allowed_Tags_Generated {
 		'amp-story-grid-layer' => array(
 			array(
 				'attr_spec_list' => array(
+					'aspect-ratio' => array(
+						'value_regex' => '\\d+:\\d+',
+					),
 					'position' => array(
 						'value' => array(
 							'landscape-half-left',
@@ -8973,7 +8985,14 @@ class AMP_Allowed_Tags_Generated {
 		),
 		'html' => array(
 			array(
-				'attr_spec_list' => array(),
+				'attr_spec_list' => array(
+					'data-amp-autocomplete-opt-in' => array(
+						'blacklisted_value_regex' => 'false',
+						'value' => array(
+							'false',
+						),
+					),
+				),
 				'tag_spec' => array(
 					'mandatory' => true,
 					'mandatory_parent' => '!doctype',
@@ -15507,6 +15526,7 @@ class AMP_Allowed_Tags_Generated {
 			),
 			array(
 				'attr_spec_list' => array(
+					'nonce' => array(),
 					'type' => array(
 						'dispatch_key' => 3,
 						'mandatory' => true,
@@ -16606,8 +16626,8 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'CSS !important',
-						'regex' => '!\\s*important',
+						'error_message' => 'CSS i-amphtml- name prefix',
+						'regex' => '(^|\\W)i-amphtml-',
 					),
 					'css_spec' => array(
 						'allowed_at_rules' => array(
@@ -18238,6 +18258,7 @@ class AMP_Allowed_Tags_Generated {
 	private static $layout_allowed_attrs = array(
 		'data-amp-bind-height' => array(),
 		'data-amp-bind-width' => array(),
+		'disable-inline-width' => array(),
 		'height' => array(),
 		'heights' => array(),
 		'layout' => array(),
