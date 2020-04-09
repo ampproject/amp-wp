@@ -15,46 +15,11 @@ namespace AmpProject\AmpWP\Admin;
 final class ReenableCssTransientCachingAjaxAction {
 
 	/**
-	 * The AJAX handler listens on both the backend and the frontend.
-	 *
-	 * @var int
-	 */
-	const SCOPE_BOTH = 0;
-
-	/**
-	 * The AJAX handler listens on the backend only.
-	 *
-	 * @var int
-	 */
-	const SCOPE_BACKEND = 1;
-
-	/**
-	 * The AJAX handler listens on the frontend only.
-	 *
-	 * @var int
-	 */
-	const SCOPE_FRONTEND = 2;
-
-	/**
-	 * Action to use for enqueueing the JS logic at the frontend.
-	 *
-	 * @var string
-	 */
-	const FRONTEND_ENQUEUE_ACTION = 'wp_enqueue_scripts';
-
-	/**
 	 * Action to use for enqueueing the JS logic at the backend.
 	 *
 	 * @var string
 	 */
 	const BACKEND_ENQUEUE_ACTION = 'admin_enqueue_scripts';
-
-	/**
-	 * Scope setting to define where the AJAX handler is listening.
-	 *
-	 * @var int
-	 */
-	private $scope;
 
 	/**
 	 * Name of the action to identify incoming AJAX requests.
@@ -83,22 +48,15 @@ final class ReenableCssTransientCachingAjaxAction {
 	 * @param string   $action   Name of the action to identify the AJAX request.
 	 * @param callable $callback Callback function to call when the AJAX request came in.
 	 * @param string   $selector Optional. Selector to attach the click event to. Leave empty to skip the click handler.
-	 * @param int      $scope    Optional. Scope of where the AJAX handler is listening. Defaults to backend only.
 	 */
 	public function __construct(
 		$action,
 		callable $callback,
-		$selector = '',
-		$scope = self::SCOPE_BACKEND
+		$selector = ''
 	) {
-		if ( ! is_int( $scope ) || $scope < self::SCOPE_BOTH || $scope > self::SCOPE_FRONTEND ) {
-			$scope = self::SCOPE_BACKEND;
-		}
-
 		$this->action   = $action;
 		$this->callback = $callback;
 		$this->selector = $selector;
-		$this->scope    = $scope;
 	}
 
 	/**
@@ -106,16 +64,7 @@ final class ReenableCssTransientCachingAjaxAction {
 	 */
 	public function register() {
 		add_action( 'wp_ajax_' . $this->action, $this->callback );
-
-		if ( in_array( $this->scope, [ self::SCOPE_FRONTEND, self::SCOPE_BOTH ], true )
-			&& ! has_action( static::FRONTEND_ENQUEUE_ACTION, [ $this, 'register_ajax_script' ] ) ) {
-			add_action( static::FRONTEND_ENQUEUE_ACTION, [ $this, 'register_ajax_script' ] );
-		}
-
-		if ( in_array( $this->scope, [ self::SCOPE_BACKEND, self::SCOPE_BOTH ], true )
-			&& ! has_action( static::BACKEND_ENQUEUE_ACTION, [ $this, 'register_ajax_script' ] ) ) {
-			add_action( static::BACKEND_ENQUEUE_ACTION, [ $this, 'register_ajax_script' ] );
-		}
+		add_action( static::BACKEND_ENQUEUE_ACTION, [ $this, 'register_ajax_script' ] );
 	}
 
 	/**
@@ -123,14 +72,6 @@ final class ReenableCssTransientCachingAjaxAction {
 	 */
 	public function register_ajax_script() {
 		if ( empty( $this->selector ) ) {
-			return;
-		}
-
-		if ( self::SCOPE_FRONTEND === $this->scope && is_admin() ) {
-			return;
-		}
-
-		if ( self::SCOPE_BACKEND === $this->scope && ! is_admin() ) {
 			return;
 		}
 
