@@ -47,15 +47,15 @@ final class AmpBoilerplateTest extends TestCase
 
         return [
             'keeps boilerplate' => $repeatTwice(
-                $htmlDocument('<html ⚡>', $ampBoilerplate),
+                $htmlDocument('<html ⚡>', $ampBoilerplate)
             ),
 
             'keeps boilerplate again' => $repeatTwice(
-                $htmlDocument('<html amp>', $ampBoilerplate),
+                $htmlDocument('<html amp>', $ampBoilerplate)
             ),
 
             'leaves out boilerplate' => $repeatTwice(
-                $htmlDocument('<html amp i-amphtml-no-boilerplate>'),
+                $htmlDocument('<html amp i-amphtml-no-boilerplate>')
             ),
 
             'removes boilerplate' => [
@@ -105,7 +105,7 @@ final class AmpBoilerplateTest extends TestCase
             ],
 
             'leaves styles that lack boilerplate attribute' => $repeatTwice(
-                $htmlDocument('<html ⚡>', '<style>h1{color:red}</style><noscript><style>h2{color:blue}</style></noscript>' . $ampBoilerplate),
+                $htmlDocument('<html ⚡>', '<style>h1{color:red}</style><noscript><style>h2{color:blue}</style></noscript>' . $ampBoilerplate)
             ),
 
             'leaves styles that lack boilerplate attribute and adds boilerplate' => [
@@ -114,7 +114,7 @@ final class AmpBoilerplateTest extends TestCase
             ],
 
             'leaves styles that lack boilerplate attribute and leaves out boilerplate' => $repeatTwice(
-                $htmlDocument('<html amp i-amphtml-no-boilerplate>', '<style>h1{color:red}</style><noscript><style>h2{color:blue}</style></noscript>'),
+                $htmlDocument('<html amp i-amphtml-no-boilerplate>', '<style>h1{color:red}</style><noscript><style>h2{color:blue}</style></noscript>')
             ),
         ];
     }
