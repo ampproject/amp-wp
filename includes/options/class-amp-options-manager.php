@@ -121,8 +121,8 @@ class AMP_Options_Manager {
 			/**
 			 * Remove Story related options.
 			 *
-             * Option::ENABLE_AMP_STORIES was added in 1.2-beta and later migrated into the `experiences` option.
-             *
+			 * Option::ENABLE_AMP_STORIES was added in 1.2-beta and later migrated into the `experiences` option.
+			 *
 			 * @since 1.5.0
 			 */
 			$options[ Option::STORY_TEMPLATES_VERSION ],
