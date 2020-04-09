@@ -66,14 +66,19 @@ final class ReenableCssTransientCachingAjaxAction {
             .forEach( ( element ) => {
                 element.addEventListener( 'click', function ( event ) {
                     event.preventDefault();
+                    if ( element.classList.contains( 'disabled' ) ) {
+                        return;
+                    }
                     wp.ajax.post( {$action}, {$arguments} )
                         .done( function () {
                             element.classList.remove( 'ajax-failure' );
                             element.classList.add( 'ajax-success' )
+                            element.classList.add( 'disabled' )
                         } )
                         .fail( function () {
                             element.classList.remove( 'ajax-success' );
                             element.classList.add( 'ajax-failure' )
+                            element.classList.add( 'disabled' )
                         } );
                 } );
             } );
