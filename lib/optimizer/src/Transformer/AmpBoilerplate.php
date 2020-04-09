@@ -12,8 +12,8 @@ use AmpProject\Tag;
 use DOMElement;
 
 /**
- * Transformer that removes <style> and <noscript> tags in <head>, keeping only the amp-custom style tag. It then
- * inserts the amp-boilerplate.
+ * Transformer that removes AMP boilerplate <style> and <noscript> tags in <head>, keeping only the amp-custom style tag.
+ * It then (re-)inserts the amp-boilerplate.
  *
  * This is ported from the Go optimizer.
  *
@@ -36,13 +36,13 @@ final class AmpBoilerplate implements Transformer
      */
     public function transform(Document $document, ErrorCollection $errors)
     {
-        $this->removeStyleAndNoscriptTags($document);
+        list($boilerplate, $css) = $this->determineBoilerplateAndCss($document->html);
+
+        $this->removeStyleAndNoscriptTags($document, $boilerplate);
 
         if ($this->hasNoBoilerplateAttribute($document)) {
             return;
         }
-
-        list($boilerplate, $css) = $this->determineBoilerplateAndCss($document->html);
 
         $styleNode = $document->createElement(Tag::STYLE);
         $styleNode->setAttribute($boilerplate, '');
@@ -70,23 +70,26 @@ final class AmpBoilerplate implements Transformer
     /**
      * Remove all <style> and <noscript> tags except for the <style amp-custom> tag.
      *
-     * @param Document $document Document to remove the tags from.
+     * @param Document $document    Document to remove the tags from.
+     * @param string   $boilerplate Boilerplate attribute name.
      */
-    private function removeStyleAndNoscriptTags(Document $document)
+    private function removeStyleAndNoscriptTags(Document $document, $boilerplate)
     {
         $headNode = $document->head->firstChild;
-        $devMode = DevMode::isActiveForDocument($document);
         while ($headNode) {
             $nextSibling = $headNode->nextSibling;
-            if ($headNode instanceof DOMElement && (! $devMode || ! DevMode::hasExemptionForNode($headNode))) {
+            if ($headNode instanceof DOMElement) {
                 switch ($headNode->tagName) {
                     case Tag::STYLE:
-                        if (! $headNode->hasAttribute(Attribute::AMP_CUSTOM)) {
+                        if ($headNode->hasAttribute($boilerplate)) {
                             $document->head->removeChild($headNode);
                         }
                         break;
                     case Tag::NOSCRIPT:
-                        $document->head->removeChild($headNode);
+                        $style = $headNode->getElementsByTagName('style')->item(0);
+                        if ($style instanceof DOMElement && $style->hasAttribute($boilerplate)) {
+                            $document->head->removeChild($headNode);
+                        }
                         break;
                 }
             }
