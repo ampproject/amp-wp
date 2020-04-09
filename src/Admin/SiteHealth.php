@@ -519,35 +519,35 @@ final class SiteHealth {
 	 */
 	public function add_styles() {
 		echo '
-            <style>
-                .wp-core-ui .button.reenable-css-transient-caching ~ .success-icon,
-                .wp-core-ui .button.reenable-css-transient-caching ~ .success-text,
-                .wp-core-ui .button.reenable-css-transient-caching ~ .failure-icon,
-                .wp-core-ui .button.reenable-css-transient-caching ~ .failure-text {
-                    display: none;
-                }
+			<style>
+				.wp-core-ui .button.reenable-css-transient-caching ~ .success-icon,
+				.wp-core-ui .button.reenable-css-transient-caching ~ .success-text,
+				.wp-core-ui .button.reenable-css-transient-caching ~ .failure-icon,
+				.wp-core-ui .button.reenable-css-transient-caching ~ .failure-text {
+					display: none;
+				}
 
-                .wp-core-ui .button.reenable-css-transient-caching ~ .success-icon,
-                .wp-core-ui .button.reenable-css-transient-caching ~ .failure-icon {
-                    font-size: xx-large;
-                    padding-right: 1rem;
-                }
+				.wp-core-ui .button.reenable-css-transient-caching ~ .success-icon,
+				.wp-core-ui .button.reenable-css-transient-caching ~ .failure-icon {
+					font-size: xx-large;
+					padding-right: 1rem;
+				}
 
-                .wp-core-ui .button.reenable-css-transient-caching.ajax-success ~ .success-icon,
-                .wp-core-ui .button.reenable-css-transient-caching.ajax-success ~ .success-text,
-                .wp-core-ui .button.reenable-css-transient-caching.ajax-failure ~ .failure-icon,
-                .wp-core-ui .button.reenable-css-transient-caching.ajax-failure ~ .failure-text {
-                    display: inline-block;
-                }
+				.wp-core-ui .button.reenable-css-transient-caching.ajax-success ~ .success-icon,
+				.wp-core-ui .button.reenable-css-transient-caching.ajax-success ~ .success-text,
+				.wp-core-ui .button.reenable-css-transient-caching.ajax-failure ~ .failure-icon,
+				.wp-core-ui .button.reenable-css-transient-caching.ajax-failure ~ .failure-text {
+					display: inline-block;
+				}
 
-                .wp-core-ui .button.reenable-css-transient-caching.ajax-success ~ .success-icon {
-                    color: #46b450;
-                }
+				.wp-core-ui .button.reenable-css-transient-caching.ajax-success ~ .success-icon {
+					color: #46b450;
+				}
 
-                .wp-core-ui .button.reenable-css-transient-caching.ajax-failure ~ .failure-icon {
-                    color: #dc3232;
-                }
-            </style>
-        ';
+				.wp-core-ui .button.reenable-css-transient-caching.ajax-failure ~ .failure-icon {
+					color: #dc3232;
+				}
+			</style>
+		';
 	}
 }
