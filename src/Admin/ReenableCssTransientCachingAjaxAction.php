@@ -60,8 +60,8 @@ final class ReenableCssTransientCachingAjaxAction {
 
 		$script = <<< JS_SCRIPT
 ;( function () {
-    var selector = {$selector};
-    setTimeout( function () {
+    window.addEventListener( 'DOMContentLoaded', ( event ) => {
+        var selector = {$selector};
         ( document.querySelectorAll( selector ) || [] )
             .forEach( ( element ) => {
                 element.addEventListener( 'click', function ( event ) {
@@ -82,7 +82,7 @@ final class ReenableCssTransientCachingAjaxAction {
                         } );
                 } );
             } );
-    }, 1000 );
+    } );
 } )();
 JS_SCRIPT;
 
