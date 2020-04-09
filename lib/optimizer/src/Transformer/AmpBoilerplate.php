@@ -79,7 +79,7 @@ final class AmpBoilerplate implements Transformer
          * @var DOMElement $style
          */
         foreach (iterator_to_array($document->head->getElementsByTagName('style')) as $style) {
-            if (! $this->hasBoilerplateAttribute($style)) {
+            if (! $this->isBoilerplateStyle($style)) {
                 continue;
             }
             if (Tag::NOSCRIPT === $style->parentNode->nodeName) {
@@ -91,12 +91,12 @@ final class AmpBoilerplate implements Transformer
     }
 
     /**
-     * Check whether an element has a boilerplate attribute.
+     * Check whether an element is a boilerplate style.
      *
-     * @param DOMElement $element Element to check if it .
-     * @return bool Whether the element has a boilerplate attribute.
+     * @param DOMElement $element Element to check.
+     * @return bool Whether the element is a boilerplate style.
      */
-    private function hasBoilerplateAttribute(DOMElement $element)
+    private function isBoilerplateStyle(DOMElement $element)
     {
         foreach (Attribute::ALL_BOILERPLATES as $boilerplate) {
             if ($element->hasAttribute($boilerplate)) {
