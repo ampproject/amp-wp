@@ -29,7 +29,7 @@ final class ReenableCssTransientCachingAjaxAction {
 	 *
 	 * @var string
 	 */
-	const AJAX_ACTION = 'reenable_css_transient_caching';
+	const AJAX_ACTION = 'amp_reenable_css_transient_caching';
 
 	/**
 	 * Selector to attach the click handler to.
@@ -54,8 +54,9 @@ final class ReenableCssTransientCachingAjaxAction {
 			return;
 		}
 
-		$selector = wp_json_encode( self::SELECTOR );
-		$action   = wp_json_encode( self::AJAX_ACTION );
+		$selector  = wp_json_encode( self::SELECTOR );
+		$action    = wp_json_encode( self::AJAX_ACTION );
+		$arguments = wp_json_encode( [ 'nonce' => wp_create_nonce( self::AJAX_ACTION ) ] );
 
 		$script = <<< JS_SCRIPT
 ;( function () {
@@ -65,7 +66,7 @@ final class ReenableCssTransientCachingAjaxAction {
             .forEach( ( element ) => {
                 element.addEventListener( 'click', function ( event ) {
                     event.preventDefault();
-                    wp.ajax.post( {$action}, {} )
+                    wp.ajax.post( {$action}, {$arguments} )
                         .done( function () {
                             element.classList.remove( 'ajax-failure' );
                             element.classList.add( 'ajax-success' )
@@ -90,6 +91,8 @@ JS_SCRIPT;
 	 * This is triggered via an AJAX call from the Site Health panel.
 	 */
 	public function reenable_css_transient_caching() {
+		check_ajax_referer( self::AJAX_ACTION, 'nonce' );
+
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( 'Unauthorized.', 401 );
 		}
