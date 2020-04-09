@@ -273,9 +273,9 @@ final class SiteHealth {
 		if ( $disabled ) {
 			$data['actions'] = sprintf(
 				'<p><a class="button reenable-css-transient-caching" href="#">%s</a><span class="dashicons dashicons-yes success-icon"></span><span class="dashicons dashicons-no failure-icon"></span><span class="success-text">%s</span><span class="failure-text">%s</span></p>',
-				__( 'Re-enable transient caching', 'amp' ),
-				__( 'Reload the page to refresh the diagnostic check.', 'amp' ),
-				__( 'The operation failed, please reload the page and try again.', 'amp' )
+				esc_html__( 'Re-enable transient caching', 'amp' ),
+				esc_html__( 'Reload the page to refresh the diagnostic check.', 'amp' ),
+				esc_html__( 'The operation failed, please reload the page and try again.', 'amp' )
 			);
 		}
 
