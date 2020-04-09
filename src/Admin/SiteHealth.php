@@ -32,7 +32,6 @@ final class SiteHealth {
 		add_action( 'admin_print_styles', [ $this, 'add_styles' ] );
 
 		$reenable_css_transient_caching_ajax_action = new ReenableCssTransientCachingAjaxAction(
-			[ $this, 'reenable_css_transient_caching' ],
 			'a.reenable-css-transient-caching'
 		);
 
@@ -517,25 +516,6 @@ final class SiteHealth {
 				],
 			]
 		);
-	}
-
-	/**
-	 * Re-enable the CSS Transient caching.
-	 *
-	 * This is triggered via an AJAX call from the Site Health panel.
-	 */
-	public function reenable_css_transient_caching() {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( 'Unauthorized.', 401 );
-		}
-
-		$result = AMP_Options_Manager::update_option( Option::DISABLE_CSS_TRANSIENT_CACHING, false );
-
-		if ( false === $result ) {
-			wp_send_json_error( 'CSS transient caching could not be re-enabled.', 500 );
-		}
-
-		wp_send_json_success( 'CSS transient caching was re-enabled.', 200 );
 	}
 
 	/**
