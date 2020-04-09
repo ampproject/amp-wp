@@ -14,7 +14,6 @@ namespace AmpProject\AmpWP\Admin;
  */
 final class AjaxAction {
 
-
 	/**
 	 * The AJAX action should be accessible by any visitor.
 	 *
