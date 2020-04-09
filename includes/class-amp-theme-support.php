@@ -2197,11 +2197,6 @@ class AMP_Theme_Support {
 			);
 		}
 
-		// Prevent styles from being removed when in Customizer preview and Standard mode is enabled.
-		if ( ! empty( $args['allow_dirty_styles'] ) && amp_is_canonical() ) {
-			$transformers = array_diff( $transformers, [ Optimizer\Transformer\AmpBoilerplate::class ] );
-		}
-
 		array_unshift( $transformers, Transformer\AmpSchemaOrgMetadata::class );
 
 		/**
