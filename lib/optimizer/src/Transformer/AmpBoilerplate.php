@@ -4,7 +4,6 @@ namespace AmpProject\Optimizer\Transformer;
 
 use AmpProject\Amp;
 use AmpProject\Attribute;
-use AmpProject\DevMode;
 use AmpProject\Dom\Document;
 use AmpProject\Optimizer\ErrorCollection;
 use AmpProject\Optimizer\Transformer;
