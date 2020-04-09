@@ -15,27 +15,6 @@ namespace AmpProject\AmpWP\Admin;
 final class ReenableCssTransientCachingAjaxAction {
 
 	/**
-	 * The AJAX action should be accessible by any visitor.
-	 *
-	 * @var int
-	 */
-	const ACCESS_ANY = 0;
-
-	/**
-	 * The AJAX action should only be accessible by authenticated users.
-	 *
-	 * @var int
-	 */
-	const ACCESS_USER = 1;
-
-	/**
-	 * The AJAX action should only be accessible by unauthenticated visitors.
-	 *
-	 * @var int
-	 */
-	const ACCESS_NO_USER = 2;
-
-	/**
 	 * The AJAX handler listens on both the backend and the frontend.
 	 *
 	 * @var int
@@ -71,13 +50,6 @@ final class ReenableCssTransientCachingAjaxAction {
 	const BACKEND_ENQUEUE_ACTION = 'admin_enqueue_scripts';
 
 	/**
-	 * Access setting for the AJAX handler.
-	 *
-	 * @var int
-	 */
-	private $access;
-
-	/**
 	 * Scope setting to define where the AJAX handler is listening.
 	 *
 	 * @var int
@@ -111,20 +83,14 @@ final class ReenableCssTransientCachingAjaxAction {
 	 * @param string   $action   Name of the action to identify the AJAX request.
 	 * @param callable $callback Callback function to call when the AJAX request came in.
 	 * @param string   $selector Optional. Selector to attach the click event to. Leave empty to skip the click handler.
-	 * @param int      $access   Optional. Defaults to restricting the AJAX action to authenticated users only.
 	 * @param int      $scope    Optional. Scope of where the AJAX handler is listening. Defaults to backend only.
 	 */
 	public function __construct(
 		$action,
 		callable $callback,
 		$selector = '',
-		$access = self::ACCESS_USER,
 		$scope = self::SCOPE_BACKEND
 	) {
-		if ( ! is_int( $access ) || $access < self::ACCESS_ANY || $access > self::ACCESS_NO_USER ) {
-			$access = self::ACCESS_USER;
-		}
-
 		if ( ! is_int( $scope ) || $scope < self::SCOPE_BOTH || $scope > self::SCOPE_FRONTEND ) {
 			$scope = self::SCOPE_BACKEND;
 		}
@@ -132,7 +98,6 @@ final class ReenableCssTransientCachingAjaxAction {
 		$this->action   = $action;
 		$this->callback = $callback;
 		$this->selector = $selector;
-		$this->access   = $access;
 		$this->scope    = $scope;
 	}
 
@@ -140,13 +105,7 @@ final class ReenableCssTransientCachingAjaxAction {
 	 * Register the AJAX action with the WordPress system.
 	 */
 	public function register() {
-		if ( in_array( $this->access, [ self::ACCESS_USER, self::ACCESS_ANY ], true ) ) {
-			add_action( $this->get_action( self::ACCESS_USER ), $this->callback );
-		}
-
-		if ( in_array( $this->access, [ self::ACCESS_NO_USER, self::ACCESS_ANY ], true ) ) {
-			add_action( $this->get_action( self::ACCESS_NO_USER ), $this->callback );
-		}
+		add_action( 'wp_ajax_' . $this->action, $this->callback );
 
 		if ( in_array( $this->scope, [ self::SCOPE_FRONTEND, self::SCOPE_BOTH ], true )
 			&& ! has_action( static::FRONTEND_ENQUEUE_ACTION, [ $this, 'register_ajax_script' ] ) ) {
@@ -203,22 +162,5 @@ JS_SCRIPT;
 
 		wp_enqueue_script( 'wp-util' );
 		wp_add_inline_script( 'wp-util', $script );
-	}
-
-	/**
-	 * Get the action name to use for registering the AJAX handler.
-	 *
-	 * @param int $access The access setting to use for the action.
-	 *
-	 * @return string WordPress action to register the AJAX handler against.
-	 */
-	private function get_action( $access ) {
-		$prefix = 'wp_ajax_';
-
-		if ( self::ACCESS_NO_USER === $access ) {
-			$prefix .= 'nopriv_';
-		}
-
-		return $prefix . $this->action;
 	}
 }
