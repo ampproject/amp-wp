@@ -36,18 +36,7 @@ final class ReenableCssTransientCachingAjaxAction {
 	 *
 	 * @var string
 	 */
-	private $selector;
-
-	/**
-	 * Instantiate a ReenableCssTransientCachingAjaxAction instance.
-	 *
-	 * @param string $selector Optional. Selector to attach the click event to. Leave empty to skip the click handler.
-	 */
-	public function __construct(
-		$selector = ''
-	) {
-		$this->selector = $selector;
-	}
+	const SELECTOR = 'a.reenable-css-transient-caching';
 
 	/**
 	 * Register the AJAX action with the WordPress system.
@@ -61,11 +50,7 @@ final class ReenableCssTransientCachingAjaxAction {
 	 * Register the AJAX logic.
 	 */
 	public function register_ajax_script() {
-		if ( empty( $this->selector ) ) {
-			return;
-		}
-
-		$selector = wp_json_encode( $this->selector );
+		$selector = wp_json_encode( self::SELECTOR );
 		$action   = wp_json_encode( self::AJAX_ACTION );
 
 		$script = <<< JS_SCRIPT

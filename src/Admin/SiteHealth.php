@@ -31,11 +31,7 @@ final class SiteHealth {
 		add_filter( 'site_status_test_php_modules', [ $this, 'add_extensions' ] );
 		add_action( 'admin_print_styles', [ $this, 'add_styles' ] );
 
-		$reenable_css_transient_caching_ajax_action = new ReenableCssTransientCachingAjaxAction(
-			'a.reenable-css-transient-caching'
-		);
-
-		$reenable_css_transient_caching_ajax_action->register();
+		( new ReenableCssTransientCachingAjaxAction() )->register();
 	}
 
 	/**
