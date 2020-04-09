@@ -12,7 +12,7 @@ namespace AmpProject\AmpWP\Admin;
  *
  * @package AmpProject\AmpWP
  */
-final class AjaxAction {
+final class ReenableCssTransientCachingAjaxAction {
 
 	/**
 	 * The AJAX action should be accessible by any visitor.
