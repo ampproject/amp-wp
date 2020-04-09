@@ -54,6 +54,11 @@ final class AmpBoilerplateTest extends TestCase
                 $htmlDocument('<html amp>', $ampBoilerplate)
             ),
 
+            'removes incorrect boilerplates' => [
+                $htmlDocument('<html amp>', $ampBoilerplate . $amp4AdsBoilerplate . $amp4EmailBoilerplate),
+                $htmlDocument('<html amp>', $ampBoilerplate),
+            ],
+
             'leaves out boilerplate' => $repeatTwice(
                 $htmlDocument('<html amp i-amphtml-no-boilerplate>')
             ),

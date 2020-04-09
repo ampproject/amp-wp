@@ -35,13 +35,13 @@ final class AmpBoilerplate implements Transformer
      */
     public function transform(Document $document, ErrorCollection $errors)
     {
-        list($boilerplate, $css) = $this->determineBoilerplateAndCss($document->html);
-
-        $this->removeStyleAndNoscriptTags($document, $boilerplate);
+        $this->removeStyleAndNoscriptTags($document);
 
         if ($this->hasNoBoilerplateAttribute($document)) {
             return;
         }
+
+        list($boilerplate, $css) = $this->determineBoilerplateAndCss($document->html);
 
         $styleNode = $document->createElement(Tag::STYLE);
         $styleNode->setAttribute($boilerplate, '');
@@ -69,10 +69,9 @@ final class AmpBoilerplate implements Transformer
     /**
      * Remove all <style> and <noscript> tags which are for the boilerplate.
      *
-     * @param Document $document    Document to remove the tags from.
-     * @param string   $boilerplate Boilerplate attribute name.
+     * @param Document $document Document to remove the tags from.
      */
-    private function removeStyleAndNoscriptTags(Document $document, $boilerplate)
+    private function removeStyleAndNoscriptTags(Document $document)
     {
         /**
          * Style element.
@@ -80,7 +79,7 @@ final class AmpBoilerplate implements Transformer
          * @var DOMElement $style
          */
         foreach (iterator_to_array($document->head->getElementsByTagName('style')) as $style) {
-            if (! $style->hasAttribute($boilerplate)) {
+            if (! $this->hasBoilerplateAttribute($style)) {
                 continue;
             }
             if (Tag::NOSCRIPT === $style->parentNode->nodeName) {
@@ -89,6 +88,23 @@ final class AmpBoilerplate implements Transformer
                 $style->parentNode->removeChild($style);
             }
         }
+    }
+
+    /**
+     * Check whether an element has a boilerplate attribute.
+     *
+     * @param DOMElement $element Element to check if it .
+     * @return bool Whether the element has a boilerplate attribute.
+     */
+    private function hasBoilerplateAttribute(DOMElement $element)
+    {
+        foreach (Attribute::ALL_BOILERPLATES as $boilerplate) {
+            if ($element->hasAttribute($boilerplate)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
