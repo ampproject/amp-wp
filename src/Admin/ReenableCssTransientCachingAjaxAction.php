@@ -48,6 +48,8 @@ final class ReenableCssTransientCachingAjaxAction {
 
 	/**
 	 * Register the AJAX logic.
+	 *
+	 * @param string $hook_suffix Hook suffix to identify from what admin page the call is coming from.
 	 */
 	public function register_ajax_script( $hook_suffix ) {
 		if ( 'site-health.php' !== $hook_suffix ) {
@@ -55,7 +57,7 @@ final class ReenableCssTransientCachingAjaxAction {
 		}
 
 		$selector  = wp_json_encode( self::SELECTOR );
-		$action	= wp_json_encode( self::AJAX_ACTION );
+		$action    = wp_json_encode( self::AJAX_ACTION );
 		$arguments = wp_json_encode( [ 'nonce' => wp_create_nonce( self::AJAX_ACTION ) ] );
 
 		$script = <<< JS_SCRIPT
