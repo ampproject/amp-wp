@@ -12,7 +12,7 @@ use DOMElement;
 
 /**
  * Transformer that removes AMP boilerplate <style> and <noscript> tags in <head>, keeping only the amp-custom style tag.
- * It then (re-)inserts the amp-boilerplate.
+ * It then (re-)inserts the amp-boilerplate unless the document is marked with the i-amphtml-no-boilerplate attribute.
  *
  * This is ported from the Go optimizer.
  *
@@ -67,7 +67,7 @@ final class AmpBoilerplate implements Transformer
     }
 
     /**
-     * Remove all <style> and <noscript> tags except for the <style amp-custom> tag.
+     * Remove all <style> and <noscript> tags which are for the boilerplate.
      *
      * @param Document $document    Document to remove the tags from.
      * @param string   $boilerplate Boilerplate attribute name.
