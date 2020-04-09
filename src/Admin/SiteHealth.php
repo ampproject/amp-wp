@@ -32,7 +32,6 @@ final class SiteHealth {
 		add_action( 'admin_print_styles', [ $this, 'add_styles' ] );
 
 		$reenable_css_transient_caching_ajax_action = new ReenableCssTransientCachingAjaxAction(
-			'reenable_css_transient_caching',
 			[ $this, 'reenable_css_transient_caching' ],
 			'a.reenable-css-transient-caching'
 		);

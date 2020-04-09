@@ -1,6 +1,6 @@
 <?php
 /**
- * Class AjaxAction.
+ * Class ReenableCssTransientCachingAjaxAction.
  *
  * @package AmpProject\AmpWP
  */
@@ -22,11 +22,11 @@ final class ReenableCssTransientCachingAjaxAction {
 	const BACKEND_ENQUEUE_ACTION = 'admin_enqueue_scripts';
 
 	/**
-	 * Name of the action to identify incoming AJAX requests.
+	 * AJAX action name to use.
 	 *
 	 * @var string
 	 */
-	private $action;
+	const AJAX_ACTION = 'reenable_css_transient_caching';
 
 	/**
 	 * Callback to execute when an AJAX request was received.
@@ -43,18 +43,15 @@ final class ReenableCssTransientCachingAjaxAction {
 	private $selector;
 
 	/**
-	 * Instantiate an AjaxAction instance.
+	 * Instantiate a ReenableCssTransientCachingAjaxAction instance.
 	 *
-	 * @param string   $action   Name of the action to identify the AJAX request.
 	 * @param callable $callback Callback function to call when the AJAX request came in.
 	 * @param string   $selector Optional. Selector to attach the click event to. Leave empty to skip the click handler.
 	 */
 	public function __construct(
-		$action,
 		callable $callback,
 		$selector = ''
 	) {
-		$this->action   = $action;
 		$this->callback = $callback;
 		$this->selector = $selector;
 	}
@@ -63,7 +60,7 @@ final class ReenableCssTransientCachingAjaxAction {
 	 * Register the AJAX action with the WordPress system.
 	 */
 	public function register() {
-		add_action( 'wp_ajax_' . $this->action, $this->callback );
+		add_action( 'wp_ajax_' . self::AJAX_ACTION, $this->callback );
 		add_action( static::BACKEND_ENQUEUE_ACTION, [ $this, 'register_ajax_script' ] );
 	}
 
@@ -76,7 +73,7 @@ final class ReenableCssTransientCachingAjaxAction {
 		}
 
 		$selector = wp_json_encode( $this->selector );
-		$action   = wp_json_encode( $this->action );
+		$action   = wp_json_encode( self::AJAX_ACTION );
 
 		$script = <<< JS_SCRIPT
 ;( function () {
