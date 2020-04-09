@@ -49,7 +49,11 @@ final class ReenableCssTransientCachingAjaxAction {
 	/**
 	 * Register the AJAX logic.
 	 */
-	public function register_ajax_script() {
+	public function register_ajax_script( $hook_suffix ) {
+		if ( 'site-health.php' !== $hook_suffix ) {
+			return;
+		}
+
 		$selector = wp_json_encode( self::SELECTOR );
 		$action   = wp_json_encode( self::AJAX_ACTION );
 
