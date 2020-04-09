@@ -55,34 +55,34 @@ final class ReenableCssTransientCachingAjaxAction {
 		}
 
 		$selector  = wp_json_encode( self::SELECTOR );
-		$action    = wp_json_encode( self::AJAX_ACTION );
+		$action	= wp_json_encode( self::AJAX_ACTION );
 		$arguments = wp_json_encode( [ 'nonce' => wp_create_nonce( self::AJAX_ACTION ) ] );
 
 		$script = <<< JS_SCRIPT
 ;( function () {
-    window.addEventListener( 'DOMContentLoaded', ( event ) => {
-        var selector = {$selector};
-        ( document.querySelectorAll( selector ) || [] )
-            .forEach( ( element ) => {
-                element.addEventListener( 'click', function ( event ) {
-                    event.preventDefault();
-                    if ( element.classList.contains( 'disabled' ) ) {
-                        return;
-                    }
-                    wp.ajax.post( {$action}, {$arguments} )
-                        .done( function () {
-                            element.classList.remove( 'ajax-failure' );
-                            element.classList.add( 'ajax-success' )
-                            element.classList.add( 'disabled' )
-                        } )
-                        .fail( function () {
-                            element.classList.remove( 'ajax-success' );
-                            element.classList.add( 'ajax-failure' )
-                            element.classList.add( 'disabled' )
-                        } );
-                } );
-            } );
-    } );
+	window.addEventListener( 'DOMContentLoaded', ( event ) => {
+		var selector = {$selector};
+		( document.querySelectorAll( selector ) || [] )
+			.forEach( ( element ) => {
+				element.addEventListener( 'click', function ( event ) {
+					event.preventDefault();
+					if ( element.classList.contains( 'disabled' ) ) {
+						return;
+					}
+					wp.ajax.post( {$action}, {$arguments} )
+						.done( function () {
+							element.classList.remove( 'ajax-failure' );
+							element.classList.add( 'ajax-success' )
+							element.classList.add( 'disabled' )
+						} )
+						.fail( function () {
+							element.classList.remove( 'ajax-success' );
+							element.classList.add( 'ajax-failure' )
+							element.classList.add( 'disabled' )
+						} );
+				} );
+			} );
+	} );
 } )();
 JS_SCRIPT;
 
