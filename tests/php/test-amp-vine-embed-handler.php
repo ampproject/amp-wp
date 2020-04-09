@@ -1,20 +1,16 @@
 <?php
 
-class AMP_Pinterest_Embed_Test extends WP_UnitTestCase {
+class AMP_Vine_Embed_Handler_Test extends WP_UnitTestCase {
 
 	public function get_conversion_data() {
 		return [
-			'no_embed'         => [
+			'no_embed'   => [
 				'<p>Hello world.</p>',
 				'<p>Hello world.</p>' . PHP_EOL,
 			],
-			'simple_url_https' => [
-				'https://www.pinterest.com/pin/606156431067611861/' . PHP_EOL,
-				'<p><amp-pinterest width="450" height="750" data-do="embedPin" data-url="https://www.pinterest.com/pin/606156431067611861/"></amp-pinterest></p>' . PHP_EOL,
-			],
-			'simple_url_http'  => [
-				'http://www.pinterest.com/pin/606156431067611861/' . PHP_EOL,
-				'<p><amp-pinterest width="450" height="750" data-do="embedPin" data-url="http://www.pinterest.com/pin/606156431067611861/"></amp-pinterest></p>' . PHP_EOL,
+			'simple_url' => [
+				'https://vine.co/v/MdKjXez002d' . PHP_EOL,
+				'<p><amp-vine data-vineid="MdKjXez002d" layout="responsive" width="400" height="400"></amp-vine></p>' . PHP_EOL,
 			],
 		];
 	}
@@ -23,7 +19,7 @@ class AMP_Pinterest_Embed_Test extends WP_UnitTestCase {
 	 * @dataProvider get_conversion_data
 	 */
 	public function test__conversion( $source, $expected ) {
-		$embed = new AMP_Pinterest_Embed_Handler();
+		$embed = new AMP_Vine_Embed_Handler();
 		$embed->register_embed();
 		$filtered_content = apply_filters( 'the_content', $source );
 
@@ -37,8 +33,8 @@ class AMP_Pinterest_Embed_Test extends WP_UnitTestCase {
 				[],
 			],
 			'converted'     => [
-				'https://www.pinterest.com/pin/606156431067611861/' . PHP_EOL,
-				[ 'amp-pinterest' => true ],
+				'https://vine.co/v/MdKjXez002d' . PHP_EOL,
+				[ 'amp-vine' => true ],
 			],
 		];
 	}
@@ -47,7 +43,7 @@ class AMP_Pinterest_Embed_Test extends WP_UnitTestCase {
 	 * @dataProvider get_scripts_data
 	 */
 	public function test__get_scripts( $source, $expected ) {
-		$embed = new AMP_Pinterest_Embed_Handler();
+		$embed = new AMP_Vine_Embed_Handler();
 		$embed->register_embed();
 		$source = apply_filters( 'the_content', $source );
 
