@@ -347,7 +347,7 @@ class AMP_Post_Template {
 		} else {
 			/**
 			 * This filter is documented in wp-includes/post-template.php.
-			 * 
+			 *
 			 * Note: This is intentionally not using get_the_content() because the legacy behavior of posts in
 			 * Reader mode is to display multi-page posts as a single page without any pagination links.
 			 */
