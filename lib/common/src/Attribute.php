@@ -46,11 +46,13 @@ interface Attribute
     const LOOP                  = 'loop';
     const MEDIA                 = 'media';
     const NAME                  = 'name';
+    const ON                    = 'on';
     const PROFILE               = 'profile';
     const REL                   = 'rel';
     const ROLE                  = 'role';
     const SIZES                 = 'sizes';
     const SRC                   = 'src';
+    const TABINDEX              = 'tabindex';
     const TYPE                  = 'type';
     const VIEWPORT              = 'viewport';
     const WIDTH                 = 'width';

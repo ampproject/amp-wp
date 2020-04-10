@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\MarkupComparison;
 use AmpProject\Dom\Document;
 
 // phpcs:disable WordPress.WP.EnqueuedResources
@@ -15,6 +16,8 @@ use AmpProject\Dom\Document;
  * @covers AMP_Tag_And_Attribute_Sanitizer
  */
 class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
+
+	use MarkupComparison;
 
 	/**
 	 * Get data for testing sanitization in the body.
@@ -3455,23 +3458,5 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 		$this->assertEmpty( $expected_errors, 'There should be no expected validation errors remaining.' );
 		$this->assertEqualMarkup( $expected_content, AMP_DOM_Utils::get_content_from_dom( $dom ) );
-	}
-
-	/**
-	 * Assert markup is equal.
-	 *
-	 * @param string $expected Expected markup.
-	 * @param string $actual   Actual markup.
-	 */
-	public function assertEqualMarkup( $expected, $actual ) {
-		$actual   = preg_replace( '/\s+/', ' ', $actual );
-		$expected = preg_replace( '/\s+/', ' ', $expected );
-		$actual   = preg_replace( '/(?<=>)\s+(?=<)/', '', trim( $actual ) );
-		$expected = preg_replace( '/(?<=>)\s+(?=<)/', '', trim( $expected ) );
-
-		$this->assertEquals(
-			array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $expected, -1, PREG_SPLIT_DELIM_CAPTURE ) ),
-			array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $actual, -1, PREG_SPLIT_DELIM_CAPTURE ) )
-		);
 	}
 }
