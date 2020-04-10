@@ -66,6 +66,21 @@ final class SiteHealth {
 	}
 
 	/**
+	 * Get action HTML for the link to learn more about persistent object caching.
+	 *
+	 * @return string HTML.
+	 */
+	private function get_persistent_object_cache_learn_more_action() {
+		return sprintf(
+			'<p><a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s <span class="screen-reader-text">%3$s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
+			esc_url( 'https://make.wordpress.org/hosting/handbook/handbook/performance/#object-cache' ),
+			esc_html__( 'Learn more about persistent object caching', 'amp' ),
+			/* translators: The accessibility text. */
+			esc_html__( '(opens in a new tab)', 'amp' )
+		);
+	}
+
+	/**
 	 * Gets the test result data for whether there is a persistent object cache.
 	 *
 	 * @return array The test data.
@@ -78,13 +93,7 @@ final class SiteHealth {
 				'color' => $is_using_object_cache ? 'green' : 'orange',
 			],
 			'description' => esc_html__( 'The AMP plugin performs at its best when persistent object cache is enabled. Object caching is used to more effectively store image dimensions and parsed CSS.', 'amp' ),
-			'actions'     => sprintf(
-				'<p><a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s <span class="screen-reader-text">%3$s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
-				'https://codex.wordpress.org/Class_Reference/WP_Object_Cache#Persistent_Caching',
-				esc_html__( 'Learn more about persistent object caching', 'amp' ),
-				/* translators: The accessibility text. */
-				esc_html__( '(opens in a new tab)', 'amp' )
-			),
+			'actions'     => $this->get_persistent_object_cache_learn_more_action(),
 			'test'        => 'amp_persistent_object_cache',
 		];
 
@@ -264,19 +273,32 @@ final class SiteHealth {
 				'label' => esc_html__( 'AMP', 'amp' ),
 				'color' => $color,
 			],
-			'description' => esc_html__( 'On sites which have highly variable CSS and are not using a persistent object cache, the transient caching of parsed stylesheets may be automatically disabled in order to prevent a site from filling up its wp_options table with too many transients.', 'amp' ),
+			'description' => wp_kses(
+				sprintf(
+					/* translators: %1$s is wp_options table, %2$s is the amp_css_transient_monitoring_threshold filter, and %3$s is the amp_css_transient_monitoring_sampling_range filter */
+					__( 'On sites which have highly variable CSS and are not using a persistent object cache, the transient caching of parsed stylesheets may be automatically disabled in order to prevent a site from filling up its <code>%1$s</code> table with too many transients. Examples of highly variable CSS include dynamically-generated style rules with selectors referring to user IDs or elements being given randomized background colors. There are two filters which may be used to configure the CSS transient monitoring: <code>%2$s</code> and <code>%3$s</code>.', 'amp' ),
+					'wp_options',
+					'amp_css_transient_monitoring_threshold',
+					'amp_css_transient_monitoring_sampling_range'
+				),
+				[
+					'code' => [],
+				]
+			),
 			'test'        => 'amp_css_transient_caching',
 			'status'      => $status,
 			'label'       => esc_html( $label ),
 		];
 
 		if ( $disabled ) {
-			$data['actions'] = sprintf(
+			$data['description'] .= ' ' . esc_html__( 'If you have identified and eliminated the cause of the variable CSS, please re-enable transient caching to reduce the amount of CSS processing required to generate AMP pages.', 'amp' );
+			$data['actions']      = sprintf(
 				'<p><a class="button reenable-css-transient-caching" href="#">%s</a><span class="dashicons dashicons-yes success-icon"></span><span class="dashicons dashicons-no failure-icon"></span><span class="success-text">%s</span><span class="failure-text">%s</span></p>',
 				esc_html__( 'Re-enable transient caching', 'amp' ),
 				esc_html__( 'Reload the page to refresh the diagnostic check.', 'amp' ),
 				esc_html__( 'The operation failed, please reload the page and try again.', 'amp' )
 			);
+			$data['actions']     .= $this->get_persistent_object_cache_learn_more_action();
 		}
 
 		return $data;
