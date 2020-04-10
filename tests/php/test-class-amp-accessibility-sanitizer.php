@@ -22,12 +22,17 @@ class AMP_Accessibility_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'missing role is added'                     => [
-				'<div href="#" on="tap:some_id.toggleClass(some_class)" tabindex="0"></div>',
-				'<div href="#" on="tap:some_id.toggleClass(some_class)" tabindex="0" role="button"></div>',
+				'<div href="#" on="tap:some_id.toggleClass(some_class)" tabindex="1"></div>',
+				'<div href="#" on="tap:some_id.toggleClass(some_class)" tabindex="1" role="button"></div>',
 			],
 
 			'missing tab index is added'                => [
 				'<div href="#" on="tap:some_id.toggleClass(some_class)" role="button"></div>',
+				'<div href="#" on="tap:some_id.toggleClass(some_class)" role="button" tabindex="0"></div>',
+			],
+
+			'missing both attributes'                   => [
+				'<div href="#" on="tap:some_id.toggleClass(some_class)"></div>',
 				'<div href="#" on="tap:some_id.toggleClass(some_class)" role="button" tabindex="0"></div>',
 			],
 
