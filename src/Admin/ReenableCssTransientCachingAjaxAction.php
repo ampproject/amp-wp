@@ -56,14 +56,10 @@ final class ReenableCssTransientCachingAjaxAction {
 			return;
 		}
 
-		$selector  = wp_json_encode( self::SELECTOR );
-		$action    = wp_json_encode( self::AJAX_ACTION );
-		$arguments = wp_json_encode( [ 'nonce' => wp_create_nonce( self::AJAX_ACTION ) ] );
-
 		$script = <<< JS_SCRIPT
 ;( function () {
 	window.addEventListener( 'DOMContentLoaded', ( event ) => {
-		var selector = {$selector};
+		var selector = SELECTOR;
 		( document.querySelectorAll( selector ) || [] )
 			.forEach( ( element ) => {
 				element.addEventListener( 'click', function ( event ) {
@@ -71,7 +67,7 @@ final class ReenableCssTransientCachingAjaxAction {
 					if ( element.classList.contains( 'disabled' ) ) {
 						return;
 					}
-					wp.ajax.post( {$action}, {$arguments} )
+					wp.ajax.post( ACTION, ARGUMENTS )
 						.done( function () {
 							element.classList.remove( 'ajax-failure' );
 							element.classList.add( 'ajax-success' )
@@ -87,6 +83,21 @@ final class ReenableCssTransientCachingAjaxAction {
 	} );
 } )();
 JS_SCRIPT;
+
+		$replacements = array_map(
+			'wp_json_encode',
+			[
+				'SELECTOR'  => self::SELECTOR,
+				'ACTION'    => self::AJAX_ACTION,
+				'ARGUMENTS' => [ 'nonce' => wp_create_nonce( self::AJAX_ACTION ) ],
+			]
+		);
+
+		$script = str_replace(
+			array_keys( $replacements ),
+			array_values( $replacements ),
+			$script
+		);
 
 		wp_enqueue_script( 'wp-util' );
 		wp_add_inline_script( 'wp-util', $script );
