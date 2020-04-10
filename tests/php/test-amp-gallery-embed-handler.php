@@ -88,13 +88,13 @@ class AMP_Gallery_Embed_Handler_Test extends WP_UnitTestCase {
 				'<style type=\'text/css\'> #gallery-8 { margin: auto; } #gallery-8 .gallery-item { float: left; margin-top: 10px; text-align: center; width: 33%; } #gallery-8 img { border: 2px solid #cfcfcf; } #gallery-8 .gallery-caption { margin-left: 0; } /* see gallery_shortcode() in wp-includes/media.php */ </style>
 				<div id=\'gallery-8\' class=\'gallery galleryid-0 gallery-columns-3 gallery-size-thumbnail\'>
 					<dl class=\'gallery-item\'><dt class=\'gallery-icon landscape\'>
-						<img width="50" height="50" src="{{file1}}.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text" aria-describedby="gallery-8-{{id1}}" lightbox="" />
+						<img width="50" height="50" src="{{file1}}.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text" loading="lazy" aria-describedby="gallery-8-{{id1}}" lightbox="" />
 					</dt><dd class=\'wp-caption-text gallery-caption\' id=\'gallery-8-{{id1}}\'> ' . self::CAPTION_TEXT . ' </dd></dl>
 					<dl class=\'gallery-item\'><dt class=\'gallery-icon landscape\'>
-						<img width="150" height="150" src="{{file2}}-150x150.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text" lightbox="" />
+						<img width="150" height="150" src="{{file2}}-150x150.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text" loading="lazy" lightbox="" />
 					</dt></dl>
 					<dl class=\'gallery-item\'><dt class=\'gallery-icon landscape\'>
-						<img width="100" height="100" src="{{file3}}.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text" lightbox="" />
+						<img width="100" height="100" src="{{file3}}.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text" loading="lazy" lightbox="" />
 					</dt></dl>
 					<br style="clear: both" />
 				</div>',
@@ -104,13 +104,13 @@ class AMP_Gallery_Embed_Handler_Test extends WP_UnitTestCase {
 				'<style type=\'text/css\'> #gallery-10 { margin: auto; } #gallery-10 .gallery-item { float: left; margin-top: 10px; text-align: center; width: 33%; } #gallery-10 img { border: 2px solid #cfcfcf; } #gallery-10 .gallery-caption { margin-left: 0; } /* see gallery_shortcode() in wp-includes/media.php */ </style>
 				<div id=\'gallery-10\' class=\'gallery galleryid-0 gallery-columns-3 gallery-size-thumbnail\'>
 					<dl class=\'gallery-item\'><dt class=\'gallery-icon landscape\'>
-						<img width="50" height="50" src="{{file1}}.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text" aria-describedby="gallery-10-{{id1}}" lightbox="" />
+						<img width="50" height="50" src="{{file1}}.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text" loading="lazy" aria-describedby="gallery-10-{{id1}}" lightbox="" />
 					</dt><dd class=\'wp-caption-text gallery-caption\' id=\'gallery-10-{{id1}}\'> ' . self::CAPTION_TEXT . ' </dd></dl>
 					<dl class=\'gallery-item\'><dt class=\'gallery-icon landscape\'>
-						<img width="150" height="150" src="{{file2}}-150x150.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text" lightbox="" />
+						<img width="150" height="150" src="{{file2}}-150x150.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text" loading="lazy" lightbox="" />
 					</dt></dl>
 					<dl class=\'gallery-item\'><dt class=\'gallery-icon landscape\'>
-						<img width="100" height="100" src="{{file3}}.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text" lightbox="" />
+						<img width="100" height="100" src="{{file3}}.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text" loading="lazy" lightbox="" />
 					</dt></dl>
 					<br style="clear: both" />
 				</div>',

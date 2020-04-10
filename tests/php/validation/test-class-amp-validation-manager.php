@@ -1610,7 +1610,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 				[
 					'type'     => 'core',
 					'name'     => 'wp-includes',
-					'function' => 'wp_make_content_images_responsive',
+					'function' => 'wp_filter_content_tags',
 				],
 				[
 					'type'     => 'core',
