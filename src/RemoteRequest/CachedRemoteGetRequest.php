@@ -7,6 +7,7 @@
 
 namespace AmpProject\AmpWP\RemoteRequest;
 
+use AmpProject\Exception\FailedToGetCachedResponse;
 use AmpProject\Exception\FailedToGetFromRemoteUrl;
 use AmpProject\RemoteGetRequest;
 use AmpProject\RemoteRequest\RemoteGetRequestResponse;
@@ -101,24 +102,23 @@ final class CachedRemoteGetRequest implements RemoteGetRequest {
 	 *
 	 * @param string $url URL to get.
 	 * @return Response Response for the executed request.
-	 * @throws FailedToGetFromRemoteUrl If retrieving the contents from the URL failed.
+	 * @throws FailedToGetCachedResponse If retrieving the contents from the URL failed.
 	 */
 	public function get( $url ) {
-		$cache_key   = self::TRANSIENT_PREFIX . md5( __CLASS__ . $url );
-		$cached_data = get_transient( $cache_key );
-		$headers     = [];
-		$status      = null;
+		$cache_key       = self::TRANSIENT_PREFIX . md5( __CLASS__ . $url );
+		$cached_response = get_transient( $cache_key );
+		$headers         = [];
 
-		if ( false !== $cached_data ) {
+		if ( false !== $cached_response ) {
 			if ( PHP_MAJOR_VERSION >= 7 ) {
-				$cached_data = unserialize( $cached_data, [ CachedData::class, DateTimeImmutable::class ] ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize,PHPCompatibility.FunctionUse.NewFunctionParameters.unserialize_optionsFound
+				$cached_response = unserialize( $cached_response, [ CachedResponse::class, DateTimeImmutable::class ] ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize,PHPCompatibility.FunctionUse.NewFunctionParameters.unserialize_optionsFound
 			} else {
 				// PHP 5.6 does not provide the second $options argument yet.
-				$cached_data = unserialize( $cached_data ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize
+				$cached_response = unserialize( $cached_response ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize
 			}
 		}
 
-		if ( false === $cached_data || $cached_data->is_expired() ) {
+		if ( ! $cached_response instanceof CachedResponse || $cached_response->is_expired() ) {
 			try {
 				$response = $this->remote_request->get( $url );
 				$status   = $response->getStatusCode();
@@ -131,12 +131,16 @@ final class CachedRemoteGetRequest implements RemoteGetRequest {
 				$body   = $exception->getMessage();
 			}
 
-			$cached_data = new CachedData( $body, $expiry );
+			$cached_response = new CachedResponse( $body, $headers, $status, $expiry );
 
-			set_transient( $cache_key, serialize( $cached_data ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
+			set_transient( $cache_key, serialize( $cached_response ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
 		}
 
-		return new RemoteGetRequestResponse( $cached_data->get_value(), $headers, $status );
+		if ( ! $cached_response->is_valid() ) {
+			throw new FailedToGetCachedResponse( $url );
+		}
+
+		return new RemoteGetRequestResponse( $cached_response->get_body(), $cached_response->get_headers(), $cached_response->get_status_code() );
 	}
 
 	/**

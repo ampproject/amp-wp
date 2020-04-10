@@ -307,6 +307,39 @@ class DocumentTest extends TestCase
                 '<!DOCTYPE html><html>' . $head . '<body><script template="amp-mustache" type="text/plain" id="foo"><table><tr>{{#example}}<td></td>{{/example}}</tr></table></script><script type="text/plain" template="amp-mustache" id="example"><p>{{#baz}}This is inside a template{{/baz}}</p></script></body></html>',
                 '<!DOCTYPE html><html>' . $head . '<body><script template="amp-mustache" type="text/plain" id="foo"><table><tr>{{#example}}<td></td>{{/example}}</tr></table></script><script type="text/plain" template="amp-mustache" id="example"><p>{{#baz}}This is inside a template{{/baz}}</p></script></body></html>',
             ],
+            'multiline_mustache_templates_appear'      => [
+                'utf-8',
+                '
+                <!DOCTYPE html>
+                <html>
+                    <head><meta charset="utf-8"></head>
+                    <body>
+                    <script type="text/plain" template="amp-mustache">
+                      <table>
+                        <tr>
+                    {{#foo}}<td></td>{{/foo}}
+                        </tr>
+                      </table>
+                    </script>
+                    </body>
+                </html>
+                ',
+                '
+                <!DOCTYPE html>
+                <html>
+                    <head><meta charset="utf-8"></head>
+                    <body>
+                    <script type="text/plain" template="amp-mustache">
+                      <table>
+                        <tr>
+                    {{#foo}}<td></td>{{/foo}}
+                        </tr>
+                      </table>
+                    </script>
+                    </body>
+                </html>
+                ',
+            ],
         ];
     }
 

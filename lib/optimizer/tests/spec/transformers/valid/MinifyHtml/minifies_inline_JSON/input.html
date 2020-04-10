@@ -55,6 +55,8 @@
         invalid json
       </script>
     </amp-analytics>
+    <!-- escape JSON values https://github.com/zeit/next.js/issues/11159 -->
+    <script id="__NEXT_DATA__" type="application/json">{"props":{"pageProps":{"content":[{"embed_html":"\u003cscript src=\"foo.bar\"\u003e\u003c/script\u003e"}]}},"page":"/","query":{},"buildId":"development","isFallback":false}</script>
   </body>
 
 </html>

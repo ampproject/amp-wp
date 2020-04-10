@@ -3344,6 +3344,10 @@ class AMP_Validation_Error_Taxonomy {
 				return __( 'Invalid attribute', 'amp' );
 			case 'required_attr_value':
 				return __( 'Required attribute value', 'amp' );
+			case 'url':
+				return __( 'URL', 'amp' );
+			case 'message':
+				return __( 'Message', 'amp' );
 			default:
 				return $key;
 		}
