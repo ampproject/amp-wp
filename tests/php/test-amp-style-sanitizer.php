@@ -10,6 +10,7 @@
 use AmpProject\AmpWP\RemoteRequest\CachedResponse;
 use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\MarkupComparison;
 use AmpProject\Dom\Document;
 use AmpProject\AmpWP\Tests\PrivateAccess;
 use AmpProject\Exception\FailedToGetFromRemoteUrl;
@@ -20,6 +21,7 @@ use AmpProject\Exception\FailedToGetFromRemoteUrl;
 class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 	use AssertContainsCompatibility;
+	use MarkupComparison;
 	use PrivateAccess;
 
 	/**
@@ -2947,24 +2949,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	public function test_get_styles() {
 		$sanitizer = new AMP_Style_Sanitizer( new Document() );
 		$this->assertEquals( [], $sanitizer->get_styles() );
-	}
-
-	/**
-	 * Assert markup is equal.
-	 *
-	 * @param string $expected Expected markup.
-	 * @param string $actual   Actual markup.
-	 */
-	public function assertEqualMarkup( $expected, $actual ) {
-		$actual   = preg_replace( '/\s+/', ' ', $actual );
-		$expected = preg_replace( '/\s+/', ' ', $expected );
-		$actual   = preg_replace( '/(?<=>)\s+(?=<)/', '', trim( $actual ) );
-		$expected = preg_replace( '/(?<=>)\s+(?=<)/', '', trim( $expected ) );
-
-		$this->assertEquals(
-			array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $expected, -1, PREG_SPLIT_DELIM_CAPTURE ) ),
-			array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $actual, -1, PREG_SPLIT_DELIM_CAPTURE ) )
-		);
 	}
 
 	/*
