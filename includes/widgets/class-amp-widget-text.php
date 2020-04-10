@@ -27,7 +27,6 @@ if ( class_exists( 'WP_Widget_Text' ) ) {
 			}
 			return parent::inject_video_max_width_style( $matches );
 		}
-
 	}
 
 }

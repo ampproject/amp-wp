@@ -12,7 +12,7 @@
             "dist": {
                 "type": "path",
                 "url": "lib/common",
-                "reference": "aac1c833df071a5e00af9a4c0c203ea739a0c733"
+                "reference": "2374941a564bc35ed22d8bd6e520c5d05b5e026f"
             },
             "require": {
                 "ext-dom": "*",
@@ -59,26 +59,22 @@
                     "phpcbf --standard=PSR12 -n src tests"
                 ],
                 "cs": [
-                    "if [ -z TEST_SKIP_PHPCS ]; then phpcs --standard=PSR12 -s -n src tests; fi"
+                    "if [ -z $TEST_SKIP_PHPCS ]; then phpcs --standard=PSR12 -s -n src tests; fi"
                 ],
                 "lint": [
-                    "if [ -z TEST_SKIP_LINTING ]; then parallel-lint -j 10 --colors --exclude vendor .; fi"
-                ],
-                "post-update-cmd": [
-                    "rm -rf tests/spec && bin/sync-amp-toolbox-test-suite.php",
-                    "bin/sync-amp-runtime-local-fallback-resources.php"
+                    "if [ -z $TEST_SKIP_LINTING ]; then parallel-lint -j 10 --colors --exclude vendor .; fi"
                 ],
                 "test": [
                     "@lint",
                     "@unit",
                     "@cs",
-                    "@analyse"
+                    "@analyze"
                 ],
-                "analyse": [
-                    "if [ -z TEST_SKIP_PHPSTAN ]; then phpstan analyse src -l3 --ansi; fi"
+                "analyze": [
+                    "if [ -z $TEST_SKIP_PHPSTAN ]; then phpstan analyze --ansi; fi"
                 ],
                 "unit": [
-                    "if [ -z TEST_SKIP_PHPUNIT ]; then phpunit --colors=always; fi"
+                    "if [ -z $TEST_SKIP_PHPUNIT ]; then phpunit --colors=always; fi"
                 ]
             },
             "license": [
@@ -95,7 +91,7 @@
             "dist": {
                 "type": "path",
                 "url": "lib/optimizer",
-                "reference": "c5bc27a780a2dc6393013493ad3e53eba4cc72f1"
+                "reference": "92ee306a1e4a15e21d9091d9946f1cb124e833e2"
             },
             "require": {
                 "ampproject/common": "^1",
@@ -143,10 +139,10 @@
                     "phpcbf --standard=PSR12 -n src tests"
                 ],
                 "cs": [
-                    "if [ -z TEST_SKIP_PHPCS ]; then phpcs --standard=PSR12 -s -n src tests; fi"
+                    "if [ -z $TEST_SKIP_PHPCS ]; then phpcs --standard=PSR12 -s -n src tests; fi"
                 ],
                 "lint": [
-                    "if [ -z TEST_SKIP_LINTING ]; then parallel-lint -j 10 --colors --exclude vendor .; fi"
+                    "if [ -z $TEST_SKIP_LINTING ]; then parallel-lint -j 10 --colors --exclude vendor .; fi"
                 ],
                 "post-update-cmd": [
                     "rm -rf tests/spec && bin/sync-amp-toolbox-test-suite.php",
@@ -156,13 +152,13 @@
                     "@lint",
                     "@unit",
                     "@cs",
-                    "@analyse"
+                    "@analyze"
                 ],
-                "analyse": [
-                    "if [ -z TEST_SKIP_PHPSTAN ]; then phpstan analyse src -l3 --ansi; fi"
+                "analyze": [
+                    "if [ -z $TEST_SKIP_PHPSTAN ]; then phpstan analyze --ansi; fi"
                 ],
                 "unit": [
-                    "if [ -z TEST_SKIP_PHPUNIT ]; then phpunit --colors=always; fi"
+                    "if [ -z $TEST_SKIP_PHPUNIT ]; then phpunit --colors=always; fi"
                 ]
             },
             "license": [
@@ -741,12 +737,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "f0eca1ac3194cc94726f0bb366672f38629272b4"
+                "reference": "b81a572cb1acffadea621e55c95af4ba94a91624"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/f0eca1ac3194cc94726f0bb366672f38629272b4",
-                "reference": "f0eca1ac3194cc94726f0bb366672f38629272b4",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/b81a572cb1acffadea621e55c95af4ba94a91624",
+                "reference": "b81a572cb1acffadea621e55c95af4ba94a91624",
                 "shasum": ""
             },
             "conflict": {
@@ -804,6 +800,7 @@
                 "firebase/php-jwt": "<2",
                 "fooman/tcpdf": "<6.2.22",
                 "fossar/tcpdf-parser": "<6.2.22",
+                "friendsofsymfony/oauth2-php": "<1.3",
                 "friendsofsymfony/rest-bundle": ">=1.2,<1.2.2",
                 "friendsofsymfony/user-bundle": ">=1.2,<1.3.5",
                 "fuel/core": "<1.8.1",
@@ -815,6 +812,7 @@
                 "illuminate/cookie": ">=4,<=4.0.11|>=4.1,<=4.1.31|>=4.2,<=4.2.22|>=5,<=5.0.35|>=5.1,<=5.1.46|>=5.2,<=5.2.45|>=5.3,<=5.3.31|>=5.4,<=5.4.36|>=5.5,<5.5.42|>=5.6,<5.6.30",
                 "illuminate/database": ">=4,<4.0.99|>=4.1,<4.1.29",
                 "illuminate/encryption": ">=4,<=4.0.11|>=4.1,<=4.1.31|>=4.2,<=4.2.22|>=5,<=5.0.35|>=5.1,<=5.1.46|>=5.2,<=5.2.45|>=5.3,<=5.3.31|>=5.4,<=5.4.36|>=5.5,<5.5.40|>=5.6,<5.6.15",
+                "illuminate/view": ">=7,<7.1.2",
                 "ivankristianto/phpwhois": "<=4.3",
                 "james-heinrich/getid3": "<1.9.9",
                 "joomla/session": "<1.3.1",
@@ -822,7 +820,7 @@
                 "kazist/phpwhois": "<=4.2.6",
                 "kreait/firebase-php": ">=3.2,<3.8.1",
                 "la-haute-societe/tcpdf": "<6.2.22",
-                "laravel/framework": ">=4,<4.0.99|>=4.1,<=4.1.31|>=4.2,<=4.2.22|>=5,<=5.0.35|>=5.1,<=5.1.46|>=5.2,<=5.2.45|>=5.3,<=5.3.31|>=5.4,<=5.4.36|>=5.5,<5.5.42|>=5.6,<5.6.30",
+                "laravel/framework": ">=4,<4.0.99|>=4.1,<=4.1.31|>=4.2,<=4.2.22|>=5,<=5.0.35|>=5.1,<=5.1.46|>=5.2,<=5.2.45|>=5.3,<=5.3.31|>=5.4,<=5.4.36|>=5.5,<5.5.42|>=5.6,<5.6.30|>=7,<7.1.2",
                 "laravel/socialite": ">=1,<1.0.99|>=2,<2.0.10",
                 "league/commonmark": "<0.18.3",
                 "librenms/librenms": "<1.53",
@@ -886,6 +884,7 @@
                 "socalnick/scn-social-auth": "<1.15.2",
                 "spoonity/tcpdf": "<6.2.22",
                 "squizlabs/php_codesniffer": ">=1,<2.8.1|>=3,<3.0.1",
+                "ssddanbrown/bookstack": "<0.25.3",
                 "stormpath/sdk": ">=0,<9.9.99",
                 "studio-42/elfinder": "<2.1.49",
                 "swiftmailer/swiftmailer": ">=4,<5.4.5",
@@ -993,7 +992,7 @@
                 }
             ],
             "description": "Prevents installation of composer packages with known security vulnerabilities: no API, simply require it",
-            "time": "2020-03-03T17:52:54+00:00"
+            "time": "2020-03-15T11:13:32+00:00"
         },
         {
             "name": "sirbrillig/phpcs-variable-analysis",

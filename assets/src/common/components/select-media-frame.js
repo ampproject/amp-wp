@@ -110,8 +110,8 @@ export const FeaturedImageToolbarSelect = wp.media.view.Toolbar.Select.extend( {
 		const selection = state.get( 'selection' );
 
 		const attachment = selection.models[ 0 ];
-		const minWidth = state.collection.get( 'library' ).get( 'suggestedWidth' );
-		const minHeight = state.collection.get( 'library' ).get( 'suggestedHeight' );
+		const minWidth = state.collection.get( 'featured-image' ).get( 'suggestedWidth' );
+		const minHeight = state.collection.get( 'featured-image' ).get( 'suggestedHeight' );
 
 		if (
 			! attachment ||

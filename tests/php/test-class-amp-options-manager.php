@@ -5,12 +5,16 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+
 /**
  * Tests for AMP_Options_Manager.
  *
  * @covers AMP_Options_Manager
  */
 class Test_AMP_Options_Manager extends WP_UnitTestCase {
+
+	use AssertContainsCompatibility;
 
 	/**
 	 * Set up.
@@ -99,7 +103,6 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	 * @covers AMP_Options_Manager::get_option()
 	 * @covers AMP_Options_Manager::update_option()
 	 * @covers AMP_Options_Manager::validate_options()
-	 * @covers AMP_Theme_Support::reset_cache_miss_url_option()
 	 */
 	public function test_get_and_set_options() {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
@@ -115,7 +118,6 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				'analytics'               => [],
 				'all_templates_supported' => true,
 				'supported_templates'     => [ 'is_singular' ],
-				'enable_response_caching' => true,
 				'version'                 => AMP__VERSION,
 			],
 			AMP_Options_Manager::get_options()
@@ -237,19 +239,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$entries = AMP_Options_Manager::get_option( 'analytics' );
 		$this->assertCount( 1, $entries );
 		$this->assertArrayNotHasKey( $id, $entries );
-
-		// Test re-enabling response cache works.
-		add_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, 'http://example.org/test-post' );
-		AMP_Options_Manager::update_option( 'enable_response_caching', true );
-		$this->assertTrue( AMP_Options_Manager::get_option( 'enable_response_caching' ) );
-		$this->assertNull( get_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, null ) );
-		wp_using_ext_object_cache( false ); // turn off external object cache.
-		add_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, 'http://example.org/test-post' );
-		AMP_Options_Manager::update_option( 'enable_response_caching', true );
-		$this->assertFalse( AMP_Options_Manager::get_option( 'enable_response_caching' ) );
-		$this->assertEquals( 'http://example.org/test-post', get_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, null ) );
 	}
-
 
 	public function get_test_get_options_defaults_data() {
 		return [
@@ -432,103 +422,9 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		// This is the correct page, and the notice has not been dismissed, so it should display.
 		delete_user_meta( get_current_user_id(), 'dismissed_wp_pointers' );
 		$output = get_echo( [ 'AMP_Options_Manager', 'render_welcome_notice' ] );
-		$this->assertContains( 'Welcome to AMP for WordPress', $output );
-		$this->assertContains( 'Bring the speed and features of the open source AMP project to your site, complete with the tools to support content authoring and website development.', $output );
-		$this->assertContains( $id, $output );
-	}
-
-	/**
-	 * Test for persistent_object_caching_notice()
-	 *
-	 * @covers AMP_Options_Manager::persistent_object_caching_notice()
-	 */
-	public function test_persistent_object_caching_notice() {
-		set_current_screen( 'toplevel_page_amp-options' );
-		$text = 'The AMP plugin performs at its best when persistent object cache is enabled.';
-
-		wp_using_ext_object_cache( null );
-		$output = get_echo( [ 'AMP_Options_Manager', 'persistent_object_caching_notice' ] );
-		$this->assertContains( $text, $output );
-
-		wp_using_ext_object_cache( true );
-		$output = get_echo( [ 'AMP_Options_Manager', 'persistent_object_caching_notice' ] );
-		$this->assertNotContains( $text, $output );
-
-		set_current_screen( 'edit.php' );
-
-		wp_using_ext_object_cache( null );
-		$output = get_echo( [ 'AMP_Options_Manager', 'persistent_object_caching_notice' ] );
-		$this->assertNotContains( $text, $output );
-
-		wp_using_ext_object_cache( true );
-		$output = get_echo( [ 'AMP_Options_Manager', 'persistent_object_caching_notice' ] );
-		$this->assertNotContains( $text, $output );
-
-		wp_using_ext_object_cache( false );
-	}
-
-	/**
-	 * Test for render_cache_miss_notice()
-	 *
-	 * @covers AMP_Options_Manager::show_response_cache_disabled_notice()
-	 */
-	public function test_show_response_cache_disabled_notice() {
-		$this->assertFalse( AMP_Options_Manager::show_response_cache_disabled_notice() );
-
-		wp_using_ext_object_cache( true ); // turn on external object cache flag.
-		$this->assertFalse( AMP_Options_Manager::show_response_cache_disabled_notice() );
-
-		AMP_Options_Manager::update_option( 'enable_response_caching', false );
-		$this->assertFalse( AMP_Options_Manager::show_response_cache_disabled_notice() );
-
-		add_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, site_url() );
-		$this->assertTrue( AMP_Options_Manager::show_response_cache_disabled_notice() );
-
-		// Test if external object cache is now disabled.
-		wp_using_ext_object_cache( false );
-		$this->assertFalse( AMP_Options_Manager::show_response_cache_disabled_notice() );
-	}
-
-	/**
-	 * Test for render_cache_miss_notice()
-	 *
-	 * @covers AMP_Options_Manager::render_cache_miss_notice()
-	 */
-	public function test_render_cache_miss_notice() {
-		set_current_screen( 'toplevel_page_amp-options' );
-		wp_using_ext_object_cache( true ); // turn on external object cache flag.
-
-		// Test default state.
-		$output = get_echo( [ 'AMP_Options_Manager', 'render_cache_miss_notice' ] );
-		$this->assertEmpty( $output );
-
-		// Test when disabled but not exceeded.
-		AMP_Options_Manager::update_option( 'enable_response_caching', false );
-		$output = get_echo( [ 'AMP_Options_Manager', 'render_cache_miss_notice' ] );
-		$this->assertEmpty( $output );
-
-		// Test when disabled and exceeded, but external object cache is disabled.
-		add_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, site_url() );
-		wp_using_ext_object_cache( false ); // turn off external object cache flag.
-		$output = get_echo( [ 'AMP_Options_Manager', 'render_cache_miss_notice' ] );
-		$this->assertEmpty( $output );
-
-		// Test when disabled, exceeded, and external object cache is enabled.
-		wp_using_ext_object_cache( true ); // turn off external object cache flag.
-		$output = get_echo( [ 'AMP_Options_Manager', 'render_cache_miss_notice' ] );
-		$this->assertContains( '<div class="notice notice-warning is-dismissible">', $output );
-
-		// Test when enabled but not exceeded.
-		delete_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION );
-		$output = get_echo( [ 'AMP_Options_Manager', 'render_cache_miss_notice' ] );
-		$this->assertEmpty( $output );
-
-		// Test when on a different screen.
-		set_current_screen( 'edit.php' );
-		$output = get_echo( [ 'AMP_Options_Manager', 'render_cache_miss_notice' ] );
-		$this->assertEmpty( $output );
-
-		wp_using_ext_object_cache( false ); // turn off external object cache flag.
+		$this->assertStringContains( 'Welcome to AMP for WordPress', $output );
+		$this->assertStringContains( 'Bring the speed and features of the open source AMP project to your site, complete with the tools to support content authoring and website development.', $output );
+		$this->assertStringContains( $id, $output );
 	}
 
 	/**
@@ -548,7 +444,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$amp_settings_errors = get_settings_errors( AMP_Options_Manager::OPTION_NAME );
 		$new_error           = end( $amp_settings_errors );
 		$this->assertStringStartsWith( 'Reader mode activated!', $new_error['message'] );
-		$this->assertContains( esc_url( amp_get_permalink( $page_id ) ), $new_error['message'], 'Expect amp_admin_get_preview_permalink() to return a page since it is the only post type supported.' );
+		$this->assertStringContains( esc_url( amp_get_permalink( $page_id ) ), $new_error['message'], 'Expect amp_admin_get_preview_permalink() to return a page since it is the only post type supported.' );
 		$this->assertCount( 0, get_posts( [ 'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ] ) );
 	}
 
@@ -584,7 +480,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$amp_settings_errors = get_settings_errors( AMP_Options_Manager::OPTION_NAME );
 		$new_error           = end( $amp_settings_errors );
 		$this->assertStringStartsWith( 'Standard mode activated!', $new_error['message'] );
-		$this->assertContains( esc_url( amp_get_permalink( $post_id ) ), $new_error['message'], 'Expect amp_admin_get_preview_permalink() to return a post since it is the only post type supported.' );
+		$this->assertStringContains( esc_url( amp_get_permalink( $post_id ) ), $new_error['message'], 'Expect amp_admin_get_preview_permalink() to return a post since it is the only post type supported.' );
 		$invalid_url_posts = get_posts(
 			[
 				'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
@@ -593,8 +489,8 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		);
 		$this->assertEquals( 'updated', $new_error['type'] );
 		$this->assertCount( 1, $invalid_url_posts );
-		$this->assertContains( 'review 1 issue', $new_error['message'] );
-		$this->assertContains( esc_url( get_edit_post_link( $invalid_url_posts[0], 'raw' ) ), $new_error['message'], 'Expect edit post link for the invalid URL post to be present.' );
+		$this->assertStringContains( 'review 1 issue', $new_error['message'] );
+		$this->assertStringContains( esc_url( get_edit_post_link( $invalid_url_posts[0], 'raw' ) ), $new_error['message'], 'Expect edit post link for the invalid URL post to be present.' );
 	}
 
 	/**
@@ -668,7 +564,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$amp_settings_errors = get_settings_errors( AMP_Options_Manager::OPTION_NAME );
 		$new_error           = end( $amp_settings_errors );
 		$this->assertStringStartsWith( 'Transitional mode activated!', $new_error['message'] );
-		$this->assertContains( esc_url( amp_get_permalink( $post_id ) ), $new_error['message'], 'Expect amp_admin_get_preview_permalink() to return a post since it is the only post type supported.' );
+		$this->assertStringContains( esc_url( amp_get_permalink( $post_id ) ), $new_error['message'], 'Expect amp_admin_get_preview_permalink() to return a post since it is the only post type supported.' );
 		$invalid_url_posts = get_posts(
 			[
 				'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
@@ -677,7 +573,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		);
 		$this->assertEquals( 'updated', $new_error['type'] );
 		$this->assertCount( 1, $invalid_url_posts );
-		$this->assertContains( 'review 2 issues', $new_error['message'] );
-		$this->assertContains( esc_url( get_edit_post_link( $invalid_url_posts[0], 'raw' ) ), $new_error['message'], 'Expect edit post link for the invalid URL post to be present.' );
+		$this->assertStringContains( 'review 2 issues', $new_error['message'] );
+		$this->assertStringContains( esc_url( get_edit_post_link( $invalid_url_posts[0], 'raw' ) ), $new_error['message'], 'Expect edit post link for the invalid URL post to be present.' );
 	}
 }

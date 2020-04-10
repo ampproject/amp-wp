@@ -89,5 +89,4 @@ class AMP_Widget_Categories extends WP_Widget_Categories {
 		endif;
 		echo wp_kses_post( $args['after_widget'] );
 	}
-
 }

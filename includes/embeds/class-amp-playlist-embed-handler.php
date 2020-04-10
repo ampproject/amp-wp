@@ -330,5 +330,4 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		return '';
 	}
-
 }

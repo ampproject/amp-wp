@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use AmpProject\Fonts;
+
 /**
  * Class AMP_Validated_URL_Post_Type
  *
@@ -257,6 +259,7 @@ class AMP_Validated_URL_Post_Type {
 			}
 		);
 	}
+
 	/**
 	 * Enqueue style.
 	 */
@@ -659,11 +662,17 @@ class AMP_Validated_URL_Post_Type {
 		// Remove fragment identifier in the rare case it could be provided. It is irrelevant for validation.
 		$url = strtok( $url, '#' );
 
+		// Query args to be removed from validated URLs.
+		$removable_query_vars = array_merge(
+			wp_removable_query_args(),
+			[ 'preview_id', 'preview_nonce', 'preview' ]
+		);
+
 		// Normalize query args, removing all that are not recognized or which are removable.
 		$url_parts = explode( '?', $url, 2 );
 		if ( 2 === count( $url_parts ) ) {
 			$args = wp_parse_args( $url_parts[1] );
-			foreach ( wp_removable_query_args() as $removable_query_arg ) {
+			foreach ( $removable_query_vars as $removable_query_arg ) {
 				unset( $args[ $removable_query_arg ] );
 			}
 			$url = $url_parts[0];
@@ -1918,7 +1927,7 @@ class AMP_Validated_URL_Post_Type {
 							printf(
 								' | <a href="%s">%s</a>',
 								esc_url( AMP_Theme_Support::get_paired_browsing_url( self::get_url_from_post( $post ) ) ),
-								esc_html__( 'Paired browsing', 'amp' )
+								esc_html__( 'Paired Browsing', 'amp' )
 							);
 						}
 						?>
@@ -2049,7 +2058,8 @@ class AMP_Validated_URL_Post_Type {
 					<?php esc_html_e( 'Total CSS size prior to minification:', 'amp' ); ?>
 				</th>
 				<td>
-					<?php echo esc_html( number_format_i18n( $included_original_size + $excluded_original_size ) ); ?><small>B</small>
+					<?php echo esc_html( number_format_i18n( $included_original_size + $excluded_original_size ) ); ?>
+					<abbr title="<?php esc_attr_e( 'bytes', 'amp' ); ?>"><?php echo esc_attr_x( 'B', 'abbreviation for bytes', 'amp' ); ?></abbr>
 				</td>
 			</tr>
 			<tr>
@@ -2057,7 +2067,8 @@ class AMP_Validated_URL_Post_Type {
 					<?php esc_html_e( 'Total CSS size after minification:', 'amp' ); ?>
 				</th>
 				<td>
-					<?php echo esc_html( number_format_i18n( $included_final_size + $excluded_final_size ) ); ?><small>B</small>
+					<?php echo esc_html( number_format_i18n( $included_final_size + $excluded_final_size ) ); ?>
+					<abbr title="<?php esc_attr_e( 'bytes', 'amp' ); ?>"><?php echo esc_attr_x( 'B', 'abbreviation for bytes', 'amp' ); ?></abbr>
 				</td>
 			</tr>
 			<tr>
@@ -2077,6 +2088,9 @@ class AMP_Validated_URL_Post_Type {
 					$percentage_budget_used = ( ( $included_final_size + $excluded_final_size ) / $style_custom_cdata_spec['max_bytes'] ) * 100;
 
 					printf( '%.1f%% ', $percentage_budget_used ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					?>
+					<span style="font-family: <?php echo esc_attr( Fonts::getEmojiFontFamilyValue() ); ?>">
+					<?php
 					if ( $percentage_budget_used > 100 ) {
 						echo '🚫';
 					} elseif ( $percentage_budget_used >= AMP_Style_Sanitizer::CSS_BUDGET_WARNING_PERCENTAGE ) {
@@ -2085,6 +2099,7 @@ class AMP_Validated_URL_Post_Type {
 						echo '✅';
 					}
 					?>
+					</span>
 				</td>
 			</tr>
 			<tr>
@@ -2100,7 +2115,8 @@ class AMP_Validated_URL_Post_Type {
 					?>
 				</th>
 				<td>
-					<?php echo esc_html( number_format_i18n( $excluded_final_size ) ); ?><small>B</small>
+					<?php echo esc_html( number_format_i18n( $excluded_final_size ) ); ?>
+					<abbr title="<?php esc_attr_e( 'bytes', 'amp' ); ?>"><?php echo esc_attr_x( 'B', 'abbreviation for bytes', 'amp' ); ?></abbr>
 				</td>
 			</tr>
 		</table>
@@ -2129,12 +2145,18 @@ class AMP_Validated_URL_Post_Type {
 			<tr>
 				<th class="column-stylesheet_expand"></th>
 				<th class="column-stylesheet_order"><?php esc_html_e( 'Order', 'amp' ); ?></th>
-				<th class="column-original_size"><?php esc_html_e( 'Original', 'amp' ); ?></th>
+				<th class="column-original_size">
+					<?php esc_html_e( 'Original', 'amp' ); ?>
+					(<abbr title="<?php esc_attr_e( 'bytes', 'amp' ); ?>"><?php echo esc_attr_x( 'B', 'abbreviation for bytes', 'amp' ); ?></abbr>)
+				</th>
 				<th class="column-minified"><?php esc_html_e( 'Minified', 'amp' ); ?></th>
-				<th class="column-final_size"><?php esc_html_e( 'Final', 'amp' ); ?></th>
+				<th class="column-final_size">
+					<?php esc_html_e( 'Final', 'amp' ); ?>
+					(<abbr title="<?php esc_attr_e( 'bytes', 'amp' ); ?>"><?php echo esc_attr_x( 'B', 'abbreviation for bytes', 'amp' ); ?></abbr>)
+				</th>
 				<th class="column-percentage"><?php esc_html_e( 'Percent', 'amp' ); ?></th>
 				<th class="column-priority"><?php esc_html_e( 'Priority', 'amp' ); ?></th>
-				<th class="column-stylesheet_status"><?php esc_html_e( 'Status', 'amp' ); ?></th>
+				<th class="column-stylesheet_included"><?php esc_html_e( 'Included', 'amp' ); ?></th>
 				<th class="column-markup"><?php esc_html_e( 'Markup', 'amp' ); ?></th>
 				<th class="column-sources_with_invalid_output"><?php esc_html_e( 'Sources', 'amp' ); ?></th>
 			</tr>
@@ -2191,7 +2213,6 @@ class AMP_Validated_URL_Post_Type {
 					<td class="column-original_size">
 						<?php
 						echo esc_html( number_format_i18n( $stylesheet['original_size'] ) );
-						echo '<small>B</small>';
 						?>
 					</td>
 					<td class="column-minified">
@@ -2206,7 +2227,6 @@ class AMP_Validated_URL_Post_Type {
 					<td class="column-final_size">
 						<?php
 						echo esc_html( number_format_i18n( $stylesheet['final_size'] ) );
-						echo '<small>B</small>';
 						?>
 					</td>
 					<td class="column-percentage">
@@ -2220,17 +2240,18 @@ class AMP_Validated_URL_Post_Type {
 					<td class="column-priority">
 						<?php echo esc_html( $stylesheet['priority'] ); ?>
 					</td>
-					<td class="column-stylesheet_status">
+					<td class="column-stylesheet_included">
 						<?php
+						$emoji_style = sprintf( 'font-family: %s;', Fonts::getEmojiFontFamilyValue() );
 						switch ( $stylesheet['status'] ) {
 							case $included_status:
-								printf( '<span title="%s">✅</span>', esc_attr__( 'Stylesheet included', 'amp' ) );
+								printf( '<span title="%s" style="%s">✅</span>', esc_attr__( 'Stylesheet included', 'amp' ), esc_attr( $emoji_style ) );
 								break;
 							case $excessive_status:
-								printf( '<span title="%s">⚠️</span>', esc_attr__( 'Stylesheet overruns CSS budget yet it is still included on page', 'amp' ) );
+								printf( '<span title="%s" style="%s">⚠️</span>', esc_attr__( 'Stylesheet overruns CSS budget yet it is still included on page', 'amp' ), esc_attr( $emoji_style ) );
 								break;
 							case $excluded_status:
-								printf( '<span title="%s">🚫</span>', esc_attr__( 'Stylesheet excluded due to exceeding CSS budget', 'amp' ) );
+								printf( '<span title="%s" style="%s">🚫</span>', esc_attr__( 'Stylesheet excluded due to exceeding CSS budget', 'amp' ), esc_attr( $emoji_style ) );
 								break;
 						}
 						?>
@@ -2811,7 +2832,6 @@ class AMP_Validated_URL_Post_Type {
 
 		return $views;
 	}
-
 
 	/**
 	 * Filters messages displayed after bulk updates.

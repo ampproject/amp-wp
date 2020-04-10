@@ -307,6 +307,39 @@ class DocumentTest extends TestCase
                 '<!DOCTYPE html><html>' . $head . '<body><script template="amp-mustache" type="text/plain" id="foo"><table><tr>{{#example}}<td></td>{{/example}}</tr></table></script><script type="text/plain" template="amp-mustache" id="example"><p>{{#baz}}This is inside a template{{/baz}}</p></script></body></html>',
                 '<!DOCTYPE html><html>' . $head . '<body><script template="amp-mustache" type="text/plain" id="foo"><table><tr>{{#example}}<td></td>{{/example}}</tr></table></script><script type="text/plain" template="amp-mustache" id="example"><p>{{#baz}}This is inside a template{{/baz}}</p></script></body></html>',
             ],
+            'multiline_mustache_templates_appear'      => [
+                'utf-8',
+                '
+                <!DOCTYPE html>
+                <html>
+                    <head><meta charset="utf-8"></head>
+                    <body>
+                    <script type="text/plain" template="amp-mustache">
+                      <table>
+                        <tr>
+                    {{#foo}}<td></td>{{/foo}}
+                        </tr>
+                      </table>
+                    </script>
+                    </body>
+                </html>
+                ',
+                '
+                <!DOCTYPE html>
+                <html>
+                    <head><meta charset="utf-8"></head>
+                    <body>
+                    <script type="text/plain" template="amp-mustache">
+                      <table>
+                        <tr>
+                    {{#foo}}<td></td>{{/foo}}
+                        </tr>
+                      </table>
+                    </script>
+                    </body>
+                </html>
+                ',
+            ],
         ];
     }
 
@@ -621,5 +654,45 @@ class DocumentTest extends TestCase
         foreach ($document->ampElements as $element) {
             $this->assertEquals('correct-element', $element->getAttribute('data-test'));
         }
+    }
+
+    /**
+     * Ge initial AMP dev mode data.
+     *
+     * @return array Test data.
+     */
+    public function getInitialAmpDevModeData()
+    {
+        $tesData = [
+            'with_dev_mode'    => [
+                Document::fromHtml('<!doctype html><html data-ampdevmode><head></head><body></body></html>'),
+                true,
+            ],
+            'without_dev_mode' => [
+                Document::fromHtml('<!doctype html><html><head></head><body></body></html>'),
+                false,
+            ],
+        ];
+
+        $domWithoutDevModeOnRoot = Document::fromHtml('<!doctype html><html><head></head><body></body></html>');
+        $domWithoutDevModeOnRoot->documentElement->setAttribute('data-ampdevmode', '');
+        $tesData['dev_mode_added_after'] = [
+            $domWithoutDevModeOnRoot, false
+        ];
+
+        return $tesData;
+    }
+
+    /**
+     * Test that AMP dev mode on the root DOM element is initially set.
+     *
+     * @dataProvider getInitialAmpDevModeData
+     *
+     * @param Document $document          Document.
+     * @param boolean  $hasInitialDevMode Whether $document should have dev mode initially or not.
+     */
+    public function testHasInitialAmpDevMode($document, $hasInitialDevMode)
+    {
+        $this->assertEquals($hasInitialDevMode, $document->hasInitialAmpDevMode());
     }
 }

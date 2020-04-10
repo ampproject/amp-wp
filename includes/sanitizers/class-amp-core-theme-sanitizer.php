@@ -6,7 +6,9 @@
  * @since 1.0
  */
 
+use AmpProject\Attribute;
 use AmpProject\Dom\Document;
+use AmpProject\Role;
 
 /**
  * Class AMP_Core_Theme_Sanitizer
@@ -54,15 +56,15 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	protected static $modal_roles = [
-		'navigation',
-		'menu',
-		'search',
-		'alert',
-		'figure',
-		'form',
-		'img',
-		'toolbar',
-		'tooltip',
+		Role::NAVIGATION,
+		Role::MENU,
+		Role::SEARCH,
+		Role::ALERT,
+		Role::FIGURE,
+		Role::FORM,
+		Role::IMG,
+		Role::TOOLBAR,
+		Role::TOOLTIP,
 	];
 
 	/**
@@ -94,6 +96,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					'add_twentytwenty_toggles'         => [],
 					'add_nav_menu_styles'              => [],
 					'add_twentytwenty_masthead_styles' => [],
+					'add_img_display_block_fix'        => [],
+					'add_twentytwenty_custom_logo_fix' => [],
 					'add_twentytwenty_current_page_awareness' => [],
 				];
 
@@ -261,23 +265,12 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * Get the acceptable validation errors.
 	 *
 	 * @since 1.0
+	 * @deprecated Now unused because viewport CSS at-rules are extracted from stylesheets into meta[name=viewport] tags.
 	 *
-	 * @param string $template Template.
 	 * @return array Acceptable errors.
 	 */
-	public static function get_acceptable_errors( $template ) {
-		if ( in_array( $template, self::$supported_themes, true ) ) {
-			return [
-				AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE => [
-					[
-						'at_rule' => 'viewport',
-					],
-					[
-						'at_rule' => '-ms-viewport',
-					],
-				],
-			];
-		}
+	public static function get_acceptable_errors() {
+		_deprecated_function( __METHOD__, '1.5' );
 		return [];
 	}
 
@@ -611,13 +604,13 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	public function add_smooth_scrolling( $link_xpaths ) {
 		foreach ( $link_xpaths as $link_xpath ) {
 			foreach ( $this->dom->xpath->query( $link_xpath ) as $link ) {
-				if ( $link instanceof DOMElement && preg_match( '/#(.+)/', $link->getAttribute( 'href' ), $matches ) ) {
-					$link->setAttribute( 'on', sprintf( 'tap:%s.scrollTo(duration=600)', $matches[1] ) );
+				if ( $link instanceof DOMElement && preg_match( '/#(.+)/', $link->getAttribute( Attribute::HREF ), $matches ) ) {
+					$link->setAttribute( Attribute::ON, sprintf( 'tap:%s.scrollTo(duration=600)', $matches[1] ) );
 
 					// Prevent browser from jumping immediately to the link target.
-					$link->removeAttribute( 'href' );
-					$link->setAttribute( 'tabindex', '0' );
-					$link->setAttribute( 'role', 'button' );
+					$link->removeAttribute( Attribute::HREF );
+					$link->setAttribute( Attribute::TABINDEX, '0' );
+					$link->setAttribute( Attribute::ROLE, Role::BUTTON );
 				}
 			}
 		}
@@ -727,6 +720,85 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				wp_add_inline_style( get_template() . '-style', $styles );
 			},
 			11
+		);
+	}
+
+	/**
+	 * Fix display of Custom Logo in Twenty Twenty.
+	 *
+	 * This is required because width:auto on the site-logo amp-img does not preserve the proportional width in the same
+	 * way as the same styles applied to an img.
+	 *
+	 * @since 1.5
+	 * @link https://github.com/ampproject/amp-wp/issues/4418
+	 * @link https://codepen.io/westonruter/pen/rNVqadv
+	 */
+	public static function add_twentytwenty_custom_logo_fix() {
+		$method = __METHOD__;
+		add_filter(
+			'get_custom_logo',
+			static function( $html ) use ( $method ) {
+				// Pattern sourced from AMP_Base_Embed_Handler::match_element_attributes().
+				$pattern = sprintf(
+					'/<img%s/',
+					implode(
+						'',
+						array_map(
+							function ( $attr_name ) {
+								return sprintf( '(?=[^>]*?%1$s="(?P<%1$s>\d+)")?', preg_quote( $attr_name, '/' ) );
+							},
+							[ 'width', 'height' ]
+						)
+					)
+				);
+				if ( preg_match( $pattern, $html, $matches ) && isset( $matches['width'] ) && isset( $matches['height'] ) ) {
+					$width  = (int) $matches['width'];
+					$height = (int) $matches['height'];
+
+					$desktop_height = 9; // in rem; see <https://github.com/WordPress/wordpress-develop/blob/ad8d01a7e9e13144d1676b8e6d70c3e81ef703af/src/wp-content/themes/twentytwenty/style.css#L4887>.
+					$mobile_height  = 6; // in rem; see <https://github.com/WordPress/wordpress-develop/blob/ad8d01a7e9e13144d1676b8e6d70c3e81ef703af/src/wp-content/themes/twentytwenty/style.css#L1424>.
+
+					$desktop_width = $desktop_height * ( $width / $height );
+					$mobile_width  = $mobile_height * ( $width / $height );
+
+					$html .= sprintf(
+						'<style data-src="%s">.site-logo amp-img { width: %frem; } @media (min-width: 700px) { .site-logo amp-img { width: %frem; } }</style>',
+						esc_attr( $method ),
+						$mobile_width,
+						$desktop_width
+					);
+
+				}
+				return $html;
+			},
+			PHP_INT_MAX
+		);
+	}
+
+	/**
+	 * Add style rule with a selector of higher specificity than just `img` to make `amp-img` have `display:block` rather than `display:inline-block`.
+	 *
+	 * This is needed to override the AMP core stylesheet which has a more specific selector `.i-amphtml-layout-intrinsic` which
+	 * is given a `display: inline-block`; this display value prevents margins from collapsing with surrounding block elements,
+	 * resulting in larger margins in AMP than expected.
+	 *
+	 * @since 1.5
+	 * @link https://github.com/ampproject/amp-wp/issues/4419
+	 */
+	public static function add_img_display_block_fix() {
+		$method = __METHOD__;
+		// Note that wp_add_inline_style() is not used because this stylesheet needs to be added _before_ style.css so
+		// that any subsequent style rules for images will continue to override.
+		add_action(
+			'wp_print_styles',
+			static function() use ( $method ) {
+				printf(
+					'<style data-src="%s">%s</style>',
+					esc_attr( $method ),
+					// The selector is targeting an attribute that can never appear. It is purely present to increase specificity.
+					'amp-img:not([_]) { display: block }'
+				);
+			}
 		);
 	}
 
@@ -956,7 +1028,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			 *
 			 * @var DOMElement $link
 			 */
-			$link->setAttribute( 'tabindex', '-1' );
+			$link->setAttribute( Attribute::TABINDEX, '-1' );
 		}
 
 		$navigation_top->parentNode->insertBefore( $navigation_top_fixed, $navigation_top->nextSibling );
@@ -1481,8 +1553,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				$a->setAttribute( 'class', 'slider-active' );
 			}
 			$a->setAttribute( Document::AMP_BIND_DATA_ATTR_PREFIX . 'class', "$selected_slide_state_id == $i ? 'slider-active' : ''" );
-			$a->setAttribute( 'role', 'button' );
-			$a->setAttribute( 'on', "tap:AMP.setState( { $selected_slide_state_id: $i } )" );
+			$a->setAttribute( Attribute::ROLE, Role::BUTTON );
+			$a->setAttribute( Attribute::ON, "tap:AMP.setState( { $selected_slide_state_id: $i } )" );
 			$li->setAttribute( 'option', (string) $i );
 			$a->appendChild( $this->dom->createTextNode( $i + 1 ) );
 			$li->appendChild( $a );
@@ -1529,9 +1601,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			$search_input_el->setAttribute( 'id', $search_input_id );
 			$on .= ",$search_input_id.focus()";
 		}
-		$search_toggle_link->setAttribute( 'on', $on );
-		$search_toggle_link->setAttribute( 'tabindex', '0' );
-		$search_toggle_link->setAttribute( 'role', 'button' );
+		$search_toggle_link->setAttribute( Attribute::ON, $on );
+		$search_toggle_link->setAttribute( Attribute::TABINDEX, '0' );
+		$search_toggle_link->setAttribute( Attribute::ROLE, Role::BUTTON );
 
 		// Set visibility and aria-expanded based of the link based on whether the search bar is expanded.
 		$search_toggle_link->setAttribute( 'aria-expanded', wp_json_encode( $hidden ) );
@@ -1618,9 +1690,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			 *
 			 * @var DOMElement $event_element
 			 */
-			$event_element->setAttribute( 'role', $this->guess_modal_role( $modal_content_node ) );
+			$event_element->setAttribute( Attribute::ROLE, $this->guess_modal_role( $modal_content_node ) );
 			// Setting tabindex to -1 (not reachable) as keyboard focus is handled through toggles.
-			$event_element->setAttribute( 'tabindex', -1 );
+			$event_element->setAttribute( Attribute::TABINDEX, -1 );
 		}
 
 		$parent_node = $modal_content_node->parentNode;
@@ -1942,11 +2014,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	protected function guess_modal_role( DOMElement $modal ) {
 		// No classes to base our guess on, so keep it generic.
-		if ( ! $modal->hasAttribute( 'class' ) ) {
-			return 'dialog';
+		if ( ! $modal->hasAttribute( Attribute::CLASS_ ) ) {
+			return Role::DIALOG;
 		}
 
-		$classes = preg_split( '/\s+/', trim( $modal->getAttribute( 'class' ) ) );
+		$classes = preg_split( '/\s+/', trim( $modal->getAttribute( Attribute::CLASS_ ) ) );
 
 		foreach ( self::$modal_roles as $role ) {
 			if ( in_array( $role, $classes, true ) ) {
@@ -1955,6 +2027,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// None of the roles we are looking for match any of the classes.
-		return 'dialog';
+		return Role::DIALOG;
 	}
 }

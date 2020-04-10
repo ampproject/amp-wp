@@ -34,6 +34,7 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	 * Tags array keys.
 	 */
 	const TAG_CHARSET        = 'charset';
+	const TAG_HTTP_EQUIV     = 'http-equiv';
 	const TAG_VIEWPORT       = 'viewport';
 	const TAG_AMP_SCRIPT_SRC = 'amp_script_src';
 	const TAG_OTHER          = 'other';
@@ -54,6 +55,7 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	protected $meta_tags = [
 		self::TAG_CHARSET        => [],
+		self::TAG_HTTP_EQUIV     => [],
 		self::TAG_VIEWPORT       => [],
 		self::TAG_AMP_SCRIPT_SRC => [],
 		self::TAG_OTHER          => [],
@@ -67,18 +69,40 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	const AMP_VIEWPORT = 'width=device-width';
 
 	/**
+	 * Spec name for the tag spec for meta elements that are allowed in the body.
+	 *
+	 * @since 1.5.2
+	 * @var string
+	 */
+	const BODY_ANCESTOR_META_TAG_SPEC_NAME = 'meta name= and content=';
+
+	/**
+	 * Get tag spec for meta tags which are allowed in the body.
+	 *
+	 * @since 1.5.2
+	 * @return string Deny pattern.
+	 */
+	private function get_body_meta_tag_name_attribute_deny_pattern() {
+		static $pattern = null;
+		if ( null === $pattern ) {
+			$tag_spec = current(
+				array_filter(
+					AMP_Allowed_Tags_Generated::get_allowed_tag( 'meta' ),
+					static function ( $spec ) {
+						return isset( $spec['tag_spec']['spec_name'] ) && self::BODY_ANCESTOR_META_TAG_SPEC_NAME === $spec['tag_spec']['spec_name'];
+					}
+				)
+			);
+			$pattern  = '/' . $tag_spec['attr_spec_list']['name']['blacklisted_value_regex'] . '/';
+		}
+		return $pattern;
+	}
+
+	/**
 	 * Sanitize.
 	 */
 	public function sanitize() {
-		$meta_elements = $this->dom->getElementsByTagName( static::$tag );
-
-		// Remove all nodes for easy reordering later on.
-		$meta_elements = array_map(
-			static function ( $element ) {
-				return $element->parentNode->removeChild( $element );
-			},
-			iterator_to_array( $meta_elements, false )
-		);
+		$meta_elements = iterator_to_array( $this->dom->getElementsByTagName( static::$tag ), false );
 
 		foreach ( $meta_elements as $meta_element ) {
 
@@ -96,13 +120,19 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 			 * @var DOMElement $meta_element
 			 */
 			if ( $meta_element->hasAttribute( Attribute::CHARSET ) ) {
-				$this->meta_tags[ self::TAG_CHARSET ][] = $meta_element;
+				$this->meta_tags[ self::TAG_CHARSET ][] = $meta_element->parentNode->removeChild( $meta_element );
+			} elseif ( $meta_element->hasAttribute( Attribute::HTTP_EQUIV ) ) {
+				$this->meta_tags[ self::TAG_HTTP_EQUIV ][] = $meta_element->parentNode->removeChild( $meta_element );
 			} elseif ( Attribute::VIEWPORT === $meta_element->getAttribute( Attribute::NAME ) ) {
-				$this->meta_tags[ self::TAG_VIEWPORT ][] = $meta_element;
+				$this->meta_tags[ self::TAG_VIEWPORT ][] = $meta_element->parentNode->removeChild( $meta_element );
 			} elseif ( Attribute::AMP_SCRIPT_SRC === $meta_element->getAttribute( Attribute::NAME ) ) {
-				$this->meta_tags[ self::TAG_AMP_SCRIPT_SRC ][] = $meta_element;
-			} else {
-				$this->meta_tags[ self::TAG_OTHER ][] = $meta_element;
+				$this->meta_tags[ self::TAG_AMP_SCRIPT_SRC ][] = $meta_element->parentNode->removeChild( $meta_element );
+			} elseif (
+				$meta_element->hasAttribute( 'name' )
+				&&
+				preg_match( $this->get_body_meta_tag_name_attribute_deny_pattern(), $meta_element->getAttribute( 'name' ) )
+			) {
+				$this->meta_tags[ self::TAG_OTHER ][] = $meta_element->parentNode->removeChild( $meta_element );
 			}
 		}
 
@@ -133,10 +163,44 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	 * Always ensure we have a viewport tag.
 	 *
 	 * The viewport defaults to 'width=device-width', which is the bare minimum that AMP requires.
+	 * If there are `@viewport` style rules, these will have been moved into the content attribute of their own meta[name=viewport]
+	 * tags by the style sanitizer. When there are multiple such meta tags, this method extracts the viewport properties of each
+	 * and then merges them into a single meta[name=viewport] tag. Any invalid properties will get removed by the
+	 * tag-and-attribute sanitizer.
 	 */
 	protected function ensure_viewport_is_present() {
 		if ( empty( $this->meta_tags[ self::TAG_VIEWPORT ] ) ) {
 			$this->meta_tags[ self::TAG_VIEWPORT ][] = $this->create_viewport_element( static::AMP_VIEWPORT );
+		} else {
+			// Merge one or more meta[name=viewport] tags into one.
+			$parsed_rules = [];
+
+			/**
+			 * Meta viewport element.
+			 *
+			 * @var DOMElement $meta_viewport
+			 */
+			foreach ( $this->meta_tags[ self::TAG_VIEWPORT ] as $meta_viewport ) {
+				$property_pairs = explode( ',', $meta_viewport->getAttribute( 'content' ) );
+				foreach ( $property_pairs as $property_pair ) {
+					$exploded_pair = explode( '=', $property_pair, 2 );
+					if ( isset( $exploded_pair[1] ) ) {
+						$parsed_rules[ trim( $exploded_pair[0] ) ] = trim( $exploded_pair[1] );
+					}
+				}
+			}
+
+			$viewport_value = implode(
+				',',
+				array_map(
+					static function ( $rule_name ) use ( $parsed_rules ) {
+						return $rule_name . '=' . $parsed_rules[ $rule_name ];
+					},
+					array_keys( $parsed_rules )
+				)
+			);
+
+			$this->meta_tags[ self::TAG_VIEWPORT ] = [ $this->create_viewport_element( $viewport_value ) ];
 		}
 	}
 

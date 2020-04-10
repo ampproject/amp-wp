@@ -814,6 +814,7 @@ class AMP_Validation_Manager {
 			foreach ( AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $validation_status_post ) as $result ) {
 				$field['results'][] = [
 					'sanitized'   => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS === $result['status'],
+					'title'       => AMP_Validation_Error_Taxonomy::get_error_title_from_code( $result['data'] ),
 					'error'       => $result['data'],
 					'status'      => $result['status'],
 					'term_status' => $result['term_status'],
@@ -1859,6 +1860,32 @@ class AMP_Validation_Manager {
 	}
 
 	/**
+	 * Remove source stack comments which appear inside of script and style tags.
+	 *
+	 * HTML comments that appear inside of script and style elements get parsed as text content. AMP does not allow
+	 * such HTML comments to appear inside of CDATA, resulting in validation errors to be emitted when validating a
+	 * page that happens to have source stack comments output when generating JSON data (e.g. All in One SEO).
+	 * Additionally, when source stack comments are output inside of style elements the result can either be CSS
+	 * parse errors or incorrect stylesheet sizes being reported due to the presence of the source stack comments.
+	 * So to prevent these issues from occurring, the source stack comments need to be removed from the document prior
+	 * to sanitizing.
+	 *
+	 * @since 1.5
+	 *
+	 * @param Document $dom Document.
+	 */
+	public static function remove_illegal_source_stack_comments( Document $dom ) {
+		/**
+		 * Script element.
+		 *
+		 * @var DOMText $text
+		 */
+		foreach ( $dom->xpath->query( '//text()[ contains( ., "<!--amp-source-stack" ) ][ parent::script or parent::style ]' ) as $text ) {
+			$text->nodeValue = preg_replace( '#<!--/?amp-source-stack.*?-->#s', '', $text->nodeValue );
+		}
+	}
+
+	/**
 	 * Finalize validation.
 	 *
 	 * @see AMP_Validation_Manager::add_admin_bar_menu_items()
@@ -2016,7 +2043,7 @@ class AMP_Validation_Manager {
 				$validation_url,
 				[
 					'cookies'     => wp_unslash( $_COOKIE ), // Pass along cookies so private pages and drafts can be accessed.
-					'timeout'     => 15, // Increase from default of 5 to give extra time for the plugin to identify the sources for any given validation errors; also, response caching is disabled when validating.
+					'timeout'     => 15, // Increase from default of 5 to give extra time for the plugin to identify the sources for any given validation errors.
 					'sslverify'   => false,
 					'redirection' => 0, // Because we're in a loop for redirection.
 					'headers'     => [
@@ -2050,7 +2077,7 @@ class AMP_Validation_Manager {
 				break;
 			}
 
-			$validation_url = $location_header;
+			$validation_url = add_query_arg( $added_query_vars, $location_header );
 		}
 
 		if ( is_wp_error( $r ) ) {

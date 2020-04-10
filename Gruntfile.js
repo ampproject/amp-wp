@@ -39,7 +39,9 @@ module.exports = function( grunt ) {
 		'vendor/*/*/*.yml',
 		'vendor/*/*/.*.yml',
 		'vendor/*/*/tests',
+		'vendor/ampproject/common/phpstan.neon.dist',
 		'vendor/ampproject/optimizer/bin',
+		'vendor/ampproject/optimizer/phpstan.neon.dist',
 		'vendor/bin',
 	];
 

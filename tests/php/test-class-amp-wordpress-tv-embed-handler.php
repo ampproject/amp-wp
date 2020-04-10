@@ -6,6 +6,8 @@
  * @since 1.4
  */
 
+use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+
 /**
  * Tests for AMP_WordPress_TV_Embed_Handler.
  *
@@ -13,6 +15,8 @@
  * @covers AMP_WordPress_TV_Embed_Handler
  */
 class Test_AMP_WordPress_TV_Embed_Handler extends WP_UnitTestCase {
+
+	use AssertContainsCompatibility;
 
 	/**
 	 * Set up.
@@ -40,7 +44,7 @@ class Test_AMP_WordPress_TV_Embed_Handler extends WP_UnitTestCase {
 		}
 		unset( $r );
 		return [
-			'body'          => '{"type":"video","version":"1.0","title":null,"width":500,"height":281,"html":"<iframe width=\'500\' height=\'281\' src=\'https:\\/\\/videopress.com\\/embed\\/yFCmLMGL?hd=0\' frameborder=\'0\' allowfullscreen><\\/iframe><script src=\'https:\\/\\/v0.wordpress.com\\/js\\/next\\/videopress-iframe.js?m=1435166243\'></script>"}', // phpcs:ignore
+			'body'          => '{"type":"video","version":"1.0","title":null,"width":500,"height":281,"html":"<iframe width=\'500\' height=\'281\' src=\'https:\\/\\/video.wordpress.com\\/embed\\/yFCmLMGL?hd=0\' frameborder=\'0\' allowfullscreen><\\/iframe><script src=\'https:\\/\\/v0.wordpress.com\\/js\\/next\\/videopress-iframe.js?m=1435166243\'></script>"}', // phpcs:ignore
 			'headers'       => [],
 			'response'      => [
 				'code'    => 200,
@@ -72,9 +76,9 @@ class Test_AMP_WordPress_TV_Embed_Handler extends WP_UnitTestCase {
 
 		$handler->register_embed();
 		$rendered = apply_filters( 'the_content', $wordpress_tv_block );
-		$this->assertContains( '<iframe', $rendered );
-		$this->assertContains( 'videopress.com/embed', $rendered );
-		$this->assertNotContains( '<script', $rendered );
+		$this->assertStringContains( '<iframe', $rendered );
+		$this->assertStringContains( 'video.wordpress.com/embed', $rendered );
+		$this->assertStringNotContains( '<script', $rendered );
 	}
 
 	/**

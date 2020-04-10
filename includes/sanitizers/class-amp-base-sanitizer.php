@@ -474,6 +474,11 @@ abstract class AMP_Base_Sanitizer {
 
 		$should_remove = $this->should_sanitize_validation_error( $validation_error, compact( 'node' ) );
 		if ( $should_remove ) {
+			if ( null === $node->parentNode ) {
+				// Node no longer exists.
+				return $should_remove;
+			}
+
 			$node->parentNode->removeChild( $node );
 		} else {
 			$this->nodes_to_keep[ $node->nodeName ][] = $node;
@@ -616,6 +621,10 @@ abstract class AMP_Base_Sanitizer {
 			}
 		} elseif ( $node instanceof DOMProcessingInstruction ) {
 			$error['text'] = trim( $node->data, '?' );
+		}
+
+		if ( ! isset( $error['node_type'] ) ) {
+			$error['node_type'] = $node->nodeType;
 		}
 
 		return $error;

@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 use AmpProject\Dom\Document;
 use AmpProject\AmpWP\Tests\PrivateAccess;
 
@@ -13,6 +14,7 @@ use AmpProject\AmpWP\Tests\PrivateAccess;
  */
 class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 
+	use AssertContainsCompatibility;
 	use PrivateAccess;
 
 	/**
@@ -165,21 +167,6 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test get_acceptable_errors().
-	 *
-	 * @covers AMP_Core_Theme_Sanitizer::get_acceptable_errors()
-	 *
-	 * @dataProvider get_templates
-	 *
-	 * @param string $template Template name.
-	 * @param array $expected Expected acceptable errors.
-	 */
-	public function test_get_acceptable_errors( $template, $expected ) {
-		$actual = AMP_Core_Theme_Sanitizer::get_acceptable_errors( $template );
-		$this->assertEquals( $expected, $actual );
-	}
-
-	/**
 	 * Test add_has_header_video_body_class().
 	 *
 	 * @covers AMP_Core_Theme_Sanitizer::add_has_header_video_body_class()
@@ -252,5 +239,39 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 		$actual    = $this->call_private_method( $sanitizer, 'guess_modal_role', [ $dom_element ] );
 
 		$this->assertEquals( $expected, $actual );
+	}
+
+	/**
+	 * Tests add_img_display_block_fix.
+	 *
+	 * @covers AMP_Core_Theme_Sanitizer::add_img_display_block_fix()
+	 */
+	public function test_add_img_display_block_fix() {
+		AMP_Core_Theme_Sanitizer::add_img_display_block_fix();
+		ob_start();
+		wp_print_styles();
+		$output = ob_get_clean();
+		$this->assertRegExp( '/amp-img.+display.+block/s', $output );
+	}
+
+	/**
+	 * Tests add_twentytwenty_custom_logo_fix.
+	 *
+	 * @covers AMP_Core_Theme_Sanitizer::add_twentytwenty_custom_logo_fix()
+	 */
+	public function test_add_twentytwenty_custom_logo_fix() {
+		add_filter(
+			'get_custom_logo',
+			static function () {
+				return '<img src="https://example.com/logo.jpg" width="100" height="200">';
+			}
+		);
+
+		AMP_Core_Theme_Sanitizer::add_twentytwenty_custom_logo_fix();
+		$logo = get_custom_logo();
+
+		$needle = '.site-logo amp-img { width: 3.000000rem; } @media (min-width: 700px) { .site-logo amp-img { width: 4.500000rem; } }';
+
+		$this->assertStringContains( $needle, $logo );
 	}
 }

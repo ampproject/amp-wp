@@ -91,6 +91,15 @@
 		<include-pattern>src/*</include-pattern>
 	</rule>
 
+	<!-- Limit max. consecutive blank lines to 1 instead of 2. -->
+	<rule ref="Squiz.WhiteSpace.FunctionSpacing">
+		<properties>
+			<property name="spacing" value="1"/>
+			<property name="spacingBeforeFirst" value="1"/>
+			<property name="spacingAfterLast" value="0"/>
+		</properties>
+	</rule>
+
 	<!-- Include sniffs for PHP cross-version compatibility. -->
 	<config name="testVersion" value="5.6-"/>
 	<rule ref="PHPCompatibilityWP">

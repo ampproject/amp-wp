@@ -27,7 +27,6 @@ use AmpProject\Dom\Document;
 class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 	const DISALLOWED_TAG                       = 'DISALLOWED_TAG';
-	const DISALLOWED_TAG_MULTIPLE_CHOICES      = 'DISALLOWED_TAG_MULTIPLE_CHOICES';
 	const DISALLOWED_CHILD_TAG                 = 'DISALLOWED_CHILD_TAG';
 	const DISALLOWED_FIRST_CHILD_TAG           = 'DISALLOWED_FIRST_CHILD_TAG';
 	const INCORRECT_NUM_CHILD_TAGS             = 'INCORRECT_NUM_CHILD_TAGS';
@@ -58,7 +57,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	const INVALID_URL_PROTOCOL                 = 'INVALID_URL_PROTOCOL';
 	const INVALID_URL                          = 'INVALID_URL';
 	const DISALLOWED_RELATIVE_URL              = 'DISALLOWED_RELATIVE_URL';
-	const DISALLOWED_EMPTY_URL                 = 'DISALLOWED_EMPTY_URL';
+	const MISSING_URL                          = 'MISSING_URL';
 	const INVALID_BLACKLISTED_VALUE_REGEX      = 'INVALID_BLACKLISTED_VALUE_REGEX';
 	const DISALLOWED_PROPERTY_IN_ATTR_VALUE    = 'DISALLOWED_PROPERTY_IN_ATTR_VALUE';
 	const MISSING_MANDATORY_PROPERTY           = 'MISSING_MANDATORY_PROPERTY';
@@ -339,6 +338,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		// ancestor nodes in AMP_Tag_And_Attribute_Sanitizer::remove_node().
 		$this_child = $element->firstChild;
 		while ( $this_child && $element->parentNode ) {
+			$prev_child = $this_child->previousSibling;
 			$next_child = $this_child->nextSibling;
 			if ( $this_child instanceof DOMElement ) {
 				$result = $this->sanitize_element( $this_child );
@@ -351,7 +351,13 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			} elseif ( $this_child instanceof DOMProcessingInstruction ) {
 				$this->remove_invalid_child( $this_child, [ 'code' => self::DISALLOWED_PROCESSING_INSTRUCTION ] );
 			}
-			$this_child = $next_child;
+
+			if ( ! $this_child->parentNode ) {
+				// Handle case where this child is replaced with children.
+				$this_child = $prev_child ? $prev_child->nextSibling : $element->firstChild;
+			} else {
+				$this_child = $next_child;
+			}
 		}
 
 		// If the element is still in the tree, process it.
@@ -505,7 +511,15 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					array_unique(
 						array_map(
 							static function ( $validation_error ) {
-								unset( $validation_error['spec_name'] );
+								unset(
+									$validation_error['spec_name'],
+									// Remove other keys that may make the error unique.
+									$validation_error['required_parent_name'],
+									$validation_error['required_ancestor_name'],
+									$validation_error['required_child_count'],
+									$validation_error['required_min_child_count'],
+									$validation_error['required_attr_value']
+								);
 								return $validation_error;
 							},
 							$validation_errors
@@ -527,13 +541,11 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					);
 				} else {
 					// Otherwise, we have a rare condition where multiple tag specs fail for different reasons.
-					$this->remove_invalid_child(
-						$node,
-						[
-							'code'   => self::DISALLOWED_TAG_MULTIPLE_CHOICES,
-							'errors' => $validation_errors,
-						]
-					);
+					foreach ( $validation_errors as $validation_error ) {
+						if ( true === $this->remove_invalid_child( $node, $validation_error ) ) {
+							break; // Once removed, ignore remaining errors.
+						}
+					}
 				}
 			}
 			return null;
@@ -931,7 +943,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// When the CDATA is expected to be JSON, ensure it's valid JSON.
-		if ( 'script' === $element->nodeName && in_array( $element->getAttribute( 'type' ), [ 'application/json', 'application/ld+json' ], true ) ) {
+		if ( 'script' === $element->nodeName && 'application/json' === $element->getAttribute( 'type' ) ) {
 			if ( '' === trim( $element->textContent ) ) {
 				return [ 'code' => self::JSON_ERROR_EMPTY ];
 			}
@@ -993,14 +1005,16 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		if ( ! empty( $tag_spec[ AMP_Rule_Spec::MANDATORY_PARENT ] ) && ! $this->has_parent( $node, $tag_spec[ AMP_Rule_Spec::MANDATORY_PARENT ] ) ) {
 			return [
-				'code' => self::WRONG_PARENT_TAG,
+				'code'                 => self::WRONG_PARENT_TAG,
+				'required_parent_name' => $tag_spec[ AMP_Rule_Spec::MANDATORY_PARENT ],
 			];
 		}
 
 		// Extension scripts must be in the head. Note this currently never fails because all AMP scripts are moved to the head before sanitization.
 		if ( isset( $tag_spec['extension_spec'] ) && ! $this->has_parent( $node, 'head' ) ) {
 			return [
-				'code' => self::WRONG_PARENT_TAG,
+				'code'                 => self::WRONG_PARENT_TAG,
+				'required_parent_name' => 'head',
 			];
 		}
 
@@ -1017,7 +1031,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		if ( ! empty( $tag_spec[ AMP_Rule_Spec::MANDATORY_ANCESTOR ] ) && ! $this->has_ancestor( $node, $tag_spec[ AMP_Rule_Spec::MANDATORY_ANCESTOR ] ) ) {
 			return [
-				'code' => self::MANDATORY_TAG_ANCESTOR,
+				'code'                   => self::MANDATORY_TAG_ANCESTOR,
+				'required_ancestor_name' => $tag_spec[ AMP_Rule_Spec::MANDATORY_ANCESTOR ],
 			];
 		}
 
@@ -1275,9 +1290,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_valid_url( $node, $attr_name, $attr_spec_rule ) ) {
 				$attrs_to_remove[] = [ $attr_node, self::INVALID_URL, null ];
-			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] ) &&
+			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_disallowed_empty( $node, $attr_name, $attr_spec_rule ) ) {
-				$attrs_to_remove[] = [ $attr_node, self::DISALLOWED_EMPTY_URL, null ];
+				$attrs_to_remove[] = [ $attr_node, self::MISSING_URL, null ];
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_RELATIVE ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_disallowed_relative( $node, $attr_name, $attr_spec_rule ) ) {
 				$attrs_to_remove[] = [ $attr_node, self::DISALLOWED_RELATIVE_URL, null ];
@@ -1334,11 +1349,17 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		$input_height->validate( $allow_auto, $allow_fluid );
 
 		if ( ! $input_width->isValid() ) {
-			return [ 'code' => self::INVALID_LAYOUT_WIDTH ];
+			return [
+				'code'      => self::INVALID_LAYOUT_WIDTH,
+				'attribute' => 'width',
+			];
 		}
 
 		if ( ! $input_height->isValid() ) {
-			return [ 'code' => self::INVALID_LAYOUT_HEIGHT ];
+			return [
+				'code'      => self::INVALID_LAYOUT_HEIGHT,
+				'attribute' => 'height',
+			];
 		}
 
 		// No need to go further if there is no layout attribute.
@@ -1356,7 +1377,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Only FLEX_ITEM allows for height to be set to auto.
 		if ( $height->isAuto() && AMP_Rule_Spec::LAYOUT_FLEX_ITEM !== $layout ) {
-			return [ 'code' => self::INVALID_LAYOUT_AUTO_HEIGHT ];
+			return [
+				'code'      => self::INVALID_LAYOUT_AUTO_HEIGHT,
+				'attribute' => 'height',
+			];
 		}
 
 		// FIXED, FIXED_HEIGHT, INTRINSIC, RESPONSIVE must have height set.
@@ -1369,12 +1393,19 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			) &&
 			! $height->isDefined()
 		) {
-			return [ 'code' => self::INVALID_LAYOUT_NO_HEIGHT ];
+			return [
+				'code'      => self::INVALID_LAYOUT_NO_HEIGHT,
+				'attribute' => 'height',
+			];
 		}
 
 		// For FIXED_HEIGHT if width is set it must be auto.
 		if ( AMP_Rule_Spec::LAYOUT_FIXED_HEIGHT === $layout && $width->isDefined() && ! $width->isAuto() ) {
-			return [ 'code' => self::INVALID_LAYOUT_FIXED_HEIGHT ];
+			return [
+				'code'                => self::INVALID_LAYOUT_FIXED_HEIGHT,
+				'attribute'           => 'width',
+				'required_attr_value' => 'auto',
+			];
 		}
 
 		// FIXED, INTRINSIC, RESPONSIVE must have width set and not be auto.
@@ -1384,7 +1415,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			AMP_Rule_Spec::LAYOUT_RESPONSIVE === $layout
 		) {
 			if ( ! $width->isDefined() || $width->isAuto() ) {
-				return [ 'code' => self::INVALID_LAYOUT_AUTO_WIDTH ];
+				return [
+					'code'      => self::INVALID_LAYOUT_AUTO_WIDTH,
+					'attribute' => 'width',
+				];
 			}
 		}
 
@@ -1401,7 +1435,11 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Heights attribute is only allowed for RESPONSIVE layout.
 		if ( ! $this->is_empty_attribute_value( $heights_attr ) && AMP_Rule_Spec::LAYOUT_RESPONSIVE !== $layout ) {
-			return [ 'code' => self::INVALID_LAYOUT_HEIGHTS ];
+			return [
+				'code'                => self::INVALID_LAYOUT_HEIGHTS,
+				'attribute'           => 'layout',
+				'required_attr_value' => 'responsive',
+			];
 		}
 
 		return true;
@@ -1973,7 +2011,12 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *                                        is no rule for this attribute.
 	 */
 	private function check_attr_spec_rule_disallowed_empty( DOMElement $node, $attr_name, $attr_spec_rule ) {
-		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] ) && ! $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] && $node->hasAttribute( $attr_name ) ) {
+		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] ) ) {
+			$allow_empty = $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ];
+		} else {
+			$allow_empty = empty( $attr_spec_rule[ AMP_Rule_Spec::MANDATORY ] );
+		}
+		if ( ! $allow_empty && $node->hasAttribute( $attr_name ) ) {
 			$attr_value = $node->getAttribute( $attr_name );
 			if ( empty( $attr_value ) ) {
 				return AMP_Rule_Spec::FAIL;
@@ -2061,7 +2104,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			)
 		);
 	}
-
 
 	/**
 	 * Check if attribute has valid properties.
@@ -2224,7 +2266,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 0.5
 	 *
-	 * @todo It would be more robust if the the actual tag spec were looked up and then matched against the parent, but this is currently overkill.
+	 * @todo It would be more robust if the the actual tag spec were looked up (see https://github.com/ampproject/amp-wp/pull/3817) and then matched against the parent. This is needed to support the spec 'subscriptions script ciphertext'.
 	 *
 	 * @param DOMElement $node             Node.
 	 * @param string     $parent_spec_name Parent spec name, for example 'body' or 'form [method=post]'.
@@ -2336,6 +2378,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					[
 						'code'                => self::DISALLOWED_DESCENDANT_TAG,
 						'allowed_descendants' => $allowed_descendants,
+						'disallowed_ancestor' => $node->parentNode->nodeName,
 						'spec_name'           => $spec_name,
 					]
 				);
@@ -2395,8 +2438,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				return true;
 			} else {
 				return [
-					'code'           => self::INCORRECT_NUM_CHILD_TAGS,
-					'children_count' => $child_element_count,
+					'code'                 => self::INCORRECT_NUM_CHILD_TAGS,
+					'children_count'       => $child_element_count,
+					'required_child_count' => $child_tags['mandatory_num_child_tags'],
 				];
 			}
 		}
@@ -2408,8 +2452,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				return true;
 			} else {
 				return [
-					'code'           => self::INCORRECT_MIN_NUM_CHILD_TAGS,
-					'children_count' => $child_element_count,
+					'code'                     => self::INCORRECT_MIN_NUM_CHILD_TAGS,
+					'children_count'           => $child_element_count,
+					'required_min_child_count' => $child_tags['mandatory_min_num_child_tags'],
 				];
 			}
 		}

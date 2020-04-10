@@ -7,14 +7,21 @@
 
 // phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
 
+use AmpProject\AmpWP\RemoteRequest\CachedResponse;
+use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
+use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\MarkupComparison;
 use AmpProject\Dom\Document;
 use AmpProject\AmpWP\Tests\PrivateAccess;
+use AmpProject\Exception\FailedToGetFromRemoteUrl;
 
 /**
  * Test AMP_Style_Sanitizer.
  */
 class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
+	use AssertContainsCompatibility;
+	use MarkupComparison;
 	use PrivateAccess;
 
 	/**
@@ -162,11 +169,11 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 			'illegal_at_rules_removed' => [
 				'<style>@charset "utf-8"; @namespace svg url(http://www.w3.org/2000/svg); @page { margin: 1cm; } @viewport { width: device-width; } @counter-style thumbs { system: cyclic; symbols: "\1F44D"; suffix: " "; } body { color: black; }</style>',
-				'',
+				'<meta name="viewport" content="width=device-width">',
 				[
 					'@page{margin:1cm}body{color:black}',
 				],
-				[ AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE, AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE, AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE ],
+				[ AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE, AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE ],
 			],
 
 			'allowed_at_rules_retained' => [
@@ -576,6 +583,76 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				[],
 				[],
 			],
+			'amp_experiment' => [
+				'
+					<html amp>
+					<head>
+						<style>
+							body[amp-x-button-color-experiment="0"] .button-color-experiment {
+								color: red;
+							}
+						</style>
+						<style>
+							body[amp-x-button-color-experiment="1"] .button-color-experiment {
+								color: green;
+							}
+						</style>
+						<style>
+							body[amp-x-button-color-experiment="2"] .button-color-experiment {
+								color: blue;
+							}
+						</style>
+					</head>
+					<body>
+						<amp-experiment>
+							<script type="application/json">
+								{
+									"button-color-experiment": {
+										"variants": {
+											"0": 30,
+											"1": 30,
+											"2": 30
+										}
+									}
+								}
+							</script>
+						</amp-experiment>
+
+						<button class="button-color-experiment">Click here</button>
+					</body>
+					</html>
+				',
+				[
+					'body[amp-x-button-color-experiment="0"] .button-color-experiment{color:red}',
+					'body[amp-x-button-color-experiment="1"] .button-color-experiment{color:green}',
+					'body[amp-x-button-color-experiment="2"] .button-color-experiment{color:blue}',
+				],
+				[],
+			],
+			'classes_in_mustache_template' => [
+				'
+				<html>
+					<head>
+					</head>
+					<body>
+						<style>
+							h2.one { color: green }
+							h2.two { color: red }
+						</style>
+						<template type="amp-mustache">
+							<h2 class="one">One</h2>
+						</template>
+						<script type="text/plain" template="amp-mustache">
+							<h2 class="two">Two</h2>
+						</script>
+					</body>
+				</html>
+				',
+				[
+					'h2.one{color:green}h2.two{color:red}',
+				],
+				[],
+			],
 		];
 	}
 
@@ -638,15 +715,15 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			}
 
 			if ( false === strpos( $expected_stylesheet, '{' ) ) {
-				$this->assertContains( $expected_stylesheet, $actual_stylesheets[ $i ] );
+				$this->assertStringContains( $expected_stylesheet, $actual_stylesheets[ $i ] );
 			} else {
 				$this->assertEquals( $expected_stylesheet, $actual_stylesheets[ $i ] );
 			}
-			$this->assertContains( $expected_stylesheet, $sanitized_html );
+			$this->assertStringContains( $expected_stylesheet, $sanitized_html );
 		}
 
 		if ( $actual_stylesheets ) {
-			$this->assertContains( "\n\n/*# sourceURL=amp-custom.css */", $sanitized_html );
+			$this->assertStringContains( "\n\n/*# sourceURL=amp-custom.css */", $sanitized_html );
 		}
 	}
 
@@ -657,6 +734,46 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function get_amp_selector_data() {
 		return [
+			'amp-date-picker-allowed-child-class-not-tree-shaken' => [
+				'<div><amp-date-picker id="baz" type="single" mode="overlay" layout="container" format="YYYY-MM-DD" src="/example.json" input-selector="#src-input"></amp-date-picker></div>',
+				'amp-date-picker .CalendarMonth_caption{border-bottom: 10px} div amp-date-picker .amp-date-picker-selecting{margin-right:10px}',
+				'amp-date-picker .CalendarMonth_caption{border-bottom:10px}div amp-date-picker .amp-date-picker-selecting{margin-right:10px}', // This class is an allowed child, so it shouldn't be removed.
+			],
+			'amp-date-picker-single-allowed-child-class-not-tree-shaken' => [
+				'<div><amp-date-picker id="baz" type="single" mode="overlay" layout="container" format="YYYY-MM-DD" src="/example.json" input-selector="#src-input"></amp-date-picker></div>',
+				'.DayPicker_weekHeaders {border-bottom: 10px}',
+				'.DayPicker_weekHeaders{border-bottom:10px}',
+			],
+			'amp-date-picker-allowed-container-child-class-not-tree-shaken' => [
+				'<div><amp-date-picker id="baz" type="single" mode="overlay" layout="container" format="YYYY-MM-DD" src="/example.json" input-selector="#src-input"></amp-date-picker></div>',
+				'amp-date-picker .amp-date-picker-calendar-container{border-bottom: 10px} div amp-date-picker .amp-date-picker-selecting{margin-right:10px}',
+				'amp-date-picker .amp-date-picker-calendar-container{border-bottom:10px}div amp-date-picker .amp-date-picker-selecting{margin-right:10px}',
+			],
+			'valid-class-wrapping-amp-date-picker-not-tree-shaken' => [
+				'<div class="foo-baz"><amp-date-picker id="baz" type="single" mode="overlay" layout="container" format="YYYY-MM-DD" src="/example.json" input-selector="#src-input"></amp-date-picker></div>',
+				'.foo-baz amp-date-picker .CalendarMonth_caption{border-bottom: 10px} div amp-date-picker .amp-date-picker-selecting{margin-right:10px}',
+				'.foo-baz amp-date-picker .CalendarMonth_caption{border-bottom:10px}div amp-date-picker .amp-date-picker-selecting{margin-right:10px}',
+			],
+			'amp-date-picker-valid-child-tree-shaken-if-component-not-in-document' => [
+				'<div><span>AMP Date Picker Not Present</span></div>',
+				'amp-date-picker .CalendarMonth_caption{border-bottom: 10px}',
+				'',
+			],
+			'amp-date-picker-similar-disallowed-child-class-tree-shaken' => [
+				'<div><amp-date-picker id="baz" type="single" mode="overlay" layout="container" format="YYYY-MM-DD" src="/example.json" input-selector="#src-input"></amp-date-picker></div>',
+				'amp-date-picker .CalendarFoo {border-bottom: 10px}',
+				'',
+			],
+			'amp-date-picker-disallowed-child-class-tree-shaken' => [
+				'<div><amp-date-picker id="baz" type="single" mode="overlay" layout="container" format="YYYY-MM-DD" src="/example.json" input-selector="#src-input"></amp-date-picker></div>',
+				'amp-date-picker .random-class{border-bottom: 10px}',
+				'',
+			],
+			'amp-date-picker-non-children-tree-shaken' => [
+				'<div><amp-date-picker id="example" type="single" mode="static" layout="fixed-height" height="150" format="YYYY-MM-DD"></amp-date-picker></div>',
+				'amp-date-picker .CalendarMonth_caption{border-bottom: 10px} .unrelated{color:#fff}',
+				'amp-date-picker .CalendarMonth_caption{border-bottom:10px}', // Non-children of the amp-date-picker should still be tree-shaken if they're not in the DOM.
+			],
 			'img' => [
 				sprintf( '<div><img class="logo" src="%s" width="200" height="100"></div>', admin_url( 'images/wordpress-logo.png' ) ),
 				'div img.logo{border:solid 1px red}',
@@ -1157,11 +1274,11 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertEquals( [], $error_codes );
 		$actual_stylesheets = array_values( $sanitizer->get_stylesheets() );
 		$this->assertCount( 1, $actual_stylesheets );
-		$this->assertContains( 'dashicons.woff") format("woff")', $actual_stylesheets[0] );
-		$this->assertNotContains( 'data:application/font-woff;', $actual_stylesheets[0] );
-		$this->assertContains( '.dashicons{', $actual_stylesheets[0] );
-		$this->assertContains( '.dashicons-admin-appearance:before{', $actual_stylesheets[0] );
-		$this->assertNotContains( '.dashicons-format-chat:before', $actual_stylesheets[0] );
+		$this->assertStringContains( 'dashicons.woff") format("woff")', $actual_stylesheets[0] );
+		$this->assertStringNotContains( 'data:application/font-woff;', $actual_stylesheets[0] );
+		$this->assertStringContains( '.dashicons{', $actual_stylesheets[0] );
+		$this->assertStringContains( '.dashicons-admin-appearance:before{', $actual_stylesheets[0] );
+		$this->assertStringNotContains( '.dashicons-format-chat:before', $actual_stylesheets[0] );
 	}
 
 	/**
@@ -1199,26 +1316,26 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertCount( 3, $actual_stylesheets );
 
 		// Check font included in theme.
-		$this->assertContains( '@font-face{font-family:"NonBreakingSpaceOverride";', $actual_stylesheets[0] );
-		$this->assertContains( 'format("woff2")', $actual_stylesheets[0] );
-		$this->assertContains( 'format("woff")', $actual_stylesheets[0] );
-		$this->assertNotContains( 'data:', $actual_stylesheets[0] );
-		$this->assertContains( 'fonts/NonBreakingSpaceOverride.woff2', $actual_stylesheets[0] );
-		$this->assertContains( 'fonts/NonBreakingSpaceOverride.woff', $actual_stylesheets[0] );
-		$this->assertContains( 'font-display:swap', $actual_stylesheets[0] );
+		$this->assertStringContains( '@font-face{font-family:"NonBreakingSpaceOverride";', $actual_stylesheets[0] );
+		$this->assertStringContains( 'format("woff2")', $actual_stylesheets[0] );
+		$this->assertStringContains( 'format("woff")', $actual_stylesheets[0] );
+		$this->assertStringNotContains( 'data:', $actual_stylesheets[0] );
+		$this->assertStringContains( 'fonts/NonBreakingSpaceOverride.woff2', $actual_stylesheets[0] );
+		$this->assertStringContains( 'fonts/NonBreakingSpaceOverride.woff', $actual_stylesheets[0] );
+		$this->assertStringContains( 'font-display:swap', $actual_stylesheets[0] );
 
 		// Check font not included in theme, but included in plugin.
-		$this->assertContains( '@font-face{font-family:"Genericons";', $actual_stylesheets[1] );
-		$this->assertContains( 'format("woff")', $actual_stylesheets[1] );
-		$this->assertNotContains( 'data:', $actual_stylesheets[1] );
-		$this->assertContains( 'assets/fonts/genericons.woff', $actual_stylesheets[1] );
-		$this->assertContains( 'font-display:swap', $actual_stylesheets[1] );
+		$this->assertStringContains( '@font-face{font-family:"Genericons";', $actual_stylesheets[1] );
+		$this->assertStringContains( 'format("woff")', $actual_stylesheets[1] );
+		$this->assertStringNotContains( 'data:', $actual_stylesheets[1] );
+		$this->assertStringContains( 'assets/fonts/genericons.woff', $actual_stylesheets[1] );
+		$this->assertStringContains( 'font-display:swap', $actual_stylesheets[1] );
 
 		// Check font not included anywhere, so must remain inline.
-		$this->assertContains( '@font-face{font-family:"Custom";', $actual_stylesheets[2] );
-		$this->assertContains( 'url("data:application/x-font-woff;charset=utf-8;base64,d09GRgABAAA")', $actual_stylesheets[2] );
-		$this->assertContains( 'format("woff")', $actual_stylesheets[2] );
-		$this->assertNotContains( 'font-display:swap', $actual_stylesheets[2] );
+		$this->assertStringContains( '@font-face{font-family:"Custom";', $actual_stylesheets[2] );
+		$this->assertStringContains( 'url("data:application/x-font-woff;charset=utf-8;base64,d09GRgABAAA")', $actual_stylesheets[2] );
+		$this->assertStringContains( 'format("woff")', $actual_stylesheets[2] );
+		$this->assertStringNotContains( 'font-display:swap', $actual_stylesheets[2] );
 	}
 
 	/**
@@ -1373,8 +1490,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertCount( 1, $actual_stylesheets );
 		$stylesheet = $actual_stylesheets[0];
 
-		$this->assertNotContains( '../images/spinner', $stylesheet );
-		$this->assertContains( sprintf( '.spinner{background-image:url("%s")', admin_url( 'images/spinner-2x.gif' ) ), $stylesheet );
+		$this->assertStringNotContains( '../images/spinner', $stylesheet );
+		$this->assertStringContains( sprintf( '.spinner{background-image:url("%s")', admin_url( 'images/spinner-2x.gif' ) ), $stylesheet );
 	}
 
 	/**
@@ -1484,6 +1601,229 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		}
 
 		$sanitize_and_get_stylesheets();
+		$this->assertEquals( 1, $request_count, 'Expected HTTP request to be cached.' );
+	}
+
+	/**
+	 * Test cache-control support when retrieving external stylesheets.
+	 *
+	 * @covers AMP_Style_Sanitizer::process_link_element()
+	 */
+	public function test_external_stylesheet_cache_control() {
+		$request_count = 0;
+		$href          = 'https://www.example.com/styles.css';
+		$response_body = 'body{color:red}';
+		$headers       = [
+			'content-type'  => 'text/css',
+			'cache-control' => 'max-age=' . ( YEAR_IN_SECONDS + MONTH_IN_SECONDS ),
+		];
+		$status_code   = 200;
+
+		add_filter(
+			'pre_http_request',
+			function( $preempt, $request, $url ) use ( $href, &$request_count, $response_body, $headers, $status_code ) {
+				$this->assertRegExp( '#^https?://#', $url );
+				if ( set_url_scheme( $url, 'https' ) === set_url_scheme( $href, 'https' ) ) {
+					$request_count++;
+					$preempt = [
+						'response' => [
+							'code' => $status_code,
+						],
+						'headers'  => $headers,
+						'body'     => $response_body,
+					];
+				}
+				return $preempt;
+			},
+			10,
+			3
+		);
+
+		$sanitize_and_get_stylesheets = static function() use ( $href ) {
+			$html = sprintf( '<html amp><head><meta charset="utf-8"><link rel="stylesheet" href="%s"></head><body></body></html>', esc_url( $href ) ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+			$dom  = Document::fromHtml( $html );
+
+			$found_error_codes = [];
+
+			$sanitizer = new AMP_Style_Sanitizer(
+				$dom,
+				[
+					'use_document_element'      => true,
+					'validation_error_callback' => static function( $error ) use ( &$found_error_codes ) {
+						$found_error_codes[] = $error['code'];
+					},
+				]
+			);
+			$sanitizer->sanitize();
+			$dom->saveHTML( $dom->documentElement );
+			return [ $found_error_codes, array_values( $sanitizer->get_stylesheets() ) ];
+		};
+
+		$this->assertEquals( 0, $request_count );
+
+		list( $found_error_codes, $actual_stylesheets ) = $sanitize_and_get_stylesheets();
+		$this->assertEmpty( $found_error_codes );
+		$this->assertEquals( 1, $request_count, 'Expected HTTP request.' );
+
+		$this->assertCount( 1, $actual_stylesheets );
+		$this->assertEquals( $response_body, $actual_stylesheets[0] );
+
+		$cache_key = CachedRemoteGetRequest::TRANSIENT_PREFIX . md5( CachedRemoteGetRequest::class . $href );
+		$transient = get_transient( $cache_key );
+		$this->assertNotFalse( $transient );
+
+		/**
+		 * Cached response.
+		 *
+		 * @var CachedResponse
+		 */
+		$cached_response = unserialize( $transient ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize
+		$this->assertInstanceOf( CachedResponse::class, $cached_response );
+
+		$this->assertEquals( $response_body, $cached_response->get_body() );
+		$this->assertEquals( $headers, $cached_response->get_headers() );
+		$this->assertEquals( $status_code, $cached_response->get_status_code() );
+
+		$expiry = $cached_response->get_expiry();
+		$this->assertGreaterThan( ( new DateTimeImmutable( '+ 1 year' ) )->getTimestamp(), $expiry->getTimestamp() );
+
+		$sanitize_and_get_stylesheets();
+		$this->assertEquals( 1, $request_count, 'Expected HTTP request to be cached.' );
+	}
+
+	/**
+	 * Data for test_external_stylesheet()
+	 *
+	 * @return array
+	 */
+	public function get_external_stylesheet_data() {
+		return [
+			'successful' => [
+				'style_url'     => 'https://www.example.com/styles.css',
+				'http_response' => [
+					'body'    => 'body { color: #fff }',
+					'code'    => 200,
+					'headers' => [
+						'cache-control' => 'max-age=1441',
+						'content-type'  => 'text/css',
+					],
+				],
+				'expected_styles' => [ 'body{color:#fff}' ],
+				'expected_errors' => [],
+				'cached_data'    => new CachedResponse(
+					'body { color: #fff }',
+					[
+						'cache-control' => 'max-age=1441',
+						'content-type'  => 'text/css',
+					],
+					200,
+					new DateTimeImmutable( '+ 1441 seconds' )
+				),
+			],
+			'failed' => [
+				'style_url'     => 'https://www.example.com/not-found/styles.css',
+				'http_response' => [
+					'body'    => 'Not Found!',
+					'code'    => 404,
+					'headers' => [
+						'content-type' => 'text/html',
+					],
+				],
+				'expected_styles' => [],
+				'expected_errors' => [ AMP_Style_Sanitizer::STYLESHEET_FETCH_ERROR ],
+				'cached_data'    => new CachedResponse(
+					FailedToGetFromRemoteUrl::withHttpStatus( 'https://www.example.com/not-found/styles.css', 404 )->getMessage(),
+					[],
+					404,
+					new DateTimeImmutable( '+ ' . DAY_IN_SECONDS . ' seconds' )
+				),
+			],
+		];
+	}
+
+	/**
+	 * Test that external stylesheets fetches are cached.
+	 *
+	 * @dataProvider get_external_stylesheet_data
+	 * @covers AMP_Style_Sanitizer::process_link_element()
+	 *
+	 * @param string         $style_url                Stylesheet URL.
+	 * @param array          $http_response            Mocked HTTP response.
+	 * @param array          $expected_styles          Expected minified stylesheets.
+	 * @param array          $expected_errors          Expected error codes.
+	 * @param CachedResponse $expected_cached_response Expected cache response.
+	 */
+	public function test_external_stylesheet( $style_url, $http_response, $expected_styles, $expected_errors, $expected_cached_response ) {
+		$request_count = 0;
+
+		add_filter(
+			'pre_http_request',
+			function( $preempt, $request, $url ) use ( $style_url, $http_response, &$request_count ) {
+				$this->assertRegExp( '#^https?://#', $url );
+				if ( set_url_scheme( $url, 'https' ) === set_url_scheme( $style_url, 'https' ) ) {
+					$request_count++;
+					$preempt = [
+						'response' => [
+							'code'    => $http_response['code'],
+						],
+						'headers' => $http_response['headers'],
+						'body' => $http_response['body'],
+					];
+				}
+				return $preempt;
+			},
+			10,
+			3
+		);
+
+		$sanitize_and_get_stylesheets = static function( $css_url ) {
+			$html = sprintf( '<html amp><head><meta charset="utf-8"><link rel="stylesheet" href="%s"></head><body></body></html>', esc_url( $css_url ) ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+			$dom  = Document::fromHtml( $html );
+
+			$found_error_codes = [];
+
+			$sanitizer = new AMP_Style_Sanitizer(
+				$dom,
+				[
+					'use_document_element'      => true,
+					'validation_error_callback' => static function( $error ) use ( &$found_error_codes ) {
+						$found_error_codes[] = $error['code'];
+					},
+				]
+			);
+			$sanitizer->sanitize();
+			$dom->saveHTML( $dom->documentElement );
+			return [ $found_error_codes, array_values( $sanitizer->get_stylesheets() ) ];
+		};
+
+		$this->assertEquals( 0, $request_count );
+
+		list( $found_error_codes, $actual_stylesheets ) = $sanitize_and_get_stylesheets( $style_url );
+
+		$this->assertEquals( $expected_errors, $found_error_codes );
+		$this->assertEquals( $expected_styles, $actual_stylesheets );
+		$this->assertEquals( 1, $request_count, 'Expected HTTP request.' );
+
+		$cache_key = CachedRemoteGetRequest::TRANSIENT_PREFIX . md5( CachedRemoteGetRequest::class . $style_url );
+		$transient = get_transient( $cache_key );
+		$this->assertNotFalse( $transient );
+
+		/**
+		 * Cached response.
+		 *
+		 * @var CachedResponse
+		 */
+		$cached_response = unserialize( $transient ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize
+		$this->assertInstanceOf( CachedResponse::class, $cached_response );
+
+		$this->assertEquals( $expected_cached_response->get_body(), $cached_response->get_body() );
+		$this->assertEquals( $expected_cached_response->get_headers(), $cached_response->get_headers() );
+		$this->assertEquals( $expected_cached_response->get_status_code(), $cached_response->get_status_code() );
+
+		$expiry = $cached_response->get_expiry();
+		$this->assertEquals( $cached_response->get_expiry()->getTimestamp(), $expiry->getTimestamp() );
+
+		$sanitize_and_get_stylesheets( $style_url );
 		$this->assertEquals( 1, $request_count, 'Expected HTTP request to be cached.' );
 	}
 
@@ -1749,7 +2089,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 		$stylesheets = array_values( $sanitizer->get_stylesheets() );
 
-		$this->assertContains( $expected, $stylesheets[0] );
+		$this->assertStringContains( $expected, $stylesheets[0] );
 	}
 
 	/**
@@ -1913,7 +2253,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 					$previous = -1;
 					foreach ( $expected_order as $i => $expected ) {
-						$test->assertContains( $expected, $stylesheet, "Did not see $expected at position $i." );
+						$test->assertStringContains( $expected, $stylesheet, "Did not see $expected at position $i." );
 						$position = strpos( $stylesheet, $expected );
 						$test->assertGreaterThan( $previous, $position, "Expected $expected to be after previous (at position $i)." );
 						$previous = $position;
@@ -1947,7 +2287,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 						'remote-finally-does-not-exist.css',
 					];
 					foreach ( $expected_absent as $expected ) {
-						$test->assertNotContains( $expected, $stylesheet, "Expected to not see $expected." );
+						$test->assertStringNotContains( $expected, $stylesheet, "Expected to not see $expected." );
 					}
 
 					$expected_order = [
@@ -1959,7 +2299,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 					$previous = -1;
 					foreach ( $expected_order as $i => $expected ) {
-						$test->assertContains( $expected, $stylesheet, "Did not see $expected at position $i." );
+						$test->assertStringContains( $expected, $stylesheet, "Did not see $expected at position $i." );
 						$position = strpos( $stylesheet, $expected );
 						$test->assertGreaterThan( $previous, $position, "Expected $expected to be after previous (at position $i)." );
 						$previous = $position;
@@ -2162,8 +2502,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$original_html  = trim( ob_get_clean() );
 		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
 
-		$this->assertContains( ".dashicons-admin-customizer:before{content:\"\xEF\x95\x80\"}", $sanitized_html );
-		$this->assertContains( 'span::after{content:"⚡️"}', $sanitized_html );
+		$this->assertStringContains( ".dashicons-admin-customizer:before{content:\"\xEF\x95\x80\"}", $sanitized_html );
+		$this->assertStringContains( 'span::after{content:"⚡️"}', $sanitized_html );
 	}
 
 	/**
@@ -2292,15 +2632,15 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					 */
 					$this->assertInstanceOf( 'DOMElement', $original_dom->getElementById( 'wpadminbar' ), 'Expected admin bar element to be present originally.' );
 					$this->assertInstanceOf( 'DOMElement', $original_dom->getElementById( 'admin-bar-css' ), 'Expected admin bar CSS to be present originally.' );
-					$this->assertContains( 'admin-bar', $original_dom->body->getAttribute( 'class' ) );
-					$this->assertContains( 'earlyprintstyle', $original_source, 'Expected early print style to not be present.' );
+					$this->assertStringContains( 'admin-bar', $original_dom->body->getAttribute( 'class' ) );
+					$this->assertStringContains( 'earlyprintstyle', $original_source, 'Expected early print style to not be present.' );
 
-					$this->assertContains( '.is-style-outline .wp-block-button__link', $amphtml_source, 'Expected block-library/style.css' );
-					$this->assertContains( '[class^="wp-block-"]:not(.wp-block-gallery) figcaption', $amphtml_source, 'Expected twentyten/blocks.css' );
-					$this->assertContains( 'amp-img.amp-wp-enforced-sizes', $amphtml_source, 'Expected amp-default.css' );
-					$this->assertContains( 'ab-empty-item', $amphtml_source, 'Expected admin-bar.css to still be present.' );
-					$this->assertNotContains( 'earlyprintstyle', $amphtml_source, 'Expected early print style to not be present.' );
-					$this->assertContains( 'admin-bar', $amphtml_dom->body->getAttribute( 'class' ) );
+					$this->assertStringContains( '.is-style-outline .wp-block-button__link', $amphtml_source, 'Expected block-library/style.css' );
+					$this->assertStringContains( '[class^="wp-block-"]:not(.wp-block-gallery) figcaption', $amphtml_source, 'Expected twentyten/blocks.css' );
+					$this->assertStringContains( 'amp-img.amp-wp-enforced-sizes', $amphtml_source, 'Expected amp-default.css' );
+					$this->assertStringContains( 'ab-empty-item', $amphtml_source, 'Expected admin-bar.css to still be present.' );
+					$this->assertStringNotContains( 'earlyprintstyle', $amphtml_source, 'Expected early print style to not be present.' );
+					$this->assertStringContains( 'admin-bar', $amphtml_dom->body->getAttribute( 'class' ) );
 					$this->assertInstanceOf( 'DOMElement', $amphtml_dom->getElementById( 'wpadminbar' ) );
 				},
 			],
@@ -2611,21 +2951,60 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertEquals( [], $sanitizer->get_styles() );
 	}
 
-	/**
-	 * Assert markup is equal.
+	/*
+	 * Gets the test data for test_viewport_rules_added_to_meta_viewport().
 	 *
-	 * @param string $expected Expected markup.
-	 * @param string $actual   Actual markup.
+	 * @return array The test data.
 	 */
-	public function assertEqualMarkup( $expected, $actual ) {
-		$actual   = preg_replace( '/\s+/', ' ', $actual );
-		$expected = preg_replace( '/\s+/', ' ', $expected );
-		$actual   = preg_replace( '/(?<=>)\s+(?=<)/', '', trim( $actual ) );
-		$expected = preg_replace( '/(?<=>)\s+(?=<)/', '', trim( $expected ) );
+	public function get_viewport_data() {
+		return [
+			'existing_meta_viewport_remains_when_no_style_rule' => [
+				'<meta name="viewport" content="width=device-width">',
+			],
+			'viewport_rule_converted_to_meta_viewport' => [
+				'<style>@viewport{ width: device-width; }</style>',
+				'<meta name="viewport" content="width=device-width">',
+			],
+			'vendor_prefixed_viewport_rule_converted_to_meta_viewport' => [
+				'<style>@-moz-viewport{ width: device-width; }</style>',
+				'<meta name="viewport" content="width=device-width">',
+			],
+			'viewport_merged_rules' => [
+				'<meta name="viewport" content="width=device-width,user-scalable=no"><style>@viewport{ initial-scale: 1; }</style><style>@-moz-viewport{ user-scalable: yes; }</style><style>@-o-viewport { minimum-scale: 0.5; }</style><style>@-baz-viewport { unrecognized: 1; }</style>',
+				'<meta name="viewport" content="width=device-width,user-scalable=yes,initial-scale=1,minimum-scale=.5,unrecognized=1">',
+			],
+		];
+	}
 
-		$this->assertEquals(
-			array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $expected, -1, PREG_SPLIT_DELIM_CAPTURE ) ),
-			array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $actual, -1, PREG_SPLIT_DELIM_CAPTURE ) )
-		);
+	/**
+	 * Test sanitization of tags and attributes for the entire document, including the HEAD.
+	 *
+	 * @dataProvider get_viewport_data
+	 * @covers AMP_Style_Sanitizer::sanitize()
+	 * @covers AMP_Meta_Sanitizer::sanitize()
+	 * @covers AMP_Meta_Sanitizer::ensure_viewport_is_present()
+	 *
+	 * @param string $markup   The markup to sanitize.
+	 * @param string $expected The expected result after sanitizing.
+	 */
+	public function test_viewport_rules_added_to_meta_viewport( $markup, $expected = null ) {
+		$opening_markup = '<html amp><head><meta charset="utf-8">';
+		$closing_markup = '<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript></head><body></body></html>';
+		$markup         = $opening_markup . $markup . $closing_markup;
+
+		if ( null === $expected ) {
+			$expected = $markup;
+		} else {
+			$expected = $opening_markup . $expected . $closing_markup;
+		}
+
+		$dom             = Document::fromHtml( $markup );
+		$style_sanitizer = new AMP_Style_Sanitizer( $dom );
+		$style_sanitizer->sanitize();
+		$meta_sanitizer = new AMP_Meta_Sanitizer( $dom );
+		$meta_sanitizer->sanitize();
+
+		$content = $dom->saveHTML( $dom->documentElement );
+		$this->assertEquals( $expected, $content );
 	}
 }

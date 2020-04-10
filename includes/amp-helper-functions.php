@@ -5,6 +5,324 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Services;
+
+/**
+ * Handle activation of plugin.
+ *
+ * @since 0.2
+ *
+ * @param bool $network_wide Whether the activation was done network-wide.
+ */
+function amp_activate( $network_wide = false ) {
+	Services::activate( $network_wide );
+	amp_after_setup_theme();
+	if ( ! did_action( 'amp_init' ) ) {
+		amp_init();
+	}
+	flush_rewrite_rules();
+}
+
+/**
+ * Handle deactivation of plugin.
+ *
+ * @since 0.2
+ *
+ * @param bool $network_wide Whether the activation was done network-wide.
+ */
+function amp_deactivate( $network_wide = false ) {
+	Services::deactivate( $network_wide );
+	// We need to manually remove the amp endpoint.
+	global $wp_rewrite;
+	foreach ( $wp_rewrite->endpoints as $index => $endpoint ) {
+		if ( amp_get_slug() === $endpoint[1] ) {
+			unset( $wp_rewrite->endpoints[ $index ] );
+			break;
+		}
+	}
+
+	flush_rewrite_rules( false );
+}
+
+/**
+ * Bootstrap plugin.
+ *
+ * @since 1.5
+ */
+function amp_bootstrap_plugin() {
+	Services::register();
+
+	// The plugins_loaded action is the earliest we can run this since that is when pluggable.php has been required and wp_hash() is available.
+	add_action( 'plugins_loaded', [ 'AMP_Validation_Manager', 'init_validate_request' ], ~PHP_INT_MAX );
+
+	/*
+	 * Register AMP scripts regardless of whether AMP is enabled or it is the AMP endpoint
+	 * for the sake of being able to use AMP components on non-AMP documents ("dirty AMP").
+	 */
+	add_action( 'wp_default_scripts', 'amp_register_default_scripts' );
+
+	// Ensure async and custom-element/custom-template attributes are present on script tags.
+	add_filter( 'script_loader_tag', 'amp_filter_script_loader_tag', PHP_INT_MAX, 2 );
+
+	// Ensure crossorigin=anonymous is added to font links.
+	add_filter( 'style_loader_tag', 'amp_filter_font_style_loader_tag_with_crossorigin_anonymous', 10, 4 );
+
+	add_action( 'after_setup_theme', 'amp_after_setup_theme', 5 );
+
+	add_action( 'plugins_loaded', '_amp_bootstrap_customizer', 9 ); // Should be hooked before priority 10 on 'plugins_loaded' to properly unhook core panels.
+}
+
+/**
+ * Init AMP.
+ *
+ * @since 0.1
+ */
+function amp_init() {
+
+	/**
+	 * Triggers on init when AMP plugin is active.
+	 *
+	 * @since 0.3
+	 */
+	do_action( 'amp_init' );
+
+	add_filter( 'allowed_redirect_hosts', [ 'AMP_HTTP', 'filter_allowed_redirect_hosts' ] );
+	AMP_HTTP::purge_amp_query_vars();
+	AMP_HTTP::send_cors_headers();
+	AMP_HTTP::handle_xhr_request();
+	AMP_Theme_Support::init();
+	AMP_Validation_Manager::init();
+	AMP_Service_Worker::init();
+	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
+	add_action( 'wp_loaded', 'amp_add_options_menu' );
+	add_action( 'wp_loaded', 'amp_bootstrap_admin' );
+
+	add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
+	AMP_Post_Type_Support::add_post_type_support();
+	add_action( 'init', [ 'AMP_Post_Type_Support', 'add_post_type_support' ], 1000 ); // After post types have been defined.
+	add_action( 'parse_query', 'amp_correct_query_when_is_front_page' );
+	add_action( 'admin_bar_menu', 'amp_add_admin_bar_view_link', 100 );
+	add_action( 'wp_loaded', 'amp_editor_core_blocks' );
+	add_filter( 'request', 'amp_force_query_var_value' );
+
+	// Redirect the old url of amp page to the updated url.
+	add_filter( 'old_slug_redirect_url', 'amp_redirect_old_slug_to_new_url' );
+
+	if ( defined( 'WP_CLI' ) && WP_CLI ) {
+		if ( class_exists( 'WP_CLI\Dispatcher\CommandNamespace' ) ) {
+			WP_CLI::add_command( 'amp', 'AMP_CLI_Namespace' );
+		}
+
+		WP_CLI::add_command( 'amp validation', 'AMP_CLI_Validation_Command' );
+	}
+
+	/*
+	 * Broadcast plugin updates.
+	 * Note that AMP_Options_Manager::get_option( 'version', '0.0' ) cannot be used because
+	 * version was new option added, and in that case default would never be used for a site
+	 * upgrading from a version prior to 1.0. So this is why get_option() is currently used.
+	 */
+	$options     = get_option( AMP_Options_Manager::OPTION_NAME, [] );
+	$old_version = isset( $options['version'] ) ? $options['version'] : '0.0';
+	if ( AMP__VERSION !== $old_version ) {
+		/**
+		 * Triggers when after amp_init when the plugin version has updated.
+		 *
+		 * @param string $old_version Old version.
+		 */
+		do_action( 'amp_plugin_update', $old_version );
+		AMP_Options_Manager::update_option( 'version', AMP__VERSION );
+	}
+}
+
+/**
+ * Set up AMP.
+ *
+ * This function must be invoked through the 'after_setup_theme' action to allow
+ * the AMP setting to declare the post types support earlier than plugins/theme.
+ *
+ * @since 0.6
+ */
+function amp_after_setup_theme() {
+	amp_get_slug(); // Ensure AMP_QUERY_VAR is set.
+
+	/**
+	 * Filters whether AMP is enabled on the current site.
+	 *
+	 * Useful if the plugin is network activated and you want to turn it off on select sites.
+	 *
+	 * @since 0.2
+	 */
+	if ( false === apply_filters( 'amp_is_enabled', true ) ) {
+		return;
+	}
+
+	add_action( 'init', 'amp_init', 0 ); // Must be 0 because widgets_init happens at init priority 1.
+}
+
+/**
+ * Make sure the `amp` query var has an explicit value.
+ *
+ * This avoids issues when filtering the deprecated `query_string` hook.
+ *
+ * @since 0.3.3
+ *
+ * @param array $query_vars Query vars.
+ * @return array Query vars.
+ */
+function amp_force_query_var_value( $query_vars ) {
+	if ( isset( $query_vars[ amp_get_slug() ] ) && '' === $query_vars[ amp_get_slug() ] ) {
+		$query_vars[ amp_get_slug() ] = 1;
+	}
+	return $query_vars;
+}
+
+/**
+ * Fix up WP_Query for front page when amp query var is present.
+ *
+ * Normally the front page would not get served if a query var is present other than preview, page, paged, and cpage.
+ *
+ * @since 0.6
+ * @see WP_Query::parse_query()
+ * @link https://github.com/WordPress/wordpress-develop/blob/0baa8ae85c670d338e78e408f8d6e301c6410c86/src/wp-includes/class-wp-query.php#L951-L971
+ *
+ * @param WP_Query $query Query.
+ */
+function amp_correct_query_when_is_front_page( WP_Query $query ) {
+	$is_front_page_query = (
+		$query->is_main_query()
+		&&
+		$query->is_home()
+		&&
+		// Is AMP endpoint.
+		false !== $query->get( amp_get_slug(), false )
+		&&
+		// Is query not yet fixed uo up to be front page.
+		! $query->is_front_page()
+		&&
+		// Is showing pages on front.
+		'page' === get_option( 'show_on_front' )
+		&&
+		// Has page on front set.
+		get_option( 'page_on_front' )
+		&&
+		// See line in WP_Query::parse_query() at <https://github.com/WordPress/wordpress-develop/blob/0baa8ae/src/wp-includes/class-wp-query.php#L961>.
+		0 === count( array_diff( array_keys( wp_parse_args( $query->query ) ), [ amp_get_slug(), 'preview', 'page', 'paged', 'cpage' ] ) )
+	);
+	if ( $is_front_page_query ) {
+		$query->is_home     = false;
+		$query->is_page     = true;
+		$query->is_singular = true;
+		$query->set( 'page_id', get_option( 'page_on_front' ) );
+	}
+}
+
+/**
+ * Whether this is in 'canonical mode'.
+ *
+ * Themes can register support for this with `add_theme_support( AMP_Theme_Support::SLUG )`:
+ *
+ *      add_theme_support( AMP_Theme_Support::SLUG );
+ *
+ * This will serve templates in AMP-first, allowing you to use AMP components in your theme templates.
+ * If you want to make available in transitional mode, where templates are served in AMP or non-AMP documents, do:
+ *
+ *      add_theme_support( AMP_Theme_Support::SLUG, array(
+ *          'paired' => true,
+ *      ) );
+ *
+ * Transitional mode is also implied if you define a template_dir:
+ *
+ *      add_theme_support( AMP_Theme_Support::SLUG, array(
+ *          'template_dir' => 'amp',
+ *      ) );
+ *
+ * If you want to have AMP-specific templates in addition to serving AMP-first, do:
+ *
+ *      add_theme_support( AMP_Theme_Support::SLUG, array(
+ *          'paired'       => false,
+ *          'template_dir' => 'amp',
+ *      ) );
+ *
+ * If you want to force AMP to always be served on a given template, you can use the templates_supported arg,
+ * for example to always serve the Category template in AMP:
+ *
+ *      add_theme_support( AMP_Theme_Support::SLUG, array(
+ *          'templates_supported' => array(
+ *              'is_category' => true,
+ *          ),
+ *      ) );
+ *
+ * Or if you want to force AMP to be used on all templates:
+ *
+ *      add_theme_support( AMP_Theme_Support::SLUG, array(
+ *          'templates_supported' => 'all',
+ *      ) );
+ *
+ * @see AMP_Theme_Support::read_theme_support()
+ * @return boolean Whether this is in AMP 'canonical' mode, that is whether it is AMP-first and there is not a separate (paired) AMP URL.
+ */
+function amp_is_canonical() {
+	if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+		return false;
+	}
+
+	$args = AMP_Theme_Support::get_theme_support_args();
+	if ( isset( $args[ AMP_Theme_Support::PAIRED_FLAG ] ) ) {
+		return empty( $args[ AMP_Theme_Support::PAIRED_FLAG ] );
+	}
+
+	// If there is a template_dir, then transitional mode is implied.
+	return empty( $args['template_dir'] );
+}
+
+/**
+ * Add frontend actions.
+ *
+ * @since 0.2
+ */
+function amp_add_frontend_actions() {
+	add_action( 'wp_head', 'amp_add_amphtml_link' );
+}
+
+/**
+ * Bootstraps the AMP customizer.
+ *
+ * Uses the priority of 12 for the 'after_setup_theme' action.
+ * Many themes run `add_theme_support()` on the 'after_setup_theme' hook, at the default priority of 10.
+ * And that function's documentation suggests adding it to that action.
+ * So this enables themes to `add_theme_support( AMP_Theme_Support::SLUG )`.
+ * And `amp_init_customizer()` will be able to recognize theme support by calling `amp_is_canonical()`.
+ *
+ * @since 0.4
+ */
+function _amp_bootstrap_customizer() {
+	add_action( 'after_setup_theme', 'amp_init_customizer', 12 );
+}
+
+/**
+ * Redirects the old AMP URL to the new AMP URL.
+ *
+ * If post slug is updated the amp page with old post slug will be redirected to the updated url.
+ *
+ * @since 0.5
+ *
+ * @param string $link New URL of the post.
+ * @return string URL to be redirected.
+ */
+function amp_redirect_old_slug_to_new_url( $link ) {
+
+	if ( is_amp_endpoint() && ! amp_is_canonical() ) {
+		if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+			$link = add_query_arg( amp_get_slug(), '', $link );
+		} else {
+			$link = trailingslashit( trailingslashit( $link ) . amp_get_slug() );
+		}
+	}
+
+	return $link;
+}
+
 /**
  * Get the slug used in AMP for the query var, endpoint, and post type support.
  *
@@ -902,6 +1220,7 @@ function amp_get_content_sanitizers( $post = null ) {
 		'AMP_Style_Sanitizer'             => [],
 		'AMP_Meta_Sanitizer'              => [],
 		'AMP_Layout_Sanitizer'            => [],
+		'AMP_Accessibility_Sanitizer'     => [],
 		'AMP_Tag_And_Attribute_Sanitizer' => [], // Note: This whitelist sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
 	];
 
@@ -972,6 +1291,17 @@ function amp_get_content_sanitizers( $post = null ) {
 			$sanitizers
 		);
 	}
+
+	/**
+	 * Filters whether parsed CSS is allowed to be cached in transients.
+	 *
+	 * When this is filtered to be false, parsed CSS will not be stored in transients. This is important when there is
+	 * highly-variable CSS content in order to prevent filling up the wp_options table with an endless number of entries.
+	 *
+	 * @since 1.5.0
+	 * @param bool $transient_caching_allowed Transient caching allowed.
+	 */
+	$sanitizers['AMP_Style_Sanitizer']['allow_transient_caching'] = apply_filters( 'amp_parsed_css_transient_caching_allowed', true );
 
 	// Force style sanitizer and whitelist sanitizer to be at end.
 	foreach ( [ 'AMP_Style_Sanitizer', 'AMP_Meta_Sanitizer', 'AMP_Tag_And_Attribute_Sanitizer' ] as $class_name ) {
@@ -1316,6 +1646,7 @@ function amp_generate_script_hash( $script ) {
  * @license   http://opensource.org/licenses/MIT MIT
  */
 if ( ! function_exists( 'array_column' ) ) {
+
 	/**
 	 * Returns the values from a single column of the input array, identified by
 	 * the $columnKey.

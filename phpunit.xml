@@ -8,7 +8,7 @@
 	defaultTestSuite="default"
 	>
 	<php>
-		<const name="WP_TEST_ACTIVATED_PLUGINS" value="jetpack/jetpack.php,gutenberg/gutenberg.php,pwa/pwa.php" />
+		<const name="WP_TEST_ACTIVATED_PLUGINS" value="gutenberg/gutenberg.php,pwa/pwa.php" />
 	</php>
 	<testsuites>
 		<!-- Default test suite to run all tests -->

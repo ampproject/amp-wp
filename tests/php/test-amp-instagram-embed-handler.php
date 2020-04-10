@@ -1,6 +1,7 @@
 <?php
 
-class AMP_Instagram_Embed_Test extends WP_UnitTestCase {
+class AMP_Instagram_Embed_Handler_Test extends WP_UnitTestCase {
+
 	public function get_conversion_data() {
 		return [
 			'no_embed'      => [
