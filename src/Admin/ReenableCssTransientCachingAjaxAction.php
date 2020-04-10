@@ -56,7 +56,7 @@ final class ReenableCssTransientCachingAjaxAction {
 			return;
 		}
 
-		$script = <<< JS_SCRIPT
+		$script = <<< 'JS_SCRIPT'
 ;( function () {
 	window.addEventListener( 'DOMContentLoaded', ( event ) => {
 		var selector = SELECTOR;
