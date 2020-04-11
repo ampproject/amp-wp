@@ -1452,8 +1452,6 @@ class AMP_Theme_Support {
 				$data .= 'html:not(#_) > body { position:unset !important; }';
 			}
 
-			$data .= sprintf( '#amp-admin-bar-item-status-icon { font-family: %s; }', Fonts::getEmojiFontFamilyValue() );
-
 			wp_add_inline_style( 'admin-bar', $data );
 		}
 

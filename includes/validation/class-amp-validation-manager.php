@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Icon;
 use AmpProject\Dom\Document;
 
 /**
@@ -245,6 +246,20 @@ class AMP_Validation_Manager {
 			add_action( 'all_admin_notices', [ __CLASS__, 'print_plugin_notice' ] );
 
 			add_action( 'admin_bar_menu', [ __CLASS__, 'add_admin_bar_menu_items' ], 101 );
+
+			add_action(
+				'admin_bar_init',
+				static function () {
+					wp_enqueue_style(
+						'amp-icons',
+						amp_get_asset_url( 'css/amp-icons.css' ),
+						[],
+						AMP__VERSION
+					);
+
+					wp_styles()->add_data( 'amp-icons', 'rtl', 'replace' );
+				}
+			);
 		}
 
 		add_action( 'wp', [ __CLASS__, 'override_validation_error_statuses' ] );
@@ -423,19 +438,20 @@ class AMP_Validation_Manager {
 
 		// Construct the parent admin bar item.
 		if ( is_amp_endpoint() ) {
-			$icon = '&#x2705;'; // WHITE HEAVY CHECK MARK. This will get overridden in AMP_Validation_Manager::finalize_validation() if there are unaccepted errors.
+			$icon = Icon::VALID; // This will get overridden in AMP_Validation_Manager::finalize_validation() if there are unaccepted errors.
 			$href = $validate_url;
 		} elseif ( $error_count > 0 ) {
-			$icon = '&#x274C;'; // CROSS MARK.
+			$icon = Icon::INVALID;
 			$href = $validate_url;
 		} else {
-			$icon = '&#x1F517;'; // LINK SYMBOL.
+			$icon = Icon::LINK;
 			$href = $amp_url;
 		}
+
 		$parent = [
 			'id'    => 'amp',
 			'title' => sprintf(
-				'<span id="amp-admin-bar-item-status-icon">%s</span> %s',
+				'<span id="amp-admin-bar-item-status-icon" class="ab-icon amp-icon %s"></span> %s',
 				$icon,
 				esc_html__( 'AMP', 'amp' )
 			),
@@ -502,7 +518,7 @@ class AMP_Validation_Manager {
 			$paired_browsing_item = [
 				'parent' => 'amp',
 				'id'     => 'amp-paired-browsing',
-				'title'  => esc_html__( 'Paired browsing', 'amp' ),
+				'title'  => esc_html__( 'Paired Browsing', 'amp' ),
 				'href'   => AMP_Theme_Support::get_paired_browsing_url(),
 			];
 
@@ -1937,7 +1953,11 @@ class AMP_Validation_Manager {
 
 		$admin_bar_icon = $dom->getElementById( 'amp-admin-bar-item-status-icon' );
 		if ( $admin_bar_icon ) {
-			$admin_bar_icon->firstChild->nodeValue = "\xE2\x9A\xA0\xEF\xB8\x8F"; // WARNING SIGN: U+26A0, U+FE0F.
+			$admin_bar_icon->setAttribute( 'class', 'ab-icon amp-icon ' . Icon::WARNING );
+
+			// The stying for the warning icon would have been already removed so it has to be re-added.
+			$style_element = new DOMElement( 'style', '.amp-icon.amp-warning::before { content: "\f534"; color: #d98500 !important; }' );
+			$admin_bar_icon->appendChild( $style_element );
 		}
 	}
 

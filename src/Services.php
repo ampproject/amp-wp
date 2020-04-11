@@ -1,6 +1,6 @@
 <?php
 /**
- * Interface BackgroundTask.
+ * Class Services.
  *
  * @package AmpProject\AmpWP
  */

@@ -1,0 +1,23 @@
+#wpadminbar span.amp-icon {
+	top: 2px;
+}
+
+.amp-icon.amp-valid::before {
+	content: "\f12a";
+	color: #0a9f1c !important;
+}
+
+.amp-icon.amp-invalid::before {
+	content: "\f153";
+	color: #e92c1a !important;
+}
+
+.amp-icon.amp-warning::before {
+	content: "\f534";
+	color: #d98500 !important;
+}
+
+.amp-icon.amp-link::before {
+	content: "\f103";
+	color: #4183f2 !important;
+}

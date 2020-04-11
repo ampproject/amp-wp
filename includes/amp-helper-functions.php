@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Services;
 
 /**
@@ -1589,13 +1590,11 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 		$href = add_query_arg( amp_get_slug(), '', amp_get_current_url() );
 	}
 
-	$icon = '&#x1F517;'; // LINK SYMBOL.
-
 	$parent = [
 		'id'    => 'amp',
 		'title' => sprintf(
-			'<span id="amp-admin-bar-item-status-icon">%s</span> %s',
-			$icon,
+			'<span id="amp-admin-bar-item-status-icon" class="ab-icon amp-icon %s"></span> %s',
+			Icon::LINK,
 			esc_html( is_amp_endpoint() ? __( 'Non-AMP', 'amp' ) : __( 'AMP', 'amp' ) )
 		),
 		'href'  => esc_url( $href ),
