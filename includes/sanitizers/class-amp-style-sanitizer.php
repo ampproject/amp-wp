@@ -2971,7 +2971,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$span = $this->dom->createElement( 'span' );
 			$span->setAttribute( 'class', 'amp-icon ' . $icon );
 			// Setting the style here prevents it from being removed during tree-shaking.
-			$span->setAttribute( 'style', 'font: normal 20px/1 dashicons; position: absolute; margin-left: 2px;' );
+			$span->setAttribute( 'style', 'position: absolute; margin-left: 2px;' );
 			$stylesheets_a_element->appendChild( $span );
 		}
 

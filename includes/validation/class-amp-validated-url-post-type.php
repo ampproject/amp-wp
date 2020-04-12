@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Icon;
 use AmpProject\Fonts;
 
 /**
@@ -521,9 +522,10 @@ class AMP_Validated_URL_Post_Type {
 				);
 			}
 			$result[] = sprintf(
-				'<span class="status-text rejected %s" title="%s">%s: %s</span>',
+				'<span class="status-text %s" title="%s"><span class="amp-icon %s"></span> %s: %s</span>',
 				esc_attr( $counts['new_rejected'] > 0 ? 'has-new' : '' ),
 				esc_attr( $title ),
+				Icon::INVALID,
 				esc_html__( 'Invalid markup kept', 'amp' ),
 				number_format_i18n( $kept_count )
 			);
@@ -543,16 +545,18 @@ class AMP_Validated_URL_Post_Type {
 				);
 			}
 			$result[] = sprintf(
-				'<span class="status-text accepted %s" title="%s">%s: %s</span>',
+				'<span class="status-text %s" title="%s"><span class="amp-icon %s"></span> %s: %s</span>',
 				esc_attr( $counts['new_accepted'] > 0 ? 'has-new' : '' ),
 				esc_attr( $title ),
+				$counts['new_accepted'] > 0 ? Icon::WARNING : Icon::VALID,
 				esc_html__( 'Invalid markup removed', 'amp' ),
 				number_format_i18n( $removed_count )
 			);
 		}
 		if ( 0 === $removed_count && 0 === $kept_count ) {
 			$result[] = sprintf(
-				'<span class="status-text accepted">%s</span>',
+				'<span class="status-text"><span class="amp-icon %s"></span> %s</span>',
+				Icon::VALID,
 				esc_html__( 'All markup valid', 'amp' )
 			);
 		}
@@ -1876,7 +1880,6 @@ class AMP_Validated_URL_Post_Type {
 							echo '</p></div>';
 						}
 						?>
-						<?php self::display_invalid_url_validation_error_counts_summary( $post ); ?>
 
 						<?php
 						$is_amp_enabled = self::is_amp_enabled_on_post( $post );

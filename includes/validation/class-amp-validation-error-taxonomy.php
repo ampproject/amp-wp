@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Icon;
+
 /**
  * Class AMP_Validation_Error_Taxonomy
  *
@@ -3363,12 +3365,12 @@ class AMP_Validation_Error_Taxonomy {
 	 */
 	public static function get_status_text_with_icon( $sanitization ) {
 		if ( $sanitization['term_status'] & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK ) {
-			$class = 'accepted';
+			$icon = Icon::VALID;
 			$text  = __( 'Removed', 'amp' );
 		} else {
-			$class = 'rejected';
+			$icon = Icon::INVALID;
 			$text  = __( 'Kept', 'amp' );
 		}
-		return sprintf( '<span class="status-text %s">%s</span>', esc_attr( $class ), esc_html( $text ) );
+		return sprintf( '<span class="status-text"><span class="amp-icon %s"></span> %s</span>', $icon, esc_html( $text ) );
 	}
 }

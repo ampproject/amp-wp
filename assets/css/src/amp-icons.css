@@ -2,6 +2,10 @@
 	top: 2px;
 }
 
+body .amp-icon {
+	font: normal 20px/1 dashicons;
+}
+
 .amp-icon.amp-valid::before {
 	content: "\f12a";
 	color: #0a9f1c !important;

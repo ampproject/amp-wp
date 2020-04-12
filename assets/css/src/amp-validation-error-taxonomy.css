@@ -202,7 +202,7 @@ dl.detailed details > summary {
 	padding-bottom: 0.6rem;
 }
 
-.status-text::before {
+#amp-enabled-icon.status-text::before {
 	margin-right: 6px;
 	background-size: 16px 16px;
 	height: 16px;
@@ -211,14 +211,17 @@ dl.detailed details > summary {
 	min-width: 16px;
 }
 
-.wp-heading-inline .status-text::before {
-	margin-right: 10px;
-	background-size: 1em 1em;
-	height: 1em;
-	width: 1em;
-	content: "";
-	min-width: 1em;
+.status-text > .amp-icon::before {
+	margin-right: 6px;
+	height: 16px;
+	width: 16px;
+	min-width: 16px;
+}
+
+.wp-heading-inline .status-text > .amp-icon::before {
+	font-size: 23px;
 	vertical-align: middle;
+	margin-right: inherit;
 }
 
 .status-text.amp-enabled::before {
@@ -227,14 +230,6 @@ dl.detailed details > summary {
 
 .status-text.amp-disabled::before {
 	background-image: url("../images/amp-logo-gray.svg");
-}
-
-.status-text.accepted::before {
-	background-image: url("../images/amp-logo-green.svg");
-}
-
-.status-text.rejected::before {
-	background-image: url("../images/amp-logo-red.svg");
 }
 
 .single-error-detail {
@@ -322,7 +317,6 @@ body.taxonomy-amp_validation_error .wp-list-table .new th.check-column input {
 
 .wp-heading-inline .status-text {
 	display: inline-block;
-	margin-left: 10px;
 	vertical-align: middle;
 	padding-bottom: 0;
 }
