@@ -456,6 +456,20 @@ class AMP_Validation_Manager {
 				esc_html__( 'AMP', 'amp' )
 			),
 			'href'  => esc_url( $href ),
+			'meta'  => [
+				'html' => sprintf(
+				/**
+				 * This hidden <span> element is needed to prevent the CSS for unused icons from being removed. New icons
+				 * may be added during post-processing, such as overriding the admin bar icon to represent a new validation
+				 * state or when new menu items are being added (eg. "CSS Usage") and a icon needs to displayed.
+				 */
+					'<span style="display: none" class="amp-icon %s %s %s %s"></span>',
+					Icon::LINK,
+					Icon::VALID,
+					Icon::WARNING,
+					Icon::INVALID
+				),
+			],
 		];
 
 		// Construct admin bar item for validation.
@@ -1954,10 +1968,6 @@ class AMP_Validation_Manager {
 		$admin_bar_icon = $dom->getElementById( 'amp-admin-bar-item-status-icon' );
 		if ( $admin_bar_icon ) {
 			$admin_bar_icon->setAttribute( 'class', 'ab-icon amp-icon ' . Icon::WARNING );
-
-			// The stying for the warning icon would have been already removed so it has to be re-added.
-			$style_element = new DOMElement( 'style', '.amp-icon.amp-warning::before { content: "\f534"; color: #d98500 !important; }' );
-			$admin_bar_icon->appendChild( $style_element );
 		}
 	}
 
