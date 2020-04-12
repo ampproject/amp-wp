@@ -566,7 +566,7 @@ function post_supports_amp( $post ) {
 function is_amp_endpoint() {
 	global $pagenow, $wp_query;
 
-	if ( is_admin() || is_embed() || is_feed() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || in_array( $pagenow, [ 'wp-login.php', 'wp-signup.php', 'wp-activate.php' ], true ) ) {
+	if ( is_admin() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || in_array( $pagenow, [ 'wp-login.php', 'wp-signup.php', 'wp-activate.php' ], true ) ) {
 		return false;
 	}
 
@@ -601,6 +601,11 @@ function is_amp_endpoint() {
 			),
 			'1.1'
 		);
+	}
+
+	// note: is_embed() and is_feed() need $wp_query, so above checks must go first
+	if ( is_embed() || is_feed() ) {
+		return false;
 	}
 
 	/*
