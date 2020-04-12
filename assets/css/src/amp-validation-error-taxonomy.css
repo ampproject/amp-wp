@@ -364,6 +364,11 @@ body.taxonomy-amp_validation_error .wp-list-table .new th.check-column input {
 	margin-bottom: 1em;
 }
 
+.amp-stylesheet-summary span.amp-icon {
+	font-size: 16px;
+	vertical-align: middle;
+}
+
 .amp-stylesheet-summary th {
 	text-align: right;
 	padding-right: 1ex;

@@ -2091,18 +2091,15 @@ class AMP_Validated_URL_Post_Type {
 					$percentage_budget_used = ( ( $included_final_size + $excluded_final_size ) / $style_custom_cdata_spec['max_bytes'] ) * 100;
 
 					printf( '%.1f%% ', $percentage_budget_used ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-					?>
-					<span style="font-family: <?php echo esc_attr( Fonts::getEmojiFontFamilyValue() ); ?>">
-					<?php
 					if ( $percentage_budget_used > 100 ) {
-						echo '🚫';
+						$icon = Icon::INVALID;
 					} elseif ( $percentage_budget_used >= AMP_Style_Sanitizer::CSS_BUDGET_WARNING_PERCENTAGE ) {
-						echo '⚠️';
+						$icon = Icon::WARNING;
 					} else {
-						echo '✅';
+						$icon = Icon::VALID;
 					}
 					?>
-					</span>
+					<span class="amp-icon <?php echo $icon ?>"></span>
 				</td>
 			</tr>
 			<tr>
@@ -2245,16 +2242,15 @@ class AMP_Validated_URL_Post_Type {
 					</td>
 					<td class="column-stylesheet_included">
 						<?php
-						$emoji_style = sprintf( 'font-family: %s;', Fonts::getEmojiFontFamilyValue() );
 						switch ( $stylesheet['status'] ) {
 							case $included_status:
-								printf( '<span title="%s" style="%s">✅</span>', esc_attr__( 'Stylesheet included', 'amp' ), esc_attr( $emoji_style ) );
+								printf( '<span title="%s" class="amp-icon amp-valid"></span>', esc_attr__( 'Stylesheet included', 'amp' ) );
 								break;
 							case $excessive_status:
-								printf( '<span title="%s" style="%s">⚠️</span>', esc_attr__( 'Stylesheet overruns CSS budget yet it is still included on page', 'amp' ), esc_attr( $emoji_style ) );
+								printf( '<span title="%s" class="amp-icon amp-warning"></span>', esc_attr__( 'Stylesheet overruns CSS budget yet it is still included on page', 'amp' ) );
 								break;
 							case $excluded_status:
-								printf( '<span title="%s" style="%s">🚫</span>', esc_attr__( 'Stylesheet excluded due to exceeding CSS budget', 'amp' ), esc_attr( $emoji_style ) );
+								printf( '<span title="%s" class="amp-icon amp-invalid"></span>', esc_attr__( 'Stylesheet excluded due to exceeding CSS budget', 'amp' ) );
 								break;
 						}
 						?>
