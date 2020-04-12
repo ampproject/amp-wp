@@ -603,7 +603,7 @@ function is_amp_endpoint() {
 		);
 	}
 
-	// note: is_embed() and is_feed() need $wp_query, so above checks must go first
+	// note: is_embed() and is_feed() need $wp_query, so above checks must go first.
 	if ( is_embed() || is_feed() ) {
 		return false;
 	}
