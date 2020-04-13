@@ -120,6 +120,10 @@ table.striped > tbody > tr.even {
 	width: 150px;
 }
 
+.wp-list-table th.column-approved {
+	width: 100px;
+}
+
 /** Add space between list table and the filter and search box above it. */
 #post-body-content button.action,
 #post-body-content #url-post-filter,

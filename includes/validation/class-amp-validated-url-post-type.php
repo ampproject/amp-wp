@@ -93,6 +93,13 @@ class AMP_Validated_URL_Post_Type {
 	const NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT = 'amp_new_validation_error_urls_count';
 
 	/**
+	 * The name of the input field that indicates the acknowledgement of a validation error.
+	 *
+	 * @var string
+	 */
+	const VALIDATION_ERROR_ACKNOWLEDGED = 'amp_validation_error_term_ack';
+
+	/**
 	 * The total number of errors associated with a URL, regardless of the maximum that can display.
 	 *
 	 * @var int
@@ -992,6 +999,17 @@ class AMP_Validated_URL_Post_Type {
 					)
 				)
 			),
+			'approved'                    => sprintf(
+				'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="%s"></div>',
+				esc_html__( 'Approved', 'amp' ),
+				esc_attr(
+					sprintf(
+						'<h3>%s</h3><p>%s</p>',
+						esc_html__( 'Approved', 'amp' ),
+						__( 'Allows confirmation of action taken to resolve the validation error.', 'amp' )
+					)
+				)
+			),
 		];
 	}
 
@@ -1654,7 +1672,7 @@ class AMP_Validated_URL_Post_Type {
 	public static function handle_validation_error_status_update() {
 		check_admin_referer( self::UPDATE_POST_TERM_STATUS_ACTION, self::UPDATE_POST_TERM_STATUS_ACTION . '_nonce' );
 
-		if ( empty( $_POST[ AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] ) || ! is_array( $_POST[ AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] ) ) {
+		if ( empty( $_POST[ 'val_errors' ] ) || ! is_array( $_POST[ 'val_errors' ] ) ) {
 			return;
 		}
 		$post = get_post();
@@ -1673,7 +1691,17 @@ class AMP_Validated_URL_Post_Type {
 			remove_filter( 'pre_term_description', 'wp_filter_kses', $has_pre_term_description_filter );
 		}
 
-		foreach ( $_POST[ AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] as $term_slug => $status ) {
+		foreach ( $_POST['val_errors'] as $term_slug => $data ) {
+			if ( ! is_array( $data ) ) {
+				continue;
+			}
+
+			$status = isset( $data[ AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] )
+				? $data[ AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ]
+				: null;
+
+			$status_acknowledged = isset( $data[ self::VALIDATION_ERROR_ACKNOWLEDGED ] );
+
 			if ( ! is_numeric( $status ) ) {
 				continue;
 			}
@@ -1683,10 +1711,15 @@ class AMP_Validated_URL_Post_Type {
 				continue;
 			}
 			$term_group = AMP_Validation_Error_Taxonomy::sanitize_term_status( $status );
+			if ( null === $term_group ) {
+				continue;
+			}
 
-			$status_changed = ( (int) $term->term_group | AMP_Validation_Error_Taxonomy::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK ) !== $term_group;
+			$term_group = $status_acknowledged
+				? $term_group | AMP_Validation_Error_Taxonomy::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK
+				: $term_group - AMP_Validation_Error_Taxonomy::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK;
 
-			if ( null !== $term_group && $status_changed && $term_group !== $term->term_group ) {
+			if ( $term_group !== $term->term_group ) {
 				$updated_count++;
 				wp_update_term( $term->term_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, compact( 'term_group' ) );
 			}

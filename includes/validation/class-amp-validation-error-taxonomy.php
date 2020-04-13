@@ -1870,7 +1870,7 @@ class AMP_Validation_Error_Taxonomy {
 				$is_removed = (bool) ( (int) $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
 
 				if ( 'post.php' === $pagenow ) {
-					$status_select_name = sprintf( '%s[%s]', AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR, $term->slug );
+					$status_select_name = sprintf( 'val_errors[%s][%s]', $term->slug, AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR );
 
 					if ( (int) $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK ) {
 						$img_src = 'amp-logo-green';
@@ -2031,6 +2031,12 @@ class AMP_Validation_Error_Taxonomy {
 					$content .= esc_html__( 'Misc', 'amp' );
 				}
 				break;
+			case 'approved':
+				if ( 'post.php' === $pagenow ) {
+					$checked    = ! ( (int) $term->term_group & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK ) ? '' : 'checked="checked"';
+					$input_name = sprintf( 'val_errors[%s][%s]', $term->slug, AMP_Validated_URL_Post_Type::VALIDATION_ERROR_ACKNOWLEDGED );
+					$content .= sprintf( '<input type="checkbox" name="%s" %s />', $input_name, $checked );
+				}
 		}
 		return $content;
 	}
@@ -2173,7 +2179,7 @@ class AMP_Validation_Error_Taxonomy {
 				if ( in_array( $key, [ 'code', 'type', 'css_property_value', 'mandatory_anyof_attrs', 'meta_property_value', 'meta_property_required_value', 'mandatory_oneof_attrs' ], true ) ) {
 					continue; // Handled above.
 				}
-				if ( in_array( $key, [ 'spec_name', 'tag_spec', 'spec_names', 'node_type' ], true ) ) {
+				if ( in_array( $key, [ 'spec_name', 'tag_spec', 'spec_names', 'node_type', 'allowed_descendants' ], true ) ) {
 					continue;
 				}
 				?>
