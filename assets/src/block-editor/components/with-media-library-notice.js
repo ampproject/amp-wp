@@ -74,19 +74,19 @@ export default ( InitialMediaUpload, minImageDimensions ) => {
 				states: [ new FeaturedImageLibrary(), new wp.media.controller.EditImage() ],
 			} );
 
-			this.frame.on( 'toolbar:create:featured-image', function ( toolbar ) {
+			this.frame.on( 'toolbar:create:featured-image', function( toolbar ) {
 				/**
 				 * @this wp.media.view.MediaFrame.Select
 				 */
 				this.createSelectToolbar( toolbar, {
 					text: wp.media.view.l10n.setFeaturedImage,
 					state: this.options.state,
-				});
+				} );
 			}, this.frame );
 
 			this.frame.on( 'open', this.onOpen );
 
-			this.frame.state('featured-image').on( 'select', this.onSelectImage, this );
+			this.frame.state( 'featured-image' ).on( 'select', this.onSelectImage, this );
 
 			// See wp.media() for this.
 			wp.media.frame = this.frame;
