@@ -479,8 +479,10 @@ function amp_remove_endpoint( $url ) {
  * If there are known validation errors for the current URL then do not output anything.
  *
  * @since 1.0
+ * @globla WP_Query $wp_query
  */
 function amp_add_amphtml_link() {
+	global $wp_query;
 
 	/**
 	 * Filters whether to show the amphtml link on the frontend.
@@ -499,7 +501,7 @@ function amp_add_amphtml_link() {
 		if ( AMP_Theme_Support::is_paired_available() ) {
 			$amp_url = add_query_arg( amp_get_slug(), '', $current_url );
 		}
-	} elseif ( is_singular() && post_supports_amp( get_post( get_queried_object_id() ) ) ) {
+	} elseif ( $wp_query instanceof WP_Query && ( $wp_query->is_singular() || $wp_query->is_posts_page ) && post_supports_amp( get_post( get_queried_object_id() ) ) ) {
 		$amp_url = amp_get_permalink( get_queried_object_id() );
 	}
 
@@ -628,23 +630,19 @@ function is_amp_endpoint() {
 		)
 	);
 
-	// If theme support is not present (if Standard or Transitional mode), then just consider the query var alone.
-	// If it turns out the URL actually does not support AMP, then AMP_Theme_Support::finish_init() will currently
-	// force the request to redirect to the non-AMP URL. This is somewhat of an accommodation for Reader mode sites
-	// calling is_amp_endpoint() early. So once transitioning to Standard or Transitional mode, then is_amp_endpoint()
-	// becomes more strict with the warnings it emits.
-	if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-		return $has_amp_query_var;
-	}
-
 	// When there is no query var and AMP is not canonical (AMP-first), then this is definitely not an AMP endpoint.
 	if ( ! $has_amp_query_var && ! amp_is_canonical() ) {
 		return false;
 	}
 
 	if ( did_action( 'wp' ) && $wp_query instanceof WP_Query ) {
-		$availability = AMP_Theme_Support::get_template_availability( $wp_query );
-		$supported    = $availability['supported'];
+		if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+			$availability = AMP_Theme_Support::get_template_availability( $wp_query );
+			$supported    = $availability['supported'];
+		} else {
+			$queried_object = get_queried_object();
+			$supported      = ( $wp_query->is_singular() || $wp_query->is_posts_page ) && $queried_object instanceof WP_Post && post_supports_amp( $queried_object );
+		}
 	} else {
 		// If WP_Query was not available yet, then we will just assume the query is supported since at this point we do
 		// know either that the site is in Standard mode or the URL was requested with the AMP query var. This can still
@@ -653,10 +651,10 @@ function is_amp_endpoint() {
 		if ( ! $warned ) {
 			_doing_it_wrong( __FUNCTION__, esc_html( $error_message ), '1.0.2' );
 		}
-		$supported = true;
+		$supported = amp_is_canonical() || $has_amp_query_var;
 	}
 
-	return amp_is_canonical() ? $supported : ( $has_amp_query_var && $supported );
+	return $supported;
 }
 
 /**
