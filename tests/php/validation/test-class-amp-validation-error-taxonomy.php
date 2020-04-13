@@ -1241,12 +1241,12 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		// Test the 'status' block in the switch for the error taxonomy page.
 		$GLOBALS['pagenow'] = 'edit-tags.php';
 		$filtered_content   = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'status', $term_id );
-		$this->assertStringContains( '<span class="status-text rejected">Kept</span>', $filtered_content );
+		$this->assertStringContains( '<span class="status-text"><span class="amp-icon amp-invalid"></span> Kept</span>', $filtered_content );
 
 		// Test the 'status' block switch for the single error page.
 		$GLOBALS['pagenow'] = 'post.php';
 		$filtered_content   = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'status', $term_id );
-		$this->assertStringContains( '<select class="amp-validation-error-status" id="amp_validation_error_term_status', $filtered_content );
+		$this->assertStringContains( '<select class="amp-validation-error-status" name="val_errors[term-', $filtered_content );
 
 		// Test the 'created_date_gmt' block in the switch.
 		$date = current_time( 'mysql', true );

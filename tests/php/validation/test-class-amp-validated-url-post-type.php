@@ -586,6 +586,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 				'details'                     => 'Context<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="&lt;h3&gt;Context&lt;/h3&gt;&lt;p&gt;The parent element of where the error occurred.&lt;/p&gt;"></div>',
 				'sources_with_invalid_output' => 'Sources',
 				'error_type'                  => 'Type',
+				'approved'                    => 'Approved<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="&lt;h3&gt;Approved&lt;/h3&gt;&lt;p&gt;Allows confirmation of action taken to resolve the validation error.&lt;/p&gt;"></div>',
 			],
 			AMP_Validated_URL_Post_Type::add_single_post_columns()
 		);
@@ -1071,42 +1072,56 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		AMP_Validated_URL_Post_Type::handle_validation_error_status_update(); // No-op since no post.
 
 		$errors = [
-			[ 'code' => 'foo' ],
-			[ 'code' => 'bar' ],
+			// All statuses for errors should be updated.
+			[
+				'code'   => 'foo',
+				'status' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
+			],
+			[
+				'code'   => 'bar',
+				'status' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+			],
+			[
+				'code'   => 'baz',
+				'status' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
+			],
+			[
+				'code'   => 'buzz',
+				'status' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS,
+			],
+			// Except for this.
+			[
+				'code'   => 'status_should_not_be_updated',
+				'status' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
+			],
 		];
-
-		// Mark error with code 'bar' as being accepted.
-		add_filter(
-			'amp_validation_error_sanitized',
-			static function ( $sanitized, $error ) {
-				return isset( $error['code'] ) && 'bar' === $error['code'] ? true : null;
-			},
-			10,
-			2
-		);
 
 		$invalid_url_post_id = AMP_Validated_URL_Post_Type::store_validation_errors(
 			$errors,
 			home_url( '/' )
 		);
+
+		foreach ( $errors as $data ) {
+			$term_data = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( $data );
+			$term      = AMP_Validation_Error_Taxonomy::get_term( $term_data['slug'] );
+			wp_update_term( $term->term_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, [ 'term_group' => $data['status'] ] );
+		}
+
 		add_filter(
 			'pre_http_request',
 			static function() use ( $errors ) {
+				$results = array_map(
+					static function ( $error ) {
+						return [
+							'sanitized' => true,
+							'error'     => $error,
+						];
+					},
+					$errors
+				);
+
 				return [
-					'body' => wp_json_encode(
-						[
-							'results' => [
-								[
-									'sanitized' => false,
-									'error'     => $errors[0],
-								],
-								[
-									'sanitized' => true,
-									'error'     => $errors[1],
-								],
-							],
-						]
-					),
+					'body' => wp_json_encode( compact('results') )
 				];
 			}
 		);
@@ -1115,9 +1130,29 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 
 		$validation_errors = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $invalid_url_post_id );
 
-		$_POST[ AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] = [
-			$validation_errors[0]['term']->slug => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
-			$validation_errors[1]['term']->slug => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+		$_POST['val_errors'] = [
+			// Accepted and acknowledged.
+			$validation_errors[0]['term']->slug => [
+				AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+				AMP_Validated_URL_Post_Type::VALIDATION_ERROR_ACKNOWLEDGED     => 'on',
+			],
+			// Accepted but not acknowledged.
+			$validation_errors[1]['term']->slug => [
+				AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+			],
+			// Rejected and acknowledged.
+			$validation_errors[2]['term']->slug => [
+				AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS,
+				AMP_Validated_URL_Post_Type::VALIDATION_ERROR_ACKNOWLEDGED     => 'on',
+			],
+			// Rejected but not acknowledged.
+			$validation_errors[3]['term']->slug => [
+				AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS,
+			],
+			// Accepted but not acknowledged. Status should not be changed.
+			$validation_errors[4]['term']->slug => [
+				AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+			],
 		];
 
 		add_filter(
@@ -1136,8 +1171,8 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		}
 		$this->assertInstanceOf( 'Exception', $exception );
 		$this->assertEquals( 302, $exception->getCode() );
-		// No validation error statuses should be updated.
-		$this->assertStringEndsWith( 'action=edit&amp_taxonomy_terms_updated=0', $exception->getMessage() );
+		// 4 out of the 5 validation error statuses should be updated, with 2 kept errors.
+		$this->assertStringEndsWith( 'action=edit&amp_taxonomy_terms_updated=4&amp_remaining_errors=2', $exception->getMessage() );
 	}
 
 	/**
