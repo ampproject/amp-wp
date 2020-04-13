@@ -584,7 +584,7 @@ function is_amp_endpoint() {
 
 	// Make sure the parse_request action has triggered before trying to read from the REST_REQUEST constant, which is set during rest_api_loaded().
 	if ( ! did_action( 'parse_request' ) ) {
-		_doing_it_wrong( __FUNCTION__, esc_html( $error_message ), '1.5.3' );
+		_doing_it_wrong( __FUNCTION__, esc_html( $error_message ), '1.6.0' );
 		$warned = true;
 	} elseif ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
 		return false;
