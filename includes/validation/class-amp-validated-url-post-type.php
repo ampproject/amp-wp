@@ -1672,7 +1672,7 @@ class AMP_Validated_URL_Post_Type {
 	public static function handle_validation_error_status_update() {
 		check_admin_referer( self::UPDATE_POST_TERM_STATUS_ACTION, self::UPDATE_POST_TERM_STATUS_ACTION . '_nonce' );
 
-		if ( empty( $_POST[ 'val_errors' ] ) || ! is_array( $_POST[ 'val_errors' ] ) ) {
+		if ( empty( $_POST['val_errors'] ) || ! is_array( $_POST['val_errors'] ) ) {
 			return;
 		}
 		$post = get_post();
@@ -2132,7 +2132,7 @@ class AMP_Validated_URL_Post_Type {
 						$icon = Icon::VALID;
 					}
 					?>
-					<span class="amp-icon <?php echo $icon ?>"></span>
+					<span class="amp-icon <?php echo esc_attr( $icon ); ?>"></span>
 				</td>
 			</tr>
 			<tr>

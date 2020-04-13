@@ -1870,10 +1870,11 @@ class AMP_Validation_Error_Taxonomy {
 				$is_removed = (bool) ( (int) $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
 
 				if ( 'post.php' === $pagenow ) {
-					$status_select_name = sprintf( 'val_errors[%s][%s]', $term->slug, AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR );
-					$valid_color = '#0a9f1c';
+					$valid_color   = '#0a9f1c';
 					$invalid_color = '#e92c1a';
-					$status_color = $is_removed ? $valid_color : $invalid_color;
+
+					$status_border_color = sprintf( 'border-color: %s;', $is_removed ? $valid_color : $invalid_color );
+					$status_select_name  = sprintf( 'val_errors[%s][%s]', $term->slug, AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR );
 
 					ob_start();
 					?>
@@ -1881,7 +1882,7 @@ class AMP_Validation_Error_Taxonomy {
 						<label for="<?php echo esc_attr( $status_select_name ); ?>" class="screen-reader-text">
 							<?php esc_html_e( 'Markup Status', 'amp' ); ?>
 						</label>
-						<select class="amp-validation-error-status" name="<?php echo esc_attr( $status_select_name ); ?>" style="border-color: <?php echo $status_color ?>">
+						<select class="amp-validation-error-status" name="<?php echo esc_attr( $status_select_name ); ?>" style="<?php echo esc_attr( $status_border_color ); ?>">
 							<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS ); ?>" <?php selected( $is_removed ); ?> data-color="<?php echo esc_attr( $valid_color ); ?>">
 								<?php esc_html_e( 'Removed', 'amp' ); ?>
 							</option>
@@ -2031,7 +2032,7 @@ class AMP_Validation_Error_Taxonomy {
 				if ( 'post.php' === $pagenow ) {
 					$checked    = ! ( (int) $term->term_group & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK ) ? '' : 'checked="checked"';
 					$input_name = sprintf( 'val_errors[%s][%s]', $term->slug, AMP_Validated_URL_Post_Type::VALIDATION_ERROR_ACKNOWLEDGED );
-					$content .= sprintf( '<input class="amp-validation-error-status-ack" type="checkbox" name="%s" %s />', esc_attr( $input_name ), $checked );
+					$content   .= sprintf( '<input class="amp-validation-error-status-ack" type="checkbox" name="%s" %s />', esc_attr( $input_name ), $checked );
 				}
 		}
 		return $content;
@@ -3368,10 +3369,10 @@ class AMP_Validation_Error_Taxonomy {
 	public static function get_status_text_with_icon( $sanitization ) {
 		if ( $sanitization['term_status'] & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK ) {
 			$icon = Icon::VALID;
-			$text  = __( 'Removed', 'amp' );
+			$text = __( 'Removed', 'amp' );
 		} else {
 			$icon = Icon::INVALID;
-			$text  = __( 'Kept', 'amp' );
+			$text = __( 'Kept', 'amp' );
 		}
 		return sprintf( '<span class="status-text"><span class="amp-icon %s"></span> %s</span>', $icon, esc_html( $text ) );
 	}

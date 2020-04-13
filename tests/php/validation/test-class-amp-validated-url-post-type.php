@@ -1121,7 +1121,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 				);
 
 				return [
-					'body' => wp_json_encode( compact('results') )
+					'body' => wp_json_encode( compact( 'results' ) ),
 				];
 			}
 		);
