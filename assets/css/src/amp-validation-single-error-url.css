@@ -71,10 +71,6 @@ table.striped > tbody > tr.even {
 	vertical-align: top;
 }
 
-.column-status img {
-	width: 1.2rem;
-}
-
 #number-errors {
 	text-align: center;
 	background-color: #d3d3d3b8;
@@ -156,4 +152,5 @@ table.striped > tbody > tr.even {
 	margin-left: 5px;
 	width: auto;
 	float: none;
+	border-width: 2px;
 }

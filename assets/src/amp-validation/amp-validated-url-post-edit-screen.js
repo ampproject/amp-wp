@@ -28,7 +28,7 @@ domReady( () => {
 	handleFiltering();
 	handleSearching();
 	setValidationErrorRowsSeenClass();
-	handleStatusChange();
+	handleRowEvents();
 	handleBulkActions();
 	watchForUnsavedChanges();
 	setupStylesheetsMetabox();
@@ -283,31 +283,35 @@ const handleSearching = () => {
 const updateSelectIcon = ( select ) => {
 	const newOption = select.options[ select.selectedIndex ];
 	if ( newOption ) {
-		const iconSrc = newOption.getAttribute( 'data-status-icon' );
-		select.parentNode.querySelector( 'img' ).setAttribute( 'src', iconSrc );
+		const color = newOption.getAttribute( 'data-color' );
+		select.style.borderColor = color;
 	}
 };
 
 /**
- * Handles a change in the error status, like from 'Removed' to 'Kept'.
- *
- * Gets the data-status-icon value from the newly-selected <option>.
- * And sets this as the src of the status icon <img>.
+ * Handles events that may occur for a row.
  */
-const handleStatusChange = () => {
-	const onChange = ( { event } ) => {
-		if ( event.target.matches( 'select' ) ) {
-			updateSelectIcon( event.target );
-		}
-	};
+const handleRowEvents = () => {
 
 	document.querySelectorAll( 'tr[id^="tag-"]' ).forEach( ( row ) => {
-		const select = row.querySelector( '.amp-validation-error-status' );
+		const statusSelect   = row.querySelector( '.amp-validation-error-status' );
+		const ackCheckbox    = row.querySelector( '.amp-validation-error-status-ack' );
 
-		if ( select ) {
-			select.addEventListener( 'change', ( event ) => {
-				onChange( { event, row, select } );
+		if ( statusSelect ) {
+			/*
+			 * Handle a change in the error status, like from 'Removed' to 'Kept'. It gets the data-status-icon value
+			 * from the newly-selected <option>. And sets this as the src of the status icon <img>.
+			 */
+			statusSelect.addEventListener( 'change', ( event ) => {
+				if ( event.target.matches( 'select' ) ) {
+					updateSelectIcon( event.target );
+				}
 			} );
+		}
+
+		if ( ackCheckbox ) {
+			// Toggle the 'new' state for the row depending on the state of approval for the validation error.
+			ackCheckbox.addEventListener( 'change', () => row.classList.toggle( 'new' ) );
 		}
 	} );
 };
