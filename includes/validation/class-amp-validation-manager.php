@@ -253,7 +253,7 @@ class AMP_Validation_Manager {
 					wp_enqueue_style(
 						'amp-icons',
 						amp_get_asset_url( 'css/amp-icons.css' ),
-						[],
+						[ 'dashicons' ],
 						AMP__VERSION
 					);
 

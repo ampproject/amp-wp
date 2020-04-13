@@ -3,6 +3,7 @@
 }
 
 body .amp-icon {
+	/* stylelint-disable font-family-no-missing-generic-family-keyword */
 	font: normal 20px/1 dashicons;
 }
 
