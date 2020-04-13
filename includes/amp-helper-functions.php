@@ -566,45 +566,45 @@ function post_supports_amp( $post ) {
 function is_amp_endpoint() {
 	global $pagenow, $wp_query;
 
-	if ( is_admin() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || in_array( $pagenow, [ 'wp-login.php', 'wp-signup.php', 'wp-activate.php' ], true ) ) {
+	// Short-circuit for admin requests or requests to non-frontend pages.
+	if ( is_admin() || in_array( $pagenow, [ 'wp-login.php', 'wp-signup.php', 'wp-activate.php' ], true ) ) {
 		return false;
+	}
+
+	$warned        = false;
+	$error_message = sprintf(
+		/* translators: %1$s: is_amp_endpoint(), %2$s: the current action, %3$s: the wp action, %4$s: the parse_request action, %5$s: the WP_Query class, %6$s: the amp_skip_post() function */
+		__( '%1$s was called too early and so it will not work properly. WordPress is currently doing the "%2$s" action. Calling this function before the "%3$s" action means it will not have access to %4$s and the queried object to determine if it is an AMP response, thus neither the %5$s filter nor the AMP enabled toggle will be considered.', 'amp' ),
+		__FUNCTION__ . '()',
+		current_action(),
+		'wp',
+		'WP_Query',
+		'amp_skip_post()'
+	);
+
+	// Make sure the parse_request action has triggered before trying to read from the REST_REQUEST constant, which is set during rest_api_loaded().
+	if ( ! did_action( 'parse_request' ) ) {
+		_doing_it_wrong( __FUNCTION__, esc_html( $error_message ), '1.5.3' );
+		$warned = true;
+	} elseif ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+		return false;
+	}
+
+	// Make sure that the parse_query action has triggered, as this is required to initially populate the global WP_Query.
+	if ( ! $warned && ! ( did_action( 'parse_query' ) || $wp_query instanceof WP_Query ) ) {
+		_doing_it_wrong( __FUNCTION__, esc_html( $error_message ), '0.4.2' );
+		$warned = true;
 	}
 
 	// Always return false when requesting service worker.
-	if ( class_exists( 'WP_Service_Workers' ) && ! empty( $wp_query ) && defined( 'WP_Service_Workers::QUERY_VAR' ) && $wp_query->get( WP_Service_Workers::QUERY_VAR ) ) {
+	// Note this is no longer required because AMP_Theme_Support::prepare_response() will abort for non-HTML responses.
+	if ( class_exists( 'WP_Service_Workers' ) && $wp_query instanceof WP_Query && defined( 'WP_Service_Workers::QUERY_VAR' ) && $wp_query->get( WP_Service_Workers::QUERY_VAR ) ) {
 		return false;
 	}
 
-	$did_parse_query = did_action( 'parse_query' );
-
-	if ( ! $did_parse_query ) {
-		_doing_it_wrong(
-			__FUNCTION__,
-			sprintf(
-				/* translators: 1: is_amp_endpoint(), 2: parse_query */
-				esc_html__( '%1$s was called before the %2$s hook was called.', 'amp' ),
-				'is_amp_endpoint()',
-				'parse_query'
-			),
-			'0.4.2'
-		);
-	}
-
-	if ( empty( $wp_query ) || ! ( $wp_query instanceof WP_Query ) ) {
-		_doing_it_wrong(
-			__FUNCTION__,
-			sprintf(
-				/* translators: 1: is_amp_endpoint(), 2: WP_Query */
-				esc_html__( '%1$s was called before the %2$s was instantiated.', 'amp' ),
-				'is_amp_endpoint()',
-				'WP_Query'
-			),
-			'1.1'
-		);
-	}
-
-	// Note: is_embed() and is_feed() need $wp_query, so above checks must go first.
-	if ( is_embed() || is_feed() ) {
+	// Short-circuit for embed or feed requests since they will never be AMP responses.
+	// Note that these conditionals only require the parse_query action to have been run. They don't depend on the wp action having been fired.
+	if ( $wp_query instanceof WP_Query && ( $wp_query->is_embed() || $wp_query->is_feed() ) ) {
 		return false;
 	}
 
@@ -637,22 +637,18 @@ function is_amp_endpoint() {
 		return false;
 	}
 
-	if ( ! did_action( 'wp' ) ) {
-		_doing_it_wrong(
-			__FUNCTION__,
-			sprintf(
-				/* translators: 1: is_amp_endpoint(). 2: wp. 3: amp_skip_post */
-				esc_html__( '%1$s was called before the %2$s action which means it will not have access to the queried object to determine if it is an AMP response, thus neither the %3$s filter nor the AMP enabled publish metabox toggle will be considered.', 'amp' ),
-				'is_amp_endpoint()',
-				'wp',
-				'amp_skip_post'
-			),
-			'1.0.2'
-		);
-		$supported = true;
-	} else {
-		$availability = AMP_Theme_Support::get_template_availability();
+	if ( did_action( 'wp' ) && $wp_query instanceof WP_Query ) {
+		$availability = AMP_Theme_Support::get_template_availability( $wp_query );
 		$supported    = $availability['supported'];
+	} else {
+		// If WP_Query was not available yet, then we will just assume the query is supported since at this point we do
+		// know either that the site is in Standard mode or the URL was requested with the AMP query var. This can still
+		// produce an undesired result when a Standard mode site has a post that opts out of AMP, but this issue will
+		// have been flagged via _doing_it_wrong() above.
+		if ( ! $warned ) {
+			_doing_it_wrong( __FUNCTION__, esc_html( $error_message ), '1.0.2' );
+		}
+		$supported = true;
 	}
 
 	return amp_is_canonical() ? $supported : ( $has_amp_query_var && $supported );
