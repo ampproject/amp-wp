@@ -2612,7 +2612,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 						'wp_footer',
 						function() {
 							?>
-							<div class="is-style-outline"><button class="wp-block-button__link"></button></div>
+							<div class="wp-block-calendar"></div>
 							<div class="wp-block-foo"><figcaption></figcaption></div>
 							<img src="https://example.com/example.jpg" width="100" height="200">
 							<?php
@@ -2635,7 +2635,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					$this->assertStringContains( 'admin-bar', $original_dom->body->getAttribute( 'class' ) );
 					$this->assertStringContains( 'earlyprintstyle', $original_source, 'Expected early print style to not be present.' );
 
-					$this->assertStringContains( '.is-style-outline .wp-block-button__link', $amphtml_source, 'Expected block-library/style.css' );
+					$this->assertStringContains( '.wp-block-calendar', $amphtml_source, 'Expected block-library/style.css' );
 					$this->assertStringContains( '[class^="wp-block-"]:not(.wp-block-gallery) figcaption', $amphtml_source, 'Expected twentyten/blocks.css' );
 					$this->assertStringContains( 'amp-img.amp-wp-enforced-sizes', $amphtml_source, 'Expected amp-default.css' );
 					$this->assertStringContains( 'ab-empty-item', $amphtml_source, 'Expected admin-bar.css to still be present.' );
