@@ -628,6 +628,11 @@ function is_amp_endpoint() {
 		)
 	);
 
+	// If theme support is not present (if Standard or Transitional mode), then just consider the query var alone.
+	// If it turns out the URL actually does not support AMP, then AMP_Theme_Support::finish_init() will currently
+	// force the request to redirect to the non-AMP URL. This is somewhat of an accommodation for Reader mode sites
+	// calling is_amp_endpoint() early. So once transitioning to Standard or Transitional mode, then is_amp_endpoint()
+	// becomes more strict with the warnings it emits.
 	if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 		return $has_amp_query_var;
 	}

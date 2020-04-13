@@ -376,6 +376,7 @@ class AMP_Theme_Support {
 			add_filter( 'template_include', [ __CLASS__, 'serve_paired_browsing_experience' ] );
 		}
 
+		// @todo These two conditions can likely be combined into one.
 		$has_query_var  = (
 			isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			||
