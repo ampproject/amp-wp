@@ -479,7 +479,7 @@ function amp_remove_endpoint( $url ) {
  * If there are known validation errors for the current URL then do not output anything.
  *
  * @since 1.0
- * @globla WP_Query $wp_query
+ * @global WP_Query $wp_query
  */
 function amp_add_amphtml_link() {
 	global $wp_query;
