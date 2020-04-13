@@ -154,3 +154,7 @@ table.striped > tbody > tr.even {
 	float: none;
 	border-width: 2px;
 }
+
+#amp-invalid-markup > .amp-icon::before {
+	margin-right: 2px;
+}

@@ -1915,8 +1915,22 @@ class AMP_Validated_URL_Post_Type {
 						?>
 
 						<?php
+						$counts = self::count_invalid_url_validation_errors( self::get_invalid_url_validation_errors( $post ) );
+
+						if ( 0 < ( $counts['new_rejected'] + $counts['new_accepted'] ) ) {
+						?>
+							<strong id="amp-invalid-markup" class="status-text">
+								<span class="amp-icon amp-warning"></span>
+								<?php esc_html_e( 'Invalid markup not approved', 'amp' ); ?>
+							</strong>
+						<?php
+							esc_html_e( 'Please approve all the invalid markup before updating.', 'amp' );
+							echo '<br /><br />';
+						}
+						?>
+
+						<?php
 						$is_amp_enabled = self::is_amp_enabled_on_post( $post );
-						$counts         = self::count_invalid_url_validation_errors( self::get_invalid_url_validation_errors( $post ) );
 						$class          = $is_amp_enabled ? 'amp-enabled' : 'amp-disabled';
 						?>
 						<strong id="amp-enabled-icon" class="status-text <?php echo esc_attr( $class ); ?>">
