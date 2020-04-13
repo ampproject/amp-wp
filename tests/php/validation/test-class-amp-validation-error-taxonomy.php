@@ -745,7 +745,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		);
 		ob_start();
 		AMP_Validation_Error_Taxonomy::render_taxonomy_filters( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
-		$this->assertStringContains( 'New errors <span class="count">(2)</span>', ob_get_clean() );
+		$this->assertStringContains( 'Unapproved errors <span class="count">(2)</span>', ob_get_clean() );
 	}
 
 	/**

@@ -1343,8 +1343,8 @@ class AMP_Validation_Error_Taxonomy {
 				$new_term_text = sprintf(
 					/* translators: %s: the new term count. */
 					_nx(
-						'With new error <span class="count">(%s)</span>',
-						'With new errors <span class="count">(%s)</span>', // @todo Should this really have variations for singular/plural? Should count be part of translated string?
+						'With unapproved error <span class="count">(%s)</span>',
+						'With unapproved errors <span class="count">(%s)</span>', // @todo Should this really have variations for singular/plural? Should count be part of translated string?
 						$new_term_count,
 						'terms',
 						'amp'
@@ -1355,8 +1355,8 @@ class AMP_Validation_Error_Taxonomy {
 				$new_term_text = sprintf(
 					/* translators: %s: the new term count. */
 					_nx(
-						'New error <span class="count">(%s)</span>',
-						'New errors <span class="count">(%s)</span>', // @todo Should this really have variations for singular/plural? Should count be part of translated string?
+						'Unapproved error <span class="count">(%s)</span>',
+						'Unapproved errors <span class="count">(%s)</span>', // @todo Should this really have variations for singular/plural? Should count be part of translated string?
 						$new_term_count,
 						'terms',
 						'amp'
