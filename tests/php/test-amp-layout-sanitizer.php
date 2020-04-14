@@ -93,7 +93,7 @@ class AMP_Layout_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'inside_amp_mustache_template_responsive'     => [
-				'<template type="amp-mustache"><amp-img src="{{url}}" layout="responsive" srcset="{{foo}}" width="{{example_width}}" height="{{example_height}}" alt="This is for {{title}}"></amp-img></template>',
+				'<template type="amp-mustache"><div><div><div><amp-img src="{{url}}" layout="responsive" srcset="{{foo}}" width="{{example_width}}" height="{{example_height}}" alt="This is for {{title}}"></amp-img></div></div></div></template>',
 			],
 		];
 	}

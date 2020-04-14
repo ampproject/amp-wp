@@ -2314,7 +2314,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'variable_width_attribute_in_template_allowed' => [
-				'<template type="amp-mustache"><amp-img src="/img1.png" width="{{width}}" height="50"></amp-img></template>',
+				'<template type="amp-mustache"><div><div><div><amp-img src="/img1.png" width="{{width}}" height="50"></amp-img></div></div></div></template>',
 				null,
 				[ 'amp-mustache' ],
 			],
