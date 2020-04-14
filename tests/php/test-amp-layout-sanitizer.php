@@ -101,7 +101,24 @@ class AMP_Layout_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'inside_amp_mustache_template_sizes'          => [
-				'<template type="amp-mustache"><div><div><div><amp-img src="https://example.com/image.jpg" sizes="{{sizes}}" layout="responsive" width="200" height="400" alt="Lake vacation"></amp-img></div></div></div></template>',
+				'<template type="amp-mustache"><div><div><div>
+					<amp-img src="/img1.png" data-amp-layout="bad" width="bad" height="bad"></amp-img>
+					<amp-img src="/img1.png" data-amp-layout="{{layout}}" width="bad" height="bad"></amp-img>
+					<amp-img src="/img1.png" width="{{width}}" height="bad"></amp-img>
+					<amp-img src="/img1.png" data-amp-layout="bad" width="{{width}}" height="bad"></amp-img>
+					<amp-img src="/img1.png" data-amp-layout="bad" width="bad" height="{{height}}"></amp-img>
+					<amp-img src="/img1.png" data-amp-layout="bad" width="bad" height="bad" heights="{{height}}"></amp-img>
+					<amp-img src="/img1.png" data-amp-layout="bad" width="bad" height="bad" heights="bad" sizes="{{sizes}}"></amp-img>
+				</div></div></div></template>',
+				'<template type="amp-mustache"><div><div><div>
+					<amp-img src="/img1.png" width="bad" height="bad" layout="bad"></amp-img>
+					<amp-img src="/img1.png" width="bad" height="bad" layout="{{layout}}"></amp-img>
+					<amp-img src="/img1.png" width="{{width}}" height="bad"></amp-img>
+					<amp-img src="/img1.png" width="{{width}}" height="bad" layout="bad"></amp-img>
+					<amp-img src="/img1.png" width="bad" height="{{height}}" layout="bad"></amp-img>
+					<amp-img src="/img1.png" width="bad" height="bad" heights="{{height}}" layout="bad"></amp-img>
+					<amp-img src="/img1.png" width="bad" height="bad" heights="bad" sizes="{{sizes}}" layout="bad"></amp-img>
+				</div></div></div></template>',
 			],
 
 			'inside_amp_mustache_template_fill'           => [
