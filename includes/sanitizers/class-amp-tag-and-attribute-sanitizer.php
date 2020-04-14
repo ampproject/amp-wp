@@ -6,6 +6,7 @@
  */
 
 use AmpProject\CssLength;
+use AmpProject\Tag;
 use AmpProject\Dom\Document;
 
 /**
@@ -1452,15 +1453,28 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Whether the node is inside a mustache template.
 	 *
+	 * @since 1.5.3
+	 *
 	 * @param DOMElement $node The node to examine.
 	 * @return bool Whether the node is inside a valid mustache template.
 	 */
 	private function is_inside_mustache_template( DOMElement $node ) {
-		return (
-			( 'template' === $node->parentNode->nodeName && 'amp-mustache' === $node->parentNode->getAttribute( 'type' ) )
-			||
-			( 'script' === $node->parentNode->nodeName && 'text/plain' === $node->parentNode->getAttribute( 'type' ) && 'amp-mustache' === $node->parentNode->getAttribute( 'template' ) )
-		);
+		if ( ! empty( $this->open_elements['template'] ) ) {
+			while ( $node->parentNode instanceof DOMElement ) {
+				$node = $node->parentNode;
+				if ( Tag::TEMPLATE === $node->nodeName && 'amp-mustache' === $node->getAttribute( 'type' ) ) {
+					return true;
+				}
+			}
+		} elseif ( ! empty( $this->open_elements['script'] ) ) {
+			while ( $node->parentNode instanceof DOMElement ) {
+				$node = $node->parentNode;
+				if ( Tag::SCRIPT === $node->nodeName && 'amp-mustache' === $node->getAttribute( 'template' ) && 'text/plain' === $node->getAttribute( 'type' ) ) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	/**
