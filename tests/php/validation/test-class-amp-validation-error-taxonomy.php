@@ -810,7 +810,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		$output = get_echo( [ 'AMP_Validation_Error_Taxonomy', 'render_error_status_filter' ] );
 		$this->assertStringContains(
 			sprintf(
-				'With new errors <span class="count">(%d)</span>',
+				'With disapproved errors <span class="count">(%d)</span>',
 				$number_of_errors
 			),
 			$output
@@ -995,12 +995,23 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 			]
 		);
 		$filtered_actions   = AMP_Validation_Error_Taxonomy::filter_tag_row_actions( $initial_actions, $term_this_taxonomy );
+		$approve_action     = $filtered_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACKNOWLEDGE_ACTION ];
 		$reject_action      = $filtered_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION ];
-		$accept_action      = $filtered_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION ];
+		$this->assertStringContains( strval( $term_this_taxonomy->term_id ), $approve_action );
 		$this->assertStringContains( strval( $term_this_taxonomy->term_id ), $reject_action );
-		$this->assertStringContains( strval( $term_this_taxonomy->term_id ), $accept_action );
+		$this->assertStringContains( 'Approve', $approve_action );
 		$this->assertStringContains( 'Keep', $reject_action );
-		$this->assertStringContains( 'Confirm removed', $accept_action );
+
+		// If its a kept error only 'Remove' action should be shown, and not 'Keep' action.
+		add_filter( 'amp_validation_error_default_sanitized', '__return_false' );
+
+		$filtered_actions = AMP_Validation_Error_Taxonomy::filter_tag_row_actions( $initial_actions, $term_this_taxonomy );
+		$approve_action   = $filtered_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACKNOWLEDGE_ACTION ];
+		$accept_action    = $filtered_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION ];
+		$this->assertStringContains( strval( $term_this_taxonomy->term_id ), $approve_action );
+		$this->assertStringContains( strval( $term_this_taxonomy->term_id ), $accept_action );
+		$this->assertStringContains( 'Approve', $approve_action );
+		$this->assertStringContains( 'Remove', $accept_action );
 	}
 
 	/**

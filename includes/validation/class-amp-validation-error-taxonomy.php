@@ -817,8 +817,8 @@ class AMP_Validation_Error_Taxonomy {
 			'bulk_actions-edit-' . self::TAXONOMY_SLUG,
 			static function( $bulk_actions ) {
 				unset( $bulk_actions['delete'] );
-				$bulk_actions[ self::VALIDATION_ERROR_ACCEPT_ACTION ] = __( 'Remove', 'amp' );
-				$bulk_actions[ self::VALIDATION_ERROR_REJECT_ACTION ] = __( 'Keep', 'amp' );
+				$bulk_actions[ self::VALIDATION_ERROR_ACCEPT_ACTION ]      = __( 'Remove', 'amp' );
+				$bulk_actions[ self::VALIDATION_ERROR_REJECT_ACTION ]      = __( 'Keep', 'amp' );
 				$bulk_actions[ self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION ] = __( 'Approve', 'amp' );
 				return $bulk_actions;
 			}
@@ -1685,14 +1685,14 @@ class AMP_Validation_Error_Taxonomy {
 					),
 					esc_html__( 'Remove', 'amp' )
 				);
-			}elseif ( $is_accepted ) {
+			} elseif ( $is_accepted ) {
 				$actions[ self::VALIDATION_ERROR_REJECT_ACTION ] = sprintf(
 					'<a href="%s">%s</a>',
 					wp_nonce_url(
 						add_query_arg( array_merge( [ 'action' => self::VALIDATION_ERROR_REJECT_ACTION ], compact( 'term_id' ) ) ),
 						self::VALIDATION_ERROR_REJECT_ACTION
 					),
-					esc_html__('Keep', 'amp' )
+					esc_html__( 'Keep', 'amp' )
 				);
 			}
 		}
@@ -2910,14 +2910,14 @@ class AMP_Validation_Error_Taxonomy {
 			$term_group = $term->term_group;
 
 			if ( self::VALIDATION_ERROR_ACCEPT_ACTION === $action ) {
-				$term_group |= AMP_Validation_Error_Taxonomy::ACCEPTED_VALIDATION_ERROR_BIT_MASK;
+				$term_group |= self::ACCEPTED_VALIDATION_ERROR_BIT_MASK;
 			} elseif ( self::VALIDATION_ERROR_REJECT_ACTION === $action ) {
-				$term_group -= AMP_Validation_Error_Taxonomy::ACCEPTED_VALIDATION_ERROR_BIT_MASK;
+				$term_group -= self::ACCEPTED_VALIDATION_ERROR_BIT_MASK;
 			} elseif ( self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION === $action ) {
-				$acknowledged = $term_group & AMP_Validation_Error_Taxonomy::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK;
-				$term_group = $acknowledged
-					? $term_group - AMP_Validation_Error_Taxonomy::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK
-					: $term_group | AMP_Validation_Error_Taxonomy::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK;
+				$acknowledged = $term_group & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK;
+				$term_group   = $acknowledged
+					? $term_group - self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK
+					: $term_group | self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK;
 			}
 
 			if ( $term_group !== $term->term_group ) {

@@ -1480,7 +1480,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		// This is now on the invalid URL post type edit.php screen, so it should output a <select> element.
 		$output = get_echo( [ 'AMP_Validated_URL_Post_Type', 'render_post_filters' ], [ $correct_post_type, $correct_which_second_argument ] );
 		$this->assertStringContains(
-			sprintf( 'With new errors <span class="count">(%d)</span>', $number_of_new_errors ),
+			sprintf( 'With disapproved errors <span class="count">(%d)</span>', $number_of_new_errors ),
 			$output
 		);
 		$this->assertStringContains(
