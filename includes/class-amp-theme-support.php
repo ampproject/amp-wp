@@ -432,6 +432,7 @@ class AMP_Theme_Support {
 	 * Ensure that the current AMP location is correct.
 	 *
 	 * @since 1.0
+	 * @since 1.6 Removed $exit param.
 	 *
 	 * @return bool Whether redirection should have been done.
 	 */
@@ -493,6 +494,7 @@ class AMP_Theme_Support {
 	 * @since 0.7
 	 * @since 1.0 Added $exit param.
 	 * @since 1.0 Renamed from redirect_canonical_amp().
+	 * @since 1.6 Removed $exit param.
 	 *
 	 * @param int $status Status code (301 or 302).
 	 * @return bool Whether redirection should have be done.

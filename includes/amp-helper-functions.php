@@ -593,18 +593,18 @@ function is_amp_endpoint() {
 	}
 
 	// Make sure that the parse_query action has triggered, as this is required to initially populate the global WP_Query.
-	if ( ! $warned && ! ( did_action( 'parse_query' ) || $wp_query instanceof WP_Query ) ) {
+	if ( ! $warned && ! ( $wp_query instanceof WP_Query || did_action( 'parse_query' ) ) ) {
 		_doing_it_wrong( __FUNCTION__, esc_html( $error_message ), '0.4.2' );
 		$warned = true;
 	}
 
-	// Always return false when requesting service worker.
+	// Always return false when requesting the service worker.
 	// Note this is no longer required because AMP_Theme_Support::prepare_response() will abort for non-HTML responses.
 	if ( class_exists( 'WP_Service_Workers' ) && $wp_query instanceof WP_Query && defined( 'WP_Service_Workers::QUERY_VAR' ) && $wp_query->get( WP_Service_Workers::QUERY_VAR ) ) {
 		return false;
 	}
 
-	// Short-circuit queries that can never AMP responses (e.g. post embeds and feeds).
+	// Short-circuit queries that can never have AMP responses (e.g. post embeds and feeds).
 	// Note that these conditionals only require the parse_query action to have been run. They don't depend on the wp action having been fired.
 	if (
 		$wp_query instanceof WP_Query
@@ -657,7 +657,7 @@ function is_amp_endpoint() {
 			$supported    = $availability['supported'];
 		} else {
 			$queried_object = get_queried_object();
-			$supported      = ( $wp_query->is_singular() || $wp_query->is_posts_page ) && $queried_object instanceof WP_Post && post_supports_amp( $queried_object );
+			$supported      = $queried_object instanceof WP_Post && ( $wp_query->is_singular() || $wp_query->is_posts_page ) && post_supports_amp( $queried_object );
 		}
 	} else {
 		// If WP_Query was not available yet, then we will just assume the query is supported since at this point we do
