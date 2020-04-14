@@ -1339,7 +1339,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return true;
 		}
 
-		if ( $this->is_inside_mustache_template( $node ) ) {
+		if ( $this->is_inside_mustache_template( $node ) && $this->has_layout_attribute_with_mustache_variable( $node ) ) {
 			return true;
 		}
 
@@ -1474,6 +1474,29 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 		}
+		return false;
+	}
+
+	/**
+	 * Whether the node has a layout attribute with variable syntax, like {{foo}}.
+	 *
+	 * This is important for whether to validate the layout of the node.
+	 * Similar to the validation logic in the AMP validator.
+	 *
+	 * @see https://github.com/ampproject/amphtml/blob/c083d2c6120a251dcc9b0beb33c0336c7d3ca5a8/validator/engine/validator.js#L4038-L4054
+	 *
+	 * @since 1.5.3
+	 *
+	 * @param DOMElement $node The node to examine.
+	 * @return bool Whether the node has a layout attribute with variable syntax.
+	 */
+	private function has_layout_attribute_with_mustache_variable( DOMElement $node ) {
+		foreach ( [ 'layout', 'width', 'height', 'sizes', 'heights' ] as $attribute ) {
+			if ( preg_match( '#{{.*}}#', $node->getAttribute( $attribute ) ) ) {
+				return true;
+			}
+		}
+
 		return false;
 	}
 

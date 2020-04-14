@@ -99,6 +99,15 @@ class AMP_Layout_Sanitizer_Test extends WP_UnitTestCase {
 			'inside_amp_mustache_template_responsive'     => [
 				'<template type="amp-mustache"><div><div><div><amp-img src="{{url}}" layout="responsive" srcset="{{foo}}" width="{{example_width}}" height="{{example_height}}" alt="This is for {{title}}"></amp-img></div></div></div></template>',
 			],
+
+			'inside_amp_mustache_template_sizes'          => [
+				'<template type="amp-mustache"><div><div><div><amp-img src="https://example.com/image.jpg" sizes="{{sizes}}" layout="responsive" width="200" height="400" alt="Lake vacation"></amp-img></div></div></div></template>',
+			],
+
+			'inside_amp_mustache_template_fill'           => [
+				'<template type="amp-mustache"><div><div><amp-img width="100%" height="10" data-amp-layout="fill" src="{{src}}"></amp-img></div></div></template>',
+				'<template type="amp-mustache"><div><div><amp-img width="auto" height="10" src="{{src}}" layout="fixed-height"></amp-img></div></div></template>',
+			],
 		];
 	}
 
