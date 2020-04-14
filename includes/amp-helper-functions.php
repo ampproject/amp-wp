@@ -654,10 +654,10 @@ function is_amp_endpoint() {
 	if ( did_action( 'wp' ) && $wp_query instanceof WP_Query ) {
 		if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 			$availability = AMP_Theme_Support::get_template_availability( $wp_query );
-			$supported    = $availability['supported'];
+			return $availability['supported'];
 		} else {
 			$queried_object = get_queried_object();
-			$supported      = $queried_object instanceof WP_Post && ( $wp_query->is_singular() || $wp_query->is_posts_page ) && post_supports_amp( $queried_object );
+			return $queried_object instanceof WP_Post && ( $wp_query->is_singular() || $wp_query->is_posts_page ) && post_supports_amp( $queried_object );
 		}
 	} else {
 		// If WP_Query was not available yet, then we will just assume the query is supported since at this point we do
@@ -667,10 +667,8 @@ function is_amp_endpoint() {
 		if ( ! $warned ) {
 			_doing_it_wrong( __FUNCTION__, esc_html( $error_message ), '1.0.2' );
 		}
-		$supported = amp_is_canonical() || $has_amp_query_var;
+		return amp_is_canonical() || $has_amp_query_var;
 	}
-
-	return $supported;
 }
 
 /**
