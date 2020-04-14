@@ -53,6 +53,7 @@ interface Attribute
     const SIZES                 = 'sizes';
     const SRC                   = 'src';
     const TABINDEX              = 'tabindex';
+    const TEMPLATE              = 'template';
     const TYPE                  = 'type';
     const VIEWPORT              = 'viewport';
     const WIDTH                 = 'width';
@@ -63,9 +64,10 @@ interface Attribute
 
     const ALL_BOILERPLATES = [self::AMP_BOILERPLATE, self::AMP4ADS_BOILERPLATE, self::AMP4EMAIL_BOILERPLATE];
 
-    const TYPE_HTML    = 'text/html';
-    const TYPE_JSON    = 'application/json';
-    const TYPE_LD_JSON = 'application/ld+json';
+    const TYPE_HTML       = 'text/html';
+    const TYPE_JSON       = 'application/json';
+    const TYPE_LD_JSON    = 'application/ld+json';
+    const TYPE_TEXT_PLAIN = 'text/plain';
 
     const REL_CANONICAL    = 'canonical';
     const REL_DNS_PREFETCH = 'dns-prefetch';

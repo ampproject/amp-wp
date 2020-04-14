@@ -5,10 +5,11 @@
  * @package AMP
  */
 
-use AmpProject\CssLength;
-use AmpProject\Tag;
-use AmpProject\Dom\Document;
 use AmpProject\Attribute;
+use AmpProject\CssLength;
+use AmpProject\Dom\Document;
+use AmpProject\Extension;
+use AmpProject\Tag;
 
 /**
  * Strips the tags and attributes from the content that are not allowed by the AMP spec.
@@ -1463,14 +1464,14 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		if ( ! empty( $this->open_elements['template'] ) ) {
 			while ( $node->parentNode instanceof DOMElement ) {
 				$node = $node->parentNode;
-				if ( Tag::TEMPLATE === $node->nodeName && 'amp-mustache' === $node->getAttribute( 'type' ) ) {
+				if ( Tag::TEMPLATE === $node->nodeName && Extension::MUSTACHE === $node->getAttribute( Attribute::TYPE ) ) {
 					return true;
 				}
 			}
 		} elseif ( ! empty( $this->open_elements['script'] ) ) {
 			while ( $node->parentNode instanceof DOMElement ) {
 				$node = $node->parentNode;
-				if ( Tag::SCRIPT === $node->nodeName && 'amp-mustache' === $node->getAttribute( 'template' ) && 'text/plain' === $node->getAttribute( 'type' ) ) {
+				if ( Tag::SCRIPT === $node->nodeName && Extension::MUSTACHE === $node->getAttribute( Attribute::TEMPLATE ) && Attribute::TYPE_TEXT_PLAIN === $node->getAttribute( Attribute::TYPE ) ) {
 					return true;
 				}
 			}
