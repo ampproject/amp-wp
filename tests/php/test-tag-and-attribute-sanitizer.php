@@ -2331,7 +2331,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-mustache' ],
 			],
 
-			'variable_attributes_in_mustache_script'     => [
+			'variable_attributes_in_mustache_script'       => [
 				'
 				<script template="amp-mustache" type="text/plain">
 					<div><div><div>
