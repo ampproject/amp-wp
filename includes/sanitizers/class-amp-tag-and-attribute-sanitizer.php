@@ -8,6 +8,7 @@
 use AmpProject\CssLength;
 use AmpProject\Tag;
 use AmpProject\Dom\Document;
+use AmpProject\Attribute;
 
 /**
  * Strips the tags and attributes from the content that are not allowed by the AMP spec.
@@ -1491,7 +1492,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return bool Whether the node has a layout attribute with variable syntax.
 	 */
 	private function has_layout_attribute_with_mustache_variable( DOMElement $node ) {
-		foreach ( [ 'layout', 'width', 'height', 'sizes', 'heights' ] as $attribute ) {
+		foreach ( [ Attribute::LAYOUT, Attribute::WIDTH, Attribute::HEIGHT, Attribute::SIZES, Attribute::HEIGHTS ] as $attribute ) {
 			if ( preg_match( '/{{[^}]+?}}/', $node->getAttribute( $attribute ) ) ) {
 				return true;
 			}
