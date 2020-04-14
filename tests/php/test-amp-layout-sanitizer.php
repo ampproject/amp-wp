@@ -83,6 +83,18 @@ class AMP_Layout_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-img src="foo.jpg" style="height:100%;" width="100%"></amp-img>',
 				'<amp-img src="foo.jpg" layout="fill"></amp-img>',
 			],
+
+			'inside_amp_mustache_template_simple_text'   => [
+				'<template type="amp-mustache"><span>Hello, {{first_name}}!</span></template>',
+			],
+
+			'inside_amp_mustache_template'               => [
+				'<template type="amp-mustache"><amp-img src="{{url}}" layout="intrinsic" srcset="{{foo}}" width="{{example_width}}" height="{{example_height}}" alt="This is for {{title}}"></amp-img></template>',
+			],
+
+			'inside_amp_mustache_template_responsive'    => [
+				'<template type="amp-mustache"><amp-img src="{{url}}" layout="responsive" srcset="{{foo}}" width="{{example_width}}" height="{{example_height}}" alt="This is for {{title}}"></amp-img></template>',
+			],
 		];
 	}
 

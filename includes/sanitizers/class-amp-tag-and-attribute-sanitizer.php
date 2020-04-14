@@ -1338,6 +1338,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return true;
 		}
 
+		if ( $this->is_inside_mustache_template( $node ) ) {
+			return true;
+		}
+
 		$layout_attr = $node->getAttribute( 'layout' );
 		$allow_fluid = AMP_Rule_Spec::LAYOUT_FLUID === $layout_attr;
 		$allow_auto  = true;
@@ -1443,6 +1447,20 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Whether the node is inside a mustache template.
+	 *
+	 * @param DOMElement $node The node to examine.
+	 * @return bool Whether the node is inside a valid mustache template.
+	 */
+	private function is_inside_mustache_template( DOMElement $node ) {
+		return (
+			( 'template' === $node->parentNode->nodeName && 'amp-mustache' === $node->parentNode->getAttribute( 'type' ) )
+			||
+			( 'script' === $node->parentNode->nodeName && 'text/plain' === $node->parentNode->getAttribute( 'type' ) && 'amp-mustache' === $node->parentNode->getAttribute( 'template' ) )
+		);
 	}
 
 	/**

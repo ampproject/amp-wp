@@ -2313,6 +2313,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_WIDTH ],
 			],
 
+			'variable_width_attribute_in_template_allowed' => [
+				'<template type="amp-mustache"><amp-img src="/img1.png" width="{{width}}" height="50"></amp-img></template>',
+				null,
+				[ 'amp-mustache' ],
+			],
+
 			'illegal_height_attribute'                     => [
 				'<amp-img src="/img1.png" width="50" height="50%"></amp-img>',
 				'',
