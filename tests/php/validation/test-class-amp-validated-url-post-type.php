@@ -1133,8 +1133,8 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$_POST['val_errors'] = [
 			// Accepted and acknowledged.
 			$validation_errors[0]['term']->slug => [
-				AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
-				AMP_Validated_URL_Post_Type::VALIDATION_ERROR_ACKNOWLEDGED     => 'on',
+				AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR     => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACKNOWLEDGE_ACTION => 'on',
 			],
 			// Accepted but not acknowledged.
 			$validation_errors[1]['term']->slug => [
@@ -1142,8 +1142,8 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 			],
 			// Rejected and acknowledged.
 			$validation_errors[2]['term']->slug => [
-				AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS,
-				AMP_Validated_URL_Post_Type::VALIDATION_ERROR_ACKNOWLEDGED     => 'on',
+				AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR     => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS,
+				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACKNOWLEDGE_ACTION => 'on',
 			],
 			// Rejected but not acknowledged.
 			$validation_errors[3]['term']->slug => [

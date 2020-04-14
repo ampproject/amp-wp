@@ -6,7 +6,6 @@
  */
 
 use AmpProject\AmpWP\Icon;
-use AmpProject\Fonts;
 
 /**
  * Class AMP_Validated_URL_Post_Type
@@ -79,25 +78,11 @@ class AMP_Validated_URL_Post_Type {
 	const STATUS_META_BOX = 'amp_validation_status';
 
 	/**
-	 * The name of the side meta box on the CPT post.php page.
-	 *
-	 * @var string
-	 */
-	const VALIDATION_ERRORS_META_BOX = 'amp_validation_errors';
-
-	/**
 	 * The transient key to use for caching the number of URLs with new validation errors.
 	 *
 	 * @var string
 	 */
 	const NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT = 'amp_new_validation_error_urls_count';
-
-	/**
-	 * The name of the input field that indicates the acknowledgement of a validation error.
-	 *
-	 * @var string
-	 */
-	const VALIDATION_ERROR_ACKNOWLEDGED = 'amp_validation_error_term_ack';
 
 	/**
 	 * The total number of errors associated with a URL, regardless of the maximum that can display.
@@ -1700,7 +1685,7 @@ class AMP_Validated_URL_Post_Type {
 				? $data[ AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ]
 				: null;
 
-			$status_acknowledged = isset( $data[ self::VALIDATION_ERROR_ACKNOWLEDGED ] );
+			$status_acknowledged = isset( $data[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACKNOWLEDGE_ACTION ] );
 
 			if ( ! is_numeric( $status ) ) {
 				continue;
@@ -1918,12 +1903,12 @@ class AMP_Validated_URL_Post_Type {
 						$counts = self::count_invalid_url_validation_errors( self::get_invalid_url_validation_errors( $post ) );
 
 						if ( 0 < ( $counts['new_rejected'] + $counts['new_accepted'] ) ) {
-						?>
+							?>
 							<strong id="amp-invalid-markup" class="status-text">
 								<span class="amp-icon amp-warning"></span>
 								<?php esc_html_e( 'Invalid markup not approved', 'amp' ); ?>
 							</strong>
-						<?php
+							<?php
 							esc_html_e( 'Please approve all the invalid markup before updating.', 'amp' );
 							echo '<br /><br />';
 						}

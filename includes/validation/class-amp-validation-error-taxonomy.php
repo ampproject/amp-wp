@@ -68,6 +68,13 @@ class AMP_Validation_Error_Taxonomy {
 	 *
 	 * @var string
 	 */
+	const VALIDATION_ERROR_ACKNOWLEDGE_ACTION = 'amp_validation_error_ack';
+
+	/**
+	 * Action name for ignoring a validation error.
+	 *
+	 * @var string
+	 */
 	const VALIDATION_ERROR_ACCEPT_ACTION = 'amp_validation_error_accept';
 
 	/**
@@ -810,8 +817,9 @@ class AMP_Validation_Error_Taxonomy {
 			'bulk_actions-edit-' . self::TAXONOMY_SLUG,
 			static function( $bulk_actions ) {
 				unset( $bulk_actions['delete'] );
-				$bulk_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION ] = __( 'Remove', 'amp' );
-				$bulk_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION ] = __( 'Keep', 'amp' );
+				$bulk_actions[ self::VALIDATION_ERROR_ACCEPT_ACTION ] = __( 'Remove', 'amp' );
+				$bulk_actions[ self::VALIDATION_ERROR_REJECT_ACTION ] = __( 'Keep', 'amp' );
+				$bulk_actions[ self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION ] = __( 'Approve', 'amp' );
 				return $bulk_actions;
 			}
 		);
@@ -1343,8 +1351,8 @@ class AMP_Validation_Error_Taxonomy {
 				$new_term_text = sprintf(
 					/* translators: %s: the new term count. */
 					_nx(
-						'With unapproved error <span class="count">(%s)</span>',
-						'With unapproved errors <span class="count">(%s)</span>', // @todo Should this really have variations for singular/plural? Should count be part of translated string?
+						'With disapproved error <span class="count">(%s)</span>',
+						'With disapproved errors <span class="count">(%s)</span>', // @todo Should this really have variations for singular/plural? Should count be part of translated string?
 						$new_term_count,
 						'terms',
 						'amp'
@@ -1355,8 +1363,8 @@ class AMP_Validation_Error_Taxonomy {
 				$new_term_text = sprintf(
 					/* translators: %s: the new term count. */
 					_nx(
-						'Unapproved error <span class="count">(%s)</span>',
-						'Unapproved errors <span class="count">(%s)</span>', // @todo Should this really have variations for singular/plural? Should count be part of translated string?
+						'Disapproved error <span class="count">(%s)</span>',
+						'Disapproved errors <span class="count">(%s)</span>', // @todo Should this really have variations for singular/plural? Should count be part of translated string?
 						$new_term_count,
 						'terms',
 						'amp'
@@ -1655,29 +1663,36 @@ class AMP_Validation_Error_Taxonomy {
 		// Only add the 'Remove' and 'Keep' links to the index page, not the individual URL page.
 		if ( 'edit-tags.php' === $pagenow ) {
 			$sanitization = self::get_validation_error_sanitization( json_decode( $term->description, true ) );
+			$is_accepted  = $sanitization['status'] & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK;
 
-			if ( self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $sanitization['status'] ) {
+			$actions[ self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION ] = sprintf(
+				'<a href="%s">%s</a>',
+				wp_nonce_url(
+					add_query_arg( array_merge( [ 'action' => self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION ], compact( 'term_id' ) ) ),
+					self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION
+				),
+				esc_html(
+					! ( $sanitization['term_status'] & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK ) ? __( 'Approve', 'amp' ) : __( 'Disapprove', 'amp' )
+				)
+			);
+
+			if ( ! $is_accepted ) {
 				$actions[ self::VALIDATION_ERROR_ACCEPT_ACTION ] = sprintf(
 					'<a href="%s">%s</a>',
 					wp_nonce_url(
 						add_query_arg( array_merge( [ 'action' => self::VALIDATION_ERROR_ACCEPT_ACTION ], compact( 'term_id' ) ) ),
 						self::VALIDATION_ERROR_ACCEPT_ACTION
 					),
-					esc_html(
-						self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $sanitization['term_status'] ? __( 'Confirm removed', 'amp' ) : __( 'Remove', 'amp' )
-					)
+					esc_html__( 'Remove', 'amp' )
 				);
-			}
-			if ( self::VALIDATION_ERROR_ACK_REJECTED_STATUS !== $sanitization['status'] ) {
+			}elseif ( $is_accepted ) {
 				$actions[ self::VALIDATION_ERROR_REJECT_ACTION ] = sprintf(
 					'<a href="%s">%s</a>',
 					wp_nonce_url(
 						add_query_arg( array_merge( [ 'action' => self::VALIDATION_ERROR_REJECT_ACTION ], compact( 'term_id' ) ) ),
 						self::VALIDATION_ERROR_REJECT_ACTION
 					),
-					esc_html(
-						self::VALIDATION_ERROR_NEW_REJECTED_STATUS === $sanitization['term_status'] ? __( 'Confirm kept', 'amp' ) : __( 'Keep', 'amp' )
-					)
+					esc_html__('Keep', 'amp' )
 				);
 			}
 		}
@@ -2031,7 +2046,7 @@ class AMP_Validation_Error_Taxonomy {
 			case 'approved':
 				if ( 'post.php' === $pagenow ) {
 					$checked    = ! ( (int) $term->term_group & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK ) ? '' : 'checked="checked"';
-					$input_name = sprintf( 'val_errors[%s][%s]', $term->slug, AMP_Validated_URL_Post_Type::VALIDATION_ERROR_ACKNOWLEDGED );
+					$input_name = sprintf( 'val_errors[%s][%s]', $term->slug, self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION );
 					$content   .= sprintf( '<input class="amp-validation-error-status-ack" type="checkbox" name="%s" %s />', esc_attr( $input_name ), $checked );
 				}
 		}
@@ -2877,8 +2892,7 @@ class AMP_Validation_Error_Taxonomy {
 	 * @return string Redirect.
 	 */
 	public static function handle_validation_error_update( $redirect_to, $action, $term_ids ) {
-		// @todo Add a new action for mark and unmark as new.
-		if ( ! in_array( $action, [ self::VALIDATION_ERROR_ACCEPT_ACTION, self::VALIDATION_ERROR_REJECT_ACTION ], true ) ) {
+		if ( ! in_array( $action, [ self::VALIDATION_ERROR_ACCEPT_ACTION, self::VALIDATION_ERROR_REJECT_ACTION, self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION ], true ) ) {
 			return $redirect_to;
 		}
 
@@ -2895,11 +2909,15 @@ class AMP_Validation_Error_Taxonomy {
 			}
 			$term_group = $term->term_group;
 
-			// The action of marking an error as removed/kept (aka accepted/rejected) also results in it being marked as not-new.
 			if ( self::VALIDATION_ERROR_ACCEPT_ACTION === $action ) {
-				$term_group = self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS;
+				$term_group |= AMP_Validation_Error_Taxonomy::ACCEPTED_VALIDATION_ERROR_BIT_MASK;
 			} elseif ( self::VALIDATION_ERROR_REJECT_ACTION === $action ) {
-				$term_group = self::VALIDATION_ERROR_ACK_REJECTED_STATUS;
+				$term_group -= AMP_Validation_Error_Taxonomy::ACCEPTED_VALIDATION_ERROR_BIT_MASK;
+			} elseif ( self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION === $action ) {
+				$acknowledged = $term_group & AMP_Validation_Error_Taxonomy::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK;
+				$term_group = $acknowledged
+					? $term_group - AMP_Validation_Error_Taxonomy::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK
+					: $term_group | AMP_Validation_Error_Taxonomy::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK;
 			}
 
 			if ( $term_group !== $term->term_group ) {
