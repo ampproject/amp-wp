@@ -604,9 +604,25 @@ function is_amp_endpoint() {
 		return false;
 	}
 
-	// Short-circuit for embed or feed requests since they will never be AMP responses.
+	// Short-circuit queries that can never AMP responses (e.g. post embeds and feeds).
 	// Note that these conditionals only require the parse_query action to have been run. They don't depend on the wp action having been fired.
-	if ( $wp_query instanceof WP_Query && ( $wp_query->is_embed() || $wp_query->is_feed() ) ) {
+	if (
+		$wp_query instanceof WP_Query
+		&&
+		(
+			$wp_query->is_embed()
+			||
+			$wp_query->is_feed()
+			||
+			$wp_query->is_comment_feed()
+			||
+			$wp_query->is_trackback()
+			||
+			$wp_query->is_robots()
+			||
+			( method_exists( $wp_query, 'is_favicon' ) && $wp_query->is_favicon() )
+		)
+	) {
 		return false;
 	}
 
