@@ -2907,7 +2907,7 @@ class AMP_Validation_Error_Taxonomy {
 			if ( ! $term ) {
 				continue;
 			}
-			$term_group = $term->term_group;
+			$term_group = (int) $term->term_group;
 
 			if ( self::VALIDATION_ERROR_ACCEPT_ACTION === $action ) {
 				$term_group |= self::ACCEPTED_VALIDATION_ERROR_BIT_MASK;
