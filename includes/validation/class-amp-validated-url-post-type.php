@@ -540,7 +540,7 @@ class AMP_Validated_URL_Post_Type {
 				'<span class="status-text %s" title="%s"><span class="amp-icon %s"></span> %s: %s</span>',
 				esc_attr( $counts['new_accepted'] > 0 ? 'has-new' : '' ),
 				esc_attr( $title ),
-				$counts['new_accepted'] > 0 ? Icon::WARNING : Icon::VALID,
+				( $counts['new_accepted'] + $counts['new_rejected'] ) > 0 ? Icon::WARNING : Icon::VALID,
 				esc_html__( 'Invalid markup removed', 'amp' ),
 				number_format_i18n( $removed_count )
 			);
