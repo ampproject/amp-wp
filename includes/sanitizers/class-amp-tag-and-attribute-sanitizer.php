@@ -1492,7 +1492,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function has_layout_attribute_with_mustache_variable( DOMElement $node ) {
 		foreach ( [ 'layout', 'width', 'height', 'sizes', 'heights' ] as $attribute ) {
-			if ( preg_match( '#{{.*}}#', $node->getAttribute( $attribute ) ) ) {
+			if ( preg_match( '/{{[^}]+?}}/', $node->getAttribute( $attribute ) ) ) {
 				return true;
 			}
 		}
