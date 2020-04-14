@@ -124,7 +124,7 @@ function amp_init() {
 	 */
 	$options     = get_option( AMP_Options_Manager::OPTION_NAME, [] );
 	$old_version = isset( $options['version'] ) ? $options['version'] : '0.0';
-	if ( AMP__VERSION !== $old_version ) {
+	if ( AMP__VERSION !== $old_version && is_admin() && current_user_can( 'manage_options' ) ) {
 		/**
 		 * Triggers when after amp_init when the plugin version has updated.
 		 *
