@@ -898,8 +898,14 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				],
 			],
 
-			'attribute_requirements_overriden_by_placeholders_within_template' => [
+			'attribute_requirements_overridden_by_placeholders_within_mustache_template' => [
 				'<template type="amp-mustache"><amp-timeago datetime="{{iso}}"></amp-timeago></template>',
+				null,
+				[ 'amp-mustache', 'amp-timeago' ],
+			],
+
+			'attribute_requirements_overridden_by_placeholders_within_mustache_script' => [
+				'<script template="amp-mustache" type="text/plain"><amp-timeago datetime="{{iso}}"></amp-timeago></script>',
 				null,
 				[ 'amp-mustache', 'amp-timeago' ],
 			],

@@ -1185,9 +1185,8 @@ final class Document extends DOMDocument
      */
     private function replaceMustacheTemplateTokens()
     {
-        $templates = $this->getElementsByTagName(Tag::TEMPLATE);
-
-        if (! $templates || 0 === count($templates)) {
+        $templates = $this->xpath->query( '//self::template[ @type = "amp-mustache" ]|//self::script[ @type = "text/plain" and @template = "amp-mustache" ]' );
+        if ( 0 === $templates->length ) {
             return;
         }
 
