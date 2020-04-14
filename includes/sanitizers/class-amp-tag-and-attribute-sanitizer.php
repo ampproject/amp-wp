@@ -1461,14 +1461,14 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return bool Whether the node is inside a valid mustache template.
 	 */
 	private function is_inside_mustache_template( DOMElement $node ) {
-		if ( ! empty( $this->open_elements['template'] ) ) {
+		if ( ! empty( $this->open_elements[ Tag::TEMPLATE ] ) ) {
 			while ( $node->parentNode instanceof DOMElement ) {
 				$node = $node->parentNode;
 				if ( Tag::TEMPLATE === $node->nodeName && Extension::MUSTACHE === $node->getAttribute( Attribute::TYPE ) ) {
 					return true;
 				}
 			}
-		} elseif ( ! empty( $this->open_elements['script'] ) ) {
+		} elseif ( ! empty( $this->open_elements[ Tag::SCRIPT ] ) ) {
 			while ( $node->parentNode instanceof DOMElement ) {
 				$node = $node->parentNode;
 				if ( Tag::SCRIPT === $node->nodeName && Extension::MUSTACHE === $node->getAttribute( Attribute::TEMPLATE ) && Attribute::TYPE_TEXT_PLAIN === $node->getAttribute( Attribute::TYPE ) ) {
