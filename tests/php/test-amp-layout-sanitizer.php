@@ -83,48 +83,6 @@ class AMP_Layout_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-img src="foo.jpg" style="height:100%;" width="100%"></amp-img>',
 				'<amp-img src="foo.jpg" layout="fill"></amp-img>',
 			],
-
-			'inside_amp_mustache_template_simple_text'    => [
-				'<template type="amp-mustache"><span>Hello, {{first_name}}!</span></template>',
-			],
-
-			'inside_amp_mustache_template_tag'            => [
-				'<template type="amp-mustache"><amp-img src="{{url}}" layout="intrinsic" srcset="{{foo}}" width="{{example_width}}" height="{{example_height}}" alt="This is for {{title}}"></amp-img></template>',
-			],
-
-			'inside_amp_mustache_script_tag'              => [
-				'<script template="amp-mustache" type="text/plain"><amp-img src="{{url}}" layout="intrinsic" srcset="{{foo}}" width="{{example_width}}" height="{{example_height}}" alt="This is for {{title}}"></amp-img></script>',
-			],
-
-			'inside_amp_mustache_template_responsive'     => [
-				'<template type="amp-mustache"><div><div><div><amp-img src="{{url}}" layout="responsive" srcset="{{foo}}" width="{{example_width}}" height="{{example_height}}" alt="This is for {{title}}"></amp-img></div></div></div></template>',
-			],
-
-			'inside_amp_mustache_template_bad_attrs'      => [
-				'<template type="amp-mustache"><div><div><div>
-					<amp-img src="/img1.png" data-amp-layout="bad" width="bad" height="bad"></amp-img>
-					<amp-img src="/img1.png" data-amp-layout="{{layout}}" width="bad" height="bad"></amp-img>
-					<amp-img src="/img1.png" width="{{width}}" height="bad"></amp-img>
-					<amp-img src="/img1.png" data-amp-layout="bad" width="{{width}}" height="bad"></amp-img>
-					<amp-img src="/img1.png" data-amp-layout="bad" width="bad" height="{{height}}"></amp-img>
-					<amp-img src="/img1.png" data-amp-layout="bad" width="bad" height="bad" heights="{{height}}"></amp-img>
-					<amp-img src="/img1.png" data-amp-layout="bad" width="bad" height="bad" heights="bad" sizes="{{sizes}}"></amp-img>
-				</div></div></div></template>',
-				'<template type="amp-mustache"><div><div><div>
-					<amp-img src="/img1.png" width="bad" height="bad" layout="bad"></amp-img>
-					<amp-img src="/img1.png" width="bad" height="bad" layout="{{layout}}"></amp-img>
-					<amp-img src="/img1.png" width="{{width}}" height="bad"></amp-img>
-					<amp-img src="/img1.png" width="{{width}}" height="bad" layout="bad"></amp-img>
-					<amp-img src="/img1.png" width="bad" height="{{height}}" layout="bad"></amp-img>
-					<amp-img src="/img1.png" width="bad" height="bad" heights="{{height}}" layout="bad"></amp-img>
-					<amp-img src="/img1.png" width="bad" height="bad" heights="bad" sizes="{{sizes}}" layout="bad"></amp-img>
-				</div></div></div></template>',
-			],
-
-			'inside_amp_mustache_template_fill'           => [
-				'<template type="amp-mustache"><div><div><amp-img width="100%" height="10" data-amp-layout="fill" src="{{src}}"></amp-img></div></div></template>',
-				'<template type="amp-mustache"><div><div><amp-img width="auto" height="10" src="{{src}}" layout="fixed-height"></amp-img></div></div></template>',
-			],
 		];
 	}
 
