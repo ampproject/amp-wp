@@ -10,6 +10,7 @@
 use AmpProject\AmpWP\RemoteRequest\CachedResponse;
 use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\MarkupComparison;
 use AmpProject\Dom\Document;
 use AmpProject\AmpWP\Tests\PrivateAccess;
 use AmpProject\Exception\FailedToGetFromRemoteUrl;
@@ -20,6 +21,7 @@ use AmpProject\Exception\FailedToGetFromRemoteUrl;
 class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 	use AssertContainsCompatibility;
+	use MarkupComparison;
 	use PrivateAccess;
 
 	/**
@@ -277,6 +279,40 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 								<div class="custom-population">Population: {{population}}</div>
 							</div>
 						</template>
+					</amp-autocomplete>
+				</form>
+				',
+				[
+					'.custom-population{color:red}',
+					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-f2a1aff{color:blue}',
+					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-d4ea4c7{outline:solid 1px black}',
+				],
+			],
+			'with_mustache_template_script' => [
+				'
+				<style>
+				.custom-population { color: red; }
+				</style>
+				<form id="myform" role="search" class="search-form" method="get" action="https://example.com/" target="_top" style="color: blue">
+					<amp-autocomplete filter="substring" items="." filter-value="title" max-entries="6" min-characters="2" submit-on-enter="" src="https://example.com/autocomplete/">
+						<script template="amp-mustache" type="text/plain" id="amp-template-custom">
+							<div class="city-item" data-value="{{city}}, {{state}}" style="outline: solid 1px black;">
+								<div style="color: {{regionColor}}">{{city}}, {{state}}</div>
+								<div class="custom-population">Population: {{population}}</div>
+							</div>
+						</script>
+					</amp-autocomplete>
+				</form>
+				',
+				'
+				<form id="myform" role="search" class="search-form amp-wp-f2a1aff" method="get" action="https://example.com/" target="_top" data-amp-original-style="color: blue">
+					<amp-autocomplete filter="substring" items="." filter-value="title" max-entries="6" min-characters="2" submit-on-enter="" src="https://example.com/autocomplete/">
+						<script template="amp-mustache" type="text/plain" id="amp-template-custom">
+							<div class="city-item amp-wp-d4ea4c7" data-value="{{city}}, {{state}}" data-amp-original-style="outline: solid 1px black;">
+								<div style="color: {{regionColor}}">{{city}}, {{state}}</div>
+								<div class="custom-population">Population: {{population}}</div>
+							</div>
+						</script>
 					</amp-autocomplete>
 				</form>
 				',
@@ -2610,7 +2646,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 						'wp_footer',
 						function() {
 							?>
-							<div class="is-style-outline"><button class="wp-block-button__link"></button></div>
+							<figure class="wp-block-audio"><figcaption></figcaption></figure>
 							<div class="wp-block-foo"><figcaption></figcaption></div>
 							<img src="https://example.com/example.jpg" width="100" height="200">
 							<?php
@@ -2633,7 +2669,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					$this->assertStringContains( 'admin-bar', $original_dom->body->getAttribute( 'class' ) );
 					$this->assertStringContains( 'earlyprintstyle', $original_source, 'Expected early print style to not be present.' );
 
-					$this->assertStringContains( '.is-style-outline .wp-block-button__link', $amphtml_source, 'Expected block-library/style.css' );
+					$this->assertStringContains( '.wp-block-audio figcaption', $amphtml_source, 'Expected block-library/style.css' );
 					$this->assertStringContains( '[class^="wp-block-"]:not(.wp-block-gallery) figcaption', $amphtml_source, 'Expected twentyten/blocks.css' );
 					$this->assertStringContains( 'amp-img.amp-wp-enforced-sizes', $amphtml_source, 'Expected amp-default.css' );
 					$this->assertStringContains( 'ab-empty-item', $amphtml_source, 'Expected admin-bar.css to still be present.' );
@@ -2947,24 +2983,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	public function test_get_styles() {
 		$sanitizer = new AMP_Style_Sanitizer( new Document() );
 		$this->assertEquals( [], $sanitizer->get_styles() );
-	}
-
-	/**
-	 * Assert markup is equal.
-	 *
-	 * @param string $expected Expected markup.
-	 * @param string $actual   Actual markup.
-	 */
-	public function assertEqualMarkup( $expected, $actual ) {
-		$actual   = preg_replace( '/\s+/', ' ', $actual );
-		$expected = preg_replace( '/\s+/', ' ', $expected );
-		$actual   = preg_replace( '/(?<=>)\s+(?=<)/', '', trim( $actual ) );
-		$expected = preg_replace( '/(?<=>)\s+(?=<)/', '', trim( $expected ) );
-
-		$this->assertEquals(
-			array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $expected, -1, PREG_SPLIT_DELIM_CAPTURE ) ),
-			array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $actual, -1, PREG_SPLIT_DELIM_CAPTURE ) )
-		);
 	}
 
 	/*

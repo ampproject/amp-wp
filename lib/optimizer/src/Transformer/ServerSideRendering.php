@@ -11,6 +11,7 @@ use AmpProject\Layout;
 use AmpProject\Optimizer\Error;
 use AmpProject\Optimizer\ErrorCollection;
 use AmpProject\Optimizer\Transformer;
+use AmpProject\Role;
 use AmpProject\Tag;
 use DOMElement;
 
@@ -525,7 +526,7 @@ final class ServerSideRendering implements Transformer
         $sizer_img->setAttribute(Attribute::ALT, '');
         $sizer_img->setAttribute(Attribute::ARIA_HIDDEN, 'true');
         $sizer_img->setAttribute(Attribute::CLASS_, Amp::INTRINSIC_SIZER_ELEMENT);
-        $sizer_img->setAttribute(Attribute::ROLE, 'presentation');
+        $sizer_img->setAttribute(Attribute::ROLE, Role::PRESENTATION);
 
         // Temporarily cast decimal dimensions to integers. Can be reverted when/if the AMP Validator allows decimals.
         // Note that the floor value is used because two elements with width=99.5 in a container 199px-wide will not fit
