@@ -1259,7 +1259,6 @@ final class Document extends DOMDocument
                 '{{#',
                 '{{^',
                 '{{/',
-                '{{/',
                 '{{',
                 '}}',
             ];
