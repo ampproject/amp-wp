@@ -6,6 +6,7 @@
  */
 
 use AmpProject\Amp;
+use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\ConfigurationArgument;
 use AmpProject\AmpWP\Transformer;
@@ -253,7 +254,7 @@ class AMP_Theme_Support {
 		self::$support_added_via_theme  = null;
 		self::$support_added_via_option = null;
 
-		$theme_support_option = AMP_Options_Manager::get_option( 'theme_support' );
+		$theme_support_option = AMP_Options_Manager::get_option( Option::THEME_SUPPORT );
 		if ( current_theme_supports( self::SLUG ) ) {
 			$args = self::get_theme_support_args();
 
@@ -282,7 +283,7 @@ class AMP_Theme_Support {
 						/* translators: 1: available_callback. 2: supported_templates */
 						esc_html__( 'The %1$s is deprecated when adding amp theme support in favor of declaratively setting the %2$s.', 'amp' ),
 						'available_callback',
-						'supported_templates'
+						Option::SUPPORTED_TEMPLATES // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 					),
 					'1.0'
 				);
@@ -669,7 +670,7 @@ class AMP_Theme_Support {
 			$all_templates_supported_by_theme_support = 'all' === $theme_support_args['templates_supported'];
 		}
 		$all_templates_supported = (
-			$all_templates_supported_by_theme_support || AMP_Options_Manager::get_option( 'all_templates_supported' )
+			$all_templates_supported_by_theme_support || AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED )
 		);
 
 		// Make sure global $wp_query is set in case of conditionals that unfortunately look at global scope.
@@ -1008,7 +1009,7 @@ class AMP_Theme_Support {
 			$theme_supported_templates = $theme_support_args['templates_supported'];
 		}
 
-		$supported_templates = AMP_Options_Manager::get_option( 'supported_templates' );
+		$supported_templates = AMP_Options_Manager::get_option( Option::SUPPORTED_TEMPLATES );
 		foreach ( $templates as $id => &$template ) {
 
 			// Capture user-elected support from options. This allows us to preserve the original user selection through programmatic overrides.
@@ -1028,7 +1029,7 @@ class AMP_Theme_Support {
 
 			// Set supported state from user preference.
 			if ( ! $template['immutable'] ) {
-				$template['supported'] = AMP_Options_Manager::get_option( 'all_templates_supported' ) || $template['user_supported'];
+				$template['supported'] = AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED ) || $template['user_supported'];
 			}
 		}
 

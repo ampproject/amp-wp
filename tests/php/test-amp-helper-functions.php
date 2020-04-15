@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\HandleValidation;
 
@@ -436,7 +437,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 */
 	public function test_amp_add_amphtml_link_transitional_mode( $data_provider ) {
 		list( $canonical_url, $amphtml_url, $available ) = $data_provider();
-		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		$this->accept_sanitization_by_default( false );
 		AMP_Theme_Support::read_theme_support();
 		AMP_Theme_Support::init();
@@ -529,8 +530,8 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		 * Simulate a user unchecking almost all of the boxes in 'AMP Settings' > 'Supported Templates'.
 		 * The user has chosen not to show them as AMP, so most URLs should not be AMP endpoints.
 		 */
-		AMP_Options_Manager::update_option( 'all_templates_supported', false );
-		AMP_Options_Manager::update_option( 'supported_templates', [ 'is_author' ] );
+		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
+		AMP_Options_Manager::update_option( Option::SUPPORTED_TEMPLATES, [ 'is_author' ] );
 
 		// A post shouldn't be an AMP endpoint, as it was unchecked in the UI via the options above.
 		$this->go_to( self::factory()->post->create() );

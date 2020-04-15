@@ -6,6 +6,7 @@
  */
 
 use AmpProject\AmpWP\Admin\SiteHealth;
+use AmpProject\AmpWP\Option;
 
 /**
  * Obsolete constant for flagging when Customizer is opened for AMP.
@@ -22,7 +23,7 @@ define( 'AMP_CUSTOMIZER_QUERY_VAR', 'customize_amp' );
  * And this does not need to toggle between the AMP and normal display.
  */
 function amp_init_customizer() {
-	if ( AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( 'theme_support' ) ) {
+	if ( AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
 		return;
 	}
 
