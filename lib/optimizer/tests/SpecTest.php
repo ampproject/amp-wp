@@ -34,6 +34,10 @@ final class SpecTest extends TestCase
     /**
      * Associative array of mapping data for stubbing remote requests for specific tests.
      *
+     * @todo This is a temporary fix only to get the test to pass with our current transformer.
+     *       We'll need to adapt the transformer to take the following changes into account:
+     *       https://github.com/ampproject/amp-toolbox/commit/b154a73c6dc9231e4060434c562a90d983e2a46d
+     *
      * @var array
      */
     const STUBBED_REMOTE_REQUESTS_FOR_TESTS = [
