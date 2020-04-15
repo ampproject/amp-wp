@@ -2077,7 +2077,7 @@ class AMP_Validation_Manager {
 				break;
 			}
 
-			$validation_url = $location_header;
+			$validation_url = add_query_arg( $added_query_vars, $location_header );
 		}
 
 		if ( is_wp_error( $r ) ) {

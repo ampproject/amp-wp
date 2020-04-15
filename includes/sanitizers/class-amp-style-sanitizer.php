@@ -5,7 +5,6 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\RemoteRequest\WpHttpRemoteGetRequest;
@@ -2668,7 +2667,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		// Skip processing stylesheets that contain mustache template variables if the element is inside of a mustache template.
 		if (
 			preg_match( '/{{[^}]+?}}/', $value ) &&
-			0 !== $this->dom->xpath->query( '//template[ @type="amp-mustache" ]//.', $element )->length
+			0 !== $this->dom->xpath->query( '//template[ @type="amp-mustache" ]//.|//script[ @template="amp-mustache" and @type="text/plain" ]//.', $element )->length
 		) {
 			return;
 		}

@@ -12,7 +12,6 @@ namespace AmpProject\AmpWP\Tests;
  *
  * @package AmpProject\AmpWP
  */
-
 trait AssertContainsCompatibility {
 
 	/**

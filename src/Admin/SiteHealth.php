@@ -29,6 +29,9 @@ final class SiteHealth {
 		add_filter( 'site_status_tests', [ $this, 'add_tests' ] );
 		add_filter( 'debug_information', [ $this, 'add_debug_information' ] );
 		add_filter( 'site_status_test_php_modules', [ $this, 'add_extensions' ] );
+		add_action( 'admin_print_styles', [ $this, 'add_styles' ] );
+
+		( new ReenableCssTransientCachingAjaxAction() )->register();
 	}
 
 	/**
@@ -63,6 +66,21 @@ final class SiteHealth {
 	}
 
 	/**
+	 * Get action HTML for the link to learn more about persistent object caching.
+	 *
+	 * @return string HTML.
+	 */
+	private function get_persistent_object_cache_learn_more_action() {
+		return sprintf(
+			'<p><a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s <span class="screen-reader-text">%3$s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
+			esc_url( 'https://make.wordpress.org/hosting/handbook/handbook/performance/#object-cache' ),
+			esc_html__( 'Learn more about persistent object caching', 'amp' ),
+			/* translators: The accessibility text. */
+			esc_html__( '(opens in a new tab)', 'amp' )
+		);
+	}
+
+	/**
 	 * Gets the test result data for whether there is a persistent object cache.
 	 *
 	 * @return array The test data.
@@ -75,13 +93,7 @@ final class SiteHealth {
 				'color' => $is_using_object_cache ? 'green' : 'orange',
 			],
 			'description' => esc_html__( 'The AMP plugin performs at its best when persistent object cache is enabled. Object caching is used to more effectively store image dimensions and parsed CSS.', 'amp' ),
-			'actions'     => sprintf(
-				'<p><a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s <span class="screen-reader-text">%3$s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
-				'https://codex.wordpress.org/Class_Reference/WP_Object_Cache#Persistent_Caching',
-				esc_html__( 'Learn more about persistent object caching', 'amp' ),
-				/* translators: The accessibility text. */
-				esc_html__( '(opens in a new tab)', 'amp' )
-			),
+			'actions'     => $this->get_persistent_object_cache_learn_more_action(),
 			'test'        => 'amp_persistent_object_cache',
 		];
 
@@ -240,11 +252,13 @@ final class SiteHealth {
 	 * @return array The test data.
 	 */
 	public function css_transient_caching() {
+		$disabled = AMP_Options_Manager::get_option( Option::DISABLE_CSS_TRANSIENT_CACHING, false );
+
 		if ( wp_using_ext_object_cache() ) {
 			$status = 'good';
 			$color  = 'blue';
 			$label  = __( 'Transient caching of parsed stylesheets is not used due to external object cache', 'amp' );
-		} elseif ( AMP_Options_Manager::get_option( Option::DISABLE_CSS_TRANSIENT_CACHING, false ) ) {
+		} elseif ( $disabled ) {
 			$status = 'recommended';
 			$color  = 'orange';
 			$label  = __( 'Transient caching of parsed stylesheets is disabled', 'amp' );
@@ -254,16 +268,40 @@ final class SiteHealth {
 			$label  = __( 'Transient caching of parsed stylesheets is enabled', 'amp' );
 		}
 
-		return [
+		$data = [
 			'badge'       => [
 				'label' => esc_html__( 'AMP', 'amp' ),
 				'color' => $color,
 			],
-			'description' => esc_html__( 'On sites which have highly variable CSS and are not using a persistent object cache, the transient caching of parsed stylesheets may be automatically disabled in order to prevent a site from filling up its wp_options table with too many transients.', 'amp' ),
+			'description' => wp_kses(
+				sprintf(
+					/* translators: %1$s is wp_options table, %2$s is the amp_css_transient_monitoring_threshold filter, and %3$s is the amp_css_transient_monitoring_sampling_range filter */
+					__( 'On sites which have highly variable CSS and are not using a persistent object cache, the transient caching of parsed stylesheets may be automatically disabled in order to prevent a site from filling up its <code>%1$s</code> table with too many transients. Examples of highly variable CSS include dynamically-generated style rules with selectors referring to user IDs or elements being given randomized background colors. There are two filters which may be used to configure the CSS transient monitoring: <code>%2$s</code> and <code>%3$s</code>.', 'amp' ),
+					'wp_options',
+					'amp_css_transient_monitoring_threshold',
+					'amp_css_transient_monitoring_sampling_range'
+				),
+				[
+					'code' => [],
+				]
+			),
 			'test'        => 'amp_css_transient_caching',
 			'status'      => $status,
 			'label'       => esc_html( $label ),
 		];
+
+		if ( $disabled ) {
+			$data['description'] .= ' ' . esc_html__( 'If you have identified and eliminated the cause of the variable CSS, please re-enable transient caching to reduce the amount of CSS processing required to generate AMP pages.', 'amp' );
+			$data['actions']      = sprintf(
+				'<p><a class="button reenable-css-transient-caching" href="#">%s</a><span class="dashicons dashicons-yes success-icon"></span><span class="dashicons dashicons-no failure-icon"></span><span class="success-text">%s</span><span class="failure-text">%s</span></p>',
+				esc_html__( 'Re-enable transient caching', 'amp' ),
+				esc_html__( 'Reload the page to refresh the diagnostic check.', 'amp' ),
+				esc_html__( 'The operation failed, please reload the page and try again.', 'amp' )
+			);
+			$data['actions']     .= $this->get_persistent_object_cache_learn_more_action();
+		}
+
+		return $data;
 	}
 
 	/**
@@ -501,5 +539,42 @@ final class SiteHealth {
 				],
 			]
 		);
+	}
+
+	/**
+	 * Add needed styles for the Site Health integration.
+	 */
+	public function add_styles() {
+		echo '
+			<style>
+				.wp-core-ui .button.reenable-css-transient-caching ~ .success-icon,
+				.wp-core-ui .button.reenable-css-transient-caching ~ .success-text,
+				.wp-core-ui .button.reenable-css-transient-caching ~ .failure-icon,
+				.wp-core-ui .button.reenable-css-transient-caching ~ .failure-text {
+					display: none;
+				}
+
+				.wp-core-ui .button.reenable-css-transient-caching ~ .success-icon,
+				.wp-core-ui .button.reenable-css-transient-caching ~ .failure-icon {
+					font-size: xx-large;
+					padding-right: 1rem;
+				}
+
+				.wp-core-ui .button.reenable-css-transient-caching.ajax-success ~ .success-icon,
+				.wp-core-ui .button.reenable-css-transient-caching.ajax-success ~ .success-text,
+				.wp-core-ui .button.reenable-css-transient-caching.ajax-failure ~ .failure-icon,
+				.wp-core-ui .button.reenable-css-transient-caching.ajax-failure ~ .failure-text {
+					display: inline-block;
+				}
+
+				.wp-core-ui .button.reenable-css-transient-caching.ajax-success ~ .success-icon {
+					color: #46b450;
+				}
+
+				.wp-core-ui .button.reenable-css-transient-caching.ajax-failure ~ .failure-icon {
+					color: #dc3232;
+				}
+			</style>
+		';
 	}
 }

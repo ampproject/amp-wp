@@ -5,8 +5,11 @@
  * @package AMP
  */
 
+use AmpProject\Attribute;
 use AmpProject\CssLength;
 use AmpProject\Dom\Document;
+use AmpProject\Extension;
+use AmpProject\Tag;
 
 /**
  * Strips the tags and attributes from the content that are not allowed by the AMP spec.
@@ -1253,7 +1256,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 			// Check the context to see if we are currently within a template tag.
 			// If this is the case and the attribute value contains a template placeholder, we skip sanitization.
-			if ( ! empty( $this->open_elements['template'] ) && preg_match( '/{{[^}]+?}}/', $attr_node->nodeValue ) ) {
+			if ( $this->is_inside_mustache_template( $node ) && preg_match( '/{{[^}]+?}}/', $attr_node->nodeValue ) ) {
 				continue;
 			}
 
@@ -1335,6 +1338,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Elements without a width or height don't need to be validated.
 		if ( ! $node->hasAttribute( 'width' ) && ! $node->hasAttribute( 'height' ) ) {
+			return true;
+		}
+
+		if ( $this->is_inside_mustache_template( $node ) && $this->has_layout_attribute_with_mustache_variable( $node ) ) {
 			return true;
 		}
 
@@ -1443,6 +1450,56 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Whether the node is inside a mustache template.
+	 *
+	 * @since 1.5.3
+	 *
+	 * @param DOMElement $node The node to examine.
+	 * @return bool Whether the node is inside a valid mustache template.
+	 */
+	private function is_inside_mustache_template( DOMElement $node ) {
+		if ( ! empty( $this->open_elements[ Tag::TEMPLATE ] ) ) {
+			while ( $node->parentNode instanceof DOMElement ) {
+				$node = $node->parentNode;
+				if ( Tag::TEMPLATE === $node->nodeName && Extension::MUSTACHE === $node->getAttribute( Attribute::TYPE ) ) {
+					return true;
+				}
+			}
+		} elseif ( ! empty( $this->open_elements[ Tag::SCRIPT ] ) ) {
+			while ( $node->parentNode instanceof DOMElement ) {
+				$node = $node->parentNode;
+				if ( Tag::SCRIPT === $node->nodeName && Extension::MUSTACHE === $node->getAttribute( Attribute::TEMPLATE ) && Attribute::TYPE_TEXT_PLAIN === $node->getAttribute( Attribute::TYPE ) ) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Whether the node has a layout attribute with variable syntax, like {{foo}}.
+	 *
+	 * This is important for whether to validate the layout of the node.
+	 * Similar to the validation logic in the AMP validator.
+	 *
+	 * @see https://github.com/ampproject/amphtml/blob/c083d2c6120a251dcc9b0beb33c0336c7d3ca5a8/validator/engine/validator.js#L4038-L4054
+	 *
+	 * @since 1.5.3
+	 *
+	 * @param DOMElement $node The node to examine.
+	 * @return bool Whether the node has a layout attribute with variable syntax.
+	 */
+	private function has_layout_attribute_with_mustache_variable( DOMElement $node ) {
+		foreach ( [ Attribute::LAYOUT, Attribute::WIDTH, Attribute::HEIGHT, Attribute::SIZES, Attribute::HEIGHTS ] as $attribute ) {
+			if ( preg_match( '/{{[^}]+?}}/', $node->getAttribute( $attribute ) ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
