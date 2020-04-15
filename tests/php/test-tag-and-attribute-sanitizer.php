@@ -2745,6 +2745,30 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				null,
 				[ 'amp-redbull-player' ],
 			],
+
+			'mustache_templates_with_variable_attrs'       => [
+				'
+				<template type="amp-mustache">
+					<!--🚫--><amp-img src="/img1.png" layout="bad" width="bad" height="bad"></amp-img>
+					<!--✅--><amp-img src="/img2.png" layout="{{layout}}" width="bad" height="bad"></amp-img>
+					<!--✅--><amp-img src="/img3.png" layout="bad" width="{{width}}" height="bad"></amp-img>
+					<!--✅--><amp-img src="/img4.png" layout="bad" width="bad" height="{{height}}"></amp-img>
+					<!--✅--><amp-img src="/img5.png" layout="bad" width="bad" height="bad" heights="{{height}}"></amp-img>
+					<!--✅--><amp-img src="/img6.png" layout="bad" width="bad" height="bad" heights="bad" sizes="{{sizes}}"></amp-img>
+				</template>
+				',
+				'
+				<template type="amp-mustache">
+					<!--✅--><amp-img src="/img2.png" layout="{{layout}}" width="bad" height="bad"></amp-img>
+					<!--✅--><amp-img src="/img3.png" layout="bad" width="{{width}}" height="bad"></amp-img>
+					<!--✅--><amp-img src="/img4.png" layout="bad" width="bad" height="{{height}}"></amp-img>
+					<!--✅--><amp-img src="/img5.png" layout="bad" width="bad" height="bad" heights="{{height}}"></amp-img>
+					<!--✅--><amp-img src="/img6.png" layout="bad" width="bad" height="bad" heights="bad" sizes="{{sizes}}"></amp-img>
+				</template>
+				',
+				[ 'amp-mustache' ],
+				[ /*...*/ ],
+			],
 		];
 	}
 
