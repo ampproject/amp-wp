@@ -2749,25 +2749,31 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			'mustache_templates_with_variable_attrs'       => [
 				'
 				<template type="amp-mustache">
-					<!--🚫--><amp-img src="/img1.png" layout="bad" width="bad" height="bad" heights="bad" sizes="bad"></amp-img>
-					<!--✅--><amp-img src="/img2.png" layout="{{layout}}" width="bad" height="bad" heights="bad" sizes="bad"></amp-img>
-					<!--✅--><amp-img src="/img3.png" layout="bad" width="{{width}}" height="bad" heights="bad" sizes="bad"></amp-img>
-					<!--✅--><amp-img src="/img4.png" layout="bad" width="bad" height="{{height}}" heights="bad" sizes="bad"></amp-img>
-					<!--✅--><amp-img src="/img5.png" layout="bad" width="bad" height="bad" heights="{{heights}}" sizes="bad"></amp-img>
-					<!--✅--><amp-img src="/img6.png" layout="bad" width="bad" height="bad" heights="bad" sizes="{{sizes}}"></amp-img>
+					<amp-img src="/img1.png" layout="bad" width="bad" height="bad" heights="bad" sizes="bad"></amp-img>
+					<amp-img src="/img2.png" layout="{{layout}}" width="bad" height="bad" heights="bad" sizes="bad"></amp-img>
+					<amp-img src="/img3.png" layout="bad" width="{{width}}" height="bad" heights="bad" sizes="bad"></amp-img>
+					<amp-img src="/img4.png" layout="bad" width="bad" height="{{height}}" heights="bad" sizes="bad"></amp-img>
+					<amp-img src="/img5.png" layout="bad" width="bad" height="bad" heights="{{heights}}" sizes="bad"></amp-img>
+					<amp-img src="/img6.png" layout="bad" width="bad" height="bad" heights="bad" sizes="{{sizes}}"></amp-img>
 				</template>
 				',
 				'
 				<template type="amp-mustache">
-					<!--✅--><amp-img src="/img2.png" layout="{{layout}}" width="bad" height="bad" heights="bad" sizes="bad"></amp-img>
-					<!--✅--><amp-img src="/img3.png" layout="bad" width="{{width}}" height="bad" heights="bad" sizes="bad"></amp-img>
-					<!--✅--><amp-img src="/img4.png" layout="bad" width="bad" height="{{height}}" heights="bad" sizes="bad"></amp-img>
-					<!--✅--><amp-img src="/img5.png" layout="bad" width="bad" height="bad" heights="{{heights}}" sizes="bad"></amp-img>
-					<!--✅--><amp-img src="/img6.png" layout="bad" width="bad" height="bad" heights="bad" sizes="{{sizes}}"></amp-img>
+					<amp-img src="/img2.png" layout="{{layout}}" width="bad" height="bad" heights="bad" sizes="bad"></amp-img>
+					<amp-img src="/img3.png" width="{{width}}" height="bad" heights="bad" sizes="bad"></amp-img>
+					<amp-img src="/img4.png" width="bad" height="{{height}}" heights="bad" sizes="bad"></amp-img>
+					<amp-img src="/img5.png" width="bad" height="bad" heights="{{heights}}" sizes="bad"></amp-img>
+					<amp-img src="/img6.png" width="bad" height="bad" heights="bad" sizes="{{sizes}}"></amp-img>
 				</template>
 				',
 				[ 'amp-mustache' ],
-				[ /*...*/ ],
+				[
+					AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_WIDTH,
+					AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE_REGEX_CASEI,
+					AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE_REGEX_CASEI,
+					AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE_REGEX_CASEI,
+					AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE_REGEX_CASEI,
+				],
 			],
 		];
 	}
