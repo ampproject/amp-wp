@@ -112,6 +112,9 @@
 	 */
 	function isHeaderVisible() {
 		const element = document.querySelector( '.site-branding' );
+		if ( ! element ) { 
+			return;
+		} 
 		const clientRect = element.getBoundingClientRect();
 		return clientRect.height + clientRect.top >= 0;
 	}
@@ -124,7 +127,8 @@
 	 */
 	function fetchShadowDocResponse( url ) {
 		const ampUrl = new URL( url );
-		ampUrl.searchParams.set( ampAppShell.componentQueryVar, 'inner' );
+		const pathSuffix = '_' + ampAppShell.componentQueryVar + '_inner';
+		ampUrl.pathname = ampUrl.pathname + pathSuffix;
 
 		return fetch( ampUrl.toString(), {
 			method: 'GET',
@@ -236,8 +240,14 @@
 					}
 
 					if ( scrollIntoView && ! isHeaderVisible() ) {
+						const siteContent = document.querySelector( '.site-content-contain' );
+
+						if ( ! siteContent ) {
+							return;
+						}
+
 						// @todo The scroll position is not correct when admin bar is used. Consider scrolling to Y coordinate smoothly instead.
-						document.querySelector( '.site-content-contain' ).scrollIntoView( {
+						siteContent.scrollIntoView( {
 							block: 'start',
 							inline: 'start',
 							behavior: 'smooth'
