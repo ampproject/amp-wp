@@ -2033,7 +2033,7 @@ class AMP_Theme_Support {
 	 */
 	public static function finish_output_buffering( $response ) {
 		self::$is_output_buffering = false;
-		return apply_filters( 'amp_document_output', self::prepare_response( $response ) );
+		return self::prepare_response( $response );
 	}
 
 	/**
