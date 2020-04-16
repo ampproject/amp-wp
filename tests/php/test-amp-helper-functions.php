@@ -589,8 +589,6 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * Test is_amp_endpoint() function when there is no WP_Query.
 	 *
 	 * @covers ::is_amp_endpoint()
-	 * @expectedIncorrectUsage is_feed
-	 * @expectedIncorrectUsage is_embed
 	 * @expectedIncorrectUsage is_amp_endpoint
 	 */
 	public function test_is_amp_endpoint_when_no_wp_query() {

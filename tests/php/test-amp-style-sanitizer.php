@@ -2626,7 +2626,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		return [
 			'admin_bar_included' => [
 				function () use ( $render_template ) {
-					$this->go_to( home_url() );
+					$this->go_to( amp_get_permalink( $this->factory()->post->create() ) );
 					show_admin_bar( true );
 					_wp_admin_bar_init();
 					switch_theme( 'twentyten' );
