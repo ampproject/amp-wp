@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Option;
+
 /**
  * Class AMP_Analytics_Options_Submenu_Page
  */
@@ -186,7 +188,7 @@ class AMP_Analytics_Options_Submenu_Page {
 	public function render() {
 		$this->render_styles();
 
-		$analytics_entries = AMP_Options_Manager::get_option( 'analytics', [] );
+		$analytics_entries = AMP_Options_Manager::get_option( Option::ANALYTICS, [] );
 
 		$this->render_title( ! empty( $analytics_entries ) );
 

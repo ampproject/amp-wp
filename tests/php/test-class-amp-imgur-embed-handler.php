@@ -27,10 +27,10 @@ class AMP_Imgur_Embed_Handler_Test extends WP_UnitTestCase {
 					return $pre;
 				}
 
-				if ( true === strpos( $url, 'fmHGADZ' ) ) {
-					$body = '<blockquote class="imgur-embed-pub" lang="en" data-id="fmHGADZ"><a href="https://imgur.com/fmHGADZ">View post on imgur.com</a></blockquote><script async src="//s.imgur.com/min/embed.js" charset="utf-8"></script>'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
-				} elseif ( true === strpos( $url, '1ApvcWB' ) ) {
-					$body = '<blockquote class="imgur-embed-pub" lang="en" data-id="a/1ApvcWB"><a href="https://imgur.com/a/1ApvcWB">Oops, all baby yoda</a></blockquote><script async src="//s.imgur.com/min/embed.js" charset="utf-8"></script>'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+				if ( false !== strpos( $url, 'fmHGADZ' ) ) {
+					$body = '{"version":"1.0","type":"rich","provider_name":"Imgur","provider_url":"https:\/\/imgur.com","width":500,"height":750,"html":"<blockquote class=\"imgur-embed-pub\" lang=\"en\" data-id=\"fmHGADZ\"><a href=\"https:\/\/imgur.com\/fmHGADZ\">View post on imgur.com<\/a><\/blockquote><script async src=\"\/\/s.imgur.com\/min\/embed.js\" charset=\"utf-8\"><\/script>"}'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+				} elseif ( false !== strpos( $url, '1ApvcWB' ) ) {
+					$body = '{"version":"1.0","type":"rich","provider_name":"Imgur","provider_url":"https:\/\/imgur.com","width":500,"height":750,"html":"<blockquote class=\"imgur-embed-pub\" lang=\"en\" data-id=\"a\/1ApvcWB\"><a href=\"https:\/\/imgur.com\/a\/1ApvcWB\">Oops, all baby yoda<\/a><\/blockquote><script async src=\"\/\/s.imgur.com\/min\/embed.js\" charset=\"utf-8\"><\/script>"}'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 				} else {
 					return $pre;
 				}
