@@ -13,7 +13,7 @@
  */
 class AMP_Allowed_Tags_Generated {
 
-	private static $spec_file_revision = 1027;
+	private static $spec_file_revision = 1028;
 	private static $minimum_validator_revision_required = 375;
 
 	private static $descendant_tag_lists = array(
@@ -4081,7 +4081,6 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'amp_layout' => array(
 						'supported_layouts' => array(
-							5,
 							6,
 							2,
 							3,
