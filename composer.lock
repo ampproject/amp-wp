@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cb8cd257007187696eafbec14e1141dc",
+    "content-hash": "71e5f177d2644f78c9d0b367b0a2c206",
     "packages": [
         {
             "name": "ampproject/common",
@@ -298,7 +298,7 @@
             "extra": {
                 "patches_applied": {
                     "Validate name-start code points for identifier <https://github.com/sabberworm/PHP-CSS-Parser/pull/185>": "patches/php-css-parser-pull-185.patch",
-                    "Fix parsing CSS selectors which contain commas <https://github.com/westonruter/PHP-CSS-Parser/pull/1>": "patches/php-css-parser-commit-10a2501.diff"
+                    "Fix parsing CSS selectors which contain commas <https://github.com/westonruter/PHP-CSS-Parser/pull/1>": "patches/php-css-parser-commit-10a2501.patch"
                 }
             },
             "autoload": {
