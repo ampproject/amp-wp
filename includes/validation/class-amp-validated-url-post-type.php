@@ -185,7 +185,7 @@ class AMP_Validated_URL_Post_Type {
 
 		// Edit post screen hooks.
 		add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_edit_post_screen_scripts' ] );
-		add_action( 'add_meta_boxes', [ __CLASS__, 'add_meta_boxes' ] );
+		add_action( 'add_meta_boxes', [ __CLASS__, 'add_meta_boxes' ], PHP_INT_MAX );
 		add_action( 'edit_form_after_title', [ __CLASS__, 'render_single_url_list_table' ] );
 		add_filter( 'edit_' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_per_page', [ __CLASS__, 'get_terms_per_page' ] );
 		add_action( 'admin_init', [ __CLASS__, 'add_taxonomy' ] );
@@ -1781,9 +1781,13 @@ class AMP_Validated_URL_Post_Type {
 	/**
 	 * Adds the meta boxes to the CPT post.php page.
 	 *
+	 * @global array $wp_meta_boxes
 	 * @return void
 	 */
 	public static function add_meta_boxes() {
+		global $wp_meta_boxes;
+		$stylesheets_metabox_id = 'amp_stylesheets';
+
 		remove_meta_box( 'submitdiv', self::POST_TYPE_SLUG, 'side' );
 		remove_meta_box( 'slugdiv', self::POST_TYPE_SLUG, 'normal' );
 		add_meta_box(
@@ -1796,7 +1800,7 @@ class AMP_Validated_URL_Post_Type {
 			[ '__back_compat_meta_box' => true ]
 		);
 		add_meta_box(
-			'amp_stylesheets',
+			$stylesheets_metabox_id,
 			__( 'Stylesheets', 'amp' ),
 			[ __CLASS__, 'print_stylesheets_meta_box' ],
 			self::POST_TYPE_SLUG,
@@ -1804,6 +1808,19 @@ class AMP_Validated_URL_Post_Type {
 			'default',
 			[ '__back_compat_meta_box' => true ]
 		);
+
+		// Ensure only the expected metaboxes are shown on this screen.
+		// Note the O(n^3) complexity here is not a concern because the each nested array has only a few items.
+		$allowed_metaboxes = [ 'slugdiv', 'submitdiv', self::STATUS_META_BOX, $stylesheets_metabox_id ];
+		foreach ( $wp_meta_boxes[ self::POST_TYPE_SLUG ] as $context => $metabox_contexts ) {
+			foreach ( $metabox_contexts as $metabox_priorities ) {
+				foreach ( array_keys( $metabox_priorities ) as $id ) {
+					if ( ! in_array( $id, $allowed_metaboxes, true ) ) {
+						remove_meta_box( $id, self::POST_TYPE_SLUG, $context );
+					}
+				}
+			}
+		}
 	}
 
 	/**

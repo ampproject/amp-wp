@@ -74,7 +74,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'rightnow_end', [ self::TESTED_CLASS, 'print_dashboard_glance_styles' ] ) );
 
 		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', [ self::TESTED_CLASS, 'enqueue_edit_post_screen_scripts' ] ) );
-		$this->assertEquals( 10, has_action( 'add_meta_boxes', [ self::TESTED_CLASS, 'add_meta_boxes' ] ) );
+		$this->assertEquals( PHP_INT_MAX, has_action( 'add_meta_boxes', [ self::TESTED_CLASS, 'add_meta_boxes' ] ) );
 		$this->assertEquals( 10, has_action( 'edit_form_top', [ self::TESTED_CLASS, 'print_url_as_title' ] ) );
 
 		$this->assertEquals( 10, has_filter( 'the_title', [ self::TESTED_CLASS, 'filter_the_title_in_post_list_table' ] ) );
@@ -1167,7 +1167,15 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 	 */
 	public function test_add_meta_boxes() {
 		global $wp_meta_boxes;
-		AMP_Validated_URL_Post_Type::add_meta_boxes();
+		AMP_Validated_URL_Post_Type::add_admin_hooks();
+		add_action(
+			'add_meta_boxes',
+			function () {
+				add_meta_box( 'bogus', 'Bogus', '__return_empty_string', AMP_Validated_URL_Post_Type::POST_TYPE_SLUG );
+			},
+			100
+		);
+		do_action( 'add_meta_boxes' );
 		$side_meta_box = $wp_meta_boxes[ AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ]['side']['default'][ AMP_Validated_URL_Post_Type::STATUS_META_BOX ];
 		$this->assertEquals( AMP_Validated_URL_Post_Type::STATUS_META_BOX, $side_meta_box['id'] );
 		$this->assertEquals( 'Status', $side_meta_box['title'] );
@@ -1183,9 +1191,11 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 			$side_meta_box['args']
 		);
 
-		$contexts = $wp_meta_boxes[ AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ]['side'];
-		foreach ( $contexts as $context ) {
+		foreach ( $wp_meta_boxes[ AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ]['side'] as $context ) {
 			$this->assertFalse( $context['submitdiv'] );
+		}
+		foreach ( $wp_meta_boxes[ AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ]['advanced'] as $context ) {
+			$this->assertFalse( $context['bogus'] );
 		}
 	}
 
