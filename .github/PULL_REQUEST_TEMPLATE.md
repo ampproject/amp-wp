@@ -1,7 +1,13 @@
 ## Summary
 
-<!-- Please reference the issue this PR addresses. -->
-Fixes #
+<!-- 
+Please reference the issue this PR addresses. If one doesn't exist, please 
+create one and put in its description what you would have otherwise put here 
+in the PR description. Do not use "Fixes" or "Closes" as the issue needs to 
+remain open for QA/UAT purposes until the release is published. 
+-->
+
+Addresses issue #...
 
 ## Checklist
 
