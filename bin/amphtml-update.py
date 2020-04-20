@@ -680,6 +680,13 @@ def GetAttrs(attrs):
 
 		if value_dict is not None:
 
+			# Skip rules for dev mode attributes since the AMP plugin will allow them to pass through.
+			# See <https://github.com/ampproject/amphtml/pull/27174#issuecomment-601391161> for how the rules are
+			# defined in a way that they can never be satisfied, and thus to make the attribute never allowed.
+			# This runs contrary to the needs of the AMP plugin, as the internal sanitizers are built to ignore them.
+			if 'data-ampdevmode' == attr_spec.name:
+				continue
+
 			# Normalize bracketed amp-bind attribute syntax to data-amp-bind-* syntax.
 			name = attr_spec.name
 			if name[0] == '[':

@@ -2143,7 +2143,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'amp-script-5'                                 => [
 				'
-					<amp-script script="myScript" layout="container"></amp-script>
+					<amp-script script="myScript" layout="container" data-ampdevmode></amp-script>
 					<script type="text/plain" target="amp-script" id="myScript">
 					document.body.textContent += \'Hello world!\';
 					</script>

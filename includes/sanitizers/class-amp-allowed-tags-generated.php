@@ -5153,12 +5153,6 @@ class AMP_Allowed_Tags_Generated {
 		'amp-script' => array(
 			array(
 				'attr_spec_list' => array(
-					'data-ampdevmode' => array(
-						'blacklisted_value_regex' => 'false',
-						'value' => array(
-							'false',
-						),
-					),
 					'max-age' => array(
 						'value_regex' => '[0-9]+',
 					),
