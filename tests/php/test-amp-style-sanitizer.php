@@ -1005,7 +1005,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				],
 			],
 			'escaped_char_class_name' => [
-				'<div class="bg-black w-16 lg:w-full hover:bg-blue @@@"></div>',
+				'<div class="bg-black w-16 lg:w-full hover:bg-blue @@@ w-1/3"></div>',
 				[
 					'.lg'               => false,
 					'.hover'            => false,
@@ -1015,6 +1015,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'.lg\:w-medium'     => false,
 					'.\@\@\@'           => true,
 					'.\@\@\@\@'         => false,
+					'.w-1\/3'           => true,
+					'.w-2\/3'           => false,
 				],
 			],
 			'toggle_class' => [
