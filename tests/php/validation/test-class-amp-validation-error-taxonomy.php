@@ -563,7 +563,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'user_has_cap', [ self::TESTED_CLASS, 'filter_user_has_cap_for_hiding_term_list_table_checkbox' ] ) );
 		$this->assertEquals( 10, has_filter( 'terms_clauses', [ self::TESTED_CLASS, 'filter_terms_clauses_for_description_search' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_notices', [ self::TESTED_CLASS, 'add_admin_notices' ] ) );
-		$this->assertEquals( 10, has_filter( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_row_actions', [ self::TESTED_CLASS, 'filter_tag_row_actions' ] ) );
+		$this->assertEquals( PHP_INT_MAX, has_filter( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_row_actions', [ self::TESTED_CLASS, 'filter_tag_row_actions' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_menu', [ self::TESTED_CLASS, 'add_admin_menu_validation_error_item' ] ) );
 		$this->assertEquals( 10, has_filter( 'parse_term_query', [ self::TESTED_CLASS, 'parse_post_php_term_query' ] ) );
 		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_custom_column', [ self::TESTED_CLASS, 'filter_manage_custom_columns' ] ) );
