@@ -1,20 +1,19 @@
-diff --git a/lib/Sabberworm/CSS/Property/Selector.php b/lib/Sabberworm/CSS/Property/Selector.php
-index bd04b88..0f1c643 100644
---- a/lib/Sabberworm/CSS/Property/Selector.php
-+++ b/lib/Sabberworm/CSS/Property/Selector.php
-@@ -43,6 +43,7 @@ class Selector {
- 			[a-zA-Z0-9\x{00A0}-\x{FFFF}_^$|*="\'~\[\]()\-\s\.:#+>]* # any sequence of valid unescaped characters
- 			(?:\\\\.)?                                              # a single escaped character
- 			(?:([\'"]).*?(?<!\\\\)\2)?                              # a quoted text like [id="example"]
-+			(?:\(.*?\))?                                            # an argument for pseudo selector like :not(a,b) or :lang(en,es).
- 		)*
- 	)$
- 	/ux';
+From fa139f65c5b098ae652c970b25e6eb03fc495eb4 Mon Sep 17 00:00:00 2001
+From: Weston Ruter <weston@xwp.co>
+Date: Wed, 25 Jul 2018 10:38:59 -0700
+Subject: [PATCH 1/2] Fix parsing CSS selectors which contain commas
+
+---
+ .../CSS/RuleSet/DeclarationBlock.php          | 60 ++++++++++++++++++-
+ tests/Sabberworm/CSS/ParserTest.php           |  6 ++
+ tests/files/specificity.css                   |  4 +-
+ 3 files changed, 68 insertions(+), 2 deletions(-)
+
 diff --git a/lib/Sabberworm/CSS/RuleSet/DeclarationBlock.php b/lib/Sabberworm/CSS/RuleSet/DeclarationBlock.php
-index a1142be..f7fca39 100644
+index e18f5d8..26c2e12 100644
 --- a/lib/Sabberworm/CSS/RuleSet/DeclarationBlock.php
 +++ b/lib/Sabberworm/CSS/RuleSet/DeclarationBlock.php
-@@ -68,7 +68,19 @@ public function setSelectors($mSelector, $oList = NULL) {
+@@ -28,7 +28,19 @@ public function setSelectors($mSelector) {
  		if (is_array($mSelector)) {
  			$this->aSelectors = $mSelector;
  		} else {
@@ -35,7 +34,7 @@ index a1142be..f7fca39 100644
  		}
  		foreach ($this->aSelectors as $iKey => $mSelector) {
  			if (!($mSelector instanceof Selector)) {
-@@ -87,6 +99,52 @@ public function setSelectors($mSelector, $oList = NULL) {
+@@ -37,6 +49,52 @@ public function setSelectors($mSelector) {
  		}
  	}
  
@@ -89,10 +88,10 @@ index a1142be..f7fca39 100644
  	public function removeSelector($mSelector) {
  		if($mSelector instanceof Selector) {
 diff --git a/tests/Sabberworm/CSS/ParserTest.php b/tests/Sabberworm/CSS/ParserTest.php
-index ea34f2e..1ff2652 100644
+index 43c22e2..a5073be 100644
 --- a/tests/Sabberworm/CSS/ParserTest.php
 +++ b/tests/Sabberworm/CSS/ParserTest.php
-@@ -154,6 +154,12 @@ function testSpecificity() {
+@@ -148,6 +148,12 @@ function testSpecificity() {
  				case "li.green":
  					$this->assertSame(11, $oSelector->getSpecificity());
  					break;
@@ -119,3 +118,26 @@ index 82a2939..df03ff0 100644
 +div[title="a,b"] {
  	font-family: Helvetica;
  }
+
+From 10a2501c119abafced3e4014aa3c0a3453a86f67 Mon Sep 17 00:00:00 2001
+From: Weston Ruter <westonruter@google.com>
+Date: Mon, 20 Apr 2020 13:53:44 -0700
+Subject: [PATCH 2/2] Update SELECTOR_VALIDATION_RX to account for
+ parenthetical groups
+
+---
+ lib/Sabberworm/CSS/Property/Selector.php | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/lib/Sabberworm/CSS/Property/Selector.php b/lib/Sabberworm/CSS/Property/Selector.php
+index bd04b88..0f1c643 100644
+--- a/lib/Sabberworm/CSS/Property/Selector.php
++++ b/lib/Sabberworm/CSS/Property/Selector.php
+@@ -43,6 +43,7 @@ class Selector {
+ 			[a-zA-Z0-9\x{00A0}-\x{FFFF}_^$|*="\'~\[\]()\-\s\.:#+>]* # any sequence of valid unescaped characters
+ 			(?:\\\\.)?                                              # a single escaped character
+ 			(?:([\'"]).*?(?<!\\\\)\2)?                              # a quoted text like [id="example"]
++			(?:\(.*?\))?                                            # an argument for pseudo selector like :not(a,b) or :lang(en,es).
+ 		)*
+ 	)$
+ 	/ux';

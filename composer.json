@@ -51,7 +51,7 @@
     "patches": {
       "sabberworm/php-css-parser": {
         "Validate name-start code points for identifier <https://github.com/sabberworm/PHP-CSS-Parser/pull/185>": "patches/php-css-parser-pull-185.patch",
-        "Fix parsing CSS selectors which contain commas <https://github.com/westonruter/PHP-CSS-Parser/pull/1>": "patches/php-css-parser-commit-10a2501.diff"
+        "Fix parsing CSS selectors which contain commas <https://github.com/westonruter/PHP-CSS-Parser/pull/1>": "patches/php-css-parser-commit-10a2501.patch"
       }
     }
   },
