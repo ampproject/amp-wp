@@ -6,6 +6,7 @@
  */
 
 use AmpProject\Amp;
+use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\ConfigurationArgument;
 use AmpProject\AmpWP\Transformer;
@@ -253,7 +254,7 @@ class AMP_Theme_Support {
 		self::$support_added_via_theme  = null;
 		self::$support_added_via_option = null;
 
-		$theme_support_option = AMP_Options_Manager::get_option( 'theme_support' );
+		$theme_support_option = AMP_Options_Manager::get_option( Option::THEME_SUPPORT );
 		if ( current_theme_supports( self::SLUG ) ) {
 			$args = self::get_theme_support_args();
 
@@ -282,7 +283,7 @@ class AMP_Theme_Support {
 						/* translators: 1: available_callback. 2: supported_templates */
 						esc_html__( 'The %1$s is deprecated when adding amp theme support in favor of declaratively setting the %2$s.', 'amp' ),
 						'available_callback',
-						'supported_templates'
+						Option::SUPPORTED_TEMPLATES // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 					),
 					'1.0'
 				);
@@ -376,25 +377,14 @@ class AMP_Theme_Support {
 			add_filter( 'template_include', [ __CLASS__, 'serve_paired_browsing_experience' ] );
 		}
 
+		$is_reader_mode = self::READER_MODE_SLUG === self::get_support_mode();
 		$has_query_var  = (
 			isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			||
 			false !== get_query_var( amp_get_slug(), false )
 		);
-		$is_reader_mode = self::READER_MODE_SLUG === self::get_support_mode();
-		if (
-			$is_reader_mode
-			&&
-			$has_query_var
-			&&
-			( ! is_singular() || ! post_supports_amp( get_post( get_queried_object_id() ) ) )
-		) {
-			// Reader mode only supports the singular template (for now) so redirect non-singular queries in reader mode to non-AMP version.
-			// Also ensure redirecting to non-AMP version when accessing a post which does not support AMP.
-			// A temporary redirect is used for admin users to allow them to see changes between reader mode and transitional modes.
-			wp_safe_redirect( amp_remove_endpoint( amp_get_current_url() ), current_user_can( 'manage_options' ) ? 302 : 301 );
-			return;
-		} elseif ( ! is_amp_endpoint() ) {
+
+		if ( ! is_amp_endpoint() ) {
 			/*
 			 * Redirect to AMP-less URL if AMP is not available for this URL and yet the query var is present.
 			 * Temporary redirect is used for admin users because implied transitional mode and template support can be
@@ -402,7 +392,7 @@ class AMP_Theme_Support {
 			 * without wrestling with the redirect cache.
 			 */
 			if ( $has_query_var ) {
-				self::redirect_non_amp_url( current_user_can( 'manage_options' ) ? 302 : 301, true );
+				self::redirect_non_amp_url( current_user_can( 'manage_options' ) ? 302 : 301 );
 			}
 
 			amp_add_frontend_actions();
@@ -443,11 +433,11 @@ class AMP_Theme_Support {
 	 * Ensure that the current AMP location is correct.
 	 *
 	 * @since 1.0
+	 * @since 1.6 Removed $exit param.
 	 *
-	 * @param bool $exit Whether to exit after redirecting.
-	 * @return bool Whether redirection was done. Naturally this is irrelevant if $exit is true.
+	 * @return bool Whether redirection should have been done.
 	 */
-	public static function ensure_proper_amp_location( $exit = true ) {
+	public static function ensure_proper_amp_location() {
 		$has_query_var = false !== get_query_var( amp_get_slug(), false ); // May come from URL param or endpoint slug.
 		$has_url_param = isset( $_GET[ amp_get_slug() ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
@@ -460,7 +450,7 @@ class AMP_Theme_Support {
 			 * to not be hampered by browser remembering permanent redirects and preventing test.
 			 */
 			if ( $has_query_var || $has_url_param ) {
-				return self::redirect_non_amp_url( current_user_can( 'manage_options' ) ? 302 : 301, $exit );
+				return self::redirect_non_amp_url( current_user_can( 'manage_options' ) ? 302 : 301 );
 			}
 		} elseif ( self::READER_MODE_SLUG === self::get_support_mode() && is_singular() ) {
 			// Prevent infinite URL space under /amp/ endpoint.
@@ -468,9 +458,10 @@ class AMP_Theme_Support {
 			$path_args = [];
 			wp_parse_str( $wp->matched_query, $path_args );
 			if ( isset( $path_args[ amp_get_slug() ] ) && '' !== $path_args[ amp_get_slug() ] ) {
-				wp_safe_redirect( amp_get_permalink( get_queried_object_id() ), 301 );
-				if ( $exit ) {
+				if ( wp_safe_redirect( amp_get_permalink( get_queried_object_id() ), 301 ) ) {
+					// @codeCoverageIgnoreStart
 					exit;
+					// @codeCoverageIgnoreEnd
 				}
 				return true;
 			}
@@ -485,13 +476,12 @@ class AMP_Theme_Support {
 			$new_url = add_query_arg( amp_get_slug(), '', amp_remove_endpoint( $old_url ) );
 			if ( $old_url !== $new_url ) {
 				// A temporary redirect is used for admin users to allow them to see changes between reader mode and transitional modes.
-				wp_safe_redirect( $new_url, current_user_can( 'manage_options' ) ? 302 : 301 );
-				// @codeCoverageIgnoreStart
-				if ( $exit ) {
+				if ( wp_safe_redirect( $new_url, current_user_can( 'manage_options' ) ? 302 : 301 ) ) {
+					// @codeCoverageIgnoreStart
 					exit;
+					// @codeCoverageIgnoreEnd
 				}
 				return true;
-				// @codeCoverageIgnoreEnd
 			}
 		}
 		return false;
@@ -505,25 +495,24 @@ class AMP_Theme_Support {
 	 * @since 0.7
 	 * @since 1.0 Added $exit param.
 	 * @since 1.0 Renamed from redirect_canonical_amp().
+	 * @since 1.6 Removed $exit param.
 	 *
-	 * @param int  $status Status code (301 or 302).
-	 * @param bool $exit   Whether to exit after redirecting.
-	 * @return bool Whether redirection was done. Naturally this is irrelevant if $exit is true.
+	 * @param int $status Status code (301 or 302).
+	 * @return bool Whether redirection should have be done.
 	 */
-	public static function redirect_non_amp_url( $status = 302, $exit = true ) {
+	public static function redirect_non_amp_url( $status = 302 ) {
 		$current_url = amp_get_current_url();
 		$non_amp_url = amp_remove_endpoint( $current_url );
 		if ( $non_amp_url === $current_url ) {
 			return false;
 		}
 
-		wp_safe_redirect( $non_amp_url, $status );
-		// @codeCoverageIgnoreStart
-		if ( $exit ) {
+		if ( wp_safe_redirect( $non_amp_url, $status ) ) {
+			// @codeCoverageIgnoreStart
 			exit;
+			// @codeCoverageIgnoreEnd
 		}
 		return true;
-		// @codeCoverageIgnoreEnd
 	}
 
 	/**
@@ -669,7 +658,7 @@ class AMP_Theme_Support {
 			$all_templates_supported_by_theme_support = 'all' === $theme_support_args['templates_supported'];
 		}
 		$all_templates_supported = (
-			$all_templates_supported_by_theme_support || AMP_Options_Manager::get_option( 'all_templates_supported' )
+			$all_templates_supported_by_theme_support || AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED )
 		);
 
 		// Make sure global $wp_query is set in case of conditionals that unfortunately look at global scope.
@@ -1008,7 +997,7 @@ class AMP_Theme_Support {
 			$theme_supported_templates = $theme_support_args['templates_supported'];
 		}
 
-		$supported_templates = AMP_Options_Manager::get_option( 'supported_templates' );
+		$supported_templates = AMP_Options_Manager::get_option( Option::SUPPORTED_TEMPLATES );
 		foreach ( $templates as $id => &$template ) {
 
 			// Capture user-elected support from options. This allows us to preserve the original user selection through programmatic overrides.
@@ -1028,7 +1017,7 @@ class AMP_Theme_Support {
 
 			// Set supported state from user preference.
 			if ( ! $template['immutable'] ) {
-				$template['supported'] = AMP_Options_Manager::get_option( 'all_templates_supported' ) || $template['user_supported'];
+				$template['supported'] = AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED ) || $template['user_supported'];
 			}
 		}
 
@@ -2023,6 +2012,7 @@ class AMP_Theme_Support {
 
 		// Respond early with results if performing a validate request.
 		if ( AMP_Validation_Manager::$is_validate_request ) {
+			status_header( 200 );
 			header( 'Content-Type: application/json; charset=utf-8' );
 			return wp_json_encode(
 				AMP_Validation_Manager::get_validate_response_data( $sanitization_results ),
