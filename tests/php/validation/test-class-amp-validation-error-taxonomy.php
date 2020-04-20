@@ -985,6 +985,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		AMP_Validation_Error_Taxonomy::register();
 		$initial_actions = [
 			'delete' => '<a href="#">Delete</a>',
+			'bad'    => 'So bad!',
 		];
 
 		// The term is for this taxonomy, so this should filter the actions.
@@ -994,9 +995,25 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 				'description' => wp_json_encode( $this->get_mock_error() ),
 			]
 		);
-		$filtered_actions   = AMP_Validation_Error_Taxonomy::filter_tag_row_actions( $initial_actions, $term_this_taxonomy );
-		$reject_action      = $filtered_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION ];
-		$accept_action      = $filtered_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION ];
+
+		AMP_Validation_Error_Taxonomy::add_admin_hooks();
+
+		add_filter(
+			AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_row_actions',
+			function ( $actions ) {
+				$actions['also_bad'] = 'Also bad!';
+				return $actions;
+			},
+			1000
+		);
+
+		$filtered_actions = apply_filters( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_row_actions', $initial_actions, get_term( $term_this_taxonomy ) );
+		$this->assertEqualSets(
+			[ 'details', AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION, AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION ],
+			array_keys( $filtered_actions )
+		);
+		$reject_action = $filtered_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION ];
+		$accept_action = $filtered_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION ];
 		$this->assertStringContains( strval( $term_this_taxonomy->term_id ), $reject_action );
 		$this->assertStringContains( strval( $term_this_taxonomy->term_id ), $accept_action );
 		$this->assertStringContains( 'Keep', $reject_action );

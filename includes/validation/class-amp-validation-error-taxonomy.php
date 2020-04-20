@@ -752,7 +752,7 @@ class AMP_Validation_Error_Taxonomy {
 		);
 		add_filter( 'terms_clauses', [ __CLASS__, 'filter_terms_clauses_for_description_search' ], 10, 3 );
 		add_action( 'admin_notices', [ __CLASS__, 'add_admin_notices' ] );
-		add_filter( self::TAXONOMY_SLUG . '_row_actions', [ __CLASS__, 'filter_tag_row_actions' ], 10, 2 );
+		add_filter( self::TAXONOMY_SLUG . '_row_actions', [ __CLASS__, 'filter_tag_row_actions' ], PHP_INT_MAX, 2 );
 		if ( get_taxonomy( self::TAXONOMY_SLUG )->show_in_menu ) {
 			add_action( 'admin_menu', [ __CLASS__, 'add_admin_menu_validation_error_item' ] );
 		}
@@ -1679,6 +1679,12 @@ class AMP_Validation_Error_Taxonomy {
 				);
 			}
 		}
+
+		$actions = wp_array_slice_assoc(
+			$actions,
+			[ 'details', self::VALIDATION_ERROR_ACCEPT_ACTION, self::VALIDATION_ERROR_REJECT_ACTION ]
+		);
+
 		return $actions;
 	}
 
