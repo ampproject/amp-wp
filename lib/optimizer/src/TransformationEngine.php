@@ -31,13 +31,13 @@ final class TransformationEngine
     /**
      * Instantiate a TransformationEngine object.
      *
-     * @param Configuration    $configuration Configuration data to use for setting up the transformers.
+     * @param Configuration    $configuration Optional. Configuration data to use for setting up the transformers.
      * @param RemoteGetRequest $remoteRequest Optional. Transport to use for remote requests. Defaults to the
      *                                     CurlRemoteGetRequest implementation shipped with the library.
      */
-    public function __construct(Configuration $configuration, RemoteGetRequest $remoteRequest = null)
+    public function __construct(Configuration $configuration = null, RemoteGetRequest $remoteRequest = null)
     {
-        $this->configuration = $configuration;
+        $this->configuration = isset($configuration) ? $configuration : new Configuration();
         $this->remoteRequest = isset($remoteRequest) ? $remoteRequest : new CurlRemoteGetRequest();
     }
 
