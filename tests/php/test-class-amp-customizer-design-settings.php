@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Option;
+
 /**
  * Class Test_AMP_Customizer_Design_Settings
  *
@@ -23,10 +25,10 @@ class Test_AMP_Customizer_Design_Settings extends WP_UnitTestCase {
 	 * @covers AMP_Customizer_Design_Settings::is_amp_customizer_enabled
 	 */
 	public function test_is_amp_customizer_enabled() {
-		AMP_Options_Manager::update_option( 'theme_support', 'foo' );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, 'foo' );
 		$this->assertEquals( false, AMP_Customizer_Design_Settings::is_amp_customizer_enabled() );
 
-		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::READER_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		$this->assertEquals( true, AMP_Customizer_Design_Settings::is_amp_customizer_enabled() );
 
 		add_filter( 'amp_customizer_is_enabled', '__return_false' );

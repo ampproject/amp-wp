@@ -5,8 +5,11 @@
  * @package AMP
  */
 
+use AmpProject\Attribute;
 use AmpProject\CssLength;
 use AmpProject\Dom\Document;
+use AmpProject\Extension;
+use AmpProject\Tag;
 
 /**
  * Strips the tags and attributes from the content that are not allowed by the AMP spec.
@@ -41,7 +44,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	const DUPLICATE_UNIQUE_TAG                 = 'DUPLICATE_UNIQUE_TAG';
 	const MANDATORY_CDATA_MISSING_OR_INCORRECT = 'MANDATORY_CDATA_MISSING_OR_INCORRECT';
 	const CDATA_TOO_LONG                       = 'CDATA_TOO_LONG';
-	const INVALID_CDATA_CSS_IMPORTANT          = 'INVALID_CDATA_CSS_IMPORTANT';
+	const INVALID_CDATA_CSS_I_AMPHTML_NAME     = 'INVALID_CDATA_CSS_I_AMPHTML_NAME';
 	const INVALID_CDATA_CONTENTS               = 'INVALID_CDATA_CONTENTS';
 	const INVALID_CDATA_HTML_COMMENTS          = 'INVALID_CDATA_HTML_COMMENTS';
 	const JSON_ERROR_CTRL_CHAR                 = 'JSON_ERROR_CTRL_CHAR';
@@ -338,6 +341,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		// ancestor nodes in AMP_Tag_And_Attribute_Sanitizer::remove_node().
 		$this_child = $element->firstChild;
 		while ( $this_child && $element->parentNode ) {
+			$prev_child = $this_child->previousSibling;
 			$next_child = $this_child->nextSibling;
 			if ( $this_child instanceof DOMElement ) {
 				$result = $this->sanitize_element( $this_child );
@@ -350,7 +354,13 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			} elseif ( $this_child instanceof DOMProcessingInstruction ) {
 				$this->remove_invalid_child( $this_child, [ 'code' => self::DISALLOWED_PROCESSING_INSTRUCTION ] );
 			}
-			$this_child = $next_child;
+
+			if ( ! $this_child->parentNode ) {
+				// Handle case where this child is replaced with children.
+				$this_child = $prev_child ? $prev_child->nextSibling : $element->firstChild;
+			} else {
+				$this_child = $next_child;
+			}
 		}
 
 		// If the element is still in the tree, process it.
@@ -912,21 +922,23 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			];
 		}
 		if ( isset( $cdata_spec['blacklisted_cdata_regex'] ) ) {
-			if ( preg_match( '@' . $cdata_spec['blacklisted_cdata_regex']['regex'] . '@u', $element->textContent ) ) {
-				if ( isset( $cdata_spec['blacklisted_cdata_regex']['error_message'] ) ) {
-					// There are only a few error messages, so map them to error codes.
-					switch ( $cdata_spec['blacklisted_cdata_regex']['error_message'] ) {
-						case 'CSS !important':
-							return [ 'code' => self::INVALID_CDATA_CSS_IMPORTANT ];
-						case 'contents':
-							return [ 'code' => self::INVALID_CDATA_CONTENTS ];
-						case 'html comments':
-							return [ 'code' => self::INVALID_CDATA_HTML_COMMENTS ];
+			foreach ( $cdata_spec['blacklisted_cdata_regex'] as $blacklisted_cdata_regex ) {
+				if ( preg_match( '@' . $blacklisted_cdata_regex['regex'] . '@u', $element->textContent ) ) {
+					if ( isset( $blacklisted_cdata_regex['error_message'] ) ) {
+						// There are only a few error messages, so map them to error codes.
+						switch ( $blacklisted_cdata_regex['error_message'] ) {
+							case 'CSS i-amphtml- name prefix':
+								return [ 'code' => self::INVALID_CDATA_CSS_I_AMPHTML_NAME ]; // @todo This really should be done as part of the CSS sanitizer.
+							case 'contents':
+								return [ 'code' => self::INVALID_CDATA_CONTENTS ];
+							case 'html comments':
+								return [ 'code' => self::INVALID_CDATA_HTML_COMMENTS ];
+						}
 					}
-				}
 
-				// Note: This fallback case is not currently reachable because all error messages are accounted for in the switch statement.
-				return [ 'code' => self::CDATA_VIOLATES_BLACKLIST ];
+					// Note: This fallback case is not currently reachable because all error messages are accounted for in the switch statement.
+					return [ 'code' => self::CDATA_VIOLATES_BLACKLIST ];
+				}
 			}
 		} elseif ( isset( $cdata_spec['cdata_regex'] ) ) {
 			$delimiter = false === strpos( $cdata_spec['cdata_regex'], '@' ) ? '@' : '#';
@@ -1246,7 +1258,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 			// Check the context to see if we are currently within a template tag.
 			// If this is the case and the attribute value contains a template placeholder, we skip sanitization.
-			if ( ! empty( $this->open_elements['template'] ) && preg_match( '/{{[^}]+?}}/', $attr_node->nodeValue ) ) {
+			if ( $this->is_inside_mustache_template( $node ) && preg_match( '/{{[^}]+?}}/', $attr_node->nodeValue ) ) {
 				continue;
 			}
 
@@ -1328,6 +1340,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Elements without a width or height don't need to be validated.
 		if ( ! $node->hasAttribute( 'width' ) && ! $node->hasAttribute( 'height' ) ) {
+			return true;
+		}
+
+		if ( $this->is_inside_mustache_template( $node ) && $this->has_layout_attribute_with_mustache_variable( $node ) ) {
 			return true;
 		}
 
@@ -1436,6 +1452,56 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Whether the node is inside a mustache template.
+	 *
+	 * @since 1.5.3
+	 *
+	 * @param DOMElement $node The node to examine.
+	 * @return bool Whether the node is inside a valid mustache template.
+	 */
+	private function is_inside_mustache_template( DOMElement $node ) {
+		if ( ! empty( $this->open_elements[ Tag::TEMPLATE ] ) ) {
+			while ( $node->parentNode instanceof DOMElement ) {
+				$node = $node->parentNode;
+				if ( Tag::TEMPLATE === $node->nodeName && Extension::MUSTACHE === $node->getAttribute( Attribute::TYPE ) ) {
+					return true;
+				}
+			}
+		} elseif ( ! empty( $this->open_elements[ Tag::SCRIPT ] ) ) {
+			while ( $node->parentNode instanceof DOMElement ) {
+				$node = $node->parentNode;
+				if ( Tag::SCRIPT === $node->nodeName && Extension::MUSTACHE === $node->getAttribute( Attribute::TEMPLATE ) && Attribute::TYPE_TEXT_PLAIN === $node->getAttribute( Attribute::TYPE ) ) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Whether the node has a layout attribute with variable syntax, like {{foo}}.
+	 *
+	 * This is important for whether to validate the layout of the node.
+	 * Similar to the validation logic in the AMP validator.
+	 *
+	 * @see https://github.com/ampproject/amphtml/blob/c083d2c6120a251dcc9b0beb33c0336c7d3ca5a8/validator/engine/validator.js#L4038-L4054
+	 *
+	 * @since 1.5.3
+	 *
+	 * @param DOMElement $node The node to examine.
+	 * @return bool Whether the node has a layout attribute with variable syntax.
+	 */
+	private function has_layout_attribute_with_mustache_variable( DOMElement $node ) {
+		foreach ( [ Attribute::LAYOUT, Attribute::WIDTH, Attribute::HEIGHT, Attribute::SIZES, Attribute::HEIGHTS ] as $attribute ) {
+			if ( preg_match( '/{{[^}]+?}}/', $node->getAttribute( $attribute ) ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**

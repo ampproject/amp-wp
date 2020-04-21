@@ -10,7 +10,7 @@ use RuntimeException;
  *
  * @package ampproject/common
  */
-final class FailedToGetFromRemoteUrl extends RuntimeException implements AmpException
+final class FailedToGetFromRemoteUrl extends RuntimeException implements FailedRemoteRequest
 {
 
     /**

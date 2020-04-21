@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\MarkupComparison;
 use AmpProject\Dom\Document;
 
 // phpcs:disable WordPress.WP.EnqueuedResources
@@ -15,6 +16,8 @@ use AmpProject\Dom\Document;
  * @covers AMP_Tag_And_Attribute_Sanitizer
  */
 class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
+
+	use MarkupComparison;
 
 	/**
 	 * Get data for testing sanitization in the body.
@@ -732,6 +735,33 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-form' ],
 			],
 
+			'scripts-gathered-from-invalid-parents'        => [
+				'
+				<ancestor-unknown>
+					<amp-audio src="https://example.com/foo.mp3" width="100" height="200"></amp-audio>
+					<parent-unknown>
+						<amp-form>
+							<form method="GET" id="a_string" class="a_string" action="https://example.com" target="_blank">
+								<unrecognized>who are you?</unrecognized>
+								<input type=text value="test" name="hello">
+							</form>
+						</amp-form>
+					</parent-unknown>
+					<amp-video src="https://example.com/foo.mp4" width="100" height="200"></amp-video>
+				</ancestor-unknown>
+				',
+				'
+				<amp-audio src="https://example.com/foo.mp3" width="100" height="200"></amp-audio>
+				<form method="GET" id="a_string" class="a_string" action="https://example.com" target="_blank">
+					who are you?
+					<input type="text" value="test" name="hello">
+				</form>
+				<amp-video src="https://example.com/foo.mp4" width="100" height="200"></amp-video>
+				',
+				[ 'amp-audio', 'amp-form', 'amp-video' ],
+				array_fill( 0, 4, AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ),
+			],
+
 			'form-visible-when-invalid'                    => [
 				'
 				<form method="post"
@@ -868,8 +898,14 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				],
 			],
 
-			'attribute_requirements_overriden_by_placeholders_within_template' => [
+			'attribute_requirements_overridden_by_placeholders_within_mustache_template' => [
 				'<template type="amp-mustache"><amp-timeago datetime="{{iso}}"></amp-timeago></template>',
+				null,
+				[ 'amp-mustache', 'amp-timeago' ],
+			],
+
+			'attribute_requirements_overridden_by_placeholders_within_mustache_script' => [
+				'<script template="amp-mustache" type="text/plain"><amp-timeago datetime="{{iso}}"></amp-timeago></script>',
 				null,
 				[ 'amp-mustache', 'amp-timeago' ],
 			],
@@ -2107,7 +2143,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'amp-script-5'                                 => [
 				'
-					<amp-script script="myScript" layout="container"></amp-script>
+					<amp-script script="myScript" layout="container" data-ampdevmode></amp-script>
 					<script type="text/plain" target="amp-script" id="myScript">
 					document.body.textContent += \'Hello world!\';
 					</script>
@@ -2283,6 +2319,30 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_WIDTH ],
 			],
 
+			'variable_attributes_in_mustache_template'     => [
+				'
+				<template type="amp-mustache">
+					<div><div><div>
+						<amp-img src="/img1.png" width="{{width}}" height="50"></amp-img>
+					</div></div></div>
+				</template>
+				',
+				null,
+				[ 'amp-mustache' ],
+			],
+
+			'variable_attributes_in_mustache_script'       => [
+				'
+				<script template="amp-mustache" type="text/plain">
+					<div><div><div>
+						<amp-img src="/img1.png" width="{{width}}" height="50"></amp-img>
+					</div></div></div>
+				</script>
+				',
+				null,
+				[ 'amp-mustache' ],
+			],
+
 			'illegal_height_attribute'                     => [
 				'<amp-img src="/img1.png" width="50" height="50%"></amp-img>',
 				'',
@@ -2389,6 +2449,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 			'fill_layout_no_dimensions'                    => [
 				'<amp-img src="/img1.png" layout="fill"></amp-img>',
+				null,
+			],
+
+			'disable-inline-width'                         => [
+				'<amp-img layout="intrinsic" height="160" width="480" disable-inline-width src="https://example.com/elva-fairy-800w.jpg" srcset="https://example.com/elva-fairy-480w.jpg 480w, https://example.com/elva-fairy-800w.jpg 800w" sizes="(max-width: 600px) 480px, 800px"></amp-img>',
 				null,
 			],
 
@@ -2685,6 +2750,36 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				null,
 				[ 'amp-redbull-player' ],
 			],
+
+			'mustache_templates_with_variable_attrs'       => [
+				'
+				<template type="amp-mustache">
+					<amp-img src="/img1.png" layout="bad" width="bad" height="bad" heights="bad" sizes="bad"></amp-img>
+					<amp-img src="/img2.png" layout="{{layout}}" width="bad" height="bad" heights="bad" sizes="bad"></amp-img>
+					<amp-img src="/img3.png" layout="bad" width="{{width}}" height="bad" heights="bad" sizes="bad"></amp-img>
+					<amp-img src="/img4.png" layout="bad" width="bad" height="{{height}}" heights="bad" sizes="bad"></amp-img>
+					<amp-img src="/img5.png" layout="bad" width="bad" height="bad" heights="{{heights}}" sizes="bad"></amp-img>
+					<amp-img src="/img6.png" layout="bad" width="bad" height="bad" heights="bad" sizes="{{sizes}}"></amp-img>
+				</template>
+				',
+				'
+				<template type="amp-mustache">
+					<amp-img src="/img2.png" layout="{{layout}}" width="bad" height="bad" heights="bad" sizes="bad"></amp-img>
+					<amp-img src="/img3.png" width="{{width}}" height="bad" heights="bad" sizes="bad"></amp-img>
+					<amp-img src="/img4.png" width="bad" height="{{height}}" heights="bad" sizes="bad"></amp-img>
+					<amp-img src="/img5.png" width="bad" height="bad" heights="{{heights}}" sizes="bad"></amp-img>
+					<amp-img src="/img6.png" width="bad" height="bad" heights="bad" sizes="{{sizes}}"></amp-img>
+				</template>
+				',
+				[ 'amp-mustache' ],
+				[
+					AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_WIDTH,
+					AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE_REGEX_CASEI,
+					AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE_REGEX_CASEI,
+					AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE_REGEX_CASEI,
+					AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE_REGEX_CASEI,
+				],
+			],
 		];
 	}
 
@@ -2880,11 +2975,17 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 					],
 				],
 			],
-			'cdata_css_important'                     => [
-				'<html amp><head><meta charset="utf-8"><style amp-custom>body { outline: solid 1px red !important; }</style></head><body></body></html>',
+			'cdata_css_i_amphtml_name'                => [
+				'<html amp><head><meta charset="utf-8"><style amp-custom>i-amphtml-scroll-container { outline: solid 1px red; }</style></head><body></body></html>',
 				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_CSS_IMPORTANT ],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_CSS_I_AMPHTML_NAME ],
+			],
+			'cdata_css_html_comment'                  => [
+				'<html amp><head><meta charset="utf-8"><style amp-custom>/* <!-- not good --> */</style></head><body></body></html>',
+				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_HTML_COMMENTS ],
 			],
 			'cdata_contents_bad_comment'              => [
 				'<html><head><meta charset="utf-8"><script type="application/ld+json"><!--{"@context":"http:\/\/schema.org"}--></script></head><body></body></html>',
@@ -3428,23 +3529,5 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 		$this->assertEmpty( $expected_errors, 'There should be no expected validation errors remaining.' );
 		$this->assertEqualMarkup( $expected_content, AMP_DOM_Utils::get_content_from_dom( $dom ) );
-	}
-
-	/**
-	 * Assert markup is equal.
-	 *
-	 * @param string $expected Expected markup.
-	 * @param string $actual   Actual markup.
-	 */
-	public function assertEqualMarkup( $expected, $actual ) {
-		$actual   = preg_replace( '/\s+/', ' ', $actual );
-		$expected = preg_replace( '/\s+/', ' ', $expected );
-		$actual   = preg_replace( '/(?<=>)\s+(?=<)/', '', trim( $actual ) );
-		$expected = preg_replace( '/(?<=>)\s+(?=<)/', '', trim( $expected ) );
-
-		$this->assertEquals(
-			array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $expected, -1, PREG_SPLIT_DELIM_CAPTURE ) ),
-			array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $actual, -1, PREG_SPLIT_DELIM_CAPTURE ) )
-		);
 	}
 }
