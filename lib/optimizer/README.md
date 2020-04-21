@@ -168,7 +168,7 @@ Configuration values for the transformers can be stored under the fully qualifie
 
 They will also usually provide publically accessible constants for the known configuration keys as well.
 
-In the following example, we configure the `AmpRuntimeCss` transformer by setting its `'canary'` option to `true` (which would default to false).
+In the following example, we configure the `AmpProject\Optimizer\AmpRuntimeCss` transformer by setting its `'canary'` option to `true` (which would default to false).
 
 ```php
 use AmpProject\Optimizer\Configuration;
@@ -228,7 +228,7 @@ Configuration objects for the individual transformers need to be registered with
 
 The configuration objects for the transformers that ship with this library are already registered by default. But if you add third-party or custom transformers, you'll need to register whatever configuration objects they might need with the main `AmpProject\Optimizer\Configuration` object first.
 
-In the following example, we add a new `MyCustomTransformer` transformer in addition to the default set and configure it with a default value, and then we register its corresponding configuration object to make sure the configuration can be properly validated and passed around.
+In the following example, we add a new `MyProject\MyCustomTransformer` transformer in addition to the default set and configure it with a default value, and then we register its corresponding configuration object to make sure the configuration can be properly validated and passed around.
 
 ```php
 use AmpProject\Optimizer\Configuration;
@@ -258,13 +258,13 @@ $configuration->registerConfigurationClass(
 $transformationEngine = new TransformationEngine(configuration);
 ```
 
-For the wiring to work correctly, the `MyProject\MyCustomTransformer` class should accept within its constructor an object implementing the `AmpProject\Optimizer\TransformerConfiguration` interface as its first argument and it should implement the `Configurable` interface to let the transformation engine know it expects a configuration object.
+For the wiring to work correctly, the `MyProject\MyCustomTransformer` class should accept within its constructor an object implementing the `AmpProject\Optimizer\TransformerConfiguration` interface as its first argument and it should implement the `AmpProject\Optimizer\Configurable` interface to let the transformation engine know it expects a configuration object.
 
 The `MyProject\MyCustomTransformerConfiguration` class should then implement that same `AmpProject\Optimizer\TransformerConfiguration` interface. For convenience, it can do so easily by extending the abstract `AmpProject\Optimizer\Configuration\BaseTransformerConfiguration` base class.
 
 The configuration object will then be automatically injected into the transformer's constructor as needed.
 
-Here's an example configuration class for our custom `MyCustomTransformer` transformer:
+Here's an example configuration class for our custom `MyProject\MyCustomTransformer` transformer:
 
 ```php
 namespace MyProject;
@@ -329,16 +329,16 @@ final class MyCustomTransformer implements Transformer, Configurable
 
 ## Transformers Requesting External Data
 
-In case your transformer needs to make remote requests to fetch external data (like the `AmpProject\Optimizer\Transformer\AmpRuntimeCss` does for fetching the latest version of the CSS to inline), you should make use of the provided `MakesRemoteRequests` abstraction.
+In case your transformer needs to make remote requests to fetch external data (like the `AmpProject\Optimizer\Transformer\AmpRuntimeCss` does for fetching the latest version of the CSS to inline), you should make use of the provided `AmpProject\Optimizer\MakesRemoteRequests` abstraction.
 
 This abstraction allows code outside of the transformation engine to control the specific conditions and limits that govern these remote request, like for example throttling them or integrating them with the caching subsystem of the framework in use.
 
-To add support for this abstraction, the transformer needs to implement the `MakesRemoteRequests` marker interface and accept a `RemoteGetRequest` object via its constructor.
+To add support for this abstraction, the transformer needs to implement the `AmpProject\Optimizer\MakesRemoteRequests` marker interface and accept an `AmpProject\RemoteGetRequest` object via its constructor.
 
 <!-- TODO: This reflects code changes that are yet to be merged via https://github.com/ampproject/amp-wp/issues/4612 -->
 <table>
 <tr>
-<td>❗️</td><td>If the object implements <strong>both</strong> the <code>MakesRemoteRequests</code> and the <code>Configurable</code> interfaces, the <code>RemoteGetRequest</code> needs to be the <strong>second</strong> argument, **after** the <code>TransformerConfiguration</code> object.<br>This requirement stems from the fact that the Optimizer package is not tied to any given auto-wiring dependency resolution.</td>
+<td>❗️</td><td>If the object implements <strong>both</strong> the <code>AmpProject\Optimizer\MakesRemoteRequests</code> and the <code>AmpProject\Optimizer\Configurable</code> interfaces, the <code>AmpProject\RemoteGetRequest</code> needs to be the <strong>second</strong> argument, <strong>after</strong> the <code>AmpProject\Optimizer\TransformerConfiguration</code> object.<br>This requirement stems from the fact that the Optimizer package is not tied to any given auto-wiring dependency resolution.</td>
 </tr>
 </table>
 
@@ -385,7 +385,7 @@ final class MyCustomTransformer implements Transformer, MakesRemoteRequests
 
 ## Adapting the Handling of Remote Requests
 
-The implementation to use for fulfilling requests made via the `RemoteGetRequest` interface can be injected into the `AmpProject\Optimizer\TransformationEngine` via its second, optional argument:
+The implementation to use for fulfilling requests made via the `AmpProject\RemoteGetRequest` interface can be injected into the `AmpProject\Optimizer\TransformationEngine` via its second, optional argument:
 
 ```php
 use AmpProject\Optimizer\Configuration;
