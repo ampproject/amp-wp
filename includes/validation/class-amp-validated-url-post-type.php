@@ -1810,7 +1810,7 @@ class AMP_Validated_URL_Post_Type {
 		);
 
 		// Ensure only the expected metaboxes are shown on this screen.
-		// Note the O(n^3) complexity here is not a concern because the each nested array has only a few items.
+		// Note the O(n^3) complexity here is not a concern because each nested array has only a few items.
 		$allowed_metaboxes = [ 'slugdiv', 'submitdiv', self::STATUS_META_BOX, $stylesheets_metabox_id ];
 		foreach ( $wp_meta_boxes[ self::POST_TYPE_SLUG ] as $context => $metabox_contexts ) {
 			foreach ( $metabox_contexts as $metabox_priorities ) {
