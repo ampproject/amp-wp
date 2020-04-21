@@ -61,13 +61,6 @@ final class AmpRuntimeCss implements Transformer, Configurable, MakesRemoteReque
     const V0_CSS_URL = Amp::CACHE_HOST . '/' . self::V0_CSS;
 
     /**
-     * Transport to use for remote requests.
-     *
-     * @var RemoteGetRequest
-     */
-    private $remoteRequest;
-
-    /**
      * Configuration store to use.
      *
      * @var TransformerConfiguration
@@ -75,15 +68,22 @@ final class AmpRuntimeCss implements Transformer, Configurable, MakesRemoteReque
     private $configuration;
 
     /**
+     * Transport to use for remote requests.
+     *
+     * @var RemoteGetRequest
+     */
+    private $remoteRequest;
+
+    /**
      * Instantiate an AmpRuntimeCss object.
      *
-     * @param RemoteGetRequest         $remoteRequest Transport to use for remote requests.
      * @param TransformerConfiguration $configuration Configuration store to use.
+     * @param RemoteGetRequest         $remoteRequest Transport to use for remote requests.
      */
-    public function __construct(RemoteGetRequest $remoteRequest, TransformerConfiguration $configuration)
+    public function __construct(TransformerConfiguration $configuration, RemoteGetRequest $remoteRequest)
     {
-        $this->remoteRequest = $remoteRequest;
         $this->configuration = $configuration;
+        $this->remoteRequest = $remoteRequest;
     }
 
     /**

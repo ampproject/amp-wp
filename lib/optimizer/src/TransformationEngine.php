@@ -84,12 +84,12 @@ final class TransformationEngine
             foreach ($this->configuration->get(Configuration::KEY_TRANSFORMERS) as $transformerClass) {
                 $arguments = [];
 
-                if (is_a($transformerClass, MakesRemoteRequests::class, true)) {
-                    $arguments[] = $this->remoteRequest;
-                }
-
                 if (is_a($transformerClass, Configurable::class, true)) {
                     $arguments[] = $this->configuration->getTransformerConfiguration($transformerClass);
+                }
+
+                if (is_a($transformerClass, MakesRemoteRequests::class, true)) {
+                    $arguments[] = $this->remoteRequest;
                 }
 
                 $transformers[$transformerClass] = new $transformerClass(...$arguments);
