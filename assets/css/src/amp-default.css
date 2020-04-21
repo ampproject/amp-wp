@@ -85,5 +85,5 @@ amp-carousel .amp-wp-gallery-caption {
  * Other themes set the bottom margin on direct descendants of the .entry-content, in which case this will be overridden.
  */
 .wp-video {
-	margin-bottom: 1em;
+	margin-bottom: 1.5em;
 }
