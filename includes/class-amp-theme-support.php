@@ -1108,12 +1108,12 @@ class AMP_Theme_Support {
 	/**
 	 * Register/override widgets.
 	 *
-	 * @deprecated As of 1.5.2 the AMP_Core_Block_Handler will sanitize the core widgets instead.
+	 * @deprecated As of 1.6 the AMP_Core_Block_Handler will sanitize the core widgets instead.
 	 * @global WP_Widget_Factory
 	 * @return void
 	 */
 	public static function register_widgets() {
-		_deprecated_function( __METHOD__, '1.5.2' );
+		_deprecated_function( __METHOD__, '1.6' );
 		global $wp_widget_factory;
 		foreach ( $wp_widget_factory->widgets as $registered_widget ) {
 			$registered_widget_class_name = get_class( $registered_widget );

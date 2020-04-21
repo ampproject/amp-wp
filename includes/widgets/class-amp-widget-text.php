@@ -6,7 +6,7 @@
  * @package AMP
  */
 
-_deprecated_file( __FILE__, '1.5.2' );
+_deprecated_file( __FILE__, '1.6' );
 
 if ( class_exists( 'WP_Widget_Text' ) ) {
 	/**

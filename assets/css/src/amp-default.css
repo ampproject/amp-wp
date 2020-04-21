@@ -77,3 +77,13 @@ amp-carousel .amp-wp-gallery-caption {
 	display: block;
 	flex-wrap: unset;
 }
+
+/*
+ * Replicate bottom-margin which is added to .mejs-container to by theme styles, although it varies;
+ * - 1.5em in Twenty Seventeen
+ * - 24px in Twenty Eleven, Twenty Thirteen and Twenty Twelve
+ * Other themes set the bottom margin on direct descendants of the .entry-content, in which case this will be overridden.
+ */
+.wp-video {
+	margin-bottom: 1em;
+}
