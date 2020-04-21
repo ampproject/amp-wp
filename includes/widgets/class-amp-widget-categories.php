@@ -4,6 +4,7 @@
  *
  * @since 0.7.0
  * @package AMP
+ * @codeCoverageIgnore
  */
 
 _deprecated_file( __FILE__, '1.6' );
