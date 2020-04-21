@@ -563,7 +563,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'user_has_cap', [ self::TESTED_CLASS, 'filter_user_has_cap_for_hiding_term_list_table_checkbox' ] ) );
 		$this->assertEquals( 10, has_filter( 'terms_clauses', [ self::TESTED_CLASS, 'filter_terms_clauses_for_description_search' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_notices', [ self::TESTED_CLASS, 'add_admin_notices' ] ) );
-		$this->assertEquals( 10, has_filter( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_row_actions', [ self::TESTED_CLASS, 'filter_tag_row_actions' ] ) );
+		$this->assertEquals( PHP_INT_MAX, has_filter( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_row_actions', [ self::TESTED_CLASS, 'filter_tag_row_actions' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_menu', [ self::TESTED_CLASS, 'add_admin_menu_validation_error_item' ] ) );
 		$this->assertEquals( 10, has_filter( 'parse_term_query', [ self::TESTED_CLASS, 'parse_post_php_term_query' ] ) );
 		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_custom_column', [ self::TESTED_CLASS, 'filter_manage_custom_columns' ] ) );
@@ -985,6 +985,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		AMP_Validation_Error_Taxonomy::register();
 		$initial_actions = [
 			'delete' => '<a href="#">Delete</a>',
+			'bad'    => 'So bad!',
 		];
 
 		// The term is for this taxonomy, so this should filter the actions.
@@ -994,9 +995,25 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 				'description' => wp_json_encode( $this->get_mock_error() ),
 			]
 		);
-		$filtered_actions   = AMP_Validation_Error_Taxonomy::filter_tag_row_actions( $initial_actions, $term_this_taxonomy );
-		$reject_action      = $filtered_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION ];
-		$accept_action      = $filtered_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION ];
+
+		AMP_Validation_Error_Taxonomy::add_admin_hooks();
+
+		add_filter(
+			AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_row_actions',
+			function ( $actions ) {
+				$actions['also_bad'] = 'Also bad!';
+				return $actions;
+			},
+			1000
+		);
+
+		$filtered_actions = apply_filters( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_row_actions', $initial_actions, get_term( $term_this_taxonomy ) );
+		$this->assertEqualSets(
+			[ 'details', AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION, AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION ],
+			array_keys( $filtered_actions )
+		);
+		$reject_action = $filtered_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION ];
+		$accept_action = $filtered_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION ];
 		$this->assertStringContains( strval( $term_this_taxonomy->term_id ), $reject_action );
 		$this->assertStringContains( strval( $term_this_taxonomy->term_id ), $accept_action );
 		$this->assertStringContains( 'Keep', $reject_action );

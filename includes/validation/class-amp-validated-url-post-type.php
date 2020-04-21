@@ -185,7 +185,7 @@ class AMP_Validated_URL_Post_Type {
 
 		// Edit post screen hooks.
 		add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_edit_post_screen_scripts' ] );
-		add_action( 'add_meta_boxes', [ __CLASS__, 'add_meta_boxes' ] );
+		add_action( 'add_meta_boxes', [ __CLASS__, 'add_meta_boxes' ], PHP_INT_MAX );
 		add_action( 'edit_form_after_title', [ __CLASS__, 'render_single_url_list_table' ] );
 		add_filter( 'edit_' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_per_page', [ __CLASS__, 'get_terms_per_page' ] );
 		add_action( 'admin_init', [ __CLASS__, 'add_taxonomy' ] );
@@ -226,7 +226,7 @@ class AMP_Validated_URL_Post_Type {
 		add_action( 'admin_action_' . self::VALIDATE_ACTION, [ __CLASS__, 'handle_validate_request' ] );
 		add_action( 'post_action_' . self::UPDATE_POST_TERM_STATUS_ACTION, [ __CLASS__, 'handle_validation_error_status_update' ] );
 		add_action( 'admin_menu', [ __CLASS__, 'add_admin_menu_new_invalid_url_count' ] );
-		add_filter( 'post_row_actions', [ __CLASS__, 'filter_post_row_actions' ], 10, 2 );
+		add_filter( 'post_row_actions', [ __CLASS__, 'filter_post_row_actions' ], PHP_INT_MAX, 2 );
 		add_filter( sprintf( 'views_edit-%s', self::POST_TYPE_SLUG ), [ __CLASS__, 'filter_table_views' ] );
 		add_filter( 'bulk_post_updated_messages', [ __CLASS__, 'filter_bulk_post_updated_messages' ], 10, 2 );
 		add_filter( 'admin_title', [ __CLASS__, 'filter_admin_title' ] );
@@ -1823,9 +1823,13 @@ class AMP_Validated_URL_Post_Type {
 	/**
 	 * Adds the meta boxes to the CPT post.php page.
 	 *
+	 * @global array $wp_meta_boxes
 	 * @return void
 	 */
 	public static function add_meta_boxes() {
+		global $wp_meta_boxes;
+		$stylesheets_metabox_id = 'amp_stylesheets';
+
 		remove_meta_box( 'submitdiv', self::POST_TYPE_SLUG, 'side' );
 		remove_meta_box( 'slugdiv', self::POST_TYPE_SLUG, 'normal' );
 		add_meta_box(
@@ -1838,7 +1842,7 @@ class AMP_Validated_URL_Post_Type {
 			[ '__back_compat_meta_box' => true ]
 		);
 		add_meta_box(
-			'amp_stylesheets',
+			$stylesheets_metabox_id,
 			__( 'Stylesheets', 'amp' ),
 			[ __CLASS__, 'print_stylesheets_meta_box' ],
 			self::POST_TYPE_SLUG,
@@ -1846,6 +1850,19 @@ class AMP_Validated_URL_Post_Type {
 			'default',
 			[ '__back_compat_meta_box' => true ]
 		);
+
+		// Ensure only the expected metaboxes are shown on this screen.
+		// Note the O(n^3) complexity here is not a concern because each nested array has only a few items.
+		$allowed_metaboxes = [ 'slugdiv', 'submitdiv', self::STATUS_META_BOX, $stylesheets_metabox_id ];
+		foreach ( $wp_meta_boxes[ self::POST_TYPE_SLUG ] as $context => $metabox_contexts ) {
+			foreach ( $metabox_contexts as $metabox_priorities ) {
+				foreach ( array_keys( $metabox_priorities ) as $id ) {
+					if ( ! in_array( $id, $allowed_metaboxes, true ) ) {
+						remove_meta_box( $id, self::POST_TYPE_SLUG, $context );
+					}
+				}
+			}
+		}
 	}
 
 	/**
@@ -2855,6 +2872,11 @@ class AMP_Validated_URL_Post_Type {
 				esc_html__( 'Forget', 'amp' )
 			);
 		}
+
+		$actions = wp_array_slice_assoc(
+			$actions,
+			[ 'edit', self::VALIDATE_ACTION, 'view', 'delete' ]
+		);
 
 		return $actions;
 	}
