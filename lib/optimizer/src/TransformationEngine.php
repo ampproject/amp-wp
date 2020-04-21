@@ -5,6 +5,8 @@ namespace AmpProject\Optimizer;
 use AmpProject\Dom\Document;
 use AmpProject\RemoteGetRequest;
 use AmpProject\RemoteRequest\CurlRemoteGetRequest;
+use ReflectionClass;
+use ReflectionException;
 
 /**
  * Transformation engine that accepts HTML and returns optimized HTML.
@@ -29,16 +31,25 @@ final class TransformationEngine
     private $remoteRequest;
 
     /**
+     * Collection of transformers that were initialized.
+     *
+     * @var Transformer[]
+     */
+    private $transformers;
+
+    /**
      * Instantiate a TransformationEngine object.
      *
-     * @param Configuration    $configuration Configuration data to use for setting up the transformers.
-     * @param RemoteGetRequest $remoteRequest Optional. Transport to use for remote requests. Defaults to the
+     * @param Configuration|null    $configuration Optional. Configuration data to use for setting up the transformers.
+     * @param RemoteGetRequest|null $remoteRequest Optional. Transport to use for remote requests. Defaults to the
      *                                     CurlRemoteGetRequest implementation shipped with the library.
      */
-    public function __construct(Configuration $configuration, RemoteGetRequest $remoteRequest = null)
+    public function __construct(Configuration $configuration = null, RemoteGetRequest $remoteRequest = null)
     {
-        $this->configuration = $configuration;
+        $this->configuration = isset($configuration) ? $configuration : new Configuration();
         $this->remoteRequest = isset($remoteRequest) ? $remoteRequest : new CurlRemoteGetRequest();
+
+        $this->initializeTransformers();
     }
 
     /**
@@ -50,7 +61,7 @@ final class TransformationEngine
      */
     public function optimizeDom(Document $document, ErrorCollection $errors)
     {
-        foreach ($this->getTransformers() as $transformer) {
+        foreach ($this->transformers as $transformer) {
             $transformer->transform($document, $errors);
         }
     }
@@ -71,31 +82,58 @@ final class TransformationEngine
     }
 
     /**
-     * Get the array of transformers to use.
-     *
-     * @return Transformer[] Array of transformers to use.
+     * Initialize the array of transformers to use.
      */
-    private function getTransformers()
+    private function initializeTransformers()
     {
-        static $transformers = null;
+        $this->transformers = [];
 
-        if (null === $transformers) {
-            $transformers = [];
-            foreach ($this->configuration->get(Configuration::KEY_TRANSFORMERS) as $transformerClass) {
-                $arguments = [];
+        foreach ($this->configuration->get(Configuration::KEY_TRANSFORMERS) as $transformerClass) {
+            $this->transformers[$transformerClass] = new $transformerClass(
+                ...$this->getTransformerDependencies($transformerClass)
+            );
+        }
+    }
 
-                if (is_a($transformerClass, MakesRemoteRequests::class, true)) {
-                    $arguments[] = $this->remoteRequest;
-                }
+    /**
+     * Get the dependencies of a transformer and put them in the correct order.
+     *
+     * @param string $transformerClass Class of the transformer to get the dependencies for.
+     * @return array Array of dependencies in the order as they appear in the transformer's constructor.
+     * @throws ReflectionException If the transformer could not be reflected upon.
+     */
+    private function getTransformerDependencies($transformerClass)
+    {
+        $constructor = (new ReflectionClass($transformerClass))->getConstructor();
 
-                if (is_a($transformerClass, Configurable::class, true)) {
-                    $arguments[] = $this->configuration->getTransformerConfiguration($transformerClass);
-                }
-
-                $transformers[$transformerClass] = new $transformerClass(...$arguments);
-            }
+        if ($constructor === null) {
+            return [];
         }
 
-        return $transformers;
+        $dependencies = [];
+        foreach ($constructor->getParameters() as $parameter) {
+            $dependencyType = $parameter->getClass();
+
+            if ($dependencyType === null) {
+                // No type provided, so we pass `null` in the hopes that the argument is optional.
+                $dependencies[] = null;
+                continue;
+            }
+
+            if (is_a($dependencyType->name, TransformerConfiguration::class, true)) {
+                $dependencies[] = $this->configuration->getTransformerConfiguration($transformerClass);
+                continue;
+            }
+
+            if (is_a($dependencyType->name, RemoteGetRequest::class, true)) {
+                $dependencies[] = $this->remoteRequest;
+                continue;
+            }
+
+            // Unknown dependency type, so we pass `null` in the hopes that the argument is optional.
+            $dependencies[] = null;
+        }
+
+        return $dependencies;
     }
 }
