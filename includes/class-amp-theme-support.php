@@ -2014,10 +2014,16 @@ class AMP_Theme_Support {
 		if ( AMP_Validation_Manager::$is_validate_request ) {
 			status_header( 200 );
 			header( 'Content-Type: application/json; charset=utf-8' );
-			return wp_json_encode(
-				AMP_Validation_Manager::get_validate_response_data( $sanitization_results ),
-				JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
-			);
+			$data       = [
+				'http_status_code' => $status_code,
+				'php_fatal_error'  => false,
+			];
+			$last_error = error_get_last();
+			if ( $last_error && in_array( $last_error['type'], [ E_ERROR, E_RECOVERABLE_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR, E_PARSE ], true ) ) {
+				$data['php_fatal_error'] = $last_error;
+			}
+			$data = array_merge( $data, AMP_Validation_Manager::get_validate_response_data( $sanitization_results ) );
+			return wp_json_encode( $data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
 		}
 
 		// Determine what the validation errors are.
