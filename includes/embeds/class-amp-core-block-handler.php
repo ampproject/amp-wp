@@ -263,13 +263,18 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 			if ( ! $select instanceof DOMElement ) {
 				continue;
 			}
+
 			$script = $dom->xpath->query( './/script[ contains( text(), "onSelectChange" ) ]', $select->parentNode )->item( 0 );
-			if ( ! $script instanceof DOMElement ) {
+			if ( $script ) {
+				$script->parentNode->removeChild( $script );
+			} elseif ( $select->hasAttribute( 'onchange' ) ) {
+				// Special condition for WordPress<=5.1.
+				$select->removeAttribute( 'onchange' );
+			} else {
 				continue;
 			}
 
 			AMP_DOM_Utils::add_amp_action( $select, 'change', 'AMP.navigateTo(url=event.value)' );
-			$script->parentNode->removeChild( $script );
 
 			// When AMP-to-AMP linking is enabled, ensure links go to the AMP version.
 			if ( ! empty( $args['amp_to_amp_linking_enabled'] ) ) {
