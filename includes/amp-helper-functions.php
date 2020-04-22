@@ -483,7 +483,9 @@ function amp_remove_endpoint( $url ) {
  * @global WP_Query $wp_query
  */
 function amp_add_amphtml_link() {
-	global $wp_query;
+	if ( amp_is_canonical() ) {
+		return;
+	}
 
 	/**
 	 * Filters whether to show the amphtml link on the frontend.
@@ -498,12 +500,13 @@ function amp_add_amphtml_link() {
 	$current_url = amp_get_current_url();
 
 	$amp_url = null;
-	if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-		if ( AMP_Theme_Support::is_paired_available() ) {
+
+	if ( is_amp_available() ) {
+		if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 			$amp_url = add_query_arg( amp_get_slug(), '', $current_url );
+		} else {
+			$amp_url = amp_get_permalink( get_queried_object_id() );
 		}
-	} elseif ( $wp_query instanceof WP_Query && ( $wp_query->is_singular() || $wp_query->is_posts_page ) && post_supports_amp( get_post( get_queried_object_id() ) ) ) {
-		$amp_url = amp_get_permalink( get_queried_object_id() );
 	}
 
 	if ( ! $amp_url ) {
@@ -554,6 +557,48 @@ function post_supports_amp( $post ) {
 }
 
 /**
+ * Determine whether AMP is available for the current URL.
+ *
+ * @todo This should go into the AmpProject\AmpWP namespace?
+ * @since 1.6
+ *
+ * @return bool Available.
+ */
+function is_amp_available() {
+	global $wp_query;
+
+	if ( ! $wp_query instanceof WP_Query || ! did_action( 'wp' ) ) {
+		_doing_it_wrong(
+			__FUNCTION__,
+			esc_html(
+				sprintf(
+					/* translators: %1$s: function name, %2$s: the current action, %3$s: the wp action, %4$s: the WP_Query class, %5$s: the amp_skip_post() function */
+					__( '%1$s was called too early and so it will not work properly. WordPress is currently doing the "%2$s" action. Calling this function before the "%3$s" action means it will not have access to %4$s and the queried object to determine if it is an AMP response, thus neither the "%5$s" filter nor the AMP enabled toggle will be considered.', 'amp' ),
+					__FUNCTION__ . '()',
+					current_action(),
+					'wp',
+					'WP_Query',
+					'amp_skip_post()'
+				)
+			),
+			'1.6.0'
+		);
+		return false;
+	}
+
+	if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+		return (
+			( $wp_query->is_singular() || $wp_query->is_posts_page )
+			&&
+			post_supports_amp( get_post( get_queried_object_id() ) )
+		);
+	}
+
+	$availability = AMP_Theme_Support::get_template_availability();
+	return $availability['supported'];
+}
+
+/**
  * Determine whether the current response being served as AMP.
  *
  * This function cannot be called before the parse_query action because it needs to be able
@@ -576,7 +621,7 @@ function is_amp_endpoint() {
 
 	$warned        = false;
 	$error_message = sprintf(
-		/* translators: %1$s: is_amp_endpoint(), %2$s: the current action, %3$s: the wp action, %4$s: the WP_Query class, %5$s: the amp_skip_post() function */
+		/* translators: %1$s: function name, %2$s: the current action, %3$s: the wp action, %4$s: the WP_Query class, %5$s: the amp_skip_post() function */
 		__( '%1$s was called too early and so it will not work properly. WordPress is currently doing the "%2$s" action. Calling this function before the "%3$s" action means it will not have access to %4$s and the queried object to determine if it is an AMP response, thus neither the "%5$s" filter nor the AMP enabled toggle will be considered.', 'amp' ),
 		__FUNCTION__ . '()',
 		current_action(),

@@ -523,19 +523,11 @@ class AMP_Theme_Support {
 	 * @since 0.7
 	 *
 	 * @see amp_is_canonical()
+	 *
 	 * @return bool Whether available.
 	 */
 	public static function is_paired_available() {
-		if ( ! current_theme_supports( self::SLUG ) ) {
-			return false;
-		}
-
-		if ( amp_is_canonical() ) {
-			return false;
-		}
-
-		$availability = self::get_template_availability();
-		return $availability['supported'];
+		return ! amp_is_canonical() && is_amp_available();
 	}
 
 	/**

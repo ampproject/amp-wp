@@ -185,10 +185,8 @@ class AMP_Template_Customizer {
 	 * Enqueues scripts used in both the AMP and non-AMP Customizer preview.
 	 *
 	 * @since 0.6
-	 * @global WP_Query $wp_query
 	 */
 	public function enqueue_preview_scripts() {
-		global $wp_query;
 
 		// Bail if user can't customize anyway.
 		if ( ! current_user_can( 'customize' ) ) {
@@ -203,28 +201,13 @@ class AMP_Template_Customizer {
 			true
 		);
 
-		if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-			$availability = AMP_Theme_Support::get_template_availability();
-			$available    = $availability['supported'];
-		} elseif ( is_singular() || $wp_query->is_posts_page ) {
-			/**
-			 * Queried object.
-			 *
-			 * @var WP_Post $queried_object
-			 */
-			$queried_object = get_queried_object();
-			$available      = post_supports_amp( $queried_object );
-		} else {
-			$available = false;
-		}
-
 		wp_add_inline_script(
 			'amp-customize-preview',
 			sprintf(
 				'ampCustomizePreview.boot( %s );',
 				wp_json_encode(
 					[
-						'available' => $available,
+						'available' => is_amp_available(),
 						'enabled'   => is_amp_endpoint(),
 					]
 				)
