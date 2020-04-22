@@ -183,39 +183,6 @@ class AMP_Options_Menu {
 				</dt>
 				<dd>
 					<?php echo wp_kses_post( $reader_description ); ?>
-
-					<?php if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) && wp_count_posts( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG )->publish > 0 ) : ?>
-						<div class="notice notice-info inline notice-alt">
-							<p>
-								<?php
-								echo wp_kses_post(
-									sprintf(
-										/* translators: %1: link to invalid URLs. 2: link to validation errors. */
-										__( 'View current site compatibility results for standard and transitional modes: %1$s and %2$s.', 'amp' ),
-										sprintf(
-											'<a href="%s">%s</a>',
-											esc_url( add_query_arg( 'post_type', AMP_Validated_URL_Post_Type::POST_TYPE_SLUG, admin_url( 'edit.php' ) ) ),
-											esc_html( get_post_type_object( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG )->labels->name )
-										),
-										sprintf(
-											'<a href="%s">%s</a>',
-											esc_url(
-												add_query_arg(
-													[
-														'taxonomy' => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
-														'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-													],
-													admin_url( 'edit-tags.php' )
-												)
-											),
-											esc_html( get_taxonomy( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG )->labels->name )
-										)
-									)
-								);
-								?>
-							</p>
-						</div>
-					<?php endif; ?>
 				</dd>
 			</dl>
 
