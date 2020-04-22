@@ -286,7 +286,6 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 		 */
 		$selects = $dom->getElementsByTagName( 'select' );
 
-		$this->assertEquals( $instance_count, $dom->body->getElementsByTagName( 'script' )->length );
 		$this->assertEquals( $instance_count, $selects->length );
 
 		$embed = new AMP_Core_Block_Handler();
