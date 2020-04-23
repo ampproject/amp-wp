@@ -76,6 +76,13 @@ interface Option {
 	const THEME_SUPPORT = 'theme_support';
 
 	/**
+	 * Enable dev tools.
+	 *
+	 * @var string
+	 */
+	const DEV_TOOLS = 'dev_tools';
+
+	/**
 	 * Version of the AMP plugin for which the options were last saved.
 	 *
 	 * This allows for recognizing updates and triggering update-specific logic.

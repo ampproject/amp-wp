@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Option;
 use AmpProject\Dom\Document;
 
 /**
@@ -211,6 +212,11 @@ class AMP_Validation_Manager {
 		AMP_Validated_URL_Post_Type::register();
 		AMP_Validation_Error_Taxonomy::register();
 
+		// Short-circuit if dev tools is not enabled.
+		if ( ! AMP_Options_Manager::get_option( Option::DEV_TOOLS ) ) {
+			return;
+		}
+
 		add_action( 'save_post', [ __CLASS__, 'handle_save_post_prompting_validation' ] );
 		add_action( 'enqueue_block_editor_assets', [ __CLASS__, 'enqueue_block_validation' ] );
 		add_action( 'edit_form_top', [ __CLASS__, 'print_edit_form_validation_status' ], 10, 2 );
@@ -269,6 +275,11 @@ class AMP_Validation_Manager {
 			'trash' !== $post->post_status
 		);
 		if ( ! $supports_validation ) {
+			return false;
+		}
+
+		// Prevent doing post validation if dev tools is not enabled.
+		if ( ! AMP_Options_Manager::get_option( Option::DEV_TOOLS ) ) {
 			return false;
 		}
 
@@ -2337,6 +2348,8 @@ class AMP_Validation_Manager {
 		 */
 		$should_enqueue_block_validation = (
 			self::has_cap()
+			&&
+			AMP_Options_Manager::get_option( Option::DEV_TOOLS )
 		);
 		if ( ! $should_enqueue_block_validation ) {
 			return;

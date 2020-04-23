@@ -30,6 +30,7 @@ class AMP_Options_Manager {
 		Option::ANALYTICS               => [],
 		Option::ALL_TEMPLATES_SUPPORTED => true,
 		Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
+		Option::DEV_TOOLS               => false,
 		Option::VERSION                 => AMP__VERSION,
 	];
 
@@ -87,6 +88,11 @@ class AMP_Options_Manager {
 
 		if ( current_theme_supports( 'amp' ) ) {
 			$defaults[ Option::THEME_SUPPORT ] = amp_is_canonical() ? AMP_Theme_Support::STANDARD_MODE_SLUG : AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
+		}
+
+		// Default to enable Dev Tools if Standard or Transitional mode.
+		if ( AMP_Theme_Support::READER_MODE_SLUG !== $defaults[ Option::THEME_SUPPORT ] ) {
+			$defaults[ Option::DEV_TOOLS ] = true;
 		}
 
 		$options = array_merge( $defaults, $options );
@@ -271,6 +277,8 @@ class AMP_Options_Manager {
 		} else {
 			unset( $options[ Option::DISABLE_CSS_TRANSIENT_CACHING ] );
 		}
+
+		$options[ Option::DEV_TOOLS ] = ! empty( $new_options[ Option::DEV_TOOLS ] );
 
 		// Store the current version with the options so we know the format.
 		$options[ Option::VERSION ] = AMP__VERSION;

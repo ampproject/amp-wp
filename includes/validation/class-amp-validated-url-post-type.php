@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Option;
 use AmpProject\Fonts;
 
 /**
@@ -121,7 +122,7 @@ class AMP_Validated_URL_Post_Type {
 				'supports'     => false,
 				'public'       => false,
 				'show_ui'      => true,
-				'show_in_menu' => current_user_can( 'manage_options' ) ? AMP_Options_Manager::OPTION_NAME : false,
+				'show_in_menu' => AMP_Options_Manager::get_option( Option::DEV_TOOLS ) && current_user_can( 'manage_options' ) ? AMP_Options_Manager::OPTION_NAME : false,
 				// @todo Show in rest.
 			]
 		);
