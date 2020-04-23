@@ -2003,10 +2003,9 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 			'<link rel="icon" href="https://example.org/favicon.png" sizes="32x32">',
 			'<link rel="icon" href="https://example.org/favicon.png" sizes="192x192">',
+			'<link crossorigin="anonymous" rel="stylesheet" id="my-font-css" href="https://fonts.googleapis.com/css?family=Tangerine" type="text/css" media="all">',
 
 			'#<style amp-custom(="")?>.*?body\s*{\s*background:\s*black;?\s*}.*?</style>#s',
-
-			'<link crossorigin="anonymous" rel="stylesheet" id="my-font-css" href="https://fonts.googleapis.com/css?family=Tangerine" type="text/css" media="all">',
 
 			'<script type="application/ld+json">{"@context"',
 
