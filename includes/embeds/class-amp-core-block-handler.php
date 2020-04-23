@@ -257,7 +257,6 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 * @param array    $args Args passed to sanitizer.
 	 */
 	private function process_archives_widgets( Document $dom, $args = [] ) {
-
 		$selects = $dom->xpath->query( '//select[ @name = "archive-dropdown" and starts-with( @id, "archives-dropdown-" ) ]' );
 		foreach ( $selects as $select ) {
 			if ( ! $select instanceof DOMElement ) {
@@ -324,10 +323,9 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 * @since 1.6
 	 * @see AMP_Core_Block_Handler::preserve_widget_text_element_dimensions()
 	 *
-	 * @param Document $dom  Select node retrieved from the widget.
+	 * @param Document $dom Select node retrieved from the widget.
 	 */
 	private function process_text_widgets( Document $dom ) {
-
 		foreach ( $dom->xpath->query( '//div[ @class = "textwidget" ]' ) as $text_widget ) {
 			// Restore the width/height attributes which were preserved in preserve_widget_text_element_dimensions.
 			foreach ( $dom->xpath->query( sprintf( './/*[ @%s or @%s ]', self::AMP_PRESERVED_WIDTH_ATTRIBUTE_NAME, self::AMP_PRESERVED_HEIGHT_ATTRIBUTE_NAME ), $text_widget ) as $element ) {
@@ -351,6 +349,5 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 				$element->removeAttribute( 'style' );
 			}
 		}
-
 	}
 }
