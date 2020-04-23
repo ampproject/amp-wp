@@ -9,7 +9,6 @@ namespace AmpProject\AmpWP\Transformer;
 
 use AmpProject\Attribute;
 use AmpProject\Dom\Document;
-use AmpProject\Optimizer\Configurable;
 use AmpProject\Optimizer\ErrorCollection;
 use AmpProject\Optimizer\Transformer;
 use AmpProject\Optimizer\TransformerConfiguration;
@@ -20,7 +19,7 @@ use AmpProject\Tag;
  *
  * @package AmpProject\AmpWP
  */
-final class AmpSchemaOrgMetadata implements Transformer, Configurable {
+final class AmpSchemaOrgMetadata implements Transformer {
 
 	/**
 	 * XPath query to use for fetching the schema.org meta script.

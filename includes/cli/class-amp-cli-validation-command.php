@@ -701,7 +701,7 @@ final class AMP_CLI_Validation_Command {
 		AMP_Validated_URL_Post_Type::store_validation_errors(
 			$validation_errors,
 			$validity['url'],
-			wp_array_slice_assoc( $validity, [ 'queried_object', 'stylesheets' ] )
+			wp_array_slice_assoc( $validity, [ 'queried_object', 'stylesheets', 'php_fatal_error' ] )
 		);
 		$unaccepted_error_count = count(
 			array_filter(

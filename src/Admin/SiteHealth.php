@@ -409,7 +409,7 @@ final class SiteHealth {
 	 * @return string The supported template(s), in a comma-separated string.
 	 */
 	private function get_supported_templates() {
-		$possible_post_types = AMP_Options_Manager::get_option( 'supported_post_types' );
+		$possible_post_types = AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES );
 
 		// Get the supported content types, like 'post'.
 		$supported_templates = array_filter(
@@ -461,7 +461,7 @@ final class SiteHealth {
 		}
 
 		// Not translated, as this is debugging information, and it could be confusing getting this from different languages.
-		return AMP_Options_Manager::get_option( 'all_templates_supported' ) ? 'true' : 'false';
+		return AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED ) ? 'true' : 'false';
 	}
 
 	/**
