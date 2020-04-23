@@ -85,7 +85,7 @@ if (! $dom instanceof Document) {
 
 $transformationEngine = new TransformationEngine();
 $errorCollection      = new ErrorCollection;
-$transformationEngine->optimizeDom($unoptimizedDom, $errorCollection);
+$transformationEngine->optimizeDom($dom, $errorCollection);
 ```
 
 Do note that the `optimizeDom()` doesn't have a return value, as it changes the provided `AmpProject\Dom\Document` in-place.
@@ -160,7 +160,7 @@ $configurationData = [
 ];
 
 $transformationEngine = new TransformationEngine(
-	new Configuration($configurationData);
+	new Configuration($configurationData)
 );
 ```
 
@@ -182,7 +182,7 @@ $configurationData = [
 ];
 
 $transformationEngine = new TransformationEngine(
-	new Configuration($configurationData);
+	new Configuration($configurationData)
 );
 ```
 
@@ -205,7 +205,7 @@ To make this transformer then known to the transformation engine, you add it to 
 
 ```php
 use AmpProject\Optimizer\Configuration;
-use AmpProject\Optimizer\TransformationEngine
+use AmpProject\Optimizer\TransformationEngine;
 use MyProject\MyCustomTransformer;
 
 $configurationData = [
@@ -218,7 +218,7 @@ $configurationData = [
 ];
 
 $transformationEngine = new TransformationEngine(
-	new Configuration($configurationData);
+	new Configuration($configurationData)
 );
 ```
 
@@ -232,7 +232,7 @@ In the following example, we add a new `MyProject\MyCustomTransformer` transform
 
 ```php
 use AmpProject\Optimizer\Configuration;
-use AmpProject\Optimizer\TransformationEngine
+use AmpProject\Optimizer\TransformationEngine;
 use MyProject\MyCustomTransformer;
 use MyProject\MyCustomTransformerConfiguration;
 
@@ -244,7 +244,7 @@ $configurationData = [
 		],
 	),
 	MyCustomTransformer::class => [
-		MyCustomTransformerConfiguration::SOME_CONFIG_KEY = 'some value';
+		MyCustomTransformerConfiguration::SOME_CONFIG_KEY => 'some value',
 	],
 ];
 
@@ -255,10 +255,10 @@ $configuration->registerConfigurationClass(
 	MyCustomTransformerConfiguration::class
 );
 
-$transformationEngine = new TransformationEngine(configuration);
+$transformationEngine = new TransformationEngine($configuration);
 ```
 
-For the wiring to work correctly, the `MyProject\MyCustomTransformer` class should accept within its constructor an object implementing the `AmpProject\Optimizer\TransformerConfiguration` interface as its first argument and it should implement the `AmpProject\Optimizer\Configurable` interface to let the transformation engine know it expects a configuration object.
+For the wiring to work correctly, the `MyProject\MyCustomTransformer` class needs to accept within its constructor an object implementing the `AmpProject\Optimizer\TransformerConfiguration` interface. The transformation engine will then inject the appropriate implementation at runtime when the transformer is being instantiated.
 
 The `MyProject\MyCustomTransformerConfiguration` class should then implement that same `AmpProject\Optimizer\TransformerConfiguration` interface. For convenience, it can do so easily by extending the abstract `AmpProject\Optimizer\Configuration\BaseTransformerConfiguration` base class.
 
@@ -269,7 +269,7 @@ Here's an example configuration class for our custom `MyProject\MyCustomTransfor
 ```php
 namespace MyProject;
 
-use AmpProject\Optimizer\BaseTransformerConfiguration;
+use AmpProject\Optimizer\Configuration\BaseTransformerConfiguration;
 
 final class MyCustomTransformerConfiguration extends BaseTransformerConfiguration
 {
@@ -305,7 +305,7 @@ use AmpProject\Optimizer\ErrorCollection;
 use AmpProject\Optimizer\TransformerConfiguration;
 use AmpProject\Optimizer\Transformer;
 
-final class MyCustomTransformer implements Transformer, Configurable
+final class MyCustomTransformer implements Transformer
 {
 	private $configuration;
 
@@ -329,29 +329,22 @@ final class MyCustomTransformer implements Transformer, Configurable
 
 ## Transformers Requesting External Data
 
-In case your transformer needs to make remote requests to fetch external data (like the `AmpProject\Optimizer\Transformer\AmpRuntimeCss` does for fetching the latest version of the CSS to inline), you should make use of the provided `AmpProject\Optimizer\MakesRemoteRequests` abstraction.
-
-This abstraction allows code outside of the transformation engine to control the specific conditions and limits that govern these remote request, like for example throttling them or integrating them with the caching subsystem of the framework in use.
-
-To add support for this abstraction, the transformer needs to implement the `AmpProject\Optimizer\MakesRemoteRequests` marker interface and accept an `AmpProject\RemoteGetRequest` object via its constructor.
-
 <!-- TODO: This reflects code changes that are yet to be merged via https://github.com/ampproject/amp-wp/issues/4612 -->
-<table>
-<tr>
-<td>❗️</td><td>If the object implements <strong>both</strong> the <code>AmpProject\Optimizer\MakesRemoteRequests</code> and the <code>AmpProject\Optimizer\Configurable</code> interfaces, the <code>AmpProject\RemoteGetRequest</code> needs to be the <strong>second</strong> argument, <strong>after</strong> the <code>AmpProject\Optimizer\TransformerConfiguration</code> object.<br>This requirement stems from the fact that the Optimizer package is not tied to any given auto-wiring dependency resolution.</td>
-</tr>
-</table>
+
+In case your transformer needs to make remote requests to fetch external data (like the `AmpProject\Optimizer\Transformer\AmpRuntimeCss` does for fetching the latest version of the CSS to inline), you need to accept an `AmpProject\RemoteGetRequest` object as an argument in your constructor. The transformation engine will then inject the appropriate implementation at runtime when the transformer is being instantiated.
+
+This layer of abstraction allows code outside of the transformation engine to control the specific conditions and limits that govern these remote request, like for example throttling them or integrating them with the caching subsystem of the framework in use.
 
 ```php
 namespace MyProject;
 
 use AmpProject\Dom\Document;
+use AmpProject\RemoteGetRequest;
 use AmpProject\Optimizer\ErrorCollection;
-use AmpProject\Optimizer\MakesRemoteRequests;
-use AmpProject\Optimizer\RemoteGetRequest;
 use AmpProject\Optimizer\Transformer;
+use Throwable;
 
-final class MyCustomTransformer implements Transformer, MakesRemoteRequests
+final class MyCustomTransformer implements Transformer
 {
 	const END_POINT = 'https://example.com/some_endpoint/';
 
