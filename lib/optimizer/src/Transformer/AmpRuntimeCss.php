@@ -5,11 +5,9 @@ namespace AmpProject\Optimizer\Transformer;
 use AmpProject\Amp;
 use AmpProject\Attribute;
 use AmpProject\Dom\Document;
-use AmpProject\Optimizer\Configurable;
 use AmpProject\Optimizer\Configuration\AmpRuntimeCssConfiguration;
 use AmpProject\Optimizer\Error;
 use AmpProject\Optimizer\ErrorCollection;
-use AmpProject\Optimizer\MakesRemoteRequests;
 use AmpProject\Optimizer\TransformerConfiguration;
 use AmpProject\RemoteGetRequest;
 use AmpProject\Optimizer\Transformer;
@@ -36,7 +34,7 @@ use Exception;
  *
  * @package ampproject/optimizer
  */
-final class AmpRuntimeCss implements Transformer, Configurable, MakesRemoteRequests
+final class AmpRuntimeCss implements Transformer
 {
 
     /**

@@ -5,6 +5,8 @@ namespace AmpProject\Optimizer;
 use AmpProject\Dom\Document;
 use AmpProject\RemoteGetRequest;
 use AmpProject\RemoteRequest\CurlRemoteGetRequest;
+use ReflectionClass;
+use ReflectionException;
 
 /**
  * Transformation engine that accepts HTML and returns optimized HTML.
@@ -82,20 +84,54 @@ final class TransformationEngine
         if (null === $transformers) {
             $transformers = [];
             foreach ($this->configuration->get(Configuration::KEY_TRANSFORMERS) as $transformerClass) {
-                $arguments = [];
-
-                if (is_a($transformerClass, Configurable::class, true)) {
-                    $arguments[] = $this->configuration->getTransformerConfiguration($transformerClass);
-                }
-
-                if (is_a($transformerClass, MakesRemoteRequests::class, true)) {
-                    $arguments[] = $this->remoteRequest;
-                }
-
-                $transformers[$transformerClass] = new $transformerClass(...$arguments);
+                $transformers[$transformerClass] = new $transformerClass(
+                    ...$this->getTransformerDependencies($transformerClass)
+                );
             }
         }
 
         return $transformers;
+    }
+
+    /**
+     * Get the dependencies of a transformer and put them in the correct order.
+     *
+     * @param string $transformerClass Class of the transformer to get the dependencies for.
+     * @return array Array of dependencies in the order as they appear in the transformer's constructor.
+     * @throws ReflectionException If the transformer could not be reflected upon.
+     */
+    private function getTransformerDependencies($transformerClass)
+    {
+        $constructor = (new ReflectionClass($transformerClass))->getConstructor();
+
+        if ($constructor === null) {
+            return [];
+        }
+
+        $dependencies = [];
+        foreach ($constructor->getParameters() as $parameter) {
+            $dependencyType = $parameter->getClass();
+
+            if ($dependencyType === null) {
+                // No type provided, so we pass `null` in the hopes that the argument is optional.
+                $dependencies[] = null;
+                continue;
+            }
+
+            if (is_a($dependencyType->name, TransformerConfiguration::class, true)) {
+                $dependencies[] = $this->configuration->getTransformerConfiguration($transformerClass);
+                continue;
+            }
+
+            if (is_a($dependencyType->name, RemoteGetRequest::class, true)) {
+                $dependencies[] = $this->remoteRequest;
+                continue;
+            }
+
+            // Unknown dependency type, so we pass `null` in the hopes that the argument is optional.
+            $dependencies[] = null;
+        }
+
+        return $dependencies;
     }
 }

@@ -11,6 +11,8 @@ use AmpProject\Optimizer\Transformer\ServerSideRendering;
 use AmpProject\RemoteRequest\StubbedRemoteGetRequest;
 use DirectoryIterator;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
+use ReflectionException;
 
 /**
  * Test the individual transformers against the NodeJS spec test suite.
@@ -106,16 +108,28 @@ final class SpecTest extends TestCase
      */
     private function getTransformer($transformerClass)
     {
-        $arguments = [];
+        $transformationEngine = new TransformationEngine(
+            new Configuration(),
+            new StubbedRemoteGetRequest(TestMarkup::STUBBED_REMOTE_REQUESTS)
+        );
 
-        if (is_a($transformerClass, MakesRemoteRequests::class, true)) {
-            $arguments[] = new StubbedRemoteGetRequest(TestMarkup::STUBBED_REMOTE_REQUESTS);
-        }
+        return new $transformerClass(...$this->callPrivateMethod($transformationEngine, 'getTransformerDependencies', [$transformerClass]));
+    }
 
-        if (is_a($transformerClass, Configurable::class, true)) {
-            $arguments[] = (new Configuration())->getTransformerConfiguration($transformerClass);
-        }
+    /**
+     * Call a private method as if it was public.
+     *
+     * @param object|string $object      Object instance or class string to call the method of.
+     * @param string        $method_name Name of the method to call.
+     * @param array         $args        Optional. Array of arguments to pass to the method.
+     * @return mixed Return value of the method call.
+     * @throws ReflectionException If the object could not be reflected upon.
+     */
+    private function callPrivateMethod($object, $method_name, $args = [])
+    {
+        $method = (new ReflectionClass($object))->getMethod($method_name);
+        $method->setAccessible(true);
 
-        return new $transformerClass(...$arguments);
+        return $method->invokeArgs($object, $args);
     }
 }

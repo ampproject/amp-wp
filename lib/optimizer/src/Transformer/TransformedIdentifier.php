@@ -3,7 +3,6 @@
 namespace AmpProject\Optimizer\Transformer;
 
 use AmpProject\Dom\Document;
-use AmpProject\Optimizer\Configurable;
 use AmpProject\Optimizer\Configuration\TransformedIdentifierConfiguration;
 use AmpProject\Optimizer\ErrorCollection;
 use AmpProject\Optimizer\Transformer;
@@ -25,7 +24,7 @@ use AmpProject\Optimizer\TransformerConfiguration;
  *
  * @package ampproject/optimizer
  */
-final class TransformedIdentifier implements Transformer, Configurable
+final class TransformedIdentifier implements Transformer
 {
 
     /**
