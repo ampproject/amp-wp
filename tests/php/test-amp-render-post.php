@@ -57,9 +57,7 @@ class AMP_Render_Post_Test extends WP_UnitTestCase {
 			]
 		);
 
-		// Set global for WP<5.2 where get_the_content() doesn't take the $post parameter.
-		$GLOBALS['post'] = get_post( $post_id );
-		setup_postdata( $post_id );
+		$this->go_to( get_permalink( $post_id ) );
 
 		$before_is_amp_endpoint = is_amp_endpoint();
 

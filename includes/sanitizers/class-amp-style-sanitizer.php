@@ -5,7 +5,6 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\RemoteRequest\WpHttpRemoteGetRequest;
@@ -1499,7 +1498,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$parsed         = null;
 		$cache_key      = null;
 		$cached         = true;
-		$cache_group    = 'amp-parsed-stylesheet-v27'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
+		$cache_group    = 'amp-parsed-stylesheet-v28'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
 		$use_transients = $this->should_use_transient_caching();
 
 		$cache_impacting_options = array_merge(
@@ -2668,7 +2667,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		// Skip processing stylesheets that contain mustache template variables if the element is inside of a mustache template.
 		if (
 			preg_match( '/{{[^}]+?}}/', $value ) &&
-			0 !== $this->dom->xpath->query( '//template[ @type="amp-mustache" ]//.', $element )->length
+			0 !== $this->dom->xpath->query( '//template[ @type="amp-mustache" ]//.|//script[ @template="amp-mustache" and @type="text/plain" ]//.', $element )->length
 		) {
 			return;
 		}
