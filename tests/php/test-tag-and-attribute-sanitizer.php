@@ -905,7 +905,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'attribute_requirements_overridden_by_placeholders_within_mustache_script' => [
-				'<script template="amp-mustache" type="text/plain"><amp-timeago datetime="{{iso}}"></amp-timeago></script>',
+				'<script template="amp-mustache" type="text/plain"><amp-timeago datetime="{{iso}}" width="100" height="100"></amp-timeago></script>',
 				null,
 				[ 'amp-mustache', 'amp-timeago' ],
 			],
