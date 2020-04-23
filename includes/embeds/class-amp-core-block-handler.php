@@ -16,6 +16,13 @@ use AmpProject\Dom\Document;
 class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 
 	/**
+	 * Count of the category widgets encountered.
+	 *
+	 * @var int
+	 */
+	private $category_widget_count = 0;
+
+	/**
 	 * Attribute to store the original width on a video or iframe just before WordPress removes it.
 	 *
 	 * @see AMP_Core_Block_Handler::preserve_widget_text_element_dimensions()
@@ -222,8 +229,6 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 * @param Document $dom Document.
 	 */
 	private function process_categories_widgets( Document $dom ) {
-		static $count = 0;
-
 		$selects = $dom->xpath->query( '//form/select[ @name = "cat" ]' );
 		foreach ( $selects as $select ) {
 			if ( ! $select instanceof DOMElement ) {
@@ -238,8 +243,8 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 				continue;
 			}
 
-			$count++;
-			$id = sprintf( 'amp-wp-widget-categories-%d', $count );
+			$this->category_widget_count++;
+			$id = sprintf( 'amp-wp-widget-categories-%d', $this->category_widget_count );
 
 			$form->setAttribute( 'id', $id );
 
