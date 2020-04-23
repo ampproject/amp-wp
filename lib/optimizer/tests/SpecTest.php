@@ -119,15 +119,15 @@ final class SpecTest extends TestCase
     /**
      * Call a private method as if it was public.
      *
-     * @param object|string $object      Object instance or class string to call the method of.
-     * @param string        $method_name Name of the method to call.
-     * @param array         $args        Optional. Array of arguments to pass to the method.
+     * @param object|string $object     Object instance or class string to call the method of.
+     * @param string        $methodName Name of the method to call.
+     * @param array         $args       Optional. Array of arguments to pass to the method.
      * @return mixed Return value of the method call.
      * @throws ReflectionException If the object could not be reflected upon.
      */
-    private function callPrivateMethod($object, $method_name, $args = [])
+    private function callPrivateMethod($object, $methodName, $args = [])
     {
-        $method = (new ReflectionClass($object))->getMethod($method_name);
+        $method = (new ReflectionClass($object))->getMethod($methodName);
         $method->setAccessible(true);
 
         return $method->invokeArgs($object, $args);

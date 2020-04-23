@@ -31,6 +31,13 @@ final class TransformationEngine
     private $remoteRequest;
 
     /**
+     * Collection of transformers that were initialized.
+     *
+     * @var Transformer[]
+     */
+    private $transformers;
+
+    /**
      * Instantiate a TransformationEngine object.
      *
      * @param Configuration|null    $configuration Optional. Configuration data to use for setting up the transformers.
@@ -41,6 +48,8 @@ final class TransformationEngine
     {
         $this->configuration = isset($configuration) ? $configuration : new Configuration();
         $this->remoteRequest = isset($remoteRequest) ? $remoteRequest : new CurlRemoteGetRequest();
+
+        $this->initializeTransformers();
     }
 
     /**
@@ -52,7 +61,7 @@ final class TransformationEngine
      */
     public function optimizeDom(Document $document, ErrorCollection $errors)
     {
-        foreach ($this->getTransformers() as $transformer) {
+        foreach ($this->transformers as $transformer) {
             $transformer->transform($document, $errors);
         }
     }
@@ -73,24 +82,17 @@ final class TransformationEngine
     }
 
     /**
-     * Get the array of transformers to use.
-     *
-     * @return Transformer[] Array of transformers to use.
+     * Initialize the array of transformers to use.
      */
-    private function getTransformers()
+    private function initializeTransformers()
     {
-        static $transformers = null;
+        $this->transformers = [];
 
-        if (null === $transformers) {
-            $transformers = [];
-            foreach ($this->configuration->get(Configuration::KEY_TRANSFORMERS) as $transformerClass) {
-                $transformers[$transformerClass] = new $transformerClass(
-                    ...$this->getTransformerDependencies($transformerClass)
-                );
-            }
+        foreach ($this->configuration->get(Configuration::KEY_TRANSFORMERS) as $transformerClass) {
+            $this->transformers[$transformerClass] = new $transformerClass(
+                ...$this->getTransformerDependencies($transformerClass)
+            );
         }
-
-        return $transformers;
     }
 
     /**
