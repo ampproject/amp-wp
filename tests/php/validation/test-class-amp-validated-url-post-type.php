@@ -74,7 +74,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'rightnow_end', [ self::TESTED_CLASS, 'print_dashboard_glance_styles' ] ) );
 
 		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', [ self::TESTED_CLASS, 'enqueue_edit_post_screen_scripts' ] ) );
-		$this->assertEquals( 10, has_action( 'add_meta_boxes', [ self::TESTED_CLASS, 'add_meta_boxes' ] ) );
+		$this->assertEquals( PHP_INT_MAX, has_action( 'add_meta_boxes', [ self::TESTED_CLASS, 'add_meta_boxes' ] ) );
 		$this->assertEquals( 10, has_action( 'edit_form_top', [ self::TESTED_CLASS, 'print_url_as_title' ] ) );
 
 		$this->assertEquals( 10, has_filter( 'the_title', [ self::TESTED_CLASS, 'filter_the_title_in_post_list_table' ] ) );
@@ -82,7 +82,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG . '_posts_columns', [ self::TESTED_CLASS, 'add_post_columns' ] ) );
 		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG . '_columns', [ self::TESTED_CLASS, 'add_single_post_columns' ] ) );
 		$this->assertEquals( 10, has_action( 'manage_posts_custom_column', [ self::TESTED_CLASS, 'output_custom_column' ] ) );
-		$this->assertEquals( 10, has_filter( 'post_row_actions', [ self::TESTED_CLASS, 'filter_post_row_actions' ] ) );
+		$this->assertEquals( PHP_INT_MAX, has_filter( 'post_row_actions', [ self::TESTED_CLASS, 'filter_post_row_actions' ] ) );
 		$this->assertEquals( 10, has_filter( 'bulk_actions-edit-' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG, [ self::TESTED_CLASS, 'filter_bulk_actions' ] ) );
 		$this->assertEquals( 10, has_filter( 'bulk_actions-' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG, '__return_false' ) );
 		$this->assertEquals( 10, has_filter( 'handle_bulk_actions-edit-' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG, [ self::TESTED_CLASS, 'handle_bulk_action' ] ) );
@@ -1221,7 +1221,15 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 	 */
 	public function test_add_meta_boxes() {
 		global $wp_meta_boxes;
-		AMP_Validated_URL_Post_Type::add_meta_boxes();
+		AMP_Validated_URL_Post_Type::add_admin_hooks();
+		add_action(
+			'add_meta_boxes',
+			function () {
+				add_meta_box( 'bogus', 'Bogus', '__return_empty_string', AMP_Validated_URL_Post_Type::POST_TYPE_SLUG );
+			},
+			100
+		);
+		do_action( 'add_meta_boxes' );
 		$side_meta_box = $wp_meta_boxes[ AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ]['side']['default'][ AMP_Validated_URL_Post_Type::STATUS_META_BOX ];
 		$this->assertEquals( AMP_Validated_URL_Post_Type::STATUS_META_BOX, $side_meta_box['id'] );
 		$this->assertEquals( 'Status', $side_meta_box['title'] );
@@ -1237,9 +1245,11 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 			$side_meta_box['args']
 		);
 
-		$contexts = $wp_meta_boxes[ AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ]['side'];
-		foreach ( $contexts as $context ) {
+		foreach ( $wp_meta_boxes[ AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ]['side'] as $context ) {
 			$this->assertFalse( $context['submitdiv'] );
+		}
+		foreach ( $wp_meta_boxes[ AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ]['advanced'] as $context ) {
+			$this->assertFalse( $context['bogus'] );
 		}
 	}
 
@@ -1731,5 +1741,57 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 				],
 			],
 		];
+	}
+
+	/**
+	 * Test that the code ensures other plugins won't mess up the validation URL action links in the post list table.
+	 */
+	public function test_post_row_actions_filter() {
+		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
+		AMP_Validated_URL_Post_Type::add_admin_hooks();
+
+		$post = self::factory()->post->create_and_get(
+			[
+				'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+				'status'    => 'publish',
+			]
+		);
+
+		add_filter(
+			'post_row_actions',
+			static function ( $actions, $post ) {
+				$actions['edit'] = sprintf(
+					'<a href="%s">%s</a>',
+					esc_url( get_edit_post_link( $post ) ),
+					'Unwanted Edit Action'
+				);
+
+				$actions['other_action'] = sprintf(
+					'<a href="%s">%s</a>',
+					'https://example.com',
+					'Unwanted Other Action'
+				);
+
+				return $actions;
+			},
+			10,
+			2
+		);
+
+		$initial_actions = [
+			'trash' => sprintf( '<a href="%s">Trash</a>', get_delete_post_link( $post->ID ) ),
+		];
+
+		$actions = apply_filters( 'post_row_actions', $initial_actions, $post );
+
+		$this->assertInternalType( 'array', $actions );
+		$this->assertArrayHasKey( 'edit', $actions );
+		$this->assertArrayHasKey( 'view', $actions );
+		$this->assertArrayHasKey( 'delete', $actions );
+		$this->assertArrayHasKey( 'amp_validate', $actions );
+		$this->assertArrayNotHasKey( 'other_action', $actions );
+
+		$this->assertStringContains( __( 'Details', 'amp' ), $actions['edit'] );
+		$this->assertStringNotContains( 'Unwanted Edit Action', $actions['edit'] );
 	}
 }

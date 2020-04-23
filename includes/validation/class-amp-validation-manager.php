@@ -756,7 +756,7 @@ class AMP_Validation_Manager {
 						[
 							'invalid_url_post' => $invalid_url_post_id,
 						],
-						wp_array_slice_assoc( $validity, [ 'queried_object', 'stylesheets' ] )
+						wp_array_slice_assoc( $validity, [ 'queried_object', 'stylesheets', 'php_fatal_error' ] )
 					)
 				);
 
@@ -2269,6 +2269,13 @@ class AMP_Validation_Manager {
 						esc_html__( 'An internal server error occurred when fetching the URL for validation.', 'amp' ),
 						esc_html( $error_message ),
 						$check_error_log,
+						$support_forum_message,
+					]
+				);
+			case 'fatal_error_during_validation':
+				return $implode_non_empty_strings_with_spaces_and_sanitize(
+					[
+						esc_html__( 'A PHP fatal error occurred while validating the URL. This may indicate either a bug in theme/plugin code or it may be due to an issue in the AMP plugin itself. The error details appear below.', 'amp' ),
 						$support_forum_message,
 					]
 				);
