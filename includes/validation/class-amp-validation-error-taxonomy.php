@@ -1699,7 +1699,7 @@ class AMP_Validation_Error_Taxonomy {
 
 		$actions = wp_array_slice_assoc(
 			$actions,
-			[ 'details', self::VALIDATION_ERROR_ACCEPT_ACTION, self::VALIDATION_ERROR_REJECT_ACTION ]
+			[ 'details', self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION, self::VALIDATION_ERROR_ACCEPT_ACTION, self::VALIDATION_ERROR_REJECT_ACTION ]
 		);
 
 		return $actions;
