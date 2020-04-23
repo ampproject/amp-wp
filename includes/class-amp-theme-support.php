@@ -312,9 +312,6 @@ class AMP_Theme_Support {
 				]
 			);
 			self::$support_added_via_option = $is_paired ? self::TRANSITIONAL_MODE_SLUG : self::STANDARD_MODE_SLUG;
-		} elseif ( true === AMP_Validation_Manager::should_validate_response() ) { // @todo Eventually reader mode should allow for validate requests.
-			self::$support_added_via_option = self::STANDARD_MODE_SLUG;
-			add_theme_support( self::SLUG );
 		}
 	}
 
@@ -414,10 +411,8 @@ class AMP_Theme_Support {
 
 		self::add_hooks();
 		self::$sanitizer_classes = amp_get_content_sanitizers();
-		if ( ! $is_reader_mode ) {
-			self::$sanitizer_classes = AMP_Validation_Manager::filter_sanitizer_args( self::$sanitizer_classes );
-		}
-		self::$embed_handlers = self::register_content_embed_handlers();
+		self::$sanitizer_classes = AMP_Validation_Manager::filter_sanitizer_args( self::$sanitizer_classes );
+		self::$embed_handlers    = self::register_content_embed_handlers();
 		self::$sanitizer_classes['AMP_Embed_Sanitizer']['embed_handlers'] = self::$embed_handlers;
 
 		foreach ( self::$sanitizer_classes as $sanitizer_class => $args ) {
@@ -613,10 +608,7 @@ class AMP_Theme_Support {
 
 		$theme_support_args = self::get_theme_support_args();
 		if ( false === $theme_support_args ) {
-			return array_merge(
-				$default_response,
-				[ 'errors' => [ 'no_theme_support' ] ]
-			);
+			$theme_support_args = [];
 		}
 
 		// Support available_callback from 0.7, though it is deprecated.
@@ -656,7 +648,9 @@ class AMP_Theme_Support {
 			$all_templates_supported_by_theme_support = 'all' === $theme_support_args['templates_supported'];
 		}
 		$all_templates_supported = (
-			$all_templates_supported_by_theme_support || AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED )
+			current_theme_supports( self::SLUG )
+			&&
+			( $all_templates_supported_by_theme_support || AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED ) )
 		);
 
 		// Make sure global $wp_query is set in case of conditionals that unfortunately look at global scope.
@@ -882,6 +876,9 @@ class AMP_Theme_Support {
 				'description' => __( 'Required for the above content types.', 'amp' ),
 			],
 		];
+
+		$has_theme_support = current_theme_supports( self::SLUG );
+
 		if ( 'page' === get_option( 'show_on_front' ) ) {
 			$templates['is_front_page'] = [
 				'label'  => __( 'Homepage', 'amp' ),
@@ -900,10 +897,21 @@ class AMP_Theme_Support {
 				/* translators: %s: the URL to the edit post screen. */
 				$templates['is_home']['description'] = sprintf( __( 'Currently disabled at the <a href="%s">page level</a>.', 'amp' ), esc_url( get_edit_post_link( get_option( 'page_for_posts' ) ) ) );
 			}
-		} else {
+		} elseif ( $has_theme_support ) {
 			$templates['is_home'] = [
 				'label' => __( 'Homepage', 'amp' ),
 			];
+		}
+
+		// If the theme does not support AMP, no other templates are currently supported.
+		if ( ! $has_theme_support ) {
+			return array_map(
+				function ( $template ) {
+					$template['supported'] = true;
+					return $template;
+				},
+				$templates
+			);
 		}
 
 		$templates = array_merge(

@@ -121,7 +121,7 @@ class AMP_Validated_URL_Post_Type {
 				'supports'     => false,
 				'public'       => false,
 				'show_ui'      => true,
-				'show_in_menu' => current_theme_supports( 'amp' ) && current_user_can( 'manage_options' ) ? AMP_Options_Manager::OPTION_NAME : false,
+				'show_in_menu' => current_user_can( 'manage_options' ) ? AMP_Options_Manager::OPTION_NAME : false,
 				// @todo Show in rest.
 			]
 		);

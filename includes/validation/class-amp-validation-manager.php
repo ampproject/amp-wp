@@ -211,41 +211,33 @@ class AMP_Validation_Manager {
 		AMP_Validated_URL_Post_Type::register();
 		AMP_Validation_Error_Taxonomy::register();
 
-		// Short-circuit if AMP is not supported as only the post types should be available.
-		if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-			return;
-		}
-
 		add_action( 'save_post', [ __CLASS__, 'handle_save_post_prompting_validation' ] );
 		add_action( 'enqueue_block_editor_assets', [ __CLASS__, 'enqueue_block_validation' ] );
 		add_action( 'edit_form_top', [ __CLASS__, 'print_edit_form_validation_status' ], 10, 2 );
 		add_action( 'rest_api_init', [ __CLASS__, 'add_rest_api_fields' ] );
 
 		// Add actions for checking theme support is present to determine plugin compatibility and show validation links in the admin bar.
-		if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-			// Actions and filters involved in validation.
-			add_action(
-				'activate_plugin',
-				function() {
-					if ( ! has_action( 'shutdown', [ __CLASS__, 'validate_after_plugin_activation' ] ) ) {
-						add_action( 'shutdown', [ __CLASS__, 'validate_after_plugin_activation' ] ); // Shutdown so all plugins will have been activated.
-					}
+		add_action(
+			'activate_plugin',
+			function() {
+				if ( ! has_action( 'shutdown', [ __CLASS__, 'validate_after_plugin_activation' ] ) ) {
+					add_action( 'shutdown', [ __CLASS__, 'validate_after_plugin_activation' ] ); // Shutdown so all plugins will have been activated.
 				}
-			);
+			}
+		);
 
-			// Prevent query vars from persisting after redirect.
-			add_filter(
-				'removable_query_args',
-				function( $query_vars ) {
-					$query_vars[] = AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR;
-					return $query_vars;
-				}
-			);
+		// Prevent query vars from persisting after redirect.
+		add_filter(
+			'removable_query_args',
+			function( $query_vars ) {
+				$query_vars[] = AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR;
+				return $query_vars;
+			}
+		);
 
-			add_action( 'all_admin_notices', [ __CLASS__, 'print_plugin_notice' ] );
+		add_action( 'all_admin_notices', [ __CLASS__, 'print_plugin_notice' ] );
 
-			add_action( 'admin_bar_menu', [ __CLASS__, 'add_admin_bar_menu_items' ], 101 );
-		}
+		add_action( 'admin_bar_menu', [ __CLASS__, 'add_admin_bar_menu_items' ], 101 );
 
 		add_action( 'wp', [ __CLASS__, 'override_validation_error_statuses' ] );
 	}
@@ -280,11 +272,6 @@ class AMP_Validation_Manager {
 			return false;
 		}
 
-		// Prevent doing post validation in Reader mode.
-		if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-			return false;
-		}
-
 		return post_supports_amp( $post );
 	}
 
@@ -292,10 +279,12 @@ class AMP_Validation_Manager {
 	 * Determine whether AMP theme support is forced via the amp_validate query param.
 	 *
 	 * @since 1.0
+	 * @deprecated No longer used.
 	 *
 	 * @return bool Whether theme support forced.
 	 */
 	public static function is_theme_support_forced() {
+		_deprecated_function( __METHOD__, '1.6' );
 		return self::$is_validate_request;
 	}
 
@@ -2348,8 +2337,6 @@ class AMP_Validation_Manager {
 		 */
 		$should_enqueue_block_validation = (
 			self::has_cap()
-			&&
-			current_theme_supports( AMP_Theme_Support::SLUG )
 		);
 		if ( ! $should_enqueue_block_validation ) {
 			return;

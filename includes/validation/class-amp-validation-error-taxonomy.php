@@ -244,7 +244,7 @@ class AMP_Validation_Error_Taxonomy {
 				'show_tagcloud'      => false,
 				'show_in_quick_edit' => false,
 				'hierarchical'       => false, // Or true? Code could be the parent term?
-				'show_in_menu'       => current_theme_supports( 'amp' ) && current_user_can( 'manage_options' ),
+				'show_in_menu'       => current_user_can( 'manage_options' ),
 				'meta_box_cb'        => false,
 				'capabilities'       => [
 					// Note that delete_terms is needed so the checkbox (cb) table column will work.

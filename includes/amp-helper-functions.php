@@ -633,9 +633,7 @@ function is_amp_endpoint() {
 	 * like by unchecking 'Categories' in 'AMP Settings' > 'Supported Templates'.
 	 * But there's a flag for the WP-CLI command that sets this query var to validate all URLs.
 	 */
-	if ( AMP_Validation_Manager::is_theme_support_forced() ) {
-		return true;
-	}
+	// @todo Find a different solution for WP-CLI.
 
 	$has_amp_query_var = (
 		isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
