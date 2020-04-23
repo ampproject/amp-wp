@@ -7,6 +7,7 @@
 
 // phpcs:disable Generic.Formatting.MultipleStatementAlignment.NotSameWarning
 
+use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\HandleValidation;
 use AmpProject\AmpWP\Tests\PrivateAccess;
@@ -309,12 +310,12 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		$this->assertTrue( AMP_Validation_Manager::has_cap() );
 		add_filter( 'amp_supportable_templates', '__return_empty_array' );
-		AMP_Options_Manager::update_option( 'all_templates_supported', false );
+		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 		$admin_bar = new WP_Admin_Bar();
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
 		$this->assertNull( $admin_bar->get_node( 'amp' ) );
 		remove_filter( 'amp_supportable_templates', '__return_empty_array' );
-		AMP_Options_Manager::update_option( 'all_templates_supported', true );
+		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, true );
 
 		// Admin bar item available in AMP-first mode.
 		add_theme_support( AMP_Theme_Support::SLUG, [ AMP_Theme_Support::PAIRED_FLAG => false ] );
@@ -1340,6 +1341,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 */
 	public function test_wrap_widget_callbacks() {
 		global $wp_registered_widgets, $_wp_sidebars_widgets;
+		$this->go_to( amp_get_permalink( $this->factory()->post->create() ) );
 
 		$search_widget_id = 'search-2';
 		$this->assertArrayHasKey( $search_widget_id, $wp_registered_widgets );
@@ -1610,7 +1612,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 				[
 					'type'     => 'core',
 					'name'     => 'wp-includes',
-					'function' => 'wp_make_content_images_responsive',
+					'function' => version_compare( get_bloginfo( 'version' ), '5.4', '>' ) ? 'wp_filter_content_tags' : 'wp_make_content_images_responsive',
 				],
 				[
 					'type'     => 'core',

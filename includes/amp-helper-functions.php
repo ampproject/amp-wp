@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Services;
 
 /**
@@ -118,20 +119,20 @@ function amp_init() {
 
 	/*
 	 * Broadcast plugin updates.
-	 * Note that AMP_Options_Manager::get_option( 'version', '0.0' ) cannot be used because
+	 * Note that AMP_Options_Manager::get_option( Option::VERSION, '0.0' ) cannot be used because
 	 * version was new option added, and in that case default would never be used for a site
 	 * upgrading from a version prior to 1.0. So this is why get_option() is currently used.
 	 */
 	$options     = get_option( AMP_Options_Manager::OPTION_NAME, [] );
-	$old_version = isset( $options['version'] ) ? $options['version'] : '0.0';
-	if ( AMP__VERSION !== $old_version ) {
+	$old_version = isset( $options[ Option::VERSION ] ) ? $options[ Option::VERSION ] : '0.0';
+	if ( AMP__VERSION !== $old_version && is_admin() && current_user_can( 'manage_options' ) ) {
 		/**
 		 * Triggers when after amp_init when the plugin version has updated.
 		 *
 		 * @param string $old_version Old version.
 		 */
 		do_action( 'amp_plugin_update', $old_version );
-		AMP_Options_Manager::update_option( 'version', AMP__VERSION );
+		AMP_Options_Manager::update_option( Option::VERSION, AMP__VERSION );
 	}
 }
 
@@ -479,8 +480,10 @@ function amp_remove_endpoint( $url ) {
  * If there are known validation errors for the current URL then do not output anything.
  *
  * @since 1.0
+ * @global WP_Query $wp_query
  */
 function amp_add_amphtml_link() {
+	global $wp_query;
 
 	/**
 	 * Filters whether to show the amphtml link on the frontend.
@@ -499,7 +502,7 @@ function amp_add_amphtml_link() {
 		if ( AMP_Theme_Support::is_paired_available() ) {
 			$amp_url = add_query_arg( amp_get_slug(), '', $current_url );
 		}
-	} elseif ( is_singular() && post_supports_amp( get_post( get_queried_object_id() ) ) ) {
+	} elseif ( $wp_query instanceof WP_Query && ( $wp_query->is_singular() || $wp_query->is_posts_page ) && post_supports_amp( get_post( get_queried_object_id() ) ) ) {
 		$amp_url = amp_get_permalink( get_queried_object_id() );
 	}
 
@@ -566,41 +569,62 @@ function post_supports_amp( $post ) {
 function is_amp_endpoint() {
 	global $pagenow, $wp_query;
 
-	if ( is_admin() || is_embed() || is_feed() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || in_array( $pagenow, [ 'wp-login.php', 'wp-signup.php', 'wp-activate.php' ], true ) ) {
+	// Short-circuit for admin requests or requests to non-frontend pages.
+	if ( is_admin() || in_array( $pagenow, [ 'wp-login.php', 'wp-signup.php', 'wp-activate.php' ], true ) ) {
 		return false;
 	}
 
-	// Always return false when requesting service worker.
-	if ( class_exists( 'WP_Service_Workers' ) && ! empty( $wp_query ) && defined( 'WP_Service_Workers::QUERY_VAR' ) && $wp_query->get( WP_Service_Workers::QUERY_VAR ) ) {
+	$warned        = false;
+	$error_message = sprintf(
+		/* translators: %1$s: is_amp_endpoint(), %2$s: the current action, %3$s: the wp action, %4$s: the WP_Query class, %5$s: the amp_skip_post() function */
+		__( '%1$s was called too early and so it will not work properly. WordPress is currently doing the "%2$s" action. Calling this function before the "%3$s" action means it will not have access to %4$s and the queried object to determine if it is an AMP response, thus neither the "%5$s" filter nor the AMP enabled toggle will be considered.', 'amp' ),
+		__FUNCTION__ . '()',
+		current_action(),
+		'wp',
+		'WP_Query',
+		'amp_skip_post()'
+	);
+
+	// Make sure the parse_request action has triggered before trying to read from the REST_REQUEST constant, which is set during rest_api_loaded().
+	if ( ! did_action( 'parse_request' ) ) {
+		_doing_it_wrong( __FUNCTION__, esc_html( $error_message ), '1.6.0' );
+		$warned = true;
+	} elseif ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
 		return false;
 	}
 
-	$did_parse_query = did_action( 'parse_query' );
-
-	if ( ! $did_parse_query ) {
-		_doing_it_wrong(
-			__FUNCTION__,
-			sprintf(
-				/* translators: 1: is_amp_endpoint(), 2: parse_query */
-				esc_html__( '%1$s was called before the %2$s hook was called.', 'amp' ),
-				'is_amp_endpoint()',
-				'parse_query'
-			),
-			'0.4.2'
-		);
+	// Make sure that the parse_query action has triggered, as this is required to initially populate the global WP_Query.
+	if ( ! $warned && ! ( $wp_query instanceof WP_Query || did_action( 'parse_query' ) ) ) {
+		_doing_it_wrong( __FUNCTION__, esc_html( $error_message ), '0.4.2' );
+		$warned = true;
 	}
 
-	if ( empty( $wp_query ) || ! ( $wp_query instanceof WP_Query ) ) {
-		_doing_it_wrong(
-			__FUNCTION__,
-			sprintf(
-				/* translators: 1: is_amp_endpoint(), 2: WP_Query */
-				esc_html__( '%1$s was called before the %2$s was instantiated.', 'amp' ),
-				'is_amp_endpoint()',
-				'WP_Query'
-			),
-			'1.1'
-		);
+	// Always return false when requesting the service worker.
+	// Note this is no longer required because AMP_Theme_Support::prepare_response() will abort for non-HTML responses.
+	if ( class_exists( 'WP_Service_Workers' ) && $wp_query instanceof WP_Query && defined( 'WP_Service_Workers::QUERY_VAR' ) && $wp_query->get( WP_Service_Workers::QUERY_VAR ) ) {
+		return false;
+	}
+
+	// Short-circuit queries that can never have AMP responses (e.g. post embeds and feeds).
+	// Note that these conditionals only require the parse_query action to have been run. They don't depend on the wp action having been fired.
+	if (
+		$wp_query instanceof WP_Query
+		&&
+		(
+			$wp_query->is_embed()
+			||
+			$wp_query->is_feed()
+			||
+			$wp_query->is_comment_feed()
+			||
+			$wp_query->is_trackback()
+			||
+			$wp_query->is_robots()
+			||
+			( method_exists( $wp_query, 'is_favicon' ) && $wp_query->is_favicon() )
+		)
+	) {
+		return false;
 	}
 
 	/*
@@ -623,34 +647,29 @@ function is_amp_endpoint() {
 		)
 	);
 
-	if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-		return $has_amp_query_var;
-	}
-
 	// When there is no query var and AMP is not canonical (AMP-first), then this is definitely not an AMP endpoint.
 	if ( ! $has_amp_query_var && ! amp_is_canonical() ) {
 		return false;
 	}
 
-	if ( ! did_action( 'wp' ) ) {
-		_doing_it_wrong(
-			__FUNCTION__,
-			sprintf(
-				/* translators: 1: is_amp_endpoint(). 2: wp. 3: amp_skip_post */
-				esc_html__( '%1$s was called before the %2$s action which means it will not have access to the queried object to determine if it is an AMP response, thus neither the %3$s filter nor the AMP enabled publish metabox toggle will be considered.', 'amp' ),
-				'is_amp_endpoint()',
-				'wp',
-				'amp_skip_post'
-			),
-			'1.0.2'
-		);
-		$supported = true;
+	if ( did_action( 'wp' ) && $wp_query instanceof WP_Query ) {
+		if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+			$availability = AMP_Theme_Support::get_template_availability( $wp_query );
+			return $availability['supported'];
+		} else {
+			$queried_object = get_queried_object();
+			return $queried_object instanceof WP_Post && ( $wp_query->is_singular() || $wp_query->is_posts_page ) && post_supports_amp( $queried_object );
+		}
 	} else {
-		$availability = AMP_Theme_Support::get_template_availability();
-		$supported    = $availability['supported'];
+		// If WP_Query was not available yet, then we will just assume the query is supported since at this point we do
+		// know either that the site is in Standard mode or the URL was requested with the AMP query var. This can still
+		// produce an undesired result when a Standard mode site has a post that opts out of AMP, but this issue will
+		// have been flagged via _doing_it_wrong() above.
+		if ( ! $warned ) {
+			_doing_it_wrong( __FUNCTION__, esc_html( $error_message ), '1.0.2' );
+		}
+		return amp_is_canonical() || $has_amp_query_var;
 	}
-
-	return amp_is_canonical() ? $supported : ( $has_amp_query_var && $supported );
 }
 
 /**
@@ -948,7 +967,7 @@ function amp_filter_font_style_loader_tag_with_crossorigin_anonymous( $tag, $han
  * @return array Analytics.
  */
 function amp_get_analytics( $analytics = [] ) {
-	$analytics_entries = AMP_Options_Manager::get_option( 'analytics', [] );
+	$analytics_entries = AMP_Options_Manager::get_option( Option::ANALYTICS, [] );
 
 	/**
 	 * Add amp-analytics tags.
@@ -1220,6 +1239,7 @@ function amp_get_content_sanitizers( $post = null ) {
 		'AMP_Style_Sanitizer'             => [],
 		'AMP_Meta_Sanitizer'              => [],
 		'AMP_Layout_Sanitizer'            => [],
+		'AMP_Accessibility_Sanitizer'     => [],
 		'AMP_Tag_And_Attribute_Sanitizer' => [], // Note: This whitelist sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
 	];
 
