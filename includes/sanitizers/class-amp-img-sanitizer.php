@@ -6,6 +6,7 @@
  */
 
 use AmpProject\DevMode;
+use AmpProject\Layout;
 
 /**
  * Class AMP_Img_Sanitizer
@@ -132,7 +133,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			} elseif ( $node->hasAttribute( 'layout' ) ) {
 				$layout = $node->getAttribute( 'layout' );
 			} else {
-				$layout = 'intrinsic';
+				$layout = Layout::INTRINSIC;
 			}
 
 			$has_width  = is_numeric( $node->getAttribute( 'width' ) );
@@ -140,12 +141,12 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 
 			// Determine which images need their dimensions determined/extracted.
 			$missing_dimensions = (
-				( ! $has_height && 'fixed-height' === $layout )
+				( ! $has_height && Layout::FIXED_HEIGHT === $layout )
 				||
 				(
 					( ! $has_width || ! $has_height )
 					&&
-					in_array( $layout, [ 'fixed', 'responsive', 'intrinsic' ], true )
+					in_array( $layout, [ Layout::FIXED, Layout::RESPONSIVE, Layout::INTRINSIC ], true )
 				)
 			);
 			if ( $missing_dimensions ) {
@@ -324,14 +325,15 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				&& 'figure' === $node->parentNode->nodeName
 				&& preg_match( '/(^|\s)(alignwide|alignfull)(\s|$)/', $node->parentNode->getAttribute( 'class' ) )
 			) {
-				$new_attributes['layout'] = 'responsive';
+				$new_attributes['layout'] = Layout::RESPONSIVE;
 			} else {
-				$new_attributes['layout'] = 'intrinsic';
+				$new_attributes['layout'] = Layout::INTRINSIC;
 			}
 		}
 
-		// Remove sizes attribute since it causes headaches in AMP and because AMP will generate it for us. See <https://github.com/ampproject/amphtml/issues/21371>.
-		unset( $new_attributes['sizes'] );
+		if ( isset( $new_attributes['sizes'] ) ) {
+			$new_attributes['disable-inline-width'] = '';
+		}
 
 		if ( $this->is_gif_url( $new_attributes['src'] ) ) {
 			$this->did_convert_elements = true;
@@ -353,7 +355,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		 */
 		if ( $img_node->hasAttribute( 'style' ) ) {
 			$layout = $img_node->getAttribute( 'layout' );
-			if ( in_array( $layout, [ 'fixed-height', 'responsive', 'fill', 'flex-item' ], true ) ) {
+			if ( in_array( $layout, [ Layout::FIXED_HEIGHT, Layout::RESPONSIVE, Layout::FILL, Layout::FLEX_ITEM ], true ) ) {
 				$required_display = 'block';
 			} elseif ( 'nodisplay' === $layout ) {
 				$required_display = 'none';
