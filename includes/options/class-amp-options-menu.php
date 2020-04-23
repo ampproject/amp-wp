@@ -172,7 +172,7 @@ class AMP_Options_Menu {
 					</label>
 				</dt>
 				<dd>
-					<?php echo wp_kses_post( $standard_description ); ?>
+					<p><?php echo wp_kses_post( $standard_description ); ?></p>
 				</dd>
 				<dt>
 					<input type="radio" id="theme_support_transitional" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="<?php echo esc_attr( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG ); ?>" <?php checked( $theme_support, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG ); ?>>
@@ -181,7 +181,7 @@ class AMP_Options_Menu {
 					</label>
 				</dt>
 				<dd>
-					<?php echo wp_kses_post( $transitional_description ); ?>
+					<p><?php echo wp_kses_post( $transitional_description ); ?></p>
 				</dd>
 				<dt>
 					<input type="radio" id="theme_support_disabled" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="<?php echo esc_attr( AMP_Theme_Support::READER_MODE_SLUG ); ?>" <?php checked( $theme_support, AMP_Theme_Support::READER_MODE_SLUG ); ?>>
@@ -190,7 +190,121 @@ class AMP_Options_Menu {
 					</label>
 				</dt>
 				<dd>
-					<?php echo wp_kses_post( $reader_description ); ?>
+					<p><?php echo wp_kses_post( $reader_description ); ?></p>
+
+					<style>
+						#reader_mode_themes {
+							margin-top: 1em;
+						}
+
+						#reader_mode_themes legend {
+							font-family: inherit;
+							font-weight: 600;
+						}
+
+						#reader_mode_themes ul {
+							margin: 0;
+						}
+
+						#reader_mode_themes li {
+							display: inline-block;
+							line-height: 1;
+							margin: 0;
+							position: relative;
+						}
+
+						#reader_mode_themes input {
+							position: absolute;
+							opacity: 0;
+						}
+
+						#reader_mode_themes label {
+							display: inline-block;
+							border: 1px solid #ddd;
+							margin: 10px !important;
+							cursor: pointer;
+						}
+
+						#reader_mode_themes .theme-screenshot {
+							display: block;
+						}
+
+						#reader_mode_themes .theme-name {
+							display: block;
+							font-size: 15px;
+							font-weight: 600;
+							height: 18px;
+							margin: 0;
+							padding: 15px;
+							white-space: nowrap;
+							text-overflow: ellipsis;
+							background: rgba(255, 255, 255, 0.65);
+							box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.1);
+						}
+
+						#reader_mode_themes input:checked + label {
+							border-color: #5b9dd9;
+							box-shadow: 0 0 2px rgba(30, 140, 190, 0.8);
+							color: white;
+						}
+
+						#reader_mode_themes input:checked + label .theme-name {
+							background-color: #5b9dd9;
+						}
+					</style>
+					<fieldset
+						id="reader_mode_themes"
+						<?php if ( AMP_Theme_Support::READER_MODE_SLUG !== $theme_support ) : ?>
+							class="hidden"
+						<?php endif; ?>
+					>
+						<legend><?php esc_html_e( 'Selected Theme:', 'amp' ); ?></legend>
+
+						<ul>
+							<?php
+							$name          = AMP_Options_Manager::OPTION_NAME . '[' . Option::READER_THEME . ']';
+							$reader_themes = AMP_Theme_Support::get_reader_themes();
+							$current_theme = AMP_Options_Manager::get_option( Option::READER_THEME );
+							if ( ! array_key_exists( $current_theme, $reader_themes ) ) {
+								$current_theme = ''; // Reset to Classic if previously-selected theme is no longer available.
+							}
+							?>
+							<?php foreach ( $reader_themes as $slug => $theme ) : ?>
+								<?php $id = $name . "[$slug]"; ?>
+								<li>
+									<input
+										type="radio"
+										id="<?php echo esc_attr( $id ); ?>"
+										name="<?php echo esc_attr( $name ); ?>"
+										value="<?php echo esc_attr( $slug ); ?>"
+										<?php checked( $current_theme, $slug ); ?>
+									>
+									<label for="<?php echo esc_attr( $name . "[$slug]" ); ?>">
+										<img class="theme-screenshot" src="<?php echo esc_url( $theme['screenshot'] ); ?>" width="300" height="225" alt="<?php echo esc_attr( $theme['name'] ); ?>">
+										<span class="theme-name"><?php echo esc_html( $theme['name'] ); ?></span>
+									</label>
+								</li>
+							<?php endforeach; ?>
+						</ul>
+					</fieldset>
+
+					<script>
+						// Update the visibility of the fieldset based on the selected template mode.
+						(function ( $ ) {
+							const templateModeInputs = $( 'input[type=radio][name="amp-options[theme_support]"]' );
+							const readerModeThemesFieldset = $( '#reader_mode_themes' );
+							const themeSupportDisabledInput = $( '#theme_support_disabled' );
+
+							function isReaderMode() {
+								return themeSupportDisabledInput.prop( 'checked' );
+							}
+
+							function updateFieldsetVisibility() {
+								readerModeThemesFieldset.toggleClass( 'hidden', ! isReaderMode() )
+							}
+							templateModeInputs.on( 'change', updateFieldsetVisibility );
+						})( jQuery );
+					</script>
 				</dd>
 			</dl>
 
@@ -416,7 +530,6 @@ class AMP_Options_Menu {
 		</p>
 		<?php
 	}
-
 
 	/**
 	 * Display Settings.

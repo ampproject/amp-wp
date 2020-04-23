@@ -240,6 +240,38 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Get reader mode themes.
+	 *
+	 * @since 1.6
+	 *
+	 * @return string[][]
+	 */
+	public static function get_reader_themes() {
+		return [
+			'twentytwenty'    => [
+				'name'       => __( 'Twenty Twenty', 'amp' ),
+				'screenshot' => plugin_dir_url( AMP__FILE__ ) . 'themes/twentytwenty/screenshot.png',
+				'directory'  => AMP__DIR__ . '/themes/twentytwenty',
+			],
+			'twentynineteen'  => [
+				'name'       => __( 'Twenty Nineteen', 'amp' ),
+				'screenshot' => plugin_dir_url( AMP__FILE__ ) . 'themes/twentynineteen/screenshot.png',
+				'directory'  => AMP__DIR__ . '/themes/twentynineteen',
+			],
+			'twentyseventeen' => [
+				'name'       => __( 'Twenty Seventeen', 'amp' ),
+				'screenshot' => plugin_dir_url( AMP__FILE__ ) . 'themes/twentyseventeen/screenshot.png',
+				'directory'  => AMP__DIR__ . '/themes/twentyseventeen',
+			],
+			''                => [
+				'name'       => __( 'Classic', 'amp' ),
+				'screenshot' => plugin_dir_url( AMP__FILE__ ) . 'templates/screenshot.png',
+				'directory'  => AMP__DIR__ . '/templates',
+			],
+		];
+	}
+
+	/**
 	 * Check theme support args or add theme support if option is set in the admin.
 	 *
 	 * The DB option is only considered if the theme does not already explicitly support AMP.

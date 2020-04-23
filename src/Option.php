@@ -76,6 +76,13 @@ interface Option {
 	const THEME_SUPPORT = 'theme_support';
 
 	/**
+	 * Theme for Reader mode.
+	 *
+	 * @var string
+	 */
+	const READER_THEME = 'reader_theme';
+
+	/**
 	 * Enable dev tools.
 	 *
 	 * @var string
