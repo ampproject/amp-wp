@@ -7,22 +7,34 @@ body .amp-icon {
 	font: normal 20px/1 dashicons;
 }
 
+/*
+ * Colors are taken from the official WordPress color palette.
+ * See https://make.wordpress.org/design/handbook/design-guide/foundations/colors/#auxiliary-hues
+ */
 .amp-icon.amp-valid::before {
 	content: "\f12a";
-	color: #0a9f1c !important;
+
+	/* Accent Green */
+	color: #46b450 !important;
 }
 
 .amp-icon.amp-invalid::before {
 	content: "\f153";
-	color: #e92c1a !important;
+
+	/* Accent Red */
+	color: #dc3232 !important;
 }
 
 .amp-icon.amp-warning::before {
 	content: "\f534";
-	color: #d98500 !important;
+
+	/* Accent Orange */
+	color: #f56e28 !important;
 }
 
 .amp-icon.amp-link::before {
 	content: "\f103";
-	color: #4183f2 !important;
+
+	/* Medium Blue */
+	color: #00a0d2 !important;
 }

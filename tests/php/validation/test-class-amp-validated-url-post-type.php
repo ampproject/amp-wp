@@ -1130,7 +1130,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 
 		$validation_errors = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $invalid_url_post_id );
 
-		$_POST['val_errors'] = [
+		$_POST[ AMP_Validated_URL_Post_Type::VALIDATION_ERRORS_INPUT_KEY ] = [
 			// Accepted and acknowledged.
 			$validation_errors[0]['term']->slug => [
 				AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR     => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,

@@ -1020,7 +1020,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		$this->assertStringContains( 'Approve', $approve_action );
 		$this->assertStringContains( 'Keep', $reject_action );
 
-		// If its a kept error only 'Remove' action should be shown, and not 'Keep' action.
+		// If it's a kept error, only the 'Remove' action should be shown, and not the 'Keep' action.
 		add_filter( 'amp_validation_error_default_sanitized', '__return_false' );
 
 		$filtered_actions = AMP_Validation_Error_Taxonomy::filter_tag_row_actions( $initial_actions, $term_this_taxonomy );
@@ -1275,7 +1275,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		// Test the 'status' block switch for the single error page.
 		$GLOBALS['pagenow'] = 'post.php';
 		$filtered_content   = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'status', $term_id );
-		$this->assertStringContains( '<select class="amp-validation-error-status" name="val_errors[term-', $filtered_content );
+		$this->assertStringContains( sprintf( '<select class="amp-validation-error-status" name="%s[term-', AMP_Validated_URL_Post_Type::VALIDATION_ERRORS_INPUT_KEY ), $filtered_content );
 
 		// Test the 'created_date_gmt' block in the switch.
 		$date = current_time( 'mysql', true );

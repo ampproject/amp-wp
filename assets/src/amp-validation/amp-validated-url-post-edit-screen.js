@@ -294,13 +294,13 @@ const updateSelectIcon = ( select ) => {
 const handleRowEvents = () => {
 
 	document.querySelectorAll( 'tr[id^="tag-"]' ).forEach( ( row ) => {
-		const statusSelect   = row.querySelector( '.amp-validation-error-status' );
-		const ackCheckbox    = row.querySelector( '.amp-validation-error-status-ack' );
+		const statusSelect = row.querySelector( '.amp-validation-error-status' );
+		const ackCheckbox  = row.querySelector( '.amp-validation-error-status-ack' );
 
 		if ( statusSelect ) {
 			/*
-			 * Handle a change in the error status, like from 'Removed' to 'Kept'. It gets the data-status-icon value
-			 * from the newly-selected <option>. And sets this as the src of the status icon <img>.
+			 * Handle a change in the error status, like from 'Removed' to 'Kept'. It gets the data-color value
+			 * from the newly-selected <option> and sets this as the border color of the <select>.
 			 */
 			statusSelect.addEventListener( 'change', ( event ) => {
 				if ( event.target.matches( 'select' ) ) {

@@ -1676,23 +1676,23 @@ class AMP_Validation_Error_Taxonomy {
 				)
 			);
 
-			if ( ! $is_accepted ) {
-				$actions[ self::VALIDATION_ERROR_ACCEPT_ACTION ] = sprintf(
-					'<a href="%s">%s</a>',
-					wp_nonce_url(
-						add_query_arg( array_merge( [ 'action' => self::VALIDATION_ERROR_ACCEPT_ACTION ], compact( 'term_id' ) ) ),
-						self::VALIDATION_ERROR_ACCEPT_ACTION
-					),
-					esc_html__( 'Remove', 'amp' )
-				);
-			} elseif ( $is_accepted ) {
+			if ( $is_accepted ) {
 				$actions[ self::VALIDATION_ERROR_REJECT_ACTION ] = sprintf(
-					'<a href="%s">%s</a>',
-					wp_nonce_url(
-						add_query_arg( array_merge( [ 'action' => self::VALIDATION_ERROR_REJECT_ACTION ], compact( 'term_id' ) ) ),
-						self::VALIDATION_ERROR_REJECT_ACTION
-					),
-					esc_html__( 'Keep', 'amp' )
+						'<a href="%s">%s</a>',
+						wp_nonce_url(
+								add_query_arg( array_merge( [ 'action' => self::VALIDATION_ERROR_REJECT_ACTION ], compact( 'term_id' ) ) ),
+								self::VALIDATION_ERROR_REJECT_ACTION
+						),
+						esc_html__( 'Keep', 'amp' )
+				);
+			} else {
+				$actions[ self::VALIDATION_ERROR_ACCEPT_ACTION ] = sprintf(
+						'<a href="%s">%s</a>',
+						wp_nonce_url(
+								add_query_arg( array_merge( [ 'action' => self::VALIDATION_ERROR_ACCEPT_ACTION ], compact( 'term_id' ) ) ),
+								self::VALIDATION_ERROR_ACCEPT_ACTION
+						),
+						esc_html__( 'Remove', 'amp' )
 				);
 			}
 		}
@@ -1895,7 +1895,12 @@ class AMP_Validation_Error_Taxonomy {
 					$invalid_color = '#e92c1a';
 
 					$status_border_color = sprintf( 'border-color: %s;', $is_removed ? $valid_color : $invalid_color );
-					$status_select_name  = sprintf( 'val_errors[%s][%s]', $term->slug, AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR );
+					$status_select_name  = sprintf(
+							'%s[%s][%s]',
+							AMP_Validated_URL_Post_Type::VALIDATION_ERRORS_INPUT_KEY,
+							$term->slug,
+							AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR
+					);
 
 					ob_start();
 					?>
@@ -2051,8 +2056,13 @@ class AMP_Validation_Error_Taxonomy {
 				break;
 			case 'approved':
 				if ( 'post.php' === $pagenow ) {
-					$checked    = ! ( (int) $term->term_group & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK ) ? '' : 'checked="checked"';
-					$input_name = sprintf( 'val_errors[%s][%s]', $term->slug, self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION );
+					$checked    = ( (int) $term->term_group & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK ) ? 'checked="checked"' : '';
+					$input_name = sprintf(
+							'%s[%s][%s]',
+							AMP_Validated_URL_Post_Type::VALIDATION_ERRORS_INPUT_KEY,
+							$term->slug,
+							self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION
+					);
 					$content   .= sprintf( '<input class="amp-validation-error-status-ack" type="checkbox" name="%s" %s />', esc_attr( $input_name ), $checked );
 				}
 		}
@@ -2918,11 +2928,11 @@ class AMP_Validation_Error_Taxonomy {
 			if ( self::VALIDATION_ERROR_ACCEPT_ACTION === $action ) {
 				$term_group |= self::ACCEPTED_VALIDATION_ERROR_BIT_MASK;
 			} elseif ( self::VALIDATION_ERROR_REJECT_ACTION === $action ) {
-				$term_group -= self::ACCEPTED_VALIDATION_ERROR_BIT_MASK;
+				$term_group &= ~self::ACCEPTED_VALIDATION_ERROR_BIT_MASK;
 			} elseif ( self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION === $action ) {
 				$acknowledged = $term_group & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK;
 				$term_group   = $acknowledged
-					? $term_group - self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK
+					? $term_group &~ self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK
 					: $term_group | self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK;
 			}
 
