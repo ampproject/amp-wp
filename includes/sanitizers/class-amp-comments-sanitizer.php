@@ -9,6 +9,7 @@ use AmpProject\Attribute;
 use AmpProject\Dom\Document;
 use AmpProject\Extension;
 use AmpProject\Layout;
+use AmpProject\Tag;
 
 /**
  * Class AMP_Comments_Sanitizer
@@ -88,9 +89,21 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 			wp_scripts()->query( 'comment-reply' )->src
 		);
 
+		$comment_reply_js = 'console.log( "Hello World from <amp-script>!" );';
+
+		$comment_reply_script = $this->dom->createElement( Tag::SCRIPT );
+		$comment_reply_script->setAttribute( Attribute::TYPE, Attribute::TYPE_TEXT_PLAIN );
+		$comment_reply_script->setAttribute( Attribute::TARGET, Extension::SCRIPT );
+
+		$comment_reply_script_id = AMP_DOM_Utils::get_element_id( $comment_reply_script, 'amp-hello-world-script' );
+
+		$comment_reply_script_hash = $this->dom->createElement( Tag::META );
+		$comment_reply_script_hash->setAttribute( Attribute::NAME, 'amp-script-src' );
+		$comment_reply_script_hash->setAttribute( Attribute::CONTENT, amp_generate_script_hash( $comment_reply_js ) );
+
 		$amp_script = $this->dom->createElement( Extension::SCRIPT );
 		$amp_script->setAttribute( Attribute::LAYOUT, Layout::CONTAINER );
-		$amp_script->setAttribute( Attribute::SRC, $comment_reply_src );
+		$amp_script->setAttribute( Attribute::SCRIPT, $comment_reply_script_id );
 		$amp_script->setAttribute( Attribute::SANDBOX, 'allow-forms' );
 
 		// @TODO: Should we iterate over all matches instead of just picking the first?
@@ -102,8 +115,12 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
+		$this->dom->head->appendChild( $comment_reply_script_hash );
+
 		$wrap_target = $wrap_target->parentNode->replaceChild( $amp_script, $wrap_target );
 		$amp_script->appendChild( $wrap_target );
+
+		$this->dom->body->appendChild( $comment_reply_script );
 	}
 
 	/**

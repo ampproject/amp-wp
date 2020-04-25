@@ -51,9 +51,11 @@ interface Attribute
     const REL                   = 'rel';
     const ROLE                  = 'role';
     const SANDBOX               = 'sandbox';
+    const SCRIPT                = 'script';
     const SIZES                 = 'sizes';
     const SRC                   = 'src';
     const TABINDEX              = 'tabindex';
+    const TARGET                = 'target';
     const TEMPLATE              = 'template';
     const TYPE                  = 'type';
     const VIEWPORT              = 'viewport';
