@@ -91,7 +91,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		add_theme_support( AMP_Theme_Support::SLUG );
 		AMP_Theme_Support::init();
-		$this->assertEquals( 10, has_action( 'widgets_init', [ self::TESTED_CLASS, 'register_widgets' ] ) );
+		$this->assertEquals( false, has_action( 'widgets_init', [ self::TESTED_CLASS, 'register_widgets' ] ) );
 		$this->assertEquals( PHP_INT_MAX, has_action( 'wp', [ self::TESTED_CLASS, 'finish_init' ] ) );
 	}
 
@@ -1077,23 +1077,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertEquals( 100, has_action( 'comment_form', [ self::TESTED_CLASS, 'amend_comment_form' ] ) );
 		$this->assertFalse( has_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' ) );
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'get_header_image_tag', [ self::TESTED_CLASS, 'amend_header_image_with_video_header' ] ) );
-	}
-
-	/**
-	 * Test register_widgets().
-	 *
-	 * @covers AMP_Theme_Support::register_widgets()
-	 * @global WP_Widget_Factory $wp_widget_factory
-	 */
-	public function test_register_widgets() {
-		global $wp_widget_factory;
-		remove_all_actions( 'widgets_init' );
-		$wp_widget_factory->widgets = [];
-		wp_widgets_init();
-		AMP_Theme_Support::register_widgets();
-
-		$this->assertArrayNotHasKey( 'WP_Widget_Categories', $wp_widget_factory->widgets );
-		$this->assertArrayHasKey( 'AMP_Widget_Categories', $wp_widget_factory->widgets );
 	}
 
 	/**
