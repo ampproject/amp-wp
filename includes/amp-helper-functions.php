@@ -1612,8 +1612,13 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 	$parent = [
 		'id'    => 'amp',
 		'title' => sprintf(
-			'<span id="amp-admin-bar-item-status-icon" class="ab-icon amp-icon %s"></span> %s',
-			Icon::LINK,
+			'%s %s',
+			Icon::link()->to_html(
+				[
+					'id'    => 'amp-admin-bar-item-status-icon',
+					'class' => 'ab-icon',
+				]
+			),
 			esc_html( is_amp_endpoint() ? __( 'Non-AMP', 'amp' ) : __( 'AMP', 'amp' ) )
 		),
 		'href'  => esc_url( $href ),

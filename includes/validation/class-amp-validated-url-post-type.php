@@ -516,10 +516,10 @@ class AMP_Validated_URL_Post_Type {
 				);
 			}
 			$result[] = sprintf(
-				'<span class="status-text %s" title="%s"><span class="amp-icon %s"></span> %s: %s</span>',
+				'<span class="status-text %s" title="%s">%s %s: %s</span>',
 				esc_attr( $counts['new_rejected'] > 0 ? 'has-new' : '' ),
 				esc_attr( $title ),
-				Icon::INVALID,
+				Icon::invalid()->to_html(),
 				esc_html__( 'Invalid markup kept', 'amp' ),
 				number_format_i18n( $kept_count )
 			);
@@ -538,19 +538,20 @@ class AMP_Validated_URL_Post_Type {
 					$counts['new_accepted']
 				);
 			}
+			$icon = ( $counts['new_accepted'] + $counts['new_rejected'] ) > 0 ? Icon::warning() : Icon::valid();
 			$result[] = sprintf(
-				'<span class="status-text %s" title="%s"><span class="amp-icon %s"></span> %s: %s</span>',
+				'<span class="status-text %s" title="%s">%s %s: %s</span>',
 				esc_attr( $counts['new_accepted'] > 0 ? 'has-new' : '' ),
 				esc_attr( $title ),
-				( $counts['new_accepted'] + $counts['new_rejected'] ) > 0 ? Icon::WARNING : Icon::VALID,
+				$icon::to_html(),
 				esc_html__( 'Invalid markup removed', 'amp' ),
 				number_format_i18n( $removed_count )
 			);
 		}
 		if ( 0 === $removed_count && 0 === $kept_count ) {
 			$result[] = sprintf(
-				'<span class="status-text"><span class="amp-icon %s"></span> %s</span>',
-				Icon::VALID,
+				'<span class="status-text">%s %s</span>',
+				Icon::valid()->to_html(),
 				esc_html__( 'All markup valid', 'amp' )
 			);
 		}
@@ -2187,14 +2188,15 @@ class AMP_Validated_URL_Post_Type {
 
 					printf( '%.1f%% ', $percentage_budget_used ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 					if ( $percentage_budget_used > 100 ) {
-						$icon = Icon::INVALID;
+						$icon = Icon::invalid();
 					} elseif ( $percentage_budget_used >= AMP_Style_Sanitizer::CSS_BUDGET_WARNING_PERCENTAGE ) {
-						$icon = Icon::WARNING;
+						$icon = Icon::warning();
 					} else {
-						$icon = Icon::VALID;
+						$icon = Icon::valid();
 					}
+
+					echo $icon::to_html();
 					?>
-					<span class="amp-icon <?php echo esc_attr( $icon ); ?>"></span>
 				</td>
 			</tr>
 			<tr>

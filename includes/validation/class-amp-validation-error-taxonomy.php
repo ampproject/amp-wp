@@ -1891,8 +1891,8 @@ class AMP_Validation_Error_Taxonomy {
 				$is_removed = (bool) ( (int) $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
 
 				if ( 'post.php' === $pagenow ) {
-					$valid_color   = '#0a9f1c';
-					$invalid_color = '#e92c1a';
+					$valid_color   = Icon::valid()->get_color();
+					$invalid_color = Icon::invalid()->get_color();
 
 					$status_border_color = sprintf( 'border-color: %s;', $is_removed ? $valid_color : $invalid_color );
 					$status_select_name  = sprintf(
@@ -3402,12 +3402,13 @@ class AMP_Validation_Error_Taxonomy {
 	 */
 	public static function get_status_text_with_icon( $sanitization ) {
 		if ( $sanitization['term_status'] & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK ) {
-			$icon = Icon::VALID;
+			$icon = Icon::valid();
 			$text = __( 'Removed', 'amp' );
 		} else {
-			$icon = Icon::INVALID;
+			$icon = Icon::invalid();
 			$text = __( 'Kept', 'amp' );
 		}
-		return sprintf( '<span class="status-text"><span class="amp-icon %s"></span> %s</span>', $icon, esc_html( $text ) );
+//		return sprintf( '<span class="status-text">%s %s</span>', $icon::to_html(), esc_html( $text ) );
+		return sprintf( '<span class="status-text">%s %s</span>', $icon::to_html(), esc_html( $text ) );
 	}
 }

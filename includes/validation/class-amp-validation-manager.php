@@ -438,36 +438,42 @@ class AMP_Validation_Manager {
 
 		// Construct the parent admin bar item.
 		if ( is_amp_endpoint() ) {
-			$icon = Icon::VALID; // This will get overridden in AMP_Validation_Manager::finalize_validation() if there are unaccepted errors.
+			$icon = Icon::valid(); // This will get overridden in AMP_Validation_Manager::finalize_validation() if there are unaccepted errors.
 			$href = $validate_url;
 		} elseif ( $error_count > 0 ) {
-			$icon = Icon::INVALID;
+			$icon = Icon::invalid();
 			$href = $validate_url;
 		} else {
-			$icon = Icon::LINK;
+			$icon = Icon::link();
 			$href = $amp_url;
 		}
+
+		$icon_html = $icon::to_html(
+			[
+				'id'    => 'amp-admin-bar-item-status-icon',
+				'class' => 'ab-icon',
+			]
+		);
 
 		$parent = [
 			'id'    => 'amp',
 			'title' => sprintf(
-				'<span id="amp-admin-bar-item-status-icon" class="ab-icon amp-icon %s"></span> %s',
-				$icon,
+				'%s %s',
+				$icon_html,
 				esc_html__( 'AMP', 'amp' )
 			),
 			'href'  => esc_url( $href ),
 			'meta'  => [
-				'html' => sprintf(
 				/**
 				 * This hidden <span> element is needed to prevent the CSS for unused icons from being removed. New icons
 				 * may be added during post-processing, such as overriding the admin bar icon to represent a new validation
 				 * state or when new menu items are being added (eg. "CSS Usage") and a icon needs to displayed.
 				 */
-					'<span style="display: none" class="amp-icon %s %s %s %s"></span>',
-					Icon::LINK,
-					Icon::VALID,
-					Icon::WARNING,
-					Icon::INVALID
+				'html' => Icon::to_html(
+					[
+						'style' => 'display: none',
+						'class' => sprintf( 'amp-icon %s %s %s %s', Icon::LINK, Icon::VALID, Icon::WARNING, Icon::INVALID ),
+					]
 				),
 			],
 		];
