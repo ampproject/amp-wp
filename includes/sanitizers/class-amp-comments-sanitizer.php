@@ -94,6 +94,7 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 		$comment_reply_script = $this->dom->createElement( Tag::SCRIPT );
 		$comment_reply_script->setAttribute( Attribute::TYPE, Attribute::TYPE_TEXT_PLAIN );
 		$comment_reply_script->setAttribute( Attribute::TARGET, Extension::SCRIPT );
+		$comment_reply_script->appendChild( $this->dom->createTextNode( $comment_reply_js ) );
 
 		$comment_reply_script_id = AMP_DOM_Utils::get_element_id( $comment_reply_script, 'amp-hello-world-script' );
 
