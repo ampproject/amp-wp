@@ -1085,10 +1085,10 @@ class AMP_Theme_Support {
 		add_action( 'template_redirect', [ __CLASS__, 'start_output_buffering' ], $priority );
 
 		// Commenting hooks.
-		add_filter( 'comment_form_defaults', [ __CLASS__, 'filter_comment_form_defaults' ], PHP_INT_MAX );
+		/*add_filter( 'comment_form_defaults', [ __CLASS__, 'filter_comment_form_defaults' ], PHP_INT_MAX );
 		add_filter( 'comment_reply_link', [ __CLASS__, 'filter_comment_reply_link' ], 10, 4 );
 		add_filter( 'cancel_comment_reply_link', [ __CLASS__, 'filter_cancel_comment_reply_link' ], 10, 3 );
-		add_action( 'comment_form', [ __CLASS__, 'amend_comment_form' ], 100 );
+		add_action( 'comment_form', [ __CLASS__, 'amend_comment_form' ], 100 );*/
 		remove_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' );
 		add_filter( 'wp_kses_allowed_html', [ __CLASS__, 'whitelist_layout_in_wp_kses_allowed_html' ], 10 );
 		add_filter( 'get_header_image_tag', [ __CLASS__, 'amend_header_image_with_video_header' ], PHP_INT_MAX );

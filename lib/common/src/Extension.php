@@ -18,6 +18,7 @@ interface Extension
     const GEO                 = 'amp-geo';
     const MUSTACHE            = 'amp-mustache';
     const PIXEL               = 'amp-pixel';
+    const SCRIPT              = 'amp-script';
     const SOCIAL_SHARE        = 'amp-social-share';
     const STORY               = 'amp-story';
     const VIDEO               = 'amp-video';

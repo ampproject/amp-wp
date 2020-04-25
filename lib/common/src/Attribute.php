@@ -50,6 +50,7 @@ interface Attribute
     const PROFILE               = 'profile';
     const REL                   = 'rel';
     const ROLE                  = 'role';
+    const SANDBOX               = 'sandbox';
     const SIZES                 = 'sizes';
     const SRC                   = 'src';
     const TABINDEX              = 'tabindex';

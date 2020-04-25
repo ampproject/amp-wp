@@ -5,7 +5,10 @@
  * @package AMP
  */
 
+use AmpProject\Attribute;
 use AmpProject\Dom\Document;
+use AmpProject\Extension;
+use AmpProject\Layout;
 
 /**
  * Class AMP_Comments_Sanitizer
@@ -13,6 +16,19 @@ use AmpProject\Dom\Document;
  * Strips and corrects attributes in forms.
  */
 class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
+
+	/**
+	 * XPath query to retrieve the entire comments section that needs to be
+	 * wrapped within an <amp-script>.
+	 *
+	 * This section needs to include at the very least the comment forms as well
+	 * as all reply buttons.
+	 *
+	 * @since 1.6
+	 *
+	 * @var string
+	 */
+	const COMMENTS_SECTION_XPATH = 'comments_section_xpath';
 
 	/**
 	 * Default args.
@@ -23,6 +39,7 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	protected $DEFAULT_ARGS = [
 		'comment_live_list' => false,
+		self::COMMENTS_SECTION_XPATH => './/*[ @id = "comments" ]',
 	];
 
 	/**
@@ -31,6 +48,7 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.7
 	 */
 	public function sanitize() {
+		$this->wrap_comments_section_in_amp_script();
 		foreach ( $this->dom->getElementsByTagName( 'form' ) as $comment_form ) {
 			/**
 			 * Comment form.
@@ -54,6 +72,38 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 				$this->add_amp_live_list_comment_attributes( $comment );
 			}
 		}
+	}
+
+	/**
+	 * Wrap the comments section wrapper element in an <amp-script> linking to
+	 * the comment-reply.js source.
+	 *
+	 * The difficulty here lies in knowing at what parent level to wrap so that
+	 * we catch both the main comment form as well as all reply buttons that we
+	 * need to interact with.
+	 */
+	protected function wrap_comments_section_in_amp_script()
+	{
+		$comment_reply_src = site_url(
+			wp_scripts()->query( 'comment-reply' )->src
+		);
+
+		$amp_script = $this->dom->createElement( Extension::SCRIPT );
+		$amp_script->setAttribute( Attribute::LAYOUT, Layout::CONTAINER );
+		$amp_script->setAttribute( Attribute::SRC, $comment_reply_src );
+		$amp_script->setAttribute( Attribute::SANDBOX, 'allow-forms' );
+
+		// @TODO: Should we iterate over all matches instead of just picking the first?
+		$wrap_target = $this->dom->xpath
+			->query( $this->args[ self::COMMENTS_SECTION_XPATH ] )
+			->item( 0 );
+
+		if ( ! $wrap_target instanceof DOMElement ) {
+			return;
+		}
+
+		$wrap_target = $wrap_target->parentNode->replaceChild( $amp_script, $wrap_target );
+		$amp_script->appendChild( $wrap_target );
 	}
 
 	/**
