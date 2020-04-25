@@ -765,20 +765,20 @@ class AMP_Validated_URL_Post_Type {
 					if ( 'with_filter' === $sanitization['forced'] ) {
 						$term_data['term_group'] = $sanitization['status'];
 						wp_update_term(
-								$term_id,
-								AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
-								[
-										'term_group' => $sanitization['status'],
-								]
+							$term_id,
+							AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
+							[
+								'term_group' => $sanitization['status'],
+							]
 						);
 					} elseif ( AMP_Validation_Manager::is_sanitization_auto_accepted( $data ) ) {
 						$term_data['term_group'] = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS;
 						wp_update_term(
-								$term_id,
-								AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
-								[
-										'term_group' => $term_data['term_group'],
-								]
+							$term_id,
+							AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
+							[
+								'term_group' => $term_data['term_group'],
+							]
 						);
 					}
 
@@ -1748,7 +1748,7 @@ class AMP_Validated_URL_Post_Type {
 
 			$term_group = $status_acknowledged
 				? $term_group | AMP_Validation_Error_Taxonomy::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK
-				: $term_group &~ AMP_Validation_Error_Taxonomy::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK;
+				: $term_group & ~ AMP_Validation_Error_Taxonomy::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK;
 
 			if ( $term_group !== $term->term_group ) {
 				$updated_count++;
