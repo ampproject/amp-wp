@@ -32,9 +32,17 @@ body .amp-icon {
 	color: #f56e28 !important;
 }
 
-.amp-icon.amp-link::before {
+.ab-icon.amp-icon.amp-link::before {
+	content: "\f103";
+}
+
+.amp-icon.amp-link:not(.ab-icon)::before {
 	content: "\f103";
 
 	/* Medium Blue */
 	color: #00a0d2 !important;
+}
+
+.amp-icon.hidden {
+	display: none;
 }

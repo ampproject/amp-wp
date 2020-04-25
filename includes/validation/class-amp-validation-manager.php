@@ -471,8 +471,7 @@ class AMP_Validation_Manager {
 				 */
 				'html' => Icon::to_html(
 					[
-						'style' => 'display: none',
-						'class' => sprintf( 'amp-icon %s %s %s %s', Icon::LINK, Icon::VALID, Icon::WARNING, Icon::INVALID ),
+						'class' => sprintf( 'hidden amp-icon %s %s %s %s', Icon::LINK, Icon::VALID, Icon::WARNING, Icon::INVALID ),
 					]
 				),
 			],
