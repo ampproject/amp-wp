@@ -12,7 +12,7 @@ namespace AmpProject\AmpWP;
  *
  * @package AmpProject\AmpWP
  */
-class Icon {
+final class Icon {
 
 	/**
 	 * Indicates there are validation errors for the AMP page.
@@ -114,27 +114,25 @@ class Icon {
 	 * @return string Rendered HTML.
 	 */
 	public function to_html( $attributes = [] ) {
-		if ( ! $this->icon ) {
-			// Silently fail.
-			return '';
-		}
-
 		$icon_class = ' amp-icon ' . $this->icon;
 
 		$attributes['class'] = isset( $attributes['class'] )
 			? $attributes['class'] . $icon_class
 			: $icon_class;
 
-		$attributes_string = array_reduce(
-			array_keys( $attributes ),
-			static function ( $attributes_string, $attribute ) use ( $attributes ) {
-				if ( ! $attribute ) {
-					return '';
-				}
-
-				return $attributes_string . sprintf( '%s="%s" ', $attribute, $attributes[ $attribute ] );
-			},
-			''
+		$attributes_string = implode(
+			' ',
+			array_map(
+				static function ( $key, $value ) {
+					return sprintf(
+						'%s="%s"',
+						htmlspecialchars( $key ),
+						htmlspecialchars( $value )
+					);
+				},
+				array_keys( $attributes ),
+				$attributes
+			)
 		);
 
 		return wp_kses_post( sprintf( '<span %s></span>', $attributes_string ) );
