@@ -203,19 +203,19 @@ dl.detailed details > summary {
 }
 
 #amp-enabled-icon.status-text::before {
-	margin-right: 6px;
-	background-size: 16px 16px;
-	height: 16px;
-	width: 16px;
+	margin-right: 2px;
+	background-size: 20px 20px;
+	height: 20px;
+	width: 20px;
 	content: "";
-	min-width: 16px;
+	min-width: 20px;
 }
 
 .status-text > .amp-icon::before {
 	margin-right: 6px;
-	height: 16px;
-	width: 16px;
-	min-width: 16px;
+	height: 20px;
+	width: 20px;
+	min-width: 20px;
 }
 
 .wp-heading-inline .status-text > .amp-icon::before {
