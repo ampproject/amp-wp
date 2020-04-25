@@ -448,7 +448,7 @@ class AMP_Validation_Manager {
 			$href = $amp_url;
 		}
 
-		$icon_html = $icon::to_html(
+		$icon_html = $icon->to_html(
 			[
 				'id'    => 'amp-admin-bar-item-status-icon',
 				'class' => 'ab-icon',
