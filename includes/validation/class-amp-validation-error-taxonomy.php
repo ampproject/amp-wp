@@ -3408,7 +3408,6 @@ class AMP_Validation_Error_Taxonomy {
 			$icon = Icon::invalid();
 			$text = __( 'Kept', 'amp' );
 		}
-//		return sprintf( '<span class="status-text">%s %s</span>', $icon::to_html(), esc_html( $text ) );
-		return sprintf( '<span class="status-text">%s %s</span>', $icon::to_html(), esc_html( $text ) );
+		return sprintf( '<span class="status-text">%s %s</span>', $icon->to_html(), esc_html( $text ) );
 	}
 }

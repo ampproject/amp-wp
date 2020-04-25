@@ -35,11 +35,20 @@ class Icon {
 	const WARNING = 'amp-warning';
 
 	/**
-	 * Current icon.
+	 * Icon class name.
 	 *
 	 * @var string
 	 */
-	private static $icon;
+	private $icon;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param string $icon Icon class name.
+	 */
+	private function __construct( $icon ) {
+		$this->icon = $icon;
+	}
 
 	/**
 	 * Invalid icon.
@@ -47,8 +56,7 @@ class Icon {
 	 * @return Icon
 	 */
 	public static function invalid() {
-		self::$icon = self::INVALID;
-		return new self();
+		return new self( self::INVALID );
 	}
 
 	/**
@@ -57,8 +65,7 @@ class Icon {
 	 * @return Icon
 	 */
 	public static function link() {
-		self::$icon = self::LINK;
-		return new self();
+		return new self( self::LINK );
 	}
 
 	/**
@@ -67,8 +74,7 @@ class Icon {
 	 * @return Icon
 	 */
 	public static function valid() {
-		self::$icon = self::VALID;
-		return new self();
+		return new self( self::VALID );
 	}
 
 	/**
@@ -77,8 +83,7 @@ class Icon {
 	 * @return Icon
 	 */
 	public static function warning() {
-		self::$icon = self::WARNING;
-		return new self();
+		return new self( self::WARNING );
 	}
 
 	/**
@@ -86,9 +91,9 @@ class Icon {
 	 *
 	 * @return string Hex color for icon.
 	 */
-	public static function get_color() {
+	public function get_color() {
 		// When updating the colors here, also do so for 'assets/css/src/amp-icons.css'.
-		switch ( self::$icon ) {
+		switch ( $this->icon ) {
 			case self::INVALID:
 				return '#dc3232';
 			case self::LINK:
@@ -108,14 +113,17 @@ class Icon {
 	 * @param array $attributes List of attributes to add to HTML output.
 	 * @return string Rendered HTML.
 	 */
-	public static function to_html( $attributes = [] ) {
-		if ( self::$icon ) {
-			$icon_class = ' amp-icon ' . self::$icon;
-
-			$attributes['class'] = isset( $attributes['class'] )
-				? $attributes['class'] . $icon_class
-				: $icon_class;
+	public function to_html( $attributes = [] ) {
+		if ( ! $this->icon ) {
+			// Silently fail.
+			return '';
 		}
+
+		$icon_class = ' amp-icon ' . $this->icon;
+
+		$attributes['class'] = isset( $attributes['class'] )
+			? $attributes['class'] . $icon_class
+			: $icon_class;
 
 		$attributes_string = array_reduce(
 			array_keys( $attributes ),
@@ -128,8 +136,6 @@ class Icon {
 			},
 			''
 		);
-
-		self::$icon = null;
 
 		return wp_kses_post( sprintf( '<span %s></span>', $attributes_string ) );
 	}

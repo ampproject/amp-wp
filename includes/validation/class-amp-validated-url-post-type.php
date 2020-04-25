@@ -538,12 +538,12 @@ class AMP_Validated_URL_Post_Type {
 					$counts['new_accepted']
 				);
 			}
-			$icon = ( $counts['new_accepted'] + $counts['new_rejected'] ) > 0 ? Icon::warning() : Icon::valid();
+			$icon     = ( $counts['new_accepted'] + $counts['new_rejected'] ) > 0 ? Icon::warning() : Icon::valid();
 			$result[] = sprintf(
 				'<span class="status-text %s" title="%s">%s %s: %s</span>',
 				esc_attr( $counts['new_accepted'] > 0 ? 'has-new' : '' ),
 				esc_attr( $title ),
-				$icon::to_html(),
+				$icon->to_html(),
 				esc_html__( 'Invalid markup removed', 'amp' ),
 				number_format_i18n( $removed_count )
 			);
@@ -1974,12 +1974,12 @@ class AMP_Validated_URL_Post_Type {
 							</strong>
 							<?php
 							esc_html_e(
-									'Review each instance of invalid markup and determine whether the action of removing
-									(or keeping) is approved. You can change the status and click preview to see what
-									impact the invalid markup has on the page. Invalid markup that is not approved is
-									markup which you may not have seen yet or which you want to fix directly in
-									underlying code.',
-									'amp'
+								'Review each instance of invalid markup and determine whether the action of removing
+								(or keeping) is approved. You can change the status and click preview to see what
+								impact the invalid markup has on the page. Invalid markup that is not approved is
+								markup which you may not have seen yet or which you want to fix directly in
+								underlying code.',
+								'amp'
 							);
 							echo '<br /><br />';
 						}
@@ -2202,7 +2202,7 @@ class AMP_Validated_URL_Post_Type {
 						$icon = Icon::valid();
 					}
 
-					echo $icon::to_html();
+					echo $icon->to_html(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 					?>
 				</td>
 			</tr>

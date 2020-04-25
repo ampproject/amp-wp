@@ -469,9 +469,9 @@ class AMP_Validation_Manager {
 				 * may be added during post-processing, such as overriding the admin bar icon to represent a new validation
 				 * state or when new menu items are being added (eg. "CSS Usage") and a icon needs to displayed.
 				 */
-				'html' => Icon::to_html(
+				'html' => Icon::link()->to_html(
 					[
-						'class' => sprintf( 'hidden amp-icon %s %s %s %s', Icon::LINK, Icon::VALID, Icon::WARNING, Icon::INVALID ),
+						'class' => sprintf( 'hidden amp-icon %s %s %s', Icon::VALID, Icon::WARNING, Icon::INVALID ),
 					]
 				),
 			],
