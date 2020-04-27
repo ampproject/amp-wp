@@ -13,8 +13,8 @@ use AmpProject\Dom\Document;
  * Much of this class is borrowed from Jetpack embeds
  */
 class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
-	const SHORT_URL_HOST = 'instagr.am';
-	const URL_PATTERN    = '#https?:\/\/(www\.)?instagr(\.am|am\.com)\/(p|tv)\/([A-Za-z0-9-_]+)#i';
+
+	const URL_PATTERN = '#https?:\/\/(www\.)?instagr(\.am|am\.com)\/(p|tv)\/([A-Za-z0-9-_]+)#i';
 
 	/**
 	 * Default width.
@@ -40,7 +40,7 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Tag.
 	 *
-	 * @var string AMP amp-facebook tag
+	 * @var string AMP amp-instagram tag
 	 */
 	private $amp_tag = 'amp-instagram';
 
@@ -48,87 +48,14 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Registers embed.
 	 */
 	public function register_embed() {
-		wp_embed_register_handler( $this->amp_tag, self::URL_PATTERN, [ $this, 'oembed' ], -1 );
+		// Not implemented.
 	}
 
 	/**
 	 * Unregisters embed.
 	 */
 	public function unregister_embed() {
-		wp_embed_unregister_handler( $this->amp_tag, -1 );
-	}
-
-	/**
-	 * WordPress OEmbed rendering callback.
-	 *
-	 * @param array  $matches URL pattern matches.
-	 * @param array  $attr    Matched attributes.
-	 * @param string $url     Matched URL.
-	 * @return string HTML markup for rendered embed.
-	 */
-	public function oembed( $matches, $attr, $url ) {
-		return $this->render(
-			[
-				'url'          => $url,
-				'instagram_id' => end( $matches ),
-			]
-		);
-	}
-
-	/**
-	 * Gets the rendered embed markup.
-	 *
-	 * @param array $args Embed rendering arguments.
-	 * @return string HTML markup for rendered embed.
-	 */
-	public function render( $args ) {
-		$args = wp_parse_args(
-			$args,
-			[
-				'url'          => false,
-				'instagram_id' => false,
-			]
-		);
-
-		if ( empty( $args['instagram_id'] ) ) {
-			return AMP_HTML_Utils::build_tag(
-				'a',
-				[
-					'href'  => esc_url_raw( $args['url'] ),
-					'class' => 'amp-wp-embed-fallback',
-				],
-				esc_html( $args['url'] )
-			);
-		}
-
-		$this->did_convert_elements = true;
-
-		return AMP_HTML_Utils::build_tag(
-			$this->amp_tag,
-			[
-				'data-shortcode' => $args['instagram_id'],
-				'data-captioned' => '',
-				'layout'         => 'responsive',
-				'width'          => $this->args['width'],
-				'height'         => $this->args['height'],
-			]
-		);
-	}
-
-	/**
-	 * Get Instagram ID from URL.
-	 *
-	 * @param string $url URL.
-	 * @return string|false The ID parsed from the URL or false if not found.
-	 */
-	private function get_instagram_id_from_url( $url ) {
-		$found = preg_match( self::URL_PATTERN, $url, $matches );
-
-		if ( ! $found ) {
-			return false;
-		}
-
-		return end( $matches );
+		// Not implemented.
 	}
 
 	/**
@@ -188,6 +115,22 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 		$node->parentNode->replaceChild( $new_node, $node );
 
 		$this->did_convert_elements = true;
+	}
+
+	/**
+	 * Get Instagram ID from URL.
+	 *
+	 * @param string $url URL.
+	 * @return string|false The ID parsed from the URL or false if not found.
+	 */
+	private function get_instagram_id_from_url( $url ) {
+		$found = preg_match( self::URL_PATTERN, $url, $matches );
+
+		if ( ! $found ) {
+			return false;
+		}
+
+		return end( $matches );
 	}
 
 	/**
