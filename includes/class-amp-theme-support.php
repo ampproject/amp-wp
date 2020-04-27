@@ -2006,7 +2006,37 @@ class AMP_Theme_Support {
 			$dom->documentElement->setAttribute( Attribute::AMP, '' );
 		}
 
-		$sanitization_results = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
+		try {
+			$sanitization_results = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
+		} catch ( Exception $e ) {
+			status_header( 500 );
+			header( 'Content-Type: text/plain' );
+
+			$response = __( 'Failed to generate AMP version of this page.', 'amp' ) . "\n\n";
+
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				$response .= sprintf( '%s (code: %s) thrown when calling sanitize_document: %s', get_class( $e ), $e->getCode(), $e->getMessage() );
+				$response .= "\n\n";
+				$response .= "Stack trace:\n";
+				foreach ( $e->getTrace() as $i => $item ) {
+					$response .= "#$i";
+					if ( isset( $item['file'] ) ) {
+						$response .= ' ' . $item['file'];
+						if ( isset( $item['line'] ) ) {
+							$response .= "({$item['line']})";
+						}
+					}
+
+					$function = $item['function'];
+					if ( isset( $item['class'] ) ) {
+						$function = $item['class'] . $item['type'] . $function . '()';
+					}
+					$response .= " $function\n";
+				}
+			}
+
+			return $response;
+		}
 
 		// Respond early with results if performing a validate request.
 		if ( AMP_Validation_Manager::$is_validate_request ) {
