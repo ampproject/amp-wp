@@ -1877,7 +1877,41 @@ class AMP_Theme_Support {
 	 */
 	public static function finish_output_buffering( $response ) {
 		self::$is_output_buffering = false;
-		return self::prepare_response( $response );
+		try {
+			return self::prepare_response( $response );
+		} catch ( Exception $e ) {
+			status_header( 500 );
+			header( 'Content-Type: text/plain' );
+
+			$error_response = __( 'Failed to generate AMP version of this page.', 'amp' ) . "\n\n";
+
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				$error_response .= sprintf( '%s (code: %s) thrown when calling sanitize_document: %s', get_class( $e ), $e->getCode(), $e->getMessage() );
+				$error_response .= "\n\n";
+				$error_response .= "Stack trace:\n";
+				foreach ( $e->getTrace() as $i => $item ) {
+					$error_response .= "#$i";
+					if ( isset( $item['file'] ) ) {
+						$error_response .= ' ' . $item['file'];
+						if ( isset( $item['line'] ) ) {
+							$error_response .= "({$item['line']})";
+						}
+					}
+
+					$function = $item['function'];
+					if ( isset( $item['class'] ) ) {
+						$function = $item['class'] . $item['type'] . $function . '()';
+					}
+					$error_response .= " $function\n";
+				}
+
+				$error_response .= "\n";
+				$error_response .= "Original response is as follows:\n";
+				$error_response .= $response;
+			}
+
+			return $error_response;
+		}
 	}
 
 	/**
@@ -2006,37 +2040,7 @@ class AMP_Theme_Support {
 			$dom->documentElement->setAttribute( Attribute::AMP, '' );
 		}
 
-		try {
-			$sanitization_results = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
-		} catch ( Exception $e ) {
-			status_header( 500 );
-			header( 'Content-Type: text/plain' );
-
-			$response = __( 'Failed to generate AMP version of this page.', 'amp' ) . "\n\n";
-
-			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-				$response .= sprintf( '%s (code: %s) thrown when calling sanitize_document: %s', get_class( $e ), $e->getCode(), $e->getMessage() );
-				$response .= "\n\n";
-				$response .= "Stack trace:\n";
-				foreach ( $e->getTrace() as $i => $item ) {
-					$response .= "#$i";
-					if ( isset( $item['file'] ) ) {
-						$response .= ' ' . $item['file'];
-						if ( isset( $item['line'] ) ) {
-							$response .= "({$item['line']})";
-						}
-					}
-
-					$function = $item['function'];
-					if ( isset( $item['class'] ) ) {
-						$function = $item['class'] . $item['type'] . $function . '()';
-					}
-					$response .= " $function\n";
-				}
-			}
-
-			return $response;
-		}
+		$sanitization_results = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
 
 		// Respond early with results if performing a validate request.
 		if ( AMP_Validation_Manager::$is_validate_request ) {
