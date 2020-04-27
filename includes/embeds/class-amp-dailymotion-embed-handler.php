@@ -96,7 +96,7 @@ class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 		if ( preg_match( '#video/(?P<video_id>[a-zA-Z0-9]+)#', $iframe_src, $matches ) ) {
 			$video_id = $matches['video_id'];
 
-			$amp_iframe_node = AMP_DOM_Utils::create_node(
+			$amp_node = AMP_DOM_Utils::create_node(
 				Document::fromNode( $iframe_node ),
 				'amp-dailymotion',
 				[
@@ -109,29 +109,9 @@ class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 
 			$this->maybe_unwrap_p_element( $iframe_node );
 
-			$iframe_node->parentNode->replaceChild( $amp_iframe_node, $iframe_node );
+			$iframe_node->parentNode->replaceChild( $amp_node, $iframe_node );
 		}
 
 		// Nothing to be done if the video ID could not be found.
-	}
-
-	/**
-	 * Replace the node's parent with itself if the parent is a <p> tag, has no attributes and has no other children.
-	 * This usually happens while `wpautop()` processes the element.
-	 *
-	 * @param DOMElement $node Node.
-	 */
-	private function maybe_unwrap_p_element( DOMElement $node ) {
-		$parent_node = $node->parentNode;
-		while ( $parent_node && ! ( $parent_node instanceof DOMElement ) ) {
-			$parent_node = $parent_node->parentNode;
-		}
-
-		if ( 'p' === $parent_node->nodeName && false === $parent_node->hasAttributes() ) {
-			$children = $parent_node->getElementsByTagName( '*' );
-			if ( 1 === $children->length ) {
-				$parent_node->parentNode->replaceChild( $node, $parent_node );
-			}
-		}
 	}
 }

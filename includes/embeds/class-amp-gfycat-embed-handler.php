@@ -6,6 +6,8 @@
  * @since 1.0
  */
 
+use AmpProject\Dom\Document;
+
 /**
  * Class AMP_Gfycat_Embed_Handler
  */
@@ -21,61 +23,80 @@ class AMP_Gfycat_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Register embed.
 	 */
 	public function register_embed() {
-		add_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ], 10, 3 );
+		// Not implemented.
 	}
 
 	/**
 	 * Unregister embed.
 	 */
 	public function unregister_embed() {
-		remove_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ], 10 );
+		// Not implemented.
 	}
 
 	/**
-	 * Filter oEmbed HTML for Gfycat to prepare it for AMP.
+	 * Sanitize all gfycat <iframe> tags to <amp-gfycat>.
 	 *
-	 * @param mixed  $return The oEmbed HTML.
-	 * @param string $url    The attempted embed URL.
-	 * @param array  $attr   Attributes.
-	 * @return string Embed.
+	 * @param Document $dom DOM.
 	 */
-	public function filter_embed_oembed_html( $return, $url, $attr ) {
-		$parsed_url = wp_parse_url( $url );
-		if ( false !== strpos( $parsed_url['host'], 'gfycat.com' ) ) {
-			if ( preg_match( '/width=["\']?(\d+)/', $return, $matches ) ) {
-				$attr['width'] = $matches[1];
-			}
-			if ( preg_match( '/height=["\']?(\d+)/', $return, $matches ) ) {
-				$attr['height'] = $matches[1];
-			}
+	public function sanitize_raw_embeds( Document $dom ) {
+		$nodes = $dom->xpath->query( '//iframe[ starts-with( @src, "https://gfycat.com/ifr/" ) ]' );
 
-			if ( empty( $attr['height'] ) ) {
-				return $return;
+		foreach ( $nodes as $node ) {
+			if ( ! $this->is_raw_embed( $node ) ) {
+				continue;
 			}
-
-			$attributes = wp_array_slice_assoc( $attr, [ 'width', 'height' ] );
-
-			if ( empty( $attr['width'] ) ) {
-				$attributes['layout'] = 'fixed-height';
-				$attributes['width']  = 'auto';
-			}
-
-			$pieces = explode( '/detail/', $parsed_url['path'] );
-			if ( ! isset( $pieces[1] ) ) {
-				if ( ! preg_match( '/\/([A-Za-z0-9]+)/', $parsed_url['path'], $matches ) ) {
-					return $return;
-				}
-				$attributes['data-gfyid'] = $matches[1];
-			} else {
-				$attributes['data-gfyid'] = $pieces[1];
-			}
-
-			$return = AMP_HTML_Utils::build_tag(
-				'amp-gfycat',
-				$attributes
-			);
+			$this->sanitize_raw_embed( $node );
 		}
-		return $return;
+	}
+
+	/**
+	 * Determine if the node has already been sanitized.
+	 *
+	 * @param DOMElement $node The DOMNode.
+	 * @return bool Whether the node is a raw embed.
+	 */
+	protected function is_raw_embed( DOMElement $node ) {
+		return $node->parentNode && 'amp-gfycat' !== $node->parentNode->nodeName;
+	}
+
+	/**
+	 * Make DailyMotion embed AMP compatible.
+	 *
+	 * @param DOMElement $iframe_node The node to make AMP compatible.
+	 */
+	private function sanitize_raw_embed( DOMElement $iframe_node ) {
+		$iframe_src = $iframe_node->getAttribute( 'src' );
+
+		if ( ! preg_match( '#/ifr/([A-Za-z0-9]+)#', $iframe_src, $matches ) ) {
+			// Nothing to do if video ID could not be found.
+			return;
+		}
+
+		$new_attributes = [
+			'data-gfyid' => $matches[1],
+			'layout'     => 'responsive',
+			'height'     => $iframe_node->getAttribute( 'height' ),
+			'width'      => $iframe_node->getAttribute( 'width' ),
+		];
+
+		if ( empty( $new_attributes['height'] ) ) {
+			return;
+		}
+
+		if ( empty( $new_attributes['width'] ) ) {
+			$new_attributes['layout'] = 'fixed-height';
+			$new_attributes['width']  = 'auto';
+		}
+
+		$amp_node = AMP_DOM_Utils::create_node(
+			Document::fromNode( $iframe_node ),
+			'amp-gfycat',
+			$new_attributes
+		);
+
+		$this->maybe_unwrap_p_element( $iframe_node );
+
+		$iframe_node->parentNode->replaceChild( $amp_node, $iframe_node );
 	}
 }
 

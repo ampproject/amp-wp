@@ -107,4 +107,24 @@ abstract class AMP_Base_Embed_Handler {
 		}
 		return wp_array_slice_assoc( $matches, $attribute_names );
 	}
+
+	/**
+	 * Replace the node's parent with itself if the parent is a <p> tag, has no attributes and has no other children.
+	 * This usually happens while `wpautop()` processes the element.
+	 *
+	 * @param DOMElement $node Node.
+	 */
+	protected function maybe_unwrap_p_element( DOMElement $node ) {
+		$parent_node = $node->parentNode;
+		while ( $parent_node && ! ( $parent_node instanceof DOMElement ) ) {
+			$parent_node = $parent_node->parentNode;
+		}
+
+		if ( 'p' === $parent_node->nodeName && false === $parent_node->hasAttributes() ) {
+			$children = $parent_node->getElementsByTagName( '*' );
+			if ( 1 === $children->length ) {
+				$parent_node->parentNode->replaceChild( $node, $parent_node );
+			}
+		}
+	}
 }
