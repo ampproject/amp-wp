@@ -1849,7 +1849,10 @@ class AMP_Theme_Support {
 			newrelic_disable_autorum();
 		}
 
-		ob_start( [ __CLASS__, 'finish_output_buffering' ] );
+		if ( ! ob_start( [ __CLASS__, 'finish_output_buffering' ] ) ) {
+			wp_die( esc_html__( 'AMP plugin unable to start output buffering.', 'amp' ) );
+		}
+
 		self::$is_output_buffering = true;
 	}
 
