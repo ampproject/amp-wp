@@ -1351,8 +1351,8 @@ class AMP_Validation_Error_Taxonomy {
 				$new_term_text = sprintf(
 					/* translators: %s: the new term count. */
 					_nx(
-						'With disapproved error <span class="count">(%s)</span>',
-						'With disapproved errors <span class="count">(%s)</span>', // @todo Should this really have variations for singular/plural? Should count be part of translated string?
+						'With unreviewed error <span class="count">(%s)</span>',
+						'With unreviewed errors <span class="count">(%s)</span>', // @todo Should this really have variations for singular/plural? Should count be part of translated string?
 						$new_term_count,
 						'terms',
 						'amp'
@@ -1363,8 +1363,8 @@ class AMP_Validation_Error_Taxonomy {
 				$new_term_text = sprintf(
 					/* translators: %s: the new term count. */
 					_nx(
-						'Disapproved error <span class="count">(%s)</span>',
-						'Disapproved errors <span class="count">(%s)</span>', // @todo Should this really have variations for singular/plural? Should count be part of translated string?
+						'Unreviewed error <span class="count">(%s)</span>',
+						'Unreviewed errors <span class="count">(%s)</span>', // @todo Should this really have variations for singular/plural? Should count be part of translated string?
 						$new_term_count,
 						'terms',
 						'amp'
@@ -2054,7 +2054,7 @@ class AMP_Validation_Error_Taxonomy {
 					$content .= esc_html__( 'Misc', 'amp' );
 				}
 				break;
-			case 'approved':
+			case 'reviewed':
 				if ( 'post.php' === $pagenow ) {
 					$checked    = ( (int) $term->term_group & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK ) ? 'checked="checked"' : '';
 					$input_name = sprintf(

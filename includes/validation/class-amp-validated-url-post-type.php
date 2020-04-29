@@ -997,14 +997,14 @@ class AMP_Validated_URL_Post_Type {
 					)
 				)
 			),
-			'approved'                    => sprintf(
+			'reviewed'                    => sprintf(
 				'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="%s"></div>',
-				esc_html__( 'Approved', 'amp' ),
+				esc_html__( 'Reviewed', 'amp' ),
 				esc_attr(
 					sprintf(
 						'<h3>%s</h3><p>%s</p>',
-						esc_html__( 'Approved', 'amp' ),
-						esc_html__( 'Allows confirmation of action taken to resolve the validation error.', 'amp' )
+						esc_html__( 'Reviewed', 'amp' ),
+						esc_html__( 'Confirm that the status of the validation error has been seen and approved of.', 'amp' )
 					)
 				)
 			),
@@ -1970,7 +1970,7 @@ class AMP_Validated_URL_Post_Type {
 							?>
 							<strong id="amp-invalid-markup" class="status-text">
 								<span class="amp-icon amp-warning"></span>
-								<?php esc_html_e( 'Invalid markup not approved', 'amp' ); ?>
+								<?php esc_html_e( 'Invalid markup not reviewed', 'amp' ); ?>
 							</strong>
 							<?php
 							esc_html_e(

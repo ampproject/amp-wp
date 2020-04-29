@@ -101,7 +101,7 @@ final class Icon {
 			case self::VALID:
 				return '#46b450';
 			case self::WARNING:
-				return '#f56e28';
+				return '#ffc733';
 			default:
 				return '';
 		}
