@@ -85,11 +85,16 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	protected function wrap_comments_section_in_amp_script()
 	{
-		$comment_reply_src = site_url(
-			wp_scripts()->query( 'comment-reply' )->src
+		$comment_reply_js_src = amp_get_asset_url( 'js/comment-reply.js' );
+
+		$comment_reply_js = sprintf(
+			"console.log( 'Start of amp-script logic' );\n%s\ninit( document.body );\nconsole.log( 'End of amp-script logic' );\n/* Adapted version of %s*/\n",
+			file_get_contents( $comment_reply_js_src ),
+			$comment_reply_js_src
 		);
 
-		$comment_reply_js = 'console.log( "Hello World from <amp-script>!" );';
+		// Strip comments to get below 10k bytes.
+		$comment_reply_js = preg_replace( '!/\*.*?\*/!s', '', $comment_reply_js );
 
 		$comment_reply_script = $this->dom->createElement( Tag::SCRIPT );
 		$comment_reply_script->setAttribute( Attribute::TYPE, Attribute::TYPE_TEXT_PLAIN );

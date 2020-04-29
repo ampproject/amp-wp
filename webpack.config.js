@@ -7,6 +7,7 @@ const OptimizeCSSAssetsPlugin = require( 'optimize-css-assets-webpack-plugin' );
 const RtlCssPlugin = require( 'rtlcss-webpack-plugin' );
 const TerserPlugin = require( 'terser-webpack-plugin' );
 const WebpackBar = require( 'webpackbar' );
+const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 
 /**
  * WordPress dependencies
@@ -211,6 +212,20 @@ const wpPolyfills = {
 	},
 };
 
+const themeCompat = {
+	plugins: [
+		new WebpackBar( {
+			name: 'Theme Compatibility',
+			color: '#8e63d2',
+		} ),
+		new CopyWebpackPlugin( [ {
+			context: './assets/',
+			from: './src/theme-compat/comment-reply.js',
+			to: './js/'
+		} ] ),
+	],
+};
+
 module.exports = [
 	ampValidation,
 	blockEditor,
@@ -218,4 +233,5 @@ module.exports = [
 	admin,
 	customizer,
 	wpPolyfills,
+	themeCompat,
 ];
