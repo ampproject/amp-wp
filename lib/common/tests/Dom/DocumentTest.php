@@ -340,6 +340,16 @@ class DocumentTest extends TestCase
                 </html>
                 ',
             ],
+            'mustache_url_encoded_attributes_in_template_tags' => [
+              'utf-8',
+                '<!DOCTYPE html><html>' . $head . '<body><template type="amp-mustache"><div><form action="{{action}}"><a href="{{url}}"><img src="{{src}}"></a></form></div></template></body></html>',
+                '<!DOCTYPE html><html>' . $head . '<body><template type="amp-mustache"><div><form action="{{action}}"><a href="{{url}}"><img src="{{src}}"></a></form></div></template></body></html>',
+            ],
+            'mustache_url_encoded_attributes_in_script_tags' => [
+              'utf-8',
+                '<!DOCTYPE html><html>' . $head . '<body><script type="text/plain" template="amp-mustache"><div><form action="{{action}}"><a href="{{url}}"><img src="{{src}}"></a></form></div></script></body></html>',
+                '<!DOCTYPE html><html>' . $head . '<body><script type="text/plain" template="amp-mustache"><div><form action="{{action}}"><a href="{{url}}"><img src="{{src}}"></a></form></div></script></body></html>',
+            ],
         ];
     }
 

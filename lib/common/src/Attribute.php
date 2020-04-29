@@ -34,6 +34,8 @@ interface Attribute
     const CONTENT               = 'content';
     const CUSTOM_ELEMENT        = 'custom-element';
     const CUSTOM_TEMPLATE       = 'custom-template';
+    const DECODING              = 'decoding';
+    const DISABLE_INLINE_WIDTH  = 'disable-inline-width';
     const HEIGHT                = 'height';
     const HEIGHTS               = 'heights';
     const HIDDEN                = 'hidden';
@@ -42,15 +44,25 @@ interface Attribute
     const HTTP_EQUIV            = 'http-equiv';
     const I_AMPHTML_VERSION     = 'i-amphtml-version';
     const ID                    = 'id';
+    const IMPORTANCE            = 'importance';
+    const INTRINSICSIZE         = 'intrinsicsize';
     const LAYOUT                = 'layout';
+    const LIGHTBOX              = 'lightbox';
+    const LOADING               = 'loading';
     const LOOP                  = 'loop';
     const MEDIA                 = 'media';
     const NAME                  = 'name';
+    const NOLOADING             = 'noloading';
+    const OBJECT_FIT            = 'object-fit';
+    const ON                    = 'on';
     const PROFILE               = 'profile';
     const REL                   = 'rel';
     const ROLE                  = 'role';
     const SIZES                 = 'sizes';
+    const STYLE                 = 'style';
     const SRC                   = 'src';
+    const TABINDEX              = 'tabindex';
+    const TEMPLATE              = 'template';
     const TYPE                  = 'type';
     const VIEWPORT              = 'viewport';
     const WIDTH                 = 'width';
@@ -59,9 +71,12 @@ interface Attribute
     const ALL_AMP4ADS   = [self::AMP4ADS, self::AMP4ADS_EMOJI, self::AMP4ADS_EMOJI_ALT];
     const ALL_AMP4EMAIL = [self::AMP4EMAIL, self::AMP4EMAIL_EMOJI, self::AMP4EMAIL_EMOJI_ALT];
 
-    const TYPE_HTML    = 'text/html';
-    const TYPE_JSON    = 'application/json';
-    const TYPE_LD_JSON = 'application/ld+json';
+    const ALL_BOILERPLATES = [self::AMP_BOILERPLATE, self::AMP4ADS_BOILERPLATE, self::AMP4EMAIL_BOILERPLATE];
+
+    const TYPE_HTML       = 'text/html';
+    const TYPE_JSON       = 'application/json';
+    const TYPE_LD_JSON    = 'application/ld+json';
+    const TYPE_TEXT_PLAIN = 'text/plain';
 
     const REL_CANONICAL    = 'canonical';
     const REL_DNS_PREFETCH = 'dns-prefetch';

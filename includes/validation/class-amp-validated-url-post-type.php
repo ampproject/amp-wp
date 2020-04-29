@@ -185,7 +185,7 @@ class AMP_Validated_URL_Post_Type {
 
 		// Edit post screen hooks.
 		add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_edit_post_screen_scripts' ] );
-		add_action( 'add_meta_boxes', [ __CLASS__, 'add_meta_boxes' ] );
+		add_action( 'add_meta_boxes', [ __CLASS__, 'add_meta_boxes' ], PHP_INT_MAX );
 		add_action( 'edit_form_after_title', [ __CLASS__, 'render_single_url_list_table' ] );
 		add_filter( 'edit_' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_per_page', [ __CLASS__, 'get_terms_per_page' ] );
 		add_action( 'admin_init', [ __CLASS__, 'add_taxonomy' ] );
@@ -226,7 +226,7 @@ class AMP_Validated_URL_Post_Type {
 		add_action( 'admin_action_' . self::VALIDATE_ACTION, [ __CLASS__, 'handle_validate_request' ] );
 		add_action( 'post_action_' . self::UPDATE_POST_TERM_STATUS_ACTION, [ __CLASS__, 'handle_validation_error_status_update' ] );
 		add_action( 'admin_menu', [ __CLASS__, 'add_admin_menu_new_invalid_url_count' ] );
-		add_filter( 'post_row_actions', [ __CLASS__, 'filter_post_row_actions' ], 10, 2 );
+		add_filter( 'post_row_actions', [ __CLASS__, 'filter_post_row_actions' ], PHP_INT_MAX, 2 );
 		add_filter( sprintf( 'views_edit-%s', self::POST_TYPE_SLUG ), [ __CLASS__, 'filter_table_views' ] );
 		add_filter( 'bulk_post_updated_messages', [ __CLASS__, 'filter_bulk_post_updated_messages' ], 10, 2 );
 		add_filter( 'admin_title', [ __CLASS__, 'filter_admin_title' ] );
@@ -848,6 +848,14 @@ class AMP_Validated_URL_Post_Type {
 			// Note that json_encode() is being used here because wp_slash() will coerce scalar values to strings.
 			update_post_meta( $post_id, '_amp_stylesheets', wp_slash( wp_json_encode( $args['stylesheets'] ) ) );
 		}
+		if ( isset( $args['php_fatal_error'] ) ) {
+			if ( empty( $args['php_fatal_error'] ) ) {
+				delete_post_meta( $post_id, '_amp_php_fatal_error' );
+			} else {
+				// Note that json_encode() is being used here because wp_slash() will coerce scalar values to strings.
+				update_post_meta( $post_id, '_amp_php_fatal_error', wp_slash( wp_json_encode( $args['php_fatal_error'] ) ) );
+			}
+		}
 
 		delete_transient( static::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT );
 
@@ -1291,7 +1299,7 @@ class AMP_Validated_URL_Post_Type {
 			self::store_validation_errors(
 				$validation_errors,
 				$validity['url'],
-				wp_array_slice_assoc( $validity, [ 'queried_object', 'stylesheets' ] )
+				wp_array_slice_assoc( $validity, [ 'queried_object', 'stylesheets', 'php_fatal_error' ] )
 			);
 			$unaccepted_error_count = count(
 				array_filter(
@@ -1401,6 +1409,12 @@ class AMP_Validated_URL_Post_Type {
 			);
 		}
 
+		// Add notice for PHP fatal error during validation request.
+		$post = get_post();
+		if ( $post instanceof WP_Post && 'post' === get_current_screen()->base && self::POST_TYPE_SLUG === get_current_screen()->post_type ) {
+			self::render_php_fatal_error_admin_notice( $post );
+		}
+
 		/**
 		 * Adds notices to the single error page.
 		 * 1. Notice with detailed error information in an expanding box.
@@ -1503,6 +1517,34 @@ class AMP_Validated_URL_Post_Type {
 	}
 
 	/**
+	 * Render PHP fatal error admin notice.
+	 *
+	 * @param WP_Post $post Post.
+	 */
+	private static function render_php_fatal_error_admin_notice( WP_Post $post ) {
+		$error = get_post_meta( $post->ID, '_amp_php_fatal_error', true );
+		if ( empty( $error ) ) {
+			return;
+		}
+		$error_data = json_decode( $error, true );
+		if ( ! is_array( $error_data ) || ! isset( $error_data['message'], $error_data['file'], $error_data['line'] ) ) {
+			return;
+		}
+		?>
+		<div class="notice notice-error">
+			<p><?php echo AMP_Validation_Manager::get_validate_url_error_message( 'fatal_error_during_validation' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></p>
+			<blockquote>
+				<pre><?php echo esc_html( $error_data['message'] ); ?></pre>
+			</blockquote>
+			<p>
+				<?php esc_html_e( 'Location:', 'amp' ); ?>
+				<code><?php echo esc_html( sprintf( '%s:%d', $error_data['file'], $error_data['line'] ) ); ?></code>
+			</p>
+		</div>
+		<?php
+	}
+
+	/**
 	 * Handles clicking 'recheck' on the inline post actions and in the admin bar on the frontend.
 	 *
 	 * @throws Exception But it is caught. This is here for a PHPCS bug.
@@ -1559,7 +1601,7 @@ class AMP_Validated_URL_Post_Type {
 					[
 						'invalid_url_post' => $post,
 					],
-					wp_array_slice_assoc( $validity, [ 'queried_object', 'stylesheets' ] )
+					wp_array_slice_assoc( $validity, [ 'queried_object', 'stylesheets', 'php_fatal_error' ] )
 				)
 			);
 			if ( is_wp_error( $stored ) ) {
@@ -1633,7 +1675,7 @@ class AMP_Validated_URL_Post_Type {
 				[
 					'invalid_url_post' => $post,
 				],
-				wp_array_slice_assoc( $validity, [ 'queried_object', 'stylesheets' ] )
+				wp_array_slice_assoc( $validity, [ 'queried_object', 'stylesheets', 'php_fatal_error' ] )
 			)
 		);
 		foreach ( $validation_errors  as $error ) {
@@ -1781,9 +1823,13 @@ class AMP_Validated_URL_Post_Type {
 	/**
 	 * Adds the meta boxes to the CPT post.php page.
 	 *
+	 * @global array $wp_meta_boxes
 	 * @return void
 	 */
 	public static function add_meta_boxes() {
+		global $wp_meta_boxes;
+		$stylesheets_metabox_id = 'amp_stylesheets';
+
 		remove_meta_box( 'submitdiv', self::POST_TYPE_SLUG, 'side' );
 		remove_meta_box( 'slugdiv', self::POST_TYPE_SLUG, 'normal' );
 		add_meta_box(
@@ -1796,7 +1842,7 @@ class AMP_Validated_URL_Post_Type {
 			[ '__back_compat_meta_box' => true ]
 		);
 		add_meta_box(
-			'amp_stylesheets',
+			$stylesheets_metabox_id,
 			__( 'Stylesheets', 'amp' ),
 			[ __CLASS__, 'print_stylesheets_meta_box' ],
 			self::POST_TYPE_SLUG,
@@ -1804,6 +1850,19 @@ class AMP_Validated_URL_Post_Type {
 			'default',
 			[ '__back_compat_meta_box' => true ]
 		);
+
+		// Ensure only the expected metaboxes are shown on this screen.
+		// Note the O(n^3) complexity here is not a concern because each nested array has only a few items.
+		$allowed_metaboxes = [ 'slugdiv', 'submitdiv', self::STATUS_META_BOX, $stylesheets_metabox_id ];
+		foreach ( $wp_meta_boxes[ self::POST_TYPE_SLUG ] as $context => $metabox_contexts ) {
+			foreach ( $metabox_contexts as $metabox_priorities ) {
+				foreach ( array_keys( $metabox_priorities ) as $id ) {
+					if ( ! in_array( $id, $allowed_metaboxes, true ) ) {
+						remove_meta_box( $id, self::POST_TYPE_SLUG, $context );
+					}
+				}
+			}
+		}
 	}
 
 	/**
@@ -1928,7 +1987,7 @@ class AMP_Validated_URL_Post_Type {
 							printf(
 								' | <a href="%s">%s</a>',
 								esc_url( AMP_Theme_Support::get_paired_browsing_url( self::get_url_from_post( $post ) ) ),
-								esc_html__( 'Paired browsing', 'amp' )
+								esc_html__( 'Paired Browsing', 'amp' )
 							);
 						}
 						?>
@@ -2813,6 +2872,11 @@ class AMP_Validated_URL_Post_Type {
 				esc_html__( 'Forget', 'amp' )
 			);
 		}
+
+		$actions = wp_array_slice_assoc(
+			$actions,
+			[ 'edit', self::VALIDATE_ACTION, 'view', 'delete' ]
+		);
 
 		return $actions;
 	}

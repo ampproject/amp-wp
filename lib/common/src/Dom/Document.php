@@ -120,6 +120,13 @@ final class Document extends DOMDocument
     const XPATH_URL_ENCODED_ATTRIBUTES_QUERY = './/*/@src|.//*/@href|.//*/@action';
 
     /**
+     * Xpath query to fetch the elements containing Mustache templates (both <template type=amp-mustache> and <script type=text/plain template=amp-mustache>).
+     *
+     * @var string
+     */
+    const XPATH_MUSTACHE_TEMPLATE_ELEMENTS_QUERY = './/self::template[ @type = "amp-mustache" ]|//self::script[ @type = "text/plain" and @template = "amp-mustache" ]';
+
+    /**
      * Error message to use when the __get() is triggered for an unknown property.
      *
      * @var string
@@ -1194,9 +1201,8 @@ final class Document extends DOMDocument
      */
     private function replaceMustacheTemplateTokens()
     {
-        $templates = $this->getElementsByTagName(Tag::TEMPLATE);
-
-        if (! $templates || 0 === count($templates)) {
+        $templates = $this->xpath->query(self::XPATH_MUSTACHE_TEMPLATE_ELEMENTS_QUERY, $this->body);
+        if (0 === $templates->length) {
             return;
         }
 
@@ -1261,7 +1267,6 @@ final class Document extends DOMDocument
                 '}}}',
                 '{{#',
                 '{{^',
-                '{{/',
                 '{{/',
                 '{{',
                 '}}',
