@@ -42,7 +42,7 @@ class AMP_Embed_Sanitizer extends AMP_Base_Sanitizer {
 
 		foreach ( $this->embed_handlers as $embed_handler ) {
 			if ( method_exists( $embed_handler, 'sanitize_raw_embeds' ) ) {
-				$embed_handler->sanitize_raw_embeds( $this->dom );
+				$embed_handler->sanitize_raw_embeds( $this->dom, $this->args );
 			}
 		}
 	}

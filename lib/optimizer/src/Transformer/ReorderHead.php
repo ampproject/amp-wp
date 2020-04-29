@@ -17,7 +17,7 @@ use DOMNode;
  * ReorderHead reorders the children of <head>. Specifically, it
  * orders the <head> like so:
  * (0) <meta charset> tag
- * (1) <style amp-runtime> (inserted by ampruntimecss.go)
+ * (1) <style amp-runtime> (inserted by AmpRuntimeCss transformer)
  * (2) remaining <meta> tags (those other than <meta charset>)
  * (3) AMP runtime .js <script> tag
  * (4) AMP viewer runtime .js <script>

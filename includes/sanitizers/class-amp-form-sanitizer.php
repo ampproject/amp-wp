@@ -7,6 +7,7 @@
  */
 
 use AmpProject\DevMode;
+use AmpProject\Dom\Document;
 
 /**
  * Class AMP_Form_Sanitizer
@@ -201,17 +202,14 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 			'submitting'     => null,
 		];
 
-		$templates = $form->getElementsByTagName( 'template' );
-		for ( $i = $templates->length - 1; $i >= 0; $i-- ) {
-			/**
-			 * Parent node.
-			 *
-			 * @var DOMElement $parent
-			 */
-			$parent = $templates->item( $i )->parentNode;
-			foreach ( array_keys( $elements ) as $attribute ) {
-				if ( $parent->hasAttribute( $attribute ) ) {
-					$elements[ $attribute ] = $parent;
+		$templates = $this->dom->xpath->query( Document::XPATH_MUSTACHE_TEMPLATE_ELEMENTS_QUERY, $form );
+		foreach ( $templates as $template ) {
+			$parent = $template->parentNode;
+			if ( $parent instanceof DOMElement ) {
+				foreach ( array_keys( $elements ) as $attribute ) {
+					if ( $parent->hasAttribute( $attribute ) ) {
+						$elements[ $attribute ] = $parent;
+					}
 				}
 			}
 		}
