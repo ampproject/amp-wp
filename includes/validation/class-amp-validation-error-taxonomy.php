@@ -2883,6 +2883,8 @@ class AMP_Validation_Error_Taxonomy {
 			return $redirect_to;
 		}
 
+		global $pagenow;
+
 		$has_pre_term_description_filter = has_filter( 'pre_term_description', 'wp_filter_kses' );
 		if ( false !== $has_pre_term_description_filter ) {
 			remove_filter( 'pre_term_description', 'wp_filter_kses', $has_pre_term_description_filter );
@@ -2899,13 +2901,25 @@ class AMP_Validation_Error_Taxonomy {
 			add_filter( 'pre_term_description', 'wp_filter_kses', $has_pre_term_description_filter );
 		}
 
-		$redirect_to = add_query_arg(
-			[
-				'amp_actioned'       => $action,
-				'amp_actioned_count' => count( $term_ids ),
-			],
-			$redirect_to
-		);
+		$term_ids_count = count( $term_ids );
+		if ( 'edit.php' === $pagenow && 'delete' === $action && 1 === $updated_count ) {
+			// Redirect to error index screen if deleting an validation error with no associated validated URLs.
+			$redirect_to = add_query_arg(
+					[
+							'amp_actioned'       => $action,
+							'amp_actioned_count' => $term_ids_count,
+					],
+					esc_url( get_admin_url( null, 'edit-tags.php?taxonomy=' . self::TAXONOMY_SLUG . '&post_type=' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ) )
+			);
+		} else {
+			$redirect_to = add_query_arg(
+					[
+							'amp_actioned'       => $action,
+							'amp_actioned_count' => $term_ids_count,
+					],
+					$redirect_to
+			);
+		}
 
 		if ( $updated_count ) {
 			delete_transient( AMP_Validated_URL_Post_Type::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT );

@@ -1426,8 +1426,8 @@ class AMP_Validated_URL_Post_Type {
 
 		/**
 		 * Adds notices to the single error page.
-		 * 1. Notice with detailed error information in an expanding box.
-		 * 2. Notice with remove (accept) and keep (reject) buttons.
+		 * 1. If the error does not occur in any validated URL: Notice with button to delete the error.
+		 * 2. Notice with detailed error information in an expanding box.
 		 */
 		if ( ! empty( $_GET[ AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] ) && isset( $_GET['post_type'] ) && self::POST_TYPE_SLUG === $_GET['post_type'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$error_id = sanitize_key( wp_unslash( $_GET[ AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -1445,63 +1445,29 @@ class AMP_Validated_URL_Post_Type {
 			$sanitization   = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $validation_error );
 			$status_text    = AMP_Validation_Error_Taxonomy::get_status_text_with_icon( $sanitization );
 			$error_title    = AMP_Validation_Error_Taxonomy::get_error_title_from_code( $validation_error );
-			$accept_all_url = wp_nonce_url(
-				add_query_arg(
-					[
-						'action'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION,
-						'term_id' => $error->term_id,
-					]
-				),
-				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION
-			);
-			$reject_all_url = wp_nonce_url(
-				add_query_arg(
-					[
-						'action'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION,
-						'term_id' => $error->term_id,
-					]
-				),
-				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION
-			);
 
-			if ( ! $sanitization['forced'] ) {
+			if ( 0 === $error->count ) {
 				echo '<div class="notice accept-reject-error">';
 
-				$info    = '';
-				$buttons = '';
+				$info    = __( 'There are no validated URLs with this validation error. Would you like to delete it?', 'amp' );
 
-				if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $sanitization['term_status'] ) {
-					$info    .= __( 'Removing all invalid markup which occur on a URL will allow it to be served as AMP.', 'amp' );
-					$buttons .= sprintf(
-						' <a class="button button-primary accept" href="%s">%s</a> ',
-						esc_url( $accept_all_url ),
-						esc_html(
-							AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $sanitization['term_status'] ? __( 'Confirm removed', 'amp' ) : __( 'Remove', 'amp' )
-						)
-					);
-				}
-				if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS !== $sanitization['term_status'] ) {
-					$info .= ' ';
-					if ( amp_is_canonical() ) {
-						$info .= __( 'Keeping invalid markup means that any URL on which it occurs will not be served as AMP.', 'amp' );
-					} else {
-						$info .= __( 'Keeping invalid markup means that any URL on which it occurs will redirect to the non-AMP version.', 'amp' );
-					}
-					$buttons .= sprintf(
-						' <a class="button button-primary reject" href="%s">%s</a> ',
-						esc_url( $reject_all_url ),
-						esc_html(
-							AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS === $sanitization['term_status'] ? __( 'Confirm kept', 'amp' ) : __( 'Keep', 'amp' )
-						)
-					);
-				}
+				$delete_url = wp_nonce_url(
+					add_query_arg(
+						[
+							'action'  => 'delete',
+							'term_id' => $error->term_id,
+						]
+					),
+					'delete'
+				);
 
-				if ( $info ) {
-					printf( '<p>%s</p>', esc_html( $info ) );
-				}
-				if ( $buttons ) {
-					printf( '<p>%s</p>', wp_kses_post( $buttons ) );
-				}
+				$delete_button = sprintf(
+					' <a class="button button-small button-primary reject" href="%s">%s</a> ',
+					esc_url( $delete_url ),
+					esc_html( __( 'Delete', 'amp' ) )
+				);
+
+				printf( '<p>%s %s</p>', esc_html( $info ), wp_kses_post( $delete_button ) );
 
 				echo '</div>';
 			}
