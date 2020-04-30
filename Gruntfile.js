@@ -14,6 +14,7 @@ module.exports = function( grunt ) {
 		'src',
 		'templates',
 		'vendor',
+		'themes',
 	];
 
 	// These patterns paths will be excluded from among the above directory.
