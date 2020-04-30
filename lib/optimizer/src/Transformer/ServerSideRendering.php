@@ -810,6 +810,13 @@ final class ServerSideRendering implements Transformer
      */
     private function extractSizesAttributeCss(Document $document, DOMElement $element, $attributeValue)
     {
+        if (!$element->hasAttribute(Attribute::SRCSET) || empty($element->getAttribute(Attribute::SRCSET))) {
+            // According to the Mozilla docs, a sizes attribute without a valid srcset attribute should have no effect.
+            // Therefore, it should simply be stripped, without producing media queries.
+            // @see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#attr-sizes
+            return '';
+        }
+
         return $this->extractAttributeCss(
             $document,
             $element,

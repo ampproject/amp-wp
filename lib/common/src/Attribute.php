@@ -58,6 +58,7 @@ interface Attribute
     const PROFILE               = 'profile';
     const REL                   = 'rel';
     const ROLE                  = 'role';
+    const SRCSET                = 'srcset';
     const SIZES                 = 'sizes';
     const STYLE                 = 'style';
     const SRC                   = 'src';

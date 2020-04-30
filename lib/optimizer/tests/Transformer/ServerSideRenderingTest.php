@@ -145,9 +145,9 @@ final class ServerSideRenderingTest extends TestCase
             ],
 
             'sizes attribute without amp-custom' => [
-                $input('<amp-img height="300" layout="responsive" sizes="(min-width: 320px) 320px, 100vw" src="https://acme.org/image1.png" width="400"></amp-img>'),
+                $input('<amp-img height="300" layout="responsive" srcset="https://acme.org/image1.png 320w, https://acme.org/image2.png 640w, https://acme.org/image3.png 1280w" sizes="(min-width: 320px) 320px, 100vw" src="https://acme.org/image1.png" width="400"></amp-img>'),
                 $expectWithoutBoilerplate(
-                    '<amp-img height="300" layout="responsive" src="https://acme.org/image1.png" width="400" id="i-amp-id" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive"><i-amphtml-sizer style="display:block;padding-top:75.0000%;"></i-amphtml-sizer></amp-img>',
+                    '<amp-img height="300" layout="responsive" srcset="https://acme.org/image1.png 320w, https://acme.org/image2.png 640w, https://acme.org/image3.png 1280w" src="https://acme.org/image1.png" width="400" id="i-amp-id" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive"><i-amphtml-sizer style="display:block;padding-top:75.0000%;"></i-amphtml-sizer></amp-img>',
                     '<style amp-custom>#i-amp-id{width:100vw};@media (min-width: 320px){#i-amp-id{width:320px;}}</style>'
                 ),
                 [],
@@ -155,19 +155,38 @@ final class ServerSideRenderingTest extends TestCase
 
             'sizes attribute with amp-custom' => [
                 $input(
-                    '<amp-img height="300" layout="responsive" sizes="(min-width: 320px) 320px, 100vw" src="https://acme.org/image1.png" width="400"></amp-img>',
+                    '<amp-img height="300" layout="responsive" srcset="https://acme.org/image1.png 320w, https://acme.org/image2.png 640w, https://acme.org/image3.png 1280w" sizes="(min-width: 320px) 320px, 100vw" src="https://acme.org/image1.png" width="400"></amp-img>',
                     '<style amp-custom>body h1{color:red;}</style>'
                 ),
                 $expectWithoutBoilerplate(
-                    '<amp-img height="300" layout="responsive" src="https://acme.org/image1.png" width="400" id="i-amp-id" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive"><i-amphtml-sizer style="display:block;padding-top:75.0000%;"></i-amphtml-sizer></amp-img>',
+                    '<amp-img height="300" layout="responsive" srcset="https://acme.org/image1.png 320w, https://acme.org/image2.png 640w, https://acme.org/image3.png 1280w" src="https://acme.org/image1.png" width="400" id="i-amp-id" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive"><i-amphtml-sizer style="display:block;padding-top:75.0000%;"></i-amphtml-sizer></amp-img>',
                     '<style amp-custom>body h1{color:red;}#i-amp-id{width:100vw};@media (min-width: 320px){#i-amp-id{width:320px;}}</style>'
                 ),
                 [],
             ],
 
+            // According to the Mozilla docs, a sizes attribute without a valid srcset attribute should have no effect.
+            // Therefore, it should simply be stripped, without producing media queries.
+            // @see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#attr-sizes
+            'sizes attribute without srcset' => [
+                $input('<amp-img height="300" layout="responsive" sizes="(min-width: 320px) 320px, 100vw" src="https://acme.org/image1.png" width="400"></amp-img>'),
+                $expectWithoutBoilerplate(
+                    '<amp-img height="300" layout="responsive" src="https://acme.org/image1.png" width="400" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive"><i-amphtml-sizer style="display:block;padding-top:75.0000%;"></i-amphtml-sizer></amp-img>',
+                ),
+                [],
+            ],
+
+            'sizes attribute empty srcset' => [
+                $input('<amp-img height="300" layout="responsive" srcset="" sizes="(min-width: 320px) 320px, 100vw" src="https://acme.org/image1.png" width="400"></amp-img>'),
+                $expectWithoutBoilerplate(
+                    '<amp-img height="300" layout="responsive" srcset="" src="https://acme.org/image1.png" width="400" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive"><i-amphtml-sizer style="display:block;padding-top:75.0000%;"></i-amphtml-sizer></amp-img>',
+                ),
+                [],
+            ],
+
             'bad sizes attribute' => [
-                $input('<amp-img height="300" layout="responsive" sizes=",,," src="https://acme.org/image1.png" width="400"></amp-img>'),
-                $expectWithBoilerplate('<amp-img height="300" layout="responsive" sizes=",,,"  src="https://acme.org/image1.png" width="400"></amp-img>'),
+                $input('<amp-img height="300" layout="responsive" srcset="https://acme.org/image1.png 320w, https://acme.org/image2.png 640w, https://acme.org/image3.png 1280w" sizes=",,," src="https://acme.org/image1.png" width="400"></amp-img>'),
+                $expectWithBoilerplate('<amp-img height="300" layout="responsive" srcset="https://acme.org/image1.png 320w, https://acme.org/image2.png 640w, https://acme.org/image3.png 1280w" sizes=",,,"  src="https://acme.org/image1.png" width="400"></amp-img>'),
                 [Error\CannotRemoveBoilerplate::class],
             ],
 
