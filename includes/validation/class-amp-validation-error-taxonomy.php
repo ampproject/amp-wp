@@ -315,18 +315,32 @@ class AMP_Validation_Error_Taxonomy {
 
 		$deleted_count = 0;
 		foreach ( $empty_term_ids as $term_id ) {
-			$term = get_term( (int) $term_id, self::TAXONOMY_SLUG );
-
-			// Skip if the term count was not actually 0.
-			if ( ! $term || 0 !== $term->count ) {
-				continue;
-			}
-
-			if ( true === wp_delete_term( $term->term_id, self::TAXONOMY_SLUG ) ) {
+			if ( true === self::delete_empty_term( $term_id ) ) {
 				$deleted_count++;
 			}
 		}
 		return $deleted_count;
+	}
+
+	/**
+	 * Delete an amp_validation_error term if it has no amp_validated_url posts associated with it.
+	 *
+	 * @param int $term_id Term ID.
+	 * @return bool True if deleted, false otherwise.
+	 */
+	public static function delete_empty_term($term_id ) {
+		$term = get_term( (int) $term_id, self::TAXONOMY_SLUG );
+
+		// Skip if the term count was not actually 0.
+		if ( ! $term || 0 !== $term->count ) {
+			return false;
+		}
+
+		if ( true === wp_delete_term( $term->term_id, self::TAXONOMY_SLUG ) ) {
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
@@ -812,14 +826,11 @@ class AMP_Validation_Error_Taxonomy {
 			2
 		);
 
-		// Add bulk actions.
+		// Remove bulk actions.
 		add_filter(
 			'bulk_actions-edit-' . self::TAXONOMY_SLUG,
 			static function( $bulk_actions ) {
 				unset( $bulk_actions['delete'] );
-				$bulk_actions[ self::VALIDATION_ERROR_ACCEPT_ACTION ]      = __( 'Remove', 'amp' );
-				$bulk_actions[ self::VALIDATION_ERROR_REJECT_ACTION ]      = __( 'Keep', 'amp' );
-				$bulk_actions[ self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION ] = __( 'Approve', 'amp' );
 				return $bulk_actions;
 			}
 		);
@@ -1566,23 +1577,12 @@ class AMP_Validation_Error_Taxonomy {
 			$actioned = sanitize_key( $_GET['amp_actioned'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$count    = (int) $_GET['amp_actioned_count']; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$message  = null;
-			if ( self::VALIDATION_ERROR_ACCEPT_ACTION === $actioned ) {
+			if ( 'delete' === $actioned ) {
 				$message = sprintf(
 					/* translators: %s is number of errors accepted */
 					_n(
-						'Removed %s instance of invalid markup. It will no longer block related URLs from being served as AMP.',
-						'Removed %s instances of invalid markup. They will no longer block related URLs from being served as AMP.',
-						number_format_i18n( $count ),
-						'amp'
-					),
-					$count
-				);
-			} elseif ( self::VALIDATION_ERROR_REJECT_ACTION === $actioned ) {
-				$message = sprintf(
-					/* translators: %s is number of errors rejected */
-					_n(
-						'Kept %s instance of invalid markup. It will continue to block related URLs from being served as AMP.',
-						'Kept %s instances of invalid markup. They will continue to block related URLs from being served as AMP.',
+						'Deleted %s instance of validation errors.',
+						'Deleted %s instances of validation errors.',
 						number_format_i18n( $count ),
 						'amp'
 					),
@@ -1627,7 +1627,7 @@ class AMP_Validation_Error_Taxonomy {
 		global $pagenow;
 
 		$term_id = $tag->term_id;
-		$term    = get_term( $tag->term_id ); // We don't want filter=display given by $tag.
+		$term    = get_term( $term_id ); // We don't want filter=display given by $tag.
 
 		/*
 		 * Hide deletion link since a validation error should only be removed once
@@ -1644,7 +1644,7 @@ class AMP_Validation_Error_Taxonomy {
 				esc_attr__( 'Toggle error details', 'amp' ),
 				esc_html__( 'Details', 'amp' )
 			);
-		} else {
+		} else if ( 'edit-tags.php' === $pagenow ) {
 			$actions['details'] = sprintf(
 				'<a href="%s">%s</a>',
 				admin_url(
@@ -1658,49 +1658,20 @@ class AMP_Validation_Error_Taxonomy {
 				),
 				esc_html__( 'Details', 'amp' )
 			);
-		}
 
-		// Only add the 'Remove' and 'Keep' links to the index page, not the individual URL page.
-		if ( 'edit-tags.php' === $pagenow ) {
-			$sanitization = self::get_validation_error_sanitization( json_decode( $term->description, true ) );
-			$is_accepted  = $sanitization['status'] & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK;
-
-			$actions[ self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION ] = sprintf(
-				'<a href="%s">%s</a>',
-				wp_nonce_url(
-					add_query_arg( array_merge( [ 'action' => self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION ], compact( 'term_id' ) ) ),
-					self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION
-				),
-				esc_html(
-					! ( $sanitization['term_status'] & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK ) ? __( 'Approve', 'amp' ) : __( 'Disapprove', 'amp' )
-				)
-			);
-
-			if ( $is_accepted ) {
-				$actions[ self::VALIDATION_ERROR_REJECT_ACTION ] = sprintf(
+			if ( 0 === $term->count ) {
+				$actions['delete'] = sprintf(
 					'<a href="%s">%s</a>',
 					wp_nonce_url(
-						add_query_arg( array_merge( [ 'action' => self::VALIDATION_ERROR_REJECT_ACTION ], compact( 'term_id' ) ) ),
-						self::VALIDATION_ERROR_REJECT_ACTION
+						add_query_arg( array_merge( [ 'action' => 'delete' ], compact( 'term_id' ) ) ),
+						'delete'
 					),
-					esc_html__( 'Keep', 'amp' )
-				);
-			} else {
-				$actions[ self::VALIDATION_ERROR_ACCEPT_ACTION ] = sprintf(
-					'<a href="%s">%s</a>',
-					wp_nonce_url(
-						add_query_arg( array_merge( [ 'action' => self::VALIDATION_ERROR_ACCEPT_ACTION ], compact( 'term_id' ) ) ),
-						self::VALIDATION_ERROR_ACCEPT_ACTION
-					),
-					esc_html__( 'Remove', 'amp' )
+					esc_html__( 'Delete', 'amp' )
 				);
 			}
 		}
 
-		$actions = wp_array_slice_assoc(
-			$actions,
-			[ 'details', self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION, self::VALIDATION_ERROR_ACCEPT_ACTION, self::VALIDATION_ERROR_REJECT_ACTION ]
-		);
+		$actions = wp_array_slice_assoc( $actions, [ 'details', 'delete' ] );
 
 		return $actions;
 	}
@@ -2908,7 +2879,7 @@ class AMP_Validation_Error_Taxonomy {
 	 * @return string Redirect.
 	 */
 	public static function handle_validation_error_update( $redirect_to, $action, $term_ids ) {
-		if ( ! in_array( $action, [ self::VALIDATION_ERROR_ACCEPT_ACTION, self::VALIDATION_ERROR_REJECT_ACTION, self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION ], true ) ) {
+		if ( 'delete' !== $action ) {
 			return $redirect_to;
 		}
 
@@ -2919,28 +2890,11 @@ class AMP_Validation_Error_Taxonomy {
 
 		$updated_count = 0;
 		foreach ( $term_ids as $term_id ) {
-			$term = get_term( $term_id );
-			if ( ! $term ) {
-				continue;
-			}
-			$term_group = (int) $term->term_group;
-
-			if ( self::VALIDATION_ERROR_ACCEPT_ACTION === $action ) {
-				$term_group |= self::ACCEPTED_VALIDATION_ERROR_BIT_MASK;
-			} elseif ( self::VALIDATION_ERROR_REJECT_ACTION === $action ) {
-				$term_group &= ~self::ACCEPTED_VALIDATION_ERROR_BIT_MASK;
-			} elseif ( self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION === $action ) {
-				$acknowledged = $term_group & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK;
-				$term_group   = $acknowledged
-					? $term_group & ~ self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK
-					: $term_group | self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK;
-			}
-
-			if ( $term_group !== $term->term_group ) {
-				wp_update_term( $term_id, self::TAXONOMY_SLUG, compact( 'term_group' ) );
+			if ( 'delete' === $action && self::delete_empty_term( $term_id ) ) {
 				$updated_count++;
 			}
 		}
+
 		if ( false !== $has_pre_term_description_filter ) {
 			add_filter( 'pre_term_description', 'wp_filter_kses', $has_pre_term_description_filter );
 		}

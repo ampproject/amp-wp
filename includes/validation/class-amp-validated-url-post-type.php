@@ -122,7 +122,7 @@ class AMP_Validated_URL_Post_Type {
 		);
 
 		// Ensure cached count of URLs with new validation errors is flushed whenever a URL is updated, trashed, or deleted.
-		$handle_delete = function ( $post_id ) {
+		$handle_delete = static function ( $post_id ) {
 			if ( static::POST_TYPE_SLUG === get_post_type( $post_id ) ) {
 				delete_transient( static::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT );
 			}
