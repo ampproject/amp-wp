@@ -264,10 +264,12 @@ class AMP_Options_Menu {
 							<?php
 							$name          = AMP_Options_Manager::OPTION_NAME . '[' . Option::READER_THEME . ']';
 							$reader_themes = AMP_Theme_Support::get_reader_themes();
-							$current_theme = AMP_Options_Manager::get_option( Option::READER_THEME );
-							if ( ! array_key_exists( $current_theme, $reader_themes ) ) {
-								$current_theme = ''; // Reset to Classic if previously-selected theme is no longer available.
-							}
+							$current_theme = AMP_Theme_Support::get_current_reader_theme();
+
+							$reader_themes[''] = [
+								'name'       => __( 'Classic', 'amp' ),
+								'screenshot' => plugin_dir_url( AMP__FILE__ ) . 'templates/screenshot.png',
+							];
 							?>
 							<?php foreach ( $reader_themes as $slug => $theme ) : ?>
 								<?php $id = $name . "[$slug]"; ?>

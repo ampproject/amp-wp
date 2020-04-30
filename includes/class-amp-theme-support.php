@@ -263,12 +263,23 @@ class AMP_Theme_Support {
 				'screenshot' => plugin_dir_url( AMP__FILE__ ) . 'themes/twentyseventeen/screenshot.png',
 				'directory'  => AMP__DIR__ . '/themes/twentyseventeen',
 			],
-			''                => [
-				'name'       => __( 'Classic', 'amp' ),
-				'screenshot' => plugin_dir_url( AMP__FILE__ ) . 'templates/screenshot.png',
-				'directory'  => AMP__DIR__ . '/templates',
-			],
 		];
+	}
+
+	/**
+	 * Get the current reader theme.
+	 *
+	 * @since 1.6
+	 *
+	 * @return string Reader theme.
+	 */
+	public static function get_current_reader_theme() {
+		$reader_themes = self::get_reader_themes();
+		$current_theme = AMP_Options_Manager::get_option( Option::READER_THEME );
+		if ( ! array_key_exists( $current_theme, $reader_themes ) ) {
+			$current_theme = ''; // Reset to Classic if previously-selected theme is no longer available.
+		}
+		return $current_theme;
 	}
 
 	/**

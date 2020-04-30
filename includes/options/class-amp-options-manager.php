@@ -282,8 +282,8 @@ class AMP_Options_Manager {
 		// @todo This should be a per-user option!
 		$options[ Option::DEV_TOOLS ] = ! empty( $new_options[ Option::DEV_TOOLS ] );
 
-		if ( isset( $new_options[ Option::READER_THEME ] ) && array_key_exists( $new_options[ Option::READER_THEME ], AMP_Theme_Support::get_reader_themes() ) ) {
-			$options[ Option::READER_THEME ] = $new_options[ Option::READER_THEME ];
+		if ( isset( $new_options[ Option::READER_THEME ] ) ) {
+			$options[ Option::READER_THEME ] = array_key_exists( $new_options[ Option::READER_THEME ], AMP_Theme_Support::get_reader_themes() ) ? $new_options[ Option::READER_THEME ] : '';
 		}
 
 		// Store the current version with the options so we know the format.
