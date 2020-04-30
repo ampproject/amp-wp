@@ -16,4 +16,3 @@ built
 .idea/
 /lib/*/vendor/
 /lib/*/composer.lock
-/themes
