@@ -1442,14 +1442,14 @@ class AMP_Validated_URL_Post_Type {
 			if ( ! is_array( $validation_error ) ) {
 				$validation_error = [];
 			}
-			$sanitization   = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $validation_error );
-			$status_text    = AMP_Validation_Error_Taxonomy::get_status_text_with_icon( $sanitization );
-			$error_title    = AMP_Validation_Error_Taxonomy::get_error_title_from_code( $validation_error );
+			$sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $validation_error );
+			$status_text  = AMP_Validation_Error_Taxonomy::get_status_text_with_icon( $sanitization );
+			$error_title  = AMP_Validation_Error_Taxonomy::get_error_title_from_code( $validation_error );
 
 			if ( 0 === $error->count ) {
 				echo '<div class="notice accept-reject-error">';
 
-				$info    = __( 'There are no validated URLs with this validation error. Would you like to delete it?', 'amp' );
+				$info = __( 'There are no validated URLs with this validation error. Would you like to delete it?', 'amp' );
 
 				$delete_url = wp_nonce_url(
 					add_query_arg(

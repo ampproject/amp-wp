@@ -586,7 +586,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 				'details'                     => 'Context<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="&lt;h3&gt;Context&lt;/h3&gt;&lt;p&gt;The parent element of where the error occurred.&lt;/p&gt;"></div>',
 				'sources_with_invalid_output' => 'Sources',
 				'error_type'                  => 'Type',
-				'approved'                    => 'Approved<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="&lt;h3&gt;Approved&lt;/h3&gt;&lt;p&gt;Allows confirmation of action taken to resolve the validation error.&lt;/p&gt;"></div>',
+				'reviewed'                    => 'Reviewed<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="&lt;h3&gt;Reviewed&lt;/h3&gt;&lt;p&gt;Confirm that the status of the validation error has been seen and approved of.&lt;/p&gt;"></div>',
 			],
 			AMP_Validated_URL_Post_Type::add_single_post_columns()
 		);
@@ -1490,7 +1490,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		// This is now on the invalid URL post type edit.php screen, so it should output a <select> element.
 		$output = get_echo( [ 'AMP_Validated_URL_Post_Type', 'render_post_filters' ], [ $correct_post_type, $correct_which_second_argument ] );
 		$this->assertStringContains(
-			sprintf( 'With disapproved errors <span class="count">(%d)</span>', $number_of_new_errors ),
+			sprintf( 'With unreviewed errors <span class="count">(%d)</span>', $number_of_new_errors ),
 			$output
 		);
 		$this->assertStringContains(

@@ -328,7 +328,7 @@ class AMP_Validation_Error_Taxonomy {
 	 * @param int $term_id Term ID.
 	 * @return bool True if deleted, false otherwise.
 	 */
-	public static function delete_empty_term($term_id ) {
+	public static function delete_empty_term( $term_id ) {
 		$term = get_term( (int) $term_id, self::TAXONOMY_SLUG );
 
 		// Skip if the term count was not actually 0.
@@ -1644,7 +1644,7 @@ class AMP_Validation_Error_Taxonomy {
 				esc_attr__( 'Toggle error details', 'amp' ),
 				esc_html__( 'Details', 'amp' )
 			);
-		} else if ( 'edit-tags.php' === $pagenow ) {
+		} elseif ( 'edit-tags.php' === $pagenow ) {
 			$actions['details'] = sprintf(
 				'<a href="%s">%s</a>',
 				admin_url(
@@ -2854,7 +2854,7 @@ class AMP_Validation_Error_Taxonomy {
 			self::handle_validation_error_update( null, $action, $term_ids );
 			$redirect_query_args['amp_actioned_count'] = count( $term_ids );
 		} elseif ( $single_term_id ) {
-			// If this is an inline action, like 'Keep' or 'Remove'.
+			// If this is an inline action, like 'Details' or 'Delete'.
 			self::handle_validation_error_update( null, $action, [ $single_term_id ] );
 			$redirect_query_args['amp_actioned_count'] = 1;
 		}
@@ -2905,19 +2905,19 @@ class AMP_Validation_Error_Taxonomy {
 		if ( 'edit.php' === $pagenow && 'delete' === $action && 1 === $updated_count ) {
 			// Redirect to error index screen if deleting an validation error with no associated validated URLs.
 			$redirect_to = add_query_arg(
-					[
-							'amp_actioned'       => $action,
-							'amp_actioned_count' => $term_ids_count,
-					],
-					esc_url( get_admin_url( null, 'edit-tags.php?taxonomy=' . self::TAXONOMY_SLUG . '&post_type=' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ) )
+				[
+					'amp_actioned'       => $action,
+					'amp_actioned_count' => $term_ids_count,
+				],
+				esc_url( get_admin_url( null, 'edit-tags.php?taxonomy=' . self::TAXONOMY_SLUG . '&post_type=' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ) )
 			);
 		} else {
 			$redirect_to = add_query_arg(
-					[
-							'amp_actioned'       => $action,
-							'amp_actioned_count' => $term_ids_count,
-					],
-					$redirect_to
+				[
+					'amp_actioned'       => $action,
+					'amp_actioned_count' => $term_ids_count,
+				],
+				$redirect_to
 			);
 		}
 
