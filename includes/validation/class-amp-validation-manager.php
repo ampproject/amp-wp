@@ -253,7 +253,7 @@ class AMP_Validation_Manager {
 					wp_enqueue_style(
 						'amp-icons',
 						amp_get_asset_url( 'css/amp-icons.css' ),
-						[ 'dashicons' ],
+						[ 'dashicons', 'admin-bar' ],
 						AMP__VERSION
 					);
 
@@ -463,18 +463,6 @@ class AMP_Validation_Manager {
 				esc_html__( 'AMP', 'amp' )
 			),
 			'href'  => esc_url( $href ),
-			'meta'  => [
-				/**
-				 * This hidden <span> element is needed to prevent the CSS for unused icons from being removed. New icons
-				 * may be added during post-processing, such as overriding the admin bar icon to represent a new validation
-				 * state or when new menu items are being added (eg. "CSS Usage") and a icon needs to displayed.
-				 */
-				'html' => Icon::link()->to_html(
-					[
-						'class' => sprintf( 'hidden amp-icon %s %s %s', Icon::VALID, Icon::WARNING, Icon::INVALID ),
-					]
-				),
-			],
 		];
 
 		// Construct admin bar item for validation.

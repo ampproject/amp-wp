@@ -2,6 +2,12 @@
 	top: 2px;
 }
 
+#wpadminbar .ab-sub-wrapper span.amp-icon {
+	position: absolute !important;
+	margin-left: 2px;
+	padding: initial !important;
+}
+
 body .amp-icon {
 	/* stylelint-disable font-family-no-missing-generic-family-keyword */
 	font: normal 20px/1 dashicons;
@@ -41,8 +47,4 @@ body .amp-icon {
 
 	/* Medium Blue */
 	color: #00a0d2 !important;
-}
-
-.amp-icon.hidden {
-	display: none;
 }

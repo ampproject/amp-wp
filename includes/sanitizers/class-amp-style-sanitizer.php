@@ -2969,9 +2969,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 		if ( isset( $icon ) ) {
 			$span = $this->dom->createElement( 'span' );
-			$span->setAttribute( 'class', 'amp-icon ' . $icon );
-			// An inline style has to be added here since it would already be removed during sanitization.
-			$span->setAttribute( 'style', 'position: absolute; margin-left: 2px;' );
+			$span->setAttribute( 'class', 'ab-icon amp-icon ' . $icon );
 			$stylesheets_a_element->appendChild( $span );
 		}
 
