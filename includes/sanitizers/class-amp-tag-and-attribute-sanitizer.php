@@ -1358,7 +1358,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			 * See https://github.com/ampproject/amp-wp/issues/4465
 			 */
 			if (
-				'' === $layout_attr
+				! $layout_attr
 				&& ! $this->supports_layout( $tag_spec, Layout::CONTAINER )
 				&& $this->supports_layout( $tag_spec, Layout::RESPONSIVE )
 			) {
@@ -1398,7 +1398,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// No need to go further if there is no layout attribute.
-		if ( '' === $layout_attr ) {
+		if ( ! $layout_attr ) {
 			return true;
 		}
 
