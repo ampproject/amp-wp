@@ -263,8 +263,18 @@ class AMP_Options_Menu {
 						<ul>
 							<?php
 							$name          = AMP_Options_Manager::OPTION_NAME . '[' . Option::READER_THEME . ']';
-							$reader_themes = AMP_Theme_Support::get_reader_themes();
 							$current_theme = AMP_Theme_Support::get_current_reader_theme();
+							$reader_themes = [];
+							foreach ( AMP_Theme_Support::get_reader_themes() as $reader_theme_slug ) {
+								$reader_theme_obj = wp_get_theme( $reader_theme_slug );
+								if ( $reader_theme_obj->errors() ) {
+									continue;
+								}
+								$reader_themes[ $reader_theme_slug ] = [
+									'screenshot' => $reader_theme_obj->get_screenshot(),
+									'name'       => $reader_theme_obj->get( 'Name' ),
+								];
+							}
 
 							$reader_themes[''] = [
 								'name'       => __( 'Classic', 'amp' ),

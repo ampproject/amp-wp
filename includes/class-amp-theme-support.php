@@ -6,9 +6,10 @@
  */
 
 use AmpProject\Amp;
-use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\ConfigurationArgument;
+use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\ReaderThemeLoader;
+use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\Transformer;
 use AmpProject\Attribute;
 use AmpProject\Dom\Document;
@@ -243,27 +244,14 @@ class AMP_Theme_Support {
 	 * Get reader mode themes.
 	 *
 	 * @since 1.6
+	 * @todo This should be extended to support any theme included at https://amp-wp.org/ecosystem/themes/.
+	 * @todo Additionally, any theme that is installed which has some AMP metadata flag could be included.
+	 * @todo There could also be a filter which allows for other themes to be forcibly included in the list.
 	 *
-	 * @return string[][]
+	 * @return string[]
 	 */
 	public static function get_reader_themes() {
-		return [
-			'twentytwenty'    => [
-				'name'       => __( 'Twenty Twenty', 'amp' ),
-				'screenshot' => plugin_dir_url( AMP__FILE__ ) . 'themes/twentytwenty/screenshot.png',
-				'directory'  => AMP__DIR__ . '/themes/twentytwenty',
-			],
-			'twentynineteen'  => [
-				'name'       => __( 'Twenty Nineteen', 'amp' ),
-				'screenshot' => plugin_dir_url( AMP__FILE__ ) . 'themes/twentynineteen/screenshot.png',
-				'directory'  => AMP__DIR__ . '/themes/twentynineteen',
-			],
-			'twentyseventeen' => [
-				'name'       => __( 'Twenty Seventeen', 'amp' ),
-				'screenshot' => plugin_dir_url( AMP__FILE__ ) . 'themes/twentyseventeen/screenshot.png',
-				'directory'  => AMP__DIR__ . '/themes/twentyseventeen',
-			],
-		];
+		return AMP_Core_Theme_Sanitizer::get_supported_themes();
 	}
 
 	/**
@@ -276,7 +264,10 @@ class AMP_Theme_Support {
 	public static function get_current_reader_theme() {
 		$reader_themes = self::get_reader_themes();
 		$current_theme = AMP_Options_Manager::get_option( Option::READER_THEME );
-		if ( ! array_key_exists( $current_theme, $reader_themes ) ) {
+
+		// @todo What if the theme is not installed?
+		// @todo What if the theme is the same as the currently-active theme?
+		if ( ! in_array( $current_theme, $reader_themes, true ) ) {
 			$current_theme = ''; // Reset to Classic if previously-selected theme is no longer available.
 		}
 		return $current_theme;
@@ -442,7 +433,7 @@ class AMP_Theme_Support {
 		$theme_support = self::get_theme_support_args();
 		if ( ! empty( $theme_support['template_dir'] ) ) {
 			self::add_amp_template_filters();
-		} elseif ( $is_reader_mode ) {
+		} elseif ( ReaderThemeLoader::is_reader_mode() && ! ReaderThemeLoader::get_reader_theme() ) {
 			add_filter(
 				'template_include',
 				static function() {
