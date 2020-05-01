@@ -118,6 +118,12 @@ class AMP_Options_Manager {
 			$options[ Option::THEME_SUPPORT ] = $defaults[ Option::THEME_SUPPORT ];
 		}
 
+		// Automatically switch to Transitional mode when the active theme is the same as the reader theme.
+		if ( AMP_Theme_Support::READER_MODE_SLUG === $options[ Option::THEME_SUPPORT ] && get_template() === $options[ Option::READER_THEME ] ) {
+			$options[ Option::THEME_SUPPORT ] = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
+			$options[ Option::READER_THEME ]  = $defaults[ Option::READER_THEME ];
+		}
+
 		unset(
 			/**
 			 * Remove 'auto_accept_sanitization' option.

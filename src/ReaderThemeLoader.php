@@ -9,13 +9,10 @@ namespace AmpProject\AmpWP;
 
 use AMP_Options_Manager;
 use AMP_Theme_Support;
-use AmpProject\AmpWP\Option;
 use WP_Theme;
 
 /**
  * Switches to the designated Reader theme when template mode enabled and when requesting an AMP page.
- *
- * This checks whether there's excessive cycling of CSS cached stylesheets and disables transient caching if so.
  *
  * @package AmpProject\AmpWP
  */
@@ -27,7 +24,7 @@ final class ReaderThemeLoader implements Service {
 	 * @return void
 	 */
 	public function register() {
-		add_action( 'setup_theme', [ $this, 'switch_theme' ] );
+		add_action( 'setup_theme', [ $this, 'override_theme' ] );
 	}
 
 	/**
@@ -74,7 +71,7 @@ final class ReaderThemeLoader implements Service {
 	 *
 	 * Note that AMP_Theme_Support will redirect to the non-AMP version if AMP is not available for the query.
 	 */
-	public function switch_theme() {
+	public function override_theme() {
 		if ( ! self::is_reader_mode() ) {
 			return;
 		}
@@ -90,13 +87,13 @@ final class ReaderThemeLoader implements Service {
 
 		add_filter(
 			'template',
-			function () use ( $theme ) {
+			static function () use ( $theme ) {
 				return $theme->get_template();
 			}
 		);
 		add_filter(
 			'stylesheet',
-			function () use ( $theme ) {
+			static function () use ( $theme ) {
 				return $theme->get_stylesheet();
 			}
 		);
