@@ -61,7 +61,7 @@ final class AmpRuntimeCssTest extends TestCase
     {
         $document      = Document::fromHtml($source);
         $remoteRequest = new StubbedRemoteGetRequest(TestMarkup::STUBBED_REMOTE_REQUESTS);
-        $transformer   = new AmpRuntimeCss($remoteRequest, new AmpRuntimeCssConfiguration($config));
+        $transformer   = new AmpRuntimeCss(new AmpRuntimeCssConfiguration($config), $remoteRequest);
         $errors        = new ErrorCollection();
 
         $transformer->transform($document, $errors);

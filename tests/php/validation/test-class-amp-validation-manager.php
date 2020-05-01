@@ -1351,7 +1351,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$archives_widget_id = 'archives-2';
 		$this->assertArrayHasKey( $archives_widget_id, $wp_registered_widgets );
 		$this->assertInternalType( 'array', $wp_registered_widgets[ $archives_widget_id ]['callback'] );
-		$wp_registered_widgets[ $archives_widget_id ]['callback'][0] = new AMP_Widget_Archives();
 
 		AMP_Validation_Manager::wrap_widget_callbacks();
 		$this->assertInstanceOf( 'AMP_Validation_Callback_Wrapper', $wp_registered_widgets[ $search_widget_id ]['callback'] );
@@ -1395,11 +1394,11 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		AMP_Theme_Support::start_output_buffering();
 		dynamic_sidebar( $sidebar_id );
 		$output     = ob_get_clean();
-		$reflection = new ReflectionMethod( 'AMP_Widget_Archives', 'widget' );
+		$reflection = new ReflectionMethod( 'WP_Widget_Archives', 'widget' );
 		$this->assertStringStartsWith(
 			sprintf(
-				'<!--amp-source-stack {"type":"plugin","name":"amp","file":%1$s,"line":%2$d,"function":%3$s,"widget_id":%4$s}--><li id=%4$s',
-				wp_json_encode( preg_replace( ':^.*(?=includes/):', '', $reflection->getFileName() ) ),
+				'<!--amp-source-stack {"type":"core","name":"wp-includes","file":%1$s,"line":%2$d,"function":%3$s,"widget_id":%4$s}--><li id=%4$s',
+				wp_json_encode( 'widgets/' . basename( $reflection->getFileName() ) ),
 				$reflection->getStartLine(),
 				wp_json_encode( $reflection->getDeclaringClass()->getName() . '::' . $reflection->getName() ),
 				wp_json_encode( $archives_widget_id )
