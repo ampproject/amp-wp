@@ -267,7 +267,7 @@ class AMP_Options_Menu {
 							$reader_themes = [];
 							foreach ( AMP_Theme_Support::get_reader_themes() as $reader_theme_slug ) {
 								$reader_theme_obj = wp_get_theme( $reader_theme_slug );
-								if ( $reader_theme_obj->errors() ) {
+								if ( $reader_theme_obj->errors() || get_template() === $reader_theme_slug ) {
 									continue;
 								}
 								$reader_themes[ $reader_theme_slug ] = [
