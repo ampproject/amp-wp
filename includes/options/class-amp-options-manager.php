@@ -119,9 +119,16 @@ class AMP_Options_Manager {
 		}
 
 		// Automatically switch to Transitional mode when the active theme is the same as the reader theme.
-		if ( AMP_Theme_Support::READER_MODE_SLUG === $options[ Option::THEME_SUPPORT ] && get_template() === $options[ Option::READER_THEME ] ) {
-			$options[ Option::THEME_SUPPORT ] = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
-			$options[ Option::READER_THEME ]  = $defaults[ Option::READER_THEME ];
+		// This also is required if the slug is not not 'amp', as the theme switching cannot be done reliably if the slug
+		// is changed from the default, in particular by the active theme.
+		// @todo Revisit this with refactoring how AMP URLs are constructed and recognized per <https://github.com/ampproject/amp-wp/issues/2204>.
+		if ( AMP_Theme_Support::READER_MODE_SLUG === $options[ Option::THEME_SUPPORT ] ) {
+			if ( get_template() === $options[ Option::READER_THEME ] ) {
+				$options[ Option::THEME_SUPPORT ] = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
+				$options[ Option::READER_THEME ]  = $defaults[ Option::READER_THEME ];
+			} elseif ( AMP_Theme_Support::SLUG !== amp_get_slug() ) {
+				$options[ Option::READER_THEME ] = $defaults[ Option::READER_THEME ];
+			}
 		}
 
 		unset(

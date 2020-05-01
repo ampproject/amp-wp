@@ -258,46 +258,53 @@ class AMP_Options_Menu {
 							class="hidden"
 						<?php endif; ?>
 					>
-						<legend><?php esc_html_e( 'Selected Theme:', 'amp' ); ?></legend>
+						<?php if ( AMP_Theme_Support::SLUG === amp_get_slug() ) : ?>
+							<legend><?php esc_html_e( 'Selected Theme:', 'amp' ); ?></legend>
+							<ul>
+								<?php
+								$name          = AMP_Options_Manager::OPTION_NAME . '[' . Option::READER_THEME . ']';
+								$current_theme = AMP_Theme_Support::get_current_reader_theme();
+								$reader_themes = [];
 
-						<ul>
-							<?php
-							$name          = AMP_Options_Manager::OPTION_NAME . '[' . Option::READER_THEME . ']';
-							$current_theme = AMP_Theme_Support::get_current_reader_theme();
-							$reader_themes = [];
-							foreach ( AMP_Theme_Support::get_reader_themes() as $reader_theme_slug ) {
-								$reader_theme_obj = wp_get_theme( $reader_theme_slug );
-								if ( $reader_theme_obj->errors() || get_template() === $reader_theme_slug ) {
-									continue;
+								// @todo If the themes are not installed, provide a way to install them (rather than skipping).
+								foreach ( AMP_Theme_Support::get_reader_themes() as $reader_theme_slug ) {
+									$reader_theme_obj = wp_get_theme( $reader_theme_slug );
+									if ( $reader_theme_obj->errors() || get_template() === $reader_theme_slug ) {
+										continue;
+									}
+									$reader_themes[ $reader_theme_slug ] = [
+										'screenshot' => $reader_theme_obj->get_screenshot(),
+										'name'       => $reader_theme_obj->get( 'Name' ),
+									];
 								}
-								$reader_themes[ $reader_theme_slug ] = [
-									'screenshot' => $reader_theme_obj->get_screenshot(),
-									'name'       => $reader_theme_obj->get( 'Name' ),
-								];
-							}
 
-							$reader_themes[''] = [
-								'name'       => __( 'Classic', 'amp' ),
-								'screenshot' => plugin_dir_url( AMP__FILE__ ) . 'templates/screenshot.png',
-							];
-							?>
-							<?php foreach ( $reader_themes as $slug => $theme ) : ?>
-								<?php $id = $name . "[$slug]"; ?>
-								<li>
-									<input
-										type="radio"
-										id="<?php echo esc_attr( $id ); ?>"
-										name="<?php echo esc_attr( $name ); ?>"
-										value="<?php echo esc_attr( $slug ); ?>"
-										<?php checked( $current_theme, $slug ); ?>
-									>
-									<label for="<?php echo esc_attr( $name . "[$slug]" ); ?>">
-										<img class="theme-screenshot" src="<?php echo esc_url( $theme['screenshot'] ); ?>" width="300" height="225" alt="<?php echo esc_attr( $theme['name'] ); ?>">
-										<span class="theme-name"><?php echo esc_html( $theme['name'] ); ?></span>
-									</label>
-								</li>
-							<?php endforeach; ?>
-						</ul>
+								$reader_themes[''] = [
+									'name'       => __( 'Classic', 'amp' ),
+									'screenshot' => plugin_dir_url( AMP__FILE__ ) . 'templates/screenshot.png',
+								];
+								?>
+								<?php foreach ( $reader_themes as $slug => $theme ) : ?>
+									<?php $id = $name . "[$slug]"; ?>
+									<li>
+										<input
+											type="radio"
+											id="<?php echo esc_attr( $id ); ?>"
+											name="<?php echo esc_attr( $name ); ?>"
+											value="<?php echo esc_attr( $slug ); ?>"
+											<?php checked( $current_theme, $slug ); ?>
+										>
+										<label for="<?php echo esc_attr( $name . "[$slug]" ); ?>">
+											<img class="theme-screenshot" src="<?php echo esc_url( $theme['screenshot'] ); ?>" width="300" height="225" alt="<?php echo esc_attr( $theme['name'] ); ?>">
+											<span class="theme-name"><?php echo esc_html( $theme['name'] ); ?></span>
+										</label>
+									</li>
+								<?php endforeach; ?>
+							</ul>
+						<?php else : ?>
+							<div class="notice notice-warning notice-alt inline">
+								<p><?php esc_html_e( 'Unable to choose a different theme for Reader mode since the site is configured to use a non-standard endpoint.', 'amp' ); ?></p>
+							</div>
+						<?php endif; ?>
 					</fieldset>
 
 					<script>
