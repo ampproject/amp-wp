@@ -1539,7 +1539,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function calculate_width( $amp_layout_spec, $input_layout, CssLength $input_width ) {
 		if (
-			( ! $this->is_empty_attribute_value( $input_layout ) || Layout::FIXED === $input_layout ) &&
+			(
+				! array_key_exists( $input_layout, Layout::TO_SPEC ) ||
+				Layout::FIXED === $input_layout
+			) &&
 			! $input_width->isDefined() &&
 			isset( $amp_layout_spec['defines_default_width'] )
 		) {
@@ -1568,11 +1571,11 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	private function calculate_height( $amp_layout_spec, $input_layout, CssLength $input_height ) {
 		if (
 			(
-				! $this->is_empty_attribute_value( $input_layout ) ||
+				! array_key_exists( $input_layout, Layout::TO_SPEC ) ||
 				in_array( $input_layout, [ Layout::FIXED, Layout::FIXED_HEIGHT ], true )
 			) &&
 			! $input_height->isDefined() &&
-			isset( $amp_layout_spec['defines_default_width'] )
+			isset( $amp_layout_spec['defines_default_height'] )
 		) {
 			$css_length = new CssLength( '1px' );
 			$css_length->validate( false, false );
