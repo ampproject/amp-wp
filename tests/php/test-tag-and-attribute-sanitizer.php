@@ -579,7 +579,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'amp-position-observer'                        => [
-				'<amp-position-observer intersection-ratios="1"></amp-position-observer>',
+				'<amp-position-observer intersection-ratios="1" layout="nodisplay"></amp-position-observer>',
 				null, // No change.
 				[ 'amp-position-observer' ],
 			],
@@ -1182,8 +1182,8 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'disallowed_empty_attr_removed'                => [
-				'<amp-user-notification data-dismiss-href></amp-user-notification>',
-				'<amp-user-notification></amp-user-notification>',
+				'<amp-user-notification data-dismiss-href layout="nodisplay"></amp-user-notification>',
+				'<amp-user-notification layout="nodisplay"></amp-user-notification>',
 				[ 'amp-user-notification' ],
 				[ AMP_Tag_And_Attribute_Sanitizer::MISSING_URL ],
 			],
@@ -1193,8 +1193,8 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'remove_node_with_disallowed_ancestor_and_disallowed_child_nodes' => [
-				'<amp-sidebar><amp-app-banner>This node is not allowed here.</amp-app-banner><nav><ul><li>Hello</li></ul><ol><li>Hello</li></ol></nav><amp-app-banner>This node is not allowed here.</amp-app-banner></amp-sidebar>',
-				'<amp-sidebar><nav><ul><li>Hello</li></ul><ol><li>Hello</li></ol></nav></amp-sidebar>',
+				'<amp-sidebar layout="nodisplay"><amp-app-banner>This node is not allowed here.</amp-app-banner><nav><ul><li>Hello</li></ul><ol><li>Hello</li></ol></nav><amp-app-banner>This node is not allowed here.</amp-app-banner></amp-sidebar>',
+				'<amp-sidebar layout="nodisplay"><nav><ul><li>Hello</li></ul><ol><li>Hello</li></ol></nav></amp-sidebar>',
 				[ 'amp-sidebar' ],
 				[
 					[
@@ -1627,7 +1627,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'amp_consent'                                  => [
-				'<amp-consent media="all" noloading></amp-consent>',
+				'<amp-consent media="all" noloading layout="nodisplay"></amp-consent>',
 				null, // No change.
 				[ 'amp-consent' ],
 			],
@@ -1669,16 +1669,16 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'amp-img-layout-illegal'                       => [
 				'<amp-img src="/img1.png" width="50" height="50" layout="container"></amp-img>',
-				'<amp-img src="/img1.png" width="50" height="50"></amp-img>',
+				'',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE_REGEX_CASEI ],
+				[ AMP_Tag_And_Attribute_Sanitizer::SPECIFIED_LAYOUT_INVALID ],
 			],
 
 			'amp-img-layout-unknown'                       => [
 				'<amp-img src="/img1.png" width="50" height="50" layout="bogus-value"></amp-img>',
-				'<amp-img src="/img1.png" width="50" height="50"></amp-img>',
+				'',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE_REGEX_CASEI ],
+				[ AMP_Tag_And_Attribute_Sanitizer::SPECIFIED_LAYOUT_INVALID ],
 			],
 
 			'non-layout-span-element-attrs'                => [
@@ -3330,8 +3330,8 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 	 * @covers AMP_Tag_And_Attribute_Sanitizer::sanitize()
 	 */
 	public function test_sanitize_body_only() {
-		$source   = '<b>Hello</b><script>document.write("hi");</script><amp-sidebar></amp-sidebar>';
-		$expected = '<b>Hello</b><amp-sidebar></amp-sidebar>';
+		$source   = '<b>Hello</b><script>document.write("hi");</script><amp-sidebar layout="nodisplay"></amp-sidebar>';
+		$expected = '<b>Hello</b><amp-sidebar layout="nodisplay"></amp-sidebar>';
 
 		$dom           = Document::fromHtml( $source );
 		$actual_errors = [];
