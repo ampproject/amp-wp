@@ -9,6 +9,7 @@ window.ampCustomizeControls = ( function( api, $ ) {
 		data: {
 			queryVar: 'amp',
 			panelId: '',
+			isAmp: false,
 			ampUrl: '',
 			l10n: {
 				unavailableMessage: '',
@@ -29,19 +30,42 @@ window.ampCustomizeControls = ( function( api, $ ) {
 	component.boot = function boot( data ) {
 		component.data = data;
 
-		function initPanel() {
-			api.panel( component.data.panelId, component.panelReady );
+		if ( component.data.panelId ) {
+			function initPanel() {
+				api.panel( component.data.panelId, component.panelReady );
+			}
+
+			if ( api.state ) {
+				component.addState();
+				api.bind( 'ready', initPanel );
+			} else { // WP<4.9.
+				api.bind( 'ready', function () {
+					component.addState(); // Needed for WP<4.9.
+					initPanel();
+				} );
+			}
 		}
 
-		if ( api.state ) {
-			component.addState();
-			api.bind( 'ready', initPanel );
-		} else { // WP<4.9.
-			api.bind( 'ready', function() {
-				component.addState(); // Needed for WP<4.9.
-				initPanel();
-			} );
+		// Inject AMP query var into every request.
+		if ( component.data.isAmp ) {
+			$.ajaxPrefilter( component.injectAmpIntoAjaxRequests );
 		}
+	};
+
+	/**
+	 * Rewrite Ajax requests to inject AMP query var.
+	 *
+	 * @param {Object} options Options.
+	 * @param {string} options.type Type.
+	 * @param {string} options.url URL.
+	 * @return {void}
+	 */
+	component.injectAmpIntoAjaxRequests = function injectAmpIntoAjaxRequests( options ) {
+		const url = new URL( options.url, window.location.href );
+		if ( ! url.searchParams.has( component.data.queryVar ) ) {
+			url.searchParams.append( component.data.queryVar, '1' );
+		}
+		options.url = url.href;
 	};
 
 	/**

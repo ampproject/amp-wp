@@ -151,8 +151,9 @@ class AMP_Template_Customizer {
 					wp_json_encode(
 						[
 							'queryVar' => amp_get_slug(),
-							'panelId'  => self::PANEL_ID,
+							'panelId'  => \AmpProject\AmpWP\ReaderThemeLoader::is_classic_reader_mode() ? self::PANEL_ID : null,
 							'ampUrl'   => amp_admin_get_preview_permalink(),
+							'isAmp'    => \AmpProject\AmpWP\ReaderThemeLoader::has_amp_query_var(),
 							'l10n'     => [
 								'unavailableMessage'  => __( 'AMP is not available for the page currently being previewed.', 'amp' ),
 								'unavailableLinkText' => __( 'Navigate to an AMP compatible page', 'amp' ),
