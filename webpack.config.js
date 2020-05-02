@@ -2,6 +2,7 @@
  * External dependencies
  */
 const path = require( 'path' );
+const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 const OptimizeCSSAssetsPlugin = require( 'optimize-css-assets-webpack-plugin' );
 const RtlCssPlugin = require( 'rtlcss-webpack-plugin' );
@@ -198,6 +199,12 @@ const wpPolyfills = {
 				}
 			},
 		} ),
+		new CopyWebpackPlugin( [
+			{
+				from: 'node_modules/lodash/lodash.js',
+				to: './vendor/lodash.js',
+			},
+		] ),
 		new WebpackBar( {
 			name: 'WordPress Polyfills',
 			color: '#21a0d0',
