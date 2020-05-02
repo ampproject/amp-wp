@@ -24,7 +24,9 @@ final class ReaderThemeLoader implements Service {
 	 * @return void
 	 */
 	public function register() {
-		add_action( 'setup_theme', [ $this, 'override_theme' ] );
+		// The following needs to run at plugins_loaded because that is when _wp_customize_include runs. Otherwise, the
+		// most logical action would be setup_theme.
+		add_action( 'plugins_loaded', [ $this, 'override_theme' ], 9 );
 	}
 
 	/**
