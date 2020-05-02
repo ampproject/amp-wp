@@ -112,6 +112,7 @@ final class ReaderThemeLoader implements Service {
 		add_filter( 'pre_option_template', $get_template );
 
 		$this->disable_widgets();
+		add_filter( 'customize_previewable_devices', [ $this, 'customize_previewable_devices' ] );
 	}
 
 	/**
@@ -125,5 +126,19 @@ final class ReaderThemeLoader implements Service {
 				return array_diff( $components, [ 'widgets' ] );
 			}
 		);
+	}
+
+	/**
+	 * Make mobile the default device when opening AMP Customizer.
+	 *
+	 * @param array $devices Devices.
+	 * @return array Devices.
+	 */
+	public function customize_previewable_devices( $devices ) {
+		if ( isset( $devices['mobile'] ) ) {
+			unset( $devices['desktop']['default'] );
+			$devices['mobile']['default'] = true;
+		}
+		return $devices;
 	}
 }
