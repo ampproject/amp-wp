@@ -491,19 +491,19 @@ function amp_add_amphtml_link() {
 	 * @todo This filter's name is incorrect. It's not about adding a canonical link but adding the amphtml link.
 	 * @since 0.2
 	 */
-	if ( false === apply_filters( 'amp_frontend_show_canonical', true ) ) {
+	if ( amp_is_canonical() || false === apply_filters( 'amp_frontend_show_canonical', true ) ) {
 		return;
 	}
 
 	$current_url = amp_get_current_url();
 
 	$amp_url = null;
-	if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-		if ( AMP_Theme_Support::is_paired_available() ) {
-			$amp_url = add_query_arg( amp_get_slug(), '', $current_url );
+	if ( \AmpProject\AmpWP\ReaderThemeLoader::is_classic_reader_mode() ) {
+		if ( $wp_query instanceof WP_Query && ( $wp_query->is_singular() || $wp_query->is_posts_page ) && post_supports_amp( get_post( get_queried_object_id() ) ) ) {
+			$amp_url = amp_get_permalink( get_queried_object_id() );
 		}
-	} elseif ( $wp_query instanceof WP_Query && ( $wp_query->is_singular() || $wp_query->is_posts_page ) && post_supports_amp( get_post( get_queried_object_id() ) ) ) {
-		$amp_url = amp_get_permalink( get_queried_object_id() );
+	} elseif ( AMP_Theme_Support::get_template_availability()['supported'] ) {
+		$amp_url = add_query_arg( amp_get_slug(), '', $current_url );
 	}
 
 	if ( ! $amp_url ) {
