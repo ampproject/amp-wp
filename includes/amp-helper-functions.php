@@ -759,6 +759,20 @@ function amp_register_default_scripts( $wp_scripts ) {
 		}
 	}
 
+	$vendor_scripts = [
+		'lodash' => [
+			'dependencies' => [],
+			'version'      => '4.17.15',
+		],
+	];
+	foreach ( $vendor_scripts as $handle => $handle_data ) {
+		if ( ! isset( $wp_scripts->registered[ $handle ] ) ) {
+			$path = amp_get_asset_url( sprintf( 'js/vendor/%s.js', $handle ) );
+
+			$wp_scripts->add( $handle, $path, $handle_data['dependencies'], $handle_data['version'], 1 );
+		}
+	}
+
 	// AMP Runtime.
 	$handle = 'amp-runtime';
 	$wp_scripts->add(
@@ -1209,6 +1223,9 @@ function amp_get_content_sanitizers( $post = null ) {
 	);
 
 	$sanitizers = [
+		'AMP_Embed_Sanitizer'             => [
+			'amp_to_amp_linking_enabled' => $amp_to_amp_linking_enabled,
+		],
 		'AMP_Core_Theme_Sanitizer'        => [
 			'template'       => get_template(),
 			'stylesheet'     => get_stylesheet(),
@@ -1227,7 +1244,6 @@ function amp_get_content_sanitizers( $post = null ) {
 		'AMP_O2_Player_Sanitizer'         => [],
 		'AMP_Audio_Sanitizer'             => [],
 		'AMP_Playbuzz_Sanitizer'          => [],
-		'AMP_Embed_Sanitizer'             => [],
 		'AMP_Iframe_Sanitizer'            => [
 			'add_placeholder' => true,
 			'current_origin'  => $current_origin,

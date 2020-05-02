@@ -11,6 +11,8 @@ use AmpProject\Optimizer\Transformer\ServerSideRendering;
 use AmpProject\RemoteRequest\StubbedRemoteGetRequest;
 use DirectoryIterator;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
+use ReflectionException;
 
 /**
  * Test the individual transformers against the NodeJS spec test suite.
@@ -125,22 +127,34 @@ final class SpecTest extends TestCase
      */
     private function getTransformer($scenario, $transformerClass)
     {
-        $arguments = [];
+        $stubbedRequests = TestMarkup::STUBBED_REMOTE_REQUESTS;
 
-        if (is_a($transformerClass, MakesRemoteRequests::class, true)) {
-            $stubbedRequests = TestMarkup::STUBBED_REMOTE_REQUESTS;
-
-            if (array_key_exists($scenario, self::STUBBED_REMOTE_REQUESTS_FOR_TESTS)) {
-                $stubbedRequests = array_merge($stubbedRequests, self::STUBBED_REMOTE_REQUESTS_FOR_TESTS[$scenario]);
-            }
-
-            $arguments[] = new StubbedRemoteGetRequest($stubbedRequests);
+        if (array_key_exists($scenario, self::STUBBED_REMOTE_REQUESTS_FOR_TESTS)) {
+            $stubbedRequests = array_merge($stubbedRequests, self::STUBBED_REMOTE_REQUESTS_FOR_TESTS[$scenario]);
         }
 
-        if (is_a($transformerClass, Configurable::class, true)) {
-            $arguments[] = (new Configuration())->getTransformerConfiguration($transformerClass);
-        }
+        $transformationEngine = new TransformationEngine(
+            new Configuration(),
+            new StubbedRemoteGetRequest($stubbedRequests)
+        );
 
-        return new $transformerClass(...$arguments);
+        return new $transformerClass(...$this->callPrivateMethod($transformationEngine, 'getTransformerDependencies', [$transformerClass]));
+    }
+
+    /**
+     * Call a private method as if it was public.
+     *
+     * @param object|string $object     Object instance or class string to call the method of.
+     * @param string        $methodName Name of the method to call.
+     * @param array         $args       Optional. Array of arguments to pass to the method.
+     * @return mixed Return value of the method call.
+     * @throws ReflectionException If the object could not be reflected upon.
+     */
+    private function callPrivateMethod($object, $methodName, $args = [])
+    {
+        $method = (new ReflectionClass($object))->getMethod($methodName);
+        $method->setAccessible(true);
+
+        return $method->invokeArgs($object, $args);
     }
 }

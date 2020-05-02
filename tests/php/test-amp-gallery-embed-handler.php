@@ -41,7 +41,7 @@ class AMP_Gallery_Embed_Handler_Test extends WP_UnitTestCase {
 	 */
 	public function get_conversion_data() {
 		$amp_carousel_caption = '<span class="amp-wp-gallery-caption"><span>' . self::CAPTION_TEXT . '</span></span>';
-		$loading_attribute    = version_compare( get_bloginfo( 'version' ), '5.4', '>' ) ? 'loading="lazy"' : '';
+		$loading_attribute    = version_compare( get_bloginfo( 'version' ), '5.5', '>' ) ? 'loading="lazy"' : '';
 
 		return [
 			'shortcode_with_invalid_id'               => [

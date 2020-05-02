@@ -135,7 +135,7 @@ class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
 	}
 
 	public function get_conversion_data() {
-		$loading_attribute = version_compare( get_bloginfo( 'version' ), '5.4', '>' ) ? 'loading="lazy" ' : '';
+		$loading_attribute = version_compare( get_bloginfo( 'version' ), '5.5', '>' ) ? 'loading="lazy" ' : '';
 
 		return [
 			'no_embed'                         => [
