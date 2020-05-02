@@ -97,17 +97,18 @@ final class ReaderThemeLoader implements Service {
 			return;
 		}
 
-		add_filter(
-			'template',
-			static function () use ( $theme ) {
-				return $theme->get_template();
-			}
-		);
-		add_filter(
-			'stylesheet',
-			static function () use ( $theme ) {
-				return $theme->get_stylesheet();
-			}
-		);
+		$get_template   = static function () use ( $theme ) {
+			return $theme->get_template();
+		};
+		$get_stylesheet = static function () use ( $theme ) {
+			return $theme->get_stylesheet();
+		};
+
+		add_filter( 'stylesheet', $get_stylesheet );
+		add_filter( 'template', $get_template );
+
+		// @link: https://core.trac.wordpress.org/ticket/20027
+		add_filter( 'pre_option_stylesheet', $get_stylesheet );
+		add_filter( 'pre_option_template', $get_template );
 	}
 }
