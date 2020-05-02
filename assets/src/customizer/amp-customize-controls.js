@@ -49,7 +49,16 @@ window.ampCustomizeControls = ( function( api, $ ) {
 
 		// Inject AMP query var into every request.
 		if ( component.data.isAmp ) {
-			$( '#customize-info .preview-notice' ).text( component.data.l10n.ampVersionNotice );
+			const previewNotice = $( '#customize-info .preview-notice' )
+			previewNotice.text( component.data.l10n.ampVersionNotice );
+
+			// @todo Move into a stylesheet.
+			previewNotice.css({
+				display: 'block',
+				lineHeight: 1.5,
+				marginRight: 28,
+			});
+
 			$.ajaxPrefilter( component.injectAmpIntoAjaxRequests );
 		}
 	};
