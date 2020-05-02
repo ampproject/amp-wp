@@ -369,8 +369,19 @@ class AMP_Validation_Manager {
 			return;
 		}
 
-		$availability = AMP_Theme_Support::get_template_availability();
-		if ( ! $availability['supported'] ) {
+		if ( \AmpProject\AmpWP\ReaderThemeLoader::is_classic_reader_mode() ) {
+			if ( is_singular() ) {
+				$post      = get_queried_object();
+				$available = ( $post instanceof WP_Post ) && post_supports_amp( $post ); // @todo Put into a ReaderMode class.
+			} else {
+				$available = false;
+			}
+		} else {
+			$availability = AMP_Theme_Support::get_template_availability();
+			$available    = $availability['supported'];
+		}
+
+		if ( ! $available ) {
 			self::$amp_admin_bar_item_added = false;
 			return;
 		}

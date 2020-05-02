@@ -387,7 +387,7 @@ function amp_get_current_url() {
 function amp_get_permalink( $post_id ) {
 
 	// When theme support is present, the plain query var should always be used.
-	if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+	if ( ! \AmpProject\AmpWP\ReaderThemeLoader::is_classic_reader_mode() ) {
 		$permalink = get_permalink( $post_id );
 		if ( ! amp_is_canonical() ) {
 			$permalink = add_query_arg( amp_get_slug(), '', $permalink );
@@ -1564,10 +1564,9 @@ function amp_wp_kses_mustache( $markup ) {
 }
 
 /**
- * Add "View AMP" admin bar item for Transitional/Reader mode.
+ * Add "View AMP" admin bar item.
  *
- * Note that when theme support is present (in Native/Transitional modes), the admin bar item will be further amended by
- * the `AMP_Validation_Manager::add_admin_bar_menu_items()` method.
+ * Note the admin bar item will be further amended by the `AMP_Validation_Manager::add_admin_bar_menu_items()` method.
  *
  * @see \AMP_Validation_Manager::add_admin_bar_menu_items()
  *
@@ -1578,11 +1577,11 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 		return;
 	}
 
-	if ( current_theme_supports( 'amp' ) ) {
+	if ( ! \AmpProject\AmpWP\ReaderThemeLoader::is_classic_reader_mode() ) {
 		$available = AMP_Theme_Support::get_template_availability()['supported'];
 	} elseif ( is_singular() ) {
 		$post      = get_queried_object();
-		$available = ( $post instanceof WP_Post ) && post_supports_amp( $post );
+		$available = ( $post instanceof WP_Post ) && post_supports_amp( $post ); // @todo Put into a ReaderMode class.
 	} else {
 		$available = false;
 	}
@@ -1603,7 +1602,7 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 	if ( is_amp_endpoint() ) {
 		$href = amp_remove_endpoint( amp_get_current_url() );
 	} elseif ( is_singular() ) {
-		$href = amp_get_permalink( get_queried_object_id() ); // For sake of Reader mode.
+		$href = amp_get_permalink( get_queried_object_id() ); // For sake of classic Reader mode.
 	} else {
 		$href = add_query_arg( amp_get_slug(), '', amp_get_current_url() );
 	}

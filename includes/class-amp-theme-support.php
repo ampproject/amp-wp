@@ -684,7 +684,7 @@ class AMP_Theme_Support {
 			$all_templates_supported_by_theme_support = 'all' === $theme_support_args['templates_supported'];
 		}
 		$all_templates_supported = (
-			current_theme_supports( self::SLUG )
+			! ReaderThemeLoader::is_classic_reader_mode()
 			&&
 			( $all_templates_supported_by_theme_support || AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED ) )
 		);
@@ -913,8 +913,6 @@ class AMP_Theme_Support {
 			],
 		];
 
-		$has_theme_support = current_theme_supports( self::SLUG );
-
 		if ( 'page' === get_option( 'show_on_front' ) ) {
 			$templates['is_front_page'] = [
 				'label'  => __( 'Homepage', 'amp' ),
@@ -933,21 +931,10 @@ class AMP_Theme_Support {
 				/* translators: %s: the URL to the edit post screen. */
 				$templates['is_home']['description'] = sprintf( __( 'Currently disabled at the <a href="%s">page level</a>.', 'amp' ), esc_url( get_edit_post_link( get_option( 'page_for_posts' ) ) ) );
 			}
-		} elseif ( $has_theme_support ) {
+		} else {
 			$templates['is_home'] = [
 				'label' => __( 'Homepage', 'amp' ),
 			];
-		}
-
-		// If the theme does not support AMP, no other templates are currently supported.
-		if ( ! $has_theme_support ) {
-			return array_map(
-				function ( $template ) {
-					$template['supported'] = true;
-					return $template;
-				},
-				$templates
-			);
 		}
 
 		$templates = array_merge(

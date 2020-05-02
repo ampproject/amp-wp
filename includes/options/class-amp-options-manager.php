@@ -30,7 +30,7 @@ class AMP_Options_Manager {
 		Option::ANALYTICS               => [],
 		Option::ALL_TEMPLATES_SUPPORTED => true,
 		Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
-		Option::READER_THEME            => 'classic',
+		Option::READER_THEME            => '',
 		Option::DEV_TOOLS               => false,
 		Option::VERSION                 => AMP__VERSION,
 	];

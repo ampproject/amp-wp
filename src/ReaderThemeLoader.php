@@ -58,6 +58,15 @@ final class ReaderThemeLoader implements Service {
 	}
 
 	/**
+	 * Determine whether it is classic reader mode.
+	 *
+	 * @return bool Is classic reader mode.
+	 */
+	public static function is_classic_reader_mode() {
+		return self::is_reader_mode() && ! self::get_reader_theme();
+	}
+
+	/**
 	 * Has AMP query var.
 	 *
 	 * @return bool Has AMP query var.
