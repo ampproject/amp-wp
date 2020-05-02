@@ -1404,6 +1404,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			}
 			return [
 				'code'      => ! $layout_attr ? self::IMPLIED_LAYOUT_INVALID : self::SPECIFIED_LAYOUT_INVALID,
+				'layout'    => $layout,
 				'node_name' => $node->tagName,
 			];
 		}
