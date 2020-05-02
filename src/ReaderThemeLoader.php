@@ -10,6 +10,7 @@ namespace AmpProject\AmpWP;
 use AMP_Options_Manager;
 use AMP_Theme_Support;
 use WP_Theme;
+use WP_Customize_Manager;
 
 /**
  * Switches to the designated Reader theme when template mode enabled and when requesting an AMP page.
@@ -113,6 +114,7 @@ final class ReaderThemeLoader implements Service {
 
 		$this->disable_widgets();
 		add_filter( 'customize_previewable_devices', [ $this, 'customize_previewable_devices' ] );
+		add_filter( 'customize_register', [ $this, 'remove_customizer_themes_panel' ], 11 );
 	}
 
 	/**
@@ -140,5 +142,16 @@ final class ReaderThemeLoader implements Service {
 			$devices['mobile']['default'] = true;
 		}
 		return $devices;
+	}
+
+	/**
+	 * Remove themes panel from AMP Customizer.
+	 *
+	 * @param WP_Customize_Manager $wp_customize
+	 */
+	public function remove_customizer_themes_panel( WP_Customize_Manager $wp_customize ) {
+		if ( $wp_customize->get_panel( 'themes' ) ) {
+			$wp_customize->remove_panel( 'themes' );
+		}
 	}
 }
