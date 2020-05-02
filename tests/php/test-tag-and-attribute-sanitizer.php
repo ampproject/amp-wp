@@ -2792,9 +2792,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[],
 				[
 					AMP_Tag_And_Attribute_Sanitizer::MISSING_LAYOUT_ATTRIBUTES,
-					AMP_Tag_And_Attribute_Sanitizer::MISSING_LAYOUT_ATTRIBUTES,
-					AMP_Tag_And_Attribute_Sanitizer::MISSING_LAYOUT_ATTRIBUTES,
-					AMP_Tag_And_Attribute_Sanitizer::MISSING_LAYOUT_ATTRIBUTES,
+					AMP_Tag_And_Attribute_Sanitizer::IMPLIED_LAYOUT_INVALID,
+					AMP_Tag_And_Attribute_Sanitizer::IMPLIED_LAYOUT_INVALID,
+					AMP_Tag_And_Attribute_Sanitizer::IMPLIED_LAYOUT_INVALID,
 				],
 			],
 
@@ -2807,9 +2807,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'',
 				[],
 				[
-					AMP_Tag_And_Attribute_Sanitizer::MISSING_LAYOUT_ATTRIBUTES,
-					AMP_Tag_And_Attribute_Sanitizer::MISSING_LAYOUT_ATTRIBUTES,
-					AMP_Tag_And_Attribute_Sanitizer::MISSING_LAYOUT_ATTRIBUTES,
+					AMP_Tag_And_Attribute_Sanitizer::IMPLIED_LAYOUT_INVALID,
+					AMP_Tag_And_Attribute_Sanitizer::IMPLIED_LAYOUT_INVALID,
+					AMP_Tag_And_Attribute_Sanitizer::IMPLIED_LAYOUT_INVALID,
 				],
 			],
 
@@ -2821,6 +2821,15 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				null,
 				[ 'amp-audio' ],
 				[],
+			],
+
+			'layout-specified-is-invalid'                  => [
+				'<amp-animation layout="responsive"><script type="application/json">{}</script></amp-animation>',
+				'',
+				[],
+				[
+					AMP_Tag_And_Attribute_Sanitizer::SPECIFIED_LAYOUT_INVALID,
+				],
 			],
 		];
 	}

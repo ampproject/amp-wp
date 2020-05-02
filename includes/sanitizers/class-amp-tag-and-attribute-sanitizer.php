@@ -44,6 +44,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	const DISALLOWED_TAG_ANCESTOR              = 'DISALLOWED_TAG_ANCESTOR';
 	const DUPLICATE_ONEOF_ATTRS                = 'DUPLICATE_ONEOF_ATTRS';
 	const DUPLICATE_UNIQUE_TAG                 = 'DUPLICATE_UNIQUE_TAG';
+	const IMPLIED_LAYOUT_INVALID               = 'IMPLIED_LAYOUT_INVALID';
 	const INCORRECT_MIN_NUM_CHILD_TAGS         = 'INCORRECT_MIN_NUM_CHILD_TAGS';
 	const INCORRECT_NUM_CHILD_TAGS             = 'INCORRECT_NUM_CHILD_TAGS';
 	const INVALID_ATTR_VALUE                   = 'INVALID_ATTR_VALUE';
@@ -79,6 +80,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	const MISSING_MANDATORY_PROPERTY           = 'MISSING_MANDATORY_PROPERTY';
 	const MISSING_REQUIRED_PROPERTY_VALUE      = 'MISSING_REQUIRED_PROPERTY_VALUE';
 	const MISSING_URL                          = 'MISSING_URL';
+	const SPECIFIED_LAYOUT_INVALID             = 'SPECIFIED_LAYOUT_INVALID';
 	const WRONG_PARENT_TAG                     = 'WRONG_PARENT_TAG';
 
 	/**
@@ -1341,11 +1343,44 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return true;
 		}
 
-		$layout_attr  = $node->getAttribute( Attribute::LAYOUT );
-		$input_width  = new CssLength( $node->getAttribute( Attribute::WIDTH ) );
-		$input_height = new CssLength( $node->getAttribute( Attribute::HEIGHT ) );
+		// We disable validating layout for tags where one of the layout attributes contains mustache syntax.
+		// See <https://github.com/ampproject/amphtml/blob/19f1b72/validator/engine/validator.js#L4301-L4311>.
+		if ( $this->is_inside_mustache_template( $node ) && $this->has_layout_attribute_with_mustache_variable( $node ) ) {
+			return true;
+		}
 
-		if ( ! $input_width->isDefined() && ! $input_height->isDefined() ) {
+		$layout_attr  = $node->getAttribute( Attribute::LAYOUT );
+		$sizes_attr   = $node->getAttribute( Attribute::SIZES );
+		$heights_attr = $node->getAttribute( Attribute::HEIGHTS );
+		$allow_fluid  = Layout::FLUID === $layout_attr;
+		$allow_auto   = true;
+
+		$input_width = new CssLength( $node->getAttribute( Attribute::WIDTH ) );
+		$input_width->validate( $allow_auto, $allow_fluid );
+		if ( ! $input_width->isValid() ) {
+			return [
+				'code'      => self::INVALID_LAYOUT_WIDTH,
+				'attribute' => Attribute::WIDTH,
+			];
+		}
+
+		$input_height = new CssLength( $node->getAttribute( Attribute::HEIGHT ) );
+		$input_height->validate( $allow_auto, $allow_fluid );
+		if ( ! $input_height->isValid() ) {
+			return [
+				'code'      => self::INVALID_LAYOUT_HEIGHT,
+				'attribute' => Attribute::HEIGHT,
+			];
+		}
+
+		// Now calculate the effective layout attributes.
+		$width  = $this->calculate_width( $tag_spec['amp_layout'], $layout_attr, $input_width );
+		$height = $this->calculate_height( $tag_spec['amp_layout'], $layout_attr, $input_height );
+		$layout = $this->calculate_layout( $layout_attr, $width, $height, $sizes_attr, $heights_attr );
+
+		// Does the tag support the computed layout?
+		// See <https://github.com/ampproject/amphtml/blob/19f1b72d/validator/engine/validator.js#L4364-L4391>.
+		if ( ! $this->supports_layout( $tag_spec, $layout ) ) {
 			/*
 			 * Special case. If no layout related attributes were provided, this implies
 			 * the CONTAINER layout. However, telling the user that the implied layout
@@ -1358,42 +1393,18 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			 * See https://github.com/ampproject/amp-wp/issues/4465
 			 */
 			if (
-				! $layout_attr
-				&& ! $this->supports_layout( $tag_spec, Layout::CONTAINER )
-				&& $this->supports_layout( $tag_spec, Layout::RESPONSIVE )
+				! $layout_attr &&
+				Layout::CONTAINER === $layout &&
+				$this->supports_layout( $tag_spec, Layout::RESPONSIVE )
 			) {
 				return [
 					'code'      => self::MISSING_LAYOUT_ATTRIBUTES,
 					'node_name' => $node->tagName,
 				];
 			}
-
-			// Elements with a valid layout but no width or height don't need to be validated.
-			return true;
-		}
-
-		if ( $this->is_inside_mustache_template( $node ) && $this->has_layout_attribute_with_mustache_variable( $node ) ) {
-			return true;
-		}
-
-		$layout_attr = $node->getAttribute( 'layout' );
-		$allow_fluid = Layout::FLUID === $layout_attr;
-		$allow_auto  = true;
-
-		$input_width->validate( $allow_auto, $allow_fluid );
-		$input_height->validate( $allow_auto, $allow_fluid );
-
-		if ( ! $input_width->isValid() ) {
 			return [
-				'code'      => self::INVALID_LAYOUT_WIDTH,
-				'attribute' => Attribute::WIDTH,
-			];
-		}
-
-		if ( ! $input_height->isValid() ) {
-			return [
-				'code'      => self::INVALID_LAYOUT_HEIGHT,
-				'attribute' => Attribute::HEIGHT,
+				'code'      => ! $layout_attr ? self::IMPLIED_LAYOUT_INVALID : self::SPECIFIED_LAYOUT_INVALID,
+				'node_name' => $node->tagName,
 			];
 		}
 
@@ -1401,14 +1412,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		if ( ! $layout_attr ) {
 			return true;
 		}
-
-		$sizes_attr   = $node->getAttribute( Attribute::SIZES );
-		$heights_attr = $node->getAttribute( Attribute::HEIGHTS );
-
-		// Now calculate the effective layout attributes.
-		$width  = $this->calculate_width( $tag_spec['amp_layout'], $layout_attr, $input_width );
-		$height = $this->calculate_height( $tag_spec['amp_layout'], $layout_attr, $input_height );
-		$layout = $this->calculate_layout( $layout_attr, $width, $height, $sizes_attr, $heights_attr );
 
 		// Only FLEX_ITEM allows for height to be set to auto.
 		if ( $height->isAuto() && Layout::FLEX_ITEM !== $layout ) {
