@@ -2787,6 +2787,21 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::MISSING_LAYOUT_ATTRIBUTES ],
 			],
+
+			'missing-layout-nodisplay'                     => [
+				'
+					<amp-animation><script type="application/json">{}</script></amp-animation>
+					<amp-link-rewriter><script type="application/json">{}</script></amp-link-rewriter>
+					<amp-install-serviceworker src="https://www.example.com/serviceworker.js" data-iframe-src="https://www.example.com/install-serviceworker.html"></amp-install-serviceworker>
+				',
+				'',
+				[],
+				[
+					AMP_Tag_And_Attribute_Sanitizer::MISSING_LAYOUT_ATTRIBUTES,
+					AMP_Tag_And_Attribute_Sanitizer::MISSING_LAYOUT_ATTRIBUTES,
+					AMP_Tag_And_Attribute_Sanitizer::MISSING_LAYOUT_ATTRIBUTES,
+				],
+			],
 		];
 	}
 
