@@ -14,6 +14,7 @@ window.ampCustomizeControls = ( function( api, $ ) {
 			l10n: {
 				unavailableMessage: '',
 				unavailableLinkText: '',
+				ampVersionNotice: '',
 			},
 		},
 		tooltipTimeout: 5000,
@@ -48,6 +49,7 @@ window.ampCustomizeControls = ( function( api, $ ) {
 
 		// Inject AMP query var into every request.
 		if ( component.data.isAmp ) {
+			$( '#customize-info .preview-notice' ).text( component.data.l10n.ampVersionNotice );
 			$.ajaxPrefilter( component.injectAmpIntoAjaxRequests );
 		}
 	};

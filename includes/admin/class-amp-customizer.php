@@ -157,6 +157,7 @@ class AMP_Template_Customizer {
 							'l10n'     => [
 								'unavailableMessage'  => __( 'AMP is not available for the page currently being previewed.', 'amp' ),
 								'unavailableLinkText' => __( 'Navigate to an AMP compatible page', 'amp' ),
+								'ampVersionNotice'    => __( 'You are customizing the AMP version of your site.', 'amp' ),
 							],
 						]
 					)
