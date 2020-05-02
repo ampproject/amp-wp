@@ -46,18 +46,20 @@ class AMP_Template_Customizer {
 
 		$self->wp_customize = $wp_customize;
 
-		/**
-		 * Fires when the AMP Template Customizer initializes.
-		 *
-		 * In practice the `customize_register` hook should be used instead.
-		 *
-		 * @since 0.4
-		 * @param AMP_Template_Customizer $self Instance.
-		 */
-		do_action( 'amp_customizer_init', $self );
+		if ( \AmpProject\AmpWP\ReaderThemeLoader::is_classic_reader_mode() ) {
+			/**
+			 * Fires when the AMP Template Customizer initializes.
+			 *
+			 * In practice the `customize_register` hook should be used instead.
+			 *
+			 * @since 0.4
+			 * @param AMP_Template_Customizer $self Instance.
+			 */
+			do_action( 'amp_customizer_init', $self );
 
-		$self->register_settings();
-		$self->register_ui();
+			$self->register_settings();
+			$self->register_ui();
+		}
 
 		add_action( 'customize_controls_enqueue_scripts', [ $self, 'add_customizer_scripts' ] );
 		add_action( 'customize_controls_print_footer_scripts', [ $self, 'print_controls_templates' ] );
