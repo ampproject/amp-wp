@@ -40,7 +40,7 @@ window.ampCustomizeControls = ( function( api, $ ) {
 				component.addState();
 				api.bind( 'ready', initPanel );
 			} else { // WP<4.9.
-				api.bind( 'ready', function () {
+				api.bind( 'ready', function() {
 					component.addState(); // Needed for WP<4.9.
 					initPanel();
 				} );
@@ -49,15 +49,15 @@ window.ampCustomizeControls = ( function( api, $ ) {
 
 		// Inject AMP query var into every request.
 		if ( component.data.isAmp ) {
-			const previewNotice = $( '#customize-info .preview-notice' )
+			const previewNotice = $( '#customize-info .preview-notice' );
 			previewNotice.text( component.data.l10n.ampVersionNotice );
 
 			// @todo Move into a stylesheet.
-			previewNotice.css({
+			previewNotice.css( {
 				display: 'block',
 				lineHeight: 1.5,
 				marginRight: 28,
-			});
+			} );
 
 			$.ajaxPrefilter( component.injectAmpIntoAjaxRequests );
 		}
