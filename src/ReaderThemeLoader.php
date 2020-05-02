@@ -147,7 +147,7 @@ final class ReaderThemeLoader implements Service {
 	/**
 	 * Remove themes panel from AMP Customizer.
 	 *
-	 * @param WP_Customize_Manager $wp_customize
+	 * @param WP_Customize_Manager $wp_customize Customize manager.
 	 */
 	public function remove_customizer_themes_panel( WP_Customize_Manager $wp_customize ) {
 		if ( $wp_customize->get_panel( 'themes' ) ) {

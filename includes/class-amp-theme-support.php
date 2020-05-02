@@ -406,7 +406,6 @@ class AMP_Theme_Support {
 			add_filter( 'template_include', [ __CLASS__, 'serve_paired_browsing_experience' ] );
 		}
 
-		$is_reader_mode = self::READER_MODE_SLUG === self::get_support_mode();
 		$has_query_var  = (
 			isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			||
