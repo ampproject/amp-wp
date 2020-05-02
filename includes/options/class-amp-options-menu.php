@@ -184,8 +184,8 @@ class AMP_Options_Menu {
 					<p><?php echo wp_kses_post( $transitional_description ); ?></p>
 				</dd>
 				<dt>
-					<input type="radio" id="theme_support_disabled" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="<?php echo esc_attr( AMP_Theme_Support::READER_MODE_SLUG ); ?>" <?php checked( $theme_support, AMP_Theme_Support::READER_MODE_SLUG ); ?>>
-					<label for="theme_support_disabled">
+					<input type="radio" id="theme_support_reader" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="<?php echo esc_attr( AMP_Theme_Support::READER_MODE_SLUG ); ?>" <?php checked( $theme_support, AMP_Theme_Support::READER_MODE_SLUG ); ?>>
+					<label for="theme_support_reader">
 						<strong><?php esc_html_e( 'Reader', 'amp' ); ?></strong>
 					</label>
 				</dt>
@@ -312,10 +312,10 @@ class AMP_Options_Menu {
 						(function ( $ ) {
 							const templateModeInputs = $( 'input[type=radio][name="amp-options[theme_support]"]' );
 							const readerModeThemesFieldset = $( '#reader_mode_themes' );
-							const themeSupportDisabledInput = $( '#theme_support_disabled' );
+							const themeSupportReaderInput = $( '#theme_support_reader' );
 
 							function isReaderMode() {
-								return themeSupportDisabledInput.prop( 'checked' );
+								return themeSupportReaderInput.prop( 'checked' );
 							}
 
 							function updateFieldsetVisibility() {
@@ -379,6 +379,12 @@ class AMP_Options_Menu {
 			</div>
 		<?php endif; ?>
 
+		<div id="non_singular_templates_unavailable_notice" class="notice notice-info notice-alt inline hidden">
+			<p>
+				<?php esc_html_e( 'Only the singular template is available in Reader mode when the Classic theme is selected.', 'amp' ); ?>
+			</p>
+		</div>
+
 		<fieldset id="supported_post_types_fieldset">
 			<?php
 			$element_name         = AMP_Options_Manager::OPTION_NAME . '[supported_post_types][]';
@@ -439,30 +445,39 @@ class AMP_Options_Menu {
 				// Update the visibility of the fieldsets based on the selected template mode and then whether all templates are indicated to be supported.
 				(function ( $ ) {
 					const templateModeInputs = $( 'input[type=radio][name="amp-options[theme_support]"]' );
-					const themeSupportDisabledInput = $( '#theme_support_disabled' );
 					const allTemplatesSupportedInput = $( '#all_templates_supported' );
+					const themeSupportReaderInput = $( '#theme_support_reader' );
+					const readerThemeInputs = $( 'input[type=radio][name="amp-options[reader_theme]"]' );
 
-					function isThemeSupportDisabled() {
-						return Boolean( themeSupportDisabledInput.length && themeSupportDisabledInput.prop( 'checked' ) );
+					function isClassicReaderMode() {
+						return (
+							themeSupportReaderInput.prop( 'checked' ) &&
+							'' === readerThemeInputs.filter( ':checked' ).val() // Classic.
+						);
 					}
 
 					function updateFieldsetVisibility() {
 						const allTemplatesSupported = 0 === allTemplatesSupportedInput.length || allTemplatesSupportedInput.prop( 'checked' );
 						$( '#all_templates_supported_fieldset, #supported_post_types_fieldset > .title' ).toggleClass(
 							'hidden',
-							isThemeSupportDisabled()
+							isClassicReaderMode()
 						);
 						$( '#supported_post_types_fieldset' ).toggleClass(
 							'hidden',
-							allTemplatesSupported && ! isThemeSupportDisabled()
+							allTemplatesSupported && ! isClassicReaderMode()
+						);
+						$( '#non_singular_templates_unavailable_notice' ).toggleClass(
+							'hidden',
+							! isClassicReaderMode()
 						);
 						$( '#supported_templates_fieldset' ).toggleClass(
 							'hidden',
-							allTemplatesSupported || isThemeSupportDisabled()
+							allTemplatesSupported || isClassicReaderMode()
 						);
 					}
 
 					templateModeInputs.on( 'change', updateFieldsetVisibility );
+					readerThemeInputs.on( 'change', updateFieldsetVisibility );
 					allTemplatesSupportedInput.on( 'click', updateFieldsetVisibility );
 					updateFieldsetVisibility();
 				})( jQuery );
