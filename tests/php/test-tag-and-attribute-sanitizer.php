@@ -2782,10 +2782,20 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'missing-layout-and-width-height'              => [
-				'<amp-img src="https://placeholder.com/350"></amp-img>',
+				'
+					<amp-img src="https://placeholder.com/350"></amp-img>
+					<amp-gist data-gistid="b9bb35bc68df68259af94430f012425f"></amp-gist>
+					<amp-web-push-widget visibility="unsubscribed"></amp-web-push-widget>
+					<amp-megaphone data-episode="OSC7749686951" data-light></amp-megaphone>
+				',
 				'',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::MISSING_LAYOUT_ATTRIBUTES ],
+				[
+					AMP_Tag_And_Attribute_Sanitizer::MISSING_LAYOUT_ATTRIBUTES,
+					AMP_Tag_And_Attribute_Sanitizer::MISSING_LAYOUT_ATTRIBUTES,
+					AMP_Tag_And_Attribute_Sanitizer::MISSING_LAYOUT_ATTRIBUTES,
+					AMP_Tag_And_Attribute_Sanitizer::MISSING_LAYOUT_ATTRIBUTES,
+				],
 			],
 
 			'missing-layout-nodisplay'                     => [
