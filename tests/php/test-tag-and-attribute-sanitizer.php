@@ -2812,6 +2812,16 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 					AMP_Tag_And_Attribute_Sanitizer::MISSING_LAYOUT_ATTRIBUTES,
 				],
 			],
+
+			'layout-attributes-not-required'               => [
+				'
+					<amp-audio src="https://example.com/foo.mp3"></amp-audio>
+					<amp-pixel src="https://example.com/tracker/foo"></amp-pixel>
+				',
+				null,
+				[ 'amp-audio' ],
+				[],
+			],
 		];
 	}
 
