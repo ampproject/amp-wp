@@ -30,6 +30,7 @@ final class ReaderThemeLoader implements Service {
 	/**
 	 * Is reader mode.
 	 *
+	 * @todo This will fail to return the right value as soon once override_theme is called and AMP_Theme_Support::read_theme_support() is executed.
 	 * @return bool Whether reader mode.
 	 */
 	public static function is_reader_mode() {

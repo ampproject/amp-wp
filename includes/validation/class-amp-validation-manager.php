@@ -508,6 +508,7 @@ class AMP_Validation_Manager {
 			$wp_admin_bar->add_node( $link_item );
 		}
 
+		// @todo This needs to be prevented if in Reader mode, but this can't be checked at the moment because read_theme_support will lose the fact its Reader mode when served on frontend.
 		if ( AMP_Theme_Support::is_paired_available() && $error_count <= 0 && amp_is_dev_mode() ) {
 			// Construct admin bar item to link to paired browsing experience.
 			$paired_browsing_item = [

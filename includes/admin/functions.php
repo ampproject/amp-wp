@@ -23,18 +23,16 @@ define( 'AMP_CUSTOMIZER_QUERY_VAR', 'customize_amp' );
  * And this does not need to toggle between the AMP and normal display.
  */
 function amp_init_customizer() {
-	if ( AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
-		return;
-	}
-
 	// Fire up the AMP Customizer.
 	add_action( 'customize_register', [ 'AMP_Template_Customizer', 'init' ], 500 );
 
-	// Add some basic design settings + controls to the Customizer.
-	add_action( 'amp_init', [ 'AMP_Customizer_Design_Settings', 'init' ] );
+	if ( \AmpProject\AmpWP\ReaderThemeLoader::is_classic_reader_mode() ) {
+		// Add some basic design settings + controls to the Customizer.
+		add_action( 'amp_init', [ 'AMP_Customizer_Design_Settings', 'init' ] );
 
-	// Add a link to the Customizer.
-	add_action( 'admin_menu', 'amp_add_customizer_link' );
+		// Add a link to the Customizer.
+		add_action( 'admin_menu', 'amp_add_customizer_link' );
+	}
 }
 
 /**
@@ -96,7 +94,7 @@ function amp_admin_get_preview_permalink() {
  */
 function amp_add_customizer_link() {
 	/** This filter is documented in includes/settings/class-amp-customizer-design-settings.php */
-	if ( ! apply_filters( 'amp_customizer_is_enabled', true ) || current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+	if ( ! apply_filters( 'amp_customizer_is_enabled', true ) ) {
 		return;
 	}
 
