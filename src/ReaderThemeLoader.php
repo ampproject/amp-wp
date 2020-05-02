@@ -110,5 +110,20 @@ final class ReaderThemeLoader implements Service {
 		// @link: https://core.trac.wordpress.org/ticket/20027
 		add_filter( 'pre_option_stylesheet', $get_stylesheet );
 		add_filter( 'pre_option_template', $get_template );
+
+		$this->disable_widgets();
+	}
+
+	/**
+	 * Disable widgets.
+	 */
+	public function disable_widgets() {
+		add_filter( 'sidebars_widgets', '__return_empty_array', PHP_INT_MAX );
+		add_filter(
+			'customize_loaded_components',
+			static function( $components ) {
+				return array_diff( $components, [ 'widgets' ] );
+			}
+		);
 	}
 }
