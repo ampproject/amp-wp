@@ -2027,7 +2027,7 @@ class AMP_Validation_Error_Taxonomy {
 				break;
 			case 'reviewed':
 				if ( 'post.php' === $pagenow ) {
-					$checked    = ( (int) $term->term_group & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK ) ? 'checked="checked"' : '';
+					$checked    = checked( (bool) ( $term->term_group & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK ), true, false );
 					$input_name = sprintf(
 						'%s[%s][%s]',
 						AMP_Validated_URL_Post_Type::VALIDATION_ERRORS_INPUT_KEY,
@@ -2061,9 +2061,11 @@ class AMP_Validation_Error_Taxonomy {
 	 *
 	 * @param array   $validation_error Validation error data.
 	 * @param WP_Term $term The validation error term.
+	 * @param bool    $wrap_with_details Whether to wrap the error details markup with a <details> element.
+	 * @param bool    $with_summary Whether to include the summary for the <details> element.
 	 * @return string HTML for the details section.
 	 */
-	public static function render_single_url_error_details( $validation_error, $term ) {
+	public static function render_single_url_error_details( $validation_error, $term, $wrap_with_details = true, $with_summary = true ) {
 		// Get the sources, if they exist.
 		if ( isset( $_GET['post'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$validation_errors = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( (int) $_GET['post'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -2287,11 +2289,17 @@ class AMP_Validation_Error_Taxonomy {
 
 		<?php
 
-		return sprintf(
-			'<details open class="details-attributes"><summary class="details-attributes__summary">%s</summary>%s</details>',
-			self::get_details_summary_label( $validation_error ),
-			ob_get_clean()
-		);
+		$output = ob_get_clean();
+
+		if ( $with_summary ) {
+			$output = sprintf( '<summary class="details-attributes__summary">%s</summary>%s', self::get_details_summary_label( $validation_error ), $output );
+		}
+
+		if ( $wrap_with_details ) {
+			$output = '<details open class="details-attributes">' . $output . '</details>';
+		}
+
+		return $output;
 	}
 
 	/**

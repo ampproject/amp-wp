@@ -156,7 +156,7 @@ table.striped > tbody > tr.even {
 }
 
 #amp-invalid-markup > .amp-icon::before {
-	margin-right: 2px;
+	margin-right: 3px;
 	margin-left: -2px;
 	font-size: 24px;
 }

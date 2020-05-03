@@ -5,10 +5,8 @@ import domReady from '@wordpress/dom-ready';
 import { __ } from '@wordpress/i18n';
 
 domReady( () => {
-	const errorDetailList = document.querySelector( 'details > dl.detailed' );
-
+	const errorDetailList = document.querySelector( 'dl.detailed' );
 	addAdditionalErrorDetails( errorDetailList );
-	unwrapErrorDetails( errorDetailList );
 } );
 
 const addAdditionalErrorDetails = ( errorDetailList ) => {
@@ -25,10 +23,4 @@ const addStatusDetail = ( errorDetails ) => {
 	detail.append( validationStatus );
 
 	errorDetails.prepend( term, detail );
-};
-
-const unwrapErrorDetails = ( errorDetailList ) => {
-	const detailsElement = errorDetailList.parentNode;
-	detailsElement.parentNode.append( errorDetailList );
-	detailsElement.style.display = 'none';
 };

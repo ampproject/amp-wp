@@ -278,15 +278,14 @@ const handleSearching = () => {
 };
 
 /**
- * Update icon for select element.
+ * Update border color for select element.
  *
  * @param {HTMLSelectElement} select Select element.
  */
-const updateSelectIcon = ( select ) => {
+const updateSelectBorderColor = ( select ) => {
 	const newOption = select.options[ select.selectedIndex ];
 	if ( newOption ) {
-		const color = newOption.getAttribute( 'data-color' );
-		select.style.borderColor = color;
+		select.style.borderColor = newOption.getAttribute( 'data-color' );
 	}
 };
 
@@ -305,7 +304,7 @@ const handleRowEvents = () => {
 			 */
 			statusSelect.addEventListener( 'change', ( event ) => {
 				if ( event.target.matches( 'select' ) ) {
-					updateSelectIcon( event.target );
+					updateSelectBorderColor( event.target );
 				}
 			} );
 		}
@@ -365,7 +364,7 @@ const handleBulkActions = () => {
 		Array.prototype.forEach.call( document.querySelectorAll( 'select.amp-validation-error-status' ), ( select ) => {
 			if ( select.closest( 'tr' ).querySelector( '.check-column input[type=checkbox]' ).checked ) {
 				select.value = '3'; // See AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS.
-				updateSelectIcon( select );
+				updateSelectBorderColor( select );
 				addBeforeUnloadPrompt();
 			}
 		} );
@@ -376,7 +375,7 @@ const handleBulkActions = () => {
 		Array.prototype.forEach.call( document.querySelectorAll( 'select.amp-validation-error-status' ), ( select ) => {
 			if ( select.closest( 'tr' ).querySelector( '.check-column input[type=checkbox]' ).checked ) {
 				select.value = '2'; // See AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS.
-				updateSelectIcon( select );
+				updateSelectBorderColor( select );
 				addBeforeUnloadPrompt();
 			}
 		} );

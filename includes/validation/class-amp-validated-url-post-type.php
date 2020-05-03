@@ -84,6 +84,11 @@ class AMP_Validated_URL_Post_Type {
 	 */
 	const NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT = 'amp_new_validation_error_urls_count';
 
+	/**
+	 * The name of the input that captures the current state of validation errors.
+	 *
+	 * @var string
+	 */
 	const VALIDATION_ERRORS_INPUT_KEY = 'validation_errors';
 
 	/**
@@ -1005,7 +1010,7 @@ class AMP_Validated_URL_Post_Type {
 					sprintf(
 						'<h3>%s</h3><p>%s</p>',
 						esc_html__( 'Reviewed', 'amp' ),
-						esc_html__( 'Confirm that the status of the validation error has been seen and approved of.', 'amp' )
+						esc_html__( 'Confirm that the action being taken on the invalid markup (causing a validation error) has been seen and approved.', 'amp' )
 					)
 				)
 			),
@@ -1476,7 +1481,7 @@ class AMP_Validated_URL_Post_Type {
 			?>
 			<div class="notice error-details">
 				<ul>
-					<?php echo AMP_Validation_Error_Taxonomy::render_single_url_error_details( $validation_error, $error ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<?php echo AMP_Validation_Error_Taxonomy::render_single_url_error_details( $validation_error, $error, false, false ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				</ul>
 			</div>
 			<?php
@@ -1967,11 +1972,7 @@ class AMP_Validated_URL_Post_Type {
 							</strong>
 							<?php
 							esc_html_e(
-								'Review each instance of invalid markup and determine whether the action of removing
-								(or keeping) is approved. You can change the status and click preview to see what
-								impact the invalid markup has on the page. Invalid markup that is not approved is
-								markup which you may not have seen yet or which you want to fix directly in
-								underlying code.',
+								'Review each instance of invalid markup and determine whether the action of removing (or keeping) is approved. You can change the status and click preview to see what impact the invalid markup has on the page. Invalid markup that is not approved is markup which you may not have seen yet or which you want to fix directly in underlying code.',
 								'amp'
 							);
 							echo '<br /><br />';
