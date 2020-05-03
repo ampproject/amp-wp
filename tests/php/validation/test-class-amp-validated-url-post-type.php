@@ -586,7 +586,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 				'details'                     => 'Context<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="&lt;h3&gt;Context&lt;/h3&gt;&lt;p&gt;The parent element of where the error occurred.&lt;/p&gt;"></div>',
 				'sources_with_invalid_output' => 'Sources',
 				'error_type'                  => 'Type',
-				'reviewed'                    => 'Reviewed<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="&lt;h3&gt;Reviewed&lt;/h3&gt;&lt;p&gt;Confirm that the status of the validation error has been seen and approved of.&lt;/p&gt;"></div>',
+				'reviewed'                    => 'Reviewed<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="&lt;h3&gt;Reviewed&lt;/h3&gt;&lt;p&gt;Confirm that the action being taken on the invalid markup (causing a validation error) has been seen and approved.&lt;/p&gt;"></div>',
 			],
 			AMP_Validated_URL_Post_Type::add_single_post_columns()
 		);
