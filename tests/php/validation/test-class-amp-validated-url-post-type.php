@@ -1357,9 +1357,9 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		// Now that the current user has permissions, this should output the correct markup.
 		$output = get_echo( [ 'AMP_Validated_URL_Post_Type', 'render_single_url_list_table' ], [ $post_correct_post_type ] );
 		$this->assertStringContains( '<form class="search-form wp-clearfix" method="get">', $output );
-		$this->assertStringContains( '<div id="accept-reject-buttons" class="hidden">', $output );
-		$this->assertStringContains( '<button type="button" class="button action accept">', $output );
-		$this->assertStringContains( '<button type="button" class="button action reject">', $output );
+		$this->assertStringContains( '<div id="remove-keep-buttons" class="hidden">', $output );
+		$this->assertStringContains( '<button type="button" class="button action remove">', $output );
+		$this->assertStringContains( '<button type="button" class="button action keep">', $output );
 	}
 
 	/**
