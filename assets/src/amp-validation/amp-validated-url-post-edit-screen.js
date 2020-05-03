@@ -56,12 +56,14 @@ const addBeforeUnloadPrompt = () => {
 /**
  * Watch for unsaved changes.
  *
- * Add an beforeunload warning when attempting to leave the page when there are unsaved changes,
- * unless the user is pressing the trash link or update button.
+ * Add an beforeunload warning when there are unsaved changes for the markup or review status.
  */
 const watchForUnsavedChanges = () => {
 	const onChange = ( event ) => {
-		if ( event.target.matches( 'select' ) && event.target.getAttribute( 'id' ) !== 'amp_validation_error_type' ) {
+		if (
+			event.target.matches( '.amp-validation-error-status' ) ||
+			event.target.matches( '.amp-validation-error-status-review' )
+		) {
 			document.getElementById( 'post' ).removeEventListener( 'change', onChange );
 			addBeforeUnloadPrompt();
 		}
@@ -292,10 +294,9 @@ const updateSelectIcon = ( select ) => {
  * Handles events that may occur for a row.
  */
 const handleRowEvents = () => {
-
 	document.querySelectorAll( 'tr[id^="tag-"]' ).forEach( ( row ) => {
 		const statusSelect = row.querySelector( '.amp-validation-error-status' );
-		const ackCheckbox  = row.querySelector( '.amp-validation-error-status-ack' );
+		const reviewCheckbox = row.querySelector( '.amp-validation-error-status-review' );
 
 		if ( statusSelect ) {
 			/*
@@ -309,9 +310,9 @@ const handleRowEvents = () => {
 			} );
 		}
 
-		if ( ackCheckbox ) {
+		if ( reviewCheckbox ) {
 			// Toggle the 'new' state for the row depending on the state of approval for the validation error.
-			ackCheckbox.addEventListener( 'change', () => row.classList.toggle( 'new' ) );
+			reviewCheckbox.addEventListener( 'change', () => row.classList.toggle( 'new' ) );
 		}
 	} );
 };
@@ -323,9 +324,9 @@ const handleRowEvents = () => {
  * Also, on unchecking the last checked box, this hides these buttons.
  */
 const handleBulkActions = () => {
-	const acceptButton = document.querySelector( 'button.action.accept' );
-	const rejectButton = document.querySelector( 'button.action.reject' );
-	const acceptAndRejectContainer = document.getElementById( 'accept-reject-buttons' );
+	const removeButton = document.querySelector( 'button.action.remove' );
+	const keepButton = document.querySelector( 'button.action.keep' );
+	const acceptAndRejectContainer = document.getElementById( 'remove-keep-buttons' );
 
 	const onChange = ( event ) => {
 		let areThereCheckedBoxes;
@@ -360,7 +361,7 @@ const handleBulkActions = () => {
 	} );
 
 	// Handle click on bulk "Remove" button.
-	acceptButton.addEventListener( 'click', () => {
+	removeButton.addEventListener( 'click', () => {
 		Array.prototype.forEach.call( document.querySelectorAll( 'select.amp-validation-error-status' ), ( select ) => {
 			if ( select.closest( 'tr' ).querySelector( '.check-column input[type=checkbox]' ).checked ) {
 				select.value = '3'; // See AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS.
@@ -371,7 +372,7 @@ const handleBulkActions = () => {
 	} );
 
 	// Handle click on bulk "Keep" button.
-	rejectButton.addEventListener( 'click', () => {
+	keepButton.addEventListener( 'click', () => {
 		Array.prototype.forEach.call( document.querySelectorAll( 'select.amp-validation-error-status' ), ( select ) => {
 			if ( select.closest( 'tr' ).querySelector( '.check-column input[type=checkbox]' ).checked ) {
 				select.value = '2'; // See AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS.

@@ -131,7 +131,7 @@ table.striped > tbody > tr.even {
 	margin-left: 4px;
 }
 
-#accept-reject-buttons:not(.hidden) {
+#remove-keep-buttons:not(.hidden) {
 	display: inline-block;
 }
 

@@ -2553,9 +2553,9 @@ class AMP_Validated_URL_Post_Type {
 			<?php $wp_list_table->search_box( esc_html__( 'Search Errors', 'amp' ), 'invalid-url-search' ); ?>
 		</form>
 
-		<div id="accept-reject-buttons" class="hidden">
-			<button type="button" class="button action accept"><?php esc_html_e( 'Remove', 'amp' ); ?></button>
-			<button type="button" class="button action reject"><?php esc_html_e( 'Keep', 'amp' ); ?></button>
+		<div id="remove-keep-buttons" class="hidden">
+			<button type="button" class="button action remove"><?php esc_html_e( 'Remove', 'amp' ); ?></button>
+			<button type="button" class="button action keep"><?php esc_html_e( 'Keep', 'amp' ); ?></button>
 			<div id="vertical-divider"></div>
 		</div>
 		<div id="url-post-filter" class="alignleft actions">

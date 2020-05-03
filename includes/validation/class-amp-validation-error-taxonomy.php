@@ -2034,7 +2034,7 @@ class AMP_Validation_Error_Taxonomy {
 						$term->slug,
 						self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION
 					);
-					$content   .= sprintf( '<input class="amp-validation-error-status-ack" type="checkbox" name="%s" %s />', esc_attr( $input_name ), $checked );
+					$content   .= sprintf( '<input class="amp-validation-error-status-review" type="checkbox" name="%s" %s />', esc_attr( $input_name ), $checked );
 				}
 		}
 		return $content;
