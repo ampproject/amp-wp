@@ -2027,7 +2027,7 @@ class AMP_Validation_Error_Taxonomy {
 				break;
 			case 'reviewed':
 				if ( 'post.php' === $pagenow ) {
-					$checked    = checked( (bool) ( $term->term_group & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK ), true, false );
+					$checked    = checked( 0 < ( (int) $term->term_group & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK ), true, false );
 					$input_name = sprintf(
 						'%s[%s][%s]',
 						AMP_Validated_URL_Post_Type::VALIDATION_ERRORS_INPUT_KEY,
