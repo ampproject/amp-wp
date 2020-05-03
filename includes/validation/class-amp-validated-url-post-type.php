@@ -1451,9 +1451,9 @@ class AMP_Validated_URL_Post_Type {
 			$error_title  = AMP_Validation_Error_Taxonomy::get_error_title_from_code( $validation_error );
 
 			if ( 0 === $error->count ) {
-				echo '<div class="notice accept-reject-error">';
+				echo '<div class="notice accept-reject-error"><p>';
 
-				$info = __( 'There are no validated URLs with this validation error. Would you like to delete it?', 'amp' );
+				esc_html_e( 'There are no validated URLs with this validation error. Would you like to delete it?', 'amp' );
 
 				$delete_url = wp_nonce_url(
 					add_query_arg(
@@ -1465,15 +1465,13 @@ class AMP_Validated_URL_Post_Type {
 					'delete'
 				);
 
-				$delete_button = sprintf(
+				printf(
 					' <a class="button button-small button-primary reject" href="%s">%s</a> ',
 					esc_url( $delete_url ),
-					esc_html( __( 'Delete', 'amp' ) )
+					esc_html__( 'Delete', 'amp' )
 				);
 
-				printf( '<p>%s %s</p>', esc_html( $info ), wp_kses_post( $delete_button ) );
-
-				echo '</div>';
+				echo '</p></div>';
 			}
 
 			$status_text   = AMP_Validation_Error_Taxonomy::get_status_text_with_icon( $sanitization );
