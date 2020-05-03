@@ -8,8 +8,8 @@
 namespace AmpProject\AmpWP\BackgroundTask;
 
 use AmpProject\AmpWP\HasDeactivation;
+use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Service;
-use AmpProject\Fonts;
 
 /**
  * Abstract base class for using cron to execute a background task.
@@ -51,14 +51,7 @@ abstract class CronBasedBackgroundTask implements Service, HasDeactivation {
 	 * @return string Warning icon markup.
 	 */
 	private function get_warning_icon() {
-		static $icon = null;
-		if ( null === $icon ) {
-			$icon = sprintf(
-				'<span style="font-family:%s">⚠️</span>',
-				esc_attr( Fonts::getEmojiFontFamilyValue() )
-			);
-		}
-		return $icon;
+		return sprintf( '<span style="vertical-align: middle">%s</span>', Icon::warning()->to_html() );
 	}
 
 	/**
