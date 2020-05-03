@@ -180,6 +180,7 @@ class AMP_Validated_URL_Post_Type {
 
 		// Edit post screen hooks.
 		add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_edit_post_screen_scripts' ] );
+		add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_edit_validation_error_screen_scripts' ] );
 		add_action( 'add_meta_boxes', [ __CLASS__, 'add_meta_boxes' ], PHP_INT_MAX );
 		add_action( 'edit_form_after_title', [ __CLASS__, 'render_single_url_list_table' ] );
 		add_filter( 'edit_' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_per_page', [ __CLASS__, 'get_terms_per_page' ] );
@@ -1756,6 +1757,32 @@ class AMP_Validated_URL_Post_Type {
 		$redirect = remove_query_arg( wp_removable_query_args(), $redirect );
 		wp_safe_redirect( add_query_arg( $args, $redirect ) );
 		exit();
+	}
+
+	/**
+	 * Enqueue scripts for the edit validation error screen.
+	 */
+	public static function enqueue_edit_validation_error_screen_scripts() {
+		if ( ! get_current_screen() || self::POST_TYPE_SLUG !== get_current_screen()->post_type ) {
+			return;
+		}
+
+		if ( ! isset( $_GET['amp_validation_error'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return;
+		}
+
+		$asset_file   = AMP__DIR__ . '/assets/js/amp-validation-error-edit-screen.asset.php';
+		$asset        = require $asset_file;
+		$dependencies = $asset['dependencies'];
+		$version      = $asset['version'];
+
+		wp_enqueue_script(
+			'amp-validation-error-edit-screen',
+			amp_get_asset_url( 'js/amp-validation-error-edit-screen.js' ),
+			$dependencies,
+			$version,
+			true
+		);
 	}
 
 	/**
