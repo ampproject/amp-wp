@@ -185,7 +185,6 @@ class AMP_Validated_URL_Post_Type {
 
 		// Edit post screen hooks.
 		add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_edit_post_screen_scripts' ] );
-		add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_edit_validation_error_screen_scripts' ] );
 		add_action( 'add_meta_boxes', [ __CLASS__, 'add_meta_boxes' ], PHP_INT_MAX );
 		add_action( 'edit_form_after_title', [ __CLASS__, 'render_single_url_list_table' ] );
 		add_filter( 'edit_' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_per_page', [ __CLASS__, 'get_terms_per_page' ] );
@@ -1449,7 +1448,6 @@ class AMP_Validated_URL_Post_Type {
 				$validation_error = [];
 			}
 			$sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $validation_error );
-			$status_text  = AMP_Validation_Error_Taxonomy::get_status_text_with_icon( $sanitization );
 			$error_title  = AMP_Validation_Error_Taxonomy::get_error_title_from_code( $validation_error );
 
 			if ( 0 === $error->count ) {
@@ -1481,12 +1479,19 @@ class AMP_Validated_URL_Post_Type {
 			?>
 			<div class="notice error-details">
 				<ul>
-					<?php echo AMP_Validation_Error_Taxonomy::render_single_url_error_details( $validation_error, $error, false, false ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<?php
+					$status_text  = AMP_Validation_Error_Taxonomy::get_status_text_with_icon( $sanitization );
+					$status_detail = sprintf( '<dt>%s</dt><dd>%s</dd>', esc_html__( 'Status', 'amp' ), $status_text );
+
+					$error_details = AMP_Validation_Error_Taxonomy::render_single_url_error_details( $validation_error, $error, false, false );
+					$error_details = str_replace( '<dl class="detailed">', '<dl class="detailed">' . $status_detail, $error_details );
+					echo $error_details; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					?>
 				</ul>
 			</div>
 			<?php
 
-			$heading = wp_kses_post( $error_title ) . ' ' . wp_kses_post( $status_text );
+			$heading = wp_kses_post( $error_title );
 			?>
 			<script type="text/javascript">
 				jQuery( function( $ ) {
@@ -1762,32 +1767,6 @@ class AMP_Validated_URL_Post_Type {
 		$redirect = remove_query_arg( wp_removable_query_args(), $redirect );
 		wp_safe_redirect( add_query_arg( $args, $redirect ) );
 		exit();
-	}
-
-	/**
-	 * Enqueue scripts for the edit validation error screen.
-	 */
-	public static function enqueue_edit_validation_error_screen_scripts() {
-		if ( ! get_current_screen() || self::POST_TYPE_SLUG !== get_current_screen()->post_type ) {
-			return;
-		}
-
-		if ( ! isset( $_GET['amp_validation_error'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			return;
-		}
-
-		$asset_file   = AMP__DIR__ . '/assets/js/amp-validation-error-edit-screen.asset.php';
-		$asset        = require $asset_file;
-		$dependencies = $asset['dependencies'];
-		$version      = $asset['version'];
-
-		wp_enqueue_script(
-			'amp-validation-error-edit-screen',
-			amp_get_asset_url( 'js/amp-validation-error-edit-screen.js' ),
-			$dependencies,
-			$version,
-			true
-		);
 	}
 
 	/**
