@@ -1951,7 +1951,7 @@ class AMP_Validated_URL_Post_Type {
 								'Review each instance of invalid markup and determine whether the action of removing (or keeping) is approved. You can change the status and click preview to see what impact the invalid markup has on the page. Invalid markup that is not approved is markup which you may not have seen yet or which you want to fix directly in underlying code.',
 								'amp'
 							);
-							echo '<br /><br />';
+							echo '<br><br>';
 						}
 						?>
 
