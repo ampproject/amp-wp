@@ -325,7 +325,7 @@ const handleRowEvents = () => {
 const handleBulkActions = () => {
 	const removeButton = document.querySelector( 'button.action.remove' );
 	const keepButton = document.querySelector( 'button.action.keep' );
-	const acceptAndRejectContainer = document.getElementById( 'remove-keep-buttons' );
+	const removeAndKeepContainer = document.getElementById( 'remove-keep-buttons' );
 
 	const onChange = ( event ) => {
 		let areThereCheckedBoxes;
@@ -336,7 +336,7 @@ const handleBulkActions = () => {
 
 		if ( event.target.checked ) {
 			// This checkbox was checked, so ensure the buttons display.
-			acceptAndRejectContainer.classList.remove( 'hidden' );
+			removeAndKeepContainer.classList.remove( 'hidden' );
 		} else {
 			/*
 			 * This checkbox was unchecked.
@@ -350,7 +350,7 @@ const handleBulkActions = () => {
 				}
 			} );
 			if ( ! areThereCheckedBoxes ) {
-				acceptAndRejectContainer.classList.add( 'hidden' );
+				removeAndKeepContainer.classList.add( 'hidden' );
 			}
 		}
 	};
