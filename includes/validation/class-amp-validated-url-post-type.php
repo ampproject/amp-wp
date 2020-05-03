@@ -1476,17 +1476,16 @@ class AMP_Validated_URL_Post_Type {
 				echo '</div>';
 			}
 
+			$status_text   = AMP_Validation_Error_Taxonomy::get_status_text_with_icon( $sanitization );
+			$status_detail = sprintf( '<dt>%s</dt><dd>%s</dd>', esc_html__( 'Status', 'amp' ), wp_kses_post( $status_text ) );
+
+			$error_details = AMP_Validation_Error_Taxonomy::render_single_url_error_details( $validation_error, $error, false, false );
+			$error_details = str_replace( '<dl class="detailed">', '<dl class="detailed">' . $status_detail, $error_details );
+
 			?>
 			<div class="notice error-details">
 				<ul>
-					<?php
-					$status_text  = AMP_Validation_Error_Taxonomy::get_status_text_with_icon( $sanitization );
-					$status_detail = sprintf( '<dt>%s</dt><dd>%s</dd>', esc_html__( 'Status', 'amp' ), $status_text );
-
-					$error_details = AMP_Validation_Error_Taxonomy::render_single_url_error_details( $validation_error, $error, false, false );
-					$error_details = str_replace( '<dl class="detailed">', '<dl class="detailed">' . $status_detail, $error_details );
-					echo $error_details; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-					?>
+					<?php echo $error_details; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				</ul>
 			</div>
 			<?php
