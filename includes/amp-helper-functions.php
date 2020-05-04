@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Services;
 
@@ -62,6 +63,8 @@ function amp_bootstrap_plugin() {
 	 */
 	add_action( 'wp_default_scripts', 'amp_register_default_scripts' );
 
+	add_action( 'wp_default_styles', 'amp_register_default_styles' );
+
 	// Ensure async and custom-element/custom-template attributes are present on script tags.
 	add_filter( 'script_loader_tag', 'amp_filter_script_loader_tag', PHP_INT_MAX, 2 );
 
@@ -103,6 +106,18 @@ function amp_init() {
 	add_action( 'init', [ 'AMP_Post_Type_Support', 'add_post_type_support' ], 1000 ); // After post types have been defined.
 	add_action( 'parse_query', 'amp_correct_query_when_is_front_page' );
 	add_action( 'admin_bar_menu', 'amp_add_admin_bar_view_link', 100 );
+
+	add_action(
+		'admin_bar_init',
+		function () {
+			$handle = 'amp-icons';
+			if ( ! is_admin() && wp_style_is( $handle, 'registered' ) ) {
+				wp_styles()->registered[ $handle ]->deps[] = 'admin-bar'; // Ensure included in dev mode.
+				wp_enqueue_style( $handle );
+			}
+		}
+	);
+
 	add_action( 'wp_loaded', 'amp_editor_core_blocks' );
 	add_filter( 'request', 'amp_force_query_var_value' );
 
@@ -819,6 +834,23 @@ function amp_register_default_scripts( $wp_scripts ) {
 			null
 		);
 	}
+}
+
+/**
+ * Register default styles.
+ *
+ * @since 1.6
+ *
+ * @param WP_Styles $styles Styles.
+ */
+function amp_register_default_styles( WP_Styles $styles ) {
+	$styles->add(
+		'amp-icons',
+		amp_get_asset_url( 'css/amp-icons.css' ),
+		[ 'dashicons' ],
+		AMP__VERSION
+	);
+	$styles->add_data( 'amp-icons', 'rtl', 'replace' );
 }
 
 /**
@@ -1624,13 +1656,16 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 		$href = add_query_arg( amp_get_slug(), '', amp_get_current_url() );
 	}
 
-	$icon = '&#x1F517;'; // LINK SYMBOL.
-
 	$parent = [
 		'id'    => 'amp',
 		'title' => sprintf(
-			'<span id="amp-admin-bar-item-status-icon">%s</span> %s',
-			$icon,
+			'%s %s',
+			Icon::link()->to_html(
+				[
+					'id'    => 'amp-admin-bar-item-status-icon',
+					'class' => 'ab-icon',
+				]
+			),
 			esc_html( is_amp_endpoint() ? __( 'Non-AMP', 'amp' ) : __( 'AMP', 'amp' ) )
 		),
 		'href'  => esc_url( $href ),

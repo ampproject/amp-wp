@@ -745,7 +745,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		);
 		ob_start();
 		AMP_Validation_Error_Taxonomy::render_taxonomy_filters( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
-		$this->assertStringContains( 'New errors <span class="count">(2)</span>', ob_get_clean() );
+		$this->assertStringContains( 'Unreviewed errors <span class="count">(2)</span>', ob_get_clean() );
 	}
 
 	/**
@@ -810,7 +810,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		$output = get_echo( [ 'AMP_Validation_Error_Taxonomy', 'render_error_status_filter' ] );
 		$this->assertStringContains(
 			sprintf(
-				'With new errors <span class="count">(%d)</span>',
+				'With unreviewed errors <span class="count">(%d)</span>',
 				$number_of_errors
 			),
 			$output
@@ -956,16 +956,19 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		$_GET['amp_actioned_count'] = $count;
 		$current_screen->taxonomy   = AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG;
 		$message                    = get_echo( [ 'AMP_Validation_Error_Taxonomy', 'add_admin_notices' ] );
-		$this->assertEquals(
-			sprintf( '<div class="notice notice-success is-dismissible"><p>Removed %d instances of invalid markup. They will no longer block related URLs from being served as AMP.</p></div>', $count ),
-			$message
-		);
+		$this->assertEquals( '', $message );
 
 		// Test the second conditional, where the error is rejected.
 		$_GET['amp_actioned'] = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION;
 		$message              = get_echo( [ 'AMP_Validation_Error_Taxonomy', 'add_admin_notices' ] );
+		$this->assertEquals( '', $message );
+
+		// Test the second conditional, where the error is rejected.
+		$_GET['amp_actioned']       = 'delete';
+		$_GET['amp_actioned_count'] = 1;
+		$message                    = get_echo( [ 'AMP_Validation_Error_Taxonomy', 'add_admin_notices' ] );
 		$this->assertEquals(
-			sprintf( '<div class="notice notice-success is-dismissible"><p>Kept %d instances of invalid markup. They will continue to block related URLs from being served as AMP.</p></div>', $count ),
+			'<div class="notice notice-success is-dismissible"><p>Deleted 1 instance of validation errors.</p></div>',
 			$message
 		);
 	}
@@ -1009,15 +1012,9 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 
 		$filtered_actions = apply_filters( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_row_actions', $initial_actions, get_term( $term_this_taxonomy ) );
 		$this->assertEqualSets(
-			[ 'details', AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION, AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION ],
+			[ 'details', 'delete' ],
 			array_keys( $filtered_actions )
 		);
-		$reject_action = $filtered_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION ];
-		$accept_action = $filtered_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION ];
-		$this->assertStringContains( strval( $term_this_taxonomy->term_id ), $reject_action );
-		$this->assertStringContains( strval( $term_this_taxonomy->term_id ), $accept_action );
-		$this->assertStringContains( 'Keep', $reject_action );
-		$this->assertStringContains( 'Confirm removed', $accept_action );
 	}
 
 	/**
@@ -1258,12 +1255,12 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		// Test the 'status' block in the switch for the error taxonomy page.
 		$GLOBALS['pagenow'] = 'edit-tags.php';
 		$filtered_content   = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'status', $term_id );
-		$this->assertStringContains( '<span class="status-text rejected">Kept</span>', $filtered_content );
+		$this->assertStringContains( '<span class="status-text"><span class=" amp-icon amp-invalid"></span> Kept</span>', $filtered_content );
 
 		// Test the 'status' block switch for the single error page.
 		$GLOBALS['pagenow'] = 'post.php';
 		$filtered_content   = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'status', $term_id );
-		$this->assertStringContains( '<select class="amp-validation-error-status" id="amp_validation_error_term_status', $filtered_content );
+		$this->assertStringContains( sprintf( '<select class="amp-validation-error-status" name="%s[term-', AMP_Validated_URL_Post_Type::VALIDATION_ERRORS_INPUT_KEY ), $filtered_content );
 
 		// Test the 'created_date_gmt' block in the switch.
 		$date = current_time( 'mysql', true );
@@ -1427,7 +1424,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 	 */
 	public function test_handle_single_url_page_bulk_and_inline_actions() {
 		// Create a new error term.
-		$initial_accepted_status = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS;
+		$initial_accepted_status = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS;
 		$error_term              = self::factory()->term->create_and_get(
 			[
 				'taxonomy'    => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
@@ -1449,7 +1446,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		$this->assertEquals( get_term( $error_term->term_id )->term_group, $initial_accepted_status );
 
 		/*
-		 * Now that the post type is correct, this should update the post accepted status to be 'accepted'.
+		 * Although the post type is correct, this should not update the post accepted status to be 'accepted'.
 		 * There should be a warning because wp_safe_redirect() should be called at the end of the tested method.
 		 */
 		$e = null;
@@ -1460,9 +1457,9 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		}
 
 		$this->assertStringContains( 'Cannot modify header information', $e->getMessage() );
-		$this->assertEquals( get_term( $error_term->term_id )->term_group, AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS );
+		$this->assertEquals( get_term( $error_term->term_id )->term_group, AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS );
 
-		// When the action is to 'reject' the error, this should update the status of the error to 'rejected'.
+		// When the action is to 'reject' the error, this should not update the status of the error to 'rejected'.
 		$_REQUEST['action'] = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION;
 		try {
 			AMP_Validation_Error_Taxonomy::handle_single_url_page_bulk_and_inline_actions( $correct_post_type );
@@ -1471,7 +1468,18 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		}
 
 		$this->assertStringContains( 'Cannot modify header information', $e->getMessage() );
-		$this->assertEquals( get_term( $error_term->term_id )->term_group, AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS );
+		$this->assertEquals( get_term( $error_term->term_id )->term_group, AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS );
+
+		// When the action is to 'delete' the error, this should delete the error.
+		$_REQUEST['action'] = 'delete';
+		try {
+			AMP_Validation_Error_Taxonomy::handle_single_url_page_bulk_and_inline_actions( $correct_post_type );
+		} catch ( Exception $exception ) {
+			$e = $exception;
+		}
+
+		$this->assertStringContains( 'Cannot modify header information', $e->getMessage() );
+		$this->assertEquals( null, get_term( $error_term->term_id ) );
 	}
 
 	/**
@@ -1485,7 +1493,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		// The action argument isn't either an accepted or rejected status, so the redirect shouldn't change.
 		$this->assertEquals( $initial_redirect_to, AMP_Validation_Error_Taxonomy::handle_validation_error_update( $initial_redirect_to, 'unexpected-action', [] ) );
 
-		$action = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION;
+		$action = 'delete';
 		$this->assertEquals(
 			add_query_arg(
 				[

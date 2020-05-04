@@ -5,13 +5,13 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\RemoteRequest\WpHttpRemoteGetRequest;
 use AmpProject\DevMode;
 use AmpProject\Dom\Document;
 use AmpProject\Exception\FailedToGetFromRemoteUrl;
-use AmpProject\Fonts;
 use AmpProject\RemoteGetRequest;
 use Sabberworm\CSS\RuleSet\DeclarationBlock;
 use Sabberworm\CSS\CSSList\CSSList;
@@ -2935,7 +2935,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		 * @var DOMElement $stylesheets_li_element
 		 */
 		$stylesheets_li_element = $validity_li_element->cloneNode( true );
-		$stylesheets_a_element  = $stylesheets_li_element->getElementsByTagName( 'a' )->item( 0 );
+		$stylesheets_li_element->setAttribute( 'id', 'wp-admin-bar-amp-stylesheets' );
+
+		$stylesheets_a_element = $stylesheets_li_element->getElementsByTagName( 'a' )->item( 0 );
 		if ( ! ( $stylesheets_a_element instanceof DOMElement ) ) {
 			return;
 		}
@@ -2961,15 +2963,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$stylesheets_a_element->appendChild( $this->dom->createTextNode( $menu_item_text ) );
 
 		if ( $css_usage_percentage > 100 ) {
-			$emoji = '🚫';
+			$icon = Icon::INVALID;
 		} elseif ( $css_usage_percentage >= self::CSS_BUDGET_WARNING_PERCENTAGE ) {
-			$emoji = '⚠️';
+			$icon = Icon::WARNING;
 		}
-		if ( isset( $emoji ) ) {
-			$stylesheets_a_element->appendChild( $this->dom->createTextNode( ' ' ) );
+		if ( isset( $icon ) ) {
 			$span = $this->dom->createElement( 'span' );
-			$span->setAttribute( 'style', sprintf( 'font-family: %s;', Fonts::getEmojiFontFamilyValue() ) );
-			$span->appendChild( $this->dom->createTextNode( $emoji ) );
+			$span->setAttribute( 'class', 'ab-icon amp-icon ' . $icon );
 			$stylesheets_a_element->appendChild( $span );
 		}
 
