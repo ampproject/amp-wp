@@ -6,6 +6,8 @@
  * @since 1.4
  */
 
+use AmpProject\Dom\Document;
+
 /**
  * Class AMP_Scribd_Embed_Handler
  */
@@ -15,63 +17,66 @@ class AMP_Scribd_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Registers embed.
 	 */
 	public function register_embed() {
-		add_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ], 10, 2 );
+		// Not implemented.
 	}
 
 	/**
 	 * Unregisters embed.
 	 */
 	public function unregister_embed() {
-		remove_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ] );
+		// Not implemented.
 	}
 
 	/**
-	 * Filter oEmbed HTML for Scribd to be AMP compatible.
+	 * Sanitize all gfycat <iframe> tags to <amp-gfycat>.
 	 *
-	 * @param string $cache Cache for oEmbed.
-	 * @param string $url   Embed URL.
-	 * @return string Embed.
+	 * @param Document $dom DOM.
 	 */
-	public function filter_embed_oembed_html( $cache, $url ) {
-		if ( ! in_array( wp_parse_url( $url, PHP_URL_HOST ), [ 'scribd.com', 'www.scribd.com' ], true ) ) {
-			return $cache;
+	public function sanitize_raw_embeds( Document $dom ) {
+		$nodes = $dom->xpath->query( '//iframe[ starts-with( @src, "https://www.scribd.com/embeds/" ) ]' );
+
+		foreach ( $nodes as $node ) {
+			if ( ! $this->is_raw_embed( $node ) ) {
+				continue;
+			}
+			$this->sanitize_raw_embed( $node );
+		}
+	}
+
+	/**
+	 * Determine if the node has already been sanitized.
+	 *
+	 * @param DOMElement $node The DOMNode.
+	 * @return bool Whether the node is a raw embed.
+	 */
+	protected function is_raw_embed( DOMElement $node ) {
+		return $node->parentNode && 'amp-iframe' !== $node->parentNode->nodeName;
+	}
+
+	/**
+	 * Make Scribd embed AMP compatible.
+	 *
+	 * @param DOMElement $iframe_node The node to make AMP compatible.
+	 */
+	private function sanitize_raw_embed( DOMElement $iframe_node ) {
+		$required_sandbox_permissions  = 'allow-popups allow-scripts';
+		$iframe_node->setAttribute(
+			'sandbox',
+			sprintf( '%s %s', $iframe_node->getAttribute( 'sandbox' ), $required_sandbox_permissions )
+		);
+
+		// Remove the accompanied script tag so that the iframe can be later unwrapped.
+		if ( 'script' === $iframe_node->nextSibling->nodeName ) {
+			$parent_element = AMP_DOM_Utils::get_parent_element( $iframe_node );
+			if ( $parent_element ) {
+				$parent_element->removeChild( $iframe_node->nextSibling );
+			}
 		}
 
-		return $this->sanitize_iframe( $cache );
-	}
+		$iframe_node->setAttribute( 'layout', 'responsive' );
 
-	/**
-	 * Retrieves iframe element from HTML string and amends or appends the correct sandbox permissions.
-	 *
-	 * @param string $html HTML string.
-	 * @return string iframe with correct sandbox permissions.
-	 */
-	private function sanitize_iframe( $html ) {
-		return preg_replace_callback(
-			'#^.*<iframe(?P<iframe_attributes>[^>]+?)></iframe>.*$#s',
-			function ( $matches ) {
-				$attrs = $matches['iframe_attributes'];
+		$this->maybe_unwrap_p_element( $iframe_node );
 
-				// Amend the required keywords to the iframe's sandbox.
-				$sandbox  = 'allow-popups allow-scripts';
-				$replaced = 0;
-				$attrs    = preg_replace(
-					'#(?<=\ssandbox=["\'])#',
-					"{$sandbox} ", // whitespace is necessary to separate prior permissions.
-					$attrs,
-					1,
-					$replaced
-				);
-
-				// If no sandbox attribute was found, then add the attribute.
-				if ( 0 === $replaced ) {
-					$attrs .= sprintf( ' sandbox="%s"', $sandbox );
-				}
-
-				// The iframe sanitizer will convert this into an amp-iframe.
-				return "<iframe{$attrs}></iframe>";
-			},
-			$html
-		);
+		// The iframe sanitizer will further sanitize and convert this into an amp-iframe.
 	}
 }

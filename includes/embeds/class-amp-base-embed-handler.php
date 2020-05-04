@@ -115,15 +115,12 @@ abstract class AMP_Base_Embed_Handler {
 	 * @param DOMElement $node Node.
 	 */
 	protected function maybe_unwrap_p_element( DOMElement $node ) {
-		$parent_node = $node->parentNode;
-		while ( $parent_node && ! ( $parent_node instanceof DOMElement ) ) {
-			$parent_node = $parent_node->parentNode;
-		}
+	    $parent_element = AMP_DOM_Utils::get_parent_element( $node );
 
-		if ( 'p' === $parent_node->nodeName && false === $parent_node->hasAttributes() ) {
-			$children = $parent_node->getElementsByTagName( '*' );
+		if ( $parent_element && 'p' === $parent_element->nodeName && false === $parent_element->hasAttributes() ) {
+			$children = $parent_element->getElementsByTagName( '*' );
 			if ( 1 === $children->length ) {
-				$parent_node->parentNode->replaceChild( $node, $parent_node );
+				$parent_element->parentNode->replaceChild( $node, $parent_element );
 			}
 		}
 	}
