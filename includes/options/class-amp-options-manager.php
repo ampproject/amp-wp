@@ -28,7 +28,7 @@ class AMP_Options_Manager {
 		Option::THEME_SUPPORT           => AMP_Theme_Support::READER_MODE_SLUG,
 		Option::SUPPORTED_POST_TYPES    => [ 'post' ],
 		Option::ANALYTICS               => [],
-		Option::ALL_TEMPLATES_SUPPORTED => true,
+		Option::ALL_TEMPLATES_SUPPORTED => false, // Specified in get_options() below.
 		Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
 		Option::READER_THEME            => '',
 		Option::DEV_TOOLS               => false,
@@ -90,6 +90,7 @@ class AMP_Options_Manager {
 		if ( current_theme_supports( 'amp' ) ) {
 			$defaults[ Option::THEME_SUPPORT ] = amp_is_canonical() ? AMP_Theme_Support::STANDARD_MODE_SLUG : AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
 		}
+		$defaults[ Option::ALL_TEMPLATES_SUPPORTED ] = AMP_Theme_Support::READER_MODE_SLUG !== $defaults[ Option::THEME_SUPPORT ];
 
 		// Default to enable Dev Tools if Standard or Transitional mode.
 		if ( AMP_Theme_Support::READER_MODE_SLUG !== $defaults[ Option::THEME_SUPPORT ] ) {
