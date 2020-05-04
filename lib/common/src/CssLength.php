@@ -71,7 +71,7 @@ final class CssLength
     protected $attrValue;
 
     /**
-     * AMP_CSS_Length constructor.
+     * Instantiate a CssLength object.
      *
      * @param string|null $attrValue Attribute value to be parsed.
      */

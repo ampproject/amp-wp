@@ -1611,7 +1611,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 				[
 					'type'     => 'core',
 					'name'     => 'wp-includes',
-					'function' => version_compare( get_bloginfo( 'version' ), '5.5', '>' ) ? 'wp_filter_content_tags' : 'wp_make_content_images_responsive',
+					'function' => version_compare( get_bloginfo( 'version' ), '5.5-alpha', '>' ) ? 'wp_filter_content_tags' : 'wp_make_content_images_responsive',
 				],
 				[
 					'type'     => 'core',
@@ -2057,7 +2057,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertInstanceOf( 'DOMElement', $dom->getElementById( 'wp-admin-bar-amp' ) );
 		$status_icon_element = $dom->getElementById( 'amp-admin-bar-item-status-icon' );
 		$this->assertInstanceOf( 'DOMElement', $status_icon_element );
-		$this->assertEquals( '✅', $status_icon_element->textContent );
+		$this->assertStringContains( 'amp-icon amp-valid', $status_icon_element->getAttribute( 'class' ) );
 		$validity_link_element = $dom->getElementById( 'wp-admin-bar-amp-validity' );
 		$this->assertInstanceOf( 'DOMElement', $validity_link_element );
 		$this->assertEquals( 'Validate', trim( $validity_link_element->textContent ) );
@@ -2073,7 +2073,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 
 		AMP_Validation_Manager::finalize_validation( $dom );
 		$this->assertEquals( 'Review 1 validation issue', trim( $validity_link_element->textContent ) );
-		$this->assertEquals( '⚠️', $status_icon_element->textContent );
+		$this->assertStringContains( 'amp-icon amp-warning', $status_icon_element->getAttribute( 'class' ) );
 	}
 
 	/**

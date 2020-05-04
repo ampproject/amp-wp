@@ -4,7 +4,7 @@
 import path from 'path';
 import fs from 'fs';
 import os from 'os';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 
 /**
  * Uploads a file to the Media Library, and awaits its upload.
@@ -27,7 +27,7 @@ export async function uploadMedia( file ) {
 	await page.waitForSelector( '.media-modal input[type=file]' );
 	const inputElement = await page.$( '.media-modal input[type=file]' );
 	const testMediaPath = path.join( __dirname, '..', 'assets', file );
-	const filename = uuid();
+	const filename = uuidv4();
 
 	const fileWithExtension = filename + fileExtension;
 	const tmpFileName = path.join( os.tmpdir(), fileWithExtension );

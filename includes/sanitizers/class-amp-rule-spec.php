@@ -55,7 +55,9 @@ abstract class AMP_Rule_Spec {
 	const VALUE_URL               = 'value_url';
 
 	/*
-	 * AMP layout types
+	 * AMP layout types.
+	 *
+	 * @deprecated Use `AmpProject\Layout` interface instead.
 	 */
 	const LAYOUT_NODISPLAY    = 'nodisplay';
 	const LAYOUT_FIXED        = 'fixed';
@@ -78,6 +80,8 @@ abstract class AMP_Rule_Spec {
 
 	/**
 	 * Supported layout values.
+	 *
+	 * @deprecated Use `AmpProject\Layout::FROM_SPEC` instead.
 	 *
 	 * @since 1.0
 	 * @var array

@@ -1,0 +1,50 @@
+#wpadminbar span.amp-icon {
+	top: 2px;
+}
+
+#wpadminbar .ab-sub-wrapper span.amp-icon {
+	position: absolute !important;
+	margin-left: 2px;
+	padding: initial !important;
+}
+
+body .amp-icon {
+	/* stylelint-disable font-family-no-missing-generic-family-keyword */
+	font: normal 20px/1 dashicons;
+}
+
+/*
+ * Colors are taken from the official WordPress color palette.
+ * See https://make.wordpress.org/design/handbook/design-guide/foundations/colors/#auxiliary-hues
+ */
+.amp-icon.amp-valid::before {
+	content: "\f12a";
+
+	/* Accent Green */
+	color: #46b450 !important;
+}
+
+.amp-icon.amp-invalid::before {
+	content: "\f153";
+
+	/* Accent Red */
+	color: #dc3232 !important;
+}
+
+.amp-icon.amp-warning::before {
+	content: "\f534";
+
+	/* Accent Orange */
+	color: #ffc733 !important;
+}
+
+.ab-icon.amp-icon.amp-link::before {
+	content: "\f103";
+}
+
+.amp-icon.amp-link:not(.ab-icon)::before {
+	content: "\f103";
+
+	/* Medium Blue */
+	color: #00a0d2 !important;
+}
