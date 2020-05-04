@@ -119,6 +119,8 @@ abstract class CronBasedBackgroundTask implements Service, HasDeactivation {
 			return $actions;
 		}
 
+		wp_enqueue_style( 'amp-icons' );
+
 		$actions['deactivate'] = preg_replace( '#(?=</a>)#i', ' ' . $this->get_warning_icon(), $actions['deactivate'] );
 
 		return $actions;
@@ -140,6 +142,8 @@ abstract class CronBasedBackgroundTask implements Service, HasDeactivation {
 		if ( $plugin_file !== $this->plugin_file ) {
 			return $plugin_meta;
 		}
+
+		wp_enqueue_style( 'amp-icons' );
 
 		$plugin_meta[] = $this->get_warning_icon() . ' ' . esc_html__( 'Large site detected. Deactivation will leave orphaned scheduled events behind.', 'amp' ) . ' ' . $this->get_warning_icon();
 

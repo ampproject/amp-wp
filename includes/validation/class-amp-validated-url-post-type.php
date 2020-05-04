@@ -290,7 +290,7 @@ class AMP_Validated_URL_Post_Type {
 			wp_enqueue_style(
 				'amp-admin-tables',
 				amp_get_asset_url( 'css/admin-tables.css' ),
-				false,
+				[ 'amp-icons' ],
 				AMP__VERSION
 			);
 
@@ -326,7 +326,7 @@ class AMP_Validated_URL_Post_Type {
 		wp_enqueue_style(
 			'amp-validation-error-taxonomy',
 			amp_get_asset_url( 'css/amp-validation-error-taxonomy.css' ),
-			[ 'common', 'amp-validation-tooltips' ],
+			[ 'common', 'amp-validation-tooltips', 'amp-icons' ],
 			AMP__VERSION
 		);
 

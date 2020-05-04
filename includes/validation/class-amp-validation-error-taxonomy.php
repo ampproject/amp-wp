@@ -931,7 +931,7 @@ class AMP_Validation_Error_Taxonomy {
 					wp_enqueue_style(
 						'amp-validation-error-taxonomy',
 						amp_get_asset_url( 'css/amp-validation-error-taxonomy.css' ),
-						[ 'common', 'amp-validation-tooltips' ],
+						[ 'common', 'amp-validation-tooltips', 'amp-icons' ],
 						AMP__VERSION
 					);
 
@@ -950,7 +950,7 @@ class AMP_Validation_Error_Taxonomy {
 					wp_enqueue_style(
 						'amp-validation-single-error-url',
 						amp_get_asset_url( 'css/amp-validation-single-error-url.css' ),
-						[ 'common' ],
+						[ 'common', 'amp-icons' ],
 						AMP__VERSION
 					);
 

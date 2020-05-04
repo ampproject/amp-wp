@@ -246,20 +246,6 @@ class AMP_Validation_Manager {
 			add_action( 'all_admin_notices', [ __CLASS__, 'print_plugin_notice' ] );
 
 			add_action( 'admin_bar_menu', [ __CLASS__, 'add_admin_bar_menu_items' ], 101 );
-
-			add_action(
-				'admin_bar_init',
-				static function () {
-					wp_enqueue_style(
-						'amp-icons',
-						amp_get_asset_url( 'css/amp-icons.css' ),
-						[ 'dashicons', 'admin-bar' ],
-						AMP__VERSION
-					);
-
-					wp_styles()->add_data( 'amp-icons', 'rtl', 'replace' );
-				}
-			);
 		}
 
 		add_action( 'wp', [ __CLASS__, 'override_validation_error_statuses' ] );
