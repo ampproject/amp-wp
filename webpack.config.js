@@ -7,7 +7,6 @@ const OptimizeCSSAssetsPlugin = require( 'optimize-css-assets-webpack-plugin' );
 const RtlCssPlugin = require( 'rtlcss-webpack-plugin' );
 const TerserPlugin = require( 'terser-webpack-plugin' );
 const WebpackBar = require( 'webpackbar' );
-const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 
 /**
  * WordPress dependencies
@@ -212,18 +211,32 @@ const wpPolyfills = {
 	},
 };
 
+// @TODO: the following configuration is a hack to get the file to be copied
+// without bundling it into a module.
+// I haven't managed to have it be minified by Webpack yet. Not sure whether
+// "minify but don't bundle" is even possible with Webpack...
 const themeCompat = {
+	...sharedConfig,
 	plugins: [
 		new WebpackBar( {
 			name: 'Theme Compatibility',
 			color: '#8e63d2',
 		} ),
-		new CopyWebpackPlugin( [ {
-			context: './assets/',
-			from: './src/theme-compat/comment-reply.js',
-			to: './js/'
-		} ] ),
 	],
+	entry: {
+		'comment-reply-bundled': './assets/src/theme-compat/comment-reply.js',
+	},
+	module: {
+		rules: [
+			{
+				test: /comment-reply\.js$/,
+				loader: 'file-loader',
+				options: {
+					name: 'comment-reply.js',
+				},
+			}
+		]
+	}
 };
 
 module.exports = [
