@@ -15,5 +15,4 @@ describe( 'AMP Settings Screen', () => {
 
 		await expect( page ).toMatchElement( '.notice-success p', { text: 'Your active theme is known to work well in standard or transitional mode.' } );
 	} );
-
 } );

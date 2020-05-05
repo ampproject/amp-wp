@@ -639,7 +639,10 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 */
 	public function test_incorrect_usage_get_template_availability() {
 		global $wp_query;
-		remove_action( 'parse_query', 'wp_hide_admin_bar_offline' );
+
+		// Suppress PWA doing-it-wrong messages from PWA plugin.
+		remove_action( 'parse_query', 'wp_hide_admin_bar_offline' ); // PWA<0.5
+		remove_action( 'parse_query', 'wp_unauthenticate_error_template_requests' ); // PWA>=0.5
 
 		// Test no query available.
 		$wp_query     = null;
@@ -667,7 +670,10 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::get_template_availability()
 	 */
 	public function test_get_template_availability_with_available_callback() {
-		remove_action( 'parse_query', 'wp_hide_admin_bar_offline' );
+		// Suppress PWA doing-it-wrong messages from PWA plugin.
+		remove_action( 'parse_query', 'wp_hide_admin_bar_offline' ); // PWA<0.5
+		remove_action( 'parse_query', 'wp_unauthenticate_error_template_requests' ); // PWA>=0.5
+
 		$this->go_to( get_permalink( self::factory()->post->create() ) );
 		add_theme_support(
 			AMP_Theme_Support::SLUG,
@@ -712,7 +718,10 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::get_template_availability()
 	 */
 	public function test_get_template_availability() {
-		remove_action( 'parse_query', 'wp_hide_admin_bar_offline' );
+		// Suppress PWA doing-it-wrong messages from PWA plugin.
+		remove_action( 'parse_query', 'wp_hide_admin_bar_offline' ); // PWA<0.5
+		remove_action( 'parse_query', 'wp_unauthenticate_error_template_requests' ); // PWA>=0.5
+
 		global $wp_query;
 		$post_id = self::factory()->post->create();
 		query_posts( [ 'p' => $post_id ] ); // phpcs:ignore
@@ -2182,7 +2191,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 				{ "aExperiment": {} }
 			</script>
 		</amp-experiment>
-		<amp-list src="https://example.com/list.json?RANDOM"></amp-list>
+		<amp-list src="https://example.com/list.json?RANDOM" width="100" height="100"></amp-list>
 		</body>
 		</html>
 		<!--comment-after-html-->
