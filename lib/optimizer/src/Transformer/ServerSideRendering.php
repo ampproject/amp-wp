@@ -731,7 +731,17 @@ final class ServerSideRendering implements Transformer
              */
             $normalizedAttributeName = strtolower($attribute->name);
             if (array_key_exists($normalizedAttributeName, self::EXTRACTION_METHOD_MAP)) {
+                if (
+                    $normalizedAttributeName === Attribute::SIZES
+                    && $ampElement->hasAttribute(Attribute::DISABLE_INLINE_WIDTH)
+                ) {
+                    // Don't remove sizes when disable-inline-width is set.
+                    // @see https://github.com/ampproject/amphtml/pull/27083
+                    continue;
+                }
+
                 $method = self::EXTRACTION_METHOD_MAP[$normalizedAttributeName];
+
                 try {
                     $customCss            .= $this->$method($document, $ampElement, $attribute->value);
                     $attributesToRemove[] = $attribute->name;
