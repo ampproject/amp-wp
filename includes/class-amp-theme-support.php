@@ -250,7 +250,10 @@ class AMP_Theme_Support {
 	 * @return string[]
 	 */
 	public static function get_reader_themes() {
-		return AMP_Core_Theme_Sanitizer::get_supported_themes();
+		return array_diff(
+			AMP_Core_Theme_Sanitizer::get_supported_themes(),
+			[ 'twentyten' ] // Excluded because not responsive!
+		);
 	}
 
 	/**
