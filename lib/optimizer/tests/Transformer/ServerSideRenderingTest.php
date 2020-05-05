@@ -171,7 +171,7 @@ final class ServerSideRenderingTest extends TestCase
             'sizes attribute without srcset' => [
                 $input('<amp-img height="300" layout="responsive" sizes="(min-width: 320px) 320px, 100vw" src="https://acme.org/image1.png" width="400"></amp-img>'),
                 $expectWithoutBoilerplate(
-                    '<amp-img height="300" layout="responsive" src="https://acme.org/image1.png" width="400" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive"><i-amphtml-sizer style="display:block;padding-top:75.0000%;"></i-amphtml-sizer></amp-img>',
+                    '<amp-img height="300" layout="responsive" src="https://acme.org/image1.png" width="400" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive"><i-amphtml-sizer style="display:block;padding-top:75.0000%;"></i-amphtml-sizer></amp-img>'
                 ),
                 [],
             ],
@@ -179,7 +179,7 @@ final class ServerSideRenderingTest extends TestCase
             'sizes attribute empty srcset' => [
                 $input('<amp-img height="300" layout="responsive" srcset="" sizes="(min-width: 320px) 320px, 100vw" src="https://acme.org/image1.png" width="400"></amp-img>'),
                 $expectWithoutBoilerplate(
-                    '<amp-img height="300" layout="responsive" srcset="" src="https://acme.org/image1.png" width="400" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive"><i-amphtml-sizer style="display:block;padding-top:75.0000%;"></i-amphtml-sizer></amp-img>',
+                    '<amp-img height="300" layout="responsive" srcset="" src="https://acme.org/image1.png" width="400" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive"><i-amphtml-sizer style="display:block;padding-top:75.0000%;"></i-amphtml-sizer></amp-img>'
                 ),
                 [],
             ],
@@ -187,7 +187,7 @@ final class ServerSideRenderingTest extends TestCase
             'sizes attribute with disable-inline-width' => [
                 $input('<amp-img height="300" layout="responsive" srcset="https://acme.org/image1.png 320w, https://acme.org/image2.png 640w, https://acme.org/image3.png 1280w" sizes="(min-width: 320px) 320px, 100vw" src="https://acme.org/image1.png" width="400" disable-inline-width></amp-img>'),
                 $expectWithoutBoilerplate(
-                    '<amp-img height="300" layout="responsive" srcset="https://acme.org/image1.png 320w, https://acme.org/image2.png 640w, https://acme.org/image3.png 1280w" sizes="(min-width: 320px) 320px, 100vw" src="https://acme.org/image1.png" width="400" disable-inline-width class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive"><i-amphtml-sizer style="display:block;padding-top:75.0000%;"></i-amphtml-sizer></amp-img>',
+                    '<amp-img height="300" layout="responsive" srcset="https://acme.org/image1.png 320w, https://acme.org/image2.png 640w, https://acme.org/image3.png 1280w" sizes="(min-width: 320px) 320px, 100vw" src="https://acme.org/image1.png" width="400" disable-inline-width class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive"><i-amphtml-sizer style="display:block;padding-top:75.0000%;"></i-amphtml-sizer></amp-img>'
                 ),
                 [],
             ],
