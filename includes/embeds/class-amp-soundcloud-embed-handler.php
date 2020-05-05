@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use AmpProject\Dom\Document;
+
 /**
  * Class AMP_SoundCloud_Embed_Handler
  *
@@ -23,163 +25,100 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Register embed.
 	 */
 	public function register_embed() {
-		add_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ], 10, 2 );
+		// Not implemented.
 	}
 
 	/**
 	 * Unregister embed.
 	 */
 	public function unregister_embed() {
-		remove_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ], 10 );
+		// Not implemented.
 	}
 
 	/**
-	 * Render oEmbed.
+	 * Sanitize all SoundCloud <iframe> tags to <amp-soundcloud>.
 	 *
-	 * @see \WP_Embed::shortcode()
-	 *
-	 * @codeCoverageIgnore
-	 * @deprecated Core's oEmbed handler is now used instead, with embed_oembed_html filter used to convert to AMP.
-	 * @param array  $matches URL pattern matches.
-	 * @param array  $attr    Shortcode attributes.
-	 * @param string $url     URL.
-	 * @return string Rendered oEmbed.
+	 * @param Document $dom DOM.
 	 */
-	public function oembed( $matches, $attr, $url ) {
-		_deprecated_function( __METHOD__, '0.6' );
-		return $this->render( $this->extract_params_from_iframe_src( $url ), $url );
-	}
+	public function sanitize_raw_embeds( Document $dom ) {
+		$nodes = $dom->xpath->query( '//iframe[ starts-with( @src, "https://w.soundcloud.com/player/" ) ]' );
 
-	/**
-	 * Filter oEmbed HTML for SoundCloud to convert to AMP.
-	 *
-	 * @param string $cache Cache for oEmbed.
-	 * @param string $url   Embed URL.
-	 * @return string Embed.
-	 */
-	public function filter_embed_oembed_html( $cache, $url ) {
-		if ( false === strpos( wp_parse_url( $url, PHP_URL_HOST ), 'soundcloud.com' ) ) {
-			return $cache;
+		foreach ( $nodes as $node ) {
+			if ( ! $this->is_raw_embed( $node ) ) {
+				continue;
+			}
+			$this->sanitize_raw_embed( $node );
 		}
-		return $this->parse_amp_component_from_iframe( $cache, $url );
 	}
 
 	/**
-	 * Parse AMP component from iframe.
+	 * Determine if the node has already been sanitized.
 	 *
-	 * @param string      $html HTML.
-	 * @param string|null $url  Embed URL, for fallback purposes.
-	 * @return string AMP component or empty if unable to determine SoundCloud ID.
+	 * @param DOMElement $node The DOMNode.
+	 * @return bool Whether the node is a raw embed.
 	 */
-	private function parse_amp_component_from_iframe( $html, $url = null ) {
-		$props = $this->match_element_attributes( $html, 'iframe', [ 'src', 'title', 'width', 'height' ] );
-		if ( ! isset( $props ) || empty( $props['src'] ) ) {
-			return $html;
-		}
+	protected function is_raw_embed( DOMElement $node ) {
+		return $node->parentNode && 'amp-soundcloud' !== $node->parentNode->nodeName;
+	}
 
-		$src   = html_entity_decode( $props['src'], ENT_QUOTES );
+	/**
+	 * Make SoundCloud embed AMP compatible.
+	 *
+	 * @param DOMElement $iframe_node The node to make AMP compatible.
+	 */
+	private function sanitize_raw_embed( DOMElement $iframe_node ) {
+		$src   = html_entity_decode( $iframe_node->getAttribute( 'src' ), ENT_QUOTES );
 		$query = [];
 		parse_str( wp_parse_url( $src, PHP_URL_QUERY ), $query );
 
 		if ( empty( $query['url'] ) ) {
-			return $html;
+			return;
 		}
 
-		$props = array_merge(
-			$props,
-			$this->extract_params_from_iframe_src( $query['url'] )
-		);
-		if ( isset( $query['visual'] ) ) {
-			$props['visual'] = $query['visual'];
-		}
+		$embed_id = $this->parse_embed_id_from_url( $query['url'] );
 
-		if ( $url && ! empty( $props['title'] ) ) {
-			$props['fallback'] = sprintf(
-				'<a fallback href="%s">%s</a>',
-				esc_url( $url ),
-				esc_html( $props['title'] )
-			);
-		}
-
-		return $this->render( $props, $url );
-	}
-
-	/**
-	 * Render embed.
-	 *
-	 * @param array  $args Args.
-	 * @param string $url  Embed URL for fallback purposes. Optional.
-	 * @return string Rendered embed.
-	 */
-	public function render( $args, $url ) {
-		$args = wp_parse_args(
-			$args,
-			[
-				'track_id'    => false,
-				'playlist_id' => false,
-				'height'      => null,
-				'width'       => null,
-				'visual'      => null,
-				'fallback'    => '',
-			]
-		);
-
-		$this->did_convert_elements = true;
-
-		$attributes = [];
-		if ( ! empty( $args['track_id'] ) ) {
-			$attributes['data-trackid'] = $args['track_id'];
-		} elseif ( ! empty( $args['playlist_id'] ) ) {
-			$attributes['data-playlistid'] = $args['playlist_id'];
-		} elseif ( $url ) {
-			return $this->render_embed_fallback( $url );
+		if ( isset( $embed_id['track_id'] ) ) {
+			$attributes['data-trackid'] = $embed_id['track_id'];
+		} elseif ( isset( $embed_id['playlist_id'] ) ) {
+			$attributes['data-playlistid'] = $embed_id['playlist_id'];
 		} else {
-			return '';
+			// Return if the track nor playlist ID was found.
+			return;
 		}
 
-		if ( isset( $args['visual'] ) ) {
-			$attributes['data-visual'] = rest_sanitize_boolean( $args['visual'] ) ? 'true' : 'false';
-		}
+		$attributes['height'] = $iframe_node->hasAttribute( 'height' )
+			? $iframe_node->getAttribute( 'height' )
+			: $this->args['height'];
 
-		$attributes['height'] = $args['height'] ?: $this->args['height'];
-		if ( $args['width'] ) {
-			$attributes['width']  = $args['width'];
+		if ( $iframe_node->hasAttribute( 'width' ) ) {
+			$attributes['width']  = $iframe_node->getAttribute( 'width' );
 			$attributes['layout'] = 'responsive';
 		} else {
 			$attributes['layout'] = 'fixed-height';
 		}
 
-		return AMP_HTML_Utils::build_tag(
+		if ( isset( $query['visual'] ) ) {
+			$attributes['data-visual'] = rest_sanitize_boolean( $query['visual'] ) ? 'true' : 'false';
+		}
+
+		$amp_node = AMP_DOM_Utils::create_node(
+			Document::fromNode( $iframe_node ),
 			'amp-soundcloud',
-			$attributes,
-			$args['fallback']
+			$attributes
 		);
+
+		$this->maybe_unwrap_p_element( $iframe_node );
+
+		$iframe_node->parentNode->replaceChild( $amp_node, $iframe_node );
 	}
 
 	/**
-	 * Render embed fallback.
+	 * Get embed ID from Soundcloud iframe src.
 	 *
 	 * @param string $url URL.
-	 * @return string Fallback link.
+	 * @return array|null Array containing ID name and value if found.
 	 */
-	private function render_embed_fallback( $url ) {
-		return AMP_HTML_Utils::build_tag(
-			'a',
-			[
-				'href'  => esc_url_raw( $url ),
-				'class' => 'amp-wp-embed-fallback',
-			],
-			esc_html( $url )
-		);
-	}
-
-	/**
-	 * Get params from Soundcloud iframe src.
-	 *
-	 * @param string $url URL.
-	 * @return array Params extracted from URL.
-	 */
-	private function extract_params_from_iframe_src( $url ) {
+	private function parse_embed_id_from_url( $url ) {
 		$parsed_url = wp_parse_url( $url );
 		if ( preg_match( '#tracks/(?P<track_id>\d+)#', $parsed_url['path'], $matches ) ) {
 			return [

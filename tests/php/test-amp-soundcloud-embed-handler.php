@@ -88,7 +88,6 @@ class AMP_SoundCloud_Embed_Handler_Test extends WP_UnitTestCase {
 		if ( false === strpos( $url, 'soundcloud.com' ) ) {
 			return $preempt;
 		}
-		unset( $r );
 
 		if ( false !== strpos( $url, 'sets' ) ) {
 			$body = $this->playlist_oembed_response;
@@ -122,12 +121,12 @@ class AMP_SoundCloud_Embed_Handler_Test extends WP_UnitTestCase {
 
 			'track_simple'    => [
 				$this->track_url . PHP_EOL,
-				'<p><amp-soundcloud data-trackid="90097394" data-visual="true" height="400" width="500" layout="responsive">' . ( function_exists( 'wp_filter_oembed_iframe_title_attribute' ) ? '<a fallback href="https://soundcloud.com/jack-villano-villano/mozart-requiem-in-d-minor">Mozart &#8211; Requiem in D minor Complete Full by Jack Villano Villano</a>' : '' ) . '</amp-soundcloud></p>' . PHP_EOL,
+				'<amp-soundcloud data-trackid="90097394" height="400" width="500" layout="responsive" data-visual="true"></amp-soundcloud>' . PHP_EOL,
 			],
 
 			'playlist_simple' => [
 				$this->playlist_url . PHP_EOL,
-				'<p><amp-soundcloud data-playlistid="40936190" data-visual="true" height="450" width="500" layout="responsive">' . ( function_exists( 'wp_filter_oembed_iframe_title_attribute' ) ? '<a fallback href="https://soundcloud.com/classical-music-playlist/sets/classical-music-essential-collection">Classical Music &#8211; The Essential Collection by Classical Music</a>' : '' ) . '</amp-soundcloud></p>' . PHP_EOL,
+				'<amp-soundcloud data-playlistid="40936190" height="450" width="500" layout="responsive" data-visual="true"></amp-soundcloud>' . PHP_EOL,
 			],
 		];
 	}
@@ -136,8 +135,6 @@ class AMP_SoundCloud_Embed_Handler_Test extends WP_UnitTestCase {
 	 * Test conversion.
 	 *
 	 * @dataProvider get_embed_conversion_data
-	 * @covers AMP_SoundCloud_Embed_Handler::filter_embed_oembed_html()
-	 * @covers AMP_SoundCloud_Embed_Handler::render()
 	 *
 	 * @param string $source   Source.
 	 * @param string $expected Expected.
@@ -145,9 +142,14 @@ class AMP_SoundCloud_Embed_Handler_Test extends WP_UnitTestCase {
 	public function test_embed_conversion( $source, $expected ) {
 		$embed = new AMP_SoundCloud_Embed_Handler();
 		$embed->register_embed();
-		$filtered_content = apply_filters( 'the_content', $source );
 
-		$this->assertEquals( $expected, $filtered_content );
+		$filtered_content = apply_filters( 'the_content', $source );
+		$dom              = AMP_DOM_Utils::get_dom_from_content( $filtered_content );
+		$embed->sanitize_raw_embeds( $dom );
+
+		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+
+		$this->assertEquals( $expected, $content );
 	}
 
 	/**
@@ -184,9 +186,12 @@ class AMP_SoundCloud_Embed_Handler_Test extends WP_UnitTestCase {
 	public function test__get_scripts( $source, $expected ) {
 		$embed = new AMP_SoundCloud_Embed_Handler();
 		$embed->register_embed();
-		$source = apply_filters( 'the_content', $source );
 
-		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( AMP_DOM_Utils::get_dom_from_content( $source ) );
+		$filtered_content = apply_filters( 'the_content', $source );
+		$dom              = AMP_DOM_Utils::get_dom_from_content( $filtered_content );
+		$embed->sanitize_raw_embeds( $dom );
+
+		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 		$whitelist_sanitizer->sanitize();
 
 		$scripts = array_merge(
