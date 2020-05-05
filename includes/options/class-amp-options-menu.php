@@ -103,6 +103,14 @@ class AMP_Options_Menu {
 			]
 		);
 
+		add_settings_field(
+			Option::SUPPRESSED_PLUGINS,
+			__( 'Suppressed Plugins', 'amp' ),
+			[ $this, 'render_suppressed_plugins' ],
+			AMP_Options_Manager::OPTION_NAME,
+			'general'
+		);
+
 		$submenus = [
 			new AMP_Analytics_Options_Submenu( AMP_Options_Manager::OPTION_NAME ),
 		];
@@ -424,6 +432,71 @@ class AMP_Options_Menu {
 				</li>
 			<?php endforeach; ?>
 		</ul>
+		<?php
+	}
+
+	/**
+	 * Render suppressed plugins.
+	 *
+	 * @since 1.6
+	 */
+	public function render_suppressed_plugins() {
+		$suppressed_plugins = AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS );
+
+		$plugins = get_plugins();
+		unset( $plugins['amp/amp.php'] );
+		foreach ( array_keys( $plugins ) as $plugin_slug ) {
+			if ( ! is_plugin_active( $plugin_slug ) ) {
+				unset( $plugins[ $plugin_slug ] );
+			}
+		}
+		uasort(
+			$plugins,
+			static function ( $a, $b ) {
+				return strcmp( $a['Name'], $b['Name'] );
+			}
+		);
+
+		?>
+		<fieldset>
+			<h4 class="title hidden"><?php esc_html_e( 'Suppressed Plugins', 'amp' ); ?></h4>
+			<p>
+				<?php esc_html_e( 'When plugins causes AMP validation errors, one option is to review the invalid markup and allow it to be removed. Another option is to suppress the plugin from doing anything when rendering AMP pages. What follows is the list of active plugins with any causing validation errors being highlighted. If a plugin is emitting invalid markup that is causing validation errors and this plugin is not necessary on the AMP version of the page, it can be suppressed.', 'amp' ); ?>
+			</p>
+
+			<style>
+			.suppressed-plugin:checked + label {
+				text-decoration: line-through;
+			}
+			</style>
+
+			<?php if ( empty( $plugins ) ) : ?>
+				<p>
+					<em><?php esc_html_e( 'You have no plugins active.', 'amp' ); ?></em>
+				</p>
+			<?php else : ?>
+				<?php
+				$element_name = AMP_Options_Manager::OPTION_NAME . '[' . Option::SUPPRESSED_PLUGINS . ']';
+				?>
+				<ul>
+					<?php foreach ( $plugins as $plugin_slug => $plugin ) : ?>
+						<li>
+							<input
+								type="checkbox"
+								class="suppressed-plugin"
+								id="<?php echo esc_attr( "$element_name-$plugin_slug" ); ?>"
+								name="<?php echo esc_attr( $element_name . '[]' ); ?>"
+								value="<?php echo esc_attr( $plugin_slug ); ?>"
+								<?php checked( in_array( $plugin_slug, $suppressed_plugins, true ) ); ?>
+							>
+							<label for="<?php echo esc_attr( "$element_name-$plugin_slug" ); ?>">
+								<?php echo esc_html( $plugin['Name'] ); ?>
+							</label>
+						</li>
+					<?php endforeach; ?>
+				</ul>
+			<?php endif; ?>
+		</fieldset>
 		<?php
 	}
 
