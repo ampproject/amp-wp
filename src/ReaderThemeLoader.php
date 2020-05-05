@@ -137,9 +137,9 @@ final class ReaderThemeLoader implements Service {
 	 * @return array Devices.
 	 */
 	public function customize_previewable_devices( $devices ) {
-		if ( isset( $devices['mobile'] ) ) {
+		if ( isset( $devices['tablet'] ) ) {
 			unset( $devices['desktop']['default'] );
-			$devices['mobile']['default'] = true;
+			$devices['tablet']['default'] = true;
 		}
 		return $devices;
 	}
