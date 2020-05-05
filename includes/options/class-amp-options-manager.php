@@ -31,6 +31,7 @@ class AMP_Options_Manager {
 		Option::ALL_TEMPLATES_SUPPORTED => true,
 		Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
 		Option::VERSION                 => AMP__VERSION,
+		Option::SUPPRESSED_PLUGINS      => [],
 	];
 
 	/**
@@ -270,6 +271,13 @@ class AMP_Options_Manager {
 			$options[ Option::DISABLE_CSS_TRANSIENT_CACHING ] = true;
 		} else {
 			unset( $options[ Option::DISABLE_CSS_TRANSIENT_CACHING ] );
+		}
+
+		$options[ Option::SUPPRESSED_PLUGINS ] = [];
+		if ( array_key_exists( Option::SUPPRESSED_PLUGINS, $new_options ) ) {
+			foreach ( $new_options[ Option::SUPPRESSED_PLUGINS ] as $suppressed_plugin ) {
+				$options[ Option::SUPPRESSED_PLUGINS ][] = $suppressed_plugin;
+			}
 		}
 
 		// Store the current version with the options so we know the format.

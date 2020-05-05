@@ -76,6 +76,13 @@ interface Option {
 	const THEME_SUPPORT = 'theme_support';
 
 	/**
+	 * Suppressed plugins
+	 *
+	 * @var string
+	 */
+	const SUPPRESSED_PLUGINS = 'suppressed_plugins';
+
+	/**
 	 * Version of the AMP plugin for which the options were last saved.
 	 *
 	 * This allows for recognizing updates and triggering update-specific logic.
