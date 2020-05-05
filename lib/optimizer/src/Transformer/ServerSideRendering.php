@@ -116,7 +116,7 @@ final class ServerSideRendering implements Transformer
     /**
      * Count of bytes to calculate against the AMP size limit for the custom CSS styling.
      *
-     * AMP only allows for 75.000 bytes of CSS across <style amp-custom> and inline style attributes.
+     * AMP only allows for 75000 bytes of CSS across <style amp-custom> and inline style attributes.
      *
      * @var int
      */
