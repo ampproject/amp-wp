@@ -213,6 +213,17 @@ class AMP_Validation_Manager {
 		AMP_Validated_URL_Post_Type::register();
 		AMP_Validation_Error_Taxonomy::register();
 
+		add_action( 'wp', [ __CLASS__, 'override_validation_error_statuses' ] );
+
+		// Prevent query vars from persisting after redirect.
+		add_filter(
+			'removable_query_args',
+			function( $query_vars ) {
+				$query_vars[] = AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR;
+				return $query_vars;
+			}
+		);
+
 		// Short-circuit if dev tools is not enabled.
 		if ( ! AMP_Options_Manager::get_option( Option::DEV_TOOLS ) ) {
 			return;
@@ -233,20 +244,10 @@ class AMP_Validation_Manager {
 			}
 		);
 
-		// Prevent query vars from persisting after redirect.
-		add_filter(
-			'removable_query_args',
-			function( $query_vars ) {
-				$query_vars[] = AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR;
-				return $query_vars;
-			}
-		);
 
 		add_action( 'all_admin_notices', [ __CLASS__, 'print_plugin_notice' ] );
 
 		add_action( 'admin_bar_menu', [ __CLASS__, 'add_admin_bar_menu_items' ], 101 );
-
-		add_action( 'wp', [ __CLASS__, 'override_validation_error_statuses' ] );
 	}
 
 	/**
