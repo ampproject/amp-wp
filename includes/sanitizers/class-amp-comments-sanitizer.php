@@ -18,6 +18,7 @@ use AmpProject\Tag;
  */
 class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 
+
 	/**
 	 * XPath query to retrieve the entire comments section that needs to be
 	 * wrapped within an <amp-script>.
@@ -31,6 +32,20 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	const COMMENTS_SECTION_XPATH = 'comments_section_xpath';
 
+	const COMMENTS_REPLY_FORM_XPATH = 'comments_reply_form_xpath';
+
+	const COMMENT_REPLY_LINK_XPATH = 'comment_reply_link_xpath';
+
+	const CANCEL_COMMENT_REPLY_LINK_XPATH = 'cancel_comment_reply_link_xpath';
+
+	const COMMENTS_SECTION_XPATH_DEFAULT_QUERY = './/*[ @id = "comments" ]';
+
+	const COMMENTS_REPLY_FORM_XPATH_DEFAULT_QUERY = './/*[ @id = "respond" ]';
+
+	const COMMENT_REPLY_LINK_XPATH_DEFAULT_QUERY = '//*[ contains( concat( " ", normalize-space( @class ), " " ), " comment-reply-link " ) ]';
+
+	const CANCEL_COMMENT_REPLY_LINK_XPATH_DEFAULT_QUERY = './/*[ @id = "cancel-comment-reply-link" ]';
+
 	/**
 	 * Default args.
 	 *
@@ -39,8 +54,11 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	protected $DEFAULT_ARGS = [
-		'comment_live_list' => false,
-		self::COMMENTS_SECTION_XPATH => './/*[ @id = "comments" ]',
+		'comment_live_list'                   => false,
+		self::COMMENTS_SECTION_XPATH          => self::COMMENTS_SECTION_XPATH_DEFAULT_QUERY,
+		self::COMMENTS_REPLY_FORM_XPATH       => self::COMMENTS_REPLY_FORM_XPATH_DEFAULT_QUERY,
+		self::COMMENT_REPLY_LINK_XPATH        => self::COMMENT_REPLY_LINK_XPATH_DEFAULT_QUERY,
+		self::CANCEL_COMMENT_REPLY_LINK_XPATH => self::CANCEL_COMMENT_REPLY_LINK_XPATH_DEFAULT_QUERY,
 	];
 
 	/**
@@ -49,7 +67,12 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.7
 	 */
 	public function sanitize() {
-		$this->wrap_comments_section_in_amp_script();
+		$comments_section = $this->detect_comments_section();
+		if ( $comments_section instanceof DOMElement ) {
+			$comments_section = $this->wrap_comments_section_in_amp_script( $comments_section );
+			$this->remove_hrefs_from_reply_links( $comments_section );
+		}
+
 		foreach ( $this->dom->getElementsByTagName( 'form' ) as $comment_form ) {
 			/**
 			 * Comment form.
@@ -75,6 +98,64 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 		}
 	}
 
+	protected function detect_comments_section() {
+		// @TODO: Should we iterate over all matches instead of just picking the first?
+		$comments_section = $this->dom->xpath
+			->query( $this->args[ self::COMMENTS_SECTION_XPATH ] )
+			->item( 0 );
+
+		$reply_form = $this->dom->xpath
+			->query( $this->args[ self::COMMENTS_REPLY_FORM_XPATH ] )
+			->item( 0 );
+
+		if ( ! $comments_section instanceof DOMElement && ! $reply_form instanceof DOMElement ) {
+			return false;
+		}
+
+		if ( ! $comments_section instanceof DOMElement ) {
+			return $reply_form;
+		}
+
+		if ( ! $reply_form instanceof DOMElement ) {
+			return $comments_section;
+		}
+
+		return $this->find_common_ancestor( $comments_section, $reply_form );
+	}
+
+	protected function find_common_ancestor( DOMElement $first, DOMElement $second ) {
+		if ( $first->isSameNode( $second ) ) {
+			return $first;
+		}
+
+		$first_parents  = $this->get_parent_nodes( $first );
+		$second_parents = $this->get_parent_nodes( $second );
+
+		$common_ancestor = false;
+
+		$first_top_most_parent  = array_pop( $first_parents );
+		$second_top_most_parent = array_pop( $second_parents );
+		while ( $first_top_most_parent->isSameNode( $second_top_most_parent ) ) {
+			$common_ancestor        = $first_top_most_parent;
+			$first_top_most_parent  = array_pop( $first_parents );
+			$second_top_most_parent = array_pop( $second_parents );
+		}
+
+		return $common_ancestor;
+	}
+
+	protected function get_parent_nodes( DOMElement $initial_node ) {
+		$parent_nodes = [];
+		$parent_node = $initial_node->parentNode;
+
+		while ( $parent_node instanceof DOMElement ) {
+			$parent_nodes[] = $parent_node;
+			$parent_node = $parent_node->parentNode;
+		}
+
+		return $parent_nodes;
+	}
+
 	/**
 	 * Wrap the comments section wrapper element in an <amp-script> linking to
 	 * the comment-reply.js source.
@@ -82,8 +163,10 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 	 * The difficulty here lies in knowing at what parent level to wrap so that
 	 * we catch both the main comment form as well as all reply buttons that we
 	 * need to interact with.
+	 *
+	 * @param DOMElement $wrap_target Target to wrap with the <amp-script>.
 	 */
-	protected function wrap_comments_section_in_amp_script()
+	protected function wrap_comments_section_in_amp_script( DOMElement $wrap_target )
 	{
 		$comment_reply_js_src = AMP__DIR__ . '/assets/js/comment-reply.js';
 
@@ -109,21 +192,38 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 		$amp_script->setAttribute( Attribute::SCRIPT, $comment_reply_script_id );
 		$amp_script->setAttribute( Attribute::SANDBOX, 'allow-forms' );
 
-		// @TODO: Should we iterate over all matches instead of just picking the first?
-		$wrap_target = $this->dom->xpath
-			->query( $this->args[ self::COMMENTS_SECTION_XPATH ] )
-			->item( 0 );
-
-		if ( ! $wrap_target instanceof DOMElement ) {
-			return;
-		}
-
 		$this->dom->head->appendChild( $comment_reply_script_hash );
 
 		$wrap_target = $wrap_target->parentNode->replaceChild( $amp_script, $wrap_target );
 		$amp_script->appendChild( $wrap_target );
 
 		$this->dom->body->appendChild( $comment_reply_script );
+
+		return $wrap_target;
+	}
+
+	protected function remove_hrefs_from_reply_links( DOMElement $comments_section ) {
+		$reply_links = $this->dom->xpath
+			->query( $this->args[ self::COMMENT_REPLY_LINK_XPATH ], $comments_section );
+
+		foreach ( $reply_links as $reply_link ) {
+			/**
+			 * Reply link to remove the href attribute from.
+			 *
+			 * @var DOMElement $reply_link
+			 */
+			$reply_link->removeAttribute( 'href' );
+		}
+
+		$cancel_comment_reply_link = $this->dom->xpath
+			->query( $this->args[ self::CANCEL_COMMENT_REPLY_LINK_XPATH ], $comments_section )
+			->item( 0 );
+
+		if ( ! $cancel_comment_reply_link instanceof DOMElement ) {
+			return;
+		}
+
+		$cancel_comment_reply_link->removeAttribute( 'href' );
 	}
 
 	/**
