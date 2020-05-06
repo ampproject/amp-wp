@@ -20,9 +20,20 @@ final class AmpRuntimeCssConfiguration extends BaseTransformerConfiguration
     /**
      * Configuration key that holds the version number to use.
      *
+     * If the version is not provided, the latest runtime version is fetched from cdn.ampproject.org.
+     *
      * @var string
      */
     const VERSION = 'version';
+
+    /**
+     * Configuration key that holds the actual runtime CSS styles to use.
+     *
+     * If the styles are not provided, the latest runtime styles are fetched from cdn.ampproject.org.
+     *
+     * @var string
+     */
+    const STYLES = 'styles';
 
     /**
      * Configuration key that holds the flag for the canary version of the runtime style.
@@ -42,6 +53,7 @@ final class AmpRuntimeCssConfiguration extends BaseTransformerConfiguration
     {
         return [
             self::VERSION => '',
+            self::STYLES  => '',
             self::CANARY  => false,
         ];
     }
@@ -59,6 +71,13 @@ final class AmpRuntimeCssConfiguration extends BaseTransformerConfiguration
             case self::VERSION:
                 if (! is_string($value)) {
                     throw InvalidConfigurationValue::forInvalidSubValueType(self::class, self::VERSION, 'string', gettype($value));
+                }
+                $value = trim($value);
+                break;
+
+            case self::STYLES:
+                if (! is_string($value)) {
+                    throw InvalidConfigurationValue::forInvalidSubValueType(self::class, self::STYLES, 'string', gettype($value));
                 }
                 $value = trim($value);
                 break;
