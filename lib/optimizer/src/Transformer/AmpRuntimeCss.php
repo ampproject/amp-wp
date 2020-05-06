@@ -162,14 +162,21 @@ final class AmpRuntimeCss implements Transformer
         }
 
         $ampRuntimeStyle->setAttribute(Attribute::I_AMPHTML_VERSION, $version);
-        $response   = $this->remoteRequest->get($v0CssUrl);
-        $statusCode = $response->getStatusCode();
 
-        if (200 < $statusCode || $statusCode >= 300) {
-            return;
+        $styles = $this->configuration->get(AmpRuntimeCssConfiguration::STYLES);
+
+        if (empty($styles)) {
+            $response   = $this->remoteRequest->get($v0CssUrl);
+            $statusCode = $response->getStatusCode();
+
+            if (200 < $statusCode || $statusCode >= 300) {
+                return;
+            }
+
+            $styles = $response->getBody();
         }
 
-        $ampRuntimeStyle->textContent = $response->getBody();
+        $ampRuntimeStyle->textContent = $styles;
     }
 
     /**
