@@ -3,6 +3,7 @@
 namespace AmpProject\Optimizer;
 
 use AmpProject\Dom\Document;
+use AmpProject\Optimizer\Configuration\AmpRuntimeCssConfiguration;
 use AmpProject\Optimizer\Tests\MarkupComparison;
 use AmpProject\Optimizer\Tests\TestMarkup;
 use AmpProject\Optimizer\Transformer\AmpRuntimeCss;
@@ -10,6 +11,7 @@ use AmpProject\Optimizer\Transformer\ReorderHead;
 use AmpProject\Optimizer\Transformer\ServerSideRendering;
 use AmpProject\RemoteRequest\StubbedRemoteGetRequest;
 use DirectoryIterator;
+use DOMComment;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use ReflectionException;
@@ -34,20 +36,19 @@ final class SpecTest extends TestCase
     const CLASS_SKIP_TEST = '__SKIP__';
 
     /**
-     * Associative array of mapping data for stubbing remote requests for specific tests.
+     * Regular expression to match the leading HTML comment that provides the configuration for a spec test.
      *
-     * @todo This is a temporary fix only to get the test to pass with our current transformer.
-     *       We'll need to adapt the transformer to take the following changes into account:
-     *       https://github.com/ampproject/amp-toolbox/commit/b154a73c6dc9231e4060434c562a90d983e2a46d
+     * @see https://regex101.com/r/ImDtxI/2
      *
-     * @var array
+     * @var string
      */
-    const STUBBED_REMOTE_REQUESTS_FOR_TESTS = [
-        'AmpRuntimeCss - always_inlines_v0css' => [
-            'https://cdn.ampproject.org/v0.css' => '/* v0-prod.css */',
-        ],
-    ];
+    const LEADING_HTML_COMMENT_REGEX_PATTERN = '/^\s*<!--\s*(?<json>{(?>[^}]*})*)\s*-->/';
 
+    /**
+     * Provide the data for running the spec tests.
+     *
+     * @return array Scenarios to test.
+     */
     public function dataTransformerSpecFiles()
     {
         $scenarios = [];
@@ -108,10 +109,12 @@ final class SpecTest extends TestCase
             $this->markTestSkipped("Skipping {$source}, {$expected}");
         }
 
+        $configuration = $this->mapConfigurationData($this->extractConfigurationData($source));
+
         $document = Document::fromHtmlFragment($source);
 
-        $transformer = $this->getTransformer($scenario, $transformerClass);
-        $errors      = new ErrorCollection();
+        $transformer   = $this->getTransformer($scenario, $transformerClass, $configuration);
+        $errors        = new ErrorCollection();
 
         $transformer->transform($document, $errors);
 
@@ -119,22 +122,86 @@ final class SpecTest extends TestCase
     }
 
     /**
+     * Map spec test input file configuration data to configuration arguments as needed by the PHP transformers.
+     *
+     * @param array $configurationData Associative array of configuration data coming from the spec test input file.
+     * @return Configuration Configuration object to use for the transformation engine.
+     */
+    public function mapConfigurationData($configurationData)
+    {
+        $mappedConfiguration = [];
+
+        foreach ($configurationData as $key => $value) {
+            switch ($key) {
+                case 'ampRuntimeStyles':
+                    $mappedConfiguration[AmpRuntimeCss::class][AmpRuntimeCssConfiguration::STYLES] = $value;
+                    break;
+                case 'ampRuntimeVersion':
+                    $mappedConfiguration[AmpRuntimeCss::class][AmpRuntimeCssConfiguration::VERSION] = $value;
+                    break;
+
+                // @TODO: Known configuration arguments used in spec tests that are not implemented yet.
+                case 'ampUrlPrefix':
+                case 'ampUrl':
+                case 'canonical':
+                case 'experimentBindAttribute':
+                case 'geoApiUrl':
+                case 'lts':
+                case 'preloadHeroImage':
+                case 'rtv':
+                default:
+                    $this->fail("Configuration argument not yet implemented: {$key}.");
+            }
+        }
+
+        return new Configuration($mappedConfiguration);
+    }
+
+    /**
+     * Parse the input source file and extract the configuration data.
+     *
+     * Input HTML files can contain a leading HTML comment that provides configuration arguments in the form of a JSON
+     * object.
+     *
+     * @param string $source Input source file to parse for a configuration snippet.
+     * @return array Associative array of configuration data found in the input HTML file.
+     */
+    public function extractConfigurationData(&$source)
+    {
+        $matches = [];
+        if (!preg_match(self::LEADING_HTML_COMMENT_REGEX_PATTERN, $source, $matches)) {
+            return [];
+        }
+
+        $json   = trim($matches['json']);
+        $source = str_replace($matches[0], '', $source);
+
+        if (empty($json)) {
+            return [];
+        }
+
+        $configurationData = (array)json_decode($json, true, 512, JSON_OBJECT_AS_ARRAY);
+        if (empty($configurationData) || json_last_error() !== JSON_ERROR_NONE) {
+            return [];
+        }
+
+        return $configurationData;
+    }
+
+    /**
      * Get the transformer to test.
      *
-     * @param string $scenario         Test scenario.
-     * @param string $transformerClass Class of the transformer to get.
+     * @param string        $scenario         Test scenario.
+     * @param string        $transformerClass Class of the transformer to get.
+     * @param Configuration $configuration    Configuration to use.
      * @return Transformer Instantiated transformer object.
      */
-    private function getTransformer($scenario, $transformerClass)
+    private function getTransformer($scenario, $transformerClass, $configuration)
     {
         $stubbedRequests = TestMarkup::STUBBED_REMOTE_REQUESTS;
 
-        if (array_key_exists($scenario, self::STUBBED_REMOTE_REQUESTS_FOR_TESTS)) {
-            $stubbedRequests = array_merge($stubbedRequests, self::STUBBED_REMOTE_REQUESTS_FOR_TESTS[$scenario]);
-        }
-
         $transformationEngine = new TransformationEngine(
-            new Configuration(),
+            $configuration,
             new StubbedRemoteGetRequest($stubbedRequests)
         );
 
