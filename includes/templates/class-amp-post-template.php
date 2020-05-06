@@ -162,7 +162,14 @@ class AMP_Post_Template {
 	public function __get( $name ) {
 		switch ( $name ) {
 			case 'post':
-				return get_post( $this->ID );
+				$post = get_post( $this->ID );
+				if ( isset( $_GET['preview_id'] ) && isset( $_GET['preview_nonce'] ) ) {
+					$id = (int) $_GET['preview_id'];
+					if( wp_verify_nonce( $_GET['preview_nonce'], 'post_preview_' . $id ) ) {
+						return _set_preview( $post );
+					}
+				}
+				return $post;
 		}
 		return null;
 	}
