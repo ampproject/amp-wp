@@ -11,7 +11,6 @@ use AmpProject\Optimizer\Transformer\ReorderHead;
 use AmpProject\Optimizer\Transformer\ServerSideRendering;
 use AmpProject\RemoteRequest\StubbedRemoteGetRequest;
 use DirectoryIterator;
-use DOMComment;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use ReflectionException;
