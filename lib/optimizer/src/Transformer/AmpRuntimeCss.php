@@ -141,6 +141,7 @@ final class AmpRuntimeCss implements Transformer
         } catch (Exception $exception) {
             $errors->add(Error\CannotInlineRuntimeCss::fromException($exception, $ampRuntimeStyle, $version));
             $this->linkCss($document, $ampRuntimeStyle);
+            $ampRuntimeStyle->parentNode->removeChild($ampRuntimeStyle);
         }
     }
 
