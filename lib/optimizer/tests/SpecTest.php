@@ -179,7 +179,7 @@ final class SpecTest extends TestCase
             return [];
         }
 
-        $configurationData = (array)json_decode($json, true, 512, JSON_OBJECT_AS_ARRAY);
+        $configurationData = (array)json_decode($json, true);
         if (empty($configurationData) || json_last_error() !== JSON_ERROR_NONE) {
             return [];
         }
