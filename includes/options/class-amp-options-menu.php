@@ -480,6 +480,9 @@ class AMP_Options_Menu {
 				?>
 				<ul>
 					<?php foreach ( $plugins as $plugin_slug => $plugin ) : ?>
+						<?php
+						$is_suppressed = array_key_exists( $plugin_slug, $suppressed_plugins );
+						?>
 						<li>
 							<input
 								type="checkbox"
@@ -487,11 +490,29 @@ class AMP_Options_Menu {
 								id="<?php echo esc_attr( "$element_name-$plugin_slug" ); ?>"
 								name="<?php echo esc_attr( $element_name . '[]' ); ?>"
 								value="<?php echo esc_attr( $plugin_slug ); ?>"
-								<?php checked( in_array( $plugin_slug, $suppressed_plugins, true ) ); ?>
+								<?php checked( $is_suppressed ); ?>
 							>
 							<label for="<?php echo esc_attr( "$element_name-$plugin_slug" ); ?>">
 								<?php echo esc_html( $plugin['Name'] ); ?>
 							</label>
+							<?php if ( $is_suppressed && version_compare( $suppressed_plugins[ $plugin_slug ][ Option::SUPPRESSED_PLUGINS_LAST_VERSION ], $plugins[ $plugin_slug ]['Version'], '!=' ) ) : ?>
+								<small>
+									<?php if ( $suppressed_plugins[ $plugin_slug ][ Option::SUPPRESSED_PLUGINS_LAST_VERSION ] && $plugins[ $plugin_slug ]['Version'] ) : ?>
+										<?php
+										echo esc_html(
+											sprintf(
+												/* translators: %1: version at which suppressed, %2: current version */
+												__( '(Now updated to version %1$s since suppressed at %2$s.)', 'amp' ),
+												$plugins[ $plugin_slug ]['Version'],
+												$suppressed_plugins[ $plugin_slug ][ Option::SUPPRESSED_PLUGINS_LAST_VERSION ]
+											)
+										);
+										?>
+									<?php else : ?>
+										<?php esc_html_e( '(Plugin updated since last suppressed.)', 'amp' ); ?>
+									<?php endif; ?>
+								</small>
+							<?php endif ?>
 						</li>
 					<?php endforeach; ?>
 				</ul>
