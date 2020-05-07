@@ -871,6 +871,8 @@ class AMP_Validated_URL_Post_Type {
 	 * @return array Environment.
 	 */
 	public static function get_validated_environment() {
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+
 		// The version is included so that plugin updates will encourage users to re-check validated URLs as they'll be marked stale.
 		$plugins = wp_array_slice_assoc(
 			wp_list_pluck( get_plugins(), 'Version' ),

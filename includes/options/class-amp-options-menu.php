@@ -439,6 +439,7 @@ class AMP_Options_Menu {
 	public function render_suppressed_plugins() {
 		$suppressed_plugins = AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS );
 
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		$plugins = get_plugins();
 		unset( $plugins['amp/amp.php'] );
 		foreach ( array_keys( $plugins ) as $plugin_slug ) {
