@@ -856,13 +856,19 @@ final class ServerSideRendering implements Transformer
      */
     private function extractHeightsAttributeCss(Document $document, DOMElement $element, $attributeName, $attributeValue)
     {
+        /*
+         * Note: Usage of :first-child could potentially be brittle here.
+         * We cannot use a selector that references the .i-amphtml-sizer element directly because that reference doesn't
+         * pass the validator.
+         * See https://github.com/ampproject/amp-wp/pull/4482#discussion_r421149537
+         */
         return $this->extractAttributeCss(
             $document,
             $element,
             $attributeName,
             $attributeValue,
-            '#__ID__>i-amphtml-sizer{height:%s}',
-            '@media %s{#__ID__>i-amphtml-sizer{height:%s}}'
+            '#__ID__:first-child{height:%s}',
+            '@media %s{#__ID__:first-child{height:%s}}'
         );
     }
 
