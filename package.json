@@ -26,7 +26,7 @@
     "@babel/core": "7.9.0",
     "@babel/plugin-proposal-class-properties": "7.8.3",
     "@babel/polyfill": "7.8.7",
-    "@wordpress/babel-preset-default": "4.11.0",
+    "@wordpress/babel-preset-default": "4.12.1",
     "@wordpress/block-editor": "3.10.0",
     "@wordpress/blocks": "6.13.0",
     "@wordpress/browserslist-config": "2.6.0",
