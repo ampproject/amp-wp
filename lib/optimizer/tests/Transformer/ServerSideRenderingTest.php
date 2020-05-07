@@ -5,6 +5,7 @@ namespace AmpProject\Optimizer\Transformer;
 use AmpProject\Dom\Document;
 use AmpProject\Optimizer\Error;
 use AmpProject\Optimizer\ErrorCollection;
+use AmpProject\Optimizer\Exception\InvalidHtmlAttribute;
 use AmpProject\Optimizer\Tests\ErrorComparison;
 use AmpProject\Optimizer\Tests\MarkupComparison;
 use AmpProject\Optimizer\Tests\TestMarkup;
@@ -221,9 +222,12 @@ final class ServerSideRenderingTest extends TestCase
                 $expectWithBoilerplate('<amp-img height="300" layout="responsive" srcset="https://acme.org/image1.png 320w, https://acme.org/image2.png 640w, https://acme.org/image3.png 1280w" sizes=",,,"  src="https://acme.org/image1.png" width="400"></amp-img>'),
                 [
                     Error\CannotRemoveBoilerplate::fromAttributesRequiringBoilerplate(
-                        Document::fromHtmlFragment(
-                            '<amp-img height="300" layout="responsive" srcset="https://acme.org/image1.png 320w, https://acme.org/image2.png 640w, https://acme.org/image3.png 1280w" sizes=",,," src="https://acme.org/image1.png" width="400"></amp-img>'
-                        )->body->firstChild
+                        InvalidHtmlAttribute::fromAttribute(
+                            'sizes',
+                            Document::fromHtmlFragment(
+                                '<amp-img height="300" layout="responsive" srcset="https://acme.org/image1.png 320w, https://acme.org/image2.png 640w, https://acme.org/image3.png 1280w" sizes=",,," src="https://acme.org/image1.png" width="400"></amp-img>'
+                            )->body->firstChild
+                        )
                     ),
                 ],
             ],
@@ -253,10 +257,13 @@ final class ServerSideRenderingTest extends TestCase
                 $input('<amp-img height="256" heights=",,," layout="responsive" width="320"></amp-img>'),
                 $expectWithBoilerplate('<amp-img height="256" heights=",,," layout="responsive" width="320"></amp-img>'),
                 [
-                    Error\CannotRemoveBoilerplate::fromAttributesRequiringBoilerplate(
-                        Document::fromHtmlFragment(
-                            '<amp-img height="256" heights=",,," layout="responsive" width="320"></amp-img>'
-                        )->body->firstChild
+                    Error\CannotRemoveBoilerplate::fromAttributeThrowingException(
+                        InvalidHtmlAttribute::fromAttribute(
+                            'heights',
+                            Document::fromHtmlFragment(
+                                '<amp-img height="256" heights=",,," layout="responsive" width="320"></amp-img>'
+                            )->body->firstChild
+                        )
                     ),
                 ],
             ],
