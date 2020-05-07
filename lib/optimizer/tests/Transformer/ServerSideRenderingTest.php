@@ -148,7 +148,7 @@ final class ServerSideRenderingTest extends TestCase
                 $input('<amp-img height="300" layout="responsive" srcset="https://acme.org/image1.png 320w, https://acme.org/image2.png 640w, https://acme.org/image3.png 1280w" sizes="(min-width: 320px) 320px, 100vw" src="https://acme.org/image1.png" width="400"></amp-img>'),
                 $expectWithoutBoilerplate(
                     '<amp-img height="300" layout="responsive" srcset="https://acme.org/image1.png 320w, https://acme.org/image2.png 640w, https://acme.org/image3.png 1280w" src="https://acme.org/image1.png" width="400" id="i-amp-id" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive"><i-amphtml-sizer style="display:block;padding-top:75.0000%;"></i-amphtml-sizer></amp-img>',
-                    '<style amp-custom>#i-amp-id{width:100vw};@media (min-width: 320px){#i-amp-id{width:320px;}}</style>'
+                    '<style amp-custom>#i-amp-id{width:100vw}@media (min-width: 320px){#i-amp-id{width:320px}}</style>'
                 ),
                 [],
             ],
@@ -160,7 +160,7 @@ final class ServerSideRenderingTest extends TestCase
                 ),
                 $expectWithoutBoilerplate(
                     '<amp-img height="300" layout="responsive" srcset="https://acme.org/image1.png 320w, https://acme.org/image2.png 640w, https://acme.org/image3.png 1280w" src="https://acme.org/image1.png" width="400" id="i-amp-id" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive"><i-amphtml-sizer style="display:block;padding-top:75.0000%;"></i-amphtml-sizer></amp-img>',
-                    '<style amp-custom>body h1{color:red;}#i-amp-id{width:100vw};@media (min-width: 320px){#i-amp-id{width:320px;}}</style>'
+                    '<style amp-custom>body h1{color:red;}#i-amp-id{width:100vw}@media (min-width: 320px){#i-amp-id{width:320px}}</style>'
                 ),
                 [],
             ],
@@ -202,7 +202,7 @@ final class ServerSideRenderingTest extends TestCase
                 $input('<amp-img height="256" heights="(min-width: 500px) 200px, 80%" layout="responsive" width="320"></amp-img>'),
                 $expectWithoutBoilerplate(
                     '<amp-img height="256" layout="responsive" width="320" id="i-amp-id" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive"><i-amphtml-sizer style="display:block;padding-top:80.0000%;"></i-amphtml-sizer></amp-img>',
-                    '<style amp-custom>#i-amp-id>i-amphtml-sizer{height:80%};@media (min-width: 500px){#i-amp-id>i-amphtml-sizer{height:200px;}}</style>'
+                    '<style amp-custom>#i-amp-id>i-amphtml-sizer{height:80%}@media (min-width: 500px){#i-amp-id>i-amphtml-sizer{height:200px}}</style>'
                 ),
                 [],
             ],
@@ -214,7 +214,7 @@ final class ServerSideRenderingTest extends TestCase
                 ),
                 $expectWithoutBoilerplate(
                     '<amp-img height="256" layout="responsive" width="320" id="i-amp-id" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive"><i-amphtml-sizer style="display:block;padding-top:80.0000%;"></i-amphtml-sizer></amp-img>',
-                    '<style amp-custom>body h1{color:red;}#i-amp-id>i-amphtml-sizer{height:80%};@media (min-width: 500px){#i-amp-id>i-amphtml-sizer{height:200px;}}</style>'
+                    '<style amp-custom>body h1{color:red;}#i-amp-id>i-amphtml-sizer{height:80%}@media (min-width: 500px){#i-amp-id>i-amphtml-sizer{height:200px}}</style>'
                 ),
                 [],
             ],
@@ -241,7 +241,7 @@ final class ServerSideRenderingTest extends TestCase
                 $input('<amp-img height="355" layout="fixed" media="(min-width: 650px)" src="wide.jpg" width="466"></amp-img>'),
                 $expectWithoutBoilerplate(
                     '<amp-img height="355" layout="fixed" src="wide.jpg" width="466" id="i-amp-id" class="i-amphtml-layout-fixed i-amphtml-layout-size-defined" style="width:466px;height:355px;" i-amphtml-layout="fixed"></amp-img>',
-                    '<style amp-custom>@media not all and (min-width: 650px){#i-amp-id{display:none;}}</style>'
+                    '<style amp-custom>@media not all and (min-width: 650px){#i-amp-id{display:none}}</style>'
                 ),
                 [],
             ],
@@ -253,7 +253,7 @@ final class ServerSideRenderingTest extends TestCase
                 ),
                 $expectWithoutBoilerplate(
                     '<amp-img height="355" layout="fixed" src="wide.jpg" width="466" id="i-amp-id" class="i-amphtml-layout-fixed i-amphtml-layout-size-defined" style="width:466px;height:355px;" i-amphtml-layout="fixed"></amp-img>',
-                    '<style amp-custom>body h1{color:red;}@media not all and (min-width: 650px){#i-amp-id{display:none;}}</style>'
+                    '<style amp-custom>body h1{color:red;}@media not all and (min-width: 650px){#i-amp-id{display:none}}</style>'
                 ),
                 [],
             ],
@@ -262,7 +262,7 @@ final class ServerSideRenderingTest extends TestCase
                 $input('<amp-img height="355" layout="fixed" media="screen and (min-width: 650px)" src="wide.jpg" width="466"></amp-img>'),
                 $expectWithoutBoilerplate(
                     '<amp-img height="355" layout="fixed" src="wide.jpg" width="466" id="i-amp-id" class="i-amphtml-layout-fixed i-amphtml-layout-size-defined" style="width:466px;height:355px;" i-amphtml-layout="fixed"></amp-img>',
-                    '<style amp-custom>@media not screen and (min-width: 650px){#i-amp-id{display:none;}}</style>'
+                    '<style amp-custom>@media not screen and (min-width: 650px){#i-amp-id{display:none}}</style>'
                 ),
                 [],
             ],
