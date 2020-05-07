@@ -33,9 +33,6 @@ final class SpecTest extends TestCase
 
         'ServerSideRendering - noscript_then_boilerplate_not_removed_due_to_attribute' => 'see https://github.com/ampproject/amp-wp/issues/4439',
         'ServerSideRendering - boilerplate_then_noscript_not_removed_due_to_attribute' => 'see https://github.com/ampproject/amp-wp/issues/4439',
-
-        'AmpRuntimeCss - always_inlines_v0css'                                 => 'see https://github.com/ampproject/amp-wp/issues/4654',
-        'AmpRuntimeCss - does_not_add_v0.css_if_style_amp-runtime_not_present' => 'see https://github.com/ampproject/amp-wp/issues/4654',
     ];
 
     const CLASS_SKIP_TEST = '__SKIP__';
