@@ -8,8 +8,6 @@
 /**
  * Class AMP_Post_Template
  *
- * @property WP_Post $post
- *
  * @since 0.2
  */
 class AMP_Post_Template {
@@ -67,15 +65,25 @@ class AMP_Post_Template {
 	public $ID;
 
 	/**
+	 * Post
+	 *
+	 * @since 0.2
+	 * @var WP_Post
+	 */
+	public $post;
+
+	/**
 	 * AMP_Post_Template constructor.
 	 *
 	 * @param WP_Post|int $post Post.
 	 */
 	public function __construct( $post ) {
 		if ( is_int( $post ) ) {
-			$this->ID = $post;
+			$this->ID   = $post;
+			$this->post = get_post( $post );
 		} elseif ( $post instanceof WP_Post ) {
-			$this->ID = $post->ID;
+			$this->ID   = $post->ID;
+			$this->post = $post;
 		}
 	}
 
@@ -149,22 +157,6 @@ class AMP_Post_Template {
 		 * @param WP_Post $post Post.
 		 */
 		$this->data = apply_filters( 'amp_post_template_data', $this->data, $this->post );
-	}
-
-	/**
-	 * Getter.
-	 *
-	 * @since 1.5
-	 *
-	 * @param string $name Property name.
-	 * @return mixed
-	 */
-	public function __get( $name ) {
-		switch ( $name ) {
-			case 'post':
-				return get_post( $this->ID );
-		}
-		return null;
 	}
 
 	/**
