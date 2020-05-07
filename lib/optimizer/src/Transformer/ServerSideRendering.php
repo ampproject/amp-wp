@@ -757,7 +757,7 @@ final class ServerSideRendering implements Transformer
                 $method = self::EXTRACTION_METHOD_MAP[$normalizedAttributeName];
 
                 try {
-                    $customCss           .= $this->$method($document, $ampElement, $attribute->name, $attribute->value);
+                    $customCss           .= $this->$method($document, $ampElement, $attribute);
                     $attributesToRemove[] = $attribute->name;
                 } catch (Exception $exception) {
                     $errors->add(Error\CannotRemoveBoilerplate::fromAttributeThrowingException($exception));
@@ -825,13 +825,12 @@ final class ServerSideRendering implements Transformer
      *
      * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#attr-sizes
      *
-     * @param Document   $document       Document containing the element to adapt.
-     * @param DOMElement $element        Element to adapt.
-     * @param string     $attributeName  Name of the attribute to be extracted.
-     * @param string     $attributeValue Value of the attribute to extract the CSS styling from.
+     * @param Document   $document  Document containing the element to adapt.
+     * @param DOMElement $element   Element to adapt.
+     * @param DOMAttr    $attribute Attribute to be extracted.
      * @return string Extract custom CSS styling.
      */
-    private function extractSizesAttributeCss(Document $document, DOMElement $element, $attributeName, $attributeValue)
+    private function extractSizesAttributeCss(Document $document, DOMElement $element, DOMAttr $attribute)
     {
         if (!$element->hasAttribute(Attribute::SRCSET) || empty($element->getAttribute(Attribute::SRCSET))) {
             // According to the Mozilla docs, a sizes attribute without a valid srcset attribute should have no effect.
@@ -843,8 +842,7 @@ final class ServerSideRendering implements Transformer
         return $this->extractAttributeCss(
             $document,
             $element,
-            $attributeName,
-            $attributeValue,
+            $attribute,
             '#__ID__{width:%s}',
             '@media %s{#__ID__{width:%s}}'
         );
@@ -862,21 +860,19 @@ final class ServerSideRendering implements Transformer
      *
      * @see https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes/#heights
      *
-     * @param Document   $document       Document containing the element to adapt.
-     * @param DOMElement $element        Element to adapt.
-     * @param string     $attributeName  Name of the attribute to be extracted.
-     * @param string     $attributeValue Value of the attribute to extract the CSS styling from.
+     * @param Document   $document  Document containing the element to adapt.
+     * @param DOMElement $element   Element to adapt.
+     * @param DOMAttr    $attribute Attribute to be extracted.
      * @return string Extract custom CSS styling.
      */
-    private function extractHeightsAttributeCss(Document $document, DOMElement $element, $attributeName, $attributeValue)
+    private function extractHeightsAttributeCss(Document $document, DOMElement $element, DOMAttr $attribute)
     {
         $this->customSizerStyles[$document->getElementId($element)] = '';
 
         return $this->extractAttributeCss(
             $document,
             $element,
-            $attributeName,
-            $attributeValue,
+            $attribute,
             '#__ID__>:first-child{padding-top:%s}',
             '@media %s{#__ID__>:first-child{padding-top:%s}}'
         );
@@ -887,23 +883,22 @@ final class ServerSideRendering implements Transformer
      *
      * @param Document   $document        Document containing the element to adapt.
      * @param DOMElement $element         Element to adapt.
-     * @param string     $attributeName   Name of the attribute to be extracted.
-     * @param string     $attributeValue  Value of the attribute to extract the CSS styling from.
+     * @param DOMAttr    $attribute       Attribute to be extracted.
      * @param string     $mainStyle       CSS template for the main style.
      * @param string     $mediaQueryStyle CSS template for a media query style.
      * @return string Extract custom CSS styling.
      */
-    private function extractAttributeCss(Document $document, DOMElement $element, $attributeName, $attributeValue, $mainStyle, $mediaQueryStyle)
+    private function extractAttributeCss(Document $document, DOMElement $element, DOMAttr $attribute, $mainStyle, $mediaQueryStyle)
     {
-        if (empty($attributeValue)) {
+        if (empty($attribute->nodeValue)) {
             return '';
         }
 
-        $sourceSizes = explode(',', $attributeValue);
+        $sourceSizes = explode(',', $attribute->nodeValue);
         $lastItem    = trim(array_pop($sourceSizes), self::CSS_TRIM_CHARACTERS);
 
         if (empty($lastItem)) {
-            throw InvalidHtmlAttribute::fromAttribute($attributeName, $element);
+            throw InvalidHtmlAttribute::fromAttribute($attribute->nodeName, $element);
         }
 
         $customCss = sprintf($mainStyle, $lastItem);
@@ -914,13 +909,13 @@ final class ServerSideRendering implements Transformer
                 $mediaCondition = trim($matches['media_condition'], self::CSS_TRIM_CHARACTERS);
 
                 if (empty($mediaCondition)) {
-                    throw InvalidHtmlAttribute::fromAttribute($attributeName, $element);
+                    throw InvalidHtmlAttribute::fromAttribute($attribute->nodeName, $element);
                 }
 
                 $dimension = trim($matches['dimension'], self::CSS_TRIM_CHARACTERS);
 
                 if (empty($dimension)) {
-                    throw InvalidHtmlAttribute::fromAttribute($attributeName, $element);
+                    throw InvalidHtmlAttribute::fromAttribute($attribute->nodeName, $element);
                 }
 
                 $customCss .= sprintf($mediaQueryStyle, $mediaCondition, $dimension);
@@ -941,15 +936,14 @@ final class ServerSideRendering implements Transformer
      * and potentially its child resources will not be fetched. If the browser window changes size or orientation, the
      * media queries are re-evaluated and elements are hidden and shown based on the new results."
      *
-     * @param Document   $document       Document containing the element to adapt.
-     * @param DOMElement $element        Element to adapt.
-     * @param string     $attributeName  Name of the attribute to be extracted.
-     * @param string     $attributeValue Value of the attribute to extract the CSS styling from.
+     * @param Document   $document  Document containing the element to adapt.
+     * @param DOMElement $element   Element to adapt.
+     * @param DOMAttr    $attribute Attribute to be extracted.
      * @return string Extract custom CSS styling.
      */
-    private function extractMediaAttributeCss(Document $document, DOMElement $element, $attributeName, $attributeValue)
+    private function extractMediaAttributeCss(Document $document, DOMElement $element, DOMAttr $attribute)
     {
-        $attributeValue = trim($attributeValue, self::CSS_TRIM_CHARACTERS);
+        $attributeValue = trim($attribute->nodeValue, self::CSS_TRIM_CHARACTERS);
 
         if (empty($attributeValue)) {
             return '';
