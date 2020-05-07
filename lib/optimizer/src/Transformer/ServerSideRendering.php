@@ -745,7 +745,6 @@ final class ServerSideRendering implements Transformer
                 try {
                     $customCss            .= $this->$method($document, $ampElement, $attribute->value);
                     $attributesToRemove[] = $attribute->name;
-                    $ampElement->removeAttribute($attribute->name);
                 } catch (Exception $exception) {
                     $errors->add(Error\CannotRemoveBoilerplate::fromAttributesRequiringBoilerplate($ampElement));
                     return false;
