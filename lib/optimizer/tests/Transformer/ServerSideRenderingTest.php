@@ -123,25 +123,49 @@ final class ServerSideRenderingTest extends TestCase
             'amp-audio' => [
                 $input('<amp-audio></amp-audio>'),
                 $expectWithBoilerplate('<amp-audio></amp-audio>'),
-                [Error\CannotRemoveBoilerplate::class],
+                [
+                    Error\CannotRemoveBoilerplate::fromAmpAudio(
+                        Document::fromHtmlFragment(
+                            '<amp-audio></amp-audio>'
+                        )->body->firstChild
+                    ),
+                ],
             ],
 
             'amp-experiment is non-empty' => [
                 $input('<amp-experiment><script type="application/json">{ "exp": { "variants": { "a": 25, "b": 25 } } }</script></amp-experiment>'),
                 $expectWithBoilerplate('<amp-experiment class="i-amphtml-layout-container" i-amphtml-layout="container"><script type="application/json">{ "exp": { "variants": { "a": 25, "b": 25 } } }</script></amp-experiment>'),
-                [Error\CannotRemoveBoilerplate::class],
+                [
+                    Error\CannotRemoveBoilerplate::fromAmpExperiment(
+                        Document::fromHtmlFragment(
+                            '<amp-experiment><script type="application/json">{ "exp": { "variants": { "a": 25, "b": 25 } } }</script></amp-experiment>'
+                        )->body->firstChild
+                    ),
+                ],
             ],
 
             'amp-story' => [
                 $input('', TestMarkup::SCRIPT_AMPSTORY),
                 $expectWithBoilerplate('', TestMarkup::SCRIPT_AMPSTORY),
-                [Error\CannotRemoveBoilerplate::class],
+                [
+                    Error\CannotRemoveBoilerplate::fromRenderDelayingScript(
+                        Document::fromHtmlFragment(
+                            TestMarkup::SCRIPT_AMPSTORY
+                        )->head->firstChild
+                    ),
+                ],
             ],
 
             'amp-dynamic-css-classes' => [
                 $input('', TestMarkup::SCRIPT_AMPDYNAMIC_CSSCLASSES),
                 $expectWithBoilerplate('', TestMarkup::SCRIPT_AMPDYNAMIC_CSSCLASSES),
-                [Error\CannotRemoveBoilerplate::class],
+                [
+                    Error\CannotRemoveBoilerplate::fromRenderDelayingScript(
+                        Document::fromHtmlFragment(
+                            TestMarkup::SCRIPT_AMPDYNAMIC_CSSCLASSES
+                        )->head->firstChild
+                    ),
+                ],
             ],
 
             'sizes attribute without amp-custom' => [
@@ -195,7 +219,13 @@ final class ServerSideRenderingTest extends TestCase
             'bad sizes attribute' => [
                 $input('<amp-img height="300" layout="responsive" srcset="https://acme.org/image1.png 320w, https://acme.org/image2.png 640w, https://acme.org/image3.png 1280w" sizes=",,," src="https://acme.org/image1.png" width="400"></amp-img>'),
                 $expectWithBoilerplate('<amp-img height="300" layout="responsive" srcset="https://acme.org/image1.png 320w, https://acme.org/image2.png 640w, https://acme.org/image3.png 1280w" sizes=",,,"  src="https://acme.org/image1.png" width="400"></amp-img>'),
-                [Error\CannotRemoveBoilerplate::class],
+                [
+                    Error\CannotRemoveBoilerplate::fromAttributesRequiringBoilerplate(
+                        Document::fromHtmlFragment(
+                            '<amp-img height="300" layout="responsive" srcset="https://acme.org/image1.png 320w, https://acme.org/image2.png 640w, https://acme.org/image3.png 1280w" sizes=",,," src="https://acme.org/image1.png" width="400"></amp-img>'
+                        )->body->firstChild
+                    ),
+                ],
             ],
 
             'heights attribute without amp-custom' => [
@@ -222,7 +252,13 @@ final class ServerSideRenderingTest extends TestCase
             'bad heights attribute' => [
                 $input('<amp-img height="256" heights=",,," layout="responsive" width="320"></amp-img>'),
                 $expectWithBoilerplate('<amp-img height="256" heights=",,," layout="responsive" width="320"></amp-img>'),
-                [Error\CannotRemoveBoilerplate::class],
+                [
+                    Error\CannotRemoveBoilerplate::fromAttributesRequiringBoilerplate(
+                        Document::fromHtmlFragment(
+                            '<amp-img height="256" heights=",,," layout="responsive" width="320"></amp-img>'
+                        )->body->firstChild
+                    ),
+                ],
             ],
 
             // @todo Remove floor when ampproject/amphtml#27528 is resolved.
