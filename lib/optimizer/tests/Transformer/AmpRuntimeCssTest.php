@@ -42,7 +42,37 @@ final class AmpRuntimeCssTest extends TestCase
                 '<style amp-runtime="" i-amphtml-version="023456789000000">/* v0.css */</style>' .
                 '</head><body></body></html>',
 
-                ['canary' => true],
+                [AmpRuntimeCssConfiguration::CANARY => true],
+            ],
+
+            'override version via config' => [
+                TestMarkup::DOCTYPE . '<html><head>' . TestMarkup::META_CHARSET . TestMarkup::STYLE_AMPRUNTIME . '</head></html>',
+
+                TestMarkup::DOCTYPE . '<html><head>' . TestMarkup::META_CHARSET .
+                '<style amp-runtime="" i-amphtml-version="012345678901234">/* 012345678901234/v0.css */</style>' .
+                '</head><body></body></html>',
+
+                [AmpRuntimeCssConfiguration::VERSION => '012345678901234'],
+            ],
+
+            'override styles via config' => [
+                TestMarkup::DOCTYPE . '<html><head>' . TestMarkup::META_CHARSET . TestMarkup::STYLE_AMPRUNTIME . '</head></html>',
+
+                TestMarkup::DOCTYPE . '<html><head>' . TestMarkup::META_CHARSET .
+                '<style amp-runtime="" i-amphtml-version="012345678900000">/* custom-styles-v0.css */</style>' .
+                '</head><body></body></html>',
+
+                [AmpRuntimeCssConfiguration::STYLES => '/* custom-styles-v0.css */'],
+            ],
+
+            'trying to inline invalid version results in linked stylesheet' => [
+                TestMarkup::DOCTYPE . '<html><head>' . TestMarkup::META_CHARSET . TestMarkup::STYLE_AMPRUNTIME . '</head></html>',
+
+                TestMarkup::DOCTYPE . '<html><head>' . TestMarkup::META_CHARSET .
+                '<link rel="stylesheet" href="https://cdn.ampproject.org/v0.css">' .
+                '</head><body></body></html>',
+
+                [AmpRuntimeCssConfiguration::VERSION => '0000000000000000'],
             ],
         ];
     }
