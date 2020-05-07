@@ -809,8 +809,17 @@ final class ServerSideRendering implements Transformer
             }
         }
 
-        $this->ampCustomStyleElement->textContent .= $customCss;
-        $this->ampCustomCssByteCount              += strlen($customCss);
+        // Inject new styles before any source map annotation comment if it exists, like: /*# sourceURL=amp-custom.css */
+        // If not present, then just put it at the end of the stylesheet. This isn't strictly required, but putting the
+        // source map comments at the end is the convention.
+        $this->ampCustomStyleElement->textContent = preg_replace(
+            ':(?=\s+/\*#[^*]+?\*/\s*$|$):s',
+            $customCss,
+            $this->ampCustomStyleElement->textContent,
+            1
+        );
+
+        $this->ampCustomCssByteCount += strlen($customCss);
 
         return true;
     }
