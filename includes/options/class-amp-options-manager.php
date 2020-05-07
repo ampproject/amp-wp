@@ -288,6 +288,7 @@ class AMP_Options_Manager {
 		}
 
 		// Update the suppressed plugins.
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		$plugins                    = get_plugins();
 		$new_suppressed_plugins     = array_key_exists( Option::SUPPRESSED_PLUGINS, $new_options ) ? $new_options[ Option::SUPPRESSED_PLUGINS ] : [];
 		$deleted_suppressed_plugins = array_diff( array_keys( $options[ Option::SUPPRESSED_PLUGINS ] ), $new_suppressed_plugins );
