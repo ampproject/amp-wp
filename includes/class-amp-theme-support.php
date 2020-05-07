@@ -2163,7 +2163,7 @@ class AMP_Theme_Support {
 
 		$enable_ssr = array_key_exists( ConfigurationArgument::ENABLE_SSR, $args )
 			? $args[ ConfigurationArgument::ENABLE_SSR ]
-			: ! ( defined( 'WP_DEBUG' ) && WP_DEBUG );
+			: true;
 
 		/**
 		 * Filter whether the AMP Optimizer should use server-side rendering or not.
