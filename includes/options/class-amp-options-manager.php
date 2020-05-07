@@ -287,10 +287,20 @@ class AMP_Options_Manager {
 			unset( $options[ Option::DISABLE_CSS_TRANSIENT_CACHING ] );
 		}
 
-		$options[ Option::SUPPRESSED_PLUGINS ] = [];
-		if ( array_key_exists( Option::SUPPRESSED_PLUGINS, $new_options ) ) {
-			foreach ( $new_options[ Option::SUPPRESSED_PLUGINS ] as $suppressed_plugin ) {
-				$options[ Option::SUPPRESSED_PLUGINS ][] = $suppressed_plugin;
+		// Update the suppressed plugins.
+		$plugins                    = get_plugins();
+		$new_suppressed_plugins     = array_key_exists( Option::SUPPRESSED_PLUGINS, $new_options ) ? $new_options[ Option::SUPPRESSED_PLUGINS ] : [];
+		$deleted_suppressed_plugins = array_diff( array_keys( $options[ Option::SUPPRESSED_PLUGINS ] ), $new_suppressed_plugins );
+		foreach ( $deleted_suppressed_plugins as $deleted_suppressed_plugin ) {
+			unset( $options[ Option::SUPPRESSED_PLUGINS ][ $deleted_suppressed_plugin ] );
+		}
+		$inserted_suppressed_plugins = array_diff( $new_suppressed_plugins, array_keys( $options[ Option::SUPPRESSED_PLUGINS ] ) );
+		foreach ( $inserted_suppressed_plugins as $inserted_suppressed_plugin ) {
+			if ( array_key_exists( $inserted_suppressed_plugin, $plugins ) ) {
+				$options[ Option::SUPPRESSED_PLUGINS ][ $inserted_suppressed_plugin ] = [
+					// Note that we store the version that was suppressed so that we can alert the user when to check again.
+					Option::SUPPRESSED_PLUGINS_LAST_VERSION => $plugins[ $inserted_suppressed_plugin ]['Version'],
+				];
 			}
 		}
 

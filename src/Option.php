@@ -92,6 +92,13 @@ interface Option {
 	const SUPPRESSED_PLUGINS = 'suppressed_plugins';
 
 	/**
+	 * Suppressed plugins, last version.
+	 *
+	 * @var string
+	 */
+	const SUPPRESSED_PLUGINS_LAST_VERSION = 'last_version';
+
+	/**
 	 * Version of the AMP plugin for which the options were last saved.
 	 *
 	 * This allows for recognizing updates and triggering update-specific logic.
