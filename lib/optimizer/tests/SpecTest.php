@@ -173,7 +173,7 @@ final class SpecTest extends TestCase
         }
 
         $json   = trim($matches['json']);
-        $source = str_replace($matches[0], '', $source);
+        $source = substr($source, strlen($matches[0]));
 
         if (empty($json)) {
             return [];
