@@ -123,6 +123,13 @@ final class ServerSideRendering implements Transformer
     private $ampCustomCssByteCount = 0;
 
     /**
+     * Associative array of custom sizer styles where the key is the ID of the associated element.
+     *
+     * @var string[]
+     */
+    private $customSizerStyles = [];
+
+    /**
      * Apply transformations to the provided DOM document.
      *
      * @param Document        $document DOM document to apply the transformations to.
@@ -557,7 +564,12 @@ final class ServerSideRendering implements Transformer
         $sizer = null;
 
         if ($layout === Layout::RESPONSIVE) {
-            $sizer = $this->createResponsiveSizer($document, $width, $height);
+            $elementId = $element->getAttribute(Attribute::ID);
+            if (!empty($elementId) && array_key_exists($elementId, $this->customSizerStyles)) {
+                $sizer = $this->createResponsiveSizer($document, $width, $height, $this->customSizerStyles[$elementId]);
+            } else {
+                $sizer = $this->createResponsiveSizer($document, $width, $height);
+            }
         } elseif ($layout === Layout::INTRINSIC) {
             $sizer = $this->createIntrinsicSizer($document, $width, $height);
         }
@@ -573,13 +585,15 @@ final class ServerSideRendering implements Transformer
      * @param Document  $document DOM document to create the sizer for.
      * @param CssLength $width    Calculated width of the element.
      * @param CssLength $height   Calculated height of the element.
+     * @param string    $style    Style to use for the sizer. Defaults to padding-top in percentage.
      * @return DOMElement
      */
-    private function createResponsiveSizer(Document $document, CssLength $width, CssLength $height)
+    private function createResponsiveSizer(Document $document, CssLength $width, CssLength $height, $style = 'padding-top:%1.4F%%;')
     {
         $padding = $height->getNumeral() / $width->getNumeral() * 100;
         $sizer   = $document->createElement(Amp::SIZER_ELEMENT);
-        $sizer->setAttribute(Tag::STYLE, sprintf('display:block;padding-top:%1.4F%%;', $padding));
+        $style   = empty($style) ? 'display:block' : "display:block;{$style}";
+        $sizer->setAttribute(Tag::STYLE, sprintf($style, $padding));
 
         return $sizer;
     }
@@ -856,19 +870,15 @@ final class ServerSideRendering implements Transformer
      */
     private function extractHeightsAttributeCss(Document $document, DOMElement $element, $attributeName, $attributeValue)
     {
-        /*
-         * Note: Usage of :first-child could potentially be brittle here.
-         * We cannot use a selector that references the .i-amphtml-sizer element directly because that reference doesn't
-         * pass the validator.
-         * See https://github.com/ampproject/amp-wp/pull/4482#discussion_r421149537
-         */
+        $this->customSizerStyles[$document->getElementId($element)] = '';
+
         return $this->extractAttributeCss(
             $document,
             $element,
             $attributeName,
             $attributeValue,
-            '#__ID__:first-child{height:%s}',
-            '@media %s{#__ID__:first-child{height:%s}}'
+            '#__ID__>:first-child{padding-top:%s}',
+            '@media %s{#__ID__>:first-child{padding-top:%s}}'
         );
     }
 
