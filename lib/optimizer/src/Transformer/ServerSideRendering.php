@@ -830,8 +830,8 @@ final class ServerSideRendering implements Transformer
             $document,
             $element,
             $attributeValue,
-            '#__ID__{width:%s};',
-            '@media %s{#__ID__{width:%s;}}'
+            '#__ID__{width:%s}',
+            '@media %s{#__ID__{width:%s}}'
         );
     }
 
@@ -858,8 +858,8 @@ final class ServerSideRendering implements Transformer
             $document,
             $element,
             $attributeValue,
-            '#__ID__>i-amphtml-sizer{height:%s};',
-            '@media %s{#__ID__>i-amphtml-sizer{height:%s;}}'
+            '#__ID__>i-amphtml-sizer{height:%s}',
+            '@media %s{#__ID__>i-amphtml-sizer{height:%s}}'
         );
     }
 
@@ -939,7 +939,7 @@ final class ServerSideRendering implements Transformer
         }
 
         return sprintf(
-            '@media not %s{#%s{display:none;}}',
+            '@media not %s{#%s{display:none}}',
             $attributeValue,
             $document->getElementId($element)
         );
