@@ -871,10 +871,15 @@ class AMP_Validated_URL_Post_Type {
 	 * @return array Environment.
 	 */
 	public static function get_validated_environment() {
+		// The version is included so that plugin updates will encourage users to re-check validated URLs as they'll be marked stale.
+		$plugins = wp_array_slice_assoc(
+			wp_list_pluck( get_plugins(), 'Version' ),
+			get_option( 'active_plugins', [] )
+		);
+
 		// We want to sort the list of plugins to avoid fluctuations due to plugins fighting for first spot
 		// to constantly invalidate our cache.
-		$plugins = get_option( 'active_plugins', [] );
-		sort( $plugins );
+		asort( $plugins );
 
 		return [
 			'theme'   => get_stylesheet(),
@@ -890,7 +895,7 @@ class AMP_Validated_URL_Post_Type {
 	 *     Staleness of the validation results. An empty array if the results are fresh.
 	 *
 	 *     @type string $theme   The theme that was active but is no longer. Absent if theme is the same.
-	 *     @type array  $plugins Plugins that used to be active but are no longer, or which are active now but weren't. Absent if the plugins were the same.
+	 *     @type array  $plugins Plugins that used to be active but are no longer, or which are active now but weren't. Also includes plugins that have version updates. Absent if the plugins were the same.
 	 *     @type array  $options Options that are now different. Absent if the options were the same.
 	 * }
 	 */
@@ -909,13 +914,13 @@ class AMP_Validated_URL_Post_Type {
 		}
 
 		if ( isset( $old_validated_environment['plugins'] ) ) {
-			$new_active_plugins = array_diff( $new_validated_environment['plugins'], $old_validated_environment['plugins'] );
+			$new_active_plugins = array_diff_assoc( $new_validated_environment['plugins'], $old_validated_environment['plugins'] );
 			if ( ! empty( $new_active_plugins ) ) {
-				$staleness['plugins']['new'] = array_values( $new_active_plugins );
+				$staleness['plugins']['new'] = array_keys( $new_active_plugins );
 			}
-			$old_active_plugins = array_diff( $old_validated_environment['plugins'], $new_validated_environment['plugins'] );
+			$old_active_plugins = array_diff_assoc( $old_validated_environment['plugins'], $new_validated_environment['plugins'] );
 			if ( ! empty( $old_active_plugins ) ) {
-				$staleness['plugins']['old'] = array_values( $old_active_plugins );
+				$staleness['plugins']['old'] = array_keys( $old_active_plugins );
 			}
 		}
 
@@ -1929,7 +1934,7 @@ class AMP_Validated_URL_Post_Type {
 								esc_html_e( 'A different theme was active when these results were obtained.', 'amp' );
 								echo ' ';
 							} elseif ( ! empty( $staleness['plugins'] ) ) {
-								esc_html_e( 'Different plugins were active when these results were obtained.', 'amp' );
+								esc_html_e( 'Plugins have been updated since these results were obtained.', 'amp' );
 								echo ' ';
 							}
 							esc_html_e( 'Please recheck.', 'amp' );
