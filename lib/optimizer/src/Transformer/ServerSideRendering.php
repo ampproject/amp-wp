@@ -180,7 +180,8 @@ final class ServerSideRendering implements Transformer
              * Try to adapt 'sizes', 'heights' and 'media' attribute to turn them from blocking attributes into CSS
              * styles we add to <style amp-custom>.
              */
-            if (! $this->adaptBlockingAttributes($document, $ampElement, $errors)) {
+            $attributesToRemove = $this->adaptBlockingAttributes($document, $ampElement, $errors);
+            if ($attributesToRemove === false) {
                 $canRemoveBoilerplate = false;
                 continue;
             }
@@ -192,6 +193,12 @@ final class ServerSideRendering implements Transformer
             if (! $this->applyLayout($document, $ampElement, $errors)) {
                 $errors->add(Error\CannotRemoveBoilerplate::fromUnsupportedLayout($ampElement));
                 $canRemoveBoilerplate = false;
+                continue;
+            }
+
+            // Removal of attributes is defer as layout application needs them.
+            foreach ($attributesToRemove as $attributeToRemove) {
+                $ampElement->removeAttribute($attributeToRemove);
             }
         }
 
@@ -724,14 +731,14 @@ final class ServerSideRendering implements Transformer
      * @param Document        $document   DOM document to apply the transformations to.
      * @param DOMElement      $ampElement Element to adapt.
      * @param ErrorCollection $errors     Collection of errors that are collected during transformation.
-     * @return bool Whether boilerplate can be removed.
+     * @return array|false Array of attributes to remove, or false if attributes could not be adapted.
      */
     private function adaptBlockingAttributes(Document $document, DOMElement $ampElement, ErrorCollection $errors)
     {
         $attributes = $ampElement->attributes;
 
         if ($attributes === null) {
-            return true;
+            return [];
         }
 
         $customCss          = '';
@@ -771,11 +778,7 @@ final class ServerSideRendering implements Transformer
             return false;
         }
 
-        foreach ($attributesToRemove as $attributeToRemove) {
-            $ampElement->removeAttribute($attributeToRemove);
-        }
-
-        return true;
+        return $attributesToRemove;
     }
 
     /**
