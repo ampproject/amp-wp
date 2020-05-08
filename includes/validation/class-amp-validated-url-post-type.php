@@ -866,6 +866,53 @@ class AMP_Validated_URL_Post_Type {
 	}
 
 	/**
+	 * Get recent validation errors by source.
+	 *
+	 * @since 1.6
+	 *
+	 * @param int $count Maximum count of validated URLs to gather validation errors from.
+	 * @return array Multidimensional array where root keys are source types, sub-keys are source names, and leaf arrays are the validation error data.
+	 */
+	public static function get_recent_validation_errors_by_source( $count = 100 ) {
+		$posts = get_posts(
+			[
+				'post_type'      => self::POST_TYPE_SLUG,
+				'posts_per_page' => $count,
+				'orderby'        => 'date',
+				'order'          => 'desc',
+			]
+		);
+
+		$errors_by_source = [];
+
+		foreach ( $posts as $post ) {
+			// Skip validated URLs which are stale since results will be misleading.
+			if ( self::get_post_staleness( $post ) ) {
+				continue;
+			}
+
+			$validation_errors = self::get_invalid_url_validation_errors( $post );
+			if ( empty( $validation_errors ) ) {
+				continue;
+			}
+
+			foreach ( $validation_errors as $validation_error ) {
+				if ( empty( $validation_error['data']['sources'] ) || ! $validation_error['term'] instanceof WP_Term ) {
+					continue;
+				}
+				foreach ( $validation_error['data']['sources'] as $source ) {
+					if ( ! isset( $source['type'], $source['name'] ) ) {
+						continue;
+					}
+					$errors_by_source[ $source['type'] ][ $source['name'] ][] = $validation_error['term'];
+				}
+			}
+		}
+
+		return $errors_by_source;
+	}
+
+	/**
 	 * Get the environment properties which will likely effect whether validation results are stale.
 	 *
 	 * @return array Environment.
