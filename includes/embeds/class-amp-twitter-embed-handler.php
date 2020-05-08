@@ -28,80 +28,28 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @since 1.0
 	 * @var string
 	 */
-	const URL_PATTERN_TIMELINE = '#https?:\/\/twitter\.com(?:\/\#\!\/|\/)(?P<username>[a-zA-Z0-9_]{1,20})(?:$|\/(?P<type>likes|lists)(\/(?P<id>[a-zA-Z0-9_-]+))?)#i';
+	const URL_PATTERN_MOMENT = '#https?:\/\/twitter\.com\/i\/moments\/(?P<id>\d+)#i';
 
 	/**
-	 * Tag.
+	 * URL pattern for a Twitter timeline.
 	 *
-	 * @var string embed HTML blockquote tag to identify and replace with AMP version.
+	 * @since 1.0
+	 * @var string
 	 */
-	protected $sanitize_tag = 'blockquote';
-
-	/**
-	 * Tag.
-	 *
-	 * @var string AMP amp-facebook tag
-	 */
-	private $amp_tag = 'amp-twitter';
+	const URL_PATTERN_TIMELINE = '#https?:\/\/twitter\.com(?:\/\#\!\/|\/)(?P<username>[a-zA-Z0-9_]{1,20})(?:$|\/(?P<type>likes|lists|timelines)(\/(?P<id>[a-zA-Z0-9_-]+))?|.+?)#i';
 
 	/**
 	 * Registers embed.
 	 */
 	public function register_embed() {
-		wp_embed_register_handler( 'amp-twitter-timeline', self::URL_PATTERN_TIMELINE, [ $this, 'oembed_timeline' ], -1 );
+		// Not implemented.
 	}
 
 	/**
 	 * Unregisters embed.
 	 */
 	public function unregister_embed() {
-		wp_embed_unregister_handler( 'amp-twitter-timeline', -1 );
-	}
-
-	/**
-	 * Render oEmbed for a timeline.
-	 *
-	 * @since 1.0
-	 *
-	 * @param array $matches URL pattern matches.
-	 * @return string Rendered oEmbed.
-	 */
-	public function oembed_timeline( $matches ) {
-		if ( ! isset( $matches['username'] ) ) {
-			return '';
-		}
-
-		$attributes = [
-			'data-timeline-source-type' => 'profile',
-			'data-timeline-screen-name' => $matches['username'],
-		];
-
-		if ( isset( $matches['type'] ) ) {
-			switch ( $matches['type'] ) {
-				case 'likes':
-					$attributes['data-timeline-source-type'] = 'likes';
-					break;
-				case 'lists':
-					if ( ! isset( $matches['id'] ) ) {
-						return '';
-					}
-					$attributes['data-timeline-source-type']       = 'list';
-					$attributes['data-timeline-slug']              = $matches['id'];
-					$attributes['data-timeline-owner-screen-name'] = $attributes['data-timeline-screen-name'];
-					unset( $attributes['data-timeline-screen-name'] );
-					break;
-				default:
-					return '';
-			}
-		}
-
-		$attributes['layout'] = 'responsive';
-		$attributes['width']  = $this->args['width'];
-		$attributes['height'] = $this->args['height'];
-
-		$this->did_convert_elements = true;
-
-		return AMP_HTML_Utils::build_tag( $this->amp_tag, $attributes );
+		// Not implemented.
 	}
 
 	/**
@@ -110,88 +58,121 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @param Document $dom DOM.
 	 */
 	public function sanitize_raw_embeds( Document $dom ) {
-		$nodes     = $dom->getElementsByTagName( $this->sanitize_tag );
-		$num_nodes = $nodes->length;
+		$this->sanitize_tweet_embeds( $dom );
+		$this->sanitize_timeline_embeds( $dom );
+		$this->sanitize_moment_embeds( $dom );
+	}
 
-		if ( 0 === $num_nodes ) {
-			return;
-		}
+	public function sanitize_tweet_embeds( Document $dom ) {
+		$nodes = $dom->xpath->query( '//blockquote[ @class = "twitter-tweet" ]' );
+		$this->sanitize_raw_embed( 'tweet', $nodes );
+	}
 
-		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
-			$node = $nodes->item( $i );
-			if ( ! $node instanceof DOMElement ) {
-				continue;
-			}
+	public function sanitize_timeline_embeds( Document $dom ) {
+		$nodes = $dom->xpath->query( '//a[ @class = "twitter-timeline" ]' );
+		$this->sanitize_raw_embed( 'timeline', $nodes );
+	}
 
-			if ( $this->is_tweet_raw_embed( $node ) ) {
-				$this->create_amp_twitter_and_replace_node( $dom, $node );
-			}
-		}
+	public function sanitize_moment_embeds( Document $dom ) {
+		$nodes = $dom->xpath->query( '//a[ @class = "twitter-moment" ]' );
+		$this->sanitize_raw_embed( 'moment', $nodes );
 	}
 
 	/**
-	 * Checks whether it's a twitter blockquote or not.
+	 * Checks whether it's a twitter AMP component.
 	 *
 	 * @param DOMElement $node The DOMNode to adjust and replace.
 	 * @return bool Whether node is for raw embed.
 	 */
-	private function is_tweet_raw_embed( $node ) {
-		// Skip processing blockquotes that have already been passed through while being wrapped with <amp-twitter>.
-		if ( $node->parentNode && 'amp-twitter' === $node->parentNode->nodeName ) {
-			return false;
-		}
-
-		$class_attr = $node->getAttribute( 'class' );
-
-		return null !== $class_attr && false !== strpos( $class_attr, 'twitter-tweet' );
+	private function is_raw_embed( $node ) {
+		return $node->parentNode && 'amp-twitter' !== $node->parentNode->nodeName;
 	}
 
 	/**
 	 * Make final modifications to DOMNode
 	 *
-	 * @param Document   $dom The HTML Document.
-	 * @param DOMElement $node The DOMNode to adjust and replace.
+	 * @param string $embed_type The type of Twitter embed.
+	 * @param DOMNodeList  $nodes List of DOMElement nodes.
 	 */
-	private function create_amp_twitter_and_replace_node( Document $dom, DOMElement $node ) {
-		$tweet_id = $this->get_tweet_id( $node );
-		if ( ! $tweet_id ) {
-			return;
-		}
-
-		$attributes = [
-			'width'        => $this->DEFAULT_WIDTH,
-			'height'       => $this->DEFAULT_HEIGHT,
-			'layout'       => 'responsive',
-			'data-tweetid' => $tweet_id,
-		];
-
-		if ( $node->hasAttributes() ) {
-			foreach ( $node->attributes as $attr ) {
-				$attributes[ $attr->nodeName ] = $attr->nodeValue;
+	private function sanitize_raw_embed( $embed_type, $nodes ) {
+		foreach ( $nodes as $node ) {
+			if ( ! $this->is_raw_embed( $node ) ) {
+				continue;
 			}
+
+			$attributes = [
+				'width'        => $this->DEFAULT_WIDTH,
+				'height'       => $this->DEFAULT_HEIGHT,
+				'layout'       => 'responsive',
+			];
+
+			switch ( $embed_type ) {
+				case 'tweet':
+					$tweet_id = $this->get_tweet_id( $node );
+					if ( ! $tweet_id ) {
+						return;
+					}
+
+					$attributes['data-tweetid'] = $tweet_id;
+					break;
+				case 'timeline':
+					$timeline_attrs = $this->get_timeline_attributes( $node->getAttribute( 'href' ) );
+					if ( ! $timeline_attrs ) {
+						return;
+					}
+
+					if (
+						( ! isset( $timeline_attrs['type'] ) && isset( $timeline_attrs['username'] ) ) ||
+						( isset( $timeline_attrs['type'] ) && in_array( $timeline_attrs['type'], [ 'likes', 'lists' ], true ) )
+					) {
+						$attributes['data-timeline-source-type'] = 'url';
+						$attributes['data-timeline-url'] = $node->getAttribute( 'href' );
+					}
+
+					break;
+				case 'moment':
+					$moment_id = $this->get_moment_id( $node->getAttribute( 'href' ) );
+					if ( ! $moment_id ) {
+						return;
+					}
+
+					$attributes['data-momentid'] = $moment_id;
+					break;
+				default:
+					return;
+			}
+
+			if ( $node->hasAttributes() ) {
+				foreach ( $node->attributes as $attr ) {
+					// Copy only `data-` attributes.
+					if ( false !== strpos( $attr->nodeName, 'data-', 0 ) ) {
+						$attributes[ $attr->nodeName ] = $attr->nodeValue;
+					}
+				}
+			}
+
+			$new_node = AMP_DOM_Utils::create_node(
+				Document::fromNode( $node ),
+				'amp-twitter',
+				$attributes
+			);
+
+			/**
+			 * Placeholder element to append to the new node.
+			 *
+			 * @var DOMElement $placeholder
+			 */
+			$placeholder = $node->cloneNode( true );
+			$placeholder->setAttribute( 'placeholder', '' );
+
+			$new_node->appendChild( $placeholder );
+
+			$this->sanitize_embed_script( $node );
+			// We can unwrap the <p> tag once the accompanied <script> is removed.
+			$this->maybe_unwrap_p_element( $node );
+
+			$node->parentNode->replaceChild( $new_node, $node );
 		}
-
-		$new_node = AMP_DOM_Utils::create_node(
-			$dom,
-			$this->amp_tag,
-			$attributes
-		);
-
-		/**
-		 * Placeholder element to append to the new node.
-		 *
-		 * @var DOMElement $placeholder
-		 */
-		$placeholder = $node->cloneNode( true );
-		$placeholder->setAttribute( 'placeholder', '' );
-
-		$new_node->appendChild( $placeholder );
-
-		$this->sanitize_embed_script( $node );
-
-		$node->parentNode->replaceChild( $new_node, $node );
-
-		$this->did_convert_elements = true;
 	}
 
 	/**
@@ -224,12 +205,53 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
+	 * Parse Twitter timeline attributes from a URL.
+	 *
+	 * @param string $url URL.
+	 * @return array Timeline attributes.
+	 */
+	private function get_timeline_attributes( $url ) {
+		$found = preg_match( self::URL_PATTERN_TIMELINE, $url, $matches );
+		if ( $found ) {
+			return $matches;
+		}
+
+		return null;
+	}
+
+	/**
+	 * Parse Twitter moment ID from a URL.
+	 *
+	 * @param string $url URL.
+	 * @return array Timeline attributes.
+	 */
+	private function get_moment_id( $url ) {
+		$found = preg_match( self::URL_PATTERN_MOMENT, $url, $matches );
+		if ( $found ) {
+			return $matches['id'];
+		}
+
+		return null;
+	}
+
+	/**
 	 * Removes Twitter's embed <script> tag.
 	 *
 	 * @param DOMElement $node The DOMNode to whose sibling is the Twitter script.
 	 */
 	private function sanitize_embed_script( $node ) {
 		$next_element_sibling = $node->nextSibling;
+
+		// Remove any <br> siblings.
+		while ( $next_element_sibling && $next_element_sibling instanceof DOMElement && 'br' === $next_element_sibling->nodeName ) {
+			$next_element_sibling->parentNode->removeChild( $next_element_sibling );
+			$next_element_sibling = $node->nextSibling;
+		}
+
+		if ( $next_element_sibling instanceof DOMElement && 'br' === $next_element_sibling->nodeName ) {
+			$next_element_sibling->parentNode->removeChild( $next_element_sibling );
+		}
+
 		while ( $next_element_sibling && ! ( $next_element_sibling instanceof DOMElement ) ) {
 			$next_element_sibling = $next_element_sibling->nextSibling;
 		}
