@@ -6,6 +6,8 @@
  * @since 1.0
  */
 
+use AmpProject\Dom\Document;
+
 /**
  * Class AMP_Hulu_Embed_Handler
  */
@@ -28,60 +30,92 @@ class AMP_Hulu_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Register embed.
 	 */
 	public function register_embed() {
-		add_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ], 10, 3 );
+		// Not implemented.
 	}
 
 	/**
 	 * Unregister embed.
 	 */
 	public function unregister_embed() {
-		remove_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ], 10 );
+		// Not implemented.
 	}
 
 	/**
-	 * Filter oEmbed HTML for Hulu to prepare it for AMP.
+	 * Sanitize all Hulu <iframe> tags to <amp-hulu>.
 	 *
-	 * @param mixed  $return The oEmbed HTML.
-	 * @param string $url    The attempted embed URL.
-	 * @param array  $attr   Attributes.
-	 * @return string Embed.
+	 * @param Document $dom DOM.
 	 */
-	public function filter_embed_oembed_html( $return, $url, $attr ) {
-		$parsed_url = wp_parse_url( $url );
-		if ( false !== strpos( $parsed_url['host'], 'hulu.com' ) ) {
-			if ( preg_match( '/width=["\']?(\d+)/', $return, $matches ) ) {
-				$attr['width'] = $matches[1];
-			}
-			if ( preg_match( '/height=["\']?(\d+)/', $return, $matches ) ) {
-				$attr['height'] = $matches[1];
-			}
+	public function sanitize_raw_embeds( Document $dom ) {
+		$nodes = $dom->xpath->query( '//iframe[ contains( @src, "www.hulu.com/embed.html" ) ]' );
 
-			if ( empty( $attr['height'] ) ) {
-				return $return;
+		foreach ( $nodes as $node ) {
+			if ( ! $this->is_raw_embed( $node ) ) {
+				continue;
 			}
-
-			$attributes = wp_array_slice_assoc( $attr, [ 'width', 'height' ] );
-
-			if ( empty( $attr['width'] ) ) {
-				$attributes['layout'] = 'fixed-height';
-				$attributes['width']  = 'auto';
-			}
-
-			$pieces = explode( '/watch/', $parsed_url['path'] );
-			if ( ! isset( $pieces[1] ) ) {
-				if ( ! preg_match( '/\/([A-Za-z0-9]+)/', $parsed_url['path'], $matches ) ) {
-					return $return;
-				}
-				$attributes['data-eid'] = $matches[1];
-			} else {
-				$attributes['data-eid'] = $pieces[1];
-			}
-
-			$return = AMP_HTML_Utils::build_tag(
-				'amp-hulu',
-				$attributes
-			);
+			$this->sanitize_raw_embed( $node );
 		}
-		return $return;
+	}
+
+	/**
+	 * Determine if the node has already been sanitized.
+	 *
+	 * @param DOMElement $node The DOMNode.
+	 * @return bool Whether the node is a raw embed.
+	 */
+	protected function is_raw_embed( DOMElement $node ) {
+		return $node->parentNode && 'amp-hulu' !== $node->parentNode->nodeName;
+	}
+
+	/**
+	 * Make Hulu embed AMP compatible.
+	 *
+	 * @param DOMElement $iframe_node The node to make AMP compatible.
+	 */
+	private function sanitize_raw_embed( DOMElement $iframe_node ) {
+		$iframe_src = $iframe_node->getAttribute('src');
+		$video_id   = $this->get_video_id( $iframe_src );
+
+		if ( ! $video_id ) {
+			return;
+		}
+
+		$attributes = [
+			'data-eid' => $video_id,
+			'layout'   => 'responsive',
+			'width'    => $this->DEFAULT_WIDTH,
+			'height'   => $this->DEFAULT_HEIGHT,
+		];
+
+		if ( $iframe_node->hasAttribute( 'width' ) ) {
+			$attributes['width'] = $iframe_node->getAttribute( 'width' );
+ 		}
+
+		if ( $iframe_node->hasAttribute( 'height' ) ) {
+			$attributes['height'] = $iframe_node->getAttribute( 'height' );
+ 		}
+
+		$amp_node = AMP_DOM_Utils::create_node(
+			Document::fromNode( $iframe_node ),
+			'amp-hulu',
+			$attributes
+		);
+
+		$this->maybe_unwrap_p_element( $iframe_node );
+
+		$iframe_node->parentNode->replaceChild( $amp_node, $iframe_node );
+	}
+
+	/**
+	 * Get video from URL.
+	 *
+	 * @param string $url Video URL.
+	 * @return string|null Video ID, or null if it was not found.
+	 */
+	private function get_video_id( $url ) {
+		if ( preg_match( '#hulu\.com/embed\.html\?eid=(?P<id>[A-Za-z0-9_-]+)#', $url, $matches ) ) {
+			return $matches['id'];
+		}
+
+		return null;
 	}
 }

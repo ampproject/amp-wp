@@ -73,12 +73,12 @@ class AMP_Hulu_Embed_Handler_Test extends WP_UnitTestCase {
 		return [
 			'url_simple'      => [
 				'https://www.hulu.com/watch/771496',
-				'<p><amp-hulu width="500" height="289" data-eid="771496"></amp-hulu></p>' . PHP_EOL,
+				'<amp-hulu data-eid="_hHzwnAcj3RrXMJFDDvkuw" layout="responsive" width="500" height="289"></amp-hulu>' . PHP_EOL,
 			],
 
 			'url_with_params' => [
 				'https://www.hulu.com/watch/771496?foo=bar',
-				'<p><amp-hulu width="500" height="289" data-eid="771496"></amp-hulu></p>' . PHP_EOL,
+				'<amp-hulu data-eid="_hHzwnAcj3RrXMJFDDvkuw" layout="responsive" width="500" height="289"></amp-hulu>' . PHP_EOL,
 			],
 
 		];
@@ -94,13 +94,14 @@ class AMP_Hulu_Embed_Handler_Test extends WP_UnitTestCase {
 	public function test__conversion( $url, $expected ) {
 		$embed = new AMP_Hulu_Embed_Handler();
 		$embed->register_embed();
+
 		$filtered_content = apply_filters( 'the_content', $url );
+		$dom              = AMP_DOM_Utils::get_dom_from_content( $filtered_content );
+		$embed->sanitize_raw_embeds( $dom );
 
-		if ( self::is_external_http_test_suite() && "<p>$url</p>" === trim( $filtered_content ) ) {
-			$this->markTestSkipped( 'Endpoint is down.' );
-		}
+		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 
-		$this->assertEquals( $expected, $filtered_content );
+		$this->assertEquals( $expected, $content );
 	}
 
 	/**
@@ -131,13 +132,12 @@ class AMP_Hulu_Embed_Handler_Test extends WP_UnitTestCase {
 	public function test__get_scripts( $url, $expected ) {
 		$embed = new AMP_Hulu_Embed_Handler();
 		$embed->register_embed();
+
 		$filtered_content = apply_filters( 'the_content', $url );
+		$dom              = AMP_DOM_Utils::get_dom_from_content( $filtered_content );
+		$embed->sanitize_raw_embeds( $dom );
 
-		if ( self::is_external_http_test_suite() && "<p>$url</p>" === trim( $filtered_content ) ) {
-			$this->markTestSkipped( 'Endpoint is down.' );
-		}
-
-		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( AMP_DOM_Utils::get_dom_from_content( $filtered_content ) );
+		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 		$whitelist_sanitizer->sanitize();
 
 		$scripts = array_merge(
