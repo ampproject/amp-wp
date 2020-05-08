@@ -18,7 +18,6 @@ use AmpProject\Tag;
 use DOMAttr;
 use DOMElement;
 use Exception;
-use RuntimeException;
 
 /**
  * Transformer applying the server-side rendering transformations to the HTML input.
