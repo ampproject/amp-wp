@@ -5,19 +5,14 @@
  * @package AMP
  */
 
+use AmpProject\Dom\Document;
+
 /**
  * Class AMP_Vimeo_Embed_Handler
  *
  * Much of this class is borrowed from Jetpack embeds
  */
 class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
-
-	/**
-	 * The embed URL pattern.
-	 *
-	 * @var string
-	 */
-	const URL_PATTERN = '#https?:\/\/(.+\.)?vimeo\.com\/.*#i';
 
 	/**
 	 * The aspect ratio.
@@ -59,75 +54,69 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Register embed.
 	 */
 	public function register_embed() {
-		wp_embed_register_handler( 'amp-vimeo', self::URL_PATTERN, [ $this, 'oembed' ], -1 );
-		add_filter( 'wp_video_shortcode_override', [ $this, 'video_override' ], 10, 2 );
+		// Not implemented.
 	}
 
 	/**
 	 * Unregister embed.
 	 */
 	public function unregister_embed() {
-		wp_embed_unregister_handler( 'amp-vimeo', -1 );
+		// Not implemented.
 	}
 
 	/**
-	 * Render oEmbed.
+	 * Sanitize all gfycat <iframe> tags to <amp-gfycat>.
 	 *
-	 * @see \WP_Embed::shortcode()
-	 *
-	 * @param array  $matches URL pattern matches.
-	 * @param array  $attr    Shortcode attribues.
-	 * @param string $url     URL.
-	 * @param string $rawattr Unmodified shortcode attributes.
-	 * @return string Rendered oEmbed.
+	 * @param Document $dom DOM.
 	 */
-	public function oembed( $matches, $attr, $url, $rawattr ) {
-		$video_id = $this->get_video_id_from_url( $url );
+	public function sanitize_raw_embeds( Document $dom ) {
+		$nodes = $dom->xpath->query( '//iframe[ starts-with( @src, "https://player.vimeo.com/video/" ) ]' );
 
-		return $this->render(
-			[
-				'url'      => $url,
-				'video_id' => $video_id,
-			]
-		);
+		foreach ( $nodes as $node ) {
+			if ( ! $this->is_raw_embed( $node ) ) {
+				continue;
+			}
+			$this->sanitize_raw_embed( $node );
+		}
 	}
 
 	/**
-	 * Render.
+	 * Determine if the node has already been sanitized.
 	 *
-	 * @param array $args Args.
-	 * @return string Rendered.
+	 * @param DOMElement $node The DOMNode.
+	 * @return bool Whether the node is a raw embed.
 	 */
-	public function render( $args ) {
-		$args = wp_parse_args(
-			$args,
-			[
-				'video_id' => false,
-			]
-		);
+	protected function is_raw_embed( DOMElement $node ) {
+		return $node->parentNode && 'amp-vimeo' !== $node->parentNode->nodeName;
+	}
 
-		if ( empty( $args['video_id'] ) ) {
-			return AMP_HTML_Utils::build_tag(
-				'a',
-				[
-					'href'  => esc_url_raw( $args['url'] ),
-					'class' => 'amp-wp-embed-fallback',
-				],
-				esc_html( $args['url'] )
-			);
+	/**
+	 * Make DailyMotion embed AMP compatible.
+	 *
+	 * @param DOMElement $iframe_node The node to make AMP compatible.
+	 */
+	private function sanitize_raw_embed( DOMElement $iframe_node ) {
+		$iframe_src = $iframe_node->getAttribute('src');
+		$video_id   = $this->get_video_id_from_url( $iframe_src );
+
+		if ( ! $video_id ) {
+			return;
 		}
 
-		$this->did_convert_elements = true;
-
-		return AMP_HTML_Utils::build_tag(
+		$amp_node = AMP_DOM_Utils::create_node(
+			Document::fromNode( $iframe_node ),
 			'amp-vimeo',
 			[
-				'data-videoid' => $args['video_id'],
+				'data-videoid' => $video_id,
 				'layout'       => 'responsive',
 				'width'        => $this->args['width'],
 				'height'       => $this->args['height'],
 			]
 		);
+
+		$this->maybe_unwrap_p_element( $iframe_node );
+
+		$iframe_node->parentNode->replaceChild( $amp_node, $iframe_node );
 	}
 
 	/**
@@ -137,42 +126,12 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return int Video ID.
 	 */
 	private function get_video_id_from_url( $url ) {
-		$path = wp_parse_url( $url, PHP_URL_PATH );
-
 		// @todo This will not get the private key for unlisted videos (which look like https://vimeo.com/123456789/abcdef0123), but amp-vimeo doesn't support them currently anyway.
-		$video_id = '';
-		if ( $path && preg_match( ':/(\d+):', $path, $matches ) ) {
+		$video_id = null;
+		if ( preg_match( ':/video/(\d+):', $url, $matches ) ) {
 			$video_id = $matches[1];
 		}
 
 		return $video_id;
-	}
-
-	/**
-	 * Override the output of Vimeo videos.
-	 *
-	 * This overrides the value in wp_video_shortcode().
-	 * The pattern matching is copied from WP_Widget_Media_Video::render().
-	 *
-	 * @param string $html Empty variable to be replaced with shortcode markup.
-	 * @param array  $attr The shortcode attributes.
-	 * @return string|null $markup The markup to output.
-	 */
-	public function video_override( $html, $attr ) {
-		if ( ! isset( $attr['src'] ) ) {
-			return $html;
-		}
-		$src           = $attr['src'];
-		$vimeo_pattern = '#^https?://(.+\.)?vimeo\.com/.*#';
-		if ( 1 !== preg_match( $vimeo_pattern, $src ) ) {
-			return $html;
-		}
-
-		$video_id = $this->get_video_id_from_url( $src );
-		if ( empty( $video_id ) ) {
-			return '';
-		}
-
-		return $this->render( compact( 'video_id' ) );
 	}
 }
