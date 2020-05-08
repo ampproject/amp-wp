@@ -65,7 +65,7 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
-	 * Sanitize all gfycat <iframe> tags to <amp-gfycat>.
+	 * Sanitize all Vimeo <iframe> tags to <amp-vimeo>.
 	 *
 	 * @param Document $dom DOM.
 	 */
@@ -91,7 +91,7 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
-	 * Make DailyMotion embed AMP compatible.
+	 * Make Vimeo embed AMP compatible.
 	 *
 	 * @param DOMElement $iframe_node The node to make AMP compatible.
 	 */
