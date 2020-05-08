@@ -66,17 +66,6 @@ final class ServerSideRendering implements Transformer
     ];
 
     /**
-     * Map of attribute names to extraction methods.
-     *
-     * @var string[]
-     */
-    const EXTRACTION_METHOD_MAP = [
-        Attribute::SIZES   => 'extractSizesAttributeCss',
-        Attribute::HEIGHTS => 'extractHeightsAttributeCss',
-        Attribute::MEDIA   => 'extractMediaAttributeCss',
-    ];
-
-    /**
      * XPath query to retrieve the <style amp-custom> tag, relative to the <head> node.
      *
      * @var string
@@ -751,25 +740,33 @@ final class ServerSideRendering implements Transformer
              * @var DOMAttr $attribute
              */
             $normalizedAttributeName = strtolower($attribute->name);
-            if (array_key_exists($normalizedAttributeName, self::EXTRACTION_METHOD_MAP)) {
-                if (
-                    $normalizedAttributeName === Attribute::SIZES
-                    && $ampElement->hasAttribute(Attribute::DISABLE_INLINE_WIDTH)
-                ) {
-                    // Don't remove sizes when disable-inline-width is set.
-                    // @see https://github.com/ampproject/amphtml/pull/27083
-                    continue;
-                }
 
-                $method = self::EXTRACTION_METHOD_MAP[$normalizedAttributeName];
+            try {
+                switch ($normalizedAttributeName) {
+                    case Attribute::SIZES:
+                        if ($ampElement->hasAttribute(Attribute::DISABLE_INLINE_WIDTH)) {
+                            // Don't remove sizes when disable-inline-width is set.
+                            // @see https://github.com/ampproject/amphtml/pull/27083
+                            break;
+                        }
 
-                try {
-                    $customCss           .= $this->$method($document, $ampElement, $attribute);
-                    $attributesToRemove[] = $attribute->name;
-                } catch (Exception $exception) {
-                    $errors->add(Error\CannotRemoveBoilerplate::fromAttributeThrowingException($exception));
-                    return false;
+                        $customCss           .= $this->extractSizesAttributeCss($document, $ampElement, $attribute);
+                        $attributesToRemove[] = $attribute->name;
+                        break;
+
+                    case Attribute::HEIGHTS:
+                        $customCss           .= $this->extractHeightsAttributeCss($document, $ampElement, $attribute);
+                        $attributesToRemove[] = $attribute->name;
+                        break;
+
+                    case Attribute::MEDIA:
+                        $customCss           .= $this->extractMediaAttributeCss($document, $ampElement, $attribute);
+                        $attributesToRemove[] = $attribute->name;
+                        break;
                 }
+            } catch (Exception $exception) {
+                $errors->add(Error\CannotRemoveBoilerplate::fromAttributeThrowingException($exception));
+                return false;
             }
         }
 
