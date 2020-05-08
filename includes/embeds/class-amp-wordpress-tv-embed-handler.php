@@ -6,6 +6,8 @@
  * @since 1.4
  */
 
+use AmpProject\Dom\Document;
+
 /**
  * Class AMP_WordPress_TV_Embed_Handler
  *
@@ -24,14 +26,56 @@ class AMP_WordPress_TV_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Register embed.
 	 */
 	public function register_embed() {
-		add_filter( 'embed_oembed_html', [ $this, 'filter_oembed_html' ], 10, 2 );
+		// Not implemented.
 	}
 
 	/**
 	 * Unregister embed.
 	 */
 	public function unregister_embed() {
-		remove_filter( 'embed_oembed_html', [ $this, 'filter_oembed_html' ], 10 );
+		// Not implemented.
+	}
+
+	/**
+	 * Sanitize all WordPress TV <iframe> tags to <amp-iframe>.
+	 *
+	 * @param Document $dom DOM.
+	 */
+	public function sanitize_raw_embeds( Document $dom ) {
+		$nodes = $dom->xpath->query( '//iframe[ starts-with( @src, "https://video.wordpress.com/embed/" ) ]' );
+
+		foreach ( $nodes as $node ) {
+			if ( ! $this->is_raw_embed( $node ) ) {
+				continue;
+			}
+			$this->sanitize_raw_embed( $node );
+		}
+	}
+
+	/**
+	 * Determine if the node has already been sanitized.
+	 *
+	 * @param DOMElement $node The DOMNode.
+	 * @return bool Whether the node is a raw embed.
+	 */
+	protected function is_raw_embed( DOMElement $node ) {
+		return $node->parentNode && 'amp-iframe' !== $node->parentNode->nodeName;
+	}
+
+	/**
+	 * Make WordPress TV embed AMP compatible.
+	 *
+	 * @param DOMElement $iframe_node The node to make AMP compatible.
+	 */
+	private function sanitize_raw_embed( DOMElement $iframe_node ) {
+		$next_sibling = $iframe_node->nextSibling;
+
+		if ( $next_sibling && 'script' === $next_sibling->nodeName ) {
+			$iframe_node->parentNode->removeChild( $next_sibling );
+		}
+
+		$iframe_node->setAttribute( 'layout', 'responsive' );
+		$this->maybe_unwrap_p_element( $iframe_node );
 	}
 
 	/**
