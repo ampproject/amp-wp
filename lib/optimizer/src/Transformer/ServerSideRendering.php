@@ -720,7 +720,7 @@ final class ServerSideRendering implements Transformer
      * @param Document        $document   DOM document to apply the transformations to.
      * @param DOMElement      $ampElement Element to adapt.
      * @param ErrorCollection $errors     Collection of errors that are collected during transformation.
-     * @return array|false Array of attributes to remove, or false if attributes could not be adapted.
+     * @return string[]|false Attribute names to remove, or false if attributes could not be adapted.
      */
     private function adaptBlockingAttributes(Document $document, DOMElement $ampElement, ErrorCollection $errors)
     {
