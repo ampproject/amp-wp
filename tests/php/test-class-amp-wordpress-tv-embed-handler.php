@@ -62,17 +62,17 @@ class Test_AMP_WordPress_TV_Embed_Handler extends WP_UnitTestCase {
 	 */
 	public function get_conversion_data() {
 		return [
-			'no_embed'        => [
+			'no_embed'                      => [
 				'<p>Hello world.</p>',
 				'<p>Hello world.</p>' . PHP_EOL,
 			],
 
-			'wrong_embed_url_wordpress_com'         => [
+			'wrong_embed_url_wordpress_com' => [
 				'https://wordpress.com/123',
 				'<p>https://wordpress.com/123</p>' . PHP_EOL,
 			],
 
-			'correct_url'               => [
+			'correct_url'                   => [
 				'https://wordpress.tv/2019/10/08/the-history-of-wordpress-in-four-minutes/',
 				'<iframe width="500" height="281" src="https://video.wordpress.com/embed/yFCmLMGL?hd=0" frameborder="0" allowfullscreen layout="responsive"></iframe>' . PHP_EOL,
 			],

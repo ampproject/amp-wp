@@ -96,7 +96,7 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @param DOMElement $iframe_node The node to make AMP compatible.
 	 */
 	private function sanitize_raw_embed( DOMElement $iframe_node ) {
-		$iframe_src = $iframe_node->getAttribute('src');
+		$iframe_src = $iframe_node->getAttribute( 'src' );
 		$video_id   = $this->get_video_id_from_url( $iframe_src );
 
 		if ( ! $video_id ) {

@@ -63,17 +63,32 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 		$this->sanitize_moment_embeds( $dom );
 	}
 
-	public function sanitize_tweet_embeds( Document $dom ) {
+	/**
+	 * Sanitize tweets.
+	 *
+	 * @param Document $dom Document.
+	 */
+	private function sanitize_tweet_embeds( Document $dom ) {
 		$nodes = $dom->xpath->query( '//blockquote[ @class = "twitter-tweet" ]' );
 		$this->sanitize_raw_embed( 'tweet', $nodes );
 	}
 
-	public function sanitize_timeline_embeds( Document $dom ) {
+	/**
+	 * Sanitize timelines.
+	 *
+	 * @param Document $dom Document.
+	 */
+	private function sanitize_timeline_embeds( Document $dom ) {
 		$nodes = $dom->xpath->query( '//a[ @class = "twitter-timeline" ]' );
 		$this->sanitize_raw_embed( 'timeline', $nodes );
 	}
 
-	public function sanitize_moment_embeds( Document $dom ) {
+	/**
+	 * Sanitize moments.
+	 *
+	 * @param Document $dom Document.
+	 */
+	private function sanitize_moment_embeds( Document $dom ) {
 		$nodes = $dom->xpath->query( '//a[ @class = "twitter-moment" ]' );
 		$this->sanitize_raw_embed( 'moment', $nodes );
 	}
@@ -84,26 +99,32 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @param DOMElement $node The DOMNode to adjust and replace.
 	 * @return bool Whether node is for raw embed.
 	 */
-	private function is_raw_embed( $node ) {
+	private function is_raw_embed( DOMElement $node ) {
 		return $node->parentNode && 'amp-twitter' !== $node->parentNode->nodeName;
 	}
 
 	/**
 	 * Make final modifications to DOMNode
 	 *
-	 * @param string $embed_type The type of Twitter embed.
-	 * @param DOMNodeList  $nodes List of DOMElement nodes.
+	 * @param string      $embed_type The type of Twitter embed.
+	 * @param DOMNodeList $nodes List of DOMElement nodes.
 	 */
-	private function sanitize_raw_embed( $embed_type, $nodes ) {
+	private function sanitize_raw_embed( $embed_type, DOMNodeList $nodes ) {
 		foreach ( $nodes as $node ) {
+			/**
+			 * Node.
+			 *
+			 * @var DOMElement $node
+			 */
+
 			if ( ! $this->is_raw_embed( $node ) ) {
 				continue;
 			}
 
 			$attributes = [
-				'width'        => $this->DEFAULT_WIDTH,
-				'height'       => $this->DEFAULT_HEIGHT,
-				'layout'       => 'responsive',
+				'width'  => $this->DEFAULT_WIDTH,
+				'height' => $this->DEFAULT_HEIGHT,
+				'layout' => 'responsive',
 			];
 
 			switch ( $embed_type ) {
@@ -126,7 +147,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 						( isset( $timeline_attrs['type'] ) && in_array( $timeline_attrs['type'], [ 'likes', 'lists' ], true ) )
 					) {
 						$attributes['data-timeline-source-type'] = 'url';
-						$attributes['data-timeline-url'] = $node->getAttribute( 'href' );
+						$attributes['data-timeline-url']         = $node->getAttribute( 'href' );
 					}
 
 					break;
@@ -181,7 +202,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @param DOMElement $node The DOMNode to adjust and replace.
 	 * @return string Tweet ID.
 	 */
-	private function get_tweet_id( $node ) {
+	private function get_tweet_id( DOMElement $node ) {
 		/**
 		 * DOMNode
 		 *
@@ -239,7 +260,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	 *
 	 * @param DOMElement $node The DOMNode to whose sibling is the Twitter script.
 	 */
-	private function sanitize_embed_script( $node ) {
+	private function sanitize_embed_script( DOMElement $node ) {
 		$next_element_sibling = $node->nextSibling;
 
 		// Remove any <br> siblings.

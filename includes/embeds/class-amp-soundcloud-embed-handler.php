@@ -75,7 +75,8 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 			return;
 		}
 
-		$embed_id = $this->parse_embed_id_from_url( $query['url'] );
+		$attributes = [];
+		$embed_id   = $this->parse_embed_id_from_url( $query['url'] );
 
 		if ( isset( $embed_id['track_id'] ) ) {
 			$attributes['data-trackid'] = $embed_id['track_id'];

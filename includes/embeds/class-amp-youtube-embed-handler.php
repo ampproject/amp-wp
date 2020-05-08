@@ -79,12 +79,11 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 			}
 
 			$iframe_src = $node->getAttribute( 'src' );
-			$video_id = $this->get_video_id_from_url( $iframe_src );
+			$video_id   = $this->get_video_id_from_url( $iframe_src );
 
 			if ( $video_id ) {
 				$this->sanitize_raw_embed( $node, $video_id );
 			}
-
 		}
 	}
 
@@ -101,8 +100,8 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Make DailyMotion embed AMP compatible.
 	 *
-	 * @param string     $video_id Video ID.
 	 * @param DOMElement $iframe_node The node to make AMP compatible.
+	 * @param string     $video_id Video ID.
 	 */
 	private function sanitize_raw_embed( DOMElement $iframe_node, $video_id ) {
 		$attributes = [

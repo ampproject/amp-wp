@@ -59,7 +59,7 @@ class AMP_Scribd_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @param DOMElement $iframe_node The node to make AMP compatible.
 	 */
 	private function sanitize_raw_embed( DOMElement $iframe_node ) {
-		$required_sandbox_permissions  = 'allow-popups allow-scripts';
+		$required_sandbox_permissions = 'allow-popups allow-scripts';
 		$iframe_node->setAttribute(
 			'sandbox',
 			sprintf( '%s %s', $iframe_node->getAttribute( 'sandbox' ), $required_sandbox_permissions )

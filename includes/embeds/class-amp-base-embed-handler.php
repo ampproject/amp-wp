@@ -115,7 +115,7 @@ abstract class AMP_Base_Embed_Handler {
 	 * @param DOMElement $node Node.
 	 */
 	protected function maybe_unwrap_p_element( DOMElement $node ) {
-	    $parent_element = AMP_DOM_Utils::get_parent_element( $node );
+		$parent_element = AMP_DOM_Utils::get_parent_element( $node );
 
 		if ( $parent_element && 'p' === $parent_element->nodeName && false === $parent_element->hasAttributes() ) {
 			$children = $parent_element->getElementsByTagName( '*' );

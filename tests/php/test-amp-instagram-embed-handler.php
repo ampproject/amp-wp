@@ -6,43 +6,43 @@ class AMP_Instagram_Embed_Handler_Test extends WP_UnitTestCase {
 		return [
 			'no_embed'                           => [
 				'<p>Hello world.</p>',
-				'<p>Hello world.</p>',
+				'<p>Hello world.</p>' . PHP_EOL,
 			],
 			'simple_url'                         => [
 				'https://instagram.com/p/7-l0z_p4A4/',
-				'<amp-instagram data-shortcode="7-l0z_p4A4" layout="responsive" width="600" height="600" data-captioned=""></amp-instagram>',
+				'<amp-instagram data-shortcode="7-l0z_p4A4" layout="responsive" width="600" height="600" data-captioned=""></amp-instagram>' . PHP_EOL . PHP_EOL,
 			],
 			'simple_tv_url'                      => [
 				'https://instagram.com/tv/7-l0z_p4A4/' . PHP_EOL,
-				'<amp-instagram data-shortcode="7-l0z_p4A4" layout="responsive" width="600" height="600" data-captioned=""></amp-instagram>',
+				'<amp-instagram data-shortcode="7-l0z_p4A4" layout="responsive" width="600" height="600" data-captioned=""></amp-instagram>' . PHP_EOL . PHP_EOL,
 			],
 			'short_url'                          => [
 				'https://instagr.am/p/7-l0z_p4A4' . PHP_EOL,
-				'<amp-instagram data-shortcode="7-l0z_p4A4" layout="responsive" width="600" height="600" data-captioned=""></amp-instagram>',
+				'<amp-instagram data-shortcode="7-l0z_p4A4" layout="responsive" width="600" height="600" data-captioned=""></amp-instagram>' . PHP_EOL . PHP_EOL,
 			],
 			'short_tv_url'                       => [
 				'https://instagr.am/tv/7-l0z_p4A4' . PHP_EOL,
-				'<amp-instagram data-shortcode="7-l0z_p4A4" layout="responsive" width="600" height="600" data-captioned=""></amp-instagram>',
+				'<amp-instagram data-shortcode="7-l0z_p4A4" layout="responsive" width="600" height="600" data-captioned=""></amp-instagram>' . PHP_EOL . PHP_EOL,
 			],
 
 			'embed_blockquote_without_instagram' => [
 				'<blockquote><p>lorem ipsum</p></blockquote>',
-				'<blockquote><p>lorem ipsum</p></blockquote>',
+				'<blockquote>' . PHP_EOL . '<p>lorem ipsum</p>' . PHP_EOL . '</blockquote>' . PHP_EOL,
 			],
 
 			'blockquote_embed'                   => [
 				wpautop( '<blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/BhsgU3jh6xE/"><div style="padding: 8px;">Lorem ipsum</div></blockquote> <script async defer src="//www.instagram.com/embed.js"></script>' ), // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine
-				'<amp-instagram data-shortcode="BhsgU3jh6xE" layout="responsive" width="600" height="600"></amp-instagram>',
+				'<amp-instagram data-shortcode="BhsgU3jh6xE" layout="responsive" width="600" height="600"></amp-instagram>' . PHP_EOL . PHP_EOL,
 			],
 
 			'blockquote_tv_embed'                => [
 				wpautop( '<blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/tv/BhsgU3jh6xE/"><div style="padding: 8px;">Lorem ipsum</div></blockquote> <script async defer src="//www.instagram.com/embed.js"></script>' ), // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine
-				'<amp-instagram data-shortcode="BhsgU3jh6xE" layout="responsive" width="600" height="600"></amp-instagram>',
+				'<amp-instagram data-shortcode="BhsgU3jh6xE" layout="responsive" width="600" height="600"></amp-instagram>' . PHP_EOL . PHP_EOL,
 			],
 
 			'blockquote_embed_with_caption'      => [
 				wpautop( '<blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/BhsgU3jh6xE/" data-instgrm-captioned><div style="padding: 8px;">Lorem ipsum</div></blockquote> <script async defer src="//www.instagram.com/embed.js"></script>' ), // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine
-				'<amp-instagram data-shortcode="BhsgU3jh6xE" layout="responsive" width="600" height="600" data-captioned=""></amp-instagram>',
+				'<amp-instagram data-shortcode="BhsgU3jh6xE" layout="responsive" width="600" height="600" data-captioned=""></amp-instagram>' . PHP_EOL . PHP_EOL,
 			],
 		];
 	}
@@ -108,6 +108,6 @@ class AMP_Instagram_Embed_Handler_Test extends WP_UnitTestCase {
 			$whitelist_sanitizer->get_scripts()
 		);
 
-		$this->assertEquals( $expected . PHP_EOL . PHP_EOL, $scripts );
+		$this->assertEquals( $expected, $scripts );
 	}
 }
