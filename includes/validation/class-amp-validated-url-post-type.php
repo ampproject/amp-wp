@@ -871,7 +871,7 @@ class AMP_Validated_URL_Post_Type {
 	 * @since 1.6
 	 *
 	 * @param int $count Maximum count of validated URLs to gather validation errors from.
-	 * @return array Multidimensional array where root keys are source types, sub-keys are source names, and leaf arrays are the validation error data.
+	 * @return array Multidimensional array where root keys are source types, sub-keys are source names, and leaf arrays are the validation error terms & data.
 	 */
 	public static function get_recent_validation_errors_by_source( $count = 100 ) {
 		$posts = get_posts(
@@ -901,10 +901,18 @@ class AMP_Validated_URL_Post_Type {
 					continue;
 				}
 				foreach ( $validation_error['data']['sources'] as $source ) {
-					if ( ! isset( $source['type'], $source['name'] ) ) {
+					if ( ! isset( $source['type'], $source['name'] ) || ! $validation_error['term'] instanceof WP_Term ) {
 						continue;
 					}
-					$errors_by_source[ $source['type'] ][ $source['name'] ][] = $validation_error['term'];
+					$data = json_decode( $validation_error['term']->description, true );
+					if ( ! is_array( $data ) ) {
+						continue;
+					}
+
+					$errors_by_source[ $source['type'] ][ $source['name'] ][] = [
+						'term' => $validation_error['term'],
+						'data' => $data,
+					];
 				}
 			}
 		}

@@ -449,9 +449,9 @@ class AMP_Options_Menu {
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		$plugins = get_plugins();
 		unset( $plugins['amp/amp.php'] );
-		foreach ( array_keys( $plugins ) as $plugin_slug ) {
-			if ( ! is_plugin_active( $plugin_slug ) ) {
-				unset( $plugins[ $plugin_slug ] );
+		foreach ( array_keys( $plugins ) as $plugin_file ) {
+			if ( ! is_plugin_active( $plugin_file ) ) {
+				unset( $plugins[ $plugin_file ] );
 			}
 		}
 		uasort(
@@ -494,57 +494,35 @@ class AMP_Options_Menu {
 			<?php else : ?>
 				<?php
 				$element_name      = AMP_Options_Manager::OPTION_NAME . '[' . Option::SUPPRESSED_PLUGINS . ']';
-				$errors_by_sources = AMP_Validated_URL_Post_Type::get_recent_validation_errors_by_source();
-				unset( $errors_by_sources['plugin']['gutenberg'] );
+				$errors_by_sources = AMP_Validated_URL_Post_Type::get_recent_validation_errors_by_source(); // @todo Exclude reviewed errors?
+				unset( $errors_by_sources['plugin']['gutenberg'] ); // Omit Gutenberg to prevent unintentional attribution for shortcodes.
+				unset( $errors_by_sources['plugin']['amp'] ); // Omit AMP because disabling in AMP responses would be bad!
 
-				$errors_by_plugin_file = [];
-				if ( isset( $errors_by_sources['plugin'] ) ) {
-					foreach ( $errors_by_sources['plugin'] as $plugin_slug => $validation_errors ) {
-						$plugin = AMP_Validation_Error_Taxonomy::get_plugin_from_slug( $plugin_slug );
-						if ( $plugin ) {
-							$errors_by_plugin_file[ $plugin['name'] ] = array_filter(
-								array_map(
-									function ( $validation_error ) {
-										if ( ! $validation_error instanceof WP_Term ) {
-											return null;
-										}
-										$data = json_decode( $validation_error->description, true );
-										if ( ! is_array( $data ) ) {
-											return null;
-										}
-										return [
-											'term' => $validation_error,
-											'data' => $data,
-										];
-									},
-									$validation_errors
-								)
-							);
-						}
-					}
-				}
-
+				// @todo Divide up the lists up front and then loop over each.
+				// @todo Handle case when this first loop is empty.
 				$already_listed_plugins = [];
 				?>
 				<ul>
-					<?php foreach ( $plugins as $plugin_slug => $plugin ) : ?>
+					<?php foreach ( $plugins as $plugin_file => $plugin ) : ?>
 						<?php
+						$plugin_slug = strtok( $plugin_file, '/' );
+
 						$is_suppressed = array_key_exists( $plugin_slug, $suppressed_plugins );
-						if ( ! $is_suppressed && ! array_key_exists( $plugin_slug, $errors_by_plugin_file ) ) {
+						if ( ! $is_suppressed && ! array_key_exists( $plugin_slug, $errors_by_sources['plugin'] ) ) {
 							continue;
 						}
-						$already_listed_plugins[] = $plugin_slug;
+						$already_listed_plugins[] = $plugin_file;
 						?>
 						<li class="plugin">
 							<input
 								type="checkbox"
 								class="suppressed-plugin"
-								id="<?php echo esc_attr( "$element_name-$plugin_slug" ); ?>"
+								id="<?php echo esc_attr( "$element_name-$plugin_file" ); ?>"
 								name="<?php echo esc_attr( $element_name . '[]' ); ?>"
 								value="<?php echo esc_attr( $plugin_slug ); ?>"
 								<?php checked( $is_suppressed ); ?>
 							>
-							<label for="<?php echo esc_attr( "$element_name-$plugin_slug" ); ?>">
+							<label for="<?php echo esc_attr( "$element_name-$plugin_file" ); ?>">
 								<?php
 								if ( ! $is_suppressed ) {
 									echo '<strong>';
@@ -555,15 +533,15 @@ class AMP_Options_Menu {
 								}
 								?>
 							</label>
-							<?php if ( $is_suppressed && version_compare( $suppressed_plugins[ $plugin_slug ][ Option::SUPPRESSED_PLUGINS_LAST_VERSION ], $plugins[ $plugin_slug ]['Version'], '!=' ) ) : ?>
+							<?php if ( $is_suppressed && version_compare( $suppressed_plugins[ $plugin_slug ][ Option::SUPPRESSED_PLUGINS_LAST_VERSION ], $plugins[ $plugin_file ]['Version'], '!=' ) ) : ?>
 								<small>
-									<?php if ( $suppressed_plugins[ $plugin_slug ][ Option::SUPPRESSED_PLUGINS_LAST_VERSION ] && $plugins[ $plugin_slug ]['Version'] ) : ?>
+									<?php if ( $suppressed_plugins[ $plugin_slug ][ Option::SUPPRESSED_PLUGINS_LAST_VERSION ] && $plugins[ $plugin_file ]['Version'] ) : ?>
 										<?php
 										echo esc_html(
 											sprintf(
 												/* translators: %1: version at which suppressed, %2: current version */
 												__( '(Now updated to version %1$s since suppressed at %2$s.)', 'amp' ),
-												$plugins[ $plugin_slug ]['Version'],
+												$plugins[ $plugin_file ]['Version'],
 												$suppressed_plugins[ $plugin_slug ][ Option::SUPPRESSED_PLUGINS_LAST_VERSION ]
 											)
 										);
@@ -572,7 +550,7 @@ class AMP_Options_Menu {
 										<?php esc_html_e( '(Plugin updated since last suppressed.)', 'amp' ); ?>
 									<?php endif; ?>
 								</small>
-							<?php elseif ( ! $is_suppressed && ! empty( $errors_by_plugin_file[ $plugin_slug ] ) ) : ?>
+							<?php elseif ( ! $is_suppressed && ! empty( $errors_by_sources['plugin'][ $plugin_slug ] ) ) : ?>
 								<details>
 									<summary>
 										<?php
@@ -582,16 +560,16 @@ class AMP_Options_Menu {
 												_n(
 													'%s error',
 													'%s errors',
-													count( $errors_by_plugin_file[ $plugin_slug ] ),
+													count( $errors_by_sources['plugin'][ $plugin_slug ] ),
 													'amp'
 												),
-												number_format_i18n( count( $errors_by_plugin_file[ $plugin_slug ] ) )
+												number_format_i18n( count( $errors_by_sources['plugin'][ $plugin_slug ] ) )
 											)
 										);
 										?>
 									</summary>
 									<ul>
-										<?php foreach ( $errors_by_plugin_file[ $plugin_slug ] as $validation_error ) : ?>
+										<?php foreach ( $errors_by_sources['plugin'][ $plugin_slug ] as $validation_error ) : ?>
 											<?php
 											$edit_term_url = admin_url(
 												add_query_arg(
@@ -653,21 +631,22 @@ class AMP_Options_Menu {
 							?>
 						</p>
 						<ul>
-							<?php foreach ( $plugins as $plugin_slug => $plugin ) : ?>
+							<?php foreach ( $plugins as $plugin_file => $plugin ) : ?>
 								<?php
-								if ( in_array( $plugin_slug, $already_listed_plugins, true ) ) {
+								if ( in_array( $plugin_file, $already_listed_plugins, true ) ) {
 									continue;
 								}
+								$plugin_slug = strtok( $plugin_file, '/' );
 								?>
 								<li class="plugin">
 									<input
 										type="checkbox"
 										class="suppressed-plugin"
-										id="<?php echo esc_attr( "$element_name-$plugin_slug" ); ?>"
+										id="<?php echo esc_attr( "$element_name-$plugin_file" ); ?>"
 										name="<?php echo esc_attr( $element_name . '[]' ); ?>"
 										value="<?php echo esc_attr( $plugin_slug ); ?>"
 									>
-									<label for="<?php echo esc_attr( "$element_name-$plugin_slug" ); ?>">
+									<label for="<?php echo esc_attr( "$element_name-$plugin_file" ); ?>">
 										<?php echo esc_html( $plugin['Name'] ); ?>
 									</label>
 								</li>
