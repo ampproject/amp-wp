@@ -29,19 +29,31 @@ final class PluginSuppression implements Service {
 
 	/**
 	 * Suppress plugins.
-	 *
-	 * @global WP_Hook[] $wp_filter
 	 */
 	public function suppress_plugins() {
-		global $wp_filter;
+
 		$suppressed = AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS );
 		if ( empty( $suppressed ) ) {
 			return;
 		}
 
-		// @todo We need to also remove shortcodes.
+		$plugin_slugs = array_keys( $suppressed );
+
+		$this->suppress_hooks( $plugin_slugs );
+		$this->suppress_shortcodes( $plugin_slugs );
+
 		// @todo We need to also remove widgets.
 		// @todo We need to also remove blocks?
+	}
+
+	/**
+	 * Suppress plugin hooks.
+	 *
+	 * @param string[] $suppressed_plugins Suppressed plugin slugs.
+	 * @global WP_Hook[] $wp_filter
+	 */
+	public function suppress_hooks( $suppressed_plugins ) {
+		global $wp_filter;
 		foreach ( $wp_filter as $tag => $filter ) {
 			foreach ( $filter->callbacks as $priority => $prioritized_callbacks ) {
 				foreach ( $prioritized_callbacks as $callback ) {
@@ -49,11 +61,32 @@ final class PluginSuppression implements Service {
 					if (
 						isset( $source['type'], $source['name'] ) &&
 						'plugin' === $source['type'] &&
-						array_key_exists( $source['name'], $suppressed )
+						in_array( $source['name'], $suppressed_plugins, true )
 					) {
 						$filter->remove_filter( $tag, $callback['function'], $priority );
 					}
 				}
+			}
+		}
+	}
+
+	/**
+	 * Suppress plugin shortcodes.
+	 *
+	 * @param string[] $suppressed_plugins Suppressed plugin slugs.
+	 * @global array $shortcode_tags
+	 */
+	public function suppress_shortcodes( $suppressed_plugins ) {
+		global $shortcode_tags;
+
+		foreach ( array_keys( $shortcode_tags ) as $tag ) {
+			$source = AMP_Validation_Manager::get_source( $shortcode_tags[ $tag ] );
+			if (
+				isset( $source['type'], $source['name'] ) &&
+				'plugin' === $source['type'] &&
+				in_array( $source['name'], $suppressed_plugins, true )
+			) {
+				add_shortcode( $tag, '__return_empty_string' );
 			}
 		}
 	}
