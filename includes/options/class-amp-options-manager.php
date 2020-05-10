@@ -274,6 +274,7 @@ class AMP_Options_Manager {
 		}
 
 		// Update the suppressed plugins.
+		// @todo If the suppressed plugins changed, re-validate the most recently validated post, or rather URLs that had the specific errors.
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		$plugins = [];
 		foreach ( get_plugins() as $plugin_file => $plugin ) {
@@ -290,6 +291,7 @@ class AMP_Options_Manager {
 				$options[ Option::SUPPRESSED_PLUGINS ][ $inserted_suppressed_plugin ] = [
 					// Note that we store the version that was suppressed so that we can alert the user when to check again.
 					Option::SUPPRESSED_PLUGINS_LAST_VERSION => $plugins[ $inserted_suppressed_plugin ]['Version'],
+					// @todo Store the URLs that had the error!
 				];
 			}
 		}
