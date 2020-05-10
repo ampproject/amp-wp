@@ -20,6 +20,13 @@ use WP_Hook;
 final class PluginSuppression implements Service {
 
 	/**
+	 * Suppressed plugin slugs.
+	 *
+	 * @var string[]
+	 */
+	private $suppressed_plugin_slugs = [];
+
+	/**
 	 * Register the service with the system.
 	 *
 	 * @return void
@@ -38,11 +45,11 @@ final class PluginSuppression implements Service {
 			return;
 		}
 
-		$plugin_slugs = array_keys( $suppressed );
+		$this->suppressed_plugin_slugs = array_keys( $suppressed );
 
-		$this->suppress_hooks( $plugin_slugs );
-		$this->suppress_shortcodes( $plugin_slugs );
-		$this->suppress_blocks( $plugin_slugs );
+		$this->suppress_hooks();
+		$this->suppress_shortcodes();
+		$this->suppress_blocks();
 
 		// @todo We need to also remove widgets.
 	}
@@ -50,20 +57,14 @@ final class PluginSuppression implements Service {
 	/**
 	 * Suppress plugin hooks.
 	 *
-	 * @param string[] $suppressed_plugins Suppressed plugin slugs.
 	 * @global WP_Hook[] $wp_filter
 	 */
-	public function suppress_hooks( $suppressed_plugins ) {
+	private function suppress_hooks() {
 		global $wp_filter;
 		foreach ( $wp_filter as $tag => $filter ) {
 			foreach ( $filter->callbacks as $priority => $prioritized_callbacks ) {
 				foreach ( $prioritized_callbacks as $callback ) {
-					$source = AMP_Validation_Manager::get_source( $callback['function'] );
-					if (
-						isset( $source['type'], $source['name'] ) &&
-						'plugin' === $source['type'] &&
-						in_array( $source['name'], $suppressed_plugins, true )
-					) {
+					if ( $this->is_callback_plugin_suppressed( $callback['function'] ) ) {
 						$filter->remove_filter( $tag, $callback['function'], $priority );
 					}
 				}
@@ -74,19 +75,13 @@ final class PluginSuppression implements Service {
 	/**
 	 * Suppress plugin shortcodes.
 	 *
-	 * @param string[] $suppressed_plugins Suppressed plugin slugs.
 	 * @global array $shortcode_tags
 	 */
-	public function suppress_shortcodes( $suppressed_plugins ) {
+	private function suppress_shortcodes() {
 		global $shortcode_tags;
 
 		foreach ( array_keys( $shortcode_tags ) as $tag ) {
-			$source = AMP_Validation_Manager::get_source( $shortcode_tags[ $tag ] );
-			if (
-				isset( $source['type'], $source['name'] ) &&
-				'plugin' === $source['type'] &&
-				in_array( $source['name'], $suppressed_plugins, true )
-			) {
+			if ( $this->is_callback_plugin_suppressed( $shortcode_tags[ $tag ] ) ) {
 				add_shortcode( $tag, '__return_empty_string' );
 			}
 		}
@@ -96,25 +91,32 @@ final class PluginSuppression implements Service {
 	 * Suppress plugin blocks.
 	 *
 	 * @todo What about static blocks added?
-	 * @param string[] $suppressed_plugins Suppressed plugin slugs.
 	 */
-	public function suppress_blocks( $suppressed_plugins ) {
+	private function suppress_blocks() {
 		$registry = WP_Block_Type_Registry::get_instance();
 
 		foreach ( $registry->get_all_registered() as $block_type ) {
-			if ( ! $block_type->is_dynamic() ) {
+			if ( ! $block_type->is_dynamic() || ! $this->is_callback_plugin_suppressed( $block_type->render_callback ) ) {
 				continue;
 			}
-			$source = AMP_Validation_Manager::get_source( $block_type->render_callback );
-			if (
-				isset( $source['type'], $source['name'] ) &&
-				'plugin' === $source['type'] &&
-				in_array( $source['name'], $suppressed_plugins, true )
-			) {
-				$block_type->script          = null;
-				$block_type->style           = null;
-				$block_type->render_callback = '__return_empty_string';
-			}
+			$block_type->script          = null;
+			$block_type->style           = null;
+			$block_type->render_callback = '__return_empty_string';
 		}
+	}
+
+	/**
+	 * Determine whether callback is from a suppressed plugin.
+	 *
+	 * @param callable $callback Callback.
+	 * @return bool Whether from suppressed plugin.
+	 */
+	private function is_callback_plugin_suppressed( $callback ) {
+		$source = AMP_Validation_Manager::get_source( $callback );
+		return (
+			isset( $source['type'], $source['name'] ) &&
+			'plugin' === $source['type'] &&
+			in_array( $source['name'], $this->suppressed_plugin_slugs, true )
+		);
 	}
 }
