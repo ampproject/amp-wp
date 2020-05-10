@@ -40,6 +40,9 @@ final class PluginSuppression implements Service {
 	 * Suppress plugins.
 	 */
 	public function suppress_plugins() {
+		if ( ! is_amp_endpoint() ) {
+			return;
+		}
 
 		$suppressed = AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS );
 		if ( empty( $suppressed ) ) {
