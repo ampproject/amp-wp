@@ -9,6 +9,7 @@ namespace AmpProject\AmpWP;
 
 use AMP_Options_Manager;
 use AMP_Validation_Manager;
+use WP_Block_Type_Registry;
 use WP_Hook;
 
 /**
@@ -41,9 +42,9 @@ final class PluginSuppression implements Service {
 
 		$this->suppress_hooks( $plugin_slugs );
 		$this->suppress_shortcodes( $plugin_slugs );
+		$this->suppress_blocks( $plugin_slugs );
 
 		// @todo We need to also remove widgets.
-		// @todo We need to also remove blocks?
 	}
 
 	/**
@@ -87,6 +88,32 @@ final class PluginSuppression implements Service {
 				in_array( $source['name'], $suppressed_plugins, true )
 			) {
 				add_shortcode( $tag, '__return_empty_string' );
+			}
+		}
+	}
+
+	/**
+	 * Suppress plugin blocks.
+	 *
+	 * @todo What about static blocks added?
+	 * @param string[] $suppressed_plugins Suppressed plugin slugs.
+	 */
+	public function suppress_blocks( $suppressed_plugins ) {
+		$registry = WP_Block_Type_Registry::get_instance();
+
+		foreach ( $registry->get_all_registered() as $block_type ) {
+			if ( ! $block_type->is_dynamic() ) {
+				continue;
+			}
+			$source = AMP_Validation_Manager::get_source( $block_type->render_callback );
+			if (
+				isset( $source['type'], $source['name'] ) &&
+				'plugin' === $source['type'] &&
+				in_array( $source['name'], $suppressed_plugins, true )
+			) {
+				$block_type->script          = null;
+				$block_type->style           = null;
+				$block_type->render_callback = '__return_empty_string';
 			}
 		}
 	}
