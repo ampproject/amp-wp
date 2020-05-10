@@ -508,7 +508,7 @@ class AMP_Options_Menu {
 						$plugin_slug = strtok( $plugin_file, '/' );
 
 						$is_suppressed = array_key_exists( $plugin_slug, $suppressed_plugins );
-						if ( ! $is_suppressed && ! array_key_exists( $plugin_slug, $errors_by_sources['plugin'] ) ) {
+						if ( ! $is_suppressed && ! isset( $errors_by_sources['plugin'][ $plugin_slug ] ) ) {
 							continue;
 						}
 						$already_listed_plugins[] = $plugin_file;
