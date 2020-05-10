@@ -32,7 +32,8 @@ final class PluginSuppression implements Service {
 	 * @return void
 	 */
 	public function register() {
-		add_action( 'wp', [ $this, 'suppress_plugins' ] );
+		$priority = defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX; // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
+		add_action( 'wp', [ $this, 'suppress_plugins' ], $priority );
 	}
 
 	/**
@@ -50,8 +51,7 @@ final class PluginSuppression implements Service {
 		$this->suppress_hooks();
 		$this->suppress_shortcodes();
 		$this->suppress_blocks();
-
-		// @todo We need to also remove widgets.
+		$this->suppress_widgets();
 	}
 
 	/**
@@ -102,6 +102,21 @@ final class PluginSuppression implements Service {
 			$block_type->script          = null;
 			$block_type->style           = null;
 			$block_type->render_callback = '__return_empty_string';
+		}
+	}
+
+	/**
+	 * Suppress plugin widgets.
+	 *
+	 * @see \AMP_Validation_Manager::wrap_widget_callbacks() Which needs to run after this.
+	 * @global array $wp_registered_widgets
+	 */
+	private function suppress_widgets() {
+		global $wp_registered_widgets;
+		foreach ( $wp_registered_widgets as $widget_id => &$registered_widget ) {
+			if ( $this->is_callback_plugin_suppressed( $registered_widget['callback'] ) ) {
+				$registered_widget['callback'] = '__return_empty_string';
+			}
 		}
 	}
 
