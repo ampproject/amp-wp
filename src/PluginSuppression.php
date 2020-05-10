@@ -1,6 +1,6 @@
 <?php
 /**
- * Abstract class PluginSuppression.
+ * Class PluginSuppression.
  *
  * @package AmpProject\AmpWP
  */
@@ -18,13 +18,6 @@ use WP_Hook;
  * @package AmpProject\AmpWP
  */
 final class PluginSuppression implements Service {
-
-	/**
-	 * Suppressed plugin slugs.
-	 *
-	 * @var string[]
-	 */
-	private $suppressed_plugin_slugs = [];
 
 	/**
 	 * Register the service with the system.
@@ -49,25 +42,26 @@ final class PluginSuppression implements Service {
 			return;
 		}
 
-		$this->suppressed_plugin_slugs = array_keys( $suppressed );
+		$suppressed_plugin_slugs = array_keys( $suppressed );
 
-		$this->suppress_hooks();
-		$this->suppress_shortcodes();
-		$this->suppress_blocks();
-		$this->suppress_widgets();
+		$this->suppress_hooks( $suppressed_plugin_slugs );
+		$this->suppress_shortcodes( $suppressed_plugin_slugs );
+		$this->suppress_blocks( $suppressed_plugin_slugs );
+		$this->suppress_widgets( $suppressed_plugin_slugs );
 	}
 
 	/**
 	 * Suppress plugin hooks.
 	 *
+	 * @param string[] $suppressed_plugins Suppressed plugins.
 	 * @global WP_Hook[] $wp_filter
 	 */
-	private function suppress_hooks() {
+	private function suppress_hooks( $suppressed_plugins ) {
 		global $wp_filter;
 		foreach ( $wp_filter as $tag => $filter ) {
 			foreach ( $filter->callbacks as $priority => $prioritized_callbacks ) {
 				foreach ( $prioritized_callbacks as $callback ) {
-					if ( $this->is_callback_plugin_suppressed( $callback['function'] ) ) {
+					if ( $this->is_callback_plugin_suppressed( $callback['function'], $suppressed_plugins ) ) {
 						$filter->remove_filter( $tag, $callback['function'], $priority );
 					}
 				}
@@ -78,13 +72,14 @@ final class PluginSuppression implements Service {
 	/**
 	 * Suppress plugin shortcodes.
 	 *
+	 * @param string[] $suppressed_plugins Suppressed plugins.
 	 * @global array $shortcode_tags
 	 */
-	private function suppress_shortcodes() {
+	private function suppress_shortcodes( $suppressed_plugins ) {
 		global $shortcode_tags;
 
 		foreach ( array_keys( $shortcode_tags ) as $tag ) {
-			if ( $this->is_callback_plugin_suppressed( $shortcode_tags[ $tag ] ) ) {
+			if ( $this->is_callback_plugin_suppressed( $shortcode_tags[ $tag ], $suppressed_plugins ) ) {
 				add_shortcode( $tag, '__return_empty_string' );
 			}
 		}
@@ -94,12 +89,14 @@ final class PluginSuppression implements Service {
 	 * Suppress plugin blocks.
 	 *
 	 * @todo What about static blocks added?
+	 *
+	 * @param string[] $suppressed_plugins Suppressed plugins.
 	 */
-	private function suppress_blocks() {
+	private function suppress_blocks( $suppressed_plugins ) {
 		$registry = WP_Block_Type_Registry::get_instance();
 
 		foreach ( $registry->get_all_registered() as $block_type ) {
-			if ( ! $block_type->is_dynamic() || ! $this->is_callback_plugin_suppressed( $block_type->render_callback ) ) {
+			if ( ! $block_type->is_dynamic() || ! $this->is_callback_plugin_suppressed( $block_type->render_callback, $suppressed_plugins ) ) {
 				continue;
 			}
 			$block_type->script          = null;
@@ -112,12 +109,14 @@ final class PluginSuppression implements Service {
 	 * Suppress plugin widgets.
 	 *
 	 * @see \AMP_Validation_Manager::wrap_widget_callbacks() Which needs to run after this.
+	 *
+	 * @param string[] $suppressed_plugins Suppressed plugins.
 	 * @global array $wp_registered_widgets
 	 */
-	private function suppress_widgets() {
+	private function suppress_widgets( $suppressed_plugins ) {
 		global $wp_registered_widgets;
 		foreach ( $wp_registered_widgets as $widget_id => &$registered_widget ) {
-			if ( $this->is_callback_plugin_suppressed( $registered_widget['callback'] ) ) {
+			if ( $this->is_callback_plugin_suppressed( $registered_widget['callback'], $suppressed_plugins ) ) {
 				$registered_widget['callback'] = '__return_empty_string';
 			}
 		}
@@ -126,15 +125,16 @@ final class PluginSuppression implements Service {
 	/**
 	 * Determine whether callback is from a suppressed plugin.
 	 *
-	 * @param callable $callback Callback.
+	 * @param callable $callback           Callback.
+	 * @param string[] $suppressed_plugins Suppressed plugins.
 	 * @return bool Whether from suppressed plugin.
 	 */
-	private function is_callback_plugin_suppressed( $callback ) {
+	private function is_callback_plugin_suppressed( $callback, $suppressed_plugins ) {
 		$source = AMP_Validation_Manager::get_source( $callback );
 		return (
 			isset( $source['type'], $source['name'] ) &&
 			'plugin' === $source['type'] &&
-			in_array( $source['name'], $this->suppressed_plugin_slugs, true )
+			in_array( $source['name'], $suppressed_plugins, true )
 		);
 	}
 }
