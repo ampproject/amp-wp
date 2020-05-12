@@ -167,7 +167,7 @@ final class AmpRuntimeCss implements Transformer, Configurable, MakesRemoteReque
         $response   = $this->remoteRequest->get($v0CssUrl);
         $statusCode = $response->getStatusCode();
 
-        if (200 < $statusCode || $statusCode >= 300) {
+        if ($statusCode < 200 || $statusCode >= 300) {
             return;
         }
 
