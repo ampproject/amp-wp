@@ -8,8 +8,6 @@
 /**
  * Class AMP_Post_Template
  *
- * @property WP_Post $post
- *
  * @since 0.2
  */
 class AMP_Post_Template {
@@ -67,15 +65,25 @@ class AMP_Post_Template {
 	public $ID;
 
 	/**
+	 * Post
+	 *
+	 * @since 0.2
+	 * @var WP_Post
+	 */
+	public $post;
+
+	/**
 	 * AMP_Post_Template constructor.
 	 *
 	 * @param WP_Post|int $post Post.
 	 */
 	public function __construct( $post ) {
 		if ( is_int( $post ) ) {
-			$this->ID = $post;
+			$this->ID   = $post;
+			$this->post = get_post( $post );
 		} elseif ( $post instanceof WP_Post ) {
-			$this->ID = $post->ID;
+			$this->ID   = $post->ID;
+			$this->post = $post;
 		}
 	}
 
@@ -107,7 +115,7 @@ class AMP_Post_Template {
 			'content_max_width'     => $content_max_width,
 
 			'document_title'        => wp_get_document_title(),
-			'canonical_url'         => get_permalink( $this->ID ),
+			'canonical_url'         => get_permalink( $this->post ),
 			'home_url'              => home_url( '/' ),
 			'blog_name'             => get_bloginfo( 'name' ),
 
@@ -149,22 +157,6 @@ class AMP_Post_Template {
 		 * @param WP_Post $post Post.
 		 */
 		$this->data = apply_filters( 'amp_post_template_data', $this->data, $this->post );
-	}
-
-	/**
-	 * Getter.
-	 *
-	 * @since 1.5
-	 *
-	 * @param string $name Property name.
-	 * @return mixed
-	 */
-	public function __get( $name ) {
-		switch ( $name ) {
-			case 'post':
-				return get_post( $this->ID );
-		}
-		return null;
 	}
 
 	/**
@@ -281,8 +273,8 @@ class AMP_Post_Template {
 	 * @since 0.2
 	 */
 	private function build_post_data() {
-		$post_title              = get_the_title( $this->ID );
-		$post_publish_timestamp  = get_the_date( 'U', $this->ID );
+		$post_title              = get_the_title( $this->post );
+		$post_publish_timestamp  = get_the_date( 'U', $this->post );
 		$post_modified_timestamp = get_post_modified_time( 'U', false, $this->post );
 		$post_author             = get_userdata( $this->post->post_author );
 
@@ -317,7 +309,7 @@ class AMP_Post_Template {
 			return;
 		}
 
-		$comments_open = comments_open( $this->ID );
+		$comments_open = comments_open( $this->post );
 
 		// Don't show link if close and no comments.
 		if ( ! $comments_open
@@ -325,7 +317,7 @@ class AMP_Post_Template {
 			return;
 		}
 
-		$comments_link_url  = get_comments_link( $this->ID );
+		$comments_link_url  = get_comments_link( $this->post );
 		$comments_link_text = $comments_open
 			? __( 'Leave a Comment', 'amp' )
 			: __( 'View Comments', 'amp' );
