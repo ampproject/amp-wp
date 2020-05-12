@@ -2106,7 +2106,7 @@ class AMP_Validation_Manager {
 		);
 
 		// Strip byte order mark (BOM).
-		if ( "\xEF\xBB\xBF" === substr( $response, 0, 3 ) ) {
+		while ( "\xEF\xBB\xBF" === substr( $response, 0, 3 ) ) {
 			$response = substr( $response, 3 );
 		}
 
