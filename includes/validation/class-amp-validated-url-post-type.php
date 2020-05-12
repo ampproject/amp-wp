@@ -910,7 +910,7 @@ class AMP_Validated_URL_Post_Type {
 						continue;
 					}
 
-					$errors_by_source[ $source['type'] ][ $source['name'] ][] = [
+					$errors_by_source[ $source['type'] ][ $source['name'] ][ $validation_error['term']->slug ] = [
 						'term' => $validation_error['term'],
 						'data' => $data,
 					];
