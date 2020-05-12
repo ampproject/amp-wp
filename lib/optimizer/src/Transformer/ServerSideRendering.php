@@ -11,6 +11,7 @@ use AmpProject\Extension;
 use AmpProject\Layout;
 use AmpProject\Optimizer\Error;
 use AmpProject\Optimizer\ErrorCollection;
+use AmpProject\Optimizer\Exception\InvalidArgument;
 use AmpProject\Optimizer\Exception\InvalidHtmlAttribute;
 use AmpProject\Optimizer\Transformer;
 use AmpProject\Role;
@@ -93,6 +94,13 @@ final class ServerSideRendering implements Transformer
      * @var int
      */
     const MAX_CSS_BYTE_COUNT = 75000;
+
+    /**
+     * Smallest acceptable difference in floating point comparisons.
+     *
+     * @var float
+     */
+    const FLOATING_POINT_EPSILON = 0.00001;
 
     /**
      * The <style amp-custom> element that custom CSS styles need to be added to.
@@ -550,7 +558,7 @@ final class ServerSideRendering implements Transformer
     ) {
         if (
             ! $width->isDefined()
-            || $width->getNumeral() === 0
+            || $this->isZero($width->getNumeral())
             || ! $height->isDefined()
             || $width->getUnit() !== $height->getUnit()
         ) {
@@ -977,5 +985,27 @@ final class ServerSideRendering implements Transformer
     private function isExcludedElement(DOMElement $element)
     {
         return in_array($element->tagName, self::EXCLUDED_ELEMENTS, true);
+    }
+
+    /**
+     * Check if a number is zero.
+     *
+     * This works correctly with both integer and float values.
+     *
+     * @param int|float $number Number to check for zero.
+     * @return bool Whether the provided number is zero.
+     * @throws InvalidArgument When an unsupported number type is provided.
+     */
+    private function isZero($number)
+    {
+        if (is_int($number)) {
+            return $number === 0;
+        }
+
+        if (!is_float($number)) {
+            throw InvalidArgument::forNumericComparison($number);
+        }
+
+        return abs($number - 0.0) < self::FLOATING_POINT_EPSILON;
     }
 }
