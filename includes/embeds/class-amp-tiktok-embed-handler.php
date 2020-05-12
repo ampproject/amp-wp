@@ -73,10 +73,11 @@ class AMP_TikTok_Embed_Handler extends AMP_Base_Embed_Handler {
 			Document::fromNode( $dom ),
 			'amp-embedly-card',
 			[
-				'layout'   => 'responsive',
-				'height'   => 700,
-				'width'    => 340,
-				'data-url' => $video_url,
+				'layout'             => 'responsive',
+				'height'             => 700,
+				'width'              => 340,
+				'data-card-controls' => 0,
+				'data-url'           => $video_url,
 			]
 		);
 
