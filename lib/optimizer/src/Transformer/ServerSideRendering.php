@@ -733,10 +733,6 @@ final class ServerSideRendering implements Transformer
     {
         $attributes = $ampElement->attributes;
 
-        if ($attributes === null) {
-            return [];
-        }
-
         $customCss          = '';
         $attributesToRemove = [];
 
