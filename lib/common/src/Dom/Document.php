@@ -1420,7 +1420,7 @@ final class Document extends DOMDocument
         /**
          * Main tag to keep.
          *
-         * @var DOMElement $mainTag
+         * @var DOMElement|null $mainTag
          */
         $mainTag = $tags->item(0);
 
