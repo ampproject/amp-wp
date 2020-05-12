@@ -869,6 +869,7 @@ class AMP_Validated_URL_Post_Type {
 	 * Get recent validation errors by source.
 	 *
 	 * @since 1.6
+	 * @todo This can be stored in object cache, invalidated whenever a validated URL post is inserted/updated/deleted.
 	 *
 	 * @param int $count Maximum count of validated URLs to gather validation errors from.
 	 * @return array Multidimensional array where root keys are source types, sub-keys are source names, and leaf arrays are the validation error terms & data.
