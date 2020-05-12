@@ -88,7 +88,7 @@
     "svg-inline-loader": "0.8.2",
     "terser-webpack-plugin": "2.3.5",
     "travis-size-report": "1.1.0",
-    "uuid": "7.0.2",
+    "uuid": "7.0.3",
     "webpack": "4.42.1",
     "webpack-cli": "3.3.11",
     "webpackbar": "4.0.0"
