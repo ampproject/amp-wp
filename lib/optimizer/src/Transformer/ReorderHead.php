@@ -10,6 +10,7 @@ use AmpProject\Optimizer\Transformer;
 use AmpProject\Tag;
 use DOMElement;
 use DOMNode;
+use DOMNodeList;
 
 /**
  * Transformer applying the head reordering transformations to the HTML input.
@@ -82,7 +83,7 @@ final class ReorderHead implements Transformer
     {
         $nodes = $document->head->childNodes;
 
-        if (! $nodes) {
+        if (! $nodes instanceof DOMNodeList || $nodes->length === 0) {
             return;
         }
 
