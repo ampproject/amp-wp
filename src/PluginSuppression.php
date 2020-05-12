@@ -117,7 +117,7 @@ final class PluginSuppression implements Service {
 		global $wp_registered_widgets;
 		foreach ( $wp_registered_widgets as $widget_id => &$registered_widget ) {
 			if ( $this->is_callback_plugin_suppressed( $registered_widget['callback'], $suppressed_plugins ) ) {
-				$registered_widget['callback'] = '__return_empty_string';
+				$registered_widget['callback'] = '__return_null';
 			}
 		}
 	}
