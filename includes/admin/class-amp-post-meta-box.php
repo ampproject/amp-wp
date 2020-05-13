@@ -100,7 +100,6 @@ class AMP_Post_Meta_Box {
 		add_action( 'post_submitbox_misc_actions', [ $this, 'render_status' ] );
 		add_action( 'save_post', [ $this, 'save_amp_status' ] );
 		add_filter( 'preview_post_link', [ $this, 'preview_post_link' ] );
-		add_filter( 'is_protected_meta', [ $this, 'hide_amp_status_meta' ], 10, 3 );
 	}
 
 	/**
@@ -422,23 +421,5 @@ class AMP_Post_Meta_Box {
 		}
 
 		return $link;
-	}
-
-	/**
-	 * Hide the `amp_status` custom field when edition a post.
-	 *
-	 * @param bool   $protected Whether the key is considered protected.
-	 * @param string $meta_key Metadata key.
-	 * @param string $meta_type Type of object metadata is for.
-	 * @return bool
-	 */
-	public function hide_amp_status_meta( $protected, $meta_key, $meta_type ) {
-		global $pagenow;
-
-		if ( is_admin() && 'post.php' === $pagenow && self::STATUS_POST_META_KEY === $meta_key && 'post' === $meta_type ) {
-			$protected = true;
-		}
-
-		return $protected;
 	}
 }
