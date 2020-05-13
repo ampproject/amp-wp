@@ -67,8 +67,21 @@ class Test_Site_Health extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'direct', $tests );
 		$this->assertArrayHasKey( 'amp_persistent_object_cache', $tests['direct'] );
 		$this->assertArrayHasKey( 'amp_curl_multi_functions', $tests['direct'] );
-		$this->assertArrayHasKey( 'amp_icu_version', $tests['direct'] );
+		$this->assertArrayNotHasKey( 'amp_icu_version', $tests['direct'] );
 		$this->assertArrayHasKey( 'amp_xdebug_extension', $tests['direct'] );
+
+
+		// Test that the the ICU version test is added only when site URL is an IDN.
+		add_filter( 'site_url', [ self::class, 'get_idn' ], 10, 4 );
+
+		$tests = $this->instance->add_tests( [] );
+		$this->assertArrayHasKey( 'amp_icu_version', $tests['direct'] );
+
+		remove_filter( 'site_url', [ self::class, 'get_idn' ] );
+	}
+
+	public static function get_idn() {
+		return 'https://xn--e28h.com';
 	}
 
 	/**

@@ -49,15 +49,42 @@ final class SiteHealth {
 			'label' => esc_html__( 'cURL multi functions', 'amp' ),
 			'test'  => [ $this, 'curl_multi_functions' ],
 		];
-		$tests['direct']['amp_icu_version']             = [
-			'label' => esc_html__( 'ICU version', 'amp' ),
-			'test'  => [ $this, 'icu_version' ],
-		];
-		$tests['direct']['amp_css_transient_caching']   = [
+
+		if ( function_exists( 'idn_to_utf8' ) ) {
+			$has_idn = false;
+
+			// Publisher’s own origins.
+			$domains = array_unique(
+				[
+					wp_parse_url( site_url(), PHP_URL_HOST ),
+					wp_parse_url( home_url(), PHP_URL_HOST ),
+				]
+			);
+
+			foreach ( $domains as $domain ) {
+				// The third parameter is set explicitly to prevent issues with newer PHP versions compiled with an old ICU version.
+				// phpcs:ignore PHPCompatibility.Constants.RemovedConstants.intl_idna_variant_2003Deprecated
+				$unicode_domain = idn_to_utf8( $domain, IDNA_DEFAULT, defined( 'INTL_IDNA_VARIANT_UTS46' ) ? INTL_IDNA_VARIANT_UTS46 : INTL_IDNA_VARIANT_2003 );
+
+				if ( $unicode_domain && $domain !== $unicode_domain ) {
+					$has_idn = true;
+					break;
+				}
+			}
+
+			if ( $has_idn ) {
+				$tests['direct']['amp_icu_version'] = [
+					'label' => esc_html__( 'ICU version', 'amp' ),
+					'test'  => [ $this, 'icu_version' ],
+				];
+			}
+		}
+
+		$tests['direct']['amp_css_transient_caching'] = [
 			'label' => esc_html__( 'Transient caching of stylesheets', 'amp' ),
 			'test'  => [ $this, 'css_transient_caching' ],
 		];
-		$tests['direct']['amp_xdebug_extension']        = [
+		$tests['direct']['amp_xdebug_extension']      = [
 			'label' => esc_html__( 'Xdebug extension', 'amp' ),
 			'test'  => [ $this, 'xdebug_extension' ],
 		];
