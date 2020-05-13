@@ -589,7 +589,7 @@ final class SiteHealth {
 	 *
 	 * @return bool True if the `intl` extension is needed, otherwise false.
 	 */
-	public function is_intl_extension_needed() {
+	private function is_intl_extension_needed() {
 		// Publisher's own origins.
 		$domains = array_unique(
 			[
