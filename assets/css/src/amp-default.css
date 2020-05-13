@@ -91,3 +91,10 @@ amp-carousel .amp-wp-gallery-caption {
 	margin-bottom: 1.5em;
 	max-width: 100%;
 }
+
+/*
+ * Fill poster appropriately when added with video shortcode.
+ */
+amp-video.wp-video-shortcode > video[poster] {
+	object-fit: cover;
+}
