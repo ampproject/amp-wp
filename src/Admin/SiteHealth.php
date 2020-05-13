@@ -590,8 +590,6 @@ final class SiteHealth {
 	 * @return bool True if the `intl` extension is needed, otherwise false.
 	 */
 	public function is_intl_extension_needed() {
-		$has_idn = false;
-
 		// Publisher's own origins.
 		$domains = array_unique(
 			[
@@ -602,11 +600,10 @@ final class SiteHealth {
 
 		foreach ( $domains as $domain ) {
 			if ( preg_match( '/(^|\.)xn--/', $domain ) ) {
-				$has_idn = true;
-				break;
+				return true;
 			}
 		}
 
-		return $has_idn;
+		return false;
 	}
 }
