@@ -1989,11 +1989,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			'<link rel="dns-prefetch" href="//cdn.ampproject.org">',
 			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0.js">',
 			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js">',
-			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0/amp-experiment-1.0.js">',
+			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0/amp-experiment-0.1.js">',
 			'<script type="text/javascript" src="https://cdn.ampproject.org/v0.js" async></script>',
 
 			'<script async custom-element="amp-dynamic-css-classes" src="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js"></script>',
-			'<script src="https://cdn.ampproject.org/v0/amp-experiment-1.0.js" async="" custom-element="amp-experiment"></script>',
+			'<script src="https://cdn.ampproject.org/v0/amp-experiment-0.1.js" async="" custom-element="amp-experiment"></script>',
 
 			'#<script( type=[\'"]text/javascript[\'"])? src=[\'"]https\://cdn\.ampproject\.org/v0/amp-ad-0\.1\.js[\'"] async(=[\'"][\'"])? custom-element=[\'"]amp-ad[\'"]>\s*</script>#s',
 			'#<script src=[\'"]https\://cdn\.ampproject\.org/v0/amp-audio-0\.1\.js[\'"] async(=[\'"][\'"])? custom-element=[\'"]amp-audio[\'"]>\s*</script>#s',
