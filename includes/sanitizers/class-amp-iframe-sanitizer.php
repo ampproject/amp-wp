@@ -135,8 +135,16 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 				if ( $node->parentNode->parentNode instanceof DOMElement && 'figure' === $node->parentNode->parentNode->tagName ) {
 					$figure_node = $node->parentNode->parentNode;
 				}
-				if ( $figure_node && $figure_node->hasAttribute( 'class' ) && in_array( 'alignfull', explode( ' ', $figure_node->getAttribute( 'class' ) ), true ) ) {
-					$normalized_attributes['layout'] = 'responsive';
+
+				if ( $figure_node && $figure_node->hasAttribute( 'class' ) ) {
+
+					$figure_node_classes = explode( ' ', $figure_node->getAttribute( 'class' ) );
+
+					$show_responsive = ( in_array( 'alignfull', $figure_node_classes, true ) || in_array( 'alignwide', $figure_node_classes, true ) );
+
+					if ( true === $show_responsive ) {
+						$normalized_attributes['layout'] = 'responsive';
+					}
 				}
 
 				$this->add_or_append_attribute( $normalized_attributes, 'class', 'amp-wp-enforced-sizes' );

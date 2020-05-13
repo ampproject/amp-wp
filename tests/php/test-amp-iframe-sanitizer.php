@@ -408,6 +408,24 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 				],
 			],
 
+			'iframe_with_wide_width_alignment'               => [
+				'<figure class="alignwide"><iframe width="750" height="422" src="https://videopress.com/embed/yFCmLMGL?hd=0" frameborder="0" allowfullscreen="" data-origwidth="750" data-origheight="422"></iframe></figure>',
+				'
+					<figure class="alignwide">
+						<amp-iframe width="750" height="422" src="https://videopress.com/embed/yFCmLMGL?hd=0" frameborder="0" allowfullscreen="" data-origwidth="750" data-origheight="422" sandbox="allow-scripts allow-same-origin" layout="responsive" class="amp-wp-enforced-sizes">
+							<span placeholder="" class="amp-wp-iframe-placeholder"></span>
+							<noscript>
+								<iframe width="750" height="422" src="https://videopress.com/embed/yFCmLMGL?hd=0" frameborder="0"></iframe>
+							</noscript>
+						</amp-iframe>
+					</figure>
+				',
+				[
+					'add_noscript_fallback' => true,
+					'add_placeholder'       => true,
+				],
+			],
+
 			'test_with_dev_mode' => [
 				'<iframe data-ampdevmode="" src="about:blank" onload="alert(\'Hey.\')"></iframe>',
 				null, // No change.
