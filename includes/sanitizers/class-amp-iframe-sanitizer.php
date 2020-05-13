@@ -140,6 +140,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 
 					$figure_node_classes = explode( ' ', $figure_node->getAttribute( 'class' ) );
 
+					// Changes layout to responsive for videos which have wide or full width (contains alignwide or alignfull class).
 					$show_responsive = ( in_array( 'alignfull', $figure_node_classes, true ) || in_array( 'alignwide', $figure_node_classes, true ) );
 
 					if ( true === $show_responsive ) {
