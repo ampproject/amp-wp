@@ -2313,6 +2313,7 @@ class AMP_Validation_Error_Taxonomy {
 	 * @return array|null
 	 */
 	public static function get_plugin_from_slug( $plugin_slug ) {
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		$plugins = get_plugins();
 		if ( isset( $plugins[ $plugin_slug ] ) ) {
 			return [

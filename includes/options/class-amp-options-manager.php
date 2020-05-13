@@ -33,6 +33,7 @@ class AMP_Options_Manager {
 		Option::READER_THEME            => '',
 		Option::DEV_TOOLS               => false,
 		Option::VERSION                 => AMP__VERSION,
+		Option::SUPPRESSED_PLUGINS      => [],
 	];
 
 	/**
@@ -299,10 +300,83 @@ class AMP_Options_Manager {
 			$options[ Option::READER_THEME ] = in_array( $new_options[ Option::READER_THEME ], AMP_Theme_Support::get_reader_themes(), true ) ? $new_options[ Option::READER_THEME ] : '';
 		}
 
+		$options[ Option::SUPPRESSED_PLUGINS ] = self::validate_suppressed_plugins(
+			array_key_exists( Option::SUPPRESSED_PLUGINS, $new_options ) ? $new_options[ Option::SUPPRESSED_PLUGINS ] : [],
+			$options[ Option::SUPPRESSED_PLUGINS ]
+		);
+
 		// Store the current version with the options so we know the format.
 		$options[ Option::VERSION ] = AMP__VERSION;
 
 		return $options;
+	}
+
+	/**
+	 * Validate suppressed plugins.
+	 *
+	 * @param string[] $new_suppressed_plugins New suppressed plugins.
+	 * @param array    $old_option             Old option.
+	 * @return array New option value.
+	 */
+	private static function validate_suppressed_plugins( $new_suppressed_plugins, $old_option ) {
+		$option = $old_option;
+
+		// Update the suppressed plugins.
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		$plugins = [];
+		foreach ( get_plugins() as $plugin_file => $plugin ) {
+			$plugins[ strtok( $plugin_file, '/' ) ] = $plugin;
+		}
+
+		$deleted_suppressed_plugins = array_diff( array_keys( $old_option ), $new_suppressed_plugins );
+		foreach ( $deleted_suppressed_plugins as $deleted_suppressed_plugin ) {
+			unset( $option[ $deleted_suppressed_plugin ] );
+		}
+		$inserted_suppressed_plugins = array_diff( $new_suppressed_plugins, array_keys( $old_option ) );
+		foreach ( $inserted_suppressed_plugins as $inserted_suppressed_plugin ) {
+			if ( array_key_exists( $inserted_suppressed_plugin, $plugins ) ) {
+				$option[ $inserted_suppressed_plugin ] = [
+					// Note that we store the version that was suppressed so that we can alert the user when to check again.
+					Option::SUPPRESSED_PLUGINS_LAST_VERSION => $plugins[ $inserted_suppressed_plugin ]['Version'],
+					// @todo Store the URLs that had the error!
+				];
+			}
+		}
+
+		// When the suppressed plugins changed, re-check the most recently validated URL so validation errors can be
+		// re-computed with the plugins newly-suppressed or un-suppressed.
+		// @todo Instead of checking the most recently-validated URL, instead check the URL(s) that the plugin's validation errors were known to occur on.
+		if ( ! empty( $deleted_suppressed_plugins ) || ! empty( $inserted_suppressed_plugins ) ) {
+			add_action(
+				'update_option_' . self::OPTION_NAME,
+				function () {
+					$validated_url_posts = get_posts(
+						[
+							'post_type'      => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+							'posts_per_page' => 1,
+						]
+					);
+					if ( count( $validated_url_posts ) === 0 ) {
+						return;
+					}
+					$url = AMP_Validated_URL_Post_Type::get_url_from_post( $validated_url_posts[0] );
+					if ( ! $url ) {
+						return;
+					}
+					$validity = AMP_Validation_Manager::validate_url( $url );
+					if ( is_wp_error( $validity ) ) {
+						return;
+					}
+					AMP_Validated_URL_Post_Type::store_validation_errors(
+						wp_list_pluck( $validity['results'], 'error' ),
+						$url,
+						wp_array_slice_assoc( $validity, [ 'queried_object', 'stylesheets', 'php_fatal_error' ] )
+					);
+				}
+			);
+		}
+
+		return $option;
 	}
 
 	/**

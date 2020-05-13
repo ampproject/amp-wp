@@ -119,6 +119,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				Option::ANALYTICS               => [],
 				Option::ALL_TEMPLATES_SUPPORTED => true,
 				Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
+				Option::SUPPRESSED_PLUGINS      => [],
 				Option::VERSION                 => AMP__VERSION,
 			],
 			AMP_Options_Manager::get_options()

@@ -23,6 +23,7 @@ final class Services {
 	 */
 	const ALL = [
 		MonitorCssTransientCaching::class,
+		PluginSuppression::class,
 		ReaderThemeLoader::class,
 	];
 

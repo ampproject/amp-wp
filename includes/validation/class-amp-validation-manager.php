@@ -244,7 +244,6 @@ class AMP_Validation_Manager {
 			}
 		);
 
-
 		add_action( 'all_admin_notices', [ __CLASS__, 'print_plugin_notice' ] );
 
 		add_action( 'admin_bar_menu', [ __CLASS__, 'add_admin_bar_menu_items' ], 101 );
@@ -1390,8 +1389,8 @@ class AMP_Validation_Manager {
 	/**
 	 * Wrap callbacks for registered widgets to keep track of queued assets and the source for anything printed for validation.
 	 *
-	 * @global array $wp_filter
 	 * @return void
+	 * @global array $wp_registered_widgets
 	 */
 	public static function wrap_widget_callbacks() {
 		global $wp_registered_widgets;
