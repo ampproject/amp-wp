@@ -446,7 +446,7 @@ class AMP_Theme_Support {
 
 		self::add_hooks();
 		self::$sanitizer_classes = amp_get_content_sanitizers();
-		if ( AMP_Validation_Manager::$is_validate_request ) {
+		if ( AMP_Validation_Manager::$is_validate_request || ( AMP_Options_Manager::get_option( Option::DEV_TOOLS ) && AMP_Validation_Manager::has_cap() ) ) {
 			self::$sanitizer_classes = AMP_Validation_Manager::filter_sanitizer_args( self::$sanitizer_classes );
 		}
 		self::$embed_handlers = self::register_content_embed_handlers();
