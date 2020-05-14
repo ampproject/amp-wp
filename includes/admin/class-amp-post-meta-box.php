@@ -78,6 +78,14 @@ class AMP_Post_Meta_Box {
 	const NONCE_ACTION = 'amp-update-status';
 
 	/**
+	 * The attribute name for the REST API.
+	 *
+	 * @since 1.5.4
+	 * @var string
+	 */
+	const REST_ATTRIBUTE_NAME = 'amp_enabled';
+
+	/**
 	 * Initialize.
 	 *
 	 * @since 0.6
@@ -88,9 +96,10 @@ class AMP_Post_Meta_Box {
 			self::STATUS_POST_META_KEY,
 			[
 				'sanitize_callback' => [ $this, 'sanitize_status' ],
+				'auth_callback'     => '__return_false',
 				'type'              => 'string',
 				'description'       => __( 'AMP status.', 'amp' ),
-				'show_in_rest'      => true,
+				'show_in_rest'      => false,
 				'single'            => true,
 			]
 		);
@@ -99,6 +108,7 @@ class AMP_Post_Meta_Box {
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_block_assets' ] );
 		add_action( 'post_submitbox_misc_actions', [ $this, 'render_status' ] );
 		add_action( 'save_post', [ $this, 'save_amp_status' ] );
+		add_action( 'rest_api_init', [ $this, 'add_rest_api_fields' ] );
 		add_filter( 'preview_post_link', [ $this, 'preview_post_link' ] );
 	}
 
@@ -225,16 +235,13 @@ class AMP_Post_Meta_Box {
 		);
 
 		$status_and_errors = self::get_status_and_errors( get_post() );
-		$enabled_status    = $status_and_errors['status'];
 		$error_messages    = $this->get_error_messages( $status_and_errors['status'], $status_and_errors['errors'] );
 
 		$data = [
-			'ampSlug'          => amp_get_slug(),
-			'possibleStatuses' => [ self::ENABLED_STATUS, self::DISABLED_STATUS ],
-			'defaultStatus'    => $enabled_status,
-			'errorMessages'    => $error_messages,
-			'hasThemeSupport'  => current_theme_supports( AMP_Theme_Support::SLUG ),
-			'isStandardMode'   => amp_is_canonical(),
+			'ampSlug'         => amp_get_slug(),
+			'errorMessages'   => $error_messages,
+			'hasThemeSupport' => current_theme_supports( AMP_Theme_Support::SLUG ),
+			'isStandardMode'  => amp_is_canonical(),
 		];
 
 		wp_localize_script(
@@ -421,5 +428,80 @@ class AMP_Post_Meta_Box {
 		}
 
 		return $link;
+	}
+
+	/**
+	 * Add a REST API field to display the AMP status on AMP supported post types.
+	 *
+	 * @return void
+	 */
+	public function add_rest_api_fields() {
+		register_rest_field(
+			AMP_Post_Type_Support::get_post_types_for_rest_api(),
+			self::REST_ATTRIBUTE_NAME,
+			[
+				'get_callback'    => [ $this, 'amp_status_get_callback' ],
+				'update_callback' => [ $this, 'amp_status_update_callback' ],
+				'schema'          => [
+					'description' => __( 'AMP status', 'amp' ),
+					'type'        => 'boolean',
+				],
+			]
+		);
+	}
+
+	/**
+	 * Display the AMP status of a post via the REST API.
+	 *
+	 * @param array $post_data Post data.
+	 * @return bool Whether AMP is enabled on post.
+	 */
+	public function amp_status_get_callback( $post_data ) {
+		$status = $this->sanitize_status( get_post_meta( $post_data['id'], self::STATUS_POST_META_KEY, true ) );
+
+		if ( '' === $status ) {
+			$post              = get_post( $post_data['id'] );
+			$status_and_errors = self::get_status_and_errors( $post );
+
+			if ( isset( $status_and_errors['status'] ) ) {
+				$status = $status_and_errors['status'];
+			}
+		}
+
+		return self::ENABLED_STATUS === $status;
+	}
+
+	/**
+	 * Update the AMP status of a post via the REST API.
+	 *
+	 * @param bool    $is_enabled Whether AMP is enabled.
+	 * @param WP_Post $post       Post being updated.
+	 * @return void|WP_Error Returns an instance of `WP_Error` if the post failed to be updated.
+	 */
+	public function amp_status_update_callback( $is_enabled, $post ) {
+		if ( ! current_user_can( 'edit_post', $post->ID ) ) {
+			return new WP_Error(
+				'rest_insufficient_permission',
+				__( 'Insufficient permissions met to update the AMP status for this post', 'amp' ),
+				[ 'status' => 500 ]
+			);
+		}
+
+		if ( wp_is_post_revision( $post->ID ) || wp_is_post_autosave( $post->ID ) ) {
+			return new WP_Error(
+				'rest_invalid_post',
+				__( 'Failed to update the AMP status for this post', 'amp' ),
+				[ 'status' => 500 ]
+			);
+		}
+
+		$status = $is_enabled ? self::ENABLED_STATUS : self::DISABLED_STATUS;
+
+		// Note: The sanitize_callback has been supplied in the register_meta() call above.
+		update_post_meta(
+			$post->ID,
+			self::STATUS_POST_META_KEY,
+			$status
+		);
 	}
 }

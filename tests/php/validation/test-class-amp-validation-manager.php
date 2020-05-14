@@ -11,6 +11,7 @@ use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\HandleValidation;
 use AmpProject\AmpWP\Tests\PrivateAccess;
+use AmpProject\AmpWP\Tests\AssertRestApiField;
 use AmpProject\Dom\Document;
 
 /**
@@ -24,6 +25,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	use AssertContainsCompatibility;
 	use HandleValidation;
 	use PrivateAccess;
+	use AssertRestApiField;
 
 	/**
 	 * The name of the tested class.
@@ -513,41 +515,31 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		add_theme_support( AMP_Theme_Support::SLUG, [ AMP_Theme_Support::PAIRED_FLAG => true ] );
 		AMP_Theme_Support::read_theme_support();
 		AMP_Validation_Manager::add_rest_api_fields();
-		$post_types_non_canonical = array_intersect(
-			get_post_types_by_support( 'amp' ),
-			get_post_types(
-				[
-					'show_in_rest' => true,
-				]
-			)
+		$this->assertRestApiFieldPresent(
+			AMP_Validation_Manager::VALIDITY_REST_FIELD_NAME,
+			[
+				'get_callback' => [ AMP_Validation_Manager::class, 'get_amp_validity_rest_field' ],
+				'schema'       => [
+					'description' => __( 'AMP validity status', 'amp' ),
+					'type'        => 'object',
+				],
+			]
 		);
-		$this->assert_rest_api_field_present( $post_types_non_canonical );
 
 		// Test in a AMP-first (canonical) context.
 		add_theme_support( AMP_Theme_Support::SLUG );
 		AMP_Theme_Support::read_theme_support();
 		AMP_Validation_Manager::add_rest_api_fields();
-		$post_types_canonical = get_post_types_by_support( 'editor' );
-		$this->assert_rest_api_field_present( $post_types_canonical );
-	}
-
-	/**
-	 * Asserts that the post types have the additional REST field.
-	 *
-	 * @param array $post_types The post types that should have the REST field.
-	 */
-	protected function assert_rest_api_field_present( $post_types ) {
-		foreach ( $post_types as $post_type ) {
-			$field = $GLOBALS['wp_rest_additional_fields'][ $post_type ][ AMP_Validation_Manager::VALIDITY_REST_FIELD_NAME ];
-			$this->assertEquals(
-				$field['schema'],
-				[
-					'description' => 'AMP validity status',
+		$this->assertRestApiFieldPresent(
+			AMP_Validation_Manager::VALIDITY_REST_FIELD_NAME,
+			[
+				'get_callback' => [ AMP_Validation_Manager::class, 'get_amp_validity_rest_field' ],
+				'schema'       => [
+					'description' => __( 'AMP validity status', 'amp' ),
 					'type'        => 'object',
-				]
-			);
-			$this->assertEquals( $field['get_callback'], [ self::TESTED_CLASS, 'get_amp_validity_rest_field' ] );
-		}
+				],
+			]
+		);
 	}
 
 	/**
