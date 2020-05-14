@@ -138,15 +138,10 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 
 				if ( $figure_node && $figure_node->hasAttribute( 'class' ) ) {
 
-					$figure_node_classes = explode( ' ', $figure_node->getAttribute( 'class' ) );
+					$figure_node_classes = preg_split( '/\s+/', trim( $figure_node->getAttribute( 'class' ) ) );
 
 					// If the alignment was set to 'wide width' or 'full width', set the layout to responsive.
-					$show_responsive = (
-						in_array( 'alignfull', $figure_node_classes, true ) ||
-						in_array( 'alignwide', $figure_node_classes, true )
-					);
-
-					if ( true === $show_responsive ) {
+					if ( in_array( 'alignfull', $figure_node_classes, true ) || in_array( 'alignwide', $figure_node_classes, true ) ) {
 						$normalized_attributes['layout'] = 'responsive';
 					}
 				}
