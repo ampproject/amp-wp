@@ -1565,7 +1565,7 @@ function amp_get_schemaorg_metadata() {
 		 */
 		$metadata = apply_filters( 'amp_post_template_metadata', $metadata, $queried_object );
 	} elseif ( is_archive() ) {
-		$metadata['@type'] = 'collection';
+		$metadata['@type'] = 'CollectionPage';
 	}
 
 	/**
