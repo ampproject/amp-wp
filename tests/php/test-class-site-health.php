@@ -67,8 +67,16 @@ class Test_Site_Health extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'direct', $tests );
 		$this->assertArrayHasKey( 'amp_persistent_object_cache', $tests['direct'] );
 		$this->assertArrayHasKey( 'amp_curl_multi_functions', $tests['direct'] );
-		$this->assertArrayHasKey( 'amp_icu_version', $tests['direct'] );
+		$this->assertArrayNotHasKey( 'amp_icu_version', $tests['direct'] );
 		$this->assertArrayHasKey( 'amp_xdebug_extension', $tests['direct'] );
+
+		// Test that the the ICU version test is added only when site URL is an IDN.
+		add_filter( 'site_url', [ self::class, 'get_idn' ], 10, 4 );
+
+		$tests = $this->instance->add_tests( [] );
+		$this->assertArrayHasKey( 'amp_icu_version', $tests['direct'] );
+
+		remove_filter( 'site_url', [ self::class, 'get_idn' ] );
 	}
 
 	/**
@@ -370,11 +378,6 @@ class Test_Site_Health extends WP_UnitTestCase {
 	public function test_add_extensions() {
 		$this->assertEquals(
 			[
-				'intl'     => [
-					'extension' => 'intl',
-					'function'  => 'idn_to_utf8',
-					'required'  => false,
-				],
 				'json'     => [
 					'extension' => 'json',
 					'function'  => 'json_encode',
@@ -391,5 +394,30 @@ class Test_Site_Health extends WP_UnitTestCase {
 			],
 			$this->instance->add_extensions( [] )
 		);
+
+		// Test that the the `intl` extension is added only when site URL is an IDN.
+		add_filter( 'site_url', [ self::class, 'get_idn' ], 10, 4 );
+
+		$extensions = $this->instance->add_extensions( [] );
+		$this->assertArrayHasKey( 'intl', $extensions );
+		$this->assertEquals(
+			[
+				'extension' => 'intl',
+				'function'  => 'idn_to_utf8',
+				'required'  => false,
+			],
+			$extensions['intl']
+		);
+
+		remove_filter( 'site_url', [ self::class, 'get_idn' ] );
+	}
+
+	/**
+	 * Get a an IDN for testing purposes.
+	 *
+	 * @return string
+	 */
+	public static function get_idn() {
+		return 'https://foo.xn--57h.bar.com';
 	}
 }
