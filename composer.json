@@ -27,7 +27,7 @@
     "phpcompatibility/phpcompatibility-wp": "2.1.0",
     "roave/security-advisories": "dev-master",
     "sirbrillig/phpcs-variable-analysis": "2.8.1",
-    "wp-coding-standards/wpcs": "2.2.1",
+    "wp-coding-standards/wpcs": "2.3.0",
     "xwp/wp-dev-lib": "1.6.4"
   },
   "suggest": {
