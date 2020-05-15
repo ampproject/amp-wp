@@ -1674,13 +1674,13 @@ if ( ! function_exists( 'array_column' ) ) {
 		if ( $argc < 2 ) {
 			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error,WordPress.Security.EscapeOutput.OutputNotEscaped
 			trigger_error( "array_column() expects at least 2 parameters, {$argc} given", E_USER_WARNING );
-			return null;
+			return false;
 		}
 
 		if ( ! is_array( $params[0] ) ) {
 			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error,WordPress.Security.EscapeOutput.OutputNotEscaped
 			trigger_error( 'array_column() expects parameter 1 to be array, ' . gettype( $params[0] ) . ' given', E_USER_WARNING );
-			return null;
+			return false;
 		}
 
 		if ( ! is_int( $params[1] )
