@@ -237,6 +237,15 @@ final class Document extends DOMDocument
     private $usedAmpEmoji;
 
     /**
+     * Store the current index by prefix.
+     *
+     * This is used to generate unique-per-prefix IDs.
+     *
+     * @var int[]
+     */
+    private $indexCounter = [];
+
+    /**
      * Creates a new AmpProject\Dom\Document object
      *
      * @link  https://php.net/manual/domdocument.construct.php
@@ -314,7 +323,7 @@ final class Document extends DOMDocument
         // We replace the $node by reference, to make sure the next lines of code will
         // work as expected with the new document.
         // Otherwise $dom and $node would refer to two different DOMDocuments.
-        $node = $dom->importNode($root->documentElement ?: $root, true);
+        $node = $dom->importNode($node, true);
         $dom->appendChild($node);
 
         $dom->hasInitialAmpDevMode = $dom->documentElement->hasAttribute(DevMode::DEV_MODE_ATTRIBUTE);
@@ -838,26 +847,26 @@ final class Document extends DOMDocument
      */
     private function maybeReplaceNoscriptElements($html)
     {
-        if (! version_compare(LIBXML_DOTTED_VERSION, '2.8', '<')) {
-            return $html;
+        if (version_compare(LIBXML_DOTTED_VERSION, '2.8', '<')) {
+            $html = preg_replace_callback(
+                '#^.+?(?=<body)#is',
+                function ($headMatches) {
+                    return preg_replace_callback(
+                        '#<noscript[^>]*>.*?</noscript>#si',
+                        function ($noscriptMatches) {
+                            $placeholder = sprintf('<!--noscript:%s-->', (string)$this->rand());
+
+                            $this->noscriptPlaceholderComments[$placeholder] = $noscriptMatches[0];
+                            return $placeholder;
+                        },
+                        $headMatches[0]
+                    );
+                },
+                $html
+            );
         }
 
-        return preg_replace_callback(
-            '#^.+?(?=<body)#is',
-            function ($headMatches) {
-                return preg_replace_callback(
-                    '#<noscript[^>]*>.*?</noscript>#si',
-                    function ($noscriptMatches) {
-                        $placeholder = sprintf('<!--noscript:%s-->', (string)$this->rand());
-
-                        $this->noscriptPlaceholderComments[$placeholder] = $noscriptMatches[0];
-                        return $placeholder;
-                    },
-                    $headMatches[0]
-                );
-            },
-            $html
-        );
+        return $html;
     }
 
     /**
@@ -1411,7 +1420,7 @@ final class Document extends DOMDocument
         /**
          * Main tag to keep.
          *
-         * @var DOMElement $mainTag
+         * @var DOMElement|null $mainTag
          */
         $mainTag = $tags->item(0);
 
@@ -1472,6 +1481,39 @@ final class Document extends DOMDocument
             ||
             $node instanceof DOMComment
         );
+    }
+
+    /**
+     * Get the ID for an element.
+     *
+     * If the element does not have an ID, create one first.
+     *
+     * @param DOMElement $element Element to get the ID for.
+     * @param string     $prefix  Optional. The prefix to use (should not have a trailing dash). Defaults to 'i-amp-id'.
+     * @return string ID to use.
+     */
+    public function getElementId(DOMElement $element, $prefix = 'i-amp-id')
+    {
+        if ($element->hasAttribute('id')) {
+            return $element->getAttribute('id');
+        }
+
+        if (array_key_exists($prefix, $this->indexCounter)) {
+            ++$this->indexCounter[$prefix];
+            $id = "{$prefix}-{$this->indexCounter[ $prefix ]}";
+        } else {
+            $id                          = $prefix;
+            $this->indexCounter[$prefix] = 1;
+        }
+
+        while ($this->getElementById($id) instanceof DOMElement) {
+            ++$this->indexCounter[$prefix];
+            $id = "{$prefix}-{$this->indexCounter[ $prefix ]}";
+        }
+
+        $element->setAttribute('id', $id);
+
+        return $id;
     }
 
     /**

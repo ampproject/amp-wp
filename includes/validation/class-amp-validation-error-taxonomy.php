@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Icon;
+
 /**
  * Class AMP_Validation_Error_Taxonomy
  *
@@ -60,6 +62,13 @@ class AMP_Validation_Error_Taxonomy {
 	 * @var int
 	 */
 	const VALIDATION_ERROR_ACK_REJECTED_STATUS = 2; // == 0b10 == ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK | ^ACCEPTED_VALIDATION_ERROR_BIT_MASK.
+
+	/**
+	 * Action name for ignoring a validation error.
+	 *
+	 * @var string
+	 */
+	const VALIDATION_ERROR_ACKNOWLEDGE_ACTION = 'amp_validation_error_ack';
 
 	/**
 	 * Action name for ignoring a validation error.
@@ -306,18 +315,32 @@ class AMP_Validation_Error_Taxonomy {
 
 		$deleted_count = 0;
 		foreach ( $empty_term_ids as $term_id ) {
-			$term = get_term( (int) $term_id, self::TAXONOMY_SLUG );
-
-			// Skip if the term count was not actually 0.
-			if ( ! $term || 0 !== $term->count ) {
-				continue;
-			}
-
-			if ( true === wp_delete_term( $term->term_id, self::TAXONOMY_SLUG ) ) {
+			if ( true === self::delete_empty_term( $term_id ) ) {
 				$deleted_count++;
 			}
 		}
 		return $deleted_count;
+	}
+
+	/**
+	 * Delete an amp_validation_error term if it has no amp_validated_url posts associated with it.
+	 *
+	 * @param int $term_id Term ID.
+	 * @return bool True if deleted, false otherwise.
+	 */
+	public static function delete_empty_term( $term_id ) {
+		$term = get_term( (int) $term_id, self::TAXONOMY_SLUG );
+
+		// Skip if the term count was not actually 0.
+		if ( ! $term || 0 !== $term->count ) {
+			return false;
+		}
+
+		if ( true === wp_delete_term( $term->term_id, self::TAXONOMY_SLUG ) ) {
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
@@ -752,7 +775,7 @@ class AMP_Validation_Error_Taxonomy {
 		);
 		add_filter( 'terms_clauses', [ __CLASS__, 'filter_terms_clauses_for_description_search' ], 10, 3 );
 		add_action( 'admin_notices', [ __CLASS__, 'add_admin_notices' ] );
-		add_filter( self::TAXONOMY_SLUG . '_row_actions', [ __CLASS__, 'filter_tag_row_actions' ], 10, 2 );
+		add_filter( self::TAXONOMY_SLUG . '_row_actions', [ __CLASS__, 'filter_tag_row_actions' ], PHP_INT_MAX, 2 );
 		if ( get_taxonomy( self::TAXONOMY_SLUG )->show_in_menu ) {
 			add_action( 'admin_menu', [ __CLASS__, 'add_admin_menu_validation_error_item' ] );
 		}
@@ -803,13 +826,11 @@ class AMP_Validation_Error_Taxonomy {
 			2
 		);
 
-		// Add bulk actions.
+		// Remove bulk actions.
 		add_filter(
 			'bulk_actions-edit-' . self::TAXONOMY_SLUG,
 			static function( $bulk_actions ) {
 				unset( $bulk_actions['delete'] );
-				$bulk_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION ] = __( 'Remove', 'amp' );
-				$bulk_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION ] = __( 'Keep', 'amp' );
 				return $bulk_actions;
 			}
 		);
@@ -910,7 +931,7 @@ class AMP_Validation_Error_Taxonomy {
 					wp_enqueue_style(
 						'amp-validation-error-taxonomy',
 						amp_get_asset_url( 'css/amp-validation-error-taxonomy.css' ),
-						[ 'common', 'amp-validation-tooltips' ],
+						[ 'common', 'amp-validation-tooltips', 'amp-icons' ],
 						AMP__VERSION
 					);
 
@@ -929,7 +950,7 @@ class AMP_Validation_Error_Taxonomy {
 					wp_enqueue_style(
 						'amp-validation-single-error-url',
 						amp_get_asset_url( 'css/amp-validation-single-error-url.css' ),
-						[ 'common' ],
+						[ 'common', 'amp-icons' ],
 						AMP__VERSION
 					);
 
@@ -1341,8 +1362,8 @@ class AMP_Validation_Error_Taxonomy {
 				$new_term_text = sprintf(
 					/* translators: %s: the new term count. */
 					_nx(
-						'With new error <span class="count">(%s)</span>',
-						'With new errors <span class="count">(%s)</span>', // @todo Should this really have variations for singular/plural? Should count be part of translated string?
+						'With unreviewed error <span class="count">(%s)</span>',
+						'With unreviewed errors <span class="count">(%s)</span>', // @todo Should this really have variations for singular/plural? Should count be part of translated string?
 						$new_term_count,
 						'terms',
 						'amp'
@@ -1353,8 +1374,8 @@ class AMP_Validation_Error_Taxonomy {
 				$new_term_text = sprintf(
 					/* translators: %s: the new term count. */
 					_nx(
-						'New error <span class="count">(%s)</span>',
-						'New errors <span class="count">(%s)</span>', // @todo Should this really have variations for singular/plural? Should count be part of translated string?
+						'Unreviewed error <span class="count">(%s)</span>',
+						'Unreviewed errors <span class="count">(%s)</span>', // @todo Should this really have variations for singular/plural? Should count be part of translated string?
 						$new_term_count,
 						'terms',
 						'amp'
@@ -1556,23 +1577,12 @@ class AMP_Validation_Error_Taxonomy {
 			$actioned = sanitize_key( $_GET['amp_actioned'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$count    = (int) $_GET['amp_actioned_count']; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$message  = null;
-			if ( self::VALIDATION_ERROR_ACCEPT_ACTION === $actioned ) {
+			if ( 'delete' === $actioned ) {
 				$message = sprintf(
 					/* translators: %s is number of errors accepted */
 					_n(
-						'Removed %s instance of invalid markup. It will no longer block related URLs from being served as AMP.',
-						'Removed %s instances of invalid markup. They will no longer block related URLs from being served as AMP.',
-						number_format_i18n( $count ),
-						'amp'
-					),
-					$count
-				);
-			} elseif ( self::VALIDATION_ERROR_REJECT_ACTION === $actioned ) {
-				$message = sprintf(
-					/* translators: %s is number of errors rejected */
-					_n(
-						'Kept %s instance of invalid markup. It will continue to block related URLs from being served as AMP.',
-						'Kept %s instances of invalid markup. They will continue to block related URLs from being served as AMP.',
+						'Deleted %s instance of validation errors.',
+						'Deleted %s instances of validation errors.',
 						number_format_i18n( $count ),
 						'amp'
 					),
@@ -1617,7 +1627,7 @@ class AMP_Validation_Error_Taxonomy {
 		global $pagenow;
 
 		$term_id = $tag->term_id;
-		$term    = get_term( $tag->term_id ); // We don't want filter=display given by $tag.
+		$term    = get_term( $term_id ); // We don't want filter=display given by $tag.
 
 		/*
 		 * Hide deletion link since a validation error should only be removed once
@@ -1634,7 +1644,7 @@ class AMP_Validation_Error_Taxonomy {
 				esc_attr__( 'Toggle error details', 'amp' ),
 				esc_html__( 'Details', 'amp' )
 			);
-		} else {
+		} elseif ( 'edit-tags.php' === $pagenow ) {
 			$actions['details'] = sprintf(
 				'<a href="%s">%s</a>',
 				admin_url(
@@ -1648,37 +1658,21 @@ class AMP_Validation_Error_Taxonomy {
 				),
 				esc_html__( 'Details', 'amp' )
 			);
-		}
 
-		// Only add the 'Remove' and 'Keep' links to the index page, not the individual URL page.
-		if ( 'edit-tags.php' === $pagenow ) {
-			$sanitization = self::get_validation_error_sanitization( json_decode( $term->description, true ) );
-
-			if ( self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $sanitization['status'] ) {
-				$actions[ self::VALIDATION_ERROR_ACCEPT_ACTION ] = sprintf(
+			if ( 0 === $term->count ) {
+				$actions['delete'] = sprintf(
 					'<a href="%s">%s</a>',
 					wp_nonce_url(
-						add_query_arg( array_merge( [ 'action' => self::VALIDATION_ERROR_ACCEPT_ACTION ], compact( 'term_id' ) ) ),
-						self::VALIDATION_ERROR_ACCEPT_ACTION
+						add_query_arg( array_merge( [ 'action' => 'delete' ], compact( 'term_id' ) ) ),
+						'delete'
 					),
-					esc_html(
-						self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $sanitization['term_status'] ? __( 'Confirm removed', 'amp' ) : __( 'Remove', 'amp' )
-					)
-				);
-			}
-			if ( self::VALIDATION_ERROR_ACK_REJECTED_STATUS !== $sanitization['status'] ) {
-				$actions[ self::VALIDATION_ERROR_REJECT_ACTION ] = sprintf(
-					'<a href="%s">%s</a>',
-					wp_nonce_url(
-						add_query_arg( array_merge( [ 'action' => self::VALIDATION_ERROR_REJECT_ACTION ], compact( 'term_id' ) ) ),
-						self::VALIDATION_ERROR_REJECT_ACTION
-					),
-					esc_html(
-						self::VALIDATION_ERROR_NEW_REJECTED_STATUS === $sanitization['term_status'] ? __( 'Confirm kept', 'amp' ) : __( 'Keep', 'amp' )
-					)
+					esc_html__( 'Delete', 'amp' )
 				);
 			}
 		}
+
+		$actions = wp_array_slice_assoc( $actions, [ 'details', 'delete' ] );
+
 		return $actions;
 	}
 
@@ -1868,26 +1862,28 @@ class AMP_Validation_Error_Taxonomy {
 				$is_removed = (bool) ( (int) $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
 
 				if ( 'post.php' === $pagenow ) {
-					$status_select_name = sprintf( '%s[%s]', AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR, $term->slug );
+					$valid_color   = Icon::valid()->get_color();
+					$invalid_color = Icon::invalid()->get_color();
 
-					if ( (int) $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK ) {
-						$img_src = 'amp-logo-green';
-					} else {
-						$img_src = 'amp-logo-red';
-					}
+					$status_border_color = sprintf( 'border-color: %s;', $is_removed ? $valid_color : $invalid_color );
+					$status_select_name  = sprintf(
+						'%s[%s][%s]',
+						AMP_Validated_URL_Post_Type::VALIDATION_ERRORS_INPUT_KEY,
+						$term->slug,
+						AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR
+					);
 
 					ob_start();
 					?>
 					<div class="amp-validation-error-status-dropdown">
-						<img src="<?php echo esc_url( amp_get_asset_url( 'images/' . $img_src . '.svg' ) ); ?>">
 						<label for="<?php echo esc_attr( $status_select_name ); ?>" class="screen-reader-text">
 							<?php esc_html_e( 'Markup Status', 'amp' ); ?>
 						</label>
-						<select class="amp-validation-error-status" id="<?php echo esc_attr( $status_select_name ); ?>" name="<?php echo esc_attr( $status_select_name ); ?>">
-							<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS ); ?>" <?php selected( $is_removed ); ?> data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/amp-logo-green.svg' ) ); ?>">
+						<select class="amp-validation-error-status" name="<?php echo esc_attr( $status_select_name ); ?>" style="<?php echo esc_attr( $status_border_color ); ?>">
+							<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS ); ?>" <?php selected( $is_removed ); ?> data-color="<?php echo esc_attr( $valid_color ); ?>">
 								<?php esc_html_e( 'Removed', 'amp' ); ?>
 							</option>
-							<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACK_REJECTED_STATUS ); ?>" <?php selected( ! $is_removed ); ?> data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/amp-logo-red.svg' ) ); ?>">
+							<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACK_REJECTED_STATUS ); ?>" <?php selected( ! $is_removed ); ?> data-color="<?php echo esc_attr( $invalid_color ); ?>">
 								<?php esc_html_e( 'Kept', 'amp' ); ?>
 							</option>
 						</select>
@@ -2029,6 +2025,17 @@ class AMP_Validation_Error_Taxonomy {
 					$content .= esc_html__( 'Misc', 'amp' );
 				}
 				break;
+			case 'reviewed':
+				if ( 'post.php' === $pagenow ) {
+					$checked    = checked( 0 < ( (int) $term->term_group & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK ), true, false );
+					$input_name = sprintf(
+						'%s[%s][%s]',
+						AMP_Validated_URL_Post_Type::VALIDATION_ERRORS_INPUT_KEY,
+						$term->slug,
+						self::VALIDATION_ERROR_ACKNOWLEDGE_ACTION
+					);
+					$content   .= sprintf( '<input class="amp-validation-error-status-review" type="checkbox" name="%s" %s />', esc_attr( $input_name ), $checked );
+				}
 		}
 		return $content;
 	}
@@ -2054,9 +2061,11 @@ class AMP_Validation_Error_Taxonomy {
 	 *
 	 * @param array   $validation_error Validation error data.
 	 * @param WP_Term $term The validation error term.
+	 * @param bool    $wrap_with_details Whether to wrap the error details markup with a <details> element.
+	 * @param bool    $with_summary Whether to include the summary for the <details> element.
 	 * @return string HTML for the details section.
 	 */
-	public static function render_single_url_error_details( $validation_error, $term ) {
+	public static function render_single_url_error_details( $validation_error, $term, $wrap_with_details = true, $with_summary = true ) {
 		// Get the sources, if they exist.
 		if ( isset( $_GET['post'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$validation_errors = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( (int) $_GET['post'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -2171,7 +2180,7 @@ class AMP_Validation_Error_Taxonomy {
 				if ( in_array( $key, [ 'code', 'type', 'css_property_value', 'mandatory_anyof_attrs', 'meta_property_value', 'meta_property_required_value', 'mandatory_oneof_attrs' ], true ) ) {
 					continue; // Handled above.
 				}
-				if ( in_array( $key, [ 'spec_name', 'tag_spec', 'spec_names', 'node_type' ], true ) ) {
+				if ( in_array( $key, [ 'spec_name', 'tag_spec', 'spec_names', 'node_type', 'allowed_descendants' ], true ) ) {
 					continue;
 				}
 				?>
@@ -2280,11 +2289,17 @@ class AMP_Validation_Error_Taxonomy {
 
 		<?php
 
-		return sprintf(
-			'<details open class="details-attributes"><summary class="details-attributes__summary">%s</summary>%s</details>',
-			self::get_details_summary_label( $validation_error ),
-			ob_get_clean()
-		);
+		$output = ob_get_clean();
+
+		if ( $with_summary ) {
+			$output = sprintf( '<summary class="details-attributes__summary">%s</summary>%s', self::get_details_summary_label( $validation_error ), $output );
+		}
+
+		if ( $wrap_with_details ) {
+			$output = '<details open class="details-attributes">' . $output . '</details>';
+		}
+
+		return $output;
 	}
 
 	/**
@@ -2847,7 +2862,7 @@ class AMP_Validation_Error_Taxonomy {
 			self::handle_validation_error_update( null, $action, $term_ids );
 			$redirect_query_args['amp_actioned_count'] = count( $term_ids );
 		} elseif ( $single_term_id ) {
-			// If this is an inline action, like 'Keep' or 'Remove'.
+			// If this is an inline action, like 'Details' or 'Delete'.
 			self::handle_validation_error_update( null, $action, [ $single_term_id ] );
 			$redirect_query_args['amp_actioned_count'] = 1;
 		}
@@ -2872,10 +2887,11 @@ class AMP_Validation_Error_Taxonomy {
 	 * @return string Redirect.
 	 */
 	public static function handle_validation_error_update( $redirect_to, $action, $term_ids ) {
-		// @todo Add a new action for mark and unmark as new.
-		if ( ! in_array( $action, [ self::VALIDATION_ERROR_ACCEPT_ACTION, self::VALIDATION_ERROR_REJECT_ACTION ], true ) ) {
+		if ( 'delete' !== $action ) {
 			return $redirect_to;
 		}
+
+		global $pagenow;
 
 		$has_pre_term_description_filter = has_filter( 'pre_term_description', 'wp_filter_kses' );
 		if ( false !== $has_pre_term_description_filter ) {
@@ -2884,35 +2900,34 @@ class AMP_Validation_Error_Taxonomy {
 
 		$updated_count = 0;
 		foreach ( $term_ids as $term_id ) {
-			$term = get_term( $term_id );
-			if ( ! $term ) {
-				continue;
-			}
-			$term_group = $term->term_group;
-
-			// The action of marking an error as removed/kept (aka accepted/rejected) also results in it being marked as not-new.
-			if ( self::VALIDATION_ERROR_ACCEPT_ACTION === $action ) {
-				$term_group = self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS;
-			} elseif ( self::VALIDATION_ERROR_REJECT_ACTION === $action ) {
-				$term_group = self::VALIDATION_ERROR_ACK_REJECTED_STATUS;
-			}
-
-			if ( $term_group !== $term->term_group ) {
-				wp_update_term( $term_id, self::TAXONOMY_SLUG, compact( 'term_group' ) );
+			if ( 'delete' === $action && self::delete_empty_term( $term_id ) ) {
 				$updated_count++;
 			}
 		}
+
 		if ( false !== $has_pre_term_description_filter ) {
 			add_filter( 'pre_term_description', 'wp_filter_kses', $has_pre_term_description_filter );
 		}
 
-		$redirect_to = add_query_arg(
-			[
-				'amp_actioned'       => $action,
-				'amp_actioned_count' => count( $term_ids ),
-			],
-			$redirect_to
-		);
+		$term_ids_count = count( $term_ids );
+		if ( 'edit.php' === $pagenow && 'delete' === $action && 1 === $updated_count ) {
+			// Redirect to error index screen if deleting an validation error with no associated validated URLs.
+			$redirect_to = add_query_arg(
+				[
+					'amp_actioned'       => $action,
+					'amp_actioned_count' => $term_ids_count,
+				],
+				esc_url( get_admin_url( null, 'edit-tags.php?taxonomy=' . self::TAXONOMY_SLUG . '&post_type=' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ) )
+			);
+		} else {
+			$redirect_to = add_query_arg(
+				[
+					'amp_actioned'       => $action,
+					'amp_actioned_count' => $term_ids_count,
+				],
+				$redirect_to
+			);
+		}
 
 		if ( $updated_count ) {
 			delete_transient( AMP_Validated_URL_Post_Type::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT );
@@ -3042,7 +3057,7 @@ class AMP_Validation_Error_Taxonomy {
 			case AMP_Tag_And_Attribute_Sanitizer::CDATA_TOO_LONG:
 			case AMP_Tag_And_Attribute_Sanitizer::MANDATORY_CDATA_MISSING_OR_INCORRECT:
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_HTML_COMMENTS:
-			case AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_CSS_IMPORTANT:
+			case AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_CSS_I_AMPHTML_NAME:
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_CONTENTS:
 			case AMP_Tag_And_Attribute_Sanitizer::CDATA_VIOLATES_BLACKLIST:
 				return esc_html__( 'Illegal text content', 'amp' );
@@ -3261,6 +3276,31 @@ class AMP_Validation_Error_Taxonomy {
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_UNIT_DIMENSIONS:
 				return esc_html__( 'Inconsistent units for width and height', 'amp' );
 
+			case AMP_Tag_And_Attribute_Sanitizer::MISSING_LAYOUT_ATTRIBUTES:
+				return sprintf(
+					/* translators: %1$s is the element name, %2$s is the attribute name 'width', %3$s is the attribute name 'height' */
+					esc_html__( 'Incomplete layout attributes specified for tag %1$s. For example, provide attributes %2$s and %3$s', 'amp' ),
+					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>',
+					'<code>width</code>',
+					'<code>height</code>'
+				);
+
+			case AMP_Tag_And_Attribute_Sanitizer::IMPLIED_LAYOUT_INVALID:
+				return sprintf(
+					/* translators: %1$s is the layout, %2$s is the tag */
+					esc_html__( 'The implied layout %1$s is not supported by tag %2$s.', 'amp' ),
+					'<code>' . esc_html( $validation_error['layout'] ) . '</code>',
+					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>'
+				);
+
+			case AMP_Tag_And_Attribute_Sanitizer::SPECIFIED_LAYOUT_INVALID:
+				return sprintf(
+					/* translators: %1$s is the layout, %2$s is the tag */
+					esc_html__( 'The specified layout %1$s is not supported by tag %2$s.', 'amp' ),
+					'<code>' . esc_html( $validation_error['layout'] ) . '</code>',
+					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>'
+				);
+
 			default:
 				/* translators: %s error code */
 				return sprintf( esc_html__( 'Unknown error (%s)', 'amp' ), $validation_error['code'] );
@@ -3363,12 +3403,12 @@ class AMP_Validation_Error_Taxonomy {
 	 */
 	public static function get_status_text_with_icon( $sanitization ) {
 		if ( $sanitization['term_status'] & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK ) {
-			$class = 'accepted';
-			$text  = __( 'Removed', 'amp' );
+			$icon = Icon::valid();
+			$text = __( 'Removed', 'amp' );
 		} else {
-			$class = 'rejected';
-			$text  = __( 'Kept', 'amp' );
+			$icon = Icon::invalid();
+			$text = __( 'Kept', 'amp' );
 		}
-		return sprintf( '<span class="status-text %s">%s</span>', esc_attr( $class ), esc_html( $text ) );
+		return sprintf( '<span class="status-text">%s %s</span>', $icon->to_html(), esc_html( $text ) );
 	}
 }

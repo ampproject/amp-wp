@@ -67,8 +67,16 @@ class Test_Site_Health extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'direct', $tests );
 		$this->assertArrayHasKey( 'amp_persistent_object_cache', $tests['direct'] );
 		$this->assertArrayHasKey( 'amp_curl_multi_functions', $tests['direct'] );
-		$this->assertArrayHasKey( 'amp_icu_version', $tests['direct'] );
+		$this->assertArrayNotHasKey( 'amp_icu_version', $tests['direct'] );
 		$this->assertArrayHasKey( 'amp_xdebug_extension', $tests['direct'] );
+
+		// Test that the the ICU version test is added only when site URL is an IDN.
+		add_filter( 'site_url', [ self::class, 'get_idn' ], 10, 4 );
+
+		$tests = $this->instance->add_tests( [] );
+		$this->assertArrayHasKey( 'amp_icu_version', $tests['direct'] );
+
+		remove_filter( 'site_url', [ self::class, 'get_idn' ] );
 	}
 
 	/**
@@ -287,9 +295,9 @@ class Test_Site_Health extends WP_UnitTestCase {
 	 * @param string $expected                The expected string of supported templates.
 	 */
 	public function test_get_supported_templates( $supported_content_types, $supported_templates, $theme_support, $expected ) {
-		AMP_Options_Manager::update_option( 'all_templates_supported', false );
-		AMP_Options_Manager::update_option( 'supported_templates', $supported_templates );
-		AMP_Options_Manager::update_option( 'theme_support', $theme_support );
+		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
+		AMP_Options_Manager::update_option( Option::SUPPORTED_TEMPLATES, $supported_templates );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, $theme_support );
 		AMP_Theme_Support::read_theme_support();
 
 		$basic_post_types = [ 'post', 'page' ];
@@ -355,8 +363,8 @@ class Test_Site_Health extends WP_UnitTestCase {
 	 * @param string $expected               The expected return value.
 	 */
 	public function test_get_serve_all_templates( $theme_support, $do_serve_all_templates, $expected ) {
-		AMP_Options_Manager::update_option( 'theme_support', $theme_support );
-		AMP_Options_Manager::update_option( 'all_templates_supported', $do_serve_all_templates );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, $theme_support );
+		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, $do_serve_all_templates );
 		AMP_Theme_Support::read_theme_support();
 
 		$this->assertEquals( $expected, $this->call_private_method( $this->instance, 'get_serve_all_templates' ) );
@@ -370,11 +378,6 @@ class Test_Site_Health extends WP_UnitTestCase {
 	public function test_add_extensions() {
 		$this->assertEquals(
 			[
-				'intl'     => [
-					'extension' => 'intl',
-					'function'  => 'idn_to_utf8',
-					'required'  => false,
-				],
 				'json'     => [
 					'extension' => 'json',
 					'function'  => 'json_encode',
@@ -391,5 +394,30 @@ class Test_Site_Health extends WP_UnitTestCase {
 			],
 			$this->instance->add_extensions( [] )
 		);
+
+		// Test that the the `intl` extension is added only when site URL is an IDN.
+		add_filter( 'site_url', [ self::class, 'get_idn' ], 10, 4 );
+
+		$extensions = $this->instance->add_extensions( [] );
+		$this->assertArrayHasKey( 'intl', $extensions );
+		$this->assertEquals(
+			[
+				'extension' => 'intl',
+				'function'  => 'idn_to_utf8',
+				'required'  => false,
+			],
+			$extensions['intl']
+		);
+
+		remove_filter( 'site_url', [ self::class, 'get_idn' ] );
+	}
+
+	/**
+	 * Get a an IDN for testing purposes.
+	 *
+	 * @return string
+	 */
+	public static function get_idn() {
+		return 'https://foo.xn--57h.bar.com';
 	}
 }

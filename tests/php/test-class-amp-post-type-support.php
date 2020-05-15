@@ -6,6 +6,8 @@
  * @since 0.6
  */
 
+use AmpProject\AmpWP\Option;
+
 /**
  * Tests for Post Type Support.
  *
@@ -76,7 +78,7 @@ class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
 				'public' => true,
 			]
 		);
-		AMP_Options_Manager::update_option( 'supported_post_types', [ 'post', 'poem' ] );
+		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, [ 'post', 'poem' ] );
 
 		AMP_Post_Type_Support::add_post_type_support();
 		$this->assertTrue( post_type_supports( 'post', AMP_Post_Type_Support::SLUG ) );

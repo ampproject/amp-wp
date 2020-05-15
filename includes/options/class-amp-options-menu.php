@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Option;
+
 /**
  * AMP_Options_Menu class.
  */
@@ -80,7 +82,7 @@ class AMP_Options_Menu {
 		);
 
 		add_settings_field(
-			'theme_support',
+			Option::THEME_SUPPORT,
 			__( 'Template Mode', 'amp' ),
 			[ $this, 'render_theme_support' ],
 			AMP_Options_Manager::OPTION_NAME,
@@ -91,7 +93,7 @@ class AMP_Options_Menu {
 		);
 
 		add_settings_field(
-			'supported_templates',
+			Option::SUPPORTED_TEMPLATES,
 			__( 'Supported Templates', 'amp' ),
 			[ $this, 'render_supported_templates' ],
 			AMP_Options_Manager::OPTION_NAME,
@@ -246,7 +248,7 @@ class AMP_Options_Menu {
 				<?php else : ?>
 					<p>
 						<label for="all_templates_supported">
-							<input id="all_templates_supported" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[all_templates_supported]' ); ?>" <?php checked( AMP_Options_Manager::get_option( 'all_templates_supported' ) ); ?>>
+							<input id="all_templates_supported" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[all_templates_supported]' ); ?>" <?php checked( AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED ) ); ?>>
 							<?php esc_html_e( 'Serve all templates as AMP regardless of what is being queried.', 'amp' ); ?>
 						</label>
 					</p>
@@ -272,7 +274,7 @@ class AMP_Options_Menu {
 		<fieldset id="supported_post_types_fieldset">
 			<?php
 			$element_name         = AMP_Options_Manager::OPTION_NAME . '[supported_post_types][]';
-			$supported_post_types = AMP_Options_Manager::get_option( 'supported_post_types' );
+			$supported_post_types = AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES );
 			?>
 			<h4 class="title"><?php esc_html_e( 'Content Types', 'amp' ); ?></h4>
 			<p>

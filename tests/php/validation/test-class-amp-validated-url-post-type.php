@@ -74,7 +74,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'rightnow_end', [ self::TESTED_CLASS, 'print_dashboard_glance_styles' ] ) );
 
 		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', [ self::TESTED_CLASS, 'enqueue_edit_post_screen_scripts' ] ) );
-		$this->assertEquals( 10, has_action( 'add_meta_boxes', [ self::TESTED_CLASS, 'add_meta_boxes' ] ) );
+		$this->assertEquals( PHP_INT_MAX, has_action( 'add_meta_boxes', [ self::TESTED_CLASS, 'add_meta_boxes' ] ) );
 		$this->assertEquals( 10, has_action( 'edit_form_top', [ self::TESTED_CLASS, 'print_url_as_title' ] ) );
 
 		$this->assertEquals( 10, has_filter( 'the_title', [ self::TESTED_CLASS, 'filter_the_title_in_post_list_table' ] ) );
@@ -82,7 +82,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG . '_posts_columns', [ self::TESTED_CLASS, 'add_post_columns' ] ) );
 		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG . '_columns', [ self::TESTED_CLASS, 'add_single_post_columns' ] ) );
 		$this->assertEquals( 10, has_action( 'manage_posts_custom_column', [ self::TESTED_CLASS, 'output_custom_column' ] ) );
-		$this->assertEquals( 10, has_filter( 'post_row_actions', [ self::TESTED_CLASS, 'filter_post_row_actions' ] ) );
+		$this->assertEquals( PHP_INT_MAX, has_filter( 'post_row_actions', [ self::TESTED_CLASS, 'filter_post_row_actions' ] ) );
 		$this->assertEquals( 10, has_filter( 'bulk_actions-edit-' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG, [ self::TESTED_CLASS, 'filter_bulk_actions' ] ) );
 		$this->assertEquals( 10, has_filter( 'bulk_actions-' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG, '__return_false' ) );
 		$this->assertEquals( 10, has_filter( 'handle_bulk_actions-edit-' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG, [ self::TESTED_CLASS, 'handle_bulk_action' ] ) );
@@ -586,6 +586,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 				'details'                     => 'Context<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="&lt;h3&gt;Context&lt;/h3&gt;&lt;p&gt;The parent element of where the error occurred.&lt;/p&gt;"></div>',
 				'sources_with_invalid_output' => 'Sources',
 				'error_type'                  => 'Type',
+				'reviewed'                    => 'Reviewed<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="&lt;h3&gt;Reviewed&lt;/h3&gt;&lt;p&gt;Confirm that the action being taken on the invalid markup (causing a validation error) has been seen and approved.&lt;/p&gt;"></div>',
 			],
 			AMP_Validated_URL_Post_Type::add_single_post_columns()
 		);
@@ -1070,36 +1071,88 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$_REQUEST[ AMP_Validated_URL_Post_Type::UPDATE_POST_TERM_STATUS_ACTION . '_nonce' ] = wp_create_nonce( AMP_Validated_URL_Post_Type::UPDATE_POST_TERM_STATUS_ACTION );
 		AMP_Validated_URL_Post_Type::handle_validation_error_status_update(); // No-op since no post.
 
-		$error = [ 'code' => 'foo' ];
+		$errors = [
+			// All statuses for errors should be updated.
+			[
+				'code'   => 'foo',
+				'status' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
+			],
+			[
+				'code'   => 'bar',
+				'status' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+			],
+			[
+				'code'   => 'baz',
+				'status' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
+			],
+			[
+				'code'   => 'buzz',
+				'status' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS,
+			],
+			// Except for this.
+			[
+				'code'   => 'status_should_not_be_updated',
+				'status' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
+			],
+		];
 
 		$invalid_url_post_id = AMP_Validated_URL_Post_Type::store_validation_errors(
-			[ $error ],
+			$errors,
 			home_url( '/' )
 		);
+
+		foreach ( $errors as $data ) {
+			$term_data = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( $data );
+			$term      = AMP_Validation_Error_Taxonomy::get_term( $term_data['slug'] );
+			wp_update_term( $term->term_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, [ 'term_group' => $data['status'] ] );
+		}
+
 		add_filter(
 			'pre_http_request',
-			static function() use ( $error ) {
+			static function() use ( $errors ) {
+				$results = array_map(
+					static function ( $error ) {
+						return [
+							'sanitized' => true,
+							'error'     => $error,
+						];
+					},
+					$errors
+				);
+
 				return [
-					'body' => wp_json_encode(
-						[
-							'results' => [
-								[
-									'sanitized' => false,
-									'error'     => $error,
-								],
-							],
-						]
-					),
+					'body' => wp_json_encode( compact( 'results' ) ),
 				];
 			}
 		);
 
 		$post = get_post( $invalid_url_post_id );
 
-		$errors = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $invalid_url_post_id );
+		$validation_errors = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $invalid_url_post_id );
 
-		$_POST[ AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] = [
-			$errors[0]['term']->slug => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+		$_POST[ AMP_Validated_URL_Post_Type::VALIDATION_ERRORS_INPUT_KEY ] = [
+			// Accepted and acknowledged.
+			$validation_errors[0]['term']->slug => [
+				AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR     => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACKNOWLEDGE_ACTION => 'on',
+			],
+			// Accepted but not acknowledged.
+			$validation_errors[1]['term']->slug => [
+				AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+			],
+			// Rejected and acknowledged.
+			$validation_errors[2]['term']->slug => [
+				AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR     => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS,
+				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACKNOWLEDGE_ACTION => 'on',
+			],
+			// Rejected but not acknowledged.
+			$validation_errors[3]['term']->slug => [
+				AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS,
+			],
+			// Accepted but not acknowledged. Status should not be changed.
+			$validation_errors[4]['term']->slug => [
+				AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+			],
 		];
 
 		add_filter(
@@ -1118,7 +1171,8 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		}
 		$this->assertInstanceOf( 'Exception', $exception );
 		$this->assertEquals( 302, $exception->getCode() );
-		$this->assertStringEndsWith( 'action=edit&amp_taxonomy_terms_updated=1&amp_remaining_errors=0', $exception->getMessage() );
+		// 4 out of the 5 validation error statuses should be updated, with 2 kept errors.
+		$this->assertStringEndsWith( 'action=edit&amp_taxonomy_terms_updated=4&amp_remaining_errors=2', $exception->getMessage() );
 	}
 
 	/**
@@ -1167,7 +1221,15 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 	 */
 	public function test_add_meta_boxes() {
 		global $wp_meta_boxes;
-		AMP_Validated_URL_Post_Type::add_meta_boxes();
+		AMP_Validated_URL_Post_Type::add_admin_hooks();
+		add_action(
+			'add_meta_boxes',
+			function () {
+				add_meta_box( 'bogus', 'Bogus', '__return_empty_string', AMP_Validated_URL_Post_Type::POST_TYPE_SLUG );
+			},
+			100
+		);
+		do_action( 'add_meta_boxes' );
 		$side_meta_box = $wp_meta_boxes[ AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ]['side']['default'][ AMP_Validated_URL_Post_Type::STATUS_META_BOX ];
 		$this->assertEquals( AMP_Validated_URL_Post_Type::STATUS_META_BOX, $side_meta_box['id'] );
 		$this->assertEquals( 'Status', $side_meta_box['title'] );
@@ -1183,9 +1245,11 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 			$side_meta_box['args']
 		);
 
-		$contexts = $wp_meta_boxes[ AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ]['side'];
-		foreach ( $contexts as $context ) {
+		foreach ( $wp_meta_boxes[ AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ]['side'] as $context ) {
 			$this->assertFalse( $context['submitdiv'] );
+		}
+		foreach ( $wp_meta_boxes[ AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ]['advanced'] as $context ) {
+			$this->assertFalse( $context['bogus'] );
 		}
 	}
 
@@ -1293,9 +1357,9 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		// Now that the current user has permissions, this should output the correct markup.
 		$output = get_echo( [ 'AMP_Validated_URL_Post_Type', 'render_single_url_list_table' ], [ $post_correct_post_type ] );
 		$this->assertStringContains( '<form class="search-form wp-clearfix" method="get">', $output );
-		$this->assertStringContains( '<div id="accept-reject-buttons" class="hidden">', $output );
-		$this->assertStringContains( '<button type="button" class="button action accept">', $output );
-		$this->assertStringContains( '<button type="button" class="button action reject">', $output );
+		$this->assertStringContains( '<div id="remove-keep-buttons" class="hidden">', $output );
+		$this->assertStringContains( '<button type="button" class="button action remove">', $output );
+		$this->assertStringContains( '<button type="button" class="button action keep">', $output );
 	}
 
 	/**
@@ -1426,7 +1490,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		// This is now on the invalid URL post type edit.php screen, so it should output a <select> element.
 		$output = get_echo( [ 'AMP_Validated_URL_Post_Type', 'render_post_filters' ], [ $correct_post_type, $correct_which_second_argument ] );
 		$this->assertStringContains(
-			sprintf( 'With new errors <span class="count">(%d)</span>', $number_of_new_errors ),
+			sprintf( 'With unreviewed errors <span class="count">(%d)</span>', $number_of_new_errors ),
 			$output
 		);
 		$this->assertStringContains(
@@ -1677,5 +1741,57 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 				],
 			],
 		];
+	}
+
+	/**
+	 * Test that the code ensures other plugins won't mess up the validation URL action links in the post list table.
+	 */
+	public function test_post_row_actions_filter() {
+		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
+		AMP_Validated_URL_Post_Type::add_admin_hooks();
+
+		$post = self::factory()->post->create_and_get(
+			[
+				'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+				'status'    => 'publish',
+			]
+		);
+
+		add_filter(
+			'post_row_actions',
+			static function ( $actions, $post ) {
+				$actions['edit'] = sprintf(
+					'<a href="%s">%s</a>',
+					esc_url( get_edit_post_link( $post ) ),
+					'Unwanted Edit Action'
+				);
+
+				$actions['other_action'] = sprintf(
+					'<a href="%s">%s</a>',
+					'https://example.com',
+					'Unwanted Other Action'
+				);
+
+				return $actions;
+			},
+			10,
+			2
+		);
+
+		$initial_actions = [
+			'trash' => sprintf( '<a href="%s">Trash</a>', get_delete_post_link( $post->ID ) ),
+		];
+
+		$actions = apply_filters( 'post_row_actions', $initial_actions, $post );
+
+		$this->assertInternalType( 'array', $actions );
+		$this->assertArrayHasKey( 'edit', $actions );
+		$this->assertArrayHasKey( 'view', $actions );
+		$this->assertArrayHasKey( 'delete', $actions );
+		$this->assertArrayHasKey( 'amp_validate', $actions );
+		$this->assertArrayNotHasKey( 'other_action', $actions );
+
+		$this->assertStringContains( __( 'Details', 'amp' ), $actions['edit'] );
+		$this->assertStringNotContains( 'Unwanted Edit Action', $actions['edit'] );
 	}
 }

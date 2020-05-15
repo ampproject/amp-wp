@@ -7,6 +7,7 @@
 
 // phpcs:disable Generic.Formatting.MultipleStatementAlignment.NotSameWarning
 
+use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\HandleValidation;
 use AmpProject\AmpWP\Tests\PrivateAccess;
@@ -309,12 +310,12 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		$this->assertTrue( AMP_Validation_Manager::has_cap() );
 		add_filter( 'amp_supportable_templates', '__return_empty_array' );
-		AMP_Options_Manager::update_option( 'all_templates_supported', false );
+		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 		$admin_bar = new WP_Admin_Bar();
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
 		$this->assertNull( $admin_bar->get_node( 'amp' ) );
 		remove_filter( 'amp_supportable_templates', '__return_empty_array' );
-		AMP_Options_Manager::update_option( 'all_templates_supported', true );
+		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, true );
 
 		// Admin bar item available in AMP-first mode.
 		add_theme_support( AMP_Theme_Support::SLUG, [ AMP_Theme_Support::PAIRED_FLAG => false ] );
@@ -1340,6 +1341,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 */
 	public function test_wrap_widget_callbacks() {
 		global $wp_registered_widgets, $_wp_sidebars_widgets;
+		$this->go_to( amp_get_permalink( $this->factory()->post->create() ) );
 
 		$search_widget_id = 'search-2';
 		$this->assertArrayHasKey( $search_widget_id, $wp_registered_widgets );
@@ -1349,7 +1351,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$archives_widget_id = 'archives-2';
 		$this->assertArrayHasKey( $archives_widget_id, $wp_registered_widgets );
 		$this->assertInternalType( 'array', $wp_registered_widgets[ $archives_widget_id ]['callback'] );
-		$wp_registered_widgets[ $archives_widget_id ]['callback'][0] = new AMP_Widget_Archives();
 
 		AMP_Validation_Manager::wrap_widget_callbacks();
 		$this->assertInstanceOf( 'AMP_Validation_Callback_Wrapper', $wp_registered_widgets[ $search_widget_id ]['callback'] );
@@ -1393,11 +1394,11 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		AMP_Theme_Support::start_output_buffering();
 		dynamic_sidebar( $sidebar_id );
 		$output     = ob_get_clean();
-		$reflection = new ReflectionMethod( 'AMP_Widget_Archives', 'widget' );
+		$reflection = new ReflectionMethod( 'WP_Widget_Archives', 'widget' );
 		$this->assertStringStartsWith(
 			sprintf(
-				'<!--amp-source-stack {"type":"plugin","name":"amp","file":%1$s,"line":%2$d,"function":%3$s,"widget_id":%4$s}--><li id=%4$s',
-				wp_json_encode( preg_replace( ':^.*(?=includes/):', '', $reflection->getFileName() ) ),
+				'<!--amp-source-stack {"type":"core","name":"wp-includes","file":%1$s,"line":%2$d,"function":%3$s,"widget_id":%4$s}--><li id=%4$s',
+				wp_json_encode( 'widgets/' . basename( $reflection->getFileName() ) ),
 				$reflection->getStartLine(),
 				wp_json_encode( $reflection->getDeclaringClass()->getName() . '::' . $reflection->getName() ),
 				wp_json_encode( $archives_widget_id )
@@ -1610,7 +1611,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 				[
 					'type'     => 'core',
 					'name'     => 'wp-includes',
-					'function' => version_compare( get_bloginfo( 'version' ), '5.4', '>' ) ? 'wp_filter_content_tags' : 'wp_make_content_images_responsive',
+					'function' => version_compare( get_bloginfo( 'version' ), '5.5-alpha', '>' ) ? 'wp_filter_content_tags' : 'wp_make_content_images_responsive',
 				],
 				[
 					'type'     => 'core',
@@ -2056,7 +2057,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertInstanceOf( 'DOMElement', $dom->getElementById( 'wp-admin-bar-amp' ) );
 		$status_icon_element = $dom->getElementById( 'amp-admin-bar-item-status-icon' );
 		$this->assertInstanceOf( 'DOMElement', $status_icon_element );
-		$this->assertEquals( '✅', $status_icon_element->textContent );
+		$this->assertStringContains( 'amp-icon amp-valid', $status_icon_element->getAttribute( 'class' ) );
 		$validity_link_element = $dom->getElementById( 'wp-admin-bar-amp-validity' );
 		$this->assertInstanceOf( 'DOMElement', $validity_link_element );
 		$this->assertEquals( 'Validate', trim( $validity_link_element->textContent ) );
@@ -2072,7 +2073,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 
 		AMP_Validation_Manager::finalize_validation( $dom );
 		$this->assertEquals( 'Review 1 validation issue', trim( $validity_link_element->textContent ) );
-		$this->assertEquals( '⚠️', $status_icon_element->textContent );
+		$this->assertStringContains( 'amp-icon amp-warning', $status_icon_element->getAttribute( 'class' ) );
 	}
 
 	/**
@@ -2182,7 +2183,8 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 			}
 
 			return [
-				'body'    => wp_json_encode( $validation ),
+				// Prepend JSON with byte order mark, whitespace, and append with HTML comment to ensure stripped.
+				'body'    => "\xEF\xBB\xBF" . ' ' . wp_json_encode( $validation ) . "\n<!-- Generated by greatness! -->\n",
 				'headers' => [
 					'content-type' => 'application/json',
 				],

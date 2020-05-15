@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Option;
+
 /**
  * Class AMP_Customizer_Design_Settings
  */
@@ -41,7 +43,7 @@ class AMP_Customizer_Design_Settings {
 	 */
 	public static function is_amp_customizer_enabled() {
 
-		if ( AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( 'theme_support' ) ) {
+		if ( AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
 			return false;
 		}
 

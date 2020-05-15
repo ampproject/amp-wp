@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 
 /**
@@ -85,7 +86,7 @@ class Test_AMP_Options_Menu extends WP_UnitTestCase {
 		// Test add_setting_field().
 		$this->assertArrayHasKey( 'amp-options', $wp_settings_fields );
 		$this->assertArrayHasKey( 'general', $wp_settings_fields['amp-options'] );
-		$this->assertArrayHasKey( 'supported_templates', $wp_settings_fields['amp-options']['general'] );
+		$this->assertArrayHasKey( Option::SUPPORTED_TEMPLATES, $wp_settings_fields['amp-options']['general'] );
 		$this->assertArrayNotHasKey( 'stories_settings', $wp_settings_fields['amp-options']['general'] );
 	}
 

@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 
 /**
@@ -68,7 +69,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		// Check change to supported_post_types.
 		update_option( 'rewrite_rules', $dummy_rewrite_rules );
 		AMP_Options_Manager::maybe_flush_rewrite_rules(
-			[ 'supported_post_types' => [ 'page' ] ],
+			[ Option::SUPPORTED_POST_TYPES => [ 'page' ] ],
 			[]
 		);
 		$this->assertEmpty( get_option( 'rewrite_rules' ) );
@@ -78,8 +79,8 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		update_option(
 			AMP_Options_Manager::OPTION_NAME,
 			[
-				[ 'supported_post_types' => [ 'page' ] ],
-				[ 'supported_post_types' => [ 'page' ] ],
+				[ Option::SUPPORTED_POST_TYPES => [ 'page' ] ],
+				[ Option::SUPPORTED_POST_TYPES => [ 'page' ] ],
 			]
 		);
 		$this->assertEquals( $dummy_rewrite_rules, get_option( 'rewrite_rules' ) );
@@ -113,12 +114,12 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		delete_option( AMP_Options_Manager::OPTION_NAME );
 		$this->assertEquals(
 			[
-				'theme_support'           => AMP_Theme_Support::READER_MODE_SLUG,
-				'supported_post_types'    => [ 'post' ],
-				'analytics'               => [],
-				'all_templates_supported' => true,
-				'supported_templates'     => [ 'is_singular' ],
-				'version'                 => AMP__VERSION,
+				Option::THEME_SUPPORT           => AMP_Theme_Support::READER_MODE_SLUG,
+				Option::SUPPORTED_POST_TYPES    => [ 'post' ],
+				Option::ANALYTICS               => [],
+				Option::ALL_TEMPLATES_SUPPORTED => true,
+				Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
+				Option::VERSION                 => AMP__VERSION,
 			],
 			AMP_Options_Manager::get_options()
 		);
@@ -126,19 +127,19 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$this->assertSame( 'default', AMP_Options_Manager::get_option( 'foo', 'default' ) );
 
 		// Test supported_post_types validation.
-		AMP_Options_Manager::update_option( 'supported_post_types', [ 'post', 'page', 'attachment' ] );
+		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, [ 'post', 'page', 'attachment' ] );
 		$this->assertSame(
 			[
 				'post',
 				'page',
 				'attachment',
 			],
-			AMP_Options_Manager::get_option( 'supported_post_types' )
+			AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES )
 		);
 
 		// Test analytics validation with missing fields.
 		AMP_Options_Manager::update_option(
-			'analytics',
+			Option::ANALYTICS,
 			[
 				'bad' => [],
 			]
@@ -149,7 +150,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 
 		// Test analytics validation with bad JSON.
 		AMP_Options_Manager::update_option(
-			'analytics',
+			Option::ANALYTICS,
 			[
 				'__new__' => [
 					'type'   => 'foo',
@@ -163,7 +164,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 
 		// Test analytics validation with good fields.
 		AMP_Options_Manager::update_option(
-			'analytics',
+			Option::ANALYTICS,
 			[
 				'__new__' => [
 					'type'   => 'foo',
@@ -175,7 +176,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 
 		// Test analytics validation with duplicate check.
 		AMP_Options_Manager::update_option(
-			'analytics',
+			Option::ANALYTICS,
 			[
 				'__new__' => [
 					'type'   => 'foo',
@@ -188,7 +189,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$wp_settings_errors = [];
 
 		// Confirm format of entry ID.
-		$entries = AMP_Options_Manager::get_option( 'analytics' );
+		$entries = AMP_Options_Manager::get_option( Option::ANALYTICS );
 		$entry   = current( $entries );
 		$id      = substr( md5( $entry['type'] . $entry['config'] ), 0, 12 );
 		$this->assertArrayHasKey( $id, $entries );
@@ -197,7 +198,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 
 		// Confirm adding another entry works.
 		AMP_Options_Manager::update_option(
-			'analytics',
+			Option::ANALYTICS,
 			[
 				'__new__' => [
 					'type'   => 'bar',
@@ -205,13 +206,13 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				],
 			]
 		);
-		$entries = AMP_Options_Manager::get_option( 'analytics' );
-		$this->assertCount( 2, AMP_Options_Manager::get_option( 'analytics' ) );
+		$entries = AMP_Options_Manager::get_option( Option::ANALYTICS );
+		$this->assertCount( 2, AMP_Options_Manager::get_option( Option::ANALYTICS ) );
 		$this->assertArrayHasKey( $id, $entries );
 
 		// Confirm updating an entry works.
 		AMP_Options_Manager::update_option(
-			'analytics',
+			Option::ANALYTICS,
 			[
 				$id => [
 					'id'     => $id,
@@ -220,13 +221,13 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				],
 			]
 		);
-		$entries = AMP_Options_Manager::get_option( 'analytics' );
+		$entries = AMP_Options_Manager::get_option( Option::ANALYTICS );
 		$this->assertEquals( 'foo', $entries[ $id ]['type'] );
 		$this->assertEquals( '{"very_good":true}', $entries[ $id ]['config'] );
 
 		// Confirm deleting an entry works.
 		AMP_Options_Manager::update_option(
-			'analytics',
+			Option::ANALYTICS,
 			[
 				$id => [
 					'id'     => $id,
@@ -236,7 +237,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				],
 			]
 		);
-		$entries = AMP_Options_Manager::get_option( 'analytics' );
+		$entries = AMP_Options_Manager::get_option( Option::ANALYTICS );
 		$this->assertCount( 1, $entries );
 		$this->assertArrayNotHasKey( $id, $entries );
 	}
@@ -279,14 +280,14 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				null,
 				AMP_Theme_Support::STANDARD_MODE_SLUG,
 				[
-					'theme_support' => 'native',
+					Option::THEME_SUPPORT => 'native',
 				],
 			],
 			'standard_via_native'                  => [
 				null,
 				AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
 				[
-					'theme_support' => 'paired',
+					Option::THEME_SUPPORT => 'paired',
 				],
 			],
 			'standard_upon_upgrade'                => [
@@ -295,7 +296,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				],
 				AMP_Theme_Support::STANDARD_MODE_SLUG,
 				[
-					'theme_support' => 'disabled',
+					Option::THEME_SUPPORT => 'disabled',
 				],
 			],
 			'transitional_upon_upgrade'            => [
@@ -304,7 +305,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				],
 				AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
 				[
-					'theme_support' => 'disabled',
+					Option::THEME_SUPPORT => 'disabled',
 				],
 			],
 		];
@@ -326,7 +327,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		if ( isset( $args ) ) {
 			add_theme_support( 'amp', $args );
 		}
-		$this->assertEquals( $expected_mode, AMP_Options_Manager::get_option( 'theme_support' ) );
+		$this->assertEquals( $expected_mode, AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) );
 	}
 
 	/**
@@ -347,30 +348,30 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		);
 		AMP_Post_Type_Support::add_post_type_support();
 
-		// Test when 'all_templates_supported' is selected.
-		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::STANDARD_MODE_SLUG );
-		AMP_Options_Manager::update_option( 'all_templates_supported', true );
-		AMP_Options_Manager::update_option( 'supported_post_types', [ 'post' ] );
+		// Test when Option::ALL_TEMPLATES_SUPPORTED is selected.
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, true );
+		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, [ 'post' ] );
 		AMP_Options_Manager::check_supported_post_type_update_errors();
 		$this->assertEmpty( get_settings_errors() );
 
-		// Test when 'all_templates_supported' is not selected.
-		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::STANDARD_MODE_SLUG );
-		AMP_Options_Manager::update_option( 'all_templates_supported', false );
+		// Test when Option::ALL_TEMPLATES_SUPPORTED is not selected.
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 		foreach ( get_post_types() as $post_type ) {
 			if ( 'foo' !== $post_type ) {
 				remove_post_type_support( $post_type, AMP_Post_Type_Support::SLUG );
 			}
 		}
-		AMP_Options_Manager::update_option( 'supported_post_types', [ 'foo' ] );
+		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, [ 'foo' ] );
 		AMP_Options_Manager::check_supported_post_type_update_errors();
 		$this->assertEmpty( get_settings_errors() );
 
-		// Test when 'all_templates_supported' is not selected, and theme support is also disabled.
+		// Test when Option::ALL_TEMPLATES_SUPPORTED is not selected, and theme support is also disabled.
 		add_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
-		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::READER_MODE_SLUG );
-		AMP_Options_Manager::update_option( 'all_templates_supported', false );
-		AMP_Options_Manager::update_option( 'supported_post_types', [ 'post' ] );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
+		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, [ 'post' ] );
 		AMP_Options_Manager::check_supported_post_type_update_errors();
 		$settings_errors    = get_settings_errors();
 		$wp_settings_errors = [];
@@ -380,8 +381,8 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		// Activation error.
 		remove_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
 		remove_post_type_support( 'foo', AMP_Post_Type_Support::SLUG );
-		AMP_Options_Manager::update_option( 'supported_post_types', [ 'foo' ] );
-		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::READER_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, [ 'foo' ] );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		AMP_Options_Manager::check_supported_post_type_update_errors();
 		$settings_errors = get_settings_errors();
 		$this->assertCount( 1, $settings_errors );
@@ -390,7 +391,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$wp_settings_errors = [];
 
 		// Deactivation error.
-		AMP_Options_Manager::update_option( 'supported_post_types', [] );
+		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, [] );
 		add_post_type_support( 'foo', AMP_Post_Type_Support::SLUG );
 		AMP_Options_Manager::check_supported_post_type_update_errors();
 		$errors = get_settings_errors();
@@ -438,8 +439,8 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		AMP_Validation_Manager::init();
 
 		$page_id = self::factory()->post->create( [ 'post_type' => 'page' ] );
-		AMP_Options_Manager::update_option( 'supported_post_types', [ 'page' ] );
-		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::READER_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, [ 'page' ] );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		AMP_Options_Manager::handle_updated_theme_support_option();
 		$amp_settings_errors = get_settings_errors( AMP_Options_Manager::OPTION_NAME );
 		$new_error           = end( $amp_settings_errors );
@@ -458,8 +459,8 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 
 		$post_id = self::factory()->post->create( [ 'post_type' => 'post' ] );
-		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::STANDARD_MODE_SLUG );
-		AMP_Options_Manager::update_option( 'supported_post_types', [ 'post' ] );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, [ 'post' ] );
 
 		$filter = static function() {
 			$validation = [
@@ -503,8 +504,8 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		self::factory()->post->create( [ 'post_type' => 'post' ] );
 
-		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::STANDARD_MODE_SLUG );
-		AMP_Options_Manager::update_option( 'supported_post_types', [ 'post' ] );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, [ 'post' ] );
 
 		$filter = static function() {
 			return [
@@ -538,8 +539,8 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 
 		$post_id = self::factory()->post->create( [ 'post_type' => 'post' ] );
-		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
-		AMP_Options_Manager::update_option( 'supported_post_types', [ 'post' ] );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, [ 'post' ] );
 
 		$filter = static function() {
 			$validation = [

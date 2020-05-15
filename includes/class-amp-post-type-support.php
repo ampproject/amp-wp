@@ -6,6 +6,8 @@
  * @since 0.6
  */
 
+use AmpProject\AmpWP\Option;
+
 /**
  * Class AMP_Post_Type_Support.
  */
@@ -56,10 +58,10 @@ class AMP_Post_Type_Support {
 	 * @since 0.6
 	 */
 	public static function add_post_type_support() {
-		if ( current_theme_supports( AMP_Theme_Support::SLUG ) && AMP_Options_Manager::get_option( 'all_templates_supported' ) ) {
+		if ( current_theme_supports( AMP_Theme_Support::SLUG ) && AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED ) ) {
 			$post_types = self::get_eligible_post_types();
 		} else {
-			$post_types = AMP_Options_Manager::get_option( 'supported_post_types', [] );
+			$post_types = AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES, [] );
 		}
 		foreach ( $post_types as $post_type ) {
 			add_post_type_support( $post_type, self::SLUG );

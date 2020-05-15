@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Icon;
 use AmpProject\Dom\Document;
 
 /**
@@ -423,20 +424,28 @@ class AMP_Validation_Manager {
 
 		// Construct the parent admin bar item.
 		if ( is_amp_endpoint() ) {
-			$icon = '&#x2705;'; // WHITE HEAVY CHECK MARK. This will get overridden in AMP_Validation_Manager::finalize_validation() if there are unaccepted errors.
+			$icon = Icon::valid(); // This will get overridden in AMP_Validation_Manager::finalize_validation() if there are unaccepted errors.
 			$href = $validate_url;
 		} elseif ( $error_count > 0 ) {
-			$icon = '&#x274C;'; // CROSS MARK.
+			$icon = Icon::invalid();
 			$href = $validate_url;
 		} else {
-			$icon = '&#x1F517;'; // LINK SYMBOL.
+			$icon = Icon::link();
 			$href = $amp_url;
 		}
+
+		$icon_html = $icon->to_html(
+			[
+				'id'    => 'amp-admin-bar-item-status-icon',
+				'class' => 'ab-icon',
+			]
+		);
+
 		$parent = [
 			'id'    => 'amp',
 			'title' => sprintf(
-				'<span id="amp-admin-bar-item-status-icon">%s</span> %s',
-				$icon,
+				'%s %s',
+				$icon_html,
 				esc_html__( 'AMP', 'amp' )
 			),
 			'href'  => esc_url( $href ),
@@ -502,7 +511,7 @@ class AMP_Validation_Manager {
 			$paired_browsing_item = [
 				'parent' => 'amp',
 				'id'     => 'amp-paired-browsing',
-				'title'  => esc_html__( 'Paired browsing', 'amp' ),
+				'title'  => esc_html__( 'Paired Browsing', 'amp' ),
 				'href'   => AMP_Theme_Support::get_paired_browsing_url(),
 			];
 
@@ -726,7 +735,7 @@ class AMP_Validation_Manager {
 						[
 							'invalid_url_post' => $invalid_url_post_id,
 						],
-						wp_array_slice_assoc( $validity, [ 'queried_object', 'stylesheets' ] )
+						wp_array_slice_assoc( $validity, [ 'queried_object', 'stylesheets', 'php_fatal_error' ] )
 					)
 				);
 
@@ -1937,7 +1946,7 @@ class AMP_Validation_Manager {
 
 		$admin_bar_icon = $dom->getElementById( 'amp-admin-bar-item-status-icon' );
 		if ( $admin_bar_icon ) {
-			$admin_bar_icon->firstChild->nodeValue = "\xE2\x9A\xA0\xEF\xB8\x8F"; // WARNING SIGN: U+26A0, U+FE0F.
+			$admin_bar_icon->setAttribute( 'class', 'ab-icon amp-icon ' . Icon::WARNING );
 		}
 	}
 
@@ -2105,6 +2114,17 @@ class AMP_Validation_Manager {
 			$validation_url
 		);
 
+		// Strip byte order mark (BOM).
+		while ( "\xEF\xBB\xBF" === substr( $response, 0, 3 ) ) {
+			$response = substr( $response, 3 );
+		}
+
+		// Strip any leading whitespace.
+		$response = ltrim( $response );
+
+		// Strip HTML comments that may have been injected at the end of the response (e.g. by a caching plugin).
+		$response = preg_replace( '/<!--.*?-->\s*$/s', '', $response );
+
 		if ( '' === $response ) {
 			return new WP_Error( 'white_screen_of_death' );
 		}
@@ -2239,6 +2259,13 @@ class AMP_Validation_Manager {
 						esc_html__( 'An internal server error occurred when fetching the URL for validation.', 'amp' ),
 						esc_html( $error_message ),
 						$check_error_log,
+						$support_forum_message,
+					]
+				);
+			case 'fatal_error_during_validation':
+				return $implode_non_empty_strings_with_spaces_and_sanitize(
+					[
+						esc_html__( 'A PHP fatal error occurred while validating the URL. This may indicate either a bug in theme/plugin code or it may be due to an issue in the AMP plugin itself. The error details appear below.', 'amp' ),
 						$support_forum_message,
 					]
 				);

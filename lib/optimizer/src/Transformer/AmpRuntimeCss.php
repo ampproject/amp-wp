@@ -5,11 +5,9 @@ namespace AmpProject\Optimizer\Transformer;
 use AmpProject\Amp;
 use AmpProject\Attribute;
 use AmpProject\Dom\Document;
-use AmpProject\Optimizer\Configurable;
 use AmpProject\Optimizer\Configuration\AmpRuntimeCssConfiguration;
 use AmpProject\Optimizer\Error;
 use AmpProject\Optimizer\ErrorCollection;
-use AmpProject\Optimizer\MakesRemoteRequests;
 use AmpProject\Optimizer\TransformerConfiguration;
 use AmpProject\RemoteGetRequest;
 use AmpProject\Optimizer\Transformer;
@@ -36,7 +34,7 @@ use Exception;
  *
  * @package ampproject/optimizer
  */
-final class AmpRuntimeCss implements Transformer, Configurable, MakesRemoteRequests
+final class AmpRuntimeCss implements Transformer
 {
 
     /**
@@ -61,13 +59,6 @@ final class AmpRuntimeCss implements Transformer, Configurable, MakesRemoteReque
     const V0_CSS_URL = Amp::CACHE_HOST . '/' . self::V0_CSS;
 
     /**
-     * Transport to use for remote requests.
-     *
-     * @var RemoteGetRequest
-     */
-    private $remoteRequest;
-
-    /**
      * Configuration store to use.
      *
      * @var TransformerConfiguration
@@ -75,15 +66,22 @@ final class AmpRuntimeCss implements Transformer, Configurable, MakesRemoteReque
     private $configuration;
 
     /**
+     * Transport to use for remote requests.
+     *
+     * @var RemoteGetRequest
+     */
+    private $remoteRequest;
+
+    /**
      * Instantiate an AmpRuntimeCss object.
      *
-     * @param RemoteGetRequest         $remoteRequest Transport to use for remote requests.
      * @param TransformerConfiguration $configuration Configuration store to use.
+     * @param RemoteGetRequest         $remoteRequest Transport to use for remote requests.
      */
-    public function __construct(RemoteGetRequest $remoteRequest, TransformerConfiguration $configuration)
+    public function __construct(TransformerConfiguration $configuration, RemoteGetRequest $remoteRequest)
     {
-        $this->remoteRequest = $remoteRequest;
         $this->configuration = $configuration;
+        $this->remoteRequest = $remoteRequest;
     }
 
     /**
@@ -143,6 +141,7 @@ final class AmpRuntimeCss implements Transformer, Configurable, MakesRemoteReque
         } catch (Exception $exception) {
             $errors->add(Error\CannotInlineRuntimeCss::fromException($exception, $ampRuntimeStyle, $version));
             $this->linkCss($document, $ampRuntimeStyle);
+            $ampRuntimeStyle->parentNode->removeChild($ampRuntimeStyle);
         }
     }
 
@@ -164,14 +163,21 @@ final class AmpRuntimeCss implements Transformer, Configurable, MakesRemoteReque
         }
 
         $ampRuntimeStyle->setAttribute(Attribute::I_AMPHTML_VERSION, $version);
-        $response   = $this->remoteRequest->get($v0CssUrl);
-        $statusCode = $response->getStatusCode();
 
-        if (200 < $statusCode || $statusCode >= 300) {
-            return;
+        $styles = $this->configuration->get(AmpRuntimeCssConfiguration::STYLES);
+
+        if (empty($styles)) {
+            $response   = $this->remoteRequest->get($v0CssUrl);
+            $statusCode = $response->getStatusCode();
+
+            if (200 < $statusCode || $statusCode >= 300) {
+                return;
+            }
+
+            $styles = $response->getBody();
         }
 
-        $ampRuntimeStyle->textContent = $response->getBody();
+        $ampRuntimeStyle->textContent = $styles;
     }
 
     /**

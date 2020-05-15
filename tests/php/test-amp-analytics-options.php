@@ -1,5 +1,6 @@
 <?php
 
+use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 use AmpProject\Dom\Document;
 
@@ -56,7 +57,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	}';
 
 	private function get_options() {
-		return AMP_Options_Manager::get_option( 'analytics', [] );
+		return AMP_Options_Manager::get_option( Option::ANALYTICS, [] );
 	}
 
 	private function render_post() {
@@ -78,7 +79,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	 */
 	private function insert_one_option( $type, $config ) {
 		AMP_Options_Manager::update_option(
-			'analytics',
+			Option::ANALYTICS,
 			[
 				'__new__' => compact( 'type', 'config' ),
 			]

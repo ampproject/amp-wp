@@ -18,7 +18,7 @@ final class FailedToGetFromRemoteUrl extends RuntimeException implements FailedR
      *
      * This is not always set.
      *
-     * @var int
+     * @var int|null
      */
     private $statusCode;
 
