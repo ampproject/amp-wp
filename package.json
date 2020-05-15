@@ -43,7 +43,7 @@
     "@wordpress/jest-puppeteer-axe": "1.6.0",
     "@wordpress/plugins": "2.16.0",
     "@wordpress/scripts": "9.0.0",
-    "@wordpress/url": "2.14.0",
+    "@wordpress/url": "2.15.0",
     "autoprefixer": "9.7.6",
     "babel-eslint": "10.1.0",
     "babel-jest": "26.0.1",
