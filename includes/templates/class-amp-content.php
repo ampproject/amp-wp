@@ -68,7 +68,7 @@ class AMP_Content {
 	 *
 	 * @param string   $content               Content.
 	 * @param string[] $embed_handler_classes Embed handler class names.
-	 * @param string[] $sanitizer_classes     Sanitizer class names.
+	 * @param array    $sanitizer_classes     Sanitizer class names.
 	 * @param array    $args                  Args.
 	 */
 	public function __construct( $content, $embed_handler_classes, $sanitizer_classes, $args = [] ) {
