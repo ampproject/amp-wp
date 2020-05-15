@@ -1625,7 +1625,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string     $attr_name      Attribute name.
 	 * @param array[]    $attr_spec_rule Attribute spec rule.
 	 *
-	 * @return string:
+	 * @return int:
 	 *      - AMP_Rule_Spec::PASS - $attr_name is mandatory and it exists
 	 *      - AMP_Rule_Spec::FAIL - $attr_name is mandatory, but doesn't exist
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name is not mandatory
@@ -1675,7 +1675,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string     $attr_name      Attribute name.
 	 * @param array      $attr_spec_rule Attribute spec rule.
 	 *
-	 * @return string:
+	 * @return int:
 	 *      - AMP_Rule_Spec::PASS - $attr_name has a value that matches the rule.
 	 *      - AMP_Rule_Spec::FAIL - $attr_name has a value that does *not* match rule.
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
@@ -1750,7 +1750,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string       $attr_name      Attribute name.
 	 * @param array|string $attr_spec_rule Attribute spec rule.
 	 *
-	 * @return string:
+	 * @return int:
 	 *      - AMP_Rule_Spec::PASS - $attr_name has a value that matches the rule.
 	 *      - AMP_Rule_Spec::FAIL - $attr_name has a value that does *not* match rule.
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
@@ -1795,7 +1795,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string           $attr_name      Attribute name.
 	 * @param array[]|string[] $attr_spec_rule Attribute spec rule.
 	 *
-	 * @return string:
+	 * @return int:
 	 *      - AMP_Rule_Spec::PASS - $attr_name has a value that matches the rule.
 	 *      - AMP_Rule_Spec::FAIL - $attr_name has a value that does *not* match rule.
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
@@ -1829,7 +1829,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string           $attr_name      Attribute name.
 	 * @param array[]|string[] $attr_spec_rule Attribute spec rule.
 	 *
-	 * @return string:
+	 * @return int:
 	 *      - AMP_Rule_Spec::PASS - $attr_name has a value that matches the rule.
 	 *      - AMP_Rule_Spec::FAIL - $attr_name has a value that does *not* match rule.
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
@@ -1860,7 +1860,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string           $attr_name      Attribute name.
 	 * @param array[]|string[] $attr_spec_rule Attribute spec rule.
 	 *
-	 * @return string:
+	 * @return int:
 	 *      - AMP_Rule_Spec::PASS - $attr_name has a value that matches the rule.
 	 *      - AMP_Rule_Spec::FAIL - $attr_name has a value that does *not* match rule.
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
@@ -1932,7 +1932,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string           $attr_name      Attribute name.
 	 * @param array[]|string[] $attr_spec_rule Attribute spec rule.
 	 *
-	 * @return string:
+	 * @return int:
 	 *      - AMP_Rule_Spec::PASS - $attr_name has a value that matches the rule.
 	 *      - AMP_Rule_Spec::FAIL - $attr_name has a value that does *not* match rule.
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
@@ -2003,7 +2003,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string           $attr_name      Attribute name.
 	 * @param array[]|string[] $attr_spec_rule Attribute spec rule.
 	 *
-	 * @return string:
+	 * @return int:
 	 *      - AMP_Rule_Spec::PASS - $attr_name has a value that matches the rule.
 	 *      - AMP_Rule_Spec::FAIL - $attr_name has a value that does *not* match rule.
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
@@ -2061,7 +2061,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string           $attr_name      Attribute name.
 	 * @param array[]|string[] $attr_spec_rule Attribute spec rule.
 	 *
-	 * @return string:
+	 * @return int:
 	 *      - AMP_Rule_Spec::PASS - $attr_name has a value that matches the rule.
 	 *      - AMP_Rule_Spec::FAIL - $attr_name has a value that does *not* match rule.
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
@@ -2092,7 +2092,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string           $attr_name      Attribute name.
 	 * @param array[]|string[] $attr_spec_rule Attribute spec rule.
 	 *
-	 * @return string:
+	 * @return int:
 	 *      - AMP_Rule_Spec::PASS - $attr_name has a value that matches the rule.
 	 *      - AMP_Rule_Spec::FAIL - $attr_name has a value that does *not* match rule.
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
