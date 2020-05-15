@@ -87,7 +87,7 @@ final class AMP_CLI_Validation_Command {
 	 * For example, by un-checking 'Posts' in 'AMP Settings' > 'Supported Templates'.
 	 * Or un-checking 'Enable AMP' in the post's editor.
 	 *
-	 * @var int
+	 * @var bool
 	 */
 	public $force_crawl_urls = false;
 
