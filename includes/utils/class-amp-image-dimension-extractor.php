@@ -77,7 +77,7 @@ class AMP_Image_Dimension_Extractor {
 	 * This method ensures the URL has a scheme and, if relative, is prepended the WordPress site URL.
 	 *
 	 * @param string $url URL to normalize.
-	 * @return string Normalized URL.
+	 * @return string|false Normalized URL, or false if normalization failed.
 	 */
 	public static function normalize_url( $url ) {
 		if ( empty( $url ) ) {
