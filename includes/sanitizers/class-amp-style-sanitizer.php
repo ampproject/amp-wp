@@ -286,7 +286,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Current sources for a given node.
 	 *
-	 * @var array
+	 * @var array|null
 	 */
 	private $current_sources;
 
