@@ -88,7 +88,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 0.5
 	 *
-	 * @var string[]
+	 * @var array
 	 */
 	protected $allowed_tags;
 
