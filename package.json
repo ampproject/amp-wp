@@ -41,7 +41,7 @@
     "@wordpress/hooks": "2.7.0",
     "@wordpress/i18n": "3.10.0",
     "@wordpress/jest-puppeteer-axe": "1.6.0",
-    "@wordpress/plugins": "2.13.0",
+    "@wordpress/plugins": "2.16.0",
     "@wordpress/scripts": "9.0.0",
     "@wordpress/url": "2.14.0",
     "autoprefixer": "9.7.6",
