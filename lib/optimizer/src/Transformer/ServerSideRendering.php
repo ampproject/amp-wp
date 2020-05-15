@@ -1002,6 +1002,6 @@ final class ServerSideRendering implements Transformer
             throw InvalidArgument::forNumericComparison($number);
         }
 
-        return abs($number - 0.0) < self::FLOATING_POINT_EPSILON;
+        return abs($number) < self::FLOATING_POINT_EPSILON;
     }
 }
