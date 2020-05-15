@@ -2114,6 +2114,17 @@ class AMP_Validation_Manager {
 			$validation_url
 		);
 
+		// Strip byte order mark (BOM).
+		while ( "\xEF\xBB\xBF" === substr( $response, 0, 3 ) ) {
+			$response = substr( $response, 3 );
+		}
+
+		// Strip any leading whitespace.
+		$response = ltrim( $response );
+
+		// Strip HTML comments that may have been injected at the end of the response (e.g. by a caching plugin).
+		$response = preg_replace( '/<!--.*?-->\s*$/s', '', $response );
+
 		if ( '' === $response ) {
 			return new WP_Error( 'white_screen_of_death' );
 		}
