@@ -7,8 +7,6 @@
 
 namespace AmpProject\AmpWP\Tests;
 
-use AMP_Post_Type_Support;
-
 /**
  * Helper trait for testing REST API fields on post types.
  *
