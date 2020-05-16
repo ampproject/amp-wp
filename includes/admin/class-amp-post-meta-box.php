@@ -483,7 +483,7 @@ class AMP_Post_Meta_Box {
 			return new WP_Error(
 				'rest_insufficient_permission',
 				__( 'Insufficient permissions met to update the AMP status for this post', 'amp' ),
-				[ 'status' => 500 ]
+				[ 'status' => 403 ]
 			);
 		}
 
