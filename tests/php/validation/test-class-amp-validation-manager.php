@@ -516,6 +516,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		AMP_Theme_Support::read_theme_support();
 		AMP_Validation_Manager::add_rest_api_fields();
 		$this->assertRestApiFieldPresent(
+			AMP_Post_Type_Support::get_post_types_for_rest_api(),
 			AMP_Validation_Manager::VALIDITY_REST_FIELD_NAME,
 			[
 				'get_callback' => [ AMP_Validation_Manager::class, 'get_amp_validity_rest_field' ],
@@ -531,6 +532,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		AMP_Theme_Support::read_theme_support();
 		AMP_Validation_Manager::add_rest_api_fields();
 		$this->assertRestApiFieldPresent(
+			AMP_Post_Type_Support::get_post_types_for_rest_api(),
 			AMP_Validation_Manager::VALIDITY_REST_FIELD_NAME,
 			[
 				'get_callback' => [ AMP_Validation_Manager::class, 'get_amp_validity_rest_field' ],

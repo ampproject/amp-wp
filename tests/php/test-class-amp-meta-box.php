@@ -410,6 +410,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		AMP_Theme_Support::read_theme_support();
 		$this->instance->add_rest_api_fields();
 		$this->assertRestApiFieldPresent(
+			[ 'post' ],
 			AMP_Post_Meta_Box::REST_ATTRIBUTE_NAME,
 			[
 				'get_callback'    => [ $this->instance, 'amp_status_get_callback' ],

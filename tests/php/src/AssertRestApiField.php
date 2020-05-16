@@ -19,12 +19,11 @@ trait AssertRestApiField {
 	/**
 	 * Asserts that the post types have the additional REST field.
 	 *
-	 * @param string $expected_field_name Expected REST API field name.
-	 * @param array  $expected_field_args Expected arguments for REST API field.
+	 * @param string[] $post_types Post types to run assertions against.
+	 * @param string   $expected_field_name Expected REST API field name.
+	 * @param array    $expected_field_args Expected arguments for REST API field.
 	 */
-	protected function assertRestApiFieldPresent( $expected_field_name, $expected_field_args ) { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName
-		$post_types = AMP_Post_Type_Support::get_post_types_for_rest_api();
-
+	protected function assertRestApiFieldPresent( $post_types, $expected_field_name, $expected_field_args ) { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName
 		foreach ( $post_types as $post_type ) {
 			$this->assertTrue( isset( $GLOBALS['wp_rest_additional_fields'][ $post_type ][ $expected_field_name ] ) );
 			$field = $GLOBALS['wp_rest_additional_fields'][ $post_type ][ $expected_field_name ];

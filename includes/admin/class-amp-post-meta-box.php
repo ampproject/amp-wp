@@ -436,8 +436,18 @@ class AMP_Post_Meta_Box {
 	 * @return void
 	 */
 	public function add_rest_api_fields() {
+		$post_type       = 'post';
+		$should_register = (
+			in_array( $post_type, get_post_types_by_support( 'amp' ), true ) &&
+			in_array( $post_type, get_post_types( [ 'show_in_rest' => true ] ), true )
+		);
+
+		if ( ! $should_register ) {
+			return;
+		}
+
 		register_rest_field(
-			AMP_Post_Type_Support::get_post_types_for_rest_api(),
+			$post_type,
 			self::REST_ATTRIBUTE_NAME,
 			[
 				'get_callback'    => [ $this, 'amp_status_get_callback' ],
