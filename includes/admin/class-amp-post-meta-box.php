@@ -489,6 +489,18 @@ class AMP_Post_Meta_Box {
 	 * @return void|WP_Error Returns an instance of `WP_Error` if the post failed to be updated.
 	 */
 	public function amp_status_update_callback( $is_enabled, $post ) {
+		if ( 'post' !== $post->post_type ) {
+			return new WP_Error(
+				'rest_invalid_post_type',
+				sprintf(
+					/* translators: %s: The name of the post type. */
+					__( 'The AMP status for the "%s" post type is not allowed.', 'amp' ),
+					$post->post_type
+				),
+				[ 'status' => 400 ]
+			);
+		}
+
 		if ( ! current_user_can( 'edit_post', $post->ID ) ) {
 			return new WP_Error(
 				'rest_insufficient_permission',
@@ -497,21 +509,21 @@ class AMP_Post_Meta_Box {
 			);
 		}
 
-		if ( wp_is_post_revision( $post->ID ) || wp_is_post_autosave( $post->ID ) ) {
-			return new WP_Error(
-				'rest_invalid_post',
-				__( 'Failed to update the AMP status for this post', 'amp' ),
-				[ 'status' => 500 ]
-			);
-		}
-
 		$status = $is_enabled ? self::ENABLED_STATUS : self::DISABLED_STATUS;
 
 		// Note: The sanitize_callback has been supplied in the register_meta() call above.
-		update_post_meta(
+		$updated = update_post_meta(
 			$post->ID,
 			self::STATUS_POST_META_KEY,
 			$status
 		);
+
+		if ( ! $updated ) {
+			return new WP_Error(
+				'rest_update_failed',
+				__( 'The AMP status for this post failed to be updated', 'amp' ),
+				[ 'status' => 500 ]
+			);
+		}
 	}
 }
