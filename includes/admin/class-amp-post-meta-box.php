@@ -86,11 +86,6 @@ class AMP_Post_Meta_Box {
 	const REST_ATTRIBUTE_NAME = 'amp_enabled';
 
 	/**
-	 * Supported post types for the REST API.
-	 */
-	const REST_POST_TYPES = [ 'page', 'post' ];
-
-	/**
 	 * Initialize.
 	 *
 	 * @since 0.6
@@ -441,18 +436,8 @@ class AMP_Post_Meta_Box {
 	 * @return void
 	 */
 	public function add_rest_api_fields() {
-		// Get post types that support AMP and can be shown via the REST API.
-		$supported_types = array_intersect(
-			get_post_types_by_support( 'amp' ),
-			get_post_types( [ 'show_in_rest' => true ] )
-		);
-
-		if ( empty( array_intersect( self::REST_POST_TYPES, $supported_types ) ) ) {
-			return;
-		}
-
 		register_rest_field(
-			self::REST_POST_TYPES,
+			AMP_Post_Type_Support::get_post_types_for_rest_api(),
 			self::REST_ATTRIBUTE_NAME,
 			[
 				'get_callback'    => [ $this, 'amp_status_get_callback' ],
@@ -494,7 +479,7 @@ class AMP_Post_Meta_Box {
 	 * @return void|WP_Error Returns an instance of `WP_Error` if the post failed to be updated.
 	 */
 	public function amp_status_update_callback( $is_enabled, $post ) {
-		if ( ! in_array( $post->post_type, self::REST_POST_TYPES, true ) ) {
+		if ( ! in_array( $post->post_type, AMP_Post_Type_Support::get_post_types_for_rest_api(), true ) ) {
 			return new WP_Error(
 				'rest_invalid_post_type',
 				sprintf(
