@@ -57,20 +57,14 @@ class AMP_Post_Type_Support {
 	 * @return string[] Post types.
 	 */
 	public static function get_post_types_for_rest_api() {
-		if ( amp_is_canonical() ) {
-			$post_types = get_post_types_by_support( 'editor' ); // @todo Shouldn't this actually only be those with 'amp' support, or if if all_templates_supported?
-		} else {
-			$post_types = array_intersect(
-				get_post_types_by_support( 'amp' ),
-				get_post_types(
-					[
-						'show_in_rest' => true,
-					]
-				)
-			);
-		}
-
-		return $post_types;
+		return array_intersect(
+			get_post_types_by_support( 'amp' ),
+			get_post_types(
+				[
+					'show_in_rest' => true,
+				]
+			)
+		);
 	}
 
 	/**
