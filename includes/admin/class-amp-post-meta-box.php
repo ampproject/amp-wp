@@ -78,9 +78,9 @@ class AMP_Post_Meta_Box {
 	const NONCE_ACTION = 'amp-update-status';
 
 	/**
-	 * The attribute name for the REST API.
+	 * The name for the REST API field containing whether AMP is enabled for a post.
 	 *
-	 * @since 1.5.4
+	 * @since 1.6
 	 * @var string
 	 */
 	const REST_ATTRIBUTE_NAME = 'amp_enabled';
@@ -431,7 +431,9 @@ class AMP_Post_Meta_Box {
 	}
 
 	/**
-	 * Add a REST API field to display the AMP status on AMP supported post types.
+	 * Add a REST API field to display whether AMP is enabled on supported post types.
+	 *
+	 * @since 1.6
 	 *
 	 * @return void
 	 */
@@ -440,10 +442,10 @@ class AMP_Post_Meta_Box {
 			AMP_Post_Type_Support::get_post_types_for_rest_api(),
 			self::REST_ATTRIBUTE_NAME,
 			[
-				'get_callback'    => [ $this, 'amp_status_get_callback' ],
-				'update_callback' => [ $this, 'amp_status_update_callback' ],
+				'get_callback'    => [ $this, 'get_amp_enabled_rest_field' ],
+				'update_callback' => [ $this, 'update_amp_enabled_rest_field' ],
 				'schema'          => [
-					'description' => __( 'AMP status', 'amp' ),
+					'description' => __( 'AMP enabled', 'amp' ),
 					'type'        => 'boolean',
 				],
 			]
@@ -451,12 +453,14 @@ class AMP_Post_Meta_Box {
 	}
 
 	/**
-	 * Display the AMP status of a post via the REST API.
+	 * Get the value of whether AMP is enabled for a REST API request.
+	 *
+	 * @since 1.6
 	 *
 	 * @param array $post_data Post data.
 	 * @return bool Whether AMP is enabled on post.
 	 */
-	public function amp_status_get_callback( $post_data ) {
+	public function get_amp_enabled_rest_field( $post_data ) {
 		$status = $this->sanitize_status( get_post_meta( $post_data['id'], self::STATUS_POST_META_KEY, true ) );
 
 		if ( '' === $status ) {
@@ -472,19 +476,21 @@ class AMP_Post_Meta_Box {
 	}
 
 	/**
-	 * Update the AMP status of a post via the REST API.
+	 * Update whether AMP is enabled for a REST API request.
+	 *
+	 * @since 1.6
 	 *
 	 * @param bool    $is_enabled Whether AMP is enabled.
 	 * @param WP_Post $post       Post being updated.
 	 * @return void|WP_Error Returns an instance of `WP_Error` if the post failed to be updated.
 	 */
-	public function amp_status_update_callback( $is_enabled, $post ) {
+	public function update_amp_enabled_rest_field( $is_enabled, $post ) {
 		if ( ! in_array( $post->post_type, AMP_Post_Type_Support::get_post_types_for_rest_api(), true ) ) {
 			return new WP_Error(
 				'rest_invalid_post_type',
 				sprintf(
 					/* translators: %s: The name of the post type. */
-					__( 'The AMP status for the "%s" post type is not allowed.', 'amp' ),
+					__( 'AMP is not supported for the "%s" post type.', 'amp' ),
 					$post->post_type
 				),
 				[ 'status' => 400 ]
@@ -494,7 +500,7 @@ class AMP_Post_Meta_Box {
 		if ( ! current_user_can( 'edit_post', $post->ID ) ) {
 			return new WP_Error(
 				'rest_insufficient_permission',
-				__( 'Insufficient permissions met to update the AMP status for this post', 'amp' ),
+				__( 'Insufficient permissions to change whether AMP is enabled for this post.', 'amp' ),
 				[ 'status' => 403 ]
 			);
 		}
@@ -511,7 +517,7 @@ class AMP_Post_Meta_Box {
 		if ( ! $updated ) {
 			return new WP_Error(
 				'rest_update_failed',
-				__( 'The AMP status for this post failed to be updated', 'amp' ),
+				__( 'The AMP enabled status for this post failed to be updated.', 'amp' ),
 				[ 'status' => 500 ]
 			);
 		}

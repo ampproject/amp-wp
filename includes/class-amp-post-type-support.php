@@ -52,6 +52,8 @@ class AMP_Post_Type_Support {
 	/**
 	 * Get post types that can be shown in the REST API and supports AMP.
 	 *
+	 * @since 1.6
+	 *
 	 * @return string[] Post types.
 	 */
 	public static function get_post_types_for_rest_api() {

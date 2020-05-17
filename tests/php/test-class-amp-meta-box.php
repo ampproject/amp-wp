@@ -413,10 +413,10 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 			AMP_Post_Type_Support::get_post_types_for_rest_api(),
 			AMP_Post_Meta_Box::REST_ATTRIBUTE_NAME,
 			[
-				'get_callback'    => [ $this->instance, 'amp_status_get_callback' ],
-				'update_callback' => [ $this->instance, 'amp_status_update_callback' ],
+				'get_callback'    => [ $this->instance, 'get_amp_enabled_rest_field' ],
+				'update_callback' => [ $this->instance, 'update_amp_enabled_rest_field' ],
 				'schema'          => [
-					'description' => __( 'AMP status', 'amp' ),
+					'description' => __( 'AMP enabled', 'amp' ),
 					'type'        => 'boolean',
 				],
 			]
@@ -424,51 +424,51 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test amp_status_get_callback.
+	 * Test get_amp_enabled_rest_field.
 	 *
-	 * @covers AMP_Post_Meta_Box::amp_status_get_callback()
+	 * @covers AMP_Post_Meta_Box::get_amp_enabled_rest_field()
 	 */
-	public function test_amp_status_get_callback() {
+	public function test_get_amp_enabled_rest_field() {
 		// AMP status should be disabled if AMP is not supported for the `post` post type.
 		remove_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
 		$id = self::factory()->post->create();
 		$this->assertFalse(
-			$this->instance->amp_status_get_callback( compact( 'id' ) )
+			$this->instance->get_amp_enabled_rest_field( compact( 'id' ) )
 		);
 
 		// AMP status should be enabled if AMP is supported for the `post` post type.
 		add_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
 		$id = self::factory()->post->create();
 		$this->assertTrue(
-			$this->instance->amp_status_get_callback( compact( 'id' ) )
+			$this->instance->get_amp_enabled_rest_field( compact( 'id' ) )
 		);
 
 		// AMP status should be enabled if the `amp_status` post meta equals 'enabled'.
 		$id = self::factory()->post->create();
 		add_metadata( 'post', $id, AMP_Post_Meta_Box::STATUS_POST_META_KEY, AMP_Post_Meta_Box::ENABLED_STATUS );
 		$this->assertTrue(
-			$this->instance->amp_status_get_callback( compact( 'id' ) )
+			$this->instance->get_amp_enabled_rest_field( compact( 'id' ) )
 		);
 
 		// AMP status should be disabled if the `amp_status` post meta equals 'disabled'.
 		$id = self::factory()->post->create();
 		add_metadata( 'post', $id, AMP_Post_Meta_Box::STATUS_POST_META_KEY, AMP_Post_Meta_Box::DISABLED_STATUS );
 		$this->assertFalse(
-			$this->instance->amp_status_get_callback( compact( 'id' ) )
+			$this->instance->get_amp_enabled_rest_field( compact( 'id' ) )
 		);
 	}
 
 	/**
-	 * Test amp_status_update_callback.
+	 * Test update_amp_enabled_rest_field.
 	 *
-	 * @covers AMP_Post_Meta_Box::amp_status_update_callback()
+	 * @covers AMP_Post_Meta_Box::update_amp_enabled_rest_field()
 	 */
-	public function test_amp_status_update_callback() {
+	public function test_update_amp_enabled_rest_field() {
 		// User should not be able to update AMP status if they do not have the `edit_post` capability.
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'subscriber' ] ) );
 		$post = self::factory()->post->create_and_get();
 		add_metadata( 'post', $post->ID, AMP_Post_Meta_Box::STATUS_POST_META_KEY, AMP_Post_Meta_Box::ENABLED_STATUS );
-		$result = $this->instance->amp_status_update_callback( false, $post );
+		$result = $this->instance->update_amp_enabled_rest_field( false, $post );
 
 		$this->assertEquals( AMP_Post_Meta_Box::ENABLED_STATUS, get_post_meta( $post->ID, AMP_Post_Meta_Box::STATUS_POST_META_KEY, true ) );
 		$this->assertInstanceOf( WP_Error::class, $result );
@@ -478,7 +478,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		$post = self::factory()->post->create_and_get();
 		add_metadata( 'post', $post->ID, AMP_Post_Meta_Box::STATUS_POST_META_KEY, AMP_Post_Meta_Box::ENABLED_STATUS );
-		$this->instance->amp_status_update_callback( false, $post );
+		$this->instance->update_amp_enabled_rest_field( false, $post );
 
 		$this->assertEquals( AMP_Post_Meta_Box::DISABLED_STATUS, get_post_meta( $post->ID, AMP_Post_Meta_Box::STATUS_POST_META_KEY, true ) );
 	}
