@@ -482,7 +482,7 @@ class AMP_Post_Meta_Box {
 	 *
 	 * @param bool    $is_enabled Whether AMP is enabled.
 	 * @param WP_Post $post       Post being updated.
-	 * @return void|WP_Error Returns an instance of `WP_Error` if the post failed to be updated.
+	 * @return null|WP_Error Null on success, WP_Error object on failure.
 	 */
 	public function update_amp_enabled_rest_field( $is_enabled, $post ) {
 		if ( ! in_array( $post->post_type, AMP_Post_Type_Support::get_post_types_for_rest_api(), true ) ) {
@@ -500,7 +500,7 @@ class AMP_Post_Meta_Box {
 		if ( ! current_user_can( 'edit_post', $post->ID ) ) {
 			return new WP_Error(
 				'rest_insufficient_permission',
-				__( 'Insufficient permissions to change whether AMP is enabled for this post.', 'amp' ),
+				__( 'Insufficient permissions to change whether AMP is enabled.', 'amp' ),
 				[ 'status' => 403 ]
 			);
 		}
@@ -514,12 +514,14 @@ class AMP_Post_Meta_Box {
 			$status
 		);
 
-		if ( ! $updated ) {
+		if ( false === $updated ) {
 			return new WP_Error(
 				'rest_update_failed',
-				__( 'The AMP enabled status for this post failed to be updated.', 'amp' ),
+				__( 'The AMP enabled status failed to be updated.', 'amp' ),
 				[ 'status' => 500 ]
 			);
 		}
+
+		return null;
 	}
 }
