@@ -44,7 +44,7 @@
     "@wordpress/plugins": "2.16.0",
     "@wordpress/scripts": "9.1.0",
     "@wordpress/url": "2.15.0",
-    "autoprefixer": "9.7.6",
+    "autoprefixer": "9.8.0",
     "babel-eslint": "10.1.0",
     "babel-jest": "26.0.1",
     "babel-loader": "8.1.0",
