@@ -49,15 +49,19 @@ final class SiteHealth {
 			'label' => esc_html__( 'cURL multi functions', 'amp' ),
 			'test'  => [ $this, 'curl_multi_functions' ],
 		];
-		$tests['direct']['amp_icu_version']             = [
-			'label' => esc_html__( 'ICU version', 'amp' ),
-			'test'  => [ $this, 'icu_version' ],
-		];
-		$tests['direct']['amp_css_transient_caching']   = [
+
+		if ( $this->is_intl_extension_needed() ) {
+			$tests['direct']['amp_icu_version'] = [
+				'label' => esc_html__( 'ICU version', 'amp' ),
+				'test'  => [ $this, 'icu_version' ],
+			];
+		}
+
+		$tests['direct']['amp_css_transient_caching'] = [
 			'label' => esc_html__( 'Transient caching of stylesheets', 'amp' ),
 			'test'  => [ $this, 'css_transient_caching' ],
 		];
-		$tests['direct']['amp_xdebug_extension']        = [
+		$tests['direct']['amp_xdebug_extension']      = [
 			'label' => esc_html__( 'Xdebug extension', 'amp' ),
 			'test'  => [ $this, 'xdebug_extension' ],
 		];
@@ -512,33 +516,35 @@ final class SiteHealth {
 	/**
 	 * Adds suggested PHP extensions to those that Core depends on.
 	 *
-	 * @param array $extensions The existing extensions from Core.
+	 * @param array $core_extensions The existing extensions from Core.
 	 * @return array The extensions, including those for AMP.
 	 */
-	public function add_extensions( $extensions ) {
-		return array_merge(
-			$extensions,
-			[
-				'intl'     => [
-					'extension' => 'intl',
-					'function'  => 'idn_to_utf8',
-					'required'  => false,
-				],
-				'json'     => [
-					'extension' => 'json',
-					'function'  => 'json_encode',
-					'required'  => false,
-				],
-				'mbstring' => [
-					'extension' => 'mbstring',
-					'required'  => false,
-				],
-				'zip'      => [
-					'extension' => 'zip',
-					'required'  => false,
-				],
-			]
-		);
+	public function add_extensions( $core_extensions ) {
+		$extensions = [
+			'json'     => [
+				'extension' => 'json',
+				'function'  => 'json_encode',
+				'required'  => false,
+			],
+			'mbstring' => [
+				'extension' => 'mbstring',
+				'required'  => false,
+			],
+			'zip'      => [
+				'extension' => 'zip',
+				'required'  => false,
+			],
+		];
+
+		if ( $this->is_intl_extension_needed() ) {
+			$extensions['intl'] = [
+				'extension' => 'intl',
+				'function'  => 'idn_to_utf8',
+				'required'  => false,
+			];
+		}
+
+		return array_merge( $core_extensions, $extensions );
 	}
 
 	/**
@@ -576,5 +582,28 @@ final class SiteHealth {
 				}
 			</style>
 		';
+	}
+
+	/**
+	 * Determine if the `intl` extension is needed.
+	 *
+	 * @return bool True if the `intl` extension is needed, otherwise false.
+	 */
+	private function is_intl_extension_needed() {
+		// Publisher's own origins.
+		$domains = array_unique(
+			[
+				wp_parse_url( site_url(), PHP_URL_HOST ),
+				wp_parse_url( home_url(), PHP_URL_HOST ),
+			]
+		);
+
+		foreach ( $domains as $domain ) {
+			if ( preg_match( '/(^|\.)xn--/', $domain ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

@@ -87,7 +87,7 @@ final class AMP_CLI_Validation_Command {
 	 * For example, by un-checking 'Posts' in 'AMP Settings' > 'Supported Templates'.
 	 * Or un-checking 'Enable AMP' in the post's editor.
 	 *
-	 * @var int
+	 * @var bool
 	 */
 	public $force_crawl_urls = false;
 
@@ -116,11 +116,13 @@ final class AMP_CLI_Validation_Command {
 	/**
 	 * The validation counts by type, like template or post type.
 	 *
-	 * @var int[] {
+	 * @var array[] {
 	 *     Validity by type.
 	 *
-	 *     @type int $valid The number of valid URLs for this type.
-	 *     @type int $total The total number of URLs for this type, valid or invalid.
+	 *     @type array $type {
+	 *         @type int $valid The number of valid URLs for this type.
+	 *         @type int $total The total number of URLs for this type, valid or invalid.
+	 *     }
 	 * }
 	 */
 	public $validity_by_type = [];

@@ -74,12 +74,17 @@ class AMP_Theme_Support {
 	 */
 	const READER_MODE_TEMPLATE_DIRECTORY = 'amp';
 
+	/**
+	 * Query var for requests to open the paired browsing interface.
+	 *
+	 * @var string
+	 */
 	const PAIRED_BROWSING_QUERY_VAR = 'amp-paired-browsing';
 
 	/**
-	 * Sanitizer classes.
+	 * Sanitizers, with keys as class names and values as arguments.
 	 *
-	 * @var array
+	 * @var array[]
 	 */
 	protected static $sanitizer_classes = [];
 
