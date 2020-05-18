@@ -902,7 +902,7 @@ export const isGalleryShortcode = ( attributes ) => {
  */
 export const isAMPEnabled = () => {
 	const { getEditedPostAttribute } = select( 'core/editor' );
-	return getEditedPostAttribute( 'amp_enabled' );
+	return getEditedPostAttribute( 'amp_enabled' ) || false;
 };
 
 /**
