@@ -212,7 +212,6 @@ const wpPolyfills = {
 		new DependencyExtractionWebpackPlugin( {
 			useDefaults: false,
 			requestToHandle: ( request ) => {
-				console.log( request, gutenbergPackages );
 				if ( gutenbergPackages.find( ( { packageName } ) => packageName === request ) ) {
 					return undefined;
 				}
