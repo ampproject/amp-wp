@@ -106,7 +106,6 @@ jobs:
       script:
         - npm run build:js
         - npm run build:css
-        - npm run env:reset-site
         - npm run env:start
         - npm run test:e2e:ci
         - npm run env:stop

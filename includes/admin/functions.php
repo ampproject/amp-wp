@@ -194,7 +194,7 @@ function amp_bootstrap_admin() {
 	$site_health = new SiteHealth();
 	$site_health->init();
 
-	if ( defined( 'AMP_NEW_ONBOARDING' ) && AMP_NEW_ONBOARDING ) {
+	if ( '1' === filter_input( INPUT_GET, 'amp-new-onboarding', FILTER_SANITIZE_NUMBER_INT ) || ( defined( 'AMP_NEW_ONBOARDING' ) && AMP_NEW_ONBOARDING ) ) {
 		$setup_wizard = new AMP_Setup_Wizard();
 		$setup_wizard->init();
 
