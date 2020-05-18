@@ -10,8 +10,6 @@ use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 
 /**
  * Tests for AMP_Options_Menu.
- * 
- * @group options_menu
  */
 class Test_AMP_Options_Menu extends WP_UnitTestCase {
 
