@@ -110,7 +110,7 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		$new_node = AMP_DOM_Utils::create_node( $dom, $this->amp_tag, $node_args );
 
-		$this->sanitize_embed_script( $node );
+		$this->maybe_remove_script_sibling( $node, 'instagram.com/embed.js' );
 
 		$node->parentNode->replaceChild( $new_node, $node );
 
@@ -131,40 +131,5 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		return end( $matches );
-	}
-
-	/**
-	 * Removes Instagram's embed <script> tag.
-	 *
-	 * @param DOMElement $node The DOMNode to whose sibling is the instagram script.
-	 */
-	private function sanitize_embed_script( $node ) {
-		$next_element_sibling = $node->nextSibling;
-		while ( $next_element_sibling && ! ( $next_element_sibling instanceof DOMElement ) ) {
-			$next_element_sibling = $next_element_sibling->nextSibling;
-		}
-
-		$script_src = 'instagram.com/embed.js';
-
-		// Handle case where script is wrapped in paragraph by wpautop.
-		if ( $next_element_sibling instanceof DOMElement && 'p' === $next_element_sibling->nodeName ) {
-			$children = $next_element_sibling->getElementsByTagName( '*' );
-			if ( 1 === $children->length && 'script' === $children->item( 0 )->nodeName && false !== strpos( $children->item( 0 )->getAttribute( 'src' ), $script_src ) ) {
-				$next_element_sibling->parentNode->removeChild( $next_element_sibling );
-				return;
-			}
-		}
-
-		// Handle case where script is immediately following.
-		$is_embed_script = (
-			$next_element_sibling instanceof DOMElement
-			&&
-			'script' === strtolower( $next_element_sibling->nodeName )
-			&&
-			false !== strpos( $next_element_sibling->getAttribute( 'src' ), $script_src )
-		);
-		if ( $is_embed_script ) {
-			$next_element_sibling->parentNode->removeChild( $next_element_sibling );
-		}
 	}
 }

@@ -67,7 +67,7 @@ class AMP_TikTok_Embed_Handler extends AMP_Base_Embed_Handler {
 			return;
 		}
 
-		$this->remove_embed_script( $blockquote_node );
+		$this->maybe_remove_script_sibling( $blockquote_node, 'tiktok.com/embed.js' );
 
 		$amp_node = AMP_DOM_Utils::create_node(
 			Document::fromNode( $dom ),
@@ -102,40 +102,5 @@ class AMP_TikTok_Embed_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		$blockquote_node->parentNode->replaceChild( $amp_node, $blockquote_node );
-	}
-
-	/**
-	 * Remove the TikTok embed script if it exists.
-	 *
-	 * @param DOMElement $node The DOMNode to make AMP compatible.
-	 */
-	protected function remove_embed_script( DOMElement $node ) {
-		$next_element_sibling = $node->nextSibling;
-		while ( $next_element_sibling && ! ( $next_element_sibling instanceof DOMElement ) ) {
-			$next_element_sibling = $next_element_sibling->nextSibling;
-		}
-
-		$script_src = 'tiktok.com/embed.js';
-
-		// Handle case where script is wrapped in paragraph by wpautop.
-		if ( $next_element_sibling instanceof DOMElement && 'p' === $next_element_sibling->nodeName ) {
-			$children = $next_element_sibling->getElementsByTagName( '*' );
-			if ( 1 === $children->length && 'script' === $children->item( 0 )->nodeName && false !== strpos( $children->item( 0 )->getAttribute( 'src' ), $script_src ) ) {
-				$next_element_sibling->parentNode->removeChild( $next_element_sibling );
-				return;
-			}
-		}
-
-		// Handle case where script is immediately following.
-		$is_embed_script = (
-			$next_element_sibling instanceof DOMElement
-			&&
-			'script' === strtolower( $next_element_sibling->nodeName )
-			&&
-			false !== strpos( $next_element_sibling->getAttribute( 'src' ), $script_src )
-		);
-		if ( $is_embed_script ) {
-			$next_element_sibling->parentNode->removeChild( $next_element_sibling );
-		}
 	}
 }

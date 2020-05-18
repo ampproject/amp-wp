@@ -112,6 +112,8 @@ abstract class AMP_Base_Embed_Handler {
 	 * Replace the node's parent with itself if the parent is a <p> tag, has no attributes and has no other children.
 	 * This usually happens while `wpautop()` processes the element.
 	 *
+	 * @since 1.6
+	 *
 	 * @param DOMElement $node Node.
 	 */
 	protected function maybe_unwrap_p_element( DOMElement $node ) {
@@ -129,6 +131,51 @@ abstract class AMP_Base_Embed_Handler {
 			if ( 1 === $child_element_count ) {
 				$parent_element->parentNode->replaceChild( $node, $parent_element );
 			}
+		}
+	}
+
+	/**
+	 * Removes the node's nearest <script> sibling with a `src` attribute containing the base `src` URL provided.
+	 *
+	 * @since 1.6
+	 *
+	 * @param DOMElement $node The DOMNode to whose sibling is the script to be removed.
+	 * @param string     $base_src_url Script URL to match against.
+	 */
+	protected function maybe_remove_script_sibling( DOMElement $node, $base_src_url ) {
+		$next_element_sibling = $node->nextSibling;
+
+		while ( $next_element_sibling && ! ( $next_element_sibling instanceof DOMElement ) ) {
+			$next_element_sibling = $next_element_sibling->nextSibling;
+		}
+
+		// Handle case where script is wrapped in paragraph by wpautop.
+		if ( $next_element_sibling instanceof DOMElement && 'p' === $next_element_sibling->nodeName ) {
+			$children = array_map(
+				static function ( DOMNode $child ) {
+					return $child instanceof DOMElement ? 1 : 0;
+				},
+				iterator_to_array( $node->childNodes )
+			);
+
+			if (
+				1 === count( $children) &&
+				'script' === $children[0]->nodeName &&
+				false !== strpos( $children->item( 0 )->getAttribute( 'src' ), $base_src_url )
+			) {
+				$next_element_sibling->parentNode->removeChild( $next_element_sibling );
+				return;
+			}
+		}
+
+		// Handle case where script is immediately following.
+		$is_embed_script = (
+			$next_element_sibling instanceof DOMElement &&
+			'script' === strtolower( $next_element_sibling->nodeName ) &&
+			false !== strpos( $next_element_sibling->getAttribute( 'src' ), $base_src_url )
+		);
+		if ( $is_embed_script ) {
+			$next_element_sibling->parentNode->removeChild( $next_element_sibling );
 		}
 	}
 }

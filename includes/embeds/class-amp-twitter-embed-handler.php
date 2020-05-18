@@ -188,7 +188,8 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 
 			$new_node->appendChild( $placeholder );
 
-			$this->sanitize_embed_script( $node );
+			$this->remove_br_sibling_elements( $node );
+			$this->maybe_remove_script_sibling( $node, 'platform.twitter.com/widgets.js' );
 			// We can unwrap the <p> tag once the accompanied <script> is removed.
 			$this->maybe_unwrap_p_element( $node );
 
@@ -256,48 +257,16 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
-	 * Removes Twitter's embed <script> tag.
+	 * Remove all <br> sibling elements for specified node.
 	 *
-	 * @param DOMElement $node The DOMNode to whose sibling is the Twitter script.
+	 * @param DOMElement $node The node to remove <br> siblings from.
 	 */
-	private function sanitize_embed_script( DOMElement $node ) {
+	private function remove_br_sibling_elements( DOMElement $node ) {
 		$next_element_sibling = $node->nextSibling;
 
-		// Remove any <br> siblings.
-		while ( $next_element_sibling && $next_element_sibling instanceof DOMElement && 'br' === $next_element_sibling->nodeName ) {
+		while ( $next_element_sibling && $next_element_sibling instanceof DOMElement &&'br' === $next_element_sibling->nodeName ) {
 			$next_element_sibling->parentNode->removeChild( $next_element_sibling );
 			$next_element_sibling = $node->nextSibling;
-		}
-
-		if ( $next_element_sibling instanceof DOMElement && 'br' === $next_element_sibling->nodeName ) {
-			$next_element_sibling->parentNode->removeChild( $next_element_sibling );
-		}
-
-		while ( $next_element_sibling && ! ( $next_element_sibling instanceof DOMElement ) ) {
-			$next_element_sibling = $next_element_sibling->nextSibling;
-		}
-
-		$script_src = 'platform.twitter.com/widgets.js';
-
-		// Handle case where script is wrapped in paragraph by wpautop.
-		if ( $next_element_sibling instanceof DOMElement && 'p' === $next_element_sibling->nodeName ) {
-			$children = $next_element_sibling->getElementsByTagName( '*' );
-			if ( 1 === $children->length && 'script' === $children->item( 0 )->nodeName && false !== strpos( $children->item( 0 )->getAttribute( 'src' ), $script_src ) ) {
-				$next_element_sibling->parentNode->removeChild( $next_element_sibling );
-				return;
-			}
-		}
-
-		// Handle case where script is immediately following.
-		$is_embed_script = (
-			$next_element_sibling instanceof DOMElement
-			&&
-			'script' === strtolower( $next_element_sibling->nodeName )
-			&&
-			false !== strpos( $next_element_sibling->getAttribute( 'src' ), $script_src )
-		);
-		if ( $is_embed_script ) {
-			$next_element_sibling->parentNode->removeChild( $next_element_sibling );
 		}
 	}
 }
