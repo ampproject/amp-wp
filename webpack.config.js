@@ -15,7 +15,7 @@ const WebpackBar = require( 'webpackbar' );
  */
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
 const DependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extraction-webpack-plugin' );
-const { defaultRequestToExternal, defaultRequestToHandle } = require( '@wordpress/dependency-extraction-webpack-plugin/util' );
+const { defaultRequestToExternal, defaultRequestToHandle, camelCaseDash } = require( '@wordpress/dependency-extraction-webpack-plugin/util' );
 const { dependencies } = require( './package' );
 
 const sharedConfig = {
@@ -169,28 +169,59 @@ const customizer = {
 	],
 };
 
-const gutenbergPackages = Object.keys( dependencies )
-	.filter(
-		( packageName ) =>
-			packageName.startsWith( '@wordpress' ) || packageName.startsWith( '@babel' ),
-	);
+const WORDPRESS_NAMESPACE = '@wordpress/';
+const BABEL_NAMESPACE = '@babel/';
+const gutenbergPackages = Object.keys( dependencies ).map(
+	( packageName ) => {
+		if ( 0 !== packageName.indexOf( WORDPRESS_NAMESPACE ) && 0 !== packageName.indexOf( BABEL_NAMESPACE ) ) {
+			return null;
+		}
+
+		const camelCaseName = '@wordpress/i18n' === packageName
+			? 'i18n'
+			: camelCaseDash( packageName.replace( WORDPRESS_NAMESPACE, '' ).replace( BABEL_NAMESPACE, '' ) );
+
+		const handle = packageName.replace( WORDPRESS_NAMESPACE, 'wp-' ).replace( BABEL_NAMESPACE, 'wp-' );
+
+		return {
+			camelCaseName,
+			entryPath: 'polyfill' === camelCaseName ? path.resolve( __dirname, 'assets/src/polyfills/wp-polyfill' ) : packageName,
+			handle,
+			packageName,
+		};
+	},
+).filter( ( packageData ) => packageData );
 
 const wpPolyfills = {
 	...defaultConfig,
 	...sharedConfig,
 	externals: {},
+	entry: gutenbergPackages.reduce(
+		( memo, { camelCaseName, entryPath } ) =>
+			( { ...memo, [ camelCaseName ]: entryPath } ),
+		{} ),
+	output: {
+		devtoolNamespace: 'wp',
+		filename: ( pathData ) => `${ gutenbergPackages.find(
+			( gutenbergPackage ) => pathData.chunk.name === gutenbergPackage.camelCaseName,
+		).handle }.js`,
+		path: path.resolve( __dirname, 'assets/js' ),
+		library: [ 'wp', '[name]' ],
+		libraryTarget: 'this',
+	},
 	plugins: [
 		new DependencyExtractionWebpackPlugin( {
 			useDefaults: false,
 			requestToHandle: ( request ) => {
-				if ( gutenbergPackages.includes( request ) ) {
+				console.log( request, gutenbergPackages );
+				if ( gutenbergPackages.find( ( { packageName } ) => packageName === request ) ) {
 					return undefined;
 				}
 
 				return defaultRequestToHandle( request );
 			},
 			requestToExternal: ( request ) => {
-				if ( gutenbergPackages.includes( request ) ) {
+				if ( gutenbergPackages.find( ( { packageName } ) => packageName === request ) ) {
 					return undefined;
 				}
 
@@ -216,16 +247,6 @@ const wpPolyfills = {
 			color: '#21a0d0',
 		} ),
 	],
-	entry: gutenbergPackages.reduce( ( memo, packageName ) => {
-		const packageSlug = packageName.replace( '@wordpress/', 'wp-' ).replace( '@babel/', 'wp-' );
-		const polyfillFile = path.resolve( __dirname, `assets/src/polyfills/${ packageSlug }.js` );
-
-		if ( fs.existsSync( polyfillFile ) ) {
-			memo[ packageSlug ] = polyfillFile;
-		}
-
-		return memo;
-	}, {} ),
 };
 
 const setup = {
