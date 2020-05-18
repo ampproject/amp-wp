@@ -12,12 +12,13 @@ use AmpProject\Dom\Document;
  * Class AMP_Hulu_Embed_Handler
  */
 class AMP_Hulu_Embed_Handler extends AMP_Base_Embed_Handler {
+
 	/**
-	 * Regex matched to produce output amp-hulu.
+	 * Base URL used for identifying embeds.
 	 *
 	 * @var string
 	 */
-	const URL_PATTERN = '#https?://(www\.)?hulu\.com/.*#i';
+	const BASE_EMBED_URL = 'www.hulu.com/embed.html';
 
 	/**
 	 * Default height.
@@ -46,7 +47,7 @@ class AMP_Hulu_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @param Document $dom DOM.
 	 */
 	public function sanitize_raw_embeds( Document $dom ) {
-		$nodes = $dom->xpath->query( '//iframe[ contains( @src, "www.hulu.com/embed.html" ) ]' );
+		$nodes = $dom->xpath->query( sprintf( '//iframe[ contains( @src, "%s" ) ]', self::BASE_EMBED_URL ) );
 
 		foreach ( $nodes as $node ) {
 			if ( ! $this->is_raw_embed( $node ) ) {

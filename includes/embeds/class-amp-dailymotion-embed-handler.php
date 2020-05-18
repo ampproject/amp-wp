@@ -17,6 +17,13 @@ class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 	const RATIO = 0.5625;
 
 	/**
+	 * Base URL used for identifying embeds.
+	 *
+	 * @var string
+	 */
+	const BASE_EMBED_URL = 'https://www.dailymotion.com/embed/video/';
+
+	/**
 	 * Default width.
 	 *
 	 * @var int
@@ -65,7 +72,7 @@ class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @param Document $dom DOM.
 	 */
 	public function sanitize_raw_embeds( Document $dom ) {
-		$nodes = $dom->xpath->query( '//iframe[ starts-with( @src, "https://www.dailymotion.com/embed/video/" ) ]' );
+		$nodes = $dom->xpath->query( sprintf( '//iframe[ starts-with( @src, "%s" ) ]', self::BASE_EMBED_URL ) );
 
 		foreach ( $nodes as $node ) {
 			if ( ! $this->is_raw_embed( $node ) ) {
@@ -93,9 +100,8 @@ class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 	private function sanitize_raw_embed( DOMElement $iframe_node ) {
 		$iframe_src = $iframe_node->getAttribute( 'src' );
 
-		if ( preg_match( '#video/(?P<video_id>[a-zA-Z0-9]+)#', $iframe_src, $matches ) ) {
-			$video_id = $matches['video_id'];
-
+		$video_id = strtok( substr( $iframe_src, strlen( self::BASE_EMBED_URL ) ), '/?#' );
+		if ( ! empty( $video_id ) ) {
 			$amp_node = AMP_DOM_Utils::create_node(
 				Document::fromNode( $iframe_node ),
 				'amp-dailymotion',

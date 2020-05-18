@@ -14,6 +14,13 @@ use AmpProject\Dom\Document;
 class AMP_Scribd_Embed_Handler extends AMP_Base_Embed_Handler {
 
 	/**
+	 * Base URL used for identifying embeds.
+	 *
+	 * @var string
+	 */
+	const BASE_EMBED_URL = 'https://www.scribd.com/embeds/';
+
+	/**
 	 * Registers embed.
 	 */
 	public function register_embed() {
@@ -33,7 +40,7 @@ class AMP_Scribd_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @param Document $dom DOM.
 	 */
 	public function sanitize_raw_embeds( Document $dom ) {
-		$nodes = $dom->xpath->query( '//iframe[ starts-with( @src, "https://www.scribd.com/embeds/" ) ]' );
+		$nodes = $dom->xpath->query( sprintf( '//iframe[ starts-with( @src, "%s" ) ]', self::BASE_EMBED_URL ) );
 
 		foreach ( $nodes as $node ) {
 			if ( ! $this->is_raw_embed( $node ) ) {

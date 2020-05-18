@@ -12,12 +12,13 @@ use AmpProject\Dom\Document;
  * Class AMP_Gfycat_Embed_Handler
  */
 class AMP_Gfycat_Embed_Handler extends AMP_Base_Embed_Handler {
+
 	/**
-	 * Regex matched to produce output amp-gfycat.
+	 * Base URL used for identifying embeds.
 	 *
 	 * @var string
 	 */
-	const URL_PATTERN = '#https?://(www\.)?gfycat\.com/.*#i';
+	const BASE_EMBED_URL = 'www.hulu.com/embed.html';
 
 	/**
 	 * Register embed.
@@ -39,7 +40,7 @@ class AMP_Gfycat_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @param Document $dom DOM.
 	 */
 	public function sanitize_raw_embeds( Document $dom ) {
-		$nodes = $dom->xpath->query( '//iframe[ starts-with( @src, "https://gfycat.com/ifr/" ) ]' );
+		$nodes = $dom->xpath->query( sprintf( '//iframe[ starts-with( @src, "%s" ) ]', self::BASE_EMBED_URL ) );
 
 		foreach ( $nodes as $node ) {
 			if ( ! $this->is_raw_embed( $node ) ) {

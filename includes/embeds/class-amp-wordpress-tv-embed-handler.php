@@ -16,6 +16,13 @@ use AmpProject\Dom\Document;
 class AMP_WordPress_TV_Embed_Handler extends AMP_Base_Embed_Handler {
 
 	/**
+	 * Base URL used for identifying embeds.
+	 *
+	 * @var string
+	 */
+	const BASE_EMBED_URL = 'https://video.wordpress.com/embed/';
+
+	/**
 	 * The URL pattern to determine if an embed URL is for this type, copied from WP_oEmbed.
 	 *
 	 * @see https://github.com/WordPress/wordpress-develop/blob/e13480/src/wp-includes/class-wp-oembed.php#L64
@@ -42,7 +49,7 @@ class AMP_WordPress_TV_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @param Document $dom DOM.
 	 */
 	public function sanitize_raw_embeds( Document $dom ) {
-		$nodes = $dom->xpath->query( '//iframe[ starts-with( @src, "https://video.wordpress.com/embed/" ) ]' );
+		$nodes = $dom->xpath->query( sprintf( '//iframe[ contains( @src, "%s" ) ]', self::BASE_EMBED_URL ) );
 
 		foreach ( $nodes as $node ) {
 			if ( ! $this->is_raw_embed( $node ) ) {

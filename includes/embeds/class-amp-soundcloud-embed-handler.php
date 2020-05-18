@@ -15,6 +15,13 @@ use AmpProject\Dom\Document;
 class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 
 	/**
+	 * Base URL used for identifying embeds.
+	 *
+	 * @var string
+	 */
+	const BASE_EMBED_URL = 'https://w.soundcloud.com/player/';
+
+	/**
 	 * Default height.
 	 *
 	 * @var int
@@ -41,7 +48,7 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @param Document $dom DOM.
 	 */
 	public function sanitize_raw_embeds( Document $dom ) {
-		$nodes = $dom->xpath->query( '//iframe[ starts-with( @src, "https://w.soundcloud.com/player/" ) ]' );
+		$nodes = $dom->xpath->query( sprintf( '//iframe[ starts-with( @src, "%s" ) ]', self::BASE_EMBED_URL ) );
 
 		foreach ( $nodes as $node ) {
 			if ( ! $this->is_raw_embed( $node ) ) {

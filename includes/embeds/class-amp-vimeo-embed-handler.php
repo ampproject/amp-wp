@@ -15,6 +15,13 @@ use AmpProject\Dom\Document;
 class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 
 	/**
+	 * Base URL used for identifying embeds.
+	 *
+	 * @var string
+	 */
+	const BASE_EMBED_URL = 'https://player.vimeo.com/video/';
+
+	/**
 	 * The aspect ratio.
 	 *
 	 * @var float
@@ -70,7 +77,7 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @param Document $dom DOM.
 	 */
 	public function sanitize_raw_embeds( Document $dom ) {
-		$nodes = $dom->xpath->query( '//iframe[ starts-with( @src, "https://player.vimeo.com/video/" ) ]' );
+		$nodes = $dom->xpath->query( sprintf( '//iframe[ contains( @src, "%s" ) ]', self::BASE_EMBED_URL ) );
 
 		foreach ( $nodes as $node ) {
 			if ( ! $this->is_raw_embed( $node ) ) {
