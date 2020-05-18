@@ -8,12 +8,12 @@ import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
-import { APP_ROOT_ID } from 'amp-onboarding';
+import { APP_ROOT_ID } from 'amp-setup';
 
-function Onboarding() {
+function Setup() {
 	return (
 		<div>
-			{ __( 'Onboarding', 'amp' ) }
+			{ __( 'Setup Wizard', 'amp' ) }
 		</div>
 	);
 }
@@ -22,6 +22,6 @@ domReady( () => {
 	const root = document.getElementById( APP_ROOT_ID );
 
 	if ( root ) {
-		render( <Onboarding />, root );
+		render( <Setup />, root );
 	}
 } );

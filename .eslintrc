@@ -57,7 +57,7 @@
     "react/no-unused-prop-types": "error",
     "react/self-closing-comp": "error",
     "import/no-unresolved": [ "error", {
-      "ignore": [ "jquery", "amp-block-editor-data", "amp-onboarding" ]
+      "ignore": [ "jquery", "amp-block-editor-data", "amp-setup" ]
     } ],
     "import/order": [ "error", { "groups": [ "builtin", [ "external", "unknown" ], "internal", "parent", "sibling", "index" ] } ],
     "jsdoc/check-indentation": "error",

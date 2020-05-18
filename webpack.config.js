@@ -228,19 +228,19 @@ const wpPolyfills = {
 	}, {} ),
 };
 
-const onboarding = {
+const setup = {
 	...defaultConfig,
 	...sharedConfig,
 	entry: {
-		'amp-onboarding': './assets/src/onboarding',
+		'amp-setup': './assets/src/setup',
 	},
 	externals: {
-		'amp-onboarding': 'ampOnboarding',
+		'amp-setup': 'ampSetup',
 	},
 	plugins: [
 		...defaultConfig.plugins,
 		new WebpackBar( {
-			name: 'Onboarding',
+			name: 'Setup',
 			color: '#1773a8',
 		} ),
 	],
@@ -253,5 +253,5 @@ module.exports = [
 	admin,
 	customizer,
 	wpPolyfills,
-	onboarding,
+	setup,
 ];

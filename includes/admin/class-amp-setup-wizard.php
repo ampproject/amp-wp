@@ -1,40 +1,40 @@
 <?php
 /**
- * AMP onboarding wizard.
+ * AMP setup wizard.
  *
  * @package AMP
  * @since @todo NEW_ONBOARDING_RELEASE_VERSION
  */
 
 /**
- * AMP onboarding wizard class.
+ * AMP setup wizard class.
  *
  * @since @todo NEW_ONBOARDING_RELEASE_VERSION
  */
-class AMP_Onboarding_Wizard {
+class AMP_Setup_Wizard {
 	/**
-	 * Onboarding screen ID.
+	 * Setup screen ID.
 	 *
 	 * @var string
 	 */
-	const SCREEN_ID = 'amp-onboarding';
+	const SCREEN_ID = 'amp-setup';
 
 	/**
 	 * Handle for JS file.
 	 *
 	 * @var string
 	 */
-	const JS_HANDLE = 'amp-onboarding';
+	const JS_HANDLE = 'amp-setup';
 
 	/**
 	 * HTML ID for the app root element.
 	 *
 	 * @var string
 	 */
-	const APP_ROOT_ID = 'amp-onboarding';
+	const APP_ROOT_ID = 'amp-setup';
 
 	/**
-	 * The minimum core WP version whose core assets are compatibile with the onboarding feature.
+	 * The minimum core WP version whose core assets are compatibile with the setup feature.
 	 *
 	 * @var float
 	 */
@@ -44,36 +44,36 @@ class AMP_Onboarding_Wizard {
 	 * Sets up hooks.
 	 */
 	public function init() {
-		add_action( 'admin_menu', [ $this, 'add_onboarding_screen' ] );
+		add_action( 'admin_menu', [ $this, 'add_setup_screen' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'override_scripts' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
 	}
 
 	/**
-	 * Adds the onboarding admin screen.
+	 * Adds the setup admin screen.
 	 */
-	public function add_onboarding_screen() {
+	public function add_setup_screen() {
 		add_submenu_page(
 			AMP_Options_Manager::OPTION_NAME,
-			__( 'Setup', 'amp' ),
-			__( 'Setup', 'amp' ),
+			__( 'Setup Wizard', 'amp' ),
+			__( 'Setup Wizard', 'amp' ),
 			'manage_options',
 			static::SCREEN_ID,
-			[ $this, 'render_onboarding_screen' ]
+			[ $this, 'render_setup_screen' ]
 		);
 	}
 
 	/**
-	 * Renders the onboarding screen markup.
+	 * Renders the setup screen markup.
 	 */
-	public function render_onboarding_screen() {
+	public function render_setup_screen() {
 		?>
 			<div id="<?php echo esc_attr( static::APP_ROOT_ID ); ?>"></div>
 		<?php
 	}
 
 	/**
-	 * Provides the onboarding screen handle.
+	 * Provides the setup screen handle.
 	 *
 	 * @return string
 	 */
@@ -87,7 +87,7 @@ class AMP_Onboarding_Wizard {
 	 * @param string  $handle    Script handle.
 	 * @param boolean $enqueue   Whether to enqueue the asset immediately. Default false.
 	 */
-	public function add_onboarding_script( $handle, $enqueue = false ) {
+	public function add_setup_script( $handle, $enqueue = false ) {
 		$asset = $this->get_asset( $handle, sprintf( '%s/assets/js/%s.asset.php', AMP__DIR__, $handle ) );
 
 		wp_register_script(
@@ -118,7 +118,7 @@ class AMP_Onboarding_Wizard {
 		 * @param $asset  null|array Null or, to override, an array containing the asset's dependencies and version string.
 		 * @param $handle string     The asset handle.
 		 */
-		$asset = apply_filters( 'amp_onboarding_asset', null, $handle );
+		$asset = apply_filters( 'amp_setup_asset', null, $handle );
 
 		if ( is_null( $asset ) ) {
 			$asset_file = $path;
@@ -129,7 +129,7 @@ class AMP_Onboarding_Wizard {
 	}
 
 	/**
-	 * Enqueues onboarding assets.
+	 * Enqueues setup assets.
 	 *
 	 * @param string $hook_suffix The current admin page.
 	 */
@@ -138,11 +138,11 @@ class AMP_Onboarding_Wizard {
 			return;
 		}
 
-		$this->add_onboarding_script( static::JS_HANDLE, true );
+		$this->add_setup_script( static::JS_HANDLE, true );
 
 		wp_localize_script(
 			static::JS_HANDLE,
-			'ampOnboarding',
+			'ampSetup',
 			[
 				'APP_ROOT_ID' => static::APP_ROOT_ID,
 			]
@@ -187,7 +187,7 @@ class AMP_Onboarding_Wizard {
 
 				$scripts->registered[ $package ]->ver = $asset['version'];
 			} else {
-				$this->add_onboarding_script( $package );
+				$this->add_setup_script( $package );
 
 				switch ( $package ) {
 					case null:
