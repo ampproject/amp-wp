@@ -191,30 +191,13 @@ class Test_AMP_Setup_Wizard  extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Provides WP versions to test in test_override_scripts.
-	 *
-	 * @return array
-	 */
-	public function get_wp_version() {
-		return [
-			[ '4.9.0' ],
-			[ '5.4.1' ],
-		];
-	}
-
-	/**
 	 * Tests AMP_Setup_Wizard::override_scripts
 	 *
 	 * @covers AMP_Setup_Wizard::override_scripts
 	 *
 	 * @dataProvider get_wp_version
 	 */
-	public function test_override_scripts( $test_wp_version ) {
-		global $wp_version;
-
-		$original_wp_version = $wp_version;
-		$wp_version          = $test_wp_version;
-
+	public function test_override_scripts() {
 		$wizard = new AMP_Setup_Wizard();
 
 		$filter_asset = function( $asset, $handle ) {
@@ -239,7 +222,5 @@ class Test_AMP_Setup_Wizard  extends WP_UnitTestCase {
 		$this->assertTrue( wp_script_is( 'wp-components', 'registered' ) );
 		$this->assertTrue( wp_script_is( 'react', 'registered' ) );
 		$this->assertTrue( wp_script_is( 'wp-polyfill', 'registered' ) );
-
-		$wp_version = $original_wp_version;
 	}
 }

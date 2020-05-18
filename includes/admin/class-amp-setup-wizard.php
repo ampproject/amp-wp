@@ -189,9 +189,38 @@ class AMP_Setup_Wizard {
 			} else {
 				$this->add_setup_script( $package );
 
+				// Add inline scripts for 4.9.
+				// @see https://github.com/WordPress/WordPress/blob/master/wp-includes/script-loader.php#L276.
 				switch ( $package ) {
-					case null:
-						// @to-do Inline scripts for polyfilled packages. Refer to Gutenberg plugin.
+					case 'wp-api-fetch':
+						$scripts->add_inline_script(
+							'wp-api-fetch',
+							sprintf(
+								'wp.apiFetch.use( wp.apiFetch.createRootURLMiddleware( "%s" ) );',
+								esc_url_raw( get_rest_url() )
+							),
+							'after'
+						);
+
+						$scripts->add_inline_script(
+							'wp-api-fetch',
+							implode(
+								"\n",
+								[
+									sprintf(
+										'wp.apiFetch.nonceMiddleware = wp.apiFetch.createNonceMiddleware( "%s" );',
+										( wp_installing() && ! is_multisite() ) ? '' : wp_create_nonce( 'wp_rest' )
+									),
+									'wp.apiFetch.use( wp.apiFetch.nonceMiddleware );',
+									'wp.apiFetch.use( wp.apiFetch.mediaUploadMiddleware );',
+									sprintf(
+										'wp.apiFetch.nonceEndpoint = "%s";',
+										admin_url( 'admin-ajax.php?action=rest-nonce' )
+									),
+								]
+							),
+							'after'
+						);
 				}
 			}
 		}
