@@ -111,6 +111,11 @@ class AMP_Options_Menu {
 		foreach ( $submenus as $submenu ) {
 			$submenu->init();
 		}
+
+		/**
+		 * Fires after AMP submenus have been created.
+		 */
+		do_action( 'amp_admin_submenus' );
 	}
 
 	/**

@@ -44,7 +44,7 @@ class AMP_Setup_Wizard {
 	 * Sets up hooks.
 	 */
 	public function init() {
-		add_action( 'admin_menu', [ $this, 'add_setup_screen' ] );
+		add_action( 'amp_admin_submenus', [ $this, 'add_setup_screen' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'override_scripts' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
 	}
@@ -59,7 +59,8 @@ class AMP_Setup_Wizard {
 			__( 'Setup Wizard', 'amp' ),
 			'manage_options',
 			static::SCREEN_ID,
-			[ $this, 'render_setup_screen' ]
+			[ $this, 'render_setup_screen' ],
+			99
 		);
 	}
 
