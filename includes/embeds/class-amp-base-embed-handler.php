@@ -118,8 +118,15 @@ abstract class AMP_Base_Embed_Handler {
 		$parent_element = AMP_DOM_Utils::get_parent_element( $node );
 
 		if ( $parent_element && 'p' === $parent_element->nodeName && false === $parent_element->hasAttributes() ) {
-			$children = $parent_element->getElementsByTagName( '*' );
-			if ( 1 === $children->length ) {
+			$child_element_count = array_sum(
+				array_map(
+					static function ( DOMNode $child ) {
+						return $child instanceof DOMElement ? 1 : 0;
+					},
+					iterator_to_array( $node->childNodes )
+				)
+			);
+			if ( 1 === $child_element_count ) {
 				$parent_element->parentNode->replaceChild( $node, $parent_element );
 			}
 		}
