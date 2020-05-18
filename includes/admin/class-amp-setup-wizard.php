@@ -84,8 +84,8 @@ class AMP_Setup_Wizard {
 	/**
 	 * Registers single script.
 	 *
-	 * @param string  $handle    Script handle.
-	 * @param boolean $enqueue   Whether to enqueue the asset immediately. Default false.
+	 * @param string  $handle  Script handle.
+	 * @param boolean $enqueue Whether to enqueue the asset immediately. Default false.
 	 */
 	public function add_setup_script( $handle, $enqueue = false ) {
 		$asset = $this->get_asset( $handle, sprintf( '%s/assets/js/%s.asset.php', AMP__DIR__, $handle ) );
@@ -115,8 +115,8 @@ class AMP_Setup_Wizard {
 		/**
 		 * Filters AMP asset details.
 		 *
-		 * @param $asset  null|array Null or, to override, an array containing the asset's dependencies and version string.
-		 * @param $handle string     The asset handle.
+		 * @param null|array $asset  Null or, to override, an array containing the asset's dependencies and version string.
+		 * @param string     $handle The asset handle.
 		 */
 		$asset = apply_filters( 'amp_setup_asset', null, $handle );
 
