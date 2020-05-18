@@ -194,8 +194,6 @@ class Test_AMP_Setup_Wizard  extends WP_UnitTestCase {
 	 * Tests AMP_Setup_Wizard::override_scripts
 	 *
 	 * @covers AMP_Setup_Wizard::override_scripts
-	 *
-	 * @dataProvider get_wp_version
 	 */
 	public function test_override_scripts() {
 		$wizard = new AMP_Setup_Wizard();
