@@ -102,16 +102,22 @@ class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		$video_id = strtok( substr( $iframe_src, strlen( self::BASE_EMBED_URL ) ), '/?#' );
 		if ( ! empty( $video_id ) ) {
-			$amp_node = AMP_DOM_Utils::create_node(
-				Document::fromNode( $iframe_node ),
-				'amp-dailymotion',
-				[
+			$args = [
 					'data-videoid' => $video_id,
 					'layout'       => 'responsive',
 					'width'        => $this->args['width'],
 					'height'       => $this->args['height'],
-				]
-			);
+				];
+
+			if ( $iframe_node->hasAttribute( 'width' ) ) {
+				$args['width'] = $iframe_node->getAttribute( 'width' );
+			}
+
+			if ( $iframe_node->hasAttribute( 'height' ) ) {
+				$args['height'] = $iframe_node->getAttribute( 'height' );
+			}
+
+			$amp_node = AMP_DOM_Utils::create_node( Document::fromNode( $iframe_node ), 'amp-dailymotion', $args );
 
 			$this->maybe_unwrap_p_element( $iframe_node );
 
