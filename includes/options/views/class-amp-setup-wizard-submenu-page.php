@@ -7,7 +7,7 @@
  */
 
 /**
- * AMP setup wizard class.
+ * AMP setup wizard submenu page class.
  *
  * @since @todo NEW_ONBOARDING_RELEASE_VERSION
  */
