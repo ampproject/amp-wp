@@ -69,7 +69,7 @@ class AMP_Scribd_Embed_Handler extends AMP_Base_Embed_Handler {
 		$required_sandbox_permissions = 'allow-popups allow-scripts';
 		$iframe_node->setAttribute(
 			'sandbox',
-			sprintf( '%s %s', $iframe_node->getAttribute( 'sandbox' ), $required_sandbox_permissions )
+			$iframe_node->getAttribute( 'sandbox' ) . ' ' . $required_sandbox_permissions
 		);
 
 		// Remove the accompanied script tag so that the iframe can be later unwrapped.

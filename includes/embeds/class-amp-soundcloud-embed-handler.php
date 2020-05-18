@@ -74,24 +74,24 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @param DOMElement $iframe_node The node to make AMP compatible.
 	 */
 	private function sanitize_raw_embed( DOMElement $iframe_node ) {
-		$src   = html_entity_decode( $iframe_node->getAttribute( 'src' ), ENT_QUOTES );
-		$query = [];
-		parse_str( wp_parse_url( $src, PHP_URL_QUERY ), $query );
+		$src = $iframe_node->getAttribute( 'src' );
 
+		parse_str( wp_parse_url( $src, PHP_URL_QUERY ), $query );
 		if ( empty( $query['url'] ) ) {
 			return;
 		}
 
-		$attributes = [];
 		$embed_id   = $this->parse_embed_id_from_url( $query['url'] );
+		if ( null === $embed_id ) {
+			return;
+		}
+
+		$attributes = [];
 
 		if ( isset( $embed_id['track_id'] ) ) {
 			$attributes['data-trackid'] = $embed_id['track_id'];
 		} elseif ( isset( $embed_id['playlist_id'] ) ) {
 			$attributes['data-playlistid'] = $embed_id['playlist_id'];
-		} else {
-			// Return if the track nor playlist ID was found.
-			return;
 		}
 
 		$attributes['height'] = $iframe_node->hasAttribute( 'height' )
@@ -124,20 +124,18 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Get embed ID from Soundcloud iframe src.
 	 *
 	 * @param string $url URL.
-	 * @return array|null Array containing ID name and value if found.
+	 * @return array|null Array with key being the embed type and value being the embed ID, or null if embed type and ID could not be found.
 	 */
 	private function parse_embed_id_from_url( $url ) {
-		$parsed_url = wp_parse_url( $url );
-		if ( preg_match( '#tracks/(?P<track_id>\d+)#', $parsed_url['path'], $matches ) ) {
-			return [
-				'track_id' => $matches['track_id'],
-			];
+		if ( preg_match( '#/player/(?P<type>tracks|playlists)/(?P<id>\d+)#', $url, $matches ) ) {
+			if ( 'tracks' === $matches['type'] ) {
+				return [ 'track_id' => $matches['id'] ];
+			}
+			if ( 'playlists' === $matches['type'] ) {
+				return [ 'playlist_id' => $matches['id'] ];
+			}
 		}
-		if ( preg_match( '#playlists/(?P<playlist_id>\d+)#', $parsed_url['path'], $matches ) ) {
-			return [
-				'playlist_id' => $matches['playlist_id'],
-			];
-		}
-		return [];
+
+		return null;
 	}
 }

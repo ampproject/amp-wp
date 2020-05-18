@@ -104,9 +104,9 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	private function sanitize_raw_embed( DOMElement $iframe_node ) {
 		$iframe_src = $iframe_node->getAttribute( 'src' );
-		$video_id   = $this->get_video_id_from_url( $iframe_src );
 
-		if ( ! $video_id ) {
+		$video_id = strtok( substr( $iframe_src, strlen( self::BASE_EMBED_URL ) ), '/?#' );
+		if ( empty( $video_id ) ) {
 			return;
 		}
 
@@ -124,21 +124,5 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 		$this->maybe_unwrap_p_element( $iframe_node );
 
 		$iframe_node->parentNode->replaceChild( $amp_node, $iframe_node );
-	}
-
-	/**
-	 * Determine the video ID from the URL.
-	 *
-	 * @param string $url URL.
-	 * @return int Video ID.
-	 */
-	private function get_video_id_from_url( $url ) {
-		// @todo This will not get the private key for unlisted videos (which look like https://vimeo.com/123456789/abcdef0123), but amp-vimeo doesn't support them currently anyway.
-		$video_id = null;
-		if ( preg_match( ':/video/(\d+):', $url, $matches ) ) {
-			$video_id = $matches[1];
-		}
-
-		return $video_id;
 	}
 }

@@ -14,6 +14,11 @@ use AmpProject\Dom\Document;
  */
 class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 
+	/**
+	 * The 16:9 aspect ratio in decimal form.
+	 *
+	 * @var float
+	 */
 	const RATIO = 0.5625;
 
 	/**
@@ -101,28 +106,34 @@ class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 		$iframe_src = $iframe_node->getAttribute( 'src' );
 
 		$video_id = strtok( substr( $iframe_src, strlen( self::BASE_EMBED_URL ) ), '/?#' );
-		if ( ! empty( $video_id ) ) {
-			$args = [
-					'data-videoid' => $video_id,
-					'layout'       => 'responsive',
-					'width'        => $this->args['width'],
-					'height'       => $this->args['height'],
-				];
-
-			if ( $iframe_node->hasAttribute( 'width' ) ) {
-				$args['width'] = $iframe_node->getAttribute( 'width' );
-			}
-
-			if ( $iframe_node->hasAttribute( 'height' ) ) {
-				$args['height'] = $iframe_node->getAttribute( 'height' );
-			}
-
-			$amp_node = AMP_DOM_Utils::create_node( Document::fromNode( $iframe_node ), 'amp-dailymotion', $args );
-
-			$this->maybe_unwrap_p_element( $iframe_node );
-
-			$iframe_node->parentNode->replaceChild( $amp_node, $iframe_node );
+		if ( empty( $video_id ) ) {
+			return;
 		}
+
+		$attributes = [
+			'data-videoid' => $video_id,
+			'layout'       => 'responsive',
+			'width'        => $this->args['width'],
+			'height'       => $this->args['height'],
+		];
+
+		if ( $iframe_node->hasAttribute( 'width' ) ) {
+			$attributes['width'] = $iframe_node->getAttribute( 'width' );
+		}
+
+		if ( $iframe_node->hasAttribute( 'height' ) ) {
+			$attributes['height'] = $iframe_node->getAttribute( 'height' );
+		}
+
+		$amp_node = AMP_DOM_Utils::create_node(
+			Document::fromNode( $iframe_node ),
+			'amp-dailymotion',
+			$attributes
+		);
+
+		$this->maybe_unwrap_p_element( $iframe_node );
+
+		$iframe_node->parentNode->replaceChild( $amp_node, $iframe_node );
 
 		// Nothing to be done if the video ID could not be found.
 	}

@@ -68,31 +68,31 @@ class AMP_Gfycat_Embed_Handler extends AMP_Base_Embed_Handler {
 	private function sanitize_raw_embed( DOMElement $iframe_node ) {
 		$iframe_src = $iframe_node->getAttribute( 'src' );
 
-		if ( ! preg_match( '#/ifr/([A-Za-z0-9]+)#', $iframe_src, $matches ) ) {
-			// Nothing to do if video ID could not be found.
+		$gfycat_id = strtok( substr( $iframe_src, strlen( self::BASE_EMBED_URL ) ), '/?#' );
+		if ( empty( $gfycat_id ) ) {
+			// Nothing to do if the ID could not be found.
 			return;
 		}
 
-		$new_attributes = [
-			'data-gfyid' => $matches[1],
+		$attributes = [
+			'data-gfyid' => $gfycat_id,
 			'layout'     => 'responsive',
-			'height'     => $iframe_node->getAttribute( 'height' ),
-			'width'      => $iframe_node->getAttribute( 'width' ),
+			'width'        => $this->args['width'],
+			'height'       => $this->args['height'],
 		];
 
-		if ( empty( $new_attributes['height'] ) ) {
-			return;
+		if ( $iframe_node->hasAttribute( 'width' ) ) {
+			$attributes['width'] = $iframe_node->getAttribute( 'width' );
 		}
 
-		if ( empty( $new_attributes['width'] ) ) {
-			$new_attributes['layout'] = 'fixed-height';
-			$new_attributes['width']  = 'auto';
+		if ( $iframe_node->hasAttribute( 'height' ) ) {
+			$attributes['height'] = $iframe_node->getAttribute( 'height' );
 		}
 
 		$amp_node = AMP_DOM_Utils::create_node(
 			Document::fromNode( $iframe_node ),
 			'amp-gfycat',
-			$new_attributes
+			$attributes
 		);
 
 		$this->maybe_unwrap_p_element( $iframe_node );

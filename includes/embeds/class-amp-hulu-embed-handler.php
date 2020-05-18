@@ -74,14 +74,14 @@ class AMP_Hulu_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	private function sanitize_raw_embed( DOMElement $iframe_node ) {
 		$iframe_src = $iframe_node->getAttribute( 'src' );
-		$video_id   = $this->get_video_id( $iframe_src );
 
-		if ( ! $video_id ) {
+		parse_str( wp_parse_url( $iframe_src, PHP_URL_QUERY ), $query );
+		if ( empty( $query['eid'] ) ) {
 			return;
 		}
 
 		$attributes = [
-			'data-eid' => $video_id,
+			'data-eid' => $query['eid'],
 			'layout'   => 'responsive',
 			'width'    => $this->DEFAULT_WIDTH,
 			'height'   => $this->DEFAULT_HEIGHT,
@@ -104,19 +104,5 @@ class AMP_Hulu_Embed_Handler extends AMP_Base_Embed_Handler {
 		$this->maybe_unwrap_p_element( $iframe_node );
 
 		$iframe_node->parentNode->replaceChild( $amp_node, $iframe_node );
-	}
-
-	/**
-	 * Get video from URL.
-	 *
-	 * @param string $url Video URL.
-	 * @return string|null Video ID, or null if it was not found.
-	 */
-	private function get_video_id( $url ) {
-		if ( preg_match( '#hulu\.com/embed\.html\?eid=(?P<id>[A-Za-z0-9_-]+)#', $url, $matches ) ) {
-			return $matches['id'];
-		}
-
-		return null;
 	}
 }
