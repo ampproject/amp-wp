@@ -193,11 +193,23 @@ function amp_bootstrap_admin() {
 
 	$site_health = new SiteHealth();
 	$site_health->init();
+}
 
-	if ( '1' === filter_input( INPUT_GET, 'amp-new-onboarding', FILTER_SANITIZE_NUMBER_INT ) || ( defined( 'AMP_NEW_ONBOARDING' ) && AMP_NEW_ONBOARDING ) ) {
-		$setup_wizard = new AMP_Setup_Wizard();
-		$setup_wizard->init();
-
-		// @todo init setup REST endpoints.
+/**
+ * Whether to activate the new onboarding feature.
+ *
+ * @todo Remove this function on release.
+ *
+ * @return boolean
+ */
+function amp_should_use_new_onboarding() {
+	if ( '1' === filter_input( INPUT_GET, 'amp-new-onboarding', FILTER_SANITIZE_NUMBER_INT ) ) {
+		return true;
 	}
+
+	if ( defined( 'AMP_NEW_ONBOARDING' ) && AMP_NEW_ONBOARDING ) {
+		return true;
+	}
+
+	return false;
 }

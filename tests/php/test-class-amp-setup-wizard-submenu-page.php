@@ -1,20 +1,20 @@
 <?php
 /**
- * Tests for AMP_Setup_Wizard class.
+ * Tests for AMP_Setup_Wizard_Submenu_Page class.
  *
  * @package AMP
  */
 
 /**
- * Tests for AMP_Setup_Wizard  class.
+ * Tests for AMP_Setup_Wizard_Submenu_Page class.
  *
  * @group setup
  *
  * @since @todo NEW_ONBOARDING_RELEASE_VERSION
  *
- * @covers AMP_Setup_Wizard
+ * @covers AMP_Setup_Wizard_Submenu
  */
-class Test_AMP_Setup_Wizard  extends WP_UnitTestCase {
+class Test_AMP_Setup_Wizard_Submenu_Page extends WP_UnitTestCase {
 
 	/**
 	 * Setup.
@@ -28,6 +28,8 @@ class Test_AMP_Setup_Wizard  extends WP_UnitTestCase {
 		remove_action( 'wp_default_scripts', 'wp_default_scripts' );
 		remove_action( 'wp_default_scripts', 'wp_default_packages' );
 		$GLOBALS['wp_scripts'] = new WP_Scripts();
+
+		$this->page = new AMP_Setup_Wizard_Submenu_Page( 'amp-options' );
 	}
 
 	/**
@@ -43,61 +45,37 @@ class Test_AMP_Setup_Wizard  extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests AMP_Setup_Wizard::init
+	 * Tests AMP_Setup_Wizard_Submenu_Page::init
 	 *
-	 * @covers AMP_Setup_Wizard::init
+	 * @covers AMP_Setup_Wizard_Submenu_Page::init
 	 */
 	public function test_init() {
-		$wizard = new AMP_Setup_Wizard();
+		$this->page->init();
 
-		$wizard->init();
-
-		$this->assertEquals( 10, has_action( 'admin_menu', [ $wizard, 'add_setup_screen' ] ) );
-		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', [ $wizard, 'override_scripts' ] ) );
-		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', [ $wizard, 'enqueue_assets' ] ) );
+		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', [ $this->page, 'override_scripts' ] ) );
+		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', [ $this->page, 'enqueue_assets' ] ) );
 	}
 
 	/**
-	 * Tests AMP_Setup_Wizard::add_setup_screen
+	 * Tests AMP_Setup_Wizard_Submenu_Page::render
 	 *
-	 * @covers AMP_Setup_Wizard::add_setup_screen
+	 * @covers AMP_Setup_Wizard_Submenu_Page::render
 	 */
-	public function test_add_setup_screen() {
-		global $submenu;
-
-		wp_set_current_user( 1 );
-
-		$wizard = new AMP_Setup_Wizard();
-
-		$wizard->add_setup_screen();
-
-		$this->assertEquals( end( $submenu['amp-options'] )[2], 'amp-setup' );
-	}
-
-	/**
-	 * Tests AMP_Setup_Wizard::render_setup_screen
-	 *
-	 * @covers AMP_Setup_Wizard::render_setup_screen
-	 */
-	public function test_render_setup_screen() {
-		$wizard = new AMP_Setup_Wizard();
-
+	public function test_render() {
 		ob_start();
 
-		$wizard->render_setup_screen();
+		$this->page->render();
 
 		$this->assertEquals( trim( ob_get_clean() ), '<div id="amp-setup"></div>' );
 	}
 
 	/**
-	 * Tests AMP_Setup_Wizard::screen_handle
+	 * Tests AMP_Setup_Wizard_Submenu_Page::screen_handle
 	 *
-	 * @covers AMP_Setup_Wizard::screen_handle
+	 * @covers AMP_Setup_Wizard_Submenu_Page::screen_handle
 	 */
 	public function test_screen_handle() {
-		$wizard = new AMP_Setup_Wizard();
-
-		$this->assertEquals( $wizard->screen_handle(), 'amp_page_amp-setup' );
+		$this->assertEquals( $this->page->screen_handle(), 'amp_page_amp-setup' );
 	}
 
 	/**
@@ -119,9 +97,9 @@ class Test_AMP_Setup_Wizard  extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests AMP_Setup_Wizard::add_setup_script
+	 * Tests AMP_Setup_Wizard_Submenu_Page::add_setup_script
 	 *
-	 * @covers AMP_Setup_Wizard::add_setup_script
+	 * @covers AMP_Setup_Wizard_Submenu_Page::add_setup_script
 	 *
 	 * @dataProvider get_test_setup_scripts
 	 *
@@ -129,8 +107,6 @@ class Test_AMP_Setup_Wizard  extends WP_UnitTestCase {
 	 * @param boolean $enqueued Whether to enqueue the script.
 	 */
 	public function test_add_setup_script( $handle, $enqueued ) {
-		$wizard = new AMP_Setup_Wizard();
-
 		$filter_asset = function( $asset, $asset_handle ) use ( $handle ) {
 			if ( $handle !== $asset_handle ) {
 				return $asset;
@@ -143,20 +119,18 @@ class Test_AMP_Setup_Wizard  extends WP_UnitTestCase {
 		};
 
 		add_filter( 'amp_setup_asset', $filter_asset, 10, 2 );
-		$wizard->add_setup_script( $handle, $enqueued );
+		$this->page->add_setup_script( $handle, $enqueued );
 		remove_filter( 'amp_setup_asset', $filter_asset );
 
 		$this->assertTrue( wp_script_is( $handle, $enqueued ? 'enqueued' : 'registered' ) );
 	}
 
 	/**
-	 * Tests AMP_Setup_Wizard::get_asset
+	 * Tests AMP_Setup_Wizard_Submenu_Page::get_asset
 	 *
-	 * @covers AMP_Setup_Wizard::get_asset
+	 * @covers AMP_Setup_Wizard_Submenu_Page::get_asset
 	 */
 	public function test_get_asset() {
-		$wizard = new AMP_Setup_Wizard();
-
 		$test_data = [
 			'dependencies' => [],
 			'version'      => '1.0',
@@ -167,37 +141,33 @@ class Test_AMP_Setup_Wizard  extends WP_UnitTestCase {
 		};
 
 		add_filter( 'amp_setup_asset', $filter_asset, 10, 2 );
-		$asset = $wizard->get_asset( 'my-handle' );
+		$asset = $this->page->get_asset( 'my-handle' );
 		remove_filter( 'amp_setup_asset', $filter_asset );
 
 		$this->assertEquals( $asset, $test_data );
 	}
 
 	/**
-	 * Tests AMP_Setup_Wizard::enqueue_assets
+	 * Tests AMP_Setup_Wizard_Submenu_Page::enqueue_assets
 	 *
-	 * @covers AMP_Setup_Wizard::enqueue_assets
+	 * @covers AMP_Setup_Wizard_Submenu_Page::enqueue_assets
 	 */
 	public function test_enqueue_assets() {
-		$wizard = new AMP_Setup_Wizard();
-
 		$handle = 'amp-setup';
 
-		$wizard->enqueue_assets( 'some-screen' );
+		$this->page->enqueue_assets( 'some-screen' );
 		$this->assertFalse( wp_script_is( $handle ) );
 
-		$wizard->enqueue_assets( $wizard->screen_handle() );
+		$this->page->enqueue_assets( $this->page->screen_handle() );
 		$this->assertTrue( wp_script_is( $handle ) );
 	}
 
 	/**
-	 * Tests AMP_Setup_Wizard::override_scripts
+	 * Tests AMP_Setup_Wizard_Submenu_Page::override_scripts
 	 *
-	 * @covers AMP_Setup_Wizard::override_scripts
+	 * @covers AMP_Setup_Wizard_Submenu_Page::override_scripts
 	 */
 	public function test_override_scripts() {
-		$wizard = new AMP_Setup_Wizard();
-
 		$filter_asset = function( $asset, $handle ) {
 			if ( 'amp-setup' !== $handle ) {
 				return $asset;
@@ -214,7 +184,7 @@ class Test_AMP_Setup_Wizard  extends WP_UnitTestCase {
 		};
 
 		add_filter( 'amp_setup_asset', $filter_asset, 10, 2 );
-		$wizard->override_scripts( $wizard->screen_handle() );
+		$this->page->override_scripts( $this->page->screen_handle() );
 		remove_filter( 'amp_setup_asset', $filter_asset );
 
 		$this->assertTrue( wp_script_is( 'wp-components', 'registered' ) );

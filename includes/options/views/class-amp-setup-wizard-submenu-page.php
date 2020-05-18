@@ -1,6 +1,6 @@
 <?php
 /**
- * AMP setup wizard.
+ * AMP setup wizard page.
  *
  * @package AMP
  * @since @todo NEW_ONBOARDING_RELEASE_VERSION
@@ -11,14 +11,7 @@
  *
  * @since @todo NEW_ONBOARDING_RELEASE_VERSION
  */
-class AMP_Setup_Wizard {
-	/**
-	 * Setup screen ID.
-	 *
-	 * @var string
-	 */
-	const SCREEN_ID = 'amp-setup';
-
+class AMP_Setup_Wizard_Submenu_Page {
 	/**
 	 * Handle for JS file.
 	 *
@@ -44,30 +37,14 @@ class AMP_Setup_Wizard {
 	 * Sets up hooks.
 	 */
 	public function init() {
-		add_action( 'amp_admin_submenus', [ $this, 'add_setup_screen' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'override_scripts' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
 	}
 
 	/**
-	 * Adds the setup admin screen.
-	 */
-	public function add_setup_screen() {
-		add_submenu_page(
-			AMP_Options_Manager::OPTION_NAME,
-			__( 'Setup Wizard', 'amp' ),
-			__( 'Setup Wizard', 'amp' ),
-			'manage_options',
-			static::SCREEN_ID,
-			[ $this, 'render_setup_screen' ],
-			99
-		);
-	}
-
-	/**
 	 * Renders the setup screen markup.
 	 */
-	public function render_setup_screen() {
+	public function render() {
 		?>
 			<div id="<?php echo esc_attr( static::APP_ROOT_ID ); ?>"></div>
 		<?php
@@ -79,7 +56,7 @@ class AMP_Setup_Wizard {
 	 * @return string
 	 */
 	public function screen_handle() {
-		return sprintf( 'amp_page_%s', static::SCREEN_ID );
+		return sprintf( 'amp_page_%s', AMP_Setup_Wizard_Submenu::SCREEN_ID );
 	}
 
 	/**

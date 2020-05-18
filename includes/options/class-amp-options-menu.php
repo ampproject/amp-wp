@@ -107,15 +107,14 @@ class AMP_Options_Menu {
 			new AMP_Analytics_Options_Submenu( AMP_Options_Manager::OPTION_NAME ),
 		];
 
+		if ( amp_should_use_new_onboarding() ) {
+			$submenus[] = new AMP_Setup_Wizard_Submenu( AMP_Options_Manager::OPTION_NAME );
+		}
+
 		// Create submenu items and calls on the Submenu Page object to render the actual contents of the page.
 		foreach ( $submenus as $submenu ) {
 			$submenu->init();
 		}
-
-		/**
-		 * Fires after AMP submenus have been created.
-		 */
-		do_action( 'amp_admin_submenus' );
 	}
 
 	/**
