@@ -2,6 +2,7 @@
  * External dependencies
  */
 const path = require( 'path' );
+const fs = require( 'fs' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 const OptimizeCSSAssetsPlugin = require( 'optimize-css-assets-webpack-plugin' );
@@ -15,6 +16,7 @@ const WebpackBar = require( 'webpackbar' );
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
 const DependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extraction-webpack-plugin' );
 const { defaultRequestToExternal, defaultRequestToHandle } = require( '@wordpress/dependency-extraction-webpack-plugin/util' );
+const { dependencies } = require( './package' );
 
 const sharedConfig = {
 	output: {
@@ -167,6 +169,12 @@ const customizer = {
 	],
 };
 
+const gutenbergPackages = Object.keys( dependencies )
+	.filter(
+		( packageName ) =>
+			packageName.startsWith( '@wordpress' ) || packageName.startsWith( '@babel' ),
+	);
+
 const wpPolyfills = {
 	...defaultConfig,
 	...sharedConfig,
@@ -175,28 +183,18 @@ const wpPolyfills = {
 		new DependencyExtractionWebpackPlugin( {
 			useDefaults: false,
 			requestToHandle: ( request ) => {
-				switch ( request ) {
-					case '@wordpress/dom-ready':
-					case '@wordpress/i18n':
-					case '@wordpress/polyfill':
-					case '@wordpress/url':
-						return undefined;
-
-					default:
-						return defaultRequestToHandle( request );
+				if ( gutenbergPackages.includes( request ) ) {
+					return undefined;
 				}
+
+				return defaultRequestToHandle( request );
 			},
 			requestToExternal: ( request ) => {
-				switch ( request ) {
-					case '@wordpress/dom-ready':
-					case '@wordpress/i18n':
-					case '@wordpress/polyfill':
-					case '@wordpress/url':
-						return undefined;
-
-					default:
-						return defaultRequestToExternal( request );
+				if ( gutenbergPackages.includes( request ) ) {
+					return undefined;
 				}
+
+				return defaultRequestToExternal( request );
 			},
 		} ),
 		new CopyWebpackPlugin( [
@@ -204,18 +202,48 @@ const wpPolyfills = {
 				from: 'node_modules/lodash/lodash.js',
 				to: './vendor/lodash.js',
 			},
+			{
+				from: 'node_modules/react/umd/react.production.min.js',
+				to: './vendor/react.js',
+			},
+			{
+				from: 'node_modules/react-dom/umd/react-dom.production.min.js',
+				to: './vendor/react-dom.js',
+			},
 		] ),
 		new WebpackBar( {
 			name: 'WordPress Polyfills',
 			color: '#21a0d0',
 		} ),
 	],
+	entry: gutenbergPackages.reduce( ( memo, packageName ) => {
+		const packageSlug = packageName.replace( '@wordpress/', 'wp-' ).replace( '@babel/', 'wp-' );
+		const polyfillFile = path.resolve( __dirname, `assets/src/polyfills/${ packageSlug }.js` );
+
+		if ( fs.existsSync( polyfillFile ) ) {
+			memo[ packageSlug ] = polyfillFile;
+		}
+
+		return memo;
+	}, {} ),
+};
+
+const onboarding = {
+	...defaultConfig,
+	...sharedConfig,
 	entry: {
-		'wp-i18n': './assets/src/polyfills/wp-i18n.js',
-		'wp-dom-ready': './assets/src/polyfills/wp-dom-ready.js',
-		'wp-polyfill': './assets/src/polyfills/wp-polyfill.js',
-		'wp-url': './assets/src/polyfills/wp-url.js',
+		'amp-onboarding': './assets/src/onboarding',
 	},
+	externals: {
+		'amp-onboarding': 'ampOnboarding',
+	},
+	plugins: [
+		...defaultConfig.plugins,
+		new WebpackBar( {
+			name: 'Onboarding',
+			color: '#1773a8',
+		} ),
+	],
 };
 
 module.exports = [
@@ -225,4 +253,5 @@ module.exports = [
 	admin,
 	customizer,
 	wpPolyfills,
+	onboarding,
 ];

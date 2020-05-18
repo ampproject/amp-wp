@@ -193,4 +193,11 @@ function amp_bootstrap_admin() {
 
 	$site_health = new SiteHealth();
 	$site_health->init();
+
+	if ( defined( 'AMP_NEW_ONBOARDING' ) && AMP_NEW_ONBOARDING ) {
+		$onboarding_wizard = new AMP_Onboarding_Wizard();
+		$onboarding_wizard->init();
+
+		// @todo init onboarding REST endpoints.
+	}
 }
