@@ -8,7 +8,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
-import { APP_ROOT_ID } from 'amp-setup';
+import { APP_ROOT_ID } from 'amp-setup'; // WP localized data.
 
 function Setup() {
 	return (
