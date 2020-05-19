@@ -253,11 +253,31 @@ const setup = {
 	entry: {
 		'amp-setup': './assets/src/setup',
 	},
+	module: {
+		...defaultConfig.module,
+		rules: [
+			...defaultConfig.module.rules,
+			{
+				test: /\.css$/,
+				use: [
+					MiniCssExtractPlugin.loader,
+					'css-loader',
+					'postcss-loader',
+				],
+			},
+		],
+	},
 	externals: {
 		'amp-setup': 'ampSetup',
 	},
 	plugins: [
 		...defaultConfig.plugins,
+		new MiniCssExtractPlugin( {
+			filename: '../css/[name]-compiled.css',
+		} ),
+		new RtlCssPlugin( {
+			filename: '../css/[name]-compiled-rtl.css',
+		} ),
 		new WebpackBar( {
 			name: 'Setup',
 			color: '#1773a8',
