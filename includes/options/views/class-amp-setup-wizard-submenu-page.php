@@ -37,8 +37,22 @@ final class AMP_Setup_Wizard_Submenu_Page {
 	 * Sets up hooks.
 	 */
 	public function init() {
+		add_action( 'admin_head-' . $this->screen_handle(), [ $this, 'override_template' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'override_scripts' ], 99 );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
+	}
+
+	public function override_template() {
+		add_filter( 'admin_footer_text', '__return_empty_string' );
+		remove_all_filters( 'update_footer' );
+		?>
+		</head>
+
+			<div id="<?php echo esc_attr( static::APP_ROOT_ID ); ?>"></div>
+		<?php
+
+		require_once ABSPATH . 'wp-admin/admin-footer.php';
+		exit();
 	}
 
 	/**
