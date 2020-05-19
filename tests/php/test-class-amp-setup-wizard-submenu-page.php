@@ -38,7 +38,11 @@ class Test_AMP_Setup_Wizard_Submenu_Page extends WP_UnitTestCase {
 		parent::tearDown();
 
 		add_action( 'wp_default_scripts', 'wp_default_scripts' );
-		add_action( 'wp_default_scripts', 'wp_default_packages' );
+
+		if ( function_exists( 'wp_default_packages' ) ) {
+			add_action( 'wp_default_scripts', 'wp_default_packages' );
+		}
+
 		$GLOBALS['wp_scripts'] = new WP_Scripts();
 	}
 
