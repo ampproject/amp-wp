@@ -45,7 +45,7 @@ final class AMP_Setup_Wizard_Submenu {
 	}
 
 	/**
-	 * Sets up hooks.
+	 * Adds the submenu page for the setup wizard.
 	 */
 	public function init() {
 		add_submenu_page(
