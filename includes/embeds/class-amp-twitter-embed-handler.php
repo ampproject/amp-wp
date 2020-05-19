@@ -264,7 +264,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	private function remove_br_sibling_elements( DOMElement $node ) {
 		$next_element_sibling = $node->nextSibling;
 
-		while ( $next_element_sibling && $next_element_sibling instanceof DOMElement &&'br' === $next_element_sibling->nodeName ) {
+		while ( $next_element_sibling && $next_element_sibling instanceof DOMElement && 'br' === $next_element_sibling->nodeName ) {
 			$next_element_sibling->parentNode->removeChild( $next_element_sibling );
 			$next_element_sibling = $node->nextSibling;
 		}

@@ -11,12 +11,12 @@ class AMP_DailyMotion_Embed_Handler_Test extends WP_UnitTestCase {
 
 			'url_simple'     => [
 				'https://www.dailymotion.com/video/x5awwth' . PHP_EOL,
-				'<amp-dailymotion data-videoid="x5awwth" layout="responsive" width="600" height="338"></amp-dailymotion>' . PHP_EOL,
+				'<amp-dailymotion data-videoid="x5awwth" layout="responsive" width="500" height="212"></amp-dailymotion>' . PHP_EOL,
 			],
 
 			'url_with_title' => [
 				'http://www.dailymotion.com/video/x5awwth_snatched-official-trailer-2-hd_shortfilms' . PHP_EOL,
-				'<amp-dailymotion data-videoid="x5awwth" layout="responsive" width="600" height="338"></amp-dailymotion>' . PHP_EOL,
+				'<amp-dailymotion data-videoid="x5awwth" layout="responsive" width="500" height="212"></amp-dailymotion>' . PHP_EOL,
 			],
 		];
 	}

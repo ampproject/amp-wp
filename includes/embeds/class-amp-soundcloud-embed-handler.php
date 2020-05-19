@@ -74,14 +74,14 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @param DOMElement $iframe_node The node to make AMP compatible.
 	 */
 	private function sanitize_raw_embed( DOMElement $iframe_node ) {
-		$src = $iframe_node->getAttribute( 'src' );
+		$iframe_src = $iframe_node->getAttribute( 'src' );
 
-		parse_str( wp_parse_url( $src, PHP_URL_QUERY ), $query );
+		parse_str( wp_parse_url( $iframe_src, PHP_URL_QUERY ), $query );
 		if ( empty( $query['url'] ) ) {
 			return;
 		}
 
-		$embed_id   = $this->parse_embed_id_from_url( $query['url'] );
+		$embed_id = $this->parse_embed_id_from_url( $query['url'] );
 		if ( null === $embed_id ) {
 			return;
 		}
@@ -127,7 +127,7 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return array|null Array with key being the embed type and value being the embed ID, or null if embed type and ID could not be found.
 	 */
 	private function parse_embed_id_from_url( $url ) {
-		if ( preg_match( '#/player/(?P<type>tracks|playlists)/(?P<id>\d+)#', $url, $matches ) ) {
+		if ( preg_match( '#/(?P<type>tracks|playlists)/(?P<id>\d+)#', $url, $matches ) ) {
 			if ( 'tracks' === $matches['type'] ) {
 				return [ 'track_id' => $matches['id'] ];
 			}

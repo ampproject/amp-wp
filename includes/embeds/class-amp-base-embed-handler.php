@@ -125,7 +125,7 @@ abstract class AMP_Base_Embed_Handler {
 					static function ( DOMNode $child ) {
 						return $child instanceof DOMElement ? 1 : 0;
 					},
-					iterator_to_array( $node->childNodes )
+					iterator_to_array( $parent_element->childNodes )
 				)
 			);
 			if ( 1 === $child_element_count ) {
@@ -151,17 +151,19 @@ abstract class AMP_Base_Embed_Handler {
 
 		// Handle case where script is wrapped in paragraph by wpautop.
 		if ( $next_element_sibling instanceof DOMElement && 'p' === $next_element_sibling->nodeName ) {
-			$children = array_map(
-				static function ( DOMNode $child ) {
-					return $child instanceof DOMElement ? 1 : 0;
-				},
-				iterator_to_array( $node->childNodes )
+			$children_elements = array_values(
+				array_filter(
+					iterator_to_array( $next_element_sibling->childNodes ),
+					static function ( DOMNode $child ) {
+						return $child instanceof DOMElement;
+					}
+				)
 			);
 
 			if (
-				1 === count( $children) &&
-				'script' === $children[0]->nodeName &&
-				false !== strpos( $children->item( 0 )->getAttribute( 'src' ), $base_src_url )
+				1 === count( $children_elements ) &&
+				'script' === $children_elements[0]->nodeName &&
+				false !== strpos( $children_elements[0]->getAttribute( 'src' ), $base_src_url )
 			) {
 				$next_element_sibling->parentNode->removeChild( $next_element_sibling );
 				return;

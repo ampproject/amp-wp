@@ -18,7 +18,7 @@ class AMP_Gfycat_Embed_Handler extends AMP_Base_Embed_Handler {
 	 *
 	 * @var string
 	 */
-	const BASE_EMBED_URL = 'www.hulu.com/embed.html';
+	const BASE_EMBED_URL = 'https://gfycat.com/ifr/';
 
 	/**
 	 * Register embed.
@@ -77,8 +77,8 @@ class AMP_Gfycat_Embed_Handler extends AMP_Base_Embed_Handler {
 		$attributes = [
 			'data-gfyid' => $gfycat_id,
 			'layout'     => 'responsive',
-			'width'        => $this->args['width'],
-			'height'       => $this->args['height'],
+			'height'     => $this->args['height'],
+			'width'      => $this->args['width'],
 		];
 
 		if ( $iframe_node->hasAttribute( 'width' ) ) {
