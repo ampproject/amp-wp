@@ -66,11 +66,11 @@ final class AMP_Setup_Wizard_Submenu_Page {
 	 * @param boolean $enqueue Whether to enqueue the asset immediately. Default false.
 	 */
 	public function add_setup_script( $handle, $enqueue = false ) {
-		$asset = $this->get_asset( $handle, sprintf( '%s/assets/js/%s.asset.php', AMP__DIR__, $handle ) );
+		$asset = $this->get_asset( $handle, AMP__DIR__ . "/assets/js/{$handle}.asset.php" );
 
 		wp_register_script(
 			$handle,
-			amp_get_asset_url( sprintf( 'js/%s.js', $handle ) ),
+			amp_get_asset_url( "js/{$handle}.js" ) ),
 			$asset['dependencies'],
 			$asset['version'],
 			true
@@ -159,9 +159,9 @@ final class AMP_Setup_Wizard_Submenu_Page {
 
 		foreach ( $wp_script_dependencies as $package ) {
 			if ( array_key_exists( $package, $scripts->registered ) ) {
-				$scripts->registered[ $package ]->src = amp_get_asset_url( sprintf( 'js/%s.js', $package ) );
+				$scripts->registered[ $package ]->src = amp_get_asset_url( "js/{$package}.js" ) );
 
-				$asset = $this->get_asset( $package, sprintf( '%s/assets/js/%s.asset.php', AMP__DIR__, $package ) );
+				$asset = $this->get_asset( $package, AMP__DIR__ . "/assets/js/{$package}.asset.php" );
 
 				$scripts->registered[ $package ]->ver = $asset['version'];
 			} else {
@@ -204,7 +204,7 @@ final class AMP_Setup_Wizard_Submenu_Page {
 		}
 
 		foreach ( $external_dependencies as $library ) {
-			$src = amp_get_asset_url( sprintf( 'js/vendor/%s.js', $library ) );
+			$src = amp_get_asset_url( "js/vendor/{$library}.js" );
 
 			if ( array_key_exists( $library, $scripts->registered ) ) {
 				$scripts->registered[ $library ]->ver = AMP__VERSION;
