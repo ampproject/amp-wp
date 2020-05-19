@@ -162,7 +162,6 @@ final class AMP_Setup_Wizard_Submenu_Page {
 		}
 
 		$bundled_core_packages = [
-			'wp-components',
 			'wp-dom-ready',
 			'wp-element',
 			'wp-escape-html',
