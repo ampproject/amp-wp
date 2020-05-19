@@ -53,7 +53,7 @@ final class AMP_Setup_Wizard_Submenu {
 			__( 'Setup Wizard', 'amp' ),
 			__( 'Setup Wizard', 'amp' ),
 			'manage_options',
-			static::SCREEN_ID,
+			self::SCREEN_ID,
 			[ $this->menu_page, 'render' ]
 		);
 	}
