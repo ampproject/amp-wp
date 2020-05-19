@@ -125,6 +125,13 @@ final class AMP_Setup_Wizard_Submenu_Page {
 				'APP_ROOT_ID' => self::APP_ROOT_ID,
 			]
 		);
+
+		wp_enqueue_style(
+			static::JS_HANDLE,
+			amp_get_asset_url( 'css/amp-setup-compiled.css' ),
+			[],
+			AMP__VERSION
+		);
 	}
 
 	/**
