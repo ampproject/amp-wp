@@ -25,9 +25,6 @@ class Test_AMP_Setup_Wizard_Submenu_Page extends WP_UnitTestCase {
 		parent::setUp();
 
 		$this->old_wp_scripts = isset( $GLOBALS['wp_scripts'] ) ? $GLOBALS['wp_scripts'] : null;
-		remove_action( 'wp_default_scripts', 'wp_default_scripts' );
-		remove_action( 'wp_default_scripts', 'wp_default_packages' );
-		$GLOBALS['wp_scripts'] = new WP_Scripts();
 
 		$this->page = new AMP_Setup_Wizard_Submenu_Page( 'amp-options' );
 	}
@@ -40,8 +37,9 @@ class Test_AMP_Setup_Wizard_Submenu_Page extends WP_UnitTestCase {
 	public function tearDown() {
 		parent::tearDown();
 
-		$GLOBALS['wp_scripts'] = $this->old_wp_scripts;
 		add_action( 'wp_default_scripts', 'wp_default_scripts' );
+		add_action( 'wp_default_scripts', 'wp_default_packages' );
+		$GLOBALS['wp_scripts'] = new WP_Scripts();
 	}
 
 	/**
@@ -52,7 +50,7 @@ class Test_AMP_Setup_Wizard_Submenu_Page extends WP_UnitTestCase {
 	public function test_init() {
 		$this->page->init();
 
-		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', [ $this->page, 'override_scripts' ] ) );
+		$this->assertEquals( 99, has_action( 'admin_enqueue_scripts', [ $this->page, 'override_scripts' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', [ $this->page, 'enqueue_assets' ] ) );
 	}
 
@@ -163,32 +161,70 @@ class Test_AMP_Setup_Wizard_Submenu_Page extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests AMP_Setup_Wizard_Submenu_Page::should_override_scripts
+	 *
+	 * @covers AMP_Setup_Wizard_Submenu_Page::should_override_scripts
+	 */
+	public function test_should_override_scripts() {
+		global $wp_version;
+
+		$original_wp_version = $wp_version;
+
+		$wp_version = '4.9';
+		$this->assertFalse( $this->page->should_override_scripts() );
+
+		$wp_version = '5.0';
+		$this->assertTrue( $this->page->should_override_scripts() );
+
+		$wp_version = '5.4';
+		$this->assertFalse( $this->page->should_override_scripts() );
+
+		$wp_version = $original_wp_version;
+	}
+
+	/**
+	 * Provides arguments for the test_override_scripts method.
+	 *
+	 * @return array Array of handles and should_override arguments.
+	 */
+	public function get_test_handles() {
+		return [
+			[ 'wp-element', true ],
+			[ 'react', true ],
+			[ 'wp-polyfill', true ],
+			[ 'wp-element', false ],
+			[ 'react', false ],
+			[ 'wp-polyfill', false ],
+		];
+	}
+
+	/**
 	 * Tests AMP_Setup_Wizard_Submenu_Page::override_scripts
 	 *
 	 * @covers AMP_Setup_Wizard_Submenu_Page::override_scripts
+	 *
+	 * @dataProvider get_test_handles
 	 */
-	public function test_override_scripts() {
-		$filter_asset = static function( $asset, $handle ) {
-			if ( 'amp-setup' !== $handle ) {
-				return $asset;
-			}
+	public function test_override_scripts( $handle, $should_override ) {
+		global $wp_scripts;
 
-			return [
-				'dependencies' => [
-					'wp-components',
-					'wp-polyfill',
-					'react',
-				],
-				'version'      => '1.0',
-			];
-		};
+		$wp_scripts = $this->old_wp_scripts;
 
-		add_filter( 'amp_setup_asset', $filter_asset, 10, 2 );
+		$filter_callback = $should_override ? '__return_true' : '__return_false';
+		add_filter( 'amp_should_override_setup_scripts', $filter_callback );
+
 		$this->page->override_scripts( $this->page->screen_handle() );
-		remove_filter( 'amp_setup_asset', $filter_asset );
 
-		$this->assertTrue( wp_script_is( 'wp-components', 'registered' ) );
-		$this->assertTrue( wp_script_is( 'react', 'registered' ) );
-		$this->assertTrue( wp_script_is( 'wp-polyfill', 'registered' ) );
+		$check = array_key_exists( $handle, $wp_scripts->registered ) && false !== strpos( $wp_scripts->registered[ $handle ]->src, 'plugins/amp' );
+
+		if ( $should_override ) {
+			$this->assertTrue( $check );
+		} else {
+			$this->assertFalse( $check );
+		}
+
+		remove_filter( 'amp_should_override_setup_scripts', $filter_callback );
+
+		$wp_scripts = $this->old_wp_scripts;
 	}
 }

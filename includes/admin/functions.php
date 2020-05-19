@@ -203,6 +203,12 @@ function amp_bootstrap_admin() {
  * @return bool
  */
 function amp_should_use_new_onboarding() {
+	global $wp_version;
+
+	if ( version_compare( $wp_version, '5.0', '<' ) ) {
+		return false;
+	}
+
 	if ( '1' === filter_input( INPUT_GET, 'amp-new-onboarding', FILTER_SANITIZE_NUMBER_INT ) ) {
 		return true;
 	}

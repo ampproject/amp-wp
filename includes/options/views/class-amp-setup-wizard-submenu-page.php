@@ -37,7 +37,7 @@ final class AMP_Setup_Wizard_Submenu_Page {
 	 * Sets up hooks.
 	 */
 	public function init() {
-		add_action( 'admin_enqueue_scripts', [ $this, 'override_scripts' ] );
+		add_action( 'admin_enqueue_scripts', [ $this, 'override_scripts' ], 99 );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
 	}
 
@@ -128,96 +128,65 @@ final class AMP_Setup_Wizard_Submenu_Page {
 	}
 
 	/**
+	 * Whether the plugin should override scripts for the onboarding screen.
+	 *
+	 * @return boolean
+	 */
+	public function should_override_scripts() {
+		global $wp_version;
+
+		$should_override_scripts = version_compare( $wp_version, self::TARGET_WP_VERSION, '<' ) && version_compare( $wp_version, '5.0', '>=' );
+
+		/**
+		 * Filters whether the plugin should override scripts for the onboarding screen.
+		 *
+		 * @param boolean $should_override_scripts Default true if WP version is between 5.0 and the current target version.
+		 */
+		return apply_filters( 'amp_should_override_setup_scripts', $should_override_scripts );
+	}
+
+	/**
 	 * Overrides core assets with required versions if needed.
 	 *
 	 * @param string $hook_suffix The current admin page.
 	 */
 	public function override_scripts( $hook_suffix ) {
-		global $wp_version;
+		global $wp_scripts;
 
 		if ( $this->screen_handle() !== $hook_suffix ) {
 			return;
 		}
 
-		if ( version_compare( $wp_version, self::TARGET_WP_VERSION, '>=' ) && wp_script_is( 'react', 'registered' ) ) {
+		if ( ! $this->should_override_scripts() ) {
 			return;
 		}
 
-		$scripts = wp_scripts();
+		$bundled_core_packages = [
+			'wp-components',
+			'wp-dom-ready',
+			'wp-element',
+			'wp-escape-html',
+			'wp-i18n',
+			'wp-polyfill',
+			'wp-url',
+		];
 
-		$main_asset_dependencies = $this->get_asset( self::JS_HANDLE, sprintf( '%s/assets/js/%s.asset.php', AMP__DIR__, self::JS_HANDLE ) )['dependencies'];
-		$wp_script_dependencies  = [];
-		$external_dependencies   = [ 'react', 'react-dom' ];
+		$bundled_external_libraries = [ 'react', 'react-dom', 'lodash' ];
 
-		foreach ( $main_asset_dependencies as $dependency ) {
-			if ( 0 === strpos( $dependency, 'wp-' ) ) {
-				$wp_script_dependencies[] = $dependency;
-			} else {
-				$external_dependencies[] = $dependency;
-			}
+		foreach ( $bundled_core_packages as $package ) {
+			$wp_scripts->registered[ $package ]->src = amp_get_asset_url( "js/{$package}.js" );
+
+			$asset = $this->get_asset( $package, AMP__DIR__ . "/assets/js/{$package}.asset.php" );
+
+			$wp_scripts->registered[ $package ]->ver = $asset['version'];
 		}
 
-		foreach ( $wp_script_dependencies as $package ) {
-			if ( array_key_exists( $package, $scripts->registered ) ) {
-				$scripts->registered[ $package ]->src = amp_get_asset_url( "js/{$package}.js" );
-
-				$asset = $this->get_asset( $package, AMP__DIR__ . "/assets/js/{$package}.asset.php" );
-
-				$scripts->registered[ $package ]->ver = $asset['version'];
-			} else {
-				$this->add_setup_script( $package );
-
-				// Add inline scripts for 4.9.
-				// @see https://github.com/WordPress/WordPress/blob/master/wp-includes/script-loader.php#L276.
-				switch ( $package ) {
-					case 'wp-api-fetch':
-						$scripts->add_inline_script(
-							'wp-api-fetch',
-							sprintf(
-								'wp.apiFetch.use( wp.apiFetch.createRootURLMiddleware( "%s" ) );',
-								esc_url_raw( get_rest_url() )
-							),
-							'after'
-						);
-
-						$scripts->add_inline_script(
-							'wp-api-fetch',
-							implode(
-								"\n",
-								[
-									sprintf(
-										'wp.apiFetch.nonceMiddleware = wp.apiFetch.createNonceMiddleware( "%s" );',
-										( wp_installing() && ! is_multisite() ) ? '' : wp_create_nonce( 'wp_rest' )
-									),
-									'wp.apiFetch.use( wp.apiFetch.nonceMiddleware );',
-									'wp.apiFetch.use( wp.apiFetch.mediaUploadMiddleware );',
-									sprintf(
-										'wp.apiFetch.nonceEndpoint = "%s";',
-										admin_url( 'admin-ajax.php?action=rest-nonce' )
-									),
-								]
-							),
-							'after'
-						);
-				}
-			}
-		}
-
-		foreach ( $external_dependencies as $library ) {
+		foreach ( $bundled_external_libraries as $library ) {
 			$src = amp_get_asset_url( "js/vendor/{$library}.js" );
 
-			if ( array_key_exists( $library, $scripts->registered ) ) {
-				$scripts->registered[ $library ]->ver = AMP__VERSION;
-				$scripts->registered[ $library ]->src = $src;
-			} else {
-				wp_register_script(
-					$library,
-					$src,
-					[],
-					AMP__VERSION,
-					true
-				);
-			}
+			$wp_scripts->registered[ $library ]->ver = AMP__VERSION;
+			$wp_scripts->registered[ $library ]->src = $src;
+
 		}
 	}
 }
