@@ -210,7 +210,7 @@ class Test_AMP_Setup_Wizard_Submenu_Page extends WP_UnitTestCase {
 	public function test_override_scripts( $handle, $should_override ) {
 		global $wp_scripts, $wp_version;
 
-		if ( version_compare( $wp_version, '5.0', '<' ) && 'wp-polyfill' === $handle ) {
+		if ( version_compare( $wp_version, '5.0', '<' ) ) {
 			$should_override = false;
 		}
 
