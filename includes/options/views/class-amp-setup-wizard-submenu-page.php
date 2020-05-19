@@ -116,13 +116,13 @@ final class AMP_Setup_Wizard_Submenu_Page {
 			return;
 		}
 
-		$this->add_setup_script( static::JS_HANDLE, true );
+		$this->add_setup_script( self::JS_HANDLE, true );
 
 		wp_localize_script(
-			static::JS_HANDLE,
+			self::JS_HANDLE,
 			'ampSetup',
 			[
-				'APP_ROOT_ID' => static::APP_ROOT_ID,
+				'APP_ROOT_ID' => self::APP_ROOT_ID,
 			]
 		);
 	}
@@ -139,13 +139,13 @@ final class AMP_Setup_Wizard_Submenu_Page {
 			return;
 		}
 
-		if ( floatval( $wp_version ) >= static::TARGET_WP_VERSION && wp_script_is( 'react', 'registered' ) ) {
+		if ( floatval( $wp_version ) >= self::TARGET_WP_VERSION && wp_script_is( 'react', 'registered' ) ) {
 			return;
 		}
 
 		$scripts = wp_scripts();
 
-		$main_asset_dependencies = $this->get_asset( static::JS_HANDLE, sprintf( '%s/assets/js/%s.asset.php', AMP__DIR__, static::JS_HANDLE ) )['dependencies'];
+		$main_asset_dependencies = $this->get_asset( self::JS_HANDLE, sprintf( '%s/assets/js/%s.asset.php', AMP__DIR__, self::JS_HANDLE ) )['dependencies'];
 		$wp_script_dependencies  = [];
 		$external_dependencies   = [ 'react', 'react-dom' ];
 
