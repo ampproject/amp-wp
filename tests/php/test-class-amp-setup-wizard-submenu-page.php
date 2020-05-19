@@ -210,7 +210,11 @@ class Test_AMP_Setup_Wizard_Submenu_Page extends WP_UnitTestCase {
 	 * @dataProvider get_test_handles
 	 */
 	public function test_override_scripts( $handle, $should_override ) {
-		global $wp_scripts;
+		global $wp_scripts, $wp_version;
+
+		if ( version_compare( $wp_version, '5.0', '<' ) ) {
+			$should_override = false;
+		}
 
 		$wp_scripts = $this->old_wp_scripts;
 
