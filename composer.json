@@ -102,6 +102,6 @@
   "minimum-stability": "dev",
   "prefer-stable": true,
   "scripts": {
-    "analyze": "if [ -z $TEST_SKIP_PHPSTAN ]; then phpstan analyze --ansi; fi"
+    "analyze": "if [ -z $TEST_SKIP_PHPSTAN ]; then phpstan --version; phpstan analyze --ansi; fi"
   }
 }
