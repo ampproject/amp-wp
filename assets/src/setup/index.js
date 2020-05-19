@@ -13,11 +13,14 @@ import { APP_ROOT_ID } from 'amp-setup'; // WP localized data.
 /**
  * Internal dependencies
  */
+import './setup.css';
 import { TechnicalBackground } from './pages/technical-background';
 import { Stepper } from './components/stepper';
 import { Goals } from './pages/goals';
-
-import './setup.css';
+import { TemplateMode } from './pages/template-mode';
+import { ChooseReaderTheme } from './pages/choose-reader-theme';
+import { SiteConfigurationSummary } from './pages/site-configuration-summary';
+import { Save } from './pages/save';
 
 const PAGES = [
 	{
@@ -27,6 +30,22 @@ const PAGES = [
 	{
 		navTitle: __( 'Site Goals', 'amp' ),
 		PageComponent: Goals,
+	},
+	{
+		navTitle: __( 'Template Mode', 'amp' ),
+		PageComponent: TemplateMode,
+	},
+	{
+		navTitle: __( 'Choose Reader Theme', 'amp' ),
+		PageComponent: ChooseReaderTheme,
+	},
+	{
+		navTitle: __( 'Site Configuration Summary', 'amp' ),
+		PageComponent: SiteConfigurationSummary,
+	},
+	{
+		navTitle: __( 'Save', 'amp' ),
+		PageComponent: Save,
 	},
 ];
 
@@ -40,35 +59,39 @@ function Setup() {
 	const { PageComponent } = useMemo( () => getPage( activePageIndex ), [ activePageIndex ] );
 
 	return (
-		<div>
-			<Stepper
-				activePageIndex={ activePageIndex }
-				pages={ PAGES }
-			/>
-			<div className="page">
-				<PageComponent />
-			</div>
-			<div>
-				{ 0 === activePageIndex
-					? <span />
-					: (
-						<button onClick={ () => {
-							setActivePageIndex( activePageIndex - 1 );
-						} }>
-							{ __( 'Back', 'amp' ) }
-						</button>
-					)
-				}
-				{ PAGES.length - 1 === activePageIndex
-					? <span />
-					: (
-						<button onClick={ () => {
-							setActivePageIndex( activePageIndex + 1 );
-						} }>
-							{ __( 'Next', 'amp' ) }
-						</button>
-					)
-				}
+		<div className="amp-setup-container">
+			<div className="amp-setup">
+				<Stepper
+					activePageIndex={ activePageIndex }
+					pages={ PAGES }
+				/>
+				<div className="page">
+					<PageComponent />
+
+					<div>
+						{ 0 === activePageIndex
+							? <span />
+							: (
+								<button onClick={ () => {
+									setActivePageIndex( activePageIndex - 1 );
+								} }>
+									{ __( 'Back', 'amp' ) }
+								</button>
+							)
+						}
+						{ PAGES.length - 1 === activePageIndex
+							? <span />
+							: (
+								<button onClick={ () => {
+									setActivePageIndex( activePageIndex + 1 );
+								} }>
+									{ __( 'Next', 'amp' ) }
+								</button>
+							)
+						}
+					</div>
+
+				</div>
 			</div>
 		</div>
 	);
