@@ -200,7 +200,7 @@ function amp_bootstrap_admin() {
  *
  * @todo Remove this function on release.
  *
- * @return boolean
+ * @return bool
  */
 function amp_should_use_new_onboarding() {
 	if ( '1' === filter_input( INPUT_GET, 'amp-new-onboarding', FILTER_SANITIZE_NUMBER_INT ) ) {
