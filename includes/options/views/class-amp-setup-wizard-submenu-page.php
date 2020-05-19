@@ -31,7 +31,7 @@ final class AMP_Setup_Wizard_Submenu_Page {
 	 *
 	 * @var float
 	 */
-	const TARGET_WP_VERSION = 5.4;
+	const TARGET_WP_VERSION = '5.4';
 
 	/**
 	 * Sets up hooks.
@@ -139,7 +139,7 @@ final class AMP_Setup_Wizard_Submenu_Page {
 			return;
 		}
 
-		if ( floatval( $wp_version ) >= self::TARGET_WP_VERSION && wp_script_is( 'react', 'registered' ) ) {
+		if ( version_compare( $wp_version, self::TARGET_WP_VERSION, '>=' ) && wp_script_is( 'react', 'registered' ) ) {
 			return;
 		}
 
