@@ -185,7 +185,7 @@ final class AMP_Setup_Wizard_Submenu_Page {
 		}
 
 		foreach ( $bundled_external_libraries as $library ) {
-			if ( ! array_key_exists( $package, $wp_scripts->registered ) ) {
+			if ( ! array_key_exists( $library, $wp_scripts->registered ) ) {
 				continue;
 			}
 
