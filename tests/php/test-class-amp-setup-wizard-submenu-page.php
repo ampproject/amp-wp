@@ -195,10 +195,8 @@ class Test_AMP_Setup_Wizard_Submenu_Page extends WP_UnitTestCase {
 		return [
 			[ 'wp-element', true ],
 			[ 'react', true ],
-			[ 'wp-polyfill', true ],
 			[ 'wp-element', false ],
 			[ 'react', false ],
-			[ 'wp-polyfill', false ],
 		];
 	}
 
