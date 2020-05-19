@@ -107,7 +107,7 @@ class Test_AMP_Setup_Wizard_Submenu_Page extends WP_UnitTestCase {
 	 * @param boolean $enqueued Whether to enqueue the script.
 	 */
 	public function test_add_setup_script( $handle, $enqueued ) {
-		$filter_asset = function( $asset, $asset_handle ) use ( $handle ) {
+		$filter_asset = static function( $asset, $asset_handle ) use ( $handle ) {
 			if ( $handle !== $asset_handle ) {
 				return $asset;
 			}
@@ -136,7 +136,7 @@ class Test_AMP_Setup_Wizard_Submenu_Page extends WP_UnitTestCase {
 			'version'      => '1.0',
 		];
 
-		$filter_asset = function() use ( $test_data ) {
+		$filter_asset = static function() use ( $test_data ) {
 			return $test_data;
 		};
 
@@ -168,7 +168,7 @@ class Test_AMP_Setup_Wizard_Submenu_Page extends WP_UnitTestCase {
 	 * @covers AMP_Setup_Wizard_Submenu_Page::override_scripts
 	 */
 	public function test_override_scripts() {
-		$filter_asset = function( $asset, $handle ) {
+		$filter_asset = static function( $asset, $handle ) {
 			if ( 'amp-setup' !== $handle ) {
 				return $asset;
 			}
