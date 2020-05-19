@@ -173,6 +173,10 @@ final class AMP_Setup_Wizard_Submenu_Page {
 		$bundled_external_libraries = [ 'react', 'react-dom', 'lodash' ];
 
 		foreach ( $bundled_core_packages as $package ) {
+			if ( ! array_key_exists( $package, $wp_scripts->registered ) ) {
+				continue;
+			}
+
 			$wp_scripts->registered[ $package ]->src = amp_get_asset_url( "js/{$package}.js" );
 
 			$asset = $this->get_asset( $package, AMP__DIR__ . "/assets/js/{$package}.asset.php" );
@@ -181,10 +185,12 @@ final class AMP_Setup_Wizard_Submenu_Page {
 		}
 
 		foreach ( $bundled_external_libraries as $library ) {
-			$src = amp_get_asset_url( "js/vendor/{$library}.js" );
+			if ( ! array_key_exists( $package, $wp_scripts->registered ) ) {
+				continue;
+			}
 
 			$wp_scripts->registered[ $library ]->ver = AMP__VERSION;
-			$wp_scripts->registered[ $library ]->src = $src;
+			$wp_scripts->registered[ $library ]->src = amp_get_asset_url( "js/vendor/{$library}.js" );
 
 		}
 	}
