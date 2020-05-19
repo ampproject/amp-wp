@@ -70,7 +70,7 @@ final class AMP_Setup_Wizard_Submenu_Page {
 
 		wp_register_script(
 			$handle,
-			amp_get_asset_url( "js/{$handle}.js" ) ),
+			amp_get_asset_url( "js/{$handle}.js" ),
 			$asset['dependencies'],
 			$asset['version'],
 			true
@@ -159,7 +159,7 @@ final class AMP_Setup_Wizard_Submenu_Page {
 
 		foreach ( $wp_script_dependencies as $package ) {
 			if ( array_key_exists( $package, $scripts->registered ) ) {
-				$scripts->registered[ $package ]->src = amp_get_asset_url( "js/{$package}.js" ) );
+				$scripts->registered[ $package ]->src = amp_get_asset_url( "js/{$package}.js" );
 
 				$asset = $this->get_asset( $package, AMP__DIR__ . "/assets/js/{$package}.asset.php" );
 
