@@ -11,7 +11,7 @@
  *
  * @since @todo NEW_ONBOARDING_RELEASE_VERSION
  */
-class AMP_Setup_Wizard_Submenu {
+final class AMP_Setup_Wizard_Submenu {
 	/**
 	 * Setup screen ID.
 	 *
