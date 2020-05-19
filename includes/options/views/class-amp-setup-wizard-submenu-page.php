@@ -29,7 +29,7 @@ final class AMP_Setup_Wizard_Submenu_Page {
 	/**
 	 * The minimum core WP version whose core assets are compatibile with the setup feature.
 	 *
-	 * @var float
+	 * @var string
 	 */
 	const TARGET_WP_VERSION = '5.4';
 
