@@ -1600,16 +1600,6 @@ class AMP_Theme_Support {
 	 * @param string[] $script_handles AMP script handles for components identified during output buffering.
 	 */
 	public static function ensure_required_markup( Document $dom, $script_handles = [] ) {
-		/**
-		 * Elements.
-		 *
-		 * @var DOMElement $meta
-		 * @var DOMElement $script
-		 * @var DOMElement $link
-		 * @var DOMElement $style
-		 * @var DOMElement $noscript
-		 */
-
 		// Gather all links.
 		$links         = [
 			Attribute::REL_PRECONNECT => [
@@ -1625,6 +1615,11 @@ class AMP_Theme_Support {
 			],
 		];
 		$link_elements = $dom->head->getElementsByTagName( Tag::LINK );
+		/**
+		 * Link element.
+		 *
+		 * @var DOMElement $link
+		 */
 		foreach ( $link_elements as $link ) {
 			if ( $link->hasAttribute( Attribute::REL ) ) {
 				$links[ $link->getAttribute( Attribute::REL ) ][] = $link;
@@ -1662,6 +1657,12 @@ class AMP_Theme_Support {
 		$ordered_scripts = [];
 		$head_scripts    = [];
 		$runtime_src     = wp_scripts()->registered[ Amp::RUNTIME ]->src;
+
+		/**
+		 * Script element.
+		 *
+		 * @var DOMElement $script
+		 */
 		foreach ( $dom->head->getElementsByTagName( Tag::SCRIPT ) as $script ) { // Note that prepare_response() already moved body scripts to head.
 			$head_scripts[] = $script;
 		}
