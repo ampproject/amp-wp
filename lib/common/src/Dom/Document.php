@@ -847,26 +847,26 @@ final class Document extends DOMDocument
      */
     private function maybeReplaceNoscriptElements($html)
     {
-        if (! version_compare(LIBXML_DOTTED_VERSION, '2.8', '<')) {
-            return $html;
+        if (version_compare(LIBXML_DOTTED_VERSION, '2.8', '<')) {
+            $html = preg_replace_callback(
+                '#^.+?(?=<body)#is',
+                function ($headMatches) {
+                    return preg_replace_callback(
+                        '#<noscript[^>]*>.*?</noscript>#si',
+                        function ($noscriptMatches) {
+                            $placeholder = sprintf('<!--noscript:%s-->', (string)$this->rand());
+
+                            $this->noscriptPlaceholderComments[$placeholder] = $noscriptMatches[0];
+                            return $placeholder;
+                        },
+                        $headMatches[0]
+                    );
+                },
+                $html
+            );
         }
 
-        return preg_replace_callback(
-            '#^.+?(?=<body)#is',
-            function ($headMatches) {
-                return preg_replace_callback(
-                    '#<noscript[^>]*>.*?</noscript>#si',
-                    function ($noscriptMatches) {
-                        $placeholder = sprintf('<!--noscript:%s-->', (string)$this->rand());
-
-                        $this->noscriptPlaceholderComments[$placeholder] = $noscriptMatches[0];
-                        return $placeholder;
-                    },
-                    $headMatches[0]
-                );
-            },
-            $html
-        );
+        return $html;
     }
 
     /**
@@ -1420,7 +1420,7 @@ final class Document extends DOMDocument
         /**
          * Main tag to keep.
          *
-         * @var DOMElement $mainTag
+         * @var DOMElement|null $mainTag
          */
         $mainTag = $tags->item(0);
 

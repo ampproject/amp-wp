@@ -130,12 +130,6 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 	 * Process links by adding adding AMP query var to links in paired mode and adding rel=amphtml.
 	 */
 	public function process_links() {
-		/**
-		 * Element.
-		 *
-		 * @var DOMElement $element
-		 */
-
 		// Remove admin bar from DOM to prevent mutating it.
 		$admin_bar_container   = $this->dom->getElementById( 'wpadminbar' );
 		$admin_bar_placeholder = null;
@@ -144,6 +138,11 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 			$admin_bar_container->parentNode->replaceChild( $admin_bar_placeholder, $admin_bar_container );
 		}
 
+		/**
+		 * Element.
+		 *
+		 * @var DOMElement $element
+		 */
 		foreach ( $this->dom->xpath->query( '//*[ local-name() = "a" or local-name() = "area" ]' ) as $element ) {
 			if ( ! $element->hasAttribute( 'href' ) ) {
 				continue;
