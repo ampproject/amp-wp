@@ -600,6 +600,12 @@ class AMP_Validation_Manager {
 		if ( true === $should_validate_response ) {
 			self::add_validation_error_sourcing();
 			self::$is_validate_request = true;
+
+			if ( '1' === (string) ini_get( 'display_errors' ) ) {
+				// Suppress the display of fatal errors that may arise during validation so that they will not be counted
+				// as actual validation errors.
+				ini_set( 'display_errors', 0 ); // phpcs:ignore WordPress.PHP.IniSet.display_errors_Blacklisted
+			}
 		} else {
 			self::$is_validate_request = false;
 
