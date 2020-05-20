@@ -27,7 +27,7 @@ final class AMP_Setup_Wizard_Submenu_Page {
 	const APP_ROOT_ID = 'amp-setup';
 
 	/**
-	 * The minimum core WP version whose core assets are compatibile with the setup feature.
+	 * The minimum core WP version whose core assets are compatible with the setup feature.
 	 *
 	 * @var string
 	 */
