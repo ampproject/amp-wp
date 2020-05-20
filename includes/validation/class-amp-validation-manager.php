@@ -601,9 +601,7 @@ class AMP_Validation_Manager {
 			self::add_validation_error_sourcing();
 			self::$is_validate_request = true;
 
-			$display_errors = (string) ini_get( 'display_errors' );
-
-			if ( '1' === $display_errors ) {
+			if ( '1' === (string) ini_get( 'display_errors' ) ) {
 				// Suppress the display of fatal errors that may arise during validation so that they will not be counted
 				// as actual validation errors.
 				ini_set( 'display_errors', 0 ); // phpcs:ignore WordPress.PHP.IniSet.display_errors_Blacklisted
