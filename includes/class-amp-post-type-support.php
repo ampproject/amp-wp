@@ -50,6 +50,24 @@ class AMP_Post_Type_Support {
 	}
 
 	/**
+	 * Get post types that can be shown in the REST API and supports AMP.
+	 *
+	 * @since 1.6
+	 *
+	 * @return string[] Post types.
+	 */
+	public static function get_post_types_for_rest_api() {
+		return array_intersect(
+			get_post_types_by_support( 'amp' ),
+			get_post_types(
+				[
+					'show_in_rest' => true,
+				]
+			)
+		);
+	}
+
+	/**
 	 * Declare support for post types.
 	 *
 	 * This function should only be invoked through the 'after_setup_theme' action to
