@@ -1305,10 +1305,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'disallowed_attributes'                        => [
-				'<a href="/path/to/file.jpg" style="border: 1px solid red !important;">Link</a>',
+				'<a href="/path/to/file.jpg" color="red">Link</a>',
 				'<a href="/path/to/file.jpg">Link</a>',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_BLACKLISTED_VALUE_REGEX ],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR ],
 			],
 
 			'onclick_attribute'                            => [
@@ -1323,13 +1323,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'multiple_disallowed_attributes'               => [
-				'<a href="/path/to/file.jpg" style="border: 1px solid red !important;" onclick="alert(e);">Link</a>',
+				'<a href="/path/to/file.jpg" color="red" onclick="alert(e);">Link</a>',
 				'<a href="/path/to/file.jpg">Link</a>',
 				[],
 				[
 					[
-						'code'      => AMP_Tag_And_Attribute_Sanitizer::INVALID_BLACKLISTED_VALUE_REGEX,
-						'node_name' => 'style',
+						'code'      => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
+						'node_name' => 'color',
 					],
 					[
 						'code'      => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
@@ -1339,7 +1339,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'attribute_recursive'                          => [
-				'<div style="border: 1px solid red !important;"><a href="/path/to/file.jpg" onclick="alert(e);">Hello World</a></div>',
+				'<div color="red"><a href="/path/to/file.jpg" onclick="alert(e);">Hello World</a></div>',
 				'<div><a href="/path/to/file.jpg">Hello World</a></div>',
 				[],
 				[
@@ -1348,8 +1348,8 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						'node_name' => 'onclick',
 					],
 					[
-						'code'      => AMP_Tag_And_Attribute_Sanitizer::INVALID_BLACKLISTED_VALUE_REGEX,
-						'node_name' => 'style',
+						'code'      => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
+						'node_name' => 'color',
 					],
 				],
 			],
@@ -1443,10 +1443,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'a_empty_with_children_with_restricted_attributes' => [
-				'<a><span style="color: red !important;">Red</span>&amp;<span style="color: blue !important;">Orange</span></a>',
+				'<a><span color="red">Red</span>&amp;<span color="orange">Orange</span></a>',
 				'<a><span>Red</span>&amp;<span>Orange</span></a>',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_BLACKLISTED_VALUE_REGEX, AMP_Tag_And_Attribute_Sanitizer::INVALID_BLACKLISTED_VALUE_REGEX ],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR, AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR ],
 			],
 
 			'spans_with_xml_namespaced_attributes'         => [
@@ -1507,10 +1507,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			// font is removed so we should check that other elements are checked as well.
 			'font_with_other_bad_elements'                 => [
-				'<font size="1">Headline</font><span style="color: blue !important">Span</span>',
+				'<font size="1">Headline</font><span color="blue">Span</span>',
 				'Headline<span>Span</span>',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG, AMP_Tag_And_Attribute_Sanitizer::INVALID_BLACKLISTED_VALUE_REGEX ],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG, AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR ],
 			],
 
 			'amp_bind_attr'                                => [
@@ -1689,15 +1689,15 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'non-layout-col-element-attrs'                 => [
-				'<table><col class="foo" width="123" style="background:red !important;"><col class="bar" style="background:green !important;" width="12%"><col class="baz" style="background:blue !important;" width="2*"><tr><td>1</td><td>2</td><td>3</td></tr></table>',
+				'<table><col class="foo" width="123" color="red"><col class="bar" color="green" width="12%"><col class="baz" color="blue" width="2*"><tr><td>1</td><td>2</td><td>3</td></tr></table>',
 				'<table><col class="foo"><col class="bar"><col class="baz"><tr><td>1</td><td>2</td><td>3</td></tr></table>',
 				[],
 				[
 					AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
-					AMP_Tag_And_Attribute_Sanitizer::INVALID_BLACKLISTED_VALUE_REGEX,
-					AMP_Tag_And_Attribute_Sanitizer::INVALID_BLACKLISTED_VALUE_REGEX,
 					AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
-					AMP_Tag_And_Attribute_Sanitizer::INVALID_BLACKLISTED_VALUE_REGEX,
+					AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
+					AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
+					AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
 					AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
 				],
 			],
