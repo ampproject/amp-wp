@@ -1212,6 +1212,11 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		);
 		$this->assertEquals( $metadata['publisher']['logo'], amp_get_publisher_logo() );
 
+		// Test author archive.
+		$this->go_to( get_author_posts_url( $user_id ) );
+		$metadata = amp_get_schemaorg_metadata();
+		$this->assertEquals( 'CollectionPage', $metadata['@type'] );
+
 		// Test override.
 		$this->go_to( get_permalink( $post_id ) );
 		$self = $this;
