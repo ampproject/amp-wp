@@ -120,7 +120,7 @@ class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Determine the video ID from the URL.
 	 *
 	 * @param string $url URL.
-	 * @return integer Video ID.
+	 * @return string Video ID.
 	 */
 	private function get_video_id_from_url( $url ) {
 		$parsed_url = wp_parse_url( $url );

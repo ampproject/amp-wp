@@ -79,13 +79,8 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 		 */
 		$fb_root = $dom->getElementById( 'fb-root' );
 		if ( $fb_root ) {
-			/**
-			 * Script.
-			 *
-			 * @var DOMElement $script_query
-			 */
-			$script_query = $dom->xpath->query( '//script[ starts-with( @src, "https://connect.facebook.net" ) and contains( @src, "sdk.js" ) ]' );
-			foreach ( $script_query as $script ) {
+			$script_elements = $dom->xpath->query( '//script[ starts-with( @src, "https://connect.facebook.net" ) and contains( @src, "sdk.js" ) ]' );
+			foreach ( $script_elements as $script ) {
 				$parent_node = $script->parentNode;
 				$parent_node->removeChild( $script );
 
@@ -96,8 +91,8 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 			}
 
 			// Remove other instances of <div id="fb-root">.
-			$fb_root_query = $dom->xpath->query( '//div[ @id = "fb-root" ]' );
-			foreach ( $fb_root_query as $fb_root ) {
+			$fb_root_elements = $dom->xpath->query( '//div[ @id = "fb-root" ]' );
+			foreach ( $fb_root_elements as $fb_root ) {
 				$fb_root->parentNode->removeChild( $fb_root );
 			}
 		}
