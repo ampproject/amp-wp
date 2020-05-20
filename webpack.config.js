@@ -15,7 +15,6 @@ const WebpackBar = require( 'webpackbar' );
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
 const DependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extraction-webpack-plugin' );
 const { defaultRequestToExternal, defaultRequestToHandle, camelCaseDash } = require( '@wordpress/dependency-extraction-webpack-plugin/util' );
-const { dependencies } = require( './package' );
 
 const sharedConfig = {
 	output: {
