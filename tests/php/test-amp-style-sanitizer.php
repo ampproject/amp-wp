@@ -2147,6 +2147,10 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'http://fonts.googleapis.com/css?family=Tangerine',
 				[],
 			],
+			'tangerine4'  => [
+				'https://fonts.googleapis.com/css2?family=Tangerine',
+				[],
+			],
 			'typekit'     => [
 				'https://use.typekit.net/abc.css',
 				[],

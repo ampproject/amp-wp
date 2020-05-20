@@ -585,9 +585,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'amp-twitter'                                  => [
-				'<amp-twitter width="321" height="543" layout="responsive" data-tweetid="98765"></amp-twitter>',
-				null, // No change.
-				[ 'amp-twitter' ],
+				'<amp-twitter width="321" height="543" layout="responsive" data-tweetid="98765" [data-tweetid]="somestate"></amp-twitter>',
+				'<amp-twitter width="321" height="543" layout="responsive" data-tweetid="98765" data-amp-bind-data-tweetid="somestate"></amp-twitter>',
+				[ 'amp-twitter', 'amp-bind' ],
 			],
 
 			'amp-user-notification'                        => [
@@ -730,7 +730,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'form'                                         => [
-				'<form method="get" action="/form/search-html/get" target="_blank"><fieldset><label><span>Search for</span><input type="search" placeholder="test" name="term" required></label><input type="submit" value="Search"><input type="button" value="Open Lightbox" on="tap:lb1.open"></fieldset></form>',
+				'<form method="get" action="/form/search-html/get" target="_blank"><fieldset><label><span>Search for</span><input type="search" placeholder="test" name="term" required></label><input type="submit" value="Search" enterkeyhint="search"><input type="button" value="Open Lightbox" on="tap:lb1.open"></fieldset></form>',
 				null,
 				[ 'amp-form' ],
 			],
