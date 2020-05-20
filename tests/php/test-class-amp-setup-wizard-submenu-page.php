@@ -31,7 +31,7 @@ class Test_AMP_Setup_Wizard_Submenu_Page extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 
-		$this->page = new AMP_Setup_Wizard_Submenu_Page( 'amp-options' );
+		$this->page = new AMP_Setup_Wizard_Submenu_Page();
 	}
 
 	/**
