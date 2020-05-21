@@ -902,7 +902,7 @@ class AMP_Validated_URL_Post_Type {
 					continue;
 				}
 				foreach ( $validation_error['data']['sources'] as $source ) {
-					if ( ! isset( $source['type'], $source['name'] ) {
+					if ( ! isset( $source['type'], $source['name'] ) ) {
 						continue;
 					}
 					$data = json_decode( $validation_error['term']->description, true );
