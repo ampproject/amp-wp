@@ -194,3 +194,26 @@ function amp_bootstrap_admin() {
 	$site_health = new SiteHealth();
 	$site_health->init();
 }
+
+/**
+ * Whether to activate the new onboarding feature.
+ *
+ * @return bool
+ */
+function amp_should_use_new_onboarding() {
+	if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
+		return false;
+	}
+
+	// @todo Remove this check when the onboarding feature is released.
+	if ( isset( $_GET['amp-new-onboarding'] ) && '1' === $_GET['amp-new-onboarding'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return true;
+	}
+
+	// @todo Remove this check when the onboarding feature is released.
+	if ( defined( 'AMP_NEW_ONBOARDING' ) && AMP_NEW_ONBOARDING ) {
+		return true;
+	}
+
+	return false;
+}
