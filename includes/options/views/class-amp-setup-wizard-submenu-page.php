@@ -30,6 +30,7 @@ final class AMP_Setup_Wizard_Submenu_Page {
 	 * Sets up hooks.
 	 */
 	public function init() {
+		add_action( 'admin_head-' . $this->screen_handle(), [ $this, 'override_template' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
 	}
 
@@ -93,7 +94,7 @@ final class AMP_Setup_Wizard_Submenu_Page {
 			[],
 			AMP__VERSION
 		);
-		
+
 		wp_add_inline_script(
 			self::JS_HANDLE,
 			sprintf(
