@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\HandleValidation;
 
@@ -500,16 +501,20 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 	public function test_get_validated_environment() {
 		switch_theme( 'twentysixteen' );
 		update_option( 'active_plugins', [ 'foo/foo.php', 'bar.php' ] );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		$old_env = AMP_Validated_URL_Post_Type::get_validated_environment();
 		$this->assertArrayHasKey( 'theme', $old_env );
 		$this->assertArrayHasKey( 'plugins', $old_env );
 		$this->assertEquals( 'twentysixteen', $old_env['theme'] );
+		$this->assertEquals( [ Option::THEME_SUPPORT => AMP_Theme_Support::TRANSITIONAL_MODE_SLUG ], $old_env['options'] );
 
 		switch_theme( 'twentyseventeen' );
 		update_option( 'active_plugins', [ 'foo/foo.php', 'baz.php' ] );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$new_env = AMP_Validated_URL_Post_Type::get_validated_environment();
 		$this->assertNotEquals( $old_env, $new_env );
 		$this->assertEquals( 'twentyseventeen', $new_env['theme'] );
+		$this->assertEquals( [ Option::THEME_SUPPORT => AMP_Theme_Support::STANDARD_MODE_SLUG ], $new_env['options'] );
 	}
 
 	/**
@@ -522,6 +527,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$error = [ 'code' => 'foo' ];
 		switch_theme( 'twentysixteen' );
 		update_option( 'active_plugins', [ 'foo/foo.php', 'bar.php' ] );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 
 		$plugins = [
 			'foo/foo.php' => [
@@ -551,6 +557,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$this->assertArrayNotHasKey( 'theme', $staleness );
 		$this->assertEqualSets( [ 'baz.php' ], $staleness['plugins']['new'] );
 		$this->assertEqualSets( [ 'bar.php' ], $staleness['plugins']['old'] );
+		$this->assertArrayNotHasKey( 'options', $staleness );
 
 		// Test theme switch.
 		switch_theme( 'twentyseventeen' );
@@ -558,13 +565,17 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'theme', $next_staleness );
 		$this->assertEquals( 'twentysixteen', $next_staleness['theme'] );
 		$this->assertSame( $next_staleness['plugins'], $staleness['plugins'] );
+		$this->assertArrayNotHasKey( 'options', $staleness );
 
-		// Test updating plugin version as well.
+		// Test updating plugin version, as well as the template mode.
 		$plugins['foo/foo.php']['Version'] = '0.2';
 		wp_cache_set( 'plugins', [ '' => $plugins ], 'plugins' );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$last_staleness = AMP_Validated_URL_Post_Type::get_post_staleness( $invalid_url_post_id );
 		$this->assertEqualSets( [ 'foo/foo.php', 'baz.php' ], $last_staleness['plugins']['new'] );
 		$this->assertEqualSets( [ 'foo/foo.php', 'bar.php' ], $last_staleness['plugins']['old'] );
+		$this->assertArrayHasKey( 'options', $last_staleness );
+		$this->assertEquals( [ Option::THEME_SUPPORT => AMP_Theme_Support::TRANSITIONAL_MODE_SLUG ], $last_staleness['options'] );
 
 		// Re-storing results updates freshness.
 		AMP_Validated_URL_Post_Type::store_validation_errors( [ $error ], home_url( '/' ), $invalid_url_post_id );

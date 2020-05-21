@@ -6,6 +6,7 @@
  */
 
 use AmpProject\AmpWP\Icon;
+use AmpProject\AmpWP\Option;
 
 /**
  * Class AMP_Validated_URL_Post_Type
@@ -942,6 +943,9 @@ class AMP_Validated_URL_Post_Type {
 		return [
 			'theme'   => get_stylesheet(),
 			'plugins' => $plugins,
+			'options' => [
+				Option::THEME_SUPPORT => AMP_Options_Manager::get_option( Option::THEME_SUPPORT ),
+			],
 		];
 	}
 
@@ -954,7 +958,7 @@ class AMP_Validated_URL_Post_Type {
 	 *
 	 *     @type string $theme   The theme that was active but is no longer. Absent if theme is the same.
 	 *     @type array  $plugins Plugins that used to be active but are no longer, or which are active now but weren't. Also includes plugins that have version updates. Absent if the plugins were the same.
-	 *     @type array  $options Options that are now different. Absent if the options were the same.
+	 *     @type array  $options Options that used to be set. Absent if the options were the same.
 	 * }
 	 */
 	public static function get_post_staleness( $post ) {
@@ -967,10 +971,13 @@ class AMP_Validated_URL_Post_Type {
 		$new_validated_environment = self::get_validated_environment();
 
 		$staleness = [];
+
+		// Theme difference.
 		if ( isset( $old_validated_environment['theme'] ) && $new_validated_environment['theme'] !== $old_validated_environment['theme'] ) {
 			$staleness['theme'] = $old_validated_environment['theme'];
 		}
 
+		// Plugin difference.
 		if ( isset( $old_validated_environment['plugins'] ) ) {
 			$new_active_plugins = array_diff_assoc( $new_validated_environment['plugins'], $old_validated_environment['plugins'] );
 			if ( ! empty( $new_active_plugins ) ) {
@@ -980,6 +987,17 @@ class AMP_Validated_URL_Post_Type {
 			if ( ! empty( $old_active_plugins ) ) {
 				$staleness['plugins']['old'] = array_keys( $old_active_plugins );
 			}
+		}
+
+		// Options difference.
+		if ( isset( $old_validated_environment['options'] ) ) {
+			$old_options = $old_validated_environment['options'];
+		} else {
+			$old_options = [];
+		}
+		$option_differences = array_diff_assoc( $old_options, $new_validated_environment['options'] );
+		if ( ! empty( $option_differences ) ) {
+			$staleness['options'] = $option_differences;
 		}
 
 		return $staleness;
