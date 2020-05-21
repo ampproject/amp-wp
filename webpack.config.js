@@ -248,6 +248,7 @@ const setup = {
 		'amp-setup': 'ampSetup',
 	},
 	plugins: [
+		...defaultConfig.plugins,
 		new WebpackBar( {
 			name: 'Setup',
 			color: '#1773a8',
