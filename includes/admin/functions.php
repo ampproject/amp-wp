@@ -201,14 +201,12 @@ function amp_bootstrap_admin() {
  * @return bool
  */
 function amp_should_use_new_onboarding() {
-	global $wp_version;
-
-	if ( version_compare( $wp_version, '5.0', '<' ) ) {
+	if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
 		return false;
 	}
 
 	// @todo Remove this check when the onboarding feature is released.
-	if ( '1' === filter_input( INPUT_GET, 'amp-new-onboarding', FILTER_SANITIZE_NUMBER_INT ) ) {
+	if ( isset( $_GET['amp-new-onboarding'] ) && '1' === $_GET['amp-new-onboarding'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		return true;
 	}
 

@@ -15,7 +15,6 @@ const WebpackBar = require( 'webpackbar' );
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
 const DependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extraction-webpack-plugin' );
 const { defaultRequestToExternal, defaultRequestToHandle, camelCaseDash } = require( '@wordpress/dependency-extraction-webpack-plugin/util' );
-const { dependencies } = require( './package' );
 
 const sharedConfig = {
 	output: {
@@ -170,7 +169,7 @@ const customizer = {
 
 const WORDPRESS_NAMESPACE = '@wordpress/';
 const BABEL_NAMESPACE = '@babel/';
-const gutenbergPackages = Object.keys( dependencies ).map(
+const gutenbergPackages = [ '@babel/polyfill', '@wordpress/dom-ready', '@wordpress/i18n', '@wordpress/url' ].map(
 	( packageName ) => {
 		if ( 0 !== packageName.indexOf( WORDPRESS_NAMESPACE ) && 0 !== packageName.indexOf( BABEL_NAMESPACE ) ) {
 			return null;
@@ -231,14 +230,6 @@ const wpPolyfills = {
 				from: 'node_modules/lodash/lodash.js',
 				to: './vendor/lodash.js',
 			},
-			{
-				from: 'node_modules/react/umd/react.production.min.js',
-				to: './vendor/react.js',
-			},
-			{
-				from: 'node_modules/react-dom/umd/react-dom.production.min.js',
-				to: './vendor/react-dom.js',
-			},
 		] ),
 		new WebpackBar( {
 			name: 'WordPress Polyfills',
@@ -272,6 +263,16 @@ const setup = {
 	},
 	plugins: [
 		...defaultConfig.plugins,
+		new DependencyExtractionWebpackPlugin( {
+			useDefaults: false,
+			// All dependencies will be bundled for the AMP setup screen for compatibility across WP versions.
+			requestToHandle: () => {
+				return undefined;
+			},
+			requestToExternal: () => {
+				return undefined;
+			},
+		} ),
 		new MiniCssExtractPlugin( {
 			filename: '../css/[name]-compiled.css',
 		} ),

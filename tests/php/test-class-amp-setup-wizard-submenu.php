@@ -17,6 +17,13 @@
 class Test_AMP_Setup_Wizard_Submenu  extends WP_UnitTestCase {
 
 	/**
+	 * Test instance.
+	 *
+	 * @var AMP_Setup_Wizard_Submenu
+	 */
+	private $wizard;
+
+	/**
 	 * Setup.
 	 *
 	 * @inheritdoc

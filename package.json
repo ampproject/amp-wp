@@ -25,17 +25,15 @@
     "@wordpress/escape-html": "1.8.0",
     "@wordpress/i18n": "3.12.0",
     "@wordpress/url": "2.15.0",
-    "prop-types": "15.7.2",
-    "react": "16.9.0",
-    "react-dom": "16.9.0"
+    "prop-types": "15.7.2"
   },
   "devDependencies": {
     "@babel/cli": "7.8.4",
-    "@babel/core": "7.9.0",
+    "@babel/core": "7.9.6",
     "@babel/plugin-proposal-class-properties": "7.8.3",
     "@wordpress/babel-preset-default": "4.12.1",
     "@wordpress/block-editor": "3.10.0",
-    "@wordpress/blocks": "6.13.0",
+    "@wordpress/blocks": "6.16.0",
     "@wordpress/browserslist-config": "2.6.0",
     "@wordpress/components": "9.6.0",
     "@wordpress/compose": "3.12.0",
@@ -73,7 +71,7 @@
     "jest-silent-reporter": "0.2.1",
     "lodash": "4.17.15",
     "mini-css-extract-plugin": "0.9.0",
-    "moment": "2.25.3",
+    "moment": "2.26.0",
     "npm-run-all": "4.1.5",
     "optimize-css-assets-webpack-plugin": "5.0.3",
     "postcss": "7.0.30",
@@ -89,7 +87,7 @@
     "svg-inline-loader": "0.8.2",
     "terser-webpack-plugin": "2.3.6",
     "travis-size-report": "1.1.0",
-    "uuid": "8.0.0",
+    "uuid": "8.1.0",
     "webpack": "4.43.0",
     "webpack-cli": "3.3.11",
     "webpackbar": "4.0.0"
