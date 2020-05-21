@@ -405,6 +405,7 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 				[
 					'add_noscript_fallback' => true,
 					'add_placeholder'       => true,
+					'align_wide_support'    => true,
 				],
 			],
 
@@ -423,6 +424,7 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 				[
 					'add_noscript_fallback' => true,
 					'add_placeholder'       => true,
+					'align_wide_support'    => true,
 				],
 			],
 

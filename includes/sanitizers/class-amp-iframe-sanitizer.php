@@ -6,6 +6,8 @@
  */
 
 use AmpProject\DevMode;
+use AmpProject\Attribute;
+use AmpProject\Layout;
 
 /**
  * Class AMP_Iframe_Sanitizer
@@ -124,8 +126,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			$this->did_convert_elements = true;
-			if ( empty( $normalized_attributes['layout'] ) && ! empty( $normalized_attributes['width'] ) && ! empty( $normalized_attributes['height'] ) ) {
-				$normalized_attributes['layout'] = 'intrinsic';
+			if ( empty( $normalized_attributes[ Attribute::LAYOUT ] ) && ! empty( $normalized_attributes[ Attribute::HEIGHT ] ) && ! empty( $normalized_attributes[ Attribute::WIDTH ] ) ) {
 
 				// Set layout to responsive if the iframe is aligned to full width.
 				$figure_node = null;
@@ -136,14 +137,14 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 					$figure_node = $node->parentNode->parentNode;
 				}
 
-				if ( $figure_node && $figure_node->hasAttribute( 'class' ) ) {
-
-					$figure_node_classes = preg_split( '/\s+/', trim( $figure_node->getAttribute( 'class' ) ) );
-
-					// If the alignment was set to 'wide width' or 'full width', set the layout to responsive.
-					if ( in_array( 'alignfull', $figure_node_classes, true ) || in_array( 'alignwide', $figure_node_classes, true ) ) {
-						$normalized_attributes['layout'] = 'responsive';
-					}
+				if (
+					! empty( $this->args['align_wide_support'] )
+					&& $figure_node
+					&& preg_match( '/(^|\s)(alignwide|alignfull)(\s|$)/', $figure_node->getAttribute( Attribute::CLASS_ ) )
+				) {
+					$normalized_attributes[ Attribute::LAYOUT ] = Layout::RESPONSIVE;
+				} else {
+					$normalized_attributes[ Attribute::LAYOUT ] = Layout::INTRINSIC;
 				}
 
 				$this->add_or_append_attribute( $normalized_attributes, 'class', 'amp-wp-enforced-sizes' );
