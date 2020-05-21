@@ -39,21 +39,14 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	const URL_PATTERN_TIMELINE = '#https?:\/\/twitter\.com(?:\/\#\!\/|\/)(?P<username>[a-zA-Z0-9_]{1,20})(?:$|\/(?P<type>likes|lists|timelines)(\/(?P<id>[a-zA-Z0-9_-]+))?|.+?)#i';
 
 	/**
-	 * Registers embed.
+	 * Default AMP tag to be used when sanitizing embeds.
+	 *
+	 * @var string
 	 */
-	public function register_embed() {
-		// Not implemented.
-	}
+	protected $amp_tag = 'amp-twitter';
 
 	/**
-	 * Unregisters embed.
-	 */
-	public function unregister_embed() {
-		// Not implemented.
-	}
-
-	/**
-	 * Sanitized <blockquote class="twitter-tweet"> tags to <amp-twitter>.
+	 * Sanitize all embeds on the page to be AMP compatible.
 	 *
 	 * @param Document $dom DOM.
 	 */
@@ -70,7 +63,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	private function sanitize_tweet_embeds( Document $dom ) {
 		$nodes = $dom->xpath->query( '//blockquote[ @class = "twitter-tweet" ]' );
-		$this->sanitize_raw_embed( 'tweet', $nodes );
+		$this->sanitize_raw_embeds_with_type( 'tweet', $nodes );
 	}
 
 	/**
@@ -80,7 +73,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	private function sanitize_timeline_embeds( Document $dom ) {
 		$nodes = $dom->xpath->query( '//a[ @class = "twitter-timeline" ]' );
-		$this->sanitize_raw_embed( 'timeline', $nodes );
+		$this->sanitize_raw_embeds_with_type( 'timeline', $nodes );
 	}
 
 	/**
@@ -90,26 +83,25 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	private function sanitize_moment_embeds( Document $dom ) {
 		$nodes = $dom->xpath->query( '//a[ @class = "twitter-moment" ]' );
-		$this->sanitize_raw_embed( 'moment', $nodes );
+		$this->sanitize_raw_embeds_with_type( 'moment', $nodes );
 	}
 
 	/**
-	 * Checks whether it's a twitter AMP component.
+	 * Make embed AMP compatible.
 	 *
-	 * @param DOMElement $node The DOMNode to adjust and replace.
-	 * @return bool Whether node is for raw embed.
+	 * @param DOMElement $node DOM element.
 	 */
-	private function is_raw_embed( DOMElement $node ) {
-		return $node->parentNode && 'amp-twitter' !== $node->parentNode->nodeName;
+	protected function sanitize_raw_embed( DOMElement $node ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+		// Not implemented.
 	}
 
 	/**
-	 * Make final modifications to DOMNode
+	 * Sanitize list of raw embeds based on the embed type.
 	 *
 	 * @param string      $embed_type The type of Twitter embed.
 	 * @param DOMNodeList $nodes List of DOMElement nodes.
 	 */
-	private function sanitize_raw_embed( $embed_type, DOMNodeList $nodes ) {
+	protected function sanitize_raw_embeds_with_type( $embed_type, DOMNodeList $nodes ) {
 		foreach ( $nodes as $node ) {
 			/**
 			 * Node.
@@ -204,11 +196,6 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return string Tweet ID.
 	 */
 	private function get_tweet_id( DOMElement $node ) {
-		/**
-		 * DOMNode
-		 *
-		 * @var DOMNodeList $anchors
-		 */
 		$anchors = $node->getElementsByTagName( 'a' );
 
 		/**

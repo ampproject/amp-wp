@@ -22,13 +22,6 @@ class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 	const RATIO = 0.5625;
 
 	/**
-	 * Base URL used for identifying embeds.
-	 *
-	 * @var string
-	 */
-	const BASE_EMBED_URL = 'https://www.dailymotion.com/embed/video/';
-
-	/**
 	 * Default width.
 	 *
 	 * @var int
@@ -41,6 +34,20 @@ class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @var int
 	 */
 	protected $DEFAULT_HEIGHT = 338;
+
+	/**
+	 * Default AMP tag to be used when sanitizing embeds.
+	 *
+	 * @var string
+	 */
+	protected $amp_tag = 'amp-dailymotion';
+
+	/**
+	 * Base URL used for identifying embeds.
+	 *
+	 * @var string
+	 */
+	protected $base_embed_url = 'https://www.dailymotion.com/embed/video/';
 
 	/**
 	 * AMP_DailyMotion_Embed_Handler constructor.
@@ -58,54 +65,14 @@ class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
-	 * Register embed.
-	 */
-	public function register_embed() {
-		// Not implemented.
-	}
-
-	/**
-	 * Unregister embed.
-	 */
-	public function unregister_embed() {
-		// Not implemented.
-	}
-
-	/**
-	 * Sanitize all DailyMotion <iframe> tags to <amp-dailymotion>.
+	 * Make embed AMP compatible.
 	 *
-	 * @param Document $dom DOM.
+	 * @param DOMElement $node DOM element.
 	 */
-	public function sanitize_raw_embeds( Document $dom ) {
-		$nodes = $dom->xpath->query( sprintf( '//iframe[ starts-with( @src, "%s" ) ]', self::BASE_EMBED_URL ) );
+	protected function sanitize_raw_embed( DOMElement $node ) {
+		$iframe_src = $node->getAttribute( 'src' );
 
-		foreach ( $nodes as $node ) {
-			if ( ! $this->is_raw_embed( $node ) ) {
-				continue;
-			}
-			$this->sanitize_raw_embed( $node );
-		}
-	}
-
-	/**
-	 * Determine if the node has already been sanitized.
-	 *
-	 * @param DOMElement $node The DOMNode.
-	 * @return bool Whether the node is a raw embed.
-	 */
-	protected function is_raw_embed( DOMElement $node ) {
-		return $node->parentNode && 'amp-dailymotion' !== $node->parentNode->nodeName;
-	}
-
-	/**
-	 * Make DailyMotion embed AMP compatible.
-	 *
-	 * @param DOMElement $iframe_node The node to make AMP compatible.
-	 */
-	private function sanitize_raw_embed( DOMElement $iframe_node ) {
-		$iframe_src = $iframe_node->getAttribute( 'src' );
-
-		$video_id = strtok( substr( $iframe_src, strlen( self::BASE_EMBED_URL ) ), '/?#' );
+		$video_id = strtok( substr( $iframe_src, strlen( $this->base_embed_url ) ), '/?#' );
 		if ( empty( $video_id ) ) {
 			return;
 		}
@@ -117,24 +84,22 @@ class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 			'height'       => $this->args['height'],
 		];
 
-		if ( $iframe_node->hasAttribute( 'width' ) ) {
-			$attributes['width'] = $iframe_node->getAttribute( 'width' );
+		if ( $node->hasAttribute( 'width' ) ) {
+			$attributes['width'] = $node->getAttribute( 'width' );
 		}
 
-		if ( $iframe_node->hasAttribute( 'height' ) ) {
-			$attributes['height'] = $iframe_node->getAttribute( 'height' );
+		if ( $node->hasAttribute( 'height' ) ) {
+			$attributes['height'] = $node->getAttribute( 'height' );
 		}
 
 		$amp_node = AMP_DOM_Utils::create_node(
-			Document::fromNode( $iframe_node ),
-			'amp-dailymotion',
+			Document::fromNode( $node ),
+			$this->amp_tag,
 			$attributes
 		);
 
-		$this->maybe_unwrap_p_element( $iframe_node );
+		$this->maybe_unwrap_p_element( $node );
 
-		$iframe_node->parentNode->replaceChild( $amp_node, $iframe_node );
-
-		// Nothing to be done if the video ID could not be found.
+		$node->parentNode->replaceChild( $amp_node, $node );
 	}
 }

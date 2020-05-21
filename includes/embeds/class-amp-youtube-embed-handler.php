@@ -36,6 +36,13 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	protected $DEFAULT_HEIGHT = 338;
 
 	/**
+	 * Default AMP tag to be used when sanitizing embeds.
+	 *
+	 * @var string
+	 */
+	protected $amp_tag = 'amp-youtube';
+
+	/**
 	 * AMP_YouTube_Embed_Handler constructor.
 	 *
 	 * @param array $args Height, width and maximum width for embed.
@@ -52,58 +59,24 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
-	 * Register embed.
-	 */
-	public function register_embed() {
-		// Not implemented.
-	}
-
-	/**
-	 * Unregister embed.
-	 */
-	public function unregister_embed() {
-		// Not implemented.
-	}
-
-	/**
-	 * Sanitize all YouTube <iframe> tags to <amp-youtube>.
+	 * Get all raw embeds from the DOM.
 	 *
-	 * @param Document $dom DOM.
+	 * @param Document $dom Document.
+	 * @return DOMNodeList A list of DOMElement nodes.
 	 */
-	public function sanitize_raw_embeds( Document $dom ) {
-		$nodes = $dom->xpath->query( '//iframe[ @src ]' );
-
-		foreach ( $nodes as $node ) {
-			if ( ! $this->is_raw_embed( $node ) ) {
-				continue;
-			}
-
-			$iframe_src = $node->getAttribute( 'src' );
-			$video_id   = $this->get_video_id_from_url( $iframe_src );
-
-			if ( $video_id ) {
-				$this->sanitize_raw_embed( $node, $video_id );
-			}
-		}
+	protected function get_raw_embed_nodes( Document $dom ) {
+		return $dom->xpath->query( '//iframe[ @src ]' );
 	}
 
 	/**
-	 * Determine if the node has already been sanitized.
+	 * Make embed AMP compatible.
 	 *
-	 * @param DOMElement $node The DOMNode.
-	 * @return bool Whether the node is a raw embed.
+	 * @param DOMElement $node DOM element.
 	 */
-	protected function is_raw_embed( DOMElement $node ) {
-		return $node->parentNode && 'amp-youtube' !== $node->parentNode->nodeName;
-	}
+	protected function sanitize_raw_embed( DOMElement $node ) {
+		$iframe_src = $node->getAttribute( 'src' );
+		$video_id   = $this->get_video_id_from_url( $iframe_src );
 
-	/**
-	 * Make DailyMotion embed AMP compatible.
-	 *
-	 * @param DOMElement $iframe_node The node to make AMP compatible.
-	 * @param string     $video_id Video ID.
-	 */
-	private function sanitize_raw_embed( DOMElement $iframe_node, $video_id ) {
 		$attributes = [
 			'data-videoid' => $video_id,
 			'layout'       => 'responsive',
@@ -112,29 +85,29 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 			'title'        => null,
 		];
 
-		if ( ! empty( $iframe_node->getAttribute( 'title' ) ) ) {
-			$attributes['title'] = $iframe_node->getAttribute( 'title' );
+		if ( ! empty( $node->getAttribute( 'title' ) ) ) {
+			$attributes['title'] = $node->getAttribute( 'title' );
 		}
 
-		if ( ! empty( $iframe_node->getAttribute( 'width' ) ) ) {
-			$attributes['width'] = $iframe_node->getAttribute( 'width' );
+		if ( ! empty( $node->getAttribute( 'width' ) ) ) {
+			$attributes['width'] = $node->getAttribute( 'width' );
 		}
 
-		if ( ! empty( $iframe_node->getAttribute( 'height' ) ) ) {
-			$attributes['height'] = $iframe_node->getAttribute( 'height' );
+		if ( ! empty( $node->getAttribute( 'height' ) ) ) {
+			$attributes['height'] = $node->getAttribute( 'height' );
 		}
 
 		$amp_node = AMP_DOM_Utils::create_node(
-			Document::fromNode( $iframe_node ),
-			'amp-youtube',
+			Document::fromNode( $node ),
+			$this->amp_tag,
 			$attributes
 		);
 
 		$this->append_placeholder( $amp_node, $video_id, $attributes['title'] );
 
-		$this->maybe_unwrap_p_element( $iframe_node );
+		$this->maybe_unwrap_p_element( $node );
 
-		$iframe_node->parentNode->replaceChild( $amp_node, $iframe_node );
+		$node->parentNode->replaceChild( $amp_node, $node );
 	}
 
 	/**
@@ -206,7 +179,8 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 			// Support is also included for other query params which don't appear to be supported by YouTube anymore.
 			if ( isset( $query_vars['v'] ) ) {
 				return $query_vars['v'];
-			} elseif ( isset( $query_vars['vi'] ) ) {
+			}
+			if ( isset( $query_vars['vi'] ) ) {
 				return $query_vars['vi'];
 			}
 		}

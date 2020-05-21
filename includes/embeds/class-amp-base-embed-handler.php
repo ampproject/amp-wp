@@ -7,6 +7,8 @@
  * @package  AMP
  */
 
+use AmpProject\Dom\Document;
+
 /**
  * Class AMP_Base_Embed_Handler
  */
@@ -40,14 +42,18 @@ abstract class AMP_Base_Embed_Handler {
 	protected $did_convert_elements = false;
 
 	/**
-	 * Registers embed.
+	 * Default AMP tag to be used when sanitizing embeds.
+	 *
+	 * @var string
 	 */
-	abstract public function register_embed();
+	protected $amp_tag = 'amp-iframe';
 
 	/**
-	 * Unregisters embed.
+	 * Base URL used for identifying embeds.
+	 *
+	 * @var string
 	 */
-	abstract public function unregister_embed();
+	protected $base_embed_url = '';
 
 	/**
 	 * Constructor.
@@ -63,6 +69,49 @@ abstract class AMP_Base_Embed_Handler {
 			]
 		);
 	}
+
+	/**
+	 * Sanitize all embeds on the page to be AMP compatible.
+	 *
+	 * @param Document $dom DOM.
+	 */
+	public function sanitize_raw_embeds( Document $dom ) {
+		$nodes = $this->get_raw_embed_nodes( $dom );
+
+		foreach ( $nodes as $node ) {
+			if ( ! $this->is_raw_embed( $node ) ) {
+				continue;
+			}
+			$this->sanitize_raw_embed( $node );
+		}
+	}
+
+	/**
+	 * Get all raw embeds from the DOM.
+	 *
+	 * @param Document $dom Document.
+	 * @return DOMNodeList A list of DOMElement nodes.
+	 */
+	protected function get_raw_embed_nodes( Document $dom ) {
+		return $dom->xpath->query( sprintf( '//iframe[ starts-with( @src, "%s" ) ]', $this->base_embed_url ) );
+	}
+
+	/**
+	 * Determine if the node is indeed a raw embed.
+	 *
+	 * @param DOMElement $node DOM element.
+	 * @return bool True if it is a raw embed, false otherwise.
+	 */
+	protected function is_raw_embed( DOMElement $node ) {
+		return $node->parentNode && $this->amp_tag !== $node->parentNode->nodeName;
+	}
+
+	/**
+	 * Make embed AMP compatible.
+	 *
+	 * @param DOMElement $node DOM element.
+	 */
+	abstract protected function sanitize_raw_embed( DOMElement $node );
 
 	/**
 	 * Get mapping of AMP component names to AMP script URLs.
@@ -139,10 +188,11 @@ abstract class AMP_Base_Embed_Handler {
 	 *
 	 * @since 1.6
 	 *
-	 * @param DOMElement $node The DOMNode to whose sibling is the script to be removed.
+	 * @param DOMElement $node         The DOMNode to whose sibling is the script to be removed.
 	 * @param string     $base_src_url Script URL to match against.
+	 * @param string     $content      Text content of node to match against.
 	 */
-	protected function maybe_remove_script_sibling( DOMElement $node, $base_src_url ) {
+	protected function maybe_remove_script_sibling( DOMElement $node, $base_src_url, $content = '' ) {
 		$next_element_sibling = $node->nextSibling;
 
 		while ( $next_element_sibling && ! ( $next_element_sibling instanceof DOMElement ) ) {
@@ -163,7 +213,10 @@ abstract class AMP_Base_Embed_Handler {
 			if (
 				1 === count( $children_elements ) &&
 				'script' === $children_elements[0]->nodeName &&
-				false !== strpos( $children_elements[0]->getAttribute( 'src' ), $base_src_url )
+				(
+					( $base_src_url && false !== strpos( $children_elements[0]->getAttribute( 'src' ), $base_src_url ) ) ||
+					( $content && false !== strpos( $children_elements[0]->textContent, $content ) )
+				)
 			) {
 				$next_element_sibling->parentNode->removeChild( $next_element_sibling );
 				return;
@@ -174,7 +227,10 @@ abstract class AMP_Base_Embed_Handler {
 		$is_embed_script = (
 			$next_element_sibling instanceof DOMElement &&
 			'script' === strtolower( $next_element_sibling->nodeName ) &&
-			false !== strpos( $next_element_sibling->getAttribute( 'src' ), $base_src_url )
+			(
+				( $base_src_url && false !== strpos( $next_element_sibling->getAttribute( 'src' ), $base_src_url ) ) ||
+				( $content && false !== strpos( $next_element_sibling->textContent, $content ) )
+			)
 		);
 		if ( $is_embed_script ) {
 			$next_element_sibling->parentNode->removeChild( $next_element_sibling );

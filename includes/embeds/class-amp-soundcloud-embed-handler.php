@@ -15,13 +15,6 @@ use AmpProject\Dom\Document;
 class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 
 	/**
-	 * Base URL used for identifying embeds.
-	 *
-	 * @var string
-	 */
-	const BASE_EMBED_URL = 'https://w.soundcloud.com/player/';
-
-	/**
 	 * Default height.
 	 *
 	 * @var int
@@ -29,52 +22,26 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 	protected $DEFAULT_HEIGHT = 200;
 
 	/**
-	 * Register embed.
-	 */
-	public function register_embed() {
-		// Not implemented.
-	}
-
-	/**
-	 * Unregister embed.
-	 */
-	public function unregister_embed() {
-		// Not implemented.
-	}
-
-	/**
-	 * Sanitize all SoundCloud <iframe> tags to <amp-soundcloud>.
+	 * Base URL used for identifying embeds.
 	 *
-	 * @param Document $dom DOM.
+	 * @var string
 	 */
-	public function sanitize_raw_embeds( Document $dom ) {
-		$nodes = $dom->xpath->query( sprintf( '//iframe[ starts-with( @src, "%s" ) ]', self::BASE_EMBED_URL ) );
-
-		foreach ( $nodes as $node ) {
-			if ( ! $this->is_raw_embed( $node ) ) {
-				continue;
-			}
-			$this->sanitize_raw_embed( $node );
-		}
-	}
+	protected $base_embed_url = 'https://w.soundcloud.com/player/';
 
 	/**
-	 * Determine if the node has already been sanitized.
+	 * Default AMP tag to be used when sanitizing embeds.
 	 *
-	 * @param DOMElement $node The DOMNode.
-	 * @return bool Whether the node is a raw embed.
+	 * @var string
 	 */
-	protected function is_raw_embed( DOMElement $node ) {
-		return $node->parentNode && 'amp-soundcloud' !== $node->parentNode->nodeName;
-	}
+	protected $amp_tag = 'amp-soundcloud';
 
 	/**
-	 * Make SoundCloud embed AMP compatible.
+	 * Make embed AMP compatible.
 	 *
-	 * @param DOMElement $iframe_node The node to make AMP compatible.
+	 * @param DOMElement $node DOM element.
 	 */
-	private function sanitize_raw_embed( DOMElement $iframe_node ) {
-		$iframe_src = $iframe_node->getAttribute( 'src' );
+	protected function sanitize_raw_embed( DOMElement $node ) {
+		$iframe_src = $node->getAttribute( 'src' );
 
 		parse_str( wp_parse_url( $iframe_src, PHP_URL_QUERY ), $query );
 		if ( empty( $query['url'] ) ) {
@@ -94,12 +61,12 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 			$attributes['data-playlistid'] = $embed_id['playlist_id'];
 		}
 
-		$attributes['height'] = $iframe_node->hasAttribute( 'height' )
-			? $iframe_node->getAttribute( 'height' )
+		$attributes['height'] = $node->hasAttribute( 'height' )
+			? $node->getAttribute( 'height' )
 			: $this->args['height'];
 
-		if ( $iframe_node->hasAttribute( 'width' ) ) {
-			$attributes['width']  = $iframe_node->getAttribute( 'width' );
+		if ( $node->hasAttribute( 'width' ) ) {
+			$attributes['width']  = $node->getAttribute( 'width' );
 			$attributes['layout'] = 'responsive';
 		} else {
 			$attributes['layout'] = 'fixed-height';
@@ -110,14 +77,14 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		$amp_node = AMP_DOM_Utils::create_node(
-			Document::fromNode( $iframe_node ),
-			'amp-soundcloud',
+			Document::fromNode( $node ),
+			$this->amp_tag,
 			$attributes
 		);
 
-		$this->maybe_unwrap_p_element( $iframe_node );
+		$this->maybe_unwrap_p_element( $node );
 
-		$iframe_node->parentNode->replaceChild( $amp_node, $iframe_node );
+		$node->parentNode->replaceChild( $amp_node, $node );
 	}
 
 	/**

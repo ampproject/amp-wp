@@ -137,8 +137,6 @@ class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
 	 * @dataProvider get_conversion_data
 	 */
 	public function test__conversion( $source, $expected, $fallback_for_expected = null ) {
-		$this->handler->register_embed();
-
 		$filtered_content = apply_filters( 'the_content', $source );
 		$dom              = AMP_DOM_Utils::get_dom_from_content( $filtered_content );
 		$this->handler->sanitize_raw_embeds( $dom );
@@ -275,8 +273,6 @@ class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
 	 * @dataProvider get_scripts_data
 	 */
 	public function test__get_scripts( $source, $expected ) {
-		$this->handler->register_embed();
-
 		$filtered_content = apply_filters( 'the_content', $source );
 		$dom              = AMP_DOM_Utils::get_dom_from_content( $filtered_content );
 		$this->handler->sanitize_raw_embeds( $dom );

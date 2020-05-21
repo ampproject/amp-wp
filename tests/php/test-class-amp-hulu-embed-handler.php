@@ -93,7 +93,6 @@ class AMP_Hulu_Embed_Handler_Test extends WP_UnitTestCase {
 	 */
 	public function test__conversion( $url, $expected ) {
 		$embed = new AMP_Hulu_Embed_Handler();
-		$embed->register_embed();
 
 		$filtered_content = apply_filters( 'the_content', $url );
 		$dom              = AMP_DOM_Utils::get_dom_from_content( $filtered_content );
@@ -131,7 +130,6 @@ class AMP_Hulu_Embed_Handler_Test extends WP_UnitTestCase {
 	 */
 	public function test__get_scripts( $url, $expected ) {
 		$embed = new AMP_Hulu_Embed_Handler();
-		$embed->register_embed();
 
 		$filtered_content = apply_filters( 'the_content', $url );
 		$dom              = AMP_DOM_Utils::get_dom_from_content( $filtered_content );

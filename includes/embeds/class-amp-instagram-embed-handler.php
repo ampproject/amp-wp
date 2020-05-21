@@ -31,70 +31,32 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	protected $DEFAULT_HEIGHT = 600;
 
 	/**
-	 * Tag.
+	 * Default AMP tag to be used when sanitizing embeds.
 	 *
-	 * @var string embed HTML blockquote tag to identify and replace with AMP version.
+	 * @var string
 	 */
-	protected $sanitize_tag = 'blockquote';
+	protected $amp_tag = 'amp-instagram';
 
 	/**
-	 * Tag.
+	 * Get all raw embeds from the DOM.
 	 *
-	 * @var string AMP amp-instagram tag
+	 * @param Document $dom Document.
+	 * @return DOMNodeList A list of DOMElement nodes.
 	 */
-	private $amp_tag = 'amp-instagram';
-
-	/**
-	 * Registers embed.
-	 */
-	public function register_embed() {
-		// Not implemented.
+	protected function get_raw_embed_nodes( Document $dom ) {
+		return $dom->getElementsByTagName( 'blockquote' );
 	}
 
 	/**
-	 * Unregisters embed.
-	 */
-	public function unregister_embed() {
-		// Not implemented.
-	}
-
-	/**
-	 * Sanitized <blockquote class="instagram-media"> tags to <amp-instagram>
+	 * Make embed AMP compatible.
 	 *
-	 * @param Document $dom DOM.
+	 * @param DOMElement $node DOM element.
 	 */
-	public function sanitize_raw_embeds( Document $dom ) {
-		/**
-		 * Node list.
-		 *
-		 * @var DOMNodeList $nodes
-		 */
-		$nodes     = $dom->getElementsByTagName( $this->sanitize_tag );
-		$num_nodes = $nodes->length;
-
-		if ( 0 === $num_nodes ) {
+	protected function sanitize_raw_embed( DOMElement $node ) {
+		if ( ! $node->hasAttribute( 'data-instgrm-permalink' ) ) {
 			return;
 		}
 
-		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
-			$node = $nodes->item( $i );
-			if ( ! $node instanceof DOMElement ) {
-				continue;
-			}
-
-			if ( $node->hasAttribute( 'data-instgrm-permalink' ) ) {
-				$this->create_amp_instagram_and_replace_node( $dom, $node );
-			}
-		}
-	}
-
-	/**
-	 * Make final modifications to DOMNode
-	 *
-	 * @param Document   $dom The HTML Document.
-	 * @param DOMElement $node The DOMNode to adjust and replace.
-	 */
-	private function create_amp_instagram_and_replace_node( $dom, $node ) {
 		$instagram_id = $this->get_instagram_id_from_url( $node->getAttribute( 'data-instgrm-permalink' ) );
 
 		$node_args = [
@@ -108,13 +70,11 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 			$node_args['data-captioned'] = '';
 		}
 
-		$new_node = AMP_DOM_Utils::create_node( $dom, $this->amp_tag, $node_args );
+		$new_node = AMP_DOM_Utils::create_node( Document::fromNode( $node ), $this->amp_tag, $node_args );
 
 		$this->maybe_remove_script_sibling( $node, 'instagram.com/embed.js' );
 
 		$node->parentNode->replaceChild( $new_node, $node );
-
-		$this->did_convert_elements = true;
 	}
 
 	/**

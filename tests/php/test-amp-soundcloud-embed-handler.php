@@ -141,7 +141,6 @@ class AMP_SoundCloud_Embed_Handler_Test extends WP_UnitTestCase {
 	 */
 	public function test_embed_conversion( $source, $expected ) {
 		$embed = new AMP_SoundCloud_Embed_Handler();
-		$embed->register_embed();
 
 		$filtered_content = apply_filters( 'the_content', $source );
 		$dom              = AMP_DOM_Utils::get_dom_from_content( $filtered_content );
@@ -185,7 +184,6 @@ class AMP_SoundCloud_Embed_Handler_Test extends WP_UnitTestCase {
 	 */
 	public function test__get_scripts( $source, $expected ) {
 		$embed = new AMP_SoundCloud_Embed_Handler();
-		$embed->register_embed();
 
 		$filtered_content = apply_filters( 'the_content', $source );
 		$dom              = AMP_DOM_Utils::get_dom_from_content( $filtered_content );

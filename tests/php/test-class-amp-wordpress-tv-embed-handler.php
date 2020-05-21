@@ -89,7 +89,6 @@ class Test_AMP_WordPress_TV_Embed_Handler extends WP_UnitTestCase {
 	 */
 	public function test_conversion( $source, $expected ) {
 		$embed = new AMP_WordPress_TV_Embed_Handler();
-		$embed->register_embed();
 
 		$filtered_content = apply_filters( 'the_content', $source );
 		$dom              = AMP_DOM_Utils::get_dom_from_content( $filtered_content );

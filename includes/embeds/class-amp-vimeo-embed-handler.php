@@ -15,13 +15,6 @@ use AmpProject\Dom\Document;
 class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 
 	/**
-	 * Base URL used for identifying embeds.
-	 *
-	 * @var string
-	 */
-	const BASE_EMBED_URL = 'https://player.vimeo.com/video/';
-
-	/**
 	 * The aspect ratio.
 	 *
 	 * @var float
@@ -43,6 +36,20 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 	protected $DEFAULT_HEIGHT = 338;
 
 	/**
+	 * Base URL used for identifying embeds.
+	 *
+	 * @var string
+	 */
+	protected $base_embed_url = 'https://player.vimeo.com/video/';
+
+	/**
+	 * Default AMP tag to be used when sanitizing embeds.
+	 *
+	 * @var string
+	 */
+	protected $amp_tag = 'amp-vimeo';
+
+	/**
 	 * AMP_Vimeo_Embed_Handler constructor.
 	 *
 	 * @param array $args Height, width and maximum width for embed.
@@ -58,61 +65,21 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
-	 * Register embed.
-	 */
-	public function register_embed() {
-		// Not implemented.
-	}
-
-	/**
-	 * Unregister embed.
-	 */
-	public function unregister_embed() {
-		// Not implemented.
-	}
-
-	/**
-	 * Sanitize all Vimeo <iframe> tags to <amp-vimeo>.
+	 * Make embed AMP compatible.
 	 *
-	 * @param Document $dom DOM.
+	 * @param DOMElement $node DOM element.
 	 */
-	public function sanitize_raw_embeds( Document $dom ) {
-		$nodes = $dom->xpath->query( sprintf( '//iframe[ contains( @src, "%s" ) ]', self::BASE_EMBED_URL ) );
+	protected function sanitize_raw_embed( DOMElement $node ) {
+		$iframe_src = $node->getAttribute( 'src' );
 
-		foreach ( $nodes as $node ) {
-			if ( ! $this->is_raw_embed( $node ) ) {
-				continue;
-			}
-			$this->sanitize_raw_embed( $node );
-		}
-	}
-
-	/**
-	 * Determine if the node has already been sanitized.
-	 *
-	 * @param DOMElement $node The DOMNode.
-	 * @return bool Whether the node is a raw embed.
-	 */
-	protected function is_raw_embed( DOMElement $node ) {
-		return $node->parentNode && 'amp-vimeo' !== $node->parentNode->nodeName;
-	}
-
-	/**
-	 * Make Vimeo embed AMP compatible.
-	 *
-	 * @param DOMElement $iframe_node The node to make AMP compatible.
-	 */
-	private function sanitize_raw_embed( DOMElement $iframe_node ) {
-		$iframe_src = $iframe_node->getAttribute( 'src' );
-
-		$video_id = strtok( substr( $iframe_src, strlen( self::BASE_EMBED_URL ) ), '/?#' );
+		$video_id = strtok( substr( $iframe_src, strlen( $this->base_embed_url ) ), '/?#' );
 		if ( empty( $video_id ) ) {
 			return;
 		}
 
 		$amp_node = AMP_DOM_Utils::create_node(
-			Document::fromNode( $iframe_node ),
-			'amp-vimeo',
+			Document::fromNode( $node ),
+			$this->amp_tag,
 			[
 				'data-videoid' => $video_id,
 				'layout'       => 'responsive',
@@ -121,8 +88,8 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 			]
 		);
 
-		$this->maybe_unwrap_p_element( $iframe_node );
+		$this->maybe_unwrap_p_element( $node );
 
-		$iframe_node->parentNode->replaceChild( $amp_node, $iframe_node );
+		$node->parentNode->replaceChild( $amp_node, $node );
 	}
 }
