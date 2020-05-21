@@ -201,9 +201,7 @@ function amp_bootstrap_admin() {
  * @return bool
  */
 function amp_should_use_new_onboarding() {
-	global $wp_version;
-
-	if ( version_compare( $wp_version, '5.0', '<' ) ) {
+	if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
 		return false;
 	}
 
