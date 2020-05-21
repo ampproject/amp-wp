@@ -99,8 +99,7 @@ final class PluginSuppression implements Service {
 			if ( ! $block_type->is_dynamic() || ! $this->is_callback_plugin_suppressed( $block_type->render_callback, $suppressed_plugins ) ) {
 				continue;
 			}
-			$block_type->script          = null;
-			$block_type->style           = null;
+			unset( $block_type->script, $block_type->style );
 			$block_type->render_callback = '__return_empty_string';
 		}
 	}
