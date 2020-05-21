@@ -21,28 +21,6 @@ export function isStandardMode( state ) {
 }
 
 /**
- * Returns the default AMP status.
- *
- * @param {Object} state Editor state.
- *
- * @return {string} The default AMP status.
- */
-export function getDefaultStatus( state ) {
-	return state.defaultStatus;
-}
-
-/**
- * Returns the possible AMP statuses.
- *
- * @param {Object} state Editor state.
- *
- * @return {string[]} The possible AMP statuses, 'enabled' and 'disabled'.
- */
-export function getPossibleStatuses( state ) {
-	return state.possibleStatuses;
-}
-
-/**
  * Returns the AMP validation error messages.
  *
  * @param {Object} state The editor state.

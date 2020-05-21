@@ -43,7 +43,7 @@
   "extra": {
     "downloads": {
       "phpstan": {
-        "url": "https://github.com/phpstan/phpstan/releases/download/0.12.14/phpstan.phar",
+        "url": "https://github.com/phpstan/phpstan/releases/latest/download/phpstan.phar",
         "path": "vendor/bin/phpstan",
         "type": "phar"
       }
@@ -101,6 +101,6 @@
   "minimum-stability": "dev",
   "prefer-stable": true,
   "scripts": {
-    "analyze": "if [ -z $TEST_SKIP_PHPSTAN ]; then phpstan analyze --ansi; fi"
+    "analyze": "if [ -z $TEST_SKIP_PHPSTAN ]; then phpstan --version; phpstan analyze --ansi; fi"
   }
 }
