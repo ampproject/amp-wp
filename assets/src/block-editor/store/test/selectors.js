@@ -4,8 +4,6 @@
 import {
 	hasThemeSupport,
 	isStandardMode,
-	getDefaultStatus,
-	getPossibleStatuses,
 	getErrorMessages,
 	getAmpSlug,
 } from '../selectors';
@@ -24,22 +22,6 @@ describe( 'selectors', () => {
 			const state = { isStandardMode: true };
 
 			expect( isStandardMode( state ) ).toBe( true );
-		} );
-	} );
-
-	describe( 'getDefaultStatus', () => {
-		it( 'should return the default AMP status', () => {
-			const state = { defaultStatus: 'enabled' };
-
-			expect( getDefaultStatus( state ) ).toStrictEqual( 'enabled' );
-		} );
-	} );
-
-	describe( 'getPossibleStatuses', () => {
-		it( 'should return the possible AMP statuses', () => {
-			const state = { possibleStatuses: [ 'enabled', 'disabled' ] };
-
-			expect( getPossibleStatuses( state ) ).toStrictEqual( [ 'enabled', 'disabled' ] );
 		} );
 	} );
 
