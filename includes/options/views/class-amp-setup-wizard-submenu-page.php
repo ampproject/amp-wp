@@ -61,20 +61,43 @@ final class AMP_Setup_Wizard_Submenu_Page {
 			return;
 		}
 
+		$asset_file   = AMP__DIR__ . '/assets/js/' . self::JS_HANDLE . '.asset.php';
+		$asset        = require $asset_file;
+		$dependencies = $asset['dependencies'];
+		$version      = $asset['version'];
+
 		wp_enqueue_script(
 			self::JS_HANDLE,
 			amp_get_asset_url( 'js/' . self::JS_HANDLE . '.js' ),
-			[],
-			AMP__VERSION,
+			$dependencies,
+			$version,
 			true
 		);
 
-		wp_localize_script(
+		wp_add_inline_script(
 			self::JS_HANDLE,
-			'ampSetup',
-			[
-				'APP_ROOT_ID' => self::APP_ROOT_ID,
-			]
+			sprintf(
+				'var ampSetup = %s;',
+				wp_json_encode(
+					[
+						'APP_ROOT_ID' => self::APP_ROOT_ID,
+					]
+				)
+			),
+			'before'
 		);
+
+		if ( function_exists( 'wp_set_script_translations' ) ) {
+			wp_set_script_translations( self::JS_HANDLE, 'amp' );
+		} elseif ( function_exists( 'wp_get_jed_locale_data' ) || function_exists( 'gutenberg_get_jed_locale_data' ) ) {
+			$locale_data  = function_exists( 'wp_get_jed_locale_data' ) ? wp_get_jed_locale_data( 'amp' ) : gutenberg_get_jed_locale_data( 'amp' );
+			$translations = wp_json_encode( $locale_data );
+
+			wp_add_inline_script(
+				self::JS_HANDLE,
+				'wp.i18n.setLocaleData( ' . $translations . ', "amp" );',
+				'after'
+			);
+		}
 	}
 }

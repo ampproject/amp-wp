@@ -248,7 +248,16 @@ const setup = {
 		'amp-setup': 'ampSetup',
 	},
 	plugins: [
-		...defaultConfig.plugins,
+		new DependencyExtractionWebpackPlugin( {
+			useDefaults: false,
+			// All dependencies will be bundled for the AMP setup screen for compatibility across WP versions.
+			requestToHandle: () => {
+				return undefined;
+			},
+			requestToExternal: () => {
+				return undefined;
+			},
+		} ),
 		new WebpackBar( {
 			name: 'Setup',
 			color: '#1773a8',
