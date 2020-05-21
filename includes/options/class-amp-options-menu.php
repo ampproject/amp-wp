@@ -457,18 +457,20 @@ class AMP_Options_Menu {
 	 * @return string[] Plugin sources which are suppressible.
 	 */
 	private static function get_suppressible_plugin_sources() {
+		$erroring_plugin_slugs   = array_keys( self::get_plugin_errors_by_sources() );
+		$suppressed_plugin_slugs = array_keys( AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS ) );
+		$active_plugin_slugs     = array_map(
+			static function ( $plugin_file ) {
+				return strtok( $plugin_file, '/' );
+			},
+			get_option( 'active_plugins', [] )
+		);
+
+		// The suppressible plugins are the set of plugins which are erroring and/or suppressed, which are also active.
 		return array_unique(
 			array_intersect(
-				array_merge(
-					array_keys( self::get_plugin_errors_by_sources() ),
-					array_keys( AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS ) )
-				),
-				array_map(
-					static function ( $plugin_file ) {
-						return strtok( $plugin_file, '/' );
-					},
-					get_option( 'active_plugins', [] )
-				)
+				array_merge( $erroring_plugin_slugs, $suppressed_plugin_slugs ),
+				$active_plugin_slugs
 			)
 		);
 	}
