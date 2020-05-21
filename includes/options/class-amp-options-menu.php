@@ -464,7 +464,7 @@ class AMP_Options_Menu {
 					array_keys( AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS ) )
 				),
 				array_map(
-					function ( $plugin_file ) {
+					static function ( $plugin_file ) {
 						return strtok( $plugin_file, '/' );
 					},
 					get_option( 'active_plugins', [] )
