@@ -206,7 +206,7 @@ function amp_should_use_new_onboarding() {
 	}
 
 	// @todo Remove this check when the onboarding feature is released.
-	if ( '1' === filter_input( INPUT_GET, 'amp-new-onboarding', FILTER_SANITIZE_NUMBER_INT ) ) {
+	if ( '1' === $_GET['amp-new-onboarding'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		return true;
 	}
 
