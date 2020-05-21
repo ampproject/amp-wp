@@ -9,16 +9,11 @@
 /**
  * Class AMP_WordPress_TV_Embed_Handler
  *
+ * This sanitizes embeds both for WordPress.tv and for VideoPress (which use the same underlying infrastructure).
+ *
  * @since 1.4
  */
 class AMP_WordPress_TV_Embed_Handler extends AMP_Base_Embed_Handler {
-
-	/**
-	 * The URL pattern to determine if an embed URL is for this type, copied from WP_oEmbed.
-	 *
-	 * @see https://github.com/WordPress/wordpress-develop/blob/e13480/src/wp-includes/class-wp-oembed.php#L64
-	 */
-	const URL_PATTERN = '#https?://wordpress\.tv/.*#i';
 
 	/**
 	 * Register embed.
@@ -42,7 +37,8 @@ class AMP_WordPress_TV_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return string The filtered embed markup.
 	 */
 	public function filter_oembed_html( $cache, $url ) {
-		if ( ! preg_match( self::URL_PATTERN, $url ) ) {
+		$host = wp_parse_url( $url, PHP_URL_HOST );
+		if ( ! in_array( $host, [ 'wordpress.tv', 'videopress.com' ], true ) ) {
 			return $cache;
 		}
 

@@ -39,20 +39,30 @@ class Test_AMP_WordPress_TV_Embed_Handler extends WP_UnitTestCase {
 			return $preempt;
 		}
 
-		if ( false === strpos( $url, 'wordpress.tv' ) ) {
-			return $preempt;
+		$body = null;
+
+		$host = wp_parse_url( $url, PHP_URL_HOST );
+		if ( 'wordpress.tv' === $host ) {
+			$body = '{"type":"video","version":"1.0","title":null,"width":500,"height":281,"html":"<iframe width=\'500\' height=\'281\' src=\'https:\\/\\/video.wordpress.com\\/embed\\/yFCmLMGL?hd=0\' frameborder=\'0\' allowfullscreen><\\/iframe><script src=\'https:\\/\\/v0.wordpress.com\\/js\\/next\\/videopress-iframe.js?m=1435166243\'></script>"}'; // phpcs:ignore
+		} elseif ( 'videopress.com' === $host ) {
+			$body = '{"version":"1.0","provider_name":"VideoPress","provider_url":"https:\/\/videopress.com\/","type":"video","title":"VideoPress Demo","width":560,"height":316,"thumbnail_url":"https:\/\/videos.files.wordpress.com\/kUJmAcSf\/bbb_sunflower_1080p_30fps_normal_scruberthumbnail_2.jpg","thumbnail_width":560,"thumbnail_height":316,"html":"<iframe width=\'560\' height=\'316\' src=\'https:\/\/video.wordpress.com\/embed\/kUJmAcSf?hd=0\' frameborder=\'0\' allowfullscreen><\/iframe><script src=\'https:\/\/v0.wordpress.com\/js\/next\/videopress-iframe.js?m=1435166243\'><\/script>"}'; // phpcs:ignore
 		}
+
+		if ( isset( $body ) ) {
+			return [
+				'body'          => $body,
+				'headers'       => [],
+				'response'      => [
+					'code'    => 200,
+					'message' => 'ok',
+				],
+				'cookies'       => [],
+				'http_response' => null,
+			];
+		}
+
 		unset( $r );
-		return [
-			'body'          => '{"type":"video","version":"1.0","title":null,"width":500,"height":281,"html":"<iframe width=\'500\' height=\'281\' src=\'https:\\/\\/video.wordpress.com\\/embed\\/yFCmLMGL?hd=0\' frameborder=\'0\' allowfullscreen><\\/iframe><script src=\'https:\\/\\/v0.wordpress.com\\/js\\/next\\/videopress-iframe.js?m=1435166243\'></script>"}', // phpcs:ignore
-			'headers'       => [],
-			'response'      => [
-				'code'    => 200,
-				'message' => 'ok',
-			],
-			'cookies'       => [],
-			'http_response' => null,
-		];
+		return $preempt;
 	}
 
 	/**
@@ -74,10 +84,24 @@ class Test_AMP_WordPress_TV_Embed_Handler extends WP_UnitTestCase {
 			<!-- /wp:core-embed/wordpress-tv -->
 		';
 
+		$videopress_block = '
+			<!-- wp:core-embed/videopress {"url":"https://videopress.com/v/kUJmAcSf","type":"video","providerNameSlug":"videopress","className":"wp-embed-aspect-16-9 wp-has-aspect-ratio"} -->
+				<figure class="wp-block-embed-videopress wp-block-embed is-type-video is-provider-videopress wp-embed-aspect-16-9 wp-has-aspect-ratio"><div class="wp-block-embed__wrapper">
+					https://videopress.com/v/kUJmAcSf
+				</div></figure>
+			<!-- /wp:core-embed/videopress -->
+		';
+
 		$handler->register_embed();
+
 		$rendered = apply_filters( 'the_content', $wordpress_tv_block );
 		$this->assertStringContains( '<iframe', $rendered );
-		$this->assertStringContains( 'video.wordpress.com/embed', $rendered );
+		$this->assertStringContains( 'https://video.wordpress.com/embed/yFCmLMGL', $rendered );
+		$this->assertStringNotContains( '<script', $rendered );
+
+		$rendered = apply_filters( 'the_content', $videopress_block );
+		$this->assertStringContains( '<iframe', $rendered );
+		$this->assertStringContains( 'https://video.wordpress.com/embed/kUJmAcSf', $rendered );
 		$this->assertStringNotContains( '<script', $rendered );
 	}
 
