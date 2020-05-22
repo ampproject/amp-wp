@@ -155,7 +155,11 @@ dc() {
 # Executes a WP CLI request in the CLI container.
 ##
 wp() {
-	dc exec -u xfs $CLI wp "$@"
+	if [ "$GITHUB_ACTIONS" == "true" ]; then
+		dc exec -T -u xfs $CLI wp "$@"
+	else
+		dc exec -u xfs $CLI wp "$@"
+	fi
 }
 
 ##
@@ -164,5 +168,9 @@ wp() {
 # Executes the given command in the wordpress container.
 ##
 container() {
-	dc exec $CONTAINER "$@"
+	if [ "$GITHUB_ACTIONS" == "true" ]; then
+		dc exec -T $CONTAINER "$@"
+	else
+		dc exec $CONTAINER "$@"
+	fi
 }
