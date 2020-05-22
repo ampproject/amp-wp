@@ -1175,7 +1175,10 @@ class AMP_Theme_Support {
 				continue;
 			}
 
-			$embed_handler->register_embed();
+			// @todo Conditional below can be removed once all embed handlers can sanitize raw embeds.
+			if ( method_exists( $embed_handler, 'register_embed' ) ) {
+				$embed_handler->register_embed();
+			}
 			$embed_handlers[] = $embed_handler;
 		}
 

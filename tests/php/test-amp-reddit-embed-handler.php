@@ -57,7 +57,7 @@ class AMP_Reddit_Embed_Handler_Test extends WP_UnitTestCase {
 
 			'url_simple' => [
 				'https://www.reddit.com/r/aww/comments/gnl55y/sticky_bun_for_you/' . PHP_EOL,
-				'<amp-embedly-card layout="responsive" width="100" height="100" data-url="https://www.reddit.com/r/aww/comments/gnl55y/sticky_bun_for_you/?ref_source=embed&amp;ref=share"><blockquote class="reddit-card" placeholder=""><p>      <a href="https://www.reddit.com/r/aww/comments/gnl55y/sticky_bun_for_you/?ref_source=embed&amp;ref=share">Sticky bun for you!</a> from      <a href="https://www.reddit.com/r/aww/">aww</a>    </p></blockquote></amp-embedly-card>' . PHP_EOL . PHP_EOL,
+				'<amp-embedly-card layout="responsive" width="100" height="100" data-url="https://www.reddit.com/r/aww/comments/gnl55y/sticky_bun_for_you/?ref_source=embed&amp;ref=share"><blockquote class="reddit-card" placeholder=""><p>' . PHP_EOL . '      <a href="https://www.reddit.com/r/aww/comments/gnl55y/sticky_bun_for_you/?ref_source=embed&amp;ref=share">Sticky bun for you!</a> from<br>' . PHP_EOL . '      <a href="https://www.reddit.com/r/aww/">aww</a>' . PHP_EOL . '    </p></blockquote></amp-embedly-card>' . PHP_EOL . PHP_EOL,
 			],
 
 			'shortcode'  => [

@@ -65,6 +65,16 @@ class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
+	 * Get all raw embeds from the DOM.
+	 *
+	 * @param Document $dom Document.
+	 * @return DOMNodeList A list of DOMElement nodes.
+	 */
+	protected function get_raw_embed_nodes( Document $dom ) {
+		return $dom->xpath->query( sprintf( '//iframe[ starts-with( @src, "%s" ) ]', $this->base_embed_url ) );
+	}
+
+	/**
 	 * Make embed AMP compatible.
 	 *
 	 * @param DOMElement $node DOM element.

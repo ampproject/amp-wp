@@ -10,12 +10,6 @@
  * Class AMP_Issuu_Embed_Handler
  */
 class AMP_Issuu_Embed_Handler extends AMP_Base_Embed_Handler {
-	/**
-	 * Regex matched to produce output amp-iframe.
-	 *
-	 * @const string
-	 */
-	const URL_PATTERN = '#https?://(www\.)?issuu\.com/.+/docs/.+#i';
 
 	/**
 	 * Register embed.

@@ -184,7 +184,10 @@ class AMP_Content {
 				continue;
 			}
 
-			$embed_handler->register_embed();
+			// @todo Conditional below can be removed once all embed handlers can sanitize raw embeds.
+			if ( method_exists( $embed_handler, 'register_embed' ) ) {
+				$embed_handler->register_embed();
+			}
 			$embed_handlers[] = $embed_handler;
 		}
 
@@ -198,8 +201,10 @@ class AMP_Content {
 	 */
 	private function unregister_embed_handlers( $embed_handlers ) {
 		foreach ( $embed_handlers as $embed_handler ) {
-			$this->add_scripts( $embed_handler->get_scripts() );
-			$embed_handler->unregister_embed();
+			// @todo Conditional below can be removed once all embed handlers can sanitize raw embeds.
+			if ( method_exists( $embed_handler, 'unregister_embed' ) ) {
+				$embed_handler->unregister_embed();
+			}
 		}
 	}
 

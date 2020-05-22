@@ -78,6 +78,10 @@ abstract class AMP_Base_Embed_Handler {
 	public function sanitize_raw_embeds( Document $dom ) {
 		$nodes = $this->get_raw_embed_nodes( $dom );
 
+		if ( 0 === $nodes->length ) {
+			return;
+		}
+
 		foreach ( $nodes as $node ) {
 			if ( ! $this->is_raw_embed( $node ) ) {
 				continue;
@@ -88,12 +92,13 @@ abstract class AMP_Base_Embed_Handler {
 
 	/**
 	 * Get all raw embeds from the DOM.
+	 * // @todo This method can be made abstract once all embed handlers can sanitize raw embeds.
 	 *
 	 * @param Document $dom Document.
 	 * @return DOMNodeList A list of DOMElement nodes.
 	 */
-	protected function get_raw_embed_nodes( Document $dom ) {
-		return $dom->xpath->query( sprintf( '//iframe[ starts-with( @src, "%s" ) ]', $this->base_embed_url ) );
+	protected function get_raw_embed_nodes( Document $dom ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+		return new DOMNodeList();
 	}
 
 	/**
@@ -108,10 +113,13 @@ abstract class AMP_Base_Embed_Handler {
 
 	/**
 	 * Make embed AMP compatible.
+	 * // @todo Make this method abstract once all embed handlers have `sanitize_raw_embeds` implemented.
 	 *
 	 * @param DOMElement $node DOM element.
 	 */
-	abstract protected function sanitize_raw_embed( DOMElement $node );
+	protected function sanitize_raw_embed( DOMElement $node ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+		// To be overridden.
+	}
 
 	/**
 	 * Get mapping of AMP component names to AMP script URLs.
