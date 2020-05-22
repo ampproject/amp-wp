@@ -221,6 +221,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 *      @type int $frameborder <iframe> `frameborder` attribute - Filter to '0' or '1'; default to '0'
 	 *      @type bool $allowfullscreen <iframe> `allowfullscreen` attribute - Convert 'false' to empty string ''
 	 *      @type bool $allowtransparency <iframe> `allowtransparency` attribute - Convert 'false' to empty string ''
+	 *      @type string $type <iframe> `type` attribute - Pass along if found
 	 * }
 	 * @return array Returns HTML attributes; normalizes src, dimensions, frameborder, sandbox, allowtransparency and allowfullscreen
 	 */
@@ -302,6 +303,13 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 
 				case 'data-amp-overflow-text':
 					// No need to copy.
+					break;
+
+				case 'type':
+					/*
+					 * Though type is non-standard attribute in <iframe> tag, some embeds (i.e Amazon Kindle Embed) uses
+					 * it, therefore we need to omit this.
+					 */
 					break;
 
 				default:
