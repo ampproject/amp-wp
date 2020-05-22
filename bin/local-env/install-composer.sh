@@ -7,12 +7,11 @@ set -e
 # Include useful functions
 . "$(dirname "$0")/includes.sh"
 
-
 # Change to the expected directory
 cd "$(dirname "$0")/../.."
 
 # Check if composer is installed
-if [ "$TRAVIS" != "true" ] && ! command_exists "composer"; then
+if [ "$TRAVIS" != "true" ] && [ "$GITHUB_ACTIONS" != "true" ] && ! command_exists "composer"; then
 	if ask "$(error_message "Composer isn't installed, would you like to download and install it automatically?")" Y; then
 		echo -en $(status_message "Installing Composer..." )
 		download "https://getcomposer.org/installer" | bash >/dev/null 2>&1
@@ -29,12 +28,11 @@ if [ "$TRAVIS" != "true" ] && ! command_exists "composer"; then
 fi
 
 # Check if the current Composer version is up to date.
-if [ "$TRAVIS" != "true" ] && ! [[ "$(composer --version)" == "Composer version $COMPOSER_VERSION "* ]]; then
+if [ "$TRAVIS" != "true" ] && [ "$GITHUB_ACTIONS" != "true" ] && ! [[ "$(composer --version)" == "Composer version $COMPOSER_VERSION "* ]]; then
 	echo -en $(status_message "Updating Composer..." )
 	composer self-update
 	echo ' done!'
 fi
-
 
 # Install/update packages
 echo -e $(status_message "Installing and updating Composer packages..." )

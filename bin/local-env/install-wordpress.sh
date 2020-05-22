@@ -94,9 +94,20 @@ echo -e $(status_message "Installing a dummy favicon...")
 container touch /var/www/html/favicon.ico
 container chmod 767 /var/www/html/favicon.ico
 
-# Activate AMP plugin.
-echo -e $(status_message "Activating AMP plugin...")
-wp plugin activate amp --quiet
+# Install if needed and activate AMP plugin.
+# TODO: Investigate why this is needed in GH CI, or maybe even better,
+# look into how to generalize the URL to the ZIP build and always use that.
+if [ "$GITHUB_ACTIONS" == "true" ]; then
+	echo -e $(status_message "Installing and activating AMP plugin...")
+	wp plugin install /github/workspace/amp.zip --activate --force --quiet
+else
+	echo -e $(status_message "Activating AMP plugin...")
+	wp plugin activate amp --quiet
+fi
+
+# Install & activate Gutenberg plugin.
+echo -e $(status_message "Installing and activating PWA plugin...")
+wp plugin install pwa --activate --force --quiet
 
 # Install & activate Gutenberg plugin.
 echo -e $(status_message "Installing and activating Gutenberg plugin...")
