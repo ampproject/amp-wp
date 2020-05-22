@@ -43,7 +43,7 @@ class AMP_TikTok_Embed_Handler extends AMP_Base_Embed_Handler {
 			return;
 		}
 
-		$this->maybe_remove_script_sibling( $node, 'tiktok.com/embed.js' );
+		$this->remove_script_sibling( $node, 'tiktok.com/embed.js' );
 
 		$amp_node = AMP_DOM_Utils::create_node(
 			Document::fromNode( $dom ),

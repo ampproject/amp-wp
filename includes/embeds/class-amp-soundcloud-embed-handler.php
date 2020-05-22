@@ -82,7 +82,7 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 			$attributes
 		);
 
-		$this->maybe_unwrap_p_element( $node );
+		$this->unwrap_p_element( $node );
 
 		$node->parentNode->replaceChild( $amp_node, $node );
 	}

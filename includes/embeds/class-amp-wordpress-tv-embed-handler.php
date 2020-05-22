@@ -28,7 +28,7 @@ class AMP_WordPress_TV_Embed_Handler extends AMP_Base_Embed_Handler {
 	protected function sanitize_raw_embed( DOMElement $node ) {
 		$node->setAttribute( 'layout', 'responsive' );
 
-		$this->maybe_remove_script_sibling( $node, 'v0.wordpress.com/js/next/videopress-iframe.js' );
-		$this->maybe_unwrap_p_element( $node );
+		$this->remove_script_sibling( $node, 'v0.wordpress.com/js/next/videopress-iframe.js' );
+		$this->unwrap_p_element( $node );
 	}
 }

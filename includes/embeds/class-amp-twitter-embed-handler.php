@@ -181,9 +181,9 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 			$new_node->appendChild( $placeholder );
 
 			$this->remove_br_sibling_elements( $node );
-			$this->maybe_remove_script_sibling( $node, 'platform.twitter.com/widgets.js' );
+			$this->remove_script_sibling( $node, 'platform.twitter.com/widgets.js' );
 			// We can unwrap the <p> tag once the accompanied <script> is removed.
-			$this->maybe_unwrap_p_element( $node );
+			$this->unwrap_p_element( $node );
 
 			$node->parentNode->replaceChild( $new_node, $node );
 		}

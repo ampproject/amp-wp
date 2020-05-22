@@ -31,8 +31,8 @@ class AMP_Scribd_Embed_Handler extends AMP_Base_Embed_Handler {
 		);
 		$node->setAttribute( 'layout', 'responsive' );
 
-		$this->maybe_remove_script_sibling( $node, null, 'scribd.com/javascripts/embed_code/inject.j' );
-		$this->maybe_unwrap_p_element( $node );
+		$this->remove_script_sibling( $node, null, 'scribd.com/javascripts/embed_code/inject.j' );
+		$this->unwrap_p_element( $node );
 
 		// The iframe sanitizer will further sanitize and convert this into an amp-iframe.
 	}

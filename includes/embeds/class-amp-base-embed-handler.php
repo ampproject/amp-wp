@@ -158,6 +158,21 @@ abstract class AMP_Base_Embed_Handler {
 	}
 
 	/**
+	 * Get all child elements of the specified element.
+	 *
+	 * @param DOMElement $node Element.
+	 * @return DOMElement[] Array of child elements for specified element.
+	 */
+	protected function get_child_elements( DOMElement $node ) {
+		return array_filter(
+			iterator_to_array( $node->childNodes ),
+			static function ( DOMNode $child ) {
+				return $child instanceof DOMElement;
+			}
+		);
+	}
+
+	/**
 	 * Replace the node's parent with itself if the parent is a <p> tag, has no attributes and has no other children.
 	 * This usually happens while `wpautop()` processes the element.
 	 *
@@ -165,18 +180,11 @@ abstract class AMP_Base_Embed_Handler {
 	 *
 	 * @param DOMElement $node Node.
 	 */
-	protected function maybe_unwrap_p_element( DOMElement $node ) {
+	protected function unwrap_p_element( DOMElement $node ) {
 		$parent_element = AMP_DOM_Utils::get_parent_element( $node );
 
 		if ( $parent_element && 'p' === $parent_element->nodeName && false === $parent_element->hasAttributes() ) {
-			$child_element_count = array_sum(
-				array_map(
-					static function ( DOMNode $child ) {
-						return $child instanceof DOMElement ? 1 : 0;
-					},
-					iterator_to_array( $parent_element->childNodes )
-				)
-			);
+			$child_element_count = count( $this->get_child_elements( $parent_element ) );
 			if ( 1 === $child_element_count ) {
 				$parent_element->parentNode->replaceChild( $node, $parent_element );
 			}
@@ -192,7 +200,7 @@ abstract class AMP_Base_Embed_Handler {
 	 * @param string     $base_src_url Script URL to match against.
 	 * @param string     $content      Text content of node to match against.
 	 */
-	protected function maybe_remove_script_sibling( DOMElement $node, $base_src_url, $content = '' ) {
+	protected function remove_script_sibling( DOMElement $node, $base_src_url, $content = '' ) {
 		$next_element_sibling = $node->nextSibling;
 
 		while ( $next_element_sibling && ! ( $next_element_sibling instanceof DOMElement ) ) {
@@ -201,14 +209,7 @@ abstract class AMP_Base_Embed_Handler {
 
 		// Handle case where script is wrapped in paragraph by wpautop.
 		if ( $next_element_sibling instanceof DOMElement && 'p' === $next_element_sibling->nodeName ) {
-			$children_elements = array_values(
-				array_filter(
-					iterator_to_array( $next_element_sibling->childNodes ),
-					static function ( DOMNode $child ) {
-						return $child instanceof DOMElement;
-					}
-				)
-			);
+			$children_elements = array_values( $this->get_child_elements( $next_element_sibling ) );
 
 			if (
 				1 === count( $children_elements ) &&

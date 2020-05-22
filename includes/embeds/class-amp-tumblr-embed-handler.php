@@ -55,7 +55,7 @@ class AMP_Tumblr_Embed_Handler extends AMP_Base_Embed_Handler {
 			'width'     => $this->args['width'],
 			'height'    => $this->args['height'],
 			'resizable' => '',
-			'sandbox'   => 'allow-scripts allow-popups allow-same-origin'
+			'sandbox'   => 'allow-scripts allow-popups allow-same-origin',
 		];
 
 		$amp_node = AMP_DOM_Utils::create_node(
@@ -69,12 +69,13 @@ class AMP_Tumblr_Embed_Handler extends AMP_Base_Embed_Handler {
 			$dom,
 			'div',
 			[
-				'overflow' => '',
-				'tabindex' => 0,
-				'role'     => 'button',
+				'overflow'   => '',
+				'tabindex'   => 0,
+				'role'       => 'button',
 				'aria-label' => esc_attr__( 'See more', 'amp' ),
 			]
 		);
+
 		$overflow_node->textContent = esc_html__( 'See more', 'amp' );
 		$amp_node->appendChild( $overflow_node );
 
@@ -85,7 +86,7 @@ class AMP_Tumblr_Embed_Handler extends AMP_Base_Embed_Handler {
 			$amp_node->appendChild( $placeholder_node );
 		}
 
-		$this->maybe_remove_script_sibling( $node, 'assets.tumblr.com/post.js' );
+		$this->remove_script_sibling( $node, 'assets.tumblr.com/post.js' );
 
 		$node->parentNode->replaceChild( $amp_node, $node );
 	}

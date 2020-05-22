@@ -105,7 +105,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		$this->append_placeholder( $amp_node, $video_id, $attributes['title'] );
 
-		$this->maybe_unwrap_p_element( $node );
+		$this->unwrap_p_element( $node );
 
 		$node->parentNode->replaceChild( $amp_node, $node );
 	}

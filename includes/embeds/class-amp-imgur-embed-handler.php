@@ -67,7 +67,7 @@ class AMP_Imgur_Embed_Handler extends AMP_Base_Embed_Handler {
 			]
 		);
 
-		$this->maybe_remove_script_sibling( $node, 's.imgur.com/min/embed.js' );
+		$this->remove_script_sibling( $node, 's.imgur.com/min/embed.js' );
 
 		$node->parentNode->replaceChild( $amp_node, $node );
 	}

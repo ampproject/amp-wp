@@ -72,7 +72,7 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		$new_node = AMP_DOM_Utils::create_node( Document::fromNode( $node ), $this->amp_tag, $node_args );
 
-		$this->maybe_remove_script_sibling( $node, 'instagram.com/embed.js' );
+		$this->remove_script_sibling( $node, 'instagram.com/embed.js' );
 
 		$node->parentNode->replaceChild( $new_node, $node );
 	}
