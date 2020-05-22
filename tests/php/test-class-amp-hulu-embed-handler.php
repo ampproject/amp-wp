@@ -78,7 +78,7 @@ class AMP_Hulu_Embed_Handler_Test extends WP_UnitTestCase {
 
 			'url_with_params' => [
 				'https://www.hulu.com/watch/771496?foo=bar',
-				'<p><amp-hulu width="500" height="289" data-eid="771496"></amp-hulu></p>'. PHP_EOL,
+				'<p><amp-hulu width="500" height="289" data-eid="771496"></amp-hulu></p>' . PHP_EOL,
 			],
 
 		];
