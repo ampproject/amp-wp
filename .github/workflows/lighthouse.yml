@@ -1,0 +1,43 @@
+name: Lighthouse CI
+on: push
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Composer dependencies
+        # Scripts are not ignored as they are needed to apply patches for the
+        # `sabberworm/php-css-parser` dependency.
+        run: composer install --prefer-dist --optimize-autoloader
+
+      - name: Install Node dependencies
+        # Prevent malicious scripts from being run with `--ignore-scripts`
+        run: npm install --ignore-scripts
+
+      - name: Run build script
+        run: npm run build
+
+      - name: Start Docker environment
+        run: npm run env:start
+
+      - name: Populate site with reference content
+        run: npm run env:populate-site
+
+      - name: Install Lighthouse CI
+        run: npm install -g @lhci/cli
+
+      - name: Run Lighthouse CI health check
+        run: lhci healthcheck
+
+      - name: Run Lighthouse CI audit
+        run: lhci collect
+
+      - name: Assert Lighthouse CI measurements against requirements
+        run: lhci assert
+
+      - name: Upload Lighthouse CI measurements
+        run: lhci collect
+
+      - name: Stop Docker environment
+        run: npm run env:stop
