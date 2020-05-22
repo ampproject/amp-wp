@@ -490,19 +490,4 @@ class AMP_DOM_Utils {
 			}
 		}
 	}
-
-	/**
-	 * Get closest parent element for specified DOM node.
-	 *
-	 * @param DOMNode $node DOMNode.
-	 * @return DOMElement|null
-	 */
-	public static function get_parent_element( DOMNode $node ) {
-		$parent_node = $node->parentNode;
-		while ( $parent_node && ! ( $parent_node instanceof DOMElement ) ) {
-			$parent_node = $parent_node->parentNode;
-		}
-
-		return $parent_node;
-	}
 }

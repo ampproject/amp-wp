@@ -189,12 +189,15 @@ abstract class AMP_Base_Embed_Handler {
 	 * @param DOMElement $node Node.
 	 */
 	protected function unwrap_p_element( DOMElement $node ) {
-		$parent_element = AMP_DOM_Utils::get_parent_element( $node );
+		$parent_node = $node->parentNode;
+		while ( $parent_node && ! ( $parent_node instanceof DOMElement ) ) {
+			$parent_node = $parent_node->parentNode;
+		}
 
-		if ( $parent_element && 'p' === $parent_element->nodeName && false === $parent_element->hasAttributes() ) {
-			$child_element_count = count( $this->get_child_elements( $parent_element ) );
+		if ( $parent_node instanceof DOMElement && 'p' === $parent_node->nodeName && false === $parent_node->hasAttributes() ) {
+			$child_element_count = count( $this->get_child_elements( $parent_node ) );
 			if ( 1 === $child_element_count ) {
-				$parent_element->parentNode->replaceChild( $node, $parent_element );
+				$parent_node->parentNode->replaceChild( $node, $parent_node );
 			}
 		}
 	}
