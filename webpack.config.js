@@ -262,7 +262,6 @@ const setup = {
 		'amp-setup': 'ampSetup',
 	},
 	plugins: [
-		...defaultConfig.plugins,
 		new DependencyExtractionWebpackPlugin( {
 			useDefaults: false,
 			// All dependencies will be bundled for the AMP setup screen for compatibility across WP versions.
