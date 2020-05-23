@@ -10,10 +10,36 @@ jobs:
       - name: Check out source files
         uses: actions/checkout@v2
 
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: |
+          echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - name: Configure Composer cache
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
       - name: Install Composer dependencies
         # Scripts are not ignored as they are needed to apply patches for the
         # `sabberworm/php-css-parser` dependency.
         run: composer install --prefer-dist --optimize-autoloader
+
+      - name: Get npm cache directory
+        id: npm-cache
+        run: |
+          echo "::set-output name=dir::$(npm config get cache)"
+
+      - name: Configure npm cache
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.npm-cache.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
       - name: Install Node dependencies
         # Prevent malicious scripts from being run with `--ignore-scripts`
@@ -29,7 +55,7 @@ jobs:
       - name: Upload release ZIP
         uses: actions/upload-artifact@v2
         with:
-          name: amp-${{needs.release-zip.outputs.amp-version}}-${GITHUB_SHA::8}.zip
+          name: amp-${{ steps.retrieve-version.outputs.amp-version }}-${{ GITHUB_SHA::8 }}.zip
           path: amp.zip
 
   lighthouse:
@@ -40,7 +66,7 @@ jobs:
       - name: Download release ZIP
         uses: actions/download-artifact@v2
         with:
-          name: amp-${{needs.release-zip.outputs.amp-version}}-${GITHUB_SHA::8}.zip
+          name: amp-${{ needs.release-zip.outputs.amp-version }}-${{ GITHUB_SHA::8 }}.zip
           path: amp.zip
 
       - name: Install MySQL client
