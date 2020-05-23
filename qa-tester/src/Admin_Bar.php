@@ -22,7 +22,6 @@ class Admin_Bar {
 	 * Constructor.
 	 *
 	 * @since 1.0.0
-	 *
 	 */
 	public function __construct() {
 		$this->test_url = get_site_option( Plugin::URL_STORAGE_KEY );

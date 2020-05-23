@@ -10,6 +10,8 @@ namespace AmpProject\AmpWP_QA_Tester;
  */
 class Plugin {
 
+	const DOWNLOAD_BASE   = 'https://raw.githubusercontent.com/wiki/ampproject/amp-wp/refs/{PR}/merge/amp-wp';
+	const PLUGIN_SLUG     = 'amp';
 	const URL_STORAGE_KEY = 'amp_qa_tester_url';
 	const REPO_BASE       = 'https://api.github.com/repos/ampproject/amp-wp/';
 
@@ -30,6 +32,14 @@ class Plugin {
 	protected $admin_bar;
 
 	/**
+	 * Rest Route.
+	 *
+	 * @since 1.0.0
+	 * @var Rest_Route|null
+	 */
+	protected $rest_route = null;
+
+	/**
 	 * Absolute path to the plugin main file.
 	 *
 	 * @since 1.0.0
@@ -45,8 +55,9 @@ class Plugin {
 	 * @param string $main_file Absolute path to the plugin main file.
 	 */
 	public function __construct( $main_file ) {
-		$this->main_file = $main_file;
-		$this->admin_bar = new Admin_Bar();
+		$this->main_file  = $main_file;
+		$this->admin_bar  = new Admin_Bar();
+		$this->rest_route = new Rest_Route();
 	}
 
 	/**
@@ -56,6 +67,7 @@ class Plugin {
 	 */
 	public function register() {
 		$this->admin_bar->register();
+		$this->rest_route->register();
 	}
 
 	/**
