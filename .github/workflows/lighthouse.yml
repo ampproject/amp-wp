@@ -3,6 +3,16 @@ on: push
 jobs:
   lighthouse:
     runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
     steps:
       - name: Check out source files
         uses: actions/checkout@v2
@@ -19,26 +29,43 @@ jobs:
       - name: Run build script
         run: npm run build
 
-      - name: Install Lighthouse CI
-        run: npm install -g @lhci/cli
+      - name: Install MySQL client
+        run: |
+          sudo apt-get install -y mysql-client
 
       - name: Install WP-CLI
-        run: curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+        run: |
+          curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+          mv wp-cli.phar /usr/local/bin/wp
+          chmod +x /usr/local/bin/wp
 
-      - name: Run PHP server via WP-CLI
-        run: php wp-cli.phar server --allow-root &
+      - name: Install WordPress Core
+        env:
+          PORT: ${{ job.services.mysql.ports[3306] }}
+        run: |
+          mkdir -p /var/www/html
+          echo "path: /var/www/html/" > wp-cli.local.yml
+          wp core download --force --allow-root
+          wp config create --dbname=lighthouse_test --dbuser=root --dbpass=root --dbhost="127.0.0.1:$PORT" --force --allow-root
+
+      - name: Initialize WordPress database
+          wp db create --allow-root
+          wp core install --title="AMP Dev" --admin_user=admin --admin_password=password --admin_email=test@test.com --skip-email --url=http://localhost:8080 --allow-root
+
+      - name: Install and activate the AMP plugin
+        run: wp plugin install amp.zip --activate --force --allow-root
+
+      - name: Install Lighthouse CI
+        run: npm install -g @lhci/cli
 
       - name: Run Lighthouse CI health check
         run: lhci healthcheck
 
       - name: Run Lighthouse CI audit
-        run: lhci collect --chrome-flags="--no-sandbox"
+        run: lhci collect
 
       - name: Assert Lighthouse CI measurements against requirements
         run: lhci assert
 
       - name: Upload Lighthouse CI measurements
         run: lhci upload
-
-      - name: Terminate PHP server
-        run: kill -s INT %1
