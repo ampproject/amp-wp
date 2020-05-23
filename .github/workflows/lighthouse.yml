@@ -4,15 +4,6 @@ jobs:
   lighthouse:
     runs-on: ubuntu-latest
 
-    services:
-      mysql:
-        image: mysql:5.7
-        env:
-          MYSQL_ROOT_PASSWORD: root
-        ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
-
     steps:
       - name: Check out source files
         uses: actions/checkout@v2
@@ -48,7 +39,7 @@ jobs:
           wp config create --dbname=lighthouse_test --dbuser=root --dbpass=root --dbhost="127.0.0.1:$PORT" --force --skip-check --allow-root
 
       - name: Starting MySQL server
-        run: sudo /etc/init.d/mysql start
+        run: sudo service mysql start
 
       - name: Initialize WordPress database
         run: |
