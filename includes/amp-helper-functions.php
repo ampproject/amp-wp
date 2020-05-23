@@ -149,6 +149,16 @@ function amp_init() {
 		do_action( 'amp_plugin_update', $old_version );
 		AMP_Options_Manager::update_option( Option::VERSION, AMP__VERSION );
 	}
+
+	if ( amp_should_use_new_onboarding() ) {
+		add_action(
+			'rest_api_init',
+			static function() {
+				$controller = new AMP_Options_REST_Controller();
+				$controller->register_routes();
+			}
+		);
+	}
 }
 
 /**
