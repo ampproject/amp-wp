@@ -251,7 +251,6 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: amp-${{ needs.release-zip.outputs.amp-version }}-${{ needs.release-zip.outputs.git-sha-8 }}.zip
-          path: amp.zip
 
       - name: Install MySQL client
         run: sudo apt-get install -y mysql-client
@@ -280,7 +279,7 @@ jobs:
           wp core install --title="AMP Dev" --admin_user=admin --admin_password=password --admin_email=test@test.com --skip-email --url=http://localhost:8080 --allow-root
 
       - name: Install and activate the AMP plugin
-        run: wp plugin install amp.zip --activate --force --allow-root
+        run: wp plugin install amp-${{ needs.release-zip.outputs.amp-version }}-${{ needs.release-zip.outputs.git-sha-8 }}.zip --activate --force --allow-root
 
       - name: Install and activate the PWA plugin
         run: wp plugin install pwa --activate --force --allow-root
