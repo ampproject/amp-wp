@@ -257,7 +257,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           # Downloaded file name will actually be amp.zip again.
-          name: amp-${{ needs.release-zip.outputs.amp-version }}-${{ needs.release-zip.outputs.git-sha-8 }}.zip
+          name: amp-${{ needs.release-zip.outputs.branch-name }}-${{ needs.release-zip.outputs.git-sha-8 }}.zip
 
       - name: Install MySQL client
         run: sudo apt-get install -y mysql-client
