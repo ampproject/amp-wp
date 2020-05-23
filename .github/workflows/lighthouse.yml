@@ -46,9 +46,13 @@ jobs:
           mkdir -p /var/www/html
           echo "path: /var/www/html/" > wp-cli.local.yml
           wp core download --force --allow-root
-          wp config create --dbname=lighthouse_test --dbuser=root --dbpass=root --dbhost="127.0.0.1:$PORT" --force --allow-root
+          wp config create --dbname=lighthouse_test --dbuser=root --dbpass=root --dbhost="127.0.0.1:$PORT" --force --skip-check --allow-root
+
+      - name: Starting MySQL server
+        run: sudo /etc/init.d/mysql start
 
       - name: Initialize WordPress database
+        run: |
           wp db create --allow-root
           wp core install --title="AMP Dev" --admin_user=admin --admin_password=password --admin_email=test@test.com --skip-email --url=http://localhost:8080 --allow-root
 
