@@ -114,7 +114,6 @@
     "dev": "wp-scripts start",
     "env:start": "./bin/local-env/start.sh",
     "env:stop": "./bin/local-env/stop.sh",
-    "env:populate": "./bin/local-env/populate-site.sh",
     "env:reset-site": "./bin/local-env/install-wordpress.sh --reset-site",
     "lint": "npm-run-all --parallel lint:*",
     "lint:css": "wp-scripts lint-style",
