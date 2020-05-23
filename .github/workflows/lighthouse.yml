@@ -42,8 +42,8 @@ jobs:
         env:
           PORT: ${{ job.services.mysql.ports[3306] }}
         run: |
-          mkdir -p /var/www/html
-          echo "path: /var/www/html/" > wp-cli.local.yml
+          mkdir -p www
+          echo "path: www/" > wp-cli.local.yml
           wp core download --force --allow-root
           wp config create --dbname=lighthouse_test --dbuser=root --dbpass=root --dbhost="127.0.0.1:$PORT" --force --skip-check --allow-root
 
