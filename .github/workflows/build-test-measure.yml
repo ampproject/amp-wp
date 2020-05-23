@@ -252,6 +252,9 @@ jobs:
         with:
           name: amp-${{ needs.release-zip.outputs.amp-version }}-${{ needs.release-zip.outputs.git-sha-8 }}.zip
 
+      - name: Display structure of downloaded files
+        run: ls -R
+
       - name: Install MySQL client
         run: sudo apt-get install -y mysql-client
 
