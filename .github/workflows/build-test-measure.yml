@@ -63,7 +63,7 @@ jobs:
         env:
           SHA8: ${GITHUB_SHA::8}
         with:
-          name: amp-${{ steps.retrieve-version.outputs.branch_name }}-${{ steps.retrieve-git-sha-8.outputs.sha8 }}.zip
+          name: amp-${{ steps.retrieve-branch-name.outputs.branch_name }}-${{ steps.retrieve-git-sha-8.outputs.sha8 }}.zip
           path: amp.zip
 
 #-----------------------------------------------------------------------------------------------------------------------
