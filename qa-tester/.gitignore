@@ -1,4 +1,6 @@
 vendor/
+assets/css/
+assets/js/
 build/
 node_modules/
 .idea/

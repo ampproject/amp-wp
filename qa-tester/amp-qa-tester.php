@@ -66,7 +66,7 @@ function load_plugin() {
 			'build_required',
 			sprintf(
 				/* translators: %s: composer install && npm install && npm run build */
-				__( 'You appear to be running the AMP QA Tester plugin from source. Please do %s to finish installation.', 'amp' ),
+				__( 'You appear to be running the AMP QA Tester plugin from source. Please do %s to finish installation.', 'amp-qa-tester' ),
 				'<code>composer install &amp;&amp; npm install &amp;&amp; npm run build</code>'
 			)
 		);
@@ -81,6 +81,8 @@ function load_plugin() {
 	define( 'AMP_QA_TESTER_VERSION', '1.0.0' );
 
 	require __DIR__ . '/vendor/autoload.php';
+
+	Plugin::load( __FILE__ );
 }
 
 /**
@@ -93,7 +95,7 @@ function display_errors_admin_notice() {
 	?>
 	<div class="notice notice-error">
 		<p>
-			<strong><?php esc_html_e( 'AMP QA Tester failed to initialize.', 'amp' ); ?></strong>
+			<strong><?php esc_html_e( 'AMP QA Tester failed to initialize.', 'amp-qa-tester' ); ?></strong>
 			<ul>
 				<?php foreach ( array_keys( $load_errors->errors ) as $error_code ) : ?>
 					<?php foreach ( $load_errors->get_error_messages( $error_code ) as $message ) : ?>

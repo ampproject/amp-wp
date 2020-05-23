@@ -1,0 +1,75 @@
+#amp-qa-tester-adminbar-inner {
+	padding: 0 6px;
+}
+
+#amp-qa-tester-adminbar-inner select {
+	padding: 2px;
+	line-height: 28px;
+	height: 28px;
+	vertical-align: middle;
+}
+
+#amp-qa-tester-adminbar-inner .button {
+	display: inline-block;
+	text-decoration: none;
+	font-size: 13px;
+	line-height: 26px;
+	height: 28px;
+	padding: 0 10px 1px;
+	cursor: pointer;
+	border-width: 1px;
+	border-style: solid;
+	-webkit-appearance: none;
+	border-radius: 3px;
+	white-space: nowrap;
+	box-sizing: border-box;
+	margin: 4px 0 0;
+}
+
+.amp-qa-tester-error {
+	background-color: #8b0000;
+}
+
+#amp-qa-tester-pull-request-selector input[type="checkbox"],
+input[type="radio"] {
+	border: 1px solid #b4b9be;
+	background: #fff;
+	color: #555;
+	clear: none;
+	cursor: pointer;
+	display: inline-block;
+	line-height: 0;
+	height: 16px;
+	margin: -4px 4px 0 0;
+	outline: 0;
+	padding: 0 !important;
+	text-align: center;
+	vertical-align: middle;
+	width: 16px;
+	min-width: 16px;
+	-webkit-appearance: none;
+	box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+	transition: .05s border-color ease-in-out;
+}
+
+#amp-qa-tester-pull-request-selector .switching {
+	border: 2px solid #eee;
+	border-radius: 50%;
+	border-top: 2px solid #333;
+	width: 14px;
+	height: 14px;
+	animation: spin 2s linear infinite;
+	margin: 6px;
+	float: left;
+}
+
+@keyframes spin {
+
+	0% {
+		transform: rotate(0deg);
+	}
+
+	100% {
+		transform: rotate(360deg);
+	}
+}
