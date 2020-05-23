@@ -54,16 +54,13 @@ echo -e $(status_message "Contributor created! Username: contributor Password: p
 wp user create subscriber subscriber@example.com --role=subscriber --user_pass=password --quiet
 echo -e $(status_message "Subscriber created! Username: subscriber Password: password")
 
-# Make sure the required folders exist and we have permissions to add files.
+# Make sure the uploads and upgrade folders exist and we have permissions to add files.
 echo -e $(status_message "Ensuring that files can be uploaded...")
 container mkdir -p \
-	/var/www/html/wp-content/mu-plugins \
-	/var/www/html/wp-content/plugins \
 	/var/www/html/wp-content/uploads \
 	/var/www/html/wp-content/upgrade
 container chmod 767 \
 	/var/www/html/wp-content \
-	/var/www/html/wp-content/mu-plugins \
 	/var/www/html/wp-content/plugins \
 	/var/www/html/wp-config.php \
 	/var/www/html/wp-settings.php \
@@ -99,12 +96,8 @@ echo -e $(status_message "Activating AMP plugin...")
 wp plugin activate amp --quiet
 
 # Install & activate Gutenberg plugin.
-echo -e $(status_message "Installing and activating PWA plugin...")
-wp plugin install pwa --activate --force --quiet
-
-# Install & activate Gutenberg plugin.
 echo -e $(status_message "Installing and activating Gutenberg plugin...")
-wp plugin install gutenberg --activate --force --quiet
+wp plugin install gutenberg --activate --force --quiet --version=7.1.0
 
 # Set pretty permalinks.
 echo -e $(status_message "Setting permalink structure...")
