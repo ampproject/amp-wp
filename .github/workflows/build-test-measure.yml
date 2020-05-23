@@ -78,6 +78,8 @@ jobs:
 
       - name: Upload build as artifact
         uses: actions/upload-artifact@v2
+        env:
+          SHA8: ${GITHUB_SHA::8}
         with:
           name: amp-${{ steps.retrieve-branch-name.outputs.branch_name }}-${{ steps.retrieve-git-sha-8.outputs.sha8 }}-dev
           path: builds/dev
@@ -248,7 +250,7 @@ jobs:
       - name: Download release ZIP
         uses: actions/download-artifact@v2
         with:
-          name: amp-${{ needs.release-zip.outputs.amp-version }}-${{ GITHUB_SHA::8 }}.zip
+          name: amp-${{ needs.release-zip.outputs.amp-version }}-${{ needs.release-zip.outputs.git-sha-8 }}.zip
           path: amp.zip
 
       - name: Install MySQL client
