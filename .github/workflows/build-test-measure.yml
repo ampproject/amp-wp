@@ -242,6 +242,8 @@ jobs:
 
 #-----------------------------------------------------------------------------------------------------------------------
 
+#-----------------------------------------------------------------------------------------------------------------------
+
   lighthouse:
     runs-on: ubuntu-latest
     needs: release-zip
@@ -250,10 +252,8 @@ jobs:
       - name: Download release ZIP
         uses: actions/download-artifact@v2
         with:
+          # Downloaded file name will actually be amp.zip again.
           name: amp-${{ needs.release-zip.outputs.amp-version }}-${{ needs.release-zip.outputs.git-sha-8 }}.zip
-
-      - name: Display structure of downloaded files
-        run: ls -R
 
       - name: Install MySQL client
         run: sudo apt-get install -y mysql-client
@@ -282,7 +282,7 @@ jobs:
           wp core install --title="AMP Dev" --admin_user=admin --admin_password=password --admin_email=test@test.com --skip-email --url=http://localhost:8080 --allow-root
 
       - name: Install and activate the AMP plugin
-        run: wp plugin install amp-${{ needs.release-zip.outputs.amp-version }}-${{ needs.release-zip.outputs.git-sha-8 }}.zip --activate --force --allow-root
+        run: wp plugin install amp.zip --activate --force --allow-root
 
       - name: Install and activate the PWA plugin
         run: wp plugin install pwa --activate --force --allow-root
