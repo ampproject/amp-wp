@@ -1,0 +1,56 @@
+{
+    "name": "ampproject/amp-wp-qa-tester",
+    "description": "Test pre-release versions of the AMP plugin.",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "minimum-stability": "dev",
+    "require": {
+      "php": "^5.6 || ^7.0"
+    },
+  "require-dev": {
+    "roave/security-advisories": "dev-master",
+    "squizlabs/php_codesniffer": "^3"
+  },
+  "config": {
+    "platform": {
+      "php": "5.6"
+    },
+    "sort-packages": true
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "1.0.x-dev",
+      "dev-develop": "1.0.x-dev"
+    },
+    "downloads": {
+      "phpstan": {
+        "url": "https://github.com/phpstan/phpstan/releases/latest/download/phpstan.phar",
+        "path": "vendor/bin/phpstan",
+        "type": "phar"
+      }
+    }
+  },
+  "autoload": {
+    "psr-4": {
+      "AmpProject\\AmpWP_QA_Tester\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "AmpProject\\AmpWP_QA_Tester\\Tests\\": "tests/src/"
+    }
+  },
+  "scripts": {
+    "cbf": "phpcbf --standard=PSR12 -n src tests",
+    "cs": "if [ -z $TEST_SKIP_PHPCS ]; then phpcs --standard=PSR12 -s -n src tests; fi",
+    "lint": "if [ -z $TEST_SKIP_LINTING ]; then parallel-lint -j 10 --colors --exclude vendor .; fi",
+    "analyze": "if [ -z $TEST_SKIP_PHPSTAN ]; then phpstan analyze --ansi; fi",
+    "unit": "if [ -z $TEST_SKIP_PHPUNIT ]; then phpunit --colors=always; fi",
+    "test": [
+      "@lint",
+      "@unit",
+      "@cs",
+      "@analyze"
+    ]
+  }
+}
