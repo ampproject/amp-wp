@@ -52,6 +52,9 @@ jobs:
       - name: Install and activate the PWA plugin
         run: wp plugin install pwa --activate --force --allow-root
 
+      - name: Switch site into Transitional mode
+        run: wp eval 'AMP_Options_Manager::update_option( AmpProject\AmpWP\Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );' --allow-root
+
       - name: Install Lighthouse CI
         run: sudo npm install -g @lhci/cli
 
@@ -61,8 +64,8 @@ jobs:
       - name: Run Lighthouse CI audit
         run: lhci collect
 
-      - name: Upload Lighthouse CI measurements
-        run: lhci upload
-
       - name: Assert Lighthouse CI measurements against requirements
         run: lhci assert
+
+      - name: Upload Lighthouse CI measurements
+        run: lhci upload
