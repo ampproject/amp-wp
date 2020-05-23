@@ -3,6 +3,7 @@ on: push
 jobs:
   lighthouse:
     runs-on: ubuntu-latest
+    needs: release-zip
 
     steps:
       - name: Check out source files

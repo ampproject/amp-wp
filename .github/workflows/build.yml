@@ -1,0 +1,30 @@
+name: Release ZIP
+on: push
+jobs:
+  release-zip:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out source files
+        uses: actions/checkout@v2
+
+      - name: Install Composer dependencies
+        # Scripts are not ignored as they are needed to apply patches for the
+        # `sabberworm/php-css-parser` dependency.
+        run: composer install --prefer-dist --optimize-autoloader
+
+      - name: Install Node dependencies
+        # Prevent malicious scripts from being run with `--ignore-scripts`
+        run: npm install --ignore-scripts
+
+      - name: Run build script
+        run: npm run build
+
+      - name: Retrieve version string
+        run: echo "::set-output name=amp_version::$(wp eval '$matches=[];preg_match( "/\*\s*Version:\s*(?P<version>\d+\.\d+(?:.\d+)?(-\w+)?)/", file_get_contents( "amp.php" ), $matches );echo $matches["version"];')"
+
+      - name: Upload release ZIP
+        uses: actions/upload-artifact@v2
+        with:
+          name: amp-${GITHUB_SHA::8}.zip
+          path: amp.zip
