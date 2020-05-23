@@ -249,6 +249,10 @@ jobs:
     needs: release-zip
 
     steps:
+      # Although we have a readily built ZIP of the plugin, we need the lighthouse configuration from source.
+      - name: Check out source files
+        uses: actions/checkout@v2
+
       - name: Download release ZIP
         uses: actions/download-artifact@v2
         with:
