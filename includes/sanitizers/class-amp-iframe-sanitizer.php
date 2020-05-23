@@ -221,7 +221,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 *      @type int $frameborder <iframe> `frameborder` attribute - Filter to '0' or '1'; default to '0'
 	 *      @type bool $allowfullscreen <iframe> `allowfullscreen` attribute - Convert 'false' to empty string ''
 	 *      @type bool $allowtransparency <iframe> `allowtransparency` attribute - Convert 'false' to empty string ''
-	 *      @type string $type <iframe> `type` attribute - Pass along if found
+	 *      @type string $type <iframe> `type` attribute - Pass along if value is not `text/html`
 	 * }
 	 * @return array Returns HTML attributes; normalizes src, dimensions, frameborder, sandbox, allowtransparency and allowfullscreen
 	 */
@@ -307,9 +307,12 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 
 				case 'type':
 					/*
-					 * Though type is non-standard attribute in <iframe> tag, some embeds (i.e Amazon Kindle Embed) uses
-					 * it, therefore we need to omit this.
+					 * Omit the `type` attribute if its value is `text/html`. Popular embed providers such as YouTube
+					 * and Amazon use this non-standard attribute.
 					 */
+					if ( 'text/html' !== strtolower( $value ) ) {
+						$out[ $name ] = $value;
+					}
 					break;
 
 				default:
