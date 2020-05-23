@@ -5,7 +5,7 @@ jobs:
   release-zip:
     runs-on: ubuntu-latest
     outputs:
-      amp-version: ${{ steps.retrieve-version.outputs.amp_version }}
+      branch-name: ${{ steps.retrieve-branch-name.outputs.branch_name }}
       git-sha-8: ${{ steps.retrieve-git-sha-8.outputs.sha8 }}
 
     steps:
@@ -50,11 +50,9 @@ jobs:
       - name: Run build script
         run: npm run build
 
-      - name: Retrieve version string
-        id: retrieve-version
-        run: |
-          wp eval '$matches=[];preg_match( "/\*\s*Version:\s*(?P<version>\d+\.\d+(?:.\d+)?(-\w+)?)/", file_get_contents( __FILE__ . "/amp.php" ), $matches );echo $matches["version"];' > version.txt
-          echo "::set-output name=amp_version::$(cat version.txt)"
+      - name: Retrieve branch name
+        id: retrieve-branch-name
+        run: echo "::set-output name=branch_name::$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//_/g')"
 
       - name: Retrieve git SHA-8 string
         id: retrieve-git-sha-8
@@ -65,7 +63,7 @@ jobs:
         env:
           SHA8: ${GITHUB_SHA::8}
         with:
-          name: amp-${{ steps.retrieve-version.outputs.amp_version }}-${{ steps.retrieve-git-sha-8.outputs.sha8 }}.zip
+          name: amp-${{ steps.retrieve-version.outputs.branch_name }}-${{ steps.retrieve-git-sha-8.outputs.sha8 }}.zip
           path: amp.zip
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -83,7 +81,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           # Downloaded file name will actually be amp.zip again.
-          name: amp-${{ needs.release-zip.outputs.amp-version }}-${{ needs.release-zip.outputs.git-sha-8 }}.zip
+          name: amp-${{ needs.release-zip.outputs.branch-name }}-${{ needs.release-zip.outputs.git-sha-8 }}.zip
 
       - name: Install MySQL client
         run: sudo apt-get install -y mysql-client
