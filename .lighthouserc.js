@@ -6,7 +6,6 @@ module.exports = {
 
 			// List of URLs to run the audit against.
 			url: [
-				'http://localhost:8080/',
 				'http://localhost:8080/?amp',
 			],
 
