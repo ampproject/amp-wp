@@ -52,7 +52,7 @@ jobs:
 
       - name: Retrieve version string
         id: retrieve-version
-        run: echo "::set-output name=amp_version::$(wp eval '$matches=[];preg_match( "/\*\s*Version:\s*(?P<version>\d+\.\d+(?:.\d+)?(-\w+)?)/", file_get_contents( "amp.php" ), $matches );echo $matches["version"];')"
+        run: echo "::set-output name=amp_version::$(wp eval '$matches=[];preg_match( "/\*\s*Version:\s*(?P<version>\d+\.\d+(?:.\d+)?(-\w+)?)/", file_get_contents( __FILE__ . "/amp.php" ), $matches );echo $matches["version"];')"
 
       - name: Retrieve git SHA-8 string
         id: retrieve-git-sha-8
