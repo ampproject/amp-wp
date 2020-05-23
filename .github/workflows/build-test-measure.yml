@@ -248,7 +248,7 @@ jobs:
       - name: Download release ZIP
         uses: actions/download-artifact@v2
         with:
-          name: amp-${{needs.release-zip.outputs.amp-version}}-${GITHUB_SHA::8}.zip
+          name: amp-${{ needs.release-zip.outputs.amp-version }}-${{ GITHUB_SHA::8 }}.zip
           path: amp.zip
 
       - name: Install MySQL client
