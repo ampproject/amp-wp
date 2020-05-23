@@ -30,14 +30,13 @@ jobs:
         run: npm run build
 
       - name: Install MySQL client
-        run: |
-          sudo apt-get install -y mysql-client
+        run: sudo apt-get install -y mysql-client
 
       - name: Install WP-CLI
         run: |
           curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
-          mv wp-cli.phar /usr/local/bin/wp
-          chmod +x /usr/local/bin/wp
+          sudo mv wp-cli.phar /usr/local/bin/wp
+          sudo chmod +x /usr/local/bin/wp
 
       - name: Install WordPress Core
         env:
