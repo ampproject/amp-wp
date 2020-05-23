@@ -50,7 +50,7 @@ jobs:
         run: wp plugin install amp.zip --activate --force --allow-root
 
       - name: Install Lighthouse CI
-        run: npm install -g @lhci/cli
+        run: sudo npm install -g @lhci/cli
 
       - name: Run Lighthouse CI health check
         run: lhci healthcheck
