@@ -87,6 +87,7 @@ final class AMP_Setup_Wizard_Submenu_Page {
 		$asset        = require $asset_file;
 		$dependencies = $asset['dependencies'];
 		$version      = $asset['version'];
+		$rtl          = is_rtl() ? '-rtl' : '';
 
 		wp_enqueue_script(
 			self::JS_HANDLE,
@@ -98,7 +99,7 @@ final class AMP_Setup_Wizard_Submenu_Page {
 
 		wp_enqueue_style(
 			static::JS_HANDLE,
-			amp_get_asset_url( 'css/amp-setup-compiled.css' ),
+			amp_get_asset_url( "css/amp-setup-compiled${$rtl}.css" ),
 			[],
 			AMP__VERSION
 		);
