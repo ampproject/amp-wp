@@ -1,0 +1,57 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Nav matches snapshot 1`] = `
+<div
+  className="amp-setup-nav"
+>
+  <div
+    className="amp-setup-nav__close"
+  >
+    <a
+      className="components-button is-link"
+      href="http://site.test"
+    >
+      Close
+    </a>
+  </div>
+  <div
+    className="amp-setup-nav__prev-next"
+  >
+    <span
+      className="amp-setup-nav__placeholder"
+    >
+       
+    </span>
+    <button
+      className="components-button amp-setup-nav__next"
+      disabled={false}
+      onClick={[Function]}
+      type="button"
+    >
+      <span>
+        Next
+         
+        <span
+          className="amp-mobile-hide"
+        >
+          Step
+        </span>
+      </span>
+      <svg
+        aria-hidden={true}
+        className="dashicon dashicons-arrow-right-alt2 amp-mobile-hide"
+        focusable={false}
+        height={18}
+        role="img"
+        viewBox="0 0 20 20"
+        width={18}
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M6 15l5-5-5-5 1-2 7 7-7 7z"
+        />
+      </svg>
+    </button>
+  </div>
+</div>
+`;

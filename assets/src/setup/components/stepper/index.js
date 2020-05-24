@@ -7,13 +7,12 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { useInstanceId } from '@wordpress/compose';
-import { useMemo, ReactElement } from '@wordpress/element';
+import { useMemo } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import { Check } from '../check';
-import './stepper.css';
+import { Check } from '../svg/check';
 
 /**
  * List bullet for a stepper item.
@@ -21,7 +20,6 @@ import './stepper.css';
  * @param {Object} props Component props.
  * @param {number} props.activePageIndex The index of the currently visible screen.
  * @param {number} props.index The index of the item being rendered.
- * @return {ReactElement} Item JSX.
  */
 export function StepperBullet( { activePageIndex, index } ) {
 	const isCheckMark = useMemo( () => index === 0, [ index ] );
@@ -61,7 +59,6 @@ StepperBullet.propTypes = {
  * @param {Object} props Component props.
  * @param {number} props.activePageIndex The index of the currently visible screen.
  * @param {Array} props.pages Page objects.
- * @return {ReactElement} Stepper JSX.
  */
 export function Stepper( { activePageIndex, pages } ) {
 	const instanceId = useInstanceId( Stepper );
@@ -69,14 +66,14 @@ export function Stepper( { activePageIndex, pages } ) {
 	return (
 		<div className="amp-stepper">
 			<ul>
-				{ pages.map( ( { navTitle }, index ) => (
+				{ pages.map( ( { title }, index ) => (
 					<li
 						className={ `amp-stepper__item ${ index === activePageIndex ? 'amp-stepper__item--active' : '' }` }
 						key={ `${ instanceId }-${ index }` }
 					>
 						<StepperBullet activePageIndex={ activePageIndex } index={ index } />
 						<span className="amp-stepper__item-title">
-							{ navTitle }
+							{ title }
 						</span>
 					</li>
 				) ) }
@@ -89,7 +86,7 @@ Stepper.propTypes = {
 	activePageIndex: PropTypes.number.isRequired,
 	pages: PropTypes.arrayOf(
 		PropTypes.shape( {
-			navTitle: PropTypes.string.isRequired,
+			title: PropTypes.string.isRequired,
 		} ),
 	).isRequired,
 };
