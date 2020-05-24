@@ -94,11 +94,11 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 
 	useEffect( () => {
 		fetchOptions();
-
-		return () => {
-			hasUnmounted.current = true;
-		};
 	}, [ fetchOptions ] );
+
+	useEffect( () => () => {
+		hasUnmounted.current = true;
+	}, [] );
 
 	return (
 		<Options.Provider
