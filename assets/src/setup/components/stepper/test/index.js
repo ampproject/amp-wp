@@ -26,6 +26,6 @@ describe( 'ValidationErrorMessage', () => {
 
 	it( 'matches snapsnot when neither index nor active index are 0 and they are not the same', () => {
 		const wrapper = create( <StepperBullet activePageIndex={ 2 } index={ 1 } /> );
-		expect( wrapper.toJSON ).toMatchSnapshot();
+		expect( wrapper.toJSON() ).toMatchSnapshot();
 	} );
 } );
