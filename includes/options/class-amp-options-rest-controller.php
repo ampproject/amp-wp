@@ -6,6 +6,8 @@
  * @since 1.6.0
  */
 
+use AmpProject\AmpWP\Option;
+
 /**
  * AMP setup wizard class.
  *
@@ -36,6 +38,7 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 				[
 					'methods'             => WP_REST_SERVER::READABLE,
 					'callback'            => [ $this, 'get_items' ],
+					'args'                => [],
 					'permission_callback' => [ $this, 'get_items_permissions_check' ],
 				],
 				[
@@ -44,6 +47,7 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
 					'permission_callback' => [ $this, 'get_item_permissions_check' ],
 				],
+				'schema' => $this->get_public_item_schema(),
 			]
 		);
 	}
@@ -53,14 +57,14 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 	 *
 	 * @since 1.6.0
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return true|WP_Error True if the request has read access, WP_Error object otherwise.
 	 */
 	public function get_items_permissions_check( $request ) {
-		if ( false && ! current_user_can( 'manage_options' ) ) {
+		if ( ! current_user_can( 'manage_options' ) ) {
 			return new WP_Error(
-				'amp_rest_cannot_view',
-				__( 'Sorry, you are not allowed to manage options for the AMP plugin.', 'amp' ),
+				'amp_wp_rest_cannot_view',
+				__( 'Sorry, you are not allowed to manage options for the AMP plugin for WordPress.', 'amp' ),
 				[ 'status' => rest_authorization_required_code() ]
 			);
 		}
@@ -77,7 +81,16 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function get_items( $request ) {
-		return rest_ensure_response( AMP_Options_Manager::get_options() );
+		$options    = AMP_Options_Manager::get_options();
+		$properties = array_keys( $this->get_item_schema()['properties'] );
+
+		foreach ( array_keys( $options ) as $option ) {
+			if ( ! in_array( $option, $properties, true ) ) {
+				unset( $options[ $option ] );
+			}
+		}
+
+		return rest_ensure_response( $options );
 	}
 
 	/**
@@ -89,12 +102,40 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 	 * @return array|WP_Error Array on success, or error object on failure.
 	 */
 	public function update_items( $request ) {
-		$params = $request->get_params();
+		$params     = $request->get_params();
+		$properties = array_keys( $this->get_item_schema()['properties'] );
 
 		foreach ( $params as $option => $new_value ) {
-			AMP_Options_Manager::update_option( $option, $new_value );
+			if ( in_array( $option, $properties, true ) ) {
+				AMP_Options_Manager::update_option( $option, $new_value );
+			}
 		}
 
 		return rest_ensure_response( $this->get_items( $request ) );
+	}
+
+	/**
+	 * Retrieves the schema for plugin options provided by the endpoint.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @return array Item schema data.
+	 */
+	public function get_item_schema() {
+		if ( ! $this->schema ) {
+			$this->schema = [
+				'$schema'    => 'http://json-schema.org/draft-04/schema#',
+				'title'      => 'amp-wp-options',
+				'type'       => 'object',
+				// Validation and sanitization occur in AMP_Options_Manager.
+				'properties' => [
+					Option::THEME_SUPPORT => [
+						'type' => 'string',
+					],
+				],
+			];
+		}
+
+		return $this->schema;
 	}
 }
