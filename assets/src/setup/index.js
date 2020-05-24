@@ -17,6 +17,7 @@ import './style.css';
 import { PAGES } from './pages';
 import { OptionsContextProvider } from './components/options-context-provider';
 import { SetupWizard } from './setup-wizard';
+import { CacheContextProvider } from './components/cache-context-provider';
 
 domReady( () => {
 	const root = document.getElementById( APP_ROOT_ID );
@@ -24,7 +25,9 @@ domReady( () => {
 	if ( root ) {
 		render(
 			<OptionsContextProvider optionsRestEndpoint={ OPTIONS_REST_ENDPOINT }>
-				<SetupWizard exitLink={ EXIT_LINK } pages={ PAGES } />
+				<CacheContextProvider>
+					<SetupWizard exitLink={ EXIT_LINK } pages={ PAGES } />
+				</CacheContextProvider>
 			</OptionsContextProvider>,
 			root,
 		);

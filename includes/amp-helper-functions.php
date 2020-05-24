@@ -155,6 +155,9 @@ function amp_init() {
 		static function() {
 			$controller = new AMP_Options_REST_Controller();
 			$controller->register_routes();
+
+			$theme_controller = new AMP_Reader_Theme_REST_Controller();
+			$theme_controller->register_routes();
 		}
 	);
 }

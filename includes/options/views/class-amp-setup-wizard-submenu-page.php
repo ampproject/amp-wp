@@ -63,7 +63,7 @@ final class AMP_Setup_Wizard_Submenu_Page {
 		?>
 		</head>
 		<body>
-			<?php // The admin footer template closes three divs. ?>
+			<?php // The admin footer template closes three divs assumed to have been opened in the header template. ?>
 			<div>
 			<div>
 			<div>
@@ -123,9 +123,10 @@ final class AMP_Setup_Wizard_Submenu_Page {
 				'var ampSetup = %s;',
 				wp_json_encode(
 					[
-						'APP_ROOT_ID'           => self::APP_ROOT_ID,
-						'EXIT_LINK'             => admin_url( 'admin.php?page=' . AMP_Options_Manager::OPTION_NAME ),
-						'OPTIONS_REST_ENDPOINT' => rest_url( 'amp-wp/v1/options' ),
+						'APP_ROOT_ID'            => self::APP_ROOT_ID,
+						'EXIT_LINK'              => admin_url( 'admin.php?page=' . AMP_Options_Manager::OPTION_NAME ),
+						'OPTIONS_REST_ENDPOINT'  => rest_url( 'amp-wp/v1/options' ),
+						'READER_THEMES_ENDPOINT' => rest_url( 'amp-wp/v1/reader-themes' ),
 					]
 				)
 			),
