@@ -26,7 +26,7 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Registers all routes for the controller.
+	 * Registers routes for the controller.
 	 *
 	 * @since 1.6.0
 	 */
@@ -53,7 +53,7 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Checks whether the current user has permission to retrieve options.
+	 * Checks whether the current user has permission to manage AMP plugin options.
 	 *
 	 * @since 1.6.0
 	 *
@@ -73,7 +73,7 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Retrieves all AMP plugin options.
+	 * Retrieves all AMP plugin options specified in the endpoint schema.
 	 *
 	 * @since 1.6.0
 	 *
@@ -94,7 +94,7 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Updates AMP plugin options.
+	 * Updates AMP plugin options specified in the endpoint schema.
 	 *
 	 * @since 1.6.0
 	 *
