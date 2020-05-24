@@ -1,0 +1,53 @@
+{
+  "name": "amp-wp-qa-tester",
+  "private": true,
+  "description": "Test pre-release versions of the AMP plugin.",
+  "scripts": {
+    "build": "wp-scripts build",
+    "dev": "wp-scripts start",
+    "format": "npm-run-all --parallel format:*",
+    "format:css": "npm run lint:css -- --fix",
+    "format:js": "wp-scripts format-js",
+    "format:php": "composer cbf",
+    "lint": "npm-run-all --parallel lint:*",
+    "lint:css": "wp-scripts lint-style",
+    "lint:js": "wp-scripts lint-js",
+    "lint:php": "composer lint",
+    "test": "npm-run-all --parallel test:js test:php",
+    "test:unit": "wp-scripts test-unit-js",
+    "test:php": "composer test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ampproject/amp-wp.git"
+  },
+  "author": "AMP Project Contributors",
+  "license": "GPL-2.0-or-later",
+  "bugs": {
+    "url": "https://github.com/ampproject/amp-wp/issues"
+  },
+  "homepage": "https://github.com/ampproject/amp-wp/qa-tester#readme",
+  "devDependencies": {
+    "@wordpress/babel-preset-default": "^4.13.0",
+    "@wordpress/browserslist-config": "^2.6.0",
+    "@wordpress/eslint-plugin": "^6.0.0",
+    "@wordpress/scripts": "^9.1.0",
+    "browserslist": "^4.12.0",
+    "mini-css-extract-plugin": "^0.9.0",
+    "npm-run-all": "^4.1.5",
+    "optimize-css-assets-webpack-plugin": "^5.0.3",
+    "postcss-color-function": "^4.1.0",
+    "postcss-import": "^12.0.1",
+    "postcss-nested": "^4.2.1",
+    "postcss-preset-env": "^6.7.0",
+    "rtlcss-webpack-plugin": "^4.0.3",
+    "terser-webpack-plugin": "^3.0.1",
+    "webpackbar": "^4.0.0"
+  },
+  "dependencies": {
+    "@wordpress/api-fetch": "^3.15.0",
+    "@wordpress/dom-ready": "^2.9.0",
+    "@wordpress/element": "^2.14.0",
+    "@wordpress/i18n": "^3.12.0"
+  }
+}
