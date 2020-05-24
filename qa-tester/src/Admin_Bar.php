@@ -1,12 +1,17 @@
 <?php
 
+/**
+ * Class Admin_Bar.
+ *
+ * @package AmpProject\AmpWP_QA_Tester
+ */
+
 namespace AmpProject\AmpWP_QA_Tester;
 
 /**
  * Class handling the plugin's admin bar menu.
  *
  * @since 1.0.0
- * @package AmpProject\AmpWP_QA_Tester
  */
 class Admin_Bar {
 
@@ -55,21 +60,21 @@ class Admin_Bar {
 
 		// Enqueue scripts.
 		wp_enqueue_script(
-				'amp-qa-tester-admin-bar-script',
-				Plugin::get_asset_url( 'js/admin-bar.js' ),
-				$dependencies,
-				$version,
-				true
+			'amp-qa-tester-admin-bar-script',
+			Plugin::get_asset_url( 'js/admin-bar.js' ),
+			$dependencies,
+			$version,
+			true
 		);
 
 		wp_add_inline_script( 'amp-qa-tester-admin-bar-script', sprintf( 'var ampQaTesterUrl="%s";', esc_url_raw( $this->test_url ) ), 'before' );
 
 		// Enqueue styling.
 		wp_enqueue_style(
-				'amp-qa-tester-admin-bar-style',
-				Plugin::get_asset_url( 'css/admin-bar-compiled.css' ),
-				[],
-				$version
+			'amp-qa-tester-admin-bar-style',
+			Plugin::get_asset_url( 'css/admin-bar-compiled.css' ),
+			[],
+			$version
 		);
 
 		wp_styles()->add_data( 'amp-qa-tester-admin-bar-style', 'rtl', 'replace' );
@@ -93,11 +98,11 @@ class Admin_Bar {
 
 		/* translators: %s: the version of plugin currently running */
 		$menu_title = sprintf( __( 'Using AMP: %s', 'amp-qa-tester' ), $on );
-		$args = [
-			'id'    => 'amp-qa-tester',
-			'title' => '<span class="amp-qa-tester-adminbar__icon"></span> <span class="amp-qa-tester-adminbar__label">' . $menu_title . '</span>',
-			'href'  => '#',
-			'meta'  => [
+		$args       = [
+			'id'     => 'amp-qa-tester',
+			'title'  => '<span class="amp-qa-tester-adminbar__icon"></span> <span class="amp-qa-tester-adminbar__label">' . $menu_title . '</span>',
+			'href'   => '#',
+			'meta'   => [
 				'class' => 'menupop amp-qa-tester-adminbar',
 			],
 			'parent' => 'top-secondary',

@@ -30,7 +30,7 @@ function load_plugin() {
 
 	$min_php_version = '5.6';
 	$min_wp_version  = '5.0';
-	$load_errors = new WP_Error();
+	$load_errors     = new WP_Error();
 
 	// If the AMP plugin is not active, we simply bail.
 	if ( ! defined( 'AMP__VERSION' ) ) {

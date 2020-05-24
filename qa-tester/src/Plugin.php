@@ -1,14 +1,20 @@
 <?php
 
+/**
+ * Class Plugin.
+ *
+ * @package AmpProject\AmpWP_QA_Tester
+ */
+
 namespace AmpProject\AmpWP_QA_Tester;
 
 /**
  * Main class for the plugin.
  *
  * @since 1.0.0
- * @package AmpProject\AmpWP_QA_Tester
  */
 class Plugin {
+
 
 	const DOWNLOAD_BASE   = 'https://raw.githubusercontent.com/wiki/ampproject/amp-wp/refs/{PR}/merge/amp-wp';
 	const PLUGIN_SLUG     = 'amp';
@@ -37,7 +43,7 @@ class Plugin {
 	 * @since 1.0.0
 	 * @var Rest_Route|null
 	 */
-	protected $rest_route = null;
+	protected $rest_route;
 
 	/**
 	 * Absolute path to the plugin main file.

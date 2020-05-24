@@ -1,4 +1,9 @@
 <?php
+/**
+ * Class Rest_Route.
+ *
+ * @package AmpProject\AmpWP_QA_Tester
+ */
 
 namespace AmpProject\AmpWP_QA_Tester;
 
@@ -11,6 +16,7 @@ use WP_REST_Server;
  * @since 1.0.0
  */
 class Rest_Route {
+
 	use Version_Switcher;
 
 	const REST_ROOT = 'amp-qa-tester/v1';
@@ -29,28 +35,32 @@ class Rest_Route {
 	 *
 	 * @since 1.0.0
 	 */
-	protected function register_route() {
+	public function register_route() {
 		$route_uri = '/switch';
 		$args      = [
-			'methods'  => WP_REST_Server::CREATABLE,
-			'callback' => [ $this, 'switch_callback' ],
-			'permission_callback' => static function() {
+			'methods'             => WP_REST_Server::CREATABLE,
+			'callback'            => [ $this, 'switch_callback' ],
+			'permission_callback' => static function () {
 				return current_user_can( 'update_plugins' );
 			},
-			'args' => [
+			'args'                => [
 				'developBuild' => [
-					'validate_callback' => static function( $param ) { return is_bool( $param ); },
-					'sanitize_callback' => static function( $param ) { return sanitize_key( $param ); },
+					'validate_callback' => static function ( $param ) {
+						return is_bool( $param );
+					},
+					'sanitize_callback' => static function ( $param ) {
+						return sanitize_key( $param );
+					},
 					'default'           => false,
 				],
-				'url' => [
-					'validate_callback' => static function( $param ) {
+				'url'          => [
+					'validate_callback' => static function ( $param ) {
 						if ( 'release' === $param || 'develop' === $param ) {
 							return true;
 						}
 						return wp_http_validate_url( $param );
 					},
-					'sanitize_callback' => static function( $param ) {
+					'sanitize_callback' => static function ( $param ) {
 						if ( 'release' === $param || 'develop' === $param ) {
 							return $param;
 						}
@@ -74,13 +84,13 @@ class Rest_Route {
 		$url = $request->get_param( 'url' );
 
 		// If the request is for the release version, retrieve the latest version from the wordpress.org API.
-		if ( $url === 'release') {
+		if ( 'release' === $url ) {
 			$args = [
-				'slug' => Plugin::PLUGIN_SLUG,
+				'slug'   => Plugin::PLUGIN_SLUG,
 				'fields' => [
 					'version'    => true,
 					'downloaded' => true,
-				]
+				],
 			];
 
 			$response = wp_remote_post(
@@ -88,8 +98,8 @@ class Rest_Route {
 				[
 					'body' => [
 						'action'  => 'plugin_information',
-						'request' => serialize( ( object ) $args ),
-					]
+						'request' => serialize( (object) $args ),
+					],
 				]
 			);
 
@@ -107,7 +117,7 @@ class Rest_Route {
 			$develop = $request['developBuild'];
 
 			// If the develop version is requested, the download url is different.
-			if ( $url === 'develop') {
+			if ( 'develop' === $url ) {
 				$version      = 'develop';
 				$download_url = str_replace( '{PR}/merge', 'heads/develop', Plugin::DOWNLOAD_BASE ) . ( $develop ? '-dev' : '' ) . '.zip';
 			} else {

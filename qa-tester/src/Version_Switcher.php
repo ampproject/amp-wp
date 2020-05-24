@@ -1,4 +1,9 @@
 <?php
+/**
+ * Class Version_Switcher.
+ *
+ * @package AmpProject\AmpWP_QA_Tester
+ */
 
 namespace AmpProject\AmpWP_QA_Tester;
 
@@ -47,7 +52,7 @@ trait Version_Switcher {
 		$plugin_name = Plugin::PLUGIN_SLUG . '/' . Plugin::PLUGIN_SLUG . '.php';
 
 		// Remove plugin from the no_update list if present.
-		unset ( $current->no_update[ $plugin_name ] );
+		unset( $current->no_update[ $plugin_name ] );
 
 		// Set the plugin to update from our custom URL.
 		$current->response[ $plugin_name ]->package     = $url;
@@ -59,7 +64,7 @@ trait Version_Switcher {
 		$upgrader = new Plugin_Upgrader( $skin );
 
 		// Run the upgrade.
-		$result = $upgrader->bulk_upgrade( [ $plugin_name ]);
+		$result = $upgrader->bulk_upgrade( [ $plugin_name ] );
 
 		// Restore the site plugin upgrade info.
 		set_site_transient( 'update_plugins', $original );
