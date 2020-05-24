@@ -242,7 +242,9 @@ const setup = {
 	...defaultConfig,
 	...sharedConfig,
 	entry: {
-		'amp-setup': './assets/src/setup',
+		'amp-setup': [
+			'./assets/src/setup',
+		],
 	},
 	module: {
 		...defaultConfig.module,
@@ -264,12 +266,26 @@ const setup = {
 	plugins: [
 		new DependencyExtractionWebpackPlugin( {
 			useDefaults: false,
-			// All dependencies will be bundled for the AMP setup screen for compatibility across WP versions.
-			requestToHandle: () => {
-				return undefined;
+			// Most dependencies will be bundled for the AMP setup screen for compatibility across WP versions.
+			requestToHandle: ( handle ) => {
+				switch ( handle ) {
+					case '@wordpress/api-fetch':
+					case '@wordpress/dom-ready':
+						return defaultRequestToHandle( handle );
+
+					default:
+						return undefined;
+				}
 			},
-			requestToExternal: () => {
-				return undefined;
+			requestToExternal: ( external ) => {
+				switch ( external ) {
+					case '@wordpress/api-fetch':
+					case '@wordpress/dom-ready':
+						return defaultRequestToExternal( external );
+
+					default:
+						return undefined;
+				}
 			},
 		} ),
 		new MiniCssExtractPlugin( {
