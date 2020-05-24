@@ -36,7 +36,7 @@ function Page( { children, exitLink } ) {
 				{ fetchOptionsError.message || __( 'There was an error loading the setup wizard.', 'amp' ) }
 				{ ' ' }
 				<a href={ exitLink }>
-					{ __( 'Return to AMP for options.', 'amp' ) }
+					{ __( 'Return to AMP for WordPress options.', 'amp' ) }
 				</a>
 			</p>
 		);
