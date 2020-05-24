@@ -18,6 +18,7 @@ import { WordmarkLogo } from './components/svg/wordmark-logo';
 import { Nav } from './components/nav';
 import { Options } from './components/options-context-provider';
 import { Loading } from './components/loading';
+import { WizardUnsavedChangesWarning } from './components/unsaved-changes-warning';
 
 /**
  * State wrapper for the page component.
@@ -90,6 +91,7 @@ export function SetupWizard( { exitLink, pages } ) {
 					/>
 				</div>
 			</div>
+			<WizardUnsavedChangesWarning />
 		</div>
 	);
 }

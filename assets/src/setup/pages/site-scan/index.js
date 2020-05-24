@@ -4,12 +4,12 @@
 import { __ } from '@wordpress/i18n';
 
 /**
- * Screen performing an AMP site scan.
+ * Screen performing an AMP Site scan.
  */
 export function SiteScan() {
 	return (
 		<div>
-			{ __( 'Site Scan', 'amp' ) }
+			{ __( 'Site scan', 'amp' ) }
 		</div>
 	);
 }

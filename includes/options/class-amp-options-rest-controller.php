@@ -45,7 +45,7 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => [ $this, 'update_items' ],
 					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
-					'permission_callback' => [ $this, 'get_item_permissions_check' ],
+					'permission_callback' => [ $this, 'get_items_permissions_check' ],
 				],
 				'schema' => $this->get_public_item_schema(),
 			]
@@ -78,7 +78,7 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 	 * @since 1.6.0
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 * @return WP_REST_Response Response object.
 	 */
 	public function get_items( $request ) {
 		$options    = AMP_Options_Manager::get_options();
@@ -99,11 +99,12 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 	 * @since 1.6.0
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return array|WP_Error Array on success, or error object on failure.
+	 * @return WP_REST_Response Response with updated options.
 	 */
 	public function update_items( $request ) {
 		$params     = $request->get_params();
-		$properties = array_keys( $this->get_item_schema()['properties'] );
+		$schema     = $this->get_item_schema();
+		$properties = array_keys( $schema['properties'] );
 
 		foreach ( $params as $option => $new_value ) {
 			if ( in_array( $option, $properties, true ) ) {
@@ -127,10 +128,20 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 				'$schema'    => 'http://json-schema.org/draft-04/schema#',
 				'title'      => 'amp-wp-options',
 				'type'       => 'object',
-				// Validation and sanitization occur in AMP_Options_Manager.
 				'properties' => [
 					Option::THEME_SUPPORT => [
-						'type' => 'string',
+						'description' => __( 'AMP template mode.', 'amp' ),
+						'default'     => AMP_Theme_Support::READER_MODE_SLUG,
+						'type'        => 'string',
+						'enum'        => [
+							AMP_Theme_Support::READER_MODE_SLUG,
+							AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
+							AMP_Theme_Support::STANDARD_MODE_SLUG,
+						],
+						'arg_options' => [
+							'sanitize_callback' => 'sanitize_text_field',
+							'validate_callback' => 'rest_validate_request_arg',
+						],
 					],
 				],
 			];

@@ -19,7 +19,7 @@ import { SiteScan } from './site-scan';
  */
 export const PAGES = [
 	{
-		title: __( 'Site Scan', 'amp' ),
+		title: __( 'Site scan', 'amp' ),
 		PageComponent: SiteScan,
 	},
 	{

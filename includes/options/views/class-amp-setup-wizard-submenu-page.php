@@ -41,23 +41,36 @@ final class AMP_Setup_Wizard_Submenu_Page {
 	}
 
 	/**
-	 * Renders the setup wizard screen output, beginning just before the closing head tag.
+	 * Renders the setup wizard screen output and exits.
 	 *
 	 * @since 1.6.0
 	 */
 	public function override_template() {
+		$this->render();
+
+		exit();
+	}
+
+	/**
+	 * Renders the setup wizard screen output, beginning just before the closing head tag.
+	 */
+	public function render() {
 		// Remove standard admin footer content.
 		add_filter( 'admin_footer_text', '__return_empty_string' );
 		remove_all_filters( 'update_footer' );
 
+		// <head> tag was opened prior to this action and hasn't been closed.
 		?>
 		</head>
 		<body>
+			<?php // The admin footer template closes three divs. ?>
+			<div>
+			<div>
+			<div>
 			<div id="<?php echo esc_attr( static::APP_ROOT_ID ); ?>"></div>
 		<?php
 
 		require_once ABSPATH . 'wp-admin/admin-footer.php';
-		exit();
 	}
 
 	/**
@@ -99,7 +112,7 @@ final class AMP_Setup_Wizard_Submenu_Page {
 
 		wp_enqueue_style(
 			static::JS_HANDLE,
-			amp_get_asset_url( "css/amp-setup-compiled${$rtl}.css" ),
+			amp_get_asset_url( "css/amp-setup-compiled{$rtl}.css" ),
 			[],
 			AMP__VERSION
 		);

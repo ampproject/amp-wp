@@ -12,7 +12,7 @@ import PropTypes from 'prop-types';
 export const Options = createContext();
 
 /**
- * Context provider for options fetching and retrieval.
+ * Context provider for options retrieval and updating.
  *
  * @param {Object} props Component props.
  * @param {?any} props.children Component children.
@@ -23,6 +23,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 	const [ fetchOptionsError, setFetchOptionsError ] = useState( null );
 	const [ savingOptions, setSavingOptions ] = useState( false );
 	const [ saveOptionsError, setSaveOptionsError ] = useState( null );
+	const [ hasChanges, setHasChanges ] = useState( false );
 	const [ hasSaved, setHasSaved ] = useState( false );
 
 	const hasUnmounted = useRef( false );
@@ -55,11 +56,11 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 	 *
 	 * @param {Object} data Plugin options to update.
 	 */
-	const saveOptions = useCallback( async ( data ) => {
+	const saveOptions = useCallback( async () => {
 		setSavingOptions( true );
 
 		try {
-			await apiFetch( { method: 'post', url: optionsRestEndpoint, data } );
+			await apiFetch( { method: 'post', url: optionsRestEndpoint, data: options } );
 
 			if ( true === hasUnmounted.current ) {
 				return;
@@ -74,7 +75,22 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 
 		setSavingOptions( false );
 		setHasSaved( true );
-	}, [ optionsRestEndpoint ] );
+	}, [ options, optionsRestEndpoint ] );
+
+	/**
+	 * Updates options in state.
+	 *
+	 * @param {Object} Updated options values.
+	 */
+	const updateOptions = useCallback( ( newOptions ) => {
+		if ( false === hasChanges ) {
+			setHasChanges( true );
+		}
+
+		if ( 'object' === typeof newOptions ) {
+			setOptions( { ...options, ...newOptions } );
+		}
+	}, [ hasChanges, options, setHasChanges, setOptions ] );
 
 	useEffect( () => {
 		fetchOptions();
@@ -90,11 +106,13 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 				{
 					fetchingOptions: null === options,
 					fetchOptionsError,
+					hasChanges,
 					hasSaved,
 					options,
 					saveOptions,
 					saveOptionsError,
 					savingOptions,
+					updateOptions,
 				}
 			}
 		>
