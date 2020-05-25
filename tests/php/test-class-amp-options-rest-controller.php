@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Option;
+
 /**
  * Tests for AMP_Options_REST_Controller.
  *
@@ -12,7 +14,7 @@
  *
  * @covers AMP_Options_REST_Controller
  */
-class Test_AMP_Options_REST_Controllerr extends WP_UnitTestCase {
+class Test_AMP_Options_REST_Controller extends WP_UnitTestCase {
 
 	/**
 	 * Test instance.
@@ -26,6 +28,8 @@ class Test_AMP_Options_REST_Controllerr extends WP_UnitTestCase {
 	 */
 	public function setUp() {
 		parent::setUp();
+
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 
 		do_action( 'rest_api_init' );
 		$this->controller = new AMP_Options_REST_Controller();
