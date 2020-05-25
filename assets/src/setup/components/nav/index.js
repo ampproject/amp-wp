@@ -15,8 +15,8 @@ import PropTypes from 'prop-types';
  */
 import { Navigation } from '../navigation-context-provider';
 
-export function Nav( { activePageIndex, exitLink } ) {
-	const { canGoForward, goBack, goForward } = useContext( Navigation );
+export function Nav( { exitLink } ) {
+	const { activePageIndex, canGoForward, goBack, goForward } = useContext( Navigation );
 
 	return (
 		<div className="amp-setup-nav">
@@ -70,6 +70,5 @@ export function Nav( { activePageIndex, exitLink } ) {
 }
 
 Nav.propTypes = {
-	activePageIndex: PropTypes.number.isRequired,
 	exitLink: PropTypes.string.isRequired,
 };

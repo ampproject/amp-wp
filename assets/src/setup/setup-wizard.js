@@ -57,7 +57,7 @@ function Page( { children, exitLink } ) {
  * @param {Array} props.pages List of page configuration objects.
  */
 export function SetupWizard( { exitLink } ) {
-	const { currentPage: { title, PageComponent }, goBack, goForward, page, pages } = useContext( Navigation );
+	const { activePageIndex, currentPage: { title, PageComponent }, goBack, goForward, pages } = useContext( Navigation );
 	const { fetchOptionsError } = useContext( Options );
 
 	return (
@@ -69,7 +69,7 @@ export function SetupWizard( { exitLink } ) {
 						{ 'Official AMP Plugin for WordPress' /* Untranslatable, as it's the plugin name. */ }
 					</div>
 					<Stepper
-						activePageIndex={ page }
+						activePageIndex={ activePageIndex }
 						pages={ pages }
 					/>
 				</div>
@@ -83,7 +83,7 @@ export function SetupWizard( { exitLink } ) {
 						</Page>
 					</Panel>
 					<Nav
-						activePageIndex={ page }
+						activePageIndex={ activePageIndex }
 						exitLink={ exitLink }
 						goBack={ goBack }
 						goForward={ goForward }

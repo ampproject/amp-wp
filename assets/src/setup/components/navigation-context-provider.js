@@ -17,29 +17,29 @@ export const Navigation = createContext();
  * @param {?any} props.children Component children.
  */
 export function NavigationContextProvider( { children, pages } ) {
-	const [ page, setPage ] = useState( 4 );
+	const [ activePageIndex, setActivePageIndex ] = useState( 0 );
 	const [ canGoForward, setCanGoForward ] = useState( false );
 
-	const currentPage = useMemo( () => pages[ page ], [ page, pages ] );
+	const currentPage = useMemo( () => pages[ activePageIndex ], [ activePageIndex, pages ] );
 
 	const goBack = useCallback( () => {
-		setPage( page - 1 );
-	}, [ setPage, page ] );
+		setActivePageIndex( activePageIndex - 1 );
+	}, [ setActivePageIndex, activePageIndex ] );
 
 	const goForward = useCallback( () => {
-		setPage( page + 1 );
+		setActivePageIndex( activePageIndex + 1 );
 		setCanGoForward( false );
-	}, [ setPage, setCanGoForward, page ] );
+	}, [ setActivePageIndex, setCanGoForward, activePageIndex ] );
 
 	return (
 		<Navigation.Provider
 			value={
 				{
+					activePageIndex,
 					canGoForward,
 					currentPage,
 					goBack,
 					goForward,
-					page,
 					pages,
 					setCanGoForward,
 				}
