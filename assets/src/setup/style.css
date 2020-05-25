@@ -132,6 +132,10 @@
 	text-decoration: none;
 }
 
+.amp-setup-nav__prev {
+	margin-right: 7px;
+}
+
 .amp-setup-nav__prev svg {
 	margin-right: 13px;
 }
@@ -200,7 +204,7 @@
 	z-index: 1;
 
 	@media screen and (max-width: 784px) {
-		display: none;
+		displa: none;
 	}
 }
 
@@ -238,6 +242,11 @@
 
 .amp-stepper__bullet--check {
 	background-color: var(--amp-wp-brand);
+	border-color: var(--amp-wp-brand);
+}
+
+.amp-stepper__bullet--dot {
+	border-color: rgba(0, 0, 0, 0);
 }
 
 .amp-stepper__bullet--dot span {
