@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ValidationErrorMessage matches snapshot when index and active index are 0 1`] = `
+exports[`StepperBullet matches snapshot when index and active index are 0 1`] = `
 <span
   className="amp-stepper__bullet amp-stepper__bullet--check"
 >
@@ -39,7 +39,7 @@ exports[`ValidationErrorMessage matches snapshot when index and active index are
 </span>
 `;
 
-exports[`ValidationErrorMessage matches snapshot when index is 0 and active index is something else 1`] = `
+exports[`StepperBullet matches snapshot when index is 0 and active index is something else 1`] = `
 <span
   className="amp-stepper__bullet amp-stepper__bullet--check"
 >
@@ -78,9 +78,15 @@ exports[`ValidationErrorMessage matches snapshot when index is 0 and active inde
 </span>
 `;
 
-exports[`ValidationErrorMessage matches snapsnot when neither index nor active index are 0 and they are not the same 1`] = `[Function]`;
+exports[`StepperBullet matches snapsnot when neither index nor active index are 0 and they are not the same 1`] = `
+<span
+  className="amp-stepper__bullet"
+>
+  2
+</span>
+`;
 
-exports[`ValidationErrorMessage matches snapsnot when neither index nor active index are 0 but they are the same 1`] = `
+exports[`StepperBullet matches snapsnot when neither index nor active index are 0 but they are the same 1`] = `
 <span
   className="amp-stepper__bullet amp-stepper__bullet--dot"
 >
