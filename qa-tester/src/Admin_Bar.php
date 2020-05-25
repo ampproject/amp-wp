@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Class Admin_Bar.
  *
@@ -66,8 +65,6 @@ class Admin_Bar {
 			$version,
 			true
 		);
-
-		wp_add_inline_script( 'amp-qa-tester-admin-bar-script', sprintf( 'var ampQaTesterUrl="%s";', esc_url_raw( $this->test_url ) ), 'before' );
 
 		// Enqueue styling.
 		wp_enqueue_style(

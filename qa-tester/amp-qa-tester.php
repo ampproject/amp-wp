@@ -62,14 +62,7 @@ function load_plugin() {
 	}
 
 	if ( ! file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
-		$load_errors->add(
-			'build_required',
-			sprintf(
-				/* translators: %s: composer install && npm install && npm run build */
-				__( 'You appear to be running the AMP QA Tester plugin from source. Please do %s to finish installation.', 'amp-qa-tester' ),
-				'<code>composer install &amp;&amp; npm install &amp;&amp; npm run build</code>'
-			)
-		);
+		$load_errors->add( 'build_required', __( 'Failed to autoload the PHP files.', 'amp-qa-tester' ) );
 	}
 
 	// Bail if there were errors loading the plugin.

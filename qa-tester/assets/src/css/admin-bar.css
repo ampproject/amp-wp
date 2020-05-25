@@ -1,3 +1,7 @@
+#amp-qa-tester-pull-request-selector {
+	min-width: 250px;
+}
+
 #amp-qa-tester-adminbar-inner {
 	padding: 0 6px;
 }
@@ -26,12 +30,11 @@
 	margin: 4px 0 0;
 }
 
-.amp-qa-tester-error {
+#amp-qa-tester-pull-request-selector .error {
 	background-color: #8b0000;
 }
 
-#amp-qa-tester-pull-request-selector input[type="checkbox"],
-input[type="radio"] {
+#amp-qa-tester-pull-request-selector input[type="checkbox"] {
 	border: 1px solid #b4b9be;
 	background: #fff;
 	color: #555;

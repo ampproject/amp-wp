@@ -7,6 +7,7 @@
 
 namespace AmpProject\AmpWP_QA_Tester;
 
+use WP_Error;
 use WP_REST_Request;
 use WP_REST_Server;
 
@@ -78,10 +79,11 @@ class Rest_Route {
 	 * Handle `switch` REST route.
 	 *
 	 * @param WP_REST_Request $request Request.
-	 * @return array|false
+	 * @return array|false|WP_Error
 	 */
 	public function switch_callback( WP_REST_Request $request ) {
-		$url = $request->get_param( 'url' );
+		$url          = $request->get_param( 'url' );
+		$is_dev_build = $request->get_param( 'isDevBuild' );
 
 		// If the request is for the release version, retrieve the latest version from the wordpress.org API.
 		if ( 'release' === $url ) {
@@ -112,22 +114,25 @@ class Rest_Route {
 				}
 			}
 		} else {
-			// Store the url so we can reference it later in the selector.
-			update_site_option( Plugin::URL_STORAGE_KEY, $url );
-			$develop = $request['developBuild'];
-
 			// If the develop version is requested, the download url is different.
 			if ( 'develop' === $url ) {
 				$version      = 'develop';
-				$download_url = str_replace( '{PR}/merge', 'heads/develop', Plugin::DOWNLOAD_BASE ) . ( $develop ? '-dev' : '' ) . '.zip';
+				$download_url = str_replace( '{PR}/merge', 'heads/develop', Plugin::DOWNLOAD_BASE ) . ( $is_dev_build ? '-dev' : '' ) . '.zip';
 			} else {
 				$url          = str_replace( Plugin::REPO_BASE, '', $url );
 				$url          = str_replace( 'pulls/', 'pull/', $url );
 				$version      = str_replace( 'pull/', '', $url );
-				$download_url = str_replace( '{PR}', urlencode( $url ), Plugin::DOWNLOAD_BASE ) . ( $develop ? '-dev' : '' ) . '.zip';
+				$download_url = str_replace( '{PR}', rawurlencode( $url ), Plugin::DOWNLOAD_BASE ) . ( $is_dev_build ? '-dev' : '' ) . '.zip';
 			}
 
-			return $this->switch_version( $download_url, $version );
+			$result = $this->switch_version( $download_url, $version );
+
+			if ( ! empty( $result ) && ! $result instanceof WP_Error ) {
+				// Store the url so we can reference it later in the selector.
+				update_site_option( Plugin::URL_STORAGE_KEY, $url );
+			}
+
+			return $result;
 		}
 
 		return false;
