@@ -27,6 +27,18 @@
 	<rule ref="VariableAnalysis"/>
 	<rule ref="PHPCompatibilityWP" />
 
+	<rule ref="WordPress.Files.FileName.InvalidClassFileName">
+		<exclude-pattern>src/*</exclude-pattern>
+	</rule>
+
+	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
+		<exclude-pattern>src/*</exclude-pattern>
+	</rule>
+
+	<rule ref="Squiz.Classes.ClassFileName">
+		<include-pattern>src/*</include-pattern>
+	</rule>
+
 	<config name="testVersion" value="5.6-" />
 
 	<file>.</file>

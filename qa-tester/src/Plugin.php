@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Class Plugin.
  *
@@ -14,7 +13,6 @@ namespace AmpProject\AmpWP_QA_Tester;
  * @since 1.0.0
  */
 class Plugin {
-
 
 	const DOWNLOAD_BASE   = 'https://raw.githubusercontent.com/wiki/ampproject/amp-wp/refs/{PR}/merge/amp-wp';
 	const PLUGIN_SLUG     = 'amp';
