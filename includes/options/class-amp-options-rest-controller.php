@@ -16,6 +16,14 @@ use AmpProject\AmpWP\Option;
 final class AMP_Options_REST_Controller extends WP_REST_Controller {
 
 	/**
+	 * Cached results of get_item_schema.
+	 *
+	 * @since 1.6.0
+	 * @var array
+	 */
+	protected $schema;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 1.6.0
@@ -123,7 +131,7 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 	 * @return array Item schema data.
 	 */
 	public function get_item_schema() {
-		if ( ! $this->schema ) {
+		if ( is_null( $this->schema ) ) {
 			$this->schema = [
 				'$schema'    => 'http://json-schema.org/draft-04/schema#',
 				'title'      => 'amp-wp-options',
