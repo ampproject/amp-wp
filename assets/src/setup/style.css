@@ -204,7 +204,7 @@
 	z-index: 1;
 
 	@media screen and (max-width: 784px) {
-		displa: none;
+		display: none;
 	}
 }
 
