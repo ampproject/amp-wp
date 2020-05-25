@@ -131,12 +131,25 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 	 * @return array Item schema data.
 	 */
 	public function get_item_schema() {
+		$reader_themes      = ( new AMP_Reader_Theme_REST_Controller() )->get_items( new WP_REST_Request() )->get_data();
+		$reader_theme_slugs = array_merge( [ AMP_Theme_Support::DEFAULT_READER_THEME ], wp_list_pluck( $reader_themes, 'slug' ) );
+
 		if ( is_null( $this->schema ) ) {
 			$this->schema = [
 				'$schema'    => 'http://json-schema.org/draft-04/schema#',
 				'title'      => 'amp-wp-options',
 				'type'       => 'object',
 				'properties' => [
+					Option::READER_THEME  => [
+						'description' => __( 'Reader mode theme.', 'amp' ),
+						'default'     => AMP_Theme_Support::DEFAULT_READER_THEME,
+						'type'        => 'string',
+						'enum'        => $reader_theme_slugs,
+						'arg_options' => [
+							'sanitize_callback' => 'sanitize_text_field',
+							'validate_callback' => 'rest_validate_request_arg',
+						],
+					],
 					Option::THEME_SUPPORT => [
 						'description' => __( 'AMP template mode.', 'amp' ),
 						'default'     => AMP_Theme_Support::READER_MODE_SLUG,

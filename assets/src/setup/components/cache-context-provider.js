@@ -19,9 +19,9 @@ export const Cache = createContext();
 export function CacheContextProvider( { children } ) {
 	const [ cache, setCache ] = useState( () => {} );
 
-	const getCachedData = useCallback( ( key ) => ( cache || {} )[ key ], [ cache ] );
+	const cacheGet = useCallback( ( key ) => ( cache || {} )[ key ], [ cache ] );
 
-	const cacheData = useCallback( ( key, data ) => {
+	const cacheSet = useCallback( ( key, data ) => {
 		setCache( { ...( cache || {} ), [ key ]: data } );
 	}, [ cache, setCache ] );
 
@@ -29,8 +29,8 @@ export function CacheContextProvider( { children } ) {
 		<Cache.Provider
 			value={
 				{
-					cacheData,
-					getCachedData,
+					cacheSet,
+					cacheGet,
 				}
 			}
 		>

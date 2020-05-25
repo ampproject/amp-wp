@@ -18,6 +18,7 @@ import { PAGES } from './pages';
 import { OptionsContextProvider } from './components/options-context-provider';
 import { SetupWizard } from './setup-wizard';
 import { CacheContextProvider } from './components/cache-context-provider';
+import { NavigationContextProvider } from './components/navigation-context-provider';
 
 domReady( () => {
 	const root = document.getElementById( APP_ROOT_ID );
@@ -26,7 +27,9 @@ domReady( () => {
 		render(
 			<OptionsContextProvider optionsRestEndpoint={ OPTIONS_REST_ENDPOINT }>
 				<CacheContextProvider>
-					<SetupWizard exitLink={ EXIT_LINK } pages={ PAGES } />
+					<NavigationContextProvider pages={ PAGES }>
+						<SetupWizard exitLink={ EXIT_LINK } />
+					</NavigationContextProvider>
 				</CacheContextProvider>
 			</OptionsContextProvider>,
 			root,

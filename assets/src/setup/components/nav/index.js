@@ -3,21 +3,20 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button, Icon } from '@wordpress/components';
-import { useCallback } from '@wordpress/element';
+import { useContext } from '@wordpress/element';
 
 /**
  * External dependencies
  */
 import PropTypes from 'prop-types';
 
-export function Nav( { activePageIndex, exitLink, pages, setActivePageIndex } ) {
-	const moveForward = useCallback( () => {
-		setActivePageIndex( activePageIndex + 1 );
-	}, [ activePageIndex, setActivePageIndex ] );
+/**
+ * Internal dependencies
+ */
+import { Navigation } from '../navigation-context-provider';
 
-	const moveBack = useCallback( () => {
-		setActivePageIndex( activePageIndex - 1 );
-	}, [ activePageIndex, setActivePageIndex ] );
+export function Nav( { activePageIndex, exitLink } ) {
+	const { canGoForward, goBack, goForward } = useContext( Navigation );
 
 	return (
 		<div className="amp-setup-nav">
@@ -36,7 +35,7 @@ export function Nav( { activePageIndex, exitLink, pages, setActivePageIndex } ) 
 					: (
 						<Button
 							className="amp-setup-nav__prev"
-							onClick={ moveBack }
+							onClick={ goBack }
 						>
 							<Icon className="amp-mobile-hide" icon="arrow-left-alt2" size={ 18 } />
 							<span>
@@ -52,8 +51,8 @@ export function Nav( { activePageIndex, exitLink, pages, setActivePageIndex } ) 
 
 				<Button
 					className="amp-setup-nav__next"
-					disabled={ pages.length - 1 === activePageIndex }
-					onClick={ moveForward }
+					disabled={ ! canGoForward }
+					onClick={ goForward }
 				>
 					<span>
 						{ __( 'Next', 'amp' ) }
@@ -73,10 +72,4 @@ export function Nav( { activePageIndex, exitLink, pages, setActivePageIndex } ) 
 Nav.propTypes = {
 	activePageIndex: PropTypes.number.isRequired,
 	exitLink: PropTypes.string.isRequired,
-	pages: PropTypes.arrayOf(
-		PropTypes.shape( {
-			title: PropTypes.string.isRequired,
-		} ),
-	).isRequired,
-	setActivePageIndex: PropTypes.func.isRequired,
 };

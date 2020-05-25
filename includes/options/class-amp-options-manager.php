@@ -31,6 +31,7 @@ class AMP_Options_Manager {
 		Option::ALL_TEMPLATES_SUPPORTED => true,
 		Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
 		Option::VERSION                 => AMP__VERSION,
+		Option::READER_THEME            => AMP_Theme_Support::DEFAULT_READER_THEME,
 	];
 
 	/**

@@ -75,7 +75,42 @@ final class AMP_Reader_Theme_REST_Controller extends WP_REST_Controller {
 			$item = $this->prepare_theme_for_response( $item );
 		}
 
+		array_unshift( $items, $this->get_classic_mode() );
+
 		return rest_ensure_response( $items );
+	}
+
+	/**
+	 * Gets configuration data for the AMP classic reader theme.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @return array Classic reader theme data.
+	 */
+	public function get_classic_mode() {
+		return [
+			'id'             => 0,
+			'slug'           => AMP_Theme_Support::DEFAULT_READER_THEME,
+			'link'           => 'https://amp-wp.org',
+			'title'          => 'AMP Classic',
+			'content'        => __(
+				'A legacy default template that looks nice and clean, wich a good balance between ease and extensibility when it comes to customization.',
+				'amp'
+			),
+			'featured_media' => [
+				'id'            => 0,
+				'title'         => 'AMP Classic Theme',
+				'alt_text'      => 'AMP Classic Theme',
+				'media_details' => [
+					'full' => [
+						'height'     => 679,
+						'source_url' => '//via.placeholder.com/1024x679',
+						'width'      => 1024,
+					],
+				],
+			],
+			'ecosystem_url'  => null,
+		];
 	}
 
 	/**
@@ -89,7 +124,7 @@ final class AMP_Reader_Theme_REST_Controller extends WP_REST_Controller {
 		$url = add_query_arg(
 			[
 				'ecosystem_types' => 245, // Theme taxonomy term.
-				'_fields'         => 'id,link,title,content,featured_media,meta',
+				'_fields'         => 'id,link,title,content,featured_media,meta,slug',
 				'per_page'        => 99, // Only 30 available as of May, 2020.
 			],
 			'https://amp-wp.org/wp-json/wp/v2/ecosystem'
@@ -177,7 +212,6 @@ final class AMP_Reader_Theme_REST_Controller extends WP_REST_Controller {
 		foreach ( $item as $key => $value ) {
 			switch ( $key ) {
 				case 'content':
-				case 'excerpt':
 				case 'title':
 					$prepared_item[ $key ] = wp_strip_all_tags( $value['rendered'], true );
 					break;

@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { useState, useMemo, useContext } from '@wordpress/element';
+import { useContext } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Panel } from '@wordpress/components';
 
@@ -19,6 +19,7 @@ import { Nav } from './components/nav';
 import { Options } from './components/options-context-provider';
 import { Loading } from './components/loading';
 import { WizardUnsavedChangesWarning } from './components/unsaved-changes-warning';
+import { Navigation } from './components/navigation-context-provider';
 
 /**
  * State wrapper for the page component.
@@ -55,11 +56,9 @@ function Page( { children, exitLink } ) {
  * @param {Object} props Component props.
  * @param {Array} props.pages List of page configuration objects.
  */
-export function SetupWizard( { exitLink, pages } ) {
-	const [ activePageIndex, setActivePageIndex ] = useState( 0 );
+export function SetupWizard( { exitLink } ) {
+	const { currentPage: { title, PageComponent }, goBack, goForward, page, pages } = useContext( Navigation );
 	const { fetchOptionsError } = useContext( Options );
-
-	const { title, PageComponent } = useMemo( () => pages[ activePageIndex ], [ activePageIndex, pages ] );
 
 	return (
 		<div className="amp-setup-container">
@@ -70,7 +69,7 @@ export function SetupWizard( { exitLink, pages } ) {
 						{ 'Official AMP Plugin for WordPress' /* Untranslatable, as it's the plugin name. */ }
 					</div>
 					<Stepper
-						activePageIndex={ activePageIndex }
+						activePageIndex={ page }
 						pages={ pages }
 					/>
 				</div>
@@ -84,10 +83,11 @@ export function SetupWizard( { exitLink, pages } ) {
 						</Page>
 					</Panel>
 					<Nav
-						activePageIndex={ activePageIndex }
+						activePageIndex={ page }
 						exitLink={ exitLink }
+						goBack={ goBack }
+						goForward={ goForward }
 						pages={ pages }
-						setActivePageIndex={ setActivePageIndex }
 					/>
 				</div>
 			</div>
@@ -98,9 +98,5 @@ export function SetupWizard( { exitLink, pages } ) {
 
 SetupWizard.propTypes = {
 	exitLink: PropTypes.string.isRequired,
-	pages: PropTypes.arrayOf(
-		PropTypes.shape( {
-			title: PropTypes.string.isRequired,
-		} ),
-	).isRequired,
+
 };

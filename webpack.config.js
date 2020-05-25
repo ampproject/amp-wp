@@ -271,6 +271,7 @@ const setup = {
 				switch ( handle ) {
 					case '@wordpress/api-fetch':
 					case '@wordpress/dom-ready':
+					case '@wordpress/html-entities':
 						return defaultRequestToHandle( handle );
 
 					default:
@@ -281,6 +282,7 @@ const setup = {
 				switch ( external ) {
 					case '@wordpress/api-fetch':
 					case '@wordpress/dom-ready':
+					case '@wordpress/html-entities':
 						return defaultRequestToExternal( external );
 
 					default:
