@@ -1,0 +1,28 @@
+name: Prune
+
+on:
+  pull_request:
+    types: [closed]
+jobs:
+  prune-pr-files:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out wiki
+        uses: actions/checkout@v2
+        with:
+          repository: ${{ github.repository }}.wiki
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Prune PR files
+        run: |
+          rm -rf "refs/pull/${{ github.event.pull_request.number }}"
+          git add .
+          git status
+          git diff --staged --quiet && echo 'No changes to commit; exiting!' && exit 0
+          git commit -m "Prune refs/pull/${{ github.event.pull_request.number }}"
+          git push origin master
+        env:
+          GIT_AUTHOR_EMAIL: ${{ github.actor }}@users.noreply.github.com
+          GIT_AUTHOR_NAME: ${{ github.actor }}
+          GIT_COMMITTER_EMAIL: ${{ github.actor }}@users.noreply.github.com
+          GIT_COMMITTER_NAME: ${{ github.actor }}
