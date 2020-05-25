@@ -110,3 +110,35 @@ jobs:
           GIT_AUTHOR_NAME: ${{ github.actor }}
           GIT_COMMITTER_EMAIL: ${{ github.actor }}@users.noreply.github.com
           GIT_COMMITTER_NAME: ${{ github.actor }}
+
+  comment-on-pr:
+    # Only run this job if it's a PR. One way to check for that is if `github.head_ref` is not empty.
+    if: ${{ github.head_ref && github.head_ref != null }}
+    runs-on: ubuntu-latest
+    needs: deploy-to-wiki
+
+    outputs:
+      pr_number: ${{ steps.get-pr-number.outputs.num }}
+
+    steps:
+      - name: Get PR number
+        id: get-pr-number
+        run: echo "::set-output name=num::$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')"
+
+      - name: Check if a comment was already made
+        id: find-comment
+        uses: peter-evans/find-comment@v1
+        with:
+          issue-number: ${{ steps.get-pr-number.outputs.num }}
+          comment-author: github-actions[bot]
+          body-includes: Plugin builds are ready
+
+      - name: Comment on PR with links to plugin builds
+        if: ${{ steps.find-comment.outputs.comment-id == '' }}
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          issue-number: ${{ steps.get-pr-number.outputs.num }}
+          body: |
+            Plugin builds are ready :cook:!
+            - Download the development build [here](https://raw.githubusercontent.com/wiki/ampproject/amp-wp/refs/pull/${{ steps.get-pr-number.outputs.num }}/merge/amp-dev.zip)
+            - Download the production build [here](https://raw.githubusercontent.com/wiki/ampproject/amp-wp/refs/pull/${{ steps.get-pr-number.outputs.num }}/merge/amp.zip)
