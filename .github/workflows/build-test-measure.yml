@@ -1,7 +1,13 @@
 name: Build, test & measure
-on: push
-jobs:
 
+on:
+  push:
+    branches:
+      - develop
+      - master
+  pull_request:
+
+jobs:
   # Build a release ZIP file and upload it as a GitHub Actions artifact.
   release-zip:
     runs-on: ubuntu-latest
@@ -48,8 +54,18 @@ jobs:
         # Prevent malicious scripts from being run with `--ignore-scripts`
         run: npm install --ignore-scripts
 
-      - name: Run build script
-        run: npm run build
+      - name: Create destination directory
+        run: mkdir -p ${{ github.ref }}
+
+      - name: Build develop version
+        run: |
+          npm run build:dev
+          mv amp.zip ${{ github.ref }}/amp-dev.zip
+
+      - name: Build production version
+        run: |
+          npm run build:prod
+          mv amp.zip ${{ github.ref }}/amp.zip
 
       - name: Retrieve branch name
         id: retrieve-branch-name
@@ -59,10 +75,8 @@ jobs:
         id: retrieve-git-sha-8
         run: echo "::set-output name=sha8::$(echo ${GITHUB_SHA} | cut -c1-8)"
 
-      - name: Upload release ZIP
+      - name: Upload artifacts
         uses: actions/upload-artifact@v2
-        env:
-          SHA8: ${GITHUB_SHA::8}
         with:
-          name: amp-${{ steps.retrieve-branch-name.outputs.branch_name }}-${{ steps.retrieve-git-sha-8.outputs.sha8 }}.zip
-          path: amp.zip
+          name: amp-${{ steps.retrieve-branch-name.outputs.branch_name }}-${{ steps.retrieve-git-sha-8.outputs.sha8 }}
+          path: ${{ github.ref }}
