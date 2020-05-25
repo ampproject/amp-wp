@@ -26,6 +26,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 	const [ hasChanges, setHasChanges ] = useState( false );
 	const [ hasSaved, setHasSaved ] = useState( false );
 
+	// This component sets state inside async functions. Use this ref to prevent state updates after unmount.
 	const hasUnmounted = useRef( false );
 
 	/**
@@ -93,8 +94,10 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 	}, [ hasChanges, options, setHasChanges, setOptions ] );
 
 	useEffect( () => {
-		fetchOptions();
-	}, [ fetchOptions ] );
+		if ( ! options ) {
+			fetchOptions();
+		}
+	}, [ fetchOptions, options ] );
 
 	useEffect( () => () => {
 		hasUnmounted.current = true;

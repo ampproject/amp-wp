@@ -15,8 +15,6 @@ export function WizardUnsavedChangesWarning() {
 	 * Warns the user if there are unsaved changes before leaving the wizard.
 	 *
 	 * @param {Event} event `beforeunload` event.
-	 *
-	 * @return {?string} Warning prompt message, if unsaved changes exist.
 	 */
 	const warnIfUnsavedChanges = useCallback( ( event ) => {
 		if ( hasChanges && ! hasSaved ) {

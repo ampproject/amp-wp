@@ -9,7 +9,7 @@
 use AmpProject\AmpWP\Option;
 
 /**
- * AMP setup wizard class.
+ * AMP options REST controller.
  *
  * @since 1.6.0
  */

@@ -60,7 +60,7 @@ class Test_AMP_Setup_Wizard_Submenu_Page extends WP_UnitTestCase {
 
 		$this->page->render();
 
-		$this->assertStringContains( '<div id="amp-setup"></div>', trim( ob_get_clean() ) );
+		$this->assertStringContains( '<div id="amp-setup"></div>', ob_get_clean() );
 	}
 
 	/**

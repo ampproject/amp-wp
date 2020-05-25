@@ -8,7 +8,7 @@ import { create } from 'react-test-renderer';
  */
 import { StepperBullet } from '..';
 
-describe( 'ValidationErrorMessage', () => {
+describe( 'StepperBullet', () => {
 	it( 'matches snapshot when index and active index are 0', () => {
 		const wrapper = create( <StepperBullet activePageIndex={ 0 } index={ 0 } /> );
 		expect( wrapper.toJSON() ).toMatchSnapshot();
@@ -29,3 +29,4 @@ describe( 'ValidationErrorMessage', () => {
 		expect( wrapper.toJSON() ).toMatchSnapshot();
 	} );
 } );
+
