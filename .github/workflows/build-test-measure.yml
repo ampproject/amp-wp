@@ -1,0 +1,68 @@
+name: Build, test & measure
+on: push
+jobs:
+
+  # Build a release ZIP file and upload it as a GitHub Actions artifact.
+  release-zip:
+    runs-on: ubuntu-latest
+    outputs:
+      branch-name: ${{ steps.retrieve-branch-name.outputs.branch_name }}
+      git-sha-8: ${{ steps.retrieve-git-sha-8.outputs.sha8 }}
+
+    steps:
+      - name: Check out source files
+        uses: actions/checkout@v2
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: |
+          echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - name: Configure Composer cache
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        # Scripts are not ignored as they are needed to apply patches for the
+        # `sabberworm/php-css-parser` dependency.
+        run: composer install --prefer-dist --optimize-autoloader
+
+      - name: Get npm cache directory
+        id: npm-cache
+        run: |
+          echo "::set-output name=dir::$(npm config get cache)"
+
+      - name: Configure npm cache
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.npm-cache.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install Node dependencies
+        # Prevent malicious scripts from being run with `--ignore-scripts`
+        run: npm install --ignore-scripts
+
+      - name: Run build script
+        run: npm run build
+
+      - name: Retrieve branch name
+        id: retrieve-branch-name
+        run: echo "::set-output name=branch_name::$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//-/g')"
+
+      - name: Retrieve git SHA-8 string
+        id: retrieve-git-sha-8
+        run: echo "::set-output name=sha8::$(echo ${GITHUB_SHA} | cut -c1-8)"
+
+      - name: Upload release ZIP
+        uses: actions/upload-artifact@v2
+        env:
+          SHA8: ${GITHUB_SHA::8}
+        with:
+          name: amp-${{ steps.retrieve-branch-name.outputs.branch_name }}-${{ steps.retrieve-git-sha-8.outputs.sha8 }}.zip
+          path: amp.zip
