@@ -111,7 +111,7 @@ final class AMP_Setup_Wizard_Submenu_Page {
 		);
 
 		wp_enqueue_style(
-			static::JS_HANDLE,
+			self::JS_HANDLE,
 			amp_get_asset_url( "css/amp-setup-compiled{$rtl}.css" ),
 			[],
 			AMP__VERSION
