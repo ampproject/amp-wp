@@ -58,7 +58,6 @@ class AMP_Options_Manager {
 						'type'       => 'object',
 						'properties' => [
 							Option::THEME_SUPPORT        => [
-								'description' => __( 'AMP template mode.', 'amp' ),
 								'default'     => AMP_Theme_Support::READER_MODE_SLUG,
 								'type'        => 'string',
 								'enum'        => [
