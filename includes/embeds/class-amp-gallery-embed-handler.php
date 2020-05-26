@@ -27,7 +27,10 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Unregister embed.
 	 */
-	public function unregister_embed() {}
+	public function unregister_embed() {
+		remove_filter( 'post_gallery', [ $this, 'maybe_override_gallery' ], 10 );
+		remove_action( 'wp_print_styles', [ $this, 'print_styles' ] );
+	}
 
 	/**
 	 * Shortcode handler.
@@ -61,7 +64,7 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 		);
 
 		if ( ! empty( $attr['amp-lightbox'] ) ) {
-			$atts['lightbox'] = filter_var( $attr['amp-lightbox'], FILTER_VALIDATE_BOOLEAN );
+			$atts['lightbox'] = rest_sanitize_boolean( $attr['amp-lightbox'] );
 		}
 
 		$id = (int) $atts['id'];
@@ -156,9 +159,17 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return string $html Markup for the gallery.
 	 */
 	public function maybe_override_gallery( $html, $attributes ) {
-		$is_lightbox = isset( $attributes['amp-lightbox'] ) && true === filter_var( $attributes['amp-lightbox'], FILTER_VALIDATE_BOOLEAN );
-		if ( isset( $attributes['amp-carousel'] ) && false === filter_var( $attributes['amp-carousel'], FILTER_VALIDATE_BOOLEAN ) ) {
-			if ( true === $is_lightbox ) {
+		$is_lightbox = isset( $attributes['amp-lightbox'] ) && rest_sanitize_boolean( $attributes['amp-lightbox'] );
+
+		// Use <amp-carousel> for the gallery if requested via amp-carousel shortcode attribute, or use by default if in Reader mode.
+		$is_carousel = (
+			isset( $attributes['amp-carousel'] ) ?
+				rest_sanitize_boolean( $attributes['amp-carousel'] ) :
+				! current_theme_supports( 'amp' ) // In AMP_Gallery_Block_Sanitizer, this is referred to as carousel_required.
+		);
+
+		if ( ! $is_carousel ) {
+			if ( $is_lightbox ) {
 				$add_lightbox_attribute = static function ( $attr ) {
 					$attr['lightbox'] = '';
 					return $attr;

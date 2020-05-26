@@ -81,14 +81,14 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 			$gallery_node = isset( $node->parentNode ) && AMP_DOM_Utils::has_class( $node->parentNode, self::$class ) ? $node->parentNode : $node;
 			$attributes   = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $gallery_node );
 
-			$is_amp_lightbox = isset( $attributes['data-amp-lightbox'] ) && true === filter_var( $attributes['data-amp-lightbox'], FILTER_VALIDATE_BOOLEAN );
-			$is_amp_carousel = (
-				! empty( $this->args['carousel_required'] )
-				||
-				filter_var( $node->getAttribute( 'data-amp-carousel' ), FILTER_VALIDATE_BOOLEAN )
-				||
-				filter_var( $node->parentNode->getAttribute( 'data-amp-carousel' ), FILTER_VALIDATE_BOOLEAN )
-			);
+			$is_amp_lightbox = isset( $attributes['data-amp-lightbox'] ) && rest_sanitize_boolean( $attributes['data-amp-lightbox'] );
+			if ( $node->hasAttribute( 'data-amp-carousel' ) || $node->parentNode->hasAttribute( 'data-amp-carousel' ) ) {
+				$is_amp_carousel = rest_sanitize_boolean( $node->getAttribute( 'data-amp-carousel' ) ) || rest_sanitize_boolean( $node->parentNode->getAttribute( 'data-amp-carousel' ) );
+			} else {
+				// The carousel_required argument is set to true when the theme does not support AMP. However, it is no
+				// no longer strictly required. Rather, carousels are just enabled by default.
+				$is_amp_carousel = ! empty( $this->args['carousel_required'] );
+			}
 
 			// We are only looking for <ul> elements which have amp-carousel / amp-lightbox true.
 			if ( ! $is_amp_carousel && ! $is_amp_lightbox ) {

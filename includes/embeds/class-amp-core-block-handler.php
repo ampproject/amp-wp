@@ -76,6 +76,26 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 * @return string Filtered block content.
 	 */
 	public function filter_rendered_block( $block_content, $block ) {
+
+		if ( isset( $block['attrs'] ) ) {
+			$injected_attributes    = '';
+			$prop_attribute_mapping = [
+				'ampLayout'    => 'data-amp-layout',
+				'ampNoLoading' => 'data-amp-noloading',
+				'ampLightbox'  => 'data-amp-lightbox',
+				'ampCarousel'  => 'data-amp-carousel',
+			];
+			foreach ( $prop_attribute_mapping as $prop => $attr ) {
+				if ( isset( $block['attrs'][ $prop ] ) ) {
+					$property_value       = rest_sanitize_boolean( $block['attrs'][ $prop ] );
+					$injected_attributes .= sprintf( ' %s="%s"', $attr, esc_attr( wp_json_encode( $property_value ) ) );
+				}
+			}
+			if ( $injected_attributes ) {
+				$block_content = preg_replace( '/(<\w+)/', '$1' . $injected_attributes, $block_content, 1 );
+			}
+		}
+
 		if ( ! isset( $block['blockName'] ) ) {
 			return $block_content;
 		}
