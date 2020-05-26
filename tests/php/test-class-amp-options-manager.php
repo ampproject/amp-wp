@@ -50,7 +50,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		AMP_Options_Manager::register_settings();
 		$registered_settings = get_registered_settings();
 		$this->assertArrayHasKey( AMP_Options_Manager::OPTION_NAME, $registered_settings );
-		$this->assertEquals( 'array', $registered_settings[ AMP_Options_Manager::OPTION_NAME ]['type'] );
+		$this->assertEquals( 'object', $registered_settings[ AMP_Options_Manager::OPTION_NAME ]['type'] );
 
 		$this->assertEquals( 10, has_action( 'update_option_' . AMP_Options_Manager::OPTION_NAME, [ 'AMP_Options_Manager', 'maybe_flush_rewrite_rules' ] ) );
 	}
