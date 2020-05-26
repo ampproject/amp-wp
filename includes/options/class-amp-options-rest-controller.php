@@ -131,7 +131,7 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 	 * @return array Item schema data.
 	 */
 	public function get_item_schema() {
-		$reader_themes      = ( new AMP_Reader_Theme_REST_Controller() )->get_items( new WP_REST_Request() )->get_data();
+		$reader_themes      = amp_get_reader_themes();
 		$reader_theme_slugs = array_merge( [ AMP_Theme_Support::DEFAULT_READER_THEME ], wp_list_pluck( $reader_themes, 'slug' ) );
 
 		if ( is_null( $this->schema ) ) {
