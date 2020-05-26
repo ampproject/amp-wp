@@ -307,8 +307,8 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 
 				case 'type':
 					/*
-					 * Omit the `type` attribute if its value is `text/html`. Popular embed providers such as YouTube
-					 * and Amazon use this non-standard attribute.
+					 * Omit the `type` attribute if its value is `text/html`. Popular embed providers such as Amazon
+					 * Kindle use this non-standard attribute, which is apparently a vestige from usage on <object>.
 					 */
 					if ( 'text/html' !== strtolower( $value ) ) {
 						$out[ $name ] = $value;
