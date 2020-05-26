@@ -58,40 +58,31 @@ class AMP_Options_Manager {
 						'type'       => 'object',
 						'properties' => [
 							Option::THEME_SUPPORT        => [
-								'default' => AMP_Theme_Support::READER_MODE_SLUG,
-								'type'    => 'string',
-								'enum'    => [
+								'type' => 'string',
+								'enum' => [
 									AMP_Theme_Support::READER_MODE_SLUG,
 									AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
 									AMP_Theme_Support::STANDARD_MODE_SLUG,
 								],
 							],
 							Option::SUPPORTED_POST_TYPES => [
-								'default' => [
-									'post',
-								],
-								'type'    => 'array',
-								'items'   => [
+								'type'  => 'array',
+								'items' => [
 									'type' => 'string',
 								],
 							],
 							Option::ANALYTICS            => [
-								'default' => [],
-								'type'    => 'array',
-								'items'   => [
+								'type'  => 'array',
+								'items' => [
 									'type' => 'string',
 								],
 							],
 							Option::ALL_TEMPLATES_SUPPORTED => [
-								'default' => false,
-								'type'    => 'boolean',
+								'type' => 'bool',
 							],
 							Option::SUPPORTED_TEMPLATES  => [
-								'default' => [
-									'is_singular',
-								],
-								'type'    => 'array',
-								'items'   => [
+								'type'  => 'array',
+								'items' => [
 									'type' => 'string',
 								],
 							],
@@ -392,7 +383,6 @@ class AMP_Options_Manager {
 		$amp_options = self::get_options();
 
 		$amp_options[ $option ] = $value;
-
 		return update_option( self::OPTION_NAME, $amp_options, false );
 	}
 
