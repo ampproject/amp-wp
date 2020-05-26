@@ -58,9 +58,9 @@ class AMP_Options_Manager {
 						'type'       => 'object',
 						'properties' => [
 							Option::THEME_SUPPORT        => [
-								'default'     => AMP_Theme_Support::READER_MODE_SLUG,
-								'type'        => 'string',
-								'enum'        => [
+								'default' => AMP_Theme_Support::READER_MODE_SLUG,
+								'type'    => 'string',
+								'enum'    => [
 									AMP_Theme_Support::READER_MODE_SLUG,
 									AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
 									AMP_Theme_Support::STANDARD_MODE_SLUG,
