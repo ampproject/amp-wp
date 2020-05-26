@@ -97,7 +97,8 @@ function amp_init() {
 	AMP_Theme_Support::init();
 	AMP_Validation_Manager::init();
 	AMP_Service_Worker::init();
-	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
+	add_action( 'init', 'AMP_Options_Manager::register_settings' );
+	add_action( 'admin_init', 'AMP_Options_Manager::init' );
 	add_action( 'wp_loaded', 'amp_add_options_menu' );
 	add_action( 'wp_loaded', 'amp_bootstrap_admin' );
 
@@ -149,14 +150,6 @@ function amp_init() {
 		do_action( 'amp_plugin_update', $old_version );
 		AMP_Options_Manager::update_option( Option::VERSION, AMP__VERSION );
 	}
-
-	add_action(
-		'rest_api_init',
-		static function() {
-			$controller = new AMP_Options_REST_Controller();
-			$controller->register_routes();
-		}
-	);
 }
 
 /**

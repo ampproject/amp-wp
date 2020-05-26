@@ -123,9 +123,10 @@ final class AMP_Setup_Wizard_Submenu_Page {
 				'var ampSetup = %s;',
 				wp_json_encode(
 					[
+						'AMP_OPTIONS_KEY'       => AMP_Options_Manager::OPTION_NAME,
 						'APP_ROOT_ID'           => self::APP_ROOT_ID,
 						'EXIT_LINK'             => admin_url( 'admin.php?page=' . AMP_Options_Manager::OPTION_NAME ),
-						'OPTIONS_REST_ENDPOINT' => rest_url( 'amp-wp/v1/options' ),
+						'OPTIONS_REST_ENDPOINT' => rest_url( 'wp/v2/settings' ),
 					]
 				)
 			),
