@@ -15,6 +15,12 @@ import PropTypes from 'prop-types';
  */
 import { Navigation } from '../navigation-context-provider';
 
+/**
+ * Navigation component.
+ *
+ * @param {Object} props Component props.
+ * @param {string} props.exitLink Link to exit the application.
+ */
 export function Nav( { exitLink } ) {
 	const { activePageIndex, canGoForward, goBack, goForward } = useContext( Navigation );
 

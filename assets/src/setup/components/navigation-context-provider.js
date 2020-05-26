@@ -11,7 +11,7 @@ import PropTypes from 'prop-types';
 export const Navigation = createContext();
 
 /**
- * Context provider for pagination.
+ * Context provider for navigating between and keeping track of pages in the app.
  *
  * @param {Object} props Component props.
  * @param {?any} props.children Component children.
@@ -22,10 +22,16 @@ export function NavigationContextProvider( { children, pages } ) {
 
 	const currentPage = useMemo( () => pages[ activePageIndex ], [ activePageIndex, pages ] );
 
+	/**
+	 * Navigates back to the previous page.
+	 */
 	const goBack = useCallback( () => {
 		setActivePageIndex( activePageIndex - 1 );
 	}, [ setActivePageIndex, activePageIndex ] );
 
+	/**
+	 * Navigates to the next page. Pages are expected to set canGoForward to true when required actions have been taken.
+	 */
 	const goForward = useCallback( () => {
 		setActivePageIndex( activePageIndex + 1 );
 		setCanGoForward( false );

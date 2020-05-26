@@ -24,7 +24,6 @@
     "@wordpress/dom-ready": "2.9.0",
     "@wordpress/element": "2.14.0",
     "@wordpress/escape-html": "1.8.0",
-    "@wordpress/html-entities": "2.7.0",
     "@wordpress/i18n": "3.12.0",
     "@wordpress/url": "2.15.0",
     "prop-types": "15.7.2"
@@ -43,6 +42,7 @@
     "@wordpress/edit-post": "3.14.0",
     "@wordpress/eslint-plugin": "5.1.0",
     "@wordpress/hooks": "2.7.0",
+    "@wordpress/html-entities": "2.7.0",
     "@wordpress/jest-puppeteer-axe": "1.8.0",
     "@wordpress/plugins": "2.16.0",
     "@wordpress/scripts": "9.1.0",

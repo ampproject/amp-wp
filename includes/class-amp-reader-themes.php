@@ -11,7 +11,7 @@
  *
  * @since 1.6.0
  */
-class AMP_Reader_Themes {
+final class AMP_Reader_Themes {
 	/**
 	 * Formatted theme data.
 	 *
@@ -77,7 +77,7 @@ class AMP_Reader_Themes {
 			'title'          => 'AMP Classic',
 			'content'        => __(
 				// @todo Improved description text.
-				'A legacy default template that looks nice and clean, wich a good balance between ease and extensibility when it comes to customization.',
+				'A legacy default template that looks nice and clean, with a good balance between ease and extensibility when it comes to customization.',
 				'amp'
 			),
 			'featured_media' => [
@@ -149,8 +149,8 @@ class AMP_Reader_Themes {
 	 * @param array $items Theme items.
 	 * @return array Theme items with image details added.
 	 */
-	private function add_media_to_themes( $items ) {
-		$media_ids = array_filter( wp_list_pluck( $items, 'featured_media' ) );
+	private function add_media_to_themes( $themes ) {
+		$media_ids = array_filter( wp_list_pluck( $themes, 'featured_media' ) );
 
 		$url = add_query_arg(
 			[
@@ -162,11 +162,21 @@ class AMP_Reader_Themes {
 			'https://amp-wp.org/wp-json/wp/v2/media'
 		);
 
-		$request = wp_remote_get( $url );
-		if ( 200 !== wp_remote_retrieve_response_code( $request ) ) {
-			$media_items = [];
-		} else {
-			$media_items = json_decode( wp_remote_retrieve_body( $request ), true );
+		/**
+		 * Filters media items for reader themes before they're fetched.
+		 *
+		 * @param null|array $media_items Media items or null if the request for items has not been overridden.
+		 * @param array      $themes      Array of theme objects
+		 */
+		$media_items = apply_filters( 'amp_pre_get_reader_theme_media', null, $themes );
+
+		if ( is_null( $media_items ) ) {
+			$request = wp_remote_get( $url );
+			if ( 200 !== wp_remote_retrieve_response_code( $request ) ) {
+				$media_items = [];
+			} else {
+				$media_items = json_decode( wp_remote_retrieve_body( $request ), true );
+			}
 		}
 
 		$keyed_media_items = [];
@@ -174,13 +184,21 @@ class AMP_Reader_Themes {
 			$keyed_media_items[ intval( $media_item['id'] ) ] = $this->prepare_featured_media( $media_item );
 		}
 
-		foreach ( $items as &$item ) {
-			if ( ! empty( $item['featured_media'] ) && isset( $keyed_media_items[ $item['featured_media'] ] ) ) {
-				$item['featured_media'] = $keyed_media_items[ $item['featured_media'] ];
+		/**
+		 * Filters media items after they have been fetched.
+		 *
+		 * @param array $media_items Reader theme media objects, keyed by the media item ID.
+		 * @param array $themes      Array of theme objects.
+		 */
+		$keyed_media_items = apply_filters( 'amp_reader_theme_media', $keyed_media_items, $themes );
+
+		foreach ( $themes as &$theme ) {
+			if ( ! empty( $theme['featured_media'] ) && isset( $keyed_media_items[ $theme['featured_media'] ] ) ) {
+				$theme['featured_media'] = $keyed_media_items[ $theme['featured_media'] ];
 			}
 		}
 
-		return $items;
+		return $themes;
 	}
 
 	/**

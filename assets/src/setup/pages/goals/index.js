@@ -14,6 +14,7 @@ import { Navigation } from '../../components/navigation-context-provider';
  */
 export function Goals() {
 	const { canGoForward, setCanGoForward } = useContext( Navigation );
+
 	/**
 	 * Allow moving forward.
 	 */

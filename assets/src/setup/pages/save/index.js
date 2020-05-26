@@ -16,6 +16,11 @@ import { Loading } from '../../components/loading';
 export function Save() {
 	const { hasSaved, saveOptions, saveOptionsError, savingOptions } = useContext( Options );
 
+	/**
+	 * Triggers saving of options on arrival of this screen.
+	 *
+	 * @todo Possibly wait for a different user action to save.
+	 */
 	useEffect( () => {
 		if ( ! hasSaved && ! savingOptions ) {
 			saveOptions();
