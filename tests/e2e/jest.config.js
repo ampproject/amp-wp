@@ -1,3 +1,5 @@
+const path = require( 'path' );
+
 module.exports = {
 	...require( '@wordpress/scripts/config/jest-e2e.config' ),
 	transform: {
@@ -16,4 +18,7 @@ module.exports = {
 		'node_modules',
 	],
 	reporters: [ [ 'jest-silent-reporter', { useDots: true } ] ],
+	moduleNameMapper: {
+		'\\.css$': path.resolve( __dirname, '__mocks__/style-mock.js' ),
+	},
 };

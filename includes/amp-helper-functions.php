@@ -1724,3 +1724,20 @@ function amp_generate_script_hash( $script ) {
 	);
 	return 'sha384-' . $hash;
 }
+
+/**
+ * Provides AMP reader themes.
+ *
+ * @since 1.6.0
+ *
+ * @return array List of reader theme data objects.
+ */
+function amp_get_reader_themes() {
+	static $amp_reader_themes;
+
+	if ( is_null( $amp_reader_themes ) ) {
+		$amp_reader_themes = ( new AMP_Reader_Themes() )->get_themes();
+	}
+
+	return $amp_reader_themes;
+}
