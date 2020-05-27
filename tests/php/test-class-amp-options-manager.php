@@ -42,6 +42,16 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests the init method.
+	 *
+	 * @covers AMP_Options_Manager::init()
+	 */
+	public function test_init() {
+		AMP_Options_Manager::init();
+		$this->assertEquals( 10, has_action( 'update_option_' . AMP_Options_Manager::OPTION_NAME, [ 'AMP_Options_Manager', 'maybe_flush_rewrite_rules' ] ) );
+	}
+
+	/**
 	 * Test register_settings.
 	 *
 	 * @covers AMP_Options_Manager::register_settings()
@@ -52,8 +62,6 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$registered_settings = get_registered_settings();
 		$this->assertArrayHasKey( AMP_Options_Manager::OPTION_NAME, $registered_settings );
 		$this->assertEquals( 'object', $registered_settings[ AMP_Options_Manager::OPTION_NAME ]['type'] );
-
-		$this->assertEquals( 10, has_action( 'update_option_' . AMP_Options_Manager::OPTION_NAME, [ 'AMP_Options_Manager', 'maybe_flush_rewrite_rules' ] ) );
 	}
 
 	/**
