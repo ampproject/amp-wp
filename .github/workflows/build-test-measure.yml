@@ -41,9 +41,10 @@ jobs:
       - name: Install Composer dependencies
         # Scripts are not ignored as they are needed to apply patches for the
         # `sabberworm/php-css-parser` dependency.
-        run: composer install \
-        --prefer-dist \
-        --optimize-autoloader
+        run: |
+          composer install \
+          --prefer-dist \
+          --optimize-autoloader
 
       - name: Get npm cache directory
         id: npm-cache
@@ -60,7 +61,9 @@ jobs:
 
       - name: Install Node dependencies
         # Prevent malicious scripts from being run with `--ignore-scripts`
-        run: npm install --ignore-scripts
+        run: |
+          npm install \
+          --ignore-scripts
 
       - name: Create destination directories
         run: mkdir -p builds/dev
@@ -76,7 +79,9 @@ jobs:
 
       - name: Retrieve git SHA-8 string
         id: retrieve-git-sha-8
-        run: echo "::set-output name=sha8::$(echo ${GITHUB_SHA} | cut -c1-8)"
+        run: |
+          echo "::set-output name=sha8::$(echo ${GITHUB_SHA} \
+          | cut -c1-8)"
 
       - name: Upload build as artifact
         uses: actions/upload-artifact@v2
@@ -262,7 +267,8 @@ jobs:
           name: amp-${{ needs['release-zip'].outputs.branch-name }}-${{ needs['release-zip'].outputs.git-sha-8 }}.zip
 
       - name: Install MySQL client
-        run: sudo apt-get install -y mysql-client
+        run: |
+          sudo apt-get install -y mysql-client
 
       - name: Install WP-CLI
         run: |
@@ -289,7 +295,8 @@ jobs:
           --allow-root
 
       - name: Start MySQL server
-        run: sudo service mysql start
+        run: |
+          sudo service mysql start
 
       - name: Initialize WordPress database
         run: |
@@ -303,38 +310,44 @@ jobs:
           --allow-root
 
       - name: Install and activate the AMP plugin
-        run: wp plugin install amp.zip \
-        --activate \
-        --force \
-        --allow-root
+        run: |
+          wp plugin install amp.zip \
+          --activate \
+          --force \
+          --allow-root
 
       - name: Install and activate the PWA plugin
-        run: wp plugin install pwa \
-        --activate \
-        --force \
-        --allow-root
+        run: |
+          wp plugin install pwa \
+          --activate \
+          --force \
+          --allow-root
 
       - name: Switch site into Transitional mode
-        run: wp eval \
-        'AMP_Options_Manager::update_option( AmpProject\AmpWP\Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );' \
-        --allow-root
+        run: |
+          wp eval \
+          'AMP_Options_Manager::update_option( AmpProject\AmpWP\Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );' \
+          --allow-root
 
       - name: Install Lighthouse CI
-        run: sudo npm install -g @lhci/cli
+        run: |
+          sudo npm install -g @lhci/cli
 
       - name: Run Lighthouse CI health check
-        run: lhci healthcheck
+        run: |
+          lhci healthcheck
 
       - name: Run Lighthouse CI audit
-        run: lhci collect
+        run: |
+          lhci collect
 
       - name: Assert Lighthouse CI measurements against requirements
         run: |
           echo -n 'Skipping assertions for now'
-          # Don't let the assertions fail the build for now...
-          # lhci assert; exit 0
+          # lhci assert
 
       - name: Upload Lighthouse CI measurements
-        run: lhci upload \
-        --upload.serverBaseUrl=${{ secrets.LHCI_SERVER_BASE_URL }} \
-        --upload.token=${{ secrets.LHCI_BUILD_TOKEN }}
+        run: |
+          lhci upload \
+          --upload.serverBaseUrl=${{ secrets.LHCI_SERVER_BASE_URL }} \
+          --upload.token=${{ secrets.LHCI_BUILD_TOKEN }}
