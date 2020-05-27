@@ -18,8 +18,8 @@ jobs:
     if: github.event.pull_request.draft == false && github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
     runs-on: ubuntu-latest
     outputs:
-      branch-name: ${{ steps.retrieve-branch-name.outputs.branch_name }}
-      git-sha-8: ${{ steps.retrieve-git-sha-8.outputs.sha8 }}
+      branch-name: ${{ steps['retrieve-branch-name'].outputs.branch_name }}
+      git-sha-8: ${{ steps['retrieve-git-sha-8'].outputs.sha8 }}
 
     steps:
       - name: Check out source files
@@ -31,9 +31,9 @@ jobs:
           echo "::set-output name=dir::$(composer config cache-files-dir)"
 
       - name: Configure Composer cache
-        uses: actions/cache@v1
+        uses: actions/cache@master
         with:
-          path: ${{ steps.composer-cache.outputs.dir }}
+          path: ${{ steps['composer-cache'].outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-composer-
@@ -49,9 +49,9 @@ jobs:
           echo "::set-output name=dir::$(npm config get cache)"
 
       - name: Configure npm cache
-        uses: actions/cache@v1
+        uses: actions/cache@master
         with:
-          path: ${{ steps.npm-cache.outputs.dir }}
+          path: ${{ steps['npm-cache'].outputs.dir }}
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
@@ -257,7 +257,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           # Downloaded file name will actually be amp.zip again.
-          name: amp-${{ needs.release-zip.outputs.branch-name }}-${{ needs.release-zip.outputs.git-sha-8 }}.zip
+          name: amp-${{ needs['release-zip'].outputs.branch-name }}-${{ needs['release-zip'].outputs.git-sha-8 }}.zip
 
       - name: Install MySQL client
         run: sudo apt-get install -y mysql-client
@@ -274,8 +274,17 @@ jobs:
         run: |
           mkdir -p www
           echo "path: www/" > wp-cli.local.yml
-          wp core download --force --allow-root
-          wp config create --dbname=lighthouse_test --dbuser=root --dbpass=root --dbhost="127.0.0.1:$PORT" --force --skip-check --allow-root
+          wp core download \
+            --force \
+            --allow-root
+          wp config create \
+            --dbname=lighthouse_test \
+            --dbuser=root \
+            --dbpass=root \
+            --dbhost="127.0.0.1:$PORT" \
+            --force \
+            --skip-check \
+            --allow-root
 
       - name: Start MySQL server
         run: sudo service mysql start
@@ -283,16 +292,30 @@ jobs:
       - name: Initialize WordPress database
         run: |
           wp db create --allow-root
-          wp core install --title="AMP Dev" --admin_user=admin --admin_password=password --admin_email=test@test.com --skip-email --url=http://localhost:8080 --allow-root
+          wp core install --title="AMP Dev" \
+            --admin_user=admin \
+            --admin_password=password \
+            --admin_email=test@test.com \
+            --skip-email \
+            --url=http://localhost:8080 \
+            --allow-root
 
       - name: Install and activate the AMP plugin
-        run: wp plugin install amp.zip --activate --force --allow-root
+        run: wp plugin install amp.zip \
+          --activate \
+          --force \
+          --allow-root
 
       - name: Install and activate the PWA plugin
-        run: wp plugin install pwa --activate --force --allow-root
+        run: wp plugin install pwa \
+          --activate \
+          --force \
+          --allow-root
 
       - name: Switch site into Transitional mode
-        run: wp eval 'AMP_Options_Manager::update_option( AmpProject\AmpWP\Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );' --allow-root
+        run: wp eval \
+          'AMP_Options_Manager::update_option( AmpProject\AmpWP\Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );' \
+          --allow-root
 
       - name: Install Lighthouse CI
         run: sudo npm install -g @lhci/cli
@@ -310,4 +333,6 @@ jobs:
           # lhci assert; exit 0
 
       - name: Upload Lighthouse CI measurements
-        run: lhci upload
+        run: lhci upload \
+          --upload.serverBaseUrl=${{ secrets.LHCI_SERVER_BASE_URL }} \
+          --upload.token=${{ secrets.LHCI_BUILD_TOKEN }}
