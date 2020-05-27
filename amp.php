@@ -9,7 +9,7 @@
  * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
- * Requires at least: 4.9
+ * Requires WP: 4.9
  * Requires PHP: 5.6
  *
  * @package AMP
