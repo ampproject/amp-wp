@@ -349,6 +349,6 @@ jobs:
       - name: Upload Lighthouse CI measurements to Lighthouse CI server
         run: |
           lhci upload \
-          --target=lhci
+          --target=lhci \
           --serverBaseUrl=${{ secrets.LHCI_SERVER_BASE_URL }} \
           --token=${{ secrets.LHCI_BUILD_TOKEN }}
