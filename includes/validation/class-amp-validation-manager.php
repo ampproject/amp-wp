@@ -612,6 +612,12 @@ class AMP_Validation_Manager {
 		if ( true === $should_validate_response ) {
 			self::add_validation_error_sourcing();
 			self::$is_validate_request = true;
+
+			if ( '1' === (string) ini_get( 'display_errors' ) ) {
+				// Suppress the display of fatal errors that may arise during validation so that they will not be counted
+				// as actual validation errors.
+				ini_set( 'display_errors', 0 ); // phpcs:ignore WordPress.PHP.IniSet.display_errors_Blacklisted
+			}
 		} else {
 			self::$is_validate_request = false;
 
@@ -767,21 +773,8 @@ class AMP_Validation_Manager {
 	 * @return void
 	 */
 	public static function add_rest_api_fields() {
-		if ( amp_is_canonical() ) {
-			$object_types = get_post_types_by_support( 'editor' ); // @todo Shouldn't this actually only be those with 'amp' support, or if if all_templates_supported?
-		} else {
-			$object_types = array_intersect(
-				get_post_types_by_support( 'amp' ),
-				get_post_types(
-					[
-						'show_in_rest' => true,
-					]
-				)
-			);
-		}
-
 		register_rest_field(
-			$object_types,
+			AMP_Post_Type_Support::get_post_types_for_rest_api(),
 			self::VALIDITY_REST_FIELD_NAME,
 			[
 				'get_callback' => [ __CLASS__, 'get_amp_validity_rest_field' ],
@@ -2411,13 +2404,8 @@ class AMP_Validation_Manager {
 
 		wp_styles()->add_data( $slug, 'rtl', 'replace' );
 
-		$status_and_errors = AMP_Post_Meta_Box::get_status_and_errors( get_post() );
-		$enabled_status    = $status_and_errors['status'];
-
 		$data = [
 			'isSanitizationAutoAccepted' => self::is_sanitization_auto_accepted(),
-			'possibleStatuses'           => [ AMP_Post_Meta_Box::ENABLED_STATUS, AMP_Post_Meta_Box::DISABLED_STATUS ],
-			'defaultStatus'              => $enabled_status,
 		];
 
 		wp_localize_script(

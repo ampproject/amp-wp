@@ -349,7 +349,7 @@ class AMP_Options_Manager {
 		if ( ! empty( $deleted_suppressed_plugins ) || ! empty( $inserted_suppressed_plugins ) ) {
 			add_action(
 				'update_option_' . self::OPTION_NAME,
-				function () {
+				static function () {
 					$validated_url_posts = get_posts(
 						[
 							'post_type'      => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
