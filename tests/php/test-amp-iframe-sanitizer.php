@@ -405,6 +405,26 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 				[
 					'add_noscript_fallback' => true,
 					'add_placeholder'       => true,
+					'align_wide_support'    => true,
+				],
+			],
+
+			'iframe_with_wide_width_alignment'               => [
+				'<figure class="alignwide"><iframe width="750" height="422" src="https://videopress.com/embed/yFCmLMGL?hd=0" frameborder="0" allowfullscreen="" data-origwidth="750" data-origheight="422"></iframe></figure>',
+				'
+					<figure class="alignwide">
+						<amp-iframe width="750" height="422" src="https://videopress.com/embed/yFCmLMGL?hd=0" frameborder="0" allowfullscreen="" data-origwidth="750" data-origheight="422" sandbox="allow-scripts allow-same-origin" layout="responsive" class="amp-wp-enforced-sizes">
+							<span placeholder="" class="amp-wp-iframe-placeholder"></span>
+							<noscript>
+								<iframe width="750" height="422" src="https://videopress.com/embed/yFCmLMGL?hd=0" frameborder="0"></iframe>
+							</noscript>
+						</amp-iframe>
+					</figure>
+				',
+				[
+					'add_noscript_fallback' => true,
+					'add_placeholder'       => true,
+					'align_wide_support'    => true,
 				],
 			],
 
@@ -448,6 +468,16 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 
 			'iframe_with_security_attr' => [
 				'<iframe security="restricted" src="https://example.com" width="320" height="640"></iframe>',
+				'
+					<amp-iframe src="https://example.com" width="320" height="640" sandbox="allow-scripts allow-same-origin" layout="intrinsic" class="amp-wp-enforced-sizes">
+						<noscript>
+							<iframe src="https://example.com" width="320" height="640"></iframe>
+						</noscript>
+					</amp-iframe>',
+			],
+
+			'iframe_with_type_html_attr' => [
+				'<iframe type="text/html" src="https://example.com" width="320" height="640"></iframe>',
 				'
 					<amp-iframe src="https://example.com" width="320" height="640" sandbox="allow-scripts allow-same-origin" layout="intrinsic" class="amp-wp-enforced-sizes">
 						<noscript>

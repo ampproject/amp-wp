@@ -6,6 +6,8 @@
  */
 
 use AmpProject\DevMode;
+use AmpProject\Attribute;
+use AmpProject\Layout;
 
 /**
  * Class AMP_Iframe_Sanitizer
@@ -124,8 +126,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			$this->did_convert_elements = true;
-			if ( empty( $normalized_attributes['layout'] ) && ! empty( $normalized_attributes['width'] ) && ! empty( $normalized_attributes['height'] ) ) {
-				$normalized_attributes['layout'] = 'intrinsic';
+			if ( empty( $normalized_attributes[ Attribute::LAYOUT ] ) && ! empty( $normalized_attributes[ Attribute::HEIGHT ] ) && ! empty( $normalized_attributes[ Attribute::WIDTH ] ) ) {
 
 				// Set layout to responsive if the iframe is aligned to full width.
 				$figure_node = null;
@@ -135,8 +136,15 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 				if ( $node->parentNode->parentNode instanceof DOMElement && 'figure' === $node->parentNode->parentNode->tagName ) {
 					$figure_node = $node->parentNode->parentNode;
 				}
-				if ( $figure_node && $figure_node->hasAttribute( 'class' ) && in_array( 'alignfull', explode( ' ', $figure_node->getAttribute( 'class' ) ), true ) ) {
-					$normalized_attributes['layout'] = 'responsive';
+
+				if (
+					! empty( $this->args['align_wide_support'] )
+					&& $figure_node
+					&& preg_match( '/(^|\s)(alignwide|alignfull)(\s|$)/', $figure_node->getAttribute( Attribute::CLASS_ ) )
+				) {
+					$normalized_attributes[ Attribute::LAYOUT ] = Layout::RESPONSIVE;
+				} else {
+					$normalized_attributes[ Attribute::LAYOUT ] = Layout::INTRINSIC;
 				}
 
 				$this->add_or_append_attribute( $normalized_attributes, 'class', 'amp-wp-enforced-sizes' );
@@ -213,6 +221,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 *      @type int $frameborder <iframe> `frameborder` attribute - Filter to '0' or '1'; default to '0'
 	 *      @type bool $allowfullscreen <iframe> `allowfullscreen` attribute - Convert 'false' to empty string ''
 	 *      @type bool $allowtransparency <iframe> `allowtransparency` attribute - Convert 'false' to empty string ''
+	 *      @type string $type <iframe> `type` attribute - Pass along if value is not `text/html`
 	 * }
 	 * @return array Returns HTML attributes; normalizes src, dimensions, frameborder, sandbox, allowtransparency and allowfullscreen
 	 */
@@ -294,6 +303,16 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 
 				case 'data-amp-overflow-text':
 					// No need to copy.
+					break;
+
+				case 'type':
+					/*
+					 * Omit the `type` attribute if its value is `text/html`. Popular embed providers such as Amazon
+					 * Kindle use this non-standard attribute, which is apparently a vestige from usage on <object>.
+					 */
+					if ( 'text/html' !== strtolower( $value ) ) {
+						$out[ $name ] = $value;
+					}
 					break;
 
 				default:

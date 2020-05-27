@@ -1284,8 +1284,9 @@ function amp_get_content_sanitizers( $post = null ) {
 		'AMP_Audio_Sanitizer'             => [],
 		'AMP_Playbuzz_Sanitizer'          => [],
 		'AMP_Iframe_Sanitizer'            => [
-			'add_placeholder' => true,
-			'current_origin'  => $current_origin,
+			'add_placeholder'    => true,
+			'current_origin'     => $current_origin,
+			'align_wide_support' => current_theme_supports( 'align-wide' ),
 		],
 		'AMP_Gallery_Block_Sanitizer'     => [ // Note: Gallery block sanitizer must come after image sanitizers since itś logic is using the already sanitized images.
 			'carousel_required' => ! is_array( $theme_support_args ), // For back-compat.
