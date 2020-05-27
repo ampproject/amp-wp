@@ -510,9 +510,6 @@ class AMP_Options_Menu {
 			</p>
 
 			<style>
-			.amp-suppressed-plugins .suppressed-plugin:checked + label {
-				text-decoration: line-through;
-			}
 			.amp-suppressed-plugins .plugin > details {
 				margin-left: 30px;
 			}
