@@ -346,8 +346,9 @@ jobs:
           echo -n 'Skipping assertions for now'
           # lhci assert
 
-      - name: Upload Lighthouse CI measurements
+      - name: Upload Lighthouse CI measurements to Lighthouse CI server
         run: |
           lhci upload \
+          --upload.target=lhci
           --upload.serverBaseUrl=${{ secrets.LHCI_SERVER_BASE_URL }} \
           --upload.token=${{ secrets.LHCI_BUILD_TOKEN }}
