@@ -48,6 +48,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	 */
 	public function test_register_settings() {
 		AMP_Options_Manager::register_settings();
+		AMP_Options_Manager::init();
 		$registered_settings = get_registered_settings();
 		$this->assertArrayHasKey( AMP_Options_Manager::OPTION_NAME, $registered_settings );
 		$this->assertEquals( 'object', $registered_settings[ AMP_Options_Manager::OPTION_NAME ]['type'] );
