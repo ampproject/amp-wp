@@ -37,7 +37,7 @@ function Page( { children, exitLink } ) {
 				{ fetchOptionsError.message || __( 'There was an error loading the setup wizard.', 'amp' ) }
 				{ ' ' }
 				<a href={ exitLink }>
-					{ __( 'Return to AMP for WordPress options.', 'amp' ) }
+					{ __( 'Return to AMP Settings.', 'amp' ) }
 				</a>
 			</p>
 		);
@@ -66,7 +66,7 @@ export function SetupWizard( { exitLink } ) {
 				<div className="amp-stepper-container">
 					<WordmarkLogo />
 					<div className="amp-setup-plugin-name">
-						{ 'Official AMP Plugin for WordPress' /* Untranslatable, as it's the plugin name. */ }
+						{ __( 'Official AMP Plugin for WordPress', 'amp' ) }
 					</div>
 					<Stepper
 						activePageIndex={ activePageIndex }

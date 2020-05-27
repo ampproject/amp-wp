@@ -98,6 +98,8 @@ function amp_init() {
 	AMP_Validation_Manager::init();
 	AMP_Service_Worker::init();
 	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
+	add_action( 'rest_api_init', 'AMP_Options_Manager::register_settings' );
+	add_action( 'admin_init', 'AMP_Options_Manager::init' );
 	add_action( 'wp_loaded', 'amp_add_options_menu' );
 	add_action( 'wp_loaded', 'amp_bootstrap_admin' );
 
@@ -153,9 +155,6 @@ function amp_init() {
 	add_action(
 		'rest_api_init',
 		static function() {
-			$options_controller = new AMP_Options_REST_Controller();
-			$options_controller->register_routes();
-
 			$reader_theme_controller = new AMP_Reader_Theme_REST_Controller();
 			$reader_theme_controller->register_routes();
 		}

@@ -8,7 +8,7 @@ import '@wordpress/components/build-style/style.css';
 /**
  * External dependencies
  */
-import { APP_ROOT_ID, EXIT_LINK, OPTIONS_REST_ENDPOINT } from 'amp-setup'; // From WP inline script.
+import { AMP_OPTIONS_KEY, APP_ROOT_ID, EXIT_LINK, OPTIONS_REST_ENDPOINT } from 'amp-setup'; // From WP inline script.
 
 /**
  * Internal dependencies
@@ -25,7 +25,7 @@ domReady( () => {
 
 	if ( root ) {
 		render(
-			<OptionsContextProvider optionsRestEndpoint={ OPTIONS_REST_ENDPOINT }>
+			<OptionsContextProvider optionsKey={ AMP_OPTIONS_KEY } optionsRestEndpoint={ OPTIONS_REST_ENDPOINT }>
 				<CacheContextProvider>
 					<NavigationContextProvider pages={ PAGES }>
 						<SetupWizard exitLink={ EXIT_LINK } />

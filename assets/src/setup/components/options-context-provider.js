@@ -18,7 +18,7 @@ export const Options = createContext();
  * @param {?any} props.children Component children.
  * @param {string} props.optionsRestEndpoint REST endpoint to retrieve options.
  */
-export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
+export function OptionsContextProvider( { children, optionsKey, optionsRestEndpoint } ) {
 	const [ options, setOptions ] = useState( null );
 	const [ fetchOptionsError, setFetchOptionsError ] = useState( null );
 	const [ savingOptions, setSavingOptions ] = useState( false );
@@ -42,7 +42,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 				return;
 			}
 
-			setOptions( fetchedOptions );
+			setOptions( fetchedOptions[ optionsKey ] );
 		} catch ( e ) {
 			if ( true === hasUnmounted.current ) {
 				return;
@@ -50,7 +50,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 
 			setFetchOptionsError( e );
 		}
-	}, [ optionsRestEndpoint ] );
+	}, [ optionsKey, optionsRestEndpoint ] );
 
 	/**
 	 * Sends options to the REST endpoint to be saved.
@@ -61,7 +61,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 		setSavingOptions( true );
 
 		try {
-			await apiFetch( { method: 'post', url: optionsRestEndpoint, data: options } );
+			await apiFetch( { method: 'post', url: optionsRestEndpoint, data: { [ optionsKey ]: options } } );
 
 			if ( true === hasUnmounted.current ) {
 				return;
@@ -76,7 +76,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 
 		setSavingOptions( false );
 		setHasSaved( true );
-	}, [ options, optionsRestEndpoint ] );
+	}, [ options, optionsKey, optionsRestEndpoint ] );
 
 	/**
 	 * Updates options in state.
@@ -126,5 +126,6 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 
 OptionsContextProvider.propTypes = {
 	children: PropTypes.any,
+	optionsKey: PropTypes.string.isRequired,
 	optionsRestEndpoint: PropTypes.string.isRequired,
 };

@@ -35,6 +35,16 @@ class AMP_Options_Manager {
 	];
 
 	/**
+	 * Sets up hooks.
+	 */
+	public static function init() {
+		add_action( 'update_option_' . self::OPTION_NAME, [ __CLASS__, 'maybe_flush_rewrite_rules' ], 10, 2 );
+		add_action( 'admin_notices', [ __CLASS__, 'render_welcome_notice' ] );
+		add_action( 'admin_notices', [ __CLASS__, 'render_php_css_parser_conflict_notice' ] );
+		add_action( 'admin_notices', [ __CLASS__, 'insecure_connection_notice' ] );
+	}
+
+	/**
 	 * Register settings.
 	 */
 	public static function register_settings() {
@@ -42,15 +52,49 @@ class AMP_Options_Manager {
 			self::OPTION_NAME,
 			self::OPTION_NAME,
 			[
-				'type'              => 'array',
+				'type'              => 'object',
 				'sanitize_callback' => [ __CLASS__, 'validate_options' ],
+				'show_in_rest'      => [
+					'schema' => [
+						'type'       => 'object',
+						'properties' => [
+							Option::THEME_SUPPORT        => [
+								'type' => 'string',
+								'enum' => [
+									AMP_Theme_Support::READER_MODE_SLUG,
+									AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
+									AMP_Theme_Support::STANDARD_MODE_SLUG,
+								],
+							],
+							Option::SUPPORTED_POST_TYPES => [
+								'type'  => 'array',
+								'items' => [
+									'type' => 'string',
+								],
+							],
+							Option::ANALYTICS            => [
+								'type'  => 'array',
+								'items' => [
+									'type' => 'string',
+								],
+							],
+							Option::ALL_TEMPLATES_SUPPORTED => [
+								'type' => 'bool',
+							],
+							Option::SUPPORTED_TEMPLATES  => [
+								'type'  => 'array',
+								'items' => [
+									'type' => 'string',
+								],
+							],
+							Option::VERSION              => [
+								'type' => 'string',
+							],
+						],
+					],
+				],
 			]
 		);
-
-		add_action( 'update_option_' . self::OPTION_NAME, [ __CLASS__, 'maybe_flush_rewrite_rules' ], 10, 2 );
-		add_action( 'admin_notices', [ __CLASS__, 'render_welcome_notice' ] );
-		add_action( 'admin_notices', [ __CLASS__, 'render_php_css_parser_conflict_notice' ] );
-		add_action( 'admin_notices', [ __CLASS__, 'insecure_connection_notice' ] );
 	}
 
 	/**
@@ -340,7 +384,6 @@ class AMP_Options_Manager {
 		$amp_options = self::get_options();
 
 		$amp_options[ $option ] = $value;
-
 		return update_option( self::OPTION_NAME, $amp_options, false );
 	}
 

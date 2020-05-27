@@ -12,7 +12,7 @@ use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
  *
  * @group setup
  *
- * @since @todo NEW_ONBOARDING_RELEASE_VERSION
+ * @since 1.6.0
  *
  * @covers AMP_Setup_Wizard_Submenu
  */
