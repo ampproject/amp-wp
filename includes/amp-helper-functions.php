@@ -299,6 +299,85 @@ function amp_is_canonical() {
  */
 function amp_add_frontend_actions() {
 	add_action( 'wp_head', 'amp_add_amphtml_link' );
+
+	if ( amp_version_is_available() ) {
+		// Insert the mobile redirect script as early as possible.
+		add_action( 'wp_head', 'amp_add_mobile_redirect_script', ~PHP_INT_MAX );
+	}
+}
+
+/**
+ * Add mobile redirect script.
+ *
+ * @since 1.6
+ */
+function amp_add_mobile_redirect_script() {
+	?>
+	<script>
+		(function ( ampSlug ) {
+			var hasTouchScreen;
+
+			if ("maxTouchPoints" in navigator) {
+				hasTouchScreen = navigator.maxTouchPoints > 0;
+			} else if ("msMaxTouchPoints" in navigator) {
+				hasTouchScreen = navigator.msMaxTouchPoints > 0;
+			} else {
+				var mQ = window.matchMedia && matchMedia("(pointer:coarse)");
+				if (mQ && mQ.media === "(pointer:coarse)") {
+					hasTouchScreen = !!mQ.matches;
+				} else if ('orientation' in window) {
+					hasTouchScreen = true; // deprecated, but good fallback
+				} else {
+					// Only as a last resort, fall back to user agent sniffing
+					var UA = navigator.userAgent;
+					hasTouchScreen = /\b(Mobile|Android|Silk\/|Kindle|BlackBerry|Opera Mini|Opera Mobi|webOS|iPhone|IEMobile|Windows Phone|iPad|iPod)\b/.test( UA );
+				}
+			}
+
+			var url = new URL( location.href );
+
+			if ( hasTouchScreen && ! url.searchParams.has( ampSlug ) ) {
+				window.stop(); // Stop loading the page! This should cancel all loading resources.
+
+				// Replace the current page with the AMP version.
+				url.searchParams.append( ampSlug, '1' );
+				location.replace( url.href );
+			}
+		})(
+			<?php echo wp_json_encode( amp_get_slug() ) ?>
+		)
+	</script>
+	<?php
+}
+
+/**
+ * Determine whether there is an AMP version available for this URL.
+ *
+ * @since 1.6
+ * @global WP_Query $wp_query
+ *
+ * @return bool True if there is an AMP version, false otherwise.
+ */
+function amp_version_is_available() {
+	global $wp_query;
+
+	$queried_object = get_queried_object();
+	if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+		// Abort if in Transitional mode and AMP is not available for the URL.
+		if ( ! AMP_Theme_Support::is_paired_available() ) {
+			return false;
+		}
+	} elseif ( ! (
+			$queried_object instanceof WP_Post &&
+			$wp_query instanceof WP_Query &&
+			( $wp_query->is_singular() || $wp_query->is_posts_page ) &&
+			post_supports_amp( $queried_object ) )
+	) {
+		// Abort if in Reader mode and the post doesn't support AMP.
+		return false;
+	}
+
+	return true;
 }
 
 /**
@@ -495,35 +574,35 @@ function amp_remove_endpoint( $url ) {
  * If there are known validation errors for the current URL then do not output anything.
  *
  * @since 1.0
- * @global WP_Query $wp_query
  */
 function amp_add_amphtml_link() {
-	global $wp_query;
-
 	/**
 	 * Filters whether to show the amphtml link on the frontend.
 	 *
-	 * @todo This filter's name is incorrect. It's not about adding a canonical link but adding the amphtml link.
 	 * @since 0.2
 	 */
-	if ( false === apply_filters( 'amp_frontend_show_canonical', true ) ) {
+	if ( has_filter( 'amp_frontend_show_canonical' ) ) {
+		_deprecated_hook('amp_frontend_show_canonical', '1.6', 'amp_frontend_show_amphtml' );
+	}
+	if ( false === (
+			apply_filters( 'amp_frontend_show_amphtml', true ) ||
+			apply_filters( 'amp_frontend_show_canonical', true )
+		)
+	) {
 		return;
 	}
 
 	$current_url = amp_get_current_url();
 
-	$amp_url = null;
-	if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-		if ( AMP_Theme_Support::is_paired_available() ) {
-			$amp_url = add_query_arg( amp_get_slug(), '', $current_url );
-		}
-	} elseif ( $wp_query instanceof WP_Query && ( $wp_query->is_singular() || $wp_query->is_posts_page ) && post_supports_amp( get_post( get_queried_object_id() ) ) ) {
-		$amp_url = amp_get_permalink( get_queried_object_id() );
-	}
-
-	if ( ! $amp_url ) {
+	if ( ! amp_version_is_available() ) {
 		printf( '<!-- %s -->', esc_html__( 'There is no amphtml version available for this URL.', 'amp' ) );
 		return;
+	}
+
+	if ( AMP_Theme_Support::is_paired_available() ) {
+		$amp_url = add_query_arg( amp_get_slug(), '', $current_url );
+	} else {
+		$amp_url = amp_get_permalink( get_queried_object_id() );
 	}
 
 	// Check to see if there are known unaccepted validation errors for this URL.
