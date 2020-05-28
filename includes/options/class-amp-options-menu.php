@@ -93,6 +93,17 @@ class AMP_Options_Menu {
 		);
 
 		add_settings_field(
+			Option::MOBILE_REDIRECT,
+			__( 'Mobile Redirect', 'amp' ),
+			[ $this, 'render_mobile_redirect' ],
+			AMP_Options_Manager::OPTION_NAME,
+			'general',
+			[
+				'class' => 'amp-mobile-redirect',
+			]
+		);
+
+		add_settings_field(
 			Option::SUPPORTED_TEMPLATES,
 			__( 'Supported Templates', 'amp' ),
 			[ $this, 'render_supported_templates' ],
@@ -229,6 +240,39 @@ class AMP_Options_Menu {
 				</p>
 			<?php endif; ?>
 		</fieldset>
+		<?php
+	}
+
+	/**
+	 * Render mobile redirect setting.
+	 *
+	 * @since 1.6
+	 */
+	public function render_mobile_redirect() {
+		$can_customize_mobile_settings = apply_filters( 'amp_customizer_is_enabled', true );
+
+		if ( $can_customize_mobile_settings ) {
+			$mobile_customizer_url = add_query_arg(
+		[
+					'autofocus[section]' => 'amp_mobile',
+					'return'             => rawurlencode( add_query_arg( 'page', AMP_Options_Manager::OPTION_NAME, admin_url( 'admin.php' ) ) ),
+				],
+				'customize.php'
+			);
+		}
+		?>
+		<p>
+			<label for="mobile_redirect">
+				<input id="mobile_redirect" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[mobile_redirect]' ); ?>" <?php checked( AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) ); ?>>
+				<?php esc_html_e( 'Redirect mobile visitors to the AMP version of a page.', 'amp' ); ?>
+			</label>
+		</p>
+		<?php
+		if ( $can_customize_mobile_settings ) : ?>
+			<p class="description">
+				<?php echo wp_kses_post( sprintf( __( 'This can be further customized in the <a href="%s">Mobile section</a> of the Customizer for AMP.', 'amp' ), $mobile_customizer_url ) ); ?>
+			</p>
+		<?php endif; ?>
 		<?php
 	}
 
