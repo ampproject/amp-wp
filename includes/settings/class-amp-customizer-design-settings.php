@@ -177,18 +177,18 @@ class AMP_Customizer_Design_Settings {
 			'amp-wp-header',
 			[
 				'selector'         => '.amp-wp-header',
-				'settings'         => [ 'blogname', 'amp_customizer[display_exit_link]' ], // @todo Site Icon.
+				'settings'         => [ 'blogname' ], // @todo Site Icon.
 				'render_callback'  => [ __CLASS__, 'render_header_bar' ],
 				'fallback_refresh' => false,
 			]
 		);
 
-		// Header.
+		// Footer.
 		$wp_customize->selective_refresh->add_partial(
 			'amp-wp-footer',
 			[
 				'selector'            => '.amp-wp-footer',
-				'settings'            => [ 'blogname' ],
+				'settings'            => [ 'blogname', 'amp_customizer[display_exit_link]' ],
 				'render_callback'     => [ __CLASS__, 'render_footer' ],
 				'fallback_refresh'    => false,
 				'container_inclusive' => true,

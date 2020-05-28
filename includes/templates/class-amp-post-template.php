@@ -292,7 +292,7 @@ class AMP_Post_Template {
 		$customizer_settings = AMP_Customizer_Settings::get_settings();
 		if ( ! empty( $customizer_settings['display_exit_link'] ) ) {
 			$data['post_canonical_link_url']  = get_permalink( $this->ID );
-			$data['post_canonical_link_text'] = __( 'Exit Reader Mode', 'amp' );
+			$data['post_canonical_link_text'] = __( 'Exit mobile version', 'amp' );
 		}
 
 		$this->add_data( $data );

@@ -23,4 +23,18 @@
 		<h2><?php echo esc_html( wptexturize( $this->get( 'blog_name' ) ) ); ?></h2>
 		<a href="#top" class="back-to-top"><?php esc_html_e( 'Back to top', 'amp' ); ?></a>
 	</div>
+
+	<?php $canonical_link_url = $this->get( 'post_canonical_link_url' ); ?>
+	<?php if ( $canonical_link_url ) : ?>
+		<?php $canonical_link_text = $this->get( 'post_canonical_link_text' ); ?>
+		<div id="site-version-switcher">
+			<a
+					id="version-switch-link"
+					rel="noamphtml"
+					href="<?php echo esc_url( $canonical_link_url ); ?>"
+			>
+				<?php echo esc_html( $canonical_link_text ); ?>
+			</a>
+		</div>
+	<?php endif; ?>
 </footer>

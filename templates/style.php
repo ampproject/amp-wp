@@ -187,17 +187,16 @@ blockquote p:last-child {
 }
 
 <?php if ( $this->get( 'post_canonical_link_url' ) || is_customize_preview() ) : ?>
-	.amp-wp-header .amp-wp-canonical-link {
-		font-size: 0.8em;
-		text-decoration: underline;
-		position: absolute;
-		<?php
-		$distance = 18;
-		if ( $this->get( 'site_icon_url' ) ) {
-			$distance += 32 + 10; // Width of site icon with margin.
-		}
-		printf( '%s: %dpx;', is_rtl() ? 'left' : 'right', $distance ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		?>
+	#version-switch-link {
+		display: block;
+		width: 100%;
+		padding: 15px 0;
+		font-size: 16px;
+		font-weight: 600;
+		color: #eaeaea;
+		text-align: center;
+		background-color: #444;
+		border: 0;
 	}
 <?php endif; ?>
 
