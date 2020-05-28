@@ -273,6 +273,18 @@ class AMP_Options_Menu {
 				<?php echo wp_kses_post( sprintf( __( 'This can be further customized in the <a href="%s">Mobile section</a> of the Customizer for AMP.', 'amp' ), $mobile_customizer_url ) ); ?>
 			</p>
 		<?php endif; ?>
+		<script>
+			( function( $ ) {
+				const templateModeInputs = $( 'input[type=radio][name="amp-options[theme_support]"]' );
+				const mobileRedirectSetting = $( 'tr.amp-mobile-redirect' );
+
+				function toggleMobileRedirectSetting( e ) {
+					mobileRedirectSetting.toggleClass( 'hidden', 'standard' === e.target.value )
+				}
+
+				templateModeInputs.on( 'change', toggleMobileRedirectSetting );
+			} )( jQuery )
+		</script>
 		<?php
 	}
 
