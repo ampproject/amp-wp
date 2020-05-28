@@ -7,7 +7,6 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { useInstanceId } from '@wordpress/compose';
-import { useMemo } from '@wordpress/element';
 
 /**
  * Internal dependencies
