@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 /**
  * WordPress dependencies
  */
@@ -16,23 +17,9 @@ import PropTypes from 'prop-types';
 import './style.css';
 import { Options } from '../../components/options-context-provider';
 
-export function ThemeCard( { content, featured_media: featuredMedia, slug, title } ) {
+export function ThemeCard( { description, screenshot_url, slug, name } ) {
 	const instanceId = useInstanceId( ThemeCard );
 	const { options: { reader_theme: readerTheme }, updateOptions } = useContext( Options );
-
-	const { imageHeight, imageWidth, imageUrl } = useMemo( () => {
-		for ( const size of [ 'large', 'full' ] ) {
-			if ( size in featuredMedia.media_details && featuredMedia.media_details[ size ] ) {
-				return {
-					imageHeight: featuredMedia.media_details[ size ].height,
-					imageUrl: featuredMedia.media_details[ size ].source_url,
-					imageWidth: featuredMedia.media_details[ size ].width,
-				};
-			}
-		}
-
-		return {};
-	}, [ featuredMedia.media_details ] );
 
 	return (
 		<li className={ `amp-wp-theme-card ${ readerTheme === slug ? 'amp-wp-theme-card--selected' : '' }` }>
@@ -47,44 +34,24 @@ export function ThemeCard( { content, featured_media: featuredMedia, slug, title
 						} }
 					/>
 					<h2>
-						{ decodeEntities( title ) }
+						{ decodeEntities( name ) }
 					</h2>
 				</div>
-				{ imageUrl && (
-					<img
-						src={ imageUrl }
-						height={ imageHeight }
-						with={ imageWidth }
-						alt={ featuredMedia.alt_text || featuredMedia.title }
-					/> )
-				}
+				<img
+					src={ screenshot_url }
+					alt={ name }
+				/>
 				<p>
-					{ decodeEntities( content ) }
+					{ decodeEntities( description ) }
 				</p>
 			</label>
 		</li>
 	);
 }
 
-const mediaDetailShape = PropTypes.shape( {
-	height: PropTypes.number.isRequired,
-	source_url: PropTypes.string.isRequired,
-	width: PropTypes.number.isRequired,
-} );
-
 ThemeCard.propTypes = {
-	content: PropTypes.string.isRequired,
-	featured_media: PropTypes.shape(
-		{
-			id: PropTypes.number.isRequired,
-			alt_text: PropTypes.string,
-			media_details: PropTypes.shape( {
-				large: mediaDetailShape,
-				full: mediaDetailShape,
-			} ),
-			title: PropTypes.string,
-		},
-	).isRequired,
+	description: PropTypes.string.isRequired,
+	screenshot_url: PropTypes.string.isRequired,
 	slug: PropTypes.string.isRequired,
-	title: PropTypes.string.isRequired,
+	name: PropTypes.string.isRequired,
 };

@@ -17,7 +17,7 @@ export const Navigation = createContext();
  * @param {?any} props.children Component children.
  */
 export function NavigationContextProvider( { children, pages } ) {
-	const [ activePageIndex, setActivePageIndex ] = useState( 0 );
+	const [ activePageIndex, setActivePageIndex ] = useState( 4 );
 	const [ canGoForward, setCanGoForward ] = useState( false );
 
 	const currentPage = useMemo( () => pages[ activePageIndex ], [ activePageIndex, pages ] );
