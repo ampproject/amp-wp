@@ -20,6 +20,13 @@ use WP_Customize_Manager;
 final class ReaderThemeLoader implements Service {
 
 	/**
+	 * Reader theme.
+	 *
+	 * @var WP_Theme
+	 */
+	private $theme;
+
+	/**
 	 * Register the service with the system.
 	 *
 	 * @return void
@@ -83,6 +90,8 @@ final class ReaderThemeLoader implements Service {
 	 * Switch theme if in Reader mode, a Reader theme was selected, and the AMP query var is present.
 	 *
 	 * Note that AMP_Theme_Support will redirect to the non-AMP version if AMP is not available for the query.
+	 *
+	 * @see \WP_Customize_Manager::start_previewing_theme() which provides for much of the inspiration here.
 	 */
 	public function override_theme() {
 		if ( ! self::is_reader_mode() ) {
@@ -90,7 +99,7 @@ final class ReaderThemeLoader implements Service {
 		}
 
 		$theme = self::get_reader_theme();
-		if ( ! $theme ) {
+		if ( ! $theme instanceof WP_Theme ) {
 			return;
 		}
 
@@ -98,19 +107,41 @@ final class ReaderThemeLoader implements Service {
 			return;
 		}
 
-		$get_template   = static function () use ( $theme ) {
-			return $theme->get_template();
+		$this->theme = $theme;
+
+		$get_template   = function () {
+			return $this->theme->get_template();
 		};
-		$get_stylesheet = static function () use ( $theme ) {
-			return $theme->get_stylesheet();
+		$get_stylesheet = function () {
+			return $this->theme->get_stylesheet();
 		};
 
 		add_filter( 'stylesheet', $get_stylesheet );
 		add_filter( 'template', $get_template );
+		add_filter(
+			'pre_option_current_theme',
+			function () {
+				return $this->theme->display( 'Name' );
+			}
+		);
 
 		// @link: https://core.trac.wordpress.org/ticket/20027
 		add_filter( 'pre_option_stylesheet', $get_stylesheet );
 		add_filter( 'pre_option_template', $get_template );
+
+		// Handle custom theme roots.
+		add_filter(
+			'pre_option_stylesheet_root',
+			function () {
+				return get_raw_theme_root( $this->theme->get_stylesheet(), true );
+			}
+		);
+		add_filter(
+			'pre_option_template_root',
+			function () {
+				return get_raw_theme_root( $this->theme->get_template(), true );
+			}
+		);
 
 		$this->disable_widgets();
 		add_filter( 'customize_previewable_devices', [ $this, 'customize_previewable_devices' ] );
