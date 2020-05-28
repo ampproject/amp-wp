@@ -300,7 +300,7 @@ function amp_is_canonical() {
 function amp_add_frontend_actions() {
 	add_action( 'wp_head', 'amp_add_amphtml_link' );
 
-	if ( amp_version_is_available() ) {
+	if ( AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) && amp_version_is_available() ) {
 		// Insert the mobile redirect script as early as possible.
 		add_action( 'wp_head', 'amp_add_mobile_redirect_script', ~PHP_INT_MAX );
 	}
