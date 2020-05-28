@@ -34,171 +34,252 @@ final class AMP_Reader_Themes {
 		}
 
 		/**
-		 * Filters reader themes before they're built.
-		 *
-		 * @param null|array $reader_themes
-		 */
-		$items = apply_filters( 'amp_pre_get_reader_themes', null );
-
-		if ( is_null( $items ) ) {
-			$items = $this->get_themes_cached();
-		}
-
-		/**
 		 * Filters supported reader themes.
 		 *
 		 * @param array Reader theme objects.
 		 */
-		$items = apply_filters( 'amp_reader_themes', $items );
+		$this->themes = apply_filters( 'amp_reader_themes', $this->get_theme_data() );
 
-		foreach ( $items as &$item ) {
-			$item = $this->prepare_theme( $item );
-		}
-
-		array_unshift( $items, $this->get_classic_mode() );
-
-		$this->themes = $items;
+		$this->install_reader_theme( 'twentyeleven' );
 
 		return $this->themes;
 	}
 
 	/**
-	 * Gets configuration data for the AMP classic reader theme.
+	 * Installs a theme from the WP repo.
+	 *
+	 * @param string $slug Theme slug.
+	 * @return bool|WP_Error True if the installation was successful, false or a WP_Error object otherwise.
+	 */
+	private function install_reader_theme( $slug ) {
+		if ( ! function_exists( 'themes_api' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/theme.php';
+		}
+
+		if ( ! class_exists( 'Theme_Upgrader' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+			require_once ABSPATH . 'wp-admin/includes/misc.php';
+			require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+			require_once ABSPATH . 'wp-admin/includes/class-theme-upgrader.php';
+		}
+
+		$api = themes_api(
+			'query_themes',
+			[
+				'author' => 'wordpressdotorg',
+				'fields' => [
+					
+				]
+			],
+		);
+
+		$upgrader = new Theme_Upgrader();
+
+		return $upgrader->install( $api->download_link );
+	}
+
+	/**
+	 * Retrieves theme data.
 	 *
 	 * @since 1.6.0
 	 *
-	 * @return array Classic reader theme data.
+	 * @return array Theme ecosystem posts copied the amp-wp.org website.
 	 */
-	public function get_classic_mode() {
+	public function get_theme_data() {
 		return [
-			'id'             => 0,
-			'slug'           => AMP_Theme_Support::DEFAULT_READER_THEME,
-			'link'           => 'https://amp-wp.org',
-			'title'          => 'AMP Classic',
-			'content'        => __(
-				// @todo Improved description text.
-				'A legacy default template that looks nice and clean, with a good balance between ease and extensibility when it comes to customization.',
-				'amp'
-			),
-			'featured_media' => [
-				'id'            => 0,
-				'title'         => 'AMP Classic Theme',
-				'alt_text'      => 'AMP Classic Theme',
-				'media_details' => [
-					'full' => [
-						'height'     => 679,
-						'source_url' => '//via.placeholder.com/1024x679', // @todo Real image needed.
-						'width'      => 1024,
+			[
+				'slug'    => 'classic',
+				'title'   => 'AMP Classic',
+				'content' => __( 'A legacy default template that looks nice and clean, with a good balance between ease and extensibility when it comes to customization.', 'amp' ),
+				'media'   =>
+				[
+					'alt_text'      => 'AMP Classic Theme',
+					'media_details' =>
+					[
+						'full' =>
+						[
+							'height'     => 679,
+							'source_url' => '//via.placeholder.com/1024x679',
+							'width'      => 1024,
+						],
 					],
 				],
+				'link'    => 'https://amp-wp.org',
 			],
-			'ecosystem_url'  => null,
+			[
+				'slug'    => 'twentytwenty',
+				'title'   => 'Twenty Twenty',
+				'content' => __( 'Our default theme for 2020 is designed to take full advantage of the flexibility of the block editor. Organizations and businesses have the ability to create dynamic landing pages with endless layouts using the group and column blocks. The centered content column and fine-tuned typography also makes it perfect for traditional blogs. Complete editor styles give you a good idea of what your content will look like, even before you publish. You can give your site a personal touch by changing the background colors and the accent color in the Customizer. The colors of all elements on your site are automatically calculated based on the colors you pick, ensuring a high, accessible color contrast for your visitors.', 'amp' ),
+				'media'   =>
+				[
+					'alt_text'      => 'Twenty Twenty',
+					'media_details' =>
+					[
+						'full' =>
+						[
+							'height'     => 679,
+							'source_url' => '//via.placeholder.com/1024x679',
+							'width'      => 1024,
+						],
+					],
+				],
+				'link'    => 'https://wordpress.org/themes/twentytwenty/',
+			],
+			[
+				'slug'    => 'twentynineteen',
+				'title'   => 'Twenty Nineteen',
+				'content' => __( 'Our 2019 default theme is designed to show off the power of the block editor. It features custom styles for all the default blocks, and is built so that what you see in the editor looks like what you&#8217;ll see on your website. Twenty Nineteen is designed to be adaptable to a wide range of websites, whether you’re running a photo blog, launching a new business, or supporting a non-profit. Featuring ample whitespace and modern sans-serif headlines paired with classic serif body text, it&#8217;s built to be beautiful on all screen sizes.', 'amp' ),
+				'media'   =>
+				[
+					'title'         => 'cropped-twentynineteen.png',
+					'alt_text'      => '',
+					'media_details' =>
+					[
+						'full' =>
+						[
+							'height'     => 679,
+							'source_url' => '//via.placeholder.com/1024x679',
+							'width'      => 1024,
+						],
+					],
+				],
+				'link'    => 'https://wordpress.org/themes/twentynineteen/',
+			],
+			[
+				'slug'    => 'twentyseventeen',
+				'title'   => 'Twenty Seventeen',
+				'content' => __( 'Twenty Seventeen brings your site to life with header video and immersive featured images. With a focus on business sites, it features multiple sections on the front page as well as widgets, navigation and social menus, a logo, and more. Personalize its asymmetrical grid with a custom color scheme and showcase your multimedia content with post formats. Our default theme for 2017 works great in many languages, for any abilities, and on any device.', 'amp' ),
+				'media'   =>
+				[
+					'title'         => 'cropped-twentyseventeen.png',
+					'alt_text'      => '',
+					'media_details' =>
+					[
+						'full' =>
+						[
+							'height'     => 679,
+							'source_url' => '//via.placeholder.com/1024x679',
+							'width'      => 1024,
+						],
+					],
+				],
+				'link'    => 'https://wordpress.org/themes/twentyseventeen/',
+			],
+			[
+				'slug'    => 'twentysixteen',
+				'title'   => 'Twenty Sixteen',
+				'content' => __( 'Twenty Sixteen is a modernized take on an ever-popular WordPress layout — the horizontal masthead with an optional right sidebar that works perfectly for blogs and websites. It has custom color options with beautiful default color schemes, a harmonious fluid grid using a mobile-first approach, and impeccable polish in every detail. Twenty Sixteen will make your WordPress look beautiful everywhere.', 'amp' ),
+				'media'   =>
+				[
+					'alt_text'      => 'Twenty Sixteen',
+					'media_details' =>
+					[
+						'full' =>
+						[
+							'height'     => 679,
+							'source_url' => '//via.placeholder.com/1024x679',
+							'width'      => 1024,
+						],
+					],
+				],
+				'link'    => 'https://wordpress.org/themes/twentysixteen/',
+			],
+			[
+				'slug'    => 'twentyfifteen',
+				'title'   => 'Twenty Fifteen',
+				'content' => __( 'Our 2015 default theme is clean, blog-focused, and designed for clarity. Twenty Fifteen&#8217;s simple, straightforward typography is readable on a wide variety of screen sizes, and suitable for multiple languages. We designed it using a mobile-first approach, meaning your content takes center-stage, regardless of whether your visitors arrive by smartphone, tablet, laptop, or desktop computer.', 'amp' ),
+				'media'   =>
+				[
+					'alt_text'      => 'Twenty Fifteen',
+					'media_details' =>
+					[
+						'full' =>
+						[
+							'height'     => 679,
+							'source_url' => '//via.placeholder.com/1024x679',
+							'width'      => 1024,
+						],
+					],
+				],
+				'link'    => 'https://wordpress.org/themes/twentyfifteen/',
+			],
+			[
+				'slug'    => 'twentyfourteen',
+				'title'   => 'Twenty Fourteen',
+				'content' => __( 'In 2014, our default theme lets you create a responsive magazine website with a sleek, modern design. Feature your favorite homepage content in either a grid or a slider. Use the three widget areas to customize your website, and change your content&#8217;s layout with a full-width page template and a contributor page to show off your authors. Creating a magazine website with WordPress has never been easier.', 'amp' ),
+				'media'   =>
+				[
+					'alt_text'      => 'Twenty Fourteen',
+					'media_details' =>
+					[
+						'full' =>
+						[
+							'height'     => 679,
+							'source_url' => '//via.placeholder.com/1024x679',
+							'width'      => 1024,
+						],
+					],
+				],
+				'link'    => 'https://wordpress.org/themes/twentyfourteen',
+			],
+			[
+				'slug'    => 'twentythirteen',
+				'title'   => 'Twenty Thirteen',
+				'content' => __( 'The 2013 theme for WordPress takes us back to the blog, featuring a full range of post formats, each displayed beautifully in their own unique way. Design details abound, starting with a vibrant color scheme and matching header images, beautiful typography and icons, and a flexible layout that looks great on any device, big or small.', 'amp' ),
+				'media'   =>
+				[
+					'alt_text'      => 'Thirty Thirteen',
+					'media_details' =>
+					[
+						'full' =>
+						[
+							'height'     => 679,
+							'source_url' => '//via.placeholder.com/1024x679',
+							'width'      => 1024,
+						],
+					],
+				],
+				'link'    => 'https://wordpress.org/themes/twentythirteen/',
+			],
+			[
+				'slug'    => 'twentytwelve',
+				'title'   => 'Twenty Twelve',
+				'content' => __( 'The 2012 theme for WordPress is a fully responsive theme that looks great on any device. Features include a front page template with its own widgets, an optional display font, styling for post formats on both index and single views, and an optional no-sidebar page template. Make it yours with a custom menu, header image, and background.', 'amp' ),
+				'media'   =>
+				[
+					'alt_text'      => 'Twenty Twelve',
+					'media_details' =>
+					[
+						'full' =>
+						[
+							'height'     => 679,
+							'source_url' => '//via.placeholder.com/1024x679',
+							'width'      => 1024,
+						],
+					],
+				],
+				'link'    => 'https://wordpress.org/themes/twentytwelve/',
+			],
+			[
+				'slug'    => 'twentyeleven',
+				'title'   => 'Twenty Eleven',
+				'content' => __( 'The 2011 theme for WordPress is sophisticated, lightweight, and adaptable. Make it yours with a custom menu, header image, and background &#8212; then go further with available theme options for light or dark color scheme, custom link colors, and three layout choices. Twenty Eleven comes equipped with a Showcase page template that transforms your front page into a showcase to show off your best content, widget support galore (sidebar, three footer areas, and a Showcase page widget area), and a custom &#8220;Ephemera&#8221; widget to display your Aside, Link, Quote, or Status posts. Included are styles for print and for the admin editor, support for featured images (as custom header images on posts and pages and as large images on featured &#8220;sticky&#8221; posts), and special styles for six different post formats.', 'amp' ),
+				'media'   =>
+				[
+					'alt_text'      => 'Twenty Eleven',
+					'media_details' =>
+					[
+						'full' =>
+						[
+							'height'     => 679,
+							'source_url' => '//via.placeholder.com/1024x679',
+							'width'      => 1024,
+						],
+					],
+				],
+				'link'    => 'https://wordpress.org/themes/twentyeleven/',
+			],
 		];
-	}
-
-	/**
-	 * Retrieves items from the remote endpoint if they are not available in cache.
-	 *
-	 * @since 1.6.0
-	 *
-	 * @return array Theme ecosystem posts from the amp-wp.org website.
-	 */
-	public function get_themes_cached() {
-		$url = add_query_arg(
-			[
-				'ecosystem_types' => 245, // Theme taxonomy term.
-				'_fields'         => 'id,link,title,content,featured_media,meta,slug',
-				'per_page'        => 99, // Only 30 available as of May, 2020.
-			],
-			'https://amp-wp.org/wp-json/wp/v2/ecosystem'
-		);
-
-		$cache_key = 'reader_themes';
-		if ( wp_using_ext_object_cache() ) {
-			$items = wp_cache_get( $cache_key, __CLASS__ );
-		} else {
-			$items = get_transient( __CLASS__ . $cache_key );
-		}
-
-		if ( false === $items ) {
-			$request = wp_remote_get( $url );
-
-			if ( 200 !== wp_remote_retrieve_response_code( $request ) ) {
-				$items = [];
-			} else {
-				$items = json_decode( wp_remote_retrieve_body( $request ), true );
-			}
-
-			$items = $this->add_media_to_themes( $items );
-
-			if ( wp_using_ext_object_cache() ) {
-				wp_cache_set( $cache_key, $items, __CLASS__, 15 * MINUTE_IN_SECONDS );
-			} else {
-				set_transient( __CLASS__ . $cache_key, $items, 15 * MINUTE_IN_SECONDS );
-			}
-		}
-
-		return $items;
-	}
-
-	/**
-	 * Retrieves featured media items from the amp-wp.org media REST endpoint and adds them to the theme data.
-	 *
-	 * @since 1.6.0
-	 *
-	 * @param array $items Theme items.
-	 * @return array Theme items with image details added.
-	 */
-	private function add_media_to_themes( $themes ) {
-		$media_ids = array_filter( wp_list_pluck( $themes, 'featured_media' ) );
-
-		$url = add_query_arg(
-			[
-				'_fields'    => 'id,title,alt_text,media_details',
-				'include'    => implode( ',', $media_ids ),
-				'media_type' => 'image',
-				'per_page'   => count( $media_ids ),
-			],
-			'https://amp-wp.org/wp-json/wp/v2/media'
-		);
-
-		/**
-		 * Filters media items for reader themes before they're fetched.
-		 *
-		 * @param null|array $media_items Media items or null if the request for items has not been overridden.
-		 * @param array      $themes      Array of theme objects
-		 */
-		$media_items = apply_filters( 'amp_pre_get_reader_theme_media', null, $themes );
-
-		if ( is_null( $media_items ) ) {
-			$request = wp_remote_get( $url );
-			if ( 200 !== wp_remote_retrieve_response_code( $request ) ) {
-				$media_items = [];
-			} else {
-				$media_items = json_decode( wp_remote_retrieve_body( $request ), true );
-			}
-		}
-
-		$keyed_media_items = [];
-		foreach ( $media_items as $media_item ) {
-			$keyed_media_items[ intval( $media_item['id'] ) ] = $this->prepare_featured_media( $media_item );
-		}
-
-		/**
-		 * Filters media items after they have been fetched.
-		 *
-		 * @param array $media_items Reader theme media objects, keyed by the media item ID.
-		 * @param array $themes      Array of theme objects.
-		 */
-		$keyed_media_items = apply_filters( 'amp_reader_theme_media', $keyed_media_items, $themes );
-
-		foreach ( $themes as &$theme ) {
-			if ( ! empty( $theme['featured_media'] ) && isset( $keyed_media_items[ $theme['featured_media'] ] ) ) {
-				$theme['featured_media'] = $keyed_media_items[ $theme['featured_media'] ];
-			}
-		}
-
-		return $themes;
 	}
 
 	/**
@@ -220,7 +301,7 @@ final class AMP_Reader_Themes {
 					break;
 
 				case 'meta':
-					$prepared_item['ecosystem_url'] = $value['ampps_ecosystem_url'];
+					$prepared_item['link'] = $value['ampps_link'];
 					break;
 
 				default:
@@ -239,7 +320,7 @@ final class AMP_Reader_Themes {
 	 * @param array $item Media details.
 	 * @return array Prepared media details.
 	 */
-	public function prepare_featured_media( $item ) {
+	public function prepare_media( $item ) {
 		$prepared_item = [];
 
 		foreach ( $item as $key => $value ) {
