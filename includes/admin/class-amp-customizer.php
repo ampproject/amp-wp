@@ -1,9 +1,11 @@
 <?php
 /**
- * Class AMP_Template_Customizer
+ * Class AMP_Customizer
  *
  * @package AMP
  */
+
+use AmpProject\AmpWP\Option;
 
 /**
  * AMP class that implements a template style editor in the Customizer.
@@ -13,7 +15,7 @@
  *
  * @since 0.4
  */
-class AMP_Template_Customizer {
+class AMP_Customizer {
 
 	/**
 	 * AMP template editor panel ID.
@@ -52,12 +54,22 @@ class AMP_Template_Customizer {
 		 * In practice the `customize_register` hook should be used instead.
 		 *
 		 * @since 0.4
-		 * @param AMP_Template_Customizer $self Instance.
+		 * @param AMP_Customizer $self Instance.
 		 */
 		do_action( 'amp_customizer_init', $self );
 
 		$self->register_settings();
 		$self->register_ui();
+
+		/**
+		 * Fires when plugins should register settings for AMP.
+		 *
+		 * In practice the `customize_controls_enqueue_scripts` hook should be used instead.
+		 *
+		 * @since 0.4
+		 * @param WP_Customize_Manager $manager Manager.
+		 */
+		do_action( 'amp_customizer_enqueue_scripts', $self->wp_customize );
 
 		add_action( 'customize_controls_enqueue_scripts', [ $self, 'add_customizer_scripts' ] );
 		add_action( 'customize_controls_print_footer_scripts', [ $self, 'print_controls_templates' ] );
@@ -133,52 +145,45 @@ class AMP_Template_Customizer {
 	 * @since 0.6
 	 */
 	public function add_customizer_scripts() {
-		if ( ! amp_is_canonical() ) {
-			wp_enqueue_script(
-				'amp-customize-controls',
-				amp_get_asset_url( 'js/amp-customize-controls.js' ),
-				[ 'jquery', 'customize-controls' ],
-				AMP__VERSION,
-				true
-			);
+		$asset_file   = AMP__DIR__ . '/assets/js/amp-customize-controls.asset.php';
+		$asset        = require $asset_file;
+		$dependencies = $asset['dependencies'];
+		$version      = $asset['version'];
 
-			wp_add_inline_script(
-				'amp-customize-controls',
-				sprintf(
-					'ampCustomizeControls.boot( %s );',
-					wp_json_encode(
-						[
-							'queryVar' => amp_get_slug(),
-							'panelId'  => self::PANEL_ID,
-							'ampUrl'   => amp_admin_get_preview_permalink(),
-							'l10n'     => [
-								'unavailableMessage'  => __( 'AMP is not available for the page currently being previewed.', 'amp' ),
-								'unavailableLinkText' => __( 'Navigate to an AMP compatible page', 'amp' ),
-							],
-						]
-					)
+		wp_enqueue_script(
+			'amp-customize-controls',
+			amp_get_asset_url( 'js/amp-customize-controls.js' ),
+			array_merge( $dependencies, [ 'jquery', 'customize-controls' ] ),
+			$version,
+			true
+		);
+
+		wp_add_inline_script(
+			'amp-customize-controls',
+			sprintf(
+				'ampCustomizeControls.boot( %s );',
+				wp_json_encode(
+					[
+						'queryVar' => amp_get_slug(),
+						'panelId'  => self::PANEL_ID,
+						'ampUrl'   => amp_admin_get_preview_permalink(),
+						'l10n'     => [
+							'unavailableMessage'  => __( 'AMP is not available for the page currently being previewed.', 'amp' ),
+							'unavailableLinkText' => __( 'Navigate to an AMP compatible page', 'amp' ),
+						],
+					]
 				)
-			);
+			)
+		);
 
-			wp_enqueue_style(
-				'amp-customizer',
-				amp_get_asset_url( 'css/amp-customizer.css' ),
-				[],
-				AMP__VERSION
-			);
+		wp_enqueue_style(
+			'amp-customizer',
+			amp_get_asset_url( 'css/amp-customizer.css' ),
+			[],
+			AMP__VERSION
+		);
 
-			wp_styles()->add_data( 'amp-customizer', 'rtl', 'replace' );
-		}
-
-		/**
-		 * Fires when plugins should register settings for AMP.
-		 *
-		 * In practice the `customize_controls_enqueue_scripts` hook should be used instead.
-		 *
-		 * @since 0.4
-		 * @param WP_Customize_Manager $manager Manager.
-		 */
-		do_action( 'amp_customizer_enqueue_scripts', $this->wp_customize );
+		wp_styles()->add_data( 'amp-customizer', 'rtl', 'replace' );
 	}
 
 	/**
@@ -195,11 +200,16 @@ class AMP_Template_Customizer {
 			return;
 		}
 
+		$asset_file   = AMP__DIR__ . '/assets/js/amp-customize-preview.asset.php';
+		$asset        = require $asset_file;
+		$dependencies = $asset['dependencies'];
+		$version      = $asset['version'];
+
 		wp_enqueue_script(
 			'amp-customize-preview',
 			amp_get_asset_url( 'js/amp-customize-preview.js' ),
-			[ 'jquery', 'customize-preview' ],
-			AMP__VERSION,
+			array_merge( $dependencies, [ 'jquery', 'customize-preview' ] ),
+			$version,
 			true
 		);
 
