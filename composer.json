@@ -71,10 +71,14 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "AmpProject\\AmpWP\\Tests\\": "tests/php/src/"
+      "AmpProject\\AmpWP\\Tests\\": "tests/php/src/",
+      "AmpProject\\AmpWP\\Seed\\": "tests/seeds/"
     },
     "classmap": [
       "tests/php/validation/"
+    ],
+    "files":  [
+      "tests/php/register-wp-cli-commands.php"
     ]
   },
   "repositories": [
