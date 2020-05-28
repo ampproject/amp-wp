@@ -22,8 +22,8 @@ import { Check } from '../svg/check';
  * @param {number} props.index The index of the item being rendered.
  */
 export function StepperBullet( { activePageIndex, index } ) {
-	const isCheckMark = useMemo( () => index === 0, [ index ] );
-	const isCurrent = useMemo( () => ( ! isCheckMark ) && activePageIndex === index, [ activePageIndex, index, isCheckMark ] );
+	const isCheckMark = index === 0;
+	const isCurrent = ( ! isCheckMark ) && activePageIndex === index;
 
 	if ( isCheckMark ) {
 		return (
