@@ -28,14 +28,15 @@ exports[`Nav matches snapshot 1`] = `
       onClick={[Function]}
       type="button"
     >
-      <span>
+      <span
+        className="amp-mobile-hide"
+      >
+        Next Step
+      </span>
+      <span
+        className="amp-mobile-show"
+      >
         Next
-         
-        <span
-          className="amp-mobile-hide"
-        >
-          Step
-        </span>
       </span>
       <svg
         aria-hidden={true}

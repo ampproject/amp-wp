@@ -16,6 +16,7 @@ export const Options = createContext();
  *
  * @param {Object} props Component props.
  * @param {?any} props.children Component children.
+ * @param {string} props.optionsKey The key of the option to use from the settings endpoint.
  * @param {string} props.optionsRestEndpoint REST endpoint to retrieve options.
  */
 export function OptionsContextProvider( { children, optionsKey, optionsRestEndpoint } ) {

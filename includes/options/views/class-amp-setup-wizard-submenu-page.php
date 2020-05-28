@@ -116,6 +116,8 @@ final class AMP_Setup_Wizard_Submenu_Page {
 			AMP__VERSION
 		);
 
+		wp_styles()->add_data( self::JS_HANDLE, 'rtl', 'replace' );
+
 		wp_add_inline_script(
 			self::JS_HANDLE,
 			sprintf(

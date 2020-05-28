@@ -44,12 +44,11 @@ export function Nav( { exitLink } ) {
 							onClick={ goBack }
 						>
 							<Icon className="amp-mobile-hide" icon="arrow-left-alt2" size={ 18 } />
-							<span>
+							<span className="amp-mobile-hide">
+								{ __( 'Previous Step', 'amp' ) }
+							</span>
+							<span className="amp-mobile-show">
 								{ __( 'Previous', 'amp' ) }
-								{ ' ' }
-								<span className="amp-mobile-hide">
-									{ __( 'Step', 'amp' ) }
-								</span>
 							</span>
 						</Button>
 					)
@@ -60,12 +59,11 @@ export function Nav( { exitLink } ) {
 					disabled={ ! canGoForward }
 					onClick={ goForward }
 				>
-					<span>
+					<span className="amp-mobile-hide">
+						{ __( 'Next Step', 'amp' ) }
+					</span>
+					<span className="amp-mobile-show">
 						{ __( 'Next', 'amp' ) }
-						{ ' ' }
-						<span className="amp-mobile-hide">
-							{ __( 'Step', 'amp' ) }
-						</span>
 					</span>
 					<Icon className="amp-mobile-hide" icon="arrow-right-alt2" size={ 18 } />
 				</Button>

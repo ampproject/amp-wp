@@ -19,6 +19,13 @@
 	}
 }
 
+.amp-mobile-show {
+
+	@media screen and (min-width: 783px) {
+		display: none;
+	}
+}
+
 .amp-setup-container,
 .amp-setup-container::before,
 .amp-setup-container::after,
